@@ -10,7 +10,7 @@ const RIVER_TILE_ID = 12
 const HILLS_TILE_ID = 6
 
 # 地形條件
-var REIER_MAX_HEIGHT =-0.25
+var RIVER_MAX_HEIGHT = -0.25
 var PLAIN_MAX_HEIGHT = 0.1
 var HILLS_MAX_HEIGHT = 0.2
 var SNOW_MAX_TEMP = 0.15
@@ -23,7 +23,12 @@ var map_size = Vector2(30, 30)
 
 # 使用 Godot 生命周期中的 _ready() 函数，场景树准备完成时调用此函数
 func _ready():
+	randomize()
 	generate_map()
+
+func _unhandled_input(event):
+	if event.is_action_pressed("ui_accept"):
+		generate_map()
 
 func generate_map():
 	noise.noise_type = FastNoiseLite.TYPE_PERLIN  # 设置噪声类型为柏林噪声
@@ -39,7 +44,7 @@ func generate_map():
 			# 高度判斷地形
 			# maybe 全地形
 			var terrain_tile_id
-			if height < REIER_MAX_HEIGHT:
+			if height < RIVER_MAX_HEIGHT:
 				terrain_tile_id = RIVER_TILE_ID
 			elif height < PLAIN_MAX_HEIGHT:
 				terrain_tile_id = PLAIN_TILE_ID
