@@ -86,7 +86,7 @@ func _spawn_player() -> void:
 		)
 
 	# Activate movement in player controller
-	if _player.has_method("set") or "active" in _player:
+	if "active" in _player:
 		_player.set("active", true)
 
 func _check_interact() -> void:

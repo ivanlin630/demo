@@ -91,7 +91,7 @@ func _place_factions(state: WorldState) -> void:
 		f.military         = rng.randi_range(GameConfig.INIT_MIL_MIN,  GameConfig.INIT_MIL_MAX)
 		f.outpost_pos      = Vector2i(rx, ry)
 
-		# Claim a 3×3 initial territory
+		# Claim a 5×5 initial territory (range -2..2 inclusive = 5 cells per axis)
 		for dy in range(-2, 3):
 			for dx in range(-2, 3):
 				var cx: int = rx + dx
