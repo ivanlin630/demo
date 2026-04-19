@@ -18,6 +18,12 @@ var _global_msgs_lbl:  Label
 var _world: WorldState
 var _main:  Node
 
+func _has_property(obj: Object, property_name: StringName) -> bool:
+	for p in obj.get_property_list():
+		if p.name == property_name:
+			return true
+	return false
+
 func _ready() -> void:
 	_build_ui()
 
@@ -33,10 +39,10 @@ func initialize(ws: WorldState, main_node: Node) -> void:
 
 func _on_turn_advanced(_turn: int) -> void:
 	_turn_lbl.text  = "回合: %d" % _world.current_turn
-	if "turns_per_advance" in _main:
-		_speed_lbl.text = "推進速度: %d 回合/次" % _main.turns_per_advance
-	if "player_active" in _main:
-		_mode_lbl.text  = "模式: %s" % ("玩家" if _main.player_active else "觀察")
+	if _has_property(_main, &"turns_per_advance"):
+		_speed_lbl.text = "推進速度: %d 回合/次" % int(_main.get("turns_per_advance"))
+	if _has_property(_main, &"player_active"):
+		_mode_lbl.text  = "模式: %s" % ("玩家" if bool(_main.get("player_active")) else "觀察")
 	_update_global_messages()
 
 func _on_outpost_selected(outpost) -> void:
@@ -88,7 +94,7 @@ func _refresh_static() -> void:
 	_mode_lbl.text     = "模式: 觀察"
 
 func _update_global_messages() -> void:
-	if _main == null or not ("message_system" in _main):
+	if _main == null or not _has_property(_main, &"message_system"):
 		return
 	var ms  := _main.get("message_system") as MessageSystem
 	if ms == null:
