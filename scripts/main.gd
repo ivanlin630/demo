@@ -26,6 +26,12 @@ var _player:          Node3D      # player_controller.gd
 var _map_image:   Image
 var _map_texture: ImageTexture
 
+func _has_property(obj: Object, property_name: StringName) -> bool:
+	for p in obj.get_property_list():
+		if p.name == property_name:
+			return true
+	return false
+
 # ── Lifecycle ─────────────────────────────────────────────────────────────────
 
 func _ready() -> void:
@@ -86,7 +92,7 @@ func _spawn_player() -> void:
 		)
 
 	# Activate movement in player controller
-	if "active" in _player:
+	if _has_property(_player, &"active"):
 		_player.set("active", true)
 
 func _check_interact() -> void:
@@ -183,8 +189,8 @@ func _init_game() -> void:
 	_spawn_faction_markers()
 
 	# Patch player node with correct map bounds
-	if "map_width"  in _player: _player.set("map_width",  world_state.map_width)
-	if "map_height" in _player: _player.set("map_height", world_state.map_height)
+	if _has_property(_player, &"map_width"):  _player.set("map_width",  world_state.map_width)
+	if _has_property(_player, &"map_height"): _player.set("map_height", world_state.map_height)
 
 # ── Map rendering ─────────────────────────────────────────────────────────────
 
