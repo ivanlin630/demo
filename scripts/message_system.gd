@@ -1,6 +1,6 @@
 class_name MessageSystem
 extends RefCounted
-## Handles message creation and propagation between outposts.
+## Handles delayed message propagation and per-faction knowledge.
 
 # ── MessageData inner class ───────────────────────────────────────────────────
 
@@ -22,12 +22,28 @@ class MessageData:
 		origin_turn = turn
 		strength    = s
 
+class PendingDelivery:
+	var target_outpost_idx: int      = -1
+	var arrive_turn:        int      = 0
+	var carrier:            String   = ""
+	var payload:            MessageData
+
+	func _init(idx: int, at_turn: int, carrier_type: String, msg: MessageData) -> void:
+		target_outpost_idx = idx
+		arrive_turn        = at_turn
+		carrier            = carrier_type
+		payload            = msg
+
 # ── Fields ────────────────────────────────────────────────────────────────────
 
 var _world: WorldState
+var _pending: Array = []   # Array[PendingDelivery]
+var _rng: RandomNumberGenerator
 
 func _init(ws: WorldState) -> void:
 	_world = ws
+	_rng = RandomNumberGenerator.new()
+	_rng.seed = ws.seed_value + 424242
 
 # ── Public API ────────────────────────────────────────────────────────────────
 
@@ -38,11 +54,13 @@ func emit_message(type: String, desc: String,
 		type, desc, source_pos, faction_id, _world.current_turn, 1.0
 	)
 	_world.global_messages.append(msg)
-	_spread_to_outposts(msg)
+	_schedule_deliveries(msg)
 
 ## Decay message strengths; remove messages that have faded below the threshold.
 ## Call once per simulation turn.
 func update_turn() -> void:
+	_process_pending_deliveries()
+
 	for o in _world.outposts:
 		var outpost := o as WorldState.OutpostData
 		var to_remove: Array = []
@@ -54,31 +72,141 @@ func update_turn() -> void:
 		for msg in to_remove:
 			outpost.known_messages.erase(msg)
 
+	for fvar in _world.factions:
+		var f := fvar as WorldState.FactionData
+		var expired: Array = []
+		for m in f.known_messages:
+			var msg := m as MessageData
+			msg.strength -= GameConfig.MSG_DECAY_PER_TURN
+			if msg.strength < GameConfig.MSG_MIN_STRENGTH:
+				expired.append(msg)
+		for msg in expired:
+			f.known_messages.erase(msg)
+
 ## Return the most-recent `count` globally emitted messages (newest last).
 func get_recent_messages(count: int) -> Array:
 	var n: int = _world.global_messages.size()
 	return _world.global_messages.slice(max(0, n - count))
 
-# ── Private helpers ───────────────────────────────────────────────────────────
-
-func _spread_to_outposts(msg: MessageData) -> void:
+## Return subjective, nearby messages that the player can plausibly know.
+func get_player_known_messages(player_pos: Vector2i, count: int = 8, radius: int = 8) -> Array:
+	var entries: Array = []
 	for o in _world.outposts:
 		var outpost := o as WorldState.OutpostData
-		var dist: int = _manhattan(msg.source_pos, outpost.pos)
+		if _world.hex_distance(player_pos, outpost.pos) > radius:
+			continue
+		for m in outpost.known_messages:
+			var msg := m as MessageData
+			entries.append({
+				"turn": msg.origin_turn,
+				"text": "[T%d][%s] %s" % [
+					msg.origin_turn,
+					_subjective_confidence(msg.strength),
+					_subjective_text(msg)
+				]
+			})
+
+	if entries.is_empty():
+		return []
+
+	entries.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		return int(a["turn"]) < int(b["turn"])
+	)
+	var start: int = int(max(0, entries.size() - count))
+	var output: Array = []
+	for i in range(start, entries.size()):
+		var text: String = str(entries[i]["text"])
+		output.append(text)
+	return output
+
+# ── Private helpers ───────────────────────────────────────────────────────────
+
+func _schedule_deliveries(msg: MessageData) -> void:
+	for i in range(_world.outposts.size()):
+		var outpost := _world.outposts[i] as WorldState.OutpostData
+		var dist: int = _world.hex_distance(msg.source_pos, outpost.pos)
 		if dist > GameConfig.MSG_SPREAD_RADIUS:
 			continue
-		var s: float = msg.strength - dist * GameConfig.MSG_DECAY_PER_CELL
-		if s < GameConfig.MSG_MIN_STRENGTH:
+
+		var strength: float = msg.strength - dist * GameConfig.MSG_DECAY_PER_CELL
+		if strength < GameConfig.MSG_MIN_STRENGTH:
 			continue
+
+		var delayed := MessageData.new(
+			msg.type,
+			msg.description,
+			msg.source_pos,
+			msg.faction_id,
+			msg.origin_turn,
+			strength
+		)
+
+		var carrier: String = _choose_carrier()
+		var turns: int = _travel_turns(dist, carrier)
+		_pending.append(PendingDelivery.new(
+			i, _world.current_turn + turns, carrier, delayed
+		))
+
+func _process_pending_deliveries() -> void:
+	if _pending.is_empty():
+		return
+
+	var remain: Array = []
+	for dvar in _pending:
+		var delivery := dvar as PendingDelivery
+		if delivery.arrive_turn > _world.current_turn:
+			remain.append(delivery)
+			continue
+
+		if delivery.target_outpost_idx < 0 or delivery.target_outpost_idx >= _world.outposts.size():
+			continue
+		var outpost := _world.outposts[delivery.target_outpost_idx] as WorldState.OutpostData
 		var copy := MessageData.new(
-			msg.type, msg.description, msg.source_pos,
-			msg.faction_id, msg.origin_turn, s
+			delivery.payload.type,
+			delivery.payload.description,
+			delivery.payload.source_pos,
+			delivery.payload.faction_id,
+			delivery.payload.origin_turn,
+			delivery.payload.strength
 		)
 		outpost.known_messages.append(copy)
-		# Mirror to the owning faction's list
+
 		var faction := _world.get_faction(outpost.faction_id)
 		if faction != null:
 			faction.known_messages.append(copy)
+
+	_pending = remain
+
+func _choose_carrier() -> String:
+	var carriers := ["信使", "商旅", "流民", "隊友"]
+	return carriers[_rng.randi_range(0, carriers.size() - 1)]
+
+func _travel_turns(dist: int, carrier: String) -> int:
+	var speed: float = 1.0
+	if carrier == "信使":
+		speed = 2.5
+	elif carrier == "商旅":
+		speed = 1.5
+	elif carrier == "流民":
+		speed = 1.0
+	else:
+		speed = 1.2
+	var base_turns := int(ceil(float(dist) / speed))
+	return max(0, base_turns + _rng.randi_range(0, 2))
+
+func _subjective_confidence(strength: float) -> String:
+	if strength >= 0.75:
+		return "可靠"
+	if strength >= 0.45:
+		return "傳聞"
+	return "可疑"
+
+func _subjective_text(msg: MessageData) -> String:
+	if msg.strength < 0.45:
+		return "聽說有大事發生在 %s 附近。" % str(msg.source_pos)
+	if msg.strength < 0.75:
+		return "有人提到：%s" % msg.description
+	return msg.description
 
 func _manhattan(a: Vector2i, b: Vector2i) -> int:
 	return abs(a.x - b.x) + abs(a.y - b.y)

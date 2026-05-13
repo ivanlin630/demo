@@ -18,7 +18,3 @@ config/features=PackedStringArray("4.2", "Forward Plus")
 [autoload]
 
 GameConfig="*res://config/game_config.gd"
-
-[rendering]
-
-renderer/rendering_method="forward_plus"

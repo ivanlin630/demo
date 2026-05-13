@@ -21,6 +21,10 @@ class FactionData:
 	var wood:        float   = 50.0
 	var ore:         float   = 20.0
 	var military:    float   = 20.0
+	var safety:      float   = 50.0   # security level; derived from military each turn
+	var labor:       float   = 60.0   # workforce; derived from population each turn
+	var unrest_turns: int    = 0      # consecutive turns below safety threshold
+	var is_armed_group: bool = false  # armed (raid/tax) vs production (farm/trade)
 	var outpost_pos: Vector2i = Vector2i.ZERO
 	var territory:       Array = []   # Array[Vector2i] of owned cell positions
 	var known_messages:  Array = []   # Array[MessageSystem.MessageData]
@@ -81,3 +85,35 @@ func get_outpost_at(pos: Vector2i) -> OutpostData:
 		if (o as OutpostData).pos == pos:
 			return o as OutpostData
 	return null
+
+## Odd-r horizontal layout hex neighbors.
+func get_hex_neighbors(pos: Vector2i) -> Array:
+	var even_offsets := [
+		Vector2i(1, 0), Vector2i(-1, 0),
+		Vector2i(0, -1), Vector2i(-1, -1),
+		Vector2i(0, 1), Vector2i(-1, 1),
+	]
+	var odd_offsets := [
+		Vector2i(1, 0), Vector2i(-1, 0),
+		Vector2i(1, -1), Vector2i(0, -1),
+		Vector2i(1, 1), Vector2i(0, 1),
+	]
+
+	var result: Array = []
+	var offsets := even_offsets if (pos.y % 2 == 0) else odd_offsets
+	for d in offsets:
+		var nb: Vector2i = pos + d
+		if is_valid_pos(nb):
+			result.append(nb)
+	return result
+
+func hex_distance(a: Vector2i, b: Vector2i) -> int:
+	var ac := _odd_r_to_cube(a)
+	var bc := _odd_r_to_cube(b)
+	return int(max(abs(ac.x - bc.x), abs(ac.y - bc.y), abs(ac.z - bc.z)))
+
+func _odd_r_to_cube(p: Vector2i) -> Vector3i:
+	var x: int = p.x - int((p.y - (p.y & 1)) / 2)
+	var z: int = p.y
+	var y: int = -x - z
+	return Vector3i(x, y, z)

@@ -46,3 +46,18 @@ const MSG_DECAY_PER_TURN: float = 0.12
 const MSG_DECAY_PER_CELL: float = 0.06
 const MSG_MIN_STRENGTH:   float = 0.10
 const MSG_SPREAD_RADIUS:  int   = 12
+
+# ── Settlement needs ──────────────────────────────────────────────────────────
+const SAFETY_FROM_MIL_RATIO: float = 0.4   # safety = military * this (capped at 100)
+const SAFETY_MIN_THRESHOLD:  float = 10.0  # below this → unrest
+const LABOR_FROM_POP_RATIO:  float = 0.6   # labor = population * this
+const LABOR_MIN_THRESHOLD:   float = 15.0  # below this → production shortage
+const UNREST_BANDIT_TURNS:   int   = 5     # turns of unrest before bandits spawn
+const UNREST_POP_LOSS_RATE:  float = 0.03  # population fled per turn when unrest
+
+# ── NPC memory intensities ────────────────────────────────────────────────────
+const MEM_SLIGHT: int   = 1
+const MEM_DEEP:   int   = 2
+const MEM_SCAR:   int   = 3
+const MEM_FADE_SLIGHT: float = 0.015  # strength loss per turn for slight memories
+const MEM_FADE_DEEP:   float = 0.004  # deep memories fade slowly; scars never fade

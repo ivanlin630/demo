@@ -16,6 +16,7 @@ func update_turn() -> void:
 		var f := item as WorldState.FactionData
 		_collect_resources(f)
 		_update_population(f)
+		_update_needs(f)
 		_try_expand(f)
 	_resolve_conflicts()
 
@@ -59,6 +60,65 @@ func _update_population(f: WorldState.FactionData) -> void:
 	# Trickle of new military from population
 	f.military   += f.population * 0.001
 
+# ── Settlement needs ──────────────────────────────────────────────────────────
+
+func _update_needs(f: WorldState.FactionData) -> void:
+	# Safety derives from military strength
+	f.safety = clamp(f.military * GameConfig.SAFETY_FROM_MIL_RATIO, 0.0, 100.0)
+
+	# Labor derives from population
+	f.labor = f.population * GameConfig.LABOR_FROM_POP_RATIO
+
+	# Production shortage: armed groups don't care about labor
+	if not f.is_armed_group and f.labor < GameConfig.LABOR_MIN_THRESHOLD:
+		if randf() < 0.3:
+			_msgs.emit_message("unrest",
+				"%s 勞力短缺，生產受阻！" % f.name, f.outpost_pos, f.id)
+
+	# Safety check → unrest
+	if f.safety < GameConfig.SAFETY_MIN_THRESHOLD:
+		f.unrest_turns += 1
+		# Population flees due to unsafe conditions
+		f.population -= f.population * GameConfig.UNREST_POP_LOSS_RATE
+		f.population  = max(1.0, f.population)
+
+		if f.unrest_turns == 1:
+			_msgs.emit_message("unrest",
+				"%s 治安惡化，居民人心惶惶！" % f.name, f.outpost_pos, f.id)
+
+		# Prolonged unrest → social collapse events
+		if f.unrest_turns >= GameConfig.UNREST_BANDIT_TURNS:
+			_trigger_collapse(f)
+	else:
+		# Safety restored → reset counter
+		if f.unrest_turns > 0:
+			f.unrest_turns = 0
+
+func _trigger_collapse(f: WorldState.FactionData) -> void:
+	var roll := randf()
+	if roll < 0.4:
+		# People flee → become refugees
+		var fled: float = f.population * 0.10
+		f.population   -= fled
+		f.population    = max(1.0, f.population)
+		_msgs.emit_message("collapse",
+			"%s 大批居民逃離，淪為流民！" % f.name, f.outpost_pos, f.id)
+	elif roll < 0.7:
+		# Military splinters → some become bandits (reduce military)
+		var splintered: float = f.military * 0.15
+		f.military -= splintered
+		f.military  = max(0.0, f.military)
+		_msgs.emit_message("collapse",
+			"%s 兵卒嘩變，轉為盜匪！" % f.name, f.outpost_pos, f.id)
+	else:
+		# Uprising → massive population and military loss
+		f.population -= f.population * 0.2
+		f.military   -= f.military   * 0.3
+		f.population  = max(1.0, f.population)
+		f.military    = max(0.0, f.military)
+		_msgs.emit_message("collapse",
+			"%s 爆發叛亂！" % f.name, f.outpost_pos, f.id)
+
 # ── Expansion ─────────────────────────────────────────────────────────────────
 
 func _try_expand(f: WorldState.FactionData) -> void:
@@ -101,7 +161,13 @@ func _resolve_conflicts() -> void:
 				_maybe_fight(fa, fb)
 
 func _are_adjacent(fa: WorldState.FactionData, fb: WorldState.FactionData) -> bool:
-	return Vector2(fa.outpost_pos).distance_to(Vector2(fb.outpost_pos)) < 35.0
+	for pos_var in fa.territory:
+		var pos := pos_var as Vector2i
+		for nb in _world.get_hex_neighbors(pos):
+			var c := _world.get_cell(nb.x, nb.y)
+			if c != null and c.faction_id == fb.id:
+				return true
+	return _world.hex_distance(fa.outpost_pos, fb.outpost_pos) <= 6
 
 func _maybe_fight(fa: WorldState.FactionData, fb: WorldState.FactionData) -> void:
 	if fa.military < GameConfig.CONFLICT_MIN_MIL \
@@ -139,9 +205,4 @@ func _maybe_fight(fa: WorldState.FactionData, fb: WorldState.FactionData) -> voi
 # ── Utility ───────────────────────────────────────────────────────────────────
 
 func _neighbors(pos: Vector2i) -> Array:
-	var result: Array = []
-	for d in [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]:
-		var nb: Vector2i = pos + d
-		if _world.is_valid_pos(nb):
-			result.append(nb)
-	return result
+	return _world.get_hex_neighbors(pos)

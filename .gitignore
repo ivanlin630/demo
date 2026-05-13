@@ -1,0 +1,8 @@
+# Godot editor/runtime generated cache
+.godot/
+
+# Local logs
+godot_log.txt
+
+# Local Godot executables (do not push binaries to GitHub)
+tools/godot/*.exe
