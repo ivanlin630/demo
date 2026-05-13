@@ -5,6 +5,7 @@ extends RefCounted
 
 var _world: WorldState
 var _msgs:  MessageSystem
+var _war_last_turn_by_pair: Dictionary = {}
 
 func _init(ws: WorldState, ms: MessageSystem) -> void:
 	_world = ws
@@ -17,8 +18,21 @@ func update_turn() -> void:
 		_collect_resources(f)
 		_update_population(f)
 		_update_needs(f)
-		_try_expand(f)
+		# Accumulate march ticks each turn; expand only when the cost threshold is met
+		f.march_tick_acc += GameConfig.TURN_TO_TICK
+		var march_cost := _get_march_tick_cost(f)
+		if f.march_tick_acc >= march_cost:
+			f.march_tick_acc -= march_cost
+			_try_expand(f)
 	_resolve_conflicts()
+
+## Tick cost for one NPC expansion step – mirrors the player speed formula.
+func _get_march_tick_cost(f: WorldState.FactionData) -> int:
+	return clampi(
+		roundi(float(GameConfig.BASE_MOVE_TICK_COST) / f.speed_factor),
+		GameConfig.MIN_MOVE_TICK_COST,
+		GameConfig.MAX_MOVE_TICK_COST
+	)
 
 # ── Resource collection ───────────────────────────────────────────────────────
 
@@ -45,8 +59,13 @@ func _collect_resources(f: WorldState.FactionData) -> void:
 	f.food -= consumed
 	if f.food < 0.0:
 		f.food = 0.0
-		_msgs.emit_message("famine",
-			"%s 陷入饑荒！" % f.name, f.outpost_pos, f.id)
+		_emit_faction_event(
+			f,
+			"famine",
+			"famine",
+			"%s 陷入饑荒！" % f.name,
+			GameConfig.EVENT_FAMINE_COOLDOWN
+		)
 
 # ── Population dynamics ───────────────────────────────────────────────────────
 
@@ -71,9 +90,13 @@ func _update_needs(f: WorldState.FactionData) -> void:
 
 	# Production shortage: armed groups don't care about labor
 	if not f.is_armed_group and f.labor < GameConfig.LABOR_MIN_THRESHOLD:
-		if randf() < 0.3:
-			_msgs.emit_message("unrest",
-				"%s 勞力短缺，生產受阻！" % f.name, f.outpost_pos, f.id)
+		_emit_faction_event(
+			f,
+			"labor_shortage",
+			"unrest",
+			"%s 勞力短缺，生產受阻！" % f.name,
+			GameConfig.EVENT_LABOR_COOLDOWN
+		)
 
 	# Safety check → unrest
 	if f.safety < GameConfig.SAFETY_MIN_THRESHOLD:
@@ -88,7 +111,9 @@ func _update_needs(f: WorldState.FactionData) -> void:
 
 		# Prolonged unrest → social collapse events
 		if f.unrest_turns >= GameConfig.UNREST_BANDIT_TURNS:
-			_trigger_collapse(f)
+			if _can_emit_faction_event(f, "collapse", GameConfig.EVENT_COLLAPSE_COOLDOWN):
+				_trigger_collapse(f)
+				f.event_last_turns["collapse"] = _world.current_turn
 	else:
 		# Safety restored → reset counter
 		if f.unrest_turns > 0:
@@ -146,9 +171,14 @@ func _try_expand(f: WorldState.FactionData) -> void:
 		f.territory.append(expand_pos)
 		f.military   -= GameConfig.EXPAND_MIL_COST * 0.1
 
-		if randf() < 0.08:
-			_msgs.emit_message("expansion",
-				"%s 向外擴張！" % f.name, f.outpost_pos, f.id)
+		if randf() < 0.20:
+			_emit_faction_event(
+				f,
+				"expansion",
+				"expansion",
+				"%s 向外擴張！" % f.name,
+				GameConfig.EVENT_EXPANSION_COOLDOWN
+			)
 
 # ── Conflict resolution ───────────────────────────────────────────────────────
 
@@ -198,9 +228,30 @@ func _maybe_fight(fa: WorldState.FactionData, fb: WorldState.FactionData) -> voi
 			lc.faction_id = winner.id
 			winner.territory.append(lost_pos)
 
-	_msgs.emit_message("war",
-		"%s 與 %s 爆發衝突！" % [fa.name, fb.name],
-		fa.outpost_pos, fa.id)
+	var a_id: int = mini(fa.id, fb.id)
+	var b_id: int = maxi(fa.id, fb.id)
+	var pair_key: String = "%d-%d" % [a_id, b_id]
+	var last_war_turn: int = int(_war_last_turn_by_pair.get(pair_key, -999999))
+	if _world.current_turn - last_war_turn >= GameConfig.EVENT_WAR_COOLDOWN:
+		_msgs.emit_message("war",
+			"%s 與 %s 爆發衝突！" % [fa.name, fb.name],
+			fa.outpost_pos, fa.id)
+		_war_last_turn_by_pair[pair_key] = _world.current_turn
+
+func _can_emit_faction_event(f: WorldState.FactionData, key: String, cooldown: int) -> bool:
+	var last_turn: int = int(f.event_last_turns.get(key, -999999))
+	return _world.current_turn - last_turn >= cooldown
+
+func _emit_faction_event(
+		f: WorldState.FactionData,
+		key: String,
+		message_type: String,
+		description: String,
+		cooldown: int) -> void:
+	if not _can_emit_faction_event(f, key, cooldown):
+		return
+	_msgs.emit_message(message_type, description, f.outpost_pos, f.id)
+	f.event_last_turns[key] = _world.current_turn
 
 # ── Utility ───────────────────────────────────────────────────────────────────
 

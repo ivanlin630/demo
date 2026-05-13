@@ -1,6 +1,6 @@
 extends Node3D
 ## Player pawn.  Activated when the player presses Enter.
-## Handles WASD movement on the XZ plane and stays within map bounds.
+## Handles hex movement (numpad or letter fallback) and stays within map bounds.
 
 var step_interval: float = 0.12
 var map_width:  int   = 128

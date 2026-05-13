@@ -25,6 +25,9 @@ class FactionData:
 	var labor:       float   = 60.0   # workforce; derived from population each turn
 	var unrest_turns: int    = 0      # consecutive turns below safety threshold
 	var is_armed_group: bool = false  # armed (raid/tax) vs production (farm/trade)
+	var speed_factor:  float = 1.0    # march speed; higher → cheaper tick cost per expansion
+	var march_tick_acc: int  = 0      # accumulated ticks towards next expansion step
+	var event_last_turns: Dictionary = {} # event key -> last emitted turn
 	var outpost_pos: Vector2i = Vector2i.ZERO
 	var territory:       Array = []   # Array[Vector2i] of owned cell positions
 	var known_messages:  Array = []   # Array[MessageSystem.MessageData]
@@ -32,6 +35,7 @@ class FactionData:
 	func _init() -> void:
 		territory      = []
 		known_messages = []
+		event_last_turns = {}
 
 class OutpostData:
 	var pos:             Vector2i = Vector2i.ZERO
@@ -44,11 +48,12 @@ class OutpostData:
 # ── World fields ──────────────────────────────────────────────────────────────
 
 ## Flat grid: index = y * map_width + x
-var cells:           Array = []
-var factions:        Array = []   # Array[FactionData]
-var outposts:        Array = []   # Array[OutpostData]
-var global_messages: Array = []   # every message ever emitted
-var current_turn:    int   = 0
+var cells:                  Array = []
+var factions:               Array = []   # Array[FactionData]
+var outposts:               Array = []   # Array[OutpostData]
+var global_messages:        Array = []   # every message ever emitted (truth record)
+var player_known_messages:  Array = []   # messages the player has personally received
+var current_turn:           int   = 0
 var map_width:       int   = 128
 var map_height:      int   = 128
 var seed_value:      int   = 0
@@ -58,6 +63,7 @@ func _init(w: int, h: int, s: int) -> void:
 	map_height = h
 	seed_value = s
 	cells.resize(w * h)
+	player_known_messages = []
 
 # ── Accessors ─────────────────────────────────────────────────────────────────
 

@@ -89,6 +89,7 @@ func _place_factions(state: WorldState) -> void:
 		f.wood             = 50.0
 		f.ore              = 20.0
 		f.military         = rng.randi_range(GameConfig.INIT_MIL_MIN,  GameConfig.INIT_MIL_MAX)
+		f.speed_factor     = rng.randf_range(GameConfig.NPC_SPEED_FACTOR_MIN, GameConfig.NPC_SPEED_FACTOR_MAX)
 		f.outpost_pos      = Vector2i(rx, ry)
 
 		# Claim a 5×5 initial territory (range -2..2 inclusive = 5 cells per axis)

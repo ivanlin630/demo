@@ -33,6 +33,19 @@ const INIT_MIL_MIN:  int = 10
 const INIT_MIL_MAX:  int = 50
 
 # ── Simulation parameters ─────────────────────────────────────────────────────
+const WORLD_SECONDS_PER_TICK: int = 30   # World simulation granularity
+const TURN_TO_TICK:           int = 10   # 1 player turn maps to N world ticks
+
+# ── Movement speed model (Q-008 phase A/B) ──────────────────────────────────
+const PLAYER_SPEED_FACTOR_DEFAULT: float = 1.0
+const BASE_MOVE_TICK_COST:         int   = 10   # base ticks per hex at speed=1.0
+const MIN_MOVE_TICK_COST:          int   = 4
+const MAX_MOVE_TICK_COST:          int   = 20
+
+# NPC march speed range (Q-008 phase B)
+const NPC_SPEED_FACTOR_MIN: float = 0.5   # slowest faction (cost ≈ 20 ticks)
+const NPC_SPEED_FACTOR_MAX: float = 3.0   # fastest faction (cost ≈ 4 ticks)
+
 const FOOD_PER_PERSON:    float = 0.5
 const GROWTH_RATE:        float = 0.03
 const STARVATION_RATE:    float = 0.08
@@ -40,6 +53,13 @@ const EXPAND_MIL_COST:    float = 2.0
 const CONFLICT_CHANCE:    float = 0.25
 const CONFLICT_MIL_RATIO: float = 0.4
 const CONFLICT_MIN_MIL:   float = 5.0
+
+# ── Event pacing (cooldowns in turns) ───────────────────────────────────────
+const EVENT_FAMINE_COOLDOWN:    int = 6
+const EVENT_LABOR_COOLDOWN:     int = 8
+const EVENT_COLLAPSE_COOLDOWN:  int = 7
+const EVENT_EXPANSION_COOLDOWN: int = 12
+const EVENT_WAR_COOLDOWN:       int = 6
 
 # ── Message propagation ───────────────────────────────────────────────────────
 const MSG_DECAY_PER_TURN: float = 0.12

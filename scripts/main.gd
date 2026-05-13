@@ -14,12 +14,15 @@ var world_state:     WorldState
 var world_generator: WorldGenerator
 var faction_system:  FactionSystem
 var message_system:  MessageSystem
+var npc_memory:      NpcMemorySystem
 
 var turns_per_advance: int  = 1
 var player_active:     bool = false
 var simulation_paused: bool  = false
 var seconds_per_turn:  float = 0.35
 var _turn_accumulator: float = 0.0
+var world_tick: int = 0
+var player_speed_factor: float = 1.0
 
 enum TimeSystem {
 	TURN_BASED,
@@ -95,7 +98,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("advance_turn"):
-		_advance_turns(turns_per_advance)
+		_advance_world_ticks(turns_per_advance * _turn_to_tick())
 	elif event.is_action_pressed("pause_toggle"):
 		simulation_paused = not simulation_paused
 		simulation_settings_changed.emit(simulation_paused, seconds_per_turn)
@@ -129,7 +132,7 @@ func _process(delta: float) -> void:
 		_turn_accumulator += delta
 		while _turn_accumulator >= seconds_per_turn:
 			_turn_accumulator -= seconds_per_turn
-			_advance_turns(1)
+			_advance_world_ticks(_turn_to_tick())
 
 	if player_active:
 		_follow_camera(delta)
@@ -137,7 +140,7 @@ func _process(delta: float) -> void:
 			var gp := get_player_grid_pos()
 			if gp != _last_player_grid_pos:
 				_last_player_grid_pos = gp
-				_advance_turns(1)
+				_advance_world_ticks(get_player_move_tick_cost())
 
 # ── Simulation ────────────────────────────────────────────────────────────────
 
@@ -146,9 +149,22 @@ func _advance_turns(count: int) -> void:
 		world_state.current_turn += 1
 		faction_system.update_turn()
 		message_system.update_turn()
+		npc_memory.update_turn()
 	_update_map_texture()
 	_refresh_faction_markers()
 	turn_advanced.emit(world_state.current_turn)
+
+func _advance_world_ticks(ticks: int) -> void:
+	if ticks <= 0:
+		return
+	world_tick += ticks
+	var target_turn: int = int(world_tick / _turn_to_tick())
+	var delta_turn: int = max(0, target_turn - world_state.current_turn)
+	if delta_turn > 0:
+		_advance_turns(delta_turn)
+	else:
+		# Even when no turn boundary is crossed, notify HUD for world-time display.
+		turn_advanced.emit(world_state.current_turn)
 
 # ── Player ────────────────────────────────────────────────────────────────────
 
@@ -195,7 +211,42 @@ func _check_interact() -> void:
 			nearest      = op
 
 	if nearest != null and nearest_dist <= 6:
+		# Transfer this faction's known messages to the player's personal journal.
+		# Player only learns what this specific NPC/faction knows.
+		var contact_faction := world_state.get_faction(nearest.faction_id)
+		if contact_faction != null:
+			for mvar in contact_faction.known_messages:
+				var msg := mvar as MessageSystem.MessageData
+				# Deduplicate: same event = same type + source + origin turn
+				var already := false
+				for pvar in world_state.player_known_messages:
+					var pm := pvar as MessageSystem.MessageData
+					if pm.origin_turn == msg.origin_turn \
+							and pm.type == msg.type \
+							and pm.source_pos == msg.source_pos:
+						already = true
+						break
+				if not already:
+					var copy := MessageSystem.MessageData.new(
+						msg.type, msg.description, msg.source_pos,
+						msg.faction_id, msg.origin_turn, msg.strength)
+					copy.received_turn = world_state.current_turn
+					world_state.player_known_messages.append(copy)
+
+		# Create a random NPC at this outpost on first contact (resident NPC)
+		var profiles: Array = npc_memory.get_faction_profiles(nearest.faction_id)
+		# Always emit outpost info; include one NPC profile if available
 		outpost_selected.emit(nearest)
+
+		# Chance to encounter a new NPC on each visit
+		if randf() < 0.4 or profiles.size() < 2:
+			var f := world_state.get_faction(nearest.faction_id)
+			var fname: String = f.name if f != null else "未知"
+			var npc_name: String = fname + " 居民%d" % (profiles.size() + 1)
+			var new_npc: NpcMemorySystem.NpcProfile = npc_memory.create_profile(npc_name, "", nearest.faction_id)
+			# Meeting this NPC is a slight memory for the player context
+			npc_memory.record_event(new_npc.id, "meeting",
+				"與玩家在 %s 相遇" % fname, GameConfig.MEM_SLIGHT)
 	else:
 		outpost_selected.emit(null)
 
@@ -279,7 +330,20 @@ func _init_game() -> void:
 	world_state     = world_generator.generate()
 	message_system  = MessageSystem.new(world_state)
 	faction_system  = FactionSystem.new(world_state, message_system)
+	npc_memory      = NpcMemorySystem.new(world_state)
 	encounter_battle = EncounterBattle.new(world_state.seed_value + 777)
+	player_speed_factor = GameConfig.PLAYER_SPEED_FACTOR_DEFAULT
+	world_tick = world_state.current_turn * _turn_to_tick()
+
+	# Seed NPC profiles for initial outpost leaders
+	for item in world_state.outposts:
+		var op := item as WorldState.OutpostData
+		var f  := world_state.get_faction(op.faction_id)
+		if f == null:
+			continue
+		var leader: NpcMemorySystem.NpcProfile = npc_memory.create_profile(f.name + " 領袖", "貴族", op.faction_id)
+		npc_memory.record_event(leader.id, "founding",
+			"建立了 %s 的統治" % f.name, GameConfig.MEM_DEEP)
 
 	_build_map_mesh()
 	_spawn_faction_markers()
@@ -383,7 +447,14 @@ func get_player_grid_pos() -> Vector2i:
 func get_player_visible_messages(count: int = 10) -> Array:
 	if not player_active:
 		return []
-	return message_system.get_player_known_messages(get_player_grid_pos(), count, 8)
+	var msgs := world_state.player_known_messages
+	var n: int = msgs.size()
+	var result: Array = []
+	for i in range(max(0, n - count), n):
+		var msg := msgs[i] as MessageSystem.MessageData
+		result.append("[登T%d/獲T%d][%s] %s" % [
+			msg.origin_turn, msg.received_turn, msg.type, msg.description])
+	return result
 
 func _try_start_battle() -> void:
 	if battle_active or not player_active:
@@ -494,6 +565,18 @@ func get_time_system_name() -> String:
 		return "半即時制"
 	return "回合制"
 
+func _turn_to_tick() -> int:
+	return max(1, int(GameConfig.TURN_TO_TICK))
+
+func get_world_tick() -> int:
+	return world_tick
+
+func get_player_move_tick_cost() -> int:
+	var safe_speed: float = max(0.2, player_speed_factor)
+	var base: float = float(GameConfig.BASE_MOVE_TICK_COST)
+	var raw_cost: int = int(round(base / safe_speed))
+	return clamp(raw_cost, int(GameConfig.MIN_MOVE_TICK_COST), int(GameConfig.MAX_MOVE_TICK_COST))
+
 func _cell_index(x: int, y: int) -> int:
 	return y * world_state.map_width + x
 
@@ -504,32 +587,43 @@ func _grid_to_world(pos: Vector2i) -> Vector3:
 
 # ── Input action registration ─────────────────────────────────────────────────
 
+func _ensure_key_binding(action_name: String, keycode: Key) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
+
+	for ev_var in InputMap.action_get_events(action_name):
+		var ev := ev_var as InputEventKey
+		if ev != null and ev.keycode == keycode:
+			return
+
+	var key_event := InputEventKey.new()
+	key_event.keycode = keycode
+	InputMap.action_add_event(action_name, key_event)
+
 func _register_input_actions() -> void:
 	var bindings := {
-		"advance_turn":  KEY_SPACE,
-		"time_mode_toggle": KEY_T,
-		"zoom_in":      KEY_PAGEUP,
-		"zoom_out":     KEY_PAGEDOWN,
-		"speed_up":      KEY_EQUAL,
-		"speed_down":    KEY_MINUS,
-		"pause_toggle":  KEY_P,
-		"auto_speed_up": KEY_BRACKETRIGHT,
-		"auto_speed_down": KEY_BRACKETLEFT,
-		"battle_start":  KEY_B,
-		"player_spawn":  KEY_ENTER,
-		"interact":      KEY_E,
-		"move_forward":  KEY_W,
-		"move_back":     KEY_S,
-		"move_left":     KEY_A,
-		"move_right":    KEY_D,
-		"move_nw":       KEY_Q,
-		"move_ne":       KEY_R,
-		"move_sw":       KEY_Z,
-		"move_se":       KEY_X,
+		"advance_turn": [KEY_SPACE],
+		"time_mode_toggle": [KEY_T],
+		"zoom_in": [KEY_PAGEUP],
+		"zoom_out": [KEY_PAGEDOWN],
+		"speed_up": [KEY_EQUAL],
+		"speed_down": [KEY_MINUS],
+		"pause_toggle": [KEY_P],
+		"auto_speed_up": [KEY_BRACKETRIGHT],
+		"auto_speed_down": [KEY_BRACKETLEFT],
+		"battle_start": [KEY_B],
+		"player_spawn": [KEY_ENTER],
+		"interact": [KEY_E],
+
+		# Numpad movement as primary, letter keys kept as compatibility fallback.
+		"move_left": [KEY_KP_4, KEY_A],
+		"move_right": [KEY_KP_6, KEY_D],
+		"move_nw": [KEY_KP_7, KEY_Q],
+		"move_ne": [KEY_KP_9, KEY_R],
+		"move_sw": [KEY_KP_1, KEY_Z],
+		"move_se": [KEY_KP_3, KEY_X],
 	}
+
 	for action_name: String in bindings:
-		if not InputMap.has_action(action_name):
-			InputMap.add_action(action_name)
-			var ev        := InputEventKey.new()
-			ev.keycode     = bindings[action_name]
-			InputMap.action_add_event(action_name, ev)
+		for keycode_var in bindings[action_name]:
+			_ensure_key_binding(action_name, keycode_var as Key)

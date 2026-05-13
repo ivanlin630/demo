@@ -10,8 +10,9 @@ class MessageData:
 	var description: String   = ""
 	var source_pos:  Vector2i = Vector2i.ZERO
 	var faction_id:  int      = -1
-	var origin_turn: int      = 0
-	var strength:    float    = 1.0   # 0.0–1.0; decays over time/distance
+	var origin_turn:   int   = 0
+	var strength:      float = 1.0   # 0.0–1.0; decays over time/distance
+	var received_turn: int   = -1    # turn when player personally received this
 
 	func _init(t: String, desc: String, src: Vector2i,
 			fid: int, turn: int, s: float = 1.0) -> void:
@@ -88,6 +89,10 @@ func get_recent_messages(count: int) -> Array:
 	var n: int = _world.global_messages.size()
 	return _world.global_messages.slice(max(0, n - count))
 
+## Expose the in-transit delivery queue (for debug views).
+func get_pending_deliveries() -> Array:
+	return _pending
+
 ## Return subjective, nearby messages that the player can plausibly know.
 func get_player_known_messages(player_pos: Vector2i, count: int = 8, radius: int = 8) -> Array:
 	var entries: Array = []
@@ -163,7 +168,7 @@ func _process_pending_deliveries() -> void:
 		var outpost := _world.outposts[delivery.target_outpost_idx] as WorldState.OutpostData
 		var copy := MessageData.new(
 			delivery.payload.type,
-			delivery.payload.description,
+			_distort_description(delivery.payload.description, delivery.payload.strength, delivery.carrier),
 			delivery.payload.source_pos,
 			delivery.payload.faction_id,
 			delivery.payload.origin_turn,
@@ -202,11 +207,49 @@ func _subjective_confidence(strength: float) -> String:
 	return "可疑"
 
 func _subjective_text(msg: MessageData) -> String:
+	if msg.strength < 0.30:
+		# Extremely weak — almost no info survives
+		return "某地附近似乎有大事發生。"
 	if msg.strength < 0.45:
-		return "聽說有大事發生在 %s 附近。" % str(msg.source_pos)
+		# Low strength — vague area + type hint
+		match msg.type:
+			"war":     return "聽說某處爆發了衝突，傷亡不明。"
+			"famine":  return "有人說某地糧食出了問題。"
+			"unrest":  return "附近好像不太平，具體不清楚。"
+			"collapse": return "聽說某聚落最近狀況很差。"
+			_:          return "聽說有大事發生在 %s 附近。" % str(msg.source_pos)
 	if msg.strength < 0.75:
-		return "有人提到：%s" % msg.description
+		# Medium — general description survives, attribution uncertain
+		return "有人提到：%s（消息來源不確定）" % msg.description
+	# High strength — full description
 	return msg.description
+
+## Apply per-carrier distortion to a description when strength is low.
+## Carrier "流民" introduces more noise than "信使".
+func _distort_description(desc: String, strength: float, carrier: String) -> String:
+	if strength >= 0.75:
+		return desc   # high-strength messages pass through clean
+
+	# Carrier-specific distortion probability
+	var distort_chance := 0.0
+	match carrier:
+		"信使":  distort_chance = 0.05   # official messenger: rarely distorts
+		"商旅":  distort_chance = 0.20   # merchants exaggerate
+		"流民":  distort_chance = 0.45   # refugees: emotionally distorted
+		"隊友":  distort_chance = 0.10
+
+	if _rng.randf() > distort_chance:
+		return desc
+
+	# Apply distortion templates based on message content
+	var distortions: Array = [
+		"（據說）" + desc,
+		desc + "（但真相不明）",
+		desc + "，傷亡人數眾說紛紜。",
+		"有人聲稱：" + desc + "，也有人否認此事。",
+		"情況比想像中更糟——" + desc,
+	]
+	return distortions[_rng.randi_range(0, distortions.size() - 1)]
 
 func _manhattan(a: Vector2i, b: Vector2i) -> int:
 	return abs(a.x - b.x) + abs(a.y - b.y)

@@ -1,0 +1,9 @@
+{
+    "godotTools.editorPath.godot4": "a:\\GDS\\demo\\tools\\godot\\Godot_v4.2.2-stable_win64.exe",
+    "chat.tools.terminal.autoApprove": {
+        "/^& \"a:\\\\GDS\\\\demo\\\\tools\\\\godot\\\\Godot_v4\\.2\\.2-stable_win64_console\\.exe\" --headless --path \"a:\\\\GDS\\\\demo\" --quit 2>&1 \\| Select-Object -First 60$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}
