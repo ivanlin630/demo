@@ -952,4 +952,4 @@ NPC 可具有長期目標。
 
 ---
 
-討論與問題追蹤請改至 [docs/open-questions.md](docs/open-questions.md)。
+討論與問題追蹤請改至 [open-questions.md](open-questions.md)。
