@@ -1,5 +1,12 @@
 # Coding Standards
 
+## 相關文件
+- [README](../README.md)
+- [核心概念](game-design.md)
+- [階段目標](project-goals.md)
+- [待討論議題](open-questions.md)
+
+
 ## General
 
 - 語言：**GDScript**，目標相容 Godot 4.2+。

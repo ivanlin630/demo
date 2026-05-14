@@ -1,5 +1,11 @@
 # 核心概念
 
+## 相關文件
+- [README](../README.md)
+- [階段目標](project-goals.md)
+- [待討論議題](open-questions.md)
+
+
 本作是一款以：
 
 - 資訊傳播

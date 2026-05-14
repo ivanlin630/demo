@@ -1,5 +1,11 @@
 # Glossary
 
+## 相關文件
+- [README](../README.md)
+- [核心概念](game-design.md)
+- [待討論議題](open-questions.md)
+
+
 | 術語 | 定義 |
 |---|---|
 | **回合（Turn）** | 一次完整的世界狀態更新週期 |

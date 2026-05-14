@@ -1,5 +1,11 @@
 # Open Questions
 
+## 相關文件
+- [README](../README.md)
+- [核心概念](game-design.md)
+- [階段目標](project-goals.md)
+
+
 > 之後所有玩法、系統、數值、UI 問題都寫在這裡。  
 > 每條問題建議使用一個編號，方便追蹤。
 

@@ -1,5 +1,11 @@
 # Project Goals
 
+## 相關文件
+- [README](../README.md)
+- [核心概念](game-design.md)
+- [待討論議題](open-questions.md)
+
+
 對應 [game-design.md](game-design.md) 四階段開發優先順序。
 
 ---

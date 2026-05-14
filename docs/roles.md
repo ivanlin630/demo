@@ -1,5 +1,11 @@
 # Roles
 
+## 相關文件
+- [README](../README.md)
+- [核心概念](game-design.md)
+- [待討論議題](open-questions.md)
+
+
 ## Human Roles
 
 | 角色 | 職責 |

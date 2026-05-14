@@ -1,5 +1,12 @@
 # Change Management
 
+## 相關文件
+- [README](../README.md)
+- [核心概念](game-design.md)
+- [階段目標](project-goals.md)
+- [待討論議題](open-questions.md)
+
+
 ## 小型修正（Small Fix）
 Bug fix、數值調整：直接改動，附說明即可。
 
