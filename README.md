@@ -8,7 +8,7 @@
 - 第一階段（Vertical Slice）已完成
 - 第二階段（Demo）已完成部分核心系統（NPC 個體化、記憶、傳聞失真、聚落需求循環）
 
-核心設計方向請見 docs/game-design.md。
+核心設計方向請見 [docs/game-design.md](docs/game-design.md)。
 
 ---
 
@@ -93,12 +93,32 @@ Godot_v4.2.2-stable_win64_console.exe --path . --quit --verbose
 
 ## 文件索引
 
-- docs/game-design.md：完整設計概念與世界觀
-- docs/project-goals.md：四階段目標與目前進度
-- docs/open-questions.md：待討論議題與決策追蹤
-- docs/glossary.md：專案術語
-- docs/coding-standards.md：程式風格規範
-- docs/change-management.md：變更管理流程
+- 核心設計與目標
+  - [docs/game-design.md](docs/game-design.md)：核心玩法、世界觀、時間尺度與設計不變量。
+  - [docs/project-goals.md](docs/project-goals.md)：四階段開發目標、目前進度與中長期範圍。
+  - [docs/open-questions.md](docs/open-questions.md)：待討論議題、決策追蹤與高優先反饋。
+
+- 協作與交付規範
+  - [docs/coding-standards.md](docs/coding-standards.md)：程式風格、命名規則與檔案責任邊界。
+  - [docs/delivery-standards.md](docs/delivery-standards.md)：交付驗收標準與文件同步要求。
+  - [docs/change-management.md](docs/change-management.md)：小型修正、功能變更與架構調整流程。
+  - [docs/roles.md](docs/roles.md)：Human / AI Agent 角色分工與可動作範圍。
+
+- 世界模型與規則拆解
+  - [docs/person.md](docs/person.md)：人物層、代表角色與未來 NPC 擴充方向。
+  - [docs/world.md](docs/world.md)：世界狀態、資源流、時間推進與勢力成長。
+  - [docs/event.md](docs/event.md)：事件觸發、結算流程與事件分層。
+  - [docs/message.md](docs/message.md)：訊息產生、傳播、失真與玩家接收流程。
+
+- 補充參考
+  - [docs/glossary.md](docs/glossary.md)：專案術語與常用定義。
+
+## Agent / Contributor 閱讀順序
+
+1. 先讀本 README，掌握專案定位、目前已實作內容、操作方式與文件地圖。
+2. 再讀 [docs/game-design.md](docs/game-design.md) 與 [docs/project-goals.md](docs/project-goals.md)，確認核心設計方向與階段目標。
+3. 開始實作、調整設計或整理文件時，隨時查閱 [docs/open-questions.md](docs/open-questions.md)，避免與未定案事項衝突。
+4. 實作前後都要遵守 [docs/coding-standards.md](docs/coding-standards.md)、[docs/delivery-standards.md](docs/delivery-standards.md) 與 [docs/change-management.md](docs/change-management.md)。
 
 ---
 
