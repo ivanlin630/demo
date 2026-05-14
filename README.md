@@ -4,7 +4,7 @@
 
 這是一個以「資訊不對稱、社會互動、世界自行演化」為核心的 Godot 4.x 原型。
 
-目前狀態對齊 docs/project-goals.md：
+目前狀態對齊 [docs/project-goals.md](docs/project-goals.md)：
 - 第一階段（Vertical Slice）已完成
 - 第二階段（Demo）已完成部分核心系統（NPC 個體化、記憶、傳聞失真、聚落需求循環）
 
