@@ -1,44 +1,96 @@
 # 團體 (Team)
 
 ## 相關文件
-- [README](../README.md)
 - [核心概念](game-design.md)
-- [待討論議題](open-questions.md)
+- [人物](person.md)
+- [世界](world.md)
+- [事件](event.md)
+
+---
 
 ## 定義
-- 地圖上的棋子單位
-- 由一名記名 NPC 統領
-- 由剩餘記名 NPC 擔任參謀
-- 團體人口上限 50（含記名與非記名）
 
-## 結構
-- `team_id`
-- `leader_id` (記名 NPC)
-- `advisors[]` (記名 NPC)
-- `members[]` (非記名 NPC)
-- `population`= 記名 NPC + 非記名 NPC
-- `population_limit = 50`
-- `resources` (糧食、物資、武器、金錢、商品)
-- `move_speed` (移動速度，影響每格耗時 Tick/Turn)
-- `tags[]` (職責標籤：生產、製造、貿易、掠奪、保衛、統領)
-- `Task[]` (執行任務種類,生產、製造、貿易、掠奪、攻擊、巡邏、閒晃)
-- `unrest_turns` 過低會影響記名 NPC行動 導致團體分離、暴動
+地圖上的棋子單位。由記名 NPC（leader + advisors）帶領，代表一群人的集體行動。
 
-## 行動方針
-- 由領導與參謀加權決定
-- 權重依忠誠、技能、角色定位調整
-- 方針影響移動、駐守、交涉、戰鬥
+---
+
+## 資料結構
+
+定義於 `scripts/data/team_data.gd`：
+
+```gdscript
+var team_id: int
+var leader_id: int          # 記名 NPC id
+var advisors: Array         # 記名 NPC id[]（前任領袖降職後加入）
+var members: Array          # 非記名 NPC id[]
+
+var population: int         # 成人人口，上限 50，最小 1
+var minor_population: int   # 未成年人口，上限 = population × 20%，不計入上限
+
+var resources: Dictionary   # { "food", "material", "weapon", "money", "goods" }
+var move_speed: float       # 移動速度，影響每格耗 Tick 數
+
+var tags: Array             # 職責標籤：["生產", "製造", "貿易", "掠奪", "保衛", "統領"]
+var current_task: String    # "idle" / "生產" / "製造" / "貿易" / "掠奪" / "攻擊" / "巡邏"
+
+var unrest_turns: int       # 不滿積累值
+var faction_id: int         # 所屬勢力，-1 = 獨立
+var tile_pos: Vector2i      # 當前大地圖格座標
+```
+
+---
+
+## 人口規則
+
+- 成人上限：50
+- 成人最小：1（不會因消耗或逃跑歸零）
+- 未成年人口：上限為 `population × 0.2`，不計入 50 人上限
+- 未成年轉成人：由年齡系統驅動（未來實作）
+
+---
+
+## 不滿（unrest_turns）
+
+| 來源 | 變化 |
+|---|---|
+| N2_riot（暴動反應） | +1 |
+| P4_expand（擴張反應） | -1 |
+| 事件：替換領袖 | -20 |
+| 事件：Team 分裂 | 歸零 |
+
+門檻：
+- `>= 20`：觸發領袖替換事件（若有統領 >= 0.3 的異見者）
+- `>= 30`：觸發分裂事件（若異見者 義氣 < 0.4 且目標衝突）
+
+---
+
+## 標籤（tags）對反應的影響
+
+| 標籤 | 影響 |
+|---|---|
+| "生產" | P2_produce 基礎分數啟用（0.6 vs 0.1） |
+| "統領" | P4_expand 基礎分數啟用（0.55 vs 0.05） |
+
+---
+
+## 資源收集條件
+
+- 所在格 `has_outpost == true`
+- 每 Tick 收取：`tile.productivity × tile.resources["food"] × 0.01`
+
+---
 
 ## 與勢力關係
-- 有 `統領` 標籤的團體可形成勢力
-- 勢力可支配其他團體，但非強制,需外交或武力支配
-- 獨立團體可存在於世界中
 
-## 資源生產
-- 每格圖塊有資源欄位
-- 團體駐守據點後 → 該格與鄰近格資源可被啟用
-- 生產力依團體標籤與人口決定
+- 有 `"統領"` 標籤的 Team 可成為勢力核心
+- `faction_id == -1` → 獨立 Team
+- 勢力支配需外交或武力（未來實作）
+
+---
 
 ## 未來擴充
+
+- 移動 AI（目標格、行軍、追擊）
 - 移動速度受地形、負重、疲勞修正
-- 團體間可形成臨時聯盟或分裂
+- Team 間外交（結盟、臣服、宣戰）
+- 任務系統（current_task 實際影響行為）

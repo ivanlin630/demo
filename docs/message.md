@@ -1,72 +1,95 @@
-# 訊息
+# 訊息 (Message)
 
-這份文件專講「訊息怎麼產生、怎麼傳、怎麼失真、怎麼被玩家接收」。
+## 相關文件
+- [核心概念](game-design.md)
+- [事件](event.md)
+- [人物](person.md)
 
-## 1) 目前訊息系統現況
+---
 
-現在已經有三層：
+## 三層架構
 
-- 世界真相：`global_messages`
-- 勢力/據點已知：`known_messages`
-- 玩家個人已知：`player_known_messages`
+| 層 | 欄位 | 說明 |
+|---|---|---|
+| 世界真相 | `WorldState.global_messages` | 所有事件的原始記錄，不失真 |
+| 團體已知 | `WorldState.team_known[team_id]` | 該 Team 接收到的訊息（可失真） |
+| 玩家已知 | `WorldState.team_known[player_team_id]` | 玩家角色持有的訊息（未來獨立） |
 
-## 2) 訊息流程
+---
 
-1. 事件觸發後呼叫 `emit_message()`
-2. 先寫進 `global_messages`
-3. 寫入事發團體或記名NPC內的 `known_messages`
-4. 如果跟其他實體單位接觸後判斷是否交換 `known_messages`與是否失真加權
-5. 玩家按 E 接觸團體或記名NPC時，複製該單位已知訊息到個人日誌
+## 資料結構
 
-## 3) 目前訊息資料欄位
+定義於 `scripts/data/message_data.gd`：
 
-主要在 [scripts/message_system.gd](../scripts/message_system.gd)：
+```gdscript
+var id: int
+var type: String           # 事件類型（"unrest", "split", "famine" 等）
+var description: String
+var source_pos: Vector2i   # 事件發生位置
+var origin_team_id: int
+var origin_tick: int       # 產生時間
+var strength: float        # 0.0–1.0，傳播強度
+var is_distorted: bool     # 是否已被人為扭曲
+```
 
-- `MessageData.type`
-- `MessageData.description`
-- `MessageData.source_pos`
-- `MessageData.faction_id`
-- `MessageData.origin_turn`
-- `MessageData.strength`
-- `MessageData.received_turn`
-- `PendingDelivery.target_outpost_idx`
-- `PendingDelivery.arrive_turn`
-- `PendingDelivery.carrier`
-- `PendingDelivery.payload`
+---
 
-## 4) 你要改哪些地方
+## 訊息系統
 
-### 傳播規則
+定義於 `scripts/simulation/message_system.gd`（class_name SimMessageSystem）。
 
-主要改 [scripts/message_system.gd](../scripts/message_system.gd)：
+### 常數
 
-舊的code邏輯
+```gdscript
+HOP_DECAY = 0.15           # 每次 hop 強度衰減
+TIME_DECAY_PER_TICK = 0.005 # 每 Tick 時間衰減
+```
 
-### 玩家接收
+### 強度衰減公式
 
-主要改 [scripts/main.gd](../scripts/main.gd)：
+```
+strength -= HOP_DECAY × hops + TIME_DECAY_PER_TICK × (current_tick - origin_tick)
+```
 
-舊的code邏輯
+### 訊息交換（`exchange_messages`）
 
-### 顯示介面
+**需要明確行動觸發**，不自動發生：
 
-主要改 [scripts/ui_controller.gd](../scripts/ui_controller.gd)：
+1. 複製訊息
+2. 套用強度衰減（hop +1, time decay）
+3. 人為失真：`if randf() > person.loyalty → is_distorted = true`
+4. 強度 > 0 的訊息寫入目標 team_known
 
-- 顯示最近世界訊息
-- 顯示玩家已接收訊息
-- 顯示 debug 面板中的 pending queue
+### 待處理佇列（`process_pending`）
 
-## 5) 訊息分類建議
+每 Tick Step 6 呼叫，處理 `_pending` 佇列中的排程訊息。
 
-如果要把系統再整理，可以分成：
+---
 
-- public：據點可同步的公開情報
-- sensitive：需要接觸人物才知道的敏感情報
-- rumor：可能失真的流言
-- truth：世界內部真實事件記錄
+## 設計規則
 
-## 6) 這份文件和其他分類的關係
+- 訊息只能靠**實體接觸**傳播（兩 Team 同格或相鄰格）
+- 人為失真由 NPC loyalty 決定（loyalty 越低越容易扭曲）
+- 玩家必須與實體（NPC 或 Team）互動才能接收訊息
+- 強度衰減 = hop 次數 + 時間老化（兩者都計）
 
-- 事件來源：看 [事件](event.md)
-- 世界資源觸發的消息：看 [世界](world.md)
-- 人物接觸與認知：看 [人物](person.md)
+---
+
+## 訊息流程
+
+```
+事件觸發（event_system）
+  → 寫入 global_messages
+  → 寫入 origin_team.team_known
+  → 實體接觸時 exchange_messages()
+    → 衰減 + 人為失真 → 寫入 target.team_known
+  → 玩家接觸實體 → 複製到 player_known
+```
+
+---
+
+## 未來擴充
+
+- **訊息分類**：public（據點可同步）/ sensitive（需人物接觸）/ rumor（自由失真）
+- **Debug 視窗**：顯示訊息來源、carrier、強度、失真狀態、到達時間
+- **玩家訊息日誌**：獨立 player_known，與 team_known 分離

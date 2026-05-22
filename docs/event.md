@@ -1,80 +1,99 @@
-# 事件
+# 事件 (Event)
 
 ## 相關文件
-- [README](../README.md)
 - [核心概念](game-design.md)
-- [待討論議題](open-questions.md)
+- [人物](person.md)
+- [世界](world.md)
+- [訊息](message.md)
 
+---
 
-這份文件專講「事件怎麼被觸發、怎麼結算、怎麼從個體反應彙總成勢力事件」。
+## 架構：Registry 模式
 
-## 1) 目前事件現況
+定義於 `scripts/simulation/event_system.gd`。
 
-事件以團體狀態驅動為主，常見類型有：
+EventSystem 只是一個 loop，每個事件類型是獨立腳本，繼承 `scripts/simulation/events/base_event.gd`：
 
-- `famine`
-- `unrest`
-- `collapse`
-- `expansion`
-- `war`
+```gdscript
+class_name BaseEvent
 
-## 2) 目前事件流程
+func check(state: WorldState, team: TeamData) -> bool   # 是否觸發
+func execute(state: WorldState, team: TeamData) -> Array # 執行，回傳新 Team（分裂用）
+```
 
-1. 世界推進到新回合
-2. 系統做資源、人口、安全、擴張、衝突結算
-3. 符合條件時發出事件
-4. 事件寫入訊息系統
-5. 訊息再慢慢擴散到據點與玩家
+新增事件：建立 `scripts/simulation/events/event_XXX.gd`，在 `EventSystem._init()` 注冊一行即可。
 
-## 3) 目前事件邏輯在哪裡改
+---
 
-主要在 [scripts/faction_system.gd](../scripts/faction_system.gd)：
+## 目前事件清單
 
-- `_collect_resources()`：食物不足會引發饑荒事件
-- `_update_needs()`：勞力 / 安全不足會引發動盪
-- `_trigger_collapse()`：長期動盪後的崩潰結果
-- `_try_expand()`：擴張事件
-- `_resolve_conflicts()`：戰爭事件
+### event_unrest_split（團體分裂）
 
-## 4) 事件頻率與門檻在哪裡改
+檔案：`scripts/simulation/events/event_unrest_split.gd`
 
-主要在 [config/game_config.gd](../config/game_config.gd)：
+觸發條件：
+- `team.unrest_turns >= 30`
+- 存在異見者（loyalty < 0.35）
+- 異見者中有人 `values["義氣"] < 0.4` 且目標與領袖衝突
 
-- `EVENT_FAMINE_COOLDOWN`
-- `EVENT_LABOR_COOLDOWN`
-- `EVENT_COLLAPSE_COOLDOWN`
-- `EVENT_EXPANSION_COOLDOWN`
-- `EVENT_WAR_COOLDOWN`
-- `SAFETY_MIN_THRESHOLD`
-- `LABOR_MIN_THRESHOLD`
-- `UNREST_BANDIT_TURNS`
+執行：
+- 取一半異見者，建立新 Team（繼承 tile_pos）
+- 分裂者的 population 從原 Team 扣除
+- 義氣 >= 0.4 的異見者不觸發分裂（即使目標衝突）
+- 分裂後 `unrest_turns` 歸零
 
-## 5) 你想要的目標版
+### event_unrest_replace（領袖替換）
 
-你想要的不是「勢力數值到了就跳事件」，而是：
+檔案：`scripts/simulation/events/event_unrest_replace.gd`
 
-1. 先有資源與壓力
-2. 再有人物反應
-3. 再由人物反應產生事件
-4. 最後才回寫成勢力層的結果
+觸發條件：
+- `team.unrest_turns >= 20`
+- 存在異見者（loyalty < 0.35）且有人統領技能 >= 0.3
 
-## 6) 事件結算建議分層
+執行：
+- 舊領袖降為 advisor
+- 統領最高的異見者升為 leader
+- `unrest_turns -= 20`
 
-### Phase 1：生存需求
+> **優先順序**：分裂事件在 replace 之前跑。分裂觸發後 unrest_turns 歸零，replace 不再觸發。
 
-- 收資源
-- 吃糧
-- 更新安全與勞力
+---
 
-### Phase 2：實體反應
+## 外部呼叫介面
 
-- 領主做決策
-- 守衛反應
-- 平民反應
-- 彙總成事件候選
+### on_leader_death(state, team)
 
-## 7) 這份文件和其他分類的關係
+由外部系統（戰鬥等）呼叫，處理領袖死亡後的繼承：
+- 找 team 內統領最高的成員
+- 統領 >= 0.3 → 升為新 leader，回傳 true
+- 無繼承人 → 回傳 false（呼叫方負責解散 Team）
 
-- 人物反應來源：看 [人物](person.md)
-- 資源壓力來源：看 [世界](world.md)
-- 事件如何變成訊息：看 [訊息](message.md)
+---
+
+## 事件流程（Tick 循環第 5 步）
+
+```
+SimRunner._step5_generate_events()
+  → EventSystem.process_events(state, team_ids)
+    → for each team:
+        for each registered event:
+          event.check() → true → event.execute()
+```
+
+---
+
+## 不動亂的積累來源
+
+`team.unrest_turns` 由 N2_riot 反應累積（每次 +1），由 P4_expand 反應消耗（每次 -1）。
+
+觸發分裂或替換事件後依門檻扣減。
+
+---
+
+## 未來擴充
+
+新增事件範例（不影響現有系統）：
+- `event_famine_collapse.gd` — 長期飢荒後 Team 崩潰
+- `event_war_declaration.gd` — Teams 間衝突觸發宣戰
+- `event_plague.gd` — 人口損失事件
+- `event_migration.gd` — Team 自發移動目標改變

@@ -2,8 +2,11 @@
 
 ## 相關文件
 - [README](../README.md)
-- [階段目標](project-goals.md)
-- [待討論議題](open-questions.md)
+- [人物](person.md)
+- [團體](team.md)
+- [世界](world.md)
+- [事件](event.md)
+- [訊息](message.md)
 
 
 本作是一款以：
@@ -946,4 +949,4 @@ NPC 可具有長期目標。
 
 ---
 
-討論與問題追蹤請改至 [open-questions.md](open-questions.md)。
+各系統細節見相關文件索引。

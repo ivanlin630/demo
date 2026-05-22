@@ -1,83 +1,160 @@
-# 人物
+# 人物 (Person)
 
 ## 相關文件
-- [README](../README.md)
 - [核心概念](game-design.md)
-- [待討論議題](open-questions.md)
+- [事件](event.md)
+- [世界](world.md)
+- [訊息](message.md)
 
+---
 
-這份文件專講「勢力內部的實體人物」：領主、守衛、平民代表，以及未來要往更細 NPC 模型擴充時該改哪裡。
+## 資料結構
 
-## 1) 目前角色層現況
+定義於 `scripts/data/person_data.gd`：
 
-現在的遊戲還是以勢力為單位，人物資料很少。真正已經存在的角色感內容主要是：
+```gdscript
+var id: int
+var person_name: String
+var role: String        # "leader" / "advisor" / "civilian" / "guard"
+var team_id: int        # 所屬團體
+var age: int
 
-- 玩家角色
-- 據點接觸時生成的少量 NPC profile
-- 勢力領袖的簡化代表
+# 狀態（每 Tick 獨立更新）
+var needs: Dictionary   # { "food": float, "safety": float, "belonging": float }
+var stress: float       # 0.0–1.0
+var fear: float         # 0.0–1.0
+var loyalty: float      # 0.0–1.0
 
-## 2) 你想要的角色架構
+# 決策輸入
+var goals: Array        # 長期目標字串，效用函數輸入
 
-最小原型建議先做三類代表人物：
+# 先天屬性（固定或極慢變動）
+var attributes: Dictionary
+# { "體力": float, "智力": float, "魅力": float, "毅力": float }
 
-- 領主 / 首領：決策者
-- 守衛 / 武裝代表：安全反應
-- 平民代表：生存、逃亡、謠言、壓力反應
+# 技能（12 項，從反應中成長）
+var skills: Dictionary
+# { "統領", "戰鬥", "弓箭", "求生", "生產", "製造",
+#   "工程", "醫療", "戰術", "計謀", "交涉", "商業" }
 
-每個人物至少要有：
+# 價值觀（半永久人格）
+var values: Dictionary
+# { "野心", "求生欲", "義氣", "貪婪", "慎重" }
 
-- `id`
-- `name`
-- `role`
-- `faction_id`
-- `stress`
-- `fear`
-- `loyalty`
-- `memory`
-- `needs`
+var memory: Array       # [{ event_id: int, intensity: String, reaction: String }]
+```
 
-if safety < threshold:
-    npc.reaction = "riot" or "migration"
-## 3) 哪些檔案要改
+---
 
-### 資料結構
+## 四層決策模型
 
-主要在 [scripts/world_state.gd](../scripts/world_state.gd)：
+```
+屬性（Attributes）→ 技能成長速率
+技能（Skills）     → 效用函數加分
+價值觀（Values）   → 目標傾向 + 反應偏好
+目標（Goals）      → 效用函數輸入
+```
 
-- 新增 `NpcEntityData` 或等價結構
-- 在 `FactionData` 加 `representatives` 或 `members`
-- 如果要記個人需求與狀態，欄位也先放這裡
+---
 
-### 生成人物
+## 反應系統
 
-主要在 [scripts/world_generator.gd](../scripts/world_generator.gd)：
+定義於 `scripts/simulation/reaction_system.gd`。
 
-- 勢力建立時順便生成最小代表人物
-- 先做 3 個代表，不要直接做完整人口池
+每 Tick 對每個 NPC 跑效用函數，輸出分數最高的反應：
 
-### 人物驅動事件
+| 代號 | 名稱 | 主要觸發條件 |
+|---|---|---|
+| P1_comply | 服從 | 高忠誠、低壓力 |
+| P2_produce | 生產 | 食物充足、低壓力、team 有生產標籤 |
+| P3_recruit | 招募 | 低壓力、高忠誠、team 人口 < 40 |
+| P4_expand | 擴張 | 食物充裕、低壓力 |
+| P5_breed | 繁殖 | 安全感高、food 需求滿足、未成年上限未滿 |
+| N1_flee | 逃離 | 高壓力、低忠誠 |
+| N2_riot | 暴動 | 高壓力、高恐懼 |
+| N3_defect | 叛逃 | 高壓力、低忠誠、高恐懼 |
+| N4_shirk | 怠工 | 高壓力、低忠誠 |
+| N5_extort | 勒索 | 高壓力、低恐懼、低忠誠 |
 
-主要在 [scripts/faction_system.gd](../scripts/faction_system.gd)：
+"none"（無反應）固定分數 0.2，作為基準競爭。
 
-- 第 2 階段讓人物根據需求做反應
-- 把人物反應彙總成勢力事件
+每個效用函數加入 skills + values + goals 加成：
+- 技能高 → 對應反應分數上升
+- 價值觀（野心/求生欲/義氣/貪婪）直接加權
+- **慎重**：跨系統關鍵字，壓低所有風險行為（N2/N3/N5 等）
 
-### 顯示與互動
+### Goals 加分（_goal_bonus）
 
-主要在 [scripts/ui_controller.gd](../scripts/ui_controller.gd)：
+| 目標字串 | 加分的反應 | 加分量 |
+|---|---|---|
+| "求生" / "逃離" | N1_flee | +0.2 |
+| "擴張" / "繁榮" | P4_expand, P3_recruit | +0.15 |
+| "發財" | N5_extort, P2_produce | +0.15 |
+| "復仇" | N2_riot, N3_defect | +0.2 |
+| "建立勢力" | P3_recruit, P4_expand | +0.2 |
 
-- 據點面板顯示代表人物
-- 顯示人物的情緒、忠誠、壓力、記憶摘要
+### 目標自動生成（每 10 Tick）
 
-## 4) 未來擴充方向
+| 條件 | 新增目標 |
+|---|---|
+| values["野心"] > 0.7 | "建立勢力" |
+| values["求生欲"] > 0.7 AND stress > 0.5 | "求生" |
+| values["貪婪"] > 0.7 | "發財" |
+| values["義氣"] > 0.7 | 移除 "逃離" / "復仇" |
 
-- 更細的群體角色
-- 派系關係
-- 個人記憶與社會記憶
-- 人物接觸才同步情報
+---
 
-## 5) 這份文件和其他分類的關係
+## 技能成長
 
-- 資源與消耗：看 [世界](world.md)
-- 事件生成：看 [事件](event.md)
-- 訊息傳播：看 [訊息](message.md)
+定義於 `scripts/simulation/skill_system.gd`。
+
+每次 NPC 執行反應後觸發：
+
+```
+growth = BASE_GROWTH(0.005) × attr_val × (0.5 + 毅力 × 0.5)
+person.skills[skill] = min(current + growth, 1.0)
+```
+
+反應對應技能與屬性：
+
+| 反應 | 成長技能 | 依賴屬性 |
+|---|---|---|
+| P2_produce | 生產 | 智力 |
+| P3_recruit / P4_expand | 統領 | 魅力 |
+| P5_breed | 醫療 | 智力 |
+| N1_flee / N4_shirk | 求生 | 體力 |
+| N2_riot | 戰鬥 | 體力 |
+| N3_defect | 計謀 | 智力 |
+| N5_extort | 商業 | 魅力 |
+
+戰術、工程、弓箭、製造、交涉：來源保留給戰鬥系統。
+
+---
+
+## 需求與壓力更新
+
+定義於 `scripts/simulation/resource_system.gd`。
+
+- 食物不足時：`needs["food"] = satisfaction`（0.0–1.0）
+- `stress += (0.5 - satisfaction) × 0.2`（食物 < 0.5 才上升）
+- `needs["food"] < 0.3`：`fear += 0.05`、`loyalty -= 0.02`
+
+---
+
+## 記憶
+
+- 執行 P1_comply / P2_produce 以外的反應 → 寫入 memory
+- intensity: "minor" / "significant"（riot, defect）/ "traumatic"（flee）
+
+---
+
+## 慎重：跨系統設計契約
+
+`values["慎重"]` 影響所有未來涉及風險決策的系統：
+- 交涉系統（談判激進度）
+- 戰術系統（進攻 vs. 固守）
+- 戰略系統（擴張 vs. 鞏固）
+- 戰鬥決策（衝鋒 vs. 撤退）
+- 訊息失真（是否主動扭曲情報）
+
+規則：高慎重 → 壓低激進選項；低慎重 → 壓低保守選項。
