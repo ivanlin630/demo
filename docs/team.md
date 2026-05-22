@@ -29,6 +29,8 @@ var minor_population: int   # 未成年人口，上限 = population × 20%，不
 
 var resources: Dictionary   # { "food", "material", "weapon", "money", "goods" }
 var move_speed: float       # 移動速度，影響每格耗 Tick 數
+var move_target: Vector2i   # 目標格，(-1,-1) = 不移動
+var move_tick_acc: int      # 累積 Tick，達移動成本門檻才走一格
 
 var tags: Array             # 職責標籤：["生產", "製造", "貿易", "掠奪", "保衛", "統領"]
 var current_task: String    # "idle" / "生產" / "製造" / "貿易" / "掠奪" / "攻擊" / "巡邏"
@@ -88,9 +90,19 @@ var tile_pos: Vector2i      # 當前大地圖格座標
 
 ---
 
+## 移動系統
+
+定義於 `scripts/simulation/movement_system.gd`。
+
+- 每 Tick 累積 `move_tick_acc`，達 `move_tick_cost` 才走一格
+- 移動成本：`clamp(round(10 / move_speed), 3, 30)`
+- 路徑：greedy step（選最接近 move_target 的鄰格）
+- 抵達：更新 `occupied_by`，**不**自動建立據點
+
 ## 未來擴充
 
-- 移動 AI（目標格、行軍、追擊）
+- 移動 AI（自動設定 move_target，依目標/資源/威脅評估）
+- A* 路徑（有障礙地形時替換 `_step_team` 內部）
 - 移動速度受地形、負重、疲勞修正
 - Team 間外交（結盟、臣服、宣戰）
 - 任務系統（current_task 實際影響行為）

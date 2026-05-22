@@ -31,7 +31,8 @@
 
 | 檔案 | 內容 |
 |---|---|
-| `scripts/debug/headless_test.gd` | 200 Tick headless 模擬；驗證資源/壓力/反應/技能成長/事件 |
+| `scripts/debug/headless_test.gd` | 200 Tick headless 模擬；驗證資源/壓力/反應/技能成長/事件/移動 |
+| `scripts/simulation/movement_system.gd` | greedy hex step；速度公式；_on_arrival 只更新 occupied_by |
 
 ### 文件
 
@@ -52,8 +53,8 @@
 
 | 項目 | 說明 | 前置需求 |
 |---|---|---|
-| **Team 移動** | tile_pos 實際改變；移動 AI（目標格、行軍）；速度公式 | 無 |
-| **訊息傳播** | 鄰近 Teams 自動 exchange_messages；proximity 觸發 | Team 移動 |
+| ~~**Team 移動**~~ | ~~tile_pos 實際改變；移動 AI（目標格、行軍）；速度公式~~ | ~~無~~ |
+| **訊息傳播** | 鄰近 Teams 自動 exchange_messages；proximity 觸發 | ✅ Team 移動 完成 |
 
 ### 中優先
 
