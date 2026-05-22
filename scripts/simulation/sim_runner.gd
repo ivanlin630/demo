@@ -24,44 +24,47 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	var near_teams := _get_near_teams(state, player_pos)
 	var far_teams := _get_far_teams(state, player_pos)
 
-	_step2_move_teams(state, near_teams)
-	_step3_collect_resources(state, near_teams)
-	_step4_resolve_consumption(state, near_teams)
-	_step5_person_reactions(state, near_teams)
-	_step6_generate_events(state, near_teams)
-	_step7_emit_messages(state)
+	var arrived_near := _step2_move_teams(state, near_teams)
+	_step3_propagate_messages(state, arrived_near, near_teams)
+	_step4_collect_resources(state, near_teams)
+	_step5_resolve_consumption(state, near_teams)
+	_step6_person_reactions(state, near_teams)
+	_step7_generate_events(state, near_teams)
+	_step8_emit_messages(state)
 
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
-		_step2_move_teams(state, far_teams)
-		_step3_collect_resources(state, far_teams)
-		_step4_resolve_consumption(state, far_teams)
-		_step6_generate_events(state, far_teams)
-		_step7_emit_messages(state)
-
-	# _step8_player_input → 預留介面
+		var arrived_far := _step2_move_teams(state, far_teams)
+		_step3_propagate_messages(state, arrived_far, far_teams)
+		_step4_collect_resources(state, far_teams)
+		_step5_resolve_consumption(state, far_teams)
+		_step7_generate_events(state, far_teams)
+		_step8_emit_messages(state)
 
 func _step1_advance_time(state: WorldState) -> void:
 	state.world.current_tick += 1
 	if state.world.current_tick % 6 == 0:
 		state.world.current_turn += 1
 
-func _step2_move_teams(state: WorldState, team_ids: Array) -> void:
-	_movement_system.process(state, team_ids)
+func _step2_move_teams(state: WorldState, team_ids: Array) -> Array:
+	return _movement_system.process(state, team_ids)
 
-func _step3_collect_resources(state: WorldState, team_ids: Array) -> void:
+func _step3_propagate_messages(state: WorldState, arrived_ids: Array, all_ids: Array) -> void:
+	_message_system.propagate_on_arrival(state, arrived_ids, all_ids)
+
+func _step4_collect_resources(state: WorldState, team_ids: Array) -> void:
 	_resource_system.collect_resources(state, team_ids)
 
-func _step4_resolve_consumption(state: WorldState, team_ids: Array) -> void:
+func _step5_resolve_consumption(state: WorldState, team_ids: Array) -> void:
 	_resource_system.resolve_consumption(state, team_ids)
 
-func _step5_person_reactions(state: WorldState, team_ids: Array) -> void:
+func _step6_person_reactions(state: WorldState, team_ids: Array) -> void:
 	_reaction_system.evaluate_all(state, team_ids, _skill_system)
 
-func _step6_generate_events(state: WorldState, team_ids: Array) -> void:
+func _step7_generate_events(state: WorldState, team_ids: Array) -> void:
 	_event_system.process_events(state, team_ids)
 
-func _step7_emit_messages(state: WorldState) -> void:
+func _step8_emit_messages(state: WorldState) -> void:
 	_message_system.process_pending(state)
 
 func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:

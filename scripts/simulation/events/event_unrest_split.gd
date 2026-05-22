@@ -23,6 +23,10 @@ func execute(state: WorldState, team: TeamData) -> Array:
 	print("[Event] Team %d 分裂 → 新 Team %d（%d人）" % [
 		team.team_id, new_team.team_id, new_team.population
 	])
+	SimMessageSystem.new().emit_message(state, "split",
+		"Team %d 發生分裂，新 Team %d 在 (%d,%d) 成立" % [
+			team.team_id, new_team.team_id, team.tile_pos.x, team.tile_pos.y
+		], team)
 	return [new_team]
 
 func _get_dissenters(state: WorldState, team: TeamData) -> Array:
