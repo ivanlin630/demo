@@ -31,8 +31,10 @@ func _run_sim_test() -> void:
 
 		# 移動目標設定
 		if t == 0:
-			team.move_target = Vector2i(3, 0)  # 向右走到 (3,0)
-			team.move_speed = 1.0              # 每 10 Tick 走一格
+			team.move_target  = Vector2i(3, 0)
+			team.move_speed   = 1.0
+			team.current_task = "掠奪"
+			team.resources["weapon"] = 20
 		elif t == 1:
 			team.move_target = Vector2i(0, 0)  # 向左走到 (0,0)
 			team.move_speed = 1.5              # 每 ~7 Tick 走一格
@@ -78,13 +80,14 @@ func _run_sim_test() -> void:
 			for tid in state.teams:
 				var t: TeamData = state.teams[tid]
 				var known_count: int = state.team_known[tid].size() if state.team_known.has(tid) else 0
-				print("  Team%d pos=(%d,%d) food=%.1f pop=%d known=%d target=(%d,%d)" % [
+				print("  Team%d pos=(%d,%d) food=%.1f pop=%d wnd=%d ct=%d rd=%.2f" % [
 					t.team_id,
 					t.tile_pos.x, t.tile_pos.y,
 					float(t.resources.get("food", 0)),
 					t.population,
-					known_count,
-					t.move_target.x, t.move_target.y
+					t.wounded,
+					t.combat_target,
+					t.readiness
 				])
 
 	print("\nglobal_messages: %d" % state.global_messages.size())
