@@ -13,3 +13,5 @@ var current_task: String = "idle"
 var unrest_turns: int = 0
 var faction_id: int = -1
 var tile_pos: Vector2i = Vector2i.ZERO
+var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
+var move_tick_acc: int = 0
