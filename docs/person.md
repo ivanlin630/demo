@@ -36,6 +36,8 @@
 - `memory`
 - `needs`
 
+if safety < threshold:
+    npc.reaction = "riot" or "migration"
 ## 3) 哪些檔案要改
 
 ### 資料結構

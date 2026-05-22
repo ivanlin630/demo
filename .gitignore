@@ -1,8 +1,11 @@
-# Godot editor/runtime generated cache
+# Godot 4+ specific ignores
 .godot/
 
-# Local logs
-godot_log.txt
+# Local tools (executables, not source)
+tools/
 
-# Local Godot executables (do not push binaries to GitHub)
-tools/godot/*.exe
+# Claude Code local config
+.claude/
+
+# Superpowers plugin cache
+.superpowers/

@@ -8,48 +8,55 @@
 
 這份文件專講「世界狀態、資源產出、消耗、時間、勢力成長」這些底層規則。
 
-## 1) 目前世界現況
+# 世界 (World)
 
-世界現在主要是以勢力為單位在運作。
+## 定義
+- 世界由六角格圖塊組成
+- 每個圖塊有基礎資源欄位（食物、木材、礦石、特殊資源）
+- 團體建設據點並駐守執行任務後才能採集該格與鄰近格的資源
 
-每個勢力目前主要有：
+# 世界 (World)
 
-- `population`
-- `food`
-- `wood`
-- `ore`
-- `military`
-- `safety`
-- `labor`
-- `unrest_turns`
+## 圖塊結構
+- `tile_id`
+- `resources` (food, wood, ore, special)
+- `productivity` (基礎生產力值)
+- `occupied_by` (team_id 或 null)
+- `has_outpost` (是否有據點,哪種據點)
 
+## 資源啟用規則
+1. **團體建設據點**：必須先在圖塊上建立據點 (`has_outpost = true`)。
+2. **團體駐守任務**：團體需駐守並執行「生產」任務。
+3. **資源啟用範圍**：據點所在格 + 鄰近格資源進入生產池。
+4. **生產量公式**：move_tick_cost = clamp(round(base_move / team.move_speed × terrain_factor × load_factor), min_cost, max_cost)
+5. **資源歸屬**：生產結果存入團體資源庫 (`team.resources`)，再由勢力或交易流動。
+## 移動與時間
+- 移動耗時公式：move_tick_cost = clamp(round(base_move / team.move_speed × terrain_factor × load_factor), min_cost, max_cost)
+- 玩家移動將消耗 Tick，推進世界時間。
+
+## 據點功能
+- 據點可作為資源生產點。
+- 據點可作為NPC團體傷患回復點
+- 據點可同步NPC團體 public 訊息（接到 message.md）。
+- 據點可作為事件觸發點。
+
+## 未來擴充
+- 據點升級：農業型、軍事型、貿易型。
+- 據點影響範圍：鄰近格數量可依升級擴大。
+- 據點防禦：保衛標籤團體駐守時提供。
+
+
+勢力主要是以團體（Team）為單位在運作。
+團體細節參照team.md
+
+勢力目前主要有：
+已宣稱圖塊範圍,供勢力團體判斷支配範圍以及外交
 
 ## 2) 世界資源怎麼流
 
 主要在 [scripts/faction_system.gd](../scripts/faction_system.gd)：
+這部分要改一改 以後資源留都會放在團體階級
 
-1. 從領地格子收資源
-2. 扣掉人口消耗的食物
-3. 更新人口、軍力、安全、勞力
-4. 根據結果影響事件與擴張
-
-## 3) 現在的消耗規則
-
-### 食物
-
-- 每回合會依人口扣食物
-- 核心公式在 `FOOD_PER_PERSON`
-
-### 人口
-
-- 食物夠：人口增長
-- 食物不夠：人口下降
-- 安全太低：額外人口流失
-
-### 軍力
-
-- 擴張與衝突都會消耗軍力
-- 軍力不足會影響勢力安全與事件觸發
 
 ## 4) 時間與世界推進
 
@@ -84,7 +91,7 @@
 - NPC 因資源壓力做出反應
 - 反應再轉成事件
 
-這會接到 [人物](person.md) 與 [事件](event.md)。
+這會接到[團體](team.md) [人物](person.md) 與 [事件](event.md)。
 
 ## 7) 現在該去哪個檔案改
 

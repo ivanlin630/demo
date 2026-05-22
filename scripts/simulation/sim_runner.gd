@@ -1,0 +1,79 @@
+class_name SimRunner
+
+const LOD_NEAR_RADIUS: int = 3
+const FAR_ZONE_INTERVAL: int = 10
+
+var _resource_system: ResourceSystem
+var _reaction_system: ReactionSystem
+var _skill_system: Object
+var _message_system: SimMessageSystem
+var _event_system: Object
+
+func _init() -> void:
+	_resource_system = ResourceSystem.new()
+	_reaction_system = ReactionSystem.new()
+	_skill_system = load("res://scripts/simulation/skill_system.gd").new()
+	_message_system = SimMessageSystem.new()
+	_event_system = load("res://scripts/simulation/event_system.gd").new()
+
+func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
+	_step1_advance_time(state)
+
+	var near_teams := _get_near_teams(state, player_pos)
+	var far_teams := _get_far_teams(state, player_pos)
+
+	_step2_collect_resources(state, near_teams)
+	_step3_resolve_consumption(state, near_teams)
+	_step4_person_reactions(state, near_teams)
+	_step5_generate_events(state, near_teams)
+	_step6_emit_messages(state)
+
+	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
+	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
+		_step2_collect_resources(state, far_teams)
+		_step3_resolve_consumption(state, far_teams)
+		_step5_generate_events(state, far_teams)
+		_step6_emit_messages(state)
+
+	# _step7_player_input → 預留介面
+
+func _step1_advance_time(state: WorldState) -> void:
+	state.world.current_tick += 1
+	if state.world.current_tick % 6 == 0:
+		state.world.current_turn += 1
+
+func _step2_collect_resources(state: WorldState, team_ids: Array) -> void:
+	_resource_system.collect_resources(state, team_ids)
+
+func _step3_resolve_consumption(state: WorldState, team_ids: Array) -> void:
+	_resource_system.resolve_consumption(state, team_ids)
+
+func _step4_person_reactions(state: WorldState, team_ids: Array) -> void:
+	_reaction_system.evaluate_all(state, team_ids, _skill_system)
+
+func _step5_generate_events(state: WorldState, team_ids: Array) -> void:
+	_event_system.process_events(state, team_ids)
+
+func _step6_emit_messages(state: WorldState) -> void:
+	_message_system.process_pending(state)
+
+func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:
+	var result: Array = []
+	for tid in state.teams:
+		var team: TeamData = state.teams[tid]
+		if _hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS:
+			result.append(tid)
+	return result
+
+func _get_far_teams(state: WorldState, player_pos: Vector2i) -> Array:
+	var result: Array = []
+	for tid in state.teams:
+		var team: TeamData = state.teams[tid]
+		if _hex_distance(team.tile_pos, player_pos) > LOD_NEAR_RADIUS:
+			result.append(tid)
+	return result
+
+func _hex_distance(a: Vector2i, b: Vector2i) -> int:
+	var dx := b.x - a.x
+	var dy := b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2

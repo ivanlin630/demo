@@ -1,11 +1,5 @@
 # 訊息
 
-## 相關文件
-- [README](../README.md)
-- [核心概念](game-design.md)
-- [待討論議題](open-questions.md)
-
-
 這份文件專講「訊息怎麼產生、怎麼傳、怎麼失真、怎麼被玩家接收」。
 
 ## 1) 目前訊息系統現況
@@ -20,9 +14,9 @@
 
 1. 事件觸發後呼叫 `emit_message()`
 2. 先寫進 `global_messages`
-3. 依距離與衰減產生 `pending delivery`
-4. 到站後寫入據點與勢力的 `known_messages`
-5. 玩家按 E 接觸據點時，複製該勢力已知訊息到個人日誌
+3. 寫入事發團體或記名NPC內的 `known_messages`
+4. 如果跟其他實體單位接觸後判斷是否交換 `known_messages`與是否失真加權
+5. 玩家按 E 接觸團體或記名NPC時，複製該單位已知訊息到個人日誌
 
 ## 3) 目前訊息資料欄位
 
@@ -46,16 +40,13 @@
 
 主要改 [scripts/message_system.gd](../scripts/message_system.gd)：
 
-- `_schedule_deliveries()`：決定送去哪裡
-- `_process_pending_deliveries()`：決定何時到站
-- `_subjective_text()`：決定失真程度
+舊的code邏輯
 
 ### 玩家接收
 
 主要改 [scripts/main.gd](../scripts/main.gd)：
 
-- `_check_interact()`：接觸據點後把對方已知訊息寫進玩家日誌
-- `get_player_visible_messages()`：玩家畫面顯示用
+舊的code邏輯
 
 ### 顯示介面
 

@@ -10,11 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Medieval World Evolution"
-config/description="2.5D Medieval survival world evolution with message propagation"
-run/main_scene="res://main.tscn"
+config/name="Demo"
+run/main_scene="res://scripts/test.tscn"
 config/features=PackedStringArray("4.2", "Forward Plus")
-
-[autoload]
-
-GameConfig="*res://config/game_config.gd"
+config/icon="res://icon.svg"
