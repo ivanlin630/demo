@@ -7,7 +7,7 @@
 | 檔案 | 內容 |
 |---|---|
 | `person_data.gd` | id, name, role, team_id, age, needs, stress, fear, loyalty, goals, attributes(4), skills(12), values(5), memory |
-| `team_data.gd` | team_id, leader_id, advisors, members, population(上限50/最小1), minor_population(cap=pop×20%), resources, move_speed, tags, current_task, unrest_turns, faction_id, tile_pos |
+| `team_data.gd` | team_id, leader_id, advisors, members, population(上限50/最小1), minor_population(cap=pop×20%), resources, move_speed, tags, current_task, unrest_turns, faction_id, tile_pos, combat_target, readiness, wounded |
 | `tile_data.gd` | tile_id, resources(food/wood/ore/special), productivity, occupied_by, has_outpost |
 | `world_data.gd` | tiles dict, current_tick, current_turn |
 | `world_state.gd` | world, teams, persons, global_messages, team_known |
@@ -17,7 +17,7 @@
 
 | 檔案 | 內容 |
 |---|---|
-| `sim_runner.gd` | Tick 循環 6 步驟；LOD：近區每 Tick，遠區每 10 Tick（跳過人物反應） |
+| `sim_runner.gd` | Tick 循環 9 步驟；LOD：近區每 Tick，遠區每 10 Tick（跳過人物反應） |
 | `resource_system.gd` | 資源收集（has_outpost → food_gain）；消耗結算（0.1/人/Tick）；needs/stress/fear 更新 |
 | `reaction_system.gd` | 10 種反應（P1–P5、N1–N5）；skills/values/goals 整合進效用函數；目標自動生成（每 10 Tick） |
 | `skill_system.gd` | on_reaction 技能成長；速率 = BASE_GROWTH × attr × (0.5 + 毅力 × 0.5) |
@@ -31,8 +31,9 @@
 
 | 檔案 | 內容 |
 |---|---|
-| `scripts/debug/headless_test.gd` | 200 Tick headless 模擬；驗證資源/壓力/反應/技能成長/事件/移動 |
-| `scripts/simulation/movement_system.gd` | greedy hex step；速度公式；_on_arrival 只更新 occupied_by |
+| `scripts/debug/headless_test.gd` | 200 Tick headless 模擬；驗證資源/壓力/反應/技能成長/事件/移動/戰鬥 |
+| `scripts/simulation/movement_system.gd` | greedy hex step；速度公式；_on_arrival 只更新 occupied_by；交戰中禁止移動 |
+| `scripts/simulation/interaction_system.gd` | current_task 驅動互動；多回合拉鋸戰；整備值/傷兵/醫療；勒索分支；撤退機制 |
 
 ### 文件
 
@@ -60,7 +61,7 @@
 
 | 項目 | 說明 | 前置需求 |
 |---|---|---|
-| **Team 間互動** | 戰鬥 / 貿易 / 外交 | Team 移動 |
+| ~~**Team 間互動**~~ | ~~戰鬥（多回合）/ 勒索 / 撤退；貿易外交設計預留~~ | ~~✅ Team 移動 完成~~ |
 | **Faction 系統** | faction_id 啟用；勢力結構、支配關係 | Team 間互動 |
 | **世界生成** | 隨機 tile 分佈與資源（目前 headless_test 硬編碼） | 無 |
 
