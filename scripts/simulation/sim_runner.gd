@@ -9,6 +9,7 @@ var _skill_system: Object
 var _movement_system: Object
 var _message_system: SimMessageSystem
 var _event_system: Object
+var _interaction_system: InteractionSystem
 
 func _init() -> void:
 	_resource_system = ResourceSystem.new()
@@ -17,6 +18,7 @@ func _init() -> void:
 	_movement_system = load("res://scripts/simulation/movement_system.gd").new()
 	_message_system = SimMessageSystem.new()
 	_event_system = load("res://scripts/simulation/event_system.gd").new()
+	_interaction_system = InteractionSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
@@ -26,20 +28,22 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 
 	var arrived_near := _step2_move_teams(state, near_teams)
 	_step3_propagate_messages(state, arrived_near, near_teams)
-	_step4_collect_resources(state, near_teams)
-	_step5_resolve_consumption(state, near_teams)
-	_step6_person_reactions(state, near_teams)
-	_step7_generate_events(state, near_teams)
-	_step8_emit_messages(state)
+	_step4_resolve_interactions(state, arrived_near, near_teams)
+	_step5_collect_resources(state, near_teams)
+	_step6_resolve_consumption(state, near_teams)
+	_step7_person_reactions(state, near_teams)
+	_step8_generate_events(state, near_teams)
+	_step9_emit_messages(state)
 
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
 		var arrived_far := _step2_move_teams(state, far_teams)
 		_step3_propagate_messages(state, arrived_far, far_teams)
-		_step4_collect_resources(state, far_teams)
-		_step5_resolve_consumption(state, far_teams)
-		_step7_generate_events(state, far_teams)
-		_step8_emit_messages(state)
+		_step4_resolve_interactions(state, arrived_far, far_teams)
+		_step5_collect_resources(state, far_teams)
+		_step6_resolve_consumption(state, far_teams)
+		_step8_generate_events(state, far_teams)
+		_step9_emit_messages(state)
 
 func _step1_advance_time(state: WorldState) -> void:
 	state.world.current_tick += 1
@@ -52,19 +56,22 @@ func _step2_move_teams(state: WorldState, team_ids: Array) -> Array:
 func _step3_propagate_messages(state: WorldState, arrived_ids: Array, all_ids: Array) -> void:
 	_message_system.propagate_on_arrival(state, arrived_ids, all_ids)
 
-func _step4_collect_resources(state: WorldState, team_ids: Array) -> void:
+func _step4_resolve_interactions(state: WorldState, arrived_ids: Array, all_ids: Array) -> void:
+	_interaction_system.process_on_arrival(state, arrived_ids, all_ids)
+
+func _step5_collect_resources(state: WorldState, team_ids: Array) -> void:
 	_resource_system.collect_resources(state, team_ids)
 
-func _step5_resolve_consumption(state: WorldState, team_ids: Array) -> void:
+func _step6_resolve_consumption(state: WorldState, team_ids: Array) -> void:
 	_resource_system.resolve_consumption(state, team_ids)
 
-func _step6_person_reactions(state: WorldState, team_ids: Array) -> void:
+func _step7_person_reactions(state: WorldState, team_ids: Array) -> void:
 	_reaction_system.evaluate_all(state, team_ids, _skill_system)
 
-func _step7_generate_events(state: WorldState, team_ids: Array) -> void:
+func _step8_generate_events(state: WorldState, team_ids: Array) -> void:
 	_event_system.process_events(state, team_ids)
 
-func _step8_emit_messages(state: WorldState) -> void:
+func _step9_emit_messages(state: WorldState) -> void:
 	_message_system.process_pending(state)
 
 func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:

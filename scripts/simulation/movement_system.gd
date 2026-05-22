@@ -8,6 +8,8 @@ func process(state: WorldState, team_ids: Array) -> Array:
 	var arrived: Array = []
 	for tid in team_ids:
 		var team: TeamData = state.teams[tid]
+		if team.combat_target != -1:
+			continue
 		if team.move_target == Vector2i(-1, -1):
 			continue
 		var cost: int = _move_cost(team)
