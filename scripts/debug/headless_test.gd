@@ -75,13 +75,17 @@ func _run_sim_test() -> void:
 			print("\n--- Tick %d ---" % state.world.current_tick)
 			for tid in state.teams:
 				var t: TeamData = state.teams[tid]
-				print("  Team%d pos=(%d,%d) food=%.1f pop=%d target=(%d,%d)" % [
+				var known_count: int = state.team_known[tid].size() if state.team_known.has(tid) else 0
+				print("  Team%d pos=(%d,%d) food=%.1f pop=%d known=%d target=(%d,%d)" % [
 					t.team_id,
 					t.tile_pos.x, t.tile_pos.y,
 					float(t.resources.get("food", 0)),
 					t.population,
+					known_count,
 					t.move_target.x, t.move_target.y
 				])
 
 	print("\nglobal_messages: %d" % state.global_messages.size())
+	for tid in state.team_known:
+		print("  team_known[%d]: %d 條" % [tid, state.team_known[tid].size()])
 	print("=== DONE ===")
