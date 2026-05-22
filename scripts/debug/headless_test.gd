@@ -36,6 +36,7 @@ func _run_sim_test() -> void:
 		elif t == 1:
 			team.move_target = Vector2i(0, 0)  # 向左走到 (0,0)
 			team.move_speed = 1.5              # 每 ~7 Tick 走一格
+			team.unrest_turns = 22             # Tick 1 觸發替換事件，emit message
 		# t == 2: 無目標，駐守
 
 		for p in range(3):
@@ -52,6 +53,7 @@ func _run_sim_test() -> void:
 				person.goals = ["逃離", "求生"]
 				person.values["義氣"] = 0.3
 				person.skills["統領"] = 0.5
+				person.loyalty = 0.2  # 低忠誠度 → 成為異見者，觸發替換事件
 			else:
 				person.goals = ["擴張", "繁榮"]
 
@@ -75,13 +77,17 @@ func _run_sim_test() -> void:
 			print("\n--- Tick %d ---" % state.world.current_tick)
 			for tid in state.teams:
 				var t: TeamData = state.teams[tid]
-				print("  Team%d pos=(%d,%d) food=%.1f pop=%d target=(%d,%d)" % [
+				var known_count: int = state.team_known[tid].size() if state.team_known.has(tid) else 0
+				print("  Team%d pos=(%d,%d) food=%.1f pop=%d known=%d target=(%d,%d)" % [
 					t.team_id,
 					t.tile_pos.x, t.tile_pos.y,
 					float(t.resources.get("food", 0)),
 					t.population,
+					known_count,
 					t.move_target.x, t.move_target.y
 				])
 
 	print("\nglobal_messages: %d" % state.global_messages.size())
+	for tid in state.team_known:
+		print("  team_known[%d]: %d 條" % [tid, state.team_known[tid].size()])
 	print("=== DONE ===")

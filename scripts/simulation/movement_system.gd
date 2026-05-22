@@ -4,7 +4,8 @@ const BASE_MOVE_TICKS: int = 10
 const MIN_MOVE_TICKS: int = 3
 const MAX_MOVE_TICKS: int = 30
 
-func process(state: WorldState, team_ids: Array) -> void:
+func process(state: WorldState, team_ids: Array) -> Array:
+	var arrived: Array = []
 	for tid in team_ids:
 		var team: TeamData = state.teams[tid]
 		if team.move_target == Vector2i(-1, -1):
@@ -14,17 +15,20 @@ func process(state: WorldState, team_ids: Array) -> void:
 		if team.move_tick_acc < cost:
 			continue
 		team.move_tick_acc = 0
-		_step_team(state, team)
+		if _step_team(state, team):
+			arrived.append(tid)
+	return arrived
 
 func _move_cost(team: TeamData) -> int:
 	return clamp(int(round(float(BASE_MOVE_TICKS) / team.move_speed)), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
 
 # 未來替換此函數實作 A* 路徑，_on_arrival 介面不變
-func _step_team(state: WorldState, team: TeamData) -> void:
+func _step_team(state: WorldState, team: TeamData) -> bool:
+	var old_pos: Vector2i = team.tile_pos
 	if team.tile_pos == team.move_target:
 		team.move_target = Vector2i(-1, -1)
 		_on_arrival(state, team)
-		return
+		return false
 	var best_pos: Vector2i = team.tile_pos
 	var best_dist: int = _hex_dist(team.tile_pos, team.move_target)
 	for neighbor in _get_neighbors(team.tile_pos):
@@ -36,6 +40,7 @@ func _step_team(state: WorldState, team: TeamData) -> void:
 	if team.tile_pos == team.move_target:
 		team.move_target = Vector2i(-1, -1)
 		_on_arrival(state, team)
+	return team.tile_pos != old_pos
 
 # 抵達只更新占用，不自動建立據點（據點建立為獨立 NPC 決策）
 func _on_arrival(state: WorldState, team: TeamData) -> void:

@@ -25,7 +25,7 @@
 | `events/base_event.gd` | BaseEvent 基底：check() + execute() |
 | `events/event_unrest_split.gd` | 分裂：unrest≥30、義氣<0.4、目標衝突 |
 | `events/event_unrest_replace.gd` | 替換：unrest≥20、統領≥0.3 |
-| `message_system.gd` | 待發佇列；HOP_DECAY=0.15；TIME_DECAY=0.005/Tick；exchange_messages（需明確觸發） |
+| `message_system.gd` | emit_message（事件觸發）；propagate_on_arrival（同格 event-driven）；4 種傳播模式（honest/unintentional/malicious/silent）；去重+衰減 |
 
 ### 測試
 
@@ -42,7 +42,7 @@
 | `docs/team.md` | 完整記錄欄位、人口規則、unrest 門檻 |
 | `docs/world.md` | 完整記錄 Tick 循環、LOD、資源系統、資料結構 |
 | `docs/event.md` | 完整記錄 registry 架構、現有事件邏輯 |
-| `docs/message.md` | 完整記錄三層架構、衰減公式、傳播規則 |
+| `docs/message.md` | 完整記錄三層架構、衰減公式、4 種傳播模式、event-driven 流程 |
 | `docs/superpowers/specs/2026-05-22-world-simulator-design.md` | 設計規格 |
 
 ---
@@ -54,7 +54,7 @@
 | 項目 | 說明 | 前置需求 |
 |---|---|---|
 | ~~**Team 移動**~~ | ~~tile_pos 實際改變；移動 AI（目標格、行軍）；速度公式~~ | ~~無~~ |
-| **訊息傳播** | 鄰近 Teams 自動 exchange_messages；proximity 觸發 | ✅ Team 移動 完成 |
+| ~~**訊息傳播**~~ | ~~同格 event-driven propagate_on_arrival；4 種失真模式；去重衰減~~ | ~~✅ Team 移動 完成~~ |
 
 ### 中優先
 

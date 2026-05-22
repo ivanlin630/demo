@@ -48,28 +48,63 @@ TIME_DECAY_PER_TICK = 0.005 # 每 Tick 時間衰減
 ### 強度衰減公式
 
 ```
-strength -= HOP_DECAY × hops + TIME_DECAY_PER_TICK × (current_tick - origin_tick)
+copy.strength = msg.strength × (1 - HOP_DECAY) × max(1 - age × TIME_DECAY_PER_TICK, 0.1)
 ```
 
-### 訊息交換（`exchange_messages`）
+強度 <= 0.05 的訊息不傳。
 
-**需要明確行動觸發**，不自動發生：
+### 訊息生成（`emit_message`）
 
-1. 複製訊息
-2. 套用強度衰減（hop +1, time decay）
-3. 人為失真：`if randf() > person.loyalty → is_distorted = true`
-4. 強度 > 0 的訊息寫入目標 team_known
+事件觸發時由各 event 直接呼叫：
+
+```gdscript
+SimMessageSystem.new().emit_message(state, type, description, team)
+```
+
+目前觸發點：
+- `event_unrest_replace.gd`：替換成功 → type = `"replace"`
+- `event_unrest_split.gd`：分裂成功 → type = `"split"`
+
+### 自動傳播（`propagate_on_arrival`）
+
+**event-driven**：只在 Team 實際移動到新格時觸發，不每 Tick 掃。
+
+- 觸發條件：MovementSystem.process() 回傳的 arrived 列表
+- 傳播範圍：**同格（tile_pos 完全相同）**，鄰格不傳
+- 近區、遠區皆適用
+
+流程：
+1. 每個 arrived Team 掃描全部 Teams
+2. 同格者雙向呼叫 `_exchange_one_way`
+3. 去重：已持有相同 `msg.id` 的訊息跳過
+4. 套用衰減後決定傳播模式
+
+### 傳播模式（`_decide_propagation_mode`）
+
+由 **發送方 leader** 的屬性機率抽樣：
+
+| 模式 | 效果 | 影響權重 |
+|---|---|---|
+| `honest` | 原樣傳遞 | 義氣 × 0.6 + 慎重 × 0.3 - 計謀 × 0.2 |
+| `unintentional` | 輕微扭曲，強度 × 0.8，可能位移 source_pos | stress × 0.4 + (1 - 慎重) × 0.2 |
+| `malicious` | 嚴重扭曲，強度 × 0.5，竄改 origin_team_id 或 source_pos | 計謀 × 0.7 - 義氣 × 0.4 |
+| `silent` | 不傳 | 慎重 × 0.3 + fear × 0.3 |
+
+### 手動交換（`exchange_messages`）
+
+保留供未來玩家手動觸發（按 E 接觸 NPC），不自動呼叫。
 
 ### 待處理佇列（`process_pending`）
 
-每 Tick Step 6 呼叫，處理 `_pending` 佇列中的排程訊息。
+每 Tick Step 8 呼叫，處理 `_pending` 佇列中的排程訊息（目前為 stub）。
 
 ---
 
 ## 設計規則
 
-- 訊息只能靠**實體接觸**傳播（兩 Team 同格或相鄰格）
-- 人為失真由 NPC loyalty 決定（loyalty 越低越容易扭曲）
+- 訊息只能靠**實體接觸**傳播（兩 Team **同格**，鄰格不傳）
+- 傳播為 event-driven：只在 Team 抵達新格時觸發，不每 Tick 掃
+- 失真模式由發送方 leader 的 `計謀 / 義氣 / 慎重 / stress / fear` 決定（4 種模式機率抽樣）
 - 玩家必須與實體（NPC 或 Team）互動才能接收訊息
 - 強度衰減 = hop 次數 + 時間老化（兩者都計）
 
@@ -78,12 +113,19 @@ strength -= HOP_DECAY × hops + TIME_DECAY_PER_TICK × (current_tick - origin_ti
 ## 訊息流程
 
 ```
-事件觸發（event_system）
-  → 寫入 global_messages
-  → 寫入 origin_team.team_known
-  → 實體接觸時 exchange_messages()
-    → 衰減 + 人為失真 → 寫入 target.team_known
-  → 玩家接觸實體 → 複製到 player_known
+事件觸發（event_unrest_split / event_unrest_replace）
+  → emit_message()
+    → 寫入 global_messages
+    → 寫入 origin_team.team_known
+
+Team 抵達新格（MovementSystem.process → arrived）
+  → SimRunner._step3_propagate_messages(arrived, all_teams)
+    → propagate_on_arrival()
+      → 找同格 Teams → _exchange_one_way()
+        → 去重 + 衰減 + 傳播模式抽樣 → 寫入 target.team_known
+
+玩家接觸實體（未來）
+  → exchange_messages() → 複製到 player_known
 ```
 
 ---
