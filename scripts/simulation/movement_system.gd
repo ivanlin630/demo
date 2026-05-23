@@ -4,7 +4,24 @@ const BASE_MOVE_TICKS: int = 10
 const MIN_MOVE_TICKS: int = 3
 const MAX_MOVE_TICKS: int = 30
 
+const TERRAIN_SPEED_MULT: Dictionary = {
+	"plains":   1.0,
+	"forest":   0.7,
+	"mountain": 0.4,
+}
+
 func process(state: WorldState, team_ids: Array) -> Array:
+	# 護衛：每 tick 追蹤目標位置
+	for tid in team_ids:
+		var team: TeamData = state.teams[tid]
+		if team.current_task != "護衛" or team.order_target_id == -1:
+			continue
+		var target: TeamData = state.teams.get(team.order_target_id)
+		if target == null:
+			team.current_task    = "idle"
+			team.order_target_id = -1
+		else:
+			team.move_target = target.tile_pos
 	var arrived: Array = []
 	for tid in team_ids:
 		var team: TeamData = state.teams[tid]
@@ -12,7 +29,7 @@ func process(state: WorldState, team_ids: Array) -> Array:
 			continue
 		if team.move_target == Vector2i(-1, -1):
 			continue
-		var cost: int = _move_cost(team)
+		var cost: int = _move_cost(state, team)
 		team.move_tick_acc += 1
 		if team.move_tick_acc < cost:
 			continue
@@ -21,8 +38,33 @@ func process(state: WorldState, team_ids: Array) -> Array:
 			arrived.append(tid)
 	return arrived
 
-func _move_cost(team: TeamData) -> int:
-	return clamp(int(round(float(BASE_MOVE_TICKS) / team.move_speed)), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
+func _move_cost(state: WorldState, team: TeamData) -> int:
+	var speed: float = _compute_team_speed(state, team)
+	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
+	if state.world.tiles.has(tile_id):
+		var terrain: String = (state.world.tiles[tile_id] as HexTileData).terrain
+		speed *= TERRAIN_SPEED_MULT.get(terrain, 1.0)
+	return clamp(int(round(float(BASE_MOVE_TICKS) / maxf(speed, 0.01))), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
+
+func _compute_team_speed(state: WorldState, team: TeamData) -> float:
+	var total_speed: float = 0.0
+	var total_count: int = 0
+	var named_ids: Array = team.advisors + team.members
+	if team.leader_id != -1:
+		named_ids.append(team.leader_id)
+	for pid in named_ids:
+		var p = state.persons.get(pid)
+		if p != null:
+			total_speed += p.get_effective_speed()
+			total_count += 1
+	var unnamed_healthy: int = maxi(team.population - total_count - team.wounded, 0)
+	total_speed += float(unnamed_healthy) * 1.0
+	total_count += unnamed_healthy
+	total_speed += float(team.wounded) * 0.5
+	total_count += team.wounded
+	if total_count == 0:
+		return 1.0
+	return total_speed / float(total_count)
 
 # 未來替換此函數實作 A* 路徑，_on_arrival 介面不變
 func _step_team(state: WorldState, team: TeamData) -> bool:

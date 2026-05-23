@@ -11,7 +11,7 @@ func _run_sim_test() -> void:
 	for i in range(3):
 		var tile := HexTileData.new()
 		tile.tile_id = i
-		tile.resources = { "food": 200, "wood": 50, "ore": 20, "special": 0 }
+		tile.resources = { "food": 200, "material": 50 }
 		tile.productivity = 1.0
 		tile.has_outpost = true
 		state.world.tiles[i] = tile
@@ -22,7 +22,7 @@ func _run_sim_test() -> void:
 		team.team_id = t
 		team.population = 10
 		team.minor_population = 1
-		team.resources = { "food": 5.0, "material": 10, "weapon": 5, "money": 20, "goods": 0 }
+		team.resources = { "food": 5.0, "material": 10, "weapon": 5, "coin": 20, "goods": 0 }
 		team.tags = ["生產"]
 		team.tile_pos = Vector2i(t, 0)
 		state.teams[t] = team

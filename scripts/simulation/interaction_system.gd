@@ -10,6 +10,15 @@ const ROUND_READINESS_DRAIN: float  = 0.08
 const READINESS_RECOVERY_BASE: float = 0.04
 const READINESS_FOOD_COST: float    = 0.05
 
+const HIT_WEIGHTS: Dictionary = {
+	"head": 0.10, "torso": 0.40,
+	"right_arm": 0.10, "left_arm": 0.10,
+	"right_leg": 0.15, "left_leg": 0.15,
+}
+const STATUS_ORDER: Array = ["healthy", "wounded", "critical", "severed"]
+const CRITICAL_DEATH_CHANCE_BASE: float = 0.10
+const CRITICAL_RECOVER_CHANCE_BASE: float = 0.40
+
 var _msg: SimMessageSystem
 
 func _init() -> void:
@@ -19,13 +28,19 @@ func _init() -> void:
 
 func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Array) -> void:
 	_tick_readiness(state, all_team_ids)
+	_tick_critical_npcs(state, all_team_ids)
 	_process_ongoing_combat(state, all_team_ids)
+	var _sub := SubteamSystem.new()
 	for arrived_id in arrived_ids:
 		if not state.teams.has(arrived_id):
 			continue
+		if _sub.try_merge_back(state, arrived_id):
+			continue
 		var arrived: TeamData = state.teams[arrived_id]
-		for other_id in all_team_ids:
-			if other_id == arrived_id or not state.teams.has(other_id):
+		if arrived.current_task == "護衛":
+			continue
+		for other_id in state.teams:
+			if other_id == arrived_id:
 				continue
 			var other: TeamData = state.teams[other_id]
 			if other.tile_pos != arrived.tile_pos:
@@ -50,7 +65,11 @@ func _tick_readiness(state: WorldState, team_ids: Array) -> void:
 		var food_used: float    = minf(food_needed, food_avail)
 		team.resources["food"]  = food_avail - food_used
 		var resource_factor: float = 0.3 + 0.7 * (food_used / maxf(food_needed, 0.001))
-		team.readiness = minf(team.readiness + READINESS_RECOVERY_BASE * morale_factor * resource_factor, 1.0)
+		var leader = state.persons.get(team.leader_id)
+		var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
+		var excess: float = clampf((cmd - 0.8) / 0.2, 0.0, 1.0)
+		var recovery: float = READINESS_RECOVERY_BASE * (1.0 + excess * 0.5)
+		team.readiness = minf(team.readiness + recovery * morale_factor * resource_factor, 1.0)
 
 func _treat_wounded(state: WorldState, team: TeamData) -> void:
 	var best_medicine: float = 0.0
@@ -103,6 +122,24 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		return
 	var same_faction: bool = a.faction_id != -1 and a.faction_id == b.faction_id
 	if same_faction:
+		if a.current_task == "徵收":
+			_resolve_tribute(state, id_a, id_b)
+		elif b.current_task == "徵收":
+			_resolve_tribute(state, id_b, id_a)
+		elif a.current_task == "信使" and a.order_target_id == id_b:
+			_deliver_order(state, id_a, id_b)
+		elif b.current_task == "信使" and b.order_target_id == id_a:
+			_deliver_order(state, id_b, id_a)
+		elif a.current_task == "idle" and b.current_task == "idle":
+			var absorber: int = id_a if a.population >= b.population else id_b
+			var absorbed: int = id_b if absorber == id_a else id_a
+			SubteamSystem.new().merge_teams(state, absorber, absorbed)
+		return
+	if a.current_task == "外交":
+		_try_diplomacy(state, id_a, id_b)
+		return
+	if b.current_task == "外交":
+		_try_diplomacy(state, id_b, id_a)
 		return
 	if a.current_task == "攻擊":
 		_start_combat(state, id_a, id_b)
@@ -169,8 +206,8 @@ func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 
 	var loss_a: int = max(int(round(eff_a * str_b / total * ROUND_CASUALTY_RATE)), 0)
 	var loss_b: int = max(int(round(eff_b * str_a / total * ROUND_CASUALTY_RATE)), 0)
-	a.wounded   += loss_a
-	b.wounded   += loss_b
+	_apply_casualties(state, id_a, loss_a)
+	_apply_casualties(state, id_b, loss_b)
 	a.readiness  = maxf(a.readiness - ROUND_READINESS_DRAIN, 0.0)
 	b.readiness  = maxf(b.readiness - ROUND_READINESS_DRAIN, 0.0)
 
@@ -199,7 +236,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var loser: TeamData  = state.teams[loser_id]
 	winner.combat_target = -1
 	loser.combat_target  = -1
-	for res in ["food", "material", "weapon", "money", "goods"]:
+	for res in ["food", "material", "weapon", "coin", "goods"]:
 		var taken: float = float(loser.resources.get(res, 0)) * LOOT_RATE
 		winner.resources[res] = float(winner.resources.get(res, 0)) + taken
 		loser.resources[res]  = float(loser.resources.get(res, 0)) - taken
@@ -208,6 +245,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	print("[Combat End] Team%d 勝 Team%d (rd=%.2f/%.2f wnd=%d/%d)" % [
 		winner_id, loser_id, winner.readiness, loser.readiness,
 		winner.wounded, loser.wounded])
+	_try_subjugate(state, winner_id, loser_id)
 
 func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> void:
 	var retreater: TeamData = state.teams[retreater_id]
@@ -216,11 +254,12 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	pursuer.combat_target   = -1
 	print("[Exhaust] Team%d 力竭撤退 (rd=%.2f wnd=%d)" % [
 		retreater_id, retreater.readiness, retreater.wounded])
+	_try_subjugate(state, pursuer_id, retreater_id)
 
 func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> void:
 	var atk: TeamData = state.teams[atk_id]
 	var def: TeamData = state.teams[def_id]
-	for res in ["food", "goods", "money"]:
+	for res in ["food", "goods", "coin"]:
 		var tribute: float = float(def.resources.get(res, 0)) * TRIBUTE_RATE
 		if tribute > 0.0:
 			atk.resources[res] = float(atk.resources.get(res, 0)) + tribute
@@ -246,11 +285,227 @@ func _try_retreat(state: WorldState, team_id: int, enemy_id: int) -> void:
 		print("[Retreat] Team%d 成功撤退 (rd=%.2f wnd=%d)" % [team_id, team.readiness, team.wounded])
 
 func _team_strength(state: WorldState, team_id: int) -> float:
-	var team: TeamData = state.teams[team_id]
+	var base: float = _strength_raw(state, team_id)
+	var team: TeamData = state.teams.get(team_id)
+	if team == null:
+		return base
+	for tid in state.teams:
+		if tid == team_id:
+			continue
+		var t: TeamData = state.teams[tid]
+		if t.current_task == "護衛" and t.order_target_id == team_id \
+				and t.tile_pos == team.tile_pos:
+			base += _strength_raw(state, tid)
+	return base
+
+func _strength_raw(state: WorldState, team_id: int) -> float:
+	var team: TeamData = state.teams.get(team_id)
+	if team == null:
+		return 0.0
 	var leader: PersonData = state.persons.get(team.leader_id)
 	var combat_skill: float = 0.0
 	if leader != null:
 		combat_skill = float(leader.skills.get("戰鬥", 0.0))
 	var weapon_bonus: float = 1.0 + float(team.resources.get("weapon", 0)) * 0.02
 	var effective_pop: int  = maxi(team.population - team.wounded, 1)
-	return float(effective_pop) * (0.5 + combat_skill * 0.5) * weapon_bonus
+	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader != null else 0.0
+	var excess: float = clampf((cmd - 0.8) / 0.2, 0.0, 1.0)
+	var leadership_mult: float = 1.0 + excess * 0.5
+	return float(effective_pop) * (0.5 + combat_skill * 0.5) * weapon_bonus * leadership_mult
+
+# ──────── 傷亡分配 ────────
+
+func _apply_casualties(state: WorldState, team_id: int, count: int) -> void:
+	if count <= 0:
+		return
+	var team: TeamData = state.teams[team_id]
+	var named_ids: Array = team.advisors + team.members
+	if team.leader_id != -1:
+		named_ids.append(team.leader_id)
+	for i in range(count):
+		if not named_ids.is_empty() and randf() < float(named_ids.size()) / maxf(float(team.population), 1.0):
+			var idx: int = randi() % named_ids.size()
+			var pid: int = named_ids[idx]
+			var p = state.persons.get(pid)
+			if p != null:
+				_hit_person(state, team_id, p)
+		else:
+			team.wounded += 1
+
+func _hit_person(state: WorldState, team_id: int, p) -> void:
+	var part: String = _random_part()
+	var cur_idx: int = STATUS_ORDER.find(p.body_parts[part]["status"])
+	if cur_idx < 0:
+		return
+	var vital: bool = part == "head" or part == "torso"
+	if cur_idx >= STATUS_ORDER.size() - 1:
+		if vital:
+			_kill_named_npc(state, team_id, p)
+		return
+	var new_status: String = STATUS_ORDER[cur_idx + 1]
+	p.body_parts[part]["status"] = new_status
+	print("[Hit] Person%d %s: %s → %s" % [p.id, part, STATUS_ORDER[cur_idx], new_status])
+	if vital and new_status == "critical":
+		print("[Critical] Person%d %s 瀕死" % [p.id, part])
+	elif not vital and new_status == "severed":
+		_kill_named_npc(state, team_id, p)
+
+func _random_part() -> String:
+	var roll: float = randf()
+	var acc: float = 0.0
+	for part in HIT_WEIGHTS:
+		acc += HIT_WEIGHTS[part]
+		if roll < acc:
+			return part
+	return "torso"
+
+# ──────── Critical NPC 每 Tick 判定 ────────
+
+func _tick_critical_npcs(state: WorldState, all_team_ids: Array) -> void:
+	for tid in all_team_ids:
+		if not state.teams.has(tid):
+			continue
+		var team: TeamData = state.teams[tid]
+		var medicine: float = _best_medicine(state, team)
+		var named_ids: Array = team.advisors + team.members
+		if team.leader_id != -1:
+			named_ids.append(team.leader_id)
+		for pid in named_ids:
+			var p = state.persons.get(pid)
+			if p == null:
+				continue
+			var has_critical: bool = false
+			for part in ["head", "torso"]:
+				if p.body_parts[part]["status"] == "critical":
+					has_critical = true
+					break
+			if not has_critical:
+				continue
+			var death_chance: float = CRITICAL_DEATH_CHANCE_BASE * (1.0 - medicine * 0.5)
+			if randf() < death_chance:
+				_kill_named_npc(state, tid, p)
+				continue
+			var recover_chance: float = CRITICAL_RECOVER_CHANCE_BASE * medicine
+			if randf() < recover_chance:
+				for part in ["head", "torso"]:
+					if p.body_parts[part]["status"] == "critical":
+						p.body_parts[part]["status"] = "wounded"
+						print("[Recover] Person%d %s: critical → wounded" % [p.id, part])
+
+func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
+	var team: TeamData = state.teams[team_id]
+	print("[Death] Person%d (%s) 死亡 (Team%d)" % [p.id, p.person_name, team_id])
+	if team.leader_id == p.id:
+		var event_system = load("res://scripts/simulation/event_system.gd").new()
+		var succeeded: bool = event_system.on_leader_death(state, team)
+		if not succeeded and team.faction_id != -1 and state.factions.has(team.faction_id):
+			var f = state.factions[team.faction_id]
+			if f.leader_team_id == team.team_id:
+				state.disband_faction(team.faction_id)
+	team.advisors.erase(p.id)
+	team.members.erase(p.id)
+	if team.leader_id == p.id:
+		team.leader_id = -1
+	team.population = maxi(team.population - 1, 1)
+	state.persons.erase(p.id)
+
+# ──────── 勢力互動 ────────
+
+func _try_subjugate(state: WorldState, winner_id: int, loser_id: int) -> void:
+	var winner: TeamData = state.teams[winner_id]
+	var loser:  TeamData = state.teams[loser_id]
+	if loser.faction_id != -1 or not winner.tags.has("統領"):
+		return
+	var fid: int = winner.faction_id
+	if fid == -1:
+		fid = state.create_faction(winner_id)
+	else:
+		state.factions[fid].member_team_ids.append(loser_id)
+	loser.faction_id = fid
+	_msg.emit_message(state, "subjugate",
+		"Team%d 主服 Team%d，加入勢力%d" % [winner_id, loser_id, fid], winner)
+	print("[Faction] Team%d 主服 Team%d → 勢力%d" % [winner_id, loser_id, fid])
+
+func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> void:
+	var initiator: TeamData = state.teams[initiator_id]
+	var target: TeamData    = state.teams[target_id]
+	if initiator.faction_id != -1 and initiator.faction_id == target.faction_id:
+		return
+	var target_leader = state.persons.get(target.leader_id)
+	if target_leader == null:
+		return
+	var honor: float     = float(target_leader.values.get("義氣", 0.5))
+	var str_init: float  = _team_strength(state, initiator_id)
+	var str_tgt: float   = _team_strength(state, target_id)
+	var str_ratio: float = str_init / maxf(str_tgt, 0.01)
+	var accept: float    = honor * 0.8 + maxf(str_ratio - 1.0, 0.0) * 0.2
+	if accept < 0.35:
+		return
+	# initiator 已有勢力 → 直接招募 target；否則以強者為 leader 建新勢力
+	var fid: int = initiator.faction_id
+	if fid == -1:
+		var strong_id: int = initiator_id if str_init >= str_tgt else target_id
+		fid = state.create_faction(strong_id)
+	if not state.factions[fid].member_team_ids.has(target_id):
+		state.factions[fid].member_team_ids.append(target_id)
+	target.faction_id = fid
+	initiator.current_task = "idle"
+	_msg.emit_message(state, "diplomacy",
+		"Team%d 外交 → Team%d 加入勢力%d" % [initiator_id, target_id, fid], initiator)
+	print("[Faction] Team%d 外交 Team%d → 勢力%d" % [initiator_id, target_id, fid])
+
+func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> void:
+	var collector: TeamData = state.teams[collector_id]
+	var payer:     TeamData = state.teams[payer_id]
+	var f = state.factions.get(collector.faction_id)
+	if f == null or f.leader_team_id != collector_id:
+		return
+	if not f.member_team_ids.has(payer_id):
+		return
+	var payer_p = state.persons.get(payer.leader_id)
+	var base_rate: float = f.tribute_rate
+	if payer_p != null:
+		base_rate += (float(payer_p.values.get("義氣", 0.5)) - 0.5) * 0.1
+		base_rate -= float(payer_p.values.get("貪婪", 0.5)) * 0.1
+		base_rate -= float(payer_p.skills.get("商業", 0.0)) * 0.05
+	var str_ratio: float = _team_strength(state, payer_id) / maxf(_team_strength(state, collector_id), 0.01)
+	if str_ratio > 1.2:
+		base_rate *= maxf(1.0 - (str_ratio - 1.0) * 0.5, 0.0)
+	base_rate = clampf(base_rate, 0.0, 0.5)
+	for res in ["food", "goods", "coin"]:
+		var amount: float = float(payer.resources.get(res, 0)) * base_rate
+		if amount <= 0.0:
+			continue
+		payer.resources[res]     = float(payer.resources.get(res, 0)) - amount
+		collector.resources[res] = float(collector.resources.get(res, 0)) + amount
+	collector.current_task = "idle"
+	collector.move_target  = Vector2i(-1, -1)
+	_msg.emit_message(state, "tribute",
+		"Team%d 向 Team%d 徵收（rate=%.2f）" % [collector_id, payer_id, base_rate], collector)
+	print("[Tribute] Team%d 徵收 Team%d rate=%.2f" % [collector_id, payer_id, base_rate])
+
+func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> void:
+	var messenger: TeamData = state.teams[messenger_id]
+	var target: TeamData    = state.teams[target_id]
+	var order: String = messenger.order_task if messenger.order_task != "" else "idle"
+	target.current_task       = order
+	messenger.current_task    = "idle"
+	messenger.order_target_id = -1
+	messenger.order_task      = ""
+	var parent: TeamData = state.teams.get(messenger.parent_team_id)
+	if parent != null:
+		messenger.move_target = parent.tile_pos
+	_msg.emit_message(state, "order_delivered",
+		"Team%d 傳令 Team%d → task=%s" % [messenger_id, target_id, order], messenger)
+	print("[Order] Team%d 傳令 Team%d → %s" % [messenger_id, target_id, order])
+
+func _best_medicine(state: WorldState, team: TeamData) -> float:
+	var best: float = 0.0
+	var named_ids: Array = team.advisors + team.members
+	if team.leader_id != -1:
+		named_ids.append(team.leader_id)
+	for pid in named_ids:
+		var p = state.persons.get(pid)
+		if p != null:
+			best = maxf(best, float(p.skills.get("醫療", 0.0)))
+	return best

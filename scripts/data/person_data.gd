@@ -33,6 +33,44 @@ var values: Dictionary = {
 	"義氣": 0.5,   # 高 → 忠誠難降，不輕易分裂
 	"貪婪": 0.5,   # 高 → 偏好勒索/積累資源
 	"慎重": 0.5,   # 高 → 壓低所有風險行為（跨系統）
+	"好戰": 0.5,   # 高 → 主動尋求戰鬥（區別野心的擴張傾向）
+	"殘忍": 0.5,   # 高 → 戰後屠殺；低 → 接受投降
+	"信義": 0.5,   # 高 → 遵守協議；低 → 容易背叛
 }
 
 var memory: Array = []
+
+var body_parts: Dictionary = {
+	"head":      { "status": "healthy" },
+	"torso":     { "status": "healthy" },
+	"right_arm": { "status": "healthy" },
+	"left_arm":  { "status": "healthy" },
+	"right_leg": { "status": "healthy" },
+	"left_leg":  { "status": "healthy" },
+}
+
+# status: "healthy"(×1.0) / "wounded"(×0.7) / "critical"(×0.3) / "severed"(×0.0)
+const STATUS_MULT: Dictionary = {
+	"healthy": 1.0, "wounded": 0.7, "critical": 0.3, "severed": 0.0
+}
+
+func get_effective_speed() -> float:
+	var base: float = 0.5 + float(attributes.get("體力", 0.5)) * 0.5
+	var r: float = STATUS_MULT.get(body_parts["right_leg"]["status"], 1.0)
+	var l: float = STATUS_MULT.get(body_parts["left_leg"]["status"], 1.0)
+	return base * (r + l) / 2.0
+
+func get_skill_mult(skill: String) -> float:
+	var arm_skills: Array = ["戰鬥", "弓箭", "製造", "工程", "醫療"]
+	if skill in arm_skills:
+		var r: float = STATUS_MULT.get(body_parts["right_arm"]["status"], 1.0)
+		var l: float = STATUS_MULT.get(body_parts["left_arm"]["status"], 1.0)
+		return (r + l) / 2.0
+	return 1.0
+
+func get_attribute_mult(attr: String) -> float:
+	if attr in ["智力", "魅力"]:
+		return STATUS_MULT.get(body_parts["head"]["status"], 1.0)
+	if attr in ["體力", "毅力"]:
+		return STATUS_MULT.get(body_parts["torso"]["status"], 1.0)
+	return 1.0

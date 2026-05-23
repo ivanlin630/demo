@@ -1,0 +1,78 @@
+const TERRAIN_WEIGHTS: Dictionary = { "plains": 50, "forest": 30, "mountain": 20 }
+
+const RESOURCE_PROFILE: Dictionary = {
+	"plains":   { "food": [80, 250], "material": [10, 50] },
+	"forest":   { "food": [40, 120], "material": [60, 180] },
+	"mountain": { "food": [10,  50], "material": [20,  80] },
+}
+
+const PRODUCTIVITY_RANGE: Dictionary = {
+	"plains":   [0.9, 1.3],
+	"forest":   [0.7, 1.1],
+	"mountain": [0.5, 0.9],
+}
+
+const ORE_GOLD_CHANCE:   float = 0.12
+const ORE_SILVER_CHANCE: float = 0.25
+
+func generate(state: WorldState, config: Dictionary) -> void:
+	var rng := RandomNumberGenerator.new()
+	if config.get("seed", -1) == -1:
+		rng.randomize()
+	else:
+		rng.seed = int(config.get("seed", 0))
+	var radius: int = config.get("radius", 4)
+	for qx in range(-radius, radius + 1):
+		for ry in range(-radius, radius + 1):
+			var pos := Vector2i(qx, ry)
+			if _hex_dist(pos, Vector2i.ZERO) > radius:
+				continue
+			var tile = load("res://scripts/data/tile_data.gd").new()
+			tile.tile_id  = qx * 1000 + ry
+			tile.terrain  = _random_terrain(rng)
+			_apply_resources(tile, rng)
+			state.world.tiles[tile.tile_id] = tile
+
+func _apply_resources(tile, rng: RandomNumberGenerator) -> void:
+	tile.resources = {}
+	var profile: Dictionary = RESOURCE_PROFILE[tile.terrain]
+	for res in profile:
+		var r: Array = profile[res]
+		tile.resources[res] = rng.randi_range(r[0], r[1])
+	var prod_r: Array = PRODUCTIVITY_RANGE[tile.terrain]
+	tile.productivity = rng.randf_range(prod_r[0], prod_r[1])
+	if tile.terrain == "mountain":
+		if rng.randf() < ORE_GOLD_CHANCE:
+			tile.resources["ore_gold"] = rng.randi_range(5, 30)
+		elif rng.randf() < ORE_SILVER_CHANCE:
+			tile.resources["ore_silver"] = rng.randi_range(10, 60)
+
+func _random_terrain(rng: RandomNumberGenerator) -> String:
+	var roll: int = rng.randi_range(0, 99)
+	var acc: int = 0
+	for t in TERRAIN_WEIGHTS:
+		acc += TERRAIN_WEIGHTS[t]
+		if roll < acc:
+			return t
+	return "plains"
+
+func pick_start_positions(state: WorldState, n: int, min_sep: int) -> Array:
+	var chosen: Array = []
+	for tid in state.world.tiles:
+		var tile = state.world.tiles[tid]
+		var pos := Vector2i(tid / 1000, tid % 1000)
+		var ok := true
+		for c in chosen:
+			if _hex_dist(pos, c) < min_sep:
+				ok = false
+				break
+		if ok:
+			chosen.append(pos)
+		if chosen.size() >= n:
+			break
+	return chosen
+
+func _hex_dist(a: Vector2i, b: Vector2i) -> int:
+	var dx := b.x - a.x
+	var dy := b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2

@@ -42,7 +42,72 @@ var values: Dictionary
 # { "野心", "求生欲", "義氣", "貪婪", "慎重" }
 
 var memory: Array       # [{ event_id: int, intensity: String, reaction: String }]
+
+# 部位健康（大地圖簡化版；遭遇戰可加 hp/max_hp）
+var body_parts: Dictionary
+# {
+#   "head":      { "status": "healthy" },
+#   "torso":     { "status": "healthy" },
+#   "right_arm": { "status": "healthy" },
+#   "left_arm":  { "status": "healthy" },
+#   "right_leg": { "status": "healthy" },
+#   "left_leg":  { "status": "healthy" },
+# }
+
+const STATUS_MULT: Dictionary = {
+    "healthy": 1.0, "wounded": 0.7, "critical": 0.3, "severed": 0.0
+}
 ```
+
+---
+
+## 部位健康系統
+
+### Status 等級
+
+| status | multiplier | 說明 |
+|---|---|---|
+| `healthy` | ×1.0 | 無懲罰 |
+| `wounded` | ×0.7 | 30% 下降 |
+| `critical` | ×0.3 | 70% 下降（head/torso：瀕死狀態） |
+| `severed` | ×0.0 | 功能全失（四肢限定） |
+
+### 部位 → 影響
+
+| 部位 | 影響 |
+|---|---|
+| `head` | 智力、魅力屬性 × mult（`get_attribute_mult`） |
+| `torso` | 體力、毅力屬性 × mult |
+| `right_arm` / `left_arm` | 戰鬥/弓箭/製造/工程/醫療 技能 × 雙臂均值（`get_skill_mult`） |
+| `right_leg` / `left_leg` | 個人移動速度 × 雙腿均值（`get_effective_speed`） |
+
+### Critical 瀕死機制（head/torso）
+
+每 Tick 雙重判定（`_tick_critical_npcs`）：
+
+1. **死亡機率**：`death_chance = 0.10 × (1 - medicine × 0.5)`
+2. **治療恢復**：若未死亡，`recover_chance = 0.40 × medicine`（critical → wounded）
+
+無醫療：~10%/Tick 死亡；醫療=1.0：5%/Tick 死亡 + 40% 恢復機會。
+
+### 戰鬥命中分配
+
+| 部位 | 機率 |
+|---|---|
+| head | 10% |
+| torso | 40% |
+| right_arm / left_arm | 各 10% |
+| right_leg / left_leg | 各 15% |
+
+每次命中：status 降一級（healthy → wounded → critical → severed）。
+四肢 severed 時：NPC 死亡。head/torso severed 不發生（critical = 瀕死上限）。
+
+### 大地圖 vs 遭遇戰分層
+
+| 層級 | 欄位 | 受傷機制 |
+|---|---|---|
+| 大地圖 NPC | `status` only | 直接改 status |
+| 玩家/遭遇戰 | `status` + `hp` + `max_hp` | 扣 HP，歸零改 status |
 
 ---
 
@@ -111,9 +176,11 @@ var memory: Array       # [{ event_id: int, intensity: String, reaction: String 
 每次 NPC 執行反應後觸發：
 
 ```
-growth = BASE_GROWTH(0.005) × attr_val × (0.5 + 毅力 × 0.5)
+growth = BASE_GROWTH(0.005) × (attr_val × attr_mult) × (0.5 + (毅力 × torso_mult) × 0.5) × skill_part_mult
 person.skills[skill] = min(current + growth, 1.0)
 ```
+
+部位受傷會壓低屬性效益（`get_attribute_mult`）及臂技能成長（`get_skill_mult`）。
 
 反應對應技能與屬性：
 

@@ -11,10 +11,9 @@ func collect_resources(state: WorldState, team_ids: Array) -> void:
 		if not state.world.tiles.has(tile_id):
 			continue
 		var tile: HexTileData = state.world.tiles[tile_id]
-		var tile_food: float = float(tile.resources.get("food", 0))
-		var food_gain: float = tile.productivity * tile_food * 0.01
-		var current_food: float = float(team.resources.get("food", 0))
-		team.resources["food"] = current_food + food_gain
+		for res in tile.resources:
+			var gain: float = tile.productivity * float(tile.resources[res]) * 0.01
+			team.resources[res] = float(team.resources.get(res, 0)) + gain
 
 func resolve_consumption(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:

@@ -10,6 +10,7 @@ var _movement_system: Object
 var _message_system: SimMessageSystem
 var _event_system: Object
 var _interaction_system: Object
+var _faction_ai_system: Object
 
 func _init() -> void:
 	_resource_system = ResourceSystem.new()
@@ -19,6 +20,7 @@ func _init() -> void:
 	_message_system = SimMessageSystem.new()
 	_event_system = load("res://scripts/simulation/event_system.gd").new()
 	_interaction_system = load("res://scripts/simulation/interaction_system.gd").new()
+	_faction_ai_system = load("res://scripts/simulation/faction_ai_system.gd").new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
@@ -31,6 +33,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step4_resolve_interactions(state, arrived_near, near_teams)
 	_step5_collect_resources(state, near_teams)
 	_step6_resolve_consumption(state, near_teams)
+	_step6b_faction_ai(state, near_teams)
 	_step7_person_reactions(state, near_teams)
 	_step8_generate_events(state, near_teams)
 	_step9_emit_messages(state)
@@ -42,6 +45,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		_step4_resolve_interactions(state, arrived_far, far_teams)
 		_step5_collect_resources(state, far_teams)
 		_step6_resolve_consumption(state, far_teams)
+		_step6b_faction_ai(state, far_teams)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
 
@@ -64,6 +68,9 @@ func _step5_collect_resources(state: WorldState, team_ids: Array) -> void:
 
 func _step6_resolve_consumption(state: WorldState, team_ids: Array) -> void:
 	_resource_system.resolve_consumption(state, team_ids)
+
+func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
+	_faction_ai_system.evaluate_all(state, team_ids)
 
 func _step7_person_reactions(state: WorldState, team_ids: Array) -> void:
 	_reaction_system.evaluate_all(state, team_ids, _skill_system)

@@ -22,8 +22,8 @@ func on_reaction(person: PersonData, reaction: String) -> void:
 	var entry: Dictionary = REACTION_SKILL_MAP[reaction]
 	var skill_key: String = entry["skill"]
 	var attr_key: String = entry["attr"]
-	var attr_val: float = float(person.attributes.get(attr_key, 0.5))
-	var endurance: float = float(person.attributes.get("毅力", 0.5))
-	var growth: float = BASE_GROWTH * attr_val * (0.5 + endurance * 0.5)
+	var attr_val: float = float(person.attributes.get(attr_key, 0.5)) * person.get_attribute_mult(attr_key)
+	var endurance: float = float(person.attributes.get("毅力", 0.5)) * person.get_attribute_mult("毅力")
+	var growth: float = BASE_GROWTH * attr_val * (0.5 + endurance * 0.5) * person.get_skill_mult(skill_key)
 	var current: float = float(person.skills.get(skill_key, 0.0))
 	person.skills[skill_key] = minf(current + growth, MAX_SKILL)

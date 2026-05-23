@@ -5,6 +5,7 @@ const GOAL_CHECK_INTERVAL: int = 10
 func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) -> void:
 	for tid in team_ids:
 		var team: TeamData = state.teams[tid]
+		var flee_count: int = 0
 		for pid in state.persons:
 			var person: PersonData = state.persons[pid]
 			if person.team_id != tid:
@@ -16,6 +17,13 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 				_apply_reaction(state, person, team, reaction)
 				if skill_sys != null:
 					skill_sys.on_reaction(person, reaction)
+			if reaction == "N1_flee":
+				flee_count += 1
+		if flee_count > 0 and float(flee_count) / maxf(team.population, 1) >= 0.3:
+			if team.current_task not in ["逃跑", "護衛"]:
+				team.current_task = "逃跑"
+				team.move_target  = Vector2i(-1, -1)
+				print("[ReactionBridge] Team%d 逃跑（%d/%d 人）" % [tid, flee_count, team.population])
 
 func _update_goals(person: PersonData) -> void:
 	var ambition: float = float(person.values.get("野心", 0.5))
@@ -151,7 +159,10 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var f: float = float(team.resources.get("food", 0))
 			team.resources["food"] = f + 2.0
 		"P3_recruit":
-			team.population = mini(team.population + 1, 50)
+			var leader = state.persons.get(team.leader_id)
+			var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
+			var cap: int = TeamData.pop_cap_from_leadership(cmd)
+			team.population = mini(team.population + 1, cap)
 		"P4_expand":
 			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
 		"P5_breed":
@@ -170,9 +181,9 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var f: float = float(team.resources.get("food", 0))
 			team.resources["food"] = maxf(f - 1.0, 0.0)
 		"N5_extort":
-			var money: float = float(team.resources.get("money", 0))
+			var money: float = float(team.resources.get("coin", 0))
 			var steal: float = minf(money, 5.0)
-			team.resources["money"] = money - steal
+			team.resources["coin"] = money - steal
 
 	_maybe_write_memory(person, reaction, state.world.current_tick)
 

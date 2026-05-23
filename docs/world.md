@@ -13,10 +13,11 @@
 ### HexTileData（`scripts/data/tile_data.gd`）
 
 ```gdscript
-var tile_id: int                              # pos.x * 1000 + pos.y
-var resources: Dictionary                     # { "food", "wood", "ore", "special" }
-var productivity: float                       # 生產力乘數
-var occupied_by: int                          # team_id 或 -1
+var tile_id: int       # pos.x * 1000 + pos.y
+var terrain: String    # "plains" / "forest" / "mountain"
+var resources: Dictionary  # 任意 string key（見資源 Key 命名規範）
+var productivity: float    # 生產力乘數（依地形而異）
+var occupied_by: int       # team_id 或 -1
 var has_outpost: bool
 ```
 
@@ -81,9 +82,12 @@ var team_known: Dictionary      # team_id → Array[MessageData]
 條件：`team.has_outpost == true`（透過 tile_id = pos.x × 1000 + pos.y 查詢）
 
 ```
-food_gain = tile.productivity × tile.resources["food"] × 0.01
-team.resources["food"] += food_gain
+for res in tile.resources:
+    gain = tile.productivity × tile.resources[res] × 0.01
+    team.resources[res] += gain
 ```
+
+收集泛用化——tile 有哪些 key，team 就累積哪些 key（包含 ore_gold 等稀有資源）。
 
 ### 資源消耗
 
@@ -112,8 +116,44 @@ food_needed = (population + minor_population) × 0.1  # FOOD_PER_PERSON_PER_TICK
 
 ---
 
+---
+
+## 資源 Key 命名規範
+
+所有 resources Dictionary 使用任意 string key，命名慣例：
+
+| Key 模式 | 說明 | 存在位置 |
+|---|---|---|
+| `"food"` | 糧食 | tile / team |
+| `"material"` | 通用原料 | tile / team |
+| `"ore_gold"` | 金礦 | tile / team |
+| `"ore_silver"` | 銀礦 | tile / team |
+| `"gem_*"` | 寶石類 | tile / team |
+| `"coin"` | 實體鑄幣（未來） | team |
+| `"credit_{fid}"` | 勢力 fid 信用幣（未來） | team |
+| `"weapon"` | 武器（通用，未來細分） | team |
+| `"goods"` | 貨物 | team |
+
+---
+
+## 地形系統
+
+定義於 `scripts/simulation/world_generator.gd`。
+
+| 地形 | food 範圍 | material 範圍 | productivity | 稀有資源 |
+|---|---|---|---|---|
+| plains | 80–250 | 10–50 | 0.9–1.3 | — |
+| forest | 40–120 | 60–180 | 0.7–1.1 | — |
+| mountain | 10–50 | 20–80 | 0.5–0.9 | ore_gold (12%)、ore_silver (25%) |
+
+WorldGenerator.generate(state, { "radius": N, "seed": S }) 產生以 (0,0) 為中心、半徑 N 的 hex 地圖。
+
+---
+
 ## 未來擴充
 
-- 地形乘數（影響移動 Tick 成本與生產力）
+- 地形移動成本（mountain 移動較慢）
+- 農作系統（outpost 升級後額外 food 產出，受天氣影響）
+- 金本位：ore_gold → coin 鑄造
+- 信用本位：立國號發行 credit_{faction_id}
 - 據點升級（農業型 / 軍事型 / 貿易型）
-- 世界生成（隨機 tile 分佈與資源）

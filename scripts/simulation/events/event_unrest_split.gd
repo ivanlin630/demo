@@ -55,7 +55,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	var new_team := TeamData.new()
 	new_team.team_id = _next_team_id(state)
 	new_team.tile_pos = parent.tile_pos
-	new_team.resources = { "food": 0, "material": 0, "weapon": 0, "money": 0, "goods": 0 }
+	new_team.resources = { "food": 0.0, "material": 0, "weapon": 0, "coin": 0, "goods": 0 }
 	new_team.tags = []
 	new_team.faction_id = -1
 
