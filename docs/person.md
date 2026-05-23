@@ -39,7 +39,11 @@ var skills: Dictionary
 
 # 價值觀（半永久人格）
 var values: Dictionary
-# { "野心", "求生欲", "義氣", "貪婪", "慎重" }
+# { "野心", "求生欲", "義氣", "貪婪", "慎重",
+#   "好戰",  # 高 → 主動尋求戰鬥（FactionAI 攻擊 goal 加權）
+#   "殘忍",  # 高 → 戰後屠殺；低 → 接受投降（效果待實裝）
+#   "信義",  # 高 → 遵守協議；低 → 容易背叛（效果待實裝）
+# }
 
 var memory: Array       # [{ event_id: int, intensity: String, reaction: String }]
 
@@ -147,6 +151,12 @@ const STATUS_MULT: Dictionary = {
 - 技能高 → 對應反應分數上升
 - 價值觀（野心/求生欲/義氣/貪婪）直接加權
 - **慎重**：跨系統關鍵字，壓低所有風險行為（N2/N3/N5 等）
+- **好戰**：FactionAI 攻擊 goal 加權（`ambition×0.4 + martial×0.4 - honor×0.4`）；個人反應效果待實裝
+- **殘忍/信義**：資料欄位已建立，個人反應與互動效果待實裝
+
+### 逃跑橋接（ReactionBridge）
+
+每 Tick 結算後：若 team 內 N1_flee 人數 ≥ 30% 人口，自動設 `team.current_task = "逃跑"`，清除 move_target。護衛任務不受影響。
 
 ### Goals 加分（_goal_bonus）
 
