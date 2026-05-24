@@ -266,21 +266,46 @@ func _resolve_volley(state: WorldState, id_a: int, id_b: int) -> void:
 func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 	var a: TeamData  = state.teams[id_a]
 	var b: TeamData  = state.teams[id_b]
+
+	var terrain_b: float = _terrain_defense_mult(state, b)
+	var terrain_a: float = _terrain_defense_mult(state, a)
+
 	var str_a: float = _team_strength(state, id_a) * a.readiness
-	var str_b: float = _team_strength(state, id_b) * b.readiness
+	var str_b: float = _team_strength(state, id_b) * b.readiness * terrain_b
 	var total: float = str_a + str_b
 	var eff_a: int   = maxi(a.population - a.wounded, 1)
 	var eff_b: int   = maxi(b.population - b.wounded, 1)
 
 	var loss_a: int = max(int(round(eff_a * str_b / total * ROUND_CASUALTY_RATE)), 0)
 	var loss_b: int = max(int(round(eff_b * str_a / total * ROUND_CASUALTY_RATE)), 0)
+
+	if eff_a >= eff_b * 3:
+		var tactics_b: float = 0.0
+		var leader_b: PersonData = state.persons.get(b.leader_id)
+		if leader_b != null:
+			tactics_b = float(leader_b.skills.get("戰術", 0.0))
+		var flank_mult: float = FLANKING_MULT - tactics_b * 0.3
+		loss_b = int(round(float(loss_b) * flank_mult))
+	if eff_b >= eff_a * 3:
+		var tactics_a: float = 0.0
+		var leader_a: PersonData = state.persons.get(a.leader_id)
+		if leader_a != null:
+			tactics_a = float(leader_a.skills.get("戰術", 0.0))
+		var flank_mult: float = FLANKING_MULT - tactics_a * 0.3
+		loss_a = int(round(float(loss_a) * flank_mult))
+
 	_apply_casualties(state, id_a, loss_a)
 	_apply_casualties(state, id_b, loss_b)
-	a.readiness  = maxf(a.readiness - ROUND_READINESS_DRAIN, 0.0)
-	b.readiness  = maxf(b.readiness - ROUND_READINESS_DRAIN, 0.0)
 
-	print("[Round] Team%d(rd=%.2f) vs Team%d(rd=%.2f)  wnd+%d/%d  eff=%d/%d" % [
-		id_a, a.readiness, id_b, b.readiness, loss_a, loss_b,
+	var wnd_ratio_a: float = float(a.wounded) / float(maxi(a.population, 1))
+	var wnd_ratio_b: float = float(b.wounded) / float(maxi(b.population, 1))
+	var drain_a: float = ROUND_READINESS_DRAIN * (2.0 if wnd_ratio_a > MORALE_CASCADE_THRESHOLD else 1.0)
+	var drain_b: float = ROUND_READINESS_DRAIN * (2.0 if wnd_ratio_b > MORALE_CASCADE_THRESHOLD else 1.0)
+	a.readiness = maxf(a.readiness - drain_a, 0.0)
+	b.readiness = maxf(b.readiness - drain_b, 0.0)
+
+	print("[Round] Team%d(rd=%.2f,terrain=%.2f) vs Team%d(rd=%.2f,terrain=%.2f)  wnd+%d/%d  eff=%d/%d" % [
+		id_a, a.readiness, terrain_a, id_b, b.readiness, terrain_b, loss_a, loss_b,
 		maxi(a.population - a.wounded, 1), maxi(b.population - b.wounded, 1)])
 
 	if maxi(a.population - a.wounded, 1) <= 1:
@@ -307,7 +332,9 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var winner_p = state.persons.get(winner.leader_id)
 	var cruelty: float = float(winner_p.values.get("殘忍", 0.5)) if winner_p else 0.5
 	var effective_loot: float = LOOT_RATE * (1.0 + cruelty * 0.7)
-	for res in ["food", "material", "weapon", "coin", "goods"]:
+	for res in ["food", "material", "coin", "goods",
+				"weapon_melee_low", "weapon_melee_high",
+				"weapon_ranged_low", "weapon_ranged_high"]:
 		var taken: float = float(loser.resources.get(res, 0)) * effective_loot
 		winner.resources[res] = float(winner.resources.get(res, 0)) + taken
 		loser.resources[res]  = float(loser.resources.get(res, 0)) - taken
@@ -328,6 +355,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var _tile: HexTileData = state.world.tiles.get(_tile_id)
 	if _tile != null:
 		OutpostSystem.new().capture(state, winner_id, _tile)
+	_apply_pursuit(state, winner_id, loser_id)
 	_try_subjugate(state, winner_id, loser_id)
 
 func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> void:
@@ -341,7 +369,21 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	var _tile: HexTileData = state.world.tiles.get(_tile_id)
 	if _tile != null:
 		OutpostSystem.new().capture(state, pursuer_id, _tile)
+	_apply_pursuit(state, pursuer_id, retreater_id)
 	_try_subjugate(state, pursuer_id, retreater_id)
+
+func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
+	if not state.teams.has(winner_id) or not state.teams.has(loser_id):
+		return
+	var winner: TeamData = state.teams[winner_id]
+	var loser:  TeamData = state.teams[loser_id]
+	if winner.population < loser.population * 2:
+		return
+	var pursuit_loss: int = maxi(int(float(loser.population) * PURSUIT_RATE), 0)
+	if pursuit_loss <= 0:
+		return
+	_apply_casualties(state, loser_id, pursuit_loss)
+	print("[Pursuit] Team%d 追擊 Team%d +%d傷亡" % [winner_id, loser_id, pursuit_loss])
 
 func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> void:
 	var atk: TeamData = state.teams[atk_id]
@@ -469,6 +511,7 @@ func _apply_casualties(state: WorldState, team_id: int, count: int) -> void:
 				_hit_person(state, team_id, p)
 		else:
 			team.wounded += 1
+	_equip.on_anon_casualties(team, count)
 
 func _hit_person(state: WorldState, team_id: int, p) -> void:
 	var part: String = _random_part()
@@ -545,6 +588,8 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	if team.leader_id == p.id:
 		team.leader_id = -1
 	team.population = maxi(team.population - 1, 1)
+	_equip.on_named_death(team, p.equipment.get("weapon", ""))
+	p.equipment["weapon"] = ""
 	state.persons.erase(p.id)
 
 # ──────── 勢力互動 ────────
