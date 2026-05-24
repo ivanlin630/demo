@@ -8,6 +8,15 @@ const ESTABLISH_AMBITION: float      = 0.7
 const ESTABLISH_READINESS: float     = 0.7
 const DIPLOMACY_READINESS_MIN: float = 0.6
 const DISCIPLINE_FAIL_BASE: float    = 0.15
+const MANUFACTURE_MATERIAL_MIN: float = 30.0
+const TRADE_MIN_STOCK: float          = 10.0   # 商隊最低持貨（有貨才出門）
+const TRADE_MIN_COIN: float           = 5.0    # 買方最低 coin 門檻
+const TRADEABLE_RES: Array = [
+	"food", "material", "goods", "gem",
+	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
+	"weapon_melee_low", "weapon_melee_high",
+	"weapon_ranged_low", "weapon_ranged_high",
+]
 
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for fid in state.factions:
@@ -37,6 +46,11 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			sub.current_task = TeamData.TASK_IDLE
 			if parent != null:
 				sub.move_target = parent.tile_pos
+
+	for tid in state.teams:
+		if not state.teams.has(tid):
+			continue
+		_update_equip_order(state, state.teams[tid])
 
 # ──────── Tag 權限 ────────
 
@@ -103,13 +117,13 @@ func _update_goals(state: WorldState, f) -> void:
 	var diplomacy_readiness: float = clampf(
 		DIPLOMACY_READINESS_MIN - (ambition - 0.5) * 0.2, 0.3, 0.9)
 	if f.is_established and leader_team.readiness >= diplomacy_readiness:
-		if _has_independent(state):
+		if _has_independent(state, f.leader_team_id):
 			f.goals.append("外交")
 
 	var attack_score: float = ambition * 0.4 + martial * 0.4 - honor * 0.4
 	if f.is_established and attack_score > 0.3 \
 			and leader_team.readiness >= 0.75 \
-			and _has_independent(state) \
+			and _has_independent(state, f.leader_team_id) \
 			and _tag_weight(leader_team, "攻擊") > 0.0:
 		f.goals.append("攻擊")
 
@@ -169,6 +183,13 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			if target_id != -1:
 				mt.current_task = "攻擊"
 				mt.move_target  = state.teams[target_id].tile_pos
+		elif _can_manufacture(state, mt):
+			mt.current_task = TeamData.TASK_MANUFACTURE
+		elif _can_trade(state, mt):
+			var pid: int = _find_trade_target(state, mt)
+			if pid != -1:
+				mt.current_task = TeamData.TASK_TRADE
+				mt.move_target  = state.teams[pid].tile_pos
 
 # ──────── 子團自主 AI ────────
 
@@ -247,6 +268,10 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	var food_pc: float = float(team.resources.get("food", 0)) / maxf(team.population, 1)
 	if food_pc < 2.0:
 		scores["逃跑"] = survival * 0.8
+	if _can_manufacture(state, team):
+		scores["製造"] = (greed * 0.4 + 0.2) * _tag_weight(team, "製造")
+	if _can_trade(state, team):
+		scores["貿易"] = (greed * 0.5 + 0.3) * _tag_weight(team, "貿易")
 
 	var best_task := "idle"
 	var best_score: float = 0.0
@@ -263,20 +288,95 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			if tid != -1: team.move_target = state.teams[tid].tile_pos
 		"逃跑":
 			team.move_target = Vector2i(-1, -1)
+		"製造":
+			pass  # 製造在原地進行
+		"貿易":
+			var pid: int = _find_trade_target(state, team)
+			if pid != -1:
+				team.move_target = state.teams[pid].tile_pos
+			else:
+				team.current_task = TeamData.TASK_IDLE
 	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
+
+func _update_equip_order(state: WorldState, team: TeamData) -> void:
+	var total_weapons: int = 0
+	for wtype in ["melee_low", "melee_high", "ranged_low", "ranged_high"]:
+		total_weapons += int(team.resources.get("weapon_" + wtype, 0))
+	if total_weapons <= 0:
+		return
+	team.equip_order = { "melee_low": 0, "melee_high": 0, "ranged_low": 0, "ranged_high": 0 }
+	var can_equip: int = total_weapons / 2
+	if team.tags.has(TeamData.TAG_MILITARY) or team.current_task == TeamData.TASK_LOOT \
+			or team.current_task == TeamData.TASK_ATTACK:
+		var pool_mh: int = int(team.resources.get("weapon_melee_high", 0)) / 2
+		var pool_rh: int = int(team.resources.get("weapon_ranged_high", 0)) / 2
+		var pool_ml: int = int(team.resources.get("weapon_melee_low", 0)) / 2
+		var pool_rl: int = int(team.resources.get("weapon_ranged_low", 0)) / 2
+		team.equip_order["melee_high"]  = mini(pool_mh, can_equip)
+		can_equip -= team.equip_order["melee_high"]
+		team.equip_order["ranged_high"] = mini(pool_rh, can_equip)
+		can_equip -= team.equip_order["ranged_high"]
+		team.equip_order["melee_low"]   = mini(pool_ml, can_equip)
+		can_equip -= team.equip_order["melee_low"]
+		team.equip_order["ranged_low"]  = mini(pool_rl, can_equip)
+	elif team.tags.has(TeamData.TAG_MERCHANT):
+		var guard_count: int = mini(team.population * 3 / 10, can_equip)
+		team.equip_order["melee_low"] = mini(int(team.resources.get("weapon_melee_low", 0)) / 2, guard_count)
+	else:
+		var guard_count: int = mini(team.population / 2, can_equip)
+		team.equip_order["melee_low"] = mini(int(team.resources.get("weapon_melee_low", 0)) / 2, guard_count)
 
 # ──────── 輔助函數 ────────
 
-func _has_independent(state: WorldState) -> bool:
-	for tid in state.teams:
-		if state.teams[tid].faction_id == -1:
+func _can_trade(state: WorldState, team: TeamData) -> bool:
+	if _tag_weight(team, "貿易") == 0.0:
+		return false
+	for res in TRADEABLE_RES:
+		var stock: float = float(team.resources.get(res, 0))
+		if res == "food":
+			stock = maxf(stock - float(team.population) * 0.1 \
+				* InteractionSystem.FOOD_RESERVE_TICKS, 0.0)
+		if stock >= TRADE_MIN_STOCK:
+			return true
+	return false
+
+func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
+	var best_id: int = -1
+	var best_d:  int = 999
+	for tid in state.team_discovered.get(merchant.team_id, []):
+		if tid == merchant.team_id or not state.teams.has(tid): continue
+		var t: TeamData = state.teams[tid]
+		if float(t.resources.get("coin", 0)) < TRADE_MIN_COIN:
+			continue
+		var d: int = _hex_dist(merchant.tile_pos, t.tile_pos)
+		if d < best_d:
+			best_d  = d
+			best_id = tid
+	return best_id
+
+func _can_manufacture(state: WorldState, team: TeamData) -> bool:
+	var tile_id: int      = team.tile_pos.x * 1000 + team.tile_pos.y
+	var tile: HexTileData = state.world.tiles.get(tile_id)
+	if tile == null or tile.outpost_type != "civilian" \
+			or tile.manufacturing_level == 0 \
+			or tile.outpost_owner != team.team_id:
+		return false
+	return float(team.resources.get("material", 0)) >= MANUFACTURE_MATERIAL_MIN
+
+func _is_known(state: WorldState, from_id: int, target_id: int) -> bool:
+	return state.team_discovered.get(from_id, []).has(target_id)
+
+func _has_independent(state: WorldState, from_team_id: int) -> bool:
+	for tid in state.team_discovered.get(from_team_id, []):
+		if state.teams.has(tid) and state.teams[tid].faction_id == -1:
 			return true
 	return false
 
 func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
 	var best_id: int = -1
 	var best_d: int  = 999
-	for tid in state.teams:
+	for tid in state.team_discovered.get(from_team.team_id, []):
+		if not state.teams.has(tid): continue
 		var t: TeamData = state.teams[tid]
 		if t.faction_id != -1 or t.team_id == from_team.team_id:
 			continue
