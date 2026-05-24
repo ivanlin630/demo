@@ -32,7 +32,12 @@ var advisors: Array = []
 var members: Array = []
 var population: int = 1
 var minor_population: int = 0
-var resources: Dictionary = { "food": 0.0, "material": 0, "weapon": 0, "coin": 0, "goods": 0 }
+var resources: Dictionary = {
+	"food": 0.0, "material": 0, "coin": 0, "goods": 0, "gem": 0,
+	"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
+	"weapon_melee_low": 0, "weapon_melee_high": 0,
+	"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+}
 var move_speed: float = 1.0
 var tags: Array = []
 var current_task: String = "idle"
@@ -44,6 +49,11 @@ var move_tick_acc: int = 0
 var combat_target: int = -1
 var readiness: float   = 1.0
 var wounded: int       = 0
+var equip_order: Dictionary = {
+	"melee_low": 0, "melee_high": 0,
+	"ranged_low": 0, "ranged_high": 0,
+}
+var armed_anon_ratio: float = 0.0
 var parent_team_id: int  = -1
 var subteam_ids:    Array = []
 var order_target_id: int  = -1
