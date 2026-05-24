@@ -151,8 +151,9 @@ const STATUS_MULT: Dictionary = {
 - 技能高 → 對應反應分數上升
 - 價值觀（野心/求生欲/義氣/貪婪）直接加權
 - **慎重**：跨系統關鍵字，壓低所有風險行為（N2/N3/N5 等）
-- **好戰**：FactionAI 攻擊 goal 加權（`ambition×0.4 + martial×0.4 - honor×0.4`）；個人反應效果待實裝
-- **殘忍/信義**：資料欄位已建立，個人反應與互動效果待實裝
+- **好戰**：`_should_attack` 加權（+0.3）；FactionAI 攻擊 goal 加權
+- **殘忍**：`_score_riot` / `_score_extort` +0.15；戰勝後 loot rate ×(1 + cruelty×0.7)；cruelty > 0.6 → 敵方傷兵 wounded → critical 機率
+- **信義**：`_try_diplomacy` 接受公式加入 trust×0.3（義氣降至×0.5）；`_resolve_tribute` 低信義少繳/高信義多繳；`event_faction_defect` 低信義 OR 低義氣 → 叛離
 
 ### 逃跑橋接（ReactionBridge）
 

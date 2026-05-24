@@ -71,6 +71,7 @@
 | ~~**世界生成**~~ | ~~WorldGenerator hex 地圖（radius 可配）；地形三型；資源 key 命名規範統一~~ | ~~無~~ |
 | ~~**子團派遣與合併**~~ | ~~dispatch/merge/護衛/信使；動態人口上限（統領技能）；統領 >0.8 加成（readiness/戰力）；faction AI 距離派遣；leader 死亡溢出分團~~ | ~~✅ Faction 系統 完成~~ |
 | ~~**Task/AI 整合 + 價值觀擴充**~~ | ~~values 擴充（好戰/殘忍/信義）；TAG 系統（7種 + task 權限表）；FactionAI values 整合 + 成員 task 指派；SoloTeamAI（獨立 team 自主）；ReactionSystem 逃跑橋接；EventTagShift~~ | ~~✅ 子團派遣完成~~ |
+| ~~**好戰/殘忍/信義 效果實裝**~~ | ~~好戰→攻擊決策加權；殘忍→loot rate/傷兵惡化/暴動勒索傾向；信義→外交接受率/徵收率/叛離條件~~ | ~~✅ Task/AI 整合完成~~ |
 
 ### 低優先（玩家系統預留）
 
