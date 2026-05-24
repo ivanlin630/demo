@@ -11,6 +11,11 @@ const DISCIPLINE_FAIL_BASE: float    = 0.15
 const MANUFACTURE_MATERIAL_MIN: float = 30.0
 const TRADE_MIN_STOCK: float          = 10.0   # 商隊最低持貨（有貨才出門）
 const TRADE_MIN_COIN: float           = 5.0    # 買方最低 coin 門檻
+const HONOR_INTERVAL_MULT: float  = 0.5   # honor=1.0 → 徵收週期 ×1.5（義氣高 → 少收稅）
+const HONOR_EMERGENCY_DISC: float = 0.3   # honor=1.0 → emergency 門檻 ×0.7（義氣高 → 緊急門檻降低）
+const LOOT_SCORE_THRESHOLD: float = 0.35  # TEST VALUE — 掠奪 goal 分數門檻
+const LOOT_READINESS_MIN: float   = 0.6   # TEST VALUE — 掠奪需要的最低 readiness
+const DEVIATION_RATE: float       = 0.05  # TEST VALUE — 子團偏離基礎概率
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
@@ -93,8 +98,10 @@ func _update_goals(state: WorldState, f) -> void:
 	var martial:  float = float(leader_p.values.get("好戰",   0.5)) if leader_p else 0.5
 
 	var food_per_cap: float = float(leader_team.resources.get("food", 0)) / maxf(leader_team.population, 1)
-	var effective_emergency: float = FOOD_EMERGENCY * (0.7 + survival * 0.6)
-	var effective_interval:  int   = maxi(int(COLLECT_INTERVAL * (1.5 - greed)), 10)
+	var effective_emergency: float = FOOD_EMERGENCY * (0.7 + survival * 0.6) \
+		* clampf(1.0 - honor * HONOR_EMERGENCY_DISC, 0.5, 1.0)
+	var effective_interval:  int   = maxi(
+		int(COLLECT_INTERVAL * (1.5 - greed) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
 
 	if food_per_cap < effective_emergency:
 		f.goals.append("徵收")
@@ -126,6 +133,13 @@ func _update_goals(state: WorldState, f) -> void:
 			and _has_independent(state, f.leader_team_id) \
 			and _tag_weight(leader_team, "攻擊") > 0.0:
 		f.goals.append("攻擊")
+
+	var loot_score: float = greed * 0.5 + martial * 0.3 - honor * 0.3
+	if f.is_established and loot_score > LOOT_SCORE_THRESHOLD \
+			and leader_team.readiness >= LOOT_READINESS_MIN \
+			and _has_independent(state, f.leader_team_id) \
+			and _tag_weight(leader_team, "掠奪") > 0.0:
+		f.goals.append("掠奪")
 
 # ──────── 任務指派 ────────
 
@@ -160,6 +174,12 @@ func _assign_tasks(state: WorldState, f) -> void:
 			leader_team.current_task = "攻擊"
 			leader_team.move_target  = state.teams[target_id].tile_pos
 			print("[FactionAI] Team%d 主動攻擊 Team%d" % [f.leader_team_id, target_id])
+	if "掠奪" in f.goals and leader_team.current_task not in ["徵收", "外交", "攻擊", "掠奪"]:
+		var target_id: int = _nearest_independent(state, leader_team)
+		if target_id != -1:
+			leader_team.current_task = "掠奪"
+			leader_team.move_target  = state.teams[target_id].tile_pos
+			print("[FactionAI] Team%d 主動掠奪 Team%d" % [f.leader_team_id, target_id])
 	_assign_member_tasks(state, f)
 
 func _assign_member_tasks(state: WorldState, f) -> void:
