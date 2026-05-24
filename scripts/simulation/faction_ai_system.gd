@@ -220,17 +220,13 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 		return
 	if _check_discipline(state, sub):
 		return
-	# movement_system 到達時清 move_target；無目標且非 idle = 任務完成
+	if sub.current_task != TeamData.TASK_IDLE and sub.move_target != Vector2i(-1, -1):
+		if _check_deviation(state, sub):
+			return
 	if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE:
 		merge_queue.append(sub.team_id)
 	elif sub.current_task == TeamData.TASK_IDLE:
-		var parent: TeamData = state.teams.get(sub.parent_team_id)
-		if parent == null:
-			return
-		if parent.tile_pos == sub.tile_pos:
-			merge_queue.append(sub.team_id)
-		else:
-			sub.move_target = parent.tile_pos
+		_evaluate_idle_subteam(state, sub, merge_queue)
 
 func _update_escort(state: WorldState, team: TeamData) -> void:
 	if team.order_target_id == -1:
@@ -268,6 +264,57 @@ func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 		print("[SubAI] Team%d 紀律失效，脫離成獨立" % sub.team_id)
 		return true
 	return false
+
+func _check_deviation(state: WorldState, sub: TeamData) -> bool:
+	var leader = state.persons.get(sub.leader_id)
+	if leader == null:
+		return false
+	var greed: float   = float(leader.values.get("貪婪", 0.5))
+	var loyalty: float = leader.loyalty
+	var deviation_chance: float = greed * (1.0 - loyalty) * DEVIATION_RATE
+	if randf() < deviation_chance:
+		var loot_target: int = _nearest_independent(state, sub)
+		if loot_target != -1:
+			sub.current_task = TeamData.TASK_LOOT
+			sub.move_target  = state.teams[loot_target].tile_pos
+			print("[SubAI] Team%d 偏離掠奪 Team%d" % [sub.team_id, loot_target])
+			return true
+		sub.current_task = TeamData.TASK_IDLE
+		sub.move_target  = Vector2i(-1, -1)
+	return false
+
+func _evaluate_idle_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	var parent: TeamData = state.teams.get(sub.parent_team_id)
+	if parent == null:
+		return
+	if parent.tile_pos == sub.tile_pos:
+		merge_queue.append(sub.team_id)
+		return
+	var leader_p = state.persons.get(sub.leader_id)
+	if leader_p == null:
+		sub.move_target = parent.tile_pos
+		return
+	var greed:   float = float(leader_p.values.get("貪婪", 0.5))
+	var martial: float = float(leader_p.values.get("好戰", 0.5))
+	var scores: Dictionary = { "回歸": 0.3 }
+	scores["掠奪"] = (greed * 0.5 + martial * 0.2) * _tag_weight(sub, "掠奪")
+	scores["攻擊"] = (martial * 0.4 + greed * 0.2) * _tag_weight(sub, "攻擊")
+	var best_task := "回歸"
+	var best_score: float = 0.0
+	for t in scores:
+		if float(scores[t]) > best_score:
+			best_score = float(scores[t])
+			best_task  = t
+	if best_task == "回歸":
+		sub.move_target = parent.tile_pos
+	else:
+		var tid: int = _nearest_independent(state, sub)
+		if tid != -1:
+			sub.current_task = best_task
+			sub.move_target  = state.teams[tid].tile_pos
+			print("[SubAI] Team%d idle→%s (Team%d)" % [sub.team_id, best_task, tid])
+		else:
+			sub.move_target = parent.tile_pos
 
 # ──────── 獨立 Team 自主 AI ────────
 
