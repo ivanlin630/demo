@@ -1,9 +1,9 @@
 const TERRAIN_WEIGHTS: Dictionary = { "plains": 50, "forest": 30, "mountain": 20 }
 
 const RESOURCE_PROFILE: Dictionary = {
-	"plains":   { "food": [80, 250], "material": [10, 50] },
-	"forest":   { "food": [40, 120], "material": [60, 180] },
-	"mountain": { "food": [10,  50], "material": [20,  80] },
+	"plains":   { "food": [100, 300], "material": [5,  20]  },   # 農業為主
+	"forest":   { "food": [20,   80], "material": [80, 220] },   # 木材為主
+	"mountain": { "food": [5,    20], "material": [30, 100] },   # 礦產為主
 }
 
 const PRODUCTIVITY_RANGE: Dictionary = {
@@ -14,6 +14,9 @@ const PRODUCTIVITY_RANGE: Dictionary = {
 
 const ORE_GOLD_CHANCE:   float = 0.12
 const ORE_SILVER_CHANCE: float = 0.25
+const GEM_CHANCE:        float = 0.05
+const ORE_IRON_MOUNTAIN_CHANCE: float = 0.30
+const ORE_IRON_PLAINS_CHANCE:   float = 0.05
 
 func generate(state: WorldState, config: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -47,6 +50,14 @@ func _apply_resources(tile, rng: RandomNumberGenerator) -> void:
 			tile.resources["ore_gold"] = rng.randi_range(5, 30)
 		elif rng.randf() < ORE_SILVER_CHANCE:
 			tile.resources["ore_silver"] = rng.randi_range(10, 60)
+		if rng.randf() < GEM_CHANCE:
+			tile.resources["gem"] = rng.randi_range(1, 8)
+		if rng.randf() < ORE_IRON_MOUNTAIN_CHANCE:
+			tile.resources["ore_iron"] = rng.randi_range(50, 150)
+	elif tile.terrain == "plains":
+		if rng.randf() < ORE_IRON_PLAINS_CHANCE:
+			tile.resources["ore_iron"] = rng.randi_range(20, 60)
+	tile.resource_cap = tile.resources.duplicate()
 
 func _random_terrain(rng: RandomNumberGenerator) -> String:
 	var roll: int = rng.randi_range(0, 99)
