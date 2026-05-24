@@ -42,14 +42,12 @@ func _run_sim_test() -> void:
 
 		# 移動目標設定
 		if t == 0:
-			team.move_speed   = 1.0
 			team.current_task = "掠奪"
 			team.tags = ["統領"]
 			team.resources["weapon_melee_low"] = 40
 		elif t == 1:
 			team.tile_pos = Vector2i(3, 0)     # 從(3,0)出發，距Team2(2,0)更遠
 			team.move_target = Vector2i(0, 0)  # 向左走到 (0,0)
-			team.move_speed = 1.5              # 每 ~11 Tick 走一格
 			team.unrest_turns = 22             # Tick 1 觸發替換事件，emit message
 		# t == 2: 無目標，駐守
 

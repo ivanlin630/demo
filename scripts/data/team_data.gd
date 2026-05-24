@@ -38,7 +38,6 @@ var resources: Dictionary = {
 	"weapon_melee_low": 0, "weapon_melee_high": 0,
 	"weapon_ranged_low": 0, "weapon_ranged_high": 0,
 }
-var move_speed: float = 1.0
 var tags: Array = []
 var current_task: String = "idle"
 var unrest_turns: int = 0
