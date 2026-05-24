@@ -58,11 +58,13 @@ const CRITICAL_RECOVER_CHANCE_BASE: float = 0.40
 var _msg: SimMessageSystem
 var _vision: VisionSystem
 var _equip: EquipmentSystem
+var _skill_sys: SkillSystem
 
 func _init() -> void:
 	_msg    = SimMessageSystem.new()
 	_vision = VisionSystem.new()
 	_equip = EquipmentSystem.new()
+	_skill_sys = load("res://scripts/simulation/skill_system.gd").new()
 
 # ──────── 主入口 ────────
 
@@ -320,6 +322,8 @@ func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 	if b.readiness <= COMBAT_ABANDON_THRESHOLD:
 		_force_retreat(state, id_b, id_a)
 		return
+	_skill_sys.on_combat_round(state, a)
+	_skill_sys.on_combat_round(state, b)
 	_try_retreat(state, id_a, id_b)
 	if a.combat_target != -1:
 		_try_retreat(state, id_b, id_a)
@@ -355,6 +359,8 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var _tile: HexTileData = state.world.tiles.get(_tile_id)
 	if _tile != null:
 		OutpostSystem.new().capture(state, winner_id, _tile)
+	_skill_sys.on_combat_end(state, winner)
+	_skill_sys.on_combat_end(state, loser)
 	_apply_pursuit(state, winner_id, loser_id)
 	_try_subjugate(state, winner_id, loser_id)
 
@@ -369,6 +375,8 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	var _tile: HexTileData = state.world.tiles.get(_tile_id)
 	if _tile != null:
 		OutpostSystem.new().capture(state, pursuer_id, _tile)
+	_skill_sys.on_combat_end(state, retreater)
+	_skill_sys.on_combat_end(state, pursuer)
 	_apply_pursuit(state, pursuer_id, retreater_id)
 	_try_subjugate(state, pursuer_id, retreater_id)
 

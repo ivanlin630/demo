@@ -27,3 +27,27 @@ func on_reaction(person: PersonData, reaction: String) -> void:
 	var growth: float = BASE_GROWTH * attr_val * (0.5 + endurance * 0.5) * person.get_skill_mult(skill_key)
 	var current: float = float(person.skills.get(skill_key, 0.0))
 	person.skills[skill_key] = minf(current + growth, MAX_SKILL)
+
+func on_combat_round(state: WorldState, team: TeamData) -> void:
+	var named_ids: Array = ([team.leader_id] as Array) + team.advisors + team.members
+	for pid in named_ids:
+		var p: PersonData = state.persons.get(pid)
+		if p == null:
+			continue
+		var wtype: String = p.equipment.get("weapon", "")
+		if wtype in ["melee_low", "melee_high"]:
+			_grow(p, "戰鬥", "體力")
+		elif wtype in ["ranged_low", "ranged_high"]:
+			_grow(p, "弓箭", "智力")
+
+func on_combat_end(state: WorldState, team: TeamData) -> void:
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null:
+		return
+	_grow(leader, "戰術", "智力")
+
+func _grow(p: PersonData, skill: String, attr: String) -> void:
+	var attr_val: float  = float(p.attributes.get(attr, 0.5)) * p.get_attribute_mult(attr)
+	var endurance: float = float(p.attributes.get("毅力", 0.5)) * p.get_attribute_mult("毅力")
+	var growth: float    = BASE_GROWTH * attr_val * (0.5 + endurance * 0.5) * p.get_skill_mult(skill)
+	p.skills[skill] = minf(float(p.skills.get(skill, 0.0)) + growth, MAX_SKILL)
