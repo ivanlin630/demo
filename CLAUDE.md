@@ -22,21 +22,13 @@ scripts/simulation/    模擬系統（sim_runner, resource, reaction, skill, int
 scripts/simulation/events/  事件（base_event + 各 event_*.gd）
 scripts/debug/         headless 測試
 docs/                  設計文件
+tools/                 godot等工具
 ```
-
-## Tick 循環順序（sim_runner.gd）
-
-step1 時間 → step2 移動 → step3 訊息 → step4 互動 → step5 收集 → step6 消耗 → step6b FactionAI → step7 反應 → step8 事件 → step9 emit_messages
-
-LOD：近區（dist≤3）每 Tick；遠區每 10 Tick（跳過人物反應）。
 
 ## 關鍵設計規則
 
 - **不直接 script 結果**：所有行為從 NPC values/skills/stress/loyalty 計算產生
 - **新功能前定義**：影響的世界狀態、資訊流動、時間消耗、受影響群體、二次後果
-- **Tag 過濾 Task**：`_tag_weight(team, task)` 決定 team 能否執行某 task
-- **FactionAI 兩層**：勢力目標（step 6b）→ leader/成員 task；獨立 team 用 SoloTeamAI
-- **子團**：tags=["子團"]，parent_team_id≠-1，不受 faction tribute 徵收
 
 ## Values 系統
 
@@ -56,7 +48,7 @@ LOD：近區（dist≤3）每 Tick；遠區每 10 Tick（跳過人物反應）�
 | 項目 | 標準 |
 |---|---|
 | 可執行 | 無 GDScript 錯誤 |
-| 功能完整 | headless 200 Tick 無崩潰，關鍵 print 出現 |
+| 功能完整 | headless 至少200 Tick 無崩潰，關鍵 print 出現 |
 | 文件更新 | 相關 docs/*.md 反映新行為 |
 
 ## 文件位置

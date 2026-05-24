@@ -40,9 +40,9 @@ var skills: Dictionary
 # 價值觀（半永久人格）
 var values: Dictionary
 # { "野心", "求生欲", "義氣", "貪婪", "慎重",
-#   "好戰",  # 高 → 主動尋求戰鬥（FactionAI 攻擊 goal 加權）
-#   "殘忍",  # 高 → 戰後屠殺；低 → 接受投降（效果待實裝）
-#   "信義",  # 高 → 遵守協議；低 → 容易背叛（效果待實裝）
+#   "好戰",  # 高 → 主動尋求戰鬥；_should_attack 加權
+#   "殘忍",  # 高 → loot rate 提升、傷兵惡化、暴動/勒索傾向
+#   "信義",  # 高 → 外交接受率、徵收率；低 → 叛離條件觸發
 # }
 
 var memory: Array       # [{ event_id: int, intensity: String, reaction: String }]
