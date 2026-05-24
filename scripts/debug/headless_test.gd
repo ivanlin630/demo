@@ -133,6 +133,9 @@ func _run_sim_test() -> void:
 	state.persons[0].skills["統領"] = 0.5
 	state.persons[1].skills["統領"] = 0.2   # sub_cap = clamp(round(49×0.25)+1,1,50) = 14
 	state.persons[1].skills["偵查"] = 0.4   # 高偵查：子隊視野更廣
+	state.persons[1].values["貪婪"] = 0.8   # 高貪婪 → idle 子團有機會觸發 mini-loop（掠奪/攻擊）
+	state.persons[1].values["好戰"] = 0.7
+	state.persons[1].loyalty       = 0.4    # 低忠誠 → deviation_chance 更高
 	state.teams[0].advisors.append(1)        # Person1 加入 Team0 的 advisors
 	state.teams[0].members.erase(1)
 	# Person2 也移到 advisors（用於驗證多 NPC 派遣）

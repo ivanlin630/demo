@@ -35,7 +35,7 @@
 | `events/event_unrest_replace.gd` | 替換：unrest≥20、統領≥0.3 |
 | `events/event_faction_defect.gd` | 脫離：faction≠-1 + unrest≥20 + 義氣<0.35 |
 | `events/event_tag_shift.gd` | tag 增減：leader 好戰/野心 → +軍隊；戰損 > 50% → +流亡；資源穩定 → -流亡 |
-| `faction_ai_system.gd` | 策略層：evaluate_all → goals/strategy → current_task/move_target；leader values 整合；成員 task 指派；獨立 team SoloAI；_tag_weight tag 權限過濾；_update_equip_order（軍隊→near戰；商隊→ranged保護）；discovered-only 目標選擇 |
+| `faction_ai_system.gd` | 策略層：evaluate_all → goals/strategy → current_task/move_target；leader values 整合；成員 task 指派；獨立 team SoloAI；_tag_weight tag 權限過濾；_update_equip_order（軍隊→near戰；商隊→ranged保護）；discovered-only 目標選擇；義氣→低徵收頻率；貪婪→掠奪 goal；子團偏離 + idle mini-loop |
 | `message_system.gd` | emit_message（事件觸發）；propagate_on_arrival（同格 event-driven）；4 種傳播模式（honest/unintentional/malicious/silent）；去重+衰減 |
 | `world_generator.gd` | hex 地圖生成；地形三型；ore_iron 分布（mountain 30%/plains 5%） |
 
@@ -83,6 +83,8 @@
 | ~~**製造系統**~~ | ~~6 種配方；ore_iron 世界資源（mountain 30%/plains 5%）；ore_steel 靠冶煉；4 種武器類型生產~~ | ~~✅ 採集/據點完成~~ |
 | ~~**迷霧系統（VisionSystem）**~~ | ~~scout_range（偵查）+ exposure（潛行）；team_discovered；地形乘數；偵查/潛行技能成長~~ | ~~✅ 世界生成完成~~ |
 | ~~**武器/戰鬥強化**~~ | ~~4 種武器類型；EquipmentSystem（個人裝備槽 + armed_anon_ratio）；Round 0 齊射；地形防禦；flanking；morale cascade；pursuit；SkillSystem 戰鬥/弓箭/戰術成長~~ | ~~✅ 製造系統完成~~ |
+| ~~**FactionAI 義氣/貪婪效果**~~ | ~~義氣高 → 徵收週期延長/緊急門檻降低；貪婪高 → 勢力 AI 加入掠奪 goal~~ | ~~✅ 武器/戰鬥強化完成~~ |
+| ~~**子團自主 AI 強化**~~ | ~~偏離掠奪（貪婪×低忠誠→DEVIATION_RATE）；idle mini-loop（貪婪/好戰 weighted 決策）~~ | ~~✅ FactionAI 完成~~ |
 
 ### 低優先（玩家系統預留）
 
