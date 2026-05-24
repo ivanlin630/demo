@@ -93,7 +93,9 @@ func _score_comply(p: PersonData, _t: TeamData) -> float:
 
 func _score_produce(p: PersonData, t: TeamData) -> float:
 	var food_ok: bool = float(p.needs.get("food", 1.0)) > 0.6
-	var base: float = 0.6 if (food_ok and p.stress < 0.4 and t.tags.has("生產")) else 0.1
+	var active: bool = food_ok and p.stress < 0.4 \
+		and (t.tags.has("生產") or t.current_task == "生產")
+	var base: float = 0.6 if active else 0.1
 	base += float(p.skills.get("生產", 0.0)) * 0.4
 	base += float(p.values.get("慎重", 0.5)) * 0.1
 	return base
@@ -160,8 +162,12 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		"P1_comply":
 			person.loyalty = minf(person.loyalty + 0.01, 1.0)
 		"P2_produce":
-			var f: float = float(team.resources.get("food", 0))
-			team.resources["food"] = f + 2.0
+			var skill: float = float(person.skills.get("生產", 0.0))
+			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
+			var tile: HexTileData = state.world.tiles.get(tile_id)
+			var farming_bonus: float = float(tile.farming_level) * 0.5 if tile != null else 0.0
+			var food_gain: float = 1.0 + skill * 1.5 + farming_bonus
+			team.resources["food"] = float(team.resources.get("food", 0)) + food_gain
 		"P3_recruit":
 			var leader = state.persons.get(team.leader_id)
 			var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
