@@ -30,6 +30,17 @@ const UPGRADE_COST: Dictionary = {
 	"manufacturing": { "material": 60, "coin": 20, "ticks": 100 },
 }
 
+# 農作/製造設施上限（index = level-1）；軍用不允許
+const FARMING_CAP: Dictionary = {
+	"civilian": [1, 2, 3],
+	"military": [0, 0, 0],
+}
+
+const MANUFACTURING_CAP: Dictionary = {
+	"civilian": [0, 1, 3],
+	"military": [0, 0, 0],
+}
+
 const GARRISON_CAP: Dictionary = {
 	"civilian": [5,  15,  30 ],
 	"military": [20, 60,  150],
@@ -151,7 +162,8 @@ func start_upgrade_farming(state: WorldState, team: TeamData) -> bool:
 	var tile := _get_team_tile(state, team)
 	if tile == null or tile.outpost_type != "civilian" or tile.outpost_level == 0:
 		return false
-	if tile.outpost_owner != team.team_id or tile.farming_level >= 3:
+	var farming_max: int = FARMING_CAP[tile.outpost_type][tile.outpost_level - 1]
+	if tile.outpost_owner != team.team_id or tile.farming_level >= farming_max:
 		return false
 	if tile.construction_team_id != -1:
 		return false
@@ -170,7 +182,8 @@ func start_upgrade_manufacturing(state: WorldState, team: TeamData) -> bool:
 	var tile := _get_team_tile(state, team)
 	if tile == null or tile.outpost_type != "civilian" or tile.outpost_level == 0:
 		return false
-	if tile.outpost_owner != team.team_id or tile.manufacturing_level >= 3:
+	var mfg_max: int = MANUFACTURING_CAP[tile.outpost_type][tile.outpost_level - 1]
+	if tile.outpost_owner != team.team_id or tile.manufacturing_level >= mfg_max:
 		return false
 	if tile.construction_team_id != -1:
 		return false
