@@ -44,7 +44,6 @@ var equip_order: Dictionary = {        # 指揮官武裝指令
 }
 var armed_anon_ratio: float = 0.0      # 匿名人口中武裝比例（0.0–1.0）
 
-var move_speed: float       # 移動速度，影響每格耗 Tick 數
 var move_target: Vector2i   # 目標格，(-1,-1) = 不移動
 var move_tick_acc: int      # 累積 Tick，達移動成本門檻才走一格
 
@@ -138,7 +137,8 @@ var wounded: int            # 當前 Tick 累計受傷人數
 定義於 `scripts/simulation/movement_system.gd`。
 
 - 每 Tick 累積 `move_tick_acc`，達 `move_tick_cost` 才走一格
-- 移動成本：`clamp(round(10 / move_speed), 3, 30)`
+- 移動成本：`clamp(round(BASE_MOVE_TICKS / _compute_team_speed), MIN_MOVE_TICKS, MAX_MOVE_TICKS)`
+- `_compute_team_speed`：記名 NPC `get_effective_speed()` + 匿名健康=1.0 + 傷者=0.5 的加權均值
 - 路徑：greedy step（選最接近 move_target 的鄰格）
 - 抵達：更新 `occupied_by`，**不**自動建立據點
 
