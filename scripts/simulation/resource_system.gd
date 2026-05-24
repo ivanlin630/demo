@@ -1,6 +1,7 @@
 class_name ResourceSystem
 
 const FOOD_PER_PERSON_PER_TICK: float = 0.1
+const OUTPOST_COLLECT_MULT: Array  = [1.0, 1.4, 2.0]   # index = outpost_level - 1
 
 func collect_resources(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
@@ -11,10 +12,24 @@ func collect_resources(state: WorldState, team_ids: Array) -> void:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level == 0:
 			continue
+
+		var outpost_mult: float = OUTPOST_COLLECT_MULT[tile.outpost_level - 1]
+		var pop_mult: float     = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
+		var leader              = state.persons.get(team.leader_id)
+		var prod_skill: float   = float(leader.skills.get("生產", 0.0)) if leader else 0.0
+		var eng_skill: float    = float(leader.skills.get("工程", 0.0)) if leader else 0.0
+
 		for res in tile.resources:
 			var gain: float = tile.productivity * float(tile.resources[res]) * 0.01
-			if res == "food" and tile.farming_level > 0:
-				gain *= (1.0 + tile.farming_level * 0.5)
+			gain *= outpost_mult * pop_mult
+			match res:
+				"food":
+					gain *= (1.0 + tile.farming_level * 0.5)
+					gain *= (1.0 + prod_skill * 0.3)
+				"material":
+					gain *= (1.0 + eng_skill * 0.3)
+				"ore_gold", "ore_silver":
+					gain *= (1.0 + eng_skill * 0.5)
 			team.resources[res] = float(team.resources.get(res, 0)) + gain
 
 func resolve_consumption(state: WorldState, team_ids: Array) -> void:
