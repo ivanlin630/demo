@@ -86,6 +86,7 @@ func _run_sim_test() -> void:
 	p3.age = 30
 	p3.loyalty = 0.5
 	p3.values["義氣"] = 0.2   # 低義氣 → 容易脫離勢力
+	p3.values["信義"] = 0.2   # 低信義 → 叛離觸發更容易
 	p3.values["野心"] = 0.3
 	state.persons[9] = p3
 	team3.leader_id = 9
@@ -98,6 +99,7 @@ func _run_sim_test() -> void:
 	state.persons[0].values["好戰"] = 0.8
 	state.persons[0].values["義氣"] = 0.2
 	state.persons[0].values["貪婪"] = 0.8
+	state.persons[0].values["殘忍"] = 0.9   # 高殘忍 → 戰後多掠奪 + 傷兵惡化
 	state.persons[0].skills["統領"] = 0.5
 	# Team2 食物設低，確保 Team3 始終為最富成員（徵收目標）
 	state.teams[2].resources["food"] = 50.0

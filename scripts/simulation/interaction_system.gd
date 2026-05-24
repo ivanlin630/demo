@@ -180,8 +180,9 @@ func _should_attack(state: WorldState, atk_id: int, def_id: int) -> bool:
 	var ambition: float  = float(leader.values.get("野心", 0.5))
 	var caution: float   = float(leader.values.get("慎重", 0.5))
 	var greed: float     = float(leader.values.get("貪婪", 0.5))
+	var martial: float   = float(leader.values.get("好戰", 0.5))
 	var str_ratio: float = _team_strength(state, atk_id) / maxf(_team_strength(state, def_id), 0.01)
-	var score: float     = ambition * 0.3 + greed * 0.3 + (str_ratio - 1.0) * 0.2 - caution * 0.5
+	var score: float     = ambition * 0.3 + martial * 0.3 + greed * 0.2 + (str_ratio - 1.0) * 0.2 - caution * 0.5
 	return score > 0.0
 
 # ──────── 結算函式 ────────
@@ -236,10 +237,21 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var loser: TeamData  = state.teams[loser_id]
 	winner.combat_target = -1
 	loser.combat_target  = -1
+	var winner_p = state.persons.get(winner.leader_id)
+	var cruelty: float = float(winner_p.values.get("殘忍", 0.5)) if winner_p else 0.5
+	var effective_loot: float = LOOT_RATE * (1.0 + cruelty * 0.7)
 	for res in ["food", "material", "weapon", "coin", "goods"]:
-		var taken: float = float(loser.resources.get(res, 0)) * LOOT_RATE
+		var taken: float = float(loser.resources.get(res, 0)) * effective_loot
 		winner.resources[res] = float(winner.resources.get(res, 0)) + taken
 		loser.resources[res]  = float(loser.resources.get(res, 0)) - taken
+	if cruelty > 0.6:
+		var worsen_chance: float = (cruelty - 0.6) * 0.5
+		for pid in state.persons:
+			var p: PersonData = state.persons[pid]
+			if p.team_id != loser_id: continue
+			for part in p.body_parts:
+				if p.body_parts[part]["status"] == "wounded" and randf() < worsen_chance:
+					p.body_parts[part]["status"] = "critical"
 	_msg.emit_message(state, "combat_end",
 		"Team %d 擊潰 Team %d" % [winner_id, loser_id], winner)
 	print("[Combat End] Team%d 勝 Team%d (rd=%.2f/%.2f wnd=%d/%d)" % [
@@ -434,11 +446,12 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 	var target_leader = state.persons.get(target.leader_id)
 	if target_leader == null:
 		return
-	var honor: float     = float(target_leader.values.get("義氣", 0.5))
+	var honor: float     = float(target_leader.values.get("義氣",  0.5))
+	var trust: float     = float(target_leader.values.get("信義", 0.5))
 	var str_init: float  = _team_strength(state, initiator_id)
 	var str_tgt: float   = _team_strength(state, target_id)
 	var str_ratio: float = str_init / maxf(str_tgt, 0.01)
-	var accept: float    = honor * 0.8 + maxf(str_ratio - 1.0, 0.0) * 0.2
+	var accept: float    = honor * 0.5 + trust * 0.3 + maxf(str_ratio - 1.0, 0.0) * 0.2
 	if accept < 0.35:
 		return
 	# initiator 已有勢力 → 直接招募 target；否則以強者為 leader 建新勢力
@@ -465,7 +478,8 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 	var payer_p = state.persons.get(payer.leader_id)
 	var base_rate: float = f.tribute_rate
 	if payer_p != null:
-		base_rate += (float(payer_p.values.get("義氣", 0.5)) - 0.5) * 0.1
+		base_rate += (float(payer_p.values.get("義氣",  0.5)) - 0.5) * 0.1
+		base_rate += (float(payer_p.values.get("信義", 0.5)) - 0.5) * 0.1
 		base_rate -= float(payer_p.values.get("貪婪", 0.5)) * 0.1
 		base_rate -= float(payer_p.skills.get("商業", 0.0)) * 0.05
 	var str_ratio: float = _team_strength(state, payer_id) / maxf(_team_strength(state, collector_id), 0.01)

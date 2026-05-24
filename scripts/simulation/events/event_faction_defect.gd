@@ -11,7 +11,9 @@ func check(state: WorldState, team: TeamData) -> bool:
 	var leader = state.persons.get(team.leader_id)
 	if leader == null:
 		return false
-	return float(leader.values.get("義氣", 0.5)) < DEFECT_HONOR_THRESHOLD
+	var honor: float = float(leader.values.get("義氣",  0.5))
+	var trust: float = float(leader.values.get("信義", 0.5))
+	return honor < DEFECT_HONOR_THRESHOLD or trust < DEFECT_HONOR_THRESHOLD
 
 func execute(state: WorldState, team: TeamData) -> Array:
 	var fid: int = team.faction_id

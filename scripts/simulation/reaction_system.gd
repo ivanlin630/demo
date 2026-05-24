@@ -128,6 +128,7 @@ func _score_flee(p: PersonData, _t: TeamData) -> float:
 func _score_riot(p: PersonData, _t: TeamData) -> float:
 	var base: float = p.stress * p.fear * 0.85
 	base += float(p.skills.get("戰鬥", 0.0)) * 0.2
+	base += float(p.values.get("殘忍", 0.5)) * 0.15
 	base -= float(p.values.get("慎重", 0.5)) * 0.2
 	return base
 
@@ -148,6 +149,7 @@ func _score_extort(p: PersonData, _t: TeamData) -> float:
 	var base: float = p.stress * boldness * (1.0 - p.loyalty) * 0.6
 	base += float(p.skills.get("商業", 0.0)) * 0.2
 	base += float(p.values.get("貪婪", 0.5)) * 0.3
+	base += float(p.values.get("殘忍", 0.5)) * 0.15
 	base -= float(p.values.get("慎重", 0.5)) * 0.25
 	return base
 
