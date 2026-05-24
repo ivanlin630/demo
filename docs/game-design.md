@@ -541,6 +541,24 @@ NPC 才會生成完整人格。
 
 ---
 
+# 玩家 Team 組成
+
+玩家 team 全員為記名 NPC（無匿名人口）。
+
+吸收其他 team 時：
+
+- 被吸收方的 leader + advisors → 玩家 advisors（已記名，直接加入）
+- 被吸收方的非記名人口 → 自動成為跟隨子隊：
+  - 系統呼叫 PersonGenerator 從人口中晉升一人為子隊 leader
+  - 子隊 parent_team_id = 玩家 team，task = 護衛（跟隨）
+  - 玩家可指派、升格、或讓子隊獨立
+
+玩家可透過「主動招募」從任意 team / 聚落的非記名人口招募個人，使其成為記名 NPC。
+
+詳見 [人物 → PersonGenerator](person.md#persongenerator預留待玩家系統實裝)。
+
+---
+
 # NPC 目標
 
 NPC 不只是狀態機。

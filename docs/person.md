@@ -236,3 +236,26 @@ person.skills[skill] = min(current + growth, 1.0)
 - 訊息失真（是否主動扭曲情報）
 
 規則：高慎重 → 壓低激進選項；低慎重 → 壓低保守選項。
+
+---
+
+## PersonGenerator（預留，待玩家系統實裝）
+
+定義於 `scripts/simulation/person_generator.gd`（尚未建立）。
+
+從非記名人口生成完整 PersonData，供：
+1. 玩家吸收 team 時，匿名人口自動晉升一名 leader 帶領跟隨子隊
+2. 玩家主動招募（付費/花時間）
+3. 事件觸發（天賦人物出現）
+
+```gdscript
+# generate(state: WorldState, source_team: TeamData) -> PersonData
+# - 從 source_team.population 取 1 人（population -= 1）
+# - name:       "NPC_{next_id}"（佔位）
+# - attributes: 隨機 0.2–0.8，依 source_team.tags 偏差
+#     軍隊 → 體力/毅力偏高；生產 → 智力偏高；商隊 → 魅力偏高
+# - skills:     全 0（從反應中成長）
+# - values:     隨機 0.2–0.8
+# - loyalty:    0.3（陌生人，需培養）
+# - role:       "civilian"
+```
