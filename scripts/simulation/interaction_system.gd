@@ -1,5 +1,37 @@
 class_name InteractionSystem
 
+# ──────── 貿易常數 ────────
+const BASE_PRICE: Dictionary = {
+	"food":              2.0,
+	"material":          4.0,
+	"goods":             5.0,
+	"gem":              20.0,
+	"ore_gold":         10.0,
+	"ore_silver":        5.0,
+	"ore_iron":          8.0,
+	"ore_steel":        12.0,
+	"weapon_melee_low":  8.0,
+	"weapon_melee_high": 18.0,
+	"weapon_ranged_low": 9.0,
+	"weapon_ranged_high": 20.0,
+}
+const TARGET_PER_POP: Dictionary = {
+	"food":              10.0,
+	"material":           5.0,
+	"goods":              3.0,
+	"gem":                1.0,
+	"ore_gold":           2.0,
+	"ore_silver":         3.0,
+	"ore_iron":           3.0,
+	"ore_steel":          1.5,
+	"weapon_melee_low":   1.0,
+	"weapon_melee_high":  0.5,
+	"weapon_ranged_low":  0.8,
+	"weapon_ranged_high": 0.4,
+}
+const FOOD_RESERVE_TICKS: float = 20.0   # TEST VALUE — food 最低自留（pop × 0.1 × N ticks）
+const MAX_COIN_PER_TRADE: float = 300.0  # TEST VALUE — 每次交易買方預算上限
+
 const ROUND_CASUALTY_RATE: float    = 0.1
 const WOUNDED_TREATMENT_RATE: float = 0.3
 const TRIBUTE_RATE: float           = 0.25
@@ -9,6 +41,10 @@ const COMBAT_ABANDON_THRESHOLD: float = 0.2
 const ROUND_READINESS_DRAIN: float  = 0.08
 const READINESS_RECOVERY_BASE: float = 0.04
 const READINESS_FOOD_COST: float    = 0.05
+const VOLLEY_CASUALTY_RATE: float     = 0.05
+const PURSUIT_RATE: float             = 0.05
+const FLANKING_MULT: float            = 1.3
+const MORALE_CASCADE_THRESHOLD: float = 0.3
 
 const HIT_WEIGHTS: Dictionary = {
 	"head": 0.10, "torso": 0.40,
@@ -20,9 +56,13 @@ const CRITICAL_DEATH_CHANCE_BASE: float = 0.10
 const CRITICAL_RECOVER_CHANCE_BASE: float = 0.40
 
 var _msg: SimMessageSystem
+var _vision: VisionSystem
+var _equip: EquipmentSystem
 
 func _init() -> void:
-	_msg = SimMessageSystem.new()
+	_msg    = SimMessageSystem.new()
+	_vision = VisionSystem.new()
+	_equip = EquipmentSystem.new()
 
 # ──────── 主入口 ────────
 
@@ -51,6 +91,8 @@ func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Arr
 
 func _tick_readiness(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
+		if not state.teams.has(tid):
+			continue
 		var team: TeamData = state.teams[tid]
 		if team.combat_target != -1:
 			continue
@@ -116,9 +158,17 @@ func _process_ongoing_combat(state: WorldState, all_team_ids: Array) -> void:
 # ──────── 新互動判斷 ────────
 
 func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
+	_vision.reveal_encounter(state, id_a, id_b)
 	var a: TeamData = state.teams[id_a]
 	var b: TeamData = state.teams[id_b]
 	if a.combat_target != -1 or b.combat_target != -1:
+		return
+	# 貿易：跨勢力均可，優先於外交/攻擊判斷
+	if a.current_task == TeamData.TASK_TRADE:
+		_resolve_trade(state, a, b)
+		return
+	if b.current_task == TeamData.TASK_TRADE:
+		_resolve_trade(state, b, a)
 		return
 	var same_faction: bool = a.faction_id != -1 and a.faction_id == b.faction_id
 	if same_faction:
@@ -195,6 +245,23 @@ func _start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	_msg.emit_message(state, "combat_start",
 		"Team %d 對 Team %d 宣戰" % [atk_id, def_id], atk)
 	print("[Combat Start] Team%d vs Team%d" % [atk_id, def_id])
+	_resolve_volley(state, atk_id, def_id)
+
+func _resolve_volley(state: WorldState, id_a: int, id_b: int) -> void:
+	var volley_a: float = _ranged_strength(state, id_a)
+	var volley_b: float = _ranged_strength(state, id_b)
+	var total: float = volley_a + volley_b
+	if total <= 0.0:
+		return
+	var a: TeamData = state.teams[id_a]
+	var b: TeamData = state.teams[id_b]
+	var eff_a: int  = maxi(a.population - a.wounded, 1)
+	var eff_b: int  = maxi(b.population - b.wounded, 1)
+	var loss_a: int = maxi(int(float(eff_a) * volley_b / total * VOLLEY_CASUALTY_RATE), 0)
+	var loss_b: int = maxi(int(float(eff_b) * volley_a / total * VOLLEY_CASUALTY_RATE), 0)
+	_apply_casualties(state, id_a, loss_a)
+	_apply_casualties(state, id_b, loss_b)
+	print("[Volley] Team%d→%d  Team%d→%d" % [id_a, loss_a, id_b, loss_b])
 
 func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 	var a: TeamData  = state.teams[id_a]
@@ -318,20 +385,71 @@ func _team_strength(state: WorldState, team_id: int) -> float:
 			base += _strength_raw(state, tid)
 	return base
 
+func _terrain_defense_mult(state: WorldState, team: TeamData) -> float:
+	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
+	var tile: HexTileData = state.world.tiles.get(tile_id)
+	if tile == null:
+		return 1.0
+	match tile.terrain:
+		"forest":   return 1.2
+		"mountain": return 1.15
+	return 1.0
+
 func _strength_raw(state: WorldState, team_id: int) -> float:
 	var team: TeamData = state.teams.get(team_id)
 	if team == null:
 		return 0.0
 	var leader: PersonData = state.persons.get(team.leader_id)
-	var combat_skill: float = 0.0
-	if leader != null:
-		combat_skill = float(leader.skills.get("戰鬥", 0.0))
-	var weapon_bonus: float = 1.0 + float(team.resources.get("weapon", 0)) * 0.02
-	var effective_pop: int  = maxi(team.population - team.wounded, 1)
-	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader != null else 0.0
+
+	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
 	var excess: float = clampf((cmd - 0.8) / 0.2, 0.0, 1.0)
 	var leadership_mult: float = 1.0 + excess * 0.5
-	return float(effective_pop) * (0.5 + combat_skill * 0.5) * weapon_bonus * leadership_mult
+
+	var tactics: float = float(leader.skills.get("戰術", 0.0)) if leader else 0.0
+	var tactics_mult: float = 1.0 + tactics * 0.3
+
+	var melee_str:  float = 0.0
+	var ranged_str: float = 0.0
+	var named_ids: Array = ([team.leader_id] as Array) + team.advisors + team.members
+	for pid in named_ids:
+		var p: PersonData = state.persons.get(pid)
+		if p == null:
+			continue
+		var wtype: String = p.equipment.get("weapon", "")
+		match wtype:
+			"melee_low":
+				melee_str  += (0.5 + float(p.skills.get("戰鬥", 0.0)) * 0.5) * 0.8
+			"melee_high":
+				melee_str  += (0.5 + float(p.skills.get("戰鬥", 0.0)) * 0.5) * 1.2
+			"ranged_low":
+				ranged_str += (0.5 + float(p.skills.get("弓箭", 0.0)) * 0.5) * 0.8
+			"ranged_high":
+				ranged_str += (0.5 + float(p.skills.get("弓箭", 0.0)) * 0.5) * 1.2
+			_:
+				melee_str  += 0.3
+
+	var named_count: int = named_ids.size()
+	var anon_pop: int    = maxi(team.population - team.wounded - named_count, 0)
+	melee_str += float(anon_pop) * team.armed_anon_ratio * 0.5
+
+	return (melee_str + ranged_str) * leadership_mult * tactics_mult
+
+func _ranged_strength(state: WorldState, team_id: int) -> float:
+	var team: TeamData = state.teams.get(team_id)
+	if team == null:
+		return 0.0
+	var ranged_str: float = 0.0
+	var named_ids: Array = ([team.leader_id] as Array) + team.advisors + team.members
+	for pid in named_ids:
+		var p: PersonData = state.persons.get(pid)
+		if p == null:
+			continue
+		match p.equipment.get("weapon", ""):
+			"ranged_low":
+				ranged_str += (0.5 + float(p.skills.get("弓箭", 0.0)) * 0.5) * 0.8
+			"ranged_high":
+				ranged_str += (0.5 + float(p.skills.get("弓箭", 0.0)) * 0.5) * 1.2
+	return ranged_str
 
 # ──────── 傷亡分配 ────────
 
@@ -531,3 +649,79 @@ func _best_medicine(state: WorldState, team: TeamData) -> float:
 		if p != null:
 			best = maxf(best, float(p.skills.get("醫療", 0.0)))
 	return best
+
+# ──────── 貿易 ────────
+
+func _local_value(team: TeamData, res: String) -> float:
+	if not BASE_PRICE.has(res):
+		return 0.0
+	var pop: float    = maxf(float(team.population), 1.0)
+	var stock: float  = float(team.resources.get(res, 0))
+	var target: float = pop * float(TARGET_PER_POP.get(res, 1.0))
+	var sr: float     = clampf((target - stock) / maxf(target, 1.0), -0.5, 1.0)
+	return float(BASE_PRICE[res]) * (1.0 + sr)
+
+func _resolve_trade(state: WorldState, seller: TeamData, buyer: TeamData) -> void:
+	var buyer_coin: float = float(buyer.resources.get("coin", 0))
+	if buyer_coin <= 0.0:
+		return
+
+	var s_leader = state.persons.get(seller.leader_id)
+	var commerce: float = float(s_leader.skills.get("商業", 0.0)) if s_leader else 0.0
+
+	var budget: float       = minf(buyer_coin, MAX_COIN_PER_TRADE)
+	var total_earned: float = 0.0
+
+	# 計算每種資源的利潤空間，排序後優先賣最值錢的
+	var res_list: Array = []
+	for res in BASE_PRICE.keys():
+		var stock: float = float(seller.resources.get(res, 0))
+		if res == "food":
+			var min_food: float = float(seller.population) * 0.1 * FOOD_RESERVE_TICKS
+			stock = maxf(stock - min_food, 0.0)
+		if stock <= 0.0:
+			continue
+		var ask: float = _local_value(seller, res) * (1.0 - commerce * 0.1)
+		var bid: float = _local_value(buyer, res)
+		if ask <= 0.0 or ask > bid:
+			continue
+		res_list.append({ "res": res, "stock": stock, "ask": ask, "bid": bid })
+
+	res_list.sort_custom(func(a, b): return (a["bid"] - a["ask"]) > (b["bid"] - b["ask"]))
+
+	for entry in res_list:
+		var ask: float = float(entry["ask"])
+		if budget < ask:
+			break
+		var res: String    = entry["res"]
+		var max_qty: float = minf(float(entry["stock"]), floorf(budget / ask))
+		if max_qty <= 0.0:
+			continue
+		seller.resources[res]  = float(seller.resources.get(res, 0)) - max_qty
+		buyer.resources[res]   = float(buyer.resources.get(res, 0))  + max_qty
+		var cost: float        = max_qty * ask
+		total_earned += cost
+		budget       -= cost
+
+	if total_earned <= 0.0:
+		return
+
+	seller.resources["coin"] = float(seller.resources.get("coin", 0)) + total_earned
+	buyer.resources["coin"]  = buyer_coin - total_earned
+
+	_msg.emit_message(state, "trade_done",
+		"Team%d→Team%d 貿易 coin=%.0f" % [seller.team_id, buyer.team_id, total_earned], seller)
+	print("[Trade] Team%d→Team%d coin+%.0f（商業=%.2f）" % [
+		seller.team_id, buyer.team_id, total_earned, commerce])
+	_grow_commerce_skill(state, seller)
+	seller.current_task = TeamData.TASK_IDLE
+
+func _grow_commerce_skill(state: WorldState, team: TeamData) -> void:
+	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null:
+			continue
+		var charm: float  = float(p.attributes.get("魅力", 0.5)) * p.get_attribute_mult("魅力")
+		var will: float   = float(p.attributes.get("毅力", 0.5)) * p.get_attribute_mult("毅力")
+		var growth: float = 0.003 * charm * (0.5 + will * 0.5) * p.get_skill_mult("商業")  # TEST VALUE
+		p.skills["商業"]  = minf(float(p.skills.get("商業", 0.0)) + growth, 1.0)
