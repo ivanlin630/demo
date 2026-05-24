@@ -4,7 +4,9 @@ const GOAL_CHECK_INTERVAL: int = 10
 
 func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) -> void:
 	for tid in team_ids:
-		var team: TeamData = state.teams[tid]
+		var team: TeamData = state.teams.get(tid)
+		if team == null:
+			continue
 		var flee_count: int = 0
 		for pid in state.persons:
 			var person: PersonData = state.persons[pid]

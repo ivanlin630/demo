@@ -2,7 +2,8 @@ class_name SubteamSystem
 
 func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		pop_count: int, task: String, move_target: Vector2i,
-		order_target_id: int = -1, order_task: String = "") -> int:
+		order_target_id: int = -1, order_task: String = "",
+		extra_advisor_ids: Array = []) -> int:
 	var parent: TeamData = state.teams.get(parent_id)
 	if parent == null:
 		return -1
@@ -16,8 +17,9 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	pop_count = mini(pop_count, sub_cap)
 	if parent.population - pop_count < 1:
 		pop_count = parent.population - 1
-	if pop_count <= 0:
+	if pop_count <= 0 and extra_advisor_ids.is_empty():
 		return -1
+	pop_count = maxi(pop_count, 0)
 
 	var sub := TeamData.new()
 	sub.team_id          = _next_team_id(state)
@@ -42,12 +44,24 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	parent.advisors.erase(sub_leader_id)
 	parent.members.erase(sub_leader_id)
 	sub_leader.team_id = sub.team_id
+	for aid in extra_advisor_ids:
+		if aid == sub_leader_id:
+			continue
+		if not (parent.advisors.has(aid) or parent.members.has(aid)):
+			continue
+		var advisor = state.persons.get(aid)
+		if advisor == null:
+			continue
+		parent.advisors.erase(aid)
+		parent.members.erase(aid)
+		advisor.team_id = sub.team_id
+		sub.advisors.append(aid)
 	parent.population -= pop_count
 	parent.subteam_ids.append(sub.team_id)
 	state.teams[sub.team_id]      = sub
 	state.team_known[sub.team_id] = []
-	print("[Sub] Team%d 派出子隊 Team%d leader=P%d (pop=%d cap=%d task=%s)" % [
-		parent_id, sub.team_id, sub_leader_id, pop_count, sub_cap, task])
+	print("[Sub] Team%d 派出子隊 Team%d leader=P%d advisors=%s (pop=%d cap=%d task=%s)" % [
+		parent_id, sub.team_id, sub_leader_id, str(sub.advisors), pop_count, sub_cap, task])
 	return sub.team_id
 
 func try_merge_back(state: WorldState, sub_id: int) -> bool:
@@ -86,6 +100,15 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 			sub_leader.team_id = absorber_id
 			if not absorber.advisors.has(absorbed.leader_id):
 				absorber.advisors.append(absorbed.leader_id)
+	# 歸還 sub.advisors
+	if absorbed.parent_team_id == absorber_id:
+		for aid in absorbed.advisors:
+			var advisor = state.persons.get(aid)
+			if advisor != null:
+				advisor.team_id = absorber_id
+				if not absorber.advisors.has(aid):
+					absorber.advisors.append(aid)
+		absorbed.advisors.clear()
 
 	var transfer: int = mini(absorbed.population, capacity)
 	var frac: float   = float(transfer) / float(absorbed.population) if absorbed.population > 0 else 0.0

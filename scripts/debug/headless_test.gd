@@ -110,6 +110,9 @@ func _run_sim_test() -> void:
 	state.persons[1].skills["統領"] = 0.2   # sub_cap = clamp(round(49×0.25)+1,1,50) = 14
 	state.teams[0].advisors.append(1)        # Person1 加入 Team0 的 advisors
 	state.teams[0].members.erase(1)
+	# Person2 也移到 advisors（用於驗證多 NPC 派遣）
+	state.teams[0].advisors.append(2)
+	state.teams[0].members.erase(2)
 	# Team5：獨立軍隊（應觸發 SoloAI 攻擊/掠奪）
 	var team5 := TeamData.new()
 	team5.team_id = 5; team5.population = 8
@@ -133,7 +136,8 @@ func _run_sim_test() -> void:
 	state.persons[11] = p6; team6.leader_id = 11
 
 	var _sub_sys := SubteamSystem.new()
-	var scout_id: int = _sub_sys.dispatch(state, 0, 1, 3, "偵查", Vector2i(3, 0))
+	var scout_id: int = _sub_sys.dispatch(state, 0, 1, 3, "偵查", Vector2i(3, 0),
+		-1, "", [2])  # Person2 作為 extra advisor
 	print("=== 子隊派遣：scout_id=%d ===" % scout_id)
 	if scout_id != -1:
 		print("  Team0 pop=%d  Team%d pop=%d task=%s" % [

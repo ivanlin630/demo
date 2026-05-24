@@ -206,7 +206,16 @@ func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 	var leader = state.persons.get(sub.leader_id)
 	if leader == null:
 		return false
-	var fail_chance: float = (1.0 - leader.loyalty) * leader.stress * DISCIPLINE_FAIL_BASE
+	var total_loyalty: float = leader.loyalty
+	var total_stress: float  = leader.stress
+	var count: int = 1
+	for aid in sub.advisors:
+		var a = state.persons.get(aid)
+		if a != null:
+			total_loyalty += a.loyalty
+			total_stress  += a.stress
+			count         += 1
+	var fail_chance: float = (1.0 - total_loyalty / count) * (total_stress / count) * DISCIPLINE_FAIL_BASE
 	if randf() < fail_chance:
 		var parent: TeamData = state.teams.get(sub.parent_team_id)
 		if parent != null:
