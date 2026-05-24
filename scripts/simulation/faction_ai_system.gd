@@ -7,16 +7,36 @@ const ESTABLISH_COMMAND: float       = 0.4
 const ESTABLISH_AMBITION: float      = 0.7
 const ESTABLISH_READINESS: float     = 0.7
 const DIPLOMACY_READINESS_MIN: float = 0.6
+const DISCIPLINE_FAIL_BASE: float    = 0.15
 
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for fid in state.factions:
 		var f = state.factions[fid]
 		_update_goals(state, f)
 		_assign_tasks(state, f)
+
+	var merge_queue: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
-		if team.faction_id == -1:
+		if team.parent_team_id != -1:
+			_evaluate_subteam(state, team, merge_queue)
+		elif team.faction_id == -1:
 			_evaluate_solo(state, team)
+
+	var sub_sys := SubteamSystem.new()
+	for sub_id in merge_queue:
+		if not state.teams.has(sub_id):
+			continue
+		var sub: TeamData = state.teams[sub_id]
+		if sub.parent_team_id == -1:
+			continue
+		var parent: TeamData = state.teams.get(sub.parent_team_id)
+		if parent != null and parent.tile_pos == sub.tile_pos:
+			sub_sys.try_merge_back(state, sub_id)
+		else:
+			sub.current_task = TeamData.TASK_IDLE
+			if parent != null:
+				sub.move_target = parent.tile_pos
 
 # ──────── Tag 權限 ────────
 
@@ -149,6 +169,55 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			if target_id != -1:
 				mt.current_task = "攻擊"
 				mt.move_target  = state.teams[target_id].tile_pos
+
+# ──────── 子團自主 AI ────────
+
+func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	if sub.current_task == TeamData.TASK_ESCORT:
+		_update_escort(state, sub)
+		_check_discipline(state, sub)
+		return
+	if _check_discipline(state, sub):
+		return
+	# movement_system 到達時清 move_target；無目標且非 idle = 任務完成
+	if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE:
+		merge_queue.append(sub.team_id)
+	elif sub.current_task == TeamData.TASK_IDLE:
+		var parent: TeamData = state.teams.get(sub.parent_team_id)
+		if parent == null:
+			return
+		if parent.tile_pos == sub.tile_pos:
+			merge_queue.append(sub.team_id)
+		else:
+			sub.move_target = parent.tile_pos
+
+func _update_escort(state: WorldState, team: TeamData) -> void:
+	if team.order_target_id == -1:
+		return
+	var target: TeamData = state.teams.get(team.order_target_id)
+	if target == null:
+		team.current_task    = TeamData.TASK_IDLE
+		team.move_target     = Vector2i(-1, -1)
+		team.order_target_id = -1
+		return
+	team.move_target = target.tile_pos
+
+func _check_discipline(state: WorldState, sub: TeamData) -> bool:
+	var leader = state.persons.get(sub.leader_id)
+	if leader == null:
+		return false
+	var fail_chance: float = (1.0 - leader.loyalty) * leader.stress * DISCIPLINE_FAIL_BASE
+	if randf() < fail_chance:
+		var parent: TeamData = state.teams.get(sub.parent_team_id)
+		if parent != null:
+			parent.subteam_ids.erase(sub.team_id)
+		sub.parent_team_id = -1
+		sub.tags.erase(TeamData.TAG_SUBTEAM)
+		sub.current_task   = TeamData.TASK_IDLE
+		sub.move_target    = Vector2i(-1, -1)
+		print("[SubAI] Team%d 紀律失效，脫離成獨立" % sub.team_id)
+		return true
+	return false
 
 # ──────── 獨立 Team 自主 AI ────────
 

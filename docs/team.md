@@ -122,6 +122,34 @@ var tile_pos: Vector2i      # 當前大地圖格座標
 - 路徑：greedy step（選最接近 move_target 的鄰格）
 - 抵達：更新 `occupied_by`，**不**自動建立據點
 
+## 子團自主 AI
+
+整合於 FactionAI step6b（`faction_ai_system.gd`）。`evaluate_all` 中 `parent_team_id != -1` → 子團模式，優先執行，跳過 faction/solo 策略。
+
+### 護衛跟隨（task == "護衛"）
+
+- 每 tick：`move_target = order_target` 的 `tile_pos`
+- `order_target` 消失 → `task → idle`，`order_target_id = -1`
+
+### 任務完成回歸
+
+| 狀態 | 行為 |
+|---|---|
+| 到達 `move_target`，parent 同格 | `try_merge_back` |
+| 到達 `move_target`，parent 不同格 | `task → idle`，`move_target → parent` |
+| `task == idle`，parent 同格 | `try_merge_back` |
+| `task == idle`，parent 不同格 | `move_target → parent` |
+
+### 紀律失效
+
+`fail_chance = (1 - sub_leader.loyalty) × sub_leader.stress × 0.15`
+
+失效 → `parent_team_id = -1`，tag 子團移除，`task → idle`。下一 tick 由 SoloAI 接管。
+
+> 未來擴充：若子團含多個記名 NPC（advisors），改為 loyalty/stress 均值計算。
+
+---
+
 ## 未來擴充
 
 - 移動 AI（自動設定 move_target，依目標/資源/威脅評估）
