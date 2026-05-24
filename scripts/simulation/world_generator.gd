@@ -29,6 +29,7 @@ func generate(state: WorldState, config: Dictionary) -> void:
 				continue
 			var tile = load("res://scripts/data/tile_data.gd").new()
 			tile.tile_id  = qx * 1000 + ry
+			tile.tile_pos = Vector2i(qx, ry)
 			tile.terrain  = _random_terrain(rng)
 			_apply_resources(tile, rng)
 			state.world.tiles[tile.tile_id] = tile

@@ -11,6 +11,7 @@ var _message_system: SimMessageSystem
 var _event_system: Object
 var _interaction_system: Object
 var _faction_ai_system: Object
+var _outpost_system: OutpostSystem
 
 func _init() -> void:
 	_resource_system = ResourceSystem.new()
@@ -21,6 +22,7 @@ func _init() -> void:
 	_event_system = load("res://scripts/simulation/event_system.gd").new()
 	_interaction_system = load("res://scripts/simulation/interaction_system.gd").new()
 	_faction_ai_system = load("res://scripts/simulation/faction_ai_system.gd").new()
+	_outpost_system = OutpostSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
@@ -31,6 +33,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	var arrived_near := _step2_move_teams(state, near_teams)
 	_step3_propagate_messages(state, arrived_near, near_teams)
 	_step4_resolve_interactions(state, arrived_near, near_teams)
+	_step4b_outpost_tick(state)
 	_step5_collect_resources(state, near_teams)
 	_step6_resolve_consumption(state, near_teams)
 	_step6b_faction_ai(state, near_teams)
@@ -62,6 +65,9 @@ func _step3_propagate_messages(state: WorldState, arrived_ids: Array, all_ids: A
 
 func _step4_resolve_interactions(state: WorldState, arrived_ids: Array, all_ids: Array) -> void:
 	_interaction_system.process_on_arrival(state, arrived_ids, all_ids)
+
+func _step4b_outpost_tick(state: WorldState) -> void:
+	_outpost_system.tick_all(state)
 
 func _step5_collect_resources(state: WorldState, team_ids: Array) -> void:
 	_resource_system.collect_resources(state, team_ids)

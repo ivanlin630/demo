@@ -5,14 +5,16 @@ const FOOD_PER_PERSON_PER_TICK: float = 0.1
 func collect_resources(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
 		var team: TeamData = state.teams[tid]
-		if not _has_outpost(state, team):
-			continue
 		var tile_id: int = _pos_to_tile_id(team.tile_pos)
 		if not state.world.tiles.has(tile_id):
 			continue
 		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level == 0:
+			continue
 		for res in tile.resources:
 			var gain: float = tile.productivity * float(tile.resources[res]) * 0.01
+			if res == "food" and tile.farming_level > 0:
+				gain *= (1.0 + tile.farming_level * 0.5)
 			team.resources[res] = float(team.resources.get(res, 0)) + gain
 
 func resolve_consumption(state: WorldState, team_ids: Array) -> void:
@@ -46,12 +48,6 @@ func _update_person_needs(state: WorldState, team_id: int, need: String, value: 
 				person.loyalty = maxf(person.loyalty - 0.02, 0.0)
 			else:
 				person.fear = maxf(person.fear - 0.02, 0.0)
-
-func _has_outpost(state: WorldState, team: TeamData) -> bool:
-	var tile_id: int = _pos_to_tile_id(team.tile_pos)
-	if not state.world.tiles.has(tile_id):
-		return false
-	return (state.world.tiles[tile_id] as HexTileData).has_outpost
 
 func _pos_to_tile_id(pos: Vector2i) -> int:
 	return pos.x * 1000 + pos.y

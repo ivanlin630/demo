@@ -16,8 +16,10 @@ func _run_sim_test() -> void:
 		if state.world.tiles.has(_tid):
 			(state.world.tiles[_tid] as HexTileData).terrain = "plains"
 	# 測試劇本：設定固定據點
-	(state.world.tiles[0] as HexTileData).has_outpost = true       # Team0 起始
-	(state.world.tiles[2000] as HexTileData).has_outpost = true    # Team2 起始
+	var _t0: HexTileData = state.world.tiles[0] as HexTileData
+	_t0.outpost_type  = "military"
+	_t0.outpost_level = 1
+	_t0.outpost_owner = 0                                          # Team0 起始軍事據點（營寨）
 	(state.world.tiles[1000] as HexTileData).resources["food"] = 0 # 測試：tile(1,0) 無糧
 
 	for t in range(3):
@@ -25,7 +27,8 @@ func _run_sim_test() -> void:
 		team.team_id = t
 		team.population = 10
 		team.minor_population = 1
-		team.resources = { "food": 500.0, "material": 10, "weapon": 5, "coin": 20, "goods": 0 }
+		var _mat: int = 100 if t == 2 else 10
+		team.resources = { "food": 500.0, "material": _mat, "weapon": 5, "coin": 20, "goods": 0 }
 		team.tags = ["生產"]
 		team.tile_pos = Vector2i(t, 0)
 		state.teams[t] = team
@@ -67,6 +70,12 @@ func _run_sim_test() -> void:
 				team.leader_id = person.id
 			else:
 				team.members.append(person.id)
+
+	# Team2 建設測試：在 (2,0) 建造村落（civilian Lv1）
+	# Team0 營寨在 (0,0)，距離 2（不同類型，無同類限制）
+	var _outpost_sys := OutpostSystem.new()
+	var _build_ok := _outpost_sys.start_build(state, state.teams[2], "civilian", 1)
+	print("=== 據點建設測試：Team2 建村落 start_build=%s ===" % str(_build_ok))
 
 	# Team3：預先設為 Team0 附庸（測試 faction AI 行為）
 	var team3 := TeamData.new()

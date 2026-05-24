@@ -257,6 +257,10 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	print("[Combat End] Team%d 勝 Team%d (rd=%.2f/%.2f wnd=%d/%d)" % [
 		winner_id, loser_id, winner.readiness, loser.readiness,
 		winner.wounded, loser.wounded])
+	var _tile_id: int = winner.tile_pos.x * 1000 + winner.tile_pos.y
+	var _tile: HexTileData = state.world.tiles.get(_tile_id)
+	if _tile != null:
+		OutpostSystem.new().capture(state, winner_id, _tile)
 	_try_subjugate(state, winner_id, loser_id)
 
 func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> void:
@@ -266,6 +270,10 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	pursuer.combat_target   = -1
 	print("[Exhaust] Team%d 力竭撤退 (rd=%.2f wnd=%d)" % [
 		retreater_id, retreater.readiness, retreater.wounded])
+	var _tile_id: int = pursuer.tile_pos.x * 1000 + pursuer.tile_pos.y
+	var _tile: HexTileData = state.world.tiles.get(_tile_id)
+	if _tile != null:
+		OutpostSystem.new().capture(state, pursuer_id, _tile)
 	_try_subjugate(state, pursuer_id, retreater_id)
 
 func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> void:

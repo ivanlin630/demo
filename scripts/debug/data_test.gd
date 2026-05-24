@@ -10,10 +10,13 @@ func _run_sim_test() -> void:
 	# 建 3 個 Tile（含據點）
 	for i in range(3):
 		var tile := HexTileData.new()
-		tile.tile_id = i
-		tile.resources = { "food": 200, "material": 50 }
+		tile.tile_id      = i
+		tile.tile_pos     = Vector2i(i, 0)
+		tile.resources    = { "food": 200, "material": 50 }
 		tile.productivity = 1.0
-		tile.has_outpost = true
+		tile.outpost_type  = "civilian"
+		tile.outpost_level = 1
+		tile.outpost_owner = i
 		state.world.tiles[i] = tile
 
 	# 建 3 個 Team，每個 Team 3 個 Person
