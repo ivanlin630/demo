@@ -32,10 +32,16 @@ var goals: Array        # 長期目標字串，效用函數輸入
 var attributes: Dictionary
 # { "體力": float, "智力": float, "魅力": float, "毅力": float }
 
-# 技能（12 項，從反應中成長）
+# 技能（14 項，從反應/系統中成長）
 var skills: Dictionary
 # { "統領", "戰鬥", "弓箭", "求生", "生產", "製造",
-#   "工程", "醫療", "戰術", "計謀", "交涉", "商業" }
+#   "工程", "醫療", "戰術", "計謀", "交涉", "商業",
+#   "偵查", "潛行" }
+# 戰鬥：體力；melee 武裝者每回合成長（InteractionSystem._resolve_combat_round）
+# 弓箭：智力+體力；ranged 武裝者 Round 0 齊射時成長（InteractionSystem._resolve_volley）
+# 戰術：智力；戰鬥結束時 leader 成長（InteractionSystem._end_combat / _force_retreat）
+# 偵查：智力+體力；影響視野半徑和能否看穿潛行；由 VisionSystem 成長
+# 潛行：體力+毅力；降低暴露值，讓 team 難被偵測；由 VisionSystem 成長
 
 # 價值觀（半永久人格）
 var values: Dictionary
@@ -61,6 +67,11 @@ var body_parts: Dictionary
 const STATUS_MULT: Dictionary = {
     "healthy": 1.0, "wounded": 0.7, "critical": 0.3, "severed": 0.0
 }
+
+# 裝備（個人武器槽）
+var equipment: Dictionary = { "weapon": "" }
+# weapon: "" / "melee_low" / "melee_high" / "ranged_low" / "ranged_high"
+# 由 EquipmentSystem 依 team.equip_order 分配；NPC 死亡時自動歸還武器庫
 ```
 
 ---

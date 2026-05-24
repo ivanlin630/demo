@@ -27,7 +27,23 @@ var members: Array          # 非記名 NPC id[]
 var population: int         # 成人人口，上限 50，最小 1
 var minor_population: int   # 未成年人口，上限 = population × 20%，不計入上限
 
-var resources: Dictionary   # { "food", "material", "weapon", "money", "goods" }
+var resources: Dictionary
+# {
+#   "food": float, "material": int, "coin": int, "goods": int, "gem": int,
+#   "ore_gold": int, "ore_silver": int, "ore_iron": int, "ore_steel": int,
+#   "weapon_melee_low": int, "weapon_melee_high": int,
+#   "weapon_ranged_low": int, "weapon_ranged_high": int,
+# }
+# ore_iron：世界資源（mountain 30% / plains 5% 機率生成）；採集後製造
+# ore_steel：只能由製造系統冶煉（ore_iron → ore_steel）
+# weapon_*：每單位代表 UNITS_PER_EQUIP(2) 件裝備；由 EquipmentSystem 分配給記名 NPC
+
+var equip_order: Dictionary = {        # 指揮官武裝指令
+    "melee_low": 0, "melee_high": 0,
+    "ranged_low": 0, "ranged_high": 0,
+}
+var armed_anon_ratio: float = 0.0      # 匿名人口中武裝比例（0.0–1.0）
+
 var move_speed: float       # 移動速度，影響每格耗 Tick 數
 var move_target: Vector2i   # 目標格，(-1,-1) = 不移動
 var move_tick_acc: int      # 累積 Tick，達移動成本門檻才走一格
@@ -39,6 +55,10 @@ var current_task: String    # "idle" / "徵收" / "偵查" / "信使" / "攻擊"
 var unrest_turns: int       # 不滿積累值
 var faction_id: int         # 所屬勢力，-1 = 獨立
 var tile_pos: Vector2i      # 當前大地圖格座標
+
+var combat_target: int      # 接觸戰鬥的目標 team_id（-1 = 無）
+var readiness: float        # 戰鬥準備度 0.0–1.0；morale cascade 時加速消耗
+var wounded: int            # 當前 Tick 累計受傷人數
 ```
 
 ---
