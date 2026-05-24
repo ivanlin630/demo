@@ -78,7 +78,8 @@ func on_named_death(team: TeamData, wtype: String) -> void:
 	if wtype == "":
 		return
 	var pool_key: String = "weapon_" + wtype
-	team.resources[pool_key] = int(team.resources.get(pool_key, 0)) + 1
+	var recovered: int = 2 if randf() < 0.5 else 0
+	team.resources[pool_key] = int(team.resources.get(pool_key, 0)) + recovered
 
 func on_anon_casualties(team: TeamData, anon_casualties: int) -> void:
 	var armed_dead: int = int(float(anon_casualties) * team.armed_anon_ratio)

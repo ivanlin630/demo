@@ -37,7 +37,15 @@ func on_combat_round(state: WorldState, team: TeamData) -> void:
 		var wtype: String = p.equipment.get("weapon", "")
 		if wtype in ["melee_low", "melee_high"]:
 			_grow(p, "戰鬥", "體力")
-		elif wtype in ["ranged_low", "ranged_high"]:
+
+func on_volley(state: WorldState, team: TeamData) -> void:
+	var named_ids: Array = ([team.leader_id] as Array) + team.advisors + team.members
+	for pid in named_ids:
+		var p: PersonData = state.persons.get(pid)
+		if p == null:
+			continue
+		var wtype: String = p.equipment.get("weapon", "")
+		if wtype in ["ranged_low", "ranged_high"]:
 			_grow(p, "弓箭", "智力")
 
 func on_combat_end(state: WorldState, team: TeamData) -> void:

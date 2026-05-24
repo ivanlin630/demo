@@ -264,6 +264,8 @@ func _resolve_volley(state: WorldState, id_a: int, id_b: int) -> void:
 	_apply_casualties(state, id_a, loss_a)
 	_apply_casualties(state, id_b, loss_b)
 	print("[Volley] Team%d→%d  Team%d→%d" % [id_a, loss_a, id_b, loss_b])
+	_skill_sys.on_volley(state, state.teams[id_a])
+	_skill_sys.on_volley(state, state.teams[id_b])
 
 func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 	var a: TeamData  = state.teams[id_a]
