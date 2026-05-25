@@ -56,6 +56,8 @@ func generate(team: TeamData, state: WorldState) -> PersonData:
 	return p
 
 func _next_id(state: WorldState) -> int:
+	# state.persons keys are always int (person_id); .max() is safe
 	if state.persons.is_empty():
 		return 0
-	return state.persons.keys().max() + 1
+	var keys: Array = state.persons.keys()
+	return keys.max() + 1
