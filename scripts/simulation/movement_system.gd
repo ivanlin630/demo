@@ -13,6 +13,8 @@ const TERRAIN_SPEED_MULT: Dictionary = {
 func process(state: WorldState, team_ids: Array) -> Array:
 	# 護衛：每 tick 追蹤目標位置
 	for tid in team_ids:
+		if not state.teams.has(tid):
+			continue
 		var team: TeamData = state.teams[tid]
 		if team.current_task != "護衛" or team.order_target_id == -1:
 			continue
@@ -24,6 +26,8 @@ func process(state: WorldState, team_ids: Array) -> Array:
 			team.move_target = target.tile_pos
 	var arrived: Array = []
 	for tid in team_ids:
+		if not state.teams.has(tid):
+			continue
 		var team: TeamData = state.teams[tid]
 		if team.combat_target != -1:
 			continue

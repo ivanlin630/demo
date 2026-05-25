@@ -166,7 +166,8 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 			var tile: HexTileData = state.world.tiles.get(tile_id)
 			var farming_bonus: float = float(tile.farming_level) * 0.5 if tile != null else 0.0
-			var food_gain: float = 1.0 + skill * 1.5 + farming_bonus
+			var hf: float = tile.harvest_factor if tile != null else 1.0
+			var food_gain: float = (1.0 + skill * 1.5 + farming_bonus) * hf
 			team.resources["food"] = float(team.resources.get("food", 0)) + food_gain
 		"P3_recruit":
 			var leader = state.persons.get(team.leader_id)

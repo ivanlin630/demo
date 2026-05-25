@@ -4,6 +4,8 @@ var tile_id: int = 0
 var tile_pos: Vector2i = Vector2i.ZERO
 var terrain: String = "plains"   # "plains" / "forest" / "mountain"
 var resources: Dictionary = { "food": 0, "material": 0 }
+var resource_cap: Dictionary = {}   # set by world_generator, never modified after gen
+var harvest_factor: float = 1.0    # 0.1–2.0，every N ticks updated by HarvestSystem
 var productivity: float = 1.0
 var occupied_by: int = -1
 
