@@ -16,6 +16,9 @@ const HONOR_EMERGENCY_DISC: float = 0.3   # honor=1.0 → emergency 門檻 ×0.7
 const LOOT_SCORE_THRESHOLD: float = 0.35  # TEST VALUE — 掠奪 goal 分數門檻
 const LOOT_READINESS_MIN: float   = 0.6   # TEST VALUE — 掠奪需要的最低 readiness
 const DEVIATION_RATE: float       = 0.05  # TEST VALUE — 子團偏離基礎概率
+const SMALL_TEAM_RATIO: float     = 0.3   # TEST VALUE — pop < cap×0.3 視為小隊
+const SMALL_VS_LARGE: float       = 0.33  # TEST VALUE — pop < absorber.pop×0.33 才觸發合併
+const CONSOLIDATE_MAX_DIST: int   = 3     # TEST VALUE — 戰前集結距離上限（hex）
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
@@ -184,11 +187,35 @@ func _assign_tasks(state: WorldState, f) -> void:
 	_assign_member_tasks(state, f)
 
 func _assign_member_tasks(state: WorldState, f) -> void:
+	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	for mid in f.member_team_ids:
 		if mid == f.leader_team_id: continue
 		var mt: TeamData = state.teams.get(mid)
 		if mt == null or mt.combat_target != -1 or mt.current_task != "idle":
 			continue
+		var absorber_id: int = _find_absorber(state, mt, f)
+		if absorber_id != -1:
+			var mt_leader = state.persons.get(mt.leader_id)
+			var mt_cmd: float = float(mt_leader.skills.get("統領", 0.0)) if mt_leader else 0.0
+			var mt_cap: int = TeamData.pop_cap_from_leadership(mt_cmd)
+			var small_b: bool = mt.population < int(float(mt_cap) * SMALL_TEAM_RATIO)
+			var small_c: bool = float(mt.population) < float(state.teams[absorber_id].population) * SMALL_VS_LARGE
+			if small_b and small_c:
+				mt.current_task    = TeamData.TASK_MERGE
+				mt.order_target_id = absorber_id
+				mt.move_target     = state.teams[absorber_id].tile_pos
+				continue
+		if "攻擊" in f.goals and leader_team != null:
+			var dist_to_leader: int = _hex_dist(mt.tile_pos, leader_team.tile_pos)
+			if dist_to_leader > 1 and dist_to_leader <= CONSOLIDATE_MAX_DIST:
+				var ldr_leader = state.persons.get(leader_team.leader_id)
+				var ldr_cmd: float = float(ldr_leader.skills.get("統領", 0.0)) if ldr_leader else 0.0
+				var ldr_cap: int = TeamData.pop_cap_from_leadership(ldr_cmd) - leader_team.population
+				if ldr_cap > 0:
+					mt.current_task    = TeamData.TASK_MERGE
+					mt.order_target_id = f.leader_team_id
+					mt.move_target     = leader_team.tile_pos
+					continue
 		if "徵收" in f.goals and _tag_weight(mt, "徵收") > 0.0:
 			var best_tid: int = _richest_member(state, f)
 			if best_tid != -1 and best_tid != mid:
@@ -211,6 +238,28 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			if pid != -1:
 				mt.current_task = TeamData.TASK_TRADE
 				mt.move_target  = state.teams[pid].tile_pos
+
+func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
+	var best_id: int = -1
+	var best_d: int  = 999
+	for tid in f.member_team_ids:
+		if tid == mt.team_id:
+			continue
+		var t: TeamData = state.teams.get(tid)
+		if t == null or t.combat_target != -1:
+			continue
+		var t_leader = state.persons.get(t.leader_id)
+		var t_cmd: float = float(t_leader.skills.get("統領", 0.0)) if t_leader else 0.0
+		var t_cap: int = TeamData.pop_cap_from_leadership(t_cmd) - t.population
+		if t_cap <= 0:
+			continue
+		var d: int = _hex_dist(mt.tile_pos, t.tile_pos)
+		if d <= 1 or d > CONSOLIDATE_MAX_DIST:
+			continue
+		if d < best_d:
+			best_d = d
+			best_id = tid
+	return best_id
 
 # ──────── 子團自主 AI ────────
 
