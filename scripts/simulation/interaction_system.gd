@@ -623,6 +623,7 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int) -> void:
 	else:
 		state.factions[fid].member_team_ids.append(loser_id)
 	loser.faction_id = fid
+	state.snapshot_faction_member(loser_id, state.world.current_tick)
 	_msg.emit_message(state, "subjugate",
 		"Team%d 主服 Team%d，加入勢力%d" % [winner_id, loser_id, fid], winner)
 	print("[Faction] Team%d 主服 Team%d → 勢力%d" % [winner_id, loser_id, fid])
@@ -651,6 +652,7 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 	if not state.factions[fid].member_team_ids.has(target_id):
 		state.factions[fid].member_team_ids.append(target_id)
 	target.faction_id = fid
+	state.snapshot_faction_member(target_id, state.world.current_tick)
 	initiator.current_task = "idle"
 	_msg.emit_message(state, "diplomacy",
 		"Team%d 外交 → Team%d 加入勢力%d" % [initiator_id, target_id, fid], initiator)
