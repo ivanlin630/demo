@@ -185,7 +185,15 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		elif a.current_task == "idle" and b.current_task == "idle":
 			var absorber: int = id_a if a.population >= b.population else id_b
 			var absorbed: int = id_b if absorber == id_a else id_a
-			SubteamSystem.new().merge_teams(state, absorber, absorbed)
+			var abs_team: TeamData = state.teams[absorbed]
+			var all_npcs: Array = []
+			if abs_team.leader_id != -1: all_npcs.append(abs_team.leader_id)
+			all_npcs.append_array(abs_team.advisors)
+			all_npcs.append_array(abs_team.members)
+			SubteamSystem.new().merge_teams(state, absorber, absorbed, all_npcs)
+		elif (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
+				or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a):
+			_try_merge(state, id_a, id_b)
 		return
 	if a.current_task == "外交":
 		_try_diplomacy(state, id_a, id_b)
@@ -647,6 +655,23 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 	_msg.emit_message(state, "diplomacy",
 		"Team%d 外交 → Team%d 加入勢力%d" % [initiator_id, target_id, fid], initiator)
 	print("[Faction] Team%d 外交 Team%d → 勢力%d" % [initiator_id, target_id, fid])
+
+func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
+	var a: TeamData = state.teams[id_a]
+	var b: TeamData = state.teams[id_b]
+	var merger_id: int = id_a if a.current_task == TeamData.TASK_MERGE else id_b
+	var target_id: int = id_b if merger_id == id_a else id_a
+	var merger: TeamData = state.teams[merger_id]
+	if merger.order_target_id != target_id:
+		return
+	var absorbed_team: TeamData = state.teams[target_id]
+	var all_npcs: Array = []
+	if absorbed_team.leader_id != -1: all_npcs.append(absorbed_team.leader_id)
+	all_npcs.append_array(absorbed_team.advisors)
+	all_npcs.append_array(absorbed_team.members)
+	SubteamSystem.new().merge_teams(state, merger_id, target_id, all_npcs)
+	merger.current_task = TeamData.TASK_IDLE
+	merger.order_target_id = -1
 
 func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> void:
 	var collector: TeamData = state.teams[collector_id]
