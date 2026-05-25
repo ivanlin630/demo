@@ -48,8 +48,9 @@ tools/                 godot等工具
 | 項目 | 標準 |
 |---|---|
 | 可執行 | 無 GDScript 錯誤 |
-| 功能完整 | headless 至少200 Tick 無崩潰，關鍵 print 出現 |
-| 文件更新 | 相關 docs/*.md 反映新行為 |
+| 功能完整 | headless 至少1000 Tick 無崩潰，關鍵 print 出現 |
+| 文件更新 | 相關 docs/*.md 反映新行為，紀錄已計畫但未完成項目，紀錄進度文件 |
+
 
 ## 文件位置
 
