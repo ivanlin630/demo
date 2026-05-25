@@ -272,6 +272,79 @@ func _run_sim_test() -> void:
 	else:
 		print("  [FAIL] gen_ok=false or leader_id unchanged")
 	state.persons.erase(30)   # 清理「假死」leader（模擬 _kill_named_npc 後段）
+
+	# ── merge_teams 驗證 ──
+	var ma := TeamData.new()
+	ma.team_id = 11; ma.population = 5; ma.faction_id = 99; ma.tile_pos = Vector2i(0, -4)
+	state.teams[11] = ma; state.team_known[11] = []; state.team_discovered[11] = []
+	var ma_p := PersonData.new()
+	ma_p.id = 40; ma_p.person_name = "MA_leader"; ma_p.role = "leader"
+	ma_p.team_id = 11; ma_p.skills["統領"] = 0.6; ma_p.loyalty = 0.8
+	state.persons[40] = ma_p; ma.leader_id = 40
+
+	var mb := TeamData.new()
+	mb.team_id = 12; mb.population = 3; mb.faction_id = 99; mb.tile_pos = Vector2i(0, -4)
+	mb.resources["food"] = 90.0
+	state.teams[12] = mb; state.team_known[12] = []; state.team_discovered[12] = []
+	var mb_p := PersonData.new()
+	mb_p.id = 41; mb_p.person_name = "MB_leader"; mb_p.role = "leader"
+	mb_p.team_id = 12; mb_p.loyalty = 0.7
+	state.persons[41] = mb_p; mb.leader_id = 41
+	var mb_m := PersonData.new()
+	mb_m.id = 42; mb_m.person_name = "MB_member"; mb_m.role = "civilian"
+	mb_m.team_id = 12; mb_m.loyalty = 0.7
+	state.persons[42] = mb_m; mb.members.append(42)
+
+	# 完全合併：transfer 所有 MB NPC，transfer_anon=-1（比例帶走匿民）
+	# MB pop=3：leader(41) + member(42) + 1 匿民；named=2 → anon=1
+	# transfer 2 named → anon_xfer = round(1 * 2/2) = 1 → total_xfer=3 → MB 完全合併
+	var _merge_npcs: Array = [41, 42]
+	var _ss := SubteamSystem.new()
+	_ss.merge_teams(state, 11, 12, _merge_npcs)  # transfer_anon 預設 -1
+	print("=== merge_teams 測試（完全合併）===")
+	if not state.teams.has(12):
+		print("  [OK] Team12 完全合併入 Team11 (pop=%d)" % ma.population)
+		if ma.advisors.has(41):
+			print("  [OK] MB_leader(41) 成為 Team11 advisor")
+		else:
+			print("  [FAIL] MB_leader(41) 未進入 advisors")
+		if ma.members.has(42):
+			print("  [OK] MB_member(42) 成為 Team11 member")
+		else:
+			print("  [FAIL] MB_member(42) 未進入 members")
+		if ma.population == 8:  # 5 + 3
+			print("  [OK] Team11 pop=8（含 1 匿民）")
+		else:
+			print("  [WARN] Team11 pop=%d（預期 8）" % ma.population)
+	else:
+		print("  [FAIL] Team12 未被刪除（pop=%d）" % mb.population)
+
+	# 追加：transfer_anon=0 測試（只移記名 NPC，匿民留下）
+	var mc := TeamData.new()
+	mc.team_id = 13; mc.population = 4; mc.faction_id = 99; mc.tile_pos = Vector2i(0, -4)
+	mc.resources["food"] = 60.0
+	state.teams[13] = mc; state.team_known[13] = []; state.team_discovered[13] = []
+	var mc_p := PersonData.new()
+	mc_p.id = 43; mc_p.person_name = "MC_leader"; mc_p.role = "leader"
+	mc_p.team_id = 13; mc_p.loyalty = 0.7
+	state.persons[43] = mc_p; mc.leader_id = 43
+	# pop=4：1 named(43) + 3 anon
+	_ss.merge_teams(state, 11, 13, [43], 0)  # transfer_anon=0：只移 leader，匿民留下
+	print("=== merge_teams 測試（transfer_anon=0）===")
+	if state.teams.has(13) and mc.population == 3:
+		print("  [OK] Team13 剩 3 匿民（成為子隊）")
+		if mc.parent_team_id == 11:
+			print("  [OK] Team13.parent_team_id=11")
+		else:
+			print("  [FAIL] Team13.parent_team_id=%d" % mc.parent_team_id)
+	else:
+		print("  [FAIL] Team13 pop=%d（預期 3）" % mc.population)
+	# 清理
+	state.teams.erase(11); state.teams.erase(12); state.teams.erase(13)
+	state.team_known.erase(11); state.team_known.erase(12); state.team_known.erase(13)
+	state.team_discovered.erase(11); state.team_discovered.erase(12); state.team_discovered.erase(13)
+	state.persons.erase(40); state.persons.erase(41); state.persons.erase(42); state.persons.erase(43)
+
 	print("=== Sim Test: 200 Ticks ===")
 	print("Team0(統領) 預建為勢力 leader，Team3 為附庸")
 	print("預期：立國 → 外交(Team1,Team2) → 定期徵收(Team3)，子隊偵查後回歸")
