@@ -16,6 +16,7 @@ var _harvest_system: HarvestSystem
 var _manufacturing_system: ManufacturingSystem
 var _vision_system: VisionSystem
 var _equipment_system: EquipmentSystem
+var _population_system: PopulationSystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -30,10 +31,13 @@ func _init() -> void:
 	_harvest_system       = HarvestSystem.new()
 	_manufacturing_system = ManufacturingSystem.new()
 	_vision_system        = VisionSystem.new()
-	_equipment_system = EquipmentSystem.new()
+	_equipment_system    = EquipmentSystem.new()
+	_population_system   = PopulationSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
+	if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
+		_step1d_overflow(state)
 
 	var near_teams := _get_near_teams(state, player_pos)
 	var far_teams := _get_far_teams(state, player_pos)
@@ -68,6 +72,9 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		_step6b_faction_ai(state, far_teams)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
+
+func _step1d_overflow(state: WorldState) -> void:
+	_population_system.check_overflow(state)
 
 func _step1b_update_vision(state: WorldState, team_ids: Array) -> void:
 	_vision_system.tick_discovery(state, team_ids)
