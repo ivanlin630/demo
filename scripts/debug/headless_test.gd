@@ -345,6 +345,109 @@ func _run_sim_test() -> void:
 	state.team_discovered.erase(11); state.team_discovered.erase(12); state.team_discovered.erase(13)
 	state.persons.erase(40); state.persons.erase(41); state.persons.erase(42); state.persons.erase(43)
 
+	# ── PopulationSystem 驗證 ──
+	# 場景 1：超額 + 有 advisor → dispatch 子隊
+	var ov1 := TeamData.new()
+	ov1.team_id = 20; ov1.population = 5; ov1.tile_pos = Vector2i(0, -5)
+	ov1.resources["food"] = 100.0
+	state.teams[20] = ov1; state.team_known[20] = []; state.team_discovered[20] = []
+	var ov1_leader := PersonData.new()
+	ov1_leader.id = 50; ov1_leader.person_name = "OV1_leader"; ov1_leader.role = "leader"
+	ov1_leader.team_id = 20; ov1_leader.skills["統領"] = 0.0  # cap=1，pop=5 → overflow=4
+	state.persons[50] = ov1_leader; ov1.leader_id = 50
+	var ov1_adv := PersonData.new()
+	ov1_adv.id = 51; ov1_adv.person_name = "OV1_adv"; ov1_adv.role = "civilian"
+	ov1_adv.team_id = 20; ov1_adv.skills["統領"] = 0.3
+	state.persons[51] = ov1_adv; ov1.advisors.append(51)
+	var _pop_sys := PopulationSystem.new()
+	_pop_sys.check_overflow(state)
+	print("=== PopulationSystem 場景1（有advisor）===")
+	var _ov1_subteam_found: bool = false
+	for _tid in state.teams:
+		var _t: TeamData = state.teams[_tid]
+		if _t.parent_team_id == 20:
+			_ov1_subteam_found = true
+			print("  [OK] Team%d 子隊建立 pop=%d" % [_t.team_id, _t.population])
+			break
+	if not _ov1_subteam_found:
+		print("  [FAIL] 未建立子隊")
+	if ov1.population <= 1:
+		print("  [OK] Team20 pop 降至 %d（≤cap=1）" % ov1.population)
+	else:
+		print("  [FAIL] Team20 pop=%d 仍超額" % ov1.population)
+
+	# 場景 2：超額 + 無 advisor → 獨立流亡 team
+	var ov2 := TeamData.new()
+	ov2.team_id = 21; ov2.population = 4; ov2.tile_pos = Vector2i(0, -5)
+	ov2.resources["food"] = 80.0
+	state.teams[21] = ov2; state.team_known[21] = []; state.team_discovered[21] = []
+	var ov2_leader := PersonData.new()
+	ov2_leader.id = 52; ov2_leader.person_name = "OV2_leader"; ov2_leader.role = "leader"
+	ov2_leader.team_id = 21; ov2_leader.skills["統領"] = 0.0  # cap=1，pop=4 → overflow=3
+	state.persons[52] = ov2_leader; ov2.leader_id = 52
+	var _teams_before_ov2: int = state.teams.size()
+	_pop_sys.check_overflow(state)
+	print("=== PopulationSystem 場景2（無advisor）===")
+	if state.teams.size() > _teams_before_ov2:
+		print("  [OK] 新 team 建立（流亡）")
+		for _tid in state.teams:
+			var _t: TeamData = state.teams[_tid]
+			if _t.tags.has("流亡") and _t.tile_pos == Vector2i(0, -5) and _t.team_id != 21:
+				print("  [OK] Team%d 流亡 pop=%d leader_id=%d" % [_t.team_id, _t.population, _t.leader_id])
+				break
+	else:
+		print("  [FAIL] 未建立流亡 team")
+
+	# 場景 3：FactionAI 閾值合併（小隊 pop 過小）
+	var fac99 = state.create_faction(22)
+	var fa := TeamData.new()
+	fa.team_id = 22; fa.population = 20; fa.faction_id = fac99; fa.tile_pos = Vector2i(0, -6)
+	state.teams[22] = fa; state.team_known[22] = []; state.team_discovered[22] = []
+	var fa_l := PersonData.new()
+	fa_l.id = 53; fa_l.person_name = "FA_leader"; fa_l.role = "leader"
+	fa_l.team_id = 22; fa_l.skills["統領"] = 0.6  # cap≈37
+	state.persons[53] = fa_l; fa.leader_id = 53
+	if not state.factions[fac99].member_team_ids.has(22):
+		state.factions[fac99].member_team_ids.append(22)
+	state.factions[fac99].leader_team_id = 22
+
+	var fb := TeamData.new()
+	fb.team_id = 23; fb.population = 2; fb.faction_id = fac99; fb.tile_pos = Vector2i(0, -8)  # dist=2
+	state.teams[23] = fb; state.team_known[23] = []; state.team_discovered[23] = []
+	var fb_l := PersonData.new()
+	fb_l.id = 54; fb_l.person_name = "FB_leader"; fb_l.role = "leader"
+	fb_l.team_id = 23; fb_l.skills["統領"] = 0.2  # cap≈13，pop=2 < 13×0.3=3.9 → 小隊
+	state.persons[54] = fb_l; fb.leader_id = 54
+	state.factions[fac99].member_team_ids.append(23)
+
+	var _fai: Object = load("res://scripts/simulation/faction_ai_system.gd").new()
+	var _f99 = state.factions[fac99]
+	_fai._assign_member_tasks(state, _f99)
+	print("=== FactionAI 閾值合併測試 ===")
+	if fb.current_task == TeamData.TASK_MERGE and fb.order_target_id == 22:
+		print("  [OK] Team23 收到 TASK_MERGE → Team22")
+	else:
+		print("  [FAIL] Team23 task=%s order=%d" % [fb.current_task, fb.order_target_id])
+
+	# 場景 4：FactionAI 戰前集結
+	_f99.goals = ["攻擊"]
+	fb.current_task = "idle"; fb.order_target_id = -1; fb.move_target = Vector2i(-1, -1)
+	_fai._assign_member_tasks(state, _f99)
+	print("=== FactionAI 戰前集結測試 ===")
+	if fb.current_task == TeamData.TASK_MERGE and fb.order_target_id == 22:
+		print("  [OK] Team23（dist=2）收到 TASK_MERGE → 主力Team22（戰前集結）")
+	else:
+		print("  [FAIL] Team23 task=%s order=%d" % [fb.current_task, fb.order_target_id])
+
+	# 清理
+	for _tid in [20, 21, 22, 23]:
+		state.teams.erase(_tid)
+		state.team_known.erase(_tid)
+		state.team_discovered.erase(_tid)
+	for _pid in [50, 51, 52, 53, 54]:
+		state.persons.erase(_pid)
+	state.factions.erase(fac99)
+
 	print("=== Sim Test: 200 Ticks ===")
 	print("Team0(統領) 預建為勢力 leader，Team3 為附庸")
 	print("預期：立國 → 外交(Team1,Team2) → 定期徵收(Team3)，子隊偵查後回歸")
