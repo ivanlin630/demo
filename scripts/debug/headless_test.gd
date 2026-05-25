@@ -448,6 +448,73 @@ func _run_sim_test() -> void:
 		state.persons.erase(_pid)
 	state.factions.erase(fac99)
 
+	# ── FactionKnownState 驗證 ──
+	var ks_fac := state.create_faction(30)
+	state.factions[ks_fac].leader_team_id = 30
+	var ks_a := TeamData.new()
+	ks_a.team_id = 30; ks_a.population = 10; ks_a.tile_pos = Vector2i(0, -9)
+	ks_a.resources["food"] = 80.0; ks_a.faction_id = ks_fac
+	state.teams[30] = ks_a; state.team_known[30] = []; state.team_discovered[30] = []
+	var ks_a_l := PersonData.new()
+	ks_a_l.id = 60; ks_a_l.person_name = "KS_leader"; ks_a_l.role = "leader"
+	ks_a_l.team_id = 30; ks_a_l.skills["統領"] = 0.6
+	state.persons[60] = ks_a_l; ks_a.leader_id = 60
+
+	var ks_b := TeamData.new()
+	ks_b.team_id = 31; ks_b.population = 5; ks_b.tile_pos = Vector2i(1, -9)
+	ks_b.resources["food"] = 50.0; ks_b.faction_id = ks_fac
+	state.teams[31] = ks_b; state.team_known[31] = []; state.team_discovered[31] = []
+	var ks_b_l := PersonData.new()
+	ks_b_l.id = 61; ks_b_l.person_name = "KS_mem1"; ks_b_l.role = "leader"
+	ks_b_l.team_id = 31
+	state.persons[61] = ks_b_l; ks_b.leader_id = 61
+	state.factions[ks_fac].member_team_ids.append(31)
+
+	var ks_c := TeamData.new()
+	ks_c.team_id = 32; ks_c.population = 3; ks_c.tile_pos = Vector2i(2, -9)
+	ks_c.resources["food"] = 30.0; ks_c.faction_id = ks_fac
+	state.teams[32] = ks_c; state.team_known[32] = []; state.team_discovered[32] = []
+	var ks_c_l := PersonData.new()
+	ks_c_l.id = 62; ks_c_l.person_name = "KS_mem2"; ks_c_l.role = "leader"
+	ks_c_l.team_id = 32
+	state.persons[62] = ks_c_l; ks_c.leader_id = 62
+	state.factions[ks_fac].member_team_ids.append(32)
+
+	var _ks_fai: Object = load("res://scripts/simulation/faction_ai_system.gd").new()
+	_ks_fai.evaluate_all(state, [30, 31, 32])
+	print("=== FactionKnownState 驗證 ===")
+
+	# 場景1：快照正確建立
+	var _snap_b: Dictionary = state.factions[ks_fac].known_member_states.get(31, {})
+	if _snap_b.get("food", -1.0) == 50.0:
+		print("  [OK] known_member_states[31].food=50.0")
+	else:
+		print("  [FAIL] known_member_states[31].food=%s" % str(_snap_b.get("food", "missing")))
+
+	# 場景2：_richest_member 讀快照（Team31 food=50 > Team32 food=30）
+	var _rm: int = _ks_fai._richest_member(state, state.factions[ks_fac])
+	if _rm == 31:
+		print("  [OK] _richest_member 返回 Team31（快照 food=50）")
+	else:
+		print("  [FAIL] _richest_member 返回 %d（預期 31）" % _rm)
+
+	# 場景3：直接改 Team31 food 但不刷新快照 → _richest_member 仍讀舊值
+	ks_b.resources["food"] = 5.0  # 繞過快照直接改
+	var _rm2: int = _ks_fai._richest_member(state, state.factions[ks_fac])
+	if _rm2 == 31:
+		print("  [OK] 快照未更新 → _richest_member 仍返回 Team31（介面隔離正確）")
+	else:
+		print("  [FAIL] _richest_member 返回 %d（預期 31，快照應仍為 food=50）" % _rm2)
+
+	# 清理
+	for _tid2 in [30, 31, 32]:
+		state.teams.erase(_tid2)
+		state.team_known.erase(_tid2)
+		state.team_discovered.erase(_tid2)
+	for _pid2 in [60, 61, 62]:
+		state.persons.erase(_pid2)
+	state.factions.erase(ks_fac)
+
 	print("=== Sim Test: 200 Ticks ===")
 	print("Team0(統領) 預建為勢力 leader，Team3 為附庸")
 	print("預期：立國 → 外交(Team1,Team2) → 定期徵收(Team3)，子隊偵查後回歸")
