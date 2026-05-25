@@ -40,7 +40,8 @@
 | `message_system.gd` | emit_message（事件觸發）；propagate_on_arrival（同格 event-driven）；4 種傳播模式（honest/unintentional/malicious/silent）；去重+衰減 |
 | `world_generator.gd` | hex 地圖生成；地形三型；ore_iron 分布（mountain 30%/plains 5%） |
 | `population_system.gd` | 超額強制分裂：每 10 tick 掃全域；有 advisor → dispatch 子隊；無 advisor → 獨立流亡 team + PersonGenerator 晉升 |
-| `faction_ai_system.gd`（快照層） | `known_member_states` 介面：FactionAI 讀成員快照（food/weapons/goods/population/tile_pos/current_task）；stub 每輪刷新，預留 IntelSystem 限制接口 |
+| `faction_ai_system.gd`（快照層） | `known_member_states` 介面：FactionAI 讀成員快照（food/weapons/goods/population/tile_pos/current_task）；stub 已由 IntelSystem bridge 取代（evaluate_all 從 team_intel 複製） |
+| `intel_system`（IntelSystem） | **情報系統**：`world_state.gd` 新增 `team_intel` Dictionary；`vision_system.gd` `tick_discovery` 寫 Tier 0/1 快照（population_est/resource_scale 含距離雜訊）；`interaction_system.gd` `reveal_encounter` / `_write_tier2_intel` 寫 Tier 2 完整快照（造假機制：偽裝平民/虛張聲勢）；FactionAI bridge：`evaluate_all` 從 team_intel 複製至 known_member_states；`_find_trade_target` 讀 coin_est；`_update_goals` 攻擊決策讀 armed_est（未知=999視為強敵）；`_calc_own_armed` helper |
 
 ### 測試
 
