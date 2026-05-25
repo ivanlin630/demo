@@ -14,3 +14,14 @@ var strategy: String = "idle"
 # 跨勢力關係（立國號才有意義；未立國號留空）
 # "neutral" / "ally" / "enemy"
 var relations: Dictionary = {}  # faction_id → String
+
+var known_member_states: Dictionary = {}
+# { team_id: int → {
+#   "food":         float,    # resources["food"]
+#   "weapons":      int,      # sum(melee_low+melee_high+ranged_low+ranged_high)
+#   "goods":        float,    # resources["goods"]
+#   "population":   int,
+#   "tile_pos":     Vector2i,
+#   "current_task": String,
+#   "last_tick":    int,
+# }}

@@ -5,6 +5,7 @@ var teams: Dictionary = {}
 var persons: Dictionary = {}
 var global_messages: Array = []
 var team_known: Dictionary = {}
+var team_discovered: Dictionary = {}   # int team_id → Array[int] 已知 team_id 清單
 var factions: Dictionary = {}
 var _next_faction_id: int = 0
 
@@ -27,3 +28,23 @@ func disband_faction(faction_id: int) -> void:
 			teams[tid].faction_id = -1
 	factions.erase(faction_id)
 	print("[Faction] 勢力%d 解散" % faction_id)
+
+func snapshot_faction_member(team_id: int, tick: int) -> void:
+	var t: TeamData = teams.get(team_id) as TeamData
+	if t == null or t.faction_id == -1:
+		return
+	var f = factions.get(t.faction_id)
+	if f == null:
+		return
+	f.known_member_states[team_id] = {
+		"food":         float(t.resources.get("food", 0.0)),
+		"weapons":      (int(t.resources.get("weapon_melee_low",   0))
+		              + int(t.resources.get("weapon_melee_high",  0))
+		              + int(t.resources.get("weapon_ranged_low",  0))
+		              + int(t.resources.get("weapon_ranged_high", 0))),
+		"goods":        float(t.resources.get("goods", 0.0)),
+		"population":   t.population,
+		"tile_pos":     t.tile_pos,
+		"current_task": t.current_task,
+		"last_tick":    tick,
+	}
