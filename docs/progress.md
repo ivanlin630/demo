@@ -39,6 +39,7 @@
 | `faction_ai_system.gd` | 策略層：evaluate_all → goals/strategy → current_task/move_target；leader values 整合；成員 task 指派；獨立 team SoloAI；_tag_weight tag 權限過濾；_update_equip_order（軍隊→near戰；商隊→ranged保護）；discovered-only 目標選擇；義氣→低徵收頻率；貪婪→掠奪 goal；子團偏離 + idle mini-loop |
 | `message_system.gd` | emit_message（事件觸發）；propagate_on_arrival（同格 event-driven）；4 種傳播模式（honest/unintentional/malicious/silent）；去重+衰減 |
 | `world_generator.gd` | hex 地圖生成；地形三型；ore_iron 分布（mountain 30%/plains 5%） |
+| `population_system.gd` | 超額強制分裂：每 10 tick 掃全域；有 advisor → dispatch 子隊；無 advisor → 獨立流亡 team + PersonGenerator 晉升 |
 
 ### 測試
 
@@ -96,5 +97,5 @@
 | 玩家角色 | 作為世界中一個人，step7 預留介面 |
 | UI / 渲染 | 大地圖顯示、勢力標記、訊息日誌 |
 | 遭遇戰地圖 | Team 成員展開至各格，全精度模擬 |
-| 超額人口強制離開 | pop 超過 pop_cap_from_leadership 時強制縮減（分團或逃亡）；PersonGenerator path 目前略過此檢查 |
+| ~~**超額人口強制離開 + 小隊合併整合**~~ | ~~PopulationSystem overflow split（每 10 tick）；FactionAI 閾值合併（pop < cap×0.3）；戰前集結（dist 2–3 先合併）~~ |
 | PersonGenerator 其他 call site | 玩家招募、天賦事件 |
