@@ -40,6 +40,7 @@
 | `message_system.gd` | emit_message（事件觸發）；propagate_on_arrival（同格 event-driven）；4 種傳播模式（honest/unintentional/malicious/silent）；去重+衰減 |
 | `world_generator.gd` | hex 地圖生成；地形三型；ore_iron 分布（mountain 30%/plains 5%） |
 | `population_system.gd` | 超額強制分裂：每 10 tick 掃全域；有 advisor → dispatch 子隊；無 advisor → 獨立流亡 team + PersonGenerator 晉升 |
+| `faction_ai_system.gd`（快照層） | `known_member_states` 介面：FactionAI 讀成員快照（food/weapons/goods/population/tile_pos/current_task）；stub 每輪刷新，預留 IntelSystem 限制接口 |
 
 ### 測試
 
