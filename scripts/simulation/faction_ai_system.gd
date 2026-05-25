@@ -29,6 +29,8 @@ const TRADEABLE_RES: Array = [
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for fid in state.factions:
 		var f = state.factions[fid]
+		for mid in f.member_team_ids:
+			state.snapshot_faction_member(mid, state.world.current_tick)
 		_update_goals(state, f)
 		_assign_tasks(state, f)
 
@@ -191,7 +193,9 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 	for mid in f.member_team_ids:
 		if mid == f.leader_team_id: continue
 		var mt: TeamData = state.teams.get(mid)
-		if mt == null or mt.combat_target != -1 or mt.current_task != "idle":
+		var snap: Dictionary = f.known_member_states.get(mid, {})
+		var known_task: String = snap.get("current_task", "idle")
+		if mt == null or mt.combat_target != -1 or known_task != "idle":
 			continue
 		var absorber_id: int = _find_absorber(state, mt, f)
 		if absorber_id != -1:
@@ -514,7 +518,8 @@ func _richest_member(state: WorldState, f) -> int:
 	for mid in f.member_team_ids:
 		if mid == f.leader_team_id or not state.teams.has(mid):
 			continue
-		var mfood: float = float(state.teams[mid].resources.get("food", 0))
+		var snap: Dictionary = f.known_member_states.get(mid, {})
+		var mfood: float = float(snap.get("food", 0.0))
 		if mfood > best_food:
 			best_food = mfood
 			best_tid  = mid
@@ -524,6 +529,8 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 	f.is_established = true
 	f.faction_name   = "勢力%d" % f.faction_id
 	f.goals.erase("立國")
+	for mid in f.member_team_ids:
+		state.snapshot_faction_member(mid, state.world.current_tick)
 	SimMessageSystem.new().emit_message(state, "faction_establish",
 		"%s 正式立國（leader=Team%d，%d teams）" % [
 			f.faction_name, f.leader_team_id, f.member_team_ids.size()],
