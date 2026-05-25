@@ -238,6 +238,40 @@ func _run_sim_test() -> void:
 	team9.leader_id = 21
 	print("=== 商隊測試：Team9 tile(1,1) 商隊，goods=100, gem=3, coin=0 ===")
 
+	# ── PersonGenerator 驗證 ──
+	var gen_team := TeamData.new()
+	gen_team.team_id    = 10
+	gen_team.population = 5     # anon_pop = 5-1(leader) = 4
+	gen_team.tags       = ["軍隊"]
+	gen_team.tile_pos   = Vector2i(0, -3)
+	state.teams[10]     = gen_team
+	state.team_known[10]      = []
+	state.team_discovered[10] = []
+	var p10_0 := PersonData.new()
+	p10_0.id          = 30
+	p10_0.person_name = "P10_leader"
+	p10_0.role        = "leader"
+	p10_0.team_id     = 10
+	state.persons[30]   = p10_0
+	gen_team.leader_id  = 30
+	var _es_gen   := EventSystem.new()
+	var _gen_ok   : bool = _es_gen.on_leader_death(state, gen_team)
+	print("=== PersonGenerator 測試 ===")
+	print("  gen_ok=%s  new_leader_id=%d" % [str(_gen_ok), gen_team.leader_id])
+	if _gen_ok and gen_team.leader_id != 30:
+		var _np: PersonData = state.persons.get(gen_team.leader_id)
+		if _np:
+			print("  [OK] 匿名晉升 Person%d 體力=%.2f 智力=%.2f 戰鬥=%.2f 統領=%.2f" % [
+				_np.id,
+				float(_np.attributes.get("體力", 0)),
+				float(_np.attributes.get("智力", 0)),
+				float(_np.skills.get("戰鬥", 0)),
+				float(_np.skills.get("統領", 0))])
+		else:
+			print("  [FAIL] new_leader 不在 state.persons")
+	else:
+		print("  [FAIL] gen_ok=false or leader_id unchanged")
+	state.persons.erase(30)   # 清理「假死」leader（模擬 _kill_named_npc 後段）
 	print("=== Sim Test: 200 Ticks ===")
 	print("Team0(統領) 預建為勢力 leader，Team3 為附庸")
 	print("預期：立國 → 外交(Team1,Team2) → 定期徵收(Team3)，子隊偵查後回歸")
