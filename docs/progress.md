@@ -27,7 +27,7 @@
 | `skill_system.gd` | on_reaction 技能成長；on_combat_round（melee → 戰鬥）；on_volley（ranged → 弓箭）；on_combat_end（leader → 戰術）；速率 = BASE_GROWTH × attr × (0.5 + 毅力 × 0.5)；body_part 損傷修正 |
 | `equipment_system.gd` | 記名 NPC 武器槽分配（依 equip_order）；armed_anon_ratio 計算；死亡武器歸還（named：50%機率回2單位；anon：比例回收）；UNITS_PER_EQUIP=2 |
 | `vision_system.gd` | 迷霧系統：scout_range（偵查技能加成）；exposure（人口+潛行技能+地形）；dist_factor 邊緣衰減；team_discovered 雙向追蹤；偵查/潛行技能成長 |
-| `interaction_system.gd` | 接觸結算：Round 0 齊射（_resolve_volley）→ 多回合戰鬥；地形防禦加成（forest×1.2/mountain×1.15）；flanking（3倍人數×1.3）；morale cascade（傷亡>30%→readiness ×2 消耗）；pursuit（勝方≥2倍→extra casualties）；loot 4種武器類型；body part 命中；_try_subjugate / _try_diplomacy / _resolve_tribute；貿易（12種資源 BASE_PRICE） |
+| `interaction_system.gd` | 接觸結算：Round 0 齊射（_resolve_volley）→ 多回合戰鬥；地形防禦加成（forest×1.2/mountain×1.15）；flanking（3倍人數×1.3）；morale cascade（傷亡>30%→readiness ×2 消耗）；pursuit（勝方≥2倍→extra casualties）；loot 4種武器類型；body part 命中；_try_subjugate / _try_diplomacy / _try_merge / _resolve_tribute；貿易（12種資源 BASE_PRICE） |
 | `movement_system.gd` | tile_pos 移動；_compute_team_speed 加權均速（body part 狀態） |
 | `event_system.gd` | Registry 架構；process_events loop；on_leader_death（外部呼叫）；無繼承人→PersonGenerator fallback；失敗→disband_faction |
 | `person_generator.gd` | PersonGenerator：anon_pop 檢查；隨機屬性(0.2–0.8)/values(0.2–0.8)/技能(0.0–0.2)；tag 偏移（6種 tag → 屬性/技能偏移 clamp）；id 從 state.persons.max()+1 派發 |
@@ -44,7 +44,7 @@
 
 | 檔案 | 內容 |
 |---|---|
-| `scripts/debug/headless_test.gd` | 200 Tick headless 模擬；驗證資源/壓力/反應/技能成長/事件/移動/戰鬥/faction立國/脫離/子團派遣/SoloAI/tag 增減 |
+| `scripts/debug/headless_test.gd` | 200 Tick headless 模擬；驗證資源/壓力/反應/技能成長/事件/移動/戰鬥/faction立國/脫離/子團派遣/SoloAI/tag 增減/PersonGenerator/merge_teams |
 
 ### 文件
 
@@ -87,6 +87,7 @@
 | ~~**FactionAI 義氣/貪婪效果**~~ | ~~義氣高 → 徵收週期延長/緊急門檻降低；貪婪高 → 勢力 AI 加入掠奪 goal~~ | ~~✅ 武器/戰鬥強化完成~~ |
 | ~~**子團自主 AI 強化**~~ | ~~偏離掠奪（貪婪×低忠誠→DEVIATION_RATE）；idle mini-loop（貪婪/好戰 weighted 決策）~~ | ~~✅ FactionAI 完成~~ |
 | ~~**PersonGenerator**~~ | ~~leader 死亡且無合格記名繼承人時，從匿名人口晉升新 leader（tag 屬性/技能偏移）~~ | ~~✅ 子團自主 AI 強化完成~~ |
+| ~~**Team 合併**~~ | ~~`merge_teams(transfer_npc_ids, transfer_anon)`；部分合併→idle子隊；TASK_MERGE + `_try_merge`；idle auto-merge 更新；transfer_anon=-1比例/0不帶/N指定~~ | ~~✅ PersonGenerator 完成~~ |
 
 ### 低優先（玩家系統預留）
 

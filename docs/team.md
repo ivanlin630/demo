@@ -49,6 +49,7 @@ var move_tick_acc: int      # 累積 Tick，達移動成本門檻才走一格
 
 var tags: Array             # 職責標籤：["統領", "軍隊", "商隊", "生產", "宗教", "流亡", "子團"]
 var current_task: String    # "idle" / "徵收" / "偵查" / "信使" / "攻擊" / "掠奪" / "外交" / "護衛" / "逃跑"
+                            # "合併"：主動合併另一 team；需同格；order_target_id 指定目標
                             # （預留）"生產" / "製造" / "貿易" / "巡邏"
 
 var unrest_turns: int       # 不滿積累值
