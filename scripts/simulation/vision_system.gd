@@ -27,6 +27,7 @@ func tick_discovery(state: WorldState, team_ids: Array) -> void:
 			if _can_detect(scout, eff_exp):
 				var is_new: bool = not state.team_discovered[tid].has(other_id)
 				_mark(state, tid, other_id)
+				_write_tier01(state, tid, other_id, other, dist, dist_f)
 				if is_new:
 					_grow_skill(state, obs, "偵查", "智力", "體力")
 			else:
@@ -76,3 +77,30 @@ func _mark(state: WorldState, obs_id: int, tgt_id: int) -> void:
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x; var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+func _write_tier01(state: WorldState, obs_id: int, tgt_id: int,
+		tgt: TeamData, dist: int, dist_f: float) -> void:
+	if not state.team_intel.has(obs_id):
+		state.team_intel[obs_id] = {}
+	var noise: float = 1.0 - dist_f  # TEST VALUE
+	var pop_est: int = maxi(1, roundi(
+		tgt.population * randf_range(1.0 - noise, 1.0 + noise)))
+	var snap: Dictionary = state.team_intel[obs_id].get(tgt_id, {}).duplicate()
+	snap["population_est"] = pop_est
+	snap["tile_pos"]       = tgt.tile_pos
+	snap["last_tick"]      = state.world.current_tick
+	if not snap.has("tier"):
+		snap["tier"] = 0
+	if dist <= 1:
+		if int(snap["tier"]) < 1:
+			snap["tier"] = 1
+		var total_res: float = 0.0
+		for rk in tgt.resources:
+			total_res += float(tgt.resources[rk])
+		var scale: int = 0
+		if   total_res >= 600.0: scale = 3
+		elif total_res >= 200.0: scale = 2
+		elif total_res >= 50.0:  scale = 1
+		scale = clampi(scale + randi_range(-1, 1), 0, 3)
+		snap["resource_scale"] = scale
+	state.team_intel[obs_id][tgt_id] = snap

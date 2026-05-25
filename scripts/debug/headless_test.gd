@@ -515,6 +515,75 @@ func _run_sim_test() -> void:
 		state.persons.erase(_pid2)
 	state.factions.erase(ks_fac)
 
+	# ── IntelSystem Tier 0/1 驗證 ──
+	var _it_vis := VisionSystem.new()
+	# 觀察者 Team70（偵查=0，在 (0,0)，vrange=3）
+	var _it_a := TeamData.new()
+	_it_a.team_id = 70; _it_a.population = 5; _it_a.tile_pos = Vector2i(0, 0)
+	state.teams[70] = _it_a; state.team_discovered[70] = []
+	var _it_a_l := PersonData.new()
+	_it_a_l.id = 70; _it_a_l.role = "leader"; _it_a_l.team_id = 70
+	_it_a_l.skills["偵查"] = 0.0
+	state.persons[70] = _it_a_l; _it_a.leader_id = 70
+
+	# 目標 Team71（pop=20，在 (2,0)，dist=2，exposure 高）
+	var _it_b := TeamData.new()
+	_it_b.team_id = 71; _it_b.population = 20; _it_b.tile_pos = Vector2i(2, 0)
+	_it_b.resources = {
+		"food": 80.0, "material": 30.0, "coin": 0.0, "goods": 0.0, "gem": 0.0,
+		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
+		"weapon_melee_low": 0.0, "weapon_melee_high": 0.0,
+		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+	}
+	state.teams[71] = _it_b; state.team_discovered[71] = []
+	var _it_b_l := PersonData.new()
+	_it_b_l.id = 71; _it_b_l.role = "leader"; _it_b_l.team_id = 71
+	state.persons[71] = _it_b_l; _it_b.leader_id = 71
+
+	_it_vis.tick_discovery(state, [70, 71])
+	print("=== IntelSystem Tier 0 驗證 ===")
+	var _it_snap0: Dictionary = state.team_intel.get(70, {}).get(71, {})
+	if _it_snap0.get("tier", -1) == 0:
+		print("  [OK] tier=0")
+	else:
+		print("  [FAIL] tier=%s（預期 0）" % str(_it_snap0.get("tier", "missing")))
+	var _pop_est: int = int(_it_snap0.get("population_est", -1))
+	if _pop_est >= 10 and _pop_est <= 30:
+		print("  [OK] population_est=%d（範圍 10–30）" % _pop_est)
+	else:
+		print("  [FAIL] population_est=%d（預期 10–30）" % _pop_est)
+
+	# Tier 1：Team70 移到 (1,0)，dist=1；Team71 total_res=110 → bucket=1，±1 → 0–2
+	_it_a.tile_pos = Vector2i(1, 0)
+	_it_vis.tick_discovery(state, [70])
+	print("=== IntelSystem Tier 1 驗證 ===")
+	var _it_snap1: Dictionary = state.team_intel.get(70, {}).get(71, {})
+	if _it_snap1.get("tier", -1) >= 1:
+		print("  [OK] tier≥1（dist=1 近接觸）")
+	else:
+		print("  [FAIL] tier=%s（預期 ≥1）" % str(_it_snap1.get("tier", "missing")))
+	var _rscale: int = int(_it_snap1.get("resource_scale", -1))
+	if _rscale >= 0 and _rscale <= 2:
+		print("  [OK] resource_scale=%d（預期 0–2，total=110→bucket1±1）" % _rscale)
+	else:
+		print("  [FAIL] resource_scale=%d（預期 0–2）" % _rscale)
+
+	# 快照持久：Team71 移出視野（dist=10），team_intel 應仍保留舊值
+	var _last_pop: int = int(state.team_intel.get(70, {}).get(71, {}).get("population_est", -1))
+	_it_b.tile_pos = Vector2i(10, 0)
+	_it_vis.tick_discovery(state, [70])
+	var _it_snap_p: Dictionary = state.team_intel.get(70, {}).get(71, {})
+	print("=== IntelSystem 快照持久 驗證 ===")
+	if int(_it_snap_p.get("population_est", -1)) == _last_pop and _last_pop > 0:
+		print("  [OK] 快照保留（population_est=%d 不變）" % _last_pop)
+	else:
+		print("  [FAIL] 快照被清除（got=%s）" % str(_it_snap_p.get("population_est", "missing")))
+
+	# 清理
+	state.teams.erase(70); state.teams.erase(71)
+	state.team_discovered.erase(70); state.team_discovered.erase(71)
+	state.persons.erase(70); state.persons.erase(71)
+
 	print("=== Sim Test: 200 Ticks ===")
 	print("Team0(統領) 預建為勢力 leader，Team3 為附庸")
 	print("預期：立國 → 外交(Team1,Team2) → 定期徵收(Team3)，子隊偵查後回歸")
