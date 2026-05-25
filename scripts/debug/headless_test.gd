@@ -584,6 +584,89 @@ func _run_sim_test() -> void:
 	state.team_discovered.erase(70); state.team_discovered.erase(71)
 	state.persons.erase(70); state.persons.erase(71)
 
+	# ── IntelSystem Tier 2 驗證 ──
+	var _it_inter := InteractionSystem.new()
+
+	# 觀察者 Team72
+	var _it_obs := TeamData.new()
+	_it_obs.team_id = 72; _it_obs.population = 5; _it_obs.tile_pos = Vector2i(0, 0)
+	state.teams[72] = _it_obs; state.team_discovered[72] = []
+	var _it_obs_l := PersonData.new()
+	_it_obs_l.id = 72; _it_obs_l.role = "leader"; _it_obs_l.team_id = 72
+	state.persons[72] = _it_obs_l; _it_obs.leader_id = 72
+
+	# 高信義 Team73（生產隊，幾乎不造假）
+	var _it_hon := TeamData.new()
+	_it_hon.team_id = 73; _it_hon.population = 10; _it_hon.tile_pos = Vector2i(0, 0)
+	_it_hon.tags = ["生產"]
+	_it_hon.resources = {
+		"food": 100.0, "material": 0.0, "coin": 20.0, "goods": 0.0, "gem": 0.0,
+		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
+		"weapon_melee_low": 4.0, "weapon_melee_high": 0.0,
+		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+	}
+	_it_hon.armed_anon_ratio = 0.0
+	state.teams[73] = _it_hon; state.team_discovered[73] = []
+	var _it_hon_l := PersonData.new()
+	_it_hon_l.id = 73; _it_hon_l.role = "leader"; _it_hon_l.team_id = 73
+	_it_hon_l.values["信義"] = 0.95
+	state.persons[73] = _it_hon_l; _it_hon.leader_id = 73
+
+	_it_inter._write_tier2_intel(state, 72, 73)
+	print("=== IntelSystem Tier 2（高信義）===")
+	var _snap73: Dictionary = state.team_intel.get(72, {}).get(73, {})
+	if _snap73.get("tier", -1) == 2:
+		print("  [OK] tier=2")
+	else:
+		print("  [FAIL] tier=%s（預期 2）" % str(_snap73.get("tier", "missing")))
+	var _food73: float = float(_snap73.get("food_est", -1.0))
+	# 高信義不應高報 food（偽裝平民時 food × 1.5–2.5）；直接值應為 100.0
+	if _food73 >= 80.0:
+		print("  [OK] food_est=%.1f（高信義，接近實際 100）" % _food73)
+	else:
+		print("  [WARN] food_est=%.1f（可能觸發偽裝，但高信義概率極低）" % _food73)
+	if _snap73.has("coin_est"):
+		print("  [OK] coin_est=%.1f（Tier 2 欄位存在）" % float(_snap73.get("coin_est", 0.0)))
+	else:
+		print("  [FAIL] coin_est 欄位缺少")
+
+	# 低信義軍隊 Team74（高 deceive_chance → 偽裝平民）
+	var _it_low := TeamData.new()
+	_it_low.team_id = 74; _it_low.population = 10; _it_low.tile_pos = Vector2i(0, 0)
+	_it_low.tags = ["軍隊"]
+	_it_low.resources = {
+		"food": 50.0, "material": 0.0, "coin": 0.0, "goods": 0.0, "gem": 0.0,
+		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
+		"weapon_melee_low": 0.0, "weapon_melee_high": 0.0,
+		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+	}
+	_it_low.armed_anon_ratio = 0.8  # anon_pop=9 → actual_armed≈7
+	state.teams[74] = _it_low; state.team_discovered[74] = []
+	var _it_low_l := PersonData.new()
+	_it_low_l.id = 74; _it_low_l.role = "leader"; _it_low_l.team_id = 74
+	_it_low_l.values["信義"] = 0.05   # deceive_chance ≈ (0.95)×0.5 = 0.475
+	_it_low_l.skills["計謀"] = 0.5    # + 0.5×0.2 = 0.1 → total ≈ 0.575
+	state.persons[74] = _it_low_l; _it_low.leader_id = 74
+
+	# 多次取樣（造假為機率事件），偽裝觸發 → armed_est < 4（實際≈7 × 0.2–0.4 = 1–3）
+	var _deception_ok: bool = false
+	for _i in range(20):
+		_it_inter._write_tier2_intel(state, 72, 74)
+		var _s74: Dictionary = state.team_intel.get(72, {}).get(74, {})
+		if int(_s74.get("armed_est", 999)) < 4:
+			_deception_ok = true; break
+	print("=== IntelSystem Tier 2（低信義軍隊 偽裝平民）===")
+	if _deception_ok:
+		print("  [OK] 偽裝平民觸發（20次取樣中 armed_est 低報）")
+	else:
+		print("  [WARN] 20次取樣均未觸發（RNG 偶發，偵查概率=0.575 應多數觸發）")
+
+	# 清理
+	for _tid_t2 in [72, 73, 74]:
+		state.teams.erase(_tid_t2)
+		state.team_discovered.erase(_tid_t2)
+		state.persons.erase(_tid_t2)
+
 	print("=== Sim Test: 200 Ticks ===")
 	print("Team0(統領) 預建為勢力 leader，Team3 為附庸")
 	print("預期：立國 → 外交(Team1,Team2) → 定期徵收(Team3)，子隊偵查後回歸")

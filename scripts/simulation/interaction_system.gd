@@ -161,6 +161,8 @@ func _process_ongoing_combat(state: WorldState, all_team_ids: Array) -> void:
 
 func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	_vision.reveal_encounter(state, id_a, id_b)
+	_write_tier2_intel(state, id_a, id_b)
+	_write_tier2_intel(state, id_b, id_a)
 	var a: TeamData = state.teams[id_a]
 	var b: TeamData = state.teams[id_b]
 	if a.combat_target != -1 or b.combat_target != -1:
@@ -807,3 +809,63 @@ func _grow_commerce_skill(state: WorldState, team: TeamData) -> void:
 		var will: float   = float(p.attributes.get("毅力", 0.5)) * p.get_attribute_mult("毅力")
 		var growth: float = 0.003 * charm * (0.5 + will * 0.5) * p.get_skill_mult("商業")  # TEST VALUE
 		p.skills["商業"]  = minf(float(p.skills.get("商業", 0.0)) + growth, 1.0)
+
+func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
+	var tgt: TeamData = state.teams.get(tgt_id) as TeamData
+	if tgt == null: return
+	var tgt_leader: PersonData = state.persons.get(tgt.leader_id) as PersonData
+	if not state.team_intel.has(obs_id):
+		state.team_intel[obs_id] = {}
+	var snap: Dictionary = state.team_intel[obs_id].get(tgt_id, {}).duplicate()
+	snap["tier"]           = 2
+	snap["tile_pos"]       = tgt.tile_pos
+	snap["last_tick"]      = state.world.current_tick
+	snap["population_est"] = tgt.population
+	snap["faction_id"]     = tgt.faction_id
+	snap["tags"]           = tgt.tags.duplicate()
+	snap["current_task"]   = tgt.current_task
+	snap["food_est"]       = float(tgt.resources.get("food",     0.0))
+	snap["material_est"]   = float(tgt.resources.get("material", 0.0))
+	snap["coin_est"]       = float(tgt.resources.get("coin",     0.0))
+	snap["goods_est"]      = float(tgt.resources.get("goods",    0.0))
+	var actual_armed: int  = _calc_armed(state, tgt)
+	snap["armed_est"]      = actual_armed
+	var honor: float   = float(tgt_leader.values.get("信義",  0.5)) if tgt_leader else 0.5
+	var scheme: float  = float(tgt_leader.skills.get("計謀",  0.0)) if tgt_leader else 0.0
+	var martial: float = float(tgt_leader.values.get("好戰",  0.5)) if tgt_leader else 0.5
+	var caution: float = float(tgt_leader.values.get("慎重",  0.5)) if tgt_leader else 0.5
+	var deceive_chance: float = (1.0 - honor) * 0.5 + scheme * 0.2  # TEST VALUE
+	var disguise_tags: Array  = ["統領", "軍隊", "流亡", "子團"]
+	var has_disguise_tag: bool = false
+	for dtag in disguise_tags:
+		if tgt.tags.has(dtag): has_disguise_tag = true; break
+	if has_disguise_tag and randf() < deceive_chance:
+		# 偽裝平民：低報武器，高報其他資源
+		snap["armed_est"]    = roundi(actual_armed * randf_range(0.2, 0.4))
+		snap["food_est"]     *= randf_range(1.5, 2.5)
+		snap["material_est"] *= randf_range(1.5, 2.5)
+		snap["goods_est"]    *= randf_range(1.5, 2.5)
+	else:
+		var is_bluff_task:     bool = tgt.current_task in ["攻擊", "掠奪"]
+		var is_bluff_martial:  bool = martial > 0.6
+		var is_bluff_merchant: bool = tgt.tags.has("商隊") and caution > 0.5
+		var armed_ratio: float = float(actual_armed) / maxf(float(tgt.population), 1.0)
+		if (is_bluff_task or is_bluff_martial or is_bluff_merchant) \
+				and armed_ratio < 0.6 and randf() < deceive_chance:
+			# 虛張聲勢：高報武器，低報其他資源
+			var bluffed: int  = roundi(actual_armed * randf_range(2.0, 4.0))
+			snap["armed_est"] = mini(bluffed, tgt.population - 1)
+			snap["food_est"]     *= randf_range(0.3, 0.7)
+			snap["material_est"] *= randf_range(0.3, 0.7)
+			snap["goods_est"]    *= randf_range(0.3, 0.7)
+	state.team_intel[obs_id][tgt_id] = snap
+
+func _calc_armed(state: WorldState, team: TeamData) -> int:
+	var named_armed: int = 0
+	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+		var p: PersonData = state.persons.get(pid) as PersonData
+		if p and p.equipment.get("weapon", "") != "":
+			named_armed += 1
+	var named_count: int = 1 + team.advisors.size() + team.members.size()
+	var anon_pop: int    = maxi(team.population - named_count, 0)
+	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)
