@@ -14,6 +14,7 @@ const TASK_MANUFACTURE := "製造"
 const TASK_TRADE       := "貿易"
 const TASK_PATROL      := "巡邏"
 const TASK_BUILD       := "建設"
+const TASK_MERGE       := "合併"
 
 const TAG_COMMAND  := "統領"
 const TAG_MILITARY := "軍隊"
