@@ -854,7 +854,7 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 				and armed_ratio < 0.6 and randf() < deceive_chance:
 			# 虛張聲勢：高報武器，低報其他資源
 			var bluffed: int  = roundi(actual_armed * randf_range(2.0, 4.0))
-			snap["armed_est"] = mini(bluffed, tgt.population - 1)
+			snap["armed_est"] = maxi(0, mini(bluffed, tgt.population - 1))
 			snap["food_est"]     *= randf_range(0.3, 0.7)
 			snap["material_est"] *= randf_range(0.3, 0.7)
 			snap["goods_est"]    *= randf_range(0.3, 0.7)
