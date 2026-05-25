@@ -29,7 +29,8 @@
 | `vision_system.gd` | 迷霧系統：scout_range（偵查技能加成）；exposure（人口+潛行技能+地形）；dist_factor 邊緣衰減；team_discovered 雙向追蹤；偵查/潛行技能成長 |
 | `interaction_system.gd` | 接觸結算：Round 0 齊射（_resolve_volley）→ 多回合戰鬥；地形防禦加成（forest×1.2/mountain×1.15）；flanking（3倍人數×1.3）；morale cascade（傷亡>30%→readiness ×2 消耗）；pursuit（勝方≥2倍→extra casualties）；loot 4種武器類型；body part 命中；_try_subjugate / _try_diplomacy / _resolve_tribute；貿易（12種資源 BASE_PRICE） |
 | `movement_system.gd` | tile_pos 移動；_compute_team_speed 加權均速（body part 狀態） |
-| `event_system.gd` | Registry 架構；process_events loop；on_leader_death（外部呼叫）；失敗→disband_faction |
+| `event_system.gd` | Registry 架構；process_events loop；on_leader_death（外部呼叫）；無繼承人→PersonGenerator fallback；失敗→disband_faction |
+| `person_generator.gd` | PersonGenerator：anon_pop 檢查；隨機屬性(0.2–0.8)/values(0.2–0.8)/技能(0.0–0.2)；tag 偏移（6種 tag → 屬性/技能偏移 clamp）；id 從 state.persons.max()+1 派發 |
 | `events/base_event.gd` | BaseEvent 基底：check() + execute() |
 | `events/event_unrest_split.gd` | 分裂：unrest≥30、義氣<0.4、目標衝突 |
 | `events/event_unrest_replace.gd` | 替換：unrest≥20、統領≥0.3 |
@@ -85,6 +86,7 @@
 | ~~**武器/戰鬥強化**~~ | ~~4 種武器類型；EquipmentSystem（個人裝備槽 + armed_anon_ratio）；Round 0 齊射；地形防禦；flanking；morale cascade；pursuit；SkillSystem 戰鬥/弓箭/戰術成長~~ | ~~✅ 製造系統完成~~ |
 | ~~**FactionAI 義氣/貪婪效果**~~ | ~~義氣高 → 徵收週期延長/緊急門檻降低；貪婪高 → 勢力 AI 加入掠奪 goal~~ | ~~✅ 武器/戰鬥強化完成~~ |
 | ~~**子團自主 AI 強化**~~ | ~~偏離掠奪（貪婪×低忠誠→DEVIATION_RATE）；idle mini-loop（貪婪/好戰 weighted 決策）~~ | ~~✅ FactionAI 完成~~ |
+| ~~**PersonGenerator**~~ | ~~leader 死亡且無合格記名繼承人時，從匿名人口晉升新 leader（tag 屬性/技能偏移）~~ | ~~✅ 子團自主 AI 強化完成~~ |
 
 ### 低優先（玩家系統預留）
 
@@ -93,3 +95,5 @@
 | 玩家角色 | 作為世界中一個人，step7 預留介面 |
 | UI / 渲染 | 大地圖顯示、勢力標記、訊息日誌 |
 | 遭遇戰地圖 | Team 成員展開至各格，全精度模擬 |
+| 超額人口強制離開 | pop 超過 pop_cap_from_leadership 時強制縮減（分團或逃亡）；PersonGenerator path 目前略過此檢查 |
+| PersonGenerator 其他 call site | 玩家招募、天賦事件 |
