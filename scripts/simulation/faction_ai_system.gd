@@ -140,6 +140,7 @@ func _update_goals(state: WorldState, f) -> void:
 			and _has_independent(state, f.leader_team_id) \
 			and _tag_weight(leader_team, "掠奪") > 0.0:
 		f.goals.append("掠奪")
+	# TODO: "合併" goal — 由 leader 手動指派 order_target_id，FactionAI 目前不自動觸發
 
 # ──────── 任務指派 ────────
 
