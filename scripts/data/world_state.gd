@@ -6,6 +6,16 @@ var persons: Dictionary = {}
 var global_messages: Array = []
 var team_known: Dictionary = {}
 var team_discovered: Dictionary = {}   # int team_id → Array[int] 已知 team_id 清單
+var team_intel: Dictionary = {}
+# { obs_id: int → { tgt_id: int → {
+#   "tier":           int,       # 最高接觸層級：0/1/2
+#   "population_est": int,       # 帶距離雜訊
+#   "tile_pos":       Vector2i,
+#   "last_tick":      int,
+#   # tier ≥ 1: "resource_scale": int,   # 0缺乏/1勉強/2充裕/3豐盛（帶±1雜訊）
+#   # tier 2: "faction_id", "tags", "current_task",
+#   #          "food_est", "material_est", "coin_est", "goods_est", "armed_est"
+# }}}
 var factions: Dictionary = {}
 var _next_faction_id: int = 0
 
