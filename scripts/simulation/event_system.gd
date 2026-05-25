@@ -64,6 +64,14 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 				print("[Split] Leader 死亡，無 advisor，溢出 %d 人視為逃亡" % overflow)
 		return true
 	else:
-		print("[Event] Team %d 無繼承人，崩潰中（統領不足）" % team.team_id)
+		var gen     := PersonGenerator.new()
+		var promoted := gen.generate(team, state)
+		if promoted != null:
+			team.leader_id  = promoted.id
+			promoted.role   = "leader"
+			print("[Event] Team%d 從匿名晉升新領袖 Person%d（統領=%.2f）" % [
+				team.team_id, promoted.id, float(promoted.skills.get("統領", 0.0))])
+			return true
+		print("[Event] Team %d 無繼承人，崩潰中（無匿名人口）" % team.team_id)
 		return false
 
