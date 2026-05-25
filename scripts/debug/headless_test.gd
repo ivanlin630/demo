@@ -480,16 +480,31 @@ func _run_sim_test() -> void:
 	state.persons[62] = ks_c_l; ks_c.leader_id = 62
 	state.factions[ks_fac].member_team_ids.append(32)
 
+	# 預建 team_intel snap（原由 VisionSystem 在 tick 中寫入，此處繞過以直接驗證橋接）
+	state.team_intel[30] = {
+		31: {
+			"tier": 1, "population_est": 5, "tile_pos": Vector2i(1, -9),
+			"last_tick": 0, "resource_scale": 1,
+			"food_est": 50.0, "material_est": 0.0, "coin_est": 0.0, "goods_est": 0.0,
+			"armed_est": 0, "faction_id": ks_fac, "tags": [], "current_task": "idle",
+		},
+		32: {
+			"tier": 1, "population_est": 3, "tile_pos": Vector2i(2, -9),
+			"last_tick": 0, "resource_scale": 0,
+			"food_est": 30.0, "material_est": 0.0, "coin_est": 0.0, "goods_est": 0.0,
+			"armed_est": 0, "faction_id": ks_fac, "tags": [], "current_task": "idle",
+		},
+	}
 	var _ks_fai: Object = load("res://scripts/simulation/faction_ai_system.gd").new()
 	_ks_fai.evaluate_all(state, [30, 31, 32])
 	print("=== FactionKnownState 驗證 ===")
 
 	# 場景1：快照正確建立
 	var _snap_b: Dictionary = state.factions[ks_fac].known_member_states.get(31, {})
-	if _snap_b.get("food", -1.0) == 50.0:
-		print("  [OK] known_member_states[31].food=50.0")
+	if _snap_b.get("food_est", -1.0) == 50.0:
+		print("  [OK] known_member_states[31].food_est=50.0（bridge 正確）")
 	else:
-		print("  [FAIL] known_member_states[31].food=%s" % str(_snap_b.get("food", "missing")))
+		print("  [FAIL] known_member_states[31].food_est=%s" % str(_snap_b.get("food_est", "missing")))
 
 	# 場景2：_richest_member 讀快照（Team31 food=50 > Team32 food=30）
 	var _rm: int = _ks_fai._richest_member(state, state.factions[ks_fac])
@@ -666,6 +681,62 @@ func _run_sim_test() -> void:
 		state.teams.erase(_tid_t2)
 		state.team_discovered.erase(_tid_t2)
 		state.persons.erase(_tid_t2)
+
+	# ── IntelSystem 攻擊決策驗證 ──
+	print("=== IntelSystem 攻擊決策 驗證 ===")
+	var _ad_leader := TeamData.new()
+	_ad_leader.team_id = 80; _ad_leader.population = 10
+	_ad_leader.tile_pos = Vector2i(0, 1); _ad_leader.tags = ["統領"]
+	_ad_leader.readiness = 0.8
+	_ad_leader.armed_anon_ratio = 0.3  # anon_pop=9 → roundi(9×0.3)=3 → own_armed=3
+	state.teams[80] = _ad_leader; state.team_discovered[80] = []
+	var _ad_fid: int = state.create_faction(80)  # 必須在 teams[80] 存在後呼叫
+	state.factions[_ad_fid].is_established = true
+	_ad_leader.faction_id = _ad_fid
+	var _ad_l_p := PersonData.new()
+	_ad_l_p.id = 80; _ad_l_p.role = "leader"; _ad_l_p.team_id = 80
+	_ad_l_p.values["野心"] = 0.8; _ad_l_p.values["好戰"] = 0.8
+	_ad_l_p.values["義氣"] = 0.1; _ad_l_p.skills["統領"] = 0.5
+	state.persons[80] = _ad_l_p; _ad_leader.leader_id = 80
+
+	var _ad_tgt := TeamData.new()
+	_ad_tgt.team_id = 81; _ad_tgt.population = 8; _ad_tgt.tile_pos = Vector2i(1, 1)
+	_ad_tgt.faction_id = -1; _ad_tgt.armed_anon_ratio = 0.0
+	state.teams[81] = _ad_tgt
+	state.team_discovered[80].append(81)
+	var _ad_tgt_p := PersonData.new()
+	_ad_tgt_p.id = 81; _ad_tgt_p.role = "leader"; _ad_tgt_p.team_id = 81
+	state.persons[81] = _ad_tgt_p; _ad_tgt.leader_id = 81
+
+	var _ad_fai: Object = load("res://scripts/simulation/faction_ai_system.gd").new()
+
+	# 場景 1：無 team_intel snap → armed_est=999 → 不應加入攻擊 goal
+	_ad_fai._update_goals(state, state.factions[_ad_fid])
+	if not state.factions[_ad_fid].goals.has("攻擊"):
+		print("  [OK] 未知目標（armed_est=999）→ 無攻擊 goal")
+	else:
+		print("  [FAIL] 未知目標仍加入攻擊 goal（應檢查 _update_goals 實力比較邏輯）")
+
+	# 場景 2：寫入弱目標 snap（armed_est=2）→ own_armed≥2×0.8=1.6 → 應加入攻擊 goal
+	if not state.team_intel.has(80):
+		state.team_intel[80] = {}
+	state.team_intel[80][81] = {
+		"tier": 0, "population_est": 8, "armed_est": 2,
+		"tile_pos": Vector2i(1, 1), "last_tick": 0,
+	}
+	state.factions[_ad_fid].goals.clear()
+	_ad_fai._update_goals(state, state.factions[_ad_fid])
+	if state.factions[_ad_fid].goals.has("攻擊"):
+		print("  [OK] 弱目標（armed_est=2）→ 加入攻擊 goal")
+	else:
+		print("  [FAIL] 弱目標未加入攻擊 goal")
+
+	# 清理
+	state.teams.erase(80); state.teams.erase(81)
+	state.team_discovered.erase(80)
+	state.persons.erase(80); state.persons.erase(81)
+	state.factions.erase(_ad_fid)
+	state.team_intel.erase(80)
 
 	print("=== Sim Test: 200 Ticks ===")
 	print("Team0(統領) 預建為勢力 leader，Team3 為附庸")

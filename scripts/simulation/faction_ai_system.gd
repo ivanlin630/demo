@@ -30,7 +30,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for fid in state.factions:
 		var f = state.factions[fid]
 		for mid in f.member_team_ids:
-			state.snapshot_faction_member(mid, state.world.current_tick)
+			var snap: Dictionary = state.team_intel.get(f.leader_team_id, {}).get(mid, {})
+			if not snap.is_empty():
+				f.known_member_states[mid] = snap
 		_update_goals(state, f)
 		_assign_tasks(state, f)
 
@@ -137,7 +139,20 @@ func _update_goals(state: WorldState, f) -> void:
 			and leader_team.readiness >= 0.75 \
 			and _has_independent(state, f.leader_team_id) \
 			and _tag_weight(leader_team, "攻擊") > 0.0:
-		f.goals.append("攻擊")
+		var target_id: int = _nearest_independent(state, leader_team)
+		if target_id != -1:
+			var tgt_snap: Dictionary = state.team_intel.get(f.leader_team_id, {}).get(target_id, {})
+			var tgt_armed: int = int(tgt_snap.get("armed_est", 999))  # 未知視為強敵
+			var own_armed: int = _calc_own_armed(state, leader_team)
+			for mid in f.known_member_states:
+				if mid == f.leader_team_id: continue
+				var ms: Dictionary = f.known_member_states[mid]
+				if ms.get("current_task", "") == "攻擊":
+					own_armed += int(ms.get("armed_est", 0))
+			if float(own_armed) >= float(tgt_armed) * 0.8:
+				f.goals.append("攻擊")
+		else:
+			f.goals.append("攻擊")
 
 	var loot_score: float = greed * 0.5 + martial * 0.3 - honor * 0.3
 	if f.is_established and loot_score > LOOT_SCORE_THRESHOLD \
@@ -466,10 +481,10 @@ func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 	var best_d:  int = 999
 	for tid in state.team_discovered.get(merchant.team_id, []):
 		if tid == merchant.team_id or not state.teams.has(tid): continue
-		var t: TeamData = state.teams[tid]
-		if float(t.resources.get("coin", 0)) < TRADE_MIN_COIN:
-			continue
-		var d: int = _hex_dist(merchant.tile_pos, t.tile_pos)
+		var snap: Dictionary = state.team_intel.get(merchant.team_id, {}).get(tid, {})
+		var coin_est: float  = float(snap.get("coin_est", 0.0))
+		if coin_est < TRADE_MIN_COIN: continue
+		var d: int = _hex_dist(merchant.tile_pos, state.teams[tid].tile_pos)
 		if d < best_d:
 			best_d  = d
 			best_id = tid
@@ -507,6 +522,16 @@ func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
 			best_id = tid
 	return best_id
 
+func _calc_own_armed(state: WorldState, team: TeamData) -> int:
+	var named_armed: int = 0
+	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+		var p: PersonData = state.persons.get(pid) as PersonData
+		if p and p.equipment.get("weapon", "") != "":
+			named_armed += 1
+	var named_count: int = 1 + team.advisors.size() + team.members.size()
+	var anon_pop: int    = maxi(team.population - named_count, 0)
+	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)
+
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x
 	var dy := b.y - a.y
@@ -519,7 +544,7 @@ func _richest_member(state: WorldState, f) -> int:
 		if mid == f.leader_team_id or not state.teams.has(mid):
 			continue
 		var snap: Dictionary = f.known_member_states.get(mid, {})
-		var mfood: float = float(snap.get("food", 0.0))
+		var mfood: float = float(snap.get("food_est", 0.0))
 		if mfood > best_food:
 			best_food = mfood
 			best_tid  = mid
@@ -529,8 +554,6 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 	f.is_established = true
 	f.faction_name   = "勢力%d" % f.faction_id
 	f.goals.erase("立國")
-	for mid in f.member_team_ids:
-		state.snapshot_faction_member(mid, state.world.current_tick)
 	SimMessageSystem.new().emit_message(state, "faction_establish",
 		"%s 正式立國（leader=Team%d，%d teams）" % [
 			f.faction_name, f.leader_team_id, f.member_team_ids.size()],
