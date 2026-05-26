@@ -69,6 +69,12 @@ tools/                 godot等工具
 
 **主 session**（`A:\GDS\demo`，`main` branch）：brainstorm → spec → plan 設計，不實作。
 
+主 session 職責：
+- 確保各 spec 之間接口一致（資料結構、函式簽名、key 命名）
+- 確保跨系統交互邏輯無矛盾（例：A 系統寫入的 key，B 系統讀取時格式相符）
+- 收到 hand-back 後評估連動風險，決定是否補開新 spec
+- 控制 merge 到 main 的時機
+
 **子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：實作 plan。
 
 ### 子 session 標準流程
