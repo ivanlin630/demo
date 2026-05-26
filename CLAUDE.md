@@ -97,10 +97,29 @@ test: 測試新增/更新
 ```
 
 **完成後：**
+
+1. 推 branch：
 ```powershell
-# 推 branch
 git push -u origin feat/<feature>
-# 回報主 session，主 session 決定 merge
 ```
 
-不要直接 merge 到 main，等主 session 確認。
+2. 寫 hand-back 文件到 `docs/superpowers/handbacks/YYYY-MM-DD-<feature>.md`：
+
+```markdown
+# Hand Back: <功能名稱>
+
+## 實作摘要
+- 改了哪些檔案（每檔一行說明）
+- 與 spec 的差異（若有）
+
+## 連動風險
+列出其他系統可能受影響的部分，主 session 決定是否補修：
+- `系統A`：說明為何可能受影響
+- （無則寫「無已知連動風險」）
+
+## 待主 session 確認
+- 設計決策（實作中遇到 spec 未覆蓋的情況）
+- 建議後續 task（發現的潛在問題或改進點）
+```
+
+3. Commit hand-back 文件，不要直接 merge 到 main，等主 session 確認。
