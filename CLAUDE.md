@@ -62,3 +62,45 @@ tools/                 godot等工具
 | 事件系統 | `docs/event.md` |
 | 訊息傳播 | `docs/message.md` |
 | 開發進度 | `docs/progress.md` |
+
+---
+
+## 雙 Session 工作流
+
+**主 session**（`A:\GDS\demo`，`main` branch）：brainstorm → spec → plan 設計，不實作。
+
+**子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：實作 plan。
+
+### 子 session 標準流程
+
+如果你在 `.worktrees/` 路徑下，你是實作 session。
+
+**開始前：**
+```powershell
+# 確認 baseline 乾淨
+.\tools\godot\Godot_v4.2.2-stable_win64_console.exe --headless --script scripts/debug/headless_test.gd
+```
+
+**實作工具：** 使用 `superpowers:executing-plans` 或 `superpowers:subagent-driven-development`
+
+**測試標準：**
+- 每個 task 完成後跑 headless test
+- 必須看到 `=== DONE ===`，無 `SCRIPT ERROR`
+- 新功能加對應驗證 print
+
+**Commit 規範：**
+```
+feat(系統): 功能描述
+fix(系統): 修正描述
+docs(主題): 文件更新
+test: 測試新增/更新
+```
+
+**完成後：**
+```powershell
+# 推 branch
+git push -u origin feat/<feature>
+# 回報主 session，主 session 決定 merge
+```
+
+不要直接 merge 到 main，等主 session 確認。
