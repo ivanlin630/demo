@@ -9,3 +9,6 @@ tools/
 
 # Superpowers plugin cache
 .superpowers/
+
+# Git worktrees (child session workspaces)
+.worktrees/
