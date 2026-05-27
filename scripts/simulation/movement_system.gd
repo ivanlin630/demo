@@ -53,7 +53,7 @@ func _move_cost(state: WorldState, team: TeamData) -> int:
 func _compute_team_speed(state: WorldState, team: TeamData) -> float:
 	var total_speed: float = 0.0
 	var total_count: int = 0
-	var named_ids: Array = team.advisors + team.members
+	var named_ids: Array = team.named_members
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
 	for pid in named_ids:

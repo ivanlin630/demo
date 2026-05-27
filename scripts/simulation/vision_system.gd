@@ -53,14 +53,14 @@ func _get_tile(state: WorldState, pos: Vector2i):
 
 func _avg_skill(state: WorldState, team: TeamData, skill: String) -> float:
 	var total: float = 0.0; var count: int = 0
-	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+	for pid in ([team.leader_id] as Array) + team.named_members:
 		var p: PersonData = state.persons.get(pid)
 		if p: total += float(p.skills.get(skill, 0.0)); count += 1
 	return total / maxf(float(count), 1.0)
 
 func _grow_skill(state: WorldState, team: TeamData,
 		skill: String, attr1: String, attr2: String) -> void:
-	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+	for pid in ([team.leader_id] as Array) + team.named_members:
 		var p: PersonData = state.persons.get(pid)
 		if p == null: continue
 		var a1: float = float(p.attributes.get(attr1, 0.5)) * p.get_attribute_mult(attr1)
