@@ -869,4 +869,9 @@ func _run_sim_test() -> void:
 	assert(_dgp.goals[0].has("active"), "goals[0] 缺少 active")
 	print("[DataStruct] goals 格式驗證通過")
 
+	var _dtm: TeamData = state.teams.get(0)
+	assert("named_members" in _dtm, "缺少 named_members 欄位")
+	assert(_dtm.named_members is Array, "named_members 應為 Array")
+	print("[DataStruct] named_members 欄位驗證通過")
+
 	print("=== DONE ===")
