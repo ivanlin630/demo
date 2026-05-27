@@ -81,7 +81,7 @@ func _run_sim_test() -> void:
 			if p == 0:
 				team.leader_id = person.id
 			else:
-				team.members.append(person.id)
+				team.named_members.append(person.id)
 
 	# Team2 建設測試：在 (2,0) 建造村落（civilian Lv1）
 	# Team0 營寨在 (0,0)，距離 2（不同類型，無同類限制）
@@ -144,11 +144,7 @@ func _run_sim_test() -> void:
 	state.persons[1].values["貪婪"] = 0.8   # 高貪婪 → idle 子團有機會觸發 mini-loop（掠奪/攻擊）
 	state.persons[1].values["好戰"] = 0.7
 	state.persons[1].loyalty       = 0.4    # 低忠誠 → deviation_chance 更高
-	state.teams[0].advisors.append(1)        # Person1 加入 Team0 的 advisors
-	state.teams[0].members.erase(1)
-	# Person2 也移到 advisors（用於驗證多 NPC 派遣）
-	state.teams[0].advisors.append(2)
-	state.teams[0].members.erase(2)
+	# Person1 和 Person2 已在 named_members 中，無需額外移動（advisors/members 已合併）
 	# Team5：獨立軍隊（應觸發 SoloAI 攻擊/掠奪）
 	var team5 := TeamData.new()
 	team5.team_id = 5; team5.population = 8
@@ -311,7 +307,7 @@ func _run_sim_test() -> void:
 	var mb_m := PersonData.new()
 	mb_m.id = 42; mb_m.person_name = "MB_member"; mb_m.role = "civilian"
 	mb_m.team_id = 12; mb_m.loyalty = 0.7
-	state.persons[42] = mb_m; mb.members.append(42)
+	state.persons[42] = mb_m; mb.named_members.append(42)
 
 	# 完全合併：transfer 所有 MB NPC，transfer_anon=-1（比例帶走匿民）
 	# MB pop=3：leader(41) + member(42) + 1 匿民；named=2 → anon=1
@@ -322,14 +318,14 @@ func _run_sim_test() -> void:
 	print("=== merge_teams 測試（完全合併）===")
 	if not state.teams.has(12):
 		print("  [OK] Team12 完全合併入 Team11 (pop=%d)" % ma.population)
-		if ma.advisors.has(41):
-			print("  [OK] MB_leader(41) 成為 Team11 advisor")
+		if ma.named_members.has(41):
+			print("  [OK] MB_leader(41) 加入 Team11 named_members")
 		else:
-			print("  [FAIL] MB_leader(41) 未進入 advisors")
-		if ma.members.has(42):
-			print("  [OK] MB_member(42) 成為 Team11 member")
+			print("  [FAIL] MB_leader(41) 未進入 named_members")
+		if ma.named_members.has(42):
+			print("  [OK] MB_member(42) 加入 Team11 named_members")
 		else:
-			print("  [FAIL] MB_member(42) 未進入 members")
+			print("  [FAIL] MB_member(42) 未進入 named_members")
 		if ma.population == 8:  # 5 + 3
 			print("  [OK] Team11 pop=8（含 1 匿民）")
 		else:
@@ -376,7 +372,7 @@ func _run_sim_test() -> void:
 	var ov1_adv := PersonData.new()
 	ov1_adv.id = 51; ov1_adv.person_name = "OV1_adv"; ov1_adv.role = "civilian"
 	ov1_adv.team_id = 20; ov1_adv.skills["統領"] = 0.3
-	state.persons[51] = ov1_adv; ov1.advisors.append(51)
+	state.persons[51] = ov1_adv; ov1.named_members.append(51)
 	var _pop_sys := PopulationSystem.new()
 	_pop_sys.check_overflow(state)
 	print("=== PopulationSystem 場景1（有advisor）===")
@@ -836,7 +832,7 @@ func _run_sim_test() -> void:
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
 		var equip_counts: Dictionary = { "melee_low": 0, "melee_high": 0, "ranged_low": 0, "ranged_high": 0, "none": 0 }
-		for pid in ([t.leader_id] as Array) + t.advisors + t.members:
+		for pid in ([t.leader_id] as Array) + t.named_members:
 			var p: PersonData = state.persons.get(pid)
 			if p == null: continue
 			var wt: String = p.equipment["right_hand"].get("type", "none")
