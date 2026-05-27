@@ -174,8 +174,8 @@ func _assign_tasks(state: WorldState, f) -> void:
 			var target_pos: Vector2i = state.teams[best_tid].tile_pos
 			var dist: int = _hex_dist(leader_team.tile_pos, target_pos)
 			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 4 \
-					and leader_team.advisors.size() > 0:
-				var sub_leader_id: int = leader_team.advisors[0]
+					and leader_team.named_members.size() > 0:
+				var sub_leader_id: int = leader_team.named_members[0]
 				var pop_count: int = maxi(leader_team.population / 4, 2)
 				SubteamSystem.new().dispatch(state, f.leader_team_id, sub_leader_id,
 					pop_count, "徵收", target_pos)
@@ -315,7 +315,7 @@ func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 	var total_loyalty: float = leader.loyalty
 	var total_stress: float  = leader.stress
 	var count: int = 1
-	for aid in sub.advisors:
+	for aid in sub.named_members:
 		var a = state.persons.get(aid)
 		if a != null:
 			total_loyalty += a.loyalty
@@ -524,11 +524,11 @@ func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
 
 func _calc_own_armed(state: WorldState, team: TeamData) -> int:
 	var named_armed: int = 0
-	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+	for pid in ([team.leader_id] as Array) + team.named_members:
 		var p: PersonData = state.persons.get(pid) as PersonData
-		if p and p.equipment.get("weapon", "") != "":
+		if p and p.equipment["right_hand"].get("type", "none") != "none":
 			named_armed += 1
-	var named_count: int = 1 + team.advisors.size() + team.members.size()
+	var named_count: int = 1 + team.named_members.size()
 	var anon_pop: int    = maxi(team.population - named_count, 0)
 	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)
 

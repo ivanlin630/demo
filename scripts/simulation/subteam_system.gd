@@ -10,7 +10,7 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	var sub_leader = state.persons.get(sub_leader_id)
 	if sub_leader == null:
 		return -1
-	if not (parent.advisors.has(sub_leader_id) or parent.members.has(sub_leader_id)):
+	if not parent.named_members.has(sub_leader_id):
 		return -1
 	var cmd: float   = float(sub_leader.skills.get("統領", 0.0))
 	var sub_cap: int = TeamData.pop_cap_from_leadership(cmd)
@@ -41,28 +41,26 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		sub.resources[res]    = amt
 		parent.resources[res] = float(parent.resources.get(res, 0)) - amt
 
-	parent.advisors.erase(sub_leader_id)
-	parent.members.erase(sub_leader_id)
+	parent.named_members.erase(sub_leader_id)
 	sub_leader.team_id = sub.team_id
 	for aid in extra_advisor_ids:
 		if aid == sub_leader_id:
 			continue
-		if not (parent.advisors.has(aid) or parent.members.has(aid)):
+		if not parent.named_members.has(aid):
 			continue
 		var advisor = state.persons.get(aid)
 		if advisor == null:
 			continue
-		parent.advisors.erase(aid)
-		parent.members.erase(aid)
+		parent.named_members.erase(aid)
 		advisor.team_id = sub.team_id
-		sub.advisors.append(aid)
+		sub.named_members.append(aid)
 	parent.population -= pop_count
 	parent.subteam_ids.append(sub.team_id)
 	state.teams[sub.team_id]          = sub
 	state.team_known[sub.team_id]     = []
 	state.team_discovered[sub.team_id] = []
 	print("[Sub] Team%d 派出子隊 Team%d leader=P%d advisors=%s (pop=%d cap=%d task=%s)" % [
-		parent_id, sub.team_id, sub_leader_id, str(sub.advisors), pop_count, sub_cap, task])
+		parent_id, sub.team_id, sub_leader_id, str(sub.named_members), pop_count, sub_cap, task])
 	return sub.team_id
 
 func try_merge_back(state: WorldState, sub_id: int) -> bool:
@@ -95,7 +93,7 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 	var actual_npcs: Array = transfer_npc_ids.slice(0, named_cap)
 	# 計算匿民轉移數量
 	var named_in_absorbed: int = (1 if absorbed.leader_id != -1 else 0) \
-		+ absorbed.advisors.size() + absorbed.members.size()
+		+ absorbed.named_members.size()
 	var anon_pop: int = maxi(absorbed.population - named_in_absorbed, 0)
 	var anon_xfer: int
 	if transfer_anon == -1:
@@ -120,13 +118,12 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		if pid == absorbed.leader_id:
 			absorbed_leader_moved = true
 			absorbed.leader_id = -1
-			if not absorber.advisors.has(pid):
-				absorber.advisors.append(pid)
+			if not absorber.named_members.has(pid):
+				absorber.named_members.append(pid)
 		else:
-			absorbed.advisors.erase(pid)
-			absorbed.members.erase(pid)
-			if not absorber.members.has(pid):
-				absorber.members.append(pid)
+			absorbed.named_members.erase(pid)
+			if not absorber.named_members.has(pid):
+				absorber.named_members.append(pid)
 	absorber.population += total_xfer
 	absorbed.population -= total_xfer
 	absorber.wounded += int(round(float(absorbed.wounded) * frac))
@@ -175,17 +172,17 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 		var sub_leader = state.persons.get(absorbed.leader_id)
 		if sub_leader != null:
 			sub_leader.team_id = absorber_id
-			if not absorber.advisors.has(absorbed.leader_id):
-				absorber.advisors.append(absorbed.leader_id)
-	# 歸還 sub.advisors
+			if not absorber.named_members.has(absorbed.leader_id):
+				absorber.named_members.append(absorbed.leader_id)
+	# 歸還 sub.named_members
 	if absorbed.parent_team_id == absorber_id:
-		for aid in absorbed.advisors:
+		for aid in absorbed.named_members:
 			var advisor = state.persons.get(aid)
 			if advisor != null:
 				advisor.team_id = absorber_id
-				if not absorber.advisors.has(aid):
-					absorber.advisors.append(aid)
-		absorbed.advisors.clear()
+				if not absorber.named_members.has(aid):
+					absorber.named_members.append(aid)
+		absorbed.named_members.clear()
 
 	var transfer: int = mini(absorbed.population, capacity)
 	var frac: float   = float(transfer) / float(absorbed.population) if absorbed.population > 0 else 0.0

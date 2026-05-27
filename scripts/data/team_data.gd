@@ -29,8 +29,7 @@ static func pop_cap_from_leadership(skill: float) -> int:
 
 var team_id: int = 0
 var leader_id: int = -1
-var advisors: Array = []
-var members: Array = []
+var named_members: Array = []
 var population: int = 1
 var minor_population: int = 0
 var resources: Dictionary = {
@@ -38,6 +37,8 @@ var resources: Dictionary = {
 	"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 	"weapon_melee_low": 0, "weapon_melee_high": 0,
 	"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+	"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+	"armor_low": 0, "armor_high": 0,
 }
 var tags: Array = []
 var current_task: String = "idle"
@@ -54,6 +55,19 @@ var equip_order: Dictionary = {
 	"ranged_low": 0, "ranged_high": 0,
 }
 var armed_anon_ratio: float = 0.0
+var anon_wage: float = 1.0
+var fatigue: float = 0.0
+var guard_ratio: float = 0.2
+var armor_config: Dictionary = {
+	"head":       "none",
+	"torso":      "low",
+	"right_arm":  "none",
+	"left_arm":   "none",
+	"right_leg":  "none",
+	"left_leg":   "none",
+}
+var known_reputations: Dictionary = {}
+var strategic_assignments: Dictionary = {}
 var parent_team_id: int  = -1
 var subteam_ids:    Array = []
 var order_target_id: int  = -1

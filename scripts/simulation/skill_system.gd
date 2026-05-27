@@ -29,22 +29,22 @@ func on_reaction(person: PersonData, reaction: String) -> void:
 	person.skills[skill_key] = minf(current + growth, MAX_SKILL)
 
 func on_combat_round(state: WorldState, team: TeamData) -> void:
-	var named_ids: Array = ([team.leader_id] as Array) + team.advisors + team.members
+	var named_ids: Array = ([team.leader_id] as Array) + team.named_members
 	for pid in named_ids:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		var wtype: String = p.equipment.get("weapon", "")
+		var wtype: String = p.equipment["right_hand"].get("type", "none")
 		if wtype in ["melee_low", "melee_high"]:
 			_grow(p, "戰鬥", "體力")
 
 func on_volley(state: WorldState, team: TeamData) -> void:
-	var named_ids: Array = ([team.leader_id] as Array) + team.advisors + team.members
+	var named_ids: Array = ([team.leader_id] as Array) + team.named_members
 	for pid in named_ids:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		var wtype: String = p.equipment.get("weapon", "")
+		var wtype: String = p.equipment["right_hand"].get("type", "none")
 		if wtype in ["ranged_low", "ranged_high"]:
 			_grow(p, "弓箭", "智力")
 

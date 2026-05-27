@@ -21,7 +21,7 @@ const TAG_SKILL_BIAS: Dictionary = {
 
 func generate(team: TeamData, state: WorldState) -> PersonData:
 	var named_count: int = (1 if team.leader_id != -1 else 0) \
-		+ team.advisors.size() + team.members.size()
+		+ team.named_members.size()
 	var anon_pop: int = team.population - named_count
 	if anon_pop <= 0:
 		return null

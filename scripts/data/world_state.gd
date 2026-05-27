@@ -18,6 +18,9 @@ var team_intel: Dictionary = {}
 # }}}
 var factions: Dictionary = {}
 var _next_faction_id: int = 0
+var player_id: int = -1
+var player_state: Dictionary = {}
+var ticks_per_day: int = 24
 
 func create_faction(leader_team_id: int) -> int:
 	var f = load("res://scripts/data/faction_data.gd").new()

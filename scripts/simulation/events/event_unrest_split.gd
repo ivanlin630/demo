@@ -45,7 +45,15 @@ func _has_goal_conflict(dissenters: Array, leader: PersonData) -> bool:
 		if loyalty_val >= 0.4:
 			continue
 		for goal in p.goals:
-			if not leader.goals.has(goal):
+			if not (goal is Dictionary):
+				continue
+			var gtype: String = goal.get("type", "")
+			var leader_has: bool = false
+			for lg in leader.goals:
+				if lg is Dictionary and lg.get("type", "") == gtype:
+					leader_has = true
+					break
+			if not leader_has:
 				return true
 	return false
 
@@ -77,7 +85,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 			p.role = "leader"
 			new_leader_assigned = true
 		else:
-			new_team.members.append(p.id)
+			new_team.named_members.append(p.id)
 
 	state.teams[new_team.team_id]          = new_team
 	state.team_known[new_team.team_id]     = []

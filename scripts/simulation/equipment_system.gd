@@ -18,7 +18,7 @@ func _update_equipment(state: WorldState, team: TeamData) -> void:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		var wtype: String = p.equipment.get("weapon", "")
+		var wtype: String = p.equipment["right_hand"].get("type", "none")
 		if wtype in equipped:
 			equipped[wtype] += 1
 
@@ -39,8 +39,8 @@ func _update_equipment(state: WorldState, team: TeamData) -> void:
 				var p: PersonData = state.persons.get(pid)
 				if p == null:
 					continue
-				if p.equipment.get("weapon", "") == "":
-					p.equipment["weapon"] = wtype
+				if p.equipment["right_hand"].get("type", "none") == "none":
+					p.equipment["right_hand"]["type"] = wtype
 					equipped_count += 1
 			team.resources[pool_key] = pool - equipped_count * UNITS_PER_EQUIP
 			if equipped_count > 0:
@@ -55,8 +55,8 @@ func _update_equipment(state: WorldState, team: TeamData) -> void:
 				var p: PersonData = state.persons.get(pid)
 				if p == null:
 					continue
-				if p.equipment.get("weapon", "") == wtype:
-					p.equipment["weapon"] = ""
+				if p.equipment["right_hand"].get("type", "none") == wtype:
+					p.equipment["right_hand"]["type"] = "none"
 					unequipped_count += 1
 			var pool: int = int(team.resources.get(pool_key, 0))
 			team.resources[pool_key] = pool + unequipped_count * UNITS_PER_EQUIP
@@ -75,7 +75,7 @@ func _update_anon_ratio(state: WorldState, team: TeamData) -> void:
 	team.armed_anon_ratio = float(armed_anon) / float(anon_pop)
 
 func on_named_death(team: TeamData, wtype: String) -> void:
-	if wtype == "":
+	if wtype == "" or wtype == "none":
 		return
 	var pool_key: String = "weapon_" + wtype
 	var recovered: int = 2 if randf() < 0.5 else 0
@@ -105,7 +105,7 @@ func _weapon_pool_total(team: TeamData) -> int:
 	return total
 
 func _get_named_ids(team: TeamData) -> Array:
-	var ids: Array = team.advisors + team.members
+	var ids: Array = team.named_members
 	if team.leader_id != -1:
 		ids.append(team.leader_id)
 	return ids

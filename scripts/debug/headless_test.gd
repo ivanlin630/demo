@@ -33,6 +33,8 @@ func _run_sim_test() -> void:
 			"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 			"weapon_melee_low": 0, "weapon_melee_high": 0,
 			"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+			"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+			"armor_low": 0, "armor_high": 0,
 		}
 		team.tags = ["生產"]
 		team.tile_pos = Vector2i(t, 0)
@@ -62,18 +64,24 @@ func _run_sim_test() -> void:
 			person.stress = 0.0
 
 			if t == 1 and p > 0:
-				person.goals = ["逃離", "求生"]
+				person.goals = [
+					{ "type": "escape_war", "target_id": -1, "active": true },
+					{ "type": "wealth",     "target_id": -1, "active": true },
+				]
 				person.values["義氣"] = 0.3
 				person.skills["統領"] = 0.5
 				person.loyalty = 0.2  # 低忠誠度 → 成為異見者，觸發替換事件
 			else:
-				person.goals = ["擴張", "繁榮"]
+				person.goals = [
+					{ "type": "domination", "target_id": -1, "active": true },
+					{ "type": "wealth",     "target_id": -1, "active": true },
+				]
 
 			state.persons[person.id] = person
 			if p == 0:
 				team.leader_id = person.id
 			else:
-				team.members.append(person.id)
+				team.named_members.append(person.id)
 
 	# Team2 建設測試：在 (2,0) 建造村落（civilian Lv1）
 	# Team0 營寨在 (0,0)，距離 2（不同類型，無同類限制）
@@ -90,6 +98,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 4, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team3.tags = []
 	team3.tile_pos = Vector2i(4, 0)
@@ -134,11 +144,7 @@ func _run_sim_test() -> void:
 	state.persons[1].values["貪婪"] = 0.8   # 高貪婪 → idle 子團有機會觸發 mini-loop（掠奪/攻擊）
 	state.persons[1].values["好戰"] = 0.7
 	state.persons[1].loyalty       = 0.4    # 低忠誠 → deviation_chance 更高
-	state.teams[0].advisors.append(1)        # Person1 加入 Team0 的 advisors
-	state.teams[0].members.erase(1)
-	# Person2 也移到 advisors（用於驗證多 NPC 派遣）
-	state.teams[0].advisors.append(2)
-	state.teams[0].members.erase(2)
+	# Person1 和 Person2 已在 named_members 中，無需額外移動（advisors/members 已合併）
 	# Team5：獨立軍隊（應觸發 SoloAI 攻擊/掠奪）
 	var team5 := TeamData.new()
 	team5.team_id = 5; team5.population = 8
@@ -147,6 +153,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 16, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team5.tags = ["軍隊"]; team5.tile_pos = Vector2i(-3, 0)
 	state.teams[5] = team5; state.team_known[5] = []; state.team_discovered[5] = []
@@ -164,6 +172,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 2, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team6.tags = ["商隊"]; team6.tile_pos = Vector2i(-3, 1)
 	state.teams[6] = team6; state.team_known[6] = []; state.team_discovered[6] = []
@@ -200,6 +210,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 100, "ore_iron": 80, "ore_steel": 0,
 		"weapon_melee_low": 0, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team8.tags         = ["生產"]
 	team8.tile_pos     = Vector2i(3, 1)
@@ -224,6 +236,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 0, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team9.tags       = ["商隊"]
 	team9.tile_pos   = Vector2i(1, 1)
@@ -293,7 +307,7 @@ func _run_sim_test() -> void:
 	var mb_m := PersonData.new()
 	mb_m.id = 42; mb_m.person_name = "MB_member"; mb_m.role = "civilian"
 	mb_m.team_id = 12; mb_m.loyalty = 0.7
-	state.persons[42] = mb_m; mb.members.append(42)
+	state.persons[42] = mb_m; mb.named_members.append(42)
 
 	# 完全合併：transfer 所有 MB NPC，transfer_anon=-1（比例帶走匿民）
 	# MB pop=3：leader(41) + member(42) + 1 匿民；named=2 → anon=1
@@ -304,14 +318,14 @@ func _run_sim_test() -> void:
 	print("=== merge_teams 測試（完全合併）===")
 	if not state.teams.has(12):
 		print("  [OK] Team12 完全合併入 Team11 (pop=%d)" % ma.population)
-		if ma.advisors.has(41):
-			print("  [OK] MB_leader(41) 成為 Team11 advisor")
+		if ma.named_members.has(41):
+			print("  [OK] MB_leader(41) 加入 Team11 named_members")
 		else:
-			print("  [FAIL] MB_leader(41) 未進入 advisors")
-		if ma.members.has(42):
-			print("  [OK] MB_member(42) 成為 Team11 member")
+			print("  [FAIL] MB_leader(41) 未進入 named_members")
+		if ma.named_members.has(42):
+			print("  [OK] MB_member(42) 加入 Team11 named_members")
 		else:
-			print("  [FAIL] MB_member(42) 未進入 members")
+			print("  [FAIL] MB_member(42) 未進入 named_members")
 		if ma.population == 8:  # 5 + 3
 			print("  [OK] Team11 pop=8（含 1 匿民）")
 		else:
@@ -358,7 +372,7 @@ func _run_sim_test() -> void:
 	var ov1_adv := PersonData.new()
 	ov1_adv.id = 51; ov1_adv.person_name = "OV1_adv"; ov1_adv.role = "civilian"
 	ov1_adv.team_id = 20; ov1_adv.skills["統領"] = 0.3
-	state.persons[51] = ov1_adv; ov1.advisors.append(51)
+	state.persons[51] = ov1_adv; ov1.named_members.append(51)
 	var _pop_sys := PopulationSystem.new()
 	_pop_sys.check_overflow(state)
 	print("=== PopulationSystem 場景1（有advisor）===")
@@ -549,6 +563,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
 		"weapon_melee_low": 0.0, "weapon_melee_high": 0.0,
 		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	state.teams[71] = _it_b; state.team_discovered[71] = []
 	var _it_b_l := PersonData.new()
@@ -619,6 +635,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
 		"weapon_melee_low": 4.0, "weapon_melee_high": 0.0,
 		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	_it_hon.armed_anon_ratio = 0.0
 	state.teams[73] = _it_hon; state.team_discovered[73] = []
@@ -654,6 +672,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
 		"weapon_melee_low": 0.0, "weapon_melee_high": 0.0,
 		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	_it_low.armed_anon_ratio = 0.8  # anon_pop=9 → actual_armed≈7
 	state.teams[74] = _it_low; state.team_discovered[74] = []
@@ -812,10 +832,10 @@ func _run_sim_test() -> void:
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
 		var equip_counts: Dictionary = { "melee_low": 0, "melee_high": 0, "ranged_low": 0, "ranged_high": 0, "none": 0 }
-		for pid in ([t.leader_id] as Array) + t.advisors + t.members:
+		for pid in ([t.leader_id] as Array) + t.named_members:
 			var p: PersonData = state.persons.get(pid)
 			if p == null: continue
-			var wt: String = p.equipment.get("weapon", "")
+			var wt: String = p.equipment["right_hand"].get("type", "none")
 			if wt in equip_counts: equip_counts[wt] += 1
 			else: equip_counts["none"] += 1
 		print("  Team%d pool_ml=%d mh=%d rl=%d rh=%d | armed_anon=%.2f | named:%s" % [
@@ -841,4 +861,55 @@ func _run_sim_test() -> void:
 		var _sp: PersonData = state.persons.get(pid)
 		if _sp: print("  Person%d 偵查=%.4f 潛行=%.4f" % [
 			pid, float(_sp.skills.get("偵查", 0)), float(_sp.skills.get("潛行", 0))])
+	# === 資料結構驗證 ===
+	var _dsp: PersonData = state.persons.get(0)
+	assert(_dsp != null, "Person0 不存在")
+	assert("salary" in _dsp, "缺少 salary 欄位")
+	assert("coin" in _dsp, "缺少 coin 欄位")
+	assert("relations" in _dsp, "缺少 relations 欄位")
+	assert(_dsp.relations is Dictionary, "relations 應為 Dictionary")
+	print("[DataStruct] salary/coin/relations 欄位驗證通過")
+
+	var _dep: PersonData = state.persons.get(0)
+	assert(_dep.equipment.has("right_hand"), "缺少 right_hand 裝備格")
+	assert(_dep.equipment.has("torso"), "缺少 torso 裝備格")
+	assert(_dep.equipment["right_hand"] is Dictionary, "right_hand 應為 Dictionary")
+	print("[DataStruct] equipment 8格驗證通過")
+
+	var _dgp: PersonData = state.persons.get(0)
+	assert(_dgp.goals.size() > 0, "goals 不應為空")
+	assert(_dgp.goals[0] is Dictionary, "goals[0] 應為 Dictionary")
+	assert(_dgp.goals[0].has("type"), "goals[0] 缺少 type")
+	assert(_dgp.goals[0].has("active"), "goals[0] 缺少 active")
+	print("[DataStruct] goals 格式驗證通過")
+
+	var _dtm: TeamData = state.teams.get(0)
+	assert("named_members" in _dtm, "缺少 named_members 欄位")
+	assert(_dtm.named_members is Array, "named_members 應為 Array")
+	print("[DataStruct] named_members 欄位驗證通過")
+
+	var _dte: TeamData = state.teams.get(0)
+	assert("fatigue" in _dte, "缺少 fatigue")
+	assert("guard_ratio" in _dte, "缺少 guard_ratio")
+	assert("anon_wage" in _dte, "缺少 anon_wage")
+	assert("armor_config" in _dte, "缺少 armor_config")
+	assert("known_reputations" in _dte, "缺少 known_reputations")
+	assert("strategic_assignments" in _dte, "缺少 strategic_assignments")
+	print("[DataStruct] TeamData 新欄位驗證通過")
+
+	var _dtr: TeamData = state.teams.get(0)
+	assert(_dtr.resources.has("mounts"), "resources 缺少 mounts")
+	assert(_dtr.resources.has("arrows"), "resources 缺少 arrows")
+	assert(_dtr.resources.has("medicine"), "resources 缺少 medicine")
+	print("[DataStruct] resources 新 key 驗證通過")
+
+	assert("player_id" in state, "WorldState 缺少 player_id")
+	assert(state.player_id == -1, "player_id 預設應為 -1")
+	assert("ticks_per_day" in state, "WorldState 缺少 ticks_per_day")
+	assert(state.ticks_per_day == 24, "ticks_per_day 應為 24")
+	print("[DataStruct] WorldState 新欄位驗證通過")
+
+	print("[DataStruct] named_members 非空: Team0=%d" % state.teams[0].named_members.size())
+	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
+	print("[DataStruct] state.ticks_per_day=%d" % state.ticks_per_day)
 	print("=== DONE ===")

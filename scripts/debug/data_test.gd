@@ -44,7 +44,7 @@ func _run_sim_test() -> void:
 			if p == 0:
 				team.leader_id = person.id
 			else:
-				team.members.append(person.id)
+				team.named_members.append(person.id)
 
 	# Team 0 的 Tile 有食物，Team 1 的沒有（測試壓力）
 	(state.world.tiles[1] as HexTileData).resources["food"] = 0

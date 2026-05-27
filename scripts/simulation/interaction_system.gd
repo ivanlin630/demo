@@ -117,7 +117,7 @@ func _tick_readiness(state: WorldState, team_ids: Array) -> void:
 
 func _treat_wounded(state: WorldState, team: TeamData) -> void:
 	var best_medicine: float = 0.0
-	var named_ids: Array = team.advisors + team.members
+	var named_ids: Array = team.named_members
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
 	for pid in named_ids:
@@ -190,8 +190,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 			var abs_team: TeamData = state.teams[absorbed]
 			var all_npcs: Array = []
 			if abs_team.leader_id != -1: all_npcs.append(abs_team.leader_id)
-			all_npcs.append_array(abs_team.advisors)
-			all_npcs.append_array(abs_team.members)
+			all_npcs.append_array(abs_team.named_members)
 			SubteamSystem.new().merge_teams(state, absorber, absorbed, all_npcs)
 		elif (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
 				or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a):
@@ -472,12 +471,12 @@ func _strength_raw(state: WorldState, team_id: int) -> float:
 
 	var melee_str:  float = 0.0
 	var ranged_str: float = 0.0
-	var named_ids: Array = ([team.leader_id] as Array) + team.advisors + team.members
+	var named_ids: Array = ([team.leader_id] as Array) + team.named_members
 	for pid in named_ids:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		var wtype: String = p.equipment.get("weapon", "")
+		var wtype: String = p.equipment["right_hand"].get("type", "none")
 		match wtype:
 			"melee_low":
 				melee_str  += (0.5 + float(p.skills.get("戰鬥", 0.0)) * 0.5) * 0.8
@@ -501,12 +500,12 @@ func _ranged_strength(state: WorldState, team_id: int) -> float:
 	if team == null:
 		return 0.0
 	var ranged_str: float = 0.0
-	var named_ids: Array = ([team.leader_id] as Array) + team.advisors + team.members
+	var named_ids: Array = ([team.leader_id] as Array) + team.named_members
 	for pid in named_ids:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		match p.equipment.get("weapon", ""):
+		match p.equipment["right_hand"].get("type", "none"):
 			"ranged_low":
 				ranged_str += (0.5 + float(p.skills.get("弓箭", 0.0)) * 0.5) * 0.8
 			"ranged_high":
@@ -519,7 +518,7 @@ func _apply_casualties(state: WorldState, team_id: int, count: int) -> void:
 	if count <= 0:
 		return
 	var team: TeamData = state.teams[team_id]
-	var named_ids: Array = team.advisors + team.members
+	var named_ids: Array = team.named_members
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
 	for i in range(count):
@@ -568,7 +567,7 @@ func _tick_critical_npcs(state: WorldState, all_team_ids: Array) -> void:
 			continue
 		var team: TeamData = state.teams[tid]
 		var medicine: float = _best_medicine(state, team)
-		var named_ids: Array = team.advisors + team.members
+		var named_ids: Array = team.named_members
 		if team.leader_id != -1:
 			named_ids.append(team.leader_id)
 		for pid in named_ids:
@@ -603,13 +602,12 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 			var f = state.factions[team.faction_id]
 			if f.leader_team_id == team.team_id:
 				state.disband_faction(team.faction_id)
-	team.advisors.erase(p.id)
-	team.members.erase(p.id)
+	team.named_members.erase(p.id)
 	if team.leader_id == p.id:
 		team.leader_id = -1
 	team.population = maxi(team.population - 1, 1)
-	_equip.on_named_death(team, p.equipment.get("weapon", ""))
-	p.equipment["weapon"] = ""
+	_equip.on_named_death(team, p.equipment["right_hand"].get("type", "none"))
+	p.equipment["right_hand"]["type"] = "none"
 	state.persons.erase(p.id)
 
 # ──────── 勢力互動 ────────
@@ -671,8 +669,7 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 	var absorbed_team: TeamData = state.teams[target_id]
 	var all_npcs: Array = []
 	if absorbed_team.leader_id != -1: all_npcs.append(absorbed_team.leader_id)
-	all_npcs.append_array(absorbed_team.advisors)
-	all_npcs.append_array(absorbed_team.members)
+	all_npcs.append_array(absorbed_team.named_members)
 	SubteamSystem.new().merge_teams(state, merger_id, target_id, all_npcs)
 	merger.current_task = TeamData.TASK_IDLE
 	merger.order_target_id = -1
@@ -725,7 +722,7 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 
 func _best_medicine(state: WorldState, team: TeamData) -> float:
 	var best: float = 0.0
-	var named_ids: Array = team.advisors + team.members
+	var named_ids: Array = team.named_members
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
 	for pid in named_ids:
@@ -801,7 +798,7 @@ func _resolve_trade(state: WorldState, seller: TeamData, buyer: TeamData) -> voi
 	seller.current_task = TeamData.TASK_IDLE
 
 func _grow_commerce_skill(state: WorldState, team: TeamData) -> void:
-	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+	for pid in ([team.leader_id] as Array) + team.named_members:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
@@ -862,10 +859,10 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 
 func _calc_armed(state: WorldState, team: TeamData) -> int:
 	var named_armed: int = 0
-	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+	for pid in ([team.leader_id] as Array) + team.named_members:
 		var p: PersonData = state.persons.get(pid) as PersonData
-		if p and p.equipment.get("weapon", "") != "":
+		if p and p.equipment["right_hand"].get("type", "none") != "none":
 			named_armed += 1
-	var named_count: int = 1 + team.advisors.size() + team.members.size()
+	var named_count: int = 1 + team.named_members.size()
 	var anon_pop: int    = maxi(team.population - named_count, 0)
 	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)

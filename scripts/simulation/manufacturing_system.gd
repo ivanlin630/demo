@@ -98,7 +98,7 @@ func _run_recipes(team: TeamData, worker_rate: float) -> String:
 func _avg_skill(state: WorldState, team: TeamData, skill: String) -> float:
 	var total: float = 0.0
 	var count: int   = 0
-	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+	for pid in ([team.leader_id] as Array) + team.named_members:
 		var p = state.persons.get(pid)
 		if p != null:
 			total += float(p.skills.get(skill, 0.0))
@@ -106,7 +106,7 @@ func _avg_skill(state: WorldState, team: TeamData, skill: String) -> float:
 	return total / maxf(count, 1)
 
 func _grow_skills(state: WorldState, team: TeamData) -> void:
-	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
+	for pid in ([team.leader_id] as Array) + team.named_members:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue

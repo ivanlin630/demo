@@ -40,8 +40,9 @@ func _try_replace_leader(state: WorldState, team: TeamData, dissenters: Array) -
 		return false
 	var old_leader: PersonData = state.persons.get(team.leader_id)
 	if old_leader != null:
-		old_leader.role = "advisor"
-		team.advisors.append(old_leader.id)
+		old_leader.role = "member"
+		if not team.named_members.has(old_leader.id):
+			team.named_members.append(old_leader.id)
 	team.leader_id = best.id
 	best.role = "leader"
 	print("[Event] Team %d 領袖替換：Person %d → Person %d（統領=%.2f）" % [

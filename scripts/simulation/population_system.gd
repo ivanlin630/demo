@@ -14,13 +14,9 @@ func check_overflow(state: WorldState) -> void:
 		if overflow <= 0:
 			continue
 		var spare_id: int = -1
-		for aid in team.advisors:
-			if aid != team.leader_id:
-				spare_id = aid
-				break
-		if spare_id == -1:
-			for mid in team.members:
-				spare_id = mid
+		for nid in team.named_members:
+			if nid != team.leader_id:
+				spare_id = nid
 				break
 		if spare_id != -1:
 			SubteamSystem.new().dispatch(state, tid, spare_id, overflow, "idle", team.tile_pos)
