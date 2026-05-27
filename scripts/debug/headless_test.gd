@@ -33,6 +33,8 @@ func _run_sim_test() -> void:
 			"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 			"weapon_melee_low": 0, "weapon_melee_high": 0,
 			"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+			"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+			"armor_low": 0, "armor_high": 0,
 		}
 		team.tags = ["生產"]
 		team.tile_pos = Vector2i(t, 0)
@@ -96,6 +98,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 4, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team3.tags = []
 	team3.tile_pos = Vector2i(4, 0)
@@ -153,6 +157,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 16, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team5.tags = ["軍隊"]; team5.tile_pos = Vector2i(-3, 0)
 	state.teams[5] = team5; state.team_known[5] = []; state.team_discovered[5] = []
@@ -170,6 +176,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 2, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team6.tags = ["商隊"]; team6.tile_pos = Vector2i(-3, 1)
 	state.teams[6] = team6; state.team_known[6] = []; state.team_discovered[6] = []
@@ -206,6 +214,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 100, "ore_iron": 80, "ore_steel": 0,
 		"weapon_melee_low": 0, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team8.tags         = ["生產"]
 	team8.tile_pos     = Vector2i(3, 1)
@@ -230,6 +240,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 0, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	team9.tags       = ["商隊"]
 	team9.tile_pos   = Vector2i(1, 1)
@@ -555,6 +567,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
 		"weapon_melee_low": 0.0, "weapon_melee_high": 0.0,
 		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	state.teams[71] = _it_b; state.team_discovered[71] = []
 	var _it_b_l := PersonData.new()
@@ -625,6 +639,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
 		"weapon_melee_low": 4.0, "weapon_melee_high": 0.0,
 		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	_it_hon.armed_anon_ratio = 0.0
 	state.teams[73] = _it_hon; state.team_discovered[73] = []
@@ -660,6 +676,8 @@ func _run_sim_test() -> void:
 		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
 		"weapon_melee_low": 0.0, "weapon_melee_high": 0.0,
 		"weapon_ranged_low": 0.0, "weapon_ranged_high": 0.0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	_it_low.armed_anon_ratio = 0.8  # anon_pop=9 → actual_armed≈7
 	state.teams[74] = _it_low; state.team_discovered[74] = []
@@ -873,5 +891,20 @@ func _run_sim_test() -> void:
 	assert("named_members" in _dtm, "缺少 named_members 欄位")
 	assert(_dtm.named_members is Array, "named_members 應為 Array")
 	print("[DataStruct] named_members 欄位驗證通過")
+
+	var _dte: TeamData = state.teams.get(0)
+	assert("fatigue" in _dte, "缺少 fatigue")
+	assert("guard_ratio" in _dte, "缺少 guard_ratio")
+	assert("anon_wage" in _dte, "缺少 anon_wage")
+	assert("armor_config" in _dte, "缺少 armor_config")
+	assert("known_reputations" in _dte, "缺少 known_reputations")
+	assert("strategic_assignments" in _dte, "缺少 strategic_assignments")
+	print("[DataStruct] TeamData 新欄位驗證通過")
+
+	var _dtr: TeamData = state.teams.get(0)
+	assert(_dtr.resources.has("mounts"), "resources 缺少 mounts")
+	assert(_dtr.resources.has("arrows"), "resources 缺少 arrows")
+	assert(_dtr.resources.has("medicine"), "resources 缺少 medicine")
+	print("[DataStruct] resources 新 key 驗證通過")
 
 	print("=== DONE ===")
