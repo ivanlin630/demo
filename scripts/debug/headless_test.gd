@@ -907,4 +907,10 @@ func _run_sim_test() -> void:
 	assert(_dtr.resources.has("medicine"), "resources 缺少 medicine")
 	print("[DataStruct] resources 新 key 驗證通過")
 
+	assert("player_id" in state, "WorldState 缺少 player_id")
+	assert(state.player_id == -1, "player_id 預設應為 -1")
+	assert("ticks_per_day" in state, "WorldState 缺少 ticks_per_day")
+	assert(state.ticks_per_day == 24, "ticks_per_day 應為 24")
+	print("[DataStruct] WorldState 新欄位驗證通過")
+
 	print("=== DONE ===")
