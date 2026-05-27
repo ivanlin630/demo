@@ -43,6 +43,10 @@ var equipment: Dictionary = { "weapon": "" }
 
 var memory: Array = []
 
+var salary: float = 0.0
+var coin: float = 0.0
+var relations: Dictionary = {}
+
 var body_parts: Dictionary = {
 	"head":      { "status": "healthy" },
 	"torso":     { "status": "healthy" },

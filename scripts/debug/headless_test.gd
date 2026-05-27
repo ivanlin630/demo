@@ -841,4 +841,13 @@ func _run_sim_test() -> void:
 		var _sp: PersonData = state.persons.get(pid)
 		if _sp: print("  Person%d 偵查=%.4f 潛行=%.4f" % [
 			pid, float(_sp.skills.get("偵查", 0)), float(_sp.skills.get("潛行", 0))])
+	# === 資料結構驗證 ===
+	var _dsp: PersonData = state.persons.get(0)
+	assert(_dsp != null, "Person0 不存在")
+	assert("salary" in _dsp, "缺少 salary 欄位")
+	assert("coin" in _dsp, "缺少 coin 欄位")
+	assert("relations" in _dsp, "缺少 relations 欄位")
+	assert(_dsp.relations is Dictionary, "relations 應為 Dictionary")
+	print("[DataStruct] salary/coin/relations 欄位驗證通過")
+
 	print("=== DONE ===")
