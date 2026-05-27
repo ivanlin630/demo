@@ -127,19 +127,32 @@ func get_reinforcement_entry_edge(
 }
 ```
 
-戰鬥不能判斷：
+死亡與戰鬥不能判斷（分開處理）：
+
+| 狀態 | 條件 | 後果 |
+|---|---|---|
+| **死亡** | torso == `"severed"` | 從地圖移除，裝備掉落/歸還 |
+| **戰鬥不能** | torso == `"critical"`，或兩腿皆 `"critical"` | 原地無法行動，仍存活；可被俘虜 |
 
 ```gdscript
-func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
-    var bp: Dictionary
+func _get_body_parts(unit: Dictionary, state: WorldState) -> Dictionary:
     if unit["person_id"] != -1:
         var p: PersonData = state.persons.get(unit["person_id"])
-        if p == null: return false
-        bp = p.body_parts
-    else:
-        bp = unit["body_parts"]
-    if bp.get("torso", {}).get("status", "healthy") in ["critical", "severed"]:
-        return false
+        return p.body_parts if p else {}
+    return unit["body_parts"]
+
+func is_dead(unit: Dictionary, state: WorldState) -> bool:
+    var bp := _get_body_parts(unit, state)
+    return bp.get("torso", {}).get("status", "healthy") == "severed"
+
+func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
+    if is_dead(unit, state): return false
+    var bp := _get_body_parts(unit, state)
+    if bp.get("torso", {}).get("status", "healthy") == "critical": return false
+    var legs_critical: int = 0
+    if bp.get("right_leg", {}).get("status") == "critical": legs_critical += 1
+    if bp.get("left_leg",  {}).get("status") == "critical": legs_critical += 1
+    if legs_critical >= 2: return false   # 兩腿皆重傷，無法移動/攻擊
     return true
 ```
 
@@ -294,7 +307,7 @@ func _should_retreat(unit: Dictionary, team_hp_ratio: float,
 
 ## 11. 俘虜系統
 
-單位 hp = 0 且被鄰近敵方包圍（≥2 單位）→ 成為俘虜（而非死亡）：
+單位 `is_combat_capable = false`（戰鬥不能，但未死亡）且被鄰近敵方包圍（≥2 單位）→ 成為俘虜：
 
 - 俘虜歸入勝方 team
 - 戰後可選：處決 / 外交談判 / 招募
