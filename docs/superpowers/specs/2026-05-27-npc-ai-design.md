@@ -230,11 +230,27 @@ func cleanup_goals(state: WorldState, p: PersonData) -> void:
                     var new_target: int = _find_revenge_redirect(state, p, g["target_id"])
                     if new_target != -1:
                         g["target_id"] = new_target
-                        # g["active"] 維持 true
                     else:
-                        g["active"] = false   # 無可轉移目標，暫停；可由新事件重啟
+                        # 無可轉移 → 退化為出生目標（依最高 value 選）
+                        g["type"] = _fallback_birth_goal(p)
+                        g["target_id"] = -1
+                        # g["active"] 維持 true
                 "gratitude", "protect":
-                    g["active"] = false   # 恩人/保護對象消失，停用
+                    # 退化為出生目標
+                    g["type"] = _fallback_birth_goal(p)
+                    g["target_id"] = -1
+
+func _fallback_birth_goal(p: PersonData) -> String:
+    # 依最高 value 對應出生目標
+    var candidates: Array = [
+        { "type": "wealth",      "value": p.values.get("貪婪",  0.5) },
+        { "type": "escape_war",  "value": p.values.get("求生欲",0.5) },
+        { "type": "domination",  "value": p.values.get("野心",  0.5) },
+        { "type": "merit",       "value": p.values.get("好戰",  0.5) },
+        { "type": "peace",       "value": p.values.get("義氣",  0.5) },
+    ]
+    candidates.sort_custom(func(a, b): return a["value"] > b["value"])
+    return candidates[0]["type"]
 
 func _find_revenge_redirect(state: WorldState, p: PersonData,
         dead_id: int) -> int:
