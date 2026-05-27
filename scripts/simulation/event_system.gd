@@ -45,15 +45,10 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 		var overflow: int = team.population - new_cap
 		if overflow > 0:
 			var spare_id: int = -1
-			for aid in team.advisors:
-				if aid != team.leader_id:
-					spare_id = aid
+			for nid in team.named_members:
+				if nid != team.leader_id:
+					spare_id = nid
 					break
-			if spare_id == -1:
-				for mid in team.members:
-					if mid != team.leader_id:
-						spare_id = mid
-						break
 			if spare_id != -1:
 				var sub_id: int = SubteamSystem.new().dispatch(
 					state, team.team_id, spare_id, overflow, "idle", team.tile_pos)
