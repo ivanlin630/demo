@@ -922,4 +922,12 @@ func _run_sim_test() -> void:
 	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
 	print("[DataStruct] state.ticks_per_day=%d" % state.ticks_per_day)
 	print("[Salary] 驗證：30 tick 後應有薪水結算 print（見上方 tick 30 附近輸出）")
+	var _evt_split: Object = load("res://scripts/simulation/events/event_unrest_split.gd").new()
+	var _tp := PersonData.new()
+	_tp.loyalty = 0.8
+	_evt_split.reset_loyalty_on_transfer(_tp, "split_hard")
+	assert(_tp.loyalty == 0.5, "split_hard loyalty 應為 0.5")
+	_evt_split.reset_loyalty_on_transfer(_tp, "split_leader")
+	assert(_tp.loyalty == 1.0, "split_leader loyalty 應為 1.0")
+	print("[TeamAI] reset_loyalty_on_transfer 驗證通過")
 	print("=== DONE ===")

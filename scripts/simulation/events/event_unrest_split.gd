@@ -92,6 +92,15 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	state.team_discovered[new_team.team_id] = []
 	return new_team
 
+func reset_loyalty_on_transfer(p: PersonData, transfer_type: String) -> void:
+	match transfer_type:
+		"split_hard":   p.loyalty = 0.5
+		"split_soft":   p.loyalty = 0.65
+		"split_leader": p.loyalty = 1.0
+		"conquered":    p.loyalty = 0.25
+		"voluntary":    p.loyalty = 0.5
+		"master":       p.loyalty = 0.9
+
 func _next_team_id(state: WorldState) -> int:
 	var max_id: int = 0
 	for tid in state.teams:
