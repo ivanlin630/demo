@@ -39,7 +39,16 @@ var values: Dictionary = {
 	"信義": 0.5,   # 高 → 遵守協議；低 → 容易背叛
 }
 
-var equipment: Dictionary = { "weapon": "" }
+var equipment: Dictionary = {
+	"head":       { "type": "none", "grade": "" },
+	"torso":      { "type": "none", "grade": "" },
+	"right_arm":  { "type": "none", "grade": "" },
+	"left_arm":   { "type": "none", "grade": "" },
+	"right_leg":  { "type": "none", "grade": "" },
+	"left_leg":   { "type": "none", "grade": "" },
+	"right_hand": { "type": "none", "grade": "" },
+	"left_hand":  { "type": "none", "grade": "" },
+}
 
 var memory: Array = []
 

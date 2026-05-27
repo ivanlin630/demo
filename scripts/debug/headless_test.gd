@@ -815,7 +815,7 @@ func _run_sim_test() -> void:
 		for pid in ([t.leader_id] as Array) + t.advisors + t.members:
 			var p: PersonData = state.persons.get(pid)
 			if p == null: continue
-			var wt: String = p.equipment.get("weapon", "")
+			var wt: String = p.equipment["right_hand"].get("type", "none")
 			if wt in equip_counts: equip_counts[wt] += 1
 			else: equip_counts["none"] += 1
 		print("  Team%d pool_ml=%d mh=%d rl=%d rh=%d | armed_anon=%.2f | named:%s" % [
@@ -849,5 +849,11 @@ func _run_sim_test() -> void:
 	assert("relations" in _dsp, "缺少 relations 欄位")
 	assert(_dsp.relations is Dictionary, "relations 應為 Dictionary")
 	print("[DataStruct] salary/coin/relations 欄位驗證通過")
+
+	var _dep: PersonData = state.persons.get(0)
+	assert(_dep.equipment.has("right_hand"), "缺少 right_hand 裝備格")
+	assert(_dep.equipment.has("torso"), "缺少 torso 裝備格")
+	assert(_dep.equipment["right_hand"] is Dictionary, "right_hand 應為 Dictionary")
+	print("[DataStruct] equipment 8格驗證通過")
 
 	print("=== DONE ===")

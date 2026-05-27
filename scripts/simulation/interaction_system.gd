@@ -477,7 +477,7 @@ func _strength_raw(state: WorldState, team_id: int) -> float:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		var wtype: String = p.equipment.get("weapon", "")
+		var wtype: String = p.equipment["right_hand"].get("type", "none")
 		match wtype:
 			"melee_low":
 				melee_str  += (0.5 + float(p.skills.get("戰鬥", 0.0)) * 0.5) * 0.8
@@ -506,7 +506,7 @@ func _ranged_strength(state: WorldState, team_id: int) -> float:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		match p.equipment.get("weapon", ""):
+		match p.equipment["right_hand"].get("type", "none"):
 			"ranged_low":
 				ranged_str += (0.5 + float(p.skills.get("弓箭", 0.0)) * 0.5) * 0.8
 			"ranged_high":
@@ -608,8 +608,8 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	if team.leader_id == p.id:
 		team.leader_id = -1
 	team.population = maxi(team.population - 1, 1)
-	_equip.on_named_death(team, p.equipment.get("weapon", ""))
-	p.equipment["weapon"] = ""
+	_equip.on_named_death(team, p.equipment["right_hand"].get("type", "none"))
+	p.equipment["right_hand"]["type"] = "none"
 	state.persons.erase(p.id)
 
 # ──────── 勢力互動 ────────
@@ -864,7 +864,7 @@ func _calc_armed(state: WorldState, team: TeamData) -> int:
 	var named_armed: int = 0
 	for pid in ([team.leader_id] as Array) + team.advisors + team.members:
 		var p: PersonData = state.persons.get(pid) as PersonData
-		if p and p.equipment.get("weapon", "") != "":
+		if p and p.equipment["right_hand"].get("type", "none") != "none":
 			named_armed += 1
 	var named_count: int = 1 + team.advisors.size() + team.members.size()
 	var anon_pop: int    = maxi(team.population - named_count, 0)
