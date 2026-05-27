@@ -106,22 +106,69 @@ func get_reinforcement_entry_edge(
 
 ## 5. 個人單位
 
-每個 named_member（含 leader）在遭遇戰中是獨立單位：
+**所有成員一人一 unit**，含具名 NPC 與匿名成員。
+
+### 具名 NPC unit
+
+直接引用 PersonData，body_parts 在遭遇戰中實時更新：
 
 ```gdscript
 # EncounterUnit（遭遇戰臨時結構，不存入 WorldState）
 {
-    "person_id": int,
+    "person_id": int,       # 具名 NPC：對應 PersonData；匿名：-1
     "team_id": int,
     "pos": Vector2i,
-    "hp": float,            # 0.0–1.0 對應 body_parts 最低健康部位
     "stamina": float,       # 0.0–1.0，受 team.fatigue 上限限制
     "is_messenger": bool,
     "has_exited": bool,     # 已撤退出地圖
+    # 具名 NPC 無 body_parts 欄位，直接讀 state.persons[person_id].body_parts
+    # 匿名 NPC 有臨時 body_parts（見下）
+    "body_parts": Dictionary,   # 僅匿名 NPC 使用
 }
 ```
 
-匿名成員合批處理：每 5 人一組當一個 unit（TEST VALUE）。
+戰鬥不能判斷：
+
+```gdscript
+func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
+    var bp: Dictionary
+    if unit["person_id"] != -1:
+        var p: PersonData = state.persons.get(unit["person_id"])
+        if p == null: return false
+        bp = p.body_parts
+    else:
+        bp = unit["body_parts"]
+    if bp.get("torso", {}).get("status", "healthy") in ["critical", "severed"]:
+        return false
+    return true
+```
+
+攻擊選部位：
+- 玩家：UI 選擇目標部位（預設 torso）
+- AI：依技能/策略選部位（高戰術→腿部牽制；一般→torso）
+
+### 匿名成員 unit
+
+無 PersonData，臨時生成通用屬性：
+
+```gdscript
+func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
+    return {
+        "person_id": -1,
+        "team_id": team.team_id,
+        "pos": pos,
+        "stamina": 1.0 - team.fatigue,
+        "is_messenger": false,
+        "has_exited": false,
+        "body_parts": {
+            "head": {"status": "healthy"}, "torso": {"status": "healthy"},
+            "right_arm": {"status": "healthy"}, "left_arm": {"status": "healthy"},
+            "right_leg": {"status": "healthy"}, "left_leg": {"status": "healthy"},
+        },
+        # 技能依 team 匿名基準值（無個體差異）
+        "skills": { "戰鬥": team.get("anon_combat_skill", 0.2) },
+    }
+```
 
 ---
 
