@@ -144,6 +144,9 @@ func _run_sim_test() -> void:
 	state.persons[1].values["貪婪"] = 0.8   # 高貪婪 → idle 子團有機會觸發 mini-loop（掠奪/攻擊）
 	state.persons[1].values["好戰"] = 0.7
 	state.persons[1].loyalty       = 0.4    # 低忠誠 → deviation_chance 更高
+	# Person1 期望薪水（非死士，需結算）
+	state.persons[1].salary = 5.0
+	state.persons[2].salary = 3.0
 	# Person1 和 Person2 已在 named_members 中，無需額外移動（advisors/members 已合併）
 	# Team5：獨立軍隊（應觸發 SoloAI 攻擊/掠奪）
 	var team5 := TeamData.new()
@@ -918,4 +921,5 @@ func _run_sim_test() -> void:
 	print("[DataStruct] named_members 非空: Team0=%d" % state.teams[0].named_members.size())
 	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
 	print("[DataStruct] state.ticks_per_day=%d" % state.ticks_per_day)
+	print("[Salary] 驗證：30 tick 後應有薪水結算 print（見上方 tick 30 附近輸出）")
 	print("=== DONE ===")

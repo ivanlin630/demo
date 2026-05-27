@@ -17,6 +17,7 @@ var _manufacturing_system: ManufacturingSystem
 var _vision_system: VisionSystem
 var _equipment_system: EquipmentSystem
 var _population_system: PopulationSystem
+var _salary_system: SalarySystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -33,6 +34,7 @@ func _init() -> void:
 	_vision_system        = VisionSystem.new()
 	_equipment_system    = EquipmentSystem.new()
 	_population_system   = PopulationSystem.new()
+	_salary_system = SalarySystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
@@ -53,6 +55,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step5a_regenerate_tiles(state)
 	_step5b_manufacture(state, near_teams)
 	_step6_resolve_consumption(state, near_teams)
+	_step6c_salary(state, near_teams)
 	_step6b_faction_ai(state, near_teams)
 	_step7_person_reactions(state, near_teams)
 	_step8_generate_events(state, near_teams)
@@ -69,6 +72,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, far_teams)
 		_step6_resolve_consumption(state, far_teams)
+		_step6c_salary(state, far_teams)
 		_step6b_faction_ai(state, far_teams)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
@@ -114,6 +118,9 @@ func _step5b_manufacture(state: WorldState, team_ids: Array) -> void:
 
 func _step6_resolve_consumption(state: WorldState, team_ids: Array) -> void:
 	_resource_system.resolve_consumption(state, team_ids)
+
+func _step6c_salary(state: WorldState, team_ids: Array) -> void:
+	_salary_system.tick(state, team_ids)
 
 func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
 	_faction_ai_system.evaluate_all(state, team_ids)
