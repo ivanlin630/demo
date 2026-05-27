@@ -353,6 +353,24 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		var taken: float = float(loser.resources.get(res, 0)) * effective_loot
 		winner.resources[res] = float(winner.resources.get(res, 0)) + taken
 		loser.resources[res]  = float(loser.resources.get(res, 0)) - taken
+	# 戰敗 looted 記憶：敗方全員記住勝方 leader
+	var _npc_ai_loot := NpcAiSystem.new()
+	for pid in ([loser.leader_id] as Array) + loser.named_members:
+		var vp: PersonData = state.persons.get(pid)
+		if vp:
+			_npc_ai_loot.write_memory(vp, "looted", winner.leader_id,
+				state.world.current_tick, 0.7)
+	# 勝方 aided_in_battle 記憶：支援護衛 team 全員
+	var _npc_ai_aid := NpcAiSystem.new()
+	for escort_id in state.teams:
+		var escort: TeamData = state.teams[escort_id]
+		if escort.current_task == "護衛" and escort.order_target_id == winner_id \
+				and escort.tile_pos == winner.tile_pos:
+			for pid in ([winner.leader_id] as Array) + winner.named_members:
+				var sp: PersonData = state.persons.get(pid)
+				if sp:
+					_npc_ai_aid.write_memory(sp, "aided_in_battle", escort.leader_id,
+						state.world.current_tick, 0.5)
 	if cruelty > 0.6:
 		var worsen_chance: float = (cruelty - 0.6) * 0.5
 		for pid in state.persons:

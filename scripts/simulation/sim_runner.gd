@@ -17,6 +17,7 @@ var _manufacturing_system: ManufacturingSystem
 var _vision_system: VisionSystem
 var _equipment_system: EquipmentSystem
 var _population_system: PopulationSystem
+var _npc_ai_system: NpcAiSystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -33,6 +34,7 @@ func _init() -> void:
 	_vision_system        = VisionSystem.new()
 	_equipment_system    = EquipmentSystem.new()
 	_population_system   = PopulationSystem.new()
+	_npc_ai_system       = NpcAiSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
@@ -55,6 +57,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step6_resolve_consumption(state, near_teams)
 	_step6b_faction_ai(state, near_teams)
 	_step7_person_reactions(state, near_teams)
+	_step7b_npc_goal_cleanup(state, near_teams)
 	_step8_generate_events(state, near_teams)
 	_step9_emit_messages(state)
 
@@ -120,6 +123,14 @@ func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
 
 func _step7_person_reactions(state: WorldState, team_ids: Array) -> void:
 	_reaction_system.evaluate_all(state, team_ids, _skill_system)
+
+func _step7b_npc_goal_cleanup(state: WorldState, team_ids: Array) -> void:
+	for tid in team_ids:
+		var team: TeamData = state.teams.get(tid)
+		if team == null: continue
+		for pid in ([team.leader_id] as Array) + team.named_members:
+			var p: PersonData = state.persons.get(pid)
+			if p: _npc_ai_system.cleanup_goals(state, p)
 
 func _step8_generate_events(state: WorldState, team_ids: Array) -> void:
 	_event_system.process_events(state, team_ids)
