@@ -27,21 +27,33 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 				team.move_target  = Vector2i(-1, -1)
 				print("[ReactionBridge] Team%d 逃跑（%d/%d 人）" % [tid, flee_count, team.population])
 
+func _has_goal_type(person: PersonData, type: String) -> bool:
+	for g in person.goals:
+		if g is Dictionary and g.get("type", "") == type:
+			return true
+	return false
+
+func _erase_goal_type(person: PersonData, type: String) -> void:
+	for i in range(person.goals.size() - 1, -1, -1):
+		var g = person.goals[i]
+		if g is Dictionary and g.get("type", "") == type:
+			person.goals.remove_at(i)
+
 func _update_goals(person: PersonData) -> void:
 	var ambition: float = float(person.values.get("野心", 0.5))
 	var survival: float = float(person.values.get("求生欲", 0.5))
 	var greed: float = float(person.values.get("貪婪", 0.5))
 	var loyalty_val: float = float(person.values.get("義氣", 0.5))
 
-	if ambition > 0.7 and not person.goals.has("建立勢力"):
-		person.goals.append("建立勢力")
-	if survival > 0.7 and person.stress > 0.5 and not person.goals.has("求生"):
-		person.goals.append("求生")
-	if greed > 0.7 and not person.goals.has("發財"):
-		person.goals.append("發財")
+	if ambition > 0.7 and not _has_goal_type(person, "domination"):
+		person.goals.append({ "type": "domination", "target_id": -1, "active": true })
+	if survival > 0.7 and person.stress > 0.5 and not _has_goal_type(person, "wealth"):
+		person.goals.append({ "type": "wealth", "target_id": -1, "active": true })
+	if greed > 0.7 and not _has_goal_type(person, "wealth"):
+		person.goals.append({ "type": "wealth", "target_id": -1, "active": true })
 	if loyalty_val > 0.7:
-		person.goals.erase("逃離")
-		person.goals.erase("復仇")
+		_erase_goal_type(person, "escape_war")
+		_erase_goal_type(person, "revenge")
 
 func _evaluate_person(person: PersonData, team: TeamData) -> String:
 	var scores: Dictionary = {
@@ -72,17 +84,17 @@ func _evaluate_person(person: PersonData, team: TeamData) -> String:
 func _goal_bonus(person: PersonData, reaction: String) -> float:
 	var bonus: float = 0.0
 	for goal in person.goals:
-		match goal:
-			"求生", "逃離":
+		if not (goal is Dictionary):
+			continue
+		var gtype: String = goal.get("type", "")
+		match gtype:
+			"escape_war", "wealth":
 				if reaction == "N1_flee": bonus += 0.2
-			"擴張", "繁榮":
+			"domination":
 				if reaction in ["P4_expand", "P3_recruit"]: bonus += 0.15
-			"發財":
-				if reaction in ["N5_extort", "P2_produce"]: bonus += 0.15
-			"復仇":
-				if reaction in ["N2_riot", "N3_defect"]: bonus += 0.2
-			"建立勢力":
 				if reaction in ["P3_recruit", "P4_expand"]: bonus += 0.2
+			"revenge":
+				if reaction in ["N2_riot", "N3_defect"]: bonus += 0.2
 	return bonus
 
 func _score_comply(p: PersonData, _t: TeamData) -> float:

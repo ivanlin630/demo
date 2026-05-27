@@ -62,12 +62,18 @@ func _run_sim_test() -> void:
 			person.stress = 0.0
 
 			if t == 1 and p > 0:
-				person.goals = ["逃離", "求生"]
+				person.goals = [
+					{ "type": "escape_war", "target_id": -1, "active": true },
+					{ "type": "wealth",     "target_id": -1, "active": true },
+				]
 				person.values["義氣"] = 0.3
 				person.skills["統領"] = 0.5
 				person.loyalty = 0.2  # 低忠誠度 → 成為異見者，觸發替換事件
 			else:
-				person.goals = ["擴張", "繁榮"]
+				person.goals = [
+					{ "type": "domination", "target_id": -1, "active": true },
+					{ "type": "wealth",     "target_id": -1, "active": true },
+				]
 
 			state.persons[person.id] = person
 			if p == 0:
@@ -855,5 +861,12 @@ func _run_sim_test() -> void:
 	assert(_dep.equipment.has("torso"), "缺少 torso 裝備格")
 	assert(_dep.equipment["right_hand"] is Dictionary, "right_hand 應為 Dictionary")
 	print("[DataStruct] equipment 8格驗證通過")
+
+	var _dgp: PersonData = state.persons.get(0)
+	assert(_dgp.goals.size() > 0, "goals 不應為空")
+	assert(_dgp.goals[0] is Dictionary, "goals[0] 應為 Dictionary")
+	assert(_dgp.goals[0].has("type"), "goals[0] 缺少 type")
+	assert(_dgp.goals[0].has("active"), "goals[0] 缺少 active")
+	print("[DataStruct] goals 格式驗證通過")
 
 	print("=== DONE ===")

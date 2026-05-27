@@ -45,7 +45,15 @@ func _has_goal_conflict(dissenters: Array, leader: PersonData) -> bool:
 		if loyalty_val >= 0.4:
 			continue
 		for goal in p.goals:
-			if not leader.goals.has(goal):
+			if not (goal is Dictionary):
+				continue
+			var gtype: String = goal.get("type", "")
+			var leader_has: bool = false
+			for lg in leader.goals:
+				if lg is Dictionary and lg.get("type", "") == gtype:
+					leader_has = true
+					break
+			if not leader_has:
 				return true
 	return false
 
