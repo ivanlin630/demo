@@ -307,7 +307,9 @@ func _should_retreat(unit: Dictionary, team_hp_ratio: float,
 
 ## 11. 俘虜系統
 
-單位 `is_combat_capable = false`（戰鬥不能，但未死亡）且被鄰近敵方包圍（≥2 單位）→ 成為俘虜：
+單位 `is_combat_capable = false`（戰鬥不能，但未死亡）後，每隔 `PRISONER_CHECK_INTERVAL` tick 掃描一次：若鄰近 hex 有 ≥2 敵方 unit → 成為俘虜。
+
+**`PRISONER_CHECK_INTERVAL` TEST VALUE 待定**：需先確認遭遇戰基礎行動速率後再設定。
 
 - 俘虜歸入勝方 team
 - 戰後可選：處決 / 外交談判 / 招募
