@@ -223,8 +223,28 @@ func cleanup_goals(state: WorldState, p: PersonData) -> void:
     for g in p.goals:
         if g["target_id"] == -1: continue
         if not state.persons.has(g["target_id"]):
-            # 目標死亡/消失，改找同 faction 下一人（若 revenge/gratitude）
-            g["active"] = false   # 暫時停用；可由新事件重啟
+            # 目標死亡/消失：依目標類型處理
+            match g["type"]:
+                "revenge":
+                    # 嘗試轉移至同 team/faction 的新目標（仇人的同伴）
+                    var new_target: int = _find_revenge_redirect(state, p, g["target_id"])
+                    if new_target != -1:
+                        g["target_id"] = new_target
+                        # g["active"] 維持 true
+                    else:
+                        g["active"] = false   # 無可轉移目標，暫停；可由新事件重啟
+                "gratitude", "protect":
+                    g["active"] = false   # 恩人/保護對象消失，停用
+
+func _find_revenge_redirect(state: WorldState, p: PersonData,
+        dead_id: int) -> int:
+    # 找已死者所在 team 的 leader 作為新仇恨對象
+    for tid in state.teams:
+        var t: TeamData = state.teams[tid]
+        if t.leader_id == dead_id or dead_id in t.named_members:
+            if t.leader_id != p.id:
+                return t.leader_id
+    return -1
 ```
 
 ---
