@@ -29,9 +29,7 @@ static func pop_cap_from_leadership(skill: float) -> int:
 
 var team_id: int = 0
 var leader_id: int = -1
-var advisors: Array = []
-var members: Array = []
-var named_members: Array = []   # 合併 advisors+members；遷移完成後移除舊欄位
+var named_members: Array = []
 var population: int = 1
 var minor_population: int = 0
 var resources: Dictionary = {

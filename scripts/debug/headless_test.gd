@@ -909,4 +909,7 @@ func _run_sim_test() -> void:
 	assert(state.ticks_per_day == 24, "ticks_per_day 應為 24")
 	print("[DataStruct] WorldState 新欄位驗證通過")
 
+	print("[DataStruct] named_members 非空: Team0=%d" % state.teams[0].named_members.size())
+	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
+	print("[DataStruct] state.ticks_per_day=%d" % state.ticks_per_day)
 	print("=== DONE ===")
