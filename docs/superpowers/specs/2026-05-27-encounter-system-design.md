@@ -60,6 +60,37 @@ func _get_pursuit_entry_edges(offset: int) -> Array:
     return [(offset) % 8, (offset + 1) % 8, (offset + 2) % 8]
 ```
 
+### 援軍進場
+
+大地圖上援軍從哪個方向抵達遭遇戰 tile，就從遭遇戰地圖對應方向的邊緣進入。
+
+```gdscript
+# 大地圖 hex 6 方向 → 遭遇戰地圖邊緣索引（0=上, 1=右上, 2=右下, 3=下, 4=左下, 5=左上）
+const WORLD_DIR_TO_EDGE: Dictionary = {
+    Vector2i( 0, -1): 0,   # 北
+    Vector2i( 1, -1): 1,   # 東北
+    Vector2i( 1,  0): 2,   # 東南
+    Vector2i( 0,  1): 3,   # 南
+    Vector2i(-1,  1): 4,   # 西南
+    Vector2i(-1,  0): 5,   # 西北
+}
+
+func get_reinforcement_entry_edge(
+        encounter_tile: Vector2i, reinforcement_tile: Vector2i) -> int:
+    var delta: Vector2i = encounter_tile - reinforcement_tile
+    # 正規化為 6 方向之一
+    var best_edge: int = 0
+    var best_dot: float = -99.0
+    for dir in WORLD_DIR_TO_EDGE:
+        var dot: float = float(delta.x * dir.x + delta.y * dir.y)
+        if dot > best_dot:
+            best_dot = dot
+            best_edge = WORLD_DIR_TO_EDGE[dir]
+    return best_edge
+```
+
+援軍在遭遇戰地圖對應邊緣隨機選 3 個 hex 進場（與一般進場同規則）。
+
 ---
 
 ## 4. 時間整合
