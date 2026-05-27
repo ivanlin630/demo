@@ -203,6 +203,22 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 		print("[Merge] Team%d ← Team%d 部分合併 (absorber=%d absorbed=%d)" % [
 			absorber_id, absorbed_id, absorber.population, absorbed.population])
 
+func _pick_subteam_leader(state: WorldState, team: TeamData, task: String) -> int:
+	var skill_map: Dictionary = {
+		"攻擊": "統領", "掠奪": "統領", "貿易": "商業",
+		"外交": "交涉", "生產": "生產", "製造": "製造", "偵查": "偵查"
+	}
+	var skill: String = skill_map.get(task, "統領")
+	var best_id: int = -1
+	var best_val: float = -1.0
+	for pid in team.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		var v: float = float(p.skills.get(skill, 0.0))
+		if v > best_val:
+			best_val = v; best_id = pid
+	return best_id
+
 func _next_team_id(state: WorldState) -> int:
 	var max_id: int = -1
 	for tid in state.teams:

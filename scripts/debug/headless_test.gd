@@ -183,6 +183,12 @@ func _run_sim_test() -> void:
 	p6.skills["潛行"] = 0.3   # 中等潛行
 	state.persons[11] = p6; team6.leader_id = 11
 
+	var _sub_sys2 := SubteamSystem.new()
+	var _best := _sub_sys2._pick_subteam_leader(state, state.teams[0], "偵查")
+	print("[TeamAI] _pick_subteam_leader(偵查) = P%d" % _best)
+	assert(_best != -1, "應能找到偵查子隊 leader")
+	assert(_best == 1, "最高偵查技能應為 Person1")
+
 	var _sub_sys := SubteamSystem.new()
 	var scout_id: int = _sub_sys.dispatch(state, 0, 1, 3, "偵查", Vector2i(3, 0),
 		-1, "", [2])  # Person2 作為 extra advisor
