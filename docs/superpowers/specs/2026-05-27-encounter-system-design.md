@@ -294,11 +294,12 @@ func _messenger_exit(state: WorldState, unit: Dictionary,
 ### AI 撤退判斷
 
 ```gdscript
-func _should_retreat(unit: Dictionary, team_hp_ratio: float,
-        p: PersonData) -> bool:
-    if team_hp_ratio < 0.3: return true   # 全隊重傷
-    if unit["hp"] < 0.2: return true      # 個人瀕危
-    if p.values.get("求生欲", 0.5) > 0.7 and team_hp_ratio < 0.5:
+func _should_retreat(unit: Dictionary, state: WorldState,
+        team_incapable_ratio: float, p: PersonData) -> bool:
+    if team_incapable_ratio > 0.7: return true   # 全隊七成戰鬥不能
+    var bp := _get_body_parts(unit, state)
+    if bp.get("torso", {}).get("status") == "critical": return true   # 個人瀕危
+    if p.values.get("求生欲", 0.5) > 0.7 and team_incapable_ratio > 0.5:
         return randf() < 0.3
     return false
 ```
@@ -319,16 +320,57 @@ func _should_retreat(unit: Dictionary, team_hp_ratio: float,
 
 ## 12. 戰術 AI（NPC 行為）
 
-每 NPC unit 每回合依以下優先序決定行動：
+每 NPC unit 每行動回合依以下優先序決定行動（行動時間依速度與體力計算 tick 數，非固定 1 tick）：
 
-1. **撤退判斷**（hp < 0.2 或 leader 傳令撤退）
+1. **撤退判斷**（torso critical 或 leader 傳令撤退）→ 朝邊緣移動
 2. **傳令任務**（若被指派傳令，優先執行）
-3. **集火目標**（有 leader 指定目標 → 優先攻擊）
-4. **接近最近敵人**（無指定目標）
-5. **技能行動**：
+3. **護送判斷**（見下方）
+4. **集火目標**（有 leader 指定目標 → 優先攻擊）
+5. **接近最近敵人**（無指定目標）
+6. **技能行動**：
    - 弓手：保持距離 3–5 hex，射擊
    - 近戰：接近並攻擊
    - 醫療：尋找受傷友方，使用 medicine
+
+### 俘虜相關：進攻方 AI
+
+- 目標已戰鬥不能 → 停止攻擊，轉移目標或留在旁邊等俘虜判定
+- 若己方數量優勢（敵方 ≤ 自方 × 0.5）：留人看守，其餘繼續戰鬥
+
+### 護送邏輯
+
+**觸發條件**（每 unit 行動時評估）：
+- 距離 ≤ `ESCORT_DETECT_RANGE` hex 內有友方戰鬥不能單位（TEST VALUE）
+- 自身 `is_combat_capable = true`
+- 附近敵方數量 ≤ `ESCORT_MAX_NEARBY_ENEMIES`（TEST VALUE）
+- `p.values["義氣"] > 0.4`，或目標為 leader（優先觸發）
+
+**執行**：
+- 移動到戰鬥不能者旁（依正常移動速度計算 tick）
+- 抵達後每行動攜帶傷者朝邊緣移動（速度 × 0.5，stamina 持續消耗）
+- 到達邊緣：兩人一起算撤退成功
+
+**中斷條件**：
+- 護送途中被 ≥2 敵包圍 → 放下傷者，依 `_should_retreat` 判斷戰鬥或逃跑；傷者留原地繼續等俘虜判定
+- 自身 stamina 耗盡 → 放下傷者，原地休息或撤退
+
+```gdscript
+func _should_escort(unit: Dictionary, state: WorldState,
+        p: PersonData) -> int:   # 返回傷者 unit index，-1=不護送
+    if not is_combat_capable(unit, state): return -1
+    var nearby_enemies: int = _count_nearby_enemies(unit, state, 2)
+    if nearby_enemies > ESCORT_MAX_NEARBY_ENEMIES: return -1
+    if p.values.get("義氣", 0.5) < 0.4: return -1
+    # 搜尋附近戰鬥不能友方
+    for i in range(state.encounter_units.size()):
+        var target := state.encounter_units[i]
+        if target["team_id"] != unit["team_id"]: continue
+        if is_dead(target, state): continue
+        if is_combat_capable(target, state): continue
+        if hex_dist(unit["pos"], target["pos"]) <= ESCORT_DETECT_RANGE:
+            return i
+    return -1
+```
 
 ### 包圍邏輯
 
