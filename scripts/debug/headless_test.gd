@@ -1134,4 +1134,14 @@ func _run_sim_test() -> void:
 	assert(_enc.hex_dist(Vector2i(0,0), Vector2i(3,0)) == 3, "hex_dist 應為 3")
 	print("[Encounter] 匿名 unit 驗證通過")
 
+	var _enc2 := EncounterSystem.new()
+	state.player_id = 0
+	_enc2.init_encounter(state, 0, 1, "normal")
+	assert(state.encounter_active, "encounter_active 應為 true")
+	var _unit_count: int = state.encounter_units.size()
+	assert(_unit_count > 0, "應有 encounter units")
+	print("[Encounter] init_encounter units=%d" % _unit_count)
+	state.encounter_active = false
+	state.encounter_units.clear()
+
 	print("=== DONE ===")
