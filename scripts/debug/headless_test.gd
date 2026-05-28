@@ -1019,4 +1019,13 @@ func _run_sim_test() -> void:
 	print("[Diplomacy] Team0→Team3 score=%.3f" % _ds)
 	assert(_ds >= 0.0 and _ds <= 1.0, "diplomacy score 應在 0.0–1.0")
 
+	var _dip2 := DiplomaticAiSystem.new()
+	# Team6（商隊）主動提外交
+	_dip2.try_proactive_diplomacy(state, state.teams[6])
+	# 攻擊後信譽下降
+	_dip2._update_reputation(state.teams[0], 3, -0.3)
+	var _rep: float = float(state.teams[0].known_reputations.get(3, 0.5))
+	assert(_rep < 0.5, "攻擊後 known_reputations 應下降")
+	print("[Diplomacy] known_reputations 更新驗證通過")
+
 	print("=== DONE ===")

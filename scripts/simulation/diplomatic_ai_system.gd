@@ -63,7 +63,54 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 	var response: String = handle_diplomacy_message(state, target, sender, action)
 	print("[Diplomacy] Team%d 回應: %s" % [target.team_id, response])
 
-# Stub — Task 2 will replace this with the full implementation.
-func handle_diplomacy_message(_state: WorldState, _self_team: TeamData,
-		_sender_team: TeamData, _action: String) -> String:
+func handle_diplomacy_message(state: WorldState, self_team: TeamData,
+		sender_team: TeamData, action: String) -> String:
+	var score: float = _calc_diplomacy_score(state, self_team, sender_team)
+	match action:
+		"propose_alliance":
+			if score > 0.55:
+				_form_alliance(state, self_team, sender_team)
+				return "accept"
+			return "reject"
+		"propose_trade":
+			if score > 0.4:
+				_update_reputation(self_team, sender_team.team_id, 0.05)
+				_update_reputation(sender_team, self_team.team_id, 0.05)
+				return "accept"
+			return "reject"
+		"demand_tribute":
+			var self_leader: PersonData = state.persons.get(self_team.leader_id)
+			var resist: float = 1.0 - score
+			if self_leader != null:
+				resist += self_leader.values.get("好戰", 0.5) * 0.3
+			if resist > 0.5:
+				return "reject"
+			var tribute: float = float(self_team.resources.get("coin", 0)) * 0.1
+			self_team.resources["coin"] = float(self_team.resources.get("coin", 0)) - tribute
+			sender_team.resources["coin"] = float(sender_team.resources.get("coin", 0)) + tribute
+			return "accept"
+		"offer_surrender":
+			if score > 0.3:
+				return "accept"
+			return "reject"
 	return "reject"
+
+func _form_alliance(state: WorldState,
+		team_a: TeamData, team_b: TeamData) -> void:
+	if team_a.faction_id != -1:
+		team_b.faction_id = team_a.faction_id
+		var f: FactionData = state.factions.get(team_a.faction_id)
+		if f and not f.member_team_ids.has(team_b.team_id):
+			f.member_team_ids.append(team_b.team_id)
+	elif team_b.faction_id != -1:
+		team_a.faction_id = team_b.faction_id
+		var f: FactionData = state.factions.get(team_b.faction_id)
+		if f and not f.member_team_ids.has(team_a.team_id):
+			f.member_team_ids.append(team_a.team_id)
+	_update_reputation(team_a, team_b.team_id, 0.2)
+	_update_reputation(team_b, team_a.team_id, 0.2)
+	print("[Diplomacy] Team%d 與 Team%d 結盟" % [team_a.team_id, team_b.team_id])
+
+func _update_reputation(team: TeamData, other_id: int, delta: float) -> void:
+	var cur: float = float(team.known_reputations.get(other_id, 0.5))
+	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)
