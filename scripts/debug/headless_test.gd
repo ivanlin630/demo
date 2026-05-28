@@ -988,4 +988,30 @@ func _run_sim_test() -> void:
 		var _cap: float = _ms.get_carry_capacity(_wt)
 		print("[TeamAI] Team0 carry_cap=%.1f weight=%.1f" % [_cap, _ms.calc_total_weight(_wt)])
 		assert(_cap > 0.0, "carry capacity 應 > 0")
+
+	# ── DayNightSystem 驗證 ──
+	var _dns := DayNightSystem.new()
+	var _saved_tick: int = state.world.current_tick
+	# tick=0, ticks_per_day=24 → time_of_day=0.0 → "dawn"
+	state.world.current_tick = 0
+	assert(_dns.get_time_period(state) == "dawn", "tick 0 應為 dawn")
+	# 驗證 tick 3 → day（3/24=0.125 > 0.1）
+	state.world.current_tick = 3
+	assert(_dns.get_time_period(state) == "day", "tick 3 應為 day")
+	assert(_dns.get_fatigue_mult(state) == 1.0, "白天疲勞乘數應為 1.0")
+	state.world.current_tick = 22   # 22/24=0.917 → "night"
+	assert(_dns.get_time_period(state) == "night", "tick 22 應為 night")
+	assert(_dns.get_speed_mult(state) == 0.5, "夜間速度乘數應為 0.5")
+	state.world.current_tick = _saved_tick
+	print("[DayNight] 時間計算驗證通過")
+
+	var _dns2 := DayNightSystem.new()
+	var _rest_team: TeamData = state.teams.get(2)
+	_rest_team.current_task = "rest"
+	_rest_team.guard_ratio = 0.0
+	var _cvr: int = _dns2.get_camp_vision_range(state, _rest_team)
+	assert(_cvr == 0, "無守夜 → camp_vision_range 應為 0")
+	_rest_team.guard_ratio = 0.5
+	_cvr = _dns2.get_camp_vision_range(state, _rest_team)
+	print("[DayNight] guard_ratio=0.5 camp_vision_range=%d" % _cvr)
 	print("=== DONE ===")

@@ -6,7 +6,8 @@ const SCOUT_BONUS: float  = 2.0  # TEST VALUE — 偵查=1.0 最多 +2 hex
 const TERRAIN_VISION_MULT: Dictionary   = { "plains": 1.0, "forest": 0.6, "mountain": 0.8 }
 const TERRAIN_EXPOSURE_MULT: Dictionary = { "plains": 1.0, "forest": 0.5, "mountain": 0.7 }
 
-func tick_discovery(state: WorldState, team_ids: Array) -> void:
+func tick_discovery(state: WorldState, team_ids: Array,
+		time_vision_mult: float = 1.0) -> void:
 	for tid in team_ids:
 		if not state.team_discovered.has(tid):
 			state.team_discovered[tid] = []
@@ -15,7 +16,7 @@ func tick_discovery(state: WorldState, team_ids: Array) -> void:
 		var obs_tile      = _get_tile(state, obs.tile_pos)
 		var obs_terrain   = obs_tile.terrain if obs_tile else "plains"
 		var vmult: float  = float(TERRAIN_VISION_MULT.get(obs_terrain, 1.0))
-		var vrange: int   = roundi((VISION_RADIUS + scout * SCOUT_BONUS) * vmult)
+		var vrange: int   = roundi((VISION_RADIUS + scout * SCOUT_BONUS) * vmult * time_vision_mult)
 		for other_id in state.teams:
 			if other_id == tid: continue
 			var other: TeamData = state.teams[other_id]

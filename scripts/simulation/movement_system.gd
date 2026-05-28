@@ -19,7 +19,8 @@ const WAGON_TERRAIN_MULT: Dictionary = {
 	"plains": 0.9, "forest": 0.4, "mountain": 0.2
 }
 
-func process(state: WorldState, team_ids: Array) -> Array:
+func process(state: WorldState, team_ids: Array,
+		time_mult: float = 1.0) -> Array:
 	# 護衛：每 tick 追蹤目標位置
 	for tid in team_ids:
 		if not state.teams.has(tid):
@@ -43,7 +44,7 @@ func process(state: WorldState, team_ids: Array) -> Array:
 			continue
 		if team.move_target == Vector2i(-1, -1):
 			continue
-		var cost: int = _move_cost(state, team)
+		var cost: int = _move_cost(state, team, time_mult)
 		team.move_tick_acc += 1
 		if team.move_tick_acc < cost:
 			continue
@@ -84,8 +85,8 @@ func _tick_stray_mounts(team: TeamData) -> void:
 	if excess > 0:
 		team.resources["mounts"] = int(team.resources["mounts"]) - ceili(excess * STRAY_RATE)
 
-func _move_cost(state: WorldState, team: TeamData) -> int:
-	var speed: float = _compute_team_speed(state, team)
+func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> int:
+	var speed: float = _compute_team_speed(state, team) * time_mult
 	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 	if state.world.tiles.has(tile_id):
 		var terrain: String = (state.world.tiles[tile_id] as HexTileData).terrain
