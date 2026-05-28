@@ -2,6 +2,11 @@ class_name ReactionSystem
 
 const GOAL_CHECK_INTERVAL: int = 10
 
+var _npc_ai: NpcAiSystem
+
+func _init() -> void:
+	_npc_ai = NpcAiSystem.new()
+
 func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) -> void:
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
@@ -14,6 +19,8 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 				continue
 			if state.world.current_tick % GOAL_CHECK_INTERVAL == 0:
 				_update_goals(person)
+				var alignment: float = _npc_ai.check_goal_alignment(person, team.current_task)
+				person.loyalty = clampf(person.loyalty + alignment, 0.0, 1.0)
 			var reaction: String = _evaluate_person(person, team)
 			if reaction != "none":
 				_apply_reaction(state, person, team, reaction)
