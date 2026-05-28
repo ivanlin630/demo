@@ -17,6 +17,7 @@ var _manufacturing_system: ManufacturingSystem
 var _vision_system: VisionSystem
 var _equipment_system: EquipmentSystem
 var _population_system: PopulationSystem
+var _day_night_system: DayNightSystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -33,18 +34,24 @@ func _init() -> void:
 	_vision_system        = VisionSystem.new()
 	_equipment_system    = EquipmentSystem.new()
 	_population_system   = PopulationSystem.new()
+	_day_night_system    = DayNightSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
+	if state.world.current_tick % state.ticks_per_day == 0:
+		print("[DayNight] Day %d 開始" % (state.world.current_tick / state.ticks_per_day))
 	if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
 		_step1d_overflow(state)
+
+	var time_speed_mult: float = _day_night_system.get_speed_mult(state)
+	var time_vision_mult: float = _day_night_system.get_vision_mult(state)
 
 	var near_teams := _get_near_teams(state, player_pos)
 	var far_teams := _get_far_teams(state, player_pos)
 
-	_step1b_update_vision(state, near_teams)
+	_step1b_update_vision(state, near_teams, time_vision_mult)
 	_step1c_update_equipment(state, near_teams)
-	var arrived_near := _step2_move_teams(state, near_teams)
+	var arrived_near := _step2_move_teams(state, near_teams, time_speed_mult)
 	_step3_propagate_messages(state, arrived_near, near_teams)
 	_step4_resolve_interactions(state, arrived_near, near_teams)
 	_step4b_outpost_tick(state)
@@ -60,9 +67,9 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
-		_step1b_update_vision(state, far_teams)
+		_step1b_update_vision(state, far_teams, time_vision_mult)
 		_step1c_update_equipment(state, far_teams)
-		var arrived_far := _step2_move_teams(state, far_teams)
+		var arrived_far := _step2_move_teams(state, far_teams, time_speed_mult)
 		_step3_propagate_messages(state, arrived_far, far_teams)
 		_step4_resolve_interactions(state, arrived_far, far_teams)
 		_step5_collect_resources(state, far_teams)
@@ -76,8 +83,9 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 func _step1d_overflow(state: WorldState) -> void:
 	_population_system.check_overflow(state)
 
-func _step1b_update_vision(state: WorldState, team_ids: Array) -> void:
-	_vision_system.tick_discovery(state, team_ids)
+func _step1b_update_vision(state: WorldState, team_ids: Array,
+		time_vision_mult: float = 1.0) -> void:
+	_vision_system.tick_discovery(state, team_ids)  # time_mult passed in Task 4
 
 func _step1c_update_equipment(state: WorldState, team_ids: Array) -> void:
 	_equipment_system.tick_all(state, team_ids)
@@ -87,8 +95,12 @@ func _step1_advance_time(state: WorldState) -> void:
 	if state.world.current_tick % 6 == 0:
 		state.world.current_turn += 1
 
-func _step2_move_teams(state: WorldState, team_ids: Array) -> Array:
-	return _movement_system.process(state, team_ids)
+func _step2_move_teams(state: WorldState, team_ids: Array,
+		time_speed_mult: float = 1.0) -> Array:
+	return _movement_system.process(state, team_ids)  # time_mult passed in Task 3
+
+func _get_time_fatigue_mult(state: WorldState) -> float:
+	return _day_night_system.get_fatigue_mult(state)
 
 func _step3_propagate_messages(state: WorldState, arrived_ids: Array, all_ids: Array) -> void:
 	_message_system.propagate_on_arrival(state, arrived_ids, all_ids)
