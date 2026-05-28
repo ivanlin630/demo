@@ -48,6 +48,11 @@ func _move_cost(state: WorldState, team: TeamData) -> int:
 	if state.world.tiles.has(tile_id):
 		var terrain: String = (state.world.tiles[tile_id] as HexTileData).terrain
 		speed *= TERRAIN_SPEED_MULT.get(terrain, 1.0)
+	# 疲勞懲罰
+	if team.fatigue >= 1.0:
+		speed *= 0.3
+	elif team.fatigue > 0.5:
+		speed *= (1.0 - team.fatigue * 0.4)
 	return clamp(int(round(float(BASE_MOVE_TICKS) / maxf(speed, 0.01))), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
 
 func _compute_team_speed(state: WorldState, team: TeamData) -> float:

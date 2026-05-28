@@ -942,4 +942,9 @@ func _run_sim_test() -> void:
 			break
 	if not _split_found:
 		print("[TeamAI] split_leader loyalty=1.0 未找到（分裂事件可能未觸發，屬正常）")
+	# 200 tick 後，移動中的 team 應有疲勞累積
+	var _ft: TeamData = state.teams.get(0)
+	if _ft:
+		print("[TeamAI] Team0 fatigue=%.4f（預期 > 0）" % _ft.fatigue)
+		assert(_ft.fatigue > 0.0, "移動 team 應有疲勞累積")
 	print("=== DONE ===")
