@@ -1083,4 +1083,16 @@ func _run_sim_test() -> void:
 	assert(not _weapon_in_inv, "裝備後 inventory 不應有武器")
 	print("[Player] equip_item 驗證通過")
 
+	# unequip_item 測試
+	var _uneq: bool = _ps.unequip_item(state, "right_hand")
+	assert(_uneq, "unequip_item 應成功")
+	assert(state.persons.get(0).equipment["right_hand"]["grade"] == "", "right_hand 應卸下")
+	var _has_weapon_back: bool = false
+	for item in state.player_state["inventory"]:
+		if item["grade"] == "weapon_melee_low": _has_weapon_back = true
+	assert(_has_weapon_back, "卸裝後 inventory 應有武器")
+	var _uneq_empty: bool = _ps.unequip_item(state, "left_hand")
+	assert(not _uneq_empty, "卸下空槽應失敗")
+	print("[Player] unequip_item 驗證通過")
+
 	print("=== DONE ===")
