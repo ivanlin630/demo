@@ -60,5 +60,10 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 		target: TeamData, action: String) -> void:
 	print("[Diplomacy] Team%d → Team%d: %s" % [sender.team_id, target.team_id, action])
 	# 透過 MessageSystem 發送（簡化：直接呼叫 handle）
-	var response: String = call("handle_diplomacy_message", state, target, sender, action)
+	var response: String = handle_diplomacy_message(state, target, sender, action)
 	print("[Diplomacy] Team%d 回應: %s" % [target.team_id, response])
+
+# Stub — Task 2 will replace this with the full implementation.
+func handle_diplomacy_message(_state: WorldState, _self_team: TeamData,
+		_sender_team: TeamData, _action: String) -> String:
+	return "reject"
