@@ -144,6 +144,72 @@ func init_encounter(state: WorldState, attacker_id: int, defender_id: int,
 	print("[Encounter] 遭遇戰開始 Team%d vs Team%d (type=%s) units=%d" % [
 		attacker_id, defender_id, combat_type, state.encounter_units.size()])
 
+func _equip_named_npc(p: PersonData, team: TeamData) -> void:
+	if p.equipment["right_hand"]["type"] == "none":
+		for grade in ["weapon_melee_low", "weapon_melee_high",
+				"weapon_ranged_low", "weapon_ranged_high"]:
+			if int(team.resources.get(grade, 0)) > 0:
+				p.equipment["right_hand"] = { "type": "pool", "grade": grade }
+				team.resources[grade] = int(team.resources[grade]) - 1
+				break
+	for slot in ["head", "torso", "left_arm", "right_arm", "left_leg", "right_leg"]:
+		if p.equipment.get(slot, {"type":"none"})["type"] != "none": continue
+		var cfg: String = team.armor_config.get(slot, "none")
+		if cfg == "none": continue
+		var grade_key: String = "armor_" + cfg
+		if int(team.resources.get(grade_key, 0)) > 0:
+			p.equipment[slot] = { "type": "pool", "grade": grade_key }
+			team.resources[grade_key] = int(team.resources[grade_key]) - 1
+
+func _distribute_anon_equipment(state: WorldState, team: TeamData) -> void:
+	var anon_units: Array = []
+	for u in state.encounter_units:
+		if u["team_id"] == team.team_id and u["person_id"] == -1:
+			anon_units.append(u)
+	var weapon_pool: int = 0
+	for grade in ["weapon_melee_low", "weapon_melee_high",
+			"weapon_ranged_low", "weapon_ranged_high"]:
+		weapon_pool += int(team.resources.get(grade, 0))
+	var i: int = 0
+	for u in anon_units:
+		u["has_weapon"] = (i < weapon_pool)
+		i += 1
+
+func setup_arrows(state: WorldState, team: TeamData) -> void:
+	var archers: int = 0
+	for u in state.encounter_units:
+		if u["team_id"] != team.team_id: continue
+		if u["person_id"] != -1:
+			var p: PersonData = state.persons.get(u["person_id"])
+			if p and float(p.skills.get("弓箭", 0.0)) > 0.1: archers += 1
+		else:
+			if float(u.get("skills", {}).get("弓箭", 0.0)) > 0.0: archers += 1
+	var total_arrows: int = int(team.resources.get("arrows", 0))
+	var per_archer: int = total_arrows / maxi(archers, 1)
+	for u in state.encounter_units:
+		if u["team_id"] != team.team_id: continue
+		var is_archer: bool = false
+		if u["person_id"] != -1:
+			var p: PersonData = state.persons.get(u["person_id"])
+			is_archer = p != null and float(p.skills.get("弓箭", 0.0)) > 0.1
+		else:
+			is_archer = float(u.get("skills", {}).get("弓箭", 0.0)) > 0.0
+		u["arrows"] = per_archer if is_archer else 0
+
+func _return_pool_equipment(state: WorldState) -> void:
+	for u in state.encounter_units:
+		if not is_dead(u, state): continue
+		var team: TeamData = state.teams.get(u["team_id"])
+		if team == null: continue
+		if u["person_id"] != -1:
+			var p: PersonData = state.persons.get(u["person_id"])
+			if p == null: continue
+			for slot in p.equipment:
+				var item: Dictionary = p.equipment[slot]
+				if item.get("type", "none") == "pool":
+					team.resources[item["grade"]] = int(team.resources.get(item["grade"], 0)) + 1
+					p.equipment[slot] = { "type": "none", "grade": "" }
+
 func _spawn_team_units(state: WorldState, team: TeamData,
 		positions: Array) -> void:
 	var pos_idx: int = 0
