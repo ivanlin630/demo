@@ -1104,7 +1104,7 @@ func _run_sim_test() -> void:
 	# 重量計算
 	_ps.add_to_inventory(state, "armor_low", 2)
 	var _wt2: float = _ps.calc_inventory_weight(state)
-	print("[Player] inventory weight=%.1f（armor_low×2=10.0）" % _wt2)
+	print("[Player] inventory weight=%.1f（累計，armor_low×2貢獻10.0）" % _wt2)
 	assert(_wt2 >= 10.0, "armor_low×2 重量應 >= 10.0")
 
 	print("=== DONE ===")
