@@ -97,7 +97,7 @@ func _step1_advance_time(state: WorldState) -> void:
 
 func _step2_move_teams(state: WorldState, team_ids: Array,
 		time_speed_mult: float = 1.0) -> Array:
-	return _movement_system.process(state, team_ids)  # time_mult passed in Task 3
+	return _movement_system.process(state, team_ids, time_speed_mult)
 
 func _get_time_fatigue_mult(state: WorldState) -> float:
 	return _day_night_system.get_fatigue_mult(state)
