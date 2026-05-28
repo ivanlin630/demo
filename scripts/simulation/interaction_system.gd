@@ -857,6 +857,14 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 			snap["goods_est"]    *= randf_range(0.3, 0.7)
 	state.team_intel[obs_id][tgt_id] = snap
 
+func _check_night_raid(state: WorldState, attacker: TeamData,
+		defender: TeamData) -> bool:
+	var dns := DayNightSystem.new()
+	if defender.current_task != "rest": return false
+	if dns.get_camp_vision_range(state, defender) > 0: return false
+	return true
+# 若 _check_night_raid 返回 true，觸發追擊戰模式（combat_type = "pursuit"）
+
 func _calc_armed(state: WorldState, team: TeamData) -> int:
 	var named_armed: int = 0
 	for pid in ([team.leader_id] as Array) + team.named_members:

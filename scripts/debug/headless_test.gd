@@ -929,4 +929,14 @@ func _run_sim_test() -> void:
 	state.world.current_tick = _saved_tick
 	print("[DayNight] 時間計算驗證通過")
 
+	var _dns2 := DayNightSystem.new()
+	var _rest_team: TeamData = state.teams.get(2)
+	_rest_team.current_task = "rest"
+	_rest_team.guard_ratio = 0.0
+	var _cvr: int = _dns2.get_camp_vision_range(state, _rest_team)
+	assert(_cvr == 0, "無守夜 → camp_vision_range 應為 0")
+	_rest_team.guard_ratio = 0.5
+	_cvr = _dns2.get_camp_vision_range(state, _rest_team)
+	print("[DayNight] guard_ratio=0.5 camp_vision_range=%d" % _cvr)
+
 	print("=== DONE ===")

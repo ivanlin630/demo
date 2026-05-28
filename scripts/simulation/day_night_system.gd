@@ -35,3 +35,27 @@ func get_vision_mult(state: WorldState) -> float:
 		"dusk":  return 0.75
 		"night": return 0.5
 	return 1.0
+
+func get_guards(state: WorldState, team: TeamData) -> Array:
+	var guard_count: int = ceili(team.population * team.guard_ratio)
+	var scored: Array = []
+	for pid in team.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		scored.append({ "id": pid, "scout": float(p.skills.get("偵查", 0.0)) })
+	scored.sort_custom(func(a, b): return a["scout"] > b["scout"])
+	var guards: Array = []
+	for i in range(mini(guard_count, scored.size())):
+		guards.append(scored[i]["id"])
+	return guards
+
+func get_camp_vision_range(state: WorldState, team: TeamData) -> int:
+	var guards: Array = get_guards(state, team)
+	if guards.size() == 0: return 0
+	var total_scout: float = 0.0
+	for pid in guards:
+		var p: PersonData = state.persons.get(pid)
+		if p: total_scout += float(p.skills.get("偵查", 0.0))
+	var avg_scout: float = total_scout / guards.size()
+	var base: int = 3   # VisionSystem.VISION_RADIUS (避免跨系統依賴)
+	return roundi((base + avg_scout * 2.0) * get_vision_mult(state))
