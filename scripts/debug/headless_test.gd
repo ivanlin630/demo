@@ -947,4 +947,10 @@ func _run_sim_test() -> void:
 	if _ft:
 		print("[TeamAI] Team0 fatigue=%.4f（預期 > 0）" % _ft.fatigue)
 		assert(_ft.fatigue > 0.0, "移動 team 應有疲勞累積")
+	var _ms: Object = load("res://scripts/simulation/movement_system.gd").new()
+	var _wt: TeamData = state.teams.get(0)
+	if _wt:
+		var _cap: float = _ms.get_carry_capacity(_wt)
+		print("[TeamAI] Team0 carry_cap=%.1f weight=%.1f" % [_cap, _ms.calc_total_weight(_wt)])
+		assert(_cap > 0.0, "carry capacity 應 > 0")
 	print("=== DONE ===")

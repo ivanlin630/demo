@@ -10,6 +10,15 @@ const TERRAIN_SPEED_MULT: Dictionary = {
 	"mountain": 0.4,
 }
 
+const BASE_CARRY: float   = 10.0   # TEST VALUE
+const MOUNT_BONUS: float  = 15.0   # TEST VALUE
+const WAGON_BONUS: float  = 40.0   # TEST VALUE
+const STRAY_RATE: float   = 0.1    # TEST VALUE 超額馱獸流失率
+
+const WAGON_TERRAIN_MULT: Dictionary = {
+	"plains": 0.9, "forest": 0.4, "mountain": 0.2
+}
+
 func process(state: WorldState, team_ids: Array) -> Array:
 	# 護衛：每 tick 追蹤目標位置
 	for tid in team_ids:
@@ -29,6 +38,7 @@ func process(state: WorldState, team_ids: Array) -> Array:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
+		_tick_stray_mounts(team)
 		if team.combat_target != -1:
 			continue
 		if team.move_target == Vector2i(-1, -1):
@@ -42,6 +52,38 @@ func process(state: WorldState, team_ids: Array) -> Array:
 			arrived.append(tid)
 	return arrived
 
+func get_effective_mounts(team: TeamData) -> int:
+	return mini(int(team.resources.get("mounts", 0)), team.population)
+
+func get_effective_wagons(team: TeamData) -> int:
+	return mini(int(team.resources.get("wagons", 0)), team.population)
+
+func get_carry_capacity(team: TeamData) -> float:
+	return team.population * BASE_CARRY \
+		+ get_effective_mounts(team) * MOUNT_BONUS \
+		+ get_effective_wagons(team) * WAGON_BONUS
+
+func calc_total_weight(team: TeamData) -> float:
+	var total: float = 0.0
+	for key in team.resources:
+		total += maxf(float(team.resources[key]), 0.0) * _resource_weight(key)
+	return total
+
+func _resource_weight(key: String) -> float:
+	match key:
+		"food":              return 0.1
+		"weapon_melee_low":  return 2.0
+		"weapon_melee_high": return 3.0
+		"armor_low":         return 4.0
+		"armor_high":        return 7.0
+		"mounts", "wagons":  return 0.0  # 搬運工具本身不計重
+		_:                   return 1.0
+
+func _tick_stray_mounts(team: TeamData) -> void:
+	var excess: int = int(team.resources.get("mounts", 0)) - team.population
+	if excess > 0:
+		team.resources["mounts"] = int(team.resources["mounts"]) - ceili(excess * STRAY_RATE)
+
 func _move_cost(state: WorldState, team: TeamData) -> int:
 	var speed: float = _compute_team_speed(state, team)
 	var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
@@ -53,6 +95,18 @@ func _move_cost(state: WorldState, team: TeamData) -> int:
 		speed *= 0.3
 	elif team.fatigue > 0.5:
 		speed *= (1.0 - team.fatigue * 0.4)
+	# 超載懲罰
+	var cap: float = get_carry_capacity(team)
+	var weight: float = calc_total_weight(team)
+	if weight > cap:
+		speed *= (cap / weight)
+	# 車輛地形懲罰
+	var wagons: int = get_effective_wagons(team)
+	if wagons > 0:
+		var tile_id2: int = team.tile_pos.x * 1000 + team.tile_pos.y
+		var tile2 = state.world.tiles.get(tile_id2)
+		var terrain2: String = tile2.terrain if tile2 else "plains"
+		speed *= WAGON_TERRAIN_MULT.get(terrain2, 1.0)
 	return clamp(int(round(float(BASE_MOVE_TICKS) / maxf(speed, 0.01))), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
 
 func _compute_team_speed(state: WorldState, team: TeamData) -> float:
