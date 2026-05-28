@@ -912,4 +912,41 @@ func _run_sim_test() -> void:
 	print("[DataStruct] named_members 非空: Team0=%d" % state.teams[0].named_members.size())
 	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
 	print("[DataStruct] state.ticks_per_day=%d" % state.ticks_per_day)
+
+	# === NpcAI Task 1: write_memory / relations ===
+	var _npc_sys := NpcAiSystem.new()
+	var _mp: PersonData = state.persons.get(1)
+	_npc_sys.write_memory(_mp, "looted", 0, 0, 0.7)
+	assert(_mp.memory.size() > 0, "memory 應有記錄")
+	assert(_mp.memory[_mp.memory.size() - 1]["type"] == "looted", "記憶 type 應為 looted")
+	assert(float(_mp.relations.get(0, 0.0)) < 0.0, "relations[0] 應為負值")
+	print("[NpcAI] write_memory/relations 驗證通過")
+
+	# === NpcAI Task 2: 目標生成/觸發 ===
+	var _gp: PersonData = PersonData.new()
+	_gp.values["貪婪"] = 0.8
+	NpcAiSystem.new().generate_birth_goals(_gp)
+	assert(_gp.goals.size() > 0, "birth goals 應生成")
+	assert(_gp.goals[0]["type"] == "wealth", "高貪婪應生成 wealth 目標")
+
+	var _npc2 := NpcAiSystem.new()
+	var _rp: PersonData = state.persons.get(1)
+	_npc2.write_memory(_rp, "looted", 0, 1, 0.7)
+	var _has_revenge: bool = false
+	for g in _rp.goals:
+		if g["type"] == "revenge" and g["active"]: _has_revenge = true
+	assert(_has_revenge, "looted 記憶應觸發 revenge 目標")
+	print("[NpcAI] 目標生成/觸發驗證通過")
+
+	# === NpcAI Task 3: check_goal_alignment ===
+	var _npc3 := NpcAiSystem.new()
+	var _cp: PersonData = state.persons.get(1)
+	# 確保有 revenge goal 且 active
+	_npc3._activate_goal(_cp, "revenge", 9)
+	var _align: float = _npc3.check_goal_alignment(_cp, "逃跑")
+	assert(_align < 0.0 or _align == 0.0, "revenge+逃跑不衝突（返回 0 或負）")
+	var _align2: float = _npc3.check_goal_alignment(_cp, "攻擊")
+	assert(_align2 > 0.0, "revenge+攻擊應 aligned（> 0）")
+	print("[NpcAI] check_goal_alignment 驗證通過")
+
 	print("=== DONE ===")
