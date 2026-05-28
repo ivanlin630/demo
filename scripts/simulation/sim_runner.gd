@@ -30,6 +30,7 @@ var _salary_system: SalarySystem
 var _day_night_system: DayNightSystem
 var _diplomatic_ai_system: DiplomaticAiSystem
 var _strategic_ai_system: StrategicAiSystem
+var _encounter_system: EncounterSystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -51,8 +52,16 @@ func _init() -> void:
 	_day_night_system    = DayNightSystem.new()
 	_diplomatic_ai_system = DiplomaticAiSystem.new()
 	_strategic_ai_system = StrategicAiSystem.new()
+	_encounter_system    = EncounterSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
+	if state.encounter_active:
+		var round_num: int = state.world.current_tick
+		var result: String = _encounter_system.advance_round(state, round_num)
+		if result != "ongoing":
+			_encounter_system.resolve_encounter_end(state, result)
+		_step1_advance_time(state)
+		return
 	_step1_advance_time(state)
 	if state.world.current_tick % state.ticks_per_day == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / state.ticks_per_day))

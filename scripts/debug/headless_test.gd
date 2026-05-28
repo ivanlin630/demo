@@ -1107,4 +1107,82 @@ func _run_sim_test() -> void:
 	print("[Player] inventory weight=%.1f（累計，armor_low×2貢獻10.0）" % _wt2)
 	assert(_wt2 >= 10.0, "armor_low×2 重量應 >= 10.0")
 
+	# ── EncounterSystem 基礎驗證 ──
+	var _enc := EncounterSystem.new()
+	var _enc_unit: Dictionary = {
+		"person_id": 0, "team_id": 0,
+		"pos": Vector2i(0, 0),
+		"stamina": 1.0, "is_messenger": false, "has_exited": false,
+	}
+	var _p0: PersonData = state.persons.get(0)
+	if _p0:
+		_p0.body_parts["torso"]["status"] = "healthy"
+		assert(not _enc.is_dead(_enc_unit, state), "healthy torso 不應死亡")
+		assert(_enc.is_combat_capable(_enc_unit, state), "healthy 應戰鬥能力")
+		_p0.body_parts["torso"]["status"] = "severed"
+		assert(_enc.is_dead(_enc_unit, state), "severed torso 應死亡")
+		_p0.body_parts["torso"]["status"] = "healthy"  # 還原
+	print("[Encounter] 基礎輔助函數驗證通過")
+
+	var _anon_unit: Dictionary = {
+		"person_id": -1, "team_id": 0,
+		"pos": Vector2i(1, 0),
+		"stamina": 0.8, "is_messenger": false, "has_exited": false,
+		"body_parts": _enc._default_body_parts(),
+	}
+	assert(_enc.is_combat_capable(_anon_unit, state), "匿名 unit 應戰鬥能力")
+	assert(_enc.hex_dist(Vector2i(0,0), Vector2i(3,0)) == 3, "hex_dist 應為 3")
+	print("[Encounter] 匿名 unit 驗證通過")
+
+	var _enc2 := EncounterSystem.new()
+	state.player_id = 0
+	_enc2.init_encounter(state, 0, 1, "normal")
+	assert(state.encounter_active, "encounter_active 應為 true")
+	var _unit_count: int = state.encounter_units.size()
+	assert(_unit_count > 0, "應有 encounter units")
+	print("[Encounter] init_encounter units=%d" % _unit_count)
+	state.encounter_active = false
+	state.encounter_units.clear()
+
+	var _enc3 := EncounterSystem.new()
+	_enc3.init_encounter(state, 0, 1, "normal")
+	if state.encounter_units.size() >= 2:
+		var _test_unit_idx: int = -1
+		for _i in range(state.encounter_units.size()):
+			if state.encounter_units[_i]["team_id"] == 0:
+				_test_unit_idx = _i
+				break
+		if _test_unit_idx != -1:
+			var _action: Dictionary = _enc3._decide_action(_test_unit_idx, state, -1)
+			assert(_action.has("type"), "_decide_action 應有 type 欄位")
+			print("[Encounter] decide_action type=%s" % _action["type"])
+	state.encounter_active = false
+	state.encounter_units.clear()
+
+	var _enc4 := EncounterSystem.new()
+	_enc4.init_encounter(state, 0, 1, "normal")
+	var _result: String = "ongoing"
+	for _r in range(50):
+		_result = _enc4.advance_round(state, _r)
+		if _result != "ongoing": break
+	print("[Encounter] advance_round 結果=%s (50輪)" % _result)
+	assert(_result != "" and _result != null, "advance_round 應有結果")
+	state.encounter_active = false
+	state.encounter_units.clear()
+
+	# 完整遭遇戰流程
+	var _enc5 := EncounterSystem.new()
+	state.player_id = 0
+	state.persons[0].team_id = 0
+	_enc5.init_encounter(state, 0, 1, "normal")
+	print("[Encounter] 遭遇戰流程測試開始 units=%d" % state.encounter_units.size())
+	var _final_result: String = "ongoing"
+	for _r in range(100):
+		_final_result = _enc5.advance_round(state, _r)
+		if _final_result != "ongoing": break
+	_enc5.resolve_encounter_end(state, _final_result)
+	assert(not state.encounter_active, "結算後 encounter_active 應為 false")
+	assert(state.encounter_units.size() == 0, "結算後 encounter_units 應清空")
+	print("[Encounter] 完整遭遇戰流程驗證通過 result=%s" % _final_result)
+
 	print("=== DONE ===")

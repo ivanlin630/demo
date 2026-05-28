@@ -42,6 +42,13 @@ func disband_faction(faction_id: int) -> void:
 	factions.erase(faction_id)
 	print("[Faction] 勢力%d 解散" % faction_id)
 
+# ── 遭遇戰臨時狀態（active 期間使用，結束後清空） ──
+var encounter_active: bool        = false
+var encounter_units: Array        = []   # Array[Dictionary]
+var encounter_attacker_id: int    = -1
+var encounter_defender_id: int    = -1
+var pursuit_edge_offset: int      = 0   # 追擊進場邊緣輪換計數
+
 func snapshot_faction_member(team_id: int, tick: int) -> void:
 	var t: TeamData = teams.get(team_id) as TeamData
 	if t == null or t.faction_id == -1:
