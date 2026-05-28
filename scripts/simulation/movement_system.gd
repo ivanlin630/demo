@@ -1,4 +1,4 @@
-class_name MovementSystem
+﻿class_name MovementSystem
 
 const BASE_MOVE_TICKS: int = 10
 const MIN_MOVE_TICKS: int = 3
@@ -42,6 +42,15 @@ func process(state: WorldState, team_ids: Array,
 		_tick_stray_mounts(team)
 		if team.combat_target != -1:
 			continue
+		# strategic_assignments 優先（-1 key = 突圍；正整數 key = 包圍目標）
+		if team.strategic_assignments.size() > 0 and team.current_task != "逃跑":
+			var sa_target: Vector2i
+			if team.strategic_assignments.has(-1):
+				sa_target = team.strategic_assignments[-1]
+			else:
+				sa_target = team.strategic_assignments.values()[0]
+			if team.move_target == Vector2i(-1, -1) or team.move_target == team.tile_pos:
+				team.move_target = sa_target
 		if team.move_target == Vector2i(-1, -1):
 			continue
 		var cost: int = _move_cost(state, team, time_mult)

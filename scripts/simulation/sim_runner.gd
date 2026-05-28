@@ -29,6 +29,7 @@ var _npc_ai_system: NpcAiSystem
 var _salary_system: SalarySystem
 var _day_night_system: DayNightSystem
 var _diplomatic_ai_system: DiplomaticAiSystem
+var _strategic_ai_system: StrategicAiSystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -49,6 +50,7 @@ func _init() -> void:
 	_salary_system       = SalarySystem.new()
 	_day_night_system    = DayNightSystem.new()
 	_diplomatic_ai_system = DiplomaticAiSystem.new()
+	_strategic_ai_system = StrategicAiSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
@@ -77,6 +79,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step6c_salary(state, near_teams)
 	_step6d_fatigue(state, near_teams)
 	_step6b_faction_ai(state, near_teams)
+	_step6e_strategic_ai(state)
 	_step7_person_reactions(state, near_teams)
 	_step7b_npc_goal_cleanup(state, near_teams)
 	_step8_generate_events(state, near_teams)
@@ -96,6 +99,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		_step6c_salary(state, far_teams)
 		_step6d_fatigue(state, far_teams)
 		_step6b_faction_ai(state, far_teams)
+		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
 
@@ -174,6 +178,10 @@ func _step6d_fatigue(state: WorldState, team_ids: Array) -> void:
 
 func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
 	_faction_ai_system.evaluate_all(state, team_ids)
+
+func _step6e_strategic_ai(state: WorldState) -> void:
+	for fid in state.factions:
+		_strategic_ai_system.tick(state, state.factions[fid])
 
 func _step7_person_reactions(state: WorldState, team_ids: Array) -> void:
 	_reaction_system.evaluate_all(state, team_ids, _skill_system)
