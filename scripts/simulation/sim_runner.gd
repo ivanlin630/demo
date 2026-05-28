@@ -99,6 +99,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		_step6c_salary(state, far_teams)
 		_step6d_fatigue(state, far_teams)
 		_step6b_faction_ai(state, far_teams)
+		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
 

@@ -47,6 +47,19 @@ func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
     if faction.strategic_goals.size() > 0:
         print("[StrategicAI] Faction%d 首要目標: %s target=%d" % [
             faction.faction_id, faction.strategic_goals[0]["type"], faction.strategic_goals[0]["target_id"]])
+    # 若無 expand goal，清除所有包圍指派（目標可能已消滅）
+    var has_expand: bool = false
+    for g in faction.strategic_goals:
+        if g["type"] == "expand":
+            has_expand = true
+            break
+    if not has_expand:
+        for tid in faction.member_team_ids:
+            var t: TeamData = state.teams.get(tid)
+            if t:
+                for key in t.strategic_assignments.keys():
+                    if key != -1:
+                        t.strategic_assignments.erase(key)
 
 func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
     var best_id: int = -1; var best_d: int = 999
@@ -98,7 +111,9 @@ func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
         if t.faction_id == -1 or t.faction_id == self_team.faction_id:
             continue
         enemy_teams.append(t)
-    if enemy_teams.size() < 2: return
+    if enemy_teams.size() < 2:
+        self_team.strategic_assignments.erase(-1)
+        return
     var best_dir: Vector2i = _find_escape_dir(self_team.tile_pos, enemy_teams)
     self_team.strategic_assignments[-1] = self_team.tile_pos + best_dir * 5
 
