@@ -6,6 +6,11 @@ const OVERPAY_BONUS: float     = 0.02  # TEST VALUE
 const SALARY_LOYALTY_PENALTY: float = 0.03  # TEST VALUE
 const MAX_LOYALTY: float       = 0.95
 
+var _npc_ai: NpcAiSystem
+
+func _init() -> void:
+	_npc_ai = NpcAiSystem.new()
+
 func tick(state: WorldState, team_ids: Array) -> void:
 	if state.world.current_tick % SALARY_INTERVAL != 0:
 		return
@@ -31,6 +36,9 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		p.coin += p.salary
 		if ratio >= 1.0:
 			p.loyalty = minf(p.loyalty + (ratio - 1.0) * OVERPAY_BONUS, MAX_LOYALTY)
+			var intensity: float = clampf((ratio - 1.0) * 0.5, 0.05, 0.8)  # TEST VALUE
+			_npc_ai.write_memory(p, "kindness", team.leader_id,
+				state.world.current_tick, intensity)
 		else:
 			p.loyalty -= (1.0 - ratio) * SALARY_LOYALTY_PENALTY
 	var anon_count: int = team.population - team.named_members.size() - 1

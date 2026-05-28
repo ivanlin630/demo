@@ -925,6 +925,7 @@ func _run_sim_test() -> void:
 	# === NpcAI Task 1: write_memory / relations ===
 	var _npc_sys := NpcAiSystem.new()
 	var _mp: PersonData = state.persons.get(1)
+	_mp.relations.clear()  # 隔離：清除 sim 累積的 kindness 影響，確保測試純粹
 	_npc_sys.write_memory(_mp, "looted", 0, 0, 0.7)
 	assert(_mp.memory.size() > 0, "memory 應有記錄")
 	assert(_mp.memory[_mp.memory.size() - 1]["type"] == "looted", "記憶 type 應為 looted")
