@@ -1095,4 +1095,16 @@ func _run_sim_test() -> void:
 	assert(not _uneq_empty, "卸下空槽應失敗")
 	print("[Player] unequip_item 驗證通過")
 
+	# get_visible_teams
+	var _visible: Array = _ps.get_visible_teams(state)
+	print("[Player] 玩家可見 team 數=%d" % _visible.size())
+	# 玩家在 Team0，Team0 discovered Team3 → visible 應包含 3
+	assert(_visible.has(3), "玩家應能看到 Team3")
+
+	# 重量計算
+	_ps.add_to_inventory(state, "armor_low", 2)
+	var _wt2: float = _ps.calc_inventory_weight(state)
+	print("[Player] inventory weight=%.1f（armor_low×2=10.0）" % _wt2)
+	assert(_wt2 >= 10.0, "armor_low×2 重量應 >= 10.0")
+
 	print("=== DONE ===")
