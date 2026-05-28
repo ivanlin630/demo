@@ -1014,4 +1014,9 @@ func _run_sim_test() -> void:
 	_rest_team.guard_ratio = 0.5
 	_cvr = _dns2.get_camp_vision_range(state, _rest_team)
 	print("[DayNight] guard_ratio=0.5 camp_vision_range=%d" % _cvr)
+	var _dip := DiplomaticAiSystem.new()
+	var _ds: float = _dip._calc_diplomacy_score(state, state.teams[0], state.teams[3])
+	print("[Diplomacy] Team0→Team3 score=%.3f" % _ds)
+	assert(_ds >= 0.0 and _ds <= 1.0, "diplomacy score 應在 0.0–1.0")
+
 	print("=== DONE ===")
