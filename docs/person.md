@@ -63,7 +63,7 @@ var body_parts: Dictionary
 #   "right_leg": { "status": "healthy", "poisoned": false },
 #   "left_leg":  { "status": "healthy", "poisoned": false },
 # }
-# poisoned: 每 tick 使該部位 status 降一級；解毒劑清除
+# poisoned: 每 tick 扣該部位 HP（HP 歸零時 status 正常降級）；解毒劑清除
 
 const STATUS_MULT: Dictionary = {
     "healthy": 1.0, "wounded": 0.7, "critical": 0.3, "severed": 0.0
@@ -100,7 +100,8 @@ var equipment: Dictionary = {}
 | `severed` | ×0.0 | 功能全失（四肢限定） |
 
 **中毒（`poisoned: true`）**：獨立 flag，疊加於任何 status 上。
-每 tick 自動將該部位 status 降一級（healthy→wounded→critical）。
+每 tick 扣該部位 HP，HP 歸零時 status 正常降級（healthy→wounded→critical）。
+大地圖 NPC（無 HP 欄位）中毒時直接每 tick 降 status 一級（fallback）。
 解毒劑（medicine ×3）清除 poisoned flag。
 
 **Medicine 使用動作（玩家/遭遇戰）**：
