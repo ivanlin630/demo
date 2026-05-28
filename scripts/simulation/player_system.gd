@@ -41,16 +41,15 @@ func take_from_team(state: WorldState, grade: String, qty: int) -> bool:
     var cur: int = int(team.resources.get(grade, 0))
     if cur < qty: return false
     team.resources[grade] = cur - qty
-    for i in range(qty):
-        add_to_inventory(state, grade, 1)
+    add_to_inventory(state, grade, qty)
     return true
 
 func deposit_to_team(state: WorldState, grade: String, qty: int) -> bool:
     var inv: Array = state.player_state.get("inventory", [])
-    for item in inv:
-        if item["grade"] == grade and item.get("qty", 0) >= qty:
-            item["qty"] -= qty
-            if item["qty"] <= 0: inv.erase(item)
+    for i in range(inv.size()):
+        if inv[i]["grade"] == grade and inv[i].get("qty", 0) >= qty:
+            inv[i]["qty"] -= qty
+            if inv[i]["qty"] <= 0: inv.remove_at(i)
             var team: TeamData = _get_player_team(state)
             if team:
                 team.resources[grade] = int(team.resources.get(grade, 0)) + qty
@@ -67,7 +66,9 @@ func equip_item(state: WorldState, slot: String, grade: String) -> bool:
             var old: Dictionary = player.equipment.get(slot, {})
             if old.get("type", "none") != "none":
                 add_to_inventory(state, old["grade"])
-            player.equipment[slot] = { "type": "pool", "grade": grade }
+            # 轉換 grade 到 EquipmentSystem/SkillSystem 預期的短格式 type
+            var wtype: String = grade.replace("weapon_", "")
+            player.equipment[slot] = { "type": wtype, "grade": grade }
             inv[i]["qty"] -= 1
             if inv[i]["qty"] <= 0: inv.remove_at(i)
             return true
@@ -90,4 +91,4 @@ func _get_player_team(state: WorldState) -> TeamData:
 func get_visible_teams(state: WorldState) -> Array:
     var p: PersonData = state.persons.get(state.player_id)
     if p == null: return []
-    return state.team_discovered.get(p.team_id, [])
+    return state.team_discovered.get(p.team_id, []).duplicate()
