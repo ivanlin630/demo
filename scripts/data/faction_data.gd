@@ -25,3 +25,8 @@ var known_member_states: Dictionary = {}
 #   "current_task": String,
 #   "last_tick":    int,
 # }}
+
+# 策略層（strategic_ai_system 讀寫）
+var strategic_goals: Array = []
+# strategic goal 格式: { "type": String, "target_id": int, "priority": float }
+# type: "expand" / "defend" / "trade_net" / "tribute" / "alliance"
