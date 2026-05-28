@@ -1144,4 +1144,19 @@ func _run_sim_test() -> void:
 	state.encounter_active = false
 	state.encounter_units.clear()
 
+	var _enc3 := EncounterSystem.new()
+	_enc3.init_encounter(state, 0, 1, "normal")
+	if state.encounter_units.size() >= 2:
+		var _test_unit_idx: int = -1
+		for _i in range(state.encounter_units.size()):
+			if state.encounter_units[_i]["team_id"] == 0:
+				_test_unit_idx = _i
+				break
+		if _test_unit_idx != -1:
+			var _action: Dictionary = _enc3._decide_action(_test_unit_idx, state, -1)
+			assert(_action.has("type"), "_decide_action 應有 type 欄位")
+			print("[Encounter] decide_action type=%s" % _action["type"])
+	state.encounter_active = false
+	state.encounter_units.clear()
+
 	print("=== DONE ===")

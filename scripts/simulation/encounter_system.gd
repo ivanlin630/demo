@@ -144,6 +144,181 @@ func init_encounter(state: WorldState, attacker_id: int, defender_id: int,
 	print("[Encounter] 遭遇戰開始 Team%d vs Team%d (type=%s) units=%d" % [
 		attacker_id, defender_id, combat_type, state.encounter_units.size()])
 
+func _calc_vision_range(unit: Dictionary, state: WorldState,
+		time_vision_mult: float) -> int:
+	var scout: float = 0.0
+	if unit["person_id"] != -1:
+		var p: PersonData = state.persons.get(unit["person_id"])
+		if p: scout = float(p.skills.get("偵查", 0.0))
+	return roundi((2.0 + scout * 2.0) * time_vision_mult)   # TEST VALUE
+
+func _count_nearby_enemies(unit: Dictionary, state: WorldState,
+		range_hex: int) -> int:
+	var count: int = 0
+	for other in state.encounter_units:
+		if other["team_id"] == unit["team_id"]: continue
+		if is_dead(other, state) or other.get("has_exited", false): continue
+		if hex_dist(unit["pos"], other["pos"]) <= range_hex:
+			count += 1
+	return count
+
+func _get_nearest_enemy_index(unit: Dictionary, state: WorldState) -> int:
+	var best_idx: int = -1; var best_d: int = 9999
+	for i in range(state.encounter_units.size()):
+		var other: Dictionary = state.encounter_units[i]
+		if other["team_id"] == unit["team_id"]: continue
+		if is_dead(other, state) or other.get("has_exited", false): continue
+		var d: int = hex_dist(unit["pos"], other["pos"])
+		if d < best_d: best_d = d; best_idx = i
+	return best_idx
+
+func _should_retreat(unit: Dictionary, state: WorldState,
+		team_incapable_ratio: float) -> bool:
+	if team_incapable_ratio > 0.7: return true
+	var bp := _get_body_parts(unit, state)
+	if bp.get("torso", {}).get("status") == "critical": return true
+	if unit["person_id"] != -1:
+		var p: PersonData = state.persons.get(unit["person_id"])
+		if p and p.values.get("求生欲", 0.5) > 0.7 and team_incapable_ratio > 0.5:
+			return randf() < 0.3
+	return false
+
+func _should_escort(unit_idx: int, state: WorldState) -> int:
+	var unit: Dictionary = state.encounter_units[unit_idx]
+	if not is_combat_capable(unit, state): return -1
+	if _count_nearby_enemies(unit, state, 2) > ESCORT_MAX_NEARBY_ENEMIES: return -1
+	var p: PersonData = null
+	if unit["person_id"] != -1:
+		p = state.persons.get(unit["person_id"])
+	if p != null and p.values.get("義氣", 0.5) < 0.4: return -1
+	for i in range(state.encounter_units.size()):
+		if i == unit_idx: continue
+		var target: Dictionary = state.encounter_units[i]
+		if target["team_id"] != unit["team_id"]: continue
+		if is_dead(target, state): continue
+		if is_combat_capable(target, state): continue
+		if hex_dist(unit["pos"], target["pos"]) <= ESCORT_DETECT_RANGE:
+			return i
+	return -1
+
+func _calc_team_incapable_ratio(team_id: int, state: WorldState) -> float:
+	var total: int = 0; var incapable: int = 0
+	for u in state.encounter_units:
+		if u["team_id"] != team_id: continue
+		if u.get("has_exited", false): continue
+		total += 1
+		if not is_combat_capable(u, state): incapable += 1
+	if total == 0: return 0.0
+	return float(incapable) / float(total)
+
+# action 格式: { "type": String, "target_idx": int, "move_to": Vector2i, "attack_part": String }
+func _decide_action(unit_idx: int, state: WorldState,
+		focus_target: int) -> Dictionary:
+	var unit: Dictionary = state.encounter_units[unit_idx]
+	if not is_combat_capable(unit, state):
+		return { "type": "incapable", "target_idx": -1,
+			"move_to": unit["pos"], "attack_part": "" }
+
+	var team_ratio: float = _calc_team_incapable_ratio(unit["team_id"], state)
+
+	# 1. 撤退
+	if _should_retreat(unit, state, team_ratio):
+		return { "type": "retreat", "target_idx": -1,
+			"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
+
+	# 2. 傳令
+	if unit.get("is_messenger", false):
+		return { "type": "messenger_exit", "target_idx": -1,
+			"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
+
+	# 3. 護送
+	var escort_idx: int = _should_escort(unit_idx, state)
+	if escort_idx != -1 and unit.get("escort_target", -1) == -1:
+		return { "type": "start_escort", "target_idx": escort_idx,
+			"move_to": state.encounter_units[escort_idx]["pos"], "attack_part": "" }
+	if unit.get("escort_target", -1) != -1:
+		var etgt: Dictionary = state.encounter_units[unit["escort_target"]]
+		if _count_nearby_enemies(unit, state, 2) >= 2:
+			unit["escort_target"] = -1
+			if _should_retreat(unit, state, team_ratio):
+				return { "type": "retreat", "target_idx": -1,
+					"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
+			var enemy_idx: int = _get_nearest_enemy_index(unit, state)
+			return { "type": "attack", "target_idx": enemy_idx,
+				"move_to": state.encounter_units[enemy_idx]["pos"] if enemy_idx != -1 else unit["pos"],
+				"attack_part": "torso" }
+		if unit["stamina"] <= 0.05:
+			unit["escort_target"] = -1
+			return { "type": "retreat", "target_idx": -1,
+				"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
+		var _etgt_ref: Dictionary = etgt  # suppress unused warning
+		return { "type": "escort_move", "target_idx": unit["escort_target"],
+			"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
+
+	# 4. 集火目標
+	if focus_target != -1 and focus_target < state.encounter_units.size():
+		var ft: Dictionary = state.encounter_units[focus_target]
+		if is_combat_capable(ft, state):
+			return { "type": "attack", "target_idx": focus_target,
+				"move_to": ft["pos"],
+				"attack_part": _choose_attack_part(unit, state) }
+
+	# 5. 接近最近敵人
+	var nearest: int = _get_nearest_enemy_index(unit, state)
+	if nearest == -1:
+		return { "type": "idle", "target_idx": -1,
+			"move_to": unit["pos"], "attack_part": "" }
+
+	var target: Dictionary = state.encounter_units[nearest]
+	var dist: int = hex_dist(unit["pos"], target["pos"])
+
+	# 6. 技能行動
+	var is_archer: bool = false
+	var archer_skill: float = 0.0
+	if unit["person_id"] != -1:
+		var p: PersonData = state.persons.get(unit["person_id"])
+		if p: archer_skill = float(p.skills.get("弓箭", 0.0))
+	is_archer = archer_skill > 0.1 and unit.get("arrows", 0) > 0
+
+	if is_archer:
+		if dist >= 3 and dist <= 5:
+			return { "type": "shoot", "target_idx": nearest,
+				"move_to": unit["pos"], "attack_part": _choose_attack_part(unit, state) }
+		elif dist < 3:
+			return { "type": "move_back", "target_idx": nearest,
+				"move_to": _calc_retreat_dir(unit, state, nearest),
+				"attack_part": "" }
+
+	if dist <= 1:
+		return { "type": "attack", "target_idx": nearest,
+			"move_to": unit["pos"], "attack_part": _choose_attack_part(unit, state) }
+	return { "type": "move", "target_idx": nearest,
+		"move_to": target["pos"], "attack_part": "" }
+
+func _choose_attack_part(unit: Dictionary, state: WorldState) -> String:
+	if unit["person_id"] == -1: return "torso"
+	var p: PersonData = state.persons.get(unit["person_id"])
+	if p == null: return "torso"
+	var tactics: float = float(p.skills.get("戰術", 0.0))
+	if tactics > 0.5 and randf() < 0.4: return "right_leg"
+	return "torso"
+
+func _nearest_edge_pos(pos: Vector2i) -> Vector2i:
+	var dirs: Array = [Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1),
+		Vector2i(0,-1), Vector2i(1,-1), Vector2i(-1,1)]
+	var best_dir: Vector2i = dirs[0]; var best_score: int = -999
+	for d in dirs:
+		var npos: Vector2i = pos + d
+		var score: int = abs(npos.x) + abs(npos.y)
+		if score > best_score: best_score = score; best_dir = d
+	return pos + best_dir
+
+func _calc_retreat_dir(unit: Dictionary, state: WorldState,
+		threat_idx: int) -> Vector2i:
+	var threat: Dictionary = state.encounter_units[threat_idx]
+	var away: Vector2i = unit["pos"] - threat["pos"]
+	return unit["pos"] + away.sign()
+
 func _equip_named_npc(p: PersonData, team: TeamData) -> void:
 	if p.equipment["right_hand"]["type"] == "none":
 		for grade in ["weapon_melee_low", "weapon_melee_high",
