@@ -32,10 +32,11 @@ func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
             faction.strategic_goals.append({ "type": "expand", "target_id": tgt_id,
                 "priority": expand_score })
 
-    var weakest_id: int = _find_weakest_member(state, faction)
-    if weakest_id != -1:
-        faction.strategic_goals.append({ "type": "defend", "target_id": weakest_id,
-            "priority": 0.7 })
+    if faction.member_team_ids.size() > 1:
+        var weakest_id: int = _find_weakest_member(state, faction)
+        if weakest_id != -1 and weakest_id != faction.leader_team_id:
+            faction.strategic_goals.append({ "type": "defend", "target_id": weakest_id,
+                "priority": 0.7 })
 
     var trade_score: float = v.get("貪婪", 0.5) * 0.4 + (1.0 - v.get("好戰", 0.5)) * 0.3
     if trade_score > 0.35:
@@ -52,7 +53,7 @@ func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
     for tid in state.team_discovered.get(from_team.team_id, []):
         if not state.teams.has(tid): continue
         var t: TeamData = state.teams[tid]
-        if t.faction_id != -1: continue
+        if t.faction_id != -1 or t.team_id == from_team.team_id: continue
         var d: int = _hex_dist(from_team.tile_pos, t.tile_pos)
         if d < best_d: best_d = d; best_id = tid
     return best_id
