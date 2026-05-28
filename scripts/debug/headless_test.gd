@@ -1069,4 +1069,18 @@ func _run_sim_test() -> void:
 	assert(int(state.teams[0].resources.get("medicine", 0)) == 4, "team medicine 應為 4")
 	print("[Player] deposit_to_team 驗證通過")
 
+	# 先給 inventory 一把武器
+	_ps.add_to_inventory(state, "weapon_melee_low", 1)
+	var _eq: bool = _ps.equip_item(state, "right_hand", "weapon_melee_low")
+	assert(_eq, "equip_item 應成功")
+	var _player: PersonData = state.persons.get(0)
+	assert(_player.equipment["right_hand"]["grade"] == "weapon_melee_low",
+		"right_hand 應裝備 weapon_melee_low")
+	# inventory 中武器應減少
+	var _weapon_in_inv: bool = false
+	for item in state.player_state["inventory"]:
+		if item["grade"] == "weapon_melee_low": _weapon_in_inv = true
+	assert(not _weapon_in_inv, "裝備後 inventory 不應有武器")
+	print("[Player] equip_item 驗證通過")
+
 	print("=== DONE ===")

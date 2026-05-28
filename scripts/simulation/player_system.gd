@@ -57,6 +57,31 @@ func deposit_to_team(state: WorldState, grade: String, qty: int) -> bool:
             return true
     return false
 
+func equip_item(state: WorldState, slot: String, grade: String) -> bool:
+    var inv: Array = state.player_state.get("inventory", [])
+    var player: PersonData = state.persons.get(state.player_id)
+    if player == null: return false
+    for i in range(inv.size()):
+        if inv[i]["grade"] == grade and inv[i].get("type", "pool") == "pool":
+            # 卸下舊裝備
+            var old: Dictionary = player.equipment.get(slot, {})
+            if old.get("type", "none") != "none":
+                add_to_inventory(state, old["grade"])
+            player.equipment[slot] = { "type": "pool", "grade": grade }
+            inv[i]["qty"] -= 1
+            if inv[i]["qty"] <= 0: inv.remove_at(i)
+            return true
+    return false
+
+func unequip_item(state: WorldState, slot: String) -> bool:
+    var player: PersonData = state.persons.get(state.player_id)
+    if player == null: return false
+    var cur: Dictionary = player.equipment.get(slot, {})
+    if cur.get("type", "none") == "none": return false
+    add_to_inventory(state, cur["grade"])
+    player.equipment[slot] = { "type": "none", "grade": "" }
+    return true
+
 func _get_player_team(state: WorldState) -> TeamData:
     var p: PersonData = state.persons.get(state.player_id)
     if p == null: return null
