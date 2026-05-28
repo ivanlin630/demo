@@ -69,55 +69,79 @@ func _calc_inventory_weight(state: WorldState) -> float:
 
 # ITEM_WEIGHT TEST VALUES
 const ITEM_WEIGHT: Dictionary = {
-    "weapon_melee_low":  3.0,
-    "weapon_melee_high": 4.0,
-    "weapon_ranged_low": 2.5,
-    "weapon_ranged_high": 3.0,
-    "armor_low":         5.0,
-    "armor_high":        8.0,
-    "food":              0.5,   # per unit
-    "medicine":          0.3,   # per unit
-    "tools":             2.0,   # per unit
-    "arrow":             0.1,   # per unit
+    "weapon_melee_low":   2.5,
+    "weapon_melee_high":  4.0,
+    "weapon_ranged_low":  2.0,   # 短弓（2h）
+    "weapon_ranged_high": 3.0,   # 長弓（2h）
+    "armor_low":          4.0,   # 皮甲 / 皮盾（依槽位效果不同）
+    "armor_high":         7.0,   # 鐵甲 / 鐵盾
+    "food":               0.5,   # per unit
+    "medicine":           0.3,   # per unit（草藥/繃帶/解毒劑消耗量不同）
+    "tools":              2.0,
+    "arrows":             0.05,  # per unit
 }
+
+# 完整物品清單（inventory grade → 中文顯示名 / 用途）
+# "weapon_melee_low"   短劍    → hand_1/hand_2（單手）
+# "weapon_melee_high"  長劍    → hand_1/hand_2（單手）
+# "weapon_ranged_low"  短弓    → hand_1+hand_2（雙手）
+# "weapon_ranged_high" 長弓    → hand_1+hand_2（雙手）
+# "armor_low"          皮甲/皮盾 → 護甲槽=減傷；手槽=格擋
+# "armor_high"         鐵甲/鐵盾 → 同上
+# "food"               乾糧    → 使用消耗，回復飢餓
+# "medicine"           藥品    → 使用時選草藥(×1)/繃帶(×2)/解毒劑(×3)
+# "tools"              工具包  → 生產/修繕用
+# "arrows"             箭矢    → 弓類武器彈藥
 ```
 
 ---
 
 ## 3. 玩家裝備欄
 
-玩家使用 `PersonData.equipment` 8 格（與 NPC 相同結構）：
+玩家使用 `PersonData.equipment` 8 槽（與 NPC 相同結構）：
 
 ```
-right_hand: 主武器
-left_hand:  副武器/盾/火把
+hand_1:     主手（無左右區分，可持武器或盾牌）
+hand_2:     副手（同上；2h 武器時與 hand_1 同時佔用）
 head:       頭部護甲
 torso:      軀幹護甲
 right_arm / left_arm / right_leg / left_leg: 肢體護甲
 ```
 
+**槽位規則：**
+- `armor_*` 裝在 head/torso/arm/leg → 提供該部位減傷
+- `armor_*` 裝在 hand_1 或 hand_2 → 視為盾牌，提供 `block_chance`
+- `weapon_ranged_*` 裝備時佔 hand_1 + hand_2（`is_2h = true`，副手不可另放物品）
+
 ### 裝備/卸下
 
-- 裝備：從物品欄取 pool 物品 → 放入對應 equipment 格
-- 卸下：從 equipment 格取出 → 放回物品欄
-
 ```gdscript
+const WEAPON_2H: Array = ["weapon_ranged_low", "weapon_ranged_high"]
+
 func equip_item(state: WorldState, slot: String, item_grade: String) -> bool:
     var inv: Array = state.player_state.get("inventory", [])
-    # 找物品欄中對應物品
     for i in range(inv.size()):
-        if inv[i]["grade"] == item_grade:
-            var player: PersonData = state.persons.get(state.player_id)
-            if player == null: return false
-            # 卸下舊裝備（若有）
-            var old := player.equipment.get(slot, {})
-            if old.get("type", "none") != "none":
-                _add_to_inventory(state, old["grade"])
+        if inv[i]["grade"] != item_grade: continue
+        var player: PersonData = state.persons.get(state.player_id)
+        if player == null: return false
+        # 2h 武器：佔 hand_1 + hand_2
+        if item_grade in WEAPON_2H:
+            _unequip_slot(state, player, "hand_1")
+            _unequip_slot(state, player, "hand_2")
+            player.equipment["hand_1"] = { "type": "pool", "grade": item_grade, "is_2h": true }
+            player.equipment["hand_2"] = { "type": "2h_ref" }  # 佔位，不可單獨裝備
+        else:
+            _unequip_slot(state, player, slot)
             player.equipment[slot] = { "type": "pool", "grade": item_grade }
-            inv[i]["qty"] -= 1
-            if inv[i]["qty"] <= 0: inv.remove_at(i)
-            return true
+        inv[i]["qty"] -= 1
+        if inv[i]["qty"] <= 0: inv.remove_at(i)
+        return true
     return false
+
+func _unequip_slot(state: WorldState, player: PersonData, slot: String) -> void:
+    var old = player.equipment.get(slot, {})
+    if old.get("type", "none") in ["none", "2h_ref"]: return
+    _add_to_inventory(state, old["grade"])
 
 func _add_to_inventory(state: WorldState, grade: String, qty: int = 1) -> bool:
     if not _can_add_item(state, grade, qty): return false

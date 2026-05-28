@@ -56,21 +56,33 @@ var memory: Array       # [{ event_id: int, intensity: String, reaction: String 
 # 部位健康（大地圖簡化版；遭遇戰可加 hp/max_hp）
 var body_parts: Dictionary
 # {
-#   "head":      { "status": "healthy" },
-#   "torso":     { "status": "healthy" },
-#   "right_arm": { "status": "healthy" },
-#   "left_arm":  { "status": "healthy" },
-#   "right_leg": { "status": "healthy" },
-#   "left_leg":  { "status": "healthy" },
+#   "head":      { "status": "healthy", "poisoned": false },
+#   "torso":     { "status": "healthy", "poisoned": false },
+#   "right_arm": { "status": "healthy", "poisoned": false },
+#   "left_arm":  { "status": "healthy", "poisoned": false },
+#   "right_leg": { "status": "healthy", "poisoned": false },
+#   "left_leg":  { "status": "healthy", "poisoned": false },
 # }
+# poisoned: 每 tick 使該部位 status 降一級；解毒劑清除
 
 const STATUS_MULT: Dictionary = {
     "healthy": 1.0, "wounded": 0.7, "critical": 0.3, "severed": 0.0
 }
+# poisoned 是獨立 flag，不進 STATUS_MULT；中毒效果 = 每 tick 自動加速 status 惡化
 
-# 裝備（個人武器槽）
-var equipment: Dictionary = { "weapon": "" }
-# weapon: "" / "melee_low" / "melee_high" / "ranged_low" / "ranged_high"
+# 裝備（8 槽位）
+var equipment: Dictionary = {}
+# {
+#   "head":      { "type": "pool", "grade": "armor_low" }   # 或 {"type":"none"}
+#   "torso":     ...
+#   "right_arm": ...  "left_arm": ...
+#   "right_leg": ...  "left_leg": ...
+#   "hand_1":    { "type": "pool", "grade": "weapon_melee_low" }  # 主手（無左右區分）
+#   "hand_2":    { "type": "pool", "grade": "armor_low" }         # 副手 / 盾牌
+# }
+# hand_1/hand_2：無左右邏輯，任一可持武器或盾牌
+# 2h 武器（weapon_ranged_*）裝備時同時佔 hand_1 + hand_2（is_2h = true）
+# armor_* 裝在 hand 槽 → 作為盾牌（提供 block_chance），裝在護甲槽 → 減傷
 # 由 EquipmentSystem 依 team.equip_order 分配；NPC 死亡時自動歸還武器庫
 ```
 
@@ -86,6 +98,17 @@ var equipment: Dictionary = { "weapon": "" }
 | `wounded` | ×0.7 | 30% 下降 |
 | `critical` | ×0.3 | 70% 下降（head/torso：瀕死狀態） |
 | `severed` | ×0.0 | 功能全失（四肢限定） |
+
+**中毒（`poisoned: true`）**：獨立 flag，疊加於任何 status 上。
+每 tick 自動將該部位 status 降一級（healthy→wounded→critical）。
+解毒劑（medicine ×3）清除 poisoned flag。
+
+**Medicine 使用動作（玩家/遭遇戰）**：
+| 動作 | 效果 | 消耗 |
+|---|---|---|
+| 草藥 | 目標部位 wounded → healthy | medicine ×1 |
+| 繃帶 | 目標部位 critical → wounded | medicine ×2 |
+| 解毒劑 | 目標部位 poisoned = false | medicine ×3 |
 
 ### 部位 → 影響
 
