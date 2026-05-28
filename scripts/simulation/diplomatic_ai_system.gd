@@ -116,3 +116,31 @@ func _form_alliance(state: WorldState,
 func _update_reputation(team: TeamData, other_id: int, delta: float) -> void:
 	var cur: float = float(team.known_reputations.get(other_id, 0.5))
 	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)
+
+func consider_betrayal(state: WorldState, self_team: TeamData,
+		ally_team: TeamData) -> bool:
+	var self_leader: PersonData = state.persons.get(self_team.leader_id)
+	if self_leader == null: return false
+	var betrayal_score: float = \
+		self_leader.values.get("野心", 0.5) * 0.4 + \
+		(1.0 - self_leader.values.get("信義", 0.5)) * 0.4 + \
+		(1.0 - self_leader.values.get("義氣", 0.5)) * 0.2
+	var power_gap: float = float(ally_team.population - self_team.population) / \
+		maxf(self_team.population, 1.0)
+	if power_gap > 0.5: betrayal_score -= 0.3
+	if betrayal_score > 0.65 and randf() < 0.1:
+		_execute_betrayal(state, self_team, ally_team)
+		return true
+	return false
+
+func _execute_betrayal(state: WorldState, self_team: TeamData,
+		ally_team: TeamData) -> void:
+	self_team.faction_id = -1
+	_update_reputation(ally_team, self_team.team_id, -0.5)
+	var ally_leader: PersonData = state.persons.get(ally_team.leader_id)
+	if ally_leader:
+		ally_leader.memory.append({
+			"type": "betrayal", "subject_id": self_team.leader_id,
+			"tick": 0, "intensity": 0.8
+		})
+	print("[Diplomacy] Team%d 背叛 Team%d" % [self_team.team_id, ally_team.team_id])
