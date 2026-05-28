@@ -134,8 +134,14 @@ func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
 func _evaluate_alliance_need(state: WorldState, faction: FactionData) -> void:
     var self_pop: int = _faction_total_pop(state, faction)
     var threat_map: Dictionary = {}
-    for tid in state.teams:
-        var t: TeamData = state.teams[tid]
+    # 只計算 faction 成員已偵測到的敵方（非全知）
+    var seen: Dictionary = {}
+    for mid in faction.member_team_ids:
+        for tid in state.team_discovered.get(mid, []):
+            seen[tid] = true
+    for tid in seen:
+        var t: TeamData = state.teams.get(tid)
+        if t == null: continue
         if t.faction_id == faction.faction_id or t.faction_id == -1: continue
         threat_map[t.faction_id] = threat_map.get(t.faction_id, 0) + t.population
     for fid in threat_map:
