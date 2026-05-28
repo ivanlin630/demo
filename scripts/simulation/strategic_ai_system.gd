@@ -1,0 +1,79 @@
+class_name StrategicAiSystem
+
+const STRATEGIC_INTERVAL: int    = 10   # TEST VALUE
+const ALLIANCE_CHECK_INTERVAL: int = 30  # TEST VALUE
+
+func tick(state: WorldState, faction: FactionData) -> void:
+    if state.world.current_tick % STRATEGIC_INTERVAL != 0: return
+    _update_faction_goals(state, faction)
+    if faction.strategic_goals.size() > 0:
+        var top: Dictionary = faction.strategic_goals[0]
+        match top["type"]:
+            "expand":
+                _assign_encirclement(state, faction, top["target_id"])
+    for tid in faction.member_team_ids:
+        var t: TeamData = state.teams.get(tid)
+        if t: _assign_breakout(state, t)
+    if state.world.current_tick % ALLIANCE_CHECK_INTERVAL == 0:
+        _evaluate_alliance_need(state, faction)
+
+func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
+    faction.strategic_goals.clear()
+    var leader_team: TeamData = state.teams.get(faction.leader_team_id)
+    if leader_team == null: return
+    var faction_leader: PersonData = state.persons.get(leader_team.leader_id)
+    if faction_leader == null: return
+    var v := faction_leader.values
+
+    var expand_score: float = v.get("野心", 0.5) * 0.5 + v.get("好戰", 0.5) * 0.5
+    if expand_score > 0.4:
+        var tgt_id: int = _nearest_independent(state, leader_team)
+        if tgt_id != -1:
+            faction.strategic_goals.append({ "type": "expand", "target_id": tgt_id,
+                "priority": expand_score })
+
+    var weakest_id: int = _find_weakest_member(state, faction)
+    if weakest_id != -1:
+        faction.strategic_goals.append({ "type": "defend", "target_id": weakest_id,
+            "priority": 0.7 })
+
+    var trade_score: float = v.get("貪婪", 0.5) * 0.4 + (1.0 - v.get("好戰", 0.5)) * 0.3
+    if trade_score > 0.35:
+        faction.strategic_goals.append({ "type": "trade_net", "target_id": -1,
+            "priority": trade_score })
+
+    faction.strategic_goals.sort_custom(func(a, b): return a["priority"] > b["priority"])
+    if faction.strategic_goals.size() > 0:
+        print("[StrategicAI] Faction%d 首要目標: %s target=%d" % [
+            faction.faction_id, faction.strategic_goals[0]["type"], faction.strategic_goals[0]["target_id"]])
+
+func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
+    var best_id: int = -1; var best_d: int = 999
+    for tid in state.team_discovered.get(from_team.team_id, []):
+        if not state.teams.has(tid): continue
+        var t: TeamData = state.teams[tid]
+        if t.faction_id != -1: continue
+        var d: int = _hex_dist(from_team.tile_pos, t.tile_pos)
+        if d < best_d: best_d = d; best_id = tid
+    return best_id
+
+func _find_weakest_member(state: WorldState, faction: FactionData) -> int:
+    var weakest_id: int = -1; var weakest_pop: int = 9999
+    for tid in faction.member_team_ids:
+        var t: TeamData = state.teams.get(tid)
+        if t and t.population < weakest_pop:
+            weakest_pop = t.population; weakest_id = tid
+    return weakest_id
+
+func _hex_dist(a: Vector2i, b: Vector2i) -> int:
+    var dx := b.x - a.x; var dy := b.y - a.y
+    return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+func _assign_encirclement(state: WorldState, faction: FactionData, target_id: int) -> void:
+    pass  # implemented in Task 3
+
+func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
+    pass  # implemented in Task 3
+
+func _evaluate_alliance_need(state: WorldState, faction: FactionData) -> void:
+    pass  # implemented in Task 4

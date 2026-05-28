@@ -1028,4 +1028,11 @@ func _run_sim_test() -> void:
 	assert(_rep < 0.5, "攻擊後 known_reputations 應下降")
 	print("[Diplomacy] known_reputations 更新驗證通過")
 
+	var _strat := StrategicAiSystem.new()
+	var _f0: FactionData = state.factions.get(0)
+	if _f0:
+		_strat._update_faction_goals(state, _f0)
+		print("[StrategicAI] Faction0 strategic_goals=%d" % _f0.strategic_goals.size())
+		assert(_f0.strategic_goals.size() > 0, "Faction0 應有至少一個戰略目標")
+
 	print("=== DONE ===")
