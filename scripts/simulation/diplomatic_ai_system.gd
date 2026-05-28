@@ -141,6 +141,6 @@ func _execute_betrayal(state: WorldState, self_team: TeamData,
 	if ally_leader:
 		ally_leader.memory.append({
 			"type": "betrayal", "subject_id": self_team.leader_id,
-			"tick": 0, "intensity": 0.8
+			"tick": state.world.current_tick, "intensity": 0.8
 		})
 	print("[Diplomacy] Team%d 背叛 Team%d" % [self_team.team_id, ally_team.team_id])
