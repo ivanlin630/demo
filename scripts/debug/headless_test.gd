@@ -1170,4 +1170,19 @@ func _run_sim_test() -> void:
 	state.encounter_active = false
 	state.encounter_units.clear()
 
+	# 完整遭遇戰流程
+	var _enc5 := EncounterSystem.new()
+	state.player_id = 0
+	state.persons[0].team_id = 0
+	_enc5.init_encounter(state, 0, 1, "normal")
+	print("[Encounter] 遭遇戰流程測試開始 units=%d" % state.encounter_units.size())
+	var _final_result: String = "ongoing"
+	for _r in range(100):
+		_final_result = _enc5.advance_round(state, _r)
+		if _final_result != "ongoing": break
+	_enc5.resolve_encounter_end(state, _final_result)
+	assert(not state.encounter_active, "結算後 encounter_active 應為 false")
+	assert(state.encounter_units.size() == 0, "結算後 encounter_units 應清空")
+	print("[Encounter] 完整遭遇戰流程驗證通過 result=%s" % _final_result)
+
 	print("=== DONE ===")

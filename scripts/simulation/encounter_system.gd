@@ -527,3 +527,57 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 		var pos: Vector2i = positions[pos_idx % positions.size()]
 		pos_idx += 1
 		state.encounter_units.append(_create_anon_unit(team, pos))
+
+func resolve_encounter_end(state: WorldState, result: String) -> void:
+	var atk_id: int = state.encounter_attacker_id
+	var def_id: int = state.encounter_defender_id
+
+	_return_pool_equipment(state)
+
+	var arrows_used: Dictionary = {}
+	for u in state.encounter_units:
+		var used: int = u.get("archer_arrows_init", 0) - u.get("arrows", 0)
+		if used > 0:
+			arrows_used[u["team_id"]] = arrows_used.get(u["team_id"], 0) + used
+	for tid in arrows_used:
+		var t: TeamData = state.teams.get(tid)
+		if t:
+			t.resources["arrows"] = maxi(int(t.resources.get("arrows", 0)) - arrows_used[tid], 0)
+
+	for u in state.encounter_units:
+		if u["person_id"] == -1: continue
+		if not is_dead(u, state): continue
+		var t: TeamData = state.teams.get(u["team_id"])
+		if t:
+			t.named_members.erase(u["person_id"])
+			if t.leader_id == u["person_id"]: t.leader_id = -1
+
+	for team_id in [atk_id, def_id]:
+		var dead_anon: int = 0
+		for u in state.encounter_units:
+			if u["team_id"] != team_id: continue
+			if u["person_id"] != -1: continue
+			if is_dead(u, state): dead_anon += 1
+		var t: TeamData = state.teams.get(team_id)
+		if t: t.population = maxi(t.population - dead_anon, 0)
+
+	var winner_id: int = atk_id if result == "attacker_win" else def_id
+	var loser_id: int  = def_id if result == "attacker_win" else atk_id
+	var winner_team: TeamData = state.teams.get(winner_id)
+	for u in state.encounter_units:
+		if not u.get("is_prisoner", false): continue
+		if u["team_id"] != loser_id: continue
+		if winner_team:
+			winner_team.population += 1
+			print("[Encounter] 俘虜加入 Team%d" % winner_id)
+
+	for team_id in [atk_id, def_id]:
+		var t: TeamData = state.teams.get(team_id)
+		if t: t.combat_target = -1
+
+	print("[Encounter] 遭遇戰結算完成 result=%s" % result)
+
+	state.encounter_units.clear()
+	state.encounter_active = false
+	state.encounter_attacker_id = -1
+	state.encounter_defender_id = -1

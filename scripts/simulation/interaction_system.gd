@@ -163,6 +163,19 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	_vision.reveal_encounter(state, id_a, id_b)
 	_write_tier2_intel(state, id_a, id_b)
 	_write_tier2_intel(state, id_b, id_a)
+	# 若玩家在場，交由 EncounterSystem 處理
+	if state.player_id != -1:
+		var player_person: PersonData = state.persons.get(state.player_id)
+		if player_person != null:
+			var player_tid: int = player_person.team_id
+			if (id_a == player_tid or id_b == player_tid):
+				var atk_id: int = id_a
+				var def_id: int = id_b
+				state.encounter_attacker_id = atk_id
+				state.encounter_defender_id = def_id
+				state.encounter_active = true
+				print("[Encounter] 玩家遭遇戰觸發 Team%d vs Team%d" % [atk_id, def_id])
+				return
 	var a: TeamData = state.teams[id_a]
 	var b: TeamData = state.teams[id_b]
 	if a.combat_target != -1 or b.combat_target != -1:
