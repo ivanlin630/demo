@@ -1044,4 +1044,67 @@ func _run_sim_test() -> void:
 					tid, str(mt.strategic_assignments)])
 				break
 
+	var _ps := PlayerSystem.new()
+	_ps.init_player(state, 0, 0)   # Person0 = 玩家，Team0
+	assert(state.player_id == 0, "player_id 應為 0")
+	assert(state.player_state.has("inventory"), "player_state 應有 inventory")
+	assert(float(state.player_state.get("coin", 0)) == 50.0, "初始金幣應為 50")
+	print("[Player] init_player 驗證通過")
+
+	# take_from_team 測試
+	state.teams[0].resources["medicine"] = 5
+	var _took: bool = _ps.take_from_team(state, "medicine", 2)
+	assert(_took, "take_from_team 應成功")
+	assert(int(state.teams[0].resources.get("medicine", 0)) == 3, "team medicine 應剩 3")
+	var _inv: Array = state.player_state.get("inventory", [])
+	var _has_med: bool = false
+	for item in _inv:
+		if item["grade"] == "medicine": _has_med = true
+	assert(_has_med, "inventory 應有 medicine")
+	print("[Player] take_from_team 驗證通過")
+
+	# deposit_to_team 測試
+	var _dep2: bool = _ps.deposit_to_team(state, "medicine", 1)
+	assert(_dep2, "deposit_to_team 應成功")
+	assert(int(state.teams[0].resources.get("medicine", 0)) == 4, "team medicine 應為 4")
+	print("[Player] deposit_to_team 驗證通過")
+
+	# 先給 inventory 一把武器
+	_ps.add_to_inventory(state, "weapon_melee_low", 1)
+	var _eq: bool = _ps.equip_item(state, "right_hand", "weapon_melee_low")
+	assert(_eq, "equip_item 應成功")
+	var _player: PersonData = state.persons.get(0)
+	assert(_player.equipment["right_hand"]["grade"] == "weapon_melee_low",
+		"right_hand 應裝備 weapon_melee_low")
+	# inventory 中武器應減少
+	var _weapon_in_inv: bool = false
+	for item in state.player_state["inventory"]:
+		if item["grade"] == "weapon_melee_low": _weapon_in_inv = true
+	assert(not _weapon_in_inv, "裝備後 inventory 不應有武器")
+	print("[Player] equip_item 驗證通過")
+
+	# unequip_item 測試
+	var _uneq: bool = _ps.unequip_item(state, "right_hand")
+	assert(_uneq, "unequip_item 應成功")
+	assert(state.persons.get(0).equipment["right_hand"]["grade"] == "", "right_hand 應卸下")
+	var _has_weapon_back: bool = false
+	for item in state.player_state["inventory"]:
+		if item["grade"] == "weapon_melee_low": _has_weapon_back = true
+	assert(_has_weapon_back, "卸裝後 inventory 應有武器")
+	var _uneq_empty: bool = _ps.unequip_item(state, "left_hand")
+	assert(not _uneq_empty, "卸下空槽應失敗")
+	print("[Player] unequip_item 驗證通過")
+
+	# get_visible_teams
+	var _visible: Array = _ps.get_visible_teams(state)
+	print("[Player] 玩家可見 team 數=%d" % _visible.size())
+	# 玩家在 Team0，Team0 discovered Team3 → visible 應包含 3
+	assert(_visible.has(3), "玩家應能看到 Team3")
+
+	# 重量計算
+	_ps.add_to_inventory(state, "armor_low", 2)
+	var _wt2: float = _ps.calc_inventory_weight(state)
+	print("[Player] inventory weight=%.1f（累計，armor_low×2貢獻10.0）" % _wt2)
+	assert(_wt2 >= 10.0, "armor_low×2 重量應 >= 10.0")
+
 	print("=== DONE ===")
