@@ -28,6 +28,7 @@ var _population_system: PopulationSystem
 var _npc_ai_system: NpcAiSystem
 var _salary_system: SalarySystem
 var _day_night_system: DayNightSystem
+var _diplomatic_ai_system: DiplomaticAiSystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -47,6 +48,7 @@ func _init() -> void:
 	_npc_ai_system       = NpcAiSystem.new()
 	_salary_system       = SalarySystem.new()
 	_day_night_system    = DayNightSystem.new()
+	_diplomatic_ai_system = DiplomaticAiSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
