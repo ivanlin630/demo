@@ -129,3 +129,5 @@ git push -u origin feat/<feature>
 ```
 
 3. Commit hand-back 文件，不要直接 merge 到 main，等主 session 確認。
+
+4. 若 `superpowers:finishing-a-development-branch` 彈出選單：**選「3. Keep the branch as-is」**，不選 1（Merge locally）。主 session 負責 merge。
