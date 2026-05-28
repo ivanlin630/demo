@@ -1044,4 +1044,29 @@ func _run_sim_test() -> void:
 					tid, str(mt.strategic_assignments)])
 				break
 
+	var _ps := PlayerSystem.new()
+	_ps.init_player(state, 0, 0)   # Person0 = 玩家，Team0
+	assert(state.player_id == 0, "player_id 應為 0")
+	assert(state.player_state.has("inventory"), "player_state 應有 inventory")
+	assert(float(state.player_state.get("coin", 0)) == 50.0, "初始金幣應為 50")
+	print("[Player] init_player 驗證通過")
+
+	# take_from_team 測試
+	state.teams[0].resources["medicine"] = 5
+	var _took: bool = _ps.take_from_team(state, "medicine", 2)
+	assert(_took, "take_from_team 應成功")
+	assert(int(state.teams[0].resources.get("medicine", 0)) == 3, "team medicine 應剩 3")
+	var _inv: Array = state.player_state.get("inventory", [])
+	var _has_med: bool = false
+	for item in _inv:
+		if item["grade"] == "medicine": _has_med = true
+	assert(_has_med, "inventory 應有 medicine")
+	print("[Player] take_from_team 驗證通過")
+
+	# deposit_to_team 測試
+	var _dep2: bool = _ps.deposit_to_team(state, "medicine", 1)
+	assert(_dep2, "deposit_to_team 應成功")
+	assert(int(state.teams[0].resources.get("medicine", 0)) == 4, "team medicine 應為 4")
+	print("[Player] deposit_to_team 驗證通過")
+
 	print("=== DONE ===")
