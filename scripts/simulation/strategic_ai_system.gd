@@ -117,4 +117,20 @@ func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
     return best_dir
 
 func _evaluate_alliance_need(state: WorldState, faction: FactionData) -> void:
-    pass  # implemented in Task 4
+    var self_pop: int = _faction_total_pop(state, faction)
+    var threat_map: Dictionary = {}
+    for tid in state.teams:
+        var t: TeamData = state.teams[tid]
+        if t.faction_id == faction.faction_id or t.faction_id == -1: continue
+        threat_map[t.faction_id] = threat_map.get(t.faction_id, 0) + t.population
+    for fid in threat_map:
+        if threat_map[fid] > self_pop * 1.5:
+            print("[StrategicAI] Faction%d 受威脅，尋求結盟" % faction.faction_id)
+            break
+
+func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
+    var total: int = 0
+    for tid in faction.member_team_ids:
+        var t: TeamData = state.teams.get(tid)
+        if t: total += t.population
+    return total
