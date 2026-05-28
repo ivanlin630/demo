@@ -35,6 +35,19 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 				f.known_member_states[mid] = snap
 		_update_goals(state, f)
 		_assign_tasks(state, f)
+		# 每 20 tick 評估一次主動外交
+		if state.world.current_tick % 20 == 0:
+			var _leader_team: TeamData = state.teams.get(f.leader_team_id)
+			if _leader_team != null:
+				DiplomaticAiSystem.new().try_proactive_diplomacy(state, _leader_team)
+		# 每 BETRAY_CHECK_INTERVAL tick 評估結盟 team 背叛
+		if state.world.current_tick % DiplomaticAiSystem.BETRAY_CHECK_INTERVAL == 0:
+			var _leader_team_b: TeamData = state.teams.get(f.leader_team_id)
+			for tid in f.member_team_ids:
+				if tid == f.leader_team_id: continue
+				var member_team: TeamData = state.teams.get(tid)
+				if member_team:
+					DiplomaticAiSystem.new().consider_betrayal(state, member_team, _leader_team_b)
 
 	var merge_queue: Array = []
 	for tid in state.teams:
