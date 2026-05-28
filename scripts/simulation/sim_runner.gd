@@ -3,6 +3,14 @@ class_name SimRunner
 const LOD_NEAR_RADIUS: int = 3
 const FAR_ZONE_INTERVAL: int = 10
 
+const FATIGUE_PER_TICK: float        = 0.002   # TEST VALUE
+const FATIGUE_RECOVERY: float        = 0.01    # TEST VALUE
+const FATIGUE_LOYALTY_PENALTY: float = 0.005   # TEST VALUE
+
+const TERRAIN_FATIGUE_MULT: Dictionary = {
+	"plains": 1.0, "forest": 1.2, "mountain": 1.4
+}
+
 var _resource_system: ResourceSystem
 var _reaction_system: ReactionSystem
 var _skill_system: Object
@@ -18,6 +26,7 @@ var _vision_system: VisionSystem
 var _equipment_system: EquipmentSystem
 var _population_system: PopulationSystem
 var _npc_ai_system: NpcAiSystem
+var _salary_system: SalarySystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -35,6 +44,7 @@ func _init() -> void:
 	_equipment_system    = EquipmentSystem.new()
 	_population_system   = PopulationSystem.new()
 	_npc_ai_system       = NpcAiSystem.new()
+	_salary_system       = SalarySystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
@@ -55,6 +65,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step5a_regenerate_tiles(state)
 	_step5b_manufacture(state, near_teams)
 	_step6_resolve_consumption(state, near_teams)
+	_step6c_salary(state, near_teams)
+	_step6d_fatigue(state, near_teams)
 	_step6b_faction_ai(state, near_teams)
 	_step7_person_reactions(state, near_teams)
 	_step7b_npc_goal_cleanup(state, near_teams)
@@ -72,6 +84,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, far_teams)
 		_step6_resolve_consumption(state, far_teams)
+		_step6c_salary(state, far_teams)
+		_step6d_fatigue(state, far_teams)
 		_step6b_faction_ai(state, far_teams)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
@@ -117,6 +131,35 @@ func _step5b_manufacture(state: WorldState, team_ids: Array) -> void:
 
 func _step6_resolve_consumption(state: WorldState, team_ids: Array) -> void:
 	_resource_system.resolve_consumption(state, team_ids)
+
+func _step6c_salary(state: WorldState, team_ids: Array) -> void:
+	_salary_system.tick(state, team_ids)
+
+func _step6d_fatigue(state: WorldState, team_ids: Array) -> void:
+	var time_mult: float = _get_time_fatigue_mult(state)
+	for tid in team_ids:
+		var team: TeamData = state.teams.get(tid)
+		if team == null: continue
+		if team.current_task == "rest":
+			# 紮營休息
+			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
+			team.fatigue -= FATIGUE_RECOVERY * rest_mult
+			team.fatigue = maxf(team.fatigue, 0.0)
+		else:
+			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
+			var tile = state.world.tiles.get(tile_id)
+			var terrain: String = tile.terrain if tile else "plains"
+			var terrain_mult: float = TERRAIN_FATIGUE_MULT.get(terrain, 1.0)
+			team.fatigue += FATIGUE_PER_TICK * terrain_mult * time_mult
+			team.fatigue = minf(team.fatigue, 1.0)
+		if team.fatigue >= 1.0:
+			for pid in team.named_members:
+				var p: PersonData = state.persons.get(pid)
+				if p: p.loyalty -= FATIGUE_LOYALTY_PENALTY
+
+func _get_time_fatigue_mult(state: WorldState) -> float:
+	# 簡化版（完整版在 day-night-cycle plan 實裝）
+	return 1.0
 
 func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
 	_faction_ai_system.evaluate_all(state, team_ids)

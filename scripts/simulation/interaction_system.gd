@@ -379,6 +379,12 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 			for part in p.body_parts:
 				if p.body_parts[part]["status"] == "wounded" and randf() < worsen_chance:
 					p.body_parts[part]["status"] = "critical"
+	# loot 結算後，全 named_members loyalty 懲罰（依義氣）
+	for pid in winner.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		var yi_qi: float = float(p.values.get("義氣", 0.5))
+		p.loyalty -= (1.0 - yi_qi) * 0.05
 	_msg.emit_message(state, "combat_end",
 		"Team %d 擊潰 Team %d" % [winner_id, loser_id], winner)
 	print("[Combat End] Team%d 勝 Team%d (rd=%.2f/%.2f wnd=%d/%d)" % [
@@ -874,6 +880,17 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 			snap["material_est"] *= randf_range(0.3, 0.7)
 			snap["goods_est"]    *= randf_range(0.3, 0.7)
 	state.team_intel[obs_id][tgt_id] = snap
+
+# 處決俘虜：呼叫者負責移除 NPC；此函數只結算目擊者 loyalty 懲罰
+func execute_prisoner(state: WorldState, team_id: int) -> void:
+	var team: TeamData = state.teams.get(team_id)
+	if team == null: return
+	for pid in team.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		var yi_qi: float = float(p.values.get("義氣", 0.5))
+		p.loyalty -= yi_qi * 0.08
+	print("[Atrocity] Team%d 處決俘虜，目擊者 loyalty 懲罰" % team_id)
 
 func _calc_armed(state: WorldState, team: TeamData) -> int:
 	var named_armed: int = 0

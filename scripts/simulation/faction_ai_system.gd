@@ -175,9 +175,11 @@ func _assign_tasks(state: WorldState, f) -> void:
 			var dist: int = _hex_dist(leader_team.tile_pos, target_pos)
 			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 4 \
 					and leader_team.named_members.size() > 0:
-				var sub_leader_id: int = leader_team.named_members[0]
+				var _sub_sys_pick := SubteamSystem.new()
+				var sub_leader_id: int = _sub_sys_pick._pick_subteam_leader(state, leader_team, "徵收")
+				if sub_leader_id == -1: sub_leader_id = leader_team.named_members[0]
 				var pop_count: int = maxi(leader_team.population / 4, 2)
-				SubteamSystem.new().dispatch(state, f.leader_team_id, sub_leader_id,
+				_sub_sys_pick.dispatch(state, f.leader_team_id, sub_leader_id,
 					pop_count, "徵收", target_pos)
 			else:
 				leader_team.current_task = "徵收"

@@ -144,6 +144,9 @@ func _run_sim_test() -> void:
 	state.persons[1].values["貪婪"] = 0.8   # 高貪婪 → idle 子團有機會觸發 mini-loop（掠奪/攻擊）
 	state.persons[1].values["好戰"] = 0.7
 	state.persons[1].loyalty       = 0.4    # 低忠誠 → deviation_chance 更高
+	# Person1 期望薪水（非死士，需結算）
+	state.persons[1].salary = 5.0
+	state.persons[2].salary = 3.0
 	# Person1 和 Person2 已在 named_members 中，無需額外移動（advisors/members 已合併）
 	# Team5：獨立軍隊（應觸發 SoloAI 攻擊/掠奪）
 	var team5 := TeamData.new()
@@ -182,6 +185,12 @@ func _run_sim_test() -> void:
 	p6.values["野心"] = 0.6; p6.values["好戰"] = 0.2
 	p6.skills["潛行"] = 0.3   # 中等潛行
 	state.persons[11] = p6; team6.leader_id = 11
+
+	var _sub_sys2 := SubteamSystem.new()
+	var _best := _sub_sys2._pick_subteam_leader(state, state.teams[0], "偵查")
+	print("[TeamAI] _pick_subteam_leader(偵查) = P%d" % _best)
+	assert(_best != -1, "應能找到偵查子隊 leader")
+	assert(_best == 1, "最高偵查技能應為 Person1")
 
 	var _sub_sys := SubteamSystem.new()
 	var scout_id: int = _sub_sys.dispatch(state, 0, 1, 3, "偵查", Vector2i(3, 0),
@@ -941,7 +950,6 @@ func _run_sim_test() -> void:
 	# === NpcAI Task 3: check_goal_alignment ===
 	var _npc3 := NpcAiSystem.new()
 	var _cp: PersonData = state.persons.get(1)
-	# 確保有 revenge goal 且 active
 	_npc3._activate_goal(_cp, "revenge", 9)
 	var _align: float = _npc3.check_goal_alignment(_cp, "逃跑")
 	assert(_align < 0.0 or _align == 0.0, "revenge+逃跑不衝突（返回 0 或負）")
@@ -949,4 +957,35 @@ func _run_sim_test() -> void:
 	assert(_align2 > 0.0, "revenge+攻擊應 aligned（> 0）")
 	print("[NpcAI] check_goal_alignment 驗證通過")
 
+	# === TeamAI 驗證 ===
+	print("[Salary] 驗證：30 tick 後應有薪水結算 print（見上方 tick 30 附近輸出）")
+	var _evt_split: Object = load("res://scripts/simulation/events/event_unrest_split.gd").new()
+	var _tp := PersonData.new()
+	_tp.loyalty = 0.8
+	_evt_split.reset_loyalty_on_transfer(_tp, "split_hard")
+	assert(_tp.loyalty == 0.5, "split_hard loyalty 應為 0.5")
+	_evt_split.reset_loyalty_on_transfer(_tp, "split_leader")
+	assert(_tp.loyalty == 1.0, "split_leader loyalty 應為 1.0")
+	print("[TeamAI] reset_loyalty_on_transfer 驗證通過")
+	var _split_found: bool = false
+	for _stid in state.teams:
+		var _st: TeamData = state.teams[_stid]
+		if _stid in [0, 1, 2, 3, 5, 6, 8, 9, 10]: continue
+		var _sldr: PersonData = state.persons.get(_st.leader_id)
+		if _sldr and absf(_sldr.loyalty - 1.0) < 0.01:
+			print("[TeamAI] split_leader loyalty=1.0 驗證通過 (Team%d)" % _stid)
+			_split_found = true
+			break
+	if not _split_found:
+		print("[TeamAI] split_leader loyalty=1.0 未找到（分裂事件可能未觸發，屬正常）")
+	var _ft: TeamData = state.teams.get(0)
+	if _ft:
+		print("[TeamAI] Team0 fatigue=%.4f（預期 > 0）" % _ft.fatigue)
+		assert(_ft.fatigue > 0.0, "移動 team 應有疲勞累積")
+	var _ms: Object = load("res://scripts/simulation/movement_system.gd").new()
+	var _wt: TeamData = state.teams.get(0)
+	if _wt:
+		var _cap: float = _ms.get_carry_capacity(_wt)
+		print("[TeamAI] Team0 carry_cap=%.1f weight=%.1f" % [_cap, _ms.calc_total_weight(_wt)])
+		assert(_cap > 0.0, "carry capacity 應 > 0")
 	print("=== DONE ===")
