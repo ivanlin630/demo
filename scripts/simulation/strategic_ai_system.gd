@@ -70,11 +70,47 @@ func _hex_dist(a: Vector2i, b: Vector2i) -> int:
     var dx := b.x - a.x; var dy := b.y - a.y
     return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
 
-func _assign_encirclement(state: WorldState, faction: FactionData, target_id: int) -> void:
-    pass  # implemented in Task 3
+func _assign_encirclement(state: WorldState, faction: FactionData,
+        target_id: int) -> void:
+    var target: TeamData = state.teams.get(target_id)
+    if target == null: return
+    var member_teams: Array = []
+    for tid in faction.member_team_ids:
+        var t: TeamData = state.teams.get(tid)
+        if t: member_teams.append(t)
+    var dirs: Array = [
+        Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
+        Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1),
+    ]
+    for i in range(member_teams.size()):
+        var t: TeamData = member_teams[i]
+        var dir: Vector2i = dirs[i % dirs.size()]
+        t.strategic_assignments[target_id] = target.tile_pos + dir * 2
 
 func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
-    pass  # implemented in Task 3
+    var enemy_teams: Array = []
+    for tid in state.team_discovered.get(self_team.team_id, []):
+        var t: TeamData = state.teams.get(tid)
+        if t == null: continue
+        if t.faction_id != self_team.faction_id:
+            enemy_teams.append(t)
+    if enemy_teams.size() < 2: return
+    var best_dir: Vector2i = _find_escape_dir(self_team.tile_pos, enemy_teams)
+    self_team.strategic_assignments[-1] = self_team.tile_pos + best_dir * 5
+
+func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
+    var dirs: Array = [
+        Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
+        Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1),
+    ]
+    var best_dir: Vector2i = dirs[0]; var best_score: float = -99.0
+    for d in dirs:
+        var score: float = 0.0
+        for e in enemies:
+            var ev: Vector2i = e.tile_pos - origin
+            score -= float(d.x * ev.x + d.y * ev.y)
+        if score > best_score: best_score = score; best_dir = d
+    return best_dir
 
 func _evaluate_alliance_need(state: WorldState, faction: FactionData) -> void:
     pass  # implemented in Task 4

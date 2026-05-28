@@ -1035,4 +1035,13 @@ func _run_sim_test() -> void:
 		print("[StrategicAI] Faction0 strategic_goals=%d" % _f0.strategic_goals.size())
 		assert(_f0.strategic_goals.size() > 0, "Faction0 應有至少一個戰略目標")
 
+	if _f0 and _f0.strategic_goals.size() > 0 and _f0.strategic_goals[0]["type"] == "expand":
+		_strat._assign_encirclement(state, _f0, _f0.strategic_goals[0]["target_id"])
+		for tid in _f0.member_team_ids:
+			var mt: TeamData = state.teams.get(tid)
+			if mt and mt.strategic_assignments.size() > 0:
+				print("[StrategicAI] Team%d strategic_assignments=%s" % [
+					tid, str(mt.strategic_assignments)])
+				break
+
 	print("=== DONE ===")
