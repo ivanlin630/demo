@@ -930,4 +930,16 @@ func _run_sim_test() -> void:
 	_evt_split.reset_loyalty_on_transfer(_tp, "split_leader")
 	assert(_tp.loyalty == 1.0, "split_leader loyalty 應為 1.0")
 	print("[TeamAI] reset_loyalty_on_transfer 驗證通過")
+	# 找第一個 loyalty = 1.0 的非初始 team leader（split_leader 觸發）
+	var _split_found: bool = false
+	for _stid in state.teams:
+		var _st: TeamData = state.teams[_stid]
+		if _stid in [0, 1, 2, 3, 5, 6, 8, 9, 10]: continue
+		var _sldr: PersonData = state.persons.get(_st.leader_id)
+		if _sldr and absf(_sldr.loyalty - 1.0) < 0.01:
+			print("[TeamAI] split_leader loyalty=1.0 驗證通過 (Team%d)" % _stid)
+			_split_found = true
+			break
+	if not _split_found:
+		print("[TeamAI] split_leader loyalty=1.0 未找到（分裂事件可能未觸發，屬正常）")
 	print("=== DONE ===")

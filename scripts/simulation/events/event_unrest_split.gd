@@ -45,8 +45,8 @@ func _has_goal_conflict(dissenters: Array, leader: PersonData) -> bool:
 		if loyalty_val >= 0.4:
 			continue
 		for goal in p.goals:
-			if not (goal is Dictionary):
-				continue
+			if not (goal is Dictionary): continue
+			if not goal.get("active", false): continue
 			var gtype: String = goal.get("type", "")
 			var leader_has: bool = false
 			for lg in leader.goals:
@@ -61,35 +61,65 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	if dissenters.is_empty():
 		return null
 	var new_team := TeamData.new()
-	new_team.team_id = _next_team_id(state)
-	new_team.tile_pos = parent.tile_pos
+	new_team.team_id   = _next_team_id(state)
+	new_team.tile_pos  = parent.tile_pos
+	new_team.faction_id = -1
 	new_team.resources = {
 		"food": 0.0, "material": 0, "coin": 0, "goods": 0, "gem": 0,
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 		"weapon_melee_low": 0, "weapon_melee_high": 0,
 		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0,
 	}
 	new_team.tags = []
-	new_team.faction_id = -1
 
-	var split_count: int = maxi(dissenters.size() / 2, 1)
-	var new_leader_assigned := false
+	# 選 new leader
+	var new_leader: PersonData = dissenters[0]
+	new_leader.team_id = new_team.team_id
+	new_leader.role    = "leader"
+	new_team.leader_id = new_leader.id
+	reset_loyalty_on_transfer(new_leader, "split_leader")
+	parent.named_members.erase(new_leader.id)
+	parent.population -= 1
+	new_team.population += 1
 
-	for i in range(split_count):
+	# Hard dissenters（loyalty < 0.35）
+	for i in range(1, dissenters.size()):
 		var p: PersonData = dissenters[i]
 		p.team_id = new_team.team_id
-		parent.population = maxi(parent.population - 1, 1)
+		new_team.named_members.append(p.id)
+		reset_loyalty_on_transfer(p, "split_hard")
+		parent.named_members.erase(p.id)
+		parent.population -= 1
 		new_team.population += 1
-		if not new_leader_assigned:
-			new_team.leader_id = p.id
-			p.role = "leader"
-			new_leader_assigned = true
-		else:
-			new_team.named_members.append(p.id)
 
-	state.teams[new_team.team_id]          = new_team
-	state.team_known[new_team.team_id]     = []
+	# Soft followers（loyalty 0.35–0.55，依魅力）
+	var charisma: float = float(new_leader.attributes.get("魅力", 0.5))
+	for pid in parent.named_members.duplicate():
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		if p.loyalty >= 0.35 and p.loyalty <= 0.55:
+			if randf() < charisma * 0.6:
+				p.team_id = new_team.team_id
+				new_team.named_members.append(p.id)
+				reset_loyalty_on_transfer(p, "split_soft")
+				parent.named_members.erase(p.id)
+				parent.population -= 1
+				new_team.population += 1
+
+	# 匿名跟隨者（依統領×魅力）
+	var leadership: float = float(new_leader.skills.get("統領", 0.0))
+	var anon_in_parent: int = parent.population - parent.named_members.size() - 1
+	var anon_split: int = roundi(leadership * charisma * anon_in_parent * 0.3)
+	anon_split = mini(anon_split, parent.population / 3)
+	new_team.population += anon_split
+	parent.population   -= anon_split
+
+	state.teams[new_team.team_id]           = new_team
+	state.team_known[new_team.team_id]      = []
 	state.team_discovered[new_team.team_id] = []
+	parent.unrest_turns = 0
 	return new_team
 
 func reset_loyalty_on_transfer(p: PersonData, transfer_type: String) -> void:
