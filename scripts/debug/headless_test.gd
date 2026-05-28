@@ -1159,4 +1159,15 @@ func _run_sim_test() -> void:
 	state.encounter_active = false
 	state.encounter_units.clear()
 
+	var _enc4 := EncounterSystem.new()
+	_enc4.init_encounter(state, 0, 1, "normal")
+	var _result: String = "ongoing"
+	for _r in range(50):
+		_result = _enc4.advance_round(state, _r)
+		if _result != "ongoing": break
+	print("[Encounter] advance_round 結果=%s (50輪)" % _result)
+	assert(_result != "" and _result != null, "advance_round 應有結果")
+	state.encounter_active = false
+	state.encounter_units.clear()
+
 	print("=== DONE ===")

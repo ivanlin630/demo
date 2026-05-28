@@ -319,6 +319,134 @@ func _calc_retreat_dir(unit: Dictionary, state: WorldState,
 	var away: Vector2i = unit["pos"] - threat["pos"]
 	return unit["pos"] + away.sign()
 
+const STATUS_ORDER: Array = ["healthy", "wounded", "critical", "severed"]
+
+func _apply_body_part_damage(unit: Dictionary, state: WorldState,
+		part: String, attacker_skill: float) -> void:
+	var bp: Dictionary = _get_body_parts(unit, state)
+	if not bp.has(part): part = "torso"
+	var cur_status: String = bp[part].get("status", "healthy")
+	var cur_idx: int = STATUS_ORDER.find(cur_status)
+	if cur_idx < 0: cur_idx = 0
+	var hit_chance: float = 0.5 + attacker_skill * 0.3
+	if randf() > hit_chance: return
+	var new_idx: int = mini(cur_idx + 1, STATUS_ORDER.size() - 1)
+	bp[part]["status"] = STATUS_ORDER[new_idx]
+	if unit["person_id"] != -1:
+		var p: PersonData = state.persons.get(unit["person_id"])
+		if p: p.body_parts[part]["status"] = STATUS_ORDER[new_idx]
+
+func _get_attacker_skill(unit: Dictionary, state: WorldState) -> float:
+	if unit["person_id"] != -1:
+		var p: PersonData = state.persons.get(unit["person_id"])
+		if p: return float(p.skills.get("戰鬥", 0.0))
+	return float(unit.get("skills", {}).get("戰鬥", 0.2))
+
+func _check_prisoners(state: WorldState, round_num: int) -> void:
+	if round_num % PRISONER_CHECK_INTERVAL != 0: return
+	for i in range(state.encounter_units.size()):
+		var unit: Dictionary = state.encounter_units[i]
+		if is_dead(unit, state): continue
+		if is_combat_capable(unit, state): continue
+		if unit.get("has_exited", false): continue
+		if unit.get("is_prisoner", false): continue
+		var nearby_enemies: int = _count_nearby_enemies(unit, state, 1)
+		if nearby_enemies >= 2:
+			unit["is_prisoner"] = true
+			var winner_team_id: int = _get_enemy_team_id(unit["team_id"], state)
+			print("[Encounter] Unit(team=%d) 被俘虜，歸入 Team%d" % [
+				unit["team_id"], winner_team_id])
+
+func _get_enemy_team_id(own_team_id: int, state: WorldState) -> int:
+	for u in state.encounter_units:
+		if u["team_id"] != own_team_id and not is_dead(u, state):
+			return u["team_id"]
+	return -1
+
+func _messenger_exit(state: WorldState, unit: Dictionary,
+		parent_team: TeamData) -> void:
+	unit["has_exited"] = true
+	if unit["person_id"] == -1: return
+	var sub_sys := SubteamSystem.new()
+	var sub_data: Dictionary = {
+		"leader_id":      unit["person_id"],
+		"parent_team_id": parent_team.team_id,
+		"tile_pos":       parent_team.tile_pos,
+		"task":           "傳令",
+	}
+	print("[Encounter] Person%d 傳令兵退出，建立子隊" % unit["person_id"])
+	if sub_sys.has_method("create_subteam"):
+		sub_sys.create_subteam(state, sub_data)
+
+func advance_round(state: WorldState, round_num: int) -> String:
+	var atk_id: int = state.encounter_attacker_id
+	var def_id: int = state.encounter_defender_id
+
+	for i in range(state.encounter_units.size()):
+		var unit: Dictionary = state.encounter_units[i]
+		if is_dead(unit, state): continue
+		if unit.get("has_exited", false): continue
+		if unit.get("is_prisoner", false): continue
+
+		var action: Dictionary = _decide_action(i, state, -1)
+
+		match action["type"]:
+			"attack", "shoot":
+				if action["target_idx"] != -1:
+					var target: Dictionary = state.encounter_units[action["target_idx"]]
+					if not is_dead(target, state) and not target.get("has_exited", false):
+						var skill: float = _get_attacker_skill(unit, state)
+						_apply_body_part_damage(target, state,
+							action["attack_part"], skill)
+						if action["type"] == "shoot":
+							unit["arrows"] = max(unit.get("arrows", 0) - 1, 0)
+						unit["stamina"] = maxf(unit.get("stamina", 1.0) - 0.05, 0.0)
+			"move", "move_back", "escort_move", "start_escort":
+				unit["pos"] = action["move_to"]
+				unit["stamina"] = maxf(unit.get("stamina", 1.0) - 0.02, 0.0)
+				if action["type"] == "start_escort":
+					unit["escort_target"] = action["target_idx"]
+			"retreat", "messenger_exit":
+				unit["pos"] = action["move_to"]
+				unit["stamina"] = maxf(unit.get("stamina", 1.0) - 0.03, 0.0)
+				var dist_to_edge: int = MAP_RADIUS - maxi(abs(unit["pos"].x), abs(unit["pos"].y))
+				if dist_to_edge <= 0:
+					unit["has_exited"] = true
+					if action["type"] == "messenger_exit":
+						var parent: TeamData = state.teams.get(unit["team_id"])
+						if parent: _messenger_exit(state, unit, parent)
+
+	_check_prisoners(state, round_num)
+
+	var atk_alive: bool = _has_active_units(atk_id, state)
+	var def_alive: bool = _has_active_units(def_id, state)
+	var atk_exited: bool = _all_exited(atk_id, state)
+	var def_exited: bool = _all_exited(def_id, state)
+
+	if def_exited or (not def_alive and def_id != -1):
+		return "attacker_win"
+	if atk_exited or (not atk_alive and atk_id != -1):
+		return "defender_win"
+	if not atk_alive and not def_alive:
+		return "draw"
+	return "ongoing"
+
+func _has_active_units(team_id: int, state: WorldState) -> bool:
+	for u in state.encounter_units:
+		if u["team_id"] == team_id:
+			if not is_dead(u, state) and not u.get("has_exited", false) \
+					and not u.get("is_prisoner", false):
+				return true
+	return false
+
+func _all_exited(team_id: int, state: WorldState) -> bool:
+	var had_units: bool = false
+	for u in state.encounter_units:
+		if u["team_id"] != team_id: continue
+		had_units = true
+		if not is_dead(u, state) and not u.get("has_exited", false): return false
+	return had_units
+
 func _equip_named_npc(p: PersonData, team: TeamData) -> void:
 	if p.equipment["right_hand"]["type"] == "none":
 		for grade in ["weapon_melee_low", "weapon_melee_high",
