@@ -78,6 +78,9 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
     for tid in faction.member_team_ids:
         var t: TeamData = state.teams.get(tid)
         if t: member_teams.append(t)
+    # clear stale encirclement assignments before re-assigning
+    for t in member_teams:
+        t.strategic_assignments.clear()
     var dirs: Array = [
         Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
         Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1),
@@ -92,8 +95,9 @@ func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     for tid in state.team_discovered.get(self_team.team_id, []):
         var t: TeamData = state.teams.get(tid)
         if t == null: continue
-        if t.faction_id != self_team.faction_id:
-            enemy_teams.append(t)
+        if t.faction_id == -1 or t.faction_id == self_team.faction_id:
+            continue
+        enemy_teams.append(t)
     if enemy_teams.size() < 2: return
     var best_dir: Vector2i = _find_escape_dir(self_team.tile_pos, enemy_teams)
     self_team.strategic_assignments[-1] = self_team.tile_pos + best_dir * 5
