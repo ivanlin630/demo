@@ -1107,4 +1107,31 @@ func _run_sim_test() -> void:
 	print("[Player] inventory weight=%.1f（累計，armor_low×2貢獻10.0）" % _wt2)
 	assert(_wt2 >= 10.0, "armor_low×2 重量應 >= 10.0")
 
+	# ── EncounterSystem 基礎驗證 ──
+	var _enc := EncounterSystem.new()
+	var _enc_unit: Dictionary = {
+		"person_id": 0, "team_id": 0,
+		"pos": Vector2i(0, 0),
+		"stamina": 1.0, "is_messenger": false, "has_exited": false,
+	}
+	var _p0: PersonData = state.persons.get(0)
+	if _p0:
+		_p0.body_parts["torso"]["status"] = "healthy"
+		assert(not _enc.is_dead(_enc_unit, state), "healthy torso 不應死亡")
+		assert(_enc.is_combat_capable(_enc_unit, state), "healthy 應戰鬥能力")
+		_p0.body_parts["torso"]["status"] = "severed"
+		assert(_enc.is_dead(_enc_unit, state), "severed torso 應死亡")
+		_p0.body_parts["torso"]["status"] = "healthy"  # 還原
+	print("[Encounter] 基礎輔助函數驗證通過")
+
+	var _anon_unit: Dictionary = {
+		"person_id": -1, "team_id": 0,
+		"pos": Vector2i(1, 0),
+		"stamina": 0.8, "is_messenger": false, "has_exited": false,
+		"body_parts": _enc._default_body_parts(),
+	}
+	assert(_enc.is_combat_capable(_anon_unit, state), "匿名 unit 應戰鬥能力")
+	assert(_enc.hex_dist(Vector2i(0,0), Vector2i(3,0)) == 3, "hex_dist 應為 3")
+	print("[Encounter] 匿名 unit 驗證通過")
+
 	print("=== DONE ===")
