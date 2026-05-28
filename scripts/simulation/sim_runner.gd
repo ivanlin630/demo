@@ -85,7 +85,7 @@ func _step1d_overflow(state: WorldState) -> void:
 
 func _step1b_update_vision(state: WorldState, team_ids: Array,
 		time_vision_mult: float = 1.0) -> void:
-	_vision_system.tick_discovery(state, team_ids)  # time_mult passed in Task 4
+	_vision_system.tick_discovery(state, team_ids, time_vision_mult)
 
 func _step1c_update_equipment(state: WorldState, team_ids: Array) -> void:
 	_equipment_system.tick_all(state, team_ids)
