@@ -102,11 +102,13 @@ func _form_alliance(state: WorldState,
 		var f: FactionData = state.factions.get(team_a.faction_id)
 		if f and not f.member_team_ids.has(team_b.team_id):
 			f.member_team_ids.append(team_b.team_id)
+		state.snapshot_faction_member(team_b.team_id, state.world.current_tick)
 	elif team_b.faction_id != -1:
 		team_a.faction_id = team_b.faction_id
 		var f: FactionData = state.factions.get(team_b.faction_id)
 		if f and not f.member_team_ids.has(team_a.team_id):
 			f.member_team_ids.append(team_a.team_id)
+		state.snapshot_faction_member(team_a.team_id, state.world.current_tick)
 	_update_reputation(team_a, team_b.team_id, 0.2)
 	_update_reputation(team_b, team_a.team_id, 0.2)
 	print("[Diplomacy] Team%d 與 Team%d 結盟" % [team_a.team_id, team_b.team_id])
