@@ -160,12 +160,9 @@ func _can_block(unit: Dictionary) -> bool:
 玩家格擋提示顯示各選項機率（如「盾牌格擋 62%」），方便決策。
 
 ```gdscript
-# 架擋基礎機率（TEST VALUE）
-const PARRY_BASE: Dictionary = {
-    "weapon_melee_low":  0.10,
-    "weapon_melee_high": 0.20,
-    "unarmed":           0.05,
-}
+# 基礎格擋機率全部由 ItemAttributes 提供：
+# ItemAttributes.get_block_chance(armor_grade)  → 盾牌
+# ItemAttributes.get_parry_chance(weapon_grade) → 武器架擋
 
 func _shield_block_chance(unit: Dictionary, state: WorldState) -> float:
     var grade: String   = _get_shield_grade(unit, state)   # "armor_low" / "armor_high"
@@ -176,7 +173,7 @@ func _shield_block_chance(unit: Dictionary, state: WorldState) -> float:
 
 func _parry_chance(unit: Dictionary, state: WorldState) -> float:
     var weapon: String  = _get_weapon_grade(unit, state)
-    var base: float     = float(PARRY_BASE.get(weapon, 0.05))
+    var base: float     = ItemAttributes.get_parry_chance(weapon)   # 查 ItemAttributes
     var p: PersonData   = state.persons.get(unit.get("person_id", -1))
     var combat: float   = float(p.skills.get("戰鬥", 0.0)) if p else 0.0
     return clampf(base + combat * 0.4, 0.0, 0.85)   # TEST VALUE
@@ -376,8 +373,9 @@ func _has_melee_weapon(unit: Dictionary, state: WorldState) -> bool:
 | 倒地速度乘數 | ×0.1 | |
 | 命中基礎率 | 60% | |
 | 戰鬥/弓箭命中加成 | skill×0.4 | |
+| 盾牌格擋基礎機率 | 見 item-attributes-design | armor_low=0.30, armor_high=0.50 |
 | 盾牌格擋技能加成 | 戰鬥×0.3 | |
-| 武器架擋基礎（melee_low/high/unarmed） | 0.10/0.20/0.05 | |
+| 武器架擋基礎機率 | 見 item-attributes-design | melee_low=0.10, melee_high=0.20 |
 | 武器架擋技能加成 | 戰鬥×0.4 | |
 | 閃避 stamina 消耗 | 0.1 | |
 | 閃避基礎成功率 | 20% | 求生=0 時 |

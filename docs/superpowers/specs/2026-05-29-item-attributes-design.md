@@ -84,6 +84,16 @@ const SHIELD_BLOCK_CHANCE: Dictionary = {
 
 static func get_block_chance(grade: String) -> float:
     return float(SHIELD_BLOCK_CHANCE.get(grade, 0.0))
+
+const WEAPON_PARRY_CHANCE: Dictionary = {
+    # 近戰武器架擋基礎機率（技能可加成，見 encounter-combat-design）
+    "weapon_melee_low":  0.10,   # TEST VALUE
+    "weapon_melee_high": 0.20,   # TEST VALUE
+    "unarmed":           0.05,   # TEST VALUE
+}
+
+static func get_parry_chance(grade: String) -> float:
+    return float(WEAPON_PARRY_CHANCE.get(grade, 0.05))
 ```
 
 **格擋邏輯：**
@@ -171,5 +181,8 @@ var is_two_hand: bool = ItemAttributes.is_2h(weapon_grade)
 | weapon_ranged_high range | 6 hex | |
 | armor_low reduction | 0.40 | 40% 減傷 |
 | armor_high reduction | 0.60 | 60% 減傷 |
-| armor_low block | 0.30 | 30% 格擋 |
-| armor_high block | 0.50 | 50% 格擋 |
+| armor_low block | 0.30 | 30% 盾牌格擋基礎 |
+| armor_high block | 0.50 | 50% 盾牌格擋基礎 |
+| weapon_melee_low parry | 0.10 | 10% 架擋基礎 |
+| weapon_melee_high parry | 0.20 | 20% 架擋基礎 |
+| unarmed parry | 0.05 | 5% 架擋基礎 |
