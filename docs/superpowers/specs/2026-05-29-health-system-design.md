@@ -69,8 +69,31 @@ const BLOOD_REGEN_PER_TICK   = 0.1     # TEST VALUE — 自然回復（無出血
 
 # 昏迷：blood < BLOOD_COMA_THRESHOLD → 無法行動（_decide_action 返回 incapable）
 # 死亡：blood <= 0.0
-# 速度影響：get_effective_speed() × clampf(blood / BLOOD_MAX, 0.0, 1.0)
 ```
+
+**合併速度公式（三個獨立乘數）：**
+
+```gdscript
+# encounter_system.gd — get_effective_speed(unit, state)
+func get_effective_speed(unit: Dictionary, state: WorldState) -> float:
+    var p: PersonData = state.persons.get(unit.get("person_id", -1))
+    var base: float   = p.get_effective_speed() if p else 1.0
+
+    # 1. stamina（遭遇戰短期行動消耗，已有實作）
+    var stamina_mult: float = unit.get("stamina", 1.0)
+
+    # 2. blood（失血影響，新增）
+    var blood_mult: float = 1.0
+    if p: blood_mult = clampf(p.blood / BLOOD_MAX, 0.0, 1.0)
+
+    # 3. 骨折（結構性懲罰，新增）
+    var frac_mult: float = 1.0
+    if p: frac_mult = _fracture_speed_mult(p.body_parts)
+
+    return base * stamina_mult * blood_mult * frac_mult
+```
+
+三者獨立相乘：失血重但不累的人仍比體力耗盡的人快；骨折是硬上限。
 
 ---
 
