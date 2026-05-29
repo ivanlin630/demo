@@ -65,7 +65,7 @@ func _calc_status(hp: float, max_hp: float, part: String) -> String:
 ```gdscript
 const BLOOD_MAX: float       = 100.0   # TEST VALUE
 const BLOOD_COMA_THRESHOLD   = 30.0    # TEST VALUE — 低於此值昏迷
-const BLOOD_REGEN_PER_TICK   = 0.2     # TEST VALUE — 自然回復（無出血時）
+const BLOOD_REGEN_PER_TICK   = 0.1     # TEST VALUE — 自然回復（無出血時）
 
 # 昏迷：blood < BLOOD_COMA_THRESHOLD → 無法行動（_decide_action 返回 incapable）
 # 死亡：blood <= 0.0
@@ -76,40 +76,24 @@ const BLOOD_REGEN_PER_TICK   = 0.2     # TEST VALUE — 自然回復（無出血
 
 ## 4. 命中傷害計算
 
+> 傷害值、減傷率、格擋機率**全部查詢 `ItemAttributes`**（見 `2026-05-29-item-attributes-design.md`），健康系統不定義數值。
+
 ```gdscript
-const WEAPON_DAMAGE: Dictionary = {
-    "weapon_melee_low":   10.0,   # TEST VALUE
-    "weapon_melee_high":  15.0,
-    "weapon_ranged_low":   8.0,
-    "weapon_ranged_high": 12.0,
-    "unarmed":             5.0,
-}
-
-const ARMOR_REDUCTION: Dictionary = {
-    "armor_low":  0.4,   # 傷害 × (1 - 0.4) = × 0.6
-    "armor_high": 0.6,
-}
-
-const SHIELD_BLOCK_CHANCE: Dictionary = {
-    "armor_low":  0.30,  # TEST VALUE — 格擋機率
-    "armor_high": 0.50,
-}
-
 func _apply_hit(attacker: Dictionary, target: Dictionary,
         part: String, state: WorldState) -> void:
-    # 1. 格擋判定（target 副手有盾牌）
-    var shield_grade := _get_hand_shield(target, state)
-    if shield_grade != "" and randf() < SHIELD_BLOCK_CHANCE.get(shield_grade, 0.0):
+    # 1. 格擋判定（target hand 槽有 armor_* = 盾牌）
+    var shield_grade: String = _get_hand_shield(target, state)
+    if shield_grade != "" and randf() < ItemAttributes.get_block_chance(shield_grade):
         return   # 格擋，無傷害
 
-    # 2. 基礎傷害
-    var weapon_grade := _get_weapon_grade(attacker, state)
-    var dmg: float = WEAPON_DAMAGE.get(weapon_grade, 5.0)
+    # 2. 基礎傷害（查 ItemAttributes）
+    var weapon_grade: String = _get_weapon_grade(attacker, state)
+    var dmg: float = ItemAttributes.get_damage(weapon_grade)
 
-    # 3. 護甲減傷（該部位護甲槽）
-    var armor_grade := _get_armor_at_slot(target, part, state)
+    # 3. 護甲減傷（該部位護甲槽，查 ItemAttributes）
+    var armor_grade: String = _get_armor_at_slot(target, part, state)
     if armor_grade != "":
-        dmg *= (1.0 - ARMOR_REDUCTION.get(armor_grade, 0.0))
+        dmg *= (1.0 - ItemAttributes.get_damage_reduction(armor_grade))
 
     # 4. 扣 HP，更新 status
     var bp: Dictionary = _get_body_parts(target, state)
@@ -328,7 +312,8 @@ func _tick_natural_regen(state: WorldState) -> void:
 | 檔案 | 動作 |
 |---|---|
 | `scripts/data/person_data.gd` | 加 `blood`；`body_parts` 新格式 |
-| `scripts/simulation/encounter_system.gd` | `_default_body_parts` 新格式；`_apply_body_part_damage` 改為扣 HP；加 `_apply_hit`、`_tick_status_effects`、`_resolve_negative_flags`、`_resolve_anon_units` |
+| `scripts/data/item_attributes.gd` | 新建（見 item-attributes-design.md）|
+| `scripts/simulation/encounter_system.gd` | `_default_body_parts` 新格式；`_apply_body_part_damage` 改為扣 HP；加 `_apply_hit`、`_tick_status_effects`、`_resolve_negative_flags`、`_resolve_anon_units`；傷害查詢改用 `ItemAttributes.*` |
 | `scripts/simulation/interaction_system.gd` | `tick()` 加 `_tick_natural_regen`；post-encounter hook 呼叫 `_resolve_negative_flags` |
 | `scripts/simulation/player_system.gd`（新） | `use_splint()`；`get_effective_speed` 加骨折修正 |
 | `scripts/debug/headless_test.gd` | 更新 body_parts 初始格式；加 blood 欄位；加結算驗證 |
@@ -356,9 +341,7 @@ func _tick_natural_regen(state: WorldState) -> void:
 | 常數 | 值 | 備註 |
 |---|---|---|
 | 各部位 max_hp | 20/50/25/30 | 平衡期調整 |
-| WEAPON_DAMAGE | 5–15 | 依武器 grade |
-| ARMOR_REDUCTION | 0.4/0.6 | 皮/鐵甲 |
-| SHIELD_BLOCK_CHANCE | 0.30/0.50 | 皮/鐵盾 |
+| 武器傷害/護甲減傷/格擋 | — | **見 item-attributes-design.md** |
 | BLEEDING_MINOR_DRAIN | 3.0/round | |
 | BLEEDING_MAJOR_DRAIN | 10.0/round | |
 | POISON_HP_DRAIN | 5.0/round | |
