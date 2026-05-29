@@ -1186,4 +1186,24 @@ func _run_sim_test() -> void:
 	assert(state.encounter_units.size() == 0, "結算後 encounter_units 應清空")
 	print("[Encounter] 完整遭遇戰流程驗證通過 result=%s" % _final_result)
 
+	# ── ItemAttributes 驗證 ──
+	print("--- ItemAttributes ---")
+	assert(ItemAttributes.get_damage("weapon_melee_low") == 10.0,
+		"get_damage weapon_melee_low should be 10.0")
+	assert(ItemAttributes.get_block_chance("armor_high") == 0.50,
+		"get_block_chance armor_high should be 0.50")
+	assert(ItemAttributes.get_parry_chance("weapon_melee_high") == 0.20,
+		"get_parry_chance weapon_melee_high should be 0.20")
+	assert(ItemAttributes.is_2h("weapon_ranged_low") == true,
+		"weapon_ranged_low should be 2h")
+	assert(ItemAttributes.is_2h("weapon_melee_high") == false,
+		"weapon_melee_high should not be 2h")
+	assert(ItemAttributes.get_weight("armor_high", 1) == 7.0,
+		"armor_high weight should be 7.0")
+	assert(ItemAttributes.get_medicine_cost("繃帶") == 2,
+		"medicine 繃帶 cost should be 2")
+	assert(ItemAttributes.get_display_name("armor_low", "hand_1") == "皮盾",
+		"armor_low in hand_1 should display as 皮盾")
+	print("ItemAttributes OK")
+
 	print("=== DONE ===")
