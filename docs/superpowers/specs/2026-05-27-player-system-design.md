@@ -67,17 +67,8 @@ func _calc_inventory_weight(state: WorldState) -> float:
     return total
 # 重量數值見 item-attributes-design.md（ItemAttributes.ITEM_WEIGHT）
 
-# 完整物品清單（inventory grade → 中文顯示名 / 用途）
-# "weapon_melee_low"   短劍    → hand_1/hand_2（單手）
-# "weapon_melee_high"  長劍    → hand_1/hand_2（單手）
-# "weapon_ranged_low"  短弓    → hand_1+hand_2（雙手）
-# "weapon_ranged_high" 長弓    → hand_1+hand_2（雙手）
-# "armor_low"          皮甲/皮盾 → 護甲槽=減傷；手槽=格擋
-# "armor_high"         鐵甲/鐵盾 → 同上
-# "food"               乾糧    → 使用消耗，回復飢餓
-# "medicine"           藥品    → 草藥(×1清小出血)/繃帶(×2清大出血)/解毒劑(×3清中毒)
-# "tools"              工具包  → 夾板(×1清骨折)；生產/修繕用
-# "arrows"             箭矢    → 弓類武器彈藥
+# 完整物品清單、顯示名、槽位相容性 → 見 item-attributes-design.md Section 0
+# ItemAttributes.get_display_name(grade, slot)
 ```
 
 ---

@@ -12,7 +12,38 @@
 
 ## Goal
 
-集中定義所有物品的戰鬥與功能屬性。**健康系統、遭遇戰系統只查詢此處，不自行定義數值。**
+集中定義所有物品的**戰鬥屬性、功能屬性、顯示名稱**。**所有系統只查詢此處，不自行定義數值。**
+
+---
+
+## 0. 物品清單（grade → 顯示名 / 槽位 / 用途）
+
+```gdscript
+const ITEM_DISPLAY_NAME: Dictionary = {
+    "weapon_melee_low":  "短劍",
+    "weapon_melee_high": "長劍",
+    "weapon_ranged_low": "短弓",
+    "weapon_ranged_high":"長弓",
+    "armor_low":         "皮甲",   # 手槽時顯示「皮盾」（由 UI 依槽位判斷）
+    "armor_high":        "鐵甲",   # 手槽時顯示「鐵盾」
+    "food":              "乾糧",
+    "medicine":          "藥品",
+    "tools":             "工具包",
+    "arrows":            "箭矢",
+}
+
+# 槽位相容性（UI 裝備按鈕依此過濾）
+# weapon_melee_*   → hand_1 / hand_2（單手）
+# weapon_ranged_*  → hand_1 + hand_2（雙手，WEAPON_IS_2H）
+# armor_*          → head/torso/right_arm/left_arm/right_leg/left_leg（減傷）
+#                    OR hand_1/hand_2（格擋）
+# food/medicine/tools/arrows → 無裝備槽，直接使用或自動供彈（arrows）
+
+static func get_display_name(grade: String, slot: String = "") -> String:
+    if grade == "armor_low"  and slot in ["hand_1", "hand_2"]: return "皮盾"
+    if grade == "armor_high" and slot in ["hand_1", "hand_2"]: return "鐵盾"
+    return ITEM_DISPLAY_NAME.get(grade, grade)
+```
 
 ---
 
