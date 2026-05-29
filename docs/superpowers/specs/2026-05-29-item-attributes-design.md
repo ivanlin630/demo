@@ -14,198 +14,227 @@
 
 集中定義所有物品的**戰鬥屬性、功能屬性、顯示名稱**。**所有系統只查詢此處，不自行定義數值。**
 
----
-
-## 0. 物品清單（grade → 顯示名 / 槽位 / 用途）
-
-```gdscript
-const ITEM_DISPLAY_NAME: Dictionary = {
-    "weapon_melee_low":  "短劍",
-    "weapon_melee_high": "長劍",
-    "weapon_ranged_low": "短弓",
-    "weapon_ranged_high":"長弓",
-    "armor_low":         "皮甲",   # 手槽時顯示「皮盾」（由 UI 依槽位判斷）
-    "armor_high":        "鐵甲",   # 手槽時顯示「鐵盾」
-    "food":              "乾糧",
-    "medicine":          "藥品",
-    "tools":             "工具包",
-    "arrows":            "箭矢",
-}
-
-# 槽位相容性（UI 裝備按鈕依此過濾）
-# weapon_melee_*   → hand_1 / hand_2（單手）
-# weapon_ranged_*  → hand_1 + hand_2（雙手，WEAPON_IS_2H）
-# armor_*          → head/torso/right_arm/left_arm/right_leg/left_leg（減傷）
-#                    OR hand_1/hand_2（格擋）
-# food/medicine/tools/arrows → 無裝備槽，直接使用或自動供彈（arrows）
-
-static func get_display_name(grade: String, slot: String = "") -> String:
-    if grade == "armor_low"  and slot in ["hand_1", "hand_2"]: return "皮盾"
-    if grade == "armor_high" and slot in ["hand_1", "hand_2"]: return "鐵盾"
-    return ITEM_DISPLAY_NAME.get(grade, grade)
-```
+新增物品 = 在 `ITEM_REGISTRY` 新增一個 entry，不需修改其他任何檔案。
 
 ---
 
-## 1. 武器屬性
+## 1. 物品登記表（ITEM_REGISTRY）
 
 ```gdscript
 # scripts/data/item_attributes.gd
 class_name ItemAttributes
 
-const WEAPON_DAMAGE: Dictionary = {
-    "weapon_melee_low":   10.0,   # TEST VALUE
-    "weapon_melee_high":  15.0,   # TEST VALUE
-    "weapon_ranged_low":   8.0,   # TEST VALUE（短弓）
-    "weapon_ranged_high": 12.0,   # TEST VALUE（長弓）
-    "unarmed":             5.0,   # TEST VALUE
+const ITEM_REGISTRY: Dictionary = {
+
+    # ── 武器 ──────────────────────────────────────────────
+    "weapon_melee_low": {
+        "display_name":   "短劍",
+        "category":       "weapon",
+        "damage":         10.0,    # TEST VALUE
+        "range":          1,
+        "is_2h":          false,
+        "parry_chance":   0.10,    # TEST VALUE
+        "weight":         2.5,     # TEST VALUE
+    },
+    "weapon_melee_high": {
+        "display_name":   "長劍",
+        "category":       "weapon",
+        "damage":         15.0,    # TEST VALUE
+        "range":          1,
+        "is_2h":          false,
+        "parry_chance":   0.20,    # TEST VALUE
+        "weight":         4.0,     # TEST VALUE
+    },
+    "weapon_ranged_low": {
+        "display_name":   "短弓",
+        "category":       "weapon",
+        "damage":         8.0,     # TEST VALUE
+        "range":          4,       # TEST VALUE
+        "is_2h":          true,
+        "parry_chance":   0.0,     # 弓無法架擋
+        "weight":         2.0,     # TEST VALUE
+    },
+    "weapon_ranged_high": {
+        "display_name":   "長弓",
+        "category":       "weapon",
+        "damage":         12.0,    # TEST VALUE
+        "range":          6,       # TEST VALUE
+        "is_2h":          true,
+        "parry_chance":   0.0,
+        "weight":         3.0,     # TEST VALUE
+    },
+    "unarmed": {
+        "display_name":   "徒手",
+        "category":       "weapon",
+        "damage":         5.0,     # TEST VALUE
+        "range":          1,
+        "is_2h":          false,
+        "parry_chance":   0.05,    # TEST VALUE
+        "weight":         0.0,
+    },
+
+    # ── 護甲 / 盾牌 ────────────────────────────────────────
+    # armor_* 裝在護甲槽（head/torso/arm/leg）→ damage_reduction
+    # armor_* 裝在手槽（hand_1/hand_2）        → block_chance（顯示名改為 display_name_shield）
+    "armor_low": {
+        "display_name":        "皮甲",
+        "display_name_shield": "皮盾",
+        "category":            "armor",
+        "damage_reduction":    0.4,    # TEST VALUE — 傷害剩 60%
+        "block_chance":        0.30,   # TEST VALUE
+        "weight":              4.0,    # TEST VALUE
+    },
+    "armor_high": {
+        "display_name":        "鐵甲",
+        "display_name_shield": "鐵盾",
+        "category":            "armor",
+        "damage_reduction":    0.6,    # TEST VALUE — 傷害剩 40%
+        "block_chance":        0.50,   # TEST VALUE
+        "weight":              7.0,    # TEST VALUE
+    },
+
+    # ── 消耗品 ─────────────────────────────────────────────
+    "food": {
+        "display_name": "乾糧",
+        "category":     "consumable",
+        "weight":       0.5,    # TEST VALUE per unit
+    },
+    "medicine": {
+        "display_name": "藥品",
+        "category":     "consumable",
+        "weight":       0.3,    # TEST VALUE per unit
+        # 各治療動作消耗 medicine 數量
+        "use_cost": {
+            "草藥":   1,   # 清除 bleeding_minor
+            "繃帶":   2,   # 清除 bleeding_major
+            "解毒劑": 3,   # 清除 poisoned
+        },
+    },
+    "tools": {
+        "display_name": "工具包",
+        "category":     "consumable",
+        "weight":       2.0,    # TEST VALUE
+        "use_cost": {
+            "夾板": 1,    # 清除 fracture
+        },
+    },
+    "arrows": {
+        "display_name":    "箭矢",
+        "category":        "consumable",
+        "weight":          0.05,   # TEST VALUE per unit
+        "cost_per_shot":   1,      # TEST VALUE
+    },
 }
+```
 
-const WEAPON_RANGE: Dictionary = {
-    # 遭遇戰 hex 攻擊距離
-    "weapon_melee_low":   1,
-    "weapon_melee_high":  1,
-    "weapon_ranged_low":  4,   # TEST VALUE
-    "weapon_ranged_high": 6,   # TEST VALUE
-    "unarmed":            1,
-}
+---
 
-const WEAPON_IS_2H: Array = [
-    "weapon_ranged_low",
-    "weapon_ranged_high",
-]
+## 2. Static 查詢函數
 
+```gdscript
+static func _get(grade: String) -> Dictionary:
+    return ITEM_REGISTRY.get(grade, {})
+
+# 武器
 static func get_damage(grade: String) -> float:
-    return float(WEAPON_DAMAGE.get(grade, WEAPON_DAMAGE["unarmed"]))
+    return float(_get(grade).get("damage", _get("unarmed").get("damage", 5.0)))
 
 static func get_range(grade: String) -> int:
-    return int(WEAPON_RANGE.get(grade, 1))
+    return int(_get(grade).get("range", 1))
 
 static func is_2h(grade: String) -> bool:
-    return grade in WEAPON_IS_2H
-```
-
----
-
-## 2. 護甲屬性
-
-```gdscript
-const ARMOR_DAMAGE_REDUCTION: Dictionary = {
-    # 命中部位有此護甲 → 傷害 × (1 - reduction)
-    "armor_low":  0.4,   # TEST VALUE — 皮甲，傷害剩 60%
-    "armor_high": 0.6,   # TEST VALUE — 鐵甲，傷害剩 40%
-}
-
-static func get_damage_reduction(grade: String) -> float:
-    return float(ARMOR_DAMAGE_REDUCTION.get(grade, 0.0))
-```
-
-**護甲槽對應：**
-- `armor_*` 裝在護甲槽（head/torso/arm/leg）→ 該部位命中時套用減傷
-- 護甲只保護自己對應的部位槽（head 護甲不保護 torso）
-
----
-
-## 3. 盾牌屬性
-
-```gdscript
-const SHIELD_BLOCK_CHANCE: Dictionary = {
-    # armor_* 裝在 hand 槽時作為盾牌
-    "armor_low":  0.30,   # TEST VALUE — 皮盾格擋機率
-    "armor_high": 0.50,   # TEST VALUE — 鐵盾格擋機率
-}
-
-static func get_block_chance(grade: String) -> float:
-    return float(SHIELD_BLOCK_CHANCE.get(grade, 0.0))
-
-const WEAPON_PARRY_CHANCE: Dictionary = {
-    # 近戰武器架擋基礎機率（技能可加成，見 encounter-combat-design）
-    "weapon_melee_low":  0.10,   # TEST VALUE
-    "weapon_melee_high": 0.20,   # TEST VALUE
-    "unarmed":           0.05,   # TEST VALUE
-}
+    return bool(_get(grade).get("is_2h", false))
 
 static func get_parry_chance(grade: String) -> float:
-    return float(WEAPON_PARRY_CHANCE.get(grade, 0.05))
-```
+    return float(_get(grade).get("parry_chance", 0.05))
 
-**格擋邏輯：**
-- 格擋成功 → 完全無傷害（不觸發部位傷害計算）
-- 格擋只在有命中時判定（不影響 miss）
-- hand_1 或 hand_2 有 armor_* → 視為盾牌，觸發格擋判定
+# 護甲 / 盾牌
+static func get_damage_reduction(grade: String) -> float:
+    return float(_get(grade).get("damage_reduction", 0.0))
 
----
+static func get_block_chance(grade: String) -> float:
+    return float(_get(grade).get("block_chance", 0.0))
 
-## 4. 物品重量
-
-```gdscript
-const ITEM_WEIGHT: Dictionary = {
-    # 玩家背包重量計算用（TEST VALUE）
-    "weapon_melee_low":   2.5,
-    "weapon_melee_high":  4.0,
-    "weapon_ranged_low":  2.0,   # 短弓（2h）
-    "weapon_ranged_high": 3.0,   # 長弓（2h）
-    "armor_low":          4.0,   # 皮甲/皮盾（依槽位效果不同）
-    "armor_high":         7.0,   # 鐵甲/鐵盾
-    "food":               0.5,   # per unit
-    "medicine":           0.3,   # per unit
-    "tools":              2.0,
-    "arrows":             0.05,  # per unit
-}
-
+# 重量
 static func get_weight(grade: String, qty: int = 1) -> float:
-    return float(ITEM_WEIGHT.get(grade, 1.0)) * qty
-```
+    return float(_get(grade).get("weight", 1.0)) * qty
 
----
-
-## 5. 消耗品屬性
-
-```gdscript
-const MEDICINE_COST: Dictionary = {
-    # 使用動作 → 消耗 medicine 數量
-    "草藥":   1,   # 清除 bleeding_minor
-    "繃帶":   2,   # 清除 bleeding_major
-    "解毒劑": 3,   # 清除 poisoned
-}
-
-const TOOLS_COST: Dictionary = {
-    "夾板": 1,   # 清除 fracture（消耗 tools）
-}
-
-const ARROW_COST_PER_SHOT: int = 1   # 每次射擊消耗箭矢數（TEST VALUE）
-
+# 消耗品
 static func get_medicine_cost(action: String) -> int:
-    return int(MEDICINE_COST.get(action, 0))
+    return int(_get("medicine").get("use_cost", {}).get(action, 0))
 
 static func get_tools_cost(action: String) -> int:
-    return int(TOOLS_COST.get(action, 0))
+    return int(_get("tools").get("use_cost", {}).get(action, 0))
+
+const ARROW_COST_PER_SHOT: int = 1   # 快捷存取（等同 _get("arrows")["cost_per_shot"]）
+
+# 顯示名稱（手槽 armor 自動返回盾牌名）
+static func get_display_name(grade: String, slot: String = "") -> String:
+    var item: Dictionary = _get(grade)
+    if slot in ["hand_1", "hand_2"] and item.has("display_name_shield"):
+        return item["display_name_shield"]
+    return item.get("display_name", grade)
+
+# 分類查詢（UI 過濾用）
+static func get_category(grade: String) -> String:
+    return _get(grade).get("category", "")
+
+static func is_weapon(grade: String) -> bool:
+    return get_category(grade) == "weapon"
+
+static func is_armor(grade: String) -> bool:
+    return get_category(grade) == "armor"
 ```
 
 ---
 
-## 6. 查詢接口彙整
+## 3. 新增物品方法
 
-健康系統和遭遇戰系統統一透過以下 static 函數查詢：
+只需在 `ITEM_REGISTRY` 末端加入新 entry，填入適用欄位：
+
+```gdscript
+# 範例：加入長矛
+"weapon_spear": {
+    "display_name":  "長矛",
+    "category":      "weapon",
+    "damage":        13.0,
+    "range":         2,        # 比近戰多 1 格
+    "is_2h":         true,
+    "parry_chance":  0.15,
+    "weight":        3.5,
+},
+```
+
+不需修改任何其他 spec 或系統檔案。
+
+---
+
+## 4. 查詢接口彙整
 
 ```gdscript
 # 武器
-var dmg: float        = ItemAttributes.get_damage(weapon_grade)
-var range: int        = ItemAttributes.get_range(weapon_grade)
-var is_2h: bool       = ItemAttributes.is_2h(weapon_grade)
-var parry: float      = ItemAttributes.get_parry_chance(weapon_grade)
+ItemAttributes.get_damage(weapon_grade)
+ItemAttributes.get_range(weapon_grade)
+ItemAttributes.is_2h(weapon_grade)
+ItemAttributes.get_parry_chance(weapon_grade)
 
 # 護甲 / 盾牌
-var reduction: float  = ItemAttributes.get_damage_reduction(armor_grade)
-var block: float      = ItemAttributes.get_block_chance(shield_grade)
+ItemAttributes.get_damage_reduction(armor_grade)
+ItemAttributes.get_block_chance(shield_grade)
 
 # 重量
-var w: float          = ItemAttributes.get_weight(grade, qty)
+ItemAttributes.get_weight(grade, qty)
 
 # 消耗品
-var med_cost: int     = ItemAttributes.get_medicine_cost("草藥")   # 1
-var tool_cost: int    = ItemAttributes.get_tools_cost("夾板")      # 1
-var arrow_cost: int   = ItemAttributes.ARROW_COST_PER_SHOT         # 1
+ItemAttributes.get_medicine_cost("草藥")    # → 1
+ItemAttributes.get_tools_cost("夾板")       # → 1
+ItemAttributes.ARROW_COST_PER_SHOT         # → 1
+
+# 顯示
+ItemAttributes.get_display_name(grade, slot)
+ItemAttributes.get_category(grade)
+ItemAttributes.is_weapon(grade)
+ItemAttributes.is_armor(grade)
 ```
 
 ---
@@ -214,9 +243,9 @@ var arrow_cost: int   = ItemAttributes.ARROW_COST_PER_SHOT         # 1
 
 | 檔案 | 動作 |
 |---|---|
-| `scripts/data/item_attributes.gd` | **新建** — 所有物品戰鬥屬性常數 + static 查詢函數 |
+| `scripts/data/item_attributes.gd` | **新建** — ITEM_REGISTRY + static 查詢函數 |
 | `scripts/simulation/encounter_system.gd` | 移除自定義傷害常數，改用 `ItemAttributes.*` |
-| `scripts/simulation/health_system.gd`（新）| 同上 |
+| `scripts/simulation/encounter_combat.gd`（新）| 使用 `ItemAttributes.*` 計算格擋/傷害 |
 | `scripts/debug/headless_test.gd` | 驗證 ItemAttributes 查詢回傳正確值 |
 
 ---
@@ -230,37 +259,38 @@ var arrow_cost: int   = ItemAttributes.ARROW_COST_PER_SHOT         # 1
 預期：
 - `ItemAttributes.get_damage("weapon_melee_low")` = 10.0
 - `ItemAttributes.get_block_chance("armor_high")` = 0.50
+- `ItemAttributes.get_parry_chance("weapon_melee_high")` = 0.20
 - `ItemAttributes.is_2h("weapon_ranged_low")` = true
 - `ItemAttributes.is_2h("weapon_melee_high")` = false
+- `ItemAttributes.get_weight("armor_high", 1)` = 7.0
+- `ItemAttributes.get_medicine_cost("繃帶")` = 2
+- `ItemAttributes.get_display_name("armor_low", "hand_1")` = "皮盾"
 
 ---
 
 ## ⚠️ TEST VALUES
 
-| 屬性 | 值 | 備註 |
+| grade | 屬性 | 值 |
 |---|---|---|
-| weapon_melee_low damage | 10.0 | 平衡期調整 |
-| weapon_melee_high damage | 15.0 | |
-| weapon_ranged_low damage | 8.0 | 短弓 |
-| weapon_ranged_high damage | 12.0 | 長弓 |
-| unarmed damage | 5.0 | |
-| weapon_ranged_low range | 4 hex | |
-| weapon_ranged_high range | 6 hex | |
-| armor_low reduction | 0.40 | 40% 減傷 |
-| armor_high reduction | 0.60 | 60% 減傷 |
-| armor_low block | 0.30 | 30% 盾牌格擋基礎 |
-| armor_high block | 0.50 | 50% 盾牌格擋基礎 |
-| weapon_melee_low parry | 0.10 | 10% 架擋基礎 |
-| weapon_melee_high parry | 0.20 | 20% 架擋基礎 |
-| unarmed parry | 0.05 | 5% 架擋基礎 |
-| weapon_melee_low 重量 | 2.5 | |
-| weapon_melee_high 重量 | 4.0 | |
-| weapon_ranged_low 重量 | 2.0 | |
-| weapon_ranged_high 重量 | 3.0 | |
-| armor_low 重量 | 4.0 | |
-| armor_high 重量 | 7.0 | |
-| food 重量 | 0.5/unit | |
-| medicine 重量 | 0.3/unit | |
-| tools 重量 | 2.0 | |
-| arrows 重量 | 0.05/unit | |
-| ARROW_COST_PER_SHOT | 1 | |
+| weapon_melee_low | damage | 10.0 |
+| weapon_melee_high | damage | 15.0 |
+| weapon_ranged_low | damage / range | 8.0 / 4 hex |
+| weapon_ranged_high | damage / range | 12.0 / 6 hex |
+| unarmed | damage | 5.0 |
+| weapon_melee_low | parry_chance | 0.10 |
+| weapon_melee_high | parry_chance | 0.20 |
+| unarmed | parry_chance | 0.05 |
+| armor_low | damage_reduction | 0.40 |
+| armor_high | damage_reduction | 0.60 |
+| armor_low | block_chance | 0.30 |
+| armor_high | block_chance | 0.50 |
+| weapon_melee_low | weight | 2.5 |
+| weapon_melee_high | weight | 4.0 |
+| weapon_ranged_low | weight | 2.0 |
+| weapon_ranged_high | weight | 3.0 |
+| armor_low | weight | 4.0 |
+| armor_high | weight | 7.0 |
+| food | weight | 0.5/unit |
+| medicine | weight | 0.3/unit |
+| tools | weight | 2.0 |
+| arrows | weight / cost_per_shot | 0.05/unit / 1 |
