@@ -45,9 +45,11 @@ func _base_speed(unit: Dictionary, state: WorldState) -> float:
     return 1.0 + body * 0.2   # TEST VALUE：體力=1.0 → 速度 1.2
 
 func _effective_speed(unit: Dictionary, state: WorldState) -> float:
-    var base: float  = _base_speed(unit, state)
+    var base: float   = _base_speed(unit, state)
     var stance: float = STANCE_SPEED_MULT.get(unit.get("stance", "walk"), 1.0)
-    var health: float = HealthSystem.get_speed_mult(unit, state)   # stamina×blood×fracture
+    # HealthSystem.get_speed_mult = stamina_mult × blood_mult × fracture_mult
+    # （定義於 health-system-design Section 3）
+    var health: float = HealthSystem.get_speed_mult(unit, state)
     return base * stance * health
 
 func _max_timer(unit: Dictionary, state: WorldState) -> int:
@@ -247,8 +249,8 @@ func _resolve_attack(attacker: Dictionary, target: Dictionary,
     var reduction: float = ItemAttributes.get_damage_reduction(armor)
     var final_dmg: float = raw_dmg * (1.0 - reduction)
 
-    # 套用至 HealthSystem
-    HealthSystem.apply_hit(target, state, target_part, final_dmg)
+    # 套用至 HealthSystem（只負責扣 HP + 更新 status，不再計算傷害）
+    HealthSystem.receive_damage(target, state, target_part, final_dmg)
     print("[Hit] part=%s dmg=%.1f" % [target_part, final_dmg])
 ```
 

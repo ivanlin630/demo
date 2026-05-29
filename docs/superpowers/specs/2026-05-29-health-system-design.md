@@ -95,34 +95,36 @@ func get_effective_speed(unit: Dictionary, state: WorldState) -> float:
 
 三者獨立相乘：失血重但不累的人仍比體力耗盡的人快；骨折是硬上限。
 
+```gdscript
+# 公開接口（encounter-combat-design 呼叫）
+static func get_speed_mult(unit: Dictionary, state: WorldState) -> float:
+    var p: PersonData = state.persons.get(unit.get("person_id", -1))
+    var stamina_mult: float = unit.get("stamina", 1.0)
+    var blood_mult: float   = 1.0
+    var frac_mult: float    = 1.0
+    if p:
+        blood_mult = clampf(p.blood / BLOOD_MAX, 0.0, 1.0)
+        frac_mult  = _fracture_speed_mult(p.body_parts)
+    return stamina_mult * blood_mult * frac_mult
+```
+
 ---
 
-## 4. 命中傷害計算
+## 4. 受傷 HP 套用
 
-> 傷害值、減傷率、格擋機率**全部查詢 `ItemAttributes`**（見 `2026-05-29-item-attributes-design.md`），健康系統不定義數值。
+> 命中判定、格擋選擇、武器傷害、護甲減傷**全部由 encounter-combat-design 處理**。
+> HealthSystem 只接收已計算完成的最終傷害值，套用至部位 HP。
 
 ```gdscript
-func _apply_hit(attacker: Dictionary, target: Dictionary,
-        part: String, state: WorldState) -> void:
-    # 1. 格擋判定（target hand 槽有 armor_* = 盾牌）
-    var shield_grade: String = _get_hand_shield(target, state)
-    if shield_grade != "" and randf() < ItemAttributes.get_block_chance(shield_grade):
-        return   # 格擋，無傷害
-
-    # 2. 基礎傷害（查 ItemAttributes）
-    var weapon_grade: String = _get_weapon_grade(attacker, state)
-    var dmg: float = ItemAttributes.get_damage(weapon_grade)
-
-    # 3. 護甲減傷（該部位護甲槽，查 ItemAttributes）
-    var armor_grade: String = _get_armor_at_slot(target, part, state)
-    if armor_grade != "":
-        dmg *= (1.0 - ItemAttributes.get_damage_reduction(armor_grade))
-
-    # 4. 扣 HP，更新 status
-    var bp: Dictionary = _get_body_parts(target, state)
-    bp[part]["hp"] = maxf(bp[part]["hp"] - dmg, 0.0)
+func receive_damage(unit: Dictionary, state: WorldState,
+        part: String, final_dmg: float) -> void:
+    var bp: Dictionary = _get_body_parts(unit, state)
+    if not bp.has(part): return
+    bp[part]["hp"] = maxf(bp[part]["hp"] - final_dmg, 0.0)
     bp[part]["status"] = _calc_status(bp[part]["hp"], bp[part]["max_hp"], part)
 ```
+
+**注意：** `ItemAttributes.get_block_chance()` 不再由 HealthSystem 呼叫；格擋邏輯完全由 encounter-combat-design 的 `_resolve_attack()` 處理。
 
 ---
 
