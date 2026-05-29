@@ -107,6 +107,12 @@ func get_reinforcement_entry_edge(
     3. `poisoned` → 消耗 medicine ×3；不足 → 技能判定；仍不足 → 一次扣各部位 HP（`hp = maxf(hp - deduct, 1.0)`）→ 清除 flag
     4. `fracture` → 消耗 tools ×1；不足 → **保留 flag 帶入大地圖**（唯一持續負面狀態）
     - 底線規則：blood 最低 1、部位 hp 最低 1（結算本身不殺人，留臨界狀態）
+  - **匿名成員結算**（無 PersonData，轉回 team pool）：
+    1. `status == dead`（torso critical 判定失敗）→ `team.population -= N`
+    2. 有 `bleeding` → 按比例消耗 `team.resources["medicine"]`；不足 → 未治療比例加入 `team.wounded`
+    3. 有 `fracture` → 直接加入 `team.wounded`（不帶入大地圖）
+    4. 有 `poisoned` → 一次扣 HP 重算 status → 再按 status 計入 wounded/dead
+    5. 其餘存活但 status != healthy → 加入 `team.wounded`
   - 大地圖骨折治療：玩家物品欄 → tools 使用 → 選目標部位 → fracture = false
   - 恢復 SimRunner 推進
 
