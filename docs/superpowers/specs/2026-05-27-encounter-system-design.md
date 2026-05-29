@@ -188,9 +188,13 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
         "is_messenger": false,
         "has_exited": false,
         "body_parts": {
-            "head": {"status": "healthy"}, "torso": {"status": "healthy"},
-            "right_arm": {"status": "healthy"}, "left_arm": {"status": "healthy"},
-            "right_leg": {"status": "healthy"}, "left_leg": {"status": "healthy"},
+            # 完整格式（對齊 health-system-design 定義）
+            "head":      { "hp": 20.0, "max_hp": 20.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "torso":     { "hp": 50.0, "max_hp": 50.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "right_arm": { "hp": 25.0, "max_hp": 25.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "left_arm":  { "hp": 25.0, "max_hp": 25.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "right_leg": { "hp": 30.0, "max_hp": 30.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "left_leg":  { "hp": 30.0, "max_hp": 30.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
         },
         # 技能依 team 匿名基準值（無個體差異）
         "skills": { "戰鬥": team.get("anon_combat_skill", 0.2) },
@@ -207,12 +211,13 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 
 ```gdscript
 func _equip_named_npc(p: PersonData, team: TeamData) -> void:
-    if p.equipment["right_hand"]["type"] == "none":
+    # 武器：優先裝 hand_1（hand_1/hand_2 無左右區分）
+    if p.equipment["hand_1"].get("type", "none") == "none":
         if int(team.resources.get("weapon_melee_low", 0)) > 0:
-            p.equipment["right_hand"] = { "type": "pool", "grade": "weapon_melee_low" }
+            p.equipment["hand_1"] = { "type": "pool", "grade": "weapon_melee_low" }
             team.resources["weapon_melee_low"] -= 1
     # torso armor
-    if p.equipment["torso"]["type"] == "none":
+    if p.equipment["torso"].get("type", "none") == "none":
         var cfg: String = team.armor_config.get("torso", "none")
         if cfg == "low" and int(team.resources.get("armor_low", 0)) > 0:
             p.equipment["torso"] = { "type": "pool", "grade": "armor_low" }
@@ -220,7 +225,7 @@ func _equip_named_npc(p: PersonData, team: TeamData) -> void:
         elif cfg == "high" and int(team.resources.get("armor_high", 0)) > 0:
             p.equipment["torso"] = { "type": "pool", "grade": "armor_high" }
             team.resources["armor_high"] -= 1
-    # 其他部位類推（head, arms, legs）
+    # 其他部位類推（head, right_arm, left_arm, right_leg, left_leg）
 ```
 
 死亡後 pool 裝備歸還 `team.resources[grade]`；unique 裝備掉落（後續 spec 定義）。

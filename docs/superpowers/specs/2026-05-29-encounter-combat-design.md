@@ -149,39 +149,80 @@ func _can_block(unit: Dictionary) -> bool:
 
 ### 格擋選項
 
-| 選項 | 條件 | 效果 |
-|---|---|---|
-| 盾牌格擋 | hand_1 或 hand_2 裝備 armor_* | 傷害 = 0 |
-| 武器架擋 | 裝備任意近戰武器 | 傷害 × 0.5（TEST VALUE） |
-| 閃避 | 無條件可選 | stamina -0.1，本次攻擊觸發 miss 機率判定 |
+**所有選項：成功 = 0 傷害；失敗 = 全傷害。**
 
-閃避 miss 機率：
+| 選項 | 條件 | 成功機率 |
+|---|---|---|
+| 盾牌格擋 | hand_1 或 hand_2 裝備 armor_* | `SHIELD_BLOCK_CHANCE[grade] + 戰鬥×0.3` |
+| 武器架擋 | 裝備任意近戰武器（含 unarmed） | `PARRY_BASE[weapon] + 戰鬥×0.4` |
+| 閃避 | 無條件可選，消耗 stamina -0.1 | `0.2 + 求生×0.4×(0.5+體力×0.5)` |
+
+玩家格擋提示顯示各選項機率（如「盾牌格擋 62%」），方便決策。
+
 ```gdscript
-func _dodge_miss_chance(unit: Dictionary, state: WorldState) -> float:
-    var p: PersonData = state.persons.get(unit.get("person_id", -1))
+# 架擋基礎機率（TEST VALUE）
+const PARRY_BASE: Dictionary = {
+    "weapon_melee_low":  0.10,
+    "weapon_melee_high": 0.20,
+    "unarmed":           0.05,
+}
+
+func _shield_block_chance(unit: Dictionary, state: WorldState) -> float:
+    var grade: String   = _get_shield_grade(unit, state)   # "armor_low" / "armor_high"
+    var base: float     = ItemAttributes.get_block_chance(grade)   # 0.30 / 0.50
+    var p: PersonData   = state.persons.get(unit.get("person_id", -1))
+    var combat: float   = float(p.skills.get("戰鬥", 0.0)) if p else 0.0
+    return clampf(base + combat * 0.3, 0.0, 0.90)   # TEST VALUE
+
+func _parry_chance(unit: Dictionary, state: WorldState) -> float:
+    var weapon: String  = _get_weapon_grade(unit, state)
+    var base: float     = float(PARRY_BASE.get(weapon, 0.05))
+    var p: PersonData   = state.persons.get(unit.get("person_id", -1))
+    var combat: float   = float(p.skills.get("戰鬥", 0.0)) if p else 0.0
+    return clampf(base + combat * 0.4, 0.0, 0.85)   # TEST VALUE
+
+func _dodge_chance(unit: Dictionary, state: WorldState) -> float:
+    var p: PersonData   = state.persons.get(unit.get("person_id", -1))
     if p == null: return 0.2
     var survival: float = float(p.skills.get("求生", 0.0))
     var body: float     = float(p.attributes.get("體力", 0.5))
-    return 0.2 + survival * 0.4 * (0.5 + body * 0.5)   # TEST VALUE
+    return clampf(0.2 + survival * 0.4 * (0.5 + body * 0.5), 0.0, 0.80)   # TEST VALUE
+
+func _resolve_block(unit: Dictionary, state: WorldState,
+        choice: String) -> bool:   # 返回 true = 格擋成功（無傷）
+    match choice:
+        "shield": return randf() < _shield_block_chance(unit, state)
+        "parry":  return randf() < _parry_chance(unit, state)
+        "dodge":
+            unit["stamina"] = maxf(float(unit.get("stamina", 0.0)) - 0.1, 0.0)
+            return randf() < _dodge_chance(unit, state)
+    return false
 ```
 
-格擋執行後：
+格擋執行後（無論成功/失敗）：
 ```gdscript
 unit["action_timer"] = mini(unit["action_timer"] + BLOCK_PENALTY,
                             _max_timer(unit, state))
-# 無需清除 pending_dodge：攻擊解算後自動清除
 ```
 
 ### NPC 自動格擋
 
+NPC 選擇成功率最高的選項；低於門檻直接受擊：
+
 ```gdscript
-func _npc_auto_block(unit: Dictionary, state: WorldState,
-        incoming_dmg: float) -> String:
-    if _has_shield(unit, state): return "shield"
-    if _has_melee_weapon(unit, state) and incoming_dmg > 5.0: return "parry"
-    var miss: float = _dodge_miss_chance(unit, state)
-    if float(unit.get("stamina", 0.0)) > 0.2 and miss > 0.4: return "dodge"
-    return "none"
+func _npc_auto_block(unit: Dictionary, state: WorldState) -> String:
+    var options: Dictionary = {}
+    if _has_shield(unit, state):
+        options["shield"] = _shield_block_chance(unit, state)
+    if _has_melee_weapon(unit, state):
+        options["parry"] = _parry_chance(unit, state)
+    if float(unit.get("stamina", 0.0)) > 0.1:
+        options["dodge"] = _dodge_chance(unit, state)
+
+    var best: String = "none"; var best_val: float = 0.3   # TEST VALUE 最低門檻
+    for opt in options:
+        if options[opt] > best_val: best_val = options[opt]; best = opt
+    return best
 ```
 
 ---
@@ -225,10 +266,10 @@ func _resolve_attack(attacker: Dictionary, target: Dictionary,
     # 射程（遠程）
     if is_ranged and not _check_range(attacker, target, state): return
 
-    # 閃避 miss 判定（target 已選閃避）
+    # 閃避 miss 判定（target 已選閃避，由格擋視窗觸發）
     if target.get("pending_dodge", false):
         target["pending_dodge"] = false
-        if randf() < _dodge_miss_chance(target, state):
+        if _resolve_block(target, state, "dodge"):
             print("[Dodge] %s 閃避成功" % str(target["person_id"]))
             return
 
@@ -335,9 +376,12 @@ func _has_melee_weapon(unit: Dictionary, state: WorldState) -> bool:
 | 倒地速度乘數 | ×0.1 | |
 | 命中基礎率 | 60% | |
 | 戰鬥/弓箭命中加成 | skill×0.4 | |
-| 武器架擋減傷 | ×0.5 | |
+| 盾牌格擋技能加成 | 戰鬥×0.3 | |
+| 武器架擋基礎（melee_low/high/unarmed） | 0.10/0.20/0.05 | |
+| 武器架擋技能加成 | 戰鬥×0.4 | |
 | 閃避 stamina 消耗 | 0.1 | |
-| 閃避基礎 miss 率 | 20% | 求生=0 時 |
+| 閃避基礎成功率 | 20% | 求生=0 時 |
+| NPC 格擋最低門檻 | 30% | 低於不格擋 |
 | 攻擊 stamina 消耗 | 0.05 | |
 | 蹲下遠程減傷 | ×0.7 | |
 | 倒地遠程減傷 | ×0.4 | |
