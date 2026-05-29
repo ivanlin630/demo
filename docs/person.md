@@ -53,22 +53,36 @@ var values: Dictionary
 
 var memory: Array       # [{ event_id: int, intensity: String, reaction: String }]
 
-# 部位健康（大地圖簡化版；遭遇戰可加 hp/max_hp）
+# 部位健康
 var body_parts: Dictionary
+# 完整格式（玩家 + 遭遇戰 named NPC）：
 # {
-#   "head":      { "status": "healthy", "poisoned": false },
-#   "torso":     { "status": "healthy", "poisoned": false },
-#   "right_arm": { "status": "healthy", "poisoned": false },
-#   "left_arm":  { "status": "healthy", "poisoned": false },
-#   "right_leg": { "status": "healthy", "poisoned": false },
-#   "left_leg":  { "status": "healthy", "poisoned": false },
+#   "head":      { "hp": 20.0, "max_hp": 20.0, "status": "healthy",
+#                  "poisoned": false, "bleeding": "none", "fracture": false },
+#   "torso":     { "hp": 50.0, "max_hp": 50.0, ... },
+#   "right_arm": { "hp": 25.0, "max_hp": 25.0, ... },
+#   "left_arm":  { "hp": 25.0, "max_hp": 25.0, ... },
+#   "right_leg": { "hp": 30.0, "max_hp": 30.0, ... },
+#   "left_leg":  { "hp": 30.0, "max_hp": 30.0, ... },
 # }
-# poisoned: 每 tick 扣該部位 HP（HP 歸零時 status 正常降級）；解毒劑清除
+# status 由 hp 門檻自動計算（不手動設定）：
+#   hp > 75%  → "healthy"
+#   25–75%    → "wounded"
+#   1–24%     → "critical"
+#   0         → "severed"（四肢）/ 死亡（head/torso）
+# bleeding: "none" / "minor" / "major"
+# fracture: 骨折 flag，不自動清除，需 tools ×1 治療
+#
+# 大地圖 NPC（簡化）：只有 {"status": "healthy"} 無 hp/flags
+
+var blood: float = 100.0   # TEST VALUE — 全身血液值
+# blood = 0   → 死亡
+# blood < 30  → 昏迷（無法行動）（TEST VALUE）
+# 影響 get_effective_speed() × (blood / 100.0)
 
 const STATUS_MULT: Dictionary = {
     "healthy": 1.0, "wounded": 0.7, "critical": 0.3, "severed": 0.0
 }
-# poisoned 是獨立 flag，不進 STATUS_MULT；中毒效果 = 每 tick 自動加速 status 惡化
 
 # 裝備（8 槽位）
 var equipment: Dictionary = {}
@@ -99,17 +113,38 @@ var equipment: Dictionary = {}
 | `critical` | ×0.3 | 70% 下降（head/torso：瀕死狀態） |
 | `severed` | ×0.0 | 功能全失（四肢限定） |
 
-**中毒（`poisoned: true`）**：獨立 flag，疊加於任何 status 上。
-每 tick 扣該部位 HP，HP 歸零時 status 正常降級（healthy→wounded→critical）。
-大地圖 NPC（無 HP 欄位）中毒時直接每 tick 降 status 一級（fallback）。
-解毒劑（medicine ×3）清除 poisoned flag。
+**負面 flags（遭遇戰中產生，部分帶入大地圖）：**
 
-**Medicine 使用動作（玩家/遭遇戰）**：
-| 動作 | 效果 | 消耗 |
+| flag | 遭遇戰效果 | 結算後 | 大地圖 |
+|---|---|---|---|
+| `bleeding: "minor"` | 每 round 扣少量 blood | 一次扣 blood ×小 → 清除 | 無 |
+| `bleeding: "major"` | 每 round 扣大量 blood | 一次扣 blood ×大 → 清除 | 無 |
+| `poisoned: true` | 每 round 扣各部位 HP | 一次扣全部位 HP → 清除 | 無 |
+| `fracture: true` | 見骨折效果表 | **保留** | ✅ 持續，tools ×1 治療 |
+
+**骨折效果（依部位）：**
+
+| 部位 | 效果 |
+|---|---|
+| head | 每 round 機率跳過行動；智力 ×0.5 |
+| torso | 疲勞消耗 ×2；速度 −20% |
+| arm（其一）| 該手槽裝備自動掉落；hand slot 無法使用 |
+| leg（其一）| 速度 −50%；無法衝刺 |
+| leg（兩隻）| 速度 −90%；無法主動移動 |
+
+**遭遇戰結束自動結算（治療優先順序）：**
+1. 掃描玩家 team 所有人的 flags
+2. 有資源 → 消耗資源清除 flag（`bleeding_major` 優先）
+3. 資源不足 → 最高醫療技能者技能判定 → 機率清除
+4. 剩餘出血/中毒 → 一次性扣值後清除；骨折保留帶入大地圖
+
+**治療物品對照：**
+| 動作 | 消耗 | 效果 |
 |---|---|---|
-| 草藥 | 目標部位 wounded → healthy | medicine ×1 |
-| 繃帶 | 目標部位 critical → wounded | medicine ×2 |
-| 解毒劑 | 目標部位 poisoned = false | medicine ×3 |
+| 草藥 | medicine ×1 | 清除 bleeding_minor |
+| 繃帶 | medicine ×2 | 清除 bleeding_major |
+| 解毒劑 | medicine ×3 | 清除 poisoned |
+| 夾板 | tools ×1 | 清除 fracture（大地圖可用）|
 
 ### 部位 → 影響
 

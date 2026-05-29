@@ -100,6 +100,12 @@ func get_reinforcement_entry_edge(
 - 遭遇戰結束（撤退/殲滅/投降）後：
   - 結算傷亡、俘虜
   - 更新雙方 team population/named_members
+  - **負面狀態結算**（玩家 team 所有人，優先順序由重到輕）：
+    1. `bleeding_major` → 消耗 medicine ×2 清除；不足 → 醫療技能判定；仍不足 → 一次扣 blood 大量 → 清除 flag
+    2. `bleeding_minor` → 消耗 medicine ×1；不足 → 技能判定；仍不足 → 一次扣 blood 少量 → 清除 flag
+    3. `poisoned` → 消耗 medicine ×3；不足 → 技能判定；仍不足 → 一次扣各部位 HP → 清除 flag
+    4. `fracture` → 消耗 tools ×1；不足 → **保留 flag 帶入大地圖**（唯一持續負面狀態）
+  - 大地圖骨折治療：玩家物品欄 → tools 使用 → 選目標部位 → fracture = false
   - 恢復 SimRunner 推進
 
 ---
