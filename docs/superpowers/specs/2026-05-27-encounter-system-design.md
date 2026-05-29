@@ -95,7 +95,7 @@ func get_reinforcement_entry_edge(
 
 ## 4. 時間整合
 
-- 遭遇戰每回合 = 1 大地圖 tick
+- 遭遇戰每tick = 1 大地圖 tick
 - SimRunner 在遭遇戰進行中不推進大地圖 tick
 - 遭遇戰結束（撤退/殲滅/投降）後：
   - 結算傷亡、俘虜
