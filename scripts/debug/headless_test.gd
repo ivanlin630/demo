@@ -844,7 +844,7 @@ func _run_sim_test() -> void:
 		for pid in ([t.leader_id] as Array) + t.named_members:
 			var p: PersonData = state.persons.get(pid)
 			if p == null: continue
-			var wt: String = p.equipment["right_hand"].get("type", "none")
+			var wt: String = p.equipment["hand_1"].get("type", "none")
 			if wt in equip_counts: equip_counts[wt] += 1
 			else: equip_counts["none"] += 1
 		print("  Team%d pool_ml=%d mh=%d rl=%d rh=%d | armed_anon=%.2f | named:%s" % [
@@ -880,9 +880,9 @@ func _run_sim_test() -> void:
 	print("[DataStruct] salary/coin/relations 欄位驗證通過")
 
 	var _dep: PersonData = state.persons.get(0)
-	assert(_dep.equipment.has("right_hand"), "缺少 right_hand 裝備格")
+	assert(_dep.equipment.has("hand_1"), "缺少 hand_1 裝備格")
 	assert(_dep.equipment.has("torso"), "缺少 torso 裝備格")
-	assert(_dep.equipment["right_hand"] is Dictionary, "right_hand 應為 Dictionary")
+	assert(_dep.equipment["hand_1"] is Dictionary, "hand_1 應為 Dictionary")
 	print("[DataStruct] equipment 8格驗證通過")
 
 	var _dgp: PersonData = state.persons.get(0)
@@ -1072,11 +1072,11 @@ func _run_sim_test() -> void:
 
 	# 先給 inventory 一把武器
 	_ps.add_to_inventory(state, "weapon_melee_low", 1)
-	var _eq: bool = _ps.equip_item(state, "right_hand", "weapon_melee_low")
+	var _eq: bool = _ps.equip_item(state, "hand_1", "weapon_melee_low")
 	assert(_eq, "equip_item 應成功")
 	var _player: PersonData = state.persons.get(0)
-	assert(_player.equipment["right_hand"]["grade"] == "weapon_melee_low",
-		"right_hand 應裝備 weapon_melee_low")
+	assert(_player.equipment["hand_1"]["grade"] == "weapon_melee_low",
+		"hand_1 應裝備 weapon_melee_low")
 	# inventory 中武器應減少
 	var _weapon_in_inv: bool = false
 	for item in state.player_state["inventory"]:
@@ -1085,14 +1085,14 @@ func _run_sim_test() -> void:
 	print("[Player] equip_item 驗證通過")
 
 	# unequip_item 測試
-	var _uneq: bool = _ps.unequip_item(state, "right_hand")
+	var _uneq: bool = _ps.unequip_item(state, "hand_1")
 	assert(_uneq, "unequip_item 應成功")
-	assert(state.persons.get(0).equipment["right_hand"]["grade"] == "", "right_hand 應卸下")
+	assert(state.persons.get(0).equipment["hand_1"]["grade"] == "", "hand_1 應卸下")
 	var _has_weapon_back: bool = false
 	for item in state.player_state["inventory"]:
 		if item["grade"] == "weapon_melee_low": _has_weapon_back = true
 	assert(_has_weapon_back, "卸裝後 inventory 應有武器")
-	var _uneq_empty: bool = _ps.unequip_item(state, "left_hand")
+	var _uneq_empty: bool = _ps.unequip_item(state, "hand_2")
 	assert(not _uneq_empty, "卸下空槽應失敗")
 	print("[Player] unequip_item 驗證通過")
 

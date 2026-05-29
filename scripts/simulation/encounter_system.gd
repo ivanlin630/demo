@@ -448,11 +448,11 @@ func _all_exited(team_id: int, state: WorldState) -> bool:
 	return had_units
 
 func _equip_named_npc(p: PersonData, team: TeamData) -> void:
-	if p.equipment["right_hand"]["type"] == "none":
+	if p.equipment["hand_1"]["type"] == "none":
 		for grade in ["weapon_melee_low", "weapon_melee_high",
 				"weapon_ranged_low", "weapon_ranged_high"]:
 			if int(team.resources.get(grade, 0)) > 0:
-				p.equipment["right_hand"] = { "type": "pool", "grade": grade }
+				p.equipment["hand_1"] = { "type": "pool", "grade": grade }
 				team.resources[grade] = int(team.resources[grade]) - 1
 				break
 	for slot in ["head", "torso", "left_arm", "right_arm", "left_leg", "right_leg"]:
