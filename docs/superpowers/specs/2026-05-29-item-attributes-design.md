@@ -2,9 +2,11 @@
 
 ## 依賴
 
-- `2026-05-27-player-system-design.md`（物品 grade 清單、inventory 格式）
-- `2026-05-27-encounter-system-design.md`（遭遇戰 unit 裝備查詢）
-- `2026-05-29-health-system-design.md`（傷害/減傷/格擋查詢）
+無上游依賴。以下系統查詢此 spec（不逆向依賴）：
+- `player-system-design.md`（背包重量）
+- `encounter-system-design.md`（箭矢消耗）
+- `encounter-combat-design.md`（傷害/格擋/架擋）
+- `health-system-design.md`（receive_damage 前的傷害計算）
 
 ---
 
@@ -105,11 +107,28 @@ static func get_parry_chance(grade: String) -> float:
 
 ## 4. 物品重量
 
-（已定義於 `player-system-design.md`，此處不重複）
+```gdscript
+const ITEM_WEIGHT: Dictionary = {
+    # 玩家背包重量計算用（TEST VALUE）
+    "weapon_melee_low":   2.5,
+    "weapon_melee_high":  4.0,
+    "weapon_ranged_low":  2.0,   # 短弓（2h）
+    "weapon_ranged_high": 3.0,   # 長弓（2h）
+    "armor_low":          4.0,   # 皮甲/皮盾（依槽位效果不同）
+    "armor_high":         7.0,   # 鐵甲/鐵盾
+    "food":               0.5,   # per unit
+    "medicine":           0.3,   # per unit
+    "tools":              2.0,
+    "arrows":             0.05,  # per unit
+}
+
+static func get_weight(grade: String, qty: int = 1) -> float:
+    return float(ITEM_WEIGHT.get(grade, 1.0)) * qty
+```
 
 ---
 
-## 5. 藥品屬性
+## 5. 消耗品屬性
 
 ```gdscript
 const MEDICINE_COST: Dictionary = {
@@ -123,8 +142,13 @@ const TOOLS_COST: Dictionary = {
     "夾板": 1,   # 清除 fracture（消耗 tools）
 }
 
+const ARROW_COST_PER_SHOT: int = 1   # 每次射擊消耗箭矢數（TEST VALUE）
+
 static func get_medicine_cost(action: String) -> int:
     return int(MEDICINE_COST.get(action, 0))
+
+static func get_tools_cost(action: String) -> int:
+    return int(TOOLS_COST.get(action, 0))
 ```
 
 ---
@@ -134,11 +158,23 @@ static func get_medicine_cost(action: String) -> int:
 健康系統和遭遇戰系統統一透過以下 static 函數查詢：
 
 ```gdscript
-# 使用範例
-var dmg: float = ItemAttributes.get_damage(weapon_grade)
-var reduction: float = ItemAttributes.get_damage_reduction(armor_grade)
-var block: float = ItemAttributes.get_block_chance(shield_grade)
-var is_two_hand: bool = ItemAttributes.is_2h(weapon_grade)
+# 武器
+var dmg: float        = ItemAttributes.get_damage(weapon_grade)
+var range: int        = ItemAttributes.get_range(weapon_grade)
+var is_2h: bool       = ItemAttributes.is_2h(weapon_grade)
+var parry: float      = ItemAttributes.get_parry_chance(weapon_grade)
+
+# 護甲 / 盾牌
+var reduction: float  = ItemAttributes.get_damage_reduction(armor_grade)
+var block: float      = ItemAttributes.get_block_chance(shield_grade)
+
+# 重量
+var w: float          = ItemAttributes.get_weight(grade, qty)
+
+# 消耗品
+var med_cost: int     = ItemAttributes.get_medicine_cost("草藥")   # 1
+var tool_cost: int    = ItemAttributes.get_tools_cost("夾板")      # 1
+var arrow_cost: int   = ItemAttributes.ARROW_COST_PER_SHOT         # 1
 ```
 
 ---
@@ -186,3 +222,14 @@ var is_two_hand: bool = ItemAttributes.is_2h(weapon_grade)
 | weapon_melee_low parry | 0.10 | 10% 架擋基礎 |
 | weapon_melee_high parry | 0.20 | 20% 架擋基礎 |
 | unarmed parry | 0.05 | 5% 架擋基礎 |
+| weapon_melee_low 重量 | 2.5 | |
+| weapon_melee_high 重量 | 4.0 | |
+| weapon_ranged_low 重量 | 2.0 | |
+| weapon_ranged_high 重量 | 3.0 | |
+| armor_low 重量 | 4.0 | |
+| armor_high 重量 | 7.0 | |
+| food 重量 | 0.5/unit | |
+| medicine 重量 | 0.3/unit | |
+| tools 重量 | 2.0 | |
+| arrows 重量 | 0.05/unit | |
+| ARROW_COST_PER_SHOT | 1 | |

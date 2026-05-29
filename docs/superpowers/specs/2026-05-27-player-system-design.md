@@ -55,31 +55,17 @@ func _can_add_item(state: WorldState, grade: String, qty: int = 1) -> bool:
     var already_has := inv.any(func(x): return x["grade"] == grade)
     if not already_has and inv.size() >= PLAYER_INVENTORY_MAX_SLOTS:
         return false
-    # 重量檢查
-    var added_weight: float = ITEM_WEIGHT.get(grade, 1.0) * qty
-    if _calc_inventory_weight(state) + added_weight > PLAYER_INVENTORY_MAX_WEIGHT:
+    # 重量檢查（查 ItemAttributes）
+    if _calc_inventory_weight(state) + ItemAttributes.get_weight(grade, qty) > PLAYER_INVENTORY_MAX_WEIGHT:
         return false
     return true
 
 func _calc_inventory_weight(state: WorldState) -> float:
     var total: float = 0.0
     for item in state.player_state.get("inventory", []):
-        total += ITEM_WEIGHT.get(item["grade"], 1.0) * item.get("qty", 1)
+        total += ItemAttributes.get_weight(item["grade"], item.get("qty", 1))
     return total
-
-# ITEM_WEIGHT TEST VALUES
-const ITEM_WEIGHT: Dictionary = {
-    "weapon_melee_low":   2.5,
-    "weapon_melee_high":  4.0,
-    "weapon_ranged_low":  2.0,   # 短弓（2h）
-    "weapon_ranged_high": 3.0,   # 長弓（2h）
-    "armor_low":          4.0,   # 皮甲 / 皮盾（依槽位效果不同）
-    "armor_high":         7.0,   # 鐵甲 / 鐵盾
-    "food":               0.5,   # per unit
-    "medicine":           0.3,   # per unit（草藥/繃帶/解毒劑消耗量不同）
-    "tools":              2.0,
-    "arrows":             0.05,  # per unit
-}
+# 重量數值見 item-attributes-design.md（ItemAttributes.ITEM_WEIGHT）
 
 # 完整物品清單（inventory grade → 中文顯示名 / 用途）
 # "weapon_melee_low"   短劍    → hand_1/hand_2（單手）

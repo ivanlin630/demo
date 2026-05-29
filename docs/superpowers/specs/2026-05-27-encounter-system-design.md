@@ -239,7 +239,7 @@ func _equip_named_npc(p: PersonData, team: TeamData) -> void:
 ## 7. 箭矢系統
 
 - 遭遇戰開始時：`archer_arrows = team.resources["arrows"] / num_archers`（整除）
-- 每次射擊消耗 1 箭（個人追蹤）
+- 每次射擊消耗 `ItemAttributes.ARROW_COST_PER_SHOT` 箭（個人追蹤）
 - 無箭不可射擊
 - 遭遇戰結束：`team.resources["arrows"] -= 遭遇戰總消耗`
 
