@@ -117,10 +117,12 @@ const STANCE_RANGED_DMG_MULT: Dictionary = {
 
 | 行動 | Stamina 消耗 | 說明 |
 |---|---|---|
-| 移動（1 hex） | 依姿態（見 STANCE_MOVE_STAMINA） | 移動至相鄰 hex |
-| 攻擊 | -0.05 | 見 Section 6 |
+| 移動（1 hex） | 依姿態（見 STANCE_MOVE_STAMINA）× 重量乘數 | 移動至相鄰 hex |
+| 攻擊 | 0.05 × 重量乘數 | 見 Section 6 |
 | 換姿態 | 0 | 切換至任意姿態 |
 | 使用物品 | 0 | medicine / tools |
+
+重量 stamina 乘數：`HealthSystem.get_weight_stamina_drain_mult(unit, state)`
 
 ---
 
@@ -167,22 +169,19 @@ func _can_block(unit: Dictionary) -> bool:
 func _shield_block_chance(unit: Dictionary, state: WorldState) -> float:
     var grade: String   = _get_shield_grade(unit, state)   # "armor_low" / "armor_high"
     var base: float     = ItemAttributes.get_block_chance(grade)   # 0.30 / 0.50
-    var p: PersonData   = state.persons.get(unit.get("person_id", -1))
-    var combat: float   = float(p.skills.get("戰鬥", 0.0)) if p else 0.0
+    var combat: float   = _get_skill(unit, state, "戰鬥")
     return clampf(base + combat * 0.3, 0.0, 0.90)   # TEST VALUE
 
 func _parry_chance(unit: Dictionary, state: WorldState) -> float:
     var weapon: String  = _get_weapon_grade(unit, state)
-    var base: float     = ItemAttributes.get_parry_chance(weapon)   # 查 ItemAttributes
-    var p: PersonData   = state.persons.get(unit.get("person_id", -1))
-    var combat: float   = float(p.skills.get("戰鬥", 0.0)) if p else 0.0
+    var base: float     = ItemAttributes.get_parry_chance(weapon)
+    var combat: float   = _get_skill(unit, state, "戰鬥")
     return clampf(base + combat * 0.4, 0.0, 0.85)   # TEST VALUE
 
 func _dodge_chance(unit: Dictionary, state: WorldState) -> float:
     var p: PersonData   = state.persons.get(unit.get("person_id", -1))
-    if p == null: return 0.2
-    var survival: float = float(p.skills.get("求生", 0.0))
-    var body: float     = float(p.attributes.get("體力", 0.5))
+    var survival: float = _get_skill(unit, state, "求生")
+    var body: float     = float(p.attributes.get("體力", 0.5)) if p else 0.5
     return clampf(0.2 + survival * 0.4 * (0.5 + body * 0.5), 0.0, 0.80)   # TEST VALUE
 
 func _resolve_block(unit: Dictionary, state: WorldState,
@@ -304,33 +303,42 @@ const STAMINA_EXHAUSTED_ATK_MULT: float = 0.5   # TEST VALUE
 
 ## 7. 輔助函數
 
+所有裝備查詢讀 `unit["equipment"]`（進場時已從 PersonData 複製或由 EncounterTemplates 填入），不再直接存取 PersonData.equipment。
+
 ```gdscript
-func _get_weapon_grade(unit: Dictionary, state: WorldState) -> String:
-    var p: PersonData = state.persons.get(unit.get("person_id", -1))
-    if p == null: return "unarmed"
-    var h1: Dictionary = p.equipment.get("hand_1", {})
-    if h1.get("type", "none") not in ["none", "2h_ref"]:
+func _get_weapon_grade(unit: Dictionary, _state: WorldState) -> String:
+    var equip: Dictionary = unit.get("equipment", {})
+    var h1: Dictionary = equip.get("hand_1", {})
+    if h1.get("type", "none") not in ["none", "2h_ref", ""]:
         return h1.get("grade", "unarmed")
     return "unarmed"
 
-func _get_armor_grade_at(unit: Dictionary, state: WorldState,
+func _get_armor_grade_at(unit: Dictionary, _state: WorldState,
         part: String) -> String:
-    var p: PersonData = state.persons.get(unit.get("person_id", -1))
-    if p == null: return "none"
-    var slot: Dictionary = p.equipment.get(part, {})
-    return slot.get("grade", "none") if slot.get("type","none") != "none" else "none"
+    var equip: Dictionary = unit.get("equipment", {})
+    var slot: Dictionary = equip.get(part, {})
+    if slot.get("type", "none") in ["none", ""]: return "none"
+    return slot.get("grade", "none")
+
+func _get_shield_grade(unit: Dictionary, _state: WorldState) -> String:
+    var equip: Dictionary = unit.get("equipment", {})
+    for hand in ["hand_1", "hand_2"]:
+        var s: Dictionary = equip.get(hand, {})
+        if s.get("grade", "").begins_with("armor_"): return s.get("grade", "")
+    return ""
 
 func _has_shield(unit: Dictionary, state: WorldState) -> bool:
-    var p: PersonData = state.persons.get(unit.get("person_id", -1))
-    if p == null: return false
-    for slot in ["hand_1", "hand_2"]:
-        var s: Dictionary = p.equipment.get(slot, {})
-        if s.get("grade","").begins_with("armor_"): return true
-    return false
+    return _get_shield_grade(unit, state) != ""
 
 func _has_melee_weapon(unit: Dictionary, state: WorldState) -> bool:
     var grade: String = _get_weapon_grade(unit, state)
     return grade.contains("melee") or grade == "unarmed"
+
+# 技能讀取：具名 NPC 從 PersonData，匿名從 unit["skills"]
+func _get_skill(unit: Dictionary, state: WorldState, skill: String) -> float:
+    var p: PersonData = state.persons.get(unit.get("person_id", -1))
+    if p: return float(p.skills.get(skill, 0.0))
+    return float(unit.get("skills", {}).get(skill, 0.0))
 ```
 
 ---

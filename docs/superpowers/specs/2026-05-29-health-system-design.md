@@ -71,21 +71,57 @@ const BLOOD_REGEN_PER_TICK   = 0.1     # TEST VALUE — 自然回復（無出血
 # 死亡：blood <= 0.0
 ```
 
-**合併速度公式（三個獨立乘數）：**
+**合併速度公式（四個獨立乘數）：**
 
-三個乘數獨立相乘：失血重但不累的人仍比體力耗盡的人快；骨折是硬上限。
+四個乘數獨立相乘：失血重但不累的人仍比體力耗盡的人快；骨折是硬上限；超重降速。
 
 ```gdscript
+const CARRY_BASE: float    = 20.0   # TEST VALUE — 基礎攜帶上限（kg）
+const CARRY_PER_BODY: float = 10.0  # TEST VALUE — 體力每點增加攜帶量
+
+func _max_carry(unit: Dictionary, state: WorldState) -> float:
+    var p: PersonData = state.persons.get(unit.get("person_id", -1))
+    var body: float = float(p.attributes.get("體力", 0.5)) if p else 0.5
+    return CARRY_BASE + body * CARRY_PER_BODY   # 體力=0.5 → 25 kg
+
+func _calc_carry_weight(unit: Dictionary, state: WorldState) -> float:
+    var total: float = 0.0
+    for slot in unit.get("equipment", {}):
+        var s: Dictionary = unit["equipment"][slot]
+        if s.has("grade"):
+            total += ItemAttributes.get_weight(s["grade"])
+    for item in unit.get("inventory", []):
+        total += ItemAttributes.get_weight(item["grade"], item.get("qty", 1))
+    return total
+
+func _weight_mult(unit: Dictionary, state: WorldState) -> float:
+    var load: float  = _calc_carry_weight(unit, state)
+    var cap: float   = _max_carry(unit, state)
+    var ratio: float = load / maxf(cap, 0.001)
+    if ratio <= 0.5: return 1.0
+    # 超過 50% → 速度遞減，最低 0.3（TEST VALUE）
+    return clampf(1.0 - (ratio - 0.5) * 1.0, 0.3, 1.0)
+
 # 公開接口（encounter-combat-design 呼叫）
 static func get_speed_mult(unit: Dictionary, state: WorldState) -> float:
     var p: PersonData = state.persons.get(unit.get("person_id", -1))
     var stamina_mult: float = unit.get("stamina", 1.0)
     var blood_mult: float   = 1.0
     var frac_mult: float    = 1.0
+    var weight_mult: float  = _weight_mult(unit, state)
     if p:
         blood_mult = clampf(p.blood / BLOOD_MAX, 0.0, 1.0)
         frac_mult  = _fracture_speed_mult(p.body_parts)
-    return stamina_mult * blood_mult * frac_mult
+    return stamina_mult * blood_mult * frac_mult * weight_mult
+
+# stamina 消耗乘數（超重時行動消耗更多體力）
+static func get_weight_stamina_drain_mult(unit: Dictionary,
+        state: WorldState) -> float:
+    var load: float  = _calc_carry_weight(unit, state)
+    var cap: float   = _max_carry(unit, state)
+    var ratio: float = load / maxf(cap, 0.001)
+    if ratio <= 0.5: return 1.0
+    return clampf(1.0 + (ratio - 0.5) * 2.0, 1.0, 3.0)   # TEST VALUE: 100% → ×2
 ```
 
 ---
@@ -347,6 +383,10 @@ func _tick_natural_regen(state: WorldState) -> void:
 |---|---|---|
 | 各部位 max_hp | 20/50/25/30 | 平衡期調整 |
 | 武器傷害/護甲減傷/格擋 | — | **見 item-attributes-design.md** |
+| CARRY_BASE | 20.0 kg | 基礎攜帶上限 |
+| CARRY_PER_BODY | 10.0 kg/體力 | 體力=0.5 → 25 kg |
+| 超重速度乘數 | 1.0−(ratio−0.5)×1.0 | load>50% 開始懲罰，最低 0.3 |
+| 超重 stamina 消耗乘數 | 1.0+(ratio−0.5)×2.0 | load=100% → ×2；最高 ×3 |
 | BLEEDING_MINOR_DRAIN | 3.0/round | |
 | BLEEDING_MAJOR_DRAIN | 10.0/round | |
 | POISON_HP_DRAIN | 5.0/round | |

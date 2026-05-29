@@ -43,20 +43,16 @@ player_state = {
 
 ### 物品欄上限
 
-**雙重限制**：格子數 **AND** 重量，任一超出即無法新增。
+**格子限制**（硬上限）：新品種需要空格；相同品種疊加不佔格。
 
 ```gdscript
-const PLAYER_INVENTORY_MAX_SLOTS: int   = 6      # TEST VALUE — 最多 6 格（每格一種物品）
-const PLAYER_INVENTORY_MAX_WEIGHT: float = 30.0  # TEST VALUE — 最大總重量
+const PLAYER_INVENTORY_MAX_SLOTS: int = 6   # TEST VALUE — 最多 6 格（每格一種物品）
 
 func _can_add_item(state: WorldState, grade: String, qty: int = 1) -> bool:
     var inv: Array = state.player_state.get("inventory", [])
     # 格子檢查：新 grade 需佔新格；已有 grade 不佔格
     var already_has := inv.any(func(x): return x["grade"] == grade)
     if not already_has and inv.size() >= PLAYER_INVENTORY_MAX_SLOTS:
-        return false
-    # 重量檢查（查 ItemAttributes）
-    if _calc_inventory_weight(state) + ItemAttributes.get_weight(grade, qty) > PLAYER_INVENTORY_MAX_WEIGHT:
         return false
     return true
 
@@ -65,11 +61,14 @@ func _calc_inventory_weight(state: WorldState) -> float:
     for item in state.player_state.get("inventory", []):
         total += ItemAttributes.get_weight(item["grade"], item.get("qty", 1))
     return total
-# 重量數值見 item-attributes-design.md（ItemAttributes.ITEM_WEIGHT）
-
-# 完整物品清單、顯示名、槽位相容性 → 見 item-attributes-design.md Section 0
+# 完整物品清單、顯示名 → 見 item-attributes-design.md
 # ItemAttributes.get_display_name(grade, slot)
 ```
+
+**重量系統（軟限制）**：玩家可超重攜帶，但進入遭遇戰後由 `HealthSystem` 套用速度/stamina 懲罰：
+- `HealthSystem._max_carry()` = 20 + 體力×10 kg（TEST VALUE）
+- 超過 50% 負重 → 速度遞減（最低 0.3×）；stamina 消耗加快
+- 大地圖行進：超重由 team.fatigue 機制間接反映（非玩家個人）
 
 ---
 
