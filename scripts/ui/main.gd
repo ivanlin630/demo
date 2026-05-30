@@ -95,6 +95,12 @@ func _on_set_move_target(pos: Vector2i) -> void:
 	_debug.refresh()
 
 func _on_tick_advanced(_events: Array) -> void:
+	var state: WorldState = _bridge.get_state()
+	if state.player_id >= 0 and not state.persons.has(state.player_id):
+		_bottom.add_message("[!] 玩家 P%d 已陣亡，模擬暫停" % state.player_id)
+		_controls.set_process(false)
+		return
+
 	_map.refresh()
 	_debug.refresh()
 	_sidebar.refresh_player()
