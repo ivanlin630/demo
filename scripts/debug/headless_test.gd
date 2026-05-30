@@ -922,9 +922,16 @@ func _run_sim_test() -> void:
 	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
 	print("[DataStruct] state.ticks_per_day=%d" % state.ticks_per_day)
 
+	# 解析 NpcAI 測試用 person（person 1 可能在模擬中死亡，回退到其他存活 person）
+	var _npc_pid: int = 1
+	if not state.persons.has(_npc_pid) or state.persons.get(_npc_pid) == null:
+		for _fpid in state.persons:
+			if _fpid != 0:
+				_npc_pid = _fpid; break
+
 	# === NpcAI Task 1: write_memory / relations ===
 	var _npc_sys := NpcAiSystem.new()
-	var _mp: PersonData = state.persons.get(1)
+	var _mp: PersonData = state.persons.get(_npc_pid)
 	_mp.relations.clear()  # 隔離：清除 sim 累積的 kindness 影響，確保測試純粹
 	_npc_sys.write_memory(_mp, "looted", 0, 0, 0.7)
 	assert(_mp.memory.size() > 0, "memory 應有記錄")
@@ -940,7 +947,7 @@ func _run_sim_test() -> void:
 	assert(_gp.goals[0]["type"] == "wealth", "高貪婪應生成 wealth 目標")
 
 	var _npc2 := NpcAiSystem.new()
-	var _rp: PersonData = state.persons.get(1)
+	var _rp: PersonData = state.persons.get(_npc_pid)
 	_npc2.write_memory(_rp, "looted", 0, 1, 0.7)
 	var _has_revenge: bool = false
 	for g in _rp.goals:
@@ -950,7 +957,7 @@ func _run_sim_test() -> void:
 
 	# === NpcAI Task 3: check_goal_alignment ===
 	var _npc3 := NpcAiSystem.new()
-	var _cp: PersonData = state.persons.get(1)
+	var _cp: PersonData = state.persons.get(_npc_pid)
 	_npc3._activate_goal(_cp, "revenge", 9)
 	var _align: float = _npc3.check_goal_alignment(_cp, "逃跑")
 	assert(_align < 0.0 or _align == 0.0, "revenge+逃跑不衝突（返回 0 或負）")
@@ -1070,6 +1077,11 @@ func _run_sim_test() -> void:
 	assert(int(state.teams[0].resources.get("medicine", 0)) == 4, "team medicine 應為 4")
 	print("[Player] deposit_to_team 驗證通過")
 
+	# 隔離：清除模擬可能殘留的 hand_1 裝備和 inventory 中的武器
+	state.persons.get(0).equipment["hand_1"] = { "type": "none", "grade": "" }
+	var _pre_inv: Array = state.player_state.get("inventory", [])
+	for _pi in range(_pre_inv.size() - 1, -1, -1):
+		if _pre_inv[_pi]["grade"] == "weapon_melee_low": _pre_inv.remove_at(_pi)
 	# 先給 inventory 一把武器
 	_ps.add_to_inventory(state, "weapon_melee_low", 1)
 	var _eq: bool = _ps.equip_item(state, "hand_1", "weapon_melee_low")
