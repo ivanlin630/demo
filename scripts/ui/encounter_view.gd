@@ -1,6 +1,8 @@
 # scripts/ui/encounter_view.gd
 extends Control
 
+signal encounter_ended()
+
 const HEX_W: float    = 60.0
 const HEX_H: float    = 52.0
 const COL_STEP: float = 45.0
@@ -17,6 +19,7 @@ var _camera: Vector2 = Vector2.ZERO
 var _zoom:   float   = 1.0
 var _cursor: Vector2i = Vector2i(-1, -1)
 var _mode:   String  = "idle"
+var _waiting_for_player: bool = false
 
 var _lbl_health:      Label
 var _lbl_equip:       Label
@@ -31,9 +34,12 @@ func show_encounter() -> void:
 	visible = true
 	_refresh_ui()
 	queue_redraw()
+	_waiting_for_player = false
+	_advance_until_player_or_end()
 
 func hide_encounter() -> void:
 	visible = false
+	encounter_ended.emit()
 
 func _ready() -> void:
 	_build_layout()
@@ -156,3 +162,126 @@ func _draw() -> void:
 		var center: Vector2 = _world_to_screen(_hex_center(_cursor.x, _cursor.y))
 		var pts: PackedVector2Array = _hex_points(center.x, center.y)
 		draw_polyline(pts + PackedVector2Array([pts[0]]), Color.WHITE, 2.0)
+
+# ── player input ─────────────────────────────────────────
+
+const HEX_DIRS: Dictionary = {
+	KEY_Q: true, KEY_W: true, KEY_E: true,
+	KEY_A: true, KEY_S: true, KEY_D: true,
+}
+
+func _hex_neighbor(pos: Vector2i, dir_key: int) -> Vector2i:
+	var dirs_even: Dictionary = {
+		KEY_Q: Vector2i(-1, -1), KEY_W: Vector2i(0, -1), KEY_E: Vector2i(1, -1),
+		KEY_A: Vector2i(-1,  0),                          KEY_D: Vector2i(1,  0),
+		KEY_S: Vector2i(0,  1),
+	}
+	var dirs_odd: Dictionary = {
+		KEY_Q: Vector2i(-1,  0), KEY_W: Vector2i(0, -1), KEY_E: Vector2i(1,  0),
+		KEY_A: Vector2i(-1,  1),                          KEY_D: Vector2i(1,  1),
+		KEY_S: Vector2i(0,  1),
+	}
+	var dirs: Dictionary = dirs_even if pos.x % 2 == 0 else dirs_odd
+	var delta: Vector2i = dirs.get(dir_key, Vector2i.ZERO)
+	return pos + delta
+
+func _input(event: InputEvent) -> void:
+	if not visible or not _waiting_for_player: return
+	if event is InputEventKey and event.pressed:
+		_handle_key(event.keycode)
+	elif event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+			_zoom = minf(_zoom * 1.1, 4.0); queue_redraw()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+			_zoom = maxf(_zoom / 1.1, 0.3); queue_redraw()
+		elif event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			_handle_click(get_local_mouse_position())
+		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			_mode = "idle"; _cursor = Vector2i(-1, -1); queue_redraw()
+
+func _handle_key(keycode: int) -> void:
+	var state: WorldState = _bridge.get_state()
+	var player_unit: Dictionary = _find_player_unit(state)
+	if player_unit.is_empty(): return
+
+	match _mode:
+		"idle":
+			if HEX_DIRS.has(keycode):
+				var cur_pos: Vector2i = player_unit.get("pos", Vector2i.ZERO)
+				var target: Vector2i = _hex_neighbor(cur_pos, keycode)
+				_do_move(player_unit, target, state)
+			elif keycode == KEY_R:
+				_mode = "attack_select"
+				_cursor = player_unit.get("pos", Vector2i.ZERO)
+				queue_redraw()
+			elif keycode == KEY_SPACE:
+				_do_wait(player_unit)
+		"attack_select":
+			if HEX_DIRS.has(keycode):
+				_cursor = _hex_neighbor(_cursor, keycode)
+				queue_redraw()
+				_lbl_cursor_info.text = _describe_hex(_cursor, state)
+			elif keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
+				_do_attack(player_unit, _cursor, state)
+				_mode = "idle"; _cursor = Vector2i(-1, -1)
+
+func _handle_click(screen_pos: Vector2) -> void:
+	var state: WorldState = _bridge.get_state()
+	var player_unit: Dictionary = _find_player_unit(state)
+	if player_unit.is_empty(): return
+	var w: Vector2 = _screen_to_world(screen_pos)
+	var col: int = int(w.x / COL_STEP)
+	var row: int = int(w.y / HEX_H)
+	var clicked: Vector2i = Vector2i(col, row)
+	match _mode:
+		"idle":
+			_lbl_cursor_info.text = _describe_hex(clicked, state)
+		"attack_select":
+			_do_attack(player_unit, clicked, state)
+			_mode = "idle"; _cursor = Vector2i(-1, -1)
+
+func _do_move(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
+	for u in state.encounter_units:
+		if u.get("pos") == target: return   # occupied
+	unit["pos"] = target
+	_end_player_turn(unit)
+
+func _do_attack(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
+	for u in state.encounter_units:
+		if u.get("pos") == target and u.get("team_id") != unit.get("team_id"):
+			unit["pending_action"] = { "type": "attack", "target_idx": state.encounter_units.find(u) }
+			break
+	_end_player_turn(unit)
+
+func _do_wait(unit: Dictionary) -> void:
+	unit["pending_action"] = { "type": "wait" }
+	_end_player_turn(unit)
+
+func _end_player_turn(unit: Dictionary) -> void:
+	unit["action_timer"] = unit.get("_max_timer", 10)
+	_waiting_for_player = false
+	_advance_until_player_or_end()
+
+func _advance_until_player_or_end() -> void:
+	while true:
+		var result: String = _bridge.advance_encounter_tick()
+		queue_redraw()
+		_refresh_ui()
+		match result:
+			"player_turn":
+				_waiting_for_player = true
+				return
+			"encounter_ended":
+				hide_encounter()
+				return
+			"no_encounter":
+				return
+
+func _describe_hex(pos: Vector2i, state: WorldState) -> String:
+	var lines: Array = ["格(%d,%d)" % [pos.x, pos.y]]
+	for u in state.encounter_units:
+		if u.get("pos") == pos:
+			var pid: int = u.get("person_id", -1)
+			var name_str: String = "P%d" % pid if pid >= 0 else "匿名"
+			lines.append("單位: %s" % name_str)
+	return "\n".join(lines)

@@ -28,6 +28,7 @@ func _ready() -> void:
 	_bottom.setup(_bridge)
 	_popups.setup(_bridge)
 	_encounter.setup(_bridge)
+	_encounter.encounter_ended.connect(_on_encounter_ended)
 	print("[Main] UI ready")
 
 func _on_tile_selected(pos: Vector2i) -> void:
@@ -48,7 +49,7 @@ func _on_tick_advanced(_events: Array) -> void:
 	if _bridge.get_state().encounter_active:
 		_encounter.show_encounter()
 		_map.visible = false
-	elif not _bridge.get_state().encounter_active and _encounter.visible:
-		_encounter.hide_encounter()
-		_map.visible = true
-		_map.refresh()
+
+func _on_encounter_ended() -> void:
+	_map.visible = true
+	_map.refresh()
