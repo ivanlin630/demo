@@ -1,6 +1,6 @@
 class_name HarvestSystem
 
-const SEASON_LENGTH: int  = 720                        # 30天/季，1年=120天（原30=1.25天）
+const SEASON_LENGTH: int = WorldState.TICKS_PER_SEASON   # 1季 = 90天
 const SEASON_BASE: Array  = [1.1, 1.5, 1.2, 0.3]      # 春夏秋冬
 const SEASON_NAMES: Array = ["春", "夏", "秋", "冬"]
 
