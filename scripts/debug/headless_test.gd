@@ -1176,10 +1176,10 @@ func _run_sim_test() -> void:
 	_enc4.init_encounter(state, 0, 1, "normal")
 	var _result: String = "ongoing"
 	for _r in range(50):
-		_result = _enc4.advance_round(state, _r)
+		_result = _enc4.advance_encounter_tick(state)
 		if _result != "ongoing": break
-	print("[Encounter] advance_round 結果=%s (50輪)" % _result)
-	assert(_result != "" and _result != null, "advance_round 應有結果")
+	print("[Encounter] advance_encounter_tick 結果=%s (50輪)" % _result)
+	assert(_result != "" and _result != null, "advance_encounter_tick 應有結果")
 	state.encounter_active = false
 	state.encounter_units.clear()
 
@@ -1191,7 +1191,7 @@ func _run_sim_test() -> void:
 	print("[Encounter] 遭遇戰流程測試開始 units=%d" % state.encounter_units.size())
 	var _final_result: String = "ongoing"
 	for _r in range(100):
-		_final_result = _enc5.advance_round(state, _r)
+		_final_result = _enc5.advance_encounter_tick(state)
 		if _final_result != "ongoing": break
 	_enc5.resolve_encounter_end(state, _final_result)
 	assert(not state.encounter_active, "結算後 encounter_active 應為 false")
@@ -1266,13 +1266,13 @@ func _run_sim_test() -> void:
 	print("--- EncounterCombat ---")
 	var _enc_state := WorldState.new()
 	var _enc_t0 := TeamData.new()
-	_enc_t0.team_id = 0; _enc_t0.population = 2
+	_enc_t0.team_id = 0; _enc_t0.population = 2; _enc_t0.armed_anon_ratio = 1.0
 	_enc_t0.resources = { "weapon_melee_low": 10, "arrows": 20, "medicine": 5,
 		"armor_low": 0, "armor_high": 0, "food": 0 }
 	_enc_t0.armor_config = { "torso": "none", "head": "none",
 		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
 	var _enc_t1 := TeamData.new()
-	_enc_t1.team_id = 1; _enc_t1.population = 2
+	_enc_t1.team_id = 1; _enc_t1.population = 2; _enc_t1.armed_anon_ratio = 1.0
 	_enc_t1.resources = { "weapon_melee_low": 10, "arrows": 0, "medicine": 5,
 		"armor_low": 0, "armor_high": 0, "food": 0 }
 	_enc_t1.armor_config = { "torso": "none", "head": "none",
@@ -1348,5 +1348,20 @@ func _run_sim_test() -> void:
 		assert(_u.has("inventory"), "unit should have inventory array")
 		assert(_u.has("action_timer"), "unit should have action_timer")
 	print("Unit equipment OK — %d units spawned" % _es_state.encounter_units.size())
+
+	# prisoner_population 驗證
+	print("--- prisoner_population ---")
+	var _total_prisoners: int = 0
+	for _tid in state.teams:
+		var _t: TeamData = state.teams[_tid]
+		_total_prisoners += _t.prisoner_population
+		assert(_t.prisoner_population <= _t.population,
+			"prisoner_population 不可超過 population（Team%d）" % _tid)
+	print("全域俘虜總數: %d" % _total_prisoners)
+	print("prisoner_population OK")
+
+	# spawn cap 驗證（觀察用）
+	print("--- encounter unit count ---")
+	print("遭遇戰 unit 上限確認：每隊 named + max %d anon" % EncounterSystem.ANON_UNIT_CAP)
 
 	print("=== DONE ===")
