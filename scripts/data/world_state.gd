@@ -1,5 +1,13 @@
 class_name WorldState
 
+# ── 時間基底 ──────────────────────────────────────────────────
+const TICKS_PER_DAY:    int   = 24           # TEST VALUE（正式: 8640 = 10秒/tick）
+const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 1（TEST）
+const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 720 ticks
+const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 2160 ticks（3月）
+const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 8640 ticks（12月）
+const SECONDS_PER_TICK: float = 86400.0 / float(TICKS_PER_DAY)
+
 var world: WorldData = WorldData.new()
 var teams: Dictionary = {}
 var persons: Dictionary = {}
