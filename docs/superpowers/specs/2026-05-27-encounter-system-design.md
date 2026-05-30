@@ -95,11 +95,25 @@ func get_reinforcement_entry_edge(
 
 ## 4. 時間整合
 
-- 遭遇戰每回合 = 1 大地圖 tick
+- 遭遇戰每tick = 1 大地圖 tick
 - SimRunner 在遭遇戰進行中不推進大地圖 tick
 - 遭遇戰結束（撤退/殲滅/投降）後：
   - 結算傷亡、俘虜
   - 更新雙方 team population/named_members
+  - **負面狀態結算**（**雙方**所有進入遭遇戰的成員，優先順序由重到輕）：
+    - 各方用**自己 team 的資源**結算（medicine/tools）
+    1. `bleeding_major` → 消耗 medicine ×2 清除；不足 → 醫療技能判定；仍不足 → 一次扣 blood 大量（`blood = maxf(blood - deduct, 1.0)`）→ 清除 flag
+    2. `bleeding_minor` → 消耗 medicine ×1；不足 → 技能判定；仍不足 → 一次扣 blood 少量（同底線）→ 清除 flag
+    3. `poisoned` → 消耗 medicine ×3；不足 → 技能判定；仍不足 → 一次扣各部位 HP（`hp = maxf(hp - deduct, 1.0)`）→ 清除 flag
+    4. `fracture` → 消耗 tools ×1；不足 → **保留 flag 帶入大地圖**（唯一持續負面狀態）
+    - 底線規則：blood 最低 1、部位 hp 最低 1（結算本身不殺人，留臨界狀態）
+  - **匿名成員結算**（無 PersonData，轉回 team pool）：
+    1. `status == dead`（torso critical 判定失敗）→ `team.population -= N`
+    2. 有 `bleeding` → 按比例消耗 `team.resources["medicine"]`；不足 → 未治療比例加入 `team.wounded`
+    3. 有 `fracture` → 直接加入 `team.wounded`（不帶入大地圖）
+    4. 有 `poisoned` → 一次扣 HP 重算 status → 再按 status 計入 wounded/dead
+    5. 其餘存活但 status != healthy → 加入 `team.wounded`
+  - 大地圖骨折治療：玩家物品欄 → tools 使用 → 選目標部位 → fracture = false
   - 恢復 SimRunner 推進
 
 ---
@@ -124,6 +138,8 @@ func get_reinforcement_entry_edge(
     # 具名 NPC 無 body_parts 欄位，直接讀 state.persons[person_id].body_parts
     # 匿名 NPC 有臨時 body_parts（見下）
     "body_parts": Dictionary,   # 僅匿名 NPC 使用
+    "equipment": Dictionary,    # 8 格裝備（格式同 PersonData.equipment）— 具名/匿名均有
+    "inventory": Array,         # Array[{grade, type, qty}]（消耗品：箭矢/藥品/工具）
 }
 ```
 
@@ -174,12 +190,22 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
         "is_messenger": false,
         "has_exited": false,
         "body_parts": {
-            "head": {"status": "healthy"}, "torso": {"status": "healthy"},
-            "right_arm": {"status": "healthy"}, "left_arm": {"status": "healthy"},
-            "right_leg": {"status": "healthy"}, "left_leg": {"status": "healthy"},
+            # 完整格式（對齊 health-system-design 定義）
+            "head":      { "hp": 20.0, "max_hp": 20.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "torso":     { "hp": 50.0, "max_hp": 50.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "right_arm": { "hp": 25.0, "max_hp": 25.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "left_arm":  { "hp": 25.0, "max_hp": 25.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "right_leg": { "hp": 30.0, "max_hp": 30.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
+            "left_leg":  { "hp": 30.0, "max_hp": 30.0, "status": "healthy", "poisoned": false, "bleeding": "none", "fracture": false },
         },
         # 技能依 team 匿名基準值（無個體差異）
         "skills": { "戰鬥": team.get("anon_combat_skill", 0.2) },
+        # 裝備/物品欄由 _init_anon_unit 在進場時填入（EncounterTemplates）
+        "equipment": {
+            "hand_1": {}, "hand_2": {}, "head": {}, "torso": {},
+            "right_arm": {}, "left_arm": {}, "right_leg": {}, "left_leg": {},
+        },
+        "inventory": [],
     }
 ```
 
@@ -187,42 +213,111 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 
 ## 6. 裝備分配（遭遇戰前）
 
+**所有 unit（具名與匿名）進入遭遇戰後均有 `equipment` 8 格與 `inventory` 消耗品欄，統一讀取。**
+
 ### 具名 NPC
 
-遭遇戰前依 `person.equipment` 8 格決定戰鬥能力。若某格為 `"none"` 則從 team pool 臨時借用（優先具名 NPC）：
+1. 複製 `PersonData.equipment` → `unit["equipment"]`
+2. 若某槽為空，從 team pool 臨時補裝（優先具名 NPC）
+3. 依 `EncounterTemplates` 填充 `unit["inventory"]`
 
 ```gdscript
-func _equip_named_npc(p: PersonData, team: TeamData) -> void:
-    if p.equipment["right_hand"]["type"] == "none":
+func _init_named_unit(unit: Dictionary, p: PersonData,
+        team: TeamData, state: WorldState) -> void:
+    # 1. 複製裝備
+    unit["equipment"] = p.equipment.duplicate(true)
+    # 2. 補裝空槽（武器）
+    if unit["equipment"]["hand_1"].get("type", "none") in ["none", ""]:
         if int(team.resources.get("weapon_melee_low", 0)) > 0:
-            p.equipment["right_hand"] = { "type": "pool", "grade": "weapon_melee_low" }
+            unit["equipment"]["hand_1"] = { "type": "pool", "grade": "weapon_melee_low" }
             team.resources["weapon_melee_low"] -= 1
-    # torso armor
-    if p.equipment["torso"]["type"] == "none":
+    # 補裝空槽（torso 護甲）
+    if unit["equipment"]["torso"].get("type", "none") in ["none", ""]:
         var cfg: String = team.armor_config.get("torso", "none")
         if cfg == "low" and int(team.resources.get("armor_low", 0)) > 0:
-            p.equipment["torso"] = { "type": "pool", "grade": "armor_low" }
+            unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_low" }
             team.resources["armor_low"] -= 1
         elif cfg == "high" and int(team.resources.get("armor_high", 0)) > 0:
-            p.equipment["torso"] = { "type": "pool", "grade": "armor_high" }
+            unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_high" }
             team.resources["armor_high"] -= 1
-    # 其他部位類推（head, arms, legs）
+    # 其他部位類推（head, right_arm, left_arm, right_leg, left_leg）
+    # 3. 填充物品欄（藥品、工具；弓手填箭矢）
+    unit["inventory"] = []
+    EncounterTemplates.fill_inventory(unit, team, state)
 ```
-
-死亡後 pool 裝備歸還 `team.resources[grade]`；unique 裝備掉落（後續 spec 定義）。
 
 ### 匿名成員
 
-依 `team.armor_config` 與 team resources 數量平均分配。超過資源數量的匿名成員無裝備。
+依 `team.armor_config` 與 team resources 平均分配裝備，再由 `EncounterTemplates` 填充物品欄：
+
+```gdscript
+func _init_anon_unit(unit: Dictionary, team: TeamData,
+        state: WorldState) -> void:
+    # 武器
+    if int(team.resources.get("weapon_melee_low", 0)) > 0:
+        unit["equipment"]["hand_1"] = { "type": "pool", "grade": "weapon_melee_low" }
+        team.resources["weapon_melee_low"] -= 1
+    # torso 護甲
+    var cfg: String = team.armor_config.get("torso", "none")
+    if cfg == "low" and int(team.resources.get("armor_low", 0)) > 0:
+        unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_low" }
+        team.resources["armor_low"] -= 1
+    elif cfg == "high" and int(team.resources.get("armor_high", 0)) > 0:
+        unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_high" }
+        team.resources["armor_high"] -= 1
+    # 其他部位類推
+    EncounterTemplates.fill_inventory(unit, team, state)
+```
+
+### 遭遇戰結束 sync-back
+
+```gdscript
+func _sync_back_units(state: WorldState, team_id: int) -> void:
+    var team: TeamData = state.teams[team_id]
+    for unit in state.encounter_units:
+        if unit["team_id"] != team_id: continue
+        if unit["person_id"] != -1:
+            # 具名 NPC：unit["equipment"] 寫回 PersonData
+            var p: PersonData = state.persons.get(unit["person_id"])
+            if p: p.equipment = unit["equipment"].duplicate(true)
+        else:
+            # 匿名：pool 裝備歸還 team.resources
+            for slot in unit["equipment"]:
+                var s: Dictionary = unit["equipment"][slot]
+                if s.get("type") == "pool" and s.has("grade"):
+                    team.resources[s["grade"]] = int(team.resources.get(s["grade"], 0)) + 1
+        # 消耗品剩餘歸還（含箭矢、藥品等）
+        for item in unit.get("inventory", []):
+            if item.get("type") == "pool":
+                var g: String = item["grade"]
+                team.resources[g] = int(team.resources.get(g, 0)) + item.get("qty", 0)
+```
+
+死亡後 pool 裝備已不歸還（unit 被移除前 inventory 清空）；unique 裝備掉落（後續 spec 定義）。
 
 ---
 
 ## 7. 箭矢系統
 
-- 遭遇戰開始時：`archer_arrows = team.resources["arrows"] / num_archers`（整除）
-- 每次射擊消耗 1 箭（個人追蹤）
-- 無箭不可射擊
-- 遭遇戰結束：`team.resources["arrows"] -= 遭遇戰總消耗`
+箭矢存在 `unit["inventory"]` 內（由 `EncounterTemplates` 進場時填充）：
+
+```gdscript
+func _has_arrows(unit: Dictionary) -> bool:
+    for item in unit.get("inventory", []):
+        if item["grade"] == "arrows" \
+                and item.get("qty", 0) >= ItemAttributes.ARROW_COST_PER_SHOT:
+            return true
+    return false
+
+func _consume_arrow(unit: Dictionary) -> void:
+    for item in unit.get("inventory", []):
+        if item["grade"] == "arrows":
+            item["qty"] = maxi(item["qty"] - ItemAttributes.ARROW_COST_PER_SHOT, 0)
+            return
+```
+
+- 無箭不可射擊（`_has_arrows` 返回 false）
+- 遭遇戰結束：剩餘箭矢由 `_sync_back_units` 自動歸還 team.resources
 
 ---
 

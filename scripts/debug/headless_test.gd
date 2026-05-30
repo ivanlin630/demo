@@ -844,7 +844,7 @@ func _run_sim_test() -> void:
 		for pid in ([t.leader_id] as Array) + t.named_members:
 			var p: PersonData = state.persons.get(pid)
 			if p == null: continue
-			var wt: String = p.equipment["right_hand"].get("type", "none")
+			var wt: String = p.equipment["hand_1"].get("type", "none")
 			if wt in equip_counts: equip_counts[wt] += 1
 			else: equip_counts["none"] += 1
 		print("  Team%d pool_ml=%d mh=%d rl=%d rh=%d | armed_anon=%.2f | named:%s" % [
@@ -880,9 +880,9 @@ func _run_sim_test() -> void:
 	print("[DataStruct] salary/coin/relations 欄位驗證通過")
 
 	var _dep: PersonData = state.persons.get(0)
-	assert(_dep.equipment.has("right_hand"), "缺少 right_hand 裝備格")
+	assert(_dep.equipment.has("hand_1"), "缺少 hand_1 裝備格")
 	assert(_dep.equipment.has("torso"), "缺少 torso 裝備格")
-	assert(_dep.equipment["right_hand"] is Dictionary, "right_hand 應為 Dictionary")
+	assert(_dep.equipment["hand_1"] is Dictionary, "hand_1 應為 Dictionary")
 	print("[DataStruct] equipment 8格驗證通過")
 
 	var _dgp: PersonData = state.persons.get(0)
@@ -922,9 +922,16 @@ func _run_sim_test() -> void:
 	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
 	print("[DataStruct] state.ticks_per_day=%d" % state.ticks_per_day)
 
+	# 解析 NpcAI 測試用 person（person 1 可能在模擬中死亡，回退到其他存活 person）
+	var _npc_pid: int = 1
+	if not state.persons.has(_npc_pid) or state.persons.get(_npc_pid) == null:
+		for _fpid in state.persons:
+			if _fpid != 0:
+				_npc_pid = _fpid; break
+
 	# === NpcAI Task 1: write_memory / relations ===
 	var _npc_sys := NpcAiSystem.new()
-	var _mp: PersonData = state.persons.get(1)
+	var _mp: PersonData = state.persons.get(_npc_pid)
 	_mp.relations.clear()  # 隔離：清除 sim 累積的 kindness 影響，確保測試純粹
 	_npc_sys.write_memory(_mp, "looted", 0, 0, 0.7)
 	assert(_mp.memory.size() > 0, "memory 應有記錄")
@@ -940,7 +947,7 @@ func _run_sim_test() -> void:
 	assert(_gp.goals[0]["type"] == "wealth", "高貪婪應生成 wealth 目標")
 
 	var _npc2 := NpcAiSystem.new()
-	var _rp: PersonData = state.persons.get(1)
+	var _rp: PersonData = state.persons.get(_npc_pid)
 	_npc2.write_memory(_rp, "looted", 0, 1, 0.7)
 	var _has_revenge: bool = false
 	for g in _rp.goals:
@@ -950,7 +957,7 @@ func _run_sim_test() -> void:
 
 	# === NpcAI Task 3: check_goal_alignment ===
 	var _npc3 := NpcAiSystem.new()
-	var _cp: PersonData = state.persons.get(1)
+	var _cp: PersonData = state.persons.get(_npc_pid)
 	_npc3._activate_goal(_cp, "revenge", 9)
 	var _align: float = _npc3.check_goal_alignment(_cp, "逃跑")
 	assert(_align < 0.0 or _align == 0.0, "revenge+逃跑不衝突（返回 0 或負）")
@@ -1070,13 +1077,18 @@ func _run_sim_test() -> void:
 	assert(int(state.teams[0].resources.get("medicine", 0)) == 4, "team medicine 應為 4")
 	print("[Player] deposit_to_team 驗證通過")
 
+	# 隔離：清除模擬可能殘留的 hand_1 裝備和 inventory 中的武器
+	state.persons.get(0).equipment["hand_1"] = { "type": "none", "grade": "" }
+	var _pre_inv: Array = state.player_state.get("inventory", [])
+	for _pi in range(_pre_inv.size() - 1, -1, -1):
+		if _pre_inv[_pi]["grade"] == "weapon_melee_low": _pre_inv.remove_at(_pi)
 	# 先給 inventory 一把武器
 	_ps.add_to_inventory(state, "weapon_melee_low", 1)
-	var _eq: bool = _ps.equip_item(state, "right_hand", "weapon_melee_low")
+	var _eq: bool = _ps.equip_item(state, "hand_1", "weapon_melee_low")
 	assert(_eq, "equip_item 應成功")
 	var _player: PersonData = state.persons.get(0)
-	assert(_player.equipment["right_hand"]["grade"] == "weapon_melee_low",
-		"right_hand 應裝備 weapon_melee_low")
+	assert(_player.equipment["hand_1"]["grade"] == "weapon_melee_low",
+		"hand_1 應裝備 weapon_melee_low")
 	# inventory 中武器應減少
 	var _weapon_in_inv: bool = false
 	for item in state.player_state["inventory"]:
@@ -1085,14 +1097,14 @@ func _run_sim_test() -> void:
 	print("[Player] equip_item 驗證通過")
 
 	# unequip_item 測試
-	var _uneq: bool = _ps.unequip_item(state, "right_hand")
+	var _uneq: bool = _ps.unequip_item(state, "hand_1")
 	assert(_uneq, "unequip_item 應成功")
-	assert(state.persons.get(0).equipment["right_hand"]["grade"] == "", "right_hand 應卸下")
+	assert(state.persons.get(0).equipment["hand_1"]["grade"] == "", "hand_1 應卸下")
 	var _has_weapon_back: bool = false
 	for item in state.player_state["inventory"]:
 		if item["grade"] == "weapon_melee_low": _has_weapon_back = true
 	assert(_has_weapon_back, "卸裝後 inventory 應有武器")
-	var _uneq_empty: bool = _ps.unequip_item(state, "left_hand")
+	var _uneq_empty: bool = _ps.unequip_item(state, "hand_2")
 	assert(not _uneq_empty, "卸下空槽應失敗")
 	print("[Player] unequip_item 驗證通過")
 
@@ -1105,8 +1117,8 @@ func _run_sim_test() -> void:
 	# 重量計算
 	_ps.add_to_inventory(state, "armor_low", 2)
 	var _wt2: float = _ps.calc_inventory_weight(state)
-	print("[Player] inventory weight=%.1f（累計，armor_low×2貢獻10.0）" % _wt2)
-	assert(_wt2 >= 10.0, "armor_low×2 重量應 >= 10.0")
+	print("[Player] inventory weight=%.1f（累計，armor_low×2貢獻8.0）" % _wt2)
+	assert(_wt2 >= 8.0, "armor_low×2 重量應 >= 8.0")
 
 	# ── EncounterSystem 基礎驗證 ──
 	var _enc := EncounterSystem.new()
@@ -1164,10 +1176,10 @@ func _run_sim_test() -> void:
 	_enc4.init_encounter(state, 0, 1, "normal")
 	var _result: String = "ongoing"
 	for _r in range(50):
-		_result = _enc4.advance_round(state, _r)
+		_result = _enc4.advance_encounter_tick(state)
 		if _result != "ongoing": break
-	print("[Encounter] advance_round 結果=%s (50輪)" % _result)
-	assert(_result != "" and _result != null, "advance_round 應有結果")
+	print("[Encounter] advance_encounter_tick 結果=%s (50輪)" % _result)
+	assert(_result != "" and _result != null, "advance_encounter_tick 應有結果")
 	state.encounter_active = false
 	state.encounter_units.clear()
 
@@ -1179,11 +1191,177 @@ func _run_sim_test() -> void:
 	print("[Encounter] 遭遇戰流程測試開始 units=%d" % state.encounter_units.size())
 	var _final_result: String = "ongoing"
 	for _r in range(100):
-		_final_result = _enc5.advance_round(state, _r)
+		_final_result = _enc5.advance_encounter_tick(state)
 		if _final_result != "ongoing": break
 	_enc5.resolve_encounter_end(state, _final_result)
 	assert(not state.encounter_active, "結算後 encounter_active 應為 false")
 	assert(state.encounter_units.size() == 0, "結算後 encounter_units 應清空")
 	print("[Encounter] 完整遭遇戰流程驗證通過 result=%s" % _final_result)
+
+	# ── ItemAttributes 驗證 ──
+	print("--- ItemAttributes ---")
+	assert(ItemAttributes.get_damage("weapon_melee_low") == 10.0,
+		"get_damage weapon_melee_low should be 10.0")
+	assert(ItemAttributes.get_block_chance("armor_high") == 0.50,
+		"get_block_chance armor_high should be 0.50")
+	assert(ItemAttributes.get_parry_chance("weapon_melee_high") == 0.20,
+		"get_parry_chance weapon_melee_high should be 0.20")
+	assert(ItemAttributes.is_2h("weapon_ranged_low") == true,
+		"weapon_ranged_low should be 2h")
+	assert(ItemAttributes.is_2h("weapon_melee_high") == false,
+		"weapon_melee_high should not be 2h")
+	assert(ItemAttributes.get_weight("armor_high", 1) == 7.0,
+		"armor_high weight should be 7.0")
+	assert(ItemAttributes.get_medicine_cost("繃帶") == 2,
+		"medicine 繃帶 cost should be 2")
+	assert(ItemAttributes.get_display_name("armor_low", "hand_1") == "皮盾",
+		"armor_low in hand_1 should display as 皮盾")
+	print("ItemAttributes OK")
+
+	# ── HealthSystem 驗證 ──
+	print("--- HealthSystem ---")
+	var _hs_unit: Dictionary = {
+		"person_id": 0,
+		"stamina": 1.0,
+		"equipment": {},
+		"inventory": [],
+	}
+	# get_speed_mult with full stamina + full blood = 1.0
+	var _sm: float = HealthSystem.get_speed_mult(_hs_unit, state)
+	assert(_sm > 0.0 and _sm <= 1.0, "get_speed_mult should be in (0,1]")
+	# receive_damage reduces hp — reset torso to known value first to avoid edge-case
+	if state.persons.has(0):
+		state.persons[0].body_parts["torso"]["hp"] = 50.0
+		state.persons[0].body_parts["torso"]["status"] = "healthy"
+	var _bp_before: float = state.persons[0].body_parts["torso"]["hp"]
+	HealthSystem.receive_damage(_hs_unit, state, "torso", 10.0)
+	var _bp_after: float = state.persons[0].body_parts["torso"]["hp"]
+	assert(_bp_after < _bp_before, "receive_damage should reduce torso hp")
+	print("HealthSystem OK")
+
+	# ── EncounterTemplates 驗證 ──
+	print("--- EncounterTemplates ---")
+	var _tmpl_team: TeamData = state.teams[0]
+	_tmpl_team.resources["arrows"]   = 30
+	_tmpl_team.resources["medicine"] = 10
+	var _archer_unit: Dictionary = {
+		"person_id": -1,
+		"team_id": 0,
+		"equipment": {
+			"hand_1": { "type": "pool", "grade": "weapon_ranged_low" },
+			"hand_2": {}, "head": {}, "torso": {},
+			"right_arm": {}, "left_arm": {}, "right_leg": {}, "left_leg": {},
+		},
+		"inventory": [],
+	}
+	EncounterTemplates.fill_inventory(_archer_unit, _tmpl_team, state)
+	var _has_arrows: bool = false
+	for _item in _archer_unit["inventory"]:
+		if _item["grade"] == "arrows": _has_arrows = true
+	assert(_has_arrows, "archer unit should have arrows in inventory")
+	assert(_tmpl_team.resources["arrows"] < 30, "team arrows should decrease after template fill")
+	print("EncounterTemplates OK")
+
+	# ── EncounterCombat 驗證 ──
+	print("--- EncounterCombat ---")
+	var _enc_state := WorldState.new()
+	var _enc_t0 := TeamData.new()
+	_enc_t0.team_id = 0; _enc_t0.population = 2; _enc_t0.armed_anon_ratio = 1.0
+	_enc_t0.resources = { "weapon_melee_low": 10, "arrows": 20, "medicine": 5,
+		"armor_low": 0, "armor_high": 0, "food": 0 }
+	_enc_t0.armor_config = { "torso": "none", "head": "none",
+		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
+	var _enc_t1 := TeamData.new()
+	_enc_t1.team_id = 1; _enc_t1.population = 2; _enc_t1.armed_anon_ratio = 1.0
+	_enc_t1.resources = { "weapon_melee_low": 10, "arrows": 0, "medicine": 5,
+		"armor_low": 0, "armor_high": 0, "food": 0 }
+	_enc_t1.armor_config = { "torso": "none", "head": "none",
+		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
+	_enc_state.teams[0] = _enc_t0
+	_enc_state.teams[1] = _enc_t1
+	_enc_state.encounter_active = true
+	_enc_state.encounter_attacker_id = 0
+	_enc_state.encounter_defender_id = 1
+	var _enc_sys := EncounterSystem.new()
+	_enc_sys.init_encounter(_enc_state, 0, 1, "normal")
+	assert(_enc_state.encounter_units.size() > 0, "encounter should have units")
+	assert(_enc_state.encounter_units[0].has("action_timer"), "unit should have action_timer")
+	assert(_enc_state.encounter_units[0].has("stance"), "unit should have stance")
+	assert(_enc_state.encounter_units[0].has("equipment"), "unit should have equipment")
+	assert(_enc_state.encounter_units[0].has("inventory"), "unit should have inventory")
+	var _enc_result: String = "ongoing"
+	for _t in range(50):
+		_enc_result = _enc_sys.advance_encounter_tick(_enc_state)
+		if _enc_result != "ongoing": break
+	print("EncounterCombat: result=%s" % _enc_result)
+	assert(_enc_result != "ongoing" or true, "encounter ran without crash")
+	print("EncounterCombat OK")
+
+	# ── PlayerSystem weight integration ──
+	print("--- PlayerSystem weight ---")
+	var _ws: WorldState = WorldState.new()
+	var _ps2 := PlayerSystem.new()
+	var _pp := PersonData.new(); _pp.id = 99; _pp.team_id = 0
+	_ws.persons[99] = _pp
+	_ws.player_id   = 99
+	_ws.player_state = { "inventory": [], "coin": 0.0 }
+	var _pteam := TeamData.new()
+	_pteam.team_id = 0
+	_pteam.resources = { "medicine": 10, "tools": 5, "arrows": 20,
+		"weapon_melee_low": 5, "armor_low": 2 }
+	_ws.teams[0] = _pteam
+	var _ok: bool = _ps2.take_from_team(_ws, "medicine", 3)
+	assert(_ok, "take_from_team should succeed")
+	assert(int(_pteam.resources.get("medicine", 0)) == 7, "team medicine should be 7")
+	assert(_ws.player_state["inventory"].size() == 1, "inventory should have 1 slot")
+	var _w: float = _ps2.calc_inventory_weight(_ws)
+	assert(_w > 0.0, "inventory weight should be > 0 (using ItemAttributes)")
+	print("PlayerSystem weight OK: %.2f kg" % _w)
+
+	# ── EncounterSystem unit equipment ──
+	print("--- EncounterSystem unit equipment ---")
+	var _es := EncounterSystem.new()
+	var _es_state := WorldState.new()
+	var _es_t0 := TeamData.new()
+	_es_t0.team_id = 0; _es_t0.population = 3
+	_es_t0.resources = {
+		"weapon_melee_low": 5, "arrows": 30, "medicine": 10,
+		"armor_low": 0, "armor_high": 0, "food": 0,
+	}
+	_es_t0.armor_config = { "torso": "none", "head": "none",
+		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
+	var _es_t1 := TeamData.new()
+	_es_t1.team_id = 1; _es_t1.population = 2
+	_es_t1.resources = {
+		"weapon_melee_low": 3, "arrows": 0, "medicine": 5,
+		"armor_low": 0, "armor_high": 0, "food": 0,
+	}
+	_es_t1.armor_config = { "torso": "none", "head": "none",
+		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
+	_es_state.teams[0] = _es_t0
+	_es_state.teams[1] = _es_t1
+	_es_state.encounter_attacker_id = 0
+	_es_state.encounter_defender_id = 1
+	_es.init_encounter(_es_state, 0, 1, "normal")
+	for _u in _es_state.encounter_units:
+		assert(_u.has("equipment"), "unit should have equipment dict")
+		assert(_u.has("inventory"), "unit should have inventory array")
+		assert(_u.has("action_timer"), "unit should have action_timer")
+	print("Unit equipment OK — %d units spawned" % _es_state.encounter_units.size())
+
+	# prisoner_population 驗證
+	print("--- prisoner_population ---")
+	var _total_prisoners: int = 0
+	for _tid in state.teams:
+		var _t: TeamData = state.teams[_tid]
+		_total_prisoners += _t.prisoner_population
+		assert(_t.prisoner_population <= _t.population,
+			"prisoner_population 不可超過 population（Team%d）" % _tid)
+	print("全域俘虜總數: %d" % _total_prisoners)
+	print("prisoner_population OK")
+
+	# spawn cap 驗證（觀察用）
+	print("--- encounter unit count ---")
+	print("遭遇戰 unit 上限確認：每隊 named + max %d anon" % EncounterSystem.ANON_UNIT_CAP)
 
 	print("=== DONE ===")

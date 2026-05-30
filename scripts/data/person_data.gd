@@ -46,23 +46,30 @@ var equipment: Dictionary = {
 	"left_arm":   { "type": "none", "grade": "" },
 	"right_leg":  { "type": "none", "grade": "" },
 	"left_leg":   { "type": "none", "grade": "" },
-	"right_hand": { "type": "none", "grade": "" },
-	"left_hand":  { "type": "none", "grade": "" },
+	"hand_1":     { "type": "none", "grade": "" },
+	"hand_2":     { "type": "none", "grade": "" },
 }
 
 var memory: Array = []
 
 var salary: float = 0.0
 var coin: float = 0.0
+var blood: float = 100.0
 var relations: Dictionary = {}
 
 var body_parts: Dictionary = {
-	"head":      { "status": "healthy" },
-	"torso":     { "status": "healthy" },
-	"right_arm": { "status": "healthy" },
-	"left_arm":  { "status": "healthy" },
-	"right_leg": { "status": "healthy" },
-	"left_leg":  { "status": "healthy" },
+	"head":      { "hp": 20.0, "max_hp": 20.0, "status": "healthy",
+	               "poisoned": false, "bleeding": "none", "fracture": false },
+	"torso":     { "hp": 50.0, "max_hp": 50.0, "status": "healthy",
+	               "poisoned": false, "bleeding": "none", "fracture": false },
+	"right_arm": { "hp": 25.0, "max_hp": 25.0, "status": "healthy",
+	               "poisoned": false, "bleeding": "none", "fracture": false },
+	"left_arm":  { "hp": 25.0, "max_hp": 25.0, "status": "healthy",
+	               "poisoned": false, "bleeding": "none", "fracture": false },
+	"right_leg": { "hp": 30.0, "max_hp": 30.0, "status": "healthy",
+	               "poisoned": false, "bleeding": "none", "fracture": false },
+	"left_leg":  { "hp": 30.0, "max_hp": 30.0, "status": "healthy",
+	               "poisoned": false, "bleeding": "none", "fracture": false },
 }
 
 # status: "healthy"(×1.0) / "wounded"(×0.7) / "critical"(×0.3) / "severed"(×0.0)
@@ -72,9 +79,12 @@ const STATUS_MULT: Dictionary = {
 
 func get_effective_speed() -> float:
 	var base: float = 0.5 + float(attributes.get("體力", 0.5)) * 0.5
-	var r: float = STATUS_MULT.get(body_parts["right_leg"]["status"], 1.0)
-	var l: float = STATUS_MULT.get(body_parts["left_leg"]["status"], 1.0)
-	return base * (r + l) / 2.0
+	var r: float = 1.0 if not body_parts["right_leg"].get("fracture", false) else 0.5
+	var l: float = 1.0 if not body_parts["left_leg"].get("fracture", false) else 0.5
+	var leg_mult: float = 1.0
+	if r < 1.0 and l < 1.0: leg_mult = 0.1
+	elif r < 1.0 or l < 1.0: leg_mult = 0.5
+	return base * leg_mult
 
 func get_skill_mult(skill: String) -> float:
 	var arm_skills: Array = ["戰鬥", "弓箭", "製造", "工程", "醫療"]

@@ -43,73 +43,91 @@ player_state = {
 
 ### 物品欄上限
 
+**格子限制**（硬上限）：新品種需要空格；相同品種疊加不佔格。
+
 ```gdscript
-const PLAYER_INVENTORY_MAX_WEIGHT: float = 30.0   # TEST VALUE
+const PLAYER_INVENTORY_MAX_SLOTS: int = 6   # TEST VALUE — 最多 6 格（每格一種物品）
+
+func _can_add_item(state: WorldState, grade: String, qty: int = 1) -> bool:
+    var inv: Array = state.player_state.get("inventory", [])
+    # 格子檢查：新 grade 需佔新格；已有 grade 不佔格
+    var already_has := inv.any(func(x): return x["grade"] == grade)
+    if not already_has and inv.size() >= PLAYER_INVENTORY_MAX_SLOTS:
+        return false
+    return true
 
 func _calc_inventory_weight(state: WorldState) -> float:
     var total: float = 0.0
     for item in state.player_state.get("inventory", []):
-        total += ITEM_WEIGHT.get(item["grade"], 1.0) * item.get("qty", 1)
+        total += ItemAttributes.get_weight(item["grade"], item.get("qty", 1))
     return total
-
-# ITEM_WEIGHT TEST VALUES
-const ITEM_WEIGHT: Dictionary = {
-    "weapon_melee_low":  3.0,
-    "weapon_melee_high": 4.0,
-    "weapon_ranged_low": 2.5,
-    "weapon_ranged_high": 3.0,
-    "armor_low":         5.0,
-    "armor_high":        8.0,
-    "food":              0.5,   # per unit
-    "medicine":          0.3,   # per unit
-    "tools":             2.0,   # per unit
-}
+# 完整物品清單、顯示名 → 見 item-attributes-design.md
+# ItemAttributes.get_display_name(grade, slot)
 ```
+
+**重量系統（軟限制）**：玩家可超重攜帶，但進入遭遇戰後由 `HealthSystem` 套用速度/stamina 懲罰：
+- `HealthSystem._max_carry()` = 20 + 體力×10 kg（TEST VALUE）
+- 超過 50% 負重 → 速度遞減（最低 0.3×）；stamina 消耗加快
+- 大地圖行進：超重由 team.fatigue 機制間接反映（非玩家個人）
 
 ---
 
 ## 3. 玩家裝備欄
 
-玩家使用 `PersonData.equipment` 8 格（與 NPC 相同結構）：
+玩家使用 `PersonData.equipment` 8 槽（與 NPC 相同結構）：
 
 ```
-right_hand: 主武器
-left_hand:  副武器/盾/火把
+hand_1:     主手（無左右區分，可持武器或盾牌）
+hand_2:     副手（同上；2h 武器時與 hand_1 同時佔用）
 head:       頭部護甲
 torso:      軀幹護甲
 right_arm / left_arm / right_leg / left_leg: 肢體護甲
 ```
 
+**槽位規則：**
+- `armor_*` 裝在 head/torso/arm/leg → 提供該部位減傷
+- `armor_*` 裝在 hand_1 或 hand_2 → 視為盾牌，提供 `block_chance`
+- `weapon_ranged_*` 裝備時佔 hand_1 + hand_2（`is_2h = true`，副手不可另放物品）
+
 ### 裝備/卸下
 
-- 裝備：從物品欄取 pool 物品 → 放入對應 equipment 格
-- 卸下：從 equipment 格取出 → 放回物品欄
-
 ```gdscript
+const WEAPON_2H: Array = ["weapon_ranged_low", "weapon_ranged_high"]
+
 func equip_item(state: WorldState, slot: String, item_grade: String) -> bool:
     var inv: Array = state.player_state.get("inventory", [])
-    # 找物品欄中對應物品
     for i in range(inv.size()):
-        if inv[i]["grade"] == item_grade:
-            var player: PersonData = state.persons.get(state.player_id)
-            if player == null: return false
-            # 卸下舊裝備（若有）
-            var old := player.equipment.get(slot, {})
-            if old.get("type", "none") != "none":
-                _add_to_inventory(state, old["grade"])
+        if inv[i]["grade"] != item_grade: continue
+        var player: PersonData = state.persons.get(state.player_id)
+        if player == null: return false
+        # 2h 武器：佔 hand_1 + hand_2
+        if item_grade in WEAPON_2H:
+            _unequip_slot(state, player, "hand_1")
+            _unequip_slot(state, player, "hand_2")
+            player.equipment["hand_1"] = { "type": "pool", "grade": item_grade, "is_2h": true }
+            player.equipment["hand_2"] = { "type": "2h_ref" }  # 佔位，不可單獨裝備
+        else:
+            _unequip_slot(state, player, slot)
             player.equipment[slot] = { "type": "pool", "grade": item_grade }
-            inv[i]["qty"] -= 1
-            if inv[i]["qty"] <= 0: inv.remove_at(i)
-            return true
+        inv[i]["qty"] -= 1
+        if inv[i]["qty"] <= 0: inv.remove_at(i)
+        return true
     return false
 
-func _add_to_inventory(state: WorldState, grade: String) -> void:
+func _unequip_slot(state: WorldState, player: PersonData, slot: String) -> void:
+    var old = player.equipment.get(slot, {})
+    if old.get("type", "none") in ["none", "2h_ref"]: return
+    _add_to_inventory(state, old["grade"])
+
+func _add_to_inventory(state: WorldState, grade: String, qty: int = 1) -> bool:
+    if not _can_add_item(state, grade, qty): return false
     var inv: Array = state.player_state.get("inventory", [])
     for item in inv:
         if item["grade"] == grade and item["type"] == "pool":
-            item["qty"] += 1
-            return
-    inv.append({ "grade": grade, "type": "pool", "qty": 1 })
+            item["qty"] += qty
+            return true
+    inv.append({ "grade": grade, "type": "pool", "qty": qty })
+    return true
 ```
 
 ---
@@ -124,9 +142,9 @@ func take_from_team(state: WorldState, grade: String, qty: int) -> bool:
     if team == null: return false
     var cur: int = int(team.resources.get(grade, 0))
     if cur < qty: return false
+    if not _can_add_item(state, grade, qty): return false   # 格子/重量不足
     team.resources[grade] = cur - qty
-    for i in range(qty):
-        _add_to_inventory(state, grade)
+    _add_to_inventory(state, grade, qty)
     return true
 ```
 
@@ -203,5 +221,7 @@ func init_player(state: WorldState, person_id: int,
 預期：
 - `state.player_id` 非 -1（初始化後）
 - `take_from_team` 成功後 team.resources 減少，inventory 增加
+- `take_from_team` 第 7 格物品 → 返回 false（格子上限）
+- `take_from_team` 超重 → 返回 false（重量上限）
 - `equip_item` 後 `person.equipment[slot]` 更新，inventory 減少
 - `get_visible_teams` 僅返回 team_discovered 範圍

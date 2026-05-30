@@ -53,24 +53,50 @@ var values: Dictionary
 
 var memory: Array       # [{ event_id: int, intensity: String, reaction: String }]
 
-# 部位健康（大地圖簡化版；遭遇戰可加 hp/max_hp）
+# 部位健康
 var body_parts: Dictionary
+# 完整格式（玩家 + 遭遇戰 named NPC）：
 # {
-#   "head":      { "status": "healthy" },
-#   "torso":     { "status": "healthy" },
-#   "right_arm": { "status": "healthy" },
-#   "left_arm":  { "status": "healthy" },
-#   "right_leg": { "status": "healthy" },
-#   "left_leg":  { "status": "healthy" },
+#   "head":      { "hp": 20.0, "max_hp": 20.0, "status": "healthy",
+#                  "poisoned": false, "bleeding": "none", "fracture": false },
+#   "torso":     { "hp": 50.0, "max_hp": 50.0, ... },
+#   "right_arm": { "hp": 25.0, "max_hp": 25.0, ... },
+#   "left_arm":  { "hp": 25.0, "max_hp": 25.0, ... },
+#   "right_leg": { "hp": 30.0, "max_hp": 30.0, ... },
+#   "left_leg":  { "hp": 30.0, "max_hp": 30.0, ... },
 # }
+# status 由 hp 門檻自動計算（不手動設定）：
+#   hp > 75%  → "healthy"
+#   25–75%    → "wounded"
+#   1–24%     → "critical"
+#   0         → "severed"（四肢）/ 死亡（head/torso）
+# bleeding: "none" / "minor" / "major"
+# fracture: 骨折 flag，不自動清除，需 tools ×1 治療
+#
+# 大地圖 NPC（簡化）：只有 {"status": "healthy"} 無 hp/flags
+
+var blood: float = 100.0   # TEST VALUE — 全身血液值
+# blood = 0   → 死亡
+# blood < 30  → 昏迷（無法行動）（TEST VALUE）
+# 影響 get_effective_speed() × (blood / 100.0)
 
 const STATUS_MULT: Dictionary = {
     "healthy": 1.0, "wounded": 0.7, "critical": 0.3, "severed": 0.0
 }
 
-# 裝備（個人武器槽）
-var equipment: Dictionary = { "weapon": "" }
-# weapon: "" / "melee_low" / "melee_high" / "ranged_low" / "ranged_high"
+# 裝備（8 槽位）
+var equipment: Dictionary = {}
+# {
+#   "head":      { "type": "pool", "grade": "armor_low" }   # 或 {"type":"none"}
+#   "torso":     ...
+#   "right_arm": ...  "left_arm": ...
+#   "right_leg": ...  "left_leg": ...
+#   "hand_1":    { "type": "pool", "grade": "weapon_melee_low" }  # 主手（無左右區分）
+#   "hand_2":    { "type": "pool", "grade": "armor_low" }         # 副手 / 盾牌
+# }
+# hand_1/hand_2：無左右邏輯，任一可持武器或盾牌
+# 2h 武器（weapon_ranged_*）裝備時同時佔 hand_1 + hand_2（is_2h = true）
+# armor_* 裝在 hand 槽 → 作為盾牌（提供 block_chance），裝在護甲槽 → 減傷
 # 由 EquipmentSystem 依 team.equip_order 分配；NPC 死亡時自動歸還武器庫
 ```
 
@@ -86,6 +112,40 @@ var equipment: Dictionary = { "weapon": "" }
 | `wounded` | ×0.7 | 30% 下降 |
 | `critical` | ×0.3 | 70% 下降（head/torso：瀕死狀態） |
 | `severed` | ×0.0 | 功能全失（四肢限定） |
+
+**負面 flags（遭遇戰中產生，部分帶入大地圖）：**
+
+| flag | 遭遇戰效果 | 結算後 | 大地圖 |
+|---|---|---|---|
+| `bleeding: "minor"` | 每 round 扣少量 blood | 一次扣 blood ×小 → 清除 | 無 |
+| `bleeding: "major"` | 每 round 扣大量 blood | 一次扣 blood ×大 → 清除 | 無 |
+| `poisoned: true` | 每 round 扣各部位 HP | 一次扣全部位 HP → 清除 | 無 |
+| `fracture: true` | 見骨折效果表 | **保留** | ✅ 持續，tools ×1 治療 |
+
+**骨折效果（依部位）：**
+
+| 部位 | 效果 |
+|---|---|
+| head | 每 round 機率跳過行動；智力 ×0.5 |
+| torso | 疲勞消耗 ×2；速度 −20% |
+| arm（其一）| 該手槽裝備自動掉落；hand slot 無法使用 |
+| leg（其一）| 速度 −50%；無法衝刺 |
+| leg（兩隻）| 速度 −90%；無法主動移動 |
+
+**遭遇戰結束自動結算（雙方所有進入遭遇戰的成員）：**
+1. 各方用自己 team 資源結算（medicine/tools）
+2. 有資源 → 消耗資源清除 flag（`bleeding_major` 優先）
+3. 資源不足 → 最高醫療技能者技能判定 → 機率清除
+4. 剩餘出血/中毒 → 一次性扣值後清除（**底線：blood ≥ 1、hp ≥ 1，不因結算死亡**）
+5. 骨折無資源 → 保留帶入大地圖
+
+**治療物品對照：**
+| 動作 | 消耗 | 效果 |
+|---|---|---|
+| 草藥 | medicine ×1 | 清除 bleeding_minor |
+| 繃帶 | medicine ×2 | 清除 bleeding_major |
+| 解毒劑 | medicine ×3 | 清除 poisoned |
+| 夾板 | tools ×1 | 清除 fracture（大地圖可用）|
 
 ### 部位 → 影響
 

@@ -542,7 +542,7 @@ func _calc_own_armed(state: WorldState, team: TeamData) -> int:
 	var named_armed: int = 0
 	for pid in ([team.leader_id] as Array) + team.named_members:
 		var p: PersonData = state.persons.get(pid) as PersonData
-		if p and p.equipment["right_hand"].get("type", "none") != "none":
+		if p and p.equipment["hand_1"].get("type", "none") != "none":
 			named_armed += 1
 	var named_count: int = 1 + team.named_members.size()
 	var anon_pop: int    = maxi(team.population - named_count, 0)
