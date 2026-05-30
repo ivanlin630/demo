@@ -14,6 +14,7 @@ var _state: WorldState
 @onready var _encounter: Control       = $EncounterView
 
 func _ready() -> void:
+	mouse_filter = Control.MOUSE_FILTER_IGNORE   # 讓點擊穿透到地圖
 	_runner = SimRunner.new()
 	_state  = WorldState.new()
 
@@ -90,6 +91,7 @@ func _on_set_move_target(pos: Vector2i) -> void:
 func _on_tick_advanced(_events: Array) -> void:
 	_map.refresh()
 	_debug.refresh()
+	_sidebar.refresh_player()
 	for evt in _events:
 		_bottom.add_message("[T%d] %s" % [_bridge.get_state().world.current_tick, str(evt.get("type", "?"))])
 	if _bridge.get_state().encounter_active:

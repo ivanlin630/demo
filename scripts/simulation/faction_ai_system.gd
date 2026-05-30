@@ -404,6 +404,7 @@ func _evaluate_idle_subteam(state: WorldState, sub: TeamData, merge_queue: Array
 # ──────── 獨立 Team 自主 AI ────────
 
 func _evaluate_solo(state: WorldState, team: TeamData) -> void:
+	if team.leader_id == state.player_id: return   # 玩家隊不受 SoloAI 控制
 	if team.combat_target != -1 or team.current_task != "idle": return
 	var leader_p = state.persons.get(team.leader_id)
 	if leader_p == null: return
