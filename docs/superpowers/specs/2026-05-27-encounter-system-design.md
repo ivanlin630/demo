@@ -24,8 +24,12 @@
 
 ## 2. 地圖規格
 
-- **六角形地圖**，邊長 10 格（含邊：271 個 hex）
+- **正六邊形地圖**，內切圓半徑 `MAP_RADIUS = 10` hex（TEST VALUE）
+  - 內切圓直徑 `MAP_DIAMETER = MAP_RADIUS × 2 = 20` hex = 1 世界地圖 hex
+  - 總 hex 數：`3×MAP_RADIUS²+3×MAP_RADIUS+1 = 331`（含中心）
+  - 有效 tile：所有 `hex_dist(center, pos) ≤ MAP_RADIUS` 的位置
 - Hex 座標系：offset-q（flat-top）
+- **注意：** 代碼當前用矩形邊界（`x,y ∈ [-MAP_RADIUS, MAP_RADIUS]`），需改為六邊形過濾
 - 地形與障礙物：繼承大地圖 tile 地形，隨機生成額外障礙物（樹木/岩石）
 - 每 hex 可有 0/1 個障礙物（blocking 或 cover）
 

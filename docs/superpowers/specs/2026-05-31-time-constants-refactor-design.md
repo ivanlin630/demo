@@ -80,13 +80,20 @@ const SECONDS_PER_TICK: float = 86400.0 / float(TICKS_PER_DAY)
 | `sim_runner.gd` | `FATIGUE_PER_TICK = 0.002` | `FATIGUE_PER_DAY = 0.05` | 20天滿疲勞（TEST VALUE） |
 | `sim_runner.gd` | `FATIGUE_RECOVERY = 0.01` | `FATIGUE_RECOVERY_PER_DAY = 0.24` | 約4天回滿（TEST VALUE） |
 
-### 微觀（小時尺度）
+### 微觀（遭遇戰尺度換算）
+
+世界地圖 1 hex = 遭遇戰地圖內切圓直徑（`MAP_DIAMETER = MAP_RADIUS × 2`）。
+標準 NPC 移動 1 world-hex 的成本 = 移動 MAP_DIAMETER 個 encounter-hex 的成本。
 
 | 檔案 | 舊常數 | 新定義 | 語意 |
 |---|---|---|---|
-| `movement_system.gd` | `BASE_MOVE_TICKS = 10` | `4 * WorldState.TICKS_PER_HOUR` | 平原 4小時/hex（TEST VALUE） |
-| `movement_system.gd` | `MIN_MOVE_TICKS = 3` | `1 * WorldState.TICKS_PER_HOUR` | 最快 1小時/hex |
-| `movement_system.gd` | `MAX_MOVE_TICKS = 30` | `12 * WorldState.TICKS_PER_HOUR` | 最慢 12小時/hex |
+| `encounter_system.gd` | （新增）| `MAP_DIAMETER: int = MAP_RADIUS * 2` | 內切圓直徑，定義 world-hex 尺度 |
+| `movement_system.gd` | `BASE_MOVE_TICKS = 10` | `EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER` | 與遭遇戰速度掛鉤；MAP_RADIUS 改大自動縮放 |
+| `movement_system.gd` | `MIN_MOVE_TICKS = 3` | `EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER / 3` | 最快（速度×3） |
+| `movement_system.gd` | `MAX_MOVE_TICKS = 30` | `EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER * 3` | 最慢（速度÷3） |
+
+> 例：MAP_RADIUS=10 → MAP_DIAMETER=20 → BASE_MOVE_TICKS=200 ticks（速度=1.0，plains）
+> = 2000秒 = 33分鐘/world-hex（TICKS_PER_DAY=8640）
 
 ### 不需改動
 
@@ -164,4 +171,4 @@ assert(HarvestSystem.new().get("SEASON_LENGTH") == WorldState.TICKS_PER_SEASON)
 ## 待確認
 
 - `FOOD_PER_PERSON_PER_DAY = 2.4` 合理？（現 0.1×24=2.4，保持不變）
-- plains 4小時/hex：地圖 radius=4，穿越地圖 ≈ 32小時（1.3天）合理？
+- MIN/MAX_MOVE_TICKS 的倍數（÷3 / ×3）是否合理？
