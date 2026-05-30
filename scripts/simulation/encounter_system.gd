@@ -1,6 +1,7 @@
 # scripts/simulation/encounter_system.gd
 class_name EncounterSystem
 
+const ANON_UNIT_CAP: int          = 30   # TEST VALUE — 每隊匿名 unit 最多 30 個
 const ESCORT_DETECT_RANGE: int    = 3    # TEST VALUE — 護送感知範圍
 const ESCORT_MAX_NEARBY_ENEMIES: int = 1 # TEST VALUE
 const PRISONER_CHECK_INTERVAL: int = 5   # TEST VALUE — 待校正
@@ -177,8 +178,10 @@ func init_encounter(state: WorldState, attacker_id: int, defender_id: int,
 			atk_positions += _get_edge_entry_positions(e, 5)
 		_spawn_team_units(state, atk, atk_positions)
 	else:
-		var atk_pos := _get_edge_entry_positions(0, atk.population + atk.named_members.size())
-		var def_pos := _get_edge_entry_positions(3, def.population + def.named_members.size())
+		var atk_anon: int = mini(int(float(atk.population) * atk.armed_anon_ratio), ANON_UNIT_CAP)
+		var def_anon: int = mini(int(float(def.population) * def.armed_anon_ratio), ANON_UNIT_CAP)
+		var atk_pos := _get_edge_entry_positions(0, atk.named_members.size() + 1 + atk_anon)
+		var def_pos := _get_edge_entry_positions(3, def.named_members.size() + 1 + def_anon)
 		_spawn_team_units(state, atk, atk_pos)
 		_spawn_team_units(state, def, def_pos)
 
@@ -611,58 +614,9 @@ func advance_encounter_tick(state: WorldState) -> String:
 	if not atk_alive and not def_alive: return "draw"
 	return "ongoing"
 
-func advance_round(state: WorldState, round_num: int) -> String:
-	var atk_id: int = state.encounter_attacker_id
-	var def_id: int = state.encounter_defender_id
-
-	for i in range(state.encounter_units.size()):
-		var unit: Dictionary = state.encounter_units[i]
-		if is_dead(unit, state): continue
-		if unit.get("has_exited", false): continue
-		if unit.get("is_prisoner", false): continue
-
-		var action: Dictionary = _decide_action(i, state, -1)
-
-		match action["type"]:
-			"attack", "shoot":
-				if action["target_idx"] != -1:
-					var target: Dictionary = state.encounter_units[action["target_idx"]]
-					if not is_dead(target, state) and not target.get("has_exited", false):
-						var skill: float = _get_attacker_skill(unit, state)
-						_apply_body_part_damage(target, state,
-							action["attack_part"], skill)
-						if action["type"] == "shoot":
-							_consume_arrow(unit)
-						unit["stamina"] = maxf(unit.get("stamina", 1.0) - 0.05, 0.0)
-			"move", "move_back", "escort_move", "start_escort":
-				unit["pos"] = action["move_to"]
-				unit["stamina"] = maxf(unit.get("stamina", 1.0) - 0.02, 0.0)
-				if action["type"] == "start_escort":
-					unit["escort_target"] = action["target_idx"]
-			"retreat", "messenger_exit":
-				unit["pos"] = action["move_to"]
-				unit["stamina"] = maxf(unit.get("stamina", 1.0) - 0.03, 0.0)
-				var dist_to_edge: int = MAP_RADIUS - maxi(abs(unit["pos"].x), abs(unit["pos"].y))
-				if dist_to_edge <= 0:
-					unit["has_exited"] = true
-					if action["type"] == "messenger_exit":
-						var parent: TeamData = state.teams.get(unit["team_id"])
-						if parent: _messenger_exit(state, unit, parent)
-
-	_check_prisoners(state, round_num)
-
-	var atk_alive: bool = _has_active_units(atk_id, state)
-	var def_alive: bool = _has_active_units(def_id, state)
-	var atk_exited: bool = _all_exited(atk_id, state)
-	var def_exited: bool = _all_exited(def_id, state)
-
-	if def_exited or (not def_alive and def_id != -1):
-		return "attacker_win"
-	if atk_exited or (not atk_alive and atk_id != -1):
-		return "defender_win"
-	if not atk_alive and not def_alive:
-		return "draw"
-	return "ongoing"
+func advance_round(state: WorldState, _round_num: int) -> String:
+	push_warning("advance_round is deprecated — use advance_encounter_tick")
+	return advance_encounter_tick(state)
 
 func _has_active_units(team_id: int, state: WorldState) -> bool:
 	for u in state.encounter_units:
@@ -786,12 +740,19 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 		var unit: Dictionary = _create_named_unit(pid, team.team_id, pos, state)
 		_init_named_unit(unit, p, team, state)
 		state.encounter_units.append(unit)
-	for _i in range(team.population):
+	# 匿名人口：只 spawn 武裝部分，加硬上限
+	# 未成年、俘虜不計入 spawn
+	var armed_count: int = int(float(team.population) * team.armed_anon_ratio)
+	var spawn_count: int = mini(armed_count, ANON_UNIT_CAP)
+	for _i in range(spawn_count):
 		var pos: Vector2i = positions[pos_idx % positions.size()]
 		pos_idx += 1
 		var unit: Dictionary = _create_anon_unit(team, pos)
 		_init_anon_unit(unit, team, state)
 		state.encounter_units.append(unit)
+	print("[Encounter] Team%d spawn: %d具名 + %d匿名（武裝率%.0f%%，人口%d）" % [
+		team.team_id, named_ids.size(), spawn_count,
+		team.armed_anon_ratio * 100, team.population])
 
 func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var atk_id: int = state.encounter_attacker_id
@@ -836,12 +797,17 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var winner_id: int = atk_id if result == "attacker_win" else def_id
 	var loser_id: int  = def_id if result == "attacker_win" else atk_id
 	var winner_team: TeamData = state.teams.get(winner_id)
+	# 新：俘虜存入 prisoner_population，上限 = winner population
 	for u in state.encounter_units:
 		if not u.get("is_prisoner", false): continue
 		if u["team_id"] != loser_id: continue
-		if winner_team:
-			winner_team.population += 1
-			print("[Encounter] 俘虜加入 Team%d" % winner_id)
+		if winner_team == null: continue
+		if winner_team.prisoner_population < winner_team.population:
+			winner_team.prisoner_population += 1
+			print("[Encounter] 俘虜收押 Team%d（總計 %d）" % [
+				winner_id, winner_team.prisoner_population])
+		else:
+			print("[Encounter] 俘虜超額，釋放")
 
 	for team_id in [atk_id, def_id]:
 		var t: TeamData = state.teams.get(team_id)
