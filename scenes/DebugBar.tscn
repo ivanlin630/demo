@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3 uid="uid://db001"]
+[ext_resource type="Script" path="res://scripts/ui/debug_bar.gd" id="1_db"]
+[node name="DebugBar" type="PanelContainer"]
+script = ExtResource("1_db")

@@ -6,6 +6,7 @@ var _runner: SimRunner
 var _state: WorldState
 
 @onready var _map:       Node2D        = $WorldMapView
+@onready var _debug:     PanelContainer = $DebugBar
 @onready var _controls:  HBoxContainer = $TurnControls
 @onready var _sidebar:   VBoxContainer = $RightSidebar
 @onready var _bottom:    HBoxContainer = $BottomBar
@@ -56,6 +57,7 @@ func _ready() -> void:
 	PlayerSystem.new().init_player(_state, 0, 0)
 
 	_bridge = SimBridge.new(_runner, _state)
+	_debug.setup(_bridge)
 	_map.setup(_bridge)
 	_map.tile_selected.connect(_on_tile_selected)
 	_controls.setup(_bridge)
@@ -80,10 +82,14 @@ func _on_set_move_target(pos: Vector2i) -> void:
 	var ptid: int = _bridge.get_player_team_id()
 	if ptid < 0: return
 	var team: TeamData = state.teams.get(ptid)
-	if team: team.move_target = pos
+	if team:
+		team.move_target = pos
+		print("[Main] move_target set Team%d → (%d,%d)" % [ptid, pos.x, pos.y])
+	_debug.refresh()
 
 func _on_tick_advanced(_events: Array) -> void:
 	_map.refresh()
+	_debug.refresh()
 	for evt in _events:
 		_bottom.add_message("[T%d] %s" % [_bridge.get_state().world.current_tick, str(evt.get("type", "?"))])
 	if _bridge.get_state().encounter_active:
