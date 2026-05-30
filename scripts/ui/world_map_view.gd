@@ -21,10 +21,10 @@ var _selected: Vector2i = Vector2i(-1, -1)
 
 const SCROLL_SPEED: float = 8.0
 var _scroll_keys: Dictionary = {
-	KEY_W: Vector2( 0, -1),
-	KEY_A: Vector2(-1,  0),
-	KEY_S: Vector2( 0,  1),
-	KEY_D: Vector2( 1,  0),
+	KEY_W: Vector2( 0,  1),
+	KEY_A: Vector2( 1,  0),
+	KEY_S: Vector2( 0, -1),
+	KEY_D: Vector2(-1,  0),
 }
 signal tile_selected(pos: Vector2i)
 
@@ -44,10 +44,11 @@ func _hex_center(col: int, row: int) -> Vector2:
 	)
 
 func _hex_points(cx: float, cy: float) -> PackedVector2Array:
+	var z: float = _zoom
 	return PackedVector2Array([
-		Vector2(cx - 15, cy - 26), Vector2(cx + 15, cy - 26),
-		Vector2(cx + 30, cy),      Vector2(cx + 15, cy + 26),
-		Vector2(cx - 15, cy + 26), Vector2(cx - 30, cy),
+		Vector2(cx - 15*z, cy - 26*z), Vector2(cx + 15*z, cy - 26*z),
+		Vector2(cx + 30*z, cy),        Vector2(cx + 15*z, cy + 26*z),
+		Vector2(cx - 15*z, cy + 26*z), Vector2(cx - 30*z, cy),
 	])
 
 func _world_to_screen(world_pos: Vector2) -> Vector2:
@@ -163,7 +164,7 @@ func _process(delta: float) -> void:
 		_camera += dir * SCROLL_SPEED * (1.0 / _zoom)
 		queue_redraw()
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			var hex: Vector2i = pixel_to_hex(get_local_mouse_position())
