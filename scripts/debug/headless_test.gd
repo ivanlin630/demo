@@ -1297,4 +1297,56 @@ func _run_sim_test() -> void:
 	assert(_enc_result != "ongoing" or true, "encounter ran without crash")
 	print("EncounterCombat OK")
 
+	# ── PlayerSystem weight integration ──
+	print("--- PlayerSystem weight ---")
+	var _ws: WorldState = WorldState.new()
+	var _ps2 := PlayerSystem.new()
+	var _pp := PersonData.new(); _pp.id = 99; _pp.team_id = 0
+	_ws.persons[99] = _pp
+	_ws.player_id   = 99
+	_ws.player_state = { "inventory": [], "coin": 0.0 }
+	var _pteam := TeamData.new()
+	_pteam.team_id = 0
+	_pteam.resources = { "medicine": 10, "tools": 5, "arrows": 20,
+		"weapon_melee_low": 5, "armor_low": 2 }
+	_ws.teams[0] = _pteam
+	var _ok: bool = _ps2.take_from_team(_ws, "medicine", 3)
+	assert(_ok, "take_from_team should succeed")
+	assert(int(_pteam.resources.get("medicine", 0)) == 7, "team medicine should be 7")
+	assert(_ws.player_state["inventory"].size() == 1, "inventory should have 1 slot")
+	var _w: float = _ps2.calc_inventory_weight(_ws)
+	assert(_w > 0.0, "inventory weight should be > 0 (using ItemAttributes)")
+	print("PlayerSystem weight OK: %.2f kg" % _w)
+
+	# ── EncounterSystem unit equipment ──
+	print("--- EncounterSystem unit equipment ---")
+	var _es := EncounterSystem.new()
+	var _es_state := WorldState.new()
+	var _es_t0 := TeamData.new()
+	_es_t0.team_id = 0; _es_t0.population = 3
+	_es_t0.resources = {
+		"weapon_melee_low": 5, "arrows": 30, "medicine": 10,
+		"armor_low": 0, "armor_high": 0, "food": 0,
+	}
+	_es_t0.armor_config = { "torso": "none", "head": "none",
+		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
+	var _es_t1 := TeamData.new()
+	_es_t1.team_id = 1; _es_t1.population = 2
+	_es_t1.resources = {
+		"weapon_melee_low": 3, "arrows": 0, "medicine": 5,
+		"armor_low": 0, "armor_high": 0, "food": 0,
+	}
+	_es_t1.armor_config = { "torso": "none", "head": "none",
+		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
+	_es_state.teams[0] = _es_t0
+	_es_state.teams[1] = _es_t1
+	_es_state.encounter_attacker_id = 0
+	_es_state.encounter_defender_id = 1
+	_es.init_encounter(_es_state, 0, 1, "normal")
+	for _u in _es_state.encounter_units:
+		assert(_u.has("equipment"), "unit should have equipment dict")
+		assert(_u.has("inventory"), "unit should have inventory array")
+		assert(_u.has("action_timer"), "unit should have action_timer")
+	print("Unit equipment OK — %d units spawned" % _es_state.encounter_units.size())
+
 	print("=== DONE ===")
