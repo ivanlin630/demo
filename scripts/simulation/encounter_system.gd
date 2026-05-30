@@ -65,6 +65,8 @@ func _create_named_unit(pid: int, team_id: int, pos: Vector2i,
 		"escort_target": -1,
 		"current_order":        { "type": "none", "target": -1 },
 		"messenger_target_idx": -1,
+		"action_timer":         0,
+		"_max_timer":           10,
 	}
 
 func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
@@ -80,6 +82,8 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 		"skills": { "戰鬥": float(team.resources.get("anon_combat_skill", 0.2)) },
 		"current_order":        { "type": "none", "target": -1 },
 		"messenger_target_idx": -1,
+		"action_timer":         0,
+		"_max_timer":           10,
 	}
 
 const MAP_RADIUS: int = 10   # TEST VALUE

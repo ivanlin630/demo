@@ -39,10 +39,11 @@ func advance_encounter_tick() -> String:
 	_runner.advance_tick(_state, player_pos)
 	if not _state.encounter_active:
 		return "encounter_ended"
+	# Reset player's timer to 0 after each round so UI gets a turn
 	for unit in _state.encounter_units:
 		if unit.get("person_id", -1) == _state.player_id:
-			if int(unit.get("action_timer", 1)) == 0:
-				return "player_turn"
+			unit["action_timer"] = 0
+			return "player_turn"
 	return "ongoing"
 
 # ── helpers ───────────────────────────────────────────────
