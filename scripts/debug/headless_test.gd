@@ -8,19 +8,19 @@ func _run_sim_test() -> void:
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 
-	# 用 WorldGenerator 產生 radius=4 的 hex 地圖（含 (4,0) 位置）
+	# 用 WorldGenerator 產生 radius=4 的 hex 地圖（含 (8,4) 位置）
 	var generator = load("res://scripts/simulation/world_generator.gd").new()
 	generator.generate(state, { "radius": 4, "seed": 42 })
 	# 強制路徑地形為 plains，避免 mountain 拖慢移動驗證外交時序
-	for _tid in [0, 1000, 2000, 3000, 4000]:
+	for _tid in [4004, 5004, 6004, 7004, 8004]:
 		if state.world.tiles.has(_tid):
 			(state.world.tiles[_tid] as HexTileData).terrain = "plains"
 	# 測試劇本：設定固定據點
-	var _t0: HexTileData = state.world.tiles[0] as HexTileData
+	var _t0: HexTileData = state.world.tiles[4004] as HexTileData
 	_t0.outpost_type  = "military"
 	_t0.outpost_level = 1
 	_t0.outpost_owner = 0                                          # Team0 起始軍事據點（營寨）
-	(state.world.tiles[1000] as HexTileData).resources["food"] = 0 # 測試：tile(1,0) 無糧
+	(state.world.tiles[5004] as HexTileData).resources["food"] = 0 # 測試：tile(5,4) 無糧
 
 	for t in range(3):
 		var team := TeamData.new()
@@ -37,7 +37,7 @@ func _run_sim_test() -> void:
 			"armor_low": 0, "armor_high": 0,
 		}
 		team.tags = ["生產"]
-		team.tile_pos = Vector2i(t, 0)
+		team.tile_pos = Vector2i(t + 4, 4)
 		state.teams[t] = team
 		state.team_known[t] = []
 		state.team_discovered[t] = []
@@ -48,8 +48,8 @@ func _run_sim_test() -> void:
 			team.tags = ["統領"]
 			team.resources["weapon_melee_low"] = 40
 		elif t == 1:
-			team.tile_pos = Vector2i(3, 0)     # 從(3,0)出發，距Team2(2,0)更遠
-			team.move_target = Vector2i(0, 0)  # 向左走到 (0,0)
+			team.tile_pos = Vector2i(7, 4)     # 從(7,4)出發，距Team2(6,4)更遠
+			team.move_target = Vector2i(4, 4)  # 向左走到 (4,4)
 			team.unrest_turns = 22             # Tick 1 觸發替換事件，emit message
 		# t == 2: 無目標，駐守
 
@@ -83,8 +83,8 @@ func _run_sim_test() -> void:
 			else:
 				team.named_members.append(person.id)
 
-	# Team2 建設測試：在 (2,0) 建造村落（civilian Lv1）
-	# Team0 營寨在 (0,0)，距離 2（不同類型，無同類限制）
+	# Team2 建設測試：在 (6,4) 建造村落（civilian Lv1）
+	# Team0 營寨在 (4,4)，距離 2（不同類型，無同類限制）
 	var _outpost_sys := OutpostSystem.new()
 	var _build_ok := _outpost_sys.start_build(state, state.teams[2], "civilian", 1)
 	print("=== 據點建設測試：Team2 建村落 start_build=%s ===" % str(_build_ok))
@@ -102,7 +102,7 @@ func _run_sim_test() -> void:
 		"armor_low": 0, "armor_high": 0,
 	}
 	team3.tags = []
-	team3.tile_pos = Vector2i(4, 0)
+	team3.tile_pos = Vector2i(8, 4)
 	team3.unrest_turns = 0
 	state.teams[3] = team3
 	state.team_known[3] = []
@@ -159,7 +159,7 @@ func _run_sim_test() -> void:
 		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
 		"armor_low": 0, "armor_high": 0,
 	}
-	team5.tags = ["軍隊"]; team5.tile_pos = Vector2i(-3, 0)
+	team5.tags = ["軍隊"]; team5.tile_pos = Vector2i(1, 4)
 	state.teams[5] = team5; state.team_known[5] = []; state.team_discovered[5] = []
 	var p5 := PersonData.new()
 	p5.id = 10; p5.person_name = "P5_0"; p5.role = "leader"; p5.team_id = 5
@@ -178,7 +178,7 @@ func _run_sim_test() -> void:
 		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
 		"armor_low": 0, "armor_high": 0,
 	}
-	team6.tags = ["商隊"]; team6.tile_pos = Vector2i(-3, 1)
+	team6.tags = ["商隊"]; team6.tile_pos = Vector2i(1, 5)
 	state.teams[6] = team6; state.team_known[6] = []; state.team_discovered[6] = []
 	var p6 := PersonData.new()
 	p6.id = 11; p6.person_name = "P6_0"; p6.role = "leader"; p6.team_id = 6
@@ -193,7 +193,7 @@ func _run_sim_test() -> void:
 	assert(_best == 1, "最高偵查技能應為 Person1")
 
 	var _sub_sys := SubteamSystem.new()
-	var scout_id: int = _sub_sys.dispatch(state, 0, 1, 3, "偵查", Vector2i(3, 0),
+	var scout_id: int = _sub_sys.dispatch(state, 0, 1, 3, "偵查", Vector2i(7, 4),
 		-1, "", [2])  # Person2 作為 extra advisor
 	print("=== 子隊派遣：scout_id=%d ===" % scout_id)
 	if scout_id != -1:
@@ -202,8 +202,8 @@ func _run_sim_test() -> void:
 			state.teams[scout_id].population, state.teams[scout_id].current_task])
 
 	# ── Team8 製造測試 ──
-	# Tile (3,1)：civilian Lv2，manufacturing_level=1
-	var _tile31_id: int = 3 * 1000 + 1
+	# Tile (7,5)：civilian Lv2，manufacturing_level=1
+	var _tile31_id: int = 7 * 1000 + 5
 	if state.world.tiles.has(_tile31_id):
 		var _t31: HexTileData = state.world.tiles[_tile31_id] as HexTileData
 		_t31.outpost_type         = "civilian"
@@ -223,7 +223,7 @@ func _run_sim_test() -> void:
 		"armor_low": 0, "armor_high": 0,
 	}
 	team8.tags         = ["生產"]
-	team8.tile_pos     = Vector2i(3, 1)
+	team8.tile_pos     = Vector2i(7, 5)
 	team8.current_task = TeamData.TASK_MANUFACTURE
 	state.teams[8]     = team8
 	state.team_known[8] = []
@@ -233,7 +233,7 @@ func _run_sim_test() -> void:
 	p8.loyalty = 0.9; p8.skills["製造"] = 0.2
 	state.persons[20] = p8
 	team8.leader_id = 20
-	print("=== 製造測試：Team8 tile(3,1) civilian Lv2, mfg_level=1, gem=5, ore_silver=100 ===")
+	print("=== 製造測試：Team8 tile(7,5) civilian Lv2, mfg_level=1, gem=5, ore_silver=100 ===")
 
 	# ── Team9 商隊測試 ──
 	# Tile (1,1)：plains（world gen 已有）
@@ -249,7 +249,7 @@ func _run_sim_test() -> void:
 		"armor_low": 0, "armor_high": 0,
 	}
 	team9.tags       = ["商隊"]
-	team9.tile_pos   = Vector2i(1, 1)
+	team9.tile_pos   = Vector2i(5, 5)
 	state.teams[9]   = team9
 	state.team_known[9] = []
 	state.team_discovered[9] = []
@@ -259,14 +259,14 @@ func _run_sim_test() -> void:
 	p9.values["貪婪"] = 0.6
 	state.persons[21] = p9
 	team9.leader_id = 21
-	print("=== 商隊測試：Team9 tile(1,1) 商隊，goods=100, gem=3, coin=0 ===")
+	print("=== 商隊測試：Team9 tile(5,5) 商隊，goods=100, gem=3, coin=0 ===")
 
 	# ── PersonGenerator 驗證 ──
 	var gen_team := TeamData.new()
 	gen_team.team_id    = 10
 	gen_team.population = 5     # anon_pop = 5-1(leader) = 4
 	gen_team.tags       = ["軍隊"]
-	gen_team.tile_pos   = Vector2i(0, -3)
+	gen_team.tile_pos   = Vector2i(4, 1)
 	state.teams[10]     = gen_team
 	state.team_known[10]      = []
 	state.team_discovered[10] = []
@@ -298,7 +298,7 @@ func _run_sim_test() -> void:
 
 	# ── merge_teams 驗證 ──
 	var ma := TeamData.new()
-	ma.team_id = 11; ma.population = 5; ma.faction_id = 99; ma.tile_pos = Vector2i(0, -4)
+	ma.team_id = 11; ma.population = 5; ma.faction_id = 99; ma.tile_pos = Vector2i(4, 0)
 	state.teams[11] = ma; state.team_known[11] = []; state.team_discovered[11] = []
 	var ma_p := PersonData.new()
 	ma_p.id = 40; ma_p.person_name = "MA_leader"; ma_p.role = "leader"
@@ -306,7 +306,7 @@ func _run_sim_test() -> void:
 	state.persons[40] = ma_p; ma.leader_id = 40
 
 	var mb := TeamData.new()
-	mb.team_id = 12; mb.population = 3; mb.faction_id = 99; mb.tile_pos = Vector2i(0, -4)
+	mb.team_id = 12; mb.population = 3; mb.faction_id = 99; mb.tile_pos = Vector2i(4, 0)
 	mb.resources["food"] = 90.0
 	state.teams[12] = mb; state.team_known[12] = []; state.team_discovered[12] = []
 	var mb_p := PersonData.new()
@@ -344,7 +344,7 @@ func _run_sim_test() -> void:
 
 	# 追加：transfer_anon=0 測試（只移記名 NPC，匿民留下）
 	var mc := TeamData.new()
-	mc.team_id = 13; mc.population = 4; mc.faction_id = 99; mc.tile_pos = Vector2i(0, -4)
+	mc.team_id = 13; mc.population = 4; mc.faction_id = 99; mc.tile_pos = Vector2i(4, 0)
 	mc.resources["food"] = 60.0
 	state.teams[13] = mc; state.team_known[13] = []; state.team_discovered[13] = []
 	var mc_p := PersonData.new()
@@ -555,18 +555,18 @@ func _run_sim_test() -> void:
 
 	# ── IntelSystem Tier 0/1 驗證 ──
 	var _it_vis := VisionSystem.new()
-	# 觀察者 Team70（偵查=0，在 (0,0)，vrange=3）
+	# 觀察者 Team70（偵查=0，在 (4,4)，vrange=3）
 	var _it_a := TeamData.new()
-	_it_a.team_id = 70; _it_a.population = 5; _it_a.tile_pos = Vector2i(0, 0)
+	_it_a.team_id = 70; _it_a.population = 5; _it_a.tile_pos = Vector2i(4, 4)
 	state.teams[70] = _it_a; state.team_discovered[70] = []
 	var _it_a_l := PersonData.new()
 	_it_a_l.id = 70; _it_a_l.role = "leader"; _it_a_l.team_id = 70
 	_it_a_l.skills["偵查"] = 0.0
 	state.persons[70] = _it_a_l; _it_a.leader_id = 70
 
-	# 目標 Team71（pop=20，在 (2,0)，dist=2，exposure 高）
+	# 目標 Team71（pop=20，在 (6,4)，dist=2，exposure 高）
 	var _it_b := TeamData.new()
-	_it_b.team_id = 71; _it_b.population = 20; _it_b.tile_pos = Vector2i(2, 0)
+	_it_b.team_id = 71; _it_b.population = 20; _it_b.tile_pos = Vector2i(6, 4)
 	_it_b.resources = {
 		"food": 80.0, "material": 30.0, "coin": 0.0, "goods": 0.0, "gem": 0.0,
 		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
@@ -593,8 +593,8 @@ func _run_sim_test() -> void:
 	else:
 		print("  [FAIL] population_est=%d（預期 10–30）" % _pop_est)
 
-	# Tier 1：Team70 移到 (1,0)，dist=1；Team71 total_res=110 → bucket=1，±1 → 0–2
-	_it_a.tile_pos = Vector2i(1, 0)
+	# Tier 1：Team70 移到 (5,4)，dist=1；Team71 total_res=110 → bucket=1，±1 → 0–2
+	_it_a.tile_pos = Vector2i(5, 4)
 	_it_vis.tick_discovery(state, [70])
 	print("=== IntelSystem Tier 1 驗證 ===")
 	var _it_snap1: Dictionary = state.team_intel.get(70, {}).get(71, {})
@@ -629,7 +629,7 @@ func _run_sim_test() -> void:
 
 	# 觀察者 Team72
 	var _it_obs := TeamData.new()
-	_it_obs.team_id = 72; _it_obs.population = 5; _it_obs.tile_pos = Vector2i(0, 0)
+	_it_obs.team_id = 72; _it_obs.population = 5; _it_obs.tile_pos = Vector2i(4, 4)
 	state.teams[72] = _it_obs; state.team_discovered[72] = []
 	var _it_obs_l := PersonData.new()
 	_it_obs_l.id = 72; _it_obs_l.role = "leader"; _it_obs_l.team_id = 72
@@ -637,7 +637,7 @@ func _run_sim_test() -> void:
 
 	# 高信義 Team73（生產隊，幾乎不造假）
 	var _it_hon := TeamData.new()
-	_it_hon.team_id = 73; _it_hon.population = 10; _it_hon.tile_pos = Vector2i(0, 0)
+	_it_hon.team_id = 73; _it_hon.population = 10; _it_hon.tile_pos = Vector2i(4, 4)
 	_it_hon.tags = ["生產"]
 	_it_hon.resources = {
 		"food": 100.0, "material": 0.0, "coin": 20.0, "goods": 0.0, "gem": 0.0,
@@ -674,7 +674,7 @@ func _run_sim_test() -> void:
 
 	# 低信義軍隊 Team74（高 deceive_chance → 偽裝平民）
 	var _it_low := TeamData.new()
-	_it_low.team_id = 74; _it_low.population = 10; _it_low.tile_pos = Vector2i(0, 0)
+	_it_low.team_id = 74; _it_low.population = 10; _it_low.tile_pos = Vector2i(4, 4)
 	_it_low.tags = ["軍隊"]
 	_it_low.resources = {
 		"food": 50.0, "material": 0.0, "coin": 0.0, "goods": 0.0, "gem": 0.0,
@@ -715,7 +715,7 @@ func _run_sim_test() -> void:
 	print("=== IntelSystem 攻擊決策 驗證 ===")
 	var _ad_leader := TeamData.new()
 	_ad_leader.team_id = 80; _ad_leader.population = 10
-	_ad_leader.tile_pos = Vector2i(0, 1); _ad_leader.tags = ["統領"]
+	_ad_leader.tile_pos = Vector2i(4, 5); _ad_leader.tags = ["統領"]
 	_ad_leader.readiness = 0.8
 	_ad_leader.armed_anon_ratio = 0.3  # anon_pop=9 → roundi(9×0.3)=3 → own_armed=3
 	state.teams[80] = _ad_leader; state.team_discovered[80] = []
@@ -729,7 +729,7 @@ func _run_sim_test() -> void:
 	state.persons[80] = _ad_l_p; _ad_leader.leader_id = 80
 
 	var _ad_tgt := TeamData.new()
-	_ad_tgt.team_id = 81; _ad_tgt.population = 8; _ad_tgt.tile_pos = Vector2i(1, 1)
+	_ad_tgt.team_id = 81; _ad_tgt.population = 8; _ad_tgt.tile_pos = Vector2i(5, 5)
 	_ad_tgt.faction_id = -1; _ad_tgt.armed_anon_ratio = 0.0
 	state.teams[81] = _ad_tgt
 	state.team_discovered[80].append(81)
@@ -751,7 +751,7 @@ func _run_sim_test() -> void:
 		state.team_intel[80] = {}
 	state.team_intel[80][81] = {
 		"tier": 0, "population_est": 8, "armed_est": 2,
-		"tile_pos": Vector2i(1, 1), "last_tick": 0,
+		"tile_pos": Vector2i(5, 5), "last_tick": 0,
 	}
 	state.factions[_ad_fid].goals.clear()
 	_ad_fai._update_goals(state, state.factions[_ad_fid])
@@ -770,8 +770,8 @@ func _run_sim_test() -> void:
 	print("=== Sim Test: 200 Ticks ===")
 	print("Team0(統領) 預建為勢力 leader，Team3 為附庸")
 	print("預期：立國 → 外交(Team1,Team2) → 定期徵收(Team3)，子隊偵查後回歸")
-	print("Team1 目標: (0,0)  Team2 無目標，駐守 (2,0)  player_pos=(2,0)")
-	var player_pos := Vector2i(2, 0)
+	print("Team1 目標: (4,4)  Team2 無目標，駐守 (6,4)  player_pos=(6,4)")
+	var player_pos := Vector2i(6, 4)
 
 	for tick in range(200):
 		runner.advance_tick(state, player_pos)
@@ -1403,5 +1403,13 @@ func _run_sim_test() -> void:
 		all_edge.size(), expected, "OK" if all_edge.size() == expected else "FAIL"])
 	print("  MAP_DIAMETER=%d" % EncounterSystem.MAP_DIAMETER)
 	print("EncounterMapShape OK" if all_edge.size() == expected else "EncounterMapShape FAIL")
+
+	print("--- TextMapRenderer ---")
+	var map_str := TextMapRenderer.render(state, 0, Vector2i(4, 4))
+	assert(map_str.contains("@"), "renderer: 需包含玩家符號 @")
+	assert(map_str.contains("?"), "renderer: 需包含迷霧符號 ?")
+	assert(map_str.length() > 100, "renderer: 非空")
+	print("  map length=%d OK" % map_str.length())
+	print("  first 200 chars:\n" + map_str.substr(0, 200))
 
 	print("=== DONE ===")

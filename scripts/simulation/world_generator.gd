@@ -27,12 +27,13 @@ func generate(state: WorldState, config: Dictionary) -> void:
 	var radius: int = config.get("radius", 4)
 	for qx in range(-radius, radius + 1):
 		for ry in range(-radius, radius + 1):
-			var pos := Vector2i(qx, ry)
-			if _hex_dist(pos, Vector2i.ZERO) > radius:
+			if _hex_dist(Vector2i(qx, ry), Vector2i.ZERO) > radius:
 				continue
+			var ox: int = qx + radius   # offset
+			var oy: int = ry + radius   # offset
 			var tile = load("res://scripts/data/tile_data.gd").new()
-			tile.tile_id  = qx * 1000 + ry
-			tile.tile_pos = Vector2i(qx, ry)
+			tile.tile_id  = ox * 1000 + oy
+			tile.tile_pos = Vector2i(ox, oy)
 			tile.terrain  = _random_terrain(rng)
 			_apply_resources(tile, rng)
 			state.world.tiles[tile.tile_id] = tile
