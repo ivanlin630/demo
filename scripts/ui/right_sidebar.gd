@@ -69,23 +69,50 @@ func refresh_player() -> void:
 	var team: TeamData = state.teams.get(ptid)
 	if team == null:
 		_lbl_player_team.text = "（無玩家隊）"
+		_lbl_player_task.text = ""
+		_lbl_player_pop.text  = ""
+		_lbl_player_res.text  = ""
 		return
 
 	var faction_str: String = "獨立"
 	if team.faction_id >= 0:
-		var f = state.factions.get(team.faction_id)
-		faction_str = "勢力%d" % team.faction_id if f else "勢力?"
+		faction_str = "勢力%d" % team.faction_id
+	_lbl_player_team.text = "Team%d [%s] 位置:(%d,%d)" % [
+		team.team_id, faction_str, team.tile_pos.x, team.tile_pos.y]
+	_lbl_player_task.text = "任務: %s  疲勞: %.0f%%" % [
+		team.current_task, team.fatigue * 100.0]
+	_lbl_player_pop.text  = "人口: %d | 受傷: %d | 未成年: %d" % [
+		team.population, team.wounded, team.minor_population]
 
-	_lbl_player_team.text = "Team%d [%s]" % [team.team_id, faction_str]
-	_lbl_player_task.text = "任務: %s" % team.current_task
-	_lbl_player_pop.text  = "人口: %d | 受傷: %d" % [team.population, team.wounded]
+	var player_person: PersonData = state.persons.get(state.player_id)
+	var person_lines: Array = []
+	if player_person:
+		var worst: int = 0
+		for part in player_person.body_parts:
+			var s: String = player_person.body_parts[part].get("status", "healthy")
+			if s == "severed" or s == "critical": worst = 2
+			elif s == "wounded" and worst < 1: worst = 1
+		var hp_str: String = ["正常", "輕傷", "重傷"][worst]
+		person_lines.append("HP: %s  忠誠: %.0f%%  壓力: %.0f%%" % [
+			hp_str, player_person.loyalty * 100.0, player_person.stress * 100.0])
+		var sk_parts: Array = []
+		for sk in player_person.skills:
+			var v: float = float(player_person.skills[sk])
+			if v > 0.01:
+				sk_parts.append("%s:%.2f" % [sk, v])
+		if sk_parts.size() > 0:
+			person_lines.append("技能: " + ", ".join(sk_parts))
 
 	var res_parts: Array = []
-	for key in ["food", "coin", "material", "weapon_melee_low", "armor_low"]:
-		var v = team.resources.get(key, 0)
-		if float(v) > 0:
-			res_parts.append("%s:%s" % [key, str(v)])
-	_lbl_player_res.text = "\n".join(res_parts) if res_parts.size() > 0 else "（無資源）"
+	for rk in team.resources:
+		var v: float = float(team.resources.get(rk, 0))
+		if v > 0:
+			res_parts.append("%s:%s" % [rk, str(int(v)) if float(v) == int(v) else "%.1f" % v])
+
+	var all_lines: Array = person_lines
+	all_lines.append("─ 資源 ─")
+	all_lines.append_array(res_parts if res_parts.size() <= 8 else res_parts.slice(0, 8))
+	_lbl_player_res.text = "\n".join(all_lines)
 
 func show_tile(pos: Vector2i) -> void:
 	_current_tile = pos
