@@ -1387,4 +1387,12 @@ func _run_sim_test() -> void:
 	print("  MAP_DIAMETER=%d" % EncounterSystem.MAP_DIAMETER)
 	print("EncounterMapShape OK" if all_edge.size() == expected else "EncounterMapShape FAIL")
 
+	print("--- TextMapRenderer ---")
+	var map_str := TextMapRenderer.render(state, 0, Vector2i(4, 4))
+	assert(map_str.contains("@"), "renderer: 需包含玩家符號 @")
+	assert(map_str.contains("?"), "renderer: 需包含迷霧符號 ?")
+	assert(map_str.length() > 100, "renderer: 非空")
+	print("  map length=%d OK" % map_str.length())
+	print("  first 200 chars:\n" + map_str.substr(0, 200))
+
 	print("=== DONE ===")
