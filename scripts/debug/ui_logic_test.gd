@@ -44,6 +44,10 @@ func _test_vision_threshold() -> void:
 	var state := WorldState.new()
 	var gen = load("res://scripts/simulation/world_generator.gd").new()
 	gen.generate(state, {"radius": 4, "seed": 42})
+	for _pos in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)]:
+		var _k: int = _pos.x * 1000 + _pos.y
+		if state.world.tiles.has(_k):
+			(state.world.tiles[_k] as HexTileData).terrain = "plains"
 	for t in range(3):
 		var team := TeamData.new()
 		team.team_id = t; team.population = 10
