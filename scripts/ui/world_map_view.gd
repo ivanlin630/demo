@@ -21,9 +21,10 @@ var _selected: Vector2i = Vector2i(-1, -1)
 
 const SCROLL_SPEED: float = 8.0
 var _scroll_keys: Dictionary = {
-	KEY_Q: Vector2(-1, -1), KEY_W: Vector2(0, -1), KEY_E: Vector2(1, -1),
-	KEY_A: Vector2(-1,  0),                         KEY_D: Vector2(1,  0),
-	KEY_S: Vector2(0,  1),
+	KEY_W: Vector2( 0, -1),
+	KEY_A: Vector2(-1,  0),
+	KEY_S: Vector2( 0,  1),
+	KEY_D: Vector2( 1,  0),
 }
 signal tile_selected(pos: Vector2i)
 
