@@ -3,8 +3,8 @@ class_name SimRunner
 const LOD_NEAR_RADIUS: int = 3
 const FAR_ZONE_INTERVAL: int = 10
 
-const FATIGUE_PER_TICK: float        = 0.002   # TEST VALUE
-const FATIGUE_RECOVERY: float        = 0.01    # TEST VALUE
+const FATIGUE_PER_DAY: float          = 0.048   # TEST VALUE — 約 20.8 天疲勞滿（原 0.002×24）
+const FATIGUE_RECOVERY_PER_DAY: float = 0.24    # TEST VALUE — 約 4.2 天回滿（原 0.01×24）
 const FATIGUE_LOYALTY_PENALTY: float = 0.005   # TEST VALUE
 
 const TERRAIN_FATIGUE_MULT: Dictionary = {
@@ -169,14 +169,14 @@ func _step6d_fatigue(state: WorldState, team_ids: Array) -> void:
 		if team.current_task == "rest":
 			# 紮營休息
 			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
-			team.fatigue -= FATIGUE_RECOVERY * rest_mult
+			team.fatigue -= FATIGUE_RECOVERY_PER_DAY / float(WorldState.TICKS_PER_DAY) * rest_mult
 			team.fatigue = maxf(team.fatigue, 0.0)
 		else:
 			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 			var tile = state.world.tiles.get(tile_id)
 			var terrain: String = tile.terrain if tile else "plains"
 			var terrain_mult: float = TERRAIN_FATIGUE_MULT.get(terrain, 1.0)
-			team.fatigue += FATIGUE_PER_TICK * terrain_mult * time_mult
+			team.fatigue += FATIGUE_PER_DAY / float(WorldState.TICKS_PER_DAY) * terrain_mult * time_mult
 			team.fatigue = minf(team.fatigue, 1.0)
 		if team.fatigue >= 1.0:
 			for pid in team.named_members:
