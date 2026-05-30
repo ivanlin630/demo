@@ -30,10 +30,22 @@ signal tile_selected(pos: Vector2i)
 
 func setup(bridge: SimBridge) -> void:
 	_bridge = bridge
+	_center_on_player()
 	queue_redraw()
 
 func refresh() -> void:
 	queue_redraw()
+
+func _center_on_player() -> void:
+	if _bridge == null: return
+	var state: WorldState = _bridge.get_state()
+	var player_tid: int = _bridge.get_player_team_id()
+	if player_tid < 0: return
+	var team: TeamData = state.teams.get(player_tid)
+	if team == null: return
+	var wc: Vector2 = _hex_center(team.tile_pos.x, team.tile_pos.y)
+	var vsize: Vector2 = get_viewport_rect().size
+	_camera = vsize * 0.5 - wc * _zoom
 
 # ── hex coordinate helpers ────────────────────────────────
 
@@ -162,6 +174,9 @@ func _process(delta: float) -> void:
 			dir += _scroll_keys[key]
 	if dir != Vector2.ZERO:
 		_camera += dir * SCROLL_SPEED * (1.0 / _zoom)
+		queue_redraw()
+	if Input.is_key_pressed(KEY_H):
+		_center_on_player()
 		queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:
