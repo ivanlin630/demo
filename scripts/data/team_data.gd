@@ -32,6 +32,7 @@ var leader_id: int = -1
 var named_members: Array = []
 var population: int = 1
 var minor_population: int = 0
+var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰鬥 spawn）
 var resources: Dictionary = {
 	"food": 0.0, "material": 0, "coin": 0, "goods": 0, "gem": 0,
 	"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,

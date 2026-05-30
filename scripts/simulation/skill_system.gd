@@ -34,7 +34,8 @@ func on_combat_round(state: WorldState, team: TeamData) -> void:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		var wtype: String = p.equipment["right_hand"].get("type", "none")
+		var grade: String = p.equipment["hand_1"].get("grade", "")
+		var wtype: String = grade.replace("weapon_", "") if grade.begins_with("weapon_") else "none"
 		if wtype in ["melee_low", "melee_high"]:
 			_grow(p, "戰鬥", "體力")
 
@@ -44,7 +45,8 @@ func on_volley(state: WorldState, team: TeamData) -> void:
 		var p: PersonData = state.persons.get(pid)
 		if p == null:
 			continue
-		var wtype: String = p.equipment["right_hand"].get("type", "none")
+		var grade: String = p.equipment["hand_1"].get("grade", "")
+		var wtype: String = grade.replace("weapon_", "") if grade.begins_with("weapon_") else "none"
 		if wtype in ["ranged_low", "ranged_high"]:
 			_grow(p, "弓箭", "智力")
 

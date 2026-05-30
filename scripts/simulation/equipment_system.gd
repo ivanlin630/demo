@@ -12,51 +12,49 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 		_update_anon_ratio(state, team)
 
 func _update_equipment(state: WorldState, team: TeamData) -> void:
-	var equipped: Dictionary = { "melee_low": 0, "melee_high": 0, "ranged_low": 0, "ranged_high": 0 }
+	var equipped: Dictionary = {
+		"melee_low": 0, "melee_high": 0, "ranged_low": 0, "ranged_high": 0
+	}
 	var named_ids: Array = _get_named_ids(team)
 	for pid in named_ids:
 		var p: PersonData = state.persons.get(pid)
-		if p == null:
-			continue
-		var wtype: String = p.equipment["right_hand"].get("type", "none")
-		if wtype in equipped:
-			equipped[wtype] += 1
+		if p == null: continue
+		var grade: String = p.equipment["hand_1"].get("grade", "")
+		var wtype: String = grade.replace("weapon_", "") if grade.begins_with("weapon_") else "none"
+		if wtype in equipped: equipped[wtype] += 1
 
 	for wtype in WEAPON_TYPES:
 		var pool_key: String = "weapon_" + wtype
-		var target: int = team.equip_order.get(wtype, 0)
+		var target: int  = team.equip_order.get(wtype, 0)
 		var current: int = equipped[wtype]
 		var deficit: int = target - current
 
 		if deficit > 0:
-			var pool: int = int(team.resources.get(pool_key, 0))
+			var pool: int     = int(team.resources.get(pool_key, 0))
 			var can_equip: int = pool / UNITS_PER_EQUIP
-			var to_equip: int = mini(deficit, can_equip)
+			var to_equip: int  = mini(deficit, can_equip)
 			var equipped_count: int = 0
 			for pid in named_ids:
-				if equipped_count >= to_equip:
-					break
+				if equipped_count >= to_equip: break
 				var p: PersonData = state.persons.get(pid)
-				if p == null:
-					continue
-				if p.equipment["right_hand"].get("type", "none") == "none":
-					p.equipment["right_hand"]["type"] = wtype
+				if p == null: continue
+				if p.equipment["hand_1"].get("type", "none") == "none":
+					p.equipment["hand_1"] = { "type": "pool", "grade": pool_key }
 					equipped_count += 1
 			team.resources[pool_key] = pool - equipped_count * UNITS_PER_EQUIP
 			if equipped_count > 0:
 				print("[Equip] Team%d 裝備 %s ×%d" % [team.team_id, wtype, equipped_count])
 
 		elif deficit < 0:
-			var to_unequip: int = -deficit
+			var to_unequip: int   = -deficit
 			var unequipped_count: int = 0
 			for pid in named_ids:
-				if unequipped_count >= to_unequip:
-					break
+				if unequipped_count >= to_unequip: break
 				var p: PersonData = state.persons.get(pid)
-				if p == null:
-					continue
-				if p.equipment["right_hand"].get("type", "none") == wtype:
-					p.equipment["right_hand"]["type"] = "none"
+				if p == null: continue
+				var grade: String = p.equipment["hand_1"].get("grade", "")
+				if grade == pool_key:
+					p.equipment["hand_1"] = { "type": "none", "grade": "" }
 					unequipped_count += 1
 			var pool: int = int(team.resources.get(pool_key, 0))
 			team.resources[pool_key] = pool + unequipped_count * UNITS_PER_EQUIP

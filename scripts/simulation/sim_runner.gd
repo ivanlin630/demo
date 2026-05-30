@@ -56,8 +56,7 @@ func _init() -> void:
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	if state.encounter_active:
-		var round_num: int = state.world.current_tick
-		var result: String = _encounter_system.advance_round(state, round_num)
+		var result: String = _encounter_system.advance_encounter_tick(state)
 		if result != "ongoing":
 			_encounter_system.resolve_encounter_end(state, result)
 		_step1_advance_time(state)
