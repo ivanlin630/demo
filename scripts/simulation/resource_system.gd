@@ -1,6 +1,6 @@
 class_name ResourceSystem
 
-const FOOD_PER_PERSON_PER_TICK: float = 0.1
+const FOOD_PER_PERSON_PER_DAY: float = 2.4   # TEST VALUE — 2.4食物/人/天（原 0.1×24）
 
 # TEST VALUES — 平衡期需調整
 const REGEN_RATE: Dictionary = {
@@ -63,7 +63,7 @@ func resolve_consumption(state: WorldState, team_ids: Array) -> void:
 			continue
 		var team: TeamData = state.teams[tid]
 		var total_pop: int = team.population + team.minor_population
-		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_TICK
+		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY / float(WorldState.TICKS_PER_DAY)
 		var food_available: float = float(team.resources.get("food", 0))
 
 		if food_available >= food_needed:
