@@ -192,6 +192,7 @@ func _do_store_to_team(grade: String, qty: int) -> void:
 func _make_base_popup(title: String) -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(400, 500)
+	panel.size     = Vector2(400, 500)   # explicit: CanvasLayer child won't auto-layout
 	panel.position = Vector2(200, 100)
 
 	var vbox := VBoxContainer.new(); vbox.name = "VBox"; panel.add_child(vbox)

@@ -22,12 +22,14 @@ script = ExtResource("1_main")
 
 [node name="DebugBar" parent="." instance=ExtResource("8_db")]
 layout_mode = 1
+anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 100.0
 grow_horizontal = 2
 
 [node name="TurnControls" parent="." instance=ExtResource("3_tc")]
 layout_mode = 1
+anchors_preset = 10
 anchor_right = 1.0
 offset_top = 100.0
 offset_bottom = 140.0
@@ -35,6 +37,7 @@ grow_horizontal = 2
 
 [node name="RightSidebar" parent="." instance=ExtResource("4_rs")]
 layout_mode = 1
+anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -46,6 +49,7 @@ grow_vertical = 2
 
 [node name="BottomBar" parent="." instance=ExtResource("5_bb")]
 layout_mode = 1
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0

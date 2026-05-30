@@ -124,7 +124,7 @@ func _find_team_at(pos: Vector2i, state: WorldState) -> TeamData:
 	return null
 
 func _on_move() -> void:
-	if _current_tile.x >= 0:
+	if _current_tile != Vector2i(-1, -1):
 		set_move_target.emit(_current_tile)
 
 func _on_members() -> void:
