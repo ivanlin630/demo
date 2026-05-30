@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3 uid="uid://wmv001"]
+[ext_resource type="Script" path="res://scripts/ui/world_map_view.gd" id="1_wmv"]
+[node name="WorldMapView" type="Node2D"]
+script = ExtResource("1_wmv")

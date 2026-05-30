@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3 uid="uid://rs001"]
+[ext_resource type="Script" path="res://scripts/ui/right_sidebar.gd" id="1_rs"]
+[node name="RightSidebar" type="VBoxContainer"]
+script = ExtResource("1_rs")
