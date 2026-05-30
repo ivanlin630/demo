@@ -68,7 +68,7 @@ func _input(event: InputEvent) -> void:
 				_log_event("移動目標設為 (%d,%d)" % [_cursor.x, _cursor.y])
 				_refresh()
 		KEY_SPACE:
-			for _i in range(_state.ticks_per_day):
+			for _i in range(WorldState.TICKS_PER_DAY):
 				var evts: Array = _bridge.advance_ticks(1)
 				_events.append_array(evts)
 			if _events.size() > 100:
@@ -128,7 +128,7 @@ func _build_state_str() -> String:
 	lines.append("────────────────")
 	lines.append("Tick: %d  (Day %d)" % [
 		_state.world.current_tick,
-		_state.world.current_tick / _state.ticks_per_day])
+		_state.world.current_tick / WorldState.TICKS_PER_DAY])
 	return "\n".join(lines)
 
 func _log_event(msg: String) -> void:
