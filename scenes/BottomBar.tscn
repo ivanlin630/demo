@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3 uid="uid://bb001"]
+[ext_resource type="Script" path="res://scripts/ui/bottom_bar.gd" id="1_bb"]
+[node name="BottomBar" type="HBoxContainer"]
+script = ExtResource("1_bb")
