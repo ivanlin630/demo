@@ -115,11 +115,35 @@ func _draw() -> void:
 			draw_colored_polygon(pts, FOG_COLOR)
 
 	# draw teams
+	var player_team_data: TeamData = state.teams.get(player_tid) if player_tid >= 0 else null
+	var player_pos_for_vision: Vector2i = player_team_data.tile_pos if player_team_data else Vector2i(-999, -999)
+
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
-		if not _is_team_visible(tid, state, player_tid, discovered): continue
-		var center: Vector2 = _world_to_screen(_hex_center(team.tile_pos.x, team.tile_pos.y))
-		_draw_team_marker(team, tid, center, state, player_tid)
+		var is_player: bool = tid == player_tid
+
+		if is_player:
+			var center: Vector2 = _world_to_screen(_hex_center(team.tile_pos.x, team.tile_pos.y))
+			_draw_team_marker(team, tid, center, state, player_tid)
+			continue
+
+		if not discovered.has(tid):
+			continue
+
+		var ddx: int = team.tile_pos.x - player_pos_for_vision.x
+		var ddy: int = team.tile_pos.y - player_pos_for_vision.y
+		var cur_dist: int = (abs(ddx) + abs(ddx + ddy) + abs(ddy)) / 2
+		var in_current_vision: bool = cur_dist <= 3
+
+		if in_current_vision:
+			var center: Vector2 = _world_to_screen(_hex_center(team.tile_pos.x, team.tile_pos.y))
+			_draw_team_marker(team, tid, center, state, player_tid)
+		else:
+			var intel: Dictionary = state.team_intel.get(player_tid, {}).get(tid, {})
+			if not intel.has("tile_pos"): continue
+			var last_pos: Vector2i = intel["tile_pos"]
+			var center: Vector2 = _world_to_screen(_hex_center(last_pos.x, last_pos.y))
+			draw_circle(center, 8.0 * _zoom, Color(0.5, 0.5, 0.5, 0.6))
 
 	# draw selected highlight
 	if _selected.x >= 0:
