@@ -21,6 +21,10 @@ func _ready() -> void:
 	_controls.setup(_bridge)
 	_controls.tick_advanced.connect(_on_tick_advanced)
 	_sidebar.setup(_bridge)
+	_sidebar.open_members.connect(func(tid): _popups.show_members(tid))
+	_sidebar.open_inventory.connect(func(): _popups.show_inventory())
+	_sidebar.open_history.connect(func(tid): _popups.show_history(tid))
+	_sidebar.set_move_target.connect(_on_set_move_target)
 	_bottom.setup(_bridge)
 	_popups.setup(_bridge)
 	_encounter.setup(_bridge)
@@ -29,6 +33,13 @@ func _ready() -> void:
 func _on_tile_selected(pos: Vector2i) -> void:
 	_sidebar.show_tile(pos)
 	_bottom.show_tile_info(pos)
+
+func _on_set_move_target(pos: Vector2i) -> void:
+	var state: WorldState = _bridge.get_state()
+	var ptid: int = _bridge.get_player_team_id()
+	if ptid < 0: return
+	var team: TeamData = state.teams.get(ptid)
+	if team: team.move_target = pos
 
 func _on_tick_advanced(_events: Array) -> void:
 	_map.refresh()
