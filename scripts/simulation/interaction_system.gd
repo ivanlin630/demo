@@ -88,6 +88,7 @@ func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Arr
 			if other.tile_pos != arrived.tile_pos:
 				continue
 			_try_interact(state, arrived_id, other_id)
+	HealthSystem.tick_natural_regen(state)
 
 # ──────── 整備值恢復 + 傷兵治療（交戰中均不進行） ────────
 

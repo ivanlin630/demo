@@ -1218,4 +1218,25 @@ func _run_sim_test() -> void:
 		"armor_low in hand_1 should display as 皮盾")
 	print("ItemAttributes OK")
 
+	# ── HealthSystem 驗證 ──
+	print("--- HealthSystem ---")
+	var _hs_unit: Dictionary = {
+		"person_id": 0,
+		"stamina": 1.0,
+		"equipment": {},
+		"inventory": [],
+	}
+	# get_speed_mult with full stamina + full blood = 1.0
+	var _sm: float = HealthSystem.get_speed_mult(_hs_unit, state)
+	assert(_sm > 0.0 and _sm <= 1.0, "get_speed_mult should be in (0,1]")
+	# receive_damage reduces hp — reset torso to known value first to avoid edge-case
+	if state.persons.has(0):
+		state.persons[0].body_parts["torso"]["hp"] = 50.0
+		state.persons[0].body_parts["torso"]["status"] = "healthy"
+	var _bp_before: float = state.persons[0].body_parts["torso"]["hp"]
+	HealthSystem.receive_damage(_hs_unit, state, "torso", 10.0)
+	var _bp_after: float = state.persons[0].body_parts["torso"]["hp"]
+	assert(_bp_after < _bp_before, "receive_damage should reduce torso hp")
+	print("HealthSystem OK")
+
 	print("=== DONE ===")

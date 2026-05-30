@@ -42,12 +42,18 @@ func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
 
 func _default_body_parts() -> Dictionary:
 	return {
-		"head":      {"status": "healthy"},
-		"torso":     {"status": "healthy"},
-		"right_arm": {"status": "healthy"},
-		"left_arm":  {"status": "healthy"},
-		"right_leg": {"status": "healthy"},
-		"left_leg":  {"status": "healthy"},
+		"head":      { "hp": 20.0, "max_hp": 20.0, "status": "healthy",
+					   "poisoned": false, "bleeding": "none", "fracture": false },
+		"torso":     { "hp": 50.0, "max_hp": 50.0, "status": "healthy",
+					   "poisoned": false, "bleeding": "none", "fracture": false },
+		"right_arm": { "hp": 25.0, "max_hp": 25.0, "status": "healthy",
+					   "poisoned": false, "bleeding": "none", "fracture": false },
+		"left_arm":  { "hp": 25.0, "max_hp": 25.0, "status": "healthy",
+					   "poisoned": false, "bleeding": "none", "fracture": false },
+		"right_leg": { "hp": 30.0, "max_hp": 30.0, "status": "healthy",
+					   "poisoned": false, "bleeding": "none", "fracture": false },
+		"left_leg":  { "hp": 30.0, "max_hp": 30.0, "status": "healthy",
+					   "poisoned": false, "bleeding": "none", "fracture": false },
 	}
 
 func _create_named_unit(pid: int, team_id: int, pos: Vector2i,
@@ -322,19 +328,8 @@ func _calc_retreat_dir(unit: Dictionary, state: WorldState,
 const STATUS_ORDER: Array = ["healthy", "wounded", "critical", "severed"]
 
 func _apply_body_part_damage(unit: Dictionary, state: WorldState,
-		part: String, attacker_skill: float) -> void:
-	var bp: Dictionary = _get_body_parts(unit, state)
-	if not bp.has(part): part = "torso"
-	var cur_status: String = bp[part].get("status", "healthy")
-	var cur_idx: int = STATUS_ORDER.find(cur_status)
-	if cur_idx < 0: cur_idx = 0
-	var hit_chance: float = 0.5 + attacker_skill * 0.3
-	if randf() > hit_chance: return
-	var new_idx: int = mini(cur_idx + 1, STATUS_ORDER.size() - 1)
-	bp[part]["status"] = STATUS_ORDER[new_idx]
-	if unit["person_id"] != -1:
-		var p: PersonData = state.persons.get(unit["person_id"])
-		if p: p.body_parts[part]["status"] = STATUS_ORDER[new_idx]
+		part: String, final_dmg: float) -> void:
+	HealthSystem.receive_damage(unit, state, part, final_dmg)
 
 func _get_attacker_skill(unit: Dictionary, state: WorldState) -> float:
 	if unit["person_id"] != -1:
