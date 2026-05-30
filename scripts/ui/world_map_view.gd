@@ -86,11 +86,11 @@ func _draw() -> void:
 		var is_discovered: bool = _is_tile_discovered(tile.tile_pos, state, player_tid, discovered)
 
 		var base_color: Color = TERRAIN_COLOR.get(tile.terrain, Color(0.5, 0.5, 0.5))
-		draw_polygon(pts, PackedColorArray([base_color, base_color, base_color, base_color, base_color, base_color]))
+		draw_colored_polygon(pts, base_color)
 		draw_polyline(pts + PackedVector2Array([pts[0]]), BORDER_COLOR, 1.0)
 
 		if not is_discovered:
-			draw_polygon(pts, PackedColorArray([FOG_COLOR, FOG_COLOR, FOG_COLOR, FOG_COLOR, FOG_COLOR, FOG_COLOR]))
+			draw_colored_polygon(pts, FOG_COLOR)
 
 	# draw teams
 	for tid in state.teams:
