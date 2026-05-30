@@ -1,8 +1,9 @@
 ﻿class_name MovementSystem
 
-const BASE_MOVE_TICKS: int = 10
-const MIN_MOVE_TICKS: int = 3
-const MAX_MOVE_TICKS: int = 30
+# world-hex 移動成本 = encounter-hex 動作時間 × 地圖直徑（1 world-hex = MAP_DIAMETER encounter-hex）
+const BASE_MOVE_TICKS: int = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER
+const MIN_MOVE_TICKS: int  = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER / 3
+const MAX_MOVE_TICKS: int  = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER * 3
 
 const TERRAIN_SPEED_MULT: Dictionary = {
 	"plains":   1.0,
