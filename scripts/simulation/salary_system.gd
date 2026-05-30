@@ -1,6 +1,6 @@
 class_name SalarySystem
 
-const SALARY_INTERVAL: int     = 30    # TEST VALUE
+const SALARY_INTERVAL: int     = 720   # 30天/月（原30=1.25天）
 const SALARY_PER_SKILL_POINT: float = 2.0   # TEST VALUE
 const OVERPAY_BONUS: float     = 0.02  # TEST VALUE
 const SALARY_LOYALTY_PENALTY: float = 0.03  # TEST VALUE
