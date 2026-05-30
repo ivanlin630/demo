@@ -97,8 +97,8 @@ func _refresh_ui() -> void:
 
 	# equip
 	var eq: Dictionary = player_unit.get("equipment", {})
-	var rh: Dictionary = eq.get("right_hand", {})
-	var lh: Dictionary = eq.get("left_hand", {})
+	var rh: Dictionary = eq.get("hand_1", {})
+	var lh: Dictionary = eq.get("hand_2", {})
 	_lbl_equip.text = "右手: %s\n左手: %s" % [rh.get("grade", "空") if rh.get("type","none") != "none" else "空", lh.get("grade", "空") if lh.get("type","none") != "none" else "空"]
 
 func _find_player_unit(state: WorldState) -> Dictionary:

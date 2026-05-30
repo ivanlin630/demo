@@ -60,7 +60,7 @@ func _health_summary(p: PersonData) -> String:
 	return "輕傷" if worst == "wounded" else "正常"
 
 func _weapon_summary(p: PersonData) -> String:
-	var h: Dictionary = p.equipment.get("right_hand", {})
+	var h: Dictionary = p.equipment.get("hand_1", {})
 	if h.get("type", "none") != "none":
 		return h.get("grade", "空")
 	return "空"
@@ -102,7 +102,7 @@ func show_inventory() -> void:
 
 	# Equipment section
 	var eq_lbl := Label.new(); eq_lbl.text = "── 裝備欄 ──"; vbox.add_child(eq_lbl)
-	var slots: Array = ["head","torso","right_arm","left_arm","right_leg","left_leg","right_hand","left_hand"]
+	var slots: Array = ["head","torso","right_arm","left_arm","right_leg","left_leg","hand_1","hand_2"]
 	for slot in slots:
 		var item: Dictionary = p.equipment.get(slot, {})
 		var grade: String = item.get("grade", "")
@@ -161,8 +161,8 @@ func _add_item_action_buttons(row: Node, grade: String, team: TeamData) -> void:
 	if grade.begins_with("weapon_"):
 		var b1 := Button.new(); b1.text = "裝→右手"; row.add_child(b1)
 		var b2 := Button.new(); b2.text = "裝→左手"; row.add_child(b2)
-		b1.pressed.connect(func(): _do_equip(grade, "right_hand"))
-		b2.pressed.connect(func(): _do_equip(grade, "left_hand"))
+		b1.pressed.connect(func(): _do_equip(grade, "hand_1"))
+		b2.pressed.connect(func(): _do_equip(grade, "hand_2"))
 	elif grade.begins_with("armor_"):
 		var b1 := Button.new(); b1.text = "裝→護甲"; row.add_child(b1)
 		b1.pressed.connect(func(): _do_equip(grade, "torso"))
