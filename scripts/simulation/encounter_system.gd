@@ -44,6 +44,9 @@ func hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x; var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
 
+func _is_in_map(pos: Vector2i) -> bool:
+	return hex_dist(Vector2i.ZERO, pos) <= MAP_RADIUS
+
 func _get_body_parts(unit: Dictionary, state: WorldState) -> Dictionary:
 	if unit["person_id"] != -1:
 		var p: PersonData = state.persons.get(unit["person_id"])
@@ -125,6 +128,7 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 	}
 
 const MAP_RADIUS: int = 10   # TEST VALUE
+const MAP_DIAMETER: int = MAP_RADIUS * 2   # 內切圓直徑 = 1 world-hex 的尺度
 
 func _get_edge_entry_positions(edge: int, count: int) -> Array:
 	var positions: Array = []
@@ -137,12 +141,24 @@ func _get_edge_entry_positions(edge: int, count: int) -> Array:
 func _get_edge_hexes(edge: int) -> Array:
 	var result: Array = []
 	match edge:
-		0: for x in range(-MAP_RADIUS, MAP_RADIUS + 1): result.append(Vector2i(x, -MAP_RADIUS))
-		1: for y in range(-MAP_RADIUS, 0): result.append(Vector2i(MAP_RADIUS, y))
-		2: for y in range(0, MAP_RADIUS + 1): result.append(Vector2i(MAP_RADIUS, y))
-		3: for x in range(-MAP_RADIUS, MAP_RADIUS + 1): result.append(Vector2i(x, MAP_RADIUS))
-		4: for y in range(0, MAP_RADIUS + 1): result.append(Vector2i(-MAP_RADIUS, y))
-		5: for y in range(-MAP_RADIUS, 0): result.append(Vector2i(-MAP_RADIUS, y))
+		0:  # top: y=-R, x from 0 to R
+			for x in range(0, MAP_RADIUS + 1):
+				result.append(Vector2i(x, -MAP_RADIUS))
+		1:  # upper-right: x=R, y from -R to 0
+			for y in range(-MAP_RADIUS, 1):
+				result.append(Vector2i(MAP_RADIUS, y))
+		2:  # lower-right: x+y=R, x from 0 to R
+			for x in range(0, MAP_RADIUS + 1):
+				result.append(Vector2i(x, MAP_RADIUS - x))
+		3:  # bottom: y=R, x from -R to 0
+			for x in range(-MAP_RADIUS, 1):
+				result.append(Vector2i(x, MAP_RADIUS))
+		4:  # lower-left: x=-R, y from 0 to R
+			for y in range(0, MAP_RADIUS + 1):
+				result.append(Vector2i(-MAP_RADIUS, y))
+		5:  # upper-left: x+y=-R, x from -R to 0
+			for x in range(-MAP_RADIUS, 1):
+				result.append(Vector2i(x, -MAP_RADIUS - x))
 	return result
 
 func _get_pursuit_entry_edges(offset: int) -> Array:
@@ -597,8 +613,7 @@ func advance_encounter_tick(state: WorldState) -> String:
 			"retreat", "messenger_exit":
 				unit["pos"]     = action["move_to"]
 				unit["stamina"] = maxf(float(unit.get("stamina", 1.0)) - 0.03, 0.0)
-				var dist_to_edge: int = MAP_RADIUS - maxi(abs(unit["pos"].x), abs(unit["pos"].y))
-				if dist_to_edge <= 0:
+				if hex_dist(Vector2i.ZERO, unit["pos"]) >= MAP_RADIUS:
 					unit["has_exited"] = true
 					if action["type"] == "messenger_exit":
 						var parent: TeamData = state.teams.get(unit["team_id"])

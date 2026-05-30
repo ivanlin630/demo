@@ -1364,4 +1364,27 @@ func _run_sim_test() -> void:
 	print("--- encounter unit count ---")
 	print("遭遇戰 unit 上限確認：每隊 named + max %d anon" % EncounterSystem.ANON_UNIT_CAP)
 
+	print("--- EncounterMapShape ---")
+	var enc := EncounterSystem.new()
+	# 每條邊應有 MAP_RADIUS+1 tiles
+	for edge in range(6):
+		var hexes: Array = enc._get_edge_hexes(edge)
+		var ok: bool = hexes.size() == EncounterSystem.MAP_RADIUS + 1
+		print("  edge%d size=%d %s" % [edge, hexes.size(), "OK" if ok else "FAIL"])
+		# 每個 tile 都應在地圖內（hex_dist == MAP_RADIUS）
+		for h in hexes:
+			var d: int = enc.hex_dist(Vector2i.ZERO, h)
+			if d != EncounterSystem.MAP_RADIUS:
+				print("  FAIL edge%d tile(%d,%d) dist=%d != %d" % [edge, h.x, h.y, d, EncounterSystem.MAP_RADIUS])
+	# 總唯一邊界 tile = 6 * MAP_RADIUS = 60
+	var all_edge: Array = []
+	for edge in range(6):
+		for h in enc._get_edge_hexes(edge):
+			if not all_edge.has(h): all_edge.append(h)
+	var expected: int = 6 * EncounterSystem.MAP_RADIUS
+	print("  unique edge tiles=%d (expected %d) %s" % [
+		all_edge.size(), expected, "OK" if all_edge.size() == expected else "FAIL"])
+	print("  MAP_DIAMETER=%d" % EncounterSystem.MAP_DIAMETER)
+	print("EncounterMapShape OK" if all_edge.size() == expected else "EncounterMapShape FAIL")
+
 	print("=== DONE ===")
