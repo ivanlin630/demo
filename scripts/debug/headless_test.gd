@@ -1239,4 +1239,27 @@ func _run_sim_test() -> void:
 	assert(_bp_after < _bp_before, "receive_damage should reduce torso hp")
 	print("HealthSystem OK")
 
+	# ── EncounterTemplates 驗證 ──
+	print("--- EncounterTemplates ---")
+	var _tmpl_team: TeamData = state.teams[0]
+	_tmpl_team.resources["arrows"]   = 30
+	_tmpl_team.resources["medicine"] = 10
+	var _archer_unit: Dictionary = {
+		"person_id": -1,
+		"team_id": 0,
+		"equipment": {
+			"hand_1": { "type": "pool", "grade": "weapon_ranged_low" },
+			"hand_2": {}, "head": {}, "torso": {},
+			"right_arm": {}, "left_arm": {}, "right_leg": {}, "left_leg": {},
+		},
+		"inventory": [],
+	}
+	EncounterTemplates.fill_inventory(_archer_unit, _tmpl_team, state)
+	var _has_arrows: bool = false
+	for _item in _archer_unit["inventory"]:
+		if _item["grade"] == "arrows": _has_arrows = true
+	assert(_has_arrows, "archer unit should have arrows in inventory")
+	assert(_tmpl_team.resources["arrows"] < 30, "team arrows should decrease after template fill")
+	print("EncounterTemplates OK")
+
 	print("=== DONE ===")
