@@ -918,6 +918,23 @@ func _run_sim_test() -> void:
 	assert(state.ticks_per_day == 24, "ticks_per_day 應為 24")
 	print("[DataStruct] WorldState 新欄位驗證通過")
 
+	print("--- TimeConstants ---")
+	assert(WorldState.TICKS_PER_MONTH  == WorldState.TICKS_PER_DAY * 30,
+		"TICKS_PER_MONTH 應 = TICKS_PER_DAY*30")
+	assert(WorldState.TICKS_PER_SEASON == WorldState.TICKS_PER_DAY * 90,
+		"TICKS_PER_SEASON 應 = TICKS_PER_DAY*90")
+	assert(WorldState.TICKS_PER_YEAR   == WorldState.TICKS_PER_DAY * 360,
+		"TICKS_PER_YEAR 應 = TICKS_PER_DAY*360")
+	assert(SalarySystem.SALARY_INTERVAL == WorldState.TICKS_PER_MONTH,
+		"SALARY_INTERVAL 應 = TICKS_PER_MONTH")
+	assert(HarvestSystem.SEASON_LENGTH  == WorldState.TICKS_PER_SEASON,
+		"SEASON_LENGTH 應 = TICKS_PER_SEASON")
+	assert(PopulationSystem.OVERFLOW_CHECK_INTERVAL == WorldState.TICKS_PER_DAY,
+		"OVERFLOW_CHECK_INTERVAL 應 = TICKS_PER_DAY")
+	print("TimeConstants OK — TICKS_PER_DAY=%d MONTH=%d SEASON=%d YEAR=%d" % [
+		WorldState.TICKS_PER_DAY, WorldState.TICKS_PER_MONTH,
+		WorldState.TICKS_PER_SEASON, WorldState.TICKS_PER_YEAR])
+
 	print("[DataStruct] named_members 非空: Team0=%d" % state.teams[0].named_members.size())
 	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
 	print("[DataStruct] state.ticks_per_day=%d" % state.ticks_per_day)
