@@ -14,8 +14,7 @@ size_flags_vertical = 3
 
 [node name="MapLabel" type="RichTextLabel" parent="VBox/HBox"]
 size_flags_horizontal = 3
-bbcode_enabled = true
-fit_content = false
+bbcode_enabled = false
 text = "載入中..."
 
 [node name="StateLabel" type="Label" parent="VBox/HBox"]
@@ -28,4 +27,4 @@ text = "事件 log..."
 autowrap_mode = 3
 
 [node name="HintLabel" type="Label" parent="VBox"]
-text = "[WASD]游標 [Enter]選中 [M]移動 [Space]+1天 [H]回玩家 [P]成員 [Q]離開"
+text = "[WASD]游標 [Enter]選中 [M]移動 [Space]+1天 [H]回玩家 [Q]離開"
