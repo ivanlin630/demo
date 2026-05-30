@@ -216,6 +216,8 @@ func _handle_key(keycode: int) -> void:
 				queue_redraw()
 			elif keycode == KEY_SPACE:
 				_do_wait(player_unit)
+			elif keycode == KEY_Z:
+				_open_command_menu(player_unit, state)
 		"attack_select":
 			if HEX_DIRS.has(keycode):
 				_cursor = _hex_neighbor(_cursor, keycode)
@@ -285,3 +287,65 @@ func _describe_hex(pos: Vector2i, state: WorldState) -> String:
 			var name_str: String = "P%d" % pid if pid >= 0 else "匿名"
 			lines.append("單位: %s" % name_str)
 	return "\n".join(lines)
+
+# ── command menu + sound range ────────────────────────────
+
+const SOUND_RANGE: int = 3   # TEST VALUE
+
+func _hex_dist(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x; var dy: int = b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+func _open_command_menu(player_unit: Dictionary, state: WorldState) -> void:
+	var player_pos: Vector2i = player_unit.get("pos", Vector2i.ZERO)
+	var player_tid: int      = player_unit.get("team_id", -1)
+
+	var popup := PopupMenu.new()
+	popup.name = "CommandMenu"
+
+	for i in range(state.encounter_units.size()):
+		var u: Dictionary = state.encounter_units[i]
+		if u.get("team_id", -1) != player_tid: continue
+		if u.get("person_id", -1) == state.player_id: continue
+		var upos: Vector2i = u.get("pos", Vector2i.ZERO)
+		var dist: int = _hex_dist(player_pos, upos)
+		var pid: int  = u.get("person_id", -1)
+		var label: String = "P%d" % pid if pid >= 0 else "匿名%d" % i
+		if dist <= SOUND_RANGE:
+			popup.add_item("命令 %s..." % label, i)
+		else:
+			popup.add_item("超出範圍 %s — 派信使" % label, 1000 + i)
+
+	popup.id_pressed.connect(func(id: int): _on_command_selected(id, player_unit, state))
+	add_child(popup)
+	popup.popup(Rect2(get_viewport().get_mouse_position(), Vector2.ZERO))
+	_waiting_for_player = true
+
+func _on_command_selected(id: int, player_unit: Dictionary, state: WorldState) -> void:
+	if id >= 1000:
+		var target_idx: int = id - 1000
+		_dispatch_messenger(player_unit, target_idx, state)
+	else:
+		_open_sub_command(id, player_unit, state)
+	_waiting_for_player = true
+
+func _dispatch_messenger(player_unit: Dictionary, target_idx: int, state: WorldState) -> void:
+	var player_tid: int = player_unit.get("team_id", -1)
+	for u in state.encounter_units:
+		if u.get("team_id", -1) != player_tid: continue
+		if u.get("person_id", -1) == state.player_id: continue
+		if u.get("is_messenger", false): continue
+		if u.get("person_id", -1) < 0: continue
+		u["is_messenger"]         = true
+		u["messenger_target_idx"] = target_idx
+		u["current_order"]        = { "type": "messenger", "target": target_idx }
+		print("[Encounter] 派信使 P%d → unit%d" % [u["person_id"], target_idx])
+		queue_redraw()
+		return
+	print("[Encounter] 無可用信使")
+
+func _open_sub_command(unit_idx: int, player_unit: Dictionary, state: WorldState) -> void:
+	if unit_idx < 0 or unit_idx >= state.encounter_units.size(): return
+	var target_unit: Dictionary = state.encounter_units[unit_idx]
+	target_unit["current_order"] = { "type": "follow_player", "target": -1 }
+	print("[Encounter] 命令 unit%d 跟隨" % unit_idx)
