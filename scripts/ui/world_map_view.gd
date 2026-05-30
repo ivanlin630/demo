@@ -30,10 +30,22 @@ signal tile_selected(pos: Vector2i)
 
 func setup(bridge: SimBridge) -> void:
 	_bridge = bridge
+	_center_on_player()
 	queue_redraw()
 
 func refresh() -> void:
 	queue_redraw()
+
+func _center_on_player() -> void:
+	if _bridge == null: return
+	var state: WorldState = _bridge.get_state()
+	var player_tid: int = _bridge.get_player_team_id()
+	if player_tid < 0: return
+	var team: TeamData = state.teams.get(player_tid)
+	if team == null: return
+	var wc: Vector2 = _hex_center(team.tile_pos.x, team.tile_pos.y)
+	var vsize: Vector2 = get_viewport_rect().size
+	_camera = vsize * 0.5 - wc * _zoom
 
 # ── hex coordinate helpers ────────────────────────────────
 
@@ -103,11 +115,35 @@ func _draw() -> void:
 			draw_colored_polygon(pts, FOG_COLOR)
 
 	# draw teams
+	var player_team_data: TeamData = state.teams.get(player_tid) if player_tid >= 0 else null
+	var player_pos_for_vision: Vector2i = player_team_data.tile_pos if player_team_data else Vector2i(-999, -999)
+
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
-		if not _is_team_visible(tid, state, player_tid, discovered): continue
-		var center: Vector2 = _world_to_screen(_hex_center(team.tile_pos.x, team.tile_pos.y))
-		_draw_team_marker(team, tid, center, state, player_tid)
+		var is_player: bool = tid == player_tid
+
+		if is_player:
+			var center: Vector2 = _world_to_screen(_hex_center(team.tile_pos.x, team.tile_pos.y))
+			_draw_team_marker(team, tid, center, state, player_tid)
+			continue
+
+		if not discovered.has(tid):
+			continue
+
+		var ddx: int = team.tile_pos.x - player_pos_for_vision.x
+		var ddy: int = team.tile_pos.y - player_pos_for_vision.y
+		var cur_dist: int = (abs(ddx) + abs(ddx + ddy) + abs(ddy)) / 2
+		var in_current_vision: bool = cur_dist <= 3
+
+		if in_current_vision:
+			var center: Vector2 = _world_to_screen(_hex_center(team.tile_pos.x, team.tile_pos.y))
+			_draw_team_marker(team, tid, center, state, player_tid)
+		else:
+			var intel: Dictionary = state.team_intel.get(player_tid, {}).get(tid, {})
+			if not intel.has("tile_pos"): continue
+			var last_pos: Vector2i = intel["tile_pos"]
+			var center: Vector2 = _world_to_screen(_hex_center(last_pos.x, last_pos.y))
+			draw_circle(center, 8.0 * _zoom, Color(0.5, 0.5, 0.5, 0.6))
 
 	# draw selected highlight
 	if _selected.x >= 0:
@@ -162,6 +198,9 @@ func _process(delta: float) -> void:
 			dir += _scroll_keys[key]
 	if dir != Vector2.ZERO:
 		_camera += dir * SCROLL_SPEED * (1.0 / _zoom)
+		queue_redraw()
+	if Input.is_key_pressed(KEY_H):
+		_center_on_player()
 		queue_redraw()
 
 func _unhandled_input(event: InputEvent) -> void:

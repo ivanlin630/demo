@@ -29,7 +29,7 @@ func _ready() -> void:
 		team.population = 10
 		team.tile_pos   = Vector2i(t, 0)
 		team.resources  = {
-			"food": 300.0, "material": 20, "coin": 20, "goods": 0, "gem": 0,
+			"food": 5000.0, "material": 100, "coin": 200, "goods": 0, "gem": 0,
 			"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
 			"weapon_melee_low": 5, "weapon_melee_high": 0,
 			"weapon_ranged_low": 0, "weapon_ranged_high": 0,
@@ -48,6 +48,9 @@ func _ready() -> void:
 			person.team_id     = t
 			person.age         = 25
 			person.loyalty     = 0.8
+			person.skills["統領"] = 0.5
+			person.skills["生產"] = 0.3
+			person.skills["戰鬥"] = 0.2
 			_state.persons[person.id] = person
 			if p == 0:
 				team.leader_id = person.id
@@ -80,6 +83,9 @@ func _on_tile_selected(pos: Vector2i) -> void:
 
 func _on_set_move_target(pos: Vector2i) -> void:
 	var state: WorldState = _bridge.get_state()
+	if not state.world.tiles.has(pos.x * 1000 + pos.y):
+		print("[Main] 移動目標 %s 不在地圖內，忽略" % str(pos))
+		return
 	var ptid: int = _bridge.get_player_team_id()
 	if ptid < 0: return
 	var team: TeamData = state.teams.get(ptid)
@@ -89,6 +95,12 @@ func _on_set_move_target(pos: Vector2i) -> void:
 	_debug.refresh()
 
 func _on_tick_advanced(_events: Array) -> void:
+	var state: WorldState = _bridge.get_state()
+	if state.player_id >= 0 and not state.persons.has(state.player_id):
+		_bottom.add_message("[!] 玩家 P%d 已陣亡，模擬暫停" % state.player_id)
+		_controls.set_process(false)
+		return
+
 	_map.refresh()
 	_debug.refresh()
 	_sidebar.refresh_player()
