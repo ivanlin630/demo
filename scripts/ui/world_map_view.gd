@@ -19,6 +19,14 @@ var _camera: Vector2   = Vector2.ZERO
 var _zoom:   float     = 1.0
 var _selected: Vector2i = Vector2i(-1, -1)
 
+const SCROLL_SPEED: float = 8.0
+var _scroll_keys: Dictionary = {
+	KEY_Q: Vector2(-1, -1), KEY_W: Vector2(0, -1), KEY_E: Vector2(1, -1),
+	KEY_A: Vector2(-1,  0),                         KEY_D: Vector2(1,  0),
+	KEY_S: Vector2(0,  1),
+}
+signal tile_selected(pos: Vector2i)
+
 func setup(bridge: SimBridge) -> void:
 	_bridge = bridge
 	queue_redraw()
@@ -144,3 +152,29 @@ func _draw_team_marker(team: TeamData, tid: int, center: Vector2,
 	draw_circle(center, 10.0 * _zoom, border)
 	if tid == player_tid:
 		draw_circle(center, 6.0 * _zoom, Color.WHITE)
+
+func _process(delta: float) -> void:
+	var dir := Vector2.ZERO
+	for key in _scroll_keys:
+		if Input.is_key_pressed(key):
+			dir += _scroll_keys[key]
+	if dir != Vector2.ZERO:
+		_camera += dir * SCROLL_SPEED * (1.0 / _zoom)
+		queue_redraw()
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			var hex: Vector2i = pixel_to_hex(get_local_mouse_position())
+			_selected = hex
+			queue_redraw()
+			tile_selected.emit(hex)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+			_zoom = minf(_zoom * 1.1, 4.0)
+			queue_redraw()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+			_zoom = maxf(_zoom / 1.1, 0.3)
+			queue_redraw()
+		elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			_selected = Vector2i(-1, -1)
+			queue_redraw()
