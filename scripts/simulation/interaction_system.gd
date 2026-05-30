@@ -179,6 +179,15 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 					state.encounter_attacker_id = id_a
 					state.encounter_defender_id = id_b
 					state.encounter_active = true
+					# Mark attacker as hostile to player if applicable
+					var player_team_id: int = -1
+					if state.player_id >= 0:
+						var _pp: PersonData = state.persons.get(state.player_id)
+						if _pp: player_team_id = _pp.team_id
+					if player_team_id >= 0:
+						var attacker_id: int = state.encounter_attacker_id
+						if attacker_id != player_team_id and not state.player_hostile_teams.has(attacker_id):
+							state.player_hostile_teams.append(attacker_id)
 					print("[Encounter] 玩家遭遇戰觸發 Team%d vs Team%d" % [id_a, id_b])
 					return
 	var a: TeamData = state.teams[id_a]
