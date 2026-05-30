@@ -1,14 +1,16 @@
 [gd_scene load_steps=8 format=3 uid="uid://main001"]
 
 [ext_resource type="Script" path="res://scripts/ui/main.gd" id="1_main"]
-[ext_resource type="PackedScene" path="res://scenes/WorldMapView.tscn" id="2_wmv"]
-[ext_resource type="PackedScene" path="res://scenes/TurnControls.tscn" id="3_tc"]
-[ext_resource type="PackedScene" path="res://scenes/RightSidebar.tscn" id="4_rs"]
-[ext_resource type="PackedScene" path="res://scenes/BottomBar.tscn" id="5_bb"]
-[ext_resource type="PackedScene" path="res://scenes/PopupLayer.tscn" id="6_pl"]
-[ext_resource type="PackedScene" path="res://scenes/EncounterView.tscn" id="7_ev"]
+[ext_resource type="PackedScene" uid="uid://wmv001" path="res://scenes/WorldMapView.tscn" id="2_wmv"]
+[ext_resource type="PackedScene" uid="uid://tc001" path="res://scenes/TurnControls.tscn" id="3_tc"]
+[ext_resource type="PackedScene" uid="uid://rs001" path="res://scenes/RightSidebar.tscn" id="4_rs"]
+[ext_resource type="PackedScene" uid="uid://bb001" path="res://scenes/BottomBar.tscn" id="5_bb"]
+[ext_resource type="PackedScene" uid="uid://pl001" path="res://scenes/PopupLayer.tscn" id="6_pl"]
+[ext_resource type="PackedScene" uid="uid://ev001" path="res://scenes/EncounterView.tscn" id="7_ev"]
 
 [node name="Main" type="Control"]
+layout_mode = 3
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 script = ExtResource("1_main")
@@ -16,11 +18,39 @@ script = ExtResource("1_main")
 [node name="WorldMapView" parent="." instance=ExtResource("2_wmv")]
 
 [node name="TurnControls" parent="." instance=ExtResource("3_tc")]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 0.0
+offset_bottom = 40.0
 
 [node name="RightSidebar" parent="." instance=ExtResource("4_rs")]
+layout_mode = 1
+anchor_left = 1.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = 40.0
+offset_right = 0.0
+offset_bottom = -80.0
 
 [node name="BottomBar" parent="." instance=ExtResource("5_bb")]
+layout_mode = 1
+anchor_left = 0.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 0.0
+offset_top = -80.0
+offset_right = -200.0
+offset_bottom = 0.0
 
 [node name="PopupLayer" parent="." instance=ExtResource("6_pl")]
 
 [node name="EncounterView" parent="." instance=ExtResource("7_ev")]
+layout_mode = 1
+anchor_right = 1.0
+anchor_bottom = 1.0
