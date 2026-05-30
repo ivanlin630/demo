@@ -39,7 +39,7 @@ func reveal_encounter(state: WorldState, id_a: int, id_b: int) -> void:
 	_mark(state, id_b, id_a)
 
 func _can_detect(scout: float, eff_exposure: float) -> bool:
-	return eff_exposure + scout * 0.3 > 0.5
+	return eff_exposure + scout * 0.3 > 0.3
 
 func _get_exposure(state: WorldState, team: TeamData) -> float:
 	var base: float    = clampf(0.2 + team.population * 0.04, 0.2, 0.9)  # TEST VALUE

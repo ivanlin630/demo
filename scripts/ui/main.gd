@@ -83,6 +83,9 @@ func _on_tile_selected(pos: Vector2i) -> void:
 
 func _on_set_move_target(pos: Vector2i) -> void:
 	var state: WorldState = _bridge.get_state()
+	if not state.world.tiles.has(pos.x * 1000 + pos.y):
+		print("[Main] 移動目標 %s 不在地圖內，忽略" % str(pos))
+		return
 	var ptid: int = _bridge.get_player_team_id()
 	if ptid < 0: return
 	var team: TeamData = state.teams.get(ptid)
