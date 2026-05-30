@@ -48,6 +48,7 @@ var encounter_units: Array        = []   # Array[Dictionary]
 var encounter_attacker_id: int    = -1
 var encounter_defender_id: int    = -1
 var pursuit_edge_offset: int      = 0   # 追擊進場邊緣輪換計數
+var encounter_tick: int           = 0
 
 func snapshot_faction_member(team_id: int, tick: int) -> void:
 	var t: TeamData = teams.get(team_id) as TeamData
