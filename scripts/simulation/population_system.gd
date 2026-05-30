@@ -1,6 +1,6 @@
 class_name PopulationSystem
 
-const OVERFLOW_CHECK_INTERVAL: int = 10  # TEST VALUE
+const OVERFLOW_CHECK_INTERVAL: int = WorldState.TICKS_PER_DAY   # 每天檢查
 
 func check_overflow(state: WorldState) -> void:
 	for tid in state.teams.keys():
