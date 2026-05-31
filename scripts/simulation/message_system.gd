@@ -1,7 +1,8 @@
 class_name SimMessageSystem
 
 const HOP_DECAY: float = 0.15
-const TIME_DECAY_PER_TICK: float = 0.005
+const TIME_DECAY_PER_HOUR: float = 0.005
+const TIME_DECAY_PER_TICK: float = TIME_DECAY_PER_HOUR / float(WorldState.TICKS_PER_HOUR)
 
 func emit_message(state: WorldState, type: String, description: String, team: TeamData) -> MessageData:
 	var msg := MessageData.new()
