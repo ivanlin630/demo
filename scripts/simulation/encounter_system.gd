@@ -127,7 +127,7 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 		"messenger_target_idx": -1,
 	}
 
-const MAP_RADIUS: int = 10   # TEST VALUE
+const MAP_RADIUS: int = 12
 const MAP_DIAMETER: int = MAP_RADIUS * 2   # 內切圓直徑 = 1 world-hex 的尺度
 
 func _get_edge_entry_positions(edge: int, count: int) -> Array:
