@@ -2,8 +2,8 @@
 class_name DayNightSystem
 
 func get_time_of_day(state: WorldState) -> float:
-	return float(state.world.current_tick % state.ticks_per_day) / \
-		float(state.ticks_per_day)
+	return float(state.world.current_tick % WorldState.TICKS_PER_DAY) / \
+		float(WorldState.TICKS_PER_DAY)
 
 func get_time_period(state: WorldState) -> String:
 	var t: float = get_time_of_day(state)
