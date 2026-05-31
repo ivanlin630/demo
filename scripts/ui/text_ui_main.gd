@@ -73,11 +73,7 @@ func _input(event: InputEvent) -> void:
 			_selected = _cursor
 			_refresh()
 		KEY_M:
-			var player_team: TeamData = _state.teams.get(_player_tid)
-			if player_team and _state.world.tiles.has(_cursor.x * 1000 + _cursor.y):
-				player_team.move_target = _cursor
-				_log_event("移動目標設為 (%d,%d)" % [_cursor.x, _cursor.y])
-				_refresh()
+			_do_move_auto()
 		KEY_SPACE:
 			for _i in range(WorldState.TICKS_PER_DAY):
 				var evts: Array = _bridge.advance_ticks(1)
@@ -132,6 +128,32 @@ func _handle_input_mode(keycode: int) -> void:
 			_input_buffer = ""
 			_input_bar.text = ""
 			_refresh()
+
+func _do_move_auto() -> void:
+	var player_team: TeamData = _state.teams.get(_player_tid)
+	if player_team == null: return
+	if not _state.world.tiles.has(_cursor.x * 1000 + _cursor.y):
+		_log_event("目標格不在地圖內")
+		_refresh()
+		return
+	player_team.move_target = _cursor
+	var target: Vector2i = _cursor
+	var max_ticks: int = 1000
+	var ticks_run: int = 0
+	while ticks_run < max_ticks:
+		var evts: Array = _bridge.advance_ticks(1)
+		_events.append_array(evts)
+		ticks_run += 1
+		if player_team.tile_pos == target:
+			_log_event("Team%d 到達 (%d,%d)" % [_player_tid, target.x, target.y])
+			break
+		if ticks_run % WorldState.TICKS_PER_DAY == 0:
+			_refresh()
+	if ticks_run >= max_ticks and player_team.tile_pos != target:
+		_log_event("移動逾時（已推進 %d ticks）" % ticks_run)
+	if _events.size() > 100:
+		_events = _events.slice(_events.size() - 100)
+	_refresh()
 
 func _move_cursor(delta: Vector2i) -> void:
 	var new_pos := _cursor + delta
