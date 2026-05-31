@@ -163,49 +163,131 @@ func _move_cursor(delta: Vector2i) -> void:
 	_refresh()
 
 func _refresh() -> void:
-	# 更新地圖
-	_map_label.text = TextMapRenderer.render(_state, _player_tid, _cursor)
-
-	# 更新狀態區
+	_map_label.text  = TextMapRenderer.render(_state, _player_tid, _cursor)
 	_state_label.text = _build_state_str()
+	_debug_bar.text  = _build_debug_str()
 
-	# 更新事件 log
-	var log_lines: Array = []
-	var show_count: int = mini(_events.size(), 6)
-	for i in range(_events.size() - show_count, _events.size()):
-		var e = _events[i]
-		log_lines.append("[T%d] %s" % [_state.world.current_tick, str(e)])
-	_event_label.text = "\n".join(log_lines)
+	if _member_mode:
+		_event_label.text = _build_member_str()
+	elif _inv_mode:
+		_event_label.text = _build_inv_str()
+	else:
+		var log_lines: Array = []
+		var show_count: int = mini(_events.size(), 6)
+		for i in range(_events.size() - show_count, _events.size()):
+			var e = _events[i]
+			log_lines.append("[T%d] %s" % [_state.world.current_tick, str(e)])
+		_event_label.text = "\n".join(log_lines)
+
+func _get_hp_status(person: PersonData) -> String:
+	var has_severe: bool = false
+	var has_wound: bool  = false
+	for part in person.body_parts.values():
+		var status: String = part.get("status", "healthy")
+		if status == "severed" or status == "critical":
+			has_severe = true
+		elif status == "wounded":
+			has_wound = true
+	if has_severe: return "重傷"
+	if has_wound:  return "輕傷"
+	return "正常"
+
+func _visible_team_at(tile_key: int) -> int:
+	var discovered: Array = _state.team_discovered.get(_player_tid, [])
+	for tid in _state.teams:
+		if tid == _player_tid: continue
+		var t: TeamData = _state.teams[tid]
+		if t.tile_pos.x * 1000 + t.tile_pos.y == tile_key and discovered.has(tid):
+			return tid
+	return -1
 
 func _build_state_str() -> String:
 	var pt: TeamData = _state.teams.get(_player_tid)
 	if pt == null: return "（無玩家 team）"
 	var lines: Array = []
+
 	var faction_name: String = "獨立"
 	if pt.faction_id >= 0 and _state.factions.has(pt.faction_id):
 		faction_name = "勢力%d" % pt.faction_id
 	lines.append("Team%d @ (%d,%d) [%s]" % [_player_tid, pt.tile_pos.x, pt.tile_pos.y, faction_name])
 	lines.append("任務: %s  疲勞: %d%%" % [pt.current_task, int(pt.fatigue * 100)])
-	lines.append("人口: %d | 受傷: %d | 未成年: %d" % [pt.population, 0, pt.minor_population])
+	lines.append("人口: %d | 未成年: %d" % [pt.population, pt.minor_population])
+
+	var player: PersonData = _state.persons.get(_state.player_id)
+	if player:
+		lines.append("────────────────")
+		lines.append("玩家: %s  HP:%s" % [player.person_name, _get_hp_status(player)])
+		var skill_parts: Array = []
+		for sk in player.skills:
+			var sv: float = float(player.skills[sk])
+			if sv > 0.01:
+				skill_parts.append("%s:%.2f" % [sk, sv])
+		if not skill_parts.is_empty():
+			lines.append("  " + " ".join(skill_parts))
+
 	var res: Dictionary = pt.resources
 	lines.append("────────────────")
-	lines.append("食: %d  幣: %d  材: %d" % [
-		int(res.get("food", 0)), int(res.get("coin", 0)), int(res.get("material", 0))])
+	lines.append("資源:")
+	lines.append("  食:%d 幣:%d 材:%d" % [int(res.get("food", 0)), int(res.get("coin", 0)), int(res.get("material", 0))])
+	lines.append("  低武:%d 高武:%d" % [int(res.get("weapon_melee_low", 0)), int(res.get("weapon_melee_high", 0))])
+	lines.append("  低甲:%d 高甲:%d" % [int(res.get("armor_low", 0)), int(res.get("armor_high", 0))])
+	lines.append("  藥:%d 工:%d" % [int(res.get("medicine", 0)), int(res.get("tools", 0))])
+
 	if _selected != Vector2i(-1, -1):
 		var sel_key: int = _selected.x * 1000 + _selected.y
 		var sel_tile = _state.world.tiles.get(sel_key)
 		lines.append("────────────────")
 		if sel_tile:
 			lines.append("選中: (%d,%d) %s" % [_selected.x, _selected.y, sel_tile.terrain])
-			lines.append("  農:%.0f%%  資源: 食:%d" % [
-				sel_tile.productivity * 100, int(sel_tile.resources.get("food", 0))])
+			lines.append("  農:%.0f%%  食:%d" % [sel_tile.productivity * 100, int(sel_tile.resources.get("food", 0))])
+			var sel_tid: int = _visible_team_at(sel_key)
+			if sel_tid >= 0:
+				var sel_t: TeamData = _state.teams[sel_tid]
+				var sel_f: String   = "獨立" if sel_t.faction_id < 0 else "勢力%d" % sel_t.faction_id
+				lines.append("  Team%d [%s] 人口:%d" % [sel_tid, sel_f, sel_t.population])
 		else:
 			lines.append("選中: (%d,%d) [無效格]" % [_selected.x, _selected.y])
+
 	lines.append("────────────────")
 	lines.append("Tick: %d  (Day %d)" % [
 		_state.world.current_tick,
 		_state.world.current_tick / WorldState.TICKS_PER_DAY])
 	return "\n".join(lines)
+
+func _build_debug_str() -> String:
+	var tick: int  = _state.world.current_tick
+	var hour: int  = (tick / WorldState.TICKS_PER_HOUR) % 24
+	var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
+	var month: int = (tick / WorldState.TICKS_PER_MONTH) % 12
+	var season_names: Array = ["春","春","春","夏","夏","夏","秋","秋","秋","冬","冬","冬"]
+	var season: String = season_names[month]
+	var lines: Array = []
+	lines.append("[DEBUG] Tick:%d Hour:%d Day:%d Month:%d Season:%s" % [tick, hour, day, month + 1, season])
+
+	var team_strs: Array = []
+	for tid in _state.teams:
+		var t: TeamData = _state.teams[tid]
+		team_strs.append("T%d@(%d,%d)pop=%d %s" % [tid, t.tile_pos.x, t.tile_pos.y, t.population, t.current_task])
+	lines.append("Teams: " + " | ".join(team_strs))
+
+	var evt_strs: Array = []
+	for i in range(maxi(0, _events.size() - 10), _events.size()):
+		var e = _events[i]
+		evt_strs.append("[%s]%s" % [str(e.get("type","?")), str(e.get("msg",""))])
+	lines.append("Events(last10): " + " | ".join(evt_strs))
+
+	var msg_strs: Array = []
+	for i in range(maxi(0, _state.global_messages.size() - 10), _state.global_messages.size()):
+		msg_strs.append(str(_state.global_messages[i]))
+	lines.append("Msgs(last10): " + " | ".join(msg_strs))
+
+	return "\n".join(lines)
+
+func _build_member_str() -> String:
+	return "（成員欄）"
+
+func _build_inv_str() -> String:
+	return "（背包欄）"
 
 func _log_event(msg: String) -> void:
 	_events.append({ "type": "ui", "msg": msg })
