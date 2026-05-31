@@ -164,27 +164,52 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	_vision.reveal_encounter(state, id_a, id_b)
 	_write_tier2_intel(state, id_a, id_b)
 	_write_tier2_intel(state, id_b, id_a)
-	# 若玩家在場，交由 EncounterSystem 處理（同陣營互動不觸發）
 	if state.player_id != -1:
 		var player_person: PersonData = state.persons.get(state.player_id)
 		if player_person != null:
-			var player_tid: int = player_person.team_id
-			if (id_a == player_tid or id_b == player_tid):
-				var other_tid: int = id_b if id_a == player_tid else id_a
-				var player_team: TeamData = state.teams.get(player_tid)
-				var other_team: TeamData  = state.teams.get(other_tid)
-				var same_faction: bool = player_team != null and other_team != null \
-					and player_team.faction_id != -1 \
-					and player_team.faction_id == other_team.faction_id
-				if not same_faction:
-					state.encounter_attacker_id = id_a
-					state.encounter_defender_id = id_b
-					state.encounter_active = true
-					# Mark attacker as hostile to player if applicable
-					var attacker_id: int = state.encounter_attacker_id
-					if player_tid >= 0 and attacker_id != player_tid and not state.player_hostile_teams.has(attacker_id):
-						state.player_hostile_teams.append(attacker_id)
-					print("[Encounter] 玩家遭遇戰觸發 Team%d vs Team%d" % [id_a, id_b])
+			var player_team_id: int = player_person.team_id
+			var is_a_player: bool = (id_a == player_team_id)
+			var is_b_player: bool = (id_b == player_team_id)
+			if is_a_player or is_b_player:
+				var npc_id: int      = id_b if is_a_player else id_a
+				var npc: TeamData    = state.teams.get(npc_id)
+				var pt: TeamData     = state.teams.get(player_team_id)
+				if npc == null or pt == null:
+					return
+
+				# 路徑 1：NPC 攻擊玩家 → 直接 EncounterSystem（維持原有邏輯）
+				if npc.combat_target == player_team_id:
+					state.encounter_attacker_id = npc_id
+					state.encounter_defender_id = player_team_id
+					state.encounter_active      = true
+					if not state.player_hostile_teams.has(npc_id):
+						state.player_hostile_teams.append(npc_id)
+					print("[Encounter] 玩家遭遇戰觸發 Team%d vs Team%d" % [npc_id, player_team_id])
+					return
+
+				# 同陣營：不 return，讓後面 NPC-NPC 邏輯處理（徵收/合併等）
+				var same_faction: bool = pt.faction_id != -1 \
+					and pt.faction_id == npc.faction_id
+				if same_faction:
+					pass   # 繼續執行到 NPC-NPC 邏輯
+				# 路徑 2：NPC 外交提案
+				elif npc.current_task == TeamData.TASK_DIPLOMACY:
+					if state.player_forced_event.is_empty():   # 不覆蓋現有強制事件
+						state.player_forced_event = {
+							"from_id":  npc_id,
+							"action":   "diplomacy",
+							"proposal": npc.order_task if npc.order_task != "" else "alliance"
+						}
+					return
+				# 路徑 3：NPC 勒索
+				elif npc.current_task == TeamData.TASK_LOOT:
+					if state.player_forced_event.is_empty():
+						state.player_forced_event = { "from_id": npc_id, "action": "extort" }
+					return
+				# 路徑 4：NPC 無敵意 → 玩家可主動選擇互動
+				else:
+					if not state.player_pending_targets.has(npc_id):
+						state.player_pending_targets.append(npc_id)
 					return
 	var a: TeamData = state.teams[id_a]
 	var b: TeamData = state.teams[id_b]
