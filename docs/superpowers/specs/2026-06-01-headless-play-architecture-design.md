@@ -72,13 +72,13 @@
   "seed": 42,
 
   "map": {
-    "radius": 4,
+    "radius": 8,
     "resource_richness": 5
   },
 
   "outposts": {
     "total_count": 10,
-    "type_ratio": { "civilian": 0.6, "military": 0.4 },
+    "type_ratio": { "civilian": 0.8, "military": 0.2 },
     "independent_ratio": 0.3,
     "min_spacing": 2
   },
@@ -99,9 +99,9 @@
 
   "player": {
     "join_mode": "independent",
-    "starting_named_count": 3,
+    "starting_named_count": 1,
     "starting_resources": {
-      "food": 500.0, "material": 50.0, "coin": 50,
+      "food": 50.0, "material": 5.0, "coin": 50,
       "weapon_melee_low": 5
     },
     "leader_name": "玩家"
@@ -116,7 +116,7 @@
 - **outposts.type_ratio**：civilian / military 比例
 - **outposts.independent_ratio**：保留給獨立的據點比例（不屬於任何勢力）
 - **outposts.min_spacing**：任意兩據點最小 hex 距離（覆蓋 `OutpostSystem.MIN_DIST_ANY`）
-- **factions.weights**：勢力據點數量加權（見 §3.3）
+- **factions.weights**：勢力據點數量加權（演算法見 §2.2 _plan_outposts）
 - **independent_teams.roving_count_range**：除了據點獨立 team，再生成多少遊蕩獨立 team
 - **teams.population_range**：每 team 隨機人口
 - **teams.named_ratio**：人口中具名成員比例（剩下為匿名 → 反映 `population - leader - named_members.size()`）
