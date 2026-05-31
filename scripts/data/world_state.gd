@@ -29,6 +29,16 @@ var _next_faction_id: int = 0
 var player_id: int = -1
 var player_state: Dictionary = {}
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
+var player_pending_targets: Array = []
+# Array[int] — 同格、無敵意 NPC team_ids，等玩家選擇互動類型或忽略
+# 玩家 team 移動到新格子時清除；玩家執行任意行動後對應 id 移除
+
+var player_forced_event: Dictionary = {}
+# NPC 強制非戰互動，格式：
+# { "from_id": int, "action": String, ... }
+# action = "diplomacy" → { ..., "proposal": String }  非阻塞，下一 TICKS_PER_HOUR 未回應自動拒絕
+# action = "extort"    → { ..., "from_id": int }       非阻塞，下一 TICKS_PER_HOUR 未回應自動拒絕
+# 空 Dict = 無待處理強制事件
 var ticks_per_day: int:
 	get: return TICKS_PER_DAY
 

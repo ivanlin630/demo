@@ -31,6 +31,7 @@ var _day_night_system: DayNightSystem
 var _diplomatic_ai_system: DiplomaticAiSystem
 var _strategic_ai_system: StrategicAiSystem
 var _encounter_system: EncounterSystem
+var _player_cmd: PlayerCommandSystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -53,6 +54,7 @@ func _init() -> void:
 	_diplomatic_ai_system = DiplomaticAiSystem.new()
 	_strategic_ai_system = StrategicAiSystem.new()
 	_encounter_system    = EncounterSystem.new()
+	_player_cmd          = PlayerCommandSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	if state.encounter_active:
@@ -75,9 +77,16 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 
 	# 近區：每小時執行
 	if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
+		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
+		if not state.player_forced_event.is_empty():
+			print("[PlayerCmd] forced_event 超時自動拒絕: %s" % str(state.player_forced_event))
+			state.player_forced_event = {}
 		_step1b_update_vision(state, near_teams, time_vision_mult)
 		_step1c_update_equipment(state, near_teams)
+		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
 		var arrived_near := _step2_move_teams(state, near_teams, time_speed_mult)
+		if _get_player_tile_pos(state) != _player_old_pos:
+			_player_cmd.clear_pending_targets(state)
 		_step3_propagate_messages(state, arrived_near, near_teams)
 		_step4_resolve_interactions(state, arrived_near, near_teams)
 		_step4b_outpost_tick(state)
@@ -232,3 +241,10 @@ func _hex_distance(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x
 	var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+func _get_player_tile_pos(state: WorldState) -> Vector2i:
+	var p: PersonData = state.persons.get(state.player_id)
+	if p == null:
+		return Vector2i(-1, -1)
+	var t: TeamData = state.teams.get(p.team_id)
+	return t.tile_pos if t != null else Vector2i(-1, -1)

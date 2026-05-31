@@ -164,27 +164,52 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	_vision.reveal_encounter(state, id_a, id_b)
 	_write_tier2_intel(state, id_a, id_b)
 	_write_tier2_intel(state, id_b, id_a)
-	# 若玩家在場，交由 EncounterSystem 處理（同陣營互動不觸發）
 	if state.player_id != -1:
 		var player_person: PersonData = state.persons.get(state.player_id)
 		if player_person != null:
-			var player_tid: int = player_person.team_id
-			if (id_a == player_tid or id_b == player_tid):
-				var other_tid: int = id_b if id_a == player_tid else id_a
-				var player_team: TeamData = state.teams.get(player_tid)
-				var other_team: TeamData  = state.teams.get(other_tid)
-				var same_faction: bool = player_team != null and other_team != null \
-					and player_team.faction_id != -1 \
-					and player_team.faction_id == other_team.faction_id
-				if not same_faction:
-					state.encounter_attacker_id = id_a
-					state.encounter_defender_id = id_b
-					state.encounter_active = true
-					# Mark attacker as hostile to player if applicable
-					var attacker_id: int = state.encounter_attacker_id
-					if player_tid >= 0 and attacker_id != player_tid and not state.player_hostile_teams.has(attacker_id):
-						state.player_hostile_teams.append(attacker_id)
-					print("[Encounter] 玩家遭遇戰觸發 Team%d vs Team%d" % [id_a, id_b])
+			var player_team_id: int = player_person.team_id
+			var is_a_player: bool = (id_a == player_team_id)
+			var is_b_player: bool = (id_b == player_team_id)
+			if is_a_player or is_b_player:
+				var npc_id: int      = id_b if is_a_player else id_a
+				var npc: TeamData    = state.teams.get(npc_id)
+				var pt: TeamData     = state.teams.get(player_team_id)
+				if npc == null or pt == null:
+					return
+
+				# 路徑 1：NPC 攻擊玩家 → 直接 EncounterSystem（維持原有邏輯）
+				if npc.combat_target == player_team_id:
+					state.encounter_attacker_id = npc_id
+					state.encounter_defender_id = player_team_id
+					state.encounter_active      = true
+					if not state.player_hostile_teams.has(npc_id):
+						state.player_hostile_teams.append(npc_id)
+					print("[Encounter] 玩家遭遇戰觸發 Team%d vs Team%d" % [npc_id, player_team_id])
+					return
+
+				# 同陣營：不 return，讓後面 NPC-NPC 邏輯處理（徵收/合併等）
+				var same_faction: bool = pt.faction_id != -1 \
+					and pt.faction_id == npc.faction_id
+				if same_faction:
+					pass   # 繼續執行到 NPC-NPC 邏輯
+				# 路徑 2：NPC 外交提案
+				elif npc.current_task == TeamData.TASK_DIPLOMACY:
+					if state.player_forced_event.is_empty():   # 不覆蓋現有強制事件
+						state.player_forced_event = {
+							"from_id":  npc_id,
+							"action":   "diplomacy",
+							"proposal": npc.order_task if npc.order_task != "" else "alliance"
+						}
+					return
+				# 路徑 3：NPC 勒索
+				elif npc.current_task == TeamData.TASK_LOOT:
+					if state.player_forced_event.is_empty():
+						state.player_forced_event = { "from_id": npc_id, "action": "extort" }
+					return
+				# 路徑 4：NPC 無敵意 → 玩家可主動選擇互動
+				else:
+					if not state.player_pending_targets.has(npc_id):
+						state.player_pending_targets.append(npc_id)
 					return
 	var a: TeamData = state.teams[id_a]
 	var b: TeamData = state.teams[id_b]
@@ -938,3 +963,35 @@ func _calc_armed(state: WorldState, team: TeamData) -> int:
 	var named_count: int = 1 + team.named_members.size()
 	var anon_pop: int    = maxi(team.population - named_count, 0)
 	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)
+
+# ──────── 玩家直接呼叫接口（繞過 current_task 檢查）────────
+
+# 供 PlayerCommandSystem 呼叫：不需要 seller 有 TASK_TRADE
+# 先嘗試 target 賣 player 買；若無成交再試 player 賣 target 買
+# 返回 { "ok": bool, "msg": String }
+func resolve_trade_direct(state: WorldState, initiator_id: int, target_id: int) -> Dictionary:
+	var pt: TeamData  = state.teams.get(initiator_id)
+	var tgt: TeamData = state.teams.get(target_id)
+	if pt == null or tgt == null:
+		return { "ok": false, "msg": "隊伍不存在" }
+	# 嘗試 target 賣、initiator 買
+	var tgt_coin_before: float = float(tgt.resources.get("coin", 0.0))
+	_resolve_trade(state, tgt, pt)
+	if float(tgt.resources.get("coin", 0.0)) != tgt_coin_before:
+		return { "ok": true, "msg": "貿易成功" }
+	# 若無成交，嘗試 initiator 賣、target 買
+	var pt_coin_before: float = float(pt.resources.get("coin", 0.0))
+	_resolve_trade(state, pt, tgt)
+	if float(pt.resources.get("coin", 0.0)) != pt_coin_before:
+		return { "ok": true, "msg": "貿易成功" }
+	return { "ok": false, "msg": "無可交易資源" }
+
+# 供 PlayerCommandSystem 呼叫：不需要 aggressor 有 TASK_LOOT
+# 直接執行勒索資源轉移（food/goods/coin × TRIBUTE_RATE）
+# 返回 { "ok": bool, "msg": String }
+func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null:
+		return { "ok": false, "msg": "目標不存在" }
+	_resolve_extortion(state, aggressor_id, target_id)
+	return { "ok": true, "msg": "勒索完成" }
