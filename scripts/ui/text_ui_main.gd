@@ -16,6 +16,11 @@ var _member_mode: bool  = false
 var _inv_mode: bool     = false
 var _inv_selection: int = -1
 
+var _interact_mode:   bool = false
+var _interact_target: int  = -1
+# -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
+var _player_cmd: PlayerCommandSystem = PlayerCommandSystem.new()
+
 @onready var _map_label:   RichTextLabel = $VBox/HBox/MapLabel
 @onready var _state_label: Label         = $VBox/HBox/StateLabel
 @onready var _event_label: Label         = $VBox/EventLabel
@@ -68,6 +73,9 @@ func _input(event: InputEvent) -> void:
 	if _inv_mode:
 		_handle_inv_mode(event.keycode)
 		return
+	if _interact_mode:
+		_handle_interact_mode(event.keycode)
+		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
 		KEY_S: _move_cursor(Vector2i(0,  1))
@@ -102,8 +110,21 @@ func _input(event: InputEvent) -> void:
 			if _member_mode: _member_mode = false
 			_inv_selection = -1
 			_refresh()
+		KEY_T:
+			_interact_mode = not _interact_mode
+			if _interact_mode:
+				if _inv_mode: _inv_mode = false
+				if _member_mode: _member_mode = false
+				_interact_target = -1
+			_refresh()
 		KEY_ESCAPE:
-			if _member_mode:
+			if _interact_mode:
+				if _interact_target >= 0:
+					_interact_target = -1   # 退回目標清單
+				else:
+					_interact_mode = false   # 關閉
+				_refresh()
+			elif _member_mode:
 				_member_mode = false
 				_refresh()
 			elif _inv_mode:
@@ -216,7 +237,9 @@ func _refresh() -> void:
 	_state_label.text = _build_state_str()
 	_debug_bar.text  = _build_debug_str()
 
-	if _member_mode:
+	if _interact_mode:
+		_event_label.text = _build_interact_str()
+	elif _member_mode:
 		_event_label.text = _build_member_str()
 	elif _inv_mode:
 		_event_label.text = _build_inv_str()
@@ -301,6 +324,13 @@ func _build_state_str() -> String:
 	lines.append("Tick: %d  (Day %d)" % [
 		_state.world.current_tick,
 		_state.world.current_tick / WorldState.TICKS_PER_DAY])
+	var _pending_n: int = _state.player_pending_targets.size()
+	var _forced_n:  int = 0 if _state.player_forced_event.is_empty() else 1
+	if _pending_n > 0 or _forced_n > 0:
+		var _hint: String = "[T] 互動"
+		if _pending_n > 0: _hint += ": 同格%d隊" % _pending_n
+		if _forced_n > 0:  _hint += "  ⚠強制事件"
+		lines.append(_hint)
 	return "\n".join(lines)
 
 func _build_debug_str() -> String:
@@ -406,3 +436,15 @@ func _log_event(msg: String) -> void:
 	_events.append({ "type": "ui", "msg": msg })
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
+
+func _handle_interact_mode(_keycode: int) -> void:
+	# TODO: Task 3 實裝
+	if _keycode == KEY_ESCAPE:
+		if _interact_target >= 0:
+			_interact_target = -1
+		else:
+			_interact_mode = false
+	_refresh()
+
+func _build_interact_str() -> String:
+	return "── 互動 ──\n（尚未實裝）\n── [T/Esc]關閉 ──"
