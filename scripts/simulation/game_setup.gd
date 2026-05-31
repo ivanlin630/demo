@@ -1,0 +1,381 @@
+class_name GameSetup
+
+const RICHNESS_MULT: Dictionary = {
+	1: 0.2, 2: 0.4, 3: 0.6, 4: 0.8, 5: 1.0,
+	6: 1.5, 7: 2.5, 8: 4.0, 9: 6.5, 10: 10.0
+}
+
+const TEAM_RESOURCE_PRESET: Dictionary = {
+	"faction_main": {
+		"food": 300.0, "material": 80.0, "coin": 50,
+		"weapon_melee_low": 8, "armor_low": 4
+	},
+	"faction_branch": {
+		"food": 150.0, "material": 30.0, "coin": 15,
+		"weapon_melee_low": 4, "armor_low": 1
+	},
+	"independent_settled": {
+		"food": 200.0, "material": 60.0, "coin": 20
+	},
+	"independent_roving": {
+		"food": 80.0, "coin": 8, "weapon_melee_low": 2
+	}
+}
+
+const FLOAT_RES_KEYS: Array = ["food", "material"]
+
+static func setup(state: WorldState, config: Dictionary) -> void:
+	var seed_val: int = int(config.get("seed", 42))
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_val
+
+	_generate_map(state, config, rng)
+	var outpost_plan: Dictionary = _plan_outposts(state, config, rng)
+	_generate_factions(state, outpost_plan, config, rng)
+	_generate_independent_teams(state, outpost_plan, config, rng)
+	_setup_player(state, config, rng)
+
+	print("[GameSetup] 完成：%d teams, %d factions, %d persons" %
+		[state.teams.size(), state.factions.size(), state.persons.size()])
+
+static func load_config(path: String) -> Dictionary:
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null:
+		push_error("Config not found: " + path)
+		return {}
+	var json := JSON.new()
+	var err := json.parse(file.get_as_text())
+	if err != OK:
+		push_error("Config JSON parse error at line %d: %s" % [
+			json.get_error_line(), json.get_error_message()])
+		return {}
+	return json.data
+
+# ── 子步驟 ──
+
+static func _generate_map(state, config, rng) -> void:
+	var map_cfg: Dictionary = config.get("map", {})
+	var richness_level: int = int(map_cfg.get("resource_richness", 5))
+	var richness_mult: float = RICHNESS_MULT.get(richness_level, 1.0)
+
+	var gen = load("res://scripts/simulation/world_generator.gd").new()
+	gen.generate(state, {
+		"radius": int(map_cfg.get("radius", 4)),
+		"seed": rng.randi(),
+		"resource_multiplier": richness_mult
+	})
+
+static func _plan_outposts(state, config, rng) -> Dictionary:
+	var ocfg: Dictionary = config.get("outposts", {})
+	var total: int = int(ocfg.get("total_count", 10))
+	var min_sp: int = int(ocfg.get("min_spacing", 2))
+	var indep_ratio: float = float(ocfg.get("independent_ratio", 0.3))
+	var type_ratio: Dictionary = ocfg.get("type_ratio",
+		{ "civilian": 0.6, "military": 0.4 })
+
+	var gen = load("res://scripts/simulation/world_generator.gd").new()
+	var positions: Array = gen.pick_start_positions(state, total, min_sp)
+	if positions.size() < total:
+		push_warning("Only %d outposts placed (wanted %d)" % [positions.size(), total])
+
+	var types: Dictionary = {}
+	var civ_ratio: float = float(type_ratio.get("civilian", 0.6))
+	for pos in positions:
+		types[pos] = "civilian" if rng.randf() < civ_ratio else "military"
+
+	var indep_count: int = int(round(positions.size() * indep_ratio))
+	var indep_outposts: Array = positions.slice(0, indep_count)
+	var faction_pool: Array = positions.slice(indep_count)
+
+	var fcfg: Dictionary = config.get("factions", {})
+	var fcount: int = int(fcfg.get("count", 2))
+	var weights: Array = fcfg.get("weights", [])
+	if weights.size() < fcount:
+		weights = []
+		for i in range(fcount):
+			weights.append(1)
+
+	var total_w: int = 0
+	for w in weights: total_w += int(w)
+	if total_w == 0: total_w = 1
+
+	var faction_outposts: Dictionary = {}
+	var assigned: int = 0
+	for fi in range(fcount):
+		var share: int
+		if fi == fcount - 1:
+			share = faction_pool.size() - assigned
+		else:
+			share = int(faction_pool.size() * float(weights[fi]) / float(total_w))
+		faction_outposts[fi] = faction_pool.slice(assigned, assigned + share)
+		assigned += share
+
+	return {
+		"faction_outposts": faction_outposts,
+		"independent_outposts": indep_outposts,
+		"outpost_types": types
+	}
+
+static func _generate_factions(state, plan, config, rng) -> void:
+	var fcfg: Dictionary = config.get("factions", {})
+	var range_per: Array = fcfg.get("teams_per_faction_range", [2, 4])
+	var tcfg: Dictionary = config.get("teams", {})
+	var pop_range: Array = tcfg.get("population_range", [8, 25])
+	var named_ratio: float = float(tcfg.get("named_ratio", 0.3))
+	var richness_mult: float = RICHNESS_MULT.get(
+		int(config.get("map", {}).get("resource_richness", 5)), 1.0)
+
+	for fi in plan.faction_outposts:
+		var outposts: Array = plan.faction_outposts[fi]
+		if outposts.is_empty(): continue
+
+		var main_pos: Vector2i = outposts[0]
+		var main_type: String = plan.outpost_types[main_pos]
+
+		var team_count: int = rng.randi_range(range_per[0], range_per[1])
+		var this_faction_team_ids: Array = []
+		for ti in range(team_count):
+			var team: TeamData = _create_team(state, rng, pop_range,
+				named_ratio, richness_mult,
+				"faction_main" if ti == 0 else "faction_branch")
+			if ti == 0:
+				team.tile_pos = main_pos
+			else:
+				team.tile_pos = _random_near(outposts, rng)
+			this_faction_team_ids.append(team.team_id)
+
+		var first_team_id: int = this_faction_team_ids[0]
+		var faction_id: int = state.create_faction(first_team_id)
+
+		for tid in this_faction_team_ids.slice(1):
+			state.factions[faction_id].member_team_ids.append(tid)
+			state.teams[tid].faction_id = faction_id
+
+		_build_outpost_tile(state, main_pos, main_type, 1, first_team_id)
+		for opos in outposts.slice(1):
+			_build_outpost_tile(state, opos, plan.outpost_types[opos], 1, first_team_id)
+
+static func _generate_independent_teams(state, plan, config, rng) -> void:
+	var indep_cfg: Dictionary = config.get("independent_teams", {})
+	var tcfg: Dictionary = config.get("teams", {})
+	var pop_range: Array = tcfg.get("population_range", [8, 25])
+	var named_ratio: float = float(tcfg.get("named_ratio", 0.3))
+	var richness_mult: float = RICHNESS_MULT.get(
+		int(config.get("map", {}).get("resource_richness", 5)), 1.0)
+
+	for opos in plan.independent_outposts:
+		_build_outpost_tile(state, opos, plan.outpost_types[opos], 1, -1)
+		if rng.randf() < 0.5:
+			var team: TeamData = _create_team(state, rng, pop_range,
+				named_ratio, richness_mult, "independent_settled")
+			team.tile_pos = opos
+			var key: int = opos.x * 1000 + opos.y
+			state.world.tiles[key].outpost_owner = team.team_id
+
+	var roving_range: Array = indep_cfg.get("roving_count_range", [2, 4])
+	var roving_count: int = rng.randi_range(roving_range[0], roving_range[1])
+	for _i in range(roving_count):
+		var team: TeamData = _create_team(state, rng, pop_range,
+			named_ratio, richness_mult, "independent_roving")
+		team.tile_pos = _random_empty_tile(state, rng)
+
+static func _setup_player(state, config, rng) -> void:
+	var pcfg: Dictionary = config.get("player", {})
+	var join_mode: String = pcfg.get("join_mode", "independent")
+	var richness_mult: float = RICHNESS_MULT.get(
+		int(config.get("map", {}).get("resource_richness", 5)), 1.0)
+
+	var team := TeamData.new()
+	team.team_id = _next_team_id(state)
+	team.population = int(pcfg.get("population", 10))
+	team.tags = ["統領"]
+	team.resources = _default_full_resources()
+	var starting: Dictionary = pcfg.get("starting_resources", {})
+	for k in starting:
+		if k in FLOAT_RES_KEYS:
+			team.resources[k] = float(starting[k]) * richness_mult
+		else:
+			team.resources[k] = int(round(float(starting[k]) * richness_mult))
+
+	var leader := PersonData.new()
+	leader.id = _next_person_id(state)
+	leader.person_name = pcfg.get("leader_name", "玩家")
+	leader.role = "leader"
+	leader.team_id = team.team_id
+	leader.age = 30
+	leader.loyalty = 1.0
+	state.persons[leader.id] = leader
+	team.leader_id = leader.id
+	state.player_id = leader.id
+
+	var named_count: int = int(pcfg.get("starting_named_count", 1))
+	for _i in range(named_count):
+		var m := PersonGenerator.generate(state, rng.randi(), "member")
+		m.team_id = team.team_id
+		state.persons[m.id] = m
+		team.named_members.append(m.id)
+
+	state.teams[team.team_id] = team
+	state.team_known[team.team_id] = []
+	state.team_discovered[team.team_id] = []
+	state.player_state = { "inventory": [],
+	                       "coin": float(starting.get("coin", 0)) }
+
+	match join_mode:
+		"independent":
+			team.tile_pos = _random_empty_tile(state, rng)
+
+		"new_faction":
+			var weakest_fid: int = _find_weakest_faction(state, config)
+			if weakest_fid == -1:
+				team.tile_pos = _random_empty_tile(state, rng)
+				push_warning("No faction to take over, fallback to independent")
+			else:
+				var faction = state.factions[weakest_fid]
+				var old_leader_team: TeamData = state.teams.get(faction.leader_team_id)
+				if old_leader_team:
+					team.tile_pos = old_leader_team.tile_pos
+				else:
+					team.tile_pos = _random_empty_tile(state, rng)
+				team.faction_id = weakest_fid
+				var old_leader_tid: int = faction.leader_team_id
+				faction.leader_team_id = team.team_id
+				if not faction.member_team_ids.has(team.team_id):
+					faction.member_team_ids.append(team.team_id)
+				print("[GameSetup] 玩家成為勢力 %d 統領（原 leader_team=%d 保留為下屬）" %
+					[weakest_fid, old_leader_tid])
+
+		_:
+			if join_mode.begins_with("join:"):
+				var fi: int = int(join_mode.substr(5))
+				if state.factions.has(fi):
+					team.faction_id = fi
+					state.factions[fi].member_team_ids.append(team.team_id)
+					var lt: TeamData = state.teams.get(state.factions[fi].leader_team_id)
+					if lt:
+						team.tile_pos = _random_near([lt.tile_pos], rng)
+					else:
+						team.tile_pos = _random_empty_tile(state, rng)
+				else:
+					team.tile_pos = _random_empty_tile(state, rng)
+					push_warning("Faction %d not found, fallback to independent" % fi)
+			else:
+				team.tile_pos = _random_empty_tile(state, rng)
+				push_warning("Unknown join_mode: %s" % join_mode)
+
+static func _find_weakest_faction(state, config) -> int:
+	var weights: Array = config.get("factions", {}).get("weights", [])
+	if weights.is_empty() or state.factions.is_empty():
+		return -1
+	var min_w: int = 999999; var min_idx: int = -1
+	for i in range(weights.size()):
+		if int(weights[i]) < min_w:
+			min_w = int(weights[i])
+			min_idx = i
+	var sorted_fids: Array = state.factions.keys()
+	sorted_fids.sort()
+	if min_idx >= 0 and min_idx < sorted_fids.size():
+		return sorted_fids[min_idx]
+	return -1
+
+# ── 內部 helpers ──────────────────────────────────────
+
+static func _next_team_id(state: WorldState) -> int:
+	var m: int = -1
+	for tid in state.teams:
+		if int(tid) > m: m = int(tid)
+	return m + 1
+
+static func _next_person_id(state: WorldState) -> int:
+	var m: int = -1
+	for pid in state.persons:
+		if int(pid) > m: m = int(pid)
+	return m + 1
+
+static func _hex_dist(a: Vector2i, b: Vector2i) -> int:
+	var dx := b.x - a.x; var dy := b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+static func _is_tile_occupied(state: WorldState, pos: Vector2i) -> bool:
+	for tid in state.teams:
+		if state.teams[tid].tile_pos == pos: return true
+	return false
+
+static func _random_near(positions: Array, rng) -> Vector2i:
+	if positions.is_empty(): return Vector2i(0, 0)
+	var origin: Vector2i = positions[rng.randi() % positions.size()]
+	var dirs: Array = [Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1),
+	                   Vector2i(0,-1), Vector2i(1,-1), Vector2i(-1,1)]
+	return origin + dirs[rng.randi() % dirs.size()]
+
+static func _random_empty_tile(state: WorldState, rng) -> Vector2i:
+	var keys: Array = state.world.tiles.keys()
+	if keys.is_empty(): return Vector2i(0, 0)
+	var attempts: int = 50
+	while attempts > 0:
+		var k: int = keys[rng.randi() % keys.size()]
+		var pos := Vector2i(k / 1000, k % 1000)
+		if not _is_tile_occupied(state, pos):
+			return pos
+		attempts -= 1
+	return Vector2i(keys[0] / 1000, keys[0] % 1000)
+
+static func _build_outpost_tile(state: WorldState, pos: Vector2i,
+		type_str: String, level: int, owner_team_id: int) -> void:
+	var key: int = pos.x * 1000 + pos.y
+	var tile: HexTileData = state.world.tiles.get(key)
+	if tile == null: return
+	tile.outpost_type  = type_str
+	tile.outpost_level = level
+	tile.outpost_owner = owner_team_id
+
+static func _default_full_resources() -> Dictionary:
+	return {
+		"food": 0.0, "material": 0.0, "coin": 0, "goods": 0,
+		"gem": 0, "ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
+		"weapon_melee_low": 0, "weapon_melee_high": 0,
+		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
+		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
+		"armor_low": 0, "armor_high": 0
+	}
+
+static func _apply_preset_resources(team: TeamData, preset_key: String,
+		richness_mult: float) -> void:
+	var preset: Dictionary = TEAM_RESOURCE_PRESET[preset_key]
+	for k in preset:
+		if k in FLOAT_RES_KEYS:
+			team.resources[k] = float(preset[k]) * richness_mult
+		else:
+			team.resources[k] = int(round(float(preset[k]) * richness_mult))
+
+static func _create_team(state: WorldState, rng, pop_range: Array,
+		named_ratio: float, richness_mult: float, preset_key: String) -> TeamData:
+	var team := TeamData.new()
+	team.team_id = _next_team_id(state)
+	team.population = rng.randi_range(pop_range[0], pop_range[1])
+
+	match preset_key:
+		"faction_main":         team.tags = ["統領"]
+		"faction_branch":       team.tags = ["獨立軍隊"]
+		"independent_settled":  team.tags = []
+		"independent_roving":   team.tags = ["獨立軍隊"]
+
+	team.resources = _default_full_resources()
+	_apply_preset_resources(team, preset_key, richness_mult)
+
+	var leader := PersonGenerator.generate(state, rng.randi(), "leader")
+	leader.team_id = team.team_id
+	state.persons[leader.id] = leader
+	team.leader_id = leader.id
+
+	var named_count: int = maxi(0, int(round(team.population * named_ratio)) - 1)
+	for _i in range(named_count):
+		var m := PersonGenerator.generate(state, rng.randi(), "member")
+		m.team_id = team.team_id
+		state.persons[m.id] = m
+		team.named_members.append(m.id)
+
+	state.teams[team.team_id] = team
+	state.team_known[team.team_id] = []
+	state.team_discovered[team.team_id] = []
+	return team
