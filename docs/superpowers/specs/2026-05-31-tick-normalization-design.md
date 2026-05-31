@@ -7,7 +7,12 @@
 
 ## 目標
 
-將所有非遭遇戰的固定 tick 常數，改用 `WorldState.TICKS_PER_HOUR` 或 `WorldState.TICKS_PER_DAY` 表達，使未來調整 `TICKS_PER_DAY` 時各系統自動縮放。
+1. 將所有非遭遇戰的固定 tick 常數，改用 `WorldState.TICKS_PER_HOUR` 或 `WorldState.TICKS_PER_DAY` 表達，使未來調整 `TICKS_PER_DAY` 時各系統自動縮放。
+2. 大地圖近區所有世界系統改為**每小時執行一次**（`% TICKS_PER_HOUR == 0`），使系統執行頻率與時間粒度解耦。
+
+**注意：** `TICKS_PER_HOUR = TICKS_PER_DAY / 24 = 1`（目前），因此 `% 1 == 0` 永遠成立，**現在行為完全不變**。未來調高 `TICKS_PER_DAY` 時自動降頻。
+
+遭遇戰系統走獨立路徑（`encounter_active` early return），完全不受影響。
 
 **不在範圍：**
 - 遭遇戰相關（`BASE_ACTION_TICKS`、`MAP_RADIUS`、`HP_REGEN_PER_TICK`、`BLOOD_REGEN_PER_TICK`、`PRISONER_CHECK_INTERVAL`）
@@ -66,18 +71,66 @@ float(state.world.current_tick % WorldState.TICKS_PER_DAY) / float(WorldState.TI
 ```gdscript
 # 舊
 const FAR_ZONE_INTERVAL: int = 10
-...
+
 if state.world.current_tick % state.ticks_per_day == 0:
-...
-if state.world.current_tick % 6 == 0:  # turn 計數（兩處）
+    print(...)
+if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
+    _step1d_overflow(state)
+
+# 近區：直接跑（每 tick）
+_step1b_update_vision(state, near_teams, time_vision_mult)
+_step1c_update_equipment(state, near_teams)
+var arrived_near := _step2_move_teams(...)
+...（所有近區步驟）
+
+if state.world.current_tick % 6 == 0:  # turn 計數
+    state.world.current_turn += 1
+if state.world.current_tick % 6 == 0:  # harvest
+    _harvest_system.tick_all(state)
+
+if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
+    ...（遠區）
 
 # 新
 const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
-...
+
 if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
-...
-if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時（兩處）
+    print(...)
+if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
+    _step1d_overflow(state)
+
+# 近區：每小時執行
+if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
+    _step1b_update_vision(state, near_teams, time_vision_mult)
+    _step1c_update_equipment(state, near_teams)
+    var arrived_near := _step2_move_teams(...)
+    _step3_propagate_messages(state, arrived_near, near_teams)
+    _step4_resolve_interactions(state, arrived_near, near_teams)
+    _step4b_outpost_tick(state)
+    _step5_collect_resources(state, near_teams)
+    _step5a_regenerate_tiles(state)
+    _step5b_manufacture(state, near_teams)
+    _step6_resolve_consumption(state, near_teams)
+    _step6c_salary(state, near_teams)
+    _step6d_fatigue(state, near_teams)
+    _step6b_faction_ai(state, near_teams)
+    _step6e_strategic_ai(state)
+    _step7_person_reactions(state, near_teams)
+    _step7b_npc_goal_cleanup(state, near_teams)
+    _step8_generate_events(state, near_teams)
+    _step9_emit_messages(state)
+
+if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
+    state.world.current_turn += 1
+if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
+    _harvest_system.tick_all(state)
+
+if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
+    if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
+        ...（遠區，同樣包在 TICKS_PER_HOUR 條件內）
 ```
+
+**注意：** `_step4c_harvest_tick` 原本在近區每 tick 內有 `% 6` 判斷，移出後改成外層獨立條件，邏輯等價。
 
 #### `scripts/simulation/strategic_ai_system.gd`
 ```gdscript
