@@ -121,13 +121,14 @@ func _move_cursor(delta: Vector2i) -> void:
 
 目前缺：
 
-**玩家角色資料：**
+**玩家角色資料（只顯示健康和技能）：**
 ```
 ────────────────
-玩家: [name] 年齡:[age]
-  忠誠:[loyalty%] 壓力:[stress%]
-  技能: 統領:[val] 戰鬥:[val] 求生:[val]
+玩家: [name]  HP:[正常/輕傷/重傷]
+  技能: 統領:[val] 戰鬥:[val] 求生:[val] ...（只列 >0.01 的）
 ```
+
+健康判斷：遍歷 `p.body_parts`，有 severed/critical → 重傷，有 wounded → 輕傷，其餘 → 正常。
 
 **完整資源：**
 ```
@@ -191,21 +192,81 @@ TextUI (Node)
 
 **HintLabel 更新文字：**
 ```
-[WASD]游標 [Enter]選中 [M]移動(自動) [Space]+1天 [G]跳N tick [H]回玩家 [Q]離開
+[WASD]游標 [Enter]選中 [M]移動(自動) [Space]+1天 [G]跳N tick [H]回玩家 [P]成員 [I]背包 [Q]離開
 ```
 
 ---
 
-## 8. 不在此次範圍
+## 8. P 鍵：成員欄
 
-- Vision system 整合（explored 持久化）— 另立 spec
-- P 鍵成員清單 — 另立 spec
-- SimBridge 事件系統整合（目前 _events 只有 UI log）— 另立 spec
-- 多 team 初始化（目前只有玩家 team）— 另立 spec
+按 P 切換「成員模式」，EventLabel 區域改顯示成員清單（按 P 或 Escape 關閉）。
+
+```
+── 成員 Team0 ──
+[隊長] 玩家  裝備:weapon_melee_low  HP:正常
+[成員] P0_1  裝備:空  HP:輕傷
+[成員] P0_2  裝備:空  HP:正常
+匿名人口: 7  武裝率: 30%
+── [P/Esc] 關閉 ──
+```
+
+**資料來源：**
+- `team.leader_id` + `team.named_members` → 依序顯示
+- 裝備：`p.equipment["hand_1"].grade`（空則顯示「空」）
+- HP：同第 5 節健康判斷
+- 匿名人口：`team.population`；武裝率：(team 武器總數) / population
+
+**實作：**
+- `_member_mode: bool`
+- 進入時 `_refresh()` 改呼叫 `_build_member_str()` 寫入 EventLabel
+- 離開時恢復正常 EventLabel
 
 ---
 
-## 驗證標準
+## 9. I 鍵：背包
+
+按 I 切換「背包模式」，EventLabel 區域改顯示裝備 + 背包（按 I 或 Escape 關閉）。
+
+```
+── 裝備 ──
+  右手: weapon_melee_low  左手: 空
+  頭:空 胸:空 右臂:空 左臂:空 右腿:空 左腿:空
+── 背包 (2/6) ──
+  [1] medicine × 2
+  [2] armor_low × 1
+── 從 Team 取出 ──
+  [T1] weapon_melee_low: 5
+  [T2] armor_low: 0（灰）
+── [數字]選取 [E]裝備 [G]取出 [S]存入 [I/Esc]關閉 ──
+```
+
+**操作流程：**
+- 按 1–9：選擇背包 slot 或 Team 取出項目（`_inv_selection: int`）
+- 選背包物品後：
+  - E → 裝備（`PlayerSystem.equip_item`，武器→hand_1，護甲→torso）
+  - S → 存回 team（`PlayerSystem.deposit_to_team`）
+- 選 Team 取出項目後：
+  - G → 取出 1 個（`PlayerSystem.take_from_team`）
+- I 或 Escape：關閉
+
+**實作：**
+- `_inv_mode: bool`、`_inv_selection: int`（-1 = 未選）
+- 攔截 1-9、E、G、S、Escape 鍵（`_input_mode` 外另一個 mode flag）
+- `_build_inv_str() -> String` 渲染背包畫面
+
+---
+
+## 10. 不在此次範圍
+
+- Vision system 整合（explored 持久化）— 另立 spec
+- SimBridge 事件系統整合（目前 _events 只有 UI log）— 另立 spec
+- 多 team 初始化（目前只有玩家 team）— 另立 spec
+- **命令**（玩家主動下令）— 另立 spec（與互動合併設計）
+- **互動**（外交/交易/攻擊觸發）— 另立 spec（與命令合併設計）
+
+---
+
+## 11. 驗證標準（更新）
 
 **Headless（map_render_test.gd）：**
 ```gdscript
@@ -224,3 +285,5 @@ assert(center_line.contains("@"))
 - G → 輸入 "48" → Enter → 推進 48 ticks（2 天）
 - M → 設目標 → 自動跑到達（EventLog 顯示到達訊息）
 - Debug 欄顯示正確 Tick/Day 和 Team 資訊
+- P → 顯示成員清單，Esc 關閉
+- I → 顯示背包，數字選取，E/G/S 操作，Esc 關閉
