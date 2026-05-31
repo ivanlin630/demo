@@ -938,3 +938,35 @@ func _calc_armed(state: WorldState, team: TeamData) -> int:
 	var named_count: int = 1 + team.named_members.size()
 	var anon_pop: int    = maxi(team.population - named_count, 0)
 	return named_armed + roundi(float(anon_pop) * team.armed_anon_ratio)
+
+# ──────── 玩家直接呼叫接口（繞過 current_task 檢查）────────
+
+# 供 PlayerCommandSystem 呼叫：不需要 seller 有 TASK_TRADE
+# 先嘗試 target 賣 player 買；若無成交再試 player 賣 target 買
+# 返回 { "ok": bool, "msg": String }
+func resolve_trade_direct(state: WorldState, initiator_id: int, target_id: int) -> Dictionary:
+	var pt: TeamData  = state.teams.get(initiator_id)
+	var tgt: TeamData = state.teams.get(target_id)
+	if pt == null or tgt == null:
+		return { "ok": false, "msg": "隊伍不存在" }
+	# 嘗試 target 賣、initiator 買
+	var tgt_coin_before: float = float(tgt.resources.get("coin", 0.0))
+	_resolve_trade(state, tgt, pt)
+	if float(tgt.resources.get("coin", 0.0)) != tgt_coin_before:
+		return { "ok": true, "msg": "貿易成功" }
+	# 若無成交，嘗試 initiator 賣、target 買
+	var pt_coin_before: float = float(pt.resources.get("coin", 0.0))
+	_resolve_trade(state, pt, tgt)
+	if float(pt.resources.get("coin", 0.0)) != pt_coin_before:
+		return { "ok": true, "msg": "貿易成功" }
+	return { "ok": false, "msg": "無可交易資源" }
+
+# 供 PlayerCommandSystem 呼叫：不需要 aggressor 有 TASK_LOOT
+# 直接執行勒索資源轉移（food/goods/coin × TRIBUTE_RATE）
+# 返回 { "ok": bool, "msg": String }
+func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null:
+		return { "ok": false, "msg": "目標不存在" }
+	_resolve_extortion(state, aggressor_id, target_id)
+	return { "ok": true, "msg": "勒索完成" }
