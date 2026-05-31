@@ -437,23 +437,78 @@ func _log_event(msg: String) -> void:
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 
-func _handle_interact_mode(_keycode: int) -> void:
-	# TODO: Task 3 實裝
-	if _keycode == KEY_ESCAPE:
+func _handle_interact_mode(keycode: int) -> void:
+	# ESC 處理
+	if keycode == KEY_ESCAPE:
 		if _interact_target >= 0:
 			_interact_target = -1
 		else:
 			_interact_mode = false
-	_refresh()
+		_refresh()
+		return
+
+	# 數字鍵 1–9
+	if keycode < KEY_1 or keycode > KEY_9:
+		return
+	var num: int = keycode - KEY_1   # 0-based
+
+	# ── 已選目標：顯示行動清單 ──
+	if _interact_target >= 0:
+		var actions: Array[String] = _player_cmd.get_available_actions(_state, _interact_target)
+		if num < actions.size():
+			var result: Dictionary = _player_cmd.execute_action(_state, _interact_target, actions[num])
+			_log_event("[互動] %s" % result.get("msg", ""))
+			_interact_target = -1   # 回到目標清單
+			# 若行動觸發遭遇戰，關閉 interact_mode
+			if _state.encounter_active:
+				_interact_mode = false
+		_refresh()
+		return
+
+	# ── 目標選擇階段 ──
+	var fe: Dictionary = _state.player_forced_event
+	var fe_opts: Array[String] = _player_cmd.get_forced_response_options(_state)
+	var fe_count: int = fe_opts.size()
+
+	# forced_event 回應
+	if not fe.is_empty() and num < fe_count:
+		var response: String = fe_opts[num]
+		var result: Dictionary = _player_cmd.respond_to_forced(_state, response)
+		_log_event("[強制互動] %s" % result.get("msg", ""))
+		_refresh()
+		return
+
+	# pending_targets 選擇
+	var pending_idx: int = num - fe_count
+	if pending_idx >= 0 and pending_idx < _state.player_pending_targets.size():
+		_interact_target = _state.player_pending_targets[pending_idx]
+		_refresh()
 
 func _build_interact_str() -> String:
 	var lines: Array = []
+
+	# 已選目標：顯示行動清單
+	if _interact_target >= 0:
+		var tgt: TeamData = _state.teams.get(_interact_target)
+		var tgt_name: String = "Team%d" % _interact_target if tgt else "未知"
+		lines.append("── %s 行動 ──" % tgt_name)
+		var actions: Array[String] = _player_cmd.get_available_actions(_state, _interact_target)
+		var row: String = ""
+		for i in range(actions.size()):
+			row += "[%d]%s  " % [i + 1, actions[i]]
+			if (i + 1) % 4 == 0:
+				lines.append(row.strip_edges())
+				row = ""
+		if not row.strip_edges().is_empty():
+			lines.append(row.strip_edges())
+		lines.append("── [Esc]返回 ──")
+		return "\n".join(lines)
+
+	# 目標選擇階段
 	lines.append("── 互動 ──")
-
 	var fe: Dictionary = _state.player_forced_event
-	var fe_count: int = 0   # forced_event 佔用的號碼數
+	var fe_count: int = 0
 
-	# forced_event（若有，排第一）
 	if not fe.is_empty():
 		var from_id: int     = fe.get("from_id", -1)
 		var action: String   = fe.get("action", "")
@@ -470,7 +525,6 @@ func _build_interact_str() -> String:
 			_:           desc = "Team%d 強制事件" % from_id
 		lines.append("[!] %s →%s" % [desc, opts_str])
 
-	# pending_targets（從 fe_count+1 開始編號）
 	var idx: int = fe_count + 1
 	if _state.player_pending_targets.is_empty() and fe.is_empty():
 		lines.append("（無可互動目標）")
