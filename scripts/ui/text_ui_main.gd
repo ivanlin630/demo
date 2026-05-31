@@ -31,37 +31,14 @@ func _ready() -> void:
 	_state  = WorldState.new()
 	_runner = SimRunner.new()
 	_bridge = SimBridge.new(_runner, _state)
+	_player_cmd = PlayerCommandSystem.new()
 
-	var gen = load("res://scripts/simulation/world_generator.gd").new()
-	gen.generate(_state, { "radius": 4, "seed": 42 })
+	var config := GameSetup.load_config("res://config/default.json")
+	GameSetup.setup(_state, config)
 
-	# 初始化測試 team（玩家 team）
-	var team := TeamData.new()
-	team.team_id    = _player_tid
-	team.population = 10
-	team.tile_pos   = Vector2i(4, 4)
-	team.tags       = ["統領"]
-	team.resources  = {
-		"food": 500.0, "material": 50.0, "coin": 50, "goods": 0,
-		"gem": 0, "ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
-		"weapon_melee_low": 5, "weapon_melee_high": 0,
-		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
-		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
-		"armor_low": 0, "armor_high": 0,
-	}
-	_state.teams[_player_tid] = team
-	_state.team_known[_player_tid] = []
-	_state.team_discovered[_player_tid] = []
-
-	var leader := PersonData.new()
-	leader.id = 0; leader.person_name = "玩家"; leader.role = "leader"
-	leader.team_id = _player_tid; leader.age = 30; leader.loyalty = 1.0
-	_state.persons[0] = leader
-	team.leader_id = 0
-	_state.player_id = 0
-	_state.player_state = { "inventory": [], "coin": 50.0 }
-
-	_cursor = team.tile_pos
+	_player_tid = _state.persons[_state.player_id].team_id
+	var pt: TeamData = _state.teams[_player_tid]
+	_cursor = pt.tile_pos
 	_refresh()
 
 func _process(_delta: float) -> void:
@@ -70,9 +47,19 @@ func _process(_delta: float) -> void:
 	_events.append_array(result.get("events", []))
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
+
+	# 移動完成偵測（move_target=-1,-1 表示到達或取消）
+	var pt: TeamData = _state.teams.get(_player_tid)
+	if pt and pt.move_target == Vector2i(-1, -1) \
+			and _input_bar.text.begins_with("移動中"):
+		_bridge.cancel_advance()
+		_input_bar.text = ""
+		_log_event("Team%d 到達 (%d,%d)" %
+			[_player_tid, pt.tile_pos.x, pt.tile_pos.y])
+
 	if result.get("done", false):
 		_input_bar.text = ""
-	else:
+	elif not _input_bar.text.begins_with("移動中"):
 		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _state.world.current_tick
 	_refresh()
 	if _state.encounter_active:
@@ -99,7 +86,14 @@ func _input(event: InputEvent) -> void:
 			_selected = _cursor
 			_refresh()
 		KEY_M:
-			_do_move_auto()
+			var r: Dictionary = _player_cmd.move_to(_state, _cursor)
+			if r.get("ok"):
+				_log_event(r.get("msg", ""))
+				_bridge.request_advance(99999)
+				_input_bar.text = "移動中 [Esc]停止"
+			else:
+				_log_event(r.get("msg", "移動失敗"))
+			_refresh()
 		KEY_SPACE:
 			_bridge.request_advance(WorldState.TICKS_PER_DAY)
 		KEY_G:
@@ -206,35 +200,6 @@ func _handle_inv_mode(keycode: int) -> void:
 		KEY_I, KEY_ESCAPE:
 			_inv_mode = false
 			_inv_selection = -1
-	_refresh()
-
-func _do_move_auto() -> void:
-	var player_team: TeamData = _state.teams.get(_player_tid)
-	if player_team == null: return
-	if not _state.world.tiles.has(_cursor.x * 1000 + _cursor.y):
-		_log_event("目標格不在地圖內")
-		_refresh()
-		return
-	player_team.move_target = _cursor
-	var target: Vector2i = _cursor
-	var dx: int = target.x - player_team.tile_pos.x
-	var dy: int = target.y - player_team.tile_pos.y
-	var dist: int = (abs(dx) + abs(dx + dy) + abs(dy)) / 2
-	var max_ticks: int = maxi(dist * 720 * WorldState.TICKS_PER_HOUR * 2, WorldState.TICKS_PER_DAY * 2)
-	var ticks_run: int = 0
-	while ticks_run < max_ticks:
-		var evts: Array = _bridge.advance_ticks(1)
-		_events.append_array(evts)
-		ticks_run += 1
-		if player_team.tile_pos == target:
-			_log_event("Team%d 到達 (%d,%d)" % [_player_tid, target.x, target.y])
-			break
-		if ticks_run % WorldState.TICKS_PER_DAY == 0:
-			_refresh()
-	if ticks_run >= max_ticks and player_team.tile_pos != target:
-		_log_event("移動逾時（已推進 %d ticks）" % ticks_run)
-	if _events.size() > 100:
-		_events = _events.slice(_events.size() - 100)
 	_refresh()
 
 func _move_cursor(delta: Vector2i) -> void:
