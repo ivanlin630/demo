@@ -1,7 +1,7 @@
 class_name SimRunner
 
 const LOD_NEAR_RADIUS: int = 3
-const FAR_ZONE_INTERVAL: int = 10
+const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
 
 const FATIGUE_PER_DAY: float          = 0.048   # TEST VALUE — 約 20.8 天疲勞滿（原 0.002×24）
 const FATIGUE_RECOVERY_PER_DAY: float = 0.24    # TEST VALUE — 約 4.2 天回滿（原 0.01×24）
@@ -73,25 +73,30 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	var near_teams := _get_near_teams(state, player_pos)
 	var far_teams := _get_far_teams(state, player_pos)
 
-	_step1b_update_vision(state, near_teams, time_vision_mult)
-	_step1c_update_equipment(state, near_teams)
-	var arrived_near := _step2_move_teams(state, near_teams, time_speed_mult)
-	_step3_propagate_messages(state, arrived_near, near_teams)
-	_step4_resolve_interactions(state, arrived_near, near_teams)
-	_step4b_outpost_tick(state)
-	_step4c_harvest_tick(state)
-	_step5_collect_resources(state, near_teams)
-	_step5a_regenerate_tiles(state)
-	_step5b_manufacture(state, near_teams)
-	_step6_resolve_consumption(state, near_teams)
-	_step6c_salary(state, near_teams)
-	_step6d_fatigue(state, near_teams)
-	_step6b_faction_ai(state, near_teams)
-	_step6e_strategic_ai(state)
-	_step7_person_reactions(state, near_teams)
-	_step7b_npc_goal_cleanup(state, near_teams)
-	_step8_generate_events(state, near_teams)
-	_step9_emit_messages(state)
+	# 近區：每小時執行
+	if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
+		_step1b_update_vision(state, near_teams, time_vision_mult)
+		_step1c_update_equipment(state, near_teams)
+		var arrived_near := _step2_move_teams(state, near_teams, time_speed_mult)
+		_step3_propagate_messages(state, arrived_near, near_teams)
+		_step4_resolve_interactions(state, arrived_near, near_teams)
+		_step4b_outpost_tick(state)
+		_step5_collect_resources(state, near_teams)
+		_step5a_regenerate_tiles(state)
+		_step5b_manufacture(state, near_teams)
+		_step6_resolve_consumption(state, near_teams)
+		_step6c_salary(state, near_teams)
+		_step6d_fatigue(state, near_teams)
+		_step6b_faction_ai(state, near_teams)
+		_step6e_strategic_ai(state)
+		_step7_person_reactions(state, near_teams)
+		_step7b_npc_goal_cleanup(state, near_teams)
+		_step8_generate_events(state, near_teams)
+		_step9_emit_messages(state)
+
+	# Harvest：每 6 小時（TICKS_PER_DAY / 4）
+	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
+		_step4c_harvest_tick(state)
 
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
@@ -123,7 +128,7 @@ func _step1c_update_equipment(state: WorldState, team_ids: Array) -> void:
 
 func _step1_advance_time(state: WorldState) -> void:
 	state.world.current_tick += 1
-	if state.world.current_tick % 6 == 0:
+	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
 		state.world.current_turn += 1
 
 func _step2_move_teams(state: WorldState, team_ids: Array,
@@ -143,8 +148,7 @@ func _step4b_outpost_tick(state: WorldState) -> void:
 	_outpost_system.tick_all(state)
 
 func _step4c_harvest_tick(state: WorldState) -> void:
-	if state.world.current_tick % 6 == 0:
-		_harvest_system.tick_all(state)
+	_harvest_system.tick_all(state)   # 外層已做頻率判斷
 
 func _step5_collect_resources(state: WorldState, team_ids: Array) -> void:
 	_resource_system.collect_resources(state, team_ids)
