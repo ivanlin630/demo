@@ -29,7 +29,8 @@ var _next_faction_id: int = 0
 var player_id: int = -1
 var player_state: Dictionary = {}
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
-var ticks_per_day: int = TICKS_PER_DAY
+var ticks_per_day: int:
+	get: return TICKS_PER_DAY
 
 func create_faction(leader_team_id: int) -> int:
 	var f = load("res://scripts/data/faction_data.gd").new()

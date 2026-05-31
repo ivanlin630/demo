@@ -1,7 +1,7 @@
 # scripts/simulation/diplomatic_ai_system.gd
 class_name DiplomaticAiSystem
 
-const BETRAY_CHECK_INTERVAL: int = 50   # TEST VALUE
+const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
 
 func _calc_diplomacy_score(state: WorldState,
 		self_team: TeamData, other_team: TeamData) -> float:

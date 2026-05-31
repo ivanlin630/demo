@@ -1,7 +1,7 @@
 class_name StrategicAiSystem
 
-const STRATEGIC_INTERVAL: int    = 10   # TEST VALUE
-const ALLIANCE_CHECK_INTERVAL: int = 30  # TEST VALUE
+const STRATEGIC_INTERVAL:      int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+const ALLIANCE_CHECK_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
 
 func tick(state: WorldState, faction: FactionData) -> void:
     if state.world.current_tick % STRATEGIC_INTERVAL != 0: return

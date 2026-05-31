@@ -1,6 +1,6 @@
 class_name ReactionSystem
 
-const GOAL_CHECK_INTERVAL: int = 10
+const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
 
 var _npc_ai: NpcAiSystem
 

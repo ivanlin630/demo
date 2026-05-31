@@ -1017,15 +1017,15 @@ func _run_sim_test() -> void:
 	# ── DayNightSystem 驗證 ──
 	var _dns := DayNightSystem.new()
 	var _saved_tick: int = state.world.current_tick
-	# tick=0, ticks_per_day=24 → time_of_day=0.0 → "dawn"
+	# tick=0, ticks_per_day=240 → time_of_day=0.0 → "dawn"
 	state.world.current_tick = 0
 	assert(_dns.get_time_period(state) == "dawn", "tick 0 應為 dawn")
-	# 驗證 tick 3 → day（3/24=0.125 > 0.1）
-	state.world.current_tick = 3
-	assert(_dns.get_time_period(state) == "day", "tick 3 應為 day")
+	# 驗證 tick 25 → day（25/240=0.104 > 0.1）
+	state.world.current_tick = 25
+	assert(_dns.get_time_period(state) == "day", "tick 25 應為 day")
 	assert(_dns.get_fatigue_mult(state) == 1.0, "白天疲勞乘數應為 1.0")
-	state.world.current_tick = 22   # 22/24=0.917 → "night"
-	assert(_dns.get_time_period(state) == "night", "tick 22 應為 night")
+	state.world.current_tick = 220   # 220/240=0.917 → "night"
+	assert(_dns.get_time_period(state) == "night", "tick 220 應為 night")
 	assert(_dns.get_speed_mult(state) == 0.5, "夜間速度乘數應為 0.5")
 	state.world.current_tick = _saved_tick
 	print("[DayNight] 時間計算驗證通過")
