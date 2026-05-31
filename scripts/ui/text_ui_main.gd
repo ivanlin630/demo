@@ -10,6 +10,12 @@ var _selected: Vector2i = Vector2i(-1, -1)
 var _player_tid: int = 0
 var _events: Array = []
 
+var _input_mode: bool   = false
+var _input_buffer: String = ""
+var _member_mode: bool  = false
+var _inv_mode: bool     = false
+var _inv_selection: int = -1
+
 @onready var _map_label:   RichTextLabel = $VBox/HBox/MapLabel
 @onready var _state_label: Label         = $VBox/HBox/StateLabel
 @onready var _event_label: Label         = $VBox/EventLabel
@@ -55,6 +61,9 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey: return
 	if not event.pressed: return
+	if _input_mode:
+		_handle_input_mode(event.keycode)
+		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
 		KEY_S: _move_cursor(Vector2i(0,  1))
@@ -76,12 +85,53 @@ func _input(event: InputEvent) -> void:
 			if _events.size() > 100:
 				_events = _events.slice(_events.size() - 100)
 			_refresh()
+		KEY_G:
+			_input_mode = true
+			_input_buffer = ""
+			_input_bar.text = "跳過 tick 數: _"
 		KEY_H:
 			var pt: TeamData = _state.teams.get(_player_tid)
 			if pt: _cursor = pt.tile_pos
 			_refresh()
+		KEY_P:
+			_member_mode = not _member_mode
+			if _inv_mode: _inv_mode = false
+			_refresh()
+		KEY_I:
+			_inv_mode = not _inv_mode
+			if _member_mode: _member_mode = false
+			_inv_selection = -1
+			_refresh()
 		KEY_Q:
 			get_tree().quit()
+
+func _handle_input_mode(keycode: int) -> void:
+	if keycode >= KEY_0 and keycode <= KEY_9:
+		if _input_buffer.length() < 6:
+			_input_buffer += str(keycode - KEY_0)
+		_input_bar.text = "跳過 tick 數: %s_" % _input_buffer
+		return
+	match keycode:
+		KEY_BACKSPACE:
+			if _input_buffer.length() > 0:
+				_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
+			_input_bar.text = "跳過 tick 數: %s_" % _input_buffer
+		KEY_ENTER:
+			if _input_buffer.length() > 0 and int(_input_buffer) > 0:
+				var n: int = mini(int(_input_buffer), 99999)
+				_input_mode = false
+				_input_bar.text = ""
+				for _i in range(n):
+					var evts: Array = _bridge.advance_ticks(1)
+					_events.append_array(evts)
+				if _events.size() > 100:
+					_events = _events.slice(_events.size() - 100)
+				_refresh()
+		KEY_ESCAPE:
+			_input_mode = false
+			_input_buffer = ""
+			_input_bar.text = ""
+			_refresh()
 
 func _move_cursor(delta: Vector2i) -> void:
 	var new_pos := _cursor + delta
