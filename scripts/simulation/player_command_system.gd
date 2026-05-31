@@ -145,14 +145,20 @@ func _can_trade(state: WorldState, pt: TeamData, tgt: TeamData) -> bool:
 		or float(tgt.resources.get("coin", 0)) > 0.0
 
 func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dictionary:
-	# STUB — 接受 NPC 外交提案，具體邏輯留後續實裝
-	# 完整實裝應依 proposal 類型呼叫 DiplomaticAiSystem 對應方法
-	var pt: TeamData  = _get_player_team(state)
-	var npc: TeamData = state.teams.get(from_id)
-	if pt == null or npc == null:
+	var from_team: TeamData = state.teams.get(from_id)
+	var pt: TeamData = _get_player_team(state)
+	if from_team == null or pt == null:
 		return { "ok": false, "msg": "隊伍不存在" }
-	print("[PlayerCmd] 玩家接受 Team%d 的 %s 提案（STUB）" % [from_id, proposal])
-	return { "ok": true, "msg": "接受：%s" % proposal }
+	match proposal:
+		"alliance", "surrender":
+			# 雙方皆獨立時 _form_alliance 無效，需先建立勢力
+			if from_team.faction_id == -1 and pt.faction_id == -1:
+				state.create_faction(from_id)   # NPC 為領袖
+			_diplomatic._form_alliance(state, from_team, pt)
+			return { "ok": true, "msg": "接受同盟，加入勢力%d" % from_team.faction_id }
+		"tribute":
+			return _pay_extortion(state, from_id)
+	return { "ok": false, "msg": "未知提案類型：%s" % proposal }
 
 func _pay_extortion(state: WorldState, from_id: int) -> Dictionary:
 	# 轉移資源給 from_id（金額由 _resolve_extortion 計算）
