@@ -1,0 +1,41 @@
+{
+  "seed": 42,
+
+  "map": {
+    "radius": 8,
+    "resource_richness": 5
+  },
+
+  "outposts": {
+    "total_count": 10,
+    "type_ratio": { "civilian": 0.8, "military": 0.2 },
+    "independent_ratio": 0.3,
+    "min_spacing": 2
+  },
+
+  "factions": {
+    "count": 3,
+    "weights": [3, 2, 1],
+    "teams_per_faction_range": [2, 4]
+  },
+
+  "independent_teams": {
+    "roving_count_range": [2, 4]
+  },
+
+  "teams": {
+    "population_range": [8, 25],
+    "named_ratio": 0.3
+  },
+
+  "player": {
+    "join_mode": "independent",
+    "population": 10,
+    "starting_named_count": 1,
+    "starting_resources": {
+      "food": 50.0, "material": 5.0, "coin": 50,
+      "weapon_melee_low": 5
+    },
+    "leader_name": "玩家"
+  }
+}
