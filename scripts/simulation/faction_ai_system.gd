@@ -1,6 +1,7 @@
 class_name FactionAISystem
 
-const COLLECT_INTERVAL: int          = 30
+const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
 const DISPATCH_DIST_THRESHOLD: int   = 2
 const FOOD_EMERGENCY: float          = 3.0
 const ESTABLISH_COMMAND: float       = 0.4
@@ -35,8 +36,8 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 				f.known_member_states[mid] = snap
 		_update_goals(state, f)
 		_assign_tasks(state, f)
-		# 每 20 tick 評估一次主動外交
-		if state.world.current_tick % 20 == 0:
+		# 每 20 小時評估一次主動外交
+		if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
 			var _leader_team: TeamData = state.teams.get(f.leader_team_id)
 			if _leader_team != null:
 				DiplomaticAiSystem.new().try_proactive_diplomacy(state, _leader_team)
