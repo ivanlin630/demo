@@ -60,7 +60,7 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 		return true
 	else:
 		var gen     := PersonGenerator.new()
-		var promoted := gen.generate(team, state)
+		var promoted := gen.generate_from_team(team, state)
 		if promoted != null:
 			team.leader_id  = promoted.id
 			promoted.role   = "leader"

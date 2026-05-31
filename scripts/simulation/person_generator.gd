@@ -1,39 +1,64 @@
-# scripts/simulation/person_generator.gd
 class_name PersonGenerator
 
-const TAG_ATTR_BIAS: Dictionary = {
-	"軍隊": { "體力": 0.1 },
-	"生產": { "智力": 0.1 },
-	"商隊": { "魅力": 0.1 },
-	"宗教": { "魅力": 0.1 },
-	"統領": { "體力": 0.05, "魅力": 0.05 },
-	"流亡": { "毅力": 0.1 },
-}
+const SURNAMES: Array = [
+	"趙", "錢", "孫", "李", "周", "吳", "鄭", "王",
+	"馮", "陳", "褚", "衛", "蔣", "沈", "韓", "楊",
+	"朱", "秦", "尤", "許", "何", "呂", "施", "張"
+]
+const GIVEN_NAMES: Array = [
+	"明", "華", "強", "勇", "剛", "毅", "智", "誠",
+	"信", "義", "禮", "仁", "孝", "忠", "和", "平",
+	"風", "雷", "雲", "山", "海", "天", "玄", "靈"
+]
 
-const TAG_SKILL_BIAS: Dictionary = {
-	"軍隊": { "戰鬥": 0.05, "弓箭": 0.05 },
-	"生產": { "生產": 0.05, "製造": 0.05 },
-	"商隊": { "交涉": 0.05, "商業": 0.05 },
-	"宗教": { "交涉": 0.05 },
-	"統領": { "統領": 0.05 },
-	"流亡": { "求生": 0.05 },
-}
+# 生成一個 PersonData，seed_offset 決定隨機結果
+# role: "leader" / "member"（leader 技能 +0.1 bonus）
+static func generate(state: WorldState, seed_offset: int,
+		role: String = "member") -> PersonData:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_offset
 
-func generate(team: TeamData, state: WorldState) -> PersonData:
-	var named_count: int = (1 if team.leader_id != -1 else 0) \
-		+ team.named_members.size()
+	var p := PersonData.new()
+	p.id = _next_id(state)
+	p.person_name = _random_name(rng, state)
+	p.role = role
+	p.age = rng.randi_range(18, 50)
+	p.loyalty = 1.0 if role == "leader" else rng.randf_range(0.5, 1.0)
+	p.stress = 0.0
+	p.fear = 0.0
+
+	# Values（直接 iterate PersonData 預設 8 鍵）
+	for v in p.values.keys():
+		p.values[v] = rng.randf_range(0.2, 0.8)
+
+	# Attributes 0.4~0.8（PersonData 預設 4 鍵：體力/智力/魅力/毅力）
+	for a in p.attributes.keys():
+		p.attributes[a] = rng.randf_range(0.4, 0.8)
+
+	# Skills 0.0~0.3（leader +0.1）
+	for s in p.skills.keys():
+		var base: float = rng.randf_range(0.0, 0.3)
+		if role == "leader": base += 0.1
+		p.skills[s] = clampf(base, 0.0, 1.0)
+
+	return p
+
+# 舊 API 相容：從團隊的匿名人口生成新的領袖候選人
+func generate_from_team(team: TeamData, state: WorldState) -> PersonData:
+	var named_count: int = (1 if team.leader_id != -1 else 0) + team.named_members.size()
 	var anon_pop: int = team.population - named_count
 	if anon_pop <= 0:
 		return null
 
 	var p := PersonData.new()
-	p.id          = _next_id(state)
+	p.id = _next_id(state)
 	p.person_name = "NPC_%d" % p.id
-	p.role        = "civilian"
-	p.team_id     = team.team_id
-	p.age         = randi_range(18, 40)
-	p.loyalty     = 0.5
-	p.stress      = 0.0
+	p.role = "civilian"
+	p.team_id = team.team_id
+	p.age = randi_range(18, 40)
+	p.loyalty = 0.5
+	p.stress = 0.0
+	p.fear = 0.0
 
 	for attr in p.attributes:
 		p.attributes[attr] = randf_range(0.2, 0.8)
@@ -42,22 +67,27 @@ func generate(team: TeamData, state: WorldState) -> PersonData:
 	for skill in p.skills:
 		p.skills[skill] = randf_range(0.0, 0.2)
 
-	for tag in team.tags:
-		if TAG_ATTR_BIAS.has(tag):
-			for attr in TAG_ATTR_BIAS[tag]:
-				p.attributes[attr] = clampf(
-					p.attributes[attr] + float(TAG_ATTR_BIAS[tag][attr]), 0.2, 0.8)
-		if TAG_SKILL_BIAS.has(tag):
-			for skill in TAG_SKILL_BIAS[tag]:
-				p.skills[skill] = clampf(
-					p.skills[skill] + float(TAG_SKILL_BIAS[tag][skill]), 0.0, 0.2)
-
 	state.persons[p.id] = p
 	return p
 
-func _next_id(state: WorldState) -> int:
-	# state.persons keys are always int (person_id); .max() is safe
-	if state.persons.is_empty():
-		return 0
-	var keys: Array = state.persons.keys()
-	return keys.max() + 1
+static func _next_id(state: WorldState) -> int:
+	var max_id: int = -1
+	for pid in state.persons:
+		if int(pid) > max_id: max_id = int(pid)
+	return max_id + 1
+
+static func _random_name(rng: RandomNumberGenerator, state: WorldState) -> String:
+	var attempts: int = 10
+	while attempts > 0:
+		var s: String = SURNAMES[rng.randi() % SURNAMES.size()]
+		var g: String = GIVEN_NAMES[rng.randi() % GIVEN_NAMES.size()]
+		var name: String = s + g
+		var dup := false
+		for pid in state.persons:
+			if state.persons[pid].person_name == name:
+				dup = true; break
+		if not dup: return name
+		attempts -= 1
+	return "%s%s%d" % [SURNAMES[rng.randi() % SURNAMES.size()],
+					   GIVEN_NAMES[rng.randi() % GIVEN_NAMES.size()],
+					   state.persons.size()]
