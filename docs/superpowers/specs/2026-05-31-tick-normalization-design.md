@@ -31,7 +31,7 @@
 | `reaction_system.gd` | `GOAL_CHECK_INTERVAL = 10` | 10 ticks | 每 10 小時 |
 | `faction_ai_system.gd` | `COLLECT_INTERVAL = 30` | 30 ticks | 每 30 小時 |
 | `faction_ai_system.gd` | hardcoded `% 20`（line 39）| 20 ticks | 每 20 小時 |
-| `message_system.gd` | `TIME_DECAY_PER_TICK = 0.005` | per tick | 每天衰減 0.12 |
+| `message_system.gd` | `TIME_DECAY_PER_TICK = 0.005` | per tick | 每小時衰減 0.005 |
 
 ---
 
@@ -127,12 +127,12 @@ if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
 # 舊
 const TIME_DECAY_PER_TICK: float = 0.005
 
-# 新
-const TIME_DECAY_PER_DAY: float  = 0.12   # 原 0.005 × 24（行為不變）
-const TIME_DECAY_PER_TICK: float = TIME_DECAY_PER_DAY / float(WorldState.TICKS_PER_DAY)
+# 新（語意：每小時衰減 0.005）
+const TIME_DECAY_PER_HOUR: float = 0.005
+const TIME_DECAY_PER_TICK: float = TIME_DECAY_PER_HOUR / float(WorldState.TICKS_PER_HOUR)
 ```
 
-**注意：** `TIME_DECAY_PER_TICK` 這個名稱保留，用法不變（其他地方直接用它），只是改成從 per-day 推算。
+**注意：** `TIME_DECAY_PER_TICK` 名稱保留，用法不變，改從 per-hour 推算。
 
 ---
 
@@ -150,7 +150,7 @@ const TIME_DECAY_PER_TICK: float = TIME_DECAY_PER_DAY / float(WorldState.TICKS_P
 | `GOAL_CHECK_INTERVAL` | 10 | `10 × 1` | **10** |
 | `COLLECT_INTERVAL` | 30 | `30 × 1` | **30** |
 | `FACTION_UPDATE_INTERVAL` | 20 | `20 × 1` | **20** |
-| `TIME_DECAY_PER_TICK` | 0.005 | `0.12 / 24` | **0.005** |
+| `TIME_DECAY_PER_TICK` | 0.005 | `0.005 / 1`（per-hour / TICKS_PER_HOUR）| **0.005** |
 
 `TICKS_PER_HOUR = 1`（當 `TICKS_PER_DAY = 24`），故所有結果不變。
 
