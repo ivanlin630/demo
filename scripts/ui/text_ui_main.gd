@@ -54,6 +54,7 @@ func _ready() -> void:
 	_state.persons[0] = leader
 	team.leader_id = 0
 	_state.player_id = 0
+	_state.player_state = { "inventory": [], "coin": 50.0 }
 
 	_cursor = team.tile_pos
 	_refresh()
@@ -63,6 +64,9 @@ func _input(event: InputEvent) -> void:
 	if not event.pressed: return
 	if _input_mode:
 		_handle_input_mode(event.keycode)
+		return
+	if _inv_mode:
+		_handle_inv_mode(event.keycode)
 		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
@@ -98,6 +102,14 @@ func _input(event: InputEvent) -> void:
 			if _member_mode: _member_mode = false
 			_inv_selection = -1
 			_refresh()
+		KEY_ESCAPE:
+			if _member_mode:
+				_member_mode = false
+				_refresh()
+			elif _inv_mode:
+				_inv_mode = false
+				_inv_selection = -1
+				_refresh()
 		KEY_Q:
 			get_tree().quit()
 
@@ -128,6 +140,43 @@ func _handle_input_mode(keycode: int) -> void:
 			_input_buffer = ""
 			_input_bar.text = ""
 			_refresh()
+
+func _handle_inv_mode(keycode: int) -> void:
+	var inv: Array         = _state.player_state.get("inventory", [])
+	var pt: TeamData       = _state.teams.get(_player_tid)
+	var team_items: Array  = _get_team_takeable_items(pt)
+	var player_sys         := PlayerSystem.new()
+
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		var num: int  = keycode - KEY_1
+		var total: int = inv.size() + team_items.size()
+		if num < total:
+			_inv_selection = num
+		_refresh()
+		return
+
+	match keycode:
+		KEY_E:
+			if _inv_selection >= 0 and _inv_selection < inv.size():
+				var grade: String = inv[_inv_selection].get("grade", "")
+				var slot: String  = "torso" if grade.begins_with("armor") else "hand_1"
+				player_sys.equip_item(_state, slot, grade)
+				_inv_selection = -1
+		KEY_S:
+			if _inv_selection >= 0 and _inv_selection < inv.size():
+				var grade: String = inv[_inv_selection].get("grade", "")
+				var qty: int      = inv[_inv_selection].get("qty", 0)
+				player_sys.deposit_to_team(_state, grade, qty)
+				_inv_selection = -1
+		KEY_G:
+			var team_idx: int = _inv_selection - inv.size()
+			if team_idx >= 0 and team_idx < team_items.size():
+				player_sys.take_from_team(_state, team_items[team_idx], 1)
+				_inv_selection = -1
+		KEY_I, KEY_ESCAPE:
+			_inv_mode = false
+			_inv_selection = -1
+	_refresh()
 
 func _do_move_auto() -> void:
 	var player_team: TeamData = _state.teams.get(_player_tid)
@@ -284,10 +333,74 @@ func _build_debug_str() -> String:
 	return "\n".join(lines)
 
 func _build_member_str() -> String:
-	return "（成員欄）"
+	var pt: TeamData = _state.teams.get(_player_tid)
+	if pt == null: return "（無玩家 team）"
+	var lines: Array = []
+	lines.append("── 成員 Team%d ──" % _player_tid)
+
+	var leader: PersonData = _state.persons.get(pt.leader_id)
+	if leader:
+		var hand1: String = leader.equipment.get("hand_1", {}).get("grade", "")
+		if hand1.is_empty(): hand1 = "空"
+		lines.append("[隊長] %s  裝備:%s  HP:%s" % [leader.person_name, hand1, _get_hp_status(leader)])
+
+	for pid in pt.named_members:
+		var p: PersonData = _state.persons.get(pid)
+		if p == null: continue
+		var hand1: String = p.equipment.get("hand_1", {}).get("grade", "")
+		if hand1.is_empty(): hand1 = "空"
+		lines.append("[成員] %s  裝備:%s  HP:%s" % [p.person_name, hand1, _get_hp_status(p)])
+
+	var named_count: int = (1 if pt.leader_id >= 0 else 0) + pt.named_members.size()
+	var anon: int = maxi(0, pt.population - named_count)
+	var weapons: int = (int(pt.resources.get("weapon_melee_low",   0))
+		+ int(pt.resources.get("weapon_melee_high",  0))
+		+ int(pt.resources.get("weapon_ranged_low",  0))
+		+ int(pt.resources.get("weapon_ranged_high", 0)))
+	var armed_rate: float = float(weapons) / maxf(float(pt.population), 1.0)
+	lines.append("匿名人口: %d  武裝率: %d%%" % [anon, int(armed_rate * 100)])
+	lines.append("── [P/Esc] 關閉 ──")
+	return "\n".join(lines)
+
+func _get_team_takeable_items(_pt: TeamData) -> Array:
+	return ["weapon_melee_low", "weapon_melee_high", "weapon_ranged_low", "weapon_ranged_high",
+		"armor_low", "armor_high", "medicine", "tools"]
 
 func _build_inv_str() -> String:
-	return "（背包欄）"
+	var player: PersonData = _state.persons.get(_state.player_id)
+	var pt: TeamData       = _state.teams.get(_player_tid)
+	if player == null or pt == null: return "（無資料）"
+	var lines: Array = []
+
+	lines.append("── 裝備 ──")
+	var h1: String = player.equipment.get("hand_1", {}).get("grade", "")
+	var h2: String = player.equipment.get("hand_2", {}).get("grade", "")
+	lines.append("  右手:%s  左手:%s" % [h1 if not h1.is_empty() else "空", h2 if not h2.is_empty() else "空"])
+	var body_slots: Array = ["head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"]
+	var body_names: Array = ["頭", "胸", "右臂", "左臂", "右腿", "左腿"]
+	var body_strs: Array = []
+	for i in range(body_slots.size()):
+		var g: String = player.equipment.get(body_slots[i], {}).get("grade", "")
+		body_strs.append("%s:%s" % [body_names[i], g if not g.is_empty() else "空"])
+	lines.append("  " + " ".join(body_strs))
+
+	var inv: Array = _state.player_state.get("inventory", [])
+	lines.append("── 背包 (%d/%d) ──" % [inv.size(), PlayerSystem.PLAYER_INVENTORY_MAX_SLOTS])
+	for i in range(inv.size()):
+		var item = inv[i]
+		var prefix: String = "[%d]*" % (i + 1) if _inv_selection == i else "[%d]" % (i + 1)
+		lines.append("  %s %s × %d" % [prefix, item.get("grade", "?"), item.get("qty", 0)])
+
+	var team_items: Array = _get_team_takeable_items(pt)
+	lines.append("── 從 Team 取出 ──")
+	for i in range(team_items.size()):
+		var idx: int = inv.size() + i
+		var prefix: String = "[T%d]*" % (i + 1) if _inv_selection == idx else "[T%d]" % (i + 1)
+		var qty: int = int(pt.resources.get(team_items[i], 0))
+		lines.append("  %s %s: %d%s" % [prefix, team_items[i], qty, "" if qty > 0 else "（灰）"])
+
+	lines.append("── [數字]選取 [E]裝備 [S]存入 [G]取出 [I/Esc]關閉 ──")
+	return "\n".join(lines)
 
 func _log_event(msg: String) -> void:
 	_events.append({ "type": "ui", "msg": msg })
