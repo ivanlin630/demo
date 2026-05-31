@@ -7,58 +7,99 @@
 
 ## 目標
 
-1. 將所有非遭遇戰的固定 tick 常數，改用 `WorldState.TICKS_PER_HOUR` 或 `WorldState.TICKS_PER_DAY` 表達，使未來調整 `TICKS_PER_DAY` 時各系統自動縮放。
-2. 大地圖近區所有世界系統改為**每小時執行一次**（`% TICKS_PER_HOUR == 0`），使系統執行頻率與時間粒度解耦。
+1. **時間系統校準**：將 `TICKS_PER_DAY` 從 24 改為 240，`MAP_RADIUS` 從 10 改為 12，使時間粒度更細、世界移動速度合理
+2. **常數正規化**：所有 `*_INTERVAL` 改用 `TICKS_PER_HOUR` / `TICKS_PER_DAY` 表達，未來調整時自動縮放
+3. **近區批次化**：大地圖近區系統改為每小時（`% TICKS_PER_HOUR`）執行，頻率與粒度解耦
 
-**注意：** `TICKS_PER_HOUR = TICKS_PER_DAY / 24 = 1`（目前），因此 `% 1 == 0` 永遠成立，**現在行為完全不變**。未來調高 `TICKS_PER_DAY` 時自動降頻。
-
-遭遇戰系統走獨立路徑（`encounter_active` early return），完全不受影響。
-
-**不在範圍：**
-- 遭遇戰相關（`BASE_ACTION_TICKS`、`MAP_RADIUS`、`HP_REGEN_PER_TICK`、`BLOOD_REGEN_PER_TICK`、`PRISONER_CHECK_INTERVAL`）
-- `BASE_MOVE_TICKS`：保留 `BASE_ACTION_TICKS × MAP_DIAMETER` 的耦合（遭遇戰與大地圖同步縮放）
+遭遇戰系統走獨立路徑（`encounter_active` early return），效能完全不受影響。
 
 ---
 
-## 現有常數與現值
+## 設計決策：新時間比例
 
-| 檔案 | 常數/用法 | 現值 | 語意（TICKS_PER_DAY=24時）|
-|---|---|---|---|
-| `world_state.gd` | `ticks_per_day`（instance var）| 24 | 與 const 重複 |
-| `day_night_system.gd` | `state.ticks_per_day` | 讀 instance var | 應改讀 const |
-| `sim_runner.gd` | `FAR_ZONE_INTERVAL = 10` | 10 ticks | 每 10 小時 |
-| `sim_runner.gd` | `% 6`（turn 計數，line 126）| 6 ticks | 每 6 小時（= 1天/4） |
-| `sim_runner.gd` | `% 6`（harvest，line 146）| 6 ticks | 每 6 小時 |
-| `sim_runner.gd` | `state.ticks_per_day`（line 65）| 讀 instance var | 應改讀 const |
-| `strategic_ai_system.gd` | `STRATEGIC_INTERVAL = 10` | 10 ticks | 每 10 小時 |
-| `strategic_ai_system.gd` | `ALLIANCE_CHECK_INTERVAL = 30` | 30 ticks | 每 30 小時 |
-| `diplomatic_ai_system.gd` | `BETRAY_CHECK_INTERVAL = 50` | 50 ticks | 每 50 小時 |
-| `reaction_system.gd` | `GOAL_CHECK_INTERVAL = 10` | 10 ticks | 每 10 小時 |
-| `faction_ai_system.gd` | `COLLECT_INTERVAL = 30` | 30 ticks | 每 30 小時 |
-| `faction_ai_system.gd` | hardcoded `% 20`（line 39）| 20 ticks | 每 20 小時 |
-| `message_system.gd` | `TIME_DECAY_PER_TICK = 0.005` | per tick | 每小時衰減 0.005 |
+| 常數 | 舊值 | 新值 |
+|---|---|---|
+| `TICKS_PER_DAY` | 24 | **240** |
+| `TICKS_PER_HOUR` | 1 | **10** |
+| `MAP_RADIUS`（遭遇戰）| 10 | **12** |
+| `MAP_DIAMETER`（遭遇戰）| 20 | **24** |
+| `BASE_ACTION_TICKS`（遭遇戰）| 10 | 不變 |
+| `BASE_MOVE_TICKS`（由耦合自動）| 200 | **240**（= 10×24）|
 
----
-
-## 修改方式
-
-### 原則
-
-- 「幾小時一次」→ `X * WorldState.TICKS_PER_HOUR`
-- 「幾天一次」→ `X * WorldState.TICKS_PER_DAY`（已有 SALARY_INTERVAL 等先例）
-- per-tick 速率 → 改為 per-day，除以 `TICKS_PER_DAY`（已有 `FOOD_PER_PERSON_PER_DAY` 先例）
-- instance var `ticks_per_day` → 全部換成 const `WorldState.TICKS_PER_DAY`
-
-### 各檔案變更
-
-#### `scripts/data/world_state.gd`
-```gdscript
-# 移除（或保留但不使用）
-# var ticks_per_day: int = 24
-# TICKS_PER_HOUR 已存在 = TICKS_PER_DAY / 24，確認有此行即可
+**結果：**
+```
+1 tick        = 6 分鐘（game time）
+1 小時        = TICKS_PER_HOUR = 10 ticks
+1 天          = TICKS_PER_DAY = 240 ticks
+遭遇戰 1 action（普通）= 10 ticks = 1 小時
+遭遇戰 1 action（最快）= 6 ticks  = 36 分鐘
+走 1 世界格   = BASE_MOVE_TICKS = 240 ticks = 1 天 ✓
 ```
 
-#### `scripts/simulation/day_night_system.gd`
+**效能：** 近區每 `TICKS_PER_HOUR=10` ticks 執行一次 → 每天 240/10 = 24 次系統運算（與現在相同）
+
+---
+
+## 常數變更對照表
+
+| 常數 | 舊值（ticks）| 新值（ticks）| 語意 |
+|---|---|---|---|
+| `TICKS_PER_DAY` | 24 | **240** | — |
+| `TICKS_PER_HOUR` | 1 | **10** | — |
+| `FAR_ZONE_INTERVAL` | 10 | **100** | 每 10 小時 |
+| `% 6`（turn 計數）| 6 | **60** | 每 6 小時（TICKS_PER_DAY/4）|
+| `% 6`（harvest）| 6 | **60** | 每 6 小時 |
+| `STRATEGIC_INTERVAL` | 10 | **100** | 每 10 小時 |
+| `ALLIANCE_CHECK_INTERVAL` | 30 | **300** | 每 30 小時 |
+| `BETRAY_CHECK_INTERVAL` | 50 | **500** | 每 50 小時 |
+| `GOAL_CHECK_INTERVAL` | 10 | **100** | 每 10 小時 |
+| `COLLECT_INTERVAL` | 30 | **300** | 每 30 小時 |
+| `FACTION_UPDATE_INTERVAL`（新）| 20 | **200** | 每 20 小時 |
+| `TIME_DECAY_PER_TICK` | 0.005 | **0.0005** | 每小時 0.005（不變）|
+| `BASE_MOVE_TICKS` | 200 | **240** | 1 天/格（由耦合自動）|
+| `OVERFLOW_CHECK_INTERVAL` | 24 | **240** | 每天（自動縮放）|
+| `SALARY_INTERVAL` | 720 | **7200** | 每月（自動縮放）|
+| `SEASON_LENGTH` | 2160 | **21600** | 每季（自動縮放）|
+
+---
+
+## 修改檔案
+
+### `scripts/data/world_state.gd`
+```gdscript
+# 舊
+const TICKS_PER_DAY:    int   = 24
+const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 1
+var ticks_per_day: int = 24   # instance var（廢棄）
+
+# 新
+const TICKS_PER_DAY:    int   = 240
+const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 10
+# ticks_per_day instance var 移除
+```
+
+### `scripts/simulation/encounter_system.gd`
+```gdscript
+# 舊
+const MAP_RADIUS:    int = 10
+const MAP_DIAMETER:  int = MAP_RADIUS * 2   # = 20
+
+# 新
+const MAP_RADIUS:    int = 12
+const MAP_DIAMETER:  int = MAP_RADIUS * 2   # = 24
+# BASE_ACTION_TICKS 不變（= 10）
+# BASE_MOVE_TICKS 在 movement_system 自動更新
+```
+
+### `scripts/simulation/movement_system.gd`
+```gdscript
+# BASE_MOVE_TICKS 由耦合自動計算，不需手動改
+# 確認公式仍為：
+const BASE_MOVE_TICKS: int = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER
+# 新值 = 10 × 24 = 240 ✓
+```
+
+### `scripts/simulation/day_night_system.gd`
 ```gdscript
 # 舊
 float(state.world.current_tick % state.ticks_per_day) / float(state.ticks_per_day)
@@ -67,43 +108,31 @@ float(state.world.current_tick % state.ticks_per_day) / float(state.ticks_per_da
 float(state.world.current_tick % WorldState.TICKS_PER_DAY) / float(WorldState.TICKS_PER_DAY)
 ```
 
-#### `scripts/simulation/sim_runner.gd`
+### `scripts/simulation/sim_runner.gd`
 ```gdscript
 # 舊
 const FAR_ZONE_INTERVAL: int = 10
-
-if state.world.current_tick % state.ticks_per_day == 0:
-    print(...)
-if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
-    _step1d_overflow(state)
-
+if state.world.current_tick % state.ticks_per_day == 0: ...
+if state.world.current_tick % 6 == 0: state.world.current_turn += 1
+if state.world.current_tick % 6 == 0: _harvest_system.tick_all(state)
 # 近區：直接跑（每 tick）
-_step1b_update_vision(state, near_teams, time_vision_mult)
-_step1c_update_equipment(state, near_teams)
-var arrived_near := _step2_move_teams(...)
-...（所有近區步驟）
-
-if state.world.current_tick % 6 == 0:  # turn 計數
-    state.world.current_turn += 1
-if state.world.current_tick % 6 == 0:  # harvest
-    _harvest_system.tick_all(state)
-
-if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
-    ...（遠區）
+_step1b_update_vision(...)
+...所有近區步驟（無條件）
 
 # 新
-const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # = 100
 
-if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
-    print(...)
-if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
-    _step1d_overflow(state)
+if state.world.current_tick % WorldState.TICKS_PER_DAY == 0: ...
+if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
+    state.world.current_turn += 1
+if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
+    _harvest_system.tick_all(state)
 
 # 近區：每小時執行
 if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
     _step1b_update_vision(state, near_teams, time_vision_mult)
     _step1c_update_equipment(state, near_teams)
-    var arrived_near := _step2_move_teams(...)
+    var arrived_near := _step2_move_teams(state, near_teams, time_speed_mult)
     _step3_propagate_messages(state, arrived_near, near_teams)
     _step4_resolve_interactions(state, arrived_near, near_teams)
     _step4b_outpost_tick(state)
@@ -120,104 +149,67 @@ if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
     _step8_generate_events(state, near_teams)
     _step9_emit_messages(state)
 
-if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
-    state.world.current_turn += 1
-if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
-    _harvest_system.tick_all(state)
-
+# 遠區：每 FAR_ZONE_INTERVAL（100 ticks = 10 小時）
 if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
-    if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
-        ...（遠區，同樣包在 TICKS_PER_HOUR 條件內）
+    ...（同現有遠區邏輯，不變）
 ```
 
-**注意：** `_step4c_harvest_tick` 原本在近區每 tick 內有 `% 6` 判斷，移出後改成外層獨立條件，邏輯等價。
-
-#### `scripts/simulation/strategic_ai_system.gd`
+### `scripts/simulation/strategic_ai_system.gd`
 ```gdscript
-# 舊
-const STRATEGIC_INTERVAL: int    = 10
-const ALLIANCE_CHECK_INTERVAL: int = 30
-
-# 新
-const STRATEGIC_INTERVAL: int      = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
-const ALLIANCE_CHECK_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+const STRATEGIC_INTERVAL:      int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
+const ALLIANCE_CHECK_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時 = 300 ticks
 ```
 
-#### `scripts/simulation/diplomatic_ai_system.gd`
+### `scripts/simulation/diplomatic_ai_system.gd`
 ```gdscript
-# 舊
-const BETRAY_CHECK_INTERVAL: int = 50
-
-# 新
-const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
+const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時 = 500 ticks
 ```
 
-#### `scripts/simulation/reaction_system.gd`
+### `scripts/simulation/reaction_system.gd`
 ```gdscript
-# 舊
-const GOAL_CHECK_INTERVAL: int = 10
-
-# 新
-const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
 ```
 
-#### `scripts/simulation/faction_ai_system.gd`
+### `scripts/simulation/faction_ai_system.gd`
 ```gdscript
-# 舊
-const COLLECT_INTERVAL: int = 30
-...
-if state.world.current_tick % 20 == 0:
-
-# 新
-const COLLECT_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
-const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 新常數，每 20 小時
-...
-if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
+const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時 = 300 ticks
+const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時 = 200 ticks（新常數）
+# 舊 hardcoded % 20 → 改為 % FACTION_UPDATE_INTERVAL
 ```
 
-#### `scripts/simulation/message_system.gd`
+### `scripts/simulation/message_system.gd`
 ```gdscript
-# 舊
-const TIME_DECAY_PER_TICK: float = 0.005
-
-# 新（語意：每小時衰減 0.005）
-const TIME_DECAY_PER_HOUR: float = 0.005
+const TIME_DECAY_PER_HOUR: float = 0.005   # 每小時衰減 0.005
 const TIME_DECAY_PER_TICK: float = TIME_DECAY_PER_HOUR / float(WorldState.TICKS_PER_HOUR)
+# 新值 = 0.005 / 10 = 0.0005（每 tick）
 ```
-
-**注意：** `TIME_DECAY_PER_TICK` 名稱保留，用法不變，改從 per-hour 推算。
 
 ---
 
-## 行為驗證
+## headless_test.gd 影響
 
-此次修改為**純重構**，`TICKS_PER_DAY = 24` 不變，所有常數數值與目前完全相同：
+測試中硬編碼的 tick 數（如 `1000 ticks`）語意從「41.7天」變為「4.17天」。測試邏輯不變，但數值解讀不同。無需修改。
 
-| 常數 | 舊值（ticks）| 新計算 | 結果 |
-|---|---|---|---|
-| `FAR_ZONE_INTERVAL` | 10 | `10 × 1` | **10** |
-| `% 6` | 6 | `24 / 4` | **6** |
-| `STRATEGIC_INTERVAL` | 10 | `10 × 1` | **10** |
-| `ALLIANCE_CHECK_INTERVAL` | 30 | `30 × 1` | **30** |
-| `BETRAY_CHECK_INTERVAL` | 50 | `50 × 1` | **50** |
-| `GOAL_CHECK_INTERVAL` | 10 | `10 × 1` | **10** |
-| `COLLECT_INTERVAL` | 30 | `30 × 1` | **30** |
-| `FACTION_UPDATE_INTERVAL` | 20 | `20 × 1` | **20** |
-| `TIME_DECAY_PER_TICK` | 0.005 | `0.005 / 1`（per-hour / TICKS_PER_HOUR）| **0.005** |
+---
 
-`TICKS_PER_HOUR = 1`（當 `TICKS_PER_DAY = 24`），故所有結果不變。
+## 驗證標準
 
-**驗證指令：**
 ```powershell
 .\tools\godot\Godot_v4.2.2-stable_win64_console.exe --headless --script scripts/debug/headless_test.gd
 ```
 
-預期：`=== DONE ===`，無 `SCRIPT ERROR`，輸出與重構前相同。
+預期：
+- `=== DONE ===`，無 `SCRIPT ERROR`
+- 1000 ticks ≈ 4.2 天（原來 41.7 天），事件/交互仍發生（比例縮短但仍出現）
+- `[Trade]`、`[Combat]`、`[FactionAI]` 等 print 仍出現
+- 無因 `% 0` 或 division by zero 導致的崩潰
 
 ---
 
 ## 注意事項
 
-- `WorldState.TICKS_PER_HOUR` 若不存在需補加（確認 world_state.gd 有 `const TICKS_PER_HOUR: int = TICKS_PER_DAY / 24`）
-- `TICKS_PER_DAY / 4 = 6`（整數除法，GDScript 無問題）
-- 完成後 `state.ticks_per_day` instance var 可標記為 deprecated 或移除，視相容性決定
+- `WorldState.TICKS_PER_HOUR` 確認已存在（= `TICKS_PER_DAY / 24`）
+- `TICKS_PER_DAY / 4 = 60`（整數，無問題）
+- `state.ticks_per_day` instance var 全部移除（grep 確認無殘留）
+- 遭遇戰地圖 tile 數：R=10→331，R=12→469（+42%），效能可接受
+- `BASE_MOVE_TICKS` 由 `encounter_system` 常數自動推算，不需手動設
