@@ -9,7 +9,7 @@ static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> Stri
 	var player_pos: Vector2i  = player_team.tile_pos if player_team else Vector2i(4, 4)
 	var discovered: Array     = state.team_discovered.get(player_tid, [])
 
-	# 找地圖邊界
+	# 找地圖邊界（tile 實際 x/y 範圍）
 	var xs: Array = []; var ys: Array = []
 	for tile in state.world.tiles.values():
 		xs.append(tile.tile_pos.x); ys.append(tile.tile_pos.y)
@@ -25,19 +25,14 @@ static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> Stri
 		if not team_at.has(k): team_at[k] = []
 		(team_at[k] as Array).append(tid)
 
+	# 每個 Y 一條線，奇數 Y 縮排 2（hex stagger）
 	var lines: Array = []
 	for y in range(ymin, ymax + 1):
-		var even_line: String = ""   # x = xmin, xmin+2, ...
-		var odd_line: String  = " "  # x = xmin+1, xmin+3, ... (1 space indent)
+		var indent: String = "  " if y % 2 == 1 else ""
+		var line: String = indent
 		for x in range(xmin, xmax + 1):
-			var pos := Vector2i(x, y)
-			var cell := _cell(state, pos, player_pos, player_tid, cursor, discovered, team_at)
-			if (x - xmin) % 2 == 0:
-				even_line += cell
-			else:
-				odd_line += cell
-		lines.append(even_line)
-		lines.append(odd_line)
+			line += _cell(state, Vector2i(x, y), player_pos, player_tid, cursor, discovered, team_at)
+		lines.append(line)
 	return "\n".join(lines)
 
 static func _cell(state: WorldState, pos: Vector2i, player_pos: Vector2i,
@@ -46,9 +41,9 @@ static func _cell(state: WorldState, pos: Vector2i, player_pos: Vector2i,
 	var tile_key: int = pos.x * 1000 + pos.y
 	var tile = state.world.tiles.get(tile_key)
 	if tile == null:
-		# 不在地圖
-		var content := "   "
-		if pos == cursor: content = "[ ]"
+		# 不在地圖（4 chars）
+		var content := "    "
+		if pos == cursor: content = "[ ] "
 		return content
 
 	# 決定格子基本符號
@@ -74,12 +69,12 @@ static func _cell(state: WorldState, pos: Vector2i, player_pos: Vector2i,
 		else:
 			ch = "?"
 
-	# 游標包圍
+	# 游標包圍（每格 4 chars）
 	var cell: String
 	if pos == cursor:
-		cell = "[%s]" % ch
+		cell = "[%s] " % ch   # 4 chars: [symbol] + space
 	else:
-		cell = "%s  " % ch   # 3 chars: symbol + 2 spaces
+		cell = "%s   " % ch   # 4 chars: symbol + 3 spaces
 
 	return cell
 
