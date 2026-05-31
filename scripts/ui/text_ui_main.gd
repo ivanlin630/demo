@@ -85,7 +85,9 @@ func _input(event: InputEvent) -> void:
 
 func _move_cursor(delta: Vector2i) -> void:
 	var new_pos := _cursor + delta
-	_cursor = new_pos   # 允許游標移出地圖（渲染時顯示空格）
+	var key: int = new_pos.x * 1000 + new_pos.y
+	if _state.world.tiles.has(key):
+		_cursor = new_pos
 	_refresh()
 
 func _refresh() -> void:
