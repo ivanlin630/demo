@@ -9,6 +9,10 @@ script = ExtResource("1")
 anchor_right = 1.0
 anchor_bottom = 1.0
 
+[node name="DebugBar" type="Label" parent="VBox"]
+text = "..."
+autowrap_mode = 3
+
 [node name="HBox" type="HBoxContainer" parent="VBox"]
 size_flags_vertical = 3
 
@@ -26,5 +30,8 @@ vertical_alignment = 0
 text = "事件 log..."
 autowrap_mode = 3
 
+[node name="InputBar" type="Label" parent="VBox"]
+text = ""
+
 [node name="HintLabel" type="Label" parent="VBox"]
-text = "[WASD]游標 [Enter]選中 [M]移動 [Space]+1天 [H]回玩家 [Q]離開"
+text = "[WASD]游標 [Enter]選中 [M]移動(自動) [Space]+1天 [G]跳N tick [H]回玩家 [P]成員 [I]背包 [Q]離開"

@@ -13,6 +13,8 @@ var _events: Array = []
 @onready var _map_label:   RichTextLabel = $VBox/HBox/MapLabel
 @onready var _state_label: Label         = $VBox/HBox/StateLabel
 @onready var _event_label: Label         = $VBox/EventLabel
+@onready var _debug_bar:   Label         = $VBox/DebugBar
+@onready var _input_bar:   Label         = $VBox/InputBar
 
 func _ready() -> void:
 	_state  = WorldState.new()
