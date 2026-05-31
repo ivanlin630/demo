@@ -129,6 +129,7 @@ var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
 #   "demand_tribute"   → 玩家 pop > target.pop × 1.5
 #   "attack"           → 永遠可選
 #   "extort"           → 玩家 readiness >= 0.7
+#   "recruit"          → 永遠可選（STUB — 招募邏輯尚未實裝）
 #   "ignore"           → 永遠可選
 func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
     var actions: Array[String] = ["ignore", "attack"]
@@ -143,6 +144,7 @@ func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
         actions.append("demand_tribute")
     if pt.readiness >= 0.7:
         actions.append("extort")
+    actions.append("recruit")   # STUB
     return actions
 
 # 執行玩家主動行動
@@ -174,6 +176,14 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
             var result := _interaction.resolve_extortion_direct(state, pt_id, target_id)
             state.player_pending_targets.erase(target_id)
             return result
+        "extort":
+            var result := _interaction.resolve_extortion_direct(state, pt_id, target_id)
+            state.player_pending_targets.erase(target_id)
+            return result
+        "recruit":
+            # STUB — 招募邏輯尚未實裝（說服/付費/目標成員選擇）
+            state.player_pending_targets.erase(target_id)
+            return { "ok": false, "msg": "招募功能尚未實裝" }
         "ignore":
             state.player_pending_targets.erase(target_id)
             return { "ok": true, "msg": "忽略" }
