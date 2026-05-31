@@ -25,39 +25,40 @@ func generate(state: WorldState, config: Dictionary) -> void:
 	else:
 		rng.seed = int(config.get("seed", 0))
 	var radius: int = config.get("radius", 4)
+	var mult: float = float(config.get("resource_multiplier", 1.0))
 	for qx in range(-radius, radius + 1):
 		for ry in range(-radius, radius + 1):
 			if _hex_dist(Vector2i(qx, ry), Vector2i.ZERO) > radius:
 				continue
-			var ox: int = qx + radius   # offset
-			var oy: int = ry + radius   # offset
+			var ox: int = qx + radius
+			var oy: int = ry + radius
 			var tile = load("res://scripts/data/tile_data.gd").new()
 			tile.tile_id  = ox * 1000 + oy
 			tile.tile_pos = Vector2i(ox, oy)
 			tile.terrain  = _random_terrain(rng)
-			_apply_resources(tile, rng)
+			_apply_resources(tile, rng, mult)
 			state.world.tiles[tile.tile_id] = tile
 
-func _apply_resources(tile, rng: RandomNumberGenerator) -> void:
+func _apply_resources(tile, rng: RandomNumberGenerator, mult: float = 1.0) -> void:
 	tile.resources = {}
 	var profile: Dictionary = RESOURCE_PROFILE[tile.terrain]
 	for res in profile:
 		var r: Array = profile[res]
-		tile.resources[res] = rng.randi_range(r[0], r[1])
+		tile.resources[res] = int(rng.randi_range(r[0], r[1]) * mult)
 	var prod_r: Array = PRODUCTIVITY_RANGE[tile.terrain]
 	tile.productivity = rng.randf_range(prod_r[0], prod_r[1])
 	if tile.terrain == "mountain":
 		if rng.randf() < ORE_GOLD_CHANCE:
-			tile.resources["ore_gold"] = rng.randi_range(5, 30)
+			tile.resources["ore_gold"] = int(rng.randi_range(5, 30) * mult)
 		elif rng.randf() < ORE_SILVER_CHANCE:
-			tile.resources["ore_silver"] = rng.randi_range(10, 60)
+			tile.resources["ore_silver"] = int(rng.randi_range(10, 60) * mult)
 		if rng.randf() < GEM_CHANCE:
-			tile.resources["gem"] = rng.randi_range(1, 8)
+			tile.resources["gem"] = int(rng.randi_range(1, 8) * mult)
 		if rng.randf() < ORE_IRON_MOUNTAIN_CHANCE:
-			tile.resources["ore_iron"] = rng.randi_range(50, 150)
+			tile.resources["ore_iron"] = int(rng.randi_range(50, 150) * mult)
 	elif tile.terrain == "plains":
 		if rng.randf() < ORE_IRON_PLAINS_CHANCE:
-			tile.resources["ore_iron"] = rng.randi_range(20, 60)
+			tile.resources["ore_iron"] = int(rng.randi_range(20, 60) * mult)
 	tile.resource_cap = tile.resources.duplicate()
 
 func _random_terrain(rng: RandomNumberGenerator) -> String:
