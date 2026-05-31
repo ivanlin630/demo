@@ -1412,4 +1412,78 @@ func _run_sim_test() -> void:
 	print("  map length=%d OK" % map_str.length())
 	print("  first 200 chars:\n" + map_str.substr(0, 200))
 
+	# ────────── PlayerCommandSystem 測試 ──────────
+	print("--- PlayerCommandSystem Tests ---")
+	# 確保 encounter 狀態乾淨
+	state.encounter_active = false
+	state.encounter_units.clear()
+	state.player_pending_targets.clear()
+	state.player_forced_event = {}
+
+	state.player_id = 0   # 安全設定，確保 player_id 有效
+	var _cmd := PlayerCommandSystem.new()
+	var _pt_id: int = state.persons.get(state.player_id).team_id   # = 0
+
+	# ── 測試 1：get_available_actions（ignore/attack 永遠可選）──
+	state.player_pending_targets.append(1)
+	var _actions := _cmd.get_available_actions(state, 1)
+	assert(_actions.has("ignore"), "ignore 永遠可選")
+	assert(_actions.has("attack"), "attack 永遠可選")
+	assert(_actions.has("recruit"), "recruit STUB 永遠可選")
+	print("  [OK] get_available_actions: %s" % str(_actions))
+
+	# ── 測試 2：execute_action("ignore") → pending 清除 ──
+	var _r_ignore := _cmd.execute_action(state, 1, "ignore")
+	assert(_r_ignore.get("ok"), "ignore 應成功")
+	assert(not state.player_pending_targets.has(1), "ignore 後 pending 清除")
+	print("  [OK] execute_action ignore: %s" % _r_ignore.get("msg", ""))
+
+	# ── 測試 3：forced_event diplomacy → refuse ──
+	state.player_forced_event = { "from_id": 2, "action": "diplomacy", "proposal": "alliance" }
+	var _opts_d := _cmd.get_forced_response_options(state)
+	assert(_opts_d.has("accept") and _opts_d.has("refuse"), "diplomacy 選項應有 accept/refuse")
+	var _r_refuse := _cmd.respond_to_forced(state, "refuse")
+	assert(_r_refuse.get("ok"), "refuse 應成功")
+	assert(state.player_forced_event.is_empty(), "refuse 後 forced_event 清除")
+	print("  [OK] forced diplomacy refuse: %s" % _r_refuse.get("msg", ""))
+
+	# ── 測試 4：forced_event extort → pay ──
+	# Team2 勒索 Team0（玩家）
+	state.player_forced_event = { "from_id": 2, "action": "extort" }
+	var _r_pay := _cmd.respond_to_forced(state, "pay")
+	assert(_r_pay.get("ok"), "pay 應成功")
+	assert(state.player_forced_event.is_empty(), "pay 後 forced_event 清除")
+	print("  [OK] forced extort pay: %s" % _r_pay.get("msg", ""))
+
+	# ── 測試 5：respond_to_forced 空事件 ──
+	var _r_empty := _cmd.respond_to_forced(state, "refuse")
+	assert(not _r_empty.get("ok"), "空 forced_event 應返回 ok=false")
+	print("  [OK] empty forced_event handled correctly")
+
+	# ── 測試 6：execute_action("attack") → encounter_active ──
+	state.player_pending_targets.append(1)
+	state.encounter_active = false
+	var _r_atk := _cmd.execute_action(state, 1, "attack")
+	assert(_r_atk.get("ok"), "attack 應成功")
+	assert(state.encounter_active, "attack 後 encounter_active 應為 true")
+	assert(state.encounter_attacker_id == _pt_id, "attacker 應為玩家")
+	assert(state.encounter_defender_id == 1, "defender 應為 Team1")
+	assert(not state.player_pending_targets.has(1), "attack 後 pending 清除")
+	print("  [OK] execute_action attack: encounter triggered, attacker=%d defender=%d" % [
+		state.encounter_attacker_id, state.encounter_defender_id])
+	state.encounter_active = false
+	state.encounter_units.clear()
+
+	# ── 測試 7：clear_pending_targets ──
+	state.player_pending_targets = [1, 2, 3]
+	state.player_forced_event = { "from_id": 2, "action": "extort" }
+	_cmd.clear_pending_targets(state)
+	assert(state.player_pending_targets.is_empty(), "clear_pending_targets 應清空 pending")
+	assert(not state.player_forced_event.is_empty(), "clear_pending_targets 不影響 forced_event")
+	state.player_forced_event = {}
+	print("  [OK] clear_pending_targets 只清 pending，保留 forced_event")
+
+	print("--- PlayerCommandSystem Tests PASSED ---")
+	# ────────────────────────────────────────────
+
 	print("=== DONE ===")
