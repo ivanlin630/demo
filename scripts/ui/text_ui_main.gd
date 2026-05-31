@@ -447,4 +447,40 @@ func _handle_interact_mode(_keycode: int) -> void:
 	_refresh()
 
 func _build_interact_str() -> String:
-	return "── 互動 ──\n（尚未實裝）\n── [T/Esc]關閉 ──"
+	var lines: Array = []
+	lines.append("── 互動 ──")
+
+	var fe: Dictionary = _state.player_forced_event
+	var fe_count: int = 0   # forced_event 佔用的號碼數
+
+	# forced_event（若有，排第一）
+	if not fe.is_empty():
+		var from_id: int     = fe.get("from_id", -1)
+		var action: String   = fe.get("action", "")
+		var proposal: String = fe.get("proposal", "")
+		var opts: Array[String] = _player_cmd.get_forced_response_options(_state)
+		var opts_str: String = ""
+		for i in range(opts.size()):
+			opts_str += " [%d]%s" % [i + 1, opts[i]]
+			fe_count += 1
+		var desc: String
+		match action:
+			"diplomacy": desc = "Team%d 要求 %s" % [from_id, proposal]
+			"extort":    desc = "Team%d 要求勒索" % from_id
+			_:           desc = "Team%d 強制事件" % from_id
+		lines.append("[!] %s →%s" % [desc, opts_str])
+
+	# pending_targets（從 fe_count+1 開始編號）
+	var idx: int = fe_count + 1
+	if _state.player_pending_targets.is_empty() and fe.is_empty():
+		lines.append("（無可互動目標）")
+	for tid in _state.player_pending_targets:
+		var t: TeamData = _state.teams.get(tid)
+		if t == null: continue
+		var faction_str: String = "獨立" if t.faction_id < 0 else "勢力%d" % t.faction_id
+		lines.append("[%d] Team%d @(%d,%d) %s pop:%d" % [
+			idx, tid, t.tile_pos.x, t.tile_pos.y, faction_str, t.population])
+		idx += 1
+
+	lines.append("── [T/Esc]關閉 ──")
+	return "\n".join(lines)
