@@ -1,11 +1,11 @@
 class_name WorldState
 
 # ── 時間基底 ──────────────────────────────────────────────────
-const TICKS_PER_DAY:    int   = 24           # TEST VALUE（正式: 8640 = 10秒/tick）
-const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 1（TEST）
-const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 720 ticks
-const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 2160 ticks（3月）
-const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 8640 ticks（12月）
+const TICKS_PER_DAY:    int   = 240          # 10 ticks/hour
+const TICKS_PER_HOUR:   int   = TICKS_PER_DAY / 24   # = 10
+const TICKS_PER_MONTH:  int   = TICKS_PER_DAY * 30   # = 7200 ticks
+const TICKS_PER_SEASON: int   = TICKS_PER_DAY * 90   # = 21600 ticks
+const TICKS_PER_YEAR:   int   = TICKS_PER_DAY * 360  # = 86400 ticks
 const SECONDS_PER_TICK: float = 86400.0 / float(TICKS_PER_DAY)
 
 var world: WorldData = WorldData.new()
@@ -29,7 +29,7 @@ var _next_faction_id: int = 0
 var player_id: int = -1
 var player_state: Dictionary = {}
 var player_hostile_teams: Array = []   # Array[int] team_ids that attacked player
-var ticks_per_day: int = 24
+var ticks_per_day: int = TICKS_PER_DAY
 
 func create_faction(leader_team_id: int) -> int:
 	var f = load("res://scripts/data/faction_data.gd").new()
