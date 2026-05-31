@@ -1486,4 +1486,25 @@ func _run_sim_test() -> void:
 	print("--- PlayerCommandSystem Tests PASSED ---")
 	# ────────────────────────────────────────────
 
+	# ── _accept_diplomacy 驗證 ──
+	print("--- _accept_diplomacy Tests ---")
+	var _cmd_a := PlayerCommandSystem.new()
+	# 建立 NPC 勢力（Team1 為領袖）
+	var _npc_faction_id: int = state.create_faction(1)
+	var _pt_a: TeamData = state.teams.get(state.persons.get(state.player_id).team_id)
+	# 暫時清除玩家勢力（隔離測試前置條件）
+	var _saved_pt_faction: int = _pt_a.faction_id
+	_pt_a.faction_id = -1
+	assert(_pt_a.faction_id == -1, "_accept_diplomacy 前玩家無勢力")
+	# 模擬 NPC 外交提案
+	state.player_forced_event = { "from_id": 1, "action": "diplomacy", "proposal": "alliance" }
+	var _resp_a := _cmd_a.respond_to_forced(state, "accept")
+	assert(_resp_a.get("ok"), "_accept_diplomacy 應成功")
+	assert(_pt_a.faction_id == _npc_faction_id, "接受後玩家應加入 NPC 勢力")
+	assert(state.player_forced_event.is_empty(), "accept 後 forced_event 應清除")
+	print("  [OK] _accept_diplomacy alliance: player faction_id=%d" % _pt_a.faction_id)
+	# 清理（避免影響其他測試）
+	_pt_a.faction_id = _saved_pt_faction
+	print("--- _accept_diplomacy Tests PASSED ---")
+
 	print("=== DONE ===")
