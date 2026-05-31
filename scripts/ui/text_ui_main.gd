@@ -64,6 +64,20 @@ func _ready() -> void:
 	_cursor = team.tile_pos
 	_refresh()
 
+func _process(_delta: float) -> void:
+	if not _bridge.is_advancing(): return
+	var result := _bridge.tick_step()
+	_events.append_array(result.get("events", []))
+	if _events.size() > 100:
+		_events = _events.slice(_events.size() - 100)
+	if result.get("done", false):
+		_input_bar.text = ""
+	else:
+		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _state.world.current_tick
+	_refresh()
+	if _state.encounter_active:
+		_bridge.cancel_advance()
+
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey: return
 	if not event.pressed: return
@@ -87,12 +101,7 @@ func _input(event: InputEvent) -> void:
 		KEY_M:
 			_do_move_auto()
 		KEY_SPACE:
-			for _i in range(WorldState.TICKS_PER_DAY):
-				var evts: Array = _bridge.advance_ticks(1)
-				_events.append_array(evts)
-			if _events.size() > 100:
-				_events = _events.slice(_events.size() - 100)
-			_refresh()
+			_bridge.request_advance(WorldState.TICKS_PER_DAY)
 		KEY_G:
 			_input_mode = true
 			_input_buffer = ""
@@ -118,7 +127,11 @@ func _input(event: InputEvent) -> void:
 				_interact_target = -1
 			_refresh()
 		KEY_ESCAPE:
-			if _interact_mode:
+			if _bridge.is_advancing():
+				_bridge.cancel_advance()
+				_input_bar.text = ""
+				_refresh()
+			elif _interact_mode:
 				if _interact_target >= 0:
 					_interact_target = -1   # 退回目標清單
 				else:
@@ -150,11 +163,7 @@ func _handle_input_mode(keycode: int) -> void:
 				var n: int = mini(int(_input_buffer), 99999)
 				_input_mode = false
 				_input_bar.text = ""
-				for _i in range(n):
-					var evts: Array = _bridge.advance_ticks(1)
-					_events.append_array(evts)
-				if _events.size() > 100:
-					_events = _events.slice(_events.size() - 100)
+				_bridge.request_advance(n)
 				_refresh()
 		KEY_ESCAPE:
 			_input_mode = false
@@ -208,7 +217,10 @@ func _do_move_auto() -> void:
 		return
 	player_team.move_target = _cursor
 	var target: Vector2i = _cursor
-	var max_ticks: int = 1000
+	var dx: int = target.x - player_team.tile_pos.x
+	var dy: int = target.y - player_team.tile_pos.y
+	var dist: int = (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+	var max_ticks: int = maxi(dist * 720 * WorldState.TICKS_PER_HOUR * 2, WorldState.TICKS_PER_DAY * 2)
 	var ticks_run: int = 0
 	while ticks_run < max_ticks:
 		var evts: Array = _bridge.advance_ticks(1)
