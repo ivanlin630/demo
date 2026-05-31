@@ -9,14 +9,13 @@ static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> Stri
 	var player_pos: Vector2i  = player_team.tile_pos if player_team else Vector2i(4, 4)
 	var discovered: Array     = state.team_discovered.get(player_tid, [])
 
-	# 找地圖邊界
+	# 找地圖邊界（tile 實際 x/y 範圍）
 	var xs: Array = []; var ys: Array = []
 	for tile in state.world.tiles.values():
 		xs.append(tile.tile_pos.x); ys.append(tile.tile_pos.y)
 	if xs.is_empty(): return "（無地圖）"
 	var xmin: int = xs.min(); var xmax: int = xs.max()
 	var ymin: int = ys.min(); var ymax: int = ys.max()
-	var mid_y: int = (ymin + ymax) / 2
 
 	# 建 team 位置查詢表（tile_key → team_id list）
 	var team_at: Dictionary = {}
@@ -26,32 +25,14 @@ static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> Stri
 		if not team_at.has(k): team_at[k] = []
 		(team_at[k] as Array).append(tid)
 
-	# 計算 display_col 範圍
-	# display_col = tile_pos.x + int(floor(float(tile_pos.y - mid_y) / 2.0))
-	var dcol_min: int = 9999; var dcol_max: int = -9999
-	for tile in state.world.tiles.values():
-		var dcol: int = tile.tile_pos.x + int(floor(float(tile.tile_pos.y - mid_y) / 2.0))
-		if dcol < dcol_min: dcol_min = dcol
-		if dcol > dcol_max: dcol_max = dcol
-
-	# Render: 每個 display_row 輸出兩個子行
-	# 偶數 dcol（相對 dcol_min）→ even_line；奇數 → odd_line（縮排 2 空格）
-	# 每格 4 chars，odd 縮排 2 → 奇偶中心完美交錯（1.5 char per cell-half）
+	# 每個 Y 一條線，奇數 Y 縮排 2（hex stagger）
 	var lines: Array = []
-	for drow in range(ymin, ymax + 1):
-		var even_line: String = ""
-		var odd_line:  String = "  "
-		for dcol in range(dcol_min, dcol_max + 1):
-			# 反推 tile_pos：tile_pos.x = dcol - int(floor(float(drow - mid_y) / 2.0))
-			var tx: int = dcol - int(floor(float(drow - mid_y) / 2.0))
-			var pos := Vector2i(tx, drow)
-			var cell := _cell(state, pos, player_pos, player_tid, cursor, discovered, team_at)
-			if (dcol - dcol_min) % 2 == 0:
-				even_line += cell
-			else:
-				odd_line += cell
-		lines.append(even_line)
-		lines.append(odd_line)
+	for y in range(ymin, ymax + 1):
+		var indent: String = "  " if y % 2 == 1 else ""
+		var line: String = indent
+		for x in range(xmin, xmax + 1):
+			line += _cell(state, Vector2i(x, y), player_pos, player_tid, cursor, discovered, team_at)
+		lines.append(line)
 	return "\n".join(lines)
 
 static func _cell(state: WorldState, pos: Vector2i, player_pos: Vector2i,
