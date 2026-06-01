@@ -118,7 +118,18 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 		_:
 			result = { "ok": false, "msg": "未知強制事件類型" }
 	state.player_forced_event = {}
+	state.player_forced_event_id = ""
 	return result
+
+func resolve_forced_response(state: WorldState, interaction_id: String, response_id: String) -> Dictionary:
+	if state.player_forced_event.is_empty():
+		return {"ok": false, "code": "forced_response_missing", "msg": "no active forced interaction"}
+	if interaction_id != "" and interaction_id != state.player_forced_event_id:
+		return {"ok": false, "code": "forced_response_missing", "msg": "interaction expired or wrong id"}
+	var valid: Array[String] = get_forced_response_options(state)
+	if not valid.has(response_id):
+		return {"ok": false, "code": "forced_response_invalid", "msg": "invalid response_id: %s" % response_id}
+	return respond_to_forced(state, response_id)
 
 # ── 清除 pending ─────────────────────────────────────────────
 

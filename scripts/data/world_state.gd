@@ -39,6 +39,9 @@ var player_forced_event: Dictionary = {}
 # action = "diplomacy" → { ..., "proposal": String }  非阻塞，下一 TICKS_PER_HOUR 未回應自動拒絕
 # action = "extort"    → { ..., "from_id": int }       非阻塞，下一 TICKS_PER_HOUR 未回應自動拒絕
 # 空 Dict = 無待處理強制事件
+var player_forced_event_id: String = ""
+# 對應 player_forced_event 的唯一 ID（str(randi()) 生成）
+# 空字串 = 無待處理強制事件
 var ticks_per_day: int:
 	get: return TICKS_PER_DAY
 

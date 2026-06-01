@@ -200,11 +200,13 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 							"action":   "diplomacy",
 							"proposal": npc.order_task if npc.order_task != "" else "alliance"
 						}
+						state.player_forced_event_id = str(randi())
 					return
 				# 路徑 3：NPC 勒索
 				elif npc.current_task == TeamData.TASK_LOOT:
 					if state.player_forced_event.is_empty():
 						state.player_forced_event = { "from_id": npc_id, "action": "extort" }
+						state.player_forced_event_id = str(randi())
 					return
 				# 路徑 4：NPC 無敵意 → 玩家可主動選擇互動
 				else:

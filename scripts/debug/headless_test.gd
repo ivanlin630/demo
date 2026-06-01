@@ -1513,6 +1513,7 @@ func _run_sim_test() -> void:
 	state.encounter_units.clear()
 	state.player_pending_targets.clear()
 	state.player_forced_event = {}
+	state.player_forced_event_id = ""
 
 	state.player_id = 0   # 安全設定，確保 player_id 有效
 	var _cmd := PlayerCommandSystem.new()
@@ -1534,6 +1535,7 @@ func _run_sim_test() -> void:
 
 	# ── 測試 3：forced_event diplomacy → refuse ──
 	state.player_forced_event = { "from_id": 2, "action": "diplomacy", "proposal": "alliance" }
+	state.player_forced_event_id = "test-forced-id"
 	var _opts_d := _cmd.get_forced_response_options(state)
 	assert(_opts_d.has("accept") and _opts_d.has("refuse"), "diplomacy 選項應有 accept/refuse")
 	var _r_refuse := _cmd.respond_to_forced(state, "refuse")
@@ -1544,6 +1546,7 @@ func _run_sim_test() -> void:
 	# ── 測試 4：forced_event extort → pay ──
 	# Team2 勒索 Team0（玩家）
 	state.player_forced_event = { "from_id": 2, "action": "extort" }
+	state.player_forced_event_id = "test-forced-id"
 	var _r_pay := _cmd.respond_to_forced(state, "pay")
 	assert(_r_pay.get("ok"), "pay 應成功")
 	assert(state.player_forced_event.is_empty(), "pay 後 forced_event 清除")
@@ -1571,10 +1574,12 @@ func _run_sim_test() -> void:
 	# ── 測試 7：clear_pending_targets ──
 	state.player_pending_targets = [1, 2, 3]
 	state.player_forced_event = { "from_id": 2, "action": "extort" }
+	state.player_forced_event_id = "test-forced-id"
 	_cmd.clear_pending_targets(state)
 	assert(state.player_pending_targets.is_empty(), "clear_pending_targets 應清空 pending")
 	assert(not state.player_forced_event.is_empty(), "clear_pending_targets 不影響 forced_event")
 	state.player_forced_event = {}
+	state.player_forced_event_id = ""
 	print("  [OK] clear_pending_targets 只清 pending，保留 forced_event")
 
 	print("--- PlayerCommandSystem Tests PASSED ---")
@@ -1592,6 +1597,7 @@ func _run_sim_test() -> void:
 	assert(_pt_a.faction_id == -1, "_accept_diplomacy 前玩家無勢力")
 	# 模擬 NPC 外交提案
 	state.player_forced_event = { "from_id": 1, "action": "diplomacy", "proposal": "alliance" }
+	state.player_forced_event_id = "test-forced-id"
 	var _resp_a := _cmd_a.respond_to_forced(state, "accept")
 	assert(_resp_a.get("ok"), "_accept_diplomacy 應成功")
 	assert(_pt_a.faction_id == _npc_faction_id, "接受後玩家應加入 NPC 勢力")
