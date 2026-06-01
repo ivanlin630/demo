@@ -377,7 +377,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 
 可見性規則：
 - 若 tile 不可見，`visibility_state = "hidden"`。
-- hidden tile 只回座標與可見性，不回 terrain / settlement / occupants / hints 的真實內容。
+- valid-but-hidden tile 仍回真實 `tile.q/r` 與 `visibility_state="hidden"`，但不回 terrain / settlement / occupants / hints 的真實內容。
 - 若 tile 可見，`visibility_state = "visible"`，才回完整摘要。
 
 ### `available_actions`
@@ -456,6 +456,7 @@ composition 規則：
 
 `command_args` 規則：
 - 每個 action 必須直接攜帶足夠呼叫對應 command 的參數。
+- `command_args` 永遠視為 fully bound，可直接送進 command；`target_requirements` 只做 UI 呈現/可用性說明，不補參數。
 - `command_args` shape 直接對應 `command_name`：
   - `move_to` → `{tile_q, tile_r}`
   - `cancel_move` → `{}`
@@ -650,7 +651,8 @@ String | null
 empty/sentinel 規則：
 - `focused_member` 無 focus 或 stale focus 時：`id=-1`, `name=""`, `team_id=-1`, `team_name=""`, `role=""`, `status={"health":"", "stress":0.0, "loyalty":0.0}`, `available_actions=[]`
 - `forced_interaction` 無互動時：`interaction_id=""`, `interaction_type=""`, `source={team_id:-1, team_name:"", member_id:-1, member_name:""}`, `message=""`, `responses=[]`
-- `location_context` hidden/invalid cursor 時：`tile={"q":-1, "r":-1}`, `visibility_state="hidden"`, `terrain=null`, `settlement=null`, `occupants=[]`, `is_player_here=false`, `hints=[]`
+- `location_context` valid-but-hidden tile 時：保留真實 `tile.q/r`，`visibility_state="hidden"`，其餘內容 redacted/null。
+- `location_context` invalid/stale cursor 時：`tile={"q":-1, "r":-1}`, `visibility_state="hidden"`, `terrain=null`, `settlement=null`, `occupants=[]`, `is_player_here=false`, `hints=[]`
 - `inventory_state` 無資料時：各陣列空、`equipped_items` 各槽為空字串
 
 ### `snapshot_meta`
@@ -868,6 +870,7 @@ Query API 的 envelope 失敗規則：
 - `get_player_snapshot` 若無玩家或無受控 team，回 `ok=false` 與對應錯誤碼。
 - `get_team_details` / `get_member_details` 若目標存在但目前不可見，回 `ok=false` 與 `not_visible`。
 - `get_team_details` / `get_member_details` / `get_location_context` 若無玩家或無 controlled team，回 `ok=false` 與 `no_player` / `no_controlled_team`。
+- `get_location_context` 若 tile 存在但目前 hidden，回 `ok=true` 與 hidden/redacted `location_context`。
 - detail query 若目標不存在，回 `ok=false` 與 `invalid_team` / `invalid_member` / `invalid_tile`。
 - `get_available_actions` 若無玩家或無受控 team，回 `ok=false`；若只有 context 不適用，回 `ok=true` 且 `data.actions = []`。
 - 不使用「成功但資料為錯誤字典」的混合模式。
