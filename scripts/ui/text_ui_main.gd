@@ -19,7 +19,6 @@ var _inv_selection: int = -1
 var _interact_mode:   bool = false
 var _interact_target: int  = -1
 # -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
-var _player_cmd: PlayerCommandSystem = PlayerCommandSystem.new()
 var _cached_snapshot: Dictionary = {}
 
 @onready var _map_label:   RichTextLabel = $VBox/HBox/MapLabel
@@ -32,8 +31,6 @@ func _ready() -> void:
 	_state  = WorldState.new()
 	_runner = SimRunner.new()
 	_bridge = SimBridge.new(_runner, _state)
-	_player_cmd = PlayerCommandSystem.new()
-
 	var config := GameSetup.load_config("res://config/default.json")
 	GameSetup.setup(_state, config)
 
@@ -43,7 +40,11 @@ func _ready() -> void:
 	_refresh()
 
 func _refresh_snapshot() -> void:
-	_cached_snapshot = _bridge.query_player()
+	var request: Dictionary = {}
+	if _interact_target >= 0:
+		request["focus_team_id"] = _interact_target
+	var _result := _bridge.query_player(request)
+	_cached_snapshot = _result.get("data", {}).get("snapshot", {})
 
 func _process(_delta: float) -> void:
 	if not _bridge.is_advancing(): return
@@ -435,9 +436,10 @@ func _handle_interact_mode(keycode: int) -> void:
 
 	# ── 已選目標：顯示行動清單 ──
 	if _interact_target >= 0:
-		var actions: Array[String] = _player_cmd.get_available_actions(_state, _interact_target)
+		var actions: Array = _cached_snapshot.get("available_actions", [])
 		if num < actions.size():
-			var result: Dictionary = _bridge.command_player("execute_action", {"target_id": _interact_target, "action_id": actions[num]})
+			var act: Dictionary = actions[num]
+			var result: Dictionary = _bridge.command_player(act.get("command_name", "execute_action"), act.get("command_args", {}))
 			_log_event("[互動] %s" % result.get("message", ""))
 			_interact_target = -1   # 回到目標清單
 			# 若行動觸發遭遇戰，關閉 interact_mode
@@ -475,10 +477,10 @@ func _build_interact_str() -> String:
 		var tgt: TeamData = _state.teams.get(_interact_target)
 		var tgt_name: String = "Team%d" % _interact_target if tgt else "未知"
 		lines.append("── %s 行動 ──" % tgt_name)
-		var actions: Array[String] = _player_cmd.get_available_actions(_state, _interact_target)
+		var actions: Array = _cached_snapshot.get("available_actions", [])
 		var row: String = ""
 		for i in range(actions.size()):
-			row += "[%d]%s  " % [i + 1, actions[i]]
+			row += "[%d]%s  " % [i + 1, actions[i].get("label", actions[i].get("action_id", ""))]
 			if (i + 1) % 4 == 0:
 				lines.append(row.strip_edges())
 				row = ""

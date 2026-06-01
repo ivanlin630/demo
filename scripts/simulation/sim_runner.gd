@@ -81,6 +81,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		if not state.player_forced_event.is_empty():
 			print("[PlayerCmd] forced_event 超時自動拒絕: %s" % str(state.player_forced_event))
 			state.player_forced_event = {}
+			state.player_forced_event_id = ""
 		_step1b_update_vision(state, near_teams, time_vision_mult)
 		_step1c_update_equipment(state, near_teams)
 		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
