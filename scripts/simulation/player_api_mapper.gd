@@ -397,6 +397,65 @@ static func map_snapshot_meta(focus_valid: bool, cursor_valid: bool) -> Dictiona
 
 # ── Full player snapshot ───────────────────────────────────────────────────────
 
+static func map_members_detail(state: WorldState) -> Array:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	if t == null:
+		return []
+	var member_ids: Array = []
+	if t.leader_id != -1:
+		member_ids.append(t.leader_id)
+	for mid in t.named_members:
+		if mid != -1 and not member_ids.has(mid):
+			member_ids.append(mid)
+	var result: Array = []
+	for mid in member_ids:
+		var m: PersonData = state.persons.get(mid)
+		if m == null:
+			continue
+		var hp_current: float = 0.0
+		var hp_max_total: float = 0.0
+		for part_data in m.body_parts.values():
+			hp_current += float(part_data.get("hp", 0.0))
+			hp_max_total += float(part_data.get("max_hp", 0.0))
+		var inventory: Array = []
+		if mid == pid:
+			inventory = state.player_state.get("inventory", []).duplicate()
+		result.append({
+			"id":         mid,
+			"name":       m.person_name,
+			"role":       "leader" if mid == t.leader_id else "member",
+			"stress":     m.stress,
+			"fear":       m.fear,
+			"loyalty":    m.loyalty,
+			"hp_current": hp_current,
+			"hp_max":     hp_max_total,
+			"attributes": m.attributes.duplicate(),
+			"values":     m.values.duplicate(),
+			"skills":     m.skills.duplicate(),
+			"body_parts": m.body_parts.duplicate(true),
+			"equipped":   m.equipment.duplicate(true),
+			"inventory":  inventory,
+		})
+	return result
+
+static func map_team_stats(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	if t == null:
+		return {}
+	var ms := MovementSystem.new()
+	return {
+		"food_qty":       int(t.resources.get("food", 0.0)),
+		"carry_weight":   ms.calc_total_weight(t),
+		"carry_capacity": ms.get_carry_capacity(t),
+		"member_count":   (1 if t.leader_id != -1 else 0) + t.named_members.size(),
+	}
+
 static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_member_id: int,
 		cursor_q: int, cursor_r: int, actions: Array) -> Dictionary:
 	var focus_valid: bool = focus_team_id != -1 and focus_member_id != -1 \
@@ -413,5 +472,7 @@ static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_mem
 		"location_context":   map_location_context(state, cursor_q, cursor_r),
 		"available_actions":  actions,
 		"inventory_state":    map_inventory_state(state),
-		"snapshot_meta":      map_snapshot_meta(focus_valid, cursor_valid)
+		"snapshot_meta":      map_snapshot_meta(focus_valid, cursor_valid),
+		"members_detail":     map_members_detail(state),
+		"team_stats":         map_team_stats(state),
 	}

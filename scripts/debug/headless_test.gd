@@ -1791,4 +1791,41 @@ func _run_sim_test() -> void:
 
 	print("SimBridge Player API Integration: ALL PASS")
 
+	# ── members_detail + team_stats in snapshot ──────────────────────────
+	print("\n--- members_detail / team_stats fields ---")
+	# Add a second named member to _sb_team to test multi-member case
+	var _sb_p2 := PersonData.new()
+	_sb_p2.id = 1; _sb_p2.person_name = "SBMember"; _sb_p2.team_id = 0
+	_sb_state.persons[1] = _sb_p2
+	_sb_team.leader_id = 0
+	_sb_team.named_members = [1]
+
+	var _snap2: Dictionary = _sb_bridge.query_player().get("data", {}).get("snapshot", {})
+	assert(_snap2.has("members_detail"), "snapshot has members_detail")
+	assert(_snap2.has("team_stats"), "snapshot has team_stats")
+	var _md: Array = _snap2.get("members_detail", [])
+	assert(_md.size() == 2, "members_detail has 2 entries, got %d" % _md.size())
+	assert(_md[0].get("role") == "leader", "first member is leader")
+	assert(_md[1].get("role") == "member", "second member is member")
+	assert(_md[0].has("hp_current"), "member has hp_current")
+	assert(_md[0].has("hp_max"), "member has hp_max")
+	assert(_md[0].has("attributes"), "member has attributes")
+	assert(_md[0].has("values"), "member has values")
+	assert(_md[0].has("skills"), "member has skills")
+	assert(_md[0].has("body_parts"), "member has body_parts")
+	assert(_md[0].has("equipped"), "member has equipped")
+	assert(_md[0].has("inventory"), "member has inventory")
+	var _ts: Dictionary = _snap2.get("team_stats", {})
+	assert(_ts.has("food_qty"), "team_stats has food_qty")
+	assert(_ts.has("carry_weight"), "team_stats has carry_weight")
+	assert(_ts.has("carry_capacity"), "team_stats has carry_capacity")
+	assert(_ts.has("member_count"), "team_stats has member_count")
+	assert(_ts.get("food_qty") == 100, "food_qty == 100, got %d" % _ts.get("food_qty"))
+	assert(_ts.get("carry_capacity") > 0.0, "carry_capacity > 0")
+	assert(_ts.get("member_count") == 2, "member_count == 2, got %d" % _ts.get("member_count"))
+	print("  [OK] members_detail: 2 members with all required fields")
+	print("  [OK] team_stats: food=%d cap=%.1f count=%d" % [
+		_ts.get("food_qty"), _ts.get("carry_capacity"), _ts.get("member_count")])
+	print("members_detail / team_stats: ALL PASS")
+
 	print("=== DONE ===")

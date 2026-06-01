@@ -21,6 +21,11 @@ var _interact_target: int  = -1
 # -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
 var _cached_snapshot: Dictionary = {}
 
+# member_mode state machine
+var _member_selection: int    = 0   # index into members_detail
+# submode: 0=quick_card 1=health 2=equipment 3=stats
+var _member_detail_submode: int = 0
+
 @onready var _map_label:   RichTextLabel = $VBox/HBox/MapLabel
 @onready var _state_label: Label         = $VBox/HBox/StateLabel
 @onready var _event_label: Label         = $VBox/EventLabel
@@ -91,6 +96,9 @@ func _input(event: InputEvent) -> void:
 		return
 	if _interact_mode:
 		_handle_interact_mode(event.keycode)
+		return
+	if _member_mode:
+		_handle_member_mode(event.keycode)
 		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
@@ -364,30 +372,56 @@ func _build_debug_str() -> String:
 
 	return "\n".join(lines)
 
+func _handle_member_mode(keycode: int) -> void:
+	var members: Array = _cached_snapshot.get("members_detail", [])
+	match keycode:
+		KEY_W:
+			if members.size() > 0:
+				_member_selection = posmod(_member_selection - 1, members.size())
+		KEY_S:
+			if members.size() > 0:
+				_member_selection = posmod(_member_selection + 1, members.size())
+		KEY_1:
+			_member_detail_submode = 0
+		KEY_2:
+			_member_detail_submode = 1
+		KEY_3:
+			_member_detail_submode = 2
+		KEY_4:
+			_member_detail_submode = 3
+		KEY_P, KEY_ESCAPE:
+			_member_mode = false
+	_refresh()
+
 func _build_member_str() -> String:
-	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
-	if ct.is_empty(): return "（無玩家 team）"
-	var lines: Array = []
-	lines.append("── 成員 %s ──" % ct.get("name", "Team?"))
+	var members: Array    = _cached_snapshot.get("members_detail", [])
+	var team_stats: Dictionary = _cached_snapshot.get("team_stats", {})
+	var ct: Dictionary    = _cached_snapshot.get("controlled_team", {})
+	if members.is_empty() and ct.is_empty():
+		return "（無玩家 team）"
 
-	for m in ct.get("members", []):
-		var role_tag: String = "[隊長]" if m.get("role", "") == "leader" else "[成員]"
-		var hand1: String = m.get("equipment", {}).get("hand_1", "")
-		if hand1.is_empty(): hand1 = "空"
-		lines.append("%s %s  裝備:%s  HP:%s" % [role_tag, m.get("name", "?"), hand1, m.get("hp_status", "?")])
+	# Clamp selection to valid range
+	if members.size() > 0:
+		_member_selection = clampi(_member_selection, 0, members.size() - 1)
 
-	var named_count: int = ct.get("members", []).size()
-	var pop: int = ct.get("population", 0)
-	var anon: int = maxi(0, pop - named_count)
-	var res: Dictionary = ct.get("resources", {})
-	var weapons: int = (res.get("weapon_melee_low",   0)
-		+ res.get("weapon_melee_high",  0)
-		+ res.get("weapon_ranged_low",  0)
-		+ res.get("weapon_ranged_high", 0))
-	var armed_rate: float = float(weapons) / maxf(float(pop), 1.0)
-	lines.append("匿名人口: %d  武裝率: %d%%" % [anon, int(armed_rate * 100)])
-	lines.append("── [P/Esc] 關閉 ──")
-	return "\n".join(lines)
+	var selected_member: Dictionary = members[_member_selection] if members.size() > 0 else {}
+
+	var detail_lines: Array = []
+	match _member_detail_submode:
+		0: detail_lines = TeamUiHelper.render_quick_card(selected_member)
+		1: detail_lines = TeamUiHelper.render_health_detail(selected_member)
+		2: detail_lines = TeamUiHelper.render_equipment_detail(selected_member)
+		3: detail_lines = TeamUiHelper.render_stats_detail(selected_member)
+
+	var team_name: String = ct.get("name", "Team?")
+	return TeamUiHelper.render_three_columns(
+		members,
+		_member_selection,
+		detail_lines,
+		team_stats,
+		team_name,
+		_state.world.current_tick
+	)
 
 func _get_team_takeable_items(_pt: TeamData) -> Array:
 	return ["weapon_melee_low", "weapon_melee_high", "weapon_ranged_low", "weapon_ranged_high",
