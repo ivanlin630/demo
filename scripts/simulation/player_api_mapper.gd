@@ -39,6 +39,10 @@ static func map_player_summary(state: WorldState) -> Dictionary:
 		}
 	var tid: int = p.team_id
 	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	var _skills: Dictionary = {}
+	for k in p.skills:
+		if float(p.skills[k]) > 0.01:
+			_skills[k] = float(p.skills[k])
 	return {
 		"player_exists": true,
 		"player_person_id": pid,
@@ -48,7 +52,9 @@ static func map_player_summary(state: WorldState) -> Dictionary:
 		"position": {"q": t.tile_pos.x, "r": t.tile_pos.y} if t != null else {"q": -1, "r": -1},
 		"encounter_active": state.encounter_active,
 		"has_pending_targets": not state.player_pending_targets.is_empty(),
-		"has_forced_interaction": not state.player_forced_event.is_empty()
+		"has_forced_interaction": not state.player_forced_event.is_empty(),
+		"hp_status": _hp_status(p),
+		"skills": _skills,
 	}
 
 # ── Controlled team ────────────────────────────────────────────────────────────
@@ -65,24 +71,46 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 	for mid in member_ids:
 		var m: PersonData = state.persons.get(mid)
 		if m != null:
-			members.append({"id": m.id, "name": m.person_name, "role": m.role})
+			members.append({
+				"id": m.id,
+				"name": m.person_name,
+				"role": m.role,
+				"hp_status": _hp_status(m),
+				"equipment": {
+					"hand_1": m.equipment.get("hand_1", {}).get("grade", ""),
+					"torso":  m.equipment.get("torso",  {}).get("grade", ""),
+				}
+			})
 	var mv: Vector2i = t.move_target
 	return {
 		"id": tid,
 		"name": "Team%d" % tid,
 		"faction": str(t.faction_id) if t.faction_id != -1 else "",
+		"faction_display": ("勢力%d" % t.faction_id) if t.faction_id >= 0 else "獨立",
 		"position": {"q": t.tile_pos.x, "r": t.tile_pos.y},
 		"members": members,
 		"resources": {
-			"food": int(t.resources.get("food", 0)),
-			"coin": int(t.resources.get("coin", 0)),
-			"material": int(t.resources.get("material", 0))
+			"food":               int(t.resources.get("food", 0)),
+			"coin":               int(t.resources.get("coin", 0)),
+			"material":           int(t.resources.get("material", 0)),
+			"weapon_melee_low":   int(t.resources.get("weapon_melee_low", 0)),
+			"weapon_melee_high":  int(t.resources.get("weapon_melee_high", 0)),
+			"weapon_ranged_low":  int(t.resources.get("weapon_ranged_low", 0)),
+			"weapon_ranged_high": int(t.resources.get("weapon_ranged_high", 0)),
+			"armor_low":          int(t.resources.get("armor_low", 0)),
+			"armor_high":         int(t.resources.get("armor_high", 0)),
+			"medicine":           int(t.resources.get("medicine", 0)),
+			"tools":              int(t.resources.get("tools", 0)),
 		},
 		"movement": {
 			"has_target": mv != Vector2i(-1, -1),
 			"target_q": mv.x,
 			"target_r": mv.y
 		},
+		"fatigue_pct":      int(t.fatigue * 100),
+		"population":       t.population,
+		"minor_population": t.minor_population,
+		"faction_id":       t.faction_id,
 		"task_summary": t.current_task
 	}
 
@@ -105,6 +133,8 @@ static func map_visible_teams(state: WorldState) -> Array:
 			"name": "Team%d" % dtid,
 			"relation": "unknown",
 			"position": {"q": dt.tile_pos.x, "r": dt.tile_pos.y},
+			"faction_display": ("勢力%d" % dt.faction_id) if dt.faction_id >= 0 else "獨立",
+			"population": dt.population,
 			"can_interact": not state.player_pending_targets.has(dtid),
 			"can_inspect": true,
 			"can_target": true
@@ -343,6 +373,20 @@ static func map_available_action(action_id: String, label: String, enabled: bool
 		"target_requirements": target_requirements,
 		"command_name": command_name, "command_args": command_args
 	}
+
+# ── Private helpers ───────────────────────────────────────────────────────────
+
+static func _hp_status(p: PersonData) -> String:
+	if p == null: return ""
+	var has_severe := false
+	var has_wound  := false
+	for part in p.body_parts.values():
+		var s: String = part.get("status", "healthy")
+		if s == "severed" or s == "critical": has_severe = true
+		elif s == "wounded": has_wound = true
+	if has_severe: return "重傷"
+	if has_wound:  return "輕傷"
+	return "正常"
 
 # ── Snapshot meta ──────────────────────────────────────────────────────────────
 

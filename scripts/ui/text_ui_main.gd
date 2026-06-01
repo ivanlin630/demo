@@ -43,6 +43,9 @@ func _refresh_snapshot() -> void:
 	var request: Dictionary = {}
 	if _interact_target >= 0:
 		request["focus_team_id"] = _interact_target
+	if _selected != Vector2i(-1, -1):
+		request["cursor_tile_q"] = _selected.x
+		request["cursor_tile_r"] = _selected.y
 	var _result := _bridge.query_player(request)
 	_cached_snapshot = _result.get("data", {}).get("snapshot", {})
 
@@ -247,45 +250,45 @@ func _get_hp_status(person: PersonData) -> String:
 	return "正常"
 
 func _visible_team_at(tile_key: int) -> int:
-	var discovered: Array = _state.team_discovered.get(_player_tid, [])
-	for tid in _state.teams:
-		if tid == _player_tid: continue
-		var t: TeamData = _state.teams[tid]
-		if t.tile_pos.x * 1000 + t.tile_pos.y == tile_key and discovered.has(tid):
-			return tid
+	var q: int = tile_key / 1000
+	var r: int = tile_key % 1000
+	for vt in _cached_snapshot.get("visible_teams", []):
+		var pos: Dictionary = vt.get("position", {})
+		if pos.get("q", -999) == q and pos.get("r", -999) == r:
+			return vt.get("id", -1)
 	return -1
 
 func _build_state_str() -> String:
-	var pt: TeamData = _state.teams.get(_player_tid)
-	if pt == null: return "（無玩家 team）"
+	var ct: Dictionary  = _cached_snapshot.get("controlled_team", {})
+	var ps: Dictionary  = _cached_snapshot.get("player_summary", {})
+	var lc: Dictionary  = _cached_snapshot.get("location_context", {})
+	if ct.is_empty(): return "（無玩家 team）"
 	var lines: Array = []
 
-	var faction_name: String = "獨立"
-	if pt.faction_id >= 0 and _state.factions.has(pt.faction_id):
-		faction_name = "勢力%d" % pt.faction_id
-	lines.append("Team%d @ (%d,%d) [%s]" % [_player_tid, pt.tile_pos.x, pt.tile_pos.y, faction_name])
-	lines.append("任務: %s  疲勞: %d%%" % [pt.current_task, int(pt.fatigue * 100)])
-	lines.append("人口: %d | 未成年: %d" % [pt.population, pt.minor_population])
+	var pos: Dictionary = ct.get("position", {})
+	lines.append("Team%d @ (%d,%d) [%s]" % [
+		ct.get("id", _player_tid),
+		pos.get("q", 0), pos.get("r", 0),
+		ct.get("faction_display", "?")])
+	lines.append("任務: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
+	lines.append("人口: %d | 未成年: %d" % [ct.get("population", 0), ct.get("minor_population", 0)])
 
-	var player: PersonData = _state.persons.get(_state.player_id)
-	if player:
+	if ps.get("player_exists", false):
 		lines.append("────────────────")
-		lines.append("玩家: %s  HP:%s" % [player.person_name, _get_hp_status(player)])
+		lines.append("玩家: %s  HP:%s" % [ps.get("player_name", ""), ps.get("hp_status", "")])
 		var skill_parts: Array = []
-		for sk in player.skills:
-			var sv: float = float(player.skills[sk])
-			if sv > 0.01:
-				skill_parts.append("%s:%.2f" % [sk, sv])
+		for sk in ps.get("skills", {}):
+			skill_parts.append("%s:%.2f" % [sk, float(ps["skills"][sk])])
 		if not skill_parts.is_empty():
 			lines.append("  " + " ".join(skill_parts))
 
-	var res: Dictionary = pt.resources
+	var res: Dictionary = ct.get("resources", {})
 	lines.append("────────────────")
 	lines.append("資源:")
-	lines.append("  食:%d 幣:%d 材:%d" % [int(res.get("food", 0)), int(res.get("coin", 0)), int(res.get("material", 0))])
-	lines.append("  低武:%d 高武:%d" % [int(res.get("weapon_melee_low", 0)), int(res.get("weapon_melee_high", 0))])
-	lines.append("  低甲:%d 高甲:%d" % [int(res.get("armor_low", 0)), int(res.get("armor_high", 0))])
-	lines.append("  藥:%d 工:%d" % [int(res.get("medicine", 0)), int(res.get("tools", 0))])
+	lines.append("  食:%d 幣:%d 材:%d" % [res.get("food", 0), res.get("coin", 0), res.get("material", 0)])
+	lines.append("  低武:%d 高武:%d" % [res.get("weapon_melee_low", 0), res.get("weapon_melee_high", 0)])
+	lines.append("  低甲:%d 高甲:%d" % [res.get("armor_low", 0), res.get("armor_high", 0)])
+	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])
 
 	if _selected != Vector2i(-1, -1):
 		var sel_key: int = _selected.x * 1000 + _selected.y
@@ -294,11 +297,20 @@ func _build_state_str() -> String:
 		if sel_tile:
 			lines.append("選中: (%d,%d) %s" % [_selected.x, _selected.y, sel_tile.terrain])
 			lines.append("  農:%.0f%%  食:%d" % [sel_tile.productivity * 100, int(sel_tile.resources.get("food", 0))])
-			var sel_tid: int = _visible_team_at(sel_key)
-			if sel_tid >= 0:
-				var sel_t: TeamData = _state.teams[sel_tid]
-				var sel_f: String   = "獨立" if sel_t.faction_id < 0 else "勢力%d" % sel_t.faction_id
-				lines.append("  Team%d [%s] 人口:%d" % [sel_tid, sel_f, sel_t.population])
+			# 查 location_context occupants（需已在 _refresh_snapshot 傳 cursor_tile_q/r）
+			var occ: Array = lc.get("occupants", [])
+			if not occ.is_empty():
+				var vts: Array = _cached_snapshot.get("visible_teams", [])
+				for o in occ:
+					var oid: int = o.get("team_id", -1)
+					var f_display: String = "?"
+					var pop: int = 0
+					for vt in vts:
+						if vt.get("id", -1) == oid:
+							f_display = vt.get("faction_display", "?")
+							pop = vt.get("population", 0)
+							break
+					lines.append("  %s [%s] 人口:%d" % [o.get("team_name", "Team?"), f_display, pop])
 		else:
 			lines.append("選中: (%d,%d) [無效格]" % [_selected.x, _selected.y])
 
@@ -345,31 +357,26 @@ func _build_debug_str() -> String:
 	return "\n".join(lines)
 
 func _build_member_str() -> String:
-	var pt: TeamData = _state.teams.get(_player_tid)
-	if pt == null: return "（無玩家 team）"
+	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
+	if ct.is_empty(): return "（無玩家 team）"
 	var lines: Array = []
-	lines.append("── 成員 Team%d ──" % _player_tid)
+	lines.append("── 成員 %s ──" % ct.get("name", "Team?"))
 
-	var leader: PersonData = _state.persons.get(pt.leader_id)
-	if leader:
-		var hand1: String = leader.equipment.get("hand_1", {}).get("grade", "")
+	for m in ct.get("members", []):
+		var role_tag: String = "[隊長]" if m.get("role", "") == "leader" else "[成員]"
+		var hand1: String = m.get("equipment", {}).get("hand_1", "")
 		if hand1.is_empty(): hand1 = "空"
-		lines.append("[隊長] %s  裝備:%s  HP:%s" % [leader.person_name, hand1, _get_hp_status(leader)])
+		lines.append("%s %s  裝備:%s  HP:%s" % [role_tag, m.get("name", "?"), hand1, m.get("hp_status", "?")])
 
-	for pid in pt.named_members:
-		var p: PersonData = _state.persons.get(pid)
-		if p == null: continue
-		var hand1: String = p.equipment.get("hand_1", {}).get("grade", "")
-		if hand1.is_empty(): hand1 = "空"
-		lines.append("[成員] %s  裝備:%s  HP:%s" % [p.person_name, hand1, _get_hp_status(p)])
-
-	var named_count: int = (1 if pt.leader_id >= 0 else 0) + pt.named_members.size()
-	var anon: int = maxi(0, pt.population - named_count)
-	var weapons: int = (int(pt.resources.get("weapon_melee_low",   0))
-		+ int(pt.resources.get("weapon_melee_high",  0))
-		+ int(pt.resources.get("weapon_ranged_low",  0))
-		+ int(pt.resources.get("weapon_ranged_high", 0)))
-	var armed_rate: float = float(weapons) / maxf(float(pt.population), 1.0)
+	var named_count: int = ct.get("members", []).size()
+	var pop: int = ct.get("population", 0)
+	var anon: int = maxi(0, pop - named_count)
+	var res: Dictionary = ct.get("resources", {})
+	var weapons: int = (res.get("weapon_melee_low",   0)
+		+ res.get("weapon_melee_high",  0)
+		+ res.get("weapon_ranged_low",  0)
+		+ res.get("weapon_ranged_high", 0))
+	var armed_rate: float = float(weapons) / maxf(float(pop), 1.0)
 	lines.append("匿名人口: %d  武裝率: %d%%" % [anon, int(armed_rate * 100)])
 	lines.append("── [P/Esc] 關閉 ──")
 	return "\n".join(lines)
@@ -379,36 +386,39 @@ func _get_team_takeable_items(_pt: TeamData) -> Array:
 		"armor_low", "armor_high", "medicine", "tools"]
 
 func _build_inv_str() -> String:
-	var player: PersonData = _state.persons.get(_state.player_id)
-	var pt: TeamData       = _state.teams.get(_player_tid)
-	if player == null or pt == null: return "（無資料）"
+	var ct: Dictionary        = _cached_snapshot.get("controlled_team", {})
+	var inv_state: Dictionary = _cached_snapshot.get("inventory_state", {})
+	if ct.is_empty() or inv_state.is_empty(): return "（無資料）"
+	var equipped: Dictionary = inv_state.get("equipped_items", {})
 	var lines: Array = []
 
 	lines.append("── 裝備 ──")
-	var h1: String = player.equipment.get("hand_1", {}).get("grade", "")
-	var h2: String = player.equipment.get("hand_2", {}).get("grade", "")
+	var h1: String = equipped.get("hand_1", "")
+	var h2: String = equipped.get("hand_2", "")
 	lines.append("  右手:%s  左手:%s" % [h1 if not h1.is_empty() else "空", h2 if not h2.is_empty() else "空"])
+	# body_slots 目前 mapper 未 expose，仍直讀 _state.persons
+	var player: PersonData = _state.persons.get(_state.player_id)
 	var body_slots: Array = ["head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"]
 	var body_names: Array = ["頭", "胸", "右臂", "左臂", "右腿", "左腿"]
 	var body_strs: Array = []
 	for i in range(body_slots.size()):
-		var g: String = player.equipment.get(body_slots[i], {}).get("grade", "")
+		var g: String = player.equipment.get(body_slots[i], {}).get("grade", "") if player else ""
 		body_strs.append("%s:%s" % [body_names[i], g if not g.is_empty() else "空"])
 	lines.append("  " + " ".join(body_strs))
 
-	var inv: Array = _cached_snapshot.get("inventory_state", {}).get("inventory_items", [])
+	var inv: Array = inv_state.get("inventory_items", [])
 	lines.append("── 背包 (%d/%d) ──" % [inv.size(), PlayerSystem.PLAYER_INVENTORY_MAX_SLOTS])
 	for i in range(inv.size()):
 		var item = inv[i]
 		var prefix: String = "[%d]*" % (i + 1) if _inv_selection == i else "[%d]" % (i + 1)
 		lines.append("  %s %s × %d" % [prefix, item.get("grade", "?"), item.get("qty", 0)])
 
-	var team_items: Array = _get_team_takeable_items(pt)
+	var team_items: Array = _get_team_takeable_items(null)
 	lines.append("── 從 Team 取出 ──")
 	for i in range(team_items.size()):
 		var idx: int = inv.size() + i
 		var prefix: String = "[T%d]*" % (i + 1) if _inv_selection == idx else "[T%d]" % (i + 1)
-		var qty: int = int(pt.resources.get(team_items[i], 0))
+		var qty: int = ct.get("resources", {}).get(team_items[i], 0)
 		lines.append("  %s %s: %d%s" % [prefix, team_items[i], qty, "" if qty > 0 else "（灰）"])
 
 	lines.append("── [數字]選取 [E]裝備 [S]存入 [G]取出 [I/Esc]關閉 ──")
