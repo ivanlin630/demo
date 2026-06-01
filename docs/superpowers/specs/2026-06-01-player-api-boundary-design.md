@@ -215,8 +215,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
         "team_id": int,
         "member_id": int,
         "tile_q": int,
-        "tile_r": int,
-        "interaction_id": String
+        "tile_r": int
     }
 }
 ```
@@ -840,6 +839,24 @@ Query API 的 envelope 失敗規則：
 - `get_available_actions` 若無玩家或無受控 team，回 `ok=false`；若只有 context 不適用，回 `ok=true` 且 `data.actions = []`。
 - 不使用「成功但資料為錯誤字典」的混合模式。
 
+fail-vs-sentinel carve-out：
+- 只有 `get_player_snapshot` 允許對 stale UI-local 狀態降級成 sentinel sub-DTO。
+- 允許降級的欄位只有 `focused_member` 與 `location_context`。
+- 其他 query 一律採明確錯誤，不回 sentinel 假資料。
+- `forced_interaction` 不屬於 stale local state；若世界狀態中無 forced interaction，回其空 sentinel shape，這是正常狀態，不是錯誤。
+
+query decision table：
+
+| Query | case | 回應 |
+|---|---|---|
+| `get_player_snapshot` | stale focus | `ok=true` + sentinel `focused_member` + `snapshot_meta.focus_valid=false` |
+| `get_player_snapshot` | stale/invalid cursor tile | `ok=true` + hidden `location_context` + `snapshot_meta.cursor_valid=false` |
+| `get_team_details` | team not visible | `ok=false`, `code=not_visible` |
+| `get_member_details` | team/member not visible | `ok=false`, `code=not_visible` |
+| `get_available_actions` | no player / no team | `ok=false`, `code=no_player/no_controlled_team` |
+| `get_available_actions` | all context sentinel | `ok=true`, `data.actions=[]` |
+| `get_available_actions` | `forced_interaction_id` 指向不存在 forced interaction | `ok=false`, `code=forced_response_missing` |
+
 錯誤碼原則：
 - 穩定、可比對。
 - 描述原因，不描述 UI 呈現。
@@ -847,6 +864,7 @@ Query API 的 envelope 失敗規則：
 
 ID 型別規則：
 - public API 的 `team_id`、`member_id` 一律使用 `int`。
+- `member_id` 視為 team-scoped，因此 focus/detail 查詢需要同時帶 `team_id` 與 `member_id`。
 - 若 UI 端有字串化顯示，僅限顯示層，不回寫到 API 輸入。
 - 若收到錯型別 id，回 `invalid_request`。
 
