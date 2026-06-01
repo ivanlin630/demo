@@ -172,19 +172,19 @@ func _add_item_action_buttons(row: Node, grade: String, team: TeamData) -> void:
 	row.add_child(store_btn)
 
 func _do_equip(grade: String, slot: String) -> void:
-	PlayerSystem.new().equip_item(_bridge.get_state(), slot, grade)
+	_bridge.command_player("equip_item", {"slot_id": slot, "item_grade": grade})
 	_close_current(); show_inventory()
 
 func _do_unequip(slot: String) -> void:
-	PlayerSystem.new().unequip_item(_bridge.get_state(), slot)
+	_bridge.command_player("unequip_item", {"slot_id": slot})
 	_close_current(); show_inventory()
 
 func _do_take_from_team(grade: String, qty: int) -> void:
-	PlayerSystem.new().take_from_team(_bridge.get_state(), grade, qty)
+	_bridge.command_player("take_team_item", {"item_grade": grade, "qty": qty})
 	_close_current(); show_inventory()
 
 func _do_store_to_team(grade: String, qty: int) -> void:
-	PlayerSystem.new().deposit_to_team(_bridge.get_state(), grade, qty)
+	_bridge.command_player("deposit_item", {"item_grade": grade, "qty": qty})
 	_close_current(); show_inventory()
 
 # ── base popup builder ─────────────────────────────────────

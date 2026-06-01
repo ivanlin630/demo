@@ -86,12 +86,11 @@ func _on_set_move_target(pos: Vector2i) -> void:
 	if not state.world.tiles.has(pos.x * 1000 + pos.y):
 		print("[Main] 移動目標 %s 不在地圖內，忽略" % str(pos))
 		return
-	var ptid: int = _bridge.get_player_team_id()
-	if ptid < 0: return
-	var team: TeamData = state.teams.get(ptid)
-	if team:
-		team.move_target = pos
-		print("[Main] move_target set Team%d → (%d,%d)" % [ptid, pos.x, pos.y])
+	var result: Dictionary = _bridge.command_player("move_to", {"tile_q": pos.x, "tile_r": pos.y})
+	if result.get("ok"):
+		print("[Main] move_target set → (%d,%d)" % [pos.x, pos.y])
+	else:
+		print("[Main] move_target failed: %s" % result.get("message", ""))
 	_debug.refresh()
 
 func _on_tick_advanced(_events: Array) -> void:

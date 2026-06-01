@@ -20,6 +20,7 @@ var _interact_mode:   bool = false
 var _interact_target: int  = -1
 # -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
 var _player_cmd: PlayerCommandSystem = PlayerCommandSystem.new()
+var _cached_snapshot: Dictionary = {}
 
 @onready var _map_label:   RichTextLabel = $VBox/HBox/MapLabel
 @onready var _state_label: Label         = $VBox/HBox/StateLabel
@@ -40,6 +41,9 @@ func _ready() -> void:
 	var pt: TeamData = _state.teams[_player_tid]
 	_cursor = pt.tile_pos
 	_refresh()
+
+func _refresh_snapshot() -> void:
+	_cached_snapshot = _bridge.query_player()
 
 func _process(_delta: float) -> void:
 	if not _bridge.is_advancing(): return
@@ -62,7 +66,7 @@ func _process(_delta: float) -> void:
 	elif not _input_bar.text.begins_with("移動中"):
 		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _state.world.current_tick
 	_refresh()
-	if _state.encounter_active:
+	if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
 		_bridge.cancel_advance()
 
 func _input(event: InputEvent) -> void:
@@ -86,13 +90,13 @@ func _input(event: InputEvent) -> void:
 			_selected = _cursor
 			_refresh()
 		KEY_M:
-			var r: Dictionary = _player_cmd.move_to(_state, _cursor)
+			var r: Dictionary = _bridge.command_player("move_to", {"tile_q": _cursor.x, "tile_r": _cursor.y})
 			if r.get("ok"):
-				_log_event(r.get("msg", ""))
+				_log_event(r.get("message", ""))
 				_bridge.request_advance(99999)
 				_input_bar.text = "移動中 [Esc]停止"
 			else:
-				_log_event(r.get("msg", "移動失敗"))
+				_log_event(r.get("message", "移動失敗"))
 			_refresh()
 		KEY_SPACE:
 			_bridge.request_advance(WorldState.TICKS_PER_DAY)
@@ -166,10 +170,9 @@ func _handle_input_mode(keycode: int) -> void:
 			_refresh()
 
 func _handle_inv_mode(keycode: int) -> void:
-	var inv: Array         = _state.player_state.get("inventory", [])
+	var inv: Array         = _cached_snapshot.get("inventory_state", {}).get("inventory_items", [])
 	var pt: TeamData       = _state.teams.get(_player_tid)
 	var team_items: Array  = _get_team_takeable_items(pt)
-	var player_sys         := PlayerSystem.new()
 
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		var num: int  = keycode - KEY_1
@@ -184,18 +187,18 @@ func _handle_inv_mode(keycode: int) -> void:
 			if _inv_selection >= 0 and _inv_selection < inv.size():
 				var grade: String = inv[_inv_selection].get("grade", "")
 				var slot: String  = "torso" if grade.begins_with("armor") else "hand_1"
-				player_sys.equip_item(_state, slot, grade)
+				_bridge.command_player("equip_item", {"slot_id": slot, "item_grade": grade})
 				_inv_selection = -1
 		KEY_S:
 			if _inv_selection >= 0 and _inv_selection < inv.size():
 				var grade: String = inv[_inv_selection].get("grade", "")
 				var qty: int      = inv[_inv_selection].get("qty", 0)
-				player_sys.deposit_to_team(_state, grade, qty)
+				_bridge.command_player("deposit_item", {"item_grade": grade, "qty": qty})
 				_inv_selection = -1
 		KEY_G:
 			var team_idx: int = _inv_selection - inv.size()
 			if team_idx >= 0 and team_idx < team_items.size():
-				player_sys.take_from_team(_state, team_items[team_idx], 1)
+				_bridge.command_player("take_team_item", {"item_grade": team_items[team_idx], "qty": 1})
 				_inv_selection = -1
 		KEY_I, KEY_ESCAPE:
 			_inv_mode = false
@@ -210,6 +213,7 @@ func _move_cursor(delta: Vector2i) -> void:
 	_refresh()
 
 func _refresh() -> void:
+	_refresh_snapshot()
 	_map_label.text  = TextMapRenderer.render(_state, _player_tid, _cursor)
 	_state_label.text = _build_state_str()
 	_debug_bar.text  = _build_debug_str()
@@ -301,8 +305,8 @@ func _build_state_str() -> String:
 	lines.append("Tick: %d  (Day %d)" % [
 		_state.world.current_tick,
 		_state.world.current_tick / WorldState.TICKS_PER_DAY])
-	var _pending_n: int = _state.player_pending_targets.size()
-	var _forced_n:  int = 0 if _state.player_forced_event.is_empty() else 1
+	var _pending_n: int = _cached_snapshot.get("pending_targets", []).size()
+	var _forced_n:  int = 0 if _cached_snapshot.get("forced_interaction", {}).get("interaction_id", "").is_empty() else 1
 	if _pending_n > 0 or _forced_n > 0:
 		var _hint: String = "[T] 互動"
 		if _pending_n > 0: _hint += ": 同格%d隊" % _pending_n
@@ -391,7 +395,7 @@ func _build_inv_str() -> String:
 		body_strs.append("%s:%s" % [body_names[i], g if not g.is_empty() else "空"])
 	lines.append("  " + " ".join(body_strs))
 
-	var inv: Array = _state.player_state.get("inventory", [])
+	var inv: Array = _cached_snapshot.get("inventory_state", {}).get("inventory_items", [])
 	lines.append("── 背包 (%d/%d) ──" % [inv.size(), PlayerSystem.PLAYER_INVENTORY_MAX_SLOTS])
 	for i in range(inv.size()):
 		var item = inv[i]
@@ -433,32 +437,34 @@ func _handle_interact_mode(keycode: int) -> void:
 	if _interact_target >= 0:
 		var actions: Array[String] = _player_cmd.get_available_actions(_state, _interact_target)
 		if num < actions.size():
-			var result: Dictionary = _player_cmd.execute_action(_state, _interact_target, actions[num])
-			_log_event("[互動] %s" % result.get("msg", ""))
+			var result: Dictionary = _bridge.command_player("execute_action", {"target_id": _interact_target, "action_id": actions[num]})
+			_log_event("[互動] %s" % result.get("message", ""))
 			_interact_target = -1   # 回到目標清單
 			# 若行動觸發遭遇戰，關閉 interact_mode
-			if _state.encounter_active:
+			_refresh_snapshot()
+			if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
 				_interact_mode = false
 		_refresh()
 		return
 
 	# ── 目標選擇階段 ──
-	var fe: Dictionary = _state.player_forced_event
-	var fe_opts: Array[String] = _player_cmd.get_forced_response_options(_state)
-	var fe_count: int = fe_opts.size()
+	var fi: Dictionary = _cached_snapshot.get("forced_interaction", {})
+	var fi_responses: Array = fi.get("responses", [])
+	var fe_count: int = fi_responses.size()
 
 	# forced_event 回應
-	if not fe.is_empty() and num < fe_count:
-		var response: String = fe_opts[num]
-		var result: Dictionary = _player_cmd.respond_to_forced(_state, response)
-		_log_event("[強制互動] %s" % result.get("msg", ""))
+	if not fi.get("interaction_id", "").is_empty() and num < fe_count:
+		var resp_args: Dictionary = fi_responses[num].get("command_args", {})
+		var result: Dictionary = _bridge.command_player("respond_to_forced", resp_args)
+		_log_event("[強制互動] %s" % result.get("message", ""))
 		_refresh()
 		return
 
 	# pending_targets 選擇
 	var pending_idx: int = num - fe_count
-	if pending_idx >= 0 and pending_idx < _state.player_pending_targets.size():
-		_interact_target = _state.player_pending_targets[pending_idx]
+	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
+	if pending_idx >= 0 and pending_idx < pending_tgts.size():
+		_interact_target = pending_tgts[pending_idx].get("target_id", -1)
 		_refresh()
 
 func _build_interact_str() -> String:
@@ -483,29 +489,24 @@ func _build_interact_str() -> String:
 
 	# 目標選擇階段
 	lines.append("── 互動 ──")
-	var fe: Dictionary = _state.player_forced_event
+	var fi: Dictionary = _cached_snapshot.get("forced_interaction", {})
+	var fi_has_event: bool = not fi.get("interaction_id", "").is_empty()
 	var fe_count: int = 0
 
-	if not fe.is_empty():
-		var from_id: int     = fe.get("from_id", -1)
-		var action: String   = fe.get("action", "")
-		var proposal: String = fe.get("proposal", "")
-		var opts: Array[String] = _player_cmd.get_forced_response_options(_state)
+	if fi_has_event:
+		var responses: Array = fi.get("responses", [])
 		var opts_str: String = ""
-		for i in range(opts.size()):
-			opts_str += " [%d]%s" % [i + 1, opts[i]]
+		for i in range(responses.size()):
+			opts_str += " [%d]%s" % [i + 1, responses[i].get("label", "?")]
 			fe_count += 1
-		var desc: String
-		match action:
-			"diplomacy": desc = "Team%d 要求 %s" % [from_id, proposal]
-			"extort":    desc = "Team%d 要求勒索" % from_id
-			_:           desc = "Team%d 強制事件" % from_id
-		lines.append("[!] %s →%s" % [desc, opts_str])
+		lines.append("[!] %s →%s" % [fi.get("message", "強制事件"), opts_str])
 
+	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
 	var idx: int = fe_count + 1
-	if _state.player_pending_targets.is_empty() and fe.is_empty():
+	if pending_tgts.is_empty() and not fi_has_event:
 		lines.append("（無可互動目標）")
-	for tid in _state.player_pending_targets:
+	for target_info in pending_tgts:
+		var tid: int = target_info.get("target_id", -1)
 		var t: TeamData = _state.teams.get(tid)
 		if t == null: continue
 		var faction_str: String = "獨立" if t.faction_id < 0 else "勢力%d" % t.faction_id
