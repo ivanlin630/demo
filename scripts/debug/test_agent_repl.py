@@ -6,7 +6,7 @@ import subprocess, json, sys, time, socket, threading
 
 GODOT = r"A:\GDS\demo\tools\godot\Godot_v4.2.2-stable_win64_console.exe"
 SCRIPT = "scripts/debug/agent_repl.gd"
-CWD = r"A:\GDS\demo\.claude\worktrees\feat+agent-repl"
+CWD = r"A:\GDS\demo"
 
 
 # ── connection helpers ──────────────────────────────────────────────────────
