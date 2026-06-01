@@ -429,7 +429,7 @@ idle. Fixes encounter_view.gd player input having no effect.
 
 ---
 
-
+### Task 6: `encounter_query` 和 `encounter_step` 命令
 
 **Files:**
 - Modify: `scripts/debug/agent_repl.gd`
@@ -538,7 +538,10 @@ func _handle_encounter_step(cmd: Dictionary) -> Dictionary:
                     return {"ok": false, "code": "invalid_target",
                         "error": "target_idx %d 超出範圍" % tidx}
                 var target: Dictionary = state.encounter_units[tidx]
-                if target.get("has_exited", false) or _bridge._runner._encounter_system.is_dead(target, state):
+                # is_dead 判斷：torso status == "severed"（與 EncounterSystem.is_dead 一致）
+                var torso: Dictionary = target.get("body_parts", {}).get("torso", {})
+                var target_dead: bool = torso.get("status", "healthy") == "severed"
+                if target.get("has_exited", false) or target_dead:
                     return {"ok": false, "code": "invalid_target", "error": "目標已死亡或離場"}
                 player_unit["pending_action"] = {"type": "attack", "target_idx": tidx}
             _:
