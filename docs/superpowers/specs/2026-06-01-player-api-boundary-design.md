@@ -791,6 +791,8 @@ interaction routing 規則：
 - `respond_to_forced(response_id)` 專責處理 `forced_interaction.responses[*]`。
 - `execute_action` 不接受 `target.kind = "interaction"`；其合法 target 只限 `none | team | member | tile`。
 - 非 forced 的一般互動，透過 `execute_action` + `team/member` target 處理。
+- `response_id` 只要求在「目前 active 的單一 forced interaction」內唯一。
+- `respond_to_forced` 會用目前 world state 的 active forced interaction 驗證 `response_id`；若互動已消失或 response 不存在，分別回 `forced_response_missing` / `forced_response_invalid`。
 
 canonical envelope examples：
 
@@ -888,6 +890,8 @@ query decision table：
 | `get_available_actions` | all context sentinel | `ok=true`, `data.actions=[]` |
 | `get_available_actions` | `member_id != -1` but `team_id == -1` | `ok=false`, `code=invalid_focus` |
 | `get_available_actions` | only one of `tile_q` / `tile_r` is `-1` | `ok=false`, `code=invalid_request` |
+| `get_available_actions` | tile 不存在 | `ok=false`, `code=invalid_tile` |
+| `get_available_actions` | tile 存在但目前 hidden | `ok=true`, `data.actions=[]` |
 | `get_available_actions` | stale/non-visible `team_id` / `member_id` | `ok=true`, `data.actions=[]` |
 | `get_available_actions` | `forced_interaction_id` 指向不存在 forced interaction | `ok=false`, `code=forced_response_missing` |
 
@@ -947,6 +951,11 @@ command 驗證規則：
   - `player_command_api.gd` 對外提供玩家 command。
   - `player_command_system.gd` 降為 internal bridge / legacy logic owner。
   - `SimRunner` 只可呼叫 internal bridge 的 `on_player_team_moved(state)`、`on_forced_interaction_timeout(state)`，不可直接讀寫 `player_pending_targets` / `player_forced_event`。
+  - `sim_bridge.gd` 對 player-facing UI 的 end-state public interface 只保留：
+    - `query_player(request) -> Dictionary`  # 代理 `player_query_api.get_player_snapshot`
+    - `command_player(name: String, args: Dictionary) -> Dictionary`  # 代理 `player_command_api`
+    - `advance_ticks(n: int) -> Array`
+  - `sim_bridge.gd` 的 `get_state()` 不再提供給 player-facing UI 消費；若暫時保留，只視為 internal/testing escape hatch，不可作為新 UI 邊界。
 
 ---
 
