@@ -67,7 +67,12 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 	if t == null:
 		return {}
 	var members: Array = []
-	var member_ids: Array = [t.leader_id] + t.named_members
+	var member_ids: Array = []
+	if t.leader_id != -1:
+		member_ids.append(t.leader_id)
+	for mid in t.named_members:
+		if mid != -1 and not member_ids.has(mid):
+			member_ids.append(mid)
 	for mid in member_ids:
 		var m: PersonData = state.persons.get(mid)
 		if m != null:
@@ -250,9 +255,6 @@ static func map_location_context(state: WorldState, tile_q: int, tile_r: int) ->
 	var pid: int = state.player_id
 	var p: PersonData = state.persons.get(pid) if pid != -1 else null
 	var ptid: int = p.team_id if p != null else -1
-	var known: Array = state.team_known.get(ptid, []) if ptid != -1 else []
-	if not known.has(tile_key):
-		return not_visible
 	var tile: HexTileData = state.world.tiles[tile_key] as HexTileData
 	var pt: TeamData = state.teams.get(ptid) if ptid != -1 else null
 	var is_here: bool = pt != null and pt.tile_pos == Vector2i(tile_q, tile_r)

@@ -44,6 +44,7 @@ scripts/simulation/
   player_command_api.gd
   player_api_mapper.gd
   player_command_system.gd   # internal bridge / legacy player state hooks
+  player_system.gd           # internal inventory/helper logic retained in phase 1
 ```
 
 ### `player_query_api.gd`
@@ -95,6 +96,24 @@ ownership 規則：
 - `player_command_api.gd` 只負責 public contract 驗證、dispatch 到 internal bridge、以及回傳標準 result。
 - `sim_runner.gd` 只能呼叫上述 internal hook，不直接讀寫玩家 UI 狀態欄位。
 - UI / playtest / `sim_bridge.gd` 都不可直接呼叫 `player_command_system.gd`。
+
+### `player_system.gd`
+
+責任：
+- phase 1 保留為 internal helper，承接既有 inventory / equipment 細節邏輯。
+- 不再作為 player-facing API，也不再讓 UI 直接 new 出來呼叫。
+
+最小 internal interface：
+- `equip_item(...)`
+- `unequip_item(...)`
+- `deposit_to_team(...)`
+- `take_from_team(...)`
+
+phase 1 fate：
+- `player_system.gd` **不刪除、不改名、不吸收到 `player_command_system.gd`**。
+- `player_command_system.gd` 負責 orchestration 與 player-state hook。
+- `player_system.gd` 負責 inventory/equipment 細節 helper。
+- 若未來要合併，視為 phase 2 refactor，不在本次 spec。
 
 forced interaction ID 規則：
 - `WorldState` 新增 `player_forced_event_id: String`。
@@ -1041,6 +1060,7 @@ command 驗證規則：
 - `main.gd` 不直接寫 `team.move_target`。
 - inventory mode 不直接呼叫 `PlayerSystem.new().equip_item()`、`deposit_to_team()`、`take_from_team()`。
 - popup inventory UI 不直接呼叫 `PlayerSystem.new().unequip_item()`。
+- `player_system.gd` 改為只被 `player_command_system.gd` / `player_command_api.gd` 間接使用，不再被 UI 直接依賴。
 - 若還有非玩家系統需要直接碰 state，不在本次範圍內。
 
 ---
@@ -1051,6 +1071,7 @@ command 驗證規則：
 - 可重用既有操作邏輯，但 public surface 要整理成明確 query / command 分層。
 - 若某些 inspect helper 目前散在 UI 或 player system，應收回 query API。
 - 這次重點不是改變模擬結果，而是把玩家視角邊界集中、穩定化。
+- `player_system.gd` 在 phase 1 保留原檔，定位為 internal inventory/helper；不直接暴露給 UI。
 - `SimRunner` 仍負責 tick 順序，但玩家專屬狀態清理（例如 clear pending targets、forced interaction timeout cleanup）要透過 player command/internal bridge 單一入口處理，避免 `SimRunner` 直接依賴玩家 UI 狀態欄位細節。
 - concrete owner 定義如下：
   - `player_command_api.gd` 對外提供玩家 command。

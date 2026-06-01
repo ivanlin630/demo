@@ -88,6 +88,20 @@ func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Arr
 			if other.tile_pos != arrived.tile_pos:
 				continue
 			_try_interact(state, arrived_id, other_id)
+	# 玩家靜止時也掃描同格 NPC，讓 ignore 後可再次互動
+	if state.player_id != -1:
+		var pp: PersonData = state.persons.get(state.player_id)
+		if pp != null:
+			var ptid: int = pp.team_id
+			var pt: TeamData = state.teams.get(ptid)
+			if pt != null and not arrived_ids.has(ptid):
+				for other_id in state.teams:
+					if other_id == ptid:
+						continue
+					var other: TeamData = state.teams[other_id]
+					if other.tile_pos != pt.tile_pos:
+						continue
+					_try_interact(state, ptid, other_id)
 	HealthSystem.tick_natural_regen(state)
 
 # ──────── 整備值恢復 + 傷兵治療（交戰中均不進行） ────────
