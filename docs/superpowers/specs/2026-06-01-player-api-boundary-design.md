@@ -26,7 +26,7 @@
 - **玩家入口只看 API**：UI / playtest 只依賴 query DTO 與 command result。
 - **模擬狀態只留在 API 內部**：`WorldState` 與各種 data class 不外漏。
 - **Query / Command 分離**：讀取與操作分檔，避免單一 facade 過胖。
-- **可漸進升級**：未來若引入 snapshot store / command bus，盡量不改 UI 介面。
+- **可漸進升級**：未來若引入 snapshot store / command bus（即 Query 改讀快照、Command 改走 dispatcher），盡量不改 UI 介面。
 - **禁止直接 script outcome**：API 只暴露由既有 NPC / team 狀態推導出的可見結果，不新增繞過模擬規則的捷徑。
 
 ---
@@ -544,7 +544,8 @@ canonical 規則：
         "enabled": bool,
         "disabled_reason": String,
         "target_requirements": Dictionary,
-        "command_name": String
+        "command_name": String,
+        "command_args": Dictionary
     }
 ]
 ```
@@ -557,6 +558,166 @@ canonical 規則：
     "team_takeable_items": Array[Dictionary], # [{grade, qty}]
     "equipped_items": Dictionary,
     "available_actions": Array[Dictionary]
+}
+```
+
+detail query canonical shapes：
+
+```gdscript
+# get_team_details(team_id)
+{
+    "ok": bool,
+    "code": String,
+    "message": String,
+    "data": {
+        "team": {
+            "id": int,
+            "name": String,
+            "faction": String,
+            "position": {"q": int, "r": int},
+            "members": Array[Dictionary],
+            "resources": Dictionary,
+            "interaction_options": Array[Dictionary]
+        }
+    }
+}
+
+# get_member_details(team_id, member_id)
+{
+    "ok": bool,
+    "code": String,
+    "message": String,
+    "data": {
+        "member": {
+            "id": int,
+            "name": String,
+            "team_id": int,
+            "team_name": String,
+            "role": String,
+            "status": Dictionary,
+            "available_actions": Array[Dictionary]
+        }
+    }
+}
+
+# get_location_context(tile_q, tile_r)
+{
+    "ok": bool,
+    "code": String,
+    "message": String,
+    "data": {
+        "location": {
+            "tile": {"q": int, "r": int},
+            "visibility_state": String,
+            "terrain": Variant,
+            "settlement": Variant,
+            "occupants": Array[Dictionary],
+            "is_player_here": bool,
+            "hints": Array[String]
+        }
+    }
+}
+
+# get_available_actions(request)
+{
+    "ok": bool,
+    "code": String,
+    "message": String,
+    "data": {
+        "actions": Array[Dictionary]
+    }
+}
+```
+
+command result canonical shapes：
+
+```gdscript
+# success
+{
+    "ok": true,
+    "code": String,        # "ok"
+    "message": String,
+    "payload": Dictionary
+}
+
+# failure
+{
+    "ok": false,
+    "code": String,
+    "message": String,
+    "payload": {}
+}
+```
+
+各 command success payload schema：
+
+```gdscript
+# move_to
+{"move_target": {"q": int, "r": int}, "refresh_required": true}
+
+# cancel_move
+{"move_cancelled": true, "refresh_required": true}
+
+# execute_action
+{"action_id": String, "result_summary": String, "refresh_required": bool}
+
+# respond_to_forced
+{"forced_interaction_resolved": true, "refresh_required": true}
+
+# equip_item
+{"equipped_slot": String, "item_grade": String, "refresh_required": true}
+
+# deposit_item
+{"item_grade": String, "qty": int, "refresh_required": true}
+
+# take_team_item
+{"item_grade": String, "qty": int, "refresh_required": true}
+```
+
+inventory action 綁定規則：
+- `inventory_items` 每筆至少包含 `row_id`, `grade`, `qty`, `equip_slots`, `available_actions`。
+- `team_takeable_items` 每筆至少包含 `row_id`, `grade`, `qty`, `available_actions`。
+- inventory row 內的 `available_actions[*].command_args` 必須已綁定該 row 所需參數。
+- `equip_item` 若同 item 可裝多槽，需展開成多個 action，各自帶不同 `slot_id`。
+- `deposit_item` 與 `take_team_item` 在目前 spec 先用固定 qty action：deposit 預設整筆 qty、take 預設 1。若未來要可調數量，新增 `allows_qty_override` 欄位，但不阻擋本次規劃。
+
+canonical envelope examples：
+
+```gdscript
+# snapshot success
+{
+    "ok": true,
+    "code": "ok",
+    "message": "",
+    "data": {
+        "snapshot": {
+            "player_summary": {...},
+            "controlled_team": {...},
+            "visible_teams": [...],
+            "focused_member": {...},
+            "pending_targets": [...],
+            "forced_interaction": {...},
+            "location_context": {...},
+            "available_actions": [...],
+            "inventory_state": {...}
+        }
+    }
+}
+
+# detail query failure
+{
+    "ok": false,
+    "code": "not_visible",
+    "message": "target not visible",
+    "data": {}
+}
+
+# command failure
+{
+    "ok": false,
+    "code": "item_unavailable",
+    "message": "item unavailable",
+    "payload": {}
 }
 ```
 
