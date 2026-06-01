@@ -470,6 +470,11 @@ request 規則：
 - `command_name`
 - `command_args`
 
+enabled 規則：
+- `available_actions` 與 row-scoped inventory actions 都必須同時包含 enabled 與 disabled action。
+- `enabled=true` 時，`disabled_reason=""`。
+- `enabled=false` 時，`disabled_reason` 必須為非空穩定說明字串。
+
 `command_name` 只允許對應既有 command surface：
 - `move_to`
 - `cancel_move`
@@ -533,6 +538,8 @@ composition 規則：
 - `inventory_state.available_actions` 只放 inventory-global actions。
 - row-scoped inventory actions 只放在 `inventory_items[*].available_actions` 與 `team_takeable_items[*].available_actions`。
 - top-level `available_actions` 不包含 row-scoped inventory actions。
+- top-level `available_actions` 是非 row-scoped action 的 canonical source。
+- `inventory_state.available_actions` 只是在 inventory mode 內重複呈現 top-level 中與 inventory 全域操作相關的那部分 actions。
 
 ## Canonical DTO Schema
 
@@ -896,6 +903,15 @@ canonical envelope examples：
 ```
 
 ---
+
+## Action Contract Matrix
+
+| Producer | DTO location | 是否可直接執行 | duplication rule |
+|---|---|---|---|
+| team interaction summary | `data.team.interaction_options` | 否，display-only | 不要求帶 `command_args`；真正可執行 action 以 `available_actions` 為準 |
+| top-level action builder | `snapshot.available_actions` / `data.actions` | 是 | canonical source for non-row-scoped actions |
+| inventory global filter | `snapshot.inventory_state.available_actions` | 是 | 僅重複 top-level 中 inventory-global subset |
+| inventory row builder | `inventory_items[*].available_actions` / `team_takeable_items[*].available_actions` | 是 | row-scoped only；不得出現在 top-level |
 
 ## 錯誤處理
 
