@@ -61,6 +61,20 @@ scripts/simulation/
 - 統一欄位命名，避免 UI 分散依賴不同內部命名。
 - 成為未來切換到 snapshot store 時的相容層。
 
+最小 interface：
+- `map_player_summary(...) -> Dictionary`
+- `map_controlled_team(...) -> Dictionary`
+- `map_visible_team(...) -> Dictionary`
+- `map_member_details(...) -> Dictionary`
+- `map_location_context(...) -> Dictionary`
+- `map_available_action(...) -> Dictionary`
+- `map_query_envelope(ok, code, message, data) -> Dictionary`
+- `map_command_result(ok, code, message, payload) -> Dictionary`
+
+ownership 規則：
+- mapper 擁有 public query DTO、command payload/result shape、envelope shape 的輸出責任。
+- mapper 不擁有業務判斷，不決定 action 是否可用，也不執行 command。
+
 ---
 
 ## API 邊界
@@ -95,6 +109,7 @@ Query API 採統一 envelope：
 - `location_context`
 - `available_actions`
 - `inventory_state`
+- `snapshot_meta`
 
 DTO 規則：
 - 可序列化、平面化優先。
@@ -130,11 +145,18 @@ Query API 至少提供以下方法：
 - snapshot 內的 `focused_member`、`location_context`、`available_actions` 都由這些 UI-local 輸入決定。
 - UI 自己保管 focus / cursor 狀態，不寫入 world state。
 
+invalid local state 規則：
+- 型別錯誤或結構錯誤仍回 `invalid_request` / `invalid_focus`。
+- 但 stale local ref 不使整個 snapshot fail。
+- `focus_team_id` / `focus_member_id` 指向不存在或不可見目標時，`focused_member` 回 sentinel 空物件，並在 `snapshot_meta.focus_valid = false`。
+- `cursor_tile_q` / `cursor_tile_r` 指向不存在 tile 時，`location_context` 回 hidden/sentinel context，並在 `snapshot_meta.cursor_valid = false`。
+- 其他主區塊仍正常回傳，讓 UI 可自我修正本地 focus/cursor。
+
 各 query 合約：
 
 | Query | 輸入 | `data` 最低欄位 | 常見錯誤碼 |
 |---|---|---|---|
-| `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions`, `snapshot.inventory_state` | `invalid_request`, `invalid_focus`, `no_player`, `no_controlled_team` |
+| `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions`, `snapshot.inventory_state`, `snapshot.snapshot_meta` | `invalid_request`, `invalid_focus`, `no_player`, `no_controlled_team` |
 | `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `invalid_team`, `not_visible` |
 | `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `invalid_team`, `invalid_member`, `not_visible` |
 | `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `invalid_tile` |
@@ -392,6 +414,13 @@ canonical 規則：
 - `snapshot.available_actions` 的 shape 必須與 `get_available_actions(request)` 完全相同。
 - `get_player_snapshot(request)` 內的 `available_actions` 視為直接重用同一套判定與映射結果，不允許雙邏輯。
 
+composition 規則：
+- action 來源分五層：forced interaction、inventory row、focused member、tile context、team/global context。
+- 合成順序固定為：forced interaction > inventory row > focused member > tile context > team/global context。
+- dedupe key 為 `command_name + serialized(command_args)`。
+- 若同 key 重複，保留較高優先層版本。
+- 最終輸出順序依上述優先層，再依 `label` 字母序穩定排序。
+
 `target_requirements` 固定 schema：
 
 ```gdscript
@@ -561,6 +590,15 @@ canonical 規則：
 }
 ```
 
+### `snapshot_meta`
+
+```gdscript
+{
+    "focus_valid": bool,
+    "cursor_valid": bool
+}
+```
+
 detail query canonical shapes：
 
 ```gdscript
@@ -699,7 +737,8 @@ canonical envelope examples：
             "forced_interaction": {...},
             "location_context": {...},
             "available_actions": [...],
-            "inventory_state": {...}
+            "inventory_state": {...},
+            "snapshot_meta": {...}
         }
     }
 }
