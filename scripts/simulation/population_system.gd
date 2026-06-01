@@ -41,8 +41,7 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 	state.teams[ot.team_id]           = ot
 	state.team_known[ot.team_id]      = []
 	state.team_discovered[ot.team_id] = []
-	var gen := PersonGenerator.new()
-	var promoted := gen.generate_from_team(ot, state)
+	var promoted := PersonGenerator.generate_for_team(state, ot, "member")
 	if promoted != null:
 		ot.leader_id  = promoted.id
 		promoted.role = "leader"
