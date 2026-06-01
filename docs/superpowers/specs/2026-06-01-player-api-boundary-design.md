@@ -177,7 +177,7 @@ invalid local state 規則：
 | `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `invalid_team`, `not_visible` |
 | `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `invalid_team`, `invalid_member`, `not_visible` |
 | `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `invalid_tile` |
-| `get_available_actions` | `team_id`, `member_id`, `tile_q`, `tile_r`, `forced_interaction_id` | `actions` | `no_player`, `no_controlled_team`, `invalid_team`, `invalid_member`, `invalid_tile`, `forced_response_missing` |
+| `get_available_actions` | `team_id`, `member_id`, `tile_q`, `tile_r`, `forced_interaction_id` | `actions` | `no_player`, `no_controlled_team`, `invalid_request`, `invalid_focus`, `forced_response_missing` |
 
 ### Command API 對外輸出
 
@@ -406,6 +406,7 @@ request 規則：
 - `forced_interaction_id` 使用空字串 `""` 表示不適用。
 - 若型別錯誤，回 `invalid_request`。
 - 若欄位缺失，API 先補成上述預設值再處理。
+- 若只有 `tile_q` 或只有 `tile_r` 非 `-1`，回 `invalid_request`。
 - 若無 player 或無 controlled team，回 `no_player` / `no_controlled_team`。
 - 若只有 context 不適用（例如全部 sentinel），回成功 envelope 並給空 `actions`。
 
@@ -424,6 +425,7 @@ request 規則：
 - `execute_action`
 - `respond_to_forced`
 - `equip_item`
+- `unequip_item`
 - `deposit_item`
 - `take_team_item`
 
@@ -645,7 +647,7 @@ String | null
 empty/sentinel 規則：
 - `focused_member` 無 focus 或 stale focus 時：`id=-1`, `name=""`, `team_id=-1`, `team_name=""`, `role=""`, `status={"health":"", "stress":0.0, "loyalty":0.0}`, `available_actions=[]`
 - `forced_interaction` 無互動時：`interaction_id=""`, `interaction_type=""`, `source={team_id:-1, team_name:"", member_id:-1, member_name:""}`, `message=""`, `responses=[]`
-- `location_context` hidden/invalid cursor 時：`visibility_state="hidden"`, `terrain=null`, `settlement=null`, `occupants=[]`, `hints=[]`
+- `location_context` hidden/invalid cursor 時：`tile={"q":-1, "r":-1}`, `visibility_state="hidden"`, `terrain=null`, `settlement=null`, `occupants=[]`, `is_player_here=false`, `hints=[]`
 - `inventory_state` 無資料時：各陣列空、`equipped_items` 各槽為空字串
 
 ### `snapshot_meta`
