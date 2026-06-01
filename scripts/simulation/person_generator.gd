@@ -43,30 +43,15 @@ static func generate(state: WorldState, seed_offset: int,
 
 	return p
 
-# 舊 API 相容：從團隊的匿名人口生成新的領袖候選人
-func generate_from_team(team: TeamData, state: WorldState) -> PersonData:
+static func generate_for_team(state: WorldState, team: TeamData,
+		role: String = "member", seed_offset: int = 0) -> PersonData:
 	var named_count: int = (1 if team.leader_id != -1 else 0) + team.named_members.size()
 	var anon_pop: int = team.population - named_count
 	if anon_pop <= 0:
 		return null
 
-	var p := PersonData.new()
-	p.id = _next_id(state)
-	p.person_name = "NPC_%d" % p.id
-	p.role = "civilian"
+	var p := generate(state, _team_seed(state, team, seed_offset), role)
 	p.team_id = team.team_id
-	p.age = randi_range(18, 40)
-	p.loyalty = 0.5
-	p.stress = 0.0
-	p.fear = 0.0
-
-	for attr in p.attributes:
-		p.attributes[attr] = randf_range(0.2, 0.8)
-	for v in p.values:
-		p.values[v] = randf_range(0.2, 0.8)
-	for skill in p.skills:
-		p.skills[skill] = randf_range(0.0, 0.2)
-
 	state.persons[p.id] = p
 	return p
 
@@ -91,3 +76,14 @@ static func _random_name(rng: RandomNumberGenerator, state: WorldState) -> Strin
 	return "%s%s%d" % [SURNAMES[rng.randi() % SURNAMES.size()],
 					   GIVEN_NAMES[rng.randi() % GIVEN_NAMES.size()],
 					   state.persons.size()]
+
+static func _team_seed(state: WorldState, team: TeamData, seed_offset: int) -> int:
+	var base: int = 17
+	base = base * 31 + state.world.current_tick
+	base = base * 31 + team.team_id
+	base = base * 31 + team.population
+	base = base * 31 + team.leader_id
+	base = base * 31 + team.named_members.size()
+	base = base * 31 + state.persons.size()
+	base = base * 31 + seed_offset
+	return abs(base)

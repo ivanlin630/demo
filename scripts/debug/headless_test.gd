@@ -335,6 +335,48 @@ func _run_sim_test() -> void:
 	state.team_known.erase(14)
 	state.team_discovered.erase(14)
 
+	print("=== PersonGenerator 匿名 helper 測試 ===")
+	var helper_state_a := WorldState.new()
+	var helper_team_a := TeamData.new()
+	helper_team_a.team_id = 15
+	helper_team_a.population = 3
+	helper_state_a.teams[15] = helper_team_a
+	var helper_a: PersonData = PersonGenerator.generate_for_team(helper_state_a, helper_team_a, "member")
+	if helper_a != null and helper_a.team_id == 15 and helper_state_a.persons.has(helper_a.id):
+		print("  [OK] helper 寫回 team_id 與 state.persons")
+	else:
+		print("  [FAIL] helper 未正確寫回 team/state")
+
+	var helper_state_b := WorldState.new()
+	var helper_team_b := TeamData.new()
+	helper_team_b.team_id = 15
+	helper_team_b.population = 3
+	helper_state_b.teams[15] = helper_team_b
+	var helper_b: PersonData = PersonGenerator.generate_for_team(helper_state_b, helper_team_b, "member")
+	if helper_a != null and helper_b != null \
+			and helper_a.person_name == helper_b.person_name \
+			and helper_a.age == helper_b.age \
+			and is_equal_approx(helper_a.skills["統領"], helper_b.skills["統領"]):
+		print("  [OK] helper 對相同 state/team 決定性一致")
+	else:
+		print("  [FAIL] helper 非決定性或產出不一致")
+
+	var helper_state_empty := WorldState.new()
+	var helper_team_empty := TeamData.new()
+	helper_team_empty.team_id = 16
+	helper_team_empty.population = 1
+	helper_state_empty.teams[16] = helper_team_empty
+	var helper_leader := PersonData.new()
+	helper_leader.id = 90
+	helper_leader.team_id = 16
+	helper_leader.role = "leader"
+	helper_state_empty.persons[90] = helper_leader
+	helper_team_empty.leader_id = 90
+	if PersonGenerator.generate_for_team(helper_state_empty, helper_team_empty, "member") == null:
+		print("  [OK] helper 無匿名人口時回傳 null")
+	else:
+		print("  [FAIL] helper 無匿名人口仍生成")
+
 	# ── merge_teams 驗證 ──
 	var ma := TeamData.new()
 	ma.team_id = 11; ma.population = 5; ma.faction_id = 99; ma.tile_pos = Vector2i(4, 0)

@@ -22,18 +22,6 @@ func process_events(state: WorldState, team_ids: Array) -> Array:
 				new_teams.append_array(event.execute(state, team))
 	return new_teams
 
-func _generate_from_anonymous_population(state: WorldState, team: TeamData) -> PersonData:
-	var named_count: int = (1 if team.leader_id != -1 else 0) + team.named_members.size()
-	var anon_pop: int = team.population - named_count
-	if anon_pop <= 0:
-		return null
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	var promoted := PersonGenerator.generate(state, rng.randi(), "member")
-	promoted.team_id = team.team_id
-	state.persons[promoted.id] = promoted
-	return promoted
-
 # 由外部呼叫（Leader 死亡後繼承檢查）
 func on_leader_death(state: WorldState, team: TeamData) -> bool:
 	var best_successor: PersonData = null
@@ -71,7 +59,7 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 				print("[Split] Leader 死亡，無 advisor，溢出 %d 人視為逃亡" % overflow)
 		return true
 	else:
-		var promoted := _generate_from_anonymous_population(state, team)
+		var promoted := PersonGenerator.generate_for_team(state, team, "member")
 		if promoted != null:
 			team.leader_id  = promoted.id
 			promoted.role   = "leader"
