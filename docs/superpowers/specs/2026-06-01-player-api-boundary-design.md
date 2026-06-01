@@ -361,6 +361,13 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 }
 ```
 
+request 規則：
+- `team_id` / `member_id` 使用 `-1` 表示不適用。
+- `tile_q` / `tile_r` 使用 `-1` 表示不適用。
+- `forced_interaction_id` 使用空字串 `""` 表示不適用。
+- 若型別錯誤，回 `invalid_request`。
+- 若欄位缺失，API 先補成上述預設值再處理。
+
 每個 action 至少包含：
 - `action_id`
 - `label`
@@ -405,6 +412,135 @@ canonical 規則：
 - 當前裝備摘要
 - 與 inventory 相關的 `available_actions`
 
+## Canonical DTO Schema
+
+以下 key/type/nullability 視為 public contract。實作可內部分拆，但 public shape 不得漂移。
+
+### `player_summary`
+
+```gdscript
+{
+    "player_exists": bool,
+    "player_person_id": int,      # 無玩家時為 -1
+    "player_name": String,        # 無玩家時為 ""
+    "controlled_team_id": int,    # 無隊伍時為 -1
+    "controlled_team_name": String,
+    "position": {"q": int, "r": int},
+    "has_pending_targets": bool,
+    "has_forced_interaction": bool
+}
+```
+
+### `controlled_team`
+
+```gdscript
+{
+    "id": int,
+    "name": String,
+    "faction": String,
+    "position": {"q": int, "r": int},
+    "members": Array[Dictionary],   # [{id, name, role}]
+    "resources": Dictionary,
+    "movement": {"has_target": bool, "target_q": int, "target_r": int},
+    "task_summary": String
+}
+```
+
+### `visible_teams`
+
+```gdscript
+[
+    {
+        "id": int,
+        "name": String,
+        "relation": String,
+        "position": {"q": int, "r": int},
+        "can_interact": bool,
+        "can_inspect": bool,
+        "can_target": bool
+    }
+]
+```
+
+### `focused_member`
+
+```gdscript
+{
+    "id": int,                     # 無 focus 時為 -1
+    "name": String,
+    "team_id": int,
+    "team_name": String,
+    "role": String,
+    "status": Dictionary,
+    "available_actions": Array[Dictionary]
+}
+```
+
+### `pending_targets`
+
+```gdscript
+[
+    {
+        "target_type": String,
+        "target_id": String,
+        "display_name": String,
+        "is_valid": bool
+    }
+]
+```
+
+### `forced_interaction`
+
+```gdscript
+{
+    "interaction_id": String,      # 無互動時為 ""
+    "interaction_type": String,
+    "source": Dictionary,          # {team_id, team_name, member_id, member_name}
+    "message": String,
+    "responses": Array[Dictionary] # [{response_id, label}]
+}
+```
+
+### `location_context`
+
+```gdscript
+{
+    "tile": {"q": int, "r": int},
+    "visibility_state": String,    # "hidden" | "visible"
+    "terrain": Variant,            # hidden 時為 null
+    "settlement": Variant,         # hidden/none 時為 null
+    "occupants": Array[Dictionary],
+    "is_player_here": bool,
+    "hints": Array[String]
+}
+```
+
+### `available_actions`
+
+```gdscript
+[
+    {
+        "action_id": String,
+        "label": String,
+        "enabled": bool,
+        "disabled_reason": String,
+        "target_requirements": Dictionary,
+        "command_name": String
+    }
+]
+```
+
+### `inventory_state`
+
+```gdscript
+{
+    "inventory_items": Array[Dictionary],  # [{grade, qty, equip_slots}]
+    "team_takeable_items": Array[Dictionary], # [{grade, qty}]
+    "equipped_items": Dictionary,
+    "available_actions": Array[Dictionary]
+}
+```
+
 ---
 
 ## 錯誤處理
@@ -448,6 +584,14 @@ ID 型別規則：
 - 若 UI 端有字串化顯示，僅限顯示層，不回寫到 API 輸入。
 - 若收到錯型別 id，回 `invalid_request`。
 
+command 驗證規則：
+- 所有 command 若無 player 或無 controlled team，優先回 `no_player` 或 `no_controlled_team`。
+- `qty <= 0` 一律回 `invalid_request`。
+- 未知 `slot_id`、未知 `item_grade`、未知 `action_id` 一律回 `invalid_request`。
+- item 不存在或數量不足回 `item_unavailable`。
+- slot 合法但無法裝備回 `equip_unavailable`。
+- 可存/可取規則不允許時，分別回 `deposit_unavailable` / `take_unavailable`。
+
 ---
 
 ## 既有呼叫點遷移範圍
@@ -475,6 +619,10 @@ ID 型別規則：
 - 若某些 inspect helper 目前散在 UI 或 player system，應收回 query API。
 - 這次重點不是改變模擬結果，而是把玩家視角邊界集中、穩定化。
 - `SimRunner` 仍負責 tick 順序，但玩家專屬狀態清理（例如 clear pending targets、forced interaction timeout cleanup）要透過 player command/internal bridge 單一入口處理，避免 `SimRunner` 直接依賴玩家 UI 狀態欄位細節。
+- concrete owner 定義如下：
+  - `player_command_api.gd` 對外提供玩家 command。
+  - `player_command_system.gd` 降為 internal bridge / legacy logic owner。
+  - `SimRunner` 只可呼叫 internal bridge 的 `on_player_team_moved(state)`、`on_forced_interaction_timeout(state)`，不可直接讀寫 `player_pending_targets` / `player_forced_event`。
 
 ---
 
