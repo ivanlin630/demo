@@ -1692,4 +1692,50 @@ func _run_sim_test() -> void:
 
 	print("PlayerQueryApi: ALL PASS")
 
+	# ── PlayerCommandApi unit tests ────────────────────────────────────────────────
+	print("\n--- PlayerCommandApi ---")
+	var _capi := PlayerCommandApi.new()
+	var _capi_state := WorldState.new()
+
+	# No player → error
+	var _capi_r1 := _capi.move_to(_capi_state, 0, 0)
+	assert(_capi_r1["ok"] == false, "cmd move_to no player")
+	assert(_capi_r1["code"] == "no_player", "cmd move_to no player code")
+	print("move_to (no player): OK")
+
+	# No player → respond_to_forced error
+	var _capi_r2 := _capi.respond_to_forced(_capi_state, "abc", "refuse")
+	assert(_capi_r2["ok"] == false, "respond_to_forced no player")
+	print("respond_to_forced (no player): OK")
+
+	# dispatch — unknown command
+	var _capi_r3 := _capi.dispatch(_capi_state, "unknown_cmd", {})
+	assert(_capi_r3["ok"] == false, "dispatch unknown cmd")
+	assert(_capi_r3["code"] == "invalid_request", "dispatch unknown cmd code")
+	print("dispatch (unknown): OK")
+
+	# respond_to_forced — expired id
+	var _capi_p1 := PersonData.new()
+	_capi_p1.id = 1; _capi_p1.person_name = "CApiP1"; _capi_p1.team_id = -1
+	_capi_state.persons[1] = _capi_p1
+	_capi_state.player_id = 1
+	_capi_state.player_forced_event = {"from_id": 2, "action": "extort"}
+	_capi_state.player_forced_event_id = "real-id"
+	var _capi_r4 := _capi.respond_to_forced(_capi_state, "wrong-id", "refuse")
+	assert(_capi_r4["ok"] == false, "respond_to_forced wrong id")
+	assert(_capi_r4["code"] == "forced_response_missing", "respond_to_forced wrong id code")
+	print("respond_to_forced (wrong id): OK")
+
+	# respond_to_forced — invalid response_id
+	var _capi_r5 := _capi.respond_to_forced(_capi_state, "real-id", "invalid_resp")
+	assert(_capi_r5["ok"] == false, "respond_to_forced invalid resp")
+	assert(_capi_r5["code"] == "forced_response_invalid", "respond_to_forced invalid resp code")
+	print("respond_to_forced (invalid response_id): OK")
+
+	# Reset
+	_capi_state.player_id = -1
+	_capi_state.player_forced_event = {}
+	_capi_state.player_forced_event_id = ""
+	print("PlayerCommandApi: ALL PASS")
+
 	print("=== DONE ===")
