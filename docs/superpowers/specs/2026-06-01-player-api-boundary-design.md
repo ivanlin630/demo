@@ -120,7 +120,11 @@ Query API 至少提供以下方法：
 ```
 
 規則：
-- 以上欄位可為空值或 sentinel value，表示 UI 目前沒有 focus / cursor。
+- `focus_team_id` / `focus_member_id` 使用空字串 `""` 表示無 focus。
+- `cursor_tile_q` / `cursor_tile_r` 使用 `-1` 表示無 cursor tile。
+- 若缺欄位，API 先補成上述預設值再處理。
+- 若型別錯誤，回 `invalid_request`。
+- 若只有 `focus_member_id` 但 `focus_team_id` 為空，回 `invalid_focus`。
 - snapshot 內的 `focused_member`、`location_context`、`available_actions` 都由這些 UI-local 輸入決定。
 - UI 自己保管 focus / cursor 狀態，不寫入 world state。
 
@@ -128,7 +132,7 @@ Query API 至少提供以下方法：
 
 | Query | 輸入 | `data` 最低欄位 | 常見錯誤碼 |
 |---|---|---|---|
-| `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions` | `no_player`, `no_controlled_team` |
+| `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions` | `invalid_request`, `invalid_focus`, `no_player`, `no_controlled_team` |
 | `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `invalid_team` |
 | `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `invalid_team`, `invalid_member` |
 | `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `invalid_tile` |
@@ -140,7 +144,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 
 - `move_to(tile_q: int, tile_r: int)`
 - `cancel_move()`
-- `execute_action(action_id: String, target_type: String, target_id: String)`
+- `execute_action(request: Dictionary)`
 - `respond_to_forced(response_id: String)`
 
 若 UI 需要改變本地 focus，只由 UI 自己保管目前 focus 的 team/member id，再把 id 傳給 query API。focus 不作為 world command。
@@ -168,7 +172,32 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 |---|---|---|---|---|
 | `move_to` | `tile_q`, `tile_r` | `move_target`, `refresh_required=true` | `no_controlled_team`, `invalid_tile`, `move_unavailable` | 是 |
 | `cancel_move` | 無 | `move_cancelled=true`, `refresh_required=true` | `no_controlled_team`, `move_unavailable` | 是 |
-| `execute_action` | `action_id`, `target_type`, `target_id` | `action_id`, `result_summary`, `refresh_required` | `invalid_target`, `action_unavailable` | 通常是 |
+| `execute_action` | `action_id`, `target.kind`, `target.*` | `action_id`, `result_summary`, `refresh_required` | `invalid_request`, `invalid_target`, `action_unavailable` | 通常是 |
+
+`execute_action(request)` 的 request：
+
+```gdscript
+{
+    "action_id": String,
+    "target": {
+        "kind": String, # "none" | "team" | "member" | "tile" | "interaction"
+        "team_id": String,
+        "member_id": String,
+        "tile_q": int,
+        "tile_r": int,
+        "interaction_id": String
+    }
+}
+```
+
+規則：
+- 無目標 action 使用 `target.kind = "none"`。
+- team 目標使用 `kind = "team"` + `team_id`。
+- member 目標使用 `kind = "member"` + `team_id` + `member_id`。
+- tile 目標使用 `kind = "tile"` + `tile_q` + `tile_r`。
+- forced / interaction 類目標使用 `kind = "interaction"` + `interaction_id`。
+- 若 `target` 內容與 `action_id` 所需 target 不匹配，回 `invalid_target`。
+- 不支援複合 target；若未來需要複合 target，視為新 command contract，不在本次 spec。
 | `respond_to_forced` | `response_id` | `forced_interaction_resolved`, `refresh_required=true` | `forced_response_missing`, `forced_response_invalid` | 是 |
 
 ---
@@ -327,6 +356,10 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `execute_action`
 - `respond_to_forced`
 
+canonical 規則：
+- `snapshot.available_actions` 的 shape 必須與 `get_available_actions(request)` 完全相同。
+- `get_player_snapshot(request)` 內的 `available_actions` 視為直接重用同一套判定與映射結果，不允許雙邏輯。
+
 ---
 
 ## 錯誤處理
@@ -344,6 +377,8 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `invalid_member`
 - `invalid_team`
 - `invalid_tile`
+- `invalid_focus`
+- `invalid_request`
 - `action_unavailable`
 - `move_unavailable`
 - `forced_response_missing`
