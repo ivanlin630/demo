@@ -1,0 +1,371 @@
+class_name PlayerApiMapper
+
+# ── Equippable slot lookup (compile-time const) ────────────────────────────────
+const EQUIPPABLE_SLOTS: Dictionary = {
+	"weapon_melee_low":   ["hand_1", "hand_2"],
+	"weapon_melee_high":  ["hand_1", "hand_2"],
+	"weapon_ranged_low":  ["hand_1"],
+	"weapon_ranged_high": ["hand_1"],
+	"armor_low":          ["head", "torso", "hand_1"],
+	"armor_high":         ["head", "torso"],
+}
+
+# ── Envelope builders ──────────────────────────────────────────────────────────
+
+static func map_query_envelope(ok: bool, code: String, message: String, data: Dictionary) -> Dictionary:
+	return {"ok": ok, "code": code, "message": message, "data": data}
+
+static func map_command_result(ok: bool, code: String, message: String, payload: Dictionary) -> Dictionary:
+	return {"ok": ok, "code": code, "message": message, "payload": payload}
+
+# ── Player summary ─────────────────────────────────────────────────────────────
+
+static func map_player_summary(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {
+			"player_exists": false, "player_person_id": -1, "player_name": "",
+			"controlled_team_id": -1, "controlled_team_name": "",
+			"position": {"q": -1, "r": -1}, "encounter_active": false,
+			"has_pending_targets": false, "has_forced_interaction": false
+		}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {
+			"player_exists": false, "player_person_id": pid, "player_name": "",
+			"controlled_team_id": -1, "controlled_team_name": "",
+			"position": {"q": -1, "r": -1}, "encounter_active": false,
+			"has_pending_targets": false, "has_forced_interaction": false
+		}
+	var tid: int = p.team_id
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	return {
+		"player_exists": true,
+		"player_person_id": pid,
+		"player_name": p.person_name,
+		"controlled_team_id": tid,
+		"controlled_team_name": "Team%d" % tid if tid != -1 else "",
+		"position": {"q": t.tile_pos.x, "r": t.tile_pos.y} if t != null else {"q": -1, "r": -1},
+		"encounter_active": state.encounter_active,
+		"has_pending_targets": not state.player_pending_targets.is_empty(),
+		"has_forced_interaction": not state.player_forced_event.is_empty()
+	}
+
+# ── Controlled team ────────────────────────────────────────────────────────────
+
+static func map_controlled_team(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	if t == null:
+		return {}
+	var members: Array = []
+	var member_ids: Array = [t.leader_id] + t.named_members
+	for mid in member_ids:
+		var m: PersonData = state.persons.get(mid)
+		if m != null:
+			members.append({"id": m.id, "name": m.person_name, "role": m.role})
+	var mv: Vector2i = t.move_target
+	return {
+		"id": tid,
+		"name": "Team%d" % tid,
+		"faction": str(t.faction_id) if t.faction_id != -1 else "",
+		"position": {"q": t.tile_pos.x, "r": t.tile_pos.y},
+		"members": members,
+		"resources": {
+			"food": int(t.resources.get("food", 0)),
+			"coin": int(t.resources.get("coin", 0)),
+			"material": int(t.resources.get("material", 0))
+		},
+		"movement": {
+			"has_target": mv != Vector2i(-1, -1),
+			"target_q": mv.x,
+			"target_r": mv.y
+		},
+		"task_summary": t.current_task
+	}
+
+# ── Visible teams ──────────────────────────────────────────────────────────────
+
+static func map_visible_teams(state: WorldState) -> Array:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	if tid == -1:
+		return []
+	var discovered: Array = state.team_discovered.get(tid, [])
+	var result: Array = []
+	for dtid in discovered:
+		var dt: TeamData = state.teams.get(dtid)
+		if dt == null:
+			continue
+		result.append({
+			"id": dtid,
+			"name": "Team%d" % dtid,
+			"relation": "unknown",
+			"position": {"q": dt.tile_pos.x, "r": dt.tile_pos.y},
+			"can_interact": not state.player_pending_targets.has(dtid),
+			"can_inspect": true,
+			"can_target": true
+		})
+	return result
+
+# ── Focused member ─────────────────────────────────────────────────────────────
+
+static func map_focused_member(state: WorldState, focus_team_id: int, focus_member_id: int) -> Dictionary:
+	var sentinel: Dictionary = {
+		"id": -1, "name": "", "team_id": -1, "team_name": "", "role": "",
+		"status": {"health": "", "stress": 0.0, "loyalty": 0.0},
+		"available_actions": []
+	}
+	if focus_team_id == -1 or focus_member_id == -1:
+		return sentinel
+	var t: TeamData = state.teams.get(focus_team_id)
+	var mp: PersonData = state.persons.get(focus_member_id)
+	if t == null or mp == null or mp.team_id != focus_team_id:
+		return sentinel
+	return {
+		"id": focus_member_id,
+		"name": mp.person_name,
+		"team_id": focus_team_id,
+		"team_name": "Team%d" % focus_team_id,
+		"role": mp.role,
+		"status": {"health": "healthy", "stress": mp.stress, "loyalty": mp.loyalty},
+		"available_actions": []
+	}
+
+# ── Pending targets ────────────────────────────────────────────────────────────
+
+static func map_pending_targets(state: WorldState) -> Array:
+	var result: Array = []
+	for tid in state.player_pending_targets:
+		var t: TeamData = state.teams.get(tid)
+		result.append({
+			"target_type": "team",
+			"target_id": int(tid),
+			"display_name": "Team%d" % tid,
+			"is_valid": t != null
+		})
+	return result
+
+# ── Forced interaction ─────────────────────────────────────────────────────────
+
+static func map_forced_interaction(state: WorldState) -> Dictionary:
+	var empty_result: Dictionary = {
+		"interaction_id": "",
+		"interaction_type": "",
+		"source": {"team_id": -1, "team_name": "", "member_id": -1, "member_name": ""},
+		"message": "",
+		"responses": []
+	}
+	var evt: Dictionary = state.player_forced_event
+	if evt.is_empty():
+		return empty_result
+	var iid: String = state.player_forced_event_id
+	var from_id: int = evt.get("from_id", -1)
+	var action: String = evt.get("action", "")
+	var proposal: String = evt.get("proposal", "")
+	var msg: String = ""
+	var responses: Array = []
+	match action:
+		"diplomacy":
+			msg = "Team%d 提議 %s" % [from_id, proposal]
+			responses = [
+				{"response_id": "accept", "label": "接受", "command_args": {"interaction_id": iid, "response_id": "accept"}},
+				{"response_id": "refuse", "label": "拒絕", "command_args": {"interaction_id": iid, "response_id": "refuse"}}
+			]
+		"extort":
+			msg = "Team%d 勒索你" % from_id
+			responses = [
+				{"response_id": "pay", "label": "付錢", "command_args": {"interaction_id": iid, "response_id": "pay"}},
+				{"response_id": "refuse", "label": "拒絕", "command_args": {"interaction_id": iid, "response_id": "refuse"}}
+			]
+		_:
+			msg = "Team%d 強制事件" % from_id
+			responses = [
+				{"response_id": "refuse", "label": "拒絕", "command_args": {"interaction_id": iid, "response_id": "refuse"}}
+			]
+	return {
+		"interaction_id": iid,
+		"interaction_type": action,
+		"source": {
+			"team_id": from_id,
+			"team_name": "Team%d" % from_id if from_id != -1 else "",
+			"member_id": -1,
+			"member_name": ""
+		},
+		"message": msg,
+		"responses": responses
+	}
+
+# ── Location context ───────────────────────────────────────────────────────────
+
+static func map_location_context(state: WorldState, tile_q: int, tile_r: int) -> Dictionary:
+	var not_visible: Dictionary = {
+		"tile": {"q": tile_q, "r": tile_r},
+		"visibility_state": "hidden",
+		"terrain": null,
+		"settlement": null,
+		"occupants": [],
+		"is_player_here": false,
+		"hints": []
+	}
+	if tile_q == -1 or tile_r == -1:
+		not_visible["tile"] = {"q": -1, "r": -1}
+		return not_visible
+	var tile_key: int = tile_q * 1000 + tile_r
+	if not state.world.tiles.has(tile_key):
+		return not_visible
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var ptid: int = p.team_id if p != null else -1
+	var known: Array = state.team_known.get(ptid, []) if ptid != -1 else []
+	if not known.has(tile_key):
+		return not_visible
+	var tile: HexTileData = state.world.tiles[tile_key] as HexTileData
+	var pt: TeamData = state.teams.get(ptid) if ptid != -1 else null
+	var is_here: bool = pt != null and pt.tile_pos == Vector2i(tile_q, tile_r)
+	var occupants: Array = []
+	for oid in state.teams:
+		if oid == ptid:
+			continue
+		var ot: TeamData = state.teams[oid]
+		if ot.tile_pos == Vector2i(tile_q, tile_r):
+			occupants.append({"team_id": oid, "team_name": "Team%d" % oid, "relation": "unknown"})
+	var settlement = null
+	if tile.outpost_type != "" and tile.outpost_owner != -1:
+		settlement = {
+			"id": tile.outpost_owner,
+			"name": "%s Lv%d" % [tile.outpost_type, tile.outpost_level],
+			"owner_faction": ""
+		}
+	return {
+		"tile": {"q": tile_q, "r": tile_r},
+		"visibility_state": "visible",
+		"terrain": tile.terrain,
+		"settlement": settlement,
+		"occupants": occupants,
+		"is_player_here": is_here,
+		"hints": []
+	}
+
+# ── Inventory state ────────────────────────────────────────────────────────────
+
+static func _get_equip_slots(grade: String) -> PackedStringArray:
+	var slots: Array = EQUIPPABLE_SLOTS.get(grade, [])
+	return PackedStringArray(slots)
+
+static func _make_item_action(action_id: String, label: String, enabled: bool,
+		disabled_reason: String, command_name: String, command_args: Dictionary) -> Dictionary:
+	return {
+		"action_id": action_id, "label": label, "enabled": enabled,
+		"disabled_reason": disabled_reason,
+		"target_requirements": {
+			"allowed_kinds": PackedStringArray(["none"]),
+			"requires_visible_target": false,
+			"requires_forced_interaction": false,
+			"allows_self_target": false
+		},
+		"command_name": command_name, "command_args": command_args
+	}
+
+static func map_inventory_state(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	var raw_inv: Array = state.player_state.get("inventory", []) if not state.player_state.is_empty() else []
+
+	var inv_items: Array = []
+	for item in raw_inv:
+		var grade: String = item.get("grade", "")
+		var qty: int = item.get("qty", 1)
+		var slots: PackedStringArray = _get_equip_slots(grade)
+		var row_actions: Array = []
+		for slot in slots:
+			row_actions.append(_make_item_action(
+				"equip_%s_%s" % [grade, slot],
+				"裝備 %s → %s" % [grade, slot],
+				true, "",
+				"equip_item", {"slot_id": slot, "item_grade": grade}
+			))
+		row_actions.append(_make_item_action(
+			"deposit_%s" % grade, "存入隊伍",
+			t != null, "" if t != null else "無受控隊伍",
+			"deposit_item", {"item_grade": grade, "qty": qty}
+		))
+		inv_items.append({"row_id": grade, "grade": grade, "qty": qty, "equip_slots": slots, "available_actions": row_actions})
+
+	var take_items: Array = []
+	if t != null:
+		for res_key in t.resources:
+			var qty: int = int(t.resources[res_key])
+			if qty > 0:
+				take_items.append({
+					"row_id": res_key, "grade": res_key, "qty": qty,
+					"available_actions": [
+						_make_item_action("take_%s" % res_key, "取出 %s" % res_key, true, "",
+							"take_team_item", {"item_grade": res_key, "qty": 1})
+					]
+				})
+
+	var equipped: Dictionary = {"head": "", "torso": "", "hand_1": "", "hand_2": ""}
+	if p != null:
+		for slot in ["head", "torso", "hand_1", "hand_2"]:
+			equipped[slot] = p.equipment.get(slot, {}).get("grade", "")
+
+	var unequip_actions: Array = []
+	for slot in ["head", "torso", "hand_1", "hand_2"]:
+		if equipped[slot] != "":
+			unequip_actions.append(_make_item_action(
+				"unequip_%s" % slot,
+				"卸下 %s (%s)" % [slot, equipped[slot]],
+				true, "",
+				"unequip_item", {"slot_id": slot}
+			))
+
+	return {
+		"inventory_items": inv_items,
+		"team_takeable_items": take_items,
+		"equipped_items": equipped,
+		"available_actions": unequip_actions
+	}
+
+# ── Available action builder ───────────────────────────────────────────────────
+
+static func map_available_action(action_id: String, label: String, enabled: bool,
+		disabled_reason: String, target_requirements: Dictionary,
+		command_name: String, command_args: Dictionary) -> Dictionary:
+	return {
+		"action_id": action_id, "label": label, "enabled": enabled,
+		"disabled_reason": disabled_reason,
+		"target_requirements": target_requirements,
+		"command_name": command_name, "command_args": command_args
+	}
+
+# ── Snapshot meta ──────────────────────────────────────────────────────────────
+
+static func map_snapshot_meta(focus_valid: bool, cursor_valid: bool) -> Dictionary:
+	return {"focus_valid": focus_valid, "cursor_valid": cursor_valid}
+
+# ── Full player snapshot ───────────────────────────────────────────────────────
+
+static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_member_id: int,
+		cursor_q: int, cursor_r: int, actions: Array) -> Dictionary:
+	var focus_valid: bool = focus_team_id != -1 and focus_member_id != -1 \
+		and state.teams.has(focus_team_id) and state.persons.has(focus_member_id)
+	var cursor_valid: bool = cursor_q != -1 and cursor_r != -1 \
+		and state.world.tiles.has(cursor_q * 1000 + cursor_r)
+	return {
+		"player_summary":     map_player_summary(state),
+		"controlled_team":    map_controlled_team(state),
+		"visible_teams":      map_visible_teams(state),
+		"focused_member":     map_focused_member(state, focus_team_id, focus_member_id),
+		"pending_targets":    map_pending_targets(state),
+		"forced_interaction": map_forced_interaction(state),
+		"location_context":   map_location_context(state, cursor_q, cursor_r),
+		"available_actions":  actions,
+		"inventory_state":    map_inventory_state(state),
+		"snapshot_meta":      map_snapshot_meta(focus_valid, cursor_valid)
+	}

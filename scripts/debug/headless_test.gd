@@ -1607,4 +1607,61 @@ func _run_sim_test() -> void:
 	_pt_a.faction_id = _saved_pt_faction
 	print("--- _accept_diplomacy Tests PASSED ---")
 
+	# ── PlayerApiMapper unit tests ─────────────────────────────────────────────────
+	print("\n--- PlayerApiMapper ---")
+	var _mapper_state := WorldState.new()
+
+	# map_query_envelope
+	var _qenv := PlayerApiMapper.map_query_envelope(true, "ok", "msg", {"x": 1})
+	assert(_qenv["ok"] == true, "map_query_envelope ok")
+	assert(_qenv["code"] == "ok", "map_query_envelope code")
+	assert(_qenv["message"] == "msg", "map_query_envelope message")
+	assert(_qenv["data"]["x"] == 1, "map_query_envelope data")
+	print("map_query_envelope: OK")
+
+	# map_command_result
+	var _cres := PlayerApiMapper.map_command_result(false, "no_player", "err", {})
+	assert(_cres["ok"] == false, "map_command_result ok")
+	assert(_cres["code"] == "no_player", "map_command_result code")
+	print("map_command_result: OK")
+
+	# map_player_summary — no player
+	var _ps_empty := PlayerApiMapper.map_player_summary(_mapper_state)
+	assert(_ps_empty["player_exists"] == false, "map_player_summary no player")
+	print("map_player_summary (no player): OK")
+
+	# map_pending_targets — empty
+	var _pt_empty := PlayerApiMapper.map_pending_targets(_mapper_state)
+	assert(_pt_empty.size() == 0, "map_pending_targets empty")
+	print("map_pending_targets (empty): OK")
+
+	# map_forced_interaction — empty
+	var _fi_empty := PlayerApiMapper.map_forced_interaction(_mapper_state)
+	assert(_fi_empty["interaction_id"] == "", "map_forced_interaction empty")
+	assert(_fi_empty["responses"].size() == 0, "map_forced_interaction responses empty")
+	print("map_forced_interaction (empty): OK")
+
+	# map_forced_interaction — extort
+	_mapper_state.player_forced_event = {"from_id": 2, "action": "extort"}
+	_mapper_state.player_forced_event_id = "abc123"
+	var _fi_extort := PlayerApiMapper.map_forced_interaction(_mapper_state)
+	assert(_fi_extort["interaction_id"] == "abc123", "map_forced_interaction extort id")
+	assert(_fi_extort["interaction_type"] == "extort", "map_forced_interaction extort type")
+	assert(_fi_extort["responses"].size() == 2, "map_forced_interaction extort responses count")
+	assert(_fi_extort["responses"][0]["response_id"] == "pay", "map_forced_interaction extort first response")
+	print("map_forced_interaction (extort): OK")
+
+	# map_forced_interaction — diplomacy
+	_mapper_state.player_forced_event = {"from_id": 3, "action": "diplomacy", "proposal": "alliance"}
+	_mapper_state.player_forced_event_id = "def456"
+	var _fi_dipl := PlayerApiMapper.map_forced_interaction(_mapper_state)
+	assert(_fi_dipl["interaction_type"] == "diplomacy", "map_forced_interaction diplomacy type")
+	assert(_fi_dipl["responses"].size() == 2, "map_forced_interaction diplomacy responses count")
+	print("map_forced_interaction (diplomacy): OK")
+
+	# Reset
+	_mapper_state.player_forced_event = {}
+	_mapper_state.player_forced_event_id = ""
+	print("PlayerApiMapper: ALL PASS")
+
 	print("=== DONE ===")
