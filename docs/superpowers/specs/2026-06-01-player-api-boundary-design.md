@@ -71,6 +71,13 @@ scripts/simulation/
 - 統一處理 player pending targets / forced interaction 等內部狀態清理，不讓外部 UI 直接碰欄位。
 
 最小 internal interface：
+- `move_to(state: WorldState, tile_q: int, tile_r: int) -> Dictionary`
+- `cancel_move(state: WorldState) -> Dictionary`
+- `execute_action(state: WorldState, request: Dictionary) -> Dictionary`
+- `equip_item(state: WorldState, slot_id: String, item_grade: String) -> Dictionary`
+- `unequip_item(state: WorldState, slot_id: String) -> Dictionary`
+- `deposit_item(state: WorldState, item_grade: String, qty: int) -> Dictionary`
+- `take_team_item(state: WorldState, item_grade: String, qty: int) -> Dictionary`
 - `on_player_team_moved(state: WorldState) -> void`
 - `on_forced_interaction_timeout(state: WorldState) -> void`
 - `clear_pending_targets(state: WorldState) -> void`
@@ -78,8 +85,9 @@ scripts/simulation/
 - `resolve_forced_response(state: WorldState, interaction_id: String, response_id: String) -> Dictionary`
 
 ownership 規則：
-- `player_command_system.gd` 擁有 internal player-state hook 與 forced interaction lifecycle。
+- `player_command_system.gd` 擁有 internal player-state hook、forced interaction lifecycle、與既有 move/action/inventory 執行邏輯。
 - `player_command_api.gd` 是唯一 public command surface。
+- `player_command_api.gd` 只負責 public contract 驗證、dispatch 到 internal bridge、以及回傳標準 result。
 - `sim_runner.gd` 只能呼叫上述 internal hook，不直接讀寫玩家 UI 狀態欄位。
 - UI / playtest / `sim_bridge.gd` 都不可直接呼叫 `player_command_system.gd`。
 
@@ -988,9 +996,14 @@ command 驗證規則：
   - `SimRunner` 只可呼叫 internal bridge 的 `on_player_team_moved(state)`、`on_forced_interaction_timeout(state)`，不可直接讀寫 `player_pending_targets` / `player_forced_event`。
   - `sim_bridge.gd` 對 player-facing UI 的 end-state public interface 只保留：
     - `query_player(request) -> Dictionary`  # 代理 `player_query_api.get_player_snapshot`
+    - `query_player_team(team_id: int) -> Dictionary`  # 代理 `get_team_details`
+    - `query_player_member(team_id: int, member_id: int) -> Dictionary`  # 代理 `get_member_details`
+    - `query_player_location(tile_q: int, tile_r: int) -> Dictionary`  # 代理 `get_location_context`
+    - `query_player_actions(request: Dictionary) -> Dictionary`  # 代理 `get_available_actions`
     - `command_player(name: String, args: Dictionary) -> Dictionary`  # 代理 `player_command_api`
     - `advance_ticks(n: int) -> Array`
   - `sim_bridge.gd` 的 `get_state()` 不再提供給 player-facing UI 消費；若暫時保留，只視為 internal/testing escape hatch，不可作為新 UI 邊界。
+  - `command_player(name, args)` 只允許 dispatch 到 public command surface：`move_to`、`cancel_move`、`execute_action`、`respond_to_forced`、`equip_item`、`unequip_item`、`deposit_item`、`take_team_item`。
 
 ---
 
