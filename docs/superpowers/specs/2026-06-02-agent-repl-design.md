@@ -1,7 +1,7 @@
 # Spec: Agent REPL — 外部 Agent 控制介面
 
 **日期：** 2026-06-02  
-**狀態：** 草稿
+**狀態：** 已審查
 
 ## 目的
 
@@ -24,7 +24,9 @@ import subprocess, json
 
 proc = subprocess.Popen(
     ["godot", "--headless", "--script", "scripts/debug/agent_repl.gd"],
-    stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True
+    stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+    stderr=subprocess.DEVNULL,  # 模擬系統 print 導向 stderr，不污染 stdout
+    text=True
 )
 
 def send(cmd: dict) -> dict:
@@ -36,6 +38,8 @@ def send(cmd: dict) -> dict:
 ## 協定：JSON Lines
 
 每次互動：agent 寫一行 JSON → Godot 回一行 JSON。
+
+**stdout 傳輸純淨保證：** `agent_repl.gd` 只用 `print()` 輸出 REPL JSON 回應。所有模擬系統內部 print（`[DayNight]`、`[Move]`、`[Faction]` 等）導向 `stderr`（透過 `print_verbose` 或不輸出）。不修改現有模擬 print 本身，而是在 REPL 模式下將 Godot 的 print 重定向：使用 `--quiet` flag 抑制 engine log，模擬 print 改用 `print_rich` 或在 REPL script 中做 suppress（待實作確認可行方案）。
 
 ### Input（stdin）
 
@@ -52,10 +56,11 @@ def send(cmd: dict) -> dict:
 
 失敗：
 ```json
-{"ok": false, "error": "描述"}
+{"ok": false, "code": "ERROR_CODE", "error": "描述"}
 ```
 
-`data` / `events` / `message` 依命令不同，可能為空。
+`data` / `events` / `message` 依命令不同，可能為空。  
+`code` 用於程式判斷錯誤類型（見各命令定義）。
 
 ## 支援命令
 
@@ -68,9 +73,9 @@ def send(cmd: dict) -> dict:
 {"cmd": "query", "request": {"focus_team_id": 2}}
 ```
 
-回傳：
+回傳（直接 pass-through bridge 回傳）：
 ```json
-{"ok": true, "data": {"snapshot": {...}}}
+{"ok": true, "code": "ok", "data": {"snapshot": {...}}, "message": ""}
 ```
 
 `snapshot` 格式與 `PlayerQueryApi.get_player_snapshot()` 相同。
@@ -85,10 +90,10 @@ def send(cmd: dict) -> dict:
 {"cmd": "command", "name": "move_to", "args": {"tile_q": 5, "tile_r": 4}}
 ```
 
-回傳：
+回傳（直接 pass-through bridge 回傳）：
 ```json
-{"ok": true, "message": "移動目標設為(5,4)"}
-{"ok": false, "error": "目標格不存在"}
+{"ok": true, "code": "ok", "message": "移動目標設為(5,4)", "payload": {...}}
+{"ok": false, "code": "invalid_target", "message": "目標格不存在", "payload": {}}
 ```
 
 ---
@@ -105,40 +110,58 @@ def send(cmd: dict) -> dict:
 ```json
 {
   "ok": true,
+  "code": "ok",
   "ticks_advanced": 240,
   "current_tick": 480,
   "events": [{"type": "new_team_spotted"}, ...]
 }
 ```
 
-`events` 為空陣列代表無事件。若遭遇戰觸發，`advance` 提前停止，`ticks_advanced < ticks`。
+`events` 為空陣列代表無事件。  
+若遭遇戰觸發，**在呼叫 advance 前短路**回傳：
+```json
+{"ok": false, "code": "encounter_active", "message": "遭遇戰進行中，無法推進世界時間"}
+```
+（不進入 `bridge.advance_ticks`；session 須用 `reset` 脫離）
 
 ---
 
 ### `reset`
 
-重建 WorldState，開始新遊戲。支援 inline config override 或指定 config 檔路徑，缺欄位 fallback 到 `default.json`。
+重建 WorldState，開始新遊戲。config 優先順序：`config` inline > `config_path` 指定檔 > `default.json`（深度合併）。若 `config` 和 `config_path` 同時存在，`config` inline 覆蓋 `config_path` 的對應欄位。
 
+config 欄位對應 `default.json` 結構：
 ```json
 {"cmd": "reset"}
-{"cmd": "reset", "config": {"seed": 99, "radius": 5}}
+{"cmd": "reset", "config": {"map": {"seed": 99, "radius": 5}}}
 {"cmd": "reset", "config_path": "res://config/test_scenario.json"}
+{"cmd": "reset", "config_path": "res://config/test_scenario.json", "config": {"map": {"seed": 1}}}
 ```
 
 回傳：
 ```json
-{"ok": true, "message": "重置完成 seed=99 radius=5"}
+{"ok": true, "code": "ok", "message": "重置完成 tick=0", "data": {"current_tick": 0}}
+```
+
+`config_path` 不存在時：
+```json
+{"ok": false, "code": "config_not_found", "message": "config_path 不存在: ..."}
 ```
 
 ---
 
 ### `quit`
 
-結束 Godot 程序。
+結束 Godot 程序。回傳後立即 flush stdout 再呼叫 `quit(code)`。
 
 ```json
 {"cmd": "quit"}
 {"cmd": "quit", "code": 1}
+```
+
+回傳（flush 後退出）：
+```json
+{"ok": true, "code": "ok", "message": "bye"}
 ```
 
 exit code 預設 0，可透過 `code` 指定。
@@ -164,34 +187,58 @@ extends SceneTree
 func _initialize() -> void:
     var bridge := _setup_game({})
     var stdin := FileAccess.open("pipe://stdin", FileAccess.READ)
+    if stdin == null:
+        push_error("agent_repl: 無法開啟 stdin")
+        quit(1)
+        return
     while not stdin.eof_reached():
         var line := stdin.get_line().strip_edges()
         if line.is_empty(): continue
         var cmd = JSON.parse_string(line)
-        if cmd == null:
-            print(JSON.stringify({"ok": false, "error": "invalid JSON"}))
+        if cmd == null or not cmd is Dictionary or not cmd.has("cmd"):
+            print(JSON.stringify({"ok": false, "code": "invalid_json", "error": "invalid JSON or missing 'cmd'"}))
             continue
         var resp := _handle(bridge, cmd)
         print(JSON.stringify(resp))
     quit(0)
 ```
 
+### stdout 純淨方案
+
+模擬系統大量 `print()` 會污染 stdout，破壞 JSON Lines 協定。實作時選用：
+
+**方案（優先）：** `--quiet` flag + Godot engine log suppression  
+執行時加 `2>nul`（Windows）或 `2>/dev/null` 將 Godot engine output 導向 stderr。
+
+**若不夠：** 在 `agent_repl.gd` 的 `_setup_game` 前後加 suppress hook（GDScript 不支援 monkeypatching，須評估 Godot `OS.set_use_file_access_save_and_swap()` 等機制是否可用）。
+
+**最壞情況備案：** agent 解析時跳過非 `{` 開頭的行（非 JSON 行忽略），降低對純淨 stdout 的依賴。
+
 ### 錯誤處理
 
-- 無效 JSON → `{"ok": false, "error": "invalid JSON"}`
-- 未知 cmd → `{"ok": false, "error": "unknown command: X"}`
-- 內部例外 → `{"ok": false, "error": "internal: ..."}`
-- 任何錯誤都不中斷迴圈，繼續接受下一個命令
+| 情況 | 回傳 | 繼續？ |
+|------|------|--------|
+| 無效 JSON / 缺 `cmd` | `{"ok":false,"code":"invalid_json"}` | ✅ |
+| 未知 cmd | `{"ok":false,"code":"unknown_command"}` | ✅ |
+| stdin 開啟失敗 | `push_error` → `quit(1)` | ❌ |
+| stdin EOF | — | `quit(0)` |
+| encounter_active + advance | `{"ok":false,"code":"encounter_active"}` | ✅ |
+| config_path 不存在 | `{"ok":false,"code":"config_not_found"}` | ✅ |
 
 ## 驗收條件
 
-1. `godot --headless --script agent_repl.gd` 啟動後等待 stdin 輸入
-2. `query` 回傳有效 snapshot（含 `player_summary.player_exists`）
-3. `command move_to` 後 `query` 確認 `move_target` 已設
-4. `advance 300` 後玩家 team 位置改變（Bug 3 修復驗證）
-5. `reset` 後 tick 歸零，位置回初始
-6. 無效 JSON 不崩潰，繼續接受輸入
-7. `quit` 正常退出，exit code 正確
+1. Windows 上以 pipe 啟動，stdin/stdout 可交換 JSON Lines（parent process 測試，非手動 console）
+2. `query` 回傳有效 snapshot（`ok:true`，含 `player_summary.player_exists:true`）
+3. `command move_to` 後 `query` 確認 `move_target` 已設為目標座標
+4. `advance 300` 後 `query` 確認玩家 team 位置改變（Bug 3 修復驗證）；`ticks_advanced` 正確回傳
+5. `advance` 返回 `events` 陣列（空或含 event type）
+6. `encounter_active` 時 `advance` 回傳 `code:"encounter_active"`，不崩潰
+7. `reset` 後 `query` 確認 tick=0、位置回初始
+8. `reset` 帶無效 `config_path` 回傳 `code:"config_not_found"`
+9. 無效 JSON 輸入不崩潰，繼續接受下一行
+10. stdin 關閉（EOF）後 Godot 正常退出 exit=0
+11. `quit` 回傳 `{"ok":true}` 後退出，exit code 正確
+12. stdout 只含 JSON Lines（agent 能無錯誤 `json.loads` 每一行）
 
 ## 範圍外
 
