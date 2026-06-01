@@ -63,6 +63,26 @@ scripts/simulation/
 - 預設為 stateless helper；每次呼叫顯式接收 `WorldState` 與 command 參數。
 - 不持有 long-lived mutable state；玩家相關持久狀態仍留在 `WorldState`。
 
+### `player_command_system.gd`
+
+責任：
+- 作為 internal bridge，承接既有玩家狀態欄位與 legacy 邏輯。
+- 提供 `player_command_api.gd` 與 `sim_runner.gd` 需要的內部 hook。
+- 統一處理 player pending targets / forced interaction 等內部狀態清理，不讓外部 UI 直接碰欄位。
+
+最小 internal interface：
+- `on_player_team_moved(state: WorldState) -> void`
+- `on_forced_interaction_timeout(state: WorldState) -> void`
+- `clear_pending_targets(state: WorldState) -> void`
+- `get_active_forced_interaction(state: WorldState) -> Variant`
+- `resolve_forced_response(state: WorldState, interaction_id: String, response_id: String) -> Dictionary`
+
+ownership 規則：
+- `player_command_system.gd` 擁有 internal player-state hook 與 forced interaction lifecycle。
+- `player_command_api.gd` 是唯一 public command surface。
+- `sim_runner.gd` 只能呼叫上述 internal hook，不直接讀寫玩家 UI 狀態欄位。
+- UI / playtest / `sim_bridge.gd` 都不可直接呼叫 `player_command_system.gd`。
+
 ### `player_api_mapper.gd`
 
 責任：
@@ -160,6 +180,7 @@ Query API 至少提供以下方法：
 - 若缺欄位，API 先補成上述預設值再處理。
 - 若型別錯誤，回 `invalid_request`。
 - 若只有 `focus_member_id` 但 `focus_team_id` 為空，回 `invalid_focus`。
+- 若只有 `cursor_tile_q` 或只有 `cursor_tile_r` 非 `-1`，回 `invalid_request`。
 - snapshot 內的 `focused_member`、`location_context`、`available_actions` 都由這些 UI-local 輸入決定。
 - UI 自己保管 focus / cursor 狀態，不寫入 world state。
 
@@ -187,7 +208,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `move_to(state: WorldState, tile_q: int, tile_r: int)`
 - `cancel_move(state: WorldState)`
 - `execute_action(state: WorldState, request: Dictionary)`
-- `respond_to_forced(state: WorldState, response_id: String)`
+- `respond_to_forced(state: WorldState, interaction_id: String, response_id: String)`
 - `equip_item(state: WorldState, slot_id: String, item_grade: String)`
 - `unequip_item(state: WorldState, slot_id: String)`
 - `deposit_item(state: WorldState, item_grade: String, qty: int)`
@@ -219,7 +240,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 | `move_to` | `tile_q`, `tile_r` | `move_target`, `refresh_required=true` | `no_controlled_team`, `invalid_tile`, `move_unavailable` | 是 |
 | `cancel_move` | 無 | `move_cancelled=true`, `refresh_required=true` | `no_controlled_team`, `move_unavailable` | 是 |
 | `execute_action` | `action_id`, `target.kind`, `target.*` | `action_id`, `result_summary`, `refresh_required` | `invalid_request`, `invalid_target`, `action_unavailable` | 通常是 |
-| `respond_to_forced` | `response_id` | `forced_interaction_resolved`, `refresh_required=true` | `forced_response_missing`, `forced_response_invalid` | 是 |
+| `respond_to_forced` | `interaction_id`, `response_id` | `forced_interaction_resolved`, `refresh_required=true` | `forced_response_missing`, `forced_response_invalid` | 是 |
 | `equip_item` | `slot_id`, `item_grade` | `equipped_slot`, `item_grade`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `equip_unavailable` | 是 |
 | `unequip_item` | `slot_id` | `unequipped_slot`, `refresh_required=true` | `invalid_request`, `equip_unavailable` | 是 |
 | `deposit_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `deposit_unavailable` | 是 |
@@ -359,7 +380,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `interaction_type`
 - 來源 team/person 摘要
 - prompt/message
-- 可選 responses 列表（每筆含 `response_id`, `label`）
+- 可選 responses 列表（每筆含 `response_id`, `label`, `command_args`）
 
 ### `location_context`
 
@@ -441,7 +462,7 @@ composition 規則：
 - dedupe key 為 `command_name + serialized(command_args)`。
 - 若同 key 重複，保留較高優先層版本。
 - 最終輸出順序依上述優先層，再依 `label` 字母序穩定排序。
-- snapshot 內 forced-interaction actions 直接從當前 world state 的單一 `forced_interaction.responses` 產生，`command_args={response_id}`，不再攜帶 `interaction_id`。
+- snapshot 內 forced-interaction actions 直接從當前 world state 的單一 `forced_interaction.responses` 產生，`command_args={interaction_id, response_id}`。
 
 `target_requirements` 固定 schema：
 
@@ -461,7 +482,7 @@ composition 規則：
   - `move_to` → `{tile_q, tile_r}`
   - `cancel_move` → `{}`
   - `execute_action` → `{action_id, target}`
-  - `respond_to_forced` → `{response_id}`
+  - `respond_to_forced` → `{interaction_id, response_id}`
   - `equip_item` → `{slot_id, item_grade}`
   - `unequip_item` → `{slot_id}`
   - `deposit_item` → `{item_grade, qty}`
@@ -629,6 +650,9 @@ nested sub-schema：
 # forced_interaction.source
 {"team_id": int, "team_name": String, "member_id": int, "member_name": String}
 
+# forced_interaction.responses[*]
+{"response_id": String, "label": String, "command_args": {"interaction_id": String, "response_id": String}}
+
 # team.interaction_options[*]
 {"action_id": String, "label": String}
 
@@ -637,6 +661,9 @@ String | null
 
 # location_context.settlement
 {"id": int, "name": String, "owner_faction": String} | null
+
+# location_context.occupants[*]
+{"team_id": int, "team_name": String, "relation": String}
 
 # inventory_items[*]
 {"row_id": String, "grade": String, "qty": int, "equip_slots": PackedStringArray, "available_actions": Array[Dictionary]}
@@ -793,8 +820,10 @@ interaction routing 規則：
 - `respond_to_forced(response_id)` 專責處理 `forced_interaction.responses[*]`。
 - `execute_action` 不接受 `target.kind = "interaction"`；其合法 target 只限 `none | team | member | tile`。
 - 非 forced 的一般互動，透過 `execute_action` + `team/member` target 處理。
-- `response_id` 只要求在「目前 active 的單一 forced interaction」內唯一。
-- `respond_to_forced` 會用目前 world state 的 active forced interaction 驗證 `response_id`；若互動已消失或 response 不存在，分別回 `forced_response_missing` / `forced_response_invalid`。
+- `respond_to_forced` 需要 `interaction_id + response_id` 成對驗證。
+- generated forced actions 必須攜帶 `command_args={interaction_id, response_id}`。
+- `respond_to_forced` 會先比對目前 active forced interaction 的 `interaction_id`；若互動已消失或 id 不匹配，回 `forced_response_missing`。
+- 在 interaction_id 匹配前提下，若 response 不存在，回 `forced_response_invalid`。
 
 canonical envelope examples：
 
