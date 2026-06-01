@@ -590,7 +590,7 @@ composition 規則：
     "interaction_type": String,
     "source": Dictionary,
     "message": String,
-    "responses": Array[Dictionary] # [{response_id, label}]
+    "responses": Array[Dictionary] # [{response_id, label, command_args}]
 }
 ```
 
@@ -899,7 +899,7 @@ Query API 的 envelope 失敗規則：
 - `get_player_snapshot` 若無玩家或無受控 team，回 `ok=false` 與對應錯誤碼。
 - `get_team_details` / `get_member_details` 若目標存在但目前不可見，回 `ok=false` 與 `not_visible`。
 - `get_team_details` / `get_member_details` / `get_location_context` 若無玩家或無 controlled team，回 `ok=false` 與 `no_player` / `no_controlled_team`。
-- `get_location_context` 若 tile 存在但目前 hidden，回 `ok=true` 與 hidden/redacted `location_context`。
+- `get_location_context` 若 tile 存在但目前 hidden，回 `ok=true` 與 hidden/redacted `data.location`。
 - detail query 若目標不存在，回 `ok=false` 與 `invalid_team` / `invalid_member` / `invalid_tile`。
 - `get_available_actions` 若無玩家或無受控 team，回 `ok=false`；若只有 context 不適用，回 `ok=true` 且 `data.actions = []`。
 - 不使用「成功但資料為錯誤字典」的混合模式。
@@ -960,7 +960,7 @@ command 驗證規則：
 - `scripts/simulation/player_system.gd` 內現有玩家 helper
 - 現有 `player_command_system.gd` 中可保留且值得重用的邏輯
 - `scripts/simulation/sim_runner.gd` 內玩家專屬 hook
-- 其他直接向 player-facing UI 暴露 `WorldState` 的 bridge / consumer
+- 若在上述檔案內追蹤到同一條玩家 UI 流程的直接 consumer，再一併納入；除此之外不擴 scope
 
 遷移完成後要求：
 - 玩家相關 UI / playtest 不直接讀寫 `WorldState`。
