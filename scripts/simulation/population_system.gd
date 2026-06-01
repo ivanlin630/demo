@@ -24,6 +24,18 @@ func check_overflow(state: WorldState) -> void:
 		else:
 			_create_overflow_team(state, team, overflow)
 
+func _generate_from_anonymous_population(state: WorldState, team: TeamData) -> PersonData:
+	var named_count: int = (1 if team.leader_id != -1 else 0) + team.named_members.size()
+	var anon_pop: int = team.population - named_count
+	if anon_pop <= 0:
+		return null
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	var promoted := PersonGenerator.generate(state, rng.randi(), "member")
+	promoted.team_id = team.team_id
+	state.persons[promoted.id] = promoted
+	return promoted
+
 func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: int) -> void:
 	var ot := TeamData.new()
 	ot.team_id      = _next_team_id(state)
@@ -41,8 +53,7 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 	state.teams[ot.team_id]           = ot
 	state.team_known[ot.team_id]      = []
 	state.team_discovered[ot.team_id] = []
-	var gen := PersonGenerator.new()
-	var promoted := gen.generate_from_team(ot, state)
+	var promoted := _generate_from_anonymous_population(state, ot)
 	if promoted != null:
 		ot.leader_id  = promoted.id
 		promoted.role = "leader"

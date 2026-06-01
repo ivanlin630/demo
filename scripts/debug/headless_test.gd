@@ -261,7 +261,7 @@ func _run_sim_test() -> void:
 	team9.leader_id = 21
 	print("=== 商隊測試：Team9 tile(5,5) 商隊，goods=100, gem=3, coin=0 ===")
 
-	# ── PersonGenerator 驗證 ──
+	# ── EventSystem 匿名晉升驗證 ──
 	var gen_team := TeamData.new()
 	gen_team.team_id    = 10
 	gen_team.population = 5     # anon_pop = 5-1(leader) = 4
@@ -279,22 +279,61 @@ func _run_sim_test() -> void:
 	gen_team.leader_id  = 30
 	var _es_gen   := EventSystem.new()
 	var _gen_ok   : bool = _es_gen.on_leader_death(state, gen_team)
-	print("=== PersonGenerator 測試 ===")
+	print("=== EventSystem 匿名晉升測試 ===")
 	print("  gen_ok=%s  new_leader_id=%d" % [str(_gen_ok), gen_team.leader_id])
 	if _gen_ok and gen_team.leader_id != 30:
 		var _np: PersonData = state.persons.get(gen_team.leader_id)
 		if _np:
-			print("  [OK] 匿名晉升 Person%d 體力=%.2f 智力=%.2f 戰鬥=%.2f 統領=%.2f" % [
-				_np.id,
-				float(_np.attributes.get("體力", 0)),
-				float(_np.attributes.get("智力", 0)),
-				float(_np.skills.get("戰鬥", 0)),
-				float(_np.skills.get("統領", 0))])
+			var _name_looks_static: bool = not _np.person_name.begins_with("NPC_")
+			if _np.team_id == 10 and _np.role == "leader" and _name_looks_static \
+					and state.persons.has(gen_team.leader_id):
+				print("  [OK] 靜態 API 晉升 Person%d name=%s team=%d role=%s" % [
+					_np.id, _np.person_name, _np.team_id, _np.role])
+			else:
+				print("  [FAIL] 晉升資料錯誤 name=%s team=%d role=%s stored=%s" % [
+					_np.person_name, _np.team_id, _np.role,
+					str(state.persons.has(gen_team.leader_id))])
 		else:
 			print("  [FAIL] new_leader 不在 state.persons")
 	else:
 		print("  [FAIL] gen_ok=false or leader_id unchanged")
 	state.persons.erase(30)   # 清理「假死」leader（模擬 _kill_named_npc 後段）
+	if gen_team.leader_id != 30:
+		state.persons.erase(gen_team.leader_id)
+	state.teams.erase(10)
+	state.team_known.erase(10)
+	state.team_discovered.erase(10)
+
+	# 無匿名人口時不應憑空晉升
+	var gen_team_empty := TeamData.new()
+	gen_team_empty.team_id = 14
+	gen_team_empty.population = 1
+	gen_team_empty.tags = ["軍隊"]
+	gen_team_empty.tile_pos = Vector2i(4, 2)
+	state.teams[14] = gen_team_empty
+	state.team_known[14] = []
+	state.team_discovered[14] = []
+	var p14_0 := PersonData.new()
+	p14_0.id = 31
+	p14_0.person_name = "P14_leader"
+	p14_0.role = "leader"
+	p14_0.team_id = 14
+	state.persons[31] = p14_0
+	gen_team_empty.leader_id = 31
+	var _persons_before_empty: int = state.persons.size()
+	var _gen_empty_ok: bool = _es_gen.on_leader_death(state, gen_team_empty)
+	print("=== EventSystem 無匿名人口測試 ===")
+	if not _gen_empty_ok and gen_team_empty.leader_id == 31 and \
+			state.persons.size() == _persons_before_empty:
+		print("  [OK] 無匿名人口時不晉升")
+	else:
+		print("  [FAIL] 無匿名人口仍晉升 ok=%s leader=%d persons=%d(before=%d)" % [
+			str(_gen_empty_ok), gen_team_empty.leader_id,
+			state.persons.size(), _persons_before_empty])
+	state.persons.erase(31)
+	state.teams.erase(14)
+	state.team_known.erase(14)
+	state.team_discovered.erase(14)
 
 	# ── merge_teams 驗證 ──
 	var ma := TeamData.new()
@@ -413,11 +452,24 @@ func _run_sim_test() -> void:
 	print("=== PopulationSystem 場景2（無advisor）===")
 	if state.teams.size() > _teams_before_ov2:
 		print("  [OK] 新 team 建立（流亡）")
+		var _ov2_found: bool = false
 		for _tid in state.teams:
 			var _t: TeamData = state.teams[_tid]
 			if _t.tags.has("流亡") and _t.tile_pos == Vector2i(0, -5) and _t.team_id != 21:
-				print("  [OK] Team%d 流亡 pop=%d leader_id=%d" % [_t.team_id, _t.population, _t.leader_id])
+				_ov2_found = true
+				var _ov2_leader_person: PersonData = state.persons.get(_t.leader_id)
+				if _ov2_leader_person != null and _ov2_leader_person.team_id == _t.team_id \
+						and not _ov2_leader_person.person_name.begins_with("NPC_") \
+						and state.persons.has(_t.leader_id):
+					print("  [OK] Team%d 流亡 pop=%d leader_id=%d name=%s" % [
+						_t.team_id, _t.population, _t.leader_id, _ov2_leader_person.person_name])
+				else:
+					print("  [FAIL] 流亡 leader 錯誤 team=%d leader=%d person=%s stored=%s" % [
+						_t.team_id, _t.leader_id,
+						str(_ov2_leader_person), str(state.persons.has(_t.leader_id))])
 				break
+		if not _ov2_found:
+			print("  [FAIL] 未找到流亡 team 詳情")
 	else:
 		print("  [FAIL] 未建立流亡 team")
 
