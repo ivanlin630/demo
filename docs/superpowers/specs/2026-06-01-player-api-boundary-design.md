@@ -467,8 +467,8 @@ canonical 規則：
 - `get_player_snapshot(request)` 內的 `available_actions` 視為直接重用同一套判定與映射結果，不允許雙邏輯。
 
 composition 規則：
-- action 來源分五層：forced interaction、inventory row、focused member、tile context、team/global context。
-- 合成順序固定為：forced interaction > inventory row > focused member > tile context > team/global context。
+- top-level action 來源分四層：forced interaction、focused member、tile context、team/global context。
+- 合成順序固定為：forced interaction > focused member > tile context > team/global context。
 - dedupe key 為 `command_name + serialized(command_args)`。
 - 若同 key 重複，保留較高優先層版本。
 - 最終輸出順序依上述優先層，再依 `label` 字母序穩定排序。
@@ -512,8 +512,9 @@ composition 規則：
 - 與 inventory 相關的 `available_actions`
 
 關係規則：
-- `inventory_state.available_actions` 是 top-level `available_actions` 的 inventory 子集。
-- 兩者 action shape 完全相同，只是用途不同：top-level 給整體 UI，inventory 子集給 inventory mode 直接渲染。
+- `inventory_state.available_actions` 只放 inventory-global actions。
+- row-scoped inventory actions 只放在 `inventory_items[*].available_actions` 與 `team_takeable_items[*].available_actions`。
+- top-level `available_actions` 不包含 row-scoped inventory actions。
 
 ## Canonical DTO Schema
 
@@ -827,7 +828,7 @@ inventory action 綁定規則：
 - 直接 command caller 若不走 generated action，可自行傳任意 `qty > 0`；API 依現有規則驗證是否允許。
 
 interaction routing 規則：
-- `respond_to_forced(response_id)` 專責處理 `forced_interaction.responses[*]`。
+- `respond_to_forced(interaction_id, response_id)` 專責處理 `forced_interaction.responses[*]`。
 - `execute_action` 不接受 `target.kind = "interaction"`；其合法 target 只限 `none | team | member | tile`。
 - 非 forced 的一般互動，透過 `execute_action` + `team/member` target 處理。
 - `respond_to_forced` 需要 `interaction_id + response_id` 成對驗證。
