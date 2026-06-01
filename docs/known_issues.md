@@ -6,12 +6,9 @@
 
 ## 🔴 高優先（影響基本可玩性）
 
-### S1. 視野公式門檻太高
-- **症狀**：只能看到相鄰 1 格的 team；dist=2 的 team 即使 pop=10 仍不可見
-- **根因**：`exposure + scout×0.3 > 0.5`，距離衰減（dist_f）使 dist=2 時 eff_exp=0.45，永遠低於門檻
-- **計算**：pop=10 plains → base=0.60；dist=2 vrange=3 → dist_f=0.75；eff_exp=0.45 < 0.5
-- **位置**：`scripts/simulation/vision_system.gd:41`
-- **建議**：門檻降至 0.3，或移除距離衰減改為二元（在範圍內就看到）
+### S1. 視野公式門檻太高 ✅ 已修
+- **修正**：`_can_detect` 門檻從 `> 0.5` 降至 `> 0.3`
+- **位置**：`scripts/simulation/vision_system.gd:42`
 
 ### S2. SALARY_INTERVAL=30 → tick 30 全體 loyalty 歸零 ✅ 已修
 - **修正**：`SALARY_INTERVAL = TICKS_PER_MONTH`（= 7200 ticks = 30天）
@@ -31,26 +28,19 @@
 - **修正了**：`pixel_to_hex` guard、`_on_move` sentinel、`_draw` 白框 sentinel
 - **仍需驗證**：重開遊戲後實測確認
 
-### U2. 可移動到地圖外
-- **症狀**：設定 move_target 到 (100,100)，team 實際移動過去不報錯
-- **根因**：`movement_system` 只看 `move_target != (-1,-1)`，不驗證 tile 存在
-- **位置**：`scripts/simulation/movement_system.gd`，及 `scripts/ui/main.gd:_on_set_move_target`
-- **建議**：`_on_set_move_target` 設定前先 `state.world.tiles.has(pos.x*1000+pos.y)`
+### U2. 可移動到地圖外 ✅ 已修
+- **修正**：`_on_set_move_target` 加 `state.world.tiles.has(pos.x*1000+pos.y)` 驗證
+- **位置**：`scripts/ui/main.gd:86`
 
-### U3. NPC 旗子看不到
-- **症狀**：地圖上看不到其他 team 的旗子
-- **根因**：S1（視野公式）+ 人口下降後暴露值不足（pop<8 → exposure<0.5）
-- **連動**：camera 已修，但 S1 不修視野範圍仍只剩 dist=1
+### U3. NPC 旗子看不到 ✅ 已修（連動 S1）
 
 ---
 
 ## 🟠 中優先（影響遊戲合理性）
 
-### S3. SEASON_LENGTH=30 → 1年=5天
-- **症狀**：季節極速切換，春夏秋冬沒有存在感
-- **根因**：30 tick = 1.25 天，4季=5天/年
+### S3. SEASON_LENGTH=30 → 1年=5天 ✅ 已修
+- **修正**：`SEASON_LENGTH = TICKS_PER_SEASON`（= 90天/季）
 - **位置**：`scripts/simulation/harvest_system.gd:3`
-- **建議**：720（30天/季），或至少 240（10天/季）
 
 ### S4. 人口分裂太快
 - **症狀**：main.gd 開局 3 team，tick 10 開始自動分裂，tick 30 已有 10+ team
