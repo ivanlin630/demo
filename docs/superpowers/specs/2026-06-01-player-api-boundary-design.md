@@ -211,7 +211,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 {
     "action_id": String,
     "target": {
-        "kind": String, # "none" | "team" | "member" | "tile" | "interaction"
+        "kind": String, # "none" | "team" | "member" | "tile"
         "team_id": int,
         "member_id": int,
         "tile_q": int,
@@ -226,7 +226,6 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - team 目標使用 `kind = "team"` + `team_id`。
 - member 目標使用 `kind = "member"` + `team_id` + `member_id`。
 - tile 目標使用 `kind = "tile"` + `tile_q` + `tile_r`。
-- forced / interaction 類目標使用 `kind = "interaction"` + `interaction_id`。
 - 若 `target` 內容與 `action_id` 所需 target 不匹配，回 `invalid_target`。
 - 不支援複合 target；若未來需要複合 target，視為新 command contract，不在本次 spec。
 
@@ -543,7 +542,7 @@ composition 規則：
 {
     "interaction_id": String,      # 無互動時為 ""
     "interaction_type": String,
-    "source": Dictionary,          # {team_id, team_name, member_id, member_name}
+    "source": Dictionary,
     "message": String,
     "responses": Array[Dictionary] # [{response_id, label}]
 }
@@ -583,12 +582,52 @@ composition 規則：
 
 ```gdscript
 {
-    "inventory_items": Array[Dictionary],  # [{grade, qty, equip_slots}]
-    "team_takeable_items": Array[Dictionary], # [{grade, qty}]
+    "inventory_items": Array[Dictionary],
+    "team_takeable_items": Array[Dictionary],
     "equipped_items": Dictionary,
     "available_actions": Array[Dictionary]
 }
 ```
+
+nested sub-schema：
+
+```gdscript
+# team.members[*]
+{"id": int, "name": String, "role": String}
+
+# controlled_team.resources
+{"food": int, "coin": int, "material": int}
+
+# focused_member.status
+{"health": String, "stress": float, "loyalty": float}
+
+# forced_interaction.source
+{"team_id": int, "team_name": String, "member_id": int, "member_name": String}
+
+# team.interaction_options[*]
+{"action_id": String, "label": String}
+
+# location_context.terrain
+String | null
+
+# location_context.settlement
+{"id": int, "name": String, "owner_faction": String} | null
+
+# inventory_items[*]
+{"row_id": String, "grade": String, "qty": int, "equip_slots": PackedStringArray, "available_actions": Array[Dictionary]}
+
+# team_takeable_items[*]
+{"row_id": String, "grade": String, "qty": int, "available_actions": Array[Dictionary]}
+
+# equipped_items
+{"head": String, "torso": String, "hand_1": String, "hand_2": String}
+```
+
+empty/sentinel 規則：
+- `focused_member` 無 focus 或 stale focus 時：`id=-1`, `name=""`, `team_id=-1`, `team_name=""`, `role=""`, `status={"health":"", "stress":0.0, "loyalty":0.0}`, `available_actions=[]`
+- `forced_interaction` 無互動時：`interaction_id=""`, `interaction_type=""`, `source={team_id:-1, team_name:"", member_id:-1, member_name:""}`, `message=""`, `responses=[]`
+- `location_context` hidden/invalid cursor 時：`visibility_state="hidden"`, `terrain=null`, `settlement=null`, `occupants=[]`, `hints=[]`
+- `inventory_state` 無資料時：各陣列空、`equipped_items` 各槽為空字串
 
 ### `snapshot_meta`
 
@@ -718,6 +757,11 @@ inventory action 綁定規則：
 - inventory row 內的 `available_actions[*].command_args` 必須已綁定該 row 所需參數。
 - `equip_item` 若同 item 可裝多槽，需展開成多個 action，各自帶不同 `slot_id`。
 - `deposit_item` 與 `take_team_item` 在目前 spec 先用固定 qty action：deposit 預設整筆 qty、take 預設 1。若未來要可調數量，新增 `allows_qty_override` 欄位，但不阻擋本次規劃。
+
+interaction routing 規則：
+- `respond_to_forced(response_id)` 專責處理 `forced_interaction.responses[*]`。
+- `execute_action` 不接受 `target.kind = "interaction"`；其合法 target 只限 `none | team | member | tile`。
+- 非 forced 的一般互動，透過 `execute_action` + `team/member` target 處理。
 
 canonical envelope examples：
 
