@@ -102,20 +102,46 @@ DTO 規則：
 
 Query API 至少提供以下方法：
 
-- `get_player_snapshot()`
+- `get_player_snapshot(request: Dictionary)`
 - `get_team_details(team_id: String)`
 - `get_member_details(team_id: String, member_id: String)`
 - `get_location_context(tile_q: int, tile_r: int)`
-- `get_available_actions(context: Dictionary)`
+- `get_available_actions(request: Dictionary)`
+
+`get_player_snapshot(request)` 的 request 至少包含：
+
+```gdscript
+{
+    "focus_team_id": String,
+    "focus_member_id": String,
+    "cursor_tile_q": int,
+    "cursor_tile_r": int
+}
+```
+
+規則：
+- 以上欄位可為空值或 sentinel value，表示 UI 目前沒有 focus / cursor。
+- snapshot 內的 `focused_member`、`location_context`、`available_actions` 都由這些 UI-local 輸入決定。
+- UI 自己保管 focus / cursor 狀態，不寫入 world state。
+
+各 query 合約：
+
+| Query | 輸入 | `data` 最低欄位 | 常見錯誤碼 |
+|---|---|---|---|
+| `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions` | `no_player`, `no_controlled_team` |
+| `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `invalid_team` |
+| `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `invalid_team`, `invalid_member` |
+| `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `invalid_tile` |
+| `get_available_actions` | `team_id`, `member_id`, `tile_q`, `tile_r`, `forced_interaction_id` | `actions` | `invalid_team`, `invalid_member`, `invalid_tile`, `forced_response_missing` |
 
 ### Command API 對外輸出
 
 Command API 提供既有玩家行為入口，至少覆蓋：
 
-- `move_to`
-- `cancel_move`
-- `execute_action`
-- `respond_to_forced`
+- `move_to(tile_q: int, tile_r: int)`
+- `cancel_move()`
+- `execute_action(action_id: String, target_type: String, target_id: String)`
+- `respond_to_forced(response_id: String)`
 
 若 UI 需要改變本地 focus，只由 UI 自己保管目前 focus 的 team/member id，再把 id 傳給 query API。focus 不作為 world command。
 
@@ -136,6 +162,15 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `message` 給使用者顯示或 debug print。
 - `payload` 只放下一步 UI 真正需要的資訊，例如刷新 hint、更新後目標、互動狀態摘要。
 
+各 command 合約：
+
+| Command | 輸入 | 成功 payload 最低欄位 | 常見錯誤碼 | UI 是否重刷 |
+|---|---|---|---|---|
+| `move_to` | `tile_q`, `tile_r` | `move_target`, `refresh_required=true` | `no_controlled_team`, `invalid_tile`, `move_unavailable` | 是 |
+| `cancel_move` | 無 | `move_cancelled=true`, `refresh_required=true` | `no_controlled_team`, `move_unavailable` | 是 |
+| `execute_action` | `action_id`, `target_type`, `target_id` | `action_id`, `result_summary`, `refresh_required` | `invalid_target`, `action_unavailable` | 通常是 |
+| `respond_to_forced` | `response_id` | `forced_interaction_resolved`, `refresh_required=true` | `forced_response_missing`, `forced_response_invalid` | 是 |
+
 ---
 
 ## 資料流
@@ -143,7 +178,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 ### 讀取流程
 
 1. UI 啟動或每 tick 刷新。
-2. UI 呼叫 `player_query_api.get_player_snapshot()` 取得 envelope。
+2. UI 呼叫 `player_query_api.get_player_snapshot(request)` 取得 envelope。
 3. 若 `ok = true`，UI 讀 `data.snapshot` 重繪畫面。
 4. 若 `ok = false`，UI 依 `code/message` 顯示一致錯誤訊息，不直接讀 `WorldState` 補救。
 
@@ -209,7 +244,8 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 
 查詢方式：
 - UI 持有 `focused_member_id`
-- 透過 `get_member_details(team_id, member_id)` 取得
+- `get_player_snapshot(request)` 會依 `focus_member_id` 內嵌 `focused_member`
+- 若需要獨立詳查，使用 `get_member_details(team_id, member_id)`
 
 至少包含：
 - member id / name
@@ -223,11 +259,25 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 用途：
 - 取代 UI 直接讀 `_state.player_pending_targets` 的行為。
 
+至少包含：
+- target 列表
+- 每個 target 的 `target_type`
+- `target_id`
+- 顯示名稱
+- 是否仍有效
+
 ### `forced_interaction`
 
 用途：
 - 取代 UI 直接讀 `_state.player_forced_event`。
 - 統一輸出必回應互動的類型、來源、可選動作與必要顯示文字。
+
+至少包含：
+- `interaction_id`
+- `interaction_type`
+- 來源 team/person 摘要
+- prompt/message
+- 可選 responses 列表（每筆含 `response_id`, `label`）
 
 ### `location_context`
 
@@ -249,7 +299,19 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - 未來 graphical UI 可直接以此生成按鈕或選單。
 
 查詢方式：
-- `get_available_actions(context)`，其中 context 至少可帶 `team_id`、`member_id`、`tile_q`、`tile_r`、`forced_interaction_id`
+- `get_available_actions(request)`
+
+`request` 最低欄位：
+
+```gdscript
+{
+    "team_id": String,
+    "member_id": String,
+    "tile_q": int,
+    "tile_r": int,
+    "forced_interaction_id": String
+}
+```
 
 每個 action 至少包含：
 - `action_id`
@@ -258,6 +320,12 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `disabled_reason`
 - `target_requirements`
 - `command_name`
+
+`command_name` 只允許對應既有 command surface：
+- `move_to`
+- `cancel_move`
+- `execute_action`
+- `respond_to_forced`
 
 ---
 
@@ -280,6 +348,11 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `move_unavailable`
 - `forced_response_missing`
 - `forced_response_invalid`
+
+Query API 的 envelope 失敗規則：
+- `get_player_snapshot` 若無玩家或無受控 team，回 `ok=false` 與對應錯誤碼。
+- detail query 若目標不存在，回 `ok=false` 與 `invalid_team` / `invalid_member` / `invalid_tile`。
+- 不使用「成功但資料為錯誤字典」的混合模式。
 
 錯誤碼原則：
 - 穩定、可比對。
@@ -317,10 +390,17 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 headless 測試需新增或補強以下驗證：
 
 - Query API 可取得穩定 DTO。
-- Command API 可處理 move、cancel、forced interaction、inspect 類流程。
+- Query API 可處理 inspect / detail 類流程。
+- Command API 可處理 move、cancel、action、forced interaction 類流程。
 - text UI / playtest 不再直接讀玩家內部 state。
 - DTO / result 必要欄位存在，避免 UI 契約回歸。
 - 關鍵流程有對應驗證 print，能在 headless log 中確認。
+
+至少覆蓋：
+- `get_player_snapshot` 在有/無 focus、有/無 forced interaction 下的 shape 穩定。
+- `get_team_details` / `get_member_details` / `get_location_context` / `get_available_actions` 的成功與失敗 envelope。
+- 每個 command 的成功與失敗 code。
+- command 回傳 `refresh_required` 後，UI 可重跑 query 而不需碰內部 state。
 
 成功標準：
 - headless test 無 `SCRIPT ERROR`
@@ -343,3 +423,4 @@ headless 測試需新增或補強以下驗證：
 - `focused_member` 由 UI 持有 focus id，再傳給 query API 查詢；不寫入 world state。
 - `available_actions` 必須同時帶 `label` 與 `disabled_reason`，避免 UI 自行硬編。
 - `location_context` 先由單一 query 一次回傳 tile / settlement / occupant 摘要；若後續證明過胖，再在實作中內部分拆，但 public contract 先維持單一入口。
+- inspect 是 query responsibility，不是 command responsibility。
