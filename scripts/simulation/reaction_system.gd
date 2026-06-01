@@ -203,11 +203,19 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		"N1_flee":
 			team.population = maxi(team.population - 1, 1)
 			person.stress = maxf(person.stress - 0.3, 0.0)
+			# 具名成員逃跑：清除 named_members 引用，避免 ghost member
+			if team.named_members.has(person.id):
+				team.named_members.erase(person.id)
+				person.team_id = -1
 		"N2_riot":
 			team.unrest_turns += 1
 		"N3_defect":
 			team.population = maxi(team.population - 1, 1)
 			person.loyalty = 0.0
+			# 具名成員叛離：清除 named_members 引用
+			if team.named_members.has(person.id):
+				team.named_members.erase(person.id)
+				person.team_id = -1
 		"N4_shirk":
 			var f: float = float(team.resources.get("food", 0))
 			team.resources["food"] = maxf(f - 1.0, 0.0)
