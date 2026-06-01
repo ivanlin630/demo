@@ -66,14 +66,23 @@ scripts/simulation/
 - `map_controlled_team(...) -> Dictionary`
 - `map_visible_team(...) -> Dictionary`
 - `map_member_details(...) -> Dictionary`
+- `map_pending_targets(...) -> Array`
+- `map_forced_interaction(...) -> Dictionary`
 - `map_location_context(...) -> Dictionary`
 - `map_available_action(...) -> Dictionary`
+- `map_inventory_state(...) -> Dictionary`
+- `map_snapshot_meta(...) -> Dictionary`
+- `map_player_snapshot(...) -> Dictionary`
 - `map_query_envelope(ok, code, message, data) -> Dictionary`
 - `map_command_result(ok, code, message, payload) -> Dictionary`
 
 ownership 規則：
 - mapper 擁有 public query DTO、command payload/result shape、envelope shape 的輸出責任。
 - mapper 不擁有業務判斷，不決定 action 是否可用，也不執行 command。
+
+action generation owner：
+- `player_query_api.gd` 擁有 available action 的組裝、優先序、dedupe、context 合成規則。
+- mapper 只負責把已決定的 action 轉成 public DTO shape。
 
 ---
 
@@ -305,8 +314,8 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - 提供 UI 當前聚焦成員資訊，而不是直接回 person 物件。
 
 查詢方式：
-- UI 持有 `focused_member_id`
-- `get_player_snapshot(request)` 會依 `focus_member_id` 內嵌 `focused_member`
+- UI 持有 `focus_team_id` + `focus_member_id`
+- `get_player_snapshot(request)` 會依兩者內嵌 `focused_member`
 - 若需要獨立詳查，使用 `get_member_details(team_id, member_id)`
 
 至少包含：
@@ -756,6 +765,7 @@ inventory action 綁定規則：
 - inventory row 內的 `available_actions[*].command_args` 必須已綁定該 row 所需參數。
 - `equip_item` 若同 item 可裝多槽，需展開成多個 action，各自帶不同 `slot_id`。
 - `deposit_item` 與 `take_team_item` 在目前 spec 先用固定 qty action：deposit 預設整筆 qty、take 預設 1。若未來要可調數量，新增 `allows_qty_override` 欄位，但不阻擋本次規劃。
+- 直接 command caller 若不走 generated action，可自行傳任意 `qty > 0`；API 依現有規則驗證是否允許。
 
 interaction routing 規則：
 - `respond_to_forced(response_id)` 專責處理 `forced_interaction.responses[*]`。
