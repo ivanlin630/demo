@@ -43,7 +43,10 @@
 | `subteam_system.gd` | dispatch / try_merge_back / 護衛跟隨；動態人口上限；紀律失效脫離 |
 | `message_system.gd` | emit_message；propagate_on_arrival；4 種失真模式；去重衰減 |
 | `world_generator.gd` | hex 地圖（radius 可配）；地形三型；ore_iron 分布 |
-| `player_system.gd` | init_player；add_to_inventory / take_from_team / deposit_to_team；equip_item / unequip_item；get_visible_teams（回傳 team_discovered 副本） |
+| `player_api_mapper.gd` | pure static DTO mapping（map_player_summary / map_forced_interaction / map_inventory_state 等） |
+| `player_query_api.gd` | snapshot 查詢組合（get_player_snapshot / get_team_details / get_location_context 等） |
+| `player_command_api.gd` | 指令驗證+分派（dispatch / move_to / respond_to_forced / execute_action 等） |
+| `sim_bridge.gd` (更新) | query_player / command_player facade；UI 與 WorldState 玩家欄位完全隔離 |
 | `encounter_system.gd` | 六角遭遇戰：init_encounter / _spawn_team_units（含匿名）；進場位置（attacker/defender/pursuit）；裝備分配；箭矢系統；decide_action 戰術 AI；advance_round 戰鬥解算（範圍/近戰/撤退/逃跑）；俘虜判定；傳令兵退出（SubteamSystem stub 待接）；resolve_encounter_end 結算 |
 
 ---
@@ -117,8 +120,8 @@
 
 | 項目 | 說明 |
 |---|---|
-| **UI / 渲染** | 大地圖顯示、勢力標記、訊息日誌；目前純 headless |
-| **玩家操作介面** | PlayerSystem 已有資料層，需 Godot scene + 輸入處理 |
+| **UI / 渲染** | ✅ text_ui_main / popup_layer / main.gd 已透過 SimBridge 隔離 WorldState 玩家欄位 |
+| **玩家操作介面** | ✅ PlayerApiMapper + PlayerQueryApi + PlayerCommandApi + SimBridge 玩家 API 邊界已建立 |
 | **遭遇戰 UI** | EncounterSystem 已有邏輯層，需 hex 地圖渲染 + 玩家指令輸入 |
 | **天氣/季節系統** | 影響地形乘數、採集效率、疲勞 |
 | **宗教/文化系統** | 新 values 或 faction 屬性 |

@@ -1738,4 +1738,57 @@ func _run_sim_test() -> void:
 	_capi_state.player_forced_event_id = ""
 	print("PlayerCommandApi: ALL PASS")
 
+	# ── SimBridge player API integration test ────────────────────────────
+	print("\n--- SimBridge Player API Integration ---")
+	var _sb_state := WorldState.new()
+	var _sb_runner := SimRunner.new()
+	var _sb_bridge := SimBridge.new(_sb_runner, _sb_state)
+
+	# Setup minimal player
+	var _sb_p := PersonData.new()
+	_sb_p.id = 0; _sb_p.person_name = "SBPlayer"; _sb_p.team_id = 0
+	_sb_state.persons[0] = _sb_p
+	_sb_state.player_id = 0
+	var _sb_team := TeamData.new()
+	_sb_team.team_id = 0; _sb_team.population = 5
+	_sb_team.tile_pos = Vector2i(0, 0)
+	_sb_team.resources = {"food": 100.0, "coin": 10, "material": 10}
+	_sb_state.teams[0] = _sb_team
+	_sb_state.world.tiles[0] = HexTileData.new()
+	_sb_state.world.tiles[1000] = HexTileData.new()  # (1,0) for move target
+
+	# query_player returns ok envelope with snapshot
+	var _qp := _sb_bridge.query_player()
+	assert(_qp.get("ok"), "SimBridge query_player should succeed")
+	var _snap: Dictionary = _qp.get("data", {}).get("snapshot", {})
+	assert(_snap.has("player_summary"), "snapshot has player_summary")
+	assert(_snap.get("player_summary", {}).get("player_exists"), "player_exists in snapshot")
+	assert(not _snap.get("player_summary", {}).get("encounter_active"), "no encounter initially")
+	print("  [OK] query_player snapshot: player_exists, no encounter")
+
+	# query_player with no player → ok=false
+	var _sb_state2 := WorldState.new()
+	var _sb_bridge2 := SimBridge.new(_sb_runner, _sb_state2)
+	var _qp2 := _sb_bridge2.query_player()
+	assert(not _qp2.get("ok"), "query_player no player should fail")
+	print("  [OK] query_player no player: ok=false")
+
+	# command_player move_to valid tile → ok
+	var _cmd_r1 := _sb_bridge.command_player("move_to", {"tile_q": 1, "tile_r": 0})
+	assert(_cmd_r1.get("ok"), "move_to valid tile: ok=true")
+	assert(_sb_state.teams[0].move_target == Vector2i(1, 0), "move_target set")
+	print("  [OK] command_player move_to: move_target set")
+
+	# command_player move_to invalid tile → ok=false
+	var _cmd_r2 := _sb_bridge.command_player("move_to", {"tile_q": 99, "tile_r": 99})
+	assert(not _cmd_r2.get("ok"), "move_to invalid tile: ok=false")
+	print("  [OK] command_player move_to invalid: ok=false")
+
+	# command_player unknown command → ok=false
+	var _cmd_r3 := _sb_bridge.command_player("nonexistent_cmd", {})
+	assert(not _cmd_r3.get("ok"), "unknown cmd: ok=false")
+	print("  [OK] command_player unknown: ok=false")
+
+	print("SimBridge Player API Integration: ALL PASS")
+
 	print("=== DONE ===")

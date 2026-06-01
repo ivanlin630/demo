@@ -108,7 +108,7 @@ func _diff_events(snap: Dictionary) -> Array:
 
 # ── Player API (query / command) ───────────────────────────────────────────────
 
-func query_player(request: Dictionary) -> Dictionary:
+func query_player(request: Dictionary = {}) -> Dictionary:
 	return _query_api.get_player_snapshot(_state, request)
 
 func query_player_team(team_id: int) -> Dictionary:
