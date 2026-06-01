@@ -1664,4 +1664,32 @@ func _run_sim_test() -> void:
 	_mapper_state.player_forced_event_id = ""
 	print("PlayerApiMapper: ALL PASS")
 
+	# ── PlayerQueryApi unit tests ──────────────────────────────────────────────────
+	print("\n--- PlayerQueryApi ---")
+	var _qapi := PlayerQueryApi.new()
+	var _qapi_state := WorldState.new()
+
+	# No player → error envelope
+	var _qapi_r1 := _qapi.get_player_snapshot(_qapi_state, {})
+	assert(_qapi_r1["ok"] == false, "get_player_snapshot no player ok=false")
+	assert(_qapi_r1["code"] == "no_player", "get_player_snapshot no player code")
+	print("get_player_snapshot (no player): OK")
+
+	# get_team_details — invalid team
+	var _qapi_r2 := _qapi.get_team_details(_qapi_state, 999)
+	assert(_qapi_r2["ok"] == false, "get_team_details invalid team")
+	print("get_team_details (invalid): OK")
+
+	# get_location_context — invalid tile
+	var _qapi_r3 := _qapi.get_location_context(_qapi_state, -1, -1)
+	assert(_qapi_r3["ok"] == false, "get_location_context invalid tile")
+	print("get_location_context (invalid tile): OK")
+
+	# get_available_actions — no player
+	var _qapi_r4 := _qapi.get_available_actions(_qapi_state, {"team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1, "forced_interaction_id": ""})
+	assert(_qapi_r4["ok"] == false, "get_available_actions no player")
+	print("get_available_actions (no player): OK")
+
+	print("PlayerQueryApi: ALL PASS")
+
 	print("=== DONE ===")
