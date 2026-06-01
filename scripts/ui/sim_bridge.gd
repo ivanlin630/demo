@@ -6,6 +6,8 @@ const TICKS_PER_TURN: int = 24
 var _runner: SimRunner
 var _state: WorldState
 var _ticks_remaining: int = 0
+var _query_api: PlayerQueryApi = PlayerQueryApi.new()
+var _cmd_api: PlayerCommandApi = PlayerCommandApi.new()
 
 func _init(runner: SimRunner, state: WorldState) -> void:
 	_runner = runner
@@ -103,3 +105,23 @@ func _diff_events(snap: Dictionary) -> Array:
 		if now > snap["discovered_count"]:
 			evts.append({ "type": "new_team_spotted" })
 	return evts
+
+# ── Player API (query / command) ───────────────────────────────────────────────
+
+func query_player(request: Dictionary) -> Dictionary:
+	return _query_api.get_player_snapshot(_state, request)
+
+func query_player_team(team_id: int) -> Dictionary:
+	return _query_api.get_team_details(_state, team_id)
+
+func query_player_member(team_id: int, member_id: int) -> Dictionary:
+	return _query_api.get_member_details(_state, team_id, member_id)
+
+func query_player_location(tile_q: int, tile_r: int) -> Dictionary:
+	return _query_api.get_location_context(_state, tile_q, tile_r)
+
+func query_player_actions(request: Dictionary) -> Dictionary:
+	return _query_api.get_available_actions(_state, request)
+
+func command_player(name: String, args: Dictionary) -> Dictionary:
+	return _cmd_api.dispatch(_state, name, args)
