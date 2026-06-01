@@ -47,12 +47,20 @@ scripts/simulation/
 - 從 `WorldState` 擷取資料並組裝成穩定 DTO。
 - 對外隱藏內部 data class 與字典結構。
 
+生命週期：
+- 預設為 stateless helper；每次呼叫顯式接收 `WorldState` 與 request。
+- 不持有 UI 狀態，也不快取 mutable world data。
+
 ### `player_command_api.gd`
 
 責任：
 - 提供玩家操作入口。
 - 代理既有玩家操作流程（move / cancel / execute_action / forced response 等）。
 - 回傳標準 result，避免 UI 再回頭讀內部 state 補判斷。
+
+生命週期：
+- 預設為 stateless helper；每次呼叫顯式接收 `WorldState` 與 command 參數。
+- 不持有 long-lived mutable state；玩家相關持久狀態仍留在 `WorldState`。
 
 ### `player_api_mapper.gd`
 
@@ -180,6 +188,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `execute_action(request: Dictionary)`
 - `respond_to_forced(response_id: String)`
 - `equip_item(slot_id: String, item_grade: String)`
+- `unequip_item(slot_id: String)`
 - `deposit_item(item_grade: String, qty: int)`
 - `take_team_item(item_grade: String, qty: int)`
 
@@ -211,6 +220,7 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 | `execute_action` | `action_id`, `target.kind`, `target.*` | `action_id`, `result_summary`, `refresh_required` | `invalid_request`, `invalid_target`, `action_unavailable` | 通常是 |
 | `respond_to_forced` | `response_id` | `forced_interaction_resolved`, `refresh_required=true` | `forced_response_missing`, `forced_response_invalid` | 是 |
 | `equip_item` | `slot_id`, `item_grade` | `equipped_slot`, `item_grade`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `equip_unavailable` | 是 |
+| `unequip_item` | `slot_id` | `unequipped_slot`, `refresh_required=true` | `invalid_request`, `equip_unavailable` | 是 |
 | `deposit_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `deposit_unavailable` | 是 |
 | `take_team_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `take_unavailable` | 是 |
 
@@ -447,6 +457,7 @@ composition 規則：
   - `execute_action` → `{action_id, target}`
   - `respond_to_forced` → `{response_id}`
   - `equip_item` → `{slot_id, item_grade}`
+  - `unequip_item` → `{slot_id}`
   - `deposit_item` → `{item_grade, qty}`
   - `take_team_item` → `{item_grade, qty}`
 - UI 不自行推導 command 參數；直接使用 `command_args`。
@@ -752,6 +763,9 @@ command result canonical shapes：
 # equip_item
 {"equipped_slot": String, "item_grade": String, "refresh_required": true}
 
+# unequip_item
+{"unequipped_slot": String, "refresh_required": true}
+
 # deposit_item
 {"item_grade": String, "qty": int, "refresh_required": true}
 
@@ -764,6 +778,7 @@ inventory action 綁定規則：
 - `team_takeable_items` 每筆至少包含 `row_id`, `grade`, `qty`, `available_actions`。
 - inventory row 內的 `available_actions[*].command_args` 必須已綁定該 row 所需參數。
 - `equip_item` 若同 item 可裝多槽，需展開成多個 action，各自帶不同 `slot_id`。
+- `unequip_item` 由已裝備槽位直接產生 action，`command_args={slot_id}`。
 - `deposit_item` 與 `take_team_item` 在目前 spec 先用固定 qty action：deposit 預設整筆 qty、take 預設 1。若未來要可調數量，新增 `allows_qty_override` 欄位，但不阻擋本次規劃。
 - 直接 command caller 若不走 generated action，可自行傳任意 `qty > 0`；API 依現有規則驗證是否允許。
 
@@ -865,6 +880,9 @@ query decision table：
 | `get_member_details` | team/member not visible | `ok=false`, `code=not_visible` |
 | `get_available_actions` | no player / no team | `ok=false`, `code=no_player/no_controlled_team` |
 | `get_available_actions` | all context sentinel | `ok=true`, `data.actions=[]` |
+| `get_available_actions` | `member_id != -1` but `team_id == -1` | `ok=false`, `code=invalid_focus` |
+| `get_available_actions` | only one of `tile_q` / `tile_r` is `-1` | `ok=false`, `code=invalid_request` |
+| `get_available_actions` | stale/non-visible `team_id` / `member_id` | `ok=true`, `data.actions=[]` |
 | `get_available_actions` | `forced_interaction_id` 指向不存在 forced interaction | `ok=false`, `code=forced_response_missing` |
 
 錯誤碼原則：
@@ -891,6 +909,8 @@ command 驗證規則：
 ## 既有呼叫點遷移範圍
 
 這次遷移目標：
+- `scripts/ui/main.gd`
+- `scripts/ui/popup_layer.gd`
 - `scripts/ui/text_ui_main.gd`
 - `scripts/debug/playtest_minimal.gd`
 - `scripts/debug/headless_test.gd`
@@ -901,7 +921,9 @@ command 驗證規則：
 遷移完成後要求：
 - 玩家相關 UI / playtest 不直接讀寫 `WorldState`。
 - 玩家相關入口不直接依賴 `_state.player_pending_targets`、`_state.player_forced_event`、`_state.teams` 這類內部欄位。
+- `main.gd` 不直接寫 `team.move_target`。
 - inventory mode 不直接呼叫 `PlayerSystem.new().equip_item()`、`deposit_to_team()`、`take_from_team()`。
+- popup inventory UI 不直接呼叫 `PlayerSystem.new().unequip_item()`。
 - 若還有非玩家系統需要直接碰 state，不在本次範圍內。
 
 ---
