@@ -214,7 +214,7 @@ invalid local state 規則：
 | `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `no_player`, `no_controlled_team`, `invalid_team`, `not_visible` |
 | `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `no_player`, `no_controlled_team`, `invalid_team`, `invalid_member`, `not_visible` |
 | `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `no_player`, `no_controlled_team`, `invalid_tile` |
-| `get_available_actions` | `team_id`, `member_id`, `tile_q`, `tile_r`, `forced_interaction_id` | `actions` | `no_player`, `no_controlled_team`, `invalid_request`, `invalid_focus`, `forced_response_missing` |
+| `get_available_actions` | `team_id`, `member_id`, `tile_q`, `tile_r`, `forced_interaction_id` | `actions` | `no_player`, `no_controlled_team`, `invalid_request`, `invalid_focus`, `invalid_team`, `invalid_member`, `invalid_tile`, `forced_response_missing` |
 
 ### Command API 對外輸出
 
@@ -260,6 +260,10 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 | `unequip_item` | `slot_id` | `unequipped_slot`, `refresh_required=true` | `invalid_request`, `equip_unavailable` | 是 |
 | `deposit_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `deposit_unavailable` | 是 |
 | `take_team_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `take_unavailable` | 是 |
+
+command precheck 規則：
+- 所有 command 都先檢查 player 是否存在；不存在時回 `no_player`。
+- 需要受控隊伍的 command 再檢查 controlled team；不存在時回 `no_controlled_team`。
 
 command target/error 規則：
 - `move_to` 對不存在 tile 回 `invalid_tile`；tile 存在但不可走/不可下令回 `move_unavailable`。
@@ -926,7 +930,8 @@ Query API 的 envelope 失敗規則：
 - `get_team_details` / `get_member_details` / `get_location_context` 若無玩家或無 controlled team，回 `ok=false` 與 `no_player` / `no_controlled_team`。
 - `get_location_context` 若 tile 存在但目前 hidden，回 `ok=true` 與 hidden/redacted `data.location`。
 - detail query 若目標不存在，回 `ok=false` 與 `invalid_team` / `invalid_member` / `invalid_tile`。
-- `get_available_actions` 若無玩家或無受控 team，回 `ok=false`；若只有 context 不適用，回 `ok=true` 且 `data.actions = []`。
+- `get_available_actions` 例外規則：它同時承擔「查詢可用 action」與「redacted 空結果」兩種語意。
+- `get_available_actions` 若無玩家或無受控 team，回 `ok=false`；若只有 context 不適用或目標目前不可見，回 `ok=true` 且 `data.actions = []`。
 - 不使用「成功但資料為錯誤字典」的混合模式。
 
 fail-vs-sentinel carve-out：
@@ -943,14 +948,17 @@ query decision table：
 | `get_player_snapshot` | stale/invalid cursor tile | `ok=true` + hidden `location_context` + `snapshot_meta.cursor_valid=false` |
 | `get_team_details` | team not visible | `ok=false`, `code=not_visible` |
 | `get_member_details` | team/member not visible | `ok=false`, `code=not_visible` |
-| `get_available_actions` | no player / no team | `ok=false`, `code=no_player/no_controlled_team` |
+| `get_available_actions` | no player | `ok=false`, `code=no_player` |
+| `get_available_actions` | no controlled team | `ok=false`, `code=no_controlled_team` |
 | `get_available_actions` | all context sentinel | `ok=true`, `data.actions=[]` |
 | `get_available_actions` | `member_id != -1` but `team_id == -1` | `ok=false`, `code=invalid_focus` |
 | `get_available_actions` | only one of `tile_q` / `tile_r` is `-1` | `ok=false`, `code=invalid_request` |
-| `get_available_actions` | nonexistent `team_id` / `member_id` | `ok=false`, `code=invalid_team/invalid_member` |
+| `get_available_actions` | nonexistent `team_id` | `ok=false`, `code=invalid_team` |
+| `get_available_actions` | nonexistent `member_id` | `ok=false`, `code=invalid_member` |
 | `get_available_actions` | tile 不存在 | `ok=false`, `code=invalid_tile` |
 | `get_available_actions` | tile 存在但目前 hidden | `ok=true`, `data.actions=[]` |
-| `get_available_actions` | stale/non-visible `team_id` / `member_id` | `ok=true`, `data.actions=[]` |
+| `get_available_actions` | visible team 不存在於目前視野 / stale visible ref | `ok=true`, `data.actions=[]` |
+| `get_available_actions` | visible member 不存在於目前視野 / stale visible ref | `ok=true`, `data.actions=[]` |
 | `get_available_actions` | `forced_interaction_id` 指向不存在 forced interaction | `ok=false`, `code=forced_response_missing` |
 
 錯誤碼原則：
