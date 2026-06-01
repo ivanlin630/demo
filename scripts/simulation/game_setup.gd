@@ -204,6 +204,8 @@ static func _setup_player(state, config, rng) -> void:
 	leader.team_id = team.team_id
 	leader.age = 30
 	leader.loyalty = 1.0
+	# 統領初始值需支撐起始人口：pop_cap_from_leadership(0.15) = 10
+	leader.skills["統領"] = 0.15
 	state.persons[leader.id] = leader
 	team.leader_id = leader.id
 	state.player_id = leader.id

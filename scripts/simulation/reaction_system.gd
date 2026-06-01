@@ -192,7 +192,8 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var leader = state.persons.get(team.leader_id)
 			var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
 			var cap: int = TeamData.pop_cap_from_leadership(cmd)
-			team.population = mini(team.population + 1, cap)
+			if team.population < cap:
+				team.population += 1
 		"P4_expand":
 			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
 		"P5_breed":
