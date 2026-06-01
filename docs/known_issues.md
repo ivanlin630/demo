@@ -1,6 +1,6 @@
 # Known Issues
 
-> 2026-05-31 | 來源：動態測試 + code review
+> 最後更新：2026-06-02 | 來源：動態測試 + code review
 
 ---
 
@@ -13,11 +13,19 @@
 - **位置**：`scripts/simulation/vision_system.gd:41`
 - **建議**：門檻降至 0.3，或移除距離衰減改為二元（在範圍內就看到）
 
-### S2. SALARY_INTERVAL=30 → tick 30 全體 loyalty 歸零
-- **症狀**：tick 30 所有人同時 loyalty=0，觸發大規模逃跑/叛變，世界在第 2 天爆炸
-- **根因**：30 tick = 1.25 天發薪，coin 根本不夠支付；`SALARY_LOYALTY_PENALTY` 累積太快
+### S2. SALARY_INTERVAL=30 → tick 30 全體 loyalty 歸零 ✅ 已修
+- **修正**：`SALARY_INTERVAL = TICKS_PER_MONTH`（= 7200 ticks = 30天）
 - **位置**：`scripts/simulation/salary_system.gd:3`
-- **建議**：`SALARY_INTERVAL = 720`（30天/月）
+
+### S6. P3_recruit 人口崩潰 ✅ 已修（2026-06-02）
+- **症狀**：開局 tick 10 人口從 10 降至 1；named member 變成 ghost（仍在列表但 pop=1）
+- **根因 A**：`team.population = mini(pop+1, cap)`，玩家 leader 統領=0.0 → cap=1 → `mini(11,1)=1`
+- **根因 B**：N1_flee/N3_defect 只改 `team.population`，不清 `named_members` → ghost member
+- **修正**：
+  - `P3_recruit`：改為 `if team.population < cap: team.population += 1`（永不減少）
+  - 玩家 leader 初始 `skills["統領"] = 0.15`（cap=10，支撐預設 pop=10）
+  - `N1_flee`/`N3_defect`：加 `named_members.erase(id)` + `person.team_id = -1`
+- **commit**：`274a08b`（recruit+初始技能）、`ef60b64`（ghost member 清理）
 
 ### U1. X<0 圖塊無法選取與移動 ✅ 已修
 - **修正了**：`pixel_to_hex` guard、`_on_move` sentinel、`_draw` 白框 sentinel
@@ -55,6 +63,28 @@
 - **根因**：`collect_resources` 只採 outpost 格，test setup 沒建 outpost
 - **位置**：`scripts/ui/main.gd`（test setup）
 - **建議**：加初始 outpost，或大幅增加初始食物（如 10000）
+
+### G1. 攻擊後無遭遇戰 UI
+- **症狀**：玩家選攻擊，模擬結算完畢但不顯示 encounter 畫面；戰後無掠奪
+- **根因**：`encounter_view.gd` 在戰前設定 `pending_action`，但 `encounter_system._decide_action` 舊版未讀取；已由 agent-repl branch 修正消費邏輯，但 UI 畫面切換邏輯尚未串接
+- **位置**：`scripts/ui/encounter_view.gd`，`scripts/ui/main.gd`
+
+### G2. 外交/貿易自動執行，無玩家選擇
+- **症狀**：NPC 發起外交/貿易，模擬自動決定結果；`player_forced_event` 有值但 UI 不顯示
+- **根因**：`main.gd` 沒有讀取 `player_forced_event` 並顯示選項 UI
+- **位置**：`scripts/ui/main.gd`
+
+### G3. 玩家無法建立自己的勢力
+- **症狀**：`PlayerCommandSystem.execute_action` 沒有 `establish_faction` 選項
+- **位置**：`scripts/simulation/player_command_system.gd`
+
+### G4. Recruit STUB 永遠失敗
+- **症狀**：玩家選招募，回傳 `"recruit: STUB"` 不實際執行
+- **位置**：`scripts/simulation/player_command_system.gd:_execute_recruit`
+
+### G5. Alliance 兩者皆獨立時無效
+- **症狀**：雙方皆無勢力時外交 accept 只有一方加入（或無效）
+- **位置**：`scripts/simulation/player_command_system.gd:_accept_diplomacy`
 
 ### U4. 地圖移動後有時消失
 - **症狀**：移動幾次後地圖變黑、旗子消失
