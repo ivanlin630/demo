@@ -55,7 +55,7 @@ func process(state: WorldState, team_ids: Array,
 		if team.move_target == Vector2i(-1, -1):
 			continue
 		var cost: int = _move_cost(state, team, time_mult)
-		team.move_tick_acc += 1
+		team.move_tick_acc += WorldState.TICKS_PER_HOUR
 		if team.move_tick_acc < cost:
 			continue
 		team.move_tick_acc = 0

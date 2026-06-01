@@ -66,7 +66,14 @@ func _process(_delta: float) -> void:
 			[_player_tid, pt.tile_pos.x, pt.tile_pos.y])
 
 	if result.get("done", false):
-		_input_bar.text = ""
+		# If interrupted during movement (event stopped advance, not arrival),
+		# resume advancing so player reaches destination
+		var _pt2: TeamData = _state.teams.get(_player_tid)
+		if _input_bar.text.begins_with("移動中") and _pt2 != null \
+				and _pt2.move_target != Vector2i(-1, -1):
+			_bridge.request_advance(99999)
+		else:
+			_input_bar.text = ""
 	elif not _input_bar.text.begins_with("移動中"):
 		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _state.world.current_tick
 	_refresh()
@@ -220,7 +227,7 @@ func _refresh() -> void:
 	_refresh_snapshot()
 	_map_label.text  = TextMapRenderer.render(_state, _player_tid, _cursor)
 	_state_label.text = _build_state_str()
-	_debug_bar.text  = _build_debug_str()
+	_debug_bar.text  = "" if (_interact_mode or _member_mode or _inv_mode) else _build_debug_str()
 
 	if _interact_mode:
 		_event_label.text = _build_interact_str()
