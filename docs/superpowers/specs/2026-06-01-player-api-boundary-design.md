@@ -38,6 +38,7 @@ scripts/simulation/
   player_query_api.gd
   player_command_api.gd
   player_api_mapper.gd
+  player_command_system.gd   # internal bridge / legacy player state hooks
 ```
 
 ### `player_query_api.gd`
@@ -136,13 +137,13 @@ DTO 規則：
 
 Query API 至少提供以下方法：
 
-- `get_player_snapshot(request: Dictionary)`
-- `get_team_details(team_id: int)`
-- `get_member_details(team_id: int, member_id: int)`
-- `get_location_context(tile_q: int, tile_r: int)`
-- `get_available_actions(request: Dictionary)`
+- `get_player_snapshot(state: WorldState, request: Dictionary)`
+- `get_team_details(state: WorldState, team_id: int)`
+- `get_member_details(state: WorldState, team_id: int, member_id: int)`
+- `get_location_context(state: WorldState, tile_q: int, tile_r: int)`
+- `get_available_actions(state: WorldState, request: Dictionary)`
 
-`get_player_snapshot(request)` 的 request 至少包含：
+`get_player_snapshot(state: WorldState, request)` 的 request 至少包含：
 
 ```gdscript
 {
@@ -183,14 +184,14 @@ invalid local state 規則：
 
 Command API 提供既有玩家行為入口，至少覆蓋：
 
-- `move_to(tile_q: int, tile_r: int)`
-- `cancel_move()`
-- `execute_action(request: Dictionary)`
-- `respond_to_forced(response_id: String)`
-- `equip_item(slot_id: String, item_grade: String)`
-- `unequip_item(slot_id: String)`
-- `deposit_item(item_grade: String, qty: int)`
-- `take_team_item(item_grade: String, qty: int)`
+- `move_to(state: WorldState, tile_q: int, tile_r: int)`
+- `cancel_move(state: WorldState)`
+- `execute_action(state: WorldState, request: Dictionary)`
+- `respond_to_forced(state: WorldState, response_id: String)`
+- `equip_item(state: WorldState, slot_id: String, item_grade: String)`
+- `unequip_item(state: WorldState, slot_id: String)`
+- `deposit_item(state: WorldState, item_grade: String, qty: int)`
+- `take_team_item(state: WorldState, item_grade: String, qty: int)`
 
 若 UI 需要改變本地 focus，只由 UI 自己保管目前 focus 的 team/member id，再把 id 傳給 query API。focus 不作為 world command。
 
@@ -911,6 +912,7 @@ command 驗證規則：
 ## 既有呼叫點遷移範圍
 
 這次遷移目標：
+- `scripts/ui/sim_bridge.gd`
 - `scripts/ui/main.gd`
 - `scripts/ui/popup_layer.gd`
 - `scripts/ui/text_ui_main.gd`
@@ -919,6 +921,7 @@ command 驗證規則：
 - `scripts/simulation/player_system.gd` 內現有玩家 helper
 - 現有 `player_command_system.gd` 中可保留且值得重用的邏輯
 - `scripts/simulation/sim_runner.gd` 內玩家專屬 hook
+- 其他直接向 player-facing UI 暴露 `WorldState` 的 bridge / consumer
 
 遷移完成後要求：
 - 玩家相關 UI / playtest 不直接讀寫 `WorldState`。
