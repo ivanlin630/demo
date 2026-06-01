@@ -135,10 +135,10 @@ Query API 至少提供以下方法：
 | Query | 輸入 | `data` 最低欄位 | 常見錯誤碼 |
 |---|---|---|---|
 | `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions`, `snapshot.inventory_state` | `invalid_request`, `invalid_focus`, `no_player`, `no_controlled_team` |
-| `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `invalid_team` |
-| `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `invalid_team`, `invalid_member` |
+| `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `invalid_team`, `not_visible` |
+| `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `invalid_team`, `invalid_member`, `not_visible` |
 | `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `invalid_tile` |
-| `get_available_actions` | `team_id`, `member_id`, `tile_q`, `tile_r`, `forced_interaction_id` | `actions` | `invalid_team`, `invalid_member`, `invalid_tile`, `forced_response_missing` |
+| `get_available_actions` | `team_id`, `member_id`, `tile_q`, `tile_r`, `forced_interaction_id` | `actions` | `no_player`, `no_controlled_team`, `invalid_team`, `invalid_member`, `invalid_tile`, `forced_response_missing` |
 
 ### Command API 對外輸出
 
@@ -367,6 +367,8 @@ request 規則：
 - `forced_interaction_id` 使用空字串 `""` 表示不適用。
 - 若型別錯誤，回 `invalid_request`。
 - 若欄位缺失，API 先補成上述預設值再處理。
+- 若無 player 或無 controlled team，回 `no_player` / `no_controlled_team`。
+- 若只有 context 不適用（例如全部 sentinel），回成功 envelope 並給空 `actions`。
 
 每個 action 至少包含：
 - `action_id`
@@ -375,6 +377,7 @@ request 規則：
 - `disabled_reason`
 - `target_requirements`
 - `command_name`
+- `command_args`
 
 `command_name` 只允許對應既有 command surface：
 - `move_to`
@@ -400,6 +403,18 @@ canonical 規則：
 }
 ```
 
+`command_args` 規則：
+- 每個 action 必須直接攜帶足夠呼叫對應 command 的參數。
+- `command_args` shape 直接對應 `command_name`：
+  - `move_to` → `{tile_q, tile_r}`
+  - `cancel_move` → `{}`
+  - `execute_action` → `{action_id, target}`
+  - `respond_to_forced` → `{response_id}`
+  - `equip_item` → `{slot_id, item_grade}`
+  - `deposit_item` → `{item_grade, qty}`
+  - `take_team_item` → `{item_grade, qty}`
+- UI 不自行推導 command 參數；直接使用 `command_args`。
+
 ### `inventory_state`
 
 用途：
@@ -411,6 +426,10 @@ canonical 規則：
 - team 可取物品列表
 - 當前裝備摘要
 - 與 inventory 相關的 `available_actions`
+
+關係規則：
+- `inventory_state.available_actions` 是 top-level `available_actions` 的 inventory 子集。
+- 兩者 action shape 完全相同，只是用途不同：top-level 給整體 UI，inventory 子集給 inventory mode 直接渲染。
 
 ## Canonical DTO Schema
 
@@ -560,6 +579,7 @@ canonical 規則：
 - `invalid_tile`
 - `invalid_focus`
 - `invalid_request`
+- `not_visible`
 - `action_unavailable`
 - `move_unavailable`
 - `item_unavailable`
@@ -571,7 +591,9 @@ canonical 規則：
 
 Query API 的 envelope 失敗規則：
 - `get_player_snapshot` 若無玩家或無受控 team，回 `ok=false` 與對應錯誤碼。
+- `get_team_details` / `get_member_details` 若目標存在但目前不可見，回 `ok=false` 與 `not_visible`。
 - detail query 若目標不存在，回 `ok=false` 與 `invalid_team` / `invalid_member` / `invalid_tile`。
+- `get_available_actions` 若無玩家或無受控 team，回 `ok=false`；若只有 context 不適用，回 `ok=true` 且 `data.actions = []`。
 - 不使用「成功但資料為錯誤字典」的混合模式。
 
 錯誤碼原則：
@@ -664,5 +686,7 @@ headless 測試需新增或補強以下驗證：
 
 - `focused_member` 由 UI 持有 focus id，再傳給 query API 查詢；不寫入 world state。
 - `available_actions` 必須同時帶 `label` 與 `disabled_reason`，避免 UI 自行硬編。
+- `available_actions` 必須直接帶 `command_args`，UI 不推導 command 參數。
 - `location_context` 先由單一 query 一次回傳 tile / settlement / occupant 摘要；若後續證明過胖，再在實作中內部分拆，但 public contract 先維持單一入口。
 - inspect 是 query responsibility，不是 command responsibility。
+- detail query 對不可見目標回 `not_visible`，不回 redacted DTO。
