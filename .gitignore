@@ -12,3 +12,10 @@ tools/
 
 # Git worktrees (child session workspaces)
 .worktrees/
+
+# Debug/test output files
+*_out.txt
+*_output.txt
+test_*.gd
+01.png
+01.png.import
