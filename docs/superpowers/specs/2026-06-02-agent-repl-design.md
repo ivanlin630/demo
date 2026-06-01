@@ -150,6 +150,101 @@ config 欄位對應 `default.json` 結構：
 
 ---
 
+### `encounter_query`
+
+查詢當前遭遇戰狀態。僅在 `encounter_active == true` 時有效。
+
+```json
+{"cmd": "encounter_query"}
+```
+
+回傳：
+```json
+{
+  "ok": true,
+  "code": "ok",
+  "data": {
+    "encounter_active": true,
+    "attacker_team_id": 3,
+    "defender_team_id": 0,
+    "player_team_id": 0,
+    "waiting_for_player": true,
+    "units": [
+      {
+        "unit_idx": 0,
+        "person_id": 1,
+        "team_id": 0,
+        "is_player": true,
+        "pos": {"x": 2, "y": 3},
+        "stamina": 0.9,
+        "has_exited": false,
+        "body_parts": {
+          "head":  {"hp": 20, "max_hp": 20, "status": "healthy"},
+          "torso": {"hp": 50, "max_hp": 50, "status": "healthy"}
+        }
+      }
+    ]
+  }
+}
+```
+
+若 `encounter_active == false`：
+```json
+{"ok": false, "code": "no_encounter", "error": "目前無遭遇戰"}
+```
+
+`waiting_for_player: true` 代表玩家 unit 的 `action_timer == 0`，可以行動。
+
+---
+
+### `encounter_step`
+
+設定玩家行動並推進遭遇戰，直到下一次 `player_turn` 或 `encounter_ended`。
+
+支援 action type：
+- `wait` — 待機
+- `attack` — 攻擊指定 unit（`target_idx` = units 陣列索引）
+
+```json
+{"cmd": "encounter_step", "action": {"type": "wait"}}
+{"cmd": "encounter_step", "action": {"type": "attack", "target_idx": 2}}
+```
+
+實作流程：
+1. 找到玩家 unit（`person_id == player_id`）
+2. 設 `unit["pending_action"] = action`
+3. 設 `unit["action_timer"] = unit.get("_max_timer", BASE_ACTION_TICKS)`（解鎖行動）
+4. 迴圈呼叫 `bridge.advance_encounter_tick()` 直到回傳 `"player_turn"` 或 `"encounter_ended"`
+5. 回傳最新 encounter 狀態
+
+回傳（戰鬥繼續）：
+```json
+{
+  "ok": true,
+  "code": "player_turn",
+  "data": { /* 同 encounter_query 的 data */ }
+}
+```
+
+回傳（戰鬥結束）：
+```json
+{
+  "ok": true,
+  "code": "encounter_ended",
+  "data": { "encounter_active": false, "units": [] }
+}
+```
+
+錯誤情況：
+```json
+{"ok": false, "code": "no_encounter",    "error": "目前無遭遇戰"}
+{"ok": false, "code": "not_your_turn",   "error": "尚未輪到玩家行動"}
+{"ok": false, "code": "invalid_target",  "error": "target_idx 超出範圍或目標已死亡"}
+{"ok": false, "code": "unknown_action",  "error": "未知 action type"}
+```
+
+---
+
 ### `quit`
 
 結束 Godot 程序。回傳後立即 flush stdout 再呼叫 `quit(code)`。
@@ -175,7 +270,7 @@ scripts/debug/agent_repl.gd   # 唯一新增檔案
 ```
 
 依賴現有系統（不修改）：
-- `SimBridge` — query / command / advance_ticks
+- `SimBridge` — query / command / advance_ticks / advance_encounter_tick
 - `GameSetup` — config 載入與世界初始化
 - `WorldState`, `SimRunner` — 模擬核心
 
@@ -223,6 +318,9 @@ func _initialize() -> void:
 | stdin 開啟失敗 | `push_error` → `quit(1)` | ❌ |
 | stdin EOF | — | `quit(0)` |
 | encounter_active + advance | `{"ok":false,"code":"encounter_active"}` | ✅ |
+| encounter_query / encounter_step，無遭遇戰 | `{"ok":false,"code":"no_encounter"}` | ✅ |
+| encounter_step，未輪到玩家 | `{"ok":false,"code":"not_your_turn"}` | ✅ |
+| encounter_step，target_idx 無效 | `{"ok":false,"code":"invalid_target"}` | ✅ |
 | config_path 不存在 | `{"ok":false,"code":"config_not_found"}` | ✅ |
 
 ## 驗收條件
@@ -240,8 +338,12 @@ func _initialize() -> void:
 11. `quit` 回傳 `{"ok":true}` 後退出，exit code 正確
 12. stdout 只含 JSON Lines（agent 能無錯誤 `json.loads` 每一行）
 
+13. `encounter_query` 在 encounter_active 時回傳 units 列表含 player unit
+14. `encounter_step` 執行 `wait` → 回傳 `player_turn` 或 `encounter_ended`，不崩潰
+15. `encounter_step` 執行 `attack` 有效 target → 回傳正確 code
+16. encounter 結束後 `advance` 恢復正常（不再回傳 `encounter_active`）
+
 ## 範圍外
 
-- encounter 戰鬥中的 `advance`（直接回傳 `encounter_active: true`，不處理戰鬥指令）
 - 多玩家 / 多 agent 並發
 - WebSocket / HTTP 協定（未來可擴充）
