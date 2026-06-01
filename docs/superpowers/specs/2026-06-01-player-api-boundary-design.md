@@ -6,6 +6,7 @@
 ## 目標
 
 - 收斂所有玩家相關入口，覆蓋現有 text UI、playtest、player helper。
+- 收斂現有 text UI inventory / equip / take / deposit 流程，不留玩家入口旁路。
 - 玩家入口不再直接碰 `WorldState`、`TeamData`、`PersonData`。
 - API 層同時支援現有 headless/text UI，並保留未來升級成 snapshot store / command bus 的路徑。
 - 這次除了邊界整理，也要補齊目前 UI 直接讀 state 所需查詢 API 與必要指令 API。
@@ -93,6 +94,7 @@ Query API 採統一 envelope：
 - `forced_interaction`
 - `location_context`
 - `available_actions`
+- `inventory_state`
 
 DTO 規則：
 - 可序列化、平面化優先。
@@ -103,8 +105,8 @@ DTO 規則：
 Query API 至少提供以下方法：
 
 - `get_player_snapshot(request: Dictionary)`
-- `get_team_details(team_id: String)`
-- `get_member_details(team_id: String, member_id: String)`
+- `get_team_details(team_id: int)`
+- `get_member_details(team_id: int, member_id: int)`
 - `get_location_context(tile_q: int, tile_r: int)`
 - `get_available_actions(request: Dictionary)`
 
@@ -112,15 +114,15 @@ Query API 至少提供以下方法：
 
 ```gdscript
 {
-    "focus_team_id": String,
-    "focus_member_id": String,
+    "focus_team_id": int,
+    "focus_member_id": int,
     "cursor_tile_q": int,
     "cursor_tile_r": int
 }
 ```
 
 規則：
-- `focus_team_id` / `focus_member_id` 使用空字串 `""` 表示無 focus。
+- `focus_team_id` / `focus_member_id` 使用 `-1` 表示無 focus。
 - `cursor_tile_q` / `cursor_tile_r` 使用 `-1` 表示無 cursor tile。
 - 若缺欄位，API 先補成上述預設值再處理。
 - 若型別錯誤，回 `invalid_request`。
@@ -132,7 +134,7 @@ Query API 至少提供以下方法：
 
 | Query | 輸入 | `data` 最低欄位 | 常見錯誤碼 |
 |---|---|---|---|
-| `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions` | `invalid_request`, `invalid_focus`, `no_player`, `no_controlled_team` |
+| `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions`, `snapshot.inventory_state` | `invalid_request`, `invalid_focus`, `no_player`, `no_controlled_team` |
 | `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `invalid_team` |
 | `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `invalid_team`, `invalid_member` |
 | `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `invalid_tile` |
@@ -146,6 +148,9 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `cancel_move()`
 - `execute_action(request: Dictionary)`
 - `respond_to_forced(response_id: String)`
+- `equip_item(slot_id: String, item_grade: String)`
+- `deposit_item(item_grade: String, qty: int)`
+- `take_team_item(item_grade: String, qty: int)`
 
 若 UI 需要改變本地 focus，只由 UI 自己保管目前 focus 的 team/member id，再把 id 傳給 query API。focus 不作為 world command。
 
@@ -173,6 +178,10 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 | `move_to` | `tile_q`, `tile_r` | `move_target`, `refresh_required=true` | `no_controlled_team`, `invalid_tile`, `move_unavailable` | 是 |
 | `cancel_move` | 無 | `move_cancelled=true`, `refresh_required=true` | `no_controlled_team`, `move_unavailable` | 是 |
 | `execute_action` | `action_id`, `target.kind`, `target.*` | `action_id`, `result_summary`, `refresh_required` | `invalid_request`, `invalid_target`, `action_unavailable` | 通常是 |
+| `respond_to_forced` | `response_id` | `forced_interaction_resolved`, `refresh_required=true` | `forced_response_missing`, `forced_response_invalid` | 是 |
+| `equip_item` | `slot_id`, `item_grade` | `equipped_slot`, `item_grade`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `equip_unavailable` | 是 |
+| `deposit_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `deposit_unavailable` | 是 |
+| `take_team_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `take_unavailable` | 是 |
 
 `execute_action(request)` 的 request：
 
@@ -181,8 +190,8 @@ Command API 提供既有玩家行為入口，至少覆蓋：
     "action_id": String,
     "target": {
         "kind": String, # "none" | "team" | "member" | "tile" | "interaction"
-        "team_id": String,
-        "member_id": String,
+        "team_id": int,
+        "member_id": int,
         "tile_q": int,
         "tile_r": int,
         "interaction_id": String
@@ -198,7 +207,6 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - forced / interaction 類目標使用 `kind = "interaction"` + `interaction_id`。
 - 若 `target` 內容與 `action_id` 所需 target 不匹配，回 `invalid_target`。
 - 不支援複合 target；若未來需要複合 target，視為新 command contract，不在本次 spec。
-| `respond_to_forced` | `response_id` | `forced_interaction_resolved`, `refresh_required=true` | `forced_response_missing`, `forced_response_invalid` | 是 |
 
 ---
 
@@ -266,6 +274,11 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - 位置摘要
 - 是否可互動、可 inspect、可作為 target
 
+可見性規則：
+- 只列出目前可見隊伍。
+- 已發現但目前不可見的隊伍不放進 `visible_teams`。
+- API 不可為了 UI 便利洩漏隱藏隊伍資訊。
+
 ### `focused_member`
 
 用途：
@@ -315,11 +328,17 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 
 至少包含：
 - tile 座標
+- `visibility_state` (`"hidden"` 或 `"visible"`)
 - terrain 摘要
 - settlement 摘要（若無則為 `null`）
 - occupant teams 摘要列表
 - 是否為玩家目前所在位置
 - 與該位置相關的 target / interaction hints
+
+可見性規則：
+- 若 tile 不可見，`visibility_state = "hidden"`。
+- hidden tile 只回座標與可見性，不回 terrain / settlement / occupants / hints 的真實內容。
+- 若 tile 可見，`visibility_state = "visible"`，才回完整摘要。
 
 ### `available_actions`
 
@@ -334,8 +353,8 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 
 ```gdscript
 {
-    "team_id": String,
-    "member_id": String,
+    "team_id": int,
+    "member_id": int,
     "tile_q": int,
     "tile_r": int,
     "forced_interaction_id": String
@@ -355,10 +374,36 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `cancel_move`
 - `execute_action`
 - `respond_to_forced`
+- `equip_item`
+- `deposit_item`
+- `take_team_item`
 
 canonical 規則：
 - `snapshot.available_actions` 的 shape 必須與 `get_available_actions(request)` 完全相同。
 - `get_player_snapshot(request)` 內的 `available_actions` 視為直接重用同一套判定與映射結果，不允許雙邏輯。
+
+`target_requirements` 固定 schema：
+
+```gdscript
+{
+    "allowed_kinds": PackedStringArray,
+    "requires_visible_target": bool,
+    "requires_forced_interaction": bool,
+    "allows_self_target": bool
+}
+```
+
+### `inventory_state`
+
+用途：
+- 收斂現有 text UI inventory mode 所需資料，避免直接讀 `player_state.inventory` 與 team 儲物內容。
+
+至少包含：
+- 玩家 inventory items
+- 每筆 item 的 `grade`, `qty`, `equip_slots`
+- team 可取物品列表
+- 當前裝備摘要
+- 與 inventory 相關的 `available_actions`
 
 ---
 
@@ -381,6 +426,10 @@ canonical 規則：
 - `invalid_request`
 - `action_unavailable`
 - `move_unavailable`
+- `item_unavailable`
+- `equip_unavailable`
+- `deposit_unavailable`
+- `take_unavailable`
 - `forced_response_missing`
 - `forced_response_invalid`
 
@@ -394,6 +443,11 @@ Query API 的 envelope 失敗規則：
 - 描述原因，不描述 UI 呈現。
 - 不把內部實作細節暴露到 public contract。
 
+ID 型別規則：
+- public API 的 `team_id`、`member_id` 一律使用 `int`。
+- 若 UI 端有字串化顯示，僅限顯示層，不回寫到 API 輸入。
+- 若收到錯型別 id，回 `invalid_request`。
+
 ---
 
 ## 既有呼叫點遷移範圍
@@ -401,12 +455,15 @@ Query API 的 envelope 失敗規則：
 這次遷移目標：
 - `scripts/ui/text_ui_main.gd`
 - `scripts/debug/playtest_minimal.gd`
+- `scripts/debug/headless_test.gd`
 - `scripts/simulation/player_system.gd` 內現有玩家 helper
 - 現有 `player_command_system.gd` 中可保留且值得重用的邏輯
+- `scripts/simulation/sim_runner.gd` 內玩家專屬 hook
 
 遷移完成後要求：
 - 玩家相關 UI / playtest 不直接讀寫 `WorldState`。
 - 玩家相關入口不直接依賴 `_state.player_pending_targets`、`_state.player_forced_event`、`_state.teams` 這類內部欄位。
+- inventory mode 不直接呼叫 `PlayerSystem.new().equip_item()`、`deposit_to_team()`、`take_from_team()`。
 - 若還有非玩家系統需要直接碰 state，不在本次範圍內。
 
 ---
@@ -417,6 +474,7 @@ Query API 的 envelope 失敗規則：
 - 可重用既有操作邏輯，但 public surface 要整理成明確 query / command 分層。
 - 若某些 inspect helper 目前散在 UI 或 player system，應收回 query API。
 - 這次重點不是改變模擬結果，而是把玩家視角邊界集中、穩定化。
+- `SimRunner` 仍負責 tick 順序，但玩家專屬狀態清理（例如 clear pending targets、forced interaction timeout cleanup）要透過 player command/internal bridge 單一入口處理，避免 `SimRunner` 直接依賴玩家 UI 狀態欄位細節。
 
 ---
 
@@ -426,7 +484,7 @@ headless 測試需新增或補強以下驗證：
 
 - Query API 可取得穩定 DTO。
 - Query API 可處理 inspect / detail 類流程。
-- Command API 可處理 move、cancel、action、forced interaction 類流程。
+- Command API 可處理 move、cancel、action、forced interaction、inventory 類流程。
 - text UI / playtest 不再直接讀玩家內部 state。
 - DTO / result 必要欄位存在，避免 UI 契約回歸。
 - 關鍵流程有對應驗證 print，能在 headless log 中確認。
@@ -435,6 +493,7 @@ headless 測試需新增或補強以下驗證：
 - `get_player_snapshot` 在有/無 focus、有/無 forced interaction 下的 shape 穩定。
 - `get_team_details` / `get_member_details` / `get_location_context` / `get_available_actions` 的成功與失敗 envelope。
 - 每個 command 的成功與失敗 code。
+- inventory 相關 command 可取代現有 text UI 直接呼叫 player system 的流程。
 - command 回傳 `refresh_required` 後，UI 可重跑 query 而不需碰內部 state。
 
 成功標準：
