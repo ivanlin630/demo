@@ -66,7 +66,24 @@ scripts/simulation/
 
 ### Query API 對外輸出
 
-Query API 輸出穩定 snapshot DTO。至少包含以下區塊：
+Query API 採統一 envelope：
+
+```gdscript
+{
+    "ok": bool,
+    "code": String,
+    "message": String,
+    "data": Dictionary
+}
+```
+
+規則：
+- 成功時 `ok = true`，`data` 為查詢結果。
+- 失敗時 `ok = false`，`code` 為穩定錯誤碼，`data` 為空字典。
+- 對玩家 UI 的主要刷新查詢使用單一 snapshot DTO，放在 `data.snapshot`。
+- 次級 detail 查詢也使用同一 envelope，避免 UI 對 query 與 command 採兩套錯誤判斷。
+
+主要 snapshot DTO 至少包含以下區塊：
 
 - `player_summary`
 - `controlled_team`
@@ -83,6 +100,14 @@ DTO 規則：
 - 不回傳 `TeamData`、`PersonData`、原始節點引用、內部索引結構。
 - 若欄位暫時不存在，明確用 `null`、空陣列、空字典或狀態欄位表達，不靠 UI 猜。
 
+Query API 至少提供以下方法：
+
+- `get_player_snapshot()`
+- `get_team_details(team_id: String)`
+- `get_member_details(team_id: String, member_id: String)`
+- `get_location_context(tile_q: int, tile_r: int)`
+- `get_available_actions(context: Dictionary)`
+
 ### Command API 對外輸出
 
 Command API 提供既有玩家行為入口，至少覆蓋：
@@ -91,7 +116,8 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `cancel_move`
 - `execute_action`
 - `respond_to_forced`
-- 現有 inspect / focus 流程需要的玩家指令入口
+
+若 UI 需要改變本地 focus，只由 UI 自己保管目前 focus 的 team/member id，再把 id 傳給 query API。focus 不作為 world command。
 
 所有 command 皆回傳統一結果：
 
@@ -117,8 +143,9 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 ### 讀取流程
 
 1. UI 啟動或每 tick 刷新。
-2. UI 呼叫 `player_query_api` 取得 snapshot DTO。
-3. UI 依 DTO 重繪畫面，不直接讀 `WorldState`。
+2. UI 呼叫 `player_query_api.get_player_snapshot()` 取得 envelope。
+3. 若 `ok = true`，UI 讀 `data.snapshot` 重繪畫面。
+4. 若 `ok = false`，UI 依 `code/message` 顯示一致錯誤訊息，不直接讀 `WorldState` 補救。
 
 ### 操作流程
 
@@ -180,6 +207,17 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 用途：
 - 提供 UI 當前聚焦成員資訊，而不是直接回 person 物件。
 
+查詢方式：
+- UI 持有 `focused_member_id`
+- 透過 `get_member_details(team_id, member_id)` 取得
+
+至少包含：
+- member id / name
+- 所屬 team id / name
+- role 摘要
+- 關鍵狀態摘要（health / stress / loyalty 等現有 UI 已需要欄位）
+- 當前可執行 member-level actions
+
 ### `pending_targets`
 
 用途：
@@ -196,18 +234,37 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 用途：
 - 提供目前 tile / settlement / occupant 等位置上下文，讓不同 UI 不必自行拆 state。
 
+至少包含：
+- tile 座標
+- terrain 摘要
+- settlement 摘要（若無則為 `null`）
+- occupant teams 摘要列表
+- 是否為玩家目前所在位置
+- 與該位置相關的 target / interaction hints
+
 ### `available_actions`
 
 用途：
 - 集中列出目前上下文下可執行的玩家操作。
 - 未來 graphical UI 可直接以此生成按鈕或選單。
 
+查詢方式：
+- `get_available_actions(context)`，其中 context 至少可帶 `team_id`、`member_id`、`tile_q`、`tile_r`、`forced_interaction_id`
+
+每個 action 至少包含：
+- `action_id`
+- `label`
+- `enabled`
+- `disabled_reason`
+- `target_requirements`
+- `command_name`
+
 ---
 
 ## 錯誤處理
 
 - Query API 不 silent fail。
-- 找不到玩家、隊伍、目標、互動內容時，要回傳明確空 DTO 或錯誤欄位。
+- 找不到玩家、隊伍、目標、互動內容時，要回傳 query envelope 錯誤，不混用「空 DTO」與「錯誤欄位」兩種模式。
 - Command API 不把失敗情況留給 UI 自己讀 state 補判斷。
 - 所有玩家入口共用同一套錯誤碼。
 
@@ -217,6 +274,8 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 - `no_controlled_team`
 - `invalid_target`
 - `invalid_member`
+- `invalid_team`
+- `invalid_tile`
 - `action_unavailable`
 - `move_unavailable`
 - `forced_response_missing`
@@ -279,10 +338,8 @@ headless 測試需新增或補強以下驗證：
 
 ---
 
-## 開放問題
+## 已定決策
 
-- `focused_member` 是否需要成為 query API 的顯式輸入，或由 UI 自行持有 focus id 再傳入查詢。
-- `available_actions` 要輸出純 action id 列表，還是同時帶 label / disabled reason。
-- `location_context` 是否一次覆蓋 tile + nearby teams + settlement，或拆成多個小 query。
-
-以上開放問題不阻擋 implementation planning，但 implementation plan 需先決定。
+- `focused_member` 由 UI 持有 focus id，再傳給 query API 查詢；不寫入 world state。
+- `available_actions` 必須同時帶 `label` 與 `disabled_reason`，避免 UI 自行硬編。
+- `location_context` 先由單一 query 一次回傳 tile / settlement / occupant 摘要；若後續證明過胖，再在實作中內部分拆，但 public contract 先維持單一入口。
