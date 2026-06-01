@@ -1,9 +1,11 @@
 ﻿class_name MovementSystem
 
-# world-hex 移動成本 = encounter-hex 動作時間 × 地圖直徑（1 world-hex = MAP_DIAMETER encounter-hex）
-const BASE_MOVE_TICKS: int = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER
-const MIN_MOVE_TICKS: int  = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER / 3
-const MAX_MOVE_TICKS: int  = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER * 3
+# world-hex 移動成本（TEST VALUE）
+# BASE = 120 ≈ 0.5 天 / hex（normal speed, plains, daytime）
+# 原設計 = encounter 常數耦合（10 × 24 = 240 = 1天/hex），已解耦
+const BASE_MOVE_TICKS: int = 120   # TEST VALUE
+const MIN_MOVE_TICKS: int  = 40    # TEST VALUE（高速最快 ~2.4h/hex）
+const MAX_MOVE_TICKS: int  = 360   # TEST VALUE（惡劣條件最慢 1.5天/hex）
 
 const TERRAIN_SPEED_MULT: Dictionary = {
 	"plains":   1.0,
@@ -123,7 +125,7 @@ func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> in
 func _compute_team_speed(state: WorldState, team: TeamData) -> float:
 	var total_speed: float = 0.0
 	var total_count: int = 0
-	var named_ids: Array = team.named_members
+	var named_ids: Array = team.named_members.duplicate()  # duplicate() — 避免直接修改 team.named_members
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
 	for pid in named_ids:

@@ -125,3 +125,8 @@ func query_player_actions(request: Dictionary) -> Dictionary:
 
 func command_player(name: String, args: Dictionary) -> Dictionary:
 	return _cmd_api.dispatch(_state, name, args)
+
+# 玩家主動打開互動選單時呼叫：掃描同格 NPC 加入 pending_targets
+func refresh_interaction_targets() -> void:
+	var cmd_sys := PlayerCommandSystem.new()
+	cmd_sys.refresh_colocation_targets(_state)

@@ -138,6 +138,25 @@ func resolve_forced_response(state: WorldState, interaction_id: String, response
 func clear_pending_targets(state: WorldState) -> void:
 	state.player_pending_targets.clear()
 
+# 玩家主動按下互動鍵（T）時呼叫：掃描同格 NPC，加入 pending_targets
+# 讓 ignore 後仍可再次主動觸發互動
+func refresh_colocation_targets(state: WorldState) -> void:
+	var pt: TeamData = _get_player_team(state)
+	if pt == null:
+		return
+	for other_id in state.teams:
+		if other_id == pt.team_id:
+			continue
+		var other: TeamData = state.teams[other_id]
+		if other.tile_pos != pt.tile_pos:
+			continue
+		if state.player_hostile_teams.has(other_id):
+			continue
+		if other.combat_target != -1:
+			continue
+		if not state.player_pending_targets.has(other_id):
+			state.player_pending_targets.append(other_id)
+
 # ── 內部 helper ──────────────────────────────────────────────
 
 func _get_player_team(state: WorldState) -> TeamData:

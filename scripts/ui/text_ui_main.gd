@@ -134,6 +134,7 @@ func _input(event: InputEvent) -> void:
 				if _inv_mode: _inv_mode = false
 				if _member_mode: _member_mode = false
 				_interact_target = -1
+				_bridge.refresh_interaction_targets()  # 掃描同格 NPC，讓 ignore 後仍可再次互動
 			_refresh()
 		KEY_ESCAPE:
 			if _bridge.is_advancing():
