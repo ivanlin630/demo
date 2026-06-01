@@ -29,6 +29,11 @@
 - **可漸進升級**：未來若引入 snapshot store / command bus（即 Query 改讀快照、Command 改走 dispatcher），盡量不改 UI 介面。
 - **禁止直接 script outcome**：API 只暴露由既有 NPC / team 狀態推導出的可見結果，不新增繞過模擬規則的捷徑。
 
+座標對應規則：
+- spec 中的 `tile_q` 對應現有 `tile_pos.x`，`tile_r` 對應現有 `tile_pos.y`。
+- API 對外接受 `int` 的 `tile_q` / `tile_r`，內部再包裝成現有 `Vector2i(x, y)`。
+- 本 spec 不引入新的 hex axial/cube 座標系；僅為現有 `Vector2i` 座標加上穩定 API 命名。
+
 ---
 
 ## 目標結構
@@ -90,6 +95,12 @@ ownership 規則：
 - `player_command_api.gd` 只負責 public contract 驗證、dispatch 到 internal bridge、以及回傳標準 result。
 - `sim_runner.gd` 只能呼叫上述 internal hook，不直接讀寫玩家 UI 狀態欄位。
 - UI / playtest / `sim_bridge.gd` 都不可直接呼叫 `player_command_system.gd`。
+
+forced interaction ID 規則：
+- `WorldState` 新增 `player_forced_event_id: String`。
+- 每次建立或覆寫 `player_forced_event` 時，同步產生新的 `player_forced_event_id`。
+- 清除 `player_forced_event` 時，同步把 `player_forced_event_id` 清成空字串 `""`。
+- spec 不採用對 `player_forced_event` dict 做 hash 生成 ID；以明確 state 欄位作為 canonical source。
 
 ### `player_api_mapper.gd`
 
@@ -338,6 +349,7 @@ command target/error 規則：
 - 玩家 person id / name
 - 受控 team id / name
 - 當前位置摘要
+- `encounter_active`
 - 關鍵狀態旗標（是否有 pending target、是否有 forced interaction）
 
 ### `controlled_team`
@@ -497,6 +509,12 @@ composition 規則：
 - 最終輸出順序依上述優先層，再依 `label` 字母序穩定排序。
 - snapshot 內 forced-interaction actions 直接從當前 world state 的單一 `forced_interaction.responses` 產生，`command_args={interaction_id, response_id}`。
 
+Phase 1 實作限制：
+- 目前現碼 `PlayerCommandSystem.get_available_actions(state, target_id)` 只覆蓋 team-level 目標。
+- 因此 first-pass `available_actions` 必須先以 forced interaction + team/global context 為主。
+- `focused_member` / `tile context` 若現階段沒有既有 sim 規則支撐，應回空 action 或 disabled action，不可為了湊齊 spec 自創新遊戲規則。
+- 後續若擴到 member/tile context，需沿用同一 DTO shape，不另開第二套 action contract。
+
 `target_requirements` 固定 schema：
 
 ```gdscript
@@ -555,6 +573,7 @@ composition 規則：
     "controlled_team_id": int,
     "controlled_team_name": String,
     "position": {"q": int, "r": int},
+    "encounter_active": bool,
     "has_pending_targets": bool,
     "has_forced_interaction": bool
 }
@@ -611,7 +630,7 @@ composition 規則：
 [
     {
         "target_type": String,
-        "target_id": String,
+        "target_id": int,
         "display_name": String,
         "is_valid": bool
     }
@@ -629,6 +648,10 @@ composition 規則：
     "responses": Array[Dictionary] # [{response_id, label, command_args}]
 }
 ```
+
+ID 來源規則：
+- `forced_interaction.interaction_id` 直接對應 `WorldState.player_forced_event_id`。
+- 若目前無 forced interaction，則為空字串 `""`。
 
 ### `location_context`
 
