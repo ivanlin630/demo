@@ -1,0 +1,6 @@
+Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+WARNING: Custom cursor shape not supported by this display server.
+     at: cursor_set_custom_image (servers/display_server.cpp:505)
+WARNING: 項目設置中啟用了 blend 檔的導入，但是編輯器設置中沒有配置 Blender 的路徑。 blend 檔將不會導入。
+     at: _editor_init (modules/gltf/register_types.cpp:63)
