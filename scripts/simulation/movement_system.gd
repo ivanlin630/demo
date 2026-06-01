@@ -1,11 +1,10 @@
 ﻿class_name MovementSystem
 
-# world-hex 移動成本（TEST VALUE）
-# BASE = 120 ≈ 0.5 天 / hex（normal speed, plains, daytime）
-# 原設計 = encounter 常數耦合（10 × 24 = 240 = 1天/hex），已解耦
-const BASE_MOVE_TICKS: int = 120   # TEST VALUE
-const MIN_MOVE_TICKS: int  = 40    # TEST VALUE（高速最快 ~2.4h/hex）
-const MAX_MOVE_TICKS: int  = 360   # TEST VALUE（惡劣條件最慢 1.5天/hex）
+# world-hex 移動成本 = encounter-hex 動作時間 × 地圖直徑 / 世界速度倍率
+const WORLD_SPEED_MULT: int = 2    # TEST VALUE — 倍率=2 → 0.5天/hex（normal speed, plains, daytime）
+const BASE_MOVE_TICKS: int = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER / WORLD_SPEED_MULT
+const MIN_MOVE_TICKS: int  = BASE_MOVE_TICKS / 3
+const MAX_MOVE_TICKS: int  = BASE_MOVE_TICKS * 3
 
 const TERRAIN_SPEED_MULT: Dictionary = {
 	"plains":   1.0,
