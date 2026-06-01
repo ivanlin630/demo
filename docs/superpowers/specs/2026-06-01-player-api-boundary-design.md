@@ -276,20 +276,22 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 ### 讀取流程
 
 1. UI 啟動或每 tick 刷新。
-2. UI 呼叫 `player_query_api.get_player_snapshot(request)` 取得 envelope。
-3. 若 `ok = true`，UI 讀 `data.snapshot` 重繪畫面。
-4. 若 `ok = false`，UI 依 `code/message` 顯示一致錯誤訊息，不直接讀 `WorldState` 補救。
+2. UI 透過 `sim_bridge.query_player(request)` 取得 envelope。
+3. `sim_bridge` 在內部持有/注入 `WorldState`，再呼叫 `player_query_api.get_player_snapshot(state, request)`。
+4. 若 `ok = true`，UI 讀 `data.snapshot` 重繪畫面。
+5. 若 `ok = false`，UI 依 `code/message` 顯示一致錯誤訊息，不直接讀 `WorldState` 補救。
 
 ### 操作流程
 
-1. UI 呼叫 `player_command_api` 發出玩家操作。
-2. API 在內部執行既有模擬/玩家流程。
-3. API 回傳標準 result。
-4. UI 依 result 決定提示訊息與是否重刷 query。
+1. UI 透過 `sim_bridge.command_player(name, args)` 發出玩家操作。
+2. `sim_bridge` 在內部持有/注入 `WorldState`，再呼叫 `player_command_api`。
+3. API 在內部執行既有模擬/玩家流程。
+4. API 回傳標準 result。
+5. UI 依 result 決定提示訊息與是否重刷 query。
 
 ### 未來升級路徑
 
-若未來導入方案 C：
+若未來導入「snapshot store + command bus」架構：
 - Query API 背後可改接 snapshot store。
 - Command API 背後可改接 dispatcher / command bus。
 - UI 仍維持相同 DTO / result 合約。
@@ -922,6 +924,7 @@ query decision table：
 | `get_available_actions` | all context sentinel | `ok=true`, `data.actions=[]` |
 | `get_available_actions` | `member_id != -1` but `team_id == -1` | `ok=false`, `code=invalid_focus` |
 | `get_available_actions` | only one of `tile_q` / `tile_r` is `-1` | `ok=false`, `code=invalid_request` |
+| `get_available_actions` | nonexistent `team_id` / `member_id` | `ok=false`, `code=invalid_team/invalid_member` |
 | `get_available_actions` | tile 不存在 | `ok=false`, `code=invalid_tile` |
 | `get_available_actions` | tile 存在但目前 hidden | `ok=true`, `data.actions=[]` |
 | `get_available_actions` | stale/non-visible `team_id` / `member_id` | `ok=true`, `data.actions=[]` |
