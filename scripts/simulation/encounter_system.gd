@@ -279,6 +279,25 @@ func _calc_team_incapable_ratio(team_id: int, state: WorldState) -> float:
 func _decide_action(unit_idx: int, state: WorldState,
 		focus_target: int) -> Dictionary:
 	var unit: Dictionary = state.encounter_units[unit_idx]
+
+	# Player control: use pending_action if set, then clear it
+	if unit.get("person_id", -1) == state.player_id and unit.has("pending_action"):
+		var pa: Dictionary = unit["pending_action"]
+		unit.erase("pending_action")
+		var pa_type: String = pa.get("type", "wait")
+		match pa_type:
+			"attack":
+				var tidx: int = pa.get("target_idx", -1)
+				if tidx >= 0 and tidx < state.encounter_units.size():
+					var tgt: Dictionary = state.encounter_units[tidx]
+					if not is_dead(tgt, state) and not tgt.get("has_exited", false):
+						return { "type": "attack", "target_idx": tidx,
+							"move_to": tgt["pos"],
+							"attack_part": _choose_attack_part(unit, state) }
+			_:
+				pass  # wait / unknown → idle
+		return { "type": "idle", "target_idx": -1, "move_to": unit["pos"], "attack_part": "" }
+
 	if not is_combat_capable(unit, state):
 		return { "type": "incapable", "target_idx": -1,
 			"move_to": unit["pos"], "attack_part": "" }

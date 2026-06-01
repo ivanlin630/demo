@@ -96,6 +96,19 @@
 - **症狀**：玩家可被事件殺死，`player_id` 仍指向已刪除的 person，所有 UI 失效
 - **建議**：player person 死亡時觸發 game over 或角色轉移
 
+### A1. agent_repl stdin 模式 stdout 污染
+- **症狀**：stdin 模式下模擬 `print()` 混入 JSON Lines stdout，污染協定
+- **根因**：GDScript `print()` 寫入 stdout；stdin REPL 與模擬 print 共用同一 fd
+- **影響範圍**：僅限 stdin 模式（Windows headless 走 TCP fallback，實際不受影響）
+- **位置**：`scripts/debug/agent_repl.gd:_run_stdin_loop`
+- **建議**：加 `--quiet` flag suppress 模擬 print，或在 stdin loop 前重導向 print 到 stderr
+
+### A2. encounter_view.gd `_max_timer` 欄位缺失（pre-existing）
+- **症狀**：`unit.get("_max_timer", 10)` 永遠回傳預設值 10，計時器顯示不正確
+- **根因**：`_create_named_unit` 未設置 `_max_timer` 欄位
+- **位置**：`scripts/ui/encounter_view.gd:263`
+- **建議**：`_create_named_unit` 加 `_max_timer` 欄位，或 encounter_view 改讀正確欄位
+
 ---
 
 ## 待討論（設計決策）
