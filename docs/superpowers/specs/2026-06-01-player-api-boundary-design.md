@@ -175,9 +175,9 @@ invalid local state 規則：
 | Query | 輸入 | `data` 最低欄位 | 常見錯誤碼 |
 |---|---|---|---|
 | `get_player_snapshot` | `focus_team_id`, `focus_member_id`, `cursor_tile_q`, `cursor_tile_r` | `snapshot.player_summary`, `snapshot.controlled_team`, `snapshot.visible_teams`, `snapshot.focused_member`, `snapshot.pending_targets`, `snapshot.forced_interaction`, `snapshot.location_context`, `snapshot.available_actions`, `snapshot.inventory_state`, `snapshot.snapshot_meta` | `invalid_request`, `invalid_focus`, `no_player`, `no_controlled_team` |
-| `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `invalid_team`, `not_visible` |
-| `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `invalid_team`, `invalid_member`, `not_visible` |
-| `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `invalid_tile` |
+| `get_team_details` | `team_id` | `team.id`, `team.name`, `team.faction`, `team.position`, `team.members`, `team.resources`, `team.interaction_options` | `no_player`, `no_controlled_team`, `invalid_team`, `not_visible` |
+| `get_member_details` | `team_id`, `member_id` | `member.id`, `member.name`, `member.team_id`, `member.role`, `member.status`, `member.available_actions` | `no_player`, `no_controlled_team`, `invalid_team`, `invalid_member`, `not_visible` |
+| `get_location_context` | `tile_q`, `tile_r` | `location.tile`, `location.terrain`, `location.settlement`, `location.occupants`, `location.hints` | `no_player`, `no_controlled_team`, `invalid_tile` |
 | `get_available_actions` | `team_id`, `member_id`, `tile_q`, `tile_r`, `forced_interaction_id` | `actions` | `no_player`, `no_controlled_team`, `invalid_request`, `invalid_focus`, `forced_response_missing` |
 
 ### Command API 對外輸出
@@ -410,6 +410,7 @@ request 規則：
 - 若只有 `tile_q` 或只有 `tile_r` 非 `-1`，回 `invalid_request`。
 - 若無 player 或無 controlled team，回 `no_player` / `no_controlled_team`。
 - 若只有 context 不適用（例如全部 sentinel），回成功 envelope 並給空 `actions`。
+- `forced_interaction_id` 是 optional optimistic-concurrency guard：空字串表示不驗證；有值時必須等於目前 world state 的 forced interaction id，否則回 `forced_response_missing`。
 
 每個 action 至少包含：
 - `action_id`
@@ -440,6 +441,7 @@ composition 規則：
 - dedupe key 為 `command_name + serialized(command_args)`。
 - 若同 key 重複，保留較高優先層版本。
 - 最終輸出順序依上述優先層，再依 `label` 字母序穩定排序。
+- snapshot 內 forced-interaction actions 直接從當前 world state 的單一 `forced_interaction.responses` 產生，`command_args={response_id}`，不再攜帶 `interaction_id`。
 
 `target_requirements` 固定 schema：
 
@@ -489,10 +491,10 @@ composition 規則：
 
 ```gdscript
 {
-    "player_exists": bool,
-    "player_person_id": int,      # 無玩家時為 -1
-    "player_name": String,        # 無玩家時為 ""
-    "controlled_team_id": int,    # 無隊伍時為 -1
+    "player_exists": true,
+    "player_person_id": int,
+    "player_name": String,
+    "controlled_team_id": int,
     "controlled_team_name": String,
     "position": {"q": int, "r": int},
     "has_pending_targets": bool,
@@ -863,6 +865,7 @@ canonical envelope examples：
 Query API 的 envelope 失敗規則：
 - `get_player_snapshot` 若無玩家或無受控 team，回 `ok=false` 與對應錯誤碼。
 - `get_team_details` / `get_member_details` 若目標存在但目前不可見，回 `ok=false` 與 `not_visible`。
+- `get_team_details` / `get_member_details` / `get_location_context` 若無玩家或無 controlled team，回 `ok=false` 與 `no_player` / `no_controlled_team`。
 - detail query 若目標不存在，回 `ok=false` 與 `invalid_team` / `invalid_member` / `invalid_tile`。
 - `get_available_actions` 若無玩家或無受控 team，回 `ok=false`；若只有 context 不適用，回 `ok=true` 且 `data.actions = []`。
 - 不使用「成功但資料為錯誤字典」的混合模式。
