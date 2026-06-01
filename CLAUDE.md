@@ -2,7 +2,7 @@
 
 ## 專案定位
 
-Godot 4.2.2 GDScript 世界模擬器。重點：NPC 決策/互動/因果生成。**禁止直接 script 結果**，所有事件必須從 NPC 模型和團體狀態出發產生。
+Godot 4.2.2 GDScript 世界模擬器。
 
 ## 常用指令
 
@@ -25,23 +25,6 @@ docs/                  設計文件
 tools/                 godot等工具
 ```
 
-## 關鍵設計規則
-
-- **不直接 script 結果**：所有行為從 NPC values/skills/stress/loyalty 計算產生
-- **新功能前定義**：影響的世界狀態、資訊流動、時間消耗、受影響群體、二次後果
-
-## Values 系統
-
-| value | 主要影響系統 |
-|---|---|
-| 野心 | FactionAI 立國/外交門檻、攻擊 goal |
-| 求生欲 | FactionAI 緊急徵收門檻、SoloAI 逃跑 |
-| 義氣 | 叛離事件、外交接受、tribute 率 |
-| 貪婪 | FactionAI 徵收週期、勒索分數 |
-| **慎重** | **跨系統關鍵字**，壓低所有風險行為 |
-| 好戰 | _should_attack 加權、FactionAI 攻擊 goal |
-| 殘忍 | loot rate、傷兵惡化、暴動/勒索傾向 |
-| 信義 | 外交接受率、tribute 率、叛離條件 |
 
 ## 交付標準
 
@@ -52,88 +35,32 @@ tools/                 godot等工具
 | 文件更新 | 相關 docs/*.md 反映新行為，紀錄已計畫但未完成項目，紀錄進度文件 |
 
 
-## 文件位置
+## 文件位置（按需讀，勿一次全讀）
 
-| 主題 | 檔案 |
-|---|---|
-| 人物/反應/values | `docs/person.md` |
-| 團體/tags/tasks | `docs/team.md` |
-| Tick 循環/世界 | `docs/world.md` |
-| 事件系統 | `docs/event.md` |
-| 訊息傳播 | `docs/message.md` |
-| 開發進度 | `docs/progress.md` |
-
+```
+docs/
+  invariants.md     ★ 跨系統規則（每 session 開頭讀一次）
+  game-design.md    遊戲設計理念
+  glossary.md       術語表
+  world.md          Tick 循環 / 世界
+  person.md         人物 / values / 反應系統
+  team.md           團體 / tags / tasks
+  faction.md        勢力 / 外交
+  event.md          事件系統
+  message.md        訊息傳播
+  tick_parameters.md  Tick 常數
+  progress.md       開發進度
+  known_issues.md   已知 bug / 待修清單
+  process/          session 工作流（01_architect, 03_implementer）
+  superpowers/      specs / plans / handbacks
+```
 ---
 
 ## 雙 Session 工作流
 
-**主 session**（`A:\GDS\demo`，`main` branch）：brainstorm → spec → plan 設計，不實作。
+**主 session**（`A:\GDS\demo`，`main` branch）：
+- 嚴格遵守`docs/process/01_architect.md`
 
-**Plan 完成後，主 session 自動輸出精簡子 session 指令：**
-```
-在 A:\GDS\demo 的 feat/<feature> worktree 實作 docs/superpowers/plans/<plan-file>.md 的全部 Task，完成後回報結果。
-```
-不加額外注意事項（注意事項寫在 plan 內）。
-
-主 session 職責：
-- 確保各 spec 之間接口一致（資料結構、函式簽名、key 命名）
-- 確保跨系統交互邏輯無矛盾（例：A 系統寫入的 key，B 系統讀取時格式相符）
-- 收到 hand-back 後評估連動風險，決定是否補開新 spec
-- 控制 merge 到 main 的時機
-
-**子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：實作 plan。
-
-### 子 session 標準流程
-
-如果你在 `.worktrees/` 路徑下，你是實作 session。
-
-**開始前：**
-```powershell
-# 確認 baseline 乾淨
-.\tools\godot\Godot_v4.2.2-stable_win64_console.exe --headless --script scripts/debug/headless_test.gd
-```
-
-**實作工具：** 使用 `superpowers:executing-plans` 或 `superpowers:subagent-driven-development`
-
-**測試標準：**
-- 每個 task 完成後跑 headless test
-- 必須看到 `=== DONE ===`，無 `SCRIPT ERROR`
-- 新功能加對應驗證 print
-
-**Commit 規範：**
-```
-feat(系統): 功能描述
-fix(系統): 修正描述
-docs(主題): 文件更新
-test: 測試新增/更新
-```
-
-**完成後：**
-
-1. 推 branch：
-```powershell
-git push -u origin feat/<feature>
-```
-
-2. 寫 hand-back 文件到 `docs/superpowers/handbacks/YYYY-MM-DD-<feature>.md`：
-
-```markdown
-# Hand Back: <功能名稱>
-
-## 實作摘要
-- 改了哪些檔案（每檔一行說明）
-- 與 spec 的差異（若有）
-
-## 連動風險
-列出其他系統可能受影響的部分，主 session 決定是否補修：
-- `系統A`：說明為何可能受影響
-- （無則寫「無已知連動風險」）
-
-## 待主 session 確認
-- 設計決策（實作中遇到 spec 未覆蓋的情況）
-- 建議後續 task（發現的潛在問題或改進點）
-```
-
-3. Commit hand-back 文件，不要直接 merge 到 main，等主 session 確認。
-
-4. **finishing-a-development-branch skill 彈出選單時，直接選 Option 3（Keep the branch as-is），不向用戶提問。**主 session 負責 merge。
+**子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：
+- 如果你在 `.worktrees/` 路徑下，你是實作 session
+- 嚴格遵守`docs/process/03_implementer.md`
