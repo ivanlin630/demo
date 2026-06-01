@@ -68,8 +68,8 @@ func respond_to_forced(state: WorldState, interaction_id: String, response_id: S
 	var pre := _check_player(state)
 	if not pre.is_empty(): return pre
 	var result := _cmd_sys.resolve_forced_response(state, interaction_id, response_id)
-	if result.has("code"):
-		return PlayerApiMapper.map_command_result(false, result["code"], result.get("msg", ""), {})
+	if not result.get("ok", false):
+		return PlayerApiMapper.map_command_result(false, result.get("code", "action_unavailable"), result.get("msg", ""), {})
 	if result.get("ok", false):
 		return PlayerApiMapper.map_command_result(true, "ok", result.get("msg", ""),
 			{"forced_interaction_resolved": true, "refresh_required": true})
