@@ -478,17 +478,20 @@ func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 	_apply_casualties(state, loser_id, pursuit_loss)
 	print("[Pursuit] Team%d 追擊 Team%d +%d傷亡" % [winner_id, loser_id, pursuit_loss])
 
-func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> void:
+func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictionary:
 	var atk: TeamData = state.teams[atk_id]
 	var def: TeamData = state.teams[def_id]
-	for res in ["food", "goods", "coin"]:
+	var gained: Dictionary = {}
+	for res in ["food", "material", "goods", "coin"]:
 		var tribute: float = float(def.resources.get(res, 0)) * TRIBUTE_RATE
 		if tribute > 0.0:
 			atk.resources[res] = float(atk.resources.get(res, 0)) + tribute
 			def.resources[res] = float(def.resources.get(res, 0)) - tribute
+			gained[res] = tribute
 	_msg.emit_message(state, "extortion",
 		"Team %d 向 Team %d 收過路費" % [atk_id, def_id], atk)
 	print("[Extort] Team%d 勒索 Team%d，Team%d 妥協給付" % [atk_id, def_id, def_id])
+	return gained
 
 func _try_retreat(state: WorldState, team_id: int, enemy_id: int) -> void:
 	var team: TeamData = state.teams[team_id]
@@ -989,11 +992,19 @@ func resolve_trade_direct(state: WorldState, initiator_id: int, target_id: int) 
 	return { "ok": false, "msg": "無可交易資源" }
 
 # 供 PlayerCommandSystem 呼叫：不需要 aggressor 有 TASK_LOOT
-# 直接執行勒索資源轉移（food/goods/coin × TRIBUTE_RATE）
+# 直接執行勒索資源轉移（food/material/goods/coin × TRIBUTE_RATE）
 # 返回 { "ok": bool, "msg": String }
 func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: int) -> Dictionary:
 	var tgt: TeamData = state.teams.get(target_id)
 	if tgt == null:
 		return { "ok": false, "msg": "目標不存在" }
-	_resolve_extortion(state, aggressor_id, target_id)
-	return { "ok": true, "msg": "勒索完成" }
+	var gained: Dictionary = _resolve_extortion(state, aggressor_id, target_id)
+	if gained.is_empty():
+		return { "ok": true, "msg": "勒索完成（對方資源耗盡，無所得）" }
+	var parts: Array = []
+	for res in gained:
+		var amount: int = int(gained[res])
+		if amount > 0:
+			parts.append("%s+%d" % [res, amount])
+	var detail: String = ", ".join(parts) if not parts.is_empty() else "少量資源"
+	return { "ok": true, "msg": "勒索完成（%s）" % detail }
