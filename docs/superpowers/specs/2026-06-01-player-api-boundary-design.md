@@ -101,6 +101,7 @@ ownership 規則：
 最小 interface：
 - `map_player_summary(...) -> Dictionary`
 - `map_controlled_team(...) -> Dictionary`
+- `map_team_details(...) -> Dictionary`
 - `map_visible_team(...) -> Dictionary`
 - `map_member_details(...) -> Dictionary`
 - `map_pending_targets(...) -> Array`
@@ -116,6 +117,12 @@ ownership 規則：
 ownership 規則：
 - mapper 擁有 public query DTO、command payload/result shape、envelope shape 的輸出責任。
 - mapper 不擁有業務判斷，不決定 action 是否可用，也不執行 command。
+
+public DTO 對應：
+- `map_controlled_team` 對應 snapshot 內 `controlled_team`
+- `map_team_details` 對應 detail query 內 `data.team`
+- `map_member_details` 對應 detail query 內 `data.member`
+- `map_location_context` 對應 snapshot/detail query 內 location DTO
 
 action generation owner：
 - `player_query_api.gd` 擁有 available action 的組裝、優先序、dedupe、context 合成規則。
@@ -253,6 +260,13 @@ Command API 提供既有玩家行為入口，至少覆蓋：
 | `unequip_item` | `slot_id` | `unequipped_slot`, `refresh_required=true` | `invalid_request`, `equip_unavailable` | 是 |
 | `deposit_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `deposit_unavailable` | 是 |
 | `take_team_item` | `item_grade`, `qty` | `item_grade`, `qty`, `refresh_required=true` | `invalid_request`, `item_unavailable`, `take_unavailable` | 是 |
+
+command target/error 規則：
+- `move_to` 對不存在 tile 回 `invalid_tile`；tile 存在但不可走/不可下令回 `move_unavailable`。
+- `execute_action` 對不存在或過期 target 回 `invalid_target`。
+- `execute_action` 對 target 存在但目前不可見，亦回 `invalid_target`，不洩漏更多視野資訊。
+- `execute_action` 對 target 可見但當前規則不允許執行，回 `action_unavailable`。
+- `respond_to_forced` 對過期 interaction 回 `forced_response_missing`。
 
 `execute_action(request)` 的 request：
 
@@ -1005,6 +1019,8 @@ command 驗證規則：
     - `advance_ticks(n: int) -> Array`
   - `sim_bridge.gd` 的 `get_state()` 不再提供給 player-facing UI 消費；若暫時保留，只視為 internal/testing escape hatch，不可作為新 UI 邊界。
   - `command_player(name, args)` 只允許 dispatch 到 public command surface：`move_to`、`cancel_move`、`execute_action`、`respond_to_forced`、`equip_item`、`unequip_item`、`deposit_item`、`take_team_item`。
+  - `command_player(name, args)` 若 `name` 不在白名單，回 `{"ok": false, "code": "invalid_request", "message": "unknown command", "payload": {}}`
+  - `command_player(name, args)` 若 `args` 缺必要欄位或型別錯誤，回 public command 的 `invalid_request`
 
 ---
 
