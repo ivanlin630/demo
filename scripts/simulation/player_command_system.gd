@@ -64,7 +64,27 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			var resp: String = _diplomatic.handle_diplomacy_message(
 				state, tgt, pt, "demand_tribute")
 			state.player_pending_targets.erase(target_id)
-			return { "ok": resp == "accept", "msg": "納貢結果: %s" % resp }
+
+			if resp == "accept":
+				var amount: float = float(tgt.resources.get("coin", 0)) * 0.1  # TEST VALUE
+				tgt.resources["coin"] = float(tgt.resources.get("coin", 0)) - amount
+				pt.resources["coin"]  = float(pt.resources.get("coin", 0)) + amount
+				print("[PlayerCmd] 索貢成功 Team%d→玩家 %.0f coin" % [target_id, amount])
+				return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
+			else:
+				# 拒絕 → 關係惡化
+				tgt.unrest_turns += 2
+				if not state.player_hostile_teams.has(target_id):
+					state.player_hostile_teams.append(target_id)
+				var leader_p: PersonData = state.persons.get(tgt.leader_id)
+				if leader_p:
+					leader_p.memory.append({
+						"event_id": state.world.current_tick,
+						"intensity": "significant",
+						"reaction": "tribute_refused"
+					})
+				print("[PlayerCmd] 索貢遭拒 Team%d→hostile" % target_id)
+				return { "ok": false, "msg": "索貢遭拒，關係惡化" }
 		"attack":
 			var tgt: TeamData = state.teams.get(target_id)
 			if tgt == null:
