@@ -150,8 +150,31 @@ func _on_interact_execute(cmd_name: String, cmd_args: Dictionary) -> void:
 	if action_id == "recruit" and result.get("ok"):
 		var payload: Dictionary = result.get("payload", {})
 		if payload.get("has_willing_named", false):
-			# recruit panel handled by recruit plan
+			var tid_r: int = payload.get("target_team_id", -1)
+			_popups.show_recruit_panel(
+				payload.get("willing_members", []),
+				tid_r,
+				func(person_id: int) -> void:
+					var r2 = _bridge.command_player("execute_action", {
+						"action_id": "recruit_named",
+						"target": {"kind": "member", "team_id": tid_r,
+								   "member_id": person_id, "tile_q": -1, "tile_r": -1}
+					})
+					_bottom.add_message("[招募] %s" % r2.get("message", ""))
+					_sidebar.refresh_player(); _debug.refresh(),
+				func() -> void:
+					var r3 = _bridge.command_player("execute_action", {
+						"action_id": "recruit_anon",
+						"target": {"kind": "team", "team_id": tid_r,
+								   "member_id": -1, "tile_q": -1, "tile_r": -1}
+					})
+					_bottom.add_message("[招募] %s" % r3.get("message", ""))
+					_sidebar.refresh_player(); _debug.refresh())
 			return
+		# Tier 1 已自動完成
+		_bottom.add_message("[招募] %s" % result.get("message", ""))
+		_sidebar.refresh_player(); _debug.refresh()
+		return
 
 	_bottom.add_message("[互動] %s" % result.get("message", "完成"))
 
