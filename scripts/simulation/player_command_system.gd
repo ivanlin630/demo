@@ -50,6 +50,11 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 				return { "ok": false, "msg": "目標不存在" }
 			var resp: String = _diplomatic.handle_diplomacy_message(
 				state, tgt, pt, "propose_alliance")
+			if resp == "accept":
+				if pt.faction_id == -1 and tgt.faction_id == -1:
+					state.create_faction(pt_id)   # 玩家為領袖（G5 修正）
+				_diplomatic._form_alliance(state, pt, tgt)
+				print("[PlayerCmd] 同盟成立，勢力%d" % pt.faction_id)
 			state.player_pending_targets.erase(target_id)
 			return { "ok": resp == "accept", "msg": "外交結果: %s" % resp }
 		"demand_tribute":
@@ -98,6 +103,8 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 		"leave_loot":
 			state.last_encounter_result = {}
 			return { "ok": true, "msg": "放棄戰利品" }
+		"establish_faction":
+			return establish_faction(state)
 		"refresh_targets":
 			refresh_colocation_targets(state)
 			return { "ok": true, "msg": "互動目標已更新" }
@@ -113,7 +120,8 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 # "extort"    → ["pay", "refuse"]
 func get_forced_response_options(state: WorldState) -> Array[String]:
 	match state.player_forced_event.get("action", ""):
-		"diplomacy": return ["accept", "refuse"]
+		"diplomacy":
+			return ["accept", "accept_join", "accept_lead", "refuse"]
 		"extort":    return ["pay", "refuse"]
 	return []
 
@@ -126,11 +134,16 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 	var result: Dictionary
 	match fe.get("action", ""):
 		"diplomacy":
-			if response == "accept":
-				result = _accept_diplomacy(state,
-					fe.get("from_id", -1), fe.get("proposal", "alliance"))
-			else:
-				result = { "ok": true, "msg": "拒絕外交提案" }
+			match response:
+				"accept", "accept_join":
+					result = _accept_diplomacy(state,
+						fe.get("from_id", -1), fe.get("proposal", "alliance"))
+				"accept_lead":
+					result = _accept_diplomacy_as_leader(state, fe.get("from_id", -1))
+				"refuse":
+					result = { "ok": true, "msg": "拒絕外交提案" }
+				_:
+					result = { "ok": false, "msg": "未知回應: %s" % response }
 		"extort":
 			if response == "pay":
 				result = _pay_extortion(state, fe.get("from_id", -1))
@@ -211,6 +224,17 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 			return _pay_extortion(state, from_id)
 	return { "ok": false, "msg": "未知提案類型：%s" % proposal }
 
+func _accept_diplomacy_as_leader(state: WorldState, from_id: int) -> Dictionary:
+	var from_team: TeamData = state.teams.get(from_id)
+	var pt: TeamData = _get_player_team(state)
+	var pt_id: int   = _get_player_team_id(state)
+	if from_team == null or pt == null:
+		return { "ok": false, "msg": "隊伍不存在" }
+	if pt.faction_id == -1:
+		state.create_faction(pt_id)
+	_diplomatic._form_alliance(state, pt, from_team)
+	return { "ok": true, "msg": "自立後接納 Team%d，勢力%d" % [from_id, pt.faction_id] }
+
 func _pay_extortion(state: WorldState, from_id: int) -> Dictionary:
 	# 轉移資源給 from_id（金額由 _resolve_extortion 計算）
 	var pt_id: int = _get_player_team_id(state)
@@ -281,6 +305,21 @@ func cancel_move(state: WorldState) -> Dictionary:
 		return { "ok": false, "msg": "玩家 team 不存在" }
 	pt.move_target = Vector2i(-1, -1)
 	return { "ok": true, "msg": "取消移動" }
+
+func establish_faction(state: WorldState) -> Dictionary:
+	var pt: TeamData = _get_player_team(state)
+	var pt_id: int   = _get_player_team_id(state)
+	if pt == null:
+		return { "ok": false, "code": "no_controlled_team",
+				 "message": "找不到玩家隊伍", "payload": {} }
+	if pt.faction_id != -1:
+		return { "ok": false, "code": "action_unavailable",
+				 "message": "已屬勢力%d" % pt.faction_id, "payload": {} }
+	state.create_faction(pt_id)
+	print("[PlayerCmd] 玩家建立勢力%d" % pt.faction_id)
+	return { "ok": true, "code": "ok",
+			 "message": "建立勢力%d" % pt.faction_id,
+			 "payload": {"action_id": "establish_faction", "refresh_required": true} }
 
 # execute_action variant that passes full target dict (for "member" kind actions)
 func execute_action_with_target(state: WorldState, action: String, target: Dictionary) -> Dictionary:
