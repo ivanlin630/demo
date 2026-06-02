@@ -155,9 +155,21 @@ func _on_tick_advanced(_events: Array) -> void:
 	_sidebar.refresh_player()
 	for evt in _events:
 		_bottom.add_message("[T%d] %s" % [_bridge.get_state().world.current_tick, str(evt.get("type", "?"))])
+
 	if _bridge.get_state().encounter_active:
 		_encounter.show_encounter()
 		_map.visible = false
+		return
+
+	# Poll forced interaction
+	var snap: Dictionary = _bridge.query_player().get("data", {}).get("snapshot", {})
+	var forced: Dictionary = snap.get("forced_interaction", {})
+	if not forced.get("responses", []).is_empty():
+		_popups.show_forced_event(forced,
+			func(cmd_args: Dictionary) -> void:
+				var r = _bridge.command_player("respond_to_forced", cmd_args)
+				_bottom.add_message("[強制] %s" % r.get("message", ""))
+				_sidebar.refresh_player(); _debug.refresh())
 
 func _on_encounter_ended() -> void:
 	_map.visible = true
