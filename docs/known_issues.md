@@ -1,6 +1,6 @@
 # Known Issues
 
-> 最後更新：2026-06-02 | 來源：動態測試 + code review
+> 最後更新：2026-06-02（玩家互動全套實裝後）| 來源：動態測試 + code review
 
 ---
 
@@ -54,27 +54,26 @@
 - **位置**：`scripts/ui/main.gd`（test setup）
 - **建議**：加初始 outpost，或大幅增加初始食物（如 10000）
 
-### G1. 攻擊後無遭遇戰 UI
-- **症狀**：玩家選攻擊，模擬結算完畢但不顯示 encounter 畫面；戰後無掠奪
-- **根因**：`encounter_view.gd` 在戰前設定 `pending_action`，但 `encounter_system._decide_action` 舊版未讀取；已由 agent-repl branch 修正消費邏輯，但 UI 畫面切換邏輯尚未串接
-- **位置**：`scripts/ui/encounter_view.gd`，`scripts/ui/main.gd`
+### G1. 攻擊後無遭遇戰 UI ✅ 已修（2026-06-02）
+- **修正**：`main.gd._on_interact_execute` attack 分支：`_map.visible=false; _encounter.show_encounter()`；`_on_encounter_ended` 查詢 `take_loot` action 顯示 `show_loot_panel`
+- **連動**：`encounter_system.resolve_encounter_end` 寫入 `state.last_encounter_result`；`player_command_system` 新增 `take_loot` / `leave_loot`
+- **commit**：feat/attack branch merge
 
-### G2. 外交/貿易自動執行，無玩家選擇
-- **症狀**：NPC 發起外交/貿易，模擬自動決定結果；`player_forced_event` 有值但 UI 不顯示
-- **根因**：`main.gd` 沒有讀取 `player_forced_event` 並顯示選項 UI
-- **位置**：`scripts/ui/main.gd`
+### G2. 外交/貿易自動執行，無玩家選擇 ✅ 已修（2026-06-02）
+- **修正**：`main.gd._on_tick_advanced` 輪詢 `forced_interaction`，呼叫 `popup_layer.show_forced_event`；貿易加 `show_trade_preview` 確認步驟
+- **commit**：feat/interaction-ui-framework + feat/trade branch merge
 
-### G3. 玩家無法建立自己的勢力
-- **症狀**：`PlayerCommandSystem.execute_action` 沒有 `establish_faction` 選項
-- **位置**：`scripts/simulation/player_command_system.gd`
+### G3. 玩家無法建立自己的勢力 ✅ 已修（2026-06-02）
+- **修正**：`player_command_system.establish_faction`；`player_query_api` Layer 5 在 faction_id==-1 時顯示行動
+- **commit**：feat/alliance-faction branch merge
 
-### G4. Recruit STUB 永遠失敗
-- **症狀**：玩家選招募，回傳 `"recruit: STUB"` 不實際執行
-- **位置**：`scripts/simulation/player_command_system.gd:_execute_recruit`
+### G4. Recruit STUB 永遠失敗 ✅ 已修（2026-06-02）
+- **修正**：`player_command_system` 實裝 `_recruit_anon_internal` + `_recruit_named_internal`；coin gate（anon=50/named=150）；`popup_layer.show_recruit_panel` 供記名成員選擇
+- **commit**：feat/recruit branch merge
 
-### G5. Alliance 兩者皆獨立時無效
-- **症狀**：雙方皆無勢力時外交 accept 只有一方加入（或無效）
-- **位置**：`scripts/simulation/player_command_system.gd:_accept_diplomacy`
+### G5. Alliance 兩者皆獨立時無效 ✅ 已修（2026-06-02）
+- **修正**：`player_command_system._accept_diplomacy_as_leader`：雙獨立時先 `create_faction(from_id)` 再 `_form_alliance`；mapper 更新 3-way 回應選項（accept / accept_join / accept_lead）
+- **commit**：feat/alliance-faction branch merge
 
 ### U4. 地圖移動後有時消失
 - **症狀**：移動幾次後地圖變黑、旗子消失
