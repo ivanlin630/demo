@@ -78,9 +78,16 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			print("[PlayerCmd] 玩家發起攻擊 Team%d → Team%d" % [pt_id, target_id])
 			return { "ok": true, "msg": "發起攻擊" }
 		"extort":
-			var result := _interaction.resolve_extortion_direct(state, pt_id, target_id)
+			var extort_result := _interaction.resolve_extortion_direct(state, pt_id, target_id)
 			state.player_pending_targets.erase(target_id)
-			return result
+			if not extort_result.get("accepted", true):
+				var tgt2: TeamData = state.teams.get(target_id)
+				if tgt2:
+					tgt2.unrest_turns += 1
+				if not state.player_hostile_teams.has(target_id):
+					state.player_hostile_teams.append(target_id)
+				print("[PlayerCmd] 勒索遭拒 Team%d → hostile" % target_id)
+			return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", "") }
 		"recruit":
 			# STUB — 招募邏輯尚未實裝（說服/付費/目標成員選擇）
 			state.player_pending_targets.erase(target_id)
