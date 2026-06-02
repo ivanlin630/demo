@@ -112,12 +112,48 @@
 #### G-06. 子隊管理
 - **NPC**：`subteam_system` + `population_system` 自動 dispatch/merge
 - **玩家**：無 dispatch_subteam / recall_subteam 指令
-- **問題待討論**：
-  - 玩家可以從自己 team 分出子隊嗎？條件是什麼？
-  - 子隊獨立運作 vs 跟隨護衛 vs 執行任務
-  - 召回子隊的條件
-  - 子隊 leader 指定邏輯（玩家手動 vs 系統晉升）
-- **討論**：待討論
+
+- **討論結論**：✅ 2026-06-03
+
+**玩家 team 人口結構：**
+- 原設計「全記名、無匿名」過於理想化，改為**記名 + 匿名混合**（同 NPC）
+- 需更新 game-design.md 相關說明
+
+**底層已完整，G-06 只需 API 接線：**
+- `SubteamSystem.dispatch(parent_id, sub_leader_id, pop_count, task, move_target, ...)` — 已有
+- `SubteamSystem.try_merge_back(sub_id)` — 同格自動合回，已有
+- `SubteamSystem._pick_subteam_leader(team, task)` — 按任務選最適 leader，已有
+- TASK 常數全齊：TASK_HERALD / TASK_ESCORT / TASK_PATROL / TASK_BUILD / TASK_MERGE...
+
+**玩家 action 清單（G-06）：**
+| action_id | 底層呼叫 |
+|---|---|
+| `dispatch_subteam` | `SubteamSystem.dispatch(...)` |
+| `order_subteam` | 直接設 subteam `current_task` + `move_target` |
+| `recall_subteam` | 派信使子隊（TASK_HERALD）→ `_deliver_order` → 目標設 TASK_MERGE + 快照座標 |
+
+**子隊 task 指派：**
+- 派出時必須指定 task（無預設）
+- 完成後 → TASK_IDLE → faction AI 接管
+- 跟隨主隊 = TASK_ESCORT（已有）
+
+**子隊服從邏輯：**
+- 玩家指令是「建議」，子隊 AI 仍運作
+- values / loyalty 偏差大 → unrest 累積 → 現有事件觸發（split / defect）
+- 零新模擬邏輯，吃現有系統
+
+**召回機制：**
+- 遠端召回 = 玩家派信使子隊（TASK_HERALD）帶「召回令」
+  - `order_task = TASK_MERGE`，`order_target_id = parent_team_id`
+  - 信使抵達 → `_deliver_order`：目標取得 TASK_MERGE + `move_target = 信使母隊快照座標`
+- 子隊移動到快照座標；若母隊已不在該格：
+  - 進入視野後（`team_discovered` 有 parent）→ MovementSystem/sim_runner 更新 `move_target`
+  - 原則：視野外不知道母隊在哪，進視野才追蹤（符合資訊不透明設計）
+- 抵達同格 → `try_merge_back` 自動觸發
+
+**需補的小修：**
+1. `_deliver_order`：傳達 TASK_MERGE 時補設 `target.move_target = origin.tile_pos`
+2. MovementSystem 或 sim_runner：TASK_MERGE team 若目標在 `team_discovered` → 更新 `move_target`
 
 ---
 
@@ -167,3 +203,4 @@
 | 缺口 | 結論 | 日期 |
 |---|---|---|
 | G-05 據點/建設 | 吃 NPC 路徑；接手機制改 _tick_construction；支配權 _has_control；駐守/巡邏 task 後續實作 | 2026-06-03 |
+| G-06 子隊管理 | 混合記名/匿名；底層已齊只需 API 接線；召回=信使(TASK_HERALD)帶快照座標；進視野自動追蹤；_deliver_order 補 move_target 設定 | 2026-06-03 |
