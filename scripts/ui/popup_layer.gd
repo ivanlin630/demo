@@ -258,6 +258,39 @@ func show_loot_panel(loot_preview: Dictionary, take_fn: Callable, leave_fn: Call
 
 	_current_popup = popup; add_child(popup)
 
+# preview: { feasible: bool, player_gives: {}, player_gets: {} }
+# confirm_fn: Callable() — execute confirm_trade
+# cancel_fn: Callable() — execute cancel_trade
+func show_trade_preview(preview: Dictionary, confirm_fn: Callable, cancel_fn: Callable) -> void:
+	_close_current()
+	var popup := _make_base_popup("貿易預覽")
+	var vbox: VBoxContainer = popup.get_node("VBox/Scroll/Content")
+	var feasible: bool = preview.get("feasible", false)
+
+	for section in [["你付出：", "player_gives"], ["你獲得：", "player_gets"]]:
+		var hdr := Label.new(); hdr.text = section[0]; vbox.add_child(hdr)
+		var data: Dictionary = preview.get(section[1], {})
+		if data.is_empty():
+			var l := Label.new(); l.text = "  （無）"; vbox.add_child(l)
+		else:
+			for rk in data:
+				var l := Label.new()
+				l.text = "  %s: %.0f" % [rk, float(data[rk])]; vbox.add_child(l)
+
+	vbox.add_child(HSeparator.new())
+
+	var btn_row := HBoxContainer.new(); vbox.add_child(btn_row)
+	var confirm_btn := Button.new()
+	confirm_btn.text = "✓ 確認" if feasible else "無法交易（資源不足）"
+	confirm_btn.disabled = not feasible
+	confirm_btn.pressed.connect(func(): _close_current(); confirm_fn.call())
+	btn_row.add_child(confirm_btn)
+	var cancel_btn := Button.new(); cancel_btn.text = "取消"
+	cancel_btn.pressed.connect(func(): _close_current(); cancel_fn.call())
+	btn_row.add_child(cancel_btn)
+
+	_current_popup = popup; add_child(popup)
+
 func _add_item_action_buttons(row: Node, grade: String, team: TeamData) -> void:
 	if grade.begins_with("weapon_"):
 		var b1 := Button.new(); b1.text = "裝→右手"; row.add_child(b1)
