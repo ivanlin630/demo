@@ -853,6 +853,21 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 
 	print("[Encounter] 遭遇戰結算完成 result=%s" % result)
 
+	# Build loot_pool: 30% of each resource from loser team
+	var loser_team_loot: TeamData = state.teams.get(loser_id)
+	var loot: Dictionary = {}
+	if loser_team_loot != null:
+		for rk in loser_team_loot.resources:
+			var v: float = float(loser_team_loot.resources.get(rk, 0))
+			if v > 0:
+				loot[rk] = v * 0.3   # TEST VALUE — 30%
+	state.last_encounter_result = {
+		"winner_id": winner_id,
+		"loser_id":  loser_id,
+		"loot_pool": loot
+	}
+	print("[Encounter] 戰鬥結束 winner=Team%d loser=Team%d loot=%s" % [winner_id, loser_id, str(loot)])
+
 	state.encounter_units.clear()
 	state.encounter_active = false
 	state.encounter_attacker_id = -1
