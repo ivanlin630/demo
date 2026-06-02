@@ -88,6 +88,16 @@ func get_location_context(state: WorldState, tile_q: int, tile_r: int) -> Dictio
 	var location := PlayerApiMapper.map_location_context(state, tile_q, tile_r)
 	return PlayerApiMapper.map_query_envelope(true, "ok", "", {"location": location})
 
+func get_trade_preview(state: WorldState, target_team_id: int) -> Dictionary:
+	var check := _check_player_with_team(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	var p: PersonData = state.persons[state.player_id]
+	var pt_id: int = p.team_id
+	var interaction: InteractionSystem = InteractionSystem.new()
+	var preview: Dictionary = interaction.preview_trade(state, pt_id, target_team_id)
+	return PlayerApiMapper.map_query_envelope(true, "ok", "", {"preview": preview})
+
 func get_available_actions(state: WorldState, request: Dictionary) -> Dictionary:
 	var check := _check_player_with_team(state)
 	if check["code"] != "ok":
