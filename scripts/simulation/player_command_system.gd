@@ -192,6 +192,7 @@ func resolve_forced_response(state: WorldState, interaction_id: String, response
 # player_forced_event 不清除（NPC 外交/勒索不因移動取消）
 func clear_pending_targets(state: WorldState) -> void:
 	state.player_pending_targets.clear()
+	state.player_state.erase("pending_trade_target")
 
 # 玩家主動按下互動鍵（T）時呼叫：掃描同格 NPC，加入 pending_targets
 # 讓 ignore 後仍可再次主動觸發互動
