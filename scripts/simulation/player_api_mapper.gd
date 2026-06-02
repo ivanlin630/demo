@@ -184,6 +184,25 @@ static func map_pending_targets(state: WorldState) -> Array:
 		})
 	return result
 
+static func map_willing_members(state: WorldState, person_ids: Array) -> Array:
+	var result: Array = []
+	for pid in person_ids:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		var best_sk: String = "—"; var best_v: float = 0.0
+		for sk in p.skills:
+			var v: float = float(p.skills[sk])
+			if v > best_v: best_v = v; best_sk = "%s:%.2f" % [sk, v]
+		result.append({
+			"person_id": pid,
+			"name": p.person_name if p.person_name != "" else "P%d" % pid,
+			"team_id": p.team_id,
+			"loyalty": p.loyalty,
+			"top_skill": best_sk,
+			"recruit_cost": PlayerCommandSystem.RECRUIT_COST_NAMED
+		})
+	return result
+
 # ── Forced interaction ─────────────────────────────────────────────────────────
 
 static func map_forced_interaction(state: WorldState) -> Dictionary:
