@@ -206,10 +206,30 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 	match action:
 		"diplomacy":
 			msg = "Team%d 提議 %s" % [from_id, proposal]
-			responses = [
-				{"response_id": "accept", "label": "接受", "command_args": {"interaction_id": iid, "response_id": "accept"}},
-				{"response_id": "refuse", "label": "拒絕", "command_args": {"interaction_id": iid, "response_id": "refuse"}}
-			]
+			var from_team: TeamData = state.teams.get(from_id) if state.teams.has(from_id) else null
+			var player_pid: int = state.player_id
+			var pp: PersonData = state.persons.get(player_pid) if state.persons.has(player_pid) else null
+			var player_team: TeamData = state.teams.get(pp.team_id if pp != null else -1) if pp != null else null
+			var both_independent: bool = from_team != null and player_team != null \
+				and from_team.faction_id == -1 and player_team.faction_id == -1 \
+				and evt.get("proposal", "") in ["alliance", "surrender"]
+
+			if both_independent:
+				responses = [
+					{ "response_id": "accept_join",  "label": "加入對方勢力（對方為主）",
+					  "command_args": {"interaction_id": iid, "response_id": "accept_join"} },
+					{ "response_id": "accept_lead",  "label": "自立後接納對方（我為主）",
+					  "command_args": {"interaction_id": iid, "response_id": "accept_lead"} },
+					{ "response_id": "refuse",       "label": "✗ 拒絕",
+					  "command_args": {"interaction_id": iid, "response_id": "refuse"} }
+				]
+			else:
+				responses = [
+					{"response_id": "accept", "label": "✓ 接受",
+					 "command_args": {"interaction_id": iid, "response_id": "accept"}},
+					{"response_id": "refuse", "label": "✗ 拒絕",
+					 "command_args": {"interaction_id": iid, "response_id": "refuse"}}
+				]
 		"extort":
 			msg = "Team%d 勒索你" % from_id
 			responses = [
