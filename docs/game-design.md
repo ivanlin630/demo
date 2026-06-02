@@ -547,7 +547,7 @@ NPC 才會生成完整人格。
 
 吸收其他 team 時：
 
-- 被吸收方的 leader + advisors → 玩家 advisors（已記名，直接加入）
+- 被吸收方的 leader + named_members → 玩家 named_members（已記名，直接加入）
 - 被吸收方的非記名人口 → 自動成為跟隨子隊：
   - 系統呼叫 PersonGenerator 從人口中晉升一人為子隊 leader
   - 子隊 parent_team_id = 玩家 team，task = 護衛（跟隨）

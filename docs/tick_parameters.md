@@ -71,6 +71,15 @@
 
 ---
 
+## 玩家指令常數
+
+| 參數 | 檔案 | 值 | 說明 |
+|---|---|---|---|
+| `RECRUIT_COST_ANON` | `simulation/player_command_system.gd` | 50.0 | 招募匿名人口費用（coin） |
+| `RECRUIT_COST_NAMED` | `simulation/player_command_system.gd` | 150.0 | 招募記名 NPC 費用（coin） |
+
+---
+
 ## AI 週期
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 | 建議意義 |
@@ -114,4 +123,4 @@
 
 ---
 
-*最後更新：2026-05-31*
+*最後更新：2026-06-02*

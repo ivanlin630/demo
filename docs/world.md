@@ -32,12 +32,46 @@ var current_turn: int      # 每 6 Tick 推進 1 Turn
 ### WorldState（`scripts/data/world_state.gd`）
 
 ```gdscript
+# ── 時間常數 ──
+const TICKS_PER_DAY    = 240      # 10 ticks/hour
+const TICKS_PER_MONTH  = 7200     # 30 天
+const TICKS_PER_SEASON = 21600    # 90 天
+const TICKS_PER_YEAR   = 86400    # 360 天
+
+# ── 核心資料 ──
 var world: WorldData
-var teams: Dictionary           # team_id → TeamData
-var persons: Dictionary         # person_id → PersonData
-var global_messages: Array      # 世界真相訊息
-var team_known: Dictionary      # team_id → Array[MessageData]
+var teams: Dictionary            # team_id → TeamData
+var persons: Dictionary          # person_id → PersonData
+var factions: Dictionary         # faction_id → FactionData
+var global_messages: Array       # 世界真相訊息
+var team_known: Dictionary       # team_id → Array[MessageData]
+var team_discovered: Dictionary  # team_id → Array[int]（已知 team_id）
+var team_intel: Dictionary       # obs_id → { tgt_id → { tier, pop_est, tile_pos, ... } }
+
+# ── 玩家狀態 ──
+var player_id: int = -1
+var player_state: Dictionary = {}           # 任意 key-value（pending_trade_target 等）
+var player_hostile_teams: Array = []        # Array[int] 對玩家敵意的 team_ids
+var player_pending_targets: Array = []      # 同格可互動的 NPC team_ids
+var player_forced_event: Dictionary = {}    # NPC 強制互動（diplomacy/extort）；空=無
+var player_forced_event_id: String = ""     # 對應事件的唯一 ID（str(randi())）
+
+# ── 遭遇戰臨時狀態 ──
+var encounter_active: bool = false
+var encounter_units: Array = []             # Array[Dictionary]
+var encounter_attacker_id: int = -1
+var encounter_defender_id: int = -1
+var pursuit_edge_offset: int = 0
+var encounter_tick: int = 0
+var last_encounter_result: Dictionary = {}
+# Format: { "winner_id": int, "loser_id": int, "loot_pool": Dictionary }
+# 玩家取/棄戰利品後清空
 ```
+
+**方法：**
+- `create_faction(leader_team_id)` → 建立新勢力，回傳 faction_id
+- `disband_faction(faction_id)` → 解散勢力，所有成員 faction_id → -1
+- `snapshot_faction_member(team_id, tick)` → 寫入勢力成員快照（food/weapons/goods/pop/tile/task）
 
 ---
 
@@ -60,15 +94,26 @@ var team_known: Dictionary      # team_id → Array[MessageData]
 
 ---
 
-## Tick 循環（6 步驟）
+## Tick 循環（14 步驟）
+
+定義於 `sim_runner.gd`。遭遇戰 active 期間跳過 ①–⑩ 直接跑 ⑪。
 
 ```
-① advance_time     → current_tick +1，每 6 Tick current_turn +1
-② collect_resources → 有 has_outpost 的 Team 收取糧食
-③ resolve_consumption → 消耗糧食，更新人物需求
-④ person_reactions → 每個 NPC 跑效用函數，輸出反應
-⑤ generate_events  → EventSystem 處理分裂/替換等事件
-⑥ emit_messages    → SimMessageSystem 處理待發訊息
+①  advance_time         → current_tick+1；每6Tick current_turn+1
+①b update_vision        → VisionSystem.tick_discovery（近/遠區皆做）
+②  collect_resources    → 有 outpost 的 Team 收取資源
+③  resolve_consumption  → 消耗食物，更新 needs/stress/fear
+④  harvest              → HarvestSystem 農業乘數更新（每6Tick）
+⑤  movement             → MovementSystem 推進移動（日夜/地形/負重/疲勞）
+⑥  interaction          → InteractionSystem 同格接觸（戰鬥/外交/勒索/貿易）
+⑦  person_reactions     → 每NPC效用函數輸出反應（近區）
+⑧  generate_events      → EventSystem 分裂/替換/脫隊
+⑨  faction_ai           → FactionAISystem 目標評估/外交/戰略指派
+⑩  population_overflow  → 人口溢出分裂（每10Tick）
+⑪  encounter_round      → EncounterSystem 遭遇戰一回合（encounter_active 時）
+⑫  salary               → SalarySystem 薪資結算（每TICKS_PER_MONTH）
+⑬  emit_messages        → SimMessageSystem 訊息傳播
+⑭  npc_cleanup          → NpcAiSystem.cleanup_goals 目標修剪
 ```
 
 ---
