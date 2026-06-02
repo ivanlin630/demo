@@ -1,6 +1,9 @@
 # scripts/simulation/player_command_system.gd
 class_name PlayerCommandSystem
 
+const RECRUIT_COST_ANON:  float = 50.0   # TEST VALUE
+const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
+
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
 
@@ -291,6 +294,26 @@ func _pay_extortion(state: WorldState, from_id: int) -> Dictionary:
 		return { "ok": false, "msg": "找不到玩家 team" }
 	_interaction.resolve_extortion_direct(state, from_id, pt_id)
 	return { "ok": true, "msg": "支付勒索" }
+
+func _recruit_anon_internal(state: WorldState, pt: TeamData,
+		tgt: TeamData, target_id: int) -> Dictionary:
+	var pt_id: int  = _get_player_team_id(state)
+	var coin: float = float(pt.resources.get("coin", 0))
+	if coin < RECRUIT_COST_ANON:
+		state.player_pending_targets.erase(target_id)
+		return { "ok": false, "msg": "金幣不足（需%d）" % int(RECRUIT_COST_ANON) }
+	if tgt.population <= 1:
+		state.player_pending_targets.erase(target_id)
+		return { "ok": false, "msg": "目標人口不足" }
+	pt.resources["coin"] = coin - RECRUIT_COST_ANON
+	tgt.population = maxi(tgt.population - 1, 1)
+	pt.population += 1
+	state.player_pending_targets.erase(target_id)
+	print("[Recruit] 匿名 Team%d←%d, 花%.0f coin, 新人口=%d" % [
+		pt_id, target_id, RECRUIT_COST_ANON, pt.population])
+	return { "ok": true, "msg": "招募成功（花費%d coin，新人口%d）" % [
+		int(RECRUIT_COST_ANON), pt.population],
+		"payload": {"has_willing_named": false, "refresh_required": true} }
 
 # ── 查詢 API（Phase 1 新增） ─────────────────────────
 
