@@ -4,7 +4,7 @@
 
 ---
 
-## 已對齊（玩家 = NPC）
+## 已對齊（玩家 = NPC）**不一定真的對齊日後討論 **
 
 | 互動 | 狀態 |
 |---|---|
@@ -62,12 +62,52 @@
 #### G-05. 據點/建設指令
 - **NPC**：FactionAI 設 `TASK_BUILD_OUTPOST` → sim_runner 呼叫 `outpost_system.try_build`
 - **玩家**：無 API 指令建/拆據點
-- **問題待討論**：
-  - 玩家建據點限當前格還是可指定格？
-  - 資源消耗條件（material？）
-  - 是否需要拆除指令？
-  - 建設時間 vs 即時？
-- **討論**：待討論
+
+- **討論結論**：✅ 2026-06-03
+
+**建設邏輯：**
+- 玩家完全吃 NPC 路徑：`execute_action("build_outpost")` → 設 `current_task = "建設"`，sim_runner 照常推進
+- 限當格建造（遠端建造靠子隊，待 G-06）
+- 資源消耗同 NPC（BUILD_COST 表：material / coin / weapon）
+- 建設時間同 NPC（BUILD_TICKS / team.population）
+
+**暫停/接手機制：**
+- NPC 已有暫停邏輯（`outpost_system._tick_construction` line 68–69：施工隊離格自動暫停，`construction_ticks_left` 存 tile 上）
+- 被攻擊後移離 → **自動暫停**，回來自動續建（免費取得）
+- 玩家不需要 cancel_build
+- `_tick_construction` 需小改：允許**任何**在格上 `current_task == "建設"` 的 team 推進施工並接手 owner
+  - 現行：只有原始 `construction_team_id` 可推進 → 改為：格上任何 `current_task == "建設"` team 皆可
+  - `_complete_construction` 完成時 owner = 當下施工 team（非原始）
+
+**拆除邏輯：**
+- 施工中（未完成）：任何 team 到格上可清除（無所有權，無限制）
+- 已完成據點：需**支配權**
+  - `_has_control(state, team_id, tile) → bool`：
+    1. `tile.outpost_owner == team_id` → true
+    2. owner 所屬勢力 == team_id 所屬勢力（faction_id 相同且非 -1）→ true
+    3. `tile.outpost_owner` 的 team 不存在（已滅）→ true（無主）
+    4. 格上無任何 owner 同勢力 team 在場 → true（無人駐守，任何佔領者可拆）
+    5. 以上皆否 → false
+
+**玩家 action 清單（G-05）：**
+| action_id | 條件 |
+|---|---|
+| `build_outpost` | 當格無據點無施工；扣 BUILD_COST |
+| `upgrade_outpost` | 當格有據點且有支配權；扣 BUILD_COST |
+| `upgrade_farming` | civilian 據點且有支配權 |
+| `upgrade_manufacturing` | civilian 據點且有支配權 |
+| `demolish_outpost` | 完成→需支配權；施工中→任何人 |
+
+**依賴項目（後續實作）：**
+- **TASK_GARRISON（駐守）**：team 待在格上不移動；FactionAI / StrategicAI 需新增派守邏輯
+  - 駐守 team 物理在格 → 算支配 owner 勢力控制該格
+- **TASK_PATROL（巡邏）**：team 循 `patrol_waypoints: Array[Vector2i]` 路線移動
+  - 需 `TeamData.patrol_waypoints` 新欄位
+  - MovementSystem 擴充：到達 waypoint 後自動設下一個目標（循環）
+  - 控制判斷：只在 team 物理上在格時算有效（間歇控制，有策略空隙可利用）
+  - 先做駐守，巡邏獨立 feature
+- 子隊遠端建造：待 G-06 完成後接入（子隊繼承同一 NPC 路徑）
+- 完整支配權（同盟）：暫不實作，待外交系統成熟後擴充
 
 #### G-06. 子隊管理
 - **NPC**：`subteam_system` + `population_system` 自動 dispatch/merge
@@ -126,4 +166,4 @@
 
 | 缺口 | 結論 | 日期 |
 |---|---|---|
-| — | — | — |
+| G-05 據點/建設 | 吃 NPC 路徑；接手機制改 _tick_construction；支配權 _has_control；駐守/巡邏 task 後續實作 | 2026-06-03 |
