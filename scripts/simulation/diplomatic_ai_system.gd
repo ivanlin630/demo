@@ -79,16 +79,14 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 				return "accept"
 			return "reject"
 		"demand_tribute":
-			var self_leader: PersonData = state.persons.get(self_team.leader_id)
-			var resist: float = 1.0 - score
-			if self_leader != null:
-				resist += self_leader.values.get("好戰", 0.5) * 0.3
-			if resist > 0.5:
-				return "reject"
-			var tribute: float = float(self_team.resources.get("coin", 0)) * 0.1
-			self_team.resources["coin"] = float(self_team.resources.get("coin", 0)) - tribute
-			sender_team.resources["coin"] = float(sender_team.resources.get("coin", 0)) + tribute
-			return "accept"
+			var leader: PersonData = state.persons.get(self_team.leader_id) if self_team.leader_id != -1 else null
+			var pride:   float = float(leader.values.get("義氣", 0.5)) if leader else 0.5
+			var caution: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
+			var power_r: float = float(sender_team.population) / maxf(float(self_team.population), 1.0)
+			# 接受分：強弱差大 + 謹慎 → 傾向接受；義氣高 → 傾向拒絕
+			var d_score: float = (power_r - 1.0) * 0.4 + caution * 0.3 - pride * 0.3
+			print("[DiplomacyAI] demand_tribute score=%.2f (power_r=%.2f, caution=%.2f, pride=%.2f)" % [d_score, power_r, caution, pride])
+			return "accept" if d_score > 0.0 else "refuse"
 		"offer_surrender":
 			if score > 0.3:
 				return "accept"
