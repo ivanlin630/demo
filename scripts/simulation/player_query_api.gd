@@ -187,6 +187,47 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 				}
 			))
 
+		# Disabled actions (shown in menu with reason)
+		var tgt_team: TeamData = state.teams.get(focus_team_id)
+		var pt_team: TeamData  = state.teams.get(ptid) if ptid != -1 else null
+		if pt_team != null and tgt_team != null:
+			# demand_tribute: disabled when population condition not met
+			if not team_actions.has("demand_tribute"):
+				var tribute_ok: bool = pt_team.population > int(tgt_team.population * 1.5)
+				if not tribute_ok:
+					actions.append(PlayerApiMapper.map_available_action(
+						"demand_tribute", "索貢", false,
+						"人口不足（需超過對方 1.5 倍）",
+						{
+							"allowed_kinds": PackedStringArray(["team"]),
+							"requires_visible_target": true,
+							"requires_forced_interaction": false,
+							"allows_self_target": false
+						},
+						"execute_action",
+						{
+							"action_id": "demand_tribute",
+							"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
+						}
+					))
+			# extort: disabled when readiness < 0.7
+			if not team_actions.has("extort"):
+				actions.append(PlayerApiMapper.map_available_action(
+					"extort", "勒索", false,
+					"準備值不足（需 ≥ 0.7，現為%.1f）" % pt_team.readiness,
+					{
+						"allowed_kinds": PackedStringArray(["team"]),
+						"requires_visible_target": true,
+						"requires_forced_interaction": false,
+						"allows_self_target": false
+					},
+					"execute_action",
+					{
+						"action_id": "extort",
+						"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
+					}
+				))
+
 	# move_to (cursor set)
 	if cursor_q != -1 and cursor_r != -1:
 		actions.append(PlayerApiMapper.map_available_action(
