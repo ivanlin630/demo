@@ -291,6 +291,50 @@ func show_trade_preview(preview: Dictionary, confirm_fn: Callable, cancel_fn: Ca
 
 	_current_popup = popup; add_child(popup)
 
+# willing_members: Array of {person_id, name, team_id, loyalty, top_skill, recruit_cost}
+# target_team_id: int
+# named_fn: Callable(person_id: int) — execute recruit_named
+# anon_fn: Callable() — execute recruit_anon
+func show_recruit_panel(willing_members: Array, target_team_id: int,
+		named_fn: Callable, anon_fn: Callable) -> void:
+	_close_current()
+	var popup := _make_base_popup("招募")
+	var vbox: VBoxContainer = popup.get_node("VBox/Scroll/Content")
+
+	var hdr := Label.new()
+	hdr.text = "Team%d 中有成員考慮投誠：" % target_team_id
+	vbox.add_child(hdr)
+
+	for m in willing_members:
+		var row := HBoxContainer.new(); vbox.add_child(row)
+		var lbl := Label.new()
+		lbl.text = "%s  忠誠:%.0f%%  %s" % [
+			m.get("name", "?"),
+			float(m.get("loyalty", 0)) * 100.0,
+			m.get("top_skill", "—")]
+		lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(lbl)
+		var btn := Button.new()
+		btn.text = "招募（%d coin）" % int(m.get("recruit_cost", 150))
+		var cp: int = m.get("person_id", -1)
+		btn.pressed.connect(func():
+			_close_current()
+			named_fn.call(cp))
+		row.add_child(btn)
+
+	vbox.add_child(HSeparator.new())
+
+	var anon_btn := Button.new()
+	anon_btn.text = "改招匿名人口（%d coin）" % int(PlayerCommandSystem.RECRUIT_COST_ANON)
+	anon_btn.pressed.connect(func(): _close_current(); anon_fn.call())
+	vbox.add_child(anon_btn)
+
+	var cancel_btn := Button.new(); cancel_btn.text = "取消"
+	cancel_btn.pressed.connect(_close_current)
+	vbox.add_child(cancel_btn)
+
+	_current_popup = popup; add_child(popup)
+
 func _add_item_action_buttons(row: Node, grade: String, team: TeamData) -> void:
 	if grade.begins_with("weapon_"):
 		var b1 := Button.new(); b1.text = "裝→右手"; row.add_child(b1)
