@@ -131,8 +131,20 @@ func _on_interact_execute(cmd_name: String, cmd_args: Dictionary) -> void:
 
 	if action_id == "trade" and result.get("ok") and result.get("payload", {}).get("requires_preview"):
 		var tid: int = result.get("payload", {}).get("preview_target_id", -1)
-		var pr := _bridge.query_player({"focus_team_id": tid})
-		# trade preview handled by trade plan
+		var pr := _bridge.query_trade_preview(tid)
+		var preview: Dictionary = pr.get("data", {}).get("preview", {})
+		var base_target: Dictionary = {"kind": "team", "team_id": tid,
+										"member_id": -1, "tile_q": -1, "tile_r": -1}
+		_popups.show_trade_preview(preview,
+			func() -> void:
+				var r2 = _bridge.command_player("execute_action", {
+					"action_id": "confirm_trade", "target": base_target})
+				_bottom.add_message("[貿易] %s" % r2.get("message", ""))
+				_sidebar.refresh_player(); _debug.refresh(),
+			func() -> void:
+				_bridge.command_player("execute_action", {
+					"action_id": "cancel_trade", "target": base_target})
+				_bottom.add_message("[貿易] 已取消"))
 		return
 
 	if action_id == "recruit" and result.get("ok"):
