@@ -407,6 +407,7 @@ func cancel_move(state: WorldState) -> Dictionary:
 	if pt == null:
 		return { "ok": false, "msg": "玩家 team 不存在" }
 	pt.move_target = Vector2i(-1, -1)
+	state.player_state.erase("pending_trade_target")
 	return { "ok": true, "msg": "取消移動" }
 
 func establish_faction(state: WorldState) -> Dictionary:
