@@ -57,6 +57,14 @@ func execute_action(state: WorldState, action_id: String, target: Dictionary) ->
 			result = _cmd_sys.execute_action(state, target_team_id, action_id)
 		"none":
 			result = _cmd_sys.execute_action(state, -1, action_id)
+		"member":
+			var member_id: int = target.get("member_id", -1)
+			if member_id == -1:
+				return PlayerApiMapper.map_command_result(false, "invalid_target", "member_id required", {})
+			if target_team_id == -1 or not state.teams.has(target_team_id):
+				return PlayerApiMapper.map_command_result(false, "invalid_target", "team_id required for member target", {})
+			# Pass full target dict to cmd_sys; cmd_sys reads member_id from request
+			result = _cmd_sys.execute_action_with_target(state, action_id, target)
 		_:
 			return PlayerApiMapper.map_command_result(false, "invalid_target", "unsupported target kind: %s" % kind, {})
 	if result.get("ok", false):

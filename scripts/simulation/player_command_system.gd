@@ -263,3 +263,20 @@ func cancel_move(state: WorldState) -> Dictionary:
 		return { "ok": false, "msg": "玩家 team 不存在" }
 	pt.move_target = Vector2i(-1, -1)
 	return { "ok": true, "msg": "取消移動" }
+
+# execute_action variant that passes full target dict (for "member" kind actions)
+func execute_action_with_target(state: WorldState, action: String, target: Dictionary) -> Dictionary:
+	var pt: TeamData = _get_player_team(state)
+	var pt_id: int   = _get_player_team_id(state)
+	if pt == null:
+		return { "ok": false, "msg": "找不到玩家 team" }
+	match action:
+		"recruit_named":
+			var from_team_id: int = target.get("team_id", -1)
+			var person_id: int    = target.get("member_id", -1)
+			return _recruit_named_internal(state, pt, from_team_id, person_id)
+	return { "ok": false, "msg": "不支援 member 目標的行動: %s" % action }
+
+func _recruit_named_internal(_state: WorldState, _pt: TeamData,
+		_from_team_id: int, _person_id: int) -> Dictionary:
+	return { "ok": false, "msg": "recruit_named 尚未實裝" }
