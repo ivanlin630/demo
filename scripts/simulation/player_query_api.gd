@@ -227,6 +227,25 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 						"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
 					}
 				))
+			# recruit: disabled when coin < RECRUIT_COST_ANON
+			if not team_actions.has("recruit"):
+				var pt_coin: float = float(pt_team.resources.get("coin", 0))
+				if pt_coin < PlayerCommandSystem.RECRUIT_COST_ANON:
+					actions.append(PlayerApiMapper.map_available_action(
+						"recruit", "招募", false,
+						"金幣不足（需%d，現%d）" % [int(PlayerCommandSystem.RECRUIT_COST_ANON), int(pt_coin)],
+						{
+							"allowed_kinds": PackedStringArray(["team"]),
+							"requires_visible_target": true,
+							"requires_forced_interaction": false,
+							"allows_self_target": false
+						},
+						"execute_action",
+						{
+							"action_id": "recruit",
+							"target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}
+						}
+					))
 
 	# move_to (cursor set)
 	if cursor_q != -1 and cursor_r != -1:

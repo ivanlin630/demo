@@ -32,7 +32,9 @@ func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
 		actions.append("demand_tribute")
 	if pt.readiness >= 0.7:
 		actions.append("extort")
-	actions.append("recruit")   # STUB
+	var coin: float = float(pt.resources.get("coin", 0))
+	if coin >= RECRUIT_COST_ANON:
+		actions.append("recruit")
 	return actions
 
 # 執行玩家主動行動

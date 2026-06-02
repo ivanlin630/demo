@@ -1519,12 +1519,19 @@ func _run_sim_test() -> void:
 	var _cmd := PlayerCommandSystem.new()
 	var _pt_id: int = state.persons.get(state.player_id).team_id   # = 0
 
-	# ── 測試 1：get_available_actions（ignore/attack 永遠可選）──
+	# ── 測試 1：get_available_actions（ignore/attack 永遠可選；recruit coin-gated）──
 	state.player_pending_targets.append(1)
+	var _pt_team0: TeamData = state.teams.get(state.persons.get(0).team_id)
+	var _orig_coin: float = float(_pt_team0.resources.get("coin", 0))
+	_pt_team0.resources["coin"] = 100.0
 	var _actions := _cmd.get_available_actions(state, 1)
 	assert(_actions.has("ignore"), "ignore 永遠可選")
 	assert(_actions.has("attack"), "attack 永遠可選")
-	assert(_actions.has("recruit"), "recruit STUB 永遠可選")
+	assert(_actions.has("recruit"), "recruit: coin 足夠時可選")
+	_pt_team0.resources["coin"] = 0.0
+	var _actions_no_coin := _cmd.get_available_actions(state, 1)
+	assert(not _actions_no_coin.has("recruit"), "recruit: coin 不足時不可選")
+	_pt_team0.resources["coin"] = _orig_coin
 	print("  [OK] get_available_actions: %s" % str(_actions))
 
 	# ── 測試 2：execute_action("ignore") → pending 清除 ──
