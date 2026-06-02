@@ -174,3 +174,32 @@ func _on_tick_advanced(_events: Array) -> void:
 func _on_encounter_ended() -> void:
 	_map.visible = true
 	_map.refresh()
+	_sidebar.refresh_player(); _debug.refresh()
+
+	# Check for loot
+	var snap: Dictionary = _bridge.query_player().get("data", {}).get("snapshot", {})
+	var actions: Array = snap.get("available_actions", [])
+	var take_act: Dictionary = {}
+	for act in actions:
+		if act.get("action_id", "") == "take_loot":
+			take_act = act
+			break
+
+	if not take_act.is_empty():
+		var loot_preview: Dictionary = take_act.get("command_args", {}).get("loot_preview", {})
+		_popups.show_loot_panel(
+			loot_preview,
+			func() -> void:
+				var r = _bridge.command_player("execute_action", {
+					"action_id": "take_loot",
+					"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
+				})
+				_bottom.add_message("[戰鬥] %s" % r.get("message", ""))
+				_sidebar.refresh_player(); _debug.refresh(),
+			func() -> void:
+				_bridge.command_player("execute_action", {
+					"action_id": "leave_loot",
+					"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
+				})
+				_bottom.add_message("[戰鬥] 放棄戰利品"))
+
