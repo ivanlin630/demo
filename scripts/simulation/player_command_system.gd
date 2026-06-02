@@ -117,9 +117,38 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 				print("[PlayerCmd] 勒索遭拒 Team%d → hostile" % target_id)
 			return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", "") }
 		"recruit":
-			# STUB — 招募邏輯尚未實裝（說服/付費/目標成員選擇）
-			state.player_pending_targets.erase(target_id)
-			return { "ok": false, "msg": "招募功能尚未實裝" }
+			var tgt: TeamData = state.teams.get(target_id)
+			if tgt == null:
+				state.player_pending_targets.erase(target_id)
+				return { "ok": false, "msg": "目標不存在" }
+
+			# 找低忠誠 named member（排除 leader）
+			var willing: Array = []
+			for pid in tgt.named_members:
+				if pid == tgt.leader_id: continue
+				var person: PersonData = state.persons.get(pid)
+				if person and person.loyalty < 0.4:
+					willing.append(pid)
+
+			if not willing.is_empty():
+				# Tier 2：回傳 DTO，讓 UI 開面板
+				var willing_dto: Array = PlayerApiMapper.map_willing_members(state, willing)
+				return { "ok": true, "msg": "有成員考慮投誠",
+						 "payload": {
+							 "has_willing_named": true,
+							 "willing_members": willing_dto,
+							 "target_team_id": target_id
+						 }}
+
+			# Tier 1：直接匿名招募
+			return _recruit_anon_internal(state, pt, tgt, target_id)
+
+		"recruit_anon":
+			var tgt3: TeamData = state.teams.get(target_id)
+			if tgt3 == null:
+				return { "ok": false, "msg": "目標不存在" }
+			return _recruit_anon_internal(state, pt, tgt3, target_id)
+
 		"take_loot":
 			var res: Dictionary = state.last_encounter_result
 			if res.is_empty() or res.get("winner_id", -1) != pt_id:
@@ -406,6 +435,27 @@ func execute_action_with_target(state: WorldState, action: String, target: Dicti
 			return _recruit_named_internal(state, pt, from_team_id, person_id)
 	return { "ok": false, "msg": "不支援 member 目標的行動: %s" % action }
 
-func _recruit_named_internal(_state: WorldState, _pt: TeamData,
-		_from_team_id: int, _person_id: int) -> Dictionary:
-	return { "ok": false, "msg": "recruit_named 尚未實裝" }
+func _recruit_named_internal(state: WorldState, pt: TeamData,
+		from_team_id: int, person_id: int) -> Dictionary:
+	var tgt4: TeamData    = state.teams.get(from_team_id)
+	var p: PersonData     = state.persons.get(person_id)
+	if tgt4 == null or p == null or p.team_id != from_team_id:
+		return { "ok": false, "msg": "成員不存在或已離隊" }
+	var coin: float = float(pt.resources.get("coin", 0))
+	if coin < RECRUIT_COST_NAMED:
+		return { "ok": false, "msg": "金幣不足（named 需%d）" % int(RECRUIT_COST_NAMED) }
+	# 轉移
+	var pt_id: int = _get_player_team_id(state)
+	pt.resources["coin"] = coin - RECRUIT_COST_NAMED
+	tgt4.named_members.erase(person_id)
+	tgt4.population = maxi(tgt4.population - 1, 1)
+	p.team_id = pt_id
+	p.loyalty  = 0.5
+	pt.named_members.append(person_id)
+	pt.population += 1
+	state.player_pending_targets.erase(from_team_id)
+	print("[Recruit] Named P%d (%s) Team%d→%d" % [
+		person_id, p.person_name, from_team_id, pt_id])
+	return { "ok": true, "msg": "招募 %s 成功（花費%d coin）" % [
+		p.person_name, int(RECRUIT_COST_NAMED)],
+		"payload": {"refresh_required": true} }
