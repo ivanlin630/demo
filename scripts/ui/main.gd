@@ -70,6 +70,7 @@ func _ready() -> void:
 	_sidebar.open_members.connect(func(tid): _popups.show_members(tid))
 	_sidebar.open_inventory.connect(func(): _popups.show_inventory())
 	_sidebar.open_history.connect(func(tid): _popups.show_history(tid))
+	_sidebar.open_interaction.connect(_on_open_interaction)
 	_sidebar.set_move_target.connect(_on_set_move_target)
 	_bottom.setup(_bridge)
 	_popups.setup(_bridge)
@@ -92,6 +93,55 @@ func _on_set_move_target(pos: Vector2i) -> void:
 	else:
 		print("[Main] move_target failed: %s" % result.get("message", ""))
 	_debug.refresh()
+
+func _on_open_interaction() -> void:
+	_bridge.refresh_interaction_targets()
+	var snap: Dictionary = _bridge.query_player().get("data", {}).get("snapshot", {})
+	var pending: Array = snap.get("pending_targets", [])
+	var forced: Dictionary = snap.get("forced_interaction", {})
+
+	# Forced interaction takes priority
+	if not forced.get("responses", []).is_empty():
+		_popups.show_forced_event(forced,
+			func(cmd_args: Dictionary) -> void:
+				var r = _bridge.command_player("respond_to_forced", cmd_args)
+				_bottom.add_message("[強制] %s" % r.get("message", ""))
+				_sidebar.refresh_player(); _debug.refresh())
+		return
+
+	if pending.is_empty():
+		_bottom.add_message("[互動] 附近無可互動目標")
+		return
+
+	_popups.show_interaction(pending,
+		func(tid: int) -> void:
+			var actions_result := _bridge.query_player_actions({
+				"team_id": tid, "member_id": -1, "tile_q": -1, "tile_r": -1
+			})
+			var acts: Array = actions_result.get("data", {}).get("actions", [])
+			_popups.show_action_menu(tid, acts, _on_interact_execute))
+
+func _on_interact_execute(cmd_name: String, cmd_args: Dictionary) -> void:
+	var result: Dictionary = _bridge.command_player(cmd_name, cmd_args)
+	_sidebar.refresh_player(); _debug.refresh()
+	var action_id: String = cmd_args.get("action_id", "")
+
+	if action_id == "attack" and result.get("ok"):
+		_map.visible = false; _encounter.show_encounter(); return
+
+	if action_id == "trade" and result.get("ok") and result.get("payload", {}).get("requires_preview"):
+		var tid: int = result.get("payload", {}).get("preview_target_id", -1)
+		var pr := _bridge.query_player({"focus_team_id": tid})
+		# trade preview handled by trade plan
+		return
+
+	if action_id == "recruit" and result.get("ok"):
+		var payload: Dictionary = result.get("payload", {})
+		if payload.get("has_willing_named", false):
+			# recruit panel handled by recruit plan
+			return
+
+	_bottom.add_message("[互動] %s" % result.get("message", "完成"))
 
 func _on_tick_advanced(_events: Array) -> void:
 	var state: WorldState = _bridge.get_state()
