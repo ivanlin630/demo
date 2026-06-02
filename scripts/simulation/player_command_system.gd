@@ -80,6 +80,24 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			# STUB — 招募邏輯尚未實裝（說服/付費/目標成員選擇）
 			state.player_pending_targets.erase(target_id)
 			return { "ok": false, "msg": "招募功能尚未實裝" }
+		"take_loot":
+			var res: Dictionary = state.last_encounter_result
+			if res.is_empty() or res.get("winner_id", -1) != pt_id:
+				return { "ok": false, "msg": "無可收取戰利品" }
+			var loot: Dictionary = res.get("loot_pool", {})
+			var loser_team: TeamData = state.teams.get(res.get("loser_id", -1))
+			for rk in loot:
+				var amount: float = float(loot[rk])
+				if loser_team != null:
+					loser_team.resources[rk] = maxf(float(loser_team.resources.get(rk, 0)) - amount, 0)
+				pt.resources[rk] = float(pt.resources.get(rk, 0)) + amount
+			state.last_encounter_result = {}
+			print("[PlayerCmd] 收取戰利品: %s" % str(loot))
+			return { "ok": true, "msg": "收取戰利品成功",
+					 "payload": {"refresh_required": true} }
+		"leave_loot":
+			state.last_encounter_result = {}
+			return { "ok": true, "msg": "放棄戰利品" }
 		"refresh_targets":
 			refresh_colocation_targets(state)
 			return { "ok": true, "msg": "互動目標已更新" }
