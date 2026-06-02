@@ -41,9 +41,14 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 		return { "ok": false, "msg": "找不到玩家 team" }
 	match action:
 		"trade":
-			var result := _interaction.resolve_trade_direct(state, pt_id, target_id)
-			state.player_pending_targets.erase(target_id)
-			return result
+			var tgt: TeamData = state.teams.get(target_id)
+			if tgt == null:
+				state.player_pending_targets.erase(target_id)
+				return { "ok": false, "msg": "目標不存在" }
+			# Store pending trade target; UI will query preview then confirm
+			state.player_state["pending_trade_target"] = target_id
+			return { "ok": true, "msg": "等待確認",
+					 "requires_preview": true, "preview_target_id": target_id }
 		"propose_alliance":
 			var tgt: TeamData = state.teams.get(target_id)
 			if tgt == null:
@@ -108,6 +113,22 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 		"refresh_targets":
 			refresh_colocation_targets(state)
 			return { "ok": true, "msg": "互動目標已更新" }
+		"confirm_trade":
+			var tid2: int = int(state.player_state.get("pending_trade_target", -1))
+			if tid2 < 0 or not state.teams.has(tid2):
+				return { "ok": false, "msg": "無待確認貿易" }
+			var result2 := _interaction.resolve_trade_direct(state, pt_id, tid2)
+			state.player_pending_targets.erase(tid2)
+			state.player_state.erase("pending_trade_target")
+			return result2
+
+		"cancel_trade":
+			var tid3: int = int(state.player_state.get("pending_trade_target", -1))
+			if tid3 >= 0:
+				state.player_pending_targets.erase(tid3)
+			state.player_state.erase("pending_trade_target")
+			return { "ok": true, "msg": "取消貿易" }
+
 		"ignore":
 			state.player_pending_targets.erase(target_id)
 			return { "ok": true, "msg": "忽略" }
