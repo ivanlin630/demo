@@ -993,18 +993,37 @@ func resolve_trade_direct(state: WorldState, initiator_id: int, target_id: int) 
 
 # 供 PlayerCommandSystem 呼叫：不需要 aggressor 有 TASK_LOOT
 # 直接執行勒索資源轉移（food/material/goods/coin × TRIBUTE_RATE）
-# 返回 { "ok": bool, "msg": String }
+# 返回 { "ok": bool, "accepted": bool, "msg": String }
 func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: int) -> Dictionary:
-	var tgt: TeamData = state.teams.get(target_id)
-	if tgt == null:
-		return { "ok": false, "msg": "目標不存在" }
+	var from_t: TeamData = state.teams.get(aggressor_id)
+	var to_t:   TeamData = state.teams.get(target_id)
+	if from_t == null or to_t == null:
+		return { "ok": false, "accepted": false, "msg": "隊伍不存在" }
+
+	# NPC refuse logic — only when player is aggressor
+	var player_p: PersonData = state.persons.get(state.player_id)
+	var player_team_id: int  = player_p.team_id if player_p != null else -1
+	if aggressor_id == player_team_id:
+		var leader: PersonData = state.persons.get(to_t.leader_id) if to_t.leader_id != -1 else null
+		var caution: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
+		var pride:   float = float(leader.values.get("義氣", 0.5)) if leader else 0.5
+		var fear:    float = leader.fear if leader else 0.3
+		var power_r: float = float(from_t.population) / maxf(float(to_t.population), 1.0)
+		var score:   float = (power_r - 1.0) * 0.4 + caution * 0.2 \
+		                   - pride * 0.3 + fear * 0.2 + from_t.readiness * 0.2
+		var accepted: bool = score > 0.5   # TEST VALUE
+		if not accepted:
+			print("[Extort] Team%d 拒絕勒索 (score=%.2f)" % [target_id, score])
+			return { "ok": true, "accepted": false, "msg": "對方拒絕勒索" }
+
+	# 資源轉移
 	var gained: Dictionary = _resolve_extortion(state, aggressor_id, target_id)
 	if gained.is_empty():
-		return { "ok": true, "msg": "勒索完成（對方資源耗盡，無所得）" }
+		return { "ok": true, "accepted": true, "msg": "勒索完成（對方資源耗盡，無所得）" }
 	var parts: Array = []
 	for res in gained:
 		var amount: int = int(gained[res])
 		if amount > 0:
 			parts.append("%s+%d" % [res, amount])
 	var detail: String = ", ".join(parts) if not parts.is_empty() else "少量資源"
-	return { "ok": true, "msg": "勒索完成（%s）" % detail }
+	return { "ok": true, "accepted": true, "msg": "勒索完成（%s）" % detail }
