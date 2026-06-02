@@ -157,6 +157,82 @@ func show_inventory() -> void:
 	_current_popup = popup
 	add_child(popup)
 
+# pending_targets: Array of {target_type, target_id, display_name, is_valid}
+# on_select: Callable(team_id: int)
+func show_interaction(pending_targets: Array, on_select: Callable) -> void:
+	_close_current()
+	var popup := _make_base_popup("互動目標")
+	var vbox: VBoxContainer = popup.get_node("VBox/Scroll/Content")
+
+	for tgt in pending_targets:
+		if not tgt.get("is_valid", false): continue
+		var tid: int = tgt.get("target_id", -1)
+		var btn := Button.new()
+		btn.text = tgt.get("display_name", "Team%d" % tid)
+		var cap_tid: int = tid
+		btn.pressed.connect(func():
+			_close_current()
+			on_select.call(cap_tid))
+		vbox.add_child(btn)
+
+	if vbox.get_child_count() == 0:
+		var lbl := Label.new(); lbl.text = "（無可用目標）"; vbox.add_child(lbl)
+
+	_current_popup = popup; add_child(popup)
+
+# actions: Array of available_action DTOs from player_query_api
+# on_execute: Callable(cmd_name: String, cmd_args: Dictionary)
+func show_action_menu(target_team_id: int, actions: Array, on_execute: Callable) -> void:
+	_close_current()
+	var popup := _make_base_popup("對 Team%d 的行動" % target_team_id)
+	var vbox: VBoxContainer = popup.get_node("VBox/Scroll/Content")
+
+	for act in actions:
+		# Skip forced_* actions here (handled by show_forced_event)
+		if str(act.get("action_id", "")).begins_with("forced_"): continue
+		var btn := Button.new()
+		btn.text = act.get("label", act.get("action_id", "?"))
+		btn.disabled = not act.get("enabled", true)
+		var tooltip: String = act.get("disabled_reason", "")
+		if tooltip != "": btn.tooltip_text = tooltip
+		var cmd_name: String = act.get("command_name", "")
+		var cmd_args: Dictionary = act.get("command_args", {})
+		btn.pressed.connect(func():
+			_close_current()
+			on_execute.call(cmd_name, cmd_args))
+		vbox.add_child(btn)
+
+	var cancel_btn := Button.new(); cancel_btn.text = "取消"
+	cancel_btn.pressed.connect(_close_current)
+	vbox.add_child(cancel_btn)
+
+	_current_popup = popup; add_child(popup)
+
+# fi_dto: forced_interaction dict from snapshot
+# on_respond: Callable(cmd_args: Dictionary)
+func show_forced_event(fi_dto: Dictionary, on_respond: Callable) -> void:
+	_close_current()
+	var popup := _make_base_popup("強制事件")
+	var vbox: VBoxContainer = popup.get_node("VBox/Scroll/Content")
+
+	var msg_lbl := Label.new()
+	msg_lbl.text = fi_dto.get("message", "")
+	msg_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD
+	vbox.add_child(msg_lbl)
+
+	vbox.add_child(HSeparator.new())
+
+	for resp in fi_dto.get("responses", []):
+		var btn := Button.new()
+		btn.text = resp.get("label", resp.get("response_id", "?"))
+		var cap_args: Dictionary = resp.get("command_args", {})
+		btn.pressed.connect(func():
+			_close_current()
+			on_respond.call(cap_args))
+		vbox.add_child(btn)
+
+	_current_popup = popup; add_child(popup)
+
 func _add_item_action_buttons(row: Node, grade: String, team: TeamData) -> void:
 	if grade.begins_with("weapon_"):
 		var b1 := Button.new(); b1.text = "裝→右手"; row.add_child(b1)
