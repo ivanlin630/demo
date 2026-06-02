@@ -14,6 +14,7 @@ signal open_members(team_id: int)
 signal open_inventory()
 signal open_history(team_id: int)
 signal set_move_target(pos: Vector2i)
+signal open_interaction()
 
 func setup(bridge: SimBridge) -> void:
 	_bridge = bridge
@@ -48,7 +49,7 @@ func _build_ui() -> void:
 	add_child(row1)
 	_make_btn("移動", row1).pressed.connect(_on_move)
 	_make_btn("命令", row1)
-	_make_btn("互動", row1)
+	_make_btn("互動", row1).pressed.connect(_on_interact)
 
 	var row2 := HBoxContainer.new()
 	add_child(row2)
@@ -137,3 +138,6 @@ func _on_items() -> void:
 func _on_history() -> void:
 	var ptid: int = _bridge.get_player_team_id()
 	if ptid >= 0: open_history.emit(ptid)
+
+func _on_interact() -> void:
+	open_interaction.emit()
