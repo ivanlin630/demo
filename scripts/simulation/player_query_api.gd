@@ -222,6 +222,41 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			}
 		))
 
+	# take_loot / leave_loot when player won last encounter
+	if not state.last_encounter_result.is_empty():
+		var ler: Dictionary = state.last_encounter_result
+		if ler.get("winner_id", -1) == ptid:
+			var loot_preview: Dictionary = ler.get("loot_pool", {})
+			actions.append(PlayerApiMapper.map_available_action(
+				"take_loot", "收取戰利品", true, "",
+				{
+					"allowed_kinds": PackedStringArray(["none"]),
+					"requires_visible_target": false,
+					"requires_forced_interaction": false,
+					"allows_self_target": false
+				},
+				"execute_action",
+				{
+					"action_id": "take_loot",
+					"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1},
+					"loot_preview": loot_preview
+				}
+			))
+			actions.append(PlayerApiMapper.map_available_action(
+				"leave_loot", "放棄戰利品", true, "",
+				{
+					"allowed_kinds": PackedStringArray(["none"]),
+					"requires_visible_target": false,
+					"requires_forced_interaction": false,
+					"allows_self_target": false
+				},
+				"execute_action",
+				{
+					"action_id": "leave_loot",
+					"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
+				}
+			))
+
 	return actions
 
 func _action_label(action_id: String) -> String:
