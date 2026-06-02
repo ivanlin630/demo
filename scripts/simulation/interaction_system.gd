@@ -991,6 +991,31 @@ func resolve_trade_direct(state: WorldState, initiator_id: int, target_id: int) 
 		return { "ok": true, "msg": "貿易成功" }
 	return { "ok": false, "msg": "無可交易資源" }
 
+func preview_trade(state: WorldState, from_id: int, to_id: int) -> Dictionary:
+	var from_t: TeamData = state.teams.get(from_id)
+	var to_t:   TeamData = state.teams.get(to_id)
+	if from_t == null or to_t == null:
+		return { "feasible": false, "player_gives": {}, "player_gets": {} }
+
+	var gives: Dictionary = {}
+	var gets:  Dictionary = {}
+
+	var from_food: float  = float(from_t.resources.get("food", 0))
+	var to_food: float    = float(to_t.resources.get("food", 0))
+	var from_coin: float  = float(from_t.resources.get("coin", 0))
+	var to_coin: float    = float(to_t.resources.get("coin", 0))
+
+	# 玩家付出：若對方 food 更少，付出部分食物
+	if to_food < from_food * 0.5 and from_food > 10:
+		gives["food"] = minf(from_food * 0.2, from_food)
+
+	# 玩家獲得：若對方 coin 更多，取一部分
+	if to_coin > from_coin * 1.5 and to_coin > 10:
+		gets["coin"] = minf(to_coin * 0.2, to_coin)
+
+	var feasible: bool = not (gives.is_empty() and gets.is_empty())
+	return { "feasible": feasible, "player_gives": gives, "player_gets": gets }
+
 # 供 PlayerCommandSystem 呼叫：不需要 aggressor 有 TASK_LOOT
 # 直接執行勒索資源轉移（food/material/goods/coin × TRIBUTE_RATE）
 # 返回 { "ok": bool, "msg": String }
