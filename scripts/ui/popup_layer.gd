@@ -233,6 +233,31 @@ func show_forced_event(fi_dto: Dictionary, on_respond: Callable) -> void:
 
 	_current_popup = popup; add_child(popup)
 
+func show_loot_panel(loot_preview: Dictionary, take_fn: Callable, leave_fn: Callable) -> void:
+	_close_current()
+	var popup := _make_base_popup("戰利品")
+	var vbox: VBoxContainer = popup.get_node("VBox/Scroll/Content")
+
+	if loot_preview.is_empty():
+		var lbl := Label.new(); lbl.text = "（無戰利品）"; vbox.add_child(lbl)
+	else:
+		for rk in loot_preview:
+			var lbl := Label.new()
+			lbl.text = "%s: %.0f" % [rk, float(loot_preview[rk])]
+			vbox.add_child(lbl)
+
+	vbox.add_child(HSeparator.new())
+
+	var take_btn := Button.new(); take_btn.text = "✓ 收取戰利品"
+	take_btn.pressed.connect(func(): _close_current(); take_fn.call())
+	vbox.add_child(take_btn)
+
+	var leave_btn := Button.new(); leave_btn.text = "✗ 放棄"
+	leave_btn.pressed.connect(func(): _close_current(); leave_fn.call())
+	vbox.add_child(leave_btn)
+
+	_current_popup = popup; add_child(popup)
+
 func _add_item_action_buttons(row: Node, grade: String, team: TeamData) -> void:
 	if grade.begins_with("weapon_"):
 		var b1 := Button.new(); b1.text = "裝→右手"; row.add_child(b1)
