@@ -123,6 +123,9 @@ func query_player_location(tile_q: int, tile_r: int) -> Dictionary:
 func query_player_actions(request: Dictionary) -> Dictionary:
 	return _query_api.get_available_actions(_state, request)
 
+func query_trade_preview(target_team_id: int) -> Dictionary:
+	return _query_api.get_trade_preview(_state, target_team_id)
+
 func command_player(name: String, args: Dictionary) -> Dictionary:
 	return _cmd_api.dispatch(_state, name, args)
 
