@@ -80,6 +80,9 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			# STUB — 招募邏輯尚未實裝（說服/付費/目標成員選擇）
 			state.player_pending_targets.erase(target_id)
 			return { "ok": false, "msg": "招募功能尚未實裝" }
+		"refresh_targets":
+			refresh_colocation_targets(state)
+			return { "ok": true, "msg": "互動目標已更新" }
 		"ignore":
 			state.player_pending_targets.erase(target_id)
 			return { "ok": true, "msg": "忽略" }
