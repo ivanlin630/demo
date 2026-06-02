@@ -204,15 +204,40 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			"cancel_move", {}
 		))
 
+	# Layer 5: player-team global actions (no target required)
+	var pt_data: TeamData = state.teams.get(ptid) if ptid != -1 else null
+	if pt_data != null and pt_data.faction_id == -1:
+		actions.append(PlayerApiMapper.map_available_action(
+			"establish_faction", "建立勢力", true, "",
+			{
+				"allowed_kinds": PackedStringArray(["none"]),
+				"requires_visible_target": false,
+				"requires_forced_interaction": false,
+				"allows_self_target": false
+			},
+			"execute_action",
+			{
+				"action_id": "establish_faction",
+				"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
+			}
+		))
+
 	return actions
 
 func _action_label(action_id: String) -> String:
 	match action_id:
-		"ignore":          return "忽略"
-		"attack":          return "攻擊"
-		"trade":           return "貿易"
+		"ignore":           return "忽略"
+		"attack":           return "攻擊"
+		"trade":            return "貿易"
 		"propose_alliance": return "提議同盟"
-		"demand_tribute":  return "要求納貢"
-		"extort":          return "勒索"
-		"recruit":         return "招募"
+		"demand_tribute":   return "要求納貢"
+		"extort":           return "勒索"
+		"recruit":          return "招募"
+		"establish_faction": return "建立勢力"
+		"take_loot":        return "收割戰利品"
+		"leave_loot":       return "放棄戰利品"
+		"recruit_anon":     return "招募匿名"
+		"recruit_named":    return "招募成員"
+		"confirm_trade":    return "確認貿易"
+		"cancel_trade":     return "取消貿易"
 	return action_id
