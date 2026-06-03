@@ -22,7 +22,9 @@ PlayerApiMapper / PlayerQueryApi / SimBridge 補全，暴露 batch1-3 所有新�
   "tribute_rate": float,
   "member_orders": [               # faction 旗下所有 team（含玩家隊）
     { "team_id": int, "name": String, "tile_pos": Vector2i,
-      "commanded_task": String }   # "" = 無指令
+      "commanded_task": String,    # "" = 無指令
+      "pending_task": String,      # 傳達中的任務（信使尚未抵達）"" = 無
+      "herald_id": int }           # 信使 team_id，-1 = 無
   ],
   "actions": [String]              # 已過濾：leave_faction / betray_faction /
                                    # disband_faction（需 is_leader）/

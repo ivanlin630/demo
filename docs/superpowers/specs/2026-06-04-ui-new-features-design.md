@@ -51,7 +51,7 @@ AI 目標: {faction_goal}   玩家目標: {player_goal_override 或 "（跟隨 A
 徵收率: {tribute_rate*100}%
 
 ── 成員指令 ──
-[1] Team{id} @({q},{r})  指令: {commanded_task 或 "無"}
+[1] Team{id} @({q},{r})  指令: {commanded_task 或 "無" 或 "傳達中（{pending_task}）"}
 [2] Team{id} ...
 
 ── 行動 ──
@@ -65,6 +65,10 @@ AI 目標: {faction_goal}   玩家目標: {player_goal_override 或 "（跟隨 A
 - `[B]` 調整徵收率 → input_mode，輸入數字（0-100）→ `_bridge.set_player_input("tribute_rate_input", float/100)` → `set_tribute_rate`
 - `[C/D/E]` → 直接 `execute_action`
 - 成員列 `[1~9]` → input_mode 輸入任務字串 → `_bridge.set_player_input("order_member_id", team_id)` + `set_player_input("member_task", str)` → `order_faction_member`
+  - **信使機制**：`order_faction_member` 不直接設 `player_commanded_task`，改派一個 TASK_HERALD 信使（1人從玩家 team 分出），帶 `order_task = commanded_task` 前往 `order_target_id = member_team_id` 所在格
+  - 信使抵達同格時：interaction_system 偵測 TASK_HERALD + order_target_id → 設 `target.player_commanded_task = herald.order_task`，信使 team 解散回歸玩家主隊人口
+  - UI 顯示：成員指令欄中信使出發後顯示 `指令: 傳達中（{commanded_task}）`，實際套用後顯示 `指令: {commanded_task}`
+  - 需新增 `WorldState` 追蹤欄位：`player_pending_orders: Dictionary = {}` → `{ member_team_id: { "task": str, "herald_id": int } }`，供 UI 查詢傳達狀態
 
 ## [O] 前哨站面板
 
