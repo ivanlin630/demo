@@ -447,7 +447,10 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	_skill_sys.on_combat_end(state, winner)
 	_skill_sys.on_combat_end(state, loser)
 	_apply_pursuit(state, winner_id, loser_id)
-	_try_subjugate(state, winner_id, loser_id)
+	var _pp_end: PersonData = state.persons.get(state.player_id)
+	var _ptid_end: int = _pp_end.team_id if _pp_end else -1
+	if _ptid_end == -1 or winner_id != _ptid_end:
+		_try_subjugate(state, winner_id, loser_id)
 
 func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> void:
 	var retreater: TeamData = state.teams[retreater_id]
@@ -463,7 +466,10 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	_skill_sys.on_combat_end(state, retreater)
 	_skill_sys.on_combat_end(state, pursuer)
 	_apply_pursuit(state, pursuer_id, retreater_id)
-	_try_subjugate(state, pursuer_id, retreater_id)
+	var _pp_fr: PersonData = state.persons.get(state.player_id)
+	var _ptid_fr: int = _pp_fr.team_id if _pp_fr else -1
+	if _ptid_fr == -1 or pursuer_id != _ptid_fr:
+		_try_subjugate(state, pursuer_id, retreater_id)
 
 func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 	if not state.teams.has(winner_id) or not state.teams.has(loser_id):
@@ -693,6 +699,9 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	state.persons.erase(p.id)
 
 # ──────── 勢力互動 ────────
+
+func subjugate_team(state: WorldState, winner_id: int, loser_id: int) -> void:
+	_try_subjugate(state, winner_id, loser_id)
 
 func _try_subjugate(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var winner: TeamData = state.teams[winner_id]

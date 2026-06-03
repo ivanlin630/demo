@@ -861,10 +861,15 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			var v: float = float(loser_team_loot.resources.get(rk, 0))
 			if v > 0:
 				loot[rk] = v * 0.3   # TEST VALUE — 30%
+	# G-02：玩家勝利 → 標記 can_subjugate，讓玩家自選；NPC 勝利維持自動
+	var _player_p2: PersonData = state.persons.get(state.player_id)
+	var _player_tid2: int = _player_p2.team_id if _player_p2 else -1
+	var is_player_winner: bool = (_player_tid2 != -1 and winner_id == _player_tid2)
 	state.last_encounter_result = {
 		"winner_id": winner_id,
 		"loser_id":  loser_id,
-		"loot_pool": loot
+		"loot_pool": loot,
+		"can_subjugate": is_player_winner
 	}
 	print("[Encounter] 戰鬥結束 winner=Team%d loser=Team%d loot=%s" % [winner_id, loser_id, str(loot)])
 

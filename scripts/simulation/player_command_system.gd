@@ -190,6 +190,18 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			state.player_state.erase("pending_trade_target")
 			return { "ok": true, "msg": "取消貿易" }
 
+		"subjugate_enemy":
+			var result: Dictionary = state.last_encounter_result
+			if result.is_empty() or not result.get("can_subjugate", false):
+				return { "ok": false, "msg": "無可收編的敗者" }
+			var loser_id: int = int(result.get("loser_id", -1))
+			var loser: TeamData = state.teams.get(loser_id)
+			if loser == null:
+				return { "ok": false, "msg": "敗者已消滅" }
+			_interaction.subjugate_team(state, pt_id, loser_id)
+			state.last_encounter_result["can_subjugate"] = false
+			return { "ok": true, "msg": "收編 Team%d" % loser_id }
+
 		"dispatch_subteam":
 			var sub_leader_id: int = int(state.player_state.get("sub_leader_id", -1))
 			var pop_count: int     = int(state.player_state.get("sub_pop_count", 1))
