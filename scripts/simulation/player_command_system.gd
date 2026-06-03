@@ -190,6 +190,70 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			state.player_state.erase("pending_trade_target")
 			return { "ok": true, "msg": "取消貿易" }
 
+		"leave_faction":
+			if pt.faction_id == -1:
+				return { "ok": false, "msg": "玩家不在勢力中" }
+			var fid3: int = pt.faction_id
+			var f3: FactionData = state.factions.get(fid3)
+			if f3 == null:
+				return { "ok": false, "msg": "勢力不存在" }
+			if f3.leader_team_id == pt_id:
+				return { "ok": false, "msg": "請使用 disband_faction（leader 不能普通離開）" }
+			pt.faction_id = -1
+			f3.member_team_ids.erase(pt_id)
+			var leader_team3: TeamData = state.teams.get(f3.leader_team_id)
+			if leader_team3 != null:
+				var leader_p3: PersonData = state.persons.get(leader_team3.leader_id)
+				if leader_p3:
+					leader_p3.loyalty = maxf(leader_p3.loyalty - 0.15, 0.0)
+			print("[PlayerCmd] 玩家離開勢力%d" % fid3)
+			return { "ok": true, "msg": "已離開勢力" }
+
+		"betray_faction":
+			if pt.faction_id == -1:
+				return { "ok": false, "msg": "玩家不在勢力中" }
+			var fid4: int = pt.faction_id
+			var f4: FactionData = state.factions.get(fid4)
+			if f4 == null:
+				return { "ok": false, "msg": "勢力不存在" }
+			for tid4 in f4.member_team_ids:
+				if tid4 == pt_id: continue
+				if not state.player_hostile_teams.has(tid4):
+					state.player_hostile_teams.append(tid4)
+			pt.faction_id = -1
+			f4.member_team_ids.erase(pt_id)
+			state.player_state["betrayal_count"] = int(state.player_state.get("betrayal_count", 0)) + 1
+			var leader_team4: TeamData = state.teams.get(f4.leader_team_id)
+			if leader_team4 != null:
+				var leader_p4: PersonData = state.persons.get(leader_team4.leader_id)
+				if leader_p4:
+					leader_p4.memory.append({
+						"type": "betrayal", "subject_id": pt.leader_id,
+						"tick": state.world.current_tick, "intensity": 0.9
+					})
+			print("[PlayerCmd] 玩家背叛勢力%d（betrayal_count=%d）" % [
+				fid4, state.player_state["betrayal_count"]])
+			return { "ok": true, "msg": "背叛勢力，原成員已敵對" }
+
+		"disband_faction":
+			if pt.faction_id == -1:
+				return { "ok": false, "msg": "玩家不在勢力中" }
+			var fid5: int = pt.faction_id
+			var f5: FactionData = state.factions.get(fid5)
+			if f5 == null:
+				return { "ok": false, "msg": "勢力不存在" }
+			if f5.leader_team_id != pt_id:
+				return { "ok": false, "msg": "只有 leader 可解散勢力" }
+			for tid5 in f5.member_team_ids:
+				if tid5 == pt_id: continue
+				var mt5: TeamData = state.teams.get(tid5)
+				if mt5 == null: continue
+				var lp5: PersonData = state.persons.get(mt5.leader_id)
+				if lp5:
+					lp5.loyalty = maxf(lp5.loyalty - 0.3, 0.0)
+			state.disband_faction(fid5)
+			return { "ok": true, "msg": "勢力已解散" }
+
 		"subjugate_enemy":
 			var result: Dictionary = state.last_encounter_result
 			if result.is_empty() or not result.get("can_subjugate", false):
