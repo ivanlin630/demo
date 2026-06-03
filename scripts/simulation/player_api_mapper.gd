@@ -452,7 +452,7 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 			"team_id": mid,
 			"name": name_str,
 			"tile_pos": mt.tile_pos,
-			"commanded_task": mt.player_commanded_task,
+			"commanded_task": mt.order_task,
 			"pending_task": pending.get("task", ""),
 			"herald_id": pending.get("herald_id", -1),
 		})
@@ -467,7 +467,7 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 		"faction_id": pt.faction_id,
 		"is_leader": is_leader,
 		"faction_goal": f.strategic_goals[0] if f.strategic_goals.size() > 0 else "",
-		"player_goal_override": f.player_goal_override,
+		"player_goal_override": "",  # field not yet on FactionData
 		"tribute_rate": f.tribute_rate,
 		"member_orders": member_orders,
 		"actions": actions,
