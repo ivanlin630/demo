@@ -303,6 +303,27 @@ G-05 加 5 個、G-06 加 3 個 → 合計約 23 個 action_id。
 屆時可一次重構為 registry 模式，比現在做更有資訊（知道完整列表）。  
 重構範圍：`player_command_system.gd` 的 `execute_action` switch → `_action_registry: Dictionary`（`action_id: Callable`）。
 
+#### T-02. NPC AI 全知（`team_intel` 未接入）
+- **現況**：`vision_system` 每 tick 寫入 `team_intel[obs][tgt]`（含噪音 `population_est`、粗略 `resource_scale`），但所有 AI 直讀 `WorldState` 精確值
+- **影響**：NPC 外交/叛盟/攻擊決策用精確人口/資源，不受視野限制
+- **討論結論**：✅ 2026-06-03 — 選方案 B
+
+**方案 B 結論：**
+
+AI 對「已發現」team 統一改讀 `team_intel`；無需單獨判斷同格，因為 dist=0 時 noise=0 → `population_est` 本身即精確值。
+
+**修改目標（三處）：**
+
+| 函式 | 現況 | 改成 |
+|---|---|---|
+| `diplomatic_ai._calc_diplomacy_score` | `other_team.population`（精確） | `team_intel[self][other]["population_est"]`，fallback = `other_team.population` |
+| `diplomatic_ai.consider_betrayal` | `ally_team.population`（精確） | 同盟讀 `faction_snapshot`（已有）；非同盟讀 `team_intel` |
+| `faction_ai._evaluate_attack` 等 | 直讀各 team 值 | 同上規則 |
+
+**Fallback 規則**：無 `team_intel` 記錄（未見過）→ 不應能鎖定（`team_discovered` 已過濾，理論上不會發生）。
+
+**遊戲效果**：潛行高 team 被低估兵力 → 對方 AI 不主動攻擊/外交，形成策略迷霧。
+
 ---
 
 ## 討論紀錄
@@ -315,3 +336,4 @@ G-05 加 5 個、G-06 加 3 個 → 合計約 23 個 action_id。
 | G-06 子隊管理 | 混合記名/匿名；底層已齊只需 API 接線；召回=信使(TASK_HERALD)帶快照座標；進視野自動追蹤；_deliver_order 補 move_target 設定 | 2026-06-03 |
 | G-01 NPC外交繞過 | diplomatic_ai try_proactive_diplomacy 加 player 攔截 → player_forced_event；零額外介面 | 2026-06-03 |
 | T-01 架構可擴充 | G-05+G-06 加完後達~23 action_id 再重構 registry；現在不動 | 2026-06-03 |
+| T-02 NPC AI 全知 | 方案B：AI 改讀 team_intel[population_est]；同格 noise=0 自動精確；同盟讀 faction_snapshot；fallback=不鎖定 | 2026-06-03 |
