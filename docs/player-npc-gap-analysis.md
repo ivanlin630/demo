@@ -308,21 +308,46 @@ G-05 加 5 個、G-06 加 3 個 → 合計約 23 個 action_id。
 - **影響**：NPC 外交/叛盟/攻擊決策用精確人口/資源，不受視野限制
 - **討論結論**：✅ 2026-06-03 — 選方案 B
 
-**方案 B 結論：**
+**方案 B 結論（外部目標）：**
 
-AI 對「已發現」team 統一改讀 `team_intel`；無需單獨判斷同格，因為 dist=0 時 noise=0 → `population_est` 本身即精確值。
+AI 對「已發現的非勢力」team 統一改讀 `team_intel`；dist=0 時 noise=0 → `population_est` 本身即精確，無需特判。
 
-**修改目標（三處）：**
+**外部目標修改（三處）：**
 
 | 函式 | 現況 | 改成 |
 |---|---|---|
-| `diplomatic_ai._calc_diplomacy_score` | `other_team.population`（精確） | `team_intel[self][other]["population_est"]`，fallback = `other_team.population` |
-| `diplomatic_ai.consider_betrayal` | `ally_team.population`（精確） | 同盟讀 `faction_snapshot`（已有）；非同盟讀 `team_intel` |
-| `faction_ai._evaluate_attack` 等 | 直讀各 team 值 | 同上規則 |
+| `diplomatic_ai._calc_diplomacy_score` | `other_team.population`（精確） | `team_intel[self_id][other_id]["population_est"]`，fallback = `self_team.population`（謹慎估算） |
+| `diplomatic_ai.consider_betrayal` | `ally_team.population`（精確） | 讀 `f.known_member_states[ally_id]["population"]`（快照） |
+| `strategic_ai._evaluate_alliance_need` | `t.population`（精確） | `team_intel[mid][tid]["population_est"]` |
+| `strategic_ai._assign_encirclement` | `target.tile_pos`（即時） | `team_intel[leader_id][target_id]["tile_pos"]` |
 
-**Fallback 規則**：無 `team_intel` 記錄（未見過）→ 不應能鎖定（`team_discovered` 已過濾，理論上不會發生）。
+**Fallback**：無 `team_intel` → `team_discovered` 已過濾，理論不發生；防禦性 fallback = 視對方與自己等強。
 
-**遊戲效果**：潛行高 team 被低估兵力 → 對方 AI 不主動攻擊/外交，形成策略迷霧。
+---
+
+**勢力內部延遲（A+B 方案）：**
+
+`strategic_ai` 讀成員狀態改從 `f.known_member_states[tid]` 讀（快照），而非直讀 WorldState。
+
+**快照更新觸發：**
+
+| 方案 | 觸發點 | 實作 |
+|---|---|---|
+| **A. 信使抵達** | `_deliver_order` 執行時 | 加一行：`state.snapshot_faction_member(herald.parent_team_id, tick)` |
+| **B. 同格同勢力接觸** | `sim_runner` 每 tick | 同格 team 中有同 `faction_id` 者 → `snapshot_faction_member` |
+
+**成員快照讀取替換（三處）：**
+
+| 函式 | 現況 | 改成 |
+|---|---|---|
+| `strategic_ai._find_weakest_member` | `t.population` | `f.known_member_states.get(tid, {}).get("population", 9999)` |
+| `strategic_ai._faction_total_pop` | `t.population` | 快照 population 加總 |
+| `strategic_ai._assign_encirclement` members | 直讀 member position | 快照 `tile_pos` |
+
+**遊戲效果：**
+- 遠方成員斷聯 → leader 無法知道最新狀態 → 可能派兵支援已滅的成員
+- 信使系統（G-06）有額外戰略價值：不只召回子隊，也傳遞情報
+- 「派信使回報戰況」成為玩家/NPC 的合理行動
 
 ---
 
@@ -336,4 +361,4 @@ AI 對「已發現」team 統一改讀 `team_intel`；無需單獨判斷同格�
 | G-06 子隊管理 | 混合記名/匿名；底層已齊只需 API 接線；召回=信使(TASK_HERALD)帶快照座標；進視野自動追蹤；_deliver_order 補 move_target 設定 | 2026-06-03 |
 | G-01 NPC外交繞過 | diplomatic_ai try_proactive_diplomacy 加 player 攔截 → player_forced_event；零額外介面 | 2026-06-03 |
 | T-01 架構可擴充 | G-05+G-06 加完後達~23 action_id 再重構 registry；現在不動 | 2026-06-03 |
-| T-02 NPC AI 全知 | 方案B：AI 改讀 team_intel[population_est]；同格 noise=0 自動精確；同盟讀 faction_snapshot；fallback=不鎖定 | 2026-06-03 |
+| T-02 NPC AI 全知 | 外部目標改讀 team_intel；勢力內部改讀 faction_snapshot（A+B更新：信使抵達+同格接觸） | 2026-06-03 |
