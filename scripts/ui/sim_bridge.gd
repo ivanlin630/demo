@@ -140,3 +140,6 @@ func query_faction_panel() -> Dictionary:
 
 func query_outpost_panel() -> Dictionary:
 	return PlayerQueryApi.new().query_outpost_panel(_state)
+
+func query_subteam_panel() -> Dictionary:
+	return PlayerQueryApi.new().query_subteam_panel(_state)

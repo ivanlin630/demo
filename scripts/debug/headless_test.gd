@@ -1804,4 +1804,10 @@ func _run_sim_test() -> void:
 		str(_op_result.get("ok")),
 		str(_op_result.get("data", {}).get("outpost_panel", {}).get("tile_pos"))])
 
+	# --- subteam_panel API ---
+	var _sp_result := PlayerQueryApi.new().query_subteam_panel(state)
+	print("[Test] query_subteam_panel ok=%s subteams=%d" % [
+		str(_sp_result.get("ok")),
+		_sp_result.get("data", {}).get("subteam_panel", {}).get("subteams", []).size()])
+
 	print("=== DONE ===")

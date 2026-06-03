@@ -516,3 +516,29 @@ static func map_outpost_panel(state: WorldState) -> Dictionary:
 		"ticks_left": tile.construction_ticks_left,
 		"actions": actions,
 	}
+
+# ── Subteam panel ──────────────────────────────────────────────────────────────
+
+static func map_subteam_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {"subteams": [], "actions_per_subteam": {}}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {"subteams": [], "actions_per_subteam": {}}
+	var ptid: int = p.team_id
+	var subteams: Array = []
+	var actions_per: Dictionary = {}
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id != ptid: continue
+		subteams.append({
+			"team_id": tid,
+			"tile_pos": t.tile_pos,
+			"current_task": t.current_task,
+			"order_task": t.order_task,
+			"population": t.population,
+			"player_commanded_task": t.order_task,
+		})
+		actions_per[str(tid)] = ["order_subteam", "recall_subteam"]
+	return {"subteams": subteams, "actions_per_subteam": actions_per}
