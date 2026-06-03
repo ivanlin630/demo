@@ -23,6 +23,6 @@ func _check_famine_warnings(state: WorldState) -> void:
 		if owner_team == null:
 			continue
 		SimMessageSystem.new().emit_message(state, "famine_warning",
-			"[Famine] 歉收警告：Tile(%d,%d) harvest=%.2f" % [
-				tile.tile_pos.x, tile.tile_pos.y, tile.harvest_factor],
-			owner_team)
+			TextBank.fmt("famine_warning", "default", {"origin": str(owner_team.team_id), "harvest": "%.2f" % tile.harvest_factor}),
+			owner_team,
+			{"origin": str(owner_team.team_id), "tile_pos": tile.tile_pos, "harvest_factor": tile.harvest_factor})

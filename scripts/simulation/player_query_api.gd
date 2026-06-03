@@ -329,6 +329,11 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 
 	return actions
 
+func get_and_clear_alerts(state: WorldState) -> Array:
+	var alerts: Array = state.player_alerts.duplicate()
+	state.player_alerts.clear()
+	return alerts
+
 func _action_label(action_id: String) -> String:
 	match action_id:
 		"ignore":           return "忽略"

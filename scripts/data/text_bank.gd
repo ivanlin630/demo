@@ -42,6 +42,7 @@ const TEMPLATES: Dictionary = {
 		"vague":         "Team{origin} 發出指令",
 	},
 	"famine_warning": {
+		"default":       "Team{origin} 轄地歉收（收成率 {harvest}）",
 		"honest":        "({x},{y})附近歉收，糧食緊張",
 		"vague":         "某地糧食不足",
 	},
