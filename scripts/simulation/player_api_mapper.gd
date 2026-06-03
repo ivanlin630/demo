@@ -415,3 +415,61 @@ static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_mem
 		"inventory_state":    map_inventory_state(state),
 		"snapshot_meta":      map_snapshot_meta(focus_valid, cursor_valid)
 	}
+
+	# ── Faction panel ──────────────────────────────────────────────────────────────
+
+	static func map_faction_panel(state: WorldState) -> Dictionary:
+		var pid: int = state.player_id
+		if pid == -1:
+			return {"in_faction": false, "faction_id": -1, "is_leader": false,
+				"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+				"member_orders": [], "actions": []}
+		var p: PersonData = state.persons.get(pid)
+		if p == null:
+			return {"in_faction": false, "faction_id": -1, "is_leader": false,
+				"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+				"member_orders": [], "actions": []}
+		var pt: TeamData = state.teams.get(p.team_id)
+		if pt == null or pt.faction_id == -1:
+			return {"in_faction": false, "faction_id": -1, "is_leader": false,
+				"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+				"member_orders": [], "actions": []}
+		var f = state.factions.get(pt.faction_id)
+		if f == null:
+			return {"in_faction": false, "faction_id": -1, "is_leader": false,
+				"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+				"member_orders": [], "actions": []}
+		var is_leader: bool = f.leader_team_id == pt.team_id
+		var pending_orders: Dictionary = state.get("player_pending_orders", {}) \
+			if state.has_method("get") else {}
+		var member_orders: Array = []
+		for mid in f.member_team_ids:
+			var mt: TeamData = state.teams.get(mid)
+			if mt == null: continue
+			var ml: PersonData = state.persons.get(mt.leader_id)
+			var name_str: String = ml.name if ml else "Team%d" % mid
+			var pending: Dictionary = pending_orders.get(mid, {})
+			member_orders.append({
+				"team_id": mid,
+				"name": name_str,
+				"tile_pos": mt.tile_pos,
+				"commanded_task": mt.player_commanded_task,
+				"pending_task": pending.get("task", ""),
+				"herald_id": pending.get("herald_id", -1),
+			})
+		var actions: Array = ["order_faction_member", "clear_member_order"]
+		if is_leader:
+			actions.append_array(["set_faction_goal", "set_tribute_rate",
+				"leave_faction", "betray_faction", "disband_faction"])
+		else:
+			actions.append("leave_faction")
+		return {
+			"in_faction": true,
+			"faction_id": pt.faction_id,
+			"is_leader": is_leader,
+			"faction_goal": f.strategic_goals[0] if f.strategic_goals.size() > 0 else "",
+			"player_goal_override": f.player_goal_override,
+			"tribute_rate": f.tribute_rate,
+			"member_orders": member_orders,
+			"actions": actions,
+		}
