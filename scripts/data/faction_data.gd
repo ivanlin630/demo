@@ -26,6 +26,10 @@ var known_member_states: Dictionary = {}
 #   "last_tick":    int,
 # }}
 
+var player_goal_override: String = ""
+# 玩家設定的勢力目標；"" = 無 override（faction_ai 自動計算）
+# 有效值："expand" / "defend" / "trade_net"
+
 # 策略層（strategic_ai_system 讀寫）
 var strategic_goals: Array = []
 # strategic goal 格式: { "type": String, "target_id": int, "priority": float }

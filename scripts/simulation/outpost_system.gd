@@ -64,12 +64,20 @@ func tick_all(state: WorldState) -> void:
 		_tick_construction(state, tile)
 
 func _tick_construction(state: WorldState, tile: HexTileData) -> void:
-	var team: TeamData = state.teams.get(tile.construction_team_id)
-	if team == null or team.tile_pos != tile.tile_pos:
-		return  # 施工隊離開，暫停進度
-	tile.construction_ticks_left -= maxi(team.population, 1)
+	# 找同格上所有 current_task == "建設" 的 team（接手機制）
+	var active_team: TeamData = null
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos == tile.tile_pos and t.current_task == TeamData.TASK_BUILD:
+			active_team = t
+			break
+	if active_team == null:
+		return  # 無施工隊在格，暫停
+	# 更新施工 team（接手：任何在格上建設的 team 都可繼續）
+	tile.construction_team_id = active_team.team_id
+	tile.construction_ticks_left -= maxi(active_team.population, 1)
 	if tile.construction_ticks_left <= 0:
-		_complete_construction(state, tile, team)
+		_complete_construction(state, tile, active_team)
 
 func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData) -> void:
 	var action: String = tile.construction_target.get("action", "")
@@ -209,6 +217,34 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	tile.construction_target    = { "action": "demolish" }
 	team.current_task = "建設"
 	print("[Outpost] Team%d 拆除 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
+	return true
+
+func _has_control(state: WorldState, team_id: int, tile: HexTileData) -> bool:
+	if tile.outpost_owner == team_id: return true
+	var team: TeamData = state.teams.get(team_id)
+	if team == null: return false
+	var owner: TeamData = state.teams.get(tile.outpost_owner)
+	if owner == null: return true
+	if team.faction_id != -1 and team.faction_id == owner.faction_id: return true
+	var owner_faction_present: bool = false
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos == tile.tile_pos and t.faction_id == owner.faction_id:
+			owner_faction_present = true
+			break
+	return not owner_faction_present
+
+func demolish_with_control(state: WorldState, team: TeamData) -> bool:
+	var tile := _get_team_tile(state, team)
+	if tile == null or tile.outpost_level == 0:
+		return false
+	if tile.construction_team_id != -1:
+		return false
+	tile.construction_team_id   = team.team_id
+	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][tile.outpost_level - 1] / 2
+	tile.construction_target    = { "action": "demolish" }
+	team.current_task = TeamData.TASK_BUILD
+	print("[Outpost] Team%d 拆除（control）at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
 func capture(state: WorldState, winner_id: int, tile: HexTileData) -> void:

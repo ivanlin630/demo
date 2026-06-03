@@ -746,6 +746,13 @@ func _return_pool_equipment(state: WorldState) -> void:
 					team.resources[item["grade"]] = int(team.resources.get(item["grade"], 0)) + 1
 					p.equipment[slot] = { "type": "none", "grade": "" }
 
+func cleanup_encounter(state: WorldState) -> void:
+	_return_pool_equipment(state)
+	state.encounter_units.clear()
+	state.encounter_active      = false
+	state.encounter_attacker_id = -1
+	state.encounter_defender_id = -1
+
 func _sync_back_units(state: WorldState, team_id: int) -> void:
 	var team: TeamData = state.teams.get(team_id)
 	if team == null: return
@@ -861,10 +868,15 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			var v: float = float(loser_team_loot.resources.get(rk, 0))
 			if v > 0:
 				loot[rk] = v * 0.3   # TEST VALUE — 30%
+	# G-02：玩家勝利 → 標記 can_subjugate，讓玩家自選；NPC 勝利維持自動
+	var _player_p2: PersonData = state.persons.get(state.player_id)
+	var _player_tid2: int = _player_p2.team_id if _player_p2 else -1
+	var is_player_winner: bool = (_player_tid2 != -1 and winner_id == _player_tid2)
 	state.last_encounter_result = {
 		"winner_id": winner_id,
 		"loser_id":  loser_id,
-		"loot_pool": loot
+		"loot_pool": loot,
+		"can_subjugate": is_player_winner
 	}
 	print("[Encounter] 戰鬥結束 winner=Team%d loser=Team%d loot=%s" % [winner_id, loser_id, str(loot)])
 
