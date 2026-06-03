@@ -190,6 +190,50 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			state.player_state.erase("pending_trade_target")
 			return { "ok": true, "msg": "取消貿易" }
 
+		"set_faction_goal":
+			if pt.faction_id == -1:
+				return { "ok": false, "msg": "玩家不在勢力中" }
+			var goal9: String = str(state.player_state.get("faction_goal_input", ""))
+			if goal9 not in ["expand", "defend", "trade_net", ""]:
+				return { "ok": false, "msg": "無效目標（expand/defend/trade_net/空字串清除）" }
+			var f9: FactionData = state.factions.get(pt.faction_id)
+			if f9 == null:
+				return { "ok": false, "msg": "勢力不存在" }
+			if f9.leader_team_id != pt_id:
+				return { "ok": false, "msg": "只有 leader 可設定勢力目標" }
+			f9.player_goal_override = goal9
+			var msg9: String = "清除 override" if goal9.is_empty() else "勢力目標設為 %s" % goal9
+			print("[PlayerCmd] set_faction_goal → %s" % goal9)
+			return { "ok": true, "msg": msg9 }
+
+		"order_faction_member":
+			var member_id9: int  = int(state.player_state.get("order_member_id", -1))
+			var m_task9: String  = str(state.player_state.get("member_task", ""))
+			var mq9: int = int(state.player_state.get("member_move_q", -1))
+			var mr9: int = int(state.player_state.get("member_move_r", -1))
+			var mt9: TeamData = state.teams.get(member_id9)
+			if mt9 == null or mt9.faction_id != pt.faction_id:
+				return { "ok": false, "msg": "目標不是同勢力成員" }
+			mt9.player_commanded_task = m_task9
+			if mq9 != -1:
+				mt9.move_target = Vector2i(mq9, mr9)
+			print("[PlayerCmd] order_faction_member Team%d → %s" % [member_id9, m_task9])
+			return { "ok": true, "msg": "已下令 Team%d" % member_id9 }
+
+		"set_tribute_rate":
+			var rate: float = float(state.player_state.get("tribute_rate_input", 0.1))
+			rate = clampf(rate, 0.0, 1.0)
+			if pt.faction_id == -1:
+				return { "ok": false, "msg": "玩家不在勢力中" }
+			var f_tr: FactionData = state.factions.get(pt.faction_id)
+			if f_tr == null:
+				return { "ok": false, "msg": "勢力不存在" }
+			if f_tr.leader_team_id != pt_id:
+				return { "ok": false, "msg": "只有 leader 可設定徵收率" }
+			f_tr.tribute_rate = rate
+			print("[PlayerCmd] set_tribute_rate → %.2f" % rate)
+			return { "ok": true, "msg": "徵收率設為 %.0f%%" % (rate * 100) }
+
 		"offer_surrender":
 			var tgt6: TeamData = state.teams.get(target_id)
 			if tgt6 == null:

@@ -112,6 +112,11 @@ func _update_goals(state: WorldState, f) -> void:
 	if leader_team == null:
 		return
 
+	# G-09：玩家設定 override → 跳過自動計算，直接套用
+	if not f.player_goal_override.is_empty():
+		f.goals.append(f.player_goal_override)
+		return
+
 	var leader_p = state.persons.get(leader_team.leader_id)
 	var ambition: float = float(leader_p.values.get("野心",   0.5)) if leader_p else 0.5
 	var greed:    float = float(leader_p.values.get("貪婪",   0.5)) if leader_p else 0.5
@@ -183,6 +188,19 @@ func _assign_tasks(state: WorldState, f) -> void:
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	if leader_team == null or leader_team.combat_target != -1:
 		return
+
+	# G-09：檢查 player_commanded_task（loyalty 門檻）
+	for tid_cmd in f.member_team_ids:
+		var t_cmd: TeamData = state.teams.get(tid_cmd)
+		if t_cmd == null or t_cmd.player_commanded_task.is_empty(): continue
+		var leader_cmd: PersonData = state.persons.get(t_cmd.leader_id)
+		var loyalty_cmd: float = leader_cmd.loyalty if leader_cmd else 0.5
+		if loyalty_cmd >= 0.4:
+			t_cmd.current_task = t_cmd.player_commanded_task
+		else:
+			t_cmd.unrest_turns += 1
+			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])
+
 	if "徵收" in f.goals and leader_team.current_task != "徵收":
 		var best_tid: int = _richest_member(state, f)
 		if best_tid != -1:
@@ -229,6 +247,8 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		var known_task: String = snap.get("current_task", "idle")
 		if mt == null or mt.combat_target != -1 or known_task != "idle":
 			continue
+		if not mt.player_commanded_task.is_empty():
+			continue  # don't override player-commanded task
 		var absorber_id: int = _find_absorber(state, mt, f)
 		if absorber_id != -1:
 			var mt_leader = state.persons.get(mt.leader_id)
