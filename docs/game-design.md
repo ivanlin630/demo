@@ -543,19 +543,19 @@ NPC 才會生成完整人格。
 
 # 玩家 Team 組成
 
-玩家 team 全員為記名 NPC（無匿名人口）。
+玩家 team 以記名 NPC（named_members）為核心，但技術上支援混合：主隊可同時有記名成員與匿名人口（population - named count）。
 
-吸收其他 team 時：
+**招募與吸收規則：**
 
-- 被吸收方的 leader + named_members → 玩家 named_members（已記名，直接加入）
-- 被吸收方的非記名人口 → 自動成為跟隨子隊：
-  - 系統呼叫 PersonGenerator 從人口中晉升一人為子隊 leader
-  - 子隊 parent_team_id = 玩家 team，task = 護衛（跟隨）
-  - 玩家可指派、升格、或讓子隊獨立
+- `recruit`：從外部 team 拉走低忠誠度記名成員，加入玩家 named_members
+- `recruit_anon`：花費 coin 從外部 team 招募匿名人口，直接加入玩家主隊人口（匿名，不記名）
+- 吸收（subjugate）時：
+  - 被吸收方 leader + named_members → 玩家 named_members（已記名，直接加入）
+  - 被吸收方匿名人口 → 自動成為跟隨子隊（parent_team_id = 玩家 team）
 
-玩家可透過「主動招募」從任意 team / 聚落的非記名人口招募個人，使其成為記名 NPC。
+**設計意圖：** 玩家隊伍長期應以記名成員為主（可互動、可指令、有個性）。匿名人口可存在於主隊，但無法個別操作，視為背景人力。
 
-詳見 [人物 → PersonGenerator](person.md#persongenerator預留待玩家系統實裝)。
+玩家可透過「主動招募」晉升匿名人口為記名 NPC（PersonGenerator，待實裝）。
 
 ---
 
