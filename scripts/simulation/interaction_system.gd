@@ -304,7 +304,8 @@ func _start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	atk.combat_target = def_id
 	def.combat_target = atk_id
 	_msg.emit_message(state, "combat_start",
-		"Team %d 對 Team %d 宣戰" % [atk_id, def_id], atk)
+		"Team %d 對 Team %d 宣戰" % [atk_id, def_id], atk,
+		{ "origin": str(atk_id), "target": str(def_id) })
 	print("[Combat Start] Team%d vs Team%d" % [atk_id, def_id])
 	_resolve_volley(state, atk_id, def_id)
 
@@ -436,7 +437,9 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		var yi_qi: float = float(p.values.get("義氣", 0.5))
 		p.loyalty -= (1.0 - yi_qi) * 0.05
 	_msg.emit_message(state, "combat_end",
-		"Team %d 擊潰 Team %d" % [winner_id, loser_id], winner)
+		"Team %d 擊潰 Team %d" % [winner_id, loser_id], winner,
+		{ "origin": str(winner_id), "loser": str(loser_id),
+		  "x": str(winner.tile_pos.x), "y": str(winner.tile_pos.y) })
 	print("[Combat End] Team%d 勝 Team%d (rd=%.2f/%.2f wnd=%d/%d)" % [
 		winner_id, loser_id, winner.readiness, loser.readiness,
 		winner.wounded, loser.wounded])
@@ -495,7 +498,8 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 			def.resources[res] = float(def.resources.get(res, 0)) - tribute
 			gained[res] = tribute
 	_msg.emit_message(state, "extortion",
-		"Team %d 向 Team %d 收過路費" % [atk_id, def_id], atk)
+		"Team %d 向 Team %d 收過路費" % [atk_id, def_id], atk,
+		{ "origin": str(atk_id), "target": str(def_id) })
 	print("[Extort] Team%d 勒索 Team%d，Team%d 妥協給付" % [atk_id, def_id, def_id])
 	return gained
 
@@ -716,7 +720,11 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int) -> void:
 	loser.faction_id = fid
 	state.snapshot_faction_member(loser_id, state.world.current_tick)
 	_msg.emit_message(state, "subjugate",
-		"Team%d 主服 Team%d，加入勢力%d" % [winner_id, loser_id, fid], winner)
+		TextBank.fmt("subjugate", "honest", {
+			"origin": str(winner_id), "loser": str(loser_id), "faction": str(fid)
+		}),
+		winner,
+		{ "origin": str(winner_id), "loser": str(loser_id), "faction": str(fid) })
 	print("[Faction] Team%d 主服 Team%d → 勢力%d" % [winner_id, loser_id, fid])
 
 func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> void:
@@ -746,7 +754,11 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 	state.snapshot_faction_member(target_id, state.world.current_tick)
 	initiator.current_task = "idle"
 	_msg.emit_message(state, "diplomacy",
-		"Team%d 外交 → Team%d 加入勢力%d" % [initiator_id, target_id, fid], initiator)
+		TextBank.fmt("diplomacy", "honest", {
+			"origin": str(initiator_id), "target": str(target_id)
+		}),
+		initiator,
+		{ "origin": str(initiator_id), "target": str(target_id), "faction": str(fid) })
 	print("[Faction] Team%d 外交 Team%d → 勢力%d" % [initiator_id, target_id, fid])
 
 func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
@@ -793,7 +805,11 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 	collector.current_task = "idle"
 	collector.move_target  = Vector2i(-1, -1)
 	_msg.emit_message(state, "tribute",
-		"Team%d 向 Team%d 徵收（rate=%.2f）" % [collector_id, payer_id, base_rate], collector)
+		TextBank.fmt("tribute", "honest", {
+			"origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % base_rate
+		}),
+		collector,
+		{ "origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % base_rate })
 	print("[Tribute] Team%d 徵收 Team%d rate=%.2f" % [collector_id, payer_id, base_rate])
 
 func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> void:
@@ -811,7 +827,11 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 	if messenger.parent_team_id != -1:
 		state.snapshot_faction_member(messenger.parent_team_id, state.world.current_tick)
 	_msg.emit_message(state, "order_delivered",
-		"Team%d 傳令 Team%d → task=%s" % [messenger_id, target_id, order], messenger)
+		TextBank.fmt("order_delivered", "honest", {
+			"origin": str(messenger_id), "target": str(target_id), "task": order
+		}),
+		messenger,
+		{ "origin": str(messenger_id), "target": str(target_id), "task": order })
 	print("[Order] Team%d 傳令 Team%d → %s" % [messenger_id, target_id, order])
 
 func _best_medicine(state: WorldState, team: TeamData) -> float:
@@ -885,7 +905,8 @@ func _resolve_trade(state: WorldState, seller: TeamData, buyer: TeamData) -> voi
 	buyer.resources["coin"]  = buyer_coin - total_earned
 
 	_msg.emit_message(state, "trade_done",
-		"Team%d→Team%d 貿易 coin=%.0f" % [seller.team_id, buyer.team_id, total_earned], seller)
+		"Team%d→Team%d 貿易 coin=%.0f" % [seller.team_id, buyer.team_id, total_earned], seller,
+		{ "origin": str(seller.team_id), "target": str(buyer.team_id) })
 	print("[Trade] Team%d→Team%d coin+%.0f（商業=%.2f）" % [
 		seller.team_id, buyer.team_id, total_earned, commerce])
 	_grow_commerce_skill(state, seller)

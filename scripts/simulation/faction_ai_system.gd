@@ -593,8 +593,10 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 	f.faction_name   = "勢力%d" % f.faction_id
 	f.goals.erase("立國")
 	SimMessageSystem.new().emit_message(state, "faction_establish",
-		"%s 正式立國（leader=Team%d，%d teams）" % [
-			f.faction_name, f.leader_team_id, f.member_team_ids.size()],
-		leader_team)
+		TextBank.fmt("faction_establish", "honest", {
+			"origin": str(f.leader_team_id), "name": f.faction_name
+		}),
+		leader_team,
+		{ "origin": str(f.leader_team_id), "name": f.faction_name })
 	print("[Faction] 立國：%s（leader=Team%d，%d teams）" % [
 		f.faction_name, f.leader_team_id, f.member_team_ids.size()])

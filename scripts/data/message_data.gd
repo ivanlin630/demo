@@ -8,3 +8,4 @@ var origin_team_id: int = -1
 var origin_tick: int = 0
 var strength: float = 1.0
 var is_distorted: bool = false
+var params: Dictionary = {}

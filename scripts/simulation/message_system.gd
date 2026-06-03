@@ -4,7 +4,8 @@ const HOP_DECAY: float = 0.15
 const TIME_DECAY_PER_HOUR: float = 0.005
 const TIME_DECAY_PER_TICK: float = TIME_DECAY_PER_HOUR / float(WorldState.TICKS_PER_HOUR)
 
-func emit_message(state: WorldState, type: String, description: String, team: TeamData) -> MessageData:
+func emit_message(state: WorldState, type: String, description: String,
+		team: TeamData, params: Dictionary = {}) -> MessageData:
 	var msg := MessageData.new()
 	msg.id = state.global_messages.size()
 	msg.type = type
@@ -13,6 +14,7 @@ func emit_message(state: WorldState, type: String, description: String, team: Te
 	msg.origin_team_id = team.team_id
 	msg.origin_tick = state.world.current_tick
 	msg.strength = 1.0
+	msg.params = params
 	state.global_messages.append(msg)
 	if not state.team_known.has(team.team_id):
 		state.team_known[team.team_id] = []
@@ -99,12 +101,113 @@ func _distort_content(state: WorldState, msg: MessageData) -> void:
 		ids.erase(msg.origin_team_id)
 		if not ids.is_empty():
 			msg.origin_team_id = ids[randi() % ids.size()]
+			msg.params["origin"] = str(msg.origin_team_id)
 	else:
 		var offsets: Array = [
 			Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1),
 			Vector2i(1,-1), Vector2i(-1,1), Vector2i(2,0), Vector2i(-2,0)
 		]
 		msg.source_pos += offsets[randi() % offsets.size()]
+		msg.params["x"] = str(msg.source_pos.x)
+		msg.params["y"] = str(msg.source_pos.y)
+	if TextBank.TEMPLATES.has(msg.type):
+		msg.description = TextBank.fmt(msg.type, "malicious", msg.params)
+
+func exchange_intel_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Array) -> void:
+	for arrived_id in arrived_ids:
+		var arrived: TeamData = state.teams.get(arrived_id)
+		if arrived == null: continue
+		for other_id in all_team_ids:
+			if other_id == arrived_id: continue
+			var other: TeamData = state.teams.get(other_id)
+			if other == null or other.tile_pos != arrived.tile_pos: continue
+			_exchange_intel(state, arrived_id, other_id)
+			_exchange_intel(state, other_id, arrived_id)
+
+func _distort_intel_entry(entry: Dictionary, mode: String) -> Dictionary:
+	var e: Dictionary = entry.duplicate()
+	match mode:
+		"honest":
+			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(0.9, 1.1))
+		"unintentional":
+			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(0.6, 1.5))
+			e["tile_pos"] = e.get("tile_pos", Vector2i.ZERO) + \
+				Vector2i(randi_range(-2, 2), randi_range(-2, 2))
+			if randf() < 0.3:
+				var tasks: Array = ["idle", "攻擊", "貿易", "生產", "偵查"]
+				e["current_task"] = tasks[randi() % tasks.size()]
+		"malicious":
+			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(0.2, 3.0))
+			e["tile_pos"] = e.get("tile_pos", Vector2i.ZERO) + \
+				Vector2i(randi_range(-6, 6), randi_range(-6, 6))
+			if randf() < 0.4:
+				var tasks2: Array = ["idle", "攻擊", "貿易", "生產", "偵查"]
+				e["current_task"] = tasks2[randi() % tasks2.size()]
+		"silent":
+			return {}
+	e["confidence"]    = clampf(float(e.get("confidence", 1.0)) * (1.0 - HOP_DECAY), 0.0, 1.0)
+	e["is_suspicious"] = false
+	return e
+
+func _decide_exchange_mode(state: WorldState, giver: TeamData, receiver: TeamData) -> String:
+	if state.player_hostile_teams.has(receiver.team_id):
+		return "malicious" if randf() < 0.3 else "silent"
+	if giver.faction_id != -1 and giver.faction_id == receiver.faction_id:
+		return "honest"
+	var rep: float = float(giver.known_reputations.get(receiver.team_id, 0.5))
+	var leader: PersonData = state.persons.get(giver.leader_id)
+	var cunningness: float = float(leader.skills.get("計謀", 0.0)) if leader else 0.0
+	var caution: float     = float(leader.values.get("慎重", 0.5)) if leader else 0.5
+	var eff_rep: float     = rep * (1.0 - caution * 0.3)
+	if cunningness > 0.5 and eff_rep < 0.4:
+		return "malicious"
+	if eff_rep > 0.6:
+		return "honest"
+	if eff_rep > 0.3:
+		return "unintentional"
+	return "silent"
+
+func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void:
+	var giver: TeamData    = state.teams.get(giver_id)
+	var receiver: TeamData = state.teams.get(receiver_id)
+	if giver == null or receiver == null: return
+
+	var mode: String = _decide_exchange_mode(state, giver, receiver)
+	if mode == "silent": return
+
+	var giver_known: Array = state.team_known.get(giver_id, [])
+	if not state.team_known.has(receiver_id):
+		state.team_known[receiver_id] = []
+	for msg in giver_known:
+		var already: bool = false
+		for existing in state.team_known[receiver_id]:
+			if existing.id == msg.id: already = true; break
+		if already: continue
+		var copy: MessageData = _copy_message(msg)
+		if mode in ["unintentional", "malicious"]:
+			copy.is_distorted = true
+			copy.strength *= 0.8
+			_distort_content(state, copy)
+		state.team_known[receiver_id].append(copy)
+
+	var rep2: float = float(giver.known_reputations.get(receiver_id, 0.5))
+	if rep2 < 0.3 and (giver.faction_id == -1 or giver.faction_id != receiver.faction_id):
+		return
+	var giver_intel: Dictionary = state.team_intel.get(giver_id, {})
+	if not state.team_intel.has(receiver_id):
+		state.team_intel[receiver_id] = {}
+	for tgt_id in giver_intel:
+		if tgt_id == receiver_id: continue
+		var entry: Dictionary = _distort_intel_entry(giver_intel[tgt_id], mode)
+		if entry.is_empty(): continue
+		var existing_conf: float = float(state.team_intel[receiver_id].get(tgt_id, {}).get("confidence", 0.0))
+		if entry.get("confidence", 0.0) > existing_conf:
+			state.team_intel[receiver_id][tgt_id] = entry
+		var recv_leader: PersonData = state.persons.get(receiver.leader_id)
+		if recv_leader:
+			var intel_skill: float = float(recv_leader.skills.get("偵查", 0.0))
+			if randf() < intel_skill * 0.5 and mode == "malicious":
+				state.team_intel[receiver_id][tgt_id]["is_suspicious"] = true
 
 # 實體接觸時交換訊息（需要明確呼叫，不自動）
 func exchange_messages(state: WorldState, from_team_id: int, to_team_id: int, person: PersonData) -> void:
@@ -150,4 +253,5 @@ func _copy_message(original: MessageData) -> MessageData:
 	copy.origin_tick = original.origin_tick
 	copy.strength = original.strength
 	copy.is_distorted = original.is_distorted
+	copy.params = original.params.duplicate()
 	return copy

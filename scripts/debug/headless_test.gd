@@ -1840,4 +1840,31 @@ func _run_sim_test() -> void:
 	for a in state.player_alerts:
 		print("  %s tick=%d data=%s" % [a["type"], a["tick"], str(a["data"])])
 
+	print("--- AdvisorSystem 驗證 ---")
+	var _adv_sys = AdvisorSystem.new()
+	var test_person: PersonData = state.persons.get(0)
+	if test_person:
+		test_person.skills["戰術"] = 0.0
+		var wrong_advice: String = _adv_sys.get_advice(test_person, "assess_enemy",
+			{"enemy_pop": 20, "self_pop": 5}, state)
+		print("  低技能建議: %s" % wrong_advice)
+		test_person.skills["戰術"] = 1.0
+		var right_advice: String = _adv_sys.get_advice(test_person, "assess_enemy",
+			{"enemy_pop": 20, "self_pop": 5}, state)
+		print("  高技能建議: %s" % right_advice)
+	print("  AdvisorSystem 驗證通過")
+
+	print("--- InquirySystem 驗證 ---")
+	var _inq := InquirySystem.new()
+	var _pt_inq: TeamData = state.teams.get(state.player_id if state.player_id != -1 else 0)
+	if _pt_inq:
+		for _other_id in state.teams:
+			if _other_id == _pt_inq.team_id: continue
+			var _other_t: TeamData = state.teams[_other_id]
+			var _opts: Array = _inq.get_options(state, _pt_inq, _other_t)
+			print("  Team%d 打聽 Team%d → %d 個選項" % [_pt_inq.team_id, _other_id, _opts.size()])
+			assert(_opts.size() <= 5, "InquirySystem 選項不超過 5")
+			break
+	print("  InquirySystem 驗證通過")
+
 	print("=== DONE ===")

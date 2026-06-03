@@ -37,6 +37,7 @@ func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
 	var coin: float = float(pt.resources.get("coin", 0))
 	if coin >= RECRUIT_COST_ANON:
 		actions.append("recruit")
+	actions.append("gather_intel")
 	return actions
 
 # ── Registry 初始化 ───────────────────────────────────────────
@@ -74,6 +75,8 @@ func _setup_registry() -> void:
 		"set_faction_goal":       _action_set_faction_goal,
 		"order_faction_member":   _action_order_faction_member,
 		"clear_member_order":     _action_clear_member_order,
+		"gather_intel":           _action_gather_intel,
+		"confirm_gather_intel":   _action_confirm_gather_intel,
 	}
 
 # 執行玩家主動行動
@@ -496,6 +499,29 @@ func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamDa
 		mt9.move_target = Vector2i(mq9, mr9)
 	print("[PlayerCmd] order_faction_member Team%d → %s" % [member_id9, m_task9])
 	return { "ok": true, "msg": "已下令 Team%d" % member_id9 }
+
+func _action_gather_intel(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var tgt_gi: TeamData = state.teams.get(target_id)
+	if tgt_gi == null:
+		return { "ok": false, "msg": "目標不存在" }
+	var options: Array = InquirySystem.new().get_options(state, pt, tgt_gi)
+	if options.is_empty():
+		return { "ok": false, "msg": "無可打聽的情報" }
+	return {
+		"ok": true,
+		"msg": "選擇要打聽的情報",
+		"payload": { "inquiry_options": options, "npc_id": target_id }
+	}
+
+func _action_confirm_gather_intel(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var npc_id_gi: int     = int(state.player_state.get("gather_intel_npc_id", -1))
+	var choice_gi: String  = str(state.player_state.get("gather_intel_choice", ""))
+	var npc_gi: TeamData   = state.teams.get(npc_id_gi)
+	if npc_gi == null or choice_gi.is_empty():
+		return { "ok": false, "msg": "參數遺漏" }
+	var result_gi: Dictionary = InquirySystem.new().resolve_inquiry(state, pt, npc_gi, choice_gi)
+	print("[PlayerCmd] gather_intel choice=%s 結果筆數=%d" % [choice_gi, result_gi.size()])
+	return { "ok": true, "msg": "情報獲取", "payload": result_gi }
 
 func _action_clear_member_order(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	# player_state 需設定：order_member_id（目標 team）

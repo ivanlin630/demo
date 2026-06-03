@@ -26,6 +26,7 @@ func execute(state: WorldState, team: TeamData) -> Array:
 	if f.member_team_ids.size() <= 1:
 		state.disband_faction(fid)
 	SimMessageSystem.new().emit_message(state, "faction_defect",
-		"Team%d 脫離勢力%d" % [team.team_id, fid], team)
+		"Team%d 脫離勢力%d" % [team.team_id, fid], team,
+		{ "origin": str(team.team_id) })
 	print("[Faction] Team%d 脫離勢力%d" % [team.team_id, fid])
 	return []
