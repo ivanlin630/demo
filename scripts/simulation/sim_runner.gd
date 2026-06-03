@@ -91,6 +91,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		_step3_propagate_messages(state, arrived_near, near_teams)
 		_step4_resolve_interactions(state, arrived_near, near_teams)
 		_step4b_outpost_tick(state)
+		_step4e_faction_snapshot(state, near_teams)
 		_step5_collect_resources(state, near_teams)
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, near_teams)
@@ -115,6 +116,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		var arrived_far := _step2_move_teams(state, far_teams, time_speed_mult)
 		_step3_propagate_messages(state, arrived_far, far_teams)
 		_step4_resolve_interactions(state, arrived_far, far_teams)
+		_step4e_faction_snapshot(state, far_teams)
 		_step5_collect_resources(state, far_teams)
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, far_teams)
@@ -156,6 +158,27 @@ func _step4_resolve_interactions(state: WorldState, arrived_ids: Array, all_ids:
 
 func _step4b_outpost_tick(state: WorldState) -> void:
 	_outpost_system.tick_all(state)
+
+func _step4e_faction_snapshot(state: WorldState, team_ids: Array) -> void:
+	# T-02 快照B：同格同勢力 → 互相更新快照（模擬面對面情報交換）
+	var pos_map: Dictionary = {}  # tile_id → Array[int] team_ids
+	for tid in team_ids:
+		var t: TeamData = state.teams.get(tid)
+		if t == null or t.faction_id == -1: continue
+		var tile_id: int = t.tile_pos.x * 1000 + t.tile_pos.y
+		if not pos_map.has(tile_id): pos_map[tile_id] = []
+		pos_map[tile_id].append(tid)
+	for tile_id in pos_map:
+		var same_tile: Array = pos_map[tile_id]
+		if same_tile.size() < 2: continue
+		for tid in same_tile:
+			var t: TeamData = state.teams[tid]
+			for other_tid in same_tile:
+				if other_tid == tid: continue
+				var other: TeamData = state.teams[other_tid]
+				if other.faction_id == t.faction_id:
+					state.snapshot_faction_member(tid, state.world.current_tick)
+					break
 
 func _step4c_harvest_tick(state: WorldState) -> void:
 	_harvest_system.tick_all(state)   # 外層已做頻率判斷
