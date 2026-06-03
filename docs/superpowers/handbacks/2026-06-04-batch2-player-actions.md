@@ -8,7 +8,14 @@
 - `scripts/simulation/encounter_system.gd`：`resolve_encounter_end` 加 `can_subjugate` flag；修正計畫 bug（原碼比較 `winner_id == state.player_id`，型別錯誤：team_id vs person_id，已改用 `persons.get(player_id).team_id`）
 - `scripts/simulation/interaction_system.gd`：`_end_combat` / `_force_retreat` 兩處加玩家勝利跳過 `_try_subjugate`；加公開 `subjugate_team` wrapper
 - `scripts/simulation/faction_ai_system.gd`：`_update_goals` 開頭加 `player_goal_override` 短路；`_assign_tasks` 加 loyalty 門檻迴圈；`_assign_member_tasks` 加 skip（`player_commanded_task` 非空）
-- `scripts/simulation/player_command_system.gd`：加 G-02/03/05/06/07/08/09 全部 action；T-01 重構為 registry 模式（`_action_registry` dict + `_setup_registry` + 30 個 `_action_*` handler）
+- `scripts/simulation/player_command_system.gd`：加 G-02/03/05/06/07/08/09 全部 action；T-01 重構為 registry 模式（`_action_registry` dict + `_setup_registry` + 30 個 `_action_*` handler）；加 `_encounter` 成員；`clear_member_order` action
+- `scripts/simulation/encounter_system.gd`（補）：加公開 `cleanup_encounter`（呼叫 `_return_pool_equipment` + 清除 4 個 encounter 狀態欄位）
+
+### 補充修正（提交後）
+
+- `_action_recall_subteam`：herald leader 改從 `pt.named_members` 選第一個非 leader 成員；無則回 `"無可用的信使人選"`（原傳 `-1` 會導致 SubteamSystem 直接失敗）
+- `encounter_system.cleanup_encounter`：新增公開 func，`_action_surrender_in_encounter` 改呼叫此 func（原僅清除 2 個欄位，遺漏 `attacker_id` / `defender_id` 及 pool equipment 歸還）
+- `clear_member_order` action：清除指定 team 的 `player_commanded_task`（原 `player_commanded_task` 無清除入口）
 
 ### 與 spec 的差異
 
@@ -25,6 +32,5 @@
 
 ## 待主 session 確認
 
-- `player_commanded_task` 無清除機制（`order_faction_member` 設值後無法自動過期）；建議加 `clear_member_order` action 或 tick 後自動清除
-- `recall_subteam` 的信使 dispatch 傳 `sub_leader_id = -1`，SubteamSystem.dispatch 會因 `sub_leader == null` 回傳 -1 而失敗；herald 需要實際 leader — 建議主 session 確認 TASK_HERALD 信使派遣邏輯是否需要補 workaround
-- `surrender_in_encounter` 清除 `encounter_units` 但未清除 `encounter_attacker_id` / `encounter_defender_id`（encounter_system 正常結束會清，但投降路徑略過），視 UI 流程可能需補清
+- `recall_subteam` 現在需要 `pt.named_members` 中有非 leader 成員才能派信使；若玩家 team 只有 leader（無 named members），此 action 永遠失敗 — 主 session 確認是否可接受此限制
+- `player_commanded_task` 現有 `clear_member_order` 清除，但無 tick 自動過期機制 — 若需要「N tick 後自動失效」需另外實作
