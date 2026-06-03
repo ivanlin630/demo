@@ -190,6 +190,49 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			state.player_state.erase("pending_trade_target")
 			return { "ok": true, "msg": "取消貿易" }
 
+		"dispatch_subteam":
+			var sub_leader_id: int = int(state.player_state.get("sub_leader_id", -1))
+			var pop_count: int     = int(state.player_state.get("sub_pop_count", 1))
+			var task: String       = str(state.player_state.get("sub_task", TeamData.TASK_IDLE))
+			var tq: int = int(state.player_state.get("sub_move_q", -1))
+			var tr: int = int(state.player_state.get("sub_move_r", -1))
+			var move_tgt: Vector2i = Vector2i(tq, tr)
+			if sub_leader_id == -1 or not state.persons.has(sub_leader_id):
+				return { "ok": false, "msg": "未指定子隊 leader" }
+			if pop_count < 1 or pop_count >= pt.population:
+				return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
+			var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
+			if sub_id == -1:
+				return { "ok": false, "msg": "派遣失敗" }
+			return { "ok": true, "msg": "派出子隊 Team%d" % sub_id, "sub_id": sub_id }
+
+		"order_subteam":
+			var sub_id2: int   = int(state.player_state.get("order_sub_id", -1))
+			var new_task: String = str(state.player_state.get("sub_new_task", TeamData.TASK_IDLE))
+			var nq: int = int(state.player_state.get("sub_new_move_q", -1))
+			var nr: int = int(state.player_state.get("sub_new_move_r", -1))
+			var sub2: TeamData = state.teams.get(sub_id2)
+			if sub2 == null or sub2.parent_team_id != pt_id:
+				return { "ok": false, "msg": "目標不是玩家子隊" }
+			sub2.current_task = new_task
+			sub2.move_target  = Vector2i(nq, nr)
+			print("[PlayerCmd] order_subteam Team%d → task=%s move=(%d,%d)" % [sub_id2, new_task, nq, nr])
+			return { "ok": true, "msg": "已下令 Team%d" % sub_id2 }
+
+		"recall_subteam":
+			var recall_sub_id: int = int(state.player_state.get("recall_sub_id", -1))
+			var recall_sub: TeamData = state.teams.get(recall_sub_id)
+			if recall_sub == null or recall_sub.parent_team_id != pt_id:
+				return { "ok": false, "msg": "目標不是玩家子隊" }
+			if pt.population < 2:
+				return { "ok": false, "msg": "人數不足以派信使" }
+			var herald_id: int = SubteamSystem.new().dispatch(
+				state, pt_id, -1, 1, TeamData.TASK_HERALD,
+				recall_sub.tile_pos, recall_sub_id, TeamData.TASK_MERGE)
+			if herald_id == -1:
+				return { "ok": false, "msg": "派信使失敗" }
+			return { "ok": true, "msg": "信使已出發至 Team%d" % recall_sub_id }
+
 		"build_outpost":
 			var outpost_type: String = str(state.player_state.get("build_type", "civilian"))
 			if outpost_type not in ["civilian", "military"]:
