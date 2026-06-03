@@ -1798,4 +1798,10 @@ func _run_sim_test() -> void:
 		str(_fp_result.get("ok")),
 		str(_fp_result.get("data", {}).get("faction_panel", {}).get("in_faction"))])
 
+	# --- outpost_panel API ---
+	var _op_result := PlayerQueryApi.new().query_outpost_panel(state)
+	print("[Test] query_outpost_panel ok=%s tile_pos=%s" % [
+		str(_op_result.get("ok")),
+		str(_op_result.get("data", {}).get("outpost_panel", {}).get("tile_pos"))])
+
 	print("=== DONE ===")

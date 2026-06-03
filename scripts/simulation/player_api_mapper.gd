@@ -472,3 +472,47 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 		"member_orders": member_orders,
 		"actions": actions,
 	}
+
+# ── Outpost panel ──────────────────────────────────────────────────────────────
+
+static func map_outpost_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var pt: TeamData = state.teams.get(p.team_id)
+	if pt == null:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var key: int = pt.tile_pos.x * 1000 + pt.tile_pos.y
+	var tile = state.world.tiles.get(key)
+	if tile == null:
+		return {"tile_pos": pt.tile_pos, "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var has_ctrl: bool = tile.outpost_owner == -1 or tile.outpost_owner == pt.team_id
+	var in_progress: bool = tile.construction_team_id != -1
+	var actions: Array = []
+	if has_ctrl:
+		if tile.outpost_type == "" and not in_progress:
+			actions.append("build_outpost")
+		elif tile.outpost_type != "" and not in_progress:
+			actions.append_array(["upgrade_outpost", "upgrade_farming",
+				"upgrade_manufacturing", "demolish_outpost"])
+	return {
+		"tile_pos": pt.tile_pos,
+		"outpost_type": tile.outpost_type,
+		"outpost_level": tile.outpost_level,
+		"outpost_owner": tile.outpost_owner,
+		"has_control": has_ctrl,
+		"construction_in_progress": in_progress,
+		"ticks_left": tile.construction_ticks_left,
+		"actions": actions,
+	}

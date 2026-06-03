@@ -137,3 +137,6 @@ func set_player_input(key: String, value: Variant) -> void:
 
 func query_faction_panel() -> Dictionary:
 	return PlayerQueryApi.new().query_faction_panel(_state)
+
+func query_outpost_panel() -> Dictionary:
+	return PlayerQueryApi.new().query_outpost_panel(_state)
