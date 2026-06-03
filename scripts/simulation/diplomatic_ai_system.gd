@@ -58,8 +58,20 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 
 func _send_diplomacy_message(state: WorldState, sender: TeamData,
 		target: TeamData, action: String) -> void:
+	# G-01：偵測玩家目標 → 寫入 forced_event，不直接解算
+	if state.player_id != -1:
+		var player_person: PersonData = state.persons.get(state.player_id)
+		if player_person != null and target.team_id == player_person.team_id:
+			if state.player_forced_event.is_empty():
+				state.player_forced_event = {
+					"action": "diplomacy",
+					"from_id": sender.team_id,
+					"proposal": action,
+				}
+				state.player_forced_event_id = str(randi())
+				print("[Diplomacy] Team%d 向玩家發起 %s → 寫入 forced_event" % [sender.team_id, action])
+			return
 	print("[Diplomacy] Team%d → Team%d: %s" % [sender.team_id, target.team_id, action])
-	# 透過 MessageSystem 發送（簡化：直接呼叫 handle）
 	var response: String = handle_diplomacy_message(state, target, sender, action)
 	print("[Diplomacy] Team%d 回應: %s" % [target.team_id, response])
 
