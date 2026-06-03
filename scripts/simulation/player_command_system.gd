@@ -193,6 +193,19 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 		"ignore":
 			state.player_pending_targets.erase(target_id)
 			return { "ok": true, "msg": "忽略" }
+		"set_tribute_rate":
+			var rate: float = float(state.player_state.get("tribute_rate_input", 0.1))
+			rate = clampf(rate, 0.0, 1.0)
+			if pt.faction_id == -1:
+				return { "ok": false, "msg": "玩家不在勢力中" }
+			var f: FactionData = state.factions.get(pt.faction_id)
+			if f == null:
+				return { "ok": false, "msg": "勢力不存在" }
+			if f.leader_team_id != pt.team_id:
+				return { "ok": false, "msg": "只有 leader 可設定徵收率" }
+			f.tribute_rate = rate
+			print("[PlayerCmd] set_tribute_rate → %.2f" % rate)
+			return { "ok": true, "msg": "徵收率設為 %.0f%%" % (rate * 100) }
 	return { "ok": false, "msg": "未知行動: %s" % action }
 
 # ── 被動回應（NPC 強制非戰互動）────────────────────────────

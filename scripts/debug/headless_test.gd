@@ -1835,4 +1835,9 @@ func _run_sim_test() -> void:
 		_ts.get("food_qty"), _ts.get("carry_capacity"), _ts.get("member_count")])
 	print("members_detail / team_stats: ALL PASS")
 
+	print("--- player_alerts ---")
+	print("  alerts 數量: %d" % state.player_alerts.size())
+	for a in state.player_alerts:
+		print("  %s tick=%d data=%s" % [a["type"], a["tick"], str(a["data"])])
+
 	print("=== DONE ===")

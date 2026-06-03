@@ -73,6 +73,19 @@ func resolve_consumption(state: WorldState, team_ids: Array) -> void:
 			team.resources["food"] = 0.0
 			var satisfaction: float = food_available / food_needed if food_needed > 0.0 else 0.0
 			_update_person_needs(state, tid, "food", satisfaction)
+			# G-04：玩家食物告急通知
+			if state.player_id != -1:
+				var pp: PersonData = state.persons.get(state.player_id)
+				if pp != null and pp.team_id == tid and satisfaction < 0.3:
+					var already: bool = false
+					for a in state.player_alerts:
+						if a["type"] == "food_critical": already = true; break
+					if not already:
+						state.player_alerts.append({
+							"type": "food_critical",
+							"tick": state.world.current_tick,
+							"data": { "needs_ratio": satisfaction }
+						})
 
 func _collect_from_tile(team: TeamData, src_tile: HexTileData,
 		outpost_mult: float, pop_mult: float,

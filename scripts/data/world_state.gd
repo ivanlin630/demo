@@ -42,6 +42,11 @@ var player_forced_event: Dictionary = {}
 var player_forced_event_id: String = ""
 # 對應 player_forced_event 的唯一 ID（str(randi()) 生成）
 # 空字串 = 無待處理強制事件
+var player_alerts: Array = []
+# Array[Dictionary]，格式：{ "type": String, "tick": int, "data": Dictionary }
+# 類型：food_critical / member_defected / faction_member_betrayed /
+#       subteam_destroyed / outpost_captured
+# UI 輪詢後清空（同 forced_event 模式）
 var ticks_per_day: int:
 	get: return TICKS_PER_DAY
 

@@ -3,6 +3,10 @@ class_name DiplomaticAiSystem
 
 const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
 
+# T-02：從 team_intel 取人口估算；無資料 fallback = self_pop（謹慎：視對方與己等強）
+func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
+	return state.team_intel.get(obs_id, {}).get(tgt_id, {}).get("population_est", fallback)
+
 func _calc_diplomacy_score(state: WorldState,
 		self_team: TeamData, other_team: TeamData) -> float:
 	var self_leader: PersonData = state.persons.get(self_team.leader_id)
@@ -12,8 +16,10 @@ func _calc_diplomacy_score(state: WorldState,
 		maxf(self_team.population * 5.0, 1.0)
 	var resource_need: float = clampf(1.0 - food_ratio, 0.0, 1.0)
 
+	# T-02：用估算人口，fallback = self.population（謹慎估算）
+	var other_pop_est: int = _get_pop_est(state, self_team.team_id, other_team.team_id, self_team.population)
 	var power_gap: float = clampf(
-		float(other_team.population - self_team.population) / \
+		float(other_pop_est - self_team.population) / \
 		maxf(self_team.population, 1.0), -1.0, 1.0)
 
 	var rep: float = float(self_team.known_reputations.get(other_team.team_id, 0.5))
@@ -58,8 +64,20 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 
 func _send_diplomacy_message(state: WorldState, sender: TeamData,
 		target: TeamData, action: String) -> void:
+	# G-01：偵測玩家目標 → 寫入 forced_event，不直接解算
+	if state.player_id != -1:
+		var player_person: PersonData = state.persons.get(state.player_id)
+		if player_person != null and target.team_id == player_person.team_id:
+			if state.player_forced_event.is_empty():
+				state.player_forced_event = {
+					"action": "diplomacy",
+					"from_id": sender.team_id,
+					"proposal": action,
+				}
+				state.player_forced_event_id = str(randi())
+				print("[Diplomacy] Team%d 向玩家發起 %s → 寫入 forced_event" % [sender.team_id, action])
+			return
 	print("[Diplomacy] Team%d → Team%d: %s" % [sender.team_id, target.team_id, action])
-	# 透過 MessageSystem 發送（簡化：直接呼叫 handle）
 	var response: String = handle_diplomacy_message(state, target, sender, action)
 	print("[Diplomacy] Team%d 回應: %s" % [target.team_id, response])
 
@@ -123,7 +141,13 @@ func consider_betrayal(state: WorldState, self_team: TeamData,
 		self_leader.values.get("野心", 0.5) * 0.4 + \
 		(1.0 - self_leader.values.get("信義", 0.5)) * 0.4 + \
 		(1.0 - self_leader.values.get("義氣", 0.5)) * 0.2
-	var power_gap: float = float(ally_team.population - self_team.population) / \
+	# T-02：從 faction_snapshot 讀盟友人口（非直讀 WorldState）
+	var ally_pop: int = ally_team.population  # fallback
+	if self_team.faction_id != -1:
+		var f: FactionData = state.factions.get(self_team.faction_id)
+		if f:
+			ally_pop = f.known_member_states.get(ally_team.team_id, {}).get("population", ally_team.population)
+	var power_gap: float = float(ally_pop - self_team.population) / \
 		maxf(self_team.population, 1.0)
 	if power_gap > 0.5: betrayal_score -= 0.3
 	if betrayal_score > 0.65 and randf() < 0.1:
@@ -141,4 +165,16 @@ func _execute_betrayal(state: WorldState, self_team: TeamData,
 			"type": "betrayal", "subject_id": self_team.leader_id,
 			"tick": state.world.current_tick, "intensity": 0.8
 		})
+	# G-04：勢力成員背叛通知
+	if state.player_id != -1:
+		var player_person: PersonData = state.persons.get(state.player_id)
+		if player_person != null:
+			var player_team: TeamData = state.teams.get(player_person.team_id)
+			if player_team != null and player_team.faction_id != -1 and \
+					player_team.faction_id == ally_team.faction_id:
+				state.player_alerts.append({
+					"type": "faction_member_betrayed",
+					"tick": state.world.current_tick,
+					"data": { "betrayer_id": self_team.team_id }
+				})
 	print("[Diplomacy] Team%d 背叛 Team%d" % [self_team.team_id, ally_team.team_id])

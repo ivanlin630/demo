@@ -798,6 +798,9 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 	var parent: TeamData = state.teams.get(messenger.parent_team_id)
 	if parent != null:
 		messenger.move_target = parent.tile_pos
+	# T-02 快照A：信使抵達 = 情報傳遞，更新 messenger 母隊在 faction 中的快照
+	if messenger.parent_team_id != -1:
+		state.snapshot_faction_member(messenger.parent_team_id, state.world.current_tick)
 	_msg.emit_message(state, "order_delivered",
 		"Team%d 傳令 Team%d → task=%s" % [messenger_id, target_id, order], messenger)
 	print("[Order] Team%d 傳令 Team%d → %s" % [messenger_id, target_id, order])
