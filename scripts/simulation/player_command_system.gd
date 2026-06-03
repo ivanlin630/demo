@@ -190,6 +190,57 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			state.player_state.erase("pending_trade_target")
 			return { "ok": true, "msg": "取消貿易" }
 
+		"build_outpost":
+			var outpost_type: String = str(state.player_state.get("build_type", "civilian"))
+			if outpost_type not in ["civilian", "military"]:
+				return { "ok": false, "msg": "無效據點類型" }
+			var _os := OutpostSystem.new()
+			var ok: bool = _os.start_build(state, pt, outpost_type, 1)
+			if not ok:
+				return { "ok": false, "msg": "無法建造（資源不足或距離限制）" }
+			print("[PlayerCmd] build_outpost type=%s" % outpost_type)
+			return { "ok": true, "msg": "開始建造 %s" % outpost_type }
+
+		"upgrade_outpost":
+			var _os2 := OutpostSystem.new()
+			var ok2: bool = _os2.start_upgrade_level(state, pt)
+			if not ok2:
+				return { "ok": false, "msg": "無法升級（非 owner 或已滿級）" }
+			return { "ok": true, "msg": "開始升級據點" }
+
+		"upgrade_farming":
+			var _os3 := OutpostSystem.new()
+			var ok3: bool = _os3.start_upgrade_farming(state, pt)
+			if not ok3:
+				return { "ok": false, "msg": "無法升級農業（非 civilian 或已滿）" }
+			return { "ok": true, "msg": "開始升級農業" }
+
+		"upgrade_manufacturing":
+			var _os4 := OutpostSystem.new()
+			var ok4: bool = _os4.start_upgrade_manufacturing(state, pt)
+			if not ok4:
+				return { "ok": false, "msg": "無法升級製造（條件不符）" }
+			return { "ok": true, "msg": "開始升級製造" }
+
+		"demolish_outpost":
+			var _os5 := OutpostSystem.new()
+			var tile_id5: int = pt.tile_pos.x * 1000 + pt.tile_pos.y
+			var tile5: HexTileData = state.world.tiles.get(tile_id5)
+			if tile5 == null:
+				return { "ok": false, "msg": "格子不存在" }
+			if tile5.construction_ticks_left > 0 and tile5.outpost_level == 0:
+				tile5.construction_team_id   = -1
+				tile5.construction_ticks_left = 0
+				tile5.construction_target     = {}
+				pt.current_task = TeamData.TASK_IDLE
+				return { "ok": true, "msg": "取消施工" }
+			if not _os5._has_control(state, pt_id, tile5):
+				return { "ok": false, "msg": "無支配權，無法拆除" }
+			var ok5: bool = _os5.demolish_with_control(state, pt)
+			if not ok5:
+				return { "ok": false, "msg": "無法拆除" }
+			return { "ok": true, "msg": "開始拆除據點" }
+
 		"ignore":
 			state.player_pending_targets.erase(target_id)
 			return { "ok": true, "msg": "忽略" }
