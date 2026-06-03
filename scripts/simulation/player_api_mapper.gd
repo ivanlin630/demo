@@ -440,7 +440,7 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
 			"member_orders": [], "actions": []}
 	var is_leader: bool = f.leader_team_id == pt.team_id
-	var pending_orders: Dictionary = {}
+	var pending_orders: Dictionary = {}  # Plan 3 Task 1 will add player_pending_orders to WorldState; change to state.player_pending_orders then
 	var member_orders: Array = []
 	for mid in f.member_team_ids:
 		var mt: TeamData = state.teams.get(mid)
