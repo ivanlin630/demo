@@ -16,7 +16,8 @@ func execute(state: WorldState, team: TeamData) -> Array:
 		team.unrest_turns = maxi(team.unrest_turns - UNREST_REPLACE_THRESHOLD, 0)
 		SimMessageSystem.new().emit_message(state, "replace",
 			"Team %d 發生領袖替換，新領袖 Person %d" % [team.team_id, team.leader_id],
-			team)
+			team,
+			{ "origin": str(team.team_id) })
 	return []
 
 func _get_dissenters(state: WorldState, team: TeamData) -> Array:

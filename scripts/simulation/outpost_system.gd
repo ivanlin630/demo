@@ -88,8 +88,13 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.outpost_owner = tile.construction_team_id
 			var n: String = get_outpost_name(tile.outpost_type, tile.outpost_level)
 			SimMessageSystem.new().emit_message(state, "outpost_built",
-				"Team%d 建成 %s at (%d,%d)" % [team.team_id, n, tile.tile_pos.x, tile.tile_pos.y],
-				team)
+				TextBank.fmt("outpost_built", "honest", {
+					"origin": str(team.team_id), "name": n,
+					"x": str(tile.tile_pos.x), "y": str(tile.tile_pos.y)
+				}),
+				team,
+				{ "origin": str(team.team_id), "name": n,
+				  "x": str(tile.tile_pos.x), "y": str(tile.tile_pos.y) })
 			print("[Outpost] Team%d 建成 %s（Lv%d）at (%d,%d)" % [
 				team.team_id, n, tile.outpost_level, tile.tile_pos.x, tile.tile_pos.y])
 		"upgrade_level":
