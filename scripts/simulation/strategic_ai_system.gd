@@ -77,9 +77,10 @@ func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) ->
 func _find_weakest_member(state: WorldState, faction: FactionData) -> int:
     var weakest_id: int = -1; var weakest_pop: int = 9999
     for tid in faction.member_team_ids:
-        var t: TeamData = state.teams.get(tid)
-        if t and t.population < weakest_pop:
-            weakest_pop = t.population; weakest_id = tid
+        # T-02：從 faction_snapshot 讀人口；無快照 = 9999（視為強健，不優先支援）
+        var pop: int = faction.known_member_states.get(tid, {}).get("population", 9999)
+        if pop < weakest_pop:
+            weakest_pop = pop; weakest_id = tid
     return weakest_id
 
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
@@ -161,6 +162,11 @@ func _evaluate_alliance_need(state: WorldState, faction: FactionData) -> void:
 func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
     var total: int = 0
     for tid in faction.member_team_ids:
+        # T-02：從快照讀人口；無快照 fallback = 直讀（自己的隊伍應有快照）
         var t: TeamData = state.teams.get(tid)
-        if t: total += t.population
+        var snap_pop: int = faction.known_member_states.get(tid, {}).get("population", -1)
+        if snap_pop >= 0:
+            total += snap_pop
+        elif t:
+            total += t.population
     return total
