@@ -746,6 +746,13 @@ func _return_pool_equipment(state: WorldState) -> void:
 					team.resources[item["grade"]] = int(team.resources.get(item["grade"], 0)) + 1
 					p.equipment[slot] = { "type": "none", "grade": "" }
 
+func cleanup_encounter(state: WorldState) -> void:
+	_return_pool_equipment(state)
+	state.encounter_units.clear()
+	state.encounter_active      = false
+	state.encounter_attacker_id = -1
+	state.encounter_defender_id = -1
+
 func _sync_back_units(state: WorldState, team_id: int) -> void:
 	var team: TeamData = state.teams.get(team_id)
 	if team == null: return

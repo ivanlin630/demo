@@ -6,6 +6,7 @@ const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
 
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
+var _encounter:   EncounterSystem    = EncounterSystem.new()
 var _action_registry: Dictionary = {}
 
 # ── 主動互動 ────────────────────────────────────────────────
@@ -72,6 +73,7 @@ func _setup_registry() -> void:
 		"surrender_in_encounter": _action_surrender_in_encounter,
 		"set_faction_goal":       _action_set_faction_goal,
 		"order_faction_member":   _action_order_faction_member,
+		"clear_member_order":     _action_clear_member_order,
 	}
 
 # 執行玩家主動行動
@@ -336,8 +338,15 @@ func _action_recall_subteam(state: WorldState, _target_id: int, pt: TeamData, pt
 		return { "ok": false, "msg": "目標不是玩家子隊" }
 	if pt.population < 2:
 		return { "ok": false, "msg": "人數不足以派信使" }
+	var herald_leader_id: int = -1
+	for pid in pt.named_members:
+		if pid != pt.leader_id:
+			herald_leader_id = pid
+			break
+	if herald_leader_id == -1:
+		return { "ok": false, "msg": "無可用的信使人選" }
 	var herald_id: int = SubteamSystem.new().dispatch(
-		state, pt_id, -1, 1, TeamData.TASK_HERALD,
+		state, pt_id, herald_leader_id, 1, TeamData.TASK_HERALD,
 		recall_sub.tile_pos, recall_sub_id, TeamData.TASK_MERGE)
 	if herald_id == -1:
 		return { "ok": false, "msg": "派信使失敗" }
@@ -451,8 +460,7 @@ func _action_surrender_in_encounter(state: WorldState, _target_id: int, pt: Team
 			pt.resources[res6b]    = float(pt.resources.get(res6b, 0)) - amt6b
 			enemy6.resources[res6b] = float(enemy6.resources.get(res6b, 0)) + amt6b
 		_interaction.subjugate_team(state, enemy_id6, pt_id)
-		state.encounter_active = false
-		state.encounter_units  = []
+		_encounter.cleanup_encounter(state)
 		print("[PlayerCmd] 玩家戰中投降，Team%d 接受" % enemy_id6)
 		return { "ok": true, "msg": "投降被接受" }
 	else:
@@ -487,6 +495,16 @@ func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamDa
 		mt9.move_target = Vector2i(mq9, mr9)
 	print("[PlayerCmd] order_faction_member Team%d → %s" % [member_id9, m_task9])
 	return { "ok": true, "msg": "已下令 Team%d" % member_id9 }
+
+func _action_clear_member_order(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	# player_state 需設定：order_member_id（目標 team）
+	var member_id: int = int(state.player_state.get("order_member_id", -1))
+	var mt: TeamData = state.teams.get(member_id)
+	if mt == null or mt.faction_id != pt.faction_id:
+		return { "ok": false, "msg": "目標不是同勢力成員" }
+	mt.player_commanded_task = ""
+	print("[PlayerCmd] clear_member_order Team%d" % member_id)
+	return { "ok": true, "msg": "已清除 Team%d 的直接指令" % member_id }
 
 # ── 被動回應（NPC 強制非戰互動）────────────────────────────
 
