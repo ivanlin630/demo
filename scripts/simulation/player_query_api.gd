@@ -204,6 +204,52 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			"cancel_move", {}
 		))
 
+	# subjugate_enemy（戰後可收編）
+	var ler: Variant = state.get("last_encounter_result")
+	if ler != null and ler.get("can_subjugate", false):
+		actions.append(PlayerApiMapper.map_available_action(
+			"subjugate_enemy", "收編敗者", true, "",
+			{
+				"allowed_kinds": PackedStringArray(["none"]),
+				"requires_visible_target": false,
+				"requires_forced_interaction": false,
+				"allows_self_target": false
+			},
+			"execute_action",
+			{"action_id": "subjugate_enemy",
+			 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}}
+		))
+
+	# confirm_gather_intel（等待選題）
+	if state.player_state.has("pending_intel_target"):
+		actions.append(PlayerApiMapper.map_available_action(
+			"confirm_gather_intel", "確認打聽", true, "",
+			{
+				"allowed_kinds": PackedStringArray(["none"]),
+				"requires_visible_target": false,
+				"requires_forced_interaction": false,
+				"allows_self_target": false
+			},
+			"execute_action",
+			{"action_id": "confirm_gather_intel",
+			 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}}
+		))
+
+	# offer_surrender（戰鬥中對目標提出投降）
+	if state.encounter_active and focus_team_id != -1:
+		actions.append(PlayerApiMapper.map_available_action(
+			"offer_surrender", "投降請和", true, "",
+			{
+				"allowed_kinds": PackedStringArray(["team"]),
+				"requires_visible_target": true,
+				"requires_forced_interaction": false,
+				"allows_self_target": false
+			},
+			"execute_action",
+			{"action_id": "offer_surrender",
+			 "target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}}
+		))
+
 	return actions
 
 func query_faction_panel(state: WorldState) -> Dictionary:
@@ -236,4 +282,24 @@ func _action_label(action_id: String) -> String:
 		"demand_tribute":  return "要求納貢"
 		"extort":          return "勒索"
 		"recruit":         return "招募"
+		"gather_intel":           return "打聽情報"
+		"confirm_gather_intel":   return "確認打聽"
+		"subjugate_enemy":        return "收編敗者"
+		"offer_surrender":        return "投降請和"
+		"surrender_in_encounter": return "戰中投降"
+		"leave_faction":          return "退出勢力"
+		"betray_faction":         return "背叛勢力"
+		"disband_faction":        return "解散勢力"
+		"set_faction_goal":       return "設定勢力目標"
+		"order_faction_member":   return "下令成員"
+		"clear_member_order":     return "清除指令"
+		"set_tribute_rate":       return "調整徵收率"
+		"build_outpost":          return "建設前哨站"
+		"upgrade_outpost":        return "升級等級"
+		"upgrade_farming":        return "升級農作"
+		"upgrade_manufacturing":  return "升級製造"
+		"demolish_outpost":       return "拆除前哨站"
+		"dispatch_subteam":       return "派遣子隊"
+		"order_subteam":          return "下令子隊"
+		"recall_subteam":         return "召回子隊"
 	return action_id
