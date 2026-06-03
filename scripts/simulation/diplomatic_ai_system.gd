@@ -165,4 +165,16 @@ func _execute_betrayal(state: WorldState, self_team: TeamData,
 			"type": "betrayal", "subject_id": self_team.leader_id,
 			"tick": state.world.current_tick, "intensity": 0.8
 		})
+	# G-04：勢力成員背叛通知
+	if state.player_id != -1:
+		var player_person: PersonData = state.persons.get(state.player_id)
+		if player_person != null:
+			var player_team: TeamData = state.teams.get(player_person.team_id)
+			if player_team != null and player_team.faction_id != -1 and \
+					player_team.faction_id == ally_team.faction_id:
+				state.player_alerts.append({
+					"type": "faction_member_betrayed",
+					"tick": state.world.current_tick,
+					"data": { "betrayer_id": self_team.team_id }
+				})
 	print("[Diplomacy] Team%d 背叛 Team%d" % [self_team.team_id, ally_team.team_id])
