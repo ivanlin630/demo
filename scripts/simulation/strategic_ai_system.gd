@@ -71,6 +71,9 @@ func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
         if d < best_d: best_d = d; best_id = tid
     return best_id
 
+func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
+    return state.team_intel.get(obs_id, {}).get(tgt_id, {}).get("population_est", fallback)
+
 func _find_weakest_member(state: WorldState, faction: FactionData) -> int:
     var weakest_id: int = -1; var weakest_pop: int = 9999
     for tid in faction.member_team_ids:
@@ -98,10 +101,14 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
         Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
         Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1),
     ]
+    # T-02：用 leader 的 team_intel 取目標最後已知位置
+    var leader_id: int = faction.leader_team_id
+    var target_pos: Vector2i = state.team_intel.get(leader_id, {}).get(
+        target_id, {}).get("tile_pos", target.tile_pos)
     for i in range(member_teams.size()):
         var t: TeamData = member_teams[i]
         var dir: Vector2i = dirs[i % dirs.size()]
-        t.strategic_assignments[target_id] = target.tile_pos + dir * 2
+        t.strategic_assignments[target_id] = target_pos + dir * 2
 
 func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     var enemy_teams: Array = []
@@ -134,16 +141,18 @@ func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
 func _evaluate_alliance_need(state: WorldState, faction: FactionData) -> void:
     var self_pop: int = _faction_total_pop(state, faction)
     var threat_map: Dictionary = {}
-    # 只計算 faction 成員已偵測到的敵方（非全知）
-    var seen: Dictionary = {}
+    var seen: Dictionary = {}  # tid → obs_id（記錄是哪個 member 看到的）
     for mid in faction.member_team_ids:
         for tid in state.team_discovered.get(mid, []):
-            seen[tid] = true
+            seen[tid] = mid
     for tid in seen:
         var t: TeamData = state.teams.get(tid)
         if t == null: continue
         if t.faction_id == faction.faction_id or t.faction_id == -1: continue
-        threat_map[t.faction_id] = threat_map.get(t.faction_id, 0) + t.population
+        # T-02：讀目擊者 member 的 team_intel 估算值
+        var obs_id: int = seen[tid]
+        var pop_est: int = _get_pop_est(state, obs_id, tid, t.population)
+        threat_map[t.faction_id] = threat_map.get(t.faction_id, 0) + pop_est
     for fid in threat_map:
         if threat_map[fid] > self_pop * 1.5:
             print("[StrategicAI] Faction%d 受威脅，尋求結盟" % faction.faction_id)
