@@ -52,7 +52,7 @@ if target_id == state.teams[state.player_id].team_id:
 #### G-02. 征服（戰後強制加入）
 - **NPC**：`interaction_system._try_subjugate` — 戰後贏家可強制敗者加入勢力（自動觸發）
 - **玩家**：勝戰只得戰利品（last_encounter_result），沒有「征服/收編」選項
-- **討論**：待確認
+- **討論結論**：✅ 2026-06-04 — 選 C
 
 **俘虜與征服的關係（獨立機制）：**
 - 俘虜（`prisoner_population`）= 戰中被制伏的個體，存入 winner
@@ -60,22 +60,19 @@ if target_id == state.teams[state.player_id].team_id:
 - 兩者共存：勝戰可同時擁有俘虜 + 征服敵 team
 - NPC 現行邏輯：`_try_subjugate` 在 `_resolve_combat_end` 自動呼叫；玩家版改為玩家主動選擇
 
-**提議選項：**
+**結論（C = A + B 並存）：**
 
-| 選項 | 做法 | 語意 | 複雜度 |
-|---|---|---|---|
-| **A. 戰後加「收編」按鈕** | `last_encounter_result` 加 `can_subjugate` flag；take_loot 畫面加「收編」→ 呼叫 `_try_subjugate` | 強制臣服；敗者 loyalty 低，日後叛離風險高 | 低（底層已有） |
-| **B. 只走 propose_alliance** | 戰後主動提同盟，敗者仍可拒絕 | 外交平等，非強制 | 零（已有） |
-| **C. 兩者並存** | A + B 同時存在，各有後果 | 最貼近歷史感 | A 的延伸 |
+| 路徑 | 做法 | 語意 |
+|---|---|---|
+| **強制收編** | `last_encounter_result` 加 `can_subjugate` flag；take_loot 畫面加「收編」→ 呼叫 `_try_subjugate` | 強制臣服；敗者 loyalty 低，日後叛離風險高 |
+| **外交收編** | 戰後主動 `propose_alliance`，敗者仍可拒絕 | 平等外交，接受者 loyalty 較高 |
 
-待確認選項。
+玩家自選路徑，各有後果。
 
 #### G-03. 背叛/離開勢力
 - **NPC**：`diplomatic_ai_system.consider_betrayal` → `_execute_betrayal`
 - **玩家**：加入勢力後無法離開；無 leave_faction / betray_faction 指令
-- **討論**：待確認
-
-**三種情境：**
+- **討論結論**：✅ 2026-06-04 — A + B 都實作
 
 **情境 A：玩家是成員（非 leader）**
 
@@ -89,15 +86,17 @@ if target_id == state.teams[state.player_id].team_id:
 **情境 B：玩家是 leader**
 - `disband_faction`：`world_state.disband_faction()`（底層已有）；所有成員 `faction_id = -1`；各成員 loyalty 劇降
 
-**情境 C：不實作**（加入勢力永久承諾）— 太嚴苛，不推薦。
-
-待確認情境選擇。
+**玩家 action 清單（G-03）：**
+| action_id | 適用情境 | 底層呼叫 |
+|---|---|---|
+| `leave_faction` | 玩家為成員 | `faction_id = -1`；發 diplomatic message |
+| `betray_faction` | 玩家為成員 | `_execute_betrayal` 等效；`player_hostile_teams`；`betrayal_count++` |
+| `disband_faction` | 玩家為 leader | `world_state.disband_faction()` |
 
 #### G-04. 通知機制
-- **NPC**：不需要，每 tick 直讀 WorldState（全知自身狀態，零延遲）
 - **玩家**：只有 `player_forced_event` 輪詢；攻擊警告、資源告急、勢力事件等無 push
-- **說明**：NPC 是程式直讀，無「通知」概念；玩家 UI 只在主動查詢時更新，需要 push 路徑
-- **討論**：待確認
+- **T-02 後更正**：NPC AI 改讀 `team_intel` / `faction_snapshot`（非直讀 WorldState），NPC 亦受資訊限制——見 T-02 結論
+- **討論結論**：✅ 2026-06-04
 
 **提議資料結構**：
 ```gdscript
@@ -236,7 +235,15 @@ UI 端輪詢 `player_alerts`，顯示後清空（同 `forced_event` 模式）。
 | **A. 遭遇戰中加投降按鈕** | 戰中玩家主動觸發 | 資源轉移 + 被收編（`_try_subjugate`）；winner 決定是否接受 |
 | **B. 外交 `offer_surrender` action** | 任意時機（含開戰前、信使送達） | 同上，透過 diplomatic 路徑 |
 
-推薦 **A+B**：A 是戰場即時，B 是外交通道。接收端 `diplomatic_ai_system:offer_surrender` 已有底層。待確認。
+**結論（A+B）**：A 戰中即時 + B 外交通道。接收端 `diplomatic_ai_system:offer_surrender` 底層已有。
+
+**玩家 action 清單（G-07）：**
+| action_id | 時機 | 底層 |
+|---|---|---|
+| `offer_surrender`（外交） | 任意時機 | `player_forced_event` → diplomatic 路徑；對方 AI 按好戰/慎重/實力比決定接受 |
+| 遭遇戰投降按鈕 | `encounter_active` 期間 | 呼叫同 `offer_surrender`；winner 接受 → 資源轉移 + `_try_subjugate` |
+
+- **討論結論**：✅ 2026-06-04
 
 #### G-08. 設定徵收率
 - **NPC**：`faction.tribute_rate` 由 FactionAI 隱式管理
@@ -259,33 +266,39 @@ UI 端輪詢 `player_alerts`，顯示後清空（同 `forced_event` 模式）。
 | **A. 玩家 leader 直接設定** | `set_tribute_rate` action；接受 0.0–1.0；底層 `tribute_rate` 欄位已有 |
 | **B. AI 管理，玩家不直接控制** | 不實作，玩家用 `demand_tribute` 一次性徵收 |
 
-待確認。
+**結論（A）**：`set_tribute_rate` action；接受 0.0–1.0；`faction.tribute_rate` 欄位已有。高率 → 成員 loyalty↓ → 現有 `event_N3_defect` / `event_split` 自動觸發，零新邏輯。
+
+- **討論結論**：✅ 2026-06-04
 
 #### G-09. 勢力策略下令
 - **NPC**：`faction_ai_system` + `strategic_ai_system` 每 tick 自動設 goals/strategy
 - **玩家**：無法改 faction goals 或對成員下戰略指令
-- **討論**：待確認
+- **討論結論**：✅ 2026-06-04 — 選 D（B + C）
 
-**提議選項：**
+**結論（D = B + C）：**
 
-| 選項 | 做法 | 玩家影響力 |
+**B：玩家設定 faction goal**
+- `set_faction_goal` action；接受 `expand / defend / trade_net`
+- 寫入 `faction.player_goal_override`；faction_ai 讀此 override 跳過自動計算
+- 抗命：好戰/野心高成員 → values 衝突 → unrest 累積 → 閾值後忽略 override，恢復自主 AI → 長期 event_split / N3_defect
+
+**C：對個別成員下令**
+- `order_faction_member` action；直設 target team `player_commanded_task` + `move_target`
+- 抗命層一：faction_ai 每 `STRATEGIC_INTERVAL` 重跑 → values 衝突自然覆寫
+- 抗命層二：loyalty 門檻
+  ```
+  if loyalty > 0.4 → 執行 player_commanded_task
+  else → 執行 AI 自算 task；unrest++
+  unrest > MAX → event_split / N3_defect
+  ```
+
+**新增欄位：**
+| 欄位 | 位置 | 說明 |
 |---|---|---|
-| **A. 完全 AI 管理** | 不實作；玩家只透過 diplomacy/tribute 間接影響 | 低（間接） |
-| **B. 玩家設定 faction goal** | `set_faction_goal` action；接受 `expand/defend/trade_net`；faction_ai 讀此 override | 中 |
-| **C. 玩家對個別成員 team 下令** | `order_faction_member` action；直接設 target team `current_task` + `move_target` | 高（微觀） |
-| **D. B + C** | 總策略 + 個別下令 | 最高 |
+| `player_goal_override: String` | `FactionData` | `""` = 無 override |
+| `player_commanded_task: String` | `TeamData` | `""` = 無命令 |
 
-**B 的抗命機制（無需新事件）：**
-```
-玩家設 faction.player_goal_override = "defend"
-↓ faction_ai 讀 override，跳過自動計算
-↓ 好戰/野心高的成員 team → values 與任務衝突 → unrest 累積
-↓ unrest > 閾值 → faction_ai 忽略 override，該 team 恢復自主 AI
-↓ 長期 → event_split / N3_defect 觸發
-```
-不需新事件，是 AI 讀取邏輯加 if 條件。
-
-待確認選項。
+零新事件，吃現有 unrest / split / defect 系統。
 
 ---
 
@@ -357,6 +370,12 @@ AI 對「已發現的非勢力」team 統一改讀 `team_intel`；dist=0 時 noi
 
 | 缺口 | 結論 | 日期 |
 |---|---|---|
+| G-02 征服 | A+B 並存：強制收編（_try_subjugate + can_subjugate flag）+ 外交收編（propose_alliance）；玩家自選 | 2026-06-04 |
+| G-03 背叛/離開勢力 | A+B：成員可 leave/betray（betrayal_count++）；leader 可 disband_faction | 2026-06-04 |
+| G-04 通知機制 | player_alerts Array；food_critical/member_defected/faction_member_betrayed/subteam_destroyed/outpost_captured | 2026-06-04 |
+| G-07 投降 | A+B：遭遇戰按鈕 + 外交 offer_surrender；底層已有 | 2026-06-04 |
+| G-08 設定徵收率 | set_tribute_rate action；0.0–1.0；高率→loyalty↓→現有事件觸發 | 2026-06-04 |
+| G-09 勢力策略下令 | D：set_faction_goal（player_goal_override）+ order_faction_member（player_commanded_task）；loyalty門檻+unrest抗命 | 2026-06-04 |
 | G-05 據點/建設 | 吃 NPC 路徑；接手機制改 _tick_construction；支配權 _has_control；駐守/巡邏 task 後續實作 | 2026-06-03 |
 | G-06 子隊管理 | 混合記名/匿名；底層已齊只需 API 接線；召回=信使(TASK_HERALD)帶快照座標；進視野自動追蹤；_deliver_order 補 move_target 設定 | 2026-06-03 |
 | G-01 NPC外交繞過 | diplomatic_ai try_proactive_diplomacy 加 player 攔截 → player_forced_event；零額外介面 | 2026-06-03 |

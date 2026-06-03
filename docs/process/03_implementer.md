@@ -43,6 +43,8 @@ git push -u origin feat/<feature>
 
 2. 寫 hand-back 文件到 `docs/superpowers/handbacks/YYYY-MM-DD-<feature>.md`：
 
+3. 回報分支給user
+
 ```markdown
 # Hand Back: <功能名稱>
 

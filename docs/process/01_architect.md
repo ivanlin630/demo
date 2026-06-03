@@ -7,9 +7,12 @@ brainstorm → spec → plan 設計，不實作。
 - 審核 Plan
 - 確保跨系統一致性
 - Merge 管理
+- 更新docs文件
+
+必須先閱讀：
+- docs/invariants.md
 
 禁止：
-
 - 直接修改程式碼
 - 為了實作方便未經同意改 Spec
 
