@@ -3,6 +3,10 @@ class_name DiplomaticAiSystem
 
 const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
 
+# T-02：從 team_intel 取人口估算；無資料 fallback = self_pop（謹慎：視對方與己等強）
+func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
+	return state.team_intel.get(obs_id, {}).get(tgt_id, {}).get("population_est", fallback)
+
 func _calc_diplomacy_score(state: WorldState,
 		self_team: TeamData, other_team: TeamData) -> float:
 	var self_leader: PersonData = state.persons.get(self_team.leader_id)
@@ -12,8 +16,10 @@ func _calc_diplomacy_score(state: WorldState,
 		maxf(self_team.population * 5.0, 1.0)
 	var resource_need: float = clampf(1.0 - food_ratio, 0.0, 1.0)
 
+	# T-02：用估算人口，fallback = self.population（謹慎估算）
+	var other_pop_est: int = _get_pop_est(state, self_team.team_id, other_team.team_id, self_team.population)
 	var power_gap: float = clampf(
-		float(other_team.population - self_team.population) / \
+		float(other_pop_est - self_team.population) / \
 		maxf(self_team.population, 1.0), -1.0, 1.0)
 
 	var rep: float = float(self_team.known_reputations.get(other_team.team_id, 0.5))
@@ -135,7 +141,13 @@ func consider_betrayal(state: WorldState, self_team: TeamData,
 		self_leader.values.get("野心", 0.5) * 0.4 + \
 		(1.0 - self_leader.values.get("信義", 0.5)) * 0.4 + \
 		(1.0 - self_leader.values.get("義氣", 0.5)) * 0.2
-	var power_gap: float = float(ally_team.population - self_team.population) / \
+	# T-02：從 faction_snapshot 讀盟友人口（非直讀 WorldState）
+	var ally_pop: int = ally_team.population  # fallback
+	if self_team.faction_id != -1:
+		var f: FactionData = state.factions.get(self_team.faction_id)
+		if f:
+			ally_pop = f.known_member_states.get(ally_team.team_id, {}).get("population", ally_team.population)
+	var power_gap: float = float(ally_pop - self_team.population) / \
 		maxf(self_team.population, 1.0)
 	if power_gap > 0.5: betrayal_score -= 0.3
 	if betrayal_score > 0.65 and randf() < 0.1:
