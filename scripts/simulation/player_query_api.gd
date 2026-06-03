@@ -206,6 +206,13 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 
 	return actions
 
+func query_faction_panel(state: WorldState) -> Dictionary:
+	var check := _check_player(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	return PlayerApiMapper.map_query_envelope(true, "ok", "",
+		{"faction_panel": PlayerApiMapper.map_faction_panel(state)})
+
 func _action_label(action_id: String) -> String:
 	match action_id:
 		"ignore":          return "忽略"

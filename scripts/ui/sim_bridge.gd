@@ -134,3 +134,6 @@ func refresh_interaction_targets() -> void:
 # 設定玩家狀態欄位（如 tribute_rate_input）
 func set_player_input(key: String, value: Variant) -> void:
 	_state.player_state[key] = value
+
+func query_faction_panel() -> Dictionary:
+	return PlayerQueryApi.new().query_faction_panel(_state)

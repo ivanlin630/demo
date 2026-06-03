@@ -1791,4 +1791,11 @@ func _run_sim_test() -> void:
 
 	print("SimBridge Player API Integration: ALL PASS")
 
+	# --- faction_panel API ---
+	var _fp_api := PlayerQueryApi.new()
+	var _fp_result := _fp_api.query_faction_panel(state)
+	print("[Test] query_faction_panel ok=%s in_faction=%s" % [
+		str(_fp_result.get("ok")),
+		str(_fp_result.get("data", {}).get("faction_panel", {}).get("in_faction"))])
+
 	print("=== DONE ===")
