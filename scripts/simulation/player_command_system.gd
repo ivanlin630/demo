@@ -190,6 +190,45 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 			state.player_state.erase("pending_trade_target")
 			return { "ok": true, "msg": "取消貿易" }
 
+		"offer_surrender":
+			var tgt6: TeamData = state.teams.get(target_id)
+			if tgt6 == null:
+				return { "ok": false, "msg": "目標不存在" }
+			var resp6: String = _diplomatic.handle_diplomacy_message(state, tgt6, pt, "offer_surrender")
+			state.player_pending_targets.erase(target_id)
+			if resp6 == "accept":
+				for res6 in ["food", "coin", "goods"]:
+					var amount6: float = float(pt.resources.get(res6, 0)) * 0.3
+					pt.resources[res6]   = float(pt.resources.get(res6, 0)) - amount6
+					tgt6.resources[res6] = float(tgt6.resources.get(res6, 0)) + amount6
+				_interaction.subjugate_team(state, target_id, pt_id)
+				print("[PlayerCmd] 玩家投降 Team%d 接受" % target_id)
+				return { "ok": true, "msg": "投降被接受，已被收編" }
+			else:
+				return { "ok": false, "msg": "對方拒絕接受投降" }
+
+		"surrender_in_encounter":
+			if not state.encounter_active:
+				return { "ok": false, "msg": "非戰鬥中" }
+			var enemy_id6: int = state.encounter_defender_id if state.encounter_attacker_id == pt_id \
+				else state.encounter_attacker_id
+			var enemy6: TeamData = state.teams.get(enemy_id6)
+			if enemy6 == null:
+				return { "ok": false, "msg": "找不到對手" }
+			var resp6b: String = _diplomatic.handle_diplomacy_message(state, enemy6, pt, "offer_surrender")
+			if resp6b == "accept":
+				for res6b in ["food", "coin", "goods"]:
+					var amt6b: float = float(pt.resources.get(res6b, 0)) * 0.3
+					pt.resources[res6b]    = float(pt.resources.get(res6b, 0)) - amt6b
+					enemy6.resources[res6b] = float(enemy6.resources.get(res6b, 0)) + amt6b
+				_interaction.subjugate_team(state, enemy_id6, pt_id)
+				state.encounter_active = false
+				state.encounter_units  = []
+				print("[PlayerCmd] 玩家戰中投降，Team%d 接受" % enemy_id6)
+				return { "ok": true, "msg": "投降被接受" }
+			else:
+				return { "ok": false, "msg": "對方拒絕" }
+
 		"leave_faction":
 			if pt.faction_id == -1:
 				return { "ok": false, "msg": "玩家不在勢力中" }
