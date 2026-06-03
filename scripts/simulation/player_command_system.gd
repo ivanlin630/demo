@@ -6,6 +6,7 @@ const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
 
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
+var _action_registry: Dictionary = {}
 
 # ── 主動互動 ────────────────────────────────────────────────
 
@@ -37,6 +38,42 @@ func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
 		actions.append("recruit")
 	return actions
 
+# ── Registry 初始化 ───────────────────────────────────────────
+
+func _setup_registry() -> void:
+	_action_registry = {
+		"trade":                  _action_trade,
+		"propose_alliance":       _action_propose_alliance,
+		"demand_tribute":         _action_demand_tribute,
+		"attack":                 _action_attack,
+		"extort":                 _action_extort,
+		"recruit":                _action_recruit,
+		"recruit_anon":           _action_recruit_anon,
+		"take_loot":              _action_take_loot,
+		"leave_loot":             _action_leave_loot,
+		"establish_faction":      _action_establish_faction_cmd,
+		"refresh_targets":        _action_refresh_targets,
+		"confirm_trade":          _action_confirm_trade,
+		"cancel_trade":           _action_cancel_trade,
+		"set_tribute_rate":       _action_set_tribute_rate,
+		"build_outpost":          _action_build_outpost,
+		"upgrade_outpost":        _action_upgrade_outpost,
+		"upgrade_farming":        _action_upgrade_farming,
+		"upgrade_manufacturing":  _action_upgrade_manufacturing,
+		"demolish_outpost":       _action_demolish_outpost,
+		"dispatch_subteam":       _action_dispatch_subteam,
+		"order_subteam":          _action_order_subteam,
+		"recall_subteam":         _action_recall_subteam,
+		"subjugate_enemy":        _action_subjugate_enemy,
+		"leave_faction":          _action_leave_faction,
+		"betray_faction":         _action_betray_faction,
+		"disband_faction":        _action_disband_faction,
+		"offer_surrender":        _action_offer_surrender,
+		"surrender_in_encounter": _action_surrender_in_encounter,
+		"set_faction_goal":       _action_set_faction_goal,
+		"order_faction_member":   _action_order_faction_member,
+	}
+
 # 執行玩家主動行動
 # 返回 { "ok": bool, "msg": String }
 func execute_action(state: WorldState, target_id: int, action: String) -> Dictionary:
@@ -44,409 +81,412 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 	var pt_id: int   = _get_player_team_id(state)
 	if pt == null:
 		return { "ok": false, "msg": "找不到玩家 team" }
-	match action:
-		"trade":
-			var tgt: TeamData = state.teams.get(target_id)
-			if tgt == null:
-				state.player_pending_targets.erase(target_id)
-				return { "ok": false, "msg": "目標不存在" }
-			# Store pending trade target; UI will query preview then confirm
-			state.player_state["pending_trade_target"] = target_id
-			return { "ok": true, "msg": "等待確認",
-					 "requires_preview": true, "preview_target_id": target_id }
-		"propose_alliance":
-			var tgt: TeamData = state.teams.get(target_id)
-			if tgt == null:
-				return { "ok": false, "msg": "目標不存在" }
-			var resp: String = _diplomatic.handle_diplomacy_message(
-				state, tgt, pt, "propose_alliance")
-			if resp == "accept":
-				if pt.faction_id == -1 and tgt.faction_id == -1:
-					state.create_faction(pt_id)   # 玩家為領袖（G5 修正）
-				_diplomatic._form_alliance(state, pt, tgt)
-				print("[PlayerCmd] 同盟成立，勢力%d" % pt.faction_id)
-			state.player_pending_targets.erase(target_id)
-			return { "ok": resp == "accept", "msg": "外交結果: %s" % resp }
-		"demand_tribute":
-			var tgt: TeamData = state.teams.get(target_id)
-			if tgt == null:
-				return { "ok": false, "msg": "目標不存在" }
-			var resp: String = _diplomatic.handle_diplomacy_message(
-				state, tgt, pt, "demand_tribute")
-			state.player_pending_targets.erase(target_id)
+	if action == "ignore":
+		state.player_pending_targets.erase(target_id)
+		return { "ok": true, "msg": "忽略" }
+	if _action_registry.is_empty():
+		_setup_registry()
+	if not _action_registry.has(action):
+		return { "ok": false, "msg": "未知行動: %s" % action }
+	return _action_registry[action].call(state, target_id, pt, pt_id)
 
-			if resp == "accept":
-				var amount: float = float(tgt.resources.get("coin", 0)) * 0.1  # TEST VALUE
-				tgt.resources["coin"] = float(tgt.resources.get("coin", 0)) - amount
-				pt.resources["coin"]  = float(pt.resources.get("coin", 0)) + amount
-				print("[PlayerCmd] 索貢成功 Team%d→玩家 %.0f coin" % [target_id, amount])
-				return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
-			else:
-				# 拒絕 → 關係惡化
-				tgt.unrest_turns += 2
-				if not state.player_hostile_teams.has(target_id):
-					state.player_hostile_teams.append(target_id)
-				var leader_p: PersonData = state.persons.get(tgt.leader_id)
-				if leader_p:
-					leader_p.memory.append({
-						"event_id": state.world.current_tick,
-						"intensity": "significant",
-						"reaction": "tribute_refused"
-					})
-				print("[PlayerCmd] 索貢遭拒 Team%d→hostile" % target_id)
-				return { "ok": false, "msg": "索貢遭拒，關係惡化" }
-		"attack":
-			var tgt: TeamData = state.teams.get(target_id)
-			if tgt == null:
-				return { "ok": false, "msg": "目標不存在" }
-			state.encounter_attacker_id = pt_id
-			state.encounter_defender_id = target_id
-			state.encounter_active      = true
-			if not state.player_hostile_teams.has(target_id):
-				state.player_hostile_teams.append(target_id)
-			state.player_pending_targets.erase(target_id)
-			print("[PlayerCmd] 玩家發起攻擊 Team%d → Team%d" % [pt_id, target_id])
-			return { "ok": true, "msg": "發起攻擊" }
-		"extort":
-			var extort_result := _interaction.resolve_extortion_direct(state, pt_id, target_id)
-			state.player_pending_targets.erase(target_id)
-			if not extort_result.get("accepted", true):
-				var tgt2: TeamData = state.teams.get(target_id)
-				if tgt2:
-					tgt2.unrest_turns += 1
-				if not state.player_hostile_teams.has(target_id):
-					state.player_hostile_teams.append(target_id)
-				print("[PlayerCmd] 勒索遭拒 Team%d → hostile" % target_id)
-			return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", "") }
-		"recruit":
-			var tgt: TeamData = state.teams.get(target_id)
-			if tgt == null:
-				state.player_pending_targets.erase(target_id)
-				return { "ok": false, "msg": "目標不存在" }
+# ── Action Handlers ───────────────────────────────────────────
 
-			# 找低忠誠 named member（排除 leader）
-			var willing: Array = []
-			for pid in tgt.named_members:
-				if pid == tgt.leader_id: continue
-				var person: PersonData = state.persons.get(pid)
-				if person and person.loyalty < 0.4:
-					willing.append(pid)
+func _action_trade(state: WorldState, target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null:
+		state.player_pending_targets.erase(target_id)
+		return { "ok": false, "msg": "目標不存在" }
+	state.player_state["pending_trade_target"] = target_id
+	return { "ok": true, "msg": "等待確認",
+			 "requires_preview": true, "preview_target_id": target_id }
 
-			if not willing.is_empty():
-				# Tier 2：回傳 DTO，讓 UI 開面板
-				var willing_dto: Array = PlayerApiMapper.map_willing_members(state, willing)
-				return { "ok": true, "msg": "有成員考慮投誠",
-						 "payload": {
-							 "has_willing_named": true,
-							 "willing_members": willing_dto,
-							 "target_team_id": target_id
-						 }}
+func _action_propose_alliance(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null:
+		return { "ok": false, "msg": "目標不存在" }
+	var resp: String = _diplomatic.handle_diplomacy_message(state, tgt, pt, "propose_alliance")
+	if resp == "accept":
+		if pt.faction_id == -1 and tgt.faction_id == -1:
+			state.create_faction(pt_id)
+		_diplomatic._form_alliance(state, pt, tgt)
+		print("[PlayerCmd] 同盟成立，勢力%d" % pt.faction_id)
+	state.player_pending_targets.erase(target_id)
+	return { "ok": resp == "accept", "msg": "外交結果: %s" % resp }
 
-			# Tier 1：直接匿名招募
-			return _recruit_anon_internal(state, pt, tgt, target_id)
+func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null:
+		return { "ok": false, "msg": "目標不存在" }
+	var resp: String = _diplomatic.handle_diplomacy_message(state, tgt, pt, "demand_tribute")
+	state.player_pending_targets.erase(target_id)
+	if resp == "accept":
+		var amount: float = float(tgt.resources.get("coin", 0)) * 0.1  # TEST VALUE
+		tgt.resources["coin"] = float(tgt.resources.get("coin", 0)) - amount
+		pt.resources["coin"]  = float(pt.resources.get("coin", 0)) + amount
+		print("[PlayerCmd] 索貢成功 Team%d→玩家 %.0f coin" % [target_id, amount])
+		return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
+	else:
+		tgt.unrest_turns += 2
+		if not state.player_hostile_teams.has(target_id):
+			state.player_hostile_teams.append(target_id)
+		var leader_p: PersonData = state.persons.get(tgt.leader_id)
+		if leader_p:
+			leader_p.memory.append({
+				"event_id": state.world.current_tick,
+				"intensity": "significant",
+				"reaction": "tribute_refused"
+			})
+		print("[PlayerCmd] 索貢遭拒 Team%d→hostile" % target_id)
+		return { "ok": false, "msg": "索貢遭拒，關係惡化" }
 
-		"recruit_anon":
-			var tgt3: TeamData = state.teams.get(target_id)
-			if tgt3 == null:
-				return { "ok": false, "msg": "目標不存在" }
-			return _recruit_anon_internal(state, pt, tgt3, target_id)
+func _action_attack(state: WorldState, target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null:
+		return { "ok": false, "msg": "目標不存在" }
+	state.encounter_attacker_id = pt_id
+	state.encounter_defender_id = target_id
+	state.encounter_active      = true
+	if not state.player_hostile_teams.has(target_id):
+		state.player_hostile_teams.append(target_id)
+	state.player_pending_targets.erase(target_id)
+	print("[PlayerCmd] 玩家發起攻擊 Team%d → Team%d" % [pt_id, target_id])
+	return { "ok": true, "msg": "發起攻擊" }
 
-		"take_loot":
-			var res: Dictionary = state.last_encounter_result
-			if res.is_empty() or res.get("winner_id", -1) != pt_id:
-				return { "ok": false, "msg": "無可收取戰利品" }
-			var loot: Dictionary = res.get("loot_pool", {})
-			var loser_team: TeamData = state.teams.get(res.get("loser_id", -1))
-			for rk in loot:
-				var amount: float = float(loot[rk])
-				if loser_team != null:
-					loser_team.resources[rk] = maxf(float(loser_team.resources.get(rk, 0)) - amount, 0)
-				pt.resources[rk] = float(pt.resources.get(rk, 0)) + amount
-			state.last_encounter_result = {}
-			print("[PlayerCmd] 收取戰利品: %s" % str(loot))
-			return { "ok": true, "msg": "收取戰利品成功",
-					 "payload": {"refresh_required": true} }
-		"leave_loot":
-			state.last_encounter_result = {}
-			return { "ok": true, "msg": "放棄戰利品" }
-		"establish_faction":
-			return establish_faction(state)
-		"refresh_targets":
-			refresh_colocation_targets(state)
-			return { "ok": true, "msg": "互動目標已更新" }
-		"confirm_trade":
-			var tid2: int = int(state.player_state.get("pending_trade_target", -1))
-			if tid2 < 0 or not state.teams.has(tid2):
-				return { "ok": false, "msg": "無待確認貿易" }
-			var result2 := _interaction.resolve_trade_direct(state, pt_id, tid2)
-			state.player_pending_targets.erase(tid2)
-			state.player_state.erase("pending_trade_target")
-			return result2
+func _action_extort(state: WorldState, target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	var extort_result := _interaction.resolve_extortion_direct(state, pt_id, target_id)
+	state.player_pending_targets.erase(target_id)
+	if not extort_result.get("accepted", true):
+		var tgt2: TeamData = state.teams.get(target_id)
+		if tgt2:
+			tgt2.unrest_turns += 1
+		if not state.player_hostile_teams.has(target_id):
+			state.player_hostile_teams.append(target_id)
+		print("[PlayerCmd] 勒索遭拒 Team%d → hostile" % target_id)
+	return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", "") }
 
-		"cancel_trade":
-			var tid3: int = int(state.player_state.get("pending_trade_target", -1))
-			if tid3 >= 0:
-				state.player_pending_targets.erase(tid3)
-			state.player_state.erase("pending_trade_target")
-			return { "ok": true, "msg": "取消貿易" }
+func _action_recruit(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null:
+		state.player_pending_targets.erase(target_id)
+		return { "ok": false, "msg": "目標不存在" }
+	var willing: Array = []
+	for pid in tgt.named_members:
+		if pid == tgt.leader_id: continue
+		var person: PersonData = state.persons.get(pid)
+		if person and person.loyalty < 0.4:
+			willing.append(pid)
+	if not willing.is_empty():
+		var willing_dto: Array = PlayerApiMapper.map_willing_members(state, willing)
+		return { "ok": true, "msg": "有成員考慮投誠",
+				 "payload": {
+					 "has_willing_named": true,
+					 "willing_members": willing_dto,
+					 "target_team_id": target_id
+				 }}
+	return _recruit_anon_internal(state, pt, tgt, target_id)
 
-		"set_faction_goal":
-			if pt.faction_id == -1:
-				return { "ok": false, "msg": "玩家不在勢力中" }
-			var goal9: String = str(state.player_state.get("faction_goal_input", ""))
-			if goal9 not in ["expand", "defend", "trade_net", ""]:
-				return { "ok": false, "msg": "無效目標（expand/defend/trade_net/空字串清除）" }
-			var f9: FactionData = state.factions.get(pt.faction_id)
-			if f9 == null:
-				return { "ok": false, "msg": "勢力不存在" }
-			if f9.leader_team_id != pt_id:
-				return { "ok": false, "msg": "只有 leader 可設定勢力目標" }
-			f9.player_goal_override = goal9
-			var msg9: String = "清除 override" if goal9.is_empty() else "勢力目標設為 %s" % goal9
-			print("[PlayerCmd] set_faction_goal → %s" % goal9)
-			return { "ok": true, "msg": msg9 }
+func _action_recruit_anon(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var tgt3: TeamData = state.teams.get(target_id)
+	if tgt3 == null:
+		return { "ok": false, "msg": "目標不存在" }
+	return _recruit_anon_internal(state, pt, tgt3, target_id)
 
-		"order_faction_member":
-			var member_id9: int  = int(state.player_state.get("order_member_id", -1))
-			var m_task9: String  = str(state.player_state.get("member_task", ""))
-			var mq9: int = int(state.player_state.get("member_move_q", -1))
-			var mr9: int = int(state.player_state.get("member_move_r", -1))
-			var mt9: TeamData = state.teams.get(member_id9)
-			if mt9 == null or mt9.faction_id != pt.faction_id:
-				return { "ok": false, "msg": "目標不是同勢力成員" }
-			mt9.player_commanded_task = m_task9
-			if mq9 != -1:
-				mt9.move_target = Vector2i(mq9, mr9)
-			print("[PlayerCmd] order_faction_member Team%d → %s" % [member_id9, m_task9])
-			return { "ok": true, "msg": "已下令 Team%d" % member_id9 }
+func _action_take_loot(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var res: Dictionary = state.last_encounter_result
+	if res.is_empty() or res.get("winner_id", -1) != pt_id:
+		return { "ok": false, "msg": "無可收取戰利品" }
+	var loot: Dictionary = res.get("loot_pool", {})
+	var loser_team: TeamData = state.teams.get(res.get("loser_id", -1))
+	for rk in loot:
+		var amount: float = float(loot[rk])
+		if loser_team != null:
+			loser_team.resources[rk] = maxf(float(loser_team.resources.get(rk, 0)) - amount, 0)
+		pt.resources[rk] = float(pt.resources.get(rk, 0)) + amount
+	state.last_encounter_result = {}
+	print("[PlayerCmd] 收取戰利品: %s" % str(loot))
+	return { "ok": true, "msg": "收取戰利品成功",
+			 "payload": {"refresh_required": true} }
 
-		"set_tribute_rate":
-			var rate: float = float(state.player_state.get("tribute_rate_input", 0.1))
-			rate = clampf(rate, 0.0, 1.0)
-			if pt.faction_id == -1:
-				return { "ok": false, "msg": "玩家不在勢力中" }
-			var f_tr: FactionData = state.factions.get(pt.faction_id)
-			if f_tr == null:
-				return { "ok": false, "msg": "勢力不存在" }
-			if f_tr.leader_team_id != pt_id:
-				return { "ok": false, "msg": "只有 leader 可設定徵收率" }
-			f_tr.tribute_rate = rate
-			print("[PlayerCmd] set_tribute_rate → %.2f" % rate)
-			return { "ok": true, "msg": "徵收率設為 %.0f%%" % (rate * 100) }
+func _action_leave_loot(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
+	state.last_encounter_result = {}
+	return { "ok": true, "msg": "放棄戰利品" }
 
-		"offer_surrender":
-			var tgt6: TeamData = state.teams.get(target_id)
-			if tgt6 == null:
-				return { "ok": false, "msg": "目標不存在" }
-			var resp6: String = _diplomatic.handle_diplomacy_message(state, tgt6, pt, "offer_surrender")
-			state.player_pending_targets.erase(target_id)
-			if resp6 == "accept":
-				for res6 in ["food", "coin", "goods"]:
-					var amount6: float = float(pt.resources.get(res6, 0)) * 0.3
-					pt.resources[res6]   = float(pt.resources.get(res6, 0)) - amount6
-					tgt6.resources[res6] = float(tgt6.resources.get(res6, 0)) + amount6
-				_interaction.subjugate_team(state, target_id, pt_id)
-				print("[PlayerCmd] 玩家投降 Team%d 接受" % target_id)
-				return { "ok": true, "msg": "投降被接受，已被收編" }
-			else:
-				return { "ok": false, "msg": "對方拒絕接受投降" }
+func _action_establish_faction_cmd(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
+	return establish_faction(state)
 
-		"surrender_in_encounter":
-			if not state.encounter_active:
-				return { "ok": false, "msg": "非戰鬥中" }
-			var enemy_id6: int = state.encounter_defender_id if state.encounter_attacker_id == pt_id \
-				else state.encounter_attacker_id
-			var enemy6: TeamData = state.teams.get(enemy_id6)
-			if enemy6 == null:
-				return { "ok": false, "msg": "找不到對手" }
-			var resp6b: String = _diplomatic.handle_diplomacy_message(state, enemy6, pt, "offer_surrender")
-			if resp6b == "accept":
-				for res6b in ["food", "coin", "goods"]:
-					var amt6b: float = float(pt.resources.get(res6b, 0)) * 0.3
-					pt.resources[res6b]    = float(pt.resources.get(res6b, 0)) - amt6b
-					enemy6.resources[res6b] = float(enemy6.resources.get(res6b, 0)) + amt6b
-				_interaction.subjugate_team(state, enemy_id6, pt_id)
-				state.encounter_active = false
-				state.encounter_units  = []
-				print("[PlayerCmd] 玩家戰中投降，Team%d 接受" % enemy_id6)
-				return { "ok": true, "msg": "投降被接受" }
-			else:
-				return { "ok": false, "msg": "對方拒絕" }
+func _action_refresh_targets(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
+	refresh_colocation_targets(state)
+	return { "ok": true, "msg": "互動目標已更新" }
 
-		"leave_faction":
-			if pt.faction_id == -1:
-				return { "ok": false, "msg": "玩家不在勢力中" }
-			var fid3: int = pt.faction_id
-			var f3: FactionData = state.factions.get(fid3)
-			if f3 == null:
-				return { "ok": false, "msg": "勢力不存在" }
-			if f3.leader_team_id == pt_id:
-				return { "ok": false, "msg": "請使用 disband_faction（leader 不能普通離開）" }
-			pt.faction_id = -1
-			f3.member_team_ids.erase(pt_id)
-			var leader_team3: TeamData = state.teams.get(f3.leader_team_id)
-			if leader_team3 != null:
-				var leader_p3: PersonData = state.persons.get(leader_team3.leader_id)
-				if leader_p3:
-					leader_p3.loyalty = maxf(leader_p3.loyalty - 0.15, 0.0)
-			print("[PlayerCmd] 玩家離開勢力%d" % fid3)
-			return { "ok": true, "msg": "已離開勢力" }
+func _action_confirm_trade(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	var tid2: int = int(state.player_state.get("pending_trade_target", -1))
+	if tid2 < 0 or not state.teams.has(tid2):
+		return { "ok": false, "msg": "無待確認貿易" }
+	var result2 := _interaction.resolve_trade_direct(state, pt_id, tid2)
+	state.player_pending_targets.erase(tid2)
+	state.player_state.erase("pending_trade_target")
+	return result2
 
-		"betray_faction":
-			if pt.faction_id == -1:
-				return { "ok": false, "msg": "玩家不在勢力中" }
-			var fid4: int = pt.faction_id
-			var f4: FactionData = state.factions.get(fid4)
-			if f4 == null:
-				return { "ok": false, "msg": "勢力不存在" }
-			for tid4 in f4.member_team_ids:
-				if tid4 == pt_id: continue
-				if not state.player_hostile_teams.has(tid4):
-					state.player_hostile_teams.append(tid4)
-			pt.faction_id = -1
-			f4.member_team_ids.erase(pt_id)
-			state.player_state["betrayal_count"] = int(state.player_state.get("betrayal_count", 0)) + 1
-			var leader_team4: TeamData = state.teams.get(f4.leader_team_id)
-			if leader_team4 != null:
-				var leader_p4: PersonData = state.persons.get(leader_team4.leader_id)
-				if leader_p4:
-					leader_p4.memory.append({
-						"type": "betrayal", "subject_id": pt.leader_id,
-						"tick": state.world.current_tick, "intensity": 0.9
-					})
-			print("[PlayerCmd] 玩家背叛勢力%d（betrayal_count=%d）" % [
-				fid4, state.player_state["betrayal_count"]])
-			return { "ok": true, "msg": "背叛勢力，原成員已敵對" }
+func _action_cancel_trade(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
+	var tid3: int = int(state.player_state.get("pending_trade_target", -1))
+	if tid3 >= 0:
+		state.player_pending_targets.erase(tid3)
+	state.player_state.erase("pending_trade_target")
+	return { "ok": true, "msg": "取消貿易" }
 
-		"disband_faction":
-			if pt.faction_id == -1:
-				return { "ok": false, "msg": "玩家不在勢力中" }
-			var fid5: int = pt.faction_id
-			var f5: FactionData = state.factions.get(fid5)
-			if f5 == null:
-				return { "ok": false, "msg": "勢力不存在" }
-			if f5.leader_team_id != pt_id:
-				return { "ok": false, "msg": "只有 leader 可解散勢力" }
-			for tid5 in f5.member_team_ids:
-				if tid5 == pt_id: continue
-				var mt5: TeamData = state.teams.get(tid5)
-				if mt5 == null: continue
-				var lp5: PersonData = state.persons.get(mt5.leader_id)
-				if lp5:
-					lp5.loyalty = maxf(lp5.loyalty - 0.3, 0.0)
-			state.disband_faction(fid5)
-			return { "ok": true, "msg": "勢力已解散" }
+func _action_set_tribute_rate(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var rate: float = float(state.player_state.get("tribute_rate_input", 0.1))
+	rate = clampf(rate, 0.0, 1.0)
+	if pt.faction_id == -1:
+		return { "ok": false, "msg": "玩家不在勢力中" }
+	var f_tr: FactionData = state.factions.get(pt.faction_id)
+	if f_tr == null:
+		return { "ok": false, "msg": "勢力不存在" }
+	if f_tr.leader_team_id != pt_id:
+		return { "ok": false, "msg": "只有 leader 可設定徵收率" }
+	f_tr.tribute_rate = rate
+	print("[PlayerCmd] set_tribute_rate → %.2f" % rate)
+	return { "ok": true, "msg": "徵收率設為 %.0f%%" % (rate * 100) }
 
-		"subjugate_enemy":
-			var result: Dictionary = state.last_encounter_result
-			if result.is_empty() or not result.get("can_subjugate", false):
-				return { "ok": false, "msg": "無可收編的敗者" }
-			var loser_id: int = int(result.get("loser_id", -1))
-			var loser: TeamData = state.teams.get(loser_id)
-			if loser == null:
-				return { "ok": false, "msg": "敗者已消滅" }
-			_interaction.subjugate_team(state, pt_id, loser_id)
-			state.last_encounter_result["can_subjugate"] = false
-			return { "ok": true, "msg": "收編 Team%d" % loser_id }
+func _action_build_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var outpost_type: String = str(state.player_state.get("build_type", "civilian"))
+	if outpost_type not in ["civilian", "military"]:
+		return { "ok": false, "msg": "無效據點類型" }
+	var _os := OutpostSystem.new()
+	var ok: bool = _os.start_build(state, pt, outpost_type, 1)
+	if not ok:
+		return { "ok": false, "msg": "無法建造（資源不足或距離限制）" }
+	print("[PlayerCmd] build_outpost type=%s" % outpost_type)
+	return { "ok": true, "msg": "開始建造 %s" % outpost_type }
 
-		"dispatch_subteam":
-			var sub_leader_id: int = int(state.player_state.get("sub_leader_id", -1))
-			var pop_count: int     = int(state.player_state.get("sub_pop_count", 1))
-			var task: String       = str(state.player_state.get("sub_task", TeamData.TASK_IDLE))
-			var tq: int = int(state.player_state.get("sub_move_q", -1))
-			var tr: int = int(state.player_state.get("sub_move_r", -1))
-			var move_tgt: Vector2i = Vector2i(tq, tr)
-			if sub_leader_id == -1 or not state.persons.has(sub_leader_id):
-				return { "ok": false, "msg": "未指定子隊 leader" }
-			if pop_count < 1 or pop_count >= pt.population:
-				return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
-			var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
-			if sub_id == -1:
-				return { "ok": false, "msg": "派遣失敗" }
-			return { "ok": true, "msg": "派出子隊 Team%d" % sub_id, "sub_id": sub_id }
+func _action_upgrade_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var _os2 := OutpostSystem.new()
+	var ok2: bool = _os2.start_upgrade_level(state, pt)
+	if not ok2:
+		return { "ok": false, "msg": "無法升級（非 owner 或已滿級）" }
+	return { "ok": true, "msg": "開始升級據點" }
 
-		"order_subteam":
-			var sub_id2: int   = int(state.player_state.get("order_sub_id", -1))
-			var new_task: String = str(state.player_state.get("sub_new_task", TeamData.TASK_IDLE))
-			var nq: int = int(state.player_state.get("sub_new_move_q", -1))
-			var nr: int = int(state.player_state.get("sub_new_move_r", -1))
-			var sub2: TeamData = state.teams.get(sub_id2)
-			if sub2 == null or sub2.parent_team_id != pt_id:
-				return { "ok": false, "msg": "目標不是玩家子隊" }
-			sub2.current_task = new_task
-			sub2.move_target  = Vector2i(nq, nr)
-			print("[PlayerCmd] order_subteam Team%d → task=%s move=(%d,%d)" % [sub_id2, new_task, nq, nr])
-			return { "ok": true, "msg": "已下令 Team%d" % sub_id2 }
+func _action_upgrade_farming(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var _os3 := OutpostSystem.new()
+	var ok3: bool = _os3.start_upgrade_farming(state, pt)
+	if not ok3:
+		return { "ok": false, "msg": "無法升級農業（非 civilian 或已滿）" }
+	return { "ok": true, "msg": "開始升級農業" }
 
-		"recall_subteam":
-			var recall_sub_id: int = int(state.player_state.get("recall_sub_id", -1))
-			var recall_sub: TeamData = state.teams.get(recall_sub_id)
-			if recall_sub == null or recall_sub.parent_team_id != pt_id:
-				return { "ok": false, "msg": "目標不是玩家子隊" }
-			if pt.population < 2:
-				return { "ok": false, "msg": "人數不足以派信使" }
-			var herald_id: int = SubteamSystem.new().dispatch(
-				state, pt_id, -1, 1, TeamData.TASK_HERALD,
-				recall_sub.tile_pos, recall_sub_id, TeamData.TASK_MERGE)
-			if herald_id == -1:
-				return { "ok": false, "msg": "派信使失敗" }
-			return { "ok": true, "msg": "信使已出發至 Team%d" % recall_sub_id }
+func _action_upgrade_manufacturing(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var _os4 := OutpostSystem.new()
+	var ok4: bool = _os4.start_upgrade_manufacturing(state, pt)
+	if not ok4:
+		return { "ok": false, "msg": "無法升級製造（條件不符）" }
+	return { "ok": true, "msg": "開始升級製造" }
 
-		"build_outpost":
-			var outpost_type: String = str(state.player_state.get("build_type", "civilian"))
-			if outpost_type not in ["civilian", "military"]:
-				return { "ok": false, "msg": "無效據點類型" }
-			var _os := OutpostSystem.new()
-			var ok: bool = _os.start_build(state, pt, outpost_type, 1)
-			if not ok:
-				return { "ok": false, "msg": "無法建造（資源不足或距離限制）" }
-			print("[PlayerCmd] build_outpost type=%s" % outpost_type)
-			return { "ok": true, "msg": "開始建造 %s" % outpost_type }
+func _action_demolish_outpost(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var _os5 := OutpostSystem.new()
+	var tile_id5: int = pt.tile_pos.x * 1000 + pt.tile_pos.y
+	var tile5: HexTileData = state.world.tiles.get(tile_id5)
+	if tile5 == null:
+		return { "ok": false, "msg": "格子不存在" }
+	if tile5.construction_ticks_left > 0 and tile5.outpost_level == 0:
+		tile5.construction_team_id   = -1
+		tile5.construction_ticks_left = 0
+		tile5.construction_target     = {}
+		pt.current_task = TeamData.TASK_IDLE
+		return { "ok": true, "msg": "取消施工" }
+	if not _os5._has_control(state, pt_id, tile5):
+		return { "ok": false, "msg": "無支配權，無法拆除" }
+	var ok5: bool = _os5.demolish_with_control(state, pt)
+	if not ok5:
+		return { "ok": false, "msg": "無法拆除" }
+	return { "ok": true, "msg": "開始拆除據點" }
 
-		"upgrade_outpost":
-			var _os2 := OutpostSystem.new()
-			var ok2: bool = _os2.start_upgrade_level(state, pt)
-			if not ok2:
-				return { "ok": false, "msg": "無法升級（非 owner 或已滿級）" }
-			return { "ok": true, "msg": "開始升級據點" }
+func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var sub_leader_id: int = int(state.player_state.get("sub_leader_id", -1))
+	var pop_count: int     = int(state.player_state.get("sub_pop_count", 1))
+	var task: String       = str(state.player_state.get("sub_task", TeamData.TASK_IDLE))
+	var tq: int = int(state.player_state.get("sub_move_q", -1))
+	var tr: int = int(state.player_state.get("sub_move_r", -1))
+	var move_tgt: Vector2i = Vector2i(tq, tr)
+	if sub_leader_id == -1 or not state.persons.has(sub_leader_id):
+		return { "ok": false, "msg": "未指定子隊 leader" }
+	if pop_count < 1 or pop_count >= pt.population:
+		return { "ok": false, "msg": "人數不合法（1 ~ population-1）" }
+	var sub_id: int = SubteamSystem.new().dispatch(state, pt_id, sub_leader_id, pop_count, task, move_tgt)
+	if sub_id == -1:
+		return { "ok": false, "msg": "派遣失敗" }
+	return { "ok": true, "msg": "派出子隊 Team%d" % sub_id, "sub_id": sub_id }
 
-		"upgrade_farming":
-			var _os3 := OutpostSystem.new()
-			var ok3: bool = _os3.start_upgrade_farming(state, pt)
-			if not ok3:
-				return { "ok": false, "msg": "無法升級農業（非 civilian 或已滿）" }
-			return { "ok": true, "msg": "開始升級農業" }
+func _action_order_subteam(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	var sub_id2: int   = int(state.player_state.get("order_sub_id", -1))
+	var new_task: String = str(state.player_state.get("sub_new_task", TeamData.TASK_IDLE))
+	var nq: int = int(state.player_state.get("sub_new_move_q", -1))
+	var nr: int = int(state.player_state.get("sub_new_move_r", -1))
+	var sub2: TeamData = state.teams.get(sub_id2)
+	if sub2 == null or sub2.parent_team_id != pt_id:
+		return { "ok": false, "msg": "目標不是玩家子隊" }
+	sub2.current_task = new_task
+	sub2.move_target  = Vector2i(nq, nr)
+	print("[PlayerCmd] order_subteam Team%d → task=%s move=(%d,%d)" % [sub_id2, new_task, nq, nr])
+	return { "ok": true, "msg": "已下令 Team%d" % sub_id2 }
 
-		"upgrade_manufacturing":
-			var _os4 := OutpostSystem.new()
-			var ok4: bool = _os4.start_upgrade_manufacturing(state, pt)
-			if not ok4:
-				return { "ok": false, "msg": "無法升級製造（條件不符）" }
-			return { "ok": true, "msg": "開始升級製造" }
+func _action_recall_subteam(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var recall_sub_id: int = int(state.player_state.get("recall_sub_id", -1))
+	var recall_sub: TeamData = state.teams.get(recall_sub_id)
+	if recall_sub == null or recall_sub.parent_team_id != pt_id:
+		return { "ok": false, "msg": "目標不是玩家子隊" }
+	if pt.population < 2:
+		return { "ok": false, "msg": "人數不足以派信使" }
+	var herald_id: int = SubteamSystem.new().dispatch(
+		state, pt_id, -1, 1, TeamData.TASK_HERALD,
+		recall_sub.tile_pos, recall_sub_id, TeamData.TASK_MERGE)
+	if herald_id == -1:
+		return { "ok": false, "msg": "派信使失敗" }
+	return { "ok": true, "msg": "信使已出發至 Team%d" % recall_sub_id }
 
-		"demolish_outpost":
-			var _os5 := OutpostSystem.new()
-			var tile_id5: int = pt.tile_pos.x * 1000 + pt.tile_pos.y
-			var tile5: HexTileData = state.world.tiles.get(tile_id5)
-			if tile5 == null:
-				return { "ok": false, "msg": "格子不存在" }
-			if tile5.construction_ticks_left > 0 and tile5.outpost_level == 0:
-				tile5.construction_team_id   = -1
-				tile5.construction_ticks_left = 0
-				tile5.construction_target     = {}
-				pt.current_task = TeamData.TASK_IDLE
-				return { "ok": true, "msg": "取消施工" }
-			if not _os5._has_control(state, pt_id, tile5):
-				return { "ok": false, "msg": "無支配權，無法拆除" }
-			var ok5: bool = _os5.demolish_with_control(state, pt)
-			if not ok5:
-				return { "ok": false, "msg": "無法拆除" }
-			return { "ok": true, "msg": "開始拆除據點" }
+func _action_subjugate_enemy(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	var result: Dictionary = state.last_encounter_result
+	if result.is_empty() or not result.get("can_subjugate", false):
+		return { "ok": false, "msg": "無可收編的敗者" }
+	var loser_id: int = int(result.get("loser_id", -1))
+	var loser: TeamData = state.teams.get(loser_id)
+	if loser == null:
+		return { "ok": false, "msg": "敗者已消滅" }
+	_interaction.subjugate_team(state, pt_id, loser_id)
+	state.last_encounter_result["can_subjugate"] = false
+	return { "ok": true, "msg": "收編 Team%d" % loser_id }
 
-		"ignore":
-			state.player_pending_targets.erase(target_id)
-			return { "ok": true, "msg": "忽略" }
-	return { "ok": false, "msg": "未知行動: %s" % action }
+func _action_leave_faction(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	if pt.faction_id == -1:
+		return { "ok": false, "msg": "玩家不在勢力中" }
+	var fid3: int = pt.faction_id
+	var f3: FactionData = state.factions.get(fid3)
+	if f3 == null:
+		return { "ok": false, "msg": "勢力不存在" }
+	if f3.leader_team_id == pt_id:
+		return { "ok": false, "msg": "請使用 disband_faction（leader 不能普通離開）" }
+	pt.faction_id = -1
+	f3.member_team_ids.erase(pt_id)
+	var leader_team3: TeamData = state.teams.get(f3.leader_team_id)
+	if leader_team3 != null:
+		var leader_p3: PersonData = state.persons.get(leader_team3.leader_id)
+		if leader_p3:
+			leader_p3.loyalty = maxf(leader_p3.loyalty - 0.15, 0.0)
+	print("[PlayerCmd] 玩家離開勢力%d" % fid3)
+	return { "ok": true, "msg": "已離開勢力" }
+
+func _action_betray_faction(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	if pt.faction_id == -1:
+		return { "ok": false, "msg": "玩家不在勢力中" }
+	var fid4: int = pt.faction_id
+	var f4: FactionData = state.factions.get(fid4)
+	if f4 == null:
+		return { "ok": false, "msg": "勢力不存在" }
+	for tid4 in f4.member_team_ids:
+		if tid4 == pt_id: continue
+		if not state.player_hostile_teams.has(tid4):
+			state.player_hostile_teams.append(tid4)
+	pt.faction_id = -1
+	f4.member_team_ids.erase(pt_id)
+	state.player_state["betrayal_count"] = int(state.player_state.get("betrayal_count", 0)) + 1
+	var leader_team4: TeamData = state.teams.get(f4.leader_team_id)
+	if leader_team4 != null:
+		var leader_p4: PersonData = state.persons.get(leader_team4.leader_id)
+		if leader_p4:
+			leader_p4.memory.append({
+				"type": "betrayal", "subject_id": pt.leader_id,
+				"tick": state.world.current_tick, "intensity": 0.9
+			})
+	print("[PlayerCmd] 玩家背叛勢力%d（betrayal_count=%d）" % [
+		fid4, state.player_state["betrayal_count"]])
+	return { "ok": true, "msg": "背叛勢力，原成員已敵對" }
+
+func _action_disband_faction(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	if pt.faction_id == -1:
+		return { "ok": false, "msg": "玩家不在勢力中" }
+	var fid5: int = pt.faction_id
+	var f5: FactionData = state.factions.get(fid5)
+	if f5 == null:
+		return { "ok": false, "msg": "勢力不存在" }
+	if f5.leader_team_id != pt_id:
+		return { "ok": false, "msg": "只有 leader 可解散勢力" }
+	for tid5 in f5.member_team_ids:
+		if tid5 == pt_id: continue
+		var mt5: TeamData = state.teams.get(tid5)
+		if mt5 == null: continue
+		var lp5: PersonData = state.persons.get(mt5.leader_id)
+		if lp5:
+			lp5.loyalty = maxf(lp5.loyalty - 0.3, 0.0)
+	state.disband_faction(fid5)
+	return { "ok": true, "msg": "勢力已解散" }
+
+func _action_offer_surrender(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var tgt6: TeamData = state.teams.get(target_id)
+	if tgt6 == null:
+		return { "ok": false, "msg": "目標不存在" }
+	var resp6: String = _diplomatic.handle_diplomacy_message(state, tgt6, pt, "offer_surrender")
+	state.player_pending_targets.erase(target_id)
+	if resp6 == "accept":
+		for res6 in ["food", "coin", "goods"]:
+			var amount6: float = float(pt.resources.get(res6, 0)) * 0.3
+			pt.resources[res6]   = float(pt.resources.get(res6, 0)) - amount6
+			tgt6.resources[res6] = float(tgt6.resources.get(res6, 0)) + amount6
+		_interaction.subjugate_team(state, target_id, pt_id)
+		print("[PlayerCmd] 玩家投降 Team%d 接受" % target_id)
+		return { "ok": true, "msg": "投降被接受，已被收編" }
+	else:
+		return { "ok": false, "msg": "對方拒絕接受投降" }
+
+func _action_surrender_in_encounter(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	if not state.encounter_active:
+		return { "ok": false, "msg": "非戰鬥中" }
+	var enemy_id6: int = state.encounter_defender_id if state.encounter_attacker_id == pt_id \
+		else state.encounter_attacker_id
+	var enemy6: TeamData = state.teams.get(enemy_id6)
+	if enemy6 == null:
+		return { "ok": false, "msg": "找不到對手" }
+	var resp6b: String = _diplomatic.handle_diplomacy_message(state, enemy6, pt, "offer_surrender")
+	if resp6b == "accept":
+		for res6b in ["food", "coin", "goods"]:
+			var amt6b: float = float(pt.resources.get(res6b, 0)) * 0.3
+			pt.resources[res6b]    = float(pt.resources.get(res6b, 0)) - amt6b
+			enemy6.resources[res6b] = float(enemy6.resources.get(res6b, 0)) + amt6b
+		_interaction.subjugate_team(state, enemy_id6, pt_id)
+		state.encounter_active = false
+		state.encounter_units  = []
+		print("[PlayerCmd] 玩家戰中投降，Team%d 接受" % enemy_id6)
+		return { "ok": true, "msg": "投降被接受" }
+	else:
+		return { "ok": false, "msg": "對方拒絕" }
+
+func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	if pt.faction_id == -1:
+		return { "ok": false, "msg": "玩家不在勢力中" }
+	var goal9: String = str(state.player_state.get("faction_goal_input", ""))
+	if goal9 not in ["expand", "defend", "trade_net", ""]:
+		return { "ok": false, "msg": "無效目標（expand/defend/trade_net/空字串清除）" }
+	var f9: FactionData = state.factions.get(pt.faction_id)
+	if f9 == null:
+		return { "ok": false, "msg": "勢力不存在" }
+	if f9.leader_team_id != pt_id:
+		return { "ok": false, "msg": "只有 leader 可設定勢力目標" }
+	f9.player_goal_override = goal9
+	var msg9: String = "清除 override" if goal9.is_empty() else "勢力目標設為 %s" % goal9
+	print("[PlayerCmd] set_faction_goal → %s" % goal9)
+	return { "ok": true, "msg": msg9 }
+
+func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var member_id9: int  = int(state.player_state.get("order_member_id", -1))
+	var m_task9: String  = str(state.player_state.get("member_task", ""))
+	var mq9: int = int(state.player_state.get("member_move_q", -1))
+	var mr9: int = int(state.player_state.get("member_move_r", -1))
+	var mt9: TeamData = state.teams.get(member_id9)
+	if mt9 == null or mt9.faction_id != pt.faction_id:
+		return { "ok": false, "msg": "目標不是同勢力成員" }
+	mt9.player_commanded_task = m_task9
+	if mq9 != -1:
+		mt9.move_target = Vector2i(mq9, mr9)
+	print("[PlayerCmd] order_faction_member Team%d → %s" % [member_id9, m_task9])
+	return { "ok": true, "msg": "已下令 Team%d" % member_id9 }
 
 # ── 被動回應（NPC 強制非戰互動）────────────────────────────
 
