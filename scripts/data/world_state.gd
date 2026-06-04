@@ -42,6 +42,9 @@ var player_forced_event: Dictionary = {}
 var player_forced_event_id: String = ""
 # 對應 player_forced_event 的唯一 ID（str(randi()) 生成）
 # 空字串 = 無待處理強制事件
+var player_pending_orders: Dictionary = {}
+# 格式：{ member_team_id(String) → { "task": String, "herald_id": int } }
+# 信使出發後寫入；信使抵達同格後 interaction_system 清除並設 player_commanded_task
 var ticks_per_day: int:
 	get: return TICKS_PER_DAY
 

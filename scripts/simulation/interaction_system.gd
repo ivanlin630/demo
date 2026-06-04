@@ -789,6 +789,14 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 	var target: TeamData    = state.teams[target_id]
 	var order: String = messenger.order_task if messenger.order_task != "" else "idle"
 	target.current_task       = order
+	# player herald：若信使是玩家下令派出的，同時更新 player_commanded_task
+	var str_target_id: String = str(target_id)
+	if state.player_pending_orders.has(str_target_id):
+		var pending: Dictionary = state.player_pending_orders[str_target_id]
+		if pending.get("herald_id", -1) == messenger_id:
+			target.player_commanded_task = order
+			state.player_pending_orders.erase(str_target_id)
+			print("[Order] player herald 抵達 Team%d，player_commanded_task = %s" % [target_id, order])
 	messenger.current_task    = "idle"
 	messenger.order_target_id = -1
 	messenger.order_task      = ""
