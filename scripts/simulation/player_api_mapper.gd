@@ -54,6 +54,8 @@ static func map_player_summary(state: WorldState) -> Dictionary:
 		"has_pending_targets": not state.player_pending_targets.is_empty(),
 		"has_forced_interaction": not state.player_forced_event.is_empty(),
 		"hp_status": _hp_status(p),
+		"loyalty": p.loyalty,
+		"stress":  p.stress,
 		"skills": _skills,
 	}
 
@@ -114,6 +116,7 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		},
 		"fatigue_pct":      int(t.fatigue * 100),
 		"population":       t.population,
+		"wounded":         t.wounded,
 		"minor_population": t.minor_population,
 		"faction_id":       t.faction_id,
 		"task_summary": t.current_task
@@ -642,3 +645,69 @@ static func map_subteam_panel(state: WorldState) -> Dictionary:
 		})
 		actions_per[str(tid)] = ["order_subteam", "recall_subteam"]
 	return {"subteams": subteams, "actions_per_subteam": actions_per}
+
+# ── Body slots ─────────────────────────────────────────────────────────────────
+
+static func map_body_slots(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	if p == null:
+		return {"head": "", "torso": "", "right_arm": "", "left_arm": "", "right_leg": "", "left_leg": ""}
+	var slots: Array = ["head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"]
+	var result: Dictionary = {}
+	for slot in slots:
+		result[slot] = p.equipment.get(slot, {}).get("grade", "")
+	return result
+
+# ── Global messages ────────────────────────────────────────────────────────────
+
+static func map_global_messages(state: WorldState, n: int = 10) -> Array:
+	var msgs: Array = []
+	var start: int = maxi(0, state.global_messages.size() - n)
+	for i in range(start, state.global_messages.size()):
+		var m = state.global_messages[i]
+		msgs.append(m.get("description", str(m)) if m is Dictionary else str(m))
+	return msgs
+
+# ── Visible teams render ───────────────────────────────────────────────────────
+
+static func map_visible_teams_render(state: WorldState, observer_tid: int) -> Array:
+	if observer_tid < 0:
+		return []
+	var observer: TeamData = state.teams.get(observer_tid)
+	if observer == null:
+		return []
+	var discovered: Array = state.team_discovered.get(observer_tid, [])
+	var result: Array = []
+	for tid in state.teams:
+		var team: TeamData = state.teams[tid]
+		var is_player: bool = tid == observer_tid
+		if is_player:
+			result.append({
+				"team_id": tid, "tile_pos": team.tile_pos,
+				"faction_id": team.faction_id, "population": team.population,
+				"is_player": true, "is_hostile": false, "draw_mode": "current"
+			})
+			continue
+		if not discovered.has(tid):
+			continue
+		var ddx: int = team.tile_pos.x - observer.tile_pos.x
+		var ddy: int = team.tile_pos.y - observer.tile_pos.y
+		var cur_dist: int = (abs(ddx) + abs(ddx + ddy) + abs(ddy)) / 2
+		if cur_dist <= 3:
+			result.append({
+				"team_id": tid, "tile_pos": team.tile_pos,
+				"faction_id": team.faction_id, "population": team.population,
+				"is_player": false, "is_hostile": state.player_hostile_teams.has(tid),
+				"draw_mode": "current"
+			})
+		else:
+			var intel: Dictionary = state.team_intel.get(observer_tid, {}).get(tid, {})
+			if intel.has("tile_pos"):
+				result.append({
+					"team_id": tid, "tile_pos": intel["tile_pos"],
+					"faction_id": team.faction_id, "population": team.population,
+					"is_player": false, "is_hostile": state.player_hostile_teams.has(tid),
+					"draw_mode": "ghost"
+				})
+	return result
