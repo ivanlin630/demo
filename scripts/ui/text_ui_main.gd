@@ -898,9 +898,9 @@ func _handle_subteam_mode(keycode: int) -> void:
 				_input_mode_callback = func(buf_r: String):
 					var r_val: int = int(buf_r)
 					_bridge.set_player_input("order_sub_id", sub_id_cap)
-					_bridge.set_player_input("order_sub_q", q_val)
-					_bridge.set_player_input("order_sub_r", r_val)
-					_bridge.set_player_input("order_sub_task", "移動")
+					_bridge.set_player_input("sub_new_move_q", q_val)
+					_bridge.set_player_input("sub_new_move_r", r_val)
+					_bridge.set_player_input("sub_new_task", TeamData.TASK_IDLE)
 					var res := _bridge.command_player("execute_action",
 						{"action_id": "order_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 					_log_event("[子隊] %s" % res.get("message", ""))
