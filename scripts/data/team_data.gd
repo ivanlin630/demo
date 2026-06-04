@@ -73,3 +73,4 @@ var parent_team_id: int  = -1
 var subteam_ids:    Array = []
 var order_target_id: int  = -1
 var order_task:     String = ""
+var player_commanded_task: String = ""  # set by player herald delivery
