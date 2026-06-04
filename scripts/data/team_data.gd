@@ -74,4 +74,4 @@ var subteam_ids:    Array = []
 var order_target_id: int  = -1
 var order_task:     String = ""
 var player_commanded_task: String = ""
-# 玩家對此 team 的直接指令；"" = 無指令（faction_ai 自動計算）
+# 玩家對此 team 的直接指令；"" = 無指令（faction_ai 自動計算）；由 herald 抵達後寫入

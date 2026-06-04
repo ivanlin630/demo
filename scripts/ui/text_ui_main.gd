@@ -11,6 +11,9 @@ var _events: Array = []
 
 var _input_mode: bool   = false
 var _input_buffer: String = ""
+var _input_mode_type: String = "numeric"   # "numeric" | "string"
+var _input_mode_callback: Callable         # (buffer: String) -> void
+var _input_mode_prompt: String = ""
 var _member_mode: bool  = false
 var _inv_mode: bool     = false
 var _inv_selection: int = -1
@@ -18,6 +21,24 @@ var _inv_selection: int = -1
 var _interact_mode:   bool = false
 var _interact_target: int  = -1
 # -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
+
+# ── 新 Panel Modes（互斥）────────────────────────────────────────────────────
+var _faction_mode:  bool = false
+var _outpost_mode:  bool = false
+var _subteam_mode:  bool = false
+var _advisor_mode:  bool = false
+var _subteam_selection: int = -1   # 當前選中的子隊 team_id
+var _advisor_selection: int = -1   # 當前選中的顧問 person_id
+
+# ── gather_intel submode ─────────────────────────────────────────────────────
+var _intel_mode: bool = false
+var _intel_target_id: int = -1
+var _intel_options: Array = []     # Array[Dictionary] 每項 {"label": String}
+
+# ── Alert bar ────────────────────────────────────────────────────────────────
+var _pending_alerts: Array = []    # Array[String] 待顯示的警報文字
+var _alert_bar: Label              # 動態建立，置於 InputBar 上方
+
 var _cached_snapshot: Dictionary = {}
 
 # member_mode state machine
@@ -39,6 +60,13 @@ func _ready() -> void:
 	GameSetup.setup(ws, config)
 	_player_tid = _bridge.get_player_team_id()
 	_cursor = _bridge.get_player_tile_pos()
+	# 動態建立 alert bar（置於 InputBar 之前）
+	_alert_bar = Label.new()
+	_alert_bar.name = "AlertBar"
+	_alert_bar.modulate = Color(1.0, 0.8, 0.0)   # 黃色警報
+	var vbox: Node = _input_bar.get_parent()
+	vbox.add_child(_alert_bar)
+	vbox.move_child(_alert_bar, _input_bar.get_index())
 	_refresh()
 
 func _refresh_snapshot() -> void:
@@ -83,6 +111,9 @@ func _input(event: InputEvent) -> void:
 	if _input_mode:
 		_handle_input_mode(event.keycode)
 		return
+	if _intel_mode:
+		_handle_intel_mode(event.keycode)
+		return
 	if _inv_mode:
 		_handle_inv_mode(event.keycode)
 		return
@@ -91,6 +122,18 @@ func _input(event: InputEvent) -> void:
 		return
 	if _member_mode:
 		_handle_member_mode(event.keycode)
+		return
+	if _faction_mode:
+		_handle_faction_mode(event.keycode)
+		return
+	if _outpost_mode:
+		_handle_outpost_mode(event.keycode)
+		return
+	if _subteam_mode:
+		_handle_subteam_mode(event.keycode)
+		return
+	if _advisor_mode:
+		_handle_advisor_mode(event.keycode)
 		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
@@ -113,7 +156,10 @@ func _input(event: InputEvent) -> void:
 			_bridge.request_advance(WorldState.TICKS_PER_DAY)
 		KEY_G:
 			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "跳過 tick 數: "
 			_input_buffer = ""
+			_input_mode_callback = Callable()   # 無 callback → 使用舊有行為
 			_input_bar.text = "跳過 tick 數: _"
 		KEY_H:
 			_cursor = _bridge.get_player_tile_pos()
@@ -135,6 +181,24 @@ func _input(event: InputEvent) -> void:
 				_interact_target = -1
 				_bridge.refresh_interaction_targets()  # 掃描同格 NPC，讓 ignore 後仍可再次互動
 			_refresh()
+		KEY_F:
+			_faction_mode = not _faction_mode
+			if _faction_mode: _close_all_modes("faction")
+			_refresh()
+		KEY_O:
+			_outpost_mode = not _outpost_mode
+			if _outpost_mode: _close_all_modes("outpost")
+			_refresh()
+		KEY_U:
+			_subteam_mode = not _subteam_mode
+			if _subteam_mode: _close_all_modes("subteam")
+			_subteam_selection = -1
+			_refresh()
+		KEY_V:
+			_advisor_mode = not _advisor_mode
+			if _advisor_mode: _close_all_modes("advisor")
+			_advisor_selection = -1
+			_refresh()
 		KEY_ESCAPE:
 			if _bridge.is_advancing():
 				_bridge.cancel_advance()
@@ -153,31 +217,87 @@ func _input(event: InputEvent) -> void:
 				_inv_mode = false
 				_inv_selection = -1
 				_refresh()
+			elif _faction_mode:
+				_faction_mode = false
+				_refresh()
+			elif _outpost_mode:
+				_outpost_mode = false
+				_refresh()
+			elif _subteam_mode:
+				if _subteam_selection >= 0:
+					_subteam_selection = -1
+				else:
+					_subteam_mode = false
+				_refresh()
 		KEY_Q:
 			get_tree().quit()
+		KEY_Z:
+			if not _pending_alerts.is_empty():
+				_pending_alerts.pop_front()
+			_check_alerts()
 
 func _handle_input_mode(keycode: int) -> void:
+	if _input_mode_type == "string":
+		# 接受 A-Z 字元
+		if keycode >= KEY_A and keycode <= KEY_Z:
+			if _input_buffer.length() < 30:
+				_input_buffer += char(keycode).to_lower()
+			_input_bar.text = "%s%s_" % [_input_mode_prompt, _input_buffer]
+			return
+		match keycode:
+			KEY_BACKSPACE:
+				if _input_buffer.length() > 0:
+					_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
+				_input_bar.text = "%s%s_" % [_input_mode_prompt, _input_buffer]
+			KEY_ENTER:
+				if _input_buffer.length() > 0:
+					_input_mode = false
+					_input_bar.text = ""
+					if _input_mode_callback.is_valid():
+						_input_mode_callback.call(_input_buffer)
+					_input_buffer = ""
+					_refresh()
+			KEY_ESCAPE:
+				_input_mode = false
+				_input_buffer = ""
+				_input_bar.text = ""
+				_input_mode_callback = Callable()
+				_refresh()
+		return
+
+	# 原有 numeric 模式
 	if keycode >= KEY_0 and keycode <= KEY_9:
 		if _input_buffer.length() < 6:
 			_input_buffer += str(keycode - KEY_0)
-		_input_bar.text = "跳過 tick 數: %s_" % _input_buffer
+		_input_bar.text = "%s%s_" % [_input_mode_prompt if not _input_mode_prompt.is_empty() else "跳過 tick 數: ", _input_buffer]
 		return
 	match keycode:
 		KEY_BACKSPACE:
 			if _input_buffer.length() > 0:
 				_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
-			_input_bar.text = "跳過 tick 數: %s_" % _input_buffer
+			_input_bar.text = "%s%s_" % [_input_mode_prompt if not _input_mode_prompt.is_empty() else "跳過 tick 數: ", _input_buffer]
 		KEY_ENTER:
-			if _input_buffer.length() > 0 and int(_input_buffer) > 0:
-				var n: int = mini(int(_input_buffer), 99999)
-				_input_mode = false
-				_input_bar.text = ""
-				_bridge.request_advance(n)
-				_refresh()
+			if _input_buffer.length() > 0:
+				if _input_mode_callback.is_valid():
+					_input_mode = false
+					_input_bar.text = ""
+					_input_mode_callback.call(_input_buffer)
+					_input_buffer = ""
+					_input_mode_callback = Callable()
+					_refresh()
+				elif int(_input_buffer) > 0:
+					# 舊有行為：跳過 N tick
+					var n: int = mini(int(_input_buffer), 99999)
+					_input_mode = false
+					_input_bar.text = ""
+					_bridge.request_advance(n)
+					_input_buffer = ""
+					_refresh()
 		KEY_ESCAPE:
 			_input_mode = false
 			_input_buffer = ""
 			_input_bar.text = ""
+			_input_mode_callback = Callable()
 			_refresh()
 
 func _handle_inv_mode(keycode: int) -> void:
@@ -233,6 +353,16 @@ func _refresh() -> void:
 		_event_label.text = _build_member_str()
 	elif _inv_mode:
 		_event_label.text = _build_inv_str()
+	elif _faction_mode:
+		_event_label.text = _build_faction_str()
+	elif _outpost_mode:
+		_event_label.text = _build_outpost_str()
+	elif _subteam_mode:
+		_event_label.text = _build_subteam_str()
+	elif _advisor_mode:
+		_event_label.text = _build_advisor_str()
+	elif _intel_mode:
+		_event_label.text = _build_intel_str()
 	else:
 		var log_lines: Array = []
 		var show_count: int = mini(_events.size(), 6)
@@ -240,6 +370,7 @@ func _refresh() -> void:
 			var e = _events[i]
 			log_lines.append("[T%d] %s" % [_bridge.get_current_tick(), str(e)])
 		_event_label.text = "\n".join(log_lines)
+	_check_alerts()
 
 func _get_hp_status(person: PersonData) -> String:
 	var has_severe: bool = false
@@ -482,8 +613,23 @@ func _handle_interact_mode(keycode: int) -> void:
 		var actions: Array = _cached_snapshot.get("available_actions", [])
 		if num < actions.size():
 			var act: Dictionary = actions[num]
-			var result: Dictionary = _bridge.command_player(act.get("command_name", "execute_action"), act.get("command_args", {}))
-			_log_event("[互動] %s" % result.get("message", ""))
+			var action_id: String = act.get("action_id", "")
+			if action_id == "gather_intel":
+				# 進入 gather_intel 子模式
+				_intel_target_id = _interact_target
+				_bridge.set_player_input("pending_intel_target", _intel_target_id)
+				var ir: Dictionary = _bridge.command_player(
+					act.get("command_name", "execute_action"), act.get("command_args", {}))
+				_intel_options = ir.get("payload", {}).get("inquiry_options", [])
+				if _intel_options.is_empty():
+					_log_event("[打聽] 無可用問題")
+				else:
+					_intel_mode = true
+					_interact_mode = false
+			else:
+				var result: Dictionary = _bridge.command_player(
+					act.get("command_name", "execute_action"), act.get("command_args", {}))
+				_log_event("[互動] %s" % result.get("message", ""))
 			_interact_target = -1   # 回到目標清單
 			# 若行動觸發遭遇戰，關閉 interact_mode
 			_refresh_snapshot()
@@ -564,3 +710,323 @@ func _build_interact_str() -> String:
 
 	lines.append("── [T/Esc]關閉 ──")
 	return "\n".join(lines)
+
+func _handle_faction_mode(keycode: int) -> void:
+	if keycode == KEY_F or keycode == KEY_ESCAPE:
+		_faction_mode = false
+		_refresh()
+		return
+	var fp: Dictionary = _bridge.query_faction_panel().get("data", {})
+	if not fp.get("in_faction", false):
+		_faction_mode = false
+		_refresh()
+		return
+	var member_orders: Array = fp.get("member_orders", [])
+
+	match keycode:
+		KEY_A:   # 設定目標
+			_input_mode = true
+			_input_mode_type = "string"
+			_input_mode_prompt = "設定勢力目標: "
+			_input_buffer = ""
+			_input_mode_callback = func(buf: String):
+				_bridge.set_player_input("faction_goal_input", buf)
+				var r := _bridge.command_player("execute_action",
+					{"action_id": "set_faction_goal", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[勢力] %s" % r.get("message", ""))
+			_input_bar.text = "%s_" % _input_mode_prompt
+		KEY_B:   # 調整徵收率
+			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "徵收率 (0-100): "
+			_input_buffer = ""
+			_input_mode_callback = func(buf: String):
+				var rate: float = clampf(float(buf) / 100.0, 0.0, 1.0)
+				_bridge.set_player_input("tribute_rate_input", rate)
+				var r := _bridge.command_player("execute_action",
+					{"action_id": "set_tribute_rate", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[勢力] %s" % r.get("message", ""))
+			_input_bar.text = "%s_" % _input_mode_prompt
+		KEY_C:   # 離開勢力
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "leave_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[勢力] %s" % r.get("message", ""))
+		KEY_D:   # 背叛勢力
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "betray_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[勢力] %s" % r.get("message", ""))
+		KEY_E:   # 解散勢力（僅 leader）
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "disband_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[勢力] %s" % r.get("message", ""))
+		_:
+			# [1~9] 下令成員
+			if keycode >= KEY_1 and keycode <= KEY_9:
+				var idx: int = keycode - KEY_1
+				if idx < member_orders.size():
+					var mo: Dictionary = member_orders[idx]
+					var member_tid: int = mo.get("team_id", -1)
+					_input_mode = true
+					_input_mode_type = "string"
+					_input_mode_prompt = "下令 Team%d 任務: " % member_tid
+					_input_buffer = ""
+					_input_mode_callback = func(buf: String):
+						_bridge.set_player_input("order_member_id", member_tid)
+						_bridge.set_player_input("member_task", buf)
+						var r := _bridge.command_player("execute_action",
+							{"action_id": "order_faction_member", "target": {"kind": "none", "team_id": member_tid, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+						_log_event("[勢力] %s" % r.get("message", ""))
+					_input_bar.text = "%s_" % _input_mode_prompt
+	_refresh()
+
+func _build_faction_str() -> String:
+	var fp: Dictionary = _bridge.query_faction_panel().get("data", {})
+	if not fp.get("in_faction", false):
+		return "── 勢力面板 ──\n（玩家不在任何勢力）\n[F/Esc]關閉"
+	var lines: Array = []
+	var role_str: String = "Leader" if fp.get("is_leader", false) else "成員"
+	lines.append("── 勢力%d [%s] ──" % [fp.get("faction_id", -1), role_str])
+	lines.append("AI 目標: %s   玩家目標: %s" % [
+		fp.get("faction_goal", "（無）"),
+		fp.get("player_goal_override", "（跟隨 AI）") if not fp.get("player_goal_override", "").is_empty() else "（跟隨 AI）"])
+	lines.append("徵收率: %.0f%%" % (fp.get("tribute_rate", 0.0) * 100))
+	lines.append("")
+	lines.append("── 成員指令 ──")
+	var member_orders: Array = fp.get("member_orders", [])
+	for i in range(member_orders.size()):
+		var mo: Dictionary = member_orders[i]
+		var pos: Dictionary = mo.get("tile_pos", {})
+		var task_str: String
+		if mo.get("pending_task", "") != "":
+			task_str = "傳達中（%s）" % mo.get("pending_task", "")
+		elif mo.get("commanded_task", "") != "":
+			task_str = mo.get("commanded_task", "")
+		else:
+			task_str = "無"
+		var pos_v: Vector2i = mo.get("tile_pos", Vector2i.ZERO) as Vector2i
+		lines.append("[%d] Team%d @(%d,%d)  指令: %s" % [
+			i + 1, mo.get("team_id", -1), pos_v.x, pos_v.y, task_str])
+	lines.append("")
+	lines.append("── 行動 ──")
+	lines.append("[A]設定目標  [B]調整徵收率  [C]離開勢力")
+	if fp.get("is_leader", false):
+		lines.append("[D]背叛勢力  [E]解散勢力（Leader）")
+	else:
+		lines.append("[D]背叛勢力")
+	lines.append("[F/Esc]關閉")
+	return "\n".join(lines)
+
+func _handle_outpost_mode(keycode: int) -> void:
+	if keycode == KEY_O or keycode == KEY_ESCAPE:
+		_outpost_mode = false
+		_refresh()
+		return
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		var op: Dictionary = _bridge.query_outpost_panel().get("data", {})
+		var actions: Array = op.get("actions", [])
+		var idx: int = keycode - KEY_1
+		if idx < actions.size():
+			var action_id: String = actions[idx]
+			var r := _bridge.command_player("execute_action",
+				{"action_id": action_id, "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[前哨] %s" % r.get("message", ""))
+	_refresh()
+
+func _build_outpost_str() -> String:
+	var op: Dictionary = _bridge.query_outpost_panel().get("data", {})
+	var lines: Array = []
+	var pos: Vector2i = op.get("tile_pos", Vector2i.ZERO) as Vector2i
+	lines.append("── 前哨站 @(%d,%d) ──" % [pos.x, pos.y])
+	lines.append("類型: %s  等級: %d" % [
+		op.get("outpost_type", "無") if op.get("outpost_type", "") != "" else "無",
+		op.get("outpost_level", 0)])
+	var owner: int = op.get("outpost_owner", -1)
+	lines.append("擁有者: %s  支配權: %s" % [
+		"Team%d" % owner if owner >= 0 else "無",
+		"是" if op.get("has_control", false) else "否"])
+	if op.get("construction_in_progress", false):
+		lines.append("施工中：剩餘 %d Tick" % op.get("ticks_left", 0))
+	lines.append("")
+	lines.append("── 可用行動 ──")
+	const ACTION_LABELS: Dictionary = {
+		"build_outpost":          "建設前哨站",
+		"upgrade_outpost":        "升級等級",
+		"upgrade_farming":        "升級農作",
+		"upgrade_manufacturing":  "升級製造",
+		"demolish_outpost":       "拆除",
+	}
+	var actions: Array = op.get("actions", [])
+	if actions.is_empty():
+		lines.append("（無可用行動）")
+	for i in range(actions.size()):
+		lines.append("[%d]%s" % [i + 1, ACTION_LABELS.get(actions[i], actions[i])])
+	lines.append("[O/Esc]關閉")
+	return "\n".join(lines)
+
+func _handle_subteam_mode(keycode: int) -> void:
+	if keycode == KEY_U or keycode == KEY_ESCAPE:
+		_subteam_mode = false
+		_subteam_selection = -1
+		_refresh()
+		return
+	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {})
+	var subteams: Array = sp.get("subteams", [])
+
+	if _subteam_selection == -1:
+		# 選子隊
+		if keycode >= KEY_1 and keycode <= KEY_9:
+			var idx: int = keycode - KEY_1
+			if idx < subteams.size():
+				_subteam_selection = subteams[idx].get("team_id", -1)
+		_refresh()
+		return
+
+	# 已選子隊：[A] 下令移動, [B] 召回
+	match keycode:
+		KEY_A:
+			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "目標 q（按 Enter 繼續）: "
+			_input_buffer = ""
+			var sub_id_cap: int = _subteam_selection
+			_input_mode_callback = func(buf_q: String):
+				var q_val: int = int(buf_q)
+				_input_mode = true
+				_input_mode_type = "numeric"
+				_input_mode_prompt = "目標 r: "
+				_input_buffer = ""
+				_input_mode_callback = func(buf_r: String):
+					var r_val: int = int(buf_r)
+					_bridge.set_player_input("order_sub_id", sub_id_cap)
+					_bridge.set_player_input("order_sub_q", q_val)
+					_bridge.set_player_input("order_sub_r", r_val)
+					_bridge.set_player_input("order_sub_task", "移動")
+					var res := _bridge.command_player("execute_action",
+						{"action_id": "order_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+					_log_event("[子隊] %s" % res.get("message", ""))
+					_subteam_selection = -1
+				_input_bar.text = "%s_" % _input_mode_prompt
+			_input_bar.text = "%s_" % _input_mode_prompt
+		KEY_B:
+			_bridge.set_player_input("recall_sub_id", _subteam_selection)
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "recall_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[子隊] %s" % r.get("message", ""))
+			_subteam_selection = -1
+	_refresh()
+
+func _build_subteam_str() -> String:
+	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {})
+	var subteams: Array = sp.get("subteams", [])
+	var lines: Array = []
+	lines.append("── 子隊 ──")
+	if subteams.is_empty():
+		lines.append("（無子隊）")
+	for i in range(subteams.size()):
+		var st: Dictionary = subteams[i]
+		var pos_v: Vector2i = st.get("tile_pos", Vector2i.ZERO) as Vector2i
+		var task_str: String = st.get("player_commanded_task", st.get("current_task", "?"))
+		var selected_mark: String = "* " if st.get("team_id", -1) == _subteam_selection else "  "
+		lines.append("[%d]%sTeam%d @(%d,%d)  %s  人口:%d" % [
+			i + 1, selected_mark, st.get("team_id", -1), pos_v.x, pos_v.y,
+			task_str, st.get("population", 0)])
+		if st.get("team_id", -1) == _subteam_selection:
+			lines.append("    [A]下令移動  [B]召回")
+	lines.append("[U/Esc]關閉")
+	return "\n".join(lines)
+
+func _handle_advisor_mode(keycode: int) -> void:
+	if keycode == KEY_V or keycode == KEY_ESCAPE:
+		_advisor_mode = false
+		_advisor_selection = -1
+		_refresh()
+		return
+	var members: Array = _cached_snapshot.get("members_detail", [])
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		var idx: int = keycode - KEY_1
+		if idx < members.size():
+			_advisor_selection = members[idx].get("id", -1)
+			if _advisor_selection >= 0:
+				_input_mode = true
+				_input_mode_type = "string"
+				_input_mode_prompt = "情境關鍵字 (attack/diplomacy/resource): "
+				_input_buffer = ""
+				var advisor_pid_cap: int = _advisor_selection
+				_input_mode_callback = func(buf: String):
+					var advice: String = _bridge.query_advisor_advice(advisor_pid_cap, buf)
+					_log_event("[Advisor] 建議：%s" % advice)
+				_input_bar.text = "%s_" % _input_mode_prompt
+	_refresh()
+
+func _build_advisor_str() -> String:
+	var members: Array = _cached_snapshot.get("members_detail", [])
+	var lines: Array = []
+	lines.append("── 顧問 ──")
+	if members.is_empty():
+		lines.append("（無可用顧問）")
+	for i in range(members.size()):
+		var m: Dictionary = members[i]
+		var skills: Dictionary = m.get("skills", {})
+		lines.append("[%d] %s  計謀:%.1f 交涉:%.1f 戰術:%.1f" % [
+			i + 1, m.get("name", "?"),
+			float(skills.get("計謀", 0)),
+			float(skills.get("交涉", 0)),
+			float(skills.get("戰術", 0))])
+	lines.append("選顧問後輸入情境關鍵字 (attack/diplomacy/resource)")
+	lines.append("[V/Esc]關閉")
+	return "\n".join(lines)
+
+func _handle_intel_mode(keycode: int) -> void:
+	if keycode == KEY_ESCAPE:
+		_intel_mode = false
+		_intel_options = []
+		_refresh()
+		return
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		var idx: int = keycode - KEY_1
+		if idx < _intel_options.size():
+			var choice: String = _intel_options[idx].get("label", "")
+			_bridge.set_player_input("gather_intel_npc_id", _intel_target_id)
+			_bridge.set_player_input("gather_intel_choice", choice)
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "confirm_gather_intel",
+				 "target": {"kind": "none", "team_id": _intel_target_id, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[Inquiry] %s" % r.get("message", ""))
+			_intel_mode = false
+			_intel_options = []
+	_refresh()
+
+func _build_intel_str() -> String:
+	var lines: Array = []
+	lines.append("── 打聽 Team%d ──" % _intel_target_id)
+	if _intel_options.is_empty():
+		lines.append("（無可用問題）")
+	for i in range(_intel_options.size()):
+		lines.append("[%d] %s" % [i + 1, _intel_options[i].get("label", "?")])
+	lines.append("[1~5]選題  [Esc]取消")
+	return "\n".join(lines)
+
+func _close_all_modes(keep: String = "") -> void:
+	if keep != "interact": _interact_mode = false; _interact_target = -1
+	if keep != "member":   _member_mode   = false
+	if keep != "inv":      _inv_mode      = false; _inv_selection   = -1
+	if keep != "faction":  _faction_mode  = false
+	if keep != "outpost":  _outpost_mode  = false
+	if keep != "subteam":  _subteam_mode  = false
+	if keep != "advisor":  _advisor_mode  = false
+	_intel_mode = false
+
+func _check_alerts() -> void:
+	var new_alerts: Array = _bridge.get_and_clear_alerts()
+	for a in new_alerts:
+		var atype: String = a.get("type", "")
+		var text: String
+		match atype:
+			"food_critical":            text = "警告：糧食危急"
+			"faction_member_betrayed":  text = "警告：勢力成員叛離"
+			_:                          text = "警告：%s" % a.get("description", atype)
+		_pending_alerts.append(text)
+	if not _pending_alerts.is_empty():
+		_alert_bar.text = "[!] %s  [Z 確認]" % _pending_alerts[0]
+	else:
+		_alert_bar.text = ""

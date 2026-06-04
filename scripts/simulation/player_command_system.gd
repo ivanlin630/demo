@@ -7,6 +7,7 @@ const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
 var _encounter:   EncounterSystem    = EncounterSystem.new()
+var _subteam:     SubteamSystem      = SubteamSystem.new()
 var _action_registry: Dictionary = {}
 
 # ── 主動互動 ────────────────────────────────────────────────
@@ -486,19 +487,32 @@ func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, 
 	print("[PlayerCmd] set_faction_goal → %s" % goal9)
 	return { "ok": true, "msg": msg9 }
 
-func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
-	var member_id9: int  = int(state.player_state.get("order_member_id", -1))
-	var m_task9: String  = str(state.player_state.get("member_task", ""))
-	var mq9: int = int(state.player_state.get("member_move_q", -1))
-	var mr9: int = int(state.player_state.get("member_move_r", -1))
-	var mt9: TeamData = state.teams.get(member_id9)
-	if mt9 == null or mt9.faction_id != pt.faction_id:
-		return { "ok": false, "msg": "目標不是同勢力成員" }
-	mt9.player_commanded_task = m_task9
-	if mq9 != -1:
-		mt9.move_target = Vector2i(mq9, mr9)
-	print("[PlayerCmd] order_faction_member Team%d → %s" % [member_id9, m_task9])
-	return { "ok": true, "msg": "已下令 Team%d" % member_id9 }
+func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var member_team_id: int   = int(state.player_state.get("order_member_id", -1))
+	var m_task: String        = str(state.player_state.get("member_task", ""))
+	var member_team: TeamData = state.teams.get(member_team_id)
+	if member_team == null:
+		return { "ok": false, "msg": "目標成員不存在" }
+	if m_task.is_empty():
+		return { "ok": false, "msg": "未指定任務" }
+	if pt.population < 2:
+		return { "ok": false, "msg": "人數不足以派信使" }
+	# 從 named_members 選一非 leader 的成員當信使
+	var herald_leader_id: int = -1
+	for pid in pt.named_members:
+		if pid != pt.leader_id:
+			herald_leader_id = pid
+			break
+	if herald_leader_id == -1:
+		return { "ok": false, "msg": "無可用的信使人選（需至少一名非隊長的記名成員）" }
+	var herald_id: int = _subteam.dispatch(
+		state, pt_id, herald_leader_id, 1, TeamData.TASK_HERALD,
+		member_team.tile_pos, member_team_id, m_task)
+	if herald_id == -1:
+		return { "ok": false, "msg": "派信使失敗" }
+	state.player_pending_orders[str(member_team_id)] = {"task": m_task, "herald_id": herald_id}
+	print("[PlayerCmd] order_faction_member Team%d → herald Team%d 傳達任務: %s" % [member_team_id, herald_id, m_task])
+	return { "ok": true, "msg": "信使 Team%d 已出發至 Team%d" % [herald_id, member_team_id] }
 
 func _action_gather_intel(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var tgt_gi: TeamData = state.teams.get(target_id)

@@ -42,6 +42,9 @@ var player_forced_event: Dictionary = {}
 var player_forced_event_id: String = ""
 # 對應 player_forced_event 的唯一 ID（str(randi()) 生成）
 # 空字串 = 無待處理強制事件
+var player_pending_orders: Dictionary = {}
+# 格式：{ member_team_id(String) → { "task": String, "herald_id": int } }
+# 信使出發後寫入；信使抵達同格後 interaction_system 清除並設 player_commanded_task
 var player_alerts: Array = []
 # Array[Dictionary]，格式：{ "type": String, "tick": int, "data": Dictionary }
 # 類型：food_critical / member_defected / faction_member_betrayed /
@@ -78,7 +81,7 @@ var encounter_defender_id: int    = -1
 var pursuit_edge_offset: int      = 0   # 追擊進場邊緣輪換計數
 var encounter_tick: int           = 0
 var last_encounter_result: Dictionary = {}
-# Format: { "winner_id": int, "loser_id": int, "loot_pool": Dictionary }
+# Format: { "winner_id": int, "loser_id": int, "loot_pool": Dictionary, "can_subjugate": bool }
 # Cleared after player takes/leaves loot.
 
 func snapshot_faction_member(team_id: int, tick: int) -> void:

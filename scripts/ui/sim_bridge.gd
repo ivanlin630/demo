@@ -269,3 +269,8 @@ func query_outpost_panel() -> Dictionary:
 
 func query_subteam_panel() -> Dictionary:
 	return PlayerQueryApi.new().query_subteam_panel(_state)
+
+func query_advisor_advice(advisor_pid: int, situation: String) -> String:
+	var p: PersonData = _state.persons.get(advisor_pid)
+	if p == null: return "顧問不存在"
+	return AdvisorSystem.new().get_advice(p, situation, {}, _state)
