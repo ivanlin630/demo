@@ -736,7 +736,7 @@ func _handle_faction_mode(keycode: int) -> void:
 		_faction_mode = false
 		_refresh()
 		return
-	var fp: Dictionary = _bridge.query_faction_panel().get("data", {})
+	var fp: Dictionary = _bridge.query_faction_panel().get("data", {}).get("faction_panel", {})
 	if not fp.get("in_faction", false):
 		_faction_mode = false
 		_refresh()
@@ -800,7 +800,7 @@ func _handle_faction_mode(keycode: int) -> void:
 	_refresh()
 
 func _build_faction_str() -> String:
-	var fp: Dictionary = _bridge.query_faction_panel().get("data", {})
+	var fp: Dictionary = _bridge.query_faction_panel().get("data", {}).get("faction_panel", {})
 	if not fp.get("in_faction", false):
 		return "── 勢力面板 ──\n（玩家不在任何勢力）\n[F/Esc]關閉"
 	var lines: Array = []
@@ -842,7 +842,7 @@ func _handle_outpost_mode(keycode: int) -> void:
 		_refresh()
 		return
 	if keycode >= KEY_1 and keycode <= KEY_9:
-		var op: Dictionary = _bridge.query_outpost_panel().get("data", {})
+		var op: Dictionary = _bridge.query_outpost_panel().get("data", {}).get("outpost_panel", {})
 		var actions: Array = op.get("actions", [])
 		var idx: int = keycode - KEY_1
 		if idx < actions.size():
@@ -853,7 +853,7 @@ func _handle_outpost_mode(keycode: int) -> void:
 	_refresh()
 
 func _build_outpost_str() -> String:
-	var op: Dictionary = _bridge.query_outpost_panel().get("data", {})
+	var op: Dictionary = _bridge.query_outpost_panel().get("data", {}).get("outpost_panel", {})
 	var lines: Array = []
 	var pos: Vector2i = op.get("tile_pos", Vector2i.ZERO) as Vector2i
 	lines.append("── 前哨站 @(%d,%d) ──" % [pos.x, pos.y])
@@ -889,7 +889,7 @@ func _handle_subteam_mode(keycode: int) -> void:
 		_subteam_selection = -1
 		_refresh()
 		return
-	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {})
+	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {}).get("subteam_panel", {})
 	var subteams: Array = sp.get("subteams", [])
 
 	if _subteam_selection == -1:
@@ -936,7 +936,7 @@ func _handle_subteam_mode(keycode: int) -> void:
 	_refresh()
 
 func _build_subteam_str() -> String:
-	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {})
+	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {}).get("subteam_panel", {})
 	var subteams: Array = sp.get("subteams", [])
 	var lines: Array = []
 	lines.append("── 子隊 ──")
