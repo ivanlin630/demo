@@ -174,9 +174,8 @@ func _draw() -> void:
 
 const HEX_DIRS: Dictionary = {
 	KEY_Q: true, KEY_W: true, KEY_E: true,
-	KEY_A: true,              KEY_D: true,
+	KEY_A: true, KEY_S: true, KEY_D: true,
 }
-# Note: KEY_S is handled separately as "surrender" action
 
 func _hex_neighbor(pos: Vector2i, dir_key: int) -> Vector2i:
 	var dirs_even: Dictionary = {
@@ -221,7 +220,10 @@ func _handle_key(keycode: int) -> void:
 						{"action_id": "surrender_in_encounter",
 						 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 					_log(r.get("message", ""))
-			elif keycode == KEY_J:
+					_refresh_ui()
+					return   # don't fall through to movement
+				# else: encounter_active == false, fall through to HEX_DIRS movement below
+			if keycode == KEY_J:
 				var state3: WorldState = _bridge.get_state()
 				if not state3.encounter_active and state3.last_encounter_result.get("can_subjugate", false):
 					var r := _bridge.command_player("execute_action",
