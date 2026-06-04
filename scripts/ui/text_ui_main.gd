@@ -123,6 +123,12 @@ func _input(event: InputEvent) -> void:
 	if _faction_mode:
 		_handle_faction_mode(event.keycode)
 		return
+	if _outpost_mode:
+		_handle_outpost_mode(event.keycode)
+		return
+	if _subteam_mode:
+		_handle_subteam_mode(event.keycode)
+		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
 		KEY_S: _move_cursor(Vector2i(0,  1))
@@ -174,6 +180,15 @@ func _input(event: InputEvent) -> void:
 			_faction_mode = not _faction_mode
 			if _faction_mode: _close_all_modes("faction")
 			_refresh()
+		KEY_O:
+			_outpost_mode = not _outpost_mode
+			if _outpost_mode: _close_all_modes("outpost")
+			_refresh()
+		KEY_U:
+			_subteam_mode = not _subteam_mode
+			if _subteam_mode: _close_all_modes("subteam")
+			_subteam_selection = -1
+			_refresh()
 		KEY_ESCAPE:
 			if _bridge.is_advancing():
 				_bridge.cancel_advance()
@@ -194,6 +209,15 @@ func _input(event: InputEvent) -> void:
 				_refresh()
 			elif _faction_mode:
 				_faction_mode = false
+				_refresh()
+			elif _outpost_mode:
+				_outpost_mode = false
+				_refresh()
+			elif _subteam_mode:
+				if _subteam_selection >= 0:
+					_subteam_selection = -1
+				else:
+					_subteam_mode = false
 				_refresh()
 		KEY_Q:
 			get_tree().quit()
@@ -323,6 +347,10 @@ func _refresh() -> void:
 		_event_label.text = _build_inv_str()
 	elif _faction_mode:
 		_event_label.text = _build_faction_str()
+	elif _outpost_mode:
+		_event_label.text = _build_outpost_str()
+	elif _subteam_mode:
+		_event_label.text = _build_subteam_str()
 	else:
 		var log_lines: Array = []
 		var show_count: int = mini(_events.size(), 6)
@@ -728,6 +756,127 @@ func _build_faction_str() -> String:
 	else:
 		lines.append("[D]背叛勢力")
 	lines.append("[F/Esc]關閉")
+	return "\n".join(lines)
+
+func _handle_outpost_mode(keycode: int) -> void:
+	if keycode == KEY_O or keycode == KEY_ESCAPE:
+		_outpost_mode = false
+		_refresh()
+		return
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		var op: Dictionary = _bridge.query_outpost_panel().get("data", {})
+		var actions: Array = op.get("actions", [])
+		var idx: int = keycode - KEY_1
+		if idx < actions.size():
+			var action_id: String = actions[idx]
+			var r := _bridge.command_player("execute_action",
+				{"action_id": action_id, "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[前哨] %s" % r.get("message", ""))
+	_refresh()
+
+func _build_outpost_str() -> String:
+	var op: Dictionary = _bridge.query_outpost_panel().get("data", {})
+	var lines: Array = []
+	var pos = op.get("tile_pos", {})
+	var pos_v: Vector2i = pos if pos is Vector2i else Vector2i(pos.get("x", 0), pos.get("y", 0))
+	lines.append("── 前哨站 @(%d,%d) ──" % [pos_v.x, pos_v.y])
+	lines.append("類型: %s  等級: %d" % [
+		op.get("outpost_type", "無") if op.get("outpost_type", "") != "" else "無",
+		op.get("outpost_level", 0)])
+	var owner: int = op.get("outpost_owner", -1)
+	lines.append("擁有者: %s  支配權: %s" % [
+		"Team%d" % owner if owner >= 0 else "無",
+		"是" if op.get("has_control", false) else "否"])
+	if op.get("construction_in_progress", false):
+		lines.append("施工中：剩餘 %d Tick" % op.get("ticks_left", 0))
+	lines.append("")
+	lines.append("── 可用行動 ──")
+	const ACTION_LABELS: Dictionary = {
+		"build_outpost":          "建設前哨站",
+		"upgrade_outpost":        "升級等級",
+		"upgrade_farming":        "升級農作",
+		"upgrade_manufacturing":  "升級製造",
+		"demolish_outpost":       "拆除",
+	}
+	var actions: Array = op.get("actions", [])
+	if actions.is_empty():
+		lines.append("（無可用行動）")
+	for i in range(actions.size()):
+		lines.append("[%d]%s" % [i + 1, ACTION_LABELS.get(actions[i], actions[i])])
+	lines.append("[O/Esc]關閉")
+	return "\n".join(lines)
+
+func _handle_subteam_mode(keycode: int) -> void:
+	if keycode == KEY_U or keycode == KEY_ESCAPE:
+		_subteam_mode = false
+		_subteam_selection = -1
+		_refresh()
+		return
+	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {})
+	var subteams: Array = sp.get("subteams", [])
+
+	if _subteam_selection == -1:
+		# 選子隊
+		if keycode >= KEY_1 and keycode <= KEY_9:
+			var idx: int = keycode - KEY_1
+			if idx < subteams.size():
+				_subteam_selection = subteams[idx].get("team_id", -1)
+		_refresh()
+		return
+
+	# 已選子隊：[A] 下令移動, [B] 召回
+	match keycode:
+		KEY_A:
+			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "目標 q（按 Enter 繼續）: "
+			_input_buffer = ""
+			var sub_id_cap: int = _subteam_selection
+			_input_mode_callback = func(buf_q: String):
+				var q_val: int = int(buf_q)
+				_input_mode = true
+				_input_mode_type = "numeric"
+				_input_mode_prompt = "目標 r: "
+				_input_buffer = ""
+				_input_mode_callback = func(buf_r: String):
+					var r_val: int = int(buf_r)
+					_bridge.set_player_input("order_sub_id", sub_id_cap)
+					_bridge.set_player_input("order_sub_q", q_val)
+					_bridge.set_player_input("order_sub_r", r_val)
+					_bridge.set_player_input("order_sub_task", "移動")
+					var res := _bridge.command_player("execute_action",
+						{"action_id": "order_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+					_log_event("[子隊] %s" % res.get("message", ""))
+					_subteam_selection = -1
+				_input_bar.text = "%s_" % _input_mode_prompt
+			_input_bar.text = "%s_" % _input_mode_prompt
+		KEY_B:
+			_bridge.set_player_input("recall_sub_id", _subteam_selection)
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "recall_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[子隊] %s" % r.get("message", ""))
+			_subteam_selection = -1
+	_refresh()
+
+func _build_subteam_str() -> String:
+	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {})
+	var subteams: Array = sp.get("subteams", [])
+	var lines: Array = []
+	lines.append("── 子隊 ──")
+	if subteams.is_empty():
+		lines.append("（無子隊）")
+	for i in range(subteams.size()):
+		var st: Dictionary = subteams[i]
+		var tpos = st.get("tile_pos", {})
+		var pos_v: Vector2i = tpos if tpos is Vector2i else Vector2i(tpos.get("x", 0), tpos.get("y", 0))
+		var task_str: String = st.get("player_commanded_task", st.get("current_task", "?"))
+		var selected_mark: String = "* " if st.get("team_id", -1) == _subteam_selection else "  "
+		lines.append("[%d]%sTeam%d @(%d,%d)  %s  人口:%d" % [
+			i + 1, selected_mark, st.get("team_id", -1), pos_v.x, pos_v.y,
+			task_str, st.get("population", 0)])
+		if st.get("team_id", -1) == _subteam_selection:
+			lines.append("    [A]下令移動  [B]召回")
+	lines.append("[U/Esc]關閉")
 	return "\n".join(lines)
 
 func _close_all_modes(keep: String = "") -> void:
