@@ -114,6 +114,9 @@ func _input(event: InputEvent) -> void:
 	if _input_mode:
 		_handle_input_mode(event.keycode)
 		return
+	if _intel_mode:
+		_handle_intel_mode(event.keycode)
+		return
 	if _inv_mode:
 		_handle_inv_mode(event.keycode)
 		return
@@ -128,6 +131,9 @@ func _input(event: InputEvent) -> void:
 		return
 	if _subteam_mode:
 		_handle_subteam_mode(event.keycode)
+		return
+	if _advisor_mode:
+		_handle_advisor_mode(event.keycode)
 		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
@@ -188,6 +194,11 @@ func _input(event: InputEvent) -> void:
 			_subteam_mode = not _subteam_mode
 			if _subteam_mode: _close_all_modes("subteam")
 			_subteam_selection = -1
+			_refresh()
+		KEY_V:
+			_advisor_mode = not _advisor_mode
+			if _advisor_mode: _close_all_modes("advisor")
+			_advisor_selection = -1
 			_refresh()
 		KEY_ESCAPE:
 			if _bridge.is_advancing():
@@ -351,6 +362,10 @@ func _refresh() -> void:
 		_event_label.text = _build_outpost_str()
 	elif _subteam_mode:
 		_event_label.text = _build_subteam_str()
+	elif _advisor_mode:
+		_event_label.text = _build_advisor_str()
+	elif _intel_mode:
+		_event_label.text = _build_intel_str()
 	else:
 		var log_lines: Array = []
 		var show_count: int = mini(_events.size(), 6)
@@ -573,8 +588,23 @@ func _handle_interact_mode(keycode: int) -> void:
 		var actions: Array = _cached_snapshot.get("available_actions", [])
 		if num < actions.size():
 			var act: Dictionary = actions[num]
-			var result: Dictionary = _bridge.command_player(act.get("command_name", "execute_action"), act.get("command_args", {}))
-			_log_event("[互動] %s" % result.get("message", ""))
+			var action_id: String = act.get("action_id", "")
+			if action_id == "gather_intel":
+				# 進入 gather_intel 子模式
+				_intel_target_id = _interact_target
+				_bridge.set_player_input("pending_intel_target", _intel_target_id)
+				var ir: Dictionary = _bridge.command_player(
+					act.get("command_name", "execute_action"), act.get("command_args", {}))
+				_intel_options = ir.get("payload", {}).get("inquiry_options", [])
+				if _intel_options.is_empty():
+					_log_event("[打聽] 無可用問題")
+				else:
+					_intel_mode = true
+					_interact_mode = false
+			else:
+				var result: Dictionary = _bridge.command_player(
+					act.get("command_name", "execute_action"), act.get("command_args", {}))
+				_log_event("[互動] %s" % result.get("message", ""))
 			_interact_target = -1   # 回到目標清單
 			# 若行動觸發遭遇戰，關閉 interact_mode
 			_refresh_snapshot()
@@ -745,7 +775,7 @@ func _build_faction_str() -> String:
 			task_str = mo.get("commanded_task", "")
 		else:
 			task_str = "無"
-		var pos_v: Vector2i = pos if pos is Vector2i else Vector2i(pos.get("x", 0), pos.get("y", 0))
+		var pos_v: Vector2i = mo.get("tile_pos", Vector2i.ZERO) as Vector2i
 		lines.append("[%d] Team%d @(%d,%d)  指令: %s" % [
 			i + 1, mo.get("team_id", -1), pos_v.x, pos_v.y, task_str])
 	lines.append("")
@@ -777,9 +807,8 @@ func _handle_outpost_mode(keycode: int) -> void:
 func _build_outpost_str() -> String:
 	var op: Dictionary = _bridge.query_outpost_panel().get("data", {})
 	var lines: Array = []
-	var pos = op.get("tile_pos", {})
-	var pos_v: Vector2i = pos if pos is Vector2i else Vector2i(pos.get("x", 0), pos.get("y", 0))
-	lines.append("── 前哨站 @(%d,%d) ──" % [pos_v.x, pos_v.y])
+	var pos: Vector2i = op.get("tile_pos", Vector2i.ZERO) as Vector2i
+	lines.append("── 前哨站 @(%d,%d) ──" % [pos.x, pos.y])
 	lines.append("類型: %s  等級: %d" % [
 		op.get("outpost_type", "無") if op.get("outpost_type", "") != "" else "無",
 		op.get("outpost_level", 0)])
@@ -867,8 +896,7 @@ func _build_subteam_str() -> String:
 		lines.append("（無子隊）")
 	for i in range(subteams.size()):
 		var st: Dictionary = subteams[i]
-		var tpos = st.get("tile_pos", {})
-		var pos_v: Vector2i = tpos if tpos is Vector2i else Vector2i(tpos.get("x", 0), tpos.get("y", 0))
+		var pos_v: Vector2i = st.get("tile_pos", Vector2i.ZERO) as Vector2i
 		var task_str: String = st.get("player_commanded_task", st.get("current_task", "?"))
 		var selected_mark: String = "* " if st.get("team_id", -1) == _subteam_selection else "  "
 		lines.append("[%d]%sTeam%d @(%d,%d)  %s  人口:%d" % [
@@ -877,6 +905,77 @@ func _build_subteam_str() -> String:
 		if st.get("team_id", -1) == _subteam_selection:
 			lines.append("    [A]下令移動  [B]召回")
 	lines.append("[U/Esc]關閉")
+	return "\n".join(lines)
+
+func _handle_advisor_mode(keycode: int) -> void:
+	if keycode == KEY_V or keycode == KEY_ESCAPE:
+		_advisor_mode = false
+		_advisor_selection = -1
+		_refresh()
+		return
+	var members: Array = _cached_snapshot.get("members_detail", [])
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		var idx: int = keycode - KEY_1
+		if idx < members.size():
+			_advisor_selection = members[idx].get("id", -1)
+			if _advisor_selection >= 0:
+				_input_mode = true
+				_input_mode_type = "string"
+				_input_mode_prompt = "情境關鍵字 (attack/diplomacy/resource): "
+				_input_buffer = ""
+				var advisor_pid_cap: int = _advisor_selection
+				_input_mode_callback = func(buf: String):
+					var advice: String = _bridge.query_advisor_advice(advisor_pid_cap, buf)
+					_log_event("[Advisor] 建議：%s" % advice)
+				_input_bar.text = "%s_" % _input_mode_prompt
+	_refresh()
+
+func _build_advisor_str() -> String:
+	var members: Array = _cached_snapshot.get("members_detail", [])
+	var lines: Array = []
+	lines.append("── 顧問 ──")
+	if members.is_empty():
+		lines.append("（無可用顧問）")
+	for i in range(members.size()):
+		var m: Dictionary = members[i]
+		var skills: Dictionary = m.get("skills", {})
+		lines.append("[%d] %s  計謀:%.1f 交涉:%.1f 戰術:%.1f" % [
+			i + 1, m.get("name", "?"),
+			float(skills.get("計謀", 0)),
+			float(skills.get("交涉", 0)),
+			float(skills.get("戰術", 0))])
+	lines.append("選顧問後輸入情境關鍵字 (attack/diplomacy/resource)")
+	lines.append("[V/Esc]關閉")
+	return "\n".join(lines)
+
+func _handle_intel_mode(keycode: int) -> void:
+	if keycode == KEY_ESCAPE:
+		_intel_mode = false
+		_intel_options = []
+		_refresh()
+		return
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		var idx: int = keycode - KEY_1
+		if idx < _intel_options.size():
+			var choice: String = _intel_options[idx].get("label", "")
+			_bridge.set_player_input("gather_intel_npc_id", _intel_target_id)
+			_bridge.set_player_input("gather_intel_choice", choice)
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "confirm_gather_intel",
+				 "target": {"kind": "none", "team_id": _intel_target_id, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[Inquiry] %s" % r.get("message", ""))
+			_intel_mode = false
+			_intel_options = []
+	_refresh()
+
+func _build_intel_str() -> String:
+	var lines: Array = []
+	lines.append("── 打聽 Team%d ──" % _intel_target_id)
+	if _intel_options.is_empty():
+		lines.append("（無可用問題）")
+	for i in range(_intel_options.size()):
+		lines.append("[%d] %s" % [i + 1, _intel_options[i].get("label", "?")])
+	lines.append("[1~5]選題  [Esc]取消")
 	return "\n".join(lines)
 
 func _close_all_modes(keep: String = "") -> void:

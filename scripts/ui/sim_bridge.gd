@@ -136,3 +136,21 @@ func get_and_clear_alerts() -> Array:
 	var alerts: Array = _state.player_alerts.duplicate()
 	_state.player_alerts.clear()
 	return alerts
+
+# 設定玩家狀態欄位（如 tribute_rate_input）
+func set_player_input(key: String, value: Variant) -> void:
+	_state.player_state[key] = value
+
+func query_faction_panel() -> Dictionary:
+	return {"ok": true, "data": PlayerApiMapper.map_faction_panel(_state)}
+
+func query_outpost_panel() -> Dictionary:
+	return {"ok": true, "data": PlayerApiMapper.map_outpost_panel(_state)}
+
+func query_subteam_panel() -> Dictionary:
+	return {"ok": true, "data": PlayerApiMapper.map_subteam_panel(_state)}
+
+func query_advisor_advice(advisor_pid: int, situation: String) -> String:
+	var p: PersonData = _state.persons.get(advisor_pid)
+	if p == null: return "顧問不存在"
+	return AdvisorSystem.new().get_advice(p, situation, {}, _state)

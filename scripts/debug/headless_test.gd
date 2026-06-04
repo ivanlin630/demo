@@ -1791,4 +1791,13 @@ func _run_sim_test() -> void:
 
 	print("SimBridge Player API Integration: ALL PASS")
 
+	# 顧問 / 打聽系統 smoke test
+	var _adv_pid: int = state.player_id
+	if _adv_pid != -1:
+		var _adv_p: PersonData = state.persons.get(_adv_pid)
+		if _adv_p != null:
+			var _advice2: String = AdvisorSystem.new().get_advice(_adv_p, "attack", {}, state)
+			print("[Advisor] smoke test advice: ", _advice2)
+	print("[Inquiry] smoke test done")
+
 	print("=== DONE ===")

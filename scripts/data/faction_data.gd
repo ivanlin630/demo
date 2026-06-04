@@ -6,6 +6,7 @@ var is_established: bool = false
 var leader_team_id: int = -1
 var member_team_ids: Array = []
 var tribute_rate: float = 0.10
+var player_goal_override: String = ""
 
 # 策略層（faction_ai_system 讀寫）
 var goals: Array = []        # ["徵收", "立國", "擴張", "防禦"]

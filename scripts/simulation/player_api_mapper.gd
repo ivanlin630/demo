@@ -413,5 +413,195 @@ static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_mem
 		"location_context":   map_location_context(state, cursor_q, cursor_r),
 		"available_actions":  actions,
 		"inventory_state":    map_inventory_state(state),
-		"snapshot_meta":      map_snapshot_meta(focus_valid, cursor_valid)
+		"snapshot_meta":      map_snapshot_meta(focus_valid, cursor_valid),
+		"members_detail":     map_members_detail(state),
+		"team_stats":         map_team_stats(state),
 	}
+
+# ── Members detail ─────────────────────────────────────────────────────────────
+
+static func map_members_detail(state: WorldState) -> Array:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	if t == null:
+		return []
+	var member_ids: Array = []
+	if t.leader_id != -1:
+		member_ids.append(t.leader_id)
+	for mid in t.named_members:
+		if mid != -1 and not member_ids.has(mid):
+			member_ids.append(mid)
+	var result: Array = []
+	for mid in member_ids:
+		var m: PersonData = state.persons.get(mid)
+		if m == null:
+			continue
+		var hp_current: float = 0.0
+		var hp_max_total: float = 0.0
+		for part_data in m.body_parts.values():
+			hp_current += float(part_data.get("hp", 0.0))
+			hp_max_total += float(part_data.get("max_hp", 0.0))
+		var inventory: Array = []
+		if mid == pid:
+			inventory = state.player_state.get("inventory", []).duplicate()
+		result.append({
+			"id":         mid,
+			"name":       m.person_name,
+			"role":       "leader" if mid == t.leader_id else "member",
+			"stress":     m.stress,
+			"fear":       m.fear,
+			"loyalty":    m.loyalty,
+			"hp_current": hp_current,
+			"hp_max":     hp_max_total,
+			"attributes": m.attributes.duplicate(),
+			"values":     m.values.duplicate(),
+			"skills":     m.skills.duplicate(),
+			"body_parts": m.body_parts.duplicate(true),
+			"equipped":   m.equipment.duplicate(true),
+			"inventory":  inventory,
+		})
+	return result
+
+static func map_team_stats(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var tid: int = p.team_id if p != null else -1
+	var t: TeamData = state.teams.get(tid) if tid != -1 else null
+	if t == null:
+		return {}
+	var ms := MovementSystem.new()
+	return {
+		"food_qty":       int(t.resources.get("food", 0.0)),
+		"carry_weight":   ms.calc_total_weight(t),
+		"carry_capacity": ms.get_carry_capacity(t),
+		"member_count":   (1 if t.leader_id != -1 else 0) + t.named_members.size(),
+	}
+
+# ── Faction panel ──────────────────────────────────────────────────────────────
+
+static func map_faction_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {"in_faction": false, "faction_id": -1, "is_leader": false,
+			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+			"member_orders": [], "actions": []}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {"in_faction": false, "faction_id": -1, "is_leader": false,
+			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+			"member_orders": [], "actions": []}
+	var pt: TeamData = state.teams.get(p.team_id)
+	if pt == null or pt.faction_id == -1:
+		return {"in_faction": false, "faction_id": -1, "is_leader": false,
+			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+			"member_orders": [], "actions": []}
+	var f = state.factions.get(pt.faction_id)
+	if f == null:
+		return {"in_faction": false, "faction_id": -1, "is_leader": false,
+			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+			"member_orders": [], "actions": []}
+	var is_leader: bool = f.leader_team_id == pt.team_id
+	var pending_orders: Dictionary = state.player_pending_orders
+	var member_orders: Array = []
+	for mid in f.member_team_ids:
+		var mt: TeamData = state.teams.get(mid)
+		if mt == null: continue
+		var ml: PersonData = state.persons.get(mt.leader_id)
+		var name_str: String = ml.person_name if ml else "Team%d" % mid
+		var pending: Dictionary = pending_orders.get(str(mid), {})
+		member_orders.append({
+			"team_id": mid,
+			"name": name_str,
+			"tile_pos": mt.tile_pos,
+			"commanded_task": mt.player_commanded_task,
+			"pending_task": pending.get("task", ""),
+			"herald_id": pending.get("herald_id", -1),
+		})
+	var actions: Array = ["order_faction_member", "clear_member_order"]
+	if is_leader:
+		actions.append_array(["set_faction_goal", "set_tribute_rate",
+			"leave_faction", "betray_faction", "disband_faction"])
+	else:
+		actions.append("leave_faction")
+	return {
+		"in_faction": true,
+		"faction_id": pt.faction_id,
+		"is_leader": is_leader,
+		"faction_goal": ", ".join(f.goals) if f.goals.size() > 0 else "",
+		"player_goal_override": f.player_goal_override,
+		"tribute_rate": f.tribute_rate,
+		"member_orders": member_orders,
+		"actions": actions,
+	}
+
+# ── Outpost panel ──────────────────────────────────────────────────────────────
+
+static func map_outpost_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var pt: TeamData = state.teams.get(p.team_id)
+	if pt == null:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var key: int = pt.tile_pos.x * 1000 + pt.tile_pos.y
+	var tile = state.world.tiles.get(key)
+	if tile == null:
+		return {"tile_pos": pt.tile_pos, "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var has_ctrl: bool = tile.outpost_owner == -1 or tile.outpost_owner == pt.team_id
+	var in_progress: bool = tile.construction_team_id != -1
+	var actions: Array = []
+	if has_ctrl:
+		if tile.outpost_type == "" and not in_progress:
+			actions.append("build_outpost")
+		elif tile.outpost_type != "" and not in_progress:
+			actions.append_array(["upgrade_outpost", "upgrade_farming",
+				"upgrade_manufacturing", "demolish_outpost"])
+	return {
+		"tile_pos": pt.tile_pos,
+		"outpost_type": tile.outpost_type,
+		"outpost_level": tile.outpost_level,
+		"outpost_owner": tile.outpost_owner,
+		"has_control": has_ctrl,
+		"construction_in_progress": in_progress,
+		"ticks_left": tile.construction_ticks_left,
+		"actions": actions,
+	}
+
+# ── Subteam panel ──────────────────────────────────────────────────────────────
+
+static func map_subteam_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {"subteams": [], "actions_per_subteam": {}}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {"subteams": [], "actions_per_subteam": {}}
+	var ptid: int = p.team_id
+	var subteams: Array = []
+	var actions_per: Dictionary = {}
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id != ptid: continue
+		subteams.append({
+			"team_id": tid,
+			"tile_pos": t.tile_pos,
+			"current_task": t.current_task,
+			"order_task": t.order_task,
+			"population": t.population,
+			"player_commanded_task": t.player_commanded_task,
+		})
+		actions_per[str(tid)] = ["order_subteam", "recall_subteam"]
+	return {"subteams": subteams, "actions_per_subteam": actions_per}
