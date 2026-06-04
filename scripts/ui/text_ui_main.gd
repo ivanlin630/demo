@@ -120,6 +120,9 @@ func _input(event: InputEvent) -> void:
 	if _interact_mode:
 		_handle_interact_mode(event.keycode)
 		return
+	if _faction_mode:
+		_handle_faction_mode(event.keycode)
+		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
 		KEY_S: _move_cursor(Vector2i(0,  1))
@@ -167,6 +170,10 @@ func _input(event: InputEvent) -> void:
 				_interact_target = -1
 				_bridge.refresh_interaction_targets()  # 掃描同格 NPC，讓 ignore 後仍可再次互動
 			_refresh()
+		KEY_F:
+			_faction_mode = not _faction_mode
+			if _faction_mode: _close_all_modes("faction")
+			_refresh()
 		KEY_ESCAPE:
 			if _bridge.is_advancing():
 				_bridge.cancel_advance()
@@ -184,6 +191,9 @@ func _input(event: InputEvent) -> void:
 			elif _inv_mode:
 				_inv_mode = false
 				_inv_selection = -1
+				_refresh()
+			elif _faction_mode:
+				_faction_mode = false
 				_refresh()
 		KEY_Q:
 			get_tree().quit()
@@ -311,6 +321,8 @@ func _refresh() -> void:
 		_event_label.text = _build_member_str()
 	elif _inv_mode:
 		_event_label.text = _build_inv_str()
+	elif _faction_mode:
+		_event_label.text = _build_faction_str()
 	else:
 		var log_lines: Array = []
 		var show_count: int = mini(_events.size(), 6)
@@ -611,6 +623,111 @@ func _build_interact_str() -> String:
 		idx += 1
 
 	lines.append("── [T/Esc]關閉 ──")
+	return "\n".join(lines)
+
+func _handle_faction_mode(keycode: int) -> void:
+	if keycode == KEY_F or keycode == KEY_ESCAPE:
+		_faction_mode = false
+		_refresh()
+		return
+	var fp: Dictionary = _bridge.query_faction_panel().get("data", {})
+	if not fp.get("in_faction", false):
+		_faction_mode = false
+		_refresh()
+		return
+	var member_orders: Array = fp.get("member_orders", [])
+
+	match keycode:
+		KEY_A:   # 設定目標
+			_input_mode = true
+			_input_mode_type = "string"
+			_input_mode_prompt = "設定勢力目標: "
+			_input_buffer = ""
+			_input_mode_callback = func(buf: String):
+				_bridge.set_player_input("faction_goal_input", buf)
+				var r := _bridge.command_player("execute_action",
+					{"action_id": "set_faction_goal", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[勢力] %s" % r.get("message", ""))
+			_input_bar.text = "%s_" % _input_mode_prompt
+		KEY_B:   # 調整徵收率
+			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "徵收率 (0-100): "
+			_input_buffer = ""
+			_input_mode_callback = func(buf: String):
+				var rate: float = clampf(float(buf) / 100.0, 0.0, 1.0)
+				_bridge.set_player_input("tribute_rate_input", rate)
+				var r := _bridge.command_player("execute_action",
+					{"action_id": "set_tribute_rate", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[勢力] %s" % r.get("message", ""))
+			_input_bar.text = "%s_" % _input_mode_prompt
+		KEY_C:   # 離開勢力
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "leave_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[勢力] %s" % r.get("message", ""))
+		KEY_D:   # 背叛勢力
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "betray_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[勢力] %s" % r.get("message", ""))
+		KEY_E:   # 解散勢力（僅 leader）
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "disband_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log_event("[勢力] %s" % r.get("message", ""))
+		_:
+			# [1~9] 下令成員
+			if keycode >= KEY_1 and keycode <= KEY_9:
+				var idx: int = keycode - KEY_1
+				if idx < member_orders.size():
+					var mo: Dictionary = member_orders[idx]
+					var member_tid: int = mo.get("team_id", -1)
+					_input_mode = true
+					_input_mode_type = "string"
+					_input_mode_prompt = "下令 Team%d 任務: " % member_tid
+					_input_buffer = ""
+					_input_mode_callback = func(buf: String):
+						_bridge.set_player_input("order_member_id", member_tid)
+						_bridge.set_player_input("member_task", buf)
+						var r := _bridge.command_player("execute_action",
+							{"action_id": "order_faction_member", "target": {"kind": "none", "team_id": member_tid, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+						_log_event("[勢力] %s" % r.get("message", ""))
+					_input_bar.text = "%s_" % _input_mode_prompt
+	_refresh()
+
+func _build_faction_str() -> String:
+	var fp: Dictionary = _bridge.query_faction_panel().get("data", {})
+	if not fp.get("in_faction", false):
+		return "── 勢力面板 ──\n（玩家不在任何勢力）\n[F/Esc]關閉"
+	var lines: Array = []
+	var role_str: String = "Leader" if fp.get("is_leader", false) else "成員"
+	lines.append("── 勢力%d [%s] ──" % [fp.get("faction_id", -1), role_str])
+	lines.append("AI 目標: %s   玩家目標: %s" % [
+		fp.get("faction_goal", "（無）"),
+		fp.get("player_goal_override", "（跟隨 AI）") if not fp.get("player_goal_override", "").is_empty() else "（跟隨 AI）"])
+	lines.append("徵收率: %.0f%%" % (fp.get("tribute_rate", 0.0) * 100))
+	lines.append("")
+	lines.append("── 成員指令 ──")
+	var member_orders: Array = fp.get("member_orders", [])
+	for i in range(member_orders.size()):
+		var mo: Dictionary = member_orders[i]
+		var pos: Dictionary = mo.get("tile_pos", {})
+		var task_str: String
+		if mo.get("pending_task", "") != "":
+			task_str = "傳達中（%s）" % mo.get("pending_task", "")
+		elif mo.get("commanded_task", "") != "":
+			task_str = mo.get("commanded_task", "")
+		else:
+			task_str = "無"
+		var pos_v: Vector2i = pos if pos is Vector2i else Vector2i(pos.get("x", 0), pos.get("y", 0))
+		lines.append("[%d] Team%d @(%d,%d)  指令: %s" % [
+			i + 1, mo.get("team_id", -1), pos_v.x, pos_v.y, task_str])
+	lines.append("")
+	lines.append("── 行動 ──")
+	lines.append("[A]設定目標  [B]調整徵收率  [C]離開勢力")
+	if fp.get("is_leader", false):
+		lines.append("[D]背叛勢力  [E]解散勢力（Leader）")
+	else:
+		lines.append("[D]背叛勢力")
+	lines.append("[F/Esc]關閉")
 	return "\n".join(lines)
 
 func _close_all_modes(keep: String = "") -> void:
