@@ -1,7 +1,6 @@
 # scripts/ui/text_ui_main.gd
 extends Node
 
-var _state: WorldState
 var _runner: SimRunner
 var _bridge: SimBridge
 
@@ -33,15 +32,13 @@ var _member_detail_submode: int = 0
 @onready var _input_bar:   Label         = $VBox/InputBar
 
 func _ready() -> void:
-	_state  = WorldState.new()
+	var ws := WorldState.new()
 	_runner = SimRunner.new()
-	_bridge = SimBridge.new(_runner, _state)
+	_bridge = SimBridge.new(_runner, ws)
 	var config := GameSetup.load_config("res://config/default.json")
-	GameSetup.setup(_state, config)
-
-	_player_tid = _state.persons[_state.player_id].team_id
-	var pt: TeamData = _state.teams[_player_tid]
-	_cursor = pt.tile_pos
+	GameSetup.setup(ws, config)
+	_player_tid = _bridge.get_player_team_id()
+	_cursor = _bridge.get_player_tile_pos()
 	_refresh()
 
 func _refresh_snapshot() -> void:
@@ -61,26 +58,21 @@ func _process(_delta: float) -> void:
 	if _events.size() > 100:
 		_events = _events.slice(_events.size() - 100)
 
-	# 移動完成偵測（move_target=-1,-1 表示到達或取消）
-	var pt: TeamData = _state.teams.get(_player_tid)
-	if pt and pt.move_target == Vector2i(-1, -1) \
-			and _input_bar.text.begins_with("移動中"):
+	var move_target: Vector2i = _bridge.get_player_move_target()
+	if move_target == Vector2i(-1, -1) and _input_bar.text.begins_with("移動中"):
 		_bridge.cancel_advance()
 		_input_bar.text = ""
-		_log_event("Team%d 到達 (%d,%d)" %
-			[_player_tid, pt.tile_pos.x, pt.tile_pos.y])
+		var pos: Vector2i = _bridge.get_player_tile_pos()
+		_log_event("Team%d 到達 (%d,%d)" % [_player_tid, pos.x, pos.y])
 
 	if result.get("done", false):
-		# If interrupted during movement (event stopped advance, not arrival),
-		# resume advancing so player reaches destination
-		var _pt2: TeamData = _state.teams.get(_player_tid)
-		if _input_bar.text.begins_with("移動中") and _pt2 != null \
-				and _pt2.move_target != Vector2i(-1, -1):
+		var mt2: Vector2i = _bridge.get_player_move_target()
+		if _input_bar.text.begins_with("移動中") and mt2 != Vector2i(-1, -1):
 			_bridge.request_advance(99999)
 		else:
 			_input_bar.text = ""
 	elif not _input_bar.text.begins_with("移動中"):
-		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _state.world.current_tick
+		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _bridge.get_current_tick()
 	_refresh()
 	if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
 		_bridge.cancel_advance()
@@ -124,8 +116,7 @@ func _input(event: InputEvent) -> void:
 			_input_buffer = ""
 			_input_bar.text = "跳過 tick 數: _"
 		KEY_H:
-			var pt: TeamData = _state.teams.get(_player_tid)
-			if pt: _cursor = pt.tile_pos
+			_cursor = _bridge.get_player_tile_pos()
 			_refresh()
 		KEY_P:
 			_member_mode = not _member_mode
@@ -191,8 +182,7 @@ func _handle_input_mode(keycode: int) -> void:
 
 func _handle_inv_mode(keycode: int) -> void:
 	var inv: Array         = _cached_snapshot.get("inventory_state", {}).get("inventory_items", [])
-	var pt: TeamData       = _state.teams.get(_player_tid)
-	var team_items: Array  = _get_team_takeable_items(pt)
+	var team_items: Array  = _get_team_takeable_items(null)
 
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		var num: int  = keycode - KEY_1
@@ -227,14 +217,13 @@ func _handle_inv_mode(keycode: int) -> void:
 
 func _move_cursor(delta: Vector2i) -> void:
 	var new_pos := _cursor + delta
-	var key: int = new_pos.x * 1000 + new_pos.y
-	if _state.world.tiles.has(key):
+	if _bridge.is_valid_tile(new_pos.x, new_pos.y):
 		_cursor = new_pos
 	_refresh()
 
 func _refresh() -> void:
 	_refresh_snapshot()
-	_map_label.text  = TextMapRenderer.render(_state, _player_tid, _cursor)
+	_map_label.text  = _bridge.render_text_map(_player_tid, _cursor)
 	_state_label.text = _build_state_str()
 	_debug_bar.text  = "" if (_interact_mode or _member_mode or _inv_mode) else _build_debug_str()
 
@@ -249,7 +238,7 @@ func _refresh() -> void:
 		var show_count: int = mini(_events.size(), 6)
 		for i in range(_events.size() - show_count, _events.size()):
 			var e = _events[i]
-			log_lines.append("[T%d] %s" % [_state.world.current_tick, str(e)])
+			log_lines.append("[T%d] %s" % [_bridge.get_current_tick(), str(e)])
 		_event_label.text = "\n".join(log_lines)
 
 func _get_hp_status(person: PersonData) -> String:
@@ -307,13 +296,13 @@ func _build_state_str() -> String:
 	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])
 
 	if _selected != Vector2i(-1, -1):
-		var sel_key: int = _selected.x * 1000 + _selected.y
-		var sel_tile = _state.world.tiles.get(sel_key)
+		var sel_tile: Dictionary = _bridge.query_tile(_selected.x, _selected.y)
 		lines.append("────────────────")
-		if sel_tile:
-			lines.append("選中: (%d,%d) %s" % [_selected.x, _selected.y, sel_tile.terrain])
-			lines.append("  農:%.0f%%  食:%d" % [sel_tile.productivity * 100, int(sel_tile.resources.get("food", 0))])
-			# 查 location_context occupants（需已在 _refresh_snapshot 傳 cursor_tile_q/r）
+		if not sel_tile.is_empty():
+			lines.append("選中: (%d,%d) %s" % [_selected.x, _selected.y, sel_tile.get("terrain", "?")])
+			lines.append("  農:%.0f%%  食:%d" % [
+				sel_tile.get("productivity", 0) * 100,
+				int(sel_tile.get("resources", {}).get("food", 0))])
 			var occ: Array = lc.get("occupants", [])
 			if not occ.is_empty():
 				var vts: Array = _cached_snapshot.get("visible_teams", [])
@@ -332,8 +321,8 @@ func _build_state_str() -> String:
 
 	lines.append("────────────────")
 	lines.append("Tick: %d  (Day %d)" % [
-		_state.world.current_tick,
-		_state.world.current_tick / WorldState.TICKS_PER_DAY])
+		_bridge.get_current_tick(),
+		_bridge.get_current_tick() / WorldState.TICKS_PER_DAY])
 	var _pending_n: int = _cached_snapshot.get("pending_targets", []).size()
 	var _forced_n:  int = 0 if _cached_snapshot.get("forced_interaction", {}).get("interaction_id", "").is_empty() else 1
 	if _pending_n > 0 or _forced_n > 0:
@@ -344,7 +333,7 @@ func _build_state_str() -> String:
 	return "\n".join(lines)
 
 func _build_debug_str() -> String:
-	var tick: int  = _state.world.current_tick
+	var tick: int  = _bridge.get_current_tick()
 	var hour: int  = (tick / WorldState.TICKS_PER_HOUR) % 24
 	var day: int   = (tick / WorldState.TICKS_PER_DAY) % 30 + 1
 	var month: int = (tick / WorldState.TICKS_PER_MONTH) % 12
@@ -353,10 +342,11 @@ func _build_debug_str() -> String:
 	var lines: Array = []
 	lines.append("[DEBUG] Tick:%d Hour:%d Day:%d Month:%d Season:%s" % [tick, hour, day, month + 1, season])
 
+	var teams_debug: Array = _bridge.get_all_teams_debug()
 	var team_strs: Array = []
-	for tid in _state.teams:
-		var t: TeamData = _state.teams[tid]
-		team_strs.append("T%d@(%d,%d)pop=%d %s" % [tid, t.tile_pos.x, t.tile_pos.y, t.population, t.current_task])
+	for td in teams_debug:
+		var pos: Vector2i = td.get("pos", Vector2i.ZERO)
+		team_strs.append("T%d@(%d,%d)pop=%d %s" % [td["id"], pos.x, pos.y, td["pop"], td["task"]])
 	lines.append("Teams: " + " | ".join(team_strs))
 
 	var evt_strs: Array = []
@@ -365,10 +355,8 @@ func _build_debug_str() -> String:
 		evt_strs.append("[%s]%s" % [str(e.get("type","?")), str(e.get("msg",""))])
 	lines.append("Events(last10): " + " | ".join(evt_strs))
 
-	var msg_strs: Array = []
-	for i in range(maxi(0, _state.global_messages.size() - 10), _state.global_messages.size()):
-		msg_strs.append(str(_state.global_messages[i]))
-	lines.append("Msgs(last10): " + " | ".join(msg_strs))
+	var msgs: Array = _bridge.query_global_messages(10)
+	lines.append("Msgs(last10): " + " | ".join(msgs))
 
 	return "\n".join(lines)
 
@@ -420,7 +408,7 @@ func _build_member_str() -> String:
 		detail_lines,
 		team_stats,
 		team_name,
-		_state.world.current_tick
+		_bridge.get_current_tick()
 	)
 
 func _get_team_takeable_items(_pt: TeamData) -> Array:
@@ -437,15 +425,18 @@ func _build_inv_str() -> String:
 	lines.append("── 裝備 ──")
 	var h1: String = equipped.get("hand_1", "")
 	var h2: String = equipped.get("hand_2", "")
-	lines.append("  右手:%s  左手:%s" % [h1 if not h1.is_empty() else "空", h2 if not h2.is_empty() else "空"])
-	# body_slots 目前 mapper 未 expose，仍直讀 _state.persons
-	var player: PersonData = _state.persons.get(_state.player_id)
-	var body_slots: Array = ["head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"]
-	var body_names: Array = ["頭", "胸", "右臂", "左臂", "右腿", "左腿"]
+	lines.append("  右手:%s  左手:%s" % [
+		h1 if not h1.is_empty() else "空",
+		h2 if not h2.is_empty() else "空"])
+	var body_slots_data: Dictionary = _bridge.query_body_slots()
+	const BODY_NAMES: Dictionary = {
+		"head": "頭", "torso": "胸", "right_arm": "右臂",
+		"left_arm": "左臂", "right_leg": "右腿", "left_leg": "左腿"
+	}
 	var body_strs: Array = []
-	for i in range(body_slots.size()):
-		var g: String = player.equipment.get(body_slots[i], {}).get("grade", "") if player else ""
-		body_strs.append("%s:%s" % [body_names[i], g if not g.is_empty() else "空"])
+	for slot in ["head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"]:
+		var g: String = body_slots_data.get(slot, "")
+		body_strs.append("%s:%s" % [BODY_NAMES[slot], g if not g.is_empty() else "空"])
 	lines.append("  " + " ".join(body_strs))
 
 	var inv: Array = inv_state.get("inventory_items", [])
@@ -526,8 +517,7 @@ func _build_interact_str() -> String:
 
 	# 已選目標：顯示行動清單
 	if _interact_target >= 0:
-		var tgt: TeamData = _state.teams.get(_interact_target)
-		var tgt_name: String = "Team%d" % _interact_target if tgt else "未知"
+		var tgt_name: String = "Team%d" % _interact_target
 		lines.append("── %s 行動 ──" % tgt_name)
 		var actions: Array = _cached_snapshot.get("available_actions", [])
 		var row: String = ""
@@ -561,11 +551,15 @@ func _build_interact_str() -> String:
 		lines.append("（無可互動目標）")
 	for target_info in pending_tgts:
 		var tid: int = target_info.get("target_id", -1)
-		var t: TeamData = _state.teams.get(tid)
-		if t == null: continue
-		var faction_str: String = "獨立" if t.faction_id < 0 else "勢力%d" % t.faction_id
+		var vts: Array = _cached_snapshot.get("visible_teams", [])
+		var vt: Dictionary = {}
+		for v in vts:
+			if v.get("id", -1) == tid: vt = v; break
+		if vt.is_empty(): continue
+		var pos: Dictionary = vt.get("position", {})
+		var faction_str: String = vt.get("faction_display", "?")
 		lines.append("[%d] Team%d @(%d,%d) %s pop:%d" % [
-			idx, tid, t.tile_pos.x, t.tile_pos.y, faction_str, t.population])
+			idx, tid, pos.get("q", 0), pos.get("r", 0), faction_str, vt.get("population", 0)])
 		idx += 1
 
 	lines.append("── [T/Esc]關閉 ──")

@@ -18,6 +18,9 @@ var _bridge: SimBridge
 var _camera: Vector2   = Vector2.ZERO
 var _zoom:   float     = 1.0
 var _selected: Vector2i = Vector2i(-1, -1)
+var _cached_tiles: Dictionary = {}   # tile_key(int) → render dict
+var _cached_teams: Array = []        # from query_visible_teams_render
+var _render_ctx: Dictionary = {}     # player_tile_pos, discovered_team_positions, vision_radius
 
 const SCROLL_SPEED: float = 8.0
 var _scroll_keys: Dictionary = {
@@ -30,20 +33,24 @@ signal tile_selected(pos: Vector2i)
 
 func setup(bridge: SimBridge) -> void:
 	_bridge = bridge
+	_refresh_cache()
 	_center_on_player()
 	queue_redraw()
 
+func _refresh_cache() -> void:
+	if _bridge == null: return
+	_cached_tiles = _bridge.query_world_tiles()
+	_cached_teams = _bridge.query_visible_teams_render()
+	_render_ctx   = _bridge.query_render_context()
+
 func refresh() -> void:
+	_refresh_cache()
 	queue_redraw()
 
 func _center_on_player() -> void:
 	if _bridge == null: return
-	var state: WorldState = _bridge.get_state()
-	var player_tid: int = _bridge.get_player_team_id()
-	if player_tid < 0: return
-	var team: TeamData = state.teams.get(player_tid)
-	if team == null: return
-	var wc: Vector2 = _hex_center(team.tile_pos.x, team.tile_pos.y)
+	var pos: Vector2i = _bridge.get_player_tile_pos()
+	var wc: Vector2 = _hex_center(pos.x, pos.y)
 	var vsize: Vector2 = get_viewport_rect().size
 	_camera = vsize * 0.5 - wc * _zoom
 
@@ -93,57 +100,58 @@ func pixel_to_hex(screen_pos: Vector2) -> Vector2i:
 
 func _draw() -> void:
 	if _bridge == null: return
-	var state: WorldState = _bridge.get_state()
-	var player_tid: int   = _bridge.get_player_team_id()
-	var discovered: Array = state.team_discovered.get(player_tid, []) if player_tid >= 0 else []
+	var player_pos: Vector2i = _render_ctx.get("player_tile_pos", Vector2i(-1, -1))
+	var disc_positions: Array = _render_ctx.get("discovered_team_positions", [])
+	var vision_r: int = _render_ctx.get("vision_radius", 3)
 
 	# draw tiles
-	for key in state.world.tiles:
-		var tile: HexTileData = state.world.tiles[key]
-		var col: int = tile.tile_pos.x
-		var row: int = tile.tile_pos.y
-		var center: Vector2 = _world_to_screen(_hex_center(col, row))
-
+	for key in _cached_tiles:
+		var tile_data: Dictionary = _cached_tiles[key]
+		var tpos: Vector2i = tile_data.get("tile_pos", Vector2i(-1, -1))
+		var center: Vector2 = _world_to_screen(_hex_center(tpos.x, tpos.y))
 		var pts: PackedVector2Array = _hex_points(center.x, center.y)
-		var is_discovered: bool = _is_tile_discovered(tile.tile_pos, state, player_tid, discovered)
 
-		var base_color: Color = TERRAIN_COLOR.get(tile.terrain, Color(0.5, 0.5, 0.5))
+		var base_color: Color = TERRAIN_COLOR.get(tile_data.get("terrain", ""), Color(0.5, 0.5, 0.5))
 		draw_colored_polygon(pts, base_color)
 		draw_polyline(pts + PackedVector2Array([pts[0]]), BORDER_COLOR, 1.0)
 
-		if not is_discovered:
+		if not _is_tile_visible(tpos, player_pos, disc_positions, vision_r):
 			draw_colored_polygon(pts, FOG_COLOR)
 
 	# draw teams
-	var player_team_data: TeamData = state.teams.get(player_tid) if player_tid >= 0 else null
-	var player_pos_for_vision: Vector2i = player_team_data.tile_pos if player_team_data else Vector2i(-999, -999)
+	var player_faction_id: int = -1
+	for td in _cached_teams:
+		if td.get("is_player", false):
+			player_faction_id = td.get("faction_id", -1)
+			break
 
-	for tid in state.teams:
-		var team: TeamData = state.teams[tid]
-		var is_player: bool = tid == player_tid
+	for team_data in _cached_teams:
+		var tpos2: Vector2i = team_data.get("tile_pos", Vector2i(-1, -1))
+		var center: Vector2 = _world_to_screen(_hex_center(tpos2.x, tpos2.y))
+		var is_player: bool = team_data.get("is_player", false)
+		var draw_mode: String = team_data.get("draw_mode", "current")
 
-		if is_player:
-			var center: Vector2 = _world_to_screen(_hex_center(team.tile_pos.x, team.tile_pos.y))
-			_draw_team_marker(team, tid, center, state, player_tid)
-			continue
-
-		if not discovered.has(tid):
-			continue
-
-		var ddx: int = team.tile_pos.x - player_pos_for_vision.x
-		var ddy: int = team.tile_pos.y - player_pos_for_vision.y
-		var cur_dist: int = (abs(ddx) + abs(ddx + ddy) + abs(ddy)) / 2
-		var in_current_vision: bool = cur_dist <= 3
-
-		if in_current_vision:
-			var center: Vector2 = _world_to_screen(_hex_center(team.tile_pos.x, team.tile_pos.y))
-			_draw_team_marker(team, tid, center, state, player_tid)
-		else:
-			var intel: Dictionary = state.team_intel.get(player_tid, {}).get(tid, {})
-			if not intel.has("tile_pos"): continue
-			var last_pos: Vector2i = intel["tile_pos"]
-			var center: Vector2 = _world_to_screen(_hex_center(last_pos.x, last_pos.y))
+		if draw_mode == "ghost":
 			draw_circle(center, 8.0 * _zoom, Color(0.5, 0.5, 0.5, 0.6))
+			continue
+
+		var faction_id: int = team_data.get("faction_id", -1)
+		var is_hostile: bool = team_data.get("is_hostile", false)
+		var border: Color
+		if is_hostile:
+			border = Color.RED
+		elif is_player:
+			border = Color.DODGER_BLUE
+		elif faction_id >= 0 and faction_id == player_faction_id:
+			border = Color.GREEN
+		elif faction_id >= 0:
+			border = Color.YELLOW
+		else:
+			border = Color(0.7, 0.7, 0.7)
+
+		draw_circle(center, 10.0 * _zoom, border)
+		if is_player:
+			draw_circle(center, 6.0 * _zoom, Color.WHITE)
 
 	# draw selected highlight
 	if _selected.x >= 0:
@@ -151,45 +159,16 @@ func _draw() -> void:
 		var pts: PackedVector2Array = _hex_points(center.x, center.y)
 		draw_polyline(pts + PackedVector2Array([pts[0]]), Color.WHITE, 2.0)
 
-func _is_tile_discovered(pos: Vector2i, state: WorldState,
-		player_tid: int, discovered: Array) -> bool:
-	if player_tid < 0: return true
-	var player_team: TeamData = state.teams.get(player_tid)
-	if player_team == null: return false
-	if player_team.tile_pos == pos: return true
-	for tid in discovered:
-		var t: TeamData = state.teams.get(tid)
-		if t and t.tile_pos == pos: return true
-	# reveal tiles within vision radius 3
-	var dx: int = pos.x - player_team.tile_pos.x
-	var dy: int = pos.y - player_team.tile_pos.y
-	var dist: int = (abs(dx) + abs(dx + dy) + abs(dy)) / 2
-	return dist <= 3
-
-func _is_team_visible(tid: int, state: WorldState,
-		player_tid: int, discovered: Array) -> bool:
-	if player_tid < 0: return true
-	return tid == player_tid or discovered.has(tid)
-
-func _draw_team_marker(team: TeamData, tid: int, center: Vector2,
-		state: WorldState, player_tid: int) -> void:
-	var border: Color
-	if state.player_hostile_teams.has(tid):
-		border = Color.RED
-	elif player_tid >= 0 and tid == player_tid:
-		border = Color.DODGER_BLUE
-	elif team.faction_id >= 0:
-		var player_team: TeamData = state.teams.get(player_tid)
-		if player_team and player_team.faction_id == team.faction_id:
-			border = Color.GREEN
-		else:
-			border = Color.YELLOW
-	else:
-		border = Color(0.7, 0.7, 0.7)
-
-	draw_circle(center, 10.0 * _zoom, border)
-	if tid == player_tid:
-		draw_circle(center, 6.0 * _zoom, Color.WHITE)
+func _is_tile_visible(pos: Vector2i, player_pos: Vector2i,
+		disc_positions: Array, vision_r: int) -> bool:
+	if player_pos.x < 0: return true
+	if pos == player_pos: return true
+	var dx: int = pos.x - player_pos.x
+	var dy: int = pos.y - player_pos.y
+	if (abs(dx) + abs(dx + dy) + abs(dy)) / 2 <= vision_r: return true
+	for dpos in disc_positions:
+		if (dpos as Vector2i) == pos: return true
+	return false
 
 func _process(delta: float) -> void:
 	var dir := Vector2.ZERO
