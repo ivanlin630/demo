@@ -34,7 +34,7 @@ layout_mode = 2
 
 [node name="HintLabel" type="Label" parent="VBox"]
 layout_mode = 2
-text = "[WASD]游標 [Enter]選中 [M]移動(自動) [Space]+1天 [G]跳N tick [H]回玩家 [P]成員 [I]背包 [Q]離開"
+text = "[WASD]游標 [M]移動 [Space]+1天 [G]跳N tick [H]回玩家 | [P]成員 [I]背包 [T]互動 [F]勢力 [O]前哨 [U]子隊 [V]顧問 | [Z]確認警報 [Q]離開"
 
 [node name="EventLabel" type="Label" parent="VBox"]
 layout_mode = 2

@@ -446,7 +446,8 @@ func _build_state_str() -> String:
 							f_display = vt.get("faction_display", "?")
 							pop = vt.get("population", 0)
 							break
-					lines.append("  %s [%s] 人口:%d" % [o.get("team_name", "Team?"), f_display, pop])
+					var pop_str: String = ("~%d" % pop) if pop >= 0 else "?"
+					lines.append("  %s [%s] 人口:%s" % [o.get("team_name", "Team?"), f_display, pop_str])
 		else:
 			lines.append("選中: (%d,%d) [無效格]" % [_selected.x, _selected.y])
 

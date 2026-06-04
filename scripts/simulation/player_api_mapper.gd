@@ -136,13 +136,15 @@ static func map_visible_teams(state: WorldState) -> Array:
 		var dt: TeamData = state.teams.get(dtid)
 		if dt == null:
 			continue
+		var intel: Dictionary = state.team_intel.get(tid, {}).get(dtid, {})
+		var pop_est: int = int(intel["population_est"]) if intel.has("population_est") else -1
 		result.append({
 			"id": dtid,
 			"name": "Team%d" % dtid,
 			"relation": "unknown",
 			"position": {"q": dt.tile_pos.x, "r": dt.tile_pos.y},
 			"faction_display": ("勢力%d" % dt.faction_id) if dt.faction_id >= 0 else "獨立",
-			"population": dt.population,
+			"population": pop_est,   # -1 = 未知；否則為 intel 估計值（含噪）
 			"can_interact": not state.player_pending_targets.has(dtid),
 			"can_inspect": true,
 			"can_target": true
