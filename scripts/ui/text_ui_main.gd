@@ -38,6 +38,7 @@ var _intel_options: Array = []     # Array[Dictionary] 每項 {"label": String}
 # ── Alert bar ────────────────────────────────────────────────────────────────
 var _pending_alerts: Array = []    # Array[String] 待顯示的警報文字
 var _alert_bar: Label              # 動態建立，置於 InputBar 上方
+var _encounter_view: Control       # 動態建立，遭遇戰 overlay
 
 var _cached_snapshot: Dictionary = {}
 
@@ -51,6 +52,7 @@ var _member_detail_submode: int = 0
 @onready var _event_label: Label         = $VBox/EventLabel
 @onready var _debug_bar:   Label         = $VBox/DebugBar
 @onready var _input_bar:   Label         = $VBox/InputBar
+@onready var _vbox:        VBoxContainer = $VBox
 
 func _ready() -> void:
 	var ws := WorldState.new()
@@ -67,6 +69,21 @@ func _ready() -> void:
 	var vbox: Node = _input_bar.get_parent()
 	vbox.add_child(_alert_bar)
 	vbox.move_child(_alert_bar, _input_bar.get_index())
+	# 動態建立 EncounterView overlay
+	_encounter_view = load("res://scripts/ui/encounter_view.gd").new()
+	_encounter_view.name = "EncounterView"
+	add_child(_encounter_view)
+	_encounter_view.setup(_bridge)
+	_encounter_view.encounter_ended.connect(_on_encounter_ended)
+	_refresh()
+
+func _enter_encounter() -> void:
+	_vbox.visible = false
+	_encounter_view.show_encounter()
+
+func _on_encounter_ended() -> void:
+	_vbox.visible = true
+	_refresh_snapshot()
 	_refresh()
 
 func _refresh_snapshot() -> void:
@@ -104,6 +121,7 @@ func _process(_delta: float) -> void:
 	_refresh()
 	if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
 		_bridge.cancel_advance()
+		_enter_encounter()
 
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey: return
@@ -636,6 +654,7 @@ func _handle_interact_mode(keycode: int) -> void:
 			_refresh_snapshot()
 			if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
 				_interact_mode = false
+				_enter_encounter()
 		_refresh()
 		return
 
