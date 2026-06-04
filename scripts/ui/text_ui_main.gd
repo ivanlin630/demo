@@ -217,6 +217,7 @@ func _handle_input_mode(keycode: int) -> void:
 				_input_mode = false
 				_input_buffer = ""
 				_input_bar.text = ""
+				_input_mode_callback = Callable()
 				_refresh()
 		return
 
