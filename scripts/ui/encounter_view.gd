@@ -26,12 +26,15 @@ var _lbl_equip:       Label
 var _lbl_actions:     Label
 var _lbl_cursor_info: Label
 
+var _post_combat: bool = false   # 遭遇戰結束後，等待玩家按 [J] 收編或任意鍵離開
+
 func setup(bridge: SimBridge) -> void:
 	_bridge = bridge
 	visible = false
 
 func show_encounter() -> void:
 	visible = true
+	_post_combat = false
 	_refresh_ui()
 	queue_redraw()
 	_waiting_for_player = false
@@ -207,6 +210,17 @@ func _input(event: InputEvent) -> void:
 			_mode = "idle"; _cursor = Vector2i(-1, -1); queue_redraw()
 
 func _handle_key(keycode: int) -> void:
+	# 戰後收編階段：任意鍵離開，[J] 則先收編再離開
+	if _post_combat:
+		if keycode == KEY_J:
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "subjugate_enemy",
+				 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log(r.get("message", ""))
+		_post_combat = false
+		_waiting_for_player = false
+		hide_encounter()
+		return
 	var state: WorldState = _bridge.get_state()
 	var player_unit: Dictionary = _find_player_unit(state)
 	if player_unit.is_empty(): return
@@ -298,6 +312,12 @@ func _advance_until_player_or_end() -> void:
 				_waiting_for_player = true
 				return
 			"encounter_ended":
+				var end_state: WorldState = _bridge.get_state()
+				if end_state.last_encounter_result.get("can_subjugate", false):
+					_post_combat = true
+					_waiting_for_player = true
+					_refresh_ui()
+					return   # 留在畫面等待 [J] 或任意鍵
 				hide_encounter()
 				return
 			"no_encounter":

@@ -662,8 +662,8 @@ func _handle_interact_mode(keycode: int) -> void:
 					act.get("command_name", "execute_action"), act.get("command_args", {}))
 				_log_event("[互動] %s" % result.get("message", ""))
 				# 貿易預覽流程：進入 trade submode
-				if result.get("ok") and result.get("requires_preview"):
-					_trade_target_id = result.get("preview_target_id", -1)
+				if result.get("ok") and result.get("payload", {}).get("requires_preview", false):
+					_trade_target_id = result.get("payload", {}).get("preview_target_id", -1)
 					_trade_mode = true
 					_interact_mode = false
 					_refresh()
@@ -1058,7 +1058,13 @@ func _build_subteam_str() -> String:
 			i + 1, selected_mark, st.get("team_id", -1), pos_v.x, pos_v.y,
 			task_str, st.get("population", 0)])
 		if st.get("team_id", -1) == _subteam_selection:
-			lines.append("    [A]下令移動  [B]召回")
+			var pop: int = sp.get("player_population", 0)
+			var can_recall: bool = not candidates.is_empty() and pop >= 2
+			if can_recall:
+				lines.append("    [A]下令移動  [B]召回")
+			else:
+				var reason: String = "人數不足" if pop < 2 else "需命名非 leader 成員"
+				lines.append("    [A]下令移動  [B]召回（不可：%s）" % reason)
 	lines.append("")
 	lines.append("── 可派遣隊長 ──")
 	if candidates.is_empty():
@@ -1164,7 +1170,7 @@ func _handle_intel_mode(keycode: int) -> void:
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		var idx: int = keycode - KEY_1
 		if idx < _intel_options.size():
-			var choice: String = _intel_options[idx].get("label", "")
+			var choice: String = _intel_options[idx].get("id", "")
 			_bridge.set_player_input("gather_intel_npc_id", _intel_target_id)
 			_bridge.set_player_input("gather_intel_choice", choice)
 			var r := _bridge.command_player("execute_action",
