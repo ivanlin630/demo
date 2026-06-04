@@ -177,14 +177,16 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 				if npc == null or pt == null:
 					return
 
-				# 路徑 1：NPC 攻擊玩家 → 直接 EncounterSystem（維持原有邏輯）
+				# 路徑 1：NPC 攻擊玩家 → 預備遭遇戰，等玩家選擇迎擊或投降
 				if npc.combat_target == player_team_id:
-					state.encounter_attacker_id = npc_id
-					state.encounter_defender_id = player_team_id
-					state.encounter_active      = true
-					if not state.player_hostile_teams.has(npc_id):
-						state.player_hostile_teams.append(npc_id)
-					print("[Encounter] 玩家遭遇戰觸發 Team%d vs Team%d" % [npc_id, player_team_id])
+					if state.player_pre_encounter.is_empty():
+						state.player_pre_encounter = {
+							"attacker_id": npc_id,
+							"defender_id": player_team_id
+						}
+						if not state.player_hostile_teams.has(npc_id):
+							state.player_hostile_teams.append(npc_id)
+						print("[Encounter] 預備遭遇戰 Team%d → 玩家 Team%d" % [npc_id, player_team_id])
 					return
 
 				# 同陣營：不 return，讓後面 NPC-NPC 邏輯處理（徵收/合併等）

@@ -73,6 +73,8 @@ func _setup_registry() -> void:
 		"disband_faction":        _action_disband_faction,
 		"offer_surrender":        _action_offer_surrender,
 		"surrender_in_encounter": _action_surrender_in_encounter,
+		"accept_encounter":        _action_accept_encounter,
+		"surrender_pre_encounter": _action_surrender_pre_encounter,
 		"set_faction_goal":       _action_set_faction_goal,
 		"order_faction_member":   _action_order_faction_member,
 		"clear_member_order":     _action_clear_member_order,
@@ -470,6 +472,42 @@ func _action_surrender_in_encounter(state: WorldState, _target_id: int, pt: Team
 		return { "ok": true, "msg": "投降被接受" }
 	else:
 		return { "ok": false, "msg": "對方拒絕" }
+
+func _action_accept_encounter(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
+	var pre: Dictionary = state.player_pre_encounter
+	if pre.is_empty():
+		return { "ok": false, "msg": "無待處理預備遭遇戰" }
+	var atk_id: int = int(pre.get("attacker_id", -1))
+	var def_id: int = int(pre.get("defender_id", -1))
+	state.player_pre_encounter = {}
+	_encounter.init_encounter(state, atk_id, def_id, "normal")
+	print("[PlayerCmd] 玩家選擇迎擊，遭遇戰開始 Team%d vs Team%d" % [atk_id, def_id])
+	return { "ok": true, "msg": "迎擊！遭遇戰開始" }
+
+func _action_surrender_pre_encounter(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var pre: Dictionary = state.player_pre_encounter
+	if pre.is_empty():
+		return { "ok": false, "msg": "無待處理預備遭遇戰" }
+	var atk_id: int = int(pre.get("attacker_id", -1))
+	var attacker: TeamData = state.teams.get(atk_id)
+	if attacker == null:
+		state.player_pre_encounter = {}
+		return { "ok": false, "msg": "攻擊者不存在" }
+	var resp: String = _diplomatic.handle_diplomacy_message(state, attacker, pt, "offer_surrender")
+	state.player_pre_encounter = {}
+	if resp == "accept":
+		for res_sp in ["food", "coin", "goods"]:
+			var amt_sp: float = float(pt.resources.get(res_sp, 0)) * 0.3
+			pt.resources[res_sp]       = float(pt.resources.get(res_sp, 0)) - amt_sp
+			attacker.resources[res_sp] = float(attacker.resources.get(res_sp, 0)) + amt_sp
+		_interaction.subjugate_team(state, atk_id, pt_id)
+		print("[PlayerCmd] 玩家預備投降，Team%d 接受" % atk_id)
+		return { "ok": true, "msg": "投降被接受，已被收編" }
+	else:
+		# 對方拒絕投降 → 強迫開戰
+		_encounter.init_encounter(state, atk_id, pt_id, "normal")
+		print("[PlayerCmd] 玩家預備投降遭拒，強制遭遇戰 Team%d vs Team%d" % [atk_id, pt_id])
+		return { "ok": false, "msg": "對方拒絕投降，遭遇戰強制開始" }
 
 func _action_set_faction_goal(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	if pt.faction_id == -1:

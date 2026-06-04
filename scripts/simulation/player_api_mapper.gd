@@ -51,6 +51,8 @@ static func map_player_summary(state: WorldState) -> Dictionary:
 		"controlled_team_name": "Team%d" % tid if tid != -1 else "",
 		"position": {"q": t.tile_pos.x, "r": t.tile_pos.y} if t != null else {"q": -1, "r": -1},
 		"encounter_active": state.encounter_active,
+		"pre_encounter_pending": not state.player_pre_encounter.is_empty(),
+		"pre_encounter_attacker_id": int(state.player_pre_encounter.get("attacker_id", -1)),
 		"has_pending_targets": not state.player_pending_targets.is_empty(),
 		"has_forced_interaction": not state.player_forced_event.is_empty(),
 		"hp_status": _hp_status(p),

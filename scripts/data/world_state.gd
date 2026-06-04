@@ -45,6 +45,10 @@ var player_forced_event_id: String = ""
 var player_pending_orders: Dictionary = {}
 # 格式：{ member_team_id(String) → { "task": String, "herald_id": int } }
 # 信使出發後寫入；信使抵達同格後 interaction_system 清除並設 player_commanded_task
+var player_pre_encounter: Dictionary = {}
+# NPC 主動攻擊玩家，等待玩家選擇迎擊或投降後才真正開始遭遇戰
+# 格式：{ "attacker_id": int, "defender_id": int }
+# 空 Dict = 無待處理預備遭遇戰
 var player_alerts: Array = []
 # Array[Dictionary]，格式：{ "type": String, "tick": int, "data": Dictionary }
 # 類型：food_critical / member_defected / faction_member_betrayed /

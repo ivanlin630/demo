@@ -40,6 +40,9 @@ var _pending_alerts: Array = []    # Array[String] 待顯示的警報文字
 var _alert_bar: Label              # 動態建立，置於 InputBar 上方
 var _encounter_view: Control       # 動態建立，遭遇戰 overlay
 
+# ── Pre-encounter submode ────────────────────────────────────────────────────
+var _pre_encounter_mode: bool = false
+
 # ── Trade submode ────────────────────────────────────────────────────────────
 var _trade_mode: bool = false
 var _trade_target_id: int = -1
@@ -124,7 +127,12 @@ func _process(_delta: float) -> void:
 	elif not _input_bar.text.begins_with("移動中"):
 		_input_bar.text = "推進中 Tick:%d [Esc]停止" % _bridge.get_current_tick()
 	_refresh()
-	if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
+	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
+	if ps.get("pre_encounter_pending", false) and not _pre_encounter_mode:
+		_bridge.cancel_advance()
+		_pre_encounter_mode = true
+		_refresh()
+	elif ps.get("encounter_active", false):
 		_bridge.cancel_advance()
 		_enter_encounter()
 
@@ -133,6 +141,9 @@ func _input(event: InputEvent) -> void:
 	if not event.pressed: return
 	if _input_mode:
 		_handle_input_mode(event.keycode)
+		return
+	if _pre_encounter_mode:
+		_handle_pre_encounter_mode(event.keycode)
 		return
 	if _trade_mode:
 		_handle_trade_mode(event.keycode)
@@ -375,7 +386,9 @@ func _refresh() -> void:
 	_state_label.text = _build_state_str()
 	_debug_bar.text  = "" if (_interact_mode or _member_mode or _inv_mode) else _build_debug_str()
 
-	if _trade_mode:
+	if _pre_encounter_mode:
+		_event_label.text = _build_pre_encounter_str()
+	elif _trade_mode:
 		_event_label.text = _build_trade_str()
 	elif _interact_mode:
 		_event_label.text = _build_interact_str()
@@ -1117,6 +1130,43 @@ func _build_advisor_str() -> String:
 	lines.append("[V/Esc]關閉")
 	return "\n".join(lines)
 
+func _handle_pre_encounter_mode(keycode: int) -> void:
+	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
+	var atk_id: int = ps.get("pre_encounter_attacker_id", -1)
+	var target: Dictionary = {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}
+	match keycode:
+		KEY_1:
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "accept_encounter", "target": target})
+			_log_event("[遭遇] %s" % r.get("message", ""))
+			_pre_encounter_mode = false
+			# encounter_active 現在為 true，下一幀 _process 會偵測並進入 encounter_view
+			_refresh()
+		KEY_2:
+			var r := _bridge.command_player("execute_action",
+				{"action_id": "surrender_pre_encounter", "target": target})
+			_log_event("[遭遇] %s" % r.get("message", ""))
+			_pre_encounter_mode = false
+			# 若投降遭拒，encounter_active = true，下一幀進入 encounter_view
+			_refresh_snapshot()
+			if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
+				_enter_encounter()
+			else:
+				_refresh()
+		_:
+			pass   # 其他鍵不處理，玩家必須明確選擇
+
+func _build_pre_encounter_str() -> String:
+	var ps: Dictionary = _cached_snapshot.get("player_summary", {})
+	var atk_id: int = ps.get("pre_encounter_attacker_id", -1)
+	var lines: Array = []
+	lines.append("！ 遭受攻擊 ！")
+	lines.append("Team%d 向你發起進攻" % atk_id)
+	lines.append("")
+	lines.append("[1] 迎擊（進入戰場）")
+	lines.append("[2] 投降（嘗試免戰，對方可能拒絕）")
+	return "\n".join(lines)
+
 func _handle_trade_mode(keycode: int) -> void:
 	if keycode == KEY_ESCAPE or keycode == KEY_2:
 		_bridge.command_player("execute_action", {
@@ -1199,9 +1249,10 @@ func _close_all_modes(keep: String = "") -> void:
 	if keep != "outpost":  _outpost_mode  = false
 	if keep != "subteam":  _subteam_mode  = false
 	if keep != "advisor":  _advisor_mode  = false
-	_intel_mode  = false
-	_trade_mode  = false
-	_trade_target_id = -1
+	_intel_mode          = false
+	_trade_mode          = false
+	_trade_target_id     = -1
+	_pre_encounter_mode  = false
 
 func _check_alerts() -> void:
 	var new_alerts: Array = _bridge.get_and_clear_alerts()
