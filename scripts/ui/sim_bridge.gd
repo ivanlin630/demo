@@ -88,6 +88,126 @@ func get_player_team_id() -> int:
 	var p: PersonData = _state.persons.get(_state.player_id)
 	return p.team_id if p else -1
 
+# ── Step 1: tick + player position helpers ─────────────────────────────────────
+
+func get_current_tick() -> int:
+	return _state.world.current_tick
+
+func get_player_tile_pos() -> Vector2i:
+	var tid: int = get_player_team_id()
+	if tid < 0: return Vector2i.ZERO
+	var t: TeamData = _state.teams.get(tid)
+	return t.tile_pos if t else Vector2i.ZERO
+
+func get_player_move_target() -> Vector2i:
+	var tid: int = get_player_team_id()
+	if tid < 0: return Vector2i(-1, -1)
+	var t: TeamData = _state.teams.get(tid)
+	return t.move_target if t else Vector2i(-1, -1)
+
+# ── Step 2: tile query helpers ─────────────────────────────────────────────────
+
+func is_valid_tile(q: int, r: int) -> bool:
+	return _state.world.tiles.has(q * 1000 + r)
+
+func query_tile(q: int, r: int) -> Dictionary:
+	var key: int = q * 1000 + r
+	var tile: HexTileData = _state.world.tiles.get(key)
+	if tile == null: return {}
+	return {
+		"terrain":        tile.terrain,
+		"productivity":   tile.harvest_factor,
+		"harvest_factor": tile.harvest_factor,
+		"resources":      tile.resources.duplicate(),
+		"outpost_type":   tile.outpost_type,
+		"outpost_level":  tile.outpost_level,
+		"outpost_owner":  tile.outpost_owner,
+	}
+
+func render_text_map(player_tid: int, cursor: Vector2i) -> String:
+	return TextMapRenderer.render(_state, player_tid, cursor)
+
+# ── Step 3: data query wrappers ────────────────────────────────────────────────
+
+func query_body_slots() -> Dictionary:
+	return PlayerApiMapper.map_body_slots(_state)
+
+func query_global_messages(n: int = 10) -> Array:
+	return PlayerApiMapper.map_global_messages(_state, n)
+
+func query_visible_teams_render() -> Array:
+	return PlayerApiMapper.map_visible_teams_render(_state, get_player_team_id())
+
+# ── Step 4: world tiles + tile/team spatial helpers ───────────────────────────
+
+func query_world_tiles() -> Dictionary:
+	var result: Dictionary = {}
+	for key in _state.world.tiles:
+		var tile: HexTileData = _state.world.tiles[key]
+		result[key] = {
+			"tile_pos":       tile.tile_pos,
+			"terrain":        tile.terrain,
+			"harvest_factor": tile.harvest_factor,
+			"resources":      tile.resources.duplicate(),
+			"outpost_type":   tile.outpost_type,
+			"outpost_level":  tile.outpost_level,
+			"outpost_owner":  tile.outpost_owner,
+		}
+	return result
+
+func is_tile_in_vision(q: int, r: int) -> bool:
+	var tid: int = get_player_team_id()
+	if tid < 0: return true
+	var t: TeamData = _state.teams.get(tid)
+	if t == null: return false
+	var dx: int = q - t.tile_pos.x
+	var dy: int = r - t.tile_pos.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2 <= 3
+
+func has_tile_intel(q: int, r: int) -> bool:
+	var player_tid: int = get_player_team_id()
+	if player_tid < 0: return false
+	var discovered: Array = _state.team_discovered.get(player_tid, [])
+	var pos := Vector2i(q, r)
+	for tid in discovered:
+		var intel: Dictionary = _state.team_intel.get(player_tid, {}).get(tid, {})
+		if intel.get("tile_pos", Vector2i(-999, -999)) == pos:
+			return true
+	return false
+
+func get_teams_at_tile(q: int, r: int) -> Array:
+	var pos := Vector2i(q, r)
+	var result: Array = []
+	for tid in _state.teams:
+		var t: TeamData = _state.teams[tid]
+		if t.tile_pos == pos:
+			result.append({
+				"id": tid, "faction_id": t.faction_id,
+				"population": t.population, "current_task": t.current_task
+			})
+	return result
+
+func get_all_teams_debug() -> Array:
+	var result: Array = []
+	for tid in _state.teams:
+		var t: TeamData = _state.teams[tid]
+		result.append({"id": tid, "pos": t.tile_pos, "pop": t.population, "task": t.current_task})
+	return result
+
+func query_render_context() -> Dictionary:
+	var ptid: int = get_player_team_id()
+	var player_team: TeamData = _state.teams.get(ptid) if ptid >= 0 else null
+	var discovered: Array = _state.team_discovered.get(ptid, []) if ptid >= 0 else []
+	var disc_positions: Array = []
+	for tid in discovered:
+		var t: TeamData = _state.teams.get(tid)
+		if t: disc_positions.append(t.tile_pos)
+	return {
+		"player_tile_pos":           player_team.tile_pos if player_team else Vector2i(-1, -1),
+		"discovered_team_positions": disc_positions,
+		"vision_radius":             3,
+	}
+
 func _snapshot() -> Dictionary:
 	var ptid: int = get_player_team_id()
 	return {
