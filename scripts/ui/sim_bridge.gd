@@ -130,3 +130,9 @@ func command_player(name: String, args: Dictionary) -> Dictionary:
 func refresh_interaction_targets() -> void:
 	var cmd_sys := PlayerCommandSystem.new()
 	cmd_sys.refresh_colocation_targets(_state)
+
+# 取出並清空 player_alerts（UI 每次 _refresh 呼叫一次）
+func get_and_clear_alerts() -> Array:
+	var alerts: Array = _state.player_alerts.duplicate()
+	_state.player_alerts.clear()
+	return alerts

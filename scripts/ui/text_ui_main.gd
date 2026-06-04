@@ -12,6 +12,9 @@ var _events: Array = []
 
 var _input_mode: bool   = false
 var _input_buffer: String = ""
+var _input_mode_type: String = "numeric"   # "numeric" | "string"
+var _input_mode_callback: Callable         # (buffer: String) -> void
+var _input_mode_prompt: String = ""
 var _member_mode: bool  = false
 var _inv_mode: bool     = false
 var _inv_selection: int = -1
@@ -19,6 +22,24 @@ var _inv_selection: int = -1
 var _interact_mode:   bool = false
 var _interact_target: int  = -1
 # -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
+
+# ── 新 Panel Modes（互斥）────────────────────────────────────────────────────
+var _faction_mode:  bool = false
+var _outpost_mode:  bool = false
+var _subteam_mode:  bool = false
+var _advisor_mode:  bool = false
+var _subteam_selection: int = -1   # 當前選中的子隊 team_id
+var _advisor_selection: int = -1   # 當前選中的顧問 person_id
+
+# ── gather_intel submode ─────────────────────────────────────────────────────
+var _intel_mode: bool = false
+var _intel_target_id: int = -1
+var _intel_options: Array = []     # Array[Dictionary] 每項 {"label": String}
+
+# ── Alert bar ────────────────────────────────────────────────────────────────
+var _pending_alerts: Array = []    # Array[String] 待顯示的警報文字
+var _alert_bar: Label              # 動態建立，置於 InputBar 上方
+
 var _cached_snapshot: Dictionary = {}
 
 @onready var _map_label:   RichTextLabel = $VBox/HBox/MapLabel
@@ -37,6 +58,13 @@ func _ready() -> void:
 	_player_tid = _state.persons[_state.player_id].team_id
 	var pt: TeamData = _state.teams[_player_tid]
 	_cursor = pt.tile_pos
+	# 動態建立 alert bar（置於 InputBar 之前）
+	_alert_bar = Label.new()
+	_alert_bar.name = "AlertBar"
+	_alert_bar.modulate = Color(1.0, 0.8, 0.0)   # 黃色警報
+	var vbox: Node = _input_bar.get_parent()
+	vbox.add_child(_alert_bar)
+	vbox.move_child(_alert_bar, _input_bar.get_index())
 	_refresh()
 
 func _refresh_snapshot() -> void:
@@ -113,7 +141,10 @@ func _input(event: InputEvent) -> void:
 			_bridge.request_advance(WorldState.TICKS_PER_DAY)
 		KEY_G:
 			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "跳過 tick 數: "
 			_input_buffer = ""
+			_input_mode_callback = Callable()   # 無 callback → 使用舊有行為
 			_input_bar.text = "跳過 tick 數: _"
 		KEY_H:
 			var pt: TeamData = _state.teams.get(_player_tid)
@@ -156,29 +187,72 @@ func _input(event: InputEvent) -> void:
 				_refresh()
 		KEY_Q:
 			get_tree().quit()
+		KEY_Z:
+			if not _pending_alerts.is_empty():
+				_pending_alerts.pop_front()
+			_check_alerts()
 
 func _handle_input_mode(keycode: int) -> void:
+	if _input_mode_type == "string":
+		# 接受 A-Z 字元
+		if keycode >= KEY_A and keycode <= KEY_Z:
+			if _input_buffer.length() < 30:
+				_input_buffer += char(keycode).to_lower()
+			_input_bar.text = "%s%s_" % [_input_mode_prompt, _input_buffer]
+			return
+		match keycode:
+			KEY_BACKSPACE:
+				if _input_buffer.length() > 0:
+					_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
+				_input_bar.text = "%s%s_" % [_input_mode_prompt, _input_buffer]
+			KEY_ENTER:
+				if _input_buffer.length() > 0:
+					_input_mode = false
+					_input_bar.text = ""
+					if _input_mode_callback.is_valid():
+						_input_mode_callback.call(_input_buffer)
+					_input_buffer = ""
+					_refresh()
+			KEY_ESCAPE:
+				_input_mode = false
+				_input_buffer = ""
+				_input_bar.text = ""
+				_refresh()
+		return
+
+	# 原有 numeric 模式
 	if keycode >= KEY_0 and keycode <= KEY_9:
 		if _input_buffer.length() < 6:
 			_input_buffer += str(keycode - KEY_0)
-		_input_bar.text = "跳過 tick 數: %s_" % _input_buffer
+		_input_bar.text = "%s%s_" % [_input_mode_prompt if not _input_mode_prompt.is_empty() else "跳過 tick 數: ", _input_buffer]
 		return
 	match keycode:
 		KEY_BACKSPACE:
 			if _input_buffer.length() > 0:
 				_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
-			_input_bar.text = "跳過 tick 數: %s_" % _input_buffer
+			_input_bar.text = "%s%s_" % [_input_mode_prompt if not _input_mode_prompt.is_empty() else "跳過 tick 數: ", _input_buffer]
 		KEY_ENTER:
-			if _input_buffer.length() > 0 and int(_input_buffer) > 0:
-				var n: int = mini(int(_input_buffer), 99999)
-				_input_mode = false
-				_input_bar.text = ""
-				_bridge.request_advance(n)
-				_refresh()
+			if _input_buffer.length() > 0:
+				if _input_mode_callback.is_valid():
+					_input_mode = false
+					_input_bar.text = ""
+					_input_mode_callback.call(_input_buffer)
+					_input_buffer = ""
+					_input_mode_callback = Callable()
+					_refresh()
+				elif int(_input_buffer) > 0:
+					# 舊有行為：跳過 N tick
+					var n: int = mini(int(_input_buffer), 99999)
+					_input_mode = false
+					_input_bar.text = ""
+					_bridge.request_advance(n)
+					_input_buffer = ""
+					_refresh()
 		KEY_ESCAPE:
 			_input_mode = false
 			_input_buffer = ""
 			_input_bar.text = ""
+			_input_mode_callback = Callable()
 			_refresh()
 
 func _handle_inv_mode(keycode: int) -> void:
@@ -243,6 +317,7 @@ func _refresh() -> void:
 			var e = _events[i]
 			log_lines.append("[T%d] %s" % [_state.world.current_tick, str(e)])
 		_event_label.text = "\n".join(log_lines)
+	_check_alerts()
 
 func _get_hp_status(person: PersonData) -> String:
 	var has_severe: bool = false
@@ -536,3 +611,28 @@ func _build_interact_str() -> String:
 
 	lines.append("── [T/Esc]關閉 ──")
 	return "\n".join(lines)
+
+func _close_all_modes(keep: String = "") -> void:
+	if keep != "interact": _interact_mode = false; _interact_target = -1
+	if keep != "member":   _member_mode   = false
+	if keep != "inv":      _inv_mode      = false; _inv_selection   = -1
+	if keep != "faction":  _faction_mode  = false
+	if keep != "outpost":  _outpost_mode  = false
+	if keep != "subteam":  _subteam_mode  = false
+	if keep != "advisor":  _advisor_mode  = false
+	_intel_mode = false
+
+func _check_alerts() -> void:
+	var new_alerts: Array = _bridge.get_and_clear_alerts()
+	for a in new_alerts:
+		var atype: String = a.get("type", "")
+		var text: String
+		match atype:
+			"food_critical":            text = "警告：糧食危急"
+			"faction_member_betrayed":  text = "警告：勢力成員叛離"
+			_:                          text = "警告：%s" % a.get("description", atype)
+		_pending_alerts.append(text)
+	if not _pending_alerts.is_empty():
+		_alert_bar.text = "[!] %s  [Z 確認]" % _pending_alerts[0]
+	else:
+		_alert_bar.text = ""

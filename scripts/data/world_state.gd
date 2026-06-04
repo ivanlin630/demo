@@ -45,6 +45,9 @@ var player_forced_event_id: String = ""
 var player_pending_orders: Dictionary = {}
 # 格式：{ member_team_id(String) → { "task": String, "herald_id": int } }
 # 信使出發後寫入；信使抵達同格後 interaction_system 清除並設 player_commanded_task
+var player_alerts: Array = []
+# Array[Dictionary]，每筆 { "type": String, "description": String }
+# 由模擬系統寫入；UI 呼叫 SimBridge.get_and_clear_alerts() 取出並清空
 var ticks_per_day: int:
 	get: return TICKS_PER_DAY
 
