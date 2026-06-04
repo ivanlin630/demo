@@ -40,6 +40,10 @@ var _pending_alerts: Array = []    # Array[String] 待顯示的警報文字
 var _alert_bar: Label              # 動態建立，置於 InputBar 上方
 var _encounter_view: Control       # 動態建立，遭遇戰 overlay
 
+# ── Trade submode ────────────────────────────────────────────────────────────
+var _trade_mode: bool = false
+var _trade_target_id: int = -1
+
 var _cached_snapshot: Dictionary = {}
 
 # member_mode state machine
@@ -128,6 +132,9 @@ func _input(event: InputEvent) -> void:
 	if not event.pressed: return
 	if _input_mode:
 		_handle_input_mode(event.keycode)
+		return
+	if _trade_mode:
+		_handle_trade_mode(event.keycode)
 		return
 	if _intel_mode:
 		_handle_intel_mode(event.keycode)
@@ -365,7 +372,9 @@ func _refresh() -> void:
 	_state_label.text = _build_state_str()
 	_debug_bar.text  = "" if (_interact_mode or _member_mode or _inv_mode) else _build_debug_str()
 
-	if _interact_mode:
+	if _trade_mode:
+		_event_label.text = _build_trade_str()
+	elif _interact_mode:
 		_event_label.text = _build_interact_str()
 	elif _member_mode:
 		_event_label.text = _build_member_str()
@@ -649,7 +658,15 @@ func _handle_interact_mode(keycode: int) -> void:
 				var result: Dictionary = _bridge.command_player(
 					act.get("command_name", "execute_action"), act.get("command_args", {}))
 				_log_event("[互動] %s" % result.get("message", ""))
+				# 貿易預覽流程：進入 trade submode
+				if result.get("ok") and result.get("requires_preview"):
+					_trade_target_id = result.get("preview_target_id", -1)
+					_trade_mode = true
+					_interact_mode = false
+					_refresh()
+					return
 			_interact_target = -1   # 回到目標清單
+			_bridge.refresh_interaction_targets()   # 重掃同格 NPC（行動後重建選單）
 			# 若行動觸發遭遇戰，關閉 interact_mode
 			_refresh_snapshot()
 			if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
@@ -996,6 +1013,50 @@ func _build_advisor_str() -> String:
 	lines.append("[V/Esc]關閉")
 	return "\n".join(lines)
 
+func _handle_trade_mode(keycode: int) -> void:
+	if keycode == KEY_ESCAPE or keycode == KEY_2:
+		_bridge.command_player("execute_action", {
+			"action_id": "cancel_trade",
+			"target": {"kind": "team", "team_id": _trade_target_id,
+						"member_id": -1, "tile_q": -1, "tile_r": -1}})
+		_log_event("[貿易] 已取消")
+		_trade_mode = false
+		_trade_target_id = -1
+	elif keycode == KEY_1:
+		var r: Dictionary = _bridge.command_player("execute_action", {
+			"action_id": "confirm_trade",
+			"target": {"kind": "team", "team_id": _trade_target_id,
+						"member_id": -1, "tile_q": -1, "tile_r": -1}})
+		_log_event("[貿易] %s" % r.get("message", ""))
+		_trade_mode = false
+		_trade_target_id = -1
+	_refresh()
+
+func _build_trade_str() -> String:
+	var lines: Array = ["── 貿易確認 ──"]
+	if _trade_target_id < 0:
+		lines.append("（目標無效）")
+		lines.append("[2/Esc]取消")
+		return "\n".join(lines)
+	var prev_result: Dictionary = _bridge.query_trade_preview(_trade_target_id)
+	var prev: Dictionary = prev_result.get("data", {}).get("preview", {})
+	if not prev.get("feasible", false):
+		lines.append("（雙方均無可交換資源）")
+	else:
+		var gives: Dictionary = prev.get("player_gives", {})
+		var gets:  Dictionary = prev.get("player_gets", {})
+		if not gives.is_empty():
+			lines.append("我方付出：")
+			for k in gives:
+				lines.append("  %s: %.0f" % [k, gives[k]])
+		if not gets.is_empty():
+			lines.append("我方獲得：")
+			for k in gets:
+				lines.append("  %s: %.0f" % [k, gets[k]])
+	lines.append("")
+	lines.append("[1]確認  [2/Esc]取消")
+	return "\n".join(lines)
+
 func _handle_intel_mode(keycode: int) -> void:
 	if keycode == KEY_ESCAPE:
 		_intel_mode = false
@@ -1034,7 +1095,9 @@ func _close_all_modes(keep: String = "") -> void:
 	if keep != "outpost":  _outpost_mode  = false
 	if keep != "subteam":  _subteam_mode  = false
 	if keep != "advisor":  _advisor_mode  = false
-	_intel_mode = false
+	_intel_mode  = false
+	_trade_mode  = false
+	_trade_target_id = -1
 
 func _check_alerts() -> void:
 	var new_alerts: Array = _bridge.get_and_clear_alerts()
