@@ -3,6 +3,7 @@ class_name PlayerCommandSystem
 
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
+var _subteam: SubteamSystem = SubteamSystem.new()
 
 # ── 主動互動 ────────────────────────────────────────────────
 
@@ -264,9 +265,9 @@ func cancel_move(state: WorldState) -> Dictionary:
 	return { "ok": true, "msg": "取消移動" }
 
 func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
-	var member_id: int    = int(state.player_state.get("order_member_id", -1))
+	var member_team_id: int = int(state.player_state.get("order_member_id", -1))
 	var m_task: String    = str(state.player_state.get("member_task", ""))
-	var member_team: TeamData = state.teams.get(member_id)
+	var member_team: TeamData = state.teams.get(member_team_id)
 	if member_team == null:
 		return { "ok": false, "msg": "目標成員不存在" }
 	if m_task.is_empty():
@@ -281,12 +282,12 @@ func _action_order_faction_member(state: WorldState, _target_id: int, pt: TeamDa
 			break
 	if herald_leader_id == -1:
 		return { "ok": false, "msg": "無可用的信使人選（需至少一名非隊長的記名成員）" }
-	var herald_id: int = SubteamSystem.new().dispatch(
+	var herald_id: int = _subteam.dispatch(
 		state, pt_id, herald_leader_id, 1, TeamData.TASK_HERALD,
-		member_team.tile_pos, member_id, m_task)
+		member_team.tile_pos, member_team_id, m_task)
 	if herald_id == -1:
 		return { "ok": false, "msg": "派信使失敗" }
 	# 寫入 player_pending_orders 供 UI 顯示「傳達中」狀態
-	state.player_pending_orders[str(member_id)] = {"task": m_task, "herald_id": herald_id}
-	print("[PlayerCmd] order_faction_member Team%d → herald Team%d 傳達任務: %s" % [member_id, herald_id, m_task])
-	return { "ok": true, "msg": "信使 Team%d 已出發至 Team%d" % [herald_id, member_id] }
+	state.player_pending_orders[str(member_team_id)] = {"task": m_task, "herald_id": herald_id}
+	print("[PlayerCmd] order_faction_member Team%d → herald Team%d 傳達任務: %s" % [member_team_id, herald_id, m_task])
+	return { "ok": true, "msg": "信使 Team%d 已出發至 Team%d" % [herald_id, member_team_id] }
