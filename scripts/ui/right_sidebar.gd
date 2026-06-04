@@ -65,48 +65,43 @@ func _make_btn(label: String, parent: Node) -> Button:
 
 func refresh_player() -> void:
 	if _bridge == null or _lbl_player_team == null: return
-	var state: WorldState = _bridge.get_state()
-	var ptid: int = _bridge.get_player_team_id()
-	var team: TeamData = state.teams.get(ptid)
-	if team == null:
+	var snap_result: Dictionary = _bridge.query_player({})
+	var snapshot: Dictionary = snap_result.get("data", {}).get("snapshot", {})
+	var ct: Dictionary = snapshot.get("controlled_team", {})
+	var ps: Dictionary = snapshot.get("player_summary", {})
+
+	if ct.is_empty():
 		_lbl_player_team.text = "（無玩家隊）"
 		_lbl_player_task.text = ""
 		_lbl_player_pop.text  = ""
 		_lbl_player_res.text  = ""
 		return
 
-	var faction_str: String = "獨立"
-	if team.faction_id >= 0:
-		faction_str = "勢力%d" % team.faction_id
+	var pos: Dictionary = ct.get("position", {})
 	_lbl_player_team.text = "Team%d [%s] 位置:(%d,%d)" % [
-		team.team_id, faction_str, team.tile_pos.x, team.tile_pos.y]
+		ct.get("id", 0), ct.get("faction_display", "獨立"), pos.get("q", 0), pos.get("r", 0)]
 	_lbl_player_task.text = "任務: %s  疲勞: %.0f%%" % [
-		team.current_task, team.fatigue * 100.0]
+		ct.get("task_summary", ""), ct.get("fatigue_pct", 0)]
 	_lbl_player_pop.text  = "人口: %d | 受傷: %d | 未成年: %d" % [
-		team.population, team.wounded, team.minor_population]
+		ct.get("population", 0), ct.get("wounded", 0), ct.get("minor_population", 0)]
 
-	var player_person: PersonData = state.persons.get(state.player_id)
 	var person_lines: Array = []
-	if player_person:
-		var worst: int = 0
-		for part in player_person.body_parts:
-			var s: String = player_person.body_parts[part].get("status", "healthy")
-			if s == "severed" or s == "critical": worst = 2
-			elif s == "wounded" and worst < 1: worst = 1
-		var hp_str: String = ["正常", "輕傷", "重傷"][worst]
+	if ps.get("player_exists", false):
 		person_lines.append("HP: %s  忠誠: %.0f%%  壓力: %.0f%%" % [
-			hp_str, player_person.loyalty * 100.0, player_person.stress * 100.0])
+			ps.get("hp_status", ""),
+			ps.get("loyalty", 0.0) * 100.0,
+			ps.get("stress", 0.0) * 100.0])
 		var sk_parts: Array = []
-		for sk in player_person.skills:
-			var v: float = float(player_person.skills[sk])
-			if v > 0.01:
-				sk_parts.append("%s:%.2f" % [sk, v])
+		for sk in ps.get("skills", {}):
+			var v: float = float(ps["skills"][sk])
+			if v > 0.01: sk_parts.append("%s:%.2f" % [sk, v])
 		if sk_parts.size() > 0:
 			person_lines.append("技能: " + ", ".join(sk_parts))
 
+	var res: Dictionary = ct.get("resources", {})
 	var res_parts: Array = []
-	for rk in team.resources:
-		var v: float = float(team.resources.get(rk, 0))
+	for rk in res:
+		var v: float = float(res.get(rk, 0))
 		if v > 0:
 			res_parts.append("%s:%s" % [rk, str(int(v)) if float(v) == int(v) else "%.1f" % v])
 
@@ -117,12 +112,6 @@ func refresh_player() -> void:
 
 func show_tile(pos: Vector2i) -> void:
 	_current_tile = pos
-
-func _find_team_at(pos: Vector2i, state: WorldState) -> TeamData:
-	for tid in state.teams:
-		var t: TeamData = state.teams[tid]
-		if t.tile_pos == pos: return t
-	return null
 
 func _on_move() -> void:
 	if _current_tile != Vector2i(-1, -1):
