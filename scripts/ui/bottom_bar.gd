@@ -68,7 +68,8 @@ func show_tile_info(pos: Vector2i) -> void:
 
 		var teams_here: Array = _bridge.get_teams_at_tile(pos.x, pos.y)
 		for td in teams_here:
-			var faction_str: String = "獨立" if td.get("faction_id", -1) < 0 else "勢力%d" % td["faction_id"]
+			var faction_id: int = td.get("faction_id", -1)
+			var faction_str: String = "獨立" if faction_id < 0 else "勢力%d" % faction_id
 			lines.append("Team%d [%s] 人口:%d 任務:%s" % [
 				td["id"], faction_str, td.get("population", 0), td.get("current_task", "")])
 	else:
