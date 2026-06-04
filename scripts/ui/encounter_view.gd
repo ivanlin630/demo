@@ -101,6 +101,13 @@ func _refresh_ui() -> void:
 	var lh: Dictionary = eq.get("hand_2", {})
 	_lbl_equip.text = "右手: %s\n左手: %s" % [rh.get("grade", "空") if rh.get("type","none") != "none" else "空", lh.get("grade", "空") if lh.get("type","none") != "none" else "空"]
 
+	# action hints
+	var state_ui: WorldState = _bridge.get_state()
+	var action_hints: String = "QWEAD:移動  R:攻擊\nZ:命令  S:投降  Space:待機"
+	if not state_ui.encounter_active and state_ui.last_encounter_result.get("can_subjugate", false):
+		action_hints += "\nJ:收編敗者"
+	_lbl_actions.text = action_hints
+
 func _find_player_unit(state: WorldState) -> Dictionary:
 	for unit in state.encounter_units:
 		if unit.get("person_id", -1) == state.player_id:
@@ -167,8 +174,9 @@ func _draw() -> void:
 
 const HEX_DIRS: Dictionary = {
 	KEY_Q: true, KEY_W: true, KEY_E: true,
-	KEY_A: true, KEY_S: true, KEY_D: true,
+	KEY_A: true,              KEY_D: true,
 }
+# Note: KEY_S is handled separately as "surrender" action
 
 func _hex_neighbor(pos: Vector2i, dir_key: int) -> Vector2i:
 	var dirs_even: Dictionary = {
@@ -206,7 +214,21 @@ func _handle_key(keycode: int) -> void:
 
 	match _mode:
 		"idle":
-			if HEX_DIRS.has(keycode):
+			if keycode == KEY_S:
+				var state2: WorldState = _bridge.get_state()
+				if state2.encounter_active:
+					var r := _bridge.command_player("execute_action",
+						{"action_id": "surrender_in_encounter",
+						 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+					_log(r.get("message", ""))
+			elif keycode == KEY_J:
+				var state3: WorldState = _bridge.get_state()
+				if not state3.encounter_active and state3.last_encounter_result.get("can_subjugate", false):
+					var r := _bridge.command_player("execute_action",
+						{"action_id": "subjugate_enemy",
+						 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+					_log(r.get("message", ""))
+			elif HEX_DIRS.has(keycode):
 				var cur_pos: Vector2i = player_unit.get("pos", Vector2i.ZERO)
 				var target: Vector2i = _hex_neighbor(cur_pos, keycode)
 				_do_move(player_unit, target, state)
@@ -349,3 +371,6 @@ func _open_sub_command(unit_idx: int, player_unit: Dictionary, state: WorldState
 	var target_unit: Dictionary = state.encounter_units[unit_idx]
 	target_unit["current_order"] = { "type": "follow_player", "target": -1 }
 	print("[Encounter] 命令 unit%d 跟隨" % unit_idx)
+
+func _log(msg: String) -> void:
+	print("[EncounterView] ", msg)
