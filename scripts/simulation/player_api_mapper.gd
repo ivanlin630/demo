@@ -604,13 +604,27 @@ static func map_outpost_panel(state: WorldState) -> Dictionary:
 			"construction_in_progress": false, "ticks_left": 0, "actions": []}
 	var has_ctrl: bool = tile.outpost_owner == -1 or tile.outpost_owner == pt.team_id
 	var in_progress: bool = tile.construction_team_id != -1
+	# Facility caps (mirrors OutpostSystem constants to avoid dependency)
+	const F_CAP: Dictionary = { "civilian": [1, 2, 3], "military": [0, 0, 0] }
+	const M_CAP: Dictionary = { "civilian": [0, 1, 3], "military": [0, 0, 0] }
+	var farming_max: int = 0
+	var mfg_max: int = 0
+	if tile.outpost_type != "" and tile.outpost_level > 0:
+		var idx: int = tile.outpost_level - 1
+		farming_max = F_CAP.get(tile.outpost_type, [0,0,0])[idx]
+		mfg_max     = M_CAP.get(tile.outpost_type, [0,0,0])[idx]
 	var actions: Array = []
 	if has_ctrl:
 		if tile.outpost_type == "" and not in_progress:
 			actions.append("build_outpost")
 		elif tile.outpost_type != "" and not in_progress:
-			actions.append_array(["upgrade_outpost", "upgrade_farming",
-				"upgrade_manufacturing", "demolish_outpost"])
+			if tile.outpost_level < 3:
+				actions.append("upgrade_outpost")
+			if tile.farming_level < farming_max:
+				actions.append("upgrade_farming")
+			if tile.manufacturing_level < mfg_max:
+				actions.append("upgrade_manufacturing")
+			actions.append("demolish_outpost")
 	return {
 		"tile_pos": pt.tile_pos,
 		"outpost_type": tile.outpost_type,
@@ -619,6 +633,10 @@ static func map_outpost_panel(state: WorldState) -> Dictionary:
 		"has_control": has_ctrl,
 		"construction_in_progress": in_progress,
 		"ticks_left": tile.construction_ticks_left,
+		"farming_level": tile.farming_level,
+		"farming_max": farming_max,
+		"manufacturing_level": tile.manufacturing_level,
+		"manufacturing_max": mfg_max,
 		"actions": actions,
 	}
 
@@ -627,11 +645,12 @@ static func map_outpost_panel(state: WorldState) -> Dictionary:
 static func map_subteam_panel(state: WorldState) -> Dictionary:
 	var pid: int = state.player_id
 	if pid == -1:
-		return {"subteams": [], "actions_per_subteam": {}}
+		return {"subteams": [], "actions_per_subteam": {}, "dispatch_candidates": [], "player_population": 0}
 	var p: PersonData = state.persons.get(pid)
 	if p == null:
-		return {"subteams": [], "actions_per_subteam": {}}
+		return {"subteams": [], "actions_per_subteam": {}, "dispatch_candidates": [], "player_population": 0}
 	var ptid: int = p.team_id
+	var pt: TeamData = state.teams.get(ptid)
 	var subteams: Array = []
 	var actions_per: Dictionary = {}
 	for tid in state.teams:
@@ -646,7 +665,26 @@ static func map_subteam_panel(state: WorldState) -> Dictionary:
 			"player_commanded_task": t.player_commanded_task,
 		})
 		actions_per[str(tid)] = ["order_subteam", "recall_subteam"]
-	return {"subteams": subteams, "actions_per_subteam": actions_per}
+	# Candidates: named members of player team not already leading a subteam
+	var used_leaders: Array = []
+	for tid2 in state.teams:
+		var t2: TeamData = state.teams[tid2]
+		if t2.parent_team_id == ptid:
+			used_leaders.append(t2.leader_id)
+	var candidates: Array = []
+	if pt != null:
+		for mpid in pt.named_members:
+			if mpid == pt.leader_id: continue
+			if used_leaders.has(mpid): continue
+			var mp: PersonData = state.persons.get(mpid)
+			if mp == null: continue
+			candidates.append({"person_id": mpid, "name": mp.person_name})
+	return {
+		"subteams": subteams,
+		"actions_per_subteam": actions_per,
+		"dispatch_candidates": candidates,
+		"player_population": pt.population if pt != null else 0,
+	}
 
 # ── Body slots ─────────────────────────────────────────────────────────────────
 

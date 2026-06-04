@@ -43,6 +43,7 @@ var _encounter_view: Control       # 動態建立，遭遇戰 overlay
 # ── Trade submode ────────────────────────────────────────────────────────────
 var _trade_mode: bool = false
 var _trade_target_id: int = -1
+var _input_mode_allow_empty: bool = false
 
 var _cached_snapshot: Dictionary = {}
 
@@ -275,8 +276,9 @@ func _handle_input_mode(keycode: int) -> void:
 					_input_buffer = _input_buffer.left(_input_buffer.length() - 1)
 				_input_bar.text = "%s%s_" % [_input_mode_prompt, _input_buffer]
 			KEY_ENTER:
-				if _input_buffer.length() > 0:
+				if _input_buffer.length() > 0 or _input_mode_allow_empty:
 					_input_mode = false
+					_input_mode_allow_empty = false
 					_input_bar.text = ""
 					if _input_mode_callback.is_valid():
 						_input_mode_callback.call(_input_buffer)
@@ -284,6 +286,7 @@ func _handle_input_mode(keycode: int) -> void:
 					_refresh()
 			KEY_ESCAPE:
 				_input_mode = false
+				_input_mode_allow_empty = false
 				_input_buffer = ""
 				_input_bar.text = ""
 				_input_mode_callback = Callable()
@@ -805,13 +808,19 @@ func _handle_faction_mode(keycode: int) -> void:
 					var member_tid: int = mo.get("team_id", -1)
 					_input_mode = true
 					_input_mode_type = "string"
-					_input_mode_prompt = "下令 Team%d 任務: " % member_tid
+					_input_mode_allow_empty = true
+					_input_mode_prompt = "下令 Team%d 任務(空=清除): " % member_tid
 					_input_buffer = ""
 					_input_mode_callback = func(buf: String):
 						_bridge.set_player_input("order_member_id", member_tid)
-						_bridge.set_player_input("member_task", buf)
-						var r := _bridge.command_player("execute_action",
-							{"action_id": "order_faction_member", "target": {"kind": "none", "team_id": member_tid, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+						var r: Dictionary
+						if buf.strip_edges().is_empty():
+							r = _bridge.command_player("execute_action",
+								{"action_id": "clear_member_order", "target": {"kind": "none", "team_id": member_tid, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+						else:
+							_bridge.set_player_input("member_task", buf)
+							r = _bridge.command_player("execute_action",
+								{"action_id": "order_faction_member", "target": {"kind": "none", "team_id": member_tid, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 						_log_event("[勢力] %s" % r.get("message", ""))
 					_input_bar.text = "%s_" % _input_mode_prompt
 	_refresh()
@@ -864,9 +873,26 @@ func _handle_outpost_mode(keycode: int) -> void:
 		var idx: int = keycode - KEY_1
 		if idx < actions.size():
 			var action_id: String = actions[idx]
-			var r := _bridge.command_player("execute_action",
-				{"action_id": action_id, "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-			_log_event("[前哨] %s" % r.get("message", ""))
+			if action_id == "build_outpost":
+				# 進入輸入模式：選擇建設類型
+				_input_mode = true
+				_input_mode_type = "numeric"
+				_input_mode_prompt = "建設類型 [1]民用 [2]軍事: "
+				_input_buffer = ""
+				_input_mode_callback = func(buf: String):
+					var btype: String = "civilian" if buf.strip_edges() == "1" else "military"
+					_bridge.set_player_input("build_type", btype)
+					var r2 := _bridge.command_player("execute_action", {
+						"action_id": "build_outpost",
+						"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+					_log_event("[前哨] %s" % r2.get("message", ""))
+				_input_bar.text = "%s_" % _input_mode_prompt
+				_refresh()
+				return
+			else:
+				var r := _bridge.command_player("execute_action",
+					{"action_id": action_id, "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[前哨] %s" % r.get("message", ""))
 	_refresh()
 
 func _build_outpost_str() -> String:
@@ -874,9 +900,17 @@ func _build_outpost_str() -> String:
 	var lines: Array = []
 	var pos: Vector2i = op.get("tile_pos", Vector2i.ZERO) as Vector2i
 	lines.append("── 前哨站 @(%d,%d) ──" % [pos.x, pos.y])
+	var otype: String = op.get("outpost_type", "")
 	lines.append("類型: %s  等級: %d" % [
-		op.get("outpost_type", "無") if op.get("outpost_type", "") != "" else "無",
+		otype if otype != "" else "無",
 		op.get("outpost_level", 0)])
+	if otype != "":
+		var fl: int = op.get("farming_level", 0)
+		var fm: int = op.get("farming_max", 0)
+		var ml: int = op.get("manufacturing_level", 0)
+		var mm: int = op.get("manufacturing_max", 0)
+		if fm > 0 or mm > 0:
+			lines.append("農作: %d/%d  製造: %d/%d" % [fl, fm, ml, mm])
 	var owner: int = op.get("outpost_owner", -1)
 	lines.append("擁有者: %s  支配權: %s" % [
 		"Team%d" % owner if owner >= 0 else "無",
@@ -910,6 +944,61 @@ func _handle_subteam_mode(keycode: int) -> void:
 	var subteams: Array = sp.get("subteams", [])
 
 	if _subteam_selection == -1:
+		# [N] 派遣新子隊
+		if keycode == KEY_N:
+			var candidates: Array = sp.get("dispatch_candidates", [])
+			var max_pop: int = sp.get("player_population", 0)
+			if candidates.is_empty():
+				_log_event("[子隊] 無可用隊長（需命名非 leader 成員）")
+				_refresh()
+				return
+			# 步驟 1：選隊長
+			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "選隊長 (1~%d): " % candidates.size()
+			_input_buffer = ""
+			_input_mode_callback = func(buf1: String):
+				var cidx: int = int(buf1) - 1
+				if cidx < 0 or cidx >= candidates.size():
+					_log_event("[子隊] 無效隊長編號")
+					return
+				var leader_id: int = candidates[cidx].get("person_id", -1)
+				_bridge.set_player_input("sub_leader_id", leader_id)
+				# 步驟 2：人數
+				_input_mode = true
+				_input_mode_type = "numeric"
+				_input_mode_prompt = "派遣人數 (1~%d): " % (max_pop - 1)
+				_input_buffer = ""
+				_input_mode_callback = func(buf2: String):
+					var pop: int = int(buf2)
+					_bridge.set_player_input("sub_pop_count", pop)
+					_bridge.set_player_input("sub_task", TeamData.TASK_IDLE)
+					# 步驟 3：目標 q
+					_input_mode = true
+					_input_mode_type = "numeric"
+					_input_mode_prompt = "目標格 Q: "
+					_input_buffer = ""
+					_input_mode_callback = func(buf3: String):
+						var dq: int = int(buf3)
+						_bridge.set_player_input("sub_move_q", dq)
+						# 步驟 4：目標 r → 執行
+						_input_mode = true
+						_input_mode_type = "numeric"
+						_input_mode_prompt = "目標格 R: "
+						_input_buffer = ""
+						_input_mode_callback = func(buf4: String):
+							var dr: int = int(buf4)
+							_bridge.set_player_input("sub_move_r", dr)
+							var res := _bridge.command_player("execute_action", {
+								"action_id": "dispatch_subteam",
+								"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+							_log_event("[子隊] %s" % res.get("message", ""))
+						_input_bar.text = "目標格 R: _"
+					_input_bar.text = "目標格 Q: _"
+				_input_bar.text = "派遣人數 (1~%d): _" % (max_pop - 1)
+			_input_bar.text = "選隊長 (1~%d): _" % candidates.size()
+			_refresh()
+			return
 		# 選子隊
 		if keycode >= KEY_1 and keycode <= KEY_9:
 			var idx: int = keycode - KEY_1
@@ -955,6 +1044,7 @@ func _handle_subteam_mode(keycode: int) -> void:
 func _build_subteam_str() -> String:
 	var sp: Dictionary = _bridge.query_subteam_panel().get("data", {}).get("subteam_panel", {})
 	var subteams: Array = sp.get("subteams", [])
+	var candidates: Array = sp.get("dispatch_candidates", [])
 	var lines: Array = []
 	lines.append("── 子隊 ──")
 	if subteams.is_empty():
@@ -969,6 +1059,14 @@ func _build_subteam_str() -> String:
 			task_str, st.get("population", 0)])
 		if st.get("team_id", -1) == _subteam_selection:
 			lines.append("    [A]下令移動  [B]召回")
+	lines.append("")
+	lines.append("── 可派遣隊長 ──")
+	if candidates.is_empty():
+		lines.append("（無：需命名非 leader 成員）")
+	for i in range(candidates.size()):
+		lines.append("  %d. %s" % [i + 1, candidates[i].get("name", "?")])
+	if not candidates.is_empty():
+		lines.append("[N]派遣新子隊")
 	lines.append("[U/Esc]關閉")
 	return "\n".join(lines)
 

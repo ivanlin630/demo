@@ -298,6 +298,11 @@ func _decide_action(unit_idx: int, state: WorldState,
 				pass  # wait / unknown → idle
 		return { "type": "idle", "target_idx": -1, "move_to": unit["pos"], "attack_part": "" }
 
+	# Player unit with no pending_action: wait this tick
+	# encounter_view will set pending_action before next advance call
+	if unit.get("person_id", -1) == state.player_id:
+		return { "type": "idle", "target_idx": -1, "move_to": unit["pos"], "attack_part": "" }
+
 	if not is_combat_capable(unit, state):
 		return { "type": "incapable", "target_idx": -1,
 			"move_to": unit["pos"], "attack_part": "" }
