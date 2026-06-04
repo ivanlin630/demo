@@ -1867,4 +1867,23 @@ func _run_sim_test() -> void:
 			break
 	print("  InquirySystem 驗證通過")
 
+	# --- faction_panel API ---
+	var _fp_api := PlayerQueryApi.new()
+	var _fp_result := _fp_api.query_faction_panel(state)
+	print("[Test] query_faction_panel ok=%s in_faction=%s" % [
+		str(_fp_result.get("ok")),
+		str(_fp_result.get("data", {}).get("faction_panel", {}).get("in_faction"))])
+
+	# --- outpost_panel API ---
+	var _op_result := PlayerQueryApi.new().query_outpost_panel(state)
+	print("[Test] query_outpost_panel ok=%s tile_pos=%s" % [
+		str(_op_result.get("ok")),
+		str(_op_result.get("data", {}).get("outpost_panel", {}).get("tile_pos"))])
+
+	# --- subteam_panel API ---
+	var _sp_result := PlayerQueryApi.new().query_subteam_panel(state)
+	print("[Test] query_subteam_panel ok=%s subteams=%d" % [
+		str(_sp_result.get("ok")),
+		_sp_result.get("data", {}).get("subteam_panel", {}).get("subteams", []).size()])
+
 	print("=== DONE ===")

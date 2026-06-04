@@ -327,6 +327,51 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 				}
 			))
 
+	# subjugate_enemy（戰後可收編）
+	if state.last_encounter_result.get("can_subjugate", false):
+		actions.append(PlayerApiMapper.map_available_action(
+			"subjugate_enemy", "收編敗者", true, "",
+			{
+				"allowed_kinds": PackedStringArray(["none"]),
+				"requires_visible_target": false,
+				"requires_forced_interaction": false,
+				"allows_self_target": false
+			},
+			"execute_action",
+			{"action_id": "subjugate_enemy",
+			 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}}
+		))
+
+	# confirm_gather_intel（等待選題）
+	if state.player_state.has("pending_intel_target"):
+		actions.append(PlayerApiMapper.map_available_action(
+			"confirm_gather_intel", "確認打聽", true, "",
+			{
+				"allowed_kinds": PackedStringArray(["none"]),
+				"requires_visible_target": false,
+				"requires_forced_interaction": false,
+				"allows_self_target": false
+			},
+			"execute_action",
+			{"action_id": "confirm_gather_intel",
+			 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}}
+		))
+
+	# offer_surrender（戰鬥中對目標提出投降）
+	if state.encounter_active and focus_team_id != -1:
+		actions.append(PlayerApiMapper.map_available_action(
+			"offer_surrender", "投降請和", true, "",
+			{
+				"allowed_kinds": PackedStringArray(["team"]),
+				"requires_visible_target": true,
+				"requires_forced_interaction": false,
+				"allows_self_target": false
+			},
+			"execute_action",
+			{"action_id": "offer_surrender",
+			 "target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}}
+		))
+
 	return actions
 
 func get_and_clear_alerts(state: WorldState) -> Array:
@@ -334,20 +379,61 @@ func get_and_clear_alerts(state: WorldState) -> Array:
 	state.player_alerts.clear()
 	return alerts
 
+func query_faction_panel(state: WorldState) -> Dictionary:
+	var check := _check_player(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	return PlayerApiMapper.map_query_envelope(true, "ok", "",
+		{"faction_panel": PlayerApiMapper.map_faction_panel(state)})
+
+func query_outpost_panel(state: WorldState) -> Dictionary:
+	var check := _check_player(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	return PlayerApiMapper.map_query_envelope(true, "ok", "",
+		{"outpost_panel": PlayerApiMapper.map_outpost_panel(state)})
+
+func query_subteam_panel(state: WorldState) -> Dictionary:
+	var check := _check_player(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	return PlayerApiMapper.map_query_envelope(true, "ok", "",
+		{"subteam_panel": PlayerApiMapper.map_subteam_panel(state)})
+
 func _action_label(action_id: String) -> String:
 	match action_id:
 		"ignore":           return "忽略"
 		"attack":           return "攻擊"
 		"trade":            return "貿易"
 		"propose_alliance": return "提議同盟"
-		"demand_tribute":   return "要求納貢"
-		"extort":           return "勒索"
-		"recruit":          return "招募"
-		"establish_faction": return "建立勢力"
-		"take_loot":        return "收割戰利品"
-		"leave_loot":       return "放棄戰利品"
-		"recruit_anon":     return "招募匿名"
-		"recruit_named":    return "招募成員"
-		"confirm_trade":    return "確認貿易"
-		"cancel_trade":     return "取消貿易"
+		"demand_tribute":        return "要求納貢"
+		"extort":                return "勒索"
+		"recruit":               return "招募"
+		"establish_faction":     return "建立勢力"
+		"take_loot":             return "收割戰利品"
+		"leave_loot":            return "放棄戰利品"
+		"recruit_anon":          return "招募匿名"
+		"recruit_named":         return "招募成員"
+		"confirm_trade":         return "確認貿易"
+		"cancel_trade":          return "取消貿易"
+		"gather_intel":           return "打聽情報"
+		"confirm_gather_intel":   return "確認打聽"
+		"subjugate_enemy":        return "收編敗者"
+		"offer_surrender":        return "投降請和"
+		"surrender_in_encounter": return "戰中投降"
+		"leave_faction":          return "退出勢力"
+		"betray_faction":         return "背叛勢力"
+		"disband_faction":        return "解散勢力"
+		"set_faction_goal":       return "設定勢力目標"
+		"order_faction_member":   return "下令成員"
+		"clear_member_order":     return "清除指令"
+		"set_tribute_rate":       return "調整徵收率"
+		"build_outpost":          return "建設前哨站"
+		"upgrade_outpost":        return "升級等級"
+		"upgrade_farming":        return "升級農作"
+		"upgrade_manufacturing":  return "升級製造"
+		"demolish_outpost":       return "拆除前哨站"
+		"dispatch_subteam":       return "派遣子隊"
+		"order_subteam":          return "下令子隊"
+		"recall_subteam":         return "召回子隊"
 	return action_id

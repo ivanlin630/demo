@@ -136,3 +136,16 @@ func command_player(name: String, args: Dictionary) -> Dictionary:
 func refresh_interaction_targets() -> void:
 	var cmd_sys := PlayerCommandSystem.new()
 	cmd_sys.refresh_colocation_targets(_state)
+
+# 設定玩家狀態欄位（如 tribute_rate_input）
+func set_player_input(key: String, value: Variant) -> void:
+	_state.player_state[key] = value
+
+func query_faction_panel() -> Dictionary:
+	return PlayerQueryApi.new().query_faction_panel(_state)
+
+func query_outpost_panel() -> Dictionary:
+	return PlayerQueryApi.new().query_outpost_panel(_state)
+
+func query_subteam_panel() -> Dictionary:
+	return PlayerQueryApi.new().query_subteam_panel(_state)

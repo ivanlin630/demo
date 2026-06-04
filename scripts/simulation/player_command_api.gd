@@ -69,6 +69,7 @@ func execute_action(state: WorldState, action_id: String, target: Dictionary) ->
 			return PlayerApiMapper.map_command_result(false, "invalid_target", "unsupported target kind: %s" % kind, {})
 	if result.get("ok", false):
 		var payload: Dictionary = {"action_id": action_id, "result_summary": result.get("msg", ""), "refresh_required": true}
+		payload.merge(result.get("payload", {}))   # forward inner payload (inquiry_options etc.)
 		if result.has("requires_preview"):
 			payload["requires_preview"] = result["requires_preview"]
 		if result.has("preview_target_id"):

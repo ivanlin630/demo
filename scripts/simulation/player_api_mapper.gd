@@ -515,3 +515,130 @@ static func map_player_snapshot(state: WorldState, focus_team_id: int, focus_mem
 		"members_detail":     map_members_detail(state),
 		"team_stats":         map_team_stats(state),
 	}
+
+# ── Faction panel ──────────────────────────────────────────────────────────────
+
+static func map_faction_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {"in_faction": false, "faction_id": -1, "is_leader": false,
+			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+			"member_orders": [], "actions": []}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {"in_faction": false, "faction_id": -1, "is_leader": false,
+			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+			"member_orders": [], "actions": []}
+	var pt: TeamData = state.teams.get(p.team_id)
+	if pt == null or pt.faction_id == -1:
+		return {"in_faction": false, "faction_id": -1, "is_leader": false,
+			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+			"member_orders": [], "actions": []}
+	var f = state.factions.get(pt.faction_id)
+	if f == null:
+		return {"in_faction": false, "faction_id": -1, "is_leader": false,
+			"faction_goal": "", "player_goal_override": "", "tribute_rate": 0.0,
+			"member_orders": [], "actions": []}
+	var is_leader: bool = f.leader_team_id == pt.team_id
+	var pending_orders: Dictionary = {}  # Plan 3 Task 1 will add player_pending_orders to WorldState; change to state.player_pending_orders then
+	var member_orders: Array = []
+	for mid in f.member_team_ids:
+		var mt: TeamData = state.teams.get(mid)
+		if mt == null: continue
+		var ml: PersonData = state.persons.get(mt.leader_id)
+		var name_str: String = ml.person_name if ml else "Team%d" % mid
+		var pending: Dictionary = pending_orders.get(mid, {})
+		member_orders.append({
+			"team_id": mid,
+			"name": name_str,
+			"tile_pos": mt.tile_pos,
+			"commanded_task": mt.player_commanded_task,
+			"pending_task": pending.get("task", ""),
+			"herald_id": pending.get("herald_id", -1),
+		})
+	var actions: Array = ["order_faction_member", "clear_member_order"]
+	if is_leader:
+		actions.append_array(["set_faction_goal", "set_tribute_rate",
+			"leave_faction", "betray_faction", "disband_faction"])
+	else:
+		actions.append("leave_faction")
+	return {
+		"in_faction": true,
+		"faction_id": pt.faction_id,
+		"is_leader": is_leader,
+		"faction_goal": ", ".join(f.goals) if f.goals.size() > 0 else "",
+		"player_goal_override": f.player_goal_override,
+		"tribute_rate": f.tribute_rate,
+		"member_orders": member_orders,
+		"actions": actions,
+	}
+
+# ── Outpost panel ──────────────────────────────────────────────────────────────
+
+static func map_outpost_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var pt: TeamData = state.teams.get(p.team_id)
+	if pt == null:
+		return {"tile_pos": Vector2i(-1, -1), "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var key: int = pt.tile_pos.x * 1000 + pt.tile_pos.y
+	var tile = state.world.tiles.get(key)
+	if tile == null:
+		return {"tile_pos": pt.tile_pos, "outpost_type": "", "outpost_level": 0,
+			"outpost_owner": -1, "has_control": false,
+			"construction_in_progress": false, "ticks_left": 0, "actions": []}
+	var has_ctrl: bool = tile.outpost_owner == -1 or tile.outpost_owner == pt.team_id
+	var in_progress: bool = tile.construction_team_id != -1
+	var actions: Array = []
+	if has_ctrl:
+		if tile.outpost_type == "" and not in_progress:
+			actions.append("build_outpost")
+		elif tile.outpost_type != "" and not in_progress:
+			actions.append_array(["upgrade_outpost", "upgrade_farming",
+				"upgrade_manufacturing", "demolish_outpost"])
+	return {
+		"tile_pos": pt.tile_pos,
+		"outpost_type": tile.outpost_type,
+		"outpost_level": tile.outpost_level,
+		"outpost_owner": tile.outpost_owner,
+		"has_control": has_ctrl,
+		"construction_in_progress": in_progress,
+		"ticks_left": tile.construction_ticks_left,
+		"actions": actions,
+	}
+
+# ── Subteam panel ──────────────────────────────────────────────────────────────
+
+static func map_subteam_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	if pid == -1:
+		return {"subteams": [], "actions_per_subteam": {}}
+	var p: PersonData = state.persons.get(pid)
+	if p == null:
+		return {"subteams": [], "actions_per_subteam": {}}
+	var ptid: int = p.team_id
+	var subteams: Array = []
+	var actions_per: Dictionary = {}
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id != ptid: continue
+		subteams.append({
+			"team_id": tid,
+			"tile_pos": t.tile_pos,
+			"current_task": t.current_task,
+			"order_task": t.order_task,
+			"population": t.population,
+			"player_commanded_task": t.player_commanded_task,
+		})
+		actions_per[str(tid)] = ["order_subteam", "recall_subteam"]
+	return {"subteams": subteams, "actions_per_subteam": actions_per}
