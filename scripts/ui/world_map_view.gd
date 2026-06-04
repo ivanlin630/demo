@@ -161,6 +161,7 @@ func _draw() -> void:
 
 func _is_tile_visible(pos: Vector2i, player_pos: Vector2i,
 		disc_positions: Array, vision_r: int) -> bool:
+	if player_pos.x < 0: return true
 	if pos == player_pos: return true
 	var dx: int = pos.x - player_pos.x
 	var dy: int = pos.y - player_pos.y
