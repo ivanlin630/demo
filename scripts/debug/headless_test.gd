@@ -1832,6 +1832,8 @@ func _run_sim_test() -> void:
 		float(_preview.get("gives_value")),
 		float(_preview.get("wants_value"))])
 
+	# Ensure player has enough coin for the fair trade test
+	state.teams[0].resources["coin"] = 50.0
 	# execute_offer: run fair trade if accepted; run bad offer if rejected
 	var _coin_pt_before:  float = float(state.teams[0].resources.get("coin", 0))
 	var _food_tgt_before: float = float(state.teams[1].resources.get("food", 0))
