@@ -138,7 +138,7 @@ func evaluate_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionar
 		var pos_count: int = 0
 		var neg_count: int = 0
 		for mem in leader.memory:
-			if int(mem.get("event_id", 0)) < state.current_tick - 1000:
+			if int(mem.get("event_id", 0)) < state.world.current_tick - 1000:
 				continue
 			var reaction: String = str(mem.get("reaction", ""))
 			if reaction in ["tribute_paid", "alliance_accepted", "trade_positive"]:

@@ -1865,6 +1865,8 @@ func _run_sim_test() -> void:
 	var _sub_result := _pcs.execute_action(state, 1, "submit_trade_offer")
 	print("[TradeTest] submit_trade_offer: ok=%s msg=%s" % [
 		str(_sub_result.get("ok")), str(_sub_result.get("msg", ""))])
+	assert(_sub_result.has("ok"), "[TradeTest] submit_trade_offer result missing 'ok' key")
+	assert(_sub_result.has("msg"), "[TradeTest] submit_trade_offer result missing 'msg' key")
 	# Clean up state in case trade failed (so later assertions aren't affected)
 	state.player_state.erase("pending_trade_target")
 	state.player_state.erase("trade_offer")

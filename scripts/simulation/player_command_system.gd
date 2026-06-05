@@ -266,6 +266,7 @@ func cancel_move(state: WorldState) -> Dictionary:
 	return { "ok": true, "msg": "取消移動" }
 
 func _action_submit_trade_offer(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	# pending_trade_target in player_state is authoritative; _target_id is ignored here
 	var tid: int              = int(state.player_state.get("pending_trade_target", -1))
 	var offer: Dictionary     = state.player_state.get("trade_offer", {})
 	if tid < 0 or offer.is_empty():
