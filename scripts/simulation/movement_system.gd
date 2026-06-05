@@ -151,10 +151,19 @@ func _step_team(state: WorldState, team: TeamData) -> bool:
 	var best_pos: Vector2i = team.tile_pos
 	var best_dist: int = _hex_dist(team.tile_pos, team.move_target)
 	for neighbor in _get_neighbors(team.tile_pos):
+		var nid: int = neighbor.x * 1000 + neighbor.y
+		if not state.world.tiles.has(nid):
+			continue   # never step off-map
 		var d: int = _hex_dist(neighbor, team.move_target)
 		if d < best_dist:
 			best_dist = d
-			best_pos = neighbor
+			best_pos  = neighbor
+	# If no on-map neighbour improves distance, team is stuck — cancel target
+	if best_pos == team.tile_pos and team.tile_pos != team.move_target:
+		print("[Move] Team %d stuck at (%d,%d), clearing move_target" % [
+			team.team_id, team.tile_pos.x, team.tile_pos.y])
+		team.move_target = Vector2i(-1, -1)
+		return false
 	team.tile_pos = best_pos
 	if team.tile_pos == team.move_target:
 		team.move_target = Vector2i(-1, -1)
