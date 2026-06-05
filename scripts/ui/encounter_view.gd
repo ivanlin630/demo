@@ -3,10 +3,11 @@ extends Control
 
 signal encounter_ended()
 
-const HEX_W: float    = 60.0
-const HEX_H: float    = 52.0
-const COL_STEP: float = 45.0
-const ODD_OFF: float  = 26.0
+const HEX_W: float         = 60.0
+const HEX_H: float         = 52.0
+const COL_STEP: float      = 45.0
+const ODD_OFF: float       = 26.0
+const MAP_RADIUS_VIEW: int = 12  # must match EncounterSystem.MAP_RADIUS
 
 const TERRAIN_COLOR: Dictionary = {
 	"plains":   Color(0.3, 0.65, 0.3),
@@ -35,6 +36,9 @@ func setup(bridge: SimBridge) -> void:
 func show_encounter() -> void:
 	visible = true
 	_post_combat = false
+	# Center camera so axial (0,0) appears at viewport center.
+	var vp_size: Vector2 = get_viewport_rect().size
+	_camera = vp_size * 0.5 - _hex_center(0, 0) * _zoom
 	_refresh_ui()
 	queue_redraw()
 	_waiting_for_player = false
@@ -120,8 +124,10 @@ func _find_player_unit(state: WorldState) -> Dictionary:
 # ── hex helpers ───────────────────────────────────────────
 
 func _hex_center(col: int, row: int) -> Vector2:
+	# Use abs(col) % 2 so odd-column stagger is always positive for negative cols.
+	var odd_off: float = ODD_OFF if (abs(col) % 2 == 1) else 0.0
 	return Vector2(col * COL_STEP + HEX_W * 0.5,
-				   row * HEX_H + (col % 2) * ODD_OFF + HEX_H * 0.5)
+				   row * HEX_H + odd_off + HEX_H * 0.5)
 
 func _hex_points(cx: float, cy: float) -> PackedVector2Array:
 	return PackedVector2Array([
@@ -142,9 +148,11 @@ func _draw() -> void:
 	if _bridge == null or not visible: return
 	var state: WorldState = _bridge.get_state()
 
-	# Draw 10×10 grid
-	for row in range(10):
-		for col in range(10):
+	# Draw hex circle — MAP_RADIUS_VIEW=12, centered at axial (0,0)
+	for row in range(-MAP_RADIUS_VIEW, MAP_RADIUS_VIEW + 1):
+		for col in range(-MAP_RADIUS_VIEW, MAP_RADIUS_VIEW + 1):
+			if _hex_dist(Vector2i(col, row), Vector2i.ZERO) > MAP_RADIUS_VIEW:
+				continue
 			var center: Vector2 = _world_to_screen(_hex_center(col, row))
 			var pts: PackedVector2Array = _hex_points(center.x, center.y)
 			draw_colored_polygon(pts, Color(0.3, 0.6, 0.3))
@@ -322,6 +330,7 @@ func _advance_until_player_or_end() -> void:
 				return
 			"no_encounter":
 				return
+		await get_tree().process_frame
 
 func _describe_hex(pos: Vector2i, state: WorldState) -> String:
 	var lines: Array = ["格(%d,%d)" % [pos.x, pos.y]]
