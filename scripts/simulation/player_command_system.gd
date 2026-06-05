@@ -173,6 +173,7 @@ func _action_extort(state: WorldState, target_id: int, _pt: TeamData, pt_id: int
 	return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", "") }
 
 func _action_recruit(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	# Always return a menu — never auto-execute. Player must call recruit_anon or recruit_named.
 	var tgt: TeamData = state.teams.get(target_id)
 	if tgt == null:
 		state.player_pending_targets.erase(target_id)
@@ -183,15 +184,20 @@ func _action_recruit(state: WorldState, target_id: int, pt: TeamData, _pt_id: in
 		var person: PersonData = state.persons.get(pid)
 		if person and person.loyalty < 0.4:
 			willing.append(pid)
+	var coin: float      = float(pt.resources.get("coin", 0))
+	var anon_ok: bool    = coin >= RECRUIT_COST_ANON and tgt.population > 1
+	var willing_dto: Array = []
 	if not willing.is_empty():
-		var willing_dto: Array = PlayerApiMapper.map_willing_members(state, willing)
-		return { "ok": true, "msg": "有成員考慮投誠",
-				 "payload": {
-					 "has_willing_named": true,
-					 "willing_members": willing_dto,
-					 "target_team_id": target_id
-				 }}
-	return _recruit_anon_internal(state, pt, tgt, target_id)
+		willing_dto = PlayerApiMapper.map_willing_members(state, willing)
+	return { "ok": true, "msg": "選擇招募方式",
+			 "payload": {
+				 "has_willing_named":   not willing.is_empty(),
+				 "willing_members":     willing_dto,
+				 "anon_available":      anon_ok,
+				 "anon_cost":           int(RECRUIT_COST_ANON),
+				 "named_cost":          int(RECRUIT_COST_NAMED),
+				 "target_team_id":      target_id
+			 }}
 
 
 func _action_recruit_anon(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
