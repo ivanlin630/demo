@@ -137,8 +137,15 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		es.on_leader_death(state, absorbed)
 	if absorbed.population <= 0:
 		absorber.subteam_ids.erase(absorbed_id)
+		# Faction cleanup before erasing
+		if absorbed.faction_id != -1:
+			var f_merge: FactionData = state.factions.get(absorbed.faction_id)
+			if f_merge != null:
+				f_merge.member_team_ids.erase(absorbed_id)
+				f_merge.known_member_states.erase(absorbed_id)
 		state.teams.erase(absorbed_id)
 		state.team_known.erase(absorbed_id)
+		state.team_discovered.erase(absorbed_id)
 		print("[Merge] Team%d ← Team%d 完全合併 (absorber_pop=%d)" % [
 			absorber_id, absorbed_id, absorber.population])
 	else:
@@ -196,8 +203,15 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	absorbed.wounded     = maxi(absorbed.wounded - int(round(float(absorbed.wounded) * frac)), 0)
 	absorber.subteam_ids.erase(absorbed_id)
 	if absorbed.population <= 0:
+		# Faction cleanup before erasing
+		if absorbed.faction_id != -1:
+			var f_merge: FactionData = state.factions.get(absorbed.faction_id)
+			if f_merge != null:
+				f_merge.member_team_ids.erase(absorbed_id)
+				f_merge.known_member_states.erase(absorbed_id)
 		state.teams.erase(absorbed_id)
 		state.team_known.erase(absorbed_id)
+		state.team_discovered.erase(absorbed_id)
 		print("[Merge] Team%d ← Team%d 完全合併 (pop=%d)" % [absorber_id, absorbed_id, absorber.population])
 	else:
 		print("[Merge] Team%d ← Team%d 部分合併 (absorber=%d absorbed=%d)" % [
