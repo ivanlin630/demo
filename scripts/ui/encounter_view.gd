@@ -322,6 +322,7 @@ func _advance_until_player_or_end() -> void:
 				return
 			"no_encounter":
 				return
+		await get_tree().process_frame
 
 func _describe_hex(pos: Vector2i, state: WorldState) -> String:
 	var lines: Array = ["格(%d,%d)" % [pos.x, pos.y]]
