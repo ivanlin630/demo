@@ -45,7 +45,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if state.world.current_tick % DiplomaticAiSystem.BETRAY_CHECK_INTERVAL == 0:
 			var leader_team_b: TeamData = state.teams.get(f.leader_team_id)
 			if leader_team_b == null: continue
-			for tid in f.member_team_ids:
+			for tid in f.member_team_ids.duplicate():  # duplicate: _execute_betrayal may erase during iteration
 				if tid == f.leader_team_id: continue
 				var member_team: TeamData = state.teams.get(tid)
 				if member_team:
