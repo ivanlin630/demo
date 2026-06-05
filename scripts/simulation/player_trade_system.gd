@@ -33,7 +33,7 @@ const TARGET_PER_POP: Dictionary = {
 	"coin":              20.0,
 }
 const FOOD_RESERVE_TICKS: float   = 20.0   # TEST VALUE
-const MAX_COIN_PER_TRADE: float   = 300.0  # TEST VALUE
+const MAX_COIN_PER_TRADE: float   = 300.0  # TEST VALUE — reserved; player offers currently uncapped
 const WEAPON_RESERVE_RATIO: float = 0.5    # TEST VALUE — armed_anon_ratio fraction to keep
 
 var _msg: SimMessageSystem = SimMessageSystem.new()
@@ -98,6 +98,17 @@ func evaluate_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionar
 
 	var player_gives: Dictionary = offer.get("player_gives", {})
 	var player_wants: Dictionary = offer.get("player_wants", {})
+
+	if player_gives.is_empty() and player_wants.is_empty():
+		return { "accepted": false, "reason": "出價為空", "ratio": 0.0, "threshold": 1.0 }
+
+	# Guard: all quantities must be positive
+	for res in player_gives:
+		if float(player_gives[res]) <= 0.0:
+			return { "accepted": false, "reason": "無效數量：" + res, "ratio": 0.0, "threshold": 1.0 }
+	for res in player_wants:
+		if float(player_wants[res]) <= 0.0:
+			return { "accepted": false, "reason": "無效數量：" + res, "ratio": 0.0, "threshold": 1.0 }
 
 	# Layer 1 — Self-preservation (hard reject)
 	for res in player_wants:
