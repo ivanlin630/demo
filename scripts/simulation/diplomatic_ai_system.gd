@@ -80,6 +80,18 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 	print("[Diplomacy] Team%d → Team%d: %s" % [sender.team_id, target.team_id, action])
 	var response: String = handle_diplomacy_message(state, target, sender, action)
 	print("[Diplomacy] Team%d 回應: %s" % [target.team_id, response])
+	# Tribute refusal consequence: write memory + reputation penalty
+	if action == "demand_tribute" and response == "refuse":
+		var sender_leader: PersonData = state.persons.get(sender.leader_id) if sender.leader_id >= 0 else null
+		if sender_leader != null:
+			sender_leader.memory.append({
+				"event_id":  state.world.current_tick,
+				"intensity": "minor",
+				"reaction":  "tribute_refused"
+			})
+		_update_reputation(sender, target.team_id, -0.1)
+		_update_reputation(target, sender.team_id, -0.05)
+		print("[Diplomacy] Team%d 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05" % target.team_id)
 
 func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 		sender_team: TeamData, action: String) -> String:
@@ -157,6 +169,10 @@ func consider_betrayal(state: WorldState, self_team: TeamData,
 
 func _execute_betrayal(state: WorldState, self_team: TeamData,
 		ally_team: TeamData) -> void:
+	# Remove from faction BEFORE clearing faction_id (need the id to find the faction)
+	var f_bt: FactionData = state.factions.get(self_team.faction_id)
+	if f_bt != null:
+		f_bt.member_team_ids.erase(self_team.team_id)
 	self_team.faction_id = -1
 	_update_reputation(ally_team, self_team.team_id, -0.5)
 	var ally_leader: PersonData = state.persons.get(ally_team.leader_id)
