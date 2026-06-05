@@ -363,7 +363,7 @@
 |---|---|---|
 | ~~遭遇戰行動邏輯不存在~~ | ~~`encounter_system.gd`~~ | ❌ 誤判：已實作 850+ 行 |
 | ~~玩家攻擊不呼叫 init_encounter~~ | ~~`player_command_system._action_attack`~~ | ✅ 已修 (2026-06-05) |
-| 貿易無實際交換邏輯 | `player_command_system._action_trade` + `interaction_system` | 🔴 待修 |
+| ~~貿易無實際交換邏輯~~ | ~~`player_command_system._action_trade`~~ | ✅ 已修 (2026-06-05) — PlayerTradeSystem |
 
 ### S2 — 重要功能殘缺
 | 問題 | 位置 |
