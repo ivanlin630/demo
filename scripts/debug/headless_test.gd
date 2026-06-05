@@ -1886,4 +1886,83 @@ func _run_sim_test() -> void:
 		str(_sp_result.get("ok")),
 		_sp_result.get("data", {}).get("subteam_panel", {}).get("subteams", []).size()])
 
+	# ── PlayerTradeSystem tests ──────────────────────────────────────────
+	var _trade_sys := PlayerTradeSystem.new()
+
+	# get_tradeable_resources
+	var _tr_res := _trade_sys.get_tradeable_resources(state, 0, 1)
+	assert(_tr_res.has("player"),          "[TradeTest] missing 'player' key")
+	assert(_tr_res.has("target_sellable"), "[TradeTest] missing 'target_sellable' key")
+	assert(_tr_res.has("prices"),          "[TradeTest] missing 'prices' key")
+	print("[TradeTest] get_tradeable_resources ok")
+
+	# evaluate_offer: fair trade (coin for food)
+	var _offer_fair := { "player_gives": {"coin": 20}, "player_wants": {"food": 5} }
+	var _eval_fair  := _trade_sys.evaluate_offer(state, 0, 1, _offer_fair)
+	print("[TradeTest] evaluate fair: accepted=%s reason=%s ratio=%.2f threshold=%.2f" % [
+		str(_eval_fair.get("accepted")),
+		str(_eval_fair.get("reason")),
+		float(_eval_fair.get("ratio", 0.0)),
+		float(_eval_fair.get("threshold", 0.0))])
+
+	# evaluate_offer: empty offer must be rejected
+	var _eval_empty := _trade_sys.evaluate_offer(state, 0, 1, {})
+	assert(not _eval_empty.get("accepted", true), "[TradeTest] empty offer must be rejected")
+
+	# evaluate_offer: demand more food than available → layer-1 reject
+	var _food_stock: float = float(state.teams[1].resources.get("food", 0))
+	var _offer_over := { "player_gives": {}, "player_wants": {"food": _food_stock + 9999} }
+	var _eval_over  := _trade_sys.evaluate_offer(state, 0, 1, _offer_over)
+	assert(not _eval_over.get("accepted", true), "[TradeTest] over-demand must be rejected (layer 1)")
+	print("[TradeTest] evaluate_offer layer-1 reject ok: %s" % _eval_over.get("reason", ""))
+
+	# preview_offer: must not mutate state
+	var _food_before: float = float(state.teams[1].resources.get("food", 0))
+	var _preview     := _trade_sys.preview_offer(state, 0, 1, _offer_fair)
+	var _food_after:  float = float(state.teams[1].resources.get("food", 0))
+	assert(_food_before == _food_after,          "[TradeTest] preview_offer must not mutate food")
+	assert(_preview.has("gives_value"),           "[TradeTest] preview missing gives_value")
+	assert(_preview.has("wants_value"),           "[TradeTest] preview missing wants_value")
+	print("[TradeTest] preview_offer no-mutate ok  gives=%.2f wants=%.2f" % [
+		float(_preview.get("gives_value")),
+		float(_preview.get("wants_value"))])
+
+	# Ensure player has enough coin for the fair trade test
+	state.teams[0].resources["coin"] = 50.0
+	# execute_offer: run fair trade if accepted; run bad offer if rejected
+	var _coin_pt_before:  float = float(state.teams[0].resources.get("coin", 0))
+	var _food_tgt_before: float = float(state.teams[1].resources.get("food", 0))
+	var _exec := _trade_sys.execute_offer(state, 0, 1, _offer_fair)
+	print("[TradeTest] execute_offer: ok=%s msg=%s" % [str(_exec.get("ok")), str(_exec.get("msg", ""))])
+	if _exec.get("ok", false):
+		assert(float(state.teams[0].resources.get("coin", 0)) < _coin_pt_before,
+			"[TradeTest] player coin should decrease after execute")
+		assert(float(state.teams[1].resources.get("food", 0)) < _food_tgt_before,
+			"[TradeTest] NPC food should decrease after execute")
+		print("[TradeTest] execute_offer mutations verified ok")
+
+	# execute_offer: player over-commits their own stock → rejected without mutation
+	var _offer_badstock := { "player_gives": {"coin": 999999}, "player_wants": {} }
+	var _exec_bad := _trade_sys.execute_offer(state, 0, 1, _offer_badstock)
+	assert(not _exec_bad.get("ok", true), "[TradeTest] over-commit player stock must fail")
+	print("[TradeTest] execute_offer bad-stock reject ok")
+	# ── end PlayerTradeSystem tests ──────────────────────────────────────
+
+	# ── submit_trade_offer command test ─────────────────────────────────
+	var _pcs := PlayerCommandSystem.new()
+	state.player_state["pending_trade_target"] = 1
+	state.player_state["trade_offer"] = {
+		"player_gives": {"coin": 10},
+		"player_wants": {"food": 3}
+	}
+	state.teams[0].resources["coin"] = floorf(float(state.teams[0].resources.get("coin", 0)) + 100)
+	var _sub_result := _pcs.execute_action(state, 1, "submit_trade_offer")
+	print("[TradeTest] submit_trade_offer: ok=%s msg=%s" % [
+		str(_sub_result.get("ok")), str(_sub_result.get("msg", ""))])
+	assert(_sub_result.has("ok"),  "[TradeTest] submit_trade_offer result missing 'ok' key")
+	assert(_sub_result.has("msg"), "[TradeTest] submit_trade_offer result missing 'msg' key")
+	state.player_state.erase("pending_trade_target")
+	state.player_state.erase("trade_offer")
+	# ── end submit_trade_offer test ─────────────────────────────────────
+
 	print("=== DONE ===")

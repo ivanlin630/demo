@@ -57,6 +57,7 @@ func _setup_registry() -> void:
 		"establish_faction":      _action_establish_faction_cmd,
 		"refresh_targets":        _action_refresh_targets,
 		"confirm_trade":          _action_confirm_trade,
+		"submit_trade_offer":     _action_submit_trade_offer,
 		"cancel_trade":           _action_cancel_trade,
 		"set_tribute_rate":       _action_set_tribute_rate,
 		"build_outpost":          _action_build_outpost,
@@ -226,7 +227,11 @@ func _action_refresh_targets(state: WorldState, _target_id: int, _pt: TeamData, 
 	refresh_colocation_targets(state)
 	return { "ok": true, "msg": "互動目標已更新" }
 
-func _action_confirm_trade(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+func _action_confirm_trade(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	# If a structured trade_offer is present, delegate to the new offer system
+	if state.player_state.has("trade_offer"):
+		return _action_submit_trade_offer(state, target_id, pt, pt_id)
+	# Legacy fallback: NPC-initiated trade confirmation
 	var tid2: int = int(state.player_state.get("pending_trade_target", -1))
 	if tid2 < 0 or not state.teams.has(tid2):
 		return { "ok": false, "msg": "無待確認貿易" }
@@ -234,6 +239,20 @@ func _action_confirm_trade(state: WorldState, _target_id: int, _pt: TeamData, pt
 	state.player_pending_targets.erase(tid2)
 	state.player_state.erase("pending_trade_target")
 	return result2
+
+func _action_submit_trade_offer(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	var tid: int          = int(state.player_state.get("pending_trade_target", -1))
+	var offer: Dictionary = state.player_state.get("trade_offer", {})
+	if tid < 0 or offer.is_empty():
+		return { "ok": false, "msg": "無待送出的出價" }
+	if not state.teams.has(tid):
+		return { "ok": false, "msg": "目標隊伍不存在" }
+	var result := PlayerTradeSystem.new().execute_offer(state, pt_id, tid, offer)
+	if result.get("ok", false):
+		state.player_pending_targets.erase(tid)
+		state.player_state.erase("pending_trade_target")
+		state.player_state.erase("trade_offer")
+	return result
 
 func _action_cancel_trade(state: WorldState, _target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
 	var tid3: int = int(state.player_state.get("pending_trade_target", -1))
