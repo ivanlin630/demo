@@ -2050,6 +2050,8 @@ func _run_sim_test() -> void:
 		"[MergeTest] absorbed team must be erased from state.teams")
 	assert(not state.team_discovered.has(_mt_abs_id),
 		"[MergeTest] absorbed team must be erased from state.team_discovered")
+	assert(not state.team_known.has(_mt_abs_id),
+		"[MergeTest] absorbed team must be erased from state.team_known")
 	state.teams.erase(_mt_abr_id)
 	state.team_known.erase(_mt_abr_id)
 	state.team_discovered.erase(_mt_abr_id)
