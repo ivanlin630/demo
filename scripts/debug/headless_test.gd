@@ -1980,4 +1980,45 @@ func _run_sim_test() -> void:
 	print("[BoundaryTest] movement boundary guard ok — team stayed on-map for 30 steps")
 	# ── end movement boundary test ───────────────────────────────────
 
+	# ── diplomatic fixes test ────────────────────────────────────────
+	var _diplo_test := DiplomaticAiSystem.new()
+
+	# Test 1: Betrayal orphan — after _execute_betrayal, faction.member_team_ids must not contain betrayer
+	var _diplo_tested_betrayal: bool = false
+	for _fid_bt in state.factions:
+		var _f_bt: FactionData = state.factions[_fid_bt]
+		if _f_bt.member_team_ids.size() < 2:
+			continue
+		var _betrayer_tid: int = -1
+		for _mid in _f_bt.member_team_ids:
+			if _mid != _f_bt.leader_team_id:
+				_betrayer_tid = _mid
+				break
+		if _betrayer_tid == -1:
+			continue
+		var _betrayer_bt: TeamData  = state.teams.get(_betrayer_tid)
+		var _leader_bt: TeamData    = state.teams.get(_f_bt.leader_team_id)
+		if _betrayer_bt == null or _leader_bt == null:
+			continue
+		_diplo_test._execute_betrayal(state, _betrayer_bt, _leader_bt)
+		assert(not _f_bt.member_team_ids.has(_betrayer_tid),
+			"[DiploTest] betrayer must be removed from faction.member_team_ids after betrayal")
+		assert(_betrayer_bt.faction_id == -1,
+			"[DiploTest] betrayer faction_id must be -1 after betrayal")
+		print("[DiploTest] betrayal orphan fix ok — Team%d removed from faction" % _betrayer_tid)
+		_diplo_tested_betrayal = true
+		break
+	if not _diplo_tested_betrayal:
+		print("[DiploTest] betrayal test skipped (no suitable faction found)")
+
+	# Test 2: Tribute refusal — handle_diplomacy_message response shape
+	var _dem2: TeamData = state.teams[0]
+	var _pay2: TeamData = state.teams[2]
+	var _resp2: String  = _diplo_test.handle_diplomacy_message(state, _pay2, _dem2, "demand_tribute")
+	print("[DiploTest] demand_tribute from Team0 to Team2: response=%s" % _resp2)
+	assert(_resp2 == "accept" or _resp2 == "refuse",
+		"[DiploTest] demand_tribute response must be 'accept' or 'refuse'")
+	print("[DiploTest] tribute refusal shape ok")
+	# ── end diplomatic fixes test ───────────────────────────────────
+
 	print("=== DONE ===")
