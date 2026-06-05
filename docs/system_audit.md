@@ -368,7 +368,7 @@
 ### S2 — 重要功能殘缺
 | 問題 | 位置 |
 |---|---|
-| ~~招募無選單（匿名/據名選擇）~~ | ~~`player_command_system._action_recruit`~~ | ❌ 誤判：recruit/recruit_anon/recruit_named 三 action 均已實作，willing 成員列表回傳完整 |
+| ~~招募無選單（匿名/據名選擇）~~ | ~~`player_command_system._action_recruit`~~ | ✅ 已修 (2026-06-05) — recruit 改為永遠回傳選單 payload（anon_available/willing_members），不再自動執行 |
 | ~~子隊合併邏輯不完整~~ | ~~`subteam_system._merge_into`~~ | ✅ 已修 (2026-06-05) — team_discovered+faction cleanup, _try_merge 參數順序修正 |
 | ~~FactionAI 任務分配 stub~~ | ~~`faction_ai_system._assign_tasks`~~ | ❌ 誤判：已實作（loyalty/goals/dispatch） |
 | ~~NPC 可移動出地圖~~ | ~~`movement_system`~~ | ✅ 已修 (2026-06-05) |
