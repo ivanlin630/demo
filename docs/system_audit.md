@@ -206,7 +206,7 @@
 **Functions:**
 - `evaluate_all()` → 每 faction 更新目標、分配任務、外交、背叛風險
 - `_update_goals()` → 根據 food/readiness/power 追加「徵收」「立國」目標
-- **`_assign_tasks()` 🔴 STUB** → 成員任務分配邏輯不存在
+- `_assign_tasks()` → 成員任務分配：player_commanded_task loyalty 檢查、徵收/立國/外交/攻擊/掠奪目標分配（已實作）
 
 ---
 
@@ -369,8 +369,8 @@
 | 問題 | 位置 |
 |---|---|
 | 招募無選單（匿名/據名選擇） | `player_command_system._action_recruit` |
-| 子隊合併邏輯不完整 | `subteam_system._merge_into` |
-| FactionAI 任務分配 stub | `faction_ai_system._assign_tasks` |
+| ~~子隊合併邏輯不完整~~ | ~~`subteam_system._merge_into`~~ | ✅ 已修 (2026-06-05) — team_discovered+faction cleanup, _try_merge 參數順序修正 |
+| ~~FactionAI 任務分配 stub~~ | ~~`faction_ai_system._assign_tasks`~~ | ❌ 誤判：已實作（loyalty/goals/dispatch） |
 | ~~NPC 可移動出地圖~~ | ~~`movement_system`~~ | ✅ 已修 (2026-06-05) |
 | ~~進貢無收款/違約~~ | ~~`diplomatic_ai_system`~~ | ✅ 已修 (2026-06-05) — 拒絕寫記憶+聲譽 |
 | ~~背叛評分但不執行~~ | ~~`diplomatic_ai_system.consider_betrayal`~~ | ✅ 已修 (2026-06-05) — orphan cleanup + iteration safety |
