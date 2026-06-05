@@ -152,9 +152,7 @@ func _action_attack(state: WorldState, target_id: int, _pt: TeamData, pt_id: int
 	var tgt: TeamData = state.teams.get(target_id)
 	if tgt == null:
 		return { "ok": false, "msg": "目標不存在" }
-	state.encounter_attacker_id = pt_id
-	state.encounter_defender_id = target_id
-	state.encounter_active      = true
+	_encounter.init_encounter(state, pt_id, target_id, "normal")
 	if not state.player_hostile_teams.has(target_id):
 		state.player_hostile_teams.append(target_id)
 	state.player_pending_targets.erase(target_id)
