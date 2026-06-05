@@ -94,6 +94,11 @@ func get_trade_preview(state: WorldState, target_team_id: int) -> Dictionary:
 		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
 	var p: PersonData  = state.persons[state.player_id]
 	var pt_id: int     = p.team_id
+	if not state.teams.has(target_team_id):
+		return PlayerApiMapper.map_query_envelope(false, "invalid_team", "team not found", {})
+	var discovered: Array = state.team_discovered.get(pt_id, [])
+	if target_team_id != pt_id and not discovered.has(target_team_id):
+		return PlayerApiMapper.map_query_envelope(false, "not_visible", "team not visible", {})
 	var trade          := PlayerTradeSystem.new()
 	var resources      := trade.get_tradeable_resources(state, pt_id, target_team_id)
 	var offer: Dictionary = state.player_state.get("trade_offer", {})
