@@ -371,7 +371,7 @@
 | 招募無選單（匿名/據名選擇） | `player_command_system._action_recruit` |
 | 子隊合併邏輯不完整 | `subteam_system._merge_into` |
 | FactionAI 任務分配 stub | `faction_ai_system._assign_tasks` |
-| NPC 可移動出地圖 | `movement_system`（無邊界） |
+| ~~NPC 可移動出地圖~~ | ~~`movement_system`~~ | ✅ 已修 (2026-06-05) |
 | 進貢無收款/違約 | `diplomatic_ai_system` |
 | 背叛評分但不執行 | `diplomatic_ai_system.consider_betrayal` |
 
