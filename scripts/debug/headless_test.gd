@@ -1965,4 +1965,19 @@ func _run_sim_test() -> void:
 	state.player_state.erase("trade_offer")
 	# ── end submit_trade_offer test ─────────────────────────────────────
 
+	# ── movement boundary test ────────────────────────────────────────
+	var _ms_test := MovementSystem.new()
+	var _test_team: TeamData = state.teams[0]
+	var _orig_tile_pos: Vector2i = _test_team.tile_pos
+	# set off-map target: team must never leave the world tiles
+	_test_team.move_target = Vector2i(9999, 9999)
+	for _mi in range(30):
+		_ms_test._step_team(state, _test_team)
+		assert(state.world.tiles.has(_test_team.tile_pos.x * 1000 + _test_team.tile_pos.y),
+			"[BoundaryTest] team must stay on-map (step %d)" % _mi)
+	_test_team.tile_pos    = _orig_tile_pos
+	_test_team.move_target = Vector2i(-1, -1)
+	print("[BoundaryTest] movement boundary guard ok — team stayed on-map for 30 steps")
+	# ── end movement boundary test ───────────────────────────────────
+
 	print("=== DONE ===")
