@@ -227,7 +227,7 @@ func execute_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionary
 	var leader: PersonData = state.persons.get(tgt.leader_id) if tgt.leader_id >= 0 else null
 	if leader != null:
 		leader.memory.append({
-			"event_id": state.current_tick,
+			"event_id": state.world.current_tick,
 			"intensity": "minor",
 			"reaction": "trade_positive"
 		})

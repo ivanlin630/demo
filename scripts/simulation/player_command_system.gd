@@ -83,6 +83,10 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 		"ignore":
 			state.player_pending_targets.erase(target_id)
 			return { "ok": true, "msg": "忽略" }
+		"confirm_trade":
+			return _action_confirm_trade(state, target_id, pt, pt_id)
+		"submit_trade_offer":
+			return _action_submit_trade_offer(state, target_id, pt, pt_id)
 	return { "ok": false, "msg": "未知行動: %s" % action }
 
 # ── 被動回應（NPC 強制非戰互動）────────────────────────────
@@ -260,3 +264,30 @@ func cancel_move(state: WorldState) -> Dictionary:
 		return { "ok": false, "msg": "玩家 team 不存在" }
 	pt.move_target = Vector2i(-1, -1)
 	return { "ok": true, "msg": "取消移動" }
+
+func _action_submit_trade_offer(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	var tid: int              = int(state.player_state.get("pending_trade_target", -1))
+	var offer: Dictionary     = state.player_state.get("trade_offer", {})
+	if tid < 0 or offer.is_empty():
+		return { "ok": false, "msg": "無待送出的出價" }
+	if not state.teams.has(tid):
+		return { "ok": false, "msg": "目標隊伍不存在" }
+	var result := PlayerTradeSystem.new().execute_offer(state, pt_id, tid, offer)
+	if result.get("ok", false):
+		state.player_pending_targets.erase(tid)
+		state.player_state.erase("pending_trade_target")
+		state.player_state.erase("trade_offer")
+	return result
+
+func _action_confirm_trade(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	# If a structured trade_offer is present, delegate to the new offer system
+	if state.player_state.has("trade_offer"):
+		return _action_submit_trade_offer(state, target_id, pt, pt_id)
+	# Legacy fallback: NPC-initiated trade confirmation
+	var tid2: int = int(state.player_state.get("pending_trade_target", -1))
+	if tid2 < 0 or not state.teams.has(tid2):
+		return { "ok": false, "msg": "無待確認貿易" }
+	var result2 := _interaction.resolve_trade_direct(state, pt_id, tid2)
+	state.player_pending_targets.erase(tid2)
+	state.player_state.erase("pending_trade_target")
+	return result2

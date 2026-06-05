@@ -1851,4 +1851,23 @@ func _run_sim_test() -> void:
 	print("[TradeTest] execute_offer bad-stock reject ok")
 	# ── end PlayerTradeSystem tests ──────────────────────────────────────
 
+	# ── submit_trade_offer command test ─────────────────────────────────
+	var _pcs := PlayerCommandSystem.new()
+	# Set up trade state manually
+	state.player_state["pending_trade_target"] = 1
+	state.player_state["trade_offer"] = {
+		"player_gives": {"coin": 10},
+		"player_wants": {"food": 3}
+	}
+	# Ensure player has enough coin
+	state.teams[0].resources["coin"] = floorf(float(state.teams[0].resources.get("coin", 0)) + 100)
+	# Ensure NPC has enough food (it should already from init)
+	var _sub_result := _pcs.execute_action(state, 1, "submit_trade_offer")
+	print("[TradeTest] submit_trade_offer: ok=%s msg=%s" % [
+		str(_sub_result.get("ok")), str(_sub_result.get("msg", ""))])
+	# Clean up state in case trade failed (so later assertions aren't affected)
+	state.player_state.erase("pending_trade_target")
+	state.player_state.erase("trade_offer")
+	# ── end submit_trade_offer test ─────────────────────────────────────
+
 	print("=== DONE ===")
