@@ -637,7 +637,7 @@ func advance_encounter_tick(state: WorldState) -> String:
 			"retreat", "messenger_exit":
 				unit["pos"]     = action["move_to"]
 				unit["stamina"] = maxf(float(unit.get("stamina", 1.0)) - 0.03, 0.0)
-				if hex_dist(Vector2i.ZERO, unit["pos"]) >= MAP_RADIUS:
+				if hex_dist(Vector2i.ZERO, unit["pos"]) > MAP_RADIUS:
 					unit["has_exited"] = true
 					if action["type"] == "messenger_exit":
 						var parent: TeamData = state.teams.get(unit["team_id"])
