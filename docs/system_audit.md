@@ -372,8 +372,8 @@
 | 子隊合併邏輯不完整 | `subteam_system._merge_into` |
 | FactionAI 任務分配 stub | `faction_ai_system._assign_tasks` |
 | ~~NPC 可移動出地圖~~ | ~~`movement_system`~~ | ✅ 已修 (2026-06-05) |
-| 進貢無收款/違約 | `diplomatic_ai_system` |
-| 背叛評分但不執行 | `diplomatic_ai_system.consider_betrayal` |
+| ~~進貢無收款/違約~~ | ~~`diplomatic_ai_system`~~ | ✅ 已修 (2026-06-05) — 拒絕寫記憶+聲譽 |
+| ~~背叛評分但不執行~~ | ~~`diplomatic_ai_system.consider_betrayal`~~ | ✅ 已修 (2026-06-05) — orphan cleanup + iteration safety |
 
 ### S3 — 品質問題
 | 問題 | 位置 |
