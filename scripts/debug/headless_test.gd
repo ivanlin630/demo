@@ -2021,4 +2021,40 @@ func _run_sim_test() -> void:
 	print("[DiploTest] tribute refusal shape ok")
 	# ── end diplomatic fixes test ───────────────────────────────────
 
+	# ── merge fixes test ─────────────────────────────────────────────
+	# Verify _merge_into cleanup: after full merge, absorbed team absent from all state dicts
+	var _mt_abs_id: int = 9990
+	var _mt_abr_id: int = 9991
+	var _mt_abs := TeamData.new()
+	_mt_abs.team_id    = _mt_abs_id
+	_mt_abs.population = 2
+	_mt_abs.faction_id = -1
+	var _mt_abr := TeamData.new()
+	_mt_abr.team_id    = _mt_abr_id
+	_mt_abr.population = 3
+	_mt_abr.faction_id = -1
+	var _mt_abr_leader := PersonData.new()
+	_mt_abr_leader.id       = 9991
+	_mt_abr_leader.team_id  = _mt_abr_id
+	_mt_abr_leader.role     = "leader"
+	_mt_abr_leader.skills["統領"] = 0.8   # cap=50, population=3, capacity=47 > 2
+	state.persons[9991]               = _mt_abr_leader
+	_mt_abr.leader_id                 = 9991
+	state.teams[_mt_abs_id]           = _mt_abs
+	state.teams[_mt_abr_id]           = _mt_abr
+	state.team_known[_mt_abs_id]      = []
+	state.team_discovered[_mt_abs_id] = []
+	var _sub_m := SubteamSystem.new()
+	_sub_m._merge_into(state, _mt_abr_id, _mt_abs_id)
+	assert(not state.teams.has(_mt_abs_id),
+		"[MergeTest] absorbed team must be erased from state.teams")
+	assert(not state.team_discovered.has(_mt_abs_id),
+		"[MergeTest] absorbed team must be erased from state.team_discovered")
+	state.teams.erase(_mt_abr_id)
+	state.team_known.erase(_mt_abr_id)
+	state.team_discovered.erase(_mt_abr_id)
+	state.persons.erase(9991)
+	print("[MergeTest] _merge_into cleanup ok")
+	# ── end merge fixes test ─────────────────────────────────────────
+
 	print("=== DONE ===")
