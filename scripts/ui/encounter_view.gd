@@ -356,7 +356,9 @@ func _do_move(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
 	for u in state.encounter_units:
 		if _is_unit_dead(u, state) or u.get("has_exited", false): continue   # BUG-13: skip corpses
 		if u.get("pos") == target: return   # occupied by live unit
-	unit["pos"] = target
+	# Use pending_action so encounter_system resets timer properly → NPCs get turns
+	unit["pending_action"] = { "type": "move", "target_idx": -1,
+		"move_to": target, "attack_part": "" }
 	_end_player_turn(unit)
 
 func _do_attack_with_part(unit: Dictionary, target: Vector2i,

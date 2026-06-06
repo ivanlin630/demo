@@ -348,6 +348,9 @@ func _decide_action(unit_idx: int, state: WorldState,
 						return { "type": "attack", "target_idx": tidx,
 							"move_to": tgt["pos"],
 							"attack_part": pa.get("attack_part", _choose_attack_part(unit, state)) }
+			"move":
+				return { "type": "move", "target_idx": -1,
+					"move_to": pa.get("move_to", unit["pos"]), "attack_part": "" }
 			_:
 				pass  # wait / unknown → idle
 		return { "type": "idle", "target_idx": -1, "move_to": unit["pos"], "attack_part": "" }
