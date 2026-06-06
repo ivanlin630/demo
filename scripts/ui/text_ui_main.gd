@@ -267,7 +267,10 @@ func _input(event: InputEvent) -> void:
 					_subteam_mode = false
 				_refresh()
 		KEY_Q:
-			get_tree().quit()
+			if _bridge != null and _bridge.get_state().encounter_active:
+				pass    # encounter_view handles Q as northwest movement
+			else:
+				get_tree().quit()
 		KEY_Z:
 			if not _pending_alerts.is_empty():
 				_pending_alerts.pop_front()
