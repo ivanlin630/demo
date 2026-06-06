@@ -358,7 +358,8 @@ func _decide_action(unit_idx: int, state: WorldState,
 	var escort_idx: int = _should_escort(unit_idx, state)
 	if escort_idx != -1 and unit.get("escort_target", -1) == -1:
 		return { "type": "start_escort", "target_idx": escort_idx,
-			"move_to": state.encounter_units[escort_idx]["pos"], "attack_part": "" }
+			"move_to": _calc_next_step(unit["pos"], state.encounter_units[escort_idx]["pos"]),
+			"attack_part": "" }
 	if unit.get("escort_target", -1) != -1:
 		var etgt: Dictionary = state.encounter_units[unit["escort_target"]]
 		if _count_nearby_enemies(unit, state, 2) >= 2:
@@ -416,7 +417,7 @@ func _decide_action(unit_idx: int, state: WorldState,
 		return { "type": "attack", "target_idx": nearest,
 			"move_to": unit["pos"], "attack_part": _choose_attack_part(unit, state) }
 	return { "type": "move", "target_idx": nearest,
-		"move_to": target["pos"], "attack_part": "" }
+		"move_to": _calc_next_step(unit["pos"], target["pos"]), "attack_part": "" }
 
 func _choose_attack_part(unit: Dictionary, state: WorldState) -> String:
 	if unit["person_id"] == -1: return "torso"
@@ -441,6 +442,23 @@ func _calc_retreat_dir(unit: Dictionary, state: WorldState,
 	var threat: Dictionary = state.encounter_units[threat_idx]
 	var away: Vector2i = unit["pos"] - threat["pos"]
 	return unit["pos"] + away.sign()
+
+func _calc_next_step(from: Vector2i, to: Vector2i) -> Vector2i:
+	# Returns one axial step from `from` toward `to`
+	const DIRS: Array = [
+		Vector2i( 1,  0), Vector2i(-1,  0),
+		Vector2i( 0,  1), Vector2i( 0, -1),
+		Vector2i( 1, -1), Vector2i(-1,  1),
+	]
+	var best: Vector2i = from
+	var best_dist: int = hex_dist(from, to)
+	for d in DIRS:
+		var candidate: Vector2i = from + d
+		var dist: int = hex_dist(candidate, to)
+		if dist < best_dist:
+			best_dist = dist
+			best = candidate
+	return best
 
 const STATUS_ORDER: Array = ["healthy", "wounded", "critical", "severed"]
 
