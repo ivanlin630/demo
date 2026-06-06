@@ -20,6 +20,10 @@ const DEVIATION_RATE: float       = 0.05  # TEST VALUE — 子團偏離基礎概
 const SMALL_TEAM_RATIO: float     = 0.3   # TEST VALUE — pop < cap×0.3 視為小隊
 const SMALL_VS_LARGE: float       = 0.33  # TEST VALUE — pop < absorber.pop×0.33 才觸發合併
 const CONSOLIDATE_MAX_DIST: int   = 3     # TEST VALUE — 戰前集結距離上限（hex）
+const ATTACK_SCORE_THRESHOLD:  float = 0.3   # minimum attack_score to pursue 攻擊 goal
+const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
+const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
+const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
@@ -149,14 +153,14 @@ func _update_goals(state: WorldState, f) -> void:
 				f.goals.append("立國")
 
 	var diplomacy_readiness: float = clampf(
-		DIPLOMACY_READINESS_MIN - (ambition - 0.5) * 0.2, 0.3, 0.9)
+		DIPLOMACY_READINESS_MIN - (ambition - 0.5) * DIPLOMACY_AMBITION_DISC, 0.3, 0.9)
 	if f.is_established and leader_team.readiness >= diplomacy_readiness:
 		if _has_independent(state, f.leader_team_id):
 			f.goals.append("外交")
 
 	var attack_score: float = ambition * 0.4 + martial * 0.4 - honor * 0.4
-	if f.is_established and attack_score > 0.3 \
-			and leader_team.readiness >= 0.75 \
+	if f.is_established and attack_score > ATTACK_SCORE_THRESHOLD \
+			and leader_team.readiness >= ATTACK_READINESS_MIN \
 			and _has_independent(state, f.leader_team_id) \
 			and _tag_weight(leader_team, "攻擊") > 0.0:
 		var target_id: int = _nearest_independent(state, leader_team)
@@ -169,7 +173,7 @@ func _update_goals(state: WorldState, f) -> void:
 				var ms: Dictionary = f.known_member_states[mid]
 				if ms.get("current_task", "") == "攻擊":
 					own_armed += int(ms.get("armed_est", 0))
-			if float(own_armed) >= float(tgt_armed) * 0.8:
+			if float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO:
 				f.goals.append("攻擊")
 		else:
 			f.goals.append("攻擊")

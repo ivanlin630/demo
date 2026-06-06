@@ -1,5 +1,24 @@
 class_name SimMessageSystem
 
+const MSG_TTL_SHORT:  int = 1680   # 7天  × 240 ticks/day
+const MSG_TTL_MEDIUM: int = 3360   # 14天
+const MSG_TTL_LONG:   int = 7200   # 30天 = TICKS_PER_MONTH
+
+const MSG_TTL_BY_TYPE: Dictionary = {
+	"combat_start":      MSG_TTL_SHORT,
+	"famine_warning":    MSG_TTL_SHORT,
+	"diplomacy":         MSG_TTL_SHORT,
+	"trade_done":        MSG_TTL_MEDIUM,
+	"extortion":         MSG_TTL_MEDIUM,
+	"tribute":           MSG_TTL_MEDIUM,
+	"order_delivered":   MSG_TTL_MEDIUM,
+	"combat_end":        MSG_TTL_LONG,
+	"subjugate":         MSG_TTL_LONG,
+	"faction_establish": MSG_TTL_LONG,
+	"outpost_built":     MSG_TTL_LONG,
+}
+const MSG_TTL_DEFAULT: int = MSG_TTL_MEDIUM
+
 const HOP_DECAY: float = 0.15
 const TIME_DECAY_PER_HOUR: float = 0.005
 const TIME_DECAY_PER_TICK: float = TIME_DECAY_PER_HOUR / float(WorldState.TICKS_PER_HOUR)
@@ -255,3 +274,27 @@ func _copy_message(original: MessageData) -> MessageData:
 	copy.is_distorted = original.is_distorted
 	copy.params = original.params.duplicate()
 	return copy
+
+func prune_old_messages(state: WorldState, current_tick: int) -> void:
+	# Prune global_messages
+	var keep: Array = []
+	for msg in state.global_messages:
+		var ttl: int = MSG_TTL_BY_TYPE.get(msg.type, MSG_TTL_DEFAULT)
+		if current_tick - msg.origin_tick <= ttl:
+			keep.append(msg)
+	var pruned_global: int = state.global_messages.size() - keep.size()
+	state.global_messages = keep
+
+	# Prune team_known for each team
+	var pruned_known: int = 0
+	for tid in state.team_known:
+		var fresh: Array = []
+		for msg in state.team_known[tid]:
+			var ttl: int = MSG_TTL_BY_TYPE.get(msg.type, MSG_TTL_DEFAULT)
+			if current_tick - msg.origin_tick <= ttl:
+				fresh.append(msg)
+		pruned_known += state.team_known[tid].size() - fresh.size()
+		state.team_known[tid] = fresh
+
+	if pruned_global + pruned_known > 0:
+		print("[MsgPrune] 刪除過期訊息 global=%d known=%d" % [pruned_global, pruned_known])

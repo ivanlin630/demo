@@ -31,6 +31,39 @@ const STANCE_RANGED_DMG_MULT: Dictionary = {
 }
 const STAMINA_EXHAUSTED_ATK_MULT: float = 0.5
 
+# Body part base HP
+const BP_HP_HEAD:  float = 20.0
+const BP_HP_TORSO: float = 50.0
+const BP_HP_ARM:   float = 25.0
+const BP_HP_LEG:   float = 30.0
+
+# Retreat / flee thresholds
+const RETREAT_TEAM_RATIO:    float = 0.7   # team ≥ this fraction incapable → retreat
+const FLEE_SURVIVAL_VALUE:   float = 0.7   # 求生欲 > this → may flee individually
+const FLEE_TEAM_RATIO:       float = 0.5   # team incapable ratio for individual flee check
+const FLEE_CHANCE:           float = 0.3   # base flee probability
+
+# Attack targeting
+const TACTICS_LEG_AIM_MIN:   float = 0.5   # tactics skill threshold for leg targeting
+const LEG_AIM_CHANCE:        float = 0.4   # prob of aiming at leg when tactics high
+
+# Hit / block / dodge
+const BASE_HIT_CHANCE:       float = 0.6
+const HIT_SKILL_WEIGHT:      float = 0.4
+const MIN_HIT_CHANCE:        float = 0.05
+const MAX_HIT_CHANCE:        float = 0.95
+const SHIELD_SKILL_BONUS:    float = 0.3
+const SHIELD_BLOCK_MAX:      float = 0.90
+const PARRY_SKILL_BONUS:     float = 0.4
+const PARRY_MAX:             float = 0.85
+const BASE_DODGE_CHANCE:     float = 0.2
+const DODGE_SURVIVAL_WEIGHT: float = 0.4
+const DODGE_BODY_HALF:       float = 0.5   # body weight factor inside dodge formula
+const DODGE_MAX:             float = 0.80
+const DODGE_STAMINA_COST:    float = 0.1
+const MIN_STAMINA_TO_DODGE:  float = 0.1
+const AUTO_BLOCK_MIN:        float = 0.3   # minimum threshold for auto-block selection
+
 const WORLD_DIR_TO_EDGE: Dictionary = {
 	Vector2i( 0, -1): 0,
 	Vector2i( 1, -1): 1,
@@ -70,17 +103,17 @@ func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
 
 func _default_body_parts() -> Dictionary:
 	return {
-		"head":      { "hp": 20.0, "max_hp": 20.0, "status": "healthy",
+		"head":      { "hp": BP_HP_HEAD,  "max_hp": BP_HP_HEAD,  "status": "healthy",
 					   "poisoned": false, "bleeding": "none", "fracture": false },
-		"torso":     { "hp": 50.0, "max_hp": 50.0, "status": "healthy",
+		"torso":     { "hp": BP_HP_TORSO, "max_hp": BP_HP_TORSO, "status": "healthy",
 					   "poisoned": false, "bleeding": "none", "fracture": false },
-		"right_arm": { "hp": 25.0, "max_hp": 25.0, "status": "healthy",
+		"right_arm": { "hp": BP_HP_ARM,   "max_hp": BP_HP_ARM,   "status": "healthy",
 					   "poisoned": false, "bleeding": "none", "fracture": false },
-		"left_arm":  { "hp": 25.0, "max_hp": 25.0, "status": "healthy",
+		"left_arm":  { "hp": BP_HP_ARM,   "max_hp": BP_HP_ARM,   "status": "healthy",
 					   "poisoned": false, "bleeding": "none", "fracture": false },
-		"right_leg": { "hp": 30.0, "max_hp": 30.0, "status": "healthy",
+		"right_leg": { "hp": BP_HP_LEG,   "max_hp": BP_HP_LEG,   "status": "healthy",
 					   "poisoned": false, "bleeding": "none", "fracture": false },
-		"left_leg":  { "hp": 30.0, "max_hp": 30.0, "status": "healthy",
+		"left_leg":  { "hp": BP_HP_LEG,   "max_hp": BP_HP_LEG,   "status": "healthy",
 					   "poisoned": false, "bleeding": "none", "fracture": false },
 	}
 
@@ -238,13 +271,13 @@ func _get_nearest_enemy_index(unit: Dictionary, state: WorldState) -> int:
 
 func _should_retreat(unit: Dictionary, state: WorldState,
 		team_incapable_ratio: float) -> bool:
-	if team_incapable_ratio > 0.7: return true
+	if team_incapable_ratio > RETREAT_TEAM_RATIO: return true
 	var bp := _get_body_parts(unit, state)
 	if bp.get("torso", {}).get("status") == "critical": return true
 	if unit["person_id"] != -1:
 		var p: PersonData = state.persons.get(unit["person_id"])
-		if p and p.values.get("求生欲", 0.5) > 0.7 and team_incapable_ratio > 0.5:
-			return randf() < 0.3
+		if p and p.values.get("求生欲", 0.5) > FLEE_SURVIVAL_VALUE and team_incapable_ratio > FLEE_TEAM_RATIO:
+			return randf() < FLEE_CHANCE
 	return false
 
 func _should_escort(unit_idx: int, state: WorldState) -> int:
@@ -388,7 +421,7 @@ func _choose_attack_part(unit: Dictionary, state: WorldState) -> String:
 	var p: PersonData = state.persons.get(unit["person_id"])
 	if p == null: return "torso"
 	var tactics: float = float(p.skills.get("戰術", 0.0))
-	if tactics > 0.5 and randf() < 0.4: return "right_leg"
+	if tactics > TACTICS_LEG_AIM_MIN and randf() < LEG_AIM_CHANCE: return "right_leg"
 	return "torso"
 
 func _nearest_edge_pos(pos: Vector2i) -> Vector2i:
@@ -509,19 +542,19 @@ func _shield_block_chance(unit: Dictionary, state: WorldState) -> float:
 	var grade: String  = _get_shield_grade(unit, state)
 	var base: float    = ItemAttributes.get_block_chance(grade)
 	var combat: float  = _get_skill(unit, state, "戰鬥")
-	return clampf(base + combat * 0.3, 0.0, 0.90)
+	return clampf(base + combat * SHIELD_SKILL_BONUS, 0.0, SHIELD_BLOCK_MAX)
 
 func _parry_chance(unit: Dictionary, state: WorldState) -> float:
 	var weapon: String = _get_weapon_grade(unit, state)
 	var base: float    = ItemAttributes.get_parry_chance(weapon)
 	var combat: float  = _get_skill(unit, state, "戰鬥")
-	return clampf(base + combat * 0.4, 0.0, 0.85)
+	return clampf(base + combat * PARRY_SKILL_BONUS, 0.0, PARRY_MAX)
 
 func _dodge_chance(unit: Dictionary, state: WorldState) -> float:
 	var p: PersonData   = state.persons.get(unit.get("person_id", -1))
 	var survival: float = _get_skill(unit, state, "求生")
 	var body: float     = float(p.attributes.get("體力", 0.5)) if p else 0.5
-	return clampf(0.2 + survival * 0.4 * (0.5 + body * 0.5), 0.0, 0.80)
+	return clampf(BASE_DODGE_CHANCE + survival * DODGE_SURVIVAL_WEIGHT * (DODGE_BODY_HALF + body * DODGE_BODY_HALF), 0.0, DODGE_MAX)
 
 func _resolve_block(unit: Dictionary, state: WorldState,
 		choice: String) -> bool:
@@ -529,7 +562,7 @@ func _resolve_block(unit: Dictionary, state: WorldState,
 		"shield": return randf() < _shield_block_chance(unit, state)
 		"parry":  return randf() < _parry_chance(unit, state)
 		"dodge":
-			unit["stamina"] = maxf(float(unit.get("stamina", 0.0)) - 0.1, 0.0)
+			unit["stamina"] = maxf(float(unit.get("stamina", 0.0)) - DODGE_STAMINA_COST, 0.0)
 			return randf() < _dodge_chance(unit, state)
 	return false
 
@@ -539,9 +572,9 @@ func _npc_auto_block(unit: Dictionary, state: WorldState) -> String:
 		options["shield"] = _shield_block_chance(unit, state)
 	if _has_melee_weapon(unit, state):
 		options["parry"] = _parry_chance(unit, state)
-	if float(unit.get("stamina", 0.0)) > 0.1:
+	if float(unit.get("stamina", 0.0)) > MIN_STAMINA_TO_DODGE:
 		options["dodge"] = _dodge_chance(unit, state)
-	var best: String = "none"; var best_val: float = 0.3
+	var best: String = "none"; var best_val: float = AUTO_BLOCK_MIN
 	for opt in options:
 		if options[opt] > best_val: best_val = options[opt]; best = opt
 	return best
@@ -554,13 +587,13 @@ func _check_range(attacker: Dictionary, target: Dictionary,
 
 func _hit_chance(attacker: Dictionary, state: WorldState) -> float:
 	var weapon: String = _get_weapon_grade(attacker, state)
-	var base: float    = 0.6
+	var base: float    = BASE_HIT_CHANCE
 	var skill: float   = 0.0
 	if weapon.contains("ranged"):
-		skill = _get_skill(attacker, state, "弓箭") * 0.4
+		skill = _get_skill(attacker, state, "弓箭") * HIT_SKILL_WEIGHT
 	else:
-		skill = _get_skill(attacker, state, "戰鬥") * 0.4
-	return clampf(base + skill, 0.05, 0.95)
+		skill = _get_skill(attacker, state, "戰鬥") * HIT_SKILL_WEIGHT
+	return clampf(base + skill, MIN_HIT_CHANCE, MAX_HIT_CHANCE)
 
 func resolve_attack(attacker: Dictionary, target: Dictionary,
 		state: WorldState, target_part: String) -> void:

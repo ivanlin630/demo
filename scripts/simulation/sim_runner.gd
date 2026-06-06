@@ -66,6 +66,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 	_step1_advance_time(state)
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / WorldState.TICKS_PER_DAY))
+		_message_system.prune_old_messages(state, state.world.current_tick)
 	if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
 		_step1d_overflow(state)
 
