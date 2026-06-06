@@ -748,6 +748,7 @@ func _all_exited(team_id: int, state: WorldState) -> bool:
 	for u in state.encounter_units:
 		if u["team_id"] != team_id: continue
 		had_units = true
+		if u.get("is_prisoner", false): continue   # BUG-8: prisoners don't block all_exited
 		if not is_dead(u, state) and not u.get("has_exited", false): return false
 	return had_units
 
@@ -917,6 +918,14 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			if is_dead(u, state): dead_anon += 1
 		var t: TeamData = state.teams.get(team_id)
 		if t: t.population = maxi(t.population - dead_anon, 0)
+
+	# BUG-10: "draw" has no winner; skip prisoner/loot logic
+	if result == "draw":
+		for team_id in [atk_id, def_id]:
+			var t: TeamData = state.teams.get(team_id)
+			if t: t.combat_target = -1
+		print("[Encounter] 遭遇戰結算完成 result=%s" % result)
+		return
 
 	var winner_id: int = atk_id if result == "attacker_win" else def_id
 	var loser_id: int  = def_id if result == "attacker_win" else atk_id
