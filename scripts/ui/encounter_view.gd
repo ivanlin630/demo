@@ -71,7 +71,7 @@ func _build_layout() -> void:
 
 	right.add_child(_make_section_label("行動"))
 	_lbl_actions = Label.new()
-	_lbl_actions.text = "QWEASD:移動  R:攻擊\nZ:命令  Space:待機"
+	_lbl_actions.text = "QWEASD:移動  R:攻擊\nZ:命令  F:投降  Space:待機"
 	right.add_child(_lbl_actions)
 
 	right.add_child(_make_section_label("游標"))
@@ -113,7 +113,7 @@ func _refresh_ui() -> void:
 
 	# action hints
 	var state_ui: WorldState = _bridge.get_state()
-	var action_hints: String = "QWEAD:移動  R:攻擊\nZ:命令  S:投降  Space:待機"
+	var action_hints: String = "QWEASD:移動  R:攻擊\nZ:命令  F:投降  Space:待機"
 	if not state_ui.encounter_active and state_ui.last_encounter_result.get("can_subjugate", false):
 		action_hints += "\nJ:收編敗者"
 	_lbl_actions.text = action_hints
@@ -276,7 +276,7 @@ func _handle_key(keycode: int) -> void:
 
 	match _mode:
 		"idle":
-			if keycode == KEY_S:
+			if keycode == KEY_F:   # BUG-12: was KEY_S; S now used for south movement
 				var state2: WorldState = _bridge.get_state()
 				if state2.encounter_active:
 					var r := _bridge.command_player("execute_action",
@@ -284,8 +284,7 @@ func _handle_key(keycode: int) -> void:
 						 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 					_log(r.get("message", ""))
 					_refresh_ui()
-					return   # don't fall through to movement
-				# else: encounter_active == false, fall through to HEX_DIRS movement below
+					return
 			if keycode == KEY_J:
 				var state3: WorldState = _bridge.get_state()
 				if not state3.encounter_active and state3.last_encounter_result.get("can_subjugate", false):
