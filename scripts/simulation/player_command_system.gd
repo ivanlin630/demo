@@ -137,8 +137,6 @@ func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt
 		return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
 	else:
 		tgt.unrest_turns += 2
-		if not state.player_hostile_teams.has(target_id):
-			state.player_hostile_teams.append(target_id)
 		var leader_p: PersonData = state.persons.get(tgt.leader_id)
 		if leader_p:
 			leader_p.memory.append({
@@ -146,7 +144,7 @@ func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt
 				"intensity": "significant",
 				"reaction": "tribute_refused"
 			})
-		print("[PlayerCmd] 索貢遭拒 Team%d→hostile" % target_id)
+		print("[PlayerCmd] 索貢遭拒 Team%d unrest+2" % target_id)
 		return { "ok": false, "msg": "索貢遭拒，關係惡化" }
 
 func _action_attack(state: WorldState, target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
@@ -167,9 +165,7 @@ func _action_extort(state: WorldState, target_id: int, _pt: TeamData, pt_id: int
 		var tgt2: TeamData = state.teams.get(target_id)
 		if tgt2:
 			tgt2.unrest_turns += 1
-		if not state.player_hostile_teams.has(target_id):
-			state.player_hostile_teams.append(target_id)
-		print("[PlayerCmd] 勒索遭拒 Team%d → hostile" % target_id)
+		print("[PlayerCmd] 勒索遭拒 Team%d unrest+1" % target_id)
 	return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", "") }
 
 func _action_recruit(state: WorldState, target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
