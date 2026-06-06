@@ -3,11 +3,8 @@ extends Control
 
 signal encounter_ended()
 
-const HEX_W: float         = 60.0
-const HEX_H: float         = 52.0
-const COL_STEP: float      = 45.0
-const ODD_OFF: float       = 26.0
-const MAP_RADIUS_VIEW: int = 12  # must match EncounterSystem.MAP_RADIUS
+const HEX_SIZE: float      = 26.0   # circumradius; horizontal spacing ≈ 45 px
+const MAP_RADIUS_VIEW: int = 12     # must match EncounterSystem.MAP_RADIUS
 
 const TERRAIN_COLOR: Dictionary = {
 	"plains":   Color(0.3, 0.65, 0.3),
@@ -38,7 +35,7 @@ func show_encounter() -> void:
 	_post_combat = false
 	# Center camera so axial (0,0) appears at viewport center.
 	var vp_size: Vector2 = get_viewport_rect().size
-	_camera = vp_size * 0.5 - _hex_center(0, 0) * _zoom
+	_camera = vp_size * 0.5 - _hex_center(Vector2i.ZERO) * _zoom
 	_refresh_ui()
 	queue_redraw()
 	_waiting_for_player = false
@@ -123,17 +120,26 @@ func _find_player_unit(state: WorldState) -> Dictionary:
 
 # ── hex helpers ───────────────────────────────────────────
 
-func _hex_center(col: int, row: int) -> Vector2:
-	# Use abs(col) % 2 so odd-column stagger is always positive for negative cols.
-	var odd_off: float = ODD_OFF if (abs(col) % 2 == 1) else 0.0
-	return Vector2(col * COL_STEP + HEX_W * 0.5,
-				   row * HEX_H + odd_off + HEX_H * 0.5)
+func _hex_center(axial: Vector2i) -> Vector2:
+	# Pointy-top axial: q=axial.x, r=axial.y
+	var q: float = float(axial.x)
+	var r: float = float(axial.y)
+	return Vector2(
+		HEX_SIZE * (1.7321 * q + 0.8660 * r),   # sqrt(3) ≈ 1.7321
+		HEX_SIZE * 1.5 * r
+	)
 
-func _hex_points(cx: float, cy: float) -> PackedVector2Array:
+func _hex_points(center: Vector2) -> PackedVector2Array:
+	# Pointy-top hexagon; r=HEX_SIZE, h=r*sqrt(3)/2
+	var r: float = HEX_SIZE
+	var h: float = HEX_SIZE * 0.8660
 	return PackedVector2Array([
-		Vector2(cx - 15, cy - 26), Vector2(cx + 15, cy - 26),
-		Vector2(cx + 30, cy),      Vector2(cx + 15, cy + 26),
-		Vector2(cx - 15, cy + 26), Vector2(cx - 30, cy),
+		Vector2(center.x,       center.y - r),
+		Vector2(center.x + h,   center.y - r * 0.5),
+		Vector2(center.x + h,   center.y + r * 0.5),
+		Vector2(center.x,       center.y + r),
+		Vector2(center.x - h,   center.y + r * 0.5),
+		Vector2(center.x - h,   center.y - r * 0.5),
 	])
 
 func _world_to_screen(pos: Vector2) -> Vector2:
@@ -153,8 +159,8 @@ func _draw() -> void:
 		for col in range(-MAP_RADIUS_VIEW, MAP_RADIUS_VIEW + 1):
 			if _hex_dist(Vector2i(col, row), Vector2i.ZERO) > MAP_RADIUS_VIEW:
 				continue
-			var center: Vector2 = _world_to_screen(_hex_center(col, row))
-			var pts: PackedVector2Array = _hex_points(center.x, center.y)
+			var center: Vector2 = _world_to_screen(_hex_center(Vector2i(col, row)))
+			var pts: PackedVector2Array = _hex_points(center)
 			draw_colored_polygon(pts, Color(0.3, 0.6, 0.3))
 			draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0, 0, 0, 0.4), 1.0)
 
@@ -162,7 +168,7 @@ func _draw() -> void:
 	for unit in state.encounter_units:
 		var pos: Vector2i = unit.get("pos", Vector2i(-1, -1))
 		if pos.x < 0: continue
-		var center: Vector2 = _world_to_screen(_hex_center(pos.x, pos.y))
+		var center: Vector2 = _world_to_screen(_hex_center(pos))
 		var is_player: bool = unit.get("person_id", -1) == state.player_id
 		var team_id: int    = unit.get("team_id", -1)
 		var attacker_id: int = state.encounter_attacker_id
@@ -177,8 +183,8 @@ func _draw() -> void:
 
 	# Draw cursor
 	if _cursor.x >= 0:
-		var center: Vector2 = _world_to_screen(_hex_center(_cursor.x, _cursor.y))
-		var pts: PackedVector2Array = _hex_points(center.x, center.y)
+		var center: Vector2 = _world_to_screen(_hex_center(_cursor))
+		var pts: PackedVector2Array = _hex_points(center)
 		draw_polyline(pts + PackedVector2Array([pts[0]]), Color.WHITE, 2.0)
 
 # ── player input ─────────────────────────────────────────
@@ -189,19 +195,38 @@ const HEX_DIRS: Dictionary = {
 }
 
 func _hex_neighbor(pos: Vector2i, dir_key: int) -> Vector2i:
-	var dirs_even: Dictionary = {
-		KEY_Q: Vector2i(-1, -1), KEY_W: Vector2i(0, -1), KEY_E: Vector2i(1, -1),
-		KEY_A: Vector2i(-1,  0),                          KEY_D: Vector2i(1,  0),
-		KEY_S: Vector2i(0,  1),
+	# Pointy-top axial directions — no even/odd split needed
+	var dirs: Dictionary = {
+		KEY_Q: Vector2i(-1,  0),   # west-NW
+		KEY_W: Vector2i( 0, -1),   # north
+		KEY_E: Vector2i( 1, -1),   # northeast
+		KEY_A: Vector2i(-1,  1),   # southwest
+		KEY_S: Vector2i( 0,  1),   # south
+		KEY_D: Vector2i( 1,  0),   # east-SE
 	}
-	var dirs_odd: Dictionary = {
-		KEY_Q: Vector2i(-1,  0), KEY_W: Vector2i(0, -1), KEY_E: Vector2i(1,  0),
-		KEY_A: Vector2i(-1,  1),                          KEY_D: Vector2i(1,  1),
-		KEY_S: Vector2i(0,  1),
-	}
-	var dirs: Dictionary = dirs_even if pos.x % 2 == 0 else dirs_odd
-	var delta: Vector2i = dirs.get(dir_key, Vector2i.ZERO)
-	return pos + delta
+	return pos + dirs.get(dir_key, Vector2i.ZERO)
+
+func _is_in_map(pos: Vector2i) -> bool:
+	var dx: int = pos.x; var dy: int = pos.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2 <= MAP_RADIUS_VIEW
+
+func _world_to_axial(world: Vector2) -> Vector2i:
+	# Inverse of pointy-top axial → pixel
+	var q: float = (world.x * 0.5774 - world.y / 3.0) / HEX_SIZE  # 0.5774 ≈ 1/sqrt(3)
+	var r: float = (world.y * (2.0 / 3.0)) / HEX_SIZE
+	return _axial_round(q, r)
+
+func _axial_round(fq: float, fr: float) -> Vector2i:
+	var fs: float = -fq - fr
+	var rq: int = roundi(fq); var rr: int = roundi(fr); var rs: int = roundi(fs)
+	var dq: float = abs(float(rq) - fq)
+	var dr: float = abs(float(rr) - fr)
+	var ds: float = abs(float(rs) - fs)
+	if dq > dr and dq > ds:
+		rq = -rr - rs
+	elif dr > ds:
+		rr = -rq - rs
+	return Vector2i(rq, rr)
 
 func _input(event: InputEvent) -> void:
 	if not visible or not _waiting_for_player: return
@@ -277,10 +302,8 @@ func _handle_click(screen_pos: Vector2) -> void:
 	var state: WorldState = _bridge.get_state()
 	var player_unit: Dictionary = _find_player_unit(state)
 	if player_unit.is_empty(): return
-	var w: Vector2 = _screen_to_world(screen_pos)
-	var col: int = int(w.x / COL_STEP)
-	var row: int = int(w.y / HEX_H)
-	var clicked: Vector2i = Vector2i(col, row)
+	var world: Vector2 = _screen_to_world(screen_pos)
+	var clicked: Vector2i = _world_to_axial(world)
 	match _mode:
 		"idle":
 			_lbl_cursor_info.text = _describe_hex(clicked, state)
@@ -289,8 +312,9 @@ func _handle_click(screen_pos: Vector2) -> void:
 			_mode = "idle"; _cursor = Vector2i(-1, -1)
 
 func _do_move(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
+	if not _is_in_map(target): return        # BUG-5a: out of bounds
 	for u in state.encounter_units:
-		if u.get("pos") == target: return   # occupied
+		if u.get("pos") == target: return    # occupied
 	unit["pos"] = target
 	_end_player_turn(unit)
 

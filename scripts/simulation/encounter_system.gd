@@ -2,6 +2,7 @@
 class_name EncounterSystem
 
 const ANON_UNIT_CAP: int          = 30   # TEST VALUE — 每隊匿名 unit 最多 30 個
+const SPAWN_RADIUS: int           = 8    # Units spawn here; MAP_RADIUS-4 buffer to map edge
 const ESCORT_DETECT_RANGE: int    = 3    # TEST VALUE — 護送感知範圍
 const ESCORT_MAX_NEARBY_ENEMIES: int = 1 # TEST VALUE
 const PRISONER_CHECK_INTERVAL: int = 5   # TEST VALUE — 待校正
@@ -171,28 +172,26 @@ func _get_edge_entry_positions(edge: int, count: int) -> Array:
 		positions.append(edge_hexes[i])
 	return positions
 
-func _get_edge_hexes(edge: int) -> Array:
+func _get_edge_hexes(edge: int, radius: int = MAP_RADIUS) -> Array:
 	var result: Array = []
+	var R: int = radius
 	match edge:
-		0:  # top: y=-R, x from 0 to R
-			for x in range(0, MAP_RADIUS + 1):
-				result.append(Vector2i(x, -MAP_RADIUS))
-		1:  # upper-right: x=R, y from -R to 0
-			for y in range(-MAP_RADIUS, 1):
-				result.append(Vector2i(MAP_RADIUS, y))
-		2:  # lower-right: x+y=R, x from 0 to R
-			for x in range(0, MAP_RADIUS + 1):
-				result.append(Vector2i(x, MAP_RADIUS - x))
-		3:  # bottom: y=R, x from -R to 0
-			for x in range(-MAP_RADIUS, 1):
-				result.append(Vector2i(x, MAP_RADIUS))
-		4:  # lower-left: x=-R, y from 0 to R
-			for y in range(0, MAP_RADIUS + 1):
-				result.append(Vector2i(-MAP_RADIUS, y))
-		5:  # upper-left: x+y=-R, x from -R to 0
-			for x in range(-MAP_RADIUS, 1):
-				result.append(Vector2i(x, -MAP_RADIUS - x))
+		0:  for x in range(0, R + 1):   result.append(Vector2i(x, -R))
+		1:  for y in range(-R, 1):       result.append(Vector2i(R, y))
+		2:  for x in range(0, R + 1):   result.append(Vector2i(x, R - x))
+		3:  for x in range(-R, 1):      result.append(Vector2i(x, R))
+		4:  for y in range(0, R + 1):   result.append(Vector2i(-R, y))
+		5:  for x in range(-R, 1):      result.append(Vector2i(x, -R - x))
 	return result
+
+func _get_spawn_positions(side: int, count: int) -> Array:
+	# side=0: edges 5,0,1 (upper); side=1: edges 2,3,4 (lower)
+	var edges: Array = [5, 0, 1] if side == 0 else [2, 3, 4]
+	var positions: Array = []
+	for e in edges:
+		positions += _get_edge_hexes(e, SPAWN_RADIUS)
+	positions.shuffle()
+	return positions.slice(0, mini(count, positions.size()))
 
 func _get_pursuit_entry_edges(offset: int) -> Array:
 	return [(offset) % 6, (offset + 1) % 6, (offset + 2) % 6]
@@ -228,13 +227,16 @@ func init_encounter(state: WorldState, attacker_id: int, defender_id: int,
 		state.pursuit_edge_offset = (state.pursuit_edge_offset + 2) % 6
 		var atk_positions: Array = []
 		for e in edges:
-			atk_positions += _get_edge_entry_positions(e, 5)
+			atk_positions += _get_edge_hexes(e, SPAWN_RADIUS)
+		atk_positions.shuffle()
 		_spawn_team_units(state, atk, atk_positions)
 	else:
 		var atk_anon: int = mini(int(float(atk.population) * atk.armed_anon_ratio), ANON_UNIT_CAP)
 		var def_anon: int = mini(int(float(def.population) * def.armed_anon_ratio), ANON_UNIT_CAP)
-		var atk_pos := _get_edge_entry_positions(0, atk.named_members.size() + 1 + atk_anon)
-		var def_pos := _get_edge_entry_positions(3, def.named_members.size() + 1 + def_anon)
+		var total_atk: int = atk.named_members.size() + 1 + atk_anon
+		var total_def: int = def.named_members.size() + 1 + def_anon
+		var atk_pos: Array = _get_spawn_positions(0, total_atk)
+		var def_pos: Array = _get_spawn_positions(1, total_def)
 		_spawn_team_units(state, atk, atk_pos)
 		_spawn_team_units(state, def, def_pos)
 
@@ -818,17 +820,17 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 	for pid in named_ids:
 		var p: PersonData = state.persons.get(pid)
 		if p == null: continue
-		var pos: Vector2i = positions[pos_idx % positions.size()]
+		if pos_idx >= positions.size(): break   # no more spawn slots
+		var pos: Vector2i = positions[pos_idx]
 		pos_idx += 1
 		var unit: Dictionary = _create_named_unit(pid, team.team_id, pos, state)
 		_init_named_unit(unit, p, team, state)
 		state.encounter_units.append(unit)
-	# 匿名人口：只 spawn 武裝部分，加硬上限
-	# 未成年、俘虜不計入 spawn
 	var armed_count: int = int(float(team.population) * team.armed_anon_ratio)
 	var spawn_count: int = mini(armed_count, ANON_UNIT_CAP)
 	for _i in range(spawn_count):
-		var pos: Vector2i = positions[pos_idx % positions.size()]
+		if pos_idx >= positions.size(): break   # no more spawn slots
+		var pos: Vector2i = positions[pos_idx]
 		pos_idx += 1
 		var unit: Dictionary = _create_anon_unit(team, pos)
 		_init_anon_unit(unit, team, state)
