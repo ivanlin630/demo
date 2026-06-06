@@ -676,8 +676,6 @@ func refresh_colocation_targets(state: WorldState) -> void:
 		var other: TeamData = state.teams[other_id]
 		if other.tile_pos != pt.tile_pos:
 			continue
-		if state.player_hostile_teams.has(other_id):
-			continue
 		if other.combat_target != -1:
 			continue
 		if not state.player_pending_targets.has(other_id):
