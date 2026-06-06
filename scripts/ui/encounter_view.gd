@@ -330,13 +330,15 @@ func _handle_click(screen_pos: Vector2) -> void:
 func _do_move(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
 	if not _is_in_map(target): return        # BUG-5a: out of bounds
 	for u in state.encounter_units:
-		if u.get("pos") == target: return    # occupied
+		if _is_unit_dead(u, state) or u.get("has_exited", false): continue   # BUG-13: skip corpses
+		if u.get("pos") == target: return   # occupied by live unit
 	unit["pos"] = target
 	_end_player_turn(unit)
 
 func _do_attack(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
 	for u in state.encounter_units:
 		if u.get("pos") == target and u.get("team_id") != unit.get("team_id"):
+			if _is_unit_dead(u, state) or u.get("has_exited", false): continue   # BUG-14: skip dead
 			unit["pending_action"] = { "type": "attack", "target_idx": state.encounter_units.find(u) }
 			break
 	_end_player_turn(unit)
