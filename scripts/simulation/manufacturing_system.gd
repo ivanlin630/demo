@@ -113,4 +113,4 @@ func _grow_skills(state: WorldState, team: TeamData) -> void:
 		var intel: float = float(p.attributes.get("智力", 0.5)) * p.get_attribute_mult("智力")
 		var will: float  = float(p.attributes.get("毅力", 0.5)) * p.get_attribute_mult("毅力")
 		var growth: float = SKILL_GROWTH * intel * (0.5 + will * 0.5) * p.get_skill_mult("製造")
-		p.skills["製造"] = minf(float(p.skills.get("製造", 0.0)) + growth, 1.0)
+		SkillSystem.cap_add(p, "製造", growth)

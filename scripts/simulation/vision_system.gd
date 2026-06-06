@@ -67,7 +67,7 @@ func _grow_skill(state: WorldState, team: TeamData,
 		var a1: float = float(p.attributes.get(attr1, 0.5)) * p.get_attribute_mult(attr1)
 		var a2: float = float(p.attributes.get(attr2, 0.5)) * p.get_attribute_mult(attr2)
 		var growth: float = 0.001 * a1 * (0.5 + a2 * 0.5) * p.get_skill_mult(skill)  # TEST VALUE
-		p.skills[skill] = minf(float(p.skills.get(skill, 0.0)) + growth, 1.0)
+		SkillSystem.cap_add(p, skill, growth)
 
 func _mark(state: WorldState, obs_id: int, tgt_id: int) -> void:
 	if not state.team_discovered.has(obs_id):

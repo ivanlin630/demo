@@ -2059,4 +2059,19 @@ func _run_sim_test() -> void:
 	print("[MergeTest] _merge_into cleanup ok")
 	# ── end merge fixes test ─────────────────────────────────────────
 
+	# ── skill cap_add test ────────────────────────────────────────────
+	var _sk_p := PersonData.new()
+	_sk_p.skills["商業"] = 0.9
+	SkillSystem.cap_add(_sk_p, "商業", 0.5)
+	assert(_sk_p.skills.get("商業", 0.0) <= 1.0,
+		"[SkillTest] cap_add must not exceed 1.0")
+	assert(_sk_p.skills.get("商業", 0.0) > 0.9,
+		"[SkillTest] cap_add must apply positive delta")
+	SkillSystem.cap_add(_sk_p, "商業", 0.0)
+	assert(_sk_p.skills.get("商業", 0.0) <= 1.0,
+		"[SkillTest] cap_add delta=0 must be safe")
+	SkillSystem.cap_add(null, "商業", 0.1)   # must not crash
+	print("[SkillTest] SkillSystem.cap_add ok")
+	# ── end skill cap_add test ────────────────────────────────────────
+
 	print("=== DONE ===")
