@@ -15,13 +15,12 @@ const BLOOD_REGEN_PER_TICK: float = 0.2
 const CARRY_BASE: float        = 20.0
 const CARRY_PER_BODY: float    = 10.0
 
-static func _calc_status(hp: float, max_hp: float, part: String) -> String:
+static func _calc_status(hp: float, max_hp: float, _part: String) -> String:
 	var ratio: float = hp / max_hp
 	if ratio > 0.75:  return "healthy"
 	if ratio > 0.25:  return "wounded"
 	if ratio > 0.0:   return "critical"
-	if part in ["head", "torso"]: return "critical"
-	return "severed"
+	return "severed"   # HP=0: all parts including head/torso — fatal wound
 
 static func receive_damage(unit: Dictionary, state: WorldState,
 		part: String, final_dmg: float) -> void:

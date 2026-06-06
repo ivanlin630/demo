@@ -509,13 +509,13 @@ func _check_prisoners(state: WorldState, round_num: int) -> void:
 		if unit.get("has_exited", false): continue
 		if unit.get("is_prisoner", false): continue
 		var nearby_enemies: int = _count_nearby_enemies(unit, state, 1)
-		if nearby_enemies >= 2:
+		if nearby_enemies >= 1:
 			unit["is_prisoner"] = true
 			var winner_team_id: int = _get_enemy_team_id(unit["team_id"], state)
 			var prisoner_name: String
 			if unit["person_id"] >= 0:
 				var pp: PersonData = state.persons.get(unit["person_id"])
-				prisoner_name = pp.name if pp != null else ("Person%d" % unit["person_id"])
+				prisoner_name = pp.person_name if pp != null else ("Person%d" % unit["person_id"])
 			else:
 				prisoner_name = "匿名兵(Team%d)" % unit["team_id"]
 			var captor_team: TeamData = state.teams.get(winner_team_id)
@@ -779,7 +779,8 @@ func _has_active_units(team_id: int, state: WorldState) -> bool:
 	for u in state.encounter_units:
 		if u["team_id"] == team_id:
 			if not is_dead(u, state) and not u.get("has_exited", false) \
-					and not u.get("is_prisoner", false):
+					and not u.get("is_prisoner", false) \
+					and is_combat_capable(u, state):
 				return true
 	return false
 
