@@ -257,6 +257,7 @@ func _count_nearby_enemies(unit: Dictionary, state: WorldState,
 	for other in state.encounter_units:
 		if other["team_id"] == unit["team_id"]: continue
 		if is_dead(other, state) or other.get("has_exited", false): continue
+		if other.get("is_prisoner", false): continue   # BUG-B: prisoners don't guard
 		if hex_dist(unit["pos"], other["pos"]) <= range_hex:
 			count += 1
 	return count

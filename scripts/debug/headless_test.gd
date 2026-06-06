@@ -2122,7 +2122,40 @@ func _run_sim_test() -> void:
 	assert(_enc_sys2.hex_dist(Vector2i(1,2), Vector2i(-1,2)) == 2,
 		"[EncounterTest] hex_dist negative q should be 2")
 
-	# _all_exited + _count_nearby_enemies prisoner tests added in Group C (BUG-8, BUG-B)
+	# _all_exited with prisoner: prisoner should be ignored (BUG-8)
+	var _enc_state2 := WorldState.new()
+	_enc_state2.encounter_attacker_id = 10
+	_enc_state2.encounter_defender_id = 11
+	var _prisoner_bp: Dictionary = _enc_sys2._default_body_parts()
+	var _prisoner_unit: Dictionary = {
+		"team_id": 11, "person_id": -1, "pos": Vector2i(0, 0),
+		"has_exited": false, "is_prisoner": true, "body_parts": _prisoner_bp,
+	}
+	_enc_state2.encounter_units.append(_prisoner_unit)
+	assert(_enc_sys2._all_exited(11, _enc_state2) == true,
+		"[EncounterTest] _all_exited must exclude prisoners")
+
+	# _count_nearby_enemies should exclude prisoners (BUG-B)
+	# Scenario: incapacitated unit (team 11, NOT prisoner) at (-1,0)
+	# surrounded by 1 real guard (team 10) at (0,0) + 1 prisoner (team 10) at (-2,0).
+	# With fix: count=1 (only real guard). Without fix: count=2, chain-capture occurs.
+	var _inc_unit: Dictionary = {
+		"team_id": 11, "person_id": -1, "pos": Vector2i(-1, 0),
+		"has_exited": false, "is_prisoner": false, "body_parts": _enc_sys2._default_body_parts(),
+	}
+	var _guard_unit: Dictionary = {
+		"team_id": 10, "person_id": -1, "pos": Vector2i(0, 0),
+		"has_exited": false, "is_prisoner": false, "body_parts": _enc_sys2._default_body_parts(),
+	}
+	var _prisoner2: Dictionary = {
+		"team_id": 10, "person_id": -1, "pos": Vector2i(-2, 0),
+		"has_exited": false, "is_prisoner": true, "body_parts": _enc_sys2._default_body_parts(),
+	}
+	_enc_state2.encounter_units.append(_inc_unit)
+	_enc_state2.encounter_units.append(_guard_unit)
+	_enc_state2.encounter_units.append(_prisoner2)
+	assert(_enc_sys2._count_nearby_enemies(_inc_unit, _enc_state2, 1) == 1,
+		"[EncounterTest] _count_nearby_enemies must not count prisoner (is_prisoner=true) as enemy")
 
 	print("[EncounterTest] encounter logic ok")
 	# ── end encounter system test ─────────────────────────────────────────
