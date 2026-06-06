@@ -25,6 +25,11 @@ var _lbl_actions:     Label
 var _lbl_cursor_info: Label
 
 var _post_combat: bool = false   # 遭遇戰結束後，等待玩家按 [J] 收編或任意鍵離開
+var _selected_part: String = "torso"   # attack target body part, chosen in attack_select mode
+
+const BODY_PARTS: Array = [
+	"head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"
+]
 
 func setup(bridge: SimBridge) -> void:
 	_bridge = bridge
@@ -117,6 +122,9 @@ func _refresh_ui() -> void:
 	if not state_ui.encounter_active and state_ui.last_encounter_result.get("can_subjugate", false):
 		action_hints += "\nJ:收編敗者"
 	_lbl_actions.text = action_hints
+
+	if _mode == "attack_select":
+		_lbl_cursor_info.text = "攻擊部位 ↑↓: %s" % _selected_part
 
 func _find_player_unit(state: WorldState) -> Dictionary:
 	for unit in state.encounter_units:
@@ -298,20 +306,31 @@ func _handle_key(keycode: int) -> void:
 				_do_move(player_unit, target, state)
 			elif keycode == KEY_R:
 				_mode = "attack_select"
+				_selected_part = "torso"   # reset to default each time
 				_cursor = player_unit.get("pos", Vector2i.ZERO)
+				_refresh_ui()
 				queue_redraw()
 			elif keycode == KEY_SPACE:
 				_do_wait(player_unit)
 			elif keycode == KEY_Z:
 				_open_command_menu(player_unit, state)
 		"attack_select":
-			if HEX_DIRS.has(keycode):
+			if keycode == KEY_UP:
+				var idx: int = BODY_PARTS.find(_selected_part)
+				_selected_part = BODY_PARTS[(idx - 1 + BODY_PARTS.size()) % BODY_PARTS.size()]
+				_refresh_ui()
+			elif keycode == KEY_DOWN:
+				var idx: int = BODY_PARTS.find(_selected_part)
+				_selected_part = BODY_PARTS[(idx + 1) % BODY_PARTS.size()]
+				_refresh_ui()
+			elif HEX_DIRS.has(keycode):
 				_cursor = _hex_neighbor(_cursor, keycode)
 				queue_redraw()
 				_lbl_cursor_info.text = _describe_hex(_cursor, state)
 			elif keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
-				_do_attack(player_unit, _cursor, state)
+				_do_attack_with_part(player_unit, _cursor, state, _selected_part)
 				_mode = "idle"; _cursor = Vector2i(-1, -1)
+				_selected_part = "torso"   # reset after use
 
 func _handle_click(screen_pos: Vector2) -> void:
 	var state: WorldState = _bridge.get_state()
@@ -334,13 +353,21 @@ func _do_move(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
 	unit["pos"] = target
 	_end_player_turn(unit)
 
-func _do_attack(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
+func _do_attack_with_part(unit: Dictionary, target: Vector2i,
+		state: WorldState, part: String) -> void:
 	for u in state.encounter_units:
 		if u.get("pos") == target and u.get("team_id") != unit.get("team_id"):
-			if _is_unit_dead(u, state) or u.get("has_exited", false): continue   # BUG-14: skip dead
-			unit["pending_action"] = { "type": "attack", "target_idx": state.encounter_units.find(u) }
+			if _is_unit_dead(u, state) or u.get("has_exited", false): continue
+			unit["pending_action"] = {
+				"type": "attack",
+				"target_idx": state.encounter_units.find(u),
+				"attack_part": part,
+			}
 			break
 	_end_player_turn(unit)
+
+func _do_attack(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
+	_do_attack_with_part(unit, target, state, _selected_part)
 
 func _do_wait(unit: Dictionary) -> void:
 	unit["pending_action"] = { "type": "wait" }

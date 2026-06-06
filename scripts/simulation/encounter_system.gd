@@ -329,7 +329,7 @@ func _decide_action(unit_idx: int, state: WorldState,
 					if not is_dead(tgt, state) and not tgt.get("has_exited", false):
 						return { "type": "attack", "target_idx": tidx,
 							"move_to": tgt["pos"],
-							"attack_part": _choose_attack_part(unit, state) }
+							"attack_part": pa.get("attack_part", _choose_attack_part(unit, state)) }
 			_:
 				pass  # wait / unknown → idle
 		return { "type": "idle", "target_idx": -1, "move_to": unit["pos"], "attack_part": "" }
