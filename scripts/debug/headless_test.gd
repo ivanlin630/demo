@@ -2059,4 +2059,18 @@ func _run_sim_test() -> void:
 	print("[MergeTest] _merge_into cleanup ok")
 	# ── end merge fixes test ─────────────────────────────────────────
 
+	# ── message prune test ────────────────────────────────────────────
+	var _msg_prune_sys := SimMessageSystem.new()
+	var _old_msg := MessageData.new()
+	_old_msg.type        = "combat_start"
+	_old_msg.origin_tick = 0
+	_old_msg.id          = 99990
+	state.global_messages.append(_old_msg)
+	var _before_g: int = state.global_messages.size()
+	_msg_prune_sys.prune_old_messages(state, 9999)
+	assert(state.global_messages.size() < _before_g,
+		"[MsgPruneTest] expired message must be pruned from global_messages")
+	print("[MsgPruneTest] message TTL prune ok")
+	# ── end message prune test ────────────────────────────────────────
+
 	print("=== DONE ===")
