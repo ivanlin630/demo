@@ -690,7 +690,18 @@ func advance_encounter_tick(state: WorldState) -> String:
 			"move", "move_back", "escort_move", "start_escort":
 				var drain_mult: float = HealthSystem.get_weight_stamina_drain_mult(unit, state)
 				var stamina_cost: float = STANCE_MOVE_STAMINA.get(unit.get("stance", "walk"), 0.02)
-				unit["pos"]     = action["move_to"]
+				var move_target: Vector2i = action["move_to"]
+				# BUG-5b: boundary check
+				if _is_in_map(move_target):
+					# BUG-15: occupancy check (skip dead/exited units)
+					var occupied: bool = false
+					for other in state.encounter_units:
+						if other == unit: continue
+						if is_dead(other, state) or other.get("has_exited", false): continue
+						if other.get("pos") == move_target:
+							occupied = true; break
+					if not occupied:
+						unit["pos"] = move_target
 				unit["stamina"] = maxf(float(unit.get("stamina", 1.0)) - stamina_cost * drain_mult, 0.0)
 				if action["type"] == "start_escort":
 					unit["escort_target"] = action["target_idx"]
