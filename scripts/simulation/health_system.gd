@@ -153,7 +153,7 @@ static func resolve_negative_flags(state: WorldState, team: TeamData) -> void:
 					bp["fracture"] = false
 
 static func resolve_anon_units(state: WorldState, team_id: int) -> void:
-	var team: TeamData = state.teams[team_id]
+	var team: TeamData = state.teams.get(team_id)
 	var anon_units: Array = []
 	for u in state.encounter_units:
 		if u["team_id"] == team_id and u.get("person_id", -1) == -1:
