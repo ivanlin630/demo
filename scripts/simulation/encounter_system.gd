@@ -509,8 +509,20 @@ func _check_prisoners(state: WorldState, round_num: int) -> void:
 		if nearby_enemies >= 2:
 			unit["is_prisoner"] = true
 			var winner_team_id: int = _get_enemy_team_id(unit["team_id"], state)
-			print("[Encounter] Unit(team=%d) 被俘虜，歸入 Team%d" % [
-				unit["team_id"], winner_team_id])
+			var prisoner_name: String
+			if unit["person_id"] >= 0:
+				var pp: PersonData = state.persons.get(unit["person_id"])
+				prisoner_name = pp.name if pp != null else ("Person%d" % unit["person_id"])
+			else:
+				prisoner_name = "匿名兵(Team%d)" % unit["team_id"]
+			var captor_team: TeamData = state.teams.get(winner_team_id)
+			var captor_name: String
+			if captor_team != null and captor_team.leader_id >= 0:
+				var cp: PersonData = state.persons.get(captor_team.leader_id)
+				captor_name = ("%s隊" % cp.name) if cp != null else ("Team%d" % winner_team_id)
+			else:
+				captor_name = "Team%d" % winner_team_id
+			print("[Encounter] %s 被 %s 俘虜" % [prisoner_name, captor_name])
 
 func _get_enemy_team_id(own_team_id: int, state: WorldState) -> int:
 	for u in state.encounter_units:

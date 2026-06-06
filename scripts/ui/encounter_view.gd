@@ -200,10 +200,16 @@ func _draw() -> void:
 
 		var color: Color = Color.DODGER_BLUE if is_player else (Color.RED if is_enemy else Color.GREEN)
 		draw_circle(center, 12.0 * _zoom, color)
+		# Dead: draw as grey (over color circle)
+		if _is_unit_dead(unit, state):
+			draw_circle(center, 12.0 * _zoom, Color(0.4, 0.4, 0.4, 0.8))
 		if is_player:
 			draw_circle(center, 7.0 * _zoom, Color.WHITE)
 		if unit.get("is_messenger", false):
 			draw_circle(center, 4.0 * _zoom, Color.YELLOW)
+		# Prisoner: orange ring around unit
+		if unit.get("is_prisoner", false):
+			draw_arc(center, 14.0 * _zoom, 0.0, TAU, 12, Color.ORANGE, 2.0 * _zoom)
 
 	# Draw cursor
 	if _cursor.x >= 0:
