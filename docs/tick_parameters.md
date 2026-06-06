@@ -1,7 +1,7 @@
 # Tick 時間參數一覽
 
-> 基準：`ticks_per_day = 24`（`scripts/data/world_state.gd`）  
-> 1 tick ≈ 1 小時遊戲時間  
+> 基準：`ticks_per_day = 240`（`scripts/data/world_state.gd`）  
+> 1 tick = 6 分鐘遊戲時間（`TICKS_PER_HOUR = 10`，`TICKS_PER_DAY = 240`）  
 > 按一次 UI「推進」= `TICKS_PER_TURN = 24` tick = 1 天
 
 ---
@@ -10,7 +10,7 @@
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 | 建議意義 |
 |---|---|---|---|---|---|
-| `ticks_per_day` | `data/world_state.gd:24` | **24** | 基準，1天=24tick | — | 不動 |
+| `ticks_per_day` | `data/world_state.gd:4` | **240** | 基準，1天=240tick（10tick/小時×24小時） | — | 不動 |
 | `TICKS_PER_TURN` | `ui/sim_bridge.gd:4` | 24 | 按一次推進1天 | — | 不動 |
 | `TICKS_PER_SECOND` | `ui/turn_controls.gd:4` | 4 | 自動跑速：4tick/秒=6小時/秒 | 視需求 | |
 | world_turn 間隔 | `sim_runner.gd:127` | 每 6 tick | 1 world_turn = 6小時 | — | 不動（顯示用） |
