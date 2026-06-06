@@ -262,6 +262,24 @@ func _count_nearby_enemies(unit: Dictionary, state: WorldState,
 			count += 1
 	return count
 
+func _find_guard_target(unit: Dictionary, state: WorldState) -> int:
+	# Returns index of an incapacitated enemy unit that has < 2 guards; -1 if none
+	for i in range(state.encounter_units.size()):
+		var candidate: Dictionary = state.encounter_units[i]
+		if candidate["team_id"] == unit["team_id"]: continue
+		if is_dead(candidate, state) or candidate.get("has_exited", false): continue
+		if is_combat_capable(candidate, state): continue   # target must be incapacitated
+		if candidate.get("is_prisoner", false): continue   # already guarded
+		var guard_count: int = 0
+		for other in state.encounter_units:
+			if other["team_id"] != unit["team_id"]: continue
+			if is_dead(other, state): continue
+			if hex_dist(other["pos"], candidate["pos"]) <= 1:
+				guard_count += 1
+		if guard_count < 2:
+			return i
+	return -1
+
 func _get_nearest_enemy_index(unit: Dictionary, state: WorldState) -> int:
 	var best_idx: int = -1; var best_d: int = 9999
 	for i in range(state.encounter_units.size()):
@@ -391,6 +409,12 @@ func _decide_action(unit_idx: int, state: WorldState,
 	# 5. 接近最近敵人
 	var nearest: int = _get_nearest_enemy_index(unit, state)
 	if nearest == -1:
+		# No combat-capable enemies visible — check if we should guard an incapacitated enemy
+		var guard_idx: int = _find_guard_target(unit, state)
+		if guard_idx != -1:
+			var guard_pos: Vector2i = state.encounter_units[guard_idx]["pos"]
+			return { "type": "move", "target_idx": guard_idx,
+				"move_to": _calc_next_step(unit["pos"], guard_pos), "attack_part": "" }
 		return { "type": "idle", "target_idx": -1,
 			"move_to": unit["pos"], "attack_part": "" }
 
