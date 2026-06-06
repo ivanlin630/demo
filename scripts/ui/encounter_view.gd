@@ -91,9 +91,15 @@ func _refresh_ui() -> void:
 	var player_unit: Dictionary = _find_player_unit(state)
 	if player_unit.is_empty(): return
 
-	# health — using status strings from body_parts
+	# health — named units store body_parts in state.persons, not unit dict
 	var lines: Array = []
-	var body: Dictionary = player_unit.get("body_parts", {})
+	var pid: int = player_unit.get("person_id", -1)
+	var body: Dictionary
+	if pid >= 0:
+		var p: PersonData = state.persons.get(pid)
+		body = p.body_parts if p != null else {}
+	else:
+		body = player_unit.get("body_parts", {})
 	for part in body:
 		var s: String = body[part].get("status", "healthy")
 		lines.append("%s: %s" % [part, s])
@@ -117,6 +123,16 @@ func _find_player_unit(state: WorldState) -> Dictionary:
 		if unit.get("person_id", -1) == state.player_id:
 			return unit
 	return {}
+
+func _is_unit_dead(unit: Dictionary, state: WorldState) -> bool:
+	var pid: int = unit.get("person_id", -1)
+	var bp: Dictionary
+	if pid >= 0:
+		var p: PersonData = state.persons.get(pid)
+		bp = p.body_parts if p != null else {}
+	else:
+		bp = unit.get("body_parts", {})
+	return bp.get("torso", {}).get("status", "healthy") == "severed"
 
 # ── hex helpers ───────────────────────────────────────────
 
