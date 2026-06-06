@@ -652,6 +652,13 @@ func advance_encounter_tick(state: WorldState) -> String:
 		unit["action_timer"] -= 1
 		if unit["action_timer"] > 0: continue
 
+		# Player turn: if timer reached 0 and no pending action, stop and wait
+		if unit.get("person_id", -1) == state.player_id:
+			if unit.get("pending_action", {}).is_empty():
+				unit["action_timer"] = 0   # keep at 0; don't go negative
+				return "player_turn"
+			# Has pending_action — fall through to process it
+
 		var action: Dictionary = _decide_action(i, state, -1)
 		match action["type"]:
 			"attack", "shoot":
@@ -678,6 +685,9 @@ func advance_encounter_tick(state: WorldState) -> String:
 						var parent: TeamData = state.teams.get(unit["team_id"])
 						if parent: _messenger_exit(state, unit, parent)
 
+		# After processing player action, clear pending_action
+		if unit.get("person_id", -1) == state.player_id:
+			unit.erase("pending_action")
 		unit["action_timer"] = _max_timer(unit, state)
 
 	_check_prisoners(state, round_num)

@@ -64,15 +64,17 @@ func advance_encounter_tick() -> String:
 	if not _state.encounter_active:
 		return "no_encounter"
 	var player_pos: Vector2i = _player_tile()
-	_runner.advance_tick(_state, player_pos)
-	if not _state.encounter_active:
-		return "encounter_ended"
-	# Reset player's timer to 0 after each round so UI gets a turn
-	for unit in _state.encounter_units:
-		if unit.get("person_id", -1) == _state.player_id:
-			unit["action_timer"] = 0
+	var enc_result: String = _runner.advance_tick(_state, player_pos)
+	# Translate encounter_system result to view-facing result
+	match enc_result:
+		"player_turn":
 			return "player_turn"
-	return "ongoing"
+		"attacker_win", "defender_win", "draw":
+			return "encounter_ended"
+		_:
+			if not _state.encounter_active:
+				return "encounter_ended"
+			return "ongoing"
 
 # ── helpers ───────────────────────────────────────────────
 

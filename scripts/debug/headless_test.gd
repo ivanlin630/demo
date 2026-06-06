@@ -2111,4 +2111,20 @@ func _run_sim_test() -> void:
 	print("[SkillTest] SkillSystem.cap_add ok")
 	# ── end skill cap_add test ────────────────────────────────────────
 
+	# ── encounter system test ────────────────────────────────────────────────
+	var _enc_sys2 := EncounterSystem.new()
+
+	# hex_dist correctness
+	assert(_enc_sys2.hex_dist(Vector2i(0,0), Vector2i(3,0)) == 3,
+		"[EncounterTest] hex_dist(0,0→3,0) should be 3")
+	assert(_enc_sys2.hex_dist(Vector2i(0,0), Vector2i(2,-2)) == 2,
+		"[EncounterTest] hex_dist diagonal should be 2")
+	assert(_enc_sys2.hex_dist(Vector2i(1,2), Vector2i(-1,2)) == 2,
+		"[EncounterTest] hex_dist negative q should be 2")
+
+	# _all_exited + _count_nearby_enemies prisoner tests added in Group C (BUG-8, BUG-B)
+
+	print("[EncounterTest] encounter logic ok")
+	# ── end encounter system test ─────────────────────────────────────────
+
 	print("=== DONE ===")

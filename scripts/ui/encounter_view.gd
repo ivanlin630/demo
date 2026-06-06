@@ -330,7 +330,7 @@ func _do_wait(unit: Dictionary) -> void:
 	_end_player_turn(unit)
 
 func _end_player_turn(unit: Dictionary) -> void:
-	unit["action_timer"] = unit.get("_max_timer", 10)
+	# Timer reset handled by encounter_system._max_timer() after action processed
 	_waiting_for_player = false
 	_advance_until_player_or_end()
 

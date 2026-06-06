@@ -56,13 +56,13 @@ func _init() -> void:
 	_encounter_system    = EncounterSystem.new()
 	_player_cmd          = PlayerCommandSystem.new()
 
-func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
+func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	if state.encounter_active:
 		var result: String = _encounter_system.advance_encounter_tick(state)
-		if result != "ongoing":
+		if result not in ["ongoing", "player_turn"]:
 			_encounter_system.resolve_encounter_end(state, result)
 		_step1_advance_time(state)
-		return
+		return result    # propagate to bridge
 	_step1_advance_time(state)
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / WorldState.TICKS_PER_DAY))
@@ -130,6 +130,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> void:
 		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
+	return ""   # non-encounter tick
 
 func _step1d_overflow(state: WorldState) -> void:
 	_population_system.check_overflow(state)
