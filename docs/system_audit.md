@@ -376,13 +376,13 @@
 | ~~背叛評分但不執行~~ | ~~`diplomatic_ai_system.consider_betrayal`~~ | ✅ 已修 (2026-06-05) — orphan cleanup + iteration safety |
 
 ### S3 — 品質問題
-| 問題 | 位置 |
-|---|---|
-| InteractionSystem 600+ 行 | `interaction_system.gd` |
-| 溢出邏輯碎片化三處 | Pop/Reaction/Event |
-| 技能成長邏輯散落各處 | Vision/Skill/Manufacturing |
-| 舊訊息永遠累積 | `message_system.gd` |
-| 全系統 magic numbers | 多處 |
+| 問題 | 位置 | 狀態 |
+|---|---|---|
+| ~~InteractionSystem 600+ 行~~ | ~~`interaction_system.gd`~~ | ✅ 已修 (2026-06-07) — 拆出 `NpcCombatSystem`，1099→~550 行 |
+| ~~溢出邏輯碎片化三處~~ | ~~Pop/Reaction/Event~~ | ✅ 已修 (2026-06-07) — `PopulationSystem.check_overflow_for_team()` 統一 |
+| ~~技能成長邏輯散落各處~~ | ~~Vision/Skill/Manufacturing~~ | ✅ 已修 (2026-06-07) — `SkillSystem.cap_add()` 統一 |
+| ~~舊訊息永遠累積~~ | ~~`message_system.gd`~~ | ✅ 已修 (2026-06-07) — `prune_old_messages()` + per-type TTL |
+| ~~全系統 magic numbers~~ | ~~多處~~ | ✅ 已修 (2026-06-07) — 常數提取至 `SimConstants` / `tick_parameters` |
 
 ### S4 — 功能設計了但未實作
 | 問題 | 位置 |
