@@ -932,7 +932,7 @@ func _grow_commerce_skill(state: WorldState, team: TeamData) -> void:
 		var charm: float  = float(p.attributes.get("魅力", 0.5)) * p.get_attribute_mult("魅力")
 		var will: float   = float(p.attributes.get("毅力", 0.5)) * p.get_attribute_mult("毅力")
 		var growth: float = 0.003 * charm * (0.5 + will * 0.5) * p.get_skill_mult("商業")  # TEST VALUE
-		p.skills["商業"]  = minf(float(p.skills.get("商業", 0.0)) + growth, 1.0)
+		SkillSystem.cap_add(p, "商業", growth)
 
 func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 	var tgt: TeamData = state.teams.get(tgt_id) as TeamData

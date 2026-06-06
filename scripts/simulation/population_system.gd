@@ -4,25 +4,28 @@ const OVERFLOW_CHECK_INTERVAL: int = WorldState.TICKS_PER_DAY   # 每天檢查
 
 func check_overflow(state: WorldState) -> void:
 	for tid in state.teams.keys():
-		if not state.teams.has(tid):
-			continue
-		var team: TeamData = state.teams[tid]
-		var leader = state.persons.get(team.leader_id)
-		var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-		var cap: int = TeamData.pop_cap_from_leadership(cmd)
-		var overflow: int = team.population - cap
-		if overflow <= 0:
-			continue
-		var spare_id: int = -1
-		for nid in team.named_members:
-			if nid != team.leader_id:
-				spare_id = nid
-				break
-		if spare_id != -1:
-			SubteamSystem.new().dispatch(state, tid, spare_id, overflow, "idle", team.tile_pos)
-			print("[PopMgmt] Team%d 超額 %d 人，advisor Team%d 帶走" % [tid, overflow, spare_id])
-		else:
-			_create_overflow_team(state, team, overflow)
+		check_overflow_for_team(state, tid)
+
+func check_overflow_for_team(state: WorldState, tid: int) -> void:
+	if not state.teams.has(tid):
+		return
+	var team: TeamData = state.teams[tid]
+	var leader = state.persons.get(team.leader_id)
+	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
+	var cap: int   = TeamData.pop_cap_from_leadership(cmd)
+	var overflow: int = team.population - cap
+	if overflow <= 0:
+		return
+	var spare_id: int = -1
+	for nid in team.named_members:
+		if nid != team.leader_id:
+			spare_id = nid
+			break
+	if spare_id != -1:
+		SubteamSystem.new().dispatch(state, tid, spare_id, overflow, "idle", team.tile_pos)
+		print("[PopMgmt] Team%d 超額 %d 人，advisor Team%d 帶走" % [tid, overflow, spare_id])
+	else:
+		_create_overflow_team(state, team, overflow)
 
 func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: int) -> void:
 	var ot := TeamData.new()

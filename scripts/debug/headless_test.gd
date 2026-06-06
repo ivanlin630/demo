@@ -2073,4 +2073,42 @@ func _run_sim_test() -> void:
 	print("[MsgPruneTest] message TTL prune ok")
 	# ── end message prune test ────────────────────────────────────────
 
+	# ── overflow consolidation test ───────────────────────────────────
+	var _pop_sys_t := PopulationSystem.new()
+	var _ov_team   := TeamData.new()
+	_ov_team.team_id   = 8880
+	_ov_team.population = 999   # far exceeds any cap
+	_ov_team.faction_id = -1
+	_ov_team.tile_pos   = Vector2i(0, 0)
+	state.teams[8880]           = _ov_team
+	state.team_known[8880]      = []
+	state.team_discovered[8880] = []
+	var _teams_before: int = state.teams.size()
+	_pop_sys_t.check_overflow_for_team(state, 8880)
+	assert(state.teams.size() > _teams_before or _ov_team.population < 999,
+		"[OverflowTest] overflow must reduce origin pop or create new team")
+	# cleanup
+	for _ov_tid in state.teams.keys().duplicate():
+		if int(_ov_tid) >= 8880:
+			state.teams.erase(_ov_tid)
+			state.team_known.erase(_ov_tid)
+			state.team_discovered.erase(_ov_tid)
+	print("[OverflowTest] check_overflow_for_team ok")
+	# ── end overflow consolidation test ──────────────────────────────
+
+	# ── skill cap_add test ────────────────────────────────────────────
+	var _sk_p := PersonData.new()
+	_sk_p.skills["商業"] = 0.9
+	SkillSystem.cap_add(_sk_p, "商業", 0.5)
+	assert(_sk_p.skills.get("商業", 0.0) <= 1.0,
+		"[SkillTest] cap_add must not exceed 1.0")
+	assert(_sk_p.skills.get("商業", 0.0) > 0.9,
+		"[SkillTest] cap_add must apply positive delta")
+	SkillSystem.cap_add(_sk_p, "商業", 0.0)
+	assert(_sk_p.skills.get("商業", 0.0) <= 1.0,
+		"[SkillTest] cap_add delta=0 must be safe")
+	SkillSystem.cap_add(null, "商業", 0.1)   # must not crash
+	print("[SkillTest] SkillSystem.cap_add ok")
+	# ── end skill cap_add test ────────────────────────────────────────
+
 	print("=== DONE ===")

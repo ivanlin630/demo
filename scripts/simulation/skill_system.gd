@@ -3,6 +3,11 @@ class_name SkillSystem
 const BASE_GROWTH: float = 0.005
 const MAX_SKILL: float = 1.0
 
+static func cap_add(person: PersonData, skill: String, delta: float) -> void:
+	if person == null or delta <= 0.0:
+		return
+	person.skills[skill] = minf(float(person.skills.get(skill, 0.0)) + delta, MAX_SKILL)
+
 const REACTION_SKILL_MAP: Dictionary = {
 	"P2_produce": { "skill": "生產",  "attr": "智力" },
 	"P3_recruit": { "skill": "統領",  "attr": "魅力" },
@@ -60,4 +65,4 @@ func _grow(p: PersonData, skill: String, attr: String) -> void:
 	var attr_val: float  = float(p.attributes.get(attr, 0.5)) * p.get_attribute_mult(attr)
 	var endurance: float = float(p.attributes.get("毅力", 0.5)) * p.get_attribute_mult("毅力")
 	var growth: float    = BASE_GROWTH * attr_val * (0.5 + endurance * 0.5) * p.get_skill_mult(skill)
-	p.skills[skill] = minf(float(p.skills.get(skill, 0.0)) + growth, MAX_SKILL)
+	SkillSystem.cap_add(p, skill, growth)
