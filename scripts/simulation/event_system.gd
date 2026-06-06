@@ -40,23 +40,8 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 		])
 		team.leader_id = best_successor.id
 		best_successor.role = "leader"
-		# 新 leader 統領不足時，溢出人口強制分團
-		var new_cap: int  = TeamData.pop_cap_from_leadership(best_command)
-		var overflow: int = team.population - new_cap
-		if overflow > 0:
-			var spare_id: int = -1
-			for nid in team.named_members:
-				if nid != team.leader_id:
-					spare_id = nid
-					break
-			if spare_id != -1:
-				var sub_id: int = SubteamSystem.new().dispatch(
-					state, team.team_id, spare_id, overflow, "idle", team.tile_pos)
-				if sub_id != -1:
-					print("[Split] Leader 死亡，統領不足，溢出 %d 人分團 Team%d" % [overflow, sub_id])
-			else:
-				team.population = new_cap
-				print("[Split] Leader 死亡，無 advisor，溢出 %d 人視為逃亡" % overflow)
+		# 新 leader 統領不足時，委託 PopulationSystem 處理溢出（dispatch 或建流亡隊）
+		PopulationSystem.new().check_overflow_for_team(state, team.team_id)
 		return true
 	else:
 		var promoted := PersonGenerator.generate_for_team(state, team, "member")

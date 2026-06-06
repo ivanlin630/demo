@@ -2059,6 +2059,29 @@ func _run_sim_test() -> void:
 	print("[MergeTest] _merge_into cleanup ok")
 	# ── end merge fixes test ─────────────────────────────────────────
 
+	# ── overflow consolidation test ───────────────────────────────────
+	var _pop_sys_t := PopulationSystem.new()
+	var _ov_team   := TeamData.new()
+	_ov_team.team_id   = 8880
+	_ov_team.population = 999   # far exceeds any cap
+	_ov_team.faction_id = -1
+	_ov_team.tile_pos   = Vector2i(0, 0)
+	state.teams[8880]           = _ov_team
+	state.team_known[8880]      = []
+	state.team_discovered[8880] = []
+	var _teams_before: int = state.teams.size()
+	_pop_sys_t.check_overflow_for_team(state, 8880)
+	assert(state.teams.size() > _teams_before or _ov_team.population < 999,
+		"[OverflowTest] overflow must reduce origin pop or create new team")
+	# cleanup
+	for _ov_tid in state.teams.keys().duplicate():
+		if int(_ov_tid) >= 8880:
+			state.teams.erase(_ov_tid)
+			state.team_known.erase(_ov_tid)
+			state.team_discovered.erase(_ov_tid)
+	print("[OverflowTest] check_overflow_for_team ok")
+	# ── end overflow consolidation test ──────────────────────────────
+
 	# ── skill cap_add test ────────────────────────────────────────────
 	var _sk_p := PersonData.new()
 	_sk_p.skills["商業"] = 0.9
