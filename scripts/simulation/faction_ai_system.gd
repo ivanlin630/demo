@@ -24,6 +24,11 @@ const ATTACK_SCORE_THRESHOLD:  float = 0.3   # minimum attack_score to pursue �
 const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
+const SURVIVAL_TASKS: Array = ["return_home", "乞食", TeamData.TASK_LOOT, "投靠"]
+const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
+const URGENCY_DAYS: float = 1.0
+const WARNING_DAYS: float = 3.0
+
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
@@ -85,6 +90,8 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		# S11: leader 死亡自動繼承（無 leader 但有 named members）
 		if team.leader_id == -1 and not team.named_members.is_empty():
 			_promote_successor(state, team)
+		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
+		_evaluate_survival(state, team)
 		_update_equip_order(state, team)
 		_update_anon_combat_skill(team)
 		_update_anon_wage(team)
@@ -200,6 +207,10 @@ func _assign_tasks(state: WorldState, f) -> void:
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	if leader_team == null or leader_team.combat_target != -1:
 		return
+	# 生存 sticky：leader 在 survival task 中不蓋過（仍跑 member 指派）
+	if leader_team.current_task in SURVIVAL_TASKS:
+		_assign_member_tasks(state, f)
+		return
 
 	# G-09：檢查 player_commanded_task（loyalty 門檻）
 	for tid_cmd in f.member_team_ids:
@@ -261,6 +272,8 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			continue
 		if not mt.player_commanded_task.is_empty():
 			continue  # don't override player-commanded task
+		if mt.current_task in SURVIVAL_TASKS:
+			continue  # 生存 sticky：不蓋過 survival task
 		var absorber_id: int = _find_absorber(state, mt, f)
 		if absorber_id != -1:
 			var mt_leader = state.persons.get(mt.leader_id)
@@ -701,6 +714,133 @@ func _richest_member(state: WorldState, f) -> int:
 			best_food = mfood
 			best_tid  = mid
 	return best_tid
+
+func _evaluate_survival(state: WorldState, team: TeamData) -> void:
+	if team.leader_id == state.player_id and state.player_id != -1:
+		return
+	if team.current_task in SURVIVAL_TASKS:
+		return
+	var pop_eff: int = team.population
+	if pop_eff <= 0: return
+	var food: float = float(team.resources.get("food", 0))
+	var food_per_day: float = float(pop_eff) * FOOD_PER_PERSON_PER_DAY_SURVIVAL
+	var days_left: float = food / maxf(food_per_day, 0.001)
+	if days_left < URGENCY_DAYS:
+		_trigger_survival(state, team, "urgent")
+	elif days_left < WARNING_DAYS:
+		_trigger_survival(state, team, "warning")
+
+func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> void:
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+
+	team.previous_task = team.current_task
+
+	# Path 1: 有 own outpost → 回家
+	var own_pos: Vector2i = _find_own_outpost(state, team)
+	if own_pos != Vector2i(-1, -1):
+		if severity == "warning" and not _should_abandon_current_task(team, own_pos):
+			team.previous_task = ""
+			return
+		team.current_task = "return_home"
+		team.move_target = own_pos
+		return
+
+	# Path 2: 殘忍/好戰 + 有獵物 → 掠奪
+	if float(leader.values.get("殘忍", 0.5)) > 0.5 \
+			or float(leader.values.get("好戰", 0.5)) > 0.6:
+		var prey_id: int = _find_weakest_prey(state, team)
+		if prey_id != -1:
+			team.current_task = TeamData.TASK_LOOT
+			team.move_target = state.teams[prey_id].tile_pos
+			team.combat_target = prey_id
+			return
+
+	# Path 3: 義氣 + 信義 → 投靠
+	var honor_sum: float = float(leader.values.get("義氣", 0.5)) \
+		+ float(leader.values.get("信義", 0.5))
+	if honor_sum > 1.2:
+		var ally_id: int = _find_strong_neighbor(state, team)
+		if ally_id != -1:
+			team.current_task = "投靠"
+			team.move_target = state.teams[ally_id].tile_pos
+			team.combat_target = ally_id
+			return
+
+	# Path 4: 默認 → 乞食
+	var aid_target: int = _find_aid_target(state, team)
+	if aid_target != -1:
+		team.current_task = "乞食"
+		team.move_target = state.teams[aid_target].tile_pos
+		team.combat_target = aid_target
+		return
+	# 全失敗 → 就地乞食（無具體目標）
+	team.current_task = "乞食"
+
+func _should_abandon_current_task(team: TeamData, survival_target: Vector2i) -> bool:
+	if team.move_target == Vector2i(-1, -1):
+		return true
+	var cur_dist: int = _hex_dist(team.tile_pos, team.move_target)
+	var surv_dist: int = _hex_dist(team.tile_pos, survival_target)
+	return surv_dist <= cur_dist + 2
+
+func _find_own_outpost(state: WorldState, team: TeamData) -> Vector2i:
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
+			return tile.tile_pos
+	return Vector2i(-1, -1)
+
+func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
+	var best_id: int = -1
+	var best_pop: int = 999999
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		if t.population >= int(float(team.population) * 0.7): continue
+		if float(t.resources.get("food", 0)) < 20.0: continue
+		if t.population < best_pop:
+			best_pop = t.population
+			best_id = tid
+	return best_id
+
+func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
+	var best_id: int = -1
+	var best_pop: int = 0
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		if t.faction_id != -1 and t.faction_id == team.faction_id: continue
+		var rep: float = float(team.known_reputations.get(tid, 0.5))
+		if rep <= 0.3: continue
+		if t.population <= int(float(team.population) * 1.5): continue
+		if t.population > best_pop:
+			best_pop = t.population
+			best_id = tid
+	return best_id
+
+func _find_aid_target(state: WorldState, team: TeamData) -> int:
+	var candidates: Array = []
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		var reserve: float = float(t.population) * 14.0
+		if float(t.resources.get("food", 0)) <= reserve: continue
+		var same_faction: bool = (t.faction_id != -1 and t.faction_id == team.faction_id)
+		var rep: float = float(team.known_reputations.get(tid, 0.5))
+		var dist: int = _hex_dist(team.tile_pos, t.tile_pos)
+		var score: float = 0.0
+		if same_faction: score += 1000.0
+		if rep >= 0.5: score += 100.0
+		score -= float(dist)
+		candidates.append({ "tid": tid, "score": score })
+	if candidates.is_empty():
+		return -1
+	candidates.sort_custom(func(a, b): return a["score"] > b["score"])
+	return int(candidates[0]["tid"])
 
 func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 	f.is_established = true

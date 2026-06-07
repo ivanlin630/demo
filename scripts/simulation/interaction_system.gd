@@ -38,11 +38,14 @@ const COMBAT_THRESHOLD: float        = 0.7
 const READINESS_RECOVERY_BASE: float = 0.04
 const READINESS_FOOD_COST: float     = 0.05
 
+const AID_RESERVE_DAYS: float = 14.0
+
 var _msg:       SimMessageSystem
 var _vision:    VisionSystem
 var _equip:     EquipmentSystem
 var _skill_sys: SkillSystem
 var _combat:    NpcCombatSystem
+var _npc_ai:    NpcAiSystem
 
 func _init() -> void:
 	_msg       = SimMessageSystem.new()
@@ -50,6 +53,7 @@ func _init() -> void:
 	_equip     = EquipmentSystem.new()
 	_skill_sys = load("res://scripts/simulation/skill_system.gd").new()
 	_combat    = NpcCombatSystem.new()
+	_npc_ai    = NpcAiSystem.new()
 
 # ──────── 主入口 ────────
 
@@ -217,6 +221,12 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		return
 	if b.current_task == "外交":
 		_try_diplomacy(state, id_b, id_a)
+		return
+	if a.current_task == "乞食" and a.combat_target == id_b:
+		_resolve_aid_request(state, id_a, id_b)
+		return
+	if b.current_task == "乞食" and b.combat_target == id_a:
+		_resolve_aid_request(state, id_b, id_a)
 		return
 	if a.current_task == "攻擊":
 		_combat.start_combat(state, id_a, id_b)
@@ -622,3 +632,85 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 			parts.append("%s+%d" % [res, amount])
 	var detail: String = ", ".join(parts) if not parts.is_empty() else "少量資源"
 	return { "ok": true, "accepted": true, "msg": "勒索完成（%s）" % detail }
+
+# ──────── 援助請求 ────────
+
+func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> Dictionary:
+	var beggar: TeamData = state.teams.get(beggar_id)
+	var target: TeamData = state.teams.get(target_id)
+	if beggar == null or target == null:
+		return { "ok": false, "msg": "對象不存在" }
+	# 玩家 target → forced event
+	if target.leader_id == state.player_id and state.player_id != -1:
+		state.player_forced_event = {
+			"from_id": beggar_id,
+			"action": "aid_request",
+			"beggar_food": float(beggar.resources.get("food", 0)),
+			"beggar_pop": beggar.population,
+		}
+		state.player_forced_event_id = "aid_%d_%d" % [beggar_id, state.world.current_tick]
+		return { "ok": true, "pending": true, "msg": "等玩家回應" }
+	# NPC 自決
+	var target_leader: PersonData = state.persons.get(target.leader_id)
+	var beggar_leader: PersonData = state.persons.get(beggar.leader_id)
+	if target_leader == null or beggar_leader == null:
+		return { "ok": false, "msg": "leader 缺失" }
+	var honor: float = float(target_leader.values.get("義氣", 0.5))
+	var greed: float = float(target_leader.values.get("貪婪", 0.5))
+	var rep: float   = float(target.known_reputations.get(beggar_id, 0.5))
+	var annoyance: float = _count_recent_begs(target_leader, beggar_id) * 0.2
+	var give_score: float = honor + rep - greed * 0.5 - annoyance
+	if give_score < 0.3:
+		_msg.emit_message(state, "aid_refused",
+			"Team%d 拒絕援助 Team%d" % [target_id, beggar_id], target,
+			{ "origin": str(target_id), "target": str(beggar_id) })
+		_aid_update_rep(beggar, target_id, -0.1)
+		_npc_ai.write_memory(beggar_leader, "rejected_aid", target_id,
+			state.world.current_tick, 0.5)
+		_npc_ai.write_memory(target_leader, "begged_at_me", beggar_id,
+			state.world.current_tick, 0.3)
+		_clear_aid_task(beggar)
+		return { "ok": true, "accepted": false, "msg": "拒絕" }
+	# 接受：計算給多少
+	var need: float = float(beggar.population) * 2.4 * 3.0 \
+		- float(beggar.resources.get("food", 0))
+	var target_food: float = float(target.resources.get("food", 0))
+	var target_reserve: float = float(target.population) * AID_RESERVE_DAYS
+	var surplus: float = maxf(target_food - target_reserve, 0.0)
+	var give: float = minf(need, surplus * give_score)
+	if give <= 0.0:
+		_msg.emit_message(state, "aid_refused",
+			"Team%d 無餘糧 Team%d" % [target_id, beggar_id], target,
+			{ "origin": str(target_id), "target": str(beggar_id) })
+		_clear_aid_task(beggar)
+		return { "ok": true, "accepted": false, "msg": "無餘糧" }
+	target.resources["food"] = target_food - give
+	beggar.resources["food"] = float(beggar.resources.get("food", 0)) + give
+	_msg.emit_message(state, "aid_given",
+		"Team%d 援助 Team%d %.0f 食物" % [target_id, beggar_id, give], target,
+		{ "origin": str(target_id), "target": str(beggar_id), "amount": "%.0f" % give })
+	_aid_update_rep(beggar, target_id, 0.15)
+	var intensity: float = clampf(give / maxf(need, 1.0), 0.1, 1.0)
+	_npc_ai.write_memory(beggar_leader, "benefactor", target_id,
+		state.world.current_tick, intensity)
+	_npc_ai.write_memory(target_leader, "begged_at_me", beggar_id,
+		state.world.current_tick, 0.2)
+	_clear_aid_task(beggar)
+	return { "ok": true, "accepted": true, "amount": give, "msg": "獲援助" }
+
+func _count_recent_begs(leader: PersonData, beggar_id: int) -> int:
+	var count: int = 0
+	for m in leader.memory:
+		if not (m is Dictionary): continue
+		if m.get("type") == "begged_at_me" and m.get("subject_id") == beggar_id:
+			count += 1
+	return count
+
+func _clear_aid_task(beggar: TeamData) -> void:
+	beggar.current_task = beggar.previous_task if beggar.previous_task != "" else TeamData.TASK_IDLE
+	beggar.previous_task = ""
+	beggar.combat_target = -1
+
+func _aid_update_rep(team: TeamData, other_id: int, delta: float) -> void:
+	var cur: float = float(team.known_reputations.get(other_id, 0.5))
+	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)

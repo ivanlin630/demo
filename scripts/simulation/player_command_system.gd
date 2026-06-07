@@ -81,6 +81,7 @@ func _setup_registry() -> void:
 		"clear_member_order":     _action_clear_member_order,
 		"gather_intel":           _action_gather_intel,
 		"confirm_gather_intel":   _action_confirm_gather_intel,
+		"respond_aid_request":    _action_respond_aid_request,
 	}
 
 # 執行玩家主動行動
@@ -680,6 +681,56 @@ func refresh_colocation_targets(state: WorldState) -> void:
 			continue
 		if not state.player_pending_targets.has(other_id):
 			state.player_pending_targets.append(other_id)
+
+func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var fe: Dictionary = state.player_forced_event
+	if fe.is_empty() or fe.get("action", "") != "aid_request":
+		return { "ok": false, "msg": "無待回應 aid event" }
+	var beggar_id: int = int(fe.get("from_id", -1))
+	var beggar: TeamData = state.teams.get(beggar_id)
+	if beggar == null:
+		state.player_forced_event = {}
+		state.player_forced_event_id = ""
+		return { "ok": false, "msg": "beggar 不存在" }
+	var b_leader: PersonData = state.persons.get(beggar.leader_id)
+	var response: Dictionary = state.player_state.get("aid_response", {})
+	var msg_sys := SimMessageSystem.new()
+	var npc_ai  := NpcAiSystem.new()
+	if response.get("refuse", false):
+		msg_sys.emit_message(state, "aid_refused",
+			"玩家拒絕援助 Team%d" % beggar_id, pt,
+			{ "origin": str(pt_id), "target": str(beggar_id) })
+		_update_rep(beggar, pt_id, -0.1)
+		if b_leader: npc_ai.write_memory(b_leader, "rejected_aid", pt_id,
+			state.world.current_tick, 0.5)
+	else:
+		var amt: float = float(response.get("give_amount", 0.0))
+		var actual: float = minf(amt, float(pt.resources.get("food", 0)))
+		if actual <= 0.0:
+			msg_sys.emit_message(state, "aid_refused",
+				"玩家無餘糧援助 Team%d" % beggar_id, pt,
+				{ "origin": str(pt_id), "target": str(beggar_id) })
+		else:
+			pt.resources["food"] = float(pt.resources.get("food", 0)) - actual
+			beggar.resources["food"] = float(beggar.resources.get("food", 0)) + actual
+			msg_sys.emit_message(state, "aid_given",
+				"玩家援助 Team%d %.0f 食物" % [beggar_id, actual], pt,
+				{ "origin": str(pt_id), "target": str(beggar_id),
+				  "amount": "%.0f" % actual })
+			_update_rep(beggar, pt_id, 0.15)
+			if b_leader: npc_ai.write_memory(b_leader, "benefactor", pt_id,
+				state.world.current_tick, clampf(actual / 50.0, 0.1, 1.0))
+	beggar.current_task = beggar.previous_task if beggar.previous_task != "" else TeamData.TASK_IDLE
+	beggar.previous_task = ""
+	beggar.combat_target = -1
+	state.player_forced_event = {}
+	state.player_forced_event_id = ""
+	state.player_state.erase("aid_response")
+	return { "ok": true, "msg": "已處理" }
+
+func _update_rep(team: TeamData, other_id: int, delta: float) -> void:
+	var cur: float = float(team.known_reputations.get(other_id, 0.5))
+	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)
 
 # ── 內部 helper ──────────────────────────────────────────────
 
