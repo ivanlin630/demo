@@ -1,6 +1,6 @@
 # Known Issues
 
-> 最後更新：2026-06-02（玩家互動全套實裝後）| 來源：動態測試 + code review
+> 最後更新：2026-06-07（遭遇戰修正後）| 來源：動態測試 + code review
 
 ---
 
@@ -121,6 +121,12 @@
 - **影響範圍**：僅限 stdin 模式（Windows headless 走 TCP fallback，實際不受影響）
 - **位置**：`scripts/debug/agent_repl.gd:_run_stdin_loop`
 - **建議**：加 `--quiet` flag suppress 模擬 print，或在 stdin loop 前重導向 print 到 stderr
+
+### S7. `anon_combat_skill` 從未由遊戲邏輯設定
+- **症狀**：主遊戲所有匿名單位戰鬥技能固定為 fallback 值 `0.2`，與勢力強度無關
+- **根因**：`encounter_system._create_anon_unit` 讀 `team.resources["anon_combat_skill"]`，但 `faction_ai`、`world_generator`、`TeamData` 初始化都未設置此 key
+- **位置**：`scripts/simulation/encounter_system.gd:152`；應設置於 `scripts/simulation/faction_ai_system.gd`
+- **建議**：faction_ai 根據勢力類型設定（流氓 0.2、民兵 0.3、正規軍 0.5、精銳 0.65）；或改為 `TeamData` 獨立欄位脫離 resources dict
 
 ### A2. encounter_view.gd `_max_timer` 欄位缺失（pre-existing）
 - **症狀**：`unit.get("_max_timer", 10)` 永遠回傳預設值 10，計時器顯示不正確
