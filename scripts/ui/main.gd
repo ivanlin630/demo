@@ -17,48 +17,9 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE   # 讓點擊穿透到地圖
 	_runner = SimRunner.new()
 	_state  = WorldState.new()
-
-	# Generate world
-	var _gen = load("res://scripts/simulation/world_generator.gd").new()
-	_gen.generate(_state, { "radius": 4, "seed": 42 })
-
-	# Create 3 teams with persons
-	for t in range(3):
-		var team := TeamData.new()
-		team.team_id    = t
-		team.population = 10
-		team.tile_pos   = Vector2i(t, 0)
-		team.resources  = {
-			"food": 5000.0, "material": 100, "coin": 200, "goods": 0, "gem": 0,
-			"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
-			"weapon_melee_low": 5, "weapon_melee_high": 0,
-			"weapon_ranged_low": 0, "weapon_ranged_high": 0,
-			"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 5, "tools": 5,
-			"armor_low": 2, "armor_high": 0,
-		}
-		team.tags = ["統領"]
-		_state.teams[t]           = team
-		_state.team_known[t]      = []
-		_state.team_discovered[t] = []
-		for p in range(3):
-			var person := PersonData.new()
-			person.id          = t * 3 + p
-			person.person_name = "P%d_%d" % [t, p]
-			person.role        = "leader" if p == 0 else "civilian"
-			person.team_id     = t
-			person.age         = 25
-			person.loyalty     = 0.8
-			person.skills["統領"] = 0.5
-			person.skills["生產"] = 0.3
-			person.skills["戰鬥"] = 0.2
-			_state.persons[person.id] = person
-			if p == 0:
-				team.leader_id = person.id
-			else:
-				team.named_members.append(person.id)
-
-	# Set player to Team 0 leader
-	PlayerSystem.new().init_player(_state, 0, 0)
+	var config := GameSetup.load_config("res://config/demo.json")
+	GameSetup.setup(_state, config)
+	PlayerSystem.new().init_player(_state, _state.player_id, _player_team_id())
 
 	_bridge = SimBridge.new(_runner, _state)
 	_debug.setup(_bridge)
@@ -77,6 +38,10 @@ func _ready() -> void:
 	_encounter.setup(_bridge)
 	_encounter.encounter_ended.connect(_on_encounter_ended)
 	print("[Main] UI ready — world generated, player=P0 Team0")
+
+func _player_team_id() -> int:
+	var p: PersonData = _state.persons.get(_state.player_id)
+	return p.team_id if p else 0
 
 func _on_tile_selected(pos: Vector2i) -> void:
 	_sidebar.show_tile(pos)
