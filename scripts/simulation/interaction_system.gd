@@ -215,6 +215,18 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		elif (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
 				or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a):
 			_try_merge(state, id_a, id_b)
+		elif a.current_task == "安頓":
+			var tile: HexTileData = state.world.tiles.get(a.tile_pos.x * 1000 + a.tile_pos.y)
+			if tile and tile.outpost_owner != -1:
+				var o: TeamData = state.teams.get(tile.outpost_owner)
+				if o and o.faction_id == a.faction_id:
+					_convert_to_resident(state, a)
+		elif b.current_task == "安頓":
+			var tile2: HexTileData = state.world.tiles.get(b.tile_pos.x * 1000 + b.tile_pos.y)
+			if tile2 and tile2.outpost_owner != -1:
+				var o2: TeamData = state.teams.get(tile2.outpost_owner)
+				if o2 and o2.faction_id == b.faction_id:
+					_convert_to_resident(state, b)
 		return
 	if a.current_task == "外交":
 		_try_diplomacy(state, id_a, id_b)
@@ -793,3 +805,13 @@ func _find_existing_resident(state: WorldState, pos: Vector2i, exclude_id: int) 
 		if t.tile_pos == pos and t.tags.has(TeamData.TAG_PRODUCE):
 			return tid
 	return -1
+
+func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
+	if not subteam.tags.has(TeamData.TAG_PRODUCE):
+		subteam.tags.append(TeamData.TAG_PRODUCE)
+	subteam.tags.erase("子團")
+	subteam.tags.erase("流亡")
+	subteam.current_task = "生產"
+	subteam.parent_team_id = -1
+	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
+		subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])

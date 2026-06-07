@@ -36,6 +36,7 @@ func _initialize() -> void:
 	_test_resident_no_salary()
 	_test_resident_tax_with_stress()
 	_test_invite_settle_execute()
+	_test_subteam_settle()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3168,3 +3169,26 @@ func _test_invite_settle_execute() -> void:
 	assert(target.tile_pos == Vector2i(5, 5), "目標應移到 outpost")
 	assert(target.faction_id == 10, "目標應入 inviter faction")
 	print("Resident Task7 OK")
+
+func _test_subteam_settle() -> void:
+	print("--- Resident Task8: 子隊 task=安頓 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[3003] = tile
+	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
+	state.teams[0] = owner
+	# 子隊 Team 1
+	var sub := TeamData.new()
+	sub.team_id = 1; sub.faction_id = 10; sub.parent_team_id = 0
+	sub.tile_pos = Vector2i(3, 3)
+	sub.tags = ["子團"]; sub.current_task = "安頓"
+	state.teams[1] = sub
+	var inter := InteractionSystem.new()
+	inter._convert_to_resident(state, sub)
+	assert(sub.tags.has(TeamData.TAG_PRODUCE), "應加 PRODUCE")
+	assert(not sub.tags.has("子團"), "應 erase 子團")
+	assert(sub.parent_team_id == -1, "應脫離 parent")
+	print("Resident Task8 OK")
