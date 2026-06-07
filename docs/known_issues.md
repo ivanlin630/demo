@@ -136,6 +136,18 @@
 - **影響**：所有匿名單位只穿 torso low 護甲，精銳/騎士等高階勢力無法有全身護甲
 - **建議**：faction_ai 根據勢力類型設定各 slot（精銳=全身 low，騎士=torso high+其他 low，流氓=none）
 
+### S7c. `guard_ratio` 從未由遊戲邏輯設定
+- **症狀**：所有隊伍警衛比例固定 0.2，夜間警衛數 = `ceil(pop × 0.2)`，無勢力差異
+- **根因**：`day_night_system` 讀 `team.guard_ratio`，但 faction_ai 從未寫入
+- **影響**：精銳軍隊與盜匪警衛比例相同；`sim_runner` 疲勞回復 `rest_mult = 1 - guard_ratio×0.5` 也固定
+- **建議**：faction_ai 根據勢力特性設定（精銳=0.4，民兵=0.2，流氓=0.1）
+
+### S7d. `anon_wage` 從未由遊戲邏輯設定
+- **症狀**：所有隊伍匿名薪資係數固定 1.0，`salary_system` 計算 `anon_total = anon_wage × anon_count`
+- **根因**：`salary_system` 讀 `team.anon_wage`，但 faction_ai 從未寫入
+- **影響**：傭兵（高薪）與義軍（低薪）薪資結構無差異
+- **建議**：faction_ai 或 world_generator 根據隊伍性質設定（傭兵=1.5，義軍=0.5）
+
 ### A2. encounter_view.gd `_max_timer` 欄位缺失（pre-existing）
 - **症狀**：`unit.get("_max_timer", 10)` 永遠回傳預設值 10，計時器顯示不正確
 - **根因**：`_create_named_unit` 未設置 `_max_timer` 欄位
