@@ -165,13 +165,16 @@
 - **設計意圖**：玩家管理 loyalty 的關鍵手段（過薪換忠誠）
 - **建議**：team panel 加每個 named NPC 薪資設定，顯示「目前 / 公平」比值
 
-### S10. `named_members` 失控膨脹（game_sim_test 發現）
-- **症狀**：跑 7200 tick，Team0 `named_members` 從 2 暴漲到 963 名
-- **可能根因**：recruit / event / faction_ai 某條路徑無上限 append
-- **影響**：encounter spawn 灌爆 unit 數、loyalty 計算偏差、儲存膨脹
-- **位置**：grep `named_members.append` 找：event_unrest_replace/split、player_command_system、subteam_system
-- **建議**：加上限檢查（cap=20？），或審視每個 append 路徑的觸發條件
-- **發現**：2026-06-07 game_sim_test.gd 跑出來
+### S10. `named_members` 失控膨脹 ✅ 已修（2026-06-07）
+- **症狀**：跑 7200 tick，Team0 `named_members` 從 2-3 暴漲到 2563 名
+- **根因**：GDScript `var x: Array = team.named_members` 是 reference 而非 copy。後續 `x.append(leader_id)` 直接 mutate 原 array
+- **修正**：5 個 site 全部加 `.duplicate()`：
+  - `equipment_system._get_named_ids` (line 106)
+  - `interaction_system._treat_wounded` (line 106)
+  - `npc_combat_system` line 57、389、452
+- **影響**：修前每天 ×96 增長（4 個 site × 24 hour），導致 loyalty/encounter/salary 全部計算錯誤
+- **commit**：cb2171d
+- **發現**：2026-06-07 game_sim_test.gd 7200 tick 跑出來
 
 ### S11. Leader 死亡後無 succession，team.leader_id=-1 卡住
 - **症狀**：遭遇戰 leader 戰死 → `encounter_system.resolve_encounter_end` 設 `team.leader_id = -1`；之後 team 永遠無 leader
