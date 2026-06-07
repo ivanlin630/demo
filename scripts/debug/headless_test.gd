@@ -2477,30 +2477,51 @@ func _test_intervals_divisible_by_cadence() -> void:
 	print("Cadence Task6 OK")
 
 func _test_salary_auto_npc_vs_player() -> void:
-	print("--- Salary auto NPC vs player ---")
+	print("--- Salary auto NPC vs player (leader 個性) ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	state.player_id = 0
-	# NPC team (leader=10, named_member=11) — salary=0 應自動設為 fair
-	var npc_leader := PersonData.new()
-	npc_leader.id = 10
-	npc_leader.team_id = 1
-	state.persons[10] = npc_leader
-	var npc_member := PersonData.new()
-	npc_member.id = 11
-	npc_member.team_id = 1
-	npc_member.skills = { "戰鬥": 1.0, "統領": 0.5 }   # fair = (1.0+0.5)*2 = 3.0
-	npc_member.salary = 0.0
-	npc_member.loyalty = 0.5
-	state.persons[11] = npc_member
-	var npc_team := TeamData.new()
-	npc_team.team_id = 1
-	npc_team.leader_id = 10
-	npc_team.named_members = [11]
-	npc_team.population = 2
-	npc_team.resources["coin"] = 1000.0
-	state.teams[1] = npc_team
-	# Player team (leader=0, named_member=12) — salary=0 應保留（玩家未設）
+	# 慷慨 NPC leader（義氣=1, 信義=1, 貪婪=0）→ mult ≈ 1.3 → salary > fair
+	var npc_leader_g := PersonData.new()
+	npc_leader_g.id = 10
+	npc_leader_g.team_id = 1
+	npc_leader_g.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.0 }
+	state.persons[10] = npc_leader_g
+	var npc_member_g := PersonData.new()
+	npc_member_g.id = 11
+	npc_member_g.team_id = 1
+	npc_member_g.skills = { "戰鬥": 1.0, "統領": 0.5 }   # fair = 3.0
+	npc_member_g.salary = 0.0
+	npc_member_g.loyalty = 0.5
+	state.persons[11] = npc_member_g
+	var npc_team_g := TeamData.new()
+	npc_team_g.team_id = 1
+	npc_team_g.leader_id = 10
+	npc_team_g.named_members = [11]
+	npc_team_g.population = 2
+	npc_team_g.resources["coin"] = 1000.0
+	state.teams[1] = npc_team_g
+	# 吝嗇 NPC leader（義氣=0, 信義=0, 貪婪=1）→ mult ≈ 0.7 → salary < fair
+	var npc_leader_s := PersonData.new()
+	npc_leader_s.id = 20
+	npc_leader_s.team_id = 2
+	npc_leader_s.values = { "義氣": 0.0, "信義": 0.0, "貪婪": 1.0 }
+	state.persons[20] = npc_leader_s
+	var npc_member_s := PersonData.new()
+	npc_member_s.id = 21
+	npc_member_s.team_id = 2
+	npc_member_s.skills = { "戰鬥": 1.0, "統領": 0.5 }
+	npc_member_s.salary = 0.0
+	npc_member_s.loyalty = 0.5
+	state.persons[21] = npc_member_s
+	var npc_team_s := TeamData.new()
+	npc_team_s.team_id = 2
+	npc_team_s.leader_id = 20
+	npc_team_s.named_members = [21]
+	npc_team_s.population = 2
+	npc_team_s.resources["coin"] = 1000.0
+	state.teams[2] = npc_team_s
+	# Player team
 	var player := PersonData.new()
 	player.id = 0
 	player.team_id = 0
@@ -2519,15 +2540,23 @@ func _test_salary_auto_npc_vs_player() -> void:
 	player_team.population = 2
 	player_team.resources["coin"] = 1000.0
 	state.teams[0] = player_team
-	# 強制執行 _pay_salary
 	var ss := SalarySystem.new()
-	ss._pay_salary(state, npc_team)
+	ss._pay_salary(state, npc_team_g)
+	ss._pay_salary(state, npc_team_s)
 	ss._pay_salary(state, player_team)
-	assert(npc_member.salary > 0.0,
-		"NPC team member salary 應被自動設為 fair，實際=%s" % str(npc_member.salary))
+	# 慷慨 leader：salary > fair(3.0) → ratio > 1 → loyalty 上升
+	assert(npc_member_g.salary > 3.0,
+		"慷慨 leader salary 應 > 3.0，實際=%s" % str(npc_member_g.salary))
+	assert(npc_member_g.loyalty > 0.5,
+		"慷慨 leader 應加 loyalty，實際=%s" % str(npc_member_g.loyalty))
+	# 吝嗇 leader：salary < fair(3.0) → ratio < 1 → loyalty 下降
+	assert(npc_member_s.salary < 3.0,
+		"吝嗇 leader salary 應 < 3.0，實際=%s" % str(npc_member_s.salary))
+	assert(npc_member_s.loyalty < 0.5,
+		"吝嗇 leader 應扣 loyalty，實際=%s" % str(npc_member_s.loyalty))
+	# Player team 保留玩家設定
 	assert(player_member.salary == 0.0,
-		"Player team member salary 應保留玩家設定（0），實際=%s" % str(player_member.salary))
-	# Player team member 應有 loyalty 損失（0 ratio）
+		"Player team salary 應保留 0，實際=%s" % str(player_member.salary))
 	assert(player_member.loyalty < 0.5,
-		"Player team member 0 薪 應扣 loyalty，實際=%s" % str(player_member.loyalty))
+		"Player team 0 薪 應扣 loyalty，實際=%s" % str(player_member.loyalty))
 	print("Salary auto NPC vs player OK")

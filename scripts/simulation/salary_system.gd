@@ -27,15 +27,23 @@ func _calc_fair_salary(p: PersonData) -> float:
 
 func _pay_salary(state: WorldState, team: TeamData) -> void:
 	var is_player_team: bool = (team.leader_id == state.player_id and state.player_id != -1)
+	# NPC team: 每次發薪依 leader 個性同步薪資（慷慨/吝嗇 leader 隊伍動態不同）
+	var npc_salary_mult: float = 1.0
+	if not is_player_team:
+		var leader: PersonData = state.persons.get(team.leader_id)
+		if leader != null:
+			var honor: float = (float(leader.values.get("義氣", 0.5)) \
+				+ float(leader.values.get("信義", 0.5))) / 2.0
+			var greed: float = float(leader.values.get("貪婪", 0.5))
+			npc_salary_mult = clampf(1.0 + (honor - greed * 0.5) * 0.4, 0.7, 1.3)
 	for pid in team.named_members:
 		var p: PersonData = state.persons.get(pid)
 		if p == null: continue
 		if _has_master_memory(p, team.leader_id): continue
 		var fair: float = _calc_fair_salary(p)
-		# NPC team: salary 未設定（<=0）時自動設為公平薪資
-		# Player team: 保留玩家設定值（包含 0 = 不付薪，自然扣 loyalty）
-		if not is_player_team and p.salary <= 0.0:
-			p.salary = fair
+		# NPC team: 每輪同步薪資（隨技能成長 / leader 個性），player team 保留玩家自訂值
+		if not is_player_team:
+			p.salary = fair * npc_salary_mult
 		var ratio: float = p.salary / maxf(fair, 0.01)
 		team.resources["coin"] = float(team.resources.get("coin", 0)) - p.salary
 		p.coin += p.salary
