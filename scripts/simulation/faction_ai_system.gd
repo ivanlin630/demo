@@ -532,7 +532,7 @@ func _update_anon_wage(team: TeamData) -> void:
 	team.anon_wage = clampf(best, 0.0, 2.0)
 
 func _update_armor_config(team: TeamData) -> void:
-	var pop_threshold: float = team.population * 0.3
+	var pop_threshold: float = maxf(team.population * 0.3, 1.0)
 	var has_high: bool = int(team.resources.get("armor_high", 0)) >= pop_threshold
 	var has_low:  bool = int(team.resources.get("armor_low", 0))  >= pop_threshold
 	# 重設全 none，再依條件填值
