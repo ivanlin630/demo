@@ -82,6 +82,7 @@ func _setup_registry() -> void:
 		"gather_intel":           _action_gather_intel,
 		"confirm_gather_intel":   _action_confirm_gather_intel,
 		"respond_aid_request":    _action_respond_aid_request,
+		"invite_settle":          _action_invite_settle,
 	}
 
 # 執行玩家主動行動
@@ -727,6 +728,23 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 	state.player_forced_event_id = ""
 	state.player_state.erase("aid_response")
 	return { "ok": true, "msg": "已處理" }
+
+func _action_invite_settle(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null: return { "ok": false, "msg": "目標不存在" }
+	var pos_arr: Array = state.player_state.get("settle_pos", [-1, -1])
+	var target_pos: Vector2i = Vector2i(int(pos_arr[0]), int(pos_arr[1]))
+	if target_pos == Vector2i(-1, -1):
+		return { "ok": false, "msg": "未指定 outpost 位置" }
+	var tile: HexTileData = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
+	if tile == null or tile.outpost_level == 0 or tile.outpost_owner != pt_id:
+		return { "ok": false, "msg": "目標非自家 outpost" }
+	# 評估接受
+	var resp: String = _diplomatic.handle_diplomacy_message(state, tgt, pt, "invite_settle")
+	if resp == "accept":
+		_interaction._execute_settlement(state, target_id, target_pos, pt.faction_id)
+		return { "ok": true, "msg": "Team%d 接受邀請" % target_id }
+	return { "ok": true, "msg": "Team%d 拒絕邀請" % target_id, "accepted": false }
 
 func _update_rep(team: TeamData, other_id: int, delta: float) -> void:
 	var cur: float = float(team.known_reputations.get(other_id, 0.5))

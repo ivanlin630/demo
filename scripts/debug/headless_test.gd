@@ -35,6 +35,7 @@ func _initialize() -> void:
 	_test_resident_movement_lock()
 	_test_resident_no_salary()
 	_test_resident_tax_with_stress()
+	_test_invite_settle_execute()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3136,3 +3137,34 @@ func _test_resident_no_salary() -> void:
 	assert(float(t.resources["coin"]) == 500.0, "PRODUCE team coin 不應扣")
 	assert(member.loyalty == 0.5, "PRODUCE member loyalty 不應扣")
 	print("Resident Task5 OK")
+
+func _test_invite_settle_execute() -> void:
+	print("--- Resident Task7: invite_settle 執行 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# Outpost on (5,5) owner Team 0
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[5005] = tile
+	# Inviter (Player team)
+	var pt := TeamData.new(); pt.team_id = 0; pt.faction_id = 10
+	pt.tile_pos = Vector2i(0, 0)
+	state.teams[0] = pt
+	# Target (流亡 roving) accepting
+	var target := TeamData.new()
+	target.team_id = 1; target.population = 5; target.faction_id = -1
+	target.tags = ["流亡"]; target.tile_pos = Vector2i(9, 9)
+	target.resources["food"] = 0   # 飢餓 → 易接受
+	var t_leader := PersonData.new(); t_leader.id = 200; t_leader.team_id = 1
+	t_leader.values = { "求生欲": 0.8, "野心": 0.1 }
+	state.persons[200] = t_leader; target.leader_id = 200
+	state.teams[1] = target
+	var inter := InteractionSystem.new()
+	inter._execute_settlement(state, 1, Vector2i(5, 5), 10)
+	# target 應 tags 加生產、移到 outpost、加入 faction
+	assert(target.tags.has(TeamData.TAG_PRODUCE), "目標應加 PRODUCE")
+	assert(not target.tags.has("流亡"), "目標應 erase 流亡")
+	assert(target.tile_pos == Vector2i(5, 5), "目標應移到 outpost")
+	assert(target.faction_id == 10, "目標應入 inviter faction")
+	print("Resident Task7 OK")

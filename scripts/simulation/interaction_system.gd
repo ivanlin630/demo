@@ -759,3 +759,37 @@ func _clear_aid_task(beggar: TeamData) -> void:
 func _aid_update_rep(team: TeamData, other_id: int, delta: float) -> void:
 	var cur: float = float(team.known_reputations.get(other_id, 0.5))
 	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)
+
+# ──────── 安頓（invite_settle）執行 ────────
+
+func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i, faction_id: int) -> void:
+	var t: TeamData = state.teams.get(team_id)
+	if t == null: return
+	t.tile_pos = outpost_pos
+	if not t.tags.has(TeamData.TAG_PRODUCE):
+		t.tags.append(TeamData.TAG_PRODUCE)
+	t.tags.erase("流亡")
+	t.faction_id = faction_id
+	t.current_task = "生產"
+	t.move_target = Vector2i(-1, -1)
+	# 加入 faction
+	if faction_id != -1 and state.factions.has(faction_id):
+		var f: FactionData = state.factions[faction_id]
+		if not f.member_team_ids.has(team_id):
+			f.member_team_ids.append(team_id)
+	# 若該 outpost 已有 PRODUCE team → 嘗試合併
+	var existing: int = _find_existing_resident(state, outpost_pos, team_id)
+	if existing != -1:
+		var fai := FactionAISystem.new()
+		var cap: int = fai._outpost_pop_cap(state, outpost_pos)
+		var et: TeamData = state.teams[existing]
+		if et.population + t.population <= cap:
+			SubteamSystem.new().merge_teams(state, existing, team_id, t.named_members)
+
+func _find_existing_resident(state: WorldState, pos: Vector2i, exclude_id: int) -> int:
+	for tid in state.teams:
+		if tid == exclude_id: continue
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos == pos and t.tags.has(TeamData.TAG_PRODUCE):
+			return tid
+	return -1

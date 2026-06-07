@@ -121,6 +121,15 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 			if score > 0.3:
 				return "accept"
 			return "reject"
+		"invite_settle":
+			var t_leader = state.persons.get(self_team.leader_id)
+			if t_leader == null: return "reject"
+			var rep: float = float(self_team.known_reputations.get(sender_team.team_id, 0.5))
+			var ambition: float = float(t_leader.values.get("野心", 0.5))
+			var survival: float = float(t_leader.values.get("求生欲", 0.5))
+			var hungry: float = 0.3 if float(self_team.resources.get("food", 0)) < self_team.population * 7.0 else 0.0
+			var accept_score: float = survival + clampf(rep - 0.5, -0.5, 0.5) + hungry - ambition * 0.4
+			return "accept" if accept_score > 0.5 else "reject"
 	return "reject"
 
 func _form_alliance(state: WorldState,
