@@ -25,15 +25,18 @@ const TEAM_RESOURCE_PRESET: Dictionary = {
 const FLOAT_RES_KEYS: Array = ["food", "material"]
 
 static func setup(state: WorldState, config: Dictionary) -> void:
-	var seed_val: int = int(config.get("seed", 42))
+	var mode: String = config.get("mode", "random")
 	var rng := RandomNumberGenerator.new()
-	rng.seed = seed_val
-
+	rng.seed = int(config.get("seed", 42))
 	_generate_map(state, config, rng)
-	var outpost_plan: Dictionary = _plan_outposts(state, config, rng)
-	_generate_factions(state, outpost_plan, config, rng)
-	_generate_independent_teams(state, outpost_plan, config, rng)
-	_setup_player(state, config, rng)
+	if mode == "explicit":
+		_setup_explicit_teams(state, config)
+		_setup_player(state, config)
+	else:
+		var outpost_plan: Dictionary = _plan_outposts(state, config, rng)
+		_generate_factions(state, outpost_plan, config, rng)
+		_generate_independent_teams(state, outpost_plan, config, rng)
+		_setup_random_player(state, config, rng)
 
 	print("[GameSetup] 完成：%d teams, %d factions, %d persons" %
 		[state.teams.size(), state.factions.size(), state.persons.size()])
@@ -179,7 +182,7 @@ static func _generate_independent_teams(state, plan, config, rng) -> void:
 			named_ratio, richness_mult, "independent_roving")
 		team.tile_pos = _random_empty_tile(state, rng)
 
-static func _setup_player(state, config, rng) -> void:
+static func _setup_random_player(state, config, rng) -> void:
 	var pcfg: Dictionary = config.get("player", {})
 	var join_mode: String = pcfg.get("join_mode", "independent")
 	var richness_mult: float = RICHNESS_MULT.get(
@@ -381,3 +384,152 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 	state.team_known[team.team_id] = []
 	state.team_discovered[team.team_id] = []
 	return team
+
+# ── explicit mode ─────────────────────────────────────────────────
+
+static func _setup_explicit_teams(state: WorldState, config: Dictionary) -> void:
+	var teams_cfg: Array = config.get("teams", [])
+	if teams_cfg.is_empty():
+		push_error("explicit mode 但 teams 陣列為空")
+		return
+	var seen_factions: Dictionary = {}
+	for t_cfg in teams_cfg:
+		var fid: int = int(t_cfg.get("faction_id", -1))
+		if fid == -1: continue
+		if seen_factions.has(fid): continue
+		seen_factions[fid] = true
+		if t_cfg.get("is_faction_leader", false):
+			state.create_faction(int(t_cfg["id"]))
+	for t_cfg in teams_cfg:
+		_build_explicit_team(state, t_cfg)
+	for ta_cfg in teams_cfg:
+		var ta_id: int = int(ta_cfg["id"])
+		if not state.team_discovered.has(ta_id):
+			state.team_discovered[ta_id] = []
+		if not state.team_known.has(ta_id):
+			state.team_known[ta_id] = []
+		for tb_cfg in teams_cfg:
+			var tb_id: int = int(tb_cfg["id"])
+			if ta_id != tb_id and not state.team_discovered[ta_id].has(tb_id):
+				state.team_discovered[ta_id].append(tb_id)
+
+static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
+	var team := TeamData.new()
+	team.team_id = int(t_cfg["id"])
+	var pos_arr: Array = t_cfg.get("tile_pos", [0, 0])
+	team.tile_pos = Vector2i(int(pos_arr[0]), int(pos_arr[1]))
+	team.population = int(t_cfg.get("population", 1))
+	team.tags = t_cfg.get("tags", []).duplicate()
+	team.faction_id = int(t_cfg.get("faction_id", -1))
+	var base_res: Dictionary = _default_full_resources()
+	for k in t_cfg.get("resources", {}):
+		base_res[k] = t_cfg["resources"][k]
+	team.resources = base_res
+	state.teams[team.team_id] = team
+	state.team_known[team.team_id] = []
+	state.team_discovered[team.team_id] = []
+	var leader_cfg: Dictionary = t_cfg.get("leader", {})
+	var leader: PersonData = _make_person(team.team_id, leader_cfg, true)
+	state.persons[leader.id] = leader
+	team.leader_id = leader.id
+	for nm_cfg in t_cfg.get("named_members", []):
+		var nm: PersonData = _make_person(team.team_id, nm_cfg, false)
+		state.persons[nm.id] = nm
+		team.named_members.append(nm.id)
+	var op_cfg: Dictionary = t_cfg.get("outpost", {})
+	if not op_cfg.is_empty():
+		var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
+		var tile: HexTileData = state.world.tiles.get(tile_id)
+		if tile:
+			tile.outpost_type = op_cfg.get("type", "civilian")
+			tile.outpost_level = int(op_cfg.get("level", 1))
+			tile.outpost_owner = team.team_id
+			if op_cfg.has("tile_food_init"):
+				tile.resources["food"] = float(op_cfg["tile_food_init"])
+	if team.faction_id != -1 and state.factions.has(team.faction_id):
+		var f: FactionData = state.factions[team.faction_id]
+		if not f.member_team_ids.has(team.team_id):
+			f.member_team_ids.append(team.team_id)
+
+static func _make_person(team_id: int, p_cfg: Dictionary, is_leader: bool) -> PersonData:
+	var p := PersonData.new()
+	p.id = (team_id * 1000) + (0 if is_leader else _next_member_id(team_id))
+	p.person_name = p_cfg.get("name", "P%d" % p.id)
+	p.role = "leader" if is_leader else "civilian"
+	p.team_id = team_id
+	p.age = int(p_cfg.get("age", 30))
+	p.loyalty = float(p_cfg.get("loyalty", 0.8))
+	p.stress = float(p_cfg.get("stress", 0.0))
+	p.salary = float(p_cfg.get("salary", 0.0))
+	for k in p_cfg.get("skills", {}):
+		p.skills[k] = float(p_cfg["skills"][k])
+	for k in p_cfg.get("values", {}):
+		p.values[k] = float(p_cfg["values"][k])
+	for k in p_cfg.get("attributes", {}):
+		p.attributes[k] = float(p_cfg["attributes"][k])
+	return p
+
+static var _member_counters: Dictionary = {}
+static func _next_member_id(team_id: int) -> int:
+	var n: int = int(_member_counters.get(team_id, 0)) + 1
+	_member_counters[team_id] = n
+	return n
+
+static func _setup_player(state: WorldState, config: Dictionary) -> void:
+	var pcfg: Dictionary = config.get("player", {})
+	if pcfg.is_empty():
+		return
+	var pteam_id: int = int(pcfg.get("team_id", -1))
+	if pteam_id == -1 or not state.teams.has(pteam_id):
+		push_warning("player.team_id=%d 不存在" % pteam_id)
+		return
+	var pteam: TeamData = state.teams[pteam_id]
+	state.player_id = pteam.leader_id
+
+# ── command schedule ───────────────────────────────────────────────
+
+static func run_command_schedule_tick(state: WorldState, cmd_sys,
+		schedule: Array, current_tick: int) -> Dictionary:
+	var fired: Array = []
+	var results: Array = []
+	for entry in schedule:
+		if int(entry.get("tick", -1)) != current_tick:
+			continue
+		var action: String = entry.get("action", "")
+		var args: Dictionary = entry.get("args", {})
+		var r: Dictionary = _dispatch_command(state, cmd_sys, action, args)
+		fired.append(action)
+		results.append(r)
+	return { "fired": fired, "results": results }
+
+static func _dispatch_command(state: WorldState, cmd_sys, action: String, args: Dictionary) -> Dictionary:
+	match action:
+		"set_move_target":
+			var pos_arr: Array = args.get("target_pos", [0, 0])
+			var mv_target := Vector2i(int(pos_arr[0]), int(pos_arr[1]))
+			if cmd_sys.has_method("move_to"):
+				return cmd_sys.move_to(state, mv_target)
+			state.player_state["move_target"] = mv_target
+			return { "ok": true, "msg": "move_target set" }
+		"propose_alliance":
+			var target_id: int = int(args.get("team_id", -1))
+			return cmd_sys.execute_action(state, target_id, "propose_alliance")
+		"attack":
+			var target_id: int = int(args.get("team_id", -1))
+			return cmd_sys.execute_action(state, target_id, "attack")
+		"submit_trade_offer":
+			var target_id: int = int(args.get("team_id", -1))
+			state.player_state["pending_trade_target"] = target_id
+			state.player_state["trade_offer"] = {
+				"player_gives": args.get("gives", {}),
+				"player_wants": args.get("wants", {})
+			}
+			return cmd_sys.execute_action(state, target_id, "submit_trade_offer")
+		"recruit_named":
+			var target_id: int = int(args.get("team_id", -1))
+			return cmd_sys.execute_action(state, target_id, "recruit_named")
+		"build_outpost":
+			state.player_state["build_type"] = args.get("type", "civilian")
+			return cmd_sys.execute_action(state, -1, "build_outpost")
+		_:
+			return { "ok": false, "msg": "未知 action: " + action }

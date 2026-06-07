@@ -14,6 +14,8 @@ func _initialize() -> void:
 	_test_salary_interval_weekly()
 	_test_intervals_divisible_by_cadence()
 	_test_salary_auto_npc_vs_player()
+	_test_setup_mode_explicit()
+	_test_full_config_load()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2560,3 +2562,56 @@ func _test_salary_auto_npc_vs_player() -> void:
 	assert(player_member.loyalty < 0.5,
 		"Player team 0 薪 應扣 loyalty，實際=%s" % str(player_member.loyalty))
 	print("Salary auto NPC vs player OK")
+
+func _test_setup_mode_explicit() -> void:
+	print("--- Config Task1: GameSetup mode=explicit ---")
+	var state := WorldState.new()
+	var config: Dictionary = {
+		"seed": 42,
+		"map": { "radius": 4 },
+		"mode": "explicit",
+		"teams": [
+			{
+				"id": 0,
+				"name": "玩家",
+				"tile_pos": [4, 4],
+				"population": 8,
+				"tags": ["統領"],
+				"faction_id": 0,
+				"is_faction_leader": true,
+				"resources": { "food": 96.0, "coin": 600 },
+				"leader": { "name": "TestLeader", "skills": { "統領": 0.7 } },
+				"named_members": []
+			}
+		],
+		"player": { "team_id": 0, "is_leader": true }
+	}
+	GameSetup.setup(state, config)
+	assert(state.teams.has(0), "Team 0 應建立")
+	var t: TeamData = state.teams[0]
+	assert(t.population == 8, "pop 應 8，實際=%d" % t.population)
+	assert(t.tile_pos == Vector2i(4, 4), "tile_pos 應 (4,4)，實際=%s" % str(t.tile_pos))
+	assert(float(t.resources.get("food", 0)) == 96.0, "food 應 96")
+	assert(state.player_id == t.leader_id, "player_id 應 = team leader_id")
+	print("Config Task1 OK")
+
+func _test_full_config_load() -> void:
+	print("--- Config Task6: 完整 config 載入 ---")
+	var s1 := WorldState.new()
+	var c1 := GameSetup.load_config("res://config/demo.json")
+	assert(not c1.is_empty(), "demo.json 載入失敗")
+	GameSetup.setup(s1, c1)
+	assert(s1.teams.size() == 3, "demo 應 3 team，實際=%d" % s1.teams.size())
+	assert(s1.player_id != -1, "demo player_id 應已設")
+	var s2 := WorldState.new()
+	var c2 := GameSetup.load_config("res://config/game_sim_test.json")
+	assert(not c2.is_empty(), "game_sim_test.json 載入失敗")
+	GameSetup.setup(s2, c2)
+	assert(s2.teams.size() == 5, "game_sim_test 應 5 team，實際=%d" % s2.teams.size())
+	assert(c2.get("command_schedule", []).size() >= 6, "command_schedule 應有 ≥6 entries")
+	var s3 := WorldState.new()
+	var c3 := GameSetup.load_config("res://config/default.json")
+	assert(c3.get("mode", "random") == "random", "default 應為 random mode")
+	GameSetup.setup(s3, c3)
+	assert(s3.teams.size() >= 2, "default 隨機應產生 >= 2 team")
+	print("Config Task6 OK")

@@ -1,0 +1,108 @@
+{
+  "seed": 77,
+  "mode": "explicit",
+  "max_ticks": 7200,
+  "map": { "radius": 4, "resource_richness": 5 },
+  "teams": [
+    {
+      "id": 0, "name": "玩家", "tile_pos": [4, 4], "population": 8,
+      "tags": ["統領"], "faction_id": 0, "is_faction_leader": true,
+      "resources": {
+        "food": 96.0, "material": 200, "coin": 600, "weapon_melee_low": 12,
+        "armor_low": 8, "medicine": 10, "tools": 5, "goods": 50
+      },
+      "leader": {
+        "name": "T0_Leader", "age": 30, "loyalty": 0.9,
+        "skills": { "統領": 0.7, "偵查": 0.4, "戰鬥": 0.4 },
+        "values": { "義氣": 0.7, "信義": 0.7, "野心": 0.5 }
+      },
+      "named_members": [
+        { "name": "T0_M1", "loyalty": 0.7, "salary": 3.0,
+          "skills": { "戰鬥": 0.3 } },
+        { "name": "T0_M2", "loyalty": 0.7, "salary": 3.0,
+          "skills": { "戰鬥": 0.3 } }
+      ],
+      "outpost": { "type": "military", "level": 1, "tile_food_init": 2000 }
+    },
+    {
+      "id": 1, "name": "友軍商隊", "tile_pos": [5, 4], "population": 6,
+      "tags": ["商隊"], "faction_id": 0,
+      "resources": {
+        "food": 72.0, "material": 200, "coin": 600, "weapon_melee_low": 4,
+        "armor_low": 2, "medicine": 10, "tools": 5, "goods": 50
+      },
+      "leader": {
+        "name": "T1_Leader", "age": 31, "loyalty": 0.9,
+        "skills": { "統領": 0.7, "商業": 0.5 },
+        "values": { "義氣": 0.6, "信義": 0.7, "貪婪": 0.4 }
+      },
+      "named_members": [
+        { "name": "T1_M1", "loyalty": 0.7 }
+      ],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 2000 }
+    },
+    {
+      "id": 2, "name": "敵對軍隊", "tile_pos": [7, 5], "population": 10,
+      "tags": ["軍隊"], "faction_id": 1, "is_faction_leader": true,
+      "resources": {
+        "food": 120.0, "material": 200, "coin": 600, "weapon_melee_low": 12,
+        "armor_low": 8, "medicine": 10
+      },
+      "leader": {
+        "name": "T2_Leader", "age": 32, "loyalty": 0.9,
+        "skills": { "統領": 0.7, "戰鬥": 0.4 },
+        "values": { "好戰": 0.8, "殘忍": 0.5, "義氣": 0.3 }
+      },
+      "named_members": [
+        { "name": "T2_M1", "loyalty": 0.7, "skills": { "戰鬥": 0.3 } },
+        { "name": "T2_M2", "loyalty": 0.7, "skills": { "戰鬥": 0.3 } }
+      ],
+      "outpost": { "type": "military", "level": 1, "tile_food_init": 2000 }
+    },
+    {
+      "id": 3, "name": "生產村", "tile_pos": [5, 7], "population": 12,
+      "tags": ["生產"], "faction_id": -1,
+      "resources": {
+        "food": 144.0, "material": 200, "coin": 600, "weapon_melee_low": 4,
+        "medicine": 10
+      },
+      "leader": {
+        "name": "T3_Leader", "age": 33, "loyalty": 0.9,
+        "skills": { "統領": 0.7, "生產": 0.4 },
+        "values": { "慎重": 0.6, "義氣": 0.5 }
+      },
+      "named_members": [
+        { "name": "T3_M1", "loyalty": 0.7 },
+        { "name": "T3_M2", "loyalty": 0.7 }
+      ],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 2000 }
+    },
+    {
+      "id": 4, "name": "流亡盜匪", "tile_pos": [3, 3], "population": 5,
+      "tags": ["流亡"], "faction_id": -1,
+      "resources": {
+        "food": 60.0, "coin": 600, "weapon_melee_low": 4
+      },
+      "leader": {
+        "name": "T4_Leader", "age": 34, "loyalty": 0.9,
+        "skills": { "統領": 0.7, "戰鬥": 0.4 },
+        "values": { "好戰": 0.7, "貪婪": 0.8, "義氣": 0.2 }
+      },
+      "named_members": [
+        { "name": "T4_M1", "loyalty": 0.7 },
+        { "name": "T4_M2", "loyalty": 0.7 }
+      ],
+      "outpost": { "type": "military", "level": 1, "tile_food_init": 2000 }
+    }
+  ],
+  "player": { "team_id": 0, "is_leader": true },
+  "command_schedule": [
+    { "tick": 240,  "action": "set_move_target",    "args": { "target_pos": [5, 4] } },
+    { "tick": 720,  "action": "propose_alliance",   "args": { "team_id": 3 } },
+    { "tick": 1200, "action": "submit_trade_offer", "args": {
+        "team_id": 3, "gives": { "food": 200.0 }, "wants": { "coin": 100.0 } } },
+    { "tick": 2400, "action": "attack",             "args": { "team_id": 2 } },
+    { "tick": 3600, "action": "recruit_named",      "args": { "team_id": 3 } },
+    { "tick": 4800, "action": "build_outpost",      "args": { "type": "civilian" } }
+  ]
+}

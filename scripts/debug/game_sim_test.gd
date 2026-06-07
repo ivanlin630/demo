@@ -72,60 +72,37 @@ func _initialize() -> void:
 
 # ──────────────────────────────────────────────────────────────────
 func _run_game_sim_test() -> void:
-	print("=== game_sim_test: 全功能 7200 tick (1 月) 遊戲循環測試 ===")
+	print("=== game_sim_test: 從 config 讀取場景 ===")
 
-	# ── 建立 state + runner ──
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var cmd  := PlayerCommandSystem.new()
+	var config := GameSetup.load_config("res://config/game_sim_test.json")
+	if config.is_empty():
+		print("[FAIL] config/game_sim_test.json 載入失敗")
+		return
+	GameSetup.setup(state, config)
+	var max_ticks: int = int(config.get("max_ticks", 7200))
+	var schedule: Array = config.get("command_schedule", [])
 
-	var generator = load("res://scripts/simulation/world_generator.gd").new()
-	generator.generate(state, { "radius": 6, "seed": 1234 })
+	var fid_a: int = state.teams.get(TEAM_PLAYER, TeamData.new()).faction_id
+	var fid_b: int = state.teams.get(TEAM_ENEMY, TeamData.new()).faction_id
 
-	# ── 強制路徑地形為 plains（避免 mountain 拖慢移動）──
-	for _xy in [
-		Vector2i(3,3), Vector2i(4,4), Vector2i(5,4), Vector2i(6,4),
-		Vector2i(7,5), Vector2i(5,5), Vector2i(5,6), Vector2i(5,7),
-		Vector2i(4,5), Vector2i(6,5)
-	]:
-		var _tid: int = _xy.x * 1000 + _xy.y
-		if state.world.tiles.has(_tid):
-			(state.world.tiles[_tid] as HexTileData).terrain = "plains"
+	var pt0: TeamData = state.teams.get(TEAM_PLAYER)
+	if pt0 != null:
+		_initial_player_coin = float(pt0.resources.get("coin", 0))
+		_initial_player_food = float(pt0.resources.get("food", 0))
+		_last_player_coin    = _initial_player_coin
 
-	# ── 建 5 個 outpost（S5 迴避：確保食物供給）──
-	_setup_outposts(state)
-
-	# ── 建 5 個 team + leaders + named members ──
-	_setup_teams(state)
-
-	# ── 設 player_id ──
-	state.player_id = state.teams[TEAM_PLAYER].leader_id
-
-	# ── 建 Faction A / B + 獨立 + 雙向發現 ──
-	var fid_a: int = state.create_faction(TEAM_PLAYER)   # Team0 為 Faction A leader
-	state.factions[fid_a].member_team_ids.append(TEAM_MERCHANT)
-	state.teams[TEAM_MERCHANT].faction_id = fid_a
-	var fid_b: int = state.create_faction(TEAM_ENEMY)    # Team2 為 Faction B leader
-	# Team3, Team4 = -1 獨立
-
-	# 補雙向發現（讓所有 team 互相認識）
-	for ta in state.teams.keys():
-		for tb in state.teams.keys():
-			if ta != tb and not state.team_discovered[ta].has(tb):
-				state.team_discovered[ta].append(tb)
-
-	# 紀錄初始值
-	var pt0: TeamData = state.teams[TEAM_PLAYER]
-	_initial_player_coin = float(pt0.resources.get("coin", 0))
-	_initial_player_food = float(pt0.resources.get("food", 0))
-	_last_player_coin    = _initial_player_coin
-
-	# ── 印初始設定 ──
 	print("\n=== 初始設定 ===")
-	print("  Faction A (id=%d) leader=Team%d members=%s" % [
-		fid_a, fid_a, str(state.factions[fid_a].member_team_ids)])
-	print("  Faction B (id=%d) leader=Team%d members=%s" % [
-		fid_b, fid_b, str(state.factions[fid_b].member_team_ids)])
+	if state.factions.has(fid_a):
+		print("  Faction A (id=%d) leader=Team%d members=%s" % [
+			fid_a, state.factions[fid_a].leader_team_id,
+			str(state.factions[fid_a].member_team_ids)])
+	if state.factions.has(fid_b):
+		print("  Faction B (id=%d) leader=Team%d members=%s" % [
+			fid_b, state.factions[fid_b].leader_team_id,
+			str(state.factions[fid_b].member_team_ids)])
 	print("  player_id = Person%d (Team%d leader)" % [state.player_id, TEAM_PLAYER])
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
@@ -134,39 +111,46 @@ func _run_game_sim_test() -> void:
 			float(t.resources.get("food", 0)), float(t.resources.get("coin", 0)),
 			str(t.tags), t.current_task, t.faction_id])
 
-	# ── 主迴圈 ──
-	print("\n=== 開始 7200 tick (1 月) 模擬 ===")
+	print("\n=== 開始 %d tick 模擬 ===" % max_ticks)
 	var ticks_completed: int = 0
-	for tick in range(7200):
+	for tick in range(max_ticks):
 		var player_pos: Vector2i = _player_pos(state)
-		var advance_result: String = runner.advance_tick(state, player_pos)
+		var _advance_result: String = runner.advance_tick(state, player_pos)
 		ticks_completed += 1
 
-		# 遭遇戰中：玩家 unit 若無 pending_action 自動設置（避免卡死）
 		if state.encounter_active:
 			_auto_drive_player_encounter(state, runner)
-			# 安全保護：encounter > 800 tick 仍未結束 → 強制結束（避免測試卡死）
 			if state.encounter_tick > 800:
 				print("[TestGuard] encounter 超時 (tick=%d) → 強制 draw 結束" % state.encounter_tick)
 				runner._encounter_system.resolve_encounter_end(state, "draw")
 
-		# 注入玩家指令
-		_inject_player_commands(state, cmd, tick + 1)
+		# command_schedule 注入
+		var sched_result: Dictionary = GameSetup.run_command_schedule_tick(
+			state, cmd, schedule, tick + 1)
+		var fired: Array = sched_result.get("fired", [])
+		var results: Array = sched_result.get("results", [])
+		for i in range(fired.size()):
+			var act: String = fired[i]
+			var r: Dictionary = results[i] if i < results.size() else {}
+			_record_cmd(act, r)
+			match act:
+				"propose_alliance":
+					_alliance_events_count += 1
+					_diplomatic_events_count += 1
+				"submit_trade_offer":
+					if r.get("ok", false):
+						_trade_events_count += 1
 
-		# 自動回應 NPC 強制事件（不阻塞測試）
 		if not state.player_forced_event.is_empty():
 			_auto_respond_forced(state, cmd)
 
-		# 統計（每 tick 都統計，但只在關鍵時印）
 		_collect_stats(state, tick + 1)
 
-		# 每天追蹤 named_members 數量（debug S10）
 		if (tick + 1) % 240 == 0:
 			var pt: TeamData = state.teams.get(TEAM_PLAYER)
 			if pt != null:
 				print("[DBG named] tick=%d Team0 named_count=%d population=%d persons_total=%d" % [
 					tick + 1, pt.named_members.size(), pt.population, state.persons.size()])
-		# 每天印玩家狀態（每 5 天詳細，其他天簡短）
 		if (tick + 1) % 240 == 0:
 			var day: int = (tick + 1) / 240
 			if day % 5 == 0 or day <= 5 or day >= 28:
@@ -174,24 +158,16 @@ func _run_game_sim_test() -> void:
 			else:
 				_print_daily_brief(state, day)
 
-		# 每 5 天印 Faction 矩陣
 		if (tick + 1) % (240 * 5) == 0:
 			_print_faction_matrix(state, (tick + 1) / 240, fid_a, fid_b)
 
-		# 不變量持續檢查（每 50 tick）
 		if (tick + 1) % 50 == 0:
 			_check_invariants_periodic(state)
 
-	# ── 月底總結 ──
 	_print_final_summary(state, ticks_completed)
-
-	# ── 最終不變量 ──
 	_check_invariants_final(state, ticks_completed)
-
-	# ── Feature 驗證 ──
 	_evaluate_features(state)
 
-	# ── 最終判定 ──
 	print("\n=== 最終判定 ===")
 	if _invariant_violations == 0:
 		print("  ALL INVARIANTS PASSED (violations=0)")
@@ -204,199 +180,8 @@ func _run_game_sim_test() -> void:
 
 
 # ══════════════════════════════════════════════════════════════════
-# Setup helpers
+# (setup helpers moved to GameSetup / config JSON)
 # ══════════════════════════════════════════════════════════════════
-
-func _setup_outposts(state: WorldState) -> void:
-	# 對應每 team 位置：(4,4) (5,4) (7,5) (5,7) (3,3)
-	var positions: Array = [
-		{ "pos": Vector2i(4,4), "owner": TEAM_PLAYER,   "type": "military" },
-		{ "pos": Vector2i(5,4), "owner": TEAM_MERCHANT, "type": "civilian" },
-		{ "pos": Vector2i(7,5), "owner": TEAM_ENEMY,    "type": "military" },
-		{ "pos": Vector2i(5,7), "owner": TEAM_PRODUCE,  "type": "civilian" },
-		{ "pos": Vector2i(3,3), "owner": TEAM_BANDIT,   "type": "military" },
-	]
-	for op in positions:
-		var pos: Vector2i = op["pos"]
-		var tid: int = pos.x * 1000 + pos.y
-		if not state.world.tiles.has(tid):
-			continue
-		var tile: HexTileData = state.world.tiles[tid] as HexTileData
-		tile.outpost_type  = op["type"]
-		tile.outpost_level = 1
-		tile.outpost_owner = op["owner"]
-		tile.resources["food"] = 2000.0
-
-
-# 建立 5 team 場景
-func _setup_teams(state: WorldState) -> void:
-	var data: Array = [
-		# tid, pop, tags, pos, task, leader_values, named_count
-		{ "tid": TEAM_PLAYER, "pop": 8, "tags": ["統領"],
-		  "pos": Vector2i(4,4), "task": TeamData.TASK_IDLE,
-		  "values": { "義氣": 0.7, "信義": 0.7, "野心": 0.5, "好戰": 0.3 },
-		  "named": 3 },
-		{ "tid": TEAM_MERCHANT, "pop": 6, "tags": ["商隊"],
-		  "pos": Vector2i(5,4), "task": TeamData.TASK_TRADE,
-		  "values": { "義氣": 0.6, "信義": 0.7, "貪婪": 0.4 },
-		  "named": 2 },
-		{ "tid": TEAM_ENEMY, "pop": 10, "tags": ["軍隊"],
-		  "pos": Vector2i(7,5), "task": TeamData.TASK_ATTACK,
-		  "values": { "好戰": 0.8, "殘忍": 0.5, "義氣": 0.3, "野心": 0.7 },
-		  "named": 3 },
-		{ "tid": TEAM_PRODUCE, "pop": 12, "tags": ["生產"],
-		  "pos": Vector2i(5,7), "task": TeamData.TASK_PRODUCE,
-		  "values": { "慎重": 0.6, "義氣": 0.5, "信義": 0.6 },
-		  "named": 3 },
-		{ "tid": TEAM_BANDIT, "pop": 5, "tags": ["流亡"],
-		  "pos": Vector2i(3,3), "task": TeamData.TASK_LOOT,
-		  "values": { "好戰": 0.7, "貪婪": 0.8, "義氣": 0.2, "殘忍": 0.6 },
-		  "named": 2 },
-	]
-
-	for cfg in data:
-		var tid: int = cfg["tid"]
-		var team := TeamData.new()
-		team.team_id = tid
-		team.population = cfg["pop"]
-		team.minor_population = 0
-		team.tags = cfg["tags"]
-		team.tile_pos = cfg["pos"]
-		team.current_task = cfg["task"]
-		team.guard_ratio = 0.2
-		team.resources = _make_resources(team.population, cfg["tags"].has("軍隊"))
-		# Team2 目標 = Team0（敵對軍隊鎖定玩家）
-		if tid == TEAM_ENEMY:
-			team.combat_target = -1   # 不直接寫死，讓 faction_ai 決策
-			team.move_target = state.teams.get(TEAM_PLAYER).tile_pos \
-				if state.teams.has(TEAM_PLAYER) else Vector2i(4, 4)
-		state.teams[tid] = team
-		state.team_known[tid] = []
-		state.team_discovered[tid] = []
-
-		# Leader
-		var leader := PersonData.new()
-		leader.id = tid * 10
-		leader.person_name = "T%d_Leader" % tid
-		leader.role = "leader"
-		leader.team_id = tid
-		leader.age = 30 + tid
-		leader.loyalty = 0.9
-		leader.stress = 0.0
-		leader.salary = 5.0
-		# 統領技能高，S4 迴避（cap 大避免分裂）
-		leader.skills["統領"] = 0.7
-		leader.skills["偵查"] = 0.4
-		leader.skills["戰鬥"] = 0.4 if cfg["tags"].has("軍隊") else 0.2
-		leader.skills["商業"] = 0.5 if cfg["tags"].has("商隊") else 0.1
-		leader.skills["生產"] = 0.4 if cfg["tags"].has("生產") else 0.1
-		for vk in cfg["values"]:
-			leader.values[vk] = cfg["values"][vk]
-		leader.goals = [
-			{ "type": "domination", "target_id": -1, "active": true },
-			{ "type": "wealth", "target_id": -1, "active": true },
-		]
-		state.persons[leader.id] = leader
-		team.leader_id = leader.id
-
-		# Named members
-		for n in range(cfg["named"]):
-			var p := PersonData.new()
-			p.id = tid * 10 + n + 1
-			p.person_name = "T%d_M%d" % [tid, n]
-			p.role = "civilian"
-			p.team_id = tid
-			p.age = 25 + n
-			p.loyalty = 0.7
-			p.salary = 3.0
-			p.skills["統領"] = 0.2
-			p.skills["戰鬥"] = 0.3 if cfg["tags"].has("軍隊") else 0.1
-			p.skills["偵查"] = 0.3
-			# 繼承 leader values 的一部分
-			for vk in cfg["values"]:
-				p.values[vk] = clampf(float(cfg["values"][vk]) - 0.1, 0.0, 1.0)
-			state.persons[p.id] = p
-			team.named_members.append(p.id)
-
-
-func _make_resources(pop: int, military: bool) -> Dictionary:
-	var weapon: int = 12 if military else 4
-	var armor: int  = 8  if military else 2
-	return {
-		"food": 5000.0,        # S5 迴避
-		"material": 200,
-		"coin": 600.0,          # S2 迴避（每月發 salary 也夠）
-		"goods": 50, "gem": 0,
-		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
-		"weapon_melee_low": weapon, "weapon_melee_high": 0,
-		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
-		"mounts": 0, "wagons": 0, "arrows": 0,
-		"medicine": 10, "tools": 5,
-		"armor_low": armor, "armor_high": 0,
-	}
-
-
-# ══════════════════════════════════════════════════════════════════
-# Player command injection
-# ══════════════════════════════════════════════════════════════════
-
-func _inject_player_commands(state: WorldState, cmd: PlayerCommandSystem, tick: int) -> void:
-	if tick == 240:
-		# Day 1 結束：移動玩家到 (5,4)（鄰近 Team1）
-		var r: Dictionary = cmd.move_to(state, Vector2i(5, 4))
-		_record_cmd("move_to (5,4)", r)
-	elif tick == 720:
-		# Day 3：對 Team3 提議結盟（獨立生產村）
-		# Team3 加入 pending_targets 才能交互；但 propose_alliance 不需要 pending
-		var r: Dictionary = cmd.execute_action(state, TEAM_PRODUCE, "propose_alliance")
-		_record_cmd("propose_alliance → Team%d" % TEAM_PRODUCE, r)
-		# 任何 propose_alliance 嘗試（即使拒絕）都算外交事件
-		_alliance_events_count += 1
-		_diplomatic_events_count += 1
-		if r.get("ok", false):
-			print("[Day3] 同盟成立！")
-	elif tick == 1200:
-		# Day 5：對 Team3 提交貿易 offer（食物換 coin）
-		var offer: Dictionary = {
-			"player_gives": { "food": 200.0 },
-			"player_wants": { "coin": 100.0 },
-		}
-		state.player_state["pending_trade_target"] = TEAM_PRODUCE
-		state.player_state["trade_offer"] = offer
-		var r: Dictionary = cmd.execute_action(state, TEAM_PRODUCE, "submit_trade_offer")
-		_record_cmd("submit_trade_offer 200 food → 100 coin", r)
-		if r.get("ok", false):
-			_trade_events_count += 1
-	elif tick == 1681:
-		# Day 7：剛過 salary tick=1680，coin 應已扣款（NPC team 看 anon_wage*anon_count）
-		var pt: TeamData = state.teams[TEAM_PLAYER]
-		var cur_coin: float = float(pt.resources.get("coin", 0))
-		print("[Cmd][Day7] 薪水驗證：tick=%d coin=%.2f (init=%.2f)" % [
-			tick, cur_coin, _initial_player_coin])
-	elif tick == 2400:
-		# Day 10：對 Team2 發起攻擊
-		var r: Dictionary = cmd.execute_action(state, TEAM_ENEMY, "attack")
-		_record_cmd("attack → Team%d" % TEAM_ENEMY, r)
-	elif tick == 3600:
-		# Day 15：對 Team3 招募 named member（如果可能）
-		var t3: TeamData = state.teams.get(TEAM_PRODUCE)
-		if t3 != null and not t3.named_members.is_empty():
-			var pick_id: int = t3.named_members[0]
-			# 降低 loyalty 確保願意（測試需求）
-			var pp: PersonData = state.persons.get(pick_id)
-			if pp != null:
-				pp.loyalty = 0.3
-			var r: Dictionary = cmd.execute_action_with_target(state, "recruit_named", {
-				"team_id": TEAM_PRODUCE, "member_id": pick_id })
-			_record_cmd("recruit_named P%d ← Team%d" % [pick_id, TEAM_PRODUCE], r)
-	elif tick == 4800:
-		# Day 20：建立 outpost（在已 outpost 格子會失敗，但會試一次嘗試）
-		var pt: TeamData = state.teams[TEAM_PLAYER]
-		state.player_state["build_type"] = "civilian"
-		var r: Dictionary = cmd.execute_action(state, -1, "build_outpost")
-		_record_cmd("build_outpost civilian @ pos=%s" % str(pt.tile_pos), r)
-		# 注：玩家在 (5,4) 已有 Team1 的 outpost → 預期 fail，
-		# 屬於正常防呆驗證（測試 player_command_system._action_build_outpost 路徑）
 
 
 func _record_cmd(label: String, r: Dictionary) -> void:
