@@ -42,6 +42,12 @@ func process(state: WorldState, team_ids: Array,
 			continue
 		var team: TeamData = state.teams[tid]
 		_tick_stray_mounts(team)
+		# 居民鎖：PRODUCE + 在自家 outpost + task 不在脫離清單
+		if team.tags.has(TeamData.TAG_PRODUCE):
+			var fai := FactionAISystem.new()
+			if fai._is_resident_team(state, team) \
+					and team.current_task not in ["逃跑", "投靠", "起義", "遷徙"]:
+				continue
 		if team.combat_target != -1:
 			continue
 		# strategic_assignments 優先（-1 key = 突圍；正整數 key = 包圍目標）

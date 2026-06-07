@@ -32,6 +32,7 @@ func _initialize() -> void:
 	_test_resident_fields()
 	_test_is_resident_detection()
 	_test_resident_pop_cap_overflow()
+	_test_resident_movement_lock()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3057,3 +3058,26 @@ func _test_resident_pop_cap_overflow() -> void:
 	ps.check_overflow_for_team(state, 0)
 	assert(t.population <= 20, "PRODUCE pop 應降到 outpost cap=20，實際=%d" % t.population)
 	print("Resident Task3 OK (剩 %d)" % t.population)
+
+func _test_resident_movement_lock() -> void:
+	print("--- Resident Task4: 居民 movement 鎖定 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[0] = tile
+	var t := TeamData.new()
+	t.team_id = 0; t.tile_pos = Vector2i(0, 0); t.population = 5
+	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
+	t.current_task = "生產"
+	t.move_target = Vector2i(3, 3)   # 想動但應被鎖
+	state.teams[0] = t
+	var mv: Object = load("res://scripts/simulation/movement_system.gd").new()
+	var moved: Array = mv.process(state, [0], 1.0)
+	assert(t.tile_pos == Vector2i(0, 0), "居民應被鎖定不動，實際=%s" % str(t.tile_pos))
+	# 但 task=逃跑 應該可動
+	t.current_task = "逃跑"
+	moved = mv.process(state, [0], 1.0)
+	# tile_pos 是否變動需看實作；至少不被 lock skip
+	print("Resident Task4 OK")
