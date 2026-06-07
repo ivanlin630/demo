@@ -127,6 +127,14 @@
 - **根因**：`encounter_system._create_anon_unit` 讀 `team.resources["anon_combat_skill"]`，但 `faction_ai`、`world_generator`、`TeamData` 初始化都未設置此 key
 - **位置**：`scripts/simulation/encounter_system.gd:152`；應設置於 `scripts/simulation/faction_ai_system.gd`
 - **建議**：faction_ai 根據勢力類型設定（流氓 0.2、民兵 0.3、正規軍 0.5、精銳 0.65）；或改為 `TeamData` 獨立欄位脫離 resources dict
+- **連動**：S7b（`armor_config` 同樣問題）
+
+### S7b. `armor_config` 從未由遊戲邏輯設定
+- **症狀**：主遊戲所有隊伍護甲配置固定為 `TeamData` 預設值（torso=low，其他=none），與勢力類型無關
+- **根因**：`faction_ai`、`world_generator`、`game_setup` 均未設置 `armor_config`
+- **位置**：`scripts/data/team_data.gd:62`；應設置於 `scripts/simulation/faction_ai_system.gd`
+- **影響**：所有匿名單位只穿 torso low 護甲，精銳/騎士等高階勢力無法有全身護甲
+- **建議**：faction_ai 根據勢力類型設定各 slot（精銳=全身 low，騎士=torso high+其他 low，流氓=none）
 
 ### A2. encounter_view.gd `_max_timer` 欄位缺失（pre-existing）
 - **症狀**：`unit.get("_max_timer", 10)` 永遠回傳預設值 10，計時器顯示不正確
