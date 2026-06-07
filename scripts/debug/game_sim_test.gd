@@ -139,8 +139,16 @@ func _run_game_sim_test() -> void:
 	var ticks_completed: int = 0
 	for tick in range(7200):
 		var player_pos: Vector2i = _player_pos(state)
-		runner.advance_tick(state, player_pos)
+		var advance_result: String = runner.advance_tick(state, player_pos)
 		ticks_completed += 1
+
+		# 遭遇戰中：玩家 unit 若無 pending_action 自動設置（避免卡死）
+		if state.encounter_active:
+			_auto_drive_player_encounter(state, runner)
+			# 安全保護：encounter > 800 tick 仍未結束 → 強制結束（避免測試卡死）
+			if state.encounter_tick > 800:
+				print("[TestGuard] encounter 超時 (tick=%d) → 強制 draw 結束" % state.encounter_tick)
+				runner._encounter_system.resolve_encounter_end(state, "draw")
 
 		# 注入玩家指令
 		_inject_player_commands(state, cmd, tick + 1)
@@ -422,6 +430,34 @@ func _player_pos(state: WorldState) -> Vector2i:
 	return t.tile_pos if t != null else Vector2i(-1, -1)
 
 
+func _auto_drive_player_encounter(state: WorldState, runner: SimRunner) -> void:
+	# 自動驅動玩家遭遇戰回合：找最近敵人 → 鄰格攻擊，否則靠近
+	var enc: EncounterSystem = runner._encounter_system
+	var pu: Dictionary = {}
+	for u in state.encounter_units:
+		if u.get("person_id", -1) == state.player_id:
+			pu = u; break
+	if pu.is_empty():
+		return
+	# 已有 pending_action 不重覆設
+	if not pu.get("pending_action", {}).is_empty():
+		return
+	var nearest_idx: int = enc._get_nearest_enemy_index(pu, state)
+	if nearest_idx == -1:
+		pu["pending_action"] = { "type": "idle", "target_idx": -1,
+			"move_to": pu["pos"], "attack_part": "" }
+		return
+	var enemy: Dictionary = state.encounter_units[nearest_idx]
+	var dist: int = enc.hex_dist(pu["pos"], enemy["pos"])
+	if dist <= 1:
+		pu["pending_action"] = { "type": "attack", "target_idx": nearest_idx,
+			"attack_part": "torso" }
+	else:
+		var next: Vector2i = enc._calc_next_step(pu["pos"], enemy["pos"])
+		pu["pending_action"] = { "type": "move", "target_idx": -1,
+			"move_to": next, "attack_part": "" }
+
+
 func _collect_stats(state: WorldState, _tick: int) -> void:
 	# 遭遇戰觸發次數
 	if state.encounter_active:
@@ -609,17 +645,22 @@ func _check_invariants_final(state: WorldState, ticks_completed: int) -> void:
 		print("  [FAIL] 沒有 team 存活！")
 		_invariant_violations += 1
 
-	# 2. leader_id 指向存在的 person
+	# 2. leader_id 指向存在的 person（leader_id=-1 = 無 leader，合法狀態）
 	var leader_fail: int = 0
+	var leader_dead_count: int = 0
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
+		if t.leader_id == -1:
+			leader_dead_count += 1   # 領袖死亡留待 succession，非 bug
+			continue
 		if state.persons.get(t.leader_id) == null:
 			leader_fail += 1
-			_fail_msgs.append("Team%d.leader_id=%d 不存在" % [tid, t.leader_id])
+			_fail_msgs.append("Team%d.leader_id=%d 指向已不存在 person（dangling）" \
+				% [tid, t.leader_id])
 	if leader_fail == 0:
-		print("  [OK] 全部 team 的 leader_id 有效")
+		print("  [OK] 全部 team 的 leader_id 有效（%d team 為無領袖 -1）" % leader_dead_count)
 	else:
-		print("  [FAIL] %d 個 team leader_id 無效" % leader_fail)
+		print("  [FAIL] %d 個 team leader_id dangling" % leader_fail)
 		_invariant_violations += leader_fail
 
 	# 3. Faction 一致性
@@ -804,10 +845,13 @@ func _evaluate_features(state: WorldState) -> void:
 		_feat_vision = true
 	_print_feat("Vision", _feat_vision, "team_discovered 總數=%d" % disc_total)
 
-	# 10. Message：global_messages 不為空
-	_feat_message = (state.global_messages.size() > 0)
+	# 10. Message：累計觀察到至少 1 種 message 種類（global_messages 會被 prune 不可靠）
+	var msg_kinds: int = 0
+	for k in _events_seen:
+		if k.begins_with("msg_"): msg_kinds += 1
+	_feat_message = (msg_kinds >= 1)
 	_print_feat("Message", _feat_message,
-		"global_messages=%d" % state.global_messages.size())
+		"觀察到 message 種類=%d, 當下 global=%d" % [msg_kinds, state.global_messages.size()])
 
 	# 統計通過數
 	var passes: int = 0

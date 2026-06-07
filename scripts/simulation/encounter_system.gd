@@ -1057,6 +1057,11 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			var t: TeamData = state.teams.get(team_id)
 			if t: t.combat_target = -1
 		print("[Encounter] 遭遇戰結算完成 result=%s" % result)
+		# 清理 encounter state（draw 也要清，否則 encounter_active 永遠 true）
+		state.encounter_units.clear()
+		state.encounter_active = false
+		state.encounter_attacker_id = -1
+		state.encounter_defender_id = -1
 		return
 
 	var winner_id: int = atk_id if result == "attacker_win" else def_id
