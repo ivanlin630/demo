@@ -81,6 +81,25 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	if state.world.current_tick % NEAR_CADENCE == 0:
 		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
 		if not state.player_forced_event.is_empty():
+			var fe_timeout: Dictionary = state.player_forced_event
+			if fe_timeout.get("action", "") == "aid_request":
+				var beggar_id_t: int = int(fe_timeout.get("from_id", -1))
+				var beggar_t: TeamData = state.teams.get(beggar_id_t)
+				if beggar_t != null:
+					var b_leader_t: PersonData = state.persons.get(beggar_t.leader_id)
+					var pt_t: TeamData = _get_player_team_sr(state)
+					if pt_t != null and b_leader_t != null:
+						_message_system.emit_message(state, "aid_refused",
+							"玩家未回應，視同拒絕援助 Team%d" % beggar_id_t, pt_t,
+							{ "origin": str(pt_t.team_id), "target": str(beggar_id_t) })
+						var cur_rep: float = float(beggar_t.known_reputations.get(pt_t.team_id, 0.5))
+						beggar_t.known_reputations[pt_t.team_id] = clampf(cur_rep - 0.1, 0.0, 1.0)
+						NpcAiSystem.new().write_memory(b_leader_t, "rejected_aid",
+							pt_t.team_id, state.world.current_tick, 0.5)
+					beggar_t.current_task = beggar_t.previous_task \
+						if beggar_t.previous_task != "" else TeamData.TASK_IDLE
+					beggar_t.previous_task = ""
+					beggar_t.combat_target = -1
 			print("[PlayerCmd] forced_event 超時自動拒絕: %s" % str(state.player_forced_event))
 			state.player_forced_event = {}
 			state.player_forced_event_id = ""
@@ -253,6 +272,12 @@ func _step8_generate_events(state: WorldState, team_ids: Array) -> void:
 
 func _step9_emit_messages(state: WorldState) -> void:
 	_message_system.process_pending(state)
+
+func _get_player_team_sr(state: WorldState) -> TeamData:
+	if state.player_id == -1: return null
+	var p: PersonData = state.persons.get(state.player_id)
+	if p == null: return null
+	return state.teams.get(p.team_id)
 
 func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:
 	var result: Array = []

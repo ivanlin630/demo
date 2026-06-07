@@ -43,6 +43,7 @@ var resources: Dictionary = {
 }
 var tags: Array = []
 var current_task: String = "idle"
+var previous_task: String = ""   # survival override 前的原 task，回復用
 var unrest_turns: int = 0
 var faction_id: int = -1
 var tile_pos: Vector2i = Vector2i.ZERO

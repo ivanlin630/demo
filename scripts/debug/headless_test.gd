@@ -17,6 +17,18 @@ func _initialize() -> void:
 	_test_setup_mode_explicit()
 	_test_full_config_load()
 	_test_s11_leader_succession()
+	_test_team_previous_task_field()
+	_test_survival_trigger_urgent()
+	_test_survival_sticky()
+	_test_survival_helpers()
+	_test_survival_decision_tree()
+	_test_strategic_ai_respects_survival()
+	_test_aid_resolve_npc_accept()
+	_test_aid_resolve_npc_refuse()
+	_test_aid_player_forced_event()
+	_test_aid_player_response_give()
+	_test_aid_repeated_annoyance()
+	_test_aid_stranger()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2661,3 +2673,311 @@ func _test_s11_leader_succession() -> void:
 	fai._promote_successor(state, team2)
 	assert(team2.leader_id == -1, "無 named 不應升職")
 	print("S11 OK")
+
+func _test_team_previous_task_field() -> void:
+	print("--- Survival Task1: TeamData.previous_task ---")
+	var t := TeamData.new()
+	assert(t.previous_task == "", "預設應為空字串，實際=%s" % t.previous_task)
+	t.previous_task = "貿易"
+	assert(t.previous_task == "貿易", "指派後應為 貿易")
+	print("Survival Task1 OK")
+
+func _test_survival_trigger_urgent() -> void:
+	print("--- Survival Task2: 緊急觸發 (food < 1 day) ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 100
+	team.population = 10
+	team.resources["food"] = 0.0
+	team.tile_pos = Vector2i(0, 0)
+	team.current_task = "idle"
+	var leader := PersonData.new()
+	leader.id = 200
+	leader.team_id = 100
+	leader.values = { "義氣": 0.5, "信義": 0.5, "貪婪": 0.5, "殘忍": 0.3, "好戰": 0.3, "求生欲": 0.5 }
+	state.persons[200] = leader
+	team.leader_id = 200
+	state.teams[100] = team
+	state.team_discovered[100] = []
+	var fai := FactionAISystem.new()
+	fai._evaluate_survival(state, team)
+	assert(team.current_task in FactionAISystem.SURVIVAL_TASKS,
+		"緊急觸發後應為 SURVIVAL_TASKS，實際=%s" % team.current_task)
+	print("Survival Task2 OK (task=%s)" % team.current_task)
+
+func _test_survival_sticky() -> void:
+	print("--- Survival Task2b: sticky 不重覆觸發 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 101
+	team.current_task = "乞食"
+	team.previous_task = "貿易"
+	state.teams[101] = team
+	var fai := FactionAISystem.new()
+	fai._evaluate_survival(state, team)
+	assert(team.current_task == "乞食", "sticky 不應改變 task")
+	assert(team.previous_task == "貿易", "previous_task 不應變")
+	print("Survival Task2b OK")
+
+func _test_survival_helpers() -> void:
+	print("--- Survival Task3: find helpers ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var t0 := TeamData.new()
+	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); t0.population = 10
+	state.teams[0] = t0
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5)
+	tile.outpost_level = 1
+	tile.outpost_owner = 0
+	state.world.tiles[5 * 1000 + 5] = tile
+	var t1 := TeamData.new()
+	t1.team_id = 1; t1.tile_pos = Vector2i(1, 0); t1.population = 3
+	t1.resources["food"] = 50.0
+	state.teams[1] = t1
+	state.team_discovered[0] = [1, 2]
+	var t2 := TeamData.new()
+	t2.team_id = 2; t2.tile_pos = Vector2i(2, 0); t2.population = 20
+	t2.faction_id = 99
+	t2.resources["food"] = 500.0
+	state.teams[2] = t2
+	state.team_discovered[2] = [0]
+	state.team_discovered[1] = [0]
+	var fai := FactionAISystem.new()
+	var op_pos = fai._find_own_outpost(state, t0)
+	assert(op_pos == Vector2i(5, 5), "own outpost 應 (5,5)，實際=%s" % str(op_pos))
+	var prey = fai._find_weakest_prey(state, t0)
+	assert(prey == 1, "weak prey 應 Team1，實際=%d" % prey)
+	var strong = fai._find_strong_neighbor(state, t0)
+	assert(strong == 2, "strong neighbor 應 Team2，實際=%d" % strong)
+	var aid = fai._find_aid_target(state, t0)
+	assert(aid != -1, "aid target 應有，實際=%d" % aid)
+	var t3 := TeamData.new()
+	t3.team_id = 3; t3.tile_pos = Vector2i(8, 8); t3.population = 5
+	state.teams[3] = t3
+	var no_op = fai._find_own_outpost(state, t3)
+	assert(no_op == Vector2i(-1, -1), "無 outpost 應 (-1,-1)，實際=%s" % str(no_op))
+	print("Survival Task3 OK")
+
+func _test_survival_decision_tree() -> void:
+	print("--- Survival Task4: 決策樹 4 路徑 ---")
+	var fai := FactionAISystem.new()
+	# (1) 有 outpost → return_home
+	var s1 := WorldState.new()
+	s1.world = WorldData.new()
+	var t1 := TeamData.new(); t1.team_id = 0; t1.tile_pos = Vector2i(0,0); t1.population = 5; t1.resources["food"] = 0
+	var l1 := PersonData.new(); l1.id = 100; l1.values = { "義氣": 0.3, "信義": 0.3, "殘忍": 0.2, "好戰": 0.2 }
+	s1.persons[100] = l1; t1.leader_id = 100
+	s1.teams[0] = t1; s1.team_discovered[0] = []
+	var tile1 := HexTileData.new(); tile1.tile_pos = Vector2i(3,3); tile1.outpost_level = 1; tile1.outpost_owner = 0
+	s1.world.tiles[3003] = tile1
+	fai._trigger_survival(s1, t1, "urgent")
+	assert(t1.current_task == "return_home", "Path 1 應 return_home，實際=%s" % t1.current_task)
+	# (2) 殘忍 + 鄰弱 → 掠奪
+	var s2 := WorldState.new()
+	s2.world = WorldData.new()
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(0,0); t2.population = 10; t2.resources["food"] = 0
+	var l2 := PersonData.new(); l2.id = 100; l2.values = { "殘忍": 0.7, "好戰": 0.5 }
+	s2.persons[100] = l2; t2.leader_id = 100
+	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(1,0); prey.population = 3
+	prey.resources["food"] = 50
+	s2.teams[0] = t2; s2.teams[1] = prey; s2.team_discovered[0] = [1]
+	fai._trigger_survival(s2, t2, "urgent")
+	assert(t2.current_task == TeamData.TASK_LOOT, "Path 2 應 掠奪，實際=%s" % t2.current_task)
+	# (3) 義氣 + 信義 → 投靠
+	var s3 := WorldState.new()
+	s3.world = WorldData.new()
+	var t3 := TeamData.new(); t3.team_id = 0; t3.tile_pos = Vector2i(0,0); t3.population = 5; t3.resources["food"] = 0
+	var l3 := PersonData.new(); l3.id = 100; l3.values = { "義氣": 0.7, "信義": 0.7, "求生欲": 0.5 }
+	s3.persons[100] = l3; t3.leader_id = 100
+	var ally := TeamData.new(); ally.team_id = 1; ally.tile_pos = Vector2i(2,0); ally.population = 20; ally.faction_id = 99
+	ally.resources["food"] = 500
+	var ally_leader := PersonData.new(); ally_leader.id = 200
+	s3.persons[200] = ally_leader; ally.leader_id = 200
+	s3.teams[0] = t3; s3.teams[1] = ally; s3.team_discovered[0] = [1]
+	t3.known_reputations[1] = 0.6
+	fai._trigger_survival(s3, t3, "urgent")
+	assert(t3.current_task == "投靠", "Path 3 應 投靠，實際=%s" % t3.current_task)
+	# (4) 默認 → 乞食
+	var s4 := WorldState.new()
+	s4.world = WorldData.new()
+	var t4 := TeamData.new(); t4.team_id = 0; t4.tile_pos = Vector2i(0,0); t4.population = 5; t4.resources["food"] = 0
+	var l4 := PersonData.new(); l4.id = 100; l4.values = { "義氣": 0.4, "信義": 0.4, "殘忍": 0.3, "好戰": 0.3 }
+	s4.persons[100] = l4; t4.leader_id = 100
+	var aid := TeamData.new(); aid.team_id = 1; aid.tile_pos = Vector2i(2,0); aid.population = 10
+	aid.resources["food"] = 500
+	s4.teams[0] = t4; s4.teams[1] = aid; s4.team_discovered[0] = [1]
+	fai._trigger_survival(s4, t4, "urgent")
+	assert(t4.current_task == "乞食", "Path 4 應 乞食，實際=%s" % t4.current_task)
+	print("Survival Task4 OK")
+
+func _test_strategic_ai_respects_survival() -> void:
+	print("--- Survival Task5: strategic_ai sticky ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var t := TeamData.new()
+	t.team_id = 0; t.tile_pos = Vector2i(0,0); t.population = 10
+	t.current_task = "乞食"
+	t.previous_task = "貿易"
+	state.teams[0] = t
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 0.9, "好戰": 0.9 }
+	state.persons[100] = leader; t.leader_id = 100
+	var f := FactionData.new()
+	f.faction_id = 0; f.leader_team_id = 0; f.member_team_ids = [0]
+	f.strategic_goals = [{ "type": "expand", "target_id": -1, "priority": 0.9 }]
+	state.factions[0] = f
+	var sai := StrategicAiSystem.new()
+	state.world.current_tick = StrategicAiSystem.STRATEGIC_INTERVAL
+	sai.tick(state, f)
+	assert(t.current_task == "乞食",
+		"sticky 應保持乞食 task，實際=%s" % t.current_task)
+	print("Survival Task5 OK")
+
+func _test_aid_resolve_npc_accept() -> void:
+	print("--- Survival Task6a: NPC 接受 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var b := TeamData.new(); b.team_id = 0; b.population = 10; b.resources["food"] = 0
+	b.current_task = "乞食"; b.previous_task = "貿易"
+	b.combat_target = 1; b.tile_pos = Vector2i(2,2)
+	var b_leader := PersonData.new(); b_leader.id = 100; b_leader.team_id = 0
+	state.persons[100] = b_leader; b.leader_id = 100
+	state.teams[0] = b
+	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	target.resources["food"] = 500.0
+	target.tile_pos = Vector2i(2,2)
+	var t_leader := PersonData.new(); t_leader.id = 200
+	t_leader.values = { "義氣": 0.8, "貪婪": 0.3 }
+	state.persons[200] = t_leader; target.leader_id = 200
+	state.teams[1] = target
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(r.get("accepted", false), "高義氣應接受，msg=%s" % r.get("msg", ""))
+	assert(float(b.resources["food"]) > 0.0, "beggar food 應 > 0")
+	assert(b.current_task == "貿易", "beggar 應回 previous_task，實際=%s" % b.current_task)
+	print("Survival Task6a OK (給 %.1f food)" % r.get("amount", 0.0))
+
+func _test_aid_resolve_npc_refuse() -> void:
+	print("--- Survival Task6b: NPC 拒絕 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var b := TeamData.new(); b.team_id = 0; b.population = 10; b.resources["food"] = 0
+	b.current_task = "乞食"; b.previous_task = "貿易"; b.combat_target = 1
+	var b_leader := PersonData.new(); b_leader.id = 100
+	state.persons[100] = b_leader; b.leader_id = 100
+	state.teams[0] = b
+	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	target.resources["food"] = 500.0
+	var t_leader := PersonData.new(); t_leader.id = 200
+	t_leader.values = { "義氣": 0.1, "貪婪": 0.9 }
+	state.persons[200] = t_leader; target.leader_id = 200
+	state.teams[1] = target
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(not r.get("accepted", true), "極吝嗇應拒絕")
+	assert(float(b.resources["food"]) == 0.0, "beggar food 應仍 0")
+	assert(b.current_task == "貿易", "拒絕後 beggar 仍回 previous_task")
+	print("Survival Task6b OK")
+
+func _test_aid_player_forced_event() -> void:
+	print("--- Survival Task7a: 玩家收到 aid forced event ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 200
+	var pt := TeamData.new(); pt.team_id = 0; pt.population = 10
+	pt.resources["food"] = 500.0
+	pt.leader_id = 200
+	state.teams[0] = pt
+	var player := PersonData.new(); player.id = 200; player.team_id = 0
+	state.persons[200] = player
+	var b := TeamData.new(); b.team_id = 1; b.population = 10
+	b.resources["food"] = 0; b.combat_target = 0; b.current_task = "乞食"
+	b.previous_task = "idle"
+	var b_leader := PersonData.new(); b_leader.id = 300
+	state.persons[300] = b_leader; b.leader_id = 300
+	state.teams[1] = b
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 1, 0)
+	assert(r.get("pending", false), "玩家 target 應 pending")
+	assert(not state.player_forced_event.is_empty(), "forced_event 應寫入")
+	assert(state.player_forced_event.get("action") == "aid_request",
+		"forced action 應為 aid_request")
+	print("Survival Task7a OK")
+
+func _test_aid_player_response_give() -> void:
+	print("--- Survival Task7b: 玩家給予回應 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 200
+	var pt := TeamData.new(); pt.team_id = 0; pt.population = 10
+	pt.resources["food"] = 500.0; pt.leader_id = 200
+	state.teams[0] = pt
+	var player := PersonData.new(); player.id = 200; player.team_id = 0
+	state.persons[200] = player
+	var b := TeamData.new(); b.team_id = 1; b.population = 10
+	b.resources["food"] = 0; b.current_task = "乞食"; b.previous_task = "idle"
+	var b_leader := PersonData.new(); b_leader.id = 300
+	state.persons[300] = b_leader; b.leader_id = 300
+	state.teams[1] = b
+	state.player_forced_event = { "from_id": 1, "action": "aid_request" }
+	state.player_state["aid_response"] = { "give_amount": 50.0 }
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd.execute_action(state, 1, "respond_aid_request")
+	assert(r.get("ok", false), "respond 應成功")
+	assert(float(b.resources["food"]) == 50.0, "beggar 應收 50 food，實際=%.1f" % float(b.resources["food"]))
+	assert(float(pt.resources["food"]) == 450.0, "玩家應扣 50 food，實際=%.1f" % float(pt.resources["food"]))
+	assert(b.current_task == "idle", "beggar 應回 previous_task，實際=%s" % b.current_task)
+	assert(state.player_forced_event.is_empty(), "forced_event 應清空")
+	print("Survival Task7b OK")
+
+func _test_aid_repeated_annoyance() -> void:
+	print("--- Survival Task9a: 反覆乞食 annoyance ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var b := TeamData.new(); b.team_id = 0; b.population = 10
+	b.combat_target = 1
+	var b_leader := PersonData.new(); b_leader.id = 100
+	state.persons[100] = b_leader; b.leader_id = 100
+	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	target.resources["food"] = 5000.0
+	var t_leader := PersonData.new(); t_leader.id = 200
+	t_leader.values = { "義氣": 0.5, "貪婪": 0.3 }
+	state.persons[200] = t_leader; target.leader_id = 200
+	state.teams[0] = b; state.teams[1] = target
+	var inter := InteractionSystem.new()
+	var accepted_count: int = 0
+	for i in range(5):
+		b.resources["food"] = 0
+		b.current_task = "乞食"; b.previous_task = "idle"
+		b.combat_target = 1
+		var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+		if r.get("accepted", false):
+			accepted_count += 1
+	assert(accepted_count < 5,
+		"反覆乞食 5 次應有拒絕，全接受 = annoyance 機制無效")
+	print("Survival Task9a OK (5 次中接受 %d 次)" % accepted_count)
+
+func _test_aid_stranger() -> void:
+	print("--- Survival Task9b: 陌生 team 也可乞食 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var b := TeamData.new(); b.team_id = 0; b.population = 5
+	b.combat_target = 1; b.current_task = "乞食"; b.previous_task = "idle"
+	var b_leader := PersonData.new(); b_leader.id = 100
+	state.persons[100] = b_leader; b.leader_id = 100
+	state.teams[0] = b
+	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	target.resources["food"] = 500.0
+	var t_leader := PersonData.new(); t_leader.id = 200
+	t_leader.values = { "義氣": 0.7, "貪婪": 0.2 }
+	state.persons[200] = t_leader; target.leader_id = 200
+	state.teams[1] = target
+	assert(not target.known_reputations.has(0), "預設無 rep 記錄")
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(r.get("accepted", false), "陌生 + 高義氣 target 應接受")
+	print("Survival Task9b OK")

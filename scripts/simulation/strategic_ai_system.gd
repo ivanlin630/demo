@@ -108,10 +108,15 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
         target_id, {}).get("tile_pos", target.tile_pos)
     for i in range(member_teams.size()):
         var t: TeamData = member_teams[i]
+        if t.current_task in FactionAISystem.SURVIVAL_TASKS:
+            continue
         var dir: Vector2i = dirs[i % dirs.size()]
         t.strategic_assignments[target_id] = target_pos + dir * 2
 
 func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
+    if self_team.current_task in FactionAISystem.SURVIVAL_TASKS:
+        self_team.strategic_assignments.erase(-1)
+        return
     var enemy_teams: Array = []
     for tid in state.team_discovered.get(self_team.team_id, []):
         var t: TeamData = state.teams.get(tid)
