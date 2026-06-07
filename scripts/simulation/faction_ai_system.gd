@@ -526,6 +526,33 @@ func _update_anon_wage(team: TeamData) -> void:
 			TeamData.TAG_EXILE:    best = minf(best, 0.3)
 	team.anon_wage = clampf(best, 0.0, 2.0)
 
+func _update_armor_config(team: TeamData) -> void:
+	var pop_threshold: float = team.population * 0.3
+	var has_high: bool = int(team.resources.get("armor_high", 0)) >= pop_threshold
+	var has_low:  bool = int(team.resources.get("armor_low", 0))  >= pop_threshold
+	# 重設全 none，再依條件填值
+	team.armor_config = {
+		"head": "none", "torso": "none",
+		"right_arm": "none", "left_arm": "none",
+		"right_leg": "none", "left_leg": "none",
+	}
+	var is_mil: bool = team.tags.has(TeamData.TAG_MILITARY)
+	var is_mer: bool = team.tags.has(TeamData.TAG_MERCHANT)
+	if is_mil and has_high:
+		team.armor_config["torso"]     = "high"
+		team.armor_config["head"]      = "low"
+		team.armor_config["right_arm"] = "low"
+		team.armor_config["left_arm"]  = "low"
+		team.armor_config["right_leg"] = "low"
+		team.armor_config["left_leg"]  = "low"
+	elif is_mil and has_low:
+		team.armor_config["torso"] = "low"
+		team.armor_config["head"]  = "low"
+	elif is_mer and has_low:
+		team.armor_config["torso"] = "low"
+	elif has_low:
+		team.armor_config["torso"] = "low"
+
 # ──────── 輔助函數 ────────
 
 func _can_trade(state: WorldState, team: TeamData) -> bool:

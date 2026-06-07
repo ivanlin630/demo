@@ -5,6 +5,7 @@ func _initialize() -> void:
 	_test_anon_combat_skill_field()
 	_test_update_anon_combat_skill()
 	_test_update_anon_wage()
+	_test_update_armor_config()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2229,3 +2230,41 @@ func _test_update_anon_wage() -> void:
 	assert(t_def.anon_wage >= 0.9 and t_def.anon_wage <= 1.1,
 		"default 應 ~1.0，實際=%s" % str(t_def.anon_wage))
 	print("S7 Task4 OK")
+
+func _test_update_armor_config() -> void:
+	print("--- S7 Task5: _update_armor_config ---")
+	var fai := FactionAISystem.new()
+	# MILITARY + 高甲庫存充足
+	var t1 := TeamData.new()
+	t1.tags = [TeamData.TAG_MILITARY]
+	t1.population = 10
+	t1.resources["armor_high"] = 20
+	t1.resources["armor_low"]  = 20
+	fai._update_armor_config(t1)
+	assert(t1.armor_config["torso"] == "high",
+		"MILITARY+high 充足 torso 應 high，實際=%s" % t1.armor_config["torso"])
+	assert(t1.armor_config["right_arm"] == "low",
+		"MILITARY+high 充足 arm 應 low，實際=%s" % t1.armor_config["right_arm"])
+	# MILITARY + 僅低甲
+	var t2 := TeamData.new()
+	t2.tags = [TeamData.TAG_MILITARY]
+	t2.population = 10
+	t2.resources["armor_low"]  = 20
+	t2.resources["armor_high"] = 0
+	fai._update_armor_config(t2)
+	assert(t2.armor_config["torso"] == "low",
+		"MILITARY+僅低 torso 應 low，實際=%s" % t2.armor_config["torso"])
+	assert(t2.armor_config["head"] == "low",
+		"MILITARY+僅低 head 應 low，實際=%s" % t2.armor_config["head"])
+	assert(t2.armor_config["right_arm"] == "none",
+		"MILITARY+僅低 arm 應 none，實際=%s" % t2.armor_config["right_arm"])
+	# 無護甲 → 全 none
+	var t3 := TeamData.new()
+	t3.tags = [TeamData.TAG_MILITARY]
+	t3.population = 10
+	t3.resources["armor_low"]  = 0
+	t3.resources["armor_high"] = 0
+	fai._update_armor_config(t3)
+	assert(t3.armor_config["torso"] == "none",
+		"無甲 torso 應 none，實際=%s" % t3.armor_config["torso"])
+	print("S7 Task5 OK")
