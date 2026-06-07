@@ -2,6 +2,7 @@ class_name SimRunner
 
 const LOD_NEAR_RADIUS: int = 3
 const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
+const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更新頻率（1h，可調）
 
 const FATIGUE_PER_DAY: float          = 0.048   # TEST VALUE — 約 20.8 天疲勞滿（原 0.002×24）
 const FATIGUE_RECOVERY_PER_DAY: float = 0.24    # TEST VALUE — 約 4.2 天回滿（原 0.01×24）
@@ -77,7 +78,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	var far_teams := _get_far_teams(state, player_pos)
 
 	# 近區：每小時執行
-	if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
+	if state.world.current_tick % NEAR_CADENCE == 0:
 		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
 		if not state.player_forced_event.is_empty():
 			print("[PlayerCmd] forced_event 超時自動拒絕: %s" % str(state.player_forced_event))
@@ -97,9 +98,9 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step5_collect_resources(state, near_teams)
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, near_teams)
-		_step6_resolve_consumption(state, near_teams)
+		_step6_resolve_consumption(state, near_teams, NEAR_CADENCE)
 		_step6c_salary(state, near_teams)
-		_step6d_fatigue(state, near_teams)
+		_step6d_fatigue(state, near_teams, NEAR_CADENCE)
 		_step6b_faction_ai(state, near_teams)
 		_step6e_strategic_ai(state)
 		_step7_person_reactions(state, near_teams)
@@ -123,9 +124,9 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step5_collect_resources(state, far_teams)
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, far_teams)
-		_step6_resolve_consumption(state, far_teams)
+		_step6_resolve_consumption(state, far_teams, FAR_ZONE_INTERVAL)
 		_step6c_salary(state, far_teams)
-		_step6d_fatigue(state, far_teams)
+		_step6d_fatigue(state, far_teams, FAR_ZONE_INTERVAL)
 		_step6b_faction_ai(state, far_teams)
 		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
@@ -199,13 +200,14 @@ func _step5a_regenerate_tiles(state: WorldState) -> void:
 func _step5b_manufacture(state: WorldState, team_ids: Array) -> void:
 	_manufacturing_system.tick_all(state, team_ids)
 
-func _step6_resolve_consumption(state: WorldState, team_ids: Array) -> void:
-	_resource_system.resolve_consumption(state, team_ids)
+func _step6_resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
+	_resource_system.resolve_consumption(state, team_ids, cadence_ticks)
 
 func _step6c_salary(state: WorldState, team_ids: Array) -> void:
 	_salary_system.tick(state, team_ids)
 
-func _step6d_fatigue(state: WorldState, team_ids: Array) -> void:
+func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
+	var day_fraction: float = float(cadence_ticks) / float(WorldState.TICKS_PER_DAY)
 	var time_mult: float = _get_time_fatigue_mult(state)
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
@@ -213,14 +215,14 @@ func _step6d_fatigue(state: WorldState, team_ids: Array) -> void:
 		if team.current_task == "rest":
 			# 紮營休息
 			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
-			team.fatigue -= FATIGUE_RECOVERY_PER_DAY / float(WorldState.TICKS_PER_DAY) * rest_mult
+			team.fatigue -= FATIGUE_RECOVERY_PER_DAY * day_fraction * rest_mult
 			team.fatigue = maxf(team.fatigue, 0.0)
 		else:
 			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 			var tile = state.world.tiles.get(tile_id)
 			var terrain: String = tile.terrain if tile else "plains"
 			var terrain_mult: float = TERRAIN_FATIGUE_MULT.get(terrain, 1.0)
-			team.fatigue += FATIGUE_PER_DAY / float(WorldState.TICKS_PER_DAY) * terrain_mult * time_mult
+			team.fatigue += FATIGUE_PER_DAY * day_fraction * terrain_mult * time_mult
 			team.fatigue = minf(team.fatigue, 1.0)
 		if team.fatigue >= 1.0:
 			for pid in team.named_members:

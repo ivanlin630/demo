@@ -43,10 +43,12 @@
 | REGEN forest material | `simulation/resource_system.gd:9` | 12.0/tick | 林地木材再生 | — |
 | `FOOD_RESERVE_TICKS` | `simulation/interaction_system.gd:32` | 20.0 | 交易自留底線=20tick食物 | — |
 
-### 食物存量參考（主場景 test setup）
+### 食物存量參考（主場景 test setup，cadence-aware 修正後）
 - 初始 food = 300，人口 = 10
-- 每天消耗 = 10 × 0.1 × 24 = **24 food/天**
+- 每天消耗 = 10 × `FOOD_PER_PERSON_PER_DAY (2.4)` = **24 food/天**
 - 無 outpost → 300 food ÷ 24 = **約 12.5 天後斷糧**
+
+> 註：2026-06-07 之前公式 bug 導致實際消耗為設計值 1/10（每天 2.4 食物 → 125 天），cadence-aware 修正後對齊設計值。
 
 ---
 
@@ -54,7 +56,7 @@
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 | 建議意義 |
 |---|---|---|---|---|---|
-| `SALARY_INTERVAL` | `simulation/salary_system.gd:3` | **30** | **每1.25天發薪** ← 太頻繁 | **720** | 每月（30天）發薪 |
+| `SALARY_INTERVAL` | `simulation/salary_system.gd:3` | **1680** | 每週發薪 | — | — |
 | `SALARY_PER_SKILL_POINT` | `simulation/salary_system.gd:4` | 2.0 | 每點技能 = 2 coin/次 | — | |
 | `OVERPAY_BONUS` | `simulation/salary_system.gd:5` | 0.02 | 超薪忠誠 +0.02/次 | — | |
 | `SALARY_LOYALTY_PENALTY` | `simulation/salary_system.gd:6` | 0.03 | 欠薪忠誠 -0.03/次 | — | |
@@ -120,6 +122,7 @@
 | 薪水太頻繁 | `SALARY_INTERVAL = 30` | 改 720（30天/次） |
 | 同盟檢查太頻繁 | `ALLIANCE_CHECK_INTERVAL = 30` | 改 240（10天/次） |
 | NPC 消失（人口掉） | 暴露公式 + test setup 食物不足 | main.gd 加食物 or 降門檻 |
+| 食物/疲勞 1/10 速率 bug | 公式 /TICKS_PER_DAY 假設每 tick 跑，實際每 hour | ✅ 已修（2026-06-07，cadence-aware）|
 
 ---
 

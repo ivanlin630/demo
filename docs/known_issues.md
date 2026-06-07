@@ -153,6 +153,12 @@
 - **位置**：`scripts/ui/encounter_view.gd:263`
 - **建議**：`_create_named_unit` 加 `_max_timer` 欄位，或 encounter_view 改讀正確欄位
 
+### S8. `p.salary` 預設值未對齊週發薪語意
+- **症狀**：`SALARY_INTERVAL` 改為 1 週後，月發薪總量變 4 倍；`p.salary` 若原為月薪意圖則玩家月支出爆增
+- **位置**：`scripts/simulation/sim_runner.gd`、`scripts/data/person_data.gd`、各 `game_setup`
+- **建議**：grep 所有設定 `p.salary = N` 的地方，N 改為 N/4；或加註解明確「per-pay-period」語意
+- **連動**：2026-06-07 cadence-aware 修正後浮現
+
 ---
 
 ## 待討論（設計決策）

@@ -8,6 +8,11 @@ func _initialize() -> void:
 	_test_update_armor_config()
 	_test_update_guard_ratio()
 	_test_faction_ai_run_calls_all_updates()
+	_test_food_consumption_total()
+	_test_fatigue_accumulation()
+	_test_fatigue_recovery()
+	_test_salary_interval_weekly()
+	_test_intervals_divisible_by_cadence()
 	quit()
 
 func _run_sim_test() -> void:
@@ -1025,8 +1030,8 @@ func _run_sim_test() -> void:
 		"TICKS_PER_SEASON 應 = TICKS_PER_DAY*90")
 	assert(WorldState.TICKS_PER_YEAR   == WorldState.TICKS_PER_DAY * 360,
 		"TICKS_PER_YEAR 應 = TICKS_PER_DAY*360")
-	assert(SalarySystem.SALARY_INTERVAL == WorldState.TICKS_PER_MONTH,
-		"SALARY_INTERVAL 應 = TICKS_PER_MONTH")
+	assert(SalarySystem.SALARY_INTERVAL == WorldState.TICKS_PER_DAY * 7,
+		"SALARY_INTERVAL 應 = 1週(TICKS_PER_DAY*7)")
 	assert(HarvestSystem.SEASON_LENGTH  == WorldState.TICKS_PER_SEASON,
 		"SEASON_LENGTH 應 = TICKS_PER_SEASON")
 	assert(PopulationSystem.OVERFLOW_CHECK_INTERVAL == WorldState.TICKS_PER_DAY,
@@ -2367,3 +2372,105 @@ func _test_faction_ai_run_calls_all_updates() -> void:
 	assert(t.guard_ratio >= 0.15 and t.guard_ratio <= 0.5,
 		"evaluate_all() 後 guard_ratio 應在合理範圍，實際=%s" % str(t.guard_ratio))
 	print("S7 Task7 OK")
+
+func _test_food_consumption_total() -> void:
+	print("--- Cadence Task2: 食物消耗總量 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = 10
+	team.minor_population = 0
+	team.resources["food"] = 2400.0
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	# 模擬跑 1 天（240 tick），每 NEAR_CADENCE=10 call 一次 → 24 calls
+	for _i in range(24):
+		rs.resolve_consumption(state, [0], 10)
+	# 預期消耗：10 × 2.4 = 24 食物/天 → 剩 2376
+	var remaining: float = float(team.resources["food"])
+	assert(remaining >= 2375.0 and remaining <= 2377.0,
+		"1 天後應剩 ~2376，實際=%s" % str(remaining))
+	print("Cadence Task2 OK")
+
+func _test_fatigue_accumulation() -> void:
+	print("--- Cadence Task3: 疲勞累積總量 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = 10
+	team.fatigue = 0.0
+	team.current_task = TeamData.TASK_ATTACK   # 行軍狀態
+	team.tile_pos = Vector2i(0, 0)
+	# 設定地形為 plains
+	var tile := HexTileData.new()
+	tile.terrain = "plains"
+	state.world.tiles[0] = tile
+	state.teams[0] = team
+	var sr := SimRunner.new()
+	# 模擬跑 1 天（24 calls）
+	for _i in range(24):
+		sr._step6d_fatigue(state, [0], 10)
+	# 預期：0.048/day → ≈ 0.048
+	assert(team.fatigue >= 0.04 and team.fatigue <= 0.06,
+		"1 天行軍後 fatigue 應 ~0.048，實際=%s" % str(team.fatigue))
+	print("Cadence Task3 OK")
+
+func _test_fatigue_recovery() -> void:
+	print("--- Cadence Task4: 疲勞回復總量 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = 10
+	team.fatigue = 1.0   # 從滿開始
+	team.current_task = "rest"   # 紮營
+	team.guard_ratio = 0.0       # 無哨兵，確保 rest_mult=1.0
+	team.tile_pos = Vector2i(0, 0)
+	var tile := HexTileData.new()
+	tile.terrain = "plains"
+	state.world.tiles[0] = tile
+	state.teams[0] = team
+	var sr := SimRunner.new()
+	# 跑 1 天紮營
+	for _i in range(24):
+		sr._step6d_fatigue(state, [0], 10)
+	# 預期：fatigue -= 0.24/day → ≈ 0.76
+	assert(team.fatigue >= 0.74 and team.fatigue <= 0.78,
+		"1 天紮營後 fatigue 應 ~0.76，實際=%s" % str(team.fatigue))
+	print("Cadence Task4 OK")
+
+func _test_salary_interval_weekly() -> void:
+	print("--- Cadence Task5: 薪水週期 ---")
+	# SALARY_INTERVAL 應為 1 週（240 × 7 = 1680 tick）
+	assert(SalarySystem.SALARY_INTERVAL == WorldState.TICKS_PER_DAY * 7,
+		"SALARY_INTERVAL 應為 1 週(1680)，實際=%s" % str(SalarySystem.SALARY_INTERVAL))
+	# 確認 NEAR_CADENCE 整除性（1680 % 10 == 0）
+	assert(SalarySystem.SALARY_INTERVAL % SimRunner.NEAR_CADENCE == 0,
+		"SALARY_INTERVAL 必須是 NEAR_CADENCE 倍數")
+	print("Cadence Task5 OK")
+
+func _test_intervals_divisible_by_cadence() -> void:
+	print("--- Cadence Task6: interval 整除性 ---")
+	var cadence: int = SimRunner.NEAR_CADENCE
+	# 列出所有應該被 cadence 觸發的 interval 常數
+	var intervals: Dictionary = {
+		"STRATEGIC_INTERVAL":      StrategicAiSystem.STRATEGIC_INTERVAL,
+		"ALLIANCE_CHECK_INTERVAL": StrategicAiSystem.ALLIANCE_CHECK_INTERVAL,
+		"BETRAY_CHECK_INTERVAL":   DiplomaticAiSystem.BETRAY_CHECK_INTERVAL,
+		"FACTION_UPDATE_INTERVAL": FactionAISystem.FACTION_UPDATE_INTERVAL,
+		"COLLECT_INTERVAL":        FactionAISystem.COLLECT_INTERVAL,
+		"GOAL_CHECK_INTERVAL":     ReactionSystem.GOAL_CHECK_INTERVAL,
+		"SALARY_INTERVAL":         SalarySystem.SALARY_INTERVAL,
+		"FAR_ZONE_INTERVAL":       SimRunner.FAR_ZONE_INTERVAL,
+		"OVERFLOW_CHECK_INTERVAL": PopulationSystem.OVERFLOW_CHECK_INTERVAL,
+	}
+	for name in intervals:
+		var val: int = intervals[name]
+		assert(val % cadence == 0,
+			"%s=%d 必須是 NEAR_CADENCE(%d) 倍數" % [name, val, cadence])
+	# TICKS_PER_DAY 也必須整除（保證每天整除次數）
+	assert(WorldState.TICKS_PER_DAY % cadence == 0,
+		"TICKS_PER_DAY 必須是 NEAR_CADENCE 倍數")
+	print("Cadence Task6 OK")
