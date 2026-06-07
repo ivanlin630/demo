@@ -455,6 +455,11 @@ func _decide_action(unit_idx: int, state: WorldState,
 	if unit["person_id"] != -1:
 		var p: PersonData = state.persons.get(unit["person_id"])
 		if p: archer_skill = float(p.skills.get("弓箭", 0.0))
+	else:
+		# anon 單位：以持有遠端武器作為弓箭手判斷，技能從 unit["skills"] 讀
+		var h1_grade: String = unit.get("equipment", {}).get("hand_1", {}).get("grade", "")
+		if h1_grade.contains("ranged"):
+			archer_skill = float(unit.get("skills", {}).get("弓箭", 0.3))
 	is_archer = archer_skill > 0.1 and _has_arrows(unit)
 
 	if is_archer:

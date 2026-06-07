@@ -54,15 +54,16 @@ func _run() -> void:
 	atk.leader_id        = 0
 	atk.named_members    = []          # leader 不算進 named_members
 	atk.population       = 20
-	atk.armed_anon_ratio = 0.5         # 5 個匿名參戰
+	atk.armed_anon_ratio = 0.5         # 10 個匿名參戰
 	atk.fatigue          = 0.0
 	atk.resources        = TeamData.new().resources.duplicate()
 	atk.resources["weapon_melee_low"]  = 10
 	atk.resources["weapon_ranged_low"] = 10
-	atk.resources["armor_low"]         = 10
+	atk.resources["armor_low"]         = 20
+	atk.resources["arrows"]            = 200
 	atk.resources["anon_combat_skill"] = 0.35
 	# equip_order: 3 近戰 + 2 遠端（_assign_anon_weapons 會按此分配）
-	atk.equip_order = { "melee_low": 3, "melee_high": 0, "ranged_low": 2, "ranged_high": 0 }
+	atk.equip_order = { "melee_low": 5, "melee_high": 0, "ranged_low": 5, "ranged_high": 0 }
 	state.teams[0] = atk
 
 	# ── 防守方（NPC 隊）：人少但精銳，全近戰 ────────────────────────────────
