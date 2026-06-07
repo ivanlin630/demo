@@ -10,6 +10,7 @@ func _initialize() -> void:
 	_test_faction_ai_run_calls_all_updates()
 	_test_food_consumption_total()
 	_test_fatigue_accumulation()
+	_test_fatigue_recovery()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2413,3 +2414,27 @@ func _test_fatigue_accumulation() -> void:
 	assert(team.fatigue >= 0.04 and team.fatigue <= 0.06,
 		"1 天行軍後 fatigue 應 ~0.048，實際=%s" % str(team.fatigue))
 	print("Cadence Task3 OK")
+
+func _test_fatigue_recovery() -> void:
+	print("--- Cadence Task4: 疲勞回復總量 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = 10
+	team.fatigue = 1.0   # 從滿開始
+	team.current_task = "rest"   # 紮營
+	team.guard_ratio = 0.0       # 無哨兵，確保 rest_mult=1.0
+	team.tile_pos = Vector2i(0, 0)
+	var tile := HexTileData.new()
+	tile.terrain = "plains"
+	state.world.tiles[0] = tile
+	state.teams[0] = team
+	var sr := SimRunner.new()
+	# 跑 1 天紮營
+	for _i in range(24):
+		sr._step6d_fatigue(state, [0], 10)
+	# 預期：fatigue -= 0.24/day → ≈ 0.76
+	assert(team.fatigue >= 0.74 and team.fatigue <= 0.78,
+		"1 天紮營後 fatigue 應 ~0.76，實際=%s" % str(team.fatigue))
+	print("Cadence Task4 OK")
