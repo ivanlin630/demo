@@ -31,6 +31,7 @@ func _initialize() -> void:
 	_test_aid_stranger()
 	_test_resident_fields()
 	_test_is_resident_detection()
+	_test_resident_pop_cap_overflow()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3033,3 +3034,26 @@ func _test_is_resident_detection() -> void:
 	tile.outpost_level = 1
 	assert(fai._outpost_pop_cap(state, Vector2i(5, 5)) == 15, "military L1 應 15")
 	print("Resident Task2 OK")
+
+func _test_resident_pop_cap_overflow() -> void:
+	print("--- Resident Task3: PRODUCE 用 outpost cap 溢出 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_level = 1
+	tile.outpost_type = "civilian"
+	tile.outpost_owner = 0
+	state.world.tiles[0] = tile
+	# PRODUCE team pop=30，超過 L1 cap=20
+	var t := TeamData.new()
+	t.team_id = 0; t.tile_pos = Vector2i(0, 0); t.population = 30
+	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	leader.skills = { "統領": 0.9 }   # 統領高,普通 cap 會大,但 PRODUCE 應用 outpost cap=20
+	state.persons[100] = leader; t.leader_id = leader.id
+	state.teams[0] = t
+	var ps := PopulationSystem.new()
+	ps.check_overflow_for_team(state, 0)
+	assert(t.population <= 20, "PRODUCE pop 應降到 outpost cap=20，實際=%d" % t.population)
+	print("Resident Task3 OK (剩 %d)" % t.population)
