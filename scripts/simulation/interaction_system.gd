@@ -793,20 +793,21 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 		var f: FactionData = state.factions[faction_id]
 		if not f.member_team_ids.has(team_id):
 			f.member_team_ids.append(team_id)
-	# 若該 outpost 已有 PRODUCE team → 嘗試合併
-	var existing: int = _find_existing_resident(state, outpost_pos, team_id)
+	# 若該 outpost 已有同 faction PRODUCE team → 嘗試合併
+	var existing: int = _find_existing_resident(state, outpost_pos, team_id, faction_id)
 	if existing != -1:
 		var fai := FactionAISystem.new()
 		var cap: int = fai._outpost_pop_cap(state, outpost_pos)
-		var et: TeamData = state.teams[existing]
-		if et.population + t.population <= cap:
+		var et: TeamData = state.teams.get(existing)
+		if et != null and et.population + t.population <= cap:
 			SubteamSystem.new().merge_teams(state, existing, team_id, t.named_members)
 
-func _find_existing_resident(state: WorldState, pos: Vector2i, exclude_id: int) -> int:
+func _find_existing_resident(state: WorldState, pos: Vector2i, exclude_id: int, faction_id: int = -2) -> int:
 	for tid in state.teams:
 		if tid == exclude_id: continue
 		var t: TeamData = state.teams[tid]
 		if t.tile_pos == pos and t.tags.has(TeamData.TAG_PRODUCE):
+			if faction_id != -2 and t.faction_id != faction_id: continue
 			return tid
 	return -1
 
