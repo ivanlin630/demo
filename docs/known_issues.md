@@ -165,6 +165,27 @@
 - **設計意圖**：玩家管理 loyalty 的關鍵手段（過薪換忠誠）
 - **建議**：team panel 加每個 named NPC 薪資設定，顯示「目前 / 公平」比值
 
+### S10. `named_members` 失控膨脹（game_sim_test 發現）
+- **症狀**：跑 7200 tick，Team0 `named_members` 從 2 暴漲到 963 名
+- **可能根因**：recruit / event / faction_ai 某條路徑無上限 append
+- **影響**：encounter spawn 灌爆 unit 數、loyalty 計算偏差、儲存膨脹
+- **位置**：grep `named_members.append` 找：event_unrest_replace/split、player_command_system、subteam_system
+- **建議**：加上限檢查（cap=20？），或審視每個 append 路徑的觸發條件
+- **發現**：2026-06-07 game_sim_test.gd 跑出來
+
+### S11. Leader 死亡後無 succession，team.leader_id=-1 卡住
+- **症狀**：遭遇戰 leader 戰死 → `encounter_system.resolve_encounter_end` 設 `team.leader_id = -1`；之後 team 永遠無 leader
+- **影響**：薪水系統 `_pay_salary` 找不到 leader 個性 → fallback；guard_ratio 等 leader-driven 邏輯失效
+- **建議**：實作 succession（最高統領技能 named member 接位）；或事件觸發玩家選擇繼承人
+- **位置**：`scripts/simulation/encounter_system.gd:1042`
+- **發現**：2026-06-07 game_sim_test.gd 跑出來
+
+### S12. encounter draw 不清 state.encounter_active ✅ 已修（2026-06-07）
+- **症狀**：`resolve_encounter_end` result="draw" 提早 return，沒清 encounter_active → 世界永久卡 encounter 模式，所有非遭遇戰系統凍結
+- **修正**：draw 分支也清 encounter_units / encounter_active / attacker_id / defender_id
+- **位置**：`scripts/simulation/encounter_system.gd:1054-1066`
+- **發現**：2026-06-07 game_sim_test.gd 跑出來
+
 ---
 
 ## 待討論（設計決策）
