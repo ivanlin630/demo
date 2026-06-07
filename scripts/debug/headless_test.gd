@@ -37,6 +37,7 @@ func _initialize() -> void:
 	_test_resident_tax_with_stress()
 	_test_invite_settle_execute()
 	_test_subteam_settle()
+	_test_uprising_trigger()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3192,3 +3193,31 @@ func _test_subteam_settle() -> void:
 	assert(not sub.tags.has("子團"), "應 erase 子團")
 	assert(sub.parent_team_id == -1, "應脫離 parent")
 	print("Resident Task8 OK")
+
+func _test_uprising_trigger() -> void:
+	print("--- Resident Task9: 起義觸發 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 99
+	state.world.tiles[0] = tile
+	var owner := TeamData.new(); owner.team_id = 99; owner.faction_id = 10
+	state.teams[99] = owner
+	# 居民 team：低 loyalty + 高 unrest + 多 stress sources
+	var v := TeamData.new()
+	v.team_id = 0; v.population = 10; v.faction_id = 10
+	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0, 0)
+	v.tax_rate = 0.7   # 重稅 source
+	v.resources["food"] = 30   # 飢餓 source
+	v.unrest_turns = 70   # 已過閾值
+	var l := PersonData.new(); l.id = 100; l.loyalty = 0.1
+	state.persons[100] = l; v.leader_id = 100
+	state.teams[0] = v
+	var fai := FactionAISystem.new()
+	fai._evaluate_uprising(state, v)
+	assert(v.current_task == "起義", "應觸發起義，實際 task=%s" % v.current_task)
+	assert(v.faction_id == -1, "應脫離 faction")
+	assert(v.tags.has("流亡"), "應加流亡")
+	assert(not v.tags.has(TeamData.TAG_PRODUCE), "應 erase 生產")
+	print("Resident Task9 OK")

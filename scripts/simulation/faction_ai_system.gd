@@ -881,3 +881,59 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 		{ "origin": str(f.leader_team_id), "name": f.faction_name })
 	print("[Faction] 立國：%s（leader=Team%d，%d teams）" % [
 		f.faction_name, f.leader_team_id, f.member_team_ids.size()])
+
+func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
+	if not _is_resident_team(state, team): return
+	if team.current_task == "起義": return
+	if team.current_task in SURVIVAL_TASKS: return
+	var avg_loy: float = _avg_named_loyalty(state, team)
+	if avg_loy >= 0.2: return
+	if team.unrest_turns < 60: return
+	if _count_stress_sources(state, team) < 2: return
+	var old_owner_id: int = -1
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile: old_owner_id = tile.outpost_owner
+	team.faction_id = -1
+	team.tags.erase(TeamData.TAG_PRODUCE)
+	team.tags.append("流亡")
+	team.current_task = "起義"
+	team.move_target = Vector2i(-1, -1)
+	print("[Uprising] Team%d 居民起義（old owner=Team%d）" % [team.team_id, old_owner_id])
+	if old_owner_id != -1:
+		var leader = state.persons.get(team.leader_id)
+		if leader:
+			NpcAiSystem.new().write_memory(leader, "enemy", old_owner_id,
+				state.world.current_tick, 1.0)
+	# 鄰格 PRODUCE team cascade fear
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if not t.tags.has(TeamData.TAG_PRODUCE): continue
+		if _hex_dist(team.tile_pos, t.tile_pos) > 2: continue
+		for pid in ([t.leader_id] as Array) + t.named_members:
+			var p = state.persons.get(pid)
+			if p: p.fear = minf(p.fear + 0.1, 1.0)
+	# 玩家是 owner → forced event
+	if old_owner_id != -1 and state.teams.has(old_owner_id):
+		var oid_team: TeamData = state.teams[old_owner_id]
+		if oid_team.leader_id == state.player_id and state.player_id != -1:
+			state.player_forced_event = {
+				"from_id": team.team_id, "action": "uprising_alert",
+				"outpost_pos": team.tile_pos,
+			}
+
+func _avg_named_loyalty(state: WorldState, team: TeamData) -> float:
+	var sum: float = 0.0
+	var cnt: int = 0
+	for pid in ([team.leader_id] as Array) + team.named_members:
+		var p = state.persons.get(pid)
+		if p:
+			sum += p.loyalty
+			cnt += 1
+	return sum / maxf(cnt, 1)
+
+func _count_stress_sources(state: WorldState, team: TeamData) -> int:
+	var sources: int = 0
+	if team.tax_rate > 0.5: sources += 1
+	if float(team.resources.get("food", 0)) < float(team.population) * 7.0: sources += 1
+	if team.unrest_turns > 40: sources += 1
+	return sources
