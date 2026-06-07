@@ -11,6 +11,7 @@ const MESSENGER_RANGE: int        = 5    # TEST VALUE
 const BASE_ACTION_TICKS: int  = 10
 const BLOCK_WINDOW: int       = 8
 const BLOCK_PENALTY: int      = 5
+const STAMINA_REGEN_PER_TICK: float = 0.003  # TEST VALUE — 體力每 tick 恢復量
 
 const STANCE_SPEED_MULT: Dictionary = {
 	"walk":   1.0,
@@ -522,7 +523,7 @@ func _check_prisoners(state: WorldState, round_num: int) -> void:
 			var captor_name: String
 			if captor_team != null and captor_team.leader_id >= 0:
 				var cp: PersonData = state.persons.get(captor_team.leader_id)
-				captor_name = ("%s隊" % cp.name) if cp != null else ("Team%d" % winner_team_id)
+				captor_name = ("%s隊" % cp.person_name) if cp != null else ("Team%d" % winner_team_id)
 			else:
 				captor_name = "Team%d" % winner_team_id
 			print("[Encounter] %s 被 %s 俘虜" % [prisoner_name, captor_name])
@@ -560,7 +561,8 @@ func _effective_speed(unit: Dictionary, state: WorldState) -> float:
 	return base * stance * health
 
 func _max_timer(unit: Dictionary, state: WorldState) -> int:
-	return maxi(roundi(float(BASE_ACTION_TICKS) / _effective_speed(unit, state)), 1)
+	var spd: float = maxf(_effective_speed(unit, state), 0.0001)
+	return clamp(roundi(float(BASE_ACTION_TICKS) / spd), 1, BASE_ACTION_TICKS * 5)
 
 func _get_weapon_grade(unit: Dictionary, _state: WorldState) -> String:
 	var equip: Dictionary = unit.get("equipment", {})
@@ -707,6 +709,7 @@ func advance_encounter_tick(state: WorldState) -> String:
 		if unit.get("is_prisoner", false): continue
 
 		HealthSystem.tick_status_effects(unit, state)
+		unit["stamina"] = minf(float(unit.get("stamina", 1.0)) + STAMINA_REGEN_PER_TICK, 1.0)
 		unit["action_timer"] -= 1
 		if unit["action_timer"] > 0: continue
 
