@@ -103,7 +103,7 @@ func _weapon_pool_total(team: TeamData) -> int:
 	return total
 
 func _get_named_ids(team: TeamData) -> Array:
-	var ids: Array = team.named_members
+	var ids: Array = team.named_members.duplicate()   # MUST duplicate (Array by ref)
 	if team.leader_id != -1:
 		ids.append(team.leader_id)
 	return ids

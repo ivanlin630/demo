@@ -160,6 +160,12 @@ func _run_game_sim_test() -> void:
 		# 統計（每 tick 都統計，但只在關鍵時印）
 		_collect_stats(state, tick + 1)
 
+		# 每天追蹤 named_members 數量（debug S10）
+		if (tick + 1) % 240 == 0:
+			var pt: TeamData = state.teams.get(TEAM_PLAYER)
+			if pt != null:
+				print("[DBG named] tick=%d Team0 named_count=%d population=%d persons_total=%d" % [
+					tick + 1, pt.named_members.size(), pt.population, state.persons.size()])
 		# 每天印玩家狀態（每 5 天詳細，其他天簡短）
 		if (tick + 1) % 240 == 0:
 			var day: int = (tick + 1) / 240

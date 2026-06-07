@@ -54,7 +54,7 @@ func tick_critical_npcs(state: WorldState, all_team_ids: Array) -> void:
 			continue
 		var team: TeamData = state.teams[tid]
 		var medicine: float = _best_medicine(state, team)
-		var named_ids: Array = team.named_members
+		var named_ids: Array = team.named_members.duplicate()   # MUST duplicate (Array by ref)
 		if team.leader_id != -1:
 			named_ids.append(team.leader_id)
 		for pid in named_ids:
@@ -386,7 +386,7 @@ func _apply_casualties(state: WorldState, team_id: int, count: int) -> void:
 	if count <= 0:
 		return
 	var team: TeamData = state.teams[team_id]
-	var named_ids: Array = team.named_members
+	var named_ids: Array = team.named_members.duplicate()   # MUST duplicate (Array by ref)
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
 	for i in range(count):
@@ -449,7 +449,7 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 
 func _best_medicine(state: WorldState, team: TeamData) -> float:
 	var best: float = 0.0
-	var named_ids: Array = team.named_members
+	var named_ids: Array = team.named_members.duplicate()   # MUST duplicate (Array by ref)
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
 	for pid in named_ids:

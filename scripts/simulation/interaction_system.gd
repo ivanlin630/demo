@@ -103,7 +103,7 @@ func _tick_readiness(state: WorldState, team_ids: Array) -> void:
 
 func _treat_wounded(state: WorldState, team: TeamData) -> void:
 	var best_medicine: float = 0.0
-	var named_ids: Array = team.named_members
+	var named_ids: Array = team.named_members.duplicate()   # MUST duplicate (Array by ref)
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
 	for pid in named_ids:
