@@ -29,6 +29,7 @@ func _initialize() -> void:
 	_test_aid_player_response_give()
 	_test_aid_repeated_annoyance()
 	_test_aid_stranger()
+	_test_resident_fields()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2981,3 +2982,13 @@ func _test_aid_stranger() -> void:
 	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
 	assert(r.get("accepted", false), "陌生 + 高義氣 target 應接受")
 	print("Survival Task9b OK")
+
+func _test_resident_fields() -> void:
+	print("--- Resident Task1: TeamData 新欄位 ---")
+	var t := TeamData.new()
+	assert(t.tax_rate == 0.3, "預設 tax_rate 應為 0.3，實際=%s" % str(t.tax_rate))
+	assert(t.pending_owner_change_tick == -1, "預設 pending 應為 -1")
+	t.tax_rate = 0.5
+	t.pending_owner_change_tick = 1000
+	assert(t.tax_rate == 0.5 and t.pending_owner_change_tick == 1000)
+	print("Resident Task1 OK")
