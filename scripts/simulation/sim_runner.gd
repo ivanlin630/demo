@@ -2,6 +2,7 @@ class_name SimRunner
 
 const LOD_NEAR_RADIUS: int = 3
 const FAR_ZONE_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時 = 100 ticks
+const NEAR_CADENCE: int = WorldState.TICKS_PER_HOUR   # TEST VALUE — 近區更新頻率（1h，可調）
 
 const FATIGUE_PER_DAY: float          = 0.048   # TEST VALUE — 約 20.8 天疲勞滿（原 0.002×24）
 const FATIGUE_RECOVERY_PER_DAY: float = 0.24    # TEST VALUE — 約 4.2 天回滿（原 0.01×24）
@@ -77,7 +78,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	var far_teams := _get_far_teams(state, player_pos)
 
 	# 近區：每小時執行
-	if state.world.current_tick % WorldState.TICKS_PER_HOUR == 0:
+	if state.world.current_tick % NEAR_CADENCE == 0:
 		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
 		if not state.player_forced_event.is_empty():
 			print("[PlayerCmd] forced_event 超時自動拒絕: %s" % str(state.player_forced_event))
