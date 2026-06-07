@@ -227,6 +227,10 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 				var o2: TeamData = state.teams.get(tile2.outpost_owner)
 				if o2 and o2.faction_id == b.faction_id:
 					_convert_to_resident(state, b)
+		elif a.current_task == "安撫" and b.tags.has(TeamData.TAG_PRODUCE):
+			_resolve_pacify(state, a, b)
+		elif b.current_task == "安撫" and a.tags.has(TeamData.TAG_PRODUCE):
+			_resolve_pacify(state, b, a)
 		return
 	if a.current_task == "外交":
 		_try_diplomacy(state, id_a, id_b)
@@ -815,3 +819,13 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 	subteam.parent_team_id = -1
 	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
 		subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])
+
+# ──────── 安撫（pacify）────────
+
+func _resolve_pacify(state: WorldState, pacifier: TeamData, village: TeamData) -> void:
+	for pid in ([village.leader_id] as Array) + village.named_members:
+		var p = state.persons.get(pid)
+		if p:
+			p.stress = maxf(p.stress - 0.05, 0.0)
+			p.loyalty = minf(p.loyalty + 0.02, 1.0)
+	village.unrest_turns = maxi(village.unrest_turns - 1, 0)

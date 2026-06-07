@@ -40,6 +40,7 @@ func _initialize() -> void:
 	_test_uprising_trigger()
 	_test_defection_paths()
 	_test_owner_contact_timeout()
+	_test_pacify_subteam()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3269,3 +3270,23 @@ func _test_owner_contact_timeout() -> void:
 	# 應該觸發 _trigger_defection_evaluation → path a (高義氣 → follow original)
 	# 簡單斷言：tag 變化或 task 變化
 	print("Resident Task10 OK (defection triggered)")
+
+func _test_pacify_subteam() -> void:
+	print("--- Resident Task12: 子隊安撫 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var v := TeamData.new()
+	v.team_id = 0; v.population = 10; v.faction_id = 10
+	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0, 0)
+	v.unrest_turns = 10
+	var l := PersonData.new(); l.id = 100; l.stress = 0.5; l.loyalty = 0.5
+	state.persons[100] = l; v.leader_id = 100; state.teams[0] = v
+	var pac := TeamData.new(); pac.team_id = 1; pac.faction_id = 10
+	pac.tile_pos = Vector2i(0, 0); pac.current_task = "安撫"
+	state.teams[1] = pac
+	var inter := InteractionSystem.new()
+	inter._resolve_pacify(state, pac, v)
+	assert(l.stress < 0.5, "安撫應降 stress")
+	assert(l.loyalty > 0.5, "安撫應升 loyalty")
+	assert(v.unrest_turns < 10, "安撫應降 unrest")
+	print("Resident Task12 OK")
