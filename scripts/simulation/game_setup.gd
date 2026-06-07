@@ -7,18 +7,18 @@ const RICHNESS_MULT: Dictionary = {
 
 const TEAM_RESOURCE_PRESET: Dictionary = {
 	"faction_main": {
-		"food": 300.0, "material": 80.0, "coin": 50,
+		"food": 500.0, "material": 80.0, "coin": 50,
 		"weapon_melee_low": 8, "armor_low": 4
 	},
 	"faction_branch": {
-		"food": 150.0, "material": 30.0, "coin": 15,
+		"food": 250.0, "material": 30.0, "coin": 15,
 		"weapon_melee_low": 4, "armor_low": 1
 	},
 	"independent_settled": {
-		"food": 200.0, "material": 60.0, "coin": 20
+		"food": 320.0, "material": 60.0, "coin": 20
 	},
 	"independent_roving": {
-		"food": 80.0, "coin": 8, "weapon_melee_low": 2
+		"food": 120.0, "coin": 8, "weapon_melee_low": 2
 	}
 }
 

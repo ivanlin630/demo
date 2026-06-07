@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_test_fatigue_recovery()
 	_test_salary_interval_weekly()
 	_test_intervals_divisible_by_cadence()
+	_test_salary_auto_npc_vs_player()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2474,3 +2475,59 @@ func _test_intervals_divisible_by_cadence() -> void:
 	assert(WorldState.TICKS_PER_DAY % cadence == 0,
 		"TICKS_PER_DAY 必須是 NEAR_CADENCE 倍數")
 	print("Cadence Task6 OK")
+
+func _test_salary_auto_npc_vs_player() -> void:
+	print("--- Salary auto NPC vs player ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 0
+	# NPC team (leader=10, named_member=11) — salary=0 應自動設為 fair
+	var npc_leader := PersonData.new()
+	npc_leader.id = 10
+	npc_leader.team_id = 1
+	state.persons[10] = npc_leader
+	var npc_member := PersonData.new()
+	npc_member.id = 11
+	npc_member.team_id = 1
+	npc_member.skills = { "戰鬥": 1.0, "統領": 0.5 }   # fair = (1.0+0.5)*2 = 3.0
+	npc_member.salary = 0.0
+	npc_member.loyalty = 0.5
+	state.persons[11] = npc_member
+	var npc_team := TeamData.new()
+	npc_team.team_id = 1
+	npc_team.leader_id = 10
+	npc_team.named_members = [11]
+	npc_team.population = 2
+	npc_team.resources["coin"] = 1000.0
+	state.teams[1] = npc_team
+	# Player team (leader=0, named_member=12) — salary=0 應保留（玩家未設）
+	var player := PersonData.new()
+	player.id = 0
+	player.team_id = 0
+	state.persons[0] = player
+	var player_member := PersonData.new()
+	player_member.id = 12
+	player_member.team_id = 0
+	player_member.skills = { "戰鬥": 1.0 }
+	player_member.salary = 0.0
+	player_member.loyalty = 0.5
+	state.persons[12] = player_member
+	var player_team := TeamData.new()
+	player_team.team_id = 0
+	player_team.leader_id = 0
+	player_team.named_members = [12]
+	player_team.population = 2
+	player_team.resources["coin"] = 1000.0
+	state.teams[0] = player_team
+	# 強制執行 _pay_salary
+	var ss := SalarySystem.new()
+	ss._pay_salary(state, npc_team)
+	ss._pay_salary(state, player_team)
+	assert(npc_member.salary > 0.0,
+		"NPC team member salary 應被自動設為 fair，實際=%s" % str(npc_member.salary))
+	assert(player_member.salary == 0.0,
+		"Player team member salary 應保留玩家設定（0），實際=%s" % str(player_member.salary))
+	# Player team member 應有 loyalty 損失（0 ratio）
+	assert(player_member.loyalty < 0.5,
+		"Player team member 0 薪 應扣 loyalty，實際=%s" % str(player_member.loyalty))
+	print("Salary auto NPC vs player OK")

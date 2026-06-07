@@ -153,11 +153,17 @@
 - **位置**：`scripts/ui/encounter_view.gd:263`
 - **建議**：`_create_named_unit` 加 `_max_timer` 欄位，或 encounter_view 改讀正確欄位
 
-### S8. `p.salary` 預設值未對齊週發薪語意
-- **症狀**：`SALARY_INTERVAL` 改為 1 週後，月發薪總量變 4 倍；`p.salary` 若原為月薪意圖則玩家月支出爆增
-- **位置**：`scripts/simulation/sim_runner.gd`、`scripts/data/person_data.gd`、各 `game_setup`
-- **建議**：grep 所有設定 `p.salary = N` 的地方，N 改為 N/4；或加註解明確「per-pay-period」語意
-- **連動**：2026-06-07 cadence-aware 修正後浮現
+### S8. `p.salary` 預設未設，主遊戲 NPC 全 0 薪資 ✅ 已修（2026-06-07）
+- **症狀**：`PersonData.salary` 預設 0.0，主遊戲 / world_generator / game_setup 從未設定；發薪時 ratio=0 → loyalty -= 0.03 每次
+- **影響**：cadence-aware 改週發薪後加劇，NPC loyalty 1.56/年下滑
+- **修正**：`salary_system._pay_salary` NPC team 自動 set fair salary（`p.salary <= 0` 時 = `_calc_fair_salary(p)`）；player team 保留玩家自訂值（0 = 玩家選擇）
+- **位置**：`scripts/simulation/salary_system.gd:28-49`
+- **待後續**：player team UI 加薪資輸入框（未做）
+
+### S9. 玩家 team 名 NPC 薪資 UI
+- **症狀**：玩家無法調整 named NPC 薪水，預設 0 → 自然扣 loyalty 直到叛逃
+- **設計意圖**：玩家管理 loyalty 的關鍵手段（過薪換忠誠）
+- **建議**：team panel 加每個 named NPC 薪資設定，顯示「目前 / 公平」比值
 
 ---
 
