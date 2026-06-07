@@ -1,0 +1,89 @@
+{
+  "seed": 42,
+  "mode": "explicit",
+  "map": { "radius": 4, "resource_richness": 5 },
+  "teams": [
+    {
+      "id": 0,
+      "name": "玩家隊",
+      "tile_pos": [0, 0],
+      "population": 10,
+      "tags": ["統領"],
+      "faction_id": 0,
+      "is_faction_leader": true,
+      "resources": {
+        "food": 120.0,
+        "material": 100,
+        "coin": 200,
+        "weapon_melee_low": 5,
+        "armor_low": 2,
+        "medicine": 5,
+        "tools": 5
+      },
+      "leader": {
+        "name": "玩家",
+        "age": 25,
+        "loyalty": 0.8,
+        "skills": { "統領": 0.5, "生產": 0.3, "戰鬥": 0.2 }
+      },
+      "named_members": [
+        { "name": "P0_1", "skills": { "統領": 0.2, "戰鬥": 0.3 }, "loyalty": 0.8 },
+        { "name": "P0_2", "skills": { "統領": 0.2, "生產": 0.3 }, "loyalty": 0.8 }
+      ],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 1000 }
+    },
+    {
+      "id": 1,
+      "name": "鄰隊1",
+      "tile_pos": [1, 0],
+      "population": 10,
+      "tags": ["統領"],
+      "faction_id": 1,
+      "is_faction_leader": true,
+      "resources": {
+        "food": 120.0,
+        "material": 100,
+        "coin": 200,
+        "weapon_melee_low": 5,
+        "armor_low": 2
+      },
+      "leader": {
+        "name": "P1_0",
+        "age": 27,
+        "loyalty": 0.8,
+        "skills": { "統領": 0.5, "戰鬥": 0.3 }
+      },
+      "named_members": [
+        { "name": "P1_1", "skills": { "戰鬥": 0.3 }, "loyalty": 0.8 },
+        { "name": "P1_2", "skills": { "戰鬥": 0.3 }, "loyalty": 0.8 }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "鄰隊2",
+      "tile_pos": [2, 0],
+      "population": 10,
+      "tags": ["統領"],
+      "faction_id": 2,
+      "is_faction_leader": true,
+      "resources": {
+        "food": 120.0,
+        "material": 100,
+        "coin": 200,
+        "weapon_melee_low": 5,
+        "armor_low": 2
+      },
+      "leader": {
+        "name": "P2_0",
+        "age": 29,
+        "loyalty": 0.8,
+        "skills": { "統領": 0.5 }
+      },
+      "named_members": [
+        { "name": "P2_1", "loyalty": 0.8 },
+        { "name": "P2_2", "loyalty": 0.8 }
+      ]
+    }
+  ],
+  "player": { "team_id": 0, "is_leader": true }
+}
