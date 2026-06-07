@@ -25,6 +25,8 @@ const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goa
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
 const SURVIVAL_TASKS: Array = ["return_home", "乞食", TeamData.TASK_LOOT, "投靠"]
+const CONTACT_TIMEOUT_DAYS: int = 30
+const OWNER_CHANGE_BUFFER_DAYS: int = 7
 const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
@@ -968,3 +970,33 @@ func _has_memory_type(person: PersonData, type: String) -> bool:
 		if m is Dictionary and m.get("type") == type:
 			return true
 	return false
+
+func _evaluate_owner_contact(state: WorldState, team: TeamData) -> void:
+	if not _is_resident_team(state, team): return
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	var owner_id: int = tile.outpost_owner if tile else -1
+	if owner_id == -1 or not state.teams.has(owner_id):
+		_trigger_defection_evaluation(state, team, "owner_gone")
+		return
+	var intel: Dictionary = state.team_intel.get(team.team_id, {})
+	var snap: Dictionary = intel.get(owner_id, {})
+	var last_tick: int = int(snap.get("last_tick", -1))
+	if last_tick == -1:
+		return   # 從未接觸（剛建立可能）
+	var days_since: int = (state.world.current_tick - last_tick) / WorldState.TICKS_PER_DAY
+	if days_since > CONTACT_TIMEOUT_DAYS:
+		_trigger_defection_evaluation(state, team, "no_contact")
+		return
+	# owner leader 異動 → 7 天緩衝
+	var owner_leader_now: int = int(snap.get("leader_id", -1))
+	var cached_key: String = "_cached_owner_leader_%d" % owner_id
+	var cached_owner_leader: int = int(team.known_reputations.get(cached_key, -2))
+	if cached_owner_leader != -2 and cached_owner_leader != owner_leader_now:
+		if team.pending_owner_change_tick == -1:
+			team.pending_owner_change_tick = state.world.current_tick + OWNER_CHANGE_BUFFER_DAYS * WorldState.TICKS_PER_DAY
+		elif state.world.current_tick >= team.pending_owner_change_tick:
+			_trigger_defection_evaluation(state, team, "owner_changed")
+			team.pending_owner_change_tick = -1
+	elif team.pending_owner_change_tick != -1:
+		team.pending_owner_change_tick = -1
+	team.known_reputations[cached_key] = owner_leader_now
