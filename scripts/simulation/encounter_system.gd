@@ -823,14 +823,49 @@ func _init_named_unit(unit: Dictionary, p: PersonData,
 	unit["inventory"] = []
 	EncounterTemplates.fill_inventory(unit, team, state)
 
+func _assign_anon_weapons(team: TeamData, count: int) -> Array:
+	# Returns a list of weapon grade strings (or "" = unarmed) for `count` anon units.
+	# Uses equip_order to determine melee/ranged split; falls back to priority order if unset.
+	var queue: Array = []
+	var order: Dictionary = team.equip_order
+	var total_ordered: int = 0
+	for v in order.values(): total_ordered += v
+
+	if total_ordered == 0:
+		# No equip_order guidance — old priority fallback (melee first)
+		for _i in range(count):
+			var assigned: String = ""
+			for grade in ["weapon_melee_low", "weapon_melee_high",
+					"weapon_ranged_low", "weapon_ranged_high"]:
+				if int(team.resources.get(grade, 0)) > 0:
+					assigned = grade
+					team.resources[grade] = int(team.resources[grade]) - 1
+					break
+			queue.append(assigned)
+		return queue
+
+	# Distribute proportionally: high-grade first within each split
+	for wtype in ["melee_high", "ranged_high", "melee_low", "ranged_low"]:
+		var key: String = "weapon_" + wtype
+		var want: int   = order.get(wtype, 0)
+		var avail: int  = int(team.resources.get(key, 0))
+		var give: int   = mini(mini(want, avail), count - queue.size())
+		for _j in range(give):
+			queue.append(key)
+		team.resources[key] = int(team.resources.get(key, 0)) - give
+		if queue.size() >= count: break
+
+	# Pad with unarmed if equip_order exhausted before all slots filled
+	while queue.size() < count:
+		queue.append("")
+	return queue
+
 func _init_anon_unit(unit: Dictionary, team: TeamData,
-		state: WorldState) -> void:
-	for grade in ["weapon_melee_low", "weapon_melee_high",
-			"weapon_ranged_low", "weapon_ranged_high"]:
-		if int(team.resources.get(grade, 0)) > 0:
-			unit["equipment"]["hand_1"] = { "type": "pool", "grade": grade }
-			team.resources[grade] = int(team.resources[grade]) - 1
-			break
+		state: WorldState, assigned_weapon: String = "") -> void:
+	# Weapon: use pre-assigned grade (from _assign_anon_weapons) if provided
+	if assigned_weapon != "":
+		unit["equipment"]["hand_1"] = { "type": "pool", "grade": assigned_weapon }
+	# (If "" or not provided, unit fights unarmed — weapon was already deducted by caller)
 	var cfg: String = team.armor_config.get("torso", "none")
 	if cfg == "low" and int(team.resources.get("armor_low", 0)) > 0:
 		unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_low" }
@@ -909,12 +944,13 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 		state.encounter_units.append(unit)
 	var armed_count: int = int(float(team.population) * team.armed_anon_ratio)
 	var spawn_count: int = mini(armed_count, ANON_UNIT_CAP)
+	var weapon_queue: Array = _assign_anon_weapons(team, spawn_count)
 	for _i in range(spawn_count):
 		if pos_idx >= positions.size(): break   # no more spawn slots
 		var pos: Vector2i = positions[pos_idx]
 		pos_idx += 1
 		var unit: Dictionary = _create_anon_unit(team, pos)
-		_init_anon_unit(unit, team, state)
+		_init_anon_unit(unit, team, state, weapon_queue[_i] if _i < weapon_queue.size() else "")
 		state.encounter_units.append(unit)
 	print("[Encounter] Team%d spawn: %d具名 + %d匿名（武裝率%.0f%%，人口%d）" % [
 		team.team_id, named_ids.size(), spawn_count,
