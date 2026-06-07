@@ -521,15 +521,17 @@ func _update_anon_combat_skill(team: TeamData) -> void:
 	team.anon_combat_skill = clampf(best, 0.1, 0.8)
 
 func _update_anon_wage(team: TeamData) -> void:
-	var best: float = 1.0  # default
+	# 雙 accumulator：避免單 best 受 tag 順序影響
+	var bonus:   float = 1.0   # 拉高項 max (MILITARY/MERCHANT)
+	var penalty: float = 1.0   # 壓低項 min (PRODUCE/RELIGION/EXILE)
 	for tag in team.tags:
 		match tag:
-			TeamData.TAG_MILITARY: best = maxf(best, 1.5)
-			TeamData.TAG_MERCHANT: best = maxf(best, 1.2)
-			TeamData.TAG_PRODUCE:  best = minf(best, 0.7)
-			TeamData.TAG_RELIGION: best = minf(best, 0.5)
-			TeamData.TAG_EXILE:    best = minf(best, 0.3)
-	team.anon_wage = clampf(best, 0.0, 2.0)
+			TeamData.TAG_MILITARY: bonus   = maxf(bonus,   1.5)
+			TeamData.TAG_MERCHANT: bonus   = maxf(bonus,   1.2)
+			TeamData.TAG_PRODUCE:  penalty = minf(penalty, 0.7)
+			TeamData.TAG_RELIGION: penalty = minf(penalty, 0.5)
+			TeamData.TAG_EXILE:    penalty = minf(penalty, 0.3)
+	team.anon_wage = clampf(bonus * penalty, 0.0, 2.0)
 
 func _update_armor_config(team: TeamData) -> void:
 	var pop_threshold: float = maxf(team.population * 0.3, 1.0)
@@ -563,6 +565,9 @@ func _has_hostile_within(state: WorldState, team: TeamData, range_hex: int) -> b
 		if tid == team.team_id: continue
 		var other: TeamData = state.teams[tid]
 		if other.faction_id == team.faction_id and team.faction_id != -1: continue
+		# 高聲望盟友過濾（rep >= 0.7 視為友軍，預設 0.5；結盟後 +0.2 → 達標）
+		var rep: float = float(team.known_reputations.get(other.team_id, 0.5))
+		if rep >= 0.7: continue
 		var d: int = _hex_dist(team.tile_pos, other.tile_pos)
 		if d <= range_hex:
 			return true

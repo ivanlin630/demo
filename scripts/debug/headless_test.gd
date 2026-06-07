@@ -2231,6 +2231,17 @@ func _test_update_anon_wage() -> void:
 	fai._update_anon_wage(t_def)
 	assert(t_def.anon_wage >= 0.9 and t_def.anon_wage <= 1.1,
 		"default 應 ~1.0，實際=%s" % str(t_def.anon_wage))
+	# 多重 tag 順序無關性（MILITARY + RELIGION = 1.5 × 0.5 = 0.75）
+	var t_combo1 := TeamData.new()
+	t_combo1.tags = [TeamData.TAG_MILITARY, TeamData.TAG_RELIGION]
+	fai._update_anon_wage(t_combo1)
+	var t_combo2 := TeamData.new()
+	t_combo2.tags = [TeamData.TAG_RELIGION, TeamData.TAG_MILITARY]
+	fai._update_anon_wage(t_combo2)
+	assert(abs(t_combo1.anon_wage - t_combo2.anon_wage) < 0.001,
+		"tag 順序不應影響結果: %s vs %s" % [str(t_combo1.anon_wage), str(t_combo2.anon_wage)])
+	assert(t_combo1.anon_wage >= 0.7 and t_combo1.anon_wage <= 0.8,
+		"MILITARY+RELIGION 應 ~0.75，實際=%s" % str(t_combo1.anon_wage))
 	print("S7 Task4 OK")
 
 func _test_update_armor_config() -> void:
@@ -2314,6 +2325,21 @@ func _test_update_guard_ratio() -> void:
 	fai._update_guard_ratio(t_def, state)
 	assert(t_def.guard_ratio >= 0.15 and t_def.guard_ratio <= 0.25,
 		"default 無威脅 應 ~0.2，實際=%s" % str(t_def.guard_ratio))
+	# 場景 E：高聲望盟友（rep>=0.7）不應計為威脅
+	var t_ally_a := TeamData.new()
+	t_ally_a.team_id = 104
+	t_ally_a.faction_id = 50
+	t_ally_a.tile_pos = Vector2i(20, 20)
+	var t_ally_b := TeamData.new()
+	t_ally_b.team_id = 105
+	t_ally_b.faction_id = 51   # 不同 faction
+	t_ally_b.tile_pos = Vector2i(21, 20)   # 鄰格
+	t_ally_a.known_reputations[105] = 0.8   # 高聲望
+	state.teams[104] = t_ally_a
+	state.teams[105] = t_ally_b
+	fai._update_guard_ratio(t_ally_a, state)
+	assert(t_ally_a.guard_ratio <= 0.25,
+		"鄰格盟友（rep=0.8）不應觸發威脅 guard_ratio，實際=%s" % str(t_ally_a.guard_ratio))
 	print("S7 Task6 OK")
 
 func _test_faction_ai_run_calls_all_updates() -> void:
