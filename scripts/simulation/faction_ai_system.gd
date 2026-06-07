@@ -937,3 +937,34 @@ func _count_stress_sources(state: WorldState, team: TeamData) -> int:
 	if float(team.resources.get("food", 0)) < float(team.population) * 7.0: sources += 1
 	if team.unrest_turns > 40: sources += 1
 	return sources
+
+func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: String) -> void:
+	var leader = state.persons.get(team.leader_id)
+	if leader == null: return
+	var honor: float = float(leader.values.get("義氣", 0.5))
+	var prudence: float = float(leader.values.get("慎重", 0.5))
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	var has_benefactor_memory: float = 0.3 if _has_memory_type(leader, "benefactor") else 0.0
+	var a_score: float = honor + has_benefactor_memory
+	var b_score: float = prudence
+	var c_score: float = ambition - honor * 0.3
+	if a_score >= b_score and a_score >= c_score:
+		print("[Defection] Team%d path A: 留 faction (原因=%s)" % [team.team_id, reason])
+		# faction_id 不變，task=待命新領主
+		team.current_task = "等待新領主"
+	elif b_score >= c_score:
+		print("[Defection] Team%d path B: 投降強鄰" % team.team_id)
+		var strong_id: int = _find_strong_neighbor(state, team)
+		if strong_id != -1:
+			team.faction_id = state.teams[strong_id].faction_id
+		else:
+			team.faction_id = -1
+	else:
+		print("[Defection] Team%d path C: 獨立" % team.team_id)
+		team.faction_id = -1
+
+func _has_memory_type(person: PersonData, type: String) -> bool:
+	for m in person.memory:
+		if m is Dictionary and m.get("type") == type:
+			return true
+	return false

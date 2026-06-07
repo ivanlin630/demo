@@ -38,6 +38,7 @@ func _initialize() -> void:
 	_test_invite_settle_execute()
 	_test_subteam_settle()
 	_test_uprising_trigger()
+	_test_defection_paths()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3221,3 +3222,24 @@ func _test_uprising_trigger() -> void:
 	assert(v.tags.has("流亡"), "應加流亡")
 	assert(not v.tags.has(TeamData.TAG_PRODUCE), "應 erase 生產")
 	print("Resident Task9 OK")
+
+func _test_defection_paths() -> void:
+	print("--- Resident Task11: 三路徑 a/b/c ---")
+	var fai := FactionAISystem.new()
+	# Path a: 高義氣 → 留 faction
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.faction_id = 10
+	var l := PersonData.new(); l.id = 100; l.values = { "義氣": 0.9, "慎重": 0.3, "野心": 0.2 }
+	state.persons[100] = l; t.leader_id = 100; state.teams[0] = t
+	fai._trigger_defection_evaluation(state, t, "no_contact")
+	# path a：faction_id 不變
+	assert(t.faction_id == 10, "高義氣應留 faction")
+	# Path c: 高野心 → 獨立
+	var t2 := TeamData.new(); t2.team_id = 1; t2.faction_id = 10
+	var l2 := PersonData.new(); l2.id = 200
+	l2.values = { "野心": 0.9, "慎重": 0.2, "義氣": 0.2 }
+	state.persons[200] = l2; t2.leader_id = 200; state.teams[1] = t2
+	fai._trigger_defection_evaluation(state, t2, "no_contact")
+	assert(t2.faction_id == -1, "高野心應獨立")
+	print("Resident Task11 OK")
