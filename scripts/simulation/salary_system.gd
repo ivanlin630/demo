@@ -26,6 +26,9 @@ func _calc_fair_salary(p: PersonData) -> float:
 	return total * SALARY_PER_SKILL_POINT
 
 func _pay_salary(state: WorldState, team: TeamData) -> void:
+	# 居民 PRODUCE team 不走薪資系統（村民自食其力，村長非家臣）
+	if team.tags.has(TeamData.TAG_PRODUCE):
+		return
 	var is_player_team: bool = (team.leader_id == state.player_id and state.player_id != -1)
 	# NPC team: 每次發薪依 leader 個性同步薪資（慷慨/吝嗇 leader 隊伍動態不同）
 	var npc_salary_mult: float = 1.0

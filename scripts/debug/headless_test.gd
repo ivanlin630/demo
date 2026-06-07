@@ -33,6 +33,7 @@ func _initialize() -> void:
 	_test_is_resident_detection()
 	_test_resident_pop_cap_overflow()
 	_test_resident_movement_lock()
+	_test_resident_no_salary()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3081,3 +3082,26 @@ func _test_resident_movement_lock() -> void:
 	moved = mv.process(state, [0], 1.0)
 	# tile_pos 是否變動需看實作；至少不被 lock skip
 	print("Resident Task4 OK")
+
+func _test_resident_no_salary() -> void:
+	print("--- Resident Task5: PRODUCE 跳薪資 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = -1   # 無玩家
+	var t := TeamData.new()
+	t.team_id = 0; t.population = 10; t.tags = [TeamData.TAG_PRODUCE]
+	t.resources["coin"] = 500.0
+	var l := PersonData.new(); l.id = 100; l.team_id = 0
+	l.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0 }   # 慷慨
+	state.persons[100] = l; t.leader_id = 100
+	var member := PersonData.new(); member.id = 101; member.team_id = 0
+	member.skills = { "戰鬥": 1.0 }; member.salary = 0; member.loyalty = 0.5
+	state.persons[101] = member; t.named_members = [101]
+	state.teams[0] = t
+	var ss := SalarySystem.new()
+	ss._pay_salary(state, t)
+	# PRODUCE team 應跳過：member.salary 不變、coin 不扣、loyalty 不變
+	assert(member.salary == 0.0, "PRODUCE member salary 不應被設")
+	assert(float(t.resources["coin"]) == 500.0, "PRODUCE team coin 不應扣")
+	assert(member.loyalty == 0.5, "PRODUCE member loyalty 不應扣")
+	print("Resident Task5 OK")
