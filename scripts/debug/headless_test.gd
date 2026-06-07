@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_test_fatigue_accumulation()
 	_test_fatigue_recovery()
 	_test_salary_interval_weekly()
+	_test_intervals_divisible_by_cadence()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2449,3 +2450,27 @@ func _test_salary_interval_weekly() -> void:
 	assert(SalarySystem.SALARY_INTERVAL % SimRunner.NEAR_CADENCE == 0,
 		"SALARY_INTERVAL 必須是 NEAR_CADENCE 倍數")
 	print("Cadence Task5 OK")
+
+func _test_intervals_divisible_by_cadence() -> void:
+	print("--- Cadence Task6: interval 整除性 ---")
+	var cadence: int = SimRunner.NEAR_CADENCE
+	# 列出所有應該被 cadence 觸發的 interval 常數
+	var intervals: Dictionary = {
+		"STRATEGIC_INTERVAL":      StrategicAiSystem.STRATEGIC_INTERVAL,
+		"ALLIANCE_CHECK_INTERVAL": StrategicAiSystem.ALLIANCE_CHECK_INTERVAL,
+		"BETRAY_CHECK_INTERVAL":   DiplomaticAiSystem.BETRAY_CHECK_INTERVAL,
+		"FACTION_UPDATE_INTERVAL": FactionAISystem.FACTION_UPDATE_INTERVAL,
+		"COLLECT_INTERVAL":        FactionAISystem.COLLECT_INTERVAL,
+		"GOAL_CHECK_INTERVAL":     ReactionSystem.GOAL_CHECK_INTERVAL,
+		"SALARY_INTERVAL":         SalarySystem.SALARY_INTERVAL,
+		"FAR_ZONE_INTERVAL":       SimRunner.FAR_ZONE_INTERVAL,
+		"OVERFLOW_CHECK_INTERVAL": PopulationSystem.OVERFLOW_CHECK_INTERVAL,
+	}
+	for name in intervals:
+		var val: int = intervals[name]
+		assert(val % cadence == 0,
+			"%s=%d 必須是 NEAR_CADENCE(%d) 倍數" % [name, val, cadence])
+	# TICKS_PER_DAY 也必須整除（保證每天整除次數）
+	assert(WorldState.TICKS_PER_DAY % cadence == 0,
+		"TICKS_PER_DAY 必須是 NEAR_CADENCE 倍數")
+	print("Cadence Task6 OK")
