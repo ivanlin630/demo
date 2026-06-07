@@ -31,15 +31,45 @@
 
 ## 架構
 
-### 居民 = PRODUCE tag team
+### 居民 = 動態偵測「PRODUCE + 在自家 outpost」
 
-複用既有 `TeamData` + `tags: ["生產"]`。**無新 team 型別**。
+**不加新 tag，不靠 PRODUCE 單一條件**。「居民身分」每次需要時動態判定：
+
+```gdscript
+func _is_resident_team(state, team) -> bool:
+    if not team.tags.has(TeamData.TAG_PRODUCE):
+        return false
+    var tile = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+    if tile == null or tile.outpost_level == 0:
+        return false
+    var owner_id: int = tile.outpost_owner
+    if owner_id == team.team_id: return true
+    if owner_id == -1: return false
+    var owner: TeamData = state.teams.get(owner_id)
+    if owner == null: return false
+    return owner.faction_id == team.faction_id and team.faction_id != -1
+```
+
+→ 條件：**PRODUCE tag + 站在 outpost + outpost 屬同 faction**
 
 關鍵特性：
 - 自己有 leader、named_members、population
 - 自己有 person.stress/loyalty/needs
-- tile_pos 固定為某個 outpost 的位置（不主動移動）
 - pop 上限由 outpost level 決定（不是 leader 統領）
+- 滿足偵測條件 → 套用居民行為（不動、收稅、起義評估、無薪資）
+- 不滿足 → 普通 PRODUCE team（可動可不動）
+
+### 何時加 PRODUCE tag（顯式，不靠 AI 自選）
+
+| 路徑 | 觸發 |
+|---|---|
+| 1. World gen | 開局 config 直接設定（既有）|
+| 2. `invite_settle` 接受 | 移民抵達 outpost 後加 PRODUCE + erase 流亡 |
+| 3. 子隊 task="安頓" 抵達 outpost | 玩家/AI 派子隊去自家 outpost，駐定後加 PRODUCE + erase 子團 |
+
+**FactionAI 不自動加 PRODUCE**。玩家無控的 tag 變更會帶來 surprise（避免）。
+
+**Tag 互斥（沿用 `event_tag_shift` pattern）**：加 PRODUCE 時 erase 流亡（同 _should_lose_exile）。
 
 ### 資源產出（多元）
 
@@ -61,12 +91,14 @@
 
 ### Movement 鎖定
 
-`movement_system.process` 加判斷：
+`movement_system.process` 加判斷（用 `_is_resident_team` 偵測）：
 
 ```gdscript
-if team.tags.has("生產") and team.current_task not in ["逃跑", "投靠", "起義", "遷徙"]:
+if _is_resident_team(state, team) and team.current_task not in ["逃跑", "投靠", "起義", "遷徙"]:
     continue   # 不處理移動
 ```
+
+→ PRODUCE 流民（未在自家 outpost）仍可自由移動。只有在駐家狀態的居民被鎖。
 
 ### Pop cap 公式
 
@@ -182,7 +214,9 @@ func _action_invite_settle(state, target_id, pt, pt_id) -> Dictionary:
 func _execute_settlement(state, team_id, outpost_pos, faction_id):
     var t: TeamData = state.teams[team_id]
     t.tile_pos = outpost_pos
-    t.tags = ["生產"]   # 強制變生產
+    if not t.tags.has(TeamData.TAG_PRODUCE):
+        t.tags.append(TeamData.TAG_PRODUCE)
+    t.tags.erase("流亡")   # 互斥
     t.faction_id = faction_id
     t.current_task = "生產"
     t.move_target = Vector2i(-1, -1)
@@ -195,6 +229,27 @@ func _execute_settlement(state, team_id, outpost_pos, faction_id):
             return { "ok": false, "msg": "pop 將超 cap" }
         # 合併：取統領最高為 leader
         SubteamSystem.new().merge_teams(state, existing, team_id, t.named_members)
+```
+
+### 子隊安頓（新 task `"安頓"`）
+
+玩家派子隊 `task="安頓"` 抵達自家 outpost。`interaction_system._resolve_pair` 加：
+
+```gdscript
+elif a.current_task == "安頓" and _tile_owned_by_same_faction(state, a):
+    _convert_to_resident(state, a)
+```
+
+```gdscript
+func _convert_to_resident(state, subteam):
+    if not subteam.tags.has(TeamData.TAG_PRODUCE):
+        subteam.tags.append(TeamData.TAG_PRODUCE)
+    subteam.tags.erase("子團")
+    subteam.tags.erase("流亡")
+    subteam.current_task = "生產"
+    subteam.parent_team_id = -1   # 不再是子隊，獨立為居民
+    print("[Settle] Team%d 安頓於 outpost (%d,%d) 變居民" % [
+        subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])
 ```
 
 ### NPC 發 invite_settle
@@ -454,3 +509,6 @@ func _resolve_pacify(state, pacifier, village):
 - 玩家 UI：稅率 slider、居民忠誠儀表板、起義警報視覺
 - aid 系統（B 後續）→ 居民可主動 request aid
 - coin 稅特定機制：除 food，居民也產 coin 上繳（市集稅）
+- **Team 性格演化（獨立 spec）**：擴充 `event_tag_shift` 處理 軍隊↔商隊、生產→軍隊（流寇）、宗教→軍隊（武力傳教）、流亡→商隊（流動商人）等 dynamic tag transition
+- **薪資流向重構（獨立 spec）**：匿名薪水沉澱機制、coin 守恆
+- **Coin 經濟（獨立 spec）**：銀/金礦 → 造幣 → 全域 coin 流動
