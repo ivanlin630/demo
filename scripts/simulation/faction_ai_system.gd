@@ -121,6 +121,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_promote_successor(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		if _is_resident_team(state, team):
+			_evaluate_uprising(state, team)
+			_evaluate_owner_contact(state, team)
 		_update_equip_order(state, team)
 		_update_anon_combat_skill(team)
 		_update_anon_wage(team)
