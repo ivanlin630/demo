@@ -8,6 +8,7 @@ func _initialize() -> void:
 	_test_update_armor_config()
 	_test_update_guard_ratio()
 	_test_faction_ai_run_calls_all_updates()
+	_test_food_consumption_total()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2367,3 +2368,23 @@ func _test_faction_ai_run_calls_all_updates() -> void:
 	assert(t.guard_ratio >= 0.15 and t.guard_ratio <= 0.5,
 		"evaluate_all() 後 guard_ratio 應在合理範圍，實際=%s" % str(t.guard_ratio))
 	print("S7 Task7 OK")
+
+func _test_food_consumption_total() -> void:
+	print("--- Cadence Task2: 食物消耗總量 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = 10
+	team.minor_population = 0
+	team.resources["food"] = 2400.0
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	# 模擬跑 1 天（240 tick），每 NEAR_CADENCE=10 call 一次 → 24 calls
+	for _i in range(24):
+		rs.resolve_consumption(state, [0], 10)
+	# 預期消耗：10 × 2.4 = 24 食物/天 → 剩 2376
+	var remaining: float = float(team.resources["food"])
+	assert(remaining >= 2375.0 and remaining <= 2377.0,
+		"1 天後應剩 ~2376，實際=%s" % str(remaining))
+	print("Cadence Task2 OK")

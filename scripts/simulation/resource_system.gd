@@ -57,13 +57,14 @@ func regenerate_tiles(state: WorldState) -> void:
 		)
 		# ore / gem 不再生
 
-func resolve_consumption(state: WorldState, team_ids: Array) -> void:
+func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
+	var day_fraction: float = float(cadence_ticks) / float(WorldState.TICKS_PER_DAY)
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
 		var total_pop: int = team.population + team.minor_population
-		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY / float(WorldState.TICKS_PER_DAY)
+		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY * day_fraction
 		var food_available: float = float(team.resources.get("food", 0))
 
 		if food_available >= food_needed:

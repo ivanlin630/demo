@@ -98,7 +98,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step5_collect_resources(state, near_teams)
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, near_teams)
-		_step6_resolve_consumption(state, near_teams)
+		_step6_resolve_consumption(state, near_teams, NEAR_CADENCE)
 		_step6c_salary(state, near_teams)
 		_step6d_fatigue(state, near_teams)
 		_step6b_faction_ai(state, near_teams)
@@ -124,7 +124,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step5_collect_resources(state, far_teams)
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, far_teams)
-		_step6_resolve_consumption(state, far_teams)
+		_step6_resolve_consumption(state, far_teams, FAR_ZONE_INTERVAL)
 		_step6c_salary(state, far_teams)
 		_step6d_fatigue(state, far_teams)
 		_step6b_faction_ai(state, far_teams)
@@ -200,8 +200,8 @@ func _step5a_regenerate_tiles(state: WorldState) -> void:
 func _step5b_manufacture(state: WorldState, team_ids: Array) -> void:
 	_manufacturing_system.tick_all(state, team_ids)
 
-func _step6_resolve_consumption(state: WorldState, team_ids: Array) -> void:
-	_resource_system.resolve_consumption(state, team_ids)
+func _step6_resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
+	_resource_system.resolve_consumption(state, team_ids, cadence_ticks)
 
 func _step6c_salary(state: WorldState, team_ids: Array) -> void:
 	_salary_system.tick(state, team_ids)
