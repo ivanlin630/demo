@@ -81,7 +81,12 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for tid in state.teams:
 		if not state.teams.has(tid):
 			continue
-		_update_equip_order(state, state.teams[tid])
+		var team: TeamData = state.teams[tid]
+		_update_equip_order(state, team)
+		_update_anon_combat_skill(team)
+		_update_anon_wage(team)
+		_update_armor_config(team)
+		_update_guard_ratio(team, state)
 
 # ──────── Tag 權限 ────────
 

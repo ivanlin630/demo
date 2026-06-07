@@ -7,6 +7,7 @@ func _initialize() -> void:
 	_test_update_anon_wage()
 	_test_update_armor_config()
 	_test_update_guard_ratio()
+	_test_faction_ai_run_calls_all_updates()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2314,3 +2315,29 @@ func _test_update_guard_ratio() -> void:
 	assert(t_def.guard_ratio >= 0.15 and t_def.guard_ratio <= 0.25,
 		"default 無威脅 應 ~0.2，實際=%s" % str(t_def.guard_ratio))
 	print("S7 Task6 OK")
+
+func _test_faction_ai_run_calls_all_updates() -> void:
+	print("--- S7 Task7: faction_ai.run() 整合 ---")
+	var fai := FactionAISystem.new()
+	var state := WorldState.new()
+	# 建 MILITARY team 且資源充足
+	var t := TeamData.new()
+	t.team_id = 200
+	t.tags = [TeamData.TAG_MILITARY]
+	t.population = 10
+	t.faction_id = 50
+	t.tile_pos = Vector2i(0, 0)
+	t.resources["armor_high"] = 20
+	t.resources["armor_low"]  = 20
+	state.teams[200] = t
+	# faction_ai evaluate_all 後 4 個欄位都應被更新
+	fai.evaluate_all(state, [200])
+	assert(t.anon_combat_skill >= 0.45,
+		"evaluate_all() 後 MILITARY anon_combat_skill 應 >=0.45，實際=%s" % str(t.anon_combat_skill))
+	assert(t.anon_wage >= 1.4,
+		"evaluate_all() 後 MILITARY anon_wage 應 >=1.4，實際=%s" % str(t.anon_wage))
+	assert(t.armor_config["torso"] == "high",
+		"evaluate_all() 後 MILITARY armor_config torso 應 high，實際=%s" % t.armor_config["torso"])
+	assert(t.guard_ratio >= 0.15 and t.guard_ratio <= 0.5,
+		"evaluate_all() 後 guard_ratio 應在合理範圍，實際=%s" % str(t.guard_ratio))
+	print("S7 Task7 OK")
