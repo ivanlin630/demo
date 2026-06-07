@@ -100,7 +100,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step5b_manufacture(state, near_teams)
 		_step6_resolve_consumption(state, near_teams, NEAR_CADENCE)
 		_step6c_salary(state, near_teams)
-		_step6d_fatigue(state, near_teams)
+		_step6d_fatigue(state, near_teams, NEAR_CADENCE)
 		_step6b_faction_ai(state, near_teams)
 		_step6e_strategic_ai(state)
 		_step7_person_reactions(state, near_teams)
@@ -126,7 +126,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step5b_manufacture(state, far_teams)
 		_step6_resolve_consumption(state, far_teams, FAR_ZONE_INTERVAL)
 		_step6c_salary(state, far_teams)
-		_step6d_fatigue(state, far_teams)
+		_step6d_fatigue(state, far_teams, FAR_ZONE_INTERVAL)
 		_step6b_faction_ai(state, far_teams)
 		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
@@ -206,7 +206,8 @@ func _step6_resolve_consumption(state: WorldState, team_ids: Array, cadence_tick
 func _step6c_salary(state: WorldState, team_ids: Array) -> void:
 	_salary_system.tick(state, team_ids)
 
-func _step6d_fatigue(state: WorldState, team_ids: Array) -> void:
+func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
+	var day_fraction: float = float(cadence_ticks) / float(WorldState.TICKS_PER_DAY)
 	var time_mult: float = _get_time_fatigue_mult(state)
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
@@ -214,14 +215,14 @@ func _step6d_fatigue(state: WorldState, team_ids: Array) -> void:
 		if team.current_task == "rest":
 			# 紮營休息
 			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
-			team.fatigue -= FATIGUE_RECOVERY_PER_DAY / float(WorldState.TICKS_PER_DAY) * rest_mult
+			team.fatigue -= FATIGUE_RECOVERY_PER_DAY * day_fraction * rest_mult
 			team.fatigue = maxf(team.fatigue, 0.0)
 		else:
 			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 			var tile = state.world.tiles.get(tile_id)
 			var terrain: String = tile.terrain if tile else "plains"
 			var terrain_mult: float = TERRAIN_FATIGUE_MULT.get(terrain, 1.0)
-			team.fatigue += FATIGUE_PER_DAY / float(WorldState.TICKS_PER_DAY) * terrain_mult * time_mult
+			team.fatigue += FATIGUE_PER_DAY * day_fraction * terrain_mult * time_mult
 			team.fatigue = minf(team.fatigue, 1.0)
 		if team.fatigue >= 1.0:
 			for pid in team.named_members:
