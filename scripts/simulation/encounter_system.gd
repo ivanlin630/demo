@@ -281,6 +281,22 @@ func _find_guard_target(unit: Dictionary, state: WorldState) -> int:
 			return i
 	return -1
 
+func _find_rescue_target(unit: Dictionary, state: WorldState) -> int:
+	# Returns index of nearest ally prisoner with no adjacent enemies; -1 if none
+	var best_idx: int = -1
+	var best_d:   int = 9999
+	for i in range(state.encounter_units.size()):
+		var candidate: Dictionary = state.encounter_units[i]
+		if not candidate.get("is_prisoner", false): continue
+		if candidate["team_id"] != unit["team_id"]: continue
+		if is_dead(candidate, state): continue
+		if _count_nearby_enemies(candidate, state, 1) > 0: continue  # 仍被看守
+		var d: int = hex_dist(unit["pos"], candidate["pos"])
+		if d < best_d:
+			best_d   = d
+			best_idx = i
+	return best_idx
+
 func _get_nearest_enemy_index(unit: Dictionary, state: WorldState) -> int:
 	var best_idx: int = -1; var best_d: int = 9999
 	for i in range(state.encounter_units.size()):
@@ -372,12 +388,20 @@ func _decide_action(unit_idx: int, state: WorldState,
 		return { "type": "retreat", "target_idx": -1,
 			"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
 
-	# 2. 傳令
+	# 2. 解救俘虜（附近無敵人才優先救）
+	if _count_nearby_enemies(unit, state, 2) == 0:
+		var rescue_idx: int = _find_rescue_target(unit, state)
+		if rescue_idx != -1:
+			var rpos: Vector2i = state.encounter_units[rescue_idx]["pos"]
+			return { "type": "move", "target_idx": rescue_idx,
+				"move_to": _calc_next_step(unit["pos"], rpos), "attack_part": "" }
+
+	# 3. 傳令
 	if unit.get("is_messenger", false):
 		return { "type": "messenger_exit", "target_idx": -1,
 			"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
 
-	# 3. 護送
+	# 4. 護送
 	var escort_idx: int = _should_escort(unit_idx, state)
 	if escort_idx != -1 and unit.get("escort_target", -1) == -1:
 		return { "type": "start_escort", "target_idx": escort_idx,
@@ -527,6 +551,28 @@ func _check_prisoners(state: WorldState, round_num: int) -> void:
 			else:
 				captor_name = "Team%d" % winner_team_id
 			print("[Encounter] %s 被 %s 俘虜" % [prisoner_name, captor_name])
+
+func _check_rescues(state: WorldState) -> void:
+	# 隊友緊鄰且無敵人看守 → 解救俘虜
+	for unit in state.encounter_units:
+		if not unit.get("is_prisoner", false): continue
+		if is_dead(unit, state): continue
+		if _count_nearby_enemies(unit, state, 1) > 0: continue  # 仍被看守
+		for other in state.encounter_units:
+			if other == unit: continue
+			if other["team_id"] != unit["team_id"]: continue
+			if is_dead(other, state) or other.get("has_exited", false): continue
+			if other.get("is_prisoner", false): continue
+			if hex_dist(other["pos"], unit["pos"]) <= 1:
+				unit["is_prisoner"] = false
+				var pname: String
+				if unit.get("person_id", -1) >= 0:
+					var pp: PersonData = state.persons.get(unit["person_id"])
+					pname = pp.person_name if pp != null else ("Person%d" % unit["person_id"])
+				else:
+					pname = "匿名兵(Team%d)" % unit["team_id"]
+				print("[Encounter] %s 被隊友解救" % pname)
+				break
 
 func _get_enemy_team_id(own_team_id: int, state: WorldState) -> int:
 	for u in state.encounter_units:
@@ -763,6 +809,7 @@ func advance_encounter_tick(state: WorldState) -> String:
 		unit["action_timer"] = _max_timer(unit, state)
 
 	_check_prisoners(state, round_num)
+	_check_rescues(state)
 
 	var atk_alive: bool  = _has_active_units(atk_id, state)
 	var def_alive: bool  = _has_active_units(def_id, state)
