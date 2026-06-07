@@ -349,6 +349,51 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> void:
 	var collector: TeamData = state.teams[collector_id]
 	var payer:     TeamData = state.teams[payer_id]
+	# PRODUCE 居民：用 team.tax_rate，跳過勢力守衛
+	if payer.tags.has(TeamData.TAG_PRODUCE):
+		var rate: float = payer.tax_rate
+		# 資源轉移（surplus × rate，保留最低儲備）
+		for res in ["food", "material", "goods", "coin"]:
+			var stock: float = float(payer.resources.get(res, 0))
+			var reserve: float = 0.0
+			if res == "food":
+				reserve = float(payer.population) * 14.0
+			elif res == "coin":
+				reserve = stock * 0.5
+			var surplus: float = maxf(stock - reserve, 0.0)
+			var take: float = surplus * rate
+			if take <= 0.0:
+				continue
+			payer.resources[res]     = stock - take
+			collector.resources[res] = float(collector.resources.get(res, 0)) + take
+		# 重稅後果
+		var stress_gain: float  = maxf(0.0, (rate - 0.3) * 0.3)
+		var loyalty_loss: float = maxf(0.0, (rate - 0.2) * 0.1)
+		var fear_gain: float    = maxf(0.0, (rate - 0.6) * 0.5)
+		var targets: Array = []
+		if payer.leader_id != -1:
+			targets.append(payer.leader_id)
+		targets.append_array(payer.named_members)
+		for pid in targets:
+			var p: PersonData = state.persons.get(pid)
+			if p == null:
+				continue
+			p.stress  = minf(p.stress  + stress_gain,  1.0)
+			p.loyalty = maxf(p.loyalty - loyalty_loss, 0.0)
+			p.fear    = minf(p.fear    + fear_gain,    1.0)
+		if rate > 0.5:
+			payer.unrest_turns += 1
+		collector.current_task = TeamData.TASK_IDLE
+		collector.move_target  = Vector2i(-1, -1)
+		_msg.emit_message(state, "tribute",
+			TextBank.fmt("tribute", "honest", {
+				"origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % rate
+			}),
+			collector,
+			{ "origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % rate })
+		print("[Tribute] Team%d 徵收居民 Team%d rate=%.2f" % [collector_id, payer_id, rate])
+		return
+	# 非 PRODUCE：原有勢力守衛 + value 修正邏輯
 	var f = state.factions.get(collector.faction_id)
 	if f == null or f.leader_team_id != collector_id:
 		return
@@ -371,7 +416,7 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			continue
 		payer.resources[res]     = float(payer.resources.get(res, 0)) - amount
 		collector.resources[res] = float(collector.resources.get(res, 0)) + amount
-	collector.current_task = "idle"
+	collector.current_task = TeamData.TASK_IDLE
 	collector.move_target  = Vector2i(-1, -1)
 	_msg.emit_message(state, "tribute",
 		TextBank.fmt("tribute", "honest", {

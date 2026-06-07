@@ -34,6 +34,7 @@ func _initialize() -> void:
 	_test_resident_pop_cap_overflow()
 	_test_resident_movement_lock()
 	_test_resident_no_salary()
+	_test_resident_tax_with_stress()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2841,6 +2842,36 @@ func _test_strategic_ai_respects_survival() -> void:
 	assert(t.current_task == "乞食",
 		"sticky 應保持乞食 task，實際=%s" % t.current_task)
 	print("Survival Task5 OK")
+
+func _test_resident_tax_with_stress() -> void:
+	print("--- Resident Task6: 重稅後果 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# Owner Team 0
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.population = 5; owner.faction_id = 10
+	owner.current_task = "徵收"; owner.tile_pos = Vector2i(0, 0)
+	state.teams[0] = owner
+	# Village Team 1 with PRODUCE tag + high tax
+	var v := TeamData.new()
+	v.team_id = 1; v.population = 10; v.faction_id = 10
+	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0, 0)
+	v.tax_rate = 0.7   # 暴政
+	v.resources["food"] = 500.0   # 充足
+	var v_leader := PersonData.new(); v_leader.id = 200; v_leader.team_id = 1
+	v_leader.stress = 0; v_leader.loyalty = 0.8; v_leader.fear = 0
+	state.persons[200] = v_leader; v.leader_id = 200
+	state.teams[1] = v
+	var inter := InteractionSystem.new()
+	inter._resolve_tribute(state, 0, 1)
+	# 食物應被徵收
+	assert(float(v.resources["food"]) < 500.0, "村莊 food 應減少")
+	# 村長 stress/fear 應上升
+	assert(v_leader.stress > 0, "重稅應升 stress，實際=%s" % str(v_leader.stress))
+	assert(v_leader.fear > 0, "rate>0.6 應升 fear，實際=%s" % str(v_leader.fear))
+	assert(v_leader.loyalty < 0.8, "重稅應扣 loyalty")
+	print("Resident Task6 OK (stress=%.2f loyalty=%.2f fear=%.2f)" \
+		% [v_leader.stress, v_leader.loyalty, v_leader.fear])
 
 func _test_aid_resolve_npc_accept() -> void:
 	print("--- Survival Task6a: NPC 接受 ---")
