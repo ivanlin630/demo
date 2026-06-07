@@ -4,6 +4,7 @@ func _initialize() -> void:
 	_run_sim_test()
 	_test_anon_combat_skill_field()
 	_test_update_anon_combat_skill()
+	_test_update_anon_wage()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2200,3 +2201,31 @@ func _test_update_anon_combat_skill() -> void:
 	assert(t_def.anon_combat_skill >= 0.2 and t_def.anon_combat_skill <= 0.3,
 		"default 應 ~0.25，實際=%s" % str(t_def.anon_combat_skill))
 	print("S7 Task3 OK")
+
+func _test_update_anon_wage() -> void:
+	print("--- S7 Task4: _update_anon_wage ---")
+	var fai := FactionAISystem.new()
+	# MILITARY → 1.5
+	var t_mil := TeamData.new()
+	t_mil.tags = [TeamData.TAG_MILITARY]
+	fai._update_anon_wage(t_mil)
+	assert(t_mil.anon_wage >= 1.4 and t_mil.anon_wage <= 1.6,
+		"MILITARY 應 ~1.5，實際=%s" % str(t_mil.anon_wage))
+	# PRODUCE → 0.7
+	var t_pro := TeamData.new()
+	t_pro.tags = [TeamData.TAG_PRODUCE]
+	fai._update_anon_wage(t_pro)
+	assert(t_pro.anon_wage <= 0.8,
+		"PRODUCE 應 <=0.8，實際=%s" % str(t_pro.anon_wage))
+	# EXILE → 0.3
+	var t_ex := TeamData.new()
+	t_ex.tags = [TeamData.TAG_EXILE]
+	fai._update_anon_wage(t_ex)
+	assert(t_ex.anon_wage <= 0.4,
+		"EXILE 應 <=0.4，實際=%s" % str(t_ex.anon_wage))
+	# default → 1.0
+	var t_def := TeamData.new()
+	fai._update_anon_wage(t_def)
+	assert(t_def.anon_wage >= 0.9 and t_def.anon_wage <= 1.1,
+		"default 應 ~1.0，實際=%s" % str(t_def.anon_wage))
+	print("S7 Task4 OK")

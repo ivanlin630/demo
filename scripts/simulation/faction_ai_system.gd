@@ -515,6 +515,17 @@ func _update_anon_combat_skill(team: TeamData) -> void:
 			TeamData.TAG_EXILE:    best = maxf(best, 0.3)
 	team.anon_combat_skill = clampf(best, 0.1, 0.8)
 
+func _update_anon_wage(team: TeamData) -> void:
+	var best: float = 1.0  # default
+	for tag in team.tags:
+		match tag:
+			TeamData.TAG_MILITARY: best = maxf(best, 1.5)
+			TeamData.TAG_MERCHANT: best = maxf(best, 1.2)
+			TeamData.TAG_PRODUCE:  best = minf(best, 0.7)
+			TeamData.TAG_RELIGION: best = minf(best, 0.5)
+			TeamData.TAG_EXILE:    best = minf(best, 0.3)
+	team.anon_wage = clampf(best, 0.0, 2.0)
+
 # ──────── 輔助函數 ────────
 
 func _can_trade(state: WorldState, team: TeamData) -> bool:
