@@ -58,6 +58,9 @@ var ticks_per_day: int:
 	get: return TICKS_PER_DAY
 
 func create_faction(leader_team_id: int) -> int:
+	if not teams.has(leader_team_id):
+		push_warning("[create_faction] leader_team_id=%d 不存在於 state.teams，跳過" % leader_team_id)
+		return -1
 	var f = load("res://scripts/data/faction_data.gd").new()
 	f.faction_id = _next_faction_id
 	f.leader_team_id = leader_team_id

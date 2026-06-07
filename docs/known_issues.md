@@ -176,13 +176,15 @@
 - **commit**：cb2171d
 - **發現**：2026-06-07 game_sim_test.gd 7200 tick 跑出來
 
-### S13. `WorldState.create_faction` Out of bounds（survival 觸發後）
-- **症狀**：`create_faction` line 67 Out of bounds get index '0'/'2' (on base: 'Dictionary')
-- **觸發**：game_sim_test survival merge 後出現
-- **可能根因**：survival 投靠路徑 / S11 succession 之一觸發 create_faction 時 input dict 缺欄位
-- **位置**：`scripts/data/world_state.gd:67`
-- **影響**：不阻塞測試（全 INVARIANTS 過），但 error log 噪音
-- **發現**：2026-06-08 NPC survival merge 後
+### S13. `WorldState.create_faction` Out of bounds ✅ 已修（2026-06-08）
+- **症狀**：`create_faction` line 67 Out of bounds get index '0'/'2'
+- **真實根因**：`game_setup._setup_explicit_teams` 順序錯誤——先 create_faction 再 build_explicit_team，導致 leader_team_id 對應 team 不存在
+- **修正**：
+  - `_setup_explicit_teams` 改為 3 段：build teams → create factions → 加非 leader members
+  - `create_faction` 加 `teams.has()` guard（防禦性）
+  - `_build_explicit_team` 移除無效的 faction member append（factions 此時尚未建立）
+- **位置**：`scripts/simulation/game_setup.gd`、`scripts/data/world_state.gd`
+- **發現**：2026-06-08 NPC survival merge 後浮現
 
 ### S11. Leader 死亡後無 succession ✅ 已修（2026-06-07）
 - **症狀**：遭遇戰 leader 戰死 → `team.leader_id = -1`；之後 team 永遠無 leader

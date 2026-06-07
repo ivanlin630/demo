@@ -392,6 +392,10 @@ static func _setup_explicit_teams(state: WorldState, config: Dictionary) -> void
 	if teams_cfg.is_empty():
 		push_error("explicit mode 但 teams 陣列為空")
 		return
+	# 先 build teams（create_faction 需要 team 已存在於 state.teams）
+	for t_cfg in teams_cfg:
+		_build_explicit_team(state, t_cfg)
+	# 再 create factions（leader 自動加入 member_team_ids）
 	var seen_factions: Dictionary = {}
 	for t_cfg in teams_cfg:
 		var fid: int = int(t_cfg.get("faction_id", -1))
@@ -400,8 +404,17 @@ static func _setup_explicit_teams(state: WorldState, config: Dictionary) -> void
 		seen_factions[fid] = true
 		if t_cfg.get("is_faction_leader", false):
 			state.create_faction(int(t_cfg["id"]))
+	# 第三段：非 leader 的 faction member 加入 faction list（leader 在 create_faction 已加）
 	for t_cfg in teams_cfg:
-		_build_explicit_team(state, t_cfg)
+		var fid2: int = int(t_cfg.get("faction_id", -1))
+		if fid2 == -1: continue
+		if t_cfg.get("is_faction_leader", false): continue
+		var tid: int = int(t_cfg["id"])
+		if state.factions.has(fid2) and state.teams.has(tid):
+			var f: FactionData = state.factions[fid2]
+			if not f.member_team_ids.has(tid):
+				f.member_team_ids.append(tid)
+			state.teams[tid].faction_id = fid2
 	for ta_cfg in teams_cfg:
 		var ta_id: int = int(ta_cfg["id"])
 		if not state.team_discovered.has(ta_id):
@@ -446,10 +459,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 			tile.outpost_owner = team.team_id
 			if op_cfg.has("tile_food_init"):
 				tile.resources["food"] = float(op_cfg["tile_food_init"])
-	if team.faction_id != -1 and state.factions.has(team.faction_id):
-		var f: FactionData = state.factions[team.faction_id]
-		if not f.member_team_ids.has(team.team_id):
-			f.member_team_ids.append(team.team_id)
+	# 注意：faction member 加入由 _setup_explicit_teams 第三段處理（factions 此時尚未建立）
 
 static func _make_person(team_id: int, p_cfg: Dictionary, is_leader: bool) -> PersonData:
 	var p := PersonData.new()
