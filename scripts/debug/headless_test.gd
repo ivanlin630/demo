@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_test_food_consumption_total()
 	_test_fatigue_accumulation()
 	_test_fatigue_recovery()
+	_test_salary_interval_weekly()
 	quit()
 
 func _run_sim_test() -> void:
@@ -1028,8 +1029,8 @@ func _run_sim_test() -> void:
 		"TICKS_PER_SEASON 應 = TICKS_PER_DAY*90")
 	assert(WorldState.TICKS_PER_YEAR   == WorldState.TICKS_PER_DAY * 360,
 		"TICKS_PER_YEAR 應 = TICKS_PER_DAY*360")
-	assert(SalarySystem.SALARY_INTERVAL == WorldState.TICKS_PER_MONTH,
-		"SALARY_INTERVAL 應 = TICKS_PER_MONTH")
+	assert(SalarySystem.SALARY_INTERVAL == WorldState.TICKS_PER_DAY * 7,
+		"SALARY_INTERVAL 應 = 1週(TICKS_PER_DAY*7)")
 	assert(HarvestSystem.SEASON_LENGTH  == WorldState.TICKS_PER_SEASON,
 		"SEASON_LENGTH 應 = TICKS_PER_SEASON")
 	assert(PopulationSystem.OVERFLOW_CHECK_INTERVAL == WorldState.TICKS_PER_DAY,
@@ -2438,3 +2439,13 @@ func _test_fatigue_recovery() -> void:
 	assert(team.fatigue >= 0.74 and team.fatigue <= 0.78,
 		"1 天紮營後 fatigue 應 ~0.76，實際=%s" % str(team.fatigue))
 	print("Cadence Task4 OK")
+
+func _test_salary_interval_weekly() -> void:
+	print("--- Cadence Task5: 薪水週期 ---")
+	# SALARY_INTERVAL 應為 1 週（240 × 7 = 1680 tick）
+	assert(SalarySystem.SALARY_INTERVAL == WorldState.TICKS_PER_DAY * 7,
+		"SALARY_INTERVAL 應為 1 週(1680)，實際=%s" % str(SalarySystem.SALARY_INTERVAL))
+	# 確認 NEAR_CADENCE 整除性（1680 % 10 == 0）
+	assert(SalarySystem.SALARY_INTERVAL % SimRunner.NEAR_CADENCE == 0,
+		"SALARY_INTERVAL 必須是 NEAR_CADENCE 倍數")
+	print("Cadence Task5 OK")

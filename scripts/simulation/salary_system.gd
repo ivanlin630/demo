@@ -1,6 +1,6 @@
 class_name SalarySystem
 
-const SALARY_INTERVAL: int = WorldState.TICKS_PER_MONTH   # 1月/次
+const SALARY_INTERVAL: int = WorldState.TICKS_PER_DAY * 7   # 1週/次
 const SALARY_PER_SKILL_POINT: float = 2.0   # TEST VALUE
 const OVERPAY_BONUS: float     = 0.02  # TEST VALUE
 const SALARY_LOYALTY_PENALTY: float = 0.03  # TEST VALUE
