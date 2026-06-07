@@ -19,7 +19,7 @@
 4. 流民 AI：找空 outpost 自主進駐（連動 B spec NPC 生存決策）
 5. 起義：faction_ai 評估 PRODUCE team 滿意度，達閾值整村變敵
 6. 失聯保護：用 intel snapshot last_tick + 7 天緩衝抵抗假消息
-7. 商隊離家不再餓死
+7. 任何有 outpost 的 team 離家後仍有穩定資源供給（不只食物，含 material/coin），避免資源過於匱乏崩潰
 
 ## 不在範圍
 
@@ -39,8 +39,17 @@
 - 自己有 leader、named_members、population
 - 自己有 person.stress/loyalty/needs
 - tile_pos 固定為某個 outpost 的位置（不主動移動）
-- 用既有 P2_produce reaction 產糧
 - pop 上限由 outpost level 決定（不是 leader 統領）
+
+### 資源產出（多元）
+
+居民在 outpost tile 上：
+1. **既有 `collect_resources`** 採集 tile 全部資源（food、material、ore_*）— 因 outpost_level > 0 而觸發
+2. **既有 `P2_produce` reaction** 對食物加成（取決於生產 skill + farming_level）
+3. **既有 `manufacturing_system`** 可在 civilian L2+ outpost 製造 goods/weapons（owner 派 named NPC 駐守 manufacturing slot）
+4. coin 來源：商業 outpost 升級（既有 `OUTPOST_TYPE` 概念可後續擴充），或 owner 收稅後自身轉化（簡化：稅收以 food/material 為主，coin 靠玩家貿易）
+
+→ 居民幫 owner 累積 food + material + goods + 偶發 ore；owner 收稅後可用於招兵/升級/交易換 coin。
 
 ### Owner 關係
 
@@ -432,10 +441,10 @@ func _resolve_pacify(state, pacifier, village):
 
 ## 解決的 known_issues
 
-- 商隊離家飢餓（Team1 demo 場景）
-- coin 收入來源：透過收稅 + 居民產出
+- **所有有 outpost 的 team 離家資源匱乏**（不限商隊，涵蓋軍隊出征、商隊跑商、宗教朝聖等場景）
+- coin 收入來源：透過收稅 + 居民產出（food + material + coin）
 - 「農民」遊戲核心無實體 → 補上
-- outpost owner 不在無人產糧 → 居民解決
+- outpost owner 不在無人產資源 → 居民解決
 
 ## 後續延伸
 
