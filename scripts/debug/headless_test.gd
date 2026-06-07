@@ -2,6 +2,7 @@ extends SceneTree
 
 func _initialize() -> void:
 	_run_sim_test()
+	_test_anon_combat_skill_field()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2161,3 +2162,12 @@ func _run_sim_test() -> void:
 	# ── end encounter system test ─────────────────────────────────────────
 
 	print("=== DONE ===")
+
+func _test_anon_combat_skill_field() -> void:
+	print("--- S7 Task1: team.anon_combat_skill 獨立欄位 ---")
+	var t := TeamData.new()
+	assert(t.anon_combat_skill == 0.2, "預設值應為 0.2，實際=%s" % str(t.anon_combat_skill))
+	# 確認欄位可被指派
+	t.anon_combat_skill = 0.55
+	assert(t.anon_combat_skill == 0.55, "指派後應為 0.55")
+	print("S7 Task1 OK")
