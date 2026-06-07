@@ -149,7 +149,7 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 		"has_exited":   false,
 		"escort_target": -1,
 		"body_parts":   _default_body_parts(),
-		"skills": { "戰鬥": float(team.resources.get("anon_combat_skill", 0.2)) },
+		"skills": { "戰鬥": team.anon_combat_skill },
 		"equipment": {
 			"hand_1": {}, "hand_2": {}, "head": {}, "torso": {},
 			"right_arm": {}, "left_arm": {}, "right_leg": {}, "left_leg": {},

@@ -1,6 +1,6 @@
 # Known Issues
 
-> 最後更新：2026-06-07（遭遇戰修正後）| 來源：動態測試 + code review
+> 最後更新：2026-06-07（S7 faction_ai 動態初始化）| 來源：動態測試 + code review
 
 ---
 
@@ -122,31 +122,30 @@
 - **位置**：`scripts/debug/agent_repl.gd:_run_stdin_loop`
 - **建議**：加 `--quiet` flag suppress 模擬 print，或在 stdin loop 前重導向 print 到 stderr
 
-### S7. `anon_combat_skill` 從未由遊戲邏輯設定
+### S7a. `anon_combat_skill` 從未由遊戲邏輯設定 ✅ 已修（2026-06-07）
 - **症狀**：主遊戲所有匿名單位戰鬥技能固定為 fallback 值 `0.2`，與勢力強度無關
 - **根因**：`encounter_system._create_anon_unit` 讀 `team.resources["anon_combat_skill"]`，但 `faction_ai`、`world_generator`、`TeamData` 初始化都未設置此 key
-- **位置**：`scripts/simulation/encounter_system.gd:152`；應設置於 `scripts/simulation/faction_ai_system.gd`
-- **建議**：faction_ai 根據勢力類型設定（流氓 0.2、民兵 0.3、正規軍 0.5、精銳 0.65）；或改為 `TeamData` 獨立欄位脫離 resources dict
-- **連動**：S7b（`armor_config` 同樣問題）
+- **修正**：`faction_ai_system._update_anon_combat_skill` 依 tags 計算；`anon_combat_skill` 從 `team.resources` 遷出為獨立欄位
+- **位置**：`scripts/simulation/faction_ai_system.gd`、`scripts/data/team_data.gd`
+- **commit**：S7 Task 1-7 系列
 
-### S7b. `armor_config` 從未由遊戲邏輯設定
+### S7b. `armor_config` 從未由遊戲邏輯設定 ✅ 已修（2026-06-07）
 - **症狀**：主遊戲所有隊伍護甲配置固定為 `TeamData` 預設值（torso=low，其他=none），與勢力類型無關
 - **根因**：`faction_ai`、`world_generator`、`game_setup` 均未設置 `armor_config`
-- **位置**：`scripts/data/team_data.gd:62`；應設置於 `scripts/simulation/faction_ai_system.gd`
-- **影響**：所有匿名單位只穿 torso low 護甲，精銳/騎士等高階勢力無法有全身護甲
-- **建議**：faction_ai 根據勢力類型設定各 slot（精銳=全身 low，騎士=torso high+其他 low，流氓=none）
+- **修正**：`faction_ai_system._update_armor_config` 依 tags + 護甲庫存閾值計算各 slot
+- **位置**：`scripts/simulation/faction_ai_system.gd`
 
-### S7c. `guard_ratio` 從未由遊戲邏輯設定
+### S7c. `guard_ratio` 從未由遊戲邏輯設定 ✅ 已修（2026-06-07）
 - **症狀**：所有隊伍警衛比例固定 0.2，夜間警衛數 = `ceil(pop × 0.2)`，無勢力差異
 - **根因**：`day_night_system` 讀 `team.guard_ratio`，但 faction_ai 從未寫入
-- **影響**：精銳軍隊與盜匪警衛比例相同；`sim_runner` 疲勞回復 `rest_mult = 1 - guard_ratio×0.5` 也固定
-- **建議**：faction_ai 根據勢力特性設定（精銳=0.4，民兵=0.2，流氓=0.1）
+- **修正**：`faction_ai_system._update_guard_ratio` 依 current_task + 鄰近威脅計算；新增 `_has_hostile_within` 輔助
+- **位置**：`scripts/simulation/faction_ai_system.gd`
 
-### S7d. `anon_wage` 從未由遊戲邏輯設定
+### S7d. `anon_wage` 從未由遊戲邏輯設定 ✅ 已修（2026-06-07）
 - **症狀**：所有隊伍匿名薪資係數固定 1.0，`salary_system` 計算 `anon_total = anon_wage × anon_count`
 - **根因**：`salary_system` 讀 `team.anon_wage`，但 faction_ai 從未寫入
-- **影響**：傭兵（高薪）與義軍（低薪）薪資結構無差異
-- **建議**：faction_ai 或 world_generator 根據隊伍性質設定（傭兵=1.5，義軍=0.5）
+- **修正**：`faction_ai_system._update_anon_wage` 依 tags 計算（MILITARY 拉高、PRODUCE/EXILE 拉低）
+- **位置**：`scripts/simulation/faction_ai_system.gd`
 
 ### A2. encounter_view.gd `_max_timer` 欄位缺失（pre-existing）
 - **症狀**：`unit.get("_max_timer", 10)` 永遠回傳預設值 10，計時器顯示不正確

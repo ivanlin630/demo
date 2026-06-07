@@ -2,6 +2,12 @@ extends SceneTree
 
 func _initialize() -> void:
 	_run_sim_test()
+	_test_anon_combat_skill_field()
+	_test_update_anon_combat_skill()
+	_test_update_anon_wage()
+	_test_update_armor_config()
+	_test_update_guard_ratio()
+	_test_faction_ai_run_calls_all_updates()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2161,3 +2167,177 @@ func _run_sim_test() -> void:
 	# ── end encounter system test ─────────────────────────────────────────
 
 	print("=== DONE ===")
+
+func _test_anon_combat_skill_field() -> void:
+	print("--- S7 Task1: team.anon_combat_skill 獨立欄位 ---")
+	var t := TeamData.new()
+	assert(t.anon_combat_skill == 0.2, "預設值應為 0.2，實際=%s" % str(t.anon_combat_skill))
+	# 確認欄位可被指派
+	t.anon_combat_skill = 0.55
+	assert(t.anon_combat_skill == 0.55, "指派後應為 0.55")
+	print("S7 Task1 OK")
+
+func _test_update_anon_combat_skill() -> void:
+	print("--- S7 Task3: _update_anon_combat_skill ---")
+	var fai := FactionAISystem.new()
+	# MILITARY → 0.5
+	var t_mil := TeamData.new()
+	t_mil.tags = [TeamData.TAG_MILITARY]
+	fai._update_anon_combat_skill(t_mil)
+	assert(t_mil.anon_combat_skill >= 0.45 and t_mil.anon_combat_skill <= 0.55,
+		"MILITARY 應 ~0.5，實際=%s" % str(t_mil.anon_combat_skill))
+	# PRODUCE → default 0.25 (PRODUCE tag=0.15 < default 0.25, so result is 0.25)
+	var t_pro := TeamData.new()
+	t_pro.tags = [TeamData.TAG_PRODUCE]
+	fai._update_anon_combat_skill(t_pro)
+	assert(t_pro.anon_combat_skill >= 0.2 and t_pro.anon_combat_skill <= 0.3,
+		"PRODUCE 單一 tag → default 0.25，實際=%s" % str(t_pro.anon_combat_skill))
+	# 多重 tag 取最高
+	var t_multi := TeamData.new()
+	t_multi.tags = [TeamData.TAG_PRODUCE, TeamData.TAG_MILITARY]
+	fai._update_anon_combat_skill(t_multi)
+	assert(t_multi.anon_combat_skill >= 0.45,
+		"多重 tag 應取最高（MILITARY=0.5），實際=%s" % str(t_multi.anon_combat_skill))
+	# 無 tag → default 0.25
+	var t_def := TeamData.new()
+	fai._update_anon_combat_skill(t_def)
+	assert(t_def.anon_combat_skill >= 0.2 and t_def.anon_combat_skill <= 0.3,
+		"default 應 ~0.25，實際=%s" % str(t_def.anon_combat_skill))
+	print("S7 Task3 OK")
+
+func _test_update_anon_wage() -> void:
+	print("--- S7 Task4: _update_anon_wage ---")
+	var fai := FactionAISystem.new()
+	# MILITARY → 1.5
+	var t_mil := TeamData.new()
+	t_mil.tags = [TeamData.TAG_MILITARY]
+	fai._update_anon_wage(t_mil)
+	assert(t_mil.anon_wage >= 1.4 and t_mil.anon_wage <= 1.6,
+		"MILITARY 應 ~1.5，實際=%s" % str(t_mil.anon_wage))
+	# PRODUCE → 0.7
+	var t_pro := TeamData.new()
+	t_pro.tags = [TeamData.TAG_PRODUCE]
+	fai._update_anon_wage(t_pro)
+	assert(t_pro.anon_wage <= 0.8,
+		"PRODUCE 應 <=0.8，實際=%s" % str(t_pro.anon_wage))
+	# EXILE → 0.3
+	var t_ex := TeamData.new()
+	t_ex.tags = [TeamData.TAG_EXILE]
+	fai._update_anon_wage(t_ex)
+	assert(t_ex.anon_wage <= 0.4,
+		"EXILE 應 <=0.4，實際=%s" % str(t_ex.anon_wage))
+	# default → 1.0
+	var t_def := TeamData.new()
+	fai._update_anon_wage(t_def)
+	assert(t_def.anon_wage >= 0.9 and t_def.anon_wage <= 1.1,
+		"default 應 ~1.0，實際=%s" % str(t_def.anon_wage))
+	print("S7 Task4 OK")
+
+func _test_update_armor_config() -> void:
+	print("--- S7 Task5: _update_armor_config ---")
+	var fai := FactionAISystem.new()
+	# MILITARY + 高甲庫存充足
+	var t1 := TeamData.new()
+	t1.tags = [TeamData.TAG_MILITARY]
+	t1.population = 10
+	t1.resources["armor_high"] = 20
+	t1.resources["armor_low"]  = 20
+	fai._update_armor_config(t1)
+	assert(t1.armor_config["torso"] == "high",
+		"MILITARY+high 充足 torso 應 high，實際=%s" % t1.armor_config["torso"])
+	assert(t1.armor_config["right_arm"] == "low",
+		"MILITARY+high 充足 arm 應 low，實際=%s" % t1.armor_config["right_arm"])
+	# MILITARY + 僅低甲
+	var t2 := TeamData.new()
+	t2.tags = [TeamData.TAG_MILITARY]
+	t2.population = 10
+	t2.resources["armor_low"]  = 20
+	t2.resources["armor_high"] = 0
+	fai._update_armor_config(t2)
+	assert(t2.armor_config["torso"] == "low",
+		"MILITARY+僅低 torso 應 low，實際=%s" % t2.armor_config["torso"])
+	assert(t2.armor_config["head"] == "low",
+		"MILITARY+僅低 head 應 low，實際=%s" % t2.armor_config["head"])
+	assert(t2.armor_config["right_arm"] == "none",
+		"MILITARY+僅低 arm 應 none，實際=%s" % t2.armor_config["right_arm"])
+	# 無護甲 → 全 none
+	var t3 := TeamData.new()
+	t3.tags = [TeamData.TAG_MILITARY]
+	t3.population = 10
+	t3.resources["armor_low"]  = 0
+	t3.resources["armor_high"] = 0
+	fai._update_armor_config(t3)
+	assert(t3.armor_config["torso"] == "none",
+		"無甲 torso 應 none，實際=%s" % t3.armor_config["torso"])
+	print("S7 Task5 OK")
+
+func _test_update_guard_ratio() -> void:
+	print("--- S7 Task6: _update_guard_ratio ---")
+	var fai := FactionAISystem.new()
+	var state := WorldState.new()
+	# 場景 A：MILITARY + 鄰格有敵對 team → 0.4
+	var t_mil := TeamData.new()
+	t_mil.team_id = 100
+	t_mil.tags = [TeamData.TAG_MILITARY]
+	t_mil.faction_id = 10
+	t_mil.tile_pos = Vector2i(5, 5)
+	state.teams[100] = t_mil
+	var t_enemy := TeamData.new()
+	t_enemy.team_id = 101
+	t_enemy.faction_id = 20  # 不同 faction
+	t_enemy.tile_pos = Vector2i(6, 6)  # distance ~1
+	state.teams[101] = t_enemy
+	fai._update_guard_ratio(t_mil, state)
+	assert(t_mil.guard_ratio >= 0.35,
+		"MILITARY 鄰敵 應 >=0.35，實際=%s" % str(t_mil.guard_ratio))
+	# 場景 B：current_task=攻擊 → 0.1
+	t_mil.current_task = TeamData.TASK_ATTACK
+	fai._update_guard_ratio(t_mil, state)
+	assert(t_mil.guard_ratio <= 0.15,
+		"攻擊中 應 <=0.15，實際=%s" % str(t_mil.guard_ratio))
+	# 場景 C：PRODUCE 無威脅 → 0.15
+	var t_pro := TeamData.new()
+	t_pro.team_id = 102
+	t_pro.tags = [TeamData.TAG_PRODUCE]
+	t_pro.faction_id = 30
+	t_pro.tile_pos = Vector2i(-20, -20)
+	state.teams[102] = t_pro
+	fai._update_guard_ratio(t_pro, state)
+	assert(t_pro.guard_ratio <= 0.2,
+		"PRODUCE 無威脅 應 <=0.2，實際=%s" % str(t_pro.guard_ratio))
+	# 場景 D：default 無威脅 → 0.2
+	var t_def := TeamData.new()
+	t_def.team_id = 103
+	t_def.faction_id = 40
+	t_def.tile_pos = Vector2i(-30, -30)
+	state.teams[103] = t_def
+	fai._update_guard_ratio(t_def, state)
+	assert(t_def.guard_ratio >= 0.15 and t_def.guard_ratio <= 0.25,
+		"default 無威脅 應 ~0.2，實際=%s" % str(t_def.guard_ratio))
+	print("S7 Task6 OK")
+
+func _test_faction_ai_run_calls_all_updates() -> void:
+	print("--- S7 Task7: faction_ai.run() 整合 ---")
+	var fai := FactionAISystem.new()
+	var state := WorldState.new()
+	# 建 MILITARY team 且資源充足
+	var t := TeamData.new()
+	t.team_id = 200
+	t.tags = [TeamData.TAG_MILITARY]
+	t.population = 10
+	t.faction_id = 50
+	t.tile_pos = Vector2i(0, 0)
+	t.resources["armor_high"] = 20
+	t.resources["armor_low"]  = 20
+	state.teams[200] = t
+	# faction_ai evaluate_all 後 4 個欄位都應被更新
+	fai.evaluate_all(state, [200])
+	assert(t.anon_combat_skill >= 0.45,
+		"evaluate_all() 後 MILITARY anon_combat_skill 應 >=0.45，實際=%s" % str(t.anon_combat_skill))
+	assert(t.anon_wage >= 1.4,
+		"evaluate_all() 後 MILITARY anon_wage 應 >=1.4，實際=%s" % str(t.anon_wage))
+	assert(t.armor_config["torso"] == "high",
+		"evaluate_all() 後 MILITARY armor_config torso 應 high，實際=%s" % t.armor_config["torso"])
+	assert(t.guard_ratio >= 0.15 and t.guard_ratio <= 0.5,
+		"evaluate_all() 後 guard_ratio 應在合理範圍，實際=%s" % str(t.guard_ratio))
+	print("S7 Task7 OK")

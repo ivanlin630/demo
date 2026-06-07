@@ -55,6 +55,7 @@ var equip_order: Dictionary = {
 	"melee_low": 0, "melee_high": 0,
 	"ranged_low": 0, "ranged_high": 0,
 }
+var anon_combat_skill: float = 0.2
 var armed_anon_ratio: float = 0.0
 var anon_wage: float = 1.0
 var fatigue: float = 0.0

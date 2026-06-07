@@ -61,7 +61,7 @@ func _run() -> void:
 	atk.resources["weapon_ranged_low"] = 10
 	atk.resources["armor_low"]         = 20
 	atk.resources["arrows"]            = 200
-	atk.resources["anon_combat_skill"] = 0.35
+	atk.anon_combat_skill = 0.35
 	# equip_order: 3 近戰 + 2 遠端（_assign_anon_weapons 會按此分配）
 	atk.equip_order = { "melee_low": 5, "melee_high": 0, "ranged_low": 5, "ranged_high": 0 }
 	state.teams[0] = atk
@@ -79,7 +79,7 @@ func _run() -> void:
 	def.resources["weapon_melee_high"] = 1
 	def.resources["armor_low"]         = 3
 	def.resources["armor_high"]        = 10
-	def.resources["anon_combat_skill"] = 0.5
+	def.anon_combat_skill = 0.5
 	# equip_order: 先配高階，再配低階
 	def.equip_order = { "melee_low": 2, "melee_high": 1, "ranged_low": 0, "ranged_high": 0 }
 	state.teams[1] = def

@@ -81,7 +81,12 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for tid in state.teams:
 		if not state.teams.has(tid):
 			continue
-		_update_equip_order(state, state.teams[tid])
+		var team: TeamData = state.teams[tid]
+		_update_equip_order(state, team)
+		_update_anon_combat_skill(team)
+		_update_anon_wage(team)
+		_update_armor_config(team)
+		_update_guard_ratio(team, state)
 
 # ──────── Tag 權限 ────────
 
@@ -503,6 +508,79 @@ func _update_equip_order(state: WorldState, team: TeamData) -> void:
 	else:
 		var guard_count: int = mini(team.population / 2, can_equip)
 		team.equip_order["melee_low"] = mini(int(team.resources.get("weapon_melee_low", 0)) / 2, guard_count)
+
+func _update_anon_combat_skill(team: TeamData) -> void:
+	var best: float = 0.25  # default
+	for tag in team.tags:
+		match tag:
+			TeamData.TAG_MILITARY: best = maxf(best, 0.5)
+			TeamData.TAG_MERCHANT: best = maxf(best, 0.2)
+			TeamData.TAG_PRODUCE:  best = maxf(best, 0.15)
+			TeamData.TAG_RELIGION: best = maxf(best, 0.2)
+			TeamData.TAG_EXILE:    best = maxf(best, 0.3)
+	team.anon_combat_skill = clampf(best, 0.1, 0.8)
+
+func _update_anon_wage(team: TeamData) -> void:
+	var best: float = 1.0  # default
+	for tag in team.tags:
+		match tag:
+			TeamData.TAG_MILITARY: best = maxf(best, 1.5)
+			TeamData.TAG_MERCHANT: best = maxf(best, 1.2)
+			TeamData.TAG_PRODUCE:  best = minf(best, 0.7)
+			TeamData.TAG_RELIGION: best = minf(best, 0.5)
+			TeamData.TAG_EXILE:    best = minf(best, 0.3)
+	team.anon_wage = clampf(best, 0.0, 2.0)
+
+func _update_armor_config(team: TeamData) -> void:
+	var pop_threshold: float = maxf(team.population * 0.3, 1.0)
+	var has_high: bool = int(team.resources.get("armor_high", 0)) >= pop_threshold
+	var has_low:  bool = int(team.resources.get("armor_low", 0))  >= pop_threshold
+	# 重設全 none，再依條件填值
+	team.armor_config = {
+		"head": "none", "torso": "none",
+		"right_arm": "none", "left_arm": "none",
+		"right_leg": "none", "left_leg": "none",
+	}
+	var is_mil: bool = team.tags.has(TeamData.TAG_MILITARY)
+	var is_mer: bool = team.tags.has(TeamData.TAG_MERCHANT)
+	if is_mil and has_high:
+		team.armor_config["torso"]     = "high"
+		team.armor_config["head"]      = "low"
+		team.armor_config["right_arm"] = "low"
+		team.armor_config["left_arm"]  = "low"
+		team.armor_config["right_leg"] = "low"
+		team.armor_config["left_leg"]  = "low"
+	elif is_mil and has_low:
+		team.armor_config["torso"] = "low"
+		team.armor_config["head"]  = "low"
+	elif is_mer and has_low:
+		team.armor_config["torso"] = "low"
+	elif has_low:
+		team.armor_config["torso"] = "low"
+
+func _has_hostile_within(state: WorldState, team: TeamData, range_hex: int) -> bool:
+	for tid in state.teams:
+		if tid == team.team_id: continue
+		var other: TeamData = state.teams[tid]
+		if other.faction_id == team.faction_id and team.faction_id != -1: continue
+		var d: int = _hex_dist(team.tile_pos, other.tile_pos)
+		if d <= range_hex:
+			return true
+	return false
+
+func _update_guard_ratio(team: TeamData, state: WorldState) -> void:
+	var ratio: float = 0.2  # default
+	if team.current_task == TeamData.TASK_ATTACK or team.current_task == TeamData.TASK_LOOT:
+		ratio = 0.1
+	else:
+		var threat: bool = _has_hostile_within(state, team, 3)
+		if team.tags.has(TeamData.TAG_MILITARY) and threat:
+			ratio = 0.4
+		elif threat:
+			ratio = 0.35
+		elif team.tags.has(TeamData.TAG_PRODUCE):
+			ratio = 0.15
+	team.guard_ratio = clampf(ratio, 0.05, 0.5)
 
 # ──────── 輔助函數 ────────
 
