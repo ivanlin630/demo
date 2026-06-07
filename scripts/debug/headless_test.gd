@@ -3,6 +3,7 @@ extends SceneTree
 func _initialize() -> void:
 	_run_sim_test()
 	_test_anon_combat_skill_field()
+	_test_update_anon_combat_skill()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2171,3 +2172,31 @@ func _test_anon_combat_skill_field() -> void:
 	t.anon_combat_skill = 0.55
 	assert(t.anon_combat_skill == 0.55, "指派後應為 0.55")
 	print("S7 Task1 OK")
+
+func _test_update_anon_combat_skill() -> void:
+	print("--- S7 Task3: _update_anon_combat_skill ---")
+	var fai := FactionAISystem.new()
+	# MILITARY → 0.5
+	var t_mil := TeamData.new()
+	t_mil.tags = [TeamData.TAG_MILITARY]
+	fai._update_anon_combat_skill(t_mil)
+	assert(t_mil.anon_combat_skill >= 0.45 and t_mil.anon_combat_skill <= 0.55,
+		"MILITARY 應 ~0.5，實際=%s" % str(t_mil.anon_combat_skill))
+	# PRODUCE → default 0.25 (PRODUCE tag=0.15 < default 0.25, so result is 0.25)
+	var t_pro := TeamData.new()
+	t_pro.tags = [TeamData.TAG_PRODUCE]
+	fai._update_anon_combat_skill(t_pro)
+	assert(t_pro.anon_combat_skill >= 0.2 and t_pro.anon_combat_skill <= 0.3,
+		"PRODUCE 單一 tag → default 0.25，實際=%s" % str(t_pro.anon_combat_skill))
+	# 多重 tag 取最高
+	var t_multi := TeamData.new()
+	t_multi.tags = [TeamData.TAG_PRODUCE, TeamData.TAG_MILITARY]
+	fai._update_anon_combat_skill(t_multi)
+	assert(t_multi.anon_combat_skill >= 0.45,
+		"多重 tag 應取最高（MILITARY=0.5），實際=%s" % str(t_multi.anon_combat_skill))
+	# 無 tag → default 0.25
+	var t_def := TeamData.new()
+	fai._update_anon_combat_skill(t_def)
+	assert(t_def.anon_combat_skill >= 0.2 and t_def.anon_combat_skill <= 0.3,
+		"default 應 ~0.25，實際=%s" % str(t_def.anon_combat_skill))
+	print("S7 Task3 OK")

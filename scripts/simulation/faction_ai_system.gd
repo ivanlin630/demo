@@ -504,6 +504,17 @@ func _update_equip_order(state: WorldState, team: TeamData) -> void:
 		var guard_count: int = mini(team.population / 2, can_equip)
 		team.equip_order["melee_low"] = mini(int(team.resources.get("weapon_melee_low", 0)) / 2, guard_count)
 
+func _update_anon_combat_skill(team: TeamData) -> void:
+	var best: float = 0.25  # default
+	for tag in team.tags:
+		match tag:
+			TeamData.TAG_MILITARY: best = maxf(best, 0.5)
+			TeamData.TAG_MERCHANT: best = maxf(best, 0.2)
+			TeamData.TAG_PRODUCE:  best = maxf(best, 0.15)
+			TeamData.TAG_RELIGION: best = maxf(best, 0.2)
+			TeamData.TAG_EXILE:    best = maxf(best, 0.3)
+	team.anon_combat_skill = clampf(best, 0.1, 0.8)
+
 # ──────── 輔助函數 ────────
 
 func _can_trade(state: WorldState, team: TeamData) -> bool:
