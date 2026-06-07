@@ -553,6 +553,30 @@ func _update_armor_config(team: TeamData) -> void:
 	elif has_low:
 		team.armor_config["torso"] = "low"
 
+func _has_hostile_within(state: WorldState, team: TeamData, range_hex: int) -> bool:
+	for tid in state.teams:
+		if tid == team.team_id: continue
+		var other: TeamData = state.teams[tid]
+		if other.faction_id == team.faction_id and team.faction_id != -1: continue
+		var d: int = _hex_dist(team.tile_pos, other.tile_pos)
+		if d <= range_hex:
+			return true
+	return false
+
+func _update_guard_ratio(team: TeamData, state: WorldState) -> void:
+	var ratio: float = 0.2  # default
+	if team.current_task == TeamData.TASK_ATTACK or team.current_task == TeamData.TASK_LOOT:
+		ratio = 0.1
+	else:
+		var threat: bool = _has_hostile_within(state, team, 3)
+		if team.tags.has(TeamData.TAG_MILITARY) and threat:
+			ratio = 0.4
+		elif threat:
+			ratio = 0.35
+		elif team.tags.has(TeamData.TAG_PRODUCE):
+			ratio = 0.15
+	team.guard_ratio = clampf(ratio, 0.05, 0.5)
+
 # ──────── 輔助函數 ────────
 
 func _can_trade(state: WorldState, team: TeamData) -> bool:

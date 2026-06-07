@@ -6,6 +6,7 @@ func _initialize() -> void:
 	_test_update_anon_combat_skill()
 	_test_update_anon_wage()
 	_test_update_armor_config()
+	_test_update_guard_ratio()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2268,3 +2269,48 @@ func _test_update_armor_config() -> void:
 	assert(t3.armor_config["torso"] == "none",
 		"無甲 torso 應 none，實際=%s" % t3.armor_config["torso"])
 	print("S7 Task5 OK")
+
+func _test_update_guard_ratio() -> void:
+	print("--- S7 Task6: _update_guard_ratio ---")
+	var fai := FactionAISystem.new()
+	var state := WorldState.new()
+	# 場景 A：MILITARY + 鄰格有敵對 team → 0.4
+	var t_mil := TeamData.new()
+	t_mil.team_id = 100
+	t_mil.tags = [TeamData.TAG_MILITARY]
+	t_mil.faction_id = 10
+	t_mil.tile_pos = Vector2i(5, 5)
+	state.teams[100] = t_mil
+	var t_enemy := TeamData.new()
+	t_enemy.team_id = 101
+	t_enemy.faction_id = 20  # 不同 faction
+	t_enemy.tile_pos = Vector2i(6, 6)  # distance ~1
+	state.teams[101] = t_enemy
+	fai._update_guard_ratio(t_mil, state)
+	assert(t_mil.guard_ratio >= 0.35,
+		"MILITARY 鄰敵 應 >=0.35，實際=%s" % str(t_mil.guard_ratio))
+	# 場景 B：current_task=攻擊 → 0.1
+	t_mil.current_task = TeamData.TASK_ATTACK
+	fai._update_guard_ratio(t_mil, state)
+	assert(t_mil.guard_ratio <= 0.15,
+		"攻擊中 應 <=0.15，實際=%s" % str(t_mil.guard_ratio))
+	# 場景 C：PRODUCE 無威脅 → 0.15
+	var t_pro := TeamData.new()
+	t_pro.team_id = 102
+	t_pro.tags = [TeamData.TAG_PRODUCE]
+	t_pro.faction_id = 30
+	t_pro.tile_pos = Vector2i(-20, -20)
+	state.teams[102] = t_pro
+	fai._update_guard_ratio(t_pro, state)
+	assert(t_pro.guard_ratio <= 0.2,
+		"PRODUCE 無威脅 應 <=0.2，實際=%s" % str(t_pro.guard_ratio))
+	# 場景 D：default 無威脅 → 0.2
+	var t_def := TeamData.new()
+	t_def.team_id = 103
+	t_def.faction_id = 40
+	t_def.tile_pos = Vector2i(-30, -30)
+	state.teams[103] = t_def
+	fai._update_guard_ratio(t_def, state)
+	assert(t_def.guard_ratio >= 0.15 and t_def.guard_ratio <= 0.25,
+		"default 無威脅 應 ~0.2，實際=%s" % str(t_def.guard_ratio))
+	print("S7 Task6 OK")
