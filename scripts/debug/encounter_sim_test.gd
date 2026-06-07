@@ -53,13 +53,13 @@ func _run() -> void:
 	atk.team_id          = 0
 	atk.leader_id        = 0
 	atk.named_members    = []          # leader 不算進 named_members
-	atk.population       = 10
+	atk.population       = 20
 	atk.armed_anon_ratio = 0.5         # 5 個匿名參戰
 	atk.fatigue          = 0.0
 	atk.resources        = TeamData.new().resources.duplicate()
-	atk.resources["weapon_melee_low"]  = 3
-	atk.resources["weapon_ranged_low"] = 2
-	atk.resources["armor_low"]         = 2
+	atk.resources["weapon_melee_low"]  = 10
+	atk.resources["weapon_ranged_low"] = 10
+	atk.resources["armor_low"]         = 10
 	atk.resources["anon_combat_skill"] = 0.35
 	# equip_order: 3 近戰 + 2 遠端（_assign_anon_weapons 會按此分配）
 	atk.equip_order = { "melee_low": 3, "melee_high": 0, "ranged_low": 2, "ranged_high": 0 }
@@ -77,6 +77,7 @@ func _run() -> void:
 	def.resources["weapon_melee_low"]  = 2
 	def.resources["weapon_melee_high"] = 1
 	def.resources["armor_low"]         = 3
+	def.resources["armor_high"]        = 10
 	def.resources["anon_combat_skill"] = 0.5
 	# equip_order: 先配高階，再配低階
 	def.equip_order = { "melee_low": 2, "melee_high": 1, "ranged_low": 0, "ranged_high": 0 }
@@ -86,10 +87,19 @@ func _run() -> void:
 	enc.init_encounter(state, 0, 1, "normal")
 	print("[EncounterSim] Units spawned: %d" % state.encounter_units.size())
 	for u in state.encounter_units:
-		var wpn: String = u.get("equipment", {}).get("hand_1", {}).get("grade", "unarmed")
-		var arm: String = u.get("equipment", {}).get("torso",  {}).get("grade", "none")
-		print("  team=%d p=%d pos=%s wpn=%s armor=%s" % [
-			u["team_id"], u["person_id"], str(u["pos"]), wpn, arm])
+		print("  team=%d p=%d pos=%s" % [u["team_id"], u["person_id"], str(u["pos"])])
+		for slot in u.get("equipment", {}):
+			var eq: Dictionary = u["equipment"][slot]
+			if eq.get("grade", "") == "": continue
+			print("    equip[%s] type=%s grade=%s" % [
+				slot, eq.get("type", "?"), eq.get("grade", "?")])
+		var inv: Array = u.get("inventory", [])
+		if inv.is_empty():
+			print("    inv: (空)")
+		else:
+			for item in inv:
+				print("    inv: grade=%s qty=%s" % [
+					item.get("grade", "?"), str(item.get("qty", 1))])
 
 	# ── Simulation loop ───────────────────────────────────────────────────────
 	var max_ticks               := 800
