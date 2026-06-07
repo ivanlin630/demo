@@ -176,11 +176,11 @@
 - **commit**：cb2171d
 - **發現**：2026-06-07 game_sim_test.gd 7200 tick 跑出來
 
-### S11. Leader 死亡後無 succession，team.leader_id=-1 卡住
-- **症狀**：遭遇戰 leader 戰死 → `encounter_system.resolve_encounter_end` 設 `team.leader_id = -1`；之後 team 永遠無 leader
-- **影響**：薪水系統 `_pay_salary` 找不到 leader 個性 → fallback；guard_ratio 等 leader-driven 邏輯失效
-- **建議**：實作 succession（最高統領技能 named member 接位）；或事件觸發玩家選擇繼承人
-- **位置**：`scripts/simulation/encounter_system.gd:1042`
+### S11. Leader 死亡後無 succession ✅ 已修（2026-06-07）
+- **症狀**：遭遇戰 leader 戰死 → `team.leader_id = -1`；之後 team 永遠無 leader
+- **修正**：`faction_ai_system._promote_successor` 從 `named_members` 選統領技能最高者升任；`evaluate_all` 每輪檢查 `leader_id == -1 and not named_members.is_empty()` 自動觸發
+- **位置**：`scripts/simulation/faction_ai_system.gd`（新函數 + evaluate_all 加判斷）
+- **限制**：若無 named members 則 team 仍無 leader（合理：真正全滅）；玩家身分轉移屬 D2 議題
 - **發現**：2026-06-07 game_sim_test.gd 跑出來
 
 ### S12. encounter draw 不清 state.encounter_active ✅ 已修（2026-06-07）

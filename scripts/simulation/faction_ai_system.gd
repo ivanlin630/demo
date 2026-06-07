@@ -82,6 +82,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
+		# S11: leader 死亡自動繼承（無 leader 但有 named members）
+		if team.leader_id == -1 and not team.named_members.is_empty():
+			_promote_successor(state, team)
 		_update_equip_order(state, team)
 		_update_anon_combat_skill(team)
 		_update_anon_wage(team)
@@ -508,6 +511,30 @@ func _update_equip_order(state: WorldState, team: TeamData) -> void:
 	else:
 		var guard_count: int = mini(team.population / 2, can_equip)
 		team.equip_order["melee_low"] = mini(int(team.resources.get("weapon_melee_low", 0)) / 2, guard_count)
+
+func _promote_successor(state: WorldState, team: TeamData) -> void:
+	# 從 named_members 選統領技能最高者升任 leader（S11 fix）
+	var best_pid: int = -1
+	var best_cmd: float = -1.0
+	for pid in team.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		var cmd: float = float(p.skills.get("統領", 0.0))
+		if cmd > best_cmd:
+			best_cmd = cmd
+			best_pid = pid
+	if best_pid == -1:
+		return
+	var new_leader: PersonData = state.persons[best_pid]
+	new_leader.role = "leader"
+	team.leader_id = best_pid
+	team.named_members.erase(best_pid)
+	print("[Succession] Team%d 新 leader: P%d (%s) 統領=%.2f" % [
+		team.team_id, best_pid, new_leader.person_name, best_cmd])
+	# 若是玩家 team 且玩家死亡，state.player_id 同步轉移（D2 連動緩解）
+	if state.player_id == -1 or state.persons.get(state.player_id) == null:
+		# 不主動轉移玩家身分，D2 屬獨立議題
+		pass
 
 func _update_anon_combat_skill(team: TeamData) -> void:
 	var best: float = 0.25  # default

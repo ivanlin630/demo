@@ -16,6 +16,7 @@ func _initialize() -> void:
 	_test_salary_auto_npc_vs_player()
 	_test_setup_mode_explicit()
 	_test_full_config_load()
+	_test_s11_leader_succession()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2615,3 +2616,48 @@ func _test_full_config_load() -> void:
 	GameSetup.setup(s3, c3)
 	assert(s3.teams.size() >= 2, "default 隨機應產生 >= 2 team")
 	print("Config Task6 OK")
+
+func _test_s11_leader_succession() -> void:
+	print("--- S11: Leader succession ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.leader_id = -1
+	team.population = 4
+	state.teams[0] = team
+	var p1 := PersonData.new()
+	p1.id = 1; p1.team_id = 0
+	p1.skills = { "統領": 0.3 }
+	state.persons[1] = p1
+	team.named_members.append(1)
+	var p2 := PersonData.new()
+	p2.id = 2; p2.team_id = 0
+	p2.skills = { "統領": 0.7 }
+	state.persons[2] = p2
+	team.named_members.append(2)
+	var p3 := PersonData.new()
+	p3.id = 3; p3.team_id = 0
+	p3.skills = { "統領": 0.5 }
+	state.persons[3] = p3
+	team.named_members.append(3)
+	var fai := FactionAISystem.new()
+	fai._promote_successor(state, team)
+	assert(team.leader_id == 2,
+		"應升統領最高的 P2 (0.7)，實際=%d" % team.leader_id)
+	assert(not team.named_members.has(2),
+		"P2 升職後不應留 named_members")
+	assert(state.persons[2].role == "leader",
+		"P2.role 應為 leader")
+	# 第二次 leader 死亡，應選 P3 (0.5)
+	team.leader_id = -1
+	fai._promote_successor(state, team)
+	assert(team.leader_id == 3,
+		"第二次應選 P3 (0.5 次高)，實際=%d" % team.leader_id)
+	# 無 named 時 no-op
+	var team2 := TeamData.new()
+	team2.team_id = 99
+	team2.leader_id = -1
+	fai._promote_successor(state, team2)
+	assert(team2.leader_id == -1, "無 named 不應升職")
+	print("S11 OK")
