@@ -36,6 +36,33 @@ const TRADEABLE_RES: Array = [
 	"weapon_ranged_low", "weapon_ranged_high",
 ]
 
+const OUTPOST_POP_CAP: Dictionary = {
+	"civilian": [20, 50, 100],   # L1, L2, L3
+	"military": [15, 35, 70],
+}
+
+func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	if tile == null or tile.outpost_level == 0: return 0
+	var arr: Array = OUTPOST_POP_CAP.get(tile.outpost_type, [10, 20, 40])
+	return int(arr[clampi(tile.outpost_level - 1, 0, 2)])
+
+func _is_resident_team(state: WorldState, team: TeamData) -> bool:
+	if not team.tags.has(TeamData.TAG_PRODUCE):
+		return false
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or tile.outpost_level == 0:
+		return false
+	var owner_id: int = tile.outpost_owner
+	if owner_id == team.team_id:
+		return true
+	if owner_id == -1:
+		return false
+	var owner: TeamData = state.teams.get(owner_id)
+	if owner == null:
+		return false
+	return owner.faction_id == team.faction_id and team.faction_id != -1
+
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for fid in state.factions:
 		var f = state.factions[fid]

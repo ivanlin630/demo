@@ -30,6 +30,7 @@ func _initialize() -> void:
 	_test_aid_repeated_annoyance()
 	_test_aid_stranger()
 	_test_resident_fields()
+	_test_is_resident_detection()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2992,3 +2993,43 @@ func _test_resident_fields() -> void:
 	t.pending_owner_change_tick = 1000
 	assert(t.tax_rate == 0.5 and t.pending_owner_change_tick == 1000)
 	print("Resident Task1 OK")
+
+func _test_is_resident_detection() -> void:
+	print("--- Resident Task2: _is_resident_team 偵測 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# Setup: outpost on (5,5) owned by Team 99
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5)
+	tile.outpost_level = 1
+	tile.outpost_type = "civilian"
+	tile.outpost_owner = 99
+	state.world.tiles[5 * 1000 + 5] = tile
+	# Owner Team 99 faction=10
+	var owner := TeamData.new(); owner.team_id = 99; owner.faction_id = 10
+	state.teams[99] = owner
+	# Test 1: PRODUCE team on outpost, same faction → 居民
+	var r := TeamData.new(); r.team_id = 0; r.tile_pos = Vector2i(5,5)
+	r.faction_id = 10; r.tags = [TeamData.TAG_PRODUCE]
+	state.teams[0] = r
+	var fai := FactionAISystem.new()
+	assert(fai._is_resident_team(state, r), "案例 1：同 faction PRODUCE 應為居民")
+	# Test 2: PRODUCE team on outpost, different faction → 非居民
+	r.faction_id = 20
+	assert(not fai._is_resident_team(state, r), "案例 2：異 faction 不算居民")
+	# Test 3: PRODUCE team not on outpost → 非居民
+	r.faction_id = 10
+	r.tile_pos = Vector2i(8, 8)
+	assert(not fai._is_resident_team(state, r), "案例 3：非 outpost 不算居民")
+	# Test 4: Non-PRODUCE team on outpost → 非居民
+	r.tile_pos = Vector2i(5, 5)
+	r.tags = ["軍隊"]
+	assert(not fai._is_resident_team(state, r), "案例 4：非 PRODUCE 不算居民")
+	# Test 5: outpost cap
+	assert(fai._outpost_pop_cap(state, Vector2i(5, 5)) == 20, "civilian L1 應 20")
+	tile.outpost_level = 2
+	assert(fai._outpost_pop_cap(state, Vector2i(5, 5)) == 50, "civilian L2 應 50")
+	tile.outpost_type = "military"
+	tile.outpost_level = 1
+	assert(fai._outpost_pop_cap(state, Vector2i(5, 5)) == 15, "military L1 應 15")
+	print("Resident Task2 OK")
