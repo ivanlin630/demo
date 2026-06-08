@@ -65,6 +65,7 @@ func _setup_registry() -> void:
 		"upgrade_farming":        _action_upgrade_farming,
 		"upgrade_manufacturing":  _action_upgrade_manufacturing,
 		"demolish_outpost":       _action_demolish_outpost,
+		"abandon_outpost":        _action_abandon_outpost,
 		"dispatch_subteam":       _action_dispatch_subteam,
 		"order_subteam":          _action_order_subteam,
 		"recall_subteam":         _action_recall_subteam,
@@ -329,6 +330,19 @@ func _action_demolish_outpost(state: WorldState, _target_id: int, pt: TeamData, 
 	if not ok5:
 		return { "ok": false, "msg": "無法拆除" }
 	return { "ok": true, "msg": "開始拆除據點" }
+
+func _action_abandon_outpost(state: WorldState, _target_id: int, _pt: TeamData, pt_id: int) -> Dictionary:
+	var pos_arr: Array = state.player_state.get("abandon_pos", [-1, -1])
+	var pos := Vector2i(int(pos_arr[0]), int(pos_arr[1]))
+	if pos.x < 0:
+		return { "ok": false, "msg": "未指定 outpost 位置" }
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	if tile == null or tile.outpost_level == 0:
+		return { "ok": false, "msg": "目標無 outpost" }
+	if tile.outpost_owner != pt_id:
+		return { "ok": false, "msg": "非自家 outpost" }
+	tile.outpost_owner = -1
+	return { "ok": true, "msg": "已棄置 outpost (%d,%d)" % [pos.x, pos.y] }
 
 func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var sub_leader_id: int = int(state.player_state.get("sub_leader_id", -1))

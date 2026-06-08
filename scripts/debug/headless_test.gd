@@ -41,6 +41,16 @@ func _initialize() -> void:
 	_test_defection_paths()
 	_test_owner_contact_timeout()
 	_test_pacify_subteam()
+	# ── Merchant Trade (A) + Outpost Capture (D) ──
+	_test_merchant_capture_fields()
+	_test_resolve_market_bidirectional()
+	_test_merchant_inventory_trade()
+	_test_find_trade_target_max_gap()
+	_test_encounter_capture_outpost()
+	_test_unowned_outpost_takeover()
+	_test_alliance_outpost_transfer()
+	_test_uprising_paths()
+	_test_abandon_outpost()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3215,6 +3225,8 @@ func _test_uprising_trigger() -> void:
 	v.resources["food"] = 30   # 飢餓 source
 	v.unrest_turns = 70   # 已過閾值
 	var l := PersonData.new(); l.id = 100; l.loyalty = 0.1
+	# 求生欲高 → 走 Path B 流亡（保留原本斷言）
+	l.values = { "求生欲": 0.9, "野心": 0.2, "慎重": 0.2, "義氣": 0.2 }
 	state.persons[100] = l; v.leader_id = 100
 	state.teams[0] = v
 	var fai := FactionAISystem.new()
@@ -3290,3 +3302,246 @@ func _test_pacify_subteam() -> void:
 	assert(l.loyalty > 0.5, "安撫應升 loyalty")
 	assert(v.unrest_turns < 10, "安撫應降 unrest")
 	print("Resident Task12 OK")
+
+# ════════════ Merchant Trade (A) + Outpost Capture (D) ════════════
+
+func _test_merchant_capture_fields() -> void:
+	print("--- Trade Task1: TeamData 新欄位 ---")
+	var t := TeamData.new()
+	assert(t.merchant_inventory == [], "預設 merchant_inventory 應為空")
+	assert(t.occupying_outpost_since == -1, "預設 occupying_outpost_since 應 -1")
+	t.merchant_inventory.append({ "grade": "food", "qty": 5, "bought_at": 2.0, "bought_from": 1 })
+	assert(t.merchant_inventory.size() == 1)
+	print("Trade Task1 OK")
+
+func _test_resolve_market_bidirectional() -> void:
+	print("--- Trade Task2: _resolve_market 雙向 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# A：有 food surplus，缺 material
+	var a := TeamData.new()
+	a.team_id = 0; a.population = 10
+	a.resources["food"] = 500.0
+	a.resources["material"] = 5.0
+	a.resources["coin"] = 200.0
+	a.current_task = TeamData.TASK_TRADE
+	state.teams[0] = a
+	# B：有 material surplus，缺 food
+	var b := TeamData.new()
+	b.team_id = 1; b.population = 10
+	b.resources["food"] = 10.0
+	b.resources["material"] = 500.0
+	b.resources["coin"] = 300.0
+	state.teams[1] = b
+	var inter := InteractionSystem.new()
+	inter._resolve_market(state, a, b)
+	# 預期：A 賣 food 給 B、B 賣 material 給 A
+	assert(float(b.resources["food"]) > 10.0, "B 應收到 food")
+	assert(float(a.resources["material"]) > 5.0, "A 應收到 material")
+	print("Trade Task2 OK (a food=%.0f mat=%.0f, b food=%.0f mat=%.0f)" % [
+		float(a.resources["food"]), float(a.resources["material"]),
+		float(b.resources["food"]), float(b.resources["material"])])
+
+func _test_merchant_inventory_trade() -> void:
+	print("--- Trade Task3: 商隊 inventory 賺差價 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# 商隊 A：inventory 有 weapon_melee_low，bought_at=10
+	var a := TeamData.new()
+	a.team_id = 0; a.population = 5
+	a.tags = ["商隊"]
+	a.resources["coin"] = 0.0
+	a.merchant_inventory.append({
+		"grade": "weapon_melee_low", "qty": 5, "bought_at": 10.0, "bought_from": 99
+	})
+	a.current_task = TeamData.TASK_TRADE
+	state.teams[0] = a
+	# Buyer B：缺武器，coin 充足
+	var b := TeamData.new()
+	b.team_id = 1; b.population = 20   # 大隊缺武器 → local_value 高
+	b.resources["coin"] = 500.0
+	b.resources["weapon_melee_low"] = 0
+	state.teams[1] = b
+	var inter := InteractionSystem.new()
+	inter._resolve_market(state, a, b)
+	# 預期：A inventory 物品賣給 B，coin 多
+	assert(float(a.resources["coin"]) > 0.0, "A 應收到 coin")
+	assert(int(b.resources.get("weapon_melee_low", 0)) > 0, "B 應收到武器")
+	# inventory 應減少或清空
+	var remaining: int = 0
+	for item in a.merchant_inventory: remaining += int(item.qty)
+	assert(remaining < 5, "inventory 應減少（賣出部分）")
+	print("Trade Task3 OK (A coin=%.0f, B 武器=%d, inv 剩 %d)" % [
+		float(a.resources["coin"]), int(b.resources["weapon_melee_low"]), remaining])
+
+func _test_find_trade_target_max_gap() -> void:
+	print("--- Trade Task4: _find_trade_target 最大價差 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var merchant := TeamData.new()
+	merchant.team_id = 0; merchant.tile_pos = Vector2i(0, 0); merchant.population = 5
+	merchant.resources["food"] = 100.0
+	state.teams[0] = merchant
+	state.team_discovered[0] = [1, 2]
+	# Team 1: 近，價差小
+	var t1 := TeamData.new()
+	t1.team_id = 1; t1.tile_pos = Vector2i(1, 0); t1.population = 5
+	t1.resources["food"] = 100.0
+	state.teams[1] = t1
+	state.team_intel[0] = { 1: { "food": 100.0, "population": 5 } }
+	# Team 2: 遠，價差大
+	var t2 := TeamData.new()
+	t2.team_id = 2; t2.tile_pos = Vector2i(3, 0); t2.population = 50
+	t2.resources["food"] = 0.0
+	state.teams[2] = t2
+	state.team_intel[0][2] = { "food": 0.0, "population": 50 }
+	var fai := FactionAISystem.new()
+	var target = fai._find_trade_target(state, merchant)
+	# Team 2 食物缺 + 人多 → local_value 高，價差大；雖遠但 score 應較高
+	assert(target == 2, "應選最大價差 target，實際=%d" % target)
+	print("Trade Task4 OK (target=%d)" % target)
+
+func _test_encounter_capture_outpost() -> void:
+	print("--- Trade Task6: 戰勝接管 outpost ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# Outpost on (4,4) owned by Team 99
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(4, 4); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 99
+	state.world.tiles[4004] = tile
+	# Attacker Team 0, defender Team 99（守 outpost 格）
+	var atk := TeamData.new(); atk.team_id = 0; atk.tile_pos = Vector2i(4, 4)
+	state.teams[0] = atk
+	var def := TeamData.new(); def.team_id = 99; def.tile_pos = Vector2i(4, 4)
+	state.teams[99] = def
+	state.encounter_attacker_id = 0
+	state.encounter_defender_id = 99
+	state.encounter_active = true
+	var enc := EncounterSystem.new()
+	enc.resolve_encounter_end(state, "attacker_win")
+	# Outpost owner 應變 attacker
+	assert(tile.outpost_owner == 0, "outpost owner 應變 attacker=0，實際=%d" % tile.outpost_owner)
+	print("Trade Task6 OK")
+
+func _test_unowned_outpost_takeover() -> void:
+	print("--- Trade Task7: 無人 outpost 3 天接管 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(2, 2); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = -1   # 無人
+	state.world.tiles[2002] = tile
+	var t := TeamData.new()
+	t.team_id = 0; t.tile_pos = Vector2i(2, 2)
+	state.teams[0] = t
+	var fai := FactionAISystem.new()
+	# 第一次：起始駐留
+	state.world.current_tick = 0
+	fai._evaluate_outpost_takeover(state, t)
+	assert(t.occupying_outpost_since == 0, "起始 tick 應記")
+	assert(tile.outpost_owner == -1, "尚未到 3 天")
+	# 跳到 3 天後
+	state.world.current_tick = 3 * WorldState.TICKS_PER_DAY
+	fai._evaluate_outpost_takeover(state, t)
+	assert(tile.outpost_owner == 0, "3 天後應接管，實際=%d" % tile.outpost_owner)
+	assert(t.occupying_outpost_since == -1, "接管後 reset")
+	print("Trade Task7 OK")
+
+func _test_alliance_outpost_transfer() -> void:
+	print("--- Trade Task8: 居民團 alliance → outpost 轉 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 99
+	state.world.tiles[3003] = tile
+	# Original owner Team 99 faction 10
+	var owner := TeamData.new(); owner.team_id = 99; owner.faction_id = 10
+	state.teams[99] = owner
+	# 居民團 Team 0
+	var v := TeamData.new()
+	v.team_id = 0; v.faction_id = 10; v.tile_pos = Vector2i(3, 3)
+	v.tags = [TeamData.TAG_PRODUCE]; v.population = 10
+	var v_leader := PersonData.new(); v_leader.id = 100
+	v_leader.values = { "義氣": 0.4, "信義": 0.5 }   # 中等義氣
+	state.persons[100] = v_leader; v.leader_id = 100
+	state.teams[0] = v
+	# 攻方 Team 5 faction 20
+	var attacker := TeamData.new(); attacker.team_id = 5; attacker.faction_id = 20
+	attacker.tile_pos = Vector2i(3, 3)
+	state.teams[5] = attacker
+	state.create_faction(5)   # 確保 faction 存在
+	# 模擬 alliance accept（直接呼叫 _form_alliance + outpost 連動）
+	var diplo := DiplomaticAiSystem.new()
+	diplo._form_alliance(state, attacker, v)
+	assert(tile.outpost_owner == 5, "outpost owner 應變攻方 5，實際=%d" % tile.outpost_owner)
+	print("Trade Task8 OK")
+
+func _test_uprising_paths() -> void:
+	print("--- Trade Task9: 起義 A 守城 vs B 流亡 ---")
+	# Path A: 野心高 → 守城
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 99
+	state.world.tiles[0] = tile
+	var owner := TeamData.new(); owner.team_id = 99; owner.faction_id = 10
+	state.teams[99] = owner
+	var v := TeamData.new()
+	v.team_id = 0; v.population = 10; v.faction_id = 10
+	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0, 0)
+	v.tax_rate = 0.7; v.resources["food"] = 0; v.unrest_turns = 70
+	var l := PersonData.new(); l.id = 100; l.loyalty = 0.1
+	l.values = { "野心": 0.9, "慎重": 0.7, "義氣": 0.3, "求生欲": 0.2 }
+	state.persons[100] = l; v.leader_id = 100
+	state.teams[0] = v
+	var fai := FactionAISystem.new()
+	fai._evaluate_uprising(state, v)
+	assert(tile.outpost_owner == 0, "Path A 應 outpost = village，實際=%d" % tile.outpost_owner)
+	assert(v.current_task == "守城", "Path A task 應 守城，實際=%s" % v.current_task)
+	assert(v.tags.has(TeamData.TAG_PRODUCE), "Path A tags 仍 PRODUCE")
+	# Path B: 求生欲高 → 流亡
+	var state2 := WorldState.new()
+	state2.world = WorldData.new()
+	var tile2 := HexTileData.new()
+	tile2.tile_pos = Vector2i(0, 0); tile2.outpost_level = 1
+	tile2.outpost_type = "civilian"; tile2.outpost_owner = 99
+	state2.world.tiles[0] = tile2
+	var owner2 := TeamData.new(); owner2.team_id = 99; owner2.faction_id = 10
+	state2.teams[99] = owner2
+	var v2 := TeamData.new()
+	v2.team_id = 0; v2.population = 10; v2.faction_id = 10
+	v2.tags = [TeamData.TAG_PRODUCE]; v2.tile_pos = Vector2i(0, 0)
+	v2.tax_rate = 0.7; v2.resources["food"] = 0; v2.unrest_turns = 70
+	var l2 := PersonData.new(); l2.id = 100; l2.loyalty = 0.1
+	l2.values = { "求生欲": 0.9, "野心": 0.2, "慎重": 0.2, "義氣": 0.2 }
+	state2.persons[100] = l2; v2.leader_id = 100
+	state2.teams[0] = v2
+	var fai2 := FactionAISystem.new()
+	fai2._evaluate_uprising(state2, v2)
+	assert(tile2.outpost_owner == 99, "Path B outpost owner 暫不變")
+	assert(v2.tags.has("流亡"), "Path B tags 應 流亡")
+	assert(not v2.tags.has(TeamData.TAG_PRODUCE), "Path B tags 應 erase 生產")
+	print("Trade Task9 OK")
+
+func _test_abandon_outpost() -> void:
+	print("--- Trade Task10: 玩家棄置 outpost ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[5005] = tile
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
+	state.teams[0] = pt
+	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
+	state.persons[100] = pp
+	state.player_state["abandon_pos"] = [5, 5]
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd.execute_action(state, -1, "abandon_outpost")
+	assert(r.get("ok", false), "abandon 應成功")
+	assert(tile.outpost_owner == -1, "outpost owner 應 -1，實際=%d" % tile.outpost_owner)
+	print("Trade Task10 OK")

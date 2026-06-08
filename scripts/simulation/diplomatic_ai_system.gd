@@ -149,6 +149,14 @@ func _form_alliance(state: WorldState,
 	_update_reputation(team_a, team_b.team_id, 0.2)
 	_update_reputation(team_b, team_a.team_id, 0.2)
 	print("[Diplomacy] Team%d 與 Team%d 結盟" % [team_a.team_id, team_b.team_id])
+	# D C1: 若 team_b 是居民團 → 投降勸服，outpost 轉給 team_a
+	if team_b.tags.has(TeamData.TAG_PRODUCE):
+		var tile: HexTileData = state.world.tiles.get(team_b.tile_pos.x * 1000 + team_b.tile_pos.y)
+		if tile != null and tile.outpost_level > 0 and tile.outpost_owner != team_a.team_id:
+			var old_owner: int = tile.outpost_owner
+			tile.outpost_owner = team_a.team_id
+			print("[Surrender] 居民團 Team%d 投降，outpost (%d,%d) %d→%d" % [
+				team_b.team_id, team_b.tile_pos.x, team_b.tile_pos.y, old_owner, team_a.team_id])
 
 func _update_reputation(team: TeamData, other_id: int, delta: float) -> void:
 	var cur: float = float(team.known_reputations.get(other_id, 0.5))
