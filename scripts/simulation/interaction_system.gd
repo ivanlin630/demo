@@ -188,11 +188,8 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	if a.combat_target != -1 or b.combat_target != -1:
 		return
 	# 貿易：跨勢力均可，優先於外交/攻擊判斷
-	if a.current_task == TeamData.TASK_TRADE:
-		_resolve_trade(state, a, b)
-		return
-	if b.current_task == TeamData.TASK_TRADE:
-		_resolve_trade(state, b, a)
+	if a.current_task == TeamData.TASK_TRADE or b.current_task == TeamData.TASK_TRADE:
+		_resolve_market(state, a, b)
 		return
 	var same_faction: bool = a.faction_id != -1 and a.faction_id == b.faction_id
 	if same_faction:
@@ -483,61 +480,68 @@ func _local_value(team: TeamData, res: String) -> float:
 	var sr: float     = clampf((target - stock) / maxf(target, 1.0), -0.5, 1.0)
 	return float(BASE_PRICE[res]) * (1.0 + sr)
 
-func _resolve_trade(state: WorldState, seller: TeamData, buyer: TeamData) -> void:
-	var buyer_coin: float = float(buyer.resources.get("coin", 0))
-	if buyer_coin <= 0.0:
-		return
+# ──────── 雙向 market 結算（取代舊 _resolve_trade）────────
 
+func _calc_reserve(team: TeamData, res: String) -> float:
+	if res == "food":
+		return float(team.population) * 0.1 * FOOD_RESERVE_TICKS
+	elif res == "coin":
+		return float(team.resources.get(res, 0)) * 0.5
+	# 其他資源：保留至 target 需求量，避免賣掉自己短缺的物資（否則雙向 market 會即買即賣）
+	return float(team.population) * float(TARGET_PER_POP.get(res, 0.0))
+
+func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int, price: float) -> void:
+	seller.resources[res] = float(seller.resources.get(res, 0)) - qty
+	buyer.resources[res]  = float(buyer.resources.get(res, 0)) + qty
+	buyer.resources["coin"]  = float(buyer.resources.get("coin", 0)) - qty * price
+	seller.resources["coin"] = float(seller.resources.get("coin", 0)) + qty * price
+
+func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
+	_attempt_trade_direction(state, a, b)
+	_attempt_trade_direction(state, b, a)
+	if a.current_task == TeamData.TASK_TRADE: a.current_task = TeamData.TASK_IDLE
+	if b.current_task == TeamData.TASK_TRADE: b.current_task = TeamData.TASK_IDLE
+
+func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamData) -> void:
+	var buyer_coin: float = float(buyer.resources.get("coin", 0))
+	if buyer_coin <= 0.0: return
 	var s_leader = state.persons.get(seller.leader_id)
 	var commerce: float = float(s_leader.skills.get("商業", 0.0)) if s_leader else 0.0
-
-	var budget: float       = minf(buyer_coin, MAX_COIN_PER_TRADE)
-	var total_earned: float = 0.0
-
-	# 計算每種資源的利潤空間，排序後優先賣最值錢的
-	var res_list: Array = []
+	# (1) seller 商隊優先賣 inventory（買低賣高賺差價）
+	if seller.tags.has(TeamData.TAG_MERCHANT):
+		var inv_copy: Array = seller.merchant_inventory.duplicate()
+		for item in inv_copy:
+			if int(item.get("bought_from", -1)) == buyer.team_id: continue
+			var inv_bid: float = _local_value(buyer, item["grade"])
+			if inv_bid <= float(item["bought_at"]): continue
+			var inv_qty: int = mini(int(item["qty"]), int(buyer_coin / inv_bid))
+			if inv_qty <= 0: continue
+			buyer.resources[item["grade"]] = float(buyer.resources.get(item["grade"], 0)) + inv_qty
+			buyer.resources["coin"]  = float(buyer.resources.get("coin", 0)) - inv_qty * inv_bid
+			seller.resources["coin"] = float(seller.resources.get("coin", 0)) + inv_qty * inv_bid
+			item["qty"] = int(item["qty"]) - inv_qty
+			buyer_coin -= inv_qty * inv_bid
+		seller.merchant_inventory = seller.merchant_inventory.filter(
+			func(it): return int(it.get("qty", 0)) > 0)
+	# (2) 賣 surplus（保留最低儲備）
 	for res in BASE_PRICE.keys():
 		var stock: float = float(seller.resources.get(res, 0))
-		if res == "food":
-			var min_food: float = float(seller.population) * 0.1 * FOOD_RESERVE_TICKS
-			stock = maxf(stock - min_food, 0.0)
-		if stock <= 0.0:
-			continue
+		var reserve: float = _calc_reserve(seller, res)
+		var surplus: float = maxf(stock - reserve, 0.0)
+		if surplus <= 0.0: continue
 		var ask: float = _local_value(seller, res) * (1.0 - commerce * 0.1)
 		var bid: float = _local_value(buyer, res)
-		if ask <= 0.0 or ask > bid:
-			continue
-		res_list.append({ "res": res, "stock": stock, "ask": ask, "bid": bid })
-
-	res_list.sort_custom(func(a, b): return (a["bid"] - a["ask"]) > (b["bid"] - b["ask"]))
-
-	for entry in res_list:
-		var ask: float = float(entry["ask"])
-		if budget < ask:
-			break
-		var res: String    = entry["res"]
-		var max_qty: float = minf(float(entry["stock"]), floorf(budget / ask))
-		if max_qty <= 0.0:
-			continue
-		seller.resources[res]  = float(seller.resources.get(res, 0)) - max_qty
-		buyer.resources[res]   = float(buyer.resources.get(res, 0))  + max_qty
-		var cost: float        = max_qty * ask
-		total_earned += cost
-		budget       -= cost
-
-	if total_earned <= 0.0:
-		return
-
-	seller.resources["coin"] = float(seller.resources.get("coin", 0)) + total_earned
-	buyer.resources["coin"]  = buyer_coin - total_earned
-
-	_msg.emit_message(state, "trade_done",
-		"Team%d→Team%d 貿易 coin=%.0f" % [seller.team_id, buyer.team_id, total_earned], seller,
-		{ "origin": str(seller.team_id), "target": str(buyer.team_id) })
-	print("[Trade] Team%d→Team%d coin+%.0f（商業=%.2f）" % [
-		seller.team_id, buyer.team_id, total_earned, commerce])
-	_grow_commerce_skill(state, seller)
-	seller.current_task = TeamData.TASK_IDLE
+		if ask <= 0.0 or ask >= bid: continue
+		var qty: int = mini(int(surplus), int(buyer_coin / ask))
+		if qty <= 0: continue
+		_execute_transfer(seller, buyer, res, qty, ask)
+		buyer_coin -= qty * ask
+		# 買方若是商隊 → 物品移到 inventory（之後高價賣出）
+		if buyer.tags.has(TeamData.TAG_MERCHANT):
+			buyer.resources[res] = float(buyer.resources.get(res, 0)) - qty
+			buyer.merchant_inventory.append({
+				"grade": res, "qty": qty, "bought_at": ask, "bought_from": seller.team_id
+			})
 
 func _grow_commerce_skill(state: WorldState, team: TeamData) -> void:
 	for pid in ([team.leader_id] as Array) + team.named_members:
@@ -620,15 +624,13 @@ func resolve_trade_direct(state: WorldState, initiator_id: int, target_id: int) 
 	var tgt: TeamData = state.teams.get(target_id)
 	if pt == null or tgt == null:
 		return { "ok": false, "msg": "隊伍不存在" }
-	# 嘗試 target 賣、initiator 買
+	# 雙向結算（target 賣 initiator 買 + initiator 賣 target 買）
 	var tgt_coin_before: float = float(tgt.resources.get("coin", 0.0))
-	_resolve_trade(state, tgt, pt)
-	if float(tgt.resources.get("coin", 0.0)) != tgt_coin_before:
-		return { "ok": true, "msg": "貿易成功" }
-	# 若無成交，嘗試 initiator 賣、target 買
-	var pt_coin_before: float = float(pt.resources.get("coin", 0.0))
-	_resolve_trade(state, pt, tgt)
-	if float(pt.resources.get("coin", 0.0)) != pt_coin_before:
+	var pt_coin_before: float  = float(pt.resources.get("coin", 0.0))
+	_attempt_trade_direction(state, tgt, pt)
+	_attempt_trade_direction(state, pt, tgt)
+	if float(tgt.resources.get("coin", 0.0)) != tgt_coin_before \
+			or float(pt.resources.get("coin", 0.0)) != pt_coin_before:
 		return { "ok": true, "msg": "貿易成功" }
 	return { "ok": false, "msg": "無可交易資源" }
 
