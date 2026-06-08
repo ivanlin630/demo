@@ -51,6 +51,8 @@ func _initialize() -> void:
 	_test_alliance_outpost_transfer()
 	_test_uprising_paths()
 	_test_abandon_outpost()
+	# ── NPC Infrastructure (C) ──
+	_test_task_extra_data_field()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3525,6 +3527,14 @@ func _test_uprising_paths() -> void:
 	assert(v2.tags.has("流亡"), "Path B tags 應 流亡")
 	assert(not v2.tags.has(TeamData.TAG_PRODUCE), "Path B tags 應 erase 生產")
 	print("Trade Task9 OK")
+
+func _test_task_extra_data_field() -> void:
+	print("--- Infra Task1: task_extra_data ---")
+	var t := TeamData.new()
+	assert(t.task_extra_data == {}, "預設為空 dict")
+	t.task_extra_data = { "build_type": "civilian", "level": 1 }
+	assert(t.task_extra_data["build_type"] == "civilian")
+	print("Infra Task1 OK")
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")
