@@ -74,6 +74,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 				f.known_member_states[mid] = snap
 		_update_goals(state, f)
 		_assign_tasks(state, f)
+		# C: 每 INFRA_INTERVAL 評估一次基建（蓋/升級/擴建）
+		if state.world.current_tick % INFRA_INTERVAL == 0:
+			_evaluate_infrastructure(state, f)
 		# 每 20 小時評估一次主動外交
 		if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
 			var _leader_team: TeamData = state.teams.get(f.leader_team_id)
@@ -848,6 +851,31 @@ func _min_dist_to_enemy_outpost(state: WorldState, leader_team: TeamData, pos: V
 		var d: int = _hex_dist(pos, tile.tile_pos)
 		if d < min_dist: min_dist = d
 	return min_dist
+
+# ──────── 基建主決策 ────────
+
+const INFRA_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時評估一次
+
+# leader values 決定新據點傾向（軍用 vs 民用）
+func _pick_outpost_type(leader: PersonData) -> String:
+	var military: float = float(leader.values.get("好戰", 0.5)) + float(leader.values.get("野心", 0.5))
+	var civilian: float = float(leader.values.get("慎重", 0.5)) + float(leader.values.get("貪婪", 0.5))
+	return "military" if military > civilian else "civilian"
+
+func _evaluate_infrastructure(state: WorldState, faction) -> void:
+	var leader_team: TeamData = state.teams.get(faction.leader_team_id)
+	if leader_team == null: return
+	if leader_team.combat_target != -1: return
+	var leader: PersonData = state.persons.get(leader_team.leader_id)
+	if leader == null: return
+	# 玩家 leader → 不自動決策（後續用 AdvisorSystem.push_outpost_advice）
+	if leader_team.leader_id == state.player_id and state.player_id != -1:
+		return
+	# (1) 蓋新 outpost
+	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
+	if loc.is_empty(): return
+	var outpost_type: String = _pick_outpost_type(leader)
+	_dispatch_builder(state, leader_team, loc.pos, outpost_type, 1)
 
 func _richest_member(state: WorldState, f) -> int:
 	var best_tid: int    = -1

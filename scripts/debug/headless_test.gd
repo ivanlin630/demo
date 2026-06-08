@@ -56,6 +56,7 @@ func _initialize() -> void:
 	_test_facility_def_registry()
 	_test_dispatch_builder()
 	_test_evaluate_outpost_location()
+	_test_evaluate_infrastructure()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3603,6 +3604,36 @@ func _test_evaluate_outpost_location() -> void:
 	var best = fai._evaluate_new_outpost_location(state, leader_team)
 	assert(not best.is_empty(), "應找到 candidate")
 	print("Infra Task4 OK (best=%s)" % str(best.pos))
+
+func _test_evaluate_infrastructure() -> void:
+	print("--- Infra Task5: _evaluate_infrastructure ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.population = 30; leader_team.tile_pos = Vector2i(0, 0)
+	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0
+	var leader := PersonData.new(); leader.id = 100
+	leader.values = { "野心": 0.3, "慎重": 0.7, "好戰": 0.2, "貪婪": 0.4 }
+	state.persons[100] = leader; leader_team.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101
+	state.persons[101] = adv; leader_team.named_members = [101]
+	state.teams[0] = leader_team
+	var fid = state.create_faction(0)
+	var f = state.factions[fid]
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			tile.productivity = 1.0; tile.outpost_level = 0
+			state.world.tiles[x * 1000 + y] = tile
+	var fai := FactionAISystem.new()
+	fai._evaluate_infrastructure(state, f)
+	var sub_count = 0
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			sub_count += 1
+	assert(sub_count >= 1, "應派出基建子隊")
+	print("Infra Task5 OK (派出 %d 子隊)" % sub_count)
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")
