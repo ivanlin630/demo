@@ -753,6 +753,29 @@ func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
 
+# ──────── 基建設施需求評估（FACILITY_DEF.trigger_check 指向）────────
+
+func _check_food_shortage(state: WorldState, faction) -> float:
+	var total_food: float = 0.0
+	var total_pop: int = 0
+	for tid in faction.member_team_ids:
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		total_food += float(t.resources.get("food", 0))
+		total_pop += t.population
+	var per_capita: float = total_food / maxf(total_pop, 1)
+	# 缺糧（< 10 天份）→ 高 priority
+	return clampf((10.0 - per_capita) / 10.0, 0.0, 1.0) * 100.0
+
+func _check_goods_shortage(state: WorldState, faction) -> float:
+	var total_goods: float = 0.0
+	for tid in faction.member_team_ids:
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		total_goods += float(t.resources.get("goods", 0))
+	# goods < 100 → 觸發
+	return clampf((100.0 - total_goods) / 100.0, 0.0, 1.0) * 50.0
+
 func _richest_member(state: WorldState, f) -> int:
 	var best_tid: int    = -1
 	var best_food: float = 0.0

@@ -53,6 +53,7 @@ func _initialize() -> void:
 	_test_abandon_outpost()
 	# ── NPC Infrastructure (C) ──
 	_test_task_extra_data_field()
+	_test_facility_def_registry()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3535,6 +3536,26 @@ func _test_task_extra_data_field() -> void:
 	t.task_extra_data = { "build_type": "civilian", "level": 1 }
 	assert(t.task_extra_data["build_type"] == "civilian")
 	print("Infra Task1 OK")
+
+func _test_facility_def_registry() -> void:
+	print("--- Infra Task2: FACILITY_DEF ---")
+	assert(OutpostSystem.FACILITY_DEF.has("farming"))
+	assert(OutpostSystem.FACILITY_DEF.has("manufacturing"))
+	var farming = OutpostSystem.FACILITY_DEF["farming"]
+	assert(farming.cost.material == 30)
+	assert(farming.cap_by_outpost.civilian == [1, 2, 3])
+	# trigger_check helpers 可呼叫
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.population = 10
+	t.resources["food"] = 0.0; t.resources["goods"] = 0.0
+	state.teams[0] = t
+	var fid = state.create_faction(0)
+	var f = state.factions[fid]
+	var fai := FactionAISystem.new()
+	assert(fai._check_food_shortage(state, f) > 50.0, "缺糧應高分")
+	assert(fai._check_goods_shortage(state, f) > 0.0, "缺貨應有分")
+	print("Infra Task2 OK")
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")

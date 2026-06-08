@@ -30,6 +30,27 @@ const UPGRADE_COST: Dictionary = {
 	"manufacturing": { "material": 60, "coin": 20, "ticks": 100 },
 }
 
+# 設施註冊表（data-driven）：NPC AI 評估擴建時讀取。
+# cost 與 UPGRADE_COST 一致；cap_by_outpost 與 FARMING_CAP/MANUFACTURING_CAP 一致。
+const FACILITY_DEF: Dictionary = {
+	"farming": {
+		"cost":              { "material": 30, "coin": 0, "ticks": 50 },
+		"cap_by_outpost":    { "civilian": [1, 2, 3], "military": [0, 0, 0] },
+		"category":          "生產",
+		"trigger_check":     "_check_food_shortage",
+		"leader_pref":       { "慎重": 0.3, "野心": -0.1 },
+		"current_level_key": "farming_level",
+	},
+	"manufacturing": {
+		"cost":              { "material": 60, "coin": 20, "ticks": 100 },
+		"cap_by_outpost":    { "civilian": [0, 1, 3], "military": [0, 0, 0] },
+		"category":          "經濟",
+		"trigger_check":     "_check_goods_shortage",
+		"leader_pref":       { "野心": 0.2, "貪婪": 0.3 },
+		"current_level_key": "manufacturing_level",
+	},
+}
+
 # 農作/製造設施上限（index = level-1）；軍用不允許
 const FARMING_CAP: Dictionary = {
 	"civilian": [1, 2, 3],
