@@ -60,6 +60,8 @@ func _initialize() -> void:
 	_test_subteam_arrival_triggers_build()
 	_test_dispatch_upgrader_and_facility()
 	_test_auto_settle_after_build()
+	_test_player_upgrade_outpost()
+	_test_player_build_facility()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3739,6 +3741,55 @@ func _test_auto_settle_after_build() -> void:
 	assert(sub.parent_team_id == -1, "子隊脫離母團")
 	assert(sub.tags.has(TeamData.TAG_PRODUCE), "civilian → PRODUCE tag")
 	print("Infra Task8 OK")
+
+func _test_player_upgrade_outpost() -> void:
+	print("--- Infra Task10: 玩家 upgrade_outpost ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
+	pt.tile_pos = Vector2i(5, 5); pt.population = 10
+	pt.resources["material"] = 300.0; pt.resources["coin"] = 60.0
+	state.teams[0] = pt
+	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
+	state.persons[100] = pp
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[5005] = tile
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd.execute_action(state, -1, "upgrade_outpost")
+	assert(r.get("ok", false), "升級應成功: %s" % r.get("msg", ""))
+	assert(tile.construction_target.get("action", "") == "upgrade_level", "施工=升級")
+	assert(tile.construction_ticks_left > 0, "施工 ticks > 0")
+	print("Infra Task10 OK")
+
+func _test_player_build_facility() -> void:
+	print("--- Infra Task11: 玩家 build_facility ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
+	pt.tile_pos = Vector2i(5, 5); pt.population = 10
+	pt.resources["material"] = 300.0; pt.resources["coin"] = 60.0
+	state.teams[0] = pt
+	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
+	state.persons[100] = pp
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	tile.farming_level = 0
+	state.world.tiles[5005] = tile
+	state.player_state["facility_type"] = "farming"
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd.execute_action(state, -1, "build_facility")
+	assert(r.get("ok", false), "擴建應成功: %s" % r.get("msg", ""))
+	assert(tile.construction_target.get("action", "") == "upgrade_farming", "施工=upgrade_farming")
+	# 未知 facility → 失敗
+	state.player_state["facility_type"] = "nonexist"
+	var r2: Dictionary = cmd.execute_action(state, -1, "build_facility")
+	assert(not r2.get("ok", true), "未知 facility 應失敗")
+	print("Infra Task11 OK")
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")
