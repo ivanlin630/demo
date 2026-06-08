@@ -64,6 +64,7 @@ func _setup_registry() -> void:
 		"upgrade_outpost":        _action_upgrade_outpost,
 		"upgrade_farming":        _action_upgrade_farming,
 		"upgrade_manufacturing":  _action_upgrade_manufacturing,
+		"build_facility":         _action_build_facility,
 		"demolish_outpost":       _action_demolish_outpost,
 		"abandon_outpost":        _action_abandon_outpost,
 		"dispatch_subteam":       _action_dispatch_subteam,
@@ -311,6 +312,20 @@ func _action_upgrade_manufacturing(state: WorldState, _target_id: int, pt: TeamD
 	if not ok4:
 		return { "ok": false, "msg": "無法升級製造（條件不符）" }
 	return { "ok": true, "msg": "開始升級製造" }
+
+# 統一設施擴建入口：依 player_state["facility_type"] 分派至對應 start_upgrade_*
+func _action_build_facility(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var facility: String = str(state.player_state.get("facility_type", "farming"))
+	if not OutpostSystem.FACILITY_DEF.has(facility):
+		return { "ok": false, "msg": "未知 facility: %s" % facility }
+	var _os := OutpostSystem.new()
+	var ok: bool = false
+	match facility:
+		"farming":       ok = _os.start_upgrade_farming(state, pt)
+		"manufacturing": ok = _os.start_upgrade_manufacturing(state, pt)
+	if not ok:
+		return { "ok": false, "msg": "無法擴建 %s（條件不符）" % facility }
+	return { "ok": true, "msg": "開始擴建 %s" % facility }
 
 func _action_demolish_outpost(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var _os5 := OutpostSystem.new()
