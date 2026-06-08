@@ -25,6 +25,8 @@ const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goa
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
 const SURVIVAL_TASKS: Array = ["return_home", "乞食", TeamData.TASK_LOOT, "投靠"]
+const CONTACT_TIMEOUT_DAYS: int = 30
+const OWNER_CHANGE_BUFFER_DAYS: int = 7
 const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
@@ -35,6 +37,33 @@ const TRADEABLE_RES: Array = [
 	"weapon_melee_low", "weapon_melee_high",
 	"weapon_ranged_low", "weapon_ranged_high",
 ]
+
+const OUTPOST_POP_CAP: Dictionary = {
+	"civilian": [20, 50, 100],   # L1, L2, L3
+	"military": [15, 35, 70],
+}
+
+func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	if tile == null or tile.outpost_level == 0: return 0
+	var arr: Array = OUTPOST_POP_CAP.get(tile.outpost_type, [10, 20, 40])
+	return int(arr[clampi(tile.outpost_level - 1, 0, 2)])
+
+func _is_resident_team(state: WorldState, team: TeamData) -> bool:
+	if not team.tags.has(TeamData.TAG_PRODUCE):
+		return false
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or tile.outpost_level == 0:
+		return false
+	var owner_id: int = tile.outpost_owner
+	if owner_id == team.team_id:
+		return true
+	if owner_id == -1:
+		return false
+	var owner: TeamData = state.teams.get(owner_id)
+	if owner == null:
+		return false
+	return owner.faction_id == team.faction_id and team.faction_id != -1
 
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for fid in state.factions:
@@ -92,6 +121,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_promote_successor(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		if _is_resident_team(state, team):
+			_evaluate_uprising(state, team)
+			_evaluate_owner_contact(state, team)
 		_update_equip_order(state, team)
 		_update_anon_combat_skill(team)
 		_update_anon_wage(team)
@@ -854,3 +886,120 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 		{ "origin": str(f.leader_team_id), "name": f.faction_name })
 	print("[Faction] 立國：%s（leader=Team%d，%d teams）" % [
 		f.faction_name, f.leader_team_id, f.member_team_ids.size()])
+
+func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
+	if not _is_resident_team(state, team): return
+	if team.current_task == "起義": return
+	if team.current_task in SURVIVAL_TASKS: return
+	var avg_loy: float = _avg_named_loyalty(state, team)
+	if avg_loy >= 0.2: return
+	if team.unrest_turns < 60: return
+	if _count_stress_sources(state, team) < 2: return
+	var old_owner_id: int = -1
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile: old_owner_id = tile.outpost_owner
+	team.faction_id = -1
+	team.tags.erase(TeamData.TAG_PRODUCE)
+	team.tags.append("流亡")
+	team.current_task = "起義"
+	team.move_target = Vector2i(-1, -1)
+	print("[Uprising] Team%d 居民起義（old owner=Team%d）" % [team.team_id, old_owner_id])
+	if old_owner_id != -1:
+		var leader = state.persons.get(team.leader_id)
+		if leader:
+			NpcAiSystem.new().write_memory(leader, "enemy", old_owner_id,
+				state.world.current_tick, 1.0)
+	# 鄰格 PRODUCE team cascade fear
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if not t.tags.has(TeamData.TAG_PRODUCE): continue
+		if _hex_dist(team.tile_pos, t.tile_pos) > 2: continue
+		for pid in ([t.leader_id] as Array) + t.named_members:
+			var p = state.persons.get(pid)
+			if p: p.fear = minf(p.fear + 0.1, 1.0)
+	# 玩家是 owner → forced event
+	if old_owner_id != -1 and state.teams.has(old_owner_id):
+		var oid_team: TeamData = state.teams[old_owner_id]
+		if oid_team.leader_id == state.player_id and state.player_id != -1:
+			state.player_forced_event = {
+				"from_id": team.team_id, "action": "uprising_alert",
+				"outpost_pos": team.tile_pos,
+			}
+
+func _avg_named_loyalty(state: WorldState, team: TeamData) -> float:
+	var sum: float = 0.0
+	var cnt: int = 0
+	for pid in ([team.leader_id] as Array) + team.named_members:
+		var p = state.persons.get(pid)
+		if p:
+			sum += p.loyalty
+			cnt += 1
+	return sum / maxf(cnt, 1)
+
+func _count_stress_sources(state: WorldState, team: TeamData) -> int:
+	var sources: int = 0
+	if team.tax_rate > 0.5: sources += 1
+	if float(team.resources.get("food", 0)) < float(team.population) * 7.0: sources += 1
+	if team.unrest_turns > 40: sources += 1
+	return sources
+
+func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: String) -> void:
+	var leader = state.persons.get(team.leader_id)
+	if leader == null: return
+	var honor: float = float(leader.values.get("義氣", 0.5))
+	var prudence: float = float(leader.values.get("慎重", 0.5))
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	var has_benefactor_memory: float = 0.3 if _has_memory_type(leader, "benefactor") else 0.0
+	var a_score: float = honor + has_benefactor_memory
+	var b_score: float = prudence
+	var c_score: float = ambition - honor * 0.3
+	if a_score >= b_score and a_score >= c_score:
+		print("[Defection] Team%d path A: 留 faction (原因=%s)" % [team.team_id, reason])
+		# faction_id 不變，task=待命新領主
+		team.current_task = "等待新領主"
+	elif b_score >= c_score:
+		print("[Defection] Team%d path B: 投降強鄰" % team.team_id)
+		var strong_id: int = _find_strong_neighbor(state, team)
+		if strong_id != -1:
+			team.faction_id = state.teams[strong_id].faction_id
+		else:
+			team.faction_id = -1
+	else:
+		print("[Defection] Team%d path C: 獨立" % team.team_id)
+		team.faction_id = -1
+
+func _has_memory_type(person: PersonData, type: String) -> bool:
+	for m in person.memory:
+		if m is Dictionary and m.get("type") == type:
+			return true
+	return false
+
+func _evaluate_owner_contact(state: WorldState, team: TeamData) -> void:
+	if not _is_resident_team(state, team): return
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	var owner_id: int = tile.outpost_owner if tile else -1
+	if owner_id == -1 or not state.teams.has(owner_id):
+		_trigger_defection_evaluation(state, team, "owner_gone")
+		return
+	var intel: Dictionary = state.team_intel.get(team.team_id, {})
+	var snap: Dictionary = intel.get(owner_id, {})
+	var last_tick: int = int(snap.get("last_tick", -1))
+	if last_tick == -1:
+		return   # 從未接觸（剛建立可能）
+	var days_since: int = (state.world.current_tick - last_tick) / WorldState.TICKS_PER_DAY
+	if days_since > CONTACT_TIMEOUT_DAYS:
+		_trigger_defection_evaluation(state, team, "no_contact")
+		return
+	# owner leader 異動 → 7 天緩衝
+	var owner_leader_now: int = int(snap.get("leader_id", -1))
+	var cached_key: String = "_cached_owner_leader_%d" % owner_id
+	var cached_owner_leader: int = int(team.known_reputations.get(cached_key, -2))
+	if cached_owner_leader != -2 and cached_owner_leader != owner_leader_now:
+		if team.pending_owner_change_tick == -1:
+			team.pending_owner_change_tick = state.world.current_tick + OWNER_CHANGE_BUFFER_DAYS * WorldState.TICKS_PER_DAY
+		elif state.world.current_tick >= team.pending_owner_change_tick:
+			_trigger_defection_evaluation(state, team, "owner_changed")
+			team.pending_owner_change_tick = -1
+	elif team.pending_owner_change_tick != -1:
+		team.pending_owner_change_tick = -1
+	team.known_reputations[cached_key] = owner_leader_now

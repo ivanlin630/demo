@@ -215,6 +215,22 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		elif (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
 				or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a):
 			_try_merge(state, id_a, id_b)
+		elif a.current_task == "安頓":
+			var tile: HexTileData = state.world.tiles.get(a.tile_pos.x * 1000 + a.tile_pos.y)
+			if tile and tile.outpost_owner != -1:
+				var o: TeamData = state.teams.get(tile.outpost_owner)
+				if o and o.faction_id == a.faction_id:
+					_convert_to_resident(state, a)
+		elif b.current_task == "安頓":
+			var tile2: HexTileData = state.world.tiles.get(b.tile_pos.x * 1000 + b.tile_pos.y)
+			if tile2 and tile2.outpost_owner != -1:
+				var o2: TeamData = state.teams.get(tile2.outpost_owner)
+				if o2 and o2.faction_id == b.faction_id:
+					_convert_to_resident(state, b)
+		elif a.current_task == "安撫" and b.tags.has(TeamData.TAG_PRODUCE):
+			_resolve_pacify(state, a, b)
+		elif b.current_task == "安撫" and a.tags.has(TeamData.TAG_PRODUCE):
+			_resolve_pacify(state, b, a)
 		return
 	if a.current_task == "外交":
 		_try_diplomacy(state, id_a, id_b)
@@ -349,6 +365,51 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> void:
 	var collector: TeamData = state.teams[collector_id]
 	var payer:     TeamData = state.teams[payer_id]
+	# PRODUCE 居民：用 team.tax_rate，跳過勢力守衛
+	if payer.tags.has(TeamData.TAG_PRODUCE):
+		var rate: float = payer.tax_rate
+		# 資源轉移（surplus × rate，保留最低儲備）
+		for res in ["food", "material", "goods", "coin"]:
+			var stock: float = float(payer.resources.get(res, 0))
+			var reserve: float = 0.0
+			if res == "food":
+				reserve = float(payer.population) * 14.0
+			elif res == "coin":
+				reserve = stock * 0.5
+			var surplus: float = maxf(stock - reserve, 0.0)
+			var take: float = surplus * rate
+			if take <= 0.0:
+				continue
+			payer.resources[res]     = stock - take
+			collector.resources[res] = float(collector.resources.get(res, 0)) + take
+		# 重稅後果
+		var stress_gain: float  = maxf(0.0, (rate - 0.3) * 0.3)
+		var loyalty_loss: float = maxf(0.0, (rate - 0.2) * 0.1)
+		var fear_gain: float    = maxf(0.0, (rate - 0.6) * 0.5)
+		var targets: Array = []
+		if payer.leader_id != -1:
+			targets.append(payer.leader_id)
+		targets.append_array(payer.named_members)
+		for pid in targets:
+			var p: PersonData = state.persons.get(pid)
+			if p == null:
+				continue
+			p.stress  = minf(p.stress  + stress_gain,  1.0)
+			p.loyalty = maxf(p.loyalty - loyalty_loss, 0.0)
+			p.fear    = minf(p.fear    + fear_gain,    1.0)
+		if rate > 0.5:
+			payer.unrest_turns += 1
+		collector.current_task = TeamData.TASK_IDLE
+		collector.move_target  = Vector2i(-1, -1)
+		_msg.emit_message(state, "tribute",
+			TextBank.fmt("tribute", "honest", {
+				"origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % rate
+			}),
+			collector,
+			{ "origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % rate })
+		print("[Tribute] Team%d 徵收居民 Team%d rate=%.2f" % [collector_id, payer_id, rate])
+		return
+	# 非 PRODUCE：原有勢力守衛 + value 修正邏輯
 	var f = state.factions.get(collector.faction_id)
 	if f == null or f.leader_team_id != collector_id:
 		return
@@ -371,7 +432,7 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			continue
 		payer.resources[res]     = float(payer.resources.get(res, 0)) - amount
 		collector.resources[res] = float(collector.resources.get(res, 0)) + amount
-	collector.current_task = "idle"
+	collector.current_task = TeamData.TASK_IDLE
 	collector.move_target  = Vector2i(-1, -1)
 	_msg.emit_message(state, "tribute",
 		TextBank.fmt("tribute", "honest", {
@@ -714,3 +775,58 @@ func _clear_aid_task(beggar: TeamData) -> void:
 func _aid_update_rep(team: TeamData, other_id: int, delta: float) -> void:
 	var cur: float = float(team.known_reputations.get(other_id, 0.5))
 	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)
+
+# ──────── 安頓（invite_settle）執行 ────────
+
+func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i, faction_id: int) -> void:
+	var t: TeamData = state.teams.get(team_id)
+	if t == null: return
+	t.tile_pos = outpost_pos
+	if not t.tags.has(TeamData.TAG_PRODUCE):
+		t.tags.append(TeamData.TAG_PRODUCE)
+	t.tags.erase("流亡")
+	t.faction_id = faction_id
+	t.current_task = "生產"
+	t.move_target = Vector2i(-1, -1)
+	# 加入 faction
+	if faction_id != -1 and state.factions.has(faction_id):
+		var f: FactionData = state.factions[faction_id]
+		if not f.member_team_ids.has(team_id):
+			f.member_team_ids.append(team_id)
+	# 若該 outpost 已有同 faction PRODUCE team → 嘗試合併
+	var existing: int = _find_existing_resident(state, outpost_pos, team_id, faction_id)
+	if existing != -1:
+		var fai := FactionAISystem.new()
+		var cap: int = fai._outpost_pop_cap(state, outpost_pos)
+		var et: TeamData = state.teams.get(existing)
+		if et != null and et.population + t.population <= cap:
+			SubteamSystem.new().merge_teams(state, existing, team_id, t.named_members)
+
+func _find_existing_resident(state: WorldState, pos: Vector2i, exclude_id: int, faction_id: int = -2) -> int:
+	for tid in state.teams:
+		if tid == exclude_id: continue
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos == pos and t.tags.has(TeamData.TAG_PRODUCE):
+			if faction_id != -2 and t.faction_id != faction_id: continue
+			return tid
+	return -1
+
+func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
+	if not subteam.tags.has(TeamData.TAG_PRODUCE):
+		subteam.tags.append(TeamData.TAG_PRODUCE)
+	subteam.tags.erase("子團")
+	subteam.tags.erase("流亡")
+	subteam.current_task = "生產"
+	subteam.parent_team_id = -1
+	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
+		subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])
+
+# ──────── 安撫（pacify）────────
+
+func _resolve_pacify(state: WorldState, pacifier: TeamData, village: TeamData) -> void:
+	for pid in ([village.leader_id] as Array) + village.named_members:
+		var p = state.persons.get(pid)
+		if p:
+			p.stress = maxf(p.stress - 0.05, 0.0)
+			p.loyalty = minf(p.loyalty + 0.02, 1.0)
+	village.unrest_turns = maxi(village.unrest_turns - 1, 0)
