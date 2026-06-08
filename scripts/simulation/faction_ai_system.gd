@@ -813,6 +813,50 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		leader_team.team_id, sub_id, target_pos.x, target_pos.y, outpost_type, level])
 	return true
 
+# 派升級子隊（task="升級"，附 target_level）
+func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Vector2i,
+		target_level: int) -> bool:
+	var tile: HexTileData = state.world.tiles.get(outpost_pos.x * 1000 + outpost_pos.y)
+	if tile == null or tile.outpost_owner != owner_team.team_id: return false
+	if target_level <= tile.outpost_level or target_level > 3: return false
+	if tile.construction_team_id != -1: return false
+	var cost: Dictionary = OutpostSystem.BUILD_COST[tile.outpost_type][target_level - 1]
+	for k in cost:
+		if k == "ticks": continue
+		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false
+	var advisor_id: int = _pick_advisor(owner_team)
+	if advisor_id == -1: return false
+	if owner_team.population < 10: return false
+	var sub_id: int = SubteamSystem.new().dispatch(
+		state, owner_team.team_id, advisor_id, 5, "升級", outpost_pos)
+	if sub_id == -1: return false
+	state.teams[sub_id].task_extra_data = { "target_level": target_level }
+	print("[Infra] Team%d 派升級子隊 Team%d → (%d,%d) Lv%d" % [
+		owner_team.team_id, sub_id, outpost_pos.x, outpost_pos.y, target_level])
+	return true
+
+# 派擴建子隊（task="擴建"，附 facility_type）
+func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost_pos: Vector2i,
+		facility_type: String) -> bool:
+	var tile: HexTileData = state.world.tiles.get(outpost_pos.x * 1000 + outpost_pos.y)
+	if tile == null or tile.outpost_owner != owner_team.team_id: return false
+	if tile.construction_team_id != -1: return false
+	var def: Dictionary = OutpostSystem.FACILITY_DEF[facility_type]
+	var cost: Dictionary = def.cost
+	for k in cost:
+		if k == "ticks": continue
+		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false
+	var advisor_id: int = _pick_advisor(owner_team)
+	if advisor_id == -1: return false
+	if owner_team.population < 6: return false
+	var sub_id: int = SubteamSystem.new().dispatch(
+		state, owner_team.team_id, advisor_id, 3, "擴建", outpost_pos)
+	if sub_id == -1: return false
+	state.teams[sub_id].task_extra_data = { "facility_type": facility_type }
+	print("[Infra] Team%d 派擴建子隊 Team%d → (%d,%d) %s" % [
+		owner_team.team_id, sub_id, outpost_pos.x, outpost_pos.y, facility_type])
+	return true
+
 # ──────── 新據點選址評分 ────────
 
 const MIN_BUILD_SCORE: float = 50.0
@@ -873,7 +917,27 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	# 玩家 leader → 不自動決策（後續用 AdvisorSystem.push_outpost_advice）
 	if leader_team.leader_id == state.player_id and state.player_id != -1:
 		return
-	# (1) 蓋新 outpost
+	# (1) 升級既有 outpost
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_owner != leader_team.team_id: continue
+		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue
+		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
+			return
+	# (2) 擴建設施（civilian only）
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_owner != leader_team.team_id: continue
+		if tile.outpost_type != "civilian" or tile.construction_team_id != -1: continue
+		for facility in OutpostSystem.FACILITY_DEF:
+			var def: Dictionary = OutpostSystem.FACILITY_DEF[facility]
+			var cap_arr: Array = def.cap_by_outpost[tile.outpost_type]
+			var cap: int = int(cap_arr[tile.outpost_level - 1])
+			var current: int = int(tile.get(def.current_level_key))
+			if current >= cap: continue
+			if _dispatch_facility_builder(state, leader_team, tile.tile_pos, facility):
+				return
+	# (3) 蓋新 outpost
 	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
 	if loc.is_empty(): return
 	var outpost_type: String = _pick_outpost_type(leader)

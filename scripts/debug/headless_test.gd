@@ -58,6 +58,7 @@ func _initialize() -> void:
 	_test_evaluate_outpost_location()
 	_test_evaluate_infrastructure()
 	_test_subteam_arrival_triggers_build()
+	_test_dispatch_upgrader_and_facility()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3667,6 +3668,41 @@ func _test_subteam_arrival_triggers_build() -> void:
 	assert(tile.construction_ticks_left > 0, "施工 ticks > 0")
 	assert(sub.current_task == TeamData.TASK_BUILD, "子隊 task → 建設")
 	print("Infra Task6 OK")
+
+func _test_dispatch_upgrader_and_facility() -> void:
+	print("--- Infra Task7: 升級/擴建 dispatch ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.population = 30
+	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0
+	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
+	leader_team.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101; adv.skills["統領"] = 0.5
+	state.persons[101] = adv
+	var adv2 := PersonData.new(); adv2.id = 102; adv2.skills["統領"] = 0.5
+	state.persons[102] = adv2
+	leader_team.named_members = [101, 102]
+	state.teams[0] = leader_team
+	state.create_faction(0)
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	tile.farming_level = 0
+	state.world.tiles[3003] = tile
+	var fai := FactionAISystem.new()
+	assert(fai._dispatch_upgrader(state, leader_team, Vector2i(3, 3), 2), "升級派子隊應成功")
+	# 擴建（farming，cap@L1=1，current=0）
+	assert(fai._dispatch_facility_builder(state, leader_team, Vector2i(3, 3), "farming"), "擴建派子隊應成功")
+	var upgrade_count := 0
+	var facility_count := 0
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.current_task == "升級": upgrade_count += 1
+		if t.current_task == "擴建": facility_count += 1
+	assert(upgrade_count == 1, "1 個升級子隊")
+	assert(facility_count == 1, "1 個擴建子隊")
+	print("Infra Task7 OK")
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")
