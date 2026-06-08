@@ -1131,6 +1131,12 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	if leader == null: return
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	var old_owner_id: int = tile.outpost_owner if tile else -1
+	# C: 起義 → 取消進行中施工（無論守城/流亡路徑）
+	if tile and tile.construction_team_id != -1:
+		tile.construction_team_id    = -1
+		tile.construction_ticks_left = 0
+		tile.construction_target     = {}
+		print("[Uprising] cancel construction at (%d,%d)" % [team.tile_pos.x, team.tile_pos.y])
 	var ambition: float = float(leader.values.get("野心", 0.5))
 	var prudence: float = float(leader.values.get("慎重", 0.5))
 	var honor: float    = float(leader.values.get("義氣", 0.5))
