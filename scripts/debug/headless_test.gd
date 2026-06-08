@@ -55,6 +55,7 @@ func _initialize() -> void:
 	_test_task_extra_data_field()
 	_test_facility_def_registry()
 	_test_dispatch_builder()
+	_test_evaluate_outpost_location()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3582,6 +3583,26 @@ func _test_dispatch_builder() -> void:
 			sub_count += 1
 	assert(sub_count == 1, "應派出 1 個子隊 task=建造")
 	print("Infra Task3 OK")
+
+func _test_evaluate_outpost_location() -> void:
+	print("--- Infra Task4: outpost location scoring ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = leader_team
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y)
+			tile.terrain = "plains"
+			tile.productivity = 1.0 if abs(x) + abs(y) > 2 else 0.5
+			tile.outpost_level = 0
+			state.world.tiles[x * 1000 + y] = tile
+	var fai := FactionAISystem.new()
+	var best = fai._evaluate_new_outpost_location(state, leader_team)
+	assert(not best.is_empty(), "應找到 candidate")
+	print("Infra Task4 OK (best=%s)" % str(best.pos))
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")

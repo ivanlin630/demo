@@ -808,6 +808,47 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		leader_team.team_id, sub_id, target_pos.x, target_pos.y, outpost_type, level])
 	return true
 
+# ──────── 新據點選址評分 ────────
+
+const MIN_BUILD_SCORE: float = 50.0
+
+const TERRAIN_BUILD_BONUS: Dictionary = {
+	"plains": 20.0, "forest": 10.0, "mountain": -10.0,
+}
+
+# 回傳最佳候選 { "pos": Vector2i, "score": float, "tile": HexTileData }，無則 {}。
+func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) -> Dictionary:
+	var candidates: Array = []
+	var center: Vector2i = leader_team.tile_pos
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level > 0: continue
+		var dist: int = _hex_dist(center, tile.tile_pos)
+		if dist > 5 or dist < 2: continue   # 太近不行
+		var score: float = float(tile.productivity) * 100.0
+		score += float(TERRAIN_BUILD_BONUS.get(tile.terrain, 0))
+		score -= float(dist) * 5.0
+		score += clampf(10.0 - float(dist), 0.0, 10.0) * 2.0
+		var min_enemy_dist: int = _min_dist_to_enemy_outpost(state, leader_team, tile.tile_pos)
+		if min_enemy_dist < 5: score -= float(5 - min_enemy_dist) * 10.0
+		if score >= MIN_BUILD_SCORE:
+			candidates.append({ "pos": tile.tile_pos, "score": score, "tile": tile })
+	if candidates.is_empty(): return {}
+	candidates.sort_custom(func(a, b): return a.score > b.score)
+	return candidates[0]
+
+func _min_dist_to_enemy_outpost(state: WorldState, leader_team: TeamData, pos: Vector2i) -> int:
+	var min_dist: int = 9999
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level == 0: continue
+		var owner: TeamData = state.teams.get(tile.outpost_owner)
+		if owner == null: continue
+		if owner.faction_id == leader_team.faction_id and owner.faction_id != -1: continue
+		var d: int = _hex_dist(pos, tile.tile_pos)
+		if d < min_dist: min_dist = d
+	return min_dist
+
 func _richest_member(state: WorldState, f) -> int:
 	var best_tid: int    = -1
 	var best_food: float = 0.0
