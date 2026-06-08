@@ -57,6 +57,7 @@ func _initialize() -> void:
 	_test_dispatch_builder()
 	_test_evaluate_outpost_location()
 	_test_evaluate_infrastructure()
+	_test_subteam_arrival_triggers_build()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3634,6 +3635,38 @@ func _test_evaluate_infrastructure() -> void:
 			sub_count += 1
 	assert(sub_count >= 1, "應派出基建子隊")
 	print("Infra Task5 OK (派出 %d 子隊)" % sub_count)
+
+func _test_subteam_arrival_triggers_build() -> void:
+	print("--- Infra Task6: 子隊抵達觸發建造 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.population = 30; owner.tile_pos = Vector2i(0, 0)
+	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0
+	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
+	owner.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101; state.persons[101] = adv
+	adv.skills["統領"] = 0.5
+	owner.named_members = [101]
+	state.teams[0] = owner
+	state.create_faction(0)
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.terrain = "plains"
+	state.world.tiles[3003] = tile
+	var fai := FactionAISystem.new()
+	assert(fai._dispatch_builder(state, owner, Vector2i(3, 3), "civilian", 1), "派建造子隊")
+	var sub_id := -1
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			sub_id = tid
+	var sub: TeamData = state.teams[sub_id]
+	sub.tile_pos = Vector2i(3, 3)   # 模擬抵達
+	var os := OutpostSystem.new()
+	assert(os.begin_subteam_construction(state, sub), "抵達應啟動建造")
+	assert(tile.construction_target.get("action", "") == "build", "construction action=build")
+	assert(tile.construction_ticks_left > 0, "施工 ticks > 0")
+	assert(sub.current_task == TeamData.TASK_BUILD, "子隊 task → 建設")
+	print("Infra Task6 OK")
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")

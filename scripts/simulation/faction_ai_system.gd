@@ -382,6 +382,8 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 # ──────── 子團自主 AI ────────
 
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	if sub.current_task == TeamData.TASK_BUILD:
+		return  # C: 施工中（建設），不打斷、不召回
 	if sub.current_task == TeamData.TASK_ESCORT:
 		_update_escort(state, sub)
 		_check_discipline(state, sub)
