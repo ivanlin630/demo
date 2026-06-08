@@ -776,6 +776,38 @@ func _check_goods_shortage(state: WorldState, faction) -> float:
 	# goods < 100 → 觸發
 	return clampf((100.0 - total_goods) / 100.0, 0.0, 1.0) * 50.0
 
+# ──────── 基建 dispatch ────────
+
+# 選一名非 leader 的記名成員當子隊 leader（建造/升級/擴建 crew）
+func _pick_advisor(team: TeamData) -> int:
+	for pid in team.named_members:
+		if pid != team.leader_id:
+			return pid
+	return -1
+
+# 派建造子隊前往 target_pos，task="建造"，附 build_type/level。
+# 資源以 1.5x 安全餘量檢查（子隊抵達後 start_build 才實際扣款）。
+func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vector2i,
+		outpost_type: String, level: int) -> bool:
+	var cost: Dictionary = OutpostSystem.BUILD_COST[outpost_type][level - 1]
+	for k in cost:
+		if k == "ticks": continue
+		if float(leader_team.resources.get(k, 0)) < float(cost[k]) * 1.5:
+			return false
+	var advisor_id: int = _pick_advisor(leader_team)
+	if advisor_id == -1: return false
+	var pop: int = maxi(10, level * 5)
+	if leader_team.population < pop * 2: return false
+	var sub_id: int = SubteamSystem.new().dispatch(
+		state, leader_team.team_id, advisor_id, pop, "建造", target_pos)
+	if sub_id == -1: return false
+	state.teams[sub_id].task_extra_data = {
+		"build_type": outpost_type, "level": level
+	}
+	print("[Infra] Team%d 派建造子隊 Team%d → (%d,%d) %s Lv%d" % [
+		leader_team.team_id, sub_id, target_pos.x, target_pos.y, outpost_type, level])
+	return true
+
 func _richest_member(state: WorldState, f) -> int:
 	var best_tid: int    = -1
 	var best_food: float = 0.0

@@ -54,6 +54,7 @@ func _initialize() -> void:
 	# ── NPC Infrastructure (C) ──
 	_test_task_extra_data_field()
 	_test_facility_def_registry()
+	_test_dispatch_builder()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3556,6 +3557,31 @@ func _test_facility_def_registry() -> void:
 	assert(fai._check_food_shortage(state, f) > 50.0, "缺糧應高分")
 	assert(fai._check_goods_shortage(state, f) > 0.0, "缺貨應有分")
 	print("Infra Task2 OK")
+
+func _test_dispatch_builder() -> void:
+	print("--- Infra Task3: _dispatch_builder ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.population = 30; owner.faction_id = 10
+	owner.tile_pos = Vector2i(0, 0)
+	owner.resources["material"] = 200.0; owner.resources["coin"] = 50.0
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	state.persons[100] = leader; owner.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101; adv.team_id = 0
+	adv.skills["統領"] = 0.4
+	state.persons[101] = adv; owner.named_members = [101]
+	state.teams[0] = owner
+	state.create_faction(0)
+	var fai := FactionAISystem.new()
+	var result = fai._dispatch_builder(state, owner, Vector2i(3, 3), "civilian", 1)
+	assert(result, "資源足應派子隊")
+	var sub_count = 0
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0 and state.teams[tid].current_task == "建造":
+			sub_count += 1
+	assert(sub_count == 1, "應派出 1 個子隊 task=建造")
+	print("Infra Task3 OK")
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")
