@@ -1105,6 +1105,17 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	}
 	print("[Encounter] 戰鬥結束 winner=Team%d loser=Team%d loot=%s" % [winner_id, loser_id, str(loot)])
 
+	# D B1: 戰勝接管 outpost（敗方所在格據點易主）
+	var loser_team_cap: TeamData = state.teams.get(loser_id)
+	if loser_team_cap != null:
+		var cap_tid: int = loser_team_cap.tile_pos.x * 1000 + loser_team_cap.tile_pos.y
+		var cap_tile: HexTileData = state.world.tiles.get(cap_tid)
+		if cap_tile != null and cap_tile.outpost_level > 0 and cap_tile.outpost_owner != winner_id:
+			var old_cap_owner: int = cap_tile.outpost_owner
+			cap_tile.outpost_owner = winner_id
+			print("[Capture] Outpost (%d,%d) %d→%d" % [
+				loser_team_cap.tile_pos.x, loser_team_cap.tile_pos.y, old_cap_owner, winner_id])
+
 	state.encounter_units.clear()
 	state.encounter_active = false
 	state.encounter_attacker_id = -1
