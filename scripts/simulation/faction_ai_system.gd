@@ -121,6 +121,8 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_promote_successor(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		# D B2: 無人 outpost 駐留接管
+		_evaluate_outpost_takeover(state, team)
 		if _is_resident_team(state, team):
 			_evaluate_uprising(state, team)
 			_evaluate_owner_contact(state, team)
@@ -673,17 +675,34 @@ func _can_trade(state: WorldState, team: TeamData) -> bool:
 			return true
 	return false
 
+const MERCHANT_MAX_RANGE: int = 20
+
 func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 	var best_id: int = -1
-	var best_d:  int = 999
+	var best_score: float = -1e9
+	var inter := InteractionSystem.new()
 	for tid in state.team_discovered.get(merchant.team_id, []):
-		if tid == merchant.team_id or not state.teams.has(tid): continue
+		if tid == merchant.team_id: continue
+		if not state.teams.has(tid): continue
+		var t: TeamData = state.teams[tid]
+		var dist: int = _hex_dist(merchant.tile_pos, t.tile_pos)
+		if dist > MERCHANT_MAX_RANGE: continue
 		var snap: Dictionary = state.team_intel.get(merchant.team_id, {}).get(tid, {})
-		var coin_est: float  = float(snap.get("coin_est", 0.0))
-		if coin_est < TRADE_MIN_COIN: continue
-		var d: int = _hex_dist(merchant.tile_pos, state.teams[tid].tile_pos)
-		if d < best_d:
-			best_d  = d
+		var max_gap: float = 0.0
+		for res in InteractionSystem.BASE_PRICE:
+			var my_val: float = inter._local_value(merchant, res)
+			var their_val_est: float = my_val
+			if snap.has(res) and res in ["food", "material"]:
+				var pop: int = int(snap.get("population", 10))
+				var stk: float = float(snap.get(res, 0))
+				var target: float = float(pop) * float(InteractionSystem.TARGET_PER_POP.get(res, 1.0))
+				var sr: float = clampf((target - stk) / maxf(target, 1.0), -0.5, 1.0)
+				their_val_est = float(InteractionSystem.BASE_PRICE[res]) * (1.0 + sr)
+			var gap: float = absf(their_val_est - my_val)
+			if gap > max_gap: max_gap = gap
+		var score: float = max_gap / float(maxi(dist, 1))
+		if score > best_score:
+			best_score = score
 			best_id = tid
 	return best_id
 
@@ -887,28 +906,66 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 	print("[Faction] 立國：%s（leader=Team%d，%d teams）" % [
 		f.faction_name, f.leader_team_id, f.member_team_ids.size()])
 
+const OUTPOST_TAKEOVER_DAYS: int = 3
+
+# D B2: 任何 team 駐留無人 outpost 滿 3 天 → 自動接管
+func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or tile.outpost_level == 0:
+		team.occupying_outpost_since = -1
+		return
+	if tile.outpost_owner == team.team_id:
+		team.occupying_outpost_since = -1
+		return
+	if tile.outpost_owner != -1:
+		team.occupying_outpost_since = -1
+		return
+	if team.occupying_outpost_since == -1:
+		team.occupying_outpost_since = state.world.current_tick
+		return
+	if state.world.current_tick - team.occupying_outpost_since >= OUTPOST_TAKEOVER_DAYS * WorldState.TICKS_PER_DAY:
+		tile.outpost_owner = team.team_id
+		team.occupying_outpost_since = -1
+		print("[Takeover] Team%d 接管無人 outpost (%d,%d)" % [
+			team.team_id, team.tile_pos.x, team.tile_pos.y])
+
 func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	if not _is_resident_team(state, team): return
-	if team.current_task == "起義": return
+	if team.current_task in ["起義", "守城"]: return
 	if team.current_task in SURVIVAL_TASKS: return
 	var avg_loy: float = _avg_named_loyalty(state, team)
 	if avg_loy >= 0.2: return
 	if team.unrest_turns < 60: return
 	if _count_stress_sources(state, team) < 2: return
-	var old_owner_id: int = -1
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
-	if tile: old_owner_id = tile.outpost_owner
-	team.faction_id = -1
-	team.tags.erase(TeamData.TAG_PRODUCE)
-	team.tags.append("流亡")
-	team.current_task = "起義"
-	team.move_target = Vector2i(-1, -1)
-	print("[Uprising] Team%d 居民起義（old owner=Team%d）" % [team.team_id, old_owner_id])
+	var old_owner_id: int = tile.outpost_owner if tile else -1
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	var prudence: float = float(leader.values.get("慎重", 0.5))
+	var honor: float    = float(leader.values.get("義氣", 0.5))
+	var survival: float = float(leader.values.get("求生欲", 0.5))
+	var stand_score: float = ambition * 0.5 + prudence * 0.3 + honor * 0.2
+	var flee_score: float  = survival * 0.5 + (1.0 - honor) * 0.3
+	if stand_score > flee_score:
+		# Path A 守城：奪取 outpost、自立（保留 PRODUCE 身分）
+		team.faction_id = -1
+		team.current_task = "守城"
+		if tile: tile.outpost_owner = team.team_id
+		print("[Uprising A] Team%d 守城（野心=%.2f，old owner=Team%d）" % [
+			team.team_id, ambition, old_owner_id])
+	else:
+		# Path B 流亡（原 spec E 邏輯）
+		team.faction_id = -1
+		team.tags.erase(TeamData.TAG_PRODUCE)
+		team.tags.append("流亡")
+		team.current_task = "起義"
+		team.move_target = Vector2i(-1, -1)
+		print("[Uprising B] Team%d 流亡（求生=%.2f，old owner=Team%d）" % [
+			team.team_id, survival, old_owner_id])
 	if old_owner_id != -1:
-		var leader = state.persons.get(team.leader_id)
-		if leader:
-			NpcAiSystem.new().write_memory(leader, "enemy", old_owner_id,
-				state.world.current_tick, 1.0)
+		NpcAiSystem.new().write_memory(leader, "enemy", old_owner_id,
+			state.world.current_tick, 1.0)
 	# 鄰格 PRODUCE team cascade fear
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
