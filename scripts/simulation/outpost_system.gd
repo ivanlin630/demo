@@ -118,6 +118,9 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				  "x": str(tile.tile_pos.x), "y": str(tile.tile_pos.y) })
 			print("[Outpost] Team%d 建成 %s（Lv%d）at (%d,%d)" % [
 				team.team_id, n, tile.outpost_level, tile.tile_pos.x, tile.tile_pos.y])
+			# C: NPC 建造子隊完工 → 就地安頓（脫離母團、加駐留 tag），outpost 持續存在
+			if team.parent_team_id != -1:
+				_auto_settle_builder(state, team, tile)
 		"upgrade_level":
 			tile.outpost_level = tile.construction_target["level"]
 			print("[Outpost] Team%d 升級 → %s Lv%d" % [
@@ -143,6 +146,22 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 	tile.construction_team_id   = -1
 	tile.construction_target     = {}
 	team.current_task = TeamData.TASK_IDLE
+
+# C: 建造子隊完工後就地安頓為駐留 team（owner 已設為自己，加 tag、脫離母團）
+func _auto_settle_builder(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	var parent: TeamData = state.teams.get(team.parent_team_id)
+	if parent != null:
+		parent.subteam_ids.erase(team.team_id)
+	team.parent_team_id = -1
+	team.tags.erase(TeamData.TAG_SUBTEAM)
+	if tile.outpost_type == "civilian":
+		if not team.tags.has(TeamData.TAG_PRODUCE):
+			team.tags.append(TeamData.TAG_PRODUCE)
+	else:
+		if not team.tags.has(TeamData.TAG_MILITARY):
+			team.tags.append(TeamData.TAG_MILITARY)
+	print("[Outpost] Team%d 完工後就地安頓 (%d,%d)（%s）" % [
+		team.team_id, tile.tile_pos.x, tile.tile_pos.y, tile.outpost_type])
 
 # ──────── 公開操作 ────────
 
