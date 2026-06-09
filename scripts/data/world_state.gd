@@ -54,6 +54,10 @@ var player_alerts: Array = []
 # 類型：food_critical / member_defected / faction_member_betrayed /
 #       subteam_destroyed / outpost_captured
 # UI 輪詢後清空（同 forced_event 模式）
+var game_over: bool = false
+var game_over_reason: String = ""
+# H: 玩家絕後 → game_over=true，sim_runner 凍結世界
+
 var ticks_per_day: int:
 	get: return TICKS_PER_DAY
 
