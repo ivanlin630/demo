@@ -88,6 +88,9 @@ func _initialize() -> void:
 	_test_npc_auto_deposit()
 	_test_player_withdraw_deposit()
 	_test_last_tile_pos_field()
+	_test_find_path_basic()
+	_test_find_path_cache()
+	_test_find_path_no_path()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4308,3 +4311,51 @@ func _test_last_tile_pos_field() -> void:
 	t.last_tile_pos = Vector2i(5, 5)
 	assert(t.last_tile_pos == Vector2i(5, 5))
 	print("Path Task1 OK")
+
+func _test_find_path_basic() -> void:
+	print("--- Path Task2: A* basic ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 100
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y)
+			tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	var r = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(3, 0))
+	assert(not r.path.is_empty(), "應有 path")
+	assert(r.cost > 0, "cost 應 > 0")
+	print("Path Task2 OK (path size=%d, cost=%.1f)" % [r.path.size(), r.cost])
+
+func _test_find_path_cache() -> void:
+	print("--- Path Task2b: cache ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 200
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	var r1 = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(2, 0))
+	var r2 = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(2, 0))
+	assert(r1.tick == r2.tick, "同 tick 應命中 cache")
+	# tick + 1 → 應重算
+	state.world.current_tick = 201
+	var r3 = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(2, 0))
+	assert(r3.tick == 201, "新 tick 重算")
+	print("Path Task2b OK")
+
+func _test_find_path_no_path() -> void:
+	print("--- Path Task2c: 無路徑 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 300
+	# 只放 from tile，沒 to tile
+	var tile := HexTileData.new(); tile.terrain = "plains"; tile.tile_pos = Vector2i(0, 0)
+	state.world.tiles[0] = tile
+	var r = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(5, 5))
+	assert(r.path.is_empty(), "無路徑應空 path")
+	assert(r.cost == INF, "cost 應 INF")
+	print("Path Task2c OK")
