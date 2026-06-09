@@ -99,6 +99,8 @@ func _initialize() -> void:
 	_test_estimate_catch_up_out_of_sight()
 	_test_movement_uses_astar()
 	_test_ai_catch_up_filters_unreachable()
+	# ── Prosperity Attack ──
+	_test_readiness_threshold()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4551,3 +4553,17 @@ func _test_ai_catch_up_filters_unreachable() -> void:
 	# t1 人更少但不可達 → 應被過濾，選可達的 t2
 	assert(prey == 2, "不可達 prey 應被過濾，選 Team2，實際=%d" % prey)
 	print("Path Task7 OK (prey=%d)" % prey)
+
+func _test_readiness_threshold() -> void:
+	print("--- Prosperity Task1: readiness threshold ---")
+	var team := TeamData.new()
+	team.tags = []
+	var leader := PersonData.new()
+	leader.values = { "殘忍": 0.8, "好戰": 0.5, "慎重": 0.3 }
+	# threshold = 0.55 - max(0.8, 0.5)*0.15 + 0.3*0.15 = 0.55 - 0.12 + 0.045 = 0.475
+	var t = FactionAISystem.calc_readiness_threshold(team, leader)
+	assert(abs(t - 0.475) < 0.01, "預期 0.475 實際=%.3f" % t)
+	team.tags = ["軍隊"]
+	t = FactionAISystem.calc_readiness_threshold(team, leader)
+	assert(abs(t - 0.375) < 0.01, "軍隊預期 0.375 實際=%.3f" % t)
+	print("Prosperity Task1 OK")

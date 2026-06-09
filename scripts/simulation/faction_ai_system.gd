@@ -31,6 +31,11 @@ const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
 
+# ── Prosperity attack（野心驅動主動征服）──
+const PROSPERITY_CADENCE: int = 720           # 3 天 評估一次
+const PROSPERITY_CADENCE_MILITARY: int = 360  # 軍隊 tag 1.5 天
+const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score +0.1
+
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
@@ -42,6 +47,37 @@ const OUTPOST_POP_CAP: Dictionary = {
 	"civilian": [20, 50, 100],   # L1, L2, L3
 	"military": [15, 35, 70],
 }
+
+# ── Prosperity helpers（static，純函數，可單測）──
+static func calc_readiness_threshold(team: TeamData, leader: PersonData) -> float:
+	var ferocity: float = maxf(
+		float(leader.values.get("殘忍", 0.5)),
+		float(leader.values.get("好戰", 0.5))
+	)
+	var caution: float = float(leader.values.get("慎重", 0.5))
+	var threshold: float = 0.55 - ferocity * 0.15 + caution * 0.15
+	if "軍隊" in team.tags:
+		threshold -= 0.1
+	return clampf(threshold, 0.3, 0.85)
+
+static func calc_readiness(team: TeamData) -> float:
+	var pop_factor: float = clampf(float(team.population) / 10.0, 0.0, 1.0)
+	var skill: float = team.anon_combat_skill
+	var food_days: float = float(team.resources.get("food", 0)) \
+		/ maxf(float(team.population) * FOOD_PER_PERSON_PER_DAY_SURVIVAL, 0.001)
+	var food_factor: float = clampf(food_days / 14.0, 0.0, 1.0)
+	var weapon: float = float(team.resources.get("weapon_melee_low", 0))
+	var weapon_factor: float = clampf(weapon / maxf(float(team.population), 1.0), 0.0, 1.0)
+	return (pop_factor + skill + food_factor + weapon_factor) / 4.0
+
+static func calc_attack_score(team: TeamData, leader: PersonData) -> float:
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	var martial: float = float(leader.values.get("好戰", 0.5))
+	var honor: float = float(leader.values.get("信義", 0.5))
+	var base: float = ambition * 0.4 + martial * 0.4 - honor * 0.4
+	if team.anon_treasury > ANON_TREASURY_BONUS_THRESHOLD:
+		base += 0.1
+	return base
 
 func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
