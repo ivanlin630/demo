@@ -814,6 +814,16 @@ func _check_goods_shortage(state: WorldState, faction) -> float:
 	# goods < 100 → 觸發
 	return clampf((100.0 - total_goods) / 100.0, 0.0, 1.0) * 50.0
 
+func _check_ore_surplus(state: WorldState, faction) -> float:
+	var total: float = 0.0
+	for tid in faction.member_team_ids:
+		for tile_id in state.world.tiles:
+			var tile: HexTileData = state.world.tiles[tile_id]
+			if tile.outpost_owner != tid: continue
+			total += float(tile.public_storage.get("ore_gold", 0)) * 5.0
+			total += float(tile.public_storage.get("ore_silver", 0))
+	return 80.0 if total > 50.0 else 0.0
+
 # ──────── 基建 dispatch ────────
 
 # 選一名非 leader 的記名成員當子隊 leader（建造/升級/擴建 crew）
