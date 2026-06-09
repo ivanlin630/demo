@@ -111,6 +111,10 @@ func _initialize() -> void:
 	_test_prosperity_cadence()
 	_test_survival_b_branch_far_outpost_loot()
 	_test_survival_b_branch_near_outpost_return()
+	_test_occupy_resident_accept()
+	_test_occupy_massacre()
+	_test_occupy_abandon()
+	_test_occupy_force()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4853,3 +4857,79 @@ func _test_survival_b_branch_near_outpost_return() -> void:
 	fas._trigger_survival(state, team, "urgent")
 	assert(team.current_task == "return_home", "近 outpost 應 return_home，實際=%s" % team.current_task)
 	print("Prosperity Task5b OK")
+
+# Task6 共用：建 attacker(0) + prey(1)擁 outpost(5,5) + resident(2)駐該 tile
+func _occupy_setup(atk_values: Dictionary, rep: float, res_caution: float) -> Dictionary:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.terrain = "plains"
+	tile.outpost_level = 1; tile.outpost_owner = 1   # prey 擁有
+	state.world.tiles[5 * 1000 + 5] = tile
+	var attacker := TeamData.new()
+	attacker.team_id = 0; attacker.tile_pos = Vector2i(5, 5); attacker.population = 10
+	var atk_leader := PersonData.new()
+	atk_leader.id = 10; atk_leader.values = atk_values
+	state.persons[10] = atk_leader; attacker.leader_id = 10
+	state.teams[0] = attacker
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(5, 5); prey.population = 3
+	state.teams[1] = prey
+	var resident := TeamData.new()
+	resident.team_id = 2; resident.tile_pos = Vector2i(5, 5); resident.population = 10
+	resident.tags = ["生產"]
+	resident.resources = { "food": 100, "material": 40 }
+	resident.known_reputations = { 0: rep }
+	var res_leader := PersonData.new()
+	res_leader.id = 20; res_leader.values = { "慎重": res_caution }
+	state.persons[20] = res_leader; resident.leader_id = 20
+	state.teams[2] = resident
+	return { "state": state, "tile": tile }
+
+func _test_occupy_resident_accept() -> void:
+	print("--- Prosperity Task6a: 居民接受 → 易主 ---")
+	# rep 0.5 (>0.3) + caution 0.1 → fear 0.5 > 0.3 → accept
+	var d := _occupy_setup({ "殘忍": 0.5 }, 0.5, 0.1)
+	var state: WorldState = d["state"]
+	var tile: HexTileData = d["tile"]
+	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
+	assert(tile.outpost_owner == 0, "接受後 outpost 應易主給 0，實際=%d" % tile.outpost_owner)
+	assert(state.teams.has(2), "居民團應仍存活")
+	print("Prosperity Task6a OK")
+
+func _test_occupy_massacre() -> void:
+	print("--- Prosperity Task6b: 殘忍 → 屠 ---")
+	# rep 0.2 → 拒投；殘忍 0.8 → 屠
+	var d := _occupy_setup({ "殘忍": 0.8, "好戰": 0.3 }, 0.2, 0.5)
+	var state: WorldState = d["state"]
+	var tile: HexTileData = d["tile"]
+	var atk: TeamData = state.teams[0]
+	var t0: float = atk.anon_treasury
+	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
+	assert(not state.teams.has(2), "屠村後居民團應消失")
+	assert(tile.outpost_owner == 0, "屠村後 outpost 易主，實際=%d" % tile.outpost_owner)
+	assert(atk.anon_treasury > t0, "屠村應增公庫")
+	assert(float(atk.resources.get("food", 0)) >= 100.0, "屠村應收居民資源")
+	print("Prosperity Task6b OK")
+
+func _test_occupy_abandon() -> void:
+	print("--- Prosperity Task6c: 義氣 → 放棄 ---")
+	var d := _occupy_setup({ "義氣": 0.8, "殘忍": 0.1, "好戰": 0.1 }, 0.2, 0.5)
+	var state: WorldState = d["state"]
+	var tile: HexTileData = d["tile"]
+	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
+	assert(tile.outpost_owner == 1, "放棄後 outpost 仍屬 prey(1)，實際=%d" % tile.outpost_owner)
+	assert(state.teams.has(2), "放棄後居民團應存活")
+	print("Prosperity Task6c OK")
+
+func _test_occupy_force() -> void:
+	print("--- Prosperity Task6d: 野心+慎重 → 強佔 pop-20%% ---")
+	var d := _occupy_setup(
+		{ "野心": 0.8, "慎重": 0.6, "殘忍": 0.1, "好戰": 0.1, "義氣": 0.1, "信義": 0.1 }, 0.2, 0.5)
+	var state: WorldState = d["state"]
+	var tile: HexTileData = d["tile"]
+	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
+	assert(tile.outpost_owner == 0, "強佔後 outpost 易主，實際=%d" % tile.outpost_owner)
+	assert(state.teams.has(2), "強佔後居民團應存活")
+	assert(state.teams[2].population == 8, "強佔 pop 應 10→8，實際=%d" % state.teams[2].population)
+	print("Prosperity Task6d OK")
