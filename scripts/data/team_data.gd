@@ -52,6 +52,7 @@ var unrest_turns: int = 0
 var faction_id: int = -1
 var tile_pos: Vector2i = Vector2i.ZERO
 var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
+var last_tile_pos: Vector2i = Vector2i(-999, -999)   # 上一移動步位置（observe_velocity 用）
 var move_tick_acc: int = 0
 var combat_target: int = -1
 var readiness: float   = 1.0

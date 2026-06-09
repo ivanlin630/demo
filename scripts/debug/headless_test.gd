@@ -87,6 +87,18 @@ func _initialize() -> void:
 	_test_npc_auto_withdraw()
 	_test_npc_auto_deposit()
 	_test_player_withdraw_deposit()
+	_test_last_tile_pos_field()
+	_test_find_path_basic()
+	_test_find_path_cache()
+	_test_find_path_no_path()
+	_test_eta_ticks()
+	_test_observe_velocity_visible()
+	_test_observe_velocity_invisible()
+	_test_estimate_catch_up_reachable()
+	_test_estimate_catch_up_too_far()
+	_test_estimate_catch_up_out_of_sight()
+	_test_movement_uses_astar()
+	_test_ai_catch_up_filters_unreachable()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2783,6 +2795,13 @@ func _test_survival_helpers() -> void:
 	print("--- Survival Task3: find helpers ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
+	state.world.current_tick = 801   # 唯一 tick，避免 path cache 跨測試污染
+	# 平原網格，讓 estimate_catch_up 的 A* 有路可走
+	for gx in range(-1, 9):
+		for gy in range(-1, 9):
+			var g := HexTileData.new()
+			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
+			state.world.tiles[gx * 1000 + gy] = g
 	var t0 := TeamData.new()
 	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); t0.population = 10
 	state.teams[0] = t0
@@ -2836,6 +2855,8 @@ func _test_survival_decision_tree() -> void:
 	# (2) 殘忍 + 鄰弱 → 掠奪
 	var s2 := WorldState.new()
 	s2.world = WorldData.new()
+	s2.world.current_tick = 810
+	_fill_plains(s2, -1, 4, -1, 2)
 	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(0,0); t2.population = 10; t2.resources["food"] = 0
 	var l2 := PersonData.new(); l2.id = 100; l2.values = { "殘忍": 0.7, "好戰": 0.5 }
 	s2.persons[100] = l2; t2.leader_id = 100
@@ -2847,6 +2868,8 @@ func _test_survival_decision_tree() -> void:
 	# (3) 義氣 + 信義 → 投靠
 	var s3 := WorldState.new()
 	s3.world = WorldData.new()
+	s3.world.current_tick = 811
+	_fill_plains(s3, -1, 4, -1, 2)
 	var t3 := TeamData.new(); t3.team_id = 0; t3.tile_pos = Vector2i(0,0); t3.population = 5; t3.resources["food"] = 0
 	var l3 := PersonData.new(); l3.id = 100; l3.values = { "義氣": 0.7, "信義": 0.7, "求生欲": 0.5 }
 	s3.persons[100] = l3; t3.leader_id = 100
@@ -2861,6 +2884,8 @@ func _test_survival_decision_tree() -> void:
 	# (4) 默認 → 乞食
 	var s4 := WorldState.new()
 	s4.world = WorldData.new()
+	s4.world.current_tick = 812
+	_fill_plains(s4, -1, 4, -1, 2)
 	var t4 := TeamData.new(); t4.team_id = 0; t4.tile_pos = Vector2i(0,0); t4.population = 5; t4.resources["food"] = 0
 	var l4 := PersonData.new(); l4.id = 100; l4.values = { "義氣": 0.4, "信義": 0.4, "殘忍": 0.3, "好戰": 0.3 }
 	s4.persons[100] = l4; t4.leader_id = 100
@@ -3414,6 +3439,13 @@ func _test_find_trade_target_max_gap() -> void:
 	print("--- Trade Task4: _find_trade_target 最大價差 ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
+	state.world.current_tick = 802   # 唯一 tick，避免 path cache 跨測試污染
+	# 平原網格，讓 estimate_catch_up 的 A* 有路可走
+	for gx in range(-1, 5):
+		for gy in range(-1, 2):
+			var g := HexTileData.new()
+			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
+			state.world.tiles[gx * 1000 + gy] = g
 	var merchant := TeamData.new()
 	merchant.team_id = 0; merchant.tile_pos = Vector2i(0, 0); merchant.population = 5
 	merchant.resources["food"] = 100.0
@@ -4297,3 +4329,225 @@ func _test_player_withdraw_deposit() -> void:
 	assert(abs(float(team.resources["food"]) - 30.0) < 0.01, "team 應 30")
 	assert(abs(float(tile.public_storage["food"]) - 80.0) < 0.01, "公庫應 80")
 	print("CoinStorage Task14 OK")
+
+# ════════ Pathfinding + ETA + catch-up ════════
+
+func _fill_plains(state: WorldState, x0: int, x1: int, y0: int, y1: int) -> void:
+	for gx in range(x0, x1):
+		for gy in range(y0, y1):
+			var g := HexTileData.new()
+			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
+			state.world.tiles[gx * 1000 + gy] = g
+
+func _test_last_tile_pos_field() -> void:
+	print("--- Path Task1: last_tile_pos 欄位 ---")
+	var t := TeamData.new()
+	assert(t.last_tile_pos == Vector2i(-999, -999), "預設 (-999,-999)")
+	t.last_tile_pos = Vector2i(5, 5)
+	assert(t.last_tile_pos == Vector2i(5, 5))
+	print("Path Task1 OK")
+
+func _test_find_path_basic() -> void:
+	print("--- Path Task2: A* basic ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 100
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y)
+			tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	var r = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(3, 0))
+	assert(not r.path.is_empty(), "應有 path")
+	assert(r.cost > 0, "cost 應 > 0")
+	print("Path Task2 OK (path size=%d, cost=%.1f)" % [r.path.size(), r.cost])
+
+func _test_find_path_cache() -> void:
+	print("--- Path Task2b: cache ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 200
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	var r1 = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(2, 0))
+	var r2 = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(2, 0))
+	assert(r1.tick == r2.tick, "同 tick 應命中 cache")
+	# tick + 1 → 應重算
+	state.world.current_tick = 201
+	var r3 = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(2, 0))
+	assert(r3.tick == 201, "新 tick 重算")
+	print("Path Task2b OK")
+
+func _test_find_path_no_path() -> void:
+	print("--- Path Task2c: 無路徑 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 300
+	# 只放 from tile，沒 to tile
+	var tile := HexTileData.new(); tile.terrain = "plains"; tile.tile_pos = Vector2i(0, 0)
+	state.world.tiles[0] = tile
+	var r = PathSystem.find_path(state, Vector2i(0, 0), Vector2i(5, 5))
+	assert(r.path.is_empty(), "無路徑應空 path")
+	assert(r.cost == INF, "cost 應 INF")
+	print("Path Task2c OK")
+
+func _test_eta_ticks() -> void:
+	print("--- Path Task3: eta_ticks ---")
+	var team := TeamData.new()
+	team.population = 5; team.fatigue = 0.0
+	var eta = PathSystem.eta_ticks(team, 5.0)
+	# BASE_MOVE_TICKS = 120, speed_mult = 1.0 → eta = 5 * 120 = 600
+	assert(eta == 600, "eta 應 600，實際=%d" % eta)
+	team.fatigue = 0.5   # speed reduced
+	var eta2 = PathSystem.eta_ticks(team, 5.0)
+	assert(eta2 > eta, "fatigue 應延長 ETA")
+	print("Path Task3 OK")
+
+func _test_observe_velocity_visible() -> void:
+	print("--- Path Task4: observe_velocity visible ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var observer := TeamData.new()
+	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0)
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(2, 0)
+	target.last_tile_pos = Vector2i(1, 0)
+	state.teams[1] = target
+	state.team_discovered[0] = [1]
+	var r = PathSystem.observe_velocity(state, observer, target)
+	assert(r.get("visible", false), "應可見")
+	assert(r.get("speed", 0) > 0, "speed 應 > 0 (1 hex movement)")
+	print("Path Task4 OK (speed=%.2f)" % r.get("speed", 0))
+
+func _test_observe_velocity_invisible() -> void:
+	print("--- Path Task4b: 不可見 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var observer := TeamData.new()
+	observer.team_id = 0
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1
+	state.teams[1] = target
+	# 不加進 discovered
+	var r = PathSystem.observe_velocity(state, observer, target)
+	assert(not r.get("visible", true), "不可見")
+	print("Path Task4b OK")
+
+func _test_estimate_catch_up_reachable() -> void:
+	print("--- Path Task5: catch_up reachable ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	var observer := TeamData.new()
+	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0); observer.fatigue = 0.0
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(2, 0); target.fatigue = 0.0
+	# Target static (last_pos == current_pos → speed 0)
+	target.last_tile_pos = Vector2i(2, 0)
+	state.teams[1] = target
+	state.team_discovered[0] = [1]
+	var r = PathSystem.estimate_catch_up(state, observer, 1)
+	assert(r.get("reachable", false), "應 reachable")
+	print("Path Task5 OK (eta=%d)" % r.get("eta", 0))
+
+func _test_estimate_catch_up_too_far() -> void:
+	print("--- Path Task5b: too_far ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# 直線 plains 走廊 (0,0)→(11,0)，path cost 11 → eta 1320 > AI_ETA_LIMIT(1200)
+	for x in range(0, 12):
+		var tile := HexTileData.new()
+		tile.tile_pos = Vector2i(x, 0); tile.terrain = "plains"
+		state.world.tiles[x * 1000 + 0] = tile
+	var observer := TeamData.new()
+	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0); observer.fatigue = 0.0
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(11, 0); target.fatigue = 0.0
+	target.last_tile_pos = Vector2i(11, 0)
+	state.teams[1] = target
+	state.team_discovered[0] = [1]
+	var r = PathSystem.estimate_catch_up(state, observer, 1)
+	assert(not r.get("reachable", true), "應 unreachable")
+	assert(r.get("reason", "") == "too_far", "reason 應 too_far，實際=%s" % r.get("reason", ""))
+	print("Path Task5b OK (eta=%d)" % r.get("eta", 0))
+
+func _test_estimate_catch_up_out_of_sight() -> void:
+	print("--- Path Task5c: out_of_sight ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var observer := TeamData.new()
+	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0)
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(2, 0)
+	state.teams[1] = target
+	# 不加進 discovered
+	var r = PathSystem.estimate_catch_up(state, observer, 1)
+	assert(not r.get("reachable", true), "應 unreachable")
+	assert(r.get("reason", "") == "out_of_sight", "reason 應 out_of_sight")
+	print("Path Task5c OK")
+
+func _test_movement_uses_astar() -> void:
+	print("--- Path Task6: movement A* 繞山 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 700   # 唯一 tick，避免與其他測試共用 (0,0)->(2,0) path cache
+	for x in range(-1, 4):
+		for y in range(-2, 2):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# (1,0) 設山地：直線成本高，A* 應改走 (1,-1) 繞行
+	(state.world.tiles[1 * 1000 + 0] as HexTileData).terrain = "mountain"
+	var mv := MovementSystem.new()
+	var next_step: Vector2i = mv._calc_next_step(state, Vector2i(0, 0), Vector2i(2, 0))
+	# 繞山：不直接踏入山地 (1,0)，且必須前進（非原地）
+	assert(next_step != Vector2i(1, 0), "A* 不應直踏山地 (1,0)")
+	assert(next_step != Vector2i(0, 0), "應前進非原地")
+	print("Path Task6 OK (next=(%d,%d) 繞山)" % [next_step.x, next_step.y])
+
+func _test_ai_catch_up_filters_unreachable() -> void:
+	print("--- Path Task7: AI catch_up 過濾不可達 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 803   # 唯一 tick
+	# 平原網格 (predator 周邊)
+	for gx in range(-1, 4):
+		for gy in range(-1, 2):
+			var g := HexTileData.new()
+			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
+			state.world.tiles[gx * 1000 + gy] = g
+	var t0 := TeamData.new()
+	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); t0.population = 10
+	state.teams[0] = t0
+	# prey 1：人更少但孤島不可達（無連通 tile）
+	var t1 := TeamData.new()
+	t1.team_id = 1; t1.tile_pos = Vector2i(50, 50); t1.population = 2
+	t1.resources["food"] = 50.0
+	state.teams[1] = t1
+	var iso := HexTileData.new()
+	iso.tile_pos = Vector2i(50, 50); iso.terrain = "plains"
+	state.world.tiles[50 * 1000 + 50] = iso   # 唯一孤立 tile，from (0,0) 無路
+	# prey 2：可達
+	var t2 := TeamData.new()
+	t2.team_id = 2; t2.tile_pos = Vector2i(2, 0); t2.population = 3
+	t2.resources["food"] = 50.0
+	state.teams[2] = t2
+	state.team_discovered[0] = [1, 2]
+	var fai := FactionAISystem.new()
+	var prey = fai._find_weakest_prey(state, t0)
+	# t1 人更少但不可達 → 應被過濾，選可達的 t2
+	assert(prey == 2, "不可達 prey 應被過濾，選 Team2，實際=%d" % prey)
+	print("Path Task7 OK (prey=%d)" % prey)
