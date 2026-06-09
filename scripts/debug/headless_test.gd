@@ -92,6 +92,8 @@ func _initialize() -> void:
 	_test_find_path_cache()
 	_test_find_path_no_path()
 	_test_eta_ticks()
+	_test_observe_velocity_visible()
+	_test_observe_velocity_invisible()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4372,3 +4374,35 @@ func _test_eta_ticks() -> void:
 	var eta2 = PathSystem.eta_ticks(team, 5.0)
 	assert(eta2 > eta, "fatigue 應延長 ETA")
 	print("Path Task3 OK")
+
+func _test_observe_velocity_visible() -> void:
+	print("--- Path Task4: observe_velocity visible ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var observer := TeamData.new()
+	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0)
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(2, 0)
+	target.last_tile_pos = Vector2i(1, 0)
+	state.teams[1] = target
+	state.team_discovered[0] = [1]
+	var r = PathSystem.observe_velocity(state, observer, target)
+	assert(r.get("visible", false), "應可見")
+	assert(r.get("speed", 0) > 0, "speed 應 > 0 (1 hex movement)")
+	print("Path Task4 OK (speed=%.2f)" % r.get("speed", 0))
+
+func _test_observe_velocity_invisible() -> void:
+	print("--- Path Task4b: 不可見 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var observer := TeamData.new()
+	observer.team_id = 0
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1
+	state.teams[1] = target
+	# 不加進 discovered
+	var r = PathSystem.observe_velocity(state, observer, target)
+	assert(not r.get("visible", true), "不可見")
+	print("Path Task4b OK")

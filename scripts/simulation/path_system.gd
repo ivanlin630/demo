@@ -82,3 +82,24 @@ static func _team_speed_mult(team: TeamData) -> float:
 	mult *= clampf(1.0 - team.fatigue, 0.1, 1.0)
 	# Hook 預留 speed_class（未實作）
 	return mult
+
+# ────────── 觀察行軍速度 ──────────
+
+static func observe_velocity(state: WorldState, observer: TeamData, target: TeamData) -> Dictionary:
+	if not state.team_discovered.get(observer.team_id, []).has(target.team_id):
+		return { "visible": false }
+	var dist: int = _hex_dist(observer.tile_pos, target.tile_pos)
+	var noise_factor: float = clampf(float(dist) / float(VisionSystem.VISION_RADIUS), 0.0, 1.0)
+	# 真實 velocity（從 last_tile_pos → tile_pos）
+	var actual_velocity: Vector2i = Vector2i(0, 0)
+	if target.last_tile_pos != Vector2i(-999, -999):
+		actual_velocity = target.tile_pos - target.last_tile_pos
+	var actual_speed: float = float(_hex_dist(Vector2i.ZERO, actual_velocity))
+	# 雜訊：距離越遠 speed 估越粗
+	var observed_speed: float = actual_speed * (1.0 + (randf() - 0.5) * noise_factor)
+	return {
+		"visible": true,
+		"speed": observed_speed,
+		"direction": actual_velocity,
+		"noise_factor": noise_factor,
+	}
