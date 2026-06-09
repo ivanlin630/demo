@@ -98,6 +98,7 @@ func _initialize() -> void:
 	_test_estimate_catch_up_too_far()
 	_test_estimate_catch_up_out_of_sight()
 	_test_movement_uses_astar()
+	_test_ai_catch_up_filters_unreachable()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2794,6 +2795,13 @@ func _test_survival_helpers() -> void:
 	print("--- Survival Task3: find helpers ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
+	state.world.current_tick = 801   # 唯一 tick，避免 path cache 跨測試污染
+	# 平原網格，讓 estimate_catch_up 的 A* 有路可走
+	for gx in range(-1, 9):
+		for gy in range(-1, 9):
+			var g := HexTileData.new()
+			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
+			state.world.tiles[gx * 1000 + gy] = g
 	var t0 := TeamData.new()
 	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); t0.population = 10
 	state.teams[0] = t0
@@ -2847,6 +2855,8 @@ func _test_survival_decision_tree() -> void:
 	# (2) 殘忍 + 鄰弱 → 掠奪
 	var s2 := WorldState.new()
 	s2.world = WorldData.new()
+	s2.world.current_tick = 810
+	_fill_plains(s2, -1, 4, -1, 2)
 	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(0,0); t2.population = 10; t2.resources["food"] = 0
 	var l2 := PersonData.new(); l2.id = 100; l2.values = { "殘忍": 0.7, "好戰": 0.5 }
 	s2.persons[100] = l2; t2.leader_id = 100
@@ -2858,6 +2868,8 @@ func _test_survival_decision_tree() -> void:
 	# (3) 義氣 + 信義 → 投靠
 	var s3 := WorldState.new()
 	s3.world = WorldData.new()
+	s3.world.current_tick = 811
+	_fill_plains(s3, -1, 4, -1, 2)
 	var t3 := TeamData.new(); t3.team_id = 0; t3.tile_pos = Vector2i(0,0); t3.population = 5; t3.resources["food"] = 0
 	var l3 := PersonData.new(); l3.id = 100; l3.values = { "義氣": 0.7, "信義": 0.7, "求生欲": 0.5 }
 	s3.persons[100] = l3; t3.leader_id = 100
@@ -2872,6 +2884,8 @@ func _test_survival_decision_tree() -> void:
 	# (4) 默認 → 乞食
 	var s4 := WorldState.new()
 	s4.world = WorldData.new()
+	s4.world.current_tick = 812
+	_fill_plains(s4, -1, 4, -1, 2)
 	var t4 := TeamData.new(); t4.team_id = 0; t4.tile_pos = Vector2i(0,0); t4.population = 5; t4.resources["food"] = 0
 	var l4 := PersonData.new(); l4.id = 100; l4.values = { "義氣": 0.4, "信義": 0.4, "殘忍": 0.3, "好戰": 0.3 }
 	s4.persons[100] = l4; t4.leader_id = 100
@@ -3425,6 +3439,13 @@ func _test_find_trade_target_max_gap() -> void:
 	print("--- Trade Task4: _find_trade_target 最大價差 ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
+	state.world.current_tick = 802   # 唯一 tick，避免 path cache 跨測試污染
+	# 平原網格，讓 estimate_catch_up 的 A* 有路可走
+	for gx in range(-1, 5):
+		for gy in range(-1, 2):
+			var g := HexTileData.new()
+			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
+			state.world.tiles[gx * 1000 + gy] = g
 	var merchant := TeamData.new()
 	merchant.team_id = 0; merchant.tile_pos = Vector2i(0, 0); merchant.population = 5
 	merchant.resources["food"] = 100.0
@@ -4311,6 +4332,13 @@ func _test_player_withdraw_deposit() -> void:
 
 # ════════ Pathfinding + ETA + catch-up ════════
 
+func _fill_plains(state: WorldState, x0: int, x1: int, y0: int, y1: int) -> void:
+	for gx in range(x0, x1):
+		for gy in range(y0, y1):
+			var g := HexTileData.new()
+			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
+			state.world.tiles[gx * 1000 + gy] = g
+
 func _test_last_tile_pos_field() -> void:
 	print("--- Path Task1: last_tile_pos 欄位 ---")
 	var t := TeamData.new()
@@ -4489,3 +4517,37 @@ func _test_movement_uses_astar() -> void:
 	assert(next_step != Vector2i(1, 0), "A* 不應直踏山地 (1,0)")
 	assert(next_step != Vector2i(0, 0), "應前進非原地")
 	print("Path Task6 OK (next=(%d,%d) 繞山)" % [next_step.x, next_step.y])
+
+func _test_ai_catch_up_filters_unreachable() -> void:
+	print("--- Path Task7: AI catch_up 過濾不可達 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 803   # 唯一 tick
+	# 平原網格 (predator 周邊)
+	for gx in range(-1, 4):
+		for gy in range(-1, 2):
+			var g := HexTileData.new()
+			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
+			state.world.tiles[gx * 1000 + gy] = g
+	var t0 := TeamData.new()
+	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); t0.population = 10
+	state.teams[0] = t0
+	# prey 1：人更少但孤島不可達（無連通 tile）
+	var t1 := TeamData.new()
+	t1.team_id = 1; t1.tile_pos = Vector2i(50, 50); t1.population = 2
+	t1.resources["food"] = 50.0
+	state.teams[1] = t1
+	var iso := HexTileData.new()
+	iso.tile_pos = Vector2i(50, 50); iso.terrain = "plains"
+	state.world.tiles[50 * 1000 + 50] = iso   # 唯一孤立 tile，from (0,0) 無路
+	# prey 2：可達
+	var t2 := TeamData.new()
+	t2.team_id = 2; t2.tile_pos = Vector2i(2, 0); t2.population = 3
+	t2.resources["food"] = 50.0
+	state.teams[2] = t2
+	state.team_discovered[0] = [1, 2]
+	var fai := FactionAISystem.new()
+	var prey = fai._find_weakest_prey(state, t0)
+	# t1 人更少但不可達 → 應被過濾，選可達的 t2
+	assert(prey == 2, "不可達 prey 應被過濾，選 Team2，實際=%d" % prey)
+	print("Path Task7 OK (prey=%d)" % prey)

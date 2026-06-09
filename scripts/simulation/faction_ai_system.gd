@@ -730,8 +730,8 @@ func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 		if tid == merchant.team_id: continue
 		if not state.teams.has(tid): continue
 		var t: TeamData = state.teams[tid]
-		var dist: int = _hex_dist(merchant.tile_pos, t.tile_pos)
-		if dist > MERCHANT_MAX_RANGE: continue
+		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, merchant, tid)
+		if not catch_result.reachable: continue
 		var snap: Dictionary = state.team_intel.get(merchant.team_id, {}).get(tid, {})
 		var max_gap: float = 0.0
 		for res in InteractionSystem.BASE_PRICE:
@@ -745,7 +745,7 @@ func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 				their_val_est = float(InteractionSystem.BASE_PRICE[res]) * (1.0 + sr)
 			var gap: float = absf(their_val_est - my_val)
 			if gap > max_gap: max_gap = gap
-		var score: float = max_gap / float(maxi(dist, 1))
+		var score: float = max_gap / float(maxi(int(catch_result.eta) / 60, 1))
 		if score > best_score:
 			best_score = score
 			best_id = tid
@@ -1182,6 +1182,7 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
+		if not PathSystem.estimate_catch_up(state, team, tid).reachable: continue
 		if t.population >= int(float(team.population) * 0.7): continue
 		if float(t.resources.get("food", 0)) < 20.0: continue
 		if t.population < best_pop:
@@ -1196,6 +1197,7 @@ func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
+		if not PathSystem.estimate_catch_up(state, team, tid).reachable: continue
 		if t.faction_id != -1 and t.faction_id == team.faction_id: continue
 		var rep: float = float(team.known_reputations.get(tid, 0.5))
 		if rep <= 0.3: continue
@@ -1213,13 +1215,14 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 		if t == null: continue
 		var reserve: float = float(t.population) * 14.0
 		if float(t.resources.get("food", 0)) <= reserve: continue
+		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid)
+		if not catch_result.reachable: continue
 		var same_faction: bool = (t.faction_id != -1 and t.faction_id == team.faction_id)
 		var rep: float = float(team.known_reputations.get(tid, 0.5))
-		var dist: int = _hex_dist(team.tile_pos, t.tile_pos)
 		var score: float = 0.0
 		if same_faction: score += 1000.0
 		if rep >= 0.5: score += 100.0
-		score -= float(dist)
+		score -= float(int(catch_result.eta) / 60)
 		candidates.append({ "tid": tid, "score": score })
 	if candidates.is_empty():
 		return -1
