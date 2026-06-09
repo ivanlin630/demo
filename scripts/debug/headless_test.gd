@@ -75,6 +75,7 @@ func _initialize() -> void:
 	_test_storage_cap()
 	_test_collect_ore_to_storage()
 	_test_mint_facility()
+	_test_manufacturing_to_storage()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4043,3 +4044,24 @@ func _test_mint_facility() -> void:
 	assert(float(tile.public_storage["ore_gold"]) < 10.0, "ore 應減")
 	assert(float(tile.public_storage.get("coin", 0)) > 0, "coin 應增")
 	print("CoinStorage Task4 OK")
+
+func _test_manufacturing_to_storage() -> void:
+	print("--- CoinStorage Task5: manufacturing 產出 → 公庫 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.outpost_owner = 0
+	tile.manufacturing_level = 1
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.current_task = TeamData.TASK_MANUFACTURE
+	team.resources["material"] = 100.0
+	state.teams[0] = team
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("goods", 0)) > 0, "goods 應進公庫")
+	assert(float(team.resources.get("goods", 0)) == 0, "goods 不應進 team")
+	print("CoinStorage Task5 OK")

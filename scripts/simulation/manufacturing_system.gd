@@ -29,12 +29,21 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 		var worker_rate: float = float(tile.manufacturing_level) * pop_mult \
 			* (0.5 + avg_skill * 0.5)
 
-		var ran_recipe: String = _run_recipes(team, worker_rate)
+		var ran_recipe: String = _run_recipes(team, tile, worker_rate)
 		if ran_recipe != "":
 			print("[Manufacture] Team%d %s worker_rate=%.2f" % [tid, ran_recipe, worker_rate])
 			_grow_skills(state, team)
 
-func _run_recipes(team: TeamData, worker_rate: float) -> String:
+# 成品流向公庫（tile 為自家 outpost）；無 outpost fallback 進 team
+func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> void:
+	if tile != null and tile.outpost_level > 0:
+		var cap: float = OutpostSystem.new()._get_storage_cap(tile, res)
+		var current: float = float(tile.public_storage.get(res, 0))
+		tile.public_storage[res] = minf(current + amt, cap)
+	else:
+		team.resources[res] = float(team.resources.get(res, 0)) + amt
+
+func _run_recipes(team: TeamData, tile: HexTileData, worker_rate: float) -> String:
 	var mat: float   = float(team.resources.get("material", 0))
 	var gem: float   = float(team.resources.get("gem", 0))
 	var iron: float  = float(team.resources.get("ore_iron", 0))
@@ -44,23 +53,21 @@ func _run_recipes(team: TeamData, worker_rate: float) -> String:
 	if gem >= 1.0 and mat >= 4.0:
 		team.resources["gem"]      = gem - 1.0
 		team.resources["material"] = mat - 4.0
-		team.resources["goods"]    = float(team.resources.get("goods", 0)) + worker_rate * CRAFT_RATE
+		_add_output(team, tile, "goods", worker_rate * CRAFT_RATE)
 		return "工藝品"
 
 	# 高階近戰武器（steel）
 	if steel >= 2.0 and mat >= 3.0:
 		team.resources["ore_steel"] = steel - 2.0
 		team.resources["material"]  = mat - 3.0
-		team.resources["weapon_melee_high"] = float(team.resources.get("weapon_melee_high", 0)) \
-			+ worker_rate * MELEE_HIGH_RATE
+		_add_output(team, tile, "weapon_melee_high", worker_rate * MELEE_HIGH_RATE)
 		return "高階近戰武器"
 
 	# 高階遠程武器（steel）
 	if steel >= 2.0 and mat >= 4.0:
 		team.resources["ore_steel"] = steel - 2.0
 		team.resources["material"]  = mat - 4.0
-		team.resources["weapon_ranged_high"] = float(team.resources.get("weapon_ranged_high", 0)) \
-			+ worker_rate * RANGED_HIGH_RATE
+		_add_output(team, tile, "weapon_ranged_high", worker_rate * RANGED_HIGH_RATE)
 		return "高階遠程武器"
 
 	# 冶煉（iron → steel）
@@ -75,22 +82,20 @@ func _run_recipes(team: TeamData, worker_rate: float) -> String:
 	if iron >= 2.0 and mat >= 3.0:
 		team.resources["ore_iron"]  = iron - 2.0
 		team.resources["material"]  = mat - 3.0
-		team.resources["weapon_melee_low"] = float(team.resources.get("weapon_melee_low", 0)) \
-			+ worker_rate * MELEE_LOW_RATE
+		_add_output(team, tile, "weapon_melee_low", worker_rate * MELEE_LOW_RATE)
 		return "低階近戰武器"
 
 	# 低階遠程武器（iron）
 	if iron >= 2.0 and mat >= 4.0:
 		team.resources["ore_iron"]  = iron - 2.0
 		team.resources["material"]  = mat - 4.0
-		team.resources["weapon_ranged_low"] = float(team.resources.get("weapon_ranged_low", 0)) \
-			+ worker_rate * RANGED_LOW_RATE
+		_add_output(team, tile, "weapon_ranged_low", worker_rate * RANGED_LOW_RATE)
 		return "低階遠程武器"
 
 	# 一般製造（無礦時 fallback）
 	if mat >= 3.0:
 		team.resources["material"] = mat - 3.0
-		team.resources["goods"]    = float(team.resources.get("goods", 0)) + worker_rate * GOODS_RATE
+		_add_output(team, tile, "goods", worker_rate * GOODS_RATE)
 		return "一般製造"
 
 	return ""
