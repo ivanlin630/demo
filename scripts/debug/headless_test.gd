@@ -83,6 +83,7 @@ func _initialize() -> void:
 	_test_encounter_treasury_loot()
 	_test_on_team_extinct_to_storage()
 	_test_pickup_abandoned_coin()
+	_test_subteam_treasury_split()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4198,3 +4199,26 @@ func _test_pickup_abandoned_coin() -> void:
 	assert(float(team.anon_treasury) == 40.0, "應撿 40 遺財")
 	assert(float(tile.abandoned_coin) == 0.0, "abandoned_coin 清空")
 	print("CoinStorage Task11b OK")
+
+func _test_subteam_treasury_split() -> void:
+	print("--- CoinStorage Task12: 子隊帶 treasury ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var parent := TeamData.new()
+	parent.team_id = 0; parent.population = 10; parent.leader_id = 100
+	parent.named_members = [101]
+	parent.anon_treasury = 100.0
+	parent.tile_pos = Vector2i(0, 0)
+	state.teams[0] = parent
+	var leader := PersonData.new(); leader.id = 100
+	state.persons[100] = leader
+	var sub_leader := PersonData.new(); sub_leader.id = 101
+	sub_leader.skills = { "統領": 0.2 }
+	state.persons[101] = sub_leader
+	var ss := SubteamSystem.new()
+	var sub_id := ss.dispatch(state, 0, 101, 3, "偵查", Vector2i(1, 0))
+	assert(sub_id != -1, "派遣應成功")
+	var sub: TeamData = state.teams[sub_id]
+	assert(abs(sub.anon_treasury - 30.0) < 0.01, "子隊 treasury 應 30，實際=%s" % sub.anon_treasury)
+	assert(abs(parent.anon_treasury - 70.0) < 0.01, "母團 treasury 應 70，實際=%s" % parent.anon_treasury)
+	print("CoinStorage Task12 OK")

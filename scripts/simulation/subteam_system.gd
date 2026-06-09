@@ -40,6 +40,9 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		var amt: float = float(parent.resources[res]) * frac
 		sub.resources[res]    = amt
 		parent.resources[res] = float(parent.resources.get(res, 0)) - amt
+	# 公庫 treasury 按比例帶走
+	sub.anon_treasury    = parent.anon_treasury * frac
+	parent.anon_treasury -= sub.anon_treasury
 
 	parent.named_members.erase(sub_leader_id)
 	sub_leader.team_id = sub.team_id
@@ -132,6 +135,13 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		var amt: float = float(absorbed.resources.get(res, 0)) * frac
 		absorber.resources[res] = float(absorber.resources.get(res, 0)) + amt
 		absorbed.resources[res] = float(absorbed.resources.get(res, 0)) - amt
+	# 公庫 treasury 按比例併入；完全併入則全帶走
+	var treas_xfer: float = absorbed.anon_treasury * frac
+	absorber.anon_treasury += treas_xfer
+	absorbed.anon_treasury -= treas_xfer
+	if absorbed.population <= 0:
+		absorber.anon_treasury += absorbed.anon_treasury
+		absorbed.anon_treasury = 0.0
 	if absorbed_leader_moved and absorbed.population > 0:
 		var es := EventSystem.new()
 		es.on_leader_death(state, absorbed)
@@ -199,6 +209,13 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 		var amt: float = float(absorbed.resources.get(res, 0)) * frac
 		absorber.resources[res] = float(absorber.resources.get(res, 0)) + amt
 		absorbed.resources[res] = float(absorbed.resources.get(res, 0)) - amt
+	# 公庫 treasury 按比例併入；完全併入則全帶走
+	var treas_xfer2: float = absorbed.anon_treasury * frac
+	absorber.anon_treasury += treas_xfer2
+	absorbed.anon_treasury -= treas_xfer2
+	if absorbed.population - transfer <= 0:
+		absorber.anon_treasury += absorbed.anon_treasury
+		absorbed.anon_treasury = 0.0
 	absorbed.population -= transfer
 	absorbed.wounded     = maxi(absorbed.wounded - int(round(float(absorbed.wounded) * frac)), 0)
 	absorber.subteam_ids.erase(absorbed_id)

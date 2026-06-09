@@ -880,6 +880,12 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 		state.player_pending_targets.erase(target_id)
 		return { "ok": false, "msg": "目標人口不足" }
 	pt.resources["coin"] = coin - RECRUIT_COST_ANON
+	# 被招募 anon 帶走在原團的 treasury 份額
+	var tgt_named: int = tgt.named_members.size() + (1 if tgt.leader_id != -1 else 0)
+	var tgt_anon: int = maxi(tgt.population - tgt_named, 1)
+	var share: float = minf(tgt.anon_treasury / float(tgt_anon), tgt.anon_treasury)
+	tgt.anon_treasury -= share
+	pt.anon_treasury += share
 	tgt.population = maxi(tgt.population - 1, 1)
 	pt.population += 1
 	state.player_pending_targets.erase(target_id)
