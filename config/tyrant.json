@@ -1,0 +1,73 @@
+{
+  "seed": 99,
+  "mode": "explicit",
+  "max_ticks": 21600,
+  "map": { "radius": 4, "resource_richness": 5 },
+  "teams": [
+    {
+      "id": 0, "name": "暴君", "tile_pos": [4, 4], "population": 10,
+      "tags": ["統領", "軍隊"], "faction_id": 0, "is_faction_leader": true,
+      "resources": {
+        "food": 100, "material": 200, "coin": 1000, "weapon_melee_low": 15,
+        "armor_low": 10, "medicine": 10, "ore_gold": 50
+      },
+      "leader": {
+        "name": "暴君", "age": 35, "loyalty": 0.9,
+        "skills": { "統領": 0.8, "戰鬥": 0.6 },
+        "values": { "貪婪": 0.95, "殘忍": 0.9, "好戰": 0.8, "義氣": 0.1, "信義": 0.1, "慎重": 0.2 }
+      },
+      "named_members": [
+        { "name": "副官1", "loyalty": 0.6, "salary": 5.0 },
+        { "name": "副官2", "loyalty": 0.6, "salary": 5.0 }
+      ],
+      "outpost": { "type": "military", "level": 2, "tile_food_init": 1000 }
+    },
+    {
+      "id": 1, "name": "受壓村", "tile_pos": [4, 5], "population": 30,
+      "tags": ["生產"], "faction_id": 0,
+      "resources": { "food": 200, "coin": 50 },
+      "leader": {
+        "name": "村長", "age": 50, "loyalty": 0.6,
+        "skills": { "統領": 0.4, "生產": 0.6 },
+        "values": { "義氣": 0.4, "慎重": 0.7 }
+      },
+      "named_members": [
+        { "name": "村民甲", "loyalty": 0.5 },
+        { "name": "村民乙", "loyalty": 0.5 }
+      ],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 500 },
+      "tax_rate": 0.8
+    },
+    {
+      "id": 2, "name": "敵對暴君", "tile_pos": [8, 5], "population": 12,
+      "tags": ["軍隊"], "faction_id": 1, "is_faction_leader": true,
+      "resources": {
+        "food": 100, "material": 200, "coin": 800, "weapon_melee_low": 20,
+        "armor_low": 10
+      },
+      "leader": {
+        "name": "黑王", "age": 40, "loyalty": 0.9,
+        "skills": { "統領": 0.7, "戰鬥": 0.7 },
+        "values": { "貪婪": 0.9, "殘忍": 0.85, "好戰": 0.95, "義氣": 0.05 }
+      },
+      "named_members": [{ "name": "親衛", "loyalty": 0.7 }],
+      "outpost": { "type": "military", "level": 1, "tile_food_init": 500 }
+    },
+    {
+      "id": 3, "name": "流民", "tile_pos": [2, 2], "population": 8,
+      "tags": ["流亡"], "faction_id": -1,
+      "resources": { "food": 30, "coin": 20 },
+      "leader": {
+        "name": "難民頭", "age": 30, "loyalty": 0.5,
+        "values": { "求生欲": 0.9, "義氣": 0.4 }
+      },
+      "named_members": []
+    }
+  ],
+  "player": { "team_id": 0, "is_leader": true },
+  "command_schedule": [
+    { "tick": 240, "action": "extract_treasury", "args": { "extract_ratio": 0.5 } },
+    { "tick": 1680, "action": "extract_treasury", "args": { "extract_ratio": 0.5 } },
+    { "tick": 3360, "action": "attack", "args": { "team_id": 2 } }
+  ]
+}

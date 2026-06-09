@@ -1,7 +1,7 @@
 {
   "seed": 77,
   "mode": "explicit",
-  "max_ticks": 7200,
+  "max_ticks": 21600,
   "map": { "radius": 4, "resource_richness": 5 },
   "teams": [
     {
