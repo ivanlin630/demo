@@ -113,7 +113,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step1b_update_vision(state, near_teams, time_vision_mult)
 		_step1c_update_equipment(state, near_teams)
 		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
-		var arrived_near := _step2_move_teams(state, near_teams, time_speed_mult)
+		var move_near: Dictionary = _step2_move_teams(state, near_teams, time_speed_mult)
+		var arrived_near: Array = move_near["arrived"]
 		if _get_player_tile_pos(state) != _player_old_pos:
 			_player_cmd.clear_pending_targets(state)
 		_step3_propagate_messages(state, arrived_near, near_teams)
@@ -142,7 +143,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
 		_step1b_update_vision(state, far_teams, time_vision_mult)
 		_step1c_update_equipment(state, far_teams)
-		var arrived_far := _step2_move_teams(state, far_teams, time_speed_mult)
+		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult)
+		var arrived_far: Array = move_far["arrived"]
 		_step3_propagate_messages(state, arrived_far, far_teams)
 		_step3b_exchange_intel(state, arrived_far, far_teams)
 		_step4_resolve_interactions(state, arrived_far, far_teams)
@@ -175,7 +177,7 @@ func _step1_advance_time(state: WorldState) -> void:
 		state.world.current_turn += 1
 
 func _step2_move_teams(state: WorldState, team_ids: Array,
-		time_speed_mult: float = 1.0) -> Array:
+		time_speed_mult: float = 1.0) -> Dictionary:
 	return _movement_system.process(state, team_ids, time_speed_mult)
 
 func _get_time_fatigue_mult(state: WorldState) -> float:

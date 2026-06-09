@@ -22,7 +22,7 @@ const WAGON_TERRAIN_MULT: Dictionary = {
 }
 
 func process(state: WorldState, team_ids: Array,
-		time_mult: float = 1.0) -> Array:
+		time_mult: float = 1.0) -> Dictionary:
 	# 護衛：每 tick 追蹤目標位置
 	for tid in team_ids:
 		if not state.teams.has(tid):
@@ -37,6 +37,7 @@ func process(state: WorldState, team_ids: Array,
 		else:
 			team.move_target = target.tile_pos
 	var arrived: Array = []
+	var moved: Array = []
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue
@@ -66,9 +67,13 @@ func process(state: WorldState, team_ids: Array,
 		if team.move_tick_acc < cost:
 			continue
 		team.move_tick_acc = 0
+		var old_target: Vector2i = team.move_target
 		if _step_team(state, team):
-			arrived.append(tid)
-	return arrived
+			moved.append(tid)
+			# arrived = 走到原 move_target（_step_team 內到達會清 move_target）
+			if team.tile_pos == old_target:
+				arrived.append(tid)
+	return { "arrived": arrived, "moved": moved }
 
 func get_effective_mounts(team: TeamData) -> int:
 	return mini(int(team.resources.get("mounts", 0)), team.population)

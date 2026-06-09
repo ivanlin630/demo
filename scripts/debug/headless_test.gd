@@ -116,6 +116,8 @@ func _initialize() -> void:
 	_test_occupy_abandon()
 	_test_occupy_force()
 	_test_attack_defeat_reaction()
+	# ── Combat Engagement ──
+	_test_movement_returns_moved_and_arrived()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3200,11 +3202,11 @@ func _test_resident_movement_lock() -> void:
 	t.move_target = Vector2i(3, 3)   # 想動但應被鎖
 	state.teams[0] = t
 	var mv: Object = load("res://scripts/simulation/movement_system.gd").new()
-	var moved: Array = mv.process(state, [0], 1.0)
+	var _r: Dictionary = mv.process(state, [0], 1.0)
 	assert(t.tile_pos == Vector2i(0, 0), "居民應被鎖定不動，實際=%s" % str(t.tile_pos))
 	# 但 task=逃跑 應該可動
 	t.current_task = "逃跑"
-	moved = mv.process(state, [0], 1.0)
+	_r = mv.process(state, [0], 1.0)
 	# tile_pos 是否變動需看實作；至少不被 lock skip
 	print("Resident Task4 OK")
 
@@ -4957,3 +4959,31 @@ func _test_attack_defeat_reaction() -> void:
 	# stress_delta = 0.2*0.5 = 0.1, *1.5 = 0.15 → leader 0→0.15
 	assert(abs(leader.stress - 0.15) < 0.01, "leader stress 應升至 0.15，實際=%.3f" % leader.stress)
 	print("Prosperity Task7 OK")
+
+func _test_movement_returns_moved_and_arrived() -> void:
+	print("--- Combat Task1: movement 回傳 moved+arrived ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# Team A: 移動但不 arrived（目標遠）
+	var a := TeamData.new()
+	a.team_id = 0; a.tile_pos = Vector2i(0, 0); a.move_target = Vector2i(3, 0)
+	a.population = 5; a.move_tick_acc = 9999
+	state.teams[0] = a
+	# Team B: 同 tick arrived（目標相鄰）
+	var b := TeamData.new()
+	b.team_id = 1; b.tile_pos = Vector2i(2, 0); b.move_target = Vector2i(3, 0)
+	b.population = 5; b.move_tick_acc = 9999
+	state.teams[1] = b
+	var ms = MovementSystem.new()
+	var result = ms.process(state, [0, 1])
+	assert(result is Dictionary, "回傳應 Dictionary")
+	assert(result.has("arrived") and result.has("moved"), "缺 key")
+	assert(1 in result["arrived"], "B 應 arrived，實際=%s" % str(result["arrived"]))
+	assert(not (0 in result["arrived"]), "A 不應 arrived（仍在途），實際=%s" % str(result["arrived"]))
+	assert(0 in result["moved"] and 1 in result["moved"], "兩 team 都 moved，實際=%s" % str(result["moved"]))
+	print("Combat Task1 OK")
