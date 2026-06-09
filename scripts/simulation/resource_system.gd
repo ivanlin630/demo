@@ -90,6 +90,12 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 							"data": { "needs_ratio": satisfaction }
 						})
 
+			# 飢餓徵用：food < 1 天份 + treasury > 0 → 應急抽公庫換 coin
+			var food_after: float = float(team.resources.get("food", 0))
+			if food_after < float(team.population) * FOOD_PER_PERSON_PER_DAY \
+					and team.anon_treasury > 0.0:
+				FactionAISystem.new()._extract_treasury(state, team, 0.3, "飢餓緊急")
+
 func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData,
 		outpost_mult: float, pop_mult: float,
 		prod_skill: float, eng_skill: float) -> void:

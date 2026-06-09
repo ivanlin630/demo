@@ -124,6 +124,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_promote_successor(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		# 公庫徵用：每月一次依 leader 貪婪評估
+		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+			_consider_extraction(state, team)
 		# D B2: 無人 outpost 駐留接管
 		_evaluate_outpost_takeover(state, team)
 		if _is_resident_team(state, team):
@@ -823,6 +826,38 @@ func _check_ore_surplus(state: WorldState, faction) -> float:
 			total += float(tile.public_storage.get("ore_gold", 0)) * 5.0
 			total += float(tile.public_storage.get("ore_silver", 0))
 	return 80.0 if total > 50.0 else 0.0
+
+# ──────── 公庫徵用 ────────
+
+func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: String) -> void:
+	if team.anon_treasury <= 0.0 or ratio <= 0.0: return
+	ratio = clampf(ratio, 0.0, 1.0)
+	var amt: float = team.anon_treasury * ratio
+	team.anon_treasury -= amt
+	team.resources["coin"] = float(team.resources.get("coin", 0)) + amt
+	var is_emergency: bool = (reason == "飢餓緊急")
+	var stress_pen: float = (0.05 if is_emergency else 0.15) * ratio
+	var loyalty_pen: float = (0.02 if is_emergency else 0.08) * ratio
+	for pid in ([team.leader_id] as Array) + team.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		p.stress = minf(p.stress + stress_pen, 1.0)
+		p.loyalty = maxf(p.loyalty - loyalty_pen, 0.0)
+	if not is_emergency:
+		team.unrest_turns += 1
+	print("[Extract] Team%d 徵用 %.0f coin (%s)" % [team.team_id, amt, reason])
+
+func _consider_extraction(state: WorldState, team: TeamData) -> void:
+	if team.anon_treasury <= 0.0: return
+	if team.leader_id == state.player_id: return   # 玩家手動
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	var greed: float = float(leader.values.get("貪婪", 0.5))
+	var prudence: float = float(leader.values.get("慎重", 0.5))
+	var extract_score: float = greed - prudence * 0.5
+	if extract_score > 0.4:
+		var ratio: float = greed * 0.3
+		_extract_treasury(state, team, ratio, "貪婪驅動")
 
 # ──────── 基建 dispatch ────────
 

@@ -78,6 +78,7 @@ func _initialize() -> void:
 	_test_manufacturing_to_storage()
 	_test_salary_to_treasury()
 	_test_promote_anon_takes_share()
+	_test_extraction()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4102,3 +4103,21 @@ func _test_promote_anon_takes_share() -> void:
 	assert(promoted.coin > 0, "新 NPC 應有 coin (升階加成)")
 	assert(team.anon_treasury < 100.0, "treasury 應扣")
 	print("CoinStorage Task7 OK (新 NPC coin=%.0f, 剩 treasury=%.0f)" % [promoted.coin, team.anon_treasury])
+
+func _test_extraction() -> void:
+	print("--- CoinStorage Task8: 徵用機制 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	team.anon_treasury = 100.0; team.resources["coin"] = 0.0
+	var leader := PersonData.new(); leader.id = 100
+	leader.values = { "貪婪": 0.8, "慎重": 0.2 }
+	state.persons[100] = leader; team.leader_id = 100
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	fai._extract_treasury(state, team, 0.3, "貪婪驅動")
+	assert(float(team.anon_treasury) == 70.0, "treasury 應 70")
+	assert(float(team.resources["coin"]) == 30.0, "coin 應 30")
+	assert(team.unrest_turns == 1, "unrest_turns 應 +1")
+	print("CoinStorage Task8 OK")
