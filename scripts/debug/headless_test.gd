@@ -77,6 +77,7 @@ func _initialize() -> void:
 	_test_mint_facility()
 	_test_manufacturing_to_storage()
 	_test_salary_to_treasury()
+	_test_promote_anon_takes_share()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4086,3 +4087,18 @@ func _test_salary_to_treasury() -> void:
 	assert(float(team.anon_treasury) == 8.0, "treasury 應 8，實際=%s" % team.anon_treasury)
 	assert(float(team.resources["coin"]) < 100.0, "coin 應被扣")
 	print("CoinStorage Task6 OK")
+
+func _test_promote_anon_takes_share() -> void:
+	print("--- CoinStorage Task7: 升 anon 帶 ×3 share ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 11; team.named_members = []
+	team.leader_id = -1
+	team.anon_treasury = 100.0
+	state.teams[0] = team
+	var promoted := PersonGenerator.generate_for_team(state, team, "member")
+	assert(promoted != null, "應產生 named NPC")
+	assert(promoted.coin > 0, "新 NPC 應有 coin (升階加成)")
+	assert(team.anon_treasury < 100.0, "treasury 應扣")
+	print("CoinStorage Task7 OK (新 NPC coin=%.0f, 剩 treasury=%.0f)" % [promoted.coin, team.anon_treasury])
