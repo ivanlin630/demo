@@ -111,9 +111,10 @@
 - **根因**：subteam 分裂可能重新指定 leader_id
 - **位置**：`scripts/simulation/faction_ai_system.gd:_evaluate_solo`
 
-### D2. player person 死亡無保護
-- **症狀**：玩家可被事件殺死，`player_id` 仍指向已刪除的 person，所有 UI 失效
-- **建議**：player person 死亡時觸發 game over 或角色轉移
+### D2. player person 死亡無保護 ✅ 已修（2026-06-09）
+- **修正**：H spec 玩家 leader 死亡 → forced event 選繼承人；無 named member → game_over
+- **位置**：`scripts/simulation/faction_ai_system.gd._handle_player_leader_death`、`player_command_system.choose_heir`
+- **連動**：選繼承人期間 `advance_tick` 凍結（回 "awaiting_heir"）；無人 → 凍結（回 "game_over"）
 
 ### A1. agent_repl stdin 模式 stdout 污染
 - **症狀**：stdin 模式下模擬 `print()` 混入 JSON Lines stdout，污染協定
