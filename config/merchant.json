@@ -1,0 +1,61 @@
+{
+  "seed": 100,
+  "mode": "explicit",
+  "max_ticks": 21600,
+  "map": { "radius": 4 },
+  "teams": [
+    {
+      "id": 0, "name": "玩家商會", "tile_pos": [4, 4], "population": 8,
+      "tags": ["商隊", "統領"], "faction_id": 0, "is_faction_leader": true,
+      "resources": { "food": 300, "material": 50, "coin": 500, "goods": 100 },
+      "leader": {
+        "name": "商會主", "skills": { "統領": 0.7, "商業": 0.8 },
+        "values": { "貪婪": 0.7, "慎重": 0.7, "義氣": 0.5, "好戰": 0.1 }
+      },
+      "named_members": [{ "name": "副手", "skills": { "商業": 0.5 }, "loyalty": 0.7 }],
+      "outpost": { "type": "civilian", "level": 2, "tile_food_init": 1500 }
+    },
+    {
+      "id": 1, "name": "貿易夥伴A", "tile_pos": [6, 4], "population": 8,
+      "tags": ["商隊"], "faction_id": 1, "is_faction_leader": true,
+      "resources": { "food": 200, "coin": 400, "goods": 80 },
+      "leader": {
+        "name": "夥伴A", "skills": { "商業": 0.6 },
+        "values": { "貪婪": 0.6, "信義": 0.7 }
+      },
+      "named_members": [{ "name": "助手A" }],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 800 }
+    },
+    {
+      "id": 2, "name": "貿易夥伴B", "tile_pos": [4, 7], "population": 6,
+      "tags": ["商隊"], "faction_id": 2, "is_faction_leader": true,
+      "resources": { "food": 150, "coin": 600, "material": 100 },
+      "leader": {
+        "name": "夥伴B", "skills": { "商業": 0.5 },
+        "values": { "貪婪": 0.5, "義氣": 0.6 }
+      },
+      "named_members": [],
+      "outpost": { "type": "civilian", "level": 1 }
+    },
+    {
+      "id": 3, "name": "生產村", "tile_pos": [2, 6], "population": 20,
+      "tags": ["生產"], "faction_id": -1,
+      "resources": { "food": 500, "coin": 30, "material": 100 },
+      "leader": {
+        "name": "村長", "skills": { "生產": 0.7 }, "values": { "慎重": 0.8 }
+      },
+      "named_members": [],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 600 }
+    },
+    {
+      "id": 4, "name": "礦工", "tile_pos": [7, 7], "population": 6,
+      "tags": ["生產"], "faction_id": -1,
+      "resources": { "food": 100, "ore_silver": 30 },
+      "leader": { "name": "礦頭", "skills": { "工程": 0.5 } },
+      "named_members": [],
+      "outpost": { "type": "civilian", "level": 1 }
+    }
+  ],
+  "player": { "team_id": 0, "is_leader": true },
+  "command_schedule": []
+}
