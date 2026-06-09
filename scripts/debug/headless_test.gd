@@ -70,6 +70,8 @@ func _initialize() -> void:
 	_test_advance_tick_game_over_freeze()
 	_test_advance_tick_awaiting_heir_freeze()
 	_test_encounter_kills_player_triggers_heir()
+	# ── Coin Economy + Outpost Public Storage ──
+	_test_coin_storage_fields()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3971,3 +3973,15 @@ func _test_encounter_kills_player_triggers_heir() -> void:
 	assert(state.player_forced_event.get("action") == "choose_heir")
 	assert(pt.leader_id == -1, "leader_id 不應自動升 (等玩家選)")
 	print("Death Task5 OK")
+
+# ── Coin Economy + Outpost Public Storage ──
+
+func _test_coin_storage_fields() -> void:
+	print("--- CoinStorage Task1: 新欄位 ---")
+	var t := TeamData.new()
+	assert(t.anon_treasury == 0.0, "anon_treasury 預設 0")
+	var tile := HexTileData.new()
+	assert(tile.public_storage == {}, "public_storage 預設空")
+	assert(tile.abandoned_coin == 0.0, "abandoned_coin 預設 0")
+	assert(tile.mint_level == 0, "mint_level 預設 0")
+	print("CoinStorage Task1 OK")
