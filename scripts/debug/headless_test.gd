@@ -119,6 +119,7 @@ func _initialize() -> void:
 	# ── Combat Engagement ──
 	_test_movement_returns_moved_and_arrived()
 	_test_process_on_move_triggers_combat()
+	_test_named_weight_speed()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5016,3 +5017,27 @@ func _test_process_on_move_triggers_combat() -> void:
 	InteractionSystem.new().process_on_move(state, [0], [0, 1])
 	assert(a.combat_target == 1, "途經同格應 start_combat（combat_target=1），實際=%d" % a.combat_target)
 	print("Combat Task2 OK")
+
+func _test_named_weight_speed() -> void:
+	print("--- Combat Task4: named K=3 weight ---")
+	var state := WorldState.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	# 2 named (leader + 1) + 8 unnamed
+	var leader := PersonData.new()
+	leader.id = 1; leader.attributes["體力"] = 0.9
+	state.persons[1] = leader
+	team.leader_id = 1
+	var member := PersonData.new()
+	member.id = 2; member.attributes["體力"] = 0.9
+	state.persons[2] = member
+	team.named_members = [2]
+	var ms = MovementSystem.new()
+	var speed_hi = ms._compute_team_speed(state, team)
+	# named 體力 降至 0.3
+	leader.attributes["體力"] = 0.3
+	member.attributes["體力"] = 0.3
+	var speed_lo = ms._compute_team_speed(state, team)
+	var diff: float = speed_hi - speed_lo
+	assert(diff > 0.08, "K=3 應差 >8%%，實際=%.3f" % diff)
+	print("Combat Task4 OK (Δspeed=%.3f)" % diff)
