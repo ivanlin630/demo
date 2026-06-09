@@ -111,6 +111,30 @@ static func _is_border_adjacent(attacker: TeamData, prey: TeamData) -> bool:
 	var dy: int = prey.tile_pos.y - attacker.tile_pos.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2 <= 2
 
+func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
+	if team.leader_id == state.player_id and state.player_id != -1: return
+	if team.combat_target != -1: return
+	if team.current_task != TeamData.TASK_IDLE: return
+	if team.current_task in SURVIVAL_TASKS: return
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+
+	var score: float = calc_attack_score(team, leader)
+	if score < ATTACK_SCORE_THRESHOLD: return
+
+	var threshold: float = calc_readiness_threshold(team, leader)
+	var readiness: float = calc_readiness(team)
+	if readiness < threshold: return
+
+	var prey_id: int = find_prosperity_prey(state, team, leader)
+	if prey_id == -1: return
+
+	team.current_task = TeamData.TASK_ATTACK
+	team.move_target = state.teams[prey_id].tile_pos
+	team.combat_target = prey_id
+	print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
+		team.team_id, prey_id, score])
+
 func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if tile == null or tile.outpost_level == 0: return 0
