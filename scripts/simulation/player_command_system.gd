@@ -86,6 +86,7 @@ func _setup_registry() -> void:
 		"respond_aid_request":    _action_respond_aid_request,
 		"invite_settle":          _action_invite_settle,
 		"choose_heir":            _action_choose_heir,
+		"extract_treasury":       _action_extract_treasury,
 	}
 
 # 執行玩家主動行動
@@ -110,6 +111,13 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 	return _action_registry[action].call(state, target_id, pt, pt_id)
 
 # ── Action Handlers ───────────────────────────────────────────
+
+func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
+	if ratio <= 0.0 or ratio > 1.0:
+		return { "ok": false, "msg": "extract_ratio 必須 (0, 1]" }
+	FactionAISystem.new()._extract_treasury(state, pt, ratio, "玩家主動")
+	return { "ok": true, "msg": "徵用 %.0f%%" % (ratio * 100) }
 
 func _action_trade(state: WorldState, target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
 	var tgt: TeamData = state.teams.get(target_id)

@@ -79,6 +79,7 @@ func _initialize() -> void:
 	_test_salary_to_treasury()
 	_test_promote_anon_takes_share()
 	_test_extraction()
+	_test_player_extract_treasury()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4121,3 +4122,19 @@ func _test_extraction() -> void:
 	assert(float(team.resources["coin"]) == 30.0, "coin 應 30")
 	assert(team.unrest_turns == 1, "unrest_turns 應 +1")
 	print("CoinStorage Task8 OK")
+
+func _test_player_extract_treasury() -> void:
+	print("--- CoinStorage Task9: 玩家徵用 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10; team.leader_id = 100
+	team.anon_treasury = 100.0; team.resources["coin"] = 0.0
+	state.teams[0] = team
+	state.player_state["extract_ratio"] = 0.5
+	var pcs := PlayerCommandSystem.new()
+	var r := pcs._action_extract_treasury(state, -1, team, 0)
+	assert(r.get("ok") == true, "應成功")
+	assert(float(team.anon_treasury) == 50.0, "treasury 應 50")
+	assert(float(team.resources["coin"]) == 50.0, "coin 應 50")
+	print("CoinStorage Task9 OK")
