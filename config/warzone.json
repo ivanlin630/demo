@@ -1,0 +1,63 @@
+{
+  "seed": 101,
+  "mode": "explicit",
+  "max_ticks": 21600,
+  "map": { "radius": 4 },
+  "teams": [
+    {
+      "id": 0, "name": "玩家軍", "tile_pos": [4, 4], "population": 15,
+      "tags": ["軍隊", "統領"], "faction_id": 0, "is_faction_leader": true,
+      "resources": {
+        "food": 200, "material": 100, "coin": 300, "weapon_melee_low": 20,
+        "armor_low": 12
+      },
+      "leader": {
+        "name": "統帥", "skills": { "統領": 0.7, "戰鬥": 0.6, "戰術": 0.5 },
+        "values": { "好戰": 0.9, "野心": 0.8, "義氣": 0.6 }
+      },
+      "named_members": [
+        { "name": "將軍A", "skills": { "戰鬥": 0.5 } },
+        { "name": "將軍B", "skills": { "戰鬥": 0.5 } }
+      ],
+      "outpost": { "type": "military", "level": 1, "tile_food_init": 600 }
+    },
+    {
+      "id": 1, "name": "敵軍A", "tile_pos": [7, 4], "population": 12,
+      "tags": ["軍隊"], "faction_id": 1, "is_faction_leader": true,
+      "resources": { "food": 150, "coin": 200, "weapon_melee_low": 15, "armor_low": 8 },
+      "leader": { "name": "敵將A", "values": { "好戰": 0.95, "野心": 0.7 } },
+      "named_members": [{ "name": "副將A" }],
+      "outpost": { "type": "military", "level": 1 }
+    },
+    {
+      "id": 2, "name": "敵軍B", "tile_pos": [4, 7], "population": 14,
+      "tags": ["軍隊"], "faction_id": 2, "is_faction_leader": true,
+      "resources": { "food": 150, "coin": 200, "weapon_melee_low": 18 },
+      "leader": { "name": "敵將B", "values": { "好戰": 0.85, "殘忍": 0.7 } },
+      "named_members": [],
+      "outpost": { "type": "military", "level": 1 }
+    },
+    {
+      "id": 3, "name": "流民", "tile_pos": [2, 2], "population": 5,
+      "tags": ["流亡"], "faction_id": -1,
+      "resources": { "food": 30 },
+      "leader": { "name": "難民", "values": { "求生欲": 0.9 } },
+      "named_members": []
+    },
+    {
+      "id": 4, "name": "盜匪", "tile_pos": [6, 6], "population": 8,
+      "tags": ["流亡"], "faction_id": -1,
+      "resources": { "food": 50, "coin": 100, "weapon_melee_low": 5 },
+      "leader": {
+        "name": "匪首", "skills": { "戰鬥": 0.4 },
+        "values": { "貪婪": 0.85, "殘忍": 0.8 }
+      },
+      "named_members": []
+    }
+  ],
+  "player": { "team_id": 0, "is_leader": true },
+  "command_schedule": [
+    { "tick": 1000, "action": "attack", "args": { "team_id": 1 } },
+    { "tick": 5000, "action": "attack", "args": { "team_id": 2 } }
+  ]
+}
