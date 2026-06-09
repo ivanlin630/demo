@@ -115,11 +115,12 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
 		var move_near: Dictionary = _step2_move_teams(state, near_teams, time_speed_mult)
 		var arrived_near: Array = move_near["arrived"]
+		var moved_near: Array = move_near["moved"]
 		if _get_player_tile_pos(state) != _player_old_pos:
 			_player_cmd.clear_pending_targets(state)
 		_step3_propagate_messages(state, arrived_near, near_teams)
 		_step3b_exchange_intel(state, arrived_near, near_teams)
-		_step4_resolve_interactions(state, arrived_near, near_teams)
+		_step4_resolve_interactions(state, moved_near, near_teams)
 		_step4b_outpost_tick(state)
 		_step4e_faction_snapshot(state, near_teams)
 		_step5_collect_resources(state, near_teams)
@@ -145,9 +146,10 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step1c_update_equipment(state, far_teams)
 		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult)
 		var arrived_far: Array = move_far["arrived"]
+		var moved_far: Array = move_far["moved"]
 		_step3_propagate_messages(state, arrived_far, far_teams)
 		_step3b_exchange_intel(state, arrived_far, far_teams)
-		_step4_resolve_interactions(state, arrived_far, far_teams)
+		_step4_resolve_interactions(state, moved_far, far_teams)
 		_step4e_faction_snapshot(state, far_teams)
 		_step5_collect_resources(state, far_teams)
 		_step5a_regenerate_tiles(state)
@@ -189,8 +191,8 @@ func _step3_propagate_messages(state: WorldState, arrived_ids: Array, all_ids: A
 func _step3b_exchange_intel(state: WorldState, arrived_ids: Array, all_team_ids: Array) -> void:
 	_message_system.exchange_intel_on_arrival(state, arrived_ids, all_team_ids)
 
-func _step4_resolve_interactions(state: WorldState, arrived_ids: Array, all_ids: Array) -> void:
-	_interaction_system.process_on_arrival(state, arrived_ids, all_ids)
+func _step4_resolve_interactions(state: WorldState, moved_ids: Array, all_ids: Array) -> void:
+	_interaction_system.process_on_move(state, moved_ids, all_ids)
 
 func _step4b_outpost_tick(state: WorldState) -> void:
 	_outpost_system.tick_all(state)
