@@ -147,34 +147,33 @@ func _compute_team_speed(state: WorldState, team: TeamData) -> float:
 		return 1.0
 	return total_speed / float(total_count)
 
-# 未來替換此函數實作 A* 路徑，_on_arrival 介面不變
+# A* 路徑步進，_on_arrival 介面不變
 func _step_team(state: WorldState, team: TeamData) -> bool:
 	var old_pos: Vector2i = team.tile_pos
 	if team.tile_pos == team.move_target:
 		team.move_target = Vector2i(-1, -1)
 		_on_arrival(state, team)
 		return false
-	var best_pos: Vector2i = team.tile_pos
-	var best_dist: int = _hex_dist(team.tile_pos, team.move_target)
-	for neighbor in _get_neighbors(team.tile_pos):
-		var nid: int = neighbor.x * 1000 + neighbor.y
-		if not state.world.tiles.has(nid):
-			continue   # never step off-map
-		var d: int = _hex_dist(neighbor, team.move_target)
-		if d < best_dist:
-			best_dist = d
-			best_pos  = neighbor
-	# If no on-map neighbour improves distance, team is stuck — cancel target
-	if best_pos == team.tile_pos and team.tile_pos != team.move_target:
+	var next_pos: Vector2i = _calc_next_step(state, team.tile_pos, team.move_target)
+	# next_pos == 原地 → 無路徑（隔絕/被山阻），team stuck — cancel target
+	if next_pos == team.tile_pos:
 		print("[Move] Team %d stuck at (%d,%d), clearing move_target" % [
 			team.team_id, team.tile_pos.x, team.tile_pos.y])
 		team.move_target = Vector2i(-1, -1)
 		return false
-	team.tile_pos = best_pos
+	team.last_tile_pos = old_pos   # 記錄上一步位置（observe_velocity 用）
+	team.tile_pos = next_pos
 	if team.tile_pos == team.move_target:
 		team.move_target = Vector2i(-1, -1)
 		_on_arrival(state, team)
 	return team.tile_pos != old_pos
+
+# A* 下一步：回傳 path[1]（下一格）；無路徑回原地
+func _calc_next_step(state: WorldState, from: Vector2i, to: Vector2i) -> Vector2i:
+	var result: Dictionary = PathSystem.find_path(state, from, to)
+	if result.path.is_empty(): return from
+	if result.path.size() > 1: return result.path[1]
+	return result.path[0]
 
 # 抵達只更新占用，不自動建立據點（據點建立為獨立 NPC 決策）
 func _on_arrival(state: WorldState, team: TeamData) -> void:

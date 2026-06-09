@@ -97,6 +97,7 @@ func _initialize() -> void:
 	_test_estimate_catch_up_reachable()
 	_test_estimate_catch_up_too_far()
 	_test_estimate_catch_up_out_of_sight()
+	_test_movement_uses_astar()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4469,3 +4470,22 @@ func _test_estimate_catch_up_out_of_sight() -> void:
 	assert(not r.get("reachable", true), "應 unreachable")
 	assert(r.get("reason", "") == "out_of_sight", "reason 應 out_of_sight")
 	print("Path Task5c OK")
+
+func _test_movement_uses_astar() -> void:
+	print("--- Path Task6: movement A* 繞山 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 700   # 唯一 tick，避免與其他測試共用 (0,0)->(2,0) path cache
+	for x in range(-1, 4):
+		for y in range(-2, 2):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# (1,0) 設山地：直線成本高，A* 應改走 (1,-1) 繞行
+	(state.world.tiles[1 * 1000 + 0] as HexTileData).terrain = "mountain"
+	var mv := MovementSystem.new()
+	var next_step: Vector2i = mv._calc_next_step(state, Vector2i(0, 0), Vector2i(2, 0))
+	# 繞山：不直接踏入山地 (1,0)，且必須前進（非原地）
+	assert(next_step != Vector2i(1, 0), "A* 不應直踏山地 (1,0)")
+	assert(next_step != Vector2i(0, 0), "應前進非原地")
+	print("Path Task6 OK (next=(%d,%d) 繞山)" % [next_step.x, next_step.y])
