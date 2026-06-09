@@ -87,6 +87,7 @@ func _initialize() -> void:
 	_test_npc_auto_withdraw()
 	_test_npc_auto_deposit()
 	_test_player_withdraw_deposit()
+	_test_last_tile_pos_field()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4297,3 +4298,13 @@ func _test_player_withdraw_deposit() -> void:
 	assert(abs(float(team.resources["food"]) - 30.0) < 0.01, "team 應 30")
 	assert(abs(float(tile.public_storage["food"]) - 80.0) < 0.01, "公庫應 80")
 	print("CoinStorage Task14 OK")
+
+# ════════ Pathfinding + ETA + catch-up ════════
+
+func _test_last_tile_pos_field() -> void:
+	print("--- Path Task1: last_tile_pos 欄位 ---")
+	var t := TeamData.new()
+	assert(t.last_tile_pos == Vector2i(-999, -999), "預設 (-999,-999)")
+	t.last_tile_pos = Vector2i(5, 5)
+	assert(t.last_tile_pos == Vector2i(5, 5))
+	print("Path Task1 OK")
