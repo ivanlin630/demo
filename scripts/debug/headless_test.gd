@@ -101,6 +101,7 @@ func _initialize() -> void:
 	_test_ai_catch_up_filters_unreachable()
 	# ── Prosperity Attack ──
 	_test_readiness_threshold()
+	_test_find_prosperity_prey()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4567,3 +4568,36 @@ func _test_readiness_threshold() -> void:
 	t = FactionAISystem.calc_readiness_threshold(team, leader)
 	assert(abs(t - 0.375) < 0.01, "軍隊預期 0.375 實際=%.3f" % t)
 	print("Prosperity Task1 OK")
+
+func _test_find_prosperity_prey() -> void:
+	print("--- Prosperity Task2: prey selector ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(-3, 5):
+		for y in range(-3, 5):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# self
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.faction_id = 0
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.values = { "貪婪": 0.8, "殘忍": 0.5, "野心": 0.5 }
+	# 弱 + 富 prey
+	var rich_prey := TeamData.new()
+	rich_prey.team_id = 1; rich_prey.tile_pos = Vector2i(2, 0); rich_prey.population = 4
+	rich_prey.faction_id = 1
+	rich_prey.resources = { "coin": 200, "food": 100, "material": 50 }
+	rich_prey.last_tile_pos = rich_prey.tile_pos
+	state.teams[1] = rich_prey
+	# 同 faction
+	var ally := TeamData.new()
+	ally.team_id = 2; ally.tile_pos = Vector2i(1, 0); ally.population = 3
+	ally.faction_id = 0
+	state.teams[2] = ally
+	state.team_discovered[0] = [1, 2]
+	var prey_id = FactionAISystem.find_prosperity_prey(state, team, leader)
+	assert(prey_id == 1, "應選 1 (rich_prey)，實際=%d" % prey_id)
+	print("Prosperity Task2 OK")

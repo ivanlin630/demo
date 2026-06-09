@@ -79,6 +79,38 @@ static func calc_attack_score(team: TeamData, leader: PersonData) -> float:
 		base += 0.1
 	return base
 
+static func find_prosperity_prey(state: WorldState, team: TeamData, leader: PersonData) -> int:
+	var greed: float = float(leader.values.get("貪婪", 0.5))
+	var cruelty: float = float(leader.values.get("殘忍", 0.5))
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	var best_id: int = -1
+	var best_score: float = 0.0
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var prey: TeamData = state.teams.get(tid)
+		if prey == null: continue
+		if prey.faction_id != -1 and prey.faction_id == team.faction_id: continue
+		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid)
+		if not catch_result.reachable: continue
+		var richness: float = (float(prey.resources.get("coin", 0))
+			+ float(prey.resources.get("food", 0))
+			+ float(prey.resources.get("material", 0))) / 100.0
+		var weakness: float = clampf(
+			1.0 - float(prey.population) / maxf(float(team.population), 1.0),
+			0.0, 1.0)
+		var border: float = 1.0 if _is_border_adjacent(team, prey) else 0.3
+		var eta_days: float = maxf(float(catch_result.eta) / 240.0, 1.0)
+		var score: float = (richness * greed + weakness * cruelty + border * ambition) / eta_days
+		if score > best_score:
+			best_score = score
+			best_id = tid
+	return best_id
+
+static func _is_border_adjacent(attacker: TeamData, prey: TeamData) -> bool:
+	var dx: int = prey.tile_pos.x - attacker.tile_pos.x
+	var dy: int = prey.tile_pos.y - attacker.tile_pos.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2 <= 2
+
 func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if tile == null or tile.outpost_level == 0: return 0
