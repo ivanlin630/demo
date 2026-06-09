@@ -51,6 +51,17 @@ func _initialize() -> void:
 	_test_alliance_outpost_transfer()
 	_test_uprising_paths()
 	_test_abandon_outpost()
+	# ── NPC Infrastructure (C) ──
+	_test_task_extra_data_field()
+	_test_facility_def_registry()
+	_test_dispatch_builder()
+	_test_evaluate_outpost_location()
+	_test_evaluate_infrastructure()
+	_test_subteam_arrival_triggers_build()
+	_test_dispatch_upgrader_and_facility()
+	_test_auto_settle_after_build()
+	_test_player_upgrade_outpost()
+	_test_player_build_facility()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3525,6 +3536,260 @@ func _test_uprising_paths() -> void:
 	assert(v2.tags.has("流亡"), "Path B tags 應 流亡")
 	assert(not v2.tags.has(TeamData.TAG_PRODUCE), "Path B tags 應 erase 生產")
 	print("Trade Task9 OK")
+
+func _test_task_extra_data_field() -> void:
+	print("--- Infra Task1: task_extra_data ---")
+	var t := TeamData.new()
+	assert(t.task_extra_data == {}, "預設為空 dict")
+	t.task_extra_data = { "build_type": "civilian", "level": 1 }
+	assert(t.task_extra_data["build_type"] == "civilian")
+	print("Infra Task1 OK")
+
+func _test_facility_def_registry() -> void:
+	print("--- Infra Task2: FACILITY_DEF ---")
+	assert(OutpostSystem.FACILITY_DEF.has("farming"))
+	assert(OutpostSystem.FACILITY_DEF.has("manufacturing"))
+	var farming = OutpostSystem.FACILITY_DEF["farming"]
+	assert(farming.cost.material == 30)
+	assert(farming.cap_by_outpost.civilian == [1, 2, 3])
+	# trigger_check helpers 可呼叫
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.population = 10
+	t.resources["food"] = 0.0; t.resources["goods"] = 0.0
+	state.teams[0] = t
+	var fid = state.create_faction(0)
+	var f = state.factions[fid]
+	var fai := FactionAISystem.new()
+	assert(fai._check_food_shortage(state, f) > 50.0, "缺糧應高分")
+	assert(fai._check_goods_shortage(state, f) > 0.0, "缺貨應有分")
+	print("Infra Task2 OK")
+
+func _test_dispatch_builder() -> void:
+	print("--- Infra Task3: _dispatch_builder ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.population = 30; owner.faction_id = 10
+	owner.tile_pos = Vector2i(0, 0)
+	owner.resources["material"] = 200.0; owner.resources["coin"] = 50.0
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	state.persons[100] = leader; owner.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101; adv.team_id = 0
+	adv.skills["統領"] = 0.4
+	state.persons[101] = adv; owner.named_members = [101]
+	state.teams[0] = owner
+	state.create_faction(0)
+	var fai := FactionAISystem.new()
+	var result = fai._dispatch_builder(state, owner, Vector2i(3, 3), "civilian", 1)
+	assert(result, "資源足應派子隊")
+	var sub_count = 0
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0 and state.teams[tid].current_task == "建造":
+			sub_count += 1
+	assert(sub_count == 1, "應派出 1 個子隊 task=建造")
+	print("Infra Task3 OK")
+
+func _test_evaluate_outpost_location() -> void:
+	print("--- Infra Task4: outpost location scoring ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = leader_team
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y)
+			tile.terrain = "plains"
+			tile.productivity = 1.0 if abs(x) + abs(y) > 2 else 0.5
+			tile.outpost_level = 0
+			state.world.tiles[x * 1000 + y] = tile
+	var fai := FactionAISystem.new()
+	var best = fai._evaluate_new_outpost_location(state, leader_team)
+	assert(not best.is_empty(), "應找到 candidate")
+	print("Infra Task4 OK (best=%s)" % str(best.pos))
+
+func _test_evaluate_infrastructure() -> void:
+	print("--- Infra Task5: _evaluate_infrastructure ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.population = 30; leader_team.tile_pos = Vector2i(0, 0)
+	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0
+	var leader := PersonData.new(); leader.id = 100
+	leader.values = { "野心": 0.3, "慎重": 0.7, "好戰": 0.2, "貪婪": 0.4 }
+	state.persons[100] = leader; leader_team.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101
+	state.persons[101] = adv; leader_team.named_members = [101]
+	state.teams[0] = leader_team
+	var fid = state.create_faction(0)
+	var f = state.factions[fid]
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			tile.productivity = 1.0; tile.outpost_level = 0
+			state.world.tiles[x * 1000 + y] = tile
+	var fai := FactionAISystem.new()
+	fai._evaluate_infrastructure(state, f)
+	var sub_count = 0
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			sub_count += 1
+	assert(sub_count >= 1, "應派出基建子隊")
+	print("Infra Task5 OK (派出 %d 子隊)" % sub_count)
+
+func _test_subteam_arrival_triggers_build() -> void:
+	print("--- Infra Task6: 子隊抵達觸發建造 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.population = 30; owner.tile_pos = Vector2i(0, 0)
+	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0
+	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
+	owner.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101; state.persons[101] = adv
+	adv.skills["統領"] = 0.5
+	owner.named_members = [101]
+	state.teams[0] = owner
+	state.create_faction(0)
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.terrain = "plains"
+	state.world.tiles[3003] = tile
+	var fai := FactionAISystem.new()
+	assert(fai._dispatch_builder(state, owner, Vector2i(3, 3), "civilian", 1), "派建造子隊")
+	var sub_id := -1
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			sub_id = tid
+	var sub: TeamData = state.teams[sub_id]
+	sub.tile_pos = Vector2i(3, 3)   # 模擬抵達
+	var os := OutpostSystem.new()
+	assert(os.begin_subteam_construction(state, sub), "抵達應啟動建造")
+	assert(tile.construction_target.get("action", "") == "build", "construction action=build")
+	assert(tile.construction_ticks_left > 0, "施工 ticks > 0")
+	assert(sub.current_task == TeamData.TASK_BUILD, "子隊 task → 建設")
+	print("Infra Task6 OK")
+
+func _test_dispatch_upgrader_and_facility() -> void:
+	print("--- Infra Task7: 升級/擴建 dispatch ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.population = 30
+	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0
+	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
+	leader_team.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101; adv.skills["統領"] = 0.5
+	state.persons[101] = adv
+	var adv2 := PersonData.new(); adv2.id = 102; adv2.skills["統領"] = 0.5
+	state.persons[102] = adv2
+	leader_team.named_members = [101, 102]
+	state.teams[0] = leader_team
+	state.create_faction(0)
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	tile.farming_level = 0
+	state.world.tiles[3003] = tile
+	var fai := FactionAISystem.new()
+	assert(fai._dispatch_upgrader(state, leader_team, Vector2i(3, 3), 2), "升級派子隊應成功")
+	# 擴建（farming，cap@L1=1，current=0）
+	assert(fai._dispatch_facility_builder(state, leader_team, Vector2i(3, 3), "farming"), "擴建派子隊應成功")
+	var upgrade_count := 0
+	var facility_count := 0
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.current_task == "升級": upgrade_count += 1
+		if t.current_task == "擴建": facility_count += 1
+	assert(upgrade_count == 1, "1 個升級子隊")
+	assert(facility_count == 1, "1 個擴建子隊")
+	print("Infra Task7 OK")
+
+func _test_auto_settle_after_build() -> void:
+	print("--- Infra Task8: 蓋完自動安頓 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.population = 30; owner.tile_pos = Vector2i(0, 0)
+	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0
+	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
+	owner.leader_id = 100
+	var adv := PersonData.new(); adv.id = 101; adv.skills["統領"] = 0.5
+	state.persons[101] = adv; owner.named_members = [101]
+	state.teams[0] = owner
+	state.create_faction(0)
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.terrain = "plains"
+	state.world.tiles[3003] = tile
+	var fai := FactionAISystem.new()
+	assert(fai._dispatch_builder(state, owner, Vector2i(3, 3), "civilian", 1), "派建造子隊")
+	var sub_id := -1
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			sub_id = tid
+	var sub: TeamData = state.teams[sub_id]
+	sub.tile_pos = Vector2i(3, 3)
+	var os := OutpostSystem.new()
+	assert(os.begin_subteam_construction(state, sub), "啟動建造")
+	# 強制完工
+	tile.construction_ticks_left = 1
+	os.tick_all(state)
+	assert(tile.outpost_level == 1, "outpost 完工 Lv1")
+	assert(tile.outpost_owner == sub_id, "owner = 子隊")
+	assert(sub.parent_team_id == -1, "子隊脫離母團")
+	assert(sub.tags.has(TeamData.TAG_PRODUCE), "civilian → PRODUCE tag")
+	print("Infra Task8 OK")
+
+func _test_player_upgrade_outpost() -> void:
+	print("--- Infra Task10: 玩家 upgrade_outpost ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
+	pt.tile_pos = Vector2i(5, 5); pt.population = 10
+	pt.resources["material"] = 300.0; pt.resources["coin"] = 60.0
+	state.teams[0] = pt
+	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
+	state.persons[100] = pp
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[5005] = tile
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd.execute_action(state, -1, "upgrade_outpost")
+	assert(r.get("ok", false), "升級應成功: %s" % r.get("msg", ""))
+	assert(tile.construction_target.get("action", "") == "upgrade_level", "施工=升級")
+	assert(tile.construction_ticks_left > 0, "施工 ticks > 0")
+	print("Infra Task10 OK")
+
+func _test_player_build_facility() -> void:
+	print("--- Infra Task11: 玩家 build_facility ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
+	pt.tile_pos = Vector2i(5, 5); pt.population = 10
+	pt.resources["material"] = 300.0; pt.resources["coin"] = 60.0
+	state.teams[0] = pt
+	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
+	state.persons[100] = pp
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	tile.farming_level = 0
+	state.world.tiles[5005] = tile
+	state.player_state["facility_type"] = "farming"
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd.execute_action(state, -1, "build_facility")
+	assert(r.get("ok", false), "擴建應成功: %s" % r.get("msg", ""))
+	assert(tile.construction_target.get("action", "") == "upgrade_farming", "施工=upgrade_farming")
+	# 未知 facility → 失敗
+	state.player_state["facility_type"] = "nonexist"
+	var r2: Dictionary = cmd.execute_action(state, -1, "build_facility")
+	assert(not r2.get("ok", true), "未知 facility 應失敗")
+	print("Infra Task11 OK")
 
 func _test_abandon_outpost() -> void:
 	print("--- Trade Task10: 玩家棄置 outpost ---")

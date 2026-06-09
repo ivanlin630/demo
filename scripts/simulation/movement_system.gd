@@ -183,6 +183,9 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		tile.occupied_by = team.team_id
 	print("[Move] Team %d 抵達 (%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
+	# C: 基建子隊抵達 → 依 task 啟動施工
+	if team.current_task in ["建造", "升級", "擴建"]:
+		OutpostSystem.new().begin_subteam_construction(state, team)
 
 func _get_neighbors(pos: Vector2i) -> Array:
 	return [

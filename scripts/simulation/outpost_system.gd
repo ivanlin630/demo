@@ -30,6 +30,27 @@ const UPGRADE_COST: Dictionary = {
 	"manufacturing": { "material": 60, "coin": 20, "ticks": 100 },
 }
 
+# 設施註冊表（data-driven）：NPC AI 評估擴建時讀取。
+# cost 與 UPGRADE_COST 一致；cap_by_outpost 與 FARMING_CAP/MANUFACTURING_CAP 一致。
+const FACILITY_DEF: Dictionary = {
+	"farming": {
+		"cost":              { "material": 30, "coin": 0, "ticks": 50 },
+		"cap_by_outpost":    { "civilian": [1, 2, 3], "military": [0, 0, 0] },
+		"category":          "生產",
+		"trigger_check":     "_check_food_shortage",
+		"leader_pref":       { "慎重": 0.3, "野心": -0.1 },
+		"current_level_key": "farming_level",
+	},
+	"manufacturing": {
+		"cost":              { "material": 60, "coin": 20, "ticks": 100 },
+		"cap_by_outpost":    { "civilian": [0, 1, 3], "military": [0, 0, 0] },
+		"category":          "經濟",
+		"trigger_check":     "_check_goods_shortage",
+		"leader_pref":       { "野心": 0.2, "貪婪": 0.3 },
+		"current_level_key": "manufacturing_level",
+	},
+}
+
 # 農作/製造設施上限（index = level-1）；軍用不允許
 const FARMING_CAP: Dictionary = {
 	"civilian": [1, 2, 3],
@@ -97,6 +118,9 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				  "x": str(tile.tile_pos.x), "y": str(tile.tile_pos.y) })
 			print("[Outpost] Team%d 建成 %s（Lv%d）at (%d,%d)" % [
 				team.team_id, n, tile.outpost_level, tile.tile_pos.x, tile.tile_pos.y])
+			# C: NPC 建造子隊完工 → 就地安頓（脫離母團、加駐留 tag），outpost 持續存在
+			if team.parent_team_id != -1:
+				_auto_settle_builder(state, team, tile)
 		"upgrade_level":
 			tile.outpost_level = tile.construction_target["level"]
 			print("[Outpost] Team%d 升級 → %s Lv%d" % [
@@ -122,6 +146,22 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 	tile.construction_team_id   = -1
 	tile.construction_target     = {}
 	team.current_task = TeamData.TASK_IDLE
+
+# C: 建造子隊完工後就地安頓為駐留 team（owner 已設為自己，加 tag、脫離母團）
+func _auto_settle_builder(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	var parent: TeamData = state.teams.get(team.parent_team_id)
+	if parent != null:
+		parent.subteam_ids.erase(team.team_id)
+	team.parent_team_id = -1
+	team.tags.erase(TeamData.TAG_SUBTEAM)
+	if tile.outpost_type == "civilian":
+		if not team.tags.has(TeamData.TAG_PRODUCE):
+			team.tags.append(TeamData.TAG_PRODUCE)
+	else:
+		if not team.tags.has(TeamData.TAG_MILITARY):
+			team.tags.append(TeamData.TAG_MILITARY)
+	print("[Outpost] Team%d 完工後就地安頓 (%d,%d)（%s）" % [
+		team.team_id, tile.tile_pos.x, tile.tile_pos.y, tile.outpost_type])
 
 # ──────── 公開操作 ────────
 
@@ -222,6 +262,89 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	tile.construction_target    = { "action": "demolish" }
 	team.current_task = "建設"
 	print("[Outpost] Team%d 拆除 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
+	return true
+
+# ──────── 子隊抵達後啟動施工（NPC 基建）────────
+
+# 子隊抵達 outpost tile 後依 current_task 啟動施工。
+# 建造：start_build（子隊自身成為 owner，完工後由 faction_ai 安頓）。
+# 升級/擴建：faction 擁有權檢查（owner 同 faction）→ 就地推進 construction。
+func begin_subteam_construction(state: WorldState, team: TeamData) -> bool:
+	var tile := _get_team_tile(state, team)
+	if tile == null:
+		return false
+	var extra: Dictionary = team.task_extra_data
+	match team.current_task:
+		"建造":
+			var btype: String = str(extra.get("build_type", "civilian"))
+			var lvl: int = int(extra.get("level", 1))
+			return start_build(state, team, btype, lvl)
+		"升級":
+			var tgt_lvl: int = int(extra.get("target_level", tile.outpost_level + 1))
+			return _subteam_upgrade_level(state, team, tile, tgt_lvl)
+		"擴建":
+			var fac: String = str(extra.get("facility_type", "farming"))
+			return _subteam_upgrade_facility(state, team, tile, fac)
+	return false
+
+func _faction_owns(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
+	if tile.outpost_owner == team.team_id:
+		return true
+	if tile.outpost_owner == team.parent_team_id and team.parent_team_id != -1:
+		return true
+	var owner: TeamData = state.teams.get(tile.outpost_owner)
+	if owner == null:
+		return false
+	return owner.faction_id == team.faction_id and team.faction_id != -1
+
+func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData, target_level: int) -> bool:
+	if tile.outpost_level == 0 or target_level <= tile.outpost_level or target_level > 3:
+		return false
+	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
+		return false
+	var cost: Dictionary = BUILD_COST[tile.outpost_type][target_level - 1]
+	if not _can_afford(team, cost):
+		return false
+	_deduct_cost(team, cost)
+	tile.construction_team_id   = team.team_id
+	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][target_level - 1]
+	tile.construction_target    = { "action": "upgrade_level", "level": target_level }
+	team.current_task = TeamData.TASK_BUILD
+	print("[Outpost] 子隊 Team%d 開始升級 → Lv%d at (%d,%d)" % [
+		team.team_id, target_level, tile.tile_pos.x, tile.tile_pos.y])
+	return true
+
+func _subteam_upgrade_facility(state: WorldState, team: TeamData, tile: HexTileData, facility: String) -> bool:
+	if tile.outpost_type != "civilian" or tile.outpost_level == 0:
+		return false
+	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
+		return false
+	var action: String = ""
+	var cur: int = 0
+	var cap: int = 0
+	match facility:
+		"farming":
+			cap = FARMING_CAP[tile.outpost_type][tile.outpost_level - 1]
+			cur = tile.farming_level
+			action = "upgrade_farming"
+		"manufacturing":
+			cap = MANUFACTURING_CAP[tile.outpost_type][tile.outpost_level - 1]
+			cur = tile.manufacturing_level
+			action = "upgrade_manufacturing"
+		_:
+			return false
+	if cur >= cap:
+		return false
+	var cost: Dictionary = UPGRADE_COST[facility]
+	if not _can_afford(team, cost):
+		return false
+	_deduct_cost(team, cost)
+	tile.construction_team_id   = team.team_id
+	tile.construction_ticks_left = cost["ticks"]
+	tile.construction_target    = { "action": action }
+	team.current_task = TeamData.TASK_BUILD
+	print("[Outpost] 子隊 Team%d 開始擴建 %s at (%d,%d)" % [
+		team.team_id, facility, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
 func _has_control(state: WorldState, team_id: int, tile: HexTileData) -> bool:
