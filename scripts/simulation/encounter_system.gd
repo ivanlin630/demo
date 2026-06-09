@@ -1146,7 +1146,97 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			print("[Capture] Outpost (%d,%d) %d→%d" % [
 				loser_team_cap.tile_pos.x, loser_team_cap.tile_pos.y, old_cap_owner, winner_id])
 
+	# Prosperity: 攻方勝 → 處理被佔 outpost 上的居民團（屠/放棄/強佔）
+	if result == "attacker_win":
+		_process_occupied_residents(state, winner_id, loser_id)
+	# Prosperity: 攻方戰敗 → reaction（loyalty 降 / leader stress 升）
+	elif result == "defender_win" and atk_id != -1:
+		var atk_total: int = 0
+		var atk_dead: int = 0
+		for u in state.encounter_units:
+			if u["team_id"] != atk_id: continue
+			atk_total += 1
+			if is_dead(u, state) or u.get("is_prisoner", false): atk_dead += 1
+		var ratio: float = float(atk_dead) / maxf(float(atk_total), 1.0)
+		ReactionSystem.new().on_attack_defeat(state, atk_id, ratio)
+
 	state.encounter_units.clear()
 	state.encounter_active = false
 	state.encounter_attacker_id = -1
 	state.encounter_defender_id = -1
+
+# ──────── Prosperity: 攻佔 outpost 居民處置 ────────
+
+func _find_prey_outpost(state: WorldState, prey: TeamData) -> HexTileData:
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level > 0 and tile.outpost_owner == prey.team_id:
+			return tile
+	return null
+
+func _find_resident_team_on_tile(state: WorldState, tile: HexTileData,
+		exclude_a: int, exclude_b: int) -> TeamData:
+	for tid in state.teams:
+		if tid == exclude_a or tid == exclude_b: continue
+		var t: TeamData = state.teams[tid]
+		if t.population <= 0: continue
+		if t.tile_pos == tile.tile_pos:
+			return t
+	return null
+
+func _process_occupied_residents(state: WorldState, attacker_id: int, prey_id: int) -> void:
+	var attacker: TeamData = state.teams.get(attacker_id)
+	var prey: TeamData = state.teams.get(prey_id)
+	if attacker == null or prey == null: return
+	var occupied_tile: HexTileData = _find_prey_outpost(state, prey)
+	if occupied_tile == null: return
+	var resident: TeamData = _find_resident_team_on_tile(state, occupied_tile, attacker_id, prey_id)
+	if resident == null: return
+	# 居民拒投靠判定
+	var rep: float = float(resident.known_reputations.get(attacker_id, 0.5))
+	var resident_leader: PersonData = state.persons.get(resident.leader_id)
+	var fear: float = clampf(1.0 - rep, 0.0, 1.0)
+	var caution: float = float(resident_leader.values.get("慎重", 0.5)) if resident_leader else 0.5
+	var accept: bool = (fear > caution + 0.2) and rep > 0.3
+	if accept:
+		occupied_tile.outpost_owner = attacker_id
+		print("[ResidentAccept] attacker=Team%d resident=Team%d outpost易主" % [attacker_id, resident.team_id])
+		return
+	# 攻城方 leader 個性決定
+	var atk_leader: PersonData = state.persons.get(attacker.leader_id)
+	if atk_leader == null:
+		_abandon_occupation(state, occupied_tile)
+		return
+	var cruelty: float = float(atk_leader.values.get("殘忍", 0.5))
+	var martial: float = float(atk_leader.values.get("好戰", 0.5))
+	var honor: float = float(atk_leader.values.get("義氣", 0.5))
+	var faith: float = float(atk_leader.values.get("信義", 0.5))
+	var ambition: float = float(atk_leader.values.get("野心", 0.5))
+	var caution2: float = float(atk_leader.values.get("慎重", 0.5))
+	if cruelty > 0.7 or martial > 0.7:
+		_massacre_residents(state, attacker, resident, occupied_tile)
+	elif honor > 0.6 or faith > 0.6:
+		_abandon_occupation(state, occupied_tile)
+	elif ambition > 0.7 and caution2 > 0.5:
+		_force_occupy(state, attacker, resident, occupied_tile)
+	else:
+		_abandon_occupation(state, occupied_tile)
+
+func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamData,
+		tile: HexTileData) -> void:
+	tile.outpost_owner = attacker.team_id
+	for k in resident.resources:
+		attacker.resources[k] = attacker.resources.get(k, 0) + resident.resources[k]
+	attacker.anon_treasury += resident.population * 5.0
+	var rid: int = resident.team_id
+	state.teams.erase(rid)
+	print("[Massacre] attacker=Team%d resident=Team%d 屠村，outpost空殼易主" % [attacker.team_id, rid])
+
+func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
+	print("[AbandonOccupation] outpost (%d,%d) 放棄佔領" % [tile.tile_pos.x, tile.tile_pos.y])
+
+func _force_occupy(state: WorldState, attacker: TeamData, resident: TeamData,
+		tile: HexTileData) -> void:
+	tile.outpost_owner = attacker.team_id
+	resident.population = int(float(resident.population) * 0.8)
+	print("[ForceOccupy] attacker=Team%d resident=Team%d 強佔 pop-20%%" % [attacker.team_id, resident.team_id])

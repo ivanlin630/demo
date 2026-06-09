@@ -99,6 +99,23 @@ func _initialize() -> void:
 	_test_estimate_catch_up_out_of_sight()
 	_test_movement_uses_astar()
 	_test_ai_catch_up_filters_unreachable()
+	# ── Prosperity Attack ──
+	_test_readiness_threshold()
+	_test_find_prosperity_prey()
+	_test_evaluate_prosperity_trigger()
+	_test_prosperity_low_ambition_skip()
+	_test_prosperity_low_readiness_skip()
+	_test_prosperity_same_faction_skip()
+	_test_prosperity_treasury_bonus()
+	_test_prosperity_prey_personality_weight()
+	_test_prosperity_cadence()
+	_test_survival_b_branch_far_outpost_loot()
+	_test_survival_b_branch_near_outpost_return()
+	_test_occupy_resident_accept()
+	_test_occupy_massacre()
+	_test_occupy_abandon()
+	_test_occupy_force()
+	_test_attack_defeat_reaction()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4551,3 +4568,392 @@ func _test_ai_catch_up_filters_unreachable() -> void:
 	# t1 人更少但不可達 → 應被過濾，選可達的 t2
 	assert(prey == 2, "不可達 prey 應被過濾，選 Team2，實際=%d" % prey)
 	print("Path Task7 OK (prey=%d)" % prey)
+
+func _test_readiness_threshold() -> void:
+	print("--- Prosperity Task1: readiness threshold ---")
+	var team := TeamData.new()
+	team.tags = []
+	var leader := PersonData.new()
+	leader.values = { "殘忍": 0.8, "好戰": 0.5, "慎重": 0.3 }
+	# threshold = 0.55 - max(0.8, 0.5)*0.15 + 0.3*0.15 = 0.55 - 0.12 + 0.045 = 0.475
+	var t = FactionAISystem.calc_readiness_threshold(team, leader)
+	assert(abs(t - 0.475) < 0.01, "預期 0.475 實際=%.3f" % t)
+	team.tags = ["軍隊"]
+	t = FactionAISystem.calc_readiness_threshold(team, leader)
+	assert(abs(t - 0.375) < 0.01, "軍隊預期 0.375 實際=%.3f" % t)
+	print("Prosperity Task1 OK")
+
+func _test_find_prosperity_prey() -> void:
+	print("--- Prosperity Task2: prey selector ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(-3, 5):
+		for y in range(-3, 5):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# self
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.faction_id = 0
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.values = { "貪婪": 0.8, "殘忍": 0.5, "野心": 0.5 }
+	# 弱 + 富 prey
+	var rich_prey := TeamData.new()
+	rich_prey.team_id = 1; rich_prey.tile_pos = Vector2i(2, 0); rich_prey.population = 4
+	rich_prey.faction_id = 1
+	rich_prey.resources = { "coin": 200, "food": 100, "material": 50 }
+	rich_prey.last_tile_pos = rich_prey.tile_pos
+	state.teams[1] = rich_prey
+	# 同 faction
+	var ally := TeamData.new()
+	ally.team_id = 2; ally.tile_pos = Vector2i(1, 0); ally.population = 3
+	ally.faction_id = 0
+	state.teams[2] = ally
+	state.team_discovered[0] = [1, 2]
+	var prey_id = FactionAISystem.find_prosperity_prey(state, team, leader)
+	assert(prey_id == 1, "應選 1 (rich_prey)，實際=%d" % prey_id)
+	print("Prosperity Task2 OK")
+
+func _prosperity_grid() -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(-3, 6):
+		for y in range(-3, 6):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	return state
+
+func _test_evaluate_prosperity_trigger() -> void:
+	print("--- Prosperity Task3: 評估 trigger TASK_ATTACK ---")
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
+	team.faction_id = 0; team.anon_combat_skill = 0.7
+	team.resources = { "food": 200, "weapon_melee_low": 15 }
+	team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 0.9, "好戰": 0.8, "信義": 0.1, "殘忍": 0.7, "貪婪": 0.6, "慎重": 0.3 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 4
+	prey.faction_id = 1
+	prey.resources = { "coin": 200, "food": 100 }
+	prey.last_tile_pos = prey.tile_pos
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	var fas = FactionAISystem.new()
+	fas._evaluate_prosperity_attack(state, team)
+	assert(team.current_task == TeamData.TASK_ATTACK, "應 TASK_ATTACK，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(2, 0), "move_target 應指向 prey tile，實際=%s" % str(team.move_target))
+	assert(team.combat_target == -1, "combat_target 不預設（到達才起戰），實際=%d" % team.combat_target)
+	print("Prosperity Task3 OK")
+
+func _test_prosperity_low_ambition_skip() -> void:
+	print("--- Prosperity Task3b: 低野心不評估 ---")
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
+	team.faction_id = 0; team.anon_combat_skill = 0.7
+	team.resources = { "food": 200, "weapon_melee_low": 15 }
+	team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 0.1, "好戰": 0.1, "信義": 0.5, "殘忍": 0.5, "貪婪": 0.5, "慎重": 0.5 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 4
+	prey.faction_id = 1; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	FactionAISystem.new()._evaluate_prosperity_attack(state, team)
+	assert(team.current_task == TeamData.TASK_IDLE, "score 太低應跳過，實際=%s" % team.current_task)
+	print("Prosperity Task3b OK")
+
+func _test_prosperity_low_readiness_skip() -> void:
+	print("--- Prosperity Task3c: 低 readiness 不評估 ---")
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 2
+	team.faction_id = 0; team.anon_combat_skill = 0.1
+	team.resources = { "food": 10 }
+	team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 0.9, "好戰": 0.8, "信義": 0.1, "殘忍": 0.7, "貪婪": 0.6, "慎重": 0.3 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 4
+	prey.faction_id = 1; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	FactionAISystem.new()._evaluate_prosperity_attack(state, team)
+	assert(team.current_task == TeamData.TASK_IDLE, "readiness 太低應跳過，實際=%s" % team.current_task)
+	print("Prosperity Task3c OK")
+
+func _test_prosperity_same_faction_skip() -> void:
+	print("--- Prosperity Task3d: 同 faction 排除 ---")
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
+	team.faction_id = 5; team.anon_combat_skill = 0.7
+	team.resources = { "food": 200, "weapon_melee_low": 15 }
+	team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 0.9, "好戰": 0.8, "信義": 0.1, "殘忍": 0.7, "貪婪": 0.6, "慎重": 0.3 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 4
+	prey.faction_id = 5; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	FactionAISystem.new()._evaluate_prosperity_attack(state, team)
+	assert(team.current_task == TeamData.TASK_IDLE, "唯一 prey 同 faction 應跳過，實際=%s" % team.current_task)
+	print("Prosperity Task3d OK")
+
+func _test_prosperity_treasury_bonus() -> void:
+	print("--- Prosperity Task3e: anon_treasury 加成 +0.1 ---")
+	var team := TeamData.new()
+	var leader := PersonData.new()
+	leader.values = { "野心": 0.5, "好戰": 0.5, "信義": 0.5 }
+	team.anon_treasury = 0.0
+	var s0 = FactionAISystem.calc_attack_score(team, leader)
+	team.anon_treasury = 250.0
+	var s1 = FactionAISystem.calc_attack_score(team, leader)
+	assert(abs((s1 - s0) - 0.1) < 0.001, "公庫加成應 +0.1，實際=%.3f" % (s1 - s0))
+	print("Prosperity Task3e OK")
+
+func _test_prosperity_prey_personality_weight() -> void:
+	print("--- Prosperity Task14: prey 評分個性權重 ---")
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.faction_id = 0
+	state.teams[0] = team
+	# A：富 + 遠（dist3 → 非接壤）
+	var rich := TeamData.new()
+	rich.team_id = 1; rich.tile_pos = Vector2i(3, -1); rich.population = 5
+	rich.faction_id = 1; rich.resources = { "coin": 300 }; rich.last_tile_pos = rich.tile_pos
+	state.teams[1] = rich
+	# B：窮 + 接壤（dist2）
+	var border := TeamData.new()
+	border.team_id = 2; border.tile_pos = Vector2i(2, 0); border.population = 5
+	border.faction_id = 1; border.resources = {}; border.last_tile_pos = border.tile_pos
+	state.teams[2] = border
+	state.team_discovered[0] = [1, 2]
+	var greedy := PersonData.new()
+	greedy.values = { "貪婪": 1.0, "野心": 0.0, "殘忍": 0.0 }
+	assert(FactionAISystem.find_prosperity_prey(state, team, greedy) == 1,
+		"高貪婪應選富 prey(1)")
+	var ambitious := PersonData.new()
+	ambitious.values = { "貪婪": 0.0, "野心": 1.0, "殘忍": 0.0 }
+	assert(FactionAISystem.find_prosperity_prey(state, team, ambitious) == 2,
+		"高野心應選接壤 prey(2)")
+	print("Prosperity Task14 OK")
+
+func _test_prosperity_cadence() -> void:
+	print("--- Prosperity Task4: cadence ---")
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.faction_id = -1; team.anon_combat_skill = 0.5
+	team.resources = { "food": 200, "weapon_melee_low": 10 }
+	team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 0.5, "好戰": 0.5, "信義": 0.5, "殘忍": 0.5, "貪婪": 0.5, "慎重": 0.5 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	state.team_discovered[0] = []   # 無 prey → 不觸發攻擊，只看 cadence
+	var fas = FactionAISystem.new()
+	state.world.current_tick = 0
+	fas.evaluate_all(state, [0])
+	assert(team.prosperity_eval_next_tick == 720, "tick0 後 next 應 720，實際=%d" % team.prosperity_eval_next_tick)
+	state.world.current_tick = 360
+	fas.evaluate_all(state, [0])
+	assert(team.prosperity_eval_next_tick == 720, "tick360 應跳過，next 仍 720，實際=%d" % team.prosperity_eval_next_tick)
+	state.world.current_tick = 720
+	fas.evaluate_all(state, [0])
+	assert(team.prosperity_eval_next_tick == 1440, "tick720 後 next 應 1440，實際=%d" % team.prosperity_eval_next_tick)
+	# 軍隊 tag → cadence 360
+	team.tags = ["軍隊"]
+	team.prosperity_eval_next_tick = 720
+	state.world.current_tick = 720
+	fas.evaluate_all(state, [0])
+	assert(team.prosperity_eval_next_tick == 1080, "軍隊 cadence 應 +360 → 1080，實際=%d" % team.prosperity_eval_next_tick)
+	print("Prosperity Task4 OK")
+
+func _survival_corridor() -> WorldState:
+	# 走廊 grid：x 0..13, y -1..1，連通供 A* 找路
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(0, 14):
+		for y in range(-1, 2):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	return state
+
+func _test_survival_b_branch_far_outpost_loot() -> void:
+	print("--- Prosperity Task5: B 分支 遠 outpost + 殘忍 → 掠 ---")
+	var state := _survival_corridor()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 5
+	team.faction_id = 0; team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "殘忍": 0.8, "好戰": 0.5, "信義": 0.5, "義氣": 0.3 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	# own outpost 遠（dist 13 → ETA 13*120=1560 > 1200 = 5 日）
+	var op_tile: HexTileData = state.world.tiles[13 * 1000 + 0]
+	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
+	# 近且弱 prey（reachable）
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 1
+	prey.faction_id = 1; prey.last_tile_pos = prey.tile_pos
+	prey.resources = { "food": 50 }
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	var fas = FactionAISystem.new()
+	fas._trigger_survival(state, team, "urgent")
+	assert(team.current_task == TeamData.TASK_LOOT, "遠 outpost + 殘忍 應 TASK_LOOT，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(2, 0), "move_target 應指向 prey tile，實際=%s" % str(team.move_target))
+	print("Prosperity Task5 OK")
+
+func _test_survival_b_branch_near_outpost_return() -> void:
+	print("--- Prosperity Task5b: 近 outpost → 回家 ---")
+	var state := _survival_corridor()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 5
+	team.faction_id = 0; team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "殘忍": 0.8, "好戰": 0.5, "信義": 0.5, "義氣": 0.3 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	# own outpost 近（dist 2 → ETA 240 < 1200）
+	var op_tile: HexTileData = state.world.tiles[2 * 1000 + 0]
+	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(3, 0); prey.population = 1
+	prey.faction_id = 1; prey.last_tile_pos = prey.tile_pos
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	var fas = FactionAISystem.new()
+	fas._trigger_survival(state, team, "urgent")
+	assert(team.current_task == "return_home", "近 outpost 應 return_home，實際=%s" % team.current_task)
+	print("Prosperity Task5b OK")
+
+# Task6 共用：建 attacker(0) + prey(1)擁 outpost(5,5) + resident(2)駐該 tile
+func _occupy_setup(atk_values: Dictionary, rep: float, res_caution: float) -> Dictionary:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.terrain = "plains"
+	tile.outpost_level = 1; tile.outpost_owner = 1   # prey 擁有
+	state.world.tiles[5 * 1000 + 5] = tile
+	var attacker := TeamData.new()
+	attacker.team_id = 0; attacker.tile_pos = Vector2i(5, 5); attacker.population = 10
+	var atk_leader := PersonData.new()
+	atk_leader.id = 10; atk_leader.values = atk_values
+	state.persons[10] = atk_leader; attacker.leader_id = 10
+	state.teams[0] = attacker
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(5, 5); prey.population = 3
+	state.teams[1] = prey
+	var resident := TeamData.new()
+	resident.team_id = 2; resident.tile_pos = Vector2i(5, 5); resident.population = 10
+	resident.tags = ["生產"]
+	resident.resources = { "food": 100, "material": 40 }
+	resident.known_reputations = { 0: rep }
+	var res_leader := PersonData.new()
+	res_leader.id = 20; res_leader.values = { "慎重": res_caution }
+	state.persons[20] = res_leader; resident.leader_id = 20
+	state.teams[2] = resident
+	return { "state": state, "tile": tile }
+
+func _test_occupy_resident_accept() -> void:
+	print("--- Prosperity Task6a: 居民接受 → 易主 ---")
+	# rep 0.5 (>0.3) + caution 0.1 → fear 0.5 > 0.3 → accept
+	var d := _occupy_setup({ "殘忍": 0.5 }, 0.5, 0.1)
+	var state: WorldState = d["state"]
+	var tile: HexTileData = d["tile"]
+	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
+	assert(tile.outpost_owner == 0, "接受後 outpost 應易主給 0，實際=%d" % tile.outpost_owner)
+	assert(state.teams.has(2), "居民團應仍存活")
+	print("Prosperity Task6a OK")
+
+func _test_occupy_massacre() -> void:
+	print("--- Prosperity Task6b: 殘忍 → 屠 ---")
+	# rep 0.2 → 拒投；殘忍 0.8 → 屠
+	var d := _occupy_setup({ "殘忍": 0.8, "好戰": 0.3 }, 0.2, 0.5)
+	var state: WorldState = d["state"]
+	var tile: HexTileData = d["tile"]
+	var atk: TeamData = state.teams[0]
+	var t0: float = atk.anon_treasury
+	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
+	assert(not state.teams.has(2), "屠村後居民團應消失")
+	assert(tile.outpost_owner == 0, "屠村後 outpost 易主，實際=%d" % tile.outpost_owner)
+	assert(atk.anon_treasury > t0, "屠村應增公庫")
+	assert(float(atk.resources.get("food", 0)) >= 100.0, "屠村應收居民資源")
+	print("Prosperity Task6b OK")
+
+func _test_occupy_abandon() -> void:
+	print("--- Prosperity Task6c: 義氣 → 放棄 ---")
+	var d := _occupy_setup({ "義氣": 0.8, "殘忍": 0.1, "好戰": 0.1 }, 0.2, 0.5)
+	var state: WorldState = d["state"]
+	var tile: HexTileData = d["tile"]
+	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
+	assert(tile.outpost_owner == 1, "放棄後 outpost 仍屬 prey(1)，實際=%d" % tile.outpost_owner)
+	assert(state.teams.has(2), "放棄後居民團應存活")
+	print("Prosperity Task6c OK")
+
+func _test_occupy_force() -> void:
+	print("--- Prosperity Task6d: 野心+慎重 → 強佔 pop-20%% ---")
+	var d := _occupy_setup(
+		{ "野心": 0.8, "慎重": 0.6, "殘忍": 0.1, "好戰": 0.1, "義氣": 0.1, "信義": 0.1 }, 0.2, 0.5)
+	var state: WorldState = d["state"]
+	var tile: HexTileData = d["tile"]
+	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
+	assert(tile.outpost_owner == 0, "強佔後 outpost 易主，實際=%d" % tile.outpost_owner)
+	assert(state.teams.has(2), "強佔後居民團應存活")
+	assert(state.teams[2].population == 8, "強佔 pop 應 10→8，實際=%d" % state.teams[2].population)
+	print("Prosperity Task6d OK")
+
+func _test_attack_defeat_reaction() -> void:
+	print("--- Prosperity Task7: 戰敗 reaction ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100; leader.stress = 0.0
+	leader.values = { "義氣": 0.6, "信義": 0.4, "慎重": 0.5 }
+	state.persons[100] = leader; team.leader_id = 100
+	var member := PersonData.new()
+	member.id = 101; member.loyalty = 1.0
+	state.persons[101] = member
+	team.named_members = [100, 101]
+	ReactionSystem.new().on_attack_defeat(state, 0, 0.4)   # loss>0.3 → 加倍
+	# loyalty_delta = -0.1*(0.6+0.4)/2 = -0.05, *2 = -0.1 → 101: 1.0→0.9
+	assert(abs(member.loyalty - 0.9) < 0.01, "named loyalty 應降至 0.9，實際=%.3f" % member.loyalty)
+	# stress_delta = 0.2*0.5 = 0.1, *1.5 = 0.15 → leader 0→0.15
+	assert(abs(leader.stress - 0.15) < 0.01, "leader stress 應升至 0.15，實際=%.3f" % leader.stress)
+	print("Prosperity Task7 OK")

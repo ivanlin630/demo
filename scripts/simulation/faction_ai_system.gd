@@ -31,6 +31,11 @@ const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
 
+# ── Prosperity attack（野心驅動主動征服）──
+const PROSPERITY_CADENCE: int = 720           # 3 天 評估一次
+const PROSPERITY_CADENCE_MILITARY: int = 360  # 軍隊 tag 1.5 天
+const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score +0.1
+
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
@@ -42,6 +47,125 @@ const OUTPOST_POP_CAP: Dictionary = {
 	"civilian": [20, 50, 100],   # L1, L2, L3
 	"military": [15, 35, 70],
 }
+
+# ── Prosperity helpers（static，純函數，可單測）──
+static func calc_readiness_threshold(team: TeamData, leader: PersonData) -> float:
+	var ferocity: float = maxf(
+		float(leader.values.get("殘忍", 0.5)),
+		float(leader.values.get("好戰", 0.5))
+	)
+	var caution: float = float(leader.values.get("慎重", 0.5))
+	var threshold: float = 0.55 - ferocity * 0.15 + caution * 0.15
+	if "軍隊" in team.tags:
+		threshold -= 0.1
+	return clampf(threshold, 0.3, 0.85)
+
+static func calc_readiness(team: TeamData) -> float:
+	var pop_factor: float = clampf(float(team.population) / 10.0, 0.0, 1.0)
+	var skill: float = team.anon_combat_skill
+	var food_days: float = float(team.resources.get("food", 0)) \
+		/ maxf(float(team.population) * FOOD_PER_PERSON_PER_DAY_SURVIVAL, 0.001)
+	var food_factor: float = clampf(food_days / 14.0, 0.0, 1.0)
+	var weapon: float = float(team.resources.get("weapon_melee_low", 0))
+	var weapon_factor: float = clampf(weapon / maxf(float(team.population), 1.0), 0.0, 1.0)
+	return (pop_factor + skill + food_factor + weapon_factor) / 4.0
+
+static func calc_attack_score(team: TeamData, leader: PersonData) -> float:
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	var martial: float = float(leader.values.get("好戰", 0.5))
+	var honor: float = float(leader.values.get("信義", 0.5))
+	var base: float = ambition * 0.4 + martial * 0.4 - honor * 0.4
+	if team.anon_treasury > ANON_TREASURY_BONUS_THRESHOLD:
+		base += 0.1
+	return base
+
+static func find_prosperity_prey(state: WorldState, team: TeamData, leader: PersonData) -> int:
+	var greed: float = float(leader.values.get("貪婪", 0.5))
+	var cruelty: float = float(leader.values.get("殘忍", 0.5))
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	var best_id: int = -1
+	var best_score: float = 0.0
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var prey: TeamData = state.teams.get(tid)
+		if prey == null: continue
+		if prey.faction_id != -1 and prey.faction_id == team.faction_id: continue
+		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid)
+		if not catch_result.reachable: continue
+		var richness: float = (float(prey.resources.get("coin", 0))
+			+ float(prey.resources.get("food", 0))
+			+ float(prey.resources.get("material", 0))) / 100.0
+		var weakness: float = clampf(
+			1.0 - float(prey.population) / maxf(float(team.population), 1.0),
+			0.0, 1.0)
+		var border: float = 1.0 if _is_border_adjacent(team, prey) else 0.3
+		var eta_days: float = maxf(float(catch_result.eta) / 240.0, 1.0)
+		var score: float = (richness * greed + weakness * cruelty + border * ambition) / eta_days
+		if score > best_score:
+			best_score = score
+			best_id = tid
+	return best_id
+
+static func _is_border_adjacent(attacker: TeamData, prey: TeamData) -> bool:
+	var dx: int = prey.tile_pos.x - attacker.tile_pos.x
+	var dy: int = prey.tile_pos.y - attacker.tile_pos.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2 <= 2
+
+func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
+	if team.leader_id == state.player_id and state.player_id != -1: return
+	if team.combat_target != -1: return
+	if team.current_task != TeamData.TASK_IDLE: return
+	if team.current_task in SURVIVAL_TASKS: return
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+
+	var score: float = calc_attack_score(team, leader)
+	if score < ATTACK_SCORE_THRESHOLD: return
+
+	var threshold: float = calc_readiness_threshold(team, leader)
+	var readiness: float = calc_readiness(team)
+	if readiness < threshold: return
+
+	var prey_id: int = find_prosperity_prey(state, team, leader)
+	if prey_id == -1: return
+
+	# combat_target 不預設：移動凍結 + interaction 早退會擋住交戰；
+	# 由 interaction_system 到達時 start_combat 設定。只給 task + move_target + 追擊目標。
+	team.current_task = TeamData.TASK_ATTACK
+	team.move_target = state.teams[prey_id].tile_pos
+	team.prosperity_target_id = prey_id
+	print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
+		team.team_id, prey_id, score])
+
+# 追擊：攻擊/掠奪 中每 tick 依 intel 最後已知位置刷新 move_target（移動目標會跑）
+# 與 strategic_ai 的 team_intel 追蹤同模式（strategic_ai_system.gd:107）
+func _refresh_attack_pursuit(state: WorldState, team: TeamData) -> void:
+	if team.combat_target != -1: return
+	if team.current_task != TeamData.TASK_ATTACK and team.current_task != TeamData.TASK_LOOT:
+		team.prosperity_target_id = -1
+		return
+	if team.prosperity_target_id == -1: return
+	var prey: TeamData = state.teams.get(team.prosperity_target_id)
+	if prey == null:   # 目標已滅 → 收手
+		team.prosperity_target_id = -1
+		team.current_task = TeamData.TASK_IDLE
+		team.move_target = Vector2i(-1, -1)
+		return
+	var last_pos: Vector2i = state.team_intel.get(team.team_id, {}).get(
+		team.prosperity_target_id, {}).get("tile_pos", prey.tile_pos)
+	team.move_target = last_pos
+
+func _is_prosperity_candidate(state: WorldState, team: TeamData) -> bool:
+	if team.parent_team_id != -1: return false   # 子隊不主動發動
+	if team.faction_id == -1: return true          # 獨立團
+	var f = state.factions.get(team.faction_id)
+	return f != null and f.leader_team_id == team.team_id
+
+# 事件觸發立即重評（新發現 / pop 暴跌 / 性格改變）
+static func mark_prosperity_recheck(state: WorldState, observer_team_id: int) -> void:
+	var t: TeamData = state.teams.get(observer_team_id)
+	if t != null:
+		t.prosperity_eval_next_tick = state.world.current_tick
 
 func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
@@ -128,6 +252,14 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_promote_successor(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）
+		if _is_prosperity_candidate(state, team) \
+				and state.world.current_tick >= team.prosperity_eval_next_tick:
+			_evaluate_prosperity_attack(state, team)
+			var cad: int = PROSPERITY_CADENCE_MILITARY if "軍隊" in team.tags else PROSPERITY_CADENCE
+			team.prosperity_eval_next_tick = state.world.current_tick + cad
+		# 追擊刷新（攻擊/掠奪 中移動目標會跑，每 tick 對齊 intel）
+		_refresh_attack_pursuit(state, team)
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			_consider_extraction(state, team)
@@ -1120,9 +1252,24 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 
 	team.previous_task = team.current_task
 
-	# Path 1: 有 own outpost → 回家
+	# Path 1: 有 own outpost → 回家（B 分支：遠 outpost + 殘忍/好戰 → 就近掠）
 	var own_pos: Vector2i = _find_own_outpost(state, team)
 	if own_pos != Vector2i(-1, -1):
+		var own_eta_days: float = float(_estimate_eta_to(state, team, own_pos)) / 240.0
+		var ferocity_ok: bool = (
+			float(leader.values.get("殘忍", 0.5)) > 0.5
+			or float(leader.values.get("好戰", 0.5)) > 0.6
+		)
+		if own_eta_days > 5.0 and ferocity_ok:
+			var prey_id: int = _find_weakest_prey(state, team)
+			if prey_id != -1:
+				# 同上：combat_target 不預設，到達由 interaction 起戰
+				team.current_task = TeamData.TASK_LOOT
+				team.move_target = state.teams[prey_id].tile_pos
+				team.prosperity_target_id = prey_id
+				print("[SurvivalLoot] team=Team%d 遠 outpost(%.1f日) → 掠 Team%d" % [
+					team.team_id, own_eta_days, prey_id])
+				return
 		if severity == "warning" and not _should_abandon_current_task(team, own_pos):
 			team.previous_task = ""
 			return
@@ -1174,6 +1321,11 @@ func _find_own_outpost(state: WorldState, team: TeamData) -> Vector2i:
 		if tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
 			return tile.tile_pos
 	return Vector2i(-1, -1)
+
+func _estimate_eta_to(state: WorldState, team: TeamData, target: Vector2i) -> int:
+	var path: Dictionary = PathSystem.find_path(state, team.tile_pos, target)
+	if path.path.is_empty(): return 9999999
+	return PathSystem.eta_ticks(team, path.cost)
 
 func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1

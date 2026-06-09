@@ -31,6 +31,7 @@ func tick_discovery(state: WorldState, team_ids: Array,
 				_write_tier01(state, tid, other_id, other, dist, dist_f)
 				if is_new:
 					_grow_skill(state, obs, "偵查", "智力", "體力")
+					FactionAISystem.mark_prosperity_recheck(state, tid)   # 新發現 → prosperity 立即重評
 			else:
 				_grow_skill(state, other, "潛行", "體力", "毅力")
 
