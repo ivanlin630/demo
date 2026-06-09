@@ -76,6 +76,7 @@ func _initialize() -> void:
 	_test_collect_ore_to_storage()
 	_test_mint_facility()
 	_test_manufacturing_to_storage()
+	_test_salary_to_treasury()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4065,3 +4066,23 @@ func _test_manufacturing_to_storage() -> void:
 	assert(float(tile.public_storage.get("goods", 0)) > 0, "goods 應進公庫")
 	assert(float(team.resources.get("goods", 0)) == 0, "goods 不應進 team")
 	print("CoinStorage Task5 OK")
+
+func _test_salary_to_treasury() -> void:
+	print("--- CoinStorage Task6: wage → treasury ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10; team.named_members = [101]
+	team.anon_wage = 1.0; team.resources["coin"] = 100.0
+	team.leader_id = 100
+	state.teams[0] = team
+	var leader := PersonData.new(); leader.id = 100
+	state.persons[100] = leader
+	var member := PersonData.new(); member.id = 101
+	state.persons[101] = member
+	var ss := SalarySystem.new()
+	ss._pay_salary(state, team)
+	# anon_count = 10 - 1 - 1 = 8, wage = 1.0, total = 8
+	assert(float(team.anon_treasury) == 8.0, "treasury 應 8，實際=%s" % team.anon_treasury)
+	assert(float(team.resources["coin"]) < 100.0, "coin 應被扣")
+	print("CoinStorage Task6 OK")

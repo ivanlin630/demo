@@ -60,6 +60,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 	var anon_count: int = team.population - team.named_members.size() - 1
 	var anon_total: float = team.anon_wage * maxf(anon_count, 0)
 	team.resources["coin"] = float(team.resources.get("coin", 0)) - anon_total
+	team.anon_treasury += anon_total   # 匿名薪水沉澱公庫（非消失）
 	if float(team.resources.get("coin", 0)) < 0:
 		team.unrest_turns += 1
 	print("[Salary] Team%d 薪水結算 coin=%.1f" % [team.team_id, float(team.resources.get("coin", 0))])
