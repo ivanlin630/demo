@@ -2,6 +2,8 @@ class_name ResourceSystem
 
 const FOOD_PER_PERSON_PER_DAY: float = 2.4   # TEST VALUE — 2.4食物/人/天（原 0.1×24）
 
+const PUBLIC_RESOURCES: Array = ["ore_gold", "ore_silver", "ore_iron", "ore_steel"]
+
 # TEST VALUES — 平衡期需調整
 const REGEN_RATE: Dictionary = {
 	"plains":   { "food": 8.0,  "material": 0.5  },
@@ -33,12 +35,12 @@ func collect_resources(state: WorldState, team_ids: Array) -> void:
 		var eng_skill: float  = float(leader.skills.get("工程", 0.0)) if leader else 0.0
 
 		if tile.outpost_level == 3:
-			_collect_from_tile(team, tile, 2.0, pop_mult, prod_skill, eng_skill)
+			_collect_from_tile(state, team, tile, 2.0, pop_mult, prod_skill, eng_skill)
 			for neighbor in _get_adjacent_tiles(state, team.tile_pos):
-				_collect_from_tile(team, neighbor, 0.5, pop_mult, prod_skill, eng_skill)
+				_collect_from_tile(state, team, neighbor, 0.5, pop_mult, prod_skill, eng_skill)
 		else:
 			var outpost_mult: float = [1.0, 1.4][tile.outpost_level - 1]
-			_collect_from_tile(team, tile, outpost_mult, pop_mult, prod_skill, eng_skill)
+			_collect_from_tile(state, team, tile, outpost_mult, pop_mult, prod_skill, eng_skill)
 
 func regenerate_tiles(state: WorldState) -> void:
 	for tile_id in state.world.tiles:
@@ -88,7 +90,7 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 							"data": { "needs_ratio": satisfaction }
 						})
 
-func _collect_from_tile(team: TeamData, src_tile: HexTileData,
+func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData,
 		outpost_mult: float, pop_mult: float,
 		prod_skill: float, eng_skill: float) -> void:
 	for res in src_tile.resources.keys():
@@ -106,7 +108,18 @@ func _collect_from_tile(team: TeamData, src_tile: HexTileData,
 				gain *= (1.0 + eng_skill * 0.3)
 			"ore_gold", "ore_silver":
 				gain *= (1.0 + eng_skill * 0.5)
-		team.resources[res] = float(team.resources.get(res, 0)) + gain
+		if res in PUBLIC_RESOURCES:
+			# 礦進自家 outpost 公庫
+			var dst_tile: HexTileData = state.world.tiles.get(_pos_to_tile_id(team.tile_pos))
+			if dst_tile != null and dst_tile.outpost_level > 0:
+				var cap: float = OutpostSystem.new()._get_storage_cap(dst_tile, res)
+				var stored: float = float(dst_tile.public_storage.get(res, 0))
+				dst_tile.public_storage[res] = minf(stored + gain, cap)
+			else:
+				# 無 outpost fallback 進 team
+				team.resources[res] = float(team.resources.get(res, 0)) + gain
+		else:
+			team.resources[res] = float(team.resources.get(res, 0)) + gain
 		# 從 tile 扣除（food/material 最終由 regenerate_tiles 補回；ore/gem 有限）
 		src_tile.resources[res] = maxf(current - gain, 0.0)
 

@@ -73,6 +73,7 @@ func _initialize() -> void:
 	# ── Coin Economy + Outpost Public Storage ──
 	_test_coin_storage_fields()
 	_test_storage_cap()
+	_test_collect_ore_to_storage()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3998,3 +3999,25 @@ func _test_storage_cap() -> void:
 	tile.outpost_type = "military"; tile.outpost_level = 2
 	assert(os._get_storage_cap(tile, "food") == 800.0, "military L2 應 800")
 	print("CoinStorage Task2 OK")
+
+func _test_collect_ore_to_storage() -> void:
+	print("--- CoinStorage Task3: ore 進公庫 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var src_tile := HexTileData.new()
+	src_tile.tile_pos = Vector2i(0, 0)
+	src_tile.outpost_type = "civilian"; src_tile.outpost_level = 1
+	src_tile.outpost_owner = 0
+	src_tile.resources["ore_gold"] = 100.0
+	src_tile.resources["food"] = 100.0
+	src_tile.productivity = 1.0
+	state.world.tiles[0] = src_tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	assert(float(team.resources.get("food", 0)) > 0, "food 應進 team")
+	assert(float(src_tile.public_storage.get("ore_gold", 0)) > 0, "ore 應進公庫")
+	assert(float(team.resources.get("ore_gold", 0)) == 0, "ore 不應進 team")
+	print("CoinStorage Task3 OK")
