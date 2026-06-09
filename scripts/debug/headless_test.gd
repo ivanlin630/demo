@@ -4650,7 +4650,8 @@ func _test_evaluate_prosperity_trigger() -> void:
 	var fas = FactionAISystem.new()
 	fas._evaluate_prosperity_attack(state, team)
 	assert(team.current_task == TeamData.TASK_ATTACK, "應 TASK_ATTACK，實際=%s" % team.current_task)
-	assert(team.combat_target == 1, "應 combat_target=1，實際=%d" % team.combat_target)
+	assert(team.move_target == Vector2i(2, 0), "move_target 應指向 prey tile，實際=%s" % str(team.move_target))
+	assert(team.combat_target == -1, "combat_target 不預設（到達才起戰），實際=%d" % team.combat_target)
 	print("Prosperity Task3 OK")
 
 func _test_prosperity_low_ambition_skip() -> void:
@@ -4831,7 +4832,7 @@ func _test_survival_b_branch_far_outpost_loot() -> void:
 	var fas = FactionAISystem.new()
 	fas._trigger_survival(state, team, "urgent")
 	assert(team.current_task == TeamData.TASK_LOOT, "遠 outpost + 殘忍 應 TASK_LOOT，實際=%s" % team.current_task)
-	assert(team.combat_target == 1, "應 combat_target=1，實際=%d" % team.combat_target)
+	assert(team.move_target == Vector2i(2, 0), "move_target 應指向 prey tile，實際=%s" % str(team.move_target))
 	print("Prosperity Task5 OK")
 
 func _test_survival_b_branch_near_outpost_return() -> void:

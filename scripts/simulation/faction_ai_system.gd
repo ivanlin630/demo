@@ -129,11 +129,31 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	var prey_id: int = find_prosperity_prey(state, team, leader)
 	if prey_id == -1: return
 
+	# combat_target 不預設：移動凍結 + interaction 早退會擋住交戰；
+	# 由 interaction_system 到達時 start_combat 設定。只給 task + move_target + 追擊目標。
 	team.current_task = TeamData.TASK_ATTACK
 	team.move_target = state.teams[prey_id].tile_pos
-	team.combat_target = prey_id
+	team.prosperity_target_id = prey_id
 	print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
 		team.team_id, prey_id, score])
+
+# 追擊：攻擊/掠奪 中每 tick 依 intel 最後已知位置刷新 move_target（移動目標會跑）
+# 與 strategic_ai 的 team_intel 追蹤同模式（strategic_ai_system.gd:107）
+func _refresh_attack_pursuit(state: WorldState, team: TeamData) -> void:
+	if team.combat_target != -1: return
+	if team.current_task != TeamData.TASK_ATTACK and team.current_task != TeamData.TASK_LOOT:
+		team.prosperity_target_id = -1
+		return
+	if team.prosperity_target_id == -1: return
+	var prey: TeamData = state.teams.get(team.prosperity_target_id)
+	if prey == null:   # 目標已滅 → 收手
+		team.prosperity_target_id = -1
+		team.current_task = TeamData.TASK_IDLE
+		team.move_target = Vector2i(-1, -1)
+		return
+	var last_pos: Vector2i = state.team_intel.get(team.team_id, {}).get(
+		team.prosperity_target_id, {}).get("tile_pos", prey.tile_pos)
+	team.move_target = last_pos
 
 func _is_prosperity_candidate(state: WorldState, team: TeamData) -> bool:
 	if team.parent_team_id != -1: return false   # 子隊不主動發動
@@ -238,6 +258,8 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_evaluate_prosperity_attack(state, team)
 			var cad: int = PROSPERITY_CADENCE_MILITARY if "軍隊" in team.tags else PROSPERITY_CADENCE
 			team.prosperity_eval_next_tick = state.world.current_tick + cad
+		# 追擊刷新（攻擊/掠奪 中移動目標會跑，每 tick 對齊 intel）
+		_refresh_attack_pursuit(state, team)
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			_consider_extraction(state, team)
@@ -1241,9 +1263,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		if own_eta_days > 5.0 and ferocity_ok:
 			var prey_id: int = _find_weakest_prey(state, team)
 			if prey_id != -1:
+				# 同上：combat_target 不預設，到達由 interaction 起戰
 				team.current_task = TeamData.TASK_LOOT
 				team.move_target = state.teams[prey_id].tile_pos
-				team.combat_target = prey_id
+				team.prosperity_target_id = prey_id
 				print("[SurvivalLoot] team=Team%d 遠 outpost(%.1f日) → 掠 Team%d" % [
 					team.team_id, own_eta_days, prey_id])
 				return
