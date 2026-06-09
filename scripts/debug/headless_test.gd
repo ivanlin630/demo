@@ -62,6 +62,14 @@ func _initialize() -> void:
 	_test_auto_settle_after_build()
 	_test_player_upgrade_outpost()
 	_test_player_build_facility()
+	_test_game_over_field()
+	_test_handle_player_leader_death()
+	_test_no_heir_game_over()
+	_test_choose_heir_action()
+	_test_choose_heir_invalid_candidate()
+	_test_advance_tick_game_over_freeze()
+	_test_advance_tick_awaiting_heir_freeze()
+	_test_encounter_kills_player_triggers_heir()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3810,3 +3818,156 @@ func _test_abandon_outpost() -> void:
 	assert(r.get("ok", false), "abandon 應成功")
 	assert(tile.outpost_owner == -1, "outpost owner 應 -1，實際=%d" % tile.outpost_owner)
 	print("Trade Task10 OK")
+
+# ──────── H: 玩家死亡保護測試 ────────
+
+func _test_game_over_field() -> void:
+	print("--- Death Task1: game_over 欄位 ---")
+	var s := WorldState.new()
+	assert(s.game_over == false, "預設 false")
+	assert(s.game_over_reason == "", "預設空字串")
+	s.game_over = true
+	s.game_over_reason = "test"
+	assert(s.game_over and s.game_over_reason == "test")
+	print("Death Task1 OK")
+
+func _test_handle_player_leader_death() -> void:
+	print("--- Death Task2: _handle_player_leader_death ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var pt := TeamData.new()
+	pt.team_id = 0; pt.leader_id = 100
+	pt.named_members = [101, 102]
+	state.teams[0] = pt
+	var p := PersonData.new(); p.id = 100; p.team_id = 0
+	state.persons[100] = p
+	var heir1 := PersonData.new(); heir1.id = 101; heir1.team_id = 0
+	state.persons[101] = heir1
+	var heir2 := PersonData.new(); heir2.id = 102; heir2.team_id = 0
+	state.persons[102] = heir2
+	# 模擬玩家死亡：persons 中移除
+	state.persons.erase(100)
+	pt.leader_id = -1
+	var fai := FactionAISystem.new()
+	fai._handle_player_leader_death(state, pt)
+	assert(not state.player_forced_event.is_empty(), "應寫入 forced_event")
+	assert(state.player_forced_event.get("action") == "choose_heir")
+	var cands: Array = state.player_forced_event.get("candidates", [])
+	assert(cands.has(101) and cands.has(102), "candidates 應含 named_members")
+	print("Death Task2 OK")
+
+func _test_no_heir_game_over() -> void:
+	print("--- Death Task2b: 無 named → game_over ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var pt := TeamData.new()
+	pt.team_id = 0; pt.leader_id = -1
+	pt.named_members = []
+	state.teams[0] = pt
+	var fai := FactionAISystem.new()
+	fai._handle_player_leader_death(state, pt)
+	assert(state.game_over, "無 named 應 game_over")
+	assert(state.game_over_reason != "", "應有原因")
+	print("Death Task2b OK")
+
+func _test_choose_heir_action() -> void:
+	print("--- Death Task3: choose_heir action ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100   # 此時 100 已死,但 player_id 還沒清
+	var pt := TeamData.new()
+	pt.team_id = 0; pt.leader_id = -1
+	pt.named_members = [101, 102]
+	state.teams[0] = pt
+	var heir1 := PersonData.new(); heir1.id = 101; heir1.team_id = 0
+	heir1.person_name = "繼承人1"
+	state.persons[101] = heir1
+	var heir2 := PersonData.new(); heir2.id = 102; heir2.team_id = 0
+	state.persons[102] = heir2
+	state.player_forced_event = {
+		"action": "choose_heir",
+		"team_id": 0,
+		"candidates": [101, 102]
+	}
+	state.player_state["heir_id"] = 101
+	var cmd := PlayerCommandSystem.new()
+	var r = cmd.execute_action(state, -1, "choose_heir")
+	assert(r.get("ok", false), "choose_heir 應成功，msg=%s" % str(r.get("msg", "")))
+	assert(pt.leader_id == 101, "leader_id 應 = 101")
+	assert(state.player_id == 101, "player_id 應 = 101")
+	assert(heir1.role == "leader", "heir1 role 應 leader")
+	assert(not pt.named_members.has(101), "heir1 應從 named_members 移除")
+	assert(state.player_forced_event.is_empty(), "forced_event 應清空")
+	print("Death Task3 OK")
+
+func _test_choose_heir_invalid_candidate() -> void:
+	print("--- Death Task3b: 非合法候選 reject ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_forced_event = {
+		"action": "choose_heir", "team_id": 0, "candidates": [101]
+	}
+	state.player_state["heir_id"] = 999   # 不在候選
+	var pt := TeamData.new(); pt.team_id = 0
+	state.teams[0] = pt
+	var cmd := PlayerCommandSystem.new()
+	var r = cmd.execute_action(state, -1, "choose_heir")
+	assert(not r.get("ok", true), "非合法候選應 reject")
+	print("Death Task3b OK")
+
+func _test_advance_tick_game_over_freeze() -> void:
+	print("--- Death Task4: advance_tick game_over 凍結 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.game_over = true
+	var runner := SimRunner.new()
+	var saved_tick: int = state.world.current_tick
+	var r: String = runner.advance_tick(state, Vector2i(0, 0))
+	assert(r == "game_over", "應回 game_over，實際=%s" % r)
+	assert(state.world.current_tick == saved_tick, "tick 不應推進")
+	print("Death Task4 OK")
+
+func _test_advance_tick_awaiting_heir_freeze() -> void:
+	print("--- Death Task4b: 等繼承人 awaiting_heir 凍結 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_forced_event = { "action": "choose_heir", "team_id": 0, "candidates": [101] }
+	var runner := SimRunner.new()
+	var saved_tick: int = state.world.current_tick
+	var r: String = runner.advance_tick(state, Vector2i(0, 0))
+	assert(r == "awaiting_heir", "應回 awaiting_heir")
+	assert(state.world.current_tick == saved_tick, "tick 不應推進")
+	print("Death Task4b OK")
+
+func _test_encounter_kills_player_triggers_heir() -> void:
+	print("--- Death Task5: encounter 殺玩家觸發 forced_event ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	# Player team
+	var pt := TeamData.new()
+	pt.team_id = 0; pt.leader_id = 100
+	pt.named_members = [101]
+	state.teams[0] = pt
+	var player_person := PersonData.new()
+	player_person.id = 100; player_person.team_id = 0
+	# 模擬玩家戰死：torso severed
+	player_person.body_parts = { "torso": { "status": "severed", "hp": 0, "max_hp": 50 } }
+	state.persons[100] = player_person
+	var heir := PersonData.new(); heir.id = 101; heir.team_id = 0
+	state.persons[101] = heir
+	# 模擬 encounter resolve：直接呼叫 promote_successor (encounter 結束後 faction_ai 會跑)
+	# encounter_system line 1042-1043：死者從 named_members 移除、leader_id=-1，
+	# 但「不」從 state.persons 移除（死者 record 保留，body_parts 標記死亡）。
+	# 故 _get_player_team_id 仍可由 persons[100].team_id 反查到玩家 team。
+	pt.leader_id = -1   # 玩家戰死（leader_id 清空，person 保留於 state.persons）
+	# 跑 faction_ai _promote_successor
+	var fai := FactionAISystem.new()
+	fai._promote_successor(state, pt)
+	# 應有 forced_event 而非 auto-promote
+	assert(not state.player_forced_event.is_empty(), "玩家 team 應 forced event 而非 auto")
+	assert(state.player_forced_event.get("action") == "choose_heir")
+	assert(pt.leader_id == -1, "leader_id 不應自動升 (等玩家選)")
+	print("Death Task5 OK")

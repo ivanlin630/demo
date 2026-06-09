@@ -58,6 +58,11 @@ func _init() -> void:
 	_player_cmd          = PlayerCommandSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
+	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick
+	if state.game_over:
+		return "game_over"
+	if state.player_forced_event.get("action", "") == "choose_heir":
+		return "awaiting_heir"
 	if state.encounter_active:
 		var result: String = _encounter_system.advance_encounter_tick(state)
 		if result not in ["ongoing", "player_turn"]:
@@ -80,7 +85,9 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	# 近區：每小時執行
 	if state.world.current_tick % NEAR_CADENCE == 0:
 		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
-		if not state.player_forced_event.is_empty():
+		# H: choose_heir 不超時（advance_tick 開頭已凍結，此處為防禦）
+		if not state.player_forced_event.is_empty() \
+				and state.player_forced_event.get("action", "") != "choose_heir":
 			var fe_timeout: Dictionary = state.player_forced_event
 			if fe_timeout.get("action", "") == "aid_request":
 				var beggar_id_t: int = int(fe_timeout.get("from_id", -1))

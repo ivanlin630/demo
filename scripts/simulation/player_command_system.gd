@@ -85,6 +85,7 @@ func _setup_registry() -> void:
 		"confirm_gather_intel":   _action_confirm_gather_intel,
 		"respond_aid_request":    _action_respond_aid_request,
 		"invite_settle":          _action_invite_settle,
+		"choose_heir":            _action_choose_heir,
 	}
 
 # 執行玩家主動行動
@@ -92,6 +93,11 @@ func _setup_registry() -> void:
 func execute_action(state: WorldState, target_id: int, action: String) -> Dictionary:
 	var pt: TeamData = _get_player_team(state)
 	var pt_id: int   = _get_player_team_id(state)
+	# H: choose_heir 在玩家 person 已死時觸發，pt 必為 null，需在 null 守衛前處理
+	if action == "choose_heir":
+		if _action_registry.is_empty():
+			_setup_registry()
+		return _action_registry["choose_heir"].call(state, target_id, pt, pt_id)
 	if pt == null:
 		return { "ok": false, "msg": "找不到玩家 team" }
 	if action == "ignore":
@@ -757,6 +763,30 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 	state.player_forced_event_id = ""
 	state.player_state.erase("aid_response")
 	return { "ok": true, "msg": "已處理" }
+
+func _action_choose_heir(state: WorldState, _target: int, _pt: TeamData, _pt_id: int) -> Dictionary:
+	var fe: Dictionary = state.player_forced_event
+	if fe.get("action", "") != "choose_heir":
+		return { "ok": false, "msg": "無待選繼承人事件" }
+	var heir_id: int = int(state.player_state.get("heir_id", -1))
+	if heir_id == -1:
+		return { "ok": false, "msg": "未選繼承人" }
+	if not fe.get("candidates", []).has(heir_id):
+		return { "ok": false, "msg": "非合法候選" }
+	var team_id: int = int(fe.get("team_id", -1))
+	var team: TeamData = state.teams.get(team_id)
+	var heir: PersonData = state.persons.get(heir_id)
+	if team == null or heir == null:
+		return { "ok": false, "msg": "team/person 失效" }
+	team.leader_id = heir_id
+	team.named_members.erase(heir_id)
+	heir.role = "leader"
+	state.player_id = heir_id
+	state.player_forced_event = {}
+	state.player_forced_event_id = ""
+	state.player_state.erase("heir_id")
+	print("[Heir] %s 繼任玩家 (Team%d)" % [heir.person_name, team_id])
+	return { "ok": true, "msg": "%s 繼任" % heir.person_name }
 
 func _action_invite_settle(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var tgt: TeamData = state.teams.get(target_id)
