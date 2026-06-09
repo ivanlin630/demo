@@ -94,6 +94,9 @@ func _initialize() -> void:
 	_test_eta_ticks()
 	_test_observe_velocity_visible()
 	_test_observe_velocity_invisible()
+	_test_estimate_catch_up_reachable()
+	_test_estimate_catch_up_too_far()
+	_test_estimate_catch_up_out_of_sight()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4406,3 +4409,63 @@ func _test_observe_velocity_invisible() -> void:
 	var r = PathSystem.observe_velocity(state, observer, target)
 	assert(not r.get("visible", true), "不可見")
 	print("Path Task4b OK")
+
+func _test_estimate_catch_up_reachable() -> void:
+	print("--- Path Task5: catch_up reachable ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	var observer := TeamData.new()
+	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0); observer.fatigue = 0.0
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(2, 0); target.fatigue = 0.0
+	# Target static (last_pos == current_pos → speed 0)
+	target.last_tile_pos = Vector2i(2, 0)
+	state.teams[1] = target
+	state.team_discovered[0] = [1]
+	var r = PathSystem.estimate_catch_up(state, observer, 1)
+	assert(r.get("reachable", false), "應 reachable")
+	print("Path Task5 OK (eta=%d)" % r.get("eta", 0))
+
+func _test_estimate_catch_up_too_far() -> void:
+	print("--- Path Task5b: too_far ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# 直線 plains 走廊 (0,0)→(11,0)，path cost 11 → eta 1320 > AI_ETA_LIMIT(1200)
+	for x in range(0, 12):
+		var tile := HexTileData.new()
+		tile.tile_pos = Vector2i(x, 0); tile.terrain = "plains"
+		state.world.tiles[x * 1000 + 0] = tile
+	var observer := TeamData.new()
+	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0); observer.fatigue = 0.0
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(11, 0); target.fatigue = 0.0
+	target.last_tile_pos = Vector2i(11, 0)
+	state.teams[1] = target
+	state.team_discovered[0] = [1]
+	var r = PathSystem.estimate_catch_up(state, observer, 1)
+	assert(not r.get("reachable", true), "應 unreachable")
+	assert(r.get("reason", "") == "too_far", "reason 應 too_far，實際=%s" % r.get("reason", ""))
+	print("Path Task5b OK (eta=%d)" % r.get("eta", 0))
+
+func _test_estimate_catch_up_out_of_sight() -> void:
+	print("--- Path Task5c: out_of_sight ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var observer := TeamData.new()
+	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0)
+	state.teams[0] = observer
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(2, 0)
+	state.teams[1] = target
+	# 不加進 discovered
+	var r = PathSystem.estimate_catch_up(state, observer, 1)
+	assert(not r.get("reachable", true), "應 unreachable")
+	assert(r.get("reason", "") == "out_of_sight", "reason 應 out_of_sight")
+	print("Path Task5c OK")

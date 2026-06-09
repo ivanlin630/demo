@@ -103,3 +103,35 @@ static func observe_velocity(state: WorldState, observer: TeamData, target: Team
 		"direction": actual_velocity,
 		"noise_factor": noise_factor,
 	}
+
+# ────────── catch-up ──────────
+
+static func estimate_catch_up(state: WorldState, self_team: TeamData, target_id: int) -> Dictionary:
+	if not state.team_discovered.get(self_team.team_id, []).has(target_id):
+		return { "reachable": false, "reason": "out_of_sight" }
+	var target_team: TeamData = state.teams.get(target_id)
+	if target_team == null:
+		return { "reachable": false, "reason": "team_missing" }
+	var path: Dictionary = find_path(state, self_team.tile_pos, target_team.tile_pos)
+	if path.path.is_empty():
+		return { "reachable": false, "reason": "no_path" }
+	var obs: Dictionary = observe_velocity(state, self_team, target_team)
+	var self_speed: float = _team_speed_mult(self_team)
+	var target_speed: float = float(obs.get("speed", 0.0))
+	var direction: Vector2i = obs.get("direction", Vector2i.ZERO)
+	var moving_away: bool = _is_moving_away_observed(self_team, target_team, direction)
+	if moving_away and target_speed >= self_speed:
+		return { "reachable": false, "reason": "too_fast" }
+	var relative_speed: float = (self_speed - target_speed) if moving_away else self_speed
+	var eta: int = int(float(path.cost) * float(MovementSystem.BASE_MOVE_TICKS) / maxf(relative_speed, 0.1))
+	if eta > AI_ETA_LIMIT:
+		return { "reachable": false, "reason": "too_far", "eta": eta }
+	return { "reachable": true, "eta": eta, "path": path.path }
+
+static func _is_moving_away_observed(self_team: TeamData, target_team: TeamData,
+		observed_direction: Vector2i) -> bool:
+	if observed_direction == Vector2i.ZERO: return false   # target 不動
+	var current_dist: int = _hex_dist(self_team.tile_pos, target_team.tile_pos)
+	var future_pos: Vector2i = target_team.tile_pos + observed_direction
+	var future_dist: int = _hex_dist(self_team.tile_pos, future_pos)
+	return future_dist > current_dist
