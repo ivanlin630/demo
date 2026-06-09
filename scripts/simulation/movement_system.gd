@@ -189,6 +189,11 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 				print("[Coin] Team%d 撿 %.0f 遺財" % [team.team_id, tile.abandoned_coin])
 				tile.abandoned_coin = 0.0
 	print("[Move] Team %d 抵達 (%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
+	# NPC 抵達自家 outpost → 自動領存公庫（玩家手動）
+	if team.leader_id != state.player_id and state.world.tiles.has(tile_id):
+		var own_tile: HexTileData = state.world.tiles[tile_id]
+		if own_tile.outpost_owner == team.team_id and own_tile.outpost_level > 0:
+			FactionAISystem.new()._evaluate_storage_visit(state, team, own_tile)
 	# C: 基建子隊抵達 → 依 task 啟動施工
 	if team.current_task in ["建造", "升級", "擴建"]:
 		OutpostSystem.new().begin_subteam_construction(state, team)

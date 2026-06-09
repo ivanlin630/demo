@@ -84,6 +84,8 @@ func _initialize() -> void:
 	_test_on_team_extinct_to_storage()
 	_test_pickup_abandoned_coin()
 	_test_subteam_treasury_split()
+	_test_npc_auto_withdraw()
+	_test_npc_auto_deposit()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4222,3 +4224,45 @@ func _test_subteam_treasury_split() -> void:
 	assert(abs(sub.anon_treasury - 30.0) < 0.01, "子隊 treasury 應 30，實際=%s" % sub.anon_treasury)
 	assert(abs(parent.anon_treasury - 70.0) < 0.01, "母團 treasury 應 70，實際=%s" % parent.anon_treasury)
 	print("CoinStorage Task12 OK")
+
+func _test_npc_auto_withdraw() -> void:
+	print("--- CoinStorage Task13a: NPC 自動領 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2
+	tile.outpost_owner = 0
+	tile.public_storage = { "food": 100.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 5; team.tile_pos = Vector2i(0, 0)
+	team.resources["food"] = 0.0
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	fai._evaluate_storage_visit(state, team, tile)
+	# need = 5 * 14 = 70；team 有 0 → 領 70；公庫剩 30
+	assert(abs(float(team.resources["food"]) - 70.0) < 0.01, "team 應領到 70，實際=%s" % team.resources["food"])
+	assert(abs(float(tile.public_storage["food"]) - 30.0) < 0.01, "公庫剩 30")
+	print("CoinStorage Task13a OK")
+
+func _test_npc_auto_deposit() -> void:
+	print("--- CoinStorage Task13b: NPC 自動存 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2
+	tile.outpost_owner = 0
+	tile.public_storage = { "food": 0.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 5; team.tile_pos = Vector2i(0, 0)
+	team.resources["food"] = 200.0   # need=70, >2x=140 → 存超量
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	fai._evaluate_storage_visit(state, team, tile)
+	# deposit = team_have(200) - need(70) = 130，cap=500 足夠
+	assert(abs(float(team.resources["food"]) - 70.0) < 0.01, "team 應剩 70，實際=%s" % team.resources["food"])
+	assert(abs(float(tile.public_storage["food"]) - 130.0) < 0.01, "公庫應 130")
+	print("CoinStorage Task13b OK")

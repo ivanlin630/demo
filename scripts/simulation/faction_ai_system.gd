@@ -888,6 +888,41 @@ func _on_team_extinct(state: WorldState, team: TeamData) -> void:
 	team.resources.clear()
 	print("[Extinct] Team%d 滅團遺財處理 at (%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 
+# ──────── NPC 自動領存公庫 ────────
+
+func _calc_team_need(team: TeamData, res: String) -> float:
+	match res:
+		"food": return float(team.population) * 14.0
+		"material": return 50.0 + float(team.population) * 2.0
+		"coin": return float(team.population) * 10.0
+		"weapon_melee_low", "weapon_melee_high", "weapon_ranged_low", "weapon_ranged_high":
+			return float(team.named_members.size()) * 2.0
+		"armor_low", "armor_high":
+			return float(team.named_members.size())
+		_:
+			return 0.0
+
+func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	if tile.outpost_owner != team.team_id: return
+	if tile.public_storage.is_empty(): return
+	var os := OutpostSystem.new()
+	for res in tile.public_storage.keys():
+		var stored: float = float(tile.public_storage[res])
+		var team_have: float = float(team.resources.get(res, 0))
+		var needed: float = _calc_team_need(team, res)
+		if team_have < needed:
+			var take: float = minf(stored, needed - team_have)
+			if take > 0.0:
+				tile.public_storage[res] = stored - take
+				team.resources[res] = team_have + take
+		elif team_have > needed * 2.0:
+			var cap: float = os._get_storage_cap(tile, res)
+			var deposit_max: float = cap - stored
+			var deposit: float = minf(team_have - needed, deposit_max)
+			if deposit > 0.0:
+				tile.public_storage[res] = stored + deposit
+				team.resources[res] = team_have - deposit
+
 # ──────── 基建 dispatch ────────
 
 # 選一名非 leader 的記名成員當子隊 leader（建造/升級/擴建 crew）
