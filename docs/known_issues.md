@@ -202,6 +202,14 @@
 
 ---
 
+## Movement
+
+- **mounts/wagons 沒加速度**：`_compute_team_speed` 只算個人 effective_speed + named 加權（NAMED_WEIGHT=3）+ 傷兵；mounts 只加 carry capacity（`get_carry_capacity`），wagons 只加 carry + 地形 penalty（`WAGON_TERRAIN_MULT`）。騎兵跟步兵當前同速。
+  待 spec：speed_class（步兵/騎兵/輜重）+ mount 速度 bonus + wagon 拖速 penalty。
+  - **發現**：2026-06-10 combat-engagement（NAMED_WEIGHT=3 實作時）
+
+---
+
 ## 待討論（設計決策）
 
 | 問題 | 選項 A | 選項 B |

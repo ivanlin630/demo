@@ -79,6 +79,31 @@ func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Arr
 			_try_interact(state, arrived_id, other_id)
 	HealthSystem.tick_natural_regen(state)
 
+# 寬版同格 scan：凡「本 tick 有移動」的 team（不限走到最終目標）即掃同格互動。
+# 解 NPC-NPC encounter=0：追擊團路過 prey 格即觸發 try_interact，不必剛好 arrived。
+# body 同 process_on_arrival，只是 driver 從 arrived_ids 換成 moved_ids。
+func process_on_move(state: WorldState, moved_ids: Array, all_team_ids: Array) -> void:
+	_tick_readiness(state, all_team_ids)
+	_combat.tick_critical_npcs(state, all_team_ids)
+	_combat.process_ongoing_combat(state, all_team_ids)
+	var _sub := SubteamSystem.new()
+	for moved_id in moved_ids:
+		if not state.teams.has(moved_id):
+			continue
+		if _sub.try_merge_back(state, moved_id):
+			continue
+		var moved: TeamData = state.teams[moved_id]
+		if moved.current_task == "護衛":
+			continue
+		for other_id in state.teams:
+			if other_id == moved_id:
+				continue
+			var other: TeamData = state.teams[other_id]
+			if other.tile_pos != moved.tile_pos:
+				continue
+			_try_interact(state, moved_id, other_id)
+	HealthSystem.tick_natural_regen(state)
+
 # ──────── 整備值恢復 + 傷兵治療（交戰中均不進行） ────────
 
 func _tick_readiness(state: WorldState, team_ids: Array) -> void:

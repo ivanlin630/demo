@@ -5,6 +5,7 @@ const WORLD_SPEED_MULT: int = 2    # TEST VALUE — 倍率=2 → 0.5天/hex（no
 const BASE_MOVE_TICKS: int = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER / WORLD_SPEED_MULT
 const MIN_MOVE_TICKS: int  = BASE_MOVE_TICKS / 3
 const MAX_MOVE_TICKS: int  = BASE_MOVE_TICKS * 3
+const NAMED_WEIGHT: int    = 3   # named 成員速度加權（隊速 = named×3 + 健康匿名×1 + 傷兵×0.5 的平均）
 
 const TERRAIN_SPEED_MULT: Dictionary = {
 	"plains":   1.0,
@@ -22,7 +23,7 @@ const WAGON_TERRAIN_MULT: Dictionary = {
 }
 
 func process(state: WorldState, team_ids: Array,
-		time_mult: float = 1.0) -> Array:
+		time_mult: float = 1.0) -> Dictionary:
 	# 護衛：每 tick 追蹤目標位置
 	for tid in team_ids:
 		if not state.teams.has(tid):
@@ -37,6 +38,7 @@ func process(state: WorldState, team_ids: Array,
 		else:
 			team.move_target = target.tile_pos
 	var arrived: Array = []
+	var moved: Array = []
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue
@@ -66,9 +68,13 @@ func process(state: WorldState, team_ids: Array,
 		if team.move_tick_acc < cost:
 			continue
 		team.move_tick_acc = 0
+		var old_target: Vector2i = team.move_target
 		if _step_team(state, team):
-			arrived.append(tid)
-	return arrived
+			moved.append(tid)
+			# arrived = 走到原 move_target（_step_team 內到達會清 move_target）
+			if team.tile_pos == old_target:
+				arrived.append(tid)
+	return { "arrived": arrived, "moved": moved }
 
 func get_effective_mounts(team: TeamData) -> int:
 	return mini(int(team.resources.get("mounts", 0)), team.population)
@@ -133,12 +139,14 @@ func _compute_team_speed(state: WorldState, team: TeamData) -> float:
 	var named_ids: Array = team.named_members.duplicate()  # duplicate() — 避免直接修改 team.named_members
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
+	var named_found: int = 0
 	for pid in named_ids:
 		var p = state.persons.get(pid)
 		if p != null:
-			total_speed += p.get_effective_speed()
-			total_count += 1
-	var unnamed_healthy: int = maxi(team.population - total_count - team.wounded, 0)
+			total_speed += p.get_effective_speed() * NAMED_WEIGHT
+			total_count += NAMED_WEIGHT
+			named_found += 1
+	var unnamed_healthy: int = maxi(team.population - named_found - team.wounded, 0)
 	total_speed += float(unnamed_healthy) * 1.0
 	total_count += unnamed_healthy
 	total_speed += float(team.wounded) * 0.5
