@@ -34,6 +34,28 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 				team.move_target  = Vector2i(-1, -1)
 				print("[ReactionBridge] Team%d 逃跑（%d/%d 人）" % [tid, flee_count, team.population])
 
+# 主動攻擊戰敗 → named 成員忠誠降、leader 壓力升（無硬性 cooldown，純 reaction）
+func on_attack_defeat(state: WorldState, team_id: int, pop_loss_ratio: float) -> void:
+	var team: TeamData = state.teams.get(team_id)
+	if team == null: return
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	var honor: float = float(leader.values.get("義氣", 0.5))
+	var faith: float = float(leader.values.get("信義", 0.5))
+	var caution: float = float(leader.values.get("慎重", 0.5))
+	var loyalty_delta: float = -0.1 * (honor + faith) / 2.0
+	var stress_delta: float = 0.2 * caution
+	if pop_loss_ratio > 0.3:
+		loyalty_delta *= 2.0
+		stress_delta *= 1.5
+	for pid in team.named_members:
+		var p: PersonData = state.persons.get(int(pid))
+		if p == null: continue
+		p.loyalty = clampf(p.loyalty + loyalty_delta, 0.0, 1.0)
+	leader.stress = clampf(leader.stress + stress_delta, 0.0, 1.0)
+	print("[AttackDefeat] Team%d 戰敗 loss=%.2f loyalty_d=%.3f stress_d=%.3f" % [
+		team_id, pop_loss_ratio, loyalty_delta, stress_delta])
+
 func _has_goal_type(person: PersonData, type: String) -> bool:
 	for g in person.goals:
 		if g is Dictionary and g.get("type", "") == type:

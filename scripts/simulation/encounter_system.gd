@@ -1149,6 +1149,16 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	# Prosperity: 攻方勝 → 處理被佔 outpost 上的居民團（屠/放棄/強佔）
 	if result == "attacker_win":
 		_process_occupied_residents(state, winner_id, loser_id)
+	# Prosperity: 攻方戰敗 → reaction（loyalty 降 / leader stress 升）
+	elif result == "defender_win" and atk_id != -1:
+		var atk_total: int = 0
+		var atk_dead: int = 0
+		for u in state.encounter_units:
+			if u["team_id"] != atk_id: continue
+			atk_total += 1
+			if is_dead(u, state) or u.get("is_prisoner", false): atk_dead += 1
+		var ratio: float = float(atk_dead) / maxf(float(atk_total), 1.0)
+		ReactionSystem.new().on_attack_defeat(state, atk_id, ratio)
 
 	state.encounter_units.clear()
 	state.encounter_active = false

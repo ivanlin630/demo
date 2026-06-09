@@ -115,6 +115,7 @@ func _initialize() -> void:
 	_test_occupy_massacre()
 	_test_occupy_abandon()
 	_test_occupy_force()
+	_test_attack_defeat_reaction()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4933,3 +4934,25 @@ func _test_occupy_force() -> void:
 	assert(state.teams.has(2), "強佔後居民團應存活")
 	assert(state.teams[2].population == 8, "強佔 pop 應 10→8，實際=%d" % state.teams[2].population)
 	print("Prosperity Task6d OK")
+
+func _test_attack_defeat_reaction() -> void:
+	print("--- Prosperity Task7: 戰敗 reaction ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100; leader.stress = 0.0
+	leader.values = { "義氣": 0.6, "信義": 0.4, "慎重": 0.5 }
+	state.persons[100] = leader; team.leader_id = 100
+	var member := PersonData.new()
+	member.id = 101; member.loyalty = 1.0
+	state.persons[101] = member
+	team.named_members = [100, 101]
+	ReactionSystem.new().on_attack_defeat(state, 0, 0.4)   # loss>0.3 → 加倍
+	# loyalty_delta = -0.1*(0.6+0.4)/2 = -0.05, *2 = -0.1 → 101: 1.0→0.9
+	assert(abs(member.loyalty - 0.9) < 0.01, "named loyalty 應降至 0.9，實際=%.3f" % member.loyalty)
+	# stress_delta = 0.2*0.5 = 0.1, *1.5 = 0.15 → leader 0→0.15
+	assert(abs(leader.stress - 0.15) < 0.01, "leader stress 應升至 0.15，實際=%.3f" % leader.stress)
+	print("Prosperity Task7 OK")
