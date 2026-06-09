@@ -119,11 +119,18 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
+		# 滅團遺財：population<=0 且仍有資產 → 轉公庫 / abandoned_coin（idempotent）
+		if team.population <= 0 and (team.anon_treasury > 0.0 or not team.resources.is_empty()):
+			_on_team_extinct(state, team)
+			continue
 		# S11: leader 死亡自動繼承（無 leader 但有 named members）
 		if team.leader_id == -1 and not team.named_members.is_empty():
 			_promote_successor(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		# 公庫徵用：每月一次依 leader 貪婪評估
+		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+			_consider_extraction(state, team)
 		# D B2: 無人 outpost 駐留接管
 		_evaluate_outpost_takeover(state, team)
 		if _is_resident_team(state, team):
@@ -813,6 +820,109 @@ func _check_goods_shortage(state: WorldState, faction) -> float:
 		total_goods += float(t.resources.get("goods", 0))
 	# goods < 100 → 觸發
 	return clampf((100.0 - total_goods) / 100.0, 0.0, 1.0) * 50.0
+
+func _check_ore_surplus(state: WorldState, faction) -> float:
+	var total: float = 0.0
+	for tid in faction.member_team_ids:
+		for tile_id in state.world.tiles:
+			var tile: HexTileData = state.world.tiles[tile_id]
+			if tile.outpost_owner != tid: continue
+			total += float(tile.public_storage.get("ore_gold", 0)) * 5.0
+			total += float(tile.public_storage.get("ore_silver", 0))
+	return 80.0 if total > 50.0 else 0.0
+
+# ──────── 公庫徵用 ────────
+
+func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: String) -> void:
+	if team.anon_treasury <= 0.0 or ratio <= 0.0: return
+	ratio = clampf(ratio, 0.0, 1.0)
+	var amt: float = team.anon_treasury * ratio
+	if amt < 1.0: return   # 忽略可忽略額度，避免空徵用噪音 + 虛增 unrest
+	team.anon_treasury -= amt
+	team.resources["coin"] = float(team.resources.get("coin", 0)) + amt
+	var is_emergency: bool = (reason == "飢餓緊急")
+	var stress_pen: float = (0.05 if is_emergency else 0.15) * ratio
+	var loyalty_pen: float = (0.02 if is_emergency else 0.08) * ratio
+	for pid in ([team.leader_id] as Array) + team.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		p.stress = minf(p.stress + stress_pen, 1.0)
+		p.loyalty = maxf(p.loyalty - loyalty_pen, 0.0)
+	if not is_emergency:
+		team.unrest_turns += 1
+	print("[Extract] Team%d 徵用 %.0f coin (%s)" % [team.team_id, amt, reason])
+
+func _consider_extraction(state: WorldState, team: TeamData) -> void:
+	if team.anon_treasury <= 0.0: return
+	if team.leader_id == state.player_id: return   # 玩家手動
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	var greed: float = float(leader.values.get("貪婪", 0.5))
+	var prudence: float = float(leader.values.get("慎重", 0.5))
+	var extract_score: float = greed - prudence * 0.5
+	if extract_score > 0.4:
+		var ratio: float = greed * 0.3
+		_extract_treasury(state, team, ratio, "貪婪驅動")
+
+# 滅團遺財處理：有 outpost → 全資源 + treasury 進公庫；無 outpost → coin 變 abandoned_coin
+func _on_team_extinct(state: WorldState, team: TeamData) -> void:
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null:
+		team.anon_treasury = 0.0
+		team.resources.clear()
+		return
+	if tile.outpost_level > 0:
+		var os := OutpostSystem.new()
+		for res in team.resources:
+			var amt: float = float(team.resources[res])
+			if amt <= 0.0: continue
+			var cap: float = os._get_storage_cap(tile, res)
+			var stored: float = float(tile.public_storage.get(res, 0))
+			tile.public_storage[res] = minf(stored + amt, cap)
+		var coin_cap: float = os._get_storage_cap(tile, "coin")
+		var cur_coin: float = float(tile.public_storage.get("coin", 0))
+		tile.public_storage["coin"] = minf(cur_coin + team.anon_treasury, coin_cap)
+	else:
+		# 無 outpost → 僅 coin/treasury 留地，其他資源消失（無容器）
+		tile.abandoned_coin += team.anon_treasury
+	team.anon_treasury = 0.0
+	team.resources.clear()
+	print("[Extinct] Team%d 滅團遺財處理 at (%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
+
+# ──────── NPC 自動領存公庫 ────────
+
+func _calc_team_need(team: TeamData, res: String) -> float:
+	match res:
+		"food": return float(team.population) * 14.0
+		"material": return 50.0 + float(team.population) * 2.0
+		"coin": return float(team.population) * 10.0
+		"weapon_melee_low", "weapon_melee_high", "weapon_ranged_low", "weapon_ranged_high":
+			return float(team.named_members.size()) * 2.0
+		"armor_low", "armor_high":
+			return float(team.named_members.size())
+		_:
+			return 0.0
+
+func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	if tile.outpost_owner != team.team_id: return
+	if tile.public_storage.is_empty(): return
+	var os := OutpostSystem.new()
+	for res in tile.public_storage.keys():
+		var stored: float = float(tile.public_storage[res])
+		var team_have: float = float(team.resources.get(res, 0))
+		var needed: float = _calc_team_need(team, res)
+		if team_have < needed:
+			var take: float = minf(stored, needed - team_have)
+			if take > 0.0:
+				tile.public_storage[res] = stored - take
+				team.resources[res] = team_have + take
+		elif team_have > needed * 2.0:
+			var cap: float = os._get_storage_cap(tile, res)
+			var deposit_max: float = cap - stored
+			var deposit: float = minf(team_have - needed, deposit_max)
+			if deposit > 0.0:
+				tile.public_storage[res] = stored + deposit
+				team.resources[res] = team_have - deposit
 
 # ──────── 基建 dispatch ────────
 

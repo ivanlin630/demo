@@ -18,6 +18,11 @@ var manufacturing_level: int = 0    # 0–3，civilian only
 var garrison: Array = []            # person_ids
 var prisoners: Array = []           # person_ids
 
+# 公庫 / 經濟
+var public_storage: Dictionary = {}   # 公庫，所有 resource keys
+var abandoned_coin: float = 0.0       # 滅團遺財（無 outpost）
+var mint_level: int = 0               # mint 設施等級
+
 # 建設進度
 var construction_ticks_left: int = 0
 var construction_team_id: int = -1

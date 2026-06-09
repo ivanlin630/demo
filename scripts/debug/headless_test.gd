@@ -70,6 +70,23 @@ func _initialize() -> void:
 	_test_advance_tick_game_over_freeze()
 	_test_advance_tick_awaiting_heir_freeze()
 	_test_encounter_kills_player_triggers_heir()
+	# ── Coin Economy + Outpost Public Storage ──
+	_test_coin_storage_fields()
+	_test_storage_cap()
+	_test_collect_ore_to_storage()
+	_test_mint_facility()
+	_test_manufacturing_to_storage()
+	_test_salary_to_treasury()
+	_test_promote_anon_takes_share()
+	_test_extraction()
+	_test_player_extract_treasury()
+	_test_encounter_treasury_loot()
+	_test_on_team_extinct_to_storage()
+	_test_pickup_abandoned_coin()
+	_test_subteam_treasury_split()
+	_test_npc_auto_withdraw()
+	_test_npc_auto_deposit()
+	_test_player_withdraw_deposit()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3971,3 +3988,312 @@ func _test_encounter_kills_player_triggers_heir() -> void:
 	assert(state.player_forced_event.get("action") == "choose_heir")
 	assert(pt.leader_id == -1, "leader_id 不應自動升 (等玩家選)")
 	print("Death Task5 OK")
+
+# ── Coin Economy + Outpost Public Storage ──
+
+func _test_coin_storage_fields() -> void:
+	print("--- CoinStorage Task1: 新欄位 ---")
+	var t := TeamData.new()
+	assert(t.anon_treasury == 0.0, "anon_treasury 預設 0")
+	var tile := HexTileData.new()
+	assert(tile.public_storage == {}, "public_storage 預設空")
+	assert(tile.abandoned_coin == 0.0, "abandoned_coin 預設 0")
+	assert(tile.mint_level == 0, "mint_level 預設 0")
+	print("CoinStorage Task1 OK")
+
+func _test_storage_cap() -> void:
+	print("--- CoinStorage Task2: storage cap ---")
+	var tile := HexTileData.new()
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	var os := OutpostSystem.new()
+	assert(os._get_storage_cap(tile, "food") == 200.0, "civilian L1 應 200")
+	tile.outpost_level = 3
+	assert(os._get_storage_cap(tile, "food") == 1500.0, "civilian L3 應 1500")
+	tile.outpost_type = "military"; tile.outpost_level = 2
+	assert(os._get_storage_cap(tile, "food") == 800.0, "military L2 應 800")
+	print("CoinStorage Task2 OK")
+
+func _test_collect_ore_to_storage() -> void:
+	print("--- CoinStorage Task3: ore 進公庫 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var src_tile := HexTileData.new()
+	src_tile.tile_pos = Vector2i(0, 0)
+	src_tile.outpost_type = "civilian"; src_tile.outpost_level = 1
+	src_tile.outpost_owner = 0
+	src_tile.resources["ore_gold"] = 100.0
+	src_tile.resources["food"] = 100.0
+	src_tile.productivity = 1.0
+	state.world.tiles[0] = src_tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	assert(float(team.resources.get("food", 0)) > 0, "food 應進 team")
+	assert(float(src_tile.public_storage.get("ore_gold", 0)) > 0, "ore 應進公庫")
+	assert(float(team.resources.get("ore_gold", 0)) == 0, "ore 不應進 team")
+	print("CoinStorage Task3 OK")
+
+func _test_mint_facility() -> void:
+	print("--- CoinStorage Task4: mint facility ---")
+	assert(OutpostSystem.FACILITY_DEF.has("mint"), "FACILITY_DEF 應有 mint")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 3
+	tile.outpost_owner = 0
+	tile.mint_level = 1
+	tile.public_storage["ore_gold"] = 10.0
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = team
+	var os := OutpostSystem.new()
+	os._tick_mint(state, tile, team)
+	assert(float(tile.public_storage["ore_gold"]) < 10.0, "ore 應減")
+	assert(float(tile.public_storage.get("coin", 0)) > 0, "coin 應增")
+	print("CoinStorage Task4 OK")
+
+func _test_manufacturing_to_storage() -> void:
+	print("--- CoinStorage Task5: manufacturing 產出 → 公庫 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.outpost_owner = 0
+	tile.manufacturing_level = 1
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.current_task = TeamData.TASK_MANUFACTURE
+	team.resources["material"] = 100.0
+	state.teams[0] = team
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("goods", 0)) > 0, "goods 應進公庫")
+	assert(float(team.resources.get("goods", 0)) == 0, "goods 不應進 team")
+	print("CoinStorage Task5 OK")
+
+func _test_salary_to_treasury() -> void:
+	print("--- CoinStorage Task6: wage → treasury ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10; team.named_members = [101]
+	team.anon_wage = 1.0; team.resources["coin"] = 100.0
+	team.leader_id = 100
+	state.teams[0] = team
+	var leader := PersonData.new(); leader.id = 100
+	state.persons[100] = leader
+	var member := PersonData.new(); member.id = 101
+	state.persons[101] = member
+	var ss := SalarySystem.new()
+	ss._pay_salary(state, team)
+	# anon_count = 10 - 1 - 1 = 8, wage = 1.0, total = 8
+	assert(float(team.anon_treasury) == 8.0, "treasury 應 8，實際=%s" % team.anon_treasury)
+	assert(float(team.resources["coin"]) < 100.0, "coin 應被扣")
+	print("CoinStorage Task6 OK")
+
+func _test_promote_anon_takes_share() -> void:
+	print("--- CoinStorage Task7: 升 anon 帶 ×3 share ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 11; team.named_members = []
+	team.leader_id = -1
+	team.anon_treasury = 100.0
+	state.teams[0] = team
+	var promoted := PersonGenerator.generate_for_team(state, team, "member")
+	assert(promoted != null, "應產生 named NPC")
+	assert(promoted.coin > 0, "新 NPC 應有 coin (升階加成)")
+	assert(team.anon_treasury < 100.0, "treasury 應扣")
+	print("CoinStorage Task7 OK (新 NPC coin=%.0f, 剩 treasury=%.0f)" % [promoted.coin, team.anon_treasury])
+
+func _test_extraction() -> void:
+	print("--- CoinStorage Task8: 徵用機制 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	team.anon_treasury = 100.0; team.resources["coin"] = 0.0
+	var leader := PersonData.new(); leader.id = 100
+	leader.values = { "貪婪": 0.8, "慎重": 0.2 }
+	state.persons[100] = leader; team.leader_id = 100
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	fai._extract_treasury(state, team, 0.3, "貪婪驅動")
+	assert(float(team.anon_treasury) == 70.0, "treasury 應 70")
+	assert(float(team.resources["coin"]) == 30.0, "coin 應 30")
+	assert(team.unrest_turns == 1, "unrest_turns 應 +1")
+	print("CoinStorage Task8 OK")
+
+func _test_player_extract_treasury() -> void:
+	print("--- CoinStorage Task9: 玩家徵用 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10; team.leader_id = 100
+	team.anon_treasury = 100.0; team.resources["coin"] = 0.0
+	state.teams[0] = team
+	state.player_state["extract_ratio"] = 0.5
+	var pcs := PlayerCommandSystem.new()
+	var r := pcs._action_extract_treasury(state, -1, team, 0)
+	assert(r.get("ok") == true, "應成功")
+	assert(float(team.anon_treasury) == 50.0, "treasury 應 50")
+	assert(float(team.resources["coin"]) == 50.0, "coin 應 50")
+	print("CoinStorage Task9 OK")
+
+func _test_encounter_treasury_loot() -> void:
+	print("--- CoinStorage Task10: encounter loot 比例 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var loser := TeamData.new()
+	loser.team_id = 0; loser.population = 15
+	loser.anon_treasury = 100.0
+	state.teams[0] = loser
+	var winner := TeamData.new()
+	winner.team_id = 1
+	winner.anon_treasury = 0.0
+	state.teams[1] = winner
+	var enc := EncounterSystem.new()
+	enc._loot_treasury_share(state, loser, winner, 5, 20)
+	assert(float(winner.anon_treasury) == 25.0, "winner 應拿 25，實際=%s" % winner.anon_treasury)
+	assert(float(loser.anon_treasury) == 75.0, "loser 剩 75")
+	print("CoinStorage Task10 OK")
+
+func _test_on_team_extinct_to_storage() -> void:
+	print("--- CoinStorage Task11a: 滅團 → 公庫 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2
+	tile.outpost_owner = 0
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 0; team.tile_pos = Vector2i(0, 0)
+	team.resources = { "food": 50.0 }
+	team.anon_treasury = 30.0
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	fai._on_team_extinct(state, team)
+	assert(float(tile.public_storage.get("food", 0)) == 50.0, "food 應進公庫")
+	assert(float(tile.public_storage.get("coin", 0)) == 30.0, "treasury 應進公庫 coin")
+	assert(float(team.anon_treasury) == 0.0, "treasury 清空")
+	print("CoinStorage Task11a OK")
+
+func _test_pickup_abandoned_coin() -> void:
+	print("--- CoinStorage Task11b: 撿 abandoned_coin ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(1, 1)
+	tile.outpost_owner = -1
+	tile.abandoned_coin = 40.0
+	state.world.tiles[1 * 1000 + 1] = tile
+	var team := TeamData.new()
+	team.team_id = 1; team.tile_pos = Vector2i(1, 1); team.anon_treasury = 0.0
+	state.teams[1] = team
+	var mv := MovementSystem.new()
+	mv._on_arrival(state, team)
+	assert(float(team.anon_treasury) == 40.0, "應撿 40 遺財")
+	assert(float(tile.abandoned_coin) == 0.0, "abandoned_coin 清空")
+	print("CoinStorage Task11b OK")
+
+func _test_subteam_treasury_split() -> void:
+	print("--- CoinStorage Task12: 子隊帶 treasury ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var parent := TeamData.new()
+	parent.team_id = 0; parent.population = 10; parent.leader_id = 100
+	parent.named_members = [101]
+	parent.anon_treasury = 100.0
+	parent.tile_pos = Vector2i(0, 0)
+	state.teams[0] = parent
+	var leader := PersonData.new(); leader.id = 100
+	state.persons[100] = leader
+	var sub_leader := PersonData.new(); sub_leader.id = 101
+	sub_leader.skills = { "統領": 0.2 }
+	state.persons[101] = sub_leader
+	var ss := SubteamSystem.new()
+	var sub_id := ss.dispatch(state, 0, 101, 3, "偵查", Vector2i(1, 0))
+	assert(sub_id != -1, "派遣應成功")
+	var sub: TeamData = state.teams[sub_id]
+	assert(abs(sub.anon_treasury - 30.0) < 0.01, "子隊 treasury 應 30，實際=%s" % sub.anon_treasury)
+	assert(abs(parent.anon_treasury - 70.0) < 0.01, "母團 treasury 應 70，實際=%s" % parent.anon_treasury)
+	print("CoinStorage Task12 OK")
+
+func _test_npc_auto_withdraw() -> void:
+	print("--- CoinStorage Task13a: NPC 自動領 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2
+	tile.outpost_owner = 0
+	tile.public_storage = { "food": 100.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 5; team.tile_pos = Vector2i(0, 0)
+	team.resources["food"] = 0.0
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	fai._evaluate_storage_visit(state, team, tile)
+	# need = 5 * 14 = 70；team 有 0 → 領 70；公庫剩 30
+	assert(abs(float(team.resources["food"]) - 70.0) < 0.01, "team 應領到 70，實際=%s" % team.resources["food"])
+	assert(abs(float(tile.public_storage["food"]) - 30.0) < 0.01, "公庫剩 30")
+	print("CoinStorage Task13a OK")
+
+func _test_npc_auto_deposit() -> void:
+	print("--- CoinStorage Task13b: NPC 自動存 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2
+	tile.outpost_owner = 0
+	tile.public_storage = { "food": 0.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 5; team.tile_pos = Vector2i(0, 0)
+	team.resources["food"] = 200.0   # need=70, >2x=140 → 存超量
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	fai._evaluate_storage_visit(state, team, tile)
+	# deposit = team_have(200) - need(70) = 130，cap=500 足夠
+	assert(abs(float(team.resources["food"]) - 70.0) < 0.01, "team 應剩 70，實際=%s" % team.resources["food"])
+	assert(abs(float(tile.public_storage["food"]) - 130.0) < 0.01, "公庫應 130")
+	print("CoinStorage Task13b OK")
+
+func _test_player_withdraw_deposit() -> void:
+	print("--- CoinStorage Task14: 玩家領/存 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2
+	tile.outpost_owner = 0
+	tile.public_storage = { "food": 100.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.resources["food"] = 10.0
+	state.teams[0] = team
+	var pcs := PlayerCommandSystem.new()
+	# 領 40
+	state.player_state["storage_res"] = "food"
+	state.player_state["storage_amount"] = 40.0
+	var rw := pcs._action_withdraw_from_storage(state, -1, team, 0)
+	assert(rw.get("ok") == true, "領取應成功")
+	assert(abs(float(team.resources["food"]) - 50.0) < 0.01, "team 應 50")
+	assert(abs(float(tile.public_storage["food"]) - 60.0) < 0.01, "公庫應 60")
+	# 存 20
+	state.player_state["storage_amount"] = 20.0
+	var rd := pcs._action_deposit_to_storage(state, -1, team, 0)
+	assert(rd.get("ok") == true, "存入應成功")
+	assert(abs(float(team.resources["food"]) - 30.0) < 0.01, "team 應 30")
+	assert(abs(float(tile.public_storage["food"]) - 80.0) < 0.01, "公庫應 80")
+	print("CoinStorage Task14 OK")

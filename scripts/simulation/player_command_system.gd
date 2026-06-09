@@ -86,6 +86,9 @@ func _setup_registry() -> void:
 		"respond_aid_request":    _action_respond_aid_request,
 		"invite_settle":          _action_invite_settle,
 		"choose_heir":            _action_choose_heir,
+		"extract_treasury":       _action_extract_treasury,
+		"withdraw_from_storage":  _action_withdraw_from_storage,
+		"deposit_to_storage":     _action_deposit_to_storage,
 	}
 
 # 執行玩家主動行動
@@ -110,6 +113,40 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 	return _action_registry[action].call(state, target_id, pt, pt_id)
 
 # ── Action Handlers ───────────────────────────────────────────
+
+func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
+	if ratio <= 0.0 or ratio > 1.0:
+		return { "ok": false, "msg": "extract_ratio 必須 (0, 1]" }
+	FactionAISystem.new()._extract_treasury(state, pt, ratio, "玩家主動")
+	return { "ok": true, "msg": "徵用 %.0f%%" % (ratio * 100) }
+
+func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var res: String = state.player_state.get("storage_res", "")
+	var amount: float = float(state.player_state.get("storage_amount", 0.0))
+	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定 res/amount" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
+	var stored: float = float(tile.public_storage.get(res, 0))
+	if stored < amount: return { "ok": false, "msg": "公庫不足" }
+	tile.public_storage[res] = stored - amount
+	pt.resources[res] = float(pt.resources.get(res, 0)) + amount
+	return { "ok": true, "msg": "取 %s × %.0f" % [res, amount] }
+
+func _action_deposit_to_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var res: String = state.player_state.get("storage_res", "")
+	var amount: float = float(state.player_state.get("storage_amount", 0.0))
+	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定 res/amount" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
+	var have: float = float(pt.resources.get(res, 0))
+	if have < amount: return { "ok": false, "msg": "team 資源不足" }
+	var cap: float = OutpostSystem.new()._get_storage_cap(tile, res)
+	var stored: float = float(tile.public_storage.get(res, 0))
+	if stored + amount > cap: return { "ok": false, "msg": "公庫已滿" }
+	tile.public_storage[res] = stored + amount
+	pt.resources[res] = have - amount
+	return { "ok": true, "msg": "存 %s × %.0f" % [res, amount] }
 
 func _action_trade(state: WorldState, target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
 	var tgt: TeamData = state.teams.get(target_id)
@@ -872,6 +909,12 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 		state.player_pending_targets.erase(target_id)
 		return { "ok": false, "msg": "目標人口不足" }
 	pt.resources["coin"] = coin - RECRUIT_COST_ANON
+	# 被招募 anon 帶走在原團的 treasury 份額
+	var tgt_named: int = tgt.named_members.size() + (1 if tgt.leader_id != -1 else 0)
+	var tgt_anon: int = maxi(tgt.population - tgt_named, 1)
+	var share: float = minf(tgt.anon_treasury / float(tgt_anon), tgt.anon_treasury)
+	tgt.anon_treasury -= share
+	pt.anon_treasury += share
 	tgt.population = maxi(tgt.population - 1, 1)
 	pt.population += 1
 	state.player_pending_targets.erase(target_id)

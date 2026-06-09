@@ -63,6 +63,7 @@ var equip_order: Dictionary = {
 var anon_combat_skill: float = 0.2
 var armed_anon_ratio: float = 0.0
 var anon_wage: float = 1.0
+var anon_treasury: float = 0.0   # 匿名兵 wage 沉澱
 var fatigue: float = 0.0
 var guard_ratio: float = 0.2
 var armor_config: Dictionary = {

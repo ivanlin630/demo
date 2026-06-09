@@ -52,6 +52,12 @@ static func generate_for_team(state: WorldState, team: TeamData,
 
 	var p := generate(state, _team_seed(state, team, seed_offset), role)
 	p.team_id = team.team_id
+	# 升 anon → named 帶 treasury share ×3
+	if anon_pop > 0 and team.anon_treasury > 0.0:
+		var per_share: float = team.anon_treasury / float(anon_pop)
+		var bonus: float = minf(per_share * 3.0, team.anon_treasury)
+		p.coin += bonus
+		team.anon_treasury -= bonus
 	state.persons[p.id] = p
 	return p
 

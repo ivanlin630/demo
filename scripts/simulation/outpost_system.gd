@@ -49,7 +49,19 @@ const FACILITY_DEF: Dictionary = {
 		"leader_pref":       { "野心": 0.2, "貪婪": 0.3 },
 		"current_level_key": "manufacturing_level",
 	},
+	"mint": {
+		"cost":              { "material": 100, "coin": 50, "ticks": 200 },
+		"cap_by_outpost":    { "civilian": [0, 1, 2], "military": [0, 0, 0] },
+		"category":          "經濟",
+		"trigger_check":     "_check_ore_surplus",
+		"leader_pref":       { "貪婪": 0.4, "野心": 0.2 },
+		"current_level_key": "mint_level",
+	},
 }
+
+const MINT_BASE_RATE: float = 10.0
+const GOLD_TO_COIN_RATIO: float = 20.0
+const SILVER_TO_COIN_RATIO: float = 5.0
 
 # 農作/製造設施上限（index = level-1）；軍用不允許
 const FARMING_CAP: Dictionary = {
@@ -75,14 +87,47 @@ const PRISONER_CAP: Dictionary = {
 const MIN_DIST_ANY:  int = 2    # 任意兩據點最小 hex 距離
 const MIN_DIST_SAME: int = 11   # 同類型最小 hex 距離
 
+# 公庫容量（index = level-1）
+const OUTPOST_STORAGE_CAP: Dictionary = {
+	"civilian": [200.0, 500.0, 1500.0],
+	"military": [300.0, 800.0, 2500.0],
+}
+
+func _get_storage_cap(tile: HexTileData, _res: String) -> float:
+	var arr: Array = OUTPOST_STORAGE_CAP.get(tile.outpost_type, [100.0, 300.0, 800.0])
+	return float(arr[clampi(tile.outpost_level - 1, 0, 2)])
+
 # ──────── Tick 驅動 ────────
 
 func tick_all(state: WorldState) -> void:
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.mint_level > 0:
+			_tick_mint(state, tile, state.teams.get(tile.outpost_owner))
 		if tile.construction_team_id == -1:
 			continue
 		_tick_construction(state, tile)
+
+func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
+	if tile.mint_level == 0: return
+	var rate: float = float(tile.mint_level) * MINT_BASE_RATE
+	var gold_qty: float = float(tile.public_storage.get("ore_gold", 0))
+	if gold_qty > 0.0:
+		var convert: float = minf(gold_qty, rate / GOLD_TO_COIN_RATIO)
+		tile.public_storage["ore_gold"] = gold_qty - convert
+		var coin_added: float = convert * GOLD_TO_COIN_RATIO
+		var cap: float = _get_storage_cap(tile, "coin")
+		var cur_coin: float = float(tile.public_storage.get("coin", 0))
+		tile.public_storage["coin"] = minf(cur_coin + coin_added, cap)
+		return
+	var silver_qty: float = float(tile.public_storage.get("ore_silver", 0))
+	if silver_qty > 0.0:
+		var convert: float = minf(silver_qty, rate / SILVER_TO_COIN_RATIO)
+		tile.public_storage["ore_silver"] = silver_qty - convert
+		var coin_added: float = convert * SILVER_TO_COIN_RATIO
+		var cap: float = _get_storage_cap(tile, "coin")
+		var cur_coin: float = float(tile.public_storage.get("coin", 0))
+		tile.public_storage["coin"] = minf(cur_coin + coin_added, cap)
 
 func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	# 找同格上所有 current_task == "建設" 的 team（接手機制）
