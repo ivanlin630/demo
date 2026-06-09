@@ -70,3 +70,15 @@ static func _heuristic(a: Vector2i, b: Vector2i) -> float:
 static func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx: int = b.x - a.x; var dy: int = b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+# ────────── ETA ──────────
+
+static func eta_ticks(team: TeamData, path_cost: float) -> int:
+	var speed_mult: float = _team_speed_mult(team)
+	return int(path_cost * float(MovementSystem.BASE_MOVE_TICKS) / maxf(speed_mult, 0.1))
+
+static func _team_speed_mult(team: TeamData) -> float:
+	var mult: float = 1.0
+	mult *= clampf(1.0 - team.fatigue, 0.1, 1.0)
+	# Hook 預留 speed_class（未實作）
+	return mult

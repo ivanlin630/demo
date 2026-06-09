@@ -91,6 +91,7 @@ func _initialize() -> void:
 	_test_find_path_basic()
 	_test_find_path_cache()
 	_test_find_path_no_path()
+	_test_eta_ticks()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4359,3 +4360,15 @@ func _test_find_path_no_path() -> void:
 	assert(r.path.is_empty(), "無路徑應空 path")
 	assert(r.cost == INF, "cost 應 INF")
 	print("Path Task2c OK")
+
+func _test_eta_ticks() -> void:
+	print("--- Path Task3: eta_ticks ---")
+	var team := TeamData.new()
+	team.population = 5; team.fatigue = 0.0
+	var eta = PathSystem.eta_ticks(team, 5.0)
+	# BASE_MOVE_TICKS = 120, speed_mult = 1.0 → eta = 5 * 120 = 600
+	assert(eta == 600, "eta 應 600，實際=%d" % eta)
+	team.fatigue = 0.5   # speed reduced
+	var eta2 = PathSystem.eta_ticks(team, 5.0)
+	assert(eta2 > eta, "fatigue 應延長 ETA")
+	print("Path Task3 OK")
