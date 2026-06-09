@@ -182,6 +182,12 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 	if state.world.tiles.has(tile_id):
 		var tile: HexTileData = state.world.tiles[tile_id]
 		tile.occupied_by = team.team_id
+		# 撿 abandoned_coin（有 owner 則僅 owner 可撿）
+		if tile.abandoned_coin > 0.0:
+			if tile.outpost_owner == -1 or tile.outpost_owner == team.team_id:
+				team.anon_treasury += tile.abandoned_coin
+				print("[Coin] Team%d 撿 %.0f 遺財" % [team.team_id, tile.abandoned_coin])
+				tile.abandoned_coin = 0.0
 	print("[Move] Team %d 抵達 (%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 	# C: 基建子隊抵達 → 依 task 啟動施工
 	if team.current_task in ["建造", "升級", "擴建"]:

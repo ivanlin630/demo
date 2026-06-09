@@ -119,6 +119,10 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
+		# 滅團遺財：population<=0 且仍有資產 → 轉公庫 / abandoned_coin（idempotent）
+		if team.population <= 0 and (team.anon_treasury > 0.0 or not team.resources.is_empty()):
+			_on_team_extinct(state, team)
+			continue
 		# S11: leader 死亡自動繼承（無 leader 但有 named members）
 		if team.leader_id == -1 and not team.named_members.is_empty():
 			_promote_successor(state, team)
@@ -858,6 +862,31 @@ func _consider_extraction(state: WorldState, team: TeamData) -> void:
 	if extract_score > 0.4:
 		var ratio: float = greed * 0.3
 		_extract_treasury(state, team, ratio, "貪婪驅動")
+
+# 滅團遺財處理：有 outpost → 全資源 + treasury 進公庫；無 outpost → coin 變 abandoned_coin
+func _on_team_extinct(state: WorldState, team: TeamData) -> void:
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null:
+		team.anon_treasury = 0.0
+		team.resources.clear()
+		return
+	if tile.outpost_level > 0:
+		var os := OutpostSystem.new()
+		for res in team.resources:
+			var amt: float = float(team.resources[res])
+			if amt <= 0.0: continue
+			var cap: float = os._get_storage_cap(tile, res)
+			var stored: float = float(tile.public_storage.get(res, 0))
+			tile.public_storage[res] = minf(stored + amt, cap)
+		var coin_cap: float = os._get_storage_cap(tile, "coin")
+		var cur_coin: float = float(tile.public_storage.get("coin", 0))
+		tile.public_storage["coin"] = minf(cur_coin + team.anon_treasury, coin_cap)
+	else:
+		# 無 outpost → 僅 coin/treasury 留地，其他資源消失（無容器）
+		tile.abandoned_coin += team.anon_treasury
+	team.anon_treasury = 0.0
+	team.resources.clear()
+	print("[Extinct] Team%d 滅團遺財處理 at (%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 
 # ──────── 基建 dispatch ────────
 
