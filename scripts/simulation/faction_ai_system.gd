@@ -837,6 +837,7 @@ func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: 
 	if team.anon_treasury <= 0.0 or ratio <= 0.0: return
 	ratio = clampf(ratio, 0.0, 1.0)
 	var amt: float = team.anon_treasury * ratio
+	if amt < 1.0: return   # 忽略可忽略額度，避免空徵用噪音 + 虛增 unrest
 	team.anon_treasury -= amt
 	team.resources["coin"] = float(team.resources.get("coin", 0)) + amt
 	var is_emergency: bool = (reason == "飢餓緊急")

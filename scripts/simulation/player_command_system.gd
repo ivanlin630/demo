@@ -87,6 +87,8 @@ func _setup_registry() -> void:
 		"invite_settle":          _action_invite_settle,
 		"choose_heir":            _action_choose_heir,
 		"extract_treasury":       _action_extract_treasury,
+		"withdraw_from_storage":  _action_withdraw_from_storage,
+		"deposit_to_storage":     _action_deposit_to_storage,
 	}
 
 # 執行玩家主動行動
@@ -118,6 +120,33 @@ func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt
 		return { "ok": false, "msg": "extract_ratio 必須 (0, 1]" }
 	FactionAISystem.new()._extract_treasury(state, pt, ratio, "玩家主動")
 	return { "ok": true, "msg": "徵用 %.0f%%" % (ratio * 100) }
+
+func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var res: String = state.player_state.get("storage_res", "")
+	var amount: float = float(state.player_state.get("storage_amount", 0.0))
+	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定 res/amount" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
+	var stored: float = float(tile.public_storage.get(res, 0))
+	if stored < amount: return { "ok": false, "msg": "公庫不足" }
+	tile.public_storage[res] = stored - amount
+	pt.resources[res] = float(pt.resources.get(res, 0)) + amount
+	return { "ok": true, "msg": "取 %s × %.0f" % [res, amount] }
+
+func _action_deposit_to_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var res: String = state.player_state.get("storage_res", "")
+	var amount: float = float(state.player_state.get("storage_amount", 0.0))
+	if res == "" or amount <= 0: return { "ok": false, "msg": "未指定 res/amount" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or tile.outpost_owner != pt_id: return { "ok": false, "msg": "非自家 outpost" }
+	var have: float = float(pt.resources.get(res, 0))
+	if have < amount: return { "ok": false, "msg": "team 資源不足" }
+	var cap: float = OutpostSystem.new()._get_storage_cap(tile, res)
+	var stored: float = float(tile.public_storage.get(res, 0))
+	if stored + amount > cap: return { "ok": false, "msg": "公庫已滿" }
+	tile.public_storage[res] = stored + amount
+	pt.resources[res] = have - amount
+	return { "ok": true, "msg": "存 %s × %.0f" % [res, amount] }
 
 func _action_trade(state: WorldState, target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
 	var tgt: TeamData = state.teams.get(target_id)

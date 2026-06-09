@@ -86,6 +86,7 @@ func _initialize() -> void:
 	_test_subteam_treasury_split()
 	_test_npc_auto_withdraw()
 	_test_npc_auto_deposit()
+	_test_player_withdraw_deposit()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4266,3 +4267,33 @@ func _test_npc_auto_deposit() -> void:
 	assert(abs(float(team.resources["food"]) - 70.0) < 0.01, "team 應剩 70，實際=%s" % team.resources["food"])
 	assert(abs(float(tile.public_storage["food"]) - 130.0) < 0.01, "公庫應 130")
 	print("CoinStorage Task13b OK")
+
+func _test_player_withdraw_deposit() -> void:
+	print("--- CoinStorage Task14: 玩家領/存 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2
+	tile.outpost_owner = 0
+	tile.public_storage = { "food": 100.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.resources["food"] = 10.0
+	state.teams[0] = team
+	var pcs := PlayerCommandSystem.new()
+	# 領 40
+	state.player_state["storage_res"] = "food"
+	state.player_state["storage_amount"] = 40.0
+	var rw := pcs._action_withdraw_from_storage(state, -1, team, 0)
+	assert(rw.get("ok") == true, "領取應成功")
+	assert(abs(float(team.resources["food"]) - 50.0) < 0.01, "team 應 50")
+	assert(abs(float(tile.public_storage["food"]) - 60.0) < 0.01, "公庫應 60")
+	# 存 20
+	state.player_state["storage_amount"] = 20.0
+	var rd := pcs._action_deposit_to_storage(state, -1, team, 0)
+	assert(rd.get("ok") == true, "存入應成功")
+	assert(abs(float(team.resources["food"]) - 30.0) < 0.01, "team 應 30")
+	assert(abs(float(tile.public_storage["food"]) - 80.0) < 0.01, "公庫應 80")
+	print("CoinStorage Task14 OK")
