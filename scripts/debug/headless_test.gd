@@ -109,6 +109,8 @@ func _initialize() -> void:
 	_test_prosperity_treasury_bonus()
 	_test_prosperity_prey_personality_weight()
 	_test_prosperity_cadence()
+	_test_survival_b_branch_far_outpost_loot()
+	_test_survival_b_branch_near_outpost_return()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4787,3 +4789,67 @@ func _test_prosperity_cadence() -> void:
 	fas.evaluate_all(state, [0])
 	assert(team.prosperity_eval_next_tick == 1080, "軍隊 cadence 應 +360 → 1080，實際=%d" % team.prosperity_eval_next_tick)
 	print("Prosperity Task4 OK")
+
+func _survival_corridor() -> WorldState:
+	# 走廊 grid：x 0..13, y -1..1，連通供 A* 找路
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(0, 14):
+		for y in range(-1, 2):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	return state
+
+func _test_survival_b_branch_far_outpost_loot() -> void:
+	print("--- Prosperity Task5: B 分支 遠 outpost + 殘忍 → 掠 ---")
+	var state := _survival_corridor()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 5
+	team.faction_id = 0; team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "殘忍": 0.8, "好戰": 0.5, "信義": 0.5, "義氣": 0.3 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	# own outpost 遠（dist 13 → ETA 13*120=1560 > 1200 = 5 日）
+	var op_tile: HexTileData = state.world.tiles[13 * 1000 + 0]
+	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
+	# 近且弱 prey（reachable）
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 1
+	prey.faction_id = 1; prey.last_tile_pos = prey.tile_pos
+	prey.resources = { "food": 50 }
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	var fas = FactionAISystem.new()
+	fas._trigger_survival(state, team, "urgent")
+	assert(team.current_task == TeamData.TASK_LOOT, "遠 outpost + 殘忍 應 TASK_LOOT，實際=%s" % team.current_task)
+	assert(team.combat_target == 1, "應 combat_target=1，實際=%d" % team.combat_target)
+	print("Prosperity Task5 OK")
+
+func _test_survival_b_branch_near_outpost_return() -> void:
+	print("--- Prosperity Task5b: 近 outpost → 回家 ---")
+	var state := _survival_corridor()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 5
+	team.faction_id = 0; team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "殘忍": 0.8, "好戰": 0.5, "信義": 0.5, "義氣": 0.3 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	# own outpost 近（dist 2 → ETA 240 < 1200）
+	var op_tile: HexTileData = state.world.tiles[2 * 1000 + 0]
+	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(3, 0); prey.population = 1
+	prey.faction_id = 1; prey.last_tile_pos = prey.tile_pos
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	var fas = FactionAISystem.new()
+	fas._trigger_survival(state, team, "urgent")
+	assert(team.current_task == "return_home", "近 outpost 應 return_home，實際=%s" % team.current_task)
+	print("Prosperity Task5b OK")

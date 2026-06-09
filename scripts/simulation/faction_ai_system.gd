@@ -1230,9 +1230,23 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 
 	team.previous_task = team.current_task
 
-	# Path 1: 有 own outpost → 回家
+	# Path 1: 有 own outpost → 回家（B 分支：遠 outpost + 殘忍/好戰 → 就近掠）
 	var own_pos: Vector2i = _find_own_outpost(state, team)
 	if own_pos != Vector2i(-1, -1):
+		var own_eta_days: float = float(_estimate_eta_to(state, team, own_pos)) / 240.0
+		var ferocity_ok: bool = (
+			float(leader.values.get("殘忍", 0.5)) > 0.5
+			or float(leader.values.get("好戰", 0.5)) > 0.6
+		)
+		if own_eta_days > 5.0 and ferocity_ok:
+			var prey_id: int = _find_weakest_prey(state, team)
+			if prey_id != -1:
+				team.current_task = TeamData.TASK_LOOT
+				team.move_target = state.teams[prey_id].tile_pos
+				team.combat_target = prey_id
+				print("[SurvivalLoot] team=Team%d 遠 outpost(%.1f日) → 掠 Team%d" % [
+					team.team_id, own_eta_days, prey_id])
+				return
 		if severity == "warning" and not _should_abandon_current_task(team, own_pos):
 			team.previous_task = ""
 			return
@@ -1284,6 +1298,11 @@ func _find_own_outpost(state: WorldState, team: TeamData) -> Vector2i:
 		if tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
 			return tile.tile_pos
 	return Vector2i(-1, -1)
+
+func _estimate_eta_to(state: WorldState, team: TeamData, target: Vector2i) -> int:
+	var path: Dictionary = PathSystem.find_path(state, team.tile_pos, target)
+	if path.path.is_empty(): return 9999999
+	return PathSystem.eta_ticks(team, path.cost)
 
 func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1
