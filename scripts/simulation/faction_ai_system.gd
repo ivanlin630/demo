@@ -564,7 +564,40 @@ func _update_equip_order(state: WorldState, team: TeamData) -> void:
 		var guard_count: int = mini(team.population / 2, can_equip)
 		team.equip_order["melee_low"] = mini(int(team.resources.get("weapon_melee_low", 0)) / 2, guard_count)
 
+func _get_player_team_id(state: WorldState) -> int:
+	if state.player_id == -1: return -1
+	var p: PersonData = state.persons.get(state.player_id)
+	if p == null:
+		# 玩家已死，找 leader_id == player_id 或 player_id in named_members 的 team
+		for tid in state.teams:
+			var t: TeamData = state.teams[tid]
+			if t.leader_id == state.player_id or state.player_id in t.named_members:
+				return tid
+		return -1
+	return p.team_id
+
+func _handle_player_leader_death(state: WorldState, team: TeamData) -> void:
+	team.leader_id = -1
+	if team.named_members.is_empty():
+		state.game_over = true
+		state.game_over_reason = "玩家絕後（Team%d 無繼承人）" % team.team_id
+		print("[GameOver] %s" % state.game_over_reason)
+		return
+	state.player_forced_event = {
+		"action": "choose_heir",
+		"team_id": team.team_id,
+		"candidates": team.named_members.duplicate(),
+	}
+	state.player_forced_event_id = "heir_%d" % state.world.current_tick
+	print("[Heir] 玩家 leader 死亡，等待選繼承人 (Team%d, %d 候選)" % [
+		team.team_id, team.named_members.size()])
+
 func _promote_successor(state: WorldState, team: TeamData) -> void:
+	# H: 玩家 team 走 _handle_player_leader_death
+	var player_team_id: int = _get_player_team_id(state)
+	if state.player_id != -1 and team.team_id == player_team_id:
+		_handle_player_leader_death(state, team)
+		return
 	# 從 named_members 選統領技能最高者升任 leader（S11 fix）
 	var best_pid: int = -1
 	var best_cmd: float = -1.0
