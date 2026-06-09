@@ -80,6 +80,7 @@ func _initialize() -> void:
 	_test_promote_anon_takes_share()
 	_test_extraction()
 	_test_player_extract_treasury()
+	_test_encounter_treasury_loot()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4138,3 +4139,21 @@ func _test_player_extract_treasury() -> void:
 	assert(float(team.anon_treasury) == 50.0, "treasury 應 50")
 	assert(float(team.resources["coin"]) == 50.0, "coin 應 50")
 	print("CoinStorage Task9 OK")
+
+func _test_encounter_treasury_loot() -> void:
+	print("--- CoinStorage Task10: encounter loot 比例 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var loser := TeamData.new()
+	loser.team_id = 0; loser.population = 15
+	loser.anon_treasury = 100.0
+	state.teams[0] = loser
+	var winner := TeamData.new()
+	winner.team_id = 1
+	winner.anon_treasury = 0.0
+	state.teams[1] = winner
+	var enc := EncounterSystem.new()
+	enc._loot_treasury_share(state, loser, winner, 5, 20)
+	assert(float(winner.anon_treasury) == 25.0, "winner 應拿 25，實際=%s" % winner.anon_treasury)
+	assert(float(loser.anon_treasury) == 75.0, "loser 剩 75")
+	print("CoinStorage Task10 OK")

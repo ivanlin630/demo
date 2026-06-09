@@ -1011,6 +1011,23 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 		team.team_id, named_ids.size(), spawn_count,
 		team.armed_anon_ratio * 100, team.population])
 
+func _loot_treasury_share(_state: WorldState, loser: TeamData, winner: TeamData,
+		anon_lost: int, original_anon: int) -> void:
+	if loser.anon_treasury <= 0: return
+	if original_anon <= 0:
+		# 全給 winner
+		winner.anon_treasury += loser.anon_treasury
+		loser.anon_treasury = 0.0
+		return
+	var ratio: float = clampf(float(anon_lost) / float(original_anon), 0.0, 1.0)
+	var amt: float = loser.anon_treasury * ratio
+	loser.anon_treasury -= amt
+	winner.anon_treasury += amt
+	# 全滅補拿剩餘
+	if loser.population == 0:
+		winner.anon_treasury += loser.anon_treasury
+		loser.anon_treasury = 0.0
+
 func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var atk_id: int = state.encounter_attacker_id
 	var def_id: int = state.encounter_defender_id
@@ -1082,6 +1099,19 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	for team_id in [atk_id, def_id]:
 		var t: TeamData = state.teams.get(team_id)
 		if t: t.combat_target = -1
+
+	# 公庫 treasury 按 anon 損失比例 loot
+	var loser_team_treasury: TeamData = state.teams.get(loser_id)
+	if loser_team_treasury != null and winner_team != null:
+		var original_anon: int = 0
+		var anon_lost: int = 0
+		for u in state.encounter_units:
+			if u["team_id"] != loser_id: continue
+			if u["person_id"] != -1: continue
+			original_anon += 1
+			if is_dead(u, state) or u.get("is_prisoner", false):
+				anon_lost += 1
+		_loot_treasury_share(state, loser_team_treasury, winner_team, anon_lost, original_anon)
 
 	print("[Encounter] 遭遇戰結算完成 result=%s" % result)
 
