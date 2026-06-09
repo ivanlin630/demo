@@ -118,6 +118,7 @@ func _initialize() -> void:
 	_test_attack_defeat_reaction()
 	# ── Combat Engagement ──
 	_test_movement_returns_moved_and_arrived()
+	_test_process_on_move_triggers_combat()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4987,3 +4988,31 @@ func _test_movement_returns_moved_and_arrived() -> void:
 	assert(not (0 in result["arrived"]), "A 不應 arrived（仍在途），實際=%s" % str(result["arrived"]))
 	assert(0 in result["moved"] and 1 in result["moved"], "兩 team 都 moved，實際=%s" % str(result["moved"]))
 	print("Combat Task1 OK")
+
+func _test_process_on_move_triggers_combat() -> void:
+	print("--- Combat Task2: moved 不 arrived 同格 → combat ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(0, 7):
+		for y in range(0, 7):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# 攻擊團 A：與 prey 同格，但 move_target 指向遠處（途經，非 arrived）
+	var a := TeamData.new()
+	a.team_id = 0; a.tile_pos = Vector2i(1, 1); a.population = 5
+	a.faction_id = 0; a.current_task = "攻擊"; a.move_target = Vector2i(5, 5)
+	var al := PersonData.new(); al.id = 10
+	state.persons[10] = al; a.leader_id = 10
+	state.teams[0] = a
+	# prey P：同格 (1,1)
+	var p := TeamData.new()
+	p.team_id = 1; p.tile_pos = Vector2i(1, 1); p.population = 3
+	p.faction_id = 1
+	var pl := PersonData.new(); pl.id = 20
+	state.persons[20] = pl; p.leader_id = 20
+	state.teams[1] = p
+	state.team_discovered[0] = [1]; state.team_discovered[1] = [0]
+	InteractionSystem.new().process_on_move(state, [0], [0, 1])
+	assert(a.combat_target == 1, "途經同格應 start_combat（combat_target=1），實際=%d" % a.combat_target)
+	print("Combat Task2 OK")
