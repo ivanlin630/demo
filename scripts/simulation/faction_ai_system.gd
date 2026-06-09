@@ -135,6 +135,18 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
 		team.team_id, prey_id, score])
 
+func _is_prosperity_candidate(state: WorldState, team: TeamData) -> bool:
+	if team.parent_team_id != -1: return false   # 子隊不主動發動
+	if team.faction_id == -1: return true          # 獨立團
+	var f = state.factions.get(team.faction_id)
+	return f != null and f.leader_team_id == team.team_id
+
+# 事件觸發立即重評（新發現 / pop 暴跌 / 性格改變）
+static func mark_prosperity_recheck(state: WorldState, observer_team_id: int) -> void:
+	var t: TeamData = state.teams.get(observer_team_id)
+	if t != null:
+		t.prosperity_eval_next_tick = state.world.current_tick
+
 func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	if tile == null or tile.outpost_level == 0: return 0
@@ -220,6 +232,12 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_promote_successor(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）
+		if _is_prosperity_candidate(state, team) \
+				and state.world.current_tick >= team.prosperity_eval_next_tick:
+			_evaluate_prosperity_attack(state, team)
+			var cad: int = PROSPERITY_CADENCE_MILITARY if "軍隊" in team.tags else PROSPERITY_CADENCE
+			team.prosperity_eval_next_tick = state.world.current_tick + cad
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			_consider_extraction(state, team)

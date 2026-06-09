@@ -108,6 +108,7 @@ func _initialize() -> void:
 	_test_prosperity_same_faction_skip()
 	_test_prosperity_treasury_bonus()
 	_test_prosperity_prey_personality_weight()
+	_test_prosperity_cadence()
 	quit()
 
 func _run_sim_test() -> void:
@@ -4753,3 +4754,36 @@ func _test_prosperity_prey_personality_weight() -> void:
 	assert(FactionAISystem.find_prosperity_prey(state, team, ambitious) == 2,
 		"高野心應選接壤 prey(2)")
 	print("Prosperity Task14 OK")
+
+func _test_prosperity_cadence() -> void:
+	print("--- Prosperity Task4: cadence ---")
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.faction_id = -1; team.anon_combat_skill = 0.5
+	team.resources = { "food": 200, "weapon_melee_low": 10 }
+	team.current_task = TeamData.TASK_IDLE
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 0.5, "好戰": 0.5, "信義": 0.5, "殘忍": 0.5, "貪婪": 0.5, "慎重": 0.5 }
+	state.persons[100] = leader
+	team.leader_id = 100
+	state.team_discovered[0] = []   # 無 prey → 不觸發攻擊，只看 cadence
+	var fas = FactionAISystem.new()
+	state.world.current_tick = 0
+	fas.evaluate_all(state, [0])
+	assert(team.prosperity_eval_next_tick == 720, "tick0 後 next 應 720，實際=%d" % team.prosperity_eval_next_tick)
+	state.world.current_tick = 360
+	fas.evaluate_all(state, [0])
+	assert(team.prosperity_eval_next_tick == 720, "tick360 應跳過，next 仍 720，實際=%d" % team.prosperity_eval_next_tick)
+	state.world.current_tick = 720
+	fas.evaluate_all(state, [0])
+	assert(team.prosperity_eval_next_tick == 1440, "tick720 後 next 應 1440，實際=%d" % team.prosperity_eval_next_tick)
+	# 軍隊 tag → cadence 360
+	team.tags = ["軍隊"]
+	team.prosperity_eval_next_tick = 720
+	state.world.current_tick = 720
+	fas.evaluate_all(state, [0])
+	assert(team.prosperity_eval_next_tick == 1080, "軍隊 cadence 應 +360 → 1080，實際=%d" % team.prosperity_eval_next_tick)
+	print("Prosperity Task4 OK")
