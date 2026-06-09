@@ -72,6 +72,7 @@ func _initialize() -> void:
 	_test_encounter_kills_player_triggers_heir()
 	# ── Coin Economy + Outpost Public Storage ──
 	_test_coin_storage_fields()
+	_test_storage_cap()
 	quit()
 
 func _run_sim_test() -> void:
@@ -3985,3 +3986,15 @@ func _test_coin_storage_fields() -> void:
 	assert(tile.abandoned_coin == 0.0, "abandoned_coin 預設 0")
 	assert(tile.mint_level == 0, "mint_level 預設 0")
 	print("CoinStorage Task1 OK")
+
+func _test_storage_cap() -> void:
+	print("--- CoinStorage Task2: storage cap ---")
+	var tile := HexTileData.new()
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	var os := OutpostSystem.new()
+	assert(os._get_storage_cap(tile, "food") == 200.0, "civilian L1 應 200")
+	tile.outpost_level = 3
+	assert(os._get_storage_cap(tile, "food") == 1500.0, "civilian L3 應 1500")
+	tile.outpost_type = "military"; tile.outpost_level = 2
+	assert(os._get_storage_cap(tile, "food") == 800.0, "military L2 應 800")
+	print("CoinStorage Task2 OK")

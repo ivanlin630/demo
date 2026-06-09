@@ -75,6 +75,16 @@ const PRISONER_CAP: Dictionary = {
 const MIN_DIST_ANY:  int = 2    # 任意兩據點最小 hex 距離
 const MIN_DIST_SAME: int = 11   # 同類型最小 hex 距離
 
+# 公庫容量（index = level-1）
+const OUTPOST_STORAGE_CAP: Dictionary = {
+	"civilian": [200.0, 500.0, 1500.0],
+	"military": [300.0, 800.0, 2500.0],
+}
+
+func _get_storage_cap(tile: HexTileData, _res: String) -> float:
+	var arr: Array = OUTPOST_STORAGE_CAP.get(tile.outpost_type, [100.0, 300.0, 800.0])
+	return float(arr[clampi(tile.outpost_level - 1, 0, 2)])
+
 # ──────── Tick 驅動 ────────
 
 func tick_all(state: WorldState) -> void:
