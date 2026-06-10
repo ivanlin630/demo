@@ -566,8 +566,11 @@ static func _spill_back_public_storage(state: WorldState, team: TeamData,
 func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 	var a_original: Dictionary = _absorb_public_storage(state, a)
 	var b_original: Dictionary = _absorb_public_storage(state, b)
+	var a_coin_before: float = float(a.resources.get("coin", 0))
 	_attempt_trade_direction(state, a, b)
 	_attempt_trade_direction(state, b, a)
+	if absf(float(a.resources.get("coin", 0)) - a_coin_before) > 0.001:
+		print("[Market] Team%d <-> Team%d 成交（公庫接入）" % [a.team_id, b.team_id])
 	_spill_back_public_storage(state, a, a_original)
 	_spill_back_public_storage(state, b, b_original)
 	if a.current_task == TeamData.TASK_TRADE: a.current_task = TeamData.TASK_IDLE
