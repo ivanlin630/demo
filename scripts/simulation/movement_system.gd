@@ -16,7 +16,11 @@ const TERRAIN_SPEED_MULT: Dictionary = {
 const BASE_CARRY: float   = 10.0   # TEST VALUE
 const MOUNT_BONUS: float  = 15.0   # TEST VALUE
 const WAGON_BONUS: float  = 40.0   # TEST VALUE
-const STRAY_RATE: float   = 0.1    # TEST VALUE 超額馱獸流失率
+# mount/wagon 速度公式參數（TEST VALUE）
+const MOUNT_SPEED_FACTOR: float = 2.0    # mount_ratio 速度加成係數
+const MOUNT_SIZE_CAP: float     = 50.0   # size_penalty 飽和點（騎兵數）
+const MOUNT_SIZE_PENALTY: float = 0.2    # 大團騎兵協調混亂最大懲罰
+const WAGON_SPEED_PENALTY: float = 0.3   # wagon_ratio 速度懲罰係數
 
 const WAGON_TERRAIN_MULT: Dictionary = {
 	"plains": 0.9, "forest": 0.4, "mountain": 0.2
@@ -43,7 +47,6 @@ func process(state: WorldState, team_ids: Array,
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
-		_tick_stray_mounts(team)
 		# 居民鎖：PRODUCE + 在自家 outpost + task 不在脫離清單
 		if team.tags.has(TeamData.TAG_PRODUCE):
 			var fai := FactionAISystem.new()
@@ -80,7 +83,9 @@ func get_effective_mounts(team: TeamData) -> int:
 	return mini(int(team.resources.get("mounts", 0)), team.population)
 
 func get_effective_wagons(team: TeamData) -> int:
-	return mini(int(team.resources.get("wagons", 0)), team.population)
+	# 1 人 1 獸：wagon 用剩餘人口（pop - effective_mounts）上限
+	var rem: int = team.population - get_effective_mounts(team)
+	return mini(int(team.resources.get("wagons", 0)), maxi(rem, 0))
 
 func get_carry_capacity(team: TeamData) -> float:
 	return team.population * BASE_CARRY \
@@ -102,11 +107,6 @@ func _resource_weight(key: String) -> float:
 		"armor_high":        return 7.0
 		"mounts", "wagons":  return 0.0  # 搬運工具本身不計重
 		_:                   return 1.0
-
-func _tick_stray_mounts(team: TeamData) -> void:
-	var excess: int = int(team.resources.get("mounts", 0)) - team.population
-	if excess > 0:
-		team.resources["mounts"] = int(team.resources["mounts"]) - ceili(excess * STRAY_RATE)
 
 func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> int:
 	var speed: float = _compute_team_speed(state, team) * time_mult
@@ -134,6 +134,27 @@ func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> in
 	return clamp(int(round(float(BASE_MOVE_TICKS) / maxf(speed, 0.01))), MIN_MOVE_TICKS, MAX_MOVE_TICKS)
 
 func _compute_team_speed(state: WorldState, team: TeamData) -> float:
+	var base_speed: float = _compute_base_team_speed(state, team)
+	return base_speed * _compute_mount_bonus(team) * _compute_wagon_penalty(team)
+
+# mount 速度加成：(1 + ratio*FACTOR) * size_penalty
+func _compute_mount_bonus(team: TeamData) -> float:
+	if team.population <= 0: return 1.0
+	var em: int = get_effective_mounts(team)
+	if em == 0: return 1.0
+	var ratio: float = float(em) / float(team.population)
+	var size_penalty: float = 1.0 - clampf(float(em) / MOUNT_SIZE_CAP, 0.0, 1.0) * MOUNT_SIZE_PENALTY
+	return (1.0 + ratio * MOUNT_SPEED_FACTOR) * size_penalty
+
+# wagon 速度懲罰：1 - ratio*PENALTY（無 size penalty）
+func _compute_wagon_penalty(team: TeamData) -> float:
+	if team.population <= 0: return 1.0
+	var ew: int = get_effective_wagons(team)
+	if ew == 0: return 1.0
+	var ratio: float = float(ew) / float(team.population)
+	return 1.0 - ratio * WAGON_SPEED_PENALTY
+
+func _compute_base_team_speed(state: WorldState, team: TeamData) -> float:
 	var total_speed: float = 0.0
 	var total_count: int = 0
 	var named_ids: Array = team.named_members.duplicate()  # duplicate() — 避免直接修改 team.named_members
@@ -194,6 +215,13 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 	if state.world.tiles.has(tile_id):
 		var tile: HexTileData = state.world.tiles[tile_id]
 		tile.occupied_by = team.team_id
+		# 野馬採集：站到有 wild_horses 的格 → 收編為 mounts
+		var wh: int = int(tile.resources.get("wild_horses", 0))
+		if wh > 0:
+			team.resources["mounts"] = int(team.resources.get("mounts", 0)) + wh
+			tile.resources["wild_horses"] = 0
+			print("[Mount] Team%d 採集野馬 +%d at (%d,%d)" % [
+				team.team_id, wh, team.tile_pos.x, team.tile_pos.y])
 		# 撿 abandoned_coin（有 owner 則僅 owner 可撿）
 		if tile.abandoned_coin > 0.0:
 			if tile.outpost_owner == -1 or tile.outpost_owner == team.team_id:
