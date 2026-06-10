@@ -111,7 +111,12 @@ const OUTPOST_STORAGE_CAP: Dictionary = {
 	"military": [300.0, 800.0, 2500.0],
 }
 
-func _get_storage_cap(tile: HexTileData, _res: String) -> float:
+# mount 公庫專屬容量（index = level-1）
+const MOUNT_STORAGE_CAP: Array = [10.0, 30.0, 80.0]
+
+func _get_storage_cap(tile: HexTileData, res: String) -> float:
+	if res == "mounts":
+		return MOUNT_STORAGE_CAP[clampi(tile.outpost_level - 1, 0, 2)]
 	var arr: Array = OUTPOST_STORAGE_CAP.get(tile.outpost_type, [100.0, 300.0, 800.0])
 	return float(arr[clampi(tile.outpost_level - 1, 0, 2)])
 
@@ -146,7 +151,12 @@ func produce_stable_day(state: WorldState, tile: HexTileData, day_fraction: floa
 	if tile.stable_progress >= 1.0 - 1e-9:
 		var produced: int = int(tile.stable_progress + 1e-9)
 		tile.stable_progress -= float(produced)
-		owner.resources["mounts"] = int(owner.resources.get("mounts", 0)) + produced
+		# 改進公庫（受 cap 限制）而非 owner team
+		var cap: float = _get_storage_cap(tile, "mounts")
+		var stored: float = float(tile.public_storage.get("mounts", 0))
+		var space: float = maxf(cap - stored, 0.0)
+		var actual: float = minf(float(produced), space)
+		tile.public_storage["mounts"] = stored + actual
 
 func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 	if tile.mint_level == 0: return

@@ -147,6 +147,13 @@ func _initialize() -> void:
 	_test_wild_horses_no_auto_collect()
 	_test_mount_loot_total_wipe()
 	_test_mount_loot_partial()
+	_test_mounts_in_public_resources()
+	_test_stable_produces_to_public_storage()
+	_test_outpost_collect_wild_horses()
+	_test_outpost_collect_no_outpost_skip()
+	_test_outpost_collect_cap_limit()
+	_test_auto_withdraw_on_active_task()
+	_test_no_withdraw_when_idle()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5378,7 +5385,9 @@ func _test_stable_produces_mounts() -> void:
 	# 直接呼叫產出 1 個月份（30 天 × 每天 1 次）→ Lv1 = 0.3/day → ~9
 	for _d in range(30):
 		os.produce_stable_day(state, tile, 1.0)
-	assert(team.resources["mounts"] == 9, "1月 Lv1 應 +9 mounts, 實際 %d" % int(team.resources["mounts"]))
+	# 公庫系統：產出進 tile.public_storage["mounts"]，不進 owner team
+	assert(int(tile.public_storage.get("mounts", 0)) == 9, "1月 Lv1 公庫應 +9 mounts, 實際 %d" % int(tile.public_storage.get("mounts", 0)))
+	assert(int(team.resources.get("mounts", 0)) == 0, "owner team 不應拿 mount")
 	assert(float(team.resources["food"]) < 1000.0, "stable 應耗 food")
 	print("Mount Task3b OK")
 
@@ -5458,3 +5467,135 @@ func _test_mount_loot_partial() -> void:
 	assert(int(winner.resources["mounts"]) == 3, "死60%% winner +3, 實際 %d" % int(winner.resources["mounts"]))
 	assert(int(loser.resources["mounts"]) == 2, "loser 剩 2")
 	print("Mount Task5b OK")
+
+# ──────── Mount 公庫系統 ────────
+
+func _test_mounts_in_public_resources() -> void:
+	print("--- MountStorage Task1: mounts in PUBLIC_RESOURCES ---")
+	assert("mounts" in ResourceSystem.PUBLIC_RESOURCES)
+	assert(OutpostSystem.new()._get_storage_cap(_mk_outpost_tile(1), "mounts") == 10.0)
+	print("MountStorage Task1 OK")
+
+func _mk_outpost_tile(level: int) -> HexTileData:
+	var tile := HexTileData.new()
+	tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_level = level; tile.outpost_owner = 0
+	return tile
+
+func _test_stable_produces_to_public_storage() -> void:
+	print("--- MountStorage Task2: stable 產出進公庫 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 5 * 1000 + 5; tile.tile_pos = Vector2i(5, 5)
+	tile.terrain = "plains"; tile.outpost_type = "civilian"
+	tile.outpost_level = 1; tile.outpost_owner = 0
+	tile.stable_level = 1
+	state.world.tiles[tile.tile_id] = tile
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.resources = { "food": 500 }
+	state.teams[0] = owner
+	var os := OutpostSystem.new()
+	# 跑 4 天確保 stable progress >= 1（0.3/day）
+	os.produce_stable_day(state, tile, 1.0)
+	os.produce_stable_day(state, tile, 1.0)
+	os.produce_stable_day(state, tile, 1.0)
+	os.produce_stable_day(state, tile, 1.0)
+	var stored: int = int(tile.public_storage.get("mounts", 0))
+	assert(stored >= 1, "公庫應 >= 1, 實際=%d" % stored)
+	assert(int(owner.resources.get("mounts", 0)) == 0, "owner team 不應拿 mount")
+	print("MountStorage Task2 OK (stored=%d)" % stored)
+
+func _test_outpost_collect_wild_horses() -> void:
+	print("--- MountStorage Task3: outpost 鄰格採野馬 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = WorldState.TICKS_PER_DAY   # day 邊界
+	var tile_op := HexTileData.new()
+	tile_op.tile_id = 0; tile_op.tile_pos = Vector2i(0, 0)
+	tile_op.outpost_level = 1; tile_op.outpost_owner = 0
+	state.world.tiles[tile_op.tile_id] = tile_op
+	var ntile := HexTileData.new()
+	ntile.tile_id = 1 * 1000 + 0; ntile.tile_pos = Vector2i(1, 0)
+	ntile.resources["wild_horses"] = 2
+	state.world.tiles[ntile.tile_id] = ntile
+	var hs := HarvestSystem.new()
+	hs.tick_all(state)
+	assert(int(tile_op.public_storage.get("mounts", 0)) == 2,
+		"應收 2，實際=%d" % int(tile_op.public_storage.get("mounts", 0)))
+	assert(int(ntile.resources.get("wild_horses", 0)) == 0, "野馬應清空")
+	print("MountStorage Task3 OK")
+
+func _test_outpost_collect_no_outpost_skip() -> void:
+	print("--- MountStorage Task3b: 無 outpost 不採 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = WorldState.TICKS_PER_DAY
+	var ntile := HexTileData.new()
+	ntile.tile_id = 0; ntile.tile_pos = Vector2i(0, 0)
+	ntile.resources["wild_horses"] = 2   # 無任何 outpost
+	state.world.tiles[ntile.tile_id] = ntile
+	var hs := HarvestSystem.new()
+	hs.tick_all(state)
+	assert(int(ntile.resources.get("wild_horses", 0)) == 2, "無 outpost 野馬保留")
+	print("MountStorage Task3b OK")
+
+func _test_outpost_collect_cap_limit() -> void:
+	print("--- MountStorage Task3c: 公庫滿不收 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = WorldState.TICKS_PER_DAY
+	var tile_op := HexTileData.new()
+	tile_op.tile_id = 0; tile_op.tile_pos = Vector2i(0, 0)
+	tile_op.outpost_level = 1; tile_op.outpost_owner = 0
+	tile_op.public_storage["mounts"] = 10.0   # 已滿（Lv1 cap=10）
+	state.world.tiles[tile_op.tile_id] = tile_op
+	var ntile := HexTileData.new()
+	ntile.tile_id = 1 * 1000 + 0; ntile.tile_pos = Vector2i(1, 0)
+	ntile.resources["wild_horses"] = 2
+	state.world.tiles[ntile.tile_id] = ntile
+	var hs := HarvestSystem.new()
+	hs.tick_all(state)
+	assert(int(tile_op.public_storage.get("mounts", 0)) == 10, "滿庫不增")
+	assert(int(ntile.resources.get("wild_horses", 0)) == 2, "野馬保留")
+	print("MountStorage Task3c OK")
+
+func _test_auto_withdraw_on_active_task() -> void:
+	print("--- MountStorage Task4a: active task 自動 withdraw ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 5 * 1000 + 5; tile.tile_pos = Vector2i(5, 5)
+	tile.outpost_level = 1; tile.outpost_owner = 0
+	tile.public_storage["mounts"] = 10.0
+	state.world.tiles[tile.tile_id] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	team.tile_pos = Vector2i(5, 5)
+	team.current_task = TeamData.TASK_ATTACK
+	team.resources = { "mounts": 0 }
+	state.teams[0] = team
+	FactionAISystem.new()._auto_withdraw_mounts(state, team)
+	assert(int(team.resources.get("mounts", 0)) == 5, "應拉 5（pop10×0.5），實際=%d" % int(team.resources.get("mounts", 0)))
+	assert(int(tile.public_storage.get("mounts", 0)) == 5, "公庫剩 5")
+	print("MountStorage Task4a OK")
+
+func _test_no_withdraw_when_idle() -> void:
+	print("--- MountStorage Task4b: idle 不 withdraw ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 5 * 1000 + 5; tile.tile_pos = Vector2i(5, 5)
+	tile.outpost_level = 1; tile.outpost_owner = 0
+	tile.public_storage["mounts"] = 10.0
+	state.world.tiles[tile.tile_id] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	team.tile_pos = Vector2i(5, 5)
+	team.current_task = TeamData.TASK_IDLE
+	team.resources = { "mounts": 0 }
+	state.teams[0] = team
+	FactionAISystem.new()._auto_withdraw_mounts(state, team)
+	assert(int(team.resources.get("mounts", 0)) == 0, "idle 不拉")
+	assert(int(tile.public_storage.get("mounts", 0)) == 10, "公庫不變")
+	print("MountStorage Task4b OK")
