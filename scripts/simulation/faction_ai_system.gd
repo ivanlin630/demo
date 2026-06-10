@@ -742,6 +742,16 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 	if sub.current_task == TeamData.TASK_BUILD:
 		return  # C: 施工中（建設），不打斷、不召回
+	if sub.current_task == "安頓":
+		# 抵達自家 faction outpost → 就地安頓（無需 co-located team；獨自抵達即轉居民）
+		# 未到則保持 移動/安頓 task，不進 merge_queue（避免被召回母團）
+		var settle_tile: HexTileData = state.world.tiles.get(
+			sub.tile_pos.x * 1000 + sub.tile_pos.y)
+		if settle_tile != null and settle_tile.outpost_owner != -1:
+			var o: TeamData = state.teams.get(settle_tile.outpost_owner)
+			if o != null and o.faction_id == sub.faction_id:
+				InteractionSystem.new()._convert_to_resident(state, sub)
+		return
 	if sub.current_task == TeamData.TASK_ESCORT:
 		_update_escort(state, sub)
 		_check_discipline(state, sub)
