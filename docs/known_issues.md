@@ -266,7 +266,8 @@
 | **M** | NPC promote/train AI | W4 |
 | **M** | DiplomacyAI 平衡 | Bug5 |
 | **M** | multi runner schedule 注入 | Bug6 |
-| **M** | mounts/wagons speed_class | mounts/wagons 無速度 bonus |
+| **M** | 戰場 mount unit-level | encounter 騎兵 unit + 衝擊 + 機動 + 戰場死亡（mounts/wagons spec 後續）|
+| **L** | mount 細分 | 戰馬/馱馬/拉車馬；輕車/重車；草地補糧；城市買飼料 |
 | **M** | named 升階機制 | anon tier spec 列後續 |
 | **L** | tag drift | leader / event 改 tag |
 | **L** | 戰俘處置 | 賣/屠/招降 |

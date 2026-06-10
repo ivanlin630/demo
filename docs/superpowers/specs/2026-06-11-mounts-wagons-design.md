@@ -29,12 +29,6 @@
 6. 移除 `_tick_stray_mounts`（mount 不流失）
 7. 戰利品 loot 公式：勝方 loot = prey_mounts × kill_ratio
 
-## 不在範圍
-
-- 戰場 mount unit-level（騎兵衝擊、機動）→ 後續 spec
-- mount 死亡（戰場 / 飢餓死亡）→ 後續 spec
-- 武裝戰馬 / 重騎兵 等子類 → 後續
-
 ## 速度公式
 
 ### Mount bonus
@@ -233,10 +227,3 @@ wagons 不算 mount，視為「物資」走既有 loot 公式。
 - 馬廄眷養 → 玩家 / NPC 有 mount 取得 channel
 - 野外採集 → 早期 mount 來源（極稀）
 - 戰利品 → 滅敵 reward 含 mount
-
-## 後續（另 spec）
-
-- **戰場 mount unit-level**：encounter 騎兵 unit + 衝擊 + 機動 + 戰場死亡
-- mount 種類細分（戰馬 vs 馱馬 vs 拉車馬）
-- wagon 種類（輕車 vs 重車）
-- 餵養機制細化（草地補糧、城市買飼料）
