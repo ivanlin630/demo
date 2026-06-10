@@ -77,8 +77,6 @@ func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Arr
 			if other.tile_pos != arrived.tile_pos:
 				continue
 			_try_interact(state, arrived_id, other_id)
-		# trader 抵達無 owner 駐紮的 outpost tile → 仍可跟公庫交易
-		_try_trader_vs_outpost(state, arrived)
 	HealthSystem.tick_natural_regen(state)
 
 # 寬版同格 scan：凡「本 tick 有移動」的 team（不限走到最終目標）即掃同格互動。
@@ -104,8 +102,6 @@ func process_on_move(state: WorldState, moved_ids: Array, all_team_ids: Array) -
 			if other.tile_pos != moved.tile_pos:
 				continue
 			_try_interact(state, moved_id, other_id)
-		# trader 抵達無 owner 駐紮的 outpost tile → 仍可跟公庫交易
-		_try_trader_vs_outpost(state, moved)
 	HealthSystem.tick_natural_regen(state)
 
 # ──────── 整備值恢復 + 傷兵治療（交戰中均不進行） ────────
@@ -525,13 +521,18 @@ func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int,
 	buyer.resources["coin"]  = float(buyer.resources.get("coin", 0)) - qty * price
 	seller.resources["coin"] = float(seller.resources.get("coin", 0)) + qty * price
 
-# 在自家 outpost 上 → absorb public_storage 進 team.resources（臨時）
+# 「村長代管公庫」：居民團（PRODUCE+在自家 faction outpost）或 outpost owner team
+# 在 outpost tile 上時，absorb public_storage 進 team.resources（臨時）
 # 回傳 { res: original_team_amount } 供 spill_back 還原
 static func _absorb_public_storage(state: WorldState, team: TeamData) -> Dictionary:
 	var original: Dictionary = {}
 	var tile: HexTileData = state.world.tiles.get(
 		team.tile_pos.x * 1000 + team.tile_pos.y)
-	if tile == null or tile.outpost_owner != team.team_id: return original
+	if tile == null or tile.outpost_owner == -1: return original
+	# 條件：outpost owner 本身 或 居民團（PRODUCE+同 faction）
+	var can_absorb: bool = (tile.outpost_owner == team.team_id) \
+		or FactionAISystem.new()._is_resident_team(state, team)
+	if not can_absorb: return original
 	for res in tile.public_storage:
 		var public_amount: float = float(tile.public_storage[res])
 		if public_amount <= 0: continue
@@ -546,7 +547,10 @@ static func _spill_back_public_storage(state: WorldState, team: TeamData,
 		original: Dictionary) -> void:
 	var tile: HexTileData = state.world.tiles.get(
 		team.tile_pos.x * 1000 + team.tile_pos.y)
-	if tile == null or tile.outpost_owner != team.team_id: return
+	if tile == null or tile.outpost_owner == -1: return
+	var can_spill: bool = (tile.outpost_owner == team.team_id) \
+		or FactionAISystem.new()._is_resident_team(state, team)
+	if not can_spill: return
 	for res in original:
 		var current: float = float(team.resources.get(res, 0))
 		var orig: float = float(original[res])
@@ -575,27 +579,6 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 	_spill_back_public_storage(state, b, b_original)
 	if a.current_task == TeamData.TASK_TRADE: a.current_task = TeamData.TASK_IDLE
 	if b.current_task == TeamData.TASK_TRADE: b.current_task = TeamData.TASK_IDLE
-
-# trader 抵達 outpost tile，但 owner team 不在 tile 上 → 仍可跟公庫交易。
-# 回傳 true 表示已處理。
-func _try_trader_vs_outpost(state: WorldState, trader: TeamData) -> bool:
-	if trader.current_task != TeamData.TASK_TRADE: return false
-	var tile: HexTileData = state.world.tiles.get(
-		trader.tile_pos.x * 1000 + trader.tile_pos.y)
-	if tile == null or tile.outpost_owner == -1: return false
-	var owner: TeamData = state.teams.get(tile.outpost_owner)
-	if owner == null: return false
-	if owner.tile_pos == trader.tile_pos: return false   # owner 同格 → 走正常 _resolve_market
-	_resolve_market_trader_vs_storage(state, trader, owner)
-	return true
-
-# owner 暫時 sync tile_pos 讓 absorb 生效，跑完還原。HACK：乾淨版需獨立 trade path。
-func _resolve_market_trader_vs_storage(state: WorldState, trader: TeamData,
-		owner: TeamData) -> void:
-	var owner_original_tile: Vector2i = owner.tile_pos
-	owner.tile_pos = trader.tile_pos   # 暫設同 tile 讓 absorb 生效
-	_resolve_market(state, trader, owner)
-	owner.tile_pos = owner_original_tile
 
 func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamData) -> void:
 	var buyer_coin: float = float(buyer.resources.get("coin", 0))

@@ -175,7 +175,7 @@ func _initialize() -> void:
 	_test_absorb_only_at_own_outpost()
 	_test_spill_back_with_cap_overflow()
 	_test_resolve_market_absorbs_storage()
-	_test_trader_vs_empty_outpost()
+	_test_resident_team_absorbs_public_storage()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5974,34 +5974,26 @@ func _test_resolve_market_absorbs_storage() -> void:
 	assert(float(b.resources.get("coin", 0)) > 0.0, "owner 應收到 coin")
 	print("TradePublic Task2 OK")
 
-func _test_trader_vs_empty_outpost() -> void:
-	print("--- TradePublic Task3: trader 抵達空 outpost 仍交易 ---")
+func _test_resident_team_absorbs_public_storage() -> void:
+	# 改設計：trader 跟 居民團（PRODUCE+在自家 faction outpost）交易，居民團代管公庫
+	print("--- TradePublic Task3: 居民團 absorb 公庫 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var it := InteractionSystem.new()
 	var tile := HexTileData.new()
 	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
-	tile.public_storage = { "food": 200.0 }
+	tile.public_storage = { "food": 100.0 }
 	state.world.tiles[0] = tile
-	# trader 在 outpost tile
-	var trader := TeamData.new(); trader.team_id = 0; trader.faction_id = -1
-	trader.tile_pos = Vector2i(0, 0); trader.population = 5
-	trader.current_task = TeamData.TASK_TRADE
-	trader.resources = { "coin": 300.0, "food": 0.0 }
-	var t_leader := PersonData.new(); t_leader.id = 10; t_leader.team_id = 0
-	state.persons[10] = t_leader; trader.leader_id = 10
-	state.teams[0] = trader
-	# owner 不在 tile 上（出征中）
-	var owner := TeamData.new(); owner.team_id = 1; owner.faction_id = -1
-	owner.tile_pos = Vector2i(5, 5); owner.population = 5
-	owner.resources = { "coin": 0.0, "food": 0.0 }
-	var o_leader := PersonData.new(); o_leader.id = 11; o_leader.team_id = 1
-	state.persons[11] = o_leader; owner.leader_id = 11
+	# 居民團 (PRODUCE tag, 同 faction owner) 在 outpost tile
+	var resident := TeamData.new(); resident.team_id = 2; resident.faction_id = 0
+	resident.tile_pos = Vector2i(0, 0); resident.population = 5
+	resident.tags = ["生產"]
+	resident.resources = { "food": 10.0 }
+	state.teams[2] = resident
+	# owner team 同 faction
+	var owner := TeamData.new(); owner.team_id = 1; owner.faction_id = 0
 	state.teams[1] = owner
-	var public_before: float = float(tile.public_storage["food"])
-	var handled: bool = it._try_trader_vs_outpost(state, trader)
-	assert(handled, "trader 在空 outpost 應觸發交易")
-	assert(float(trader.resources.get("food", 0)) > 0.0, "trader 應買到公庫 food，實際 %.1f" % float(trader.resources.get("food", 0)))
-	assert(float(tile.public_storage["food"]) < public_before, "公庫 food 應減少")
-	assert(owner.tile_pos == Vector2i(5, 5), "owner tile_pos 應還原 (5,5)，實際 %s" % str(owner.tile_pos))
+	var original = InteractionSystem._absorb_public_storage(state, resident)
+	assert(original.has("food"), "居民團 absorb 應觸發")
+	assert(int(resident.resources["food"]) == 110, "資源應 absorb，實際=%d" % int(resident.resources["food"]))
+	assert(float(tile.public_storage["food"]) == 0.0, "公庫應清空")
 	print("TradePublic Task3 OK")
