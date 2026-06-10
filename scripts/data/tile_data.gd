@@ -15,6 +15,8 @@ var outpost_level: int = 0          # 0=無, 1/2/3
 var outpost_owner: int = -1         # team_id
 var farming_level: int = 0          # 0–3，civilian only
 var manufacturing_level: int = 0    # 0–3，civilian only
+var stable_level: int = 0           # 0–3 馬廄（眷養 mounts，限平原）
+var stable_progress: float = 0.0    # mount 產出小數累積（≥1 轉整數入 owner team）
 var garrison: Array = []            # person_ids
 var prisoners: Array = []           # person_ids
 

@@ -28,6 +28,15 @@ const BUILD_TICKS: Dictionary = {
 const UPGRADE_COST: Dictionary = {
 	"farming":       { "material": 30, "coin": 0,  "ticks": 50  },
 	"manufacturing": { "material": 60, "coin": 20, "ticks": 100 },
+	"stable":        { "material": 30, "coin": 50, "ticks": 7200 },
+}
+
+# 馬廄各等級每日產出 mounts / 消耗 food（index = level-1）
+const STABLE_PRODUCE_PER_DAY: Array = [0.3, 0.7, 1.0]
+const STABLE_FOOD_PER_DAY: Array    = [5.0, 10.0, 15.0]
+const STABLE_CAP: Dictionary = {
+	"civilian": [1, 2, 3],
+	"military":  [0, 0, 0],
 }
 
 # 設施註冊表（data-driven）：NPC AI 評估擴建時讀取。
@@ -56,6 +65,15 @@ const FACILITY_DEF: Dictionary = {
 		"trigger_check":     "_check_ore_surplus",
 		"leader_pref":       { "貪婪": 0.4, "野心": 0.2 },
 		"current_level_key": "mint_level",
+	},
+	"stable": {
+		"cost":              { "material": 30, "coin": 50, "ticks": 7200 },
+		"cap_by_outpost":    { "civilian": [1, 2, 3], "military": [0, 0, 0] },
+		"category":          "軍事",
+		"trigger_check":     "_check_mount_demand",
+		"leader_pref":       { "野心": 0.2, "好戰": 0.3 },
+		"current_level_key": "stable_level",
+		"required_terrain":  "plains",
 	},
 }
 
@@ -100,13 +118,35 @@ func _get_storage_cap(tile: HexTileData, _res: String) -> float:
 # ──────── Tick 驅動 ────────
 
 func tick_all(state: WorldState) -> void:
+	# outpost tick 在近區每小時跑一次 → day_fraction = 1 小時/天
+	var day_fraction: float = float(WorldState.TICKS_PER_HOUR) / float(WorldState.TICKS_PER_DAY)
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.mint_level > 0:
 			_tick_mint(state, tile, state.teams.get(tile.outpost_owner))
+		if tile.stable_level > 0:
+			produce_stable_day(state, tile, day_fraction)
 		if tile.construction_team_id == -1:
 			continue
 		_tick_construction(state, tile)
+
+# 馬廄：消耗 owner team food → 累積 mounts；day_fraction = 本次 tick 佔一天的比例。
+# 測試可直接以 day_fraction=1.0 模擬整天。
+func produce_stable_day(state: WorldState, tile: HexTileData, day_fraction: float) -> void:
+	if tile.stable_level <= 0: return
+	var owner: TeamData = state.teams.get(tile.outpost_owner)
+	if owner == null: return
+	var lvl_idx: int = clampi(tile.stable_level - 1, 0, 2)
+	var food_cost: float = STABLE_FOOD_PER_DAY[lvl_idx] * day_fraction
+	if float(owner.resources.get("food", 0)) < food_cost:
+		return   # 草料不足，本次不產
+	owner.resources["food"] = float(owner.resources.get("food", 0)) - food_cost
+	tile.stable_progress += STABLE_PRODUCE_PER_DAY[lvl_idx] * day_fraction
+	# epsilon 吸收浮點累加誤差（30×0.3 = 8.999… → 9）
+	if tile.stable_progress >= 1.0 - 1e-9:
+		var produced: int = int(tile.stable_progress + 1e-9)
+		tile.stable_progress -= float(produced)
+		owner.resources["mounts"] = int(owner.resources.get("mounts", 0)) + produced
 
 func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 	if tile.mint_level == 0: return
@@ -176,6 +216,9 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 		"upgrade_manufacturing":
 			tile.manufacturing_level = mini(tile.manufacturing_level + 1, 3)
 			print("[Outpost] 製造升級 Lv%d at (%d,%d)" % [tile.manufacturing_level, tile.tile_pos.x, tile.tile_pos.y])
+		"upgrade_stable":
+			tile.stable_level = mini(tile.stable_level + 1, 3)
+			print("[Outpost] 馬廄升級 Lv%d at (%d,%d)" % [tile.stable_level, tile.tile_pos.x, tile.tile_pos.y])
 		"demolish":
 			print("[Outpost] Team%d 拆除 %s at (%d,%d)" % [
 				team.team_id, get_outpost_name(tile.outpost_type, tile.outpost_level),
@@ -185,6 +228,8 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.outpost_owner = -1
 			tile.farming_level = 0
 			tile.manufacturing_level = 0
+			tile.stable_level = 0
+			tile.stable_progress = 0.0
 			tile.garrison.clear()
 			tile.prisoners.clear()
 	tile.construction_ticks_left = 0
@@ -376,6 +421,12 @@ func _subteam_upgrade_facility(state: WorldState, team: TeamData, tile: HexTileD
 			cap = MANUFACTURING_CAP[tile.outpost_type][tile.outpost_level - 1]
 			cur = tile.manufacturing_level
 			action = "upgrade_manufacturing"
+		"stable":
+			if tile.terrain != "plains":
+				return false   # 馬廄限平原
+			cap = STABLE_CAP[tile.outpost_type][tile.outpost_level - 1]
+			cur = tile.stable_level
+			action = "upgrade_stable"
 		_:
 			return false
 	if cur >= cap:

@@ -936,6 +936,22 @@ func _check_goods_shortage(state: WorldState, faction) -> float:
 	# goods < 100 → 觸發
 	return clampf((100.0 - total_goods) / 100.0, 0.0, 1.0) * 50.0
 
+func _check_mount_demand(state: WorldState, faction) -> float:
+	# 軍隊/商隊團多 + mount/pop 比偏低 → 高 priority 蓋馬廄
+	var total_pop: int = 0
+	var total_mounts: int = 0
+	var has_demand_tag: bool = false
+	for tid in faction.member_team_ids:
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		total_pop += t.population
+		total_mounts += int(t.resources.get("mounts", 0))
+		if "軍隊" in t.tags or "商隊" in t.tags:
+			has_demand_tag = true
+	if not has_demand_tag: return 0.0
+	var ratio: float = float(total_mounts) / maxf(float(total_pop), 1.0)
+	return clampf((0.5 - ratio) / 0.5, 0.0, 1.0) * 60.0
+
 func _check_ore_surplus(state: WorldState, faction) -> float:
 	var total: float = 0.0
 	for tid in faction.member_team_ids:
@@ -1189,6 +1205,9 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if tile.outpost_type != "civilian" or tile.construction_team_id != -1: continue
 		for facility in OutpostSystem.FACILITY_DEF:
 			var def: Dictionary = OutpostSystem.FACILITY_DEF[facility]
+			# 地形限制（如馬廄限平原）
+			if def.has("required_terrain") and tile.terrain != def["required_terrain"]:
+				continue
 			var cap_arr: Array = def.cap_by_outpost[tile.outpost_type]
 			var cap: int = int(cap_arr[tile.outpost_level - 1])
 			var current: int = int(tile.get(def.current_level_key))
