@@ -24,7 +24,12 @@ const ATTACK_SCORE_THRESHOLD:  float = 0.3   # minimum attack_score to pursue �
 const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
-const SURVIVAL_TASKS: Array = ["return_home", "乞食", TeamData.TASK_LOOT, "投靠"]
+const SURVIVAL_TASKS: Array = ["return_home", "乞食", "投靠"]
+# stuck: task 仍是進攻型但 move_target 已被 movement 清掉（off-map / 無路徑）→ 視為 idle 允許重評
+const STUCK_TASKS: Array = [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
+
+static func _is_stuck(team: TeamData) -> bool:
+	return team.current_task in STUCK_TASKS and team.move_target == Vector2i(-1, -1)
 const CONTACT_TIMEOUT_DAYS: int = 30
 const OWNER_CHANGE_BUFFER_DAYS: int = 7
 const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
@@ -114,7 +119,8 @@ static func _is_border_adjacent(attacker: TeamData, prey: TeamData) -> bool:
 func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id and state.player_id != -1: return
 	if team.combat_target != -1: return
-	if team.current_task != TeamData.TASK_IDLE: return
+	# stuck（task=攻擊/掠奪 但 move_target 已清）視為 idle，允許重評換目標
+	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
 	if team.current_task in SURVIVAL_TASKS: return
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
@@ -628,7 +634,9 @@ func _evaluate_idle_subteam(state: WorldState, sub: TeamData, merge_queue: Array
 
 func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id: return   # 玩家隊不受 SoloAI 控制
-	if team.combat_target != -1 or team.current_task != "idle": return
+	if team.combat_target != -1: return
+	# stuck 視為 idle，允許重評（task 保留意圖直到重新派發）
+	if team.current_task != "idle" and not _is_stuck(team): return
 	var leader_p = state.persons.get(team.leader_id)
 	if leader_p == null: return
 
