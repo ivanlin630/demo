@@ -7,6 +7,7 @@
     {
       "id": 0, "name": "玩家軍", "tile_pos": [4, 4], "population": 15,
       "tags": ["軍隊", "統領"], "faction_id": 0, "is_faction_leader": true,
+      "anon_tiers": { "新兵": 3, "老兵": 6, "菁英": 3 },
       "resources": {
         "food": 200, "material": 100, "coin": 300, "weapon_melee_low": 20,
         "armor_low": 12
@@ -24,6 +25,7 @@
     {
       "id": 1, "name": "敵軍A", "tile_pos": [7, 4], "population": 12,
       "tags": ["軍隊"], "faction_id": 1, "is_faction_leader": true,
+      "anon_tiers": { "新兵": 4, "老兵": 5, "菁英": 2 },
       "resources": { "food": 150, "coin": 200, "weapon_melee_low": 15, "armor_low": 8 },
       "leader": { "name": "敵將A", "values": { "好戰": 0.95, "野心": 0.7 } },
       "named_members": [{ "name": "副將A" }],
@@ -32,6 +34,7 @@
     {
       "id": 2, "name": "敵軍B", "tile_pos": [4, 7], "population": 14,
       "tags": ["軍隊"], "faction_id": 2, "is_faction_leader": true,
+      "anon_tiers": { "平民": 2, "新兵": 5, "老兵": 5, "菁英": 1 },
       "resources": { "food": 150, "coin": 200, "weapon_melee_low": 18 },
       "leader": { "name": "敵將B", "values": { "好戰": 0.85, "殘忍": 0.7 } },
       "named_members": [],
@@ -40,6 +43,7 @@
     {
       "id": 3, "name": "流民", "tile_pos": [2, 2], "population": 5,
       "tags": ["流亡"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
       "resources": { "food": 30 },
       "leader": { "name": "難民", "values": { "求生欲": 0.9 } },
       "named_members": []
@@ -47,6 +51,7 @@
     {
       "id": 4, "name": "盜匪", "tile_pos": [6, 6], "population": 8,
       "tags": ["流亡"], "faction_id": -1,
+      "anon_tiers": { "平民": 2, "新兵": 4, "老兵": 1 },
       "resources": { "food": 50, "coin": 100, "weapon_melee_low": 5 },
       "leader": {
         "name": "匪首", "skills": { "戰鬥": 0.4 },

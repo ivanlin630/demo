@@ -7,6 +7,7 @@
     {
       "id": 0, "name": "玩家", "tile_pos": [4, 4], "population": 8,
       "tags": ["統領"], "faction_id": 0, "is_faction_leader": true,
+      "anon_tiers": { "平民": 3, "新兵": 2, "老兵": 1 },
       "resources": {
         "food": 96.0, "material": 200, "coin": 600, "weapon_melee_low": 12,
         "armor_low": 8, "medicine": 10, "tools": 5, "goods": 50
@@ -26,6 +27,7 @@
     {
       "id": 1, "name": "友軍商隊", "tile_pos": [5, 4], "population": 6,
       "tags": ["商隊"], "faction_id": 0,
+      "anon_tiers": { "平民": 4, "新兵": 1 },
       "resources": {
         "food": 72.0, "material": 200, "coin": 600, "weapon_melee_low": 4,
         "armor_low": 2, "medicine": 10, "tools": 5, "goods": 50
@@ -43,6 +45,7 @@
     {
       "id": 2, "name": "敵對軍隊", "tile_pos": [7, 5], "population": 10,
       "tags": ["軍隊"], "faction_id": 1, "is_faction_leader": true,
+      "anon_tiers": { "平民": 1, "新兵": 3, "老兵": 4 },
       "resources": {
         "food": 120.0, "material": 200, "coin": 600, "weapon_melee_low": 12,
         "armor_low": 8, "medicine": 10
@@ -61,6 +64,7 @@
     {
       "id": 3, "name": "生產村", "tile_pos": [5, 7], "population": 12,
       "tags": ["生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 10 },
       "resources": {
         "food": 144.0, "material": 200, "coin": 600, "weapon_melee_low": 4,
         "medicine": 10
@@ -78,6 +82,7 @@
     {
       "id": 4, "name": "流亡盜匪", "tile_pos": [3, 3], "population": 5,
       "tags": ["流亡"], "faction_id": -1,
+      "anon_tiers": { "平民": 1, "新兵": 2 },
       "resources": {
         "food": 60.0, "coin": 600, "weapon_melee_low": 4
       },

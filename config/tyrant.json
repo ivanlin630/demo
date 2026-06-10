@@ -7,6 +7,7 @@
     {
       "id": 0, "name": "暴君", "tile_pos": [4, 4], "population": 10,
       "tags": ["統領", "軍隊"], "faction_id": 0, "is_faction_leader": true,
+      "anon_tiers": { "新兵": 3, "老兵": 4, "菁英": 1 },
       "resources": {
         "food": 100, "material": 200, "coin": 1000, "weapon_melee_low": 15,
         "armor_low": 10, "medicine": 10, "ore_gold": 50
@@ -25,6 +26,7 @@
     {
       "id": 1, "name": "受壓村", "tile_pos": [4, 5], "population": 30,
       "tags": ["生產"], "faction_id": 0,
+      "anon_tiers": { "平民": 28 },
       "resources": { "food": 200, "coin": 50 },
       "leader": {
         "name": "村長", "age": 50, "loyalty": 0.6,
@@ -41,6 +43,7 @@
     {
       "id": 2, "name": "敵對暴君", "tile_pos": [8, 5], "population": 12,
       "tags": ["軍隊"], "faction_id": 1, "is_faction_leader": true,
+      "anon_tiers": { "平民": 1, "新兵": 4, "老兵": 5, "菁英": 1 },
       "resources": {
         "food": 100, "material": 200, "coin": 800, "weapon_melee_low": 20,
         "armor_low": 10
@@ -56,6 +59,7 @@
     {
       "id": 3, "name": "流民", "tile_pos": [2, 2], "population": 8,
       "tags": ["流亡"], "faction_id": -1,
+      "anon_tiers": { "平民": 7, "新兵": 1 },
       "resources": { "food": 30, "coin": 20 },
       "leader": {
         "name": "難民頭", "age": 30, "loyalty": 0.5,

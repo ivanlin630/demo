@@ -7,6 +7,7 @@
     {
       "id": 0, "name": "玩家商會", "tile_pos": [4, 4], "population": 8,
       "tags": ["商隊", "統領"], "faction_id": 0, "is_faction_leader": true,
+      "anon_tiers": { "平民": 4, "新兵": 3 },
       "resources": { "food": 300, "material": 50, "coin": 500, "goods": 100 },
       "leader": {
         "name": "商會主", "skills": { "統領": 0.7, "商業": 0.8 },
@@ -18,6 +19,7 @@
     {
       "id": 1, "name": "貿易夥伴A", "tile_pos": [6, 4], "population": 8,
       "tags": ["商隊"], "faction_id": 1, "is_faction_leader": true,
+      "anon_tiers": { "平民": 5, "新兵": 2 },
       "resources": { "food": 200, "coin": 400, "goods": 80 },
       "leader": {
         "name": "夥伴A", "skills": { "商業": 0.6 },
@@ -29,6 +31,7 @@
     {
       "id": 2, "name": "貿易夥伴B", "tile_pos": [4, 7], "population": 6,
       "tags": ["商隊"], "faction_id": 2, "is_faction_leader": true,
+      "anon_tiers": { "平民": 4, "新兵": 1, "老兵": 1 },
       "resources": { "food": 150, "coin": 600, "material": 100 },
       "leader": {
         "name": "夥伴B", "skills": { "商業": 0.5 },
@@ -40,6 +43,7 @@
     {
       "id": 3, "name": "生產村", "tile_pos": [2, 6], "population": 20,
       "tags": ["生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 19 },
       "resources": { "food": 500, "coin": 30, "material": 100 },
       "leader": {
         "name": "村長", "skills": { "生產": 0.7 }, "values": { "慎重": 0.8 }
@@ -50,6 +54,7 @@
     {
       "id": 4, "name": "礦工", "tile_pos": [7, 7], "population": 6,
       "tags": ["生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 5 },
       "resources": { "food": 100, "ore_silver": 30 },
       "leader": { "name": "礦頭", "skills": { "工程": 0.5 } },
       "named_members": [],
