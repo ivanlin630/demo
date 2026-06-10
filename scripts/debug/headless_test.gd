@@ -38,6 +38,7 @@ func _initialize() -> void:
 	_test_breakout_distance_guard()
 	_test_stuck_allows_reeval()
 	_test_survival_reeval_in_loot()
+	_test_trade_net_dispatches()
 	_test_aid_resolve_npc_accept()
 	_test_aid_resolve_npc_refuse()
 	_test_aid_player_forced_event()
@@ -5256,3 +5257,26 @@ func _test_survival_reeval_in_loot() -> void:
 	assert(team.previous_task == TeamData.TASK_LOOT,
 		"survival 應進入評估（previous_task=掠奪），實際=%s" % team.previous_task)
 	print("Wakeup Task4 OK")
+
+func _test_trade_net_dispatches() -> void:
+	print("--- Wakeup Task5: trade_net dispatch ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var f := FactionData.new()
+	f.faction_id = 0; f.member_team_ids = [0]; f.leader_team_id = 0
+	state.factions[0] = f
+	var trader := TeamData.new()
+	trader.team_id = 0; trader.faction_id = 0; trader.tile_pos = Vector2i(0, 0)
+	trader.tags = ["商隊"]; trader.current_task = "idle"
+	state.teams[0] = trader
+	var partner := TeamData.new()
+	partner.team_id = 1; partner.faction_id = -1; partner.tile_pos = Vector2i(3, 0)
+	partner.resources["goods"] = 50.0
+	state.teams[1] = partner
+	state.team_discovered[0] = [1]
+	var sai := StrategicAiSystem.new()
+	sai._dispatch_trade_net(state, f)
+	assert(trader.current_task == TeamData.TASK_TRADE,
+		"商隊應派 trade，實際=%s" % trader.current_task)
+	assert(trader.move_target == Vector2i(3, 0), "move_target 應指 partner")
+	print("Wakeup Task5 OK")

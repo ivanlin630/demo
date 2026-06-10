@@ -168,8 +168,10 @@ func _step_team(state: WorldState, team: TeamData) -> bool:
 	var next_pos: Vector2i = _calc_next_step(state, team.tile_pos, team.move_target)
 	# next_pos == 原地 → 無路徑（隔絕/被山阻），team stuck — cancel target
 	if next_pos == team.tile_pos:
-		print("[Move] Team %d stuck at (%d,%d), clearing move_target" % [
-			team.team_id, team.tile_pos.x, team.tile_pos.y])
+		print("[Move] Team %d stuck at (%d,%d) target=(%d,%d), task=%s, sa=%s" % [
+			team.team_id, team.tile_pos.x, team.tile_pos.y,
+			team.move_target.x, team.move_target.y,
+			team.current_task, str(team.strategic_assignments)])
 		team.move_target = Vector2i(-1, -1)
 		return false
 	team.last_tile_pos = old_pos   # 記錄上一步位置（observe_velocity 用）

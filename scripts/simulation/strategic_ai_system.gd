@@ -29,6 +29,8 @@ func tick(state: WorldState, faction: FactionData) -> void:
         match top["type"]:
             "expand":
                 _assign_encirclement(state, faction, top["target_id"])
+            "trade_net":
+                _dispatch_trade_net(state, faction)
     for tid in faction.member_team_ids:
         var t: TeamData = state.teams.get(tid)
         if t: _assign_breakout(state, t)
@@ -205,3 +207,28 @@ func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
         elif t:
             total += t.population
     return total
+
+# trade_net goal：派 idle 商隊去鄰近有貨/有錢的對象交易（移動到對方格，由 interaction 同格成交）
+func _dispatch_trade_net(state: WorldState, faction: FactionData) -> void:
+    for tid in faction.member_team_ids:
+        var t: TeamData = state.teams.get(tid)
+        if t == null: continue
+        if not ("商隊" in t.tags): continue
+        if t.current_task != TeamData.TASK_IDLE: continue
+        var partner_id: int = _find_trade_partner(state, t)
+        if partner_id == -1: continue
+        var p: TeamData = state.teams[partner_id]
+        t.current_task = TeamData.TASK_TRADE
+        t.move_target = p.tile_pos
+        print("[StrategicAI] Faction%d 商隊 Team%d → trade Team%d" % [
+            faction.faction_id, t.team_id, partner_id])
+
+func _find_trade_partner(state: WorldState, trader: TeamData) -> int:
+    for tid in state.team_discovered.get(trader.team_id, []):
+        var t: TeamData = state.teams.get(tid)
+        if t == null: continue
+        if t.faction_id != -1 and t.faction_id == trader.faction_id: continue
+        # 對方有 goods 或一定 coin 即視為可交易對象
+        if float(t.resources.get("goods", 0)) > 0 or float(t.resources.get("coin", 0)) > 50:
+            return tid
+    return -1
