@@ -95,6 +95,54 @@
         { "name": "T4_M1", "loyalty": 0.7 },
         { "name": "T4_M2", "loyalty": 0.7 }
       ]
+    },
+    {
+      "id": 5, "name": "流亡狼軍", "tile_pos": [2, 5], "population": 6,
+      "tags": ["軍隊", "流亡"], "faction_id": -1,
+      "anon_tiers": { "新兵": 4, "老兵": 1 },
+      "resources": {
+        "food": 72.0, "coin": 100, "weapon_melee_low": 8, "armor_low": 3
+      },
+      "leader": {
+        "name": "T5_Leader", "age": 28, "loyalty": 0.9,
+        "skills": { "統領": 0.6, "戰鬥": 0.6, "戰術": 0.4 },
+        "values": { "好戰": 0.9, "野心": 0.8, "貪婪": 0.7, "義氣": 0.1 }
+      },
+      "named_members": [
+        { "name": "T5_M1", "loyalty": 0.7, "skills": { "戰鬥": 0.4 } }
+      ]
+    },
+    {
+      "id": 6, "name": "獨立商隊", "tile_pos": [6, 2], "population": 5,
+      "tags": ["商隊"], "faction_id": -1,
+      "anon_tiers": { "平民": 3, "新兵": 1 },
+      "resources": {
+        "food": 60.0, "coin": 800, "goods": 100, "weapon_melee_low": 2
+      },
+      "leader": {
+        "name": "T6_Leader", "age": 40, "loyalty": 0.9,
+        "skills": { "統領": 0.5, "商業": 0.7 },
+        "values": { "貪婪": 0.8, "慎重": 0.7, "信義": 0.6 }
+      },
+      "named_members": [
+        { "name": "T6_M1", "loyalty": 0.7, "skills": { "商業": 0.4 } }
+      ]
+    },
+    {
+      "id": 7, "name": "武裝部落", "tile_pos": [7, 7], "population": 8,
+      "tags": ["軍隊"], "faction_id": -1,
+      "anon_tiers": { "平民": 2, "新兵": 4, "老兵": 1 },
+      "resources": {
+        "food": 96.0, "coin": 200, "weapon_melee_low": 8, "armor_low": 4
+      },
+      "leader": {
+        "name": "T7_Leader", "age": 35, "loyalty": 0.9,
+        "skills": { "統領": 0.6, "戰鬥": 0.5 },
+        "values": { "好戰": 0.7, "殘忍": 0.6, "野心": 0.5 }
+      },
+      "named_members": [
+        { "name": "T7_M1", "loyalty": 0.7 }
+      ]
     }
   ],
   "player": { "team_id": 0, "is_leader": true },
