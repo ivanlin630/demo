@@ -45,6 +45,10 @@ const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score
 const THREAT_CADENCE: int = 240   # 1 日 評估一次威脅
 const TRADE_TIMEOUT: int = 1440   # 貿易 task 6 日未成交 → 放棄（防 zombie）
 
+# ── Outpost 居民派駐 AI ──
+const RESIDENCY_CADENCE: int = 720    # 3 天 評估一次 outpost 居民派駐
+const RESIDENCY_COOLDOWN: int = 1680  # 7 天 邀請被拒後冷卻
+
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
@@ -295,6 +299,81 @@ func _is_resident_team(state: WorldState, team: TeamData) -> bool:
 		return false
 	return owner.faction_id == team.faction_id and team.faction_id != -1
 
+# ──────── Outpost 居民派駐 AI ────────
+
+# tile 上是否已有 PRODUCE（居民）team（任一 faction）
+func _has_resident_team_on_tile(state: WorldState, tile: HexTileData) -> bool:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos != tile.tile_pos: continue
+		if "生產" in t.tags: return true
+	return false
+
+# cadence 評估：掃自家無居民 outpost，依個性派子隊或邀流亡
+func _evaluate_outpost_residency(state: WorldState, team: TeamData) -> void:
+	if state.world.current_tick < team.residency_eval_next_tick: return
+	team.residency_eval_next_tick = state.world.current_tick + RESIDENCY_CADENCE
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_owner != team.team_id: continue
+		if _has_resident_team_on_tile(state, tile): continue
+		_try_dispatch_or_invite(state, team, tile, leader)
+
+# 個性決定管道：野心/好戰 → 派子隊；商業/慎重 → 邀流亡
+func _try_dispatch_or_invite(state: WorldState, team: TeamData,
+		tile: HexTileData, leader: PersonData) -> void:
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	var military: float = float(leader.values.get("好戰", 0.5))
+	var commerce: float = float(leader.skills.get("商業", 0.0))
+	var caution: float = float(leader.values.get("慎重", 0.5))
+	var dispatch_score: float = ambition * 0.5 + military * 0.3
+	var invite_score: float = commerce * 0.4 + caution * 0.3
+	if dispatch_score > invite_score and team.population >= 8:
+		_dispatch_subteam_settle(state, team, tile)
+	else:
+		_try_invite_nearby_exile(state, team, tile)
+
+# 派子隊安頓：抵達 outpost → interaction "安頓" handler → _convert_to_resident
+func _dispatch_subteam_settle(state: WorldState, owner: TeamData, tile: HexTileData) -> void:
+	var settler_count: int = clampi(owner.population / 4, 2, 5)
+	if owner.population < settler_count + 1: return   # 至少留 1 人
+	var sub_leader_id: int = -1
+	if owner.named_members.size() > 2:
+		sub_leader_id = int(owner.named_members[0])
+	else:
+		# 無多餘 named → 升一名 anon 為 sub leader（dispatch 要求 leader ∈ named_members）
+		var new_leader: PersonData = PersonGenerator.generate_for_team(
+			state, owner, "member")
+		if new_leader != null:
+			owner.named_members.append(new_leader.id)
+			sub_leader_id = new_leader.id
+	if sub_leader_id == -1: return
+	var subteam_id: int = SubteamSystem.new().dispatch(
+		state, owner.team_id, sub_leader_id, settler_count, "安頓", tile.tile_pos)
+	if subteam_id == -1: return
+	print("[Residency] Team%d 派子隊 Team%d 安頓 outpost (%d,%d) pop=%d" % [
+		owner.team_id, subteam_id, tile.tile_pos.x, tile.tile_pos.y, settler_count])
+
+# 邀視野內流亡團安頓；個性接受 → task=安頓，拒絕 → 設 7 天冷卻
+func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	for tid in state.team_discovered.get(team.team_id, []):
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		if not ("流亡" in t.tags): continue
+		if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
+		var dipl := DiplomaticAiSystem.new()
+		var resp: String = dipl.handle_diplomacy_message(
+			state, t, team, "invite_settle")
+		if resp == "accept":
+			t.current_task = "安頓"
+			t.move_target = tile.tile_pos
+			print("[Residency] Team%d 邀請 Team%d 安頓 outpost (%d,%d)" % [
+				team.team_id, tid, tile.tile_pos.x, tile.tile_pos.y])
+			return
+		team.invite_cooldown[tid] = state.world.current_tick + RESIDENCY_COOLDOWN
+
 const MOUNT_TARGET_RATIO: float = 0.5
 
 # NPC 出征前自動從自家 outpost 公庫拉 mount 至 population × ratio
@@ -401,6 +480,8 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_consider_extraction(state, team)
 		# D B2: 無人 outpost 駐留接管
 		_evaluate_outpost_takeover(state, team)
+		# 居民派駐：自家無居民 outpost → 派子隊/邀流亡（cadence 內控）
+		_evaluate_outpost_residency(state, team)
 		if _is_resident_team(state, team):
 			_evaluate_uprising(state, team)
 			_evaluate_owner_contact(state, team)
@@ -661,6 +742,16 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 	if sub.current_task == TeamData.TASK_BUILD:
 		return  # C: 施工中（建設），不打斷、不召回
+	if sub.current_task == "安頓":
+		# 抵達自家 faction outpost → 就地安頓（無需 co-located team；獨自抵達即轉居民）
+		# 未到則保持 移動/安頓 task，不進 merge_queue（避免被召回母團）
+		var settle_tile: HexTileData = state.world.tiles.get(
+			sub.tile_pos.x * 1000 + sub.tile_pos.y)
+		if settle_tile != null and settle_tile.outpost_owner != -1:
+			var o: TeamData = state.teams.get(settle_tile.outpost_owner)
+			if o != null and o.faction_id == sub.faction_id:
+				InteractionSystem.new()._convert_to_resident(state, sub)
+		return
 	if sub.current_task == TeamData.TASK_ESCORT:
 		_update_escort(state, sub)
 		_check_discipline(state, sub)

@@ -176,6 +176,15 @@ func _initialize() -> void:
 	_test_spill_back_with_cap_overflow()
 	_test_resolve_market_absorbs_storage()
 	_test_resident_team_absorbs_public_storage()
+	# ── Outpost 居民派駐 AI ──
+	_test_residency_team_fields()
+	_test_has_resident_team_check()
+	_test_dispatch_high_ambition()
+	_test_invite_high_commerce()
+	_test_dispatch_subteam_creates_subteam()
+	_test_invite_exile_accept()
+	_test_invite_exile_reject_cooldown()
+	_test_settle_triggers_subteam_merge_back()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5997,3 +6006,181 @@ func _test_resident_team_absorbs_public_storage() -> void:
 	assert(int(resident.resources["food"]) == 110, "資源應 absorb，實際=%d" % int(resident.resources["food"]))
 	assert(float(tile.public_storage["food"]) == 0.0, "公庫應清空")
 	print("TradePublic Task3 OK")
+
+# ──────── Outpost 居民派駐 AI ────────
+
+func _test_residency_team_fields() -> void:
+	print("--- Residency Task1: TeamData 新欄位 ---")
+	var t := TeamData.new()
+	assert(t.residency_eval_next_tick == 0, "預設 residency_eval_next_tick 應為 0")
+	assert(t.invite_cooldown is Dictionary and t.invite_cooldown.size() == 0, "預設 invite_cooldown 應為空 dict")
+	print("Residency Task1 OK")
+
+func _test_has_resident_team_check() -> void:
+	print("--- Residency Task2: _has_resident_team_on_tile ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(5, 5); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[5005] = tile
+	var fai := FactionAISystem.new()
+	# 無 team → false
+	assert(not fai._has_resident_team_on_tile(state, tile), "無 team 應 false")
+	# 非 PRODUCE team 在 tile → false
+	var m := TeamData.new(); m.team_id = 1; m.tile_pos = Vector2i(5, 5); m.tags = ["軍隊"]
+	state.teams[1] = m
+	assert(not fai._has_resident_team_on_tile(state, tile), "非 PRODUCE 應 false")
+	# PRODUCE team 在 tile → true
+	var r := TeamData.new(); r.team_id = 2; r.tile_pos = Vector2i(5, 5); r.tags = ["生產"]
+	state.teams[2] = r
+	assert(fai._has_resident_team_on_tile(state, tile), "PRODUCE 應 true")
+	print("Residency Task2 OK")
+
+func _test_dispatch_high_ambition() -> void:
+	print("--- Residency Task3a: 高野心走 dispatch ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(2, 2); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[2002] = tile
+	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
+	owner.population = 20; owner.tile_pos = Vector2i(5, 5)
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	leader.values = { "野心": 0.9, "好戰": 0.8, "慎重": 0.1 }
+	leader.skills = { "商業": 0.0, "統領": 0.8 }
+	state.persons[100] = leader; owner.leader_id = 100
+	for i in range(3):
+		var mm := PersonData.new(); mm.id = 200 + i; mm.team_id = 0; mm.skills = { "統領": 0.5 }
+		state.persons[mm.id] = mm; owner.named_members.append(mm.id)
+	state.teams[0] = owner
+	var before: int = state.teams.size()
+	var fai := FactionAISystem.new()
+	fai._try_dispatch_or_invite(state, owner, tile, leader)
+	assert(state.teams.size() == before + 1, "高野心應派子隊（teams+1），實際=%d" % state.teams.size())
+	print("Residency Task3a OK")
+
+func _test_invite_high_commerce() -> void:
+	print("--- Residency Task3b: 高商業走 invite ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(2, 2); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[2002] = tile
+	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
+	owner.population = 20; owner.tile_pos = Vector2i(2, 2)
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	leader.values = { "野心": 0.1, "好戰": 0.1, "慎重": 0.9 }
+	leader.skills = { "商業": 0.9 }
+	state.persons[100] = leader; owner.leader_id = 100
+	state.teams[0] = owner
+	var ex := TeamData.new(); ex.team_id = 1; ex.faction_id = -1
+	ex.tags = ["流亡"]; ex.population = 8; ex.tile_pos = Vector2i(3, 3)
+	ex.resources["food"] = 0
+	var el := PersonData.new(); el.id = 101; el.team_id = 1
+	el.values = { "求生欲": 0.9, "野心": 0.1 }
+	state.persons[101] = el; ex.leader_id = 101
+	state.teams[1] = ex
+	state.team_discovered[0] = [1]
+	var fai := FactionAISystem.new()
+	fai._try_dispatch_or_invite(state, owner, tile, leader)
+	assert(ex.current_task == "安頓", "高商業低野心應邀流亡安頓，實際=%s" % ex.current_task)
+	print("Residency Task3b OK")
+
+func _test_dispatch_subteam_creates_subteam() -> void:
+	print("--- Residency Task4: _dispatch_subteam_settle ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(4, 4); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[4004] = tile
+	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
+	owner.population = 20; owner.tile_pos = Vector2i(7, 7)
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0; leader.skills = { "統領": 0.8 }
+	state.persons[100] = leader; owner.leader_id = 100
+	for i in range(3):
+		var mm := PersonData.new(); mm.id = 200 + i; mm.team_id = 0; mm.skills = { "統領": 0.5 }
+		state.persons[mm.id] = mm; owner.named_members.append(mm.id)
+	state.teams[0] = owner
+	var fai := FactionAISystem.new()
+	fai._dispatch_subteam_settle(state, owner, tile)
+	var found: int = -1
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			found = tid; break
+	assert(found != -1, "應創建子隊")
+	var sub: TeamData = state.teams[found]
+	assert(sub.tags.has("子團"), "子隊應有 子團 tag")
+	assert(sub.current_task == "安頓", "子隊 task 應為 安頓，實際=%s" % sub.current_task)
+	assert(sub.move_target == Vector2i(4, 4), "子隊 move_target 應為 outpost")
+	assert(sub.population == 5, "settler_count clamp 20/4=5，實際=%d" % sub.population)
+	print("Residency Task4 OK")
+
+func _test_invite_exile_accept() -> void:
+	print("--- Residency Task5a: 邀流亡接受 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(1, 1); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[1001] = tile
+	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
+	state.teams[0] = owner
+	var ex := TeamData.new(); ex.team_id = 1; ex.faction_id = -1
+	ex.tags = ["流亡"]; ex.population = 8; ex.tile_pos = Vector2i(3, 3)
+	ex.resources["food"] = 0
+	var el := PersonData.new(); el.id = 101; el.team_id = 1
+	el.values = { "求生欲": 0.9, "野心": 0.1 }
+	state.persons[101] = el; ex.leader_id = 101
+	state.teams[1] = ex
+	state.team_discovered[0] = [1]
+	var fai := FactionAISystem.new()
+	fai._try_invite_nearby_exile(state, owner, tile)
+	assert(ex.current_task == "安頓", "接受應 task=安頓")
+	assert(ex.move_target == Vector2i(1, 1), "move_target 應為 outpost")
+	print("Residency Task5a OK")
+
+func _test_invite_exile_reject_cooldown() -> void:
+	print("--- Residency Task5b: 邀流亡拒絕設冷卻 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	state.world.current_tick = 1000
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(1, 1); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[1001] = tile
+	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
+	state.teams[0] = owner
+	var ex := TeamData.new(); ex.team_id = 1; ex.faction_id = -1
+	ex.tags = ["流亡"]; ex.population = 8; ex.tile_pos = Vector2i(3, 3)
+	ex.resources["food"] = 1000.0
+	var el := PersonData.new(); el.id = 101; el.team_id = 1
+	el.values = { "求生欲": 0.1, "野心": 0.9 }
+	state.persons[101] = el; ex.leader_id = 101
+	state.teams[1] = ex
+	state.team_discovered[0] = [1]
+	var fai := FactionAISystem.new()
+	fai._try_invite_nearby_exile(state, owner, tile)
+	assert(ex.current_task != "安頓", "拒絕不應安頓")
+	assert(int(owner.invite_cooldown.get(1, 0)) == 1000 + FactionAISystem.RESIDENCY_COOLDOWN, "應設 7 天冷卻")
+	print("Residency Task5b OK")
+
+func _test_settle_triggers_subteam_merge_back() -> void:
+	print("--- Residency Task6: 流民駐紮觸發子隊回母團 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_level = 1
+	tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	state.world.tiles[0] = tile
+	var parent := TeamData.new(); parent.team_id = 0; parent.faction_id = 10
+	parent.tile_pos = Vector2i(0, 0); parent.population = 5
+	var pl := PersonData.new(); pl.id = 100; pl.team_id = 0; pl.skills = { "統領": 0.8 }
+	state.persons[100] = pl; parent.leader_id = 100
+	state.teams[0] = parent
+	var sub := TeamData.new(); sub.team_id = 1; sub.faction_id = 10; sub.parent_team_id = 0
+	sub.tile_pos = Vector2i(0, 0); sub.tags = ["子團", "生產"]; sub.population = 3
+	state.teams[1] = sub; parent.subteam_ids = [1]
+	var flee := TeamData.new(); flee.team_id = 2; flee.faction_id = 10
+	flee.tile_pos = Vector2i(0, 0); flee.tags = ["流亡"]; flee.population = 4
+	state.teams[2] = flee
+	var inter := InteractionSystem.new()
+	inter._convert_to_resident(state, flee)
+	assert(not state.teams.has(1), "子隊應回母團（完全合併移除），teams 仍有 1")
+	print("Residency Task6 OK")

@@ -900,6 +900,15 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 	subteam.parent_team_id = -1
 	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
 		subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])
+	# 流民變居民後，若同 tile 有 SUBTEAM+PRODUCE 子隊（暫派駐居民），觸發回母團
+	# 註：try_merge_back 可能因母團太遠失敗，則子隊留 outpost 與流民共處
+	for tid in state.teams:
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		if t.tile_pos != subteam.tile_pos: continue
+		if t.team_id == subteam.team_id: continue
+		if "子團" in t.tags and "生產" in t.tags:
+			SubteamSystem.new().try_merge_back(state, t.team_id)
 
 # ──────── 安撫（pacify）────────
 
