@@ -1,10 +1,34 @@
 # Known Issues
 
-> 最後更新：2026-06-07（S7 faction_ai 動態初始化）| 來源：動態測試 + code review
+> 最後更新：2026-06-10（NPC wakeup fixes + tier system + speed tune）| 來源：動態測試 + code review
 
 ---
 
 ## 🔴 高優先（影響基本可玩性）
+
+### W1. NPC 0 Combat 起戰 — 會合不上
+- **症狀**：multi 4 config × 90 天，ProsperityAttack 5 次排程 + attacker 都會動，但 `[Encounter]` / `[Hit]` = 0
+- **根因**：attacker 追會動的 prey，雙方同速 → 永遠差 1 hex；`interaction_system.process_on_move` 要嚴格同格才 try_interact
+- **發現**：2026-06-10 NPC wakeup fixes merge 後驗證
+- **建議**：開「會合/攔截」spec，候選方案：
+  - A. 相鄰即接戰（距 ≤ 1 hex）
+  - B. prey 預警停下（看到 hostile attacker 靠近）
+  - C. 攻擊方攔截預測（算 prey 未來位置）
+  - D. 防守方 active 反應（迎戰/逃跑）
+
+### W2. NPC 0 Trade 成交 — 會合不上
+- **症狀**：trade_net 派發 433 次（wakeup 後），但 `[Market]` / 成交 = 0
+- **根因**：同 W1，trader 追會動的 partner 永遠差 1 hex
+- **副作用**：商隊 task 卡 "貿易" 不回 idle → 新形態 zombie（已非 stuck，但等同無進度）
+- **發現**：2026-06-10
+- **建議**：跟 W1 一起解，或 trader 派往「定點」對象（有 outpost 的 resident / 商隊駐點）；trade task 加 timeout 自動回 idle
+
+### Bug2. salary 拖 coin 無下限
+- **症狀**：integration test merchant min_coin=-49 / warzone min_coin=-42（90 天）
+- **根因**：salary 系統發薪前不檢查 coin >= 0；新團 `[Split]` 出來特別易負
+- **影響**：經濟守恆破，新生團體永久赤字
+- **發現**：2026-06-09 integration test
+- **建議**：coin<0 觸發欠薪後果（接 reaction 系統 → loyalty 降 / 離隊 / anon 補充停），或夾在 0 並記欠薪
 
 ### S1. 視野公式門檻太高 ✅ 已修
 - **修正**：`_can_detect` 門檻從 `> 0.5` 降至 `> 0.3`
@@ -94,6 +118,31 @@
 - **位置**：`scripts/ui/bottom_bar.gd:show_tile_info`
 
 ---
+
+### Bug5. DiplomacyAI demand_tribute 恆負
+- **症狀**：90 天 120 次 evaluation，分數恆 −0.15（power_r=0.40, caution=0.80, pride=0.50）
+- **根因**：caution=0.80 權重壓制 score 恆 < 0；同一決策每次重算同值
+- **影響**：強者不勒索，AI 過保守
+- **發現**：2026-06-09 integration test
+- **建議**：調 caution 權重或 power_ratio 門檻；對未變動局勢快取決策
+
+### Bug6. multi runner 不注入 command_schedule
+- **症狀**：`game_sim_multi.gd` 只跑 advance_tick，未呼叫 `GameSetup.run_command_schedule_tick`
+- **影響**：config 的 `command_schedule`（如 tyrant extract_treasury / warzone attack）全部不觸發；放大 W1/W2 觀感
+- **嚴重度**：測試保真度
+- **發現**：2026-06-09 integration test
+- **建議**：runner 比照 game_sim_test 補 schedule 注入 + encounter 超時保護
+
+### W3. BREAKOUT_DIST / ENCIRCLE_DIST tune
+- **症狀**：常數調為 2/1 適配 radius 4 測試地圖；正式地圖 radius 可能不同
+- **發現**：2026-06-10 NPC wakeup
+- **建議**：改 `min(N, map_radius)` 動態計算
+
+### W4. NPC 不主動 promote / train
+- **症狀**：multi 90 天 tier promotion = 0；戰場升等 0（因 0 combat），訓練 task 0 派
+- **根因**：NPC AI 無 promote/train 決策邏輯
+- **發現**：2026-06-10 anon tier merge 後
+- **建議**：faction_ai 加 leader 個性 + 物資 自動評估 promote/train（接 W1 解了戰鬥才有戰場 exp）
 
 ## 🟡 低優先（體驗問題，不影響可玩性）
 
@@ -207,6 +256,22 @@
 - **mounts/wagons 沒加速度**：`_compute_team_speed` 只算個人 effective_speed + named 加權（NAMED_WEIGHT=3）+ 傷兵；mounts 只加 carry capacity（`get_carry_capacity`），wagons 只加 carry + 地形 penalty（`WAGON_TERRAIN_MULT`）。騎兵跟步兵當前同速。
   待 spec：speed_class（步兵/騎兵/輜重）+ mount 速度 bonus + wagon 拖速 penalty。
   - **發現**：2026-06-10 combat-engagement（NAMED_WEIGHT=3 實作時）
+
+## 待 spec（按優先排序）
+
+| 優先 | spec | 解的問題 |
+|---|---|---|
+| **H** | NPC 會合/攔截 | W1 + W2（0 Combat / 0 Trade）|
+| **H** | salary 欠薪後果 | Bug2 |
+| **M** | NPC promote/train AI | W4 |
+| **M** | DiplomacyAI 平衡 | Bug5 |
+| **M** | multi runner schedule 注入 | Bug6 |
+| **M** | mounts/wagons speed_class | mounts/wagons 無速度 bonus |
+| **M** | named 升階機制 | anon tier spec 列後續 |
+| **L** | tag drift | leader / event 改 tag |
+| **L** | 戰俘處置 | 賣/屠/招降 |
+| **L** | 外交招募 / 雇傭軍 | 直接買高 tier anon |
+| **L** | anon tier UI | team panel / 升等進度 / 死亡分檔 |
 
 ---
 
