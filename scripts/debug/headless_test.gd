@@ -34,6 +34,8 @@ func _initialize() -> void:
 	_test_survival_helpers()
 	_test_survival_decision_tree()
 	_test_strategic_ai_respects_survival()
+	_test_strategic_in_map_check()
+	_test_breakout_distance_guard()
 	_test_aid_resolve_npc_accept()
 	_test_aid_resolve_npc_refuse()
 	_test_aid_player_forced_event()
@@ -5154,3 +5156,43 @@ func _test_anon_speed_tiers() -> void:
 	assert(abs(sp_elite - 1.0) < 0.01, "純菁英隊速應 1.0，實際=%f" % sp_elite)
 	assert(sp_elite - sp_pleb > 0.25, "菁英應快約 30%%")
 	print("AnonTier speed OK (pleb=%.2f elite=%.2f)" % [sp_pleb, sp_elite])
+
+func _test_strategic_in_map_check() -> void:
+	print("--- Wakeup Task1: in-map check ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(0, 5):
+		for y in range(0, 5):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# off-map (10,10) → nearest valid 應回 in-map tile
+	var pos = StrategicAiSystem._nearest_valid_tile(state, Vector2i(10, 10), Vector2i(0, 0))
+	assert(StrategicAiSystem._is_valid_tile(state, pos), "回 in-map tile，實際=%s" % str(pos))
+	assert(StrategicAiSystem._is_valid_tile(state, Vector2i(2, 2)), "(2,2) in map")
+	assert(not StrategicAiSystem._is_valid_tile(state, Vector2i(10, 10)), "(10,10) out")
+	print("Wakeup Task1 OK (nearest=%s)" % str(pos))
+
+func _test_breakout_distance_guard() -> void:
+	print("--- Wakeup Task2: breakout 距離 guard ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var self_team := TeamData.new()
+	self_team.team_id = 0; self_team.tile_pos = Vector2i(0, 0); self_team.faction_id = 1
+	self_team.current_task = "idle"
+	state.teams[0] = self_team
+	# 2 enemy 都在 5 hex 外 → 不觸發 breakout
+	var e1 := TeamData.new(); e1.team_id = 1; e1.tile_pos = Vector2i(5, 0); e1.faction_id = 2
+	var e2 := TeamData.new(); e2.team_id = 2; e2.tile_pos = Vector2i(0, 5); e2.faction_id = 2
+	state.teams[1] = e1; state.teams[2] = e2
+	state.team_discovered[0] = [1, 2]
+	var sai := StrategicAiSystem.new()
+	sai._assign_breakout(state, self_team)
+	assert(not self_team.strategic_assignments.has(-1),
+		"鄰敵 > 3 hex 不應觸發 breakout，實際 sa=%s" % str(self_team.strategic_assignments))
+	# 移近一個 enemy 至 2 hex → 觸發
+	e1.tile_pos = Vector2i(2, 0)
+	sai._assign_breakout(state, self_team)
+	assert(self_team.strategic_assignments.has(-1),
+		"鄰敵 <= 3 hex 應觸發 breakout")
+	print("Wakeup Task2 OK")

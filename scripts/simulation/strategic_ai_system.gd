@@ -2,6 +2,24 @@ class_name StrategicAiSystem
 
 const STRATEGIC_INTERVAL:      int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
 const ALLIANCE_CHECK_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+const BREAKOUT_DIST: int = 2     # 原 5，縮為 2（radius 小地圖友善）
+const ENCIRCLE_DIST: int = 1     # 原 2，縮為 1
+const BREAKOUT_NEAREST_THRESHOLD: int = 3   # 鄰敵 > 此距不觸發 breakout
+
+static func _is_valid_tile(state: WorldState, pos: Vector2i) -> bool:
+    return state.world.tiles.has(pos.x * 1000 + pos.y)
+
+static func _nearest_valid_tile(state: WorldState, target: Vector2i, fallback: Vector2i) -> Vector2i:
+    if _is_valid_tile(state, target): return target
+    # 從 target 往 fallback 方向找最近 in-map tile
+    var dir: Vector2i = fallback - target
+    var step: Vector2i = Vector2i(sign(dir.x), sign(dir.y))
+    if step == Vector2i.ZERO: return fallback
+    var cur: Vector2i = target
+    for _i in range(20):
+        cur = cur + step
+        if _is_valid_tile(state, cur): return cur
+    return fallback
 
 func tick(state: WorldState, faction: FactionData) -> void:
     if state.world.current_tick % STRATEGIC_INTERVAL != 0: return
@@ -111,7 +129,9 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
         if t.current_task in FactionAISystem.SURVIVAL_TASKS:
             continue
         var dir: Vector2i = dirs[i % dirs.size()]
-        t.strategic_assignments[target_id] = target_pos + dir * 2
+        var sa_pos: Vector2i = target_pos + dir * ENCIRCLE_DIST
+        sa_pos = _nearest_valid_tile(state, sa_pos, target_pos)
+        t.strategic_assignments[target_id] = sa_pos
 
 func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     if self_team.current_task in FactionAISystem.SURVIVAL_TASKS:
@@ -127,8 +147,18 @@ func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     if enemy_teams.size() < 2:
         self_team.strategic_assignments.erase(-1)
         return
+    # 鄰敵 > BREAKOUT_NEAREST_THRESHOLD hex 不觸發 breakout（看遠敵不必恐慌）
+    var nearest_dist: int = 9999
+    for e in enemy_teams:
+        var d: int = _hex_dist(self_team.tile_pos, e.tile_pos)
+        if d < nearest_dist: nearest_dist = d
+    if nearest_dist > BREAKOUT_NEAREST_THRESHOLD:
+        self_team.strategic_assignments.erase(-1)
+        return
     var best_dir: Vector2i = _find_escape_dir(self_team.tile_pos, enemy_teams)
-    self_team.strategic_assignments[-1] = self_team.tile_pos + best_dir * 5
+    var sa_pos: Vector2i = self_team.tile_pos + best_dir * BREAKOUT_DIST
+    sa_pos = _nearest_valid_tile(state, sa_pos, self_team.tile_pos)
+    self_team.strategic_assignments[-1] = sa_pos
 
 func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
     var dirs: Array = [
