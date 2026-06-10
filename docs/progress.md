@@ -129,13 +129,17 @@
 
 ### 待開發（大功能）
 
-| 項目 | 說明 |
-|---|---|
-| **NPC 會合/攔截機制** | 0 Combat / 0 Trade 成交根因：attacker 追會動的 prey 永遠差 1 hex；trade partner 同理。需「相鄰即接戰 / prey 預警停 / 攔截預測」spec |
-| **named 升階機制** | 從 anon 抽 → tier 決定 named 初始屬性 |
-| **戰俘處置 spec** | 賣 / 屠 / 招降 / 釋放，loyalty 規則 |
-| **外交招募 spec** | 投靠 / 雇傭軍 / 直接買高 tier |
-| **tag drift** | leader values / event 改 tag（軍隊變商隊等）|
+| 項目 | 狀態 | 說明 |
+|---|---|---|
+| **Mounts/Wagons 速度** | 🚧 plan + sub 中 | mount bonus max 3X + size_penalty / wagon -30% / 1 人 1 獸 / stable facility / wild_horses 野採 / mount 吃糧 / loot 公式 |
+| **NPC 會合/攔截**（W1+W2）| 🚧 spec + plan 寫好，待 mounts merge 後 dispatch | ThreatAssessment + predict_intercept + 4 反應 + trader → outpost-only + trade timeout |
+| **戰場 mount unit-level** | 未開 spec | mounts/wagons spec 後續：encounter 騎兵 unit + 衝擊 + 機動 + 戰場 mount 死亡 |
+| **named 升階機制** | 未開 spec | 從 anon 抽 → tier 決定 named 初始屬性 |
+| **戰俘處置 spec** | 未開 spec | 賣 / 屠 / 招降 / 釋放，loyalty 規則 |
+| **外交招募 spec** | 未開 spec | 投靠 / 雇傭軍 / 直接買高 tier |
+| **tag drift** | 未開 spec | leader values / event 改 tag（軍隊變商隊等）|
+| **salary 欠薪後果** | 未開 spec | Bug2：coin<0 → loyalty 降 / 離隊（接 reaction）|
+| **NPC promote/train AI** | 未開 spec | W4：leader 個性 + 物資 自動評估 promote/train |
 | **UI / 渲染** | ✅ text_ui_main / popup_layer / main.gd 已透過 SimBridge 隔離 WorldState 玩家欄位 |
 | **玩家操作介面** | ✅ PlayerApiMapper + PlayerQueryApi + PlayerCommandApi + SimBridge 玩家 API 邊界已建立 |
 | **成員檢視 UI（team_ui）** | ✅ 三欄式 member inspector 完成（2026-06-02）：PlayerApiMapper.members_detail + team_stats；TeamUiHelper 靜態渲染；text_ui_main member_mode 狀態機（W/S 選人，1–4 切換子模式：快覽/健康/裝備/能力）；headless_test + team_ui_test 驗證 |
