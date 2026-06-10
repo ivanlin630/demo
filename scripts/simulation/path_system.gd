@@ -135,3 +135,23 @@ static func _is_moving_away_observed(self_team: TeamData, target_team: TeamData,
 	var future_pos: Vector2i = target_team.tile_pos + observed_direction
 	var future_dist: int = _hex_dist(self_team.tile_pos, future_pos)
 	return future_dist > current_dist
+
+# ────────── 攔截預測 ──────────
+
+# 依觀察到的速度自適應 N 步預測 target 未來位置。N = 到 target 的路徑成本（越遠預測越多步）。
+# 視野外 / 不動 / 預測落在地圖外 → fallback 回 target 當前位置。
+static func predict_intercept(state: WorldState, attacker: TeamData,
+		target: TeamData) -> Vector2i:
+	var obs: Dictionary = observe_velocity(state, attacker, target)
+	if not obs.get("visible", false):
+		return target.tile_pos
+	var direction: Vector2i = obs.get("direction", Vector2i.ZERO)
+	var target_speed: float = float(obs.get("speed", 0.0))
+	if direction == Vector2i.ZERO or target_speed < 0.1:
+		return target.tile_pos
+	var path: Dictionary = find_path(state, attacker.tile_pos, target.tile_pos)
+	var n: int = maxi(1, int(path.cost))
+	var predicted: Vector2i = target.tile_pos + direction * n
+	if not state.world.tiles.has(predicted.x * 1000 + predicted.y):
+		return target.tile_pos
+	return predicted
