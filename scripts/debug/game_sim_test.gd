@@ -613,17 +613,18 @@ func _evaluate_features(state: WorldState) -> void:
 	_print_feat("Diplomacy", _feat_diplomacy,
 		"diplomatic_events=%d alliance=%d" % [_diplomatic_events_count, _alliance_events_count])
 
-	# 8. S7 參數：Team2 anon_combat_skill >= 0.4（軍隊 tag 的標誌性 S7 fix）
-	# armor_config 視 armor 庫存 vs pop_threshold，pop 大幅成長後可能不足 → 視為次要
+	# 8. Anon tier：Team2 anon_combat_skill 改由 AnonTierSystem tier 組成 computed
+	# （舊 S7 tag-based ≥0.4 已廢；新模型起始平民 → 0.1，隨升等/戰鬥提升）
 	if state.teams.has(TEAM_ENEMY):
 		var t2: TeamData = state.teams[TEAM_ENEMY]
 		var acs: float = t2.anon_combat_skill
+		var expected: float = AnonTierSystem.avg_combat_skill(t2)
 		var torso: String = str(t2.armor_config.get("torso", "none"))
-		# S7 主要修正：anon_combat_skill 由 faction_ai tag-based 計算（軍隊 → ≥0.4）
-		if acs >= 0.4:
+		# computed getter 應等於 AnonTierSystem.avg_combat_skill
+		if abs(acs - expected) < 0.001:
 			_feat_s7_param = true
-		_print_feat("S7-Params", _feat_s7_param,
-			"Team%d anon_combat_skill=%.2f (≥0.4) armor_torso=%s (info)" % [
+		_print_feat("AnonTier-Computed", _feat_s7_param,
+			"Team%d anon_combat_skill=%.2f (=tier avg) armor_torso=%s (info)" % [
 				TEAM_ENEMY, acs, torso])
 	else:
 		_print_feat("S7-Params", false, "Team%d 已不存在" % TEAM_ENEMY)
