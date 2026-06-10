@@ -21,11 +21,17 @@
 ```gdscript
 var team_id: int
 var leader_id: int          # 記名 NPC id
-var advisors: Array         # 記名 NPC id[]（前任領袖降職後加入）
-var members: Array          # 非記名 NPC id[]
+var named_members: Array    # 記名 NPC id[]（取代舊 advisors + members）
 
 var population: int         # 成人人口，上限 50，最小 1
 var minor_population: int   # 未成年人口，上限 = population × 20%，不計入上限
+
+# anon 4 tier（取代舊 anon_combat_skill / anon_wage scalar）
+var anon_tiers: Dictionary = { "平民": 0, "新兵": 0, "老兵": 0, "菁英": 0 }
+var anon_exp: Dictionary   = { "平民": 0.0, "新兵": 0.0, "老兵": 0.0 }
+# anon_combat_skill / anon_wage 為 computed getter，delegate AnonTierSystem
+var armed_anon_ratio: float = 0.0      # 匿名人口中武裝比例（0.0–1.0）
+var anon_treasury: float = 0.0          # 匿名薪資沉澱（待轉具名 / 戰利品分配）
 
 var resources: Dictionary
 # {
@@ -42,24 +48,47 @@ var equip_order: Dictionary = {        # 指揮官武裝指令
     "melee_low": 0, "melee_high": 0,
     "ranged_low": 0, "ranged_high": 0,
 }
-var armed_anon_ratio: float = 0.0      # 匿名人口中武裝比例（0.0–1.0）
 
 var move_target: Vector2i   # 目標格，(-1,-1) = 不移動
 var move_tick_acc: int      # 累積 Tick，達移動成本門檻才走一格
+var last_tile_pos: Vector2i # 上一 tick 位置（observe_velocity 用）
 
 var tags: Array             # 職責標籤：["統領", "軍隊", "商隊", "生產", "宗教", "流亡", "子團"]
 var current_task: String    # "idle" / "徵收" / "偵查" / "信使" / "攻擊" / "掠奪" / "外交" / "護衛" / "逃跑"
-                            # "合併"：主動合併另一 team；需同格；order_target_id 指定目標
-                            # （預留）"生產" / "製造" / "貿易" / "巡邏"
+                            # "貿易" / "訓練" / "合併" / "安頓" / "安撫" / "return_home" / "投靠" / "乞食"
+                            # "起義" / "遷徙"
 
 var unrest_turns: int       # 不滿積累值
 var faction_id: int         # 所屬勢力，-1 = 獨立
 var tile_pos: Vector2i      # 當前大地圖格座標
 
-var combat_target: int      # 接觸戰鬥的目標 team_id（-1 = 無）
+var combat_target: int      # 接觸戰鬥的目標 team_id（-1 = 無，戰鬥中才設）
+var prosperity_target_id: int  # 攻擊意圖目標 team_id（-1 = 無，AI 派 attack 用）
 var readiness: float        # 戰鬥準備度 0.0–1.0；morale cascade 時加速消耗
 var wounded: int            # 當前 Tick 累計受傷人數
+var prosperity_eval_next_tick: int  # 下次 prosperity 評估 tick（cadence 控制）
+var strategic_assignments: Dictionary  # StrategicAI 派的座標目標（key: target_id 或 -1, value: Vector2i）
 ```
+
+### Anon Tier 系統
+
+4 階梯（取代舊 scalar）：
+
+| tier | combat | speed | base_wage |
+|---|---|---|---|
+| 平民 | 0.1 | 0.7 | 0.5 |
+| 新兵 | 0.3 | 0.8 | 1.0 |
+| 老兵 | 0.5 | 0.9 | 1.5 |
+| 菁英 | 0.7 | 1.0 | 2.5 |
+
+升等規則（`AnonTierSystem.try_promote`）：
+- 需 exp ≥ threshold × count（個體成本，threshold 50/100/200）
+- 扣 coin + food + material × count
+- leader 戰術 skill 控訓練上限（≤0.4 新兵 / ≤0.7 老兵 / >0.7 菁英）；戰場 exp 不受限
+- 升菁英需 team 持有 `weapon_melee_high ≥ 新菁英總數`（check 不消耗）
+- 經驗來源：訓練 task（leader 戰術 × n / tick）+ 戰鬥存活（+5，勝方 +5）
+
+死亡分配（weighted random by tier count），不殺 named。
 
 ---
 

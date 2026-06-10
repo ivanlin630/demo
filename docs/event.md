@@ -90,10 +90,24 @@ SimRunner._step5_generate_events()
 
 ---
 
+## 既有 Registry 事件補充
+
+- `event_faction_defect.gd` — faction ≠ -1 + unrest ≥ 20 + 義氣 < 0.35 → 脫離 faction
+- `event_tag_shift.gd` — 好戰/野心 → +軍隊；戰損 > 50% → +流亡；資源穩定 → -流亡
+
+## System Event Tags（非 Registry，僅 log/reaction hook）
+
+| Tag | 觸發 | 用途 |
+|---|---|---|
+| `ProsperityAttack` | faction_ai 攻擊評估通過 | log 攻擊 attacker/prey/score |
+| `AttackDefeat` | encounter end 攻方戰敗 | reaction_system handler：named loyalty 降 / leader stress 升（依義氣/信義/慎重）|
+| `ResidentAccept` | 攻佔 outpost 居民接受 | log，outpost owner 易主 |
+| `Massacre` | 攻佔 outpost 居民拒投靠 + 殘忍/好戰 leader | log，居民團解散，pop → anon_treasury |
+| `AbandonOccupation` | 攻佔 outpost 居民拒投靠 + 義氣/信義 leader | log，放棄佔領 |
+| `ForceOccupy` | 攻佔 outpost 居民拒投靠 + 野心+慎重 leader | log，強佔 + 居民 pop -20% |
+
 ## 未來擴充
 
-新增事件範例（不影響現有系統）：
 - `event_famine_collapse.gd` — 長期飢荒後 Team 崩潰
 - `event_war_declaration.gd` — Teams 間衝突觸發宣戰
 - `event_plague.gd` — 人口損失事件
-- `event_migration.gd` — Team 自發移動目標改變

@@ -41,3 +41,23 @@
 - Memories
 
 禁止硬編碼結果
+
+## Interaction
+
+- **嚴禁非同格互動**：戰鬥 / 貿易 / 外交 / 投靠 / 徵收 / 信使 / 安頓 / 安撫 全部需 `team.tile_pos == other.tile_pos`
+- 觸發點：`interaction_system.process_on_move`（mover 對全 team 掃同格 → try_interact）
+
+## Anon
+
+- anon 是 team-level 抽象集體，**無個體 entity**
+- 4 tier scalar（平民/新兵/老兵/菁英）儲存於 `team.anon_tiers` dict
+- 變動只透過 `AnonTierSystem` API：`add_anon` / `remove_anon` / `add_exp` / `kill_random` / `transfer_proportional` / `try_promote`
+- `anon_combat_skill` / `anon_wage` 為 computed getter（不可直接寫）
+- 入團時保留來源 tier（戰俘 / 投靠 帶原 tier 進入）
+
+## Task
+
+- `current_task` 是團體狀態（不是個體）
+- `combat_target` 是「正在戰鬥」flag（戰鬥中設、結束清）
+- `prosperity_target_id` 是「想攻擊誰」意圖（攻擊 AI 評估時設）
+- 兩者語意分離，不可混用

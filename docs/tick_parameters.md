@@ -23,14 +23,26 @@
 
 ## 移動速度
 
+> 2026-06-10 update：BASE_MOVE_TICKS 公式改為由 EncounterSystem + WORLD_SPEED_MULT 推導
+
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 |
 |---|---|---|---|---|
-| `BASE_MOVE_TICKS` | `simulation/movement_system.gd:3` | **10** | 平原無負重：10tick/hex = 10小時 | — |
-| `MIN_MOVE_TICKS` | `simulation/movement_system.gd:4` | 3 | 最快：3tick/hex = 3小時 | — |
-| `MAX_MOVE_TICKS` | `simulation/movement_system.gd:5` | 30 | 最慢：30tick/hex = 1.25天 | — |
-| `TERRAIN_SPEED_MULT` plains | `movement_system.gd:7` | 1.0 | 平原 ×1 | — |
-| `TERRAIN_SPEED_MULT` forest | `movement_system.gd:8` | 0.7 | 林地 ×0.7 → 14tick/hex | — |
-| `TERRAIN_SPEED_MULT` mountain | `movement_system.gd:9` | 0.4 | 山地 ×0.4 → 25tick/hex | — |
+| `WORLD_SPEED_MULT` | `movement_system.gd:4` | **5** | 世界比戰場快幾倍（5 = 菁英 0.2 天/hex）| — |
+| `BASE_MOVE_TICKS` | `movement_system.gd:5` | **48**（= 10 × 24 ÷ 5）| 平原 menorah speed_mult=1.0：48 tick/hex = 4.8 小時 | — |
+| `MIN_MOVE_TICKS` | `movement_system.gd:6` | **16**（= BASE/3）| 最快：16 tick/hex | — |
+| `MAX_MOVE_TICKS` | `movement_system.gd:7` | **144**（= BASE×3）| 最慢：144 tick/hex | — |
+| `NAMED_WEIGHT` | `movement_system.gd:?` | **3** | named 個人 speed 在 team avg 中加權 ×3 | — |
+| `TERRAIN_SPEED_MULT` plains | `movement_system.gd:?` | 1.0 | 平原 ×1 | — |
+| `TERRAIN_SPEED_MULT` forest | `movement_system.gd:?` | 0.7 | 林地 ×0.7 | — |
+| `TERRAIN_SPEED_MULT` mountain | `movement_system.gd:?` | 0.4 | 山地 ×0.4 | — |
+
+### Tier 速度（AnonTierSystem）
+
+實際 anon speed mult：
+- 平民 0.7 → 平原 ~68 tick/hex = 0.29 天
+- 新兵 0.8 → ~60 tick = 0.25 天
+- 老兵 0.9 → ~53 tick = 0.22 天
+- 菁英 1.0 → 48 tick = 0.2 天
 
 ---
 
