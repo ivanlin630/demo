@@ -41,6 +41,10 @@ const PROSPERITY_CADENCE: int = 720           # 3 天 評估一次
 const PROSPERITY_CADENCE_MILITARY: int = 360  # 軍隊 tag 1.5 天
 const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score +0.1
 
+# ── Threat response（被動威脅反應）──
+const THREAT_CADENCE: int = 240   # 1 日 評估一次威脅
+const TRADE_TIMEOUT: int = 1440   # 貿易 task 6 日未成交 → 放棄（防 zombie）
+
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
 	"ore_gold", "ore_silver", "ore_iron", "ore_steel",
@@ -157,9 +161,105 @@ func _refresh_attack_pursuit(state: WorldState, team: TeamData) -> void:
 		team.current_task = TeamData.TASK_IDLE
 		team.move_target = Vector2i(-1, -1)
 		return
+	# C: 攻擊追擊用攔截預測（朝 prey 移動方向提前 N 步），視野外/不動 fallback intel 最後已知
 	var last_pos: Vector2i = state.team_intel.get(team.team_id, {}).get(
 		team.prosperity_target_id, {}).get("tile_pos", prey.tile_pos)
-	team.move_target = last_pos
+	var predicted: Vector2i = PathSystem.predict_intercept(state, team, prey)
+	team.move_target = predicted if predicted != prey.tile_pos else last_pos
+
+# ──────── D: 被動威脅反應 ────────
+
+# 威脅評估（cadence）：找視野內最高 threat，超門檻 → dispatch 反應。
+# 已在反應 task 中則重評威脅是否仍在，無則回 idle。
+func _evaluate_threat(state: WorldState, team: TeamData) -> void:
+	if state.world.current_tick < team.threat_eval_next_tick: return
+	team.threat_eval_next_tick = state.world.current_tick + THREAT_CADENCE
+	if team.combat_target != -1: return
+	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_FLEE]:
+		if not _has_active_threat(state, team):
+			team.current_task = TeamData.TASK_IDLE
+			team.move_target = Vector2i(-1, -1)
+		return
+	# 不打斷其他進行中 task（只有 idle 才主動評威脅）
+	if team.current_task != TeamData.TASK_IDLE: return
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	var caution: float = float(leader.values.get("慎重", 0.5))
+	var threshold: float = ThreatAssessment.THREAT_BASE_THRESHOLD + caution * 0.3
+	var best_threat: float = 0.0
+	var best_id: int = -1
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var other: TeamData = state.teams.get(tid)
+		if other == null: continue
+		var t: float = ThreatAssessment.score(state, team, other)
+		if t > best_threat:
+			best_threat = t
+			best_id = tid
+	if best_threat < threshold: return
+	_dispatch_threat_response(state, team, best_id, best_threat)
+
+func _has_active_threat(state: WorldState, team: TeamData) -> bool:
+	for tid in state.team_discovered.get(team.team_id, []):
+		var other: TeamData = state.teams.get(tid)
+		if other == null: continue
+		var t: float = ThreatAssessment.score(state, team, other)
+		if t > ThreatAssessment.THREAT_BASE_THRESHOLD:
+			return true
+	return false
+
+# 依 leader 性格評 4 反應（逃跑/備戰/求和/迎戰），居民團不可迎戰。
+func _dispatch_threat_response(state: WorldState, team: TeamData,
+		threat_id: int, threat_score: float) -> void:
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	var survival: float = float(leader.values.get("求生欲", 0.5))
+	var martial: float = float(leader.values.get("好戰", 0.5))
+	var caution: float = float(leader.values.get("慎重", 0.5))
+	var greed: float = float(leader.values.get("貪婪", 0.5))
+	var honor: float = float(leader.values.get("信義", 0.5))
+	var is_resident: bool = _is_resident_team(state, team)
+	var scores: Dictionary = {
+		TeamData.TASK_FLEE: survival * 0.8 + (threat_score - 0.5) * 0.3,
+		TeamData.TASK_PREPARE: caution * 0.6 + martial * 0.3,
+		"求和": greed * 0.5 + honor * 0.3 - martial * 0.3,
+	}
+	if not is_resident:
+		scores[TeamData.TASK_DEFEND] = martial * 0.7 + (1.0 - threat_score) * 0.2
+	var best: String = ""
+	var best_score: float = -INF
+	for action in scores:
+		if scores[action] > best_score:
+			best_score = scores[action]
+			best = action
+	var other: TeamData = state.teams.get(threat_id)
+	if other == null: return
+	match best:
+		TeamData.TASK_FLEE:
+			team.current_task = TeamData.TASK_FLEE
+			team.move_target = _flee_target(state, team, other)
+		TeamData.TASK_DEFEND:
+			team.current_task = TeamData.TASK_DEFEND
+			team.move_target = other.tile_pos
+			team.prosperity_target_id = threat_id
+		TeamData.TASK_PREPARE:
+			team.current_task = TeamData.TASK_PREPARE
+			team.move_target = Vector2i(-1, -1)
+		"求和":
+			team.current_task = TeamData.TASK_DIPLOMACY
+			team.move_target = other.tile_pos
+			team.order_target_id = threat_id
+			team.order_task = "tribute_offer"
+	print("[ThreatResponse] Team%d → %s (threat=Team%d, score=%.2f)" % [
+		team.team_id, best, threat_id, best_score])
+
+func _flee_target(state: WorldState, team: TeamData, threat: TeamData) -> Vector2i:
+	# 朝反方向走 3 hex
+	var dir: Vector2i = team.tile_pos - threat.tile_pos
+	var pos: Vector2i = team.tile_pos + Vector2i(sign(dir.x), sign(dir.y)) * 3
+	if state.world.tiles.has(pos.x * 1000 + pos.y):
+		return pos
+	return team.tile_pos
 
 func _is_prosperity_candidate(state: WorldState, team: TeamData) -> bool:
 	if team.parent_team_id != -1: return false   # 子隊不主動發動
@@ -289,6 +389,13 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			team.prosperity_eval_next_tick = state.world.current_tick + cad
 		# 追擊刷新（攻擊/掠奪 中移動目標會跑，每 tick 對齊 intel）
 		_refresh_attack_pursuit(state, team)
+		# D: 被動威脅評估（cadence 內部控管）
+		_evaluate_threat(state, team)
+		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）
+		if team.current_task == TeamData.TASK_TRADE \
+				and state.world.current_tick - team.trade_task_start_tick > TRADE_TIMEOUT:
+			team.current_task = TeamData.TASK_IDLE
+			team.move_target = Vector2i(-1, -1)
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			_consider_extraction(state, team)
@@ -525,6 +632,7 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			if pid != -1:
 				mt.current_task = TeamData.TASK_TRADE
 				mt.move_target  = state.teams[pid].tile_pos
+				mt.trade_task_start_tick = state.world.current_tick
 
 func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 	var best_id: int = -1
@@ -703,6 +811,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			var pid: int = _find_trade_target(state, team)
 			if pid != -1:
 				team.move_target = state.teams[pid].tile_pos
+				team.trade_task_start_tick = state.world.current_tick
 			else:
 				team.current_task = TeamData.TASK_IDLE
 	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
