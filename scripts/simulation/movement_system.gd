@@ -1,7 +1,7 @@
 ﻿class_name MovementSystem
 
 # world-hex 移動成本 = encounter-hex 動作時間 × 地圖直徑 / 世界速度倍率
-const WORLD_SPEED_MULT: int = 2    # TEST VALUE — 倍率=2 → 0.5天/hex（normal speed, plains, daytime）
+const WORLD_SPEED_MULT: int = 5    # TEST VALUE — 倍率=5 → 0.2天/hex 菁英 / 0.29天/hex 平民（normal speed, plains, daytime）
 const BASE_MOVE_TICKS: int = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER / WORLD_SPEED_MULT
 const MIN_MOVE_TICKS: int  = BASE_MOVE_TICKS / 3
 const MAX_MOVE_TICKS: int  = BASE_MOVE_TICKS * 3
