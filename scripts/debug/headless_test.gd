@@ -171,6 +171,11 @@ func _initialize() -> void:
 	_test_resident_lock_prepare_allowed()
 	_test_find_trade_partner_outpost_only()
 	_test_trade_timeout()
+	_test_absorb_then_spill_no_trade()
+	_test_absorb_only_at_own_outpost()
+	_test_spill_back_with_cap_overflow()
+	_test_resolve_market_absorbs_storage()
+	_test_trader_vs_empty_outpost()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5879,3 +5884,124 @@ func _test_trade_timeout() -> void:
 	FactionAISystem.new().evaluate_all(state, [0])
 	assert(t.current_task == TeamData.TASK_IDLE, "超時應 idle，實際=%s" % t.current_task)
 	print("Engagement Task7b OK")
+
+# ──────── Trade 接公庫 ────────
+
+func _test_absorb_then_spill_no_trade() -> void:
+	print("--- TradePublic Task1a: absorb→spill round-trip ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 0
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.public_storage = { "food": 50.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.resources = { "food": 10.0 }
+	state.teams[0] = team
+	var orig: Dictionary = InteractionSystem._absorb_public_storage(state, team)
+	assert(float(team.resources["food"]) == 60.0, "absorb 後 team.food 應 60，實際 %.1f" % float(team.resources["food"]))
+	assert(float(orig["food"]) == 10.0, "original 應記 team 原 food=10")
+	assert(float(tile.public_storage["food"]) == 0.0, "absorb 應 move 出公庫（=0）")
+	InteractionSystem._spill_back_public_storage(state, team, orig)
+	assert(float(team.resources["food"]) == 10.0, "spill_back 後 team.food 應還原 10，實際 %.1f" % float(team.resources["food"]))
+	assert(float(tile.public_storage["food"]) == 50.0, "公庫 food 應還原 50，實際 %.1f" % float(tile.public_storage["food"]))
+	print("TradePublic Task1a OK")
+
+func _test_absorb_only_at_own_outpost() -> void:
+	print("--- TradePublic Task1b: 別人 outpost 不 absorb ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 99   # 別團 outpost
+	tile.public_storage = { "food": 50.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.resources = { "food": 10.0 }
+	state.teams[0] = team
+	var orig: Dictionary = InteractionSystem._absorb_public_storage(state, team)
+	assert(orig.is_empty(), "別人 outpost 不應 absorb")
+	assert(float(team.resources["food"]) == 10.0, "team.food 不變")
+	assert(float(tile.public_storage["food"]) == 50.0, "公庫不變")
+	print("TradePublic Task1b OK")
+
+func _test_spill_back_with_cap_overflow() -> void:
+	print("--- TradePublic Task1c: spill_back 超 cap 留 team ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 0
+	tile.outpost_type = "civilian"; tile.outpost_level = 1   # cap food = 200
+	tile.public_storage = { "food": 180.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.resources = { "food": 0.0 }
+	state.teams[0] = team
+	var orig: Dictionary = InteractionSystem._absorb_public_storage(state, team)
+	# 模擬 trade 後 team food 多 100（180 借出 + 100 賺）
+	team.resources["food"] = 280.0
+	InteractionSystem._spill_back_public_storage(state, team, orig)
+	assert(float(tile.public_storage["food"]) == 200.0, "公庫應補到 cap=200，實際 %.1f" % float(tile.public_storage["food"]))
+	assert(float(team.resources["food"]) == 80.0, "超 cap 的 80 應留 team，實際 %.1f" % float(team.resources["food"]))
+	print("TradePublic Task1c OK")
+
+func _test_resolve_market_absorbs_storage() -> void:
+	print("--- TradePublic Task2: _resolve_market absorb 公庫 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var it := InteractionSystem.new()
+	# b：outpost owner，公庫有 food，自己 coin 少；a：trader 帶 coin
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.public_storage = { "food": 200.0 }
+	state.world.tiles[0] = tile
+	var a := TeamData.new(); a.team_id = 0; a.faction_id = -1; a.tile_pos = Vector2i(0, 0)
+	a.population = 5; a.current_task = TeamData.TASK_TRADE
+	a.resources = { "coin": 300.0, "food": 0.0 }
+	var a_leader := PersonData.new(); a_leader.id = 10; a_leader.team_id = 0
+	state.persons[10] = a_leader; a.leader_id = 10
+	state.teams[0] = a
+	var b := TeamData.new(); b.team_id = 1; b.faction_id = -1; b.tile_pos = Vector2i(0, 0)
+	b.population = 5; b.current_task = "idle"
+	b.resources = { "coin": 0.0, "food": 0.0 }
+	var b_leader := PersonData.new(); b_leader.id = 11; b_leader.team_id = 1
+	state.persons[11] = b_leader; b.leader_id = 11
+	state.teams[1] = b
+	var public_before: float = float(tile.public_storage["food"])
+	var a_coin_before: float = float(a.resources["coin"])
+	it._resolve_market(state, a, b)
+	# a 應買到 food（coin 減），b 公庫 food 減（賣出），b coin 增
+	assert(float(a.resources.get("food", 0)) > 0.0, "trader 應買到 food，實際 %.1f" % float(a.resources.get("food", 0)))
+	assert(float(a.resources["coin"]) < a_coin_before, "trader coin 應減少")
+	assert(float(tile.public_storage["food"]) < public_before, "公庫 food 應減少（賣出），實際 %.1f" % float(tile.public_storage["food"]))
+	assert(float(b.resources.get("coin", 0)) > 0.0, "owner 應收到 coin")
+	print("TradePublic Task2 OK")
+
+func _test_trader_vs_empty_outpost() -> void:
+	print("--- TradePublic Task3: trader 抵達空 outpost 仍交易 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var it := InteractionSystem.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.public_storage = { "food": 200.0 }
+	state.world.tiles[0] = tile
+	# trader 在 outpost tile
+	var trader := TeamData.new(); trader.team_id = 0; trader.faction_id = -1
+	trader.tile_pos = Vector2i(0, 0); trader.population = 5
+	trader.current_task = TeamData.TASK_TRADE
+	trader.resources = { "coin": 300.0, "food": 0.0 }
+	var t_leader := PersonData.new(); t_leader.id = 10; t_leader.team_id = 0
+	state.persons[10] = t_leader; trader.leader_id = 10
+	state.teams[0] = trader
+	# owner 不在 tile 上（出征中）
+	var owner := TeamData.new(); owner.team_id = 1; owner.faction_id = -1
+	owner.tile_pos = Vector2i(5, 5); owner.population = 5
+	owner.resources = { "coin": 0.0, "food": 0.0 }
+	var o_leader := PersonData.new(); o_leader.id = 11; o_leader.team_id = 1
+	state.persons[11] = o_leader; owner.leader_id = 11
+	state.teams[1] = owner
+	var public_before: float = float(tile.public_storage["food"])
+	var handled: bool = it._try_trader_vs_outpost(state, trader)
+	assert(handled, "trader 在空 outpost 應觸發交易")
+	assert(float(trader.resources.get("food", 0)) > 0.0, "trader 應買到公庫 food，實際 %.1f" % float(trader.resources.get("food", 0)))
+	assert(float(tile.public_storage["food"]) < public_before, "公庫 food 應減少")
+	assert(owner.tile_pos == Vector2i(5, 5), "owner tile_pos 應還原 (5,5)，實際 %s" % str(owner.tile_pos))
+	print("TradePublic Task3 OK")
