@@ -144,7 +144,7 @@ func _initialize() -> void:
 	_test_stable_facility_def()
 	_test_stable_produces_mounts()
 	_test_wild_horses_generation()
-	_test_wild_horses_harvest()
+	_test_wild_horses_no_auto_collect()
 	_test_mount_loot_total_wipe()
 	_test_mount_loot_partial()
 	quit()
@@ -5401,8 +5401,9 @@ func _test_wild_horses_generation() -> void:
 	assert(with_horses <= plains, "wild_horses tile 不超過 plains 數")
 	print("Mount Task4a OK (plains=%d with_horses=%d)" % [plains, with_horses])
 
-func _test_wild_horses_harvest() -> void:
-	print("--- Mount Task4b: wild_horses 採集 ---")
+func _test_wild_horses_no_auto_collect() -> void:
+	# 抵達不自動收編野馬（待公庫 spec 加 outpost 採集）
+	print("--- Mount Task4b: wild_horses 抵達不自動收編 ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var tile := HexTileData.new()
@@ -5416,8 +5417,8 @@ func _test_wild_horses_harvest() -> void:
 	state.teams[0] = team
 	var ms := MovementSystem.new()
 	ms._on_arrival(state, team)
-	assert(int(team.resources.get("mounts", 0)) == 2, "採集後 mounts=2, 實際 %d" % int(team.resources.get("mounts", 0)))
-	assert(int(tile.resources.get("wild_horses", 0)) == 0, "tile wild_horses 應清空")
+	assert(int(team.resources.get("mounts", 0)) == 0, "不收編 mounts=0, 實際 %d" % int(team.resources.get("mounts", 0)))
+	assert(int(tile.resources.get("wild_horses", 0)) == 2, "tile 野馬保留")
 	print("Mount Task4b OK")
 
 func _test_mount_loot_total_wipe() -> void:

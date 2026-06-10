@@ -262,6 +262,7 @@
 | 優先 | spec | 解的問題 |
 |---|---|---|
 | **H** | NPC 會合/攔截 | W1 + W2（0 Combat / 0 Trade）|
+| **M** | mount 公庫系統 | mounts 改為 outpost public_storage（採集 / stable 產出 → 公庫，team 出征前 withdraw）；同時加 outpost 鄰格 wild_horses 自動採集 |
 | **M** | encounter-engagement 後續 | 攔截方反追（prey 預測 attacker）；戰報廣播；玩家版反應 UI |
 | **H** | salary 欠薪後果 | Bug2 |
 | **M** | NPC promote/train AI | W4 |

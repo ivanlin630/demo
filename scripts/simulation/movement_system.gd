@@ -215,13 +215,6 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 	if state.world.tiles.has(tile_id):
 		var tile: HexTileData = state.world.tiles[tile_id]
 		tile.occupied_by = team.team_id
-		# 野馬採集：站到有 wild_horses 的格 → 收編為 mounts
-		var wh: int = int(tile.resources.get("wild_horses", 0))
-		if wh > 0:
-			team.resources["mounts"] = int(team.resources.get("mounts", 0)) + wh
-			tile.resources["wild_horses"] = 0
-			print("[Mount] Team%d 採集野馬 +%d at (%d,%d)" % [
-				team.team_id, wh, team.tile_pos.x, team.tile_pos.y])
 		# 撿 abandoned_coin（有 owner 則僅 owner 可撿）
 		if tile.abandoned_coin > 0.0:
 			if tile.outpost_owner == -1 or tile.outpost_owner == team.team_id:
