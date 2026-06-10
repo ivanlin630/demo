@@ -129,6 +129,7 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 				absorber.named_members.append(pid)
 	absorber.population += total_xfer
 	absorbed.population -= total_xfer
+	AnonTierSystem.transfer_proportional(absorbed, absorber, anon_xfer)
 	absorber.wounded += int(round(float(absorbed.wounded) * frac))
 	absorbed.wounded = maxi(absorbed.wounded - int(round(float(absorbed.wounded) * frac)), 0)
 	for res in absorbed.resources:
@@ -204,6 +205,8 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	var transfer: int = mini(absorbed.population, capacity)
 	var frac: float   = float(transfer) / float(absorbed.population) if absorbed.population > 0 else 0.0
 	absorber.population += transfer
+	AnonTierSystem.transfer_proportional(absorbed, absorber,
+		roundi(float(AnonTierSystem.total_pop(absorbed)) * frac))
 	absorber.wounded    += int(round(float(absorbed.wounded) * frac))
 	for res in absorbed.resources:
 		var amt: float = float(absorbed.resources.get(res, 0)) * frac

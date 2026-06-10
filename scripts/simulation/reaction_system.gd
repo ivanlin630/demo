@@ -216,6 +216,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var cap: int = TeamData.pop_cap_from_leadership(cmd)
 			if team.population < cap:
 				team.population += 1
+				AnonTierSystem.add_anon(team, "平民", 1)
 		"P4_expand":
 			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
 		"P5_breed":

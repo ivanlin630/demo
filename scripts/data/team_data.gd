@@ -15,6 +15,7 @@ const TASK_TRADE       := "貿易"
 const TASK_PATROL      := "巡邏"
 const TASK_BUILD       := "建設"
 const TASK_MERGE       := "合併"
+const TASK_TRAIN       := "訓練"
 
 const TAG_COMMAND  := "統領"
 const TAG_MILITARY := "軍隊"
@@ -63,9 +64,28 @@ var equip_order: Dictionary = {
 	"melee_low": 0, "melee_high": 0,
 	"ranged_low": 0, "ranged_high": 0,
 }
-var anon_combat_skill: float = 0.2
+# ── Anon Tier 系統（取代舊 scalar anon_combat_skill / anon_wage）──
+var anon_tiers: Dictionary = {
+	"平民": 0, "新兵": 0, "老兵": 0, "菁英": 0,
+}
+var anon_exp: Dictionary = {
+	"平民": 0.0, "新兵": 0.0, "老兵": 0.0,
+}
+# 向後相容 computed getter（read-only；舊 set 點為 no-op）
+var anon_combat_skill: float:
+	get:
+		return AnonTierSystem.avg_combat_skill(self)
+	set(_value):
+		pass
+var anon_wage: float:
+	get:
+		var total: int = AnonTierSystem.total_pop(self)
+		if total <= 0:
+			return 1.0
+		return AnonTierSystem.total_wage(self) / float(total)
+	set(_value):
+		pass
 var armed_anon_ratio: float = 0.0
-var anon_wage: float = 1.0
 var anon_treasury: float = 0.0   # 匿名兵 wage 沉澱
 var fatigue: float = 0.0
 var guard_ratio: float = 0.2

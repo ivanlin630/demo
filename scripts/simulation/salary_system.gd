@@ -57,8 +57,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 				state.world.current_tick, intensity)
 		else:
 			p.loyalty -= (1.0 - ratio) * SALARY_LOYALTY_PENALTY
-	var anon_count: int = team.population - team.named_members.size() - 1
-	var anon_total: float = team.anon_wage * maxf(anon_count, 0)
+	var anon_total: float = AnonTierSystem.total_wage(team)
 	team.resources["coin"] = float(team.resources.get("coin", 0)) - anon_total
 	team.anon_treasury += anon_total   # 匿名薪水沉澱公庫（非消失）
 	if float(team.resources.get("coin", 0)) < 0:

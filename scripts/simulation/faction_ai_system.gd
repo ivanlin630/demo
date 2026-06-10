@@ -269,8 +269,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_evaluate_uprising(state, team)
 			_evaluate_owner_contact(state, team)
 		_update_equip_order(state, team)
-		_update_anon_combat_skill(team)
-		_update_anon_wage(team)
+		# anon_combat_skill / anon_wage 改 computed（AnonTierSystem），不再主動更新
 		_update_armor_config(team)
 		_update_guard_ratio(team, state)
 
@@ -759,30 +758,6 @@ func _promote_successor(state: WorldState, team: TeamData) -> void:
 	if state.player_id == -1 or state.persons.get(state.player_id) == null:
 		# 不主動轉移玩家身分，D2 屬獨立議題
 		pass
-
-func _update_anon_combat_skill(team: TeamData) -> void:
-	var best: float = 0.25  # default
-	for tag in team.tags:
-		match tag:
-			TeamData.TAG_MILITARY: best = maxf(best, 0.5)
-			TeamData.TAG_MERCHANT: best = maxf(best, 0.2)
-			TeamData.TAG_PRODUCE:  best = maxf(best, 0.15)
-			TeamData.TAG_RELIGION: best = maxf(best, 0.2)
-			TeamData.TAG_EXILE:    best = maxf(best, 0.3)
-	team.anon_combat_skill = clampf(best, 0.1, 0.8)
-
-func _update_anon_wage(team: TeamData) -> void:
-	# 雙 accumulator：避免單 best 受 tag 順序影響
-	var bonus:   float = 1.0   # 拉高項 max (MILITARY/MERCHANT)
-	var penalty: float = 1.0   # 壓低項 min (PRODUCE/RELIGION/EXILE)
-	for tag in team.tags:
-		match tag:
-			TeamData.TAG_MILITARY: bonus   = maxf(bonus,   1.5)
-			TeamData.TAG_MERCHANT: bonus   = maxf(bonus,   1.2)
-			TeamData.TAG_PRODUCE:  penalty = minf(penalty, 0.7)
-			TeamData.TAG_RELIGION: penalty = minf(penalty, 0.5)
-			TeamData.TAG_EXILE:    penalty = minf(penalty, 0.3)
-	team.anon_wage = clampf(bonus * penalty, 0.0, 2.0)
 
 func _update_armor_config(team: TeamData) -> void:
 	var pop_threshold: float = maxf(team.population * 0.3, 1.0)

@@ -146,9 +146,12 @@ func _compute_team_speed(state: WorldState, team: TeamData) -> float:
 			total_speed += p.get_effective_speed() * NAMED_WEIGHT
 			total_count += NAMED_WEIGHT
 			named_found += 1
-	var unnamed_healthy: int = maxi(team.population - named_found - team.wounded, 0)
-	total_speed += float(unnamed_healthy) * 1.0
-	total_count += unnamed_healthy
+	# anon 依 tier 各自 speed（取代舊統一 1.0）
+	for tier in AnonTierSystem.TIER_ORDER:
+		var n: int = int(team.anon_tiers.get(tier, 0))
+		if n > 0:
+			total_speed += float(n) * float(AnonTierSystem.TIER_STATS[tier]["speed"])
+			total_count += n
 	total_speed += float(team.wounded) * 0.5
 	total_count += team.wounded
 	if total_count == 0:

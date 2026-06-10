@@ -2,9 +2,20 @@ extends SceneTree
 
 func _initialize() -> void:
 	_run_sim_test()
-	_test_anon_combat_skill_field()
-	_test_update_anon_combat_skill()
-	_test_update_anon_wage()
+	_test_anon_tier_const()
+	_test_team_anon_tiers_default()
+	_test_anon_tier_queries()
+	_test_add_remove_anon()
+	_test_add_exp()
+	_test_kill_random_proportional()
+	_test_transfer_proportional()
+	_test_promote_success()
+	_test_promote_insufficient_exp()
+	_test_promote_insufficient_resources()
+	_test_promote_elite_requires_weapon()
+	_test_promote_leader_skill_cap()
+	_test_training_adds_exp()
+	_test_anon_speed_tiers()
 	_test_update_armor_config()
 	_test_update_guard_ratio()
 	_test_faction_ai_run_calls_all_updates()
@@ -2280,82 +2291,6 @@ func _run_sim_test() -> void:
 
 	print("=== DONE ===")
 
-func _test_anon_combat_skill_field() -> void:
-	print("--- S7 Task1: team.anon_combat_skill 獨立欄位 ---")
-	var t := TeamData.new()
-	assert(t.anon_combat_skill == 0.2, "預設值應為 0.2，實際=%s" % str(t.anon_combat_skill))
-	# 確認欄位可被指派
-	t.anon_combat_skill = 0.55
-	assert(t.anon_combat_skill == 0.55, "指派後應為 0.55")
-	print("S7 Task1 OK")
-
-func _test_update_anon_combat_skill() -> void:
-	print("--- S7 Task3: _update_anon_combat_skill ---")
-	var fai := FactionAISystem.new()
-	# MILITARY → 0.5
-	var t_mil := TeamData.new()
-	t_mil.tags = [TeamData.TAG_MILITARY]
-	fai._update_anon_combat_skill(t_mil)
-	assert(t_mil.anon_combat_skill >= 0.45 and t_mil.anon_combat_skill <= 0.55,
-		"MILITARY 應 ~0.5，實際=%s" % str(t_mil.anon_combat_skill))
-	# PRODUCE → default 0.25 (PRODUCE tag=0.15 < default 0.25, so result is 0.25)
-	var t_pro := TeamData.new()
-	t_pro.tags = [TeamData.TAG_PRODUCE]
-	fai._update_anon_combat_skill(t_pro)
-	assert(t_pro.anon_combat_skill >= 0.2 and t_pro.anon_combat_skill <= 0.3,
-		"PRODUCE 單一 tag → default 0.25，實際=%s" % str(t_pro.anon_combat_skill))
-	# 多重 tag 取最高
-	var t_multi := TeamData.new()
-	t_multi.tags = [TeamData.TAG_PRODUCE, TeamData.TAG_MILITARY]
-	fai._update_anon_combat_skill(t_multi)
-	assert(t_multi.anon_combat_skill >= 0.45,
-		"多重 tag 應取最高（MILITARY=0.5），實際=%s" % str(t_multi.anon_combat_skill))
-	# 無 tag → default 0.25
-	var t_def := TeamData.new()
-	fai._update_anon_combat_skill(t_def)
-	assert(t_def.anon_combat_skill >= 0.2 and t_def.anon_combat_skill <= 0.3,
-		"default 應 ~0.25，實際=%s" % str(t_def.anon_combat_skill))
-	print("S7 Task3 OK")
-
-func _test_update_anon_wage() -> void:
-	print("--- S7 Task4: _update_anon_wage ---")
-	var fai := FactionAISystem.new()
-	# MILITARY → 1.5
-	var t_mil := TeamData.new()
-	t_mil.tags = [TeamData.TAG_MILITARY]
-	fai._update_anon_wage(t_mil)
-	assert(t_mil.anon_wage >= 1.4 and t_mil.anon_wage <= 1.6,
-		"MILITARY 應 ~1.5，實際=%s" % str(t_mil.anon_wage))
-	# PRODUCE → 0.7
-	var t_pro := TeamData.new()
-	t_pro.tags = [TeamData.TAG_PRODUCE]
-	fai._update_anon_wage(t_pro)
-	assert(t_pro.anon_wage <= 0.8,
-		"PRODUCE 應 <=0.8，實際=%s" % str(t_pro.anon_wage))
-	# EXILE → 0.3
-	var t_ex := TeamData.new()
-	t_ex.tags = [TeamData.TAG_EXILE]
-	fai._update_anon_wage(t_ex)
-	assert(t_ex.anon_wage <= 0.4,
-		"EXILE 應 <=0.4，實際=%s" % str(t_ex.anon_wage))
-	# default → 1.0
-	var t_def := TeamData.new()
-	fai._update_anon_wage(t_def)
-	assert(t_def.anon_wage >= 0.9 and t_def.anon_wage <= 1.1,
-		"default 應 ~1.0，實際=%s" % str(t_def.anon_wage))
-	# 多重 tag 順序無關性（MILITARY + RELIGION = 1.5 × 0.5 = 0.75）
-	var t_combo1 := TeamData.new()
-	t_combo1.tags = [TeamData.TAG_MILITARY, TeamData.TAG_RELIGION]
-	fai._update_anon_wage(t_combo1)
-	var t_combo2 := TeamData.new()
-	t_combo2.tags = [TeamData.TAG_RELIGION, TeamData.TAG_MILITARY]
-	fai._update_anon_wage(t_combo2)
-	assert(abs(t_combo1.anon_wage - t_combo2.anon_wage) < 0.001,
-		"tag 順序不應影響結果: %s vs %s" % [str(t_combo1.anon_wage), str(t_combo2.anon_wage)])
-	assert(t_combo1.anon_wage >= 0.7 and t_combo1.anon_wage <= 0.8,
-		"MILITARY+RELIGION 應 ~0.75，實際=%s" % str(t_combo1.anon_wage))
-	print("S7 Task4 OK")
-
 func _test_update_armor_config() -> void:
 	print("--- S7 Task5: _update_armor_config ---")
 	var fai := FactionAISystem.new()
@@ -2468,12 +2403,8 @@ func _test_faction_ai_run_calls_all_updates() -> void:
 	t.resources["armor_high"] = 20
 	t.resources["armor_low"]  = 20
 	state.teams[200] = t
-	# faction_ai evaluate_all 後 4 個欄位都應被更新
+	# faction_ai evaluate_all 後 armor / guard 仍更新（anon_combat_skill/anon_wage 改 computed）
 	fai.evaluate_all(state, [200])
-	assert(t.anon_combat_skill >= 0.45,
-		"evaluate_all() 後 MILITARY anon_combat_skill 應 >=0.45，實際=%s" % str(t.anon_combat_skill))
-	assert(t.anon_wage >= 1.4,
-		"evaluate_all() 後 MILITARY anon_wage 應 >=1.4，實際=%s" % str(t.anon_wage))
 	assert(t.armor_config["torso"] == "high",
 		"evaluate_all() 後 MILITARY armor_config torso 應 high，實際=%s" % t.armor_config["torso"])
 	assert(t.guard_ratio >= 0.15 and t.guard_ratio <= 0.5,
@@ -4136,7 +4067,8 @@ func _test_salary_to_treasury() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0; team.population = 10; team.named_members = [101]
-	team.anon_wage = 1.0; team.resources["coin"] = 100.0
+	team.anon_tiers["新兵"] = 8   # total_wage = 8 × 1.0 = 8.0
+	team.resources["coin"] = 100.0
 	team.leader_id = 100
 	state.teams[0] = team
 	var leader := PersonData.new(); leader.id = 100
@@ -4635,7 +4567,7 @@ func _test_evaluate_prosperity_trigger() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
-	team.faction_id = 0; team.anon_combat_skill = 0.7
+	team.faction_id = 0; team.anon_tiers["菁英"] = 15  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -4663,7 +4595,7 @@ func _test_prosperity_low_ambition_skip() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
-	team.faction_id = 0; team.anon_combat_skill = 0.7
+	team.faction_id = 0; team.anon_tiers["菁英"] = 15  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -4686,7 +4618,7 @@ func _test_prosperity_low_readiness_skip() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 2
-	team.faction_id = 0; team.anon_combat_skill = 0.1
+	team.faction_id = 0; team.anon_tiers["平民"] = 2  # avg_combat=0.1
 	team.resources = { "food": 10 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -4709,7 +4641,7 @@ func _test_prosperity_same_faction_skip() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
-	team.faction_id = 5; team.anon_combat_skill = 0.7
+	team.faction_id = 5; team.anon_tiers["菁英"] = 15  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -4772,7 +4704,7 @@ func _test_prosperity_cadence() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
-	team.faction_id = -1; team.anon_combat_skill = 0.5
+	team.faction_id = -1; team.anon_tiers["老兵"] = 10  # avg_combat=0.5
 	team.resources = { "food": 200, "weapon_melee_low": 10 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -5041,3 +4973,184 @@ func _test_named_weight_speed() -> void:
 	var diff: float = speed_hi - speed_lo
 	assert(diff > 0.08, "K=3 應差 >8%%，實際=%.3f" % diff)
 	print("Combat Task4 OK (Δspeed=%.3f)" % diff)
+
+# ════════════ Anon Tier 系統 ════════════
+
+func _test_anon_tier_const() -> void:
+	print("--- AnonTier Task1: const ---")
+	assert(AnonTierSystem.TIER_ORDER.size() == 4)
+	assert(AnonTierSystem.TIER_STATS["平民"]["combat"] == 0.1)
+	assert(AnonTierSystem.TIER_STATS["菁英"]["speed"] == 1.0)
+	assert(AnonTierSystem.PROMOTION_EXP_THRESHOLD["老兵"] == 200.0)
+	assert(not AnonTierSystem.PROMOTION_EXP_THRESHOLD.has("菁英"))
+	print("AnonTier Task1 OK")
+
+func _test_team_anon_tiers_default() -> void:
+	var t := TeamData.new()
+	assert(t.anon_tiers["平民"] == 0)
+	assert(t.anon_tiers.size() == 4)
+	assert(t.anon_exp["平民"] == 0.0)
+	assert(t.anon_exp.size() == 3)
+	print("AnonTier Task1b OK")
+
+func _test_anon_tier_queries() -> void:
+	var t := TeamData.new()
+	t.anon_tiers = { "平民": 5, "新兵": 3, "老兵": 2, "菁英": 0 }
+	assert(AnonTierSystem.total_pop(t) == 10)
+	# wage: 5*0.5 + 3*1.0 + 2*1.5 = 8.5
+	assert(abs(AnonTierSystem.total_wage(t) - 8.5) < 0.01)
+	# avg combat: (5*0.1 + 3*0.3 + 2*0.5) / 10 = 0.24
+	assert(abs(AnonTierSystem.avg_combat_skill(t) - 0.24) < 0.01)
+	# avg speed: (5*0.7 + 3*0.8 + 2*0.9) / 10 = 0.77
+	assert(abs(AnonTierSystem.avg_speed(t) - 0.77) < 0.01)
+	assert(AnonTierSystem.tier_count(t, "新兵") == 3)
+	print("AnonTier Task2 OK")
+
+func _test_add_remove_anon() -> void:
+	var t := TeamData.new()
+	AnonTierSystem.add_anon(t, "新兵", 5)
+	assert(t.anon_tiers["新兵"] == 5)
+	var removed: int = AnonTierSystem.remove_anon(t, "新兵", 3)
+	assert(removed == 3 and t.anon_tiers["新兵"] == 2)
+	var removed2: int = AnonTierSystem.remove_anon(t, "新兵", 10)
+	assert(removed2 == 2 and t.anon_tiers["新兵"] == 0)
+	print("AnonTier Task3a OK")
+
+func _test_add_exp() -> void:
+	var t := TeamData.new()
+	AnonTierSystem.add_exp(t, "平民", 30.0)
+	assert(abs(t.anon_exp["平民"] - 30.0) < 0.01)
+	# 菁英 無 exp slot → no-op
+	AnonTierSystem.add_exp(t, "菁英", 99.0)
+	assert(not t.anon_exp.has("菁英"))
+	print("AnonTier Task3b OK")
+
+func _test_kill_random_proportional() -> void:
+	var t := TeamData.new()
+	t.anon_tiers = { "平民": 50, "新兵": 30, "老兵": 20, "菁英": 0 }
+	var killed = AnonTierSystem.kill_random(t, 10, "combat")
+	assert(killed["平民"] + killed["新兵"] + killed["老兵"] + killed["菁英"] == 10)
+	assert(AnonTierSystem.total_pop(t) == 90)
+	print("AnonTier Task3c OK (killed=%s)" % str(killed))
+
+func _test_transfer_proportional() -> void:
+	var src := TeamData.new()
+	var dst := TeamData.new()
+	src.anon_tiers = { "平民": 50, "新兵": 30, "老兵": 20, "菁英": 0 }
+	var moved = AnonTierSystem.transfer_proportional(src, dst, 20)
+	assert(AnonTierSystem.total_pop(src) == 80)
+	assert(AnonTierSystem.total_pop(dst) == 20)
+	assert(moved["平民"] + moved["新兵"] + moved["老兵"] + moved["菁英"] == 20)
+	print("AnonTier Task3d OK (moved=%s)" % str(moved))
+
+func _make_promote_team(state: WorldState, tact: float) -> TeamData:
+	var team := TeamData.new()
+	team.team_id = 0
+	var leader := PersonData.new()
+	leader.id = 1
+	leader.skills = { "戰術": tact }
+	state.persons[1] = leader
+	team.leader_id = 1
+	state.teams[0] = team
+	return team
+
+func _test_promote_success() -> void:
+	var state := WorldState.new()
+	var team := _make_promote_team(state, 0.5)
+	team.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
+	team.anon_exp["平民"] = 50.0
+	team.resources = { "coin": 100, "food": 200, "material": 50 }
+	var n = AnonTierSystem.try_promote(state, team, "平民", 5)
+	assert(n == 5, "預期升 5，實際=%d" % n)
+	assert(team.anon_tiers["平民"] == 5)
+	assert(team.anon_tiers["新兵"] == 5)
+	assert(team.resources["coin"] == 100 - 25)   # 5×5
+	assert(team.resources["food"] == 200 - 50)    # 5×10
+	assert(team.resources["material"] == 50 - 10) # 5×2
+	assert(team.anon_exp["平民"] == 0.0)
+	print("AnonTier Task4a OK")
+
+func _test_promote_insufficient_exp() -> void:
+	var state := WorldState.new()
+	var team := _make_promote_team(state, 0.5)
+	team.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
+	team.anon_exp["平民"] = 30.0   # < 50
+	team.resources = { "coin": 100, "food": 200, "material": 50 }
+	var n = AnonTierSystem.try_promote(state, team, "平民", 5)
+	assert(n == 0, "exp 不足應回 0，實際=%d" % n)
+	assert(team.anon_tiers["平民"] == 10)
+	assert(team.resources["coin"] == 100)   # 不部分扣
+	print("AnonTier Task4b OK")
+
+func _test_promote_insufficient_resources() -> void:
+	var state := WorldState.new()
+	var team := _make_promote_team(state, 0.5)
+	team.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
+	team.anon_exp["平民"] = 50.0
+	team.resources = { "coin": 10, "food": 200, "material": 50 }   # coin 不夠 25
+	var n = AnonTierSystem.try_promote(state, team, "平民", 5)
+	assert(n == 0, "物資不足應回 0，實際=%d" % n)
+	assert(team.anon_tiers["平民"] == 10)
+	assert(team.resources["coin"] == 10)   # 不部分扣
+	print("AnonTier Task4c OK")
+
+func _test_promote_elite_requires_weapon() -> void:
+	var state := WorldState.new()
+	var team := _make_promote_team(state, 0.8)   # cap 菁英
+	team.anon_tiers = { "平民": 0, "新兵": 0, "老兵": 10, "菁英": 0 }
+	team.anon_exp["老兵"] = 200.0
+	team.resources = { "coin": 1000, "food": 1000, "material": 1000, "weapon_melee_high": 0 }
+	var n0 = AnonTierSystem.try_promote(state, team, "老兵", 5)
+	assert(n0 == 0, "無高武器升菁英應回 0，實際=%d" % n0)
+	team.resources["weapon_melee_high"] = 5
+	var n1 = AnonTierSystem.try_promote(state, team, "老兵", 5)
+	assert(n1 == 5, "有高武器應升 5，實際=%d" % n1)
+	assert(team.anon_tiers["菁英"] == 5)
+	assert(team.resources["weapon_melee_high"] == 5, "武器只 check 不消耗")
+	print("AnonTier Task4d OK")
+
+func _test_promote_leader_skill_cap() -> void:
+	var state := WorldState.new()
+	var team := _make_promote_team(state, 0.3)   # cap 新兵
+	team.anon_tiers = { "平民": 0, "新兵": 10, "老兵": 0, "菁英": 0 }
+	team.anon_exp["新兵"] = 100.0
+	team.resources = { "coin": 1000, "food": 1000, "material": 1000 }
+	var n = AnonTierSystem.try_promote(state, team, "新兵", 5)
+	assert(n == 0, "leader 戰術 0.3 不可升老兵，應回 0，實際=%d" % n)
+	assert(team.anon_tiers["新兵"] == 10)
+	print("AnonTier Task4e OK")
+
+func _test_training_adds_exp() -> void:
+	var state := WorldState.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.current_task = TeamData.TASK_TRAIN
+	team.anon_tiers["平民"] = 10
+	var leader := PersonData.new()
+	leader.id = 1
+	leader.skills = { "戰術": 0.5 }
+	state.persons[1] = leader
+	team.leader_id = 1
+	state.teams[0] = team
+	var ts = TrainingSystem.new()
+	ts.process(state, [0])
+	# 每 tick exp += 0.5 × 10 = 5.0
+	assert(abs(team.anon_exp["平民"] - 5.0) < 0.01, "訓練 exp 應 5.0，實際=%f" % team.anon_exp["平民"])
+	print("AnonTier Task5 OK")
+
+func _test_anon_speed_tiers() -> void:
+	print("--- AnonTier: movement speed tier-aware ---")
+	var state := WorldState.new()
+	var ms = MovementSystem.new()
+	var t_pleb := TeamData.new()
+	t_pleb.team_id = 0; t_pleb.population = 10; t_pleb.leader_id = -1
+	t_pleb.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
+	var sp_pleb = ms._compute_team_speed(state, t_pleb)
+	var t_elite := TeamData.new()
+	t_elite.team_id = 1; t_elite.population = 10; t_elite.leader_id = -1
+	t_elite.anon_tiers = { "平民": 0, "新兵": 0, "老兵": 0, "菁英": 10 }
+	var sp_elite = ms._compute_team_speed(state, t_elite)
+	assert(abs(sp_pleb - 0.7) < 0.01, "純平民隊速應 0.7，實際=%f" % sp_pleb)
+	assert(abs(sp_elite - 1.0) < 0.01, "純菁英隊速應 1.0，實際=%f" % sp_elite)
+	assert(sp_elite - sp_pleb > 0.25, "菁英應快約 30%%")
+	print("AnonTier speed OK (pleb=%.2f elite=%.2f)" % [sp_pleb, sp_elite])
