@@ -154,6 +154,23 @@ func _initialize() -> void:
 	_test_outpost_collect_cap_limit()
 	_test_auto_withdraw_on_active_task()
 	_test_no_withdraw_when_idle()
+	# ── Encounter Engagement ──
+	_test_predict_intercept_static()
+	_test_predict_intercept_moving()
+	_test_predict_intercept_out_of_sight()
+	_test_threat_score_out_of_sight()
+	_test_threat_score_high_hostile()
+	_test_threat_score_distance_decay()
+	_test_task_defend_prepare_const()
+	_test_evaluate_threat_finds_hostile()
+	_test_evaluate_threat_cadence()
+	_test_dispatch_flee_high_survival()
+	_test_dispatch_defend_high_martial_non_resident()
+	_test_dispatch_prepare_resident()
+	_test_dispatch_tribute_high_business()
+	_test_resident_lock_prepare_allowed()
+	_test_find_trade_partner_outpost_only()
+	_test_trade_timeout()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5291,6 +5308,10 @@ func _test_trade_net_dispatches() -> void:
 	partner.team_id = 1; partner.faction_id = -1; partner.tile_pos = Vector2i(3, 0)
 	partner.resources["goods"] = 50.0
 	state.teams[1] = partner
+	# W2: trade partner 須有 outpost（靜止目標才追得上）
+	var p_tile := HexTileData.new()
+	p_tile.tile_pos = Vector2i(3, 0); p_tile.outpost_owner = 1
+	state.world.tiles[3 * 1000 + 0] = p_tile
 	state.team_discovered[0] = [1]
 	var sai := StrategicAiSystem.new()
 	sai._dispatch_trade_net(state, f)
@@ -5599,3 +5620,261 @@ func _test_no_withdraw_when_idle() -> void:
 	assert(int(team.resources.get("mounts", 0)) == 0, "idle 不拉")
 	assert(int(tile.public_storage.get("mounts", 0)) == 10, "公庫不變")
 	print("MountStorage Task4b OK")
+
+# ════════ Encounter Engagement ════════
+
+func _eng_plains_grid(state: WorldState, x0: int, x1: int, y0: int, y1: int) -> void:
+	for x in range(x0, x1):
+		for y in range(y0, y1):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+
+func _test_predict_intercept_static() -> void:
+	print("--- Engagement Task1a: prey 不動 → 回當前 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	_eng_plains_grid(state, 0, 12, -1, 2)
+	var attacker := TeamData.new(); attacker.team_id = 0; attacker.tile_pos = Vector2i(0, 0)
+	state.teams[0] = attacker
+	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(5, 0)
+	prey.last_tile_pos = Vector2i(5, 0)   # velocity 0
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	var p = PathSystem.predict_intercept(state, attacker, prey)
+	assert(p == prey.tile_pos, "靜止 prey → 回當前，實際=%s" % str(p))
+	print("Engagement Task1a OK")
+
+func _test_predict_intercept_moving() -> void:
+	print("--- Engagement Task1b: prey 移動 → 預測前方 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	_eng_plains_grid(state, 0, 12, -1, 2)
+	var attacker := TeamData.new(); attacker.team_id = 0; attacker.tile_pos = Vector2i(0, 0)
+	state.teams[0] = attacker
+	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(3, 0)
+	prey.last_tile_pos = Vector2i(2, 0)   # 朝 +x
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	var p = PathSystem.predict_intercept(state, attacker, prey)
+	assert(p != prey.tile_pos, "移動 prey 應預測未來格，實際=%s" % str(p))
+	assert(p.x > prey.tile_pos.x, "預測應在 prey 前方，實際=%s" % str(p))
+	print("Engagement Task1b OK")
+
+func _test_predict_intercept_out_of_sight() -> void:
+	print("--- Engagement Task1c: 視野外 → fallback 當前 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	_eng_plains_grid(state, 0, 12, -1, 2)
+	var attacker := TeamData.new(); attacker.team_id = 0; attacker.tile_pos = Vector2i(0, 0)
+	state.teams[0] = attacker
+	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(3, 0)
+	prey.last_tile_pos = Vector2i(2, 0)
+	state.teams[1] = prey
+	state.team_discovered[0] = []   # 不在視野
+	var p = PathSystem.predict_intercept(state, attacker, prey)
+	assert(p == prey.tile_pos, "視野外應 fallback 當前，實際=%s" % str(p))
+	print("Engagement Task1c OK")
+
+func _test_threat_score_out_of_sight() -> void:
+	print("--- Engagement Task2a: 視野外 score = 0 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var self_team := TeamData.new(); self_team.team_id = 0; self_team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = self_team
+	var other := TeamData.new(); other.team_id = 1; other.tile_pos = Vector2i(5, 0)
+	state.teams[1] = other
+	var s = ThreatAssessment.score(state, self_team, other)
+	assert(s == 0.0, "視野外應 0，實際=%.2f" % s)
+	print("Engagement Task2a OK")
+
+func _test_threat_score_high_hostile() -> void:
+	print("--- Engagement Task2b: 朝我來+敵意+近 → score 高 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var self_team := TeamData.new(); self_team.team_id = 0; self_team.tile_pos = Vector2i(0, 0)
+	self_team.population = 5
+	self_team.known_reputations = { 1: 0.1 }   # 高敵意
+	state.teams[0] = self_team
+	var other := TeamData.new(); other.team_id = 1; other.tile_pos = Vector2i(2, 0)
+	other.last_tile_pos = Vector2i(3, 0)   # velocity (-1,0) → 朝我來
+	other.population = 20
+	state.teams[1] = other
+	state.team_discovered[0] = [1]
+	state.team_intel[0] = { 1: { "population_est": 20 } }
+	var s = ThreatAssessment.score(state, self_team, other)
+	assert(s > 0.5, "敵意接近應 score>0.5，實際=%.2f" % s)
+	print("Engagement Task2b OK (score=%.2f)" % s)
+
+func _test_threat_score_distance_decay() -> void:
+	print("--- Engagement Task2c: 近 > 遠（距離衰減）---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var self_team := TeamData.new(); self_team.team_id = 0; self_team.tile_pos = Vector2i(0, 0)
+	self_team.population = 5; self_team.known_reputations = { 1: 0.2 }
+	state.teams[0] = self_team
+	var other := TeamData.new(); other.team_id = 1
+	state.teams[1] = other
+	state.team_discovered[0] = [1]
+	state.team_intel[0] = { 1: { "population_est": 15 } }
+	# 近：dist 1，朝我來
+	other.tile_pos = Vector2i(1, 0); other.last_tile_pos = Vector2i(2, 0)
+	var near_s = ThreatAssessment.score(state, self_team, other)
+	# 遠：dist 5，朝我來
+	other.tile_pos = Vector2i(5, 0); other.last_tile_pos = Vector2i(6, 0)
+	var far_s = ThreatAssessment.score(state, self_team, other)
+	assert(near_s > far_s, "近應 > 遠，near=%.2f far=%.2f" % [near_s, far_s])
+	print("Engagement Task2c OK (near=%.2f far=%.2f)" % [near_s, far_s])
+
+func _test_task_defend_prepare_const() -> void:
+	print("--- Engagement Task3: const + 欄位 ---")
+	assert(TeamData.TASK_DEFEND == "迎戰")
+	assert(TeamData.TASK_PREPARE == "備戰")
+	var t := TeamData.new()
+	assert(t.threat_eval_next_tick == 0)
+	assert(t.trade_task_start_tick == 0)
+	print("Engagement Task3 OK")
+
+func _eng_make_leader(state: WorldState, team: TeamData, vals: Dictionary) -> void:
+	var leader := PersonData.new()
+	leader.id = team.team_id * 100 + 1; leader.team_id = team.team_id
+	leader.values = vals
+	state.persons[leader.id] = leader
+	team.leader_id = leader.id
+
+func _test_evaluate_threat_finds_hostile() -> void:
+	print("--- Engagement Task4a: _evaluate_threat 找到敵 → dispatch ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	state.world.current_tick = 0
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.population = 5; team.known_reputations = { 1: 0.1 }
+	team.current_task = TeamData.TASK_IDLE
+	_eng_make_leader(state, team, { "慎重": 0.0, "求生欲": 0.9, "好戰": 0.1,
+		"貪婪": 0.1, "信義": 0.1 })
+	state.teams[0] = team
+	var enemy := TeamData.new(); enemy.team_id = 1; enemy.tile_pos = Vector2i(2, 0)
+	enemy.last_tile_pos = Vector2i(3, 0); enemy.population = 20
+	state.teams[1] = enemy
+	state.team_discovered[0] = [1]
+	state.team_intel[0] = { 1: { "population_est": 20 } }
+	var fai := FactionAISystem.new()
+	fai._evaluate_threat(state, team)
+	assert(team.current_task != TeamData.TASK_IDLE, "應觸發反應，task=%s" % team.current_task)
+	assert(team.threat_eval_next_tick == 240, "cadence 應設 240，實際=%d" % team.threat_eval_next_tick)
+	print("Engagement Task4a OK (→ %s)" % team.current_task)
+
+func _test_evaluate_threat_cadence() -> void:
+	print("--- Engagement Task4b: cadence 跳過 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.current_task = TeamData.TASK_IDLE
+	team.threat_eval_next_tick = 240
+	_eng_make_leader(state, team, { "慎重": 0.0 })
+	state.teams[0] = team
+	state.team_discovered[0] = []
+	var fai := FactionAISystem.new()
+	# tick 120 < 240 → 跳過，不改 next_tick
+	state.world.current_tick = 120
+	fai._evaluate_threat(state, team)
+	assert(team.threat_eval_next_tick == 240, "120 不應評，next 仍 240，實際=%d" % team.threat_eval_next_tick)
+	# tick 240 → 評，next = 480
+	state.world.current_tick = 240
+	fai._evaluate_threat(state, team)
+	assert(team.threat_eval_next_tick == 480, "240 應評，next=480，實際=%d" % team.threat_eval_next_tick)
+	print("Engagement Task4b OK")
+
+func _eng_dispatch_setup(vals: Dictionary, resident: bool) -> Array:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.population = 5
+	if resident:
+		var tile := HexTileData.new()
+		tile.tile_pos = Vector2i(0, 0); tile.outpost_level = 1
+		tile.outpost_type = "civilian"; tile.outpost_owner = 0
+		state.world.tiles[0] = tile
+		team.tags = [TeamData.TAG_PRODUCE]
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0; leader.values = vals
+	state.persons[1] = leader; team.leader_id = 1
+	state.teams[0] = team
+	var other := TeamData.new(); other.team_id = 1; other.tile_pos = Vector2i(1, 0)
+	state.teams[1] = other
+	return [state, team]
+
+func _test_dispatch_flee_high_survival() -> void:
+	print("--- Engagement Task5a: 求生欲高 → 逃跑 ---")
+	var r := _eng_dispatch_setup({ "求生欲": 0.9, "好戰": 0.1, "慎重": 0.1,
+		"貪婪": 0.1, "信義": 0.1 }, false)
+	FactionAISystem.new()._dispatch_threat_response(r[0], r[1], 1, 0.6)
+	assert(r[1].current_task == TeamData.TASK_FLEE, "應逃跑，實際=%s" % r[1].current_task)
+	print("Engagement Task5a OK")
+
+func _test_dispatch_defend_high_martial_non_resident() -> void:
+	print("--- Engagement Task5b: 好戰高+非居民 → 迎戰 ---")
+	var r := _eng_dispatch_setup({ "求生欲": 0.2, "好戰": 0.9, "慎重": 0.2,
+		"貪婪": 0.1, "信義": 0.1 }, false)
+	FactionAISystem.new()._dispatch_threat_response(r[0], r[1], 1, 0.3)
+	assert(r[1].current_task == TeamData.TASK_DEFEND, "應迎戰，實際=%s" % r[1].current_task)
+	print("Engagement Task5b OK")
+
+func _test_dispatch_prepare_resident() -> void:
+	print("--- Engagement Task5c: 好戰高+居民 → 備戰（不可迎戰）---")
+	var r := _eng_dispatch_setup({ "求生欲": 0.2, "好戰": 0.9, "慎重": 0.2,
+		"貪婪": 0.1, "信義": 0.1 }, true)
+	FactionAISystem.new()._dispatch_threat_response(r[0], r[1], 1, 0.3)
+	assert(r[1].current_task == TeamData.TASK_PREPARE, "居民應備戰，實際=%s" % r[1].current_task)
+	print("Engagement Task5c OK")
+
+func _test_dispatch_tribute_high_business() -> void:
+	print("--- Engagement Task5d: 貪婪+信義高 → 求和外交 ---")
+	var r := _eng_dispatch_setup({ "求生欲": 0.2, "好戰": 0.1, "慎重": 0.1,
+		"貪婪": 0.9, "信義": 0.7 }, false)
+	FactionAISystem.new()._dispatch_threat_response(r[0], r[1], 1, 0.3)
+	assert(r[1].current_task == TeamData.TASK_DIPLOMACY, "應外交，實際=%s" % r[1].current_task)
+	assert(r[1].order_task == "tribute_offer", "應 tribute_offer，實際=%s" % r[1].order_task)
+	print("Engagement Task5d OK")
+
+func _test_resident_lock_prepare_allowed() -> void:
+	print("--- Engagement Task6: 居民 task=備戰 不被鎖 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	_eng_plains_grid(state, 0, 5, 0, 5)
+	var tile: HexTileData = state.world.tiles[0]
+	tile.outpost_level = 1; tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(0, 0); t.population = 5
+	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
+	t.current_task = TeamData.TASK_PREPARE
+	t.move_target = Vector2i(3, 0)
+	state.teams[0] = t
+	var mv: Object = load("res://scripts/simulation/movement_system.gd").new()
+	for _i in range(300):
+		mv.process(state, [0], 1.0)
+	assert(t.tile_pos.x > 0, "備戰 不應被鎖，tile 應移動，實際=%s" % str(t.tile_pos))
+	print("Engagement Task6 OK (移動到 %s)" % str(t.tile_pos))
+
+func _test_find_trade_partner_outpost_only() -> void:
+	print("--- Engagement Task7a: trade partner 只選有 outpost ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var trader := TeamData.new(); trader.team_id = 0; trader.faction_id = -1
+	state.teams[0] = trader
+	var with_op := TeamData.new(); with_op.team_id = 1; with_op.faction_id = -1
+	with_op.resources["goods"] = 10
+	state.teams[1] = with_op
+	var no_op := TeamData.new(); no_op.team_id = 2; no_op.faction_id = -1
+	no_op.resources["goods"] = 10
+	state.teams[2] = no_op
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
+	state.world.tiles[0] = tile
+	state.team_discovered[0] = [2, 1]   # 2 先掃但無 outpost → 應跳過
+	var partner: int = StrategicAiSystem.new()._find_trade_partner(state, trader)
+	assert(partner == 1, "應選有 outpost 的 Team1，實際=%d" % partner)
+	print("Engagement Task7a OK")
+
+func _test_trade_timeout() -> void:
+	print("--- Engagement Task7b: 貿易 task 超時 → idle ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	state.world.current_tick = 1500
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	state.world.tiles[0] = tile
+	var t := TeamData.new(); t.team_id = 0; t.faction_id = -1; t.tile_pos = Vector2i(0, 0)
+	t.population = 2; t.resources["food"] = 100.0; t.tags = [TeamData.TAG_MERCHANT]
+	t.current_task = TeamData.TASK_TRADE; t.trade_task_start_tick = 0
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	leader.values = { "求生欲": 0.5 }
+	state.persons[1] = leader; t.leader_id = 1
+	state.teams[0] = t
+	FactionAISystem.new().evaluate_all(state, [0])
+	assert(t.current_task == TeamData.TASK_IDLE, "超時應 idle，實際=%s" % t.current_task)
+	print("Engagement Task7b OK")
