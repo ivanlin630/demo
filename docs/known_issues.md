@@ -262,6 +262,7 @@
 | 優先 | spec | 解的問題 |
 |---|---|---|
 | **H** | NPC 會合/攔截 | W1 + W2（0 Combat / 0 Trade）|
+| **M** | encounter-engagement 後續 | 攔截方反追（prey 預測 attacker）；戰報廣播；玩家版反應 UI |
 | **H** | salary 欠薪後果 | Bug2 |
 | **M** | NPC promote/train AI | W4 |
 | **M** | DiplomacyAI 平衡 | Bug5 |

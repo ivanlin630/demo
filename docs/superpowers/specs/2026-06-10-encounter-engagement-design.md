@@ -29,13 +29,6 @@
 - trade_net dispatch 改為「找有 outpost 的 team」（靜止目標必到）
 - 不需 trader 預測 partner
 
-## 不在範圍
-
-- 求援 / 信使類 task → 等 mounts/wagons speed_class spec
-- 攔截方反追（C 的反向：prey 預測 attacker）→ 後續
-- 戰報廣播（戰勝者 reputation 跨 faction 傳播）→ 後續
-- 玩家版本反應 UI → 另 spec
-
 ## W1-C：Attacker 自適應預測
 
 ### `path_system.gd` 加 helper
