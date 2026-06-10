@@ -17,6 +17,8 @@ const ORE_SILVER_CHANCE: float = 0.25
 const GEM_CHANCE:        float = 0.05
 const ORE_IRON_MOUNTAIN_CHANCE: float = 0.30
 const ORE_IRON_PLAINS_CHANCE:   float = 0.05
+const WILD_HORSE_PLAINS_CHANCE: float = 0.01
+const WILD_HORSE_FOREST_CHANCE: float = 0.005
 
 func generate(state: WorldState, config: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -60,6 +62,14 @@ func _apply_resources(tile, rng: RandomNumberGenerator, mult: float = 1.0) -> vo
 		if rng.randf() < ORE_IRON_PLAINS_CHANCE:
 			tile.resources["ore_iron"] = int(rng.randi_range(20, 60) * mult)
 	tile.resource_cap = tile.resources.duplicate()
+	# 野馬：平原 1% 1-2 隻 / 森林 0.5% 1 隻（不計入 resource_cap，再生由 HarvestSystem 處理）
+	match tile.terrain:
+		"plains":
+			if rng.randf() < WILD_HORSE_PLAINS_CHANCE:
+				tile.resources["wild_horses"] = rng.randi_range(1, 2)
+		"forest":
+			if rng.randf() < WILD_HORSE_FOREST_CHANCE:
+				tile.resources["wild_horses"] = 1
 
 func _random_terrain(rng: RandomNumberGenerator) -> String:
 	var roll: int = rng.randi_range(0, 99)
