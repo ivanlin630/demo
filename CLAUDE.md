@@ -6,13 +6,20 @@ Godot 4.2.2 GDScript 世界模擬器。
 
 ## 常用指令
 
+**用 wrapper（強制 UTF-8 output，避免 CP950 亂碼）**：
+
 ```powershell
 # 重建 class 快取（新增 class_name 檔案後必跑）
-.\tools\godot\Godot_v4.2.2-stable_win64_console.exe --headless --import
+.\tools\godot.ps1 --headless --import
 
 # 跑 headless 測試
-.\tools\godot\Godot_v4.2.2-stable_win64_console.exe --headless --script scripts/debug/headless_test.gd
+.\tools\godot.ps1 --headless --script scripts/debug/headless_test.gd
+
+# 跑 multi sanity
+.\tools\godot.ps1 --headless --script scripts/debug/game_sim_multi.gd
 ```
+
+不用 wrapper 直接呼叫 Godot exe 的 print 輸出會是 CP950 → grep 中文亂碼。
 
 ## 架構
 
