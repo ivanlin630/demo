@@ -32,6 +32,7 @@ var _day_night_system: DayNightSystem
 var _diplomatic_ai_system: DiplomaticAiSystem
 var _strategic_ai_system: StrategicAiSystem
 var _encounter_system: EncounterSystem
+var _training_system: TrainingSystem
 var _player_cmd: PlayerCommandSystem
 
 func _init() -> void:
@@ -55,6 +56,7 @@ func _init() -> void:
 	_diplomatic_ai_system = DiplomaticAiSystem.new()
 	_strategic_ai_system = StrategicAiSystem.new()
 	_encounter_system    = EncounterSystem.new()
+	_training_system     = TrainingSystem.new()
 	_player_cmd          = PlayerCommandSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
@@ -130,6 +132,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step6c_salary(state, near_teams)
 		_step6d_fatigue(state, near_teams, NEAR_CADENCE)
 		_step6b_faction_ai(state, near_teams)
+		_step6f_training(state, near_teams)
 		_step6e_strategic_ai(state)
 		_step7_person_reactions(state, near_teams)
 		_step7b_npc_goal_cleanup(state, near_teams)
@@ -158,6 +161,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step6c_salary(state, far_teams)
 		_step6d_fatigue(state, far_teams, FAR_ZONE_INTERVAL)
 		_step6b_faction_ai(state, far_teams)
+		_step6f_training(state, far_teams)
 		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
@@ -262,6 +266,9 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 
 func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
 	_faction_ai_system.evaluate_all(state, team_ids)
+
+func _step6f_training(state: WorldState, team_ids: Array) -> void:
+	_training_system.process(state, team_ids)
 
 func _step6e_strategic_ai(state: WorldState) -> void:
 	for fid in state.factions:
