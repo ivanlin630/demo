@@ -116,6 +116,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	anon_split = mini(anon_split, parent.population / 3)
 	new_team.population += anon_split
 	parent.population   -= anon_split
+	AnonTierSystem.transfer_proportional(parent, new_team, anon_split)
 
 	state.teams[new_team.team_id]           = new_team
 	state.team_known[new_team.team_id]      = []

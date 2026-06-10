@@ -149,7 +149,7 @@ func _create_anon_unit(team: TeamData, pos: Vector2i) -> Dictionary:
 		"has_exited":   false,
 		"escort_target": -1,
 		"body_parts":   _default_body_parts(),
-		"skills": { "戰鬥": team.anon_combat_skill },
+		"skills": { "戰鬥": AnonTierSystem.avg_combat_skill(team) },
 		"equipment": {
 			"hand_1": {}, "hand_2": {}, "head": {}, "torso": {},
 			"right_arm": {}, "left_arm": {}, "right_leg": {}, "left_leg": {},
@@ -1066,7 +1066,9 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			if u["person_id"] != -1: continue
 			if is_dead(u, state): dead_anon += 1
 		var t: TeamData = state.teams.get(team_id)
-		if t: t.population = maxi(t.population - dead_anon, 0)
+		if t:
+			AnonTierSystem.kill_random(t, dead_anon, "combat")
+			t.population = maxi(t.population - dead_anon, 0)
 
 	# BUG-10: "draw" has no winner; skip prisoner/loot logic
 	if result == "draw":
@@ -1084,6 +1086,16 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var winner_id: int = atk_id if result == "attacker_win" else def_id
 	var loser_id: int  = def_id if result == "attacker_win" else atk_id
 	var winner_team: TeamData = state.teams.get(winner_id)
+	# 戰鬥存活 exp：倖存各 tier +5，勝方額外 +5
+	var loser_team_exp: TeamData = state.teams.get(loser_id)
+	const EXP_SURVIVOR: float = 5.0
+	const EXP_VICTORY_BONUS: float = 5.0
+	for exp_tier in AnonTierSystem.TIER_ORDER:
+		if exp_tier == "菁英": continue
+		if winner_team != null and AnonTierSystem.tier_count(winner_team, exp_tier) > 0:
+			AnonTierSystem.add_exp(winner_team, exp_tier, EXP_SURVIVOR + EXP_VICTORY_BONUS)
+		if loser_team_exp != null and AnonTierSystem.tier_count(loser_team_exp, exp_tier) > 0:
+			AnonTierSystem.add_exp(loser_team_exp, exp_tier, EXP_SURVIVOR)
 	# 新：俘虜存入 prisoner_population，上限 = winner population
 	for u in state.encounter_units:
 		if not u.get("is_prisoner", false): continue

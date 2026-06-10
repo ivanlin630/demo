@@ -917,6 +917,7 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 	pt.anon_treasury += share
 	tgt.population = maxi(tgt.population - 1, 1)
 	pt.population += 1
+	AnonTierSystem.transfer_proportional(tgt, pt, 1)
 	state.player_pending_targets.erase(target_id)
 	print("[Recruit] 匿名 Team%d←%d, 花%.0f coin, 新人口=%d" % [
 		pt_id, target_id, RECRUIT_COST_ANON, pt.population])

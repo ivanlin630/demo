@@ -220,6 +220,7 @@ static func _setup_random_player(state, config, rng) -> void:
 		state.persons[m.id] = m
 		team.named_members.append(m.id)
 
+	_setup_anon_tiers(team, {})
 	state.teams[team.team_id] = team
 	state.team_known[team.team_id] = []
 	state.team_discovered[team.team_id] = []
@@ -334,6 +335,16 @@ static func _build_outpost_tile(state: WorldState, pos: Vector2i,
 	tile.outpost_level = level
 	tile.outpost_owner = owner_team_id
 
+static func _setup_anon_tiers(team: TeamData, cfg: Dictionary) -> void:
+	var at: Dictionary = cfg.get("anon_tiers", {})
+	if at.is_empty():
+		var named_in: int = team.named_members.size() + (1 if team.leader_id != -1 else 0)
+		var anon_total: int = maxi(team.population - named_in - team.wounded, 0)
+		team.anon_tiers["平民"] = anon_total
+	else:
+		for tier in AnonTierSystem.TIER_ORDER:
+			team.anon_tiers[tier] = int(at.get(tier, 0))
+
 static func _default_full_resources() -> Dictionary:
 	return {
 		"food": 0.0, "material": 0.0, "coin": 0, "goods": 0,
@@ -380,6 +391,7 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 		state.persons[m.id] = m
 		team.named_members.append(m.id)
 
+	_setup_anon_tiers(team, {})
 	state.teams[team.team_id] = team
 	state.team_known[team.team_id] = []
 	state.team_discovered[team.team_id] = []
@@ -449,6 +461,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 		var nm: PersonData = _make_person(team.team_id, nm_cfg, false)
 		state.persons[nm.id] = nm
 		team.named_members.append(nm.id)
+	_setup_anon_tiers(team, t_cfg)
 	var op_cfg: Dictionary = t_cfg.get("outpost", {})
 	if not op_cfg.is_empty():
 		var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
