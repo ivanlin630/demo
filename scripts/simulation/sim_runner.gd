@@ -118,8 +118,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		var moved_near: Array = move_near["moved"]
 		if _get_player_tile_pos(state) != _player_old_pos:
 			_player_cmd.clear_pending_targets(state)
-		_step3_propagate_messages(state, arrived_near, near_teams)
-		_step3b_exchange_intel(state, arrived_near, near_teams)
+		_step3_propagate_messages(state, moved_near, near_teams)
+		_step3b_exchange_intel(state, moved_near, near_teams)
 		_step4_resolve_interactions(state, moved_near, near_teams)
 		_step4b_outpost_tick(state)
 		_step4e_faction_snapshot(state, near_teams)
@@ -147,8 +147,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult)
 		var arrived_far: Array = move_far["arrived"]
 		var moved_far: Array = move_far["moved"]
-		_step3_propagate_messages(state, arrived_far, far_teams)
-		_step3b_exchange_intel(state, arrived_far, far_teams)
+		_step3_propagate_messages(state, moved_far, far_teams)
+		_step3b_exchange_intel(state, moved_far, far_teams)
 		_step4_resolve_interactions(state, moved_far, far_teams)
 		_step4e_faction_snapshot(state, far_teams)
 		_step5_collect_resources(state, far_teams)
