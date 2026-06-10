@@ -1,6 +1,7 @@
 class_name ResourceSystem
 
 const FOOD_PER_PERSON_PER_DAY: float = 2.4   # TEST VALUE — 2.4食物/人/天（原 0.1×24）
+const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
 
 const PUBLIC_RESOURCES: Array = ["ore_gold", "ore_silver", "ore_iron", "ore_steel"]
 
@@ -61,10 +62,16 @@ func regenerate_tiles(state: WorldState) -> void:
 
 func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
 	var day_fraction: float = float(cadence_ticks) / float(WorldState.TICKS_PER_DAY)
+	var ms := MovementSystem.new()
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
+		# mount 吃糧（草料）：effective_mounts × 0.5/day
+		var em: int = ms.get_effective_mounts(team)
+		if em > 0:
+			var mount_food: float = float(em) * FOOD_PER_MOUNT_PER_DAY * day_fraction
+			team.resources["food"] = maxf(0.0, float(team.resources.get("food", 0)) - mount_food)
 		var total_pop: int = team.population + team.minor_population
 		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY * day_fraction
 		var food_available: float = float(team.resources.get("food", 0))

@@ -13,6 +13,23 @@ func tick_all(state: WorldState) -> void:
 	print("[Harvest] Tick%d 季節=%s base=%.1f" % [
 		state.world.current_tick, SEASON_NAMES[season], base])
 	_check_famine_warnings(state)
+	_regen_wild_horses(state)
+
+const WILD_HORSE_REGEN_CHANCE: float = 0.05   # 每月 5% chance +1（極慢）
+const WILD_HORSE_TILE_CAP: int = 3
+
+# 每月（month 邊界）平原/森林 tile 5% 機率 +1 野馬，上限 WILD_HORSE_TILE_CAP
+func _regen_wild_horses(state: WorldState) -> void:
+	if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+		return
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.terrain != "plains" and tile.terrain != "forest":
+			continue
+		if int(tile.resources.get("wild_horses", 0)) >= WILD_HORSE_TILE_CAP:
+			continue
+		if randf() < WILD_HORSE_REGEN_CHANCE:
+			tile.resources["wild_horses"] = int(tile.resources.get("wild_horses", 0)) + 1
 
 func _check_famine_warnings(state: WorldState) -> void:
 	for tile_id in state.world.tiles:

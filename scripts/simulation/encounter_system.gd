@@ -220,6 +220,10 @@ func init_encounter(state: WorldState, attacker_id: int, defender_id: int,
 	var def: TeamData = state.teams.get(defender_id)
 	if atk == null or def == null: return
 
+	# mount loot 用：記錄戰前人口快照
+	atk.encounter_initial_pop = atk.population
+	def.encounter_initial_pop = def.population
+
 	if combat_type == "pursuit":
 		var center_positions: Array = [Vector2i(0,0), Vector2i(1,0),
 			Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1)]
@@ -1028,6 +1032,24 @@ func _loot_treasury_share(_state: WorldState, loser: TeamData, winner: TeamData,
 		winner.anon_treasury += loser.anon_treasury
 		loser.anon_treasury = 0.0
 
+# mount loot：勝方擄獲 loser_mounts × kill_ratio（kill_ratio = 陣亡/初始人口）
+func apply_mount_loot(state: WorldState, winner_id: int, loser_id: int) -> void:
+	if winner_id == -1 or loser_id == -1: return
+	var winner: TeamData = state.teams.get(winner_id)
+	var loser: TeamData = state.teams.get(loser_id)
+	if winner == null or loser == null: return
+	var initial: int = loser.encounter_initial_pop
+	if initial <= 0: return
+	var dead: int = maxi(initial - loser.population, 0)
+	var kill_ratio: float = clampf(float(dead) / float(initial), 0.0, 1.0)
+	var loser_mounts: int = int(loser.resources.get("mounts", 0))
+	var loot: int = roundi(float(loser_mounts) * kill_ratio)
+	if loot <= 0: return
+	loser.resources["mounts"] = loser_mounts - loot
+	winner.resources["mounts"] = int(winner.resources.get("mounts", 0)) + loot
+	print("[Loot] Team%d → Team%d mounts +%d (kill_ratio=%.2f)" % [
+		loser_id, winner_id, loot, kill_ratio])
+
 func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var atk_id: int = state.encounter_attacker_id
 	var def_id: int = state.encounter_defender_id
@@ -1124,6 +1146,9 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			if is_dead(u, state) or u.get("is_prisoner", false):
 				anon_lost += 1
 		_loot_treasury_share(state, loser_team_treasury, winner_team, anon_lost, original_anon)
+
+	# mount loot：勝方依 prey 人口陣亡比例擄獲 mounts（wagons 走既有物資 loot）
+	apply_mount_loot(state, winner_id, loser_id)
 
 	print("[Encounter] 遭遇戰結算完成 result=%s" % result)
 

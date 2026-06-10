@@ -56,6 +56,7 @@ var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
 var last_tile_pos: Vector2i = Vector2i(-999, -999)   # 上一移動步位置（observe_velocity 用）
 var move_tick_acc: int = 0
 var combat_target: int = -1
+var encounter_initial_pop: int = 0   # 遭遇戰開始時人口快照（mount loot kill_ratio 用）
 var prosperity_eval_next_tick: int = 0   # 下次 prosperity 評估 tick（cadence + 事件重評）
 var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）
 var readiness: float   = 1.0

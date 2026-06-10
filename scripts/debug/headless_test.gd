@@ -136,6 +136,17 @@ func _initialize() -> void:
 	_test_movement_returns_moved_and_arrived()
 	_test_process_on_move_triggers_combat()
 	_test_named_weight_speed()
+	# ── Mounts / Wagons 速度系統 ──
+	_test_effective_mount_wagon_limit()
+	_test_compute_mount_bonus()
+	_test_compute_wagon_penalty()
+	_test_mount_food_consumption()
+	_test_stable_facility_def()
+	_test_stable_produces_mounts()
+	_test_wild_horses_generation()
+	_test_wild_horses_harvest()
+	_test_mount_loot_total_wipe()
+	_test_mount_loot_partial()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5280,3 +5291,169 @@ func _test_trade_net_dispatches() -> void:
 		"商隊應派 trade，實際=%s" % trader.current_task)
 	assert(trader.move_target == Vector2i(3, 0), "move_target 應指 partner")
 	print("Wakeup Task5 OK")
+
+# ──────── Mounts / Wagons 速度系統 ────────
+
+func _test_effective_mount_wagon_limit() -> void:
+	print("--- Mount Task1a: 1人1獸 ---")
+	var ms = MovementSystem.new()
+	var team := TeamData.new()
+	team.population = 10
+	team.resources = { "mounts": 5, "wagons": 8 }
+	assert(ms.get_effective_mounts(team) == 5, "5 mounts < 10 pop")
+	assert(ms.get_effective_wagons(team) == 5, "wagons cap by remaining pop (10-5)")
+	team.resources["mounts"] = 12
+	assert(ms.get_effective_mounts(team) == 10, "mount cap by pop")
+	assert(ms.get_effective_wagons(team) == 0, "no remaining pop")
+	print("Mount Task1a OK")
+
+func _test_compute_mount_bonus() -> void:
+	print("--- Mount Task1b: mount bonus 公式 ---")
+	var ms = MovementSystem.new()
+	var team := TeamData.new()
+	team.population = 10
+	team.resources = { "mounts": 10 }   # 全騎兵
+	# ratio=1.0, size_penalty = 1 - 10/50*0.2 = 0.96 → bonus = 3.0*0.96 = 2.88
+	var b = ms._compute_mount_bonus(team)
+	assert(abs(b - 2.88) < 0.01, "全騎 expect 2.88, got %.2f" % b)
+	team.resources["mounts"] = 0
+	assert(ms._compute_mount_bonus(team) == 1.0)
+	team.population = 50; team.resources["mounts"] = 50
+	# ratio=1, size_penalty=0.8, bonus = 3.0*0.8 = 2.4
+	var b2 = ms._compute_mount_bonus(team)
+	assert(abs(b2 - 2.4) < 0.01, "50 騎 expect 2.4, got %.2f" % b2)
+	print("Mount Task1b OK")
+
+func _test_compute_wagon_penalty() -> void:
+	print("--- Mount Task1c: wagon penalty 公式 ---")
+	var ms = MovementSystem.new()
+	var team := TeamData.new()
+	team.population = 10
+	team.resources = { "wagons": 5 }
+	# ratio = 0.5, penalty = 1 - 0.5*0.3 = 0.85
+	assert(abs(ms._compute_wagon_penalty(team) - 0.85) < 0.01)
+	print("Mount Task1c OK")
+
+func _test_mount_food_consumption() -> void:
+	print("--- Mount Task2: mount 食物消耗 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = 10
+	team.resources = { "food": 1000.0, "mounts": 10 }
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	# 跑 1 天份消耗（cadence = TICKS_PER_DAY）
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	# 人口：10 × 2.4 = 24；mount：10 × 0.5 = 5 → 共 29
+	var consumed: float = 1000.0 - float(team.resources["food"])
+	assert(abs(consumed - 29.0) < 0.01, "1天應耗 29 food (24人+5馬), 實際 %.2f" % consumed)
+	print("Mount Task2 OK")
+
+func _test_stable_facility_def() -> void:
+	print("--- Mount Task3a: stable FACILITY_DEF ---")
+	assert(OutpostSystem.FACILITY_DEF.has("stable"), "FACILITY_DEF 應有 stable")
+	var s = OutpostSystem.FACILITY_DEF["stable"]
+	assert(s["cost"]["material"] == 30, "stable material cost 30")
+	assert(s["current_level_key"] == "stable_level", "current_level_key=stable_level")
+	assert(s["required_terrain"] == "plains", "stable 限平原")
+	print("Mount Task3a OK")
+
+func _test_stable_produces_mounts() -> void:
+	print("--- Mount Task3b: stable 產 mount ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.outpost_owner = 0; tile.stable_level = 1
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	team.resources = { "food": 1000.0, "mounts": 0 }
+	team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = team
+	var os := OutpostSystem.new()
+	# 直接呼叫產出 1 個月份（30 天 × 每天 1 次）→ Lv1 = 0.3/day → ~9
+	for _d in range(30):
+		os.produce_stable_day(state, tile, 1.0)
+	assert(team.resources["mounts"] == 9, "1月 Lv1 應 +9 mounts, 實際 %d" % int(team.resources["mounts"]))
+	assert(float(team.resources["food"]) < 1000.0, "stable 應耗 food")
+	print("Mount Task3b OK")
+
+func _test_wild_horses_generation() -> void:
+	print("--- Mount Task4a: wild_horses 生成機率 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var gen = load("res://scripts/simulation/world_generator.gd").new()
+	gen.generate(state, { "radius": 12, "seed": 7 })
+	var plains: int = 0
+	var with_horses: int = 0
+	for tid in state.world.tiles:
+		var t: HexTileData = state.world.tiles[tid]
+		if t.terrain == "plains":
+			plains += 1
+			if int(t.resources.get("wild_horses", 0)) > 0:
+				with_horses += 1
+	# 約 1% plains 有 wild_horses；只驗證機制存在且不全為 0/全部
+	assert(plains > 0, "應有 plains tile")
+	assert(with_horses <= plains, "wild_horses tile 不超過 plains 數")
+	print("Mount Task4a OK (plains=%d with_horses=%d)" % [plains, with_horses])
+
+func _test_wild_horses_harvest() -> void:
+	print("--- Mount Task4b: wild_horses 採集 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 5 * 1000 + 5; tile.tile_pos = Vector2i(5, 5); tile.terrain = "plains"
+	tile.resources["wild_horses"] = 2
+	state.world.tiles[tile.tile_id] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 5
+	team.resources = { "mounts": 0 }
+	team.tile_pos = Vector2i(5, 5)
+	state.teams[0] = team
+	var ms := MovementSystem.new()
+	ms._on_arrival(state, team)
+	assert(int(team.resources.get("mounts", 0)) == 2, "採集後 mounts=2, 實際 %d" % int(team.resources.get("mounts", 0)))
+	assert(int(tile.resources.get("wild_horses", 0)) == 0, "tile wild_horses 應清空")
+	print("Mount Task4b OK")
+
+func _test_mount_loot_total_wipe() -> void:
+	print("--- Mount Task5a: loot 全滅 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var winner := TeamData.new()
+	winner.team_id = 0; winner.population = 10; winner.resources = { "mounts": 0 }
+	winner.tile_pos = Vector2i(0, 0)
+	state.teams[0] = winner
+	var loser := TeamData.new()
+	loser.team_id = 1; loser.population = 0; loser.resources = { "mounts": 5 }
+	loser.encounter_initial_pop = 10   # 全滅：10 → 0
+	loser.tile_pos = Vector2i(9, 9)
+	state.teams[1] = loser
+	var es := EncounterSystem.new()
+	es.apply_mount_loot(state, 0, 1)
+	assert(int(winner.resources["mounts"]) == 5, "全滅 winner +5, 實際 %d" % int(winner.resources["mounts"]))
+	assert(int(loser.resources["mounts"]) == 0, "loser 失全部")
+	print("Mount Task5a OK")
+
+func _test_mount_loot_partial() -> void:
+	print("--- Mount Task5b: loot 半勝 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var winner := TeamData.new()
+	winner.team_id = 0; winner.population = 10; winner.resources = { "mounts": 0 }
+	winner.tile_pos = Vector2i(0, 0)
+	state.teams[0] = winner
+	var loser := TeamData.new()
+	loser.team_id = 1; loser.population = 4; loser.resources = { "mounts": 5 }
+	loser.encounter_initial_pop = 10   # 死 6 → ratio 0.6 → roundi(5*0.6)=3
+	loser.tile_pos = Vector2i(9, 9)
+	state.teams[1] = loser
+	var es := EncounterSystem.new()
+	es.apply_mount_loot(state, 0, 1)
+	assert(int(winner.resources["mounts"]) == 3, "死60%% winner +3, 實際 %d" % int(winner.resources["mounts"]))
+	assert(int(loser.resources["mounts"]) == 2, "loser 剩 2")
+	print("Mount Task5b OK")
