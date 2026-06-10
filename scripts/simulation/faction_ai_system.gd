@@ -195,6 +195,29 @@ func _is_resident_team(state: WorldState, team: TeamData) -> bool:
 		return false
 	return owner.faction_id == team.faction_id and team.faction_id != -1
 
+const MOUNT_TARGET_RATIO: float = 0.5
+
+# NPC 出征前自動從自家 outpost 公庫拉 mount 至 population × ratio
+# 註：spec 原列 TASK_PREPARE，但 TeamData 無此 task，改以 idle 為唯一不出征狀態
+func _auto_withdraw_mounts(state: WorldState, team: TeamData) -> void:
+	if team.current_task == TeamData.TASK_IDLE:
+		return
+	var tile: HexTileData = state.world.tiles.get(
+		team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or tile.outpost_owner != team.team_id:
+		return
+	var available: int = int(tile.public_storage.get("mounts", 0))
+	if available <= 0:
+		return
+	var current: int = int(team.resources.get("mounts", 0))
+	var target: int = int(float(team.population) * MOUNT_TARGET_RATIO)
+	var need: int = maxi(target - current, 0)
+	var take: int = mini(need, available)
+	if take > 0:
+		tile.public_storage["mounts"] = available - take
+		team.resources["mounts"] = current + take
+		print("[Mount] Team%d auto-withdraw %d mounts" % [team.team_id, take])
+
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for fid in state.factions:
 		var f = state.factions[fid]
@@ -278,6 +301,8 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		# anon_combat_skill / anon_wage 改 computed（AnonTierSystem），不再主動更新
 		_update_armor_config(team)
 		_update_guard_ratio(team, state)
+		# 出征前自動從自家 outpost 公庫拉 mount
+		_auto_withdraw_mounts(state, team)
 
 # ──────── Tag 權限 ────────
 
