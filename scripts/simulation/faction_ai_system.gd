@@ -48,6 +48,7 @@ const TRADE_TIMEOUT: int = 1440   # 貿易 task 6 日未成交 → 放棄（防 
 # ── Outpost 居民派駐 AI ──
 const RESIDENCY_CADENCE: int = 720    # 3 天 評估一次 outpost 居民派駐
 const RESIDENCY_COOLDOWN: int = 1680  # 7 天 邀請被拒後冷卻
+const MIN_PARENT_POP_AFTER_DISPATCH: int = 10
 
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
@@ -309,6 +310,18 @@ func _has_resident_team_on_tile(state: WorldState, tile: HexTileData) -> bool:
 		if "生產" in t.tags: return true
 	return false
 
+# 是否已有 in-flight 子隊朝該 outpost 安頓中（避免重派 spam）
+func _has_inflight_settler(state: WorldState, owner: TeamData, tile: HexTileData) -> bool:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.team_id == owner.team_id: continue
+		if t.faction_id != owner.faction_id: continue
+		if not ("子團" in t.tags): continue
+		if t.current_task != "安頓": continue
+		if t.move_target != tile.tile_pos: continue
+		return true
+	return false
+
 # cadence 評估：掃自家無居民 outpost，依個性派子隊或邀流亡
 func _evaluate_outpost_residency(state: WorldState, team: TeamData) -> void:
 	if state.world.current_tick < team.residency_eval_next_tick: return
@@ -319,6 +332,7 @@ func _evaluate_outpost_residency(state: WorldState, team: TeamData) -> void:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_owner != team.team_id: continue
 		if _has_resident_team_on_tile(state, tile): continue
+		if _has_inflight_settler(state, team, tile): continue   # 新增
 		_try_dispatch_or_invite(state, team, tile, leader)
 
 # 個性決定管道：野心/好戰 → 派子隊；商業/慎重 → 邀流亡
@@ -338,7 +352,7 @@ func _try_dispatch_or_invite(state: WorldState, team: TeamData,
 # 派子隊安頓：抵達 outpost → interaction "安頓" handler → _convert_to_resident
 func _dispatch_subteam_settle(state: WorldState, owner: TeamData, tile: HexTileData) -> void:
 	var settler_count: int = clampi(owner.population / 4, 2, 5)
-	if owner.population < settler_count + 1: return   # 至少留 1 人
+	if owner.population - settler_count < MIN_PARENT_POP_AFTER_DISPATCH: return
 	var sub_leader_id: int = -1
 	if owner.named_members.size() > 2:
 		sub_leader_id = int(owner.named_members[0])
@@ -356,12 +370,13 @@ func _dispatch_subteam_settle(state: WorldState, owner: TeamData, tile: HexTileD
 	print("[Residency] Team%d 派子隊 Team%d 安頓 outpost (%d,%d) pop=%d" % [
 		owner.team_id, subteam_id, tile.tile_pos.x, tile.tile_pos.y, settler_count])
 
-# 邀視野內流亡團安頓；個性接受 → task=安頓，拒絕 → 設 7 天冷卻
+# 邀視野內流亡團安頓；個性接受 → task=安頓 + 長 cooldown，拒絕 → 7 天 cooldown
 func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileData) -> void:
 	for tid in state.team_discovered.get(team.team_id, []):
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
 		if not ("流亡" in t.tags): continue
+		if t.current_task == "安頓": continue   # 已在路上，不重邀
 		if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
 		var dipl := DiplomaticAiSystem.new()
 		var resp: String = dipl.handle_diplomacy_message(
@@ -369,6 +384,7 @@ func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileDa
 		if resp == "accept":
 			t.current_task = "安頓"
 			t.move_target = tile.tile_pos
+			team.invite_cooldown[tid] = state.world.current_tick + RESIDENCY_COOLDOWN * 4   # 等 settle 流程
 			print("[Residency] Team%d 邀請 Team%d 安頓 outpost (%d,%d)" % [
 				team.team_id, tid, tile.tile_pos.x, tile.tile_pos.y])
 			return

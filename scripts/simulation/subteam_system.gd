@@ -70,6 +70,8 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	var sub: TeamData = state.teams.get(sub_id)
 	if sub == null or sub.parent_team_id == -1:
 		return false
+	if sub.current_task == "安頓":
+		return false   # 派駐安頓任務中不 merge_back（避免 spam dispatch）
 	var parent: TeamData = state.teams.get(sub.parent_team_id)
 	if parent == null or parent.tile_pos != sub.tile_pos:
 		return false
