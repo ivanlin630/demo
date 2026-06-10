@@ -220,6 +220,7 @@ func _dispatch_trade_net(state: WorldState, faction: FactionData) -> void:
         var p: TeamData = state.teams[partner_id]
         t.current_task = TeamData.TASK_TRADE
         t.move_target = p.tile_pos
+        t.trade_task_start_tick = state.world.current_tick
         print("[StrategicAI] Faction%d 商隊 Team%d → trade Team%d" % [
             faction.faction_id, t.team_id, partner_id])
 
@@ -228,6 +229,14 @@ func _find_trade_partner(state: WorldState, trader: TeamData) -> int:
         var t: TeamData = state.teams.get(tid)
         if t == null: continue
         if t.faction_id != -1 and t.faction_id == trader.faction_id: continue
+        # W2: 只追有 outpost 的對象（靜止目標，移動商隊才追得上同格成交）
+        var has_outpost: bool = false
+        for tile_id in state.world.tiles:
+            var tile: HexTileData = state.world.tiles[tile_id]
+            if tile.outpost_owner == tid:
+                has_outpost = true
+                break
+        if not has_outpost: continue
         # 對方有 goods 或一定 coin 即視為可交易對象
         if float(t.resources.get("goods", 0)) > 0 or float(t.resources.get("coin", 0)) > 50:
             return tid

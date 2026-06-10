@@ -1,0 +1,53 @@
+class_name ThreatAssessment
+
+# 威脅評估（static 純函數）：限視野 + reputation + intel 估算實力 + 朝我移動 + 距離衰減。
+# 認知不等於真實：對方實力用觀察者 team_intel snapshot 估算，非全知。
+
+const THREAT_BASE_THRESHOLD: float = 0.3
+const REPUTATION_NEUTRAL: float = 0.5
+const POWER_BASELINE: float = 1.0
+
+static func score(state: WorldState, self_team: TeamData,
+		other: TeamData) -> float:
+	if not state.team_discovered.get(self_team.team_id, []).has(other.team_id):
+		return 0.0
+	var approach: float = _approach_score(state, self_team, other)
+	var rep: float = float(self_team.known_reputations.get(other.team_id,
+		REPUTATION_NEUTRAL))
+	var hostility: float = clampf(1.0 - rep, 0.0, 1.0)
+	var power_ratio: float = _power_ratio(state, self_team, other)
+	var raw: float = approach * 1.0 + hostility * 1.0 + (power_ratio - 1.0) * 0.5
+	var dist: int = _hex_dist(self_team.tile_pos, other.tile_pos)
+	var dist_factor: float = clampf(1.0 - float(dist) / 5.0, 0.1, 1.0)
+	return maxf(raw * dist_factor, 0.0)
+
+static func _approach_score(state: WorldState, self_team: TeamData,
+		other: TeamData) -> float:
+	var obs: Dictionary = PathSystem.observe_velocity(state, self_team, other)
+	if not obs.get("visible", false): return 0.0
+	var dir: Vector2i = obs.get("direction", Vector2i.ZERO)
+	if dir == Vector2i.ZERO: return 0.0
+	var current_dist: int = _hex_dist(self_team.tile_pos, other.tile_pos)
+	var future_pos: Vector2i = other.tile_pos + dir
+	var future_dist: int = _hex_dist(self_team.tile_pos, future_pos)
+	if current_dist == future_dist: return 0.0
+	return clampf(float(current_dist - future_dist), -1.0, 1.0)
+
+static func _power_ratio(state: WorldState, self_team: TeamData,
+		other: TeamData) -> float:
+	var self_power: float = _team_power(self_team)
+	# 對方用 team_intel snapshot（NPC 不全知）
+	var intel: Dictionary = state.team_intel.get(self_team.team_id,
+		{}).get(other.team_id, {})
+	var pop_est: int = int(intel.get("population_est", other.population))
+	# 無 combat skill in intel → 用 0.3 baseline 估算
+	var other_power: float = float(pop_est) * 0.3
+	return other_power / maxf(self_power, 0.1)
+
+static func _team_power(team: TeamData) -> float:
+	var combat: float = AnonTierSystem.avg_combat_skill(team)
+	return float(team.population) * combat
+
+static func _hex_dist(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x; var dy: int = b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2

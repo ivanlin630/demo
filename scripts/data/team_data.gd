@@ -16,6 +16,8 @@ const TASK_PATROL      := "巡邏"
 const TASK_BUILD       := "建設"
 const TASK_MERGE       := "合併"
 const TASK_TRAIN       := "訓練"
+const TASK_DEFEND      := "迎戰"
+const TASK_PREPARE     := "備戰"
 
 const TAG_COMMAND  := "統領"
 const TAG_MILITARY := "軍隊"
@@ -59,6 +61,8 @@ var combat_target: int = -1
 var encounter_initial_pop: int = 0   # 遭遇戰開始時人口快照（mount loot kill_ratio 用）
 var prosperity_eval_next_tick: int = 0   # 下次 prosperity 評估 tick（cadence + 事件重評）
 var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）
+var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
+var trade_task_start_tick: int = 0       # 貿易 task 起始 tick（timeout 防 zombie）
 var readiness: float   = 1.0
 var wounded: int       = 0
 var equip_order: Dictionary = {

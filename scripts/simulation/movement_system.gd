@@ -51,7 +51,7 @@ func process(state: WorldState, team_ids: Array,
 		if team.tags.has(TeamData.TAG_PRODUCE):
 			var fai := FactionAISystem.new()
 			if fai._is_resident_team(state, team) \
-					and team.current_task not in ["逃跑", "投靠", "起義", "遷徙"]:
+					and team.current_task not in ["逃跑", "投靠", "起義", "遷徙", TeamData.TASK_PREPARE]:
 				continue
 		if team.combat_target != -1:
 			continue
