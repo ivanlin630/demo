@@ -5858,8 +5858,9 @@ func _test_find_trade_partner_outpost_only() -> void:
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
 	state.world.tiles[0] = tile
 	state.team_discovered[0] = [2, 1]   # 2 先掃但無 outpost → 應跳過
-	var partner: int = StrategicAiSystem.new()._find_trade_partner(state, trader)
-	assert(partner == 1, "應選有 outpost 的 Team1，實際=%d" % partner)
+	var partner: Dictionary = StrategicAiSystem.new()._find_trade_partner(state, trader)
+	assert(not partner.is_empty() and int(partner["team_id"]) == 1, "應選有 outpost 的 Team1，實際=%s" % str(partner))
+	assert(partner["outpost_pos"] == Vector2i(0, 0), "outpost_pos 應 (0,0)")
 	print("Engagement Task7a OK")
 
 func _test_trade_timeout() -> void:

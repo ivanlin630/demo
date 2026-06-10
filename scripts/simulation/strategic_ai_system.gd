@@ -208,36 +208,30 @@ func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
             total += t.population
     return total
 
-# trade_net goal：派 idle 商隊去鄰近有貨/有錢的對象交易（移動到對方格，由 interaction 同格成交）
+# trade_net goal：派 idle 商隊去有 outpost 的對象交易（move_target 設 outpost tile_pos，靜止點必到；同格由 interaction 成交，採購也可）
 func _dispatch_trade_net(state: WorldState, faction: FactionData) -> void:
     for tid in faction.member_team_ids:
         var t: TeamData = state.teams.get(tid)
         if t == null: continue
         if not ("商隊" in t.tags): continue
         if t.current_task != TeamData.TASK_IDLE: continue
-        var partner_id: int = _find_trade_partner(state, t)
-        if partner_id == -1: continue
-        var p: TeamData = state.teams[partner_id]
+        var partner_info: Dictionary = _find_trade_partner(state, t)
+        if partner_info.is_empty(): continue
         t.current_task = TeamData.TASK_TRADE
-        t.move_target = p.tile_pos
+        t.move_target = partner_info["outpost_pos"]   # 直接指向 outpost tile（靜止點）
         t.trade_task_start_tick = state.world.current_tick
-        print("[StrategicAI] Faction%d 商隊 Team%d → trade Team%d" % [
-            faction.faction_id, t.team_id, partner_id])
+        print("[StrategicAI] Faction%d 商隊 Team%d → trade Team%d @ outpost %s" % [
+            faction.faction_id, t.team_id, int(partner_info["team_id"]), str(partner_info["outpost_pos"])])
 
-func _find_trade_partner(state: WorldState, trader: TeamData) -> int:
+# 回 { "team_id": int, "outpost_pos": Vector2i } 或空 dict 表無
+func _find_trade_partner(state: WorldState, trader: TeamData) -> Dictionary:
     for tid in state.team_discovered.get(trader.team_id, []):
         var t: TeamData = state.teams.get(tid)
         if t == null: continue
         if t.faction_id != -1 and t.faction_id == trader.faction_id: continue
-        # W2: 只追有 outpost 的對象（靜止目標，移動商隊才追得上同格成交）
-        var has_outpost: bool = false
+        # W2: 對方有 outpost = 可交易（move_target 指 outpost tile，採購也可，不需對方有貨）
         for tile_id in state.world.tiles:
             var tile: HexTileData = state.world.tiles[tile_id]
             if tile.outpost_owner == tid:
-                has_outpost = true
-                break
-        if not has_outpost: continue
-        # 對方有 goods 或一定 coin 即視為可交易對象
-        if float(t.resources.get("goods", 0)) > 0 or float(t.resources.get("coin", 0)) > 50:
-            return tid
-    return -1
+                return { "team_id": tid, "outpost_pos": tile.tile_pos }
+    return {}
