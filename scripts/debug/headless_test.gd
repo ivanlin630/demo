@@ -4353,8 +4353,8 @@ func _test_eta_ticks() -> void:
 	var team := TeamData.new()
 	team.population = 5; team.fatigue = 0.0
 	var eta = PathSystem.eta_ticks(team, 5.0)
-	# BASE_MOVE_TICKS = 120, speed_mult = 1.0 → eta = 5 * 120 = 600
-	assert(eta == 600, "eta 應 600，實際=%d" % eta)
+	# BASE_MOVE_TICKS = 48, speed_mult = 1.0 → eta = 5 * 48 = 240
+	assert(eta == 240, "eta 應 240，實際=%d" % eta)
 	team.fatigue = 0.5   # speed reduced
 	var eta2 = PathSystem.eta_ticks(team, 5.0)
 	assert(eta2 > eta, "fatigue 應延長 ETA")
@@ -4418,8 +4418,8 @@ func _test_estimate_catch_up_too_far() -> void:
 	print("--- Path Task5b: too_far ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	# 直線 plains 走廊 (0,0)→(11,0)，path cost 11 → eta 1320 > AI_ETA_LIMIT(1200)
-	for x in range(0, 12):
+	# 直線 plains 走廊 (0,0)→(27,0)，path cost 27 → eta 1296 > AI_ETA_LIMIT(1200)
+	for x in range(0, 28):
 		var tile := HexTileData.new()
 		tile.tile_pos = Vector2i(x, 0); tile.terrain = "plains"
 		state.world.tiles[x * 1000 + 0] = tile
@@ -4427,8 +4427,8 @@ func _test_estimate_catch_up_too_far() -> void:
 	observer.team_id = 0; observer.tile_pos = Vector2i(0, 0); observer.fatigue = 0.0
 	state.teams[0] = observer
 	var target := TeamData.new()
-	target.team_id = 1; target.tile_pos = Vector2i(11, 0); target.fatigue = 0.0
-	target.last_tile_pos = Vector2i(11, 0)
+	target.team_id = 1; target.tile_pos = Vector2i(27, 0); target.fatigue = 0.0
+	target.last_tile_pos = Vector2i(27, 0)
 	state.teams[1] = target
 	state.team_discovered[0] = [1]
 	var r = PathSystem.estimate_catch_up(state, observer, 1)
@@ -4733,10 +4733,10 @@ func _test_prosperity_cadence() -> void:
 	print("Prosperity Task4 OK")
 
 func _survival_corridor() -> WorldState:
-	# 走廊 grid：x 0..13, y -1..1，連通供 A* 找路
+	# 走廊 grid：x 0..27, y -1..1，連通供 A* 找路（足夠製造 >5 日 ETA 場景）
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	for x in range(0, 14):
+	for x in range(0, 28):
 		for y in range(-1, 2):
 			var tile := HexTileData.new()
 			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
@@ -4755,8 +4755,8 @@ func _test_survival_b_branch_far_outpost_loot() -> void:
 	leader.values = { "殘忍": 0.8, "好戰": 0.5, "信義": 0.5, "義氣": 0.3 }
 	state.persons[100] = leader
 	team.leader_id = 100
-	# own outpost 遠（dist 13 → ETA 13*120=1560 > 1200 = 5 日）
-	var op_tile: HexTileData = state.world.tiles[13 * 1000 + 0]
+	# own outpost 遠（dist 26 → ETA 26*48=1248 > 1200 = 5 日）
+	var op_tile: HexTileData = state.world.tiles[26 * 1000 + 0]
 	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
 	# 近且弱 prey（reachable）
 	var prey := TeamData.new()
