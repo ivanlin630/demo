@@ -34,6 +34,11 @@ func _initialize() -> void:
 	_test_survival_helpers()
 	_test_survival_decision_tree()
 	_test_strategic_ai_respects_survival()
+	_test_strategic_in_map_check()
+	_test_breakout_distance_guard()
+	_test_stuck_allows_reeval()
+	_test_survival_reeval_in_loot()
+	_test_trade_net_dispatches()
 	_test_aid_resolve_npc_accept()
 	_test_aid_resolve_npc_refuse()
 	_test_aid_player_forced_event()
@@ -5154,3 +5159,124 @@ func _test_anon_speed_tiers() -> void:
 	assert(abs(sp_elite - 1.0) < 0.01, "純菁英隊速應 1.0，實際=%f" % sp_elite)
 	assert(sp_elite - sp_pleb > 0.25, "菁英應快約 30%%")
 	print("AnonTier speed OK (pleb=%.2f elite=%.2f)" % [sp_pleb, sp_elite])
+
+func _test_strategic_in_map_check() -> void:
+	print("--- Wakeup Task1: in-map check ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(0, 5):
+		for y in range(0, 5):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# off-map (10,10) → nearest valid 應回 in-map tile
+	var pos = StrategicAiSystem._nearest_valid_tile(state, Vector2i(10, 10), Vector2i(0, 0))
+	assert(StrategicAiSystem._is_valid_tile(state, pos), "回 in-map tile，實際=%s" % str(pos))
+	assert(StrategicAiSystem._is_valid_tile(state, Vector2i(2, 2)), "(2,2) in map")
+	assert(not StrategicAiSystem._is_valid_tile(state, Vector2i(10, 10)), "(10,10) out")
+	print("Wakeup Task1 OK (nearest=%s)" % str(pos))
+
+func _test_breakout_distance_guard() -> void:
+	print("--- Wakeup Task2: breakout 距離 guard ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var self_team := TeamData.new()
+	self_team.team_id = 0; self_team.tile_pos = Vector2i(0, 0); self_team.faction_id = 1
+	self_team.current_task = "idle"
+	state.teams[0] = self_team
+	# 2 enemy 都在 5 hex 外 → 不觸發 breakout
+	var e1 := TeamData.new(); e1.team_id = 1; e1.tile_pos = Vector2i(5, 0); e1.faction_id = 2
+	var e2 := TeamData.new(); e2.team_id = 2; e2.tile_pos = Vector2i(0, 5); e2.faction_id = 2
+	state.teams[1] = e1; state.teams[2] = e2
+	state.team_discovered[0] = [1, 2]
+	var sai := StrategicAiSystem.new()
+	sai._assign_breakout(state, self_team)
+	assert(not self_team.strategic_assignments.has(-1),
+		"鄰敵 > 3 hex 不應觸發 breakout，實際 sa=%s" % str(self_team.strategic_assignments))
+	# 移近一個 enemy 至 2 hex → 觸發
+	e1.tile_pos = Vector2i(2, 0)
+	sai._assign_breakout(state, self_team)
+	assert(self_team.strategic_assignments.has(-1),
+		"鄰敵 <= 3 hex 應觸發 breakout")
+	print("Wakeup Task2 OK")
+
+func _test_stuck_allows_reeval() -> void:
+	print("--- Wakeup Task3: stuck 視為 idle ---")
+	var stuck := TeamData.new()
+	stuck.current_task = TeamData.TASK_ATTACK
+	stuck.move_target = Vector2i(-1, -1)
+	assert(FactionAISystem._is_stuck(stuck), "攻擊+無 target 應 stuck")
+	var moving := TeamData.new()
+	moving.current_task = TeamData.TASK_ATTACK
+	moving.move_target = Vector2i(2, 2)
+	assert(not FactionAISystem._is_stuck(moving), "有 target 不算 stuck")
+	# 行為：stuck solo team 應被重評派新目標
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.faction_id = -1; team.parent_team_id = -1
+	team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.current_task = TeamData.TASK_ATTACK   # stuck
+	team.move_target = Vector2i(-1, -1)
+	team.resources["food"] = 100.0
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 1.0, "好戰": 1.0, "貪婪": 0.0, "求生欲": 0.0 }
+	state.persons[100] = leader; team.leader_id = 100
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.faction_id = -1; prey.tile_pos = Vector2i(2, 0)
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	var fai := FactionAISystem.new()
+	fai._evaluate_solo(state, team)
+	assert(team.move_target == Vector2i(2, 0),
+		"stuck solo 應重評派新 move_target，實際=%s" % str(team.move_target))
+	print("Wakeup Task3 OK")
+
+func _test_survival_reeval_in_loot() -> void:
+	print("--- Wakeup Task4: survival 在 loot 中可重評 ---")
+	assert(not (TeamData.TASK_LOOT in FactionAISystem.SURVIVAL_TASKS),
+		"TASK_LOOT 應已從 SURVIVAL_TASKS 移除")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10; team.tile_pos = Vector2i(0, 0)
+	team.current_task = TeamData.TASK_LOOT
+	team.move_target = Vector2i(3, 3)
+	team.resources["food"] = 0.0   # days_left = 0 → urgent
+	team.previous_task = ""
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "殘忍": 0.1, "好戰": 0.1, "義氣": 0.1, "信義": 0.1 }
+	state.persons[100] = leader; team.leader_id = 100
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	fai._evaluate_survival(state, team)
+	# loot 不再 early-return → _trigger_survival 跑 → previous_task 被設
+	assert(team.previous_task == TeamData.TASK_LOOT,
+		"survival 應進入評估（previous_task=掠奪），實際=%s" % team.previous_task)
+	print("Wakeup Task4 OK")
+
+func _test_trade_net_dispatches() -> void:
+	print("--- Wakeup Task5: trade_net dispatch ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var f := FactionData.new()
+	f.faction_id = 0; f.member_team_ids = [0]; f.leader_team_id = 0
+	state.factions[0] = f
+	var trader := TeamData.new()
+	trader.team_id = 0; trader.faction_id = 0; trader.tile_pos = Vector2i(0, 0)
+	trader.tags = ["商隊"]; trader.current_task = "idle"
+	state.teams[0] = trader
+	var partner := TeamData.new()
+	partner.team_id = 1; partner.faction_id = -1; partner.tile_pos = Vector2i(3, 0)
+	partner.resources["goods"] = 50.0
+	state.teams[1] = partner
+	state.team_discovered[0] = [1]
+	var sai := StrategicAiSystem.new()
+	sai._dispatch_trade_net(state, f)
+	assert(trader.current_task == TeamData.TASK_TRADE,
+		"商隊應派 trade，實際=%s" % trader.current_task)
+	assert(trader.move_target == Vector2i(3, 0), "move_target 應指 partner")
+	print("Wakeup Task5 OK")

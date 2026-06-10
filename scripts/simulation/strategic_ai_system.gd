@@ -2,6 +2,24 @@ class_name StrategicAiSystem
 
 const STRATEGIC_INTERVAL:      int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
 const ALLIANCE_CHECK_INTERVAL: int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
+const BREAKOUT_DIST: int = 2     # 原 5，縮為 2（radius 小地圖友善）
+const ENCIRCLE_DIST: int = 1     # 原 2，縮為 1
+const BREAKOUT_NEAREST_THRESHOLD: int = 3   # 鄰敵 > 此距不觸發 breakout
+
+static func _is_valid_tile(state: WorldState, pos: Vector2i) -> bool:
+    return state.world.tiles.has(pos.x * 1000 + pos.y)
+
+static func _nearest_valid_tile(state: WorldState, target: Vector2i, fallback: Vector2i) -> Vector2i:
+    if _is_valid_tile(state, target): return target
+    # 從 target 往 fallback 方向找最近 in-map tile
+    var dir: Vector2i = fallback - target
+    var step: Vector2i = Vector2i(sign(dir.x), sign(dir.y))
+    if step == Vector2i.ZERO: return fallback
+    var cur: Vector2i = target
+    for _i in range(20):
+        cur = cur + step
+        if _is_valid_tile(state, cur): return cur
+    return fallback
 
 func tick(state: WorldState, faction: FactionData) -> void:
     if state.world.current_tick % STRATEGIC_INTERVAL != 0: return
@@ -11,6 +29,8 @@ func tick(state: WorldState, faction: FactionData) -> void:
         match top["type"]:
             "expand":
                 _assign_encirclement(state, faction, top["target_id"])
+            "trade_net":
+                _dispatch_trade_net(state, faction)
     for tid in faction.member_team_ids:
         var t: TeamData = state.teams.get(tid)
         if t: _assign_breakout(state, t)
@@ -111,7 +131,9 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
         if t.current_task in FactionAISystem.SURVIVAL_TASKS:
             continue
         var dir: Vector2i = dirs[i % dirs.size()]
-        t.strategic_assignments[target_id] = target_pos + dir * 2
+        var sa_pos: Vector2i = target_pos + dir * ENCIRCLE_DIST
+        sa_pos = _nearest_valid_tile(state, sa_pos, target_pos)
+        t.strategic_assignments[target_id] = sa_pos
 
 func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     if self_team.current_task in FactionAISystem.SURVIVAL_TASKS:
@@ -127,8 +149,18 @@ func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     if enemy_teams.size() < 2:
         self_team.strategic_assignments.erase(-1)
         return
+    # 鄰敵 > BREAKOUT_NEAREST_THRESHOLD hex 不觸發 breakout（看遠敵不必恐慌）
+    var nearest_dist: int = 9999
+    for e in enemy_teams:
+        var d: int = _hex_dist(self_team.tile_pos, e.tile_pos)
+        if d < nearest_dist: nearest_dist = d
+    if nearest_dist > BREAKOUT_NEAREST_THRESHOLD:
+        self_team.strategic_assignments.erase(-1)
+        return
     var best_dir: Vector2i = _find_escape_dir(self_team.tile_pos, enemy_teams)
-    self_team.strategic_assignments[-1] = self_team.tile_pos + best_dir * 5
+    var sa_pos: Vector2i = self_team.tile_pos + best_dir * BREAKOUT_DIST
+    sa_pos = _nearest_valid_tile(state, sa_pos, self_team.tile_pos)
+    self_team.strategic_assignments[-1] = sa_pos
 
 func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
     var dirs: Array = [
@@ -175,3 +207,28 @@ func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
         elif t:
             total += t.population
     return total
+
+# trade_net goal：派 idle 商隊去鄰近有貨/有錢的對象交易（移動到對方格，由 interaction 同格成交）
+func _dispatch_trade_net(state: WorldState, faction: FactionData) -> void:
+    for tid in faction.member_team_ids:
+        var t: TeamData = state.teams.get(tid)
+        if t == null: continue
+        if not ("商隊" in t.tags): continue
+        if t.current_task != TeamData.TASK_IDLE: continue
+        var partner_id: int = _find_trade_partner(state, t)
+        if partner_id == -1: continue
+        var p: TeamData = state.teams[partner_id]
+        t.current_task = TeamData.TASK_TRADE
+        t.move_target = p.tile_pos
+        print("[StrategicAI] Faction%d 商隊 Team%d → trade Team%d" % [
+            faction.faction_id, t.team_id, partner_id])
+
+func _find_trade_partner(state: WorldState, trader: TeamData) -> int:
+    for tid in state.team_discovered.get(trader.team_id, []):
+        var t: TeamData = state.teams.get(tid)
+        if t == null: continue
+        if t.faction_id != -1 and t.faction_id == trader.faction_id: continue
+        # 對方有 goods 或一定 coin 即視為可交易對象
+        if float(t.resources.get("goods", 0)) > 0 or float(t.resources.get("coin", 0)) > 50:
+            return tid
+    return -1
