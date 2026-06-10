@@ -5058,7 +5058,7 @@ func _test_promote_success() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.5)
 	team.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
-	team.anon_exp["平民"] = 50.0
+	team.anon_exp["平民"] = 250.0   # ×count: 5 升等需 5×50
 	team.resources = { "coin": 100, "food": 200, "material": 50 }
 	var n = AnonTierSystem.try_promote(state, team, "平民", 5)
 	assert(n == 5, "預期升 5，實際=%d" % n)
@@ -5067,7 +5067,7 @@ func _test_promote_success() -> void:
 	assert(team.resources["coin"] == 100 - 25)   # 5×5
 	assert(team.resources["food"] == 200 - 50)    # 5×10
 	assert(team.resources["material"] == 50 - 10) # 5×2
-	assert(team.anon_exp["平民"] == 0.0)
+	assert(team.anon_exp["平民"] == 0.0)            # 250 - 5×50
 	print("AnonTier Task4a OK")
 
 func _test_promote_insufficient_exp() -> void:
@@ -5086,7 +5086,7 @@ func _test_promote_insufficient_resources() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.5)
 	team.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
-	team.anon_exp["平民"] = 50.0
+	team.anon_exp["平民"] = 250.0   # exp 夠（×count: 5×50）
 	team.resources = { "coin": 10, "food": 200, "material": 50 }   # coin 不夠 25
 	var n = AnonTierSystem.try_promote(state, team, "平民", 5)
 	assert(n == 0, "物資不足應回 0，實際=%d" % n)
@@ -5098,7 +5098,7 @@ func _test_promote_elite_requires_weapon() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.8)   # cap 菁英
 	team.anon_tiers = { "平民": 0, "新兵": 0, "老兵": 10, "菁英": 0 }
-	team.anon_exp["老兵"] = 200.0
+	team.anon_exp["老兵"] = 1000.0   # ×count: 5×200
 	team.resources = { "coin": 1000, "food": 1000, "material": 1000, "weapon_melee_high": 0 }
 	var n0 = AnonTierSystem.try_promote(state, team, "老兵", 5)
 	assert(n0 == 0, "無高武器升菁英應回 0，實際=%d" % n0)
@@ -5113,7 +5113,7 @@ func _test_promote_leader_skill_cap() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.3)   # cap 新兵
 	team.anon_tiers = { "平民": 0, "新兵": 10, "老兵": 0, "菁英": 0 }
-	team.anon_exp["新兵"] = 100.0
+	team.anon_exp["新兵"] = 500.0   # ×count: 5×100（exp 夠，但 skill cap 應卡）
 	team.resources = { "coin": 1000, "food": 1000, "material": 1000 }
 	var n = AnonTierSystem.try_promote(state, team, "新兵", 5)
 	assert(n == 0, "leader 戰術 0.3 不可升老兵，應回 0，實際=%d" % n)

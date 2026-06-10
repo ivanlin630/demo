@@ -170,9 +170,9 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 	# 1. count 足
 	if int(team.anon_tiers.get(from_tier, 0)) < count:
 		return 0
-	# 2. exp 足（pool 達門檻即可升一波；consume 一個門檻量）
+	# 2. exp 足（每升 1 人需 1 份 threshold；consume threshold × count）
 	var threshold: float = float(PROMOTION_EXP_THRESHOLD[from_tier])
-	if float(team.anon_exp.get(from_tier, 0.0)) < threshold:
+	if float(team.anon_exp.get(from_tier, 0.0)) < threshold * float(count):
 		return 0
 	# 3. 物資足
 	var cost: Dictionary = PROMOTION_COST[from_tier]
@@ -196,7 +196,7 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 		team.resources[res] = float(team.resources.get(res, 0)) - float(cost[res]) * float(count)
 	team.anon_tiers[from_tier] = int(team.anon_tiers[from_tier]) - count
 	team.anon_tiers[to_tier] = int(team.anon_tiers.get(to_tier, 0)) + count
-	team.anon_exp[from_tier] = float(team.anon_exp[from_tier]) - threshold
+	team.anon_exp[from_tier] = float(team.anon_exp[from_tier]) - threshold * float(count)
 	return count
 
 static func _training_cap(tact: float) -> String:
