@@ -88,9 +88,9 @@ const PRIO_FACTION:  int = 30
 const PRIO_AMBIENT:  int = 10
 
 # 嘗試設 task。優先權嚴格大於現任才搶得動（同層先到先得）。
-# 回 true = 已設；false = 被現任擋下。
-static func try_set(team: TeamData, new_task: String, move_target: Vector2i,
-		priority: int, source: String = "") -> bool:
+# state 供抗命判定讀 leader；回 true = 已設；false = 被現任擋下。
+static func try_set(state: WorldState, team: TeamData, new_task: String,
+		move_target: Vector2i, priority: int, source: String = "") -> bool:
 	if team.combat_target != -1:
 		return false   # 戰鬥鎖絕對（內部結束流程走 release_combat）
 	if priority <= team.task_priority and team.current_task != TeamData.TASK_IDLE:
