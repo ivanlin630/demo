@@ -915,6 +915,8 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 		state.player_pending_targets.erase(target_id)
 		return { "ok": false, "msg": "目標人口不足" }
 	pt.resources["coin"] = coin - RECRUIT_COST_ANON
+	# 守恆：買人付給對方，coin 不蒸發
+	tgt.resources["coin"] = float(tgt.resources.get("coin", 0)) + RECRUIT_COST_ANON
 	# 被招募 anon 帶走在原團的 treasury 份額
 	var tgt_named: int = tgt.named_members.size() + (1 if tgt.leader_id != -1 else 0)
 	var tgt_anon: int = maxi(tgt.population - tgt_named, 1)
@@ -1035,6 +1037,8 @@ func _recruit_named_internal(state: WorldState, pt: TeamData,
 	# 轉移
 	var pt_id: int = _get_player_team_id(state)
 	pt.resources["coin"] = coin - RECRUIT_COST_NAMED
+	# 守恆：買人付給對方，coin 不蒸發
+	tgt4.resources["coin"] = float(tgt4.resources.get("coin", 0)) + RECRUIT_COST_NAMED
 	tgt4.named_members.erase(person_id)
 	tgt4.population = maxi(tgt4.population - 1, 1)
 	p.team_id = pt_id

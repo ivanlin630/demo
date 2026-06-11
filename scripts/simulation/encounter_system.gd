@@ -963,6 +963,10 @@ func _return_pool_equipment(state: WorldState) -> void:
 
 func cleanup_encounter(state: WorldState) -> void:
 	_return_pool_equipment(state)
+	# 守恆：中止路徑（投降等）存活單位的 pool 裝備也歸還，不蒸發
+	for team_id in [state.encounter_attacker_id, state.encounter_defender_id]:
+		if team_id != -1:
+			_sync_back_units(state, team_id)
 	state.encounter_units.clear()
 	state.encounter_active      = false
 	state.encounter_attacker_id = -1
@@ -1004,6 +1008,7 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 	var armed_count: int = int(float(team.population) * team.armed_anon_ratio)
 	var spawn_count: int = mini(armed_count, ANON_UNIT_CAP)
 	var weapon_queue: Array = _assign_anon_weapons(team, spawn_count)
+	var spawned_anon: int = 0
 	for _i in range(spawn_count):
 		if pos_idx >= positions.size(): break   # no more spawn slots
 		var pos: Vector2i = positions[pos_idx]
@@ -1011,6 +1016,12 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 		var unit: Dictionary = _create_anon_unit(team, pos)
 		_init_anon_unit(unit, team, state, weapon_queue[_i] if _i < weapon_queue.size() else "")
 		state.encounter_units.append(unit)
+		spawned_anon += 1
+	# 守恆：spawn 位不足未上場者，已預扣武器歸還
+	for j in range(spawned_anon, weapon_queue.size()):
+		var grade: String = weapon_queue[j]
+		if grade != "":
+			team.resources[grade] = int(team.resources.get(grade, 0)) + 1
 	print("[Encounter] Team%d spawn: %d具名 + %d匿名（武裝率%.0f%%，人口%d）" % [
 		team.team_id, named_ids.size(), spawn_count,
 		team.armed_anon_ratio * 100, team.population])

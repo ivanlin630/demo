@@ -231,6 +231,8 @@ func _initialize() -> void:
 	_test_military_outpost_builds_weaponsmith()
 	_test_military_residency_dispatch_only()
 	_test_production_requires_resident()
+	_test_promotion_coin_to_treasury()
+	_test_recruit_coin_to_target()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7080,3 +7082,46 @@ func _test_production_requires_resident() -> void:
 	ms.tick_all(state2, [0])
 	assert(float(tile2.public_storage.get("goods", 0)) == 0.0, "無 PRODUCE 居民 → 製造停產")
 	print("Facility Task5b OK")
+
+func _test_promotion_coin_to_treasury() -> void:
+	print("--- Facility Task6a: 升等 coin → anon_treasury ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 12
+	team.anon_tiers = { "平民": 10 }
+	team.anon_exp = { "平民": 999.0 }
+	team.resources = { "coin": 100.0, "food": 999.0, "material": 999.0 }
+	var leader := PersonData.new(); leader.id = 1
+	leader.skills = { "戰術": 0.9 }
+	state.persons[1] = leader; team.leader_id = 1
+	state.teams[0] = team
+	var cost: Dictionary = AnonTierSystem.PROMOTION_COST["平民"]
+	var coin_cost: float = float(cost.get("coin", 0)) * 2.0
+	var before_total: float = float(team.resources["coin"]) + team.anon_treasury
+	var n: int = AnonTierSystem.try_promote(state, team, "平民", 2)
+	assert(n == 2, "應升 2 人")
+	var after_total: float = float(team.resources["coin"]) + team.anon_treasury
+	assert(absf(after_total - before_total) < 0.001, "coin 總量不變（轉入公庫）")
+	assert(team.anon_treasury >= coin_cost - 0.001, "treasury 應收餉銀")
+	print("Facility Task6a OK")
+
+func _test_recruit_coin_to_target() -> void:
+	print("--- Facility Task6b: 招募 coin → 目標 team ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
+	pt.population = 5; pt.resources = { "coin": 200.0 }
+	state.teams[0] = pt
+	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
+	state.persons[100] = pp
+	var tgt := TeamData.new(); tgt.team_id = 1; tgt.population = 8
+	tgt.anon_tiers = { "平民": 7 }
+	state.teams[1] = tgt
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd._recruit_anon_internal(state, pt, tgt, 1)
+	assert(r.get("ok", false), "招募應成功: %s" % r.get("msg", ""))
+	assert(float(pt.resources["coin"]) == 150.0, "pt coin -50")
+	assert(float(tgt.resources.get("coin", 0)) == 50.0, "tgt coin +50（轉移非蒸發）")
+	print("Facility Task6b OK")
