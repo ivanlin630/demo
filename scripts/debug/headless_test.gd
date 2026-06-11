@@ -197,6 +197,8 @@ func _initialize() -> void:
 	_test_n1_leader_tier_sync()
 	_test_n1_named_spawns_exile()
 	_test_n3_joins_existing_exile()
+	_test_bridge_no_threat_no_hijack()
+	_test_bridge_with_threat_flees()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6368,3 +6370,45 @@ func _test_n3_joins_existing_exile() -> void:
 	assert(exile.named_members.has(2), "流亡 named 含 person")
 	assert(state.teams.size() == 2, "不應另建 team")
 	print("Reaction Task5d OK")
+
+func _make_panic_team(state: WorldState) -> TeamData:
+	# pop=3 全 named 高壓低忠誠 → 全員 N1_flee
+	var team := TeamData.new(); team.team_id = 0; team.population = 3
+	team.tile_pos = Vector2i(2, 0)
+	state.teams[0] = team
+	for i in range(3):
+		var p := PersonData.new(); p.id = 1 + i; p.team_id = 0
+		p.stress = 1.0; p.loyalty = 0.0; p.fear = 0.0
+		p.values = { "求生欲": 1.0, "慎重": 0.0 }
+		state.persons[1 + i] = p
+		if i == 0: team.leader_id = p.id
+		else: team.named_members.append(p.id)
+	return team
+
+func _test_bridge_no_threat_no_hijack() -> void:
+	print("--- Reaction Task6a: 無威脅不劫持 task ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := _make_panic_team(state)
+	var rs := ReactionSystem.new()
+	rs.evaluate_all(state, [0])
+	assert(team.current_task != "逃跑", "無威脅 task 不應變逃跑，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(-1, -1), "move_target 不應被設")
+	print("Reaction Task6a OK")
+
+func _test_bridge_with_threat_flees() -> void:
+	print("--- Reaction Task6b: 真威脅 → 逃跑 + 反方向目標 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := _make_panic_team(state)
+	var threat := TeamData.new(); threat.team_id = 9; threat.population = 20
+	threat.tile_pos = Vector2i(0, 0); threat.last_tile_pos = Vector2i(-1, 0)   # 朝我來
+	state.teams[9] = threat
+	team.known_reputations = { 9: 0.1 }   # 高敵意
+	state.team_discovered[0] = [9]
+	state.team_intel[0] = { 9: { "population_est": 20 } }
+	var t5 := HexTileData.new(); t5.tile_pos = Vector2i(5, 0)
+	state.world.tiles[5000] = t5   # 反方向 (2,0)+(1,0)*3 = (5,0)
+	var rs := ReactionSystem.new()
+	rs.evaluate_all(state, [0])
+	assert(team.current_task == "逃跑", "應逃跑，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(5, 0), "move_target 應 (5,0)，實際=%s" % str(team.move_target))
+	print("Reaction Task6b OK")

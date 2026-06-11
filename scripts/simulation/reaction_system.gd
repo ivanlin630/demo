@@ -40,9 +40,14 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 			team.work_morale = clampf(lerpf(team.work_morale, target_morale, 0.1), 0.5, 1.5)
 		if flee_count > 0 and float(flee_count) / maxf(team.population, 1) >= 0.3:
 			if team.current_task not in ["逃跑", "護衛"]:
-				team.current_task = "逃跑"
-				team.move_target  = Vector2i(-1, -1)
-				print("[ReactionBridge] Team%d 逃跑（%d/%d 人）" % [tid, flee_count, team.population])
+				var threat_id: int = _find_top_threat(state, team)
+				if threat_id != -1:
+					var threat: TeamData = state.teams[threat_id]
+					team.current_task = "逃跑"
+					team.move_target = _flee_target_simple(state, team, threat)
+					print("[ReactionBridge] Team%d 逃跑（%d/%d 人）← threat Team%d" % [
+						tid, flee_count, team.population, threat_id])
+				# 無威脅 → 不劫持 task（內心恐慌但無處可逃）
 
 # 主動攻擊戰敗 → named 成員忠誠降、leader 壓力升（無硬性 cooldown，純 reaction）
 func on_attack_defeat(state: WorldState, team_id: int, pop_loss_ratio: float) -> void:
@@ -254,6 +259,26 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		state.world.current_tick, person.id, person.role, person.team_id,
 		reaction, person.stress, person.loyalty
 	])
+
+func _find_top_threat(state: WorldState, team: TeamData) -> int:
+	var best_id: int = -1
+	var best: float = ThreatAssessment.THREAT_BASE_THRESHOLD
+	for tid in state.team_discovered.get(team.team_id, []):
+		var other: TeamData = state.teams.get(tid)
+		if other == null: continue
+		var s: float = ThreatAssessment.score(state, team, other)
+		if s > best:
+			best = s
+			best_id = tid
+	return best_id
+
+# 朝威脅反方向 3 hex（in-map check；仿 faction_ai._flee_target）
+func _flee_target_simple(state: WorldState, team: TeamData, threat: TeamData) -> Vector2i:
+	var dir: Vector2i = team.tile_pos - threat.tile_pos
+	var pos: Vector2i = team.tile_pos + Vector2i(signi(dir.x), signi(dir.y)) * 3
+	if state.world.tiles.has(pos.x * 1000 + pos.y):
+		return pos
+	return team.tile_pos
 
 # 離團者去處：同格流亡 team 加入，否則自立 1 人流亡 team
 func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) -> void:
