@@ -213,6 +213,7 @@ func _initialize() -> void:
 	_test_salary_budget_ratio()
 	_test_salary_full_pay_unchanged()
 	_test_trade_partner_requires_resident()
+	_test_diplomacy_reject_cooldown()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6654,3 +6655,42 @@ func _test_trade_partner_requires_resident() -> void:
 	assert(int(partner_b.get("team_id", -1)) == 1, "應選 Team1 outpost，實際=%s" % str(partner_b))
 	assert(partner_b["outpost_pos"] == Vector2i(3, 3), "outpost_pos 應 (3,3)")
 	print("EcoFix Task2 OK")
+
+func _test_diplomacy_reject_cooldown() -> void:
+	print("--- EcoFix Task3: reject cooldown ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	state.world.current_tick = 100
+	# A：缺糧（resource_need 1.0）+ 高義氣信義（self_peace 0.15）→ score 0.55 → propose_trade
+	var a := TeamData.new(); a.team_id = 0; a.faction_id = -1; a.population = 5
+	a.resources["food"] = 0.0
+	var al := PersonData.new(); al.id = 1; al.team_id = 0
+	al.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.0, "慎重": 1.0 }
+	state.persons[1] = al; a.leader_id = 1
+	state.teams[0] = a
+	# B：糧足 + 低義氣信義 → 對 A score 0.1 → reject
+	var b := TeamData.new(); b.team_id = 1; b.faction_id = -1; b.population = 5
+	b.resources["food"] = 1000.0
+	var bl := PersonData.new(); bl.id = 2; bl.team_id = 1
+	bl.values = { "義氣": 0.0, "信義": 0.0, "貪婪": 0.0, "慎重": 0.5 }
+	state.persons[2] = bl; b.leader_id = 2
+	state.teams[1] = b
+	state.team_discovered[0] = [1]
+	var dip := DiplomaticAiSystem.new()
+	# 直接發 → B reject → cooldown 寫入
+	dip._send_diplomacy_message(state, a, b, "propose_trade")
+	var until: int = int(a.diplomacy_reject_cooldown.get(1, 0))
+	assert(until == 100 + DiplomaticAiSystem.REJECT_COOLDOWN,
+		"reject 應設 cooldown=%d，實際=%d" % [100 + DiplomaticAiSystem.REJECT_COOLDOWN, until])
+	# cooldown 內 try_proactive 不再發 → cooldown 值不被刷新（再發送會被 reject 覆寫成新值）
+	state.world.current_tick = 200
+	seed(7)
+	for i in range(50):
+		dip.try_proactive_diplomacy(state, a)
+	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) == until,
+		"cooldown 內不應再發（值被刷新=有發送），實際=%d" % int(a.diplomacy_reject_cooldown.get(1, 0)))
+	# cooldown 過期 → 恢復發送（reject 重設新 cooldown）
+	state.world.current_tick = until + 1
+	for i in range(50):
+		dip.try_proactive_diplomacy(state, a)
+	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) > until, "cooldown 過期應恢復發送")
+	print("EcoFix Task3 OK")

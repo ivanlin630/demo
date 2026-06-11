@@ -2,6 +2,7 @@
 class_name DiplomaticAiSystem
 
 const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
+const REJECT_COOLDOWN: int = WorldState.TICKS_PER_DAY * 7   # 被拒後同對象冷卻 7 天
 
 # T-02：從 team_intel 取人口估算；無資料 fallback = self_pop（謹慎：視對方與己等強）
 func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
@@ -47,6 +48,9 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 		var other: TeamData = state.teams.get(other_id)
 		if other == null: continue
 		if other.faction_id == self_team.faction_id and self_team.faction_id != -1: continue
+		# 被拒冷卻中 → 換下一個對象（防同對象連發 spam）
+		if state.world.current_tick < int(self_team.diplomacy_reject_cooldown.get(other.team_id, 0)):
+			continue
 		var score: float = _calc_diplomacy_score(state, self_team, other)
 
 		if score > 0.6 and self_team.faction_id != -1:
@@ -80,6 +84,9 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 	print("[Diplomacy] Team%d → Team%d: %s" % [sender.team_id, target.team_id, action])
 	var response: String = handle_diplomacy_message(state, target, sender, action)
 	print("[Diplomacy] Team%d 回應: %s" % [target.team_id, response])
+	if response == "reject" or response == "refuse":
+		sender.diplomacy_reject_cooldown[target.team_id] = \
+			state.world.current_tick + REJECT_COOLDOWN
 	# Tribute refusal consequence: write memory + reputation penalty
 	if action == "demand_tribute" and response == "refuse":
 		var sender_leader: PersonData = state.persons.get(sender.leader_id) if sender.leader_id >= 0 else null
