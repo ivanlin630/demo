@@ -47,7 +47,7 @@ static func slots_used(tile: HexTileData) -> int:
 | 設施 | level key | 產出（配方）| 歸屬 |
 |---|---|---|---|
 | 農田 farming | farming_level（既有）| food 採集乘數 | civilian |
-| 工坊 workshop | manufacturing_level（沿用）| goods（3 mat）/ **tools（2 iron+2 mat）/ arrows（3 mat）** | civilian |
+| 工坊 workshop | manufacturing_level（沿用）| goods（3 mat）/ **tools（4 mat）/ arrows（3 mat）** — 全可再生原料 | civilian |
 | 藥坊 apothecary | apothecary_level（新）| herb → medicine（herb 為 B 期圖塊資源；B 期前無地利 → NPC 不會蓋，dormant）| civilian |
 | 鑄幣 mint | mint_level（既有）| ore_gold/silver → coin | civilian |
 | 馬廄 stable | stable_level（既有）| food → mounts（B 期改野馬→戰馬拆分）| civilian（B 期拆軍民兩段）|
@@ -104,9 +104,11 @@ score(f) = terrain_fit(f) × (1.0 + deficit(f)) × personality_pref(leader, f)
 | **享樂（未來）** | material + tools + **goods** | 市集/廟宇…（B 期後）|
 
 - 升級 Lv2 = 基準 ×2、Lv3 = ×3（含 tools、工期同倍率）。全 TEST VALUE
-- **outpost 本體同步去 coin**：civilian = 純 material；military = material + weapon（既有 weapon 成分保留）
+- **建造守恆原則：有限資源及其子鏈（ore_*/gem/weapon/armor/coin）永不入建造成本** — 建造只消耗可再生資源（material、tools[純 mat 製]）
+- **outpost 本體**：兩種據點都 = material + tools（civilian 50/150/400 mat + 2/4/8 tools；military 80/200/500 mat + 3/6/10 tools，**weapon 成本移除**）。TEST VALUE
 - coin 保留用途：薪資 / 貿易 / anon 升等 / 玩家招募 / 勒索進貢 — 專職人力與市場，建設歸實物
-- 依賴鏈（自動 bootstrap，無死鎖）：工坊低級純 mat 可起步 → 產 tools（2 iron+2 mat）→ 中級設施全要 tools → 無鐵村買 tools/iron、軍鎮蓋武器坊也要向民間買 tools（軍民貿易線）
+- 依賴鏈：工坊低級純 mat 起步 → 產 tools（4 mat，可再生）→ 中級設施 + outpost 本體全要 tools → 軍鎮向民間買 tools（軍民貿易線）
+- **Bootstrap 注意**：第一個 outpost 也要 tools，而 tools 產自工坊（在 outpost 內）→ 雞生蛋。解法：config 種子 tools（開局團隊帶工具，拓荒者套件）+ 貿易/搶劫可得。config 全面補 tools 初始量
 - 農田工期最短（3 天）→ 飢餓 override 拆遷改建不會餓死在工期裡
 
 ## 5a. 軍屯（military outpost residency）
@@ -139,8 +141,9 @@ if tile_type == "military":
 6. 工坊配方：tools / arrows 產出；護甲坊：armor_low/high 產出
 7. 配方組內缺口排序：arrows 存量最低 → 先做 arrows
 8. 生產人力 gate：無居民團 tile 設施不產
-9. 建造成本三級制：低級純 mat 可蓋；中級無 tools 蓋不了；建造不扣 coin（grep 驗證建設路徑無 coin 扣除）
-10. outpost 本體建造不扣 coin（civilian 純 mat / military mat+weapon）
+9. 建造成本三級制：低級純 mat 可蓋；中級無 tools 蓋不了；建造不扣 coin / 不扣任何有限資源（grep 驗證建設路徑無 coin/ore/weapon 扣除）
+10. outpost 本體建造 = mat + tools（兩種據點；weapon 成本已移除）
+10b. tools 配方純 mat（4 mat）— 建造鏈全程可再生
 11. multi 90 天：NPC 建造設施 > 0（baseline stable = 0）、**村莊設施組合差異度**（≥2 種不同組合）、ALL INVARIANTS PASSED
 
 ## 風險
