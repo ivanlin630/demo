@@ -218,6 +218,9 @@ func _initialize() -> void:
 	_test_n1_leader_no_anon_pop_stable()
 	# ── Minor 長大簡版 ──
 	_test_minor_maturation()
+
+	_test_facility_def_v2()
+	_test_facility_slots()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -3676,10 +3679,10 @@ func _test_task_extra_data_field() -> void:
 func _test_facility_def_registry() -> void:
 	print("--- Infra Task2: FACILITY_DEF ---")
 	assert(OutpostSystem.FACILITY_DEF.has("farming"))
-	assert(OutpostSystem.FACILITY_DEF.has("manufacturing"))
+	assert(OutpostSystem.FACILITY_DEF.has("workshop"))
 	var farming = OutpostSystem.FACILITY_DEF["farming"]
 	assert(farming.cost.material == 30)
-	assert(farming.cap_by_outpost.civilian == [1, 2, 3])
+	assert(farming.allowed_outpost == ["civilian"])
 	# trigger_check helpers 可呼叫
 	var state := WorldState.new()
 	state.world = WorldData.new()
@@ -3912,7 +3915,8 @@ func _test_player_build_facility() -> void:
 	var cmd := PlayerCommandSystem.new()
 	var r: Dictionary = cmd.execute_action(state, -1, "build_facility")
 	assert(r.get("ok", false), "擴建應成功: %s" % r.get("msg", ""))
-	assert(tile.construction_target.get("action", "") == "upgrade_farming", "施工=upgrade_farming")
+	assert(tile.construction_target.get("action", "") == "upgrade_facility", "施工=upgrade_facility")
+	assert(tile.construction_target.get("facility", "") == "farming", "facility=farming")
 	# 未知 facility → 失敗
 	state.player_state["facility_type"] = "nonexist"
 	var r2: Dictionary = cmd.execute_action(state, -1, "build_facility")
@@ -5463,7 +5467,7 @@ func _test_stable_facility_def() -> void:
 	print("--- Mount Task3a: stable FACILITY_DEF ---")
 	assert(OutpostSystem.FACILITY_DEF.has("stable"), "FACILITY_DEF 應有 stable")
 	var s = OutpostSystem.FACILITY_DEF["stable"]
-	assert(s["cost"]["material"] == 30, "stable material cost 30")
+	assert(s["cost"]["material"] == 40, "stable material cost 40")
 	assert(s["current_level_key"] == "stable_level", "current_level_key=stable_level")
 	assert(s["required_terrain"] == "plains", "stable 限平原")
 	print("Mount Task3a OK")
@@ -6787,3 +6791,44 @@ func _test_n1_leader_no_anon_pop_stable() -> void:
 	assert(team.population == 2, "有 anon 應扣 pop=2，實際=%d" % team.population)
 	assert(int(team.anon_tiers["平民"]) == 0, "平民 tier 應 -1，實際=%d" % int(team.anon_tiers["平民"]))
 	print("EcoFix Task4b OK")
+
+# ══ Facility Overhaul A 期 ══════════════════════════════════════
+
+func _test_facility_def_v2() -> void:
+	print("--- Facility Task1a: FACILITY_DEF v2 ---")
+	assert(OutpostSystem.FACILITY_DEF.size() == 8)
+	for f in ["farming", "workshop", "apothecary", "mint", "stable",
+			"smeltery", "weaponsmith", "armorsmith"]:
+		assert(OutpostSystem.FACILITY_DEF.has(f), "缺 %s" % f)
+	assert(OutpostSystem.FACILITY_DEF["weaponsmith"]["allowed_outpost"] == ["military"])
+	assert(OutpostSystem.FACILITY_DEF["farming"]["allowed_outpost"] == ["civilian"])
+	# 三級成本：低級無 tools，中級含 tools，全部無 coin
+	assert(not OutpostSystem.FACILITY_DEF["farming"]["cost"].has("coin"))
+	assert(int(OutpostSystem.FACILITY_DEF["smeltery"]["cost"].get("tools", 0)) > 0)
+	assert(int(OutpostSystem.FACILITY_DEF["farming"]["cost"].get("tools", 0)) == 0)
+	print("Facility Task1a OK")
+
+func _test_facility_slots() -> void:
+	print("--- Facility Task1b: slot 制 ---")
+	var tile := HexTileData.new()
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	assert(OutpostSystem.slot_cap(tile) == 2)
+	tile.outpost_level = 3
+	assert(OutpostSystem.slot_cap(tile) == 5)
+	tile.outpost_type = "military"; tile.outpost_level = 1
+	assert(OutpostSystem.slot_cap(tile) == 1)
+	tile.farming_level = 1; tile.weaponsmith_level = 2
+	assert(OutpostSystem.slots_used(tile) == 2, "2 類設施 = 2 slot（level 不佔額外）")
+	# slot 滿 → 新設施蓋不了（military Lv1 cap=1，已用 2）
+	var team := TeamData.new(); team.team_id = 0
+	team.resources = { "material": 999.0, "tools": 99.0 }
+	tile.outpost_owner = 0; tile.construction_team_id = -1
+	var os := OutpostSystem.new()
+	assert(not os._begin_facility_construction(team, tile, "smeltery"), "slot 滿應失敗")
+	# 升級不佔 slot：weaponsmith Lv2 → Lv3 應可
+	assert(os._begin_facility_construction(team, tile, "weaponsmith"), "升級不佔 slot 應成功")
+	assert(tile.construction_target.get("facility", "") == "weaponsmith")
+	# allowed_outpost gate：military tile 蓋 civilian 設施失敗
+	tile.construction_team_id = -1; tile.construction_target = {}
+	assert(not os._begin_facility_construction(team, tile, "mint"), "military 蓋 mint 應失敗")
+	print("Facility Task1b OK")

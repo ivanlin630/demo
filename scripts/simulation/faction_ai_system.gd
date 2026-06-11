@@ -1467,20 +1467,21 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue
 		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
 			return
-	# (2) 擴建設施（civilian only）
+	# (2) 擴建設施（slot 制；Task 4 重寫為需求迴路 score）
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_owner != leader_team.team_id: continue
-		if tile.outpost_type != "civilian" or tile.construction_team_id != -1: continue
+		if tile.construction_team_id != -1: continue
 		for facility in OutpostSystem.FACILITY_DEF:
 			var def: Dictionary = OutpostSystem.FACILITY_DEF[facility]
+			if not (tile.outpost_type in def["allowed_outpost"]):
+				continue
 			# 地形限制（如馬廄限平原）
 			if def.has("required_terrain") and tile.terrain != def["required_terrain"]:
 				continue
-			var cap_arr: Array = def.cap_by_outpost[tile.outpost_type]
-			var cap: int = int(cap_arr[tile.outpost_level - 1])
 			var current: int = int(tile.get(def.current_level_key))
-			if current >= cap: continue
+			if current > 0: continue
+			if OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile): continue
 			if _dispatch_facility_builder(state, leader_team, tile.tile_pos, facility):
 				return
 	# (3) 蓋新 outpost
