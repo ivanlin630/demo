@@ -934,19 +934,35 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
 
 func _update_equip_order(state: WorldState, team: TeamData) -> void:
+	# 已裝備武器離開 storage pool；target 若只看 storage 會隨裝備行為縮放
+	# → equip/unequip 每 tick 振盪（[Equip] spam 根因），故計入已裝備量
+	var equipped_units: Dictionary = {
+		"melee_low": 0, "melee_high": 0, "ranged_low": 0, "ranged_high": 0
+	}
+	var named_ids: Array = team.named_members.duplicate()
+	if team.leader_id != -1:
+		named_ids.append(team.leader_id)
+	for pid in named_ids:
+		var p: PersonData = state.persons.get(pid)
+		if p == null: continue
+		var grade: String = p.equipment["hand_1"].get("grade", "")
+		if grade.begins_with("weapon_"):
+			var wtype: String = grade.replace("weapon_", "")
+			if equipped_units.has(wtype):
+				equipped_units[wtype] += EquipmentSystem.UNITS_PER_EQUIP
 	var total_weapons: int = 0
 	for wtype in ["melee_low", "melee_high", "ranged_low", "ranged_high"]:
-		total_weapons += int(team.resources.get("weapon_" + wtype, 0))
+		total_weapons += int(team.resources.get("weapon_" + wtype, 0)) + int(equipped_units[wtype])
 	if total_weapons <= 0:
 		return
 	team.equip_order = { "melee_low": 0, "melee_high": 0, "ranged_low": 0, "ranged_high": 0 }
 	var can_equip: int = total_weapons / 2
 	if team.tags.has(TeamData.TAG_MILITARY) or team.current_task == TeamData.TASK_LOOT \
 			or team.current_task == TeamData.TASK_ATTACK:
-		var pool_mh: int = int(team.resources.get("weapon_melee_high", 0)) / 2
-		var pool_rh: int = int(team.resources.get("weapon_ranged_high", 0)) / 2
-		var pool_ml: int = int(team.resources.get("weapon_melee_low", 0)) / 2
-		var pool_rl: int = int(team.resources.get("weapon_ranged_low", 0)) / 2
+		var pool_mh: int = (int(team.resources.get("weapon_melee_high", 0)) + int(equipped_units["melee_high"])) / 2
+		var pool_rh: int = (int(team.resources.get("weapon_ranged_high", 0)) + int(equipped_units["ranged_high"])) / 2
+		var pool_ml: int = (int(team.resources.get("weapon_melee_low", 0)) + int(equipped_units["melee_low"])) / 2
+		var pool_rl: int = (int(team.resources.get("weapon_ranged_low", 0)) + int(equipped_units["ranged_low"])) / 2
 		team.equip_order["melee_high"]  = mini(pool_mh, can_equip)
 		can_equip -= team.equip_order["melee_high"]
 		team.equip_order["ranged_high"] = mini(pool_rh, can_equip)
@@ -956,10 +972,12 @@ func _update_equip_order(state: WorldState, team: TeamData) -> void:
 		team.equip_order["ranged_low"]  = mini(pool_rl, can_equip)
 	elif team.tags.has(TeamData.TAG_MERCHANT):
 		var guard_count: int = mini(team.population * 3 / 10, can_equip)
-		team.equip_order["melee_low"] = mini(int(team.resources.get("weapon_melee_low", 0)) / 2, guard_count)
+		team.equip_order["melee_low"] = mini(
+			(int(team.resources.get("weapon_melee_low", 0)) + int(equipped_units["melee_low"])) / 2, guard_count)
 	else:
 		var guard_count: int = mini(team.population / 2, can_equip)
-		team.equip_order["melee_low"] = mini(int(team.resources.get("weapon_melee_low", 0)) / 2, guard_count)
+		team.equip_order["melee_low"] = mini(
+			(int(team.resources.get("weapon_melee_low", 0)) + int(equipped_units["melee_low"])) / 2, guard_count)
 
 func _get_player_team_id(state: WorldState) -> int:
 	if state.player_id == -1: return -1

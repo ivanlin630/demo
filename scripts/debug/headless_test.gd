@@ -214,6 +214,7 @@ func _initialize() -> void:
 	_test_salary_full_pay_unchanged()
 	_test_trade_partner_requires_resident()
 	_test_diplomacy_reject_cooldown()
+	_test_equip_order_no_oscillation()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6694,3 +6695,38 @@ func _test_diplomacy_reject_cooldown() -> void:
 		dip.try_proactive_diplomacy(state, a)
 	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) > until, "cooldown 過期應恢復發送")
 	print("EcoFix Task3 OK")
+
+func _test_equip_order_no_oscillation() -> void:
+	print("--- EcoFix Task4: equip order 計入已裝備 → 不振盪 ---")
+	# 根因：舊版 target 只看 storage pool；裝備後 pool 縮小 → target 縮小
+	# → unequip 還回 pool → target 又變大 → 再 equip，每 tick 循環
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	team.tags = ["軍隊"]
+	team.resources["weapon_melee_low"] = 12
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	state.persons[1] = leader; team.leader_id = 1
+	for i in range(3):
+		var p := PersonData.new(); p.id = 2 + i; p.team_id = 0
+		state.persons[p.id] = p
+		team.named_members.append(p.id)
+	state.teams[0] = team
+	var fa := FactionAISystem.new()
+	var eq := EquipmentSystem.new()
+	# tick 1：4 named 全裝備，pool 12-8=4
+	fa._update_equip_order(state, team)
+	eq._update_equipment(state, team)
+	var pool_t1: int = int(team.resources.get("weapon_melee_low", 0))
+	assert(pool_t1 == 4, "tick1 後 pool 應 4，實際=%d" % pool_t1)
+	# tick 2-6：target 計入已裝備 → 不 unequip、pool 恆定
+	for i in range(5):
+		fa._update_equip_order(state, team)
+		eq._update_equipment(state, team)
+		var pool_n: int = int(team.resources.get("weapon_melee_low", 0))
+		assert(pool_n == 4, "pool 振盪：tick%d pool=%d（應恆 4）" % [i + 2, pool_n])
+	var armed: int = 0
+	for pid in [1, 2, 3, 4]:
+		if state.persons[pid].equipment["hand_1"].get("grade", "") == "weapon_melee_low":
+			armed += 1
+	assert(armed == 4, "4 named 應全程保持裝備，實際=%d" % armed)
+	print("EcoFix Task4 OK")
