@@ -243,11 +243,11 @@ func _test_minor_maturation() -> void:
 	state.world.current_tick = WorldState.TICKS_PER_MONTH + WorldState.TICKS_PER_DAY
 	ps.check_overflow(state)
 	assert(team.minor_population == 4, "非月邊界不長大")
-	# pop 滿 50 不長
+	# pop 滿 50 照長 → 溢出交給 overflow 分團（同呼叫內處理）
 	team.population = 50
 	state.world.current_tick = WorldState.TICKS_PER_MONTH * 2
 	ps.check_overflow(state)
-	assert(team.minor_population == 4, "pop 滿不長大")
+	assert(team.minor_population == 3, "滿 50 仍長大，實際 minor=%d" % team.minor_population)
 	print("PopFix OK")
 
 func _run_sim_test() -> void:
