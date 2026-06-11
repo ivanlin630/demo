@@ -43,10 +43,12 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 				var threat_id: int = _find_top_threat(state, team)
 				if threat_id != -1:
 					var threat: TeamData = state.teams[threat_id]
-					team.current_task = "逃跑"
-					team.move_target = _flee_target_simple(state, team, threat)
-					print("[ReactionBridge] Team%d 逃跑（%d/%d 人）← threat Team%d" % [
-						tid, flee_count, team.population, threat_id])
+					# 恐慌逃跑 = PRIO_THREAT (70)：蓋不動 survival (80) → ping-pong 結構性消失
+					if TaskArbiter.try_set(state, team, "逃跑",
+							_flee_target_simple(state, team, threat),
+							TaskArbiter.PRIO_THREAT, "bridge_panic"):
+						print("[ReactionBridge] Team%d 逃跑（%d/%d 人）← threat Team%d" % [
+							tid, flee_count, team.population, threat_id])
 				# 無威脅 → 不劫持 task（內心恐慌但無處可逃）
 
 # 主動攻擊戰敗 → named 成員忠誠降、leader 壓力升（無硬性 cooldown，純 reaction）
@@ -297,7 +299,8 @@ func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) 
 	ot.faction_id = -1
 	ot.tags = ["流亡"]
 	ot.population = 1
-	ot.current_task = TeamData.TASK_IDLE
+	ot.current_task = TeamData.TASK_IDLE   # 新 team 建立豁免：直接賦值 + priority 0
+	ot.task_priority = 0
 	ot.leader_id = person.id
 	person.team_id = ot.team_id
 	person.role = "leader"

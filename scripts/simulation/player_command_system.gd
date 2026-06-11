@@ -380,7 +380,7 @@ func _action_demolish_outpost(state: WorldState, _target_id: int, pt: TeamData, 
 		tile5.construction_team_id   = -1
 		tile5.construction_ticks_left = 0
 		tile5.construction_target     = {}
-		pt.current_task = TeamData.TASK_IDLE
+		TaskArbiter.release(pt)
 		return { "ok": true, "msg": "取消施工" }
 	if not _os5._has_control(state, pt_id, tile5):
 		return { "ok": false, "msg": "無支配權，無法拆除" }
@@ -426,8 +426,12 @@ func _action_order_subteam(state: WorldState, _target_id: int, _pt: TeamData, pt
 	var sub2: TeamData = state.teams.get(sub_id2)
 	if sub2 == null or sub2.parent_team_id != pt_id:
 		return { "ok": false, "msg": "目標不是玩家子隊" }
-	sub2.current_task = new_task
-	sub2.move_target  = Vector2i(nq, nr)
+	if new_task == TeamData.TASK_IDLE:
+		TaskArbiter.release(sub2)
+		sub2.move_target = Vector2i(nq, nr)
+	elif not TaskArbiter.try_set(state, sub2, new_task, Vector2i(nq, nr),
+			TaskArbiter.PRIO_PLAYER, "player_order"):
+		return { "ok": false, "msg": "Team%d 正忙（更高優先任務 %s）" % [sub_id2, sub2.current_task] }
 	print("[PlayerCmd] order_subteam Team%d → task=%s move=(%d,%d)" % [sub_id2, new_task, nq, nr])
 	return { "ok": true, "msg": "已下令 Team%d" % sub_id2 }
 
@@ -793,9 +797,12 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 			_update_rep(beggar, pt_id, 0.15)
 			if b_leader: npc_ai.write_memory(b_leader, "benefactor", pt_id,
 				state.world.current_tick, clampf(actual / 50.0, 0.1, 1.0))
-	beggar.current_task = beggar.previous_task if beggar.previous_task != "" else TeamData.TASK_IDLE
-	beggar.previous_task = ""
 	beggar.combat_target = -1
+	if beggar.previous_task != "" and beggar.previous_task != TeamData.TASK_IDLE:
+		TaskArbiter.transition(beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)
+	else:
+		TaskArbiter.release(beggar)
+	beggar.previous_task = ""
 	state.player_forced_event = {}
 	state.player_forced_event_id = ""
 	state.player_state.erase("aid_response")

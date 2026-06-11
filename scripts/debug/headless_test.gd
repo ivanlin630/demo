@@ -208,6 +208,7 @@ func _initialize() -> void:
 	_test_arbiter_suppression_burst()
 	_test_arbiter_survival_beats_dispatch()
 	_test_arbiter_dispatch_beats_faction_goal()
+	_test_bridge_cannot_stomp_survival()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6545,3 +6546,25 @@ func _test_arbiter_dispatch_beats_faction_goal() -> void:
 		"faction goal(30) 不得蓋 貿易(50)")
 	assert(team.current_task == TeamData.TASK_TRADE, "貿易應保留")
 	print("Arbiter Task2b OK")
+func _test_bridge_cannot_stomp_survival() -> void:
+	print("--- Arbiter Task4: bridge(70) 蓋不動 survival 乞食(80) ---")
+	# = 逃跑↔乞食 ping-pong 結構性消失
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := _make_panic_team(state)
+	# 真威脅在場（同 Task6b 設定）
+	var threat := TeamData.new(); threat.team_id = 9; threat.population = 20
+	threat.tile_pos = Vector2i(0, 0); threat.last_tile_pos = Vector2i(-1, 0)
+	state.teams[9] = threat
+	team.known_reputations = { 9: 0.1 }
+	state.team_discovered[0] = [9]
+	state.team_intel[0] = { 9: { "population_est": 20 } }
+	var t5 := HexTileData.new(); t5.tile_pos = Vector2i(5, 0)
+	state.world.tiles[5000] = t5
+	# team 已在 survival 乞食 (80)
+	assert(TaskArbiter.try_set(state, team, "乞食", Vector2i(1, 0), TaskArbiter.PRIO_SURVIVAL))
+	var rs := ReactionSystem.new()
+	rs.evaluate_all(state, [0])
+	assert(team.current_task == "乞食", "bridge 不得蓋 survival，實際=%s" % team.current_task)
+	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL)
+	assert(team.move_target == Vector2i(1, 0), "move_target 不應被 bridge 改動")
+	print("Arbiter Task4 OK")
