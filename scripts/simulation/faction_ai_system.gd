@@ -1337,7 +1337,7 @@ func _pick_advisor(team: TeamData) -> int:
 # 資源以 1.5x 安全餘量檢查（子隊抵達後 start_build 才實際扣款）。
 func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vector2i,
 		outpost_type: String, level: int) -> bool:
-	var cost: Dictionary = OutpostSystem.BUILD_COST[outpost_type][level - 1]
+	var cost: Dictionary = OutpostSystem.OUTPOST_COST[outpost_type][level - 1]
 	for k in cost:
 		if k == "ticks": continue
 		if float(leader_team.resources.get(k, 0)) < float(cost[k]) * 1.5:
@@ -1363,7 +1363,7 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 	if tile == null or tile.outpost_owner != owner_team.team_id: return false
 	if target_level <= tile.outpost_level or target_level > 3: return false
 	if tile.construction_team_id != -1: return false
-	var cost: Dictionary = OutpostSystem.BUILD_COST[tile.outpost_type][target_level - 1]
+	var cost: Dictionary = OutpostSystem.OUTPOST_COST[tile.outpost_type][target_level - 1]
 	for k in cost:
 		if k == "ticks": continue
 		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false

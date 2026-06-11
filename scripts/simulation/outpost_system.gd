@@ -5,17 +5,18 @@ const OUTPOST_NAMES: Dictionary = {
 	"military": ["營寨", "城堡", "堡壘"],
 }
 
-# 建造費（index = level-1）
-const BUILD_COST: Dictionary = {
+# 據點本體建造費（index = level-1）。建造守恆：civilian 純 mat / military mat+tools，
+# 無 coin/weapon（有限資源永不入建造）。TEST VALUES
+const OUTPOST_COST: Dictionary = {
 	"civilian": [
-		{ "material": 50,  "coin": 10, "weapon": 0  },
-		{ "material": 150, "coin": 30, "weapon": 0  },
-		{ "material": 400, "coin": 80, "weapon": 0  },
+		{ "material": 50,  "tools": 0 },
+		{ "material": 150, "tools": 0 },
+		{ "material": 400, "tools": 0 },
 	],
 	"military": [
-		{ "material": 80,  "coin": 10, "weapon": 10 },
-		{ "material": 200, "coin": 20, "weapon": 30 },
-		{ "material": 500, "coin": 40, "weapon": 80 },
+		{ "material": 80,  "tools": 3 },
+		{ "material": 200, "tools": 6 },
+		{ "material": 500, "tools": 10 },
 	],
 }
 
@@ -296,7 +297,7 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 	if not _check_distance(state, tile.tile_pos, type):
 		push_warning("[Outpost] start_build: 距離限制違規")
 		return false
-	var cost: Dictionary = BUILD_COST[type][level - 1]
+	var cost: Dictionary = OUTPOST_COST[type][level - 1]
 	if not _can_afford(team, cost):
 		push_warning("[Outpost] start_build: 資源不足")
 		return false
@@ -317,7 +318,7 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 	if tile.outpost_owner != team.team_id or tile.construction_team_id != -1:
 		return false
 	var new_level: int = tile.outpost_level + 1
-	var cost: Dictionary = BUILD_COST[tile.outpost_type][new_level - 1]
+	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][new_level - 1]
 	if not _can_afford(team, cost):
 		return false
 	_deduct_cost(team, cost)
@@ -433,7 +434,7 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 		return false
 	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
 		return false
-	var cost: Dictionary = BUILD_COST[tile.outpost_type][target_level - 1]
+	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][target_level - 1]
 	if not _can_afford(team, cost):
 		return false
 	_deduct_cost(team, cost)

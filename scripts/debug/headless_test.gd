@@ -221,6 +221,7 @@ func _initialize() -> void:
 
 	_test_facility_def_v2()
 	_test_facility_slots()
+	_test_outpost_cost_no_finite()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -6832,3 +6833,15 @@ func _test_facility_slots() -> void:
 	tile.construction_team_id = -1; tile.construction_target = {}
 	assert(not os._begin_facility_construction(team, tile, "mint"), "military 蓋 mint 應失敗")
 	print("Facility Task1b OK")
+
+func _test_outpost_cost_no_finite() -> void:
+	print("--- Facility Task2: outpost 本體成本守恆 ---")
+	for lvl_cost in OutpostSystem.OUTPOST_COST["civilian"]:
+		assert(not lvl_cost.has("coin") or int(lvl_cost.get("coin", 0)) == 0)
+		assert(int(lvl_cost.get("weapon", 0)) == 0)
+		assert(int(lvl_cost.get("tools", 0)) == 0, "civilian 純 mat")
+	for lvl_cost in OutpostSystem.OUTPOST_COST["military"]:
+		assert(int(lvl_cost.get("coin", 0)) == 0)
+		assert(int(lvl_cost.get("weapon", 0)) == 0, "weapon 成本移除")
+		assert(int(lvl_cost.get("tools", 0)) > 0, "military 要 tools")
+	print("Facility Task2 OK")
