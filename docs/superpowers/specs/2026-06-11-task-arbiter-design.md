@@ -25,6 +25,53 @@
 
 **設計決定（依 invariants「玩家不是世界中心」）**：玩家命令 60 < 威脅 70 — NPC 隊收玩家命令後遇恐慌仍會自行逃跑（NPC 有自主性）。
 
+### 玩家命令（PRIO_PLAYER）定義
+
+判定標準 = **「這道命令是人類發的」**（走 player_command_system 路徑），非階級關係：
+- 玩家對自己 team / 玩家派的子隊 / 玩家當 faction leader 透過信使下令 → 60
+- NPC faction leader 指派成員、NPC 母團派子隊 → 50（AI 對 AI 同層競爭）
+
+### 起義 = PRIO_THREAT (70)
+
+反抗行為，玩家命令 (60) 壓不住。
+
+### 仲裁不管的層（NPC 自主性保留）
+
+N1/N3 離團、N2 unrest、event_unrest_split/replace/faction_defect、紀律失效脫離、loyalty 漂移 — 全在 person/event/membership 層，照常發生。**命令鎖得住隊伍的手，鎖不住隊伍的心。**
+
+## 抗命與壓抑（軟 60）
+
+NPC 自主慾望 (50) 挑戰玩家命令 (60) 時不硬擋，走 leader 個性判定：
+
+```gdscript
+# try_set 內特例窗口（只開 50-挑戰-60 這一格）
+if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH:
+    if _defiance_check(state, team):
+        print("[抗命] Team%d leader 棄玩家命令 → %s" % [team.team_id, new_task])
+        # → 接管
+    else:
+        # 壓抑：慾望轉 stress/unrest（餵既有叛變管線）
+        leader.stress = minf(leader.stress + 0.05, 1.0)
+        team.unrest_turns += 1
+        # → 擋下
+
+static func _defiance_check(state: WorldState, team: TeamData) -> bool:
+    var leader: PersonData = state.persons.get(team.leader_id)
+    if leader == null: return false
+    var obedience: float = leader.loyalty \
+        + float(leader.values.get("義氣", 0.5)) * 0.5 \
+        + float(leader.values.get("信義", 0.5)) * 0.5
+    var desire: float = float(leader.values.get("貪婪", 0.5)) \
+        + float(leader.values.get("野心", 0.5)) * 0.5 \
+        + leader.stress * 0.3   # 壓抑累積 → 越憋越想反
+    return desire > obedience + 0.3   # 確定性，無 RNG
+```
+
+- 忠誠 leader：擋下 + 憋；stress 進 desire 公式 → **第一次忍、憋多了爆**（時間演化，非隨機）
+- 貪婪低忠 leader：直接抗命棄單
+- survival 80 / threat 70 對 60 本來就硬蓋，不走抗命
+- NPC 對 NPC（50 vs 50）維持先到先得；NPC 間抗命後續另議
+
 ## API
 
 新檔 `scripts/simulation/task_arbiter.gd`：
@@ -126,4 +173,8 @@ Migration 規則：
 8. 玩家命令 (60) 蓋掉貿易 (50)、蓋不動威脅 (70)
 9. try_set false 時呼叫端不殘留配套欄位（抽 2-3 個代表 case）
 10. grep 驗證：migration 後 `current_task = ` 直接賦值僅存於 task_arbiter.gd + 新 team 建立點
-11. multi 4 config × 90 天：「逃跑↔乞食」轉換次數對比（30,478 → 預期 < 1,000）、無 invariant violation、task 滯留 > 30 天 = 0
+11. 抗命：貪婪 0.9 / loyalty 0.1 leader → 50 挑戰 60 成功接管 + [抗命] log
+12. 壓抑：忠誠 leader → 50 挑戰 60 擋下 + stress/unrest 上升
+13. 壓抑累積爆發：同 leader 連續被擋 N 次後 stress 推 desire 過閾 → 抗命成功
+14. 起義 (70) 蓋掉玩家命令 (60)
+15. multi 4 config × 90 天：「逃跑↔乞食」轉換次數對比（30,478 → 預期 < 1,000）、無 invariant violation、task 滯留 > 30 天 = 0
