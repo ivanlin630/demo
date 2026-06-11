@@ -225,27 +225,35 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		"N1_flee":
 			if team.population <= 1 and person.id == team.leader_id:
 				return   # solo 無處可逃：不變化、stress 不洩壓（持續高壓餵 N2/N3）
-			team.population = maxi(team.population - 1, 1)
 			person.stress = maxf(person.stress - 0.3, 0.0)
 			if team.named_members.has(person.id):
+				team.population = maxi(team.population - 1, 1)
 				team.named_members.erase(person.id)
 				person.team_id = -1
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
-				AnonTierSystem.kill_random(team, 1, "flee")   # leader 留下，實際走的是 anon
+				# leader 留下，實際走的是 anon；無 anon 可走 → pop 不變
+				# （舊版無條件扣 pop → pop < named 數 → guard equip target 振盪）
+				if _anon_actually_left(team, "flee"):
+					team.population = maxi(team.population - 1, 1)
+			else:
+				team.population = maxi(team.population - 1, 1)
 		"N2_riot":
 			team.unrest_turns += 1
 		"N3_defect":
 			if team.population <= 1 and person.id == team.leader_id:
 				return   # solo leader 無從叛逃自己
-			team.population = maxi(team.population - 1, 1)
 			person.loyalty = 0.0
 			if team.named_members.has(person.id):
+				team.population = maxi(team.population - 1, 1)
 				team.named_members.erase(person.id)
 				person.team_id = -1
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
-				AnonTierSystem.kill_random(team, 1, "defect")
+				if _anon_actually_left(team, "defect"):
+					team.population = maxi(team.population - 1, 1)
+			else:
+				team.population = maxi(team.population - 1, 1)
 		"N4_shirk":
 			var f: float = float(team.resources.get("food", 0))
 			team.resources["food"] = maxf(f - 1.0, 0.0)
@@ -282,6 +290,14 @@ func _flee_target_simple(state: WorldState, team: TeamData, threat: TeamData) ->
 	if state.world.tiles.has(pos.x * 1000 + pos.y):
 		return pos
 	return team.tile_pos
+
+# leader 流失 anon：kill_random 實際有殺到人才回 true（anon=0 時無人可走）
+func _anon_actually_left(team: TeamData, source: String) -> bool:
+	var killed: Dictionary = AnonTierSystem.kill_random(team, 1, source)
+	for tier in killed:
+		if int(killed[tier]) > 0:
+			return true
+	return false
 
 # 離團者去處：同格流亡 team 加入，否則自立 1 人流亡 team
 func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) -> void:

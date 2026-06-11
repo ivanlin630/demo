@@ -233,6 +233,15 @@ func _find_trade_partner(state: WorldState, trader: TeamData) -> Dictionary:
         # W2: 對方有 outpost = 可交易（move_target 指 outpost tile，採購也可，不需對方有貨）
         for tile_id in state.world.tiles:
             var tile: HexTileData = state.world.tiles[tile_id]
-            if tile.outpost_owner == tid:
-                return { "team_id": tid, "outpost_pos": tile.tile_pos }
+            if tile.outpost_owner != tid: continue
+            # W2 修正：tile 上要有居民團（村長）才派 — trader 到了才有人成交
+            if not _tile_has_resident(state, tile): continue
+            return { "team_id": tid, "outpost_pos": tile.tile_pos }
     return {}
+
+func _tile_has_resident(state: WorldState, tile: HexTileData) -> bool:
+    for rid in state.teams:
+        var r: TeamData = state.teams[rid]
+        if r.tile_pos != tile.tile_pos: continue
+        if "生產" in r.tags: return true
+    return false

@@ -209,6 +209,13 @@ func _initialize() -> void:
 	_test_arbiter_survival_beats_dispatch()
 	_test_arbiter_dispatch_beats_faction_goal()
 	_test_bridge_cannot_stomp_survival()
+	# ── Economy / Spam Fixes ──
+	_test_salary_budget_ratio()
+	_test_salary_full_pay_unchanged()
+	_test_trade_partner_requires_resident()
+	_test_diplomacy_reject_cooldown()
+	_test_equip_order_no_oscillation()
+	_test_n1_leader_no_anon_pop_stable()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5347,6 +5354,7 @@ func _test_trade_net_dispatches() -> void:
 	var partner := TeamData.new()
 	partner.team_id = 1; partner.faction_id = -1; partner.tile_pos = Vector2i(3, 0)
 	partner.resources["goods"] = 50.0
+	partner.tags = ["生產"]   # EcoFix Task2: outpost tile 須有居民團才派
 	state.teams[1] = partner
 	# W2: trade partner 須有 outpost（靜止目標才追得上）
 	var p_tile := HexTileData.new()
@@ -5891,9 +5899,11 @@ func _test_find_trade_partner_outpost_only() -> void:
 	state.teams[0] = trader
 	var with_op := TeamData.new(); with_op.team_id = 1; with_op.faction_id = -1
 	with_op.resources["goods"] = 10
+	with_op.tags = ["生產"]; with_op.tile_pos = Vector2i(0, 0)   # EcoFix Task2: 居民團駐 outpost tile
 	state.teams[1] = with_op
 	var no_op := TeamData.new(); no_op.team_id = 2; no_op.faction_id = -1
 	no_op.resources["goods"] = 10
+	no_op.tile_pos = Vector2i(9, 9)
 	state.teams[2] = no_op
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
 	state.world.tiles[0] = tile
@@ -6568,3 +6578,180 @@ func _test_bridge_cannot_stomp_survival() -> void:
 	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL)
 	assert(team.move_target == Vector2i(1, 0), "move_target 不應被 bridge 改動")
 	print("Arbiter Task4 OK")
+
+# ──────── Economy / Spam Fixes ────────
+
+func _test_salary_budget_ratio() -> void:
+	print("--- EcoFix Task1a: 量入為出 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.tags = ["軍隊"]
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	leader.values = { "義氣": 0.5, "信義": 0.5, "貪婪": 0.5 }   # mult = 1.1
+	state.persons[1] = leader; team.leader_id = 1
+	var m := PersonData.new(); m.id = 2; m.team_id = 0
+	m.skills = { "戰鬥": 0.5 }   # fair = 0.5 * SALARY_PER_SKILL_POINT = 1.0
+	m.loyalty = 0.5
+	state.persons[2] = m
+	team.named_members = [2]
+	state.teams[0] = team
+	# payroll = fair(1.0) * mult(1.1) + anon wage；coin 只給一半
+	var anon_total: float = AnonTierSystem.total_wage(team)
+	var payroll: float = 1.0 * 1.1 + anon_total
+	team.resources["coin"] = payroll * 0.5
+	var ss := SalarySystem.new()
+	ss._pay_salary(state, team)
+	var coin_after: float = float(team.resources.get("coin", 0))
+	assert(coin_after >= -0.001, "coin 不得為負，實際=%.2f" % coin_after)
+	assert(coin_after < 0.05, "錢應幾乎發光（按比例縮水發完），實際=%.2f" % coin_after)
+	assert(m.coin > 0.0, "named 領到減額薪資，實際=%.2f" % m.coin)
+	assert(m.loyalty < 0.5, "減薪 → ratio 路徑掉 loyalty，實際=%.2f" % m.loyalty)
+	assert(team.unrest_turns == 1, "減薪應 unrest+1，實際=%d" % team.unrest_turns)
+	print("EcoFix Task1a OK")
+
+func _test_salary_full_pay_unchanged() -> void:
+	print("--- EcoFix Task1b: coin 充足 → 全額照舊 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.tags = ["軍隊"]
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	leader.values = { "義氣": 0.5, "信義": 0.5, "貪婪": 0.5 }   # mult = 1.1
+	state.persons[1] = leader; team.leader_id = 1
+	var m := PersonData.new(); m.id = 2; m.team_id = 0
+	m.skills = { "戰鬥": 0.5 }   # fair = 1.0, salary = 1.1
+	m.loyalty = 0.5
+	state.persons[2] = m
+	team.named_members = [2]
+	state.teams[0] = team
+	team.resources["coin"] = 100.0
+	var ss := SalarySystem.new()
+	ss._pay_salary(state, team)
+	var coin_after: float = float(team.resources.get("coin", 0))
+	assert(absf(coin_after - (100.0 - 1.1)) < 0.01, "全額發薪 coin=98.9，實際=%.2f" % coin_after)
+	assert(absf(m.coin - 1.1) < 0.01, "named 領全額 1.1，實際=%.2f" % m.coin)
+	assert(m.loyalty > 0.5, "超額薪資（mult 1.1）→ loyalty 上升，實際=%.2f" % m.loyalty)
+	assert(team.unrest_turns == 0, "coin 充足不應 unrest，實際=%d" % team.unrest_turns)
+	print("EcoFix Task1b OK")
+
+func _test_trade_partner_requires_resident() -> void:
+	print("--- EcoFix Task2: partner 限居民團 tile ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var trader := TeamData.new(); trader.team_id = 0; trader.faction_id = -1
+	trader.tile_pos = Vector2i(5, 5)
+	state.teams[0] = trader
+	var owner := TeamData.new(); owner.team_id = 1; owner.faction_id = -1
+	owner.tile_pos = Vector2i(8, 8)   # owner 本人不在 outpost tile
+	state.teams[1] = owner
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(3, 3); tile.outpost_owner = 1
+	state.world.tiles[3003] = tile
+	state.team_discovered[0] = [1]
+	var sai := StrategicAiSystem.new()
+	# A: outpost 有 owner 但 tile 上無居民團 → 不選
+	var partner_a: Dictionary = sai._find_trade_partner(state, trader)
+	assert(partner_a.is_empty(), "無居民團不應選，實際=%s" % str(partner_a))
+	# B: tile 上有生產居民團 → 選，outpost_pos 正確
+	var resident := TeamData.new(); resident.team_id = 2; resident.tags = ["生產"]
+	resident.tile_pos = Vector2i(3, 3)
+	state.teams[2] = resident
+	var partner_b: Dictionary = sai._find_trade_partner(state, trader)
+	assert(int(partner_b.get("team_id", -1)) == 1, "應選 Team1 outpost，實際=%s" % str(partner_b))
+	assert(partner_b["outpost_pos"] == Vector2i(3, 3), "outpost_pos 應 (3,3)")
+	print("EcoFix Task2 OK")
+
+func _test_diplomacy_reject_cooldown() -> void:
+	print("--- EcoFix Task3: reject cooldown ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	state.world.current_tick = 100
+	# A：缺糧（resource_need 1.0）+ 高義氣信義（self_peace 0.15）→ score 0.55 → propose_trade
+	var a := TeamData.new(); a.team_id = 0; a.faction_id = -1; a.population = 5
+	a.resources["food"] = 0.0
+	var al := PersonData.new(); al.id = 1; al.team_id = 0
+	al.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.0, "慎重": 1.0 }
+	state.persons[1] = al; a.leader_id = 1
+	state.teams[0] = a
+	# B：糧足 + 低義氣信義 → 對 A score 0.1 → reject
+	var b := TeamData.new(); b.team_id = 1; b.faction_id = -1; b.population = 5
+	b.resources["food"] = 1000.0
+	var bl := PersonData.new(); bl.id = 2; bl.team_id = 1
+	bl.values = { "義氣": 0.0, "信義": 0.0, "貪婪": 0.0, "慎重": 0.5 }
+	state.persons[2] = bl; b.leader_id = 2
+	state.teams[1] = b
+	state.team_discovered[0] = [1]
+	var dip := DiplomaticAiSystem.new()
+	# 直接發 → B reject → cooldown 寫入
+	dip._send_diplomacy_message(state, a, b, "propose_trade")
+	var until: int = int(a.diplomacy_reject_cooldown.get(1, 0))
+	assert(until == 100 + DiplomaticAiSystem.REJECT_COOLDOWN,
+		"reject 應設 cooldown=%d，實際=%d" % [100 + DiplomaticAiSystem.REJECT_COOLDOWN, until])
+	# cooldown 內 try_proactive 不再發 → cooldown 值不被刷新（再發送會被 reject 覆寫成新值）
+	state.world.current_tick = 200
+	seed(7)
+	for i in range(50):
+		dip.try_proactive_diplomacy(state, a)
+	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) == until,
+		"cooldown 內不應再發（值被刷新=有發送），實際=%d" % int(a.diplomacy_reject_cooldown.get(1, 0)))
+	# cooldown 過期 → 恢復發送（reject 重設新 cooldown）
+	state.world.current_tick = until + 1
+	for i in range(50):
+		dip.try_proactive_diplomacy(state, a)
+	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) > until, "cooldown 過期應恢復發送")
+	print("EcoFix Task3 OK")
+
+func _test_equip_order_no_oscillation() -> void:
+	print("--- EcoFix Task4: equip order 計入已裝備 → 不振盪 ---")
+	# 根因：舊版 target 只看 storage pool；裝備後 pool 縮小 → target 縮小
+	# → unequip 還回 pool → target 又變大 → 再 equip，每 tick 循環
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	team.tags = ["軍隊"]
+	team.resources["weapon_melee_low"] = 12
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	state.persons[1] = leader; team.leader_id = 1
+	for i in range(3):
+		var p := PersonData.new(); p.id = 2 + i; p.team_id = 0
+		state.persons[p.id] = p
+		team.named_members.append(p.id)
+	state.teams[0] = team
+	var fa := FactionAISystem.new()
+	var eq := EquipmentSystem.new()
+	# tick 1：4 named 全裝備，pool 12-8=4
+	fa._update_equip_order(state, team)
+	eq._update_equipment(state, team)
+	var pool_t1: int = int(team.resources.get("weapon_melee_low", 0))
+	assert(pool_t1 == 4, "tick1 後 pool 應 4，實際=%d" % pool_t1)
+	# tick 2-6：target 計入已裝備 → 不 unequip、pool 恆定
+	for i in range(5):
+		fa._update_equip_order(state, team)
+		eq._update_equipment(state, team)
+		var pool_n: int = int(team.resources.get("weapon_melee_low", 0))
+		assert(pool_n == 4, "pool 振盪：tick%d pool=%d（應恆 4）" % [i + 2, pool_n])
+	var armed: int = 0
+	for pid in [1, 2, 3, 4]:
+		if state.persons[pid].equipment["hand_1"].get("grade", "") == "weapon_melee_low":
+			armed += 1
+	assert(armed == 4, "4 named 應全程保持裝備，實際=%d" % armed)
+	print("EcoFix Task4 OK")
+
+func _test_n1_leader_no_anon_pop_stable() -> void:
+	print("--- EcoFix Task4b: leader flee 無 anon → pop 不變 ---")
+	# 根因 2：舊版 leader N1/N3 無條件扣 pop，anon=0 時沒人真的走
+	# → pop < named 數 → guard equip target 0↔1 振盪（multi Team14 churn）
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 2
+	team.leader_id = 1; team.named_members = [2]
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0; leader.stress = 0.9
+	var m := PersonData.new(); m.id = 2; m.team_id = 0
+	state.persons[1] = leader; state.persons[2] = m
+	state.teams[0] = team
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, leader, team, "N1_flee")
+	assert(team.population == 2, "anon=0 無人可走，pop 應 2，實際=%d" % team.population)
+	rs._apply_reaction(state, leader, team, "N3_defect")
+	assert(team.population == 2, "N3 同理 pop 應 2，實際=%d" % team.population)
+	# 有 anon → 照舊扣 pop + tier -1
+	team.anon_tiers["平民"] = 1; team.population = 3
+	leader.stress = 0.9
+	rs._apply_reaction(state, leader, team, "N1_flee")
+	assert(team.population == 2, "有 anon 應扣 pop=2，實際=%d" % team.population)
+	assert(int(team.anon_tiers["平民"]) == 0, "平民 tier 應 -1，實際=%d" % int(team.anon_tiers["平民"]))
+	print("EcoFix Task4b OK")

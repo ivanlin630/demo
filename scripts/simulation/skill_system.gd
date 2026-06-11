@@ -10,7 +10,6 @@ static func cap_add(person: PersonData, skill: String, delta: float) -> void:
 
 const REACTION_SKILL_MAP: Dictionary = {
 	"P2_produce": { "skill": "生產",  "attr": "智力" },
-	"P3_recruit": { "skill": "統領",  "attr": "魅力" },
 	"P4_expand":  { "skill": "統領",  "attr": "魅力" },
 	"P5_breed":   { "skill": "醫療",  "attr": "智力" },
 	"N1_flee":    { "skill": "求生",  "attr": "體力" },

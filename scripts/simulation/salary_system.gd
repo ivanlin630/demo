@@ -39,6 +39,19 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 				+ float(leader.values.get("信義", 0.5))) / 2.0
 			var greed: float = float(leader.values.get("貪婪", 0.5))
 			npc_salary_mult = clampf(1.0 + (honor - greed * 0.5) * 0.4, 0.7, 1.3)
+	# ── 量入為出：估總 payroll，coin 不足 → 全員按比例減薪（leader 主動緊縮，非賴帳）──
+	var named_payroll: float = 0.0
+	for pid in team.named_members:
+		var p0: PersonData = state.persons.get(pid)
+		if p0 == null: continue
+		if _has_master_memory(p0, team.leader_id): continue
+		named_payroll += (p0.salary if is_player_team else _calc_fair_salary(p0) * npc_salary_mult)
+	var anon_total: float = AnonTierSystem.total_wage(team)
+	var payroll: float = named_payroll + anon_total
+	var coin_avail: float = maxf(float(team.resources.get("coin", 0)), 0.0)
+	var budget_ratio: float = 1.0
+	if payroll > 0.0 and coin_avail < payroll:
+		budget_ratio = coin_avail / payroll
 	for pid in team.named_members:
 		var p: PersonData = state.persons.get(pid)
 		if p == null: continue
@@ -47,9 +60,10 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		# NPC team: 每輪同步薪資（隨技能成長 / leader 個性），player team 保留玩家自訂值
 		if not is_player_team:
 			p.salary = fair * npc_salary_mult
-		var ratio: float = p.salary / maxf(fair, 0.01)
-		team.resources["coin"] = float(team.resources.get("coin", 0)) - p.salary
-		p.coin += p.salary
+		var paid: float = p.salary * budget_ratio
+		var ratio: float = paid / maxf(fair, 0.01)
+		team.resources["coin"] = maxf(float(team.resources.get("coin", 0)) - paid, 0.0)
+		p.coin += paid
 		if ratio >= 1.0:
 			p.loyalty = minf(p.loyalty + (ratio - 1.0) * OVERPAY_BONUS, MAX_LOYALTY)
 			var intensity: float = clampf((ratio - 1.0) * 0.5, 0.05, 0.8)  # TEST VALUE
@@ -57,11 +71,12 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 				state.world.current_tick, intensity)
 		else:
 			p.loyalty -= (1.0 - ratio) * SALARY_LOYALTY_PENALTY
-	var anon_total: float = AnonTierSystem.total_wage(team)
-	team.resources["coin"] = float(team.resources.get("coin", 0)) - anon_total
-	team.anon_treasury += anon_total   # 匿名薪水沉澱公庫（非消失）
-	if float(team.resources.get("coin", 0)) < 0:
+	var anon_paid: float = anon_total * budget_ratio
+	team.resources["coin"] = maxf(float(team.resources.get("coin", 0)) - anon_paid, 0.0)
+	team.anon_treasury += anon_paid   # 匿名薪水沉澱公庫（非消失）
+	if budget_ratio < 1.0:
 		team.unrest_turns += 1
+		print("[Salary] Team%d 減薪 %.0f%%（coin 不足）" % [team.team_id, (1.0 - budget_ratio) * 100.0])
 	print("[Salary] Team%d 薪水結算 coin=%.1f" % [team.team_id, float(team.resources.get("coin", 0))])
 
 func _has_master_memory(p: PersonData, leader_id: int) -> bool:
