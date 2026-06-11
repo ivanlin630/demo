@@ -381,7 +381,7 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 	all_npcs.append_array(absorbed_team.named_members)
 	SubteamSystem.new().merge_teams(state, target_id, merger_id, all_npcs)
 	# reset merger task (safe even if merger_id erased — GDScript ref stays valid)
-	merger.current_task    = TeamData.TASK_IDLE
+	TaskArbiter.release(merger)
 	merger.order_target_id = -1
 
 func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> void:
@@ -466,16 +466,24 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 	var messenger: TeamData = state.teams[messenger_id]
 	var target: TeamData    = state.teams[target_id]
 	var order: String = messenger.order_task if messenger.order_task != "" else "idle"
-	target.current_task       = order
 	# player herald：若信使是玩家下令派出的，同時更新 player_commanded_task
 	var str_target_id: String = str(target_id)
+	var is_player_order: bool = false
 	if state.player_pending_orders.has(str_target_id):
 		var pending: Dictionary = state.player_pending_orders[str_target_id]
 		if pending.get("herald_id", -1) == messenger_id:
+			is_player_order = true
 			target.player_commanded_task = order
 			state.player_pending_orders.erase(str_target_id)
 			print("[Order] player herald 抵達 Team%d，player_commanded_task = %s" % [target_id, order])
-	messenger.current_task    = "idle"
+	if order == TeamData.TASK_IDLE:
+		TaskArbiter.release(target)
+	else:
+		# 玩家信使命令 60，NPC 對 NPC 下令 50；被高層擋下時 player_commanded_task
+		# 仍保留意圖，faction_ai 後續重試
+		var order_prio: int = TaskArbiter.PRIO_PLAYER if is_player_order else TaskArbiter.PRIO_DISPATCH
+		TaskArbiter.try_set(state, target, order, target.move_target, order_prio, "herald_order")
+	TaskArbiter.release(messenger)
 	messenger.order_target_id = -1
 	messenger.order_task      = ""
 	var parent: TeamData = state.teams.get(messenger.parent_team_id)

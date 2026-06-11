@@ -789,8 +789,7 @@ func _update_escort(state: WorldState, team: TeamData) -> void:
 		return
 	var target: TeamData = state.teams.get(team.order_target_id)
 	if target == null:
-		team.current_task    = TeamData.TASK_IDLE
-		team.move_target     = Vector2i(-1, -1)
+		TaskArbiter.release(team)   # 護衛對象消失 → 任務結束
 		team.order_target_id = -1
 		return
 	team.move_target = target.tile_pos

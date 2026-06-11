@@ -37,7 +37,7 @@ func process(state: WorldState, team_ids: Array,
 			continue
 		var target: TeamData = state.teams.get(team.order_target_id)
 		if target == null:
-			team.current_task    = "idle"
+			TaskArbiter.release(team)   # 護衛對象消失 → 任務結束
 			team.order_target_id = -1
 		else:
 			team.move_target = target.tile_pos
