@@ -226,6 +226,9 @@ func _initialize() -> void:
 	_test_armorsmith_recipes()
 	_test_recipe_deficit_ordering()
 	_test_smeltery_separate()
+	_test_terrain_fit_scores()
+	_test_hunger_override()
+	_test_military_outpost_builds_weaponsmith()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -6928,3 +6931,75 @@ func _test_smeltery_separate() -> void:
 	assert(steel_out > 0, "smeltery 應產 steel")
 	assert(float(team2.resources["ore_iron"]) == 48.0, "扣 2 iron")
 	print("Facility Task3d OK")
+
+func _make_infra_state(outpost_type: String) -> Array:
+	# 回傳 [state, team, tile, leader]：tile(0,0) + 6 鄰格 plains
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for pos in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
+			Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
+		var t := HexTileData.new()
+		t.tile_pos = pos; t.terrain = "plains"
+		state.world.tiles[pos.x * 1000 + pos.y] = t
+	var tile: HexTileData = state.world.tiles[0]
+	tile.outpost_type = outpost_type; tile.outpost_level = 1; tile.outpost_owner = 0
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10; team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = team
+	var leader := PersonData.new(); leader.id = 100
+	state.persons[100] = leader; team.leader_id = 100
+	return [state, team, tile, leader]
+
+func _test_terrain_fit_scores() -> void:
+	print("--- Facility Task4a: terrain_fit ---")
+	var r := _make_infra_state("military")
+	var state: WorldState = r[0]; var tile: HexTileData = r[2]
+	var fai := FactionAISystem.new()
+	# 無 ore → 武器坊 0.5；加鄰格 ore_iron → 3.0
+	assert(fai._facility_terrain_fit(state, "weaponsmith", tile) == 0.5)
+	var nb: HexTileData = state.world.tiles[1000]   # (1,0)
+	nb.resources["ore_iron"] = 50
+	assert(fai._facility_terrain_fit(state, "weaponsmith", tile) == 3.0, "鄰格 ore → ×3")
+	# 無 herb → 藥坊 0.0（不蓋）
+	assert(fai._facility_terrain_fit(state, "apothecary", tile) == 0.0, "無 herb → 0")
+	print("Facility Task4a OK")
+
+func _test_hunger_override() -> void:
+	print("--- Facility Task4b: 飢餓 override + 拆遷 ---")
+	var r := _make_infra_state("civilian")
+	var state: WorldState = r[0]; var team: TeamData = r[1]
+	var tile: HexTileData = r[2]; var leader: PersonData = r[3]
+	team.resources["food"] = 0.0   # < pop×2.4×7
+	var fai := FactionAISystem.new()
+	var pick: Dictionary = fai._pick_facility(state, team, tile, leader)
+	assert(pick.get("facility", "") == "farming", "缺糧 → 農田最優先")
+	assert(not pick.has("demolish_first"), "有 slot 不拆")
+	# slot 滿（civilian Lv1 cap=2）且無 farming → 拆 score 最低設施
+	tile.manufacturing_level = 1; tile.stable_level = 1
+	var pick2: Dictionary = fai._pick_facility(state, team, tile, leader)
+	assert(pick2.get("facility", "") == "farming", "slot 滿仍選農田")
+	assert(pick2.has("demolish_first"), "slot 滿 → 應拆遷")
+	assert(pick2["demolish_first"] != "farming", "不拆農田")
+	print("Facility Task4b OK")
+
+func _test_military_outpost_builds_weaponsmith() -> void:
+	print("--- Facility Task4c: 軍用 outpost 選 weaponsmith ---")
+	var r := _make_infra_state("military")
+	var state: WorldState = r[0]; var team: TeamData = r[1]
+	var tile: HexTileData = r[2]; var leader: PersonData = r[3]
+	var nb: HexTileData = state.world.tiles[1000]
+	nb.resources["ore_iron"] = 50   # 鄰格鐵礦
+	leader.values = { "好戰": 0.8, "慎重": 0.0 }
+	team.resources = { "food": 999.0, "armor_low": 10.0 }   # 不飢餓、護甲足
+	team.armed_anon_ratio = 0.0                              # 武裝缺口
+	team.known_reputations = { 9: 0.1 }                      # 近期威脅
+	var enemy := TeamData.new(); enemy.team_id = 9
+	state.teams[9] = enemy
+	var fai := FactionAISystem.new()
+	var pick: Dictionary = fai._pick_facility(state, team, tile, leader)
+	assert(pick.get("facility", "") == "weaponsmith",
+		"軍用+鄰 ore+武裝缺口 → weaponsmith，實際=%s" % str(pick))
+	# allowed_outpost gate 嚴：military 永不選 civilian 設施
+	for f in ["farming", "workshop", "mint", "stable", "apothecary"]:
+		assert(pick.get("facility", "") != f)
+	print("Facility Task4c OK")
