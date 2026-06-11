@@ -46,6 +46,7 @@ var resources: Dictionary = {
 }
 var tags: Array = []
 var current_task: String = "idle"
+var task_priority: int = 0   # 現任 task 優先權；idle 時 0（TaskArbiter 管理）
 var previous_task: String = ""   # survival override 前的原 task，回復用
 var tax_rate: float = 0.3                    # 收稅率（PRODUCE team 用，0.1-0.7）
 var merchant_inventory: Array = []           # 商隊 inventory，元素: {grade, qty, bought_at, bought_from}

@@ -199,6 +199,13 @@ func _initialize() -> void:
 	_test_n3_joins_existing_exile()
 	_test_bridge_no_threat_no_hijack()
 	_test_bridge_with_threat_flees()
+	# ── Task Arbiter ──
+	_test_arbiter_basic()
+	_test_arbiter_combat_lock()
+	_test_arbiter_release_transition()
+	_test_arbiter_defiance()
+	_test_arbiter_suppression()
+	_test_arbiter_suppression_burst()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6412,3 +6419,94 @@ func _test_bridge_with_threat_flees() -> void:
 	assert(team.current_task == "逃跑", "應逃跑，實際=%s" % team.current_task)
 	assert(team.move_target == Vector2i(5, 0), "move_target 應 (5,0)，實際=%s" % str(team.move_target))
 	print("Reaction Task6b OK")
+
+
+# ══ Task Arbiter ══════════════════════════════════════════════
+
+func _test_arbiter_basic() -> void:
+	print("--- Arbiter Task1a: try_set 高低層 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	assert(t.task_priority == 0)
+	# idle 任何層可寫
+	assert(TaskArbiter.try_set(state, t, "貿易", Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH))
+	assert(t.current_task == "貿易" and t.task_priority == 50)
+	# 低蓋高 ✗
+	assert(not TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_FACTION))
+	# 同層 ✗
+	assert(not TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
+	# 高蓋低 ✓
+	assert(TaskArbiter.try_set(state, t, "乞食", Vector2i(3, 3), TaskArbiter.PRIO_SURVIVAL))
+	assert(t.task_priority == 80)
+	print("Arbiter Task1a OK")
+
+func _test_arbiter_combat_lock() -> void:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.combat_target = 5
+	state.teams[0] = t
+	assert(not TaskArbiter.try_set(state, t, "逃跑", Vector2i(1, 1), TaskArbiter.PRIO_SURVIVAL))
+	print("Arbiter Task1b OK")
+
+func _test_arbiter_release_transition() -> void:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	TaskArbiter.try_set(state, t, "安頓", Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(t, "生產", TaskArbiter.PRIO_AMBIENT)
+	assert(t.current_task == "生產" and t.task_priority == 10)
+	TaskArbiter.release(t)
+	assert(t.current_task == TeamData.TASK_IDLE and t.task_priority == 0)
+	assert(t.move_target == Vector2i(-1, -1))
+	print("Arbiter Task1c OK")
+
+func _test_arbiter_defiance() -> void:
+	print("--- Arbiter Task1d: 抗命/壓抑 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	var leader := PersonData.new(); leader.id = 1
+	leader.loyalty = 0.1
+	leader.values = { "貪婪": 0.9, "野心": 0.8, "義氣": 0.1, "信義": 0.1 }
+	state.persons[1] = leader; t.leader_id = 1
+	# 玩家命令在任
+	TaskArbiter.try_set(state, t, "巡邏", Vector2i(1, 1), TaskArbiter.PRIO_PLAYER)
+	# 貪婪低忠 → 抗命成功
+	assert(TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH),
+		"低忠貪婪 leader 應抗命成功")
+	print("Arbiter Task1d OK")
+
+func _test_arbiter_suppression() -> void:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	var leader := PersonData.new(); leader.id = 1
+	leader.loyalty = 0.9
+	leader.values = { "貪婪": 0.6, "野心": 0.5, "義氣": 0.8, "信義": 0.8 }
+	state.persons[1] = leader; t.leader_id = 1
+	TaskArbiter.try_set(state, t, "巡邏", Vector2i(1, 1), TaskArbiter.PRIO_PLAYER)
+	var stress0: float = leader.stress
+	var unrest0: int = t.unrest_turns
+	assert(not TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH),
+		"忠誠 leader 應被壓抑")
+	assert(leader.stress > stress0, "壓抑 stress 上升")
+	assert(t.unrest_turns > unrest0, "壓抑 unrest 上升")
+	print("Arbiter Task1e OK")
+
+func _test_arbiter_suppression_burst() -> void:
+	# 中間 leader 連續被擋 → stress 累積推 desire 過閾 → 終於抗命
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	var leader := PersonData.new(); leader.id = 1
+	leader.loyalty = 0.4
+	leader.values = { "貪婪": 0.7, "野心": 0.6, "義氣": 0.3, "信義": 0.3 }
+	state.persons[1] = leader; t.leader_id = 1
+	TaskArbiter.try_set(state, t, "巡邏", Vector2i(1, 1), TaskArbiter.PRIO_PLAYER)
+	var defied: bool = false
+	for _i in range(30):
+		if TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH):
+			defied = true
+			break
+	assert(defied, "壓抑累積後應爆發抗命")
+	print("Arbiter Task1f OK")
