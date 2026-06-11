@@ -206,6 +206,8 @@ func _initialize() -> void:
 	_test_arbiter_defiance()
 	_test_arbiter_suppression()
 	_test_arbiter_suppression_burst()
+	_test_arbiter_survival_beats_dispatch()
+	_test_arbiter_dispatch_beats_faction_goal()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6510,3 +6512,36 @@ func _test_arbiter_suppression_burst() -> void:
 			break
 	assert(defied, "壓抑累積後應爆發抗命")
 	print("Arbiter Task1f OK")
+func _test_arbiter_survival_beats_dispatch() -> void:
+	print("--- Arbiter Task2a: survival(80) 蓋掉 貿易(50) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 100; team.population = 10
+	team.resources["food"] = 0.0
+	team.tile_pos = Vector2i(0, 0)
+	var leader := PersonData.new(); leader.id = 200; leader.team_id = 100
+	leader.values = { "義氣": 0.3, "信義": 0.3, "貪婪": 0.5, "殘忍": 0.3, "好戰": 0.3, "求生欲": 0.5 }
+	state.persons[200] = leader; team.leader_id = 200
+	state.teams[100] = team
+	state.team_discovered[100] = []
+	# 先派貿易 (50)
+	assert(TaskArbiter.try_set(state, team, TeamData.TASK_TRADE, Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
+	# 斷糧 → survival 觸發應蓋掉貿易
+	var fai := FactionAISystem.new()
+	fai._evaluate_survival(state, team)
+	assert(team.current_task in FactionAISystem.SURVIVAL_TASKS,
+		"survival 應蓋掉貿易，實際=%s" % team.current_task)
+	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL,
+		"priority 應 80，實際=%d" % team.task_priority)
+	print("Arbiter Task2a OK (task=%s)" % team.current_task)
+
+func _test_arbiter_dispatch_beats_faction_goal() -> void:
+	print("--- Arbiter Task2b: faction goal(30) 蓋不動 貿易(50) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0
+	state.teams[0] = team
+	assert(TaskArbiter.try_set(state, team, TeamData.TASK_TRADE, Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
+	assert(not TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK, Vector2i(3, 3), TaskArbiter.PRIO_FACTION),
+		"faction goal(30) 不得蓋 貿易(50)")
+	assert(team.current_task == TeamData.TASK_TRADE, "貿易應保留")
+	print("Arbiter Task2b OK")
