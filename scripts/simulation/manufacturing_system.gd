@@ -3,12 +3,58 @@ class_name ManufacturingSystem
 # TEST VALUES — 平衡期需調整
 const GOODS_RATE:       float = 0.10
 const CRAFT_RATE:       float = 0.20
+const TOOLS_RATE:       float = 0.10
+const ARROWS_RATE:      float = 0.10
 const SMELT_RATE:       float = 0.50
 const MELEE_LOW_RATE:   float = 0.05
 const RANGED_LOW_RATE:  float = 0.04
 const MELEE_HIGH_RATE:  float = 0.03
 const RANGED_HIGH_RATE: float = 0.025
+const ARMOR_LOW_RATE:   float = 0.05
+const ARMOR_HIGH_RATE:  float = 0.03
 const SKILL_GROWTH: float = 0.003
+
+const RATES: Dictionary = {
+	"GOODS_RATE": GOODS_RATE, "CRAFT_RATE": CRAFT_RATE,
+	"TOOLS_RATE": TOOLS_RATE, "ARROWS_RATE": ARROWS_RATE,
+	"SMELT_RATE": SMELT_RATE,
+	"MELEE_LOW_RATE": MELEE_LOW_RATE, "RANGED_LOW_RATE": RANGED_LOW_RATE,
+	"MELEE_HIGH_RATE": MELEE_HIGH_RATE, "RANGED_HIGH_RATE": RANGED_HIGH_RATE,
+	"ARMOR_LOW_RATE": ARMOR_LOW_RATE, "ARMOR_HIGH_RATE": ARMOR_HIGH_RATE,
+}
+
+# 缺口排序用 target（stock / (target × pop) 最低者先做）；缺項 fallback 1.0
+const TARGET_PER_POP: Dictionary = {
+	"goods": 3.0, "tools": 0.5, "arrows": 2.0,
+	"ore_steel": 1.5,
+	"weapon_melee_low": 1.0, "weapon_ranged_low": 0.8,
+	"weapon_melee_high": 0.5, "weapon_ranged_high": 0.4,
+	"armor_low": 0.3, "armor_high": 0.15,
+}
+
+# 4 配方組：各設施只跑自己組；組內依缺口排序，原料不足跳下一個。
+# tools/arrows 純可再生原料（建造鏈守恆）。
+const RECIPE_GROUPS: Dictionary = {
+	"manufacturing_level": [   # 工坊
+		{ "out": "goods",  "rate_const": "GOODS_RATE",  "in": { "material": 3.0 } },
+		{ "out": "tools",  "rate_const": "TOOLS_RATE",  "in": { "material": 4.0 } },
+		{ "out": "arrows", "rate_const": "ARROWS_RATE", "in": { "material": 3.0 } },
+		{ "out": "goods",  "rate_const": "CRAFT_RATE",  "in": { "gem": 1.0, "material": 4.0 } },  # 工藝品（高價值優先嘗試）
+	],
+	"smelter_level": [
+		{ "out": "ore_steel", "rate_const": "SMELT_RATE", "in": { "ore_iron": 2.0, "material": 1.0 } },
+	],
+	"weaponsmith_level": [
+		{ "out": "weapon_melee_low",   "rate_const": "MELEE_LOW_RATE",   "in": { "ore_iron": 2.0, "material": 3.0 } },
+		{ "out": "weapon_ranged_low",  "rate_const": "RANGED_LOW_RATE",  "in": { "ore_iron": 2.0, "material": 4.0 } },
+		{ "out": "weapon_melee_high",  "rate_const": "MELEE_HIGH_RATE",  "in": { "ore_steel": 2.0, "material": 3.0 } },
+		{ "out": "weapon_ranged_high", "rate_const": "RANGED_HIGH_RATE", "in": { "ore_steel": 2.0, "material": 4.0 } },
+	],
+	"armorsmith_level": [
+		{ "out": "armor_low",  "rate_const": "ARMOR_LOW_RATE",  "in": { "ore_iron": 2.0, "material": 2.0 } },
+		{ "out": "armor_high", "rate_const": "ARMOR_HIGH_RATE", "in": { "ore_steel": 2.0, "material": 3.0 } },
+	],
+}
 
 func tick_all(state: WorldState, team_ids: Array) -> void:
 	for tid in team_ids:
@@ -19,20 +65,35 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 			continue
 		var tile_id: int      = team.tile_pos.x * 1000 + team.tile_pos.y
 		var tile: HexTileData = state.world.tiles.get(tile_id)
-		if tile == null or tile.outpost_type != "civilian" \
-				or tile.manufacturing_level == 0 \
-				or tile.outpost_owner != team.team_id:
+		if tile == null or tile.outpost_level == 0:
+			continue
+		if not _team_works_tile(state, team, tile):
 			continue
 
 		var pop_mult: float   = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
 		var avg_skill: float  = _avg_skill(state, team, "製造")
-		var worker_rate: float = float(tile.manufacturing_level) * pop_mult \
-			* (0.5 + avg_skill * 0.5)
 
-		var ran_recipe: String = _run_recipes(team, tile, worker_rate)
-		if ran_recipe != "":
-			print("[Manufacture] Team%d %s worker_rate=%.2f" % [tid, ran_recipe, worker_rate])
+		var ran_any: bool = false
+		for level_key in RECIPE_GROUPS:
+			var level: int = int(tile.get(level_key))
+			if level <= 0:
+				continue
+			var worker_rate: float = float(level) * pop_mult * (0.5 + avg_skill * 0.5)
+			var ran_recipe: String = _run_recipe_group(team, tile, level_key, worker_rate)
+			if ran_recipe != "":
+				ran_any = true
+				print("[Manufacture] Team%d %s worker_rate=%.2f" % [tid, ran_recipe, worker_rate])
+		if ran_any:
 			_grow_skills(state, team)
+
+# 生產權：owner 本人或同 faction（軍屯/派駐居民團代工）
+func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> bool:
+	if tile.outpost_owner == team.team_id:
+		return true
+	var owner: TeamData = state.teams.get(tile.outpost_owner)
+	if owner == null:
+		return false
+	return owner.faction_id == team.faction_id and team.faction_id != -1
 
 # 成品流向公庫（tile 為自家 outpost）；無 outpost fallback 進 team
 func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> void:
@@ -43,62 +104,35 @@ func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> 
 	else:
 		team.resources[res] = float(team.resources.get(res, 0)) + amt
 
-func _run_recipes(team: TeamData, tile: HexTileData, worker_rate: float) -> String:
-	var mat: float   = float(team.resources.get("material", 0))
-	var gem: float   = float(team.resources.get("gem", 0))
-	var iron: float  = float(team.resources.get("ore_iron", 0))
-	var steel: float = float(team.resources.get("ore_steel", 0))
-
-	# 工藝品優先（有 gem）
-	if gem >= 1.0 and mat >= 4.0:
-		team.resources["gem"]      = gem - 1.0
-		team.resources["material"] = mat - 4.0
-		_add_output(team, tile, "goods", worker_rate * CRAFT_RATE)
-		return "工藝品"
-
-	# 高階近戰武器（steel）
-	if steel >= 2.0 and mat >= 3.0:
-		team.resources["ore_steel"] = steel - 2.0
-		team.resources["material"]  = mat - 3.0
-		_add_output(team, tile, "weapon_melee_high", worker_rate * MELEE_HIGH_RATE)
-		return "高階近戰武器"
-
-	# 高階遠程武器（steel）
-	if steel >= 2.0 and mat >= 4.0:
-		team.resources["ore_steel"] = steel - 2.0
-		team.resources["material"]  = mat - 4.0
-		_add_output(team, tile, "weapon_ranged_high", worker_rate * RANGED_HIGH_RATE)
-		return "高階遠程武器"
-
-	# 冶煉（iron → steel）
-	if iron >= 2.0 and mat >= 1.0:
-		team.resources["ore_iron"]  = iron - 2.0
-		team.resources["material"]  = mat - 1.0
-		team.resources["ore_steel"] = float(team.resources.get("ore_steel", 0)) \
-			+ worker_rate * SMELT_RATE
-		return "冶煉"
-
-	# 低階近戰武器（iron）
-	if iron >= 2.0 and mat >= 3.0:
-		team.resources["ore_iron"]  = iron - 2.0
-		team.resources["material"]  = mat - 3.0
-		_add_output(team, tile, "weapon_melee_low", worker_rate * MELEE_LOW_RATE)
-		return "低階近戰武器"
-
-	# 低階遠程武器（iron）
-	if iron >= 2.0 and mat >= 4.0:
-		team.resources["ore_iron"]  = iron - 2.0
-		team.resources["material"]  = mat - 4.0
-		_add_output(team, tile, "weapon_ranged_low", worker_rate * RANGED_LOW_RATE)
-		return "低階遠程武器"
-
-	# 一般製造（無礦時 fallback）
-	if mat >= 3.0:
-		team.resources["material"] = mat - 3.0
-		_add_output(team, tile, "goods", worker_rate * GOODS_RATE)
-		return "一般製造"
-
+# 組內缺口排序：stock(out) / (TARGET_PER_POP × pop) 最低者先做；
+# 原料不足跳下一個；每設施每 tick 跑一條配方。回傳配方名（"" = 無可跑）。
+func _run_recipe_group(team: TeamData, tile: HexTileData, level_key: String,
+		worker_rate: float) -> String:
+	var recipes: Array = RECIPE_GROUPS[level_key]
+	var order: Array = []
+	for i in range(recipes.size()):
+		var out: String = recipes[i]["out"]
+		var stock: float = float(team.resources.get(out, 0)) \
+			+ float(tile.public_storage.get(out, 0))
+		var target: float = float(TARGET_PER_POP.get(out, 1.0)) * float(maxi(team.population, 1))
+		order.append({ "idx": i, "ratio": stock / maxf(target, 0.001) })
+	order.sort_custom(func(a, b): return a.ratio < b.ratio)
+	for entry in order:
+		var recipe: Dictionary = recipes[entry.idx]
+		if not _can_consume(team, recipe["in"]):
+			continue
+		for res in recipe["in"]:
+			team.resources[res] = float(team.resources.get(res, 0)) - float(recipe["in"][res])
+		var rate: float = float(RATES[recipe["rate_const"]])
+		_add_output(team, tile, recipe["out"], worker_rate * rate)
+		return recipe["out"]
 	return ""
+
+func _can_consume(team: TeamData, inputs: Dictionary) -> bool:
+	for res in inputs:
+		if float(team.resources.get(res, 0)) < float(inputs[res]):
+			return false
+	return true
 
 func _avg_skill(state: WorldState, team: TeamData, skill: String) -> float:
 	var total: float = 0.0

@@ -222,6 +222,10 @@ func _initialize() -> void:
 	_test_facility_def_v2()
 	_test_facility_slots()
 	_test_outpost_cost_no_finite()
+	_test_workshop_recipes()
+	_test_armorsmith_recipes()
+	_test_recipe_deficit_ordering()
+	_test_smeltery_separate()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -6845,3 +6849,82 @@ func _test_outpost_cost_no_finite() -> void:
 		assert(int(lvl_cost.get("weapon", 0)) == 0, "weapon 成本移除")
 		assert(int(lvl_cost.get("tools", 0)) > 0, "military 要 tools")
 	print("Facility Task2 OK")
+
+func _make_mfg_state(facility_levels: Dictionary) -> Array:
+	# 回傳 [state, team, tile]：tile(0,0) civilian Lv2 owner=0，team task=製造
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = str(facility_levels.get("_outpost", "civilian"))
+	tile.outpost_level = 2; tile.outpost_owner = 0
+	for k in facility_levels:
+		if k != "_outpost":
+			tile.set(k, int(facility_levels[k]))
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.current_task = TeamData.TASK_MANUFACTURE
+	state.teams[0] = team
+	return [state, team, tile]
+
+func _test_workshop_recipes() -> void:
+	print("--- Facility Task3a: workshop 配方（goods/tools/arrows）---")
+	# tools 純 mat（4 mat）：goods 庫存高 → tools 缺口最大 → 做 tools
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	team.resources = { "material": 100.0, "goods": 99.0, "arrows": 99.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("tools", 0)) > 0, "tools 應產出")
+	assert(float(team.resources["material"]) == 96.0, "tools = 4 mat 純可再生")
+	print("Facility Task3a OK")
+
+func _test_armorsmith_recipes() -> void:
+	print("--- Facility Task3b: armorsmith 配方 ---")
+	var r := _make_mfg_state({ "_outpost": "military", "armorsmith_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	team.resources = { "material": 100.0, "ore_iron": 10.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("armor_low", 0)) > 0, "armor_low 應產出（2 iron+2 mat）")
+	assert(float(team.resources["ore_iron"]) == 8.0, "扣 2 iron")
+	# armor_high：只有 steel
+	var r2 := _make_mfg_state({ "_outpost": "military", "armorsmith_level": 1 })
+	var state2: WorldState = r2[0]; var team2: TeamData = r2[1]; var tile2: HexTileData = r2[2]
+	team2.resources = { "material": 100.0, "ore_steel": 10.0 }
+	ms.tick_all(state2, [0])
+	assert(float(tile2.public_storage.get("armor_high", 0)) > 0, "armor_high 應產出（2 steel+3 mat）")
+	print("Facility Task3b OK")
+
+func _test_recipe_deficit_ordering() -> void:
+	print("--- Facility Task3c: 組內缺口排序 ---")
+	# arrows 存量/target 最低 → 先做 arrows
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	team.resources = { "material": 100.0, "goods": 99.0, "tools": 99.0, "arrows": 0.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("arrows", 0)) > 0, "arrows 缺口最大應先做")
+	assert(float(tile.public_storage.get("goods", 0)) == 0, "goods 不應做")
+	print("Facility Task3c OK")
+
+func _test_smeltery_separate() -> void:
+	print("--- Facility Task3d: 冶煉獨立設施 ---")
+	# workshop tile 無冶煉：iron 充足也不產 steel
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]
+	team.resources = { "material": 100.0, "ore_iron": 50.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(team.resources.get("ore_steel", 0)) == 0.0, "workshop 不冶煉")
+	# smeltery tile 產 steel
+	var r2 := _make_mfg_state({ "_outpost": "military", "smelter_level": 1 })
+	var state2: WorldState = r2[0]; var team2: TeamData = r2[1]; var tile2: HexTileData = r2[2]
+	team2.resources = { "material": 100.0, "ore_iron": 50.0 }
+	ms.tick_all(state2, [0])
+	var steel_out: float = float(tile2.public_storage.get("ore_steel", 0)) \
+		+ float(team2.resources.get("ore_steel", 0))
+	assert(steel_out > 0, "smeltery 應產 steel")
+	assert(float(team2.resources["ore_iron"]) == 48.0, "扣 2 iron")
+	print("Facility Task3d OK")
