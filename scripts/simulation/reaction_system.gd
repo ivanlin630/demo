@@ -13,6 +13,8 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 		if team == null:
 			continue
 		var flee_count: int = 0
+		var morale_acc: float = 0.0
+		var morale_n: int = 0
 		for pid in state.persons:
 			var person: PersonData = state.persons[pid]
 			if person.team_id != tid:
@@ -28,6 +30,14 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 					skill_sys.on_reaction(person, reaction)
 			if reaction == "N1_flee":
 				flee_count += 1
+			match reaction:
+				"P2_produce": morale_acc += 1.0; morale_n += 1
+				"N4_shirk":   morale_acc -= 1.0; morale_n += 1
+				"none":       pass
+				_:            morale_n += 1   # 其他 reaction 中性計入
+		if morale_n > 0:
+			var target_morale: float = clampf(1.0 + (morale_acc / float(morale_n)) * 0.5, 0.5, 1.5)
+			team.work_morale = clampf(lerpf(team.work_morale, target_morale, 0.1), 0.5, 1.5)
 		if flee_count > 0 and float(flee_count) / maxf(team.population, 1) >= 0.3:
 			if team.current_task not in ["逃跑", "護衛"]:
 				team.current_task = "逃跑"
@@ -195,13 +205,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		"P1_comply":
 			person.loyalty = minf(person.loyalty + 0.01, 1.0)
 		"P2_produce":
-			var skill: float = float(person.skills.get("生產", 0.0))
-			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
-			var tile: HexTileData = state.world.tiles.get(tile_id)
-			var farming_bonus: float = float(tile.farming_level) * 0.5 if tile != null else 0.0
-			var hf: float = tile.harvest_factor if tile != null else 1.0
-			var food_gain: float = (1.0 + skill * 1.5 + farming_bonus) * hf
-			team.resources["food"] = float(team.resources.get("food", 0)) + food_gain
+			pass   # 效果改由 work_morale 係數體現（evaluate_all 統計）
 		"P4_expand":
 			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
 		"P5_breed":

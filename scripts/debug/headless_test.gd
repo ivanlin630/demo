@@ -188,6 +188,8 @@ func _initialize() -> void:
 	# ── Reaction 職責收斂 ──
 	_test_reaction_fields()
 	_test_p3_removed()
+	_test_p2_no_food()
+	_test_work_morale_shift()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6209,3 +6211,35 @@ func _test_p3_removed() -> void:
 	var r: String = rs._evaluate_person(p, team)
 	assert(r != "P3_recruit", "P3 應已刪除，實際=%s" % r)
 	print("Reaction Task1b OK")
+
+func _test_p2_no_food() -> void:
+	print("--- Reaction Task2a: P2 不加 food ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.resources = { "food": 100.0 }
+	state.teams[0] = team
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	state.persons[1] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "P2_produce")
+	assert(abs(float(team.resources["food"]) - 100.0) < 0.001, "P2 不應加 food")
+	print("Reaction Task2a OK")
+
+func _test_work_morale_shift() -> void:
+	print("--- Reaction Task2b: 全員 P2 → morale 上升 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 3
+	team.tags = ["生產"]
+	state.teams[0] = team
+	for i in range(3):
+		var p := PersonData.new(); p.id = 10 + i; p.team_id = 0
+		p.skills = { "生產": 0.9 }; p.values = { "慎重": 0.8 }
+		p.loyalty = 0.9
+		state.persons[10 + i] = p
+		if i == 0: team.leader_id = p.id
+		else: team.named_members.append(p.id)
+	var rs := ReactionSystem.new()
+	for _i in range(50):
+		rs.evaluate_all(state, [0])
+	assert(team.work_morale > 1.0, "勤奮村 morale 應 > 1.0，實際=%.2f" % team.work_morale)
+	print("Reaction Task2b OK (morale=%.2f)" % team.work_morale)
