@@ -1,10 +1,29 @@
 class_name PopulationSystem
 
 const OVERFLOW_CHECK_INTERVAL: int = WorldState.TICKS_PER_DAY   # 每天檢查
+const MATURE_RATE: float = 0.1   # TEST VALUE — 每月 minor 轉成人比例（簡版，無性別/個體年齡）
+const POP_HARD_CAP: int = 50
 
 func check_overflow(state: WorldState) -> void:
+	# minor 長大簡版：每月 10% minor → 平民 anon（人口循環下游，性別/年齡留人口結構 spec）
+	if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+		_mature_minors(state)
 	for tid in state.teams.keys():
 		check_overflow_for_team(state, tid)
+
+func _mature_minors(state: WorldState) -> void:
+	for tid in state.teams:
+		var team: TeamData = state.teams[tid]
+		if team.minor_population <= 0: continue
+		if team.population >= POP_HARD_CAP: continue
+		var n: int = maxi(int(team.minor_population * MATURE_RATE), 1)
+		n = mini(n, team.minor_population)
+		n = mini(n, POP_HARD_CAP - team.population)
+		if n <= 0: continue
+		team.minor_population -= n
+		team.population += n
+		AnonTierSystem.add_anon(team, "平民", n)
+		print("[PopMgmt] Team%d %d 名未成年長大成人（平民）" % [tid, n])
 
 func check_overflow_for_team(state: WorldState, tid: int) -> void:
 	if not state.teams.has(tid):

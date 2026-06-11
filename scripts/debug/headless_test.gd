@@ -216,7 +216,39 @@ func _initialize() -> void:
 	_test_diplomacy_reject_cooldown()
 	_test_equip_order_no_oscillation()
 	_test_n1_leader_no_anon_pop_stable()
+	# ── Minor 長大簡版 ──
+	_test_minor_maturation()
 	quit()
+
+func _test_minor_maturation() -> void:
+	print("--- PopFix: minor 每月長大 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = WorldState.TICKS_PER_MONTH   # 月邊界
+	var team := TeamData.new(); team.team_id = 0
+	team.population = 10
+	team.minor_population = 5
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	leader.skills = { "統領": 0.99 }   # cap 大，避免 overflow 干擾
+	state.persons[1] = leader; team.leader_id = 1
+	state.teams[0] = team
+	var tiers_before: int = AnonTierSystem.total_pop(team)
+	var ps := PopulationSystem.new()
+	ps.check_overflow(state)
+	# 5 × 0.1 = 0.5 → max(,1) = 1 名長大
+	assert(team.minor_population == 4, "minor 應 4，實際=%d" % team.minor_population)
+	assert(team.population == 11, "pop 應 11，實際=%d" % team.population)
+	assert(AnonTierSystem.total_pop(team) == tiers_before + 1, "tier 平民 +1")
+	# 非月邊界不觸發
+	state.world.current_tick = WorldState.TICKS_PER_MONTH + WorldState.TICKS_PER_DAY
+	ps.check_overflow(state)
+	assert(team.minor_population == 4, "非月邊界不長大")
+	# pop 滿 50 不長
+	team.population = 50
+	state.world.current_tick = WorldState.TICKS_PER_MONTH * 2
+	ps.check_overflow(state)
+	assert(team.minor_population == 4, "pop 滿不長大")
+	print("PopFix OK")
 
 func _run_sim_test() -> void:
 	var state := WorldState.new()
