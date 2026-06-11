@@ -255,10 +255,11 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 
 	_maybe_write_memory(person, reaction, state.world.current_tick)
 
-	print("[Tick %d] Person %d (%s/team%d) → %s | stress=%.2f loyalty=%.2f" % [
-		state.world.current_tick, person.id, person.role, person.team_id,
-		reaction, person.stress, person.loyalty
-	])
+	if reaction != person.last_reaction:
+		print("[Tick %d] Person %d (%s/team%d) → %s | stress=%.2f loyalty=%.2f" % [
+			state.world.current_tick, person.id, person.role, person.team_id,
+			reaction, person.stress, person.loyalty])
+	person.last_reaction = reaction
 
 func _find_top_threat(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1
