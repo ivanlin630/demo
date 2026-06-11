@@ -199,6 +199,16 @@ func _initialize() -> void:
 	_test_n3_joins_existing_exile()
 	_test_bridge_no_threat_no_hijack()
 	_test_bridge_with_threat_flees()
+	# ── Task Arbiter ──
+	_test_arbiter_basic()
+	_test_arbiter_combat_lock()
+	_test_arbiter_release_transition()
+	_test_arbiter_defiance()
+	_test_arbiter_suppression()
+	_test_arbiter_suppression_burst()
+	_test_arbiter_survival_beats_dispatch()
+	_test_arbiter_dispatch_beats_faction_goal()
+	_test_bridge_cannot_stomp_survival()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6412,3 +6422,149 @@ func _test_bridge_with_threat_flees() -> void:
 	assert(team.current_task == "逃跑", "應逃跑，實際=%s" % team.current_task)
 	assert(team.move_target == Vector2i(5, 0), "move_target 應 (5,0)，實際=%s" % str(team.move_target))
 	print("Reaction Task6b OK")
+
+
+# ══ Task Arbiter ══════════════════════════════════════════════
+
+func _test_arbiter_basic() -> void:
+	print("--- Arbiter Task1a: try_set 高低層 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	assert(t.task_priority == 0)
+	# idle 任何層可寫
+	assert(TaskArbiter.try_set(state, t, "貿易", Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH))
+	assert(t.current_task == "貿易" and t.task_priority == 50)
+	# 低蓋高 ✗
+	assert(not TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_FACTION))
+	# 同層 ✗
+	assert(not TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
+	# 高蓋低 ✓
+	assert(TaskArbiter.try_set(state, t, "乞食", Vector2i(3, 3), TaskArbiter.PRIO_SURVIVAL))
+	assert(t.task_priority == 80)
+	print("Arbiter Task1a OK")
+
+func _test_arbiter_combat_lock() -> void:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.combat_target = 5
+	state.teams[0] = t
+	assert(not TaskArbiter.try_set(state, t, "逃跑", Vector2i(1, 1), TaskArbiter.PRIO_SURVIVAL))
+	print("Arbiter Task1b OK")
+
+func _test_arbiter_release_transition() -> void:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	TaskArbiter.try_set(state, t, "安頓", Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(t, "生產", TaskArbiter.PRIO_AMBIENT)
+	assert(t.current_task == "生產" and t.task_priority == 10)
+	TaskArbiter.release(t)
+	assert(t.current_task == TeamData.TASK_IDLE and t.task_priority == 0)
+	assert(t.move_target == Vector2i(-1, -1))
+	print("Arbiter Task1c OK")
+
+func _test_arbiter_defiance() -> void:
+	print("--- Arbiter Task1d: 抗命/壓抑 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	var leader := PersonData.new(); leader.id = 1
+	leader.loyalty = 0.1
+	leader.values = { "貪婪": 0.9, "野心": 0.8, "義氣": 0.1, "信義": 0.1 }
+	state.persons[1] = leader; t.leader_id = 1
+	# 玩家命令在任
+	TaskArbiter.try_set(state, t, "巡邏", Vector2i(1, 1), TaskArbiter.PRIO_PLAYER)
+	# 貪婪低忠 → 抗命成功
+	assert(TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH),
+		"低忠貪婪 leader 應抗命成功")
+	print("Arbiter Task1d OK")
+
+func _test_arbiter_suppression() -> void:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	var leader := PersonData.new(); leader.id = 1
+	leader.loyalty = 0.9
+	leader.values = { "貪婪": 0.6, "野心": 0.5, "義氣": 0.8, "信義": 0.8 }
+	state.persons[1] = leader; t.leader_id = 1
+	TaskArbiter.try_set(state, t, "巡邏", Vector2i(1, 1), TaskArbiter.PRIO_PLAYER)
+	var stress0: float = leader.stress
+	var unrest0: int = t.unrest_turns
+	assert(not TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH),
+		"忠誠 leader 應被壓抑")
+	assert(leader.stress > stress0, "壓抑 stress 上升")
+	assert(t.unrest_turns > unrest0, "壓抑 unrest 上升")
+	print("Arbiter Task1e OK")
+
+func _test_arbiter_suppression_burst() -> void:
+	# 中間 leader 連續被擋 → stress 累積推 desire 過閾 → 終於抗命
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	var leader := PersonData.new(); leader.id = 1
+	leader.loyalty = 0.4
+	leader.values = { "貪婪": 0.7, "野心": 0.6, "義氣": 0.3, "信義": 0.3 }
+	state.persons[1] = leader; t.leader_id = 1
+	TaskArbiter.try_set(state, t, "巡邏", Vector2i(1, 1), TaskArbiter.PRIO_PLAYER)
+	var defied: bool = false
+	for _i in range(30):
+		if TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH):
+			defied = true
+			break
+	assert(defied, "壓抑累積後應爆發抗命")
+	print("Arbiter Task1f OK")
+func _test_arbiter_survival_beats_dispatch() -> void:
+	print("--- Arbiter Task2a: survival(80) 蓋掉 貿易(50) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 100; team.population = 10
+	team.resources["food"] = 0.0
+	team.tile_pos = Vector2i(0, 0)
+	var leader := PersonData.new(); leader.id = 200; leader.team_id = 100
+	leader.values = { "義氣": 0.3, "信義": 0.3, "貪婪": 0.5, "殘忍": 0.3, "好戰": 0.3, "求生欲": 0.5 }
+	state.persons[200] = leader; team.leader_id = 200
+	state.teams[100] = team
+	state.team_discovered[100] = []
+	# 先派貿易 (50)
+	assert(TaskArbiter.try_set(state, team, TeamData.TASK_TRADE, Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
+	# 斷糧 → survival 觸發應蓋掉貿易
+	var fai := FactionAISystem.new()
+	fai._evaluate_survival(state, team)
+	assert(team.current_task in FactionAISystem.SURVIVAL_TASKS,
+		"survival 應蓋掉貿易，實際=%s" % team.current_task)
+	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL,
+		"priority 應 80，實際=%d" % team.task_priority)
+	print("Arbiter Task2a OK (task=%s)" % team.current_task)
+
+func _test_arbiter_dispatch_beats_faction_goal() -> void:
+	print("--- Arbiter Task2b: faction goal(30) 蓋不動 貿易(50) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0
+	state.teams[0] = team
+	assert(TaskArbiter.try_set(state, team, TeamData.TASK_TRADE, Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
+	assert(not TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK, Vector2i(3, 3), TaskArbiter.PRIO_FACTION),
+		"faction goal(30) 不得蓋 貿易(50)")
+	assert(team.current_task == TeamData.TASK_TRADE, "貿易應保留")
+	print("Arbiter Task2b OK")
+func _test_bridge_cannot_stomp_survival() -> void:
+	print("--- Arbiter Task4: bridge(70) 蓋不動 survival 乞食(80) ---")
+	# = 逃跑↔乞食 ping-pong 結構性消失
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := _make_panic_team(state)
+	# 真威脅在場（同 Task6b 設定）
+	var threat := TeamData.new(); threat.team_id = 9; threat.population = 20
+	threat.tile_pos = Vector2i(0, 0); threat.last_tile_pos = Vector2i(-1, 0)
+	state.teams[9] = threat
+	team.known_reputations = { 9: 0.1 }
+	state.team_discovered[0] = [9]
+	state.team_intel[0] = { 9: { "population_est": 20 } }
+	var t5 := HexTileData.new(); t5.tile_pos = Vector2i(5, 0)
+	state.world.tiles[5000] = t5
+	# team 已在 survival 乞食 (80)
+	assert(TaskArbiter.try_set(state, team, "乞食", Vector2i(1, 0), TaskArbiter.PRIO_SURVIVAL))
+	var rs := ReactionSystem.new()
+	rs.evaluate_all(state, [0])
+	assert(team.current_task == "乞食", "bridge 不得蓋 survival，實際=%s" % team.current_task)
+	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL)
+	assert(team.move_target == Vector2i(1, 0), "move_target 不應被 bridge 改動")
+	print("Arbiter Task4 OK")

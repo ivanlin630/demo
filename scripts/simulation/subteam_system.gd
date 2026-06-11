@@ -26,7 +26,8 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	sub.tile_pos         = parent.tile_pos
 	sub.faction_id       = parent.faction_id
 	sub.parent_team_id   = parent_id
-	sub.current_task     = task
+	sub.current_task     = task   # 新 team 建立豁免：dispatch 出的 task = PRIO_DISPATCH
+	sub.task_priority    = TaskArbiter.PRIO_DISPATCH if task != TeamData.TASK_IDLE else 0
 	sub.move_target      = move_target
 	sub.order_target_id  = order_target_id
 	sub.order_task       = order_task
@@ -163,7 +164,7 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 			absorber_id, absorbed_id, absorber.population])
 	else:
 		absorbed.parent_team_id = absorber_id
-		absorbed.current_task = TeamData.TASK_IDLE
+		TaskArbiter.release(absorbed)
 		if not absorbed.tags.has("子團"):
 			absorbed.tags.append("子團")
 		if not absorber.subteam_ids.has(absorbed_id):

@@ -217,8 +217,9 @@ func _dispatch_trade_net(state: WorldState, faction: FactionData) -> void:
         if t.current_task != TeamData.TASK_IDLE: continue
         var partner_info: Dictionary = _find_trade_partner(state, t)
         if partner_info.is_empty(): continue
-        t.current_task = TeamData.TASK_TRADE
-        t.move_target = partner_info["outpost_pos"]   # 直接指向 outpost tile（靜止點）
+        if not TaskArbiter.try_set(state, t, TeamData.TASK_TRADE,
+                partner_info["outpost_pos"], TaskArbiter.PRIO_DISPATCH, "trade_net"):
+            continue   # 被擋 → 不設 trade_task_start_tick
         t.trade_task_start_tick = state.world.current_tick
         print("[StrategicAI] Faction%d 商隊 Team%d → trade Team%d @ outpost %s" % [
             faction.faction_id, t.team_id, int(partner_info["team_id"]), str(partner_info["outpost_pos"])])

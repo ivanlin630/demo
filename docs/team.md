@@ -57,6 +57,7 @@ var tags: Array             # 職責標籤：["統領", "軍隊", "商隊", "生
 var current_task: String    # "idle" / "徵收" / "偵查" / "信使" / "攻擊" / "掠奪" / "外交" / "護衛" / "逃跑"
                             # "貿易" / "訓練" / "合併" / "安頓" / "安撫" / "return_home" / "投靠" / "乞食"
                             # "起義" / "遷徙"
+var task_priority: int      # 現任 task 優先權（TaskArbiter 管理）；idle 時 0
 
 var unrest_turns: int       # 不滿積累值
 var faction_id: int         # 所屬勢力，-1 = 獨立
@@ -199,6 +200,27 @@ var strategic_assignments: Dictionary  # StrategicAI 派的座標目標（key: t
 > 未來擴充：若子團含多個記名 NPC（advisors），改為 loyalty/stress 均值計算。
 
 ---
+
+## Task 優先權仲裁（TaskArbiter）
+
+所有 `current_task` 寫入走 `TaskArbiter`（`scripts/simulation/task_arbiter.gd`）；
+直接賦值僅允許於新 team 建立點（reaction 流亡 / population overflow / subteam dispatch，須同時設 `task_priority`）。
+
+| 優先 | 常數 | 來源 |
+|---|---|---|
+| 100 | PRIO_COMBAT | `combat_target != -1` 戰鬥鎖（絕對）|
+| 80 | PRIO_SURVIVAL | survival（return_home / 乞食 / 投靠 / 飢餓掠奪）|
+| 70 | PRIO_THREAT | threat response + bridge 恐慌逃跑 + 起義/守城 |
+| 60 | PRIO_PLAYER | 玩家命令（player_commanded_task / player herald / order_subteam）|
+| 50 | PRIO_DISPATCH | AI 派遣（貿易/安頓/建設/prosperity/偵查/信使/徵收/外交/護衛/合併）|
+| 30 | PRIO_FACTION | faction goal 攻擊傾向 |
+| 10 | PRIO_AMBIENT | 閒置填充（居民「生產」常駐 / 等待新領主）|
+| 0 | — | idle |
+
+- API：`try_set`（嚴格大於現任才搶得動；同層先到先得；回 false 呼叫端不得做配套副作用）/ `release`（完成/取消 → idle + priority 0 + move_target 清）/ `transition`（就地轉換，如 安頓→生產）
+- 抗命窗口（軟 60）：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定（`_defiance_check`，無 RNG）；抗命成功印 `[抗命]`，被壓抑 → leader stress +0.05、team unrest +1（stress 進 desire 公式 → 憋多了爆）
+- 不變量：`current_task == idle` ⟺ `task_priority == 0`；戰鬥鎖期間一切 try_set false
+- 詳見 `docs/superpowers/specs/2026-06-11-task-arbiter-design.md`
 
 ## 未來擴充
 

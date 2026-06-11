@@ -44,7 +44,8 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 	ot.faction_id   = -1
 	ot.tags         = ["流亡"]
 	ot.population   = overflow_pop
-	ot.current_task = TeamData.TASK_IDLE
+	ot.current_task = TeamData.TASK_IDLE   # 新 team 建立豁免：overflow 流亡 idle + priority 0
+	ot.task_priority = 0
 	var frac: float = float(overflow_pop) / float(origin.population)
 	for res in origin.resources:
 		var amt: float = float(origin.resources.get(res, 0)) * frac
