@@ -212,6 +212,7 @@ func _initialize() -> void:
 	# ── Economy / Spam Fixes ──
 	_test_salary_budget_ratio()
 	_test_salary_full_pay_unchanged()
+	_test_trade_partner_requires_resident()
 	quit()
 
 func _run_sim_test() -> void:
@@ -5350,6 +5351,7 @@ func _test_trade_net_dispatches() -> void:
 	var partner := TeamData.new()
 	partner.team_id = 1; partner.faction_id = -1; partner.tile_pos = Vector2i(3, 0)
 	partner.resources["goods"] = 50.0
+	partner.tags = ["生產"]   # EcoFix Task2: outpost tile 須有居民團才派
 	state.teams[1] = partner
 	# W2: trade partner 須有 outpost（靜止目標才追得上）
 	var p_tile := HexTileData.new()
@@ -5894,9 +5896,11 @@ func _test_find_trade_partner_outpost_only() -> void:
 	state.teams[0] = trader
 	var with_op := TeamData.new(); with_op.team_id = 1; with_op.faction_id = -1
 	with_op.resources["goods"] = 10
+	with_op.tags = ["生產"]; with_op.tile_pos = Vector2i(0, 0)   # EcoFix Task2: 居民團駐 outpost tile
 	state.teams[1] = with_op
 	var no_op := TeamData.new(); no_op.team_id = 2; no_op.faction_id = -1
 	no_op.resources["goods"] = 10
+	no_op.tile_pos = Vector2i(9, 9)
 	state.teams[2] = no_op
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
 	state.world.tiles[0] = tile
@@ -6625,3 +6629,28 @@ func _test_salary_full_pay_unchanged() -> void:
 	assert(m.loyalty > 0.5, "超額薪資（mult 1.1）→ loyalty 上升，實際=%.2f" % m.loyalty)
 	assert(team.unrest_turns == 0, "coin 充足不應 unrest，實際=%d" % team.unrest_turns)
 	print("EcoFix Task1b OK")
+
+func _test_trade_partner_requires_resident() -> void:
+	print("--- EcoFix Task2: partner 限居民團 tile ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var trader := TeamData.new(); trader.team_id = 0; trader.faction_id = -1
+	trader.tile_pos = Vector2i(5, 5)
+	state.teams[0] = trader
+	var owner := TeamData.new(); owner.team_id = 1; owner.faction_id = -1
+	owner.tile_pos = Vector2i(8, 8)   # owner 本人不在 outpost tile
+	state.teams[1] = owner
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(3, 3); tile.outpost_owner = 1
+	state.world.tiles[3003] = tile
+	state.team_discovered[0] = [1]
+	var sai := StrategicAiSystem.new()
+	# A: outpost 有 owner 但 tile 上無居民團 → 不選
+	var partner_a: Dictionary = sai._find_trade_partner(state, trader)
+	assert(partner_a.is_empty(), "無居民團不應選，實際=%s" % str(partner_a))
+	# B: tile 上有生產居民團 → 選，outpost_pos 正確
+	var resident := TeamData.new(); resident.team_id = 2; resident.tags = ["生產"]
+	resident.tile_pos = Vector2i(3, 3)
+	state.teams[2] = resident
+	var partner_b: Dictionary = sai._find_trade_partner(state, trader)
+	assert(int(partner_b.get("team_id", -1)) == 1, "應選 Team1 outpost，實際=%s" % str(partner_b))
+	assert(partner_b["outpost_pos"] == Vector2i(3, 3), "outpost_pos 應 (3,3)")
+	print("EcoFix Task2 OK")
