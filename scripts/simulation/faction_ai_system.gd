@@ -1484,10 +1484,13 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	var food: float = float(team.resources.get("food", 0))
 	var food_per_day: float = float(pop_eff) * FOOD_PER_PERSON_PER_DAY_SURVIVAL
 	var days_left: float = food / maxf(food_per_day, 0.001)
-	if days_left < URGENCY_DAYS:
-		_trigger_survival(state, team, "urgent")
-	elif days_left < WARNING_DAYS:
-		_trigger_survival(state, team, "warning")
+	if days_left < URGENCY_DAYS or days_left < WARNING_DAYS:
+		var severity: String = "urgent" if days_left < URGENCY_DAYS else "warning"
+		var prev_task: String = team.current_task
+		_trigger_survival(state, team, severity)
+		if team.current_task != prev_task:
+			print("[Survival] Team%d %s days_left=%.1f %s→%s" % [
+				team.team_id, severity, days_left, prev_task, team.current_task])
 
 func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)

@@ -112,6 +112,7 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 			continue
 		var gain: float = src_tile.productivity * current * 0.01
 		gain *= outpost_mult * pop_mult
+		gain *= team.work_morale
 		match res:
 			"food":
 				gain *= (1.0 + float(src_tile.farming_level) * 0.5)

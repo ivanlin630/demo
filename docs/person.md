@@ -203,18 +203,24 @@ var equipment: Dictionary = {}
 
 每 Tick 對每個 NPC 跑效用函數，輸出分數最高的反應：
 
-| 代號 | 名稱 | 主要觸發條件 |
-|---|---|---|
-| P1_comply | 服從 | 高忠誠、低壓力 |
-| P2_produce | 生產 | 食物充足、低壓力、team 有生產標籤 |
-| P3_recruit | 招募 | 低壓力、高忠誠、team 人口 < 40 |
-| P4_expand | 擴張 | 食物充裕、低壓力 |
-| P5_breed | 繁殖 | 安全感高、food 需求滿足、未成年上限未滿 |
-| N1_flee | 逃離 | 高壓力、低忠誠 |
-| N2_riot | 暴動 | 高壓力、高恐懼 |
-| N3_defect | 叛逃 | 高壓力、低忠誠、高恐懼 |
-| N4_shirk | 怠工 | 高壓力、低忠誠 |
-| N5_extort | 勒索 | 高壓力、低恐懼、低忠誠 |
+| 代號 | 名稱 | 主要觸發條件 | 效果 |
+|---|---|---|---|
+| P1_comply | 服從 | 高忠誠、低壓力 | loyalty +0.01 |
+| P2_produce | 生產 | 食物充足、低壓力、team 有生產標籤 | 無直接效果；計入 work_morale 統計 |
+| P4_expand | 擴張 | 食物充裕、低壓力 | unrest_turns -1 |
+| P5_breed | 繁殖 | 安全感高、food 滿足、未成年上限未滿 | 需糧食盈餘（food > pop×2.4×7）才 minor +1 |
+| N1_flee | 逃離 | 高壓力、低忠誠 | pop -1；solo leader 不動（stress 不洩壓）；named 離團組/入流亡 team；leader 逃由 anon tier 同步 -1 |
+| N2_riot | 暴動 | 高壓力、高恐懼 | unrest_turns +1 |
+| N3_defect | 叛逃 | 高壓力、低忠誠、高恐懼 | 同 N1 結構，loyalty=0 |
+| N4_shirk | 怠工 | 高壓力、低忠誠 | food -1；計入 work_morale 負項 |
+| N5_extort | 勒索 | 高壓力、低恐懼、低忠誠 | team coin → person.coin（守恆，上限 5/次） |
+
+P3_recruit 已刪除（2026-06-11 reaction 職責收斂）：reaction 不再直接生人口。
+
+### work_morale（工作態度係數）
+
+`team.work_morale` ∈ [0.5, 1.5]，預設 1.0。`evaluate_all` 每輪統計：P2 +1、N4 -1、其他反應中性計入，
+目標值 `1.0 + mean×0.5`，lerp 0.1 漸進。`resource_system._collect_from_tile` 採集 gain 乘此係數。
 
 "none"（無反應）固定分數 0.2，作為基準競爭。
 
@@ -228,17 +234,20 @@ var equipment: Dictionary = {}
 
 ### 逃跑橋接（ReactionBridge）
 
-每 Tick 結算後：若 team 內 N1_flee 人數 ≥ 30% 人口，自動設 `team.current_task = "逃跑"`，清除 move_target。護衛任務不受影響。
+每 Tick 結算後：若 team 內 N1_flee 人數 ≥ 30% 人口，且 `ThreatAssessment` 在 team_discovered 中找到
+score > 門檻的真威脅，才設 `team.current_task = "逃跑"`，move_target = 威脅反方向 3 hex（in-map check）。
+無真威脅 → 不劫持 task（內心恐慌但無處可逃）。護衛/已逃跑任務不受影響。
+
+已知問題：bridge 與 survival 鏈（乞食/return_home）互搶 task（仲裁未定，見 known_issues task仲裁）。
 
 ### Goals 加分（_goal_bonus）
 
 | 目標字串 | 加分的反應 | 加分量 |
 |---|---|---|
 | "求生" / "逃離" | N1_flee | +0.2 |
-| "擴張" / "繁榮" | P4_expand, P3_recruit | +0.15 |
 | "發財" | N5_extort, P2_produce | +0.15 |
 | "復仇" | N2_riot, N3_defect | +0.2 |
-| "建立勢力" | P3_recruit, P4_expand | +0.2 |
+| "建立勢力" | P4_expand | +0.35 |
 
 ### 目標自動生成（每 10 Tick）
 
@@ -269,7 +278,7 @@ person.skills[skill] = min(current + growth, 1.0)
 | 反應 | 成長技能 | 依賴屬性 |
 |---|---|---|
 | P2_produce | 生產 | 智力 |
-| P3_recruit / P4_expand | 統領 | 魅力 |
+| P4_expand | 統領 | 魅力 |
 | P5_breed | 醫療 | 智力 |
 | N1_flee / N4_shirk | 求生 | 體力 |
 | N2_riot | 戰鬥 | 體力 |

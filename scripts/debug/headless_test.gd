@@ -185,6 +185,20 @@ func _initialize() -> void:
 	_test_invite_exile_accept()
 	_test_invite_exile_reject_cooldown()
 	_test_settle_triggers_subteam_merge_back()
+	# ── Reaction 職責收斂 ──
+	_test_reaction_fields()
+	_test_p3_removed()
+	_test_p2_no_food()
+	_test_work_morale_shift()
+	_test_collect_uses_morale()
+	_test_p5_needs_surplus()
+	_test_n5_coin_conserved()
+	_test_n1_solo_skip()
+	_test_n1_leader_tier_sync()
+	_test_n1_named_spawns_exile()
+	_test_n3_joins_existing_exile()
+	_test_bridge_no_threat_no_hijack()
+	_test_bridge_with_threat_flees()
 	quit()
 
 func _run_sim_test() -> void:
@@ -2696,7 +2710,9 @@ func _test_full_config_load() -> void:
 	var c2 := GameSetup.load_config("res://config/game_sim_test.json")
 	assert(not c2.is_empty(), "game_sim_test.json 載入失敗")
 	GameSetup.setup(s2, c2)
-	assert(s2.teams.size() == 5, "game_sim_test 應 5 team，實際=%d" % s2.teams.size())
+	var expected_teams: int = c2.get("teams", []).size()
+	assert(s2.teams.size() == expected_teams,
+		"game_sim_test 應 %d team，實際=%d" % [expected_teams, s2.teams.size()])
 	assert(c2.get("command_schedule", []).size() >= 6, "command_schedule 應有 ≥6 entries")
 	var s3 := WorldState.new()
 	var c3 := GameSetup.load_config("res://config/default.json")
@@ -6184,3 +6200,215 @@ func _test_settle_triggers_subteam_merge_back() -> void:
 	inter._convert_to_resident(state, flee)
 	assert(not state.teams.has(1), "子隊應回母團（完全合併移除），teams 仍有 1")
 	print("Residency Task6 OK")
+
+# ── Reaction 職責收斂 ──────────────────────────────────────
+
+func _test_reaction_fields() -> void:
+	print("--- Reaction Task1a: work_morale / last_reaction 欄位 ---")
+	var t := TeamData.new()
+	assert(abs(t.work_morale - 1.0) < 0.001)
+	var p := PersonData.new()
+	assert(p.last_reaction == "")
+	print("Reaction Task1a OK")
+
+func _test_p3_removed() -> void:
+	print("--- Reaction Task1b: P3_recruit 已刪除 ---")
+	var rs := ReactionSystem.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	p.values = { "野心": 0.9, "貪婪": 0.9 }   # 舊 P3 高分個性
+	var r: String = rs._evaluate_person(p, team)
+	assert(r != "P3_recruit", "P3 應已刪除，實際=%s" % r)
+	print("Reaction Task1b OK")
+
+func _test_p2_no_food() -> void:
+	print("--- Reaction Task2a: P2 不加 food ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.resources = { "food": 100.0 }
+	state.teams[0] = team
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	state.persons[1] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "P2_produce")
+	assert(abs(float(team.resources["food"]) - 100.0) < 0.001, "P2 不應加 food")
+	print("Reaction Task2a OK")
+
+func _test_work_morale_shift() -> void:
+	print("--- Reaction Task2b: 全員 P2 → morale 上升 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 3
+	team.tags = ["生產"]
+	state.teams[0] = team
+	for i in range(3):
+		var p := PersonData.new(); p.id = 10 + i; p.team_id = 0
+		p.skills = { "生產": 0.9 }; p.values = { "慎重": 0.8 }
+		p.loyalty = 0.9
+		state.persons[10 + i] = p
+		if i == 0: team.leader_id = p.id
+		else: team.named_members.append(p.id)
+	var rs := ReactionSystem.new()
+	for _i in range(50):
+		rs.evaluate_all(state, [0])
+	assert(team.work_morale > 1.0, "勤奮村 morale 應 > 1.0，實際=%.2f" % team.work_morale)
+	print("Reaction Task2b OK (morale=%.2f)" % team.work_morale)
+
+func _test_collect_uses_morale() -> void:
+	print("--- Reaction Task3: 採集 gain 乘 work_morale ---")
+	var rs := ResourceSystem.new()
+	var gains: Array = []
+	for morale in [0.5, 1.5]:
+		var state := WorldState.new(); state.world = WorldData.new()
+		var team := TeamData.new(); team.team_id = 0; team.population = 5
+		team.resources = { "food": 0.0 }
+		team.work_morale = morale
+		state.teams[0] = team
+		var tile := HexTileData.new()
+		tile.resources = { "food": 1000.0 }
+		rs._collect_from_tile(state, team, tile, 1.0, 1.0, 0.0, 0.0)
+		gains.append(float(team.resources["food"]))
+	assert(gains[0] > 0.0, "morale 0.5 仍應有產出")
+	var ratio: float = gains[1] / gains[0]
+	assert(abs(ratio - 3.0) < 0.01, "1.5/0.5 gain 應 3 倍，實際=%.2f" % ratio)
+	print("Reaction Task3 OK (ratio=%.2f)" % ratio)
+
+func _test_p5_needs_surplus() -> void:
+	print("--- Reaction Task4a: P5 需糧食盈餘 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	team.resources = { "food": 50.0 }   # 50 < 10*2.4*7=168
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "P5_breed")
+	assert(team.minor_population == 0, "糧不足不生")
+	team.resources["food"] = 200.0
+	rs._apply_reaction(state, p, team, "P5_breed")
+	assert(team.minor_population == 1, "盈餘該生")
+	print("Reaction Task4a OK")
+
+func _test_n5_coin_conserved() -> void:
+	print("--- Reaction Task4b: N5 coin 守恆 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.resources = { "coin": 100.0 }
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	var rs := ReactionSystem.new()
+	var before: float = float(team.resources["coin"]) + p.coin
+	rs._apply_reaction(state, p, team, "N5_extort")
+	var after: float = float(team.resources["coin"]) + p.coin
+	assert(abs(before - after) < 0.001, "coin 總和守恆")
+	assert(p.coin > 0, "偷的錢進 person.coin")
+	print("Reaction Task4b OK")
+
+func _test_n1_solo_skip() -> void:
+	print("--- Reaction Task5a: solo leader flee 無變化 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 1
+	var p := PersonData.new(); p.id = 1; p.team_id = 0; p.stress = 0.9
+	team.leader_id = 1
+	state.teams[0] = team; state.persons[1] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "N1_flee")
+	assert(team.population == 1, "solo pop 不變")
+	assert(abs(p.stress - 0.9) < 0.001, "solo stress 不洩壓，實際=%.2f" % p.stress)
+	assert(state.teams.size() == 1, "不應生流亡 team")
+	print("Reaction Task5a OK")
+
+func _test_n1_leader_tier_sync() -> void:
+	print("--- Reaction Task5b: leader flee → anon tier 同步 -1 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.anon_tiers = { "平民": 4 }
+	var p := PersonData.new(); p.id = 1; p.team_id = 0; p.stress = 0.9
+	team.leader_id = 1
+	state.teams[0] = team; state.persons[1] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "N1_flee")
+	assert(team.population == 4, "pop 應 4，實際=%d" % team.population)
+	var anon_sum: int = 0
+	for tier in team.anon_tiers: anon_sum += int(team.anon_tiers[tier])
+	assert(anon_sum == 3, "anon 總和應 3，實際=%d" % anon_sum)
+	assert(p.team_id == 0, "leader 留下")
+	print("Reaction Task5b OK")
+
+func _test_n1_named_spawns_exile() -> void:
+	print("--- Reaction Task5c: named flee → 自立流亡 team ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.tile_pos = Vector2i(3, 3); team.leader_id = 1
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	var p := PersonData.new(); p.id = 2; p.team_id = 0
+	team.named_members = [2]
+	state.teams[0] = team; state.persons[1] = leader; state.persons[2] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "N1_flee")
+	assert(team.population == 4, "原 team pop -1")
+	assert(not team.named_members.has(2), "named 移除")
+	assert(state.teams.size() == 2, "應新建流亡 team")
+	var exile: TeamData = state.teams[1]
+	assert("流亡" in exile.tags, "tags 應含 流亡")
+	assert(exile.leader_id == 2 and p.team_id == 1, "person 為流亡 leader")
+	assert(exile.population == 1, "流亡 pop=1")
+	print("Reaction Task5c OK")
+
+func _test_n3_joins_existing_exile() -> void:
+	print("--- Reaction Task5d: named defect → 加入同格流亡 team ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.tile_pos = Vector2i(3, 3); team.leader_id = 1
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	var p := PersonData.new(); p.id = 2; p.team_id = 0
+	team.named_members = [2]
+	var exile := TeamData.new(); exile.team_id = 7; exile.population = 2
+	exile.tile_pos = Vector2i(3, 3); exile.tags = ["流亡"]
+	state.teams[0] = team; state.teams[7] = exile
+	state.persons[1] = leader; state.persons[2] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "N3_defect")
+	assert(p.team_id == 7, "應加入既有流亡 team，實際=%d" % p.team_id)
+	assert(exile.population == 3, "流亡 pop +1")
+	assert(exile.named_members.has(2), "流亡 named 含 person")
+	assert(state.teams.size() == 2, "不應另建 team")
+	print("Reaction Task5d OK")
+
+func _make_panic_team(state: WorldState) -> TeamData:
+	# pop=3 全 named 高壓低忠誠 → 全員 N1_flee
+	var team := TeamData.new(); team.team_id = 0; team.population = 3
+	team.tile_pos = Vector2i(2, 0)
+	state.teams[0] = team
+	for i in range(3):
+		var p := PersonData.new(); p.id = 1 + i; p.team_id = 0
+		p.stress = 1.0; p.loyalty = 0.0; p.fear = 0.0
+		p.values = { "求生欲": 1.0, "慎重": 0.0 }
+		state.persons[1 + i] = p
+		if i == 0: team.leader_id = p.id
+		else: team.named_members.append(p.id)
+	return team
+
+func _test_bridge_no_threat_no_hijack() -> void:
+	print("--- Reaction Task6a: 無威脅不劫持 task ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := _make_panic_team(state)
+	var rs := ReactionSystem.new()
+	rs.evaluate_all(state, [0])
+	assert(team.current_task != "逃跑", "無威脅 task 不應變逃跑，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(-1, -1), "move_target 不應被設")
+	print("Reaction Task6a OK")
+
+func _test_bridge_with_threat_flees() -> void:
+	print("--- Reaction Task6b: 真威脅 → 逃跑 + 反方向目標 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := _make_panic_team(state)
+	var threat := TeamData.new(); threat.team_id = 9; threat.population = 20
+	threat.tile_pos = Vector2i(0, 0); threat.last_tile_pos = Vector2i(-1, 0)   # 朝我來
+	state.teams[9] = threat
+	team.known_reputations = { 9: 0.1 }   # 高敵意
+	state.team_discovered[0] = [9]
+	state.team_intel[0] = { 9: { "population_est": 20 } }
+	var t5 := HexTileData.new(); t5.tile_pos = Vector2i(5, 0)
+	state.world.tiles[5000] = t5   # 反方向 (2,0)+(1,0)*3 = (5,0)
+	var rs := ReactionSystem.new()
+	rs.evaluate_all(state, [0])
+	assert(team.current_task == "逃跑", "應逃跑，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(5, 0), "move_target 應 (5,0)，實際=%s" % str(team.move_target))
+	print("Reaction Task6b OK")

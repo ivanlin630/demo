@@ -51,6 +51,7 @@ var equipment: Dictionary = {
 }
 
 var memory: Array = []
+var last_reaction: String = ""   # diff print 用
 
 var salary: float = 0.0
 var coin: float = 0.0

@@ -13,6 +13,8 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 		if team == null:
 			continue
 		var flee_count: int = 0
+		var morale_acc: float = 0.0
+		var morale_n: int = 0
 		for pid in state.persons:
 			var person: PersonData = state.persons[pid]
 			if person.team_id != tid:
@@ -28,11 +30,24 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 					skill_sys.on_reaction(person, reaction)
 			if reaction == "N1_flee":
 				flee_count += 1
+			match reaction:
+				"P2_produce": morale_acc += 1.0; morale_n += 1
+				"N4_shirk":   morale_acc -= 1.0; morale_n += 1
+				"none":       pass
+				_:            morale_n += 1   # 其他 reaction 中性計入
+		if morale_n > 0:
+			var target_morale: float = clampf(1.0 + (morale_acc / float(morale_n)) * 0.5, 0.5, 1.5)
+			team.work_morale = clampf(lerpf(team.work_morale, target_morale, 0.1), 0.5, 1.5)
 		if flee_count > 0 and float(flee_count) / maxf(team.population, 1) >= 0.3:
 			if team.current_task not in ["逃跑", "護衛"]:
-				team.current_task = "逃跑"
-				team.move_target  = Vector2i(-1, -1)
-				print("[ReactionBridge] Team%d 逃跑（%d/%d 人）" % [tid, flee_count, team.population])
+				var threat_id: int = _find_top_threat(state, team)
+				if threat_id != -1:
+					var threat: TeamData = state.teams[threat_id]
+					team.current_task = "逃跑"
+					team.move_target = _flee_target_simple(state, team, threat)
+					print("[ReactionBridge] Team%d 逃跑（%d/%d 人）← threat Team%d" % [
+						tid, flee_count, team.population, threat_id])
+				# 無威脅 → 不劫持 task（內心恐慌但無處可逃）
 
 # 主動攻擊戰敗 → named 成員忠誠降、leader 壓力升（無硬性 cooldown，純 reaction）
 func on_attack_defeat(state: WorldState, team_id: int, pop_loss_ratio: float) -> void:
@@ -88,7 +103,6 @@ func _evaluate_person(person: PersonData, team: TeamData) -> String:
 	var scores: Dictionary = {
 		"P1_comply":  _score_comply(person, team),
 		"P2_produce": _score_produce(person, team),
-		"P3_recruit": _score_recruit(person, team),
 		"P4_expand":  _score_expand(person, team),
 		"P5_breed":   _score_breed(person, team),
 		"N1_flee":    _score_flee(person, team),
@@ -120,8 +134,7 @@ func _goal_bonus(person: PersonData, reaction: String) -> float:
 			"escape_war", "wealth":
 				if reaction == "N1_flee": bonus += 0.2
 			"domination":
-				if reaction in ["P4_expand", "P3_recruit"]: bonus += 0.15
-				if reaction in ["P3_recruit", "P4_expand"]: bonus += 0.2
+				if reaction == "P4_expand": bonus += 0.35
 			"revenge":
 				if reaction in ["N2_riot", "N3_defect"]: bonus += 0.2
 	return bonus
@@ -139,12 +152,6 @@ func _score_produce(p: PersonData, t: TeamData) -> float:
 	var base: float = 0.6 if active else 0.1
 	base += float(p.skills.get("生產", 0.0)) * 0.4
 	base += float(p.values.get("慎重", 0.5)) * 0.1
-	return base
-
-func _score_recruit(p: PersonData, t: TeamData) -> float:
-	var base: float = 0.5 if (t.population < 40 and p.stress < 0.3 and p.loyalty > 0.7) else 0.05
-	base += float(p.skills.get("統領", 0.0)) * 0.3
-	base += float(p.values.get("野心", 0.5)) * 0.15
 	return base
 
 func _score_expand(p: PersonData, t: TeamData) -> float:
@@ -203,42 +210,40 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		"P1_comply":
 			person.loyalty = minf(person.loyalty + 0.01, 1.0)
 		"P2_produce":
-			var skill: float = float(person.skills.get("生產", 0.0))
-			var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
-			var tile: HexTileData = state.world.tiles.get(tile_id)
-			var farming_bonus: float = float(tile.farming_level) * 0.5 if tile != null else 0.0
-			var hf: float = tile.harvest_factor if tile != null else 1.0
-			var food_gain: float = (1.0 + skill * 1.5 + farming_bonus) * hf
-			team.resources["food"] = float(team.resources.get("food", 0)) + food_gain
-		"P3_recruit":
-			var leader = state.persons.get(team.leader_id)
-			var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-			var cap: int = TeamData.pop_cap_from_leadership(cmd)
-			if team.population < cap:
-				team.population += 1
-				AnonTierSystem.add_anon(team, "平民", 1)
+			pass   # 效果改由 work_morale 係數體現（evaluate_all 統計）
 		"P4_expand":
 			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
 		"P5_breed":
-			var cap: int = int(team.population * 0.2)
-			if team.minor_population < cap:
-				team.minor_population += 1
+			var surplus_ok: bool = float(team.resources.get("food", 0)) \
+				> float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
+			if surplus_ok:
+				var cap: int = int(team.population * 0.2)
+				if team.minor_population < cap:
+					team.minor_population += 1
 		"N1_flee":
+			if team.population <= 1 and person.id == team.leader_id:
+				return   # solo 無處可逃：不變化、stress 不洩壓（持續高壓餵 N2/N3）
 			team.population = maxi(team.population - 1, 1)
 			person.stress = maxf(person.stress - 0.3, 0.0)
-			# 具名成員逃跑：清除 named_members 引用，避免 ghost member
 			if team.named_members.has(person.id):
 				team.named_members.erase(person.id)
 				person.team_id = -1
+				_spawn_exile_or_join(state, person, team.tile_pos)
+			elif person.id == team.leader_id:
+				AnonTierSystem.kill_random(team, 1, "flee")   # leader 留下，實際走的是 anon
 		"N2_riot":
 			team.unrest_turns += 1
 		"N3_defect":
+			if team.population <= 1 and person.id == team.leader_id:
+				return   # solo leader 無從叛逃自己
 			team.population = maxi(team.population - 1, 1)
 			person.loyalty = 0.0
-			# 具名成員叛離：清除 named_members 引用
 			if team.named_members.has(person.id):
 				team.named_members.erase(person.id)
 				person.team_id = -1
+				_spawn_exile_or_join(state, person, team.tile_pos)
+			elif person.id == team.leader_id:
+				AnonTierSystem.kill_random(team, 1, "defect")
 		"N4_shirk":
 			var f: float = float(team.resources.get("food", 0))
 			team.resources["food"] = maxf(f - 1.0, 0.0)
@@ -246,13 +251,67 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var money: float = float(team.resources.get("coin", 0))
 			var steal: float = minf(money, 5.0)
 			team.resources["coin"] = money - steal
+			person.coin += steal   # 守恆：偷進私囊
 
 	_maybe_write_memory(person, reaction, state.world.current_tick)
 
-	print("[Tick %d] Person %d (%s/team%d) → %s | stress=%.2f loyalty=%.2f" % [
-		state.world.current_tick, person.id, person.role, person.team_id,
-		reaction, person.stress, person.loyalty
-	])
+	if reaction != person.last_reaction:
+		print("[Tick %d] Person %d (%s/team%d) → %s | stress=%.2f loyalty=%.2f" % [
+			state.world.current_tick, person.id, person.role, person.team_id,
+			reaction, person.stress, person.loyalty])
+	person.last_reaction = reaction
+
+func _find_top_threat(state: WorldState, team: TeamData) -> int:
+	var best_id: int = -1
+	var best: float = ThreatAssessment.THREAT_BASE_THRESHOLD
+	for tid in state.team_discovered.get(team.team_id, []):
+		var other: TeamData = state.teams.get(tid)
+		if other == null: continue
+		var s: float = ThreatAssessment.score(state, team, other)
+		if s > best:
+			best = s
+			best_id = tid
+	return best_id
+
+# 朝威脅反方向 3 hex（in-map check；仿 faction_ai._flee_target）
+func _flee_target_simple(state: WorldState, team: TeamData, threat: TeamData) -> Vector2i:
+	var dir: Vector2i = team.tile_pos - threat.tile_pos
+	var pos: Vector2i = team.tile_pos + Vector2i(signi(dir.x), signi(dir.y)) * 3
+	if state.world.tiles.has(pos.x * 1000 + pos.y):
+		return pos
+	return team.tile_pos
+
+# 離團者去處：同格流亡 team 加入，否則自立 1 人流亡 team
+func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) -> void:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos != pos: continue
+		if not ("流亡" in t.tags): continue
+		t.named_members.append(person.id)
+		t.population += 1
+		person.team_id = t.team_id
+		return
+	var ot := TeamData.new()
+	ot.team_id = _next_team_id(state)
+	ot.tile_pos = pos
+	ot.faction_id = -1
+	ot.tags = ["流亡"]
+	ot.population = 1
+	ot.current_task = TeamData.TASK_IDLE
+	ot.leader_id = person.id
+	person.team_id = ot.team_id
+	person.role = "leader"
+	state.teams[ot.team_id] = ot
+	state.team_known[ot.team_id] = []
+	state.team_discovered[ot.team_id] = []
+	print("[Reaction] Person%d 離團自立流亡 Team%d at (%d,%d)" % [
+		person.id, ot.team_id, pos.x, pos.y])
+
+func _next_team_id(state: WorldState) -> int:
+	var max_id: int = -1
+	for tid in state.teams:
+		if tid > max_id: max_id = tid
+	return max_id + 1
 
 func _maybe_write_memory(person: PersonData, reaction: String, tick: int) -> void:
 	if reaction in ["none", "P1_comply", "P2_produce"]:
