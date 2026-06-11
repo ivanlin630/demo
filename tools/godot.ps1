@@ -1,9 +1,11 @@
 #!/usr/bin/env pwsh
-# Godot wrapper：Godot Windows console.exe 寫 stdout 用 system locale (CP950 in Taiwan)。
-# 用 cmd /c redirect 寫 binary log，read 後 CP950 → UTF-8 轉碼，給 PowerShell pipeline。
+# Godot wrapper: Godot win console exe writes stdout in system locale (CP950).
+# Run via cmd /c redirect to binary log, then transcode CP950 -> UTF-8 for the pipeline.
 # Usage: .\tools\godot.ps1 --headless --script scripts/debug/headless_test.gd
-# Worktree 注意：tools/godot/*.exe 被 gitignore，worktree 內沒有 → fallback 主 repo 路徑。
-$exe = "$PSScriptRoot\godot\Godot_v4.2.2-stable_win64_console.exe"
+# Worktree note: tools/godot/*.exe is gitignored (absent in worktrees) -> fallback to main repo path.
+# NOTE: keep this file ASCII-only. PS 5.1 reads BOM-less files as ANSI; non-ASCII comments corrupt parsing.
+$root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$exe = Join-Path $root "godot\Godot_v4.2.2-stable_win64_console.exe"
 if (-not (Test-Path $exe)) {
     $exe = "A:\GDS\demo\tools\godot\Godot_v4.2.2-stable_win64_console.exe"
 }

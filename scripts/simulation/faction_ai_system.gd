@@ -181,7 +181,12 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	if state.world.current_tick < team.threat_eval_next_tick: return
 	team.threat_eval_next_tick = state.world.current_tick + THREAT_CADENCE
 	if team.combat_target != -1: return
-	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_FLEE]:
+	if team.current_task == "起義":
+		# 起義（流亡路徑）是瞬時事件，結算已完成 → 釋放回常規 AI
+		#（若有追兵，下次 cadence threat 評估會派逃跑）
+		TaskArbiter.release(team)
+		return
+	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_FLEE, "守城"]:
 		if not _has_active_threat(state, team):
 			TaskArbiter.release(team)
 		return
