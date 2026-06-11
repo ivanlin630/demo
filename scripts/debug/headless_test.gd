@@ -193,6 +193,10 @@ func _initialize() -> void:
 	_test_collect_uses_morale()
 	_test_p5_needs_surplus()
 	_test_n5_coin_conserved()
+	_test_n1_solo_skip()
+	_test_n1_leader_tier_sync()
+	_test_n1_named_spawns_exile()
+	_test_n3_joins_existing_exile()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6293,3 +6297,74 @@ func _test_n5_coin_conserved() -> void:
 	assert(abs(before - after) < 0.001, "coin 總和守恆")
 	assert(p.coin > 0, "偷的錢進 person.coin")
 	print("Reaction Task4b OK")
+
+func _test_n1_solo_skip() -> void:
+	print("--- Reaction Task5a: solo leader flee 無變化 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 1
+	var p := PersonData.new(); p.id = 1; p.team_id = 0; p.stress = 0.9
+	team.leader_id = 1
+	state.teams[0] = team; state.persons[1] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "N1_flee")
+	assert(team.population == 1, "solo pop 不變")
+	assert(abs(p.stress - 0.9) < 0.001, "solo stress 不洩壓，實際=%.2f" % p.stress)
+	assert(state.teams.size() == 1, "不應生流亡 team")
+	print("Reaction Task5a OK")
+
+func _test_n1_leader_tier_sync() -> void:
+	print("--- Reaction Task5b: leader flee → anon tier 同步 -1 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.anon_tiers = { "平民": 4 }
+	var p := PersonData.new(); p.id = 1; p.team_id = 0; p.stress = 0.9
+	team.leader_id = 1
+	state.teams[0] = team; state.persons[1] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "N1_flee")
+	assert(team.population == 4, "pop 應 4，實際=%d" % team.population)
+	var anon_sum: int = 0
+	for tier in team.anon_tiers: anon_sum += int(team.anon_tiers[tier])
+	assert(anon_sum == 3, "anon 總和應 3，實際=%d" % anon_sum)
+	assert(p.team_id == 0, "leader 留下")
+	print("Reaction Task5b OK")
+
+func _test_n1_named_spawns_exile() -> void:
+	print("--- Reaction Task5c: named flee → 自立流亡 team ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.tile_pos = Vector2i(3, 3); team.leader_id = 1
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	var p := PersonData.new(); p.id = 2; p.team_id = 0
+	team.named_members = [2]
+	state.teams[0] = team; state.persons[1] = leader; state.persons[2] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "N1_flee")
+	assert(team.population == 4, "原 team pop -1")
+	assert(not team.named_members.has(2), "named 移除")
+	assert(state.teams.size() == 2, "應新建流亡 team")
+	var exile: TeamData = state.teams[1]
+	assert("流亡" in exile.tags, "tags 應含 流亡")
+	assert(exile.leader_id == 2 and p.team_id == 1, "person 為流亡 leader")
+	assert(exile.population == 1, "流亡 pop=1")
+	print("Reaction Task5c OK")
+
+func _test_n3_joins_existing_exile() -> void:
+	print("--- Reaction Task5d: named defect → 加入同格流亡 team ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.tile_pos = Vector2i(3, 3); team.leader_id = 1
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	var p := PersonData.new(); p.id = 2; p.team_id = 0
+	team.named_members = [2]
+	var exile := TeamData.new(); exile.team_id = 7; exile.population = 2
+	exile.tile_pos = Vector2i(3, 3); exile.tags = ["流亡"]
+	state.teams[0] = team; state.teams[7] = exile
+	state.persons[1] = leader; state.persons[2] = p
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "N3_defect")
+	assert(p.team_id == 7, "應加入既有流亡 team，實際=%d" % p.team_id)
+	assert(exile.population == 3, "流亡 pop +1")
+	assert(exile.named_members.has(2), "流亡 named 含 person")
+	assert(state.teams.size() == 2, "不應另建 team")
+	print("Reaction Task5d OK")

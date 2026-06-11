@@ -216,21 +216,29 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 				if team.minor_population < cap:
 					team.minor_population += 1
 		"N1_flee":
+			if team.population <= 1 and person.id == team.leader_id:
+				return   # solo 無處可逃：不變化、stress 不洩壓（持續高壓餵 N2/N3）
 			team.population = maxi(team.population - 1, 1)
 			person.stress = maxf(person.stress - 0.3, 0.0)
-			# 具名成員逃跑：清除 named_members 引用，避免 ghost member
 			if team.named_members.has(person.id):
 				team.named_members.erase(person.id)
 				person.team_id = -1
+				_spawn_exile_or_join(state, person, team.tile_pos)
+			elif person.id == team.leader_id:
+				AnonTierSystem.kill_random(team, 1, "flee")   # leader 留下，實際走的是 anon
 		"N2_riot":
 			team.unrest_turns += 1
 		"N3_defect":
+			if team.population <= 1 and person.id == team.leader_id:
+				return   # solo leader 無從叛逃自己
 			team.population = maxi(team.population - 1, 1)
 			person.loyalty = 0.0
-			# 具名成員叛離：清除 named_members 引用
 			if team.named_members.has(person.id):
 				team.named_members.erase(person.id)
 				person.team_id = -1
+				_spawn_exile_or_join(state, person, team.tile_pos)
+			elif person.id == team.leader_id:
+				AnonTierSystem.kill_random(team, 1, "defect")
 		"N4_shirk":
 			var f: float = float(team.resources.get("food", 0))
 			team.resources["food"] = maxf(f - 1.0, 0.0)
@@ -246,6 +254,38 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		state.world.current_tick, person.id, person.role, person.team_id,
 		reaction, person.stress, person.loyalty
 	])
+
+# 離團者去處：同格流亡 team 加入，否則自立 1 人流亡 team
+func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) -> void:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos != pos: continue
+		if not ("流亡" in t.tags): continue
+		t.named_members.append(person.id)
+		t.population += 1
+		person.team_id = t.team_id
+		return
+	var ot := TeamData.new()
+	ot.team_id = _next_team_id(state)
+	ot.tile_pos = pos
+	ot.faction_id = -1
+	ot.tags = ["流亡"]
+	ot.population = 1
+	ot.current_task = TeamData.TASK_IDLE
+	ot.leader_id = person.id
+	person.team_id = ot.team_id
+	person.role = "leader"
+	state.teams[ot.team_id] = ot
+	state.team_known[ot.team_id] = []
+	state.team_discovered[ot.team_id] = []
+	print("[Reaction] Person%d 離團自立流亡 Team%d at (%d,%d)" % [
+		person.id, ot.team_id, pos.x, pos.y])
+
+func _next_team_id(state: WorldState) -> int:
+	var max_id: int = -1
+	for tid in state.teams:
+		if tid > max_id: max_id = tid
+	return max_id + 1
 
 func _maybe_write_memory(person: PersonData, reaction: String, tick: int) -> void:
 	if reaction in ["none", "P1_comply", "P2_produce"]:
