@@ -185,6 +185,9 @@ func _initialize() -> void:
 	_test_invite_exile_accept()
 	_test_invite_exile_reject_cooldown()
 	_test_settle_triggers_subteam_merge_back()
+	# ── Reaction 職責收斂 ──
+	_test_reaction_fields()
+	_test_p3_removed()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6186,3 +6189,23 @@ func _test_settle_triggers_subteam_merge_back() -> void:
 	inter._convert_to_resident(state, flee)
 	assert(not state.teams.has(1), "子隊應回母團（完全合併移除），teams 仍有 1")
 	print("Residency Task6 OK")
+
+# ── Reaction 職責收斂 ──────────────────────────────────────
+
+func _test_reaction_fields() -> void:
+	print("--- Reaction Task1a: work_morale / last_reaction 欄位 ---")
+	var t := TeamData.new()
+	assert(abs(t.work_morale - 1.0) < 0.001)
+	var p := PersonData.new()
+	assert(p.last_reaction == "")
+	print("Reaction Task1a OK")
+
+func _test_p3_removed() -> void:
+	print("--- Reaction Task1b: P3_recruit 已刪除 ---")
+	var rs := ReactionSystem.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	p.values = { "野心": 0.9, "貪婪": 0.9 }   # 舊 P3 高分個性
+	var r: String = rs._evaluate_person(p, team)
+	assert(r != "P3_recruit", "P3 應已刪除，實際=%s" % r)
+	print("Reaction Task1b OK")

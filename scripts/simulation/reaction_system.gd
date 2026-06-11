@@ -88,7 +88,6 @@ func _evaluate_person(person: PersonData, team: TeamData) -> String:
 	var scores: Dictionary = {
 		"P1_comply":  _score_comply(person, team),
 		"P2_produce": _score_produce(person, team),
-		"P3_recruit": _score_recruit(person, team),
 		"P4_expand":  _score_expand(person, team),
 		"P5_breed":   _score_breed(person, team),
 		"N1_flee":    _score_flee(person, team),
@@ -120,8 +119,7 @@ func _goal_bonus(person: PersonData, reaction: String) -> float:
 			"escape_war", "wealth":
 				if reaction == "N1_flee": bonus += 0.2
 			"domination":
-				if reaction in ["P4_expand", "P3_recruit"]: bonus += 0.15
-				if reaction in ["P3_recruit", "P4_expand"]: bonus += 0.2
+				if reaction == "P4_expand": bonus += 0.35
 			"revenge":
 				if reaction in ["N2_riot", "N3_defect"]: bonus += 0.2
 	return bonus
@@ -139,12 +137,6 @@ func _score_produce(p: PersonData, t: TeamData) -> float:
 	var base: float = 0.6 if active else 0.1
 	base += float(p.skills.get("生產", 0.0)) * 0.4
 	base += float(p.values.get("慎重", 0.5)) * 0.1
-	return base
-
-func _score_recruit(p: PersonData, t: TeamData) -> float:
-	var base: float = 0.5 if (t.population < 40 and p.stress < 0.3 and p.loyalty > 0.7) else 0.05
-	base += float(p.skills.get("統領", 0.0)) * 0.3
-	base += float(p.values.get("野心", 0.5)) * 0.15
 	return base
 
 func _score_expand(p: PersonData, t: TeamData) -> float:
@@ -210,13 +202,6 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var hf: float = tile.harvest_factor if tile != null else 1.0
 			var food_gain: float = (1.0 + skill * 1.5 + farming_bonus) * hf
 			team.resources["food"] = float(team.resources.get("food", 0)) + food_gain
-		"P3_recruit":
-			var leader = state.persons.get(team.leader_id)
-			var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
-			var cap: int = TeamData.pop_cap_from_leadership(cmd)
-			if team.population < cap:
-				team.population += 1
-				AnonTierSystem.add_anon(team, "平民", 1)
 		"P4_expand":
 			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
 		"P5_breed":

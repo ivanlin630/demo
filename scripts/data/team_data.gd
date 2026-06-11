@@ -52,6 +52,7 @@ var merchant_inventory: Array = []           # 商隊 inventory，元素: {grade
 var occupying_outpost_since: int = -1        # 駐留無人 outpost 起始 tick，達 3 天接管
 var pending_owner_change_tick: int = -1      # 偵測 owner 異動緩衝倒數（7 天）
 var unrest_turns: int = 0
+var work_morale: float = 1.0   # 工作態度係數 [0.5,1.5]，reaction 統計寫入，產出系統消費
 var faction_id: int = -1
 var tile_pos: Vector2i = Vector2i.ZERO
 var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
