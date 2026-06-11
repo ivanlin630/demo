@@ -357,7 +357,7 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 		state.factions[fid].member_team_ids.append(target_id)
 	target.faction_id = fid
 	state.snapshot_faction_member(target_id, state.world.current_tick)
-	initiator.current_task = "idle"
+	TaskArbiter.release(initiator)
 	_msg.emit_message(state, "diplomacy",
 		TextBank.fmt("diplomacy", "honest", {
 			"origin": str(initiator_id), "target": str(target_id)
@@ -421,8 +421,7 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			p.fear    = minf(p.fear    + fear_gain,    1.0)
 		if rate > 0.5:
 			payer.unrest_turns += 1
-		collector.current_task = TeamData.TASK_IDLE
-		collector.move_target  = Vector2i(-1, -1)
+		TaskArbiter.release(collector)
 		_msg.emit_message(state, "tribute",
 			TextBank.fmt("tribute", "honest", {
 				"origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % rate
@@ -454,8 +453,7 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			continue
 		payer.resources[res]     = float(payer.resources.get(res, 0)) - amount
 		collector.resources[res] = float(collector.resources.get(res, 0)) + amount
-	collector.current_task = TeamData.TASK_IDLE
-	collector.move_target  = Vector2i(-1, -1)
+	TaskArbiter.release(collector)
 	_msg.emit_message(state, "tribute",
 		TextBank.fmt("tribute", "honest", {
 			"origin": str(collector_id), "target": str(payer_id), "rate": "%.2f" % base_rate
@@ -577,8 +575,8 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 		print("[Market] Team%d <-> Team%d 成交（公庫接入）" % [a.team_id, b.team_id])
 	_spill_back_public_storage(state, a, a_original)
 	_spill_back_public_storage(state, b, b_original)
-	if a.current_task == TeamData.TASK_TRADE: a.current_task = TeamData.TASK_IDLE
-	if b.current_task == TeamData.TASK_TRADE: b.current_task = TeamData.TASK_IDLE
+	if a.current_task == TeamData.TASK_TRADE: TaskArbiter.release(a)
+	if b.current_task == TeamData.TASK_TRADE: TaskArbiter.release(b)
 
 func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamData) -> void:
 	var buyer_coin: float = float(buyer.resources.get("coin", 0))
@@ -848,9 +846,13 @@ func _count_recent_begs(leader: PersonData, beggar_id: int) -> int:
 	return count
 
 func _clear_aid_task(beggar: TeamData) -> void:
-	beggar.current_task = beggar.previous_task if beggar.previous_task != "" else TeamData.TASK_IDLE
-	beggar.previous_task = ""
 	beggar.combat_target = -1
+	if beggar.previous_task != "" and beggar.previous_task != TeamData.TASK_IDLE:
+		# 恢復 survival 前的原 task（就地轉換，move_target 保留）
+		TaskArbiter.transition(beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)
+	else:
+		TaskArbiter.release(beggar)
+	beggar.previous_task = ""
 
 func _aid_update_rep(team: TeamData, other_id: int, delta: float) -> void:
 	var cur: float = float(team.known_reputations.get(other_id, 0.5))
@@ -866,7 +868,7 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 		t.tags.append(TeamData.TAG_PRODUCE)
 	t.tags.erase("流亡")
 	t.faction_id = faction_id
-	t.current_task = "生產"
+	TaskArbiter.transition(t, "生產", TaskArbiter.PRIO_AMBIENT)
 	t.move_target = Vector2i(-1, -1)
 	# 加入 faction
 	if faction_id != -1 and state.factions.has(faction_id):
@@ -896,7 +898,7 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 		subteam.tags.append(TeamData.TAG_PRODUCE)
 	subteam.tags.erase("子團")
 	subteam.tags.erase("流亡")
-	subteam.current_task = "生產"
+	TaskArbiter.transition(subteam, "生產", TaskArbiter.PRIO_AMBIENT)
 	subteam.parent_team_id = -1
 	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
 		subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])

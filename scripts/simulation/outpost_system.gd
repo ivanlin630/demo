@@ -245,7 +245,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 	tile.construction_ticks_left = 0
 	tile.construction_team_id   = -1
 	tile.construction_target     = {}
-	team.current_task = TeamData.TASK_IDLE
+	TaskArbiter.release(team)
 
 # C: 建造子隊完工後就地安頓為駐留 team（owner 已設為自己，加 tag、脫離母團）
 func _auto_settle_builder(state: WorldState, team: TeamData, tile: HexTileData) -> void:
@@ -286,7 +286,7 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[type][level - 1]
 	tile.construction_target    = { "action": "build", "type": type, "level": level }
-	team.current_task = "建設"
+	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 開始建 %s Lv%d at (%d,%d)（需 %d person-ticks）" % [
 		team.team_id, type, level, tile.tile_pos.x, tile.tile_pos.y,
 		tile.construction_ticks_left])
@@ -306,7 +306,7 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][new_level - 1]
 	tile.construction_target    = { "action": "upgrade_level", "level": new_level }
-	team.current_task = "建設"
+	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 升級 → Lv%d at (%d,%d)" % [
 		team.team_id, new_level, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -327,7 +327,7 @@ func start_upgrade_farming(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = cost["ticks"]
 	tile.construction_target    = { "action": "upgrade_farming" }
-	team.current_task = "建設"
+	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 農作升級 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
@@ -347,7 +347,7 @@ func start_upgrade_manufacturing(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = cost["ticks"]
 	tile.construction_target    = { "action": "upgrade_manufacturing" }
-	team.current_task = "建設"
+	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 製造升級 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
@@ -360,7 +360,7 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][tile.outpost_level - 1] / 2
 	tile.construction_target    = { "action": "demolish" }
-	team.current_task = "建設"
+	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 拆除 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
@@ -409,7 +409,7 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][target_level - 1]
 	tile.construction_target    = { "action": "upgrade_level", "level": target_level }
-	team.current_task = TeamData.TASK_BUILD
+	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] 子隊 Team%d 開始升級 → Lv%d at (%d,%d)" % [
 		team.team_id, target_level, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -448,7 +448,7 @@ func _subteam_upgrade_facility(state: WorldState, team: TeamData, tile: HexTileD
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = cost["ticks"]
 	tile.construction_target    = { "action": action }
-	team.current_task = TeamData.TASK_BUILD
+	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] 子隊 Team%d 開始擴建 %s at (%d,%d)" % [
 		team.team_id, facility, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -477,7 +477,7 @@ func demolish_with_control(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][tile.outpost_level - 1] / 2
 	tile.construction_target    = { "action": "demolish" }
-	team.current_task = TeamData.TASK_BUILD
+	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 拆除（control）at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
