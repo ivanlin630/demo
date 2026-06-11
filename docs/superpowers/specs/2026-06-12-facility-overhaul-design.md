@@ -95,7 +95,21 @@ score(f) = terrain_fit(f) × (1.0 + deficit(f)) × personality_pref(leader, f)
 
 **personality_pref：** 沿用既有 leader_pref dict（慎重→農田、貪婪→mint、好戰→武器坊…）。
 
-## 4. 軍屯（military outpost residency）
+## 4. 建造成本：三級制（coin 完全退出建設經濟）
+
+| 級 | 成本構成 | 設施（基準成本 / 工期）|
+|---|---|---|
+| **低（基礎）** | material only | 農田 30/3天（720t）、工坊 60/7天（1680t）、馬廄 40/14天（3360t）|
+| **中（工藝）** | material + **tools** | 藥坊 50+2t/7天、冶煉 80+3t/14天、武器坊 80+3t/14天、護甲坊 80+3t/14天、鑄幣 100+5t/30天（7200t）|
+| **享樂（未來）** | material + tools + **goods** | 市集/廟宇…（B 期後）|
+
+- 升級 Lv2 = 基準 ×2、Lv3 = ×3（含 tools、工期同倍率）。全 TEST VALUE
+- **outpost 本體同步去 coin**：civilian = 純 material；military = material + weapon（既有 weapon 成分保留）
+- coin 保留用途：薪資 / 貿易 / anon 升等 / 玩家招募 / 勒索進貢 — 專職人力與市場，建設歸實物
+- 依賴鏈（自動 bootstrap，無死鎖）：工坊低級純 mat 可起步 → 產 tools（2 iron+2 mat）→ 中級設施全要 tools → 無鐵村買 tools/iron、軍鎮蓋武器坊也要向民間買 tools（軍民貿易線）
+- 農田工期最短（3 天）→ 飢餓 override 拆遷改建不會餓死在工期裡
+
+## 5a. 軍屯（military outpost residency）
 
 `_try_dispatch_or_invite` 加 filter：
 
@@ -109,7 +123,7 @@ if tile_type == "military":
 - 軍屯子隊 = SUBTEAM+PRODUCE dual tag（同民用派駐機制）
 - 殘餘風險保留：紀律失效脫離 / 起義（loyalty<0.2 + unrest≥60）皆既有 — 苛待守軍 → 兵工廠叛變（低頻高戲劇性，feature）
 
-## 5. 生產人力規則
+## 5b. 生產人力規則
 
 設施日產 tick（mint/stable/製造類）統一加 gate：**tile 上有居民團（PRODUCE tag）才生產**。
 - 既有 mint/stable 的 tick_all 補此 gate（行為變化：無人軍堡/空村停產）
@@ -125,7 +139,9 @@ if tile_type == "military":
 6. 工坊配方：tools / arrows 產出；護甲坊：armor_low/high 產出
 7. 配方組內缺口排序：arrows 存量最低 → 先做 arrows
 8. 生產人力 gate：無居民團 tile 設施不產
-9. multi 90 天：NPC 建造設施 > 0（baseline stable = 0）、**村莊設施組合差異度**（≥2 種不同組合）、ALL INVARIANTS PASSED
+9. 建造成本三級制：低級純 mat 可蓋；中級無 tools 蓋不了；建造不扣 coin（grep 驗證建設路徑無 coin 扣除）
+10. outpost 本體建造不扣 coin（civilian 純 mat / military mat+weapon）
+11. multi 90 天：NPC 建造設施 > 0（baseline stable = 0）、**村莊設施組合差異度**（≥2 種不同組合）、ALL INVARIANTS PASSED
 
 ## 風險
 
