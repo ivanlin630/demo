@@ -2696,7 +2696,9 @@ func _test_full_config_load() -> void:
 	var c2 := GameSetup.load_config("res://config/game_sim_test.json")
 	assert(not c2.is_empty(), "game_sim_test.json 載入失敗")
 	GameSetup.setup(s2, c2)
-	assert(s2.teams.size() == 5, "game_sim_test 應 5 team，實際=%d" % s2.teams.size())
+	var expected_teams: int = c2.get("teams", []).size()
+	assert(s2.teams.size() == expected_teams,
+		"game_sim_test 應 %d team，實際=%d" % [expected_teams, s2.teams.size()])
 	assert(c2.get("command_schedule", []).size() >= 6, "command_schedule 應有 ≥6 entries")
 	var s3 := WorldState.new()
 	var c3 := GameSetup.load_config("res://config/default.json")
