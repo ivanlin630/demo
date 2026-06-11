@@ -149,13 +149,24 @@ func tick_all(state: WorldState) -> void:
 	var day_fraction: float = float(WorldState.TICKS_PER_HOUR) / float(WorldState.TICKS_PER_DAY)
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.mint_level > 0:
-			_tick_mint(state, tile, state.teams.get(tile.outpost_owner))
-		if tile.stable_level > 0:
-			produce_stable_day(state, tile, day_fraction)
+		# 生產人力 gate：tile 上有居民團（PRODUCE tag）才生產（無人 = 停產）
+		if tile.mint_level > 0 or tile.stable_level > 0:
+			if _has_resident_on_tile(state, tile):
+				if tile.mint_level > 0:
+					_tick_mint(state, tile, state.teams.get(tile.outpost_owner))
+				if tile.stable_level > 0:
+					produce_stable_day(state, tile, day_fraction)
 		if tile.construction_team_id == -1:
 			continue
 		_tick_construction(state, tile)
+
+# tile 上是否有 PRODUCE（居民）team（軍屯子隊同 tag）
+func _has_resident_on_tile(state: WorldState, tile: HexTileData) -> bool:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos != tile.tile_pos: continue
+		if TeamData.TAG_PRODUCE in t.tags: return true
+	return false
 
 # 馬廄：消耗 owner team food → 累積 mounts；day_fraction = 本次 tick 佔一天的比例。
 # 測試可直接以 day_fraction=1.0 模擬整天。

@@ -69,6 +69,9 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 			continue
 		if not _team_works_tile(state, team, tile):
 			continue
+		# 生產人力 gate：tile 上有居民團（PRODUCE tag）才生產
+		if not OutpostSystem.new()._has_resident_on_tile(state, tile):
+			continue
 
 		var pop_mult: float   = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
 		var avg_skill: float  = _avg_skill(state, team, "製造")

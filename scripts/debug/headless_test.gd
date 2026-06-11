@@ -229,6 +229,8 @@ func _initialize() -> void:
 	_test_terrain_fit_scores()
 	_test_hunger_override()
 	_test_military_outpost_builds_weaponsmith()
+	_test_military_residency_dispatch_only()
+	_test_production_requires_resident()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -4184,6 +4186,7 @@ func _test_manufacturing_to_storage() -> void:
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
 	team.current_task = TeamData.TASK_MANUFACTURE
+	team.tags.append(TeamData.TAG_PRODUCE)   # 生產人力 gate
 	team.resources["material"] = 100.0
 	state.teams[0] = team
 	var ms := ManufacturingSystem.new()
@@ -6868,6 +6871,7 @@ func _make_mfg_state(facility_levels: Dictionary) -> Array:
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
 	team.current_task = TeamData.TASK_MANUFACTURE
+	team.tags.append(TeamData.TAG_PRODUCE)   # 生產人力 gate
 	state.teams[0] = team
 	return [state, team, tile]
 
@@ -7003,3 +7007,76 @@ func _test_military_outpost_builds_weaponsmith() -> void:
 	for f in ["farming", "workshop", "mint", "stable", "apothecary"]:
 		assert(pick.get("facility", "") != f)
 	print("Facility Task4c OK")
+
+func _test_military_residency_dispatch_only() -> void:
+	print("--- Facility Task5a: 軍屯只 dispatch 不 invite ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.outpost_type = "military"
+	tile.outpost_level = 1; tile.outpost_owner = 0
+	state.world.tiles[3003] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 20; team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = team
+	# 高商業/慎重 leader（民用會走 invite）
+	var leader := PersonData.new(); leader.id = 100
+	leader.values = { "野心": 0.0, "好戰": 0.0, "慎重": 0.9 }
+	leader.skills = { "商業": 0.9 }
+	state.persons[100] = leader; team.leader_id = 100
+	# 視野內有流亡團（民用情境會被邀）
+	var exile := TeamData.new(); exile.team_id = 5; exile.population = 3
+	exile.tile_pos = Vector2i(4, 4); exile.tags = ["流亡"]
+	state.teams[5] = exile
+	state.team_discovered[0] = [5]
+	var fai := FactionAISystem.new()
+	fai._try_dispatch_or_invite(state, team, tile, leader)
+	assert(exile.current_task != "安頓", "military 不 invite 流亡")
+	assert(team.invite_cooldown.is_empty(), "不應觸發 invite cooldown")
+	assert(state.teams.size() == 2, "invite 傾向 leader → 軍屯不派也不邀")
+	# 高野心 leader → dispatch 子隊
+	leader.values = { "野心": 0.9, "好戰": 0.9, "慎重": 0.0 }
+	leader.skills = { "商業": 0.0 }
+	fai._try_dispatch_or_invite(state, team, tile, leader)
+	var sub_found: bool = false
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			sub_found = true
+	assert(sub_found, "高野心 → 軍屯 dispatch 子隊")
+	print("Facility Task5a OK")
+
+func _test_production_requires_resident() -> void:
+	print("--- Facility Task5b: 生產人力 gate ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_type = "civilian"
+	tile.outpost_level = 2; tile.outpost_owner = 0
+	tile.mint_level = 1; tile.stable_level = 1; tile.terrain = "plains"
+	tile.public_storage = { "ore_gold": 10.0 }
+	state.world.tiles[0] = tile
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.population = 10; owner.tile_pos = Vector2i(5, 5)
+	owner.resources["food"] = 1000.0
+	state.teams[0] = owner
+	var os := OutpostSystem.new()
+	os.tick_all(state)
+	assert(float(tile.public_storage.get("coin", 0)) == 0.0, "無居民 → mint 停產")
+	assert(tile.stable_progress == 0.0, "無居民 → stable 停產")
+	# 加 PRODUCE 居民團 → 生產恢復
+	var resident := TeamData.new()
+	resident.team_id = 1; resident.population = 5; resident.tile_pos = Vector2i(0, 0)
+	resident.tags = [TeamData.TAG_PRODUCE]
+	state.teams[1] = resident
+	os.tick_all(state)
+	assert(float(tile.public_storage.get("coin", 0)) > 0.0, "有居民 → mint 產 coin")
+	assert(tile.stable_progress > 0.0, "有居民 → stable 產出累積")
+	# 製造 gate：無 PRODUCE 居民 → 不產
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state2: WorldState = r[0]; var team2: TeamData = r[1]; var tile2: HexTileData = r[2]
+	team2.tags.clear()
+	team2.resources = { "material": 100.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state2, [0])
+	assert(float(tile2.public_storage.get("goods", 0)) == 0.0, "無 PRODUCE 居民 → 製造停產")
+	print("Facility Task5b OK")

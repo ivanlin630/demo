@@ -353,6 +353,11 @@ func _try_dispatch_or_invite(state: WorldState, team: TeamData,
 	var caution: float = float(leader.values.get("慎重", 0.5))
 	var dispatch_score: float = ambition * 0.5 + military * 0.3
 	var invite_score: float = commerce * 0.4 + caution * 0.3
+	if tile.outpost_type == "military":
+		# 軍屯：只信任自己人（軍火庫不交給流民），無 invite fallback
+		if dispatch_score > invite_score and team.population >= 8:
+			_dispatch_subteam_settle(state, team, tile)
+		return
 	if dispatch_score > invite_score and team.population >= 8:
 		_dispatch_subteam_settle(state, team, tile)
 	else:
