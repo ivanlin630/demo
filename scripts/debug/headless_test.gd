@@ -209,6 +209,9 @@ func _initialize() -> void:
 	_test_arbiter_survival_beats_dispatch()
 	_test_arbiter_dispatch_beats_faction_goal()
 	_test_bridge_cannot_stomp_survival()
+	# ── Economy / Spam Fixes ──
+	_test_salary_budget_ratio()
+	_test_salary_full_pay_unchanged()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6568,3 +6571,57 @@ func _test_bridge_cannot_stomp_survival() -> void:
 	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL)
 	assert(team.move_target == Vector2i(1, 0), "move_target 不應被 bridge 改動")
 	print("Arbiter Task4 OK")
+
+# ──────── Economy / Spam Fixes ────────
+
+func _test_salary_budget_ratio() -> void:
+	print("--- EcoFix Task1a: 量入為出 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.tags = ["軍隊"]
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	leader.values = { "義氣": 0.5, "信義": 0.5, "貪婪": 0.5 }   # mult = 1.1
+	state.persons[1] = leader; team.leader_id = 1
+	var m := PersonData.new(); m.id = 2; m.team_id = 0
+	m.skills = { "戰鬥": 0.5 }   # fair = 0.5 * SALARY_PER_SKILL_POINT = 1.0
+	m.loyalty = 0.5
+	state.persons[2] = m
+	team.named_members = [2]
+	state.teams[0] = team
+	# payroll = fair(1.0) * mult(1.1) + anon wage；coin 只給一半
+	var anon_total: float = AnonTierSystem.total_wage(team)
+	var payroll: float = 1.0 * 1.1 + anon_total
+	team.resources["coin"] = payroll * 0.5
+	var ss := SalarySystem.new()
+	ss._pay_salary(state, team)
+	var coin_after: float = float(team.resources.get("coin", 0))
+	assert(coin_after >= -0.001, "coin 不得為負，實際=%.2f" % coin_after)
+	assert(coin_after < 0.05, "錢應幾乎發光（按比例縮水發完），實際=%.2f" % coin_after)
+	assert(m.coin > 0.0, "named 領到減額薪資，實際=%.2f" % m.coin)
+	assert(m.loyalty < 0.5, "減薪 → ratio 路徑掉 loyalty，實際=%.2f" % m.loyalty)
+	assert(team.unrest_turns == 1, "減薪應 unrest+1，實際=%d" % team.unrest_turns)
+	print("EcoFix Task1a OK")
+
+func _test_salary_full_pay_unchanged() -> void:
+	print("--- EcoFix Task1b: coin 充足 → 全額照舊 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.tags = ["軍隊"]
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
+	leader.values = { "義氣": 0.5, "信義": 0.5, "貪婪": 0.5 }   # mult = 1.1
+	state.persons[1] = leader; team.leader_id = 1
+	var m := PersonData.new(); m.id = 2; m.team_id = 0
+	m.skills = { "戰鬥": 0.5 }   # fair = 1.0, salary = 1.1
+	m.loyalty = 0.5
+	state.persons[2] = m
+	team.named_members = [2]
+	state.teams[0] = team
+	team.resources["coin"] = 100.0
+	var ss := SalarySystem.new()
+	ss._pay_salary(state, team)
+	var coin_after: float = float(team.resources.get("coin", 0))
+	assert(absf(coin_after - (100.0 - 1.1)) < 0.01, "全額發薪 coin=98.9，實際=%.2f" % coin_after)
+	assert(absf(m.coin - 1.1) < 0.01, "named 領全額 1.1，實際=%.2f" % m.coin)
+	assert(m.loyalty > 0.5, "超額薪資（mult 1.1）→ loyalty 上升，實際=%.2f" % m.loyalty)
+	assert(team.unrest_turns == 0, "coin 充足不應 unrest，實際=%d" % team.unrest_turns)
+	print("EcoFix Task1b OK")
