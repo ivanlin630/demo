@@ -215,6 +215,7 @@ func _initialize() -> void:
 	_test_trade_partner_requires_resident()
 	_test_diplomacy_reject_cooldown()
 	_test_equip_order_no_oscillation()
+	_test_n1_leader_no_anon_pop_stable()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6730,3 +6731,27 @@ func _test_equip_order_no_oscillation() -> void:
 			armed += 1
 	assert(armed == 4, "4 named 應全程保持裝備，實際=%d" % armed)
 	print("EcoFix Task4 OK")
+
+func _test_n1_leader_no_anon_pop_stable() -> void:
+	print("--- EcoFix Task4b: leader flee 無 anon → pop 不變 ---")
+	# 根因 2：舊版 leader N1/N3 無條件扣 pop，anon=0 時沒人真的走
+	# → pop < named 數 → guard equip target 0↔1 振盪（multi Team14 churn）
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 2
+	team.leader_id = 1; team.named_members = [2]
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0; leader.stress = 0.9
+	var m := PersonData.new(); m.id = 2; m.team_id = 0
+	state.persons[1] = leader; state.persons[2] = m
+	state.teams[0] = team
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, leader, team, "N1_flee")
+	assert(team.population == 2, "anon=0 無人可走，pop 應 2，實際=%d" % team.population)
+	rs._apply_reaction(state, leader, team, "N3_defect")
+	assert(team.population == 2, "N3 同理 pop 應 2，實際=%d" % team.population)
+	# 有 anon → 照舊扣 pop + tier -1
+	team.anon_tiers["平民"] = 1; team.population = 3
+	leader.stress = 0.9
+	rs._apply_reaction(state, leader, team, "N1_flee")
+	assert(team.population == 2, "有 anon 應扣 pop=2，實際=%d" % team.population)
+	assert(int(team.anon_tiers["平民"]) == 0, "平民 tier 應 -1，實際=%d" % int(team.anon_tiers["平民"]))
+	print("EcoFix Task4b OK")
