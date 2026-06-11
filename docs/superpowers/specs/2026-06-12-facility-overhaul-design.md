@@ -105,11 +105,23 @@ score(f) = terrain_fit(f) × (1.0 + deficit(f)) × personality_pref(leader, f)
 
 - 升級 Lv2 = 基準 ×2、Lv3 = ×3（含 tools、工期同倍率）。全 TEST VALUE
 - **建造守恆原則：有限資源及其子鏈（ore_*/gem/weapon/armor/coin）永不入建造成本** — 建造只消耗可再生資源（material、tools[純 mat 製]）
-- **outpost 本體**：兩種據點都 = material + tools（civilian 50/150/400 mat + 2/4/8 tools；military 80/200/500 mat + 3/6/10 tools，**weapon 成本移除**）。TEST VALUE
+- **outpost 本體**：civilian = **純 material**（50/150/400）；military = material + tools（80/200/500 + 3/6/10 tools，weapon 成本移除）。TEST VALUE
+- **無雞生蛋**：拓荒 → 民用據點（純 mat）→ 內建工坊 → 產 tools → 才蓋得起軍用據點與中級設施 = 自然的文明階梯（先民後軍）
 - coin 保留用途：薪資 / 貿易 / anon 升等 / 玩家招募 / 勒索進貢 — 專職人力與市場，建設歸實物
-- 依賴鏈：工坊低級純 mat 起步 → 產 tools（4 mat，可再生）→ 中級設施 + outpost 本體全要 tools → 軍鎮向民間買 tools（軍民貿易線）
-- **Bootstrap 注意**：第一個 outpost 也要 tools，而 tools 產自工坊（在 outpost 內）→ 雞生蛋。解法：config 種子 tools（開局團隊帶工具，拓荒者套件）+ 貿易/搶劫可得。config 全面補 tools 初始量
+- 依賴鏈：工坊低級純 mat 起步 → 產 tools（4 mat，可再生）→ 中級設施 + 軍用據點全要 tools → 軍鎮向民間買 tools（軍民貿易線）
 - 農田工期最短（3 天）→ 飢餓 override 拆遷改建不會餓死在工期裡
+
+## 4b. 有限資源守恆審計（終局經濟）
+
+**Invariant：有限資源（ore/gem/weapon/armor/coin）總量恆定 — 只有開採增加，任何系統不得銷毀，只能轉移。**
+
+挖完 = 時代轉折（武備珍稀紀元 / coin 通縮 → 為 D 期信用貨幣鋪敘事），不是滅絕。
+
+| 現有 sink | 改 |
+|---|---|
+| anon 升等 PROMOTION_COST coin（5/15/50）蒸發 | → 入 `team.anon_treasury`（訓練餉銀，本來就是給兵的錢）。food/material 成本照舊消耗（可再生）|
+| 玩家招募 RECRUIT_COST（50/150）蒸發 | → 轉給目標 team（買人付給對方）|
+| 武器/護甲銷毀路徑 | 實作時 audit：確認戰鬥/死亡只走 歸還/loot/abandoned 轉移；發現銷毀點 → 改轉移 |
 
 ## 5a. 軍屯（military outpost residency）
 
@@ -142,8 +154,9 @@ if tile_type == "military":
 7. 配方組內缺口排序：arrows 存量最低 → 先做 arrows
 8. 生產人力 gate：無居民團 tile 設施不產
 9. 建造成本三級制：低級純 mat 可蓋；中級無 tools 蓋不了；建造不扣 coin / 不扣任何有限資源（grep 驗證建設路徑無 coin/ore/weapon 扣除）
-10. outpost 本體建造 = mat + tools（兩種據點；weapon 成本已移除）
+10. outpost 本體：civilian 純 mat / military mat+tools（weapon 成本已移除）
 10b. tools 配方純 mat（4 mat）— 建造鏈全程可再生
+10c. 守恆審計：升等 coin → anon_treasury（總量不變）；招募 coin → 目標 team；全 sim 90 天 coin 總量（teams + persons + treasury + 公庫 + abandoned）恆定
 11. multi 90 天：NPC 建造設施 > 0（baseline stable = 0）、**村莊設施組合差異度**（≥2 種不同組合）、ALL INVARIANTS PASSED
 
 ## 風險
