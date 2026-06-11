@@ -190,6 +190,7 @@ func _initialize() -> void:
 	_test_p3_removed()
 	_test_p2_no_food()
 	_test_work_morale_shift()
+	_test_collect_uses_morale()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6243,3 +6244,22 @@ func _test_work_morale_shift() -> void:
 		rs.evaluate_all(state, [0])
 	assert(team.work_morale > 1.0, "勤奮村 morale 應 > 1.0，實際=%.2f" % team.work_morale)
 	print("Reaction Task2b OK (morale=%.2f)" % team.work_morale)
+
+func _test_collect_uses_morale() -> void:
+	print("--- Reaction Task3: 採集 gain 乘 work_morale ---")
+	var rs := ResourceSystem.new()
+	var gains: Array = []
+	for morale in [0.5, 1.5]:
+		var state := WorldState.new(); state.world = WorldData.new()
+		var team := TeamData.new(); team.team_id = 0; team.population = 5
+		team.resources = { "food": 0.0 }
+		team.work_morale = morale
+		state.teams[0] = team
+		var tile := HexTileData.new()
+		tile.resources = { "food": 1000.0 }
+		rs._collect_from_tile(state, team, tile, 1.0, 1.0, 0.0, 0.0)
+		gains.append(float(team.resources["food"]))
+	assert(gains[0] > 0.0, "morale 0.5 仍應有產出")
+	var ratio: float = gains[1] / gains[0]
+	assert(abs(ratio - 3.0) < 0.01, "1.5/0.5 gain 應 3 倍，實際=%.2f" % ratio)
+	print("Reaction Task3 OK (ratio=%.2f)" % ratio)
