@@ -29,6 +29,7 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var player_died: bool = false
 	var max_treasury: float = 0.0
 	var min_coin: float = 1e9
+	var pop_init: int = _total_pop(state)
 	for tick in range(max_ticks):
 		var pp: Vector2i = _player_pos(state)
 		var result = runner.advance_tick(state, pp)
@@ -45,6 +46,9 @@ func _run_config(cfg_name: String) -> Dictionary:
 			var t = state.teams[tid]
 			max_treasury = maxf(max_treasury, t.anon_treasury)
 			min_coin = minf(min_coin, float(t.resources.get("coin", 0)))
+		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
+			print("[PopSample] %s tick=%d total_pop=%d" % [
+				cfg_name, state.world.current_tick, _total_pop(state)])
 	# 蒐集事件統計（從 log 或 state）
 	var team_count: int = state.teams.size()
 	var alive_persons: int = state.persons.size()
@@ -52,12 +56,20 @@ func _run_config(cfg_name: String) -> Dictionary:
 		"ticks_completed": min(state.world.current_tick, max_ticks),
 		"team_count_final": team_count,
 		"persons_final": alive_persons,
+		"pop_init": pop_init,
+		"pop_final": _total_pop(state),
 		"player_died": (state.player_id == -1 or state.game_over),
 		"max_treasury": max_treasury,
 		"min_coin": min_coin,
 		"game_over": state.game_over,
 		"game_over_reason": state.game_over_reason,
 	}
+
+func _total_pop(state: WorldState) -> int:
+	var total: int = 0
+	for tid in state.teams:
+		total += state.teams[tid].population
+	return total
 
 func _player_pos(state: WorldState) -> Vector2i:
 	var p: PersonData = state.persons.get(state.player_id)
@@ -89,18 +101,21 @@ func _auto_drive_encounter(state: WorldState, runner: SimRunner) -> void:
 
 func _print_comparison(summary: Array) -> void:
 	print("\n========== 多配置對比 ==========")
-	print("%-20s %10s %12s %10s %10s %12s %10s" % [
-		"config", "ticks", "teams", "persons", "died", "max_treas", "min_coin"])
+	print("%-20s %10s %12s %10s %10s %12s %10s %10s %10s" % [
+		"config", "ticks", "teams", "persons", "died", "max_treas", "min_coin",
+		"pop_init", "pop_final"])
 	for entry in summary:
 		var s = entry.stats
-		print("%-20s %10d %12d %10d %10s %12.0f %10.0f" % [
+		print("%-20s %10d %12d %10d %10s %12.0f %10.0f %10d %10d" % [
 			entry.config,
 			int(s.get("ticks_completed", 0)),
 			int(s.get("team_count_final", 0)),
 			int(s.get("persons_final", 0)),
 			"yes" if s.get("player_died", false) else "no",
 			float(s.get("max_treasury", 0)),
-			float(s.get("min_coin", 0))
+			float(s.get("min_coin", 0)),
+			int(s.get("pop_init", 0)),
+			int(s.get("pop_final", 0))
 		])
 		if s.get("game_over", false):
 			print("    > game_over: %s" % s.get("game_over_reason", "?"))
