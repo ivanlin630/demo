@@ -191,6 +191,8 @@ func _initialize() -> void:
 	_test_p2_no_food()
 	_test_work_morale_shift()
 	_test_collect_uses_morale()
+	_test_p5_needs_surplus()
+	_test_n5_coin_conserved()
 	quit()
 
 func _run_sim_test() -> void:
@@ -6263,3 +6265,31 @@ func _test_collect_uses_morale() -> void:
 	var ratio: float = gains[1] / gains[0]
 	assert(abs(ratio - 3.0) < 0.01, "1.5/0.5 gain 應 3 倍，實際=%.2f" % ratio)
 	print("Reaction Task3 OK (ratio=%.2f)" % ratio)
+
+func _test_p5_needs_surplus() -> void:
+	print("--- Reaction Task4a: P5 需糧食盈餘 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	team.resources = { "food": 50.0 }   # 50 < 10*2.4*7=168
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	var rs := ReactionSystem.new()
+	rs._apply_reaction(state, p, team, "P5_breed")
+	assert(team.minor_population == 0, "糧不足不生")
+	team.resources["food"] = 200.0
+	rs._apply_reaction(state, p, team, "P5_breed")
+	assert(team.minor_population == 1, "盈餘該生")
+	print("Reaction Task4a OK")
+
+func _test_n5_coin_conserved() -> void:
+	print("--- Reaction Task4b: N5 coin 守恆 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	team.resources = { "coin": 100.0 }
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	var rs := ReactionSystem.new()
+	var before: float = float(team.resources["coin"]) + p.coin
+	rs._apply_reaction(state, p, team, "N5_extort")
+	var after: float = float(team.resources["coin"]) + p.coin
+	assert(abs(before - after) < 0.001, "coin 總和守恆")
+	assert(p.coin > 0, "偷的錢進 person.coin")
+	print("Reaction Task4b OK")

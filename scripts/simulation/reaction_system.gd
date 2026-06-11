@@ -209,9 +209,12 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		"P4_expand":
 			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
 		"P5_breed":
-			var cap: int = int(team.population * 0.2)
-			if team.minor_population < cap:
-				team.minor_population += 1
+			var surplus_ok: bool = float(team.resources.get("food", 0)) \
+				> float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
+			if surplus_ok:
+				var cap: int = int(team.population * 0.2)
+				if team.minor_population < cap:
+					team.minor_population += 1
 		"N1_flee":
 			team.population = maxi(team.population - 1, 1)
 			person.stress = maxf(person.stress - 0.3, 0.0)
@@ -235,6 +238,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var money: float = float(team.resources.get("coin", 0))
 			var steal: float = minf(money, 5.0)
 			team.resources["coin"] = money - steal
+			person.coin += steal   # 守恆：偷進私囊
 
 	_maybe_write_memory(person, reaction, state.world.current_tick)
 
