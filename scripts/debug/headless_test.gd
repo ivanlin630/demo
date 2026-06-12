@@ -241,6 +241,8 @@ func _initialize() -> void:
 	_test_daily_catch_to_horses()
 	_test_military_stable_trains_mounts()
 	_test_civilian_stable_no_training()
+	_test_wagon_recipe()
+	_test_medicine_recipe()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7339,3 +7341,38 @@ func _test_civilian_stable_no_training() -> void:
 	assert(float(owner.resources["food"]) == 1000.0, "廢 food→mounts：不耗 food 不憑空產")
 	assert("military" in OutpostSystem.FACILITY_DEF["stable"]["allowed_outpost"], "stable 開放 military")
 	print("Material Task3b OK")
+
+func _test_wagon_recipe() -> void:
+	print("--- Material Task4a: wagons 配方 ---")
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	# 其他成品庫存拉滿 → wagons 缺口最大；horses 來源 = team 自有
+	team.resources = { "horses": 1.0, "material": 6.0, "tools": 99.0, "goods": 99.0, "arrows": 99.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("wagons", 0)) > 0, "wagons 應產出")
+	assert(float(team.resources["horses"]) == 0.0, "horses 消耗 1")
+	assert(float(team.resources["material"]) == 0.0, "material 消耗 6")
+	assert(float(team.resources["tools"]) == 98.0, "tools 消耗 1")
+	# 無 horses → wagons 不可做（改跑其他配方或不產 wagons）
+	var wagons_before: float = float(tile.public_storage.get("wagons", 0))
+	team.resources = { "material": 6.0, "tools": 99.0, "goods": 99.0, "arrows": 99.0 }
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("wagons", 0)) == wagons_before, "無 horses 不產 wagons")
+	print("Material Task4a OK")
+
+func _test_medicine_recipe() -> void:
+	print("--- Material Task4b: medicine 配方 ---")
+	var r := _make_mfg_state({ "apothecary_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	team.resources = { "herb": 2.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("medicine", 0)) > 0, "medicine 應產出")
+	assert(float(team.resources["herb"]) == 0.0, "herb 消耗 2")
+	# 無 herb 不產
+	var med_before: float = float(tile.public_storage.get("medicine", 0))
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("medicine", 0)) == med_before, "無 herb 不產")
+	assert(InteractionSystem.BASE_PRICE.has("horses") and InteractionSystem.BASE_PRICE.has("medicine"), "貿易價格表補 horses/medicine")
+	print("Material Task4b OK")
