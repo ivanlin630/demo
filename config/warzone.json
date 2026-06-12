@@ -10,7 +10,7 @@
       "anon_tiers": { "新兵": 3, "老兵": 6, "菁英": 3 },
       "resources": {
         "food": 200, "material": 100, "coin": 300, "weapon_melee_low": 20,
-        "armor_low": 12
+        "armor_low": 12, "tools": 3
       },
       "leader": {
         "name": "統帥", "skills": { "統領": 0.7, "戰鬥": 0.6, "戰術": 0.5 },
@@ -26,7 +26,7 @@
       "id": 1, "name": "敵軍A", "tile_pos": [7, 4], "population": 12,
       "tags": ["軍隊"], "faction_id": 1, "is_faction_leader": true,
       "anon_tiers": { "新兵": 4, "老兵": 5, "菁英": 2 },
-      "resources": { "food": 150, "coin": 200, "weapon_melee_low": 15, "armor_low": 8 },
+      "resources": { "food": 150, "coin": 200, "weapon_melee_low": 15, "armor_low": 8, "tools": 3 },
       "leader": { "name": "敵將A", "values": { "好戰": 0.95, "野心": 0.7 } },
       "named_members": [{ "name": "副將A" }],
       "outpost": { "type": "military", "level": 1 }
@@ -35,7 +35,7 @@
       "id": 2, "name": "敵軍B", "tile_pos": [4, 7], "population": 14,
       "tags": ["軍隊"], "faction_id": 2, "is_faction_leader": true,
       "anon_tiers": { "平民": 2, "新兵": 5, "老兵": 5, "菁英": 1 },
-      "resources": { "food": 150, "coin": 200, "weapon_melee_low": 18 },
+      "resources": { "food": 150, "coin": 200, "weapon_melee_low": 18, "tools": 3 },
       "leader": { "name": "敵將B", "values": { "好戰": 0.85, "殘忍": 0.7 } },
       "named_members": [],
       "outpost": { "type": "military", "level": 1 }

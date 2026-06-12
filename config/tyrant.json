@@ -10,7 +10,7 @@
       "anon_tiers": { "新兵": 3, "老兵": 4, "菁英": 1 },
       "resources": {
         "food": 100, "material": 200, "coin": 1000, "weapon_melee_low": 15,
-        "armor_low": 10, "medicine": 10, "ore_gold": 50
+        "armor_low": 10, "medicine": 10, "ore_gold": 50, "tools": 3
       },
       "leader": {
         "name": "暴君", "age": 35, "loyalty": 0.9,
@@ -46,7 +46,7 @@
       "anon_tiers": { "平民": 1, "新兵": 4, "老兵": 5, "菁英": 1 },
       "resources": {
         "food": 100, "material": 200, "coin": 800, "weapon_melee_low": 20,
-        "armor_low": 10
+        "armor_low": 10, "tools": 3
       },
       "leader": {
         "name": "黑王", "age": 40, "loyalty": 0.9,

@@ -1784,12 +1784,13 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 
 	team.previous_task = team.current_task
 
-	# 正在腳下工地施工（多半是飢餓 override 的農田）→ 建設即自救，不中斷
-	# （人已在家，return_home 無意義；農田完工才是糧食出路）
+	# 正在腳下工地蓋「農田」→ 建設即自救，不中斷（農田完工才是糧食出路，工期僅 3 天）
+	# 其他設施（鑄幣廠 30 天等）照常被飢餓中斷 — 不會蓋到餓死
 	if team.current_task == TeamData.TASK_BUILD:
 		var cur_tile: HexTileData = state.world.tiles.get(
 			team.tile_pos.x * 1000 + team.tile_pos.y)
-		if cur_tile != null and cur_tile.construction_team_id == team.team_id:
+		if cur_tile != null and cur_tile.construction_team_id == team.team_id \
+				and str(cur_tile.construction_target.get("facility", "")) == "farming":
 			team.previous_task = ""
 			return
 

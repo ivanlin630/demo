@@ -4,6 +4,14 @@ class_name PlayerCommandSystem
 const RECRUIT_COST_ANON:  float = 50.0   # TEST VALUE
 const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
 
+# 投降抽成清單：30% 轉移給受降方（含武備 — 半繳械投降）
+const SURRENDER_TRANSFER_RES: Array = [
+	"food", "coin", "goods",
+	"weapon_melee_low", "weapon_melee_high",
+	"weapon_ranged_low", "weapon_ranged_high",
+	"armor_low", "armor_high",
+]
+
 var _interaction: InteractionSystem = InteractionSystem.new()
 var _diplomatic:  DiplomaticAiSystem = DiplomaticAiSystem.new()
 var _encounter:   EncounterSystem    = EncounterSystem.new()
@@ -538,7 +546,7 @@ func _action_offer_surrender(state: WorldState, target_id: int, pt: TeamData, pt
 	var resp6: String = _diplomatic.handle_diplomacy_message(state, tgt6, pt, "offer_surrender")
 	state.player_pending_targets.erase(target_id)
 	if resp6 == "accept":
-		for res6 in ["food", "coin", "goods"]:
+		for res6 in SURRENDER_TRANSFER_RES:
 			var amount6: float = float(pt.resources.get(res6, 0)) * 0.3
 			pt.resources[res6]   = float(pt.resources.get(res6, 0)) - amount6
 			tgt6.resources[res6] = float(tgt6.resources.get(res6, 0)) + amount6
@@ -558,7 +566,7 @@ func _action_surrender_in_encounter(state: WorldState, _target_id: int, pt: Team
 		return { "ok": false, "msg": "找不到對手" }
 	var resp6b: String = _diplomatic.handle_diplomacy_message(state, enemy6, pt, "offer_surrender")
 	if resp6b == "accept":
-		for res6b in ["food", "coin", "goods"]:
+		for res6b in SURRENDER_TRANSFER_RES:
 			var amt6b: float = float(pt.resources.get(res6b, 0)) * 0.3
 			pt.resources[res6b]    = float(pt.resources.get(res6b, 0)) - amt6b
 			enemy6.resources[res6b] = float(enemy6.resources.get(res6b, 0)) + amt6b
@@ -592,7 +600,7 @@ func _action_surrender_pre_encounter(state: WorldState, _target_id: int, pt: Tea
 	var resp: String = _diplomatic.handle_diplomacy_message(state, attacker, pt, "offer_surrender")
 	state.player_pre_encounter = {}
 	if resp == "accept":
-		for res_sp in ["food", "coin", "goods"]:
+		for res_sp in SURRENDER_TRANSFER_RES:
 			var amt_sp: float = float(pt.resources.get(res_sp, 0)) * 0.3
 			pt.resources[res_sp]       = float(pt.resources.get(res_sp, 0)) - amt_sp
 			attacker.resources[res_sp] = float(attacker.resources.get(res_sp, 0)) + amt_sp

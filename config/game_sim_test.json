@@ -48,7 +48,7 @@
       "anon_tiers": { "平民": 1, "新兵": 3, "老兵": 4 },
       "resources": {
         "food": 120.0, "material": 200, "coin": 600, "weapon_melee_low": 12,
-        "armor_low": 8, "medicine": 10
+        "armor_low": 8, "medicine": 10, "tools": 3
       },
       "leader": {
         "name": "T2_Leader", "age": 32, "loyalty": 0.9,
