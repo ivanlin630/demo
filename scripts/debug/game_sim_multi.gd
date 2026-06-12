@@ -5,8 +5,13 @@ const CONFIGS: Array = [
 ]
 
 func _initialize() -> void:
+	# SIM_CONFIGS=tyrant,warzone → 只跑指定 config（長跑平行分工用）
+	var cfgs: Array = CONFIGS
+	var env_cfg: String = OS.get_environment("SIM_CONFIGS")
+	if env_cfg != "":
+		cfgs = env_cfg.split(",")
 	var summary: Array = []
-	for cfg_name in CONFIGS:
+	for cfg_name in cfgs:
 		var stats: Dictionary = _run_config(cfg_name)
 		summary.append({ "config": cfg_name, "stats": stats })
 	_print_comparison(summary)
