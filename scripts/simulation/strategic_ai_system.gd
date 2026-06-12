@@ -6,6 +6,8 @@ const BREAKOUT_DIST: int = 2     # 原 5，縮為 2（radius 小地圖友善）
 const ENCIRCLE_DIST: int = 1     # 原 2，縮為 1
 const BREAKOUT_NEAREST_THRESHOLD: int = 3   # 鄰敵 > 此距不觸發 breakout
 
+var _last_goal_sig: Dictionary = {}   # { faction_id: "type_target" } diff print 用
+
 static func _is_valid_tile(state: WorldState, pos: Vector2i) -> bool:
     return state.world.tiles.has(pos.x * 1000 + pos.y)
 
@@ -65,8 +67,13 @@ func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
 
     faction.strategic_goals.sort_custom(func(a, b): return a["priority"] > b["priority"])
     if faction.strategic_goals.size() > 0:
-        print("[StrategicAI] Faction%d 首要目標: %s target=%d" % [
-            faction.faction_id, faction.strategic_goals[0]["type"], faction.strategic_goals[0]["target_id"]])
+        # diff print：首要目標變化才印（壓 log spam）
+        var top_sig: String = "%s_%d" % [faction.strategic_goals[0]["type"],
+            faction.strategic_goals[0]["target_id"]]
+        if _last_goal_sig.get(faction.faction_id, "") != top_sig:
+            _last_goal_sig[faction.faction_id] = top_sig
+            print("[StrategicAI] Faction%d 首要目標: %s target=%d" % [
+                faction.faction_id, faction.strategic_goals[0]["type"], faction.strategic_goals[0]["target_id"]])
     # 若無 expand goal，清除所有包圍指派（目標可能已消滅）
     var has_expand: bool = false
     for g in faction.strategic_goals:

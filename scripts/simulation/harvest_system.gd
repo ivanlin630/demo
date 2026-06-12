@@ -4,14 +4,18 @@ const SEASON_LENGTH: int = WorldState.TICKS_PER_SEASON   # 1季 = 90天
 const SEASON_BASE: Array  = [1.1, 1.5, 1.2, 0.3]      # 春夏秋冬
 const SEASON_NAMES: Array = ["春", "夏", "秋", "冬"]
 
+var _last_season: int = -1   # diff print：季節變化才印
+
 func tick_all(state: WorldState) -> void:
 	var season: int  = (state.world.current_tick / SEASON_LENGTH) % 4
 	var base: float  = SEASON_BASE[season]
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		tile.harvest_factor = clampf(base + randf_range(-0.25, 0.25), 0.1, 2.0)
-	print("[Harvest] Tick%d 季節=%s base=%.1f" % [
-		state.world.current_tick, SEASON_NAMES[season], base])
+	if season != _last_season:
+		_last_season = season
+		print("[Harvest] Tick%d 季節=%s base=%.1f" % [
+			state.world.current_tick, SEASON_NAMES[season], base])
 	_check_famine_warnings(state)
 	_regen_wild_horses(state)
 	_regen_herb(state)
