@@ -1430,6 +1430,10 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 		var t: TeamData = state.teams[tid]
 		if t.combat_target != -1: continue
 		if t.leader_id == state.player_id and state.player_id != -1: continue
+		# 糧 < 3 天不復工（餓肚子不搬磚 — 否則和 survival 搶人 ping-pong）
+		var days_left: float = float(t.resources.get("food", 0)) \
+			/ maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		if days_left < 3.0: continue
 		var is_owner: bool = t.team_id == tile.outpost_owner
 		var resident_here: bool = t.tile_pos == tile.tile_pos \
 			and t.faction_id == leader_team.faction_id and t.faction_id != -1 \
@@ -1628,6 +1632,8 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level == 0: continue
 		if tile.construction_team_id != -1:
+			if OutpostSystem.new().check_construction_timeout(state, tile):
+				continue
 			_try_resume_construction(state, tile, leader_team)
 			continue
 		var owner_team: TeamData = state.teams.get(tile.outpost_owner)

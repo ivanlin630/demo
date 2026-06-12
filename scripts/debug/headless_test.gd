@@ -252,6 +252,8 @@ func _initialize() -> void:
 	_test_famine_price_spike()
 
 	_test_site_diff_print()
+	_test_resume_requires_food()
+	_test_construction_timeout()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7552,3 +7554,56 @@ func _test_site_diff_print() -> void:
 	ok = fai._dispatch_builder(state, leader_team, best1.pos, "civilian", 1)
 	assert(not ok and fai._last_dispatch_fail.get(1, "") == reason, "同原因 dedupe")
 	print("Malthus Task1 OK")
+
+func _test_resume_requires_food() -> void:
+	print("--- Malthus Task2a: 復工糧門檻 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(2, 2)
+	tile.outpost_owner = 0
+	tile.construction_team_id = 0
+	tile.construction_ticks_left = 50
+	tile.construction_target = { "action": "build", "type": "civilian", "level": 1 }
+	state.world.tiles[2 * 1000 + 2] = tile
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.faction_id = 1
+	leader_team.population = 10
+	leader_team.tile_pos = Vector2i(0, 0)
+	leader_team.resources["food"] = 10.0   # 0.42 天 < 3 天
+	state.teams[0] = leader_team
+	var fai := FactionAISystem.new()
+	fai._try_resume_construction(state, tile, leader_team)
+	assert(leader_team.current_task != TeamData.TASK_BUILD, "糧 < 3 天不復工")
+	leader_team.resources["food"] = 10.0 * 2.4 * 5.0   # 5 天
+	fai._try_resume_construction(state, tile, leader_team)
+	assert(leader_team.current_task == TeamData.TASK_BUILD, "糧 >= 3 天應復工")
+	print("Malthus Task2a OK")
+
+func _test_construction_timeout() -> void:
+	print("--- Malthus Task2b: 工地 timeout ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 31 * WorldState.TICKS_PER_DAY
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(2, 2)
+	tile.construction_team_id = 7
+	tile.construction_ticks_left = 50
+	tile.construction_target = { "action": "build", "type": "civilian", "level": 1 }
+	tile.construction_started_tick = 0
+	tile.construction_last_progress_tick = 0
+	state.world.tiles[2 * 1000 + 2] = tile
+	var ct := TeamData.new(); ct.team_id = 7
+	state.teams[7] = ct
+	var os := OutpostSystem.new()
+	# 30 天內 → 不取消
+	state.world.current_tick = 29 * WorldState.TICKS_PER_DAY
+	assert(not os.check_construction_timeout(state, tile), "30 天內不取消")
+	# 超過 30 天 → 取消 + 退 50% material（civilian Lv1 = 50 → 25）
+	state.world.current_tick = 31 * WorldState.TICKS_PER_DAY
+	assert(os.check_construction_timeout(state, tile), "30 天無進度應取消")
+	assert(absf(float(ct.resources.get("material", 0)) - 25.0) < 0.01,
+		"退 50%% material，實際=%s" % str(ct.resources.get("material", 0)))
+	assert(tile.construction_team_id == -1 and tile.construction_target.is_empty(), "tile 釋放")
+	assert(tile.construction_started_tick == -1, "started 重設")
+	print("Malthus Task2b OK")
