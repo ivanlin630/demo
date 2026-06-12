@@ -250,6 +250,8 @@ func _initialize() -> void:
 	_test_recipe_input_scaling()
 	_test_price_covers_input_cost()
 	_test_famine_price_spike()
+
+	_test_site_diff_print()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7518,3 +7520,35 @@ func _test_siting_multi_center() -> void:
 	assert(not best.is_empty(), "多中心應產生候選")
 	assert(best.pos == Vector2i(12, 10), "第二 outpost 周邊進候選，實際=%s" % str(best.pos))
 	print("Material Task5c OK")
+
+func _test_site_diff_print() -> void:
+	print("--- Malthus Task1: 選址 diff print + 派工失敗 log ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(0, 0)
+	leader_team.faction_id = 1
+	state.teams[0] = leader_team
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			tile.productivity = 1.0; tile.outpost_level = 0
+			state.world.tiles[x * 1000 + y] = tile
+	var fai := FactionAISystem.new()
+	# 同 faction 同址連評 → sig 只記一次（第二次不重印）
+	var best1: Dictionary = fai._evaluate_new_outpost_location(state, leader_team)
+	assert(not best1.is_empty(), "應有候選")
+	var sig1: String = fai._last_site_sig.get(1, "")
+	assert(sig1 != "", "首評應記 sig")
+	var best2: Dictionary = fai._evaluate_new_outpost_location(state, leader_team)
+	assert(best2.pos == best1.pos, "同世界同址")
+	assert(fai._last_site_sig.get(1, "") == sig1, "同址 sig 不變（diff print 不重印）")
+	# 派工失敗原因記錄：無資源 → 資源不足；同原因連續 dedupe
+	var ok: bool = fai._dispatch_builder(state, leader_team, best1.pos, "civilian", 1)
+	assert(not ok, "無資源應失敗")
+	var reason: String = fai._last_dispatch_fail.get(1, "")
+	assert(reason.begins_with("資源不足"), "應記資源不足，實際=%s" % reason)
+	ok = fai._dispatch_builder(state, leader_team, best1.pos, "civilian", 1)
+	assert(not ok and fai._last_dispatch_fail.get(1, "") == reason, "同原因 dedupe")
+	print("Malthus Task1 OK")
