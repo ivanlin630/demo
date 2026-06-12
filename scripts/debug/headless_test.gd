@@ -246,6 +246,10 @@ func _initialize() -> void:
 	_test_horses_loot()
 	_test_siting_resource_weight()
 	_test_siting_multi_center()
+
+	_test_recipe_input_scaling()
+	_test_price_covers_input_cost()
+	_test_famine_price_spike()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -6896,6 +6900,11 @@ func _make_mfg_state(facility_levels: Dictionary) -> Array:
 	state.teams[0] = team
 	return [state, team, tile]
 
+# _make_mfg_state 預設參數下的本 tick 產量 q（pop=10、avg_skill=0）
+func _mfg_q(level: int, rate: float) -> float:
+	var worker_rate: float = float(level) * clampf(sqrt(10.0 / 5.0), 0.5, 2.0) * 0.5
+	return worker_rate * rate
+
 func _test_workshop_recipes() -> void:
 	print("--- Facility Task3a: workshop 配方（goods/tools/arrows）---")
 	# tools 純 mat（4 mat）：goods 庫存高 → tools 缺口最大 → 做 tools
@@ -6904,8 +6913,10 @@ func _test_workshop_recipes() -> void:
 	team.resources = { "material": 100.0, "goods": 99.0, "arrows": 99.0 }
 	var ms := ManufacturingSystem.new()
 	ms.tick_all(state, [0])
+	var q_tools: float = _mfg_q(1, ManufacturingSystem.TOOLS_RATE)
 	assert(float(tile.public_storage.get("tools", 0)) > 0, "tools 應產出")
-	assert(float(team.resources["material"]) == 96.0, "tools = 4 mat 純可再生")
+	assert(is_equal_approx(float(team.resources["material"]), 100.0 - 4.0 * q_tools),
+		"tools = 4 mat/單位 純可再生")
 	print("Facility Task3a OK")
 
 func _test_armorsmith_recipes() -> void:
@@ -6915,8 +6926,9 @@ func _test_armorsmith_recipes() -> void:
 	team.resources = { "material": 100.0, "ore_iron": 10.0 }
 	var ms := ManufacturingSystem.new()
 	ms.tick_all(state, [0])
+	var q_armor: float = _mfg_q(1, ManufacturingSystem.ARMOR_LOW_RATE)
 	assert(float(tile.public_storage.get("armor_low", 0)) > 0, "armor_low 應產出（2 iron+2 mat）")
-	assert(float(team.resources["ore_iron"]) == 8.0, "扣 2 iron")
+	assert(is_equal_approx(float(team.resources["ore_iron"]), 10.0 - 2.0 * q_armor), "扣 2 iron/單位")
 	# armor_high：只有 steel
 	var r2 := _make_mfg_state({ "_outpost": "military", "armorsmith_level": 1 })
 	var state2: WorldState = r2[0]; var team2: TeamData = r2[1]; var tile2: HexTileData = r2[2]
@@ -6937,6 +6949,60 @@ func _test_recipe_deficit_ordering() -> void:
 	assert(float(tile.public_storage.get("goods", 0)) == 0, "goods 不應做")
 	print("Facility Task3c OK")
 
+func _test_recipe_input_scaling() -> void:
+	print("--- Econ Task1: 投入隨產量縮放 ---")
+	# 配方 in = 每單位成品原料：本 tick 產 q 單位 → 扣 in × q（非固定全額）
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	team.resources = { "material": 100.0, "goods": 99.0, "arrows": 99.0 }
+	# worker_rate = level × pop_mult × (0.5 + avg_skill × 0.5)；無 named member → avg_skill 0
+	var worker_rate: float = 1.0 * clampf(sqrt(10.0 / 5.0), 0.5, 2.0) * 0.5
+	var q: float = worker_rate * ManufacturingSystem.TOOLS_RATE
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(is_equal_approx(float(tile.public_storage.get("tools", 0)), q),
+		"tools 產出應 = q（%.4f），實際 %.4f" % [q, float(tile.public_storage.get("tools", 0))])
+	assert(is_equal_approx(float(team.resources["material"]), 100.0 - 4.0 * q),
+		"material 扣帳應 = 4 × q（per-unit），實際扣 %.4f" % (100.0 - float(team.resources["material"])))
+	print("Econ Task1 OK")
+
+func _test_price_covers_input_cost() -> void:
+	print("--- Econ Task2a: 價 ≥ 原料 ×1.2 ---")
+	for level_key in ManufacturingSystem.RECIPE_GROUPS:
+		for recipe in ManufacturingSystem.RECIPE_GROUPS[level_key]:
+			if recipe["rate_const"] == "CRAFT_RATE":
+				continue   # 工藝品 = gem 觸媒高效路線，本就有利，豁免
+			var input_value: float = 0.0
+			for res in recipe["in"]:
+				assert(InteractionSystem.BASE_PRICE.has(res), "原料 %s 缺 BASE_PRICE" % res)
+				input_value += float(recipe["in"][res]) * float(InteractionSystem.BASE_PRICE[res])
+			var out_price: float = float(InteractionSystem.BASE_PRICE.get(recipe["out"], 0.0))
+			assert(out_price >= input_value * 1.2 - 0.0001,
+				"%s 價 %.1f < 原料 %.1f × 1.2" % [recipe["out"], out_price, input_value])
+	assert(InteractionSystem.BASE_PRICE.has("herb"), "herb 補價")
+	assert(InteractionSystem.BASE_PRICE.has("mounts"), "mounts 補價")
+	assert(InteractionSystem.BASE_PRICE.has("wagons"), "wagons 補價")
+	print("Econ Task2a OK")
+
+func _test_famine_price_spike() -> void:
+	print("--- Econ Task2b: 飢荒不對稱 clamp ---")
+	var isys := InteractionSystem.new()
+	var team := TeamData.new()
+	team.population = 10
+	team.resources = {}
+	# 生存品 stock 0 → 5×；一般品 stock 0 → 2×
+	assert(is_equal_approx(isys._local_value(team, "food"),
+		float(InteractionSystem.BASE_PRICE["food"]) * 5.0), "food 饑荒應 5×")
+	assert(is_equal_approx(isys._local_value(team, "material"),
+		float(InteractionSystem.BASE_PRICE["material"]) * 2.0), "material 饑荒維持 2×")
+	# 過剩下限 0.5× 兩者皆同
+	team.resources = { "food": 100000.0, "material": 100000.0 }
+	assert(is_equal_approx(isys._local_value(team, "food"),
+		float(InteractionSystem.BASE_PRICE["food"]) * 0.5), "food 過剩 0.5×")
+	assert(is_equal_approx(isys._local_value(team, "material"),
+		float(InteractionSystem.BASE_PRICE["material"]) * 0.5), "material 過剩 0.5×")
+	print("Econ Task2b OK")
+
 func _test_smeltery_separate() -> void:
 	print("--- Facility Task3d: 冶煉獨立設施 ---")
 	# workshop tile 無冶煉：iron 充足也不產 steel
@@ -6954,7 +7020,8 @@ func _test_smeltery_separate() -> void:
 	var steel_out: float = float(tile2.public_storage.get("ore_steel", 0)) \
 		+ float(team2.resources.get("ore_steel", 0))
 	assert(steel_out > 0, "smeltery 應產 steel")
-	assert(float(team2.resources["ore_iron"]) == 48.0, "扣 2 iron")
+	var q_smelt: float = _mfg_q(1, ManufacturingSystem.SMELT_RATE)
+	assert(is_equal_approx(float(team2.resources["ore_iron"]), 50.0 - 2.0 * q_smelt), "扣 2 iron/單位")
 	print("Facility Task3d OK")
 
 func _make_infra_state(outpost_type: String) -> Array:
@@ -7353,10 +7420,11 @@ func _test_wagon_recipe() -> void:
 	team.resources = { "horses": 1.0, "material": 6.0, "tools": 99.0, "goods": 99.0, "arrows": 99.0 }
 	var ms := ManufacturingSystem.new()
 	ms.tick_all(state, [0])
+	var q_wagon: float = _mfg_q(1, ManufacturingSystem.WAGON_RATE)
 	assert(float(tile.public_storage.get("wagons", 0)) > 0, "wagons 應產出")
-	assert(float(team.resources["horses"]) == 0.0, "horses 消耗 1")
-	assert(float(team.resources["material"]) == 0.0, "material 消耗 6")
-	assert(float(team.resources["tools"]) == 98.0, "tools 消耗 1")
+	assert(is_equal_approx(float(team.resources["horses"]), 1.0 - 1.0 * q_wagon), "horses 消耗 1/單位")
+	assert(is_equal_approx(float(team.resources["material"]), 6.0 - 6.0 * q_wagon), "material 消耗 6/單位")
+	assert(is_equal_approx(float(team.resources["tools"]), 99.0 - 1.0 * q_wagon), "tools 消耗 1/單位")
 	# 無 horses → wagons 不可做（改跑其他配方或不產 wagons）
 	var wagons_before: float = float(tile.public_storage.get("wagons", 0))
 	team.resources = { "material": 6.0, "tools": 99.0, "goods": 99.0, "arrows": 99.0 }
@@ -7371,9 +7439,11 @@ func _test_medicine_recipe() -> void:
 	team.resources = { "herb": 2.0 }
 	var ms := ManufacturingSystem.new()
 	ms.tick_all(state, [0])
+	var q_med: float = _mfg_q(1, ManufacturingSystem.MEDICINE_RATE)
 	assert(float(tile.public_storage.get("medicine", 0)) > 0, "medicine 應產出")
-	assert(float(team.resources["herb"]) == 0.0, "herb 消耗 2")
+	assert(is_equal_approx(float(team.resources["herb"]), 2.0 - 2.0 * q_med), "herb 消耗 2/單位")
 	# 無 herb 不產
+	team.resources["herb"] = 0.0
 	var med_before: float = float(tile.public_storage.get("medicine", 0))
 	ms.tick_all(state, [0])
 	assert(float(tile.public_storage.get("medicine", 0)) == med_before, "無 herb 不產")
