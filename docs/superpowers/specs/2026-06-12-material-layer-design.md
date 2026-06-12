@@ -61,6 +61,18 @@ horses 1 + material 6 + tools 1 --工坊配方--> wagons（馬車）
 - 藥坊：藥草林 → 藥鄉
 - = 高產點圖塊 → 專業化村莊的地理錨點（A 期設計目的的材料面落地）
 
+## 5. 選址改制：周邊常識 + 滾動拓殖
+
+現況問題：`_evaluate_new_outpost_location` score 不看特殊資源（藥草林對選址 = 0 分）+ 只以 leader 所在為圓心。
+
+| 改 | 內容 |
+|---|---|
+| **資源權重** | 候選格本格+鄰 6 格掃特殊資源加分：herb +30/格、wild_horses +25、ore_iron +20、ore_gold/silver +35（TEST VALUE）|
+| **多中心評估** | 圓心從「leader 所在」改「faction 每個 outpost」（同 A 期設施評估範圍邏輯）|
+| **dist 2-5 保留** | 「居住地周邊地理常識」— 非全知，住附近自然知道 |
+
+湧現：**踏腳石拓殖鏈** — 蓋 A 村 → 從 A 村看到 5 格內藥草林 → 蓋 B 村 →… 勢力沿資源點滾動擴張，遠處富點要擴張過去才「發現」。行為上等效漸進探索，不開 tile 迷霧大坑（真迷霧歸「偵察+傳聞」future spec，known_issues 已記）。
+
 ## 測試
 
 1. world_gen：herb 生成於 forest（30% 一般 / 5% 高產）；野馬草原 plains 3% 4-8
@@ -72,7 +84,9 @@ horses 1 + material 6 + tools 1 --工坊配方--> wagons（馬車）
 7. horses 吃草料 0.5/day；不進 speed 計算
 8. 藥坊：herb 2 → medicine；無 herb 不產
 9. mounts/horses 戰利品 loot 比例
-10. multi 90 天：herb 被採 > 0、horses 捕獲 > 0、（若軍鎮成形）mounts 訓練 > 0、藥坊建造 ≥ 0（地利出現即評分 > 0）
+10. 選址資源權重：候選格鄰藥草林 → score 顯著高於同條件無資源格
+11. 多中心選址：非 leader 所在的 outpost 周邊富點也進候選
+12. multi 90 天：herb 被採 > 0、horses 捕獲 > 0、（若軍鎮成形）mounts 訓練 > 0、藥坊建造 ≥ 0（地利出現即評分 > 0）、新據點選址落在資源點旁的比例
 
 ## 風險
 
