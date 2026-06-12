@@ -190,8 +190,12 @@ func _print_food_ledger(state: WorldState, cfg_name: String, snapshot: Dictionar
 		var income_str: String = "NA"
 		if snapshot.has(tid):
 			income_str = "%.1f" % ((food - float(snapshot[tid])) / 30.0 + burn)
-		print("[FoodLedger] %s team=%d kind=%s pop=%d food=%.0f days=%.1f burn/day=%.1f income/day=%s" % [
-			cfg_name, tid, kind, t.population, food, days, burn, income_str])
+		var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
+		var tile_str: String = "off_map"
+		if tile != null:
+			tile_str = "%s/pool=%.0f/op=%d" % [tile.terrain, float(tile.resources.get("food", 0)), tile.outpost_level]
+		print("[FoodLedger] %s team=%d kind=%s pop=%d food=%.0f days=%.1f burn/day=%.1f income/day=%s tile=%s task=%s" % [
+			cfg_name, tid, kind, t.population, food, days, burn, income_str, tile_str, t.current_task])
 		snapshot[tid] = food
 
 func _print_comparison(summary: Array) -> void:
