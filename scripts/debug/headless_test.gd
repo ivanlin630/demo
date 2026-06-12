@@ -239,6 +239,8 @@ func _initialize() -> void:
 	_test_herb_regen()
 	_test_collect_excludes_wild_horses()
 	_test_daily_catch_to_horses()
+	_test_military_stable_trains_mounts()
+	_test_civilian_stable_no_training()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -5492,13 +5494,15 @@ func _test_stable_facility_def() -> void:
 	print("Mount Task3a OK")
 
 func _test_stable_produces_mounts() -> void:
-	print("--- Mount Task3b: stable 產 mount ---")
+	# B 期改制：military stable 訓練公庫 horses → mounts（civilian 不再 food→mounts）
+	print("--- Mount Task3b: military stable 訓練 mount ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var tile := HexTileData.new()
 	tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
-	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.outpost_type = "military"; tile.outpost_level = 1
 	tile.outpost_owner = 0; tile.stable_level = 1
+	tile.public_storage["horses"] = 5.0
 	state.world.tiles[0] = tile
 	var team := TeamData.new()
 	team.team_id = 0; team.population = 10
@@ -5506,13 +5510,13 @@ func _test_stable_produces_mounts() -> void:
 	team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
 	var os := OutpostSystem.new()
-	# 直接呼叫產出 1 個月份（30 天 × 每天 1 次）→ Lv1 = 0.3/day → ~9
+	# 30 天 Lv1 = 0.3/day → 累積 9，但 horses 只有 5 → 訓練 5 後停
 	for _d in range(30):
 		os.produce_stable_day(state, tile, 1.0)
-	# 公庫系統：產出進 tile.public_storage["mounts"]，不進 owner team
-	assert(int(tile.public_storage.get("mounts", 0)) == 9, "1月 Lv1 公庫應 +9 mounts, 實際 %d" % int(tile.public_storage.get("mounts", 0)))
+	assert(int(tile.public_storage.get("mounts", 0)) == 5, "horses 5 訓練 5 mounts, 實際 %d" % int(tile.public_storage.get("mounts", 0)))
+	assert(int(tile.public_storage.get("horses", 0)) == 0, "horses 應耗盡")
 	assert(int(team.resources.get("mounts", 0)) == 0, "owner team 不應拿 mount")
-	assert(float(team.resources["food"]) < 1000.0, "stable 應耗 food")
+	assert(float(team.resources["food"]) < 1000.0, "訓練應耗 food")
 	print("Mount Task3b OK")
 
 func _test_wild_horses_generation() -> void:
@@ -5612,9 +5616,10 @@ func _test_stable_produces_to_public_storage() -> void:
 	state.world = WorldData.new()
 	var tile := HexTileData.new()
 	tile.tile_id = 5 * 1000 + 5; tile.tile_pos = Vector2i(5, 5)
-	tile.terrain = "plains"; tile.outpost_type = "civilian"
+	tile.terrain = "plains"; tile.outpost_type = "military"
 	tile.outpost_level = 1; tile.outpost_owner = 0
 	tile.stable_level = 1
+	tile.public_storage["horses"] = 10.0
 	state.world.tiles[tile.tile_id] = tile
 	var owner := TeamData.new()
 	owner.team_id = 0; owner.resources = { "food": 500 }
@@ -5627,6 +5632,7 @@ func _test_stable_produces_to_public_storage() -> void:
 	os.produce_stable_day(state, tile, 1.0)
 	var stored: int = int(tile.public_storage.get("mounts", 0))
 	assert(stored >= 1, "公庫應 >= 1, 實際=%d" % stored)
+	assert(int(tile.public_storage.get("horses", 0)) < 10, "horses 應被消耗")
 	assert(int(owner.resources.get("mounts", 0)) == 0, "owner team 不應拿 mount")
 	print("MountStorage Task2 OK (stored=%d)" % stored)
 
@@ -7060,10 +7066,11 @@ func _test_production_requires_resident() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var tile := HexTileData.new()
-	tile.tile_pos = Vector2i(0, 0); tile.outpost_type = "civilian"
+	# B 期：stable 訓練只在 military，tile 設 military（mint 生產 gate 不看 type）
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_type = "military"
 	tile.outpost_level = 2; tile.outpost_owner = 0
 	tile.mint_level = 1; tile.stable_level = 1; tile.terrain = "plains"
-	tile.public_storage = { "ore_gold": 10.0 }
+	tile.public_storage = { "ore_gold": 10.0, "horses": 5.0 }
 	state.world.tiles[0] = tile
 	var owner := TeamData.new()
 	owner.team_id = 0; owner.population = 10; owner.tile_pos = Vector2i(5, 5)
@@ -7280,3 +7287,55 @@ func _test_daily_catch_to_horses() -> void:
 	assert(int(n2.resources["wild_horses"]) == 2, "鄰格野馬剩 2")
 	assert(int(op1.public_storage.get("mounts", 0)) == 0, "日捕不進 mounts")
 	print("Material Task2b OK")
+
+func _test_military_stable_trains_mounts() -> void:
+	print("--- Material Task3a: military stable 訓練 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.outpost_type = "military"; tile.outpost_level = 1
+	tile.outpost_owner = 0; tile.stable_level = 1
+	tile.public_storage["horses"] = 5.0
+	state.world.tiles[0] = tile
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.resources = { "food": 1000.0 }
+	state.teams[0] = owner
+	var os := OutpostSystem.new()
+	for _d in range(10):
+		os.produce_stable_day(state, tile, 1.0)
+	# 10 天 × 0.3 = 3.0 → 訓練 3
+	assert(int(tile.public_storage.get("mounts", 0)) == 3, "10日應訓 3, 實際 %d" % int(tile.public_storage.get("mounts", 0)))
+	assert(int(tile.public_storage.get("horses", 0)) == 2, "horses 剩 2, 實際 %d" % int(tile.public_storage.get("horses", 0)))
+	assert(float(owner.resources["food"]) < 1000.0, "訓練耗草料")
+	# horses 耗盡 → 不產
+	tile.public_storage["horses"] = 0.0
+	var mounts_before: int = int(tile.public_storage.get("mounts", 0))
+	var food_before: float = float(owner.resources["food"])
+	for _d in range(10):
+		os.produce_stable_day(state, tile, 1.0)
+	assert(int(tile.public_storage.get("mounts", 0)) == mounts_before, "horses=0 不產")
+	assert(float(owner.resources["food"]) == food_before, "horses=0 不耗 food")
+	print("Material Task3a OK")
+
+func _test_civilian_stable_no_training() -> void:
+	print("--- Material Task3b: civilian stable 無訓練/廢 food→mounts ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.outpost_owner = 0; tile.stable_level = 2
+	tile.public_storage["horses"] = 5.0
+	state.world.tiles[0] = tile
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.resources = { "food": 1000.0 }
+	state.teams[0] = owner
+	var os := OutpostSystem.new()
+	for _d in range(30):
+		os.produce_stable_day(state, tile, 1.0)
+	assert(int(tile.public_storage.get("mounts", 0)) == 0, "civilian 不訓練 mounts")
+	assert(int(tile.public_storage.get("horses", 0)) == 5, "horses 不消耗")
+	assert(float(owner.resources["food"]) == 1000.0, "廢 food→mounts：不耗 food 不憑空產")
+	assert("military" in OutpostSystem.FACILITY_DEF["stable"]["allowed_outpost"], "stable 開放 military")
+	print("Material Task3b OK")
