@@ -137,7 +137,22 @@ if tile_type == "military":
 - 軍屯子隊 = SUBTEAM+PRODUCE dual tag（同民用派駐機制）
 - 殘餘風險保留：紀律失效脫離 / 起義（loyalty<0.2 + unrest≥60）皆既有 — 苛待守軍 → 兵工廠叛變（低頻高戲劇性，feature）
 
-## 5b. 生產人力規則
+## 5b. 建造執行鏈（實作期定案，2026-06-12 回寫）
+
+實作驗收時發現決策層之外整條執行鏈斷裂（歷史上 stable 0 建造的真因），定案如下：
+
+1. **評估範圍 = faction 內所有 outpost**（不限 leader 自有）；以該 outpost **owner 團的 local 資料 + owner leader 個性**評估（子隊安頓後的居民團據點也被評，且比用 faction leader 全知資料更符合不變量）
+2. **執行優先序：就地施工 > 居民出工 > 派子隊** — owner 站在 tile 上直接開工；否則 tile 上同 faction 居民團出工出料；最後才派子隊
+3. **子隊派工資金**：`_fund_subteam_cost` — dispatch 後 owner 補足建造費差額給子隊（純轉移守恆）；無多餘 named 時 `_pick_or_promote_advisor` 升 anon 當工頭
+4. **飢餓豁免（窄）**：team 站在自己工地且**蓋的是農田** → survival 不中斷（自救邏輯，工期僅 3 天）；其他設施照常被中斷
+5. **復工掃描**：`_try_resume_construction`（infra cadence）— 卡住工地由在場 owner/居民強制復工；owner 在外 → 召回
+6. **工期單位 = person-ticks**（`_tick_construction` 每 cadence 扣 pop 數）：FACILITY_DEF ticks 以 1 人施工 = 設計天數 校準（農田 72 / 工坊 168 / 中級 336 / 鑄幣 720），人多更快
+
+## 5c. 投降抽成（守恆 audit 衍生定案）
+
+投降 = **半繳械**：30% 轉移給受降方，清單含 food/coin/goods + 武器 ×4 + 護甲 ×2（`SURRENDER_TRANSFER_RES`）。戰場配發裝備於投降中止時歸還原主（audit 修復，不再蒸發）。
+
+## 5d. 生產人力規則
 
 設施日產 tick（mint/stable/製造類）統一加 gate：**tile 上有居民團（PRODUCE tag）才生產**。
 - 既有 mint/stable 的 tick_all 補此 gate（行為變化：無人軍堡/空村停產）
