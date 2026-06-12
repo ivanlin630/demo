@@ -66,7 +66,7 @@ const FACILITY_DEF: Dictionary = {
 	},
 	"stable": {
 		"cost": { "material": 40, "tools": 0, "ticks": 336 },
-		"allowed_outpost": ["civilian"],
+		"allowed_outpost": ["civilian", "military"],
 		"current_level_key": "stable_level",
 		"required_terrain": "plains",
 		"leader_pref": { "野心": 0.2, "好戰": 0.3 },
@@ -138,7 +138,7 @@ const OUTPOST_STORAGE_CAP: Dictionary = {
 const MOUNT_STORAGE_CAP: Array = [10.0, 30.0, 80.0]
 
 func _get_storage_cap(tile: HexTileData, res: String) -> float:
-	if res == "mounts":
+	if res == "mounts" or res == "horses":
 		return MOUNT_STORAGE_CAP[clampi(tile.outpost_level - 1, 0, 2)]
 	var arr: Array = OUTPOST_STORAGE_CAP.get(tile.outpost_type, [100.0, 300.0, 800.0])
 	return float(arr[clampi(tile.outpost_level - 1, 0, 2)])
@@ -169,28 +169,33 @@ func _has_resident_on_tile(state: WorldState, tile: HexTileData) -> bool:
 		if TeamData.TAG_PRODUCE in t.tags: return true
 	return false
 
-# 馬廄：消耗 owner team food → 累積 mounts；day_fraction = 本次 tick 佔一天的比例。
-# 測試可直接以 day_fraction=1.0 模擬整天。
+# 馬廄雙態：military = 訓練（公庫 horses + owner 草料 → 公庫 mounts）；
+# civilian = 無產出（捕獲加成在 HarvestSystem 日捕端）。B 期廢 food→mounts 魔法。
+# day_fraction = 本次 tick 佔一天的比例；測試可直接以 day_fraction=1.0 模擬整天。
 func produce_stable_day(state: WorldState, tile: HexTileData, day_fraction: float) -> void:
 	if tile.stable_level <= 0: return
+	if tile.outpost_type != "military": return
 	var owner: TeamData = state.teams.get(tile.outpost_owner)
 	if owner == null: return
+	var horses_avail: float = float(tile.public_storage.get("horses", 0))
+	if horses_avail < 1.0: return   # 無馴馬可訓
 	var lvl_idx: int = clampi(tile.stable_level - 1, 0, 2)
 	var food_cost: float = STABLE_FOOD_PER_DAY[lvl_idx] * day_fraction
 	if float(owner.resources.get("food", 0)) < food_cost:
-		return   # 草料不足，本次不產
+		return   # 草料不足，本次不訓
 	owner.resources["food"] = float(owner.resources.get("food", 0)) - food_cost
 	tile.stable_progress += STABLE_PRODUCE_PER_DAY[lvl_idx] * day_fraction
 	# epsilon 吸收浮點累加誤差（30×0.3 = 8.999… → 9）
 	if tile.stable_progress >= 1.0 - 1e-9:
-		var produced: int = int(tile.stable_progress + 1e-9)
-		tile.stable_progress -= float(produced)
-		# 改進公庫（受 cap 限制）而非 owner team
+		var trained: int = int(tile.stable_progress + 1e-9)
+		trained = mini(trained, int(horses_avail))
+		tile.stable_progress -= float(trained)
+		tile.public_storage["horses"] = horses_avail - float(trained)
 		var cap: float = _get_storage_cap(tile, "mounts")
 		var stored: float = float(tile.public_storage.get("mounts", 0))
-		var space: float = maxf(cap - stored, 0.0)
-		var actual: float = minf(float(produced), space)
-		tile.public_storage["mounts"] = stored + actual
+		tile.public_storage["mounts"] = minf(stored + float(trained), cap)
+		if trained > 0:
+			print("[Stable] Outpost %s 訓練戰馬 +%d" % [str(tile.tile_pos), trained])
 
 func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 	if tile.mint_level == 0: return

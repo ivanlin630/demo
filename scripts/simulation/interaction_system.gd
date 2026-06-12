@@ -18,6 +18,8 @@ const BASE_PRICE: Dictionary = {
 	"arrows":            4.0,
 	"armor_low":        10.0,
 	"armor_high":       22.0,
+	"horses":           15.0,
+	"medicine":         12.0,
 }
 const TARGET_PER_POP: Dictionary = {
 	"food":              10.0,
@@ -36,6 +38,8 @@ const TARGET_PER_POP: Dictionary = {
 	"arrows":             2.0,
 	"armor_low":          0.3,
 	"armor_high":         0.15,
+	"horses":             0.5,
+	"medicine":           1.0,
 }
 const FOOD_RESERVE_TICKS: float = 20.0   # TEST VALUE — food 最低自留（pop × 0.1 × N ticks）
 const MAX_COIN_PER_TRADE: float = 300.0  # TEST VALUE — 每次交易買方預算上限

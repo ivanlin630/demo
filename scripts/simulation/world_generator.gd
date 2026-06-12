@@ -19,6 +19,9 @@ const ORE_IRON_MOUNTAIN_CHANCE: float = 0.30
 const ORE_IRON_PLAINS_CHANCE:   float = 0.05
 const WILD_HORSE_PLAINS_CHANCE: float = 0.01
 const WILD_HORSE_FOREST_CHANCE: float = 0.005
+const HERB_FOREST_CHANCE: float = 0.30      # TEST VALUE
+const HERB_RICH_CHANCE: float = 0.05        # 藥草林（先 roll rich 再 roll 一般）TEST VALUE
+const WILD_HORSE_RICH_CHANCE: float = 0.03  # 野馬草原 TEST VALUE
 
 func generate(state: WorldState, config: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -61,11 +64,21 @@ func _apply_resources(tile, rng: RandomNumberGenerator, mult: float = 1.0) -> vo
 	elif tile.terrain == "plains":
 		if rng.randf() < ORE_IRON_PLAINS_CHANCE:
 			tile.resources["ore_iron"] = int(rng.randi_range(20, 60) * mult)
+	# herb：森林 30% 帶 2-6；藥草林（高產點）5% 帶 10-20。計入 resource_cap（月再生上限 = 初始值）
+	if tile.terrain == "forest":
+		if rng.randf() < HERB_RICH_CHANCE:
+			tile.resources["herb"] = rng.randi_range(10, 20)
+		elif rng.randf() < HERB_FOREST_CHANCE:
+			tile.resources["herb"] = rng.randi_range(2, 6)
 	tile.resource_cap = tile.resources.duplicate()
-	# 野馬：平原 1% 1-2 隻 / 森林 0.5% 1 隻（不計入 resource_cap，再生由 HarvestSystem 處理）
+	# 野馬：平原 1% 1-2 隻 / 森林 0.5% 1 隻（活物不被 generic collect 採集，再生由 HarvestSystem 處理）
+	# 野馬草原（高產點）：平原 3% 帶 4-8，resource_cap["wild_horses"]=8 標記富點（僅供再生 cap 判定）
 	match tile.terrain:
 		"plains":
-			if rng.randf() < WILD_HORSE_PLAINS_CHANCE:
+			if rng.randf() < WILD_HORSE_RICH_CHANCE:
+				tile.resources["wild_horses"] = rng.randi_range(4, 8)
+				tile.resource_cap["wild_horses"] = 8
+			elif rng.randf() < WILD_HORSE_PLAINS_CHANCE:
 				tile.resources["wild_horses"] = rng.randi_range(1, 2)
 		"forest":
 			if rng.randf() < WILD_HORSE_FOREST_CHANCE:

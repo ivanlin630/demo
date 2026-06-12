@@ -12,6 +12,8 @@ const MELEE_HIGH_RATE:  float = 0.03
 const RANGED_HIGH_RATE: float = 0.025
 const ARMOR_LOW_RATE:   float = 0.05
 const ARMOR_HIGH_RATE:  float = 0.03
+const WAGON_RATE:       float = 0.05
+const MEDICINE_RATE:    float = 0.10
 const SKILL_GROWTH: float = 0.003
 
 const RATES: Dictionary = {
@@ -21,6 +23,7 @@ const RATES: Dictionary = {
 	"MELEE_LOW_RATE": MELEE_LOW_RATE, "RANGED_LOW_RATE": RANGED_LOW_RATE,
 	"MELEE_HIGH_RATE": MELEE_HIGH_RATE, "RANGED_HIGH_RATE": RANGED_HIGH_RATE,
 	"ARMOR_LOW_RATE": ARMOR_LOW_RATE, "ARMOR_HIGH_RATE": ARMOR_HIGH_RATE,
+	"WAGON_RATE": WAGON_RATE, "MEDICINE_RATE": MEDICINE_RATE,
 }
 
 # 缺口排序用 target（stock / (target × pop) 最低者先做）；缺項 fallback 1.0
@@ -30,6 +33,7 @@ const TARGET_PER_POP: Dictionary = {
 	"weapon_melee_low": 1.0, "weapon_ranged_low": 0.8,
 	"weapon_melee_high": 0.5, "weapon_ranged_high": 0.4,
 	"armor_low": 0.3, "armor_high": 0.15,
+	"wagons": 0.2, "medicine": 1.0, "horses": 0.5,
 }
 
 # 4 配方組：各設施只跑自己組；組內依缺口排序，原料不足跳下一個。
@@ -40,6 +44,11 @@ const RECIPE_GROUPS: Dictionary = {
 		{ "out": "tools",  "rate_const": "TOOLS_RATE",  "in": { "material": 4.0 } },
 		{ "out": "arrows", "rate_const": "ARROWS_RATE", "in": { "material": 3.0 } },
 		{ "out": "goods",  "rate_const": "CRAFT_RATE",  "in": { "gem": 1.0, "material": 4.0 } },  # 工藝品（高價值優先嘗試）
+		# 馬車：horses 來源 = 居民團自有（採集/交易）；公庫 horses 供軍用訓練
+		{ "out": "wagons", "rate_const": "WAGON_RATE", "in": { "horses": 1.0, "material": 6.0, "tools": 1.0 } },
+	],
+	"apothecary_level": [   # 藥坊
+		{ "out": "medicine", "rate_const": "MEDICINE_RATE", "in": { "herb": 2.0 } },
 	],
 	"smelter_level": [
 		{ "out": "ore_steel", "rate_const": "SMELT_RATE", "in": { "ore_iron": 2.0, "material": 1.0 } },

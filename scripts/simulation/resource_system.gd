@@ -3,7 +3,7 @@ class_name ResourceSystem
 const FOOD_PER_PERSON_PER_DAY: float = 2.4   # TEST VALUE — 2.4食物/人/天（原 0.1×24）
 const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
 
-const PUBLIC_RESOURCES: Array = ["ore_gold", "ore_silver", "ore_iron", "ore_steel", "mounts"]
+const PUBLIC_RESOURCES: Array = ["ore_gold", "ore_silver", "ore_iron", "ore_steel", "mounts", "horses"]
 
 # TEST VALUES — 平衡期需調整
 const REGEN_RATE: Dictionary = {
@@ -72,6 +72,11 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 		if em > 0:
 			var mount_food: float = float(em) * FOOD_PER_MOUNT_PER_DAY * day_fraction
 			team.resources["food"] = maxf(0.0, float(team.resources.get("food", 0)) - mount_food)
+		# 馴馬（horses）草料：×0.5/day，馴馬不騎 → 不受 effective（pop）限制
+		var horses_n: float = float(team.resources.get("horses", 0))
+		if horses_n > 0.0:
+			var horse_food: float = horses_n * FOOD_PER_MOUNT_PER_DAY * day_fraction
+			team.resources["food"] = maxf(0.0, float(team.resources.get("food", 0)) - horse_food)
 		var total_pop: int = team.population + team.minor_population
 		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY * day_fraction
 		var food_available: float = float(team.resources.get("food", 0))
@@ -107,6 +112,8 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 		outpost_mult: float, pop_mult: float,
 		prod_skill: float, eng_skill: float) -> void:
 	for res in src_tile.resources.keys():
+		if res == "wild_horses":
+			continue   # 活物不走 generic 採集（日捕在 HarvestSystem）
 		var current: float = float(src_tile.resources.get(res, 0))
 		if current <= 0.0:
 			continue

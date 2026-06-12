@@ -62,6 +62,10 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var fac: Dictionary = _facility_stats(state)
 	print("[FacilityStats] %s 設施總數=%d 組合=%s" % [
 		cfg_name, int(fac.facility_count), str(fac.combos)])
+	# B 期材料層統計：team 持有 + 公庫總量（herb 只能從 tile 採集而來 → >0 即驗證採集鏈）
+	var mat: Dictionary = _material_totals(state)
+	print("[MaterialStats] %s herb=%.1f horses=%.1f mounts=%.1f wagons=%.2f medicine=%.2f" % [
+		cfg_name, mat.herb, mat.horses, mat.mounts, mat.wagons, mat.medicine])
 	return {
 		"coin_eq_init": coin_eq_init,
 		"coin_eq_final": coin_eq_final,
@@ -149,6 +153,18 @@ func _auto_drive_encounter(state: WorldState, runner: SimRunner) -> void:
 						"move_to": enc._calc_next_step(u["pos"], enemy["pos"]),
 						"attack_part": "" }
 			break
+
+func _material_totals(state: WorldState) -> Dictionary:
+	var totals: Dictionary = { "herb": 0.0, "horses": 0.0, "mounts": 0.0, "wagons": 0.0, "medicine": 0.0 }
+	for tid in state.teams:
+		var team: TeamData = state.teams[tid]
+		for k in totals:
+			totals[k] = float(totals[k]) + float(team.resources.get(k, 0))
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		for k in totals:
+			totals[k] = float(totals[k]) + float(tile.public_storage.get(k, 0))
+	return totals
 
 func _print_comparison(summary: Array) -> void:
 	print("\n========== 多配置對比 ==========")
