@@ -237,6 +237,8 @@ func _initialize() -> void:
 	_test_herb_generation()
 	_test_horse_plain_generation()
 	_test_herb_regen()
+	_test_collect_excludes_wild_horses()
+	_test_daily_catch_to_horses()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -5643,9 +5645,11 @@ func _test_outpost_collect_wild_horses() -> void:
 	state.world.tiles[ntile.tile_id] = ntile
 	var hs := HarvestSystem.new()
 	hs.tick_all(state)
-	assert(int(tile_op.public_storage.get("mounts", 0)) == 2,
-		"應收 2，實際=%d" % int(tile_op.public_storage.get("mounts", 0)))
-	assert(int(ntile.resources.get("wild_horses", 0)) == 0, "野馬應清空")
+	# B 期改制：日捕進 horses（非 mounts），無馬廄日捕上限 1
+	assert(int(tile_op.public_storage.get("horses", 0)) == 1,
+		"應捕 1（日上限），實際=%d" % int(tile_op.public_storage.get("horses", 0)))
+	assert(int(tile_op.public_storage.get("mounts", 0)) == 0, "不再直接進 mounts")
+	assert(int(ntile.resources.get("wild_horses", 0)) == 1, "野馬剩 1")
 	print("MountStorage Task3 OK")
 
 func _test_outpost_collect_no_outpost_skip() -> void:
@@ -5670,7 +5674,7 @@ func _test_outpost_collect_cap_limit() -> void:
 	var tile_op := HexTileData.new()
 	tile_op.tile_id = 0; tile_op.tile_pos = Vector2i(0, 0)
 	tile_op.outpost_level = 1; tile_op.outpost_owner = 0
-	tile_op.public_storage["mounts"] = 10.0   # 已滿（Lv1 cap=10）
+	tile_op.public_storage["horses"] = 10.0   # 已滿（Lv1 cap=10）
 	state.world.tiles[tile_op.tile_id] = tile_op
 	var ntile := HexTileData.new()
 	ntile.tile_id = 1 * 1000 + 0; ntile.tile_pos = Vector2i(1, 0)
@@ -5678,7 +5682,7 @@ func _test_outpost_collect_cap_limit() -> void:
 	state.world.tiles[ntile.tile_id] = ntile
 	var hs := HarvestSystem.new()
 	hs.tick_all(state)
-	assert(int(tile_op.public_storage.get("mounts", 0)) == 10, "滿庫不增")
+	assert(int(tile_op.public_storage.get("horses", 0)) == 10, "滿庫不增")
 	assert(int(ntile.resources.get("wild_horses", 0)) == 2, "野馬保留")
 	print("MountStorage Task3c OK")
 
@@ -7223,3 +7227,56 @@ func _test_herb_regen() -> void:
 	hs._regen_herb(state)
 	assert(int(tile.resources["herb"]) == 5, "達 cap 不再生")
 	print("Material Task1c OK")
+
+func _test_collect_excludes_wild_horses() -> void:
+	print("--- Material Task2a: collect 排除活物 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.productivity = 1.0
+	tile.resources = { "wild_horses": 2, "herb": 100.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10
+	team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	rs._collect_from_tile(state, team, tile, 1.0, 1.0, 0.0, 0.0)
+	assert(int(tile.resources["wild_horses"]) == 2, "wild_horses 不被 generic 採，實際=%d" % int(tile.resources["wild_horses"]))
+	assert(float(team.resources.get("herb", 0)) > 0.0, "herb 正常採")
+	assert(not team.resources.has("wild_horses"), "team 不應有 wild_horses")
+	print("Material Task2a OK")
+
+func _test_daily_catch_to_horses() -> void:
+	print("--- Material Task2b: 日捕進 horses + 馬廄加成 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = WorldState.TICKS_PER_DAY
+	# 無馬廄 outpost：日捕上限 1
+	var op1 := HexTileData.new()
+	op1.tile_id = 0; op1.tile_pos = Vector2i(0, 0)
+	op1.outpost_level = 1; op1.outpost_owner = 0; op1.outpost_type = "military"
+	state.world.tiles[0] = op1
+	var n1 := HexTileData.new()
+	n1.tile_id = 1 * 1000 + 0; n1.tile_pos = Vector2i(1, 0)
+	n1.resources["wild_horses"] = 5
+	state.world.tiles[n1.tile_id] = n1
+	# civilian stable Lv2：日捕上限 1+2=3
+	var op2 := HexTileData.new()
+	op2.tile_id = 10 * 1000 + 10; op2.tile_pos = Vector2i(10, 10)
+	op2.outpost_level = 2; op2.outpost_owner = 1; op2.outpost_type = "civilian"
+	op2.stable_level = 2
+	state.world.tiles[op2.tile_id] = op2
+	var n2 := HexTileData.new()
+	n2.tile_id = 11 * 1000 + 10; n2.tile_pos = Vector2i(11, 10)
+	n2.resources["wild_horses"] = 5
+	state.world.tiles[n2.tile_id] = n2
+	var hs := HarvestSystem.new()
+	hs._collect_wild_horses_by_outposts(state)
+	assert(int(op1.public_storage.get("horses", 0)) == 1, "無馬廄日捕 1，實際=%d" % int(op1.public_storage.get("horses", 0)))
+	assert(int(n1.resources["wild_horses"]) == 4, "鄰格野馬剩 4")
+	assert(int(op2.public_storage.get("horses", 0)) == 3, "stable Lv2 日捕 3，實際=%d" % int(op2.public_storage.get("horses", 0)))
+	assert(int(n2.resources["wild_horses"]) == 2, "鄰格野馬剩 2")
+	assert(int(op1.public_storage.get("mounts", 0)) == 0, "日捕不進 mounts")
+	print("Material Task2b OK")

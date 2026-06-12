@@ -138,7 +138,7 @@ const OUTPOST_STORAGE_CAP: Dictionary = {
 const MOUNT_STORAGE_CAP: Array = [10.0, 30.0, 80.0]
 
 func _get_storage_cap(tile: HexTileData, res: String) -> float:
-	if res == "mounts":
+	if res == "mounts" or res == "horses":
 		return MOUNT_STORAGE_CAP[clampi(tile.outpost_level - 1, 0, 2)]
 	var arr: Array = OUTPOST_STORAGE_CAP.get(tile.outpost_type, [100.0, 300.0, 800.0])
 	return float(arr[clampi(tile.outpost_level - 1, 0, 2)])
