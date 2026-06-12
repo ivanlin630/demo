@@ -1342,6 +1342,17 @@ func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileDat
 
 # ──────── 基建 dispatch ────────
 
+# 選址 diff print：同 faction 同址不重印（{ faction_id: "x_y" }）
+var _last_site_sig: Dictionary = {}
+# 派工失敗原因 diff print：同 faction 同原因連續不重印（{ faction_id: reason }）
+var _last_dispatch_fail: Dictionary = {}
+
+func _log_dispatch_fail(faction_id: int, reason: String, cost: Dictionary) -> void:
+	if _last_dispatch_fail.get(faction_id, "") == reason:
+		return
+	_last_dispatch_fail[faction_id] = reason
+	print("[Site] Faction%d 派工失敗: %s (需 %s)" % [faction_id, reason, str(cost)])
+
 # 選一名非 leader 的記名成員當子隊 leader（建造/升級/擴建 crew）
 func _pick_advisor(team: TeamData) -> int:
 	for pid in team.named_members:
@@ -1357,14 +1368,24 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	for k in cost:
 		if k == "ticks": continue
 		if float(leader_team.resources.get(k, 0)) < float(cost[k]) * 1.5:
+			_log_dispatch_fail(leader_team.faction_id,
+				"資源不足 1.5x: %s 有 %.0f" % [k, float(leader_team.resources.get(k, 0))], cost)
 			return false
 	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
-	if advisor_id == -1: return false
+	if advisor_id == -1:
+		_log_dispatch_fail(leader_team.faction_id, "無 advisor 可派可升", cost)
+		return false
 	var pop: int = maxi(10, level * 5)
-	if leader_team.population < pop * 2: return false
+	if leader_team.population < pop * 2:
+		_log_dispatch_fail(leader_team.faction_id,
+			"pop 不足: %d < %d" % [leader_team.population, pop * 2], cost)
+		return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, leader_team.team_id, advisor_id, pop, "建造", target_pos)
-	if sub_id == -1: return false
+	if sub_id == -1:
+		_log_dispatch_fail(leader_team.faction_id, "subteam dispatch 失敗", cost)
+		return false
+	_last_dispatch_fail.erase(leader_team.faction_id)
 	_fund_subteam_cost(leader_team, state.teams[sub_id], cost)
 	state.teams[sub_id].task_extra_data = {
 		"build_type": outpost_type, "level": level
@@ -1409,6 +1430,10 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 		var t: TeamData = state.teams[tid]
 		if t.combat_target != -1: continue
 		if t.leader_id == state.player_id and state.player_id != -1: continue
+		# 糧 < 3 天不復工（餓肚子不搬磚 — 否則和 survival 搶人 ping-pong）
+		var days_left: float = float(t.resources.get("food", 0)) \
+			/ maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		if days_left < 3.0: continue
 		var is_owner: bool = t.team_id == tile.outpost_owner
 		var resident_here: bool = t.tile_pos == tile.tile_pos \
 			and t.faction_id == leader_team.faction_id and t.faction_id != -1 \
@@ -1532,8 +1557,11 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 	if candidates.is_empty(): return {}
 	candidates.sort_custom(func(a, b): return a.score > b.score)
 	var best: Dictionary = candidates[0]
-	print("[Site] 選址 %s score=%.0f 周邊資源=%s" % [
-		str(best.pos), best.score, str(_site_resources_nearby(state, best.pos))])
+	var sig: String = "%d_%d" % [best.pos.x, best.pos.y]
+	if _last_site_sig.get(leader_team.faction_id, "") != sig:
+		_last_site_sig[leader_team.faction_id] = sig
+		print("[Site] 選址 %s score=%.0f 周邊資源=%s" % [
+			str(best.pos), best.score, str(_site_resources_nearby(state, best.pos))])
 	return best
 
 func _site_resource_bonus(state: WorldState, pos: Vector2i) -> float:
@@ -1604,6 +1632,8 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level == 0: continue
 		if tile.construction_team_id != -1:
+			if OutpostSystem.new().check_construction_timeout(state, tile):
+				continue
 			_try_resume_construction(state, tile, leader_team)
 			continue
 		var owner_team: TeamData = state.teams.get(tile.outpost_owner)

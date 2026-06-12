@@ -51,6 +51,7 @@
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 |
 |---|---|---|---|---|
 | `FOOD_PER_PERSON_PER_TICK` | `simulation/resource_system.gd:3` | **0.1** | 10人 = 1food/tick = 24food/天 | — |
+| `COLLECT_RATE` | `simulation/resource_system.gd:9` | **0.05** | 每次 collect 取 tile 池比例（馬爾薩斯 tune 0.01→0.05；池常駐 cap，遠區村收入 ≈ cap×rate×mults×2.4 次/日） | — |
 | REGEN plains food | `simulation/resource_system.gd:7` | 8.0/tick | 平原農業再生（需 outpost） | — |
 | REGEN forest material | `simulation/resource_system.gd:9` | 12.0/tick | 林地木材再生 | — |
 | `FOOD_RESERVE_TICKS` | `simulation/interaction_system.gd:32` | 20.0 | 交易自留底線=20tick食物 | — |

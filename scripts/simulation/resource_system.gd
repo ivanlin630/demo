@@ -3,6 +3,10 @@ class_name ResourceSystem
 const FOOD_PER_PERSON_PER_DAY: float = 2.4   # TEST VALUE — 2.4食物/人/天（原 0.1×24）
 const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
 
+# 採集係數：每次 collect 取 tile 池的比例（馬爾薩斯 tune R1: 0.01→0.05 —
+# 池常駐 cap，遠區村 income ≈ cap×rate×mults×2.4次/日，0.01 時 7/day << burn 28.8）
+const COLLECT_RATE: float = 0.05
+
 const PUBLIC_RESOURCES: Array = ["ore_gold", "ore_silver", "ore_iron", "ore_steel", "mounts", "horses"]
 
 # TEST VALUES — 平衡期需調整
@@ -117,7 +121,7 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 		var current: float = float(src_tile.resources.get(res, 0))
 		if current <= 0.0:
 			continue
-		var gain: float = src_tile.productivity * current * 0.01
+		var gain: float = src_tile.productivity * current * COLLECT_RATE
 		gain *= outpost_mult * pop_mult
 		gain *= team.work_morale
 		match res:

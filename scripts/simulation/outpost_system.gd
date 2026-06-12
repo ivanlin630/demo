@@ -26,6 +26,9 @@ const BUILD_TICKS: Dictionary = {
 	"military": [100, 300, 600],
 }
 
+# 工地無實際進度逾此時長 → 取消退料（防永久卡死黑洞）
+const CONSTRUCTION_TIMEOUT: int = 30 * WorldState.TICKS_PER_DAY
+
 # 馬廄各等級每日產出 mounts / 消耗 food（index = level-1）
 const STABLE_PRODUCE_PER_DAY: Array = [0.3, 0.7, 1.0]
 const STABLE_FOOD_PER_DAY: Array    = [5.0, 10.0, 15.0]
@@ -230,6 +233,9 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 		return  # 無施工隊在格，暫停（faction_ai._try_resume_construction 負責召回復工）
 	# 更新施工 team（接手：任何在格上建設的 team 都可繼續）
 	tile.construction_team_id = active_team.team_id
+	if tile.construction_started_tick == -1:
+		tile.construction_started_tick = state.world.current_tick
+	tile.construction_last_progress_tick = state.world.current_tick
 	tile.construction_ticks_left -= maxi(active_team.population, 1)
 	if tile.construction_ticks_left <= 0:
 		_complete_construction(state, tile, active_team)
@@ -281,6 +287,8 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 	tile.construction_ticks_left = 0
 	tile.construction_team_id   = -1
 	tile.construction_target     = {}
+	tile.construction_started_tick = -1
+	tile.construction_last_progress_tick = -1
 	TaskArbiter.release(team)
 
 # C: 建造子隊完工後就地安頓為駐留 team（owner 已設為自己，加 tag、脫離母團）
@@ -322,6 +330,8 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[type][level - 1]
 	tile.construction_target    = { "action": "build", "type": type, "level": level }
+	tile.construction_started_tick = state.world.current_tick
+	tile.construction_last_progress_tick = state.world.current_tick
 	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 開始建 %s Lv%d at (%d,%d)（需 %d person-ticks）" % [
 		team.team_id, type, level, tile.tile_pos.x, tile.tile_pos.y,
@@ -342,6 +352,8 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][new_level - 1]
 	tile.construction_target    = { "action": "upgrade_level", "level": new_level }
+	tile.construction_started_tick = state.world.current_tick
+	tile.construction_last_progress_tick = state.world.current_tick
 	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 升級 → Lv%d at (%d,%d)" % [
 		team.team_id, new_level, tile.tile_pos.x, tile.tile_pos.y])
@@ -401,6 +413,48 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	print("[Outpost] Team%d 拆除 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
+# 依 construction_target 查當前工地已付成本（timeout 退料用）
+static func construction_cost_of(tile: HexTileData) -> Dictionary:
+	var action: String = str(tile.construction_target.get("action", ""))
+	match action:
+		"build":
+			return OUTPOST_COST[str(tile.construction_target["type"])] \
+				[int(tile.construction_target["level"]) - 1]
+		"upgrade_level":
+			return OUTPOST_COST[tile.outpost_type][int(tile.construction_target["level"]) - 1]
+		"upgrade_facility":
+			var fac: String = str(tile.construction_target.get("facility", ""))
+			if FACILITY_DEF.has(fac):
+				var cur: int = int(tile.get(FACILITY_DEF[fac]["current_level_key"]))
+				return upgrade_cost(fac, cur + 1)
+	return {}   # demolish 無付款
+
+# 工地 30 天無實際進度 → 取消、退 50% 料給施工團、tile 釋放。回傳 true = 已取消。
+func check_construction_timeout(state: WorldState, tile: HexTileData) -> bool:
+	if tile.construction_team_id == -1:
+		return false
+	# 時鐘未起算（開工後尚無進度 tick）→ 從本次掃描起算
+	if tile.construction_last_progress_tick == -1:
+		tile.construction_last_progress_tick = state.world.current_tick
+		if tile.construction_started_tick == -1:
+			tile.construction_started_tick = state.world.current_tick
+		return false
+	if state.world.current_tick - tile.construction_last_progress_tick <= CONSTRUCTION_TIMEOUT:
+		return false
+	var ct: TeamData = state.teams.get(tile.construction_team_id)
+	var cost: Dictionary = construction_cost_of(tile)
+	if ct != null:
+		for k in cost:
+			if k == "ticks": continue
+			ct.resources[k] = float(ct.resources.get(k, 0)) + float(cost[k]) * 0.5
+	tile.construction_team_id = -1
+	tile.construction_ticks_left = 0
+	tile.construction_target = {}
+	tile.construction_started_tick = -1
+	tile.construction_last_progress_tick = -1
+	print("[Infra] 工地逾時取消 at (%d,%d) 退料 50%%" % [tile.tile_pos.x, tile.tile_pos.y])
+	return true
+
 # 拆除單一設施（騰 slot；需求迴路拆遷用）
 func demolish_facility(_state: WorldState, tile: HexTileData, facility: String) -> void:
 	if not FACILITY_DEF.has(facility):
@@ -458,6 +512,8 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][target_level - 1]
 	tile.construction_target    = { "action": "upgrade_level", "level": target_level }
+	tile.construction_started_tick = state.world.current_tick
+	tile.construction_last_progress_tick = state.world.current_tick
 	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] 子隊 Team%d 開始升級 → Lv%d at (%d,%d)" % [
 		team.team_id, target_level, tile.tile_pos.x, tile.tile_pos.y])

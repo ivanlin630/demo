@@ -250,6 +250,10 @@ func _initialize() -> void:
 	_test_recipe_input_scaling()
 	_test_price_covers_input_cost()
 	_test_famine_price_spike()
+
+	_test_site_diff_print()
+	_test_resume_requires_food()
+	_test_construction_timeout()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7518,3 +7522,88 @@ func _test_siting_multi_center() -> void:
 	assert(not best.is_empty(), "多中心應產生候選")
 	assert(best.pos == Vector2i(12, 10), "第二 outpost 周邊進候選，實際=%s" % str(best.pos))
 	print("Material Task5c OK")
+
+func _test_site_diff_print() -> void:
+	print("--- Malthus Task1: 選址 diff print + 派工失敗 log ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(0, 0)
+	leader_team.faction_id = 1
+	state.teams[0] = leader_team
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			tile.productivity = 1.0; tile.outpost_level = 0
+			state.world.tiles[x * 1000 + y] = tile
+	var fai := FactionAISystem.new()
+	# 同 faction 同址連評 → sig 只記一次（第二次不重印）
+	var best1: Dictionary = fai._evaluate_new_outpost_location(state, leader_team)
+	assert(not best1.is_empty(), "應有候選")
+	var sig1: String = fai._last_site_sig.get(1, "")
+	assert(sig1 != "", "首評應記 sig")
+	var best2: Dictionary = fai._evaluate_new_outpost_location(state, leader_team)
+	assert(best2.pos == best1.pos, "同世界同址")
+	assert(fai._last_site_sig.get(1, "") == sig1, "同址 sig 不變（diff print 不重印）")
+	# 派工失敗原因記錄：無資源 → 資源不足；同原因連續 dedupe
+	var ok: bool = fai._dispatch_builder(state, leader_team, best1.pos, "civilian", 1)
+	assert(not ok, "無資源應失敗")
+	var reason: String = fai._last_dispatch_fail.get(1, "")
+	assert(reason.begins_with("資源不足"), "應記資源不足，實際=%s" % reason)
+	ok = fai._dispatch_builder(state, leader_team, best1.pos, "civilian", 1)
+	assert(not ok and fai._last_dispatch_fail.get(1, "") == reason, "同原因 dedupe")
+	print("Malthus Task1 OK")
+
+func _test_resume_requires_food() -> void:
+	print("--- Malthus Task2a: 復工糧門檻 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(2, 2)
+	tile.outpost_owner = 0
+	tile.construction_team_id = 0
+	tile.construction_ticks_left = 50
+	tile.construction_target = { "action": "build", "type": "civilian", "level": 1 }
+	state.world.tiles[2 * 1000 + 2] = tile
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.faction_id = 1
+	leader_team.population = 10
+	leader_team.tile_pos = Vector2i(0, 0)
+	leader_team.resources["food"] = 10.0   # 0.42 天 < 3 天
+	state.teams[0] = leader_team
+	var fai := FactionAISystem.new()
+	fai._try_resume_construction(state, tile, leader_team)
+	assert(leader_team.current_task != TeamData.TASK_BUILD, "糧 < 3 天不復工")
+	leader_team.resources["food"] = 10.0 * 2.4 * 5.0   # 5 天
+	fai._try_resume_construction(state, tile, leader_team)
+	assert(leader_team.current_task == TeamData.TASK_BUILD, "糧 >= 3 天應復工")
+	print("Malthus Task2a OK")
+
+func _test_construction_timeout() -> void:
+	print("--- Malthus Task2b: 工地 timeout ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 31 * WorldState.TICKS_PER_DAY
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(2, 2)
+	tile.construction_team_id = 7
+	tile.construction_ticks_left = 50
+	tile.construction_target = { "action": "build", "type": "civilian", "level": 1 }
+	tile.construction_started_tick = 0
+	tile.construction_last_progress_tick = 0
+	state.world.tiles[2 * 1000 + 2] = tile
+	var ct := TeamData.new(); ct.team_id = 7
+	state.teams[7] = ct
+	var os := OutpostSystem.new()
+	# 30 天內 → 不取消
+	state.world.current_tick = 29 * WorldState.TICKS_PER_DAY
+	assert(not os.check_construction_timeout(state, tile), "30 天內不取消")
+	# 超過 30 天 → 取消 + 退 50% material（civilian Lv1 = 50 → 25）
+	state.world.current_tick = 31 * WorldState.TICKS_PER_DAY
+	assert(os.check_construction_timeout(state, tile), "30 天無進度應取消")
+	assert(absf(float(ct.resources.get("material", 0)) - 25.0) < 0.01,
+		"退 50%% material，實際=%s" % str(ct.resources.get("material", 0)))
+	assert(tile.construction_team_id == -1 and tile.construction_target.is_empty(), "tile 釋放")
+	assert(tile.construction_started_tick == -1, "started 重設")
+	print("Malthus Task2b OK")

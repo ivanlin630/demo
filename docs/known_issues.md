@@ -1,10 +1,24 @@
 # Known Issues
 
-> 最後更新：2026-06-10（NPC wakeup fixes + tier system + speed tune）| 來源：動態測試 + code review
+> 最後更新：2026-06-12（馬爾薩斯修正 2 年驗證）| 來源：動態測試 + code review
 
 ---
 
 ## 🔴 高優先（影響基本可玩性）
+
+### W3. P5 生育永不觸發 — reaction 權重結構性輸分
+- **症狀**：COLLECT_RATE tune 後多 team 糧緩衝 100+ 天（7 天盈餘門檻遠超），2 年 multi 生育/長大成人 = 0
+- **根因**：`_score_breed` max ≈ 0.5（0.4 + 醫療×0.1），P2_produce active=0.6+、P1_comply 忠誠高可達 1.0 → P5 永不中選；且 minor cap = `int(pop×0.2)` → pop≤4 cap=0
+- **影響**：人口循環死路 — 糧食前提已修好但生育鏈不通
+- **發現**：2026-06-12 malthus-fixes 2 年驗證
+- **建議**：reaction 權重 spec（P5 加糧食盈餘 bonus 或獨立於 winner-take-all 的機率 roll）；cap 改 `maxi(1, pop/5)`
+
+### W4. Faction leader 行為性貧窮 — 建造解鎖極慢
+- **症狀**：2 年 multi 派建造子隊 = 0；失敗原因 log（本批新增）顯示全是 material < cost×1.5（leader material +0.2/day 涓滴，門檻 75 要爬數年）
+- **根因**：leader team 常駐外面（迎戰/乞食/逃跑），不在 outpost tile → collect 收入 0；material 只靠稅/貿易涓滴
+- **影響**：新據點/設施建造近乎凍結（2 年全 config 僅 2 件設施完工）
+- **發現**：2026-06-12 malthus-fixes 2 年驗證
+- **建議**：leader 駐留行為 spec，或建造資金改走 outpost 公庫/faction 共同出資而非 leader team 口袋
 
 ### W1. NPC 0 Combat 起戰 — 會合不上
 - **症狀**：multi 4 config × 90 天，ProsperityAttack 5 次排程 + attacker 都會動，但 `[Encounter]` / `[Hit]` = 0

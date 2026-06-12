@@ -33,3 +33,5 @@ var mint_level: int = 0               # mint 設施等級
 var construction_ticks_left: int = 0
 var construction_team_id: int = -1
 var construction_target: Dictionary = {}   # { action, type?, level? }
+var construction_started_tick: int = -1        # 施工開始 tick（timeout 判定）
+var construction_last_progress_tick: int = -1  # 最後實際進度 tick

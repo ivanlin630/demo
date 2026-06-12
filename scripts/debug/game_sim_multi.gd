@@ -5,8 +5,13 @@ const CONFIGS: Array = [
 ]
 
 func _initialize() -> void:
+	# SIM_CONFIGS=tyrant,warzone → 只跑指定 config（長跑平行分工用）
+	var cfgs: Array = CONFIGS
+	var env_cfg: String = OS.get_environment("SIM_CONFIGS")
+	if env_cfg != "":
+		cfgs = env_cfg.split(",")
 	var summary: Array = []
-	for cfg_name in CONFIGS:
+	for cfg_name in cfgs:
 		var stats: Dictionary = _run_config(cfg_name)
 		summary.append({ "config": cfg_name, "stats": stats })
 	_print_comparison(summary)
@@ -31,6 +36,7 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var min_coin: float = 1e9
 	var pop_init: int = _total_pop(state)
 	var coin_eq_init: float = _coin_equivalent_total(state)
+	var food_snapshot: Dictionary = {}   # team_id → 上月食物量（FoodLedger 反推 income 用）
 	for tick in range(max_ticks):
 		var pp: Vector2i = _player_pos(state)
 		var result = runner.advance_tick(state, pp)
@@ -50,6 +56,7 @@ func _run_config(cfg_name: String) -> Dictionary:
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			print("[PopSample] %s tick=%d total_pop=%d" % [
 				cfg_name, state.world.current_tick, _total_pop(state)])
+			_print_food_ledger(state, cfg_name, food_snapshot)
 	# 蒐集事件統計（從 log 或 state）
 	var team_count: int = state.teams.size()
 	var alive_persons: int = state.persons.size()
@@ -165,6 +172,36 @@ func _material_totals(state: WorldState) -> Dictionary:
 		for k in totals:
 			totals[k] = float(totals[k]) + float(tile.public_storage.get(k, 0))
 	return totals
+
+# 月度糧收支儀器：burn = pop×2.4 + (mounts+horses)×0.5（估算）；
+# 收入難直接量 → 用月間 food 變化反推：income/day = ΔF/30 + burn
+func _print_food_ledger(state: WorldState, cfg_name: String, snapshot: Dictionary) -> void:
+	var owners: Dictionary = {}
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level > 0 and tile.outpost_owner != -1:
+			owners[tile.outpost_owner] = true
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		var food: float = float(t.resources.get("food", 0))
+		var burn: float = float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
+			+ (float(t.resources.get("mounts", 0)) + float(t.resources.get("horses", 0))) \
+			* ResourceSystem.FOOD_PER_MOUNT_PER_DAY
+		var days: float = food / maxf(burn, 0.001)
+		var kind: String = "wander"
+		if owners.has(tid): kind = "outpost"
+		elif TeamData.TAG_PRODUCE in t.tags: kind = "resident"
+		elif TeamData.TAG_MILITARY in t.tags: kind = "military"
+		var income_str: String = "NA"
+		if snapshot.has(tid):
+			income_str = "%.1f" % ((food - float(snapshot[tid])) / 30.0 + burn)
+		var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
+		var tile_str: String = "off_map"
+		if tile != null:
+			tile_str = "%s/pool=%.0f/op=%d" % [tile.terrain, float(tile.resources.get("food", 0)), tile.outpost_level]
+		print("[FoodLedger] %s team=%d kind=%s pop=%d food=%.0f days=%.1f burn/day=%.1f income/day=%s tile=%s task=%s" % [
+			cfg_name, tid, kind, t.population, food, days, burn, income_str, tile_str, t.current_task])
+		snapshot[tid] = food
 
 func _print_comparison(summary: Array) -> void:
 	print("\n========== 多配置對比 ==========")
