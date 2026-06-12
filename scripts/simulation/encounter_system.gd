@@ -1055,11 +1055,19 @@ func apply_mount_loot(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var kill_ratio: float = clampf(float(dead) / float(initial), 0.0, 1.0)
 	var loser_mounts: int = int(loser.resources.get("mounts", 0))
 	var loot: int = roundi(float(loser_mounts) * kill_ratio)
-	if loot <= 0: return
-	loser.resources["mounts"] = loser_mounts - loot
-	winner.resources["mounts"] = int(winner.resources.get("mounts", 0)) + loot
-	print("[Loot] Team%d → Team%d mounts +%d (kill_ratio=%.2f)" % [
-		loser_id, winner_id, loot, kill_ratio])
+	if loot > 0:
+		loser.resources["mounts"] = loser_mounts - loot
+		winner.resources["mounts"] = int(winner.resources.get("mounts", 0)) + loot
+		print("[Loot] Team%d → Team%d mounts +%d (kill_ratio=%.2f)" % [
+			loser_id, winner_id, loot, kill_ratio])
+	# horses（馴馬）同公式
+	var loser_horses: int = int(loser.resources.get("horses", 0))
+	var hloot: int = roundi(float(loser_horses) * kill_ratio)
+	if hloot > 0:
+		loser.resources["horses"] = loser_horses - hloot
+		winner.resources["horses"] = int(winner.resources.get("horses", 0)) + hloot
+		print("[Loot] Team%d → Team%d horses +%d (kill_ratio=%.2f)" % [
+			loser_id, winner_id, hloot, kill_ratio])
 
 func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var atk_id: int = state.encounter_attacker_id

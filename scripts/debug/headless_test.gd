@@ -243,6 +243,9 @@ func _initialize() -> void:
 	_test_civilian_stable_no_training()
 	_test_wagon_recipe()
 	_test_medicine_recipe()
+	_test_horses_loot()
+	_test_siting_resource_weight()
+	_test_siting_multi_center()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7376,3 +7379,72 @@ func _test_medicine_recipe() -> void:
 	assert(float(tile.public_storage.get("medicine", 0)) == med_before, "無 herb 不產")
 	assert(InteractionSystem.BASE_PRICE.has("horses") and InteractionSystem.BASE_PRICE.has("medicine"), "貿易價格表補 horses/medicine")
 	print("Material Task4b OK")
+
+func _test_horses_loot() -> void:
+	print("--- Material Task5a: horses loot ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var winner := TeamData.new()
+	winner.team_id = 0; winner.population = 10; winner.resources = {}
+	winner.tile_pos = Vector2i(0, 0)
+	state.teams[0] = winner
+	var loser := TeamData.new()
+	loser.team_id = 1; loser.population = 5; loser.resources = { "horses": 4 }
+	loser.encounter_initial_pop = 10   # 死 5 → kill_ratio 0.5
+	loser.tile_pos = Vector2i(9, 9)
+	state.teams[1] = loser
+	var es := EncounterSystem.new()
+	es.apply_mount_loot(state, 0, 1)
+	assert(int(winner.resources.get("horses", 0)) == 2, "winner +2 horses, 實際 %d" % int(winner.resources.get("horses", 0)))
+	assert(int(loser.resources.get("horses", 0)) == 2, "loser 剩 2")
+	print("Material Task5a OK")
+
+func _test_siting_resource_weight() -> void:
+	print("--- Material Task5b: 選址資源權重 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(5, 5)
+	state.teams[0] = leader_team
+	# 兩候選同 productivity/terrain/dist：A=(7,5) 鄰藥草林、B=(3,5) 無
+	for pos in [Vector2i(7, 5), Vector2i(3, 5)]:
+		var t := HexTileData.new()
+		t.tile_id = pos.x * 1000 + pos.y; t.tile_pos = pos
+		t.terrain = "plains"; t.productivity = 1.0
+		state.world.tiles[t.tile_id] = t
+	var herb_tile := HexTileData.new()
+	herb_tile.tile_id = 8 * 1000 + 5; herb_tile.tile_pos = Vector2i(8, 5)
+	herb_tile.terrain = "forest"; herb_tile.productivity = 0.1
+	herb_tile.resources["herb"] = 15
+	state.world.tiles[herb_tile.tile_id] = herb_tile
+	var fai := FactionAISystem.new()
+	var best: Dictionary = fai._evaluate_new_outpost_location(state, leader_team)
+	assert(not best.is_empty(), "應有候選")
+	assert(best.pos == Vector2i(7, 5), "鄰藥草林者勝出，實際=%s" % str(best.pos))
+	print("Material Task5b OK (score=%.0f)" % best.score)
+
+func _test_siting_multi_center() -> void:
+	print("--- Material Task5c: 選址多中心 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var leader_team := TeamData.new()
+	leader_team.team_id = 0; leader_team.tile_pos = Vector2i(0, 0)
+	leader_team.faction_id = 1
+	state.teams[0] = leader_team
+	# faction 第二 outpost 在 (10,10)，富點候選 (12,10) 距 leader 22 / 距 outpost 2
+	var op := HexTileData.new()
+	op.tile_id = 10 * 1000 + 10; op.tile_pos = Vector2i(10, 10)
+	op.outpost_level = 1; op.outpost_owner = 5
+	state.world.tiles[op.tile_id] = op
+	var op_owner := TeamData.new()
+	op_owner.team_id = 5; op_owner.faction_id = 1
+	state.teams[5] = op_owner
+	var cand := HexTileData.new()
+	cand.tile_id = 12 * 1000 + 10; cand.tile_pos = Vector2i(12, 10)
+	cand.terrain = "plains"; cand.productivity = 1.0
+	state.world.tiles[cand.tile_id] = cand
+	var fai := FactionAISystem.new()
+	var best: Dictionary = fai._evaluate_new_outpost_location(state, leader_team)
+	assert(not best.is_empty(), "多中心應產生候選")
+	assert(best.pos == Vector2i(12, 10), "第二 outpost 周邊進候選，實際=%s" % str(best.pos))
+	print("Material Task5c OK")
