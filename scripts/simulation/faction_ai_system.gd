@@ -1358,13 +1358,14 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		if k == "ticks": continue
 		if float(leader_team.resources.get(k, 0)) < float(cost[k]) * 1.5:
 			return false
-	var advisor_id: int = _pick_advisor(leader_team)
+	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
 	if advisor_id == -1: return false
 	var pop: int = maxi(10, level * 5)
 	if leader_team.population < pop * 2: return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, leader_team.team_id, advisor_id, pop, "建造", target_pos)
 	if sub_id == -1: return false
+	_fund_subteam_cost(leader_team, state.teams[sub_id], cost)
 	state.teams[sub_id].task_extra_data = {
 		"build_type": outpost_type, "level": level
 	}
@@ -1383,16 +1384,83 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 	for k in cost:
 		if k == "ticks": continue
 		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false
-	var advisor_id: int = _pick_advisor(owner_team)
+	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1: return false
 	if owner_team.population < 10: return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, owner_team.team_id, advisor_id, 5, "升級", outpost_pos)
 	if sub_id == -1: return false
+	_fund_subteam_cost(owner_team, state.teams[sub_id], cost)
 	state.teams[sub_id].task_extra_data = { "target_level": target_level }
 	print("[Infra] Team%d 派升級子隊 Team%d → (%d,%d) Lv%d" % [
 		owner_team.team_id, sub_id, outpost_pos.x, outpost_pos.y, target_level])
 	return true
+
+# 施工中斷（survival 等劫持後未復工）→ 在場居民復工，否則召回 owner 回工地
+func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team: TeamData) -> void:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos == tile.tile_pos and t.current_task == TeamData.TASK_BUILD:
+			return   # 已有人施工
+	var interruptible: Array = [TeamData.TASK_IDLE, TeamData.TASK_PRODUCE,
+		TeamData.TASK_MANUFACTURE, TeamData.TASK_TRADE]
+	var candidates: Array = []
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.combat_target != -1: continue
+		if t.leader_id == state.player_id and state.player_id != -1: continue
+		var is_owner: bool = t.team_id == tile.outpost_owner
+		var resident_here: bool = t.tile_pos == tile.tile_pos \
+			and t.faction_id == leader_team.faction_id and t.faction_id != -1 \
+			and TeamData.TAG_PRODUCE in t.tags
+		if not (is_owner or resident_here): continue
+		# 已在工地的 return_home 殭屍態（到家但飢餓 sticky）也可復工
+		var at_site_stuck: bool = t.tile_pos == tile.tile_pos \
+			and t.current_task == "return_home"
+		if not (t.current_task in interruptible or at_site_stuck): continue
+		if t.tile_pos == tile.tile_pos:
+			candidates.push_front(t)   # 在場優先
+		else:
+			candidates.append(t)
+	if candidates.is_empty(): return
+	var worker: TeamData = candidates[0]
+	TaskArbiter.transition(worker, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	worker.move_target = tile.tile_pos
+	print("[Infra] Team%d 復工 at (%d,%d)%s" % [worker.team_id,
+		tile.tile_pos.x, tile.tile_pos.y,
+		"" if worker.tile_pos == tile.tile_pos else "（趕路中）"])
+
+# tile 上可施工的居民團（PRODUCE、閒置非戰鬥；擁有權由 _subteam_upgrade_facility 驗證）
+func _resident_team_for_construction(state: WorldState, tile: HexTileData) -> TeamData:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos != tile.tile_pos: continue
+		if not (TeamData.TAG_PRODUCE in t.tags): continue
+		if t.combat_target != -1: continue
+		if t.current_task == TeamData.TASK_BUILD: continue
+		return t
+	return null
+
+# 無多餘 named → 升一名 anon 為工頭（同 residency dispatch 機制）
+func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
+	var advisor_id: int = _pick_advisor(team)
+	if advisor_id != -1:
+		return advisor_id
+	var new_advisor: PersonData = PersonGenerator.generate_for_team(state, team, "member")
+	if new_advisor == null:
+		return -1
+	team.named_members.append(new_advisor.id)
+	return new_advisor.id
+
+# 撥付建造款：dispatch 比例分資源不足以付建造費 → 從 owner 補足至 cost（守恆：純轉移）
+func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, cost: Dictionary) -> void:
+	for k in cost:
+		if k == "ticks": continue
+		var need: float = maxf(float(cost[k]) - float(sub.resources.get(k, 0)), 0.0)
+		if need <= 0.0: continue
+		var transfer: float = minf(need, float(owner_team.resources.get(k, 0)))
+		sub.resources[k] = float(sub.resources.get(k, 0)) + transfer
+		owner_team.resources[k] = float(owner_team.resources.get(k, 0)) - transfer
 
 # 派擴建子隊（task="擴建"，附 facility_type）
 func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost_pos: Vector2i,
@@ -1401,16 +1469,18 @@ func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost
 	if tile == null or tile.outpost_owner != owner_team.team_id: return false
 	if tile.construction_team_id != -1: return false
 	var def: Dictionary = OutpostSystem.FACILITY_DEF[facility_type]
-	var cost: Dictionary = def.cost
+	var cur_lvl: int = int(tile.get(def["current_level_key"]))
+	var cost: Dictionary = OutpostSystem.upgrade_cost(facility_type, cur_lvl + 1)
 	for k in cost:
 		if k == "ticks": continue
 		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false
-	var advisor_id: int = _pick_advisor(owner_team)
+	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1: return false
 	if owner_team.population < 6: return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, owner_team.team_id, advisor_id, 3, "擴建", outpost_pos)
 	if sub_id == -1: return false
+	_fund_subteam_cost(owner_team, state.teams[sub_id], cost)
 	state.teams[sub_id].task_extra_data = { "facility_type": facility_type }
 	print("[Infra] Team%d 派擴建子隊 Team%d → (%d,%d) %s" % [
 		owner_team.team_id, sub_id, outpost_pos.x, outpost_pos.y, facility_type])
@@ -1483,17 +1553,41 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue
 		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
 			return
-	# (2) 擴建設施（軍民皆可；slot 制 + 需求迴路 score：地利×缺口×個性）
+	# (2) 擴建設施（faction 內所有 outpost；owner 以自身 local 資料評估，
+	#     就地施工優先：owner 在場 > 居民團 > 派擴建子隊）
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.outpost_owner != leader_team.team_id: continue
 		if tile.outpost_level == 0: continue
-		if tile.construction_team_id != -1: continue
-		var pick: Dictionary = _pick_facility(state, leader_team, tile, leader)
+		if tile.construction_team_id != -1:
+			_try_resume_construction(state, tile, leader_team)
+			continue
+		var owner_team: TeamData = state.teams.get(tile.outpost_owner)
+		if owner_team == null: continue
+		if owner_team.team_id != leader_team.team_id \
+				and (owner_team.faction_id != leader_team.faction_id or owner_team.faction_id == -1):
+			continue
+		# 玩家 team 不自動決策
+		if owner_team.leader_id == state.player_id and state.player_id != -1: continue
+		var owner_leader: PersonData = state.persons.get(owner_team.leader_id)
+		if owner_leader == null: continue
+		var pick: Dictionary = _pick_facility(state, owner_team, tile, owner_leader)
 		if pick.is_empty(): continue
 		if pick.has("demolish_first"):
 			OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
-		if _dispatch_facility_builder(state, leader_team, tile.tile_pos, pick["facility"]):
+		# owner 在場 → 就地開工（居民村長 / 領主駐地）
+		if owner_team.tile_pos == tile.tile_pos and owner_team.combat_target == -1 \
+				and owner_team.current_task != TeamData.TASK_BUILD:
+			if OutpostSystem.new()._subteam_upgrade_facility(state, owner_team, tile, pick["facility"]):
+				return
+		# tile 上同 faction 居民團出工出料
+		var resident: TeamData = _resident_team_for_construction(state, tile)
+		if resident != null:
+			if OutpostSystem.new()._subteam_upgrade_facility(state, resident, tile, pick["facility"]):
+				print("[Infra] Team%d 令居民 Team%d 就地擴建 %s at (%d,%d)" % [
+					owner_team.team_id, resident.team_id, pick["facility"],
+					tile.tile_pos.x, tile.tile_pos.y])
+				return
+		if _dispatch_facility_builder(state, owner_team, tile.tile_pos, pick["facility"]):
 			return
 	# (3) 蓋新 outpost
 	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
@@ -1689,6 +1783,15 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	if leader == null: return
 
 	team.previous_task = team.current_task
+
+	# 正在腳下工地施工（多半是飢餓 override 的農田）→ 建設即自救，不中斷
+	# （人已在家，return_home 無意義；農田完工才是糧食出路）
+	if team.current_task == TeamData.TASK_BUILD:
+		var cur_tile: HexTileData = state.world.tiles.get(
+			team.tile_pos.x * 1000 + team.tile_pos.y)
+		if cur_tile != null and cur_tile.construction_team_id == team.team_id:
+			team.previous_task = ""
+			return
 
 	# Path 1: 有 own outpost → 回家（B 分支：遠 outpost + 殘忍/好戰 → 就近掠）
 	var own_pos: Vector2i = _find_own_outpost(state, team)

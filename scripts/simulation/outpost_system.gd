@@ -38,52 +38,53 @@ const FACILITY_SLOTS: Dictionary = {
 
 # 設施註冊表 v2（data-driven）：NPC AI 需求迴路讀取。
 # 三級建造成本：低級純 mat / 中級 mat+tools。建造守恆：無 coin、無有限資源。TEST VALUES
+# ticks = person-ticks（pop=1 時 ×10 = world ticks：farming 72 ≈ 3 天）
 const FACILITY_DEF: Dictionary = {
 	"farming": {
-		"cost": { "material": 30, "tools": 0, "ticks": 720 },
+		"cost": { "material": 30, "tools": 0, "ticks": 72 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "farming_level",
 		"leader_pref": { "慎重": 0.3 },
 	},
 	"workshop": {
-		"cost": { "material": 60, "tools": 0, "ticks": 1680 },
+		"cost": { "material": 60, "tools": 0, "ticks": 168 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "manufacturing_level",
 		"leader_pref": { "貪婪": 0.2 },
 	},
 	"apothecary": {
-		"cost": { "material": 50, "tools": 2, "ticks": 1680 },
+		"cost": { "material": 50, "tools": 2, "ticks": 168 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "apothecary_level",
 		"leader_pref": { "慎重": 0.2 },
 	},
 	"mint": {
-		"cost": { "material": 100, "tools": 5, "ticks": 7200 },
+		"cost": { "material": 100, "tools": 5, "ticks": 720 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "mint_level",
 		"leader_pref": { "貪婪": 0.4, "野心": 0.2 },
 	},
 	"stable": {
-		"cost": { "material": 40, "tools": 0, "ticks": 3360 },
+		"cost": { "material": 40, "tools": 0, "ticks": 336 },
 		"allowed_outpost": ["civilian"],
 		"current_level_key": "stable_level",
 		"required_terrain": "plains",
 		"leader_pref": { "野心": 0.2, "好戰": 0.3 },
 	},
 	"smeltery": {
-		"cost": { "material": 80, "tools": 3, "ticks": 3360 },
+		"cost": { "material": 80, "tools": 3, "ticks": 336 },
 		"allowed_outpost": ["military"],
 		"current_level_key": "smelter_level",
 		"leader_pref": { "好戰": 0.2 },
 	},
 	"weaponsmith": {
-		"cost": { "material": 80, "tools": 3, "ticks": 3360 },
+		"cost": { "material": 80, "tools": 3, "ticks": 336 },
 		"allowed_outpost": ["military"],
 		"current_level_key": "weaponsmith_level",
 		"leader_pref": { "好戰": 0.4 },
 	},
 	"armorsmith": {
-		"cost": { "material": 80, "tools": 3, "ticks": 3360 },
+		"cost": { "material": 80, "tools": 3, "ticks": 336 },
 		"allowed_outpost": ["military"],
 		"current_level_key": "armorsmith_level",
 		"leader_pref": { "慎重": 0.3, "好戰": 0.2 },
@@ -221,7 +222,7 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 			active_team = t
 			break
 	if active_team == null:
-		return  # 無施工隊在格，暫停
+		return  # 無施工隊在格，暫停（faction_ai._try_resume_construction 負責召回復工）
 	# 更新施工 team（接手：任何在格上建設的 team 都可繼續）
 	tile.construction_team_id = active_team.team_id
 	tile.construction_ticks_left -= maxi(active_team.population, 1)

@@ -30,6 +30,7 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var max_treasury: float = 0.0
 	var min_coin: float = 1e9
 	var pop_init: int = _total_pop(state)
+	var coin_eq_init: float = _coin_equivalent_total(state)
 	for tick in range(max_ticks):
 		var pp: Vector2i = _player_pos(state)
 		var result = runner.advance_tick(state, pp)
@@ -52,7 +53,20 @@ func _run_config(cfg_name: String) -> Dictionary:
 	# 蒐集事件統計（從 log 或 state）
 	var team_count: int = state.teams.size()
 	var alive_persons: int = state.persons.size()
+	# coin 守恆審計：coin 等值總量（coin + gold×20 + silver×5，含地面/公庫/人身/遺財）
+	# mint 依固定匯率轉換 → 等值總量應恆定
+	var coin_eq_final: float = _coin_equivalent_total(state)
+	print("[CoinAudit] %s coin_eq init=%.1f final=%.1f delta=%.2f" % [
+		cfg_name, coin_eq_init, coin_eq_final, coin_eq_final - coin_eq_init])
+	# 設施統計：NPC 建造數 + 村莊設施組合
+	var fac: Dictionary = _facility_stats(state)
+	print("[FacilityStats] %s 設施總數=%d 組合=%s" % [
+		cfg_name, int(fac.facility_count), str(fac.combos)])
 	return {
+		"coin_eq_init": coin_eq_init,
+		"coin_eq_final": coin_eq_final,
+		"facility_count": fac.facility_count,
+		"facility_combos": fac.combos,
 		"ticks_completed": min(state.world.current_tick, max_ticks),
 		"team_count_final": team_count,
 		"persons_final": alive_persons,
@@ -64,6 +78,43 @@ func _run_config(cfg_name: String) -> Dictionary:
 		"game_over": state.game_over,
 		"game_over_reason": state.game_over_reason,
 	}
+
+# 有限資源守恆審計：coin 等值總量（mint 匯率 gold×20 / silver×5）
+func _coin_equivalent_total(state: WorldState) -> float:
+	var total: float = 0.0
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		total += float(t.resources.get("coin", 0)) + t.anon_treasury
+		total += float(t.resources.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
+		total += float(t.resources.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
+	for pid in state.persons:
+		total += state.persons[pid].coin
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		total += float(tile.public_storage.get("coin", 0)) + tile.abandoned_coin
+		total += float(tile.public_storage.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
+		total += float(tile.public_storage.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
+		total += float(tile.resources.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
+		total += float(tile.resources.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
+	return total
+
+# 設施統計：總設施類數 + 各 outpost 的設施組合分佈
+func _facility_stats(state: WorldState) -> Dictionary:
+	var combos: Dictionary = {}
+	var count: int = 0
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level == 0: continue
+		var set_arr: Array = []
+		for f in OutpostSystem.FACILITY_DEF:
+			if int(tile.get(OutpostSystem.FACILITY_DEF[f]["current_level_key"])) > 0:
+				set_arr.append(f)
+		count += set_arr.size()
+		if not set_arr.is_empty():
+			set_arr.sort()
+			var key: String = ",".join(set_arr)
+			combos[key] = int(combos.get(key, 0)) + 1
+	return { "facility_count": count, "combos": combos }
 
 func _total_pop(state: WorldState) -> int:
 	var total: int = 0
