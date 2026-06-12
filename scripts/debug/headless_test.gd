@@ -233,6 +233,10 @@ func _initialize() -> void:
 	_test_production_requires_resident()
 	_test_promotion_coin_to_treasury()
 	_test_recruit_coin_to_target()
+
+	_test_herb_generation()
+	_test_horse_plain_generation()
+	_test_herb_regen()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7125,3 +7129,97 @@ func _test_recruit_coin_to_target() -> void:
 	assert(float(pt.resources["coin"]) == 150.0, "pt coin -50")
 	assert(float(tgt.resources.get("coin", 0)) == 50.0, "tgt coin +50（轉移非蒸發）")
 	print("Facility Task6b OK")
+
+# ──────── B 期材料層 ────────
+
+func _test_herb_generation() -> void:
+	print("--- Material Task1a: herb 生成 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var gen = load("res://scripts/simulation/world_generator.gd").new()
+	gen.generate(state, { "radius": 20, "seed": 7 })
+	var forest: int = 0
+	var herb_normal: int = 0
+	var herb_rich: int = 0
+	for tid in state.world.tiles:
+		var t: HexTileData = state.world.tiles[tid]
+		var h: int = int(t.resources.get("herb", 0))
+		if t.terrain == "forest":
+			forest += 1
+			if h >= 10:
+				assert(h <= 20, "藥草林 10-20，實際=%d" % h)
+				herb_rich += 1
+			elif h > 0:
+				assert(h >= 2 and h <= 6, "一般 herb 2-6，實際=%d" % h)
+				herb_normal += 1
+			if h > 0:
+				assert(int(t.resource_cap.get("herb", 0)) == h, "herb 計入 resource_cap")
+		else:
+			assert(h == 0, "非 forest 不應有 herb")
+	assert(forest > 100, "樣本 forest 應 >100，實際=%d" % forest)
+	var normal_ratio: float = float(herb_normal) / float(forest)
+	var rich_ratio: float = float(herb_rich) / float(forest)
+	assert(normal_ratio > 0.15 and normal_ratio < 0.45, "一般 herb ~28%%，實際=%.2f" % normal_ratio)
+	assert(rich_ratio > 0.01 and rich_ratio < 0.12, "藥草林 ~5%%，實際=%.2f" % rich_ratio)
+	print("Material Task1a OK (forest=%d normal=%d rich=%d)" % [forest, herb_normal, herb_rich])
+
+func _test_horse_plain_generation() -> void:
+	print("--- Material Task1b: 野馬草原生成 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var gen = load("res://scripts/simulation/world_generator.gd").new()
+	gen.generate(state, { "radius": 20, "seed": 7 })
+	var plains: int = 0
+	var rich: int = 0
+	var normal: int = 0
+	for tid in state.world.tiles:
+		var t: HexTileData = state.world.tiles[tid]
+		if t.terrain != "plains":
+			continue
+		plains += 1
+		var wh: int = int(t.resources.get("wild_horses", 0))
+		if wh >= 4:
+			assert(wh <= 8, "野馬草原 4-8，實際=%d" % wh)
+			assert(int(t.resource_cap.get("wild_horses", 0)) == 8, "富點 cap 標記 8")
+			rich += 1
+		elif wh > 0:
+			assert(not t.resource_cap.has("wild_horses"), "一般野馬不入 resource_cap")
+			normal += 1
+	var rich_ratio: float = float(rich) / float(plains)
+	assert(rich_ratio > 0.005 and rich_ratio < 0.10, "野馬草原 ~3%%，實際=%.3f" % rich_ratio)
+	# 富點再生 cap 8：3 隻起跑、跑 200 個月應突破一般 cap 3
+	var tile := HexTileData.new()
+	tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.resources["wild_horses"] = 3
+	tile.resource_cap["wild_horses"] = 8
+	var st2 := WorldState.new(); st2.world = WorldData.new()
+	st2.world.tiles[0] = tile
+	var hs := HarvestSystem.new()
+	for m in range(200):
+		st2.world.current_tick = WorldState.TICKS_PER_MONTH * (m + 1)
+		hs._regen_wild_horses(st2)
+	var final_wh: int = int(tile.resources["wild_horses"])
+	assert(final_wh > 3 and final_wh <= 8, "富點 cap 8 再生，實際=%d" % final_wh)
+	print("Material Task1b OK (plains=%d rich=%d normal=%d regen=%d)" % [plains, rich, normal, final_wh])
+
+func _test_herb_regen() -> void:
+	print("--- Material Task1c: herb 月再生 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0); tile.terrain = "forest"
+	tile.resources["herb"] = 3
+	tile.resource_cap["herb"] = 5
+	state.world.tiles[0] = tile
+	var hs := HarvestSystem.new()
+	state.world.current_tick = WorldState.TICKS_PER_MONTH
+	hs._regen_herb(state)
+	assert(int(tile.resources["herb"]) == 4, "月邊界 +1，實際=%d" % int(tile.resources["herb"]))
+	state.world.current_tick = WorldState.TICKS_PER_MONTH + WorldState.TICKS_PER_DAY
+	hs._regen_herb(state)
+	assert(int(tile.resources["herb"]) == 4, "非月邊界不再生")
+	tile.resources["herb"] = 5
+	state.world.current_tick = WorldState.TICKS_PER_MONTH * 2
+	hs._regen_herb(state)
+	assert(int(tile.resources["herb"]) == 5, "達 cap 不再生")
+	print("Material Task1c OK")
