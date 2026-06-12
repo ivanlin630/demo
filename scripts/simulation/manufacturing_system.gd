@@ -37,13 +37,14 @@ const TARGET_PER_POP: Dictionary = {
 }
 
 # 4 配方組：各設施只跑自己組；組內依缺口排序，原料不足跳下一個。
+# in = 每單位成品原料（per-unit）；實際扣帳 = in × 本 tick 產量 q。
 # tools/arrows 純可再生原料（建造鏈守恆）。
 const RECIPE_GROUPS: Dictionary = {
 	"manufacturing_level": [   # 工坊
 		{ "out": "goods",  "rate_const": "GOODS_RATE",  "in": { "material": 3.0 } },
 		{ "out": "tools",  "rate_const": "TOOLS_RATE",  "in": { "material": 4.0 } },
-		{ "out": "arrows", "rate_const": "ARROWS_RATE", "in": { "material": 3.0 } },
-		{ "out": "goods",  "rate_const": "CRAFT_RATE",  "in": { "gem": 1.0, "material": 4.0 } },  # 工藝品（高價值優先嘗試）
+		{ "out": "arrows", "rate_const": "ARROWS_RATE", "in": { "material": 0.8 } },
+		{ "out": "goods",  "rate_const": "CRAFT_RATE",  "in": { "gem": 0.25, "material": 1.0 } },  # 工藝品 = gem 觸媒高效路線
 		# 馬車：horses 來源 = 居民團自有（採集/交易）；公庫 horses 供軍用訓練
 		{ "out": "wagons", "rate_const": "WAGON_RATE", "in": { "horses": 1.0, "material": 6.0, "tools": 1.0 } },
 	],
@@ -131,18 +132,22 @@ func _run_recipe_group(team: TeamData, tile: HexTileData, level_key: String,
 	order.sort_custom(func(a, b): return a.ratio < b.ratio)
 	for entry in order:
 		var recipe: Dictionary = recipes[entry.idx]
-		if not _can_consume(team, recipe["in"]):
+		var rate: float = float(RATES[recipe["rate_const"]])
+		var q: float = worker_rate * rate          # 本 tick 產量
+		if q <= 0.0:
+			continue
+		if not _can_consume_scaled(team, recipe["in"], q):
 			continue
 		for res in recipe["in"]:
-			team.resources[res] = float(team.resources.get(res, 0)) - float(recipe["in"][res])
-		var rate: float = float(RATES[recipe["rate_const"]])
-		_add_output(team, tile, recipe["out"], worker_rate * rate)
+			team.resources[res] = float(team.resources.get(res, 0)) \
+				- float(recipe["in"][res]) * q     # 投入隨產量縮放（in = 每單位成品原料）
+		_add_output(team, tile, recipe["out"], q)
 		return recipe["out"]
 	return ""
 
-func _can_consume(team: TeamData, inputs: Dictionary) -> bool:
+func _can_consume_scaled(team: TeamData, inputs: Dictionary, q: float) -> bool:
 	for res in inputs:
-		if float(team.resources.get(res, 0)) < float(inputs[res]):
+		if float(team.resources.get(res, 0)) < float(inputs[res]) * q:
 			return false
 	return true
 
