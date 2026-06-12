@@ -5,17 +5,18 @@ const OUTPOST_NAMES: Dictionary = {
 	"military": ["營寨", "城堡", "堡壘"],
 }
 
-# 建造費（index = level-1）
-const BUILD_COST: Dictionary = {
+# 據點本體建造費（index = level-1）。建造守恆：civilian 純 mat / military mat+tools，
+# 無 coin/weapon（有限資源永不入建造）。TEST VALUES
+const OUTPOST_COST: Dictionary = {
 	"civilian": [
-		{ "material": 50,  "coin": 10, "weapon": 0  },
-		{ "material": 150, "coin": 30, "weapon": 0  },
-		{ "material": 400, "coin": 80, "weapon": 0  },
+		{ "material": 50,  "tools": 0 },
+		{ "material": 150, "tools": 0 },
+		{ "material": 400, "tools": 0 },
 	],
 	"military": [
-		{ "material": 80,  "coin": 10, "weapon": 10 },
-		{ "material": 200, "coin": 20, "weapon": 30 },
-		{ "material": 500, "coin": 40, "weapon": 80 },
+		{ "material": 80,  "tools": 3 },
+		{ "material": 200, "tools": 6 },
+		{ "material": 500, "tools": 10 },
 	],
 }
 
@@ -25,72 +26,94 @@ const BUILD_TICKS: Dictionary = {
 	"military": [100, 300, 600],
 }
 
-const UPGRADE_COST: Dictionary = {
-	"farming":       { "material": 30, "coin": 0,  "ticks": 50  },
-	"manufacturing": { "material": 60, "coin": 20, "ticks": 100 },
-	"stable":        { "material": 30, "coin": 50, "ticks": 7200 },
-}
-
 # 馬廄各等級每日產出 mounts / 消耗 food（index = level-1）
 const STABLE_PRODUCE_PER_DAY: Array = [0.3, 0.7, 1.0]
 const STABLE_FOOD_PER_DAY: Array    = [5.0, 10.0, 15.0]
-const STABLE_CAP: Dictionary = {
-	"civilian": [1, 2, 3],
-	"military":  [0, 0, 0],
+
+# slot 制：每設施類型佔 1 slot（level 深度不佔額外）；index = outpost_level-1。TEST VALUES
+const FACILITY_SLOTS: Dictionary = {
+	"civilian": [2, 3, 5],
+	"military": [1, 2, 3],
 }
 
-# 設施註冊表（data-driven）：NPC AI 評估擴建時讀取。
-# cost 與 UPGRADE_COST 一致；cap_by_outpost 與 FARMING_CAP/MANUFACTURING_CAP 一致。
+# 設施註冊表 v2（data-driven）：NPC AI 需求迴路讀取。
+# 三級建造成本：低級純 mat / 中級 mat+tools。建造守恆：無 coin、無有限資源。TEST VALUES
+# ticks = person-ticks（pop=1 時 ×10 = world ticks：farming 72 ≈ 3 天）
 const FACILITY_DEF: Dictionary = {
 	"farming": {
-		"cost":              { "material": 30, "coin": 0, "ticks": 50 },
-		"cap_by_outpost":    { "civilian": [1, 2, 3], "military": [0, 0, 0] },
-		"category":          "生產",
-		"trigger_check":     "_check_food_shortage",
-		"leader_pref":       { "慎重": 0.3, "野心": -0.1 },
+		"cost": { "material": 30, "tools": 0, "ticks": 72 },
+		"allowed_outpost": ["civilian"],
 		"current_level_key": "farming_level",
+		"leader_pref": { "慎重": 0.3 },
 	},
-	"manufacturing": {
-		"cost":              { "material": 60, "coin": 20, "ticks": 100 },
-		"cap_by_outpost":    { "civilian": [0, 1, 3], "military": [0, 0, 0] },
-		"category":          "經濟",
-		"trigger_check":     "_check_goods_shortage",
-		"leader_pref":       { "野心": 0.2, "貪婪": 0.3 },
+	"workshop": {
+		"cost": { "material": 60, "tools": 0, "ticks": 168 },
+		"allowed_outpost": ["civilian"],
 		"current_level_key": "manufacturing_level",
+		"leader_pref": { "貪婪": 0.2 },
+	},
+	"apothecary": {
+		"cost": { "material": 50, "tools": 2, "ticks": 168 },
+		"allowed_outpost": ["civilian"],
+		"current_level_key": "apothecary_level",
+		"leader_pref": { "慎重": 0.2 },
 	},
 	"mint": {
-		"cost":              { "material": 100, "coin": 50, "ticks": 200 },
-		"cap_by_outpost":    { "civilian": [0, 1, 2], "military": [0, 0, 0] },
-		"category":          "經濟",
-		"trigger_check":     "_check_ore_surplus",
-		"leader_pref":       { "貪婪": 0.4, "野心": 0.2 },
+		"cost": { "material": 100, "tools": 5, "ticks": 720 },
+		"allowed_outpost": ["civilian"],
 		"current_level_key": "mint_level",
+		"leader_pref": { "貪婪": 0.4, "野心": 0.2 },
 	},
 	"stable": {
-		"cost":              { "material": 30, "coin": 50, "ticks": 7200 },
-		"cap_by_outpost":    { "civilian": [1, 2, 3], "military": [0, 0, 0] },
-		"category":          "軍事",
-		"trigger_check":     "_check_mount_demand",
-		"leader_pref":       { "野心": 0.2, "好戰": 0.3 },
+		"cost": { "material": 40, "tools": 0, "ticks": 336 },
+		"allowed_outpost": ["civilian"],
 		"current_level_key": "stable_level",
-		"required_terrain":  "plains",
+		"required_terrain": "plains",
+		"leader_pref": { "野心": 0.2, "好戰": 0.3 },
+	},
+	"smeltery": {
+		"cost": { "material": 80, "tools": 3, "ticks": 336 },
+		"allowed_outpost": ["military"],
+		"current_level_key": "smelter_level",
+		"leader_pref": { "好戰": 0.2 },
+	},
+	"weaponsmith": {
+		"cost": { "material": 80, "tools": 3, "ticks": 336 },
+		"allowed_outpost": ["military"],
+		"current_level_key": "weaponsmith_level",
+		"leader_pref": { "好戰": 0.4 },
+	},
+	"armorsmith": {
+		"cost": { "material": 80, "tools": 3, "ticks": 336 },
+		"allowed_outpost": ["military"],
+		"current_level_key": "armorsmith_level",
+		"leader_pref": { "慎重": 0.3, "好戰": 0.2 },
 	},
 }
+
+static func slot_cap(tile: HexTileData) -> int:
+	var arr: Array = FACILITY_SLOTS.get(tile.outpost_type, [0, 0, 0])
+	return int(arr[clampi(tile.outpost_level - 1, 0, 2)])
+
+static func slots_used(tile: HexTileData) -> int:
+	var n: int = 0
+	for f in FACILITY_DEF:
+		if int(tile.get(FACILITY_DEF[f]["current_level_key"])) > 0:
+			n += 1
+	return n
+
+# 升級成本 = 基準 cost × target_level（Lv1=×1 / Lv2=×2 / Lv3=×3），含 ticks
+static func upgrade_cost(facility: String, target_level: int) -> Dictionary:
+	var base: Dictionary = FACILITY_DEF[facility]["cost"]
+	var mult: int = clampi(target_level, 1, 3)
+	var out: Dictionary = {}
+	for k in base:
+		out[k] = int(base[k]) * mult
+	return out
 
 const MINT_BASE_RATE: float = 10.0
 const GOLD_TO_COIN_RATIO: float = 20.0
 const SILVER_TO_COIN_RATIO: float = 5.0
-
-# 農作/製造設施上限（index = level-1）；軍用不允許
-const FARMING_CAP: Dictionary = {
-	"civilian": [1, 2, 3],
-	"military": [0, 0, 0],
-}
-
-const MANUFACTURING_CAP: Dictionary = {
-	"civilian": [0, 1, 3],
-	"military": [0, 0, 0],
-}
 
 const GARRISON_CAP: Dictionary = {
 	"civilian": [5,  15,  30 ],
@@ -127,13 +150,24 @@ func tick_all(state: WorldState) -> void:
 	var day_fraction: float = float(WorldState.TICKS_PER_HOUR) / float(WorldState.TICKS_PER_DAY)
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.mint_level > 0:
-			_tick_mint(state, tile, state.teams.get(tile.outpost_owner))
-		if tile.stable_level > 0:
-			produce_stable_day(state, tile, day_fraction)
+		# 生產人力 gate：tile 上有居民團（PRODUCE tag）才生產（無人 = 停產）
+		if tile.mint_level > 0 or tile.stable_level > 0:
+			if _has_resident_on_tile(state, tile):
+				if tile.mint_level > 0:
+					_tick_mint(state, tile, state.teams.get(tile.outpost_owner))
+				if tile.stable_level > 0:
+					produce_stable_day(state, tile, day_fraction)
 		if tile.construction_team_id == -1:
 			continue
 		_tick_construction(state, tile)
+
+# tile 上是否有 PRODUCE（居民）team（軍屯子隊同 tag）
+func _has_resident_on_tile(state: WorldState, tile: HexTileData) -> bool:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.tile_pos != tile.tile_pos: continue
+		if TeamData.TAG_PRODUCE in t.tags: return true
+	return false
 
 # 馬廄：消耗 owner team food → 累積 mounts；day_fraction = 本次 tick 佔一天的比例。
 # 測試可直接以 day_fraction=1.0 模擬整天。
@@ -188,7 +222,7 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 			active_team = t
 			break
 	if active_team == null:
-		return  # 無施工隊在格，暫停
+		return  # 無施工隊在格，暫停（faction_ai._try_resume_construction 負責召回復工）
 	# 更新施工 team（接手：任何在格上建設的 team 都可繼續）
 	tile.construction_team_id = active_team.team_id
 	tile.construction_ticks_left -= maxi(active_team.population, 1)
@@ -220,15 +254,13 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.outpost_level = tile.construction_target["level"]
 			print("[Outpost] Team%d 升級 → %s Lv%d" % [
 				team.team_id, tile.outpost_type, tile.outpost_level])
-		"upgrade_farming":
-			tile.farming_level = mini(tile.farming_level + 1, 3)
-			print("[Outpost] 農作升級 Lv%d at (%d,%d)" % [tile.farming_level, tile.tile_pos.x, tile.tile_pos.y])
-		"upgrade_manufacturing":
-			tile.manufacturing_level = mini(tile.manufacturing_level + 1, 3)
-			print("[Outpost] 製造升級 Lv%d at (%d,%d)" % [tile.manufacturing_level, tile.tile_pos.x, tile.tile_pos.y])
-		"upgrade_stable":
-			tile.stable_level = mini(tile.stable_level + 1, 3)
-			print("[Outpost] 馬廄升級 Lv%d at (%d,%d)" % [tile.stable_level, tile.tile_pos.x, tile.tile_pos.y])
+		"upgrade_facility":
+			var fac: String = str(tile.construction_target.get("facility", ""))
+			if FACILITY_DEF.has(fac):
+				var key: String = FACILITY_DEF[fac]["current_level_key"]
+				tile.set(key, mini(int(tile.get(key)) + 1, 3))
+				print("[Outpost] 設施完工 %s Lv%d at (%d,%d)" % [
+					fac, int(tile.get(key)), tile.tile_pos.x, tile.tile_pos.y])
 		"demolish":
 			print("[Outpost] Team%d 拆除 %s at (%d,%d)" % [
 				team.team_id, get_outpost_name(tile.outpost_type, tile.outpost_level),
@@ -236,9 +268,8 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.outpost_type  = ""
 			tile.outpost_level = 0
 			tile.outpost_owner = -1
-			tile.farming_level = 0
-			tile.manufacturing_level = 0
-			tile.stable_level = 0
+			for fac_name in FACILITY_DEF:
+				tile.set(FACILITY_DEF[fac_name]["current_level_key"], 0)
 			tile.stable_progress = 0.0
 			tile.garrison.clear()
 			tile.prisoners.clear()
@@ -278,7 +309,7 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 	if not _check_distance(state, tile.tile_pos, type):
 		push_warning("[Outpost] start_build: 距離限制違規")
 		return false
-	var cost: Dictionary = BUILD_COST[type][level - 1]
+	var cost: Dictionary = OUTPOST_COST[type][level - 1]
 	if not _can_afford(team, cost):
 		push_warning("[Outpost] start_build: 資源不足")
 		return false
@@ -299,7 +330,7 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 	if tile.outpost_owner != team.team_id or tile.construction_team_id != -1:
 		return false
 	var new_level: int = tile.outpost_level + 1
-	var cost: Dictionary = BUILD_COST[tile.outpost_type][new_level - 1]
+	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][new_level - 1]
 	if not _can_afford(team, cost):
 		return false
 	_deduct_cost(team, cost)
@@ -311,44 +342,45 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 		team.team_id, new_level, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
-func start_upgrade_farming(state: WorldState, team: TeamData) -> bool:
+# 通用設施 建造/升級（玩家路徑）：slot 制 + allowed_outpost gate
+func start_upgrade_facility(state: WorldState, team: TeamData, facility: String) -> bool:
 	var tile := _get_team_tile(state, team)
-	if tile == null or tile.outpost_type != "civilian" or tile.outpost_level == 0:
+	if tile == null or tile.outpost_level == 0:
 		return false
-	var farming_max: int = FARMING_CAP[tile.outpost_type][tile.outpost_level - 1]
-	if tile.outpost_owner != team.team_id or tile.farming_level >= farming_max:
+	if tile.outpost_owner != team.team_id or tile.construction_team_id != -1:
 		return false
-	if tile.construction_team_id != -1:
-		return false
-	var cost: Dictionary = UPGRADE_COST["farming"]
-	if not _can_afford(team, cost):
-		return false
-	_deduct_cost(team, cost)
-	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = cost["ticks"]
-	tile.construction_target    = { "action": "upgrade_farming" }
-	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
-	print("[Outpost] Team%d 農作升級 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
-	return true
+	return _begin_facility_construction(team, tile, facility)
+
+func start_upgrade_farming(state: WorldState, team: TeamData) -> bool:
+	return start_upgrade_facility(state, team, "farming")
 
 func start_upgrade_manufacturing(state: WorldState, team: TeamData) -> bool:
-	var tile := _get_team_tile(state, team)
-	if tile == null or tile.outpost_type != "civilian" or tile.outpost_level == 0:
+	return start_upgrade_facility(state, team, "workshop")
+
+# 共用 gate + 扣款 + 排程（呼叫端先驗 owner/faction 與 construction 空檔）
+func _begin_facility_construction(team: TeamData, tile: HexTileData, facility: String) -> bool:
+	if not FACILITY_DEF.has(facility):
 		return false
-	var mfg_max: int = MANUFACTURING_CAP[tile.outpost_type][tile.outpost_level - 1]
-	if tile.outpost_owner != team.team_id or tile.manufacturing_level >= mfg_max:
+	var def: Dictionary = FACILITY_DEF[facility]
+	if not (tile.outpost_type in def["allowed_outpost"]):
 		return false
-	if tile.construction_team_id != -1:
+	if def.has("required_terrain") and tile.terrain != def["required_terrain"]:
 		return false
-	var cost: Dictionary = UPGRADE_COST["manufacturing"]
+	var cur: int = int(tile.get(def["current_level_key"]))
+	if cur >= 3:
+		return false
+	if cur == 0 and slots_used(tile) >= slot_cap(tile):
+		return false   # 新設施要空 slot；升級不佔
+	var cost: Dictionary = upgrade_cost(facility, cur + 1)
 	if not _can_afford(team, cost):
 		return false
 	_deduct_cost(team, cost)
 	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = cost["ticks"]
-	tile.construction_target    = { "action": "upgrade_manufacturing" }
-	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
-	print("[Outpost] Team%d 製造升級 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
+	tile.construction_ticks_left = int(cost["ticks"])
+	tile.construction_target    = { "action": "upgrade_facility", "facility": facility }
+	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	print("[Outpost] Team%d 設施施工 %s → Lv%d at (%d,%d)" % [
+		team.team_id, facility, cur + 1, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
 func start_demolish(state: WorldState, team: TeamData) -> bool:
@@ -363,6 +395,18 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 拆除 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
+
+# 拆除單一設施（騰 slot；需求迴路拆遷用）
+func demolish_facility(_state: WorldState, tile: HexTileData, facility: String) -> void:
+	if not FACILITY_DEF.has(facility):
+		return
+	var key: String = FACILITY_DEF[facility]["current_level_key"]
+	if int(tile.get(key)) <= 0:
+		return
+	tile.set(key, 0)
+	if facility == "stable":
+		tile.stable_progress = 0.0
+	print("[Outpost] 拆除設施 %s at (%d,%d)" % [facility, tile.tile_pos.x, tile.tile_pos.y])
 
 # ──────── 子隊抵達後啟動施工（NPC 基建）────────
 
@@ -402,7 +446,7 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 		return false
 	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
 		return false
-	var cost: Dictionary = BUILD_COST[tile.outpost_type][target_level - 1]
+	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][target_level - 1]
 	if not _can_afford(team, cost):
 		return false
 	_deduct_cost(team, cost)
@@ -415,43 +459,11 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	return true
 
 func _subteam_upgrade_facility(state: WorldState, team: TeamData, tile: HexTileData, facility: String) -> bool:
-	if tile.outpost_type != "civilian" or tile.outpost_level == 0:
+	if tile.outpost_level == 0:
 		return false
 	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
 		return false
-	var action: String = ""
-	var cur: int = 0
-	var cap: int = 0
-	match facility:
-		"farming":
-			cap = FARMING_CAP[tile.outpost_type][tile.outpost_level - 1]
-			cur = tile.farming_level
-			action = "upgrade_farming"
-		"manufacturing":
-			cap = MANUFACTURING_CAP[tile.outpost_type][tile.outpost_level - 1]
-			cur = tile.manufacturing_level
-			action = "upgrade_manufacturing"
-		"stable":
-			if tile.terrain != "plains":
-				return false   # 馬廄限平原
-			cap = STABLE_CAP[tile.outpost_type][tile.outpost_level - 1]
-			cur = tile.stable_level
-			action = "upgrade_stable"
-		_:
-			return false
-	if cur >= cap:
-		return false
-	var cost: Dictionary = UPGRADE_COST[facility]
-	if not _can_afford(team, cost):
-		return false
-	_deduct_cost(team, cost)
-	tile.construction_team_id   = team.team_id
-	tile.construction_ticks_left = cost["ticks"]
-	tile.construction_target    = { "action": action }
-	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
-	print("[Outpost] 子隊 Team%d 開始擴建 %s at (%d,%d)" % [
-		team.team_id, facility, tile.tile_pos.x, tile.tile_pos.y])
-	return true
+	return _begin_facility_construction(team, tile, facility)
 
 func _has_control(state: WorldState, team_id: int, tile: HexTileData) -> bool:
 	if tile.outpost_owner == team_id: return true

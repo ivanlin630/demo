@@ -607,14 +607,13 @@ static func map_outpost_panel(state: WorldState) -> Dictionary:
 	var has_ctrl: bool = tile.outpost_owner == -1 or tile.outpost_owner == pt.team_id
 	var in_progress: bool = tile.construction_team_id != -1
 	# Facility caps (mirrors OutpostSystem constants to avoid dependency)
-	const F_CAP: Dictionary = { "civilian": [1, 2, 3], "military": [0, 0, 0] }
-	const M_CAP: Dictionary = { "civilian": [0, 1, 3], "military": [0, 0, 0] }
+	# slot 制：設施可升至 Lv3；新設施需空 slot + allowed_outpost
 	var farming_max: int = 0
 	var mfg_max: int = 0
-	if tile.outpost_type != "" and tile.outpost_level > 0:
-		var idx: int = tile.outpost_level - 1
-		farming_max = F_CAP.get(tile.outpost_type, [0,0,0])[idx]
-		mfg_max     = M_CAP.get(tile.outpost_type, [0,0,0])[idx]
+	if tile.outpost_type == "civilian" and tile.outpost_level > 0:
+		var slot_free: bool = OutpostSystem.slots_used(tile) < OutpostSystem.slot_cap(tile)
+		farming_max = 3 if (tile.farming_level > 0 or slot_free) else 0
+		mfg_max     = 3 if (tile.manufacturing_level > 0 or slot_free) else 0
 	var actions: Array = []
 	if has_ctrl:
 		if tile.outpost_type == "" and not in_progress:

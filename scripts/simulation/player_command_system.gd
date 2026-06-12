@@ -356,16 +356,15 @@ func _action_upgrade_manufacturing(state: WorldState, _target_id: int, pt: TeamD
 		return { "ok": false, "msg": "無法升級製造（條件不符）" }
 	return { "ok": true, "msg": "開始升級製造" }
 
-# 統一設施擴建入口：依 player_state["facility_type"] 分派至對應 start_upgrade_*
+# 統一設施擴建入口：依 player_state["facility_type"] 走通用 start_upgrade_facility
 func _action_build_facility(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var facility: String = str(state.player_state.get("facility_type", "farming"))
+	if facility == "manufacturing":
+		facility = "workshop"   # 舊指令別名
 	if not OutpostSystem.FACILITY_DEF.has(facility):
 		return { "ok": false, "msg": "未知 facility: %s" % facility }
 	var _os := OutpostSystem.new()
-	var ok: bool = false
-	match facility:
-		"farming":       ok = _os.start_upgrade_farming(state, pt)
-		"manufacturing": ok = _os.start_upgrade_manufacturing(state, pt)
+	var ok: bool = _os.start_upgrade_facility(state, pt, facility)
 	if not ok:
 		return { "ok": false, "msg": "無法擴建 %s（條件不符）" % facility }
 	return { "ok": true, "msg": "開始擴建 %s" % facility }
@@ -916,6 +915,8 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 		state.player_pending_targets.erase(target_id)
 		return { "ok": false, "msg": "目標人口不足" }
 	pt.resources["coin"] = coin - RECRUIT_COST_ANON
+	# 守恆：買人付給對方，coin 不蒸發
+	tgt.resources["coin"] = float(tgt.resources.get("coin", 0)) + RECRUIT_COST_ANON
 	# 被招募 anon 帶走在原團的 treasury 份額
 	var tgt_named: int = tgt.named_members.size() + (1 if tgt.leader_id != -1 else 0)
 	var tgt_anon: int = maxi(tgt.population - tgt_named, 1)
@@ -1036,6 +1037,8 @@ func _recruit_named_internal(state: WorldState, pt: TeamData,
 	# 轉移
 	var pt_id: int = _get_player_team_id(state)
 	pt.resources["coin"] = coin - RECRUIT_COST_NAMED
+	# 守恆：買人付給對方，coin 不蒸發
+	tgt4.resources["coin"] = float(tgt4.resources.get("coin", 0)) + RECRUIT_COST_NAMED
 	tgt4.named_members.erase(person_id)
 	tgt4.population = maxi(tgt4.population - 1, 1)
 	p.team_id = pt_id

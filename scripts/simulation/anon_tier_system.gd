@@ -193,7 +193,10 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 			return 0
 	# 全過 → 執行
 	for res in cost:
-		team.resources[res] = float(team.resources.get(res, 0)) - float(cost[res]) * float(count)
+		var amt: float = float(cost[res]) * float(count)
+		team.resources[res] = float(team.resources.get(res, 0)) - amt
+		if res == "coin":
+			team.anon_treasury += amt   # 守恆：訓練餉銀入公庫，不蒸發
 	team.anon_tiers[from_tier] = int(team.anon_tiers[from_tier]) - count
 	team.anon_tiers[to_tier] = int(team.anon_tiers.get(to_tier, 0)) + count
 	team.anon_exp[from_tier] = float(team.anon_exp[from_tier]) - threshold * float(count)

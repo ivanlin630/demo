@@ -218,6 +218,21 @@ func _initialize() -> void:
 	_test_n1_leader_no_anon_pop_stable()
 	# ── Minor 長大簡版 ──
 	_test_minor_maturation()
+
+	_test_facility_def_v2()
+	_test_facility_slots()
+	_test_outpost_cost_no_finite()
+	_test_workshop_recipes()
+	_test_armorsmith_recipes()
+	_test_recipe_deficit_ordering()
+	_test_smeltery_separate()
+	_test_terrain_fit_scores()
+	_test_hunger_override()
+	_test_military_outpost_builds_weaponsmith()
+	_test_military_residency_dispatch_only()
+	_test_production_requires_resident()
+	_test_promotion_coin_to_treasury()
+	_test_recruit_coin_to_target()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -3676,10 +3691,10 @@ func _test_task_extra_data_field() -> void:
 func _test_facility_def_registry() -> void:
 	print("--- Infra Task2: FACILITY_DEF ---")
 	assert(OutpostSystem.FACILITY_DEF.has("farming"))
-	assert(OutpostSystem.FACILITY_DEF.has("manufacturing"))
+	assert(OutpostSystem.FACILITY_DEF.has("workshop"))
 	var farming = OutpostSystem.FACILITY_DEF["farming"]
 	assert(farming.cost.material == 30)
-	assert(farming.cap_by_outpost.civilian == [1, 2, 3])
+	assert(farming.allowed_outpost == ["civilian"])
 	# trigger_check helpers 可呼叫
 	var state := WorldState.new()
 	state.world = WorldData.new()
@@ -3912,7 +3927,8 @@ func _test_player_build_facility() -> void:
 	var cmd := PlayerCommandSystem.new()
 	var r: Dictionary = cmd.execute_action(state, -1, "build_facility")
 	assert(r.get("ok", false), "擴建應成功: %s" % r.get("msg", ""))
-	assert(tile.construction_target.get("action", "") == "upgrade_farming", "施工=upgrade_farming")
+	assert(tile.construction_target.get("action", "") == "upgrade_facility", "施工=upgrade_facility")
+	assert(tile.construction_target.get("facility", "") == "farming", "facility=farming")
 	# 未知 facility → 失敗
 	state.player_state["facility_type"] = "nonexist"
 	var r2: Dictionary = cmd.execute_action(state, -1, "build_facility")
@@ -4172,6 +4188,7 @@ func _test_manufacturing_to_storage() -> void:
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
 	team.current_task = TeamData.TASK_MANUFACTURE
+	team.tags.append(TeamData.TAG_PRODUCE)   # 生產人力 gate
 	team.resources["material"] = 100.0
 	state.teams[0] = team
 	var ms := ManufacturingSystem.new()
@@ -5463,7 +5480,7 @@ func _test_stable_facility_def() -> void:
 	print("--- Mount Task3a: stable FACILITY_DEF ---")
 	assert(OutpostSystem.FACILITY_DEF.has("stable"), "FACILITY_DEF 應有 stable")
 	var s = OutpostSystem.FACILITY_DEF["stable"]
-	assert(s["cost"]["material"] == 30, "stable material cost 30")
+	assert(s["cost"]["material"] == 40, "stable material cost 40")
 	assert(s["current_level_key"] == "stable_level", "current_level_key=stable_level")
 	assert(s["required_terrain"] == "plains", "stable 限平原")
 	print("Mount Task3a OK")
@@ -6787,3 +6804,324 @@ func _test_n1_leader_no_anon_pop_stable() -> void:
 	assert(team.population == 2, "有 anon 應扣 pop=2，實際=%d" % team.population)
 	assert(int(team.anon_tiers["平民"]) == 0, "平民 tier 應 -1，實際=%d" % int(team.anon_tiers["平民"]))
 	print("EcoFix Task4b OK")
+
+# ══ Facility Overhaul A 期 ══════════════════════════════════════
+
+func _test_facility_def_v2() -> void:
+	print("--- Facility Task1a: FACILITY_DEF v2 ---")
+	assert(OutpostSystem.FACILITY_DEF.size() == 8)
+	for f in ["farming", "workshop", "apothecary", "mint", "stable",
+			"smeltery", "weaponsmith", "armorsmith"]:
+		assert(OutpostSystem.FACILITY_DEF.has(f), "缺 %s" % f)
+	assert(OutpostSystem.FACILITY_DEF["weaponsmith"]["allowed_outpost"] == ["military"])
+	assert(OutpostSystem.FACILITY_DEF["farming"]["allowed_outpost"] == ["civilian"])
+	# 三級成本：低級無 tools，中級含 tools，全部無 coin
+	assert(not OutpostSystem.FACILITY_DEF["farming"]["cost"].has("coin"))
+	assert(int(OutpostSystem.FACILITY_DEF["smeltery"]["cost"].get("tools", 0)) > 0)
+	assert(int(OutpostSystem.FACILITY_DEF["farming"]["cost"].get("tools", 0)) == 0)
+	print("Facility Task1a OK")
+
+func _test_facility_slots() -> void:
+	print("--- Facility Task1b: slot 制 ---")
+	var tile := HexTileData.new()
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	assert(OutpostSystem.slot_cap(tile) == 2)
+	tile.outpost_level = 3
+	assert(OutpostSystem.slot_cap(tile) == 5)
+	tile.outpost_type = "military"; tile.outpost_level = 1
+	assert(OutpostSystem.slot_cap(tile) == 1)
+	tile.farming_level = 1; tile.weaponsmith_level = 2
+	assert(OutpostSystem.slots_used(tile) == 2, "2 類設施 = 2 slot（level 不佔額外）")
+	# slot 滿 → 新設施蓋不了（military Lv1 cap=1，已用 2）
+	var team := TeamData.new(); team.team_id = 0
+	team.resources = { "material": 999.0, "tools": 99.0 }
+	tile.outpost_owner = 0; tile.construction_team_id = -1
+	var os := OutpostSystem.new()
+	assert(not os._begin_facility_construction(team, tile, "smeltery"), "slot 滿應失敗")
+	# 升級不佔 slot：weaponsmith Lv2 → Lv3 應可
+	assert(os._begin_facility_construction(team, tile, "weaponsmith"), "升級不佔 slot 應成功")
+	assert(tile.construction_target.get("facility", "") == "weaponsmith")
+	# allowed_outpost gate：military tile 蓋 civilian 設施失敗
+	tile.construction_team_id = -1; tile.construction_target = {}
+	assert(not os._begin_facility_construction(team, tile, "mint"), "military 蓋 mint 應失敗")
+	print("Facility Task1b OK")
+
+func _test_outpost_cost_no_finite() -> void:
+	print("--- Facility Task2: outpost 本體成本守恆 ---")
+	for lvl_cost in OutpostSystem.OUTPOST_COST["civilian"]:
+		assert(not lvl_cost.has("coin") or int(lvl_cost.get("coin", 0)) == 0)
+		assert(int(lvl_cost.get("weapon", 0)) == 0)
+		assert(int(lvl_cost.get("tools", 0)) == 0, "civilian 純 mat")
+	for lvl_cost in OutpostSystem.OUTPOST_COST["military"]:
+		assert(int(lvl_cost.get("coin", 0)) == 0)
+		assert(int(lvl_cost.get("weapon", 0)) == 0, "weapon 成本移除")
+		assert(int(lvl_cost.get("tools", 0)) > 0, "military 要 tools")
+	print("Facility Task2 OK")
+
+func _make_mfg_state(facility_levels: Dictionary) -> Array:
+	# 回傳 [state, team, tile]：tile(0,0) civilian Lv2 owner=0，team task=製造
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = str(facility_levels.get("_outpost", "civilian"))
+	tile.outpost_level = 2; tile.outpost_owner = 0
+	for k in facility_levels:
+		if k != "_outpost":
+			tile.set(k, int(facility_levels[k]))
+	state.world.tiles[0] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.current_task = TeamData.TASK_MANUFACTURE
+	team.tags.append(TeamData.TAG_PRODUCE)   # 生產人力 gate
+	state.teams[0] = team
+	return [state, team, tile]
+
+func _test_workshop_recipes() -> void:
+	print("--- Facility Task3a: workshop 配方（goods/tools/arrows）---")
+	# tools 純 mat（4 mat）：goods 庫存高 → tools 缺口最大 → 做 tools
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	team.resources = { "material": 100.0, "goods": 99.0, "arrows": 99.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("tools", 0)) > 0, "tools 應產出")
+	assert(float(team.resources["material"]) == 96.0, "tools = 4 mat 純可再生")
+	print("Facility Task3a OK")
+
+func _test_armorsmith_recipes() -> void:
+	print("--- Facility Task3b: armorsmith 配方 ---")
+	var r := _make_mfg_state({ "_outpost": "military", "armorsmith_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	team.resources = { "material": 100.0, "ore_iron": 10.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("armor_low", 0)) > 0, "armor_low 應產出（2 iron+2 mat）")
+	assert(float(team.resources["ore_iron"]) == 8.0, "扣 2 iron")
+	# armor_high：只有 steel
+	var r2 := _make_mfg_state({ "_outpost": "military", "armorsmith_level": 1 })
+	var state2: WorldState = r2[0]; var team2: TeamData = r2[1]; var tile2: HexTileData = r2[2]
+	team2.resources = { "material": 100.0, "ore_steel": 10.0 }
+	ms.tick_all(state2, [0])
+	assert(float(tile2.public_storage.get("armor_high", 0)) > 0, "armor_high 應產出（2 steel+3 mat）")
+	print("Facility Task3b OK")
+
+func _test_recipe_deficit_ordering() -> void:
+	print("--- Facility Task3c: 組內缺口排序 ---")
+	# arrows 存量/target 最低 → 先做 arrows
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
+	team.resources = { "material": 100.0, "goods": 99.0, "tools": 99.0, "arrows": 0.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(tile.public_storage.get("arrows", 0)) > 0, "arrows 缺口最大應先做")
+	assert(float(tile.public_storage.get("goods", 0)) == 0, "goods 不應做")
+	print("Facility Task3c OK")
+
+func _test_smeltery_separate() -> void:
+	print("--- Facility Task3d: 冶煉獨立設施 ---")
+	# workshop tile 無冶煉：iron 充足也不產 steel
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state: WorldState = r[0]; var team: TeamData = r[1]
+	team.resources = { "material": 100.0, "ore_iron": 50.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state, [0])
+	assert(float(team.resources.get("ore_steel", 0)) == 0.0, "workshop 不冶煉")
+	# smeltery tile 產 steel
+	var r2 := _make_mfg_state({ "_outpost": "military", "smelter_level": 1 })
+	var state2: WorldState = r2[0]; var team2: TeamData = r2[1]; var tile2: HexTileData = r2[2]
+	team2.resources = { "material": 100.0, "ore_iron": 50.0 }
+	ms.tick_all(state2, [0])
+	var steel_out: float = float(tile2.public_storage.get("ore_steel", 0)) \
+		+ float(team2.resources.get("ore_steel", 0))
+	assert(steel_out > 0, "smeltery 應產 steel")
+	assert(float(team2.resources["ore_iron"]) == 48.0, "扣 2 iron")
+	print("Facility Task3d OK")
+
+func _make_infra_state(outpost_type: String) -> Array:
+	# 回傳 [state, team, tile, leader]：tile(0,0) + 6 鄰格 plains
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for pos in [Vector2i(0, 0), Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
+			Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1)]:
+		var t := HexTileData.new()
+		t.tile_pos = pos; t.terrain = "plains"
+		state.world.tiles[pos.x * 1000 + pos.y] = t
+	var tile: HexTileData = state.world.tiles[0]
+	tile.outpost_type = outpost_type; tile.outpost_level = 1; tile.outpost_owner = 0
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10; team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = team
+	var leader := PersonData.new(); leader.id = 100
+	state.persons[100] = leader; team.leader_id = 100
+	return [state, team, tile, leader]
+
+func _test_terrain_fit_scores() -> void:
+	print("--- Facility Task4a: terrain_fit ---")
+	var r := _make_infra_state("military")
+	var state: WorldState = r[0]; var tile: HexTileData = r[2]
+	var fai := FactionAISystem.new()
+	# 無 ore → 武器坊 0.5；加鄰格 ore_iron → 3.0
+	assert(fai._facility_terrain_fit(state, "weaponsmith", tile) == 0.5)
+	var nb: HexTileData = state.world.tiles[1000]   # (1,0)
+	nb.resources["ore_iron"] = 50
+	assert(fai._facility_terrain_fit(state, "weaponsmith", tile) == 3.0, "鄰格 ore → ×3")
+	# 無 herb → 藥坊 0.0（不蓋）
+	assert(fai._facility_terrain_fit(state, "apothecary", tile) == 0.0, "無 herb → 0")
+	print("Facility Task4a OK")
+
+func _test_hunger_override() -> void:
+	print("--- Facility Task4b: 飢餓 override + 拆遷 ---")
+	var r := _make_infra_state("civilian")
+	var state: WorldState = r[0]; var team: TeamData = r[1]
+	var tile: HexTileData = r[2]; var leader: PersonData = r[3]
+	team.resources["food"] = 0.0   # < pop×2.4×7
+	var fai := FactionAISystem.new()
+	var pick: Dictionary = fai._pick_facility(state, team, tile, leader)
+	assert(pick.get("facility", "") == "farming", "缺糧 → 農田最優先")
+	assert(not pick.has("demolish_first"), "有 slot 不拆")
+	# slot 滿（civilian Lv1 cap=2）且無 farming → 拆 score 最低設施
+	tile.manufacturing_level = 1; tile.stable_level = 1
+	var pick2: Dictionary = fai._pick_facility(state, team, tile, leader)
+	assert(pick2.get("facility", "") == "farming", "slot 滿仍選農田")
+	assert(pick2.has("demolish_first"), "slot 滿 → 應拆遷")
+	assert(pick2["demolish_first"] != "farming", "不拆農田")
+	print("Facility Task4b OK")
+
+func _test_military_outpost_builds_weaponsmith() -> void:
+	print("--- Facility Task4c: 軍用 outpost 選 weaponsmith ---")
+	var r := _make_infra_state("military")
+	var state: WorldState = r[0]; var team: TeamData = r[1]
+	var tile: HexTileData = r[2]; var leader: PersonData = r[3]
+	var nb: HexTileData = state.world.tiles[1000]
+	nb.resources["ore_iron"] = 50   # 鄰格鐵礦
+	leader.values = { "好戰": 0.8, "慎重": 0.0 }
+	team.resources = { "food": 999.0, "armor_low": 10.0 }   # 不飢餓、護甲足
+	team.armed_anon_ratio = 0.0                              # 武裝缺口
+	team.known_reputations = { 9: 0.1 }                      # 近期威脅
+	var enemy := TeamData.new(); enemy.team_id = 9
+	state.teams[9] = enemy
+	var fai := FactionAISystem.new()
+	var pick: Dictionary = fai._pick_facility(state, team, tile, leader)
+	assert(pick.get("facility", "") == "weaponsmith",
+		"軍用+鄰 ore+武裝缺口 → weaponsmith，實際=%s" % str(pick))
+	# allowed_outpost gate 嚴：military 永不選 civilian 設施
+	for f in ["farming", "workshop", "mint", "stable", "apothecary"]:
+		assert(pick.get("facility", "") != f)
+	print("Facility Task4c OK")
+
+func _test_military_residency_dispatch_only() -> void:
+	print("--- Facility Task5a: 軍屯只 dispatch 不 invite ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(3, 3); tile.outpost_type = "military"
+	tile.outpost_level = 1; tile.outpost_owner = 0
+	state.world.tiles[3003] = tile
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 20; team.tile_pos = Vector2i(0, 0)
+	state.teams[0] = team
+	# 高商業/慎重 leader（民用會走 invite）
+	var leader := PersonData.new(); leader.id = 100
+	leader.values = { "野心": 0.0, "好戰": 0.0, "慎重": 0.9 }
+	leader.skills = { "商業": 0.9 }
+	state.persons[100] = leader; team.leader_id = 100
+	# 視野內有流亡團（民用情境會被邀）
+	var exile := TeamData.new(); exile.team_id = 5; exile.population = 3
+	exile.tile_pos = Vector2i(4, 4); exile.tags = ["流亡"]
+	state.teams[5] = exile
+	state.team_discovered[0] = [5]
+	var fai := FactionAISystem.new()
+	fai._try_dispatch_or_invite(state, team, tile, leader)
+	assert(exile.current_task != "安頓", "military 不 invite 流亡")
+	assert(team.invite_cooldown.is_empty(), "不應觸發 invite cooldown")
+	assert(state.teams.size() == 2, "invite 傾向 leader → 軍屯不派也不邀")
+	# 高野心 leader → dispatch 子隊
+	leader.values = { "野心": 0.9, "好戰": 0.9, "慎重": 0.0 }
+	leader.skills = { "商業": 0.0 }
+	fai._try_dispatch_or_invite(state, team, tile, leader)
+	var sub_found: bool = false
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			sub_found = true
+	assert(sub_found, "高野心 → 軍屯 dispatch 子隊")
+	print("Facility Task5a OK")
+
+func _test_production_requires_resident() -> void:
+	print("--- Facility Task5b: 生產人力 gate ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.outpost_type = "civilian"
+	tile.outpost_level = 2; tile.outpost_owner = 0
+	tile.mint_level = 1; tile.stable_level = 1; tile.terrain = "plains"
+	tile.public_storage = { "ore_gold": 10.0 }
+	state.world.tiles[0] = tile
+	var owner := TeamData.new()
+	owner.team_id = 0; owner.population = 10; owner.tile_pos = Vector2i(5, 5)
+	owner.resources["food"] = 1000.0
+	state.teams[0] = owner
+	var os := OutpostSystem.new()
+	os.tick_all(state)
+	assert(float(tile.public_storage.get("coin", 0)) == 0.0, "無居民 → mint 停產")
+	assert(tile.stable_progress == 0.0, "無居民 → stable 停產")
+	# 加 PRODUCE 居民團 → 生產恢復
+	var resident := TeamData.new()
+	resident.team_id = 1; resident.population = 5; resident.tile_pos = Vector2i(0, 0)
+	resident.tags = [TeamData.TAG_PRODUCE]
+	state.teams[1] = resident
+	os.tick_all(state)
+	assert(float(tile.public_storage.get("coin", 0)) > 0.0, "有居民 → mint 產 coin")
+	assert(tile.stable_progress > 0.0, "有居民 → stable 產出累積")
+	# 製造 gate：無 PRODUCE 居民 → 不產
+	var r := _make_mfg_state({ "manufacturing_level": 1 })
+	var state2: WorldState = r[0]; var team2: TeamData = r[1]; var tile2: HexTileData = r[2]
+	team2.tags.clear()
+	team2.resources = { "material": 100.0 }
+	var ms := ManufacturingSystem.new()
+	ms.tick_all(state2, [0])
+	assert(float(tile2.public_storage.get("goods", 0)) == 0.0, "無 PRODUCE 居民 → 製造停產")
+	print("Facility Task5b OK")
+
+func _test_promotion_coin_to_treasury() -> void:
+	print("--- Facility Task6a: 升等 coin → anon_treasury ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 12
+	team.anon_tiers = { "平民": 10 }
+	team.anon_exp = { "平民": 999.0 }
+	team.resources = { "coin": 100.0, "food": 999.0, "material": 999.0 }
+	var leader := PersonData.new(); leader.id = 1
+	leader.skills = { "戰術": 0.9 }
+	state.persons[1] = leader; team.leader_id = 1
+	state.teams[0] = team
+	var cost: Dictionary = AnonTierSystem.PROMOTION_COST["平民"]
+	var coin_cost: float = float(cost.get("coin", 0)) * 2.0
+	var before_total: float = float(team.resources["coin"]) + team.anon_treasury
+	var n: int = AnonTierSystem.try_promote(state, team, "平民", 2)
+	assert(n == 2, "應升 2 人")
+	var after_total: float = float(team.resources["coin"]) + team.anon_treasury
+	assert(absf(after_total - before_total) < 0.001, "coin 總量不變（轉入公庫）")
+	assert(team.anon_treasury >= coin_cost - 0.001, "treasury 應收餉銀")
+	print("Facility Task6a OK")
+
+func _test_recruit_coin_to_target() -> void:
+	print("--- Facility Task6b: 招募 coin → 目標 team ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
+	pt.population = 5; pt.resources = { "coin": 200.0 }
+	state.teams[0] = pt
+	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
+	state.persons[100] = pp
+	var tgt := TeamData.new(); tgt.team_id = 1; tgt.population = 8
+	tgt.anon_tiers = { "平民": 7 }
+	state.teams[1] = tgt
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd._recruit_anon_internal(state, pt, tgt, 1)
+	assert(r.get("ok", false), "招募應成功: %s" % r.get("msg", ""))
+	assert(float(pt.resources["coin"]) == 150.0, "pt coin -50")
+	assert(float(tgt.resources.get("coin", 0)) == 50.0, "tgt coin +50（轉移非蒸發）")
+	print("Facility Task6b OK")
