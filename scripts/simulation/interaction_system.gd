@@ -1,25 +1,29 @@
 class_name InteractionSystem
 
 # ──────── 貿易常數 ────────
+# 定價規則：成品價 ≥ 原料價值（Σ in × BASE_PRICE）× 1.2（工藝品 gem 路線豁免）
 const BASE_PRICE: Dictionary = {
-	"food":              2.0,
-	"material":          4.0,
-	"goods":             5.0,
-	"gem":              20.0,
-	"ore_gold":         10.0,
-	"ore_silver":        5.0,
-	"ore_iron":          8.0,
-	"ore_steel":        12.0,
-	"weapon_melee_low":  8.0,
-	"weapon_melee_high": 18.0,
-	"weapon_ranged_low": 9.0,
-	"weapon_ranged_high": 20.0,
-	"tools":             6.0,
-	"arrows":            4.0,
-	"armor_low":        10.0,
-	"armor_high":       22.0,
-	"horses":           15.0,
-	"medicine":         12.0,
+	"food":               2.0,
+	"material":           4.0,
+	"herb":               3.0,
+	"goods":             15.0,   # in 12
+	"gem":               20.0,
+	"ore_gold":          10.0,
+	"ore_silver":         5.0,
+	"ore_iron":           8.0,
+	"ore_steel":         24.0,   # in 20
+	"weapon_melee_low":  34.0,   # in 28
+	"weapon_melee_high": 72.0,   # in 60
+	"weapon_ranged_low": 39.0,   # in 32
+	"weapon_ranged_high": 77.0,  # in 64
+	"tools":             20.0,   # in 16
+	"arrows":             4.0,   # in 3.2
+	"armor_low":         30.0,   # in 24
+	"armor_high":        72.0,   # in 60
+	"horses":            15.0,
+	"mounts":            45.0,   # horses + 草料 + 軍設施 margin
+	"wagons":            72.0,   # in 59
+	"medicine":          12.0,   # in 6
 }
 const TARGET_PER_POP: Dictionary = {
 	"food":              10.0,
@@ -40,7 +44,11 @@ const TARGET_PER_POP: Dictionary = {
 	"armor_high":         0.15,
 	"horses":             0.5,
 	"medicine":           1.0,
+	"herb":               1.0,
+	"mounts":             0.2,
+	"wagons":             0.2,
 }
+const SURVIVAL_GOODS: Array = ["food", "medicine"]   # 飢荒不對稱 clamp 適用
 const FOOD_RESERVE_TICKS: float = 20.0   # TEST VALUE — food 最低自留（pop × 0.1 × N ticks）
 const MAX_COIN_PER_TRADE: float = 300.0  # TEST VALUE — 每次交易買方預算上限
 
@@ -520,7 +528,11 @@ func _local_value(team: TeamData, res: String) -> float:
 	var pop: float    = maxf(float(team.population), 1.0)
 	var stock: float  = float(team.resources.get(res, 0))
 	var target: float = pop * float(TARGET_PER_POP.get(res, 1.0))
-	var sr: float     = clampf((target - stock) / maxf(target, 1.0), -0.5, 1.0)
+	var shortage: float = (target - stock) / maxf(target, 1.0)   # ≤ 1.0
+	if res in SURVIVAL_GOODS and shortage > 0.5:
+		# 生存品短缺過半 → 急速攀升：0.5→1.0 區間映射 sr 1.0→4.0（饑荒價最高 5×）
+		shortage = 1.0 + (shortage - 0.5) * 6.0
+	var sr: float = clampf(shortage, -0.5, 4.0 if res in SURVIVAL_GOODS else 1.0)
 	return float(BASE_PRICE[res]) * (1.0 + sr)
 
 # ──────── 雙向 market 結算（取代舊 _resolve_trade）────────

@@ -248,6 +248,8 @@ func _initialize() -> void:
 	_test_siting_multi_center()
 
 	_test_recipe_input_scaling()
+	_test_price_covers_input_cost()
+	_test_famine_price_spike()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -6963,6 +6965,43 @@ func _test_recipe_input_scaling() -> void:
 	assert(is_equal_approx(float(team.resources["material"]), 100.0 - 4.0 * q),
 		"material 扣帳應 = 4 × q（per-unit），實際扣 %.4f" % (100.0 - float(team.resources["material"])))
 	print("Econ Task1 OK")
+
+func _test_price_covers_input_cost() -> void:
+	print("--- Econ Task2a: 價 ≥ 原料 ×1.2 ---")
+	for level_key in ManufacturingSystem.RECIPE_GROUPS:
+		for recipe in ManufacturingSystem.RECIPE_GROUPS[level_key]:
+			if recipe["rate_const"] == "CRAFT_RATE":
+				continue   # 工藝品 = gem 觸媒高效路線，本就有利，豁免
+			var input_value: float = 0.0
+			for res in recipe["in"]:
+				assert(InteractionSystem.BASE_PRICE.has(res), "原料 %s 缺 BASE_PRICE" % res)
+				input_value += float(recipe["in"][res]) * float(InteractionSystem.BASE_PRICE[res])
+			var out_price: float = float(InteractionSystem.BASE_PRICE.get(recipe["out"], 0.0))
+			assert(out_price >= input_value * 1.2 - 0.0001,
+				"%s 價 %.1f < 原料 %.1f × 1.2" % [recipe["out"], out_price, input_value])
+	assert(InteractionSystem.BASE_PRICE.has("herb"), "herb 補價")
+	assert(InteractionSystem.BASE_PRICE.has("mounts"), "mounts 補價")
+	assert(InteractionSystem.BASE_PRICE.has("wagons"), "wagons 補價")
+	print("Econ Task2a OK")
+
+func _test_famine_price_spike() -> void:
+	print("--- Econ Task2b: 飢荒不對稱 clamp ---")
+	var isys := InteractionSystem.new()
+	var team := TeamData.new()
+	team.population = 10
+	team.resources = {}
+	# 生存品 stock 0 → 5×；一般品 stock 0 → 2×
+	assert(is_equal_approx(isys._local_value(team, "food"),
+		float(InteractionSystem.BASE_PRICE["food"]) * 5.0), "food 饑荒應 5×")
+	assert(is_equal_approx(isys._local_value(team, "material"),
+		float(InteractionSystem.BASE_PRICE["material"]) * 2.0), "material 饑荒維持 2×")
+	# 過剩下限 0.5× 兩者皆同
+	team.resources = { "food": 100000.0, "material": 100000.0 }
+	assert(is_equal_approx(isys._local_value(team, "food"),
+		float(InteractionSystem.BASE_PRICE["food"]) * 0.5), "food 過剩 0.5×")
+	assert(is_equal_approx(isys._local_value(team, "material"),
+		float(InteractionSystem.BASE_PRICE["material"]) * 0.5), "material 過剩 0.5×")
+	print("Econ Task2b OK")
 
 func _test_smeltery_separate() -> void:
 	print("--- Facility Task3d: 冶煉獨立設施 ---")
