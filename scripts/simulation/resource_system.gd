@@ -220,6 +220,33 @@ func _apply_normal_tax(state: WorldState, team: TeamData, tile: HexTileData,
 			continue
 		team.resources[res] = float(team.resources.get(res, 0)) - actual
 		tile.public_storage[res] = cur + actual
+	_apply_chronic_tax_unrest(state, team, rate)
+
+# 一般稅慢性不滿：tax_rate 超容忍閾值 → 居民 leader/named stress 緩增；超久 → unrest_turns。
+# tolerance = 0.3 + 順從×0.2 + 義氣×0.1 − 野心×0.2（個性決定，非硬編）
+func _apply_chronic_tax_unrest(state: WorldState, team: TeamData, rate: float) -> void:
+	var lp: PersonData = state.persons.get(team.leader_id)
+	if lp == null:
+		return
+	var submit: float = float(lp.values.get("順從", 0.5))
+	var honor_v: float = float(lp.values.get("義氣", 0.5))
+	var amb: float = float(lp.values.get("野心", 0.5))
+	var tolerance: float = 0.3 + submit * 0.2 + honor_v * 0.1 - amb * 0.2
+	if rate <= tolerance:
+		return
+	var p_stress: float = (rate - tolerance) * 0.02
+	var targets: Array = []
+	if team.leader_id != -1:
+		targets.append(team.leader_id)
+	targets.append_array(team.named_members)
+	for pid in targets:
+		var p: PersonData = state.persons.get(pid)
+		if p == null:
+			continue
+		p.stress = minf(p.stress + p_stress, 1.0)
+	# 慢性累積：leader 長期高壓 → 緩升 unrest（暴政自毀的下行通道）
+	if lp.stress > 0.7:
+		team.unrest_turns += 1
 
 func _get_adjacent_tiles(state: WorldState, center: Vector2i) -> Array:
 	var result: Array = []

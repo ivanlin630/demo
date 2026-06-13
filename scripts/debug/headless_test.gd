@@ -266,6 +266,8 @@ func _initialize() -> void:
 	_test_aid_hoarder()
 	_test_aid_saint()
 	_test_aid_mercy_floor()
+	_test_normal_tax_chronic_unrest()
+	_test_special_tax_spike()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -8055,3 +8057,64 @@ func _test_aid_mercy_floor() -> void:
 	assert(not r2.get("accepted", true), "真禽獸(honor≈0)應拒絕")
 	assert(float(b2.resources["food"]) == 0.0, "真禽獸不給，乞丐仍 0")
 	print("Fief Task4c OK (mercy=%.1f / 真禽獸拒絕)" % float(b.resources["food"]))
+
+# ──────── Fief Economy: 兩稅獨立不滿（Task 5）────────
+
+func _test_normal_tax_chronic_unrest() -> void:
+	print("--- Fief Task5a: 一般稅慢性不滿 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	var lp := PersonData.new(); lp.id = 100; lp.team_id = 0
+	lp.values = { "順從": 0.5, "義氣": 0.5, "野心": 0.5 }   # tolerance = 0.35
+	lp.stress = 0.0
+	state.persons[100] = lp; team.leader_id = 100
+	var nm := PersonData.new(); nm.id = 101; nm.team_id = 0; nm.stress = 0.0
+	state.persons[101] = nm; team.named_members = [101]
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	# rate 0.7 > tolerance 0.35 → stress 緩增
+	rs._apply_chronic_tax_unrest(state, team, 0.7)
+	assert(lp.stress > 0.0, "rate>tolerance leader 應升 stress，實際=%.4f" % lp.stress)
+	assert(nm.stress > 0.0, "named 也應升 stress")
+	var s_high: float = lp.stress
+	# rate 0.2 < tolerance → 無變化
+	rs._apply_chronic_tax_unrest(state, team, 0.2)
+	assert(absf(lp.stress - s_high) < 1e-9, "rate<tolerance 不應再升 stress")
+	print("Fief Task5a OK (重稅 stress=%.4f，輕稅無增)" % s_high)
+
+func _test_special_tax_spike() -> void:
+	print("--- Fief Task5b: 特別稅尖峰 + 厭煩疊加 ---")
+	# A: 單次特別稅，taken_ratio 貢獻 → stress > rate-only base
+	var sA := _fief_make_special_payer(0.4)
+	var inter := InteractionSystem.new()
+	inter._resolve_tribute(sA, 0, 1)
+	var leaderA: PersonData = sA.persons[200]
+	# rate = 0.6；rate-only base = (0.6-0.3)*0.3 = 0.09；含 taken_ratio 應更高
+	assert(leaderA.stress > 0.09 + 1e-4,
+		"含搜刮比例 stress 應 > 0.09，實際=%.4f" % leaderA.stress)
+	var sa_stress: float = leaderA.stress
+	# B: 連續特別稅，預埋 2 條 special_taxed 記憶 → annoyance 疊加 stress 更高
+	var sB := _fief_make_special_payer(0.4)
+	var leaderB: PersonData = sB.persons[200]
+	leaderB.memory.append({ "type": "special_taxed", "subject_id": 0 })
+	leaderB.memory.append({ "type": "special_taxed", "subject_id": 0 })
+	inter._resolve_tribute(sB, 0, 1)
+	assert(leaderB.stress > sa_stress,
+		"連續特別稅 annoyance 疊加應更高，A=%.4f B=%.4f" % [sa_stress, leaderB.stress])
+	print("Fief Task5b OK (單次 stress=%.4f，連續 stress=%.4f)" % [sa_stress, leaderB.stress])
+
+func _fief_make_special_payer(tax_rate: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var collector := TeamData.new(); collector.team_id = 0; collector.population = 5
+	collector.tile_pos = Vector2i(0, 0); collector.current_task = "徵收"
+	state.teams[0] = collector
+	var payer := TeamData.new(); payer.team_id = 1; payer.population = 10
+	payer.tags = [TeamData.TAG_PRODUCE]; payer.tile_pos = Vector2i(0, 0)
+	payer.tax_rate = tax_rate
+	payer.resources = { "food": 500.0 }
+	var pl := PersonData.new(); pl.id = 200; pl.team_id = 1; pl.stress = 0.0
+	state.persons[200] = pl; payer.leader_id = 200
+	state.teams[1] = payer
+	return state

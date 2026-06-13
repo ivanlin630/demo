@@ -413,9 +413,12 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 	if payer.tags.has(TeamData.TAG_PRODUCE):
 		# 特別稅：一般稅率 × MULT，重於常態，進 collector(leader) 口袋（應急/戰爭）
 		var rate: float = payer.tax_rate * SPECIAL_TAX_MULT
-		# 資源轉移（surplus × rate，保留最低儲備）
+		# 資源轉移（surplus × rate，保留最低儲備）；累計搜刮量/庫存量算尖峰強度
+		var total_take: float = 0.0
+		var total_stock: float = 0.0
 		for res in ["food", "material", "goods", "coin"]:
 			var stock: float = float(payer.resources.get(res, 0))
+			total_stock += stock
 			var reserve: float = 0.0
 			if res == "food":
 				reserve = float(payer.population) * 14.0
@@ -427,10 +430,20 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 				continue
 			payer.resources[res]     = stock - take
 			collector.resources[res] = float(collector.resources.get(res, 0)) + take
-		# 重稅後果
-		var stress_gain: float  = maxf(0.0, (rate - 0.3) * 0.3)
-		var loyalty_loss: float = maxf(0.0, (rate - 0.2) * 0.1)
+			total_take += take
+		# 尖峰強度：本次搜刮占居民總庫存比例
+		var taken_ratio: float = total_take / maxf(total_stock, 1.0)
+		# 厭煩疊加：近期被同一 collector 特別稅次數（連續加徵 → 怨恨爆）
+		var payer_leader: PersonData = state.persons.get(payer.leader_id)
+		var tax_count: int = _count_recent_special_tax(payer_leader, collector_id) if payer_leader else 0
+		# 重稅後果（既有 rate 門檻 + 尖峰搜刮比例 + 厭煩疊加）
+		var stress_gain: float  = maxf(0.0, (rate - 0.3) * 0.3) \
+			+ taken_ratio * 0.3 + float(tax_count) * 0.1
+		var loyalty_loss: float = maxf(0.0, (rate - 0.2) * 0.1) + taken_ratio * 0.1
 		var fear_gain: float    = maxf(0.0, (rate - 0.6) * 0.5)
+		if payer_leader != null:
+			_npc_ai.write_memory(payer_leader, "special_taxed", collector_id,
+				state.world.current_tick, 0.5)
 		var targets: Array = []
 		if payer.leader_id != -1:
 			targets.append(payer.leader_id)
@@ -890,6 +903,17 @@ func _count_recent_begs(leader: PersonData, beggar_id: int) -> int:
 	for m in leader.memory:
 		if not (m is Dictionary): continue
 		if m.get("type") == "begged_at_me" and m.get("subject_id") == beggar_id:
+			count += 1
+	return count
+
+# 近期被同一 collector 特別稅次數（連續加徵厭煩疊加）
+func _count_recent_special_tax(leader: PersonData, collector_id: int) -> int:
+	if leader == null:
+		return 0
+	var count: int = 0
+	for m in leader.memory:
+		if not (m is Dictionary): continue
+		if m.get("type") == "special_taxed" and m.get("subject_id") == collector_id:
 			count += 1
 	return count
 
