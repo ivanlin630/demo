@@ -18,6 +18,7 @@ func tick_all(state: WorldState) -> void:
 			state.world.current_tick, SEASON_NAMES[season], base])
 	_check_famine_warnings(state)
 	_regen_wild_horses(state)
+	_regen_wild_game(state)
 	_regen_herb(state)
 	# 每日 outpost 鄰格 wild_horses 批採進公庫（tick_all 每 6 小時跑，日邊界才採）
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
@@ -40,6 +41,23 @@ func _regen_wild_horses(state: WorldState) -> void:
 			continue
 		if randf() < WILD_HORSE_REGEN_CHANCE:
 			tile.resources["wild_horses"] = int(tile.resources.get("wild_horses", 0)) + 1
+
+const WILD_GAME_REGEN_CHANCE: float = 0.30   # TEST VALUE — 每月增長機率（比野馬快，獵物繁殖快）
+
+# 每月（month 邊界）平原/森林 tile 機率 +1 wild_game，上限 resource_cap["wild_game"]
+func _regen_wild_game(state: WorldState) -> void:
+	if state.world.current_tick % WorldState.TICKS_PER_MONTH != 0:
+		return
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		var cap: int = int(tile.resource_cap.get("wild_game", 0))
+		if cap <= 0:
+			continue
+		var cur: int = int(tile.resources.get("wild_game", 0))
+		if cur >= cap:
+			continue
+		if randf() < WILD_GAME_REGEN_CHANCE:
+			tile.resources["wild_game"] = cur + 1
 
 # 每月（month 邊界）herb +1 至 resource_cap["herb"]（生成初始值）
 func _regen_herb(state: WorldState) -> void:
