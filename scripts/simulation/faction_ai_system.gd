@@ -1984,9 +1984,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 				state.teams[aid_target].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
 			team.combat_target = aid_target
 		return
-	# 全失敗 → 就地乞食（無具體目標，move_target 保留原值）
-	TaskArbiter.try_set(state, team, "乞食", team.move_target,
-		TaskArbiter.PRIO_SURVIVAL, "survival")
+	# 全失敗（無人可乞）→ 不空轉乞食 latch（原 bug：mt=-1 釘死 p80，餓死 husk）。
+	# 釋放回 idle → solo AI 覓食/遷徙/掠奪，或真無糧則 famine 收場。
+	TaskArbiter.release(team)
+	team.previous_task = ""
 
 func _should_abandon_current_task(team: TeamData, survival_target: Vector2i) -> bool:
 	if team.move_target == Vector2i(-1, -1):
