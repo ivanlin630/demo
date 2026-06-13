@@ -1,5 +1,43 @@
 # 開發進度
 
+## 📍 當前狀態（2026-06-13 session 末，重啟交接）
+
+### 本 arc 已 merge（依序）
+設施改制 A 期（slot/8設施/軍民/三級成本/守恆審計）→ B 期材料層（herb/馬鏈/選址滾動拓殖）→ 經濟一致性（per-unit 製造 + 全表定價 + 飢荒5x）→ 馬爾薩斯修正（選址diff/復工門檻/COLLECT_RATE 0.01→0.05）→ 飢餓致死鏈（famine_days + hunger→blood + 昏迷 + blood=0死）→ 封建財政公庫（一般稅自動進公庫 + 建造扣公庫 + 特別稅 + 慷慨光譜 + 兩稅不滿）→ W4 caravan-load 派工提領 + leader 治理 → **W5 task latch 大修**（核心）→ W6 死亡資產守恆 → 經濟死水解鎖（自給階梯 + 治理faction leader + 生育分層）
+
+### 🔑 本 session 最大發現：task latch 凍結世界（W5）
+TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 dump）量出 **92% team-time 凍結在不釋放的 survival(p80)/panic(p70)**。世界非窮而是**癱瘓**。修 survival 糧恢復釋放 + 逃跑 timeout + 乞食釋放 + 餓死團清除後，**所有機制自己活起來**：
+
+| 機制 | latch 修前 | 解凍後（2年×4config）|
+|---|---|---|
+| 戰鬥 Combat Start | ~0 | 13 |
+| 貿易 Market 成交 | 0 | 11 |
+| 徵稅 / 援助 | 稀有 | 12 / 6 |
+| 生育長大成人 | 0 | 39 |
+| 設施建造 | 2 | 4 |
+| coin_eq 守恆 | — | delta 0.00 ×4 |
+
+**重要結論**：W1/W2「0 combat/0 trade」**不是擦肩會合問題，是 latch 症狀**（速度差本就存在，team 凍住沒去追）。會合機制不用做。
+
+### ⚠ 剩餘未達標：軍閥型 config 崩潰
+tyrant 60→0 全滅、warzone 54→3。根因 = **config 開局零生產基礎 + 遊牧軍閥 leader 永不 idle 在家**（W4 未根治）。
+
+### 🎯 重啟後的決策（已與用戶確認）
+- **遊戲類型 = 世界模擬器，合理 NPC+經濟是可玩前提**（不能把玩家迴路硬接在自毀世界上）
+- 但「合理」≠「完美 AI」。標準：**2 年無荒謬全滅 + 各 config pop≠0 + 戰鬥/貿易≠0**。達標即收手，**勿掉回 NPC 完美化無底洞**
+- **下一步（高效路徑）**：先改軍閥 config 給生產基礎（民村/農田種子）排除變因 → 跑 2 年 → 資料說話：
+  - 世界變合理 → 停，轉玩家可玩性迴路
+  - 仍崩 → 才做**最小** AI 補丁（leader 駐留），非大戰略引擎
+- 順手（非優先）：`faction_ai_system.gd` 2000+ 行怪獸拆檔（每次都改它，編輯可靠性受損）
+
+### 待修小項
+- W4 遊牧軍閥 leader 不駐留（建造仍卡 tyrant/warzone）— 部分修
+- Bug2 salary coin 無下限
+- config 在 radius 外 spawn team（(7,7) 超 radius 4）隱患
+- 全參數 TEST VALUE 待正式平衡
+
+---
+
 ## 已完成
 
 ### 資料結構層（`scripts/data/`）
