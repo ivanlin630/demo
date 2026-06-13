@@ -834,7 +834,26 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 	var rep: float   = float(target.known_reputations.get(beggar_id, 0.5))
 	var annoyance: float = _count_recent_begs(target_leader, beggar_id) * 0.2
 	var give_score: float = honor + rep - greed * 0.5 - annoyance
-	if give_score < 0.3:
+	# 需求 + 乞丐是否將餓死（人性底線判定）
+	var need: float = float(beggar.population) * 2.4 * 3.0 \
+		- float(beggar.resources.get("food", 0))
+	var beggar_starving: bool = float(beggar.resources.get("food", 0)) \
+		< float(beggar.population) * 2.4
+	var mercy_amount: float = float(beggar.population) * 2.4   # 1 天份
+	# 慷慨光譜：留存(reserve)與給予比例(give_fraction)由個性兩極決定（取代 flat AID_RESERVE_DAYS）
+	# 守財奴(高貪低義) hoard→1 → reserve 近 60 天、give_fraction≈0；聖人(高義低貪) → reserve 2 天、可動 reserve
+	var hoard: float = greed - honor                           # [-1,1]
+	var reserve_days: float = lerpf(2.0, 60.0, (hoard + 1.0) / 2.0)
+	var target_food: float = float(target.resources.get("food", 0))
+	var reserve: float = float(target.population) * reserve_days * 2.4
+	var give_fraction: float = clampf(honor - greed * 0.5 + rep * 0.3 - annoyance, 0.0, 1.2)
+	var surplus: float = maxf(target_food - reserve, 0.0)
+	var give: float = minf(need, surplus * give_fraction)
+	# 人性底線：算出 give≤0，但乞丐將餓死且施主非真禽獸(honor>0.1)、未被反覆煩擾 → 給最低 1 天份
+	if give <= 0.0 and beggar_starving and honor > 0.1 and annoyance < 0.4:
+		give = minf(need, mercy_amount)
+	# 吝嗇拒絕（give_score 低且無人性底線可救）
+	if give_score < 0.3 and give <= 0.0:
 		_msg.emit_message(state, "aid_refused",
 			"Team%d 拒絕援助 Team%d" % [target_id, beggar_id], target,
 			{ "origin": str(target_id), "target": str(beggar_id) })
@@ -845,13 +864,7 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 			state.world.current_tick, 0.3)
 		_clear_aid_task(beggar)
 		return { "ok": true, "accepted": false, "msg": "拒絕" }
-	# 接受：計算給多少
-	var need: float = float(beggar.population) * 2.4 * 3.0 \
-		- float(beggar.resources.get("food", 0))
-	var target_food: float = float(target.resources.get("food", 0))
-	var target_reserve: float = float(target.population) * AID_RESERVE_DAYS
-	var surplus: float = maxf(target_food - target_reserve, 0.0)
-	var give: float = minf(need, surplus * give_score)
+	# 有給予意願但 reserve 吃光 surplus → 無餘糧
 	if give <= 0.0:
 		_msg.emit_message(state, "aid_refused",
 			"Team%d 無餘糧 Team%d" % [target_id, beggar_id], target,

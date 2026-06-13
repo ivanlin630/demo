@@ -263,6 +263,9 @@ func _initialize() -> void:
 	_test_build_local_only()
 	_test_special_tax_heavier()
 	_test_special_tax_war_trigger()
+	_test_aid_hoarder()
+	_test_aid_saint()
+	_test_aid_mercy_floor()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7987,3 +7990,68 @@ func _test_special_tax_war_trigger() -> void:
 	assert("徵收" in f.goals, "野心高+建材枯應觸發徵收，goals=%s strategy=%s" % [str(f.goals), f.strategy])
 	assert(f.strategy == "戰爭基金", "strategy 應為戰爭基金，實際=%s" % f.strategy)
 	print("Fief Task3b OK (goals=%s strategy=%s)" % [str(f.goals), f.strategy])
+
+# ──────── Fief Economy: 乞食慷慨光譜（Task 4）────────
+
+func _fief_make_aid_state(t_honor: float, t_greed: float, target_food: float,
+		beggar_food: float, beggar_pop: int, rep: float = 0.5) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var b := TeamData.new(); b.team_id = 0; b.population = beggar_pop
+	b.resources["food"] = beggar_food
+	b.current_task = "乞食"; b.previous_task = "idle"; b.combat_target = 1
+	b.tile_pos = Vector2i(2, 2)
+	var bl := PersonData.new(); bl.id = 100; bl.team_id = 0
+	state.persons[100] = bl; b.leader_id = 100
+	state.teams[0] = b
+	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	target.resources["food"] = target_food; target.tile_pos = Vector2i(2, 2)
+	target.known_reputations[0] = rep
+	var tl := PersonData.new(); tl.id = 200
+	tl.values = { "義氣": t_honor, "貪婪": t_greed }
+	state.persons[200] = tl; target.leader_id = 200
+	state.teams[1] = target
+	return state
+
+func _test_aid_hoarder() -> void:
+	print("--- Fief Task4a: 守財奴 give≈0 ---")
+	# 貪0.9 義0.1；乞丐不缺糧（避免 mercy）→ give_fraction≈0 + give_score<0.3 → 拒絕
+	var state := _fief_make_aid_state(0.1, 0.9, 1000.0, 100.0, 10)
+	var b: TeamData = state.teams[0]
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(not r.get("accepted", true), "守財奴應拒絕 (give≈0)")
+	assert(absf(float(b.resources["food"]) - 100.0) < 0.01, "乞丐食物不應增加")
+	print("Fief Task4a OK (拒絕, give≈0)")
+
+func _test_aid_saint() -> void:
+	print("--- Fief Task4b: 聖人 give 高、可動 reserve ---")
+	# 義0.9 貪0.1 rep1.0 → give_fraction = 0.9-0.05+0.3 = 1.15 (>1 動 reserve)
+	var state := _fief_make_aid_state(0.9, 0.1, 500.0, 0.0, 10, 1.0)
+	var b: TeamData = state.teams[0]
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(r.get("accepted", false), "聖人應接受，msg=%s" % r.get("msg", ""))
+	var amt: float = float(r.get("amount", 0))
+	# need = 10*2.4*3 = 72；surplus 充足 → 給滿 need
+	assert(absf(amt - 72.0) < 1.0, "聖人應給滿 need 72，實際=%.1f" % amt)
+	assert(float(b.resources["food"]) > 0.0, "乞丐獲食")
+	print("Fief Task4b OK (給 %.1f food)" % amt)
+
+func _test_aid_mercy_floor() -> void:
+	print("--- Fief Task4c: 人性底線 vs 真禽獸 ---")
+	# 守財奴 honor 0.15 (>0.1)，乞丐將餓死 (food 0) → mercy 1 天份 = pop*2.4
+	var state := _fief_make_aid_state(0.15, 0.9, 1000.0, 0.0, 5)
+	var b: TeamData = state.teams[0]
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(r.get("accepted", false), "honor>0.1 遇將餓死者應給 mercy，msg=%s" % r.get("msg", ""))
+	assert(absf(float(b.resources["food"]) - 12.0) < 0.5,
+		"mercy 應給 1 天份 5*2.4=12，實際=%.2f" % float(b.resources["food"]))
+	# 真禽獸 honor 0.05 → 不給
+	var state2 := _fief_make_aid_state(0.05, 0.9, 1000.0, 0.0, 5)
+	var b2: TeamData = state2.teams[0]
+	var r2: Dictionary = inter._resolve_aid_request(state2, 0, 1)
+	assert(not r2.get("accepted", true), "真禽獸(honor≈0)應拒絕")
+	assert(float(b2.resources["food"]) == 0.0, "真禽獸不給，乞丐仍 0")
+	print("Fief Task4c OK (mercy=%.1f / 真禽獸拒絕)" % float(b.resources["food"]))
