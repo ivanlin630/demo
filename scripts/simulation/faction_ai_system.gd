@@ -27,7 +27,8 @@ const ATTACK_SCORE_THRESHOLD:  float = 0.3   # minimum attack_score to pursue �
 const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
-const SURVIVAL_TASKS: Array = ["return_home", "乞食", "投靠"]
+const SURVIVAL_TASKS: Array = ["return_home", "乞食", "投靠", TeamData.TASK_FORAGE]
+const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
 # stuck: task 仍是進攻型但 move_target 已被 movement 清掉（off-map / 無路徑）→ 視為 idle 允許重評
 const STUCK_TASKS: Array = [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
 
@@ -2055,6 +2056,16 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 				team.combat_target = ally_id
 			return
 
+	# Path 3.5: 小群 → 覓食（pop 門檻 proxy income/burn；大軍不划算 → 掉下去走乞食/idle）
+	if team.population <= FORAGE_VIABLE_POP:
+		var forage_pos: Vector2i = _find_forage_tile(state, team)
+		if forage_pos != Vector2i(-1, -1):
+			if TaskArbiter.try_set(state, team, TeamData.TASK_FORAGE,
+					forage_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
+				print("[SurvivalForage] team=Team%d pop=%d → 覓食 @(%d,%d)" % [
+					team.team_id, team.population, forage_pos.x, forage_pos.y])
+			return
+
 	# Path 4: 默認 → 乞食
 	var aid_target: int = _find_aid_target(state, team)
 	if aid_target != -1:
@@ -2066,6 +2077,23 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	# 釋放回 idle → solo AI 覓食/遷徙/掠奪，或真無糧則 famine 收場。
 	TaskArbiter.release(team)
 	team.previous_task = ""
+
+# 找最佳覓食格：本格+鄰格食物池最高的無 outpost tile；無則回本格（原地覓食）。
+func _find_forage_tile(state: WorldState, team: TeamData) -> Vector2i:
+	var best_pos: Vector2i = team.tile_pos
+	var best_food: float = -1.0
+	var dirs: Array = [Vector2i.ZERO, Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
+		Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1)]
+	for d in dirs:
+		var p: Vector2i = team.tile_pos + d
+		var tile: HexTileData = state.world.tiles.get(p.x * 1000 + p.y)
+		if tile == null or tile.outpost_level > 0:
+			continue
+		var f: float = float(tile.resources.get("food", 0))
+		if f > best_food:
+			best_food = f
+			best_pos = p
+	return best_pos if best_food >= 0.0 else team.tile_pos
 
 func _should_abandon_current_task(team: TeamData, survival_target: Vector2i) -> bool:
 	if team.move_target == Vector2i(-1, -1):
