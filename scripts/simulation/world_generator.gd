@@ -22,6 +22,10 @@ const WILD_HORSE_FOREST_CHANCE: float = 0.005
 const HERB_FOREST_CHANCE: float = 0.30      # TEST VALUE
 const HERB_RICH_CHANCE: float = 0.05        # 藥草林（先 roll rich 再 roll 一般）TEST VALUE
 const WILD_HORSE_RICH_CHANCE: float = 0.03  # 野馬草原 TEST VALUE
+const WILD_GAME_PLAINS_CHANCE: float = 0.20   # TEST VALUE — 平原帶獵物機率
+const WILD_GAME_FOREST_CHANCE: float = 0.30   # TEST VALUE — 森林獵物更多
+const WILD_GAME_MIN: int = 2
+const WILD_GAME_MAX: int = 6
 
 func generate(state: WorldState, config: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -83,6 +87,16 @@ func _apply_resources(tile, rng: RandomNumberGenerator, mult: float = 1.0) -> vo
 		"forest":
 			if rng.randf() < WILD_HORSE_FOREST_CHANCE:
 				tile.resources["wild_horses"] = 1
+	# 野味（鹿/兔/豬）：平原/森林帶可獵小獵物，計入 resource_cap（月再生上限）
+	match tile.terrain:
+		"plains":
+			if rng.randf() < WILD_GAME_PLAINS_CHANCE:
+				tile.resources["wild_game"] = rng.randi_range(WILD_GAME_MIN, WILD_GAME_MAX)
+		"forest":
+			if rng.randf() < WILD_GAME_FOREST_CHANCE:
+				tile.resources["wild_game"] = rng.randi_range(WILD_GAME_MIN, WILD_GAME_MAX)
+	if int(tile.resources.get("wild_game", 0)) > 0:
+		tile.resource_cap["wild_game"] = int(tile.resources["wild_game"])
 
 func _random_terrain(rng: RandomNumberGenerator) -> String:
 	var roll: int = rng.randi_range(0, 99)
