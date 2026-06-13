@@ -292,7 +292,133 @@ func _initialize() -> void:
 	_test_npc_forage_viability()
 	_test_forage_release()
 	_test_survival_start_config()
+	# ── 階段1 Plan 2a 小獵物食物層 ──
+	_test_wild_game_seeded()
+	_test_wild_game_regen()
+	_test_hunt_small_game()
+	_test_passive_hunt_on_forage()
+	_test_player_hunt_action()
 	quit()
+
+func _test_wild_game_seeded() -> void:
+	print("--- world_gen wild_game 灑點 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var gen = load("res://scripts/simulation/world_generator.gd").new()
+	gen.generate(state, { "radius": 4, "seed": 7, "resource_multiplier": 1.0 })
+	var any_game: bool = false
+	var bad_terrain: bool = false
+	for tid in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tid]
+		var wg: int = int(tile.resources.get("wild_game", 0))
+		if wg > 0:
+			any_game = true
+			if tile.terrain == "mountain":
+				bad_terrain = true   # wild_game 只該在平原/森林
+	assert(any_game, "應有 tile 帶 wild_game")
+	assert(not bad_terrain, "wild_game 不應出現在 mountain")
+	print("wild_game seeded OK")
+
+func _test_wild_game_regen() -> void:
+	print("--- wild_game 月再生 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = WorldState.TICKS_PER_MONTH   # 月邊界
+	var tile := HexTileData.new()
+	tile.tile_id = 4 * 1000 + 4; tile.tile_pos = Vector2i(4, 4)
+	tile.terrain = "forest"
+	tile.resources = {"wild_game": 1}
+	tile.resource_cap = {"wild_game": 5}
+	state.world.tiles[tile.tile_id] = tile
+	var hs := HarvestSystem.new()
+	# 跑多次月邊界（再生有機率），統計是否會增長至 cap 附近
+	var grew: bool = false
+	for _m in range(200):
+		var before: int = int(tile.resources["wild_game"])
+		hs._regen_wild_game(state)
+		if int(tile.resources["wild_game"]) > before:
+			grew = true
+		assert(int(tile.resources["wild_game"]) <= 5, "不應超過 cap")
+	assert(grew, "月再生應曾使 wild_game 增長")
+	print("wild_game regen OK")
+
+func _test_hunt_small_game() -> void:
+	print("--- 小獵物狩獵 roll ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4 * 1000 + 4; tile.tile_pos = Vector2i(4, 4)
+	tile.terrain = "plains"; tile.resources = {"wild_game": 5}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"求生": 0.9}   # 高求生 → 高命中
+	state.persons[0] = leader
+	var team := TeamData.new()
+	team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4, 4)
+	team.resources = {"food": 0.0}
+	state.teams[0] = team
+	var hunt := HuntSystem.new()
+	# 主動狩獵多次：應得食物 + 枯竭 wild_game
+	var got_food: bool = false
+	for _i in range(20):
+		var r: Dictionary = hunt.hunt_small_game(state, team, tile, true)
+		if float(team.resources["food"]) > 0.0:
+			got_food = true
+	assert(got_food, "高求生隊主動獵應得食物")
+	assert(int(tile.resources["wild_game"]) < 5, "獵物應被枯竭，實際=%s" % str(tile.resources["wild_game"]))
+	assert(int(tile.resources["wild_game"]) >= 0, "獵物不應為負")
+	print("hunt_small_game OK")
+
+func _test_passive_hunt_on_forage() -> void:
+	print("--- 覓食被動小獵 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4 * 1000 + 4; tile.tile_pos = Vector2i(4, 4)
+	tile.terrain = "plains"; tile.productivity = 1.0; tile.harvest_factor = 1.0
+	tile.outpost_level = 0
+	tile.resources = {"food": 100.0, "wild_game": 5}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"求生": 0.9}
+	state.persons[0] = leader
+	var team := TeamData.new()
+	team.team_id = 0; team.leader_id = 0; team.population = 3; team.tile_pos = Vector2i(4, 4)
+	team.resources = {"food": 0.0}
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	var game_before: int = int(tile.resources["wild_game"])
+	for _i in range(50):
+		rs.collect_resources(state, [0])
+	# 覓食 tick 多次 → 被動小獵應曾枯竭 wild_game
+	assert(int(tile.resources["wild_game"]) < game_before,
+		"覓食 tick 應被動獵掉部分 wild_game，實際=%d" % int(tile.resources["wild_game"]))
+	print("passive hunt OK")
+
+func _test_player_hunt_action() -> void:
+	print("--- 玩家 hunt 指令 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4 * 1000 + 4; tile.tile_pos = Vector2i(4, 4)
+	tile.terrain = "plains"; tile.resources = {"wild_game": 5}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"求生": 0.9}
+	state.persons[0] = leader
+	state.player_id = 0
+	var team := TeamData.new()
+	team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4, 4)
+	team.resources = {"food": 0.0}
+	state.teams[0] = team
+	var cmd := PlayerCommandSystem.new()
+	var got_food: bool = false
+	for _i in range(20):
+		var r: Dictionary = cmd.execute_action(state, -1, "hunt")
+		if float(team.resources["food"]) > 0.0:
+			got_food = true
+	assert(got_food, "hunt 指令應得食物")
+	print("player hunt OK")
 
 func _test_minor_maturation() -> void:
 	print("--- PopFix: minor 每月長大 ---")
