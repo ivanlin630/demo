@@ -7,6 +7,10 @@ const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/�
 # 池常駐 cap，遠區村 income ≈ cap×rate×mults×2.4次/日，0.01 時 7/day << burn 28.8）
 const COLLECT_RATE: float = 0.05
 
+# 覓食：無據點隊從腳下 tile 低率採食物（只食物，不繞過據點經濟）。
+# 率 < COLLECT_RATE：只減緩餓死、不餵飽 → 逼遷徙/定居。收入隨 pop_mult(≤2)封頂 + burn 線性 → 大群人均趨零。
+const FORAGE_RATE: float = 0.02   # TEST VALUE
+
 const PUBLIC_RESOURCES: Array = ["ore_gold", "ore_silver", "ore_iron", "ore_steel", "mounts", "horses"]
 
 # 一般稅：採集所得（私產）按 tax_rate 自動撥腳下 tile owner 公庫。
@@ -45,6 +49,10 @@ func collect_resources(state: WorldState, team_ids: Array) -> void:
 			continue
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level == 0:
+			var pop_mult_f: float = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
+			var leader_f = state.persons.get(team.leader_id)
+			var prod_skill_f: float = float(leader_f.skills.get("生產", 0.0)) if leader_f else 0.0
+			_forage_from_tile(state, team, tile, pop_mult_f, prod_skill_f)
 			continue
 
 		var pop_mult: float  = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
@@ -157,6 +165,39 @@ func _apply_famine_attrition(state: WorldState, team: TeamData, day_fraction: fl
 			actually += killed[t]
 		team.population = maxi(team.population - actually, 1)   # pop 最小 1（leader 不在此死）
 		print("[Famine] Team%d 餓死 anon %d (famine=%.0f天)" % [team.team_id, actually, team.famine_days])
+
+# 覓食：無 outpost 隊採腳下 tile 食物（食物 only、FORAGE_RATE、枯竭、無稅無公庫）。
+func _forage_from_tile(state: WorldState, team: TeamData, tile: HexTileData,
+		pop_mult: float, prod_skill: float) -> void:
+	var current: float = float(tile.resources.get("food", 0))
+	if current <= 0.0:
+		return
+	var gain: float = tile.productivity * current * FORAGE_RATE
+	gain *= pop_mult * team.work_morale
+	gain *= (1.0 + prod_skill * 0.3)
+	gain *= tile.harvest_factor
+	team.resources["food"] = float(team.resources.get("food", 0)) + gain
+	tile.resources["food"] = maxf(current - gain, 0.0)   # 枯竭
+	team.forage_today = float(team.forage_today) + gain   # episode 日彙整（見 flush_forage_episodes）
+
+# 日邊界：覓食累積彙整成 episode（只玩家隊發訊息，其餘僅歸零防 spam）。回傳產生的訊息文字陣列（供測試/UI）。
+func flush_forage_episodes(state: WorldState, team_ids: Array) -> Array:
+	var out: Array = []
+	for tid in team_ids:
+		if not state.teams.has(tid):
+			continue
+		var team: TeamData = state.teams[tid]
+		var got: float = float(team.forage_today)
+		team.forage_today = 0.0
+		if got <= 0.0:
+			continue
+		var is_player: bool = false
+		var leader = state.persons.get(team.leader_id)
+		if leader != null and leader.id == state.player_id:
+			is_player = true
+		if is_player:
+			out.append("覓食所得 +%d 糧" % int(round(got)))
+	return out
 
 func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData,
 		outpost_mult: float, pop_mult: float,

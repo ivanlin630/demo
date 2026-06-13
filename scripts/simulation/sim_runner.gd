@@ -77,6 +77,10 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_message_system.prune_old_messages(state, state.world.current_tick)
 		# 飢餓致死鏈：日邊界結算 blood<=0 死亡（leader 死交既有繼承/玩家 forced event）
 		HealthSystem.check_starvation_deaths(state)
+		# 覓食 episode 日彙整：歸零各隊 forage_today，玩家隊產訊息（防 per-tick spam）
+		var forage_msgs: Array = _resource_system.flush_forage_episodes(state, state.teams.keys())
+		for fm in forage_msgs:
+			print("[ForageEpisode] %s" % fm)
 	if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
 		_step1d_overflow(state)
 
