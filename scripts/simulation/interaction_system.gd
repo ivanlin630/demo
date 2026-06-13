@@ -59,6 +59,8 @@ const READINESS_RECOVERY_BASE: float = 0.04
 const READINESS_FOOD_COST: float     = 0.05
 
 const AID_RESERVE_DAYS: float = 14.0
+# 特別稅（徵收 task）= 一般稅率 × 此倍率，重於常態一般稅（戰時/缺糧額外加徵）。TEST VALUE
+const SPECIAL_TAX_MULT: float = 1.5
 
 var _msg:       SimMessageSystem
 var _vision:    VisionSystem
@@ -409,10 +411,14 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 	var payer:     TeamData = state.teams[payer_id]
 	# PRODUCE 居民：用 team.tax_rate，跳過勢力守衛
 	if payer.tags.has(TeamData.TAG_PRODUCE):
-		var rate: float = payer.tax_rate
-		# 資源轉移（surplus × rate，保留最低儲備）
+		# 特別稅：一般稅率 × MULT，重於常態，進 collector(leader) 口袋（應急/戰爭）
+		var rate: float = payer.tax_rate * SPECIAL_TAX_MULT
+		# 資源轉移（surplus × rate，保留最低儲備）；累計搜刮量/庫存量算尖峰強度
+		var total_take: float = 0.0
+		var total_stock: float = 0.0
 		for res in ["food", "material", "goods", "coin"]:
 			var stock: float = float(payer.resources.get(res, 0))
+			total_stock += stock
 			var reserve: float = 0.0
 			if res == "food":
 				reserve = float(payer.population) * 14.0
@@ -424,10 +430,20 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 				continue
 			payer.resources[res]     = stock - take
 			collector.resources[res] = float(collector.resources.get(res, 0)) + take
-		# 重稅後果
-		var stress_gain: float  = maxf(0.0, (rate - 0.3) * 0.3)
-		var loyalty_loss: float = maxf(0.0, (rate - 0.2) * 0.1)
+			total_take += take
+		# 尖峰強度：本次搜刮占居民總庫存比例
+		var taken_ratio: float = total_take / maxf(total_stock, 1.0)
+		# 厭煩疊加：近期被同一 collector 特別稅次數（連續加徵 → 怨恨爆）
+		var payer_leader: PersonData = state.persons.get(payer.leader_id)
+		var tax_count: int = _count_recent_special_tax(payer_leader, collector_id) if payer_leader else 0
+		# 重稅後果（既有 rate 門檻 + 尖峰搜刮比例 + 厭煩疊加）
+		var stress_gain: float  = maxf(0.0, (rate - 0.3) * 0.3) \
+			+ taken_ratio * 0.3 + float(tax_count) * 0.1
+		var loyalty_loss: float = maxf(0.0, (rate - 0.2) * 0.1) + taken_ratio * 0.1
 		var fear_gain: float    = maxf(0.0, (rate - 0.6) * 0.5)
+		if payer_leader != null:
+			_npc_ai.write_memory(payer_leader, "special_taxed", collector_id,
+				state.world.current_tick, 0.5)
 		var targets: Array = []
 		if payer.leader_id != -1:
 			targets.append(payer.leader_id)
@@ -831,7 +847,26 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 	var rep: float   = float(target.known_reputations.get(beggar_id, 0.5))
 	var annoyance: float = _count_recent_begs(target_leader, beggar_id) * 0.2
 	var give_score: float = honor + rep - greed * 0.5 - annoyance
-	if give_score < 0.3:
+	# 需求 + 乞丐是否將餓死（人性底線判定）
+	var need: float = float(beggar.population) * 2.4 * 3.0 \
+		- float(beggar.resources.get("food", 0))
+	var beggar_starving: bool = float(beggar.resources.get("food", 0)) \
+		< float(beggar.population) * 2.4
+	var mercy_amount: float = float(beggar.population) * 2.4   # 1 天份
+	# 慷慨光譜：留存(reserve)與給予比例(give_fraction)由個性兩極決定（取代 flat AID_RESERVE_DAYS）
+	# 守財奴(高貪低義) hoard→1 → reserve 近 60 天、give_fraction≈0；聖人(高義低貪) → reserve 2 天、可動 reserve
+	var hoard: float = greed - honor                           # [-1,1]
+	var reserve_days: float = lerpf(2.0, 60.0, (hoard + 1.0) / 2.0)
+	var target_food: float = float(target.resources.get("food", 0))
+	var reserve: float = float(target.population) * reserve_days * 2.4
+	var give_fraction: float = clampf(honor - greed * 0.5 + rep * 0.3 - annoyance, 0.0, 1.2)
+	var surplus: float = maxf(target_food - reserve, 0.0)
+	var give: float = minf(need, surplus * give_fraction)
+	# 人性底線：算出 give≤0，但乞丐將餓死且施主非真禽獸(honor>0.1)、未被反覆煩擾 → 給最低 1 天份
+	if give <= 0.0 and beggar_starving and honor > 0.1 and annoyance < 0.4:
+		give = minf(need, mercy_amount)
+	# 吝嗇拒絕（give_score 低且無人性底線可救）
+	if give_score < 0.3 and give <= 0.0:
 		_msg.emit_message(state, "aid_refused",
 			"Team%d 拒絕援助 Team%d" % [target_id, beggar_id], target,
 			{ "origin": str(target_id), "target": str(beggar_id) })
@@ -842,13 +877,7 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 			state.world.current_tick, 0.3)
 		_clear_aid_task(beggar)
 		return { "ok": true, "accepted": false, "msg": "拒絕" }
-	# 接受：計算給多少
-	var need: float = float(beggar.population) * 2.4 * 3.0 \
-		- float(beggar.resources.get("food", 0))
-	var target_food: float = float(target.resources.get("food", 0))
-	var target_reserve: float = float(target.population) * AID_RESERVE_DAYS
-	var surplus: float = maxf(target_food - target_reserve, 0.0)
-	var give: float = minf(need, surplus * give_score)
+	# 有給予意願但 reserve 吃光 surplus → 無餘糧
 	if give <= 0.0:
 		_msg.emit_message(state, "aid_refused",
 			"Team%d 無餘糧 Team%d" % [target_id, beggar_id], target,
@@ -874,6 +903,17 @@ func _count_recent_begs(leader: PersonData, beggar_id: int) -> int:
 	for m in leader.memory:
 		if not (m is Dictionary): continue
 		if m.get("type") == "begged_at_me" and m.get("subject_id") == beggar_id:
+			count += 1
+	return count
+
+# 近期被同一 collector 特別稅次數（連續加徵厭煩疊加）
+func _count_recent_special_tax(leader: PersonData, collector_id: int) -> int:
+	if leader == null:
+		return 0
+	var count: int = 0
+	for m in leader.memory:
+		if not (m is Dictionary): continue
+		if m.get("type") == "special_taxed" and m.get("subject_id") == collector_id:
 			count += 1
 	return count
 

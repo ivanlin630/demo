@@ -254,6 +254,20 @@ func _initialize() -> void:
 	_test_site_diff_print()
 	_test_resume_requires_food()
 	_test_construction_timeout()
+	# ── Fief Economy 封建財政 ──
+	_test_normal_tax_to_vault()
+	_test_normal_tax_owner_vault()
+	_test_normal_tax_vault_cap()
+	_test_build_from_vault()
+	_test_build_vault_then_pocket()
+	_test_build_local_only()
+	_test_special_tax_heavier()
+	_test_special_tax_war_trigger()
+	_test_aid_hoarder()
+	_test_aid_saint()
+	_test_aid_mercy_floor()
+	_test_normal_tax_chronic_unrest()
+	_test_special_tax_spike()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7787,3 +7801,320 @@ func _test_construction_timeout() -> void:
 	assert(tile.construction_team_id == -1 and tile.construction_target.is_empty(), "tile 釋放")
 	assert(tile.construction_started_tick == -1, "started 重設")
 	print("Malthus Task2b OK")
+
+# ──────── Fief Economy: 一般稅自動進公庫（Task 1）────────
+
+func _fief_make_tax_state(owner_id: int, collector_id: int, rate: float,
+		ground_food: float, pub_food: float = 0.0) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.terrain = "plains"
+	tile.outpost_type = "civilian"
+	tile.outpost_level = 1
+	tile.outpost_owner = owner_id
+	tile.productivity = 1.0
+	tile.farming_level = 0
+	tile.harvest_factor = 1.0
+	tile.resources = { "food": ground_food }
+	tile.resource_cap = { "food": 9999.0 }
+	tile.public_storage = { "food": pub_food }
+	state.world.tiles[0] = tile
+	# owner team（若 != collector）
+	if owner_id != collector_id:
+		var ot := TeamData.new(); ot.team_id = owner_id; ot.tax_rate = rate
+		ot.tile_pos = Vector2i(9, 9)
+		state.teams[owner_id] = ot
+	# 採集團
+	var ct := TeamData.new(); ct.team_id = collector_id
+	ct.population = 5; ct.work_morale = 1.0; ct.tax_rate = rate
+	ct.tile_pos = Vector2i(0, 0)
+	ct.resources = { "food": 0.0 }
+	state.teams[collector_id] = ct
+	return state
+
+func _test_normal_tax_to_vault() -> void:
+	print("--- Fief Task1a: 一般稅自動進公庫（自立村）---")
+	# 自家 outpost owner=自己, rate 0.3, ground 100 → gain=5.0, tax=1.5
+	var state := _fief_make_tax_state(0, 0, 0.3, 100.0)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	var pub: float = float(tile.public_storage.get("food", 0))
+	var priv: float = float(team.resources.get("food", 0))
+	var ground_left: float = float(tile.resources.get("food", 0))
+	# gain = 5.0；tax = 5*0.3 = 1.5 進公庫，私產 = 3.5
+	assert(absf(pub - 1.5) < 0.01, "公庫應 1.5，實際=%.3f" % pub)
+	assert(absf(priv - 3.5) < 0.01, "私產應 3.5，實際=%.3f" % priv)
+	# 守恆：私產 + 公庫 == 地面減量（100 - ground_left）
+	assert(absf((priv + pub) - (100.0 - ground_left)) < 0.01, "守恆破壞")
+	print("Fief Task1a OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
+
+func _test_normal_tax_owner_vault() -> void:
+	print("--- Fief Task1b: 稅進 tile owner 公庫 ---")
+	# 採集團 0 站在 owner=1 的 tile，owner rate=0.5 → tax=2.5
+	var state := _fief_make_tax_state(1, 0, 0.5, 100.0)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	team.tax_rate = 0.1   # 採集者自身 tax_rate 不應被用（用 owner 的 0.5）
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	var pub: float = float(tile.public_storage.get("food", 0))
+	var priv: float = float(team.resources.get("food", 0))
+	assert(absf(pub - 2.5) < 0.01, "owner rate 0.5 → 公庫 2.5，實際=%.3f" % pub)
+	assert(absf(priv - 2.5) < 0.01, "私產 2.5，實際=%.3f" % priv)
+	print("Fief Task1b OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
+
+func _test_normal_tax_vault_cap() -> void:
+	print("--- Fief Task1c: 公庫 cap 不溢出 ---")
+	# civilian Lv1 cap = 200；預存 199.5 → 空間 0.5；tax 1.5 → 只進 0.5
+	var state := _fief_make_tax_state(0, 0, 0.3, 100.0, 199.5)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	var pub: float = float(tile.public_storage.get("food", 0))
+	var priv: float = float(team.resources.get("food", 0))
+	assert(absf(pub - 200.0) < 0.01, "公庫應卡 cap 200，實際=%.3f" % pub)
+	# gain 5.0，只課 0.5 進公庫 → 私產 4.5
+	assert(absf(priv - 4.5) < 0.01, "溢出部分留私產 4.5，實際=%.3f" % priv)
+	print("Fief Task1c OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
+
+# ──────── Fief Economy: 建造扣公庫（本地優先）（Task 2）────────
+
+func _fief_make_build_state(pub_mat: float, priv_mat: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.terrain = "plains"
+	tile.outpost_level = 0
+	tile.public_storage = { "material": pub_mat }
+	state.world.tiles[0] = tile
+	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	team.tile_pos = Vector2i(0, 0)
+	team.resources = { "material": priv_mat }
+	state.teams[0] = team
+	return state
+
+func _test_build_from_vault() -> void:
+	print("--- Fief Task2a: 公庫足 → 建造扣公庫、私產不動 ---")
+	# civilian Lv1 cost material 50；公庫 100、私產 0
+	var state := _fief_make_build_state(100.0, 0.0)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var os := OutpostSystem.new()
+	var ok: bool = os.start_build(state, team, "civilian", 1)
+	assert(ok, "公庫足應可建造")
+	assert(absf(float(tile.public_storage["material"]) - 50.0) < 0.01,
+		"公庫應扣 50 → 50，實際=%.2f" % float(tile.public_storage["material"]))
+	assert(absf(float(team.resources.get("material", 0))) < 0.01, "私產不應動")
+	print("Fief Task2a OK (公庫 100→%.0f 私產=%.0f)" % [
+		float(tile.public_storage["material"]), float(team.resources.get("material", 0))])
+
+func _test_build_vault_then_pocket() -> void:
+	print("--- Fief Task2b: 公庫不足 → 扣光公庫 + 私產補差額 ---")
+	# cost 50；公庫 30 + 私產 40 = 70 足
+	var state := _fief_make_build_state(30.0, 40.0)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var os := OutpostSystem.new()
+	var ok: bool = os.start_build(state, team, "civilian", 1)
+	assert(ok, "合併池足應可建造")
+	assert(absf(float(tile.public_storage["material"])) < 0.01,
+		"公庫應扣光，實際=%.2f" % float(tile.public_storage["material"]))
+	assert(absf(float(team.resources["material"]) - 20.0) < 0.01,
+		"私產補差額 40-20=20，實際=%.2f" % float(team.resources["material"]))
+	print("Fief Task2b OK (公庫 30→0 私產 40→%.0f)" % float(team.resources["material"]))
+
+func _test_build_local_only() -> void:
+	print("--- Fief Task2c: 他格公庫不被扣（嚴格本地）---")
+	var state := _fief_make_build_state(50.0, 0.0)
+	# 加遠處 tile B，公庫滿
+	var tile_b := HexTileData.new()
+	tile_b.tile_pos = Vector2i(20, 20)
+	tile_b.outpost_level = 0
+	tile_b.public_storage = { "material": 1000.0 }
+	state.world.tiles[20 * 1000 + 20] = tile_b
+	var team: TeamData = state.teams[0]
+	var os := OutpostSystem.new()
+	var ok: bool = os.start_build(state, team, "civilian", 1)
+	assert(ok, "本格公庫足應可建造")
+	assert(absf(float(tile_b.public_storage["material"]) - 1000.0) < 0.01,
+		"他格公庫不應被動，實際=%.2f" % float(tile_b.public_storage["material"]))
+	print("Fief Task2c OK (他格公庫保持 %.0f)" % float(tile_b.public_storage["material"]))
+
+# ──────── Fief Economy: 特別稅改造（Task 3）────────
+
+func _test_special_tax_heavier() -> void:
+	print("--- Fief Task3a: 特別稅 rate×MULT 進 collector 口袋 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var collector := TeamData.new(); collector.team_id = 0; collector.population = 5
+	collector.tile_pos = Vector2i(0, 0); collector.current_task = "徵收"
+	collector.resources = { "food": 0.0 }
+	state.teams[0] = collector
+	var payer := TeamData.new(); payer.team_id = 1; payer.population = 10
+	payer.tags = [TeamData.TAG_PRODUCE]; payer.tile_pos = Vector2i(0, 0)
+	payer.tax_rate = 0.4
+	payer.resources = { "food": 500.0 }
+	var pl := PersonData.new(); pl.id = 200; pl.team_id = 1
+	state.persons[200] = pl; payer.leader_id = 200
+	state.teams[1] = payer
+	var inter := InteractionSystem.new()
+	inter._resolve_tribute(state, 0, 1)
+	# rate = 0.4×1.5 = 0.6；reserve food = pop×14 = 140；surplus 360；take = 216
+	var taken: float = float(collector.resources.get("food", 0))
+	assert(absf(taken - 216.0) < 0.5, "特別稅 take 應 216（0.6×360），實際=%.2f" % taken)
+	assert(absf(float(payer.resources["food"]) - 284.0) < 0.5,
+		"payer 餘 284，實際=%.2f" % float(payer.resources["food"]))
+	print("Fief Task3a OK (collector 口袋 +%.1f food)" % taken)
+
+func _test_special_tax_war_trigger() -> void:
+	print("--- Fief Task3b: 戰爭基金觸發徵收（非缺糧）---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 1   # 非週期徵收點
+	var leader_team := TeamData.new(); leader_team.team_id = 0; leader_team.population = 10
+	leader_team.resources = { "food": 1000.0, "material": 0.0 }   # 糧足、建材枯
+	state.teams[0] = leader_team
+	var lp := PersonData.new(); lp.id = 100
+	lp.values = { "野心": 0.9, "好戰": 0.5, "求生欲": 0.5, "義氣": 0.5, "貪婪": 0.5 }
+	state.persons[100] = lp; leader_team.leader_id = 100
+	var f := FactionData.new()
+	f.faction_id = 0; f.leader_team_id = 0; f.member_team_ids = [0]
+	f.is_established = false
+	state.factions[0] = f
+	var fai := FactionAISystem.new()
+	fai._update_goals(state, f)
+	assert("徵收" in f.goals, "野心高+建材枯應觸發徵收，goals=%s strategy=%s" % [str(f.goals), f.strategy])
+	assert(f.strategy == "戰爭基金", "strategy 應為戰爭基金，實際=%s" % f.strategy)
+	print("Fief Task3b OK (goals=%s strategy=%s)" % [str(f.goals), f.strategy])
+
+# ──────── Fief Economy: 乞食慷慨光譜（Task 4）────────
+
+func _fief_make_aid_state(t_honor: float, t_greed: float, target_food: float,
+		beggar_food: float, beggar_pop: int, rep: float = 0.5) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var b := TeamData.new(); b.team_id = 0; b.population = beggar_pop
+	b.resources["food"] = beggar_food
+	b.current_task = "乞食"; b.previous_task = "idle"; b.combat_target = 1
+	b.tile_pos = Vector2i(2, 2)
+	var bl := PersonData.new(); bl.id = 100; bl.team_id = 0
+	state.persons[100] = bl; b.leader_id = 100
+	state.teams[0] = b
+	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	target.resources["food"] = target_food; target.tile_pos = Vector2i(2, 2)
+	target.known_reputations[0] = rep
+	var tl := PersonData.new(); tl.id = 200
+	tl.values = { "義氣": t_honor, "貪婪": t_greed }
+	state.persons[200] = tl; target.leader_id = 200
+	state.teams[1] = target
+	return state
+
+func _test_aid_hoarder() -> void:
+	print("--- Fief Task4a: 守財奴 give≈0 ---")
+	# 貪0.9 義0.1；乞丐不缺糧（避免 mercy）→ give_fraction≈0 + give_score<0.3 → 拒絕
+	var state := _fief_make_aid_state(0.1, 0.9, 1000.0, 100.0, 10)
+	var b: TeamData = state.teams[0]
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(not r.get("accepted", true), "守財奴應拒絕 (give≈0)")
+	assert(absf(float(b.resources["food"]) - 100.0) < 0.01, "乞丐食物不應增加")
+	print("Fief Task4a OK (拒絕, give≈0)")
+
+func _test_aid_saint() -> void:
+	print("--- Fief Task4b: 聖人 give 高、可動 reserve ---")
+	# 義0.9 貪0.1 rep1.0 → give_fraction = 0.9-0.05+0.3 = 1.15 (>1 動 reserve)
+	var state := _fief_make_aid_state(0.9, 0.1, 500.0, 0.0, 10, 1.0)
+	var b: TeamData = state.teams[0]
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(r.get("accepted", false), "聖人應接受，msg=%s" % r.get("msg", ""))
+	var amt: float = float(r.get("amount", 0))
+	# need = 10*2.4*3 = 72；surplus 充足 → 給滿 need
+	assert(absf(amt - 72.0) < 1.0, "聖人應給滿 need 72，實際=%.1f" % amt)
+	assert(float(b.resources["food"]) > 0.0, "乞丐獲食")
+	print("Fief Task4b OK (給 %.1f food)" % amt)
+
+func _test_aid_mercy_floor() -> void:
+	print("--- Fief Task4c: 人性底線 vs 真禽獸 ---")
+	# 守財奴 honor 0.15 (>0.1)，乞丐將餓死 (food 0) → mercy 1 天份 = pop*2.4
+	var state := _fief_make_aid_state(0.15, 0.9, 1000.0, 0.0, 5)
+	var b: TeamData = state.teams[0]
+	var inter := InteractionSystem.new()
+	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
+	assert(r.get("accepted", false), "honor>0.1 遇將餓死者應給 mercy，msg=%s" % r.get("msg", ""))
+	assert(absf(float(b.resources["food"]) - 12.0) < 0.5,
+		"mercy 應給 1 天份 5*2.4=12，實際=%.2f" % float(b.resources["food"]))
+	# 真禽獸 honor 0.05 → 不給
+	var state2 := _fief_make_aid_state(0.05, 0.9, 1000.0, 0.0, 5)
+	var b2: TeamData = state2.teams[0]
+	var r2: Dictionary = inter._resolve_aid_request(state2, 0, 1)
+	assert(not r2.get("accepted", true), "真禽獸(honor≈0)應拒絕")
+	assert(float(b2.resources["food"]) == 0.0, "真禽獸不給，乞丐仍 0")
+	print("Fief Task4c OK (mercy=%.1f / 真禽獸拒絕)" % float(b.resources["food"]))
+
+# ──────── Fief Economy: 兩稅獨立不滿（Task 5）────────
+
+func _test_normal_tax_chronic_unrest() -> void:
+	print("--- Fief Task5a: 一般稅慢性不滿 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	var lp := PersonData.new(); lp.id = 100; lp.team_id = 0
+	lp.values = { "順從": 0.5, "義氣": 0.5, "野心": 0.5 }   # tolerance = 0.35
+	lp.stress = 0.0
+	state.persons[100] = lp; team.leader_id = 100
+	var nm := PersonData.new(); nm.id = 101; nm.team_id = 0; nm.stress = 0.0
+	state.persons[101] = nm; team.named_members = [101]
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	# rate 0.7 > tolerance 0.35 → stress 緩增
+	rs._apply_chronic_tax_unrest(state, team, 0.7)
+	assert(lp.stress > 0.0, "rate>tolerance leader 應升 stress，實際=%.4f" % lp.stress)
+	assert(nm.stress > 0.0, "named 也應升 stress")
+	var s_high: float = lp.stress
+	# rate 0.2 < tolerance → 無變化
+	rs._apply_chronic_tax_unrest(state, team, 0.2)
+	assert(absf(lp.stress - s_high) < 1e-9, "rate<tolerance 不應再升 stress")
+	print("Fief Task5a OK (重稅 stress=%.4f，輕稅無增)" % s_high)
+
+func _test_special_tax_spike() -> void:
+	print("--- Fief Task5b: 特別稅尖峰 + 厭煩疊加 ---")
+	# A: 單次特別稅，taken_ratio 貢獻 → stress > rate-only base
+	var sA := _fief_make_special_payer(0.4)
+	var inter := InteractionSystem.new()
+	inter._resolve_tribute(sA, 0, 1)
+	var leaderA: PersonData = sA.persons[200]
+	# rate = 0.6；rate-only base = (0.6-0.3)*0.3 = 0.09；含 taken_ratio 應更高
+	assert(leaderA.stress > 0.09 + 1e-4,
+		"含搜刮比例 stress 應 > 0.09，實際=%.4f" % leaderA.stress)
+	var sa_stress: float = leaderA.stress
+	# B: 連續特別稅，預埋 2 條 special_taxed 記憶 → annoyance 疊加 stress 更高
+	var sB := _fief_make_special_payer(0.4)
+	var leaderB: PersonData = sB.persons[200]
+	leaderB.memory.append({ "type": "special_taxed", "subject_id": 0 })
+	leaderB.memory.append({ "type": "special_taxed", "subject_id": 0 })
+	inter._resolve_tribute(sB, 0, 1)
+	assert(leaderB.stress > sa_stress,
+		"連續特別稅 annoyance 疊加應更高，A=%.4f B=%.4f" % [sa_stress, leaderB.stress])
+	print("Fief Task5b OK (單次 stress=%.4f，連續 stress=%.4f)" % [sa_stress, leaderB.stress])
+
+func _fief_make_special_payer(tax_rate: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var collector := TeamData.new(); collector.team_id = 0; collector.population = 5
+	collector.tile_pos = Vector2i(0, 0); collector.current_task = "徵收"
+	state.teams[0] = collector
+	var payer := TeamData.new(); payer.team_id = 1; payer.population = 10
+	payer.tags = [TeamData.TAG_PRODUCE]; payer.tile_pos = Vector2i(0, 0)
+	payer.tax_rate = tax_rate
+	payer.resources = { "food": 500.0 }
+	var pl := PersonData.new(); pl.id = 200; pl.team_id = 1; pl.stress = 0.0
+	state.persons[200] = pl; payer.leader_id = 200
+	state.teams[1] = payer
+	return state

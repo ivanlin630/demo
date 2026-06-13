@@ -4,6 +4,8 @@ const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 �
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
 const DISPATCH_DIST_THRESHOLD: int   = 2
 const FOOD_EMERGENCY: float          = 3.0
+# 戰爭基金：野心/好戰高 leader material 低於此 → 非缺糧也觸發特別稅徵收。TEST VALUE
+const WAR_CHEST_MIN: float           = 200.0
 const ESTABLISH_COMMAND: float       = 0.4
 const ESTABLISH_AMBITION: float      = 0.7
 const ESTABLISH_READINESS: float     = 0.7
@@ -571,9 +573,15 @@ func _update_goals(state: WorldState, f) -> void:
 	var effective_interval:  int   = maxi(
 		int(COLLECT_INTERVAL * (1.5 - greed) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
 
+	# 戰爭基金：野心/好戰高 + 建材低 → 額外加徵特別稅（非缺糧驅動）
+	var war_chest_need: bool = (ambition > 0.6 or martial > 0.6) \
+		and float(leader_team.resources.get("material", 0)) < WAR_CHEST_MIN
 	if food_per_cap < effective_emergency:
 		f.goals.append("徵收")
 		f.strategy = "緊急徵收"
+	elif war_chest_need:
+		f.goals.append("徵收")
+		f.strategy = "戰爭基金"
 	elif state.world.current_tick % effective_interval == 0:
 		f.goals.append("徵收")
 		f.strategy = "定期徵收"
@@ -652,7 +660,7 @@ func _assign_tasks(state: WorldState, f) -> void:
 		if best_tid != -1:
 			var target_pos: Vector2i = state.teams[best_tid].tile_pos
 			var dist: int = _hex_dist(leader_team.tile_pos, target_pos)
-			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 4 \
+			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 3 \
 					and leader_team.named_members.size() > 0:
 				var _sub_sys_pick := SubteamSystem.new()
 				var sub_leader_id: int = _sub_sys_pick._pick_subteam_leader(state, leader_team, "徵收")
@@ -1386,7 +1394,8 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		_log_dispatch_fail(leader_team.faction_id, "subteam dispatch 失敗", cost)
 		return false
 	_last_dispatch_fail.erase(leader_team.faction_id)
-	_fund_subteam_cost(leader_team, state.teams[sub_id], cost)
+	var tgt_tile = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
+	_fund_subteam_cost(leader_team, state.teams[sub_id], tgt_tile, cost)
 	state.teams[sub_id].task_extra_data = {
 		"build_type": outpost_type, "level": level
 	}
@@ -1402,16 +1411,18 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 	if target_level <= tile.outpost_level or target_level > 3: return false
 	if tile.construction_team_id != -1: return false
 	var cost: Dictionary = OutpostSystem.OUTPOST_COST[tile.outpost_type][target_level - 1]
+	# 公庫+私產合併池（升級在自有 tile，公庫本地可用 → W4 解）
 	for k in cost:
 		if k == "ticks": continue
-		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false
+		var avail: float = float(tile.public_storage.get(k, 0)) + float(owner_team.resources.get(k, 0))
+		if avail < float(cost[k]) * 1.5: return false
 	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1: return false
 	if owner_team.population < 10: return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, owner_team.team_id, advisor_id, 5, "升級", outpost_pos)
 	if sub_id == -1: return false
-	_fund_subteam_cost(owner_team, state.teams[sub_id], cost)
+	_fund_subteam_cost(owner_team, state.teams[sub_id], tile, cost)
 	state.teams[sub_id].task_extra_data = { "target_level": target_level }
 	print("[Infra] Team%d 派升級子隊 Team%d → (%d,%d) Lv%d" % [
 		owner_team.team_id, sub_id, outpost_pos.x, outpost_pos.y, target_level])
@@ -1477,11 +1488,15 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 	team.named_members.append(new_advisor.id)
 	return new_advisor.id
 
-# 撥付建造款：dispatch 比例分資源不足以付建造費 → 從 owner 補足至 cost（守恆：純轉移）
-func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, cost: Dictionary) -> void:
+# 撥付建造款：公庫優先。目標 tile 公庫足 → 子隊不需補（抵達後 _deduct_cost 自扣公庫）；
+# 僅當「公庫 + 子隊私產」不足時，owner 私產補差額（守恆：純轉移）。
+# tile 可能為 null（無 outpost 目標格）→ 退化為純 owner 私產補足。
+func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, tile, cost: Dictionary) -> void:
 	for k in cost:
 		if k == "ticks": continue
-		var need: float = maxf(float(cost[k]) - float(sub.resources.get(k, 0)), 0.0)
+		var vault: float = float(tile.public_storage.get(k, 0)) if tile != null else 0.0
+		var have: float = vault + float(sub.resources.get(k, 0))
+		var need: float = maxf(float(cost[k]) - have, 0.0)
 		if need <= 0.0: continue
 		var transfer: float = minf(need, float(owner_team.resources.get(k, 0)))
 		sub.resources[k] = float(sub.resources.get(k, 0)) + transfer
@@ -1496,16 +1511,18 @@ func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost
 	var def: Dictionary = OutpostSystem.FACILITY_DEF[facility_type]
 	var cur_lvl: int = int(tile.get(def["current_level_key"]))
 	var cost: Dictionary = OutpostSystem.upgrade_cost(facility_type, cur_lvl + 1)
+	# 公庫+私產合併池（擴建在自有 tile，公庫本地可用 → W4 解）
 	for k in cost:
 		if k == "ticks": continue
-		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false
+		var avail: float = float(tile.public_storage.get(k, 0)) + float(owner_team.resources.get(k, 0))
+		if avail < float(cost[k]) * 1.5: return false
 	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1: return false
 	if owner_team.population < 6: return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, owner_team.team_id, advisor_id, 3, "擴建", outpost_pos)
 	if sub_id == -1: return false
-	_fund_subteam_cost(owner_team, state.teams[sub_id], cost)
+	_fund_subteam_cost(owner_team, state.teams[sub_id], tile, cost)
 	state.teams[sub_id].task_extra_data = { "facility_type": facility_type }
 	print("[Infra] Team%d 派擴建子隊 Team%d → (%d,%d) %s" % [
 		owner_team.team_id, sub_id, outpost_pos.x, outpost_pos.y, facility_type])
