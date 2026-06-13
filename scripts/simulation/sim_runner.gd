@@ -75,6 +75,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / WorldState.TICKS_PER_DAY))
 		_message_system.prune_old_messages(state, state.world.current_tick)
+		# 飢餓致死鏈：日邊界結算 blood<=0 死亡（leader 死交既有繼承/玩家 forced event）
+		HealthSystem.check_starvation_deaths(state)
 	if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
 		_step1d_overflow(state)
 

@@ -95,6 +95,13 @@ func is_dead(unit: Dictionary, state: WorldState) -> bool:
 func is_combat_capable(unit: Dictionary, state: WorldState) -> bool:
 	if is_dead(unit, state): return false
 	if unit.get("has_exited", false): return false
+	# 失血/餓暈昏迷：blood < BLOOD_COMA_THRESHOLD → 倒地失能（body parts 全 healthy 仍倒）
+	var p_coma: PersonData = state.persons.get(unit.get("person_id", -1))
+	if p_coma != null and p_coma.blood < HealthSystem.BLOOD_COMA_THRESHOLD:
+		return false
+	if unit.get("person_id", -1) == -1 \
+			and float(unit.get("blood", 100.0)) < HealthSystem.BLOOD_COMA_THRESHOLD:
+		return false
 	var bp := _get_body_parts(unit, state)
 	if bp.get("torso", {}).get("status", "healthy") == "critical": return false
 	var legs_critical: int = 0
