@@ -152,7 +152,7 @@ if give <= 0.0 and beggar_is_starving and honor > 0.1:
 ## 風險
 
 - 全參數 TEST VALUE（tax_rate 0.3、SPECIAL_TAX_MULT 1.5、reserve_days 2-60、MIN_MERCY_FOOD、tolerance 係數、cap）
-- 一般稅自動扣可能讓居民私產過低 → 居民自己餓（famine 鏈）→ tax_rate 過高自我毀滅。需 multi 觀察；可加「居民私產低於 N 天份免稅」保護
+- **過度課稅自我毀滅 = 刻意湧現，不加保護**：tax_rate 過高 → 居民私產被抽乾 → 居民餓（famine 鏈接手乞食/逃難/餓死）→ 稅基崩潰 → 公庫收入歸零。拉弗曲線自然懲罰，暴君自食惡果。**不加「私產低於 N 天免稅」之類硬性兜底**（會抹掉因果、替暴君護航）。tax_rate 是有真實下行風險的統治者決策。NPC leader 依個性收斂稅率（慎重高→低稅）屬 faction_ai 後續觀察層，本 spec 只讓後果存在
 - 建造扣公庫改 caller 簽章（多處傳 tile）— 確保所有路徑同步，玩家建造 UI 路徑一併
 - 特別稅抽公庫 = 上級抽下級稅金，與一般稅可能雙重課稅同批產出 → 觀察居民負擔
 - 慷慨光譜 reserve 60 天上限：守財奴近乎不給 → 流浪團更難乞到 → famine 死亡可能上升（設計意圖：慷慨村才養得起流民，但觀察滅團率）
