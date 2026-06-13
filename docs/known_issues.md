@@ -19,19 +19,19 @@
 - **驗證**：4 config coin_eq delta 全 0.00、ALL INVARIANTS PASSED。
 - **遺留**：config 在 radius 外 spawn team（(7,7) 超 radius 4）為獨立 config/世界生成問題，待查。
 
-### W3. P5 生育永不觸發 — reaction 權重結構性輸分
+### W3. P5 生育永不觸發 — reaction 權重結構性輸分 ✅ 已修（2026-06-13 economy-bootstrap）
 - **症狀**：COLLECT_RATE tune 後多 team 糧緩衝 100+ 天（7 天盈餘門檻遠超），2 年 multi 生育/長大成人 = 0
 - **根因**：`_score_breed` max ≈ 0.5（0.4 + 醫療×0.1），P2_produce active=0.6+、P1_comply 忠誠高可達 1.0 → P5 永不中選；且 minor cap = `int(pop×0.2)` → pop≤4 cap=0
-- **影響**：人口循環死路 — 糧食前提已修好但生育鏈不通
-- **發現**：2026-06-12 malthus-fixes 2 年驗證
-- **建議**：reaction 權重 spec（P5 加糧食盈餘 bonus 或獨立於 winner-take-all 的機率 roll）；cap 改 `maxi(1, pop/5)`
+- **修**：P5_breed 移出 `_evaluate_person`/`_apply_reaction`（脫離 winner-take-all），改 `_evaluate_life_events` 獨立層（與行動反應並行，機率 roll `BREED_BASE_CHANCE`=0.15 + 醫療×0.1）；cap 改 `maxi(1, int(pop×0.25))`
+- **驗證**：2 年 multi 長大成人 0→**39**；game_sim_test 60→46 止跌
+- **遺留**：生育仍受 surplus gate（food > pop×2.4×7）限制 → 餓肚軍閥團（food=0/乞食）永不生育，無法逆轉軍閥型崩潰（設計上飢餓不生，但平衡待 famine spec）
 
-### W4. Faction leader 行為性貧窮 — 建造解鎖極慢
+### W4. Faction leader 行為性貧窮 — 建造解鎖極慢 ⚠ 部分修（2026-06-13 economy-bootstrap）
 - **症狀**：2 年 multi 派建造子隊 = 0；失敗原因 log（本批新增）顯示全是 material < cost×1.5（leader material +0.2/day 涓滴，門檻 75 要爬數年）
 - **根因**：leader team 常駐外面（迎戰/乞食/逃跑），不在 outpost tile → collect 收入 0；material 只靠稅/貿易涓滴
-- **影響**：新據點/設施建造近乎凍結（2 年全 config 僅 2 件設施完工）
-- **發現**：2026-06-12 malthus-fixes 2 年驗證
-- **建議**：leader 駐留行為 spec，或建造資金改走 outpost 公庫/faction 共同出資而非 leader team 口袋
+- **修（部分）**：faction leader 補「治理」回家路徑（公庫<75 + 不在家 + idle → 回家攢公庫）；自給階梯讓無 tools faction 先蓋民村→工坊→產 tools→後期軍鎮
+- **驗證**：2 年設施完工 2→4（merchant 自然長出 workshop）；但限**常駐型 leader**（merchant）有效
+- **遺留**：遊牧軍閥 leader（tyrant/warzone 好戰高）永遠在外迎戰，從不 idle 在家 → 治理觸發不到、建造仍 0。需 leader 駐留行為 spec（強制週期回防/或建造資金走 faction 共同出資）才能根治
 
 ### W1. NPC 0 Combat 起戰 — 會合不上
 - **症狀**：multi 4 config × 90 天，ProsperityAttack 5 次排程 + attacker 都會動，但 `[Encounter]` / `[Hit]` = 0

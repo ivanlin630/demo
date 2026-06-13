@@ -126,6 +126,8 @@
 | 外交門檻 | DiplomaticAiSystem score 0.55/0.6 |
 | 遭遇戰數值 | EncounterSystem 射程/命中/傷亡率 |
 | 戰略 AI 間隔 | StrategicAiSystem STRATEGIC_INTERVAL / ALLIANCE_CHECK_INTERVAL |
+| 生育機率 | ReactionSystem BREED_BASE_CHANCE=0.15（+醫療×0.1）；minor cap=maxi(1,int(pop×0.25))（2026-06-13 economy-bootstrap）|
+| 治理門檻 | FactionAISystem GOVERN_MATERIAL_TARGET=75（公庫達標放手擴張）|
 
 ### 待開發（大功能）
 
