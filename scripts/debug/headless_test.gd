@@ -285,6 +285,13 @@ func _initialize() -> void:
 	_test_breed_life_event()
 	_test_breed_parallel_with_action()
 	_test_breed_cap()
+	# ── 階段1 覓食地基 ──
+	_test_forage_no_outpost()
+	_test_forage_scale_cap()
+	_test_forage_episode_daily()
+	_test_npc_forage_viability()
+	_test_forage_release()
+	_test_survival_start_config()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -3199,12 +3206,12 @@ func _test_survival_decision_tree() -> void:
 	t3.known_reputations[1] = 0.6
 	fai._trigger_survival(s3, t3, "urgent")
 	assert(t3.current_task == "投靠", "Path 3 應 投靠，實際=%s" % t3.current_task)
-	# (4) 默認 → 乞食
+	# (4) 默認 → 乞食（pop > FORAGE_VIABLE_POP，跳過覓食路徑落到乞食）
 	var s4 := WorldState.new()
 	s4.world = WorldData.new()
 	s4.world.current_tick = 812
 	_fill_plains(s4, -1, 4, -1, 2)
-	var t4 := TeamData.new(); t4.team_id = 0; t4.tile_pos = Vector2i(0,0); t4.population = 5; t4.resources["food"] = 0
+	var t4 := TeamData.new(); t4.team_id = 0; t4.tile_pos = Vector2i(0,0); t4.population = 20; t4.resources["food"] = 0
 	var l4 := PersonData.new(); l4.id = 100; l4.values = { "義氣": 0.4, "信義": 0.4, "殘忍": 0.3, "好戰": 0.3 }
 	s4.persons[100] = l4; t4.leader_id = 100
 	var aid := TeamData.new(); aid.team_id = 1; aid.tile_pos = Vector2i(2,0); aid.population = 10
@@ -8451,3 +8458,137 @@ func _test_breed_cap() -> void:
 			ok = true; break
 	assert(ok, "pop=20 cap=5 minor=4 應可生育")
 	print("Bootstrap Task3d OK")
+
+# ════════════════════════════════════════════════════════════════════
+# 階段1 覓食地基
+# ════════════════════════════════════════════════════════════════════
+
+func _test_forage_no_outpost() -> void:
+	print("--- Forage: 無 outpost 採食物 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4 * 1000 + 4
+	tile.tile_pos = Vector2i(4, 4)
+	tile.terrain = "plains"
+	tile.productivity = 1.0
+	tile.harvest_factor = 1.0
+	tile.outpost_level = 0   # 無 outpost
+	tile.resources = {"food": 200.0, "material": 50.0}
+	state.world.tiles[tile.tile_id] = tile
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = 5
+	team.tile_pos = Vector2i(4, 4)
+	team.resources = {"food": 0.0, "material": 0.0}
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	assert(float(team.resources["food"]) > 0.0, "無 outpost 應能覓食得食物，實際=%s" % str(team.resources["food"]))
+	assert(float(team.resources.get("material", 0)) == 0.0, "覓食不應得 material，實際=%s" % str(team.resources.get("material", 0)))
+	assert(float(tile.resources["food"]) < 200.0, "tile 食物應被扣，實際=%s" % str(tile.resources["food"]))
+	print("Forage no-outpost OK")
+
+func _test_forage_scale_cap() -> void:
+	print("--- Forage: 大群人均收入趨零 ---")
+	var rs := ResourceSystem.new()
+	var gains: Dictionary = {}
+	for pop in [5, 60]:
+		var state := WorldState.new()
+		state.world = WorldData.new()
+		var tile := HexTileData.new()
+		tile.tile_id = 4 * 1000 + 4
+		tile.tile_pos = Vector2i(4, 4)
+		tile.terrain = "plains"; tile.productivity = 1.0; tile.harvest_factor = 1.0
+		tile.outpost_level = 0
+		tile.resources = {"food": 200.0}
+		state.world.tiles[tile.tile_id] = tile
+		var team := TeamData.new()
+		team.team_id = 0; team.population = pop; team.tile_pos = Vector2i(4, 4)
+		team.resources = {"food": 0.0}
+		state.teams[0] = team
+		rs.collect_resources(state, [0])
+		gains[pop] = float(team.resources["food"]) / float(pop)
+	assert(gains[60] < gains[5] * 0.2,
+		"大群人均應遠低於小群：pop5=%.3f pop60=%.3f" % [gains[5], gains[60]])
+	print("Forage scale-cap OK (人均 pop5=%.3f pop60=%.3f)" % [gains[5], gains[60]])
+
+func _test_forage_episode_daily() -> void:
+	print("--- Forage: 日彙整 episode ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	state.persons[100] = leader
+	var team := TeamData.new()
+	team.team_id = 0; team.leader_id = 100; team.forage_today = 15.0
+	state.teams[0] = team
+	var rs := ResourceSystem.new()
+	var msgs: Array = rs.flush_forage_episodes(state, [0])
+	assert(team.forage_today == 0.0, "彙整後應歸零，實際=%s" % str(team.forage_today))
+	assert(msgs.size() == 1, "玩家隊有覓食應產 1 條 episode，實際=%d" % msgs.size())
+	print("Forage episode OK")
+
+func _test_npc_forage_viability() -> void:
+	print("--- NPC forage path 門檻 ---")
+	var fai := FactionAISystem.new()
+	var small := _mk_starving_team(0, 5)
+	var st1 := _mk_state_with(small)
+	fai._trigger_survival(st1, small, "urgent")
+	assert(small.current_task == TeamData.TASK_FORAGE,
+		"小隊應覓食，實際 task=%s" % small.current_task)
+	var big := _mk_starving_team(0, 60)
+	var st2 := _mk_state_with(big)
+	fai._trigger_survival(st2, big, "urgent")
+	assert(big.current_task != TeamData.TASK_FORAGE,
+		"大軍不應覓食，實際 task=%s" % big.current_task)
+	print("NPC forage viability OK")
+
+func _mk_starving_team(tid: int, pop: int) -> TeamData:
+	var t := TeamData.new()
+	t.team_id = tid; t.population = pop; t.tile_pos = Vector2i(4, 4)
+	t.resources = {"food": 0.0}
+	return t
+
+func _mk_state_with(team: TeamData) -> WorldState:
+	var s := WorldState.new()
+	s.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4 * 1000 + 4; tile.tile_pos = Vector2i(4, 4)
+	tile.terrain = "plains"; tile.productivity = 1.0; tile.harvest_factor = 1.0
+	tile.outpost_level = 0; tile.resources = {"food": 200.0}
+	s.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = team.team_id * 1000
+	leader.team_id = team.team_id
+	leader.values = {"殘忍": 0.2, "好戰": 0.2, "義氣": 0.2, "信義": 0.2}
+	s.persons[leader.id] = leader
+	team.leader_id = leader.id
+	s.teams[team.team_id] = team
+	return s
+
+func _test_forage_release() -> void:
+	print("--- Forage 釋放：糧恢復退出 ---")
+	var fai := FactionAISystem.new()
+	var team := _mk_starving_team(0, 5)
+	team.current_task = TeamData.TASK_FORAGE
+	var st := _mk_state_with(team)
+	team.resources["food"] = float(team.population) * 2.4 * 10.0
+	fai._evaluate_survival(st, team)
+	assert(team.current_task != TeamData.TASK_FORAGE,
+		"糧恢復應釋放覓食，實際 task=%s" % team.current_task)
+	print("Forage release OK")
+
+func _test_survival_start_config() -> void:
+	print("--- survival_start config 載入 ---")
+	var state := WorldState.new()
+	var config: Dictionary = GameSetup.load_config("res://config/survival_start.json")
+	assert(not config.is_empty(), "config 載入失敗")
+	GameSetup.setup(state, config)
+	var pid: int = state.player_id
+	assert(pid != -1, "無玩家")
+	var p: PersonData = state.persons[pid]
+	var t: TeamData = state.teams[p.team_id]
+	assert(t.population <= 5, "開局應小隊，實際 pop=%d" % t.population)
+	var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
+	assert(tile != null and tile.outpost_level == 0, "開局玩家不應有 outpost")
+	print("survival_start config OK")
