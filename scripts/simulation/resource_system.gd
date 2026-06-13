@@ -9,6 +9,10 @@ const COLLECT_RATE: float = 0.05
 
 const PUBLIC_RESOURCES: Array = ["ore_gold", "ore_silver", "ore_iron", "ore_steel", "mounts", "horses"]
 
+# 一般稅：採集所得（私產）按 tax_rate 自動撥腳下 tile owner 公庫。
+# ore/製造成品已直接進公庫，不重複課；只課進私產的 food/material/goods。
+const NORMAL_TAX_RES: Array = ["food", "material", "goods"]
+
 # ── 飢餓致死鏈（2026-06-13 famine-death spec）──
 const FAMINE_SATISFACTION_THRESHOLD: float = 0.3   # 食物滿足度低於此 → 斷糧
 const FAMINE_GRACE_DAYS: int = 7                    # 寬限期：grace 內不致死（避免開局滅團潮）
@@ -48,13 +52,17 @@ func collect_resources(state: WorldState, team_ids: Array) -> void:
 		var prod_skill: float = float(leader.skills.get("生產", 0.0)) if leader else 0.0
 		var eng_skill: float  = float(leader.skills.get("工程", 0.0)) if leader else 0.0
 
+		# 本格+鄰格採集所得聚合（私產部分），用於課一般稅（稅進站立 tile 公庫）
+		var gained: Dictionary = {}
 		if tile.outpost_level == 3:
-			_collect_from_tile(state, team, tile, 2.0, pop_mult, prod_skill, eng_skill)
+			_collect_from_tile(state, team, tile, 2.0, pop_mult, prod_skill, eng_skill, gained)
 			for neighbor in _get_adjacent_tiles(state, team.tile_pos):
-				_collect_from_tile(state, team, neighbor, 0.5, pop_mult, prod_skill, eng_skill)
+				_collect_from_tile(state, team, neighbor, 0.5, pop_mult, prod_skill, eng_skill, gained)
 		else:
 			var outpost_mult: float = [1.0, 1.4][tile.outpost_level - 1]
-			_collect_from_tile(state, team, tile, outpost_mult, pop_mult, prod_skill, eng_skill)
+			_collect_from_tile(state, team, tile, outpost_mult, pop_mult, prod_skill, eng_skill, gained)
+
+		_apply_normal_tax(state, team, tile, gained)
 
 func regenerate_tiles(state: WorldState) -> void:
 	for tile_id in state.world.tiles:
@@ -152,7 +160,7 @@ func _apply_famine_attrition(state: WorldState, team: TeamData, day_fraction: fl
 
 func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData,
 		outpost_mult: float, pop_mult: float,
-		prod_skill: float, eng_skill: float) -> void:
+		prod_skill: float, eng_skill: float, gained: Dictionary = {}) -> void:
 	for res in src_tile.resources.keys():
 		if res == "wild_horses":
 			continue   # 活物不走 generic 採集（日捕在 HarvestSystem）
@@ -183,8 +191,35 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 				team.resources[res] = float(team.resources.get(res, 0)) + gain
 		else:
 			team.resources[res] = float(team.resources.get(res, 0)) + gain
+			gained[res] = float(gained.get(res, 0)) + gain   # 私產所得 → 一般稅基數
 		# 從 tile 扣除（food/material 最終由 regenerate_tiles 補回；ore/gem 有限）
 		src_tile.resources[res] = maxf(current - gain, 0.0)
+
+# 一般稅：採集所得按 owner tax_rate 撥腳下 tile 公庫（守恆轉移：私產減=公庫增）。
+# 公庫滿 cap → 多的留採集者私產（不溢出）。稅率 = tile owner 的 tax_rate；
+# 採集者即 owner（自立村）→ 自己存自己村庫。
+func _apply_normal_tax(state: WorldState, team: TeamData, tile: HexTileData,
+		gained: Dictionary) -> void:
+	if tile.outpost_level == 0:
+		return
+	var owner: TeamData = state.teams.get(tile.outpost_owner)
+	var rate: float = float(owner.tax_rate) if owner != null else float(team.tax_rate)
+	if rate <= 0.0:
+		return
+	var os := OutpostSystem.new()
+	for res in NORMAL_TAX_RES:
+		var g: float = float(gained.get(res, 0))
+		if g <= 0.0:
+			continue
+		var tax: float = g * rate
+		var cap: float = os._get_storage_cap(tile, res)
+		var cur: float = float(tile.public_storage.get(res, 0))
+		var space: float = maxf(cap - cur, 0.0)
+		var actual: float = minf(tax, space)          # cap 滿 → 多的留私產
+		if actual <= 0.0:
+			continue
+		team.resources[res] = float(team.resources.get(res, 0)) - actual
+		tile.public_storage[res] = cur + actual
 
 func _get_adjacent_tiles(state: WorldState, center: Vector2i) -> Array:
 	var result: Array = []

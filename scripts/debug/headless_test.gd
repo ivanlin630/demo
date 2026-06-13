@@ -254,6 +254,10 @@ func _initialize() -> void:
 	_test_site_diff_print()
 	_test_resume_requires_food()
 	_test_construction_timeout()
+	# ── Fief Economy 封建財政 ──
+	_test_normal_tax_to_vault()
+	_test_normal_tax_owner_vault()
+	_test_normal_tax_vault_cap()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7787,3 +7791,83 @@ func _test_construction_timeout() -> void:
 	assert(tile.construction_team_id == -1 and tile.construction_target.is_empty(), "tile 釋放")
 	assert(tile.construction_started_tick == -1, "started 重設")
 	print("Malthus Task2b OK")
+
+# ──────── Fief Economy: 一般稅自動進公庫（Task 1）────────
+
+func _fief_make_tax_state(owner_id: int, collector_id: int, rate: float,
+		ground_food: float, pub_food: float = 0.0) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.terrain = "plains"
+	tile.outpost_type = "civilian"
+	tile.outpost_level = 1
+	tile.outpost_owner = owner_id
+	tile.productivity = 1.0
+	tile.farming_level = 0
+	tile.harvest_factor = 1.0
+	tile.resources = { "food": ground_food }
+	tile.resource_cap = { "food": 9999.0 }
+	tile.public_storage = { "food": pub_food }
+	state.world.tiles[0] = tile
+	# owner team（若 != collector）
+	if owner_id != collector_id:
+		var ot := TeamData.new(); ot.team_id = owner_id; ot.tax_rate = rate
+		ot.tile_pos = Vector2i(9, 9)
+		state.teams[owner_id] = ot
+	# 採集團
+	var ct := TeamData.new(); ct.team_id = collector_id
+	ct.population = 5; ct.work_morale = 1.0; ct.tax_rate = rate
+	ct.tile_pos = Vector2i(0, 0)
+	ct.resources = { "food": 0.0 }
+	state.teams[collector_id] = ct
+	return state
+
+func _test_normal_tax_to_vault() -> void:
+	print("--- Fief Task1a: 一般稅自動進公庫（自立村）---")
+	# 自家 outpost owner=自己, rate 0.3, ground 100 → gain=5.0, tax=1.5
+	var state := _fief_make_tax_state(0, 0, 0.3, 100.0)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	var pub: float = float(tile.public_storage.get("food", 0))
+	var priv: float = float(team.resources.get("food", 0))
+	var ground_left: float = float(tile.resources.get("food", 0))
+	# gain = 5.0；tax = 5*0.3 = 1.5 進公庫，私產 = 3.5
+	assert(absf(pub - 1.5) < 0.01, "公庫應 1.5，實際=%.3f" % pub)
+	assert(absf(priv - 3.5) < 0.01, "私產應 3.5，實際=%.3f" % priv)
+	# 守恆：私產 + 公庫 == 地面減量（100 - ground_left）
+	assert(absf((priv + pub) - (100.0 - ground_left)) < 0.01, "守恆破壞")
+	print("Fief Task1a OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
+
+func _test_normal_tax_owner_vault() -> void:
+	print("--- Fief Task1b: 稅進 tile owner 公庫 ---")
+	# 採集團 0 站在 owner=1 的 tile，owner rate=0.5 → tax=2.5
+	var state := _fief_make_tax_state(1, 0, 0.5, 100.0)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	team.tax_rate = 0.1   # 採集者自身 tax_rate 不應被用（用 owner 的 0.5）
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	var pub: float = float(tile.public_storage.get("food", 0))
+	var priv: float = float(team.resources.get("food", 0))
+	assert(absf(pub - 2.5) < 0.01, "owner rate 0.5 → 公庫 2.5，實際=%.3f" % pub)
+	assert(absf(priv - 2.5) < 0.01, "私產 2.5，實際=%.3f" % priv)
+	print("Fief Task1b OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
+
+func _test_normal_tax_vault_cap() -> void:
+	print("--- Fief Task1c: 公庫 cap 不溢出 ---")
+	# civilian Lv1 cap = 200；預存 199.5 → 空間 0.5；tax 1.5 → 只進 0.5
+	var state := _fief_make_tax_state(0, 0, 0.3, 100.0, 199.5)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var rs := ResourceSystem.new()
+	rs.collect_resources(state, [0])
+	var pub: float = float(tile.public_storage.get("food", 0))
+	var priv: float = float(team.resources.get("food", 0))
+	assert(absf(pub - 200.0) < 0.01, "公庫應卡 cap 200，實際=%.3f" % pub)
+	# gain 5.0，只課 0.5 進公庫 → 私產 4.5
+	assert(absf(priv - 4.5) < 0.01, "溢出部分留私產 4.5，實際=%.3f" % priv)
+	print("Fief Task1c OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
