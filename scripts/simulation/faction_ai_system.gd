@@ -1411,9 +1411,11 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 	if target_level <= tile.outpost_level or target_level > 3: return false
 	if tile.construction_team_id != -1: return false
 	var cost: Dictionary = OutpostSystem.OUTPOST_COST[tile.outpost_type][target_level - 1]
+	# 公庫+私產合併池（升級在自有 tile，公庫本地可用 → W4 解）
 	for k in cost:
 		if k == "ticks": continue
-		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false
+		var avail: float = float(tile.public_storage.get(k, 0)) + float(owner_team.resources.get(k, 0))
+		if avail < float(cost[k]) * 1.5: return false
 	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1: return false
 	if owner_team.population < 10: return false
@@ -1509,9 +1511,11 @@ func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost
 	var def: Dictionary = OutpostSystem.FACILITY_DEF[facility_type]
 	var cur_lvl: int = int(tile.get(def["current_level_key"]))
 	var cost: Dictionary = OutpostSystem.upgrade_cost(facility_type, cur_lvl + 1)
+	# 公庫+私產合併池（擴建在自有 tile，公庫本地可用 → W4 解）
 	for k in cost:
 		if k == "ticks": continue
-		if float(owner_team.resources.get(k, 0)) < float(cost[k]) * 1.5: return false
+		var avail: float = float(tile.public_storage.get(k, 0)) + float(owner_team.resources.get(k, 0))
+		if avail < float(cost[k]) * 1.5: return false
 	var advisor_id: int = _pick_or_promote_advisor(state, owner_team)
 	if advisor_id == -1: return false
 	if owner_team.population < 6: return false
