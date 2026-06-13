@@ -152,6 +152,12 @@
 - **狀態**：pre-existing baseline（與覓食無關）
 - **優先**：M — 滅團守恆相關，另案
 
+### Bug9. EncounterSystem player_id==-1 → anon 被當玩家
+- **症狀**：`advance_encounter_tick` / `_decide_action` 以 `person_id == state.player_id` 判玩家；若 `player_id==-1`（無玩家），anon（person_id=-1）全被當玩家 → 回 `player_turn` 停手 / idle
+- **狀態**：現流程不觸發（正式遊戲 player_id>=0；NPC vs NPC 走 npc_combat 不走 encounter）。beast-combat 測試以 player_id=-999 迴避
+- **影響 2b-2**：**NPC 遭遇野獸（伏擊）必須走 `npc_combat_system`，不可走 `EncounterSystem`**，否則無玩家的獸戰會卡。2b-2 設計須遵守
+- **優先**：L — 若 2b-2 需無玩家跑 encounter，才在玩家判定加 `state.player_id != -1` 守衛
+
 ### W7. 覓食 vs 乞食 仲裁（forage-foundation 遺留）
 - **症狀**：`_find_forage_tile` 周圍無食物時仍回本格 → 小隊（pop≤15）恆覓食、不到乞食 Path4。枯竭區小隊空覓而非乞食富鄰
 - **狀態**：2 年 multi 實測世界穩定（died=no、未顯退化）→ **暫不動，留量測**。主 session 曾試加 `best_food` 門檻使無食物回 -1,-1，但會弄紅 3 個依賴「urgent→SURVIVAL_TASK」的 baseline 測試（那些測試 setup 無食物 tile）→ 還原。要修需同步重整那批測試語意
