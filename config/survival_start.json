@@ -1,0 +1,34 @@
+{
+  "seed": 7,
+  "mode": "explicit",
+  "max_ticks": 21600,
+  "map": { "radius": 4, "resource_richness": 5 },
+  "teams": [
+    {
+      "id": 0, "name": "流民", "tile_pos": [4, 4], "population": 3,
+      "tags": ["流亡"], "faction_id": -1,
+      "anon_tiers": { "平民": 2 },
+      "resources": { "food": 30, "coin": 5, "weapon_melee_low": 1 },
+      "leader": {
+        "name": "頭目", "age": 28, "loyalty": 0.7,
+        "skills": { "求生": 0.4, "偵查": 0.3 },
+        "values": { "求生欲": 0.9, "義氣": 0.4 }
+      },
+      "named_members": []
+    },
+    {
+      "id": 1, "name": "野村", "tile_pos": [2, 5], "population": 20,
+      "tags": ["生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 18 },
+      "resources": { "food": 150, "coin": 30 },
+      "leader": {
+        "name": "村長", "age": 50, "loyalty": 0.6,
+        "skills": { "生產": 0.5 },
+        "values": { "慎重": 0.7 }
+      },
+      "named_members": [],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 400 }
+    }
+  ],
+  "player": { "team_id": 0, "is_leader": true }
+}
