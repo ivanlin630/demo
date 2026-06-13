@@ -18,7 +18,7 @@
 - **覓食只給食物**：material / ore / goods 仍需 outpost；forage 不繞過據點經濟。
 - **覓食必枯竭且 scale-capped**：抽取率 > tile 回填率（停駐→當地抽乾）；收入隨 `pop_mult`（≤2.0）封頂、消耗隨 `pop` 線性 → 大群人均趨零。此性質是「大軍不能覓食」的唯一保證，不得用特例 code 取代。
 - **野獸守恆中性**：beast pseudo-team 無 coin / 有限資源；給的「肉」= 食物（不在 coin_eq 審計），用完即清。野獸不持有、不路由有限資源，不破守恆。
-- **狩獵風險真實**：失敗 / 反擊走既有 body_parts 損傷 + 死亡順序（弱者先死）；成員陣亡為永久後果。
+- **狩獵風險真實**：失敗 / 反擊走**既有戰鬥傷亡機制**（encounter 逐 unit body_parts；npc_combat `_apply_casualties` 依 named:anon 比機率挑人 + 隨機部位累傷 → 要害 critical / 肢體 severed 才死），**非飢餓的「弱者先死」順序**（那是斷糧 minor→anon→named）。minor 不參戰、不在戰鬥傷亡內。成員陣亡為永久後果。
 - **對稱**：任一新機制（forage path / 狩獵 / 野獸戰）NPC 必須同樣能用，無玩家專屬分支（見 invariants「對稱性」）。
 
 ## 1. 覓食（食物地基）
@@ -58,18 +58,37 @@ const FORAGE_RATE: float = 0.02   # TEST VALUE — 低於 COLLECT_RATE(0.05)；�
 
 ## 3. 野獸 + 狩獵（texture / 激情時刻）
 
-### 世界基底
-`world_generator` 灑 tile 資源（類 `wild_horses`）：
+### 生成源（野獸不憑空跳出）
+`world_generator` 灑 tile 資源（類 `wild_horses`），規律生成 / 再生：
 - `wild_game`：平原 / 森林常見（鹿/豬），可獵、月再生（類 `_regen_wild_horses`）
-- 稀有猛獸（熊/狼群）：低機率，可獵**且能伏擊**路過隊
+- `predator_density`：稀有猛獸（熊/狼群），森林 / 山多，低機率，月再生 + 可事件遷入
+- 隊伍經過 tile → 觸發狩獵 / 伏擊（見偵測），野獸**從該 tile 密度生成**
 
-### 野獸 = 臨時 pseudo-team
-beast tag 的輕量 TeamData：無 leader / 無裝備 / 無外交 / 無 coin。「units」= 動物（單體熊 / 多體豬群 / 狼群）。stats：戰鬥力 + 行為類。獵畢 / 戰畢即清除。
+### 持久性模型（丙：環境 + emergent 惡獸）
+- **環境獸**（本 spec 做滿）：= tile `wild_game` / `predator_density`，打完該次即清，無個體身分。未來任務只能「清剿某區猛獸」（指地點）。
+- **惡獸**（晉升 hook 輕量做，完整留任務系統 spec）：掠食者**存活且殺夠人 → 累積 infamy → 晉升持久遊蕩實體**（得身分 / 惡名 / 跨 tick 存在），未來 bounty 可指名獵殺。emergent，非預設。
+- **階段1 範圍**：環境獸全做 + 掠食者 infamy 計數 hook；**惡獸的持久遊蕩 / 身分 / bounty 接點留後續 spec**（spec 此處只宣告實體模型走向，不堵死未來）。
+
+### 野獸 = 臨時 pseudo-team（環境獸）
+beast tag 的輕量 TeamData：無 leader / 無裝備 / 無外交 / 無 coin。「units」= 動物（單體熊 / 多體豬群 / 狼群）。stats：戰鬥力 + 行為類。獵畢 / 戰畢即清除（惡獸晉升後改持久，後續 spec）。
 
 ### 行為 2-3 類（不做個別動物 AI）
 - **逃型**（鹿）：嘗試逃離 → 復用既有 pursuit / flee；挑戰 = 追到（reward = 逮住）
 - **戰型**（豬/熊）：主動近戰，獠牙 → body_part 損傷
 - **伏擊型**（猛獸主動）：路過隊被野獸發起遭遇戰（獵人↔獵物反轉，不請自來的高潮）
+
+### 伏擊偵測（復用 vision system）
+猛獸 = **低 exposure 實體**（動物天生隱蔽，森林 `TERRAIN_EXPOSURE_MULT` 再砍半 → 林中最難察）。隊伍將踏入 / 位於有掠食者的 tile 時，擲偵測：
+
+```gdscript
+# 復用 vision_system._can_detect 模型：偵查(+求生 bonus) vs 獸 exposure × 距離
+# 高 → 偵測成功：預警 + 決策岔路（避開繞路 / 備戰 / 反過來主動獵）
+# 中 → 模糊 tier 情報（「林中有大型獸痕」，知道有不知精確 — 認知≠真實）
+# 低 → 偵測失敗：被伏擊 → encounter 開場野獸當 attacker + 突襲優勢
+#       （復用既有 entry position / pursuit_edge_offset → 有利進場位 + 可能免費首輪）
+# 對稱：NPC band 同擲，高偵查繞開 / 低被咬
+# 技能成長：成功偵測/閃避 → 長 偵查/求生（reuse _grow_skill）；被伏擊不長
+```
 
 ### 兩條戰鬥路徑（對稱）
 | | 玩家獵（激情時刻） | NPC 獵（自動） |
@@ -119,6 +138,7 @@ NPC band 經過有 `wild_game` 的 tile 且飢餓 → 可發起 `npc_combat_syst
 ## 測試
 
 - `headless_test` 單元：無 outpost 隊覓食得食物、forage 限食物（material 不增）、tile food 枯竭、大 pop 隊覓食人均收入趨零。
-- 野獸：玩家 encounter 獵獸（勝得肉/敗受傷）、NPC auto 獵獸（弱隊掉人）、猛獸伏擊觸發。
+- 野獸：玩家 encounter 獵獸（勝得肉/敗受傷）、NPC auto 獵獸（弱隊掉人）。
+- 伏擊偵測：高偵查隊預先偵測掠食者（得預警/可避）、低偵查隊被伏擊（野獸 attacker + 突襲優勢）、森林降偵測率、掠食者 infamy 計數累積。
 - 整合：`game_sim_multi` 4 config × 2 年 — 無荒謬全滅、coin_eq delta 0、`team_trace` 確認大軍不亂覓食、開局 survival config 小隊撐過。
 - 對稱性：NPC 與玩家走同覓食 / 戰鬥數學的證據（log）。
