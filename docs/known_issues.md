@@ -33,22 +33,17 @@
 - **驗證**：2 年設施完工 2→4（merchant 自然長出 workshop）；但限**常駐型 leader**（merchant）有效
 - **遺留**：遊牧軍閥 leader（tyrant/warzone 好戰高）永遠在外迎戰，從不 idle 在家 → 治理觸發不到、建造仍 0。需 leader 駐留行為 spec（強制週期回防/或建造資金走 faction 共同出資）才能根治
 
-### W1. NPC 0 Combat 起戰 — 會合不上
-- **症狀**：multi 4 config × 90 天，ProsperityAttack 5 次排程 + attacker 都會動，但 `[Encounter]` / `[Hit]` = 0
-- **根因**：attacker 追會動的 prey，雙方同速 → 永遠差 1 hex；`interaction_system.process_on_move` 要嚴格同格才 try_interact
-- **發現**：2026-06-10 NPC wakeup fixes merge 後驗證
-- **建議**：開「會合/攔截」spec，候選方案：
-  - A. 相鄰即接戰（距 ≤ 1 hex）
-  - B. prey 預警停下（看到 hostile attacker 靠近）
-  - C. 攻擊方攔截預測（算 prey 未來位置）
-  - D. 防守方 active 反應（迎戰/逃跑）
+### W1. NPC 0 Combat ✅ 大半解（2026-06-13 W5 latch 修復）
+- **原症狀**：multi 90 天 ProsperityAttack 排程但 `[Combat Start]`/`[Hit]` = 0
+- **真根因（修正）**：非「擦肩追不到」— 是 **W5 task latch**：team 凍在 survival/逃跑(p80/p70) 從不去追攻擊目標。速度差(tier 0.7-1.0 + 坐騎)本就存在，team 真的動起來就收斂得到。
+- **解凍後實測**：2 年 4 config `[Combat Start]` 0→**13**。W5 latch 修復連帶解 W1。
+- **遺留**：戰鬥量仍偏低（13/2年/4config）；`[Hit]` 僅 1（多數戰前投降/逃）。量級 tune + 軍閥型存活屬下一層（W4 leader 駐留 + 食物基礎），非收斂問題。
 
-### W2. NPC 0 Trade 成交 — 會合不上
-- **症狀**：trade_net 派發 433 次（wakeup 後），但 `[Market]` / 成交 = 0
-- **根因**：同 W1，trader 追會動的 partner 永遠差 1 hex
-- **副作用**：商隊 task 卡 "貿易" 不回 idle → 新形態 zombie（已非 stuck，但等同無進度）
-- **發現**：2026-06-10
-- **建議**：跟 W1 一起解，或 trader 派往「定點」對象（有 outpost 的 resident / 商隊駐點）；trade task 加 timeout 自動回 idle
+### W2. NPC 0 Trade ✅ 大半解（2026-06-13 W5 latch 修復）
+- **原症狀**：trade_net 派發但 `[Market]` 成交 = 0
+- **真根因（修正）**：同 W1 — latch 症狀，trader 凍住沒去追 partner。非擦肩。
+- **解凍後實測**：2 年 `[Market]` 成交 0→**11**、tribute 12、aid_given 6。經濟流動起來。
+- **遺留**：成交量偏低；商隊專業化貿易量待 slot/供應鏈成熟（C 期）。
 
 ### Bug2. salary 拖 coin 無下限
 - **症狀**：integration test merchant min_coin=-49 / warzone min_coin=-42（90 天）
