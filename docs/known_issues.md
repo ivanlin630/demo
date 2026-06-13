@@ -12,12 +12,12 @@
 - **修**：survival 糧恢復釋放(hysteresis 7天)、threat dist_factor floor→0 + 逃跑 5天 timeout、乞食無施主釋放、餓死 pop→0 + tick末單點 erase。逃跑 217→32、乞食消、攻擊 8→82。
 - **發現**：TeamTrace 遙測（scripts/debug/team_trace.gd，gated game_sim_test 每日 dump）
 
-### W6. 死亡路徑資產不守恆（W5 暴露）
-- **症狀**：latch 修好啟用死亡後，multi coin_eq delta game_sim_test -200 / merchant -150（~5%）；tyrant/warzone 0。
-- **根因（部分）**：戰死 `persons.erase` 連 person.coin 銷毀（已修，退回團）；殘留 ore_gold/silver 在某死亡路徑未路由（疑 `_route_extinct_assets` tile==null 分支清資產不路由，或團死在地圖外格）。
-- **影響**：有限資源守恆破 ~5%（W5 修前為 0）
-- **發現**：2026-06-13 W5 latch 修復後
-- **建議**：死亡-資產守恆專注 audit — tile==null 路由 fallback；全死亡路徑（combat massacre/disband、famine extinct、tile==null）統一走守恆路由
+### W6. 死亡路徑資產不守恆 ✅ 已修（2026-06-13）
+- **症狀**：latch 修好啟用死亡後，multi coin_eq delta game_sim_test -200 / merchant -150（~5%）。
+- **根因**：(1) 戰死 `persons.erase` 連 person.coin 銷毀；(2) **團死在地圖外格**（config spawn 超出 radius，如 merchant Team4/7 @(7,7)）→ `_route_extinct_assets` tile==null 分支清資產不路由（merchant -150 = oreS 5+25=30×5 完全吻合）。
+- **修**：戰死 person.coin 退回團；tile==null → `_nearest_valid_tile` 擴環找最近有效格路由（守恆）。
+- **驗證**：4 config coin_eq delta 全 0.00、ALL INVARIANTS PASSED。
+- **遺留**：config 在 radius 外 spawn team（(7,7) 超 radius 4）為獨立 config/世界生成問題，待查。
 
 ### W3. P5 生育永不觸發 — reaction 權重結構性輸分
 - **症狀**：COLLECT_RATE tune 後多 team 糧緩衝 100+ 天（7 天盈餘門檻遠超），2 年 multi 生育/長大成人 = 0

@@ -1328,13 +1328,26 @@ func cleanup_extinct_teams(state: WorldState) -> void:
 		print("[Extinct] Team%d 滅團清除（遺財已路由）" % tid)
 	state.teams_pending_erase.clear()
 
+# 從 pos 擴環找最近有效 tile（地圖外滅團遺財路由用）
+func _nearest_valid_tile(state: WorldState, pos: Vector2i) -> HexTileData:
+	for r in range(1, 12):
+		for dx in range(-r, r + 1):
+			for dy in range(-r, r + 1):
+				var t: HexTileData = state.world.tiles.get((pos.x + dx) * 1000 + (pos.y + dy))
+				if t != null:
+					return t
+	return null
+
 # 遺財路由：有 outpost → 資源進公庫(coin/ore 溢出→abandoned/地面 守恆)；無 outpost → coin→abandoned、ore→地面
 func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	# 死在地圖外格（config 可能 spawn 超出 radius）→ 改路由到最近有效格（守恆，不清空丟失）
 	if tile == null:
-		team.anon_treasury = 0.0
-		team.resources.clear()
-		return
+		tile = _nearest_valid_tile(state, team.tile_pos)
+		if tile == null:
+			team.anon_treasury = 0.0
+			team.resources.clear()
+			return
 	if tile.outpost_level > 0:
 		var os := OutpostSystem.new()
 		# coin = resources.coin + treasury：進公庫至 cap，溢出 → abandoned_coin（守恆）
