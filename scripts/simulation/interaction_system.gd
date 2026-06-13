@@ -176,6 +176,8 @@ func _treat_wounded(state: WorldState, team: TeamData) -> void:
 # ──────── 新互動判斷 ────────
 
 func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
+	if not state.teams.has(id_a) or not state.teams.has(id_b):
+		return   # 本 tick 內滅團/合併移除 → id 仍留掃描迴圈，避免 state.teams[id] Out of bounds
 	_vision.reveal_encounter(state, id_a, id_b)
 	_write_tier2_intel(state, id_a, id_b)
 	_write_tier2_intel(state, id_b, id_a)

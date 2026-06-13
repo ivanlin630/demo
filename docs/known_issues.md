@@ -141,10 +141,11 @@
 - **缺少**：harvest_factor（農業效率）
 - **位置**：`scripts/ui/bottom_bar.gd:show_tile_info`
 
-### Bug7. interaction_system._try_interact Out of bounds（baseline）
+### Bug7. interaction_system._try_interact Out of bounds ✅ 已修（2026-06-14）
 - **症狀**：multi-sim 尾段 `interaction_system.gd:233 Out of bounds get index '5' (on base: 'Dictionary')` ×3
-- **狀態**：pre-existing baseline（早於 forage merge，覓食 stash 驗證確認無關）
-- **優先**：L — 另案查
+- **根因**：本 tick 內滅團/合併移除的 team id 仍留在 `process_on_move` 掃描迴圈 → `_try_interact` line 233 `state.teams[id]` 直接 index stale id（同 vision_system 那類 race）
+- **修**：`_try_interact` 頂加 `if not state.teams.has(id_a) or not state.teams.has(id_b): return`（L3 一行守衛）
+- **驗證**：warzone 2 年 multi `Out of bounds` 0（原 3）、SCRIPT ERROR 0、died=no
 
 ### Bug8. _test_on_team_extinct_to_storage 失敗（baseline）
 - **症狀**：headless `food 應進公庫` assert 失敗（滅團食物未進公庫）
