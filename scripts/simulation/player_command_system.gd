@@ -97,6 +97,7 @@ func _setup_registry() -> void:
 		"extract_treasury":       _action_extract_treasury,
 		"withdraw_from_storage":  _action_withdraw_from_storage,
 		"deposit_to_storage":     _action_deposit_to_storage,
+		"hunt":                   _action_hunt,
 	}
 
 # 執行玩家主動行動
@@ -121,6 +122,13 @@ func execute_action(state: WorldState, target_id: int, action: String) -> Dictio
 	return _action_registry[action].call(state, target_id, pt, pt_id)
 
 # ── Action Handlers ───────────────────────────────────────────
+
+func _action_hunt(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or int(tile.resources.get("wild_game", 0)) <= 0:
+		return { "ok": false, "msg": "此地無獵物" }
+	var r: Dictionary = HuntSystem.new().hunt_small_game(state, pt, tile, true)
+	return { "ok": true, "msg": r.get("msg", "") }
 
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
