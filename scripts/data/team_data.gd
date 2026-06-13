@@ -27,6 +27,7 @@ const TAG_PRODUCE  := "生產"
 const TAG_RELIGION := "宗教"
 const TAG_EXILE    := "流亡"
 const TAG_SUBTEAM  := "子團"
+const TAG_BEAST    := "野獸"
 
 static func pop_cap_from_leadership(skill: float) -> int:
 	return clampi(int(round(49.0 * minf(skill / 0.8, 1.0))) + 1, 1, 50)
@@ -39,6 +40,8 @@ var minor_population: int = 0
 var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰鬥 spawn）
 var famine_days: float = 0.0   # 連續斷糧（satisfaction<0.3）累積天數；飢餓致死鏈用（型別 float，語意=天）
 var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，日邊界歸零）
+var beast_kind: String = ""       # 非空 = 此 team 為野獸 pseudo-team（鹿/野豬/熊/狼群）
+var beast_strength: float = 0.0   # npc_combat 用：beast team 的整體戰鬥力
 var resources: Dictionary = {
 	"food": 0.0, "material": 0, "coin": 0, "goods": 0, "gem": 0,
 	"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,

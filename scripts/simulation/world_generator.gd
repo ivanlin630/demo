@@ -26,6 +26,9 @@ const WILD_GAME_PLAINS_CHANCE: float = 0.20   # TEST VALUE — 平原帶獵物�
 const WILD_GAME_FOREST_CHANCE: float = 0.30   # TEST VALUE — 森林獵物更多
 const WILD_GAME_MIN: int = 2
 const WILD_GAME_MAX: int = 6
+const PREDATOR_FOREST_CHANCE: float = 0.12   # TEST VALUE — 森林帶猛獸機率
+const PREDATOR_MOUNTAIN_CHANCE: float = 0.15 # TEST VALUE — 山地猛獸更多
+const PREDATOR_MAX: int = 2
 
 func generate(state: WorldState, config: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -97,6 +100,16 @@ func _apply_resources(tile, rng: RandomNumberGenerator, mult: float = 1.0) -> vo
 				tile.resources["wild_game"] = rng.randi_range(WILD_GAME_MIN, WILD_GAME_MAX)
 	if int(tile.resources.get("wild_game", 0)) > 0:
 		tile.resource_cap["wild_game"] = int(tile.resources["wild_game"])
+	# 猛獸（熊/野豬/狼群）：森林/山地帶 predator_density，計入 resource_cap（月再生上限）
+	match tile.terrain:
+		"forest":
+			if rng.randf() < PREDATOR_FOREST_CHANCE:
+				tile.resources["predator_density"] = rng.randi_range(1, PREDATOR_MAX)
+		"mountain":
+			if rng.randf() < PREDATOR_MOUNTAIN_CHANCE:
+				tile.resources["predator_density"] = rng.randi_range(1, PREDATOR_MAX)
+	if int(tile.resources.get("predator_density", 0)) > 0:
+		tile.resource_cap["predator_density"] = int(tile.resources["predator_density"])
 
 func _random_terrain(rng: RandomNumberGenerator) -> String:
 	var roll: int = rng.randi_range(0, 99)
