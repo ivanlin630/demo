@@ -447,6 +447,10 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	var _death_wtype: String = _death_grade.replace("weapon_", "") if _death_grade.begins_with("weapon_") else "none"
 	_equip.on_named_death(team, _death_wtype)
 	p.equipment["hand_1"] = { "type": "none", "grade": "" }
+	# 守恆：死者隨身 coin 退回團（否則 persons.erase 連 coin 一起銷毀）
+	if p.coin > 0.0:
+		team.resources["coin"] = float(team.resources.get("coin", 0)) + p.coin
+		p.coin = 0.0
 	state.persons.erase(p.id)
 
 func _best_medicine(state: WorldState, team: TeamData) -> float:

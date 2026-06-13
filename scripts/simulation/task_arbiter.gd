@@ -25,6 +25,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.move_target = move_target
 		team.task_priority = priority
 		team.task_reason = _source
+		team.task_start_tick = state.world.current_tick
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
 	if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH:
@@ -35,6 +36,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			team.move_target = move_target
 			team.task_priority = priority
 			team.task_reason = "defy_" + _source
+			team.task_start_tick = state.world.current_tick
 			return true
 		if leader != null:
 			# 壓抑：慾望轉 stress/unrest（餵既有叛變管線；stress 進 desire 公式 → 憋多了爆）

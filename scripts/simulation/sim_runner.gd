@@ -170,10 +170,15 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
+	_step_cleanup_extinct_teams(state)
 	return ""   # non-encounter tick
 
 func _step1d_overflow(state: WorldState) -> void:
 	_population_system.check_overflow(state)
+
+# 滅團延遲清除：tick 末單點 route+erase（中途 erase 不安全 — 多系統持 team_ids 快照）
+func _step_cleanup_extinct_teams(state: WorldState) -> void:
+	_faction_ai_system.cleanup_extinct_teams(state)
 
 func _step1b_update_vision(state: WorldState, team_ids: Array,
 		time_vision_mult: float = 1.0) -> void:

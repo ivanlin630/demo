@@ -25,6 +25,7 @@ var team_intel: Dictionary = {}
 #   #          "food_est", "material_est", "coin_est", "goods_est", "armed_est"
 # }}}
 var factions: Dictionary = {}
+var teams_pending_erase: Array = []   # 滅團延遲清除：tick 末單點 erase（中途 erase 不安全）
 var _next_faction_id: int = 0
 var player_id: int = -1
 var player_state: Dictionary = {}

@@ -147,6 +147,7 @@ func _run_game_sim_test() -> void:
 		_collect_stats(state, tick + 1)
 
 		if (tick + 1) % 240 == 0:
+			TeamTrace.dump(state, tick + 1)
 			var pt: TeamData = state.teams.get(TEAM_PLAYER)
 			if pt != null:
 				print("[DBG named] tick=%d Team0 named_count=%d population=%d persons_total=%d" % [

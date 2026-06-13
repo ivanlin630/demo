@@ -39,6 +39,7 @@ const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
 const SURVIVAL_RECOVER_DAYS: float = 7.0   # 糧恢復到此 → 脫離 survival（hysteresis 防抖）
+const FLEE_TIMEOUT: int = 5 * 240          # 逃跑逾時（5 天無戰鬥 → 釋放重評，小地圖防永逃）
 
 # ── Prosperity attack（野心驅動主動征服）──
 const PROSPERITY_CADENCE: int = 720           # 3 天 評估一次
@@ -191,7 +192,10 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		TaskArbiter.release(team)
 		return
 	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_FLEE, "守城"]:
-		if not _has_active_threat(state, team):
+		# 威脅消失 → 釋放；或逃跑逾時（小地圖逃不到 5 格脫離 → 靠 timeout 重評，否則永逃）
+		var fled_too_long: bool = team.current_task == TeamData.TASK_FLEE \
+			and state.world.current_tick - team.task_start_tick > FLEE_TIMEOUT
+		if not _has_active_threat(state, team) or fled_too_long:
 			TaskArbiter.release(team)
 		return
 	# 不打斷其他進行中 task（只有 idle 才主動評威脅）
@@ -480,12 +484,12 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			if parent != null:
 				sub.move_target = parent.tile_pos
 
-	for tid in state.teams:
+	for tid in state.teams.keys():   # keys() 快照 → 滅團可安全 erase
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
-		# 滅團遺財：population<=0 且仍有資產 → 轉公庫 / abandoned_coin（idempotent）
-		if team.population <= 0 and (team.anon_treasury > 0.0 or not team.resources.is_empty()):
+		# 滅團：population<=0 → 遺財轉公庫/abandoned + 移除空殼團（餓死路徑原只清資產不 erase → husk）
+		if team.population <= 0:
 			_on_team_extinct(state, team)
 			continue
 		# S11: leader 死亡自動繼承（無 leader 但有 named members）
@@ -1301,8 +1305,31 @@ func _consider_extraction(state: WorldState, team: TeamData) -> void:
 		var ratio: float = greed * 0.3
 		_extract_treasury(state, team, ratio, "貪婪驅動")
 
-# 滅團遺財處理：有 outpost → 全資源 + treasury 進公庫；無 outpost → coin 變 abandoned_coin
+# 滅團標記：清 faction 引用 + 排入延遲清除（資產路由延到 erase 當下，捕捉時序間加回的 coin）
 func _on_team_extinct(state: WorldState, team: TeamData) -> void:
+	if team.faction_id != -1 and state.factions.has(team.faction_id):
+		var f = state.factions[team.faction_id]
+		f.member_team_ids.erase(team.team_id)
+		if f.leader_team_id == team.team_id:
+			state.disband_faction(team.faction_id)
+	if not state.teams_pending_erase.has(team.team_id):
+		state.teams_pending_erase.append(team.team_id)
+
+# tick 末單點：路由遺財（守恆）+ erase。中途 erase 不安全（多系統持 team_ids 快照）
+func cleanup_extinct_teams(state: WorldState) -> void:
+	if state.teams_pending_erase.is_empty():
+		return
+	for tid in state.teams_pending_erase:
+		if not state.teams.has(tid):
+			continue
+		var team: TeamData = state.teams[tid]
+		_route_extinct_assets(state, team)
+		state.teams.erase(tid)
+		print("[Extinct] Team%d 滅團清除（遺財已路由）" % tid)
+	state.teams_pending_erase.clear()
+
+# 遺財路由：有 outpost → 資源進公庫(coin/ore 溢出→abandoned/地面 守恆)；無 outpost → coin→abandoned、ore→地面
+func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	if tile == null:
 		team.anon_treasury = 0.0
@@ -1310,21 +1337,34 @@ func _on_team_extinct(state: WorldState, team: TeamData) -> void:
 		return
 	if tile.outpost_level > 0:
 		var os := OutpostSystem.new()
+		# coin = resources.coin + treasury：進公庫至 cap，溢出 → abandoned_coin（守恆）
+		var coin_total: float = float(team.resources.get("coin", 0)) + team.anon_treasury
+		var coin_cap: float = os._get_storage_cap(tile, "coin")
+		var coin_room: float = maxf(coin_cap - float(tile.public_storage.get("coin", 0)), 0.0)
+		var coin_in: float = minf(coin_total, coin_room)
+		tile.public_storage["coin"] = float(tile.public_storage.get("coin", 0)) + coin_in
+		tile.abandoned_coin += coin_total - coin_in
+		# 其他資源：進公庫至 cap。ore_gold/silver 溢出落地面（coin_eq 守恆）；非有限資源溢出消失
 		for res in team.resources:
+			if res == "coin": continue
 			var amt: float = float(team.resources[res])
 			if amt <= 0.0: continue
 			var cap: float = os._get_storage_cap(tile, res)
 			var stored: float = float(tile.public_storage.get(res, 0))
-			tile.public_storage[res] = minf(stored + amt, cap)
-		var coin_cap: float = os._get_storage_cap(tile, "coin")
-		var cur_coin: float = float(tile.public_storage.get("coin", 0))
-		tile.public_storage["coin"] = minf(cur_coin + team.anon_treasury, coin_cap)
+			var room: float = maxf(cap - stored, 0.0)
+			var put: float = minf(amt, room)
+			tile.public_storage[res] = stored + put
+			if res in ["ore_gold", "ore_silver"]:
+				tile.resources[res] = float(tile.resources.get(res, 0)) + (amt - put)
 	else:
-		# 無 outpost → 僅 coin/treasury 留地，其他資源消失（無容器）
-		tile.abandoned_coin += team.anon_treasury
+		# 無 outpost → coin+treasury 進 abandoned、ore 落地面（守恆：coin_eq 全算）；其他無容器消失
+		tile.abandoned_coin += team.anon_treasury + float(team.resources.get("coin", 0))
+		tile.resources["ore_gold"] = float(tile.resources.get("ore_gold", 0)) \
+			+ float(team.resources.get("ore_gold", 0))
+		tile.resources["ore_silver"] = float(tile.resources.get("ore_silver", 0)) \
+			+ float(team.resources.get("ore_silver", 0))
 	team.anon_treasury = 0.0
 	team.resources.clear()
-	print("[Extinct] Team%d 滅團遺財處理 at (%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
 
 # ──────── NPC 自動領存公庫 ────────
 
