@@ -12,6 +12,7 @@ const ESTABLISH_READINESS: float     = 0.7
 const DIPLOMACY_READINESS_MIN: float = 0.6
 const DISCIPLINE_FAIL_BASE: float    = 0.15
 const MANUFACTURE_MATERIAL_MIN: float = 30.0
+const GOVERN_MATERIAL_TARGET: float = 75.0   # TEST VALUE — 公庫建材達標就放手擴張
 const TRADE_MIN_STOCK: float          = 10.0   # 商隊最低持貨（有貨才出門）
 const TRADE_MIN_COIN: float           = 5.0    # 買方最低 coin 門檻
 const HONOR_INTERVAL_MULT: float  = 0.5   # honor=1.0 → 徵收週期 ×1.5（義氣高 → 少收稅）
@@ -914,6 +915,15 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		scores["製造"] = (greed * 0.4 + 0.2) * _tag_weight(team, "製造")
 	if _can_trade(state, team):
 		scores["貿易"] = (greed * 0.5 + 0.3) * _tag_weight(team, "貿易")
+	# W4 A：駐家治理傾向 — 慎重/野心高 leader 在自家 outpost 攢公庫（建材未達標才積極）
+	var own_pos: Vector2i = _find_own_outpost(state, team)
+	if own_pos != Vector2i(-1, -1):
+		var caution: float = float(leader_p.values.get("慎重", 0.5))
+		var amb_dev: float = float(leader_p.values.get("野心", 0.5))
+		var home_tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
+		var vault_mat: float = float(home_tile.public_storage.get("material", 0)) if home_tile else 0.0
+		if vault_mat < GOVERN_MATERIAL_TARGET:
+			scores["治理"] = (caution * 0.4 + amb_dev * 0.2 + 0.15) * _tag_weight(team, "治理")
 
 	var best_task := "idle"
 	var best_score: float = 0.0
@@ -937,6 +947,8 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			var pid: int = _find_trade_target(state, team)
 			if pid == -1: return
 			solo_target = state.teams[pid].tile_pos
+		"治理":
+			solo_target = own_pos
 	if _is_stuck(team):
 		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評
 	if not TaskArbiter.try_set(state, team, best_task, solo_target,
@@ -1373,11 +1385,19 @@ func _pick_advisor(team: TeamData) -> int:
 func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vector2i,
 		outpost_type: String, level: int) -> bool:
 	var cost: Dictionary = OutpostSystem.OUTPOST_COST[outpost_type][level - 1]
+	# 腳下公庫 caravan-load：leader 站自家 outpost → 公庫+私產合併池 gate（W4 B）
+	var home_tile: HexTileData = state.world.tiles.get(
+		leader_team.tile_pos.x * 1000 + leader_team.tile_pos.y)
+	var vault: Dictionary = {}
+	if home_tile != null and home_tile.outpost_owner == leader_team.team_id:
+		vault = home_tile.public_storage
 	for k in cost:
 		if k == "ticks": continue
-		if float(leader_team.resources.get(k, 0)) < float(cost[k]) * 1.5:
+		var avail: float = float(vault.get(k, 0)) + float(leader_team.resources.get(k, 0))
+		if avail < float(cost[k]) * 1.5:
 			_log_dispatch_fail(leader_team.faction_id,
-				"資源不足 1.5x: %s 有 %.0f" % [k, float(leader_team.resources.get(k, 0))], cost)
+				"資源不足 1.5x: %s 有 %.0f(公庫%.0f+私%.0f)" % [k, avail,
+				float(vault.get(k, 0)), float(leader_team.resources.get(k, 0))], cost)
 			return false
 	var advisor_id: int = _pick_or_promote_advisor(state, leader_team)
 	if advisor_id == -1:
@@ -1394,8 +1414,8 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		_log_dispatch_fail(leader_team.faction_id, "subteam dispatch 失敗", cost)
 		return false
 	_last_dispatch_fail.erase(leader_team.faction_id)
-	var tgt_tile = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
-	_fund_subteam_cost(leader_team, state.teams[sub_id], tgt_tile, cost)
+	# caravan-load：從腳下公庫優先撥付，差額補私產（守恆：公庫減 == 子隊增）
+	_fund_subteam_from_vault(state, leader_team, state.teams[sub_id], home_tile, cost)
 	state.teams[sub_id].task_extra_data = {
 		"build_type": outpost_type, "level": level
 	}
@@ -1501,6 +1521,26 @@ func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, tile, cost: Diction
 		var transfer: float = minf(need, float(owner_team.resources.get(k, 0)))
 		sub.resources[k] = float(sub.resources.get(k, 0)) + transfer
 		owner_team.resources[k] = float(owner_team.resources.get(k, 0)) - transfer
+
+# 腳下公庫撥付（caravan-load 新據點）：home_tile 公庫優先裝車，差額補 owner 私產。
+# 新據點目標格無公庫 → 子隊背 cost 上路，抵達後 start_build fallback 子隊私產扣款。守恆純轉移。
+func _fund_subteam_from_vault(_state: WorldState, owner: TeamData, sub: TeamData,
+		home_tile: HexTileData, cost: Dictionary) -> void:
+	var vault: Dictionary = home_tile.public_storage if (home_tile != null \
+		and home_tile.outpost_owner == owner.team_id) else {}
+	for k in cost:
+		if k == "ticks": continue
+		var need: float = maxf(float(cost[k]) - float(sub.resources.get(k, 0)), 0.0)
+		if need <= 0.0: continue
+		var from_vault: float = minf(need, float(vault.get(k, 0)))
+		if from_vault > 0.0:
+			vault[k] = float(vault.get(k, 0)) - from_vault
+			sub.resources[k] = float(sub.resources.get(k, 0)) + from_vault
+			need -= from_vault
+		if need > 0.0:
+			var t: float = minf(need, float(owner.resources.get(k, 0)))
+			owner.resources[k] = float(owner.resources.get(k, 0)) - t
+			sub.resources[k] = float(sub.resources.get(k, 0)) + t
 
 # 派擴建子隊（task="擴建"，附 facility_type）
 func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost_pos: Vector2i,
