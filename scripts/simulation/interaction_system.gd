@@ -59,6 +59,8 @@ const READINESS_RECOVERY_BASE: float = 0.04
 const READINESS_FOOD_COST: float     = 0.05
 
 const AID_RESERVE_DAYS: float = 14.0
+# 特別稅（徵收 task）= 一般稅率 × 此倍率，重於常態一般稅（戰時/缺糧額外加徵）。TEST VALUE
+const SPECIAL_TAX_MULT: float = 1.5
 
 var _msg:       SimMessageSystem
 var _vision:    VisionSystem
@@ -409,7 +411,8 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 	var payer:     TeamData = state.teams[payer_id]
 	# PRODUCE 居民：用 team.tax_rate，跳過勢力守衛
 	if payer.tags.has(TeamData.TAG_PRODUCE):
-		var rate: float = payer.tax_rate
+		# 特別稅：一般稅率 × MULT，重於常態，進 collector(leader) 口袋（應急/戰爭）
+		var rate: float = payer.tax_rate * SPECIAL_TAX_MULT
 		# 資源轉移（surplus × rate，保留最低儲備）
 		for res in ["food", "material", "goods", "coin"]:
 			var stock: float = float(payer.resources.get(res, 0))

@@ -261,6 +261,8 @@ func _initialize() -> void:
 	_test_build_from_vault()
 	_test_build_vault_then_pocket()
 	_test_build_local_only()
+	_test_special_tax_heavier()
+	_test_special_tax_war_trigger()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7938,3 +7940,50 @@ func _test_build_local_only() -> void:
 	assert(absf(float(tile_b.public_storage["material"]) - 1000.0) < 0.01,
 		"他格公庫不應被動，實際=%.2f" % float(tile_b.public_storage["material"]))
 	print("Fief Task2c OK (他格公庫保持 %.0f)" % float(tile_b.public_storage["material"]))
+
+# ──────── Fief Economy: 特別稅改造（Task 3）────────
+
+func _test_special_tax_heavier() -> void:
+	print("--- Fief Task3a: 特別稅 rate×MULT 進 collector 口袋 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var collector := TeamData.new(); collector.team_id = 0; collector.population = 5
+	collector.tile_pos = Vector2i(0, 0); collector.current_task = "徵收"
+	collector.resources = { "food": 0.0 }
+	state.teams[0] = collector
+	var payer := TeamData.new(); payer.team_id = 1; payer.population = 10
+	payer.tags = [TeamData.TAG_PRODUCE]; payer.tile_pos = Vector2i(0, 0)
+	payer.tax_rate = 0.4
+	payer.resources = { "food": 500.0 }
+	var pl := PersonData.new(); pl.id = 200; pl.team_id = 1
+	state.persons[200] = pl; payer.leader_id = 200
+	state.teams[1] = payer
+	var inter := InteractionSystem.new()
+	inter._resolve_tribute(state, 0, 1)
+	# rate = 0.4×1.5 = 0.6；reserve food = pop×14 = 140；surplus 360；take = 216
+	var taken: float = float(collector.resources.get("food", 0))
+	assert(absf(taken - 216.0) < 0.5, "特別稅 take 應 216（0.6×360），實際=%.2f" % taken)
+	assert(absf(float(payer.resources["food"]) - 284.0) < 0.5,
+		"payer 餘 284，實際=%.2f" % float(payer.resources["food"]))
+	print("Fief Task3a OK (collector 口袋 +%.1f food)" % taken)
+
+func _test_special_tax_war_trigger() -> void:
+	print("--- Fief Task3b: 戰爭基金觸發徵收（非缺糧）---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.world.current_tick = 1   # 非週期徵收點
+	var leader_team := TeamData.new(); leader_team.team_id = 0; leader_team.population = 10
+	leader_team.resources = { "food": 1000.0, "material": 0.0 }   # 糧足、建材枯
+	state.teams[0] = leader_team
+	var lp := PersonData.new(); lp.id = 100
+	lp.values = { "野心": 0.9, "好戰": 0.5, "求生欲": 0.5, "義氣": 0.5, "貪婪": 0.5 }
+	state.persons[100] = lp; leader_team.leader_id = 100
+	var f := FactionData.new()
+	f.faction_id = 0; f.leader_team_id = 0; f.member_team_ids = [0]
+	f.is_established = false
+	state.factions[0] = f
+	var fai := FactionAISystem.new()
+	fai._update_goals(state, f)
+	assert("徵收" in f.goals, "野心高+建材枯應觸發徵收，goals=%s strategy=%s" % [str(f.goals), f.strategy])
+	assert(f.strategy == "戰爭基金", "strategy 應為戰爭基金，實際=%s" % f.strategy)
+	print("Fief Task3b OK (goals=%s strategy=%s)" % [str(f.goals), f.strategy])

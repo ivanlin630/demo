@@ -4,6 +4,8 @@ const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 �
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
 const DISPATCH_DIST_THRESHOLD: int   = 2
 const FOOD_EMERGENCY: float          = 3.0
+# 戰爭基金：野心/好戰高 leader material 低於此 → 非缺糧也觸發特別稅徵收。TEST VALUE
+const WAR_CHEST_MIN: float           = 200.0
 const ESTABLISH_COMMAND: float       = 0.4
 const ESTABLISH_AMBITION: float      = 0.7
 const ESTABLISH_READINESS: float     = 0.7
@@ -571,9 +573,15 @@ func _update_goals(state: WorldState, f) -> void:
 	var effective_interval:  int   = maxi(
 		int(COLLECT_INTERVAL * (1.5 - greed) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
 
+	# 戰爭基金：野心/好戰高 + 建材低 → 額外加徵特別稅（非缺糧驅動）
+	var war_chest_need: bool = (ambition > 0.6 or martial > 0.6) \
+		and float(leader_team.resources.get("material", 0)) < WAR_CHEST_MIN
 	if food_per_cap < effective_emergency:
 		f.goals.append("徵收")
 		f.strategy = "緊急徵收"
+	elif war_chest_need:
+		f.goals.append("徵收")
+		f.strategy = "戰爭基金"
 	elif state.world.current_tick % effective_interval == 0:
 		f.goals.append("徵收")
 		f.strategy = "定期徵收"
@@ -652,7 +660,7 @@ func _assign_tasks(state: WorldState, f) -> void:
 		if best_tid != -1:
 			var target_pos: Vector2i = state.teams[best_tid].tile_pos
 			var dist: int = _hex_dist(leader_team.tile_pos, target_pos)
-			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 4 \
+			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 3 \
 					and leader_team.named_members.size() > 0:
 				var _sub_sys_pick := SubteamSystem.new()
 				var sub_leader_id: int = _sub_sys_pick._pick_subteam_leader(state, leader_team, "徵收")
