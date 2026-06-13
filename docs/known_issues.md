@@ -141,6 +141,21 @@
 - **缺少**：harvest_factor（農業效率）
 - **位置**：`scripts/ui/bottom_bar.gd:show_tile_info`
 
+### Bug7. interaction_system._try_interact Out of bounds（baseline）
+- **症狀**：multi-sim 尾段 `interaction_system.gd:233 Out of bounds get index '5' (on base: 'Dictionary')` ×3
+- **狀態**：pre-existing baseline（早於 forage merge，覓食 stash 驗證確認無關）
+- **優先**：L — 另案查
+
+### Bug8. _test_on_team_extinct_to_storage 失敗（baseline）
+- **症狀**：headless `food 應進公庫` assert 失敗（滅團食物未進公庫）
+- **狀態**：pre-existing baseline（與覓食無關）
+- **優先**：M — 滅團守恆相關，另案
+
+### W7. 覓食 vs 乞食 仲裁（forage-foundation 遺留）
+- **症狀**：`_find_forage_tile` 周圍無食物時仍回本格 → 小隊（pop≤15）恆覓食、不到乞食 Path4。枯竭區小隊空覓而非乞食富鄰
+- **狀態**：2 年 multi 實測世界穩定（died=no、未顯退化）→ **暫不動，留量測**。主 session 曾試加 `best_food` 門檻使無食物回 -1,-1，但會弄紅 3 個依賴「urgent→SURVIVAL_TASK」的 baseline 測試（那些測試 setup 無食物 tile）→ 還原。要修需同步重整那批測試語意
+- **優先**：L — 量測顯問題再開
+
 ---
 
 ### Bug5. DiplomacyAI demand_tribute 恆負
