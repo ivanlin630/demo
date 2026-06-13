@@ -9,6 +9,15 @@ const COLLECT_RATE: float = 0.05
 
 const PUBLIC_RESOURCES: Array = ["ore_gold", "ore_silver", "ore_iron", "ore_steel", "mounts", "horses"]
 
+# ── 飢餓致死鏈（2026-06-13 famine-death spec）──
+const FAMINE_SATISFACTION_THRESHOLD: float = 0.3   # 食物滿足度低於此 → 斷糧
+const FAMINE_GRACE_DAYS: int = 7                    # 寬限期：grace 內不致死（避免開局滅團潮）
+const FAMINE_MINOR_DEATH_RATE: float = 0.10         # grace 後每日餓死 minor 比例
+const FAMINE_ANON_DEATH_RATE: float = 0.05          # minor 耗盡後每日餓死 anon 比例
+# 個人飢餓累積（named 用，跟人走不跟團）
+const HUNGER_GAIN_PER_DAY: float = 0.05
+const HUNGER_RECOVER_PER_DAY: float = 0.1
+
 # TEST VALUES — 平衡期需調整
 const REGEN_RATE: Dictionary = {
 	"plains":   { "food": 8.0,  "material": 0.5  },
@@ -88,10 +97,18 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 		if food_available >= food_needed:
 			team.resources["food"] = food_available - food_needed
 			_update_person_needs(state, tid, "food", 1.0)
+			team.famine_days = 0.0   # 吃飽 → 斷糧計時歸零
 		else:
 			team.resources["food"] = 0.0
 			var satisfaction: float = food_available / food_needed if food_needed > 0.0 else 0.0
 			_update_person_needs(state, tid, "food", satisfaction)
+			# 團級斷糧累積 + grace 後 minor/anon 耗損
+			if satisfaction < FAMINE_SATISFACTION_THRESHOLD:
+				team.famine_days += day_fraction
+				if team.famine_days > float(FAMINE_GRACE_DAYS):
+					_apply_famine_attrition(state, team, day_fraction)
+			else:
+				team.famine_days = 0.0
 			# G-04：玩家食物告急通知
 			if state.player_id != -1:
 				var pp: PersonData = state.persons.get(state.player_id)
@@ -111,6 +128,27 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 			if food_after < float(team.population) * FOOD_PER_PERSON_PER_DAY \
 					and team.anon_treasury > 0.0:
 				FactionAISystem.new()._extract_treasury(state, team, 0.3, "飢餓緊急")
+
+# grace 期後每日餓死：先死 minor，minor 耗盡才死 anon。
+# cadence 多次/日 → 用 famine_days 跨整數日偵測，只在跨日當次結算（避免重複殺）。
+func _apply_famine_attrition(state: WorldState, team: TeamData, day_fraction: float) -> void:
+	if int(team.famine_days) == int(team.famine_days - day_fraction):
+		return   # 未跨整數日，不結算
+	if team.minor_population > 0:
+		var md: int = ceili(float(team.minor_population) * FAMINE_MINOR_DEATH_RATE)
+		md = mini(md, team.minor_population)
+		team.minor_population -= md
+		print("[Famine] Team%d 餓死 minor %d (famine=%.0f天)" % [team.team_id, md, team.famine_days])
+		return
+	var anon_total: int = AnonTierSystem.total_pop(team)
+	if anon_total > 0:
+		var ad: int = maxi(ceili(float(anon_total) * FAMINE_ANON_DEATH_RATE), 1)
+		var killed: Dictionary = AnonTierSystem.kill_random(team, ad, "famine")
+		var actually: int = 0
+		for t in killed:
+			actually += killed[t]
+		team.population = maxi(team.population - actually, 1)   # pop 最小 1（leader 不在此死）
+		print("[Famine] Team%d 餓死 anon %d (famine=%.0f天)" % [team.team_id, actually, team.famine_days])
 
 func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData,
 		outpost_mult: float, pop_mult: float,

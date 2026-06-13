@@ -2442,7 +2442,79 @@ func _run_sim_test() -> void:
 	print("[EncounterTest] encounter logic ok")
 	# ── end encounter system test ─────────────────────────────────────────
 
+	# ── 飢餓致死鏈（famine-death）──
+	_test_famine_days_accumulate()
+	_test_famine_grace_no_death()
+	_test_famine_minor_dies_first()
+	_test_famine_anon_after_minor()
+
 	print("=== DONE ===")
+
+func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = pop
+	team.minor_population = minor
+	team.leader_id = -1
+	team.resources["food"] = food
+	state.teams[0] = team
+	return state
+
+func _test_famine_days_accumulate() -> void:
+	print("--- Famine Task1a: famine_days 累積/歸零 ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(10, 0, 0.0)
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	var team: TeamData = state.teams[0]
+	assert(absf(team.famine_days - 1.0) < 0.01, "斷糧 1 天 → famine_days≈1，實際=%s" % str(team.famine_days))
+	# 吃飽 → 歸零
+	team.resources["food"] = 10000.0
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	assert(team.famine_days == 0.0, "吃飽 → famine_days 歸零，實際=%s" % str(team.famine_days))
+	print("Famine Task1a OK")
+
+func _test_famine_grace_no_death() -> void:
+	print("--- Famine Task1b: grace 7 天內不致死 ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(10, 5, 0.0)
+	var team: TeamData = state.teams[0]
+	AnonTierSystem.add_anon(team, "平民", 10)
+	for _i in range(7):
+		rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	assert(team.famine_days <= 7.0 + 0.01, "7 天 famine_days≈7，實際=%s" % str(team.famine_days))
+	assert(team.minor_population == 5, "grace 內 minor 不變，實際=%d" % team.minor_population)
+	assert(AnonTierSystem.total_pop(team) == 10, "grace 內 anon 不變")
+	assert(team.population == 10, "grace 內 pop 不變")
+	print("Famine Task1b OK")
+
+func _test_famine_minor_dies_first() -> void:
+	print("--- Famine Task1c: grace 後先死 minor ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(10, 5, 0.0)
+	var team: TeamData = state.teams[0]
+	AnonTierSystem.add_anon(team, "平民", 10)
+	team.famine_days = 7.0   # grace 邊界
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # 跨 7→8
+	assert(team.minor_population == 4, "minor 5 餓死 ceili(0.5)=1 → 4，實際=%d" % team.minor_population)
+	assert(AnonTierSystem.total_pop(team) == 10, "minor 未耗盡時 anon 不動")
+	print("Famine Task1c OK")
+
+func _test_famine_anon_after_minor() -> void:
+	print("--- Famine Task1d: minor 耗盡後死 anon + pop 同步 ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(20, 0, 0.0)
+	var team: TeamData = state.teams[0]
+	AnonTierSystem.add_anon(team, "平民", 20)
+	team.famine_days = 7.0
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # 跨 7→8
+	var anon_now: int = AnonTierSystem.total_pop(team)
+	assert(anon_now == 19, "anon 20 餓死 ceili(1.0)=1 → 19，實際=%d" % anon_now)
+	assert(team.population == 19, "pop 同步扣 → 19，實際=%d" % team.population)
+	assert(anon_now + team.named_members.size() == team.population,
+		"sum(tiers)+named == pop 守恆")
+	print("Famine Task1d OK")
 
 func _test_update_armor_config() -> void:
 	print("--- S7 Task5: _update_armor_config ---")
