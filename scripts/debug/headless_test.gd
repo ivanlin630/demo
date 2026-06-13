@@ -298,6 +298,13 @@ func _initialize() -> void:
 	_test_hunt_small_game()
 	_test_passive_hunt_on_forage()
 	_test_player_hunt_action()
+	# ── 階段1 Plan 2b-1 野獸戰鬥核心 ──
+	_test_beast_claw_damage()
+	_test_predator_seeded()
+	_test_build_beast_team()
+	_test_beast_encounter_resolve()
+	_test_npc_hunt_beast()
+	_test_player_hunt_beast()
 	quit()
 
 func _test_wild_game_seeded() -> void:
@@ -419,6 +426,135 @@ func _test_player_hunt_action() -> void:
 			got_food = true
 	assert(got_food, "hunt 指令應得食物")
 	print("player hunt OK")
+
+# ──────── 階段1 Plan 2b-1 野獸戰鬥核心 ────────
+
+func _test_beast_claw_damage() -> void:
+	print("--- 爪牙武器 grade ---")
+	assert(ItemAttributes.get_damage("beast_claw_light") >= 10.0, "輕爪牙應有傷害")
+	assert(ItemAttributes.get_damage("beast_claw_heavy") > ItemAttributes.get_damage("beast_claw_light"), "重爪牙傷害更高")
+	assert(ItemAttributes.get_range("beast_claw_heavy") == 1, "爪牙近戰 range=1")
+	print("beast claw OK")
+
+func _test_predator_seeded() -> void:
+	print("--- predator_density 灑點 + tag ---")
+	assert(TeamData.TAG_BEAST != null and TeamData.TAG_BEAST != "", "需 TAG_BEAST const")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var gen = load("res://scripts/simulation/world_generator.gd").new()
+	gen.generate(state, { "radius": 4, "seed": 11, "resource_multiplier": 1.0 })
+	var any_pred: bool = false
+	for tid in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tid]
+		if int(tile.resources.get("predator_density", 0)) > 0:
+			any_pred = true
+			assert(tile.terrain != "plains", "predator 偏森林/山，不灑平原（TEST 假設）")
+	assert(any_pred, "應有 tile 帶 predator_density")
+	print("predator seeded OK")
+
+func _test_build_beast_team() -> void:
+	print("--- BeastSystem 造獸隊 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var bs := BeastSystem.new()
+	var bid: int = bs.build_beast_team(state, "boar", Vector2i(4, 4))
+	assert(state.teams.has(bid), "獸隊應入 state.teams")
+	var bt: TeamData = state.teams[bid]
+	assert(bt.tags.has(TeamData.TAG_BEAST), "應有 TAG_BEAST")
+	assert(bt.beast_kind == "boar", "kind=boar")
+	assert(bt.beast_strength > 0.0, "beast_strength>0")
+	assert(bt.population >= 1, "獸數>=1")
+	assert(bt.faction_id == -1, "野獸無 faction")
+	print("build beast OK")
+
+func _test_beast_encounter_resolve() -> void:
+	print("--- 獵獸遭遇戰解算 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "forest"
+	tile.resources = {}
+	state.world.tiles[tile.tile_id] = tile
+	# 獵人隊（強，應能勝）
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"戰鬥": 0.8}
+	state.persons[0] = leader
+	state.player_id = -999   # 無玩家：避免 anon(person_id=-1) 撞上預設 player_id=-1 被當玩家停手
+	var hunter := TeamData.new()
+	hunter.team_id = 0; hunter.leader_id = 0; hunter.population = 5; hunter.tile_pos = Vector2i(4,4)
+	hunter.armed_anon_ratio = 1.0
+	hunter.resources = {"food": 0.0, "weapon_melee_low": 5}
+	state.teams[0] = hunter
+	var bs := BeastSystem.new()
+	var bid: int = bs.build_beast_team(state, "boar", Vector2i(4,4))
+	var enc := EncounterSystem.new()
+	enc.init_encounter(state, 0, bid, "normal")
+	# 推進到結束
+	var result: String = "ongoing"
+	var guard: int = 0
+	while result == "ongoing" and guard < 2000:
+		result = enc.advance_encounter_tick(state)
+		guard += 1
+	assert(result != "ongoing", "遭遇戰應結束，實際=%s" % result)
+	enc.resolve_encounter_end(state, result)
+	# 獸隊應被清除
+	assert(not state.teams.has(bid), "獸隊戰畢應清除")
+	if result == "attacker_win":
+		assert(float(hunter.resources.get("food", 0)) > 0.0, "勝獵應得肉")
+	print("beast encounter OK (result=%s, hunter_food=%.0f)" % [result, float(hunter.resources.get("food",0))])
+
+func _test_npc_hunt_beast() -> void:
+	print("--- NPC 自動獵獸 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "plains"
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader
+	var band := TeamData.new()
+	band.team_id = 0; band.leader_id = 0; band.population = 12; band.tile_pos = Vector2i(4,4)
+	band.readiness = 1.0; band.resources = {"food": 0.0, "weapon_melee_low": 10}
+	state.teams[0] = band
+	var bs := BeastSystem.new()
+	var bid: int = bs.build_beast_team(state, "deer", Vector2i(4,4))   # 弱獸，band 應勝
+	var nc := NpcCombatSystem.new()
+	# beast strength 應被 team_strength 認得
+	assert(nc.team_strength(state, bid) > 0.0, "beast team_strength 應 >0")
+	nc.start_combat(state, 0, bid)
+	# 解算數回合
+	for _r in range(10):
+		if not state.teams.has(bid): break
+		nc._resolve_combat_round(state, 0, bid)
+	# deer 弱 → band 應勝、獸清除、band 得肉
+	assert(not state.teams.has(bid) or band.resources.get("food", 0) > 0.0,
+		"band 應獵得肉或獸已清除")
+	print("NPC hunt beast OK")
+
+func _test_player_hunt_beast() -> void:
+	print("--- 玩家 hunt_beast 指令 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "forest"
+	tile.resources = {"predator_density": 1}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var team := TeamData.new()
+	team.team_id = 0; team.leader_id = 0; team.population = 5; team.tile_pos = Vector2i(4,4)
+	team.armed_anon_ratio = 1.0; team.resources = {"weapon_melee_low": 5}
+	state.teams[0] = team
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd.execute_action(state, -1, "hunt_beast")
+	assert(r.get("ok", false), "有 predator 應可發起獵獸，msg=%s" % str(r.get("msg","")))
+	assert(state.encounter_active, "應進入遭遇戰")
+	# 無 predator 的格應失敗
+	tile.resources["predator_density"] = 0
+	state.encounter_active = false
+	var r2: Dictionary = cmd.execute_action(state, -1, "hunt_beast")
+	assert(not r2.get("ok", true), "無 predator 不應發起")
+	print("player hunt_beast OK")
 
 func _test_minor_maturation() -> void:
 	print("--- PopFix: minor 每月長大 ---")

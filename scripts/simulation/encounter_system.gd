@@ -392,6 +392,20 @@ func _decide_action(unit_idx: int, state: WorldState,
 		return { "type": "incapable", "target_idx": -1,
 			"move_to": unit["pos"], "attack_part": "" }
 
+	# 野獸行為：逃型(flee)往邊界撤；戰型/掠食(fight/predator)撲最近敵人
+	if unit.get("is_beast", false):
+		var beh: String = unit.get("beast_behavior", "fight")
+		if beh == "flee":
+			return { "type": "retreat", "target_idx": -1,
+				"move_to": _nearest_edge_pos(unit["pos"]), "attack_part": "" }
+		var enemy_idx: int = _get_nearest_enemy_index(unit, state)
+		if enemy_idx == -1:
+			return { "type": "idle", "target_idx": -1, "move_to": unit["pos"], "attack_part": "" }
+		var ep: Vector2i = state.encounter_units[enemy_idx]["pos"]
+		if hex_dist(unit["pos"], ep) <= 1:
+			return { "type": "attack", "target_idx": enemy_idx, "move_to": ep, "attack_part": "torso" }
+		return { "type": "move", "target_idx": -1, "move_to": _calc_next_step(unit["pos"], ep), "attack_part": "" }
+
 	var team_ratio: float = _calc_team_incapable_ratio(unit["team_id"], state)
 
 	# 1. 撤退
@@ -1001,6 +1015,9 @@ func _sync_back_units(state: WorldState, team_id: int) -> void:
 
 func _spawn_team_units(state: WorldState, team: TeamData,
 		positions: Array) -> void:
+	if team.beast_kind != "":
+		_spawn_beast_units(state, team, positions)
+		return
 	var pos_idx: int = 0
 	var named_ids: Array = ([team.leader_id] as Array) + team.named_members
 	for pid in named_ids:
@@ -1032,6 +1049,26 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 	print("[Encounter] Team%d spawn: %d具名 + %d匿名（武裝率%.0f%%，人口%d）" % [
 		team.team_id, named_ids.size(), spawn_count,
 		team.armed_anon_ratio * 100, team.population])
+
+# 野獸單位 spawn：claw 裝 hand_1（innate）、戰鬥 skill、放大 body_parts HP、behavior 標記。
+func _spawn_beast_units(state: WorldState, team: TeamData, positions: Array) -> void:
+	var prof: Dictionary = BeastSystem.BEAST_PROFILE.get(team.beast_kind, {})
+	var hp_mult: float = float(prof.get("hp_mult", 1.0))
+	var pos_idx: int = 0
+	for _n in range(team.population):
+		if pos_idx >= positions.size(): break
+		var pos: Vector2i = positions[pos_idx]; pos_idx += 1
+		var unit: Dictionary = _create_anon_unit(team, pos)   # 取得 body_parts/equipment 骨架
+		# 放大 body_parts HP（猛獸耐打）
+		for part in unit["body_parts"].values():
+			part["hp"] = part["hp"] * hp_mult
+			part["max_hp"] = part["max_hp"] * hp_mult
+		unit["equipment"]["hand_1"] = { "type": "innate", "grade": prof.get("claw", "beast_claw_light") }
+		unit["skills"] = { "戰鬥": float(prof.get("combat", 0.3)) }
+		unit["is_beast"] = true
+		unit["beast_behavior"] = prof.get("behavior", "fight")
+		state.encounter_units.append(unit)
+	print("[Encounter] Beast %s spawn %d 隻" % [team.beast_kind, team.population])
 
 func _loot_treasury_share(_state: WorldState, loser: TeamData, winner: TeamData,
 		anon_lost: int, original_anon: int) -> void:
@@ -1117,6 +1154,33 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		if t:
 			AnonTierSystem.kill_random(t, dead_anon, "combat")
 			t.population = maxi(t.population - dead_anon, 0)
+
+	# 野獸結算：beast 不走人類 loot/subjugate/outpost；勝方獵獸得肉，獸隊戰畢清除。
+	var beast_atk: bool = (state.teams.get(atk_id) != null and state.teams[atk_id].beast_kind != "")
+	var beast_def: bool = (state.teams.get(def_id) != null and state.teams[def_id].beast_kind != "")
+	if beast_atk or beast_def:
+		var bs := BeastSystem.new()
+		if result == "attacker_win" or result == "defender_win":
+			var win_b: int = atk_id if result == "attacker_win" else def_id
+			var los_b: int = def_id if result == "attacker_win" else atk_id
+			var loser_b: TeamData = state.teams.get(los_b)
+			if loser_b != null and loser_b.beast_kind != "":
+				bs.reward_and_cleanup(state, win_b, los_b)      # 玩家/NPC 獵勝獸 → 得肉
+			else:
+				bs._cleanup(state, win_b)                       # 獸贏（玩家敗）→ 獸不擄掠，僅清除
+		else:
+			# draw：清除參戰獸隊，不殘留
+			if beast_atk: bs._cleanup(state, atk_id)
+			if beast_def: bs._cleanup(state, def_id)
+		for tid_b in [atk_id, def_id]:
+			var tb: TeamData = state.teams.get(tid_b)
+			if tb: tb.combat_target = -1
+		print("[Encounter] 野獸遭遇戰結算 result=%s" % result)
+		state.encounter_units.clear()
+		state.encounter_active = false
+		state.encounter_attacker_id = -1
+		state.encounter_defender_id = -1
+		return
 
 	# BUG-10: "draw" has no winner; skip prisoner/loot logic
 	if result == "draw":

@@ -49,6 +49,25 @@ const ITEM_REGISTRY: Dictionary = {
 		"parry_chance":  0.05,
 		"weight":        0.0,
 	},
+	# 野獸偽武器（爪牙）：裝在 beast 單位 hand_1，近戰 range=1，無重量/格擋
+	"beast_claw_light": {
+		"display_name": "爪牙",
+		"category":     "weapon",
+		"damage":       12.0,
+		"range":        1,
+		"is_2h":        false,
+		"parry_chance": 0.0,
+		"weight":       0.0,
+	},
+	"beast_claw_heavy": {
+		"display_name": "巨爪利齒",
+		"category":     "weapon",
+		"damage":       22.0,
+		"range":        1,
+		"is_2h":        false,
+		"parry_chance": 0.0,
+		"weight":       0.0,
+	},
 
 	# ── 護甲 / 盾牌 ────────────────────────────────────────
 	"armor_low": {

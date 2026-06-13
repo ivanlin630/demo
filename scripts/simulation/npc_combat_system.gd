@@ -91,8 +91,10 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	_resolve_volley(state, atk_id, def_id)
 
 func team_strength(state: WorldState, team_id: int) -> float:
-	var base: float = _strength_raw(state, team_id)
 	var team: TeamData = state.teams.get(team_id)
+	if team != null and team.beast_kind != "":
+		return team.beast_strength
+	var base: float = _strength_raw(state, team_id)
 	if team == null:
 		return base
 	for tid in state.teams:
@@ -205,6 +207,15 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var loser: TeamData  = state.teams[loser_id]
 	winner.combat_target = -1
 	loser.combat_target  = -1
+	# 野獸結算：不走人類 loot/subjugate/capture/pursuit
+	if loser.beast_kind != "" or winner.beast_kind != "":
+		if loser.beast_kind != "" and winner.beast_kind == "":
+			BeastSystem.new().reward_and_cleanup(state, winner_id, loser_id)   # 獵勝得肉
+		elif winner.beast_kind != "":
+			BeastSystem.new()._cleanup(state, winner_id)                       # 獸贏，不擄掠
+		else:
+			BeastSystem.new()._cleanup(state, loser_id)                        # 雙獸（不會發生）
+		return
 	var winner_p = state.persons.get(winner.leader_id)
 	var cruelty: float = float(winner_p.values.get("殘忍", 0.5)) if winner_p else 0.5
 	var effective_loot: float = LOOT_RATE * (1.0 + cruelty * 0.7)
@@ -270,6 +281,11 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	var pursuer: TeamData   = state.teams[pursuer_id]
 	retreater.combat_target = -1
 	pursuer.combat_target   = -1
+	# 野獸退場：不走人類 capture/subjugate/pursuit，僅清除參戰獸隊
+	if retreater.beast_kind != "" or pursuer.beast_kind != "":
+		if retreater.beast_kind != "": BeastSystem.new()._cleanup(state, retreater_id)
+		if pursuer.beast_kind != "": BeastSystem.new()._cleanup(state, pursuer_id)
+		return
 	print("[Exhaust] Team%d 力竭撤退 (rd=%.2f wnd=%d)" % [
 		retreater_id, retreater.readiness, retreater.wounded])
 	var _tile_id: int = pursuer.tile_pos.x * 1000 + pursuer.tile_pos.y
