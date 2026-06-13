@@ -56,6 +56,7 @@ var last_reaction: String = ""   # diff print 用
 var salary: float = 0.0
 var coin: float = 0.0
 var blood: float = 100.0
+var hunger: float = 0.0   # 個人飢餓累積 [0,1]；跟人走不跟團（中途加入不繼承團時鐘）；飢餓致死鏈用
 var relations: Dictionary = {}
 
 var body_parts: Dictionary = {

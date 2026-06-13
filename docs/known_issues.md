@@ -91,6 +91,7 @@
 - **根因**：`collect_resources` 只採 outpost 格，test setup 沒建 outpost
 - **位置**：`scripts/ui/main.gd`（test setup）
 - **建議**：加初始 outpost，或大幅增加初始食物（如 10000）
+- **勘誤（2026-06-13）**：症狀數字（0.1/tick×24）為 2026-05 舊 prototype 行為；現行 burn 為 `FOOD_PER_PERSON_PER_DAY=2.4`/人/天，斷糧後的人口死亡鏈已由 2026-06-13 famine-death spec 補實（團級 famine_days minor/anon 耗損 + named hunger→blood 餓死，grace 7 天）。
 
 ### G1. 攻擊後無遭遇戰 UI ✅ 已修（2026-06-02）
 - **修正**：`main.gd._on_interact_execute` attack 分支：`_map.visible=false; _encounter.show_encounter()`；`_on_encounter_ended` 查詢 `take_loot` action 顯示 `show_loot_panel`
@@ -117,6 +118,7 @@
 - **症狀**：移動幾次後地圖變黑、旗子消失
 - **根因**：player person 因食物不足死亡 → `player_tid=-1` → `discovered=[]` → 地圖全黑
 - **連動**：S5（食物）是主因；player 無死亡保護是次因
+- **勘誤（2026-06-13）**：「player 無死亡保護」為 2026-05 舊 prototype 行為；現行 famine-death spec 下，玩家 leader 餓死（blood=0）走既有 `_handle_player_leader_death` → `choose_heir` forced event（凍結世界等選繼承人），非靜默 `player_tid=-1`。地圖全黑殘留問題如仍存在屬 UI 層獨立議題。
 
 ### U5. 右側欄資訊不完整
 - **缺少**：玩家 HP（body_parts 狀態）、attributes/values、skills

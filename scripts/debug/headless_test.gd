@@ -2442,7 +2442,187 @@ func _run_sim_test() -> void:
 	print("[EncounterTest] encounter logic ok")
 	# ── end encounter system test ─────────────────────────────────────────
 
+	# ── 飢餓致死鏈（famine-death）──
+	_test_famine_days_accumulate()
+	_test_famine_grace_no_death()
+	_test_famine_minor_dies_first()
+	_test_famine_anon_after_minor()
+	_test_hunger_accumulate_recover()
+	_test_hunger_blood_drain()
+	_test_coma_incapacitates()
+	_test_blood_zero_death()
+	_test_player_leader_starves()
+
 	print("=== DONE ===")
+
+func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0
+	team.population = pop
+	team.minor_population = minor
+	team.leader_id = -1
+	team.resources["food"] = food
+	state.teams[0] = team
+	return state
+
+func _test_famine_days_accumulate() -> void:
+	print("--- Famine Task1a: famine_days 累積/歸零 ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(10, 0, 0.0)
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	var team: TeamData = state.teams[0]
+	assert(absf(team.famine_days - 1.0) < 0.01, "斷糧 1 天 → famine_days≈1，實際=%s" % str(team.famine_days))
+	# 吃飽 → 歸零
+	team.resources["food"] = 10000.0
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	assert(team.famine_days == 0.0, "吃飽 → famine_days 歸零，實際=%s" % str(team.famine_days))
+	print("Famine Task1a OK")
+
+func _test_famine_grace_no_death() -> void:
+	print("--- Famine Task1b: grace 7 天內不致死 ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(10, 5, 0.0)
+	var team: TeamData = state.teams[0]
+	AnonTierSystem.add_anon(team, "平民", 10)
+	for _i in range(7):
+		rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	assert(team.famine_days <= 7.0 + 0.01, "7 天 famine_days≈7，實際=%s" % str(team.famine_days))
+	assert(team.minor_population == 5, "grace 內 minor 不變，實際=%d" % team.minor_population)
+	assert(AnonTierSystem.total_pop(team) == 10, "grace 內 anon 不變")
+	assert(team.population == 10, "grace 內 pop 不變")
+	print("Famine Task1b OK")
+
+func _test_famine_minor_dies_first() -> void:
+	print("--- Famine Task1c: grace 後先死 minor ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(10, 5, 0.0)
+	var team: TeamData = state.teams[0]
+	AnonTierSystem.add_anon(team, "平民", 10)
+	team.famine_days = 7.0   # grace 邊界
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # 跨 7→8
+	assert(team.minor_population == 4, "minor 5 餓死 ceili(0.5)=1 → 4，實際=%d" % team.minor_population)
+	assert(AnonTierSystem.total_pop(team) == 10, "minor 未耗盡時 anon 不動")
+	print("Famine Task1c OK")
+
+func _test_famine_anon_after_minor() -> void:
+	print("--- Famine Task1d: minor 耗盡後死 anon + pop 同步 ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(20, 0, 0.0)
+	var team: TeamData = state.teams[0]
+	AnonTierSystem.add_anon(team, "平民", 20)
+	team.famine_days = 7.0
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # 跨 7→8
+	var anon_now: int = AnonTierSystem.total_pop(team)
+	assert(anon_now == 19, "anon 20 餓死 ceili(1.0)=1 → 19，實際=%d" % anon_now)
+	assert(team.population == 19, "pop 同步扣 → 19，實際=%d" % team.population)
+	assert(anon_now + team.named_members.size() == team.population,
+		"sum(tiers)+named == pop 守恆")
+	print("Famine Task1d OK")
+
+func _test_hunger_accumulate_recover() -> void:
+	print("--- Famine Task2a: named hunger 累積/回復 ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(1, 0, 0.0)
+	var p := PersonData.new()
+	p.id = 100; p.team_id = 0
+	state.persons[100] = p
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # satisfaction 0 → +0.05/日
+	assert(absf(p.hunger - 0.05) < 0.001, "斷糧 1 天 hunger≈0.05，實際=%s" % str(p.hunger))
+	# 吃飽 → 回復 0.1/日
+	state.teams[0].resources["food"] = 10000.0
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	assert(p.hunger == 0.0, "吃飽 1 天 hunger 由 0.05 回復至 0，實際=%s" % str(p.hunger))
+	# 中途加入者 0 起算（新 person 預設 hunger 0）
+	var p2 := PersonData.new()
+	assert(p2.hunger == 0.0, "新 person hunger 預設 0")
+	print("Famine Task2a OK")
+
+func _test_hunger_blood_drain() -> void:
+	print("--- Famine Task2b: hunger>=0.7 餓傷流血 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var p := PersonData.new()
+	p.id = 200; p.team_id = 0; p.hunger = 0.8; p.blood = 100.0
+	state.persons[200] = p
+	HealthSystem.tick_natural_regen(state)
+	assert(p.blood < 100.0, "hunger 0.8 → 不回血反流失，實際 blood=%s" % str(p.blood))
+	# hunger 0.3 → 正常再生
+	var p3 := PersonData.new()
+	p3.id = 201; p3.team_id = 0; p3.hunger = 0.3; p3.blood = 50.0
+	state.persons[201] = p3
+	HealthSystem.tick_natural_regen(state)
+	assert(p3.blood > 50.0, "hunger 0.3 → 正常再生，實際 blood=%s" % str(p3.blood))
+	print("Famine Task2b OK")
+
+func _test_coma_incapacitates() -> void:
+	print("--- Famine Task3a: blood<30 昏迷失能 ---")
+	var enc := EncounterSystem.new()
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var p := PersonData.new()
+	p.id = 300; p.team_id = 0; p.blood = 20.0   # body parts 全 healthy
+	state.persons[300] = p
+	var unit := { "person_id": 300, "has_exited": false }
+	assert(not enc.is_combat_capable(unit, state), "blood 20 → 昏迷失能")
+	p.blood = 40.0
+	assert(enc.is_combat_capable(unit, state), "blood 40 → 可戰")
+	# anon unit 戰場血量
+	var aunit := { "person_id": -1, "has_exited": false, "blood": 20.0,
+		"body_parts": enc._default_body_parts() }
+	assert(not enc.is_combat_capable(aunit, state), "anon blood 20 → 昏迷失能")
+	print("Famine Task3a OK")
+
+func _test_blood_zero_death() -> void:
+	print("--- Famine Task3b: blood=0 死亡 + 繼承 + pop 同步 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 2; team.leader_id = 10
+	team.named_members = [11]
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 10; leader.team_id = 0; leader.blood = 0.0; leader.hunger = 0.8
+	state.persons[10] = leader
+	var heir := PersonData.new()
+	heir.id = 11; heir.team_id = 0; heir.blood = 100.0; heir.skills["統領"] = 0.3
+	state.persons[11] = heir
+	HealthSystem.check_starvation_deaths(state)
+	assert(team.leader_id == -1, "leader 餓死 → leader_id=-1")
+	assert(team.population == 1, "pop 同步 -1 → 1，實際=%d" % team.population)
+	assert(leader.team_id == 0, "死者 team_id 不改（沿用戰死模型）")
+	# 既有繼承鏈
+	FactionAISystem.new()._promote_successor(state, team)
+	assert(team.leader_id == 11, "繼承 → 新 leader P11，實際=%d" % team.leader_id)
+	assert(11 not in team.named_members, "新 leader 已自 named_members 移出")
+	# 重複結算防護：死者已脫離編制 → 再呼叫不重扣
+	HealthSystem.check_starvation_deaths(state)
+	assert(team.population == 1, "死者脫離編制後不重複結算 pop")
+	print("Famine Task3b OK")
+
+func _test_player_leader_starves() -> void:
+	print("--- Famine Task3c: 玩家 leader 餓死 → choose_heir forced event ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 2; team.leader_id = 10
+	team.named_members = [11]
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 10; leader.team_id = 0; leader.blood = 0.0; leader.hunger = 0.9
+	state.persons[10] = leader
+	state.player_id = 10
+	var heir := PersonData.new()
+	heir.id = 11; heir.team_id = 0; heir.blood = 100.0
+	state.persons[11] = heir
+	HealthSystem.check_starvation_deaths(state)
+	assert(team.leader_id == -1, "玩家 leader 餓死 → leader_id=-1")
+	# 既有偵測點：evaluate_all 偵測 leader_id==-1 → _promote_successor → 玩家走 _handle_player_leader_death
+	FactionAISystem.new()._promote_successor(state, team)
+	assert(state.player_forced_event.get("action", "") == "choose_heir",
+		"玩家路徑應產生 choose_heir forced event，實際=%s" % str(state.player_forced_event))
+	print("Famine Task3c OK")
 
 func _test_update_armor_config() -> void:
 	print("--- S7 Task5: _update_armor_config ---")

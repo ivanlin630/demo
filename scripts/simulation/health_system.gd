@@ -12,6 +12,11 @@ const RESOLVE_POISON_HP: float = 10.0
 const HP_REGEN_PER_TICK: float = 0.5
 const HP_REGEN_FRACTURE: float = 0.05
 const BLOOD_REGEN_PER_TICK: float = 0.2
+# 餓傷流血：hunger >= 此值 → blood 改流失取代再生。
+# tick_natural_regen 為 per-cadence（近區 ~24 次/日）非 per-tick；故 drain 取與
+# BLOOD_REGEN_PER_TICK 同量級（每次呼叫），近區實際 ~5 血/日（spec 意圖值）。
+const HUNGER_BLOOD_THRESHOLD: float = 0.7
+const HUNGER_BLOOD_DRAIN_PER_TICK: float = 0.2
 const CARRY_BASE: float        = 20.0
 const CARRY_PER_BODY: float    = 10.0
 
@@ -195,7 +200,9 @@ static func tick_natural_regen(state: WorldState) -> void:
 		for part in p.body_parts:
 			if p.body_parts[part].get("bleeding", "none") != "none":
 				has_bleeding = true; break
-		if not has_bleeding:
+		if p.hunger >= HUNGER_BLOOD_THRESHOLD:
+			p.blood = maxf(p.blood - HUNGER_BLOOD_DRAIN_PER_TICK, 0.0)   # 餓傷：流失取代再生
+		elif not has_bleeding:
 			p.blood = minf(p.blood + BLOOD_REGEN_PER_TICK, BLOOD_MAX)
 		for part in p.body_parts:
 			var bp = p.body_parts[part]
@@ -203,6 +210,32 @@ static func tick_natural_regen(state: WorldState) -> void:
 							   else HP_REGEN_PER_TICK
 			bp["hp"] = minf(bp["hp"] + regen, bp["max_hp"])
 			bp["status"] = _calc_status(bp["hp"], bp["max_hp"], part)
+
+# 日邊界結算：blood<=0 的 named → 死亡（通用死因：餓死/失血）。
+# named 死 = named_members.erase + pop-1（沿用戰死處理模式：person 留 state.persons，team_id 不改）。
+# leader 死 → leader_id=-1，交既有繼承鏈（faction_ai _promote_successor / 玩家 _handle_player_leader_death）。
+# 不 null team_id：保 _get_player_team_id 找得到玩家團 → 玩家 leader 餓死走 choose_heir forced event。
+# 重複結算防護：只處理仍在編制（leader 或 named_members）的人；死後脫離編制即跳過。
+static func check_starvation_deaths(state: WorldState) -> void:
+	var dead: Array = []
+	for pid in state.persons:
+		var p: PersonData = state.persons[pid]
+		if p.team_id == -1: continue
+		if p.blood > 0.0: continue
+		var team: TeamData = state.teams.get(p.team_id)
+		if team == null: continue
+		if team.leader_id != pid and pid not in team.named_members: continue
+		dead.append(pid)
+	for pid in dead:
+		var p: PersonData = state.persons[pid]
+		var team: TeamData = state.teams.get(p.team_id)
+		if team == null: continue
+		var cause: String = "餓死" if p.hunger >= 0.7 else "失血而亡"
+		print("[Death] Person%d (team%d) %s" % [pid, p.team_id, cause])
+		team.named_members.erase(pid)
+		team.population = maxi(team.population - 1, 1)
+		if team.leader_id == pid:
+			team.leader_id = -1
 
 static func use_splint(state: WorldState, pid: int, part: String) -> bool:
 	var inv: Array = state.player_state.get("inventory", [])
