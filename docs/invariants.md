@@ -25,6 +25,7 @@
 
 - Event = Consequence
 - 禁止 Scripted Outcome
+- **遍歷 id 快照前必驗存在**：team/person id 陣列是 tick 開頭的快照，元素可能在本 tick 內滅團/死亡被移除；存取 dict 前先驗 `.has(id)`，否則 Invalid get index
 
 ## 關鍵設計規則
 

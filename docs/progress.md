@@ -19,15 +19,27 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 
 **重要結論**：W1/W2「0 combat/0 trade」**不是擦肩會合問題，是 latch 症狀**（速度差本就存在，team 凍住沒去追）。會合機制不用做。
 
-### ⚠ 剩餘未達標：軍閥型 config 崩潰
-tyrant 60→0 全滅、warzone 54→3。根因 = **config 開局零生產基礎 + 遊牧軍閥 leader 永不 idle 在家**（W4 未根治）。
+### ✅ 軍閥型 config 已達標（2026-06-13 後續，config-first 解）
+前況：tyrant 60→0 全滅、warzone 54→3。**純 config 修**（未動 AI）：
+1. 每軍閥 faction 加一座生產村（生產 tag + civilian L1 outpost + tile_food_init 500，複製受壓村模式）→ faction 自給
+2. tyrant `敵對暴君` tile_pos (8,5) 出界（hex_dist=5 > radius 4）→ 修 (7,5)。整個 faction 1 原坐空 tile 無法收糧 = 主要崩因（交接舊記「(7,7)」為誤記，真凶 (8,5)）
+
+跑 21600 tick（2.5 年）結果，**達「合理」門檻全部**：
+
+| config | pop | teams | died | 戰鬥(Round) | 貿易(Market) |
+|---|---|---|---|---|---|
+| tyrant | 88→57 | 5→14 | no | 166 | 59 |
+| warzone | 134→128 | 5→28 | no | 33 | 211 |
+
+順帶修 `vision_system.tick_discovery` race：team_ids 快照含本 tick 內滅團 id → `state.teams[tid]` 報 Invalid get index。加 `state.teams.has(tid)` 守衛（[Extinct] 增多才觸發）。修後 SCRIPT ERROR 0。
+
+**結論：世界已合理 → 下一步轉玩家可玩性迴路，勿再追 NPC 完美化。** 殘留 [Survival] 6399 次警告為高頻但非 latch（戰鬥/貿易/製造/分裂全流動，team 數淨增），低優先可後看。
 
 ### 🎯 重啟後的決策（已與用戶確認）
 - **遊戲類型 = 世界模擬器，合理 NPC+經濟是可玩前提**（不能把玩家迴路硬接在自毀世界上）
 - 但「合理」≠「完美 AI」。標準：**2 年無荒謬全滅 + 各 config pop≠0 + 戰鬥/貿易≠0**。達標即收手，**勿掉回 NPC 完美化無底洞**
-- **下一步（高效路徑）**：先改軍閥 config 給生產基礎（民村/農田種子）排除變因 → 跑 2 年 → 資料說話：
-  - 世界變合理 → 停，轉玩家可玩性迴路
-  - 仍崩 → 才做**最小** AI 補丁（leader 駐留），非大戰略引擎
+- ~~下一步：改軍閥 config 給生產基礎 → 跑 2 年 → 資料說話~~ **已完成，世界達標（見下「✅ 軍閥型 config 已達標」）**
+- **現在下一步：轉玩家可玩性迴路**（世界已合理，不再追 NPC 完美化）
 - 順手（非優先）：`faction_ai_system.gd` 2000+ 行怪獸拆檔（每次都改它，編輯可靠性受損）
 
 ### 待修小項

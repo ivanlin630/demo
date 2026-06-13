@@ -9,6 +9,8 @@ const TERRAIN_EXPOSURE_MULT: Dictionary = { "plains": 1.0, "forest": 0.5, "mount
 func tick_discovery(state: WorldState, team_ids: Array,
 		time_vision_mult: float = 1.0) -> void:
 	for tid in team_ids:
+		if not state.teams.has(tid):
+			continue   # 本 tick 內滅團/解散 → id 仍留在傳入 team_ids 快照
 		if not state.team_discovered.has(tid):
 			state.team_discovered[tid] = []
 		var obs: TeamData = state.teams[tid]

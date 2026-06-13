@@ -58,6 +58,48 @@
         "values": { "貪婪": 0.85, "殘忍": 0.8 }
       },
       "named_members": []
+    },
+    {
+      "id": 5, "name": "玩家屬村", "tile_pos": [4, 5], "population": 28,
+      "tags": ["生產"], "faction_id": 0,
+      "anon_tiers": { "平民": 26 },
+      "resources": { "food": 200, "coin": 40 },
+      "leader": {
+        "name": "村長甲", "age": 48, "loyalty": 0.6,
+        "skills": { "統領": 0.4, "生產": 0.6 },
+        "values": { "義氣": 0.5, "慎重": 0.6 }
+      },
+      "named_members": [{ "name": "村民甲", "loyalty": 0.5 }],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 500 },
+      "tax_rate": 0.6
+    },
+    {
+      "id": 6, "name": "敵A屬村", "tile_pos": [7, 3], "population": 26,
+      "tags": ["生產"], "faction_id": 1,
+      "anon_tiers": { "平民": 24 },
+      "resources": { "food": 200, "coin": 30 },
+      "leader": {
+        "name": "村長乙", "age": 50, "loyalty": 0.55,
+        "skills": { "統領": 0.4, "生產": 0.55 },
+        "values": { "義氣": 0.4, "慎重": 0.7 }
+      },
+      "named_members": [{ "name": "村民乙", "loyalty": 0.5 }],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 500 },
+      "tax_rate": 0.6
+    },
+    {
+      "id": 7, "name": "敵B屬村", "tile_pos": [4, 6], "population": 26,
+      "tags": ["生產"], "faction_id": 2,
+      "anon_tiers": { "平民": 24 },
+      "resources": { "food": 200, "coin": 30 },
+      "leader": {
+        "name": "村長丙", "age": 50, "loyalty": 0.55,
+        "skills": { "統領": 0.4, "生產": 0.55 },
+        "values": { "義氣": 0.4, "慎重": 0.7 }
+      },
+      "named_members": [{ "name": "村民丙", "loyalty": 0.5 }],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 500 },
+      "tax_rate": 0.6
     }
   ],
   "player": { "team_id": 0, "is_leader": true },

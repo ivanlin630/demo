@@ -41,7 +41,7 @@
       "tax_rate": 0.8
     },
     {
-      "id": 2, "name": "敵對暴君", "tile_pos": [8, 5], "population": 12,
+      "id": 2, "name": "敵對暴君", "tile_pos": [7, 5], "population": 12,
       "tags": ["軍隊"], "faction_id": 1, "is_faction_leader": true,
       "anon_tiers": { "平民": 1, "新兵": 4, "老兵": 5, "菁英": 1 },
       "resources": {
@@ -55,6 +55,20 @@
       },
       "named_members": [{ "name": "親衛", "loyalty": 0.7 }],
       "outpost": { "type": "military", "level": 1, "tile_food_init": 500 }
+    },
+    {
+      "id": 4, "name": "敵屬村", "tile_pos": [6, 5], "population": 28,
+      "tags": ["生產"], "faction_id": 1,
+      "anon_tiers": { "平民": 26 },
+      "resources": { "food": 200, "coin": 40 },
+      "leader": {
+        "name": "屬村長", "age": 48, "loyalty": 0.55,
+        "skills": { "統領": 0.4, "生產": 0.6 },
+        "values": { "義氣": 0.4, "慎重": 0.7 }
+      },
+      "named_members": [{ "name": "村民丙", "loyalty": 0.5 }],
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 500 },
+      "tax_rate": 0.8
     },
     {
       "id": 3, "name": "流民", "tile_pos": [2, 2], "population": 8,
