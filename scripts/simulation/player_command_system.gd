@@ -98,6 +98,7 @@ func _setup_registry() -> void:
 		"withdraw_from_storage":  _action_withdraw_from_storage,
 		"deposit_to_storage":     _action_deposit_to_storage,
 		"hunt":                   _action_hunt,
+		"hunt_beast":             _action_hunt_beast,
 	}
 
 # 執行玩家主動行動
@@ -129,6 +130,17 @@ func _action_hunt(state: WorldState, _target: int, pt: TeamData, _pt_id: int) ->
 		return { "ok": false, "msg": "此地無獵物" }
 	var r: Dictionary = HuntSystem.new().hunt_small_game(state, pt, tile, true)
 	return { "ok": true, "msg": r.get("msg", "") }
+
+func _action_hunt_beast(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or int(tile.resources.get("predator_density", 0)) <= 0:
+		return { "ok": false, "msg": "此地無猛獸可獵" }
+	# 依地形選獸級（簡版：山→bear、其餘→boar）。TEST VALUE，待 2b-2 量測調整。
+	var kind: String = "bear" if tile.terrain == "mountain" else "boar"
+	tile.resources["predator_density"] = int(tile.resources["predator_density"]) - 1   # 枯竭
+	var bid: int = BeastSystem.new().build_beast_team(state, kind, pt.tile_pos)
+	_encounter.init_encounter(state, pt_id, bid, "normal")
+	return { "ok": true, "msg": "發起獵 %s" % kind, "requires_preview": false }
 
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
