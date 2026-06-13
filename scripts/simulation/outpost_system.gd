@@ -323,10 +323,10 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 		push_warning("[Outpost] start_build: 距離限制違規")
 		return false
 	var cost: Dictionary = OUTPOST_COST[type][level - 1]
-	if not _can_afford(team, cost):
+	if not _can_afford(team, tile, cost):
 		push_warning("[Outpost] start_build: 資源不足")
 		return false
-	_deduct_cost(team, cost)
+	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[type][level - 1]
 	tile.construction_target    = { "action": "build", "type": type, "level": level }
@@ -346,9 +346,9 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 		return false
 	var new_level: int = tile.outpost_level + 1
 	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][new_level - 1]
-	if not _can_afford(team, cost):
+	if not _can_afford(team, tile, cost):
 		return false
-	_deduct_cost(team, cost)
+	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][new_level - 1]
 	tile.construction_target    = { "action": "upgrade_level", "level": new_level }
@@ -389,9 +389,9 @@ func _begin_facility_construction(team: TeamData, tile: HexTileData, facility: S
 	if cur == 0 and slots_used(tile) >= slot_cap(tile):
 		return false   # 新設施要空 slot；升級不佔
 	var cost: Dictionary = upgrade_cost(facility, cur + 1)
-	if not _can_afford(team, cost):
+	if not _can_afford(team, tile, cost):
 		return false
-	_deduct_cost(team, cost)
+	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = int(cost["ticks"])
 	tile.construction_target    = { "action": "upgrade_facility", "facility": facility }
@@ -506,9 +506,9 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
 		return false
 	var cost: Dictionary = OUTPOST_COST[tile.outpost_type][target_level - 1]
-	if not _can_afford(team, cost):
+	if not _can_afford(team, tile, cost):
 		return false
-	_deduct_cost(team, cost)
+	_deduct_cost(team, tile, cost)
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][target_level - 1]
 	tile.construction_target    = { "action": "upgrade_level", "level": target_level }
@@ -591,18 +591,26 @@ func _get_team_tile(state: WorldState, team: TeamData) -> HexTileData:
 	var tid: int = team.tile_pos.x * 1000 + team.tile_pos.y
 	return state.world.tiles.get(tid)
 
-func _can_afford(team: TeamData, cost: Dictionary) -> bool:
+# 建造付款：腳下 tile 公庫 + 施工團私產 合併池，優先扣公庫（本地）。
+func _can_afford(team: TeamData, tile: HexTileData, cost: Dictionary) -> bool:
 	for res in cost:
 		if res == "ticks":
 			continue
-		if float(team.resources.get(res, 0)) < float(cost.get(res, 0)):
+		var avail: float = float(tile.public_storage.get(res, 0)) \
+			+ float(team.resources.get(res, 0))
+		if avail < float(cost.get(res, 0)):
 			return false
 	return true
 
-func _deduct_cost(team: TeamData, cost: Dictionary) -> void:
+func _deduct_cost(team: TeamData, tile: HexTileData, cost: Dictionary) -> void:
 	for res in cost:
 		if res == "ticks":
 			continue
-		var amount: float = float(cost.get(res, 0))
-		if amount > 0.0:
-			team.resources[res] = maxf(float(team.resources.get(res, 0)) - amount, 0.0)
+		var need: float = float(cost.get(res, 0))
+		if need <= 0.0:
+			continue
+		var from_vault: float = minf(need, float(tile.public_storage.get(res, 0)))
+		tile.public_storage[res] = float(tile.public_storage.get(res, 0)) - from_vault
+		var rem: float = need - from_vault
+		if rem > 0.0:
+			team.resources[res] = maxf(float(team.resources.get(res, 0)) - rem, 0.0)

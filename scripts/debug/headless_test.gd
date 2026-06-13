@@ -258,6 +258,9 @@ func _initialize() -> void:
 	_test_normal_tax_to_vault()
 	_test_normal_tax_owner_vault()
 	_test_normal_tax_vault_cap()
+	_test_build_from_vault()
+	_test_build_vault_then_pocket()
+	_test_build_local_only()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -7871,3 +7874,67 @@ func _test_normal_tax_vault_cap() -> void:
 	# gain 5.0，只課 0.5 進公庫 → 私產 4.5
 	assert(absf(priv - 4.5) < 0.01, "溢出部分留私產 4.5，實際=%.3f" % priv)
 	print("Fief Task1c OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
+
+# ──────── Fief Economy: 建造扣公庫（本地優先）（Task 2）────────
+
+func _fief_make_build_state(pub_mat: float, priv_mat: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.terrain = "plains"
+	tile.outpost_level = 0
+	tile.public_storage = { "material": pub_mat }
+	state.world.tiles[0] = tile
+	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	team.tile_pos = Vector2i(0, 0)
+	team.resources = { "material": priv_mat }
+	state.teams[0] = team
+	return state
+
+func _test_build_from_vault() -> void:
+	print("--- Fief Task2a: 公庫足 → 建造扣公庫、私產不動 ---")
+	# civilian Lv1 cost material 50；公庫 100、私產 0
+	var state := _fief_make_build_state(100.0, 0.0)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var os := OutpostSystem.new()
+	var ok: bool = os.start_build(state, team, "civilian", 1)
+	assert(ok, "公庫足應可建造")
+	assert(absf(float(tile.public_storage["material"]) - 50.0) < 0.01,
+		"公庫應扣 50 → 50，實際=%.2f" % float(tile.public_storage["material"]))
+	assert(absf(float(team.resources.get("material", 0))) < 0.01, "私產不應動")
+	print("Fief Task2a OK (公庫 100→%.0f 私產=%.0f)" % [
+		float(tile.public_storage["material"]), float(team.resources.get("material", 0))])
+
+func _test_build_vault_then_pocket() -> void:
+	print("--- Fief Task2b: 公庫不足 → 扣光公庫 + 私產補差額 ---")
+	# cost 50；公庫 30 + 私產 40 = 70 足
+	var state := _fief_make_build_state(30.0, 40.0)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var os := OutpostSystem.new()
+	var ok: bool = os.start_build(state, team, "civilian", 1)
+	assert(ok, "合併池足應可建造")
+	assert(absf(float(tile.public_storage["material"])) < 0.01,
+		"公庫應扣光，實際=%.2f" % float(tile.public_storage["material"]))
+	assert(absf(float(team.resources["material"]) - 20.0) < 0.01,
+		"私產補差額 40-20=20，實際=%.2f" % float(team.resources["material"]))
+	print("Fief Task2b OK (公庫 30→0 私產 40→%.0f)" % float(team.resources["material"]))
+
+func _test_build_local_only() -> void:
+	print("--- Fief Task2c: 他格公庫不被扣（嚴格本地）---")
+	var state := _fief_make_build_state(50.0, 0.0)
+	# 加遠處 tile B，公庫滿
+	var tile_b := HexTileData.new()
+	tile_b.tile_pos = Vector2i(20, 20)
+	tile_b.outpost_level = 0
+	tile_b.public_storage = { "material": 1000.0 }
+	state.world.tiles[20 * 1000 + 20] = tile_b
+	var team: TeamData = state.teams[0]
+	var os := OutpostSystem.new()
+	var ok: bool = os.start_build(state, team, "civilian", 1)
+	assert(ok, "本格公庫足應可建造")
+	assert(absf(float(tile_b.public_storage["material"]) - 1000.0) < 0.01,
+		"他格公庫不應被動，實際=%.2f" % float(tile_b.public_storage["material"]))
+	print("Fief Task2c OK (他格公庫保持 %.0f)" % float(tile_b.public_storage["material"]))

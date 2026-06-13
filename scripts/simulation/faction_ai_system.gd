@@ -1386,7 +1386,8 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		_log_dispatch_fail(leader_team.faction_id, "subteam dispatch 失敗", cost)
 		return false
 	_last_dispatch_fail.erase(leader_team.faction_id)
-	_fund_subteam_cost(leader_team, state.teams[sub_id], cost)
+	var tgt_tile = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
+	_fund_subteam_cost(leader_team, state.teams[sub_id], tgt_tile, cost)
 	state.teams[sub_id].task_extra_data = {
 		"build_type": outpost_type, "level": level
 	}
@@ -1411,7 +1412,7 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, owner_team.team_id, advisor_id, 5, "升級", outpost_pos)
 	if sub_id == -1: return false
-	_fund_subteam_cost(owner_team, state.teams[sub_id], cost)
+	_fund_subteam_cost(owner_team, state.teams[sub_id], tile, cost)
 	state.teams[sub_id].task_extra_data = { "target_level": target_level }
 	print("[Infra] Team%d 派升級子隊 Team%d → (%d,%d) Lv%d" % [
 		owner_team.team_id, sub_id, outpost_pos.x, outpost_pos.y, target_level])
@@ -1477,11 +1478,15 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 	team.named_members.append(new_advisor.id)
 	return new_advisor.id
 
-# 撥付建造款：dispatch 比例分資源不足以付建造費 → 從 owner 補足至 cost（守恆：純轉移）
-func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, cost: Dictionary) -> void:
+# 撥付建造款：公庫優先。目標 tile 公庫足 → 子隊不需補（抵達後 _deduct_cost 自扣公庫）；
+# 僅當「公庫 + 子隊私產」不足時，owner 私產補差額（守恆：純轉移）。
+# tile 可能為 null（無 outpost 目標格）→ 退化為純 owner 私產補足。
+func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, tile, cost: Dictionary) -> void:
 	for k in cost:
 		if k == "ticks": continue
-		var need: float = maxf(float(cost[k]) - float(sub.resources.get(k, 0)), 0.0)
+		var vault: float = float(tile.public_storage.get(k, 0)) if tile != null else 0.0
+		var have: float = vault + float(sub.resources.get(k, 0))
+		var need: float = maxf(float(cost[k]) - have, 0.0)
 		if need <= 0.0: continue
 		var transfer: float = minf(need, float(owner_team.resources.get(k, 0)))
 		sub.resources[k] = float(sub.resources.get(k, 0)) + transfer
@@ -1505,7 +1510,7 @@ func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, owner_team.team_id, advisor_id, 3, "擴建", outpost_pos)
 	if sub_id == -1: return false
-	_fund_subteam_cost(owner_team, state.teams[sub_id], cost)
+	_fund_subteam_cost(owner_team, state.teams[sub_id], tile, cost)
 	state.teams[sub_id].task_extra_data = { "facility_type": facility_type }
 	print("[Infra] Team%d 派擴建子隊 Team%d → (%d,%d) %s" % [
 		owner_team.team_id, sub_id, outpost_pos.x, outpost_pos.y, facility_type])
