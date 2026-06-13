@@ -114,7 +114,10 @@ var last_encounter_result: Dictionary = {}
 ⑫  salary               → SalarySystem 薪資結算（每TICKS_PER_MONTH）
 ⑬  emit_messages        → SimMessageSystem 訊息傳播
 ⑭  npc_cleanup          → NpcAiSystem.cleanup_goals 目標修剪
+⑮  cleanup_extinct      → tick 末單點：滅團(pop≤0)路由遺財(守恆)+ erase（中途 erase 不安全）
 ```
+
+> 註：飢餓致死於日邊界 `check_starvation_deaths`（blood≤0）；一般稅於採集(②)後自動撥公庫；滅團清除(⑮)延後到 tick 末避免多系統持 team_ids 快照崩潰。
 
 ---
 

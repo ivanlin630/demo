@@ -76,9 +76,14 @@ var body_parts: Dictionary
 # 大地圖 NPC（簡化）：只有 {"status": "healthy"} 無 hp/flags
 
 var blood: float = 100.0   # TEST VALUE — 全身血液值
-# blood = 0   → 死亡
-# blood < 30  → 昏迷（無法行動）（TEST VALUE）
+# blood = 0   → 死亡（check_starvation_deaths 日邊界判定，通用死因）
+# blood < 30  → 昏迷失能（BLOOD_COMA_THRESHOLD，is_combat_capable false → 戰場可被俘）
 # 影響 get_effective_speed() × (blood / 100.0)
+
+var hunger: float = 0.0    # 個人飢餓 [0,1]（2026-06-13 famine-death）；跟人走不跟團
+# satisfaction<0.3 → hunger 累積(0.05/日×缺糧比)；吃飽 → -0.1/日恢復
+# hunger ≥ 0.7 → tick_natural_regen blood 流失取代再生（餓傷）→ 衰弱(blood→speed)→ 昏迷 → 死
+# 中途加入者 hunger=0 不繼承團時鐘；饑荒叛逃者帶餓垮身體入新團
 
 const STATUS_MULT: Dictionary = {
     "healthy": 1.0, "wounded": 0.7, "critical": 0.3, "severed": 0.0
@@ -201,21 +206,29 @@ var equipment: Dictionary = {}
 
 定義於 `scripts/simulation/reaction_system.gd`。
 
-每 Tick 對每個 NPC 跑效用函數，輸出分數最高的反應：
+反應分兩層（2026-06-13 W3 生育分層）：
+
+**行動反應**（winner-take-all，這 tick 做一件事）— `_evaluate_person` 輸出分數最高者：
 
 | 代號 | 名稱 | 主要觸發條件 | 效果 |
 |---|---|---|---|
 | P1_comply | 服從 | 高忠誠、低壓力 | loyalty +0.01 |
 | P2_produce | 生產 | 食物充足、低壓力、team 有生產標籤 | 無直接效果；計入 work_morale 統計 |
 | P4_expand | 擴張 | 食物充裕、低壓力 | unrest_turns -1 |
-| P5_breed | 繁殖 | 安全感高、food 滿足、未成年上限未滿 | 需糧食盈餘（food > pop×2.4×7）才 minor +1 |
-| N1_flee | 逃離 | 高壓力、低忠誠 | pop -1；solo leader 不動（stress 不洩壓）；named 離團組/入流亡 team；leader 逃由 anon tier 同步 -1 |
+| N1_flee | 逃離 | 高壓力、低忠誠 | pop -1；solo leader 不動（stress 不洩壓）；named 離團組/入流亡 team |
 | N2_riot | 暴動 | 高壓力、高恐懼 | unrest_turns +1 |
 | N3_defect | 叛逃 | 高壓力、低忠誠、高恐懼 | 同 N1 結構，loyalty=0 |
 | N4_shirk | 怠工 | 高壓力、低忠誠 | food -1；計入 work_morale 負項 |
 | N5_extort | 勒索 | 高壓力、低恐懼、低忠誠 | team coin → person.coin（守恆，上限 5/次） |
 
-P3_recruit 已刪除（2026-06-11 reaction 職責收斂）：reaction 不再直接生人口。
+**生命事件**（獨立 roll，可與行動並行 — 人邊工作邊生育）— `_evaluate_life_events`：
+
+| 代號 | 名稱 | 觸發 | 效果 |
+|---|---|---|---|
+| P5_breed | 繁殖 | 安全+溫飽+食物盈餘(>pop×2.4×7)+minor<cap | 機率 BREED_BASE_CHANCE(0.15)+醫療×0.1 → minor +1。cap=maxi(1,int(pop×0.25)) |
+
+> W3 修（2026-06-13）：P5 原在 winner-take-all 永遠輸 P1/P2（max 0.5 vs ~1.0）→ 0 生育。移到生命事件層獨立 roll 後 2 年 multi 長大成人 0→39。生命事件層可擴展（未來生病/衰老）。
+> P3_recruit 已刪除（2026-06-11）：reaction 不再直接生人口。
 
 ### work_morale（工作態度係數）
 
