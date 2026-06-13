@@ -1,6 +1,7 @@
 class_name ReactionSystem
 
 const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
+const BREED_BASE_CHANCE: float = 0.15   # TEST VALUE
 
 var _npc_ai: NpcAiSystem
 
@@ -28,6 +29,9 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 				_apply_reaction(state, person, team, reaction)
 				if skill_sys != null:
 					skill_sys.on_reaction(person, reaction)
+			# 生命事件（獨立於行動反應，可並行）
+			for ev in _evaluate_life_events(person, team):
+				_apply_life_event(state, person, team, ev)
 			if reaction == "N1_flee":
 				flee_count += 1
 			match reaction:
@@ -106,7 +110,6 @@ func _evaluate_person(person: PersonData, team: TeamData) -> String:
 		"P1_comply":  _score_comply(person, team),
 		"P2_produce": _score_produce(person, team),
 		"P4_expand":  _score_expand(person, team),
-		"P5_breed":   _score_breed(person, team),
 		"N1_flee":    _score_flee(person, team),
 		"N2_riot":    _score_riot(person, team),
 		"N3_defect":  _score_defect(person, team),
@@ -172,6 +175,25 @@ func _score_breed(p: PersonData, t: TeamData) -> float:
 	base += float(p.skills.get("醫療", 0.0)) * 0.1
 	return base
 
+# 生命事件層（與行動反應並行，winner-take-all 不適用）
+func _evaluate_life_events(p: PersonData, t: TeamData) -> Array:
+	var events: Array = []
+	var safe: bool = float(p.needs.get("safety", 1.0)) > 0.7
+	var fed: bool = float(p.needs.get("food", 1.0)) > 0.7
+	var surplus_ok: bool = float(t.resources.get("food", 0)) \
+		> float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
+	var cap: int = maxi(1, int(t.population * 0.25))
+	if safe and fed and surplus_ok and t.minor_population < cap:
+		var chance: float = BREED_BASE_CHANCE + float(p.skills.get("醫療", 0.0)) * 0.1
+		if randf() < chance:
+			events.append("P5_breed")
+	return events
+
+func _apply_life_event(_state: WorldState, _person: PersonData, team: TeamData, ev: String) -> void:
+	match ev:
+		"P5_breed":
+			team.minor_population += 1
+
 func _score_flee(p: PersonData, _t: TeamData) -> float:
 	var base: float = p.stress * (1.0 - p.loyalty) * 0.9
 	base += float(p.values.get("求生欲", 0.5)) * 0.3
@@ -215,13 +237,6 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			pass   # 效果改由 work_morale 係數體現（evaluate_all 統計）
 		"P4_expand":
 			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
-		"P5_breed":
-			var surplus_ok: bool = float(team.resources.get("food", 0)) \
-				> float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
-			if surplus_ok:
-				var cap: int = int(team.population * 0.2)
-				if team.minor_population < cap:
-					team.minor_population += 1
 		"N1_flee":
 			if team.population <= 1 and person.id == team.leader_id:
 				return   # solo 無處可逃：不變化、stress 不洩壓（持續高壓餵 N2/N3）
