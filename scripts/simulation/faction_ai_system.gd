@@ -38,6 +38,7 @@ const OWNER_CHANGE_BUFFER_DAYS: int = 7
 const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
+const SURVIVAL_RECOVER_DAYS: float = 7.0   # 糧恢復到此 → 脫離 survival（hysteresis 防抖）
 
 # ── Prosperity attack（野心驅動主動征服）──
 const PROSPERITY_CADENCE: int = 720           # 3 天 評估一次
@@ -1895,13 +1896,17 @@ func _richest_member(state: WorldState, f) -> int:
 func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id and state.player_id != -1:
 		return
-	if team.current_task in SURVIVAL_TASKS:
-		return
 	var pop_eff: int = team.population
 	if pop_eff <= 0: return
 	var food: float = float(team.resources.get("food", 0))
 	var food_per_day: float = float(pop_eff) * FOOD_PER_PERSON_PER_DAY_SURVIVAL
 	var days_left: float = food / maxf(food_per_day, 0.001)
+	# 已在 survival task：糧恢復(hysteresis)→ 釋放回 idle，讓建造/生產/攻擊接手
+	# （核心修：原本 early-return 永不釋放 → return_home/乞食 永久 p80 凍結）
+	if team.current_task in SURVIVAL_TASKS:
+		if days_left >= SURVIVAL_RECOVER_DAYS:
+			TaskArbiter.release(team)
+		return
 	if days_left < URGENCY_DAYS or days_left < WARNING_DAYS:
 		var severity: String = "urgent" if days_left < URGENCY_DAYS else "warning"
 		var prev_task: String = team.current_task

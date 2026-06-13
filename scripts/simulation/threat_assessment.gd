@@ -18,7 +18,8 @@ static func score(state: WorldState, self_team: TeamData,
 	var power_ratio: float = _power_ratio(state, self_team, other)
 	var raw: float = approach * 1.0 + hostility * 1.0 + (power_ratio - 1.0) * 0.5
 	var dist: int = _hex_dist(self_team.tile_pos, other.tile_pos)
-	var dist_factor: float = clampf(1.0 - float(dist) / 5.0, 0.1, 1.0)
+	# 距離脫離：dist≥5 → factor 0（逃出生天）。原 floor 0.1 → 遠敵永遠算威脅 → 逃跑永不釋放
+	var dist_factor: float = clampf(1.0 - float(dist) / 5.0, 0.0, 1.0)
 	return maxf(raw * dist_factor, 0.0)
 
 static func _approach_score(state: WorldState, self_team: TeamData,

@@ -69,6 +69,7 @@ var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tic
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻
 var trade_task_start_tick: int = 0       # 貿易 task 起始 tick（timeout 防 zombie）
+var task_reason: String = ""             # 最近一次 task 設定來源（TaskArbiter _source；遙測用）
 var readiness: float   = 1.0
 var wounded: int       = 0
 var equip_order: Dictionary = {

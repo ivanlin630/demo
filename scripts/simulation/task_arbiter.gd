@@ -24,6 +24,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		team.current_task = new_task
 		team.move_target = move_target
 		team.task_priority = priority
+		team.task_reason = _source
 		return true
 	# 抗命窗口：NPC 慾望 (50) 挑戰玩家命令 (60) → leader 個性確定性判定
 	if team.task_priority == PRIO_PLAYER and priority == PRIO_DISPATCH:
@@ -33,6 +34,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			team.current_task = new_task
 			team.move_target = move_target
 			team.task_priority = priority
+			team.task_reason = "defy_" + _source
 			return true
 		if leader != null:
 			# 壓抑：慾望轉 stress/unrest（餵既有叛變管線；stress 進 desire 公式 → 憋多了爆）
@@ -49,9 +51,10 @@ static func release(team: TeamData) -> void:
 
 
 # 不改釋放流程、就地轉換 task 的欄位同步（如 安頓→生產）
-static func transition(team: TeamData, new_task: String, priority: int) -> void:
+static func transition(team: TeamData, new_task: String, priority: int, _source: String = "transition") -> void:
 	team.current_task = new_task
 	team.task_priority = priority
+	team.task_reason = _source
 
 
 # 抗命判定：確定性，無 RNG。desire > obedience + 0.3 → 抗命
