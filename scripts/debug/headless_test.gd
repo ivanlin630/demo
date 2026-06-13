@@ -268,6 +268,13 @@ func _initialize() -> void:
 	_test_aid_mercy_floor()
 	_test_normal_tax_chronic_unrest()
 	_test_special_tax_spike()
+	# ── W4 收尾：派工公庫提領 + leader 駐家治理 ──
+	_test_dispatch_builder_uses_vault()
+	_test_dispatch_builder_local_only()
+	_test_caravan_load_conserves()
+	_test_govern_option_cautious()
+	_test_govern_warmonger_roams()
+	_test_govern_enough_stops()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -8118,3 +8125,142 @@ func _fief_make_special_payer(tax_rate: float) -> WorldState:
 	state.persons[200] = pl; payer.leader_id = 200
 	state.teams[1] = payer
 	return state
+
+# ──────── W4: 派工腳下公庫提領（caravan-load）────────
+
+# leader Team0 站自家 outpost(0,0)（owner=0、vault material=pub），私產 priv；
+# on_home=false → leader 改站 (5,5)（無 outpost）→ 腳下無公庫
+func _w4_make_dispatch_state(pub_mat: float, priv_mat: float, on_home: bool) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.outpost_level = 1; tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	tile.public_storage = { "material": pub_mat }
+	state.world.tiles[0] = tile
+	var team := TeamData.new(); team.team_id = 0; team.faction_id = 10
+	team.population = 30
+	team.tile_pos = Vector2i(0, 0) if on_home else Vector2i(5, 5)
+	team.resources = { "material": priv_mat }
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	leader.skills = { "統領": 0.8 }
+	state.persons[100] = leader; team.leader_id = 100
+	var advisor := PersonData.new(); advisor.id = 200; advisor.team_id = 0
+	advisor.skills = { "統領": 0.8 }
+	state.persons[200] = advisor; team.named_members.append(200)
+	state.teams[0] = team
+	return state
+
+func _w4_find_subteam(state: WorldState) -> TeamData:
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == 0:
+			return state.teams[tid]
+	return null
+
+func _test_dispatch_builder_uses_vault() -> void:
+	print("--- W4 Task1a: 站自家 outpost → 公庫足派工成功 ---")
+	# civilian Lv1 cost material 50；公庫 100、私產 0；1.5x gate=75 → 公庫過關
+	var state := _w4_make_dispatch_state(100.0, 0.0, true)
+	var fai := FactionAISystem.new()
+	var ok: bool = fai._dispatch_builder(state, state.teams[0], Vector2i(1, 1), "civilian", 1)
+	assert(ok, "公庫足應派工成功")
+	var sub: TeamData = _w4_find_subteam(state)
+	assert(sub != null, "應創建建造子隊")
+	print("W4 Task1a OK (派工成功，子隊 Team%d material=%.0f)" % [
+		sub.team_id, float(sub.resources.get("material", 0))])
+
+func _test_dispatch_builder_local_only() -> void:
+	print("--- W4 Task1b: 不在自家 outpost → 僅算私產 → 不足失敗 ---")
+	# 公庫 1000 但 leader 站 (5,5)（腳下無公庫）、私產 0 → gate 只看私產 → 失敗
+	var state := _w4_make_dispatch_state(1000.0, 0.0, false)
+	var fai := FactionAISystem.new()
+	var ok: bool = fai._dispatch_builder(state, state.teams[0], Vector2i(1, 1), "civilian", 1)
+	assert(not ok, "腳下無公庫 + 私產 0 應失敗")
+	assert(_w4_find_subteam(state) == null, "失敗不應創建子隊")
+	var tile: HexTileData = state.world.tiles[0]
+	assert(absf(float(tile.public_storage["material"]) - 1000.0) < 0.01,
+		"遠處自家公庫不被動用，實際=%.2f" % float(tile.public_storage["material"]))
+	print("W4 Task1b OK (失敗，遠處公庫保持 %.0f)" % float(tile.public_storage["material"]))
+
+func _test_caravan_load_conserves() -> void:
+	print("--- W4 Task1c: caravan-load 守恆（公庫減 == 子隊增）---")
+	var state := _w4_make_dispatch_state(100.0, 0.0, true)
+	var tile: HexTileData = state.world.tiles[0]
+	var team: TeamData = state.teams[0]
+	var total_before: float = float(tile.public_storage["material"]) \
+		+ float(team.resources.get("material", 0))
+	var fai := FactionAISystem.new()
+	var ok: bool = fai._dispatch_builder(state, team, Vector2i(1, 1), "civilian", 1)
+	assert(ok, "應派工成功")
+	var sub: TeamData = _w4_find_subteam(state)
+	var vault_after: float = float(tile.public_storage["material"])
+	var sub_mat: float = float(sub.resources.get("material", 0))
+	var priv_after: float = float(team.resources.get("material", 0))
+	# 子隊背包 >= cost 50
+	assert(sub_mat >= 50.0 - 0.01, "子隊背包應 >= cost 50，實際=%.2f" % sub_mat)
+	# 公庫扣量 == 子隊增量（私產 0 不補）
+	assert(absf((100.0 - vault_after) - sub_mat) < 0.01,
+		"公庫扣 %.2f 應 == 子隊增 %.2f" % [100.0 - vault_after, sub_mat])
+	# 總量守恆
+	assert(absf((vault_after + sub_mat + priv_after) - total_before) < 0.01,
+		"material 總量應守恆 %.2f，實際=%.2f" % [total_before, vault_after + sub_mat + priv_after])
+	print("W4 Task1c OK (公庫 100→%.0f 子隊+%.0f 守恆)" % [vault_after, sub_mat])
+
+# ──────── W4: Leader 駐家發展傾向（治理）────────
+
+# 獨立 team(faction_id=-1) Team0 站自家 outpost(0,0)、idle；leader values 可調
+func _w4_make_solo_govern_state(caution: float, ambition: float, martial: float,
+		greed: float, vault_mat: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.outpost_level = 1; tile.outpost_type = "civilian"; tile.outpost_owner = 0
+	tile.public_storage = { "material": vault_mat }
+	state.world.tiles[0] = tile
+	var team := TeamData.new(); team.team_id = 0; team.faction_id = -1
+	team.population = 10; team.tile_pos = Vector2i(0, 0)
+	team.current_task = "idle"; team.combat_target = -1
+	team.resources = { "food": 100.0 }   # food_pc 高 → 不觸發逃跑
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	leader.values = { "慎重": caution, "野心": ambition, "好戰": martial,
+		"貪婪": greed, "求生欲": 0.2 }
+	state.persons[100] = leader; team.leader_id = 100
+	state.teams[0] = team
+	return state
+
+func _test_govern_option_cautious() -> void:
+	print("--- W4 Task2a: 慎重型 + 公庫不足 → 選治理駐家 ---")
+	# 慎重 0.9、野心 0.2、好戰 0.1、貪婪 0.2、公庫 0 → 治理分最高
+	var state := _w4_make_solo_govern_state(0.9, 0.2, 0.1, 0.2, 0.0)
+	var fai := FactionAISystem.new()
+	fai._evaluate_solo(state, state.teams[0])
+	var team: TeamData = state.teams[0]
+	assert(team.current_task == "治理",
+		"應選治理，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(0, 0),
+		"治理 target 應為自家 outpost (0,0)，實際=(%d,%d)" % [team.move_target.x, team.move_target.y])
+	print("W4 Task2a OK (task=治理 → 自家 outpost)")
+
+func _test_govern_warmonger_roams() -> void:
+	print("--- W4 Task2b: 好戰/野心高 → 攻擊掠奪分壓過治理 → 不選治理 ---")
+	# 慎重 0.2、野心 0.9、好戰 0.9、貪婪 0.8、公庫 0；軍隊 tag → 攻擊/掠奪 tag_weight 1.0
+	var state := _w4_make_solo_govern_state(0.2, 0.9, 0.9, 0.8, 0.0)
+	state.teams[0].tags = ["軍隊"]
+	var fai := FactionAISystem.new()
+	fai._evaluate_solo(state, state.teams[0])
+	var team: TeamData = state.teams[0]
+	assert(team.current_task != "治理",
+		"好戰型不應選治理，實際=%s" % team.current_task)
+	print("W4 Task2b OK (task=%s 非治理)" % team.current_task)
+
+func _test_govern_enough_stops() -> void:
+	print("--- W4 Task2c: 公庫建材達標 → 治理分不加 → 不優先治理 ---")
+	# 慎重 0.9 但公庫 material 100 >= GOVERN_MATERIAL_TARGET(75) → 不加治理分
+	var state := _w4_make_solo_govern_state(0.9, 0.2, 0.1, 0.2, 100.0)
+	var fai := FactionAISystem.new()
+	fai._evaluate_solo(state, state.teams[0])
+	var team: TeamData = state.teams[0]
+	assert(team.current_task != "治理",
+		"公庫達標不應優先治理，實際=%s" % team.current_task)
+	print("W4 Task2c OK (task=%s 非治理)" % team.current_task)
