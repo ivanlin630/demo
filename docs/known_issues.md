@@ -6,6 +6,19 @@
 
 ## 🔴 高優先（影響基本可玩性）
 
+### W5. Task latch 凍結世界 ✅ 大部分已修（2026-06-13）
+- **症狀**：TeamTrace 量測 90 天，92% team-time 卡在不釋放的 survival(return_home/乞食 p80) + panic(逃跑 p70)。生產性 task 僅 8%。世界非窮而是癱瘓（T1 囤 mat 1622 卻凍死、T2 糧 34 天坐死）。
+- **根因**：`_evaluate_survival` 一進 survival 就 early-return 不釋放；`_has_active_threat` dist_factor floor 0.1 + 小地圖逃不到 5 格 → 永威脅；乞食無施主空轉 latch；餓死團 pop floor 1 不清除成空殼。
+- **修**：survival 糧恢復釋放(hysteresis 7天)、threat dist_factor floor→0 + 逃跑 5天 timeout、乞食無施主釋放、餓死 pop→0 + tick末單點 erase。逃跑 217→32、乞食消、攻擊 8→82。
+- **發現**：TeamTrace 遙測（scripts/debug/team_trace.gd，gated game_sim_test 每日 dump）
+
+### W6. 死亡路徑資產不守恆（W5 暴露）
+- **症狀**：latch 修好啟用死亡後，multi coin_eq delta game_sim_test -200 / merchant -150（~5%）；tyrant/warzone 0。
+- **根因（部分）**：戰死 `persons.erase` 連 person.coin 銷毀（已修，退回團）；殘留 ore_gold/silver 在某死亡路徑未路由（疑 `_route_extinct_assets` tile==null 分支清資產不路由，或團死在地圖外格）。
+- **影響**：有限資源守恆破 ~5%（W5 修前為 0）
+- **發現**：2026-06-13 W5 latch 修復後
+- **建議**：死亡-資產守恆專注 audit — tile==null 路由 fallback；全死亡路徑（combat massacre/disband、famine extinct、tile==null）統一走守恆路由
+
 ### W3. P5 生育永不觸發 — reaction 權重結構性輸分
 - **症狀**：COLLECT_RATE tune 後多 team 糧緩衝 100+ 天（7 天盈餘門檻遠超），2 年 multi 生育/長大成人 = 0
 - **根因**：`_score_breed` max ≈ 0.5（0.4 + 醫療×0.1），P2_produce active=0.6+、P1_comply 忠誠高可達 1.0 → P5 永不中選；且 minor cap = `int(pop×0.2)` → pop≤4 cap=0
