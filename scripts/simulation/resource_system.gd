@@ -53,6 +53,8 @@ func collect_resources(state: WorldState, team_ids: Array) -> void:
 			var leader_f = state.persons.get(team.leader_id)
 			var prod_skill_f: float = float(leader_f.skills.get("生產", 0.0)) if leader_f else 0.0
 			_forage_from_tile(state, team, tile, pop_mult_f, prod_skill_f)
+			if int(tile.resources.get("wild_game", 0)) > 0:
+				HuntSystem.new().hunt_small_game(state, team, tile, false)   # 被動低率小獵
 			continue
 
 		var pop_mult: float  = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
@@ -203,8 +205,8 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 		outpost_mult: float, pop_mult: float,
 		prod_skill: float, eng_skill: float, gained: Dictionary = {}) -> void:
 	for res in src_tile.resources.keys():
-		if res == "wild_horses":
-			continue   # 活物不走 generic 採集（日捕在 HarvestSystem）
+		if res == "wild_horses" or res == "wild_game":
+			continue   # 活物不走 generic 採集（野馬日捕在 HarvestSystem；野味走 HuntSystem）
 		var current: float = float(src_tile.resources.get(res, 0))
 		if current <= 0.0:
 			continue
