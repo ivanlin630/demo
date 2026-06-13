@@ -96,12 +96,12 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 
 		if food_available >= food_needed:
 			team.resources["food"] = food_available - food_needed
-			_update_person_needs(state, tid, "food", 1.0)
+			_update_person_needs(state, tid, "food", 1.0, day_fraction)
 			team.famine_days = 0.0   # 吃飽 → 斷糧計時歸零
 		else:
 			team.resources["food"] = 0.0
 			var satisfaction: float = food_available / food_needed if food_needed > 0.0 else 0.0
-			_update_person_needs(state, tid, "food", satisfaction)
+			_update_person_needs(state, tid, "food", satisfaction, day_fraction)
 			# 團級斷糧累積 + grace 後 minor/anon 耗損
 			if satisfaction < FAMINE_SATISFACTION_THRESHOLD:
 				team.famine_days += day_fraction
@@ -194,7 +194,8 @@ func _get_adjacent_tiles(state: WorldState, center: Vector2i) -> Array:
 			result.append(state.world.tiles[nid])
 	return result
 
-func _update_person_needs(state: WorldState, team_id: int, need: String, value: float) -> void:
+func _update_person_needs(state: WorldState, team_id: int, need: String, value: float,
+		day_fraction: float = 0.0) -> void:
 	for pid in state.persons:
 		var person: PersonData = state.persons[pid]
 		if person.team_id != team_id:
@@ -210,6 +211,12 @@ func _update_person_needs(state: WorldState, team_id: int, need: String, value: 
 				person.loyalty = maxf(person.loyalty - 0.02, 0.0)
 			else:
 				person.fear = maxf(person.fear - 0.02, 0.0)
+			# 個人飢餓累積（斷糧越深累積越快；吃飽則回復）
+			if value < FAMINE_SATISFACTION_THRESHOLD:
+				person.hunger = minf(person.hunger + HUNGER_GAIN_PER_DAY * day_fraction
+					* (FAMINE_SATISFACTION_THRESHOLD - value) / FAMINE_SATISFACTION_THRESHOLD, 1.0)
+			else:
+				person.hunger = maxf(person.hunger - HUNGER_RECOVER_PER_DAY * day_fraction, 0.0)
 
 func _pos_to_tile_id(pos: Vector2i) -> int:
 	return pos.x * 1000 + pos.y

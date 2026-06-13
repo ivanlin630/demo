@@ -2447,6 +2447,8 @@ func _run_sim_test() -> void:
 	_test_famine_grace_no_death()
 	_test_famine_minor_dies_first()
 	_test_famine_anon_after_minor()
+	_test_hunger_accumulate_recover()
+	_test_hunger_blood_drain()
 
 	print("=== DONE ===")
 
@@ -2515,6 +2517,41 @@ func _test_famine_anon_after_minor() -> void:
 	assert(anon_now + team.named_members.size() == team.population,
 		"sum(tiers)+named == pop 守恆")
 	print("Famine Task1d OK")
+
+func _test_hunger_accumulate_recover() -> void:
+	print("--- Famine Task2a: named hunger 累積/回復 ---")
+	var rs := ResourceSystem.new()
+	var state := _famine_make_state(1, 0, 0.0)
+	var p := PersonData.new()
+	p.id = 100; p.team_id = 0
+	state.persons[100] = p
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # satisfaction 0 → +0.05/日
+	assert(absf(p.hunger - 0.05) < 0.001, "斷糧 1 天 hunger≈0.05，實際=%s" % str(p.hunger))
+	# 吃飽 → 回復 0.1/日
+	state.teams[0].resources["food"] = 10000.0
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	assert(p.hunger == 0.0, "吃飽 1 天 hunger 由 0.05 回復至 0，實際=%s" % str(p.hunger))
+	# 中途加入者 0 起算（新 person 預設 hunger 0）
+	var p2 := PersonData.new()
+	assert(p2.hunger == 0.0, "新 person hunger 預設 0")
+	print("Famine Task2a OK")
+
+func _test_hunger_blood_drain() -> void:
+	print("--- Famine Task2b: hunger>=0.7 餓傷流血 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var p := PersonData.new()
+	p.id = 200; p.team_id = 0; p.hunger = 0.8; p.blood = 100.0
+	state.persons[200] = p
+	HealthSystem.tick_natural_regen(state)
+	assert(p.blood < 100.0, "hunger 0.8 → 不回血反流失，實際 blood=%s" % str(p.blood))
+	# hunger 0.3 → 正常再生
+	var p3 := PersonData.new()
+	p3.id = 201; p3.team_id = 0; p3.hunger = 0.3; p3.blood = 50.0
+	state.persons[201] = p3
+	HealthSystem.tick_natural_regen(state)
+	assert(p3.blood > 50.0, "hunger 0.3 → 正常再生，實際 blood=%s" % str(p3.blood))
+	print("Famine Task2b OK")
 
 func _test_update_armor_config() -> void:
 	print("--- S7 Task5: _update_armor_config ---")

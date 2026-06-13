@@ -12,6 +12,11 @@ const RESOLVE_POISON_HP: float = 10.0
 const HP_REGEN_PER_TICK: float = 0.5
 const HP_REGEN_FRACTURE: float = 0.05
 const BLOOD_REGEN_PER_TICK: float = 0.2
+# 餓傷流血：hunger >= 此值 → blood 改流失取代再生。
+# tick_natural_regen 為 per-cadence（近區 ~24 次/日）非 per-tick；故 drain 取與
+# BLOOD_REGEN_PER_TICK 同量級（每次呼叫），近區實際 ~5 血/日（spec 意圖值）。
+const HUNGER_BLOOD_THRESHOLD: float = 0.7
+const HUNGER_BLOOD_DRAIN_PER_TICK: float = 0.2
 const CARRY_BASE: float        = 20.0
 const CARRY_PER_BODY: float    = 10.0
 
@@ -195,7 +200,9 @@ static func tick_natural_regen(state: WorldState) -> void:
 		for part in p.body_parts:
 			if p.body_parts[part].get("bleeding", "none") != "none":
 				has_bleeding = true; break
-		if not has_bleeding:
+		if p.hunger >= HUNGER_BLOOD_THRESHOLD:
+			p.blood = maxf(p.blood - HUNGER_BLOOD_DRAIN_PER_TICK, 0.0)   # 餓傷：流失取代再生
+		elif not has_bleeding:
 			p.blood = minf(p.blood + BLOOD_REGEN_PER_TICK, BLOOD_MAX)
 		for part in p.body_parts:
 			var bp = p.body_parts[part]
