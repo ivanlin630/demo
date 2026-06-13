@@ -1716,10 +1716,26 @@ func _min_dist_to_enemy_outpost(state: WorldState, leader_team: TeamData, pos: V
 const INFRA_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時評估一次
 
 # leader values 決定新據點傾向（軍用 vs 民用）
-func _pick_outpost_type(leader: PersonData) -> String:
+func _pick_outpost_type(state: WorldState, leader_team: TeamData, leader: PersonData) -> String:
+	# 文明階梯：軍鎮需 tools；無 tools 來源 → 只能蓋民村（個性想軍鎮也買不起）
+	var has_tools: bool = float(leader_team.resources.get("tools", 0)) >= 3.0 \
+		or _faction_has_workshop(state, leader_team)
+	if not has_tools:
+		return "civilian"
 	var military: float = float(leader.values.get("好戰", 0.5)) + float(leader.values.get("野心", 0.5))
 	var civilian: float = float(leader.values.get("慎重", 0.5)) + float(leader.values.get("貪婪", 0.5))
 	return "military" if military > civilian else "civilian"
+
+func _faction_has_workshop(state: WorldState, leader_team: TeamData) -> bool:
+	for tile_id in state.world.tiles:
+		var t: HexTileData = state.world.tiles[tile_id]
+		if t.outpost_level > 0 and int(t.manufacturing_level) > 0:
+			if t.outpost_owner == leader_team.team_id:
+				return true
+			var o: TeamData = state.teams.get(t.outpost_owner)
+			if o != null and o.faction_id == leader_team.faction_id and leader_team.faction_id != -1:
+				return true
+	return false
 
 func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	var leader_team: TeamData = state.teams.get(faction.leader_team_id)
@@ -1775,10 +1791,19 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 				return
 		if _dispatch_facility_builder(state, owner_team, tile.tile_pos, pick["facility"]):
 			return
+	# (3) 蓋新 outpost 前：公庫不足 + leader 不在家 + idle → 回家治理攢公庫
+	var own_pos: Vector2i = _find_own_outpost(state, leader_team)
+	if own_pos != Vector2i(-1, -1) and leader_team.tile_pos != own_pos:
+		var home_tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
+		var vault_mat: float = float(home_tile.public_storage.get("material", 0)) if home_tile else 0.0
+		if vault_mat < GOVERN_MATERIAL_TARGET and leader_team.current_task == TeamData.TASK_IDLE:
+			if TaskArbiter.try_set(state, leader_team, "治理", own_pos,
+					TaskArbiter.PRIO_DISPATCH, "govern_accumulate"):
+				return
 	# (3) 蓋新 outpost
 	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
 	if loc.is_empty(): return
-	var outpost_type: String = _pick_outpost_type(leader)
+	var outpost_type: String = _pick_outpost_type(state, leader_team, leader)
 	_dispatch_builder(state, leader_team, loc.pos, outpost_type, 1)
 
 # ──────── 設施需求迴路（score = 地利 × (1+缺口) × 個性）────────

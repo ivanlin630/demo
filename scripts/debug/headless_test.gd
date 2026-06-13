@@ -275,6 +275,16 @@ func _initialize() -> void:
 	_test_govern_option_cautious()
 	_test_govern_warmonger_roams()
 	_test_govern_enough_stops()
+	# ── Economy Bootstrap：自給階梯 + 治理 faction leader + 生育分層 ──
+	_test_pick_civilian_no_tools()
+	_test_pick_military_with_workshop()
+	_test_pick_military_tools_stock()
+	_test_govern_faction_leader()
+	_test_govern_skip_when_vault_full()
+	_test_breed_decoupled()
+	_test_breed_life_event()
+	_test_breed_parallel_with_action()
+	_test_breed_cap()
 	quit()
 
 func _test_minor_maturation() -> void:
@@ -6570,17 +6580,22 @@ func _test_collect_uses_morale() -> void:
 	print("Reaction Task3 OK (ratio=%.2f)" % ratio)
 
 func _test_p5_needs_surplus() -> void:
-	print("--- Reaction Task4a: P5 需糧食盈餘 ---")
-	var state := WorldState.new(); state.world = WorldData.new()
+	print("--- Reaction Task4a: P5 需糧食盈餘（生命事件層）---")
 	var team := TeamData.new(); team.team_id = 0; team.population = 10
 	team.resources = { "food": 50.0 }   # 50 < 10*2.4*7=168
-	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	var p := PersonData.new(); p.id = 1; p.team_id = 0   # needs 預設 safe/fed
 	var rs := ReactionSystem.new()
-	rs._apply_reaction(state, p, team, "P5_breed")
-	assert(team.minor_population == 0, "糧不足不生")
+	var bad: bool = false
+	for i in 200:
+		if "P5_breed" in rs._evaluate_life_events(p, team):
+			bad = true; break
+	assert(not bad, "糧不足不生")
 	team.resources["food"] = 200.0
-	rs._apply_reaction(state, p, team, "P5_breed")
-	assert(team.minor_population == 1, "盈餘該生")
+	var got: bool = false
+	for i in 200:
+		if "P5_breed" in rs._evaluate_life_events(p, team):
+			got = true; break
+	assert(got, "盈餘該生")
 	print("Reaction Task4a OK")
 
 func _test_n5_coin_conserved() -> void:
@@ -8264,3 +8279,175 @@ func _test_govern_enough_stops() -> void:
 	assert(team.current_task != "治理",
 		"公庫達標不應優先治理，實際=%s" % team.current_task)
 	print("W4 Task2c OK (task=%s 非治理)" % team.current_task)
+
+# ──────── Economy Bootstrap Task1：自給階梯 ────────
+
+func _bootstrap_pick_state(martial: float, ambition: float, caution: float,
+		greed: float, tools: float, workshop: bool) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# leader 自家 civilian outpost（manufacturing 0）at (0,0)
+	var home := HexTileData.new()
+	home.tile_pos = Vector2i(0, 0); home.outpost_level = 1
+	home.outpost_type = "civilian"; home.outpost_owner = 0
+	state.world.tiles[0] = home
+	if workshop:
+		var ws := HexTileData.new()
+		ws.tile_pos = Vector2i(1, 1); ws.outpost_level = 1
+		ws.outpost_type = "civilian"; ws.outpost_owner = 0
+		ws.manufacturing_level = 2
+		state.world.tiles[1001] = ws
+	var team := TeamData.new(); team.team_id = 0; team.faction_id = 10
+	team.resources = { "tools": tools }
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	leader.values = { "好戰": martial, "野心": ambition, "慎重": caution, "貪婪": greed }
+	state.persons[100] = leader; team.leader_id = 100
+	state.teams[0] = team
+	return state
+
+func _test_pick_civilian_no_tools() -> void:
+	print("--- Bootstrap Task1: 自給階梯 ---")
+	# 好戰 leader + tools 0 + 無工坊 → 只能蓋民村（個性想軍鎮也買不起）
+	var state := _bootstrap_pick_state(0.9, 0.9, 0.2, 0.2, 0.0, false)
+	var fai := FactionAISystem.new()
+	var t: String = fai._pick_outpost_type(state, state.teams[0], state.persons[100])
+	assert(t == "civilian", "無 tools 好戰也只能蓋民村，實際=%s" % t)
+	print("Bootstrap Task1a OK")
+
+func _test_pick_military_with_workshop() -> void:
+	# faction 有 workshop outpost(manufacturing_level>0) → has_tools → 好戰回軍鎮
+	var state := _bootstrap_pick_state(0.9, 0.9, 0.2, 0.2, 0.0, true)
+	var fai := FactionAISystem.new()
+	var t: String = fai._pick_outpost_type(state, state.teams[0], state.persons[100])
+	assert(t == "military", "有工坊好戰應回軍鎮，實際=%s" % t)
+	print("Bootstrap Task1b OK")
+
+func _test_pick_military_tools_stock() -> void:
+	# tools 庫存 >= 3 → 無工坊也 has_tools → military 可選
+	var state := _bootstrap_pick_state(0.9, 0.9, 0.2, 0.2, 5.0, false)
+	var fai := FactionAISystem.new()
+	var t: String = fai._pick_outpost_type(state, state.teams[0], state.persons[100])
+	assert(t == "military", "tools 庫存>=3 應回軍鎮，實際=%s" % t)
+	print("Bootstrap Task1c OK")
+
+# ──────── Economy Bootstrap Task2：治理接 faction leader ────────
+
+func _bootstrap_govern_state(leader_pos: Vector2i, vault_mat: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# leader_team 自家 civilian outpost (0,0) level 1
+	var home := HexTileData.new()
+	home.tile_pos = Vector2i(0, 0); home.terrain = "plains"
+	home.outpost_level = 1; home.outpost_type = "civilian"; home.outpost_owner = 0
+	home.public_storage = { "material": vault_mat }
+	state.world.tiles[0] = home
+	var team := TeamData.new(); team.team_id = 0
+	team.population = 10; team.tile_pos = leader_pos
+	team.current_task = "idle"; team.combat_target = -1
+	team.resources = {}   # 無私產 → 升級/擴建派工皆失敗 → 落到治理判定
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
+	leader.values = { "慎重": 0.5 }
+	state.persons[100] = leader; team.leader_id = 100
+	state.teams[0] = team
+	state.create_faction(0)
+	return state
+
+func _test_govern_faction_leader() -> void:
+	print("--- Bootstrap Task2: 治理接 faction leader ---")
+	# faction leader 不在自家 outpost + 公庫 < 75 + idle → 設「治理」、target=自家 outpost
+	var state := _bootstrap_govern_state(Vector2i(5, 5), 0.0)
+	var fid: int = state.teams[0].faction_id
+	var fai := FactionAISystem.new()
+	fai._evaluate_infrastructure(state, state.factions[fid])
+	var team: TeamData = state.teams[0]
+	assert(team.current_task == "治理",
+		"faction leader 公庫不足應回家治理，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(0, 0),
+		"治理 target 應為自家 outpost，實際=(%d,%d)" % [team.move_target.x, team.move_target.y])
+	print("Bootstrap Task2a OK")
+
+func _test_govern_skip_when_vault_full() -> void:
+	# 公庫 material >= 75 → 不治理（正常派工路徑）
+	var state := _bootstrap_govern_state(Vector2i(5, 5), 100.0)
+	var fid: int = state.teams[0].faction_id
+	var fai := FactionAISystem.new()
+	fai._evaluate_infrastructure(state, state.factions[fid])
+	var team: TeamData = state.teams[0]
+	assert(team.current_task != "治理",
+		"公庫達標不應治理，實際=%s" % team.current_task)
+	print("Bootstrap Task2b OK")
+
+# ──────── Economy Bootstrap Task3：生育反應分層 ────────
+
+func _bootstrap_breed_team(pop: int, minor: int, food: float) -> TeamData:
+	var team := TeamData.new(); team.team_id = 0
+	team.population = pop; team.minor_population = minor
+	team.resources = { "food": food }
+	return team
+
+func _bootstrap_breed_person(safety: float, food_need: float) -> PersonData:
+	var p := PersonData.new(); p.id = 1; p.team_id = 0
+	p.needs = { "safety": safety, "food": food_need }
+	return p
+
+func _test_breed_decoupled() -> void:
+	print("--- Bootstrap Task3: 生育分層 ---")
+	# P5 移出 _evaluate_person（行動反應不含 P5）
+	var rs := ReactionSystem.new()
+	var team := _bootstrap_breed_team(10, 0, 1000.0)
+	var p := _bootstrap_breed_person(1.0, 1.0)
+	p.loyalty = 0.0; p.stress = 0.0   # 舊邏輯下 P5_breed(0.4) 會勝出
+	var r: String = rs._evaluate_person(p, team)
+	assert(r != "P5_breed", "行動反應不應含 P5_breed，實際=%s" % r)
+	print("Bootstrap Task3a OK")
+
+func _test_breed_life_event() -> void:
+	# 安全+溫飽+盈餘+未滿 cap → 多次抽樣應出現 P5_breed；不安全 → 永不
+	var rs := ReactionSystem.new()
+	var team := _bootstrap_breed_team(10, 0, 1000.0)
+	var p := _bootstrap_breed_person(1.0, 1.0)
+	var got: bool = false
+	for i in 200:
+		if "P5_breed" in rs._evaluate_life_events(p, team):
+			got = true; break
+	assert(got, "條件滿足多次抽樣應出現 P5_breed")
+	p.needs["safety"] = 0.0
+	var bad: bool = false
+	for i in 200:
+		if "P5_breed" in rs._evaluate_life_events(p, team):
+			bad = true; break
+	assert(not bad, "不安全不應生育")
+	print("Bootstrap Task3b OK")
+
+func _test_breed_parallel_with_action() -> void:
+	# 同 person 同 tick：行動 P1_comply + 生命事件 P5_breed 並行
+	var rs := ReactionSystem.new()
+	var team := _bootstrap_breed_team(10, 0, 1000.0)
+	var p := _bootstrap_breed_person(1.0, 1.0)
+	p.loyalty = 1.0; p.stress = 0.0   # → 行動反應 P1_comply 勝出
+	var action: String = rs._evaluate_person(p, team)
+	assert(action == "P1_comply", "高忠誠應 P1_comply，實際=%s" % action)
+	var got: bool = false
+	for i in 200:
+		if "P5_breed" in rs._evaluate_life_events(p, team):
+			got = true; break
+	assert(got, "行動與生育應並行")
+	print("Bootstrap Task3c OK")
+
+func _test_breed_cap() -> void:
+	# pop=4 → cap=maxi(1,int(4×0.25))=1；pop=20 → cap=5
+	var rs := ReactionSystem.new()
+	var p := _bootstrap_breed_person(1.0, 1.0)
+	var t4 := _bootstrap_breed_team(4, 1, 1000.0)   # minor 已達 cap=1
+	var capped: bool = false
+	for i in 200:
+		if "P5_breed" in rs._evaluate_life_events(p, t4):
+			capped = true; break
+	assert(not capped, "達 cap 不應生育 (pop=4 cap=1 minor=1)")
+	var t20 := _bootstrap_breed_team(20, 4, 1000.0)   # cap=5 minor=4
+	var ok: bool = false
+	for i in 200:
+		if "P5_breed" in rs._evaluate_life_events(p, t20):
+			ok = true; break
+	assert(ok, "pop=20 cap=5 minor=4 應可生育")
+	print("Bootstrap Task3d OK")
