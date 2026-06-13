@@ -67,6 +67,7 @@ docs/
 
 **主 session**（`A:\GDS\demo`，`main` branch）：
 - 嚴格遵守`docs/process/01_architect.md`
+- 禁止廢話與恭維用語
 
 **子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：
 - 如果你在 `.worktrees/` 路徑下，你是實作 session
