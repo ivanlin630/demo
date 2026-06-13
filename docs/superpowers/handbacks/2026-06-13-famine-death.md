@@ -41,3 +41,8 @@ Branch: `feat/famine-death`
 - **餓傷與戰場 bleeding 疊加**：hunger≥0.7 期間 `tick_natural_regen` 不再生血，戰場出血團恢復變慢、致死率可能上升。建議觀察 encounter 致死分布。
 - **昏迷新語意**：`is_combat_capable` 現在把 blood<30 判為失能。失血未死的 named/anon 在 encounter 中會倒地，可能改變既有戰鬥平衡（原本只看 body part）。
 - **ghost person 殘留**：餓死者留在 `state.persons`（team_id 不變，沿用戰死模型），`_update_person_needs`/`tick_natural_regen` 仍會迭代到，僅 cosmetic；不影響 stored pop。與既有 encounter ghost 行為一致。
+- **全圖飢荒 → 掠奪塌成乞食（行為觀察，非 bug）**：`_trigger_survival`（`faction_ai_system.gd:1856`）survival 決策本有掠奪路徑（Path 1B 遠 outpost + Path 2，門檻 `殘忍>0.5 或 好戰>0.6` + 有獵物）。但 `_find_weakest_prey`（:1948）要求獵物 **食物≥20**（:1957）且更弱（pop<0.7×自己）。本次 multi run 全圖斷糧（多數團 food=0）→ 無團達 20 食物門檻 → prey 全 -1 → 掠奪/攻擊全落空，統一掉 Path 4 乞食（90 天 0 遭遇戰 / 0 loot；survival transition 41×→乞食、8×→return_home）。另 11× `[ProsperityAttack]`（貪婪層攻擊，與 survival 掠奪不同路）亦被 survival 飢餓 override 成乞食/return_home（attacker 自身將餓死）。catch-22：大家都餓時沒糧可搶。要看到掠奪/戰鬥，需 config 製造貧富不均（部分團囤糧）或放寬食物使 attacker readiness 足。屬連動觀察，本 spec 範圍不改。
+
+## 本次發現（待主 session 評估，非本 spec 範圍）
+
+- **`SURVIVAL_TASKS` 漏列 `掠奪`（潛在 bug）**：`SURVIVAL_TASKS = ["return_home","乞食","投靠"]`（`faction_ai_system.gd:27`）未含 `TeamData.TASK_LOOT`（"掠奪"）。但 `_trigger_survival` Path 1B/2 會把 survival 團設成 `掠奪`。後果：survival-觸發的掠奪團不被各 sticky guard（:133/:633/:696/:1841/:2041 `if current_task in SURVIVAL_TASKS`）認成「已在 survival 態」→ 下一評估 tick 可能被 prosperity/strategic AI 重評蓋掉，掠奪未抵達即被打斷。本次 run 因 0 掠奪未暴露；一旦食物放寬讓 survival 掠奪真的跑，會浮現「掠奪團半路被改任務」抖動。建議：`SURVIVAL_TASKS` 補入 `"掠奪"`（或 survival 掠奪改用獨立 sticky flag）。
