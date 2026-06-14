@@ -317,6 +317,8 @@ func _initialize() -> void:
 	_test_beast_reward_exp()
 	_test_predator_infamy()
 	_test_npc_active_hunt()
+	# ── SoloAI 主動尋家 + 承諾慣性 ──
+	_test_solo_commitment()
 	quit()
 
 func _test_wild_game_seeded() -> void:
@@ -9110,3 +9112,27 @@ func _test_survival_start_config() -> void:
 	var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
 	assert(tile != null and tile.outpost_level == 0, "開局玩家不應有 outpost")
 	print("survival_start config OK")
+
+func _test_solo_commitment() -> void:
+	print("--- SoloAI 承諾慣性 ---")
+	var fai := FactionAISystem.new()
+	# 中性個性，攻擊/掠奪/外交 分數接近 → 無慣性會抖；有慣性則黏上次
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.values = {"好戰": 0.5, "貪婪": 0.5, "野心": 0.5}
+	state.persons[0] = leader
+	# 兩個獨立鄰隊供 攻擊/掠奪/外交 target
+	for tid in [1, 2]:
+		var o := TeamData.new(); o.team_id = tid; o.tile_pos = Vector2i(4+tid, 4)
+		o.population = 3; o.faction_id = -1
+		state.teams[tid] = o
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
+	team.population = 8; team.tags = ["軍隊"]; team.current_task = "idle"
+	team.solo_intent = "掠奪"   # 上次選掠奪
+	team.resources = {"food": 100.0}
+	state.teams[0] = team
+	state.team_discovered[0] = [1, 2]   # _nearest_independent 需 discovered 名單
+	fai._evaluate_solo(state, team)
+	assert(team.current_task == "掠奪", "有 solo_intent=掠奪 + 慣性 → 應續掠奪，實際=%s" % team.current_task)
+	assert(team.solo_intent == "掠奪", "選後 solo_intent 記錄")
+	print("solo commitment OK")

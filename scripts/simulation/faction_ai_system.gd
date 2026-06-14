@@ -33,6 +33,7 @@ const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算�
 const LOOT_GATE: float = 0.55   # TEST VALUE
 const JOIN_GATE: float = 0.55   # TEST VALUE
 const CAMP_GATE: float = 0.50   # TEST VALUE
+const SOLO_COMMITMENT_BONUS: float = 0.15   # TEST VALUE — SoloAI 慣性加成（止 flip-flop，非鎖死）
 const CRUDE_CAMP_FOOD_SEED: float = 40.0   # TEST VALUE — 紮營種子糧（+同抬 cap）
 # stuck: task 仍是進攻型但 move_target 已被 movement 清掉（off-map / 無路徑）→ 視為 idle 允許重評
 const STUCK_TASKS: Array = [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
@@ -936,6 +937,10 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if vault_mat < GOVERN_MATERIAL_TARGET:
 			scores["治理"] = (caution * 0.4 + amb_dev * 0.2 + 0.15) * _tag_weight(team, "治理")
 
+	# 承諾慣性：上次方向加分（非明顯更優不換）
+	if team.solo_intent != "" and scores.has(team.solo_intent):
+		scores[team.solo_intent] = float(scores[team.solo_intent]) + SOLO_COMMITMENT_BONUS
+
 	var best_task := "idle"
 	var best_score: float = 0.0
 	for t in scores:
@@ -967,6 +972,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		return
 	if best_task == "貿易":
 		team.trade_task_start_tick = state.world.current_tick
+	team.solo_intent = best_task
 	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
 
 func _update_equip_order(state: WorldState, team: TeamData) -> void:
