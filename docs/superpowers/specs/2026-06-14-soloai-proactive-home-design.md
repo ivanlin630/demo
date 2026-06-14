@@ -26,7 +26,9 @@
 既有 scores（idle/攻擊/掠奪/外交/逃跑/製造/貿易/治理）後，加：
 
 ```gdscript
-# 主動尋家（僅無 own outpost 的流浪團）：value 加權，與 roving 競爭最高分
+# 主動尋家（僅無 own outpost 的流浪團）：純 value 加權，與 roving 競爭最高分。
+# ⚠ 不乘 _tag_weight：該函數對「流亡」tag 回 0（line 542）→ 會把最需要尋家的流亡團歸零。
+#   尋家是 value-driven、對任何無家團（流亡/無 tag）開放，故 bypass _tag_weight。
 if _find_own_outpost(state, team) == Vector2i(-1, -1):
     var survival_v: float = float(leader_p.values.get("求生欲", 0.5))
     var caution: float    = float(leader_p.values.get("慎重", 0.5))
@@ -34,12 +36,13 @@ if _find_own_outpost(state, team) == Vector2i(-1, -1):
     var honor: float      = float(leader_p.values.get("義氣", 0.5))
     # 紮營：求生/慎重/野心（自立建家）
     if _find_unowned_farmable_tile(state, team) != Vector2i(-1, -1):
-        scores[TeamData.TASK_CAMP] = (survival_v * 0.3 + caution * 0.3 + ambition2 * 0.3) \
-            * _tag_weight(team, "紮營")   # TEST VALUE 權重
+        scores[TeamData.TASK_CAMP] = survival_v * 0.3 + caution * 0.3 + ambition2 * 0.3   # TEST VALUE
     # 投靠：義氣/慕強/求生（依附強者）
     if _find_strong_neighbor(state, team) != -1:
-        scores["投靠"] = (honor * 0.4 + survival_v * 0.4) * _tag_weight(team, "投靠")   # TEST VALUE
+        scores["投靠"] = honor * 0.4 + survival_v * 0.4   # TEST VALUE
 ```
+
+> 註：roving 選項（攻擊/掠奪…）**仍乘 `_tag_weight`**（維持既有），故流亡團的 roving 分被歸零、尋家分保留 → 流亡團 SoloAI 傾向尋家（合理：被打殘的流亡團想安身）。軍隊 tag 團 roving 分高 → 續 roving。
 
 best_task 勝出後 match 補：
 ```gdscript
