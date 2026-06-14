@@ -2101,22 +2101,22 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	TaskArbiter.release(team)
 	team.previous_task = ""
 
-# 找最佳覓食格：本格+鄰格食物池最高的無 outpost tile；無則回本格（原地覓食）。
+# 找最佳狩獵格：本格+鄰格 wild_game 最多的無 outpost tile；皆無 game → (-1,-1)（掉去乞食/loot）。
 func _find_forage_tile(state: WorldState, team: TeamData) -> Vector2i:
-	var best_pos: Vector2i = team.tile_pos
-	var best_food: float = -1.0
-	var dirs: Array = [Vector2i.ZERO, Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
-		Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1)]
+	var best_pos: Vector2i = Vector2i(-1, -1)
+	var best_game: int = 0
+	var dirs: Array = [Vector2i.ZERO, Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1),
+		Vector2i(0,-1), Vector2i(1,-1), Vector2i(-1,1)]
 	for d in dirs:
 		var p: Vector2i = team.tile_pos + d
-		var tile: HexTileData = state.world.tiles.get(p.x * 1000 + p.y)
+		var tile: HexTileData = state.world.tiles.get(p.x*1000 + p.y)
 		if tile == null or tile.outpost_level > 0:
 			continue
-		var f: float = float(tile.resources.get("food", 0))
-		if f > best_food:
-			best_food = f
+		var g: int = int(tile.resources.get("wild_game", 0))
+		if g > best_game:
+			best_game = g
 			best_pos = p
-	return best_pos if best_food >= 0.0 else team.tile_pos
+	return best_pos
 
 func _should_abandon_current_task(team: TeamData, survival_target: Vector2i) -> bool:
 	if team.move_target == Vector2i(-1, -1):

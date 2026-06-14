@@ -285,9 +285,8 @@ func _initialize() -> void:
 	_test_breed_life_event()
 	_test_breed_parallel_with_action()
 	_test_breed_cap()
-	# ── 階段1 覓食地基 ──
-	_test_forage_no_outpost()
-	_test_forage_scale_cap()
+	# ── 階段1 覓食地基（subsistence 改狩獵唯一）──
+	_test_no_passive_forage_food()
 	_test_forage_episode_daily()
 	_test_npc_forage_viability()
 	_test_forage_release()
@@ -297,6 +296,7 @@ func _initialize() -> void:
 	_test_wild_game_regen()
 	_test_hunt_small_game()
 	_test_passive_hunt_on_forage()
+	_test_find_game_tile()
 	_test_player_hunt_action()
 	# ── 階段1 Plan 2b-1 野獸戰鬥核心 ──
 	_test_beast_claw_damage()
@@ -408,7 +408,31 @@ func _test_passive_hunt_on_forage() -> void:
 	# 覓食 tick 多次 → 被動小獵應曾枯竭 wild_game
 	assert(int(tile.resources["wild_game"]) < game_before,
 		"覓食 tick 應被動獵掉部分 wild_game，實際=%d" % int(tile.resources["wild_game"]))
+	assert(float(team.resources.get("food", 0)) > 0.0, "有 wild_game 應靠被動小獵得食物")
 	print("passive hunt OK")
+
+func _test_find_game_tile() -> void:
+	print("--- forage path 找 wild_game 格 ---")
+	var fai := FactionAISystem.new()
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 本格無 game、鄰格 (5,4) 有 game → 應選鄰格
+	for p in [Vector2i(4,4), Vector2i(5,4)]:
+		var tile := HexTileData.new()
+		tile.tile_id = p.x*1000+p.y; tile.tile_pos = p; tile.terrain = "plains"
+		tile.outpost_level = 0
+		tile.resources = {"food": 100.0, "wild_game": (5 if p == Vector2i(5,4) else 0)}
+		state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
+	state.teams[0] = team
+	var pos: Vector2i = fai._find_forage_tile(state, team)
+	assert(pos == Vector2i(5,4), "應選有 wild_game 的鄰格，實際=%s" % str(pos))
+	# 周圍全無 game → 回 -1,-1（掉去乞食/loot）
+	state.world.tiles[5*1000+4].resources["wild_game"] = 0
+	var pos2: Vector2i = fai._find_forage_tile(state, team)
+	assert(pos2 == Vector2i(-1,-1), "周圍無 game 應回 (-1,-1)，實際=%s" % str(pos2))
+	print("find game tile OK")
 
 func _test_player_hunt_action() -> void:
 	print("--- 玩家 hunt 指令 ---")
@@ -3500,6 +3524,7 @@ func _test_survival_trigger_urgent() -> void:
 	team.leader_id = 200
 	state.teams[100] = team
 	state.team_discovered[100] = []
+	_mk_game_tile(state, Vector2i(0, 0))   # 狩獵唯一：survival forage 需 wild_game
 	var fai := FactionAISystem.new()
 	fai._evaluate_survival(state, team)
 	assert(team.current_task in FactionAISystem.SURVIVAL_TASKS,
@@ -6026,6 +6051,7 @@ func _test_survival_reeval_in_loot() -> void:
 	leader.values = { "殘忍": 0.1, "好戰": 0.1, "義氣": 0.1, "信義": 0.1 }
 	state.persons[100] = leader; team.leader_id = 100
 	state.teams[0] = team
+	_mk_game_tile(state, Vector2i(0, 0))   # 狩獵唯一：survival forage 需 wild_game
 	var fai := FactionAISystem.new()
 	fai._evaluate_survival(state, team)
 	# loot 不再 early-return → _trigger_survival 跑 → previous_task 被設
@@ -7239,6 +7265,7 @@ func _test_arbiter_survival_beats_dispatch() -> void:
 	state.persons[200] = leader; team.leader_id = 200
 	state.teams[100] = team
 	state.team_discovered[100] = []
+	_mk_game_tile(state, Vector2i(0, 0))   # 狩獵唯一：survival forage 需 wild_game
 	# 先派貿易 (50)
 	assert(TaskArbiter.try_set(state, team, TeamData.TASK_TRADE, Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
 	# 斷糧 → survival 觸發應蓋掉貿易
@@ -8868,55 +8895,29 @@ func _test_breed_cap() -> void:
 # 階段1 覓食地基
 # ════════════════════════════════════════════════════════════════════
 
-func _test_forage_no_outpost() -> void:
-	print("--- Forage: 無 outpost 採食物 ---")
-	var state := WorldState.new()
-	state.world = WorldData.new()
+func _test_no_passive_forage_food() -> void:
+	print("--- 無被動覓食食物（狩獵唯一）---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 無 wild_game 的格 → 應零食物產出
 	var tile := HexTileData.new()
-	tile.tile_id = 4 * 1000 + 4
-	tile.tile_pos = Vector2i(4, 4)
-	tile.terrain = "plains"
-	tile.productivity = 1.0
-	tile.harvest_factor = 1.0
-	tile.outpost_level = 0   # 無 outpost
-	tile.resources = {"food": 200.0, "material": 50.0}
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "plains"
+	tile.productivity = 1.0; tile.harvest_factor = 1.0; tile.outpost_level = 0
+	tile.resources = {"food": 200.0}   # 有 food pool 但無 wild_game
 	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"求生": 0.9}
+	state.persons[0] = leader
 	var team := TeamData.new()
-	team.team_id = 0
-	team.population = 5
-	team.tile_pos = Vector2i(4, 4)
-	team.resources = {"food": 0.0, "material": 0.0}
+	team.team_id = 0; team.leader_id = 0; team.population = 3; team.tile_pos = Vector2i(4,4)
+	team.resources = {"food": 0.0}
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
-	rs.collect_resources(state, [0])
-	assert(float(team.resources["food"]) > 0.0, "無 outpost 應能覓食得食物，實際=%s" % str(team.resources["food"]))
-	assert(float(team.resources.get("material", 0)) == 0.0, "覓食不應得 material，實際=%s" % str(team.resources.get("material", 0)))
-	assert(float(tile.resources["food"]) < 200.0, "tile 食物應被扣，實際=%s" % str(tile.resources["food"]))
-	print("Forage no-outpost OK")
-
-func _test_forage_scale_cap() -> void:
-	print("--- Forage: 大群人均收入趨零 ---")
-	var rs := ResourceSystem.new()
-	var gains: Dictionary = {}
-	for pop in [5, 60]:
-		var state := WorldState.new()
-		state.world = WorldData.new()
-		var tile := HexTileData.new()
-		tile.tile_id = 4 * 1000 + 4
-		tile.tile_pos = Vector2i(4, 4)
-		tile.terrain = "plains"; tile.productivity = 1.0; tile.harvest_factor = 1.0
-		tile.outpost_level = 0
-		tile.resources = {"food": 200.0}
-		state.world.tiles[tile.tile_id] = tile
-		var team := TeamData.new()
-		team.team_id = 0; team.population = pop; team.tile_pos = Vector2i(4, 4)
-		team.resources = {"food": 0.0}
-		state.teams[0] = team
+	for _i in range(30):
 		rs.collect_resources(state, [0])
-		gains[pop] = float(team.resources["food"]) / float(pop)
-	assert(gains[60] < gains[5] * 0.2,
-		"大群人均應遠低於小群：pop5=%.3f pop60=%.3f" % [gains[5], gains[60]])
-	print("Forage scale-cap OK (人均 pop5=%.3f pop60=%.3f)" % [gains[5], gains[60]])
+	assert(float(team.resources["food"]) == 0.0,
+		"無 wild_game 格不應有任何食物產出（被動覓食已移除），實際=%s" % str(team.resources["food"]))
+	assert(float(tile.resources["food"]) == 200.0, "food pool 不應被無據點隊動")
+	print("no passive forage food OK")
 
 func _test_forage_episode_daily() -> void:
 	print("--- Forage: 日彙整 episode ---")
@@ -8949,6 +8950,12 @@ func _test_npc_forage_viability() -> void:
 		"大軍不應覓食，實際 task=%s" % big.current_task)
 	print("NPC forage viability OK")
 
+func _mk_game_tile(state: WorldState, pos: Vector2i) -> void:
+	var t := HexTileData.new()
+	t.tile_id = pos.x * 1000 + pos.y; t.tile_pos = pos; t.terrain = "plains"
+	t.outpost_level = 0; t.resources = {"wild_game": 5}
+	state.world.tiles[t.tile_id] = t
+
 func _mk_starving_team(tid: int, pop: int) -> TeamData:
 	var t := TeamData.new()
 	t.team_id = tid; t.population = pop; t.tile_pos = Vector2i(4, 4)
@@ -8961,7 +8968,7 @@ func _mk_state_with(team: TeamData) -> WorldState:
 	var tile := HexTileData.new()
 	tile.tile_id = 4 * 1000 + 4; tile.tile_pos = Vector2i(4, 4)
 	tile.terrain = "plains"; tile.productivity = 1.0; tile.harvest_factor = 1.0
-	tile.outpost_level = 0; tile.resources = {"food": 200.0}
+	tile.outpost_level = 0; tile.resources = {"food": 200.0, "wild_game": 5}   # 狩獵唯一：forage path 需 wild_game
 	s.world.tiles[tile.tile_id] = tile
 	var leader := PersonData.new(); leader.id = team.team_id * 1000
 	leader.team_id = team.team_id
