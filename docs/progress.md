@@ -9,9 +9,22 @@
 - **Bug7 已修**（interaction:233 stale-id race，一行守衛；warzone 2 年 OOB 3→0）。
 - **階段1 Plan 2b-1（野獸戰鬥核心）已 merge**：爪牙武器 grade + predator_density 生成/再生 + BeastSystem pseudo-team（負 id）+ encounter beast spawn/逃戰行為/爪牙攻擊/得肉清除 + npc_combat beast_strength/reward + 玩家 hunt_beast 指令。reuse 人類戰鬥機制。6 測試綠/2 年 multi died=no/coin_eq 0/無 beast 殘留。
 - **階段1 Plan 2b-2（野獸伏擊+偵測）已 merge**：AmbushSystem.detect（偵查/求生 vs 掠食者隱蔽）+ 伏擊編排（玩家→encounter/NPC→npc_combat 遵 Bug9）+ sim_runner 接入 + 獵勝戰鬥 exp + 掠食者 infamy 計數 + NPC 主動獵獸。7 測試綠/2 年 died=no/coin_eq 0/[Ambush]×5。
-- **✅ 階段1（開局生存）整套完成**：覓食 + 小獵物 + 野獸戰鬥 + 伏擊。世界仍 2 年無崩、守恆 0。
-- **下一步**：階段2（招人成幫）/ 玩家迴路其他部分 / 或先量測 tune 階段1 全 TEST VALUE（FORAGE_RATE / BEAST_PROFILE / AMBUSH 數值）。
-- 殘留待處理：UI 接入（覓食 episode / hunt 指令 / 伏擊 encounter 進場目前僅 headless 驗，未走真實 UI bridge）；Bug8（滅團 food 公庫）；Bug9（encounter player_id==-1 latent）。
+- **subsistence 改狩獵唯一（Plan 2c）已 merge**：移除被動覓食食物噴泉（量測 income~44>>burn~7、囤 300+天糧）→ 食物唯一來源=狩獵 wild_game。
+- **tile_food_init→cap bug 修 + outpost.terrain 釘地形**：村餓死真因（tile_food_init 不設 cap、村在山地）；survival_start 村釘平原 → 23→22 穩。
+- **絕境驅動多元生存行為（desperation-survival）已 merge**：`_trigger_survival` 重構 desperation×values（warning 個性門檻 / urgent 解閘人人有活路）+ pref helpers + 紮營（依個性軍/民 + 升 tag 清流亡 = 流浪→定居攀爬）。2 年 multi 行為多元（loot130/camp17/forage14/beg15/join9/hunt6）、survival_start 23→21、coin_eq 0、無誤觸。
+- **✅ 階段1（開局生存）整套完成 + 求生行為多元化**：覓食(已退場)→狩獵唯一 + 野獸戰鬥/伏擊 + 絕境多元生存。世界 2 年無崩、守恆 0。
+- **NPC 向上攀爬**：吞併→建勢力（npc_combat/interaction）、建造/紮營→定居成生產/軍隊（auto_settle + crude camp）、W4 設施階梯、pop→分裂。流浪→定居這階補齊。
+
+### 佇列（下一步選項）
+1. **SoloAI 主動尋家**（缺口）：穩定流民（窮+和平）目前 idle 到餓才反應；SoloAI 無「主動紮營/投靠」目標。補主動尋家驅動（reuse desperation helpers）= bottom-up 進展引擎。
+2. **狩獵受傷→醫療需求**（你提的）：小獵物零受傷不真實；補偶發傷 → medicine 經濟接入 + 第二維 precarity。
+3. **量測 tune 階段1 全 TEST VALUE**：FORAGE/BEAST_PROFILE/AMBUSH/desperation gate（loot 偏高 130 可調均衡）。一次一變因。
+4. 階段2（招人成幫）/ UI 接入（覓食 episode/hunt/伏擊進場僅 headless 驗）。
+
+### 殘留 bug / 量測限制
+- **team0(玩家隊)在 multi 餓死 = harness 限制**（玩家隊 _evaluate_survival early-return + auto-driver 不代跑玩家生存）非 cascade bug。要量測玩家生存需 NPC-觀測 config 或 auto-driver 補生存代跑。
+- Bug8（滅團 food 公庫 baseline）；Bug9（encounter player_id==-1 latent）。
+- invariants 新增：對稱性、玩法節奏（decisions-not-chores + 激情時刻）。
 - invariants 新增：對稱性（無玩家專屬機制）、玩法節奏（decisions-not-chores + 激情時刻）。
 
 ---
