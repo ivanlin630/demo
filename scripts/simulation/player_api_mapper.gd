@@ -120,6 +120,8 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		},
 		"fatigue_pct":      int(t.fatigue * 100),
 		"population":       t.population,
+		"anon_total":       AnonTierSystem.total_pop(t),
+		"armed_count":      _armed_count(t),
 		"wounded":         t.wounded,
 		"minor_population": t.minor_population,
 		"faction_id":       t.faction_id,
@@ -127,6 +129,12 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"starving":         _food_days(t) < 3.0,   # WARNING_DAYS=3
 		"task_summary": t.current_task
 	}
+
+# 武裝數 = named 成員（含 leader）+ anon 持武（anon 人口 × armed_anon_ratio）
+static func _armed_count(t: TeamData) -> int:
+	var named_count: int = t.named_members.size() + (1 if t.leader_id != -1 else 0)
+	var anon_pop: int = maxi(t.population - named_count, 0)
+	return named_count + roundi(float(anon_pop) * float(t.armed_anon_ratio))
 
 const FOOD_PER_PERSON_PER_DAY: float = 2.4
 static func _food_days(t: TeamData) -> float:
