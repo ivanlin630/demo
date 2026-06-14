@@ -7,6 +7,7 @@ func _initialize() -> void:
 	await _test_u19_forced_auto_enter()
 	await _test_u21_interact_paging()
 	await _test_u12_trade_str()
+	await _test_trade_offer_builder()
 	await _test_hunt_action_listed()
 	await _test_armed_count_shown()
 	await _test_member_equip_flow()
@@ -147,6 +148,25 @@ func _test_u12_trade_str() -> void:
 	node._trade_target_id = 6001
 	var s: String = node._build_trade_str()
 	_check("交易字串非『無可交換』", not s.contains("無可交換") and not s.contains("無資源"))
+	await _free_ui(node)
+
+# offer-builder：建構出價後 _build_trade_str 應顯雙欄(給/要)+天平，且非舊「無可交換」
+func _test_trade_offer_builder() -> void:
+	print("\n── 交易 offer-builder ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var ppos = st.teams[ptid].tile_pos
+	st.teams[ptid].resources["food"] = 50.0
+	var npc := TeamData.new(); npc.team_id = 7777; npc.tile_pos = ppos; npc.population = 5
+	npc.resources = {"coin": 100}
+	st.teams[7777] = npc
+	node._trade_mode = true; node._trade_target_id = 7777
+	st.player_state["pending_trade_target"] = 7777
+	st.player_state["trade_offer"] = {"player_gives": {"food": 10}, "player_wants": {"coin": 10}}
+	var s: String = node._build_trade_str()
+	_check("交易字串顯天平(給/要值)", s.contains("給") and s.contains("要"))
+	_check("非舊『無可交換』", not s.contains("無可交換"))
 	await _free_ui(node)
 
 # hunt：腳下 tile 有 wild_game → snapshot.available_actions 應含 hunt（P1 Layer 6 self/tile 動作）。

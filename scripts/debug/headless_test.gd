@@ -220,6 +220,8 @@ func _initialize() -> void:
 	_test_salary_budget_ratio()
 	_test_salary_full_pay_unchanged()
 	_test_trade_partner_requires_resident()
+	_test_trade_session_dto()
+	_test_trade_conservation()
 	_test_diplomacy_reject_cooldown()
 	_test_equip_order_no_oscillation()
 	_test_n1_leader_no_anon_pop_stable()
@@ -9381,3 +9383,58 @@ func _test_equip_member() -> void:
 	assert(int(team.resources.get("weapon_melee_low",0)) == 1, "卸下還回 team 池")
 	assert(state.persons[1].equipment["hand_1"].get("grade","") == "", "卸下後手1 應空")
 	print("equip_member OK")
+
+func _test_trade_session_dto() -> void:
+	print("--- get_trade_session DTO ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 5
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 20}
+	state.teams[0] = pt
+	var npc := TeamData.new(); npc.team_id = 1; npc.population = 5
+	npc.tile_pos = Vector2i(4,4); npc.resources = {"material": 30, "coin": 100}
+	state.teams[1] = npc
+	state.player_state["trade_offer"] = {"player_gives": {"food": 10}, "player_wants": {"coin": 10}}
+	state.player_state["pending_trade_target"] = 1
+	var qa := PlayerQueryApi.new()
+	var d: Dictionary = qa.get_trade_session(state, 1).get("data", {})
+	assert(d.get("feasible", false), "同格應 feasible")
+	assert(d.get("player_items", []).size() > 0, "玩家清單非空")
+	assert(d.get("target_items", []).size() > 0, "NPC 清單非空")
+	assert(d.has("give_value") and d.has("want_value"), "天平兩端")
+	assert(d.has("npc_would_accept"), "接受預估")
+	print("trade_session DTO OK")
+
+# 守恆：成交前後雙方 coin_eq（Σ qty×BASE_PRICE）總和不變，資源雙向轉移
+func _test_trade_conservation() -> void:
+	print("--- trade conservation ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 5
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 20}
+	state.teams[0] = pt
+	var nl := PersonData.new(); nl.id = 10; nl.team_id = 1
+	state.persons[10] = nl
+	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 10; npc.population = 5
+	npc.tile_pos = Vector2i(4,4); npc.resources = {"material": 30.0, "coin": 100}
+	state.teams[1] = npc
+	var bp: Dictionary = PlayerTradeSystem.BASE_PRICE
+	var coin_eq := func(t: TeamData) -> float:
+		var s: float = 0.0
+		for r in t.resources:
+			s += float(t.resources[r]) * float(bp.get(r, 0.0))
+		return s
+	var before: float = coin_eq.call(pt) + coin_eq.call(npc)
+	# 玩家給 food 5 換 coin 5（依 NPC food 估值，5 food≈10 coin > 5 coin → 接受）
+	var offer := {"player_gives": {"food": 5.0}, "player_wants": {"coin": 5}}
+	var res := PlayerTradeSystem.new().execute_offer(state, 0, 1, offer)
+	assert(res.get("ok", false), "成交應成功：%s" % str(res.get("msg","")))
+	assert(int(pt.resources.get("food",0)) == 45, "玩家 food 應減 5")
+	assert(int(pt.resources.get("coin",0)) == 25, "玩家 coin 應加 5")
+	assert(int(npc.resources.get("food",0)) == 5, "NPC food 應加 5")
+	assert(int(npc.resources.get("coin",0)) == 95, "NPC coin 應減 5")
+	var after: float = coin_eq.call(pt) + coin_eq.call(npc)
+	assert(abs(after - before) < 0.01, "coin_eq 守恆：%.2f vs %.2f" % [before, after])
+	print("trade conservation OK")
