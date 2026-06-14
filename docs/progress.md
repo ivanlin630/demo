@@ -24,7 +24,10 @@
 - **UI-flow 測試 harness 已 merge**：headless 實例化 TextUI.tscn + 注入 + 驅動 + 斷言 → 輸入流/選單/內容 class bug 自動回歸（省手動 GUI 驗）。`scripts/debug/ui_flow_test.gd`。
 - **B3 玩測 bug 批修已 merge**：attack_select 操作提示 / U14b 自隊武裝數(DTO+status) / U10b 玩家全滅→game-over。配 harness 自動測。
 - **B4 成員管理已 merge**：set_member_salary(S9)/set_armed_anon_ratio(U18)/equip_member·unequip_member(U13b) 指令+UI。守恆(裝備扣/還 team 池)。armed_anon_ratio 下游 encounter/npc_combat 有讀=有效。
-- **UI 修路線圖（「都做」）**：B3 ✅ → B4 ✅ → **交易介面**(功能,需 brainstorm→spec,下個) → **P3 全動作覆蓋**。U16 地圖迷霧(axial 投影)真視覺待互動迭代。
+- **UI 修路線圖（「都做」）**：B3 ✅ → B4 ✅ → **交易 offer-builder ✅（2026-06-15 merge）** → **P3 全動作覆蓋（spec+plan ready，待子 session）**。U16 地圖迷霧(axial 投影)真視覺待互動迭代。
+- **交易 offer-builder 已 merge（2026-06-15）**：`get_trade_session` DTO（雙方清單+估值+公平天平+NPC 接受預估，reuse local_value/evaluate_offer，零新交易邏輯）+ text_ui offer-builder（我給/我要欄+數量+天平+送出+翻頁），取代舊 auto-trade confirm。買/賣/以物易物同介面。DTO/守恆/flow 全綠。
+- **P3 全動作覆蓋 spec+plan 已寫（2026-06-15，待子 session）**：審計找 6 孤兒動作（公庫 deposit/withdraw、outpost build_facility/abandon、faction extract_treasury、team-target invite_settle/recruit_anon）。plan 5 task A→D→B→C→E。spec `2026-06-15-p3-action-coverage-design`、plan `2026-06-15-p3-action-coverage`。
+- **🗺 路線圖 + 已知問題解方彙整：`docs/roadmap.md`（2026-06-15 建）**。近期=P3→GUI run-verify 債清償（最高槓桿，轉 ui_flow 自動回歸）→U16；中期=tune/階段2 招人/②目標錨；含 Bug2/W4/Bug5/Bug6/Bug8/Bug9/U16 各附建議解 + 工量。圖形 UI 項（U5/U6/U7/S4）moot（TextUI 主用）。
 - U11 戰報/U12 交易/U13b 等 GUI 顯示部分：wiring 已接（harness/headless 驗 flow），真視覺待人工偶查。
 
 ### 佇列（下一步選項）
