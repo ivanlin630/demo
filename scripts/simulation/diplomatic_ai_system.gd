@@ -48,6 +48,8 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 		var other: TeamData = state.teams.get(other_id)
 		if other == null: continue
 		if other.faction_id == self_team.faction_id and self_team.faction_id != -1: continue
+		# invariant：外交/徵收需同格（嚴禁非同格互動）→ 隔空求貢/提案違規。對齊 process_on_move 同格外交。
+		if other.tile_pos != self_team.tile_pos: continue
 		# 被拒冷卻中 → 換下一個對象（防同對象連發 spam）
 		if state.world.current_tick < int(self_team.diplomacy_reject_cooldown.get(other.team_id, 0)):
 			continue
@@ -79,6 +81,9 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 					"proposal": action,
 				}
 				state.player_forced_event_id = str(randi())
+				# 設冷卻：玩家拒/超時後不立刻重發（原玩家路徑漏設 → 隔空 spam）
+				sender.diplomacy_reject_cooldown[target.team_id] = \
+					state.world.current_tick + REJECT_COOLDOWN
 				print("[Diplomacy] Team%d 向玩家發起 %s → 寫入 forced_event" % [sender.team_id, action])
 			return
 	print("[Diplomacy] Team%d → Team%d: %s" % [sender.team_id, target.team_id, action])

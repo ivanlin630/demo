@@ -426,3 +426,9 @@
 | U7 Camera | 每次 tick 回正 | C 鍵手動回正 |
 | D2 player 死亡 | Game Over 畫面 | 自動轉移到新角色 |
 | S4 人口分裂 | 提高門檻 | demo 期間停用 |
+
+### U20. 遠端 demand_tribute 對玩家 spam ✅ 已修（2026-06-14 run-verify）
+- **症狀**：Team5 在 (7,10) 對玩家 (4,4) 隔空 demand_tribute，每幾 tick 重寫 forced_event spam（玩家未動）
+- **根因**：`diplomatic_ai_system.try_proactive_diplomacy` 遍歷 `team_discovered`（所有已發現隊，非同格）→ 隔空提案，違反 invariant「外交/徵收需同格」；且玩家路徑漏設 reject_cooldown → forced_event 超時清掉後無限重發
+- **修**：(1) proactive diplomacy 加同格 gate `other.tile_pos != self_team.tile_pos → continue`（守不變量，對齊 process_on_move 同格外交）；(2) 玩家路徑補設 `diplomacy_reject_cooldown`
+- **連動**：同格 gate 降 NPC 遠端外交頻率（本就違規），NPC 外交改靠 process_on_move 同格觸發。頻率變化待量測
