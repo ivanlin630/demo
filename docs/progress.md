@@ -21,6 +21,11 @@
 - **文字 UI 翻新 P2（chrome 重整）已 merge**：status 增強(food_days/趨勢/成員健康)+hint 行+feedback 行+LogStrip(panel 共存)。helper 單元測綠;**GUI 視覺已人工 run-verify ✓**(2026-06-14 chrome 四區正常顯示)。玩測順帶抓 pre-existing 遭遇戰/互動 UI bug。
 - **遭遇戰/互動 UI bug 批修已 merge**：U10 戰後凍結✅/U11 命中回饋✅/U12 交易誤判✅/U13 卸裝[U]✅/U14 進場數(非bug)/U15 戰後按鍵閃退✅/U16 地圖迷霧 axial 投影(pre-existing 未修,記錄)。headless+ui_logic 全綠;**U10/U11/U12/U13/U15 GUI 待人工 run-verify**。**P3(全動作覆蓋照 §4 矩陣 + 調薪 set_member_salary 指令) 待寫**。
 
+- **UI-flow 測試 harness 已 merge**：headless 實例化 TextUI.tscn + 注入 + 驅動 + 斷言 → 輸入流/選單/內容 class bug 自動回歸（省手動 GUI 驗）。`scripts/debug/ui_flow_test.gd`。
+- **B3 玩測 bug 批修已 merge**：attack_select 操作提示 / U14b 自隊武裝數(DTO+status) / U10b 玩家全滅→game-over。配 harness 自動測。
+- **UI 修路線圖（「都做」）**：B3 play-bug ✅ → **B4 成員管理**(調薪 set_member_salary/武裝anon set/成員 equip 指令+UI，待寫) → **交易介面**(功能,需 brainstorm→spec) → **P3 全動作覆蓋**。U16 地圖迷霧(axial 投影)真視覺待互動迭代。
+- U11 戰報/U12 交易/U13b 等 GUI 顯示部分：wiring 已接（harness/headless 驗 flow），真視覺待人工偶查。
+
 ### 佇列（下一步選項）
 - ~~狩獵受傷→醫療~~ **已涵蓋**：危險獸走真戰鬥（encounter/npc_combat）→ body_parts 傷 → 戰後 `resolve_negative_flags` 耗 medicine。小獵物抽象 roll 免傷（合理）。無需另做。
 1. **UI 接入（player 可玩性）**：stage-1 全機制（覓食/狩獵/hunt 指令/野獸/伏擊/求生）目前**僅 headless 驗,玩家無法經 UI 玩**。原 arc 目標「世界合理→轉玩家迴路」。team0 harness 餓死症結也因玩家無 UI 自驅。
