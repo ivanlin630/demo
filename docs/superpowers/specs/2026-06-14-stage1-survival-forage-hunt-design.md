@@ -4,56 +4,45 @@
 > 議題：玩家核心迴路定為 Kenshi 型「下而上生存起家」。但無據點的流民小隊**現在沒有任何食物收入**（`collect_resources` 卡 `outpost_level>0`、無 forage），吃完初始糧必餓死 → 開局不可玩。本 spec 補開局生存地基：覓食（食物地基）+ 狩獵（texture / 激情時刻），玩家側與 NPC 側對稱。
 >
 > 本 spec 屬玩家核心迴路 4 階段拆分的**階段1**（階段2 招人 / 階段3 據點 / 階段4 成勢力，皆後續獨立 spec）。
+>
+> **修訂（2026-06-14 量測後 — subsistence 改狩獵唯一）**：初版被動覓食（`_forage_from_tile` 抽 tile food）2 年量測露餡為**食物噴泉**（無據點小隊 income ~44/天 >> burn ~7 → 累積 300+ 天存糧、無遷徙/定居壓力，違背「減緩餓死不餵飽」意圖）。根因：每小時採 ×24/天 + 平原 regen 回填快過抽取 → 枯竭沒咬到。**改為：無據點隊零被動食物，subsistence = 狩獵（小獵物 roll + 野獸），靠 `wild_game`（有限/枯竭/慢再生）。** 解噴泉 + 回到「食物=離散狩獵事件非無聲進度條」+ 真遊牧獵人精準度。下記 §1/§2 為修訂後設計；初版被動覓食碼待 Plan 2c 移除。
 
 ## 設計核心
 
-- **覓食不是新資源模型** — 是現有 `collect_resources` 的小 delta：去掉 outpost 閘 + 限食物 only + 比 outpost 更低的 forage 率。枯竭/回填/scale 鎖全用現成基底。
-- **大軍不能靠覓食活，是數學自然結果**：收入端 `pop_mult` 封頂 2.0、消耗端 `pop` 線性 → 大群人均收入趨零。NPC 不亂覓食則靠 survival AI 加一條 path + viability 門檻（不是戰略引擎）。
+- **無據點隊零被動食物，subsistence = 狩獵**：食物只來自獵 `wild_game`（小獵物 roll）+ 野獸（肉）。無 game 的格 → 無糧 → 必遷。`wild_game` 有限、枯竭、慢再生 → 遊牧獵人精準度，逼定居（農田=穩定糧）。
+- **大軍不能靠狩獵活，是數學自然結果**：`wild_game` 每格有限上限、命中 roll，大群人均獵獲趨零 → 大軍靠補給/劫掠非狩獵。NPC 不亂獵靠 survival AI 一條 path + 戰力/糧況門檻（不是戰略引擎）。
 - **狩獵分層**：小獵物 = 抽象求生 roll（緩檔一行字）；危險野獸 = 進遭遇戰（激情時刻，全控真風險）。野獸 = 臨時 pseudo-team，復用既有兩條戰鬥路徑。
 - **節奏雙檔**：緩檔 zero grind（設 task → 跳時間 → 食物以離散敘述 episode 進，岔路才介入）；激情檔玩家冒險自找（全手動、真傷亡）。
 - **對稱**：覓食 / 狩獵玩家與 NPC 走同一套食物 + 戰鬥數學，無玩家專屬機制。
 
 ## 不變量
 
-- **覓食只給食物**：material / ore / goods 仍需 outpost；forage 不繞過據點經濟。
-- **覓食必枯竭且 scale-capped**：抽取率 > tile 回填率（停駐→當地抽乾）；收入隨 `pop_mult`（≤2.0）封頂、消耗隨 `pop` 線性 → 大群人均趨零。此性質是「大軍不能覓食」的唯一保證，不得用特例 code 取代。
+- **無據點隊食物唯一來源 = 狩獵**：無被動 tile-food 採集；material / ore / goods 仍需 outpost。
+- **狩獵必枯竭且 scale-capped**：獵獲扣 `wild_game`（有限/慢再生）；每格 game 有限 + 命中 roll → 大群人均獵獲趨零（大軍不能靠狩獵活）。此為「逼遷徙/定居」與「大軍不靠狩獵」的保證，不得用特例 code 取代。
 - **野獸守恆中性**：beast pseudo-team 無 coin / 有限資源；給的「肉」= 食物（不在 coin_eq 審計），用完即清。野獸不持有、不路由有限資源，不破守恆。
 - **狩獵風險真實**：失敗 / 反擊走**既有戰鬥傷亡機制**（encounter 逐 unit body_parts；npc_combat `_apply_casualties` 依 named:anon 比機率挑人 + 隨機部位累傷 → 要害 critical / 肢體 severed 才死），**非飢餓的「弱者先死」順序**（那是斷糧 minor→anon→named）。minor 不參戰、不在戰鬥傷亡內。成員陣亡為永久後果。
 - **對稱**：任一新機制（forage path / 狩獵 / 野獸戰）NPC 必須同樣能用，無玩家專屬分支（見 invariants「對稱性」）。
 
-## 1. 覓食（食物地基）
+## 1. Subsistence = 狩獵（無被動覓食）
 
-### tile 基底（已存在，不改）
-`tile.resources["food"]`（平原初始 100-300）、`resource_cap["food"]`、`regenerate_tiles`（平原 8×harvest_factor/tick 回填至 cap）。
+### 無據點隊零被動食物
+`collect_resources` 的 `outpost_level==0` 分支**不採 tile food**（移除初版 `_forage_from_tile`）。無據點隊食物收入歸零 → 必須狩獵。`tile.resources["food"]` 池保留供 outpost 經濟，不再被無據點隊抽。
 
-### 改動：`resource_system.collect_resources`
-現況 line 47 `if tile.outpost_level == 0: continue` → 無據點直接跳過。
+### 食物 = 狩獵 `wild_game`
+小獵物（兔/鹿）抽象 roll（§2）+ 野獸肉（§3）。`wild_game` 有限、每格上限、慢月再生 → 一格獵完即枯 → 遊牧。命中 roll + 有限存量 → 大群人均趨零（大軍不靠狩獵）。
 
-改為：無 outpost 時走 **forage 分支**（限食物、低率），有 outpost 維持現狀。
+### 表現：離散敘述 episode（不變）
+獵獲走離散事件流（「獵得野兔 +N / 空手而回 / 追鹿入林→遭遇戰」），日邊界彙整避免 spam（沿用 `forage_today` + episode 管道）。
 
-```gdscript
-const FORAGE_RATE: float = 0.02   # TEST VALUE — 低於 COLLECT_RATE(0.05)；只減緩餓死不餵飽
-# outpost_level == 0：
-#   只採 tile food（material/ore/goods 跳過）
-#   gain = productivity × tile.food × FORAGE_RATE × pop_mult × work_morale × harvest_factor
-#         （無 outpost_mult、無 farming_level）
-#   食物進 team.resources["food"]（不課稅、無公庫）
-#   抽乾本格 food（既有扣減邏輯）→ 枯竭
-```
+## 2. 小獵物（抽象 roll，subsistence 主力）
 
-枯竭 + scale 鎖（pop_mult≤2 vs burn 線性）→ 停駐慢性餓死、大軍人均趨零，自然逼遷徙 / 定居 / 改劫掠。
-
-### 表現：離散敘述 episode
-覓食所得**不靜默涓滴**，而是離散事件流。緩檔推進中跳出具體結果（採到野莓 +N / 一無所獲 / 追獵入林）。技術：復用既有 event / message 流（`SimMessageSystem` 或 event log），日邊界結算彙整成一條，避免 per-tick spam。
-
-## 2. 小獵物（抽象 roll）
-
-緩檔內，低風險小獵物（兔/鳥）= 求生技能判定，無場景：
+無場景的低風險小獵（兔/鹿），求生技能判定 — **這是無據點隊的主要食物源**：
 
 ```gdscript
-# 求生(survival skill) + 偵查 → roll 命中 → +食物（小塊）
-# 失敗 → 空手 / 偶發小傷（flavor）
-# 同樣抽 tile.wild_game（見 3）→ 枯竭
+# 求生(+偵查) → roll 命中 → +食物（扣 1 wild_game）；失敗 → 空手
+# active=主動狩獵（高命中）/ passive=移動/駐紮時自動嘗試（低命中）
+# 命中率/產量須撐得起「能活但險」的遊牧獵人（待量測 tune）— 非噴泉、非餓死
+# 無 wild_game 的格 → 0 產出 → 逼遷徙找獵物 / 定居
 ```
 
 ## 3. 野獸 + 狩獵（texture / 激情時刻）
