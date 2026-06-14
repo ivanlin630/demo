@@ -46,9 +46,16 @@ VBox 動態加 Label（仿既有 AlertBar，不改 .tscn）：
 
 **鐵則：現有 player 指令一律 UI 可達，不遺漏。** registry 現 63 動作。
 
-- **覆蓋審計**：列 `player_command_system` registry 全 63 動作 → 對照 text_ui 已接 / 未接，補齊未接的（含**調稅 `set_tribute_rate`**、outpost build/upgrade/farming/manufacturing、faction goal/order、subteam、trade、recruit、treasury/storage…）。
-- **調薪缺口（S9，需先補指令）**：玩家設 named 成員薪資**無指令**（grep 空）→ 屬 sim 側缺口，非純 UI。Phase 3 前置：`player_command_system` 補 `set_member_salary`（玩家管 loyalty 的手段，S9 設計意圖）→ 再上 UI。
-- 每動作經 `available_actions` DTO 驅動（contextual 可用性），UI 只渲染清單，不硬編動作邏輯。
+**覆蓋審計結果（2026-06-14，text_ui grep vs registry）：**
+
+已接（~28）：attack / build_outpost / upgrade_outpost·farming·manufacturing / demolish_outpost / dispatch·order·recall_subteam / set_faction_goal·order·clear_member_order / leave·betray·disband_faction / recruit·recruit_anon / gather_intel·confirm_gather_intel / confirm·cancel·submit_trade·trade / subjugate_enemy / take·leave_loot / surrender_in·pre_encounter / accept_encounter / set_tribute_rate。equip/unequip/deposit_item/take_team_item（裝備欄/物品欄）已接。
+
+**缺口（P3 補齊，不靠用戶記）：**
+- **self/據點/公庫類**（真缺，需 panel 或 self-action 層）：`hunt`·`hunt_beast`（P1 暴露/P3 接 UI）、`build_facility`、`abandon_outpost`、`deposit_to_storage`·`withdraw_from_storage`（outpost 公庫存取，異於 team 物品欄）、`extract_treasury`（提領公庫）、`establish_faction`、`invite_settle`。
+- **team-target 類**（P3 須逐一驗動態 interact 清單是否已露；未露則補）：`demand_tribute`、`propose_alliance`、`extort`、`offer_surrender`、`respond_aid_request`。
+- **調薪（S9，需先補指令）**：玩家設 named 成員薪資**無 registry 指令** → sim 側缺口。Phase 3 前置：`player_command_system` 補 `set_member_salary`（玩家管 loyalty 手段，S9 意圖）→ 再上 UI。
+
+**P3 Task 0 = 重跑此審計**（registry 全動作 × text_ui 覆蓋 grep）產生最終 gap 清單，逐項補。每動作經 `available_actions` DTO 驅動（contextual），UI 只渲染、不硬編動作邏輯。
 
 ## 5. stage-1 互動接線（text_ui）
 
