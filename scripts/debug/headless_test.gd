@@ -320,6 +320,10 @@ func _initialize() -> void:
 	# ── SoloAI 主動尋家 + 承諾慣性 ──
 	_test_solo_commitment()
 	_test_solo_seek_home()
+	# ── 文字 UI Phase 1: API 暴露 ──
+	_test_location_game_predator()
+	_test_precarity_dto()
+	_test_self_actions()
 	quit()
 
 func _test_wild_game_seeded() -> void:
@@ -9173,3 +9177,56 @@ func _test_solo_seek_home() -> void:
 	assert(t1.current_task == "掠奪" or t1.current_task == "攻擊",
 		"好戰盜匪應 roving 非尋家，實際=%s" % t1.current_task)
 	print("solo seek home OK")
+
+# ── 文字 UI Phase 1: API 暴露 ──
+func _test_location_game_predator() -> void:
+	print("--- location_context 獵物獸情 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "forest"
+	tile.resources = {"food": 80.0, "wild_game": 4, "predator_density": 1}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"偵查": 0.9}
+	state.persons[0] = leader; state.player_id = 0
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
+	state.teams[0] = team
+	var lc: Dictionary = PlayerApiMapper.map_location_context(state, 4, 4)
+	assert(int(lc.get("wild_game", -1)) == 4, "應暴露 wild_game，實際=%s" % str(lc.get("wild_game")))
+	assert(lc.has("predator"), "應有 predator 旗")
+	assert(int(lc.get("food", -1)) == 80, "應暴露 tile food")
+	print("location game/predator OK")
+
+func _test_precarity_dto() -> void:
+	print("--- 糧 precarity DTO ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0
+	team.population = 5; team.resources = {"food": 24.0}   # 5×2.4=12/day → 2 天
+	state.teams[0] = team
+	var ct: Dictionary = PlayerApiMapper.map_controlled_team(state)
+	assert(ct.has("food_days"), "controlled_team 應有 food_days")
+	assert(abs(float(ct["food_days"]) - 2.0) < 0.2, "food_days≈2，實際=%s" % str(ct["food_days"]))
+	assert(ct.get("starving", false) == true, "2 天 < WARNING(3) → starving")
+	print("precarity DTO OK")
+
+func _test_self_actions() -> void:
+	print("--- available_actions self 動作(hunt/hunt_beast) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "forest"
+	tile.resources = {"wild_game": 3, "predator_density": 1}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
+	state.teams[0] = team
+	var qa := PlayerQueryApi.new()
+	var res: Dictionary = qa.get_available_actions(state, {})
+	var ids: Array = []
+	for a in res.get("data", {}).get("actions", []):
+		ids.append(a.get("action_id", ""))
+	assert("hunt" in ids, "腳下有 wild_game 應列 hunt，實際=%s" % str(ids))
+	assert("hunt_beast" in ids, "腳下有 predator 應列 hunt_beast")
+	print("self actions OK")

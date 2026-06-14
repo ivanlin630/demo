@@ -384,7 +384,32 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			 "target": {"kind": "team", "team_id": focus_team_id, "member_id": -1, "tile_q": -1, "tile_r": -1}}
 		))
 
+	# Layer 6: 玩家隊 self/tile 動作（hunt/hunt_beast，依腳下 tile）
+	var self_tile: HexTileData = pt_tile_self(state, ptid)
+	if self_tile != null:
+		if int(self_tile.resources.get("wild_game", 0)) > 0:
+			actions.append(PlayerApiMapper.map_available_action(
+				"hunt", _action_label("hunt"), true, "",
+				{ "allowed_kinds": PackedStringArray(["none"]),
+				  "requires_visible_target": false, "requires_forced_interaction": false,
+				  "allows_self_target": false },
+				"execute_action",
+				{ "action_id": "hunt", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
+		if int(self_tile.resources.get("predator_density", 0)) > 0:
+			actions.append(PlayerApiMapper.map_available_action(
+				"hunt_beast", _action_label("hunt_beast"), true, "",
+				{ "allowed_kinds": PackedStringArray(["none"]),
+				  "requires_visible_target": false, "requires_forced_interaction": false,
+				  "allows_self_target": false },
+				"execute_action",
+				{ "action_id": "hunt_beast", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
+
 	return actions
+
+func pt_tile_self(state: WorldState, ptid: int) -> HexTileData:
+	if ptid == -1 or not state.teams.has(ptid): return null
+	var pt: TeamData = state.teams[ptid]
+	return state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
 
 func get_and_clear_alerts(state: WorldState) -> Array:
 	var alerts: Array = state.player_alerts.duplicate()
@@ -422,6 +447,8 @@ func _action_label(action_id: String) -> String:
 		"extort":                return "勒索"
 		"recruit":               return "招募"
 		"establish_faction":     return "建立勢力"
+		"hunt":                  return "狩獵"
+		"hunt_beast":            return "獵猛獸"
 		"take_loot":             return "收割戰利品"
 		"leave_loot":            return "放棄戰利品"
 		"recruit_anon":          return "招募匿名"
