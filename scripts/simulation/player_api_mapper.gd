@@ -122,6 +122,7 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"population":       t.population,
 		"anon_total":       AnonTierSystem.total_pop(t),
 		"armed_count":      _armed_count(t),
+		"armed_ratio":      t.armed_anon_ratio,
 		"wounded":         t.wounded,
 		"minor_population": t.minor_population,
 		"faction_id":       t.faction_id,
