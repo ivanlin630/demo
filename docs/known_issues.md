@@ -181,6 +181,18 @@
 - **結論**：spawn 數 = `named + min(pop × armed_anon_ratio, ANON_UNIT_CAP)`，正確（armed_anon_ratio<1 → 非全員上場為設計）。headless 加公式 assert 佐證。
 - **觀感補**：`encounter_view` 加「我方 X 敵方 Y」在場兵力 label，避免玩家誤以為人數錯。
 
+### U17. 遭遇戰旗色反了（玩家當攻擊方）✅ 已修（2026-06-14，待 run-verify）
+- **症狀**：玩家發起攻擊時自家 anon 顯紅(像敵)、敵方顯綠(像友) — 直覺相反
+- **根因**：`encounter_view._draw` 用 `is_enemy = team_id==attacker_id`；玩家當攻擊方時 attacker_id=自家 → 自家 anon 判敵(紅)、敵方(defender)落 else(綠)
+- **修**：改按「自家隊 vs 敵隊」上色（玩家=藍/自家=綠/敵=紅），不用 attacker_id
+- **待 run-verify**
+
+### U18. 玩家無法武裝 anon（UI/指令皆缺）
+- **症狀**：找不到 UI 武裝匿名兵
+- **根因**：`armed_anon_ratio`/`equip_order` 由 `faction_ai` 為 NPC 自動設，**玩家無指令**（grep `player_command_system` 空）→ UI 自然無入口。同 S9 調薪類缺口
+- **修向**：補 `player_command_system` 設 armed_anon_ratio/equip_order 指令 → 再上 UI。屬 P3 全動作覆蓋前置（sim 側缺口）
+- **優先**：M
+
 ### U15. 遭遇戰後按鍵閃退 ✅ 已修（2026-06-14，待 run-verify）
 - **症狀**：戰鬥一結束（戰後「按任意鍵離開」畫面）按鍵 → 整個遊戲閃退（2026-06-14 玩測）。
 - **根因**：`text_ui_main._input` 無 overlay 守衛。`encounter_view` overlay 顯示時主畫面 `_input` 仍處理同鍵；`KEY_Q`→`get_tree().quit()` 僅由 `is_encounter_active()` 把關。U10 戰後畫面 `encounter_active=false` 但 overlay 仍可見 → 玩家按遭遇戰移動鍵 **Q** 想離開 → 觸發 `quit()` → 閃退。WASD 亦漏到 `_move_cursor` 漂移世界游標。

@@ -219,17 +219,20 @@ func _draw() -> void:
 			draw_colored_polygon(pts, Color(0.3, 0.6, 0.3))
 			draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0, 0, 0, 0.4), 1.0)
 
-	# Draw units
+	# Draw units — 上色按「自家隊 vs 敵隊」(非 attacker_id：玩家當攻擊方時 attacker_id=自家會反色)
+	var player_team_id: int = -1
+	var pp = state.persons.get(state.player_id) if state.player_id != -1 else null
+	if pp != null: player_team_id = pp.team_id
 	for unit in state.encounter_units:
 		var pos: Vector2i = unit.get("pos", Vector2i(-1, -1))
 		if pos.x < 0: continue
 		var center: Vector2 = _world_to_screen(_hex_center(pos))
 		var is_player: bool = unit.get("person_id", -1) == state.player_id
 		var team_id: int    = unit.get("team_id", -1)
-		var attacker_id: int = state.encounter_attacker_id
-		var is_enemy: bool  = team_id == attacker_id and not is_player
+		var is_own: bool    = (team_id == player_team_id)   # 自家(玩家 leader 藍 / 自家 anon 綠)
 
-		var color: Color = Color.DODGER_BLUE if is_player else (Color.RED if is_enemy else Color.GREEN)
+		# 玩家=藍、自家=綠、敵=紅（紅=敵直覺）
+		var color: Color = Color.DODGER_BLUE if is_player else (Color.GREEN if is_own else Color.RED)
 		draw_circle(center, 12.0 * _zoom, color)
 		# Dead: draw as grey (over color circle)
 		if _is_unit_dead(unit, state):
