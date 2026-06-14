@@ -68,6 +68,7 @@ func _setup_registry() -> void:
 		"submit_trade_offer":     _action_submit_trade_offer,
 		"cancel_trade":           _action_cancel_trade,
 		"set_tribute_rate":       _action_set_tribute_rate,
+		"set_armed_anon_ratio":   _action_set_armed_ratio,
 		"build_outpost":          _action_build_outpost,
 		"upgrade_outpost":        _action_upgrade_outpost,
 		"upgrade_farming":        _action_upgrade_farming,
@@ -351,6 +352,13 @@ func _action_set_tribute_rate(state: WorldState, _target_id: int, pt: TeamData, 
 	f_tr.tribute_rate = rate
 	print("[PlayerCmd] set_tribute_rate → %.2f" % rate)
 	return { "ok": true, "msg": "徵收率設為 %.0f%%" % (rate * 100) }
+
+# U18：設自隊匿名武裝比例（none-target，比照 set_tribute_rate）
+func _action_set_armed_ratio(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var r: float = clampf(float(state.player_state.get("armed_ratio_input", pt.armed_anon_ratio)), 0.0, 1.0)
+	pt.armed_anon_ratio = r
+	print("[PlayerCmd] set_armed_anon_ratio → %.2f" % r)
+	return { "ok": true, "msg": "武裝比例設為 %.0f%%" % (r * 100.0) }
 
 func _action_build_outpost(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var outpost_type: String = str(state.player_state.get("build_type", "civilian"))
@@ -1051,7 +1059,61 @@ func execute_action_with_target(state: WorldState, action: String, target: Dicti
 			var from_team_id: int = target.get("team_id", -1)
 			var person_id: int    = target.get("member_id", -1)
 			return _recruit_named_internal(state, pt, from_team_id, person_id)
+		"set_member_salary":
+			return _action_set_member_salary(state, target, pt)
+		"equip_member":
+			return _action_equip_member(state, target, pt)
+		"unequip_member":
+			return _action_unequip_member(state, target, pt)
 	return { "ok": false, "msg": "不支援 member 目標的行動: %s" % action }
+
+# S9：玩家調自隊名成員薪資。amount 經 player_state["salary_input"] 暫存。
+func _action_set_member_salary(state: WorldState, target: Dictionary, pt: TeamData) -> Dictionary:
+	var mid: int = int(target.get("member_id", -1))
+	var m: PersonData = state.persons.get(mid)
+	if m == null or not pt.named_members.has(mid):
+		return { "ok": false, "msg": "非自隊成員" }
+	var amt: float = float(state.player_state.get("salary_input", m.salary))
+	m.salary = maxf(amt, 0.0)
+	print("[PlayerCmd] set_member_salary P%d → %.0f" % [mid, m.salary])
+	return { "ok": true, "msg": "%s 薪資設為 %.0f" % [m.person_name, m.salary] }
+
+# U13b：從自隊武器池裝備名成員 slot（扣 team 資源；原槽位裝備還回池）。
+func _action_equip_member(state: WorldState, target: Dictionary, pt: TeamData) -> Dictionary:
+	var mid: int    = int(target.get("member_id", -1))
+	var slot: String  = String(target.get("slot_id", ""))
+	var grade: String = String(target.get("item_grade", ""))
+	var m: PersonData = state.persons.get(mid)
+	if m == null or not pt.named_members.has(mid):
+		return { "ok": false, "msg": "非自隊成員" }
+	if slot == "" or grade == "" or int(pt.resources.get(grade, 0)) <= 0:
+		return { "ok": false, "msg": "無此裝備" }
+	# 先卸原槽（pool 裝備還回池）
+	var cur: Dictionary = m.equipment.get(slot, {})
+	if cur.get("type", "none") == "pool" and cur.get("grade", "") != "":
+		pt.resources[cur["grade"]] = int(pt.resources.get(cur["grade"], 0)) + 1
+	pt.resources[grade] = int(pt.resources[grade]) - 1
+	m.equipment[slot] = { "type": "pool", "grade": grade }
+	if ItemAttributes.is_2h(grade):
+		m.equipment["hand_2"] = { "type": "2h_ref" }
+	print("[PlayerCmd] equip_member P%d slot=%s grade=%s" % [mid, slot, grade])
+	return { "ok": true, "msg": "%s 裝備 %s" % [m.person_name, grade] }
+
+# U13b：卸下名成員 slot 裝備，還回 team 武器池。
+func _action_unequip_member(state: WorldState, target: Dictionary, pt: TeamData) -> Dictionary:
+	var mid: int   = int(target.get("member_id", -1))
+	var slot: String = String(target.get("slot_id", ""))
+	var m: PersonData = state.persons.get(mid)
+	if m == null or not pt.named_members.has(mid):
+		return { "ok": false, "msg": "非自隊成員" }
+	var cur: Dictionary = m.equipment.get(slot, {})
+	if cur.get("type", "none") == "pool" and cur.get("grade", "") != "":
+		pt.resources[cur["grade"]] = int(pt.resources.get(cur["grade"], 0)) + 1
+		if ItemAttributes.is_2h(cur["grade"]):
+			m.equipment["hand_2"] = { "type": "none", "grade": "" }
+	m.equipment[slot] = { "type": "none", "grade": "" }
+	print("[PlayerCmd] unequip_member P%d slot=%s" % [mid, slot])
+	return { "ok": true, "msg": "%s 卸下 %s" % [m.person_name, slot] }
 
 func _recruit_named_internal(state: WorldState, pt: TeamData,
 		from_team_id: int, person_id: int) -> Dictionary:

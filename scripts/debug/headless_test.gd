@@ -327,6 +327,10 @@ func _initialize() -> void:
 	_test_location_game_predator()
 	_test_precarity_dto()
 	_test_self_actions()
+	# ── B4 成員管理 ──
+	_test_set_member_salary()
+	_test_set_armed_ratio()
+	_test_equip_member()
 	quit()
 
 func _test_wild_game_seeded() -> void:
@@ -9317,3 +9321,63 @@ func _test_self_actions() -> void:
 	assert("hunt" in ids, "腳下有 wild_game 應列 hunt，實際=%s" % str(ids))
 	assert("hunt_beast" in ids, "腳下有 predator 應列 hunt_beast")
 	print("self actions OK")
+
+func _test_set_member_salary() -> void:
+	print("--- set_member_salary ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	var m := PersonData.new(); m.id = 1; m.team_id = 0; m.salary = 5.0
+	state.persons[0] = leader; state.persons[1] = m; state.player_id = 0
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.named_members = [1]
+	state.teams[0] = team
+	var cmd := PlayerCommandSystem.new()
+	state.player_state["salary_input"] = 12.0
+	var r: Dictionary = cmd.execute_action_with_target(state, "set_member_salary",
+		{"kind":"member","team_id":0,"member_id":1})
+	assert(r.get("ok", false), "set_member_salary 應成功，msg=%s" % str(r.get("msg","")))
+	assert(abs(state.persons[1].salary - 12.0) < 0.01, "成員薪資應=12，實際=%s" % str(state.persons[1].salary))
+	# 非自隊成員應拒
+	var r2: Dictionary = cmd.execute_action_with_target(state, "set_member_salary",
+		{"kind":"member","team_id":0,"member_id":999})
+	assert(not r2.get("ok", true), "非自隊成員應拒")
+	print("set_member_salary OK")
+
+func _test_set_armed_ratio() -> void:
+	print("--- set_armed_anon_ratio ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.armed_anon_ratio = 0.0
+	state.teams[0] = team
+	var cmd := PlayerCommandSystem.new()
+	state.player_state["armed_ratio_input"] = 0.7
+	var r: Dictionary = cmd.execute_action(state, -1, "set_armed_anon_ratio")
+	assert(r.get("ok", false), "應成功")
+	assert(abs(team.armed_anon_ratio - 0.7) < 0.01, "ratio=0.7，實際=%s" % str(team.armed_anon_ratio))
+	# 越界夾住
+	state.player_state["armed_ratio_input"] = 1.5
+	cmd.execute_action(state, -1, "set_armed_anon_ratio")
+	assert(team.armed_anon_ratio <= 1.0, "夾在 1.0")
+	print("set_armed_ratio OK")
+
+func _test_equip_member() -> void:
+	print("--- equip_member ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	var m := PersonData.new(); m.id = 1; m.team_id = 0
+	state.persons[0] = leader; state.persons[1] = m; state.player_id = 0
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.named_members = [1]
+	team.resources = {"weapon_melee_low": 1}
+	state.teams[0] = team
+	var cmd := PlayerCommandSystem.new()
+	var r: Dictionary = cmd.execute_action_with_target(state, "equip_member",
+		{"kind":"member","team_id":0,"member_id":1,"slot_id":"hand_1","item_grade":"weapon_melee_low"})
+	assert(r.get("ok", false), "equip_member 應成功，msg=%s" % str(r.get("msg","")))
+	assert(state.persons[1].equipment["hand_1"].get("grade","") == "weapon_melee_low", "成員手1 應裝武器")
+	assert(int(team.resources.get("weapon_melee_low",0)) == 0, "武器從 team 池扣 1")
+	# unequip 還回
+	cmd.execute_action_with_target(state, "unequip_member",
+		{"kind":"member","team_id":0,"member_id":1,"slot_id":"hand_1"})
+	assert(int(team.resources.get("weapon_melee_low",0)) == 1, "卸下還回 team 池")
+	assert(state.persons[1].equipment["hand_1"].get("grade","") == "", "卸下後手1 應空")
+	print("equip_member OK")
