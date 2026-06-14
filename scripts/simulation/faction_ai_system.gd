@@ -2060,13 +2060,23 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 		return false
 	if tile.terrain == "mountain":
 		return false
-	tile.outpost_type = "civilian"
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var martial: float = float(leader.values.get("好戰", 0.5)) if leader else 0.5
+	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
+	var is_military: bool = (martial > 0.6 or ambition > 0.7)   # TEST VALUE 門檻
+	tile.outpost_type = "military" if is_military else "civilian"
 	tile.outpost_level = 1
 	tile.outpost_owner = team.team_id
 	# 種子糧 + 同抬 cap（沿用 tile_food_init bug 修原則，否則 regen 卡地形預設）
 	tile.resources["food"] = maxf(float(tile.resources.get("food", 0)), CRUDE_CAMP_FOOD_SEED)
 	tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), CRUDE_CAMP_FOOD_SEED)
-	print("[CrudeCamp] Team%d 紮營 @(%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
+	# 身分躍遷（比照 _auto_settle_builder）：升軍/生產 tag、清流亡（流浪→定居，非一律生產）
+	var new_tag: String = TeamData.TAG_MILITARY if is_military else TeamData.TAG_PRODUCE
+	if not team.tags.has(new_tag):
+		team.tags.append(new_tag)
+	team.tags.erase("流亡")
+	print("[CrudeCamp] Team%d 紮營 @(%d,%d) → %s" % [
+		team.team_id, team.tile_pos.x, team.tile_pos.y, tile.outpost_type])
 	return true
 
 func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> void:
