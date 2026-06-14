@@ -12,6 +12,7 @@
 - **只對無家隊**：gated `_find_own_outpost == -1`（已有據點不再找家）。
 - **全 reuse desperation helpers**：`_find_unowned_farmable_tile` / `establish_crude_camp`（到達結算）/ `_find_strong_neighbor`。零新機制，只接線。
 - **與 survival 分離但同動作**：SoloAI 在 **stable/idle**（不缺糧）觸發；`_trigger_survival` 在 **缺糧 <3 天**觸發。同樣紮營/投靠動作，不同觸發時機（主動 vs 被動）。
+- **承諾慣性（延續感）**：SoloAI 每次重評記住上次選的策略方向（`solo_intent`），重評時該方向**加 commitment 分** → 非明顯更優不換 → 止「這 tick 紮營下 tick 掠奪」的精神分裂。values 穩定 + 慣性 = 策略有延續。（更深的「目標錨」見待 spec，不在本 spec）
 
 ## 不變量
 
@@ -56,6 +57,26 @@ best_task 勝出後 match 補：
 
 > 數值（pref 權重 / `_tag_weight` for 紮營/投靠）= TEST VALUE，量測 tune。
 
+## 2. 承諾慣性（延續感）
+
+`team_data.gd` 加 `var solo_intent: String = ""`（上次 SoloAI 選的策略方向）。
+
+`_evaluate_solo` 算完 scores、選 best 前，對上次方向加慣性分：
+
+```gdscript
+const SOLO_COMMITMENT_BONUS: float = 0.15   # TEST VALUE — 慣性加成（非明顯更優不換）
+# ...算完 scores 後：
+if team.solo_intent != "" and scores.has(team.solo_intent):
+    scores[team.solo_intent] += SOLO_COMMITMENT_BONUS
+# ...選 best_task 後：
+if best_task != "idle":
+    team.solo_intent = best_task   # 記住，供下次加慣性
+```
+
+效果：values 穩定 → 同方向分數本就近似；慣性再壓住**情境抖動**（如獵物暫時不在 → 掠奪型不立刻改貿易，會續找獵物）。策略跨多 tick 連貫。
+
+> 慣性僅止 flip-flop，非鎖死 — 情境明顯變（出現更高分選項超過 bonus）仍會換。完成/釋放不清 `solo_intent`（個性傾向延續）；可選：投靠/紮營成功定居後該團不再走 SoloAI（有家），intent 自然失效。
+
 ## 風險
 
 - **勿 uniform**：紮營/投靠是評分項，與 roving 競爭；好戰/貪婪/商業型應壓過尋家。量測：行為分佈仍多元（攻擊/掠奪/貿易/紮營/投靠並存），非全定居。
@@ -67,4 +88,5 @@ best_task 勝出後 match 補：
 ## 測試
 
 - 單元：求生型無家流浪團（求生/慎重高）SoloAI → 選紮營（或投靠）；好戰/貪婪盜匪 → 攻擊/掠奪壓過尋家（不找家）；有 own outpost 隊 → 不評尋家；無可農地 + 無強鄰 → 不選尋家（落 roving/idle）。
-- 整合：`game_sim_multi` 2 年 — 無家流浪團主動安身率 >0（[CrudeCamp]/投靠 較 desperation-only 增加）、行為仍多元（roving 未消失）、coin_eq 0、無新增 SCRIPT ERROR、無誤觸（有家隊不找家）。
+- 承諾慣性：同隊連續兩次 SoloAI 重評，情境未明顯變 → 選同方向（`solo_intent` 加成生效，不抖動）；出現明顯更高分選項（超 bonus）→ 仍會換。
+- 整合：`game_sim_multi` 2 年 — 無家流浪團主動安身率 >0（[CrudeCamp]/投靠 較 desperation-only 增加）、行為仍多元（roving 未消失）、**策略連貫**（同隊不每 cadence 換 task kind）、coin_eq 0、無新增 SCRIPT ERROR、無誤觸（有家隊不找家）。
