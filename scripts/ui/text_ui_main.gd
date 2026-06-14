@@ -158,6 +158,14 @@ func _process(_delta: float) -> void:
 	elif ps.get("encounter_active", false):
 		_bridge.cancel_advance()
 		_enter_encounter()
+	elif not _cached_snapshot.get("forced_interaction", {}).get("interaction_id", "").is_empty() \
+			and not _interact_mode and not _pre_encounter_mode:
+		# U19: 強制事件（乞食/繼承/勒索回應…）自動進互動模式顯選單，否則玩家無從回應 → 卡死
+		# （choose_heir 凍世界，更須自動進）。回應 handler/render 已在 interact mode 內。
+		_bridge.cancel_advance()
+		_interact_mode = true
+		_interact_target = -1
+		_refresh()
 
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey: return

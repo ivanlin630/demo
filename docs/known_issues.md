@@ -181,6 +181,25 @@
 - **結論**：spawn 數 = `named + min(pop × armed_anon_ratio, ANON_UNIT_CAP)`，正確（armed_anon_ratio<1 → 非全員上場為設計）。headless 加公式 assert 佐證。
 - **觀感補**：`encounter_view` 加「我方 X 敵方 Y」在場兵力 label，避免玩家誤以為人數錯。
 
+### U19. 強制事件無選單 → 卡死（H, blocker, 2026-06-14 run-verify 新發現）
+- **症狀**：強制事件（乞食/繼承/勒索回應等）觸發但畫面無選單，一直卡（choose_heir 還凍世界）
+- **根因**：`text_ui_main._process`（154-160）pre_encounter/encounter_active 有自動進模式，**一般 `forced_interaction` 無對等自動進選單** → 只顯「⚠強制事件」hint，玩家無從回應
+- **修向**：`_process` 偵測 `forced_interaction` 非空 → `cancel_advance` + 進 forced-response 模式（仿 pre_encounter）；新 `_forced_mode` + handler 列 `forced_interaction.responses` 供選
+
+### U10b. 全 Team 死亡直接退出（edge，2026-06-14 run-verify）
+- **症狀**：遭遇戰中玩家全隊死亡 → 直接退出（應走 game-over / choose_heir）
+- **修向**：encounter 結算偵測玩家隊全滅 → 接 `_handle_player_leader_death`/game-over，非靜默退出。低頻 edge
+
+### U11b. 戰報 label 未顯（U11 修了但 GUI 沒出，run-verify）
+- **症狀**：`_lbl_log` 戰報已加+wire（query_encounter_log）但玩家戰鬥沒看到
+- **疑因**：encounter_log 玩家戰鬥未填 / facade 回空 / label 被佈局擠出。需 GUI 查
+### U12b. 交易仍跳無資源（U12 direct preview 修沒對症，run-verify）
+- **症狀**：互動→交易仍誤判。direct preview 加了但 text_ui trade 流可能仍走舊 path
+### U13b. 裝備穿脫僅玩家，NPC named 成員無入口（run-verify）
+- **修向**：member 面板加成員 equip/unequip（equip_item slot 已支援,需 member-target UI）
+### U14b. 主畫面看不到自 team 武裝數（U14 reframe + U18，run-verify）
+- **症狀**：玩家想在平時 UI 看自隊武裝 anon 數,非進場後。併 U18（武裝 anon 指令）+ status 顯 armed 數
+
 ### U17. 遭遇戰旗色反了（玩家當攻擊方）✅ 已修（2026-06-14，待 run-verify）
 - **症狀**：玩家發起攻擊時自家 anon 顯紅(像敵)、敵方顯綠(像友) — 直覺相反
 - **根因**：`encounter_view._draw` 用 `is_enemy = team_id==attacker_id`；玩家當攻擊方時 attacker_id=自家 → 自家 anon 判敵(紅)、敵方(defender)落 else(綠)
