@@ -42,7 +42,15 @@ VBox 動態加 Label（仿既有 AlertBar，不改 .tscn）：
 - **feedback 行**（常駐）：上一指令成/敗 + 原因，著色（綠成/紅敗），持續到下個指令（不再瞬時擠 InputBar）。
 - **event log**：與 panel 共存（常駐最新 N 條，不被 panel 蓋）+ 分級著色 + 露 stage-1 episode。
 
-## 4. stage-1 互動接線（text_ui）
+## 4. 全動作覆蓋（Phase 3 — 現有功能一律上 UI）
+
+**鐵則：現有 player 指令一律 UI 可達，不遺漏。** registry 現 63 動作。
+
+- **覆蓋審計**：列 `player_command_system` registry 全 63 動作 → 對照 text_ui 已接 / 未接，補齊未接的（含**調稅 `set_tribute_rate`**、outpost build/upgrade/farming/manufacturing、faction goal/order、subteam、trade、recruit、treasury/storage…）。
+- **調薪缺口（S9，需先補指令）**：玩家設 named 成員薪資**無指令**（grep 空）→ 屬 sim 側缺口，非純 UI。Phase 3 前置：`player_command_system` 補 `set_member_salary`（玩家管 loyalty 的手段，S9 設計意圖）→ 再上 UI。
+- 每動作經 `available_actions` DTO 驅動（contextual 可用性），UI 只渲染清單，不硬編動作邏輯。
+
+## 5. stage-1 互動接線（text_ui）
 
 - **hunt / hunt_beast**：tile/互動選單列出（available_actions 驅動），站獵物/獸格可發起。hunt_beast → 起 encounter（既有 encounter_view 接管）。
 - **tile info**：顯 `wild_game` 數、`predator` 預警 tier（認知分級）。
