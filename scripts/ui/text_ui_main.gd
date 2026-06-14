@@ -55,6 +55,7 @@ var _pre_encounter_mode: bool = false
 # ── Trade submode ────────────────────────────────────────────────────────────
 var _trade_mode: bool = false
 var _trade_target_id: int = -1
+var _trade_page: int = 0   # offer-builder 清單分頁（>9 項翻頁）
 var _input_mode_allow_empty: bool = false
 
 var _cached_snapshot: Dictionary = {}
@@ -559,7 +560,7 @@ const MODE_KEYMAP: Dictionary = {
 	"subteam":       "[1-9]選隊 [N]派遣 [A]下令移動 [B]召回 [U/Esc]關閉",
 	"advisor":       "[1-9]選顧問問策 [V/Esc]關閉",
 	"intel":         "[1-5]選題 [Esc]取消",
-	"trade":         "[1]確認 [2/Esc]取消",
+	"trade":         "[數字]選項 [Enter]送出 [C]清 [,.]翻頁 [Esc]離開",
 	"pre_encounter": "[1]迎擊 [2]投降",
 }
 static func _mode_keymap(mode: String) -> String:
@@ -934,6 +935,8 @@ func _handle_interact_mode(keycode: int) -> void:
 				# 貿易預覽流程：進入 trade submode
 				if result.get("ok") and result.get("payload", {}).get("requires_preview", false):
 					_trade_target_id = result.get("payload", {}).get("preview_target_id", -1)
+					_bridge.set_player_input("trade_offer", {"player_gives": {}, "player_wants": {}})
+					_trade_page = 0
 					_trade_mode = true
 					_interact_mode = false
 					_refresh()
@@ -1447,48 +1450,123 @@ func _build_pre_encounter_str() -> String:
 	return "\n".join(lines)
 
 func _handle_trade_mode(keycode: int) -> void:
-	if keycode == KEY_ESCAPE or keycode == KEY_2:
+	# 翻頁（清單 >9 項）
+	if keycode == KEY_COMMA:
+		_trade_page = maxi(0, _trade_page - 1); _refresh(); return
+	if keycode == KEY_PERIOD:
+		_trade_page += 1; _refresh(); return
+	# 離開（清出價）
+	if keycode == KEY_ESCAPE:
 		_bridge.command_player("execute_action", {
 			"action_id": "cancel_trade",
 			"target": {"kind": "team", "team_id": _trade_target_id,
 						"member_id": -1, "tile_q": -1, "tile_r": -1}})
-		_log_event("[貿易] 已取消")
-		_trade_mode = false
-		_trade_target_id = -1
-	elif keycode == KEY_1:
+		_bridge.set_player_input("trade_offer", {})
+		_log_event("[交易] 已離開")
+		_trade_mode = false; _trade_target_id = -1; _trade_page = 0
+		_refresh(); return
+	# 清空出價
+	if keycode == KEY_C:
+		_bridge.set_player_input("trade_offer", {"player_gives": {}, "player_wants": {}})
+		_refresh(); return
+	# 送出
+	if keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
 		var r: Dictionary = _bridge.command_player("execute_action", {
-			"action_id": "confirm_trade",
+			"action_id": "submit_trade_offer",
 			"target": {"kind": "team", "team_id": _trade_target_id,
 						"member_id": -1, "tile_q": -1, "tile_r": -1}})
-		_log_event("[貿易] %s" % r.get("message", ""))
-		_set_feedback(r.get("ok", true), r.get("message", ""))
-		_trade_mode = false
-		_trade_target_id = -1
-	_refresh()
+		_log_event("[交易] %s" % r.get("message", ""))
+		_set_feedback(r.get("ok", false), r.get("message", ""))
+		if r.get("ok", false):
+			_trade_mode = false; _trade_target_id = -1; _trade_page = 0
+		_refresh(); return
+	# 數字選項 → 選清單某項 → 收數量
+	if keycode < KEY_1 or keycode > KEY_9:
+		return
+	var idx: int = (keycode - KEY_1) + _trade_page * 9
+	var rows: Array = _trade_session_rows()
+	if idx >= rows.size():
+		return
+	var row: Dictionary = rows[idx]
+	_input_mode = true
+	_input_mode_type = "numeric"
+	_input_buffer = ""
+	_input_mode_prompt = "%s %s 數量: " % ["給" if row["side"] == "give" else "要", row["grade"]]
+	_input_mode_callback = func(buf: String) -> void:
+		var qty: int = int(buf)
+		if qty > 0:
+			_trade_add(row["side"], row["grade"], qty)
+		_refresh()
+	_input_bar.text = "%s_" % _input_mode_prompt
+
+# offer-builder 列：player_items→「我給」、target_items→「我要」，扁平化供索引一致
+func _trade_session_rows() -> Array:
+	var d: Dictionary = _bridge.query_trade_session(_trade_target_id).get("data", {})
+	var rows: Array = []
+	for it in d.get("player_items", []):
+		rows.append({"side": "give", "grade": it.get("grade", ""),
+			"qty": it.get("qty", 0), "unit_value": it.get("unit_value", 0.0)})
+	for it in d.get("target_items", []):
+		rows.append({"side": "want", "grade": it.get("grade", ""),
+			"qty": it.get("qty", 0), "unit_value": it.get("unit_value", 0.0)})
+	return rows
+
+# 加一項到當前出價（讀 DTO 既有出價→寫回，守 UI 邊界：不直存 state）
+func _trade_add(side: String, grade: String, qty: int) -> void:
+	var d: Dictionary = _bridge.query_trade_session(_trade_target_id).get("data", {})
+	var off: Dictionary = d.get("offer", {})
+	var gives: Dictionary = (off.get("gives", {}) as Dictionary).duplicate()
+	var wants: Dictionary = (off.get("wants", {}) as Dictionary).duplicate()
+	if side == "give":
+		gives[grade] = float(gives.get(grade, 0)) + qty
+	else:
+		wants[grade] = float(wants.get(grade, 0)) + qty
+	_bridge.set_player_input("trade_offer", {"player_gives": gives, "player_wants": wants})
 
 func _build_trade_str() -> String:
-	var lines: Array = ["── 貿易確認 ──"]
+	var lines: Array = ["── 物物交換 Team%d ──" % _trade_target_id]
 	if _trade_target_id < 0:
-		lines.append("（目標無效）")
-		lines.append("[2/Esc]取消")
+		lines.append("（目標無效）"); lines.append("[Esc]離開")
 		return "\n".join(lines)
-	var prev_result: Dictionary = _bridge.query_trade_direct_preview(_trade_target_id)
-	var prev: Dictionary = prev_result.get("data", {}).get("preview", {})
-	if not prev.get("feasible", false):
-		lines.append("（雙方均無可交換資源）")
-	else:
-		var gives: Dictionary = prev.get("player_gives", {})
-		var gets:  Dictionary = prev.get("player_gets", {})
-		if not gives.is_empty():
-			lines.append("我方付出：")
-			for k in gives:
-				lines.append("  %s: %.0f" % [k, gives[k]])
-		if not gets.is_empty():
-			lines.append("我方獲得：")
-			for k in gets:
-				lines.append("  %s: %.0f" % [k, gets[k]])
-	lines.append("")
-	lines.append("[1]確認  [2/Esc]取消")
+	var d: Dictionary = _bridge.query_trade_session(_trade_target_id).get("data", {})
+	if not d.get("feasible", false):
+		lines.append("（需與對方同格才能交易）"); lines.append("[Esc]離開")
+		return "\n".join(lines)
+	var rows: Array = _trade_session_rows()
+	var start: int = _trade_page * 9
+	var endi: int = mini(start + 9, rows.size())
+	var shown_give: bool = false
+	var shown_want: bool = false
+	for gi in range(start, endi):
+		var row: Dictionary = rows[gi]
+		var label: int = gi - start + 1
+		if row["side"] == "give":
+			if not shown_give:
+				lines.append("我給（我方物資）："); shown_give = true
+		else:
+			if not shown_want:
+				lines.append("我要（對方物資）："); shown_want = true
+		lines.append("  [%d] %s ×%d (值%.1f)" % [label, row["grade"], int(row["qty"]), float(row["unit_value"])])
+	if rows.size() > 9:
+		lines.append("第 %d/%d 頁 [,]上 [.]下" % [_trade_page + 1, int(ceil(rows.size() / 9.0))])
+	# 當前出價
+	var off: Dictionary = d.get("offer", {})
+	var gives: Dictionary = off.get("gives", {})
+	var wants: Dictionary = off.get("wants", {})
+	var go: Array = []
+	for k in gives: go.append("%s×%d" % [k, int(gives[k])])
+	var wo: Array = []
+	for k in wants: wo.append("%s×%d" % [k, int(wants[k])])
+	lines.append("出價：給 %s ⇄ 要 %s" % [
+		"—" if go.is_empty() else "、".join(go),
+		"—" if wo.is_empty() else "、".join(wo)])
+	# 天平 + NPC 接受預估
+	var acc: String = ""
+	if not gives.is_empty() or not wants.is_empty():
+		acc = "  NPC:%s" % ("✓接受" if d.get("npc_would_accept", false) else "✗拒絕")
+	lines.append("給值 %.1f ⇄ 要值 %.1f%s" % [
+		float(d.get("give_value", 0.0)), float(d.get("want_value", 0.0)), acc])
+	lines.append("[數字]選項 [Enter]送出 [C]清 [Esc]離開")
 	return "\n".join(lines)
 
 func _handle_intel_mode(keycode: int) -> void:
