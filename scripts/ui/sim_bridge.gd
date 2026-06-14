@@ -28,6 +28,10 @@ func cancel_advance() -> void:
 func is_advancing() -> bool:
 	return _ticks_remaining > 0
 
+# 是否處於遭遇戰（text UI 不直存 state.encounter_active）
+func is_encounter_active() -> bool:
+	return _state.encounter_active
+
 # 每 frame 呼叫：推進 TICKS_PER_HOUR ticks，回傳結果
 # 遭遇戰/新發現事件觸發時自動停止
 # 返回 { "events": Array, "done": bool }

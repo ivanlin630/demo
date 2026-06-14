@@ -59,6 +59,8 @@ static func map_player_summary(state: WorldState) -> Dictionary:
 		"loyalty": p.loyalty,
 		"stress":  p.stress,
 		"skills": _skills,
+		"food_days": _food_days(t) if t != null else 0.0,
+		"starving": (_food_days(t) < 3.0) if t != null else false,
 	}
 
 # ── Controlled team ────────────────────────────────────────────────────────────
@@ -121,8 +123,15 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"wounded":         t.wounded,
 		"minor_population": t.minor_population,
 		"faction_id":       t.faction_id,
+		"food_days":        _food_days(t),
+		"starving":         _food_days(t) < 3.0,   # WARNING_DAYS=3
 		"task_summary": t.current_task
 	}
+
+const FOOD_PER_PERSON_PER_DAY: float = 2.4
+static func _food_days(t: TeamData) -> float:
+	var burn: float = maxf(float(t.population) * FOOD_PER_PERSON_PER_DAY, 0.001)
+	return float(t.resources.get("food", 0)) / burn
 
 # ── Visible teams ──────────────────────────────────────────────────────────────
 
@@ -325,8 +334,24 @@ static func map_location_context(state: WorldState, tile_q: int, tile_r: int) ->
 		"settlement": settlement,
 		"occupants": occupants,
 		"is_player_here": is_here,
+		"food": int(tile.resources.get("food", 0)),
+		"wild_game": int(tile.resources.get("wild_game", 0)),
+		"predator": _predator_intel(state, tile),
 		"hints": []
 	}
+
+# 玩家對該 tile 掠食者的認知：none(無) / detected(偵測到，預警) / lurking(有但沒察覺)
+static func _predator_intel(state: WorldState, tile: HexTileData) -> String:
+	if int(tile.resources.get("predator_density", 0)) <= 0:
+		return "none"
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var pt: TeamData = state.teams.get(p.team_id) if p != null else null
+	if pt != null and pt.tile_pos == tile.tile_pos:
+		if AmbushSystem.new().detect(state, pt, tile):
+			return "detected"
+		return "lurking"
+	return "lurking"   # 非腳下格 → 預設未察覺（認知不透明）
 
 # ── Inventory state ────────────────────────────────────────────────────────────
 
