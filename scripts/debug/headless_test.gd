@@ -317,6 +317,9 @@ func _initialize() -> void:
 	_test_beast_reward_exp()
 	_test_predator_infamy()
 	_test_npc_active_hunt()
+	# ── SoloAI 主動尋家 + 承諾慣性 ──
+	_test_solo_commitment()
+	_test_solo_seek_home()
 	quit()
 
 func _test_wild_game_seeded() -> void:
@@ -9110,3 +9113,63 @@ func _test_survival_start_config() -> void:
 	var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
 	assert(tile != null and tile.outpost_level == 0, "開局玩家不應有 outpost")
 	print("survival_start config OK")
+
+func _test_solo_commitment() -> void:
+	print("--- SoloAI 承諾慣性 ---")
+	var fai := FactionAISystem.new()
+	# 中性個性，攻擊/掠奪/外交 分數接近 → 無慣性會抖；有慣性則黏上次
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.values = {"好戰": 0.5, "貪婪": 0.5, "野心": 0.5}
+	state.persons[0] = leader
+	# 兩個獨立鄰隊供 攻擊/掠奪/外交 target
+	for tid in [1, 2]:
+		var o := TeamData.new(); o.team_id = tid; o.tile_pos = Vector2i(4+tid, 4)
+		o.population = 3; o.faction_id = -1
+		state.teams[tid] = o
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
+	team.population = 8; team.tags = ["軍隊"]; team.current_task = "idle"
+	team.solo_intent = "掠奪"   # 上次選掠奪
+	team.resources = {"food": 100.0}
+	state.teams[0] = team
+	state.team_discovered[0] = [1, 2]   # _nearest_independent 需 discovered 名單
+	fai._evaluate_solo(state, team)
+	assert(team.current_task == "掠奪", "有 solo_intent=掠奪 + 慣性 → 應續掠奪，實際=%s" % team.current_task)
+	assert(team.solo_intent == "掠奪", "選後 solo_intent 記錄")
+	print("solo commitment OK")
+
+func _test_solo_seek_home() -> void:
+	print("--- SoloAI 主動尋家 ---")
+	var fai := FactionAISystem.new()
+	# 共用世界：本格 + 鄰格無主可農地（供紮營）
+	var state := WorldState.new(); state.world = WorldData.new()
+	for p in [Vector2i(4,4), Vector2i(5,4)]:
+		var tile := HexTileData.new()
+		tile.tile_id = p.x*1000+p.y; tile.tile_pos = p; tile.terrain = "plains"
+		tile.outpost_owner = -1; tile.outpost_level = 0; tile.resource_cap = {"food": 50.0}
+		state.world.tiles[tile.tile_id] = tile
+	# 求生型流亡團（不兇）→ 應主動紮營（流亡 tag 不該歸零尋家）
+	var refugee := PersonData.new(); refugee.id = 0; refugee.team_id = 0
+	refugee.values = {"好戰": 0.2, "貪婪": 0.2, "野心": 0.4, "求生欲": 0.9, "慎重": 0.7}
+	state.persons[0] = refugee
+	var t0 := TeamData.new(); t0.team_id = 0; t0.leader_id = 0; t0.tile_pos = Vector2i(4,4)
+	t0.population = 4; t0.tags = ["流亡"]; t0.current_task = "idle"; t0.resources = {"food": 100.0}
+	state.teams[0] = t0
+	fai._evaluate_solo(state, t0)
+	assert(t0.current_task == TeamData.TASK_CAMP or t0.current_task == "投靠",
+		"求生型流亡團應主動尋家，實際=%s" % t0.current_task)
+	# 好戰盜匪（有獵物）→ 掠奪壓過尋家（不找家）
+	var prey := TeamData.new(); prey.team_id = 9; prey.tile_pos = Vector2i(3,4)
+	prey.population = 2; prey.faction_id = -1; prey.resources = {"food": 30.0}
+	state.teams[9] = prey
+	var raider := PersonData.new(); raider.id = 1000; raider.team_id = 1
+	raider.values = {"好戰": 0.9, "貪婪": 0.9, "野心": 0.5, "求生欲": 0.5}
+	state.persons[1000] = raider
+	var t1 := TeamData.new(); t1.team_id = 1; t1.leader_id = 1000; t1.tile_pos = Vector2i(4,4)
+	t1.population = 10; t1.tags = ["軍隊"]; t1.current_task = "idle"; t1.resources = {"food": 100.0}
+	state.teams[1] = t1
+	state.team_discovered[1] = [9]   # _nearest_independent 需 discovered 名單
+	fai._evaluate_solo(state, t1)
+	assert(t1.current_task == "掠奪" or t1.current_task == "攻擊",
+		"好戰盜匪應 roving 非尋家，實際=%s" % t1.current_task)
+	print("solo seek home OK")

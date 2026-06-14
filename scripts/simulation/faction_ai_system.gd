@@ -33,6 +33,7 @@ const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算�
 const LOOT_GATE: float = 0.55   # TEST VALUE
 const JOIN_GATE: float = 0.55   # TEST VALUE
 const CAMP_GATE: float = 0.50   # TEST VALUE
+const SOLO_COMMITMENT_BONUS: float = 0.15   # TEST VALUE — SoloAI 慣性加成（止 flip-flop，非鎖死）
 const CRUDE_CAMP_FOOD_SEED: float = 40.0   # TEST VALUE — 紮營種子糧（+同抬 cap）
 # stuck: task 仍是進攻型但 move_target 已被 movement 清掉（off-map / 無路徑）→ 視為 idle 允許重評
 const STUCK_TASKS: Array = [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
@@ -936,6 +937,19 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if vault_mat < GOVERN_MATERIAL_TARGET:
 			scores["治理"] = (caution * 0.4 + amb_dev * 0.2 + 0.15) * _tag_weight(team, "治理")
 
+	# 主動尋家（僅無 own outpost 的流浪團）：純 value 加權，與 roving 競爭。
+	# 不乘 _tag_weight（該函數對「流亡」tag 回 0，會歸零最需尋家的流亡團）。
+	if own_pos == Vector2i(-1, -1):
+		if _find_unowned_farmable_tile(state, team) != Vector2i(-1, -1):
+			scores[TeamData.TASK_CAMP] = survival * 0.3 \
+				+ float(leader_p.values.get("慎重", 0.5)) * 0.3 + ambition * 0.3
+		if _find_strong_neighbor(state, team) != -1:
+			scores["投靠"] = float(leader_p.values.get("義氣", 0.5)) * 0.4 + survival * 0.4
+
+	# 承諾慣性：上次方向加分（非明顯更優不換）
+	if team.solo_intent != "" and scores.has(team.solo_intent):
+		scores[team.solo_intent] = float(scores[team.solo_intent]) + SOLO_COMMITMENT_BONUS
+
 	var best_task := "idle"
 	var best_score: float = 0.0
 	for t in scores:
@@ -960,6 +974,15 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			solo_target = state.teams[pid].tile_pos
 		"治理":
 			solo_target = own_pos
+		TeamData.TASK_CAMP:
+			var cpos: Vector2i = _find_unowned_farmable_tile(state, team)
+			if cpos == Vector2i(-1, -1): return
+			solo_target = cpos
+		"投靠":
+			var ally: int = _find_strong_neighbor(state, team)
+			if ally == -1: return
+			solo_target = state.teams[ally].tile_pos
+			team.combat_target = ally
 	if _is_stuck(team):
 		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評
 	if not TaskArbiter.try_set(state, team, best_task, solo_target,
@@ -967,6 +990,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		return
 	if best_task == "貿易":
 		team.trade_task_start_tick = state.world.current_tick
+	team.solo_intent = best_task
 	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
 
 func _update_equip_order(state: WorldState, team: TeamData) -> void:
@@ -1992,10 +2016,20 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 			TaskArbiter.release(team)
 			team.previous_task = ""
 			return
+		# 主動紮營到達目標格卻無法立營（該格已被占/變更）→ 釋放重評，避免凍結
+		# （invariant：進得去出得來；主動 camp 免糧恢復釋放，故須補此到達兜底）
+		if team.task_priority == TaskArbiter.PRIO_DISPATCH and team.tile_pos == team.move_target:
+			TaskArbiter.release(team)
+			team.previous_task = ""
+			return
 	# 已在 survival task：糧恢復(hysteresis)→ 釋放回 idle，讓建造/生產/攻擊接手
 	# （核心修：原本 early-return 永不釋放 → return_home/乞食 永久 p80 凍結）
+	# 例外：SoloAI 主動紮營（PRIO_DISPATCH）本就在不缺糧時觸發，不可被「糧足」釋放 →
+	#   否則往鄰格 farmable 移動途中即被釋放、到不了 → 永遠重派 churn（移動 1 格即可結算）。
 	if team.current_task in SURVIVAL_TASKS:
-		if days_left >= SURVIVAL_RECOVER_DAYS:
+		var proactive_camp: bool = team.current_task == TeamData.TASK_CAMP \
+			and team.task_priority == TaskArbiter.PRIO_DISPATCH
+		if days_left >= SURVIVAL_RECOVER_DAYS and not proactive_camp:
 			TaskArbiter.release(team)
 		return
 	if days_left < URGENCY_DAYS or days_left < WARNING_DAYS:
