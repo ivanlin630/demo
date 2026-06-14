@@ -90,6 +90,8 @@ func _initialize() -> void:
 	_test_advance_tick_game_over_freeze()
 	_test_advance_tick_awaiting_heir_freeze()
 	_test_encounter_kills_player_triggers_heir()
+	_test_controlled_team_armed()
+	_test_u10b_player_wiped()
 	# ── Coin Economy + Outpost Public Storage ──
 	_test_coin_storage_fields()
 	_test_storage_cap()
@@ -4778,6 +4780,38 @@ func _test_game_over_field() -> void:
 	s.game_over_reason = "test"
 	assert(s.game_over and s.game_over_reason == "test")
 	print("Death Task1 OK")
+
+func _test_controlled_team_armed() -> void:
+	print("--- controlled_team 武裝數 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0
+	team.population = 10; team.armed_anon_ratio = 0.5
+	team.anon_tiers = {"平民": 9}
+	team.resources = {"weapon_melee_low": 5}
+	state.teams[0] = team
+	var ct: Dictionary = PlayerApiMapper.map_controlled_team(state)
+	assert(ct.has("armed_count"), "DTO 應有 armed_count")
+	assert(ct.has("anon_total"), "DTO 應有 anon_total")
+	assert(int(ct["armed_count"]) >= 0, "armed_count 非負")
+	print("controlled_team armed OK")
+
+func _test_u10b_player_wiped() -> void:
+	print("--- 玩家遭遇戰全滅 → game-over/heir ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var pteam := TeamData.new(); pteam.team_id = 0; pteam.leader_id = 0; pteam.population = 0   # 全滅
+	pteam.named_members = []
+	state.teams[0] = pteam
+	state.encounter_attacker_id = 9; state.encounter_defender_id = 0
+	var enc := EncounterSystem.new()
+	enc.resolve_encounter_end(state, "attacker_win")   # 玩家(defender)敗
+	# 玩家隊全滅 + 無 named → game_over（非靜默）
+	assert(state.game_over or state.player_forced_event.get("action","") == "choose_heir",
+		"玩家全滅應 game_over 或 choose_heir，實際 game_over=%s fe=%s" % [state.game_over, str(state.player_forced_event)])
+	print("U10b player wiped OK")
 
 func _test_handle_player_leader_death() -> void:
 	print("--- Death Task2: _handle_player_leader_death ---")

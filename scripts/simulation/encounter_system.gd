@@ -1199,6 +1199,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			var tb: TeamData = state.teams.get(tid_b)
 			if tb: tb.combat_target = -1
 		print("[Encounter] 野獸遭遇戰結算 result=%s" % result)
+		_check_player_wiped(state)
 		state.encounter_units.clear()
 		state.encounter_active = false
 		state.encounter_attacker_id = -1
@@ -1211,6 +1212,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			var t: TeamData = state.teams.get(team_id)
 			if t: t.combat_target = -1
 		print("[Encounter] 遭遇戰結算完成 result=%s" % result)
+		_check_player_wiped(state)
 		# 清理 encounter state（draw 也要清，否則 encounter_active 永遠 true）
 		state.encounter_units.clear()
 		state.encounter_active = false
@@ -1310,10 +1312,20 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		var ratio: float = float(atk_dead) / maxf(float(atk_total), 1.0)
 		ReactionSystem.new().on_attack_defeat(state, atk_id, ratio)
 
+	_check_player_wiped(state)
 	state.encounter_units.clear()
 	state.encounter_active = false
 	state.encounter_attacker_id = -1
 	state.encounter_defender_id = -1
+
+# U10b: 玩家隊遭遇戰全滅 → 接既有玩家死亡鏈（繼承/game-over），非靜默退出
+func _check_player_wiped(state: WorldState) -> void:
+	if state.player_id == -1 or state.game_over: return
+	var pp: PersonData = state.persons.get(state.player_id)
+	if pp == null: return
+	var pt: TeamData = state.teams.get(pp.team_id)
+	if pt != null and pt.population <= 0:
+		FactionAISystem.new()._handle_player_leader_death(state, pt)
 
 # ──────── Prosperity: 攻佔 outpost 居民處置 ────────
 
