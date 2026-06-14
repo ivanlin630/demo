@@ -23,7 +23,8 @@
 
 - **UI-flow 測試 harness 已 merge**：headless 實例化 TextUI.tscn + 注入 + 驅動 + 斷言 → 輸入流/選單/內容 class bug 自動回歸（省手動 GUI 驗）。`scripts/debug/ui_flow_test.gd`。
 - **B3 玩測 bug 批修已 merge**：attack_select 操作提示 / U14b 自隊武裝數(DTO+status) / U10b 玩家全滅→game-over。配 harness 自動測。
-- **UI 修路線圖（「都做」）**：B3 play-bug ✅ → **B4 成員管理**(調薪 set_member_salary/武裝anon set/成員 equip 指令+UI，待寫) → **交易介面**(功能,需 brainstorm→spec) → **P3 全動作覆蓋**。U16 地圖迷霧(axial 投影)真視覺待互動迭代。
+- **B4 成員管理已 merge**：set_member_salary(S9)/set_armed_anon_ratio(U18)/equip_member·unequip_member(U13b) 指令+UI。守恆(裝備扣/還 team 池)。armed_anon_ratio 下游 encounter/npc_combat 有讀=有效。
+- **UI 修路線圖（「都做」）**：B3 ✅ → B4 ✅ → **交易介面**(功能,需 brainstorm→spec,下個) → **P3 全動作覆蓋**。U16 地圖迷霧(axial 投影)真視覺待互動迭代。
 - U11 戰報/U12 交易/U13b 等 GUI 顯示部分：wiring 已接（harness/headless 驗 flow），真視覺待人工偶查。
 
 ### 佇列（下一步選項）
