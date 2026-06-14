@@ -43,6 +43,11 @@
 - 可跳時間；事件只在 juncture 介入
 - **激情時刻全手動 + 真風險**，且主要由玩家冒險決策觸發（非隨機 spam）
 
+## UI 邊界
+
+- **UI 只經 player API**：UI 層（`scripts/ui/*`）禁止直讀/直寫 `WorldState`；一切經 `SimBridge` → `PlayerQueryApi`/`PlayerCommandApi` 的 DTO
+- **DTO 是 UI 契約**：玩家 UI 需要的任何 sim 資訊，必須 map 進 DTO（非讓 UI 繞道取）→ 換 UI（文字↔圖形）只需接同一 API
+
 ## NPC
 
 決策來源：
