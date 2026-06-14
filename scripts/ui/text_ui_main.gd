@@ -162,6 +162,12 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey: return
 	if not event.pressed: return
+	# 遭遇戰 overlay 顯示中（含戰後「按任意鍵離開」畫面，此時 encounter_active 已 false）
+	# → 鍵盤全權交給 encounter_view，主畫面一律不處理。
+	# 否則 Q 會落到下方 KEY_Q→get_tree().quit() 造成戰後一按鍵就閃退；
+	# WASD 也會同時漂移世界地圖游標。用 overlay 可見性（非 encounter_active）判定。
+	if _encounter_view != null and _encounter_view.visible:
+		return
 	if _input_mode:
 		_handle_input_mode(event.keycode)
 		return
