@@ -28,6 +28,17 @@
       },
       "named_members": [],
       "outpost": { "type": "civilian", "level": 1, "tile_food_init": 400, "terrain": "plains" }
+    },
+    {
+      "id": 2, "name": "乞丐團", "tile_pos": [5, 4], "population": 2,
+      "tags": ["流亡"], "faction_id": -1,
+      "anon_tiers": { "平民": 1 },
+      "resources": { "food": 0, "coin": 0 },
+      "leader": {
+        "name": "乞丐", "age": 35, "loyalty": 0.5,
+        "values": { "求生欲": 0.95, "義氣": 0.6 }
+      },
+      "named_members": []
     }
   ],
   "player": { "team_id": 0, "is_leader": true }
