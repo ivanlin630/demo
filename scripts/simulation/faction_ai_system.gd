@@ -937,6 +937,15 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if vault_mat < GOVERN_MATERIAL_TARGET:
 			scores["治理"] = (caution * 0.4 + amb_dev * 0.2 + 0.15) * _tag_weight(team, "治理")
 
+	# 主動尋家（僅無 own outpost 的流浪團）：純 value 加權，與 roving 競爭。
+	# 不乘 _tag_weight（該函數對「流亡」tag 回 0，會歸零最需尋家的流亡團）。
+	if own_pos == Vector2i(-1, -1):
+		if _find_unowned_farmable_tile(state, team) != Vector2i(-1, -1):
+			scores[TeamData.TASK_CAMP] = survival * 0.3 \
+				+ float(leader_p.values.get("慎重", 0.5)) * 0.3 + ambition * 0.3
+		if _find_strong_neighbor(state, team) != -1:
+			scores["投靠"] = float(leader_p.values.get("義氣", 0.5)) * 0.4 + survival * 0.4
+
 	# 承諾慣性：上次方向加分（非明顯更優不換）
 	if team.solo_intent != "" and scores.has(team.solo_intent):
 		scores[team.solo_intent] = float(scores[team.solo_intent]) + SOLO_COMMITMENT_BONUS
@@ -965,6 +974,15 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			solo_target = state.teams[pid].tile_pos
 		"治理":
 			solo_target = own_pos
+		TeamData.TASK_CAMP:
+			var cpos: Vector2i = _find_unowned_farmable_tile(state, team)
+			if cpos == Vector2i(-1, -1): return
+			solo_target = cpos
+		"投靠":
+			var ally: int = _find_strong_neighbor(state, team)
+			if ally == -1: return
+			solo_target = state.teams[ally].tile_pos
+			team.combat_target = ally
 	if _is_stuck(team):
 		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評
 	if not TaskArbiter.try_set(state, team, best_task, solo_target,
