@@ -305,6 +305,14 @@ func _initialize() -> void:
 	_test_beast_encounter_resolve()
 	_test_npc_hunt_beast()
 	_test_player_hunt_beast()
+	# ── 階段1 Plan 2b-2 野獸伏擊 + 偵測 ──
+	_test_ambush_detect()
+	_test_ambush_player()
+	_test_ambush_npc()
+	_test_ambush_detected_no_fight()
+	_test_beast_reward_exp()
+	_test_predator_infamy()
+	_test_npc_active_hunt()
 	quit()
 
 func _test_wild_game_seeded() -> void:
@@ -555,6 +563,141 @@ func _test_player_hunt_beast() -> void:
 	var r2: Dictionary = cmd.execute_action(state, -1, "hunt_beast")
 	assert(not r2.get("ok", true), "無 predator 不應發起")
 	print("player hunt_beast OK")
+
+# ── 階段1 Plan 2b-2 野獸伏擊 + 偵測 ──
+
+func _test_ambush_detect() -> void:
+	print("--- 伏擊偵測 roll ---")
+	var amb := AmbushSystem.new()
+	# 高偵查隊 vs 低 predator → 多數偵測到
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new(); tile.terrain = "plains"; tile.resources = {"predator_density": 1}
+	var hi := PersonData.new(); hi.id = 0; hi.team_id = 0; hi.skills = {"偵查": 0.9, "求生": 0.5}
+	state.persons[0] = hi
+	var t_hi := TeamData.new(); t_hi.team_id = 0; t_hi.leader_id = 0; t_hi.population = 3
+	state.teams[0] = t_hi
+	var hi_detect: int = 0
+	for _i in range(50):
+		if amb.detect(state, t_hi, tile): hi_detect += 1
+	# 低偵查隊 → 少偵測
+	var lo := PersonData.new(); lo.id = 1000; lo.team_id = 1; lo.skills = {"偵查": 0.0, "求生": 0.0}
+	state.persons[1000] = lo
+	var t_lo := TeamData.new(); t_lo.team_id = 1; t_lo.leader_id = 1000; t_lo.population = 3
+	state.teams[1] = t_lo
+	var lo_detect: int = 0
+	for _i in range(50):
+		if amb.detect(state, t_lo, tile): lo_detect += 1
+	assert(hi_detect > lo_detect, "高偵查應比低偵查更常偵測：hi=%d lo=%d" % [hi_detect, lo_detect])
+	print("ambush detect OK (hi=%d lo=%d)" % [hi_detect, lo_detect])
+
+func _mk_ambush_state(_detect_skill: float) -> Dictionary:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "forest"
+	tile.resources = {"predator_density": 2}
+	state.world.tiles[tile.tile_id] = tile
+	return { "state": state, "tile": tile }
+
+func _test_ambush_player() -> void:
+	print("--- 玩家被伏擊 → 直接 encounter ---")
+	var d := _mk_ambush_state(0.0)
+	var state: WorldState = d.state
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"偵查": 0.0, "求生": 0.0}   # 低偵查 → 必被伏擊
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	pt.tile_pos = Vector2i(4,4); pt.armed_anon_ratio = 1.0; pt.resources = {"weapon_melee_low": 4}
+	state.teams[0] = pt
+	var amb := AmbushSystem.new()
+	var triggered: bool = false
+	for _i in range(50):
+		amb.check_ambush(state, [0])
+		if state.encounter_active:
+			triggered = true; break
+	assert(triggered, "低偵查玩家隊在 predator 格應曾被伏擊進 encounter")
+	print("ambush player OK")
+
+func _test_ambush_npc() -> void:
+	print("--- NPC 被伏擊 → npc_combat（非 encounter）---")
+	var d := _mk_ambush_state(0.0)
+	var state: WorldState = d.state
+	state.player_id = -999   # 無玩家
+	var leader := PersonData.new(); leader.id = 100; leader.team_id = 1
+	leader.skills = {"偵查": 0.0}
+	state.persons[100] = leader
+	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 100; npc.population = 4
+	npc.tile_pos = Vector2i(4,4); npc.readiness = 1.0; npc.resources = {"weapon_melee_low": 4}
+	state.teams[1] = npc
+	var amb := AmbushSystem.new()
+	var combat_set: bool = false
+	for _i in range(50):
+		amb.check_ambush(state, [1])
+		if npc.combat_target != -1 or not state.teams.has(1):
+			combat_set = true; break
+	assert(not state.encounter_active, "NPC 伏擊不可進 EncounterSystem（Bug9）")
+	assert(combat_set, "NPC 應曾被野獸 npc_combat 攻擊")
+	print("ambush npc OK")
+
+func _test_ambush_detected_no_fight() -> void:
+	print("--- 高偵查 → 偵測到、不被伏擊 ---")
+	var d := _mk_ambush_state(0.0)
+	var state: WorldState = d.state
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"偵查": 0.95, "求生": 0.9}   # 高 → 必偵測
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	pt.tile_pos = Vector2i(4,4); pt.resources = {}
+	state.teams[0] = pt
+	var amb := AmbushSystem.new()
+	for _i in range(50):
+		amb.check_ambush(state, [0])
+	assert(not state.encounter_active, "高偵查隊應偵測到、不被伏擊")
+	print("ambush detected-no-fight OK")
+
+func _test_beast_reward_exp() -> void:
+	print("--- 獵勝得 exp ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"戰鬥": 0.3}
+	state.persons[0] = leader
+	var winner := TeamData.new(); winner.team_id = 0; winner.leader_id = 0; winner.population = 5
+	winner.resources = {"food": 0.0}
+	state.teams[0] = winner
+	var bs := BeastSystem.new()
+	var bid: int = bs.build_beast_team(state, "boar", Vector2i(0,0))
+	var before: float = float(leader.skills.get("戰鬥", 0))
+	bs.reward_and_cleanup(state, 0, bid)
+	assert(float(leader.skills.get("戰鬥", 0)) > before, "獵勝應長戰鬥 exp")
+	print("beast reward exp OK")
+
+func _test_predator_infamy() -> void:
+	print("--- 掠食者 infamy 計數 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new(); tile.tile_id = 0; tile.tile_pos = Vector2i(0,0)
+	state.world.tiles[0] = tile
+	var amb := AmbushSystem.new()
+	amb.record_infamy(state, Vector2i(0,0))
+	amb.record_infamy(state, Vector2i(0,0))
+	assert(tile.predator_infamy == 2, "infamy 應累加，實際=%d" % tile.predator_infamy)
+	print("predator infamy OK")
+
+func _test_npc_active_hunt() -> void:
+	print("--- NPC 主動獵獸 ---")
+	var fai := FactionAISystem.new()
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new(); tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4)
+	tile.terrain = "forest"; tile.resources = {"predator_density": 1}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"戰鬥": 0.6}
+	state.persons[0] = leader
+	var band := TeamData.new(); band.team_id = 0; band.leader_id = 0; band.population = 15
+	band.tile_pos = Vector2i(4,4); band.readiness = 1.0; band.resources = {"food": 0.0, "weapon_melee_low": 12}
+	state.teams[0] = band
+	var hunted: bool = fai.try_hunt_predator(state, band)
+	assert(hunted, "戰力足的飢餓隊在 predator 格應主動獵")
+	assert(state.teams.has(0), "獵發起後 band 仍在（npc_combat 解算）")
+	print("npc active hunt OK")
 
 func _test_minor_maturation() -> void:
 	print("--- PopFix: minor 每月長大 ---")
