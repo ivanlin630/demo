@@ -432,3 +432,8 @@
 - **根因**：`diplomatic_ai_system.try_proactive_diplomacy` 遍歷 `team_discovered`（所有已發現隊，非同格）→ 隔空提案，違反 invariant「外交/徵收需同格」；且玩家路徑漏設 reject_cooldown → forced_event 超時清掉後無限重發
 - **修**：(1) proactive diplomacy 加同格 gate `other.tile_pos != self_team.tile_pos → continue`（守不變量，對齊 process_on_move 同格外交）；(2) 玩家路徑補設 `diplomacy_reject_cooldown`
 - **連動**：同格 gate 降 NPC 遠端外交頻率（本就違規），NPC 外交改靠 process_on_move 同格觸發。頻率變化待量測
+
+### U21. 互動選單超過 9 項無法選 ✅ 已修（2026-06-14 run-verify）
+- **症狀**：互動選單（forced 回應 + pending 目標 / 行動清單）>9 項時，數字鍵只 1-9，第 10+ 項選不了
+- **修**：互動模式加分頁 `_interact_page`，`[,]`上頁 `[.]`下頁，每頁 9 項 renumber 1-9，num 含頁偏移；target-list 改 forced→pending 合一清單（全域索引對齊 handler）。進互動/選目標/Esc 重置頁
+- **待 run-verify**

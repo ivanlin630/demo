@@ -21,6 +21,7 @@ var _inv_selection: int = -1
 
 var _interact_mode:   bool = false
 var _interact_target: int  = -1
+var _interact_page:   int  = 0   # 互動選單分頁（>9 項翻頁）
 # -1 = 目標/事件選擇階段；>= 0 = 已選 pending target，顯示行動清單
 
 # ── 新 Panel Modes（互斥）────────────────────────────────────────────────────
@@ -165,6 +166,7 @@ func _process(_delta: float) -> void:
 		_bridge.cancel_advance()
 		_interact_mode = true
 		_interact_target = -1
+		_interact_page = 0
 		_refresh()
 
 func _input(event: InputEvent) -> void:
@@ -254,6 +256,7 @@ func _input(event: InputEvent) -> void:
 				if _inv_mode: _inv_mode = false
 				if _member_mode: _member_mode = false
 				_interact_target = -1
+				_interact_page = 0
 				_bridge.refresh_interaction_targets()  # 掃描同格 NPC，讓 ignore 後仍可再次互動
 			_refresh()
 		KEY_F:
@@ -803,13 +806,19 @@ func _handle_interact_mode(keycode: int) -> void:
 			_interact_target = -1
 		else:
 			_interact_mode = false
+		_interact_page = 0   # 切換視圖重置分頁
 		_refresh()
 		return
 
-	# 數字鍵 1–9
+	# 翻頁（選單 >9 項時）：[,] 上一頁 / [.] 下一頁
+	if keycode == KEY_COMMA:
+		_interact_page = maxi(0, _interact_page - 1); _refresh(); return
+	if keycode == KEY_PERIOD:
+		_interact_page += 1; _refresh(); return
+	# 數字鍵 1–9（含頁偏移）
 	if keycode < KEY_1 or keycode > KEY_9:
 		return
-	var num: int = keycode - KEY_1   # 0-based
+	var num: int = (keycode - KEY_1) + _interact_page * 9   # 0-based + 頁偏移
 
 	# ── 已選目標：顯示行動清單 ──
 	if _interact_target >= 0:
@@ -870,6 +879,7 @@ func _handle_interact_mode(keycode: int) -> void:
 	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
 	if pending_idx >= 0 and pending_idx < pending_tgts.size():
 		_interact_target = pending_tgts[pending_idx].get("target_id", -1)
+		_interact_page = 0   # 進行動清單從頁 0
 		_refresh()
 
 func _build_interact_str() -> String:
@@ -880,47 +890,54 @@ func _build_interact_str() -> String:
 		var tgt_name: String = "Team%d" % _interact_target
 		lines.append("── %s 行動 ──" % tgt_name)
 		var actions: Array = _cached_snapshot.get("available_actions", [])
+		var a_start: int = _interact_page * 9
 		var row: String = ""
-		for i in range(actions.size()):
-			row += "[%d]%s  " % [i + 1, actions[i].get("label", actions[i].get("action_id", ""))]
-			if (i + 1) % 4 == 0:
+		var a_shown: int = 0
+		for gi in range(a_start, mini(a_start + 9, actions.size())):
+			a_shown += 1
+			row += "[%d]%s  " % [a_shown, actions[gi].get("label", actions[gi].get("action_id", ""))]
+			if a_shown % 4 == 0:
 				lines.append(row.strip_edges())
 				row = ""
 		if not row.strip_edges().is_empty():
 			lines.append(row.strip_edges())
+		if actions.size() > 9:
+			lines.append("第 %d/%d 頁 [,]上 [.]下" % [_interact_page + 1, int(ceil(actions.size() / 9.0))])
 		lines.append("── [Esc]返回 ──")
 		return "\n".join(lines)
 
 	# 目標選擇階段
 	lines.append("── 互動 ──")
+	# 合一清單（與 handler 全域索引一致：先 forced 回應，後 pending 目標）→ 分頁
 	var fi: Dictionary = _cached_snapshot.get("forced_interaction", {})
-	var fi_has_event: bool = not fi.get("interaction_id", "").is_empty()
-	var fe_count: int = 0
-
-	if fi_has_event:
-		var responses: Array = fi.get("responses", [])
-		var opts_str: String = ""
-		for i in range(responses.size()):
-			opts_str += " [%d]%s" % [i + 1, responses[i].get("label", "?")]
-			fe_count += 1
-		lines.append("[!] %s →%s" % [fi.get("message", "強制事件"), opts_str])
-
+	var items: Array = []
+	if not fi.get("interaction_id", "").is_empty():
+		var msg: String = fi.get("message", "強制事件")
+		for r in fi.get("responses", []):
+			items.append("⚠ %s：%s" % [msg, r.get("label", "?")])
 	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
-	var idx: int = fe_count + 1
-	if pending_tgts.is_empty() and not fi_has_event:
-		lines.append("（無可互動目標）")
+	var vts: Array = _cached_snapshot.get("visible_teams", [])
 	for target_info in pending_tgts:
 		var tid: int = target_info.get("target_id", -1)
-		var vts: Array = _cached_snapshot.get("visible_teams", [])
 		var vt: Dictionary = {}
 		for v in vts:
 			if v.get("id", -1) == tid: vt = v; break
-		if vt.is_empty(): continue
+		if vt.is_empty():
+			items.append("Team%d" % tid)
+			continue
 		var pos: Dictionary = vt.get("position", {})
-		var faction_str: String = vt.get("faction_display", "?")
-		lines.append("[%d] Team%d @(%d,%d) %s pop:%d" % [
-			idx, tid, pos.get("q", 0), pos.get("r", 0), faction_str, vt.get("population", 0)])
-		idx += 1
+		items.append("Team%d @(%d,%d) %s pop:%d" % [
+			tid, pos.get("q", 0), pos.get("r", 0), vt.get("faction_display", "?"), vt.get("population", 0)])
+	if items.is_empty():
+		lines.append("（無可互動目標）")
+	else:
+		var t_start: int = _interact_page * 9
+		var t_shown: int = 0
+		for gi in range(t_start, mini(t_start + 9, items.size())):
+			t_shown += 1
+			lines.append("[%d] %s" % [t_shown, items[gi]])
+		if items.size() > 9:
+			lines.append("第 %d/%d 頁 [,]上 [.]下" % [_interact_page + 1, int(ceil(items.size() / 9.0))])
 
 	lines.append("── [T/Esc]關閉 ──")
 	return "\n".join(lines)
