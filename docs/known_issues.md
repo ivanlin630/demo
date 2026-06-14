@@ -181,6 +181,20 @@
 - **結論**：spawn 數 = `named + min(pop × armed_anon_ratio, ANON_UNIT_CAP)`，正確（armed_anon_ratio<1 → 非全員上場為設計）。headless 加公式 assert 佐證。
 - **觀感補**：`encounter_view` 加「我方 X 敵方 Y」在場兵力 label，避免玩家誤以為人數錯。
 
+### U15. 遭遇戰後按鍵閃退 ✅ 已修（2026-06-14，待 run-verify）
+- **症狀**：戰鬥一結束（戰後「按任意鍵離開」畫面）按鍵 → 整個遊戲閃退（2026-06-14 玩測）。
+- **根因**：`text_ui_main._input` 無 overlay 守衛。`encounter_view` overlay 顯示時主畫面 `_input` 仍處理同鍵；`KEY_Q`→`get_tree().quit()` 僅由 `is_encounter_active()` 把關。U10 戰後畫面 `encounter_active=false` 但 overlay 仍可見 → 玩家按遭遇戰移動鍵 **Q** 想離開 → 觸發 `quit()` → 閃退。WASD 亦漏到 `_move_cursor` 漂移世界游標。
+- **修**：`_input` 開頭 `if _encounter_view != null and _encounter_view.visible: return`（用 overlay 可見性，涵蓋戰後 active=false 視窗）。
+- **連動**：U10 修引入「按任意鍵離開」提示才暴露此既有 Q=quit 衝突。
+- **後續風險**：`KEY_Q`→`get_tree().quit()` 在一般地圖遊玩仍是「按 Q 直接退遊戲」的危險綁定（Q 也是直覺移動鍵），建議改安全組合或移除（另議）。
+
+### U16. 世界地圖迷霧/視野與玩家位置對不上 ⚠ 已根因，pre-existing（未修）
+- **症狀**：文字世界地圖「揭露區域（視野）與玩家位置 @ 對不上」（2026-06-14 玩測，描述為「遭遇戰視野很怪」，實為世界地圖 fog）。
+- **根因**：座標系為 **axial**（`world_generator` `tile_pos = axial + radius`、movement/vision 用 axial cube 距離）。`text_map_renderer.render` 視野判定 `_hex_dist`（axial，正確）**但渲染用「奇數列縮排 2 空格」交替 stagger**——對 axial 是錯誤投影（pointy-top 正確為每列累進半格 / 先 axial→offset 轉換）。→ @-中心的視野 disc 在交替 stagger 下逐列剪切偏移，遠處對不上。
+- **與本批無關**：`text_map_renderer` 非本批改動，純既有渲染 bug。
+- **修向（待確認）**：render 改正確 axial→offset 投影（col = q + (r - (r&1))/2 類）或累進列偏移；屬視覺需逐步對照調，建議獨立 task 與使用者看輸出迭代。
+- **優先**：M（影響可讀性，不致崩潰）。
+
 ### U9. 圖形 Main.tscn UI 仍 reach-through raw WorldState（邊界債）
 - **症狀**：`main.gd`/`encounter_view.gd`/`popup_layer.gd`/`debug_bar.gd` 大量 `_bridge.get_state()` 直讀 raw `WorldState`（body_parts/units/world.current_tick）→ 違反「UI 只經 player API」invariant（2026-06-14 新增）
 - **狀態**：text_ui 已清（P1）；圖形 UI 未清。text-UI-only 階段不影響

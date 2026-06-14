@@ -29,7 +29,14 @@ Plan: `docs/superpowers/plans/2026-06-14-encounter-ui-bugfix-batch.md`
 - `headless_test`：U11/U12/U14 OK、`=== DONE ===`。唯一 `SCRIPT ERROR: food 應進公庫` = **pre-existing Bug8 baseline**（非本批，plan 明示勿動），與 baseline 同一 halt 點，**無新增回歸**。
 - `team_ui_test`：`=== TEAM UI TEST DONE ===`，無 error。
 
-## 連動風險
+## 玩測回報追修（2026-06-14 同日）
+
+玩測抓到 2 個現象，systematic-debugging 走查（headless smoke 排除我的 U10/U11/U14 顯示碼 + sim 轉場路徑全乾淨後定位）：
+
+- **U15 戰後按鍵閃退（已修，commit `ace7363`）**：根因 = `text_ui_main._input` 無 overlay 守衛，`KEY_Q`→`get_tree().quit()` 僅靠 `is_encounter_active()` 把關；**U10 戰後「按任意鍵離開」畫面 `encounter_active=false` 但 overlay 仍可見** → 按遭遇戰移動鍵 Q 離開即 quit 閃退。修：`_input` 開頭以 `_encounter_view.visible` 守衛，overlay 顯示中主畫面一律不吃鍵（連帶修 WASD 漏到世界游標）。**此為 U10 修引入提示後暴露的既有 Q=quit 衝突。**
+- **U16 世界地圖迷霧/視野對不上（未修，pre-existing）**：根因 = 座標系 axial，但 `text_map_renderer` 用「奇數列交替縮排」渲染（對 axial 是錯投影，應 axial→offset 或累進列偏移）。**非本批改動，純既有渲染 bug**，屬視覺需逐步對照調 → 建議獨立 task 與使用者看輸出迭代，未動。
+
+
 - `encounter_system.resolve_attack`：新增 `_enc_log` 對 NPC vs NPC 的 encounter 也會 append（玩家視角戰報含非玩家單位戰鬥）。僅顯示用，無守恆/結果影響。NPC vs NPC 多走 `npc_combat`（不經 encounter），實際 spam 風險低。
 - `world_state.encounter_log`：未在 `resolve_encounter_end` 清空（僅 `init_encounter` 清）→ 戰後仍可讀（U10 戰後畫面正需要）。下場戰開始時清。**不入存檔/快照**，無守恆顧慮。
 - `encounter_view.gd` 仍 `_bridge.get_state()` 直讀 raw state（U9 邊界債既有）；U11 combat log 走 bridge facade 符合邊界，但本檔整體解耦屬 U9 另案。
