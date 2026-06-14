@@ -34,8 +34,12 @@
   "npc_would_accept": bool,      # 用 NPC offer 評估邏輯預估
 }
 ```
-- `unit_value` = `InteractionSystem._local_value(team, grade)`（BASE_PRICE × 供需）。
-- `npc_would_accept` = 跑既有 offer 評估（submit_trade_offer 內 NPC 接受判定抽成可預估的純函數，或複用其門檻）。
+- **估值沿用既有供需定價（不新增機制）**：`unit_value = InteractionSystem._local_value(team, grade)` = `BASE_PRICE × (1 + 供需比)` → 通膨/通縮 = per-team 稀缺度 emergent（囤積壓價/稀缺抬價）。
+- **whose value（明確）**：
+  - `player_items[].unit_value` = **玩家隊** `_local_value`（玩家視角）；`target_items[].unit_value` = **NPC** `_local_value`。
+  - `npc_would_accept` / 公平判定 = 用 **NPC 的** `_local_value`（NPC 按自身稀缺度決定收不收）。
+  - 兩邊值並列 → 玩家看到「兩地供需差 = 套利空間」（把你富的賣給缺它的隊）。
+- `npc_would_accept` = 跑既有 offer 評估抽成的純函數（見風險：與 submit 同一真相）。
 - 可交易項 = `InteractionSystem.BASE_PRICE.keys()` ∩ team.resources（有量者）+ coin。
 
 ## 2. UI 層：offer-builder（`text_ui_main` 交易模式）
