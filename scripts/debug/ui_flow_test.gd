@@ -9,8 +9,39 @@ func _initialize() -> void:
 	await _test_u12_trade_str()
 	await _test_hunt_action_listed()
 	await _test_armed_count_shown()
+	await _test_member_equip_flow()
+	await _test_armed_ratio_cmd()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
+
+func _test_member_equip_flow() -> void:
+	print("\n── 成員裝備 flow ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	# 注入名成員 + 武器池
+	var m := PersonData.new(); m.id = 99001; m.team_id = ptid
+	st.persons[99001] = m; st.teams[ptid].named_members.append(99001)
+	st.teams[ptid].resources["weapon_melee_low"] = 2
+	node._member_mode = true; node._member_detail_submode = 2; node._member_selection = 0
+	node._refresh()
+	var r = node._bridge.command_player("execute_action",
+		{"action_id":"equip_member","target":{"kind":"member","team_id":ptid,"member_id":99001,"slot_id":"hand_1","item_grade":"weapon_melee_low"}})
+	_check("equip_member 經 bridge 成功", r.get("ok", false))
+	_check("成員裝上武器", st.persons[99001].equipment["hand_1"].get("grade","") == "weapon_melee_low")
+	_check("status 含武裝比例", node._state_label.text.contains("比例"))
+	await _free_ui(node)
+
+func _test_armed_ratio_cmd() -> void:
+	print("\n── 設武裝比例 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	st.player_state["armed_ratio_input"] = 0.6
+	var r = node._bridge.command_player("execute_action", {"action_id":"set_armed_anon_ratio","target":{"kind":"none"}})
+	_check("set_armed_anon_ratio 成功", r.get("ok", false))
+	var ptid: int = st.persons[st.player_id].team_id
+	_check("ratio 設為 0.6", abs(st.teams[ptid].armed_anon_ratio - 0.6) < 0.01)
+	await _free_ui(node)
 
 func _test_armed_count_shown() -> void:
 	print("\n── 自隊武裝數顯示 ──")

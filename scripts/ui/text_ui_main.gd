@@ -241,6 +241,21 @@ func _input(event: InputEvent) -> void:
 		KEY_H:
 			_cursor = _bridge.get_player_tile_pos()
 			_refresh()
+		KEY_R:
+			# U18：設匿名武裝比例（輸入 0~100 百分比）
+			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "武裝比例 %: "
+			_input_buffer = ""
+			_input_mode_callback = func(buf: String) -> void:
+				var pct: float = clampf(buf.to_float(), 0.0, 100.0)
+				var st = _bridge.get_state()
+				st.player_state["armed_ratio_input"] = pct / 100.0
+				var r: Dictionary = _bridge.command_player("execute_action",
+					{"action_id": "set_armed_anon_ratio", "target": {"kind": "none"}})
+				_set_feedback(r.get("ok", false), r.get("message", r.get("result_summary", "")))
+				_refresh()
+			_input_bar.text = "武裝比例 %: _"
 		KEY_P:
 			_member_mode = not _member_mode
 			if _inv_mode: _inv_mode = false
@@ -603,7 +618,7 @@ func _build_state_str() -> String:
 		pos.get("q", 0), pos.get("r", 0),
 		ct.get("faction_display", "?")])
 	lines.append("任務: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
-	lines.append("人口: %d  武裝: %d | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), ct.get("minor_population", 0)])
+	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
 	var food_days: float = float(ct.get("food_days", 99.0))
 	var starving: bool = bool(ct.get("starving", false))
 	lines.append("糧: %.1f 天%s" % [food_days, "  ⚠斷糧" if starving else ""])
@@ -716,9 +731,77 @@ func _handle_member_mode(keycode: int) -> void:
 			_member_detail_submode = 2
 		KEY_4:
 			_member_detail_submode = 3
+		KEY_E:
+			# U13b：裝備選中成員 hand_1（裝 team 池第一個可用武器）
+			if _member_detail_submode == 2 and members.size() > 0:
+				_equip_selected_member(members[_member_selection])
+		KEY_U:
+			# U13b：卸下選中成員 hand_1
+			if _member_detail_submode == 2 and members.size() > 0:
+				_unequip_selected_member(members[_member_selection])
+		KEY_Y:
+			# S9：調選中成員薪資（任一 submode）
+			if members.size() > 0:
+				_prompt_member_salary(members[_member_selection])
+				return
 		KEY_P, KEY_ESCAPE:
 			_member_mode = false
 	_refresh()
+
+# U13b：裝 team 武器池第一個可用武器到成員 hand_1
+func _equip_selected_member(member: Dictionary) -> void:
+	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
+	var tid: int = int(ct.get("id", -1))
+	var mid: int = int(member.get("id", -1))
+	if tid == -1 or mid == -1:
+		return
+	const WEAPON_GRADES: Array = ["weapon_melee_high", "weapon_melee_low",
+		"weapon_ranged_high", "weapon_ranged_low"]
+	var res: Dictionary = ct.get("resources", {})
+	var grade: String = ""
+	for g in WEAPON_GRADES:
+		if int(res.get(g, 0)) > 0:
+			grade = g
+			break
+	if grade == "":
+		_set_feedback(false, "team 無可裝備武器")
+		return
+	var r: Dictionary = _bridge.command_player("execute_action",
+		{"action_id": "equip_member",
+		 "target": {"kind": "member", "team_id": tid, "member_id": mid,
+			"slot_id": "hand_1", "item_grade": grade}})
+	_set_feedback(r.get("ok", false), r.get("message", r.get("result_summary", "")))
+
+# U13b：卸下成員 hand_1
+func _unequip_selected_member(member: Dictionary) -> void:
+	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
+	var tid: int = int(ct.get("id", -1))
+	var mid: int = int(member.get("id", -1))
+	if tid == -1 or mid == -1:
+		return
+	var r: Dictionary = _bridge.command_player("execute_action",
+		{"action_id": "unequip_member",
+		 "target": {"kind": "member", "team_id": tid, "member_id": mid, "slot_id": "hand_1"}})
+	_set_feedback(r.get("ok", false), r.get("message", r.get("result_summary", "")))
+
+# S9：數字輸入收薪資 → set_member_salary
+func _prompt_member_salary(member: Dictionary) -> void:
+	var ct: Dictionary = _cached_snapshot.get("controlled_team", {})
+	var tid: int = int(ct.get("id", -1))
+	var mid: int = int(member.get("id", -1))
+	_input_mode = true
+	_input_mode_type = "numeric"
+	_input_mode_prompt = "%s 薪資: " % member.get("name", "成員")
+	_input_buffer = ""
+	_input_mode_callback = func(buf: String) -> void:
+		var st = _bridge.get_state()
+		st.player_state["salary_input"] = buf.to_float()
+		var r: Dictionary = _bridge.command_player("execute_action",
+			{"action_id": "set_member_salary",
+			 "target": {"kind": "member", "team_id": tid, "member_id": mid}})
+		_set_feedback(r.get("ok", false), r.get("message", r.get("result_summary", "")))
+		_refresh()
+	_input_bar.text = "%s薪資: _" % member.get("name", "成員")
 
 func _build_member_str() -> String:
 	var members: Array    = _cached_snapshot.get("members_detail", [])
@@ -741,7 +824,7 @@ func _build_member_str() -> String:
 		3: detail_lines = TeamUiHelper.render_stats_detail(selected_member)
 
 	var team_name: String = ct.get("name", "Team?")
-	return TeamUiHelper.render_three_columns(
+	var body: String = TeamUiHelper.render_three_columns(
 		members,
 		_member_selection,
 		detail_lines,
@@ -749,6 +832,11 @@ func _build_member_str() -> String:
 		team_name,
 		_bridge.get_current_tick()
 	)
+	var hint: String = "[W/S]選成員 [1-4]切頁 [Y]調薪"
+	if _member_detail_submode == 2:
+		hint += " [E]裝備 [U]卸下"
+	hint += " [P/Esc]關閉"
+	return body + "\n" + hint
 
 func _get_team_takeable_items(_pt: TeamData) -> Array:
 	return ["weapon_melee_low", "weapon_melee_high", "weapon_ranged_low", "weapon_ranged_high",
