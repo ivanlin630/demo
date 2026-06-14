@@ -15,10 +15,12 @@
 - **✅ 階段1（開局生存）整套完成 + 求生行為多元化**：覓食(已退場)→狩獵唯一 + 野獸戰鬥/伏擊 + 絕境多元生存。世界 2 年無崩、守恆 0。
 - **NPC 向上攀爬**：吞併→建勢力（npc_combat/interaction）、建造/紮營→定居成生產/軍隊（auto_settle + crude camp）、W4 設施階梯、pop→分裂。流浪→定居這階補齊。
 
+- **SoloAI 主動尋家 + 承諾慣性已 merge**：`_evaluate_solo` 加 紮營/投靠 value 加權（無家團、bypass _tag_weight 避流亡歸零）+ solo_intent 慣性（止 flip-flop）。churn 修（主動 camp 免糧足釋放 + 到達兜底）。2 年×3 roving 主導非 uniform、安身率↑、守恆 0。流浪→定居 bottom-up 進展接上。
+
 ### 佇列（下一步選項）
-1. **SoloAI 主動尋家**（缺口）：穩定流民（窮+和平）目前 idle 到餓才反應；SoloAI 無「主動紮營/投靠」目標。補主動尋家驅動（reuse desperation helpers）= bottom-up 進展引擎。
-2. **狩獵受傷→醫療需求**（你提的）：小獵物零受傷不真實；補偶發傷 → medicine 經濟接入 + 第二維 precarity。
-3. **量測 tune 階段1 全 TEST VALUE**：FORAGE/BEAST_PROFILE/AMBUSH/desperation gate（loot 偏高 130 可調均衡）。一次一變因。
+1. **狩獵受傷→醫療需求**（你提的）：小獵物零受傷不真實；補偶發傷 → medicine 經濟接入 + 第二維 precarity。
+2. **量測 tune 階段1 全 TEST VALUE**：FORAGE/BEAST_PROFILE/AMBUSH/desperation gate（loot 偏高 130）/ SoloAI proactive 投靠·掠奪占比低（投靠 0 次,門檻嚴）。一次一變因。
+3. **②深層目標錨**（待 spec）：接 dormant goal 系統,長弧（盜匪→建國）。先量測承諾慣性夠不夠。
 4. 階段2（招人成幫）/ UI 接入（覓食 episode/hunt/伏擊進場僅 headless 驗）。
 
 ### 殘留 bug / 量測限制
