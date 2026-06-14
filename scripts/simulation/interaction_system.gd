@@ -553,6 +553,10 @@ func _local_value(team: TeamData, res: String) -> float:
 	var sr: float = clampf(shortage, -0.5, 4.0 if res in SURVIVAL_GOODS else 1.0)
 	return float(BASE_PRICE[res]) * (1.0 + sr)
 
+# 公開存取（DTO 估值用）：_local_value 私有，trade_session DTO 經此取單價
+func local_value(team: TeamData, res: String) -> float:
+	return _local_value(team, res)
+
 # ──────── 雙向 market 結算（取代舊 _resolve_trade）────────
 
 func _calc_reserve(team: TeamData, res: String) -> float:

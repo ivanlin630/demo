@@ -258,6 +258,9 @@ func query_player_actions(request: Dictionary) -> Dictionary:
 func query_trade_preview(target_team_id: int) -> Dictionary:
 	return _query_api.get_trade_preview(_state, target_team_id)
 
+func query_trade_session(target_team_id: int) -> Dictionary:
+	return _query_api.get_trade_session(_state, target_team_id)
+
 # U12: text UI confirm_trade 預覽（auto-trade 方向）
 func query_trade_direct_preview(target_team_id: int) -> Dictionary:
 	return _query_api.get_trade_direct_preview(_state, target_team_id)
