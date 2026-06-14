@@ -152,32 +152,34 @@
 - **狀態**：pre-existing baseline（與覓食無關）
 - **優先**：M — 滅團守恆相關，另案
 
-### U10. 遭遇戰戰後「卡住」（敵死後）✅ 根因確認，待修
+### U10. 遭遇戰戰後「卡住」（敵死後）✅ 已修（2026-06-14，待 run-verify）
+- **修**：`encounter_view._refresh_ui` 在 `_post_combat`/`not encounter_active` 時不再因無 player_unit early-return → 改顯戰果摘要 + `_post_combat_hint`（「按任意鍵離開」/ can_subjugate 加「[J]收編敗者」）。組字抽 static helper，ui_logic_test 覆蓋。
+- **驗證**：ui_logic_test PASS；GUI 凍結觀感待人工 run-verify。
+
+<details><summary>原根因紀錄</summary>
 - **症狀**：殺光敵人後遭遇戰畫面卡住，無法離開（2026-06-14 玩測，用戶被迫關遊戲）
 - **根因**：`encounter_view._refresh_ui` line 96-97 無 player_unit 即 early-return。戰畢 resolve 清空 `encounter_units`/`encounter_active=false` → `_find_player_unit` 回空 → `_refresh_ui` 提早 return → 戰後 `_post_combat`（can_subjugate=true）的「按任意鍵離開 / J 收編」提示**從未渲染** → 看似凍結（實際按任意鍵會走 `_handle_key` 戰後分支離開，但無提示）
 - **觸發**：僅 `last_encounter_result.can_subjugate=true`（贏且可收編敗者）；不可收編 → `hide_encounter()` 直接退出，無此問題
 - **修向**：`_refresh_ui` 在 `_post_combat`/戰畢時不因無 player_unit 就 return → 改顯戰果摘要 + 「按任意鍵離開 / [J]收編」提示
 - **優先**：H（game-breaking 凍結觀感）
+</details>
 
-### U11. 戰鬥無擊中指示
-- **症狀**：encounter 攻擊命中無視覺/文字回饋（玩家不知打中沒）
-- **修向**：encounter_view 攻擊解算後顯命中/傷害（resolve_attack 已 print `[Hit] part dmg`，UI 未呈現）
-- **優先**：M
+### U11. 戰鬥無擊中指示 ✅ 已修（2026-06-14，待 run-verify）
+- **修**：新增 `WorldState.encounter_log` channel；`resolve_attack` 命中/落空/格擋/閃避各 append 一條（`init_encounter` 清空）；`sim_bridge.query_encounter_log(n)` facade；`encounter_view` 加「戰報」label 滾顯最新 6 條。只加 log，不改戰鬥結果/守恆。
+- **驗證**：headless `encounter_log OK`；GUI 滾動顯示待人工 run-verify。
 
-### U12. 互動交易跳「無資源」
-- **症狀**：互動選單交易 → 跳無資源（即便雙方有貨）
-- **修向**：查 text_ui interact→trade 流 + `get_trade_preview`/`_resolve_market` 條件；可能 trade_offer 未帶資源或 preview 取資源錯
-- **優先**：M
+### U12. 互動交易跳「無資源」 ✅ 已修（2026-06-14，待 run-verify）
+- **根因**：text-UI `_build_trade_str` 呼叫 offer-based `query_trade_preview`（回 `{resources, offer_preview}`），卻期望 auto-trade `interaction_system.preview_trade` 的 `{feasible, player_gives, player_gets}` shape → 永遠讀不到 feasible → 誤判「雙方均無可交換資源」。confirm 流程（`resolve_trade_direct`）本身正常。
+- **修**：新增 `PlayerQueryApi.get_trade_direct_preview` + `sim_bridge.query_trade_direct_preview`，`_build_trade_str` 改用之。
+- **驗證**：headless `U12 trade preview OK`（互補資源 feasible=true）；GUI 待 run-verify。
 
-### U13. 物品欄已裝備物無卸下路徑
-- **症狀**：inv 模式已裝備的東西無法卸下（unequip_item 指令在，UI 無入口）
-- **修向**：inv/member 裝備格加卸下鍵（`PlayerCommandApi.unequip_item` 已存在，只缺 UI 綁定）
-- **優先**：M
+### U13. 物品欄已裝備物無卸下路徑 ✅ 已修（2026-06-14，待 run-verify）
+- **修**：inv 版面改「已裝備槽（可選）→ 背包 → Team取出」三段，加 `[U]` 卸下鍵綁既有 `unequip_item`；已裝備槽前置使數字鍵可達。
+- **驗證**：parse OK；卸下流程待人工 run-verify。
 
-### U14. 遭遇戰進場人數存疑
-- **症狀**：雙方進場 unit 數疑似不對（待確認 spawn 數 vs 預期）
-- **修向**：對照 `_spawn_team_units`（armed_anon_ratio × pop, ANON_UNIT_CAP）vs UI 顯示;可能正確只是 UI 沒標總數。先量測再判
-- **優先**：L（先確認是否真 bug）
+### U14. 遭遇戰進場人數存疑 ✅ 確認非 bug，已標總數（2026-06-14）
+- **結論**：spawn 數 = `named + min(pop × armed_anon_ratio, ANON_UNIT_CAP)`，正確（armed_anon_ratio<1 → 非全員上場為設計）。headless 加公式 assert 佐證。
+- **觀感補**：`encounter_view` 加「我方 X 敵方 Y」在場兵力 label，避免玩家誤以為人數錯。
 
 ### U9. 圖形 Main.tscn UI 仍 reach-through raw WorldState（邊界債）
 - **症狀**：`main.gd`/`encounter_view.gd`/`popup_layer.gd`/`debug_bar.gd` 大量 `_bridge.get_state()` 直讀 raw `WorldState`（body_parts/units/world.current_tick）→ 違反「UI 只經 player API」invariant（2026-06-14 新增）
