@@ -6,6 +6,11 @@ func _initialize() -> void:
 	_test_constants()
 	_test_setup_sanity()
 	_test_vision_threshold()
+	_test_member_health_line()
+	_test_resource_trend()
+	_test_mode_keymap()
+	_test_feedback_format()
+	_test_log_strip()
 	print("\n=== UI Logic Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -80,3 +85,51 @@ func _test_vision_threshold() -> void:
 	var out := Vector2i(10, 10)
 	_check("(10,10) 不在地圖（邊界驗證依據）",
 		not state.world.tiles.has(out.x * 1000 + out.y))
+
+# ── chrome P2: status 成員健康一行 ───────────────────────────────────────────
+
+func _test_member_health_line() -> void:
+	print("\n── chrome. 成員健康一行 ──")
+	var members: Array = [
+		{ "name": "甲", "hp_status": "正常" },
+		{ "name": "乙", "hp_status": "重傷" },
+		{ "name": "丙", "hp_status": "輕傷" },
+	]
+	var line: String = TextUiMain._member_health_line(members)
+	_check("摘要傷員（乙重傷）line=%s" % line, "重傷" in line and "乙" in line)
+	var ok_line: String = TextUiMain._member_health_line([{ "name": "甲", "hp_status": "正常" }])
+	_check("全正常非空 line=%s" % ok_line, ok_line != "")
+
+# ── chrome P2: 資源趨勢箭頭 ──────────────────────────────────────────────────
+
+func _test_resource_trend() -> void:
+	print("\n── chrome. 資源趨勢箭頭 ──")
+	_check("增→↑", TextUiMain._resource_trend(100.0, 120.0) == "↑")
+	_check("減→↓", TextUiMain._resource_trend(100.0, 80.0) == "↓")
+	_check("平→無", TextUiMain._resource_trend(100.0, 100.0) == "")
+
+# ── chrome P2: 模式 keymap ───────────────────────────────────────────────────
+
+func _test_mode_keymap() -> void:
+	print("\n── chrome. 模式 keymap ──")
+	_check("main 有鍵表", TextUiMain._mode_keymap("main") != "")
+	_check("interact 有鍵表", TextUiMain._mode_keymap("interact") != "")
+	_check("未知 mode fallback main", TextUiMain._mode_keymap("zzz") == TextUiMain._mode_keymap("main"))
+
+# ── chrome P2: feedback 行格式 ───────────────────────────────────────────────
+
+func _test_feedback_format() -> void:
+	print("\n── chrome. feedback 格式 ──")
+	_check("成功訊息含內容", TextUiMain._feedback_text(true, "獵得野味 +12").contains("獵得"))
+	_check("成敗異色", TextUiMain._feedback_color(true) != TextUiMain._feedback_color(false))
+
+# ── chrome P2: event LogStrip 組字 ───────────────────────────────────────────
+
+func _test_log_strip() -> void:
+	print("\n── chrome. event LogStrip ──")
+	var events: Array = [
+		{"type":"ui","msg":"A"}, {"type":"ui","msg":"B"}, {"type":"ui","msg":"C"}, {"type":"ui","msg":"D"}
+	]
+	var s: String = TextUiMain._log_strip_text(events, 3)
+	_check("顯最新 3 條（BCD）s=%s" % s, "D" in s and "C" in s and "B" in s)
+	_check("舊的 A 不顯", not ("A" in s))

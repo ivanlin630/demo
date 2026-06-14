@@ -1,5 +1,6 @@
 # scripts/ui/text_ui_main.gd
 extends Node
+class_name TextUiMain
 
 var _runner: SimRunner
 var _bridge: SimBridge
@@ -40,6 +41,13 @@ var _pending_alerts: Array = []    # Array[String] 待顯示的警報文字
 var _alert_bar: Label              # 動態建立，置於 InputBar 上方
 var _encounter_view: Control       # 動態建立，遭遇戰 overlay
 
+# ── chrome P2：常駐 chrome 區（動態建立，仿 _alert_bar）─────────────────────────
+var _log_strip: Label              # 常駐事件 log（與 panel 共存，永遠顯最新 N 條）
+var _feedback_line: Label          # 指令成敗 feedback（著色，持續到下個指令）
+var _hint_line: Label              # 當前模式可用鍵
+var _res_baseline: Dictionary = {} # 資源每日基準（日邊界更新）→ 趨勢箭頭
+var _res_baseline_day: int = -1
+
 # ── Pre-encounter submode ────────────────────────────────────────────────────
 var _pre_encounter_mode: bool = false
 
@@ -77,6 +85,21 @@ func _ready() -> void:
 	var vbox: Node = _input_bar.get_parent()
 	vbox.add_child(_alert_bar)
 	vbox.move_child(_alert_bar, _input_bar.get_index())
+	# 動態建立常駐 chrome 區（順序 …LogStrip → FeedbackLine → HintLine → AlertBar → InputBar）
+	_log_strip = Label.new()
+	_log_strip.name = "LogStrip"
+	_log_strip.modulate = Color(0.7, 0.7, 0.7)   # 灰：背景事件
+	vbox.add_child(_log_strip)
+	vbox.move_child(_log_strip, _alert_bar.get_index())
+	_feedback_line = Label.new()
+	_feedback_line.name = "FeedbackLine"
+	vbox.add_child(_feedback_line)
+	vbox.move_child(_feedback_line, _alert_bar.get_index())
+	_hint_line = Label.new()
+	_hint_line.name = "HintLine"
+	_hint_line.modulate = Color(0.6, 0.7, 0.9)   # 藍：操作提示
+	vbox.add_child(_hint_line)
+	vbox.move_child(_hint_line, _alert_bar.get_index())
 	# 動態建立 EncounterView overlay
 	_encounter_view = load("res://scripts/ui/encounter_view.gd").new()
 	_encounter_view.name = "EncounterView"
@@ -188,6 +211,7 @@ func _input(event: InputEvent) -> void:
 				_input_bar.text = "移動中 [Esc]停止"
 			else:
 				_log_event(r.get("message", "移動失敗"))
+			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_refresh()
 		KEY_SPACE:
 			_bridge.request_advance(WorldState.TICKS_PER_DAY)
@@ -416,6 +440,9 @@ func _refresh() -> void:
 			var e = _events[i]
 			log_lines.append("[T%d] %s" % [_bridge.get_current_tick(), str(e)])
 		_event_label.text = "\n".join(log_lines)
+	# 常駐 chrome：hint（當前模式鍵表）+ LogStrip（與 panel 共存，永遠顯最新 N 條）
+	_hint_line.text = _mode_keymap(_current_mode_name())
+	_log_strip.text = _log_strip_text(_events, 3)
 	_check_alerts()
 
 func _get_hp_status(person: PersonData) -> String:
@@ -440,6 +467,82 @@ func _visible_team_at(tile_key: int) -> int:
 			return vt.get("id", -1)
 	return -1
 
+# ── chrome P2 helpers（純函數，供 ui_logic_test 單元覆蓋）─────────────────────
+
+# 成員健康一行摘要：有傷列傷員，全正常則簡短「全員正常」
+static func _member_health_line(members: Array) -> String:
+	var hurt: Array = []
+	for m in members:
+		var s: String = str(m.get("hp_status", "正常"))
+		if s != "正常":
+			hurt.append("%s(%s)" % [m.get("name", "?"), s])
+	if hurt.is_empty():
+		return "成員: 全員正常"
+	return "成員傷: " + "、".join(hurt)
+
+# 資源趨勢箭頭：相對每日基準的 delta（>0.5 ↑、<-0.5 ↓、否則無）
+static func _resource_trend(baseline: float, cur: float) -> String:
+	if cur > baseline + 0.5: return "↑"
+	if cur < baseline - 0.5: return "↓"
+	return ""
+
+# 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
+const MODE_KEYMAP: Dictionary = {
+	"main":          "[WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"interact":      "[1-9]選目標/行動 [Esc]返回",
+	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
+	"inv":           "[1-9]選物 [E]裝備 [S]存入 [G]取出 [I/Esc]關閉",
+	"faction":       "[A]目標 [B]徵收率 [C]離開 [D]背叛 [E]解散 [1-9]下令成員 [F/Esc]關閉",
+	"outpost":       "[1-9]行動 [O/Esc]關閉",
+	"subteam":       "[1-9]選隊 [N]派遣 [A]下令移動 [B]召回 [U/Esc]關閉",
+	"advisor":       "[1-9]選顧問問策 [V/Esc]關閉",
+	"intel":         "[1-5]選題 [Esc]取消",
+	"trade":         "[1]確認 [2/Esc]取消",
+	"pre_encounter": "[1]迎擊 [2]投降",
+}
+static func _mode_keymap(mode: String) -> String:
+	return MODE_KEYMAP.get(mode, MODE_KEYMAP["main"])
+
+# feedback 行文字（成✓ 敗✗）
+static func _feedback_text(ok: bool, msg: String) -> String:
+	return ("✓ " if ok else "✗ ") + msg
+static func _feedback_color(ok: bool) -> Color:
+	return Color(0.5, 0.9, 0.5) if ok else Color(0.95, 0.5, 0.5)
+
+# event LogStrip 組字：取最新 n 條的 msg，以「 | 」串接
+static func _log_strip_text(events: Array, n: int) -> String:
+	var out: Array = []
+	var start: int = maxi(0, events.size() - n)
+	for i in range(start, events.size()):
+		out.append(str(events[i].get("msg", "")))
+	return " | ".join(out)
+
+# 當前模式字串（依各 mode flag，順序對齊 _input dispatch）
+func _current_mode_name() -> String:
+	if _input_mode:         return _current_mode_name_under_input()
+	if _pre_encounter_mode: return "pre_encounter"
+	if _trade_mode:         return "trade"
+	if _intel_mode:         return "intel"
+	if _inv_mode:           return "inv"
+	if _interact_mode:      return "interact"
+	if _member_mode:        return "member"
+	if _faction_mode:       return "faction"
+	if _outpost_mode:       return "outpost"
+	if _subteam_mode:       return "subteam"
+	if _advisor_mode:       return "advisor"
+	return "main"
+
+# 輸入模式時保留底層 panel 的提示（次要：顯通用輸入提示）
+func _current_mode_name_under_input() -> String:
+	return "main"
+
+# 指令成敗 feedback（持續到下個指令，不清）
+func _set_feedback(ok: bool, msg: String) -> void:
+	if _feedback_line == null: return
+	if str(msg).is_empty(): return
+	_feedback_line.text = _feedback_text(ok, msg)
+	_feedback_line.modulate = _feedback_color(ok)
+
 func _build_state_str() -> String:
 	var ct: Dictionary  = _cached_snapshot.get("controlled_team", {})
 	var ps: Dictionary  = _cached_snapshot.get("player_summary", {})
@@ -454,6 +557,10 @@ func _build_state_str() -> String:
 		ct.get("faction_display", "?")])
 	lines.append("任務: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
 	lines.append("人口: %d | 未成年: %d" % [ct.get("population", 0), ct.get("minor_population", 0)])
+	var food_days: float = float(ct.get("food_days", 99.0))
+	var starving: bool = bool(ct.get("starving", false))
+	lines.append("糧: %.1f 天%s" % [food_days, "  ⚠斷糧" if starving else ""])
+	lines.append(_member_health_line(ct.get("members", [])))
 
 	if ps.get("player_exists", false):
 		lines.append("────────────────")
@@ -465,9 +572,16 @@ func _build_state_str() -> String:
 			lines.append("  " + " ".join(skill_parts))
 
 	var res: Dictionary = ct.get("resources", {})
+	var day: int = _bridge.get_current_tick() / WorldState.TICKS_PER_DAY
+	if day != _res_baseline_day:
+		_res_baseline_day = day
+		_res_baseline = res.duplicate()
 	lines.append("────────────────")
 	lines.append("資源:")
-	lines.append("  食:%d 幣:%d 材:%d" % [res.get("food", 0), res.get("coin", 0), res.get("material", 0)])
+	lines.append("  食:%d%s 幣:%d%s 材:%d%s" % [
+		res.get("food", 0),     _resource_trend(float(_res_baseline.get("food", res.get("food", 0))), float(res.get("food", 0))),
+		res.get("coin", 0),     _resource_trend(float(_res_baseline.get("coin", res.get("coin", 0))), float(res.get("coin", 0))),
+		res.get("material", 0), _resource_trend(float(_res_baseline.get("material", res.get("material", 0))), float(res.get("material", 0)))])
 	lines.append("  低武:%d 高武:%d" % [res.get("weapon_melee_low", 0), res.get("weapon_melee_high", 0)])
 	lines.append("  低甲:%d 高甲:%d" % [res.get("armor_low", 0), res.get("armor_high", 0)])
 	lines.append("  藥:%d 工:%d" % [res.get("medicine", 0), res.get("tools", 0)])
@@ -677,6 +791,7 @@ func _handle_interact_mode(keycode: int) -> void:
 				var result: Dictionary = _bridge.command_player(
 					act.get("command_name", "execute_action"), act.get("command_args", {}))
 				_log_event("[互動] %s" % result.get("message", ""))
+				_set_feedback(result.get("ok", true), result.get("message", ""))
 				# 貿易預覽流程：進入 trade submode
 				if result.get("ok") and result.get("payload", {}).get("requires_preview", false):
 					_trade_target_id = result.get("payload", {}).get("preview_target_id", -1)
@@ -704,6 +819,7 @@ func _handle_interact_mode(keycode: int) -> void:
 		var resp_args: Dictionary = fi_responses[num].get("command_args", {})
 		var result: Dictionary = _bridge.command_player("respond_to_forced", resp_args)
 		_log_event("[強制互動] %s" % result.get("message", ""))
+		_set_feedback(result.get("ok", true), result.get("message", ""))
 		_refresh()
 		return
 
@@ -790,6 +906,7 @@ func _handle_faction_mode(keycode: int) -> void:
 				var r := _bridge.command_player("execute_action",
 					{"action_id": "set_faction_goal", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 				_log_event("[勢力] %s" % r.get("message", ""))
+				_set_feedback(r.get("ok", true), r.get("message", ""))
 			_input_bar.text = "%s_" % _input_mode_prompt
 		KEY_B:   # 調整徵收率
 			_input_mode = true
@@ -802,19 +919,23 @@ func _handle_faction_mode(keycode: int) -> void:
 				var r := _bridge.command_player("execute_action",
 					{"action_id": "set_tribute_rate", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 				_log_event("[勢力] %s" % r.get("message", ""))
+				_set_feedback(r.get("ok", true), r.get("message", ""))
 			_input_bar.text = "%s_" % _input_mode_prompt
 		KEY_C:   # 離開勢力
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "leave_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 			_log_event("[勢力] %s" % r.get("message", ""))
+			_set_feedback(r.get("ok", true), r.get("message", ""))
 		KEY_D:   # 背叛勢力
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "betray_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 			_log_event("[勢力] %s" % r.get("message", ""))
+			_set_feedback(r.get("ok", true), r.get("message", ""))
 		KEY_E:   # 解散勢力（僅 leader）
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "disband_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 			_log_event("[勢力] %s" % r.get("message", ""))
+			_set_feedback(r.get("ok", true), r.get("message", ""))
 		_:
 			# [1~9] 下令成員
 			if keycode >= KEY_1 and keycode <= KEY_9:
@@ -838,6 +959,7 @@ func _handle_faction_mode(keycode: int) -> void:
 							r = _bridge.command_player("execute_action",
 								{"action_id": "order_faction_member", "target": {"kind": "none", "team_id": member_tid, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 						_log_event("[勢力] %s" % r.get("message", ""))
+						_set_feedback(r.get("ok", true), r.get("message", ""))
 					_input_bar.text = "%s_" % _input_mode_prompt
 	_refresh()
 
@@ -902,6 +1024,7 @@ func _handle_outpost_mode(keycode: int) -> void:
 						"action_id": "build_outpost",
 						"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 					_log_event("[前哨] %s" % r2.get("message", ""))
+					_set_feedback(r2.get("ok", true), r2.get("message", ""))
 				_input_bar.text = "%s_" % _input_mode_prompt
 				_refresh()
 				return
@@ -909,6 +1032,7 @@ func _handle_outpost_mode(keycode: int) -> void:
 				var r := _bridge.command_player("execute_action",
 					{"action_id": action_id, "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 				_log_event("[前哨] %s" % r.get("message", ""))
+				_set_feedback(r.get("ok", true), r.get("message", ""))
 	_refresh()
 
 func _build_outpost_str() -> String:
@@ -1009,6 +1133,7 @@ func _handle_subteam_mode(keycode: int) -> void:
 								"action_id": "dispatch_subteam",
 								"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 							_log_event("[子隊] %s" % res.get("message", ""))
+							_set_feedback(res.get("ok", true), res.get("message", ""))
 						_input_bar.text = "目標格 R: _"
 					_input_bar.text = "目標格 Q: _"
 				_input_bar.text = "派遣人數 (1~%d): _" % (max_pop - 1)
@@ -1046,6 +1171,7 @@ func _handle_subteam_mode(keycode: int) -> void:
 					var res := _bridge.command_player("execute_action",
 						{"action_id": "order_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 					_log_event("[子隊] %s" % res.get("message", ""))
+					_set_feedback(res.get("ok", true), res.get("message", ""))
 					_subteam_selection = -1
 				_input_bar.text = "%s_" % _input_mode_prompt
 			_input_bar.text = "%s_" % _input_mode_prompt
@@ -1054,6 +1180,7 @@ func _handle_subteam_mode(keycode: int) -> void:
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "recall_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 			_log_event("[子隊] %s" % r.get("message", ""))
+			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_subteam_selection = -1
 	_refresh()
 
@@ -1142,6 +1269,7 @@ func _handle_pre_encounter_mode(keycode: int) -> void:
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "accept_encounter", "target": target})
 			_log_event("[遭遇] %s" % r.get("message", ""))
+			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_pre_encounter_mode = false
 			# encounter_active 現在為 true，下一幀 _process 會偵測並進入 encounter_view
 			_refresh()
@@ -1149,6 +1277,7 @@ func _handle_pre_encounter_mode(keycode: int) -> void:
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "surrender_pre_encounter", "target": target})
 			_log_event("[遭遇] %s" % r.get("message", ""))
+			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_pre_encounter_mode = false
 			# 若投降遭拒，encounter_active = true，下一幀進入 encounter_view
 			_refresh_snapshot()
@@ -1185,6 +1314,7 @@ func _handle_trade_mode(keycode: int) -> void:
 			"target": {"kind": "team", "team_id": _trade_target_id,
 						"member_id": -1, "tile_q": -1, "tile_r": -1}})
 		_log_event("[貿易] %s" % r.get("message", ""))
+		_set_feedback(r.get("ok", true), r.get("message", ""))
 		_trade_mode = false
 		_trade_target_id = -1
 	_refresh()
@@ -1230,6 +1360,7 @@ func _handle_intel_mode(keycode: int) -> void:
 				{"action_id": "confirm_gather_intel",
 				 "target": {"kind": "none", "team_id": _intel_target_id, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 			_log_event("[Inquiry] %s" % r.get("message", ""))
+			_set_feedback(r.get("ok", true), r.get("message", ""))
 			_intel_mode = false
 			_intel_options = []
 	_refresh()
