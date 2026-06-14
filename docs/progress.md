@@ -17,6 +17,8 @@
 
 - **SoloAI 主動尋家 + 承諾慣性已 merge**：`_evaluate_solo` 加 紮營/投靠 value 加權（無家團、bypass _tag_weight 避流亡歸零）+ solo_intent 慣性（止 flip-flop）。churn 修（主動 camp 免糧足釋放 + 到達兜底）。2 年×3 roving 主導非 uniform、安身率↑、守恆 0。流浪→定居 bottom-up 進展接上。
 
+- **文字 UI 翻新 P1（API 暴露+邊界）已 merge**：DTO 暴露 stage-1（food_days/starving precarity、wild_game/predator 認知分級、available_actions hunt/hunt_beast Layer6）+ text_ui 唯一洩漏(encounter_active)走 bridge。invariants 加 UI 邊界。spec §4 含全動作覆蓋審計矩陣。**P2(chrome)/P3(全動作覆蓋照矩陣+調薪指令) 待寫**（先深讀 text_ui 渲染）。
+
 ### 佇列（下一步選項）
 - ~~狩獵受傷→醫療~~ **已涵蓋**：危險獸走真戰鬥（encounter/npc_combat）→ body_parts 傷 → 戰後 `resolve_negative_flags` 耗 medicine。小獵物抽象 roll 免傷（合理）。無需另做。
 1. **UI 接入（player 可玩性）**：stage-1 全機制（覓食/狩獵/hunt 指令/野獸/伏擊/求生）目前**僅 headless 驗,玩家無法經 UI 玩**。原 arc 目標「世界合理→轉玩家迴路」。team0 harness 餓死症結也因玩家無 UI 自驅。

@@ -152,6 +152,11 @@
 - **狀態**：pre-existing baseline（與覓食無關）
 - **優先**：M — 滅團守恆相關，另案
 
+### U9. 圖形 Main.tscn UI 仍 reach-through raw WorldState（邊界債）
+- **症狀**：`main.gd`/`encounter_view.gd`/`popup_layer.gd`/`debug_bar.gd` 大量 `_bridge.get_state()` 直讀 raw `WorldState`（body_parts/units/world.current_tick）→ 違反「UI 只經 player API」invariant（2026-06-14 新增）
+- **狀態**：text_ui 已清（P1）；圖形 UI 未清。text-UI-only 階段不影響
+- **優先**：M — 若推圖形 UI 或全面套 UI 邊界 invariant 才需解耦（範圍大,涉 encounter tactical view）。另案
+
 ### Bug9. EncounterSystem player_id==-1 → anon 被當玩家
 - **症狀**：`advance_encounter_tick` / `_decide_action` 以 `person_id == state.player_id` 判玩家；若 `player_id==-1`（無玩家），anon（person_id=-1）全被當玩家 → 回 `player_turn` 停手 / idle
 - **狀態**：現流程不觸發（正式遊戲 player_id>=0；NPC vs NPC 走 npc_combat 不走 encounter）。beast-combat 測試以 player_id=-999 迴避
