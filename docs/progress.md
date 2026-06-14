@@ -158,6 +158,7 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 |---|---|
 | `scripts/debug/headless_test.gd` | 1000+ Tick headless 模擬；涵蓋所有系統驗證（資源/反應/戰鬥/faction/子團/視野/薪水/疲勞/日夜/外交/戰略/玩家/遭遇戰/**members_detail/team_stats**） |
 | `scripts/debug/team_ui_test.gd` | 成員快照欄位驗證 + TeamUiHelper 所有渲染函數覆蓋測試 |
+| `scripts/debug/ui_flow_test.gd` | **UI-flow 整合 harness**（2026-06-15）：實例化 TextUI.tscn → 注入 bridge state → 驅真鍵盤 handler/_process → 斷言 label/state。免手動 GUI 驗。首批覆蓋 U19 forced 自動進互動 / U21 互動選單分頁(10+) / U12 交易顯示 / hunt 動作可選。**未來修 UI 加對應 flow 測試自動回歸。** |
 
 ---
 
