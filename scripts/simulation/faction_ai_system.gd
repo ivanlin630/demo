@@ -2016,10 +2016,20 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 			TaskArbiter.release(team)
 			team.previous_task = ""
 			return
+		# 主動紮營到達目標格卻無法立營（該格已被占/變更）→ 釋放重評，避免凍結
+		# （invariant：進得去出得來；主動 camp 免糧恢復釋放，故須補此到達兜底）
+		if team.task_priority == TaskArbiter.PRIO_DISPATCH and team.tile_pos == team.move_target:
+			TaskArbiter.release(team)
+			team.previous_task = ""
+			return
 	# 已在 survival task：糧恢復(hysteresis)→ 釋放回 idle，讓建造/生產/攻擊接手
 	# （核心修：原本 early-return 永不釋放 → return_home/乞食 永久 p80 凍結）
+	# 例外：SoloAI 主動紮營（PRIO_DISPATCH）本就在不缺糧時觸發，不可被「糧足」釋放 →
+	#   否則往鄰格 farmable 移動途中即被釋放、到不了 → 永遠重派 churn（移動 1 格即可結算）。
 	if team.current_task in SURVIVAL_TASKS:
-		if days_left >= SURVIVAL_RECOVER_DAYS:
+		var proactive_camp: bool = team.current_task == TeamData.TASK_CAMP \
+			and team.task_priority == TaskArbiter.PRIO_DISPATCH
+		if days_left >= SURVIVAL_RECOVER_DAYS and not proactive_camp:
 			TaskArbiter.release(team)
 		return
 	if days_left < URGENCY_DAYS or days_left < WARNING_DAYS:
