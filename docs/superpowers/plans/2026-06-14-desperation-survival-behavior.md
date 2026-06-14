@@ -166,16 +166,34 @@ func _test_crude_camp() -> void:
 	tile.outpost_owner = -1; tile.outpost_level = 0
 	tile.resource_cap = {"food": 50.0}
 	state.world.tiles[tile.tile_id] = tile
-	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(4,4)
-	team.population = 3; team.resources = {"material": 0}   # 流民無建材
+	# 和平流民 leader → 民營 + 生產 tag
+	var peaceful := PersonData.new(); peaceful.id = 0; peaceful.team_id = 0
+	peaceful.values = {"好戰": 0.2, "野心": 0.5, "求生欲": 0.9}
+	state.persons[0] = peaceful
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
+	team.population = 3; team.resources = {"material": 0}; team.tags = ["流亡"]   # 流民無建材、流亡身分
 	state.teams[0] = team
 	var ok: bool = fai.establish_crude_camp(state, team)
 	assert(ok, "無主可農地應能立 crude camp（免建材）")
-	assert(tile.outpost_level == 1 and tile.outpost_owner == 0, "tile 應成 team0 的 civilian L1")
-	assert(tile.outpost_type == "civilian", "crude camp = civilian")
+	assert(tile.outpost_level == 1 and tile.outpost_owner == 0, "tile 應成 team0 L1")
+	assert(tile.outpost_type == "civilian", "和平流民 → 民營")
+	assert(team.tags.has("生產") and not team.tags.has("流亡"), "和平流民紮營 → 升生產、清流亡")
 	assert(float(tile.resource_cap.get("food", 0)) >= 50.0, "食物 cap 不降")
-	# 已佔的格 → 不能再立
 	assert(not fai.establish_crude_camp(state, team), "已佔格不可再立")
+	# 好戰 leader → 軍營 + 軍隊 tag（不一律生產）
+	var tile2 := HexTileData.new()
+	tile2.tile_id = 5*1000+4; tile2.tile_pos = Vector2i(5,4); tile2.terrain = "plains"
+	tile2.outpost_owner = -1; tile2.outpost_level = 0; tile2.resource_cap = {"food": 50.0}
+	state.world.tiles[tile2.tile_id] = tile2
+	var raider := PersonData.new(); raider.id = 1000; raider.team_id = 1
+	raider.values = {"好戰": 0.9, "野心": 0.8, "殘忍": 0.7}
+	state.persons[1000] = raider
+	var t2 := TeamData.new(); t2.team_id = 1; t2.leader_id = 1000; t2.tile_pos = Vector2i(5,4)
+	t2.tags = ["流亡"]
+	state.teams[1] = t2
+	fai.establish_crude_camp(state, t2)
+	assert(tile2.outpost_type == "military", "好戰流民 → 軍營")
+	assert(t2.tags.has("軍隊"), "好戰流民紮營 → 升軍隊（非一律生產）")
 	print("crude camp OK")
 ```
 
@@ -185,25 +203,35 @@ func _test_crude_camp() -> void:
 
 `team_data.gd`：`const TASK_CAMP := "紮營"`。
 
-`faction_ai_system.gd` 新增（**即時**立 crude camp，免建材 — 反映流民搭棚；非走 `OutpostSystem.start_build` 的成本/工期）：
+`faction_ai_system.gd` 新增（**即時**立 crude camp，免建材 — 反映流民搭棚；非走 `OutpostSystem.start_build` 的成本/工期）。**營地類型依個性**（好戰/野心→軍營→軍隊；其餘→民營→生產），**升對應 tag + 清流亡**（比照 `_auto_settle_builder` 的身分躍遷，完成「流浪→定居」攀爬，但**非一律生產**）：
 
 ```gdscript
 const CRUDE_CAMP_FOOD_SEED: float = 40.0   # TEST VALUE — 紮營種子糧（+同抬 cap）
 
-# 在腳下無主可農地即時立 crude civilian L1 camp（求生豁免，免建材/免工期）。回傳成功否。
+# 在腳下無主可農地即時立 crude L1 camp（求生豁免，免建材/免工期）。
+# 類型 + tag 依 leader 個性：好戰/野心 → 軍營/軍隊；其餘 → 民營/生產。回傳成功否。
 func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x*1000 + team.tile_pos.y)
 	if tile == null or tile.outpost_level > 0 or tile.outpost_owner != -1:
 		return false
 	if tile.terrain == "mountain":
 		return false
-	tile.outpost_type = "civilian"
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var martial: float = float(leader.values.get("好戰", 0.5)) if leader else 0.5
+	var ambition: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
+	var is_military: bool = (martial > 0.6 or ambition > 0.7)   # TEST VALUE 門檻
+	tile.outpost_type = "military" if is_military else "civilian"
 	tile.outpost_level = 1
 	tile.outpost_owner = team.team_id
-	# 種子糧 + 同抬 cap（沿用 tile_food_init bug 修原則，否則 regen 卡地形預設）
 	tile.resources["food"] = maxf(float(tile.resources.get("food", 0)), CRUDE_CAMP_FOOD_SEED)
 	tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), CRUDE_CAMP_FOOD_SEED)
-	print("[CrudeCamp] Team%d 紮營 @(%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
+	# 身分躍遷（比照 _auto_settle_builder）：升軍/生產 tag、清流亡（流浪→定居）
+	var new_tag: String = TeamData.TAG_MILITARY if is_military else TeamData.TAG_PRODUCE
+	if not team.tags.has(new_tag):
+		team.tags.append(new_tag)
+	team.tags.erase("流亡")
+	print("[CrudeCamp] Team%d 紮營 @(%d,%d) → %s" % [
+		team.team_id, team.tile_pos.x, team.tile_pos.y, tile.outpost_type])
 	return true
 ```
 
