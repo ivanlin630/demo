@@ -23,6 +23,8 @@ var _lbl_health:      Label
 var _lbl_equip:       Label
 var _lbl_actions:     Label
 var _lbl_cursor_info: Label
+var _lbl_count:       Label   # U14: 雙方在場兵力
+var _lbl_log:         Label   # U11: 戰報（命中/傷害）
 
 var _post_combat: bool = false   # 遭遇戰結束後，等待玩家按 [J] 收編或任意鍵離開
 var _selected_part: String = "torso"   # attack target body part, chosen in attack_select mode
@@ -79,10 +81,19 @@ func _build_layout() -> void:
 	_lbl_actions.text = "QWEASD:移動  R:攻擊\nZ:命令  F:投降  Space:待機"
 	right.add_child(_lbl_actions)
 
+	right.add_child(_make_section_label("雙方兵力"))
+	_lbl_count = Label.new()
+	right.add_child(_lbl_count)
+
 	right.add_child(_make_section_label("游標"))
 	_lbl_cursor_info = Label.new()
 	_lbl_cursor_info.autowrap_mode = TextServer.AUTOWRAP_WORD
 	right.add_child(_lbl_cursor_info)
+
+	right.add_child(_make_section_label("戰報"))
+	_lbl_log = Label.new()
+	_lbl_log.autowrap_mode = TextServer.AUTOWRAP_WORD
+	right.add_child(_lbl_log)
 
 func _make_section_label(text: String) -> Label:
 	var lbl := Label.new()
@@ -93,8 +104,28 @@ func _make_section_label(text: String) -> Label:
 func _refresh_ui() -> void:
 	if _bridge == null: return
 	var state: WorldState = _bridge.get_state()
+	# U11: 戰報（命中/傷害）每次刷新顯示，戰前/戰後皆可
+	if _lbl_log != null:
+		_lbl_log.text = "\n".join(_bridge.query_encounter_log(6))
+	# U10: 戰後 / 無玩家單位 → 顯戰果 + 離開提示（不可 early-return 成空白凍結畫面）
+	if _post_combat or not state.encounter_active:
+		var res: Dictionary = state.last_encounter_result
+		_lbl_actions.text     = _post_combat_hint(res)
+		_lbl_cursor_info.text = "戰果：%s" % _post_combat_summary(res)
+		return
 	var player_unit: Dictionary = _find_player_unit(state)
 	if player_unit.is_empty(): return
+
+	# U14: 顯雙方在場兵力總數（玩家視角：我方 vs 敵方）
+	if _lbl_count != null:
+		var ptid: int = player_unit.get("team_id", -1)
+		var own: int = 0
+		var foe: int = 0
+		for u in state.encounter_units:
+			if _is_unit_dead(u, state) or u.get("has_exited", false): continue
+			if u.get("team_id", -1) == ptid: own += 1
+			else: foe += 1
+		_lbl_count.text = "我方 %d  敵方 %d" % [own, foe]
 
 	# health — named units store body_parts in state.persons, not unit dict
 	var lines: Array = []
@@ -481,3 +512,16 @@ func _open_sub_command(unit_idx: int, player_unit: Dictionary, state: WorldState
 
 func _log(msg: String) -> void:
 	print("[EncounterView] ", msg)
+
+# U10: 戰後提示組字（static → 可單元測）
+static func _post_combat_hint(res: Dictionary) -> String:
+	var hint: String = "戰鬥結束。按任意鍵離開"
+	if res.get("can_subjugate", false):
+		hint += " / [J]收編敗者"
+	return hint
+
+static func _post_combat_summary(res: Dictionary) -> String:
+	if res.is_empty(): return "結束"
+	var w: int = int(res.get("winner_id", -1))
+	if w < 0: return "結束"
+	return "Team%d 勝，Team%d 敗" % [w, int(res.get("loser_id", -1))]

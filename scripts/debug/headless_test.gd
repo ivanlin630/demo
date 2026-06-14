@@ -101,6 +101,7 @@ func _initialize() -> void:
 	_test_extraction()
 	_test_player_extract_treasury()
 	_test_encounter_treasury_loot()
+	_test_u12_trade_direct_preview()
 	_test_on_team_extinct_to_storage()
 	_test_pickup_abandoned_coin()
 	_test_subteam_treasury_split()
@@ -2167,6 +2168,37 @@ func _run_sim_test() -> void:
 	print("EncounterCombat: result=%s" % _enc_result)
 	assert(_enc_result != "ongoing" or true, "encounter ran without crash")
 	print("EncounterCombat OK")
+
+	# ── U11: encounter_log 戰報 channel ──
+	print("--- U11 encounter combat log ---")
+	assert("encounter_log" in _enc_state, "WorldState 需 encounter_log 欄位")
+	_enc_state.encounter_log.clear()
+	assert(_enc_state.encounter_units.size() >= 2, "需至少 2 unit 測攻擊")
+	_enc_sys.resolve_attack(_enc_state.encounter_units[0],
+		_enc_state.encounter_units[1], _enc_state, "torso")
+	assert(_enc_state.encounter_log.size() >= 1,
+		"resolve_attack 每次應 append 一條戰報（命中/落空/格擋/閃避）")
+	print("encounter_log OK: %s" % str(_enc_state.encounter_log))
+
+	# ── U14: 進場人數 = named + min(pop×armed_anon_ratio, CAP)；確認非 bug（僅 UI 補標總數）──
+	print("--- U14 spawn count（確認正確）---")
+	var _u14 := WorldState.new(); _u14.world = WorldData.new()
+	var _u14_t0 := TeamData.new()
+	_u14_t0.team_id = 0; _u14_t0.population = 10
+	_u14_t0.armed_anon_ratio = 0.5; _u14_t0.leader_id = -1
+	_u14_t0.resources = { "weapon_melee_low": 20 }
+	var _u14_t1 := TeamData.new()
+	_u14_t1.team_id = 1; _u14_t1.population = 10
+	_u14_t1.armed_anon_ratio = 0.5; _u14_t1.leader_id = -1
+	_u14_t1.resources = { "weapon_melee_low": 20 }
+	_u14.teams[0] = _u14_t0; _u14.teams[1] = _u14_t1
+	_u14.encounter_attacker_id = 0; _u14.encounter_defender_id = 1
+	EncounterSystem.new().init_encounter(_u14, 0, 1, "normal")
+	var _u14_n: int = 0
+	for _u in _u14.encounter_units:
+		if _u.get("team_id", -1) == 0: _u14_n += 1
+	assert(_u14_n == 5, "U14: 進場數應 = pop10×ratio0.5 = 5（確認非 bug），got %d" % _u14_n)
+	print("U14 spawn count OK: team0 進場 %d（pop10×0.5，符合公式）" % _u14_n)
 
 	# ── PlayerSystem weight integration ──
 	print("--- PlayerSystem weight ---")
@@ -5046,6 +5078,27 @@ func _test_player_extract_treasury() -> void:
 	assert(float(team.anon_treasury) == 50.0, "treasury 應 50")
 	assert(float(team.resources["coin"]) == 50.0, "coin 應 50")
 	print("CoinStorage Task9 OK")
+
+func _test_u12_trade_direct_preview() -> void:
+	# U12 重現：互補資源時 auto-trade 預覽應 feasible，不誤判「無資源」
+	print("--- U12 trade direct preview ---")
+	var st := WorldState.new(); st.world = WorldData.new()
+	var pa := PersonData.new(); pa.id = 1; pa.team_id = 0
+	st.persons[1] = pa; st.player_id = 1
+	var t0 := TeamData.new(); t0.team_id = 0
+	t0.resources = { "food": 100.0, "coin": 5.0 }
+	var t1 := TeamData.new(); t1.team_id = 1
+	t1.resources = { "food": 5.0, "coin": 100.0 }
+	st.teams[0] = t0; st.teams[1] = t1
+	st.team_discovered[0] = [1]
+	var qa := PlayerQueryApi.new()
+	var res := qa.get_trade_direct_preview(st, 1)
+	assert(res.get("ok", false), "preview 應 ok")
+	var prev: Dictionary = res.get("data", {}).get("preview", {})
+	assert(prev.has("feasible"), "preview shape 須含 feasible（U12 根因：原讀錯 API shape）")
+	assert(prev.get("feasible", false),
+		"雙方互補資源 → feasible，不應誤判『無可交換資源』")
+	print("U12 trade preview OK: %s" % str(prev))
 
 func _test_encounter_treasury_loot() -> void:
 	print("--- CoinStorage Task10: encounter loot 比例 ---")

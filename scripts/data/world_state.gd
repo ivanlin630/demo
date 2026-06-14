@@ -92,6 +92,7 @@ var encounter_attacker_id: int    = -1
 var encounter_defender_id: int    = -1
 var pursuit_edge_offset: int      = 0   # 追擊進場邊緣輪換計數
 var encounter_tick: int           = 0
+var encounter_log: Array          = []   # U11: 遭遇戰命中/閃避/格擋/落空 訊息流（init 清空，UI 經 bridge 讀最新 n 條）
 var last_encounter_result: Dictionary = {}
 # Format: { "winner_id": int, "loser_id": int, "loot_pool": Dictionary, "can_subjugate": bool }
 # Cleared after player takes/leaves loot.

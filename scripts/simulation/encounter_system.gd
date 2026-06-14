@@ -222,6 +222,7 @@ func init_encounter(state: WorldState, attacker_id: int, defender_id: int,
 	state.encounter_attacker_id = attacker_id
 	state.encounter_defender_id = defender_id
 	state.encounter_units.clear()
+	state.encounter_log.clear()   # U11: 新戰開始清空戰報
 
 	var atk: TeamData = state.teams.get(attacker_id)
 	var def: TeamData = state.teams.get(defender_id)
@@ -738,10 +739,13 @@ func resolve_attack(attacker: Dictionary, target: Dictionary,
 	var weapon: String  = _get_weapon_grade(attacker, state)
 	var is_ranged: bool = weapon.contains("ranged")
 	if is_ranged and not _check_range(attacker, target, state): return
+	var atk_name: String = _unit_label(attacker)   # U11: 戰報用
+	var tgt_name: String = _unit_label(target)
 	if target.get("pending_dodge", false):
 		target["pending_dodge"] = false
 		if _resolve_block(target, state, "dodge"):
 			print("[Dodge] unit team=%d 閃避成功" % target["team_id"])
+			_enc_log(state, "%s 閃避了 %s" % [tgt_name, atk_name])
 			target["action_timer"] = mini(target["action_timer"] + BLOCK_PENALTY,
 				_max_timer(target, state))
 			return
@@ -755,9 +759,11 @@ func resolve_attack(attacker: Dictionary, target: Dictionary,
 				_max_timer(target, state))
 			if blocked:
 				print("[Block] team=%d blocked with %s" % [target["team_id"], choice])
+				_enc_log(state, "%s 格擋了 %s" % [tgt_name, atk_name])
 				return
 	if randf() > _hit_chance(attacker, state):
 		print("[Miss]")
+		_enc_log(state, "%s 攻擊 %s 落空" % [atk_name, tgt_name])
 		return
 	var raw_dmg: float = ItemAttributes.get_damage(weapon)
 	var drain_mult: float = HealthSystem.get_weight_stamina_drain_mult(attacker, state)
@@ -771,6 +777,19 @@ func resolve_attack(attacker: Dictionary, target: Dictionary,
 	var final_dmg: float = raw_dmg * (1.0 - reduction)
 	HealthSystem.receive_damage(target, state, target_part, final_dmg)
 	print("[Hit] part=%s dmg=%.1f" % [target_part, final_dmg])
+	_enc_log(state, "%s 擊中 %s %s -%.0f" % [atk_name, tgt_name, target_part, final_dmg])
+
+# U11: 戰報 helper ───────────────────────────────────────────
+func _unit_label(unit: Dictionary) -> String:
+	var pid: int = int(unit.get("person_id", -1))
+	if pid >= 0: return "P%d" % pid
+	if unit.get("is_beast", false): return "野獸"
+	return "匿名兵"
+
+func _enc_log(state: WorldState, msg: String) -> void:
+	state.encounter_log.append(msg)
+	if state.encounter_log.size() > 50:
+		state.encounter_log = state.encounter_log.slice(state.encounter_log.size() - 50)
 
 func advance_encounter_tick(state: WorldState) -> String:
 	var atk_id: int = state.encounter_attacker_id

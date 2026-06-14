@@ -11,8 +11,22 @@ func _initialize() -> void:
 	_test_mode_keymap()
 	_test_feedback_format()
 	_test_log_strip()
+	_test_post_combat_hint()
 	print("\n=== UI Logic Test DONE === errors: %d" % _errors)
 	quit()
+
+# ── U10: 遭遇戰戰後提示組字 ──────────────────────────────────────────────────
+func _test_post_combat_hint() -> void:
+	print("\n── U10. 戰後提示 ──")
+	var EncView = load("res://scripts/ui/encounter_view.gd")
+	var hint_subj: String = EncView._post_combat_hint({"can_subjugate": true})
+	var hint_no:   String = EncView._post_combat_hint({"can_subjugate": false})
+	_check("can_subjugate → 含「J收編」", hint_subj.contains("J") and hint_subj.contains("收編"))
+	_check("不可收編 → 僅按任意鍵（無 J）", not hint_no.contains("J"))
+	_check("提示永遠含「離開」字樣", hint_no.contains("離開") and hint_subj.contains("離開"))
+	var summ: String = EncView._post_combat_summary({"winner_id": 0, "loser_id": 1})
+	_check("戰果摘要含勝負隊", summ.contains("Team0") and summ.contains("Team1"))
+	_check("空結果摘要 fallback「結束」", EncView._post_combat_summary({}) == "結束")
 
 func _check(label: String, ok: bool) -> void:
 	if ok:

@@ -162,6 +162,12 @@ func _process(_delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not event is InputEventKey: return
 	if not event.pressed: return
+	# 遭遇戰 overlay 顯示中（含戰後「按任意鍵離開」畫面，此時 encounter_active 已 false）
+	# → 鍵盤全權交給 encounter_view，主畫面一律不處理。
+	# 否則 Q 會落到下方 KEY_Q→get_tree().quit() 造成戰後一按鍵就閃退；
+	# WASD 也會同時漂移世界地圖游標。用 overlay 可見性（非 encounter_active）判定。
+	if _encounter_view != null and _encounter_view.visible:
+		return
 	if _input_mode:
 		_handle_input_mode(event.keycode)
 		return
@@ -366,13 +372,33 @@ func _handle_input_mode(keycode: int) -> void:
 			_input_mode_callback = Callable()
 			_refresh()
 
+# U13: inv 選取版面 — 已裝備槽在前（[數字] 1..eq_n），背包次之，Team 取出最後
+#   [E]裝備背包物  [U]卸下已裝備槽  [S]存背包物  [G]取 Team 物
+func _inv_equipped_slots() -> Array:
+	var inv_state: Dictionary = _cached_snapshot.get("inventory_state", {})
+	var equipped: Dictionary  = inv_state.get("equipped_items", {})
+	var out: Array = []
+	for slot in ["hand_1", "hand_2"]:
+		var g: String = equipped.get(slot, "")
+		if not g.is_empty():
+			out.append({ "slot": slot, "grade": g })
+	var body: Dictionary = _bridge.query_body_slots()
+	for slot in ["head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"]:
+		var bg: String = body.get(slot, "")
+		if not bg.is_empty():
+			out.append({ "slot": slot, "grade": bg })
+	return out
+
 func _handle_inv_mode(keycode: int) -> void:
+	var eq: Array          = _inv_equipped_slots()
 	var inv: Array         = _cached_snapshot.get("inventory_state", {}).get("inventory_items", [])
 	var team_items: Array  = _get_team_takeable_items(null)
+	var eq_n: int  = eq.size()
+	var inv_n: int = inv.size()
 
 	if keycode >= KEY_1 and keycode <= KEY_9:
 		var num: int  = keycode - KEY_1
-		var total: int = inv.size() + team_items.size()
+		var total: int = eq_n + inv_n + team_items.size()
 		if num < total:
 			_inv_selection = num
 		_refresh()
@@ -380,19 +406,29 @@ func _handle_inv_mode(keycode: int) -> void:
 
 	match keycode:
 		KEY_E:
-			if _inv_selection >= 0 and _inv_selection < inv.size():
-				var grade: String = inv[_inv_selection].get("grade", "")
+			var inv_idx: int = _inv_selection - eq_n
+			if inv_idx >= 0 and inv_idx < inv_n:
+				var grade: String = inv[inv_idx].get("grade", "")
 				var slot: String  = "torso" if grade.begins_with("armor") else "hand_1"
-				_bridge.command_player("equip_item", {"slot_id": slot, "item_grade": grade})
+				var r: Dictionary = _bridge.command_player("equip_item", {"slot_id": slot, "item_grade": grade})
+				_set_feedback(r.get("ok", false), r.get("message", ""))
+				_inv_selection = -1
+		KEY_U:
+			if _inv_selection >= 0 and _inv_selection < eq_n:
+				var slot: String = eq[_inv_selection].get("slot", "")
+				if slot != "":
+					var r: Dictionary = _bridge.command_player("unequip_item", {"slot_id": slot})
+					_set_feedback(r.get("ok", false), r.get("message", ""))
 				_inv_selection = -1
 		KEY_S:
-			if _inv_selection >= 0 and _inv_selection < inv.size():
-				var grade: String = inv[_inv_selection].get("grade", "")
-				var qty: int      = inv[_inv_selection].get("qty", 0)
+			var inv_idx2: int = _inv_selection - eq_n
+			if inv_idx2 >= 0 and inv_idx2 < inv_n:
+				var grade: String = inv[inv_idx2].get("grade", "")
+				var qty: int      = inv[inv_idx2].get("qty", 0)
 				_bridge.command_player("deposit_item", {"item_grade": grade, "qty": qty})
 				_inv_selection = -1
 		KEY_G:
-			var team_idx: int = _inv_selection - inv.size()
+			var team_idx: int = _inv_selection - eq_n - inv_n
 			if team_idx >= 0 and team_idx < team_items.size():
 				_bridge.command_player("take_team_item", {"item_grade": team_items[team_idx], "qty": 1})
 				_inv_selection = -1
@@ -491,7 +527,7 @@ const MODE_KEYMAP: Dictionary = {
 	"main":          "[WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [U]子隊 [V]顧問 [T]互動 [Q]離開",
 	"interact":      "[1-9]選目標/行動 [Esc]返回",
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
-	"inv":           "[1-9]選物 [E]裝備 [S]存入 [G]取出 [I/Esc]關閉",
+	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
 	"faction":       "[A]目標 [B]徵收率 [C]離開 [D]背叛 [E]解散 [1-9]下令成員 [F/Esc]關閉",
 	"outpost":       "[1-9]行動 [O/Esc]關閉",
 	"subteam":       "[1-9]選隊 [N]派遣 [A]下令移動 [B]召回 [U/Esc]關閉",
@@ -711,42 +747,40 @@ func _build_inv_str() -> String:
 	var ct: Dictionary        = _cached_snapshot.get("controlled_team", {})
 	var inv_state: Dictionary = _cached_snapshot.get("inventory_state", {})
 	if ct.is_empty() or inv_state.is_empty(): return "（無資料）"
-	var equipped: Dictionary = inv_state.get("equipped_items", {})
 	var lines: Array = []
-
-	lines.append("── 裝備 ──")
-	var h1: String = equipped.get("hand_1", "")
-	var h2: String = equipped.get("hand_2", "")
-	lines.append("  右手:%s  左手:%s" % [
-		h1 if not h1.is_empty() else "空",
-		h2 if not h2.is_empty() else "空"])
-	var body_slots_data: Dictionary = _bridge.query_body_slots()
-	const BODY_NAMES: Dictionary = {
-		"head": "頭", "torso": "胸", "right_arm": "右臂",
-		"left_arm": "左臂", "right_leg": "右腿", "left_leg": "左腿"
+	const SLOT_NAMES: Dictionary = {
+		"hand_1": "右手", "hand_2": "左手", "head": "頭", "torso": "胸",
+		"right_arm": "右臂", "left_arm": "左臂", "right_leg": "右腿", "left_leg": "左腿"
 	}
-	var body_strs: Array = []
-	for slot in ["head", "torso", "right_arm", "left_arm", "right_leg", "left_leg"]:
-		var g: String = body_slots_data.get(slot, "")
-		body_strs.append("%s:%s" % [BODY_NAMES[slot], g if not g.is_empty() else "空"])
-	lines.append("  " + " ".join(body_strs))
 
+	# ── 已裝備（可選取 → [U]卸下） ──
+	var eq: Array = _inv_equipped_slots()
+	lines.append("── 裝備（[U]卸下選中）──")
+	if eq.is_empty():
+		lines.append("  （無已裝備物）")
+	for i in range(eq.size()):
+		var prefix: String = "[%d]*" % (i + 1) if _inv_selection == i else "[%d]" % (i + 1)
+		lines.append("  %s %s: %s" % [prefix, SLOT_NAMES.get(eq[i]["slot"], eq[i]["slot"]), eq[i]["grade"]])
+
+	# ── 背包（[E]裝備 / [S]存入） ──
 	var inv: Array = inv_state.get("inventory_items", [])
 	lines.append("── 背包 (%d/%d) ──" % [inv.size(), PlayerSystem.PLAYER_INVENTORY_MAX_SLOTS])
 	for i in range(inv.size()):
 		var item = inv[i]
-		var prefix: String = "[%d]*" % (i + 1) if _inv_selection == i else "[%d]" % (i + 1)
+		var sel_idx: int = eq.size() + i
+		var prefix: String = "[%d]*" % (sel_idx + 1) if _inv_selection == sel_idx else "[%d]" % (sel_idx + 1)
 		lines.append("  %s %s × %d" % [prefix, item.get("grade", "?"), item.get("qty", 0)])
 
+	# ── 從 Team 取出（[G]） ──
 	var team_items: Array = _get_team_takeable_items(null)
 	lines.append("── 從 Team 取出 ──")
 	for i in range(team_items.size()):
-		var idx: int = inv.size() + i
-		var prefix: String = "[T%d]*" % (i + 1) if _inv_selection == idx else "[T%d]" % (i + 1)
+		var sel_idx2: int = eq.size() + inv.size() + i
+		var prefix: String = "[%d]*" % (sel_idx2 + 1) if _inv_selection == sel_idx2 else "[%d]" % (sel_idx2 + 1)
 		var qty: int = ct.get("resources", {}).get(team_items[i], 0)
 		lines.append("  %s %s: %d%s" % [prefix, team_items[i], qty, "" if qty > 0 else "（灰）"])
 
-	lines.append("── [數字]選取 [E]裝備 [S]存入 [G]取出 [I/Esc]關閉 ──")
+	lines.append("── [數字]選取 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉 ──")
 	return "\n".join(lines)
 
 func _log_event(msg: String) -> void:
@@ -1325,7 +1359,7 @@ func _build_trade_str() -> String:
 		lines.append("（目標無效）")
 		lines.append("[2/Esc]取消")
 		return "\n".join(lines)
-	var prev_result: Dictionary = _bridge.query_trade_preview(_trade_target_id)
+	var prev_result: Dictionary = _bridge.query_trade_direct_preview(_trade_target_id)
 	var prev: Dictionary = prev_result.get("data", {}).get("preview", {})
 	if not prev.get("feasible", false):
 		lines.append("（雙方均無可交換資源）")

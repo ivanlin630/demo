@@ -32,6 +32,12 @@ func is_advancing() -> bool:
 func is_encounter_active() -> bool:
 	return _state.encounter_active
 
+# U11: 遭遇戰戰報最新 n 條（UI 經此 facade 讀，不直存 encounter_log）
+func query_encounter_log(n: int = 5) -> Array:
+	var log: Array = _state.encounter_log
+	if log.size() <= n: return log.duplicate()
+	return log.slice(log.size() - n)
+
 # 每 frame 呼叫：推進 TICKS_PER_HOUR ticks，回傳結果
 # 遭遇戰/新發現事件觸發時自動停止
 # 返回 { "events": Array, "done": bool }
@@ -251,6 +257,10 @@ func query_player_actions(request: Dictionary) -> Dictionary:
 
 func query_trade_preview(target_team_id: int) -> Dictionary:
 	return _query_api.get_trade_preview(_state, target_team_id)
+
+# U12: text UI confirm_trade 預覽（auto-trade 方向）
+func query_trade_direct_preview(target_team_id: int) -> Dictionary:
+	return _query_api.get_trade_direct_preview(_state, target_team_id)
 
 func get_and_clear_alerts() -> Array:
 	return PlayerQueryApi.new().get_and_clear_alerts(_state)
