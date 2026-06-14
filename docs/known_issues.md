@@ -330,6 +330,7 @@
 | **L** | mount 細分 | 戰馬/馱馬/拉車馬；輕車/重車；草地補糧；城市買飼料 |
 | **M** | named 升階機制 | anon tier spec 列後續 |
 | **L** | tag drift | leader / event 改 tag |
+| **M** | 團 vs 團突襲優勢 | 對稱：野獸伏擊已實作（AmbushSystem，2b-2）；團對團伏擊待做 — reuse `vision_system` 偵測（潛行降 exposure / 偵查偵測）+ 攻擊方未被偵測 → 首擊/陣位優勢 + 激活 dormant `_check_night_raid`。屬階段2+ 劫掠/戰團。**注意：團伏擊用 vision 偵測，非 beast 專屬 AmbushSystem** |
 | **L** | 戰俘處置 | 賣/屠/招降 |
 | **L** | 外交招募 / 雇傭軍 | 直接買高 tier anon |
 | **L** | anon tier UI | team panel / 升等進度 / 死亡分檔 |

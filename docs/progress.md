@@ -8,7 +8,10 @@
 - **階段1 Plan 2a（小獵物食物層）已 merge**：wild_game world-gen + 月再生 + `HuntSystem.hunt_small_game`（求生 roll/枯竭/食物）+ NPC 覓食被動小獵 + 玩家 hunt 指令 + `_collect_from_tile` 排除活物。2 年 multi died=no/coin_eq 0/survival_start 23→36。
 - **Bug7 已修**（interaction:233 stale-id race，一行守衛；warzone 2 年 OOB 3→0）。
 - **階段1 Plan 2b-1（野獸戰鬥核心）已 merge**：爪牙武器 grade + predator_density 生成/再生 + BeastSystem pseudo-team（負 id）+ encounter beast spawn/逃戰行為/爪牙攻擊/得肉清除 + npc_combat beast_strength/reward + 玩家 hunt_beast 指令。reuse 人類戰鬥機制。6 測試綠/2 年 multi died=no/coin_eq 0/無 beast 殘留。
-- **階段1 Plan 2b-2（伏擊）待寫**：predator 偵測（vision 復用：偵查/求生 vs 獸 exposure，分級預警/被伏擊）+ 獸主動發起 + infamy + NPC 主動獵獸。注意 Bug9：**NPC 獸戰走 npc_combat，不走 encounter**。獵勝給 exp（2b-1 暫無）可一併補。
+- **階段1 Plan 2b-2（野獸伏擊+偵測）已 merge**：AmbushSystem.detect（偵查/求生 vs 掠食者隱蔽）+ 伏擊編排（玩家→encounter/NPC→npc_combat 遵 Bug9）+ sim_runner 接入 + 獵勝戰鬥 exp + 掠食者 infamy 計數 + NPC 主動獵獸。7 測試綠/2 年 died=no/coin_eq 0/[Ambush]×5。
+- **✅ 階段1（開局生存）整套完成**：覓食 + 小獵物 + 野獸戰鬥 + 伏擊。世界仍 2 年無崩、守恆 0。
+- **下一步**：階段2（招人成幫）/ 玩家迴路其他部分 / 或先量測 tune 階段1 全 TEST VALUE（FORAGE_RATE / BEAST_PROFILE / AMBUSH 數值）。
+- 殘留待處理：UI 接入（覓食 episode / hunt 指令 / 伏擊 encounter 進場目前僅 headless 驗，未走真實 UI bridge）；Bug8（滅團 food 公庫）；Bug9（encounter player_id==-1 latent）。
 - invariants 新增：對稱性（無玩家專屬機制）、玩法節奏（decisions-not-chores + 激情時刻）。
 
 ---
