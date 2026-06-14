@@ -33,6 +33,10 @@ func _initialize() -> void:
 	_test_survival_sticky()
 	_test_survival_helpers()
 	_test_survival_decision_tree()
+	_test_survival_prefs()
+	_test_find_unowned_farmable()
+	_test_crude_camp()
+	_test_desperation_cascade()
 	_test_strategic_ai_respects_survival()
 	_test_strategic_in_map_check()
 	_test_breakout_distance_guard()
@@ -3636,20 +3640,102 @@ func _test_survival_decision_tree() -> void:
 	t3.known_reputations[1] = 0.6
 	fai._trigger_survival(s3, t3, "urgent")
 	assert(t3.current_task == "投靠", "Path 3 應 投靠，實際=%s" % t3.current_task)
-	# (4) 默認 → 乞食（pop > FORAGE_VIABLE_POP，跳過覓食路徑落到乞食）
+	# (4) 默認 → 乞食（pop > FORAGE_VIABLE_POP 跳覓食；周圍格皆有主 → 無法紮營 → 落到乞食）
 	var s4 := WorldState.new()
 	s4.world = WorldData.new()
 	s4.world.current_tick = 812
 	_fill_plains(s4, -1, 4, -1, 2)
+	for _tid4 in s4.world.tiles:   # 全格標有主，排除紮營（cascade 新增選項）→ 確保測乞食墊底
+		s4.world.tiles[_tid4].outpost_owner = 7
 	var t4 := TeamData.new(); t4.team_id = 0; t4.tile_pos = Vector2i(0,0); t4.population = 20; t4.resources["food"] = 0
 	var l4 := PersonData.new(); l4.id = 100; l4.values = { "義氣": 0.4, "信義": 0.4, "殘忍": 0.3, "好戰": 0.3 }
 	s4.persons[100] = l4; t4.leader_id = 100
-	var aid := TeamData.new(); aid.team_id = 1; aid.tile_pos = Vector2i(2,0); aid.population = 10
+	# aid pop18：非弱獵物(>=t4*0.7=14 不被掠)、非強鄰(<t4*1.5=30 不投靠)、但糧足可乞
+	var aid := TeamData.new(); aid.team_id = 1; aid.tile_pos = Vector2i(2,0); aid.population = 18
 	aid.resources["food"] = 500
 	s4.teams[0] = t4; s4.teams[1] = aid; s4.team_discovered[0] = [1]
 	fai._trigger_survival(s4, t4, "urgent")
 	assert(t4.current_task == "乞食", "Path 4 應 乞食，實際=%s" % t4.current_task)
 	print("Survival Task4 OK")
+
+func _test_survival_prefs() -> void:
+	print("--- 生存選項 pref ---")
+	var fai := FactionAISystem.new()
+	var ferocious := PersonData.new()
+	ferocious.values = {"殘忍": 0.9, "好戰": 0.8, "義氣": 0.1, "野心": 0.2, "求生欲": 0.5}
+	var honorable := PersonData.new()
+	honorable.values = {"殘忍": 0.1, "好戰": 0.1, "義氣": 0.9, "信義": 0.8, "野心": 0.2}
+	var ambitious := PersonData.new()
+	ambitious.values = {"殘忍": 0.2, "野心": 0.9, "統領": 0.6, "求生欲": 0.7, "義氣": 0.3}
+	assert(fai._loot_pref(ferocious) > fai._loot_pref(honorable), "兇者掠奪 pref 較高")
+	assert(fai._join_pref(honorable) > fai._join_pref(ferocious), "義氣者投靠 pref 較高")
+	assert(fai._camp_pref(ambitious) > fai._camp_pref(ferocious), "野心者紮營 pref 較高")
+	print("survival prefs OK")
+
+func _test_find_unowned_farmable() -> void:
+	print("--- 找無主可農地 ---")
+	var fai := FactionAISystem.new()
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 本格 mountain（不可農）、鄰格 (5,4) plains 無主 → 選 (5,4)
+	for p in [Vector2i(4,4), Vector2i(5,4)]:
+		var tile := HexTileData.new()
+		tile.tile_id = p.x*1000+p.y; tile.tile_pos = p
+		tile.terrain = ("mountain" if p == Vector2i(4,4) else "plains")
+		tile.outpost_owner = -1; tile.outpost_level = 0
+		state.world.tiles[tile.tile_id] = tile
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(4,4)
+	state.teams[0] = team
+	var pos: Vector2i = fai._find_unowned_farmable_tile(state, team)
+	assert(pos == Vector2i(5,4), "應選無主平原鄰格，實際=%s" % str(pos))
+	# 鄰格被佔 → 無可農 → (-1,-1)
+	state.world.tiles[5*1000+4].outpost_level = 1
+	state.world.tiles[5*1000+4].outpost_owner = 9
+	assert(fai._find_unowned_farmable_tile(state, team) == Vector2i(-1,-1), "已佔不可選")
+	print("find unowned farmable OK")
+
+func _test_crude_camp() -> void:
+	print("--- 即時 crude camp ---")
+	var fai := FactionAISystem.new()
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "plains"
+	tile.outpost_owner = -1; tile.outpost_level = 0
+	tile.resource_cap = {"food": 50.0}
+	state.world.tiles[tile.tile_id] = tile
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(4,4)
+	team.population = 3; team.resources = {"material": 0}   # 流民無建材
+	state.teams[0] = team
+	var ok: bool = fai.establish_crude_camp(state, team)
+	assert(ok, "無主可農地應能立 crude camp（免建材）")
+	assert(tile.outpost_level == 1 and tile.outpost_owner == 0, "tile 應成 team0 的 civilian L1")
+	assert(tile.outpost_type == "civilian", "crude camp = civilian")
+	assert(float(tile.resource_cap.get("food", 0)) >= 50.0, "食物 cap 不降")
+	# 已佔的格 → 不能再立
+	assert(not fai.establish_crude_camp(state, team), "已佔格不可再立")
+	print("crude camp OK")
+
+func _test_desperation_cascade() -> void:
+	print("--- 絕境 cascade：urgent 解閘 ---")
+	var fai := FactionAISystem.new()
+	# 求生型流民（不兇不義，warning 下舊邏輯無活路）：urgent 應拿到某可行 survival task
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.values = {"殘忍": 0.2, "好戰": 0.2, "義氣": 0.3, "信義": 0.3, "野心": 0.6, "求生欲": 0.9}
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 鄰格無主平原（可紮營）
+	for p in [Vector2i(4,4), Vector2i(5,4)]:
+		var tile := HexTileData.new()
+		tile.tile_id = p.x*1000+p.y; tile.tile_pos = p; tile.terrain = "plains"
+		tile.outpost_owner = -1; tile.outpost_level = 0; tile.resource_cap = {"food": 50.0}
+		state.world.tiles[tile.tile_id] = tile
+	state.persons[0] = leader
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.population = 3
+	team.tile_pos = Vector2i(4,4); team.resources = {"food": 0.0}
+	state.teams[0] = team
+	fai._trigger_survival(state, team, "urgent")
+	# urgent + 野心0.6 + 無主可農地 → 應選紮營（或至少非 idle release）
+	assert(team.current_task != TeamData.TASK_IDLE and team.current_task != "",
+		"urgent 求生型流民應有活路，實際 task=%s" % team.current_task)
+	print("desperation cascade OK (task=%s)" % team.current_task)
 
 func _test_strategic_ai_respects_survival() -> void:
 	print("--- Survival Task5: strategic_ai sticky ---")
@@ -8940,11 +9026,13 @@ func _test_npc_forage_viability() -> void:
 	var fai := FactionAISystem.new()
 	var small := _mk_starving_team(0, 5)
 	var st1 := _mk_state_with(small)
+	st1.world.tiles[4004].outpost_owner = 7   # 標有主：排除紮營(cascade新增)，隔離測覓食墊底
 	fai._trigger_survival(st1, small, "urgent")
 	assert(small.current_task == TeamData.TASK_FORAGE,
 		"小隊應覓食，實際 task=%s" % small.current_task)
 	var big := _mk_starving_team(0, 60)
 	var st2 := _mk_state_with(big)
+	st2.world.tiles[4004].outpost_owner = 7
 	fai._trigger_survival(st2, big, "urgent")
 	assert(big.current_task != TeamData.TASK_FORAGE,
 		"大軍不應覓食，實際 task=%s" % big.current_task)

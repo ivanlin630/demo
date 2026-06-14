@@ -19,6 +19,7 @@ const TASK_TRAIN       := "訓練"
 const TASK_DEFEND      := "迎戰"
 const TASK_PREPARE     := "備戰"
 const TASK_FORAGE      := "覓食"
+const TASK_CAMP        := "紮營"
 
 const TAG_COMMAND  := "統領"
 const TAG_MILITARY := "軍隊"
