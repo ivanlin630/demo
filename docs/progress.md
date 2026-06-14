@@ -18,10 +18,11 @@
 - **SoloAI 主動尋家 + 承諾慣性已 merge**：`_evaluate_solo` 加 紮營/投靠 value 加權（無家團、bypass _tag_weight 避流亡歸零）+ solo_intent 慣性（止 flip-flop）。churn 修（主動 camp 免糧足釋放 + 到達兜底）。2 年×3 roving 主導非 uniform、安身率↑、守恆 0。流浪→定居 bottom-up 進展接上。
 
 ### 佇列（下一步選項）
-1. **狩獵受傷→醫療需求**（你提的）：小獵物零受傷不真實；補偶發傷 → medicine 經濟接入 + 第二維 precarity。
-2. **量測 tune 階段1 全 TEST VALUE**：FORAGE/BEAST_PROFILE/AMBUSH/desperation gate（loot 偏高 130）/ SoloAI proactive 投靠·掠奪占比低（投靠 0 次,門檻嚴）。一次一變因。
+- ~~狩獵受傷→醫療~~ **已涵蓋**：危險獸走真戰鬥（encounter/npc_combat）→ body_parts 傷 → 戰後 `resolve_negative_flags` 耗 medicine。小獵物抽象 roll 免傷（合理）。無需另做。
+1. **UI 接入（player 可玩性）**：stage-1 全機制（覓食/狩獵/hunt 指令/野獸/伏擊/求生）目前**僅 headless 驗,玩家無法經 UI 玩**。原 arc 目標「世界合理→轉玩家迴路」。team0 harness 餓死症結也因玩家無 UI 自驅。
+2. **量測 tune 階段1 全 TEST VALUE**：loot 偏高 130 / SoloAI proactive 投靠占比低（0 次,門檻嚴）/ FORAGE/BEAST/AMBUSH 數值。一次一變因（世界已穩,非急）。
 3. **②深層目標錨**（待 spec）：接 dormant goal 系統,長弧（盜匪→建國）。先量測承諾慣性夠不夠。
-4. 階段2（招人成幫）/ UI 接入（覓食 episode/hunt/伏擊進場僅 headless 驗）。
+4. 階段2（招人成幫）。
 
 ### 殘留 bug / 量測限制
 - **team0(玩家隊)在 multi 餓死 = harness 限制**（玩家隊 _evaluate_survival early-return + auto-driver 不代跑玩家生存）非 cascade bug。要量測玩家生存需 NPC-觀測 config 或 auto-driver 補生存代跑。
