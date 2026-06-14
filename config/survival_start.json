@@ -27,7 +27,7 @@
         "values": { "慎重": 0.7 }
       },
       "named_members": [],
-      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 400 }
+      "outpost": { "type": "civilian", "level": 1, "tile_food_init": 400, "terrain": "plains" }
     }
   ],
   "player": { "team_id": 0, "is_leader": true }

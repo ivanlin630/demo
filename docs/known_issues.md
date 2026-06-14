@@ -331,6 +331,7 @@
 | **M** | named 升階機制 | anon tier spec 列後續 |
 | **L** | tag drift | leader / event 改 tag |
 | **M** | 團 vs 團突襲優勢 | 對稱：野獸伏擊已實作（AmbushSystem，2b-2）；團對團伏擊待做 — reuse `vision_system` 偵測（潛行降 exposure / 偵查偵測）+ 攻擊方未被偵測 → 首擊/陣位優勢 + 激活 dormant `_check_night_raid`。屬階段2+ 劫掠/戰團。**注意：團伏擊用 vision 偵測，非 beast 專屬 AmbushSystem** |
+| **M** | 山村採礦換糧特化經濟 | 山地 food regen 低（種田餵不飽），真實山村靠採礦/畜牧→交易換糧（進口糧）。現食物模型只「收本地糧」→ 山村必餓。需缺糧村自動 trade ore→food / 進口糧 AI。階段3+ 經濟深度。現階段 explicit 村用 `outpost.terrain` 釘可農地規避 |
 | **L** | 戰俘處置 | 賣/屠/招降 |
 | **L** | 外交招募 / 雇傭軍 | 直接買高 tier anon |
 | **L** | anon tier UI | team panel / 升等進度 / 死亡分檔 |

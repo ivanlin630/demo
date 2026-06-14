@@ -467,11 +467,16 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 		var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y
 		var tile: HexTileData = state.world.tiles.get(tile_id)
 		if tile:
+			if op_cfg.has("terrain"):
+				tile.terrain = String(op_cfg["terrain"])   # explicit 場景可釘地形（如村莊放可農平原）
 			tile.outpost_type = op_cfg.get("type", "civilian")
 			tile.outpost_level = int(op_cfg.get("level", 1))
 			tile.outpost_owner = team.team_id
 			if op_cfg.has("tile_food_init"):
-				tile.resources["food"] = float(op_cfg["tile_food_init"])
+				var f: float = float(op_cfg["tile_food_init"])
+				tile.resources["food"] = f
+				# bug 修：tile_food_init 須同抬 resource_cap，否則初始糧吃完後 regen 卡回地形預設 → 村餓死
+				tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), f)
 	# 注意：faction member 加入由 _setup_explicit_teams 第三段處理（factions 此時尚未建立）
 
 static func _make_person(team_id: int, p_cfg: Dictionary, is_leader: bool) -> PersonData:
