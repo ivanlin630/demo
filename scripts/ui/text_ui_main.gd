@@ -603,7 +603,7 @@ func _build_state_str() -> String:
 		pos.get("q", 0), pos.get("r", 0),
 		ct.get("faction_display", "?")])
 	lines.append("任務: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
-	lines.append("人口: %d | 未成年: %d" % [ct.get("population", 0), ct.get("minor_population", 0)])
+	lines.append("人口: %d  武裝: %d | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), ct.get("minor_population", 0)])
 	var food_days: float = float(ct.get("food_days", 99.0))
 	var starving: bool = bool(ct.get("starving", false))
 	lines.append("糧: %.1f 天%s" % [food_days, "  ⚠斷糧" if starving else ""])

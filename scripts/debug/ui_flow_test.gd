@@ -8,8 +8,16 @@ func _initialize() -> void:
 	await _test_u21_interact_paging()
 	await _test_u12_trade_str()
 	await _test_hunt_action_listed()
+	await _test_armed_count_shown()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
+
+func _test_armed_count_shown() -> void:
+	print("\n── 自隊武裝數顯示 ──")
+	var node = await _make_ui()
+	node._refresh()
+	_check("status 含「武裝」", node._state_label.text.contains("武裝"))
+	await _free_ui(node)
 
 func _check(label: String, ok: bool) -> void:
 	print(("  PASS: " if ok else "  FAIL: ") + label)

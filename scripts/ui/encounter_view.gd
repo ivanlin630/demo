@@ -155,6 +155,7 @@ func _refresh_ui() -> void:
 	_lbl_actions.text = action_hints
 
 	if _mode == "attack_select":
+		_lbl_actions.text     = _attack_select_hint(_selected_part)
 		_lbl_cursor_info.text = "攻擊部位 ↑↓: %s" % _selected_part
 
 func _find_player_unit(state: WorldState) -> Dictionary:
@@ -371,6 +372,10 @@ func _handle_key(keycode: int) -> void:
 				_do_attack_with_part(player_unit, _cursor, state, _selected_part)
 				_mode = "idle"; _cursor = Vector2i(-1, -1)
 				_selected_part = "torso"   # reset after use
+			elif keycode == KEY_ESCAPE:
+				_mode = "idle"; _cursor = Vector2i(-1, -1)
+				_selected_part = "torso"
+				_refresh_ui(); queue_redraw()
 
 func _handle_click(screen_pos: Vector2) -> void:
 	var state: WorldState = _bridge.get_state()
@@ -515,6 +520,10 @@ func _open_sub_command(unit_idx: int, player_unit: Dictionary, state: WorldState
 
 func _log(msg: String) -> void:
 	print("[EncounterView] ", msg)
+
+# attack_select 操作提示組字（static → 可單元測）
+static func _attack_select_hint(part: String) -> String:
+	return "↑↓選部位:%s  移游標瞄敵  Enter攻擊  Esc取消" % part
 
 # U10: 戰後提示組字（static → 可單元測）
 static func _post_combat_hint(res: Dictionary) -> String:

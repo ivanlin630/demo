@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_test_feedback_format()
 	_test_log_strip()
 	_test_post_combat_hint()
+	_test_attack_select_hint()
 	print("\n=== UI Logic Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -27,6 +28,15 @@ func _test_post_combat_hint() -> void:
 	var summ: String = EncView._post_combat_summary({"winner_id": 0, "loser_id": 1})
 	_check("戰果摘要含勝負隊", summ.contains("Team0") and summ.contains("Team1"))
 	_check("空結果摘要 fallback「結束」", EncView._post_combat_summary({}) == "結束")
+
+func _test_attack_select_hint() -> void:
+	print("\n── attack_select 提示 ──")
+	var EncView = load("res://scripts/ui/encounter_view.gd")
+	var h: String = EncView._attack_select_hint("torso")
+	_check("含 ↑↓選部位", h.contains("↑") and h.contains("部位"))
+	_check("含 Enter 攻擊", h.contains("Enter") and h.contains("攻擊"))
+	_check("含 Esc 取消", h.contains("Esc"))
+	_check("顯當前部位", h.contains("torso"))
 
 func _check(label: String, ok: bool) -> void:
 	if ok:
