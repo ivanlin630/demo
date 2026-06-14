@@ -267,7 +267,7 @@ func _input(event: InputEvent) -> void:
 					_subteam_mode = false
 				_refresh()
 		KEY_Q:
-			if _bridge != null and _bridge.get_state().encounter_active:
+			if _bridge != null and _bridge.is_encounter_active():
 				pass    # encounter_view handles Q as northwest movement
 			else:
 				get_tree().quit()
