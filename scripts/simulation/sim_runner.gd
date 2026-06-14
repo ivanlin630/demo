@@ -34,6 +34,7 @@ var _strategic_ai_system: StrategicAiSystem
 var _encounter_system: EncounterSystem
 var _training_system: TrainingSystem
 var _player_cmd: PlayerCommandSystem
+var _ambush_system: AmbushSystem
 
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
@@ -58,6 +59,7 @@ func _init() -> void:
 	_encounter_system    = EncounterSystem.new()
 	_training_system     = TrainingSystem.new()
 	_player_cmd          = PlayerCommandSystem.new()
+	_ambush_system       = AmbushSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick
@@ -134,6 +136,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step4_resolve_interactions(state, moved_near, near_teams)
 		_step4b_outpost_tick(state)
 		_step4e_faction_snapshot(state, near_teams)
+		_step_ambush_check(state, near_teams)
+		if state.encounter_active: return "player_turn"   # 伏擊起 encounter → 交還 bridge
 		_step5_collect_resources(state, near_teams)
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, near_teams)
@@ -163,6 +167,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step3b_exchange_intel(state, moved_far, far_teams)
 		_step4_resolve_interactions(state, moved_far, far_teams)
 		_step4e_faction_snapshot(state, far_teams)
+		_step_ambush_check(state, far_teams)
 		_step5_collect_resources(state, far_teams)
 		_step5a_regenerate_tiles(state)
 		_step5b_manufacture(state, far_teams)
@@ -176,6 +181,9 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step9_emit_messages(state)
 	_step_cleanup_extinct_teams(state)
 	return ""   # non-encounter tick
+
+func _step_ambush_check(state: WorldState, team_ids: Array) -> void:
+	_ambush_system.check_ambush(state, team_ids)
 
 func _step1d_overflow(state: WorldState) -> void:
 	_population_system.check_overflow(state)

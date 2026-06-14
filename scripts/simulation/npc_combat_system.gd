@@ -212,6 +212,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		if loser.beast_kind != "" and winner.beast_kind == "":
 			BeastSystem.new().reward_and_cleanup(state, winner_id, loser_id)   # 獵勝得肉
 		elif winner.beast_kind != "":
+			AmbushSystem.new().record_infamy(state, winner.tile_pos)           # 獸致死 → tile infamy
 			BeastSystem.new()._cleanup(state, winner_id)                       # 獸贏，不擄掠
 		else:
 			BeastSystem.new()._cleanup(state, loser_id)                        # 雙獸（不會發生）

@@ -47,6 +47,10 @@ func reward_and_cleanup(state: WorldState, winner_id: int, beast_id: int) -> voi
 		winner.forage_today = float(winner.forage_today) + float(prof.get("meat", 0))
 		if float(prof.get("hide", 0)) > 0:
 			winner.resources["material"] = float(winner.resources.get("material", 0)) + float(prof["hide"])
+		# 獵勝得戰鬥 exp（勝方 leader/named）
+		for pid in ([winner.leader_id] as Array) + winner.named_members:
+			var p: PersonData = state.persons.get(pid)
+			if p: SkillSystem.cap_add(p, "戰鬥", 0.003)   # TEST VALUE 獵勝 exp
 		print("[BeastHunt] Team%d 獵 %s 得肉%d" % [winner_id, beast.beast_kind, int(prof.get("meat", 0))])
 	_cleanup(state, beast_id)
 

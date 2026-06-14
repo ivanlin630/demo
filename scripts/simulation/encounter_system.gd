@@ -1167,7 +1167,11 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			if loser_b != null and loser_b.beast_kind != "":
 				bs.reward_and_cleanup(state, win_b, los_b)      # 玩家/NPC 獵勝獸 → 得肉
 			else:
-				bs._cleanup(state, win_b)                       # 獸贏（玩家敗）→ 獸不擄掠，僅清除
+				# 獸贏（玩家敗）→ 獸不擄掠，僅清除；致死 → tile infamy +1
+				var win_beast: TeamData = state.teams.get(win_b)
+				if win_beast != null:
+					AmbushSystem.new().record_infamy(state, win_beast.tile_pos)
+				bs._cleanup(state, win_b)
 		else:
 			# draw：清除參戰獸隊，不殘留
 			if beast_atk: bs._cleanup(state, atk_id)

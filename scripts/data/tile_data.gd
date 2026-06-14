@@ -28,6 +28,7 @@ var prisoners: Array = []           # person_ids
 var public_storage: Dictionary = {}   # 公庫，所有 resource keys
 var abandoned_coin: float = 0.0       # 滅團遺財（無 outpost）
 var mint_level: int = 0               # mint 設施等級
+var predator_infamy: int = 0          # 掠食者致死計數（輕量 hook；持久惡獸實體屬任務系統）
 
 # 建設進度
 var construction_ticks_left: int = 0

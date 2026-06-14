@@ -1994,6 +1994,24 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 			print("[Survival] Team%d %s days_left=%.1f %s→%s" % [
 				team.team_id, severity, days_left, prev_task, team.current_task])
 
+# NPC 主動獵獸：腳下有 predator + 戰力足 + 缺糧 → npc_combat 起獵。回傳是否發起。
+func try_hunt_predator(state: WorldState, team: TeamData) -> bool:
+	if team.beast_kind != "" or team.combat_target != -1:
+		return false
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or int(tile.resources.get("predator_density", 0)) <= 0:
+		return false
+	var leader = state.persons.get(team.leader_id)
+	var combat: float = float(leader.skills.get("戰鬥", 0.0)) if leader else 0.0
+	# 戰力門檻（TEST VALUE）：人多 + 有戰技才獵，弱隊不送死
+	if team.population < 8 or combat < 0.3:
+		return false
+	var kind: String = "bear" if tile.terrain == "mountain" else "boar"
+	tile.resources["predator_density"] = int(tile.resources["predator_density"]) - 1
+	var bid: int = BeastSystem.new().build_beast_team(state, kind, team.tile_pos)
+	NpcCombatSystem.new().start_combat(state, team.team_id, bid)
+	return true
+
 func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
@@ -2055,6 +2073,11 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 					state.teams[ally_id].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
 				team.combat_target = ally_id
 			return
+
+	# Path 3.4: 腳下有 predator + 戰力足 → 主動獵獸（優於覓食）
+	if try_hunt_predator(state, team):
+		print("[BeastHunt] team=Team%d 主動獵腳下掠食者" % team.team_id)
+		return
 
 	# Path 3.5: 小群 → 覓食（pop 門檻 proxy income/burn；大軍不划算 → 掉下去走乞食/idle）
 	if team.population <= FORAGE_VIABLE_POP:
