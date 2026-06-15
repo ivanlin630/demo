@@ -39,6 +39,7 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var pop_init: int = _total_pop(state)
 	var coin_eq_init: float = _coin_equivalent_total(state)
 	var food_snapshot: Dictionary = {}   # team_id → 上月食物量（FoodLedger 反推 income 用）
+	var task_hist: Dictionary = {}       # 行為量測:每月取樣 current_task → team-time 佔比（階段1 tune 用）
 	for tick in range(max_ticks):
 		var pp: Vector2i = _player_pos(state)
 		var result = runner.advance_tick(state, pp)
@@ -63,6 +64,10 @@ func _run_config(cfg_name: String) -> Dictionary:
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			print("[PopSample] %s tick=%d total_pop=%d" % [
 				cfg_name, state.world.current_tick, _total_pop(state)])
+			for tid2 in state.teams:   # 行為量測:月取樣 task → team-time histogram
+				var tk: String = state.teams[tid2].current_task
+				if tk == "": tk = "idle"
+				task_hist[tk] = int(task_hist.get(tk, 0)) + 1
 			_print_food_ledger(state, cfg_name, food_snapshot)
 	# 蒐集事件統計（從 log 或 state）
 	var team_count: int = state.teams.size()
@@ -80,6 +85,7 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var mat: Dictionary = _material_totals(state)
 	print("[MaterialStats] %s herb=%.1f horses=%.1f mounts=%.1f wagons=%.2f medicine=%.2f" % [
 		cfg_name, mat.herb, mat.horses, mat.mounts, mat.wagons, mat.medicine])
+	_print_task_hist(cfg_name, task_hist)
 	return {
 		"coin_eq_init": coin_eq_init,
 		"coin_eq_final": coin_eq_final,
@@ -133,6 +139,19 @@ func _facility_stats(state: WorldState) -> Dictionary:
 			var key: String = ",".join(set_arr)
 			combos[key] = int(combos.get(key, 0)) + 1
 	return { "facility_count": count, "combos": combos }
+
+# 行為量測:印 task team-time 佔比（降序）。階段1 tune 看哪行為過載（如掠奪偏高）。
+func _print_task_hist(cfg_name: String, hist: Dictionary) -> void:
+	var total: int = 0
+	for k in hist: total += int(hist[k])
+	if total == 0:
+		print("[TaskHist] %s (無取樣)" % cfg_name); return
+	var keys: Array = hist.keys()
+	keys.sort_custom(func(a, b): return int(hist[a]) > int(hist[b]))
+	var parts: Array = []
+	for k in keys:
+		parts.append("%s=%.1f%%(%d)" % [k, 100.0 * float(hist[k]) / float(total), int(hist[k])])
+	print("[TaskHist] %s samples=%d %s" % [cfg_name, total, "  ".join(parts)])
 
 func _total_pop(state: WorldState) -> int:
 	var total: int = 0
