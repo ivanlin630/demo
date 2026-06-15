@@ -40,6 +40,9 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var coin_eq_init: float = _coin_equivalent_total(state)
 	var food_snapshot: Dictionary = {}   # team_id → 上月食物量（FoodLedger 反推 income 用）
 	var task_hist: Dictionary = {}       # 行為量測:每月取樣 current_task → team-time 佔比（階段1 tune 用）
+	var intent_last: Dictionary = {}     # ②目標錨量測:tid→上次 solo_intent
+	var intent_changes: int = 0          # solo_intent 月間變動次數（thrash）
+	var intent_samples: int = 0          # 有 solo_intent 的月取樣總數
 	for tick in range(max_ticks):
 		var pp: Vector2i = _player_pos(state)
 		var result = runner.advance_tick(state, pp)
@@ -68,6 +71,13 @@ func _run_config(cfg_name: String) -> Dictionary:
 				var tk: String = state.teams[tid2].current_task
 				if tk == "": tk = "idle"
 				task_hist[tk] = int(task_hist.get(tk, 0)) + 1
+				# ②目標錨量測:solo_intent thrash（roving/solo 隊的長弧連貫性）
+				var si: String = state.teams[tid2].solo_intent
+				if si != "":
+					intent_samples += 1
+					if intent_last.has(tid2) and intent_last[tid2] != si:
+						intent_changes += 1
+					intent_last[tid2] = si
 			_print_food_ledger(state, cfg_name, food_snapshot)
 	# 蒐集事件統計（從 log 或 state）
 	var team_count: int = state.teams.size()
@@ -86,6 +96,9 @@ func _run_config(cfg_name: String) -> Dictionary:
 	print("[MaterialStats] %s herb=%.1f horses=%.1f mounts=%.1f wagons=%.2f medicine=%.2f" % [
 		cfg_name, mat.herb, mat.horses, mat.mounts, mat.wagons, mat.medicine])
 	_print_task_hist(cfg_name, task_hist)
+	var thrash_rate: float = (100.0 * float(intent_changes) / float(intent_samples)) if intent_samples > 0 else 0.0
+	print("[IntentThrash] %s solo_intent 月間變動 %d/%d 取樣 = %.1f%%（低=慣性夠連貫,高=漂移需 goal 錨）" % [
+		cfg_name, intent_changes, intent_samples, thrash_rate])
 	return {
 		"coin_eq_init": coin_eq_init,
 		"coin_eq_final": coin_eq_final,
