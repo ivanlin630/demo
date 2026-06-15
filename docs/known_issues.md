@@ -9,6 +9,15 @@
 
 ## 🔴 高優先（影響基本可玩性）
 
+### P4 玩測批（2026-06-16 玩測抓,主 session harness 驗修中）
+- **U16 地圖視野不以玩家為中心** ✅ 真修(viewport,見下 U16)。
+- **P4-1 demand_tribute forced event「未知提案類型」** ✅ 修(`_accept_diplomacy` 加 "demand_tribute" case + framing「要求納貢」)。
+- **P4-2 打獵選項混在 team 互動選單中** ⚠ 開:self/tile 動作(hunt/hunt_beast/establish_faction 等 allowed_kinds=none)目前**只在聚焦某隊後的 available_actions** → 既混進 team 選項,且 hunt 需先選隊才能用。**修向**:互動選單分離 self-actions(無目標)vs team-actions;self-actions 在目標選擇階段直接可選,team-focus 只顯 allowed_kinds 含 "team" 的。
+- **P4-3 跟其他 team 互動缺乞討等生存選項(選項不全)** ⚠ 開:玩家無「乞討/投靠」等生存動作(對稱性缺——NPC 會乞食/投靠,玩家不能主動)。**修向**:補玩家 survival 動作(beg/投靠請求)到對他隊互動。屬對稱性 feature,需設計。
+- **P4-4 遭遇戰到邊界不會停** ⚠ 開:遭遇戰戰術視野單位/游標到 MAP_RADIUS 不停(走出邊界)。advance 迴圈有 `_is_in_map` guard(:833),疑為 encounter_view 游標/玩家 pending move 路徑漏檢。GUI 層,需 encounter_view 查。
+- **「等很多」**:玩測尚有未列出問題,待補。
+- **狀態**:U16/P4-1 已修;P4-2/3/4 + 待補 → 規劃 play UI 修批(主 session harness 驗,不勞用戶重測)。
+
 ### W5. Task latch 凍結世界 ✅ 大部分已修（2026-06-13）
 - **症狀**：TeamTrace 量測 90 天，92% team-time 卡在不釋放的 survival(return_home/乞食 p80) + panic(逃跑 p70)。生產性 task 僅 8%。世界非窮而是癱瘓（T1 囤 mat 1622 卻凍死、T2 糧 34 天坐死）。
 - **根因**：`_evaluate_survival` 一進 survival 就 early-return 不釋放；`_has_active_threat` dist_factor floor 0.1 + 小地圖逃不到 5 格 → 永威脅；乞食無施主空轉 latch；餓死團 pop floor 1 不清除成空殼。
@@ -224,10 +233,11 @@
 - **自動測（2026-06-15）**：ui_flow `_test_u15_overlay_input_guard`（overlay 可見→KEY_W 被吞、隱藏→移游標）鎖回歸。
 - **後續風險**：`KEY_Q`→`get_tree().quit()` 在一般地圖遊玩仍是「按 Q 直接退遊戲」的危險綁定（Q 也是直覺移動鍵），建議改安全組合或移除（另議）。
 
-### U16. 世界地圖迷霧/視野與玩家位置對不上 ✅ 已修（2026-06-15）
-- **修**：`text_map_renderer.render` 列縮排由「奇偶交替 stagger」（offset 慣例，與 axial 不符）改為**累進切變** `indent = "  ".repeat(y - ymin)`（axial q+r/2 投影）→ 視野 `?` 邊界成對稱菱形繞 @，@ 與視野對齊。代價：整盤右下斜（平行四邊形，axial 正確投影），地圖本身六角形故觀感正常。
-- **回歸**：`map_render_test` 改驗前導空白序列對稱（V 形回文，`[16,14,12,10,8,10,12,14,16]`）；舊交替 stagger 非回文 → 抓得到。`=== ASSERTIONS PASSED ===`。
-- **教訓**：headless `--script` 中 `assert` 失敗會中止 `_initialize` 在 `quit()` 前 → SceneTree 不退、進程 idle 卡死（誤判為「跑很久」）。寫測勿讓 assert 擋在 quit 前無條件路徑。
+### U16. 世界地圖迷霧/視野與玩家位置對不上 ✅ 真修（2026-06-16,二修）
+- **2026-06-15 首修不完整**：只把列縮排改累進切變(axial 投影),但 render 仍是**整圖絕對座標 + @ 放玩家絕對位置** → 玩家偏離地圖中心時 @ 不在視窗中央。首修的 palindrome 回歸測 player 在 (4,4) 正中心 → 看似置中而誤過。玩測(2026-06-16)確認仍偏。
+- **2026-06-16 真修**：`text_map_renderer.render` 改 **VIEW_RADIUS 玩家中心視窗**——以玩家為中心畫 ±VIEW_RADIUS,@ 恆在正中列/欄,地圖在底下捲。`_cell` 玩家標記恆畫(null tile 也顯 @)。
+- **回歸**：`map_render_test` 改驗 @ 恆在視窗正中(玩家放偏離格,換位 @ col 不變),取代舊 palindrome(只驗中心 case 故漏)。`=== ASSERTIONS PASSED ===`。
+- **教訓**：(1) 回歸測須涵蓋**非中心 case**(首修漏因測點剛好對稱)。(2) headless `--script` 中 `assert` 失敗中止在 `quit()` 前 → 進程 idle 卡死;寫測先 print 診斷再 assert。
 
 <details><summary>原根因紀錄</summary>
 - **症狀**：文字世界地圖「揭露區域（視野）與玩家位置 @ 對不上」（2026-06-14 玩測，描述為「遭遇戰視野很怪」，實為世界地圖 fog）。
