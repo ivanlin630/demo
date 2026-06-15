@@ -12,11 +12,12 @@
 ### P4 玩測批（2026-06-16 玩測抓,主 session harness 驗修中）
 - **U16 地圖視野不以玩家為中心** ✅ 真修(viewport,見下 U16)。
 - **P4-1 demand_tribute forced event「未知提案類型」** ✅ 修(`_accept_diplomacy` 加 "demand_tribute" case + framing「要求納貢」)。
-- **P4-2 打獵選項混在 team 互動選單中** ⚠ 開:self/tile 動作(hunt/hunt_beast/establish_faction 等 allowed_kinds=none)目前**只在聚焦某隊後的 available_actions** → 既混進 team 選項,且 hunt 需先選隊才能用。**修向**:互動選單分離 self-actions(無目標)vs team-actions;self-actions 在目標選擇階段直接可選,team-focus 只顯 allowed_kinds 含 "team" 的。
-- **P4-3 跟其他 team 互動缺乞討等生存選項(選項不全)** ⚠ 開:玩家無「乞討/投靠」等生存動作(對稱性缺——NPC 會乞食/投靠,玩家不能主動)。**修向**:補玩家 survival 動作(beg/投靠請求)到對他隊互動。屬對稱性 feature,需設計。
-- **P4-4 遭遇戰到邊界不會停** ⚠ 開:遭遇戰戰術視野單位/游標到 MAP_RADIUS 不停(走出邊界)。advance 迴圈有 `_is_in_map` guard(:833),疑為 encounter_view 游標/玩家 pending move 路徑漏檢。GUI 層,需 encounter_view 查。
-- **「等很多」**:玩測尚有未列出問題,待補。
-- **狀態**:U16/P4-1 已修;P4-2/3/4 + 待補 → 規劃 play UI 修批(主 session harness 驗,不勞用戶重測)。
+- **P4-2 打獵選項混在 team 互動選單中** ✅ 修:`_interact_action_split()` 分離 self/原地動作 vs team-target;self-actions 在目標選擇階段直接可選,team-focus 只顯 team-kind。ui_flow 驗。
+- **P4-3 跟其他 team 互動缺乞討等生存選項(選項不全)** ⚠ 開→roadmap:玩家無「乞討/投靠」等主動生存動作(對稱性缺——NPC 會,玩家不能)。**非「已有功能 UI 落差」,是缺玩家 command(新 feature)** → 對稱性,需設計 spec。
+- **P4-4 遭遇戰到邊界不會停** ✅ 修:encounter_view 移動 target + attack_select 游標加 `_is_in_map` clamp。GUI clamp 邏輯確,視覺待玩測。
+- **動作 UI 覆蓋保證**:新增 `_test_action_ui_coverage`,47 registry actions 全驗有 UI 路徑(防未來新增漏接)。
+- **「等很多」**:玩測尚有未列出問題,待用戶補。
+- **狀態**:U16/P4-1/P4-2/P4-4 已修 + harness 驗;P4-3=對稱性 feature→roadmap;覆蓋測保證已有功能全可達。
 
 ### W5. Task latch 凍結世界 ✅ 大部分已修（2026-06-13）
 - **症狀**：TeamTrace 量測 90 天，92% team-time 卡在不釋放的 survival(return_home/乞食 p80) + panic(逃跑 p70)。生產性 task 僅 8%。世界非窮而是癱瘓（T1 囤 mat 1622 卻凍死、T2 糧 34 天坐死）。
