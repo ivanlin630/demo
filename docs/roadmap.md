@@ -33,14 +33,16 @@
 |---|---|---|
 | ~~量測 tune 階段1 TEST VALUES~~ ✅ 量測結案 | — | 2026-06-15 [TaskHist] 量測:世界健康行為多元,「loot 偏高 130」= 原始計數假象(time-share tyrant 掠奪 15.6% 劫掠型本該)。不需 tune |
 | ~~階段2 招人成幫~~ ✅ merged | — | 2026-06-16 投靠(食物)/招募(coin)+能力 legibility+tutorial。見 progress |
-| ~~②深層目標錨~~ ✅ 量測結案:不需要 | — | 2026-06-16 [IntentThrash] 量測:solo_intent 月間 thrash tyrant 12.8%/warzone 0% = 慣性已足連貫 + teams 確實攀爬(pop長/勢力成形)。長弧 emergent 已發生,加 goal 錨=設計自警的「戰略引擎無底洞」,不建。faction 長弧由 strategic_ai 處理 |
+| **②深層目標錨 / 戰略 AI 深化** → 移**長期**（見下） | 是 | 2026-06-16 [IntentThrash] 量測:solo_intent thrash tyrant 12.8%/warzone 0% = 慣性已足連貫,**現在不急**(非永不做)。用戶重視戰略 AI → 長期做 |
 | **task 優先權仲裁（Spec A）** | 是 | current_task 被 5+ 系統互蓋。優先表已設計，待 reaction 收斂後實作 |
 | **salary 欠薪後果** | 接 Bug2 | 見問題解方 |
 | **NPC 勒索機制活化** | 是 | demand_tribute 現休眠(2026-06-15 量測 NPC 發起=0)。發起點 `try_proactive_diplomacy:68` 被早return+同格gate+方向反(弱勒強)三重掐死。要當壓力機制需:翻方向(強勒弱)+ 優先序重排 + 平衡。世界穩定不需要,僅在要「強權壓迫」玩法層才做 |
 
 ### 🟡 長期（系統擴張，世界已穩才碰）
 
-階段3 據點 / 階段4 勢力 / mount 公庫系統 / 設施 B 期材料層 / 戰場 mount unit-level / named 升階 / 信用貨幣（勢力券）/ 新礦事件 / 戰俘處置 / 山村採礦換糧經濟。（細節見 known_issues.md「待 spec」表，優先序不變。）
+階段3 據點 / 階段4 勢力 / **②深層目標錨 + 戰略 AI 深化** / mount 公庫系統 / 設施 B 期材料層 / 戰場 mount unit-level / named 升階 / 信用貨幣（勢力券）/ 新礦事件 / 戰俘處置 / 山村採礦換糧經濟。（細節見 known_issues.md「待 spec」表，優先序不變。）
+
+**②深層目標錨 / 戰略 AI（長期,用戶重視）**：現況 solo_intent 短期慣性 + faction strategic_ai 目標已撐住基本連貫（2026-06-16 量測 thrash 低、攀爬發生）→ **不急**。長期方向（接 階段4 勢力,faction 層戰略最吃重時做）：慢變長期 goal 欄位（稱霸/安身/致富）跨多 tick 偏 task 選擇 + faction 級長弧策略深化。**仍守「極克制」**——先有明確需求（如玩測顯勢力行為短視）再 spec,防戰略引擎無底洞。
 
 ### 🔧 技術債（隨手或專案）
 
