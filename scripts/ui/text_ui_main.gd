@@ -32,6 +32,12 @@ var _advisor_mode:  bool = false
 var _subteam_selection: int = -1   # 當前選中的子隊 team_id
 var _advisor_selection: int = -1   # 當前選中的顧問 person_id
 
+# ── 公庫面板 + 破壞性二次確認暫存 ────────────────────────────────────────────
+var _storage_mode: bool = false
+var _storage_page: int = 0
+var _outpost_pending_abandon: bool = false   # abandon_outpost 二次確認 armed
+var _faction_extract_pending: float = -1.0   # 高比例 extract_treasury 二次確認暫存比例
+
 # ── gather_intel submode ─────────────────────────────────────────────────────
 var _intel_mode: bool = false
 var _intel_target_id: int = -1
@@ -212,6 +218,9 @@ func _input(event: InputEvent) -> void:
 	if _advisor_mode:
 		_handle_advisor_mode(event.keycode)
 		return
+	if _storage_mode:
+		_handle_storage_mode(event.keycode)
+		return
 	match event.keycode:
 		KEY_W: _move_cursor(Vector2i(0, -1))
 		KEY_S: _move_cursor(Vector2i(0,  1))
@@ -292,6 +301,12 @@ func _input(event: InputEvent) -> void:
 			_advisor_mode = not _advisor_mode
 			if _advisor_mode: _close_all_modes("advisor")
 			_advisor_selection = -1
+			_refresh()
+		KEY_K:
+			# 公庫面板（[G] 已綁跳 Tick，故用 [K]）
+			_storage_mode = not _storage_mode
+			if _storage_mode: _close_all_modes("storage")
+			_storage_page = 0
 			_refresh()
 		KEY_ESCAPE:
 			if _bridge.is_advancing():
@@ -494,6 +509,8 @@ func _refresh() -> void:
 		_event_label.text = _build_subteam_str()
 	elif _advisor_mode:
 		_event_label.text = _build_advisor_str()
+	elif _storage_mode:
+		_event_label.text = _build_storage_str()
 	elif _intel_mode:
 		_event_label.text = _build_intel_str()
 	else:
@@ -551,14 +568,15 @@ static func _resource_trend(baseline: float, cur: float) -> String:
 
 # 當前模式可用鍵表（依各 _handle_*_mode 實際鍵對齊）
 const MODE_KEYMAP: Dictionary = {
-	"main":          "[WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [U]子隊 [V]顧問 [T]互動 [Q]離開",
+	"main":          "[WASD]移游標 [Enter]選格 [M]移動 [Space]推進日 [G]跳Tick [I]物品 [P]成員 [F]勢力 [O]前哨 [K]公庫 [U]子隊 [V]顧問 [T]互動 [Q]離開",
 	"interact":      "[1-9]選目標/行動 [Esc]返回",
 	"member":        "[W/S]選員 [1-4]切頁(卡/傷/裝/能) [P/Esc]關閉",
 	"inv":           "[1-9]選 [E]裝備 [U]卸下 [S]存入 [G]取出 [I/Esc]關閉",
-	"faction":       "[A]目標 [B]徵收率 [C]離開 [D]背叛 [E]解散 [1-9]下令成員 [F/Esc]關閉",
+	"faction":       "[A]目標 [B]徵收率 [G]徵用國庫 [C]離開 [D]背叛 [E]解散 [1-9]下令成員 [F/Esc]關閉",
 	"outpost":       "[1-9]行動 [O/Esc]關閉",
 	"subteam":       "[1-9]選隊 [N]派遣 [A]下令移動 [B]召回 [U/Esc]關閉",
 	"advisor":       "[1-9]選顧問問策 [V/Esc]關閉",
+	"storage":       "[數字]存/取 [,.]翻頁 [Esc]離開",
 	"intel":         "[1-5]選題 [Esc]取消",
 	"trade":         "[數字]選項 [Enter]送出 [C]清 [,.]翻頁 [Esc]離開",
 	"pre_encounter": "[1]迎擊 [2]投降",
@@ -593,6 +611,7 @@ func _current_mode_name() -> String:
 	if _outpost_mode:       return "outpost"
 	if _subteam_mode:       return "subteam"
 	if _advisor_mode:       return "advisor"
+	if _storage_mode:       return "storage"
 	return "main"
 
 # 輸入模式時保留底層 panel 的提示（次要：顯通用輸入提示）
@@ -1086,6 +1105,45 @@ func _handle_faction_mode(keycode: int) -> void:
 				{"action_id": "disband_faction", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
 			_log_event("[勢力] %s" % r.get("message", ""))
 			_set_feedback(r.get("ok", true), r.get("message", ""))
+		KEY_G:   # 徵用國庫（僅 leader；高比例二次確認）
+			if not fp.get("is_leader", false):
+				_set_feedback(false, "只有 Leader 可徵用國庫")
+				_refresh()
+				return
+			if _faction_extract_pending > 0.0:
+				# 高比例第二次按 G → 確認執行
+				var ratio2: float = _faction_extract_pending
+				_faction_extract_pending = -1.0
+				_bridge.set_player_input("extract_ratio", ratio2)
+				var rc := _bridge.command_player("execute_action",
+					{"action_id": "extract_treasury", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[勢力] %s" % rc.get("message", rc.get("msg", "")))
+				_set_feedback(rc.get("ok", false), rc.get("message", rc.get("msg", "")))
+				_refresh()
+				return
+			_input_mode = true
+			_input_mode_type = "numeric"
+			_input_mode_prompt = "徵用比例 (1-100): "
+			_input_buffer = ""
+			_input_mode_callback = func(buf: String):
+				var ratio: float = clampf(float(buf) / 100.0, 0.0, 1.0)
+				if ratio <= 0.0:
+					_set_feedback(false, "比例須 (0,100]")
+					_refresh()
+					return
+				if ratio > 0.5:
+					# 破壞性高比例 → armed，需再按 G 確認
+					_faction_extract_pending = ratio
+					_set_feedback(false, "高比例 %.0f%%！再按 [G] 確認徵用" % (ratio * 100.0))
+					_refresh()
+					return
+				_bridge.set_player_input("extract_ratio", ratio)
+				var r2 := _bridge.command_player("execute_action",
+					{"action_id": "extract_treasury", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[勢力] %s" % r2.get("message", r2.get("msg", "")))
+				_set_feedback(r2.get("ok", false), r2.get("message", r2.get("msg", "")))
+				_refresh()
+			_input_bar.text = "%s_" % _input_mode_prompt
 		_:
 			# [1~9] 下令成員
 			if keycode >= KEY_1 and keycode <= KEY_9:
@@ -1144,6 +1202,7 @@ func _build_faction_str() -> String:
 	lines.append("── 行動 ──")
 	lines.append("[A]設定目標  [B]調整徵收率  [C]離開勢力")
 	if fp.get("is_leader", false):
+		lines.append("[G]徵用國庫（Leader）")
 		lines.append("[D]背叛勢力  [E]解散勢力（Leader）")
 	else:
 		lines.append("[D]背叛勢力")
@@ -1153,6 +1212,7 @@ func _build_faction_str() -> String:
 func _handle_outpost_mode(keycode: int) -> void:
 	if keycode == KEY_O or keycode == KEY_ESCAPE:
 		_outpost_mode = false
+		_outpost_pending_abandon = false
 		_refresh()
 		return
 	if keycode >= KEY_1 and keycode <= KEY_9:
@@ -1161,6 +1221,31 @@ func _handle_outpost_mode(keycode: int) -> void:
 		var idx: int = keycode - KEY_1
 		if idx < actions.size():
 			var action_id: String = actions[idx]
+			# 任何非 abandon 的選擇都解除棄置 armed
+			var was_armed: bool = _outpost_pending_abandon
+			if action_id != "abandon_outpost":
+				_outpost_pending_abandon = false
+			if action_id == "build_facility":
+				_prompt_build_facility(op)
+				_refresh()
+				return
+			if action_id == "abandon_outpost":
+				# 破壞性：二次確認
+				if not was_armed:
+					_outpost_pending_abandon = true
+					_set_feedback(false, "棄置據點？再按一次確認")
+					_refresh()
+					return
+				_outpost_pending_abandon = false
+				var pos: Vector2i = op.get("tile_pos", Vector2i.ZERO) as Vector2i
+				_bridge.set_player_input("abandon_pos", [pos.x, pos.y])
+				var ra := _bridge.command_player("execute_action", {
+					"action_id": "abandon_outpost",
+					"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+				_log_event("[前哨] %s" % ra.get("message", ra.get("msg", "")))
+				_set_feedback(ra.get("ok", false), ra.get("message", ra.get("msg", "")))
+				_refresh()
+				return
 			if action_id == "build_outpost":
 				# 進入輸入模式：選擇建設類型
 				_input_mode = true
@@ -1184,6 +1269,42 @@ func _handle_outpost_mode(keycode: int) -> void:
 				_log_event("[前哨] %s" % r.get("message", ""))
 				_set_feedback(r.get("ok", true), r.get("message", ""))
 	_refresh()
+
+# 蓋設施：列出本 outpost_type 允許且尚有空 slot 的設施 → 數字選 → build_facility
+func _facility_choices(otype: String) -> Array:
+	var out: Array = []
+	for fac in OutpostSystem.FACILITY_DEF:
+		if otype in OutpostSystem.FACILITY_DEF[fac]["allowed_outpost"]:
+			out.append(fac)
+	return out
+
+func _prompt_build_facility(op: Dictionary) -> void:
+	var otype: String = op.get("outpost_type", "")
+	var choices: Array = _facility_choices(otype)
+	if choices.is_empty():
+		_set_feedback(false, "此據點類型無可蓋設施")
+		return
+	var menu: Array = []
+	for i in range(choices.size()):
+		menu.append("[%d]%s" % [i + 1, choices[i]])
+	_input_mode = true
+	_input_mode_type = "numeric"
+	_input_mode_prompt = "蓋設施 %s 選: " % " ".join(menu)
+	_input_buffer = ""
+	_input_mode_callback = func(buf: String) -> void:
+		var ci: int = int(buf) - 1
+		if ci < 0 or ci >= choices.size():
+			_set_feedback(false, "無效設施編號")
+			_refresh()
+			return
+		_bridge.set_player_input("facility_type", choices[ci])
+		var r := _bridge.command_player("execute_action", {
+			"action_id": "build_facility",
+			"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+		_log_event("[前哨] %s" % r.get("message", r.get("msg", "")))
+		_set_feedback(r.get("ok", false), r.get("message", r.get("msg", "")))
+		_refresh()
+	_input_bar.text = "%s_" % _input_mode_prompt
 
 func _build_outpost_str() -> String:
 	var op: Dictionary = _bridge.query_outpost_panel().get("data", {}).get("outpost_panel", {})
@@ -1215,6 +1336,8 @@ func _build_outpost_str() -> String:
 		"upgrade_farming":        "升級農作",
 		"upgrade_manufacturing":  "升級製造",
 		"demolish_outpost":       "拆除",
+		"build_facility":         "蓋設施",
+		"abandon_outpost":        "棄置據點",
 	}
 	var actions: Array = op.get("actions", [])
 	if actions.is_empty():
@@ -1223,6 +1346,73 @@ func _build_outpost_str() -> String:
 		lines.append("[%d]%s" % [i + 1, ACTION_LABELS.get(actions[i], actions[i])])
 	lines.append("[O/Esc]關閉")
 	return "\n".join(lines)
+
+# ── 公庫面板（deposit/withdraw_to_storage）────────────────────────────────────
+# 扁平化列：team_res→存入、stored→取出，索引一致供數字鍵選取（對齊 trade mode 模式）
+func _storage_rows() -> Array:
+	var d: Dictionary = _bridge.query_storage_panel().get("data", {}).get("storage_panel", {})
+	var rows: Array = []
+	for it in d.get("team_res", []):
+		rows.append({"dir": "deposit", "res": it.get("res",""), "qty": it.get("qty",0)})
+	for it in d.get("stored", []):
+		rows.append({"dir": "withdraw", "res": it.get("res",""), "qty": it.get("qty",0), "cap": it.get("cap",0)})
+	return rows
+
+func _build_storage_str() -> String:
+	var d: Dictionary = _bridge.query_storage_panel().get("data", {}).get("storage_panel", {})
+	if not d.get("feasible", false):
+		return "── 公庫 ──\n（%s）\n[K/Esc]離開" % d.get("reason", "")
+	var lines: Array = ["── 公庫 ──"]
+	var rows: Array = _storage_rows()
+	var start: int = _storage_page * 9
+	var endi: int = mini(start + 9, rows.size())
+	var shown_dep: bool = false
+	var shown_wd: bool = false
+	for gi in range(start, endi):
+		var row: Dictionary = rows[gi]
+		var label: int = gi - start + 1
+		if row["dir"] == "deposit":
+			if not shown_dep: lines.append("存入（我方→公庫）："); shown_dep = true
+			lines.append("  [%d] %s ×%d" % [label, row["res"], int(row["qty"])])
+		else:
+			if not shown_wd: lines.append("取出（公庫→我方）："); shown_wd = true
+			lines.append("  [%d] %s ×%d/%d" % [label, row["res"], int(row["qty"]), int(row["cap"])])
+	if rows.is_empty():
+		lines.append("（公庫與我方皆無可存取資源）")
+	if rows.size() > 9:
+		lines.append("第 %d/%d 頁 [,]上 [.]下" % [_storage_page + 1, int(ceil(rows.size()/9.0))])
+	lines.append("[數字]選項 [K/Esc]離開")
+	return "\n".join(lines)
+
+func _handle_storage_mode(keycode: int) -> void:
+	if keycode == KEY_K or keycode == KEY_ESCAPE:
+		_storage_mode = false; _storage_page = 0; _refresh(); return
+	if keycode == KEY_COMMA:
+		_storage_page = maxi(0, _storage_page - 1); _refresh(); return
+	if keycode == KEY_PERIOD:
+		_storage_page += 1; _refresh(); return
+	if keycode < KEY_1 or keycode > KEY_9:
+		return
+	var idx: int = (keycode - KEY_1) + _storage_page * 9
+	var rows: Array = _storage_rows()
+	if idx >= rows.size(): return
+	var row: Dictionary = rows[idx]
+	_input_mode = true
+	_input_mode_type = "numeric"
+	_input_buffer = ""
+	_input_mode_prompt = "%s %s 數量: " % ["存" if row["dir"] == "deposit" else "取", row["res"]]
+	_input_mode_callback = func(buf: String) -> void:
+		var qty: int = int(buf)
+		if qty > 0:
+			_bridge.set_player_input("storage_res", row["res"])
+			_bridge.set_player_input("storage_amount", float(qty))
+			var aid: String = "deposit_to_storage" if row["dir"] == "deposit" else "withdraw_from_storage"
+			var r: Dictionary = _bridge.command_player("execute_action", {
+				"action_id": aid,
+				"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_set_feedback(r.get("ok", false), r.get("message", r.get("msg", "")))
+		_refresh()
+	_input_bar.text = "%s_" % _input_mode_prompt
 
 func _handle_subteam_mode(keycode: int) -> void:
 	if keycode == KEY_U or keycode == KEY_ESCAPE:
@@ -1608,6 +1798,9 @@ func _close_all_modes(keep: String = "") -> void:
 	if keep != "outpost":  _outpost_mode  = false
 	if keep != "subteam":  _subteam_mode  = false
 	if keep != "advisor":  _advisor_mode  = false
+	if keep != "storage":  _storage_mode  = false; _storage_page = 0
+	_outpost_pending_abandon = false
+	_faction_extract_pending = -1.0
 	_intel_mode          = false
 	_trade_mode          = false
 	_trade_target_id     = -1

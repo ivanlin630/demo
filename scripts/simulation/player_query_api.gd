@@ -447,6 +447,13 @@ func query_faction_panel(state: WorldState) -> Dictionary:
 	return PlayerApiMapper.map_query_envelope(true, "ok", "",
 		{"faction_panel": PlayerApiMapper.map_faction_panel(state)})
 
+func get_storage_panel(state: WorldState) -> Dictionary:
+	var check := _check_player_with_team(state)
+	if check["code"] != "ok":
+		return PlayerApiMapper.map_query_envelope(false, check["code"], check["msg"], {})
+	return PlayerApiMapper.map_query_envelope(true, "ok", "",
+		{ "storage_panel": PlayerApiMapper.map_storage_panel(state) })
+
 func query_outpost_panel(state: WorldState) -> Dictionary:
 	var check := _check_player(state)
 	if check["code"] != "ok":
@@ -476,6 +483,7 @@ func _action_label(action_id: String) -> String:
 		"take_loot":             return "收割戰利品"
 		"leave_loot":            return "放棄戰利品"
 		"recruit_anon":          return "招募匿名"
+		"invite_settle":         return "邀請定居"
 		"recruit_named":         return "招募成員"
 		"confirm_trade":         return "確認貿易"
 		"cancel_trade":          return "取消貿易"

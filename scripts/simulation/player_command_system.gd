@@ -46,8 +46,25 @@ func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
 	var coin: float = float(pt.resources.get("coin", 0))
 	if coin >= RECRUIT_COST_ANON:
 		actions.append("recruit")
+	# recruit_anon：有 coin 且目標有匿名人口可招（與 recruit 並列，直接執行版）
+	if coin >= RECRUIT_COST_ANON and _target_has_anon(tgt):
+		actions.append("recruit_anon")
+	# invite_settle：玩家站在自家 outpost → 可邀目標前來定居
+	if _can_invite_settle(state, pt, tgt):
+		actions.append("invite_settle")
 	actions.append("gather_intel")
 	return actions
+
+# recruit_anon 前提：目標人口 > 1（_recruit_anon_internal 拒 pop<=1）
+func _target_has_anon(tgt: TeamData) -> bool:
+	return tgt.population > 1
+
+# invite_settle 前提：玩家腳下為自家 outpost（_action_invite_settle 需 settle_pos 指向自家 outpost）
+func _can_invite_settle(state: WorldState, pt: TeamData, tgt: TeamData) -> bool:
+	if tgt == null:
+		return false
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	return tile != null and tile.outpost_level > 0 and tile.outpost_owner == pt.team_id
 
 # ── Registry 初始化 ───────────────────────────────────────────
 
