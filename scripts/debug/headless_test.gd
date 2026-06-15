@@ -342,7 +342,34 @@ func _initialize() -> void:
 	_test_extract_treasury_conservation()
 	# ── 階段2 招人成幫 ──
 	_test_team_capabilities_dto()
+	_test_accept_join_request()
 	quit()
+
+func _test_accept_join_request() -> void:
+	print("--- 投靠核心(食物併入) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"統領": 0.5}   # 撐 pop cap
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 10}
+	state.teams[0] = pt
+	# 絕境流民團(3 anon)
+	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	ds.resources = {"coin": 5}; ds.anon_treasury = 6.0
+	state.teams[1] = ds
+	var coin_before: float = float(pt.resources.get("coin",0)) + pt.anon_treasury \
+		+ float(ds.resources.get("coin",0)) + ds.anon_treasury
+	var cs := PlayerCommandSystem.new()
+	var r: Dictionary = cs._accept_join_request(state, 1)
+	assert(r.get("ok", false), "投靠應成功:%s" % str(r))
+	assert(pt.population == 5, "玩家 pop 2→5,實際=%d" % pt.population)
+	# 食物扣 = MEAL × 3
+	assert(abs(float(pt.resources.get("food",0)) - (50.0 - PlayerCommandSystem.JOIN_ONBOARD_MEAL * 3)) < 0.01, "扣 onboarding 食物")
+	# coin 守恆:併入後玩家 coin = 原玩家 + 流民(merge_teams 帶 treasury/coin),總額不變
+	var coin_after: float = float(pt.resources.get("coin",0)) + pt.anon_treasury
+	assert(abs(coin_after - coin_before) < 0.01, "coin 守恆,before=%.1f after=%.1f" % [coin_before, coin_after])
+	print("投靠核心 OK")
 
 func _test_team_capabilities_dto() -> void:
 	print("--- 隊能力 DTO ---")

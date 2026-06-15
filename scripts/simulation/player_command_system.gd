@@ -3,6 +3,7 @@ class_name PlayerCommandSystem
 
 const RECRUIT_COST_ANON:  float = 50.0   # TEST VALUE
 const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
+const JOIN_ONBOARD_MEAL:  float = 0.8    # 一餐 ≈ FOOD_PER_PERSON_PER_DAY/3 (TEST VALUE)
 
 # 投降抽成清單：30% 轉移給受降方（含武備 — 半繳械投降）
 const SURRENDER_TRANSFER_RES: Array = [
@@ -733,6 +734,25 @@ func _action_clear_member_order(state: WorldState, _target_id: int, pt: TeamData
 	mt.player_commanded_task = ""
 	print("[PlayerCmd] clear_member_order Team%d" % member_id)
 	return { "ok": true, "msg": "已清除 Team%d 的直接指令" % member_id }
+
+# ── 投靠收留（食物軌整團併入）──────────────────────────────
+
+# 投靠收留：扣 onboarding 食物（MEAL×對方人數，被吃掉=合法消耗）+ 整團併入（reuse merge_teams,守恆）
+func _accept_join_request(state: WorldState, from_id: int) -> Dictionary:
+	var pt: TeamData = _get_player_team(state)
+	var from_team: TeamData = state.teams.get(from_id)
+	if pt == null or from_team == null:
+		return { "ok": false, "msg": "對象不存在" }
+	if pt.tile_pos != from_team.tile_pos:
+		return { "ok": false, "msg": "需同格才能收留" }
+	var cost: float = JOIN_ONBOARD_MEAL * float(from_team.population)
+	if float(pt.resources.get("food", 0)) < cost:
+		return { "ok": false, "msg": "食物不足收留（需%.1f）" % cost }
+	var joined: int = from_team.population
+	pt.resources["food"] = float(pt.resources.get("food", 0)) - cost   # 餵他們進來：吃掉,食物非守恆
+	SubteamSystem.new().merge_teams(state, pt.team_id, from_id)         # 整團併入：pop/named/tier/treasury 守恆
+	return { "ok": true, "msg": "收留 %d 人（食物 -%.1f）" % [joined, cost],
+		"payload": {"joined": joined, "food_cost": cost} }
 
 # ── 被動回應（NPC 強制非戰互動）────────────────────────────
 
