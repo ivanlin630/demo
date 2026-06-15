@@ -344,7 +344,30 @@ func _initialize() -> void:
 	_test_team_capabilities_dto()
 	_test_accept_join_request()
 	_test_join_request_trigger_and_respond()
+	_test_recruit_tutorial()
 	quit()
+
+func _test_recruit_tutorial() -> void:
+	print("--- tutorial onboarding ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 1
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 100.0}   # 盈餘 > 閾值
+	state.teams[0] = pt
+	var tut := RecruitTutorial.new()
+	tut.check(state)
+	assert(bool(state.player_state.get("recruit_tutorial_fired", false)), "tutorial 應觸發設 flag")
+	assert(state.player_forced_event.get("action", "") == "join_request", "送 join_request")
+	var tid: int = int(state.player_forced_event.get("from_id", -1))
+	var tut_team: TeamData = state.teams.get(tid)
+	assert(tut_team != null and tut_team.population == 4, "1 named+3 anon=4")
+	assert(tut_team.leader_id != -1, "有堪用 named")
+	# 二次呼不重複
+	state.player_forced_event = {}
+	tut.check(state)
+	assert(state.player_forced_event.is_empty(), "一次性:不再觸發")
+	print("tutorial onboarding OK")
 
 func _test_join_request_trigger_and_respond() -> void:
 	print("--- join_request 觸發+回應 ---")
