@@ -343,6 +343,7 @@ func _initialize() -> void:
 	# ── 階段2 招人成幫 ──
 	_test_team_capabilities_dto()
 	_test_accept_join_request()
+	_test_join_request_cap_capped()
 	_test_join_request_trigger_and_respond()
 	_test_recruit_tutorial()
 	_test_join_conservation()
@@ -424,6 +425,57 @@ func _test_join_request_trigger_and_respond() -> void:
 	assert(r.get("ok", false) and pt.population == 5, "accept 收留 pop→5")
 	assert(state.player_forced_event.is_empty(), "event 已清")
 	print("join_request 觸發+回應 OK")
+
+func _test_join_request_cap_capped() -> void:
+	print("--- 投靠撞 pop_cap 守恆 (B-1) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"統領": 0.15}   # pop_cap_from_leadership(0.15)=10
+	state.persons[0] = leader; state.player_id = 0
+	var cap: int = TeamData.pop_cap_from_leadership(0.15)
+	assert(cap == 10, "前置: cap(0.15)應=10,實際=%d" % cap)
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = cap   # 已滿
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 200.0}
+	state.teams[0] = pt
+	# 同格來源隊 8 人(全 anon)
+	var ds := TeamData.new(); ds.team_id = 1; ds.population = 8; ds.tile_pos = Vector2i(4,4)
+	ds.resources = {"food": 0.0}
+	state.teams[1] = ds
+	var food_before: float = float(pt.resources.get("food", 0))
+	var pop_before: int = pt.population
+	var cs := PlayerCommandSystem.new()
+	var r: Dictionary = cs._accept_join_request(state, 1)
+	var actual_joined: int = pt.population - pop_before
+	var spent: float = food_before - float(pt.resources.get("food", 0))
+	print("  撞滿 case: ok=%s joined_reported=%s actual=%d food_spent=%.2f msg=%s" % [
+		str(r.get("ok", false)), str(r.get("payload", {}).get("joined", "n/a")),
+		actual_joined, spent, str(r.get("msg", ""))])
+	# (a) 撞滿(0 容量) → 拒收: ok=false, 無人併入, 食物不扣
+	assert(actual_joined == 0, "撞滿不應併入任何人,實際併入=%d" % actual_joined)
+	assert(abs(spent) < 0.01, "撞滿食物不應蒸發,實扣=%.2f" % spent)
+	assert(not r.get("ok", false), "撞滿應回 ok=false(拒收),實際=%s" % str(r))
+	# 部分容量 case: cap 還剩 3 → 來源 8 人 → 只進 3,食物只扣 3 人份
+	var pt2 := TeamData.new(); pt2.team_id = 2; pt2.leader_id = 2; pt2.population = cap - 3
+	pt2.tile_pos = Vector2i(5,5); pt2.resources = {"food": 200.0}
+	var leader2 := PersonData.new(); leader2.id = 2; leader2.team_id = 2; leader2.skills = {"統領": 0.15}
+	state.persons[2] = leader2; state.player_id = 2
+	state.teams[2] = pt2
+	var ds2 := TeamData.new(); ds2.team_id = 3; ds2.population = 8; ds2.tile_pos = Vector2i(5,5)
+	ds2.resources = {"food": 0.0}
+	state.teams[3] = ds2
+	var food_before2: float = float(pt2.resources.get("food", 0))
+	var pop_before2: int = pt2.population
+	var r2: Dictionary = cs._accept_join_request(state, 3)
+	var actual_joined2: int = pt2.population - pop_before2
+	var reported2: int = int(r2.get("payload", {}).get("joined", -1))
+	var spent2: float = food_before2 - float(pt2.resources.get("food", 0))
+	print("  部分 case: ok=%s joined_reported=%d actual=%d food_spent=%.2f" % [
+		str(r2.get("ok", false)), reported2, actual_joined2, spent2])
+	assert(actual_joined2 == 3, "部分容量應只進 3,實際=%d" % actual_joined2)
+	assert(reported2 == actual_joined2, "msg/payload 報的 joined 應=實際併入 (報=%d 實=%d)" % [reported2, actual_joined2])
+	assert(abs(spent2 - PlayerCommandSystem.JOIN_ONBOARD_MEAL * 3) < 0.01,
+		"食物應只扣 3 人份=%.2f,實扣=%.2f" % [PlayerCommandSystem.JOIN_ONBOARD_MEAL * 3, spent2])
+	print("投靠撞 pop_cap 守恆 OK")
 
 func _test_accept_join_request() -> void:
 	print("--- 投靠核心(食物併入) ---")
