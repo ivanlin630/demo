@@ -348,7 +348,8 @@ func _handle_key(keycode: int) -> void:
 			elif HEX_DIRS.has(keycode):
 				var cur_pos: Vector2i = player_unit.get("pos", Vector2i.ZERO)
 				var target: Vector2i = _hex_neighbor(cur_pos, keycode)
-				_do_move(player_unit, target, state)
+				if _is_in_map(target):   # P4-4:邊界 clamp,移動不走出戰場
+					_do_move(player_unit, target, state)
 			elif keycode == KEY_R:
 				_mode = "attack_select"
 				_selected_part = "torso"   # reset to default each time
@@ -369,9 +370,11 @@ func _handle_key(keycode: int) -> void:
 				_selected_part = BODY_PARTS[(idx + 1) % BODY_PARTS.size()]
 				_refresh_ui()
 			elif HEX_DIRS.has(keycode):
-				_cursor = _hex_neighbor(_cursor, keycode)
-				queue_redraw()
-				_lbl_cursor_info.text = _describe_hex(_cursor, state)
+				var nc: Vector2i = _hex_neighbor(_cursor, keycode)
+				if _is_in_map(nc):   # P4-4:瞄準游標邊界 clamp,不走出戰場
+					_cursor = nc
+					queue_redraw()
+					_lbl_cursor_info.text = _describe_hex(_cursor, state)
 			elif keycode == KEY_ENTER or keycode == KEY_KP_ENTER:
 				_do_attack_with_part(player_unit, _cursor, state, _selected_part)
 				_mode = "idle"; _cursor = Vector2i(-1, -1)
