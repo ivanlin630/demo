@@ -340,7 +340,133 @@ func _initialize() -> void:
 	_test_get_actions_recruit_anon_invite()
 	_test_storage_conservation()
 	_test_extract_treasury_conservation()
+	# ── 階段2 招人成幫 ──
+	_test_team_capabilities_dto()
+	_test_accept_join_request()
+	_test_join_request_trigger_and_respond()
+	_test_recruit_tutorial()
+	_test_join_conservation()
 	quit()
+
+func _test_join_conservation() -> void:
+	print("--- 投靠守恆整合(coin_eq) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 10, "ore_gold": 2}
+	state.teams[0] = pt
+	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	ds.resources = {"coin": 5, "ore_silver": 4}; ds.anon_treasury = 6.0
+	state.teams[1] = ds
+	var ce_before: float = _coin_eq_sum(state)
+	var food_before: float = float(pt.resources.get("food", 0))
+	var cs := PlayerCommandSystem.new()
+	var r: Dictionary = cs._accept_join_request(state, 1)
+	assert(r.get("ok", false), "投靠成功")
+	var ce_after: float = _coin_eq_sum(state)
+	assert(abs(ce_after - ce_before) < 0.01, "coin_eq 守恆 before=%.2f after=%.2f" % [ce_before, ce_after])
+	# food 確減 onboarding（食物非 coin_eq）
+	var spent: float = food_before - float(pt.resources.get("food", 0))
+	assert(abs(spent - PlayerCommandSystem.JOIN_ONBOARD_MEAL * 3) < 0.01, "food 減 onboarding=%.2f" % spent)
+	print("投靠守恆整合 OK")
+
+func _coin_eq_sum(state: WorldState) -> float:
+	var total: float = 0.0
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		total += float(t.resources.get("coin", 0)) + t.anon_treasury
+		total += float(t.resources.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
+		total += float(t.resources.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
+	return total
+
+func _test_recruit_tutorial() -> void:
+	print("--- tutorial onboarding ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 1
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 100.0}   # 盈餘 > 閾值
+	state.teams[0] = pt
+	var tut := RecruitTutorial.new()
+	tut.check(state)
+	assert(bool(state.player_state.get("recruit_tutorial_fired", false)), "tutorial 應觸發設 flag")
+	assert(state.player_forced_event.get("action", "") == "join_request", "送 join_request")
+	var tid: int = int(state.player_forced_event.get("from_id", -1))
+	var tut_team: TeamData = state.teams.get(tid)
+	assert(tut_team != null and tut_team.population == 4, "1 named+3 anon=4")
+	assert(tut_team.leader_id != -1, "有堪用 named")
+	# 二次呼不重複
+	state.player_forced_event = {}
+	tut.check(state)
+	assert(state.player_forced_event.is_empty(), "一次性:不再觸發")
+	print("tutorial onboarding OK")
+
+func _test_join_request_trigger_and_respond() -> void:
+	print("--- join_request 觸發+回應 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0}
+	state.teams[0] = pt
+	# 絕境流民同格(food_days 低 → 應發投靠)
+	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	ds.resources = {"food": 0.0}; ds.current_task = "乞食"
+	state.teams[1] = ds
+	var fai := FactionAISystem.new()
+	fai._maybe_request_join_player(state, ds)   # 絕境同格 → 寫 forced_event
+	assert(state.player_forced_event.get("action", "") == "join_request", "應發 join_request")
+	assert(int(state.player_forced_event.get("from_id", -1)) == 1, "from_id=1")
+	# 回應 accept → 併入
+	var cs := PlayerCommandSystem.new()
+	var r: Dictionary = cs.respond_to_forced(state, "accept")
+	assert(r.get("ok", false) and pt.population == 5, "accept 收留 pop→5")
+	assert(state.player_forced_event.is_empty(), "event 已清")
+	print("join_request 觸發+回應 OK")
+
+func _test_accept_join_request() -> void:
+	print("--- 投靠核心(食物併入) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"統領": 0.5}   # 撐 pop cap
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 10}
+	state.teams[0] = pt
+	# 絕境流民團(3 anon)
+	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	ds.resources = {"coin": 5}; ds.anon_treasury = 6.0
+	state.teams[1] = ds
+	var coin_before: float = float(pt.resources.get("coin",0)) + pt.anon_treasury \
+		+ float(ds.resources.get("coin",0)) + ds.anon_treasury
+	var cs := PlayerCommandSystem.new()
+	var r: Dictionary = cs._accept_join_request(state, 1)
+	assert(r.get("ok", false), "投靠應成功:%s" % str(r))
+	assert(pt.population == 5, "玩家 pop 2→5,實際=%d" % pt.population)
+	# 食物扣 = MEAL × 3
+	assert(abs(float(pt.resources.get("food",0)) - (50.0 - PlayerCommandSystem.JOIN_ONBOARD_MEAL * 3)) < 0.01, "扣 onboarding 食物")
+	# coin 守恆:併入後玩家 coin = 原玩家 + 流民(merge_teams 帶 treasury/coin),總額不變
+	var coin_after: float = float(pt.resources.get("coin",0)) + pt.anon_treasury
+	assert(abs(coin_after - coin_before) < 0.01, "coin 守恆,before=%.1f after=%.1f" % [coin_before, coin_after])
+	print("投靠核心 OK")
+
+func _test_team_capabilities_dto() -> void:
+	print("--- 隊能力 DTO ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"求生": 0.5, "戰鬥": 0.4}
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 40.0}
+	state.teams[0] = pt
+	var d: Dictionary = PlayerApiMapper.map_controlled_team(state)
+	var cap: Dictionary = d.get("capabilities", {})
+	assert(cap.has("hunt_chance") and cap.has("hunt_yield"), "獵率/產出")
+	assert(cap.has("combat_power"), "戰力")
+	assert(abs(cap.get("food_burn_per_day", 0.0) - 4 * 2.4) < 0.01, "日耗 pop×2.4")
+	assert(cap.get("hunt_survival", 0.0) > 0.4, "求生平均反映 leader 求生")
+	print("隊能力 DTO OK")
 
 func _test_wild_game_seeded() -> void:
 	print("--- world_gen wild_game 灑點 ---")

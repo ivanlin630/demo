@@ -642,6 +642,12 @@ func _build_state_str() -> String:
 	var food_days: float = float(ct.get("food_days", 99.0))
 	var starving: bool = bool(ct.get("starving", false))
 	lines.append("糧: %.1f 天%s" % [food_days, "  ⚠斷糧" if starving else ""])
+	var cap: Dictionary = ct.get("capabilities", {})
+	if not cap.is_empty():
+		lines.append("狩獵 %d%%/%.0f糧  戰力 %.0f  日耗 %.1f食(撐%.0f天)" % [
+			int(float(cap.get("hunt_chance", 0.0)) * 100), float(cap.get("hunt_yield", 0.0)),
+			float(cap.get("combat_power", 0.0)), float(cap.get("food_burn_per_day", 0.0)),
+			food_days])
 	lines.append(_member_health_line(ct.get("members", [])))
 
 	if ps.get("player_exists", false):

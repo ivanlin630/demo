@@ -151,6 +151,8 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step7b_npc_goal_cleanup(state, near_teams)
 		_step8_generate_events(state, near_teams)
 		_step9_emit_messages(state)
+		# 階段2 tutorial onboarding：玩家食物盈餘 → 一次性送投奔者小隊（check 內守 forced_event 非空跳過）
+		RecruitTutorial.new().check(state)
 
 	# Harvest：每 6 小時（TICKS_PER_DAY / 4）
 	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
