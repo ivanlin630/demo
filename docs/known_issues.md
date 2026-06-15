@@ -1,6 +1,9 @@
 # Known Issues
 
-> 最後更新：2026-06-12（馬爾薩斯修正 2 年驗證）| 來源：動態測試 + code review
+> 最後更新：2026-06-15（對現碼驗證掃描）| 來源：動態測試 + code review
+>
+> **2026-06-15 驗證掃描**：對現碼核對開放項,多數已漂移。已修/過時標記:Bug2(floor 已修)、Bug5(公式已改)、Bug8(stale test)、S4(改 overflow-based)、A2(重構解)、Movement mount/wagon(已有 bonus)、D1(部分緩解)。**仍有效真 backlog**:Bug6(runner schedule)、Bug9(player_id 守衛 latent)、W4(promote/train、leader 駐留)、W3(dist tune)。
+> **圖形 Main.tscn 項 moot**:`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical(`main.gd`/`right_sidebar`/`bottom_bar`/`popup_layer`)項凍結,復活圖形 UI 才解。
 
 ---
 
@@ -50,7 +53,8 @@
 - **根因**：salary 系統發薪前不檢查 coin >= 0；新團 `[Split]` 出來特別易負
 - **影響**：經濟守恆破，新生團體永久赤字
 - **發現**：2026-06-09 integration test
-- **建議**：coin<0 觸發欠薪後果（接 reaction 系統 → loyalty 降 / 離隊 / anon 補充停），或夾在 0 並記欠薪
+- **驗證（2026-06-15）**：**floor 已修**——`salary_system:65/75` 已 `maxf(coin−paid, 0.0)` → coin 不再為負。剩「欠薪後果」(發不出薪 → loyalty/離隊/anon 補充停)= 設計 spec,未做。
+- **狀態**：負 coin 缺陷 ✅；欠薪後果 → 路線圖 spec
 
 ### S1. 視野公式門檻太高 ✅ 已修
 - **修正**：`_can_detect` 門檻從 `> 0.5` 降至 `> 0.3`
@@ -92,7 +96,7 @@
 - **症狀**：main.gd 開局 3 team，tick 10 開始自動分裂，tick 30 已有 10+ team
 - **根因**：PopMgmt 分裂條件觸發太容易；10 人就能分裂出子隊
 - **位置**：`scripts/simulation/population_system.gd`
-- **建議**：提高分裂門檻，或 demo 期間停用自動分裂
+- **勘誤（2026-06-15）**：描述過時。現 population_system 無「pop10 分裂」,改 **overflow-based**(`check_overflow`/`_create_overflow_team`,超 cap 才溢出建團)。且症狀指 graphical `main.gd` 開局 = **moot**(TextUI 為 `main_scene`)。如仍嫌溢出太快屬另議 tune。
 
 ### S5. main.gd test setup 無 outpost → 12.5 天必定斷糧
 - **症狀**：300 food / (10人×0.1/tick×24tick/天) = 12.5 天；斷糧後人口死亡，UI 失效
@@ -147,10 +151,10 @@
 - **修**：`_try_interact` 頂加 `if not state.teams.has(id_a) or not state.teams.has(id_b): return`（L3 一行守衛）
 - **驗證**：warzone 2 年 multi `Out of bounds` 0（原 3）、SCRIPT ERROR 0、died=no
 
-### Bug8. _test_on_team_extinct_to_storage 失敗（baseline）
-- **症狀**：headless `food 應進公庫` assert 失敗（滅團食物未進公庫）
-- **狀態**：pre-existing baseline（與覓食無關）
-- **優先**：M — 滅團守恆相關，另案
+### Bug8. _test_on_team_extinct_to_storage 失敗 = stale test（非碼 bug）
+- **症狀**：headless `food 應進公庫` assert 失敗
+- **驗證（2026-06-15）**：**非碼 bug,是測試過時**。W6 重構後 `_on_team_extinct` 只標記 `teams_pending_erase`,實際路由延到 `cleanup_extinct_teams → _route_extinct_assets`(邏輯正確,進公庫)。測試只呼 `_on_team_extinct` 沒呼 `cleanup_extinct_teams` → 路由沒跑 → assert 失敗。
+- **修**：測試加呼 `fai.cleanup_extinct_teams(state)` 再斷言。assert 值(50 food/30 coin)正確,「勿動」誤解除——值對,只缺呼全路徑。無守恆風險。
 
 ### U10. 遭遇戰戰後「卡住」（敵死後）✅ 已修（2026-06-14，待 run-verify）
 - **修**：`encounter_view._refresh_ui` 在 `_post_combat`/`not encounter_active` 時不再因無 player_unit early-return → 改顯戰果摘要 + `_post_combat_hint`（「按任意鍵離開」/ can_subjugate 加「[J]收編敗者」）。組字抽 static helper，ui_logic_test 覆蓋。
@@ -256,7 +260,8 @@
 - **根因**：caution=0.80 權重壓制 score 恆 < 0；同一決策每次重算同值
 - **影響**：強者不勒索，AI 過保守
 - **發現**：2026-06-09 integration test
-- **建議**：調 caution 權重或 power_ratio 門檻；對未變動局勢快取決策
+- **勘誤（2026-06-15）**：公式已改,描述失效。現 `d_score = (power_r−1)×0.4 + caution×0.3 − pride×0.3`(`diplomatic_ai_system:129`)——caution 現為**加**分(原記為壓制)。是否仍偏保守 **需重新量測**,勿照舊描述盲調。
+- **建議**：量測現 score 分布 → 若仍少勒索再調 power_r 門檻 + 對未變局勢快取
 
 ### Bug6. multi runner 不注入 command_schedule
 - **症狀**：`game_sim_multi.gd` 只跑 advance_tick，未呼叫 `GameSetup.run_command_schedule_tick`
@@ -287,10 +292,11 @@
 - **症狀**：按成員按鈕可能不顯示 popup（已加 print debug，尚未確認）
 - **位置**：`scripts/ui/popup_layer.gd`
 
-### D1. SoloAI 保護條件脆弱
+### D1. SoloAI 保護條件脆弱 ⚠ 部分緩解（2026-06-15 驗證）
 - **症狀**：`team.leader_id == state.player_id` 在子隊分裂後可能失效
 - **根因**：subteam 分裂可能重新指定 leader_id
 - **位置**：`scripts/simulation/faction_ai_system.gd:_evaluate_solo`
+- **驗證（2026-06-15）**：部分點已加 `named_members` fallback(`:1049` `leader_id==player_id or player_id in named_members`)+ player_id≠−1 守衛(`:141`)。但 `_evaluate_solo`(`:907`) 仍只查 leader_id → 邊緣仍脆。低優先。
 
 ### D2. player person 死亡無保護 ✅ 已修（2026-06-09）
 - **修正**：H spec 玩家 leader 死亡 → forced event 選繼承人；無 named member → game_over
@@ -329,11 +335,9 @@
 - **修正**：`faction_ai_system._update_anon_wage` 依 tags 計算（MILITARY 拉高、PRODUCE/EXILE 拉低）
 - **位置**：`scripts/simulation/faction_ai_system.gd`
 
-### A2. encounter_view.gd `_max_timer` 欄位缺失（pre-existing）
+### A2. encounter_view.gd `_max_timer` 欄位缺失 ✅ 已重構解（2026-06-15 驗證）
 - **症狀**：`unit.get("_max_timer", 10)` 永遠回傳預設值 10，計時器顯示不正確
-- **根因**：`_create_named_unit` 未設置 `_max_timer` 欄位
-- **位置**：`scripts/ui/encounter_view.gd:263`
-- **建議**：`_create_named_unit` 加 `_max_timer` 欄位，或 encounter_view 改讀正確欄位
+- **驗證（2026-06-15）**：encounter_view 已不再讀 `_max_timer` default;timer reset 移到 `encounter_system._max_timer()`(view `:402/:428` 註解)。原 stale 讀取消失 → 解。
 
 ### S8. `p.salary` 預設未設，主遊戲 NPC 全 0 薪資 ✅ 已修（2026-06-07）
 - **症狀**：`PersonData.salary` 預設 0.0，主遊戲 / world_generator / game_setup 從未設定；發薪時 ratio=0 → loyalty -= 0.03 每次
@@ -385,9 +389,9 @@
 
 ## Movement
 
-- **mounts/wagons 沒加速度**：`_compute_team_speed` 只算個人 effective_speed + named 加權（NAMED_WEIGHT=3）+ 傷兵；mounts 只加 carry capacity（`get_carry_capacity`），wagons 只加 carry + 地形 penalty（`WAGON_TERRAIN_MULT`）。騎兵跟步兵當前同速。
-  待 spec：speed_class（步兵/騎兵/輜重）+ mount 速度 bonus + wagon 拖速 penalty。
-  - **發現**：2026-06-10 combat-engagement（NAMED_WEIGHT=3 實作時）
+- **mounts/wagons 速度**：⚠ 部分修（2026-06-15 驗證）。`_compute_team_speed`(`movement:138`) 現已 `× _compute_mount_bonus(team) × _compute_wagon_penalty(team)` → mount 加速、wagon 拖速**已有**。
+  - **遺留**：speed_class（步兵/騎兵/輜重分類）仍缺——同隊內騎/步未分速,只算隊級平均 bonus。完整 unit-level speed_class 待 spec。
+  - **發現**：2026-06-10 combat-engagement；2026-06-15 驗證 mount/wagon bonus 已實作
 
 ## 待 spec（按優先排序）
 
