@@ -960,7 +960,7 @@ func _accept_diplomacy(state: WorldState, from_id: int, proposal: String) -> Dic
 				state.create_faction(from_id)   # NPC 為領袖
 			_diplomatic._form_alliance(state, from_team, pt)
 			return { "ok": true, "msg": "接受同盟，加入勢力%d" % from_team.faction_id }
-		"tribute":
+		"tribute", "demand_tribute":   # _send_diplomacy_message 寫 "demand_tribute"（原只認 "tribute" → 未知提案類型 bug）
 			return _pay_extortion(state, from_id)
 	return { "ok": false, "msg": "未知提案類型：%s" % proposal }
 

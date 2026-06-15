@@ -265,7 +265,7 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 	var responses: Array = []
 	match action:
 		"diplomacy":
-			msg = "Team%d 提議 %s" % [from_id, proposal]
+			msg = "Team%d 要求你納貢" % from_id if proposal == "demand_tribute" else "Team%d 提議 %s" % [from_id, proposal]
 			var from_team: TeamData = state.teams.get(from_id) if state.teams.has(from_id) else null
 			var player_pid: int = state.player_id
 			var pp: PersonData = state.persons.get(player_pid) if state.persons.has(player_pid) else null
