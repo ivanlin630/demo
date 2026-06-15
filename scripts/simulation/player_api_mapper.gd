@@ -599,7 +599,7 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 		})
 	var actions: Array = ["order_faction_member", "clear_member_order"]
 	if is_leader:
-		actions.append_array(["set_faction_goal", "set_tribute_rate",
+		actions.append_array(["set_faction_goal", "set_tribute_rate", "extract_treasury",
 			"leave_faction", "betray_faction", "disband_faction"])
 	else:
 		actions.append("leave_faction")
@@ -613,6 +613,28 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 		"member_orders": member_orders,
 		"actions": actions,
 	}
+
+# ── Storage panel (公庫) ─────────────────────────────────────────────────────
+# 公庫存取面板 DTO：feasible=站在自家 outpost；stored=公庫現貨、team_res=我方可存。
+static func map_storage_panel(state: WorldState) -> Dictionary:
+	var pid: int = state.player_id
+	var p: PersonData = state.persons.get(pid) if pid != -1 else null
+	var pt: TeamData = state.teams.get(p.team_id) if p != null else null
+	if pt == null:
+		return { "feasible": false, "reason": "無隊伍", "stored": [], "team_res": [] }
+	var tile = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null or tile.outpost_owner != pt.team_id:
+		return { "feasible": false, "reason": "需站在自家 outpost", "stored": [], "team_res": [] }
+	var os := OutpostSystem.new()
+	var stored: Array = []
+	for res in tile.public_storage:
+		if float(tile.public_storage[res]) > 0:
+			stored.append({ "res": res, "qty": int(tile.public_storage[res]), "cap": int(os.storage_cap(tile, res)) })
+	var team_res: Array = []
+	for res in pt.resources:
+		if float(pt.resources[res]) > 0:
+			team_res.append({ "res": res, "qty": int(pt.resources[res]) })
+	return { "feasible": true, "reason": "", "stored": stored, "team_res": team_res }
 
 # ── Outpost panel ──────────────────────────────────────────────────────────────
 
@@ -660,6 +682,11 @@ static func map_outpost_panel(state: WorldState) -> Dictionary:
 			if tile.manufacturing_level < mfg_max:
 				actions.append("upgrade_manufacturing")
 			actions.append("demolish_outpost")
+			# 棄置（放棄所有權保留地物，別於 demolish 拆毀地物）
+			actions.append("abandon_outpost")
+			# 有空 slot → 可蓋新設施
+			if OutpostSystem.slots_used(tile) < OutpostSystem.slot_cap(tile):
+				actions.append("build_facility")
 	return {
 		"tile_pos": pt.tile_pos,
 		"outpost_type": tile.outpost_type,

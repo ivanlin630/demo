@@ -140,6 +140,10 @@ const OUTPOST_STORAGE_CAP: Dictionary = {
 # mount 公庫專屬容量（index = level-1）
 const MOUNT_STORAGE_CAP: Array = [10.0, 30.0, 80.0]
 
+# 公開 wrapper：UI/查詢層讀公庫容量（不直呼私有 _get_storage_cap）
+func storage_cap(tile: HexTileData, res: String) -> float:
+	return _get_storage_cap(tile, res)
+
 func _get_storage_cap(tile: HexTileData, res: String) -> float:
 	if res == "mounts" or res == "horses":
 		return MOUNT_STORAGE_CAP[clampi(tile.outpost_level - 1, 0, 2)]
