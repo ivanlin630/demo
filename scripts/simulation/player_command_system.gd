@@ -890,7 +890,7 @@ func _action_invite_settle(state: WorldState, target_id: int, pt: TeamData, pt_i
 	var pos_arr: Array = state.player_state.get("settle_pos", [-1, -1])
 	var target_pos: Vector2i = Vector2i(int(pos_arr[0]), int(pos_arr[1]))
 	if target_pos == Vector2i(-1, -1):
-		return { "ok": false, "msg": "未指定 outpost 位置" }
+		target_pos = pt.tile_pos   # 互動選單路徑未設 settle_pos → 預設玩家腳下 outpost（emit gate 已保證站在自家 outpost）
 	var tile: HexTileData = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
 	if tile == null or tile.outpost_level == 0 or tile.outpost_owner != pt_id:
 		return { "ok": false, "msg": "目標非自家 outpost" }
