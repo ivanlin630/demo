@@ -266,8 +266,10 @@
 - **根因**：caution=0.80 權重壓制 score 恆 < 0；同一決策每次重算同值
 - **影響**：強者不勒索，AI 過保守
 - **發現**：2026-06-09 integration test
-- **勘誤（2026-06-15）**：公式已改,描述失效。現 `d_score = (power_r−1)×0.4 + caution×0.3 − pride×0.3`(`diplomatic_ai_system:129`)——caution 現為**加**分(原記為壓制)。是否仍偏保守 **需重新量測**,勿照舊描述盲調。
-- **建議**：量測現 score 分布 → 若仍少勒索再調 power_r 門檻 + 對未變局勢快取
+- **結案（2026-06-15 量測）：非缺陷,原症狀誤判。** 經 warzone 整場量測:
+  - **NPC demand_tribute 發起 = 0 次**。收方公式(`:129` `d_score=(power_r−1)×0.4 + caution×0.3 − pride×0.3`)其實**正確**——拒絕弱者勒索合理。舊「score 恆 −0.15 過保守」= 把正確的收方行為當 bug(−0.15 正是 power_r=0.4 弱者來勒索的應拒值)。
+  - 真實狀態:**NPC 勒索機制休眠**。唯一發起點 `try_proactive_diplomacy:68` 被三重掐死:早 return(score>0.6 結盟/>0.4 貿易先返)、U20 同格 gate、**方向反**(`power_gap>0.5`=other 較大才發 → 弱勒強 → 必拒)。
+  - **不破壞任何東西**(世界穩),屬休眠機制非 defect → **關閉**。要活化 NPC 勒索 = 設計題,見路線圖。
 
 ### Bug6. multi runner 不注入 command_schedule ✅ 已修（2026-06-15）
 - **症狀**：`game_sim_multi.gd` 只跑 advance_tick，未呼叫 `GameSetup.run_command_schedule_tick`
