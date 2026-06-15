@@ -340,7 +340,26 @@ func _initialize() -> void:
 	_test_get_actions_recruit_anon_invite()
 	_test_storage_conservation()
 	_test_extract_treasury_conservation()
+	# ── 階段2 招人成幫 ──
+	_test_team_capabilities_dto()
 	quit()
+
+func _test_team_capabilities_dto() -> void:
+	print("--- 隊能力 DTO ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"求生": 0.5, "戰鬥": 0.4}
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 40.0}
+	state.teams[0] = pt
+	var d: Dictionary = PlayerApiMapper.map_controlled_team(state)
+	var cap: Dictionary = d.get("capabilities", {})
+	assert(cap.has("hunt_chance") and cap.has("hunt_yield"), "獵率/產出")
+	assert(cap.has("combat_power"), "戰力")
+	assert(abs(cap.get("food_burn_per_day", 0.0) - 4 * 2.4) < 0.01, "日耗 pop×2.4")
+	assert(cap.get("hunt_survival", 0.0) > 0.4, "求生平均反映 leader 求生")
+	print("隊能力 DTO OK")
 
 func _test_wild_game_seeded() -> void:
 	print("--- world_gen wild_game 灑點 ---")

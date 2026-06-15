@@ -16,8 +16,20 @@ func _initialize() -> void:
 	await _test_outpost_build_abandon()
 	await _test_faction_extract_treasury()
 	await _test_u15_overlay_input_guard()
+	await _test_capabilities_shown()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
+
+func _test_capabilities_shown() -> void:
+	print("\n── 隊能力讀數顯示 ──")
+	var node = await _make_ui()
+	node._refresh()
+	# status label 應含能力讀數關鍵字
+	var s: String = node._state_label.text
+	_check("status 含獵率", s.contains("獵") or s.contains("狩獵"))
+	_check("status 含戰力", s.contains("戰力"))
+	_check("status 含日耗", s.contains("日耗") or s.contains("耗"))
+	await _free_ui(node)
 
 # 公庫面板：自家 outpost + 雙向資源 → 顯存入/取出 + food
 func _test_storage_panel_ui() -> void:

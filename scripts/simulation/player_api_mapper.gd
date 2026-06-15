@@ -128,7 +128,23 @@ static func map_controlled_team(state: WorldState) -> Dictionary:
 		"faction_id":       t.faction_id,
 		"food_days":        _food_days(t),
 		"starving":         _food_days(t) < 3.0,   # WARNING_DAYS=3
-		"task_summary": t.current_task
+		"task_summary": t.current_task,
+		"capabilities": _team_capabilities(state, t),
+	}
+
+# 隊級能力讀數（按真技能聚合算，非假數字）：狩獵=named avg求生、戰力=武裝+named戰鬥、日耗=pop×2.4
+static func _team_capabilities(state: WorldState, t: TeamData) -> Dictionary:
+	var hp: Dictionary = HuntSystem.new().hunt_preview(state, t)
+	var combat: float = float(_armed_count(t))
+	for mid in ([t.leader_id] as Array) + t.named_members:
+		var m: PersonData = state.persons.get(mid)
+		if m != null: combat += float(m.skills.get("戰鬥", 0.0))
+	return {
+		"hunt_survival":     hp["survival"],
+		"hunt_chance":       hp["chance"],
+		"hunt_yield":        hp["yield"],
+		"combat_power":      combat,             # proxy：武裝數 + named 戰鬥技能和（與遭遇戰上場概念對齊）
+		"food_burn_per_day": float(t.population) * FOOD_PER_PERSON_PER_DAY,
 	}
 
 # 武裝數 = named 成員（含 leader）+ anon 持武（anon 人口 × armed_anon_ratio）

@@ -27,3 +27,12 @@ func _avg_survival(state: WorldState, team: TeamData) -> float:
 		var p: PersonData = state.persons.get(pid)
 		if p: total += float(p.skills.get("求生", 0.0)); count += 1
 	return total / maxf(float(count), 1.0)
+
+# dry-run：不消耗、不擲骰，回隊狩獵能力（按 hunt_small_game 主動公式 chance/yield）。能力讀數 legibility 用。
+func hunt_preview(state: WorldState, team: TeamData) -> Dictionary:
+	var survival: float = _avg_survival(state, team)
+	return {
+		"survival": survival,
+		"chance":   clampf(ACTIVE_BASE_CHANCE + survival * 0.4, 0.0, 0.95),
+		"yield":    FOOD_PER_GAME * (1.0 + survival * 0.3),
+	}
