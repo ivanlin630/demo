@@ -56,6 +56,12 @@ func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
 	actions.append("gather_intel")
 	return actions
 
+# UI 覆蓋審計用：回傳全 registry action id（_test_action_ui_coverage 驗每個都有 UI 路徑）
+func get_registered_actions() -> Array:
+	if _action_registry.is_empty():
+		_setup_registry()
+	return _action_registry.keys()
+
 # recruit_anon 前提：目標人口 > 1（_recruit_anon_internal 拒 pop<=1）
 func _target_has_anon(tgt: TeamData) -> bool:
 	return tgt.population > 1

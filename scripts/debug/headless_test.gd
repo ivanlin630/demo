@@ -223,6 +223,7 @@ func _initialize() -> void:
 	_test_trade_session_dto()
 	_test_trade_conservation()
 	_test_massacre_conservation()
+	_test_action_ui_coverage()
 	_test_diplomacy_reject_cooldown()
 	_test_u20_proactive_same_tile_gate()
 	_test_equip_order_no_oscillation()
@@ -9669,6 +9670,42 @@ func _test_trade_session_dto() -> void:
 		assert(int(it["qty"]) >= 1, "清單不得有 qty<1 項（×0 幽靈），實際 %s" % str(it))
 		assert(it["grade"] != "weapon_melee_low", "碎量 0.5 weapon 不應列出")
 	print("trade_session DTO OK")
+
+# Goal: 遍歷所有功能,確保每個 registry action 都有 UI 可達路徑。
+# 新增 action 未列入 → fail,逼迫做 UI 覆蓋決策(防功能無 UI 落差)。
+func _test_action_ui_coverage() -> void:
+	print("--- 動作 UI 覆蓋審計 ---")
+	var coverage: Dictionary = {
+		"attack": "interact-team", "trade": "interact-team", "propose_alliance": "interact-team",
+		"demand_tribute": "interact-team", "extort": "interact-team", "recruit": "interact-team",
+		"recruit_anon": "interact-team", "invite_settle": "interact-team", "gather_intel": "interact-team",
+		"offer_surrender": "interact-team(encounter)",
+		"hunt": "interact-self", "hunt_beast": "interact-self", "establish_faction": "interact-self",
+		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
+		"confirm_gather_intel": "interact-self",
+		"build_outpost": "outpost-panel", "upgrade_outpost": "outpost-panel",
+		"upgrade_farming": "outpost-panel", "upgrade_manufacturing": "outpost-panel",
+		"demolish_outpost": "outpost-panel", "abandon_outpost": "outpost-panel", "build_facility": "outpost-panel",
+		"set_faction_goal": "faction-panel", "set_tribute_rate": "faction-panel",
+		"extract_treasury": "faction-panel", "leave_faction": "faction-panel",
+		"betray_faction": "faction-panel", "disband_faction": "faction-panel",
+		"order_faction_member": "faction-panel", "clear_member_order": "faction-panel",
+		"dispatch_subteam": "subteam-panel", "order_subteam": "subteam-panel", "recall_subteam": "subteam-panel",
+		"set_armed_anon_ratio": "member-panel",
+		"deposit_to_storage": "storage-mode", "withdraw_from_storage": "storage-mode",
+		"submit_trade_offer": "trade-mode", "cancel_trade": "trade-mode",
+		"choose_heir": "forced-mode", "respond_aid_request": "forced-mode",
+		"surrender_pre_encounter": "pre-encounter", "accept_encounter": "pre-encounter",
+		"surrender_in_encounter": "encounter-view",
+		"refresh_targets": "internal(dead)", "confirm_trade": "internal(legacy)",
+	}
+	var cs := PlayerCommandSystem.new()
+	var missing: Array = []
+	for act in cs.get_registered_actions():
+		if not coverage.has(act):
+			missing.append(act)
+	assert(missing.is_empty(), "registry action 無 UI 覆蓋對應（新增未列入?）：%s" % str(missing))
+	print("動作 UI 覆蓋審計 OK（%d actions 全有路徑）" % cs.get_registered_actions().size())
 
 # 守恆：成交前後雙方 coin_eq（Σ qty×BASE_PRICE）總和不變，資源雙向轉移
 func _test_massacre_conservation() -> void:
