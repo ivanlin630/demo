@@ -18,8 +18,40 @@ func _initialize() -> void:
 	await _test_u15_overlay_input_guard()
 	await _test_capabilities_shown()
 	await _test_join_request_ui()
+	await _test_interact_self_team_split()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
+
+# P4-2:self/原地動作(hunt)應在 self-actions(目標選擇階段直接可選),不混進 team-target 行動清單。
+func _test_interact_self_team_split() -> void:
+	print("\n── P4-2 互動 self/team 動作分離 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var ppos = st.teams[ptid].tile_pos
+	var tile = st.world.tiles.get(ppos.x * 1000 + ppos.y)
+	if tile == null:
+		tile = HexTileData.new(); tile.tile_pos = ppos; st.world.tiles[ppos.x*1000+ppos.y] = tile
+	tile.resources["wild_game"] = 5   # → hunt 可用
+	var other := TeamData.new(); other.team_id = 7001; other.tile_pos = ppos
+	other.population = 5; other.faction_id = -1
+	st.teams[7001] = other
+	st.team_discovered[ptid] = [7001]
+	node._interact_mode = true; node._interact_target = -1
+	node._bridge.refresh_interaction_targets()
+	node._refresh()
+	var split: Dictionary = node._interact_action_split()
+	var self_ids: Array = []
+	for a in split["self"]: self_ids.append(a.get("action_id", ""))
+	_check("hunt 在 self-actions（不需先選隊）", "hunt" in self_ids)
+	_check("目標選擇階段顯 hunt label", node._build_interact_str().contains("狩獵"))
+	# 聚焦該隊 → team 行動清單不含 hunt
+	node._interact_target = 7001
+	node._refresh()
+	var team_ids: Array = []
+	for a in node._interact_action_split()["team"]: team_ids.append(a.get("action_id", ""))
+	_check("team 行動清單不含 hunt", not ("hunt" in team_ids))
+	await _free_ui(node)
 
 func _test_join_request_ui() -> void:
 	print("\n── join_request 收留 UI ──")

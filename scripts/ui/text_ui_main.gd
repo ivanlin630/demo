@@ -934,9 +934,9 @@ func _handle_interact_mode(keycode: int) -> void:
 		return
 	var num: int = (keycode - KEY_1) + _interact_page * 9   # 0-based + 頁偏移
 
-	# ── 已選目標：顯示行動清單 ──
+	# ── 已選目標：顯示行動清單（只 team-target 動作）──
 	if _interact_target >= 0:
-		var actions: Array = _cached_snapshot.get("available_actions", [])
+		var actions: Array = _interact_action_split()["team"]
 		if num < actions.size():
 			var act: Dictionary = actions[num]
 			var action_id: String = act.get("action_id", "")
@@ -990,22 +990,60 @@ func _handle_interact_mode(keycode: int) -> void:
 		_refresh()
 		return
 
+	# P4-2:self/原地動作（hunt 等,直接執行不需選隊）
+	var self_acts: Array = _interact_action_split()["self"]
+	var self_idx: int = num - fe_count
+	if self_idx >= 0 and self_idx < self_acts.size():
+		var sa: Dictionary = self_acts[self_idx]
+		if not sa.get("enabled", true):
+			_set_feedback(false, sa.get("disabled_reason", "不可執行"))
+			_refresh(); return
+		var sr: Dictionary = _bridge.command_player(
+			sa.get("command_name", "execute_action"), sa.get("command_args", {}))
+		_log_event("[原地] %s" % sr.get("message", ""))
+		_set_feedback(sr.get("ok", true), sr.get("message", ""))
+		_refresh_snapshot()
+		if _cached_snapshot.get("player_summary", {}).get("encounter_active", false):
+			_interact_mode = false
+			_enter_encounter()
+		_refresh()
+		return
+
 	# pending_targets 選擇
-	var pending_idx: int = num - fe_count
+	var pending_idx: int = num - fe_count - self_acts.size()
 	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
 	if pending_idx >= 0 and pending_idx < pending_tgts.size():
 		_interact_target = pending_tgts[pending_idx].get("target_id", -1)
 		_interact_page = 0   # 進行動清單從頁 0
 		_refresh()
 
+# P4-2:分離 self/原地動作(hunt/hunt_beast/establish_faction 等 allowed_kinds 非 team)
+# 與 team-target 動作。forced 另由 forced_interaction.responses 處理;move_to/cancel_move 有專鍵。
+func _interact_action_split() -> Dictionary:
+	var team_acts: Array = []
+	var self_acts: Array = []
+	for a in _cached_snapshot.get("available_actions", []):
+		var tr: Dictionary = a.get("target_requirements", {})
+		if tr.get("requires_forced_interaction", false):
+			continue
+		var aid: String = a.get("action_id", "")
+		if aid == "move_to" or aid == "cancel_move":
+			continue
+		var ak = tr.get("allowed_kinds", PackedStringArray())
+		if "team" in ak:
+			team_acts.append(a)
+		else:
+			self_acts.append(a)   # none/tile = 自身/原地動作
+	return { "team": team_acts, "self": self_acts }
+
 func _build_interact_str() -> String:
 	var lines: Array = []
 
-	# 已選目標：顯示行動清單
+	# 已選目標：顯示行動清單（只 team-target 動作,self-actions 在目標選擇階段）
 	if _interact_target >= 0:
 		var tgt_name: String = "Team%d" % _interact_target
 		lines.append("── %s 行動 ──" % tgt_name)
-		var actions: Array = _cached_snapshot.get("available_actions", [])
+		var actions: Array = _interact_action_split()["team"]
 		var a_start: int = _interact_page * 9
 		var row: String = ""
 		var a_shown: int = 0
@@ -1024,13 +1062,16 @@ func _build_interact_str() -> String:
 
 	# 目標選擇階段
 	lines.append("── 互動 ──")
-	# 合一清單（與 handler 全域索引一致：先 forced 回應，後 pending 目標）→ 分頁
+	# 合一清單（與 handler 全域索引一致：forced 回應 → self/原地動作 → pending 目標）→ 分頁
 	var fi: Dictionary = _cached_snapshot.get("forced_interaction", {})
 	var items: Array = []
 	if not fi.get("interaction_id", "").is_empty():
 		var msg: String = fi.get("message", "強制事件")
 		for r in fi.get("responses", []):
 			items.append("⚠ %s：%s" % [msg, r.get("label", "?")])
+	for sa in _interact_action_split()["self"]:   # P4-2:self/原地動作(hunt 等)直接可選,不需先選隊
+		var en: bool = sa.get("enabled", true)
+		items.append("%s%s" % [sa.get("label", sa.get("action_id", "")), "" if en else "（不可）"])
 	var pending_tgts: Array = _cached_snapshot.get("pending_targets", [])
 	var vts: Array = _cached_snapshot.get("visible_teams", [])
 	for target_info in pending_tgts:
