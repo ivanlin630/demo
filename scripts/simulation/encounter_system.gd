@@ -1389,7 +1389,9 @@ func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamDa
 	tile.outpost_owner = attacker.team_id
 	for k in resident.resources:
 		attacker.resources[k] = attacker.resources.get(k, 0) + resident.resources[k]
-	attacker.anon_treasury += resident.population * 5.0
+	# 守恆(Bug10)：接收 resident 公庫（原 erase 前未轉 → 銷毀）；移除原 `+= pop×5` 憑空鑄幣
+	attacker.anon_treasury += resident.anon_treasury
+	resident.anon_treasury = 0.0
 	var rid: int = resident.team_id
 	state.teams.erase(rid)
 	print("[Massacre] attacker=Team%d resident=Team%d 屠村，outpost空殼易主" % [attacker.team_id, rid])

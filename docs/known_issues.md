@@ -242,12 +242,13 @@
 - **狀態**：text_ui 已清（P1）；圖形 UI 未清。text-UI-only 階段不影響
 - **優先**：M — 若推圖形 UI 或全面套 UI 邊界 invariant 才需解耦（範圍大,涉 encounter tactical view）。另案
 
-### Bug10. attack schedule 觸發後戰鬥路徑漏 +60 coin_eq（2026-06-15 Bug6 修後暴露）
-- **症狀**：multi tyrant 啟用 command_schedule 後,coin_eq delta 0→**+60**。schedule fire 時序:tick240/1680 extract_treasury(已驗守恆乾淨)、tick3360 **attack** → 戰鬥。
-- **隔離**：`_extract_treasury` 守恆乾淨(`anon_treasury−=amt; coin+=amt`,兩者皆在 coin_eq)→ 排除。**+60 來自 attack→encounter→戰鬥**(死亡 person.coin 退團 / loot / subjugate coin 路由疑兇)。
-- **成因**：schedule 從不 fire(Bug6)時此漏洞被遮蔽;Bug6 修好讓玩家發起 attack 真觸發 → 才現形。屬 W6 死亡資產守恆的遺漏分支。
-- **狀態**：新發現,未修。需隔離戰鬥 coin 路由(逐段 audit attack→death→loot/subjugate)。**勿與 extract 混淆**。
-- **優先**：M（守恆破,但需玩家主動 attack 才觸發,NPC vs NPC 走 npc_combat 另路徑待查是否同漏）
+### Bug10. 屠村 _massacre_residents 破壞 coin 守恆 ✅ 已修（2026-06-15）
+- **症狀**：multi tyrant 啟用 command_schedule(Bug6 修)後,coin_eq delta 0→+60。
+- **根因**：`encounter_system._massacre_residents` 兩個守恆破:(1) `attacker.anon_treasury += resident.population × 5.0` = **憑空鑄幣**(無來源);(2) resident 直接 `state.teams.erase` 但 `resident.anon_treasury` 未轉走 → **銷毀**。淨 = 鑄 − 丟 = +60。
+- **隔離**：`_extract_treasury` 守恆乾淨(排除);`_force_occupy` 無 coin(排除)。
+- **修**：移除 `+= pop×5` 鑄幣;改 `attacker.anon_treasury += resident.anon_treasury; resident.anon_treasury = 0`(接收 resident 公庫,守恆)。
+- **驗證**：headless `Bug10 massacre conservation OK`(coin 190→190)+ 修正既有 `_test_occupy_massacre`(改驗精確接收非鑄幣)+ tyrant 端到端 coin_eq delta=−0.00。
+- **教訓**：Bug6(schedule 不 fire)長期遮蔽此漏;測試保真度修好才暴露真守恆 bug。
 
 ### Bug9. EncounterSystem player_id==-1 → anon 被當玩家 ✅ 已修（2026-06-15）
 - **症狀**：`advance_encounter_tick` / `_decide_action` 以 `person_id == state.player_id` 判玩家；若 `player_id==-1`（無玩家），anon（person_id=-1）全被當玩家 → 回 `player_turn` 停手 / idle

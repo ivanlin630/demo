@@ -222,6 +222,7 @@ func _initialize() -> void:
 	_test_trade_partner_requires_resident()
 	_test_trade_session_dto()
 	_test_trade_conservation()
+	_test_massacre_conservation()
 	_test_diplomacy_reject_cooldown()
 	_test_u20_proactive_same_tile_gate()
 	_test_equip_order_no_oscillation()
@@ -5858,11 +5859,13 @@ func _test_occupy_massacre() -> void:
 	var state: WorldState = d["state"]
 	var tile: HexTileData = d["tile"]
 	var atk: TeamData = state.teams[0]
+	state.teams[2].anon_treasury = 25.0   # 給 resident 公庫 → 驗屠村守恆接收（非舊 +pop×5 鑄幣）
 	var t0: float = atk.anon_treasury
 	EncounterSystem.new()._process_occupied_residents(state, 0, 1)
 	assert(not state.teams.has(2), "屠村後居民團應消失")
 	assert(tile.outpost_owner == 0, "屠村後 outpost 易主，實際=%d" % tile.outpost_owner)
-	assert(atk.anon_treasury > t0, "屠村應增公庫")
+	assert(absf(atk.anon_treasury - (t0 + 25.0)) < 0.001,
+		"屠村守恆:應精確接收 resident 公庫 25（非 +pop×5 鑄幣），t0=%.1f after=%.1f" % [t0, atk.anon_treasury])
 	assert(float(atk.resources.get("food", 0)) >= 100.0, "屠村應收居民資源")
 	print("Prosperity Task6b OK")
 
@@ -9542,6 +9545,28 @@ func _test_trade_session_dto() -> void:
 	print("trade_session DTO OK")
 
 # 守恆：成交前後雙方 coin_eq（Σ qty×BASE_PRICE）總和不變，資源雙向轉移
+func _test_massacre_conservation() -> void:
+	print("--- Bug10: 屠村守恆 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2, 2)
+	tile.outpost_type = "civilian"; tile.outpost_level = 1; tile.outpost_owner = 1
+	state.world.tiles[2 * 1000 + 2] = tile
+	var atk := TeamData.new(); atk.team_id = 0; atk.tile_pos = Vector2i(2, 2)
+	atk.resources = { "coin": 100 }; atk.anon_treasury = 20.0
+	state.teams[0] = atk
+	var res := TeamData.new(); res.team_id = 1; res.tile_pos = Vector2i(2, 2); res.population = 12
+	res.resources = { "coin": 30, "food": 50.0 }; res.anon_treasury = 40.0
+	state.teams[1] = res
+	var coin_before: float = atk.anon_treasury + float(atk.resources.get("coin", 0)) \
+		+ res.anon_treasury + float(res.resources.get("coin", 0))
+	var es := EncounterSystem.new()
+	es._massacre_residents(state, atk, res, tile)
+	var coin_after: float = atk.anon_treasury + float(atk.resources.get("coin", 0))   # res 已 erase
+	assert(absf(coin_after - coin_before) < 0.001,
+		"屠村 coin 應守恆(原 +pop×5 鑄幣 + 丟 res 公庫)，before=%.1f after=%.1f" % [coin_before, coin_after])
+	assert(not state.teams.has(1), "resident 應 erase")
+	print("Bug10 massacre conservation OK (coin=%.1f)" % coin_after)
+
 func _test_trade_conservation() -> void:
 	print("--- trade conservation ---")
 	var state := WorldState.new(); state.world = WorldData.new()
