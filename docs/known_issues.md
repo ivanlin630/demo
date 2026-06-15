@@ -204,7 +204,7 @@
 - **症狀**：玩家發起攻擊時自家 anon 顯紅(像敵)、敵方顯綠(像友) — 直覺相反
 - **根因**：`encounter_view._draw` 用 `is_enemy = team_id==attacker_id`；玩家當攻擊方時 attacker_id=自家 → 自家 anon 判敵(紅)、敵方(defender)落 else(綠)
 - **修**：改按「自家隊 vs 敵隊」上色（玩家=藍/自家=綠/敵=紅），不用 attacker_id
-- **待 run-verify**
+- **自動測（2026-06-15）**：抽 `encounter_view._unit_color` static helper + ui_logic `_test_unit_color` 鎖。實際渲染色待玩測肉眼。
 
 ### U18. 玩家無法武裝 anon（UI/指令皆缺）
 - **症狀**：找不到 UI 武裝匿名兵
@@ -217,6 +217,7 @@
 - **根因**：`text_ui_main._input` 無 overlay 守衛。`encounter_view` overlay 顯示時主畫面 `_input` 仍處理同鍵；`KEY_Q`→`get_tree().quit()` 僅由 `is_encounter_active()` 把關。U10 戰後畫面 `encounter_active=false` 但 overlay 仍可見 → 玩家按遭遇戰移動鍵 **Q** 想離開 → 觸發 `quit()` → 閃退。WASD 亦漏到 `_move_cursor` 漂移世界游標。
 - **修**：`_input` 開頭 `if _encounter_view != null and _encounter_view.visible: return`（用 overlay 可見性，涵蓋戰後 active=false 視窗）。
 - **連動**：U10 修引入「按任意鍵離開」提示才暴露此既有 Q=quit 衝突。
+- **自動測（2026-06-15）**：ui_flow `_test_u15_overlay_input_guard`（overlay 可見→KEY_W 被吞、隱藏→移游標）鎖回歸。
 - **後續風險**：`KEY_Q`→`get_tree().quit()` 在一般地圖遊玩仍是「按 Q 直接退遊戲」的危險綁定（Q 也是直覺移動鍵），建議改安全組合或移除（另議）。
 
 ### U16. 世界地圖迷霧/視野與玩家位置對不上 ⚠ 已根因，pre-existing（未修）
@@ -432,6 +433,7 @@
 - **根因**：`diplomatic_ai_system.try_proactive_diplomacy` 遍歷 `team_discovered`（所有已發現隊，非同格）→ 隔空提案，違反 invariant「外交/徵收需同格」；且玩家路徑漏設 reject_cooldown → forced_event 超時清掉後無限重發
 - **修**：(1) proactive diplomacy 加同格 gate `other.tile_pos != self_team.tile_pos → continue`（守不變量，對齊 process_on_move 同格外交）；(2) 玩家路徑補設 `diplomacy_reject_cooldown`
 - **連動**：同格 gate 降 NPC 遠端外交頻率（本就違規），NPC 外交改靠 process_on_move 同格觸發。頻率變化待量測
+- **自動測（2026-06-15）**：headless `_test_u20_proactive_same_tile_gate`（遠端隊不得隔空提案 + 同格正控）+ `_test_diplomacy_reject_cooldown` 鎖。
 
 ### U21. 互動選單超過 9 項無法選 ✅ 已修（2026-06-14 run-verify）
 - **症狀**：互動選單（forced 回應 + pending 目標 / 行動清單）>9 項時，數字鍵只 1-9，第 10+ 項選不了

@@ -94,25 +94,34 @@
 
 ---
 
-## GUI run-verify 債（最高槓桿，路線圖近期 #2）
+## GUI run-verify 債（2026-06-15 自動回歸補完）
 
-以下「sim/headless 已修、GUI 視覺未人工確認」項。**策略：先盤點哪些能進 ui_flow harness 自動驗，剩真視覺一次玩測批清。**
+**狀態：所有 run-verify 項已自動回歸覆蓋（邏輯/flow 層）。** 剩純真視覺（顏色/版面/滾動渲染）集中一次玩測批清。
 
-| item | 修了什麼 | 可 harness 自動驗? |
+| item | 修了什麼 | 自動測 |
 |---|---|---|
-| U10 戰後凍結 | _refresh_ui 不 early-return + 戰果摘要 | 部分（encounter_view 邏輯）|
-| U10b 全隊死→game-over | 結算偵測全滅 | 可 |
-| U11/U11b 命中回饋戰報 | encounter_log channel + label | flow 可驗填值，視覺待看 |
-| U12/U12b 交易誤判 | （已被 trade offer-builder 取代）→ **應已消解，玩測確認舊 path 不再走** | trade ui_flow 已綠 |
-| U13/U13b 卸裝 + NPC 成員裝備 | [U] unequip + member equip（B4）| B4 ui_flow 已綠 |
-| U14/U14b 進場數 + 自隊武裝顯示 | 公式 assert + status armed 數（B3）| 已綠 |
-| U15 戰後按鍵閃退 | _input overlay 守衛 | 可（注入 overlay 可見 → 按鍵不 quit）|
-| U17 旗色 | 按自/敵上色 | 部分（_draw 邏輯）|
-| U19 強制事件無選單 | _process 自動進 forced 模式 | 已綠（harness 有測）|
-| U20 遠端 tribute spam | 同格 gate + cooldown | headless 可 |
-| U21 選單>9 | _interact_page 分頁 | 已綠 |
+| U10 戰後凍結 | _refresh_ui 不 early-return + 戰果摘要 | ✅ ui_logic `_test_post_combat_hint` |
+| U10b 全隊死→game-over | 結算偵測全滅 | ✅ headless game_over 系列 |
+| U11/U11b 命中回饋戰報 | encounter_log channel + label | ✅ headless `encounter_log`（填值）|
+| U12/U12b 交易誤判 | 被 trade offer-builder 取代 | ✅ ui_flow trade（舊 path 不再走）|
+| U13/U13b 卸裝 + NPC 成員裝備 | [U] unequip + member equip | ✅ ui_flow `_test_member_equip_flow` |
+| U14/U14b 進場數 + 自隊武裝 | 公式 assert + status armed | ✅ ui_flow `_test_armed_count_shown` + headless |
+| U15 戰後按鍵閃退 | _input overlay 守衛 | ✅ ui_flow `_test_u15_overlay_input_guard`（2026-06-15）|
+| U17 旗色 | 抽 `_unit_color` 按自/敵上色 | ✅ ui_logic `_test_unit_color`（2026-06-15）|
+| U19 強制事件無選單 | _process 自動進 forced 模式 | ✅ ui_flow `_test_u19_forced_auto_enter` |
+| U20 遠端 tribute spam | 同格 gate + cooldown | ✅ headless `_test_u20_proactive_same_tile_gate` + reject_cooldown（2026-06-15）|
+| U21 選單>9 | _interact_page 分頁 | ✅ ui_flow `_test_u21_interact_paging` |
 
-→ 多數已有或可加 ui_flow 覆蓋。**真視覺殘項**（顏色/版面/滾動觀感）集中一次玩測批驗即可，不再逐項手動 treadmill。
+### 真視覺殘項玩測清單（一次跑遊戲批驗，無法 headless）
+
+邏輯已自動鎖，以下只剩「實際渲染對不對」需肉眼：
+1. **遭遇戰**：旗色實渲（玩家藍/自家綠/敵紅 U17）、戰報 label 滾動顯示（U11b）、戰後「按任意鍵離開/[J]收編」實顯（U10）、戰後按鍵不閃退（U15）。
+2. **新面板實顯**：公庫 [K]（存/取兩欄+數量輸入）、outpost 蓋設施選單/棄置二次確認、faction [G]徵用比例+高比例二次確認、trade offer-builder 天平版面。
+3. **互動選單**：recruit_anon/invite_settle 實際出現可選且成交（invite_settle L3 修後）。
+4. **chrome**：P2 四區（已 run-verify ✓，順帶複查）。
+5. **U16 地圖迷霧**：獨立互動修（見路線圖近期 #3），非此清單。
+
+→ **run-verify treadmill 已止**：邏輯回歸自動化，肉眼項收斂成上面一張清單，一次玩測清完。
 
 附帶風險（另議）：**`KEY_Q`→`get_tree().quit()` 在一般遊玩仍是危險綁定**（Q 也是直覺移動鍵）→ 建議改安全組合或移除確認。
 
