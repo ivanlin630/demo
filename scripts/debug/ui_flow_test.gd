@@ -91,35 +91,25 @@ func _test_recruit_named_reachable() -> void:
 	var disloyal := PersonData.new(); disloyal.id = 43211; disloyal.team_id = 4321
 	disloyal.loyalty = 0.2; disloyal.person_name = "叛徒"; disloyal.skills = {"戰鬥": 0.5}
 	st.persons[43211] = disloyal; npc.named_members.append(43211)
-	# 進互動模式聚焦該隊
+	# 進互動模式，直接聚焦該隊（對齊 main P4-2 互動模型：set _interact_target，不靠鍵碼索引）
+	st.team_discovered[ptid] = st.team_discovered.get(ptid, [])
+	if not st.team_discovered[ptid].has(4321): st.team_discovered[ptid].append(4321)
+	st.player_pending_targets.append(4321)
 	node._interact_mode = true
-	node._interact_target = -1
 	node._interact_page = 0
-	node._bridge.refresh_interaction_targets()
+	node._interact_target = 4321
 	node._refresh()
-	# 找到 NPC 在 pending_targets 中的索引並選取
-	var pending: Array = node._cached_snapshot.get("pending_targets", [])
-	var fi: Dictionary = node._cached_snapshot.get("forced_interaction", {})
-	var fe_count: int = fi.get("responses", []).size()
-	var npc_pidx: int = -1
-	for i in range(pending.size()):
-		if pending[i].get("target_id", -1) == 4321:
-			npc_pidx = i; break
-	_check("NPC 4321 在 pending_targets", npc_pidx >= 0)
-	if npc_pidx < 0:
-		await _free_ui(node); return
-	node._handle_interact_mode(KEY_1 + fe_count + npc_pidx)   # 選 NPC → 進行動清單
 	_check("已聚焦 NPC（_interact_target=4321）", node._interact_target == 4321)
-	# 找 recruit action 在 available_actions 中的索引
-	var acts: Array = node._cached_snapshot.get("available_actions", [])
+	# recruit 為 team-target 動作（P4-2 後在 _interact_action_split()["team"]，非 available_actions）
+	var team_acts: Array = node._interact_action_split()["team"]
 	var recruit_idx: int = -1
-	for i in range(acts.size()):
-		if acts[i].get("action_id", "") == "recruit":
+	for i in range(team_acts.size()):
+		if team_acts[i].get("action_id", "") == "recruit":
 			recruit_idx = i; break
-	_check("available_actions 含 recruit", recruit_idx >= 0)
-	if recruit_idx < 0:
+	_check("team 行動清單含 recruit", recruit_idx >= 0)
+	if recruit_idx < 0 or recruit_idx >= 9:
 		await _free_ui(node); return
-	node._handle_interact_mode(KEY_1 + recruit_idx)   # 選 recruit
+	node._handle_interact_mode(KEY_1 + recruit_idx)   # 選 recruit → 進招募子模式
 	# 斷言：進入招募子選單（顯記名候選 + 匿名選項）
 	var rs: String = node._event_label.text
 	print("  recruit 子選單文字: %s" % rs.replace("\n", " | "))

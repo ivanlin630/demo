@@ -19,6 +19,15 @@
 - **「等很多」**:玩測尚有未列出問題,待用戶補。
 - **狀態**:U16/P4-1/P4-2/P4-4 已修 + harness 驗;P4-3=對稱性 feature→roadmap;覆蓋測保證已有功能全可達。
 
+### P5 QA批（2026-06-16 QA session harness 系統遍歷，stage2 驗收抓）
+> ui_flow 31/31 全綠但漏抓——測試只驗「能呼叫/字串含關鍵字」，不驗端到端守恆與主場景路徑。
+- **B-1 收留撞 pop_cap：扣糧成功但 0 人併入 + msg 謊報**（高，守恆紅線）。`_accept_join_request`（player_command_system.gd:757/760/763）先用意圖值 `from_team.population` 算 cost/joined，再呼 `merge_teams`→`_merge_into`（capacity<=0 時 transfer=0 啥都不轉但仍 return）→ 食物已先扣（憑空蒸發）+ msg 謊報人數。修向：cost/joined 改 merge 後量測 delta；或 merge 前驗 capacity，0 容量直接拒。
+- **A-1 記名招募在主場景 TextUI 死路**（高，stage2 核心迴路斷）。`recruit` 回 payload menu(has_willing_named/anon_available)，但 `text_ui_main.gd` team-target handler（916-977）不消費此 menu，只 `_log_event` 後清 target。`recruit_named` 唯一路徑 `execute_action_with_target`（member-kind）text UI 從不呼 → 記名招募完全不可達。功能寫在停用的圖形 `main.gd`（show_recruit_panel:115-142）。`recruit_named` 不在 registry → `_test_action_ui_coverage` 抓不到。修向：把 recruit menu 消費搬進 text_ui_main。
+- **C-1 玩家無設自隊 task command**（高，對稱性，keystone）。registry 無 `set_task`/寫 `pt.current_task` 的 command；NPC 自動設 TASK_FORAGE/TASK_CAMP/TASK_TRAIN。連鎖鎖死 C-2/3/4。→ roadmap（需 spec，同 P4-3 對稱性 feature 模式）。
+- **C-2 紮營 establish_crude_camp**（中）/ **C-3 覓食 forage**（中）/ **C-4 anon 升 tier train/promote**（中）：NPC 會、玩家 registry 無對應；皆 task-shaped，C-1 的 task menu 一併解 → roadmap。
+- **C-5 安撫村莊 pacify**（低）/ **C-6 主動定居 resident**（低）：對稱缺口 → roadmap。
+- **狀態**：B-1/A-1 → 立修（feat/qa-p5-fixes）；C-1~C-6 → 對稱性 roadmap，待 spec。
+
 ### W5. Task latch 凍結世界 ✅ 大部分已修（2026-06-13）
 - **症狀**：TeamTrace 量測 90 天，92% team-time 卡在不釋放的 survival(return_home/乞食 p80) + panic(逃跑 p70)。生產性 task 僅 8%。世界非窮而是癱瘓（T1 囤 mat 1622 卻凍死、T2 糧 34 天坐死）。
 - **根因**：`_evaluate_survival` 一進 survival 就 early-return 不釋放；`_has_active_threat` dist_factor floor 0.1 + 小地圖逃不到 5 格 → 永威脅；乞食無施主空轉 latch；餓死團 pop floor 1 不清除成空殼。
