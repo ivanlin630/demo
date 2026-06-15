@@ -43,6 +43,14 @@ var _intel_mode: bool = false
 var _intel_target_id: int = -1
 var _intel_options: Array = []     # Array[Dictionary] 每項 {"label": String}
 
+# ── 招募子模式（recruit menu payload 消費；A-1）───────────────────────────────
+var _recruit_mode: bool = false
+var _recruit_target_id: int = -1
+var _recruit_members: Array = []        # willing_members DTO（記名候選）
+var _recruit_anon_available: bool = false
+var _recruit_anon_cost: int = 0
+var _recruit_named_cost: int = 0
+
 # ── Alert bar ────────────────────────────────────────────────────────────────
 var _pending_alerts: Array = []    # Array[String] 待顯示的警報文字
 var _alert_bar: Label              # 動態建立，置於 InputBar 上方
@@ -196,6 +204,9 @@ func _input(event: InputEvent) -> void:
 		return
 	if _intel_mode:
 		_handle_intel_mode(event.keycode)
+		return
+	if _recruit_mode:
+		_handle_recruit_mode(event.keycode)
 		return
 	if _inv_mode:
 		_handle_inv_mode(event.keycode)
@@ -513,6 +524,8 @@ func _refresh() -> void:
 		_event_label.text = _build_storage_str()
 	elif _intel_mode:
 		_event_label.text = _build_intel_str()
+	elif _recruit_mode:
+		_event_label.text = _build_recruit_str()
 	else:
 		var log_lines: Array = []
 		var show_count: int = mini(_events.size(), 6)
@@ -604,6 +617,7 @@ func _current_mode_name() -> String:
 	if _pre_encounter_mode: return "pre_encounter"
 	if _trade_mode:         return "trade"
 	if _intel_mode:         return "intel"
+	if _recruit_mode:       return "recruit"
 	if _inv_mode:           return "inv"
 	if _interact_mode:      return "interact"
 	if _member_mode:        return "member"
@@ -952,6 +966,24 @@ func _handle_interact_mode(keycode: int) -> void:
 				else:
 					_intel_mode = true
 					_interact_mode = false
+			elif action_id == "recruit":
+				# recruit 回 menu payload → 進招募子模式（記名候選 + 匿名選項）
+				var rr: Dictionary = _bridge.command_player(
+					act.get("command_name", "execute_action"), act.get("command_args", {}))
+				if not rr.get("ok", false):
+					_log_event("[招募] %s" % rr.get("message", rr.get("msg", "無法招募")))
+				else:
+					var rp: Dictionary = rr.get("payload", {})
+					_recruit_members        = rp.get("willing_members", [])
+					_recruit_anon_available = rp.get("anon_available", false)
+					_recruit_anon_cost      = int(rp.get("anon_cost", 0))
+					_recruit_named_cost     = int(rp.get("named_cost", 0))
+					if _recruit_members.is_empty() and not _recruit_anon_available:
+						_log_event("[招募] 無可招募對象")
+					else:
+						_recruit_target_id = _interact_target
+						_recruit_mode = true
+						_interact_mode = false
 			else:
 				var result: Dictionary = _bridge.command_player(
 					act.get("command_name", "execute_action"), act.get("command_args", {}))
@@ -1796,6 +1828,59 @@ func _build_intel_str() -> String:
 	lines.append("[1~5]選題  [Esc]取消")
 	return "\n".join(lines)
 
+# 招募子模式：列記名候選（[1..N]）+ 匿名選項（[0/A]）。reuse 既有 command 路徑,勿複製招募邏輯。
+func _handle_recruit_mode(keycode: int) -> void:
+	if keycode == KEY_ESCAPE:
+		_exit_recruit_mode()
+		return
+	# 匿名招募：[A] 或 [0]
+	if (keycode == KEY_A or keycode == KEY_0) and _recruit_anon_available:
+		var ra: Dictionary = _bridge.command_player("execute_action", {
+			"action_id": "recruit_anon",
+			"target": {"kind": "team", "team_id": _recruit_target_id,
+					   "member_id": -1, "tile_q": -1, "tile_r": -1}})
+		_log_event("[招募] %s" % ra.get("message", ra.get("msg", "")))
+		_set_feedback(ra.get("ok", true), ra.get("message", ra.get("msg", "")))
+		_exit_recruit_mode()
+		return
+	# 記名招募：[1..N] 選候選 → recruit_named（member-kind，經 execute_action_with_target）
+	if keycode >= KEY_1 and keycode <= KEY_9:
+		var idx: int = keycode - KEY_1
+		if idx < _recruit_members.size():
+			var pid_r: int = int(_recruit_members[idx].get("person_id", -1))
+			var rn: Dictionary = _bridge.command_player("execute_action", {
+				"action_id": "recruit_named",
+				"target": {"kind": "member", "team_id": _recruit_target_id,
+						   "member_id": pid_r, "tile_q": -1, "tile_r": -1}})
+			_log_event("[招募] %s" % rn.get("message", rn.get("msg", "")))
+			_set_feedback(rn.get("ok", true), rn.get("message", rn.get("msg", "")))
+			_exit_recruit_mode()
+	_refresh()
+
+func _exit_recruit_mode() -> void:
+	_recruit_mode = false
+	_recruit_target_id = -1
+	_recruit_members = []
+	_recruit_anon_available = false
+	_bridge.refresh_interaction_targets()   # 招募後重掃同格（pop/named 已變）
+	_refresh()
+
+func _build_recruit_str() -> String:
+	var lines: Array = ["── 招募 Team%d ──" % _recruit_target_id]
+	if _recruit_members.is_empty():
+		lines.append("（無願投靠的記名成員）")
+	for i in range(_recruit_members.size()):
+		var m: Dictionary = _recruit_members[i]
+		lines.append("[%d] %s 忠誠%.2f %s（記名 %d coin）" % [
+			i + 1, m.get("name", "?"), float(m.get("loyalty", 0.0)),
+			m.get("top_skill", "—"), _recruit_named_cost])
+	if _recruit_anon_available:
+		lines.append("[A] 招募匿名人口（%d coin）" % _recruit_anon_cost)
+	else:
+		lines.append("[A] 匿名招募（不可用：金幣不足或無匿名人口）")
+	lines.append("[1~9]記名  [A]匿名  [Esc]取消")
+	return "\n".join(lines)
+
 func _close_all_modes(keep: String = "") -> void:
 	if keep != "interact": _interact_mode = false; _interact_target = -1
 	if keep != "member":   _member_mode   = false
@@ -1808,6 +1893,10 @@ func _close_all_modes(keep: String = "") -> void:
 	_outpost_pending_abandon = false
 	_faction_extract_pending = -1.0
 	_intel_mode          = false
+	_recruit_mode        = false
+	_recruit_target_id   = -1
+	_recruit_members     = []
+	_recruit_anon_available = false
 	_trade_mode          = false
 	_trade_target_id     = -1
 	_pre_encounter_mode  = false

@@ -18,6 +18,7 @@ func _initialize() -> void:
 	await _test_u15_overlay_input_guard()
 	await _test_capabilities_shown()
 	await _test_join_request_ui()
+	await _test_recruit_named_reachable()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -36,6 +37,68 @@ func _test_join_request_ui() -> void:
 	node._process(0.1)   # U19 自動進 forced 模式
 	var s: String = node._event_label.text
 	_check("forced 顯收留選項", s.contains("收留") or s.contains("投靠") or s.contains("婉拒"))
+	await _free_ui(node)
+
+# A-1：記名招募在 TextUI 主場景可達。
+# 真路徑：recruit action 回 menu payload（has_willing_named/willing_members/anon_available）；
+# team-target handler 須消費此 payload → 進招募子模式 → 玩家選記名 → recruit_named 經 execute_action_with_target 真執行。
+func _test_recruit_named_reachable() -> void:
+	print("\n── A-1 記名招募 TextUI 可達 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var pid: int = st.player_id
+	var ptid: int = st.persons[pid].team_id
+	var ppos = st.teams[ptid].tile_pos
+	st.teams[ptid].resources["coin"] = 300.0   # > named gate 150
+	# 同格 NPC 隊：含一名不忠 named 成員（loyalty<0.4）
+	var npc := TeamData.new(); npc.team_id = 4321; npc.tile_pos = ppos
+	npc.population = 4; npc.faction_id = -1
+	st.teams[4321] = npc
+	var lead := PersonData.new(); lead.id = 43210; lead.team_id = 4321; lead.loyalty = 0.9
+	st.persons[43210] = lead; npc.leader_id = 43210; npc.named_members.append(43210)
+	var disloyal := PersonData.new(); disloyal.id = 43211; disloyal.team_id = 4321
+	disloyal.loyalty = 0.2; disloyal.person_name = "叛徒"; disloyal.skills = {"戰鬥": 0.5}
+	st.persons[43211] = disloyal; npc.named_members.append(43211)
+	# 進互動模式聚焦該隊
+	node._interact_mode = true
+	node._interact_target = -1
+	node._interact_page = 0
+	node._bridge.refresh_interaction_targets()
+	node._refresh()
+	# 找到 NPC 在 pending_targets 中的索引並選取
+	var pending: Array = node._cached_snapshot.get("pending_targets", [])
+	var fi: Dictionary = node._cached_snapshot.get("forced_interaction", {})
+	var fe_count: int = fi.get("responses", []).size()
+	var npc_pidx: int = -1
+	for i in range(pending.size()):
+		if pending[i].get("target_id", -1) == 4321:
+			npc_pidx = i; break
+	_check("NPC 4321 在 pending_targets", npc_pidx >= 0)
+	if npc_pidx < 0:
+		await _free_ui(node); return
+	node._handle_interact_mode(KEY_1 + fe_count + npc_pidx)   # 選 NPC → 進行動清單
+	_check("已聚焦 NPC（_interact_target=4321）", node._interact_target == 4321)
+	# 找 recruit action 在 available_actions 中的索引
+	var acts: Array = node._cached_snapshot.get("available_actions", [])
+	var recruit_idx: int = -1
+	for i in range(acts.size()):
+		if acts[i].get("action_id", "") == "recruit":
+			recruit_idx = i; break
+	_check("available_actions 含 recruit", recruit_idx >= 0)
+	if recruit_idx < 0:
+		await _free_ui(node); return
+	node._handle_interact_mode(KEY_1 + recruit_idx)   # 選 recruit
+	# 斷言：進入招募子選單（顯記名候選 + 匿名選項）
+	var rs: String = node._event_label.text
+	print("  recruit 子選單文字: %s" % rs.replace("\n", " | "))
+	_check("進招募子模式（_current_mode_name=recruit）", node._current_mode_name() == "recruit")
+	_check("子選單顯記名候選（叛徒）", rs.contains("叛徒") or rs.contains("記名"))
+	_check("子選單顯匿名選項", rs.contains("匿名"))
+	# 選記名候選（第 1 個）→ recruit_named 真執行
+	var coin_before: float = float(st.teams[ptid].resources.get("coin", 0))
+	node._handle_recruit_mode(KEY_1)
+	_check("recruit_named 執行：成員轉到玩家隊", st.persons[43211].team_id == ptid)
+	_check("recruit_named 執行：coin 扣 150", abs(coin_before - float(st.teams[ptid].resources.get("coin", 0)) - 150.0) < 0.01)
 	await _free_ui(node)
 
 func _test_capabilities_shown() -> void:
