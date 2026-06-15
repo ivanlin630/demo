@@ -30,6 +30,8 @@
 - **P3 全動作覆蓋 spec+plan 已寫（2026-06-15，待子 session）**：審計找 6 孤兒動作（公庫 deposit/withdraw、outpost build_facility/abandon、faction extract_treasury、team-target invite_settle/recruit_anon）。plan 5 task A→D→B→C→E。spec `2026-06-15-p3-action-coverage-design`、plan `2026-06-15-p3-action-coverage`。
 - **🗺 路線圖 + 已知問題解方彙整：`docs/roadmap.md`（2026-06-15 建）**。近期=P3→GUI run-verify 債清償（最高槓桿，轉 ui_flow 自動回歸）→U16；中期=tune/階段2 招人/②目標錨；含 Bug2/W4/Bug5/Bug6/Bug8/Bug9/U16 各附建議解 + 工量。圖形 UI 項（U5/U6/U7/S4）moot（TextUI 主用）。
 - U11 戰報/U12 交易/U13b 等 GUI 顯示部分：wiring 已接（harness/headless 驗 flow），真視覺待人工偶查。
+- **bug 批修 + known_issues 對齊（2026-06-15）**：Bug6(schedule 注入+dispatch)/Bug8(stale test)/Bug9(player_id 守衛)/**Bug10(屠村 _massacre_residents 鑄幣+丟公庫,守恆 +60 → 修,Bug6 連帶撈到)** 全修。Bug2(floor 已修)/Bug5(量測證非缺陷,NPC 勒索休眠→roadmap) 結案。known_issues 全條目對齊現碼（7 項漂移已標正）。
+- **行為量測儀器裝好（2026-06-15）**：`game_sim_multi` 加 `[TaskHist]` 月取樣 task team-time 佔比。**量測裁決:世界健康,不需 tune**。tyrant 掠奪 15.6%(劫掠型本該)/逃跑 15.6%/徵收 13.3%/攻擊 11.1%/治理 11.1%；warzone 治理 22.8%/idle 19.6%/紮營 12%/掠奪 5.4%。兩場 coin_eq delta=0。原「loot 偏高 130」= 原始計數假象,佔比正常。SoloAI 投靠低(2.2%)+warzone idle 偏高 = polish 非問題。**measure-first 結論:健康世界不硬調,轉階段2。**
 
 ### 佇列（下一步選項）
 - ~~狩獵受傷→醫療~~ **已涵蓋**：危險獸走真戰鬥（encounter/npc_combat）→ body_parts 傷 → 戰後 `resolve_negative_flags` 耗 medicine。小獵物抽象 roll 免傷（合理）。無需另做。
