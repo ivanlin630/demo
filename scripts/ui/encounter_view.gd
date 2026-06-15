@@ -206,6 +206,10 @@ func _screen_to_world(pos: Vector2) -> Vector2:
 
 # ── draw ─────────────────────────────────────────────────
 
+# U17: 旗色決策（玩家=藍 / 自家=綠 / 敵=紅）。抽 static 供測，防顏色反覆回歸。
+static func _unit_color(is_player: bool, is_own: bool) -> Color:
+	return Color.DODGER_BLUE if is_player else (Color.GREEN if is_own else Color.RED)
+
 func _draw() -> void:
 	if _bridge == null or not visible: return
 	var state: WorldState = _bridge.get_state()
@@ -233,7 +237,7 @@ func _draw() -> void:
 		var is_own: bool    = (team_id == player_team_id)   # 自家(玩家 leader 藍 / 自家 anon 綠)
 
 		# 玩家=藍、自家=綠、敵=紅（紅=敵直覺）
-		var color: Color = Color.DODGER_BLUE if is_player else (Color.GREEN if is_own else Color.RED)
+		var color: Color = _unit_color(is_player, is_own)
 		draw_circle(center, 12.0 * _zoom, color)
 		# Dead: draw as grey (over color circle)
 		if _is_unit_dead(unit, state):

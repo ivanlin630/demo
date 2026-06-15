@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_test_log_strip()
 	_test_post_combat_hint()
 	_test_attack_select_hint()
+	_test_unit_color()
 	print("\n=== UI Logic Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -37,6 +38,14 @@ func _test_attack_select_hint() -> void:
 	_check("含 Enter 攻擊", h.contains("Enter") and h.contains("攻擊"))
 	_check("含 Esc 取消", h.contains("Esc"))
 	_check("顯當前部位", h.contains("torso"))
+
+# U17: 遭遇戰旗色（玩家藍/自家綠/敵紅，防再反）
+func _test_unit_color() -> void:
+	print("\n── U17. 遭遇戰旗色 ──")
+	var EncView = load("res://scripts/ui/encounter_view.gd")
+	_check("玩家=藍", EncView._unit_color(true, true) == Color.DODGER_BLUE)
+	_check("自家 anon=綠", EncView._unit_color(false, true) == Color.GREEN)
+	_check("敵=紅", EncView._unit_color(false, false) == Color.RED)
 
 func _check(label: String, ok: bool) -> void:
 	if ok:

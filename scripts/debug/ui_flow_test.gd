@@ -15,6 +15,7 @@ func _initialize() -> void:
 	await _test_storage_panel_ui()
 	await _test_outpost_build_abandon()
 	await _test_faction_extract_treasury()
+	await _test_u15_overlay_input_guard()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -101,6 +102,24 @@ func _test_armed_count_shown() -> void:
 	var node = await _make_ui()
 	node._refresh()
 	_check("status 含「武裝」", node._state_label.text.contains("武裝"))
+	await _free_ui(node)
+
+# U15：遭遇戰 overlay 顯示中，主畫面 _input 須一律不處理（否則戰後按 Q→quit 閃退、WASD 漂游標）。
+# 測：overlay visible → 送 KEY_W → _cursor 不動（證 guard early-return）。
+func _test_u15_overlay_input_guard() -> void:
+	print("\n── U15 overlay 輸入守衛 ──")
+	var node = await _make_ui()
+	node._encounter_view.visible = true
+	var before: Vector2i = node._cursor
+	var ev := InputEventKey.new()
+	ev.keycode = KEY_W
+	ev.pressed = true
+	node._input(ev)
+	_check("overlay 可見時 KEY_W 被吞（_cursor 不變）", node._cursor == before)
+	# 反證：overlay 隱藏 → KEY_W 應移游標
+	node._encounter_view.visible = false
+	node._input(ev)
+	_check("overlay 隱藏時 KEY_W 移游標（_cursor 變）", node._cursor != before)
 	await _free_ui(node)
 
 func _check(label: String, ok: bool) -> void:

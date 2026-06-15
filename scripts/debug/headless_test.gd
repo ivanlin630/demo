@@ -223,6 +223,7 @@ func _initialize() -> void:
 	_test_trade_session_dto()
 	_test_trade_conservation()
 	_test_diplomacy_reject_cooldown()
+	_test_u20_proactive_same_tile_gate()
 	_test_equip_order_no_oscillation()
 	_test_n1_leader_no_anon_pop_stable()
 	# ── Minor 長大簡版 ──
@@ -7636,6 +7637,42 @@ func _test_diplomacy_reject_cooldown() -> void:
 		dip.try_proactive_diplomacy(state, a)
 	assert(int(a.diplomacy_reject_cooldown.get(1, 0)) > until, "cooldown 過期應恢復發送")
 	print("EcoFix Task3 OK")
+
+# U20：proactive diplomacy 同格 gate — 遠端已發現隊不得隔空對玩家提案（防 spam）
+func _test_u20_proactive_same_tile_gate() -> void:
+	print("--- U20: proactive diplomacy 同格 gate ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	state.world.current_tick = 100
+	# 玩家隊（大 pop，目標）
+	var pl := PersonData.new(); pl.id = 0; pl.team_id = 0
+	state.persons[0] = pl; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.faction_id = -1; pt.population = 20
+	pt.tile_pos = Vector2i(4, 4); pt.leader_id = 0
+	state.teams[0] = pt
+	# 發起隊（高義氣信義 → score 高；遠端 (7,10)）
+	var sl := PersonData.new(); sl.id = 5; sl.team_id = 5
+	sl.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.7, "慎重": 1.0 }
+	state.persons[5] = sl
+	var st := TeamData.new(); st.team_id = 5; st.faction_id = -1; st.population = 5
+	st.tile_pos = Vector2i(7, 10); st.leader_id = 5
+	state.teams[5] = st
+	state.team_discovered[5] = [0]
+	var dip := DiplomaticAiSystem.new()
+	# 遠端：呼 50 次，forced_event 須恆空（gate line 52 continue，與 randf 無關）
+	seed(11)
+	for i in range(50):
+		dip.try_proactive_diplomacy(state, state.teams[5])
+	assert(state.player_forced_event.is_empty(),
+		"遠端隊不得隔空對玩家提案（U20 spam）,實際=%s" % str(state.player_forced_event))
+	# 正控：移同格 → 應發得出（證路徑可觸發,gate 才是擋遠端的關鍵）
+	st.tile_pos = Vector2i(4, 4)
+	var fired: bool = false
+	for i in range(80):
+		dip.try_proactive_diplomacy(state, state.teams[5])
+		if not state.player_forced_event.is_empty():
+			fired = true; break
+	assert(fired, "同格時 proactive diplomacy 應發得出（否則遠端測為假陰）")
+	print("U20 same-tile gate OK")
 
 func _test_equip_order_no_oscillation() -> void:
 	print("--- EcoFix Task4: equip order 計入已裝備 → 不振盪 ---")
