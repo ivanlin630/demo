@@ -345,7 +345,40 @@ func _initialize() -> void:
 	_test_accept_join_request()
 	_test_join_request_trigger_and_respond()
 	_test_recruit_tutorial()
+	_test_join_conservation()
 	quit()
+
+func _test_join_conservation() -> void:
+	print("--- 投靠守恆整合(coin_eq) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 10, "ore_gold": 2}
+	state.teams[0] = pt
+	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	ds.resources = {"coin": 5, "ore_silver": 4}; ds.anon_treasury = 6.0
+	state.teams[1] = ds
+	var ce_before: float = _coin_eq_sum(state)
+	var food_before: float = float(pt.resources.get("food", 0))
+	var cs := PlayerCommandSystem.new()
+	var r: Dictionary = cs._accept_join_request(state, 1)
+	assert(r.get("ok", false), "投靠成功")
+	var ce_after: float = _coin_eq_sum(state)
+	assert(abs(ce_after - ce_before) < 0.01, "coin_eq 守恆 before=%.2f after=%.2f" % [ce_before, ce_after])
+	# food 確減 onboarding（食物非 coin_eq）
+	var spent: float = food_before - float(pt.resources.get("food", 0))
+	assert(abs(spent - PlayerCommandSystem.JOIN_ONBOARD_MEAL * 3) < 0.01, "food 減 onboarding=%.2f" % spent)
+	print("投靠守恆整合 OK")
+
+func _coin_eq_sum(state: WorldState) -> float:
+	var total: float = 0.0
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		total += float(t.resources.get("coin", 0)) + t.anon_treasury
+		total += float(t.resources.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
+		total += float(t.resources.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
+	return total
 
 func _test_recruit_tutorial() -> void:
 	print("--- tutorial onboarding ---")
