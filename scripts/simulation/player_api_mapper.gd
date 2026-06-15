@@ -296,6 +296,17 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 				{"response_id": "pay", "label": "付錢", "command_args": {"interaction_id": iid, "response_id": "pay"}},
 				{"response_id": "refuse", "label": "拒絕", "command_args": {"interaction_id": iid, "response_id": "refuse"}}
 			]
+		"join_request":
+			var ft: TeamData = state.teams.get(from_id)
+			var n: int = ft.population if ft != null else 0
+			msg = "Team%d 求投靠（%d 人）" % [from_id, n]
+			responses = [
+				{ "response_id": "accept", "label": "收留（食物 -%.1f,+%d 人）" % [
+					PlayerCommandSystem.JOIN_ONBOARD_MEAL * n, n],
+				  "command_args": {"interaction_id": iid, "response_id": "accept"} },
+				{ "response_id": "refuse", "label": "✗ 婉拒",
+				  "command_args": {"interaction_id": iid, "response_id": "refuse"} },
+			]
 		_:
 			msg = "Team%d 強制事件" % from_id
 			responses = [

@@ -2177,7 +2177,14 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 					return
 			"join":
 				var ally_id: int = _find_strong_neighbor(state, team)
-				if ally_id != -1 and TaskArbiter.try_set(state, team, "投靠",
+				if ally_id == -1:
+					continue
+				# 投靠對象是玩家隊且同格 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge
+				var p_join: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
+				if p_join != null and ally_id == p_join.team_id:
+					if _maybe_request_join_player(state, team):
+						return
+				if TaskArbiter.try_set(state, team, "投靠",
 						state.teams[ally_id].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
 					team.combat_target = ally_id
 					print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, ally_id])
@@ -2261,6 +2268,20 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 			best_pop = t.population
 			best_id = tid
 	return best_id
+
+# 絕境團投靠對象是玩家 → 不自動 merge,寫 forced_event 讓玩家決定（對稱:NPC 投靠 NPC 仍自動）
+# 需同格才求（co-located）；已有待處理 forced_event 則跳過。回 true=已寫事件。
+func _maybe_request_join_player(state: WorldState, team: TeamData) -> bool:
+	var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
+	if pp == null: return false
+	var ptid: int = pp.team_id
+	var ppt: TeamData = state.teams.get(ptid)
+	if ppt == null or ppt.tile_pos != team.tile_pos: return false   # 同格才求
+	if not state.player_forced_event.is_empty(): return false        # 已有待處理 event
+	state.player_forced_event = { "action": "join_request", "from_id": team.team_id }
+	state.player_forced_event_id = str(randi())
+	print("[JoinRequest] 流民 Team%d 求投靠玩家 Team%d" % [team.team_id, ptid])
+	return true
 
 func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1

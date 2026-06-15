@@ -343,7 +343,31 @@ func _initialize() -> void:
 	# ── 階段2 招人成幫 ──
 	_test_team_capabilities_dto()
 	_test_accept_join_request()
+	_test_join_request_trigger_and_respond()
 	quit()
+
+func _test_join_request_trigger_and_respond() -> void:
+	print("--- join_request 觸發+回應 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0}
+	state.teams[0] = pt
+	# 絕境流民同格(food_days 低 → 應發投靠)
+	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	ds.resources = {"food": 0.0}; ds.current_task = "乞食"
+	state.teams[1] = ds
+	var fai := FactionAISystem.new()
+	fai._maybe_request_join_player(state, ds)   # 絕境同格 → 寫 forced_event
+	assert(state.player_forced_event.get("action", "") == "join_request", "應發 join_request")
+	assert(int(state.player_forced_event.get("from_id", -1)) == 1, "from_id=1")
+	# 回應 accept → 併入
+	var cs := PlayerCommandSystem.new()
+	var r: Dictionary = cs.respond_to_forced(state, "accept")
+	assert(r.get("ok", false) and pt.population == 5, "accept 收留 pop→5")
+	assert(state.player_forced_event.is_empty(), "event 已清")
+	print("join_request 觸發+回應 OK")
 
 func _test_accept_join_request() -> void:
 	print("--- 投靠核心(食物併入) ---")

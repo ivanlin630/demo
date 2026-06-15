@@ -764,6 +764,7 @@ func get_forced_response_options(state: WorldState) -> Array[String]:
 		"diplomacy":
 			return ["accept", "accept_join", "accept_lead", "refuse"]
 		"extort":    return ["pay", "refuse"]
+		"join_request": return ["accept", "refuse"]
 	return []
 
 # 回應強制互動，清除 forced_event
@@ -790,6 +791,11 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 				result = _pay_extortion(state, fe.get("from_id", -1))
 			else:
 				result = { "ok": true, "msg": "拒絕勒索" }
+		"join_request":
+			if response == "accept":
+				result = _accept_join_request(state, fe.get("from_id", -1))
+			else:
+				result = { "ok": true, "msg": "婉拒收留" }
 		_:
 			result = { "ok": false, "msg": "未知強制事件類型" }
 	state.player_forced_event = {}

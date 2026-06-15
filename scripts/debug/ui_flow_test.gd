@@ -17,8 +17,26 @@ func _initialize() -> void:
 	await _test_faction_extract_treasury()
 	await _test_u15_overlay_input_guard()
 	await _test_capabilities_shown()
+	await _test_join_request_ui()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
+
+func _test_join_request_ui() -> void:
+	print("\n── join_request 收留 UI ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	st.teams[ptid].resources["food"] = 50.0
+	var ppos = st.teams[ptid].tile_pos
+	var ds := TeamData.new(); ds.team_id = 8888; ds.population = 3; ds.tile_pos = ppos
+	st.teams[8888] = ds
+	st.player_forced_event = {"action": "join_request", "from_id": 8888}
+	st.player_forced_event_id = "t1"
+	node._bridge.request_advance(1)   # _process 早段需 is_advancing 才往下跑
+	node._process(0.1)   # U19 自動進 forced 模式
+	var s: String = node._event_label.text
+	_check("forced 顯收留選項", s.contains("收留") or s.contains("投靠") or s.contains("婉拒"))
+	await _free_ui(node)
 
 func _test_capabilities_shown() -> void:
 	print("\n── 隊能力讀數顯示 ──")
