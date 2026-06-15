@@ -2,22 +2,18 @@
 class_name TextMapRenderer
 
 const VISION_RADIUS: int = 3   # 與 VisionSystem 一致（TEST VALUE）
+const VIEW_RADIUS: int = 5     # 視窗半徑（以玩家為中心顯示的範圍,> VISION_RADIUS 留霧邊）
 const TERRAIN_CHAR: Dictionary = { "plains": "P", "forest": "F", "mountain": "M" }
 
+# U16: 以玩家所在格為中心的視窗（@ 永遠在正中,地圖在底下捲）。
+# axial 投影:列 dr 的水平位移 = dq + dr/2 → 用累進切變（每列右移半格 = 2 字元）。
+# 舊版渲染整張地圖絕對座標 + @ 放玩家絕對位置 → 玩家偏離地圖中心時 @ 不在視窗中央（U16 真因）。
 static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> String:
 	var player_team: TeamData = state.teams.get(player_tid)
 	var player_pos: Vector2i  = player_team.tile_pos if player_team else Vector2i(4, 4)
 	var discovered: Array     = state.team_discovered.get(player_tid, [])
 
-	# 找地圖邊界（tile 實際 x/y 範圍）
-	var xs: Array = []; var ys: Array = []
-	for tile in state.world.tiles.values():
-		xs.append(tile.tile_pos.x); ys.append(tile.tile_pos.y)
-	if xs.is_empty(): return "（無地圖）"
-	var xmin: int = xs.min(); var xmax: int = xs.max()
-	var ymin: int = ys.min(); var ymax: int = ys.max()
-
-	# 建 team 位置查詢表（tile_key → team_id list）
+	# team 位置查詢表（tile_key → team_id list）
 	var team_at: Dictionary = {}
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
@@ -25,21 +21,27 @@ static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> Stri
 		if not team_at.has(k): team_at[k] = []
 		(team_at[k] as Array).append(tid)
 
-	# 每個 Y 一條線。tile_pos 為 axial(q,r)，pointy-top 螢幕水平位移 = q + r/2，
-	# 故每下一列累進右移半格（半格 = 2 字元，cell 寬 4）。舊碼用奇偶交替 stagger
-	# （offset 座標慣例）與 axial _hex_dist 不一致 → 視野圈隨距離剪切歪掉（U16）。
+	# 以玩家為中心的視窗:dr/dq ∈ [-VIEW_RADIUS, VIEW_RADIUS]，hex 距離內才畫。
+	# 每列累進切變 indent = (dr + VIEW_RADIUS) * 2（dr 由上到下遞增 → 右移）。
 	var lines: Array = []
-	for y in range(ymin, ymax + 1):
-		var indent: String = "  ".repeat(y - ymin)
+	for dr in range(-VIEW_RADIUS, VIEW_RADIUS + 1):
+		var indent: String = "  ".repeat(dr + VIEW_RADIUS)
 		var line: String = indent
-		for x in range(xmin, xmax + 1):
-			line += _cell(state, Vector2i(x, y), player_pos, player_tid, cursor, discovered, team_at)
+		for dq in range(-VIEW_RADIUS, VIEW_RADIUS + 1):
+			if _hex_dist(Vector2i(dq, dr), Vector2i.ZERO) > VIEW_RADIUS:
+				line += "    "   # 視窗外（菱形外緣）留白,維持對齊
+				continue
+			var pos: Vector2i = player_pos + Vector2i(dq, dr)
+			line += _cell(state, pos, player_pos, player_tid, cursor, discovered, team_at)
 		lines.append(line)
 	return "\n".join(lines)
 
 static func _cell(state: WorldState, pos: Vector2i, player_pos: Vector2i,
 		player_tid: int, cursor: Vector2i,
 		discovered: Array, team_at: Dictionary) -> String:
+	# 玩家標記恆畫（即使腳下 tile 資料缺,@ 也要在視窗正中顯示）
+	if pos == player_pos:
+		return "[@] " if pos == cursor else "@   "
 	var tile_key: int = pos.x * 1000 + pos.y
 	var tile = state.world.tiles.get(tile_key)
 	if tile == null:
@@ -48,19 +50,14 @@ static func _cell(state: WorldState, pos: Vector2i, player_pos: Vector2i,
 		if pos == cursor: content = "[ ] "
 		return content
 
-	# 決定格子基本符號
 	var dist: int = _hex_dist(player_pos, pos)
 	var in_vision: bool = dist <= VISION_RADIUS
-
-	# 確認是否已探索（視野內 → 自動已探索；暫以 in_vision 代替 explored 追蹤）
 	var explored: bool = in_vision  # TODO: 可加 WorldState 已探索 tile 清單
 
 	var ch: String
-	# 玩家位置
 	if pos == player_pos:
 		ch = "@"
 	else:
-		# 已發現的 team 在此格
 		var known_tid: int = _visible_team(team_at, tile_key, discovered, player_tid)
 		if known_tid >= 0:
 			ch = str(known_tid % 10)
@@ -71,13 +68,11 @@ static func _cell(state: WorldState, pos: Vector2i, player_pos: Vector2i,
 		else:
 			ch = "?"
 
-	# 游標包圍（每格 4 chars）
 	var cell: String
 	if pos == cursor:
-		cell = "[%s] " % ch   # 4 chars: [symbol] + space
+		cell = "[%s] " % ch   # 4 chars
 	else:
-		cell = "%s   " % ch   # 4 chars: symbol + 3 spaces
-
+		cell = "%s   " % ch   # 4 chars
 	return cell
 
 static func _visible_team(team_at: Dictionary, key: int, discovered: Array, player_tid: int) -> int:
