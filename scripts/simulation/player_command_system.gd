@@ -54,6 +54,8 @@ func get_available_actions(state: WorldState, target_id: int) -> Array[String]:
 	if _can_invite_settle(state, pt, tgt):
 		actions.append("invite_settle")
 	actions.append("gather_intel")
+	# beg：玩家主動乞討（對稱性——NPC 會乞食,玩家亦可）。需求/接受由 _resolve_aid_request 自決,非需時自然被拒
+	actions.append("beg")
 	return actions
 
 # UI 覆蓋審計用：回傳全 registry action id（_test_action_ui_coverage 驗每個都有 UI 路徑）
@@ -115,6 +117,7 @@ func _setup_registry() -> void:
 		"order_faction_member":   _action_order_faction_member,
 		"clear_member_order":     _action_clear_member_order,
 		"gather_intel":           _action_gather_intel,
+		"beg":                    _action_beg,
 		"confirm_gather_intel":   _action_confirm_gather_intel,
 		"respond_aid_request":    _action_respond_aid_request,
 		"invite_settle":          _action_invite_settle,
@@ -932,6 +935,16 @@ func _action_invite_settle(state: WorldState, target_id: int, pt: TeamData, pt_i
 		_interaction._execute_settlement(state, target_id, target_pos, pt.faction_id)
 		return { "ok": true, "msg": "Team%d 接受邀請" % target_id }
 	return { "ok": true, "msg": "Team%d 拒絕邀請" % target_id, "accepted": false }
+
+func _action_beg(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
+	var tgt: TeamData = state.teams.get(target_id)
+	if tgt == null: return { "ok": false, "msg": "目標不存在" }
+	if pt.tile_pos != tgt.tile_pos: return { "ok": false, "msg": "需同格才能乞討" }
+	# 玩家當乞丐:reuse _resolve_aid_request（NPC 依 honor/rep/greed 自決;給糧守恆轉移;重複乞討 annoyance 自限）
+	var r: Dictionary = _interaction._resolve_aid_request(state, pt_id, target_id)
+	if r.get("accepted", false):
+		return { "ok": true, "msg": "Team%d 施捨食物 %.0f" % [target_id, float(r.get("amount", 0))] }
+	return { "ok": true, "msg": "Team%d 不予施捨（%s）" % [target_id, r.get("msg", "拒絕")] }
 
 func _update_rep(team: TeamData, other_id: int, delta: float) -> void:
 	var cur: float = float(team.known_reputations.get(other_id, 0.5))

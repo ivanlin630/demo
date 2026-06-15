@@ -488,6 +488,7 @@ func _action_label(action_id: String) -> String:
 		"confirm_trade":         return "確認貿易"
 		"cancel_trade":          return "取消貿易"
 		"gather_intel":           return "打聽情報"
+		"beg":                    return "乞討"
 		"confirm_gather_intel":   return "確認打聽"
 		"subjugate_enemy":        return "收編敗者"
 		"offer_surrender":        return "投降請和"

@@ -224,6 +224,7 @@ func _initialize() -> void:
 	_test_trade_conservation()
 	_test_massacre_conservation()
 	_test_action_ui_coverage()
+	_test_player_beg()
 	_test_diplomacy_reject_cooldown()
 	_test_u20_proactive_same_tile_gate()
 	_test_equip_order_no_oscillation()
@@ -9671,6 +9672,29 @@ func _test_trade_session_dto() -> void:
 		assert(it["grade"] != "weapon_melee_low", "碎量 0.5 weapon 不應列出")
 	print("trade_session DTO OK")
 
+func _test_player_beg() -> void:
+	print("--- 玩家乞討（對稱性）---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var pl := PersonData.new(); pl.id = 0; pl.team_id = 0
+	state.persons[0] = pl; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 3
+	pt.tile_pos = Vector2i(4, 4); pt.resources = { "food": 1.0 }   # 快餓死 → need 高
+	state.teams[0] = pt
+	var nl := PersonData.new(); nl.id = 10; nl.team_id = 1
+	nl.values = { "義氣": 1.0, "貪婪": 0.0 }   # 慷慨
+	state.persons[10] = nl
+	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 10; npc.population = 5
+	npc.tile_pos = Vector2i(4, 4); npc.resources = { "food": 500.0 }
+	npc.known_reputations = { 0: 0.6 }
+	state.teams[1] = npc
+	var cs := PlayerCommandSystem.new()
+	var before: float = float(pt.resources.get("food", 0))
+	var r: Dictionary = cs.execute_action(state, 1, "beg")
+	assert(r.get("ok", false), "beg 應 ok:%s" % str(r))
+	assert(float(pt.resources.get("food", 0)) > before,
+		"慷慨富鄰應施捨→玩家糧增,實際 %.1f→%.1f" % [before, float(pt.resources.get("food", 0))])
+	print("玩家乞討 OK (糧 %.1f→%.1f)" % [before, float(pt.resources.get("food", 0))])
+
 # Goal: 遍歷所有功能,確保每個 registry action 都有 UI 可達路徑。
 # 新增 action 未列入 → fail,逼迫做 UI 覆蓋決策(防功能無 UI 落差)。
 func _test_action_ui_coverage() -> void:
@@ -9679,6 +9703,7 @@ func _test_action_ui_coverage() -> void:
 		"attack": "interact-team", "trade": "interact-team", "propose_alliance": "interact-team",
 		"demand_tribute": "interact-team", "extort": "interact-team", "recruit": "interact-team",
 		"recruit_anon": "interact-team", "invite_settle": "interact-team", "gather_intel": "interact-team",
+		"beg": "interact-team",
 		"offer_surrender": "interact-team(encounter)",
 		"hunt": "interact-self", "hunt_beast": "interact-self", "establish_faction": "interact-self",
 		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
