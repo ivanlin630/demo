@@ -754,14 +754,24 @@ func _accept_join_request(state: WorldState, from_id: int) -> Dictionary:
 		return { "ok": false, "msg": "對象不存在" }
 	if pt.tile_pos != from_team.tile_pos:
 		return { "ok": false, "msg": "需同格才能收留" }
-	var cost: float = JOIN_ONBOARD_MEAL * float(from_team.population)
+	# 預估可進人數（受 pop_cap 限,與 merge 部分合併同口徑）
+	var leader = state.persons.get(pt.leader_id)
+	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
+	var capacity: int = TeamData.pop_cap_from_leadership(cmd) - pt.population
+	var will_join: int = mini(from_team.population, maxi(capacity, 0))
+	if will_join <= 0:
+		return { "ok": false, "msg": "隊伍已滿，無法收留" }
+	var cost: float = JOIN_ONBOARD_MEAL * float(will_join)
 	if float(pt.resources.get("food", 0)) < cost:
 		return { "ok": false, "msg": "食物不足收留（需%.1f）" % cost }
-	var joined: int = from_team.population
-	pt.resources["food"] = float(pt.resources.get("food", 0)) - cost   # 餵他們進來：吃掉,食物非守恆
+	# 量測實際併入（撞 cap 沒進來的不餵、不報）→ 食物按 delta 扣,守恆與 msg 與實際一致
+	var pop_before: int = pt.population
 	SubteamSystem.new().merge_teams(state, pt.team_id, from_id)         # 整團併入：pop/named/tier/treasury 守恆
-	return { "ok": true, "msg": "收留 %d 人（食物 -%.1f）" % [joined, cost],
-		"payload": {"joined": joined, "food_cost": cost} }
+	var joined: int = pt.population - pop_before
+	var actual_cost: float = JOIN_ONBOARD_MEAL * float(joined)
+	pt.resources["food"] = float(pt.resources.get("food", 0)) - actual_cost   # 餵他們進來：吃掉,食物非守恆
+	return { "ok": true, "msg": "收留 %d 人（食物 -%.1f）" % [joined, actual_cost],
+		"payload": {"joined": joined, "food_cost": actual_cost} }
 
 # ── 被動回應（NPC 強制非戰互動）────────────────────────────
 
