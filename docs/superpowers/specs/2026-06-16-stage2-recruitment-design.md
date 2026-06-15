@@ -26,19 +26,21 @@
 
 **來源**：emergent 為主——流亡/敗殘/分裂/絕境流民團（既有人口動態持續產出遊蕩隊）。config 只 seed 開局（survival_start 已有乞丐團/野村）。**無特製 spawner**。
 
-**雙軌成本（按對象絕境度分流）**：
-- **絕境散人 → 食物**：對方 `food_days` 低 或 current_task ∈ survival（乞食/return_home/投靠）→ 願免 coin 投靠,只收 **onboarding 食物 = MEAL × 收容人數**（MEAL = TEST VALUE ≈ `FOOD_PER_PERSON_PER_DAY/3`,一餐）。輕上前成本,真壓力在後續每日 burn。
-- **穩定隊專才 → coin**：對方非絕境 → 沿用現 `recruit_anon`(50)/`recruit_named`(150),付 coin 轉對方隊（守恆）。
+**雙軌成本（按觸發/誰主動分流,非按絕境度）**：
+- **投靠（對方主動來）→ 食物**：絕境流民主動求收留 → 只收 **onboarding 食物 = MEAL × 收容人數**（MEAL = TEST VALUE ≈ `FOOD_PER_PERSON_PER_DAY/3`,一餐）。輕上前成本,真壓力在後續每日 burn。收留難民:你餵他進來。
+- **招募（玩家主動去取）→ coin**：玩家主動挖人 → 沿用現 `recruit_anon`(50)/`recruit_named`(150),付 coin 轉對方隊（守恆）。挖角:對方不缺,要錢買。
 
-**絕境判定** helper：`_is_desperate(target) = food_days < 門檻 or current_task in SURVIVAL_TASKS`。決定該對象走食物軌或 coin 軌。
+**為何按觸發分流（非按絕境度）**：更明確 + 防玩家鑽絕境判定（找半絕境隊低價食物挖）。玩家**只能食物收留「主動來投靠的」**;想主動拿人 → 付 coin。
+
+**絕境判定** helper：`_is_desperate(target) = food_days < 門檻 or current_task in SURVIVAL_TASKS` —— 用作 **NPC 是否對玩家發起投靠的閘**（絕境才會來投靠）,非玩家招募的成本選擇器。
 
 ## ② 收容觸發 / 流程（API + UI）
 
-兩觸發並存：
-- **NPC 主動求加**：絕境流民團同格玩家 → 寫 `player_forced_event`（action="join_request", from_id）→ text_ui forced 模式顯「流民 TeamX 快餓死,願以勞力換口飯。收留?[食物 N]」→ 接受（扣食物 + 併入,reuse recruit 轉移）/拒。接既有 forced_interaction 自動進場（U19）。
-- **玩家主動招**：互動選單對同格流民「招募」(P3 已 emit recruit_anon)→ 依 `_is_desperate` 決食物/coin 成本 → 送 command。
+兩觸發並存,**成本由觸發決定（投靠=食物 / 招募=coin）**：
+- **NPC 主動求加（投靠 → 食物）**：`_is_desperate` 流民團同格玩家 → 寫 `player_forced_event`（action="join_request", from_id）→ text_ui forced 模式顯「流民 TeamX 快餓死,願以勞力換口飯。收留?[食物 N]」→ 接受（扣食物 + 併入,reuse recruit 轉移,**跳過 coin**）/拒。接既有 forced_interaction 自動進場（U19）。
+- **玩家主動招（招募 → coin）**：互動選單對同格隊「招募」(P3 已 emit recruit_anon)→ 付 coin（現成 `_recruit_anon_internal`,守恆）。**無食物軌**。
 
-併入 = reuse `_recruit_anon_internal` 的人口/treasury/tier 轉移（食物軌時 coin 成本改為食物扣 + 跳過 coin 轉移）。
+併入核心（人口/treasury/tier 轉移）兩軌共用;成本層分流:投靠扣食物跳 coin、招募扣 coin 轉對方。
 
 ## ③ 養得起 + 招來幹嘛（全 reuse,不新做）
 
