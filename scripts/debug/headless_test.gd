@@ -9523,7 +9523,8 @@ func _test_trade_session_dto() -> void:
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 20}
 	state.teams[0] = pt
 	var npc := TeamData.new(); npc.team_id = 1; npc.population = 5
-	npc.tile_pos = Vector2i(4,4); npc.resources = {"material": 30, "coin": 100}
+	# weapon_melee_low 碎量 0.5 → 不可交易，不得列出（防 ×0 幽靈列，02.png 玩測抓到）
+	npc.tile_pos = Vector2i(4,4); npc.resources = {"material": 30, "coin": 100, "weapon_melee_low": 0.5}
 	state.teams[1] = npc
 	state.player_state["trade_offer"] = {"player_gives": {"food": 10}, "player_wants": {"coin": 10}}
 	state.player_state["pending_trade_target"] = 1
@@ -9534,6 +9535,9 @@ func _test_trade_session_dto() -> void:
 	assert(d.get("target_items", []).size() > 0, "NPC 清單非空")
 	assert(d.has("give_value") and d.has("want_value"), "天平兩端")
 	assert(d.has("npc_would_accept"), "接受預估")
+	for it in d.get("target_items", []):
+		assert(int(it["qty"]) >= 1, "清單不得有 qty<1 項（×0 幽靈），實際 %s" % str(it))
+		assert(it["grade"] != "weapon_melee_low", "碎量 0.5 weapon 不應列出")
 	print("trade_session DTO OK")
 
 # 守恆：成交前後雙方 coin_eq（Σ qty×BASE_PRICE）總和不變，資源雙向轉移

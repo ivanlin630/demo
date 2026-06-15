@@ -628,11 +628,11 @@ static func map_storage_panel(state: WorldState) -> Dictionary:
 	var os := OutpostSystem.new()
 	var stored: Array = []
 	for res in tile.public_storage:
-		if float(tile.public_storage[res]) > 0:
+		if int(tile.public_storage[res]) >= 1:   # 整數 ≥1 才可交易，避免碎量顯示 ×0 幽靈列
 			stored.append({ "res": res, "qty": int(tile.public_storage[res]), "cap": int(os.storage_cap(tile, res)) })
 	var team_res: Array = []
 	for res in pt.resources:
-		if float(pt.resources[res]) > 0:
+		if int(pt.resources[res]) >= 1:
 			team_res.append({ "res": res, "qty": int(pt.resources[res]) })
 	return { "feasible": true, "reason": "", "stored": stored, "team_res": team_res }
 
@@ -835,9 +835,9 @@ static func map_trade_session(state: WorldState, target_id: int) -> Dictionary:
 	for res in InteractionSystem.BASE_PRICE:
 		if res == "coin":
 			continue
-		if float(pt.resources.get(res, 0)) > 0:
+		if int(pt.resources.get(res, 0)) >= 1:   # 整數 ≥1 才可交易，避免碎量顯示 ×0 幽靈列
 			p_items.append({ "grade": res, "qty": int(pt.resources[res]), "unit_value": inter.local_value(pt, res) })
-		if float(tgt.resources.get(res, 0)) > 0:
+		if int(tgt.resources.get(res, 0)) >= 1:
 			t_items.append({ "grade": res, "qty": int(tgt.resources[res]), "unit_value": inter.local_value(tgt, res) })
 	if int(pt.resources.get("coin", 0)) > 0:
 		p_items.append({ "grade": "coin", "qty": int(pt.resources["coin"]), "unit_value": 1.0 })
