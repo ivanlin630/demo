@@ -25,10 +25,12 @@ static func render(state: WorldState, player_tid: int, cursor: Vector2i) -> Stri
 		if not team_at.has(k): team_at[k] = []
 		(team_at[k] as Array).append(tid)
 
-	# 每個 Y 一條線，奇數 Y 縮排 2（hex stagger）
+	# 每個 Y 一條線。tile_pos 為 axial(q,r)，pointy-top 螢幕水平位移 = q + r/2，
+	# 故每下一列累進右移半格（半格 = 2 字元，cell 寬 4）。舊碼用奇偶交替 stagger
+	# （offset 座標慣例）與 axial _hex_dist 不一致 → 視野圈隨距離剪切歪掉（U16）。
 	var lines: Array = []
 	for y in range(ymin, ymax + 1):
-		var indent: String = "  " if y % 2 == 1 else ""
+		var indent: String = "  ".repeat(y - ymin)
 		var line: String = indent
 		for x in range(xmin, xmax + 1):
 			line += _cell(state, Vector2i(x, y), player_pos, player_tid, cursor, discovered, team_at)

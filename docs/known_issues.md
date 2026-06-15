@@ -220,12 +220,18 @@
 - **自動測（2026-06-15）**：ui_flow `_test_u15_overlay_input_guard`（overlay 可見→KEY_W 被吞、隱藏→移游標）鎖回歸。
 - **後續風險**：`KEY_Q`→`get_tree().quit()` 在一般地圖遊玩仍是「按 Q 直接退遊戲」的危險綁定（Q 也是直覺移動鍵），建議改安全組合或移除（另議）。
 
-### U16. 世界地圖迷霧/視野與玩家位置對不上 ⚠ 已根因，pre-existing（未修）
+### U16. 世界地圖迷霧/視野與玩家位置對不上 ✅ 已修（2026-06-15）
+- **修**：`text_map_renderer.render` 列縮排由「奇偶交替 stagger」（offset 慣例，與 axial 不符）改為**累進切變** `indent = "  ".repeat(y - ymin)`（axial q+r/2 投影）→ 視野 `?` 邊界成對稱菱形繞 @，@ 與視野對齊。代價：整盤右下斜（平行四邊形，axial 正確投影），地圖本身六角形故觀感正常。
+- **回歸**：`map_render_test` 改驗前導空白序列對稱（V 形回文，`[16,14,12,10,8,10,12,14,16]`）；舊交替 stagger 非回文 → 抓得到。`=== ASSERTIONS PASSED ===`。
+- **教訓**：headless `--script` 中 `assert` 失敗會中止 `_initialize` 在 `quit()` 前 → SceneTree 不退、進程 idle 卡死（誤判為「跑很久」）。寫測勿讓 assert 擋在 quit 前無條件路徑。
+
+<details><summary>原根因紀錄</summary>
 - **症狀**：文字世界地圖「揭露區域（視野）與玩家位置 @ 對不上」（2026-06-14 玩測，描述為「遭遇戰視野很怪」，實為世界地圖 fog）。
 - **根因**：座標系為 **axial**（`world_generator` `tile_pos = axial + radius`、movement/vision 用 axial cube 距離）。`text_map_renderer.render` 視野判定 `_hex_dist`（axial，正確）**但渲染用「奇數列縮排 2 空格」交替 stagger**——對 axial 是錯誤投影（pointy-top 正確為每列累進半格 / 先 axial→offset 轉換）。→ @-中心的視野 disc 在交替 stagger 下逐列剪切偏移，遠處對不上。
 - **與本批無關**：`text_map_renderer` 非本批改動，純既有渲染 bug。
 - **修向（待確認）**：render 改正確 axial→offset 投影（col = q + (r - (r&1))/2 類）或累進列偏移；屬視覺需逐步對照調，建議獨立 task 與使用者看輸出迭代。
 - **優先**：M（影響可讀性，不致崩潰）。
+</details>
 
 ### U9. 圖形 Main.tscn UI 仍 reach-through raw WorldState（邊界債）
 - **症狀**：`main.gd`/`encounter_view.gd`/`popup_layer.gd`/`debug_bar.gd` 大量 `_bridge.get_state()` 直讀 raw `WorldState`（body_parts/units/world.current_tick）→ 違反「UI 只經 player API」invariant（2026-06-14 新增）

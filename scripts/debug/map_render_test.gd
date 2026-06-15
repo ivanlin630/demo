@@ -42,11 +42,20 @@ func _initialize() -> void:
 	print("=== END MAP ===")
 	print("length=%d" % map_str.length())
 
-	# 驗證：radius=4 → ymin=0, ymax=8 → 9 rows × 2 sub-lines = 18 lines
+	# 驗證：radius=4 → y 0..8 → 9 行（每 y 一行；axial 累進切變投影 U16）
 	var lines_arr := map_str.split("\n")
-	assert(lines_arr.size() == 18, "地圖應有 18 行，實際: %d" % lines_arr.size())
-	# 玩家在 (4,4) = display_row 4 = 第 9 行（index 8），even sub-line
-	var center_line: String = lines_arr[8]
-	assert(center_line.contains("@"), "中間行應含 '@'，實際: '%s'" % center_line)
-	print("=== ASSERTIONS PASSED ===")
+	assert(lines_arr.size() == 9, "地圖應有 9 行，實際: %d" % lines_arr.size())
+	# @ 在 y=4（player (4,4)）→ 第 5 行（index 4）
+	var center_line: String = lines_arr[4]
+	assert(center_line.contains("@"), "@ 應在第 5 行，實際: '%s'" % center_line)
+	# U16 回歸：axial 累進切變（indent=q+r/2）下，各列前導空白序列須對稱（V 形，
+	# 中心 @ 列最短），= 視野圈正確繞 @。舊奇偶交替 stagger 會破壞對稱（非回文）。
+	var lead: Array = []
+	for ln in lines_arr:
+		lead.append(ln.length() - ln.lstrip(" ").length())
+	var n: int = lead.size()
+	for i in range(n):
+		assert(lead[i] == lead[n - 1 - i],
+			"前導空白應對稱（U16 axial 投影），實際 lead=%s" % str(lead))
+	print("=== ASSERTIONS PASSED === lead=%s" % str(lead))
 	quit()
