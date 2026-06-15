@@ -1,6 +1,11 @@
 # 開發進度
 
-## 📍 當前狀態（2026-06-14）
+## 📍 當前狀態（2026-06-16）
+
+- **階段2 招人成幫已 merge（2026-06-16）**：投靠（NPC 絕境同格→`join_request` forced event→玩家收留,扣食物 onboarding[一餐×人數,消耗品非守恆] + reuse `merge_teams` 整團併入,守恆）+ 招募（玩家主動→coin 挖角,既有 recruit）。成本**按觸發分流**(投靠=食物/招募=coin)。隊能力讀數 DTO(`capabilities`:按真技能聚合——求生 named 平均→獵率/產出、戰鬥逐個體→戰力 proxy、pop→日耗)+ status 顯示 = emergent legibility。tutorial onboarding(食物盈餘閾值一次性送 1 堪用 named+3 tier0 anon→走真投靠流程)。reuse merge_teams/hunt 公式/forced 路徑/dispatch_subteam(specialist→子隊長),零新系統。headless+ui_flow 全綠、coin_eq 守恆。spec `2026-06-16-stage2-recruitment-design`、plan 同名。
+- **養得起/離隊** = reuse 既有 famine/loyalty/defect(不新做);**部署** = emergent 自動貢獻(不做逐人指派 UI,YAGNI)。
+
+## 📍 前狀態（2026-06-14）
 
 **玩家核心迴路定為 Kenshi 型下而上生存**（spec `2026-06-14-stage1-survival-forage-hunt-design`）。階段拆分：1 開局生存 / 2 招人 / 3 據點 / 4 成勢力。
 
