@@ -5180,6 +5180,7 @@ func _test_on_team_extinct_to_storage() -> void:
 	state.teams[0] = team
 	var fai := FactionAISystem.new()
 	fai._on_team_extinct(state, team)
+	fai.cleanup_extinct_teams(state)   # W6 後路由延到 cleanup（_on_team_extinct 只標記）
 	assert(float(tile.public_storage.get("food", 0)) == 50.0, "food 應進公庫")
 	assert(float(tile.public_storage.get("coin", 0)) == 30.0, "treasury 應進公庫 coin")
 	assert(float(team.anon_treasury) == 0.0, "treasury 清空")

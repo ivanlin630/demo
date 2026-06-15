@@ -27,6 +27,8 @@ func _run_config(cfg_name: String) -> Dictionary:
 		return {}
 	GameSetup.setup(state, config)
 	var max_ticks: int = int(config.get("max_ticks", 21600))
+	var schedule: Array = config.get("command_schedule", [])   # Bug6: 注入 config schedule（原缺 → tyrant/warzone schedule 全不觸發）
+	var cmd := PlayerCommandSystem.new()
 	var initial_player_id: int = state.player_id
 	var encounters: int = 0
 	var uprisings: int = 0
@@ -42,6 +44,11 @@ func _run_config(cfg_name: String) -> Dictionary:
 		var result = runner.advance_tick(state, pp)
 		if state.encounter_active and result == "player_turn":
 			_auto_drive_encounter(state, runner)
+		var sched_r: Dictionary = GameSetup.run_command_schedule_tick(state, cmd, schedule, tick + 1)   # Bug6: config schedule 注入
+		for fi in range(sched_r.get("fired", []).size()):
+			print("[Schedule] %s tick=%d fired %s → %s" % [
+				cfg_name, tick + 1, sched_r["fired"][fi],
+				str(sched_r.get("results", [])[fi] if fi < sched_r.get("results", []).size() else {})])
 		if state.game_over:
 			print("[GameOver] %s @ tick=%d 因: %s" % [cfg_name, tick, state.game_over_reason])
 			break

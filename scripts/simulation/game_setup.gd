@@ -559,5 +559,8 @@ static func _dispatch_command(state: WorldState, cmd_sys, action: String, args: 
 		"build_outpost":
 			state.player_state["build_type"] = args.get("type", "civilian")
 			return cmd_sys.execute_action(state, -1, "build_outpost")
+		"extract_treasury":   # Bug6: tyrant config schedule 用,原缺 dispatch → no-op
+			state.player_state["extract_ratio"] = float(args.get("extract_ratio", 0.0))
+			return cmd_sys.execute_action(state, -1, "extract_treasury")
 		_:
 			return { "ok": false, "msg": "未知 action: " + action }

@@ -364,7 +364,7 @@ func _decide_action(unit_idx: int, state: WorldState,
 	var unit: Dictionary = state.encounter_units[unit_idx]
 
 	# Player control: use pending_action if set, then clear it
-	if unit.get("person_id", -1) == state.player_id and unit.has("pending_action"):
+	if state.player_id != -1 and unit.get("person_id", -1) == state.player_id and unit.has("pending_action"):
 		var pa: Dictionary = unit["pending_action"]
 		unit.erase("pending_action")
 		var pa_type: String = pa.get("type", "wait")
@@ -386,7 +386,7 @@ func _decide_action(unit_idx: int, state: WorldState,
 
 	# Player unit with no pending_action: wait this tick
 	# encounter_view will set pending_action before next advance call
-	if unit.get("person_id", -1) == state.player_id:
+	if state.player_id != -1 and unit.get("person_id", -1) == state.player_id:
 		return { "type": "idle", "target_idx": -1, "move_to": unit["pos"], "attack_part": "" }
 
 	if not is_combat_capable(unit, state):
@@ -809,7 +809,7 @@ func advance_encounter_tick(state: WorldState) -> String:
 		if unit["action_timer"] > 0: continue
 
 		# Player turn: if timer reached 0 and no pending action, stop and wait
-		if unit.get("person_id", -1) == state.player_id:
+		if state.player_id != -1 and unit.get("person_id", -1) == state.player_id:
 			if unit.get("pending_action", {}).is_empty():
 				unit["action_timer"] = 0   # keep at 0; don't go negative
 				return "player_turn"
@@ -853,7 +853,7 @@ func advance_encounter_tick(state: WorldState) -> String:
 						if parent: _messenger_exit(state, unit, parent)
 
 		# After processing player action, clear pending_action
-		if unit.get("person_id", -1) == state.player_id:
+		if state.player_id != -1 and unit.get("person_id", -1) == state.player_id:
 			unit.erase("pending_action")
 		unit["action_timer"] = _max_timer(unit, state)
 

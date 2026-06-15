@@ -242,11 +242,16 @@
 - **狀態**：text_ui 已清（P1）；圖形 UI 未清。text-UI-only 階段不影響
 - **優先**：M — 若推圖形 UI 或全面套 UI 邊界 invariant 才需解耦（範圍大,涉 encounter tactical view）。另案
 
-### Bug9. EncounterSystem player_id==-1 → anon 被當玩家
+### Bug10. attack schedule 觸發後戰鬥路徑漏 +60 coin_eq（2026-06-15 Bug6 修後暴露）
+- **症狀**：multi tyrant 啟用 command_schedule 後,coin_eq delta 0→**+60**。schedule fire 時序:tick240/1680 extract_treasury(已驗守恆乾淨)、tick3360 **attack** → 戰鬥。
+- **隔離**：`_extract_treasury` 守恆乾淨(`anon_treasury−=amt; coin+=amt`,兩者皆在 coin_eq)→ 排除。**+60 來自 attack→encounter→戰鬥**(死亡 person.coin 退團 / loot / subjugate coin 路由疑兇)。
+- **成因**：schedule 從不 fire(Bug6)時此漏洞被遮蔽;Bug6 修好讓玩家發起 attack 真觸發 → 才現形。屬 W6 死亡資產守恆的遺漏分支。
+- **狀態**：新發現,未修。需隔離戰鬥 coin 路由(逐段 audit attack→death→loot/subjugate)。**勿與 extract 混淆**。
+- **優先**：M（守恆破,但需玩家主動 attack 才觸發,NPC vs NPC 走 npc_combat 另路徑待查是否同漏）
+
+### Bug9. EncounterSystem player_id==-1 → anon 被當玩家 ✅ 已修（2026-06-15）
 - **症狀**：`advance_encounter_tick` / `_decide_action` 以 `person_id == state.player_id` 判玩家；若 `player_id==-1`（無玩家），anon（person_id=-1）全被當玩家 → 回 `player_turn` 停手 / idle
-- **狀態**：現流程不觸發（正式遊戲 player_id>=0；NPC vs NPC 走 npc_combat 不走 encounter）。beast-combat 測試以 player_id=-999 迴避
-- **影響 2b-2**：**NPC 遭遇野獸（伏擊）必須走 `npc_combat_system`，不可走 `EncounterSystem`**，否則無玩家的獸戰會卡。2b-2 設計須遵守
-- **優先**：L — 若 2b-2 需無玩家跑 encounter，才在玩家判定加 `state.player_id != -1` 守衛
+- **修**：`encounter_system` 4 處 `person_id==state.player_id` 全前置 `state.player_id != -1 and`（367/389/812/856 玩家回合/idle/pending 判定）→ player_id=-1 時 anon 不再誤判為玩家。latent 防護(現流程 player_id>=0,但無玩家 encounter 不再卡)。
 
 ### W7. 覓食 vs 乞食 仲裁（forage-foundation 遺留）
 - **症狀**：`_find_forage_tile` 周圍無食物時仍回本格 → 小隊（pop≤15）恆覓食、不到乞食 Path4。枯竭區小隊空覓而非乞食富鄰
@@ -263,12 +268,12 @@
 - **勘誤（2026-06-15）**：公式已改,描述失效。現 `d_score = (power_r−1)×0.4 + caution×0.3 − pride×0.3`(`diplomatic_ai_system:129`)——caution 現為**加**分(原記為壓制)。是否仍偏保守 **需重新量測**,勿照舊描述盲調。
 - **建議**：量測現 score 分布 → 若仍少勒索再調 power_r 門檻 + 對未變局勢快取
 
-### Bug6. multi runner 不注入 command_schedule
+### Bug6. multi runner 不注入 command_schedule ✅ 已修（2026-06-15）
 - **症狀**：`game_sim_multi.gd` 只跑 advance_tick，未呼叫 `GameSetup.run_command_schedule_tick`
 - **影響**：config 的 `command_schedule`（如 tyrant extract_treasury / warzone attack）全部不觸發；放大 W1/W2 觀感
-- **嚴重度**：測試保真度
-- **發現**：2026-06-09 integration test
-- **建議**：runner 比照 game_sim_test 補 schedule 注入 + encounter 超時保護
+- **修**：`_run_config` 加 `cmd := PlayerCommandSystem.new()` + `schedule` + 迴圈內 `run_command_schedule_tick(state, cmd, schedule, tick+1)` + fired log。**另補 `GameSetup._dispatch_command` 缺的 `extract_treasury` 分支**(原只 attack/trade/alliance/recruit/build,extract 落 `_:` no-op)。
+- **驗證**：tyrant 跑出 `[Schedule] tick=240 fired extract_treasury → ok`、`tick3360 attack → ok`。
+- **副產**：schedule 真 fire 後暴露 **Bug10**(attack 戰鬥路徑漏 +60 coin_eq)——原被「schedule 不 fire」遮蔽。
 
 ### W3. BREAKOUT_DIST / ENCIRCLE_DIST tune
 - **症狀**：常數調為 2/1 適配 radius 4 測試地圖；正式地圖 radius 可能不同
