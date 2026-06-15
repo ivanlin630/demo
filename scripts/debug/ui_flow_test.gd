@@ -12,8 +12,60 @@ func _initialize() -> void:
 	await _test_armed_count_shown()
 	await _test_member_equip_flow()
 	await _test_armed_ratio_cmd()
+	await _test_storage_panel_ui()
+	await _test_outpost_build_abandon()
+	await _test_faction_extract_treasury()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
+
+# 公庫面板：自家 outpost + 雙向資源 → 顯存入/取出 + food
+func _test_storage_panel_ui() -> void:
+	print("\n── 公庫面板 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var ppos = st.teams[ptid].tile_pos
+	st.teams[ptid].resources["food"] = 60.0
+	var tile = st.world.tiles.get(ppos.x*1000 + ppos.y)
+	if tile == null:
+		tile = HexTileData.new(); st.world.tiles[ppos.x*1000+ppos.y] = tile
+	tile.outpost_owner = ptid; tile.outpost_type = "civilian"; tile.outpost_level = 1
+	tile.public_storage = {"food": 20.0}
+	node._storage_mode = true
+	var s: String = node._build_storage_str()
+	_check("公庫字串顯存入/取出", s.contains("存") and s.contains("取"))
+	_check("公庫顯 food", s.contains("food"))
+	await _free_ui(node)
+
+# outpost 面板：自家 outpost → 顯設施/棄置行動列
+func _test_outpost_build_abandon() -> void:
+	print("\n── outpost build_facility/abandon ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var ppos = st.teams[ptid].tile_pos
+	var tile = st.world.tiles.get(ppos.x*1000 + ppos.y)
+	if tile == null:
+		tile = HexTileData.new(); st.world.tiles[ppos.x*1000+ppos.y] = tile
+	tile.outpost_owner = ptid; tile.outpost_type = "civilian"; tile.outpost_level = 1
+	node._outpost_mode = true
+	var s: String = node._build_outpost_str()
+	_check("outpost 面板顯設施/棄置", s.contains("設施") or s.contains("擴建") or s.contains("棄"))
+	await _free_ui(node)
+
+# faction 面板：玩家為 leader → 顯徵用國庫
+func _test_faction_extract_treasury() -> void:
+	print("\n── faction extract_treasury ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var fac := FactionData.new(); fac.faction_id = 555; fac.leader_team_id = ptid
+	st.factions[555] = fac
+	st.teams[ptid].faction_id = 555
+	node._faction_mode = true
+	var s: String = node._build_faction_str()
+	_check("faction 面板顯提幣", s.contains("提幣") or s.contains("徵用") or s.contains("國庫"))
+	await _free_ui(node)
 
 func _test_member_equip_flow() -> void:
 	print("\n── 成員裝備 flow ──")

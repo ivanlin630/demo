@@ -333,6 +333,11 @@ func _initialize() -> void:
 	_test_set_member_salary()
 	_test_set_armed_ratio()
 	_test_equip_member()
+	# ── P3 全動作覆蓋 ──
+	_test_storage_panel_dto()
+	_test_get_actions_recruit_anon_invite()
+	_test_storage_conservation()
+	_test_extract_treasury_conservation()
 	quit()
 
 func _test_wild_game_seeded() -> void:
@@ -9383,6 +9388,94 @@ func _test_equip_member() -> void:
 	assert(int(team.resources.get("weapon_melee_low",0)) == 1, "卸下還回 team 池")
 	assert(state.persons[1].equipment["hand_1"].get("grade","") == "", "卸下後手1 應空")
 	print("equip_member OK")
+
+# ── P3 全動作覆蓋 ──
+func _test_storage_panel_dto() -> void:
+	print("--- get_storage_panel DTO ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 80.0, "coin": 20}
+	state.teams[0] = pt
+	var tile := HexTileData.new(); tile.outpost_owner = 0; tile.outpost_type = "civilian"
+	tile.outpost_level = 1; tile.public_storage = {"food": 30.0}
+	state.world.tiles[4*1000+4] = tile
+	var qa := PlayerQueryApi.new()
+	var d: Dictionary = qa.get_storage_panel(state).get("data", {}).get("storage_panel", {})
+	assert(d.get("feasible", false), "自家 outpost 應 feasible")
+	assert(d.get("stored", []).size() > 0, "公庫清單非空")
+	assert(d.get("team_res", []).size() > 0, "我方清單非空")
+	# 非自家 → not feasible
+	tile.outpost_owner = 99
+	var d2: Dictionary = qa.get_storage_panel(state).get("data", {}).get("storage_panel", {})
+	assert(not d2.get("feasible", true), "非自家 outpost 應 not feasible")
+	print("storage_panel DTO OK")
+
+func _test_get_actions_recruit_anon_invite() -> void:
+	print("--- get_available_actions: recruit_anon/invite_settle ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 10
+	pt.tile_pos = Vector2i(4,4); pt.resources = {"coin": 500}
+	state.teams[0] = pt
+	var tgt := TeamData.new(); tgt.team_id = 1; tgt.population = 6
+	tgt.tile_pos = Vector2i(4,4)
+	state.teams[1] = tgt
+	var cs := PlayerCommandSystem.new()
+	var acts: Array = cs.get_available_actions(state, 1)
+	assert(acts.has("recruit_anon"), "合格目標應含 recruit_anon")
+	# invite_settle 須玩家站自家 outpost → 此時無 outpost → 不應出現
+	assert(not acts.has("invite_settle"), "無自家 outpost 不應 emit invite_settle")
+	# 加自家 outpost → 應 emit invite_settle
+	var tile := HexTileData.new(); tile.outpost_owner = 0; tile.outpost_type = "civilian"
+	tile.outpost_level = 1; tile.tile_pos = Vector2i(4,4)
+	state.world.tiles[4*1000+4] = tile
+	var acts2: Array = cs.get_available_actions(state, 1)
+	assert(acts2.has("invite_settle"), "站自家 outpost 應 emit invite_settle")
+	print("get_actions recruit_anon/invite_settle OK (acts=%s)" % str(acts2))
+
+# 守恆：deposit 20 → withdraw 20 → 隊資源/公庫雙向回原值
+func _test_storage_conservation() -> void:
+	print("--- storage conservation ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2; tile.outpost_owner = 0
+	tile.public_storage = { "food": 100.0 }
+	state.world.tiles[0] = tile
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
+	team.resources["food"] = 50.0
+	state.teams[0] = team
+	var pcs := PlayerCommandSystem.new()
+	var team0: float = float(team.resources["food"])
+	var vault0: float = float(tile.public_storage["food"])
+	state.player_state["storage_res"] = "food"
+	state.player_state["storage_amount"] = 20.0
+	assert(pcs._action_deposit_to_storage(state, -1, team, 0).get("ok"), "存入應成功")
+	state.player_state["storage_amount"] = 20.0
+	assert(pcs._action_withdraw_from_storage(state, -1, team, 0).get("ok"), "領取應成功")
+	assert(abs(float(team.resources["food"]) - team0) < 0.01, "隊 food 應回原值")
+	assert(abs(float(tile.public_storage["food"]) - vault0) < 0.01, "公庫 food 應回原值")
+	print("storage conservation OK")
+
+# 守恆：extract_treasury 國庫減量 == 隊 coin 增量
+func _test_extract_treasury_conservation() -> void:
+	print("--- extract_treasury conservation ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new()
+	team.team_id = 0; team.population = 10; team.leader_id = 100
+	team.anon_treasury = 100.0; team.resources["coin"] = 0.0
+	state.teams[0] = team
+	state.player_state["extract_ratio"] = 0.3
+	var pcs := PlayerCommandSystem.new()
+	var t0: float = float(team.anon_treasury)
+	var r := pcs._action_extract_treasury(state, -1, team, 0)
+	assert(r.get("ok"), "徵用應成功")
+	var moved: float = t0 - float(team.anon_treasury)
+	assert(abs(moved - float(team.resources["coin"])) < 0.01, "國庫減量 == 隊 coin 增量")
+	print("extract_treasury conservation OK")
 
 func _test_trade_session_dto() -> void:
 	print("--- get_trade_session DTO ---")
