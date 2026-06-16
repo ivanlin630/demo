@@ -206,6 +206,7 @@ func _initialize() -> void:
 	_test_n3_joins_existing_exile()
 	_test_bridge_no_threat_no_hijack()
 	_test_bridge_with_threat_flees()
+	_test_panic_skips_player_team()
 	# ── Task Arbiter ──
 	_test_arbiter_basic()
 	_test_arbiter_combat_lock()
@@ -7556,6 +7557,43 @@ func _test_bridge_with_threat_flees() -> void:
 	assert(team.current_task == "逃跑", "應逃跑，實際=%s" % team.current_task)
 	assert(team.move_target == Vector2i(5, 0), "move_target 應 (5,0)，實際=%s" % str(team.move_target))
 	print("Reaction Task6b OK")
+
+func _test_panic_skips_player_team() -> void:
+	print("--- 恐慌橋跳過玩家主隊（NPC 對照）---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 共用威脅敵隊 9（朝兩隊方向逼近，高敵意）
+	var enemy := TeamData.new(); enemy.team_id = 9; enemy.leader_id = 90
+	enemy.tile_pos = Vector2i(5, 4); enemy.last_tile_pos = Vector2i(6, 4); enemy.population = 50
+	state.teams[9] = enemy
+	state.persons[90] = PersonData.new(); state.persons[90].id = 90; state.persons[90].team_id = 9
+	enemy.named_members.append(90)
+	# 反方向逃跑目標 tile：(4,4)-(5,4)=(-1,0) → (4,4)+(-1,0)*3 = (1,4)，key=1*1000+4
+	var flee_tile := HexTileData.new(); flee_tile.tile_pos = Vector2i(1, 4)
+	state.world.tiles[1004] = flee_tile
+	var mk_team = func(tid: int) -> TeamData:
+		var t := TeamData.new(); t.team_id = tid; t.tile_pos = Vector2i(4, 4); t.population = 5
+		var ld := PersonData.new(); ld.id = tid * 100; ld.team_id = tid
+		ld.loyalty = 0.0; ld.stress = 1.0; ld.fear = 1.0
+		ld.values = { "求生欲": 1.0, "慎重": 0.0 }
+		state.persons[ld.id] = ld; t.leader_id = ld.id
+		for i in range(4):
+			var m := PersonData.new(); m.id = tid * 100 + 1 + i; m.team_id = tid
+			m.loyalty = 0.0; m.stress = 1.0; m.fear = 1.0
+			m.values = { "求生欲": 1.0, "慎重": 0.0 }
+			state.persons[m.id] = m; t.named_members.append(m.id)
+		state.teams[tid] = t
+		t.known_reputations = { 9: 0.1 }              # 高敵意
+		state.team_discovered[tid] = [9]
+		state.team_intel[tid] = { 9: { "population_est": 50 } }
+		return t
+	var pt: TeamData = mk_team.call(0)
+	var nt: TeamData = mk_team.call(1)
+	state.player_id = 0
+	var rs := ReactionSystem.new()
+	rs.evaluate_all(state, [0, 1, 9])
+	assert(nt.current_task == "逃跑", "NPC 對照隊應觸發恐慌逃跑(測有效性前提),實際=%s" % nt.current_task)
+	assert(pt.current_task != "逃跑", "玩家主隊不該被設逃跑 task,實際=%s" % pt.current_task)
+	print("恐慌橋跳過玩家主隊 OK")
 
 
 # ══ Task Arbiter ══════════════════════════════════════════════

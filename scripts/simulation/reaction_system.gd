@@ -42,7 +42,8 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 		if morale_n > 0:
 			var target_morale: float = clampf(1.0 + (morale_acc / float(morale_n)) * 0.5, 0.5, 1.5)
 			team.work_morale = clampf(lerpf(team.work_morale, target_morale, 0.1), 0.5, 1.5)
-		if flee_count > 0 and float(flee_count) / maxf(team.population, 1) >= 0.3:
+		if flee_count > 0 and float(flee_count) / maxf(team.population, 1) >= 0.3 \
+				and team.leader_id != state.player_id:   # 玩家主隊直接控,不被恐慌劫持 task
 			if team.current_task not in ["逃跑", "護衛"]:
 				var threat_id: int = _find_top_threat(state, team)
 				if threat_id != -1:
