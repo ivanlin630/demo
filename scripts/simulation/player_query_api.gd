@@ -428,6 +428,17 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 				"execute_action",
 				{ "action_id": "hunt_beast", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
 
+	# camp（self-action,紮營）：腳下無主 + 非山地 + 未開發才列（免材料落腳 lvl1 outpost）。
+	if self_tile != null and self_tile.outpost_level == 0 and self_tile.outpost_owner == -1 \
+			and self_tile.terrain != "mountain":
+		actions.append(PlayerApiMapper.map_available_action(
+			"camp", _action_label("camp"), true, "",
+			{ "allowed_kinds": PackedStringArray(["none"]),
+			  "requires_visible_target": false, "requires_forced_interaction": false,
+			  "allows_self_target": false },
+			"execute_action",
+			{ "action_id": "camp", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
+
 	# train（self-action）：有匿名人口才列。一次性 coin→add_exp+try_promote。
 	var pt_train: TeamData = state.teams.get(ptid) if ptid != -1 else null
 	if pt_train != null and AnonTierSystem.total_pop(pt_train) > 0:
@@ -492,6 +503,7 @@ func _action_label(action_id: String) -> String:
 		"hunt":                  return "狩獵"
 		"hunt_beast":            return "獵猛獸"
 		"train":                 return "訓練（-%d coin）" % int(PlayerCommandSystem.TRAIN_COST_COIN)
+		"camp":                  return "紮營"
 		"take_loot":             return "收割戰利品"
 		"leave_loot":            return "放棄戰利品"
 		"recruit_anon":          return "招募匿名"

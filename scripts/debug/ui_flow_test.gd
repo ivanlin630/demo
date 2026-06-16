@@ -22,6 +22,7 @@ func _initialize() -> void:
 	await _test_recruit_named_reachable()
 	await _test_player_status_label()
 	await _test_train_action_reachable()
+	await _test_camp_action_reachable()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -68,6 +69,21 @@ func _test_train_action_reachable() -> void:
 	var self_ids: Array = []
 	for a in node._interact_action_split()["self"]: self_ids.append(a.get("action_id",""))
 	_check("train 在 self-actions", "train" in self_ids)
+	await _free_ui(node)
+
+func _test_camp_action_reachable() -> void:
+	print("\n── 紮營 self-action 可達 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var pt = st.teams[st.persons[st.player_id].team_id]
+	var tile = st.world.tiles.get(pt.tile_pos.x*1000 + pt.tile_pos.y)
+	if tile != null:
+		tile.outpost_level = 0; tile.outpost_owner = -1; tile.terrain = "plains"
+	node._interact_mode = true; node._interact_target = -1
+	node._refresh()
+	var self_ids: Array = []
+	for a in node._interact_action_split()["self"]: self_ids.append(a.get("action_id",""))
+	_check("camp 在 self-actions", "camp" in self_ids)
 	await _free_ui(node)
 
 func _test_join_request_ui() -> void:

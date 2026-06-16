@@ -6,6 +6,8 @@ const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
 const JOIN_ONBOARD_MEAL:  float = 0.8    # 一餐 ≈ FOOD_PER_PERSON_PER_DAY/3 (TEST VALUE)
 const TRAIN_COST_COIN: float = 30.0      # TEST VALUE — 一次訓練的 coin sink
 const TRAIN_EXP_GAIN:  float = 20.0      # TEST VALUE — 一次訓練給最低非菁英 tier 的 exp
+const CAMP_BUILD_TICKS: int   = 240      # TEST VALUE — 紮營 person-ticks（免材料但限時施工）
+const CAMP_FOOD_CAP:    float = 40.0     # TEST VALUE — 紮營只抬 food cap（regen 產糧）,不送即時糧
 
 # 投降抽成清單：30% 轉移給受降方（含武備 — 半繳械投降）
 const SURRENDER_TRANSFER_RES: Array = [
@@ -130,6 +132,7 @@ func _setup_registry() -> void:
 		"hunt":                   _action_hunt,
 		"hunt_beast":             _action_hunt_beast,
 		"train":                  _action_train,
+		"camp":                   _action_camp,
 	}
 
 # 執行玩家主動行動
@@ -200,6 +203,28 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 		msg += "，升階 %d 人" % promoted
 	msg += "）"
 	return { "ok": true, "msg": msg, "payload": {"promoted": promoted} }
+
+# 紮營（Y 版,生存落腳）：免材料 + 無即時糧（只抬 cap）+ 距離 spacing + 限時施工。
+# 玩家發起的限時建造令（設玩家隊 task=建設,PRIO_PLAYER）→ construction 推進 → 完工釋放回 idle。
+func _action_camp(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	var camp_type: String = str(state.player_state.get("build_type", "civilian"))
+	if camp_type not in ["civilian", "military"]:
+		return { "ok": false, "msg": "無效紮營類型" }
+	var tile: HexTileData = state.world.tiles.get(pt.tile_pos.x * 1000 + pt.tile_pos.y)
+	if tile == null:
+		return { "ok": false, "msg": "格子不存在" }
+	if tile.outpost_level > 0 or tile.outpost_owner != -1:
+		return { "ok": false, "msg": "此地已有據點" }
+	if tile.terrain == "mountain":
+		return { "ok": false, "msg": "山地無法紮營" }
+	var os := OutpostSystem.new()
+	if not os._check_distance(state, tile.tile_pos, camp_type):
+		return { "ok": false, "msg": "離既有據點太近,無法紮營" }
+	tile.construction_target = { "action": "crude_camp", "type": camp_type, "level": 1, "owner": pt.team_id }
+	tile.construction_ticks_left = CAMP_BUILD_TICKS
+	tile.construction_started_tick = -1
+	TaskArbiter.try_set(state, pt, TeamData.TASK_BUILD, pt.tile_pos, TaskArbiter.PRIO_PLAYER, "player_camp")
+	return { "ok": true, "msg": "開始紮營 %s（%d ticks,免材料）" % [camp_type, CAMP_BUILD_TICKS] }
 
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))

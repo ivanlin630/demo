@@ -225,6 +225,7 @@ func _initialize() -> void:
 	_test_trade_conservation()
 	_test_massacre_conservation()
 	_test_action_ui_coverage()
+	_test_player_camp()
 	_test_player_beg()
 	_test_diplomacy_reject_cooldown()
 	_test_u20_proactive_same_tile_gate()
@@ -9591,6 +9592,36 @@ func _test_precarity_dto() -> void:
 	assert(ct.get("starving", false) == true, "2 天 < WARNING(3) → starving")
 	print("precarity DTO OK")
 
+func _test_player_camp() -> void:
+	print("--- 玩家紮營（Y 版:免材料/無即時糧/抬cap）---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	pt.tile_pos = Vector2i(4,4); pt.resources = {}   # 免材料:刻意空
+	pt.tags = ["流亡"]
+	state.teams[0] = pt
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(4,4); tile.terrain = "plains"
+	tile.outpost_level = 0; tile.outpost_owner = -1
+	state.world.tiles[4*1000+4] = tile
+	state.player_state["build_type"] = "civilian"
+	var cs := PlayerCommandSystem.new()
+	var food_before: float = float(tile.resources.get("food", 0))
+	var r: Dictionary = cs._action_camp(state, -1, pt, 0)
+	assert(r.get("ok", false), "紮營應成功（免材料）:%s" % str(r))
+	assert(pt.current_task == TeamData.TASK_BUILD, "紮營中玩家隊 task=建設,實際=%s" % pt.current_task)
+	assert(tile.construction_ticks_left > 0, "應設施工 ticks")
+	var os := OutpostSystem.new()
+	for _i in range(100):
+		os._tick_construction(state, tile)
+		if tile.outpost_level > 0: break
+	assert(tile.outpost_level == 1, "完工應 lvl1,實際=%d" % tile.outpost_level)
+	assert(tile.outpost_owner == 0, "owner=玩家隊")
+	assert(float(tile.resource_cap.get("food",0)) >= PlayerCommandSystem.CAMP_FOOD_CAP - 0.01, "food cap 應抬到 CAMP_FOOD_CAP")
+	assert(float(tile.resources.get("food",0)) <= food_before + 0.01, "不送即時糧（resources.food 不增）")
+	assert(not pt.tags.has("流亡"), "完工脫流亡")
+	print("玩家紮營 OK")
+
 func _test_self_actions() -> void:
 	print("--- available_actions self 動作(hunt/hunt_beast) ---")
 	var state := WorldState.new(); state.world = WorldData.new()
@@ -9819,7 +9850,7 @@ func _test_action_ui_coverage() -> void:
 		"beg": "interact-team",
 		"offer_surrender": "interact-team(encounter)",
 		"hunt": "interact-self", "hunt_beast": "interact-self", "establish_faction": "interact-self",
-		"train": "interact-self",
+		"train": "interact-self", "camp": "interact-self",
 		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
 		"confirm_gather_intel": "interact-self",
 		"build_outpost": "outpost-panel", "upgrade_outpost": "outpost-panel",

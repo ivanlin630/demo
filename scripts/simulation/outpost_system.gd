@@ -276,6 +276,18 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				tile.set(key, mini(int(tile.get(key)) + 1, 3))
 				print("[Outpost] 設施完工 %s Lv%d at (%d,%d)" % [
 					fac, int(tile.get(key)), tile.tile_pos.x, tile.tile_pos.y])
+		"crude_camp":
+			# 玩家紮營完工（Y 版）：免材料,只抬 food cap（regen 才產糧）,絕不送即時糧（去剝削）
+			tile.outpost_type  = str(tile.construction_target.get("type", "civilian"))
+			tile.outpost_level = 1
+			tile.outpost_owner = int(tile.construction_target.get("owner", team.team_id))
+			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
+			var camp_tag: String = TeamData.TAG_MILITARY if tile.outpost_type == "military" else TeamData.TAG_PRODUCE
+			if not team.tags.has(camp_tag):
+				team.tags.append(camp_tag)
+			team.tags.erase("流亡")
+			print("[CrudeCamp] Team%d 玩家紮營完工 @(%d,%d) → %s" % [
+				team.team_id, tile.tile_pos.x, tile.tile_pos.y, tile.outpost_type])
 		"demolish":
 			print("[Outpost] Team%d 拆除 %s at (%d,%d)" % [
 				team.team_id, get_outpost_name(tile.outpost_type, tile.outpost_level),
