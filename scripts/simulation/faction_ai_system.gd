@@ -2101,8 +2101,8 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	tile.outpost_type = "military" if is_military else "civilian"
 	tile.outpost_level = 1
 	tile.outpost_owner = team.team_id
-	# 種子糧 + 同抬 cap（沿用 tile_food_init bug 修原則，否則 regen 卡地形預設）
-	tile.resources["food"] = maxf(float(tile.resources.get("food", 0)), CRUDE_CAMP_FOOD_SEED)
+	# 只抬 food cap（regen 才產糧）,不送即時糧。2026-06-16 A/B 量測:即時糧非 load-bearing
+	# （拿掉後 2yr×4config died=0、pop 不掉）→ 移除以恢復絕境稀缺,與玩家紮營版一致。
 	tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), CRUDE_CAMP_FOOD_SEED)
 	# 身分躍遷（比照 _auto_settle_builder）：升軍/生產 tag、清流亡（流浪→定居，非一律生產）
 	var new_tag: String = TeamData.TAG_MILITARY if is_military else TeamData.TAG_PRODUCE

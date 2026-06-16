@@ -37,7 +37,7 @@
 | **task 優先權仲裁（Spec A）** | 是 | current_task 被 5+ 系統互蓋。優先表已設計，待 reaction 收斂後實作 |
 | **salary 欠薪後果** | 接 Bug2 | 見問題解方 |
 | **玩家主動生存動作（對稱性）** | 是 | P4-3:NPC 會乞討/投靠求生,玩家無對應主動 command。補玩家 beg/投靠請求對他隊。接階段2 招人對稱面。需設計（成本/接受判定/UI） |
-| ~~玩家動作 parity（C-1~C-6）~~ ✅ merged 81e245b | — | 2026-06-16 brainstorm reframe（NPC task=AI 抽象 ≠ 玩家直接控,真對稱=動作 parity,spec `2026-06-16-player-action-parity-design.md`）。C-1 設自隊 task→砍/C-4 訓練升tier ✅/C-2 紮營 ✅/C-3 覓食·C-5 pacify·C-6 settle·主動投靠 ⏸ 擱置。副產:panic 收口（玩家隊不被恐慌劫持）+「任務:」→「狀態:」。**遺留**:NPC crude_camp 即時糧軟化絕境→獨立量測 task |
+| ~~玩家動作 parity（C-1~C-6）~~ ✅ merged 81e245b | — | 2026-06-16 brainstorm reframe（NPC task=AI 抽象 ≠ 玩家直接控,真對稱=動作 parity,spec `2026-06-16-player-action-parity-design.md`）。C-1 設自隊 task→砍/C-4 訓練升tier ✅/C-2 紮營 ✅/C-3 覓食·C-5 pacify·C-6 settle·主動投靠 ⏸ 擱置。副產:panic 收口（玩家隊不被恐慌劫持）+「任務:」→「狀態:」。**遺留 ✅**:NPC crude_camp 即時糧 2026-06-16 A/B 量測=非 load-bearing(died=0)→移除即時糧,留 cap,與玩家版一致 |
 | **NPC 勒索機制活化** | 是 | demand_tribute 現休眠(2026-06-15 量測 NPC 發起=0)。發起點 `try_proactive_diplomacy:68` 被早return+同格gate+方向反(弱勒強)三重掐死。要當壓力機制需:翻方向(強勒弱)+ 優先序重排 + 平衡。世界穩定不需要,僅在要「強權壓迫」玩法層才做 |
 
 ### 🟡 長期（系統擴張，世界已穩才碰）
