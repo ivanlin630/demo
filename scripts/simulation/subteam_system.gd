@@ -79,6 +79,35 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	_merge_into(state, sub.parent_team_id, sub_id)
 	return true
 
+# 按比例搬 wounded + resources + anon_treasury 給 absorber；will_empty 時 treasury 全帶走（守恆）
+# 呼叫前 caller 應已決定 frac 與 will_empty（absorbed 是否將清空）；population/anon-tier 轉移由 caller 處理
+func _transfer_proportional_assets(absorber: TeamData, absorbed: TeamData, frac: float, will_empty: bool) -> void:
+	var w_xfer: int = int(round(float(absorbed.wounded) * frac))
+	absorber.wounded += w_xfer
+	absorbed.wounded = maxi(absorbed.wounded - w_xfer, 0)
+	for res in absorbed.resources:
+		var amt: float = float(absorbed.resources.get(res, 0)) * frac
+		absorber.resources[res] = float(absorber.resources.get(res, 0)) + amt
+		absorbed.resources[res] = float(absorbed.resources.get(res, 0)) - amt
+	var treas_xfer: float = absorbed.anon_treasury * frac
+	absorber.anon_treasury += treas_xfer
+	absorbed.anon_treasury -= treas_xfer
+	if will_empty:
+		absorber.anon_treasury += absorbed.anon_treasury
+		absorbed.anon_treasury = 0.0
+
+# 滅團清理：faction 成員表 + 全域 team registry（teams/known/discovered）移除 absorbed
+func _erase_absorbed_team(state: WorldState, absorbed_id: int) -> void:
+	var absorbed: TeamData = state.teams.get(absorbed_id)
+	if absorbed != null and absorbed.faction_id != -1:
+		var f: FactionData = state.factions.get(absorbed.faction_id)
+		if f != null:
+			f.member_team_ids.erase(absorbed_id)
+			f.known_member_states.erase(absorbed_id)
+	state.teams.erase(absorbed_id)
+	state.team_known.erase(absorbed_id)
+	state.team_discovered.erase(absorbed_id)
+
 func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		transfer_npc_ids: Array = [], transfer_anon: int = -1) -> void:
 	if transfer_npc_ids.is_empty() and transfer_anon == -1:
@@ -133,33 +162,13 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 	absorber.population += total_xfer
 	absorbed.population -= total_xfer
 	AnonTierSystem.transfer_proportional(absorbed, absorber, anon_xfer)
-	absorber.wounded += int(round(float(absorbed.wounded) * frac))
-	absorbed.wounded = maxi(absorbed.wounded - int(round(float(absorbed.wounded) * frac)), 0)
-	for res in absorbed.resources:
-		var amt: float = float(absorbed.resources.get(res, 0)) * frac
-		absorber.resources[res] = float(absorber.resources.get(res, 0)) + amt
-		absorbed.resources[res] = float(absorbed.resources.get(res, 0)) - amt
-	# 公庫 treasury 按比例併入；完全併入則全帶走
-	var treas_xfer: float = absorbed.anon_treasury * frac
-	absorber.anon_treasury += treas_xfer
-	absorbed.anon_treasury -= treas_xfer
-	if absorbed.population <= 0:
-		absorber.anon_treasury += absorbed.anon_treasury
-		absorbed.anon_treasury = 0.0
+	_transfer_proportional_assets(absorber, absorbed, frac, absorbed.population <= 0)
 	if absorbed_leader_moved and absorbed.population > 0:
 		var es := EventSystem.new()
 		es.on_leader_death(state, absorbed)
 	if absorbed.population <= 0:
 		absorber.subteam_ids.erase(absorbed_id)
-		# Faction cleanup before erasing
-		if absorbed.faction_id != -1:
-			var f_merge: FactionData = state.factions.get(absorbed.faction_id)
-			if f_merge != null:
-				f_merge.member_team_ids.erase(absorbed_id)
-				f_merge.known_member_states.erase(absorbed_id)
-		state.teams.erase(absorbed_id)
-		state.team_known.erase(absorbed_id)
-		state.team_discovered.erase(absorbed_id)
+		_erase_absorbed_team(state, absorbed_id)
 		print("[Merge] Team%d ← Team%d 完全合併 (absorber_pop=%d)" % [
 			absorber_id, absorbed_id, absorber.population])
 	else:
@@ -214,31 +223,11 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	absorber.population += transfer
 	AnonTierSystem.transfer_proportional(absorbed, absorber,
 		roundi(float(AnonTierSystem.total_pop(absorbed)) * frac))
-	absorber.wounded    += int(round(float(absorbed.wounded) * frac))
-	for res in absorbed.resources:
-		var amt: float = float(absorbed.resources.get(res, 0)) * frac
-		absorber.resources[res] = float(absorber.resources.get(res, 0)) + amt
-		absorbed.resources[res] = float(absorbed.resources.get(res, 0)) - amt
-	# 公庫 treasury 按比例併入；完全併入則全帶走
-	var treas_xfer2: float = absorbed.anon_treasury * frac
-	absorber.anon_treasury += treas_xfer2
-	absorbed.anon_treasury -= treas_xfer2
-	if absorbed.population - transfer <= 0:
-		absorber.anon_treasury += absorbed.anon_treasury
-		absorbed.anon_treasury = 0.0
+	_transfer_proportional_assets(absorber, absorbed, frac, absorbed.population - transfer <= 0)
 	absorbed.population -= transfer
-	absorbed.wounded     = maxi(absorbed.wounded - int(round(float(absorbed.wounded) * frac)), 0)
 	absorber.subteam_ids.erase(absorbed_id)
 	if absorbed.population <= 0:
-		# Faction cleanup before erasing
-		if absorbed.faction_id != -1:
-			var f_merge: FactionData = state.factions.get(absorbed.faction_id)
-			if f_merge != null:
-				f_merge.member_team_ids.erase(absorbed_id)
-				f_merge.known_member_states.erase(absorbed_id)
-		state.teams.erase(absorbed_id)
-		state.team_known.erase(absorbed_id)
-		state.team_discovered.erase(absorbed_id)
+		_erase_absorbed_team(state, absorbed_id)
 		print("[Merge] Team%d ← Team%d 完全合併 (pop=%d)" % [absorber_id, absorbed_id, absorber.population])
 	elif transfer > 0:
 		print("[Merge] Team%d ← Team%d 部分合併 (absorber=%d absorbed=%d)" % [

@@ -594,6 +594,13 @@ func _action_disband_faction(state: WorldState, _target_id: int, pt: TeamData, p
 	state.disband_faction(fid5)
 	return { "ok": true, "msg": "勢力已解散" }
 
+# 投降資產轉移：from 隊 30% 指定資源交給 to 隊（收編前戰利品，守恆）
+func _transfer_surrender_assets(from: TeamData, to: TeamData) -> void:
+	for res in SURRENDER_TRANSFER_RES:
+		var amt: float = float(from.resources.get(res, 0)) * 0.3
+		from.resources[res] = float(from.resources.get(res, 0)) - amt
+		to.resources[res]   = float(to.resources.get(res, 0)) + amt
+
 func _action_offer_surrender(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var tgt6: TeamData = state.teams.get(target_id)
 	if tgt6 == null:
@@ -601,10 +608,7 @@ func _action_offer_surrender(state: WorldState, target_id: int, pt: TeamData, pt
 	var resp6: String = _diplomatic.handle_diplomacy_message(state, tgt6, pt, "offer_surrender")
 	state.player_pending_targets.erase(target_id)
 	if resp6 == "accept":
-		for res6 in SURRENDER_TRANSFER_RES:
-			var amount6: float = float(pt.resources.get(res6, 0)) * 0.3
-			pt.resources[res6]   = float(pt.resources.get(res6, 0)) - amount6
-			tgt6.resources[res6] = float(tgt6.resources.get(res6, 0)) + amount6
+		_transfer_surrender_assets(pt, tgt6)
 		_interaction.subjugate_team(state, target_id, pt_id)
 		print("[PlayerCmd] 玩家投降 Team%d 接受" % target_id)
 		return { "ok": true, "msg": "投降被接受，已被收編" }
@@ -621,10 +625,7 @@ func _action_surrender_in_encounter(state: WorldState, _target_id: int, pt: Team
 		return { "ok": false, "msg": "找不到對手" }
 	var resp6b: String = _diplomatic.handle_diplomacy_message(state, enemy6, pt, "offer_surrender")
 	if resp6b == "accept":
-		for res6b in SURRENDER_TRANSFER_RES:
-			var amt6b: float = float(pt.resources.get(res6b, 0)) * 0.3
-			pt.resources[res6b]    = float(pt.resources.get(res6b, 0)) - amt6b
-			enemy6.resources[res6b] = float(enemy6.resources.get(res6b, 0)) + amt6b
+		_transfer_surrender_assets(pt, enemy6)
 		_interaction.subjugate_team(state, enemy_id6, pt_id)
 		_encounter.cleanup_encounter(state)
 		print("[PlayerCmd] 玩家戰中投降，Team%d 接受" % enemy_id6)
@@ -655,10 +656,7 @@ func _action_surrender_pre_encounter(state: WorldState, _target_id: int, pt: Tea
 	var resp: String = _diplomatic.handle_diplomacy_message(state, attacker, pt, "offer_surrender")
 	state.player_pre_encounter = {}
 	if resp == "accept":
-		for res_sp in SURRENDER_TRANSFER_RES:
-			var amt_sp: float = float(pt.resources.get(res_sp, 0)) * 0.3
-			pt.resources[res_sp]       = float(pt.resources.get(res_sp, 0)) - amt_sp
-			attacker.resources[res_sp] = float(attacker.resources.get(res_sp, 0)) + amt_sp
+		_transfer_surrender_assets(pt, attacker)
 		_interaction.subjugate_team(state, atk_id, pt_id)
 		print("[PlayerCmd] 玩家預備投降，Team%d 接受" % atk_id)
 		return { "ok": true, "msg": "投降被接受，已被收編" }
