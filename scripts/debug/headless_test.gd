@@ -36,6 +36,7 @@ func _initialize() -> void:
 	_test_survival_prefs()
 	_test_find_unowned_farmable()
 	_test_crude_camp()
+	_test_npc_promote_via_training()
 	_test_desperation_cascade()
 	_test_strategic_ai_respects_survival()
 	_test_strategic_in_map_check()
@@ -3990,6 +3991,24 @@ func _test_crude_camp() -> void:
 	assert(tile2.outpost_type == "military", "好戰流民 → 軍營")
 	assert(t2.tags.has("軍隊"), "好戰流民紮營 → 升軍隊（非一律生產）")
 	print("crude camp OK")
+
+# W4: NPC TASK_TRAIN 累積 exp 後應實際升階（training_system 補 try_promote caller）
+func _test_npc_promote_via_training() -> void:
+	print("--- W4: NPC 訓練升階 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"戰術": 0.5}
+	state.persons[0] = leader
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0
+	team.current_task = TeamData.TASK_TRAIN
+	team.resources = {"coin": 500.0, "food": 500.0, "material": 100.0}   # 升階 PROMOTION_COST 足
+	state.teams[0] = team
+	AnonTierSystem.add_anon(team, "平民", 4)
+	var ts := TrainingSystem.new()
+	for _i in range(200):
+		ts.process(state, [0])
+	assert(int(team.anon_tiers.get("新兵", 0)) > 0, "NPC 訓練後應有平民升新兵,新兵=%d" % int(team.anon_tiers.get("新兵",0)))
+	print("W4 NPC 訓練升階 OK")
 
 func _test_desperation_cascade() -> void:
 	print("--- 絕境 cascade：urgent 解閘 ---")

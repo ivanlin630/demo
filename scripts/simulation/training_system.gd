@@ -25,3 +25,9 @@ func process(state: WorldState, team_ids: Array) -> void:
 			if n <= 0:
 				continue
 			AnonTierSystem.add_exp(team, tier, tact * float(n) * EXP_RATE_MULT)
+			# W4: 補 promote tick caller — 累積 exp 後升到不能升（count=1 迴圈,exp/物資/count 不足自停）
+			var promoted: int = 0
+			while AnonTierSystem.try_promote(state, team, tier, 1) > 0:
+				promoted += 1
+			if promoted > 0:
+				print("[Train] Team%d %s 升階 %d 人" % [team.team_id, tier, promoted])
