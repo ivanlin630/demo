@@ -350,6 +350,7 @@ func _initialize() -> void:
 	_test_join_request_trigger_and_respond()
 	_test_recruit_tutorial()
 	_test_join_conservation()
+	_test_player_train()
 	quit()
 
 func _test_join_conservation() -> void:
@@ -666,6 +667,28 @@ func _test_player_hunt_action() -> void:
 			got_food = true
 	assert(got_food, "hunt 指令應得食物")
 	print("player hunt OK")
+
+func _test_player_train() -> void:
+	print("--- 玩家訓練/晉升 anon ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader; state.player_id = 0
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0
+	pt.tile_pos = Vector2i(4,4)
+	pt.resources = {"coin": 1000.0, "food": 200.0, "material": 50.0}   # coin 足多次訓練 + 升階 PROMOTION_COST
+	state.teams[0] = pt
+	AnonTierSystem.add_anon(pt, "平民", 4)   # 4 個平民
+	var cs := PlayerCommandSystem.new()
+	var exp_before: float = float(pt.anon_exp.get("平民", 0.0))
+	var coin_before: float = float(pt.resources.get("coin", 0))
+	var r: Dictionary = cs._action_train(state, -1, pt, 0)
+	assert(r.get("ok", false), "訓練應成功:%s" % str(r))
+	assert(abs(coin_before - float(pt.resources.get("coin",0)) - PlayerCommandSystem.TRAIN_COST_COIN) < 0.01, "coin 扣 TRAIN_COST")
+	assert(float(pt.anon_exp.get("平民", 0.0)) > exp_before, "平民 exp 應增")
+	for _i in range(20):
+		cs._action_train(state, -1, pt, 0)
+	assert(int(pt.anon_tiers.get("新兵", 0)) > 0, "連訓後應有平民升新兵,新兵=%d" % int(pt.anon_tiers.get("新兵",0)))
+	print("玩家訓練/晉升 anon OK")
 
 # ──────── 階段1 Plan 2b-1 野獸戰鬥核心 ────────
 
@@ -9796,6 +9819,7 @@ func _test_action_ui_coverage() -> void:
 		"beg": "interact-team",
 		"offer_surrender": "interact-team(encounter)",
 		"hunt": "interact-self", "hunt_beast": "interact-self", "establish_faction": "interact-self",
+		"train": "interact-self",
 		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
 		"confirm_gather_intel": "interact-self",
 		"build_outpost": "outpost-panel", "upgrade_outpost": "outpost-panel",

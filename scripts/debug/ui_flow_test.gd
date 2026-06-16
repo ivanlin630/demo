@@ -21,6 +21,7 @@ func _initialize() -> void:
 	await _test_interact_self_team_split()
 	await _test_recruit_named_reachable()
 	await _test_player_status_label()
+	await _test_train_action_reachable()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -53,6 +54,20 @@ func _test_interact_self_team_split() -> void:
 	var team_ids: Array = []
 	for a in node._interact_action_split()["team"]: team_ids.append(a.get("action_id", ""))
 	_check("team 行動清單不含 hunt", not ("hunt" in team_ids))
+	await _free_ui(node)
+
+func _test_train_action_reachable() -> void:
+	print("\n── 訓練 self-action 可達 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var pt = st.teams[st.persons[st.player_id].team_id]
+	pt.resources["coin"] = 100.0
+	AnonTierSystem.add_anon(pt, "平民", 4)
+	node._interact_mode = true; node._interact_target = -1
+	node._refresh()
+	var self_ids: Array = []
+	for a in node._interact_action_split()["self"]: self_ids.append(a.get("action_id",""))
+	_check("train 在 self-actions", "train" in self_ids)
 	await _free_ui(node)
 
 func _test_join_request_ui() -> void:

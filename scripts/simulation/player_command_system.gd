@@ -4,6 +4,8 @@ class_name PlayerCommandSystem
 const RECRUIT_COST_ANON:  float = 50.0   # TEST VALUE
 const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
 const JOIN_ONBOARD_MEAL:  float = 0.8    # 一餐 ≈ FOOD_PER_PERSON_PER_DAY/3 (TEST VALUE)
+const TRAIN_COST_COIN: float = 30.0      # TEST VALUE — 一次訓練的 coin sink
+const TRAIN_EXP_GAIN:  float = 20.0      # TEST VALUE — 一次訓練給最低非菁英 tier 的 exp
 
 # 投降抽成清單：30% 轉移給受降方（含武備 — 半繳械投降）
 const SURRENDER_TRANSFER_RES: Array = [
@@ -127,6 +129,7 @@ func _setup_registry() -> void:
 		"deposit_to_storage":     _action_deposit_to_storage,
 		"hunt":                   _action_hunt,
 		"hunt_beast":             _action_hunt_beast,
+		"train":                  _action_train,
 	}
 
 # 執行玩家主動行動
@@ -169,6 +172,34 @@ func _action_hunt_beast(state: WorldState, _target: int, pt: TeamData, pt_id: in
 	var bid: int = BeastSystem.new().build_beast_team(state, kind, pt.tile_pos)
 	_encounter.init_encounter(state, pt_id, bid, "normal")
 	return { "ok": true, "msg": "發起獵 %s" % kind, "requires_preview": false }
+
+# 訓練/晉升：一次性花 coin → 給最低非菁英 tier 一批 exp → 立即嘗試升階（reuse AnonTierSystem,玩家版比 NPC 完整）
+# coin = 消耗 sink（訓練開銷）。升階另消耗 PROMOTION_COST 物資（既有規則）。
+func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	if AnonTierSystem.total_pop(pt) <= 0:
+		return { "ok": false, "msg": "無匿名人口可訓練" }
+	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
+		return { "ok": false, "msg": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN }
+	pt.resources["coin"] = float(pt.resources.get("coin", 0)) - TRAIN_COST_COIN   # 消耗 sink
+	var target_tier: String = ""
+	for tier in AnonTierSystem.TIER_ORDER:
+		if tier == "菁英": break
+		if int(pt.anon_tiers.get(tier, 0)) > 0:
+			target_tier = tier; break
+	if target_tier == "":
+		return { "ok": true, "msg": "訓練（-%.0f coin,無可升階對象）" % TRAIN_COST_COIN }
+	AnonTierSystem.add_exp(pt, target_tier, TRAIN_EXP_GAIN)
+	var promoted: int = 0
+	for tier in AnonTierSystem.TIER_ORDER:
+		if tier == "菁英": break
+		var n: int = int(pt.anon_tiers.get(tier, 0))
+		if n > 0:
+			promoted += AnonTierSystem.try_promote(state, pt, tier, n)
+	var msg: String = "訓練（-%.0f coin → %s +exp" % [TRAIN_COST_COIN, target_tier]
+	if promoted > 0:
+		msg += "，升階 %d 人" % promoted
+	msg += "）"
+	return { "ok": true, "msg": msg, "payload": {"promoted": promoted} }
 
 func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
