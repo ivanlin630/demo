@@ -876,7 +876,7 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 		_msg.emit_message(state, "aid_refused",
 			"Team%d 拒絕援助 Team%d" % [target_id, beggar_id], target,
 			{ "origin": str(target_id), "target": str(beggar_id) })
-		_aid_update_rep(beggar, target_id, -0.1)
+		beggar.update_reputation(target_id, -0.1)
 		_npc_ai.write_memory(beggar_leader, "rejected_aid", target_id,
 			state.world.current_tick, 0.5)
 		_npc_ai.write_memory(target_leader, "begged_at_me", beggar_id,
@@ -895,7 +895,7 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 	_msg.emit_message(state, "aid_given",
 		"Team%d 援助 Team%d %.0f 食物" % [target_id, beggar_id, give], target,
 		{ "origin": str(target_id), "target": str(beggar_id), "amount": "%.0f" % give })
-	_aid_update_rep(beggar, target_id, 0.15)
+	beggar.update_reputation(target_id, 0.15)
 	var intensity: float = clampf(give / maxf(need, 1.0), 0.1, 1.0)
 	_npc_ai.write_memory(beggar_leader, "benefactor", target_id,
 		state.world.current_tick, intensity)
@@ -931,10 +931,6 @@ func _clear_aid_task(beggar: TeamData) -> void:
 	else:
 		TaskArbiter.release(beggar)
 	beggar.previous_task = ""
-
-func _aid_update_rep(team: TeamData, other_id: int, delta: float) -> void:
-	var cur: float = float(team.known_reputations.get(other_id, 0.5))
-	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)
 
 # ──────── 安頓（invite_settle）執行 ────────
 
@@ -974,7 +970,7 @@ func _find_existing_resident(state: WorldState, pos: Vector2i, exclude_id: int, 
 func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 	if not subteam.tags.has(TeamData.TAG_PRODUCE):
 		subteam.tags.append(TeamData.TAG_PRODUCE)
-	subteam.tags.erase("子團")
+	subteam.tags.erase(TeamData.TAG_SUBTEAM)
 	subteam.tags.erase("流亡")
 	TaskArbiter.transition(subteam, "生產", TaskArbiter.PRIO_AMBIENT)
 	subteam.parent_team_id = -1
@@ -987,7 +983,7 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 		if t == null: continue
 		if t.tile_pos != subteam.tile_pos: continue
 		if t.team_id == subteam.team_id: continue
-		if "子團" in t.tags and "生產" in t.tags:
+		if TeamData.TAG_SUBTEAM in t.tags and "生產" in t.tags:
 			SubteamSystem.new().try_merge_back(state, t.team_id)
 
 # ──────── 安撫（pacify）────────

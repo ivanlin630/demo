@@ -340,7 +340,7 @@ func _has_inflight_settler(state: WorldState, owner: TeamData, tile: HexTileData
 		var t: TeamData = state.teams[tid]
 		if t.team_id == owner.team_id: continue
 		if t.faction_id != owner.faction_id: continue
-		if not ("子團" in t.tags): continue
+		if not (TeamData.TAG_SUBTEAM in t.tags): continue
 		if t.current_task != "安頓": continue
 		if t.move_target != tile.tile_pos: continue
 		return true
@@ -539,7 +539,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 
 func _tag_weight(team: TeamData, task: String) -> float:
 	if task in ["idle", "逃跑"]: return 1.0
-	if team.tags.has("統領") or team.tags.has("子團"): return 1.0
+	if team.tags.has("統領") or team.tags.has(TeamData.TAG_SUBTEAM): return 1.0
 	if team.tags.has("流亡"): return 0.0
 	var task_tags: Dictionary = {
 		"攻擊":  ["軍隊"],

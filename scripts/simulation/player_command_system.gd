@@ -874,7 +874,7 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 		msg_sys.emit_message(state, "aid_refused",
 			"玩家拒絕援助 Team%d" % beggar_id, pt,
 			{ "origin": str(pt_id), "target": str(beggar_id) })
-		_update_rep(beggar, pt_id, -0.1)
+		beggar.update_reputation(pt_id, -0.1)
 		if b_leader: npc_ai.write_memory(b_leader, "rejected_aid", pt_id,
 			state.world.current_tick, 0.5)
 	else:
@@ -891,7 +891,7 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 				"玩家援助 Team%d %.0f 食物" % [beggar_id, actual], pt,
 				{ "origin": str(pt_id), "target": str(beggar_id),
 				  "amount": "%.0f" % actual })
-			_update_rep(beggar, pt_id, 0.15)
+			beggar.update_reputation(pt_id, 0.15)
 			if b_leader: npc_ai.write_memory(b_leader, "benefactor", pt_id,
 				state.world.current_tick, clampf(actual / 50.0, 0.1, 1.0))
 	beggar.combat_target = -1
@@ -955,10 +955,6 @@ func _action_beg(state: WorldState, target_id: int, pt: TeamData, pt_id: int) ->
 	if r.get("accepted", false):
 		return { "ok": true, "msg": "Team%d 施捨食物 %.0f" % [target_id, float(r.get("amount", 0))] }
 	return { "ok": true, "msg": "Team%d 不予施捨（%s）" % [target_id, r.get("msg", "拒絕")] }
-
-func _update_rep(team: TeamData, other_id: int, delta: float) -> void:
-	var cur: float = float(team.known_reputations.get(other_id, 0.5))
-	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)
 
 # ── 內部 helper ──────────────────────────────────────────────
 

@@ -34,7 +34,7 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	sub.leader_id        = sub_leader_id
 	sub.population       = pop_count
 	sub.readiness        = parent.readiness
-	sub.tags             = ["子團"]
+	sub.tags             = [TeamData.TAG_SUBTEAM]
 
 	var frac: float = float(pop_count) / float(parent.population)
 	for res in parent.resources:
@@ -165,12 +165,16 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 	else:
 		absorbed.parent_team_id = absorber_id
 		TaskArbiter.release(absorbed)
-		if not absorbed.tags.has("子團"):
-			absorbed.tags.append("子團")
+		if not absorbed.tags.has(TeamData.TAG_SUBTEAM):
+			absorbed.tags.append(TeamData.TAG_SUBTEAM)
 		if not absorber.subteam_ids.has(absorbed_id):
 			absorber.subteam_ids.append(absorbed_id)
-		print("[Merge] Team%d ← Team%d 部分合併 (absorber=%d absorbed=%d)" % [
-			absorber_id, absorbed_id, absorber.population, absorbed.population])
+		if total_xfer > 0:
+			print("[Merge] Team%d ← Team%d 部分合併 (absorber=%d absorbed=%d)" % [
+				absorber_id, absorbed_id, absorber.population, absorbed.population])
+		else:
+			print("[Merge] Team%d ← Team%d 容量不足，未轉移人員 (absorber=%d)" % [
+				absorber_id, absorbed_id, absorber.population])
 
 func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	var absorber: TeamData = state.teams[absorber_id]
@@ -183,7 +187,7 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	# 子隊回歸但母團已滿 → 獨立分團，不重試
 	if capacity <= 0 and absorbed.parent_team_id == absorber_id:
 		absorbed.parent_team_id = -1
-		absorbed.tags.erase("子團")
+		absorbed.tags.erase(TeamData.TAG_SUBTEAM)
 		absorber.subteam_ids.erase(absorbed_id)
 		print("[Split] Team%d 回歸失敗（母團滿員），獨立為新分團" % absorbed_id)
 		return
@@ -236,9 +240,12 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 		state.team_known.erase(absorbed_id)
 		state.team_discovered.erase(absorbed_id)
 		print("[Merge] Team%d ← Team%d 完全合併 (pop=%d)" % [absorber_id, absorbed_id, absorber.population])
-	else:
+	elif transfer > 0:
 		print("[Merge] Team%d ← Team%d 部分合併 (absorber=%d absorbed=%d)" % [
 			absorber_id, absorbed_id, absorber.population, absorbed.population])
+	else:
+		print("[Merge] Team%d ← Team%d 容量不足，未轉移人員 (absorber=%d)" % [
+			absorber_id, absorbed_id, absorber.population])
 
 func _pick_subteam_leader(state: WorldState, team: TeamData, task: String) -> int:
 	var skill_map: Dictionary = {

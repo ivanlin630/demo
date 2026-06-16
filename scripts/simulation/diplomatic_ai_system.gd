@@ -101,8 +101,8 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 				"intensity": "minor",
 				"reaction":  "tribute_refused"
 			})
-		_update_reputation(sender, target.team_id, -0.1)
-		_update_reputation(target, sender.team_id, -0.05)
+		sender.update_reputation(target.team_id, -0.1)
+		target.update_reputation(sender.team_id, -0.05)
 		print("[Diplomacy] Team%d 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05" % target.team_id)
 
 func handle_diplomacy_message(state: WorldState, self_team: TeamData,
@@ -116,8 +116,8 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 			return "reject"
 		"propose_trade":
 			if score > 0.4:
-				_update_reputation(self_team, sender_team.team_id, 0.05)
-				_update_reputation(sender_team, self_team.team_id, 0.05)
+				self_team.update_reputation(sender_team.team_id, 0.05)
+				sender_team.update_reputation(self_team.team_id, 0.05)
 				return "accept"
 			return "reject"
 		"demand_tribute":
@@ -158,8 +158,8 @@ func _form_alliance(state: WorldState,
 		if f and not f.member_team_ids.has(team_a.team_id):
 			f.member_team_ids.append(team_a.team_id)
 		state.snapshot_faction_member(team_a.team_id, state.world.current_tick)
-	_update_reputation(team_a, team_b.team_id, 0.2)
-	_update_reputation(team_b, team_a.team_id, 0.2)
+	team_a.update_reputation(team_b.team_id, 0.2)
+	team_b.update_reputation(team_a.team_id, 0.2)
 	print("[Diplomacy] Team%d 與 Team%d 結盟" % [team_a.team_id, team_b.team_id])
 	# D C1: 若 team_b 是居民團 → 投降勸服，outpost 轉給 team_a
 	if team_b.tags.has(TeamData.TAG_PRODUCE):
@@ -169,10 +169,6 @@ func _form_alliance(state: WorldState,
 			tile.outpost_owner = team_a.team_id
 			print("[Surrender] 居民團 Team%d 投降，outpost (%d,%d) %d→%d" % [
 				team_b.team_id, team_b.tile_pos.x, team_b.tile_pos.y, old_owner, team_a.team_id])
-
-func _update_reputation(team: TeamData, other_id: int, delta: float) -> void:
-	var cur: float = float(team.known_reputations.get(other_id, 0.5))
-	team.known_reputations[other_id] = clampf(cur + delta, 0.0, 1.0)
 
 func consider_betrayal(state: WorldState, self_team: TeamData,
 		ally_team: TeamData) -> bool:
@@ -203,7 +199,7 @@ func _execute_betrayal(state: WorldState, self_team: TeamData,
 	if f_bt != null:
 		f_bt.member_team_ids.erase(self_team.team_id)
 	self_team.faction_id = -1
-	_update_reputation(ally_team, self_team.team_id, -0.5)
+	ally_team.update_reputation(self_team.team_id, -0.5)
 	var ally_leader: PersonData = state.persons.get(ally_team.leader_id)
 	if ally_leader:
 		ally_leader.memory.append({

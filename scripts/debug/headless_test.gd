@@ -2098,7 +2098,7 @@ func _run_sim_test() -> void:
 	# Team6（商隊）主動提外交
 	_dip2.try_proactive_diplomacy(state, state.teams[6])
 	# 攻擊後信譽下降
-	_dip2._update_reputation(state.teams[0], 3, -0.3)
+	state.teams[0].update_reputation(3, -0.3)
 	var _rep: float = float(state.teams[0].known_reputations.get(3, 0.5))
 	assert(_rep < 0.5, "攻擊後 known_reputations 應下降")
 	print("[Diplomacy] known_reputations 更新驗證通過")
