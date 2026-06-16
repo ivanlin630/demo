@@ -31,6 +31,8 @@
 
 | 項目 | 待 spec? | 解的問題 |
 |---|---|---|
+| **遭遇戰收斂修（P6:E-1/E-2/E-3）** | 是 | 2026-06-17 玩測抓:弱隊(armed=0)殺不光對攻擊免疫(E-1,高)/AI 小隊死戰不撤(E-2)/玩家走邊無逃離(E-3)。normal 遭遇戰無敗方 pop 損耗 + unarmed 不上場 → 世界無法收斂消滅弱隊。需設計敗方損耗/撤退門檻/玩家逃離。詳見 known_issues P6 |
+| **戰俘處置（半套→中期）** | 是 | capture/store(`prisoner_population`)已做,**處置全缺**(賣/屠/招降/釋放/勞役)→俘虜只增不用死數字。設計 disposal 動作 + loyalty/coin 規則。詳見 known_issues P6 |
 | ~~量測 tune 階段1 TEST VALUES~~ ✅ 量測結案 | — | 2026-06-15 [TaskHist] 量測:世界健康行為多元,「loot 偏高 130」= 原始計數假象(time-share tyrant 掠奪 15.6% 劫掠型本該)。不需 tune |
 | ~~階段2 招人成幫~~ ✅ merged | — | 2026-06-16 投靠(食物)/招募(coin)+能力 legibility+tutorial。見 progress |
 | **②深層目標錨 / 戰略 AI 深化** → 移**長期**（見下） | 是 | 2026-06-16 [IntentThrash] 量測:solo_intent thrash tyrant 12.8%/warzone 0% = 慣性已足連貫,**現在不急**(非永不做)。用戶重視戰略 AI → 長期做 |
@@ -45,7 +47,7 @@
 
 ### 🟡 長期（系統擴張，世界已穩才碰）
 
-階段3 據點 / 階段4 勢力 / **②深層目標錨 + 戰略 AI 深化** / mount 公庫系統 / 設施 B 期材料層 / 戰場 mount unit-level / named 升階 / 信用貨幣（勢力券）/ 新礦事件 / 戰俘處置 / 山村採礦換糧經濟。（細節見 known_issues.md「待 spec」表，優先序不變。）
+階段3 據點 / 階段4 勢力 / **②深層目標錨 + 戰略 AI 深化** / mount 公庫系統 / 設施 B 期材料層 / 戰場 mount unit-level / named 升階 / 信用貨幣（勢力券）/ 新礦事件 / 山村採礦換糧經濟。（細節見 known_issues.md「待 spec」表，優先序不變。）
 
 **②深層目標錨 / 戰略 AI（長期,用戶重視）**：現況 solo_intent 短期慣性 + faction strategic_ai 目標已撐住基本連貫（2026-06-16 量測 thrash 低、攀爬發生）→ **不急**。長期方向（接 階段4 勢力,faction 層戰略最吃重時做）：慢變長期 goal 欄位（稱霸/安身/致富）跨多 tick 偏 task 選擇 + faction 級長弧策略深化。**仍守「極克制」**——先有明確需求（如玩測顯勢力行為短視）再 spec,防戰略引擎無底洞。
 
