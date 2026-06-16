@@ -4,7 +4,7 @@ class_name PlayerCommandSystem
 const RECRUIT_COST_ANON:  float = 50.0   # TEST VALUE
 const RECRUIT_COST_NAMED: float = 150.0  # TEST VALUE
 const JOIN_ONBOARD_MEAL:  float = 0.8    # 一餐 ≈ FOOD_PER_PERSON_PER_DAY/3 (TEST VALUE)
-const TRAIN_COST_COIN: float = 30.0      # TEST VALUE — 一次訓練的 coin sink
+const TRAIN_COST_COIN: float = 30.0      # TEST VALUE — 一次訓練 coin（守恆:餉銀入公庫,非 sink）
 const TRAIN_EXP_GAIN:  float = 20.0      # TEST VALUE — 一次訓練給最低非菁英 tier 的 exp
 const CAMP_BUILD_TICKS: int   = 240      # TEST VALUE — 紮營 person-ticks（免材料但限時施工）
 const CAMP_FOOD_CAP:    float = 40.0     # TEST VALUE — 紮營只抬 food cap（regen 產糧）,不送即時糧
@@ -177,13 +177,14 @@ func _action_hunt_beast(state: WorldState, _target: int, pt: TeamData, pt_id: in
 	return { "ok": true, "msg": "發起獵 %s" % kind, "requires_preview": false }
 
 # 訓練/晉升：一次性花 coin → 給最低非菁英 tier 一批 exp → 立即嘗試升階（reuse AnonTierSystem,玩家版比 NPC 完整）
-# coin = 消耗 sink（訓練開銷）。升階另消耗 PROMOTION_COST 物資（既有規則）。
+# coin 守恆：訓練餉銀入自隊公庫(anon_treasury),不蒸發（對齊 try_promote「訓練餉銀入公庫」）。
 func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
 	if AnonTierSystem.total_pop(pt) <= 0:
 		return { "ok": false, "msg": "無匿名人口可訓練" }
 	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
 		return { "ok": false, "msg": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN }
-	pt.resources["coin"] = float(pt.resources.get("coin", 0)) - TRAIN_COST_COIN   # 消耗 sink
+	pt.resources["coin"] = float(pt.resources.get("coin", 0)) - TRAIN_COST_COIN
+	pt.anon_treasury += TRAIN_COST_COIN   # 守恆：餉銀入公庫,不蒸發（coin_eq 不破）
 	var target_tier: String = ""
 	for tier in AnonTierSystem.TIER_ORDER:
 		if tier == "菁英": break

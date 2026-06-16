@@ -92,7 +92,7 @@
 |---|---|---|---|
 | `RECRUIT_COST_ANON` | `simulation/player_command_system.gd` | 50.0 | 招募匿名人口費用（coin） |
 | `RECRUIT_COST_NAMED` | `simulation/player_command_system.gd` | 150.0 | 招募記名 NPC 費用（coin） |
-| `TRAIN_COST_COIN` | `simulation/player_command_system.gd` | 30.0 | 玩家一次訓練 coin（消耗 sink，2026-06-17） |
+| `TRAIN_COST_COIN` | `simulation/player_command_system.gd` | 30.0 | 玩家一次訓練 coin（守恆:餉銀入公庫 anon_treasury，2026-06-17） |
 | `TRAIN_EXP_GAIN` | `simulation/player_command_system.gd` | 20.0 | 一次訓練給最低 tier 的 exp |
 | `CAMP_BUILD_TICKS` | `simulation/player_command_system.gd` | 240 | 玩家紮營施工 ticks |
 | `CAMP_FOOD_CAP` | `simulation/player_command_system.gd` | 40.0 | 玩家紮營抬 tile food cap（**非即時糧**） |

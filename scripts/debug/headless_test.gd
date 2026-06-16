@@ -683,9 +683,12 @@ func _test_player_train() -> void:
 	var cs := PlayerCommandSystem.new()
 	var exp_before: float = float(pt.anon_exp.get("平民", 0.0))
 	var coin_before: float = float(pt.resources.get("coin", 0))
+	var coineq_before: float = coin_before + pt.anon_treasury   # 守恆:coin+公庫
 	var r: Dictionary = cs._action_train(state, -1, pt, 0)
 	assert(r.get("ok", false), "訓練應成功:%s" % str(r))
 	assert(abs(coin_before - float(pt.resources.get("coin",0)) - PlayerCommandSystem.TRAIN_COST_COIN) < 0.01, "coin 扣 TRAIN_COST")
+	# 守恆:訓練餉銀入公庫不蒸發（首訓未升階,coin+treasury 不變）
+	assert(abs((float(pt.resources.get("coin",0)) + pt.anon_treasury) - coineq_before) < 0.01, "訓練 coin 守恆(入公庫非蒸發)")
 	assert(float(pt.anon_exp.get("平民", 0.0)) > exp_before, "平民 exp 應增")
 	for _i in range(20):
 		cs._action_train(state, -1, pt, 0)

@@ -51,7 +51,7 @@ QA C-1~C-6 原框架把 **NPC task（AI 抽象）** 和 **玩家能力（直接�
 - `TRAIN_EXP_GAIN`：一次給的 exp（推進「約 1/3 階」量，沿用 AnonTierSystem 既有 exp 尺度，標 TEST VALUE）。
 - exp 施加對象：自隊 anon pool 經既有 `AnonTierSystem.add_exp` + `try_promote`（沿用其內部分配/升階規則，勿自訂）。
 
-**守恆（決斷）**：訓練 coin = **消耗 sink**（食宿/教官開銷，coin 離開經濟）。**必須在 coin_eq 審計把訓練 sink 標為合法消耗**（同 onboarding 食物模式），否則破壞 coin 守恆審計。實作對齊既有合法 coin sink 慣例（查 coin_eq 審計如何排除合法 sink）。
+**守恆（決斷，2026-06-17 修正）**：訓練 coin **守恆——餉銀入自隊公庫 `anon_treasury`，不蒸發**（對齊 `try_promote` 既有「訓練餉銀入公庫」模式）。原設計寫「消耗 sink（憑空消失）」是**錯的**：(1) 破 coin_eq 守恆（player session delta≠0）；(2) 無產出經濟（W8）下純通縮。改為入公庫 → coin_eq 不破、語意=餉銀付給隊內。
 
 **UI（定錨）**：self-action，置於互動模式**目標選擇階段**與 hunt 並列（同 P4-2 self-action 分類，不需先選隊）。顯示「訓練（-%d coin → anon +exp）」+ 結果 feedback（升階則報「平民→新兵」之類）。
 
