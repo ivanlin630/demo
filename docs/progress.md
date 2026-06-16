@@ -1,6 +1,17 @@
 # 開發進度
 
-## 📍 當前狀態（2026-06-16）
+## 📍 當前狀態（2026-06-17）
+
+- **玩家動作 parity 已 merge（`81e245b`）**：QA P5 走查重frame C-1~C-6（NPC task=AI 抽象 ≠ 玩家直接控,真對稱=動作 parity）。新 `_action_train`（一次性 coin 30→`add_exp`+`try_promote`,玩家版比 NPC 完整）+ `_action_camp`（紮營 Y版:免材料/無即時糧只抬cap/距離spacing/限時建造,reuse construction）+ **panic 收口**（reaction 恐慌橋加 `leader_id!=player_id` 守衛,玩家主隊不被劫持移動,其餘恐慌效果保留）+ 玩家隊狀態列「任務:」→「狀態:」。spec `2026-06-16-player-action-parity-design`、plan 同名、handback 同名。功能經 key-injection driver 端到端驗（訓練/招募/紮營）。
+- **QA P5 修復已 merge**：B-1 收留撞 pop_cap 守恆（食物按量測 delta 扣、msg 報實際併入,不謊報）+ A-1 記名招募在 TextUI 主場景可達（消費 recruit menu payload）。
+- **W4 promote 層1 修（`4d1e540`）**：`training_system` 補 `try_promote` tick caller（原只 add_exp 永不升階,NPC 一旦訓練即升）。層2（NPC AI 鮮少選 TASK_TRAIN）遺留。
+- **NPC crude_camp 即時糧移除（`ad67869`）**：A/B 量測非 load-bearing（died=0,pop 不掉）→ 移除即時種子糧(留 cap),恢復絕境稀缺,與玩家紮營版一致。
+- **W8 coin 產出鏈休眠（2026-06-17 量測新發現）**：純coin 鑄造Δ=0、ore 挖礦Δ=0 → 金銀礦從沒挖、鑄幣廠從沒用,coin 純零和集中。詳見 known_issues W8 / roadmap。
+- **refactor R1-R6 + known_issues 瘦身 479→225**（已修 42 項移 `docs/archive/resolved_issues.md`）。
+- **P3 全動作覆蓋確認已達**（50/50 覆蓋審計 + ui_flow 面板測綠）;**Bug2 欠薪後果確認已存在**（reaction N3_defect 離隊鏈,原「未做」=stale）。
+- 全測綠、coin_eq delta=0（4 config）。
+
+## 📍 前狀態（2026-06-16）
 
 - **階段2 招人成幫已 merge（2026-06-16）**：投靠（NPC 絕境同格→`join_request` forced event→玩家收留,扣食物 onboarding[一餐×人數,消耗品非守恆] + reuse `merge_teams` 整團併入,守恆）+ 招募（玩家主動→coin 挖角,既有 recruit）。成本**按觸發分流**(投靠=食物/招募=coin)。隊能力讀數 DTO(`capabilities`:按真技能聚合——求生 named 平均→獵率/產出、戰鬥逐個體→戰力 proxy、pop→日耗)+ status 顯示 = emergent legibility。tutorial onboarding(食物盈餘閾值一次性送 1 堪用 named+3 tier0 anon→走真投靠流程)。reuse merge_teams/hunt 公式/forced 路徑/dispatch_subteam(specialist→子隊長),零新系統。headless+ui_flow 全綠、coin_eq 守恆。spec `2026-06-16-stage2-recruitment-design`、plan 同名。
 - **養得起/離隊** = reuse 既有 famine/loyalty/defect(不新做);**部署** = emergent 自動貢獻(不做逐人指派 UI,YAGNI)。
@@ -244,8 +255,9 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 | **戰俘處置 spec** | 未開 spec | 賣 / 屠 / 招降 / 釋放，loyalty 規則 |
 | **外交招募 spec** | 未開 spec | 投靠 / 雇傭軍 / 直接買高 tier |
 | **tag drift** | 未開 spec | leader values / event 改 tag（軍隊變商隊等）|
-| **salary 欠薪後果** | 未開 spec | Bug2：coin<0 → loyalty 降 / 離隊（接 reaction）|
-| **NPC promote/train AI** | 未開 spec | W4：leader 個性 + 物資 自動評估 promote/train |
+| ~~salary 欠薪後果~~ | ✅ 已存在(2026-06-17 確認) | Bug2 stale：減薪→掉忠誠(salary:73)→N3_defect 離隊鏈已完整 |
+| **NPC promote/train AI（W4 層2）** | ⚠ 層1 已修 | promote tick caller 已補(training_system)；遺留：NPC AI 鮮少選 TASK_TRAIN |
+| **coin 產出激活（W8）** | 未開 spec | 2026-06-17 量測:金銀礦/鑄幣全休眠,coin 零生成純零和集中。激活 NPC 採礦+鑄幣決策 |
 | **UI / 渲染** | ✅ text_ui_main / popup_layer / main.gd 已透過 SimBridge 隔離 WorldState 玩家欄位 |
 | **玩家操作介面** | ✅ PlayerApiMapper + PlayerQueryApi + PlayerCommandApi + SimBridge 玩家 API 邊界已建立 |
 | **成員檢視 UI（team_ui）** | ✅ 三欄式 member inspector 完成（2026-06-02）：PlayerApiMapper.members_detail + team_stats；TeamUiHelper 靜態渲染；text_ui_main member_mode 狀態機（W/S 選人，1–4 切換子模式：快覽/健康/裝備/能力）；headless_test + team_ui_test 驗證 |

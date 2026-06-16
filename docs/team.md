@@ -91,6 +91,7 @@ var strategic_assignments: Dictionary  # StrategicAI 派的座標目標（key: t
 - leader 戰術 skill 控訓練上限（≤0.4 新兵 / ≤0.7 老兵 / >0.7 菁英）；戰場 exp 不受限
 - 升菁英需 team 持有 `weapon_melee_high ≥ 新菁英總數`（check 不消耗）
 - 經驗來源：訓練 task（leader 戰術 × n / tick）+ 戰鬥存活（+5，勝方 +5）
+- **觸發者**（2026-06-17）：NPC 經 `training_system`（TASK_TRAIN 隊每 tick add_exp **+ try_promote**，W4 層1 修前缺 promote caller→永不升階）；玩家經 `_action_train`（一次性 coin 30 → add_exp + try_promote，self-action）。遺留 W4 層2：NPC AI 鮮少選 TASK_TRAIN。
 
 死亡分配（weighted random by tier count），不殺 named。
 
