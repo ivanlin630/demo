@@ -9620,6 +9620,7 @@ func _test_player_camp() -> void:
 	assert(float(tile.resource_cap.get("food",0)) >= PlayerCommandSystem.CAMP_FOOD_CAP - 0.01, "food cap 應抬到 CAMP_FOOD_CAP")
 	assert(float(tile.resources.get("food",0)) <= food_before + 0.01, "不送即時糧（resources.food 不增）")
 	assert(not pt.tags.has("流亡"), "完工脫流亡")
+	assert(pt.current_task != TeamData.TASK_BUILD, "完工應釋放 task（非永卡建設）,實際=%s" % pt.current_task)
 	print("玩家紮營 OK")
 
 func _test_self_actions() -> void:

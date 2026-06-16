@@ -286,6 +286,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			if not team.tags.has(camp_tag):
 				team.tags.append(camp_tag)
 			team.tags.erase("流亡")
+			TaskArbiter.release(team)   # 紮營完工 → 釋放玩家隊回 idle（否則永卡 task=建設）
 			print("[CrudeCamp] Team%d 玩家紮營完工 @(%d,%d) → %s" % [
 				team.team_id, tile.tile_pos.x, tile.tile_pos.y, tile.outpost_type])
 		"demolish":
