@@ -43,6 +43,8 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var intent_last: Dictionary = {}     # ②目標錨量測:tid→上次 solo_intent
 	var intent_changes: int = 0          # solo_intent 月間變動次數（thrash）
 	var intent_samples: int = 0          # 有 solo_intent 的月取樣總數
+	var inv_violations: int = 0          # 不變量月取樣違反總計（Phase1 診斷,揭露現有 drift）
+	var inv_first_sample: Array = []     # 首次非空違反例（前 3）
 	for tick in range(max_ticks):
 		var pp: Vector2i = _player_pos(state)
 		var result = runner.advance_tick(state, pp)
@@ -67,6 +69,13 @@ func _run_config(cfg_name: String) -> Dictionary:
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			print("[PopSample] %s tick=%d total_pop=%d" % [
 				cfg_name, state.world.current_tick, _total_pop(state)])
+			var inv: Array = InvariantAudit.check(state)
+			if not inv.is_empty():
+				inv_violations += inv.size()
+				if inv_first_sample.is_empty():
+					inv_first_sample = inv.slice(0, mini(3, inv.size()))
+				print("[InvariantViolation] %s tick=%d 違反 %d 項,例:%s" % [
+					cfg_name, state.world.current_tick, inv.size(), str(inv.slice(0, mini(2, inv.size())))])
 			for tid2 in state.teams:   # 行為量測:月取樣 task → team-time histogram
 				var tk: String = state.teams[tid2].current_task
 				if tk == "": tk = "idle"
@@ -99,6 +108,8 @@ func _run_config(cfg_name: String) -> Dictionary:
 	var thrash_rate: float = (100.0 * float(intent_changes) / float(intent_samples)) if intent_samples > 0 else 0.0
 	print("[IntentThrash] %s solo_intent 月間變動 %d/%d 取樣 = %.1f%%（低=慣性夠連貫,高=漂移需 goal 錨）" % [
 		cfg_name, intent_changes, intent_samples, thrash_rate])
+	print("[InvariantSummary] %s 違反取樣總計=%d 首例=%s" % [
+		cfg_name, inv_violations, str(inv_first_sample)])
 	return {
 		"coin_eq_init": coin_eq_init,
 		"coin_eq_final": coin_eq_final,
