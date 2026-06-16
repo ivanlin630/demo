@@ -117,6 +117,15 @@
 - **狀態**：text_ui 已清（P1）；圖形 UI 未清。text-UI-only 階段不影響
 - **優先**：M — 若推圖形 UI 或全面套 UI 邊界 invariant 才需解耦（範圍大,涉 encounter tactical view）。另案
 
+### W8. coin 產出鏈完全休眠 — 經濟純零和集中（2026-06-17 量測新發現）
+- **量測**：2yr×4config，純 coin 鑄造Δ=**0**、ore-eq 挖礦Δ=**0**（地下金銀從沒被挖）。coin supply = 初始固定池（game_sim_test 4100），**零生成**。
+- **症狀**：coin 只靠 loot/tribute 零和重分配 → 贏家單調集中（單隊 1090 vs 中位 7.5，~25% 時點團 coin=0）。輸家**無法生 coin 翻身**（不挖礦、不鑄幣，只能靠贏戰搶）。
+- **根因（W4 同型休眠）**：產出鏈（挖金銀礦 → 鑄幣廠 `_tick_mint` ore→coin）**機制完整但 NPC 從不觸發**——不採金銀 ore、不蓋鑄幣廠。`_tick_mint` 無 print（故先前 grep 誤判）。
+- **連帶**：roadmap「金銀挖完→通縮→勢力發券」敘事**空轉**（金銀根本沒開挖）。
+- **不破壞**：減薪=0、無死、世界穩（coin 對生存非必要,團跑 lean 仍活）。屬**經濟深度**缺口非穩定性 bug。
+- **修向（需 spec）**：激活 NPC 採金銀 ore + 蓋鑄幣廠決策（faction_ai 加礦點評估 + mint 需求迴路）→ coin 真生成 + 窮團翻身路 + 緩解集中。屬 NPC AI 深化（memory:不追 NPC 完美化 → 僅在要經濟深度玩法層才做）。
+- **優先**：M（經濟深度想做才做;世界穩不急）。
+
 ### W7. 覓食 vs 乞食 仲裁（forage-foundation 遺留）
 - **症狀**：`_find_forage_tile` 周圍無食物時仍回本格 → 小隊（pop≤15）恆覓食、不到乞食 Path4。枯竭區小隊空覓而非乞食富鄰
 - **狀態**：2 年 multi 實測世界穩定（died=no、未顯退化）→ **暫不動，留量測**。主 session 曾試加 `best_food` 門檻使無食物回 -1,-1，但會弄紅 3 個依賴「urgent→SURVIVAL_TASK」的 baseline 測試（那些測試 setup 無食物 tile）→ 還原。要修需同步重整那批測試語意

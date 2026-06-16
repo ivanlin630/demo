@@ -39,6 +39,9 @@
 | **玩家主動生存動作（對稱性）** | 是 | P4-3:NPC 會乞討/投靠求生,玩家無對應主動 command。補玩家 beg/投靠請求對他隊。接階段2 招人對稱面。需設計（成本/接受判定/UI） |
 | ~~玩家動作 parity（C-1~C-6）~~ ✅ merged 81e245b | — | 2026-06-16 brainstorm reframe（NPC task=AI 抽象 ≠ 玩家直接控,真對稱=動作 parity,spec `2026-06-16-player-action-parity-design.md`）。C-1 設自隊 task→砍/C-4 訓練升tier ✅/C-2 紮營 ✅/C-3 覓食·C-5 pacify·C-6 settle·主動投靠 ⏸ 擱置。副產:panic 收口（玩家隊不被恐慌劫持）+「任務:」→「狀態:」。**遺留 ✅**:NPC crude_camp 即時糧 2026-06-16 A/B 量測=非 load-bearing(died=0)→移除即時糧,留 cap,與玩家版一致 |
 | **NPC 勒索機制活化** | 是 | demand_tribute 現休眠(2026-06-15 量測 NPC 發起=0)。發起點 `try_proactive_diplomacy:68` 被早return+同格gate+方向反(弱勒強)三重掐死。要當壓力機制需:翻方向(強勒弱)+ 優先序重排 + 平衡。世界穩定不需要,僅在要「強權壓迫」玩法層才做 |
+| **coin 產出鏈激活（W8）** | 是 | 2026-06-17 量測:純coin 鑄造Δ=0、ore 挖礦Δ=0 → 金銀礦從沒挖、鑄幣廠從沒用,coin 零生成、純零和集中(贏家1090 vs 窮團0,翻不了身)。需激活 NPC 採金銀 ore + 蓋鑄幣廠決策(faction_ai 礦點評估 + mint 需求迴路)。world 穩不急,要經濟深度(挖礦致富/通縮敘事)才做。詳見 known_issues W8 |
+
+> **休眠機制家族（W4 同型:機制完整但 NPC AI 從不觸發）**：W8 coin 產出 / Bug5 NPC 勒索 / W4 層2 NPC 不選 TASK_TRAIN / W4-Faction leader 不駐留建造。共同根=NPC 決策層不 invoke 既有機制。世界靠生存/掠奪穩定,深度機制全睡 → **只在要經濟/戰略深度玩法層才逐一激活,守「不追 NPC 完美化」**。
 
 ### 🟡 長期（系統擴張，世界已穩才碰）
 
