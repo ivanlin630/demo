@@ -2,7 +2,7 @@
 
 > 最後更新：2026-06-16 | **本檔只列開放項**。已修項（✅）移 `docs/archive/resolved_issues.md`（保留根因/修法/教訓,可搜尋）。
 > 來源：動態測試 + code review + QA harness 遍歷。
-> **仍有效真 backlog**：Bug2(salary floor 後果)、Bug5(休眠)、W4(promote/train + leader 駐留)、W3(dist tune)、P5 C-1~C-6(玩家自隊 task 對稱)。
+> **仍有效真 backlog**：Bug2(salary floor 後果)、Bug5(休眠)、W4(NPC promote/train + leader 駐留)、W3(dist tune)。（P5 C-1~C-6 對稱缺口 ✅ 2026-06-16 reframe+實作,見下 P5 段。）
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。
 
 
@@ -22,10 +22,13 @@
 > ui_flow 31/31 全綠但漏抓——測試只驗「能呼叫/字串含關鍵字」，不驗端到端守恆與主場景路徑。
 - **B-1 收留撞 pop_cap：扣糧成功但 0 人併入 + msg 謊報**（高，守恆紅線）。`_accept_join_request`（player_command_system.gd:757/760/763）先用意圖值 `from_team.population` 算 cost/joined，再呼 `merge_teams`→`_merge_into`（capacity<=0 時 transfer=0 啥都不轉但仍 return）→ 食物已先扣（憑空蒸發）+ msg 謊報人數。修向：cost/joined 改 merge 後量測 delta；或 merge 前驗 capacity，0 容量直接拒。
 - **A-1 記名招募在主場景 TextUI 死路**（高，stage2 核心迴路斷）。`recruit` 回 payload menu(has_willing_named/anon_available)，但 `text_ui_main.gd` team-target handler（916-977）不消費此 menu，只 `_log_event` 後清 target。`recruit_named` 唯一路徑 `execute_action_with_target`（member-kind）text UI 從不呼 → 記名招募完全不可達。功能寫在停用的圖形 `main.gd`（show_recruit_panel:115-142）。`recruit_named` 不在 registry → `_test_action_ui_coverage` 抓不到。修向：把 recruit menu 消費搬進 text_ui_main。
-- **C-1 玩家無設自隊 task command**（高，對稱性，keystone）。registry 無 `set_task`/寫 `pt.current_task` 的 command；NPC 自動設 TASK_FORAGE/TASK_CAMP/TASK_TRAIN。連鎖鎖死 C-2/3/4。→ roadmap（需 spec，同 P4-3 對稱性 feature 模式）。
-- **C-2 紮營 establish_crude_camp**（中）/ **C-3 覓食 forage**（中）/ **C-4 anon 升 tier train/promote**（中）：NPC 會、玩家 registry 無對應；皆 task-shaped，C-1 的 task menu 一併解 → roadmap。
-- **C-5 安撫村莊 pacify**（低）/ **C-6 主動定居 resident**（低）：對稱缺口 → roadmap。
-- **狀態**：B-1/A-1 → 立修（feat/qa-p5-fixes）；C-1~C-6 → 對稱性 roadmap，待 spec。
+- **C-1~C-6 ✅ 2026-06-16 brainstorm 重frame + 實作（merged 81e245b）**。走查發現原框架混淆「NPC task(AI 抽象)」與「玩家能力(直接動作)」——玩家直接控,不需持續 auto-task,真對稱=動作 parity（見 spec `2026-06-16-player-action-parity-design.md`）：
+  - **C-1 設自隊 task → 砍掉**（玩家不要 auto-task,reframe 非缺口）。
+  - **C-4 訓練/升 tier ✅ 做**（`_action_train` 一次性 coin→add_exp+try_promote;玩家版比 NPC 完整,NPC 無 promote tick caller=W4）。
+  - **C-2 紮營 ✅ 做**（`_action_camp` Y版:免材料/無即時糧/距離spacing/限時施工）。
+  - **C-3 覓食 ⏸ 擱置**（冗餘 hunt/hunt_beast,YAGNI）/ **C-5 pacify ⏸** / **C-6 settle ⏸**（niche/階段3 過早）/ **主動投靠 ⏸**（邊緣）。
+  - **副產**：玩家主隊被恐慌橋寫 task=逃跑（latent,未實際劫持移動）→ 加守衛 ✅;「任務:」label→「狀態:」✅。
+- **遺留（roadmap）**：NPC `establish_crude_camp` 即時糧軟化絕境 → 獨立量測 task（先量測 NPC 是否靠紮營免死,再決定是否去即時糧;本批只改玩家版,NPC 未動）。
 
 ### W4. Faction leader 行為性貧窮 — 建造解鎖極慢 ⚠ 部分修（2026-06-13 economy-bootstrap）
 - **症狀**：2 年 multi 派建造子隊 = 0；失敗原因 log（本批新增）顯示全是 material < cost×1.5（leader material +0.2/day 涓滴，門檻 75 要爬數年）
