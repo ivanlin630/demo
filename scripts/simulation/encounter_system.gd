@@ -1163,6 +1163,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		if t:
 			t.named_members.erase(u["person_id"])
 			if t.leader_id == u["person_id"]: t.leader_id = -1
+			t.population = maxi(t.population - 1, 0)   # named 死也減 pop（原只 anon 減 → named 死 pop over-count）
 
 	for team_id in [atk_id, def_id]:
 		var dead_anon: int = 0
