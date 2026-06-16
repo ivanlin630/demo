@@ -214,9 +214,37 @@ func _screen_to_world(pos: Vector2) -> Vector2:
 static func _unit_color(is_player: bool, is_own: bool) -> Color:
 	return Color.DODGER_BLUE if is_player else (Color.GREEN if is_own else Color.RED)
 
+# 遭遇戰 fog：我方各單位視野範圍(per-unit,不共享)聯集的 hex 集合。視野公式同 EncounterSystem._calc_vision_range（2+偵查×2）。
+func _player_visible_hexes(state: WorldState, player_team_id: int) -> Dictionary:
+	var vis: Dictionary = {}
+	if player_team_id == -1: return vis
+	for u in state.encounter_units:
+		if u.get("team_id", -1) != player_team_id: continue
+		if u.get("has_exited", false): continue
+		var pos: Vector2i = u.get("pos", Vector2i(-1, -1))
+		if pos == Vector2i(-1, -1): continue
+		var scout: float = 0.0
+		var pid: int = u.get("person_id", -1)
+		if pid != -1:
+			var p: PersonData = state.persons.get(pid)
+			if p != null: scout = float(p.skills.get("偵查", 0.0))
+		var vr: int = int(round(2.0 + scout * 2.0))
+		for dq in range(-vr, vr + 1):
+			for dr in range(-vr, vr + 1):
+				var h: Vector2i = pos + Vector2i(dq, dr)
+				if _hex_dist(pos, h) <= vr:
+					vis[h] = true
+	return vis
+
 func _draw() -> void:
 	if _bridge == null or not visible: return
 	var state: WorldState = _bridge.get_state()
+
+	var player_team_id: int = -1
+	var pp = state.persons.get(state.player_id) if state.player_id != -1 else null
+	if pp != null: player_team_id = pp.team_id
+	# 遭遇戰 fog：我方單位視野範圍聯集（per-unit,不共享）。視野外地形變暗、敵單位藏
+	var vis: Dictionary = _player_visible_hexes(state, player_team_id)
 
 	# Draw hex circle — MAP_RADIUS_VIEW=12, centered at axial (0,0)
 	for row in range(-MAP_RADIUS_VIEW, MAP_RADIUS_VIEW + 1):
@@ -225,20 +253,21 @@ func _draw() -> void:
 				continue
 			var center: Vector2 = _world_to_screen(_hex_center(Vector2i(col, row)))
 			var pts: PackedVector2Array = _hex_points(center)
-			draw_colored_polygon(pts, Color(0.3, 0.6, 0.3))
+			# 視野外 = fog（暗）；視野內 = 正常綠
+			var terr: Color = Color(0.3, 0.6, 0.3) if vis.has(Vector2i(col, row)) else Color(0.12, 0.14, 0.12)
+			draw_colored_polygon(pts, terr)
 			draw_polyline(pts + PackedVector2Array([pts[0]]), Color(0, 0, 0, 0.4), 1.0)
 
 	# Draw units — 上色按「自家隊 vs 敵隊」(非 attacker_id：玩家當攻擊方時 attacker_id=自家會反色)
-	var player_team_id: int = -1
-	var pp = state.persons.get(state.player_id) if state.player_id != -1 else null
-	if pp != null: player_team_id = pp.team_id
 	for unit in state.encounter_units:
 		var pos: Vector2i = unit.get("pos", Vector2i(-1, -1))
 		if pos == Vector2i(-1, -1): continue   # U16:只跳真正無位置 sentinel,保留合法 x<0 半場單位（原 pos.x<0 誤殺負 x）
-		var center: Vector2 = _world_to_screen(_hex_center(pos))
 		var is_player: bool = unit.get("person_id", -1) == state.player_id
 		var team_id: int    = unit.get("team_id", -1)
 		var is_own: bool    = (team_id == player_team_id)   # 自家(玩家 leader 藍 / 自家 anon 綠)
+		# fog：敵單位在我方視野外 → 不畫（我方單位永遠畫,它們是視野來源）
+		if not is_own and not vis.has(pos): continue
+		var center: Vector2 = _world_to_screen(_hex_center(pos))
 
 		# 玩家=藍、自家=綠、敵=紅（紅=敵直覺）
 		var color: Color = _unit_color(is_player, is_own)
