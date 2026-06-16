@@ -234,7 +234,7 @@ func _draw() -> void:
 	if pp != null: player_team_id = pp.team_id
 	for unit in state.encounter_units:
 		var pos: Vector2i = unit.get("pos", Vector2i(-1, -1))
-		if pos.x < 0: continue
+		if pos == Vector2i(-1, -1): continue   # U16:只跳真正無位置 sentinel,保留合法 x<0 半場單位（原 pos.x<0 誤殺負 x）
 		var center: Vector2 = _world_to_screen(_hex_center(pos))
 		var is_player: bool = unit.get("person_id", -1) == state.player_id
 		var team_id: int    = unit.get("team_id", -1)

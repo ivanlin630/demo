@@ -566,8 +566,9 @@ func _check_prisoners(state: WorldState, round_num: int) -> void:
 		if unit.get("is_prisoner", false): continue
 		var nearby_enemies: int = _count_nearby_enemies(unit, state, 1)
 		if nearby_enemies >= 1:
-			unit["is_prisoner"] = true
 			var winner_team_id: int = _get_enemy_team_id(unit["team_id"], state)
+			if winner_team_id < 0: continue   # 野獸(負 id pseudo-team)不抓俘虜——獵殺非俘虜
+			unit["is_prisoner"] = true
 			var prisoner_name: String
 			if unit["person_id"] >= 0:
 				var pp: PersonData = state.persons.get(unit["person_id"])
