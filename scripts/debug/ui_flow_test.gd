@@ -20,6 +20,7 @@ func _initialize() -> void:
 	await _test_join_request_ui()
 	await _test_interact_self_team_split()
 	await _test_recruit_named_reachable()
+	await _test_player_status_label()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -235,6 +236,14 @@ func _test_u15_overlay_input_guard() -> void:
 	node._encounter_view.visible = false
 	node._input(ev)
 	_check("overlay 隱藏時 KEY_W 移游標（_cursor 變）", node._cursor != before)
+	await _free_ui(node)
+
+func _test_player_status_label() -> void:
+	print("\n── 玩家隊狀態 label（非任務）──")
+	var node = await _make_ui()
+	node._refresh()
+	var s: String = node._state_label.text
+	_check("狀態列用「狀態:」不用「任務:」", s.contains("狀態:") and not s.contains("任務:"))
 	await _free_ui(node)
 
 func _check(label: String, ok: bool) -> void:

@@ -651,7 +651,7 @@ func _build_state_str() -> String:
 		ct.get("id", _player_tid),
 		pos.get("q", 0), pos.get("r", 0),
 		ct.get("faction_display", "?")])
-	lines.append("任務: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
+	lines.append("狀態: %s  疲勞: %d%%" % [ct.get("task_summary", ""), ct.get("fatigue_pct", 0)])
 	lines.append("人口: %d  武裝: %d (比例%d%%) | 未成年: %d" % [ct.get("population", 0), ct.get("armed_count", 0), int(float(ct.get("armed_ratio", 0.0)) * 100.0), ct.get("minor_population", 0)])
 	var food_days: float = float(ct.get("food_days", 99.0))
 	var starving: bool = bool(ct.get("starving", false))
