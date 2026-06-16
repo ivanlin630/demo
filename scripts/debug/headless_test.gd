@@ -355,6 +355,7 @@ func _initialize() -> void:
 	_test_player_train()
 	# ── 不變量審計框架 Phase1 ──
 	_test_invariant_audit()
+	_test_invariant_faction_bidir()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -376,6 +377,24 @@ func _test_invariant_audit() -> void:
 	assert(v.size() > 0, "pop drift 應被偵測")
 	assert("population" in str(v), "違反訊息應含 population:%s" % str(v))
 	print("InvariantAudit population OK")
+
+func _test_invariant_faction_bidir() -> void:
+	print("--- InvariantAudit faction 雙向 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.faction_id = 9
+	state.teams[0] = t
+	var f := FactionData.new(); f.faction_id = 9; f.member_team_ids = [0]
+	state.factions[9] = f
+	# 修掉 population 干擾：給最小一致 team
+	t.leader_id = -1; t.named_members = []; t.wounded = 0; t.population = 0
+	assert(InvariantAudit.check(state).is_empty(), "雙向一致不該違反:%s" % str(InvariantAudit.check(state)))
+	# 造懸空：member 列含 0 但 team0.faction_id 改成別的
+	t.faction_id = 5
+	assert("faction" in str(InvariantAudit.check(state)), "faction 雙向破口應偵測")
+	# 反向：team 自稱屬 9 但不在 member 列
+	t.faction_id = 9; f.member_team_ids = []
+	assert("faction" in str(InvariantAudit.check(state)), "faction 反向破口應偵測")
+	print("InvariantAudit faction 雙向 OK")
 
 func _test_join_conservation() -> void:
 	print("--- 投靠守恆整合(coin_eq) ---")
