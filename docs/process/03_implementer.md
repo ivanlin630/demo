@@ -1,5 +1,17 @@
 **子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：實作 plan。
 
+### 第一步（強制）：建立隔離 worktree
+
+**禁止在主 checkout 原地 `git checkout -b`**（會與主 session 共用目錄、撞 git）。子 session 必須跑在獨立 worktree。`executing-plans` / `subagent-driven-development` 不會自動建 worktree，要自己先建：
+
+```powershell
+# 在主 repo 根目錄執行，<feature> 換成功能名（kebab-case，對齊 plan 檔名）
+git worktree add .worktrees/<feature> -b feat/<feature>
+cd .worktrees/<feature>
+```
+
+之後所有實作、commit、push 都在此目錄。確認 `git rev-parse --show-toplevel` 指向 `.worktrees/<feature>/` 再開工。
+
 ### 子 session 標準流程：
 
 - 將 Spec 轉換成可實作 Plan
