@@ -353,7 +353,29 @@ func _initialize() -> void:
 	_test_recruit_tutorial()
 	_test_join_conservation()
 	_test_player_train()
+	# ── 不變量審計框架 Phase1 ──
+	_test_invariant_audit()
 	quit()
+
+func _test_invariant_audit() -> void:
+	print("--- InvariantAudit 框架 + population ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 正常隊：pop == leader(1) + named(1) + anon(3) + wounded(0) = 5
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader
+	var m := PersonData.new(); m.id = 1; m.team_id = 0
+	state.persons[1] = m
+	var t := TeamData.new(); t.team_id = 0; t.leader_id = 0; t.named_members = [1]
+	t.wounded = 0; t.population = 5
+	AnonTierSystem.add_anon(t, "平民", 3)
+	state.teams[0] = t
+	assert(InvariantAudit.check(state).is_empty(), "正常隊不該有違反:%s" % str(InvariantAudit.check(state)))
+	# 造 drift：named 死(移出 named_members)但 pop 沒減 → pop=5 但實際 leader+named(0)+anon(3)=4
+	t.named_members = []
+	var v: Array = InvariantAudit.check(state)
+	assert(v.size() > 0, "pop drift 應被偵測")
+	assert("population" in str(v), "違反訊息應含 population:%s" % str(v))
+	print("InvariantAudit population OK")
 
 func _test_join_conservation() -> void:
 	print("--- 投靠守恆整合(coin_eq) ---")
