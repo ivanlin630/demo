@@ -116,6 +116,10 @@ func _refresh_ui() -> void:
 	var player_unit: Dictionary = _find_player_unit(state)
 	if player_unit.is_empty(): return
 
+	# U16(遭遇戰): 相機跟玩家單位（原固定 axial(0,0) → 玩家單位偏離中心時看不到自己/半邊出畫面）
+	var pu_pos: Vector2i = player_unit.get("pos", Vector2i.ZERO)
+	_camera = get_viewport_rect().size * 0.5 - _hex_center(pu_pos) * _zoom
+
 	# U14: 顯雙方在場兵力總數（玩家視角：我方 vs 敵方）
 	if _lbl_count != null:
 		var ptid: int = player_unit.get("team_id", -1)

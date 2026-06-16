@@ -22,7 +22,7 @@
 - **E-1 弱隊殺不光 / 對攻擊免疫**（高，世界無法收斂）。`armed_anon_ratio=0` 隊 → encounter spawn 0 匿名只 1 named 接戰；normal 遭遇戰**不減隊 pop**（只擊退上場單位）→ 打贏隊 pop 原封不動 → 弱隊無限被刷但殺不死。根因：normal 遭遇戰無「敗方 pop 損耗」機制 + 未上場 unarmed pop 不受傷。修向需設計：敗方 pop 損耗 / 強制 subjugate-or-flee / 武裝率下限。
 - **E-2 AI 死戰到死**（中）。`_should_retreat`(encounter:322) 存在(殘廢率>0.7/torso critical/求生欲高30%機率) 但小隊(1單位)只在該單位倒下 ratio 才>0.7 → 等於戰到殘才逃,觀感死戰。小隊撤退門檻需調(絕對 HP/敵我懸殊判定,非只 ratio)。
 - **E-3 玩家走到戰場邊無逃離**（中）。has_exited 退場機制存在,但玩家「移動到邊界→離開戰場」可能未 wire（待確認 encounter_view 玩家輸入）。
-- **U16-b 遭遇戰視角疑固定**（待確認）。世界地圖 `text_map_renderer.render` headless 證實**跟玩家+@置中正確**;玩家報「視角固定某格」疑指**遭遇戰 tactical view**（另一 renderer，非世界地圖）→ 待確認是哪個 view + encounter_view 是否隨單位捲動。「x=0可視 x≤-1迷霧」疑=地圖邊 off-map（無 tile=空白,可能正常非 bug）。
+- **U16-b 遭遇戰相機固定 ✅ 修（2026-06-17，待 run-verify）**。確認=**遭遇戰 tactical view**（非世界地圖;world map render headless 證實正確）。根因：`encounter_view.show_encounter:45` 相機固定置中 axial(0,0) **設一次永不更新** → 玩家單位偏離 (0,0) 時看不到自己、半邊出畫面（「x=0可視 x≤-1切」）。**修**：`_refresh_ui` 每次重置相機跟玩家單位 pos（`_camera = vp*0.5 - _hex_center(player_unit.pos)*_zoom`）。parse 綠、ui_logic 0。**GUI 視覺待玩家 run-verify**。
 - **俘虜處置缺**（→ roadmap 中期）。capture/store(`prisoner_population`)✅,處置(賣/屠/招降/釋放/勞役)❌ 全沒 → 俘虜只增不用的死數字。
 
 ### P5 QA批（2026-06-16 QA session harness 系統遍歷，stage2 驗收抓）
