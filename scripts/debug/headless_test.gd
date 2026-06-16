@@ -356,6 +356,7 @@ func _initialize() -> void:
 	# ── 不變量審計框架 Phase1 ──
 	_test_invariant_audit()
 	_test_invariant_faction_bidir()
+	_test_invariant_subteam_bidir()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -395,6 +396,20 @@ func _test_invariant_faction_bidir() -> void:
 	t.faction_id = 9; f.member_team_ids = []
 	assert("faction" in str(InvariantAudit.check(state)), "faction 反向破口應偵測")
 	print("InvariantAudit faction 雙向 OK")
+
+func _test_invariant_subteam_bidir() -> void:
+	print("--- InvariantAudit subteam 雙向 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var parent := TeamData.new(); parent.team_id = 0; parent.subteam_ids = [1]
+	parent.leader_id = -1; parent.population = 0
+	var child := TeamData.new(); child.team_id = 1; child.parent_team_id = 0
+	child.leader_id = -1; child.population = 0
+	state.teams[0] = parent; state.teams[1] = child
+	assert(InvariantAudit.check(state).is_empty(), "subteam 一致不該違反:%s" % str(InvariantAudit.check(state)))
+	# 造破口：parent 列 child 但 child.parent_team_id 改別的
+	child.parent_team_id = -1
+	assert("subteam" in str(InvariantAudit.check(state)), "subteam 雙向破應偵測")
+	print("InvariantAudit subteam 雙向 OK")
 
 func _test_join_conservation() -> void:
 	print("--- 投靠守恆整合(coin_eq) ---")

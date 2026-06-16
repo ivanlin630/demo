@@ -6,6 +6,7 @@ static func check(state: WorldState) -> Array[String]:
 	var violations: Array[String] = []
 	_check_population(state, violations)
 	_check_faction_bidir(state, violations)
+	_check_subteam_bidir(state, violations)
 	return violations
 
 # population 不變量：== leader(0/1) + named + anon + wounded
@@ -38,3 +39,14 @@ static func _check_faction_bidir(state: WorldState, out: Array[String]) -> void:
 			out.append("faction 反向破 Team%d.faction_id=%d 但 faction 不存在" % [tid, t.faction_id])
 		elif not f.member_team_ids.has(tid):
 			out.append("faction 反向破 Team%d 自稱屬 Faction%d 但不在 member_team_ids" % [tid, t.faction_id])
+
+# subteam 雙向：parent.subteam_ids 內每隊 parent_team_id 須回指 parent。
+static func _check_subteam_bidir(state: WorldState, out: Array[String]) -> void:
+	for pid in state.teams:
+		var parent: TeamData = state.teams[pid]
+		for cid in parent.subteam_ids:
+			var child: TeamData = state.teams.get(cid)
+			if child == null:
+				out.append("subteam 懸空 Team%d.subteam_ids 含已不存在 Team%d" % [pid, cid])
+			elif child.parent_team_id != pid:
+				out.append("subteam 雙向破 Team%d 列子隊 Team%d 但其 parent_team_id=%d" % [pid, cid, child.parent_team_id])
