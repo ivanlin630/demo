@@ -42,8 +42,9 @@
 - **根因**：salary 系統發薪前不檢查 coin >= 0；新團 `[Split]` 出來特別易負
 - **影響**：經濟守恆破，新生團體永久赤字
 - **發現**：2026-06-09 integration test
-- **驗證（2026-06-15）**：**floor 已修**——`salary_system:65/75` 已 `maxf(coin−paid, 0.0)` → coin 不再為負。剩「欠薪後果」(發不出薪 → loyalty/離隊/anon 補充停)= 設計 spec,未做。
-- **狀態**：負 coin 缺陷 ✅；欠薪後果 → 路線圖 spec
+- **驗證（2026-06-15）**：**floor 已修**——`salary_system:65/75` 已 `maxf(coin−paid, 0.0)` → coin 不再為負。
+- **驗證（2026-06-16，原「欠薪後果未做」= stale）**：欠薪後果鏈**其實已有**——減薪→掉忠誠（`salary_system:73` `loyalty -= (1-ratio) × SALARY_LOYALTY_PENALTY`）→ 低忠誠/高壓觸發 reaction `N3_defect`(`:259`)→`_anon_actually_left`(`:269`) 真離隊。**功能完整**。剩「anon 補充停」屬邊緣低優先（budget_ratio<1 時 anon 薪自然少，已部分反映）。
+- **狀態**：負 coin ✅；欠薪後果鏈 ✅（已存在,非缺）；anon 補充停 = 低優先邊緣 tune
 
 ---
 
@@ -138,11 +139,11 @@
 - **發現**：2026-06-10 NPC wakeup
 - **建議**：改 `min(N, map_radius)` 動態計算
 
-### W4. NPC 不主動 promote / train
+### W4. NPC 不主動 promote / train ⚠ 部分修（2026-06-16）
 - **症狀**：multi 90 天 tier promotion = 0；戰場升等 0（因 0 combat），訓練 task 0 派
-- **根因**：NPC AI 無 promote/train 決策邏輯
-- **發現**：2026-06-10 anon tier merge 後
-- **建議**：faction_ai 加 leader 個性 + 物資 自動評估 promote/train（接 W1 解了戰鬥才有戰場 exp）
+- **根因（兩層）**：(1) **promote tick caller 缺**——`training_system` 只 `add_exp` 從不 `try_promote` → 即使 TASK_TRAIN 累積 exp 也永不升階;(2) NPC AI 鮮少選 TASK_TRAIN。
+- **修（2026-06-16，層1）✅**：`training_system.process` 補 `try_promote`（count=1 迴圈升到不能升）。headless `W4 NPC 訓練升階 OK`、warzone sanity 世界穩。**機制活化:NPC 一旦訓練即會升階**。
+- **遺留（層2）**：NPC AI 決策仍鮮少選 TASK_TRAIN（faction_ai 無 promote/train 評估邏輯）→ 實戰升階量仍低。要常態升階需 faction_ai 加 leader 個性 + 物資自動評估 train。低-中優先，接戰場 exp（W1）成熟後一起 tune。
 
 ## 🟡 低優先（體驗問題，不影響可玩性）
 
