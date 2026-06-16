@@ -228,7 +228,7 @@ func _player_visible_hexes(state: WorldState, player_team_id: int) -> Dictionary
 		if pid != -1:
 			var p: PersonData = state.persons.get(pid)
 			if p != null: scout = float(p.skills.get("偵查", 0.0))
-		var vr: int = int(round(2.0 + scout * 2.0))
+		var vr: int = int(round(5.0 + scout * 2.0))   # 同 EncounterSystem._calc_vision_range
 		for dq in range(-vr, vr + 1):
 			for dr in range(-vr, vr + 1):
 				var h: Vector2i = pos + Vector2i(dq, dr)

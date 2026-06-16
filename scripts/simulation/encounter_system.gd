@@ -262,7 +262,7 @@ func _calc_vision_range(unit: Dictionary, state: WorldState,
 	if unit["person_id"] != -1:
 		var p: PersonData = state.persons.get(unit["person_id"])
 		if p: scout = float(p.skills.get("偵查", 0.0))
-	return roundi((2.0 + scout * 2.0) * time_vision_mult)   # TEST VALUE
+	return roundi((5.0 + scout * 2.0) * time_vision_mult)   # TEST VALUE — base≥弓射程(5)避免弓兵看不到射程內目標震盪
 
 func _count_nearby_enemies(unit: Dictionary, state: WorldState,
 		range_hex: int) -> int:
@@ -316,6 +316,19 @@ func _get_nearest_enemy_index(unit: Dictionary, state: WorldState) -> int:
 		if other["team_id"] == unit["team_id"]: continue
 		if is_dead(other, state) or other.get("has_exited", false): continue
 		var d: int = hex_dist(unit["pos"], other["pos"])
+		if d < best_d: best_d = d; best_idx = i
+	return best_idx
+
+# fog/視野受限：本單位視野內(per-unit,不共享)最近敵。無視野內敵→-1。
+func _nearest_visible_enemy_index(unit: Dictionary, state: WorldState) -> int:
+	var vr: int = _calc_vision_range(unit, state, 1.0)
+	var best_idx: int = -1; var best_d: int = 9999
+	for i in range(state.encounter_units.size()):
+		var other: Dictionary = state.encounter_units[i]
+		if other["team_id"] == unit["team_id"]: continue
+		if is_dead(other, state) or other.get("has_exited", false): continue
+		var d: int = hex_dist(unit["pos"], other["pos"])
+		if d > vr: continue   # 視野外,看不到 → 不反應
 		if d < best_d: best_d = d; best_idx = i
 	return best_idx
 
@@ -460,8 +473,9 @@ func _decide_action(unit_idx: int, state: WorldState,
 				"move_to": ft["pos"],
 				"attack_part": _choose_attack_part(unit, state) }
 
-	# 5. 接近最近敵人
-	var nearest: int = _get_nearest_enemy_index(unit, state)
+	# 5. 接近敵人（fog/視野受限:優先攻擊視野內最近敵;無視野內敵→往最近敵 advance-to-contact）
+	var nearest_vis: int = _nearest_visible_enemy_index(unit, state)
+	var nearest: int = nearest_vis if nearest_vis != -1 else _get_nearest_enemy_index(unit, state)
 	if nearest == -1:
 		# No combat-capable enemies visible — check if we should guard an incapacitated enemy
 		var guard_idx: int = _find_guard_target(unit, state)
@@ -474,6 +488,11 @@ func _decide_action(unit_idx: int, state: WorldState,
 
 	var target: Dictionary = state.encounter_units[nearest]
 	var dist: int = hex_dist(unit["pos"], target["pos"])
+
+	# 視野外敵(advance-to-contact)：只往最近敵推進,不攻擊（NPC 不對看不到的敵反應,不共享視野）
+	if nearest_vis == -1:
+		return { "type": "move", "target_idx": -1,
+			"move_to": _calc_next_step(unit["pos"], target["pos"]), "attack_part": "" }
 
 	# 6. 技能行動
 	var is_archer: bool = false
