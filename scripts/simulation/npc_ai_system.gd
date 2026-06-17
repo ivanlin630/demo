@@ -71,23 +71,23 @@ func check_goal_alignment(p: PersonData, task: String) -> float:
 func _goal_task_delta(goal_type: String, task: String) -> float:
 	match goal_type:
 		"wealth":
-			if task in ["貿易", "生產", "製造", "掠奪"]: return 0.005
+			if task in [TeamData.TASK_TRADE, TeamData.TASK_PRODUCE, TeamData.TASK_MANUFACTURE, TeamData.TASK_LOOT]: return 0.005
 		"escape_war":
-			if task in ["攻擊", "掠奪"]: return -0.015
-			if task in ["逃跑", "rest", "貿易"]: return 0.005
+			if task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]: return -0.015
+			if task in [TeamData.TASK_FLEE, TeamData.TASK_REST, TeamData.TASK_TRADE]: return 0.005
 		"domination":
-			if task in ["攻擊", "掠奪"]: return 0.005
+			if task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]: return 0.005
 		"merit":
-			if task in ["攻擊"]: return 0.005
+			if task in [TeamData.TASK_ATTACK]: return 0.005
 		"peace":
-			if task in ["攻擊", "掠奪"]: return -0.01
-			if task in ["外交", "貿易"]: return 0.005
+			if task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]: return -0.01
+			if task in [TeamData.TASK_DIPLOMACY, TeamData.TASK_TRADE]: return 0.005
 		"revenge":
-			if task in ["攻擊", "掠奪"]: return 0.005
+			if task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]: return 0.005
 		"gratitude":
-			if task in ["外交", "貿易"]: return 0.003
+			if task in [TeamData.TASK_DIPLOMACY, TeamData.TASK_TRADE]: return 0.003
 		"protect":
-			if task in ["攻擊"]: return 0.008
+			if task in [TeamData.TASK_ATTACK]: return 0.008
 	return 0.0
 
 func get_goal_task_override(state: WorldState, p: PersonData) -> String:

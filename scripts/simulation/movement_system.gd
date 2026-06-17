@@ -33,7 +33,7 @@ func process(state: WorldState, team_ids: Array,
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
-		if team.current_task != "護衛" or team.order_target_id == -1:
+		if team.current_task != TeamData.TASK_ESCORT or team.order_target_id == -1:
 			continue
 		var target: TeamData = state.teams.get(team.order_target_id)
 		if target == null:
@@ -51,12 +51,12 @@ func process(state: WorldState, team_ids: Array,
 		if team.tags.has(TeamData.TAG_PRODUCE):
 			var fai := FactionAISystem.new()
 			if fai._is_resident_team(state, team) \
-					and team.current_task not in ["逃跑", "投靠", "起義", "遷徙", TeamData.TASK_PREPARE]:
+					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_REVOLT, "遷徙", TeamData.TASK_PREPARE]:
 				continue
 		if team.combat_target != -1:
 			continue
 		# strategic_assignments 優先（-1 key = 突圍；正整數 key = 包圍目標）
-		if team.strategic_assignments.size() > 0 and team.current_task != "逃跑":
+		if team.strategic_assignments.size() > 0 and team.current_task != TeamData.TASK_FLEE:
 			var sa_target: Vector2i
 			if team.strategic_assignments.has(-1):
 				sa_target = team.strategic_assignments[-1]

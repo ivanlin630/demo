@@ -90,7 +90,7 @@ func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Arr
 		if _sub.try_merge_back(state, arrived_id):
 			continue
 		var arrived: TeamData = state.teams[arrived_id]
-		if arrived.current_task == "護衛":
+		if arrived.current_task == TeamData.TASK_ESCORT:
 			continue
 		for other_id in state.teams:
 			if other_id == arrived_id:
@@ -115,7 +115,7 @@ func process_on_move(state: WorldState, moved_ids: Array, all_team_ids: Array) -
 		if _sub.try_merge_back(state, moved_id):
 			continue
 		var moved: TeamData = state.teams[moved_id]
-		if moved.current_task == "護衛":
+		if moved.current_task == TeamData.TASK_ESCORT:
 			continue
 		for other_id in state.teams:
 			if other_id == moved_id:
@@ -242,15 +242,15 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		return
 	var same_faction: bool = a.faction_id != -1 and a.faction_id == b.faction_id
 	if same_faction:
-		if a.current_task == "徵收":
+		if a.current_task == TeamData.TASK_TRIBUTE:
 			_resolve_tribute(state, id_a, id_b)
-		elif b.current_task == "徵收":
+		elif b.current_task == TeamData.TASK_TRIBUTE:
 			_resolve_tribute(state, id_b, id_a)
-		elif a.current_task == "信使" and a.order_target_id == id_b:
+		elif a.current_task == TeamData.TASK_HERALD and a.order_target_id == id_b:
 			_deliver_order(state, id_a, id_b)
-		elif b.current_task == "信使" and b.order_target_id == id_a:
+		elif b.current_task == TeamData.TASK_HERALD and b.order_target_id == id_a:
 			_deliver_order(state, id_b, id_a)
-		elif a.current_task == "idle" and b.current_task == "idle":
+		elif a.current_task == TeamData.TASK_IDLE and b.current_task == TeamData.TASK_IDLE:
 			var absorber: int = id_a if a.population >= b.population else id_b
 			var absorbed: int = id_b if absorber == id_a else id_a
 			var abs_team: TeamData = state.teams[absorbed]
@@ -261,45 +261,45 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		elif (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
 				or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a):
 			_try_merge(state, id_a, id_b)
-		elif a.current_task == "安頓":
+		elif a.current_task == TeamData.TASK_SETTLE:
 			var tile: HexTileData = state.world.tiles.get(a.tile_pos.x * 1000 + a.tile_pos.y)
 			if tile and tile.outpost_owner != -1:
 				var o: TeamData = state.teams.get(tile.outpost_owner)
 				if o and o.faction_id == a.faction_id:
 					_convert_to_resident(state, a)
-		elif b.current_task == "安頓":
+		elif b.current_task == TeamData.TASK_SETTLE:
 			var tile2: HexTileData = state.world.tiles.get(b.tile_pos.x * 1000 + b.tile_pos.y)
 			if tile2 and tile2.outpost_owner != -1:
 				var o2: TeamData = state.teams.get(tile2.outpost_owner)
 				if o2 and o2.faction_id == b.faction_id:
 					_convert_to_resident(state, b)
-		elif a.current_task == "安撫" and b.tags.has(TeamData.TAG_PRODUCE):
+		elif a.current_task == TeamData.TASK_PACIFY and b.tags.has(TeamData.TAG_PRODUCE):
 			_resolve_pacify(state, a, b)
-		elif b.current_task == "安撫" and a.tags.has(TeamData.TAG_PRODUCE):
+		elif b.current_task == TeamData.TASK_PACIFY and a.tags.has(TeamData.TAG_PRODUCE):
 			_resolve_pacify(state, b, a)
 		return
-	if a.current_task == "外交":
+	if a.current_task == TeamData.TASK_DIPLOMACY:
 		_try_diplomacy(state, id_a, id_b)
 		return
-	if b.current_task == "外交":
+	if b.current_task == TeamData.TASK_DIPLOMACY:
 		_try_diplomacy(state, id_b, id_a)
 		return
-	if a.current_task == "乞食" and a.combat_target == id_b:
+	if a.current_task == TeamData.TASK_BEG and a.combat_target == id_b:
 		_resolve_aid_request(state, id_a, id_b)
 		return
-	if b.current_task == "乞食" and b.combat_target == id_a:
+	if b.current_task == TeamData.TASK_BEG and b.combat_target == id_a:
 		_resolve_aid_request(state, id_b, id_a)
 		return
-	if a.current_task == "攻擊":
+	if a.current_task == TeamData.TASK_ATTACK:
 		_combat.start_combat(state, id_a, id_b)
-	elif b.current_task == "攻擊":
+	elif b.current_task == TeamData.TASK_ATTACK:
 		_combat.start_combat(state, id_b, id_a)
-	elif a.current_task == "掠奪" and a.readiness >= COMBAT_THRESHOLD:
+	elif a.current_task == TeamData.TASK_LOOT and a.readiness >= COMBAT_THRESHOLD:
 		if _should_pay_tribute(state, id_b, id_a):
 			_resolve_extortion(state, id_a, id_b)
 		elif _should_attack(state, id_a, id_b):
 			_combat.start_combat(state, id_a, id_b)
-	elif b.current_task == "掠奪" and b.readiness >= COMBAT_THRESHOLD:
+	elif b.current_task == TeamData.TASK_LOOT and b.readiness >= COMBAT_THRESHOLD:
 		if _should_pay_tribute(state, id_a, id_b):
 			_resolve_extortion(state, id_b, id_a)
 		elif _should_attack(state, id_b, id_a):
@@ -309,7 +309,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 
 func _should_pay_tribute(state: WorldState, def_id: int, atk_id: int) -> bool:
 	var def: TeamData = state.teams[def_id]
-	if def.current_task == "逃跑":
+	if def.current_task == TeamData.TASK_FLEE:
 		return true
 	var leader: PersonData = state.persons.get(def.leader_id)
 	if leader == null:
@@ -501,7 +501,7 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> void:
 	var messenger: TeamData = state.teams[messenger_id]
 	var target: TeamData    = state.teams[target_id]
-	var order: String = messenger.order_task if messenger.order_task != "" else "idle"
+	var order: String = messenger.order_task if messenger.order_task != "" else TeamData.TASK_IDLE
 	# player herald：若信使是玩家下令派出的，同時更新 player_commanded_task
 	var str_target_id: String = str(target_id)
 	var is_player_order: bool = false
@@ -717,7 +717,7 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 		snap["material_est"] *= randf_range(1.5, 2.5)
 		snap["goods_est"]    *= randf_range(1.5, 2.5)
 	else:
-		var is_bluff_task:     bool = tgt.current_task in ["攻擊", "掠奪"]
+		var is_bluff_task:     bool = tgt.current_task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
 		var is_bluff_martial:  bool = martial > 0.6
 		var is_bluff_merchant: bool = tgt.tags.has("商隊") and caution > 0.5
 		var armed_ratio: float = float(actual_armed) / maxf(float(tgt.population), 1.0)

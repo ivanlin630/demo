@@ -44,12 +44,12 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 			team.work_morale = clampf(lerpf(team.work_morale, target_morale, 0.1), 0.5, 1.5)
 		if flee_count > 0 and float(flee_count) / maxf(team.population, 1) >= 0.3 \
 				and team.leader_id != state.player_id:   # 玩家主隊直接控,不被恐慌劫持 task
-			if team.current_task not in ["逃跑", "護衛"]:
+			if team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_ESCORT]:
 				var threat_id: int = _find_top_threat(state, team)
 				if threat_id != -1:
 					var threat: TeamData = state.teams[threat_id]
 					# 恐慌逃跑 = PRIO_THREAT (70)：蓋不動 survival (80) → ping-pong 結構性消失
-					if TaskArbiter.try_set(state, team, "逃跑",
+					if TaskArbiter.try_set(state, team, TeamData.TASK_FLEE,
 							_flee_target_simple(state, team, threat),
 							TaskArbiter.PRIO_THREAT, "bridge_panic"):
 						print("[ReactionBridge] Team%d 逃跑（%d/%d 人）← threat Team%d" % [
@@ -154,7 +154,7 @@ func _score_comply(p: PersonData, _t: TeamData) -> float:
 func _score_produce(p: PersonData, t: TeamData) -> float:
 	var food_ok: bool = float(p.needs.get("food", 1.0)) > 0.6
 	var active: bool = food_ok and p.stress < 0.4 \
-		and (t.tags.has("生產") or t.current_task == "生產")
+		and (t.tags.has("生產") or t.current_task == TeamData.TASK_PRODUCE)
 	var base: float = 0.6 if active else 0.1
 	base += float(p.skills.get("生產", 0.0)) * 0.4
 	base += float(p.values.get("慎重", 0.5)) * 0.1

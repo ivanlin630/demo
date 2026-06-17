@@ -270,7 +270,7 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 	for tid in team_ids:
 		var team: TeamData = state.teams.get(tid)
 		if team == null: continue
-		if team.current_task == "rest":
+		if team.current_task == TeamData.TASK_REST:
 			# 紮營休息
 			var rest_mult: float = 1.0 - team.guard_ratio * 0.5
 			team.fatigue -= FATIGUE_RECOVERY_PER_DAY * day_fraction * rest_mult

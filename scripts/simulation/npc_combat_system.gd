@@ -101,7 +101,7 @@ func team_strength(state: WorldState, team_id: int) -> float:
 		if tid == team_id:
 			continue
 		var t: TeamData = state.teams[tid]
-		if t.current_task == "護衛" and t.order_target_id == team_id \
+		if t.current_task == TeamData.TASK_ESCORT and t.order_target_id == team_id \
 				and t.tile_pos == team.tile_pos:
 			base += _strength_raw(state, tid)
 	return base
@@ -237,7 +237,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var _npc_ai_aid := NpcAiSystem.new()
 	for escort_id in state.teams:
 		var escort: TeamData = state.teams[escort_id]
-		if escort.current_task == "護衛" and escort.order_target_id == winner_id \
+		if escort.current_task == TeamData.TASK_ESCORT and escort.order_target_id == winner_id \
 				and escort.tile_pos == winner.tile_pos:
 			for pid in ([winner.leader_id] as Array) + winner.named_members:
 				var sp: PersonData = state.persons.get(pid)
@@ -316,7 +316,7 @@ func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 
 func _try_retreat(state: WorldState, team_id: int, enemy_id: int) -> void:
 	var team: TeamData = state.teams[team_id]
-	if team.combat_target == -1 or team.current_task != "逃跑":
+	if team.combat_target == -1 or team.current_task != TeamData.TASK_FLEE:
 		return
 	var leader: PersonData = state.persons.get(team.leader_id)
 	var survival: float = 0.5
@@ -486,7 +486,7 @@ func _best_medicine(state: WorldState, team: TeamData) -> float:
 # TODO: 接入 _try_interact，返回 true 時設 combat_type = "pursuit"
 func _check_night_raid(state: WorldState, attacker: TeamData, defender: TeamData) -> bool:
 	var dns := DayNightSystem.new()
-	if defender.current_task != "rest": return false
+	if defender.current_task != TeamData.TASK_REST: return false
 	if dns.get_camp_vision_range(state, defender) > 0: return false
 	return true
 

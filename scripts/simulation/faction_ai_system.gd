@@ -27,7 +27,7 @@ const ATTACK_SCORE_THRESHOLD:  float = 0.3   # minimum attack_score to pursue �
 const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
-const SURVIVAL_TASKS: Array = ["return_home", "乞食", "投靠", TeamData.TASK_FORAGE, TeamData.TASK_CAMP]
+const SURVIVAL_TASKS: Array = [TeamData.TASK_RETURN_HOME, TeamData.TASK_BEG, TeamData.TASK_JOIN, TeamData.TASK_FORAGE, TeamData.TASK_CAMP]
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
 # desperation × values：warning 用個性門檻；urgent ×gate_mult=0 解閘（人人有活路）
 const LOOT_GATE: float = 0.55   # TEST VALUE
@@ -192,7 +192,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	if state.world.current_tick < team.threat_eval_next_tick: return
 	team.threat_eval_next_tick = state.world.current_tick + THREAT_CADENCE
 	if team.combat_target != -1: return
-	if team.current_task == "起義":
+	if team.current_task == TeamData.TASK_REVOLT:
 		# 起義（流亡路徑）是瞬時事件，結算已完成 → 釋放回常規 AI
 		#（若有追兵，下次 cadence threat 評估會派逃跑）
 		TaskArbiter.release(team)
@@ -340,7 +340,7 @@ func _has_inflight_settler(state: WorldState, owner: TeamData, tile: HexTileData
 		if t.team_id == owner.team_id: continue
 		if t.faction_id != owner.faction_id: continue
 		if not (TeamData.TAG_SUBTEAM in t.tags): continue
-		if t.current_task != "安頓": continue
+		if t.current_task != TeamData.TASK_SETTLE: continue
 		if t.move_target != tile.tile_pos: continue
 		return true
 	return false
@@ -393,7 +393,7 @@ func _dispatch_subteam_settle(state: WorldState, owner: TeamData, tile: HexTileD
 			sub_leader_id = new_leader.id
 	if sub_leader_id == -1: return
 	var subteam_id: int = SubteamSystem.new().dispatch(
-		state, owner.team_id, sub_leader_id, settler_count, "安頓", tile.tile_pos)
+		state, owner.team_id, sub_leader_id, settler_count, TeamData.TASK_SETTLE, tile.tile_pos)
 	if subteam_id == -1: return
 	print("[Residency] Team%d 派子隊 Team%d 安頓 outpost (%d,%d) pop=%d" % [
 		owner.team_id, subteam_id, tile.tile_pos.x, tile.tile_pos.y, settler_count])
@@ -404,12 +404,12 @@ func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileDa
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
 		if not ("流亡" in t.tags): continue
-		if t.current_task == "安頓": continue   # 已在路上，不重邀
+		if t.current_task == TeamData.TASK_SETTLE: continue   # 已在路上，不重邀
 		if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
 		var dipl := DiplomaticAiSystem.new()
 		var resp: String = dipl.handle_diplomacy_message(
 			state, t, team, "invite_settle")
-		if resp == "accept" and TaskArbiter.try_set(state, t, "安頓",
+		if resp == "accept" and TaskArbiter.try_set(state, t, TeamData.TASK_SETTLE,
 				tile.tile_pos, TaskArbiter.PRIO_DISPATCH, "invite_settle"):
 			team.invite_cooldown[tid] = state.world.current_tick + RESIDENCY_COOLDOWN * 4   # 等 settle 流程
 			print("[Residency] Team%d 邀請 Team%d 安頓 outpost (%d,%d)" % [
@@ -537,21 +537,21 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 # ──────── Tag 權限 ────────
 
 func _tag_weight(team: TeamData, task: String) -> float:
-	if task in ["idle", "逃跑"]: return 1.0
+	if task in [TeamData.TASK_IDLE, TeamData.TASK_FLEE]: return 1.0
 	if team.tags.has("統領") or team.tags.has(TeamData.TAG_SUBTEAM): return 1.0
 	if team.tags.has("流亡"): return 0.0
 	var task_tags: Dictionary = {
-		"攻擊":  ["軍隊"],
-		"掠奪":  ["軍隊"],
-		"徵收":  ["軍隊", "統領"],
-		"護衛":  ["軍隊", "商隊"],
-		"偵查":  ["軍隊", "商隊"],
-		"外交":  ["商隊", "宗教"],
-		"信使":  ["軍隊", "商隊", "生產", "宗教"],
-		"生產":  ["生產"],
-		"製造":  ["生產"],
-		"貿易":  ["商隊"],
-		"巡邏":  ["軍隊", "統領"],
+		TeamData.TASK_ATTACK:      ["軍隊"],
+		TeamData.TASK_LOOT:        ["軍隊"],
+		TeamData.TASK_TRIBUTE:     ["軍隊", "統領"],
+		TeamData.TASK_ESCORT:      ["軍隊", "商隊"],
+		TeamData.TASK_SCOUT:       ["軍隊", "商隊"],
+		TeamData.TASK_DIPLOMACY:   ["商隊", "宗教"],
+		TeamData.TASK_HERALD:      ["軍隊", "商隊", "生產", "宗教"],
+		TeamData.TASK_PRODUCE:     ["生產"],
+		TeamData.TASK_MANUFACTURE: ["生產"],
+		TeamData.TASK_TRADE:       ["商隊"],
+		TeamData.TASK_PATROL:      ["軍隊", "統領"],
 	}
 	var required: Array = task_tags.get(task, [])
 	if required.is_empty(): return 1.0
@@ -619,7 +619,7 @@ func _update_goals(state: WorldState, f) -> void:
 	if f.is_established and attack_score > ATTACK_SCORE_THRESHOLD \
 			and leader_team.readiness >= ATTACK_READINESS_MIN \
 			and _has_independent(state, f.leader_team_id) \
-			and _tag_weight(leader_team, "攻擊") > 0.0:
+			and _tag_weight(leader_team, TeamData.TASK_ATTACK) > 0.0:
 		var target_id: int = _nearest_independent(state, leader_team)
 		if target_id != -1:
 			var tgt_snap: Dictionary = state.team_intel.get(f.leader_team_id, {}).get(target_id, {})
@@ -628,7 +628,7 @@ func _update_goals(state: WorldState, f) -> void:
 			for mid in f.known_member_states:
 				if mid == f.leader_team_id: continue
 				var ms: Dictionary = f.known_member_states[mid]
-				if ms.get("current_task", "") == "攻擊":
+				if ms.get("current_task", "") == TeamData.TASK_ATTACK:
 					own_armed += int(ms.get("armed_est", 0))
 			if float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO:
 				f.goals.append("攻擊")
@@ -639,7 +639,7 @@ func _update_goals(state: WorldState, f) -> void:
 	if f.is_established and loot_score > LOOT_SCORE_THRESHOLD \
 			and leader_team.readiness >= LOOT_READINESS_MIN \
 			and _has_independent(state, f.leader_team_id) \
-			and _tag_weight(leader_team, "掠奪") > 0.0:
+			and _tag_weight(leader_team, TeamData.TASK_LOOT) > 0.0:
 		f.goals.append("掠奪")
 	# TODO: "合併" goal — 由 leader 手動指派 order_target_id，FactionAI 目前不自動觸發
 
@@ -667,7 +667,7 @@ func _assign_tasks(state: WorldState, f) -> void:
 			t_cmd.unrest_turns += 1
 			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])
 
-	if "徵收" in f.goals and leader_team.current_task != "徵收":
+	if "徵收" in f.goals and leader_team.current_task != TeamData.TASK_TRIBUTE:
 		var best_tid: int = _richest_member(state, f)
 		if best_tid != -1:
 			var target_pos: Vector2i = state.teams[best_tid].tile_pos
@@ -675,29 +675,29 @@ func _assign_tasks(state: WorldState, f) -> void:
 			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 3 \
 					and leader_team.named_members.size() > 0:
 				var _sub_sys_pick := SubteamSystem.new()
-				var sub_leader_id: int = _sub_sys_pick._pick_subteam_leader(state, leader_team, "徵收")
+				var sub_leader_id: int = _sub_sys_pick._pick_subteam_leader(state, leader_team, TeamData.TASK_TRIBUTE)
 				if sub_leader_id == -1: sub_leader_id = leader_team.named_members[0]
 				var pop_count: int = maxi(leader_team.population / 4, 2)
 				_sub_sys_pick.dispatch(state, f.leader_team_id, sub_leader_id,
-					pop_count, "徵收", target_pos)
+					pop_count, TeamData.TASK_TRIBUTE, target_pos)
 			else:
-				TaskArbiter.try_set(state, leader_team, "徵收", target_pos,
+				TaskArbiter.try_set(state, leader_team, TeamData.TASK_TRIBUTE, target_pos,
 					TaskArbiter.PRIO_DISPATCH, "faction_tribute")
 	if "立國" in f.goals:
 		_declare_established(state, f, leader_team)
-	if "外交" in f.goals and leader_team.current_task not in ["徵收", "外交", "攻擊"]:
+	if "外交" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK]:
 		var target_id: int = _nearest_independent(state, leader_team)
 		if target_id != -1:
-			TaskArbiter.try_set(state, leader_team, "外交",
+			TaskArbiter.try_set(state, leader_team, TeamData.TASK_DIPLOMACY,
 				state.teams[target_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "faction_diplomacy")
-	if "攻擊" in f.goals and leader_team.current_task not in ["徵收", "外交", "攻擊"]:
+	if "攻擊" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK]:
 		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1 and TaskArbiter.try_set(state, leader_team, "攻擊",
+		if target_id != -1 and TaskArbiter.try_set(state, leader_team, TeamData.TASK_ATTACK,
 				state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
 			print("[FactionAI] Team%d 主動攻擊 Team%d" % [f.leader_team_id, target_id])
-	if "掠奪" in f.goals and leader_team.current_task not in ["徵收", "外交", "攻擊", "掠奪"]:
+	if "掠奪" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK, TeamData.TASK_LOOT]:
 		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1 and TaskArbiter.try_set(state, leader_team, "掠奪",
+		if target_id != -1 and TaskArbiter.try_set(state, leader_team, TeamData.TASK_LOOT,
 				state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
 			print("[FactionAI] Team%d 主動掠奪 Team%d" % [f.leader_team_id, target_id])
 	_assign_member_tasks(state, f)
@@ -708,8 +708,8 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		if mid == f.leader_team_id: continue
 		var mt: TeamData = state.require_team(mid)
 		var snap: Dictionary = f.known_member_states.get(mid, {})
-		var known_task: String = snap.get("current_task", "idle")
-		if mt.combat_target != -1 or known_task != "idle":
+		var known_task: String = snap.get("current_task", TeamData.TASK_IDLE)
+		if mt.combat_target != -1 or known_task != TeamData.TASK_IDLE:
 			continue
 		if not mt.player_commanded_task.is_empty():
 			continue  # don't override player-commanded task
@@ -741,17 +741,17 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		if "徵收" in f.goals and _tag_weight(mt, "徵收") > 0.0:
 			var best_tid: int = _richest_member(state, f)
 			if best_tid != -1 and best_tid != mid:
-				TaskArbiter.try_set(state, mt, "徵收",
+				TaskArbiter.try_set(state, mt, TeamData.TASK_TRIBUTE,
 					state.teams[best_tid].tile_pos, TaskArbiter.PRIO_DISPATCH, "member_tribute")
 		elif "外交" in f.goals and _tag_weight(mt, "外交") > 0.0:
 			var target_id: int = _nearest_independent(state, mt)
 			if target_id != -1:
-				TaskArbiter.try_set(state, mt, "外交",
+				TaskArbiter.try_set(state, mt, TeamData.TASK_DIPLOMACY,
 					state.teams[target_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "member_diplomacy")
 		elif "攻擊" in f.goals and _tag_weight(mt, "攻擊") > 0.0:
 			var target_id: int = _nearest_independent(state, mt)
 			if target_id != -1:
-				TaskArbiter.try_set(state, mt, "攻擊",
+				TaskArbiter.try_set(state, mt, TeamData.TASK_ATTACK,
 					state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal")
 		elif _can_manufacture(state, mt):
 			TaskArbiter.try_set(state, mt, TeamData.TASK_MANUFACTURE,
@@ -790,7 +790,7 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 	if sub.current_task == TeamData.TASK_BUILD:
 		return  # C: 施工中（建設），不打斷、不召回
-	if sub.current_task == "安頓":
+	if sub.current_task == TeamData.TASK_SETTLE:
 		# 抵達自家 faction outpost → 就地安頓（無需 co-located team；獨自抵達即轉居民）
 		# 未到則保持 移動/安頓 task，不進 merge_queue（避免被召回母團）
 		var settle_tile: HexTileData = state.world.tiles.get(
@@ -878,8 +878,8 @@ func _evaluate_idle_subteam(state: WorldState, sub: TeamData, merge_queue: Array
 	var greed:   float = float(leader_p.values.get("貪婪", 0.5))
 	var martial: float = float(leader_p.values.get("好戰", 0.5))
 	var scores: Dictionary = { "回歸": 0.3 }
-	scores["掠奪"] = (greed * 0.5 + martial * 0.2) * _tag_weight(sub, "掠奪")
-	scores["攻擊"] = (martial * 0.4 + greed * 0.2) * _tag_weight(sub, "攻擊")
+	scores[TeamData.TASK_LOOT] = (greed * 0.5 + martial * 0.2) * _tag_weight(sub, TeamData.TASK_LOOT)
+	scores[TeamData.TASK_ATTACK] = (martial * 0.4 + greed * 0.2) * _tag_weight(sub, TeamData.TASK_ATTACK)
 	var best_task := "回歸"
 	var best_score: float = 0.0
 	for t in scores:
@@ -903,7 +903,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id: return   # 玩家隊不受 SoloAI 控制
 	if team.combat_target != -1: return
 	# stuck 視為 idle，允許重評（task 保留意圖直到重新派發）
-	if team.current_task != "idle" and not _is_stuck(team): return
+	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
 	var leader_p = state.persons.get(team.leader_id)
 	if leader_p == null: return
 
@@ -912,17 +912,17 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	var ambition: float = float(leader_p.values.get("野心",   0.5))
 	var survival: float = float(leader_p.values.get("求生欲", 0.5))
 
-	var scores: Dictionary = { "idle": 0.1 }
-	scores["攻擊"] = (ambition * 0.4 + martial * 0.4) * _tag_weight(team, "攻擊")
-	scores["掠奪"] = (greed * 0.5 + martial * 0.3)    * _tag_weight(team, "掠奪")
-	scores["外交"] = maxf(ambition * 0.4 - martial * 0.2, 0.0) * _tag_weight(team, "外交")
+	var scores: Dictionary = { TeamData.TASK_IDLE: 0.1 }
+	scores[TeamData.TASK_ATTACK] = (ambition * 0.4 + martial * 0.4) * _tag_weight(team, TeamData.TASK_ATTACK)
+	scores[TeamData.TASK_LOOT] = (greed * 0.5 + martial * 0.3)    * _tag_weight(team, TeamData.TASK_LOOT)
+	scores[TeamData.TASK_DIPLOMACY] = maxf(ambition * 0.4 - martial * 0.2, 0.0) * _tag_weight(team, TeamData.TASK_DIPLOMACY)
 	var food_pc: float = float(team.resources.get("food", 0)) / maxf(team.population, 1)
 	if food_pc < 2.0:
-		scores["逃跑"] = survival * 0.8
+		scores[TeamData.TASK_FLEE] = survival * 0.8
 	if _can_manufacture(state, team):
-		scores["製造"] = (greed * 0.4 + 0.2) * _tag_weight(team, "製造")
+		scores[TeamData.TASK_MANUFACTURE] = (greed * 0.4 + 0.2) * _tag_weight(team, TeamData.TASK_MANUFACTURE)
 	if _can_trade(state, team):
-		scores["貿易"] = (greed * 0.5 + 0.3) * _tag_weight(team, "貿易")
+		scores[TeamData.TASK_TRADE] = (greed * 0.5 + 0.3) * _tag_weight(team, TeamData.TASK_TRADE)
 	# W4 A：駐家治理傾向 — 慎重/野心高 leader 在自家 outpost 攢公庫（建材未達標才積極）
 	var own_pos: Vector2i = _find_own_outpost(state, team)
 	if own_pos != Vector2i(-1, -1):
@@ -940,31 +940,31 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			scores[TeamData.TASK_CAMP] = survival * 0.3 \
 				+ float(leader_p.values.get("慎重", 0.5)) * 0.3 + ambition * 0.3
 		if _find_strong_neighbor(state, team) != -1:
-			scores["投靠"] = float(leader_p.values.get("義氣", 0.5)) * 0.4 + survival * 0.4
+			scores[TeamData.TASK_JOIN] = float(leader_p.values.get("義氣", 0.5)) * 0.4 + survival * 0.4
 
 	# 承諾慣性：上次方向加分（非明顯更優不換）
 	if team.solo_intent != "" and scores.has(team.solo_intent):
 		scores[team.solo_intent] = float(scores[team.solo_intent]) + SOLO_COMMITMENT_BONUS
 
-	var best_task := "idle"
+	var best_task := TeamData.TASK_IDLE
 	var best_score: float = 0.0
 	for t in scores:
 		if float(scores[t]) > best_score:
 			best_score = float(scores[t])
 			best_task = t
 
-	if best_task == "idle": return
+	if best_task == TeamData.TASK_IDLE: return
 	var solo_target: Vector2i = team.move_target
 	match best_task:
-		"攻擊", "掠奪", "外交":
+		TeamData.TASK_ATTACK, TeamData.TASK_LOOT, TeamData.TASK_DIPLOMACY:
 			var tid: int = _nearest_independent(state, team)
 			if tid == -1: return
 			solo_target = state.teams[tid].tile_pos
-		"逃跑":
+		TeamData.TASK_FLEE:
 			solo_target = Vector2i(-1, -1)
-		"製造":
+		TeamData.TASK_MANUFACTURE:
 			pass  # 製造在原地進行
-		"貿易":
+		TeamData.TASK_TRADE:
 			var pid: int = _find_trade_target(state, team)
 			if pid == -1: return
 			solo_target = state.teams[pid].tile_pos
@@ -974,7 +974,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			var cpos: Vector2i = _find_unowned_farmable_tile(state, team)
 			if cpos == Vector2i(-1, -1): return
 			solo_target = cpos
-		"投靠":
+		TeamData.TASK_JOIN:
 			var ally: int = _find_strong_neighbor(state, team)
 			if ally == -1: return
 			solo_target = state.teams[ally].tile_pos
@@ -984,7 +984,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if not TaskArbiter.try_set(state, team, best_task, solo_target,
 			TaskArbiter.PRIO_DISPATCH, "solo"):
 		return
-	if best_task == "貿易":
+	if best_task == TeamData.TASK_TRADE:
 		team.trade_task_start_tick = state.world.current_tick
 	team.solo_intent = best_task
 	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
@@ -1149,7 +1149,7 @@ func _update_guard_ratio(team: TeamData, state: WorldState) -> void:
 # ──────── 輔助函數 ────────
 
 func _can_trade(state: WorldState, team: TeamData) -> bool:
-	if _tag_weight(team, "貿易") == 0.0:
+	if _tag_weight(team, TeamData.TASK_TRADE) == 0.0:
 		return false
 	for res in TRADEABLE_RES:
 		var stock: float = float(team.resources.get(res, 0))
@@ -1549,7 +1549,7 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 		if not (is_owner or resident_here): continue
 		# 已在工地的 return_home 殭屍態（到家但飢餓 sticky）也可復工
 		var at_site_stuck: bool = t.tile_pos == tile.tile_pos \
-			and t.current_task == "return_home"
+			and t.current_task == TeamData.TASK_RETURN_HOME
 		if not (t.current_task in interruptible or at_site_stuck): continue
 		if t.tile_pos == tile.tile_pos:
 			candidates.push_front(t)   # 在場優先
@@ -2143,7 +2143,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		if severity == "warning" and not _should_abandon_current_task(team, own_pos):
 			team.previous_task = ""
 			return
-		TaskArbiter.try_set(state, team, "return_home", own_pos,
+		TaskArbiter.try_set(state, team, TeamData.TASK_RETURN_HOME, own_pos,
 			TaskArbiter.PRIO_SURVIVAL, "survival")
 		return
 
@@ -2177,7 +2177,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 				if p_join != null and ally_id == p_join.team_id:
 					if _maybe_request_join_player(state, team):
 						return
-				if TaskArbiter.try_set(state, team, "投靠",
+				if TaskArbiter.try_set(state, team, TeamData.TASK_JOIN,
 						state.teams[ally_id].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
 					team.combat_target = ally_id
 					print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, ally_id])
@@ -2202,7 +2202,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 				team.team_id, team.population, forage_pos.x, forage_pos.y])
 			return
 	var aid_target: int = _find_aid_target(state, team)
-	if aid_target != -1 and TaskArbiter.try_set(state, team, "乞食",
+	if aid_target != -1 and TaskArbiter.try_set(state, team, TeamData.TASK_BEG,
 			state.teams[aid_target].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
 		team.combat_target = aid_target
 		return
@@ -2353,7 +2353,7 @@ func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
 
 func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	if not _is_resident_team(state, team): return
-	if team.current_task in ["起義", "守城"]: return
+	if team.current_task in [TeamData.TASK_REVOLT, "守城"]: return
 	if team.current_task in SURVIVAL_TASKS: return
 	var avg_loy: float = _avg_named_loyalty(state, team)
 	if avg_loy >= 0.2: return
@@ -2376,7 +2376,7 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 				TaskArbiter.PRIO_THREAT, "uprising"):
 			return
 	else:
-		if not TaskArbiter.try_set(state, team, "起義", Vector2i(-1, -1),
+		if not TaskArbiter.try_set(state, team, TeamData.TASK_REVOLT, Vector2i(-1, -1),
 				TaskArbiter.PRIO_THREAT, "uprising"):
 			return
 	# C: 起義 → 取消進行中施工（無論守城/流亡路徑）

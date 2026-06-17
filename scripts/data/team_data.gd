@@ -65,7 +65,7 @@ var resources: Dictionary = {
 	"armor_low": 0, "armor_high": 0,
 }
 var tags: Array = []
-var current_task: String = "idle"
+var current_task: String = TASK_IDLE
 var task_priority: int = 0   # 現任 task 優先權；idle 時 0（TaskArbiter 管理）
 var previous_task: String = ""   # survival override 前的原 task，回復用
 var tax_rate: float = 0.3                    # 收稅率（PRODUCE team 用，0.1-0.7）

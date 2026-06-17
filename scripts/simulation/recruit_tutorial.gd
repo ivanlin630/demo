@@ -13,7 +13,7 @@ func check(state: WorldState) -> void:
 	# 生 tutorial 流民團
 	var tid: int = _next_team_id(state)
 	var team := TeamData.new(); team.team_id = tid; team.tile_pos = pt.tile_pos
-	team.current_task = "投靠"
+	team.current_task = TeamData.TASK_JOIN
 	var nl := PersonData.new(); nl.id = _next_person_id(state)
 	nl.team_id = tid; nl.person_name = "投奔者"; nl.role = "leader"
 	nl.skills = {"狩獵": 0.5, "求生": 0.5, "戰鬥": 0.4}   # 略偏堪用
