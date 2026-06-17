@@ -889,6 +889,17 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 				result = _accept_join_request(state, fe.get("from_id", -1))
 			else:
 				result = { "ok": true, "msg": "婉拒收留" }
+		"aid_request":
+			if response == "give":
+				state.player_state["aid_response"] = { "give_amount": AID_GIVE_DEFAULT }
+			else:
+				state.player_state["aid_response"] = { "refuse": true }
+			result = _action_respond_aid_request(state, -1, _get_player_team(state), _get_player_team_id(state))
+		"choose_heir":
+			# response_id = "heir_<pid>"
+			var hid: int = int(response.trim_prefix("heir_"))
+			state.player_state["heir_id"] = hid
+			result = _action_choose_heir(state, -1, _get_player_team(state), _get_player_team_id(state))
 		_:
 			result = { "ok": false, "msg": "未知強制事件類型" }
 	state.player_forced_event = {}
