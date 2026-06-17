@@ -4,6 +4,7 @@ func _initialize() -> void:
 	_run_sim_test()
 	_test_anon_tier_const()
 	_test_anon_cohort_key()
+	_test_anon_cohort_mutate()
 	_test_team_anon_tiers_default()
 	_test_anon_tier_queries()
 	_test_add_remove_anon()
@@ -6299,6 +6300,38 @@ func _test_anon_cohort_key() -> void:
 			var p: Array = AnonCohort._parse(k)
 			assert(p[0] == tier and p[1] == health, "round-trip 失敗: %s" % k)
 	print("[OK] _test_anon_cohort_key")
+
+func _test_anon_cohort_mutate() -> void:
+	var c: Dictionary = {}
+	# add 建鍵
+	AnonCohort.add(c, "平民", "healthy", 3)
+	assert(c.get("平民|healthy", 0) == 3, "add 後應 3")
+	# add 累加同鍵
+	AnonCohort.add(c, "平民", "healthy", 2)
+	assert(c.get("平民|healthy", 0) == 5, "add 累加應 5")
+	# add n<=0 noop
+	AnonCohort.add(c, "平民", "healthy", 0)
+	AnonCohort.add(c, "平民", "healthy", -4)
+	assert(c.get("平民|healthy", 0) == 5, "add 非正數應 noop")
+	# remove 回實際移除數，clamp 到現有
+	var r1: int = AnonCohort.remove(c, "平民", "healthy", 2)
+	assert(r1 == 2 and c.get("平民|healthy", 0) == 3, "remove 2 後應 3")
+	var r2: int = AnonCohort.remove(c, "平民", "healthy", 99)
+	assert(r2 == 3, "remove 超量應只移除現有 3，實際 %d" % r2)
+	# 稀疏：歸零鍵刪除
+	assert(not c.has("平民|healthy"), "count 0 鍵應刪除")
+	# remove 不存在鍵回 0
+	assert(AnonCohort.remove(c, "菁英", "wounded", 5) == 0, "remove 空桶應回 0")
+	# move：healthy→wounded
+	AnonCohort.add(c, "老兵", "healthy", 4)
+	var m: int = AnonCohort.move(c, "老兵", "healthy", "老兵", "wounded", 1)
+	assert(m == 1, "move 應移 1")
+	assert(c.get("老兵|healthy", 0) == 3 and c.get("老兵|wounded", 0) == 1, "move 後 healthy3 wounded1")
+	# move clamp 到來源現有，不夠只移現有
+	var m2: int = AnonCohort.move(c, "老兵", "healthy", "老兵", "wounded", 99)
+	assert(m2 == 3, "move 超量應只移現有 3，實際 %d" % m2)
+	assert(not c.has("老兵|healthy") and c.get("老兵|wounded", 0) == 4, "move 後 healthy 桶空、wounded4")
+	print("[OK] _test_anon_cohort_mutate")
 
 func _test_team_anon_tiers_default() -> void:
 	var t := TeamData.new()

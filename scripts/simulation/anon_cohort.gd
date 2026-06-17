@@ -13,3 +13,30 @@ static func _key(tier: String, health: String) -> String:
 
 static func _parse(key: String) -> Array:
 	return key.split("|")   # [tier, health]
+
+# ───── 增減（維持稀疏 + 非負）─────
+
+static func add(cohorts: Dictionary, tier: String, health: String, n: int) -> void:
+	if n <= 0:
+		return
+	var k: String = _key(tier, health)
+	cohorts[k] = int(cohorts.get(k, 0)) + n
+
+static func remove(cohorts: Dictionary, tier: String, health: String, n: int) -> int:
+	if n <= 0:
+		return 0
+	var k: String = _key(tier, health)
+	var cur: int = int(cohorts.get(k, 0))
+	var removed: int = mini(cur, n)
+	var left: int = cur - removed
+	if left <= 0:
+		cohorts.erase(k)
+	else:
+		cohorts[k] = left
+	return removed
+
+static func move(cohorts: Dictionary, from_tier: String, from_health: String,
+		to_tier: String, to_health: String, n: int) -> int:
+	var moved: int = remove(cohorts, from_tier, from_health, n)
+	add(cohorts, to_tier, to_health, moved)
+	return moved
