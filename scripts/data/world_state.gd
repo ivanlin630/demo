@@ -115,6 +115,49 @@ func set_subteam_parent(child: TeamData, parent_id: int) -> void:
 func detach_subteam(child: TeamData) -> void:
 	set_subteam_parent(child, -1)
 
+# 單一 team 移除 chokepoint：清光所有指向 tid 的 ref，使「無懸空 team_id」成不變量。
+# 所有 team 移除（滅團/合併/野獸清除）都須走此入口。
+func erase_team(tid: int) -> void:
+	var team: TeamData = teams.get(tid)
+	if team == null:
+		return
+	# 1. 母子：脫離 parent + 孤兒化自己的子隊
+	if team.parent_team_id != -1:
+		detach_subteam(team)
+	for cid in team.subteam_ids.duplicate():
+		if teams.has(cid):
+			teams[cid].parent_team_id = -1
+	team.subteam_ids.clear()
+	# 2. faction：退成員 + known_member_states + 若為盟主則解散
+	if team.faction_id != -1 and factions.has(team.faction_id):
+		var f = factions[team.faction_id]
+		f.member_team_ids.erase(tid)
+		f.known_member_states.erase(tid)
+		if f.leader_team_id == tid:
+			disband_faction(team.faction_id)
+	# 3. 其他隊指向 tid 的 ref 全清
+	for otid in teams:
+		if otid == tid:
+			continue
+		var o: TeamData = teams[otid]
+		if o.combat_target == tid:
+			o.combat_target = -1
+		if o.order_target_id == tid:
+			o.order_target_id = -1
+		o.known_reputations.erase(tid)
+		o.invite_cooldown.erase(tid)
+		o.diplomacy_reject_cooldown.erase(tid)
+		o.strategic_assignments.erase(tid)
+	# 4. registry：自身條目 + 交叉 discovered/known
+	team_known.erase(tid)
+	team_discovered.erase(tid)
+	for obs in team_known:
+		team_known[obs].erase(tid)
+	for obs in team_discovered:
+		team_discovered[obs].erase(tid)
+	# 5. 移除
+	teams.erase(tid)
+
 # ── 遭遇戰臨時狀態（active 期間使用，結束後清空） ──
 var encounter_active: bool        = false
 var encounter_units: Array        = []   # Array[Dictionary]
