@@ -7,6 +7,7 @@ static func check(state: WorldState) -> Array[String]:
 	_check_population(state, violations)
 	_check_faction_bidir(state, violations)
 	_check_subteam_bidir(state, violations)
+	_check_anon_cohort(state, violations)
 	return violations
 
 # population 不變量：== leader(0/1) + named + anon(含 wounded 桶)
@@ -50,3 +51,17 @@ static func _check_subteam_bidir(state: WorldState, out: Array[String]) -> void:
 				out.append("subteam 懸空 Team%d.subteam_ids 含已不存在 Team%d" % [pid, cid])
 			elif child.parent_team_id != pid:
 				out.append("subteam 雙向破 Team%d 列子隊 Team%d 但其 parent_team_id=%d" % [pid, cid, child.parent_team_id])
+
+# anon cohort 自洽：每桶 count>0、鍵合法（tier ∈ TIER_ORDER、health ∈ HEALTH_ORDER）。
+# count<0 或非法鍵 = AnonCohort 入口被繞過或腐化。population getter 已是恆等式（total_pop），
+# 故 _check_population 對 anon 部分恆綠；此網守的是 cohort 內部結構。
+static func _check_anon_cohort(state: WorldState, out: Array[String]) -> void:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		for key in t.anon_cohorts:
+			var parts: Array = AnonCohort._parse(key)
+			if parts.size() != 2 or parts[0] not in AnonCohort.TIER_ORDER \
+					or parts[1] not in AnonCohort.HEALTH_ORDER:
+				out.append("cohort 非法鍵 Team%d: '%s'" % [tid, key])
+			if int(t.anon_cohorts[key]) <= 0:
+				out.append("cohort 桶非正 Team%d: '%s'=%d（稀疏應刪零桶）" % [tid, key, int(t.anon_cohorts[key])])
