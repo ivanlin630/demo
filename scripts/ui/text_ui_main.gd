@@ -1168,8 +1168,13 @@ func _handle_faction_mode(keycode: int) -> void:
 		return
 	var member_orders: Array = fp.get("member_orders", [])
 
+	var is_faction_leader: bool = fp.get("is_leader", false)
+
 	match keycode:
-		KEY_A:   # 設定目標
+		KEY_A:   # 設定目標（Q7-6：僅 leader；非 leader no-op,顯示亦不列）
+			if not is_faction_leader:
+				_refresh()
+				return
 			_input_mode = true
 			_input_mode_type = "string"
 			_input_mode_prompt = "設定勢力目標: "
@@ -1181,7 +1186,10 @@ func _handle_faction_mode(keycode: int) -> void:
 				_log_event("[勢力] %s" % r.get("message", ""))
 				_set_feedback(r.get("ok", true), r.get("message", ""))
 			_input_bar.text = "%s_" % _input_mode_prompt
-		KEY_B:   # 調整徵收率
+		KEY_B:   # 調整徵收率（Q7-6：僅 leader）
+			if not is_faction_leader:
+				_refresh()
+				return
 			_input_mode = true
 			_input_mode_type = "numeric"
 			_input_mode_prompt = "徵收率 (0-100): "
@@ -1304,11 +1312,13 @@ func _build_faction_str() -> String:
 			i + 1, mo.get("team_id", -1), pos_v.x, pos_v.y, task_str])
 	lines.append("")
 	lines.append("── 行動 ──")
-	lines.append("[A]設定目標  [B]調整徵收率  [C]離開勢力")
+	# Q7-6：[A]目標 / [B]徵收率 僅 leader 可用 → 非 leader 不顯（display 對齊 command 權限）
 	if fp.get("is_leader", false):
+		lines.append("[A]設定目標  [B]調整徵收率  [C]離開勢力")
 		lines.append("[G]徵用國庫（Leader）")
 		lines.append("[D]背叛勢力  [E]解散勢力（Leader）")
 	else:
+		lines.append("[C]離開勢力")
 		lines.append("[D]背叛勢力")
 	lines.append("[F/Esc]關閉")
 	return "\n".join(lines)
