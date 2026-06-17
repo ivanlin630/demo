@@ -55,8 +55,4 @@ func reward_and_cleanup(state: WorldState, winner_id: int, beast_id: int) -> voi
 	_cleanup(state, beast_id)
 
 func _cleanup(state: WorldState, beast_id: int) -> void:
-	state.teams.erase(beast_id)
-	state.team_known.erase(beast_id)
-	state.team_discovered.erase(beast_id)
-	for obs in state.team_discovered:
-		state.team_discovered[obs].erase(beast_id)
+	state.erase_team(beast_id)

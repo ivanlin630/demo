@@ -1351,9 +1351,7 @@ func cleanup_extinct_teams(state: WorldState) -> void:
 			continue
 		var team: TeamData = state.teams[tid]
 		_route_extinct_assets(state, team)
-		if team.parent_team_id != -1:
-			state.detach_subteam(team)   # 子隊滅團 → 從 parent.subteam_ids 移除（消懸空）
-		state.teams.erase(tid)
+		state.erase_team(tid)   # 清光所有 ref（含 detach、registry、交叉）
 		print("[Extinct] Team%d 滅團清除（遺財已路由）" % tid)
 	state.teams_pending_erase.clear()
 

@@ -99,17 +99,9 @@ func _transfer_proportional_assets(absorber: TeamData, absorbed: TeamData, frac:
 		absorber.anon_treasury += absorbed.anon_treasury
 		absorbed.anon_treasury = 0.0
 
-# 滅團清理：faction 成員表 + 全域 team registry（teams/known/discovered）移除 absorbed
+# 滅團清理：統一走 erase_team chokepoint（faction member/known_member_states + registry + 交叉 ref）
 func _erase_absorbed_team(state: WorldState, absorbed_id: int) -> void:
-	var absorbed: TeamData = state.teams.get(absorbed_id)
-	if absorbed != null and absorbed.faction_id != -1:
-		var f: FactionData = state.factions.get(absorbed.faction_id)
-		if f != null:
-			f.member_team_ids.erase(absorbed_id)
-			f.known_member_states.erase(absorbed_id)
-	state.teams.erase(absorbed_id)
-	state.team_known.erase(absorbed_id)
-	state.team_discovered.erase(absorbed_id)
+	state.erase_team(absorbed_id)
 
 func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		transfer_npc_ids: Array = [], transfer_anon: int = -1) -> void:
