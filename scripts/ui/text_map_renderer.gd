@@ -1,7 +1,7 @@
 # scripts/ui/text_map_renderer.gd
 class_name TextMapRenderer
 
-const VISION_RADIUS: int = 3   # 與 VisionSystem 一致（TEST VALUE）
+const VISION_RADIUS: int = VisionSystem.VISION_RADIUS   # 引用 sim 權威源（單一真值）
 const VIEW_RADIUS: int = 5     # 視窗半徑（以玩家為中心顯示的範圍,> VISION_RADIUS 留霧邊）
 const TERRAIN_CHAR: Dictionary = { "plains": "P", "forest": "F", "mountain": "M" }
 

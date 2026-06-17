@@ -57,5 +57,5 @@ func get_camp_vision_range(state: WorldState, team: TeamData) -> int:
 		var p: PersonData = state.persons.get(pid)
 		if p: total_scout += float(p.skills.get("偵查", 0.0))
 	var avg_scout: float = total_scout / guards.size()
-	var base: int = 3   # VisionSystem.VISION_RADIUS (避免跨系統依賴)
+	var base: int = VisionSystem.VISION_RADIUS
 	return roundi((base + avg_scout * 2.0) * get_vision_mult(state))
