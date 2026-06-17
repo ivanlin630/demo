@@ -261,56 +261,31 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 	var action: String = evt.get("action", "")
 	var proposal: String = evt.get("proposal", "")
 	var msg: String = ""
-	var responses: Array = []
+	# msg：per-action 文案（display 文案,單一處,保留 per-action）
 	match action:
 		"diplomacy":
 			msg = "Team%d 要求你納貢" % from_id if proposal == "demand_tribute" else "Team%d 提議 %s" % [from_id, proposal]
-			var from_team: TeamData = state.teams.get(from_id) if state.teams.has(from_id) else null
-			var player_pid: int = state.player_id
-			var pp: PersonData = state.persons.get(player_pid) if state.persons.has(player_pid) else null
-			var player_team: TeamData = state.teams.get(pp.team_id if pp != null else -1) if pp != null else null
-			var both_independent: bool = from_team != null and player_team != null \
-				and from_team.faction_id == -1 and player_team.faction_id == -1 \
-				and evt.get("proposal", "") in ["alliance", "surrender"]
-
-			if both_independent:
-				responses = [
-					{ "response_id": "accept_join",  "label": "加入對方勢力（對方為主）",
-					  "command_args": {"interaction_id": iid, "response_id": "accept_join"} },
-					{ "response_id": "accept_lead",  "label": "自立後接納對方（我為主）",
-					  "command_args": {"interaction_id": iid, "response_id": "accept_lead"} },
-					{ "response_id": "refuse",       "label": "✗ 拒絕",
-					  "command_args": {"interaction_id": iid, "response_id": "refuse"} }
-				]
-			else:
-				responses = [
-					{"response_id": "accept", "label": "✓ 接受",
-					 "command_args": {"interaction_id": iid, "response_id": "accept"}},
-					{"response_id": "refuse", "label": "✗ 拒絕",
-					 "command_args": {"interaction_id": iid, "response_id": "refuse"}}
-				]
 		"extort":
 			msg = "Team%d 勒索你" % from_id
-			responses = [
-				{"response_id": "pay", "label": "付錢", "command_args": {"interaction_id": iid, "response_id": "pay"}},
-				{"response_id": "refuse", "label": "拒絕", "command_args": {"interaction_id": iid, "response_id": "refuse"}}
-			]
 		"join_request":
 			var ft: TeamData = state.teams.get(from_id)
-			var n: int = ft.population if ft != null else 0
-			msg = "Team%d 求投靠（%d 人）" % [from_id, n]
-			responses = [
-				{ "response_id": "accept", "label": "收留（食物 -%.1f,+%d 人）" % [
-					PlayerCommandSystem.JOIN_ONBOARD_MEAL * n, n],
-				  "command_args": {"interaction_id": iid, "response_id": "accept"} },
-				{ "response_id": "refuse", "label": "✗ 婉拒",
-				  "command_args": {"interaction_id": iid, "response_id": "refuse"} },
-			]
+			msg = "Team%d 求投靠（%d 人）" % [from_id, ft.population if ft != null else 0]
+		"aid_request":
+			var ft2: TeamData = state.teams.get(from_id)
+			msg = "Team%d 向你乞食（%d 人）" % [from_id, ft2.population if ft2 != null else 0]
+		"choose_heir":
+			msg = "領袖殞落,擇繼承人"
 		_:
 			msg = "Team%d 強制事件" % from_id
-			responses = [
-				{"response_id": "refuse", "label": "拒絕", "command_args": {"interaction_id": iid, "response_id": "refuse"}}
-			]
+	# responses：單一源 = get_forced_response_options，每 id 配 label（不可 drift）
+	var pcs := PlayerCommandSystem.new()
+	var responses: Array = []
+	for rid in pcs.get_forced_response_options(state):
+		responses.append({
+			"response_id": rid,
+			"label": _forced_label(action, rid, state, evt),
+			"command_args": { "interaction_id": iid, "response_id": rid }
+		})
 	return {
 		"interaction_id": iid,
 		"interaction_type": action,
@@ -323,6 +298,31 @@ static func map_forced_interaction(state: WorldState) -> Dictionary:
 		"message": msg,
 		"responses": responses
 	}
+
+# 每個 forced response id 的顯示 label（per-action,單一處）
+static func _forced_label(action: String, rid: String, state: WorldState, evt: Dictionary) -> String:
+	match action:
+		"diplomacy":
+			match rid:
+				"accept": return "✓ 接受"
+				"accept_join": return "加入對方勢力（對方為主）"
+				"accept_lead": return "自立後接納對方（我為主）"
+				"refuse": return "✗ 拒絕"
+		"extort":
+			return "付錢" if rid == "pay" else "拒絕"
+		"join_request":
+			var ft: TeamData = state.teams.get(evt.get("from_id", -1))
+			var n: int = ft.population if ft != null else 0
+			if rid == "accept":
+				return "收留（食物 -%.1f,+%d 人）" % [PlayerCommandSystem.JOIN_ONBOARD_MEAL * n, n]
+			return "✗ 婉拒"
+		"aid_request":
+			return "施捨 %.0f 糧" % PlayerCommandSystem.AID_GIVE_DEFAULT if rid == "give" else "✗ 拒絕"
+		"choose_heir":
+			var pid: int = int(rid.trim_prefix("heir_"))
+			var p: PersonData = state.persons.get(pid)
+			return "立 %s 為繼承人" % (p.person_name if p != null else "P%d" % pid)
+	return rid
 
 # ── Location context ───────────────────────────────────────────────────────────
 
