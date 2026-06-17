@@ -85,6 +85,21 @@ func disband_faction(faction_id: int) -> void:
 	factions.erase(faction_id)
 	print("[Faction] 勢力%d 解散" % faction_id)
 
+# 雙向單一入口：team.faction_id ↔ faction.member_team_ids 一處同維護（規則3）。
+# 換 faction 自動退舊團、入新團；idempotent。
+func set_team_faction(team: TeamData, fid: int) -> void:
+	if team.faction_id == fid:
+		return
+	if team.faction_id != -1 and factions.has(team.faction_id):
+		factions[team.faction_id].member_team_ids.erase(team.team_id)
+	team.faction_id = fid
+	if fid != -1 and factions.has(fid):
+		if not factions[fid].member_team_ids.has(team.team_id):
+			factions[fid].member_team_ids.append(team.team_id)
+
+func clear_team_faction(team: TeamData) -> void:
+	set_team_faction(team, -1)
+
 # ── 遭遇戰臨時狀態（active 期間使用，結束後清空） ──
 var encounter_active: bool        = false
 var encounter_units: Array        = []   # Array[Dictionary]
