@@ -8,6 +8,7 @@ const TRAIN_COST_COIN: float = 30.0      # TEST VALUE — 一次訓練 coin（�
 const TRAIN_EXP_GAIN:  float = 20.0      # TEST VALUE — 一次訓練給最低非菁英 tier 的 exp
 const CAMP_BUILD_TICKS: int   = 240      # TEST VALUE — 紮營 person-ticks（免材料但限時施工）
 const CAMP_FOOD_CAP:    float = 40.0     # TEST VALUE — 紮營只抬 food cap（regen 產糧）,不送即時糧
+const AID_GIVE_DEFAULT: float = 5.0      # TEST VALUE — forced aid_request give 預設量（一餐量,免新增數值輸入 UI）
 
 # 投降抽成清單：30% 轉移給受降方（含武備 — 半繳械投降）
 const SURRENDER_TRANSFER_RES: Array = [
@@ -832,12 +833,32 @@ func _accept_join_request(state: WorldState, from_id: int) -> Dictionary:
 # "diplomacy" → ["accept", "refuse"]
 # "extort"    → ["pay", "refuse"]
 func get_forced_response_options(state: WorldState) -> Array[String]:
-	match state.player_forced_event.get("action", ""):
+	var fe: Dictionary = state.player_forced_event
+	var action: String = fe.get("action", "")
+	match action:
 		"diplomacy":
-			return ["accept", "accept_join", "accept_lead", "refuse"]
-		"extort":    return ["pay", "refuse"]
-		"join_request": return ["accept", "refuse"]
-	return []
+			# 動態：雙方獨立 + alliance/surrender → 加入/自立；否則 accept/refuse
+			var from_team: TeamData = state.teams.get(fe.get("from_id", -1))
+			var pp: PersonData = state.persons.get(state.player_id)
+			var player_team: TeamData = state.teams.get(pp.team_id) if pp != null else null
+			var both_independent: bool = from_team != null and player_team != null \
+				and from_team.faction_id == -1 and player_team.faction_id == -1 \
+				and fe.get("proposal", "") in ["alliance", "surrender"]
+			if both_independent:
+				return ["accept_join", "accept_lead", "refuse"] as Array[String]
+			return ["accept", "refuse"] as Array[String]
+		"extort":
+			return ["pay", "refuse"] as Array[String]
+		"join_request":
+			return ["accept", "refuse"] as Array[String]
+		"aid_request":
+			return ["give", "refuse"] as Array[String]
+		"choose_heir":
+			var ids: Array[String] = []
+			for pid in fe.get("candidates", []):
+				ids.append("heir_%d" % int(pid))
+			return ids
+	return [] as Array[String]
 
 # 回應強制互動，清除 forced_event
 # 返回 { "ok": bool, "msg": String }
