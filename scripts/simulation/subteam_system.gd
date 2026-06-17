@@ -92,6 +92,11 @@ func _transfer_proportional_assets(absorber: TeamData, absorbed: TeamData, frac:
 	absorber.anon_treasury += treas_xfer
 	absorbed.anon_treasury -= treas_xfer
 	if will_empty:
+		# absorbed 將被 erase → 掃光殘餘 resources（非僅 frac）+ treasury，否則殘餘 coin 隨 erase 漏失。
+		# （population getter 後，frac 可能在 leader/named 已搬出時算得=0 → resources 完全沒搬）
+		for res in absorbed.resources:
+			absorber.resources[res] = float(absorber.resources.get(res, 0)) + float(absorbed.resources.get(res, 0))
+			absorbed.resources[res] = 0.0
 		absorber.anon_treasury += absorbed.anon_treasury
 		absorbed.anon_treasury = 0.0
 
