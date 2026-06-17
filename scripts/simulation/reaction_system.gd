@@ -243,17 +243,13 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 				return   # solo 無處可逃：不變化、stress 不洩壓（持續高壓餵 N2/N3）
 			person.stress = maxf(person.stress - 0.3, 0.0)
 			if team.named_members.has(person.id):
-				team.population = maxi(team.population - 1, 1)
 				team.named_members.erase(person.id)
 				person.team_id = -1
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
-				# leader 留下，實際走的是 anon；無 anon 可走 → pop 不變
-				# （舊版無條件扣 pop → pop < named 數 → guard equip target 振盪）
-				if _anon_actually_left(team, "flee"):
-					team.population = maxi(team.population - 1, 1)
-			else:
-				team.population = maxi(team.population - 1, 1)
+				# leader 留下，實際走的是 anon（kill_random 移 anon 桶）；population getter 自動反映
+				_anon_actually_left(team, "flee")
+			# 非 named/leader（anon 無個體）→ 無 cohort 來源可動，population getter 不變
 		"N2_riot":
 			team.unrest_turns += 1
 		"N3_defect":
@@ -261,15 +257,12 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 				return   # solo leader 無從叛逃自己
 			person.loyalty = 0.0
 			if team.named_members.has(person.id):
-				team.population = maxi(team.population - 1, 1)
 				team.named_members.erase(person.id)
 				person.team_id = -1
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
-				if _anon_actually_left(team, "defect"):
-					team.population = maxi(team.population - 1, 1)
-			else:
-				team.population = maxi(team.population - 1, 1)
+				_anon_actually_left(team, "defect")   # 走的是 anon；population getter 自動反映
+			# 非 named/leader（anon 無個體）→ 無 cohort 來源可動，population getter 不變
 		"N4_shirk":
 			var f: float = float(team.resources.get("food", 0))
 			team.resources["food"] = maxf(f - 1.0, 0.0)
@@ -322,7 +315,6 @@ func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) 
 		if t.tile_pos != pos: continue
 		if not ("流亡" in t.tags): continue
 		t.named_members.append(person.id)
-		t.population += 1
 		person.team_id = t.team_id
 		return
 	var ot := TeamData.new()
@@ -330,7 +322,6 @@ func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) 
 	ot.tile_pos = pos
 	ot.faction_id = -1
 	ot.tags = ["流亡"]
-	ot.population = 1
 	ot.current_task = TeamData.TASK_IDLE   # 新 team 建立豁免：直接賦值 + priority 0
 	ot.task_priority = 0
 	ot.leader_id = person.id

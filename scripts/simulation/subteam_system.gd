@@ -32,7 +32,6 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	sub.order_target_id  = order_target_id
 	sub.order_task       = order_task
 	sub.leader_id        = sub_leader_id
-	sub.population       = pop_count
 	sub.readiness        = parent.readiness
 	sub.tags             = [TeamData.TAG_SUBTEAM]
 
@@ -62,7 +61,6 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	var named_in_sub: int = sub.named_members.size() + (1 if sub.leader_id != -1 else 0)
 	var anon_to_sub: int = maxi(pop_count - named_in_sub, 0)
 	AnonTierSystem.transfer_proportional(parent, sub, anon_to_sub)
-	parent.population -= pop_count
 	parent.subteam_ids.append(sub.team_id)
 	state.teams[sub.team_id]          = sub
 	state.team_known[sub.team_id]     = []
@@ -160,8 +158,6 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 			absorbed.named_members.erase(pid)
 			if not absorber.named_members.has(pid):
 				absorber.named_members.append(pid)
-	absorber.population += total_xfer
-	absorbed.population -= total_xfer
 	AnonTierSystem.transfer_proportional(absorbed, absorber, anon_xfer)
 	_transfer_proportional_assets(absorber, absorbed, frac, absorbed.population <= 0)
 	if absorbed_leader_moved and absorbed.population > 0:
@@ -209,6 +205,7 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 			sub_leader.team_id = absorber_id
 			if not absorber.named_members.has(absorbed.leader_id):
 				absorber.named_members.append(absorbed.leader_id)
+		absorbed.leader_id = -1   # leader 已歸還 absorber → 清空，否則 population getter 仍計 1 phantom leader 擋滅團
 	# 歸還 sub.named_members
 	if absorbed.parent_team_id == absorber_id:
 		for aid in absorbed.named_members:
@@ -221,11 +218,10 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 
 	var transfer: int = mini(absorbed.population, capacity)
 	var frac: float   = float(transfer) / float(absorbed.population) if absorbed.population > 0 else 0.0
-	absorber.population += transfer
 	AnonTierSystem.transfer_proportional(absorbed, absorber,
 		roundi(float(AnonTierSystem.total_pop(absorbed)) * frac))
-	_transfer_proportional_assets(absorber, absorbed, frac, absorbed.population - transfer <= 0)
-	absorbed.population -= transfer
+	# named/leader 已搬、anon 已轉 → absorbed.population getter 即剩餘量
+	_transfer_proportional_assets(absorber, absorbed, frac, absorbed.population <= 0)
 	absorber.subteam_ids.erase(absorbed_id)
 	if absorbed.population <= 0:
 		_erase_absorbed_team(state, absorbed_id)

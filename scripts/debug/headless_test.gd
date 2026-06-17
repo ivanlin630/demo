@@ -1,5 +1,18 @@
 extends SceneTree
 
+# population 為 getter（leader+named+anon）後，測試 setup 不能直設 population。
+# 此 helper 補/減 平民 healthy anon，使 getter 恰為 n（保留既有 tier/wounded 結構）。
+# 須在 leader_id / named_members 設好後呼叫。
+static func _seed_pop(team: TeamData, n: int) -> void:
+	var named_in: int = team.named_members.size() + (1 if team.leader_id != -1 else 0)
+	var want_anon: int = maxi(n - named_in, 0)
+	var cur_anon: int = AnonCohort.total(team.anon_cohorts)
+	var delta: int = want_anon - cur_anon
+	if delta > 0:
+		AnonCohort.add(team.anon_cohorts, "平民", "healthy", delta)
+	elif delta < 0:
+		AnonCohort.remove(team.anon_cohorts, "平民", "healthy", -delta)
+
 func _initialize() -> void:
 	_run_sim_test()
 	_test_anon_tier_const()
@@ -374,15 +387,16 @@ func _test_invariant_audit() -> void:
 	var m := PersonData.new(); m.id = 1; m.team_id = 0
 	state.persons[1] = m
 	var t := TeamData.new(); t.team_id = 0; t.leader_id = 0; t.named_members = [1]
-	t.wounded = 0; t.population = 5
+	t.wounded = 0
 	AnonTierSystem.add_anon(t, "平民", 3)
 	state.teams[0] = t
+	# population 為唯讀 getter（leader+named+anon）→ 物理上不可 drift。
+	assert(t.population == 5, "getter = leader1+named1+anon3 = 5，實際=%d" % t.population)
 	assert(InvariantAudit.check(state).is_empty(), "正常隊不該有違反:%s" % str(InvariantAudit.check(state)))
-	# 造 drift：named 死(移出 named_members)但 pop 沒減 → pop=5 但實際 leader+named(0)+anon(3)=4
+	# 移除 named → getter 自動降為 leader1+named0+anon3 = 4（無獨立純量可脫鉤）
 	t.named_members = []
-	var v: Array = InvariantAudit.check(state)
-	assert(v.size() > 0, "pop drift 應被偵測")
-	assert("population" in str(v), "違反訊息應含 population:%s" % str(v))
+	assert(t.population == 4, "named 移除後 getter 自動 = 4，實際=%d" % t.population)
+	assert(InvariantAudit.check(state).is_empty(), "getter 模型不可能 drift:%s" % str(InvariantAudit.check(state)))
 	print("InvariantAudit population OK")
 
 func _test_invariant_faction_bidir() -> void:
@@ -393,7 +407,7 @@ func _test_invariant_faction_bidir() -> void:
 	var f := FactionData.new(); f.faction_id = 9; f.member_team_ids = [0]
 	state.factions[9] = f
 	# 修掉 population 干擾：給最小一致 team
-	t.leader_id = -1; t.named_members = []; t.wounded = 0; t.population = 0
+	t.leader_id = -1; t.named_members = []; t.wounded = 0; _seed_pop(t, 0)
 	assert(InvariantAudit.check(state).is_empty(), "雙向一致不該違反:%s" % str(InvariantAudit.check(state)))
 	# 造懸空：member 列含 0 但 team0.faction_id 改成別的
 	t.faction_id = 5
@@ -407,9 +421,9 @@ func _test_invariant_subteam_bidir() -> void:
 	print("--- InvariantAudit subteam 雙向 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var parent := TeamData.new(); parent.team_id = 0; parent.subteam_ids = [1]
-	parent.leader_id = -1; parent.population = 0
+	parent.leader_id = -1; _seed_pop(parent, 0)
 	var child := TeamData.new(); child.team_id = 1; child.parent_team_id = 0
-	child.leader_id = -1; child.population = 0
+	child.leader_id = -1; _seed_pop(child, 0)
 	state.teams[0] = parent; state.teams[1] = child
 	assert(InvariantAudit.check(state).is_empty(), "subteam 一致不該違反:%s" % str(InvariantAudit.check(state)))
 	# 造破口：parent 列 child 但 child.parent_team_id 改別的
@@ -422,10 +436,10 @@ func _test_join_conservation() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 2)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 10, "ore_gold": 2}
 	state.teams[0] = pt
-	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	var ds := TeamData.new(); ds.team_id = 1; _seed_pop(ds, 3); ds.tile_pos = Vector2i(4,4)
 	ds.resources = {"coin": 5, "ore_silver": 4}; ds.anon_treasury = 6.0
 	state.teams[1] = ds
 	var ce_before: float = _coin_eq_sum(state)
@@ -454,7 +468,7 @@ func _test_recruit_tutorial() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 1
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 1)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 100.0}   # 盈餘 > 閾值
 	state.teams[0] = pt
 	var tut := RecruitTutorial.new()
@@ -476,11 +490,11 @@ func _test_join_request_trigger_and_respond() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 2)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0}
 	state.teams[0] = pt
 	# 絕境流民同格(food_days 低 → 應發投靠)
-	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	var ds := TeamData.new(); ds.team_id = 1; _seed_pop(ds, 3); ds.tile_pos = Vector2i(4,4)
 	ds.resources = {"food": 0.0}; ds.current_task = "乞食"
 	state.teams[1] = ds
 	var fai := FactionAISystem.new()
@@ -502,11 +516,11 @@ func _test_join_request_cap_capped() -> void:
 	state.persons[0] = leader; state.player_id = 0
 	var cap: int = TeamData.pop_cap_from_leadership(0.15)
 	assert(cap == 10, "前置: cap(0.15)應=10,實際=%d" % cap)
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = cap   # 已滿
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, cap   )# 已滿
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 200.0}
 	state.teams[0] = pt
 	# 同格來源隊 8 人(全 anon)
-	var ds := TeamData.new(); ds.team_id = 1; ds.population = 8; ds.tile_pos = Vector2i(4,4)
+	var ds := TeamData.new(); ds.team_id = 1; _seed_pop(ds, 8); ds.tile_pos = Vector2i(4,4)
 	ds.resources = {"food": 0.0}
 	state.teams[1] = ds
 	var food_before: float = float(pt.resources.get("food", 0))
@@ -523,12 +537,12 @@ func _test_join_request_cap_capped() -> void:
 	assert(abs(spent) < 0.01, "撞滿食物不應蒸發,實扣=%.2f" % spent)
 	assert(not r.get("ok", false), "撞滿應回 ok=false(拒收),實際=%s" % str(r))
 	# 部分容量 case: cap 還剩 3 → 來源 8 人 → 只進 3,食物只扣 3 人份
-	var pt2 := TeamData.new(); pt2.team_id = 2; pt2.leader_id = 2; pt2.population = cap - 3
+	var pt2 := TeamData.new(); pt2.team_id = 2; pt2.leader_id = 2; _seed_pop(pt2, cap - 3)
 	pt2.tile_pos = Vector2i(5,5); pt2.resources = {"food": 200.0}
 	var leader2 := PersonData.new(); leader2.id = 2; leader2.team_id = 2; leader2.skills = {"統領": 0.15}
 	state.persons[2] = leader2; state.player_id = 2
 	state.teams[2] = pt2
-	var ds2 := TeamData.new(); ds2.team_id = 3; ds2.population = 8; ds2.tile_pos = Vector2i(5,5)
+	var ds2 := TeamData.new(); ds2.team_id = 3; _seed_pop(ds2, 8); ds2.tile_pos = Vector2i(5,5)
 	ds2.resources = {"food": 0.0}
 	state.teams[3] = ds2
 	var food_before2: float = float(pt2.resources.get("food", 0))
@@ -551,11 +565,11 @@ func _test_accept_join_request() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	leader.skills = {"統領": 0.5}   # 撐 pop cap
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 2
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 2)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 10}
 	state.teams[0] = pt
 	# 絕境流民團(3 anon)
-	var ds := TeamData.new(); ds.team_id = 1; ds.population = 3; ds.tile_pos = Vector2i(4,4)
+	var ds := TeamData.new(); ds.team_id = 1; _seed_pop(ds, 3); ds.tile_pos = Vector2i(4,4)
 	ds.resources = {"coin": 5}; ds.anon_treasury = 6.0
 	state.teams[1] = ds
 	var coin_before: float = float(pt.resources.get("coin",0)) + pt.anon_treasury \
@@ -577,7 +591,7 @@ func _test_team_capabilities_dto() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	leader.skills = {"求生": 0.5, "戰鬥": 0.4}
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 4)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 40.0}
 	state.teams[0] = pt
 	var d: Dictionary = PlayerApiMapper.map_controlled_team(state)
@@ -671,7 +685,7 @@ func _test_passive_hunt_on_forage() -> void:
 	leader.skills = {"求生": 0.9}
 	state.persons[0] = leader
 	var team := TeamData.new()
-	team.team_id = 0; team.leader_id = 0; team.population = 3; team.tile_pos = Vector2i(4, 4)
+	team.team_id = 0; team.leader_id = 0; _seed_pop(team, 3); team.tile_pos = Vector2i(4, 4)
 	team.resources = {"food": 0.0}
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
@@ -811,7 +825,7 @@ func _test_beast_encounter_resolve() -> void:
 	state.persons[0] = leader
 	state.player_id = -999   # 無玩家：避免 anon(person_id=-1) 撞上預設 player_id=-1 被當玩家停手
 	var hunter := TeamData.new()
-	hunter.team_id = 0; hunter.leader_id = 0; hunter.population = 5; hunter.tile_pos = Vector2i(4,4)
+	hunter.team_id = 0; hunter.leader_id = 0; _seed_pop(hunter, 5); hunter.tile_pos = Vector2i(4,4)
 	hunter.armed_anon_ratio = 1.0
 	hunter.resources = {"food": 0.0, "weapon_melee_low": 5}
 	state.teams[0] = hunter
@@ -843,7 +857,7 @@ func _test_npc_hunt_beast() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader
 	var band := TeamData.new()
-	band.team_id = 0; band.leader_id = 0; band.population = 12; band.tile_pos = Vector2i(4,4)
+	band.team_id = 0; band.leader_id = 0; _seed_pop(band, 12); band.tile_pos = Vector2i(4,4)
 	band.readiness = 1.0; band.resources = {"food": 0.0, "weapon_melee_low": 10}
 	state.teams[0] = band
 	var bs := BeastSystem.new()
@@ -872,7 +886,7 @@ func _test_player_hunt_beast() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
 	var team := TeamData.new()
-	team.team_id = 0; team.leader_id = 0; team.population = 5; team.tile_pos = Vector2i(4,4)
+	team.team_id = 0; team.leader_id = 0; _seed_pop(team, 5); team.tile_pos = Vector2i(4,4)
 	team.armed_anon_ratio = 1.0; team.resources = {"weapon_melee_low": 5}
 	state.teams[0] = team
 	var cmd := PlayerCommandSystem.new()
@@ -896,7 +910,7 @@ func _test_ambush_detect() -> void:
 	var tile := HexTileData.new(); tile.terrain = "plains"; tile.resources = {"predator_density": 1}
 	var hi := PersonData.new(); hi.id = 0; hi.team_id = 0; hi.skills = {"偵查": 0.9, "求生": 0.5}
 	state.persons[0] = hi
-	var t_hi := TeamData.new(); t_hi.team_id = 0; t_hi.leader_id = 0; t_hi.population = 3
+	var t_hi := TeamData.new(); t_hi.team_id = 0; t_hi.leader_id = 0; _seed_pop(t_hi, 3)
 	state.teams[0] = t_hi
 	var hi_detect: int = 0
 	for _i in range(50):
@@ -904,7 +918,7 @@ func _test_ambush_detect() -> void:
 	# 低偵查隊 → 少偵測
 	var lo := PersonData.new(); lo.id = 1000; lo.team_id = 1; lo.skills = {"偵查": 0.0, "求生": 0.0}
 	state.persons[1000] = lo
-	var t_lo := TeamData.new(); t_lo.team_id = 1; t_lo.leader_id = 1000; t_lo.population = 3
+	var t_lo := TeamData.new(); t_lo.team_id = 1; t_lo.leader_id = 1000; _seed_pop(t_lo, 3)
 	state.teams[1] = t_lo
 	var lo_detect: int = 0
 	for _i in range(50):
@@ -927,7 +941,7 @@ func _test_ambush_player() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	leader.skills = {"偵查": 0.0, "求生": 0.0}   # 低偵查 → 必被伏擊
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 4)
 	pt.tile_pos = Vector2i(4,4); pt.armed_anon_ratio = 1.0; pt.resources = {"weapon_melee_low": 4}
 	state.teams[0] = pt
 	var amb := AmbushSystem.new()
@@ -947,7 +961,7 @@ func _test_ambush_npc() -> void:
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 1
 	leader.skills = {"偵查": 0.0}
 	state.persons[100] = leader
-	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 100; npc.population = 4
+	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 100; _seed_pop(npc, 4)
 	npc.tile_pos = Vector2i(4,4); npc.readiness = 1.0; npc.resources = {"weapon_melee_low": 4}
 	state.teams[1] = npc
 	var amb := AmbushSystem.new()
@@ -967,7 +981,7 @@ func _test_ambush_detected_no_fight() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	leader.skills = {"偵查": 0.95, "求生": 0.9}   # 高 → 必偵測
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 4)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {}
 	state.teams[0] = pt
 	var amb := AmbushSystem.new()
@@ -982,7 +996,7 @@ func _test_beast_reward_exp() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	leader.skills = {"戰鬥": 0.3}
 	state.persons[0] = leader
-	var winner := TeamData.new(); winner.team_id = 0; winner.leader_id = 0; winner.population = 5
+	var winner := TeamData.new(); winner.team_id = 0; winner.leader_id = 0; _seed_pop(winner, 5)
 	winner.resources = {"food": 0.0}
 	state.teams[0] = winner
 	var bs := BeastSystem.new()
@@ -1013,7 +1027,7 @@ func _test_npc_active_hunt() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	leader.skills = {"戰鬥": 0.6}
 	state.persons[0] = leader
-	var band := TeamData.new(); band.team_id = 0; band.leader_id = 0; band.population = 15
+	var band := TeamData.new(); band.team_id = 0; band.leader_id = 0; _seed_pop(band, 15)
 	band.tile_pos = Vector2i(4,4); band.readiness = 1.0; band.resources = {"food": 0.0, "weapon_melee_low": 12}
 	state.teams[0] = band
 	var hunted: bool = fai.try_hunt_predator(state, band)
@@ -1027,11 +1041,11 @@ func _test_minor_maturation() -> void:
 	state.world = WorldData.new()
 	state.world.current_tick = WorldState.TICKS_PER_MONTH   # 月邊界
 	var team := TeamData.new(); team.team_id = 0
-	team.population = 10
 	team.minor_population = 5
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
 	leader.skills = { "統領": 0.99 }   # cap 大，避免 overflow 干擾
 	state.persons[1] = leader; team.leader_id = 1
+	_seed_pop(team, 10)   # leader + 9 anon = 10
 	state.teams[0] = team
 	var tiers_before: int = AnonTierSystem.total_pop(team)
 	var ps := PopulationSystem.new()
@@ -1045,7 +1059,7 @@ func _test_minor_maturation() -> void:
 	ps.check_overflow(state)
 	assert(team.minor_population == 4, "非月邊界不長大")
 	# pop 滿 50 照長 → 溢出交給 overflow 分團（同呼叫內處理）
-	team.population = 50
+	_seed_pop(team, 50)
 	state.world.current_tick = WorldState.TICKS_PER_MONTH * 2
 	ps.check_overflow(state)
 	assert(team.minor_population == 3, "滿 50 仍長大，實際 minor=%d" % team.minor_population)
@@ -1072,7 +1086,7 @@ func _run_sim_test() -> void:
 	for t in range(3):
 		var team := TeamData.new()
 		team.team_id = t
-		team.population = 10
+		_seed_pop(team, 10)
 		team.minor_population = 1
 		var _mat: int = 100 if t == 2 else 10
 		team.resources = {
@@ -1139,7 +1153,7 @@ func _run_sim_test() -> void:
 	# Team3：預先設為 Team0 附庸（測試 faction AI 行為）
 	var team3 := TeamData.new()
 	team3.team_id = 3
-	team3.population = 8
+	_seed_pop(team3, 8)
 	team3.resources = {
 		"food": 200.0, "material": 5, "coin": 30, "goods": 10, "gem": 0,
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
@@ -1197,7 +1211,7 @@ func _run_sim_test() -> void:
 	# Person1 和 Person2 已在 named_members 中，無需額外移動（advisors/members 已合併）
 	# Team5：獨立軍隊（應觸發 SoloAI 攻擊/掠奪）
 	var team5 := TeamData.new()
-	team5.team_id = 5; team5.population = 8
+	team5.team_id = 5; _seed_pop(team5, 8)
 	team5.resources = {
 		"food": 300.0, "material": 5, "coin": 0, "goods": 0, "gem": 0,
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
@@ -1216,7 +1230,7 @@ func _run_sim_test() -> void:
 
 	# Team6：獨立商隊（應觸發 SoloAI 外交）
 	var team6 := TeamData.new()
-	team6.team_id = 6; team6.population = 6
+	team6.team_id = 6; _seed_pop(team6, 6)
 	team6.resources = {
 		"food": 200.0, "material": 3, "coin": 50, "goods": 20, "gem": 0,
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
@@ -1260,7 +1274,7 @@ func _run_sim_test() -> void:
 		_t31.terrain              = "plains"
 	var team8 := TeamData.new()
 	team8.team_id    = 8
-	team8.population = 10
+	_seed_pop(team8, 10)
 	team8.resources  = {
 		"food": 500.0, "material": 500.0, "coin": 0, "goods": 0, "gem": 5,
 		"ore_gold": 0, "ore_silver": 100, "ore_iron": 80, "ore_steel": 0,
@@ -1286,7 +1300,7 @@ func _run_sim_test() -> void:
 	# Tile (1,1)：plains（world gen 已有）
 	var team9 := TeamData.new()
 	team9.team_id    = 9
-	team9.population = 5
+	_seed_pop(team9, 5)
 	team9.resources  = {
 		"food": 300.0, "material": 0, "coin": 0, "goods": 100.0, "gem": 3,
 		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
@@ -1311,7 +1325,7 @@ func _run_sim_test() -> void:
 	# ── EventSystem 匿名晉升驗證 ──
 	var gen_team := TeamData.new()
 	gen_team.team_id    = 10
-	gen_team.population = 5     # anon_pop = 5-1(leader) = 4
+	AnonCohort.add(gen_team.anon_cohorts, "平民", "healthy", 4)   # +leader(30) → pop 5, anon 4
 	gen_team.tags       = ["軍隊"]
 	gen_team.tile_pos   = Vector2i(4, 1)
 	state.teams[10]     = gen_team
@@ -1354,7 +1368,7 @@ func _run_sim_test() -> void:
 	# 無匿名人口時不應憑空晉升
 	var gen_team_empty := TeamData.new()
 	gen_team_empty.team_id = 14
-	gen_team_empty.population = 1
+	# 僅 leader（下方設 31），0 anon → population getter = 1；on_leader_death 無 anon 可晉升
 	gen_team_empty.tags = ["軍隊"]
 	gen_team_empty.tile_pos = Vector2i(4, 2)
 	state.teams[14] = gen_team_empty
@@ -1386,7 +1400,7 @@ func _run_sim_test() -> void:
 	var helper_state_a := WorldState.new()
 	var helper_team_a := TeamData.new()
 	helper_team_a.team_id = 15
-	helper_team_a.population = 3
+	_seed_pop(helper_team_a, 3)
 	helper_state_a.teams[15] = helper_team_a
 	var helper_a: PersonData = PersonGenerator.generate_for_team(helper_state_a, helper_team_a, "member")
 	if helper_a != null and helper_a.team_id == 15 and helper_state_a.persons.has(helper_a.id):
@@ -1397,7 +1411,7 @@ func _run_sim_test() -> void:
 	var helper_state_b := WorldState.new()
 	var helper_team_b := TeamData.new()
 	helper_team_b.team_id = 15
-	helper_team_b.population = 3
+	_seed_pop(helper_team_b, 3)
 	helper_state_b.teams[15] = helper_team_b
 	var helper_b: PersonData = PersonGenerator.generate_for_team(helper_state_b, helper_team_b, "member")
 	if helper_a != null and helper_b != null \
@@ -1411,7 +1425,7 @@ func _run_sim_test() -> void:
 	var helper_state_empty := WorldState.new()
 	var helper_team_empty := TeamData.new()
 	helper_team_empty.team_id = 16
-	helper_team_empty.population = 1
+	# 僅 leader（下方設 90），0 anon → generate_for_team 應回 null（無 anon 可晉升）
 	helper_state_empty.teams[16] = helper_team_empty
 	var helper_leader := PersonData.new()
 	helper_leader.id = 90
@@ -1426,7 +1440,7 @@ func _run_sim_test() -> void:
 
 	# ── merge_teams 驗證 ──
 	var ma := TeamData.new()
-	ma.team_id = 11; ma.population = 5; ma.faction_id = 99; ma.tile_pos = Vector2i(4, 0)
+	ma.team_id = 11; AnonCohort.add(ma.anon_cohorts, "平民", "healthy", 4); ma.faction_id = 99; ma.tile_pos = Vector2i(4, 0)  # +leader(40) → pop 5
 	state.teams[11] = ma; state.team_known[11] = []; state.team_discovered[11] = []
 	var ma_p := PersonData.new()
 	ma_p.id = 40; ma_p.person_name = "MA_leader"; ma_p.role = "leader"
@@ -1434,7 +1448,7 @@ func _run_sim_test() -> void:
 	state.persons[40] = ma_p; ma.leader_id = 40
 
 	var mb := TeamData.new()
-	mb.team_id = 12; mb.population = 3; mb.faction_id = 99; mb.tile_pos = Vector2i(4, 0)
+	mb.team_id = 12; AnonCohort.add(mb.anon_cohorts, "平民", "healthy", 1); mb.faction_id = 99; mb.tile_pos = Vector2i(4, 0)  # +leader(41)+named(42) → pop 3
 	mb.resources["food"] = 90.0
 	state.teams[12] = mb; state.team_known[12] = []; state.team_discovered[12] = []
 	var mb_p := PersonData.new()
@@ -1472,7 +1486,7 @@ func _run_sim_test() -> void:
 
 	# 追加：transfer_anon=0 測試（只移記名 NPC，匿民留下）
 	var mc := TeamData.new()
-	mc.team_id = 13; mc.population = 4; mc.faction_id = 99; mc.tile_pos = Vector2i(4, 0)
+	mc.team_id = 13; AnonCohort.add(mc.anon_cohorts, "平民", "healthy", 3); mc.faction_id = 99; mc.tile_pos = Vector2i(4, 0)  # +leader(43) → pop 4
 	mc.resources["food"] = 60.0
 	state.teams[13] = mc; state.team_known[13] = []; state.team_discovered[13] = []
 	var mc_p := PersonData.new()
@@ -1499,7 +1513,7 @@ func _run_sim_test() -> void:
 	# ── PopulationSystem 驗證 ──
 	# 場景 1：超額 + 有 advisor → dispatch 子隊
 	var ov1 := TeamData.new()
-	ov1.team_id = 20; ov1.population = 5; ov1.tile_pos = Vector2i(0, -5)
+	ov1.team_id = 20; _seed_pop(ov1, 5); ov1.tile_pos = Vector2i(0, -5)
 	ov1.resources["food"] = 100.0
 	state.teams[20] = ov1; state.team_known[20] = []; state.team_discovered[20] = []
 	var ov1_leader := PersonData.new()
@@ -1529,7 +1543,7 @@ func _run_sim_test() -> void:
 
 	# 場景 2：超額 + 無 advisor → 獨立流亡 team
 	var ov2 := TeamData.new()
-	ov2.team_id = 21; ov2.population = 4; ov2.tile_pos = Vector2i(0, -5)
+	ov2.team_id = 21; _seed_pop(ov2, 4); ov2.tile_pos = Vector2i(0, -5)
 	ov2.resources["food"] = 80.0
 	state.teams[21] = ov2; state.team_known[21] = []; state.team_discovered[21] = []
 	var ov2_leader := PersonData.new()
@@ -1565,23 +1579,25 @@ func _run_sim_test() -> void:
 	# 場景 3：FactionAI 閾值合併（小隊 pop 過小）
 	var fac99 = state.create_faction(22)
 	var fa := TeamData.new()
-	fa.team_id = 22; fa.population = 20; fa.faction_id = fac99; fa.tile_pos = Vector2i(0, -6)
+	fa.team_id = 22; fa.faction_id = fac99; fa.tile_pos = Vector2i(0, -6)
 	state.teams[22] = fa; state.team_known[22] = []; state.team_discovered[22] = []
 	var fa_l := PersonData.new()
 	fa_l.id = 53; fa_l.person_name = "FA_leader"; fa_l.role = "leader"
 	fa_l.team_id = 22; fa_l.skills["統領"] = 0.6  # cap≈37
 	state.persons[53] = fa_l; fa.leader_id = 53
+	_seed_pop(fa, 20)   # leader + 19 anon = 20
 	if not state.factions[fac99].member_team_ids.has(22):
 		state.factions[fac99].member_team_ids.append(22)
 	state.factions[fac99].leader_team_id = 22
 
 	var fb := TeamData.new()
-	fb.team_id = 23; fb.population = 2; fb.faction_id = fac99; fb.tile_pos = Vector2i(0, -8)  # dist=2
+	fb.team_id = 23; fb.faction_id = fac99; fb.tile_pos = Vector2i(0, -8)  # dist=2
 	state.teams[23] = fb; state.team_known[23] = []; state.team_discovered[23] = []
 	var fb_l := PersonData.new()
 	fb_l.id = 54; fb_l.person_name = "FB_leader"; fb_l.role = "leader"
 	fb_l.team_id = 23; fb_l.skills["統領"] = 0.2  # cap≈13，pop=2 < 13×0.3=3.9 → 小隊
 	state.persons[54] = fb_l; fb.leader_id = 54
+	_seed_pop(fb, 2)   # leader + 1 anon = 2
 	state.factions[fac99].member_team_ids.append(23)
 
 	var _fai: Object = load("res://scripts/simulation/faction_ai_system.gd").new()
@@ -1616,7 +1632,7 @@ func _run_sim_test() -> void:
 	var ks_fac := state.create_faction(30)
 	state.factions[ks_fac].leader_team_id = 30
 	var ks_a := TeamData.new()
-	ks_a.team_id = 30; ks_a.population = 10; ks_a.tile_pos = Vector2i(0, -9)
+	ks_a.team_id = 30; _seed_pop(ks_a, 10); ks_a.tile_pos = Vector2i(0, -9)
 	ks_a.resources["food"] = 80.0; ks_a.faction_id = ks_fac
 	state.teams[30] = ks_a; state.team_known[30] = []; state.team_discovered[30] = []
 	var ks_a_l := PersonData.new()
@@ -1625,7 +1641,7 @@ func _run_sim_test() -> void:
 	state.persons[60] = ks_a_l; ks_a.leader_id = 60
 
 	var ks_b := TeamData.new()
-	ks_b.team_id = 31; ks_b.population = 5; ks_b.tile_pos = Vector2i(1, -9)
+	ks_b.team_id = 31; _seed_pop(ks_b, 5); ks_b.tile_pos = Vector2i(1, -9)
 	ks_b.resources["food"] = 50.0; ks_b.faction_id = ks_fac
 	state.teams[31] = ks_b; state.team_known[31] = []; state.team_discovered[31] = []
 	var ks_b_l := PersonData.new()
@@ -1635,7 +1651,7 @@ func _run_sim_test() -> void:
 	state.factions[ks_fac].member_team_ids.append(31)
 
 	var ks_c := TeamData.new()
-	ks_c.team_id = 32; ks_c.population = 3; ks_c.tile_pos = Vector2i(2, -9)
+	ks_c.team_id = 32; _seed_pop(ks_c, 3); ks_c.tile_pos = Vector2i(2, -9)
 	ks_c.resources["food"] = 30.0; ks_c.faction_id = ks_fac
 	state.teams[32] = ks_c; state.team_known[32] = []; state.team_discovered[32] = []
 	var ks_c_l := PersonData.new()
@@ -1698,7 +1714,7 @@ func _run_sim_test() -> void:
 	var _it_vis := VisionSystem.new()
 	# 觀察者 Team70（偵查=0，在 (4,4)，vrange=3）
 	var _it_a := TeamData.new()
-	_it_a.team_id = 70; _it_a.population = 5; _it_a.tile_pos = Vector2i(4, 4)
+	_it_a.team_id = 70; _seed_pop(_it_a, 5); _it_a.tile_pos = Vector2i(4, 4)
 	state.teams[70] = _it_a; state.team_discovered[70] = []
 	var _it_a_l := PersonData.new()
 	_it_a_l.id = 70; _it_a_l.role = "leader"; _it_a_l.team_id = 70
@@ -1707,7 +1723,7 @@ func _run_sim_test() -> void:
 
 	# 目標 Team71（pop=20，在 (6,4)，dist=2，exposure 高）
 	var _it_b := TeamData.new()
-	_it_b.team_id = 71; _it_b.population = 20; _it_b.tile_pos = Vector2i(6, 4)
+	_it_b.team_id = 71; _seed_pop(_it_b, 20); _it_b.tile_pos = Vector2i(6, 4)
 	_it_b.resources = {
 		"food": 80.0, "material": 30.0, "coin": 0.0, "goods": 0.0, "gem": 0.0,
 		"ore_gold": 0.0, "ore_silver": 0.0, "ore_iron": 0.0, "ore_steel": 0.0,
@@ -1770,7 +1786,7 @@ func _run_sim_test() -> void:
 
 	# 觀察者 Team72
 	var _it_obs := TeamData.new()
-	_it_obs.team_id = 72; _it_obs.population = 5; _it_obs.tile_pos = Vector2i(4, 4)
+	_it_obs.team_id = 72; _seed_pop(_it_obs, 5); _it_obs.tile_pos = Vector2i(4, 4)
 	state.teams[72] = _it_obs; state.team_discovered[72] = []
 	var _it_obs_l := PersonData.new()
 	_it_obs_l.id = 72; _it_obs_l.role = "leader"; _it_obs_l.team_id = 72
@@ -1778,7 +1794,7 @@ func _run_sim_test() -> void:
 
 	# 高信義 Team73（生產隊，幾乎不造假）
 	var _it_hon := TeamData.new()
-	_it_hon.team_id = 73; _it_hon.population = 10; _it_hon.tile_pos = Vector2i(4, 4)
+	_it_hon.team_id = 73; _seed_pop(_it_hon, 10); _it_hon.tile_pos = Vector2i(4, 4)
 	_it_hon.tags = ["生產"]
 	_it_hon.resources = {
 		"food": 100.0, "material": 0.0, "coin": 20.0, "goods": 0.0, "gem": 0.0,
@@ -1815,7 +1831,7 @@ func _run_sim_test() -> void:
 
 	# 低信義軍隊 Team74（高 deceive_chance → 偽裝平民）
 	var _it_low := TeamData.new()
-	_it_low.team_id = 74; _it_low.population = 10; _it_low.tile_pos = Vector2i(4, 4)
+	_it_low.team_id = 74; _seed_pop(_it_low, 10); _it_low.tile_pos = Vector2i(4, 4)
 	_it_low.tags = ["軍隊"]
 	_it_low.resources = {
 		"food": 50.0, "material": 0.0, "coin": 0.0, "goods": 0.0, "gem": 0.0,
@@ -1855,7 +1871,7 @@ func _run_sim_test() -> void:
 	# ── IntelSystem 攻擊決策驗證 ──
 	print("=== IntelSystem 攻擊決策 驗證 ===")
 	var _ad_leader := TeamData.new()
-	_ad_leader.team_id = 80; _ad_leader.population = 10
+	_ad_leader.team_id = 80; _seed_pop(_ad_leader, 10)
 	_ad_leader.tile_pos = Vector2i(4, 5); _ad_leader.tags = ["統領"]
 	_ad_leader.readiness = 0.8
 	_ad_leader.armed_anon_ratio = 0.3  # anon_pop=9 → roundi(9×0.3)=3 → own_armed=3
@@ -1870,7 +1886,7 @@ func _run_sim_test() -> void:
 	state.persons[80] = _ad_l_p; _ad_leader.leader_id = 80
 
 	var _ad_tgt := TeamData.new()
-	_ad_tgt.team_id = 81; _ad_tgt.population = 8; _ad_tgt.tile_pos = Vector2i(5, 5)
+	_ad_tgt.team_id = 81; _seed_pop(_ad_tgt, 8); _ad_tgt.tile_pos = Vector2i(5, 5)
 	_ad_tgt.faction_id = -1; _ad_tgt.armed_anon_ratio = 0.0
 	state.teams[81] = _ad_tgt
 	state.team_discovered[80].append(81)
@@ -2424,13 +2440,13 @@ func _run_sim_test() -> void:
 	print("--- EncounterCombat ---")
 	var _enc_state := WorldState.new()
 	var _enc_t0 := TeamData.new()
-	_enc_t0.team_id = 0; _enc_t0.population = 2; _enc_t0.armed_anon_ratio = 1.0
+	_enc_t0.team_id = 0; _seed_pop(_enc_t0, 2); _enc_t0.armed_anon_ratio = 1.0
 	_enc_t0.resources = { "weapon_melee_low": 10, "arrows": 20, "medicine": 5,
 		"armor_low": 0, "armor_high": 0, "food": 0 }
 	_enc_t0.armor_config = { "torso": "none", "head": "none",
 		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
 	var _enc_t1 := TeamData.new()
-	_enc_t1.team_id = 1; _enc_t1.population = 2; _enc_t1.armed_anon_ratio = 1.0
+	_enc_t1.team_id = 1; _seed_pop(_enc_t1, 2); _enc_t1.armed_anon_ratio = 1.0
 	_enc_t1.resources = { "weapon_melee_low": 10, "arrows": 0, "medicine": 5,
 		"armor_low": 0, "armor_high": 0, "food": 0 }
 	_enc_t1.armor_config = { "torso": "none", "head": "none",
@@ -2470,11 +2486,11 @@ func _run_sim_test() -> void:
 	print("--- U14 spawn count（確認正確）---")
 	var _u14 := WorldState.new(); _u14.world = WorldData.new()
 	var _u14_t0 := TeamData.new()
-	_u14_t0.team_id = 0; _u14_t0.population = 10
+	_u14_t0.team_id = 0; _seed_pop(_u14_t0, 10)
 	_u14_t0.armed_anon_ratio = 0.5; _u14_t0.leader_id = -1
 	_u14_t0.resources = { "weapon_melee_low": 20 }
 	var _u14_t1 := TeamData.new()
-	_u14_t1.team_id = 1; _u14_t1.population = 10
+	_u14_t1.team_id = 1; _seed_pop(_u14_t1, 10)
 	_u14_t1.armed_anon_ratio = 0.5; _u14_t1.leader_id = -1
 	_u14_t1.resources = { "weapon_melee_low": 20 }
 	_u14.teams[0] = _u14_t0; _u14.teams[1] = _u14_t1
@@ -2512,7 +2528,7 @@ func _run_sim_test() -> void:
 	var _es := EncounterSystem.new()
 	var _es_state := WorldState.new()
 	var _es_t0 := TeamData.new()
-	_es_t0.team_id = 0; _es_t0.population = 3
+	_es_t0.team_id = 0; _seed_pop(_es_t0, 3)
 	_es_t0.resources = {
 		"weapon_melee_low": 5, "arrows": 30, "medicine": 10,
 		"armor_low": 0, "armor_high": 0, "food": 0,
@@ -2520,7 +2536,7 @@ func _run_sim_test() -> void:
 	_es_t0.armor_config = { "torso": "none", "head": "none",
 		"right_arm": "none", "left_arm": "none", "right_leg": "none", "left_leg": "none" }
 	var _es_t1 := TeamData.new()
-	_es_t1.team_id = 1; _es_t1.population = 2
+	_es_t1.team_id = 1; _seed_pop(_es_t1, 2)
 	_es_t1.resources = {
 		"weapon_melee_low": 3, "arrows": 0, "medicine": 5,
 		"armor_low": 0, "armor_high": 0, "food": 0,
@@ -2835,7 +2851,7 @@ func _run_sim_test() -> void:
 	_sb_state.persons[0] = _sb_p
 	_sb_state.player_id = 0
 	var _sb_team := TeamData.new()
-	_sb_team.team_id = 0; _sb_team.population = 5
+	_sb_team.team_id = 0; _seed_pop(_sb_team, 5)
 	_sb_team.tile_pos = Vector2i(0, 0)
 	_sb_team.resources = {"food": 100.0, "coin": 10, "material": 10}
 	_sb_state.teams[0] = _sb_team
@@ -3105,11 +3121,11 @@ func _run_sim_test() -> void:
 	var _mt_abr_id: int = 9991
 	var _mt_abs := TeamData.new()
 	_mt_abs.team_id    = _mt_abs_id
-	_mt_abs.population = 2
+	_seed_pop(_mt_abs, 2)
 	_mt_abs.faction_id = -1
 	var _mt_abr := TeamData.new()
 	_mt_abr.team_id    = _mt_abr_id
-	_mt_abr.population = 3
+	_seed_pop(_mt_abr, 3)
 	_mt_abr.faction_id = -1
 	var _mt_abr_leader := PersonData.new()
 	_mt_abr_leader.id       = 9991
@@ -3155,7 +3171,7 @@ func _run_sim_test() -> void:
 	var _pop_sys_t := PopulationSystem.new()
 	var _ov_team   := TeamData.new()
 	_ov_team.team_id   = 8880
-	_ov_team.population = 999   # far exceeds any cap
+	_seed_pop(_ov_team, 999   )# far exceeds any cap
 	_ov_team.faction_id = -1
 	_ov_team.tile_pos   = Vector2i(0, 0)
 	state.teams[8880]           = _ov_team
@@ -3256,7 +3272,7 @@ func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0
-	team.population = pop
+	_seed_pop(team, pop)
 	team.minor_population = minor
 	team.leader_id = -1
 	team.resources["food"] = food
@@ -3281,7 +3297,7 @@ func _test_famine_grace_no_death() -> void:
 	var rs := ResourceSystem.new()
 	var state := _famine_make_state(10, 5, 0.0)
 	var team: TeamData = state.teams[0]
-	AnonTierSystem.add_anon(team, "平民", 10)
+	# make_state 已 seed 10 平民 anon（population getter=10）→ 不再重複 add
 	for _i in range(7):
 		rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
 	assert(team.famine_days <= 7.0 + 0.01, "7 天 famine_days≈7，實際=%s" % str(team.famine_days))
@@ -3295,7 +3311,7 @@ func _test_famine_minor_dies_first() -> void:
 	var rs := ResourceSystem.new()
 	var state := _famine_make_state(10, 5, 0.0)
 	var team: TeamData = state.teams[0]
-	AnonTierSystem.add_anon(team, "平民", 10)
+	# make_state 已 seed 10 平民 anon → 不重複 add
 	team.famine_days = 7.0   # grace 邊界
 	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # 跨 7→8
 	assert(team.minor_population == 4, "minor 5 餓死 ceili(0.5)=1 → 4，實際=%d" % team.minor_population)
@@ -3307,7 +3323,7 @@ func _test_famine_anon_after_minor() -> void:
 	var rs := ResourceSystem.new()
 	var state := _famine_make_state(20, 0, 0.0)
 	var team: TeamData = state.teams[0]
-	AnonTierSystem.add_anon(team, "平民", 20)
+	# make_state 已 seed 20 平民 anon → 不重複 add
 	team.famine_days = 7.0
 	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)   # 跨 7→8
 	var anon_now: int = AnonTierSystem.total_pop(team)
@@ -3375,8 +3391,8 @@ func _test_blood_zero_death() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 2; team.leader_id = 10
-	team.named_members = [11]
+	team.team_id = 0; team.leader_id = 10
+	team.named_members = [11]; _seed_pop(team, 2)
 	state.teams[0] = team
 	var leader := PersonData.new()
 	leader.id = 10; leader.team_id = 0; leader.blood = 0.0; leader.hunger = 0.8
@@ -3402,8 +3418,8 @@ func _test_player_leader_starves() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 2; team.leader_id = 10
-	team.named_members = [11]
+	team.team_id = 0; team.leader_id = 10
+	team.named_members = [11]; _seed_pop(team, 2)
 	state.teams[0] = team
 	var leader := PersonData.new()
 	leader.id = 10; leader.team_id = 0; leader.blood = 0.0; leader.hunger = 0.9
@@ -3426,7 +3442,7 @@ func _test_update_armor_config() -> void:
 	# MILITARY + 高甲庫存充足
 	var t1 := TeamData.new()
 	t1.tags = [TeamData.TAG_MILITARY]
-	t1.population = 10
+	_seed_pop(t1, 10)
 	t1.resources["armor_high"] = 20
 	t1.resources["armor_low"]  = 20
 	fai._update_armor_config(t1)
@@ -3437,7 +3453,7 @@ func _test_update_armor_config() -> void:
 	# MILITARY + 僅低甲
 	var t2 := TeamData.new()
 	t2.tags = [TeamData.TAG_MILITARY]
-	t2.population = 10
+	_seed_pop(t2, 10)
 	t2.resources["armor_low"]  = 20
 	t2.resources["armor_high"] = 0
 	fai._update_armor_config(t2)
@@ -3450,7 +3466,7 @@ func _test_update_armor_config() -> void:
 	# 無護甲 → 全 none
 	var t3 := TeamData.new()
 	t3.tags = [TeamData.TAG_MILITARY]
-	t3.population = 10
+	_seed_pop(t3, 10)
 	t3.resources["armor_low"]  = 0
 	t3.resources["armor_high"] = 0
 	fai._update_armor_config(t3)
@@ -3526,7 +3542,7 @@ func _test_faction_ai_run_calls_all_updates() -> void:
 	var t := TeamData.new()
 	t.team_id = 200
 	t.tags = [TeamData.TAG_MILITARY]
-	t.population = 10
+	_seed_pop(t, 10)
 	t.faction_id = 50
 	t.tile_pos = Vector2i(0, 0)
 	t.resources["armor_high"] = 20
@@ -3546,7 +3562,7 @@ func _test_food_consumption_total() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0
-	team.population = 10
+	_seed_pop(team, 10)
 	team.minor_population = 0
 	team.resources["food"] = 2400.0
 	state.teams[0] = team
@@ -3566,7 +3582,7 @@ func _test_fatigue_accumulation() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0
-	team.population = 10
+	_seed_pop(team, 10)
 	team.fatigue = 0.0
 	team.current_task = TeamData.TASK_ATTACK   # 行軍狀態
 	team.tile_pos = Vector2i(0, 0)
@@ -3590,7 +3606,7 @@ func _test_fatigue_recovery() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0
-	team.population = 10
+	_seed_pop(team, 10)
 	team.fatigue = 1.0   # 從滿開始
 	team.current_task = "rest"   # 紮營
 	team.guard_ratio = 0.0       # 無哨兵，確保 rest_mult=1.0
@@ -3664,7 +3680,7 @@ func _test_salary_auto_npc_vs_player() -> void:
 	npc_team_g.team_id = 1
 	npc_team_g.leader_id = 10
 	npc_team_g.named_members = [11]
-	npc_team_g.population = 2
+	_seed_pop(npc_team_g, 2)
 	npc_team_g.resources["coin"] = 1000.0
 	state.teams[1] = npc_team_g
 	# 吝嗇 NPC leader（義氣=0, 信義=0, 貪婪=1）→ mult ≈ 0.7 → salary < fair
@@ -3684,7 +3700,7 @@ func _test_salary_auto_npc_vs_player() -> void:
 	npc_team_s.team_id = 2
 	npc_team_s.leader_id = 20
 	npc_team_s.named_members = [21]
-	npc_team_s.population = 2
+	_seed_pop(npc_team_s, 2)
 	npc_team_s.resources["coin"] = 1000.0
 	state.teams[2] = npc_team_s
 	# Player team
@@ -3703,7 +3719,7 @@ func _test_salary_auto_npc_vs_player() -> void:
 	player_team.team_id = 0
 	player_team.leader_id = 0
 	player_team.named_members = [12]
-	player_team.population = 2
+	_seed_pop(player_team, 2)
 	player_team.resources["coin"] = 1000.0
 	state.teams[0] = player_team
 	var ss := SalarySystem.new()
@@ -3789,7 +3805,7 @@ func _test_s11_leader_succession() -> void:
 	var team := TeamData.new()
 	team.team_id = 0
 	team.leader_id = -1
-	team.population = 4
+	_seed_pop(team, 4)
 	state.teams[0] = team
 	var p1 := PersonData.new()
 	p1.id = 1; p1.team_id = 0
@@ -3841,7 +3857,7 @@ func _test_survival_trigger_urgent() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 100
-	team.population = 10
+	_seed_pop(team, 10)
 	team.resources["food"] = 0.0
 	team.tile_pos = Vector2i(0, 0)
 	team.current_task = "idle"
@@ -3887,7 +3903,7 @@ func _test_survival_helpers() -> void:
 			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
 			state.world.tiles[gx * 1000 + gy] = g
 	var t0 := TeamData.new()
-	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); t0.population = 10
+	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); _seed_pop(t0, 10)
 	state.teams[0] = t0
 	var tile := HexTileData.new()
 	tile.tile_pos = Vector2i(5, 5)
@@ -3895,12 +3911,12 @@ func _test_survival_helpers() -> void:
 	tile.outpost_owner = 0
 	state.world.tiles[5 * 1000 + 5] = tile
 	var t1 := TeamData.new()
-	t1.team_id = 1; t1.tile_pos = Vector2i(1, 0); t1.population = 3
+	t1.team_id = 1; t1.tile_pos = Vector2i(1, 0); _seed_pop(t1, 3)
 	t1.resources["food"] = 50.0
 	state.teams[1] = t1
 	state.team_discovered[0] = [1, 2]
 	var t2 := TeamData.new()
-	t2.team_id = 2; t2.tile_pos = Vector2i(2, 0); t2.population = 20
+	t2.team_id = 2; t2.tile_pos = Vector2i(2, 0); _seed_pop(t2, 20)
 	t2.faction_id = 99
 	t2.resources["food"] = 500.0
 	state.teams[2] = t2
@@ -3916,7 +3932,7 @@ func _test_survival_helpers() -> void:
 	var aid = fai._find_aid_target(state, t0)
 	assert(aid != -1, "aid target 應有，實際=%d" % aid)
 	var t3 := TeamData.new()
-	t3.team_id = 3; t3.tile_pos = Vector2i(8, 8); t3.population = 5
+	t3.team_id = 3; t3.tile_pos = Vector2i(8, 8); _seed_pop(t3, 5)
 	state.teams[3] = t3
 	var no_op = fai._find_own_outpost(state, t3)
 	assert(no_op == Vector2i(-1, -1), "無 outpost 應 (-1,-1)，實際=%s" % str(no_op))
@@ -3928,7 +3944,7 @@ func _test_survival_decision_tree() -> void:
 	# (1) 有 outpost → return_home
 	var s1 := WorldState.new()
 	s1.world = WorldData.new()
-	var t1 := TeamData.new(); t1.team_id = 0; t1.tile_pos = Vector2i(0,0); t1.population = 5; t1.resources["food"] = 0
+	var t1 := TeamData.new(); t1.team_id = 0; t1.tile_pos = Vector2i(0,0); _seed_pop(t1, 5); t1.resources["food"] = 0
 	var l1 := PersonData.new(); l1.id = 100; l1.values = { "義氣": 0.3, "信義": 0.3, "殘忍": 0.2, "好戰": 0.2 }
 	s1.persons[100] = l1; t1.leader_id = 100
 	s1.teams[0] = t1; s1.team_discovered[0] = []
@@ -3941,10 +3957,10 @@ func _test_survival_decision_tree() -> void:
 	s2.world = WorldData.new()
 	s2.world.current_tick = 810
 	_fill_plains(s2, -1, 4, -1, 2)
-	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(0,0); t2.population = 10; t2.resources["food"] = 0
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(0,0); _seed_pop(t2, 10); t2.resources["food"] = 0
 	var l2 := PersonData.new(); l2.id = 100; l2.values = { "殘忍": 0.7, "好戰": 0.5 }
 	s2.persons[100] = l2; t2.leader_id = 100
-	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(1,0); prey.population = 3
+	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(1,0); _seed_pop(prey, 3)
 	prey.resources["food"] = 50
 	s2.teams[0] = t2; s2.teams[1] = prey; s2.team_discovered[0] = [1]
 	fai._trigger_survival(s2, t2, "urgent")
@@ -3954,10 +3970,10 @@ func _test_survival_decision_tree() -> void:
 	s3.world = WorldData.new()
 	s3.world.current_tick = 811
 	_fill_plains(s3, -1, 4, -1, 2)
-	var t3 := TeamData.new(); t3.team_id = 0; t3.tile_pos = Vector2i(0,0); t3.population = 5; t3.resources["food"] = 0
+	var t3 := TeamData.new(); t3.team_id = 0; t3.tile_pos = Vector2i(0,0); _seed_pop(t3, 5); t3.resources["food"] = 0
 	var l3 := PersonData.new(); l3.id = 100; l3.values = { "義氣": 0.7, "信義": 0.7, "求生欲": 0.5 }
 	s3.persons[100] = l3; t3.leader_id = 100
-	var ally := TeamData.new(); ally.team_id = 1; ally.tile_pos = Vector2i(2,0); ally.population = 20; ally.faction_id = 99
+	var ally := TeamData.new(); ally.team_id = 1; ally.tile_pos = Vector2i(2,0); _seed_pop(ally, 20); ally.faction_id = 99
 	ally.resources["food"] = 500
 	var ally_leader := PersonData.new(); ally_leader.id = 200
 	s3.persons[200] = ally_leader; ally.leader_id = 200
@@ -3972,11 +3988,11 @@ func _test_survival_decision_tree() -> void:
 	_fill_plains(s4, -1, 4, -1, 2)
 	for _tid4 in s4.world.tiles:   # 全格標有主，排除紮營（cascade 新增選項）→ 確保測乞食墊底
 		s4.world.tiles[_tid4].outpost_owner = 7
-	var t4 := TeamData.new(); t4.team_id = 0; t4.tile_pos = Vector2i(0,0); t4.population = 20; t4.resources["food"] = 0
+	var t4 := TeamData.new(); t4.team_id = 0; t4.tile_pos = Vector2i(0,0); _seed_pop(t4, 20); t4.resources["food"] = 0
 	var l4 := PersonData.new(); l4.id = 100; l4.values = { "義氣": 0.4, "信義": 0.4, "殘忍": 0.3, "好戰": 0.3 }
 	s4.persons[100] = l4; t4.leader_id = 100
 	# aid pop18：非弱獵物(>=t4*0.7=14 不被掠)、非強鄰(<t4*1.5=30 不投靠)、但糧足可乞
-	var aid := TeamData.new(); aid.team_id = 1; aid.tile_pos = Vector2i(2,0); aid.population = 18
+	var aid := TeamData.new(); aid.team_id = 1; aid.tile_pos = Vector2i(2,0); _seed_pop(aid, 18)
 	aid.resources["food"] = 500
 	s4.teams[0] = t4; s4.teams[1] = aid; s4.team_discovered[0] = [1]
 	fai._trigger_survival(s4, t4, "urgent")
@@ -4032,7 +4048,7 @@ func _test_crude_camp() -> void:
 	peaceful.values = {"好戰": 0.2, "野心": 0.5, "求生欲": 0.9}
 	state.persons[0] = peaceful
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
-	team.population = 3; team.resources = {"material": 0}; team.tags = ["流亡"]   # 流民無建材、流亡身分
+	_seed_pop(team, 3); team.resources = {"material": 0}; team.tags = ["流亡"]   # 流民無建材、流亡身分
 	state.teams[0] = team
 	var ok: bool = fai.establish_crude_camp(state, team)
 	assert(ok, "無主可農地應能立 crude camp（免建材）")
@@ -4089,7 +4105,7 @@ func _test_desperation_cascade() -> void:
 		tile.outpost_owner = -1; tile.outpost_level = 0; tile.resource_cap = {"food": 50.0}
 		state.world.tiles[tile.tile_id] = tile
 	state.persons[0] = leader
-	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.population = 3
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; _seed_pop(team, 3)
 	team.tile_pos = Vector2i(4,4); team.resources = {"food": 0.0}
 	state.teams[0] = team
 	fai._trigger_survival(state, team, "urgent")
@@ -4103,7 +4119,7 @@ func _test_strategic_ai_respects_survival() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var t := TeamData.new()
-	t.team_id = 0; t.tile_pos = Vector2i(0,0); t.population = 10
+	t.team_id = 0; t.tile_pos = Vector2i(0,0); _seed_pop(t, 10)
 	t.current_task = "乞食"
 	t.previous_task = "貿易"
 	state.teams[0] = t
@@ -4128,12 +4144,12 @@ func _test_resident_tax_with_stress() -> void:
 	state.world = WorldData.new()
 	# Owner Team 0
 	var owner := TeamData.new()
-	owner.team_id = 0; owner.population = 5; owner.faction_id = 10
+	owner.team_id = 0; _seed_pop(owner, 5); owner.faction_id = 10
 	owner.current_task = "徵收"; owner.tile_pos = Vector2i(0, 0)
 	state.teams[0] = owner
 	# Village Team 1 with PRODUCE tag + high tax
 	var v := TeamData.new()
-	v.team_id = 1; v.population = 10; v.faction_id = 10
+	v.team_id = 1; _seed_pop(v, 10); v.faction_id = 10
 	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0, 0)
 	v.tax_rate = 0.7   # 暴政
 	v.resources["food"] = 500.0   # 充足
@@ -4156,13 +4172,13 @@ func _test_aid_resolve_npc_accept() -> void:
 	print("--- Survival Task6a: NPC 接受 ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var b := TeamData.new(); b.team_id = 0; b.population = 10; b.resources["food"] = 0
+	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 10); b.resources["food"] = 0
 	b.current_task = "乞食"; b.previous_task = "貿易"
 	b.combat_target = 1; b.tile_pos = Vector2i(2,2)
 	var b_leader := PersonData.new(); b_leader.id = 100; b_leader.team_id = 0
 	state.persons[100] = b_leader; b.leader_id = 100
 	state.teams[0] = b
-	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	var target := TeamData.new(); target.team_id = 1; _seed_pop(target, 10)
 	target.resources["food"] = 500.0
 	target.tile_pos = Vector2i(2,2)
 	var t_leader := PersonData.new(); t_leader.id = 200
@@ -4180,12 +4196,12 @@ func _test_aid_resolve_npc_refuse() -> void:
 	print("--- Survival Task6b: NPC 拒絕 ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var b := TeamData.new(); b.team_id = 0; b.population = 10; b.resources["food"] = 0
+	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 10); b.resources["food"] = 0
 	b.current_task = "乞食"; b.previous_task = "貿易"; b.combat_target = 1
 	var b_leader := PersonData.new(); b_leader.id = 100
 	state.persons[100] = b_leader; b.leader_id = 100
 	state.teams[0] = b
-	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	var target := TeamData.new(); target.team_id = 1; _seed_pop(target, 10)
 	target.resources["food"] = 500.0
 	var t_leader := PersonData.new(); t_leader.id = 200
 	t_leader.values = { "義氣": 0.1, "貪婪": 0.9 }
@@ -4203,13 +4219,13 @@ func _test_aid_player_forced_event() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	state.player_id = 200
-	var pt := TeamData.new(); pt.team_id = 0; pt.population = 10
+	var pt := TeamData.new(); pt.team_id = 0; _seed_pop(pt, 10)
 	pt.resources["food"] = 500.0
 	pt.leader_id = 200
 	state.teams[0] = pt
 	var player := PersonData.new(); player.id = 200; player.team_id = 0
 	state.persons[200] = player
-	var b := TeamData.new(); b.team_id = 1; b.population = 10
+	var b := TeamData.new(); b.team_id = 1; _seed_pop(b, 10)
 	b.resources["food"] = 0; b.combat_target = 0; b.current_task = "乞食"
 	b.previous_task = "idle"
 	var b_leader := PersonData.new(); b_leader.id = 300
@@ -4228,12 +4244,12 @@ func _test_aid_player_response_give() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	state.player_id = 200
-	var pt := TeamData.new(); pt.team_id = 0; pt.population = 10
+	var pt := TeamData.new(); pt.team_id = 0; _seed_pop(pt, 10)
 	pt.resources["food"] = 500.0; pt.leader_id = 200
 	state.teams[0] = pt
 	var player := PersonData.new(); player.id = 200; player.team_id = 0
 	state.persons[200] = player
-	var b := TeamData.new(); b.team_id = 1; b.population = 10
+	var b := TeamData.new(); b.team_id = 1; _seed_pop(b, 10)
 	b.resources["food"] = 0; b.current_task = "乞食"; b.previous_task = "idle"
 	var b_leader := PersonData.new(); b_leader.id = 300
 	state.persons[300] = b_leader; b.leader_id = 300
@@ -4253,11 +4269,11 @@ func _test_aid_repeated_annoyance() -> void:
 	print("--- Survival Task9a: 反覆乞食 annoyance ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var b := TeamData.new(); b.team_id = 0; b.population = 10
+	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 10)
 	b.combat_target = 1
 	var b_leader := PersonData.new(); b_leader.id = 100
 	state.persons[100] = b_leader; b.leader_id = 100
-	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	var target := TeamData.new(); target.team_id = 1; _seed_pop(target, 10)
 	target.resources["food"] = 5000.0
 	var t_leader := PersonData.new(); t_leader.id = 200
 	t_leader.values = { "義氣": 0.5, "貪婪": 0.3 }
@@ -4280,12 +4296,12 @@ func _test_aid_stranger() -> void:
 	print("--- Survival Task9b: 陌生 team 也可乞食 ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var b := TeamData.new(); b.team_id = 0; b.population = 5
+	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 5)
 	b.combat_target = 1; b.current_task = "乞食"; b.previous_task = "idle"
 	var b_leader := PersonData.new(); b_leader.id = 100
 	state.persons[100] = b_leader; b.leader_id = 100
 	state.teams[0] = b
-	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	var target := TeamData.new(); target.team_id = 1; _seed_pop(target, 10)
 	target.resources["food"] = 500.0
 	var t_leader := PersonData.new(); t_leader.id = 200
 	t_leader.values = { "義氣": 0.7, "貪婪": 0.2 }
@@ -4359,7 +4375,7 @@ func _test_resident_pop_cap_overflow() -> void:
 	state.world.tiles[0] = tile
 	# PRODUCE team pop=30，超過 L1 cap=20
 	var t := TeamData.new()
-	t.team_id = 0; t.tile_pos = Vector2i(0, 0); t.population = 30
+	t.team_id = 0; t.tile_pos = Vector2i(0, 0); _seed_pop(t, 30)
 	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
 	leader.skills = { "統領": 0.9 }   # 統領高,普通 cap 會大,但 PRODUCE 應用 outpost cap=20
@@ -4379,7 +4395,7 @@ func _test_resident_movement_lock() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_owner = 0
 	state.world.tiles[0] = tile
 	var t := TeamData.new()
-	t.team_id = 0; t.tile_pos = Vector2i(0, 0); t.population = 5
+	t.team_id = 0; t.tile_pos = Vector2i(0, 0); _seed_pop(t, 5)
 	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
 	t.current_task = "生產"
 	t.move_target = Vector2i(3, 3)   # 想動但應被鎖
@@ -4399,7 +4415,7 @@ func _test_resident_no_salary() -> void:
 	state.world = WorldData.new()
 	state.player_id = -1   # 無玩家
 	var t := TeamData.new()
-	t.team_id = 0; t.population = 10; t.tags = [TeamData.TAG_PRODUCE]
+	t.team_id = 0; _seed_pop(t, 10); t.tags = [TeamData.TAG_PRODUCE]
 	t.resources["coin"] = 500.0
 	var l := PersonData.new(); l.id = 100; l.team_id = 0
 	l.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0 }   # 慷慨
@@ -4431,7 +4447,7 @@ func _test_invite_settle_execute() -> void:
 	state.teams[0] = pt
 	# Target (流亡 roving) accepting
 	var target := TeamData.new()
-	target.team_id = 1; target.population = 5; target.faction_id = -1
+	target.team_id = 1; _seed_pop(target, 5); target.faction_id = -1
 	target.tags = ["流亡"]; target.tile_pos = Vector2i(9, 9)
 	target.resources["food"] = 0   # 飢餓 → 易接受
 	var t_leader := PersonData.new(); t_leader.id = 200; t_leader.team_id = 1
@@ -4482,7 +4498,7 @@ func _test_uprising_trigger() -> void:
 	state.teams[99] = owner
 	# 居民 team：低 loyalty + 高 unrest + 多 stress sources
 	var v := TeamData.new()
-	v.team_id = 0; v.population = 10; v.faction_id = 10
+	v.team_id = 0; _seed_pop(v, 10); v.faction_id = 10
 	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0, 0)
 	v.tax_rate = 0.7   # 重稅 source
 	v.resources["food"] = 30   # 飢餓 source
@@ -4532,7 +4548,7 @@ func _test_owner_contact_timeout() -> void:
 	var owner := TeamData.new(); owner.team_id = 99; owner.faction_id = 10
 	state.teams[99] = owner
 	var v := TeamData.new()
-	v.team_id = 0; v.population = 10; v.faction_id = 10
+	v.team_id = 0; _seed_pop(v, 10); v.faction_id = 10
 	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0,0)
 	var l := PersonData.new(); l.id = 100; l.values = { "義氣": 0.9 }
 	state.persons[100] = l; v.leader_id = 100
@@ -4551,7 +4567,7 @@ func _test_pacify_subteam() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var v := TeamData.new()
-	v.team_id = 0; v.population = 10; v.faction_id = 10
+	v.team_id = 0; _seed_pop(v, 10); v.faction_id = 10
 	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0, 0)
 	v.unrest_turns = 10
 	var l := PersonData.new(); l.id = 100; l.stress = 0.5; l.loyalty = 0.5
@@ -4583,7 +4599,7 @@ func _test_resolve_market_bidirectional() -> void:
 	state.world = WorldData.new()
 	# A：有 food surplus，缺 material
 	var a := TeamData.new()
-	a.team_id = 0; a.population = 10
+	a.team_id = 0; _seed_pop(a, 10)
 	a.resources["food"] = 500.0
 	a.resources["material"] = 5.0
 	a.resources["coin"] = 200.0
@@ -4591,7 +4607,7 @@ func _test_resolve_market_bidirectional() -> void:
 	state.teams[0] = a
 	# B：有 material surplus，缺 food
 	var b := TeamData.new()
-	b.team_id = 1; b.population = 10
+	b.team_id = 1; _seed_pop(b, 10)
 	b.resources["food"] = 10.0
 	b.resources["material"] = 500.0
 	b.resources["coin"] = 300.0
@@ -4611,7 +4627,7 @@ func _test_merchant_inventory_trade() -> void:
 	state.world = WorldData.new()
 	# 商隊 A：inventory 有 weapon_melee_low，bought_at=10
 	var a := TeamData.new()
-	a.team_id = 0; a.population = 5
+	a.team_id = 0; _seed_pop(a, 5)
 	a.tags = ["商隊"]
 	a.resources["coin"] = 0.0
 	a.merchant_inventory.append({
@@ -4621,7 +4637,7 @@ func _test_merchant_inventory_trade() -> void:
 	state.teams[0] = a
 	# Buyer B：缺武器，coin 充足
 	var b := TeamData.new()
-	b.team_id = 1; b.population = 20   # 大隊缺武器 → local_value 高
+	b.team_id = 1; _seed_pop(b, 20   )# 大隊缺武器 → local_value 高
 	b.resources["coin"] = 500.0
 	b.resources["weapon_melee_low"] = 0
 	state.teams[1] = b
@@ -4649,19 +4665,19 @@ func _test_find_trade_target_max_gap() -> void:
 			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
 			state.world.tiles[gx * 1000 + gy] = g
 	var merchant := TeamData.new()
-	merchant.team_id = 0; merchant.tile_pos = Vector2i(0, 0); merchant.population = 5
+	merchant.team_id = 0; merchant.tile_pos = Vector2i(0, 0); _seed_pop(merchant, 5)
 	merchant.resources["food"] = 100.0
 	state.teams[0] = merchant
 	state.team_discovered[0] = [1, 2]
 	# Team 1: 近，價差小
 	var t1 := TeamData.new()
-	t1.team_id = 1; t1.tile_pos = Vector2i(1, 0); t1.population = 5
+	t1.team_id = 1; t1.tile_pos = Vector2i(1, 0); _seed_pop(t1, 5)
 	t1.resources["food"] = 100.0
 	state.teams[1] = t1
 	state.team_intel[0] = { 1: { "food": 100.0, "population": 5 } }
 	# Team 2: 遠，價差大
 	var t2 := TeamData.new()
-	t2.team_id = 2; t2.tile_pos = Vector2i(3, 0); t2.population = 50
+	t2.team_id = 2; t2.tile_pos = Vector2i(3, 0); _seed_pop(t2, 50)
 	t2.resources["food"] = 0.0
 	state.teams[2] = t2
 	state.team_intel[0][2] = { "food": 0.0, "population": 50 }
@@ -4732,7 +4748,7 @@ func _test_alliance_outpost_transfer() -> void:
 	# 居民團 Team 0
 	var v := TeamData.new()
 	v.team_id = 0; v.faction_id = 10; v.tile_pos = Vector2i(3, 3)
-	v.tags = [TeamData.TAG_PRODUCE]; v.population = 10
+	v.tags = [TeamData.TAG_PRODUCE]; _seed_pop(v, 10)
 	var v_leader := PersonData.new(); v_leader.id = 100
 	v_leader.values = { "義氣": 0.4, "信義": 0.5 }   # 中等義氣
 	state.persons[100] = v_leader; v.leader_id = 100
@@ -4760,7 +4776,7 @@ func _test_uprising_paths() -> void:
 	var owner := TeamData.new(); owner.team_id = 99; owner.faction_id = 10
 	state.teams[99] = owner
 	var v := TeamData.new()
-	v.team_id = 0; v.population = 10; v.faction_id = 10
+	v.team_id = 0; _seed_pop(v, 10); v.faction_id = 10
 	v.tags = [TeamData.TAG_PRODUCE]; v.tile_pos = Vector2i(0, 0)
 	v.tax_rate = 0.7; v.resources["food"] = 0; v.unrest_turns = 70
 	var l := PersonData.new(); l.id = 100; l.loyalty = 0.1
@@ -4782,7 +4798,7 @@ func _test_uprising_paths() -> void:
 	var owner2 := TeamData.new(); owner2.team_id = 99; owner2.faction_id = 10
 	state2.teams[99] = owner2
 	var v2 := TeamData.new()
-	v2.team_id = 0; v2.population = 10; v2.faction_id = 10
+	v2.team_id = 0; _seed_pop(v2, 10); v2.faction_id = 10
 	v2.tags = [TeamData.TAG_PRODUCE]; v2.tile_pos = Vector2i(0, 0)
 	v2.tax_rate = 0.7; v2.resources["food"] = 0; v2.unrest_turns = 70
 	var l2 := PersonData.new(); l2.id = 100; l2.loyalty = 0.1
@@ -4814,7 +4830,7 @@ func _test_facility_def_registry() -> void:
 	# trigger_check helpers 可呼叫
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var t := TeamData.new(); t.team_id = 0; t.population = 10
+	var t := TeamData.new(); t.team_id = 0; _seed_pop(t, 10)
 	t.resources["food"] = 0.0; t.resources["goods"] = 0.0
 	state.teams[0] = t
 	var fid = state.create_faction(0)
@@ -4829,7 +4845,7 @@ func _test_dispatch_builder() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var owner := TeamData.new()
-	owner.team_id = 0; owner.population = 30; owner.faction_id = 10
+	owner.team_id = 0; _seed_pop(owner, 30); owner.faction_id = 10
 	owner.tile_pos = Vector2i(0, 0)
 	owner.resources["material"] = 200.0; owner.resources["coin"] = 50.0
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
@@ -4874,7 +4890,7 @@ func _test_evaluate_infrastructure() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var leader_team := TeamData.new()
-	leader_team.team_id = 0; leader_team.population = 30; leader_team.tile_pos = Vector2i(0, 0)
+	leader_team.team_id = 0; _seed_pop(leader_team, 30); leader_team.tile_pos = Vector2i(0, 0)
 	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0
 	var leader := PersonData.new(); leader.id = 100
 	leader.values = { "野心": 0.3, "慎重": 0.7, "好戰": 0.2, "貪婪": 0.4 }
@@ -4904,7 +4920,7 @@ func _test_subteam_arrival_triggers_build() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var owner := TeamData.new()
-	owner.team_id = 0; owner.population = 30; owner.tile_pos = Vector2i(0, 0)
+	owner.team_id = 0; _seed_pop(owner, 30); owner.tile_pos = Vector2i(0, 0)
 	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0
 	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
 	owner.leader_id = 100
@@ -4936,7 +4952,7 @@ func _test_dispatch_upgrader_and_facility() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var leader_team := TeamData.new()
-	leader_team.team_id = 0; leader_team.population = 30
+	leader_team.team_id = 0; _seed_pop(leader_team, 30)
 	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0
 	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
 	leader_team.leader_id = 100
@@ -4971,7 +4987,7 @@ func _test_auto_settle_after_build() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var owner := TeamData.new()
-	owner.team_id = 0; owner.population = 30; owner.tile_pos = Vector2i(0, 0)
+	owner.team_id = 0; _seed_pop(owner, 30); owner.tile_pos = Vector2i(0, 0)
 	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0
 	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
 	owner.leader_id = 100
@@ -5007,7 +5023,7 @@ func _test_player_upgrade_outpost() -> void:
 	state.world = WorldData.new()
 	state.player_id = 100
 	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
-	pt.tile_pos = Vector2i(5, 5); pt.population = 10
+	pt.tile_pos = Vector2i(5, 5); _seed_pop(pt, 10)
 	pt.resources["material"] = 300.0; pt.resources["coin"] = 60.0
 	state.teams[0] = pt
 	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
@@ -5029,7 +5045,7 @@ func _test_player_build_facility() -> void:
 	state.world = WorldData.new()
 	state.player_id = 100
 	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
-	pt.tile_pos = Vector2i(5, 5); pt.population = 10
+	pt.tile_pos = Vector2i(5, 5); _seed_pop(pt, 10)
 	pt.resources["material"] = 300.0; pt.resources["coin"] = 60.0
 	state.teams[0] = pt
 	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
@@ -5089,7 +5105,7 @@ func _test_controlled_team_armed() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0
-	team.population = 10; team.armed_anon_ratio = 0.5
+	_seed_pop(team, 10); team.armed_anon_ratio = 0.5
 	_seed_anon(team, {"平民": 9})
 	team.resources = {"weapon_melee_low": 5}
 	state.teams[0] = team
@@ -5104,7 +5120,7 @@ func _test_u10b_player_wiped() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
-	var pteam := TeamData.new(); pteam.team_id = 0; pteam.leader_id = 0; pteam.population = 0   # 全滅
+	var pteam := TeamData.new(); pteam.team_id = 0; pteam.leader_id = -1   # 全滅：無 leader/named/anon → pop getter = 0
 	pteam.named_members = []
 	state.teams[0] = pteam
 	state.encounter_attacker_id = 9; state.encounter_defender_id = 0
@@ -5293,7 +5309,7 @@ func _test_collect_ore_to_storage() -> void:
 	src_tile.productivity = 1.0
 	state.world.tiles[0] = src_tile
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
@@ -5334,7 +5350,7 @@ func _test_manufacturing_to_storage() -> void:
 	tile.manufacturing_level = 1
 	state.world.tiles[0] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
 	team.current_task = TeamData.TASK_MANUFACTURE
 	team.tags.append(TeamData.TAG_PRODUCE)   # 生產人力 gate
 	team.resources["material"] = 100.0
@@ -5356,10 +5372,10 @@ func _test_salary_to_treasury() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10; team.named_members = [101]
+	team.team_id = 0; team.named_members = [101]
 	AnonCohort.add(team.anon_cohorts, "新兵", "healthy", 8)   # total_wage = 8 × 1.0 = 8.0
 	team.resources["coin"] = 100.0
-	team.leader_id = 100
+	team.leader_id = 100   # leader(100)+named(101)+8 新兵 anon → population getter = 10
 	state.teams[0] = team
 	var leader := PersonData.new(); leader.id = 100
 	state.persons[100] = leader
@@ -5377,7 +5393,7 @@ func _test_promote_anon_takes_share() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 11; team.named_members = []
+	team.team_id = 0; _seed_pop(team, 11); team.named_members = []
 	team.leader_id = -1
 	team.anon_treasury = 100.0
 	state.teams[0] = team
@@ -5392,7 +5408,7 @@ func _test_extraction() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10
+	team.team_id = 0; _seed_pop(team, 10)
 	team.anon_treasury = 100.0; team.resources["coin"] = 0.0
 	var leader := PersonData.new(); leader.id = 100
 	leader.values = { "貪婪": 0.8, "慎重": 0.2 }
@@ -5410,7 +5426,7 @@ func _test_player_extract_treasury() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10; team.leader_id = 100
+	team.team_id = 0; team.leader_id = 100; _seed_pop(team, 10)
 	team.anon_treasury = 100.0; team.resources["coin"] = 0.0
 	state.teams[0] = team
 	state.player_state["extract_ratio"] = 0.5
@@ -5447,7 +5463,7 @@ func _test_encounter_treasury_loot() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var loser := TeamData.new()
-	loser.team_id = 0; loser.population = 15
+	loser.team_id = 0; _seed_pop(loser, 15)
 	loser.anon_treasury = 100.0
 	state.teams[0] = loser
 	var winner := TeamData.new()
@@ -5470,7 +5486,7 @@ func _test_on_team_extinct_to_storage() -> void:
 	tile.outpost_owner = 0
 	state.world.tiles[0] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 0; team.tile_pos = Vector2i(0, 0)
+	team.team_id = 0; _seed_pop(team, 0); team.tile_pos = Vector2i(0, 0)
 	team.resources = { "food": 50.0 }
 	team.anon_treasury = 30.0
 	state.teams[0] = team
@@ -5505,8 +5521,8 @@ func _test_subteam_treasury_split() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var parent := TeamData.new()
-	parent.team_id = 0; parent.population = 10; parent.leader_id = 100
-	parent.named_members = [101]
+	parent.team_id = 0; parent.leader_id = 100
+	parent.named_members = [101]; _seed_pop(parent, 10)   # leader+named+8 anon = 10
 	parent.anon_treasury = 100.0
 	parent.tile_pos = Vector2i(0, 0)
 	state.teams[0] = parent
@@ -5534,7 +5550,7 @@ func _test_npc_auto_withdraw() -> void:
 	tile.public_storage = { "food": 100.0 }
 	state.world.tiles[0] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 5; team.tile_pos = Vector2i(0, 0)
+	team.team_id = 0; _seed_pop(team, 5); team.tile_pos = Vector2i(0, 0)
 	team.resources["food"] = 0.0
 	state.teams[0] = team
 	var fai := FactionAISystem.new()
@@ -5555,7 +5571,7 @@ func _test_npc_auto_deposit() -> void:
 	tile.public_storage = { "food": 0.0 }
 	state.world.tiles[0] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 5; team.tile_pos = Vector2i(0, 0)
+	team.team_id = 0; _seed_pop(team, 5); team.tile_pos = Vector2i(0, 0)
 	team.resources["food"] = 200.0   # need=70, >2x=140 → 存超量
 	state.teams[0] = team
 	var fai := FactionAISystem.new()
@@ -5663,7 +5679,7 @@ func _test_find_path_no_path() -> void:
 func _test_eta_ticks() -> void:
 	print("--- Path Task3: eta_ticks ---")
 	var team := TeamData.new()
-	team.population = 5; team.fatigue = 0.0
+	_seed_pop(team, 5); team.fatigue = 0.0
 	var eta = PathSystem.eta_ticks(team, 5.0)
 	# BASE_MOVE_TICKS = 48, speed_mult = 1.0 → eta = 5 * 48 = 240
 	assert(eta == 240, "eta 應 240，實際=%d" % eta)
@@ -5795,11 +5811,11 @@ func _test_ai_catch_up_filters_unreachable() -> void:
 			g.tile_pos = Vector2i(gx, gy); g.terrain = "plains"
 			state.world.tiles[gx * 1000 + gy] = g
 	var t0 := TeamData.new()
-	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); t0.population = 10
+	t0.team_id = 0; t0.tile_pos = Vector2i(0, 0); _seed_pop(t0, 10)
 	state.teams[0] = t0
 	# prey 1：人更少但孤島不可達（無連通 tile）
 	var t1 := TeamData.new()
-	t1.team_id = 1; t1.tile_pos = Vector2i(50, 50); t1.population = 2
+	t1.team_id = 1; t1.tile_pos = Vector2i(50, 50); _seed_pop(t1, 2)
 	t1.resources["food"] = 50.0
 	state.teams[1] = t1
 	var iso := HexTileData.new()
@@ -5807,7 +5823,7 @@ func _test_ai_catch_up_filters_unreachable() -> void:
 	state.world.tiles[50 * 1000 + 50] = iso   # 唯一孤立 tile，from (0,0) 無路
 	# prey 2：可達
 	var t2 := TeamData.new()
-	t2.team_id = 2; t2.tile_pos = Vector2i(2, 0); t2.population = 3
+	t2.team_id = 2; t2.tile_pos = Vector2i(2, 0); _seed_pop(t2, 3)
 	t2.resources["food"] = 50.0
 	state.teams[2] = t2
 	state.team_discovered[0] = [1, 2]
@@ -5842,21 +5858,21 @@ func _test_find_prosperity_prey() -> void:
 			state.world.tiles[x * 1000 + y] = tile
 	# self
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
 	team.faction_id = 0
 	state.teams[0] = team
 	var leader := PersonData.new()
 	leader.values = { "貪婪": 0.8, "殘忍": 0.5, "野心": 0.5 }
 	# 弱 + 富 prey
 	var rich_prey := TeamData.new()
-	rich_prey.team_id = 1; rich_prey.tile_pos = Vector2i(2, 0); rich_prey.population = 4
+	rich_prey.team_id = 1; rich_prey.tile_pos = Vector2i(2, 0); _seed_pop(rich_prey, 4)
 	rich_prey.faction_id = 1
 	rich_prey.resources = { "coin": 200, "food": 100, "material": 50 }
 	rich_prey.last_tile_pos = rich_prey.tile_pos
 	state.teams[1] = rich_prey
 	# 同 faction
 	var ally := TeamData.new()
-	ally.team_id = 2; ally.tile_pos = Vector2i(1, 0); ally.population = 3
+	ally.team_id = 2; ally.tile_pos = Vector2i(1, 0); _seed_pop(ally, 3)
 	ally.faction_id = 0
 	state.teams[2] = ally
 	state.team_discovered[0] = [1, 2]
@@ -5878,7 +5894,7 @@ func _test_evaluate_prosperity_trigger() -> void:
 	print("--- Prosperity Task3: 評估 trigger TASK_ATTACK ---")
 	var state := _prosperity_grid()
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 15)
 	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "菁英", "healthy", 15)  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
@@ -5889,7 +5905,7 @@ func _test_evaluate_prosperity_trigger() -> void:
 	state.persons[100] = leader
 	team.leader_id = 100
 	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 4
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 4)
 	prey.faction_id = 1
 	prey.resources = { "coin": 200, "food": 100 }
 	prey.last_tile_pos = prey.tile_pos
@@ -5906,7 +5922,7 @@ func _test_prosperity_low_ambition_skip() -> void:
 	print("--- Prosperity Task3b: 低野心不評估 ---")
 	var state := _prosperity_grid()
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 15)
 	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "菁英", "healthy", 15)  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
@@ -5917,7 +5933,7 @@ func _test_prosperity_low_ambition_skip() -> void:
 	state.persons[100] = leader
 	team.leader_id = 100
 	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 4
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 4)
 	prey.faction_id = 1; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
@@ -5929,7 +5945,7 @@ func _test_prosperity_low_readiness_skip() -> void:
 	print("--- Prosperity Task3c: 低 readiness 不評估 ---")
 	var state := _prosperity_grid()
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 2
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 2)
 	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "平民", "healthy", 2)  # avg_combat=0.1
 	team.resources = { "food": 10 }
 	team.current_task = TeamData.TASK_IDLE
@@ -5940,7 +5956,7 @@ func _test_prosperity_low_readiness_skip() -> void:
 	state.persons[100] = leader
 	team.leader_id = 100
 	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 4
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 4)
 	prey.faction_id = 1; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
@@ -5952,7 +5968,7 @@ func _test_prosperity_same_faction_skip() -> void:
 	print("--- Prosperity Task3d: 同 faction 排除 ---")
 	var state := _prosperity_grid()
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 15)
 	team.faction_id = 5; AnonCohort.add(team.anon_cohorts, "菁英", "healthy", 15)  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
@@ -5963,7 +5979,7 @@ func _test_prosperity_same_faction_skip() -> void:
 	state.persons[100] = leader
 	team.leader_id = 100
 	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 4
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 4)
 	prey.faction_id = 5; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
@@ -5987,17 +6003,17 @@ func _test_prosperity_prey_personality_weight() -> void:
 	print("--- Prosperity Task14: prey 評分個性權重 ---")
 	var state := _prosperity_grid()
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
 	team.faction_id = 0
 	state.teams[0] = team
 	# A：富 + 遠（dist3 → 非接壤）
 	var rich := TeamData.new()
-	rich.team_id = 1; rich.tile_pos = Vector2i(3, -1); rich.population = 5
+	rich.team_id = 1; rich.tile_pos = Vector2i(3, -1); _seed_pop(rich, 5)
 	rich.faction_id = 1; rich.resources = { "coin": 300 }; rich.last_tile_pos = rich.tile_pos
 	state.teams[1] = rich
 	# B：窮 + 接壤（dist2）
 	var border := TeamData.new()
-	border.team_id = 2; border.tile_pos = Vector2i(2, 0); border.population = 5
+	border.team_id = 2; border.tile_pos = Vector2i(2, 0); _seed_pop(border, 5)
 	border.faction_id = 1; border.resources = {}; border.last_tile_pos = border.tile_pos
 	state.teams[2] = border
 	state.team_discovered[0] = [1, 2]
@@ -6015,7 +6031,7 @@ func _test_prosperity_cadence() -> void:
 	print("--- Prosperity Task4: cadence ---")
 	var state := _prosperity_grid()
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
 	team.faction_id = -1; AnonCohort.add(team.anon_cohorts, "老兵", "healthy", 10)  # avg_combat=0.5
 	team.resources = { "food": 200, "weapon_melee_low": 10 }
 	team.current_task = TeamData.TASK_IDLE
@@ -6059,7 +6075,7 @@ func _test_survival_b_branch_far_outpost_loot() -> void:
 	print("--- Prosperity Task5: B 分支 遠 outpost + 殘忍 → 掠 ---")
 	var state := _survival_corridor()
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 5
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 5)
 	team.faction_id = 0; team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
 	var leader := PersonData.new()
@@ -6072,7 +6088,7 @@ func _test_survival_b_branch_far_outpost_loot() -> void:
 	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
 	# 近且弱 prey（reachable）
 	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); prey.population = 1
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 1)
 	prey.faction_id = 1; prey.last_tile_pos = prey.tile_pos
 	prey.resources = { "food": 50 }
 	state.teams[1] = prey
@@ -6087,7 +6103,7 @@ func _test_survival_b_branch_near_outpost_return() -> void:
 	print("--- Prosperity Task5b: 近 outpost → 回家 ---")
 	var state := _survival_corridor()
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 5
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 5)
 	team.faction_id = 0; team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
 	var leader := PersonData.new()
@@ -6099,7 +6115,7 @@ func _test_survival_b_branch_near_outpost_return() -> void:
 	var op_tile: HexTileData = state.world.tiles[2 * 1000 + 0]
 	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
 	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(3, 0); prey.population = 1
+	prey.team_id = 1; prey.tile_pos = Vector2i(3, 0); _seed_pop(prey, 1)
 	prey.faction_id = 1; prey.last_tile_pos = prey.tile_pos
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
@@ -6117,16 +6133,16 @@ func _occupy_setup(atk_values: Dictionary, rep: float, res_caution: float) -> Di
 	tile.outpost_level = 1; tile.outpost_owner = 1   # prey 擁有
 	state.world.tiles[5 * 1000 + 5] = tile
 	var attacker := TeamData.new()
-	attacker.team_id = 0; attacker.tile_pos = Vector2i(5, 5); attacker.population = 10
+	attacker.team_id = 0; attacker.tile_pos = Vector2i(5, 5); _seed_pop(attacker, 10)
 	var atk_leader := PersonData.new()
 	atk_leader.id = 10; atk_leader.values = atk_values
 	state.persons[10] = atk_leader; attacker.leader_id = 10
 	state.teams[0] = attacker
 	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(5, 5); prey.population = 3
+	prey.team_id = 1; prey.tile_pos = Vector2i(5, 5); _seed_pop(prey, 3)
 	state.teams[1] = prey
 	var resident := TeamData.new()
-	resident.team_id = 2; resident.tile_pos = Vector2i(5, 5); resident.population = 10
+	resident.team_id = 2; resident.tile_pos = Vector2i(5, 5); _seed_pop(resident, 10)
 	resident.tags = ["生產"]
 	resident.resources = { "food": 100, "material": 40 }
 	resident.known_reputations = { 0: rep }
@@ -6191,7 +6207,7 @@ func _test_attack_defeat_reaction() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10
+	team.team_id = 0; _seed_pop(team, 10)
 	state.teams[0] = team
 	var leader := PersonData.new()
 	leader.id = 100; leader.stress = 0.0
@@ -6220,12 +6236,12 @@ func _test_movement_returns_moved_and_arrived() -> void:
 	# Team A: 移動但不 arrived（目標遠）
 	var a := TeamData.new()
 	a.team_id = 0; a.tile_pos = Vector2i(0, 0); a.move_target = Vector2i(3, 0)
-	a.population = 5; a.move_tick_acc = 9999
+	_seed_pop(a, 5); a.move_tick_acc = 9999
 	state.teams[0] = a
 	# Team B: 同 tick arrived（目標相鄰）
 	var b := TeamData.new()
 	b.team_id = 1; b.tile_pos = Vector2i(2, 0); b.move_target = Vector2i(3, 0)
-	b.population = 5; b.move_tick_acc = 9999
+	_seed_pop(b, 5); b.move_tick_acc = 9999
 	state.teams[1] = b
 	var ms = MovementSystem.new()
 	var result = ms.process(state, [0, 1])
@@ -6247,14 +6263,14 @@ func _test_process_on_move_triggers_combat() -> void:
 			state.world.tiles[x * 1000 + y] = tile
 	# 攻擊團 A：與 prey 同格，但 move_target 指向遠處（途經，非 arrived）
 	var a := TeamData.new()
-	a.team_id = 0; a.tile_pos = Vector2i(1, 1); a.population = 5
+	a.team_id = 0; a.tile_pos = Vector2i(1, 1); _seed_pop(a, 5)
 	a.faction_id = 0; a.current_task = "攻擊"; a.move_target = Vector2i(5, 5)
 	var al := PersonData.new(); al.id = 10
 	state.persons[10] = al; a.leader_id = 10
 	state.teams[0] = a
 	# prey P：同格 (1,1)
 	var p := TeamData.new()
-	p.team_id = 1; p.tile_pos = Vector2i(1, 1); p.population = 3
+	p.team_id = 1; p.tile_pos = Vector2i(1, 1); _seed_pop(p, 3)
 	p.faction_id = 1
 	var pl := PersonData.new(); pl.id = 20
 	state.persons[20] = pl; p.leader_id = 20
@@ -6268,7 +6284,7 @@ func _test_named_weight_speed() -> void:
 	print("--- Combat Task4: named K=3 weight ---")
 	var state := WorldState.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10
+	team.team_id = 0; _seed_pop(team, 10)
 	# 2 named (leader + 1) + 8 unnamed
 	var leader := PersonData.new()
 	leader.id = 1; leader.attributes["體力"] = 0.9
@@ -6568,11 +6584,11 @@ func _test_anon_speed_tiers() -> void:
 	var state := WorldState.new()
 	var ms = MovementSystem.new()
 	var t_pleb := TeamData.new()
-	t_pleb.team_id = 0; t_pleb.population = 10; t_pleb.leader_id = -1
+	t_pleb.team_id = 0; _seed_pop(t_pleb, 10); t_pleb.leader_id = -1
 	_seed_anon(t_pleb, { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 })
 	var sp_pleb = ms._compute_team_speed(state, t_pleb)
 	var t_elite := TeamData.new()
-	t_elite.team_id = 1; t_elite.population = 10; t_elite.leader_id = -1
+	t_elite.team_id = 1; _seed_pop(t_elite, 10); t_elite.leader_id = -1
 	_seed_anon(t_elite, { "平民": 0, "新兵": 0, "老兵": 0, "菁英": 10 })
 	var sp_elite = ms._compute_team_speed(state, t_elite)
 	assert(abs(sp_pleb - 0.7) < 0.01, "純平民隊速應 0.7，實際=%f" % sp_pleb)
@@ -6635,7 +6651,7 @@ func _test_stuck_allows_reeval() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0; team.faction_id = -1; team.parent_team_id = -1
-	team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
 	team.current_task = TeamData.TASK_ATTACK   # stuck
 	team.move_target = Vector2i(-1, -1)
 	team.resources["food"] = 100.0
@@ -6661,7 +6677,7 @@ func _test_survival_reeval_in_loot() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10; team.tile_pos = Vector2i(0, 0)
+	team.team_id = 0; _seed_pop(team, 10); team.tile_pos = Vector2i(0, 0)
 	team.current_task = TeamData.TASK_LOOT
 	team.move_target = Vector2i(3, 3)
 	team.resources["food"] = 0.0   # days_left = 0 → urgent
@@ -6713,7 +6729,7 @@ func _test_effective_mount_wagon_limit() -> void:
 	print("--- Mount Task1a: 1人1獸 ---")
 	var ms = MovementSystem.new()
 	var team := TeamData.new()
-	team.population = 10
+	_seed_pop(team, 10)
 	team.resources = { "mounts": 5, "wagons": 8 }
 	assert(ms.get_effective_mounts(team) == 5, "5 mounts < 10 pop")
 	assert(ms.get_effective_wagons(team) == 5, "wagons cap by remaining pop (10-5)")
@@ -6726,14 +6742,14 @@ func _test_compute_mount_bonus() -> void:
 	print("--- Mount Task1b: mount bonus 公式 ---")
 	var ms = MovementSystem.new()
 	var team := TeamData.new()
-	team.population = 10
+	_seed_pop(team, 10)
 	team.resources = { "mounts": 10 }   # 全騎兵
 	# ratio=1.0, size_penalty = 1 - 10/50*0.2 = 0.96 → bonus = 3.0*0.96 = 2.88
 	var b = ms._compute_mount_bonus(team)
 	assert(abs(b - 2.88) < 0.01, "全騎 expect 2.88, got %.2f" % b)
 	team.resources["mounts"] = 0
 	assert(ms._compute_mount_bonus(team) == 1.0)
-	team.population = 50; team.resources["mounts"] = 50
+	_seed_pop(team, 50); team.resources["mounts"] = 50
 	# ratio=1, size_penalty=0.8, bonus = 3.0*0.8 = 2.4
 	var b2 = ms._compute_mount_bonus(team)
 	assert(abs(b2 - 2.4) < 0.01, "50 騎 expect 2.4, got %.2f" % b2)
@@ -6743,7 +6759,7 @@ func _test_compute_wagon_penalty() -> void:
 	print("--- Mount Task1c: wagon penalty 公式 ---")
 	var ms = MovementSystem.new()
 	var team := TeamData.new()
-	team.population = 10
+	_seed_pop(team, 10)
 	team.resources = { "wagons": 5 }
 	# ratio = 0.5, penalty = 1 - 0.5*0.3 = 0.85
 	assert(abs(ms._compute_wagon_penalty(team) - 0.85) < 0.01)
@@ -6755,7 +6771,7 @@ func _test_mount_food_consumption() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0
-	team.population = 10
+	_seed_pop(team, 10)
 	team.resources = { "food": 1000.0, "mounts": 10 }
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
@@ -6787,7 +6803,7 @@ func _test_stable_produces_mounts() -> void:
 	tile.public_storage["horses"] = 5.0
 	state.world.tiles[0] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10
+	team.team_id = 0; _seed_pop(team, 10)
 	team.resources = { "food": 1000.0, "mounts": 0 }
 	team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
@@ -6830,7 +6846,7 @@ func _test_wild_horses_no_auto_collect() -> void:
 	tile.resources["wild_horses"] = 2
 	state.world.tiles[tile.tile_id] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 5
+	team.team_id = 0; _seed_pop(team, 5)
 	team.resources = { "mounts": 0 }
 	team.tile_pos = Vector2i(5, 5)
 	state.teams[0] = team
@@ -6845,11 +6861,11 @@ func _test_mount_loot_total_wipe() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var winner := TeamData.new()
-	winner.team_id = 0; winner.population = 10; winner.resources = { "mounts": 0 }
+	winner.team_id = 0; _seed_pop(winner, 10); winner.resources = { "mounts": 0 }
 	winner.tile_pos = Vector2i(0, 0)
 	state.teams[0] = winner
 	var loser := TeamData.new()
-	loser.team_id = 1; loser.population = 0; loser.resources = { "mounts": 5 }
+	loser.team_id = 1; _seed_pop(loser, 0); loser.resources = { "mounts": 5 }
 	loser.encounter_initial_pop = 10   # 全滅：10 → 0
 	loser.tile_pos = Vector2i(9, 9)
 	state.teams[1] = loser
@@ -6864,11 +6880,11 @@ func _test_mount_loot_partial() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var winner := TeamData.new()
-	winner.team_id = 0; winner.population = 10; winner.resources = { "mounts": 0 }
+	winner.team_id = 0; _seed_pop(winner, 10); winner.resources = { "mounts": 0 }
 	winner.tile_pos = Vector2i(0, 0)
 	state.teams[0] = winner
 	var loser := TeamData.new()
-	loser.team_id = 1; loser.population = 4; loser.resources = { "mounts": 5 }
+	loser.team_id = 1; _seed_pop(loser, 4); loser.resources = { "mounts": 5 }
 	loser.encounter_initial_pop = 10   # 死 6 → ratio 0.6 → roundi(5*0.6)=3
 	loser.tile_pos = Vector2i(9, 9)
 	state.teams[1] = loser
@@ -6984,7 +7000,7 @@ func _test_auto_withdraw_on_active_task() -> void:
 	tile.public_storage["mounts"] = 10.0
 	state.world.tiles[tile.tile_id] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10
+	team.team_id = 0; _seed_pop(team, 10)
 	team.tile_pos = Vector2i(5, 5)
 	team.current_task = TeamData.TASK_ATTACK
 	team.resources = { "mounts": 0 }
@@ -7004,7 +7020,7 @@ func _test_no_withdraw_when_idle() -> void:
 	tile.public_storage["mounts"] = 10.0
 	state.world.tiles[tile.tile_id] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10
+	team.team_id = 0; _seed_pop(team, 10)
 	team.tile_pos = Vector2i(5, 5)
 	team.current_task = TeamData.TASK_IDLE
 	team.resources = { "mounts": 0 }
@@ -7081,12 +7097,12 @@ func _test_threat_score_high_hostile() -> void:
 	print("--- Engagement Task2b: 朝我來+敵意+近 → score 高 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var self_team := TeamData.new(); self_team.team_id = 0; self_team.tile_pos = Vector2i(0, 0)
-	self_team.population = 5
+	_seed_pop(self_team, 5)
 	self_team.known_reputations = { 1: 0.1 }   # 高敵意
 	state.teams[0] = self_team
 	var other := TeamData.new(); other.team_id = 1; other.tile_pos = Vector2i(2, 0)
 	other.last_tile_pos = Vector2i(3, 0)   # velocity (-1,0) → 朝我來
-	other.population = 20
+	_seed_pop(other, 20)
 	state.teams[1] = other
 	state.team_discovered[0] = [1]
 	state.team_intel[0] = { 1: { "population_est": 20 } }
@@ -7098,7 +7114,7 @@ func _test_threat_score_distance_decay() -> void:
 	print("--- Engagement Task2c: 近 > 遠（距離衰減）---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var self_team := TeamData.new(); self_team.team_id = 0; self_team.tile_pos = Vector2i(0, 0)
-	self_team.population = 5; self_team.known_reputations = { 1: 0.2 }
+	_seed_pop(self_team, 5); self_team.known_reputations = { 1: 0.2 }
 	state.teams[0] = self_team
 	var other := TeamData.new(); other.team_id = 1
 	state.teams[1] = other
@@ -7134,13 +7150,13 @@ func _test_evaluate_threat_finds_hostile() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	state.world.current_tick = 0
 	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
-	team.population = 5; team.known_reputations = { 1: 0.1 }
+	_seed_pop(team, 5); team.known_reputations = { 1: 0.1 }
 	team.current_task = TeamData.TASK_IDLE
 	_eng_make_leader(state, team, { "慎重": 0.0, "求生欲": 0.9, "好戰": 0.1,
 		"貪婪": 0.1, "信義": 0.1 })
 	state.teams[0] = team
 	var enemy := TeamData.new(); enemy.team_id = 1; enemy.tile_pos = Vector2i(2, 0)
-	enemy.last_tile_pos = Vector2i(3, 0); enemy.population = 20
+	enemy.last_tile_pos = Vector2i(3, 0); _seed_pop(enemy, 20)
 	state.teams[1] = enemy
 	state.team_discovered[0] = [1]
 	state.team_intel[0] = { 1: { "population_est": 20 } }
@@ -7173,7 +7189,7 @@ func _test_evaluate_threat_cadence() -> void:
 func _eng_dispatch_setup(vals: Dictionary, resident: bool) -> Array:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
-	team.population = 5
+	_seed_pop(team, 5)
 	if resident:
 		var tile := HexTileData.new()
 		tile.tile_pos = Vector2i(0, 0); tile.outpost_level = 1
@@ -7226,7 +7242,7 @@ func _test_resident_lock_prepare_allowed() -> void:
 	_eng_plains_grid(state, 0, 5, 0, 5)
 	var tile: HexTileData = state.world.tiles[0]
 	tile.outpost_level = 1; tile.outpost_type = "civilian"; tile.outpost_owner = 0
-	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(0, 0); t.population = 5
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(0, 0); _seed_pop(t, 5)
 	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
 	t.current_task = TeamData.TASK_PREPARE
 	t.move_target = Vector2i(3, 0)
@@ -7265,7 +7281,7 @@ func _test_trade_timeout() -> void:
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
 	state.world.tiles[0] = tile
 	var t := TeamData.new(); t.team_id = 0; t.faction_id = -1; t.tile_pos = Vector2i(0, 0)
-	t.population = 2; t.resources["food"] = 100.0; t.tags = [TeamData.TAG_MERCHANT]
+	_seed_pop(t, 2); t.resources["food"] = 100.0; t.tags = [TeamData.TAG_MERCHANT]
 	t.current_task = TeamData.TASK_TRADE; t.trade_task_start_tick = 0
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
 	leader.values = { "求生欲": 0.5 }
@@ -7343,13 +7359,13 @@ func _test_resolve_market_absorbs_storage() -> void:
 	tile.public_storage = { "food": 200.0 }
 	state.world.tiles[0] = tile
 	var a := TeamData.new(); a.team_id = 0; a.faction_id = -1; a.tile_pos = Vector2i(0, 0)
-	a.population = 5; a.current_task = TeamData.TASK_TRADE
+	_seed_pop(a, 5); a.current_task = TeamData.TASK_TRADE
 	a.resources = { "coin": 300.0, "food": 0.0 }
 	var a_leader := PersonData.new(); a_leader.id = 10; a_leader.team_id = 0
 	state.persons[10] = a_leader; a.leader_id = 10
 	state.teams[0] = a
 	var b := TeamData.new(); b.team_id = 1; b.faction_id = -1; b.tile_pos = Vector2i(0, 0)
-	b.population = 5; b.current_task = "idle"
+	_seed_pop(b, 5); b.current_task = "idle"
 	b.resources = { "coin": 0.0, "food": 0.0 }
 	var b_leader := PersonData.new(); b_leader.id = 11; b_leader.team_id = 1
 	state.persons[11] = b_leader; b.leader_id = 11
@@ -7375,7 +7391,7 @@ func _test_resident_team_absorbs_public_storage() -> void:
 	state.world.tiles[0] = tile
 	# 居民團 (PRODUCE tag, 同 faction owner) 在 outpost tile
 	var resident := TeamData.new(); resident.team_id = 2; resident.faction_id = 0
-	resident.tile_pos = Vector2i(0, 0); resident.population = 5
+	resident.tile_pos = Vector2i(0, 0); _seed_pop(resident, 5)
 	resident.tags = ["生產"]
 	resident.resources = { "food": 10.0 }
 	state.teams[2] = resident
@@ -7425,7 +7441,7 @@ func _test_dispatch_high_ambition() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_owner = 0
 	state.world.tiles[2002] = tile
 	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
-	owner.population = 20; owner.tile_pos = Vector2i(5, 5)
+	_seed_pop(owner, 20); owner.tile_pos = Vector2i(5, 5)
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
 	leader.values = { "野心": 0.9, "好戰": 0.8, "慎重": 0.1 }
 	leader.skills = { "商業": 0.0, "統領": 0.8 }
@@ -7448,14 +7464,14 @@ func _test_invite_high_commerce() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_owner = 0
 	state.world.tiles[2002] = tile
 	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
-	owner.population = 20; owner.tile_pos = Vector2i(2, 2)
+	_seed_pop(owner, 20); owner.tile_pos = Vector2i(2, 2)
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
 	leader.values = { "野心": 0.1, "好戰": 0.1, "慎重": 0.9 }
 	leader.skills = { "商業": 0.9 }
 	state.persons[100] = leader; owner.leader_id = 100
 	state.teams[0] = owner
 	var ex := TeamData.new(); ex.team_id = 1; ex.faction_id = -1
-	ex.tags = ["流亡"]; ex.population = 8; ex.tile_pos = Vector2i(3, 3)
+	ex.tags = ["流亡"]; _seed_pop(ex, 8); ex.tile_pos = Vector2i(3, 3)
 	ex.resources["food"] = 0
 	var el := PersonData.new(); el.id = 101; el.team_id = 1
 	el.values = { "求生欲": 0.9, "野心": 0.1 }
@@ -7475,7 +7491,7 @@ func _test_dispatch_subteam_creates_subteam() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_owner = 0
 	state.world.tiles[4004] = tile
 	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
-	owner.population = 20; owner.tile_pos = Vector2i(7, 7)
+	_seed_pop(owner, 20); owner.tile_pos = Vector2i(7, 7)
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0; leader.skills = { "統領": 0.8 }
 	state.persons[100] = leader; owner.leader_id = 100
 	for i in range(3):
@@ -7506,7 +7522,7 @@ func _test_invite_exile_accept() -> void:
 	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
 	state.teams[0] = owner
 	var ex := TeamData.new(); ex.team_id = 1; ex.faction_id = -1
-	ex.tags = ["流亡"]; ex.population = 8; ex.tile_pos = Vector2i(3, 3)
+	ex.tags = ["流亡"]; _seed_pop(ex, 8); ex.tile_pos = Vector2i(3, 3)
 	ex.resources["food"] = 0
 	var el := PersonData.new(); el.id = 101; el.team_id = 1
 	el.values = { "求生欲": 0.9, "野心": 0.1 }
@@ -7530,7 +7546,7 @@ func _test_invite_exile_reject_cooldown() -> void:
 	var owner := TeamData.new(); owner.team_id = 0; owner.faction_id = 10
 	state.teams[0] = owner
 	var ex := TeamData.new(); ex.team_id = 1; ex.faction_id = -1
-	ex.tags = ["流亡"]; ex.population = 8; ex.tile_pos = Vector2i(3, 3)
+	ex.tags = ["流亡"]; _seed_pop(ex, 8); ex.tile_pos = Vector2i(3, 3)
 	ex.resources["food"] = 1000.0
 	var el := PersonData.new(); el.id = 101; el.team_id = 1
 	el.values = { "求生欲": 0.1, "野心": 0.9 }
@@ -7551,15 +7567,15 @@ func _test_settle_triggers_subteam_merge_back() -> void:
 	tile.outpost_type = "civilian"; tile.outpost_owner = 0
 	state.world.tiles[0] = tile
 	var parent := TeamData.new(); parent.team_id = 0; parent.faction_id = 10
-	parent.tile_pos = Vector2i(0, 0); parent.population = 5
+	parent.tile_pos = Vector2i(0, 0); _seed_pop(parent, 5)
 	var pl := PersonData.new(); pl.id = 100; pl.team_id = 0; pl.skills = { "統領": 0.8 }
 	state.persons[100] = pl; parent.leader_id = 100
 	state.teams[0] = parent
 	var sub := TeamData.new(); sub.team_id = 1; sub.faction_id = 10; sub.parent_team_id = 0
-	sub.tile_pos = Vector2i(0, 0); sub.tags = ["子團", "生產"]; sub.population = 3
+	sub.tile_pos = Vector2i(0, 0); sub.tags = ["子團", "生產"]; _seed_pop(sub, 3)
 	state.teams[1] = sub; parent.subteam_ids = [1]
 	var flee := TeamData.new(); flee.team_id = 2; flee.faction_id = 10
-	flee.tile_pos = Vector2i(0, 0); flee.tags = ["流亡"]; flee.population = 4
+	flee.tile_pos = Vector2i(0, 0); flee.tags = ["流亡"]; _seed_pop(flee, 4)
 	state.teams[2] = flee
 	var inter := InteractionSystem.new()
 	inter._convert_to_resident(state, flee)
@@ -7579,7 +7595,7 @@ func _test_reaction_fields() -> void:
 func _test_p3_removed() -> void:
 	print("--- Reaction Task1b: P3_recruit 已刪除 ---")
 	var rs := ReactionSystem.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 5)
 	var p := PersonData.new(); p.id = 1; p.team_id = 0
 	p.values = { "野心": 0.9, "貪婪": 0.9 }   # 舊 P3 高分個性
 	var r: String = rs._evaluate_person(p, team)
@@ -7589,7 +7605,7 @@ func _test_p3_removed() -> void:
 func _test_p2_no_food() -> void:
 	print("--- Reaction Task2a: P2 不加 food ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 5)
 	team.resources = { "food": 100.0 }
 	state.teams[0] = team
 	var p := PersonData.new(); p.id = 1; p.team_id = 0
@@ -7602,7 +7618,7 @@ func _test_p2_no_food() -> void:
 func _test_work_morale_shift() -> void:
 	print("--- Reaction Task2b: 全員 P2 → morale 上升 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 3
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 3)
 	team.tags = ["生產"]
 	state.teams[0] = team
 	for i in range(3):
@@ -7624,7 +7640,7 @@ func _test_collect_uses_morale() -> void:
 	var gains: Array = []
 	for morale in [0.5, 1.5]:
 		var state := WorldState.new(); state.world = WorldData.new()
-		var team := TeamData.new(); team.team_id = 0; team.population = 5
+		var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 5)
 		team.resources = { "food": 0.0 }
 		team.work_morale = morale
 		state.teams[0] = team
@@ -7639,7 +7655,7 @@ func _test_collect_uses_morale() -> void:
 
 func _test_p5_needs_surplus() -> void:
 	print("--- Reaction Task4a: P5 需糧食盈餘（生命事件層）---")
-	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 10)
 	team.resources = { "food": 50.0 }   # 50 < 10*2.4*7=168
 	var p := PersonData.new(); p.id = 1; p.team_id = 0   # needs 預設 safe/fed
 	var rs := ReactionSystem.new()
@@ -7659,7 +7675,7 @@ func _test_p5_needs_surplus() -> void:
 func _test_n5_coin_conserved() -> void:
 	print("--- Reaction Task4b: N5 coin 守恆 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 5)
 	team.resources = { "coin": 100.0 }
 	var p := PersonData.new(); p.id = 1; p.team_id = 0
 	var rs := ReactionSystem.new()
@@ -7673,7 +7689,7 @@ func _test_n5_coin_conserved() -> void:
 func _test_n1_solo_skip() -> void:
 	print("--- Reaction Task5a: solo leader flee 無變化 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 1
+	var team := TeamData.new(); team.team_id = 0   # leader(1) below → solo pop 1, 0 anon
 	var p := PersonData.new(); p.id = 1; p.team_id = 0; p.stress = 0.9
 	team.leader_id = 1
 	state.teams[0] = team; state.persons[1] = p
@@ -7687,7 +7703,7 @@ func _test_n1_solo_skip() -> void:
 func _test_n1_leader_tier_sync() -> void:
 	print("--- Reaction Task5b: leader flee → anon tier 同步 -1 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 5)
 	_seed_anon(team, { "平民": 4 })
 	var p := PersonData.new(); p.id = 1; p.team_id = 0; p.stress = 0.9
 	team.leader_id = 1
@@ -7704,11 +7720,12 @@ func _test_n1_leader_tier_sync() -> void:
 func _test_n1_named_spawns_exile() -> void:
 	print("--- Reaction Task5c: named flee → 自立流亡 team ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var team := TeamData.new(); team.team_id = 0
 	team.tile_pos = Vector2i(3, 3); team.leader_id = 1
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
 	var p := PersonData.new(); p.id = 2; p.team_id = 0
 	team.named_members = [2]
+	_seed_pop(team, 5)   # leader+named(1)+3 anon = 5
 	state.teams[0] = team; state.persons[1] = leader; state.persons[2] = p
 	var rs := ReactionSystem.new()
 	rs._apply_reaction(state, p, team, "N1_flee")
@@ -7724,12 +7741,13 @@ func _test_n1_named_spawns_exile() -> void:
 func _test_n3_joins_existing_exile() -> void:
 	print("--- Reaction Task5d: named defect → 加入同格流亡 team ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var team := TeamData.new(); team.team_id = 0
 	team.tile_pos = Vector2i(3, 3); team.leader_id = 1
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
 	var p := PersonData.new(); p.id = 2; p.team_id = 0
 	team.named_members = [2]
-	var exile := TeamData.new(); exile.team_id = 7; exile.population = 2
+	_seed_pop(team, 5)   # leader+named(1)+3 anon = 5
+	var exile := TeamData.new(); exile.team_id = 7; _seed_pop(exile, 2)
 	exile.tile_pos = Vector2i(3, 3); exile.tags = ["流亡"]
 	state.teams[0] = team; state.teams[7] = exile
 	state.persons[1] = leader; state.persons[2] = p
@@ -7743,7 +7761,7 @@ func _test_n3_joins_existing_exile() -> void:
 
 func _make_panic_team(state: WorldState) -> TeamData:
 	# pop=3 全 named 高壓低忠誠 → 全員 N1_flee
-	var team := TeamData.new(); team.team_id = 0; team.population = 3
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 3)
 	team.tile_pos = Vector2i(2, 0)
 	state.teams[0] = team
 	for i in range(3):
@@ -7769,7 +7787,7 @@ func _test_bridge_with_threat_flees() -> void:
 	print("--- Reaction Task6b: 真威脅 → 逃跑 + 反方向目標 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var team := _make_panic_team(state)
-	var threat := TeamData.new(); threat.team_id = 9; threat.population = 20
+	var threat := TeamData.new(); threat.team_id = 9; _seed_pop(threat, 20)
 	threat.tile_pos = Vector2i(0, 0); threat.last_tile_pos = Vector2i(-1, 0)   # 朝我來
 	state.teams[9] = threat
 	team.known_reputations = { 9: 0.1 }   # 高敵意
@@ -7788,7 +7806,7 @@ func _test_panic_skips_player_team() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	# 共用威脅敵隊 9（朝兩隊方向逼近，高敵意）
 	var enemy := TeamData.new(); enemy.team_id = 9; enemy.leader_id = 90
-	enemy.tile_pos = Vector2i(5, 4); enemy.last_tile_pos = Vector2i(6, 4); enemy.population = 50
+	enemy.tile_pos = Vector2i(5, 4); enemy.last_tile_pos = Vector2i(6, 4); _seed_pop(enemy, 50)
 	state.teams[9] = enemy
 	state.persons[90] = PersonData.new(); state.persons[90].id = 90; state.persons[90].team_id = 9
 	enemy.named_members.append(90)
@@ -7796,7 +7814,7 @@ func _test_panic_skips_player_team() -> void:
 	var flee_tile := HexTileData.new(); flee_tile.tile_pos = Vector2i(1, 4)
 	state.world.tiles[1004] = flee_tile
 	var mk_team = func(tid: int) -> TeamData:
-		var t := TeamData.new(); t.team_id = tid; t.tile_pos = Vector2i(4, 4); t.population = 5
+		var t := TeamData.new(); t.team_id = tid; t.tile_pos = Vector2i(4, 4)   # leader+4 named = pop 5, 0 anon
 		var ld := PersonData.new(); ld.id = tid * 100; ld.team_id = tid
 		ld.loyalty = 0.0; ld.stress = 1.0; ld.fear = 1.0
 		ld.values = { "求生欲": 1.0, "慎重": 0.0 }
@@ -7914,7 +7932,7 @@ func _test_arbiter_survival_beats_dispatch() -> void:
 	print("--- Arbiter Task2a: survival(80) 蓋掉 貿易(50) ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 100; team.population = 10
+	team.team_id = 100; _seed_pop(team, 10)
 	team.resources["food"] = 0.0
 	team.tile_pos = Vector2i(0, 0)
 	var leader := PersonData.new(); leader.id = 200; leader.team_id = 100
@@ -7950,7 +7968,7 @@ func _test_bridge_cannot_stomp_survival() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var team := _make_panic_team(state)
 	# 真威脅在場（同 Task6b 設定）
-	var threat := TeamData.new(); threat.team_id = 9; threat.population = 20
+	var threat := TeamData.new(); threat.team_id = 9; _seed_pop(threat, 20)
 	threat.tile_pos = Vector2i(0, 0); threat.last_tile_pos = Vector2i(-1, 0)
 	state.teams[9] = threat
 	team.known_reputations = { 9: 0.1 }
@@ -7972,7 +7990,7 @@ func _test_bridge_cannot_stomp_survival() -> void:
 func _test_salary_budget_ratio() -> void:
 	print("--- EcoFix Task1a: 量入為出 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 5)
 	team.tags = ["軍隊"]
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
 	leader.values = { "義氣": 0.5, "信義": 0.5, "貪婪": 0.5 }   # mult = 1.1
@@ -8000,7 +8018,7 @@ func _test_salary_budget_ratio() -> void:
 func _test_salary_full_pay_unchanged() -> void:
 	print("--- EcoFix Task1b: coin 充足 → 全額照舊 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 5
+	var team := TeamData.new(); team.team_id = 0   # anon=0：薪資只發 1 named（coin 只扣 1.1 → 98.9）
 	team.tags = ["軍隊"]
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
 	leader.values = { "義氣": 0.5, "信義": 0.5, "貪婪": 0.5 }   # mult = 1.1
@@ -8051,14 +8069,14 @@ func _test_diplomacy_reject_cooldown() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	state.world.current_tick = 100
 	# A：缺糧（resource_need 1.0）+ 高義氣信義（self_peace 0.15）→ score 0.55 → propose_trade
-	var a := TeamData.new(); a.team_id = 0; a.faction_id = -1; a.population = 5
+	var a := TeamData.new(); a.team_id = 0; a.faction_id = -1; _seed_pop(a, 5)
 	a.resources["food"] = 0.0
 	var al := PersonData.new(); al.id = 1; al.team_id = 0
 	al.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.0, "慎重": 1.0 }
 	state.persons[1] = al; a.leader_id = 1
 	state.teams[0] = a
 	# B：糧足 + 低義氣信義 → 對 A score 0.1 → reject
-	var b := TeamData.new(); b.team_id = 1; b.faction_id = -1; b.population = 5
+	var b := TeamData.new(); b.team_id = 1; b.faction_id = -1; _seed_pop(b, 5)
 	b.resources["food"] = 1000.0
 	var bl := PersonData.new(); bl.id = 2; bl.team_id = 1
 	bl.values = { "義氣": 0.0, "信義": 0.0, "貪婪": 0.0, "慎重": 0.5 }
@@ -8093,14 +8111,14 @@ func _test_u20_proactive_same_tile_gate() -> void:
 	# 玩家隊（大 pop，目標）
 	var pl := PersonData.new(); pl.id = 0; pl.team_id = 0
 	state.persons[0] = pl; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.faction_id = -1; pt.population = 20
+	var pt := TeamData.new(); pt.team_id = 0; pt.faction_id = -1; _seed_pop(pt, 20)
 	pt.tile_pos = Vector2i(4, 4); pt.leader_id = 0
 	state.teams[0] = pt
 	# 發起隊（高義氣信義 → score 高；遠端 (7,10)）
 	var sl := PersonData.new(); sl.id = 5; sl.team_id = 5
 	sl.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.7, "慎重": 1.0 }
 	state.persons[5] = sl
-	var st := TeamData.new(); st.team_id = 5; st.faction_id = -1; st.population = 5
+	var st := TeamData.new(); st.team_id = 5; st.faction_id = -1; _seed_pop(st, 5)
 	st.tile_pos = Vector2i(7, 10); st.leader_id = 5
 	state.teams[5] = st
 	state.team_discovered[5] = [0]
@@ -8126,7 +8144,7 @@ func _test_equip_order_no_oscillation() -> void:
 	# 根因：舊版 target 只看 storage pool；裝備後 pool 縮小 → target 縮小
 	# → unequip 還回 pool → target 又變大 → 再 equip，每 tick 循環
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 10)
 	team.tags = ["軍隊"]
 	team.resources["weapon_melee_low"] = 12
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
@@ -8161,8 +8179,9 @@ func _test_n1_leader_no_anon_pop_stable() -> void:
 	# 根因 2：舊版 leader N1/N3 無條件扣 pop，anon=0 時沒人真的走
 	# → pop < named 數 → guard equip target 0↔1 振盪（multi Team14 churn）
 	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 2
+	var team := TeamData.new(); team.team_id = 0
 	team.leader_id = 1; team.named_members = [2]
+	_seed_pop(team, 2)   # leader+named = 2, 0 anon
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0; leader.stress = 0.9
 	var m := PersonData.new(); m.id = 2; m.team_id = 0
 	state.persons[1] = leader; state.persons[2] = m
@@ -8173,7 +8192,7 @@ func _test_n1_leader_no_anon_pop_stable() -> void:
 	rs._apply_reaction(state, leader, team, "N3_defect")
 	assert(team.population == 2, "N3 同理 pop 應 2，實際=%d" % team.population)
 	# 有 anon → 照舊扣 pop + tier -1
-	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 1); team.population = 3
+	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 1); _seed_pop(team, 3)
 	leader.stress = 0.9
 	rs._apply_reaction(state, leader, team, "N1_flee")
 	assert(team.population == 2, "有 anon 應扣 pop=2，實際=%d" % team.population)
@@ -8246,7 +8265,7 @@ func _make_mfg_state(facility_levels: Dictionary) -> Array:
 			tile.set(k, int(facility_levels[k]))
 	state.world.tiles[0] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
 	team.current_task = TeamData.TASK_MANUFACTURE
 	team.tags.append(TeamData.TAG_PRODUCE)   # 生產人力 gate
 	state.teams[0] = team
@@ -8340,7 +8359,7 @@ func _test_famine_price_spike() -> void:
 	print("--- Econ Task2b: 飢荒不對稱 clamp ---")
 	var isys := InteractionSystem.new()
 	var team := TeamData.new()
-	team.population = 10
+	_seed_pop(team, 10)
 	team.resources = {}
 	# 生存品 stock 0 → 5×；一般品 stock 0 → 2×
 	assert(is_equal_approx(isys._local_value(team, "food"),
@@ -8388,7 +8407,7 @@ func _make_infra_state(outpost_type: String) -> Array:
 	var tile: HexTileData = state.world.tiles[0]
 	tile.outpost_type = outpost_type; tile.outpost_level = 1; tile.outpost_owner = 0
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10; team.tile_pos = Vector2i(0, 0)
+	team.team_id = 0; _seed_pop(team, 10); team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
 	var leader := PersonData.new(); leader.id = 100
 	state.persons[100] = leader; team.leader_id = 100
@@ -8457,7 +8476,7 @@ func _test_military_residency_dispatch_only() -> void:
 	tile.outpost_level = 1; tile.outpost_owner = 0
 	state.world.tiles[3003] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 20; team.tile_pos = Vector2i(0, 0)
+	team.team_id = 0; _seed_pop(team, 20); team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
 	# 高商業/慎重 leader（民用會走 invite）
 	var leader := PersonData.new(); leader.id = 100
@@ -8465,7 +8484,7 @@ func _test_military_residency_dispatch_only() -> void:
 	leader.skills = { "商業": 0.9 }
 	state.persons[100] = leader; team.leader_id = 100
 	# 視野內有流亡團（民用情境會被邀）
-	var exile := TeamData.new(); exile.team_id = 5; exile.population = 3
+	var exile := TeamData.new(); exile.team_id = 5; _seed_pop(exile, 3)
 	exile.tile_pos = Vector2i(4, 4); exile.tags = ["流亡"]
 	state.teams[5] = exile
 	state.team_discovered[0] = [5]
@@ -8497,7 +8516,7 @@ func _test_production_requires_resident() -> void:
 	tile.public_storage = { "ore_gold": 10.0, "horses": 5.0 }
 	state.world.tiles[0] = tile
 	var owner := TeamData.new()
-	owner.team_id = 0; owner.population = 10; owner.tile_pos = Vector2i(5, 5)
+	owner.team_id = 0; _seed_pop(owner, 10); owner.tile_pos = Vector2i(5, 5)
 	owner.resources["food"] = 1000.0
 	state.teams[0] = owner
 	var os := OutpostSystem.new()
@@ -8506,7 +8525,7 @@ func _test_production_requires_resident() -> void:
 	assert(tile.stable_progress == 0.0, "無居民 → stable 停產")
 	# 加 PRODUCE 居民團 → 生產恢復
 	var resident := TeamData.new()
-	resident.team_id = 1; resident.population = 5; resident.tile_pos = Vector2i(0, 0)
+	resident.team_id = 1; _seed_pop(resident, 5); resident.tile_pos = Vector2i(0, 0)
 	resident.tags = [TeamData.TAG_PRODUCE]
 	state.teams[1] = resident
 	os.tick_all(state)
@@ -8527,7 +8546,7 @@ func _test_promotion_coin_to_treasury() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 12
+	team.team_id = 0; _seed_pop(team, 12)
 	_seed_anon(team, { "平民": 10 })
 	team.anon_exp = { "平民": 999.0 }
 	team.resources = { "coin": 100.0, "food": 999.0, "material": 999.0 }
@@ -8551,11 +8570,11 @@ func _test_recruit_coin_to_target() -> void:
 	state.world = WorldData.new()
 	state.player_id = 100
 	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 100
-	pt.population = 5; pt.resources = { "coin": 200.0 }
+	_seed_pop(pt, 5); pt.resources = { "coin": 200.0 }
 	state.teams[0] = pt
 	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
 	state.persons[100] = pp
-	var tgt := TeamData.new(); tgt.team_id = 1; tgt.population = 8
+	var tgt := TeamData.new(); tgt.team_id = 1; _seed_pop(tgt, 8)
 	_seed_anon(tgt, { "平民": 7 })
 	state.teams[1] = tgt
 	var cmd := PlayerCommandSystem.new()
@@ -8669,7 +8688,7 @@ func _test_collect_excludes_wild_horses() -> void:
 	tile.resources = { "wild_horses": 2, "herb": 100.0 }
 	state.world.tiles[0] = tile
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10
+	team.team_id = 0; _seed_pop(team, 10)
 	team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
@@ -8807,11 +8826,11 @@ func _test_horses_loot() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var winner := TeamData.new()
-	winner.team_id = 0; winner.population = 10; winner.resources = {}
+	winner.team_id = 0; _seed_pop(winner, 10); winner.resources = {}
 	winner.tile_pos = Vector2i(0, 0)
 	state.teams[0] = winner
 	var loser := TeamData.new()
-	loser.team_id = 1; loser.population = 5; loser.resources = { "horses": 4 }
+	loser.team_id = 1; _seed_pop(loser, 5); loser.resources = { "horses": 4 }
 	loser.encounter_initial_pop = 10   # 死 5 → kill_ratio 0.5
 	loser.tile_pos = Vector2i(9, 9)
 	state.teams[1] = loser
@@ -8916,7 +8935,7 @@ func _test_resume_requires_food() -> void:
 	state.world.tiles[2 * 1000 + 2] = tile
 	var leader_team := TeamData.new()
 	leader_team.team_id = 0; leader_team.faction_id = 1
-	leader_team.population = 10
+	_seed_pop(leader_team, 10)
 	leader_team.tile_pos = Vector2i(0, 0)
 	leader_team.resources["food"] = 10.0   # 0.42 天 < 3 天
 	state.teams[0] = leader_team
@@ -8982,7 +9001,7 @@ func _fief_make_tax_state(owner_id: int, collector_id: int, rate: float,
 		state.teams[owner_id] = ot
 	# 採集團
 	var ct := TeamData.new(); ct.team_id = collector_id
-	ct.population = 5; ct.work_morale = 1.0; ct.tax_rate = rate
+	_seed_pop(ct, 5); ct.work_morale = 1.0; ct.tax_rate = rate
 	ct.tile_pos = Vector2i(0, 0)
 	ct.resources = { "food": 0.0 }
 	state.teams[collector_id] = ct
@@ -9047,7 +9066,7 @@ func _fief_make_build_state(pub_mat: float, priv_mat: float) -> WorldState:
 	tile.outpost_level = 0
 	tile.public_storage = { "material": pub_mat }
 	state.world.tiles[0] = tile
-	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 10)
 	team.tile_pos = Vector2i(0, 0)
 	team.resources = { "material": priv_mat }
 	state.teams[0] = team
@@ -9106,16 +9125,17 @@ func _test_special_tax_heavier() -> void:
 	print("--- Fief Task3a: 特別稅 rate×MULT 進 collector 口袋 ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var collector := TeamData.new(); collector.team_id = 0; collector.population = 5
+	var collector := TeamData.new(); collector.team_id = 0; _seed_pop(collector, 5)
 	collector.tile_pos = Vector2i(0, 0); collector.current_task = "徵收"
 	collector.resources = { "food": 0.0 }
 	state.teams[0] = collector
-	var payer := TeamData.new(); payer.team_id = 1; payer.population = 10
+	var payer := TeamData.new(); payer.team_id = 1
 	payer.tags = [TeamData.TAG_PRODUCE]; payer.tile_pos = Vector2i(0, 0)
 	payer.tax_rate = 0.4
 	payer.resources = { "food": 500.0 }
 	var pl := PersonData.new(); pl.id = 200; pl.team_id = 1
 	state.persons[200] = pl; payer.leader_id = 200
+	_seed_pop(payer, 10)   # leader + 9 anon = 10（reserve = pop×14 = 140）
 	state.teams[1] = payer
 	var inter := InteractionSystem.new()
 	inter._resolve_tribute(state, 0, 1)
@@ -9131,7 +9151,7 @@ func _test_special_tax_war_trigger() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	state.world.current_tick = 1   # 非週期徵收點
-	var leader_team := TeamData.new(); leader_team.team_id = 0; leader_team.population = 10
+	var leader_team := TeamData.new(); leader_team.team_id = 0; _seed_pop(leader_team, 10)
 	leader_team.resources = { "food": 1000.0, "material": 0.0 }   # 糧足、建材枯
 	state.teams[0] = leader_team
 	var lp := PersonData.new(); lp.id = 100
@@ -9153,19 +9173,21 @@ func _fief_make_aid_state(t_honor: float, t_greed: float, target_food: float,
 		beggar_food: float, beggar_pop: int, rep: float = 0.5) -> WorldState:
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var b := TeamData.new(); b.team_id = 0; b.population = beggar_pop
+	var b := TeamData.new(); b.team_id = 0
 	b.resources["food"] = beggar_food
 	b.current_task = "乞食"; b.previous_task = "idle"; b.combat_target = 1
 	b.tile_pos = Vector2i(2, 2)
 	var bl := PersonData.new(); bl.id = 100; bl.team_id = 0
 	state.persons[100] = bl; b.leader_id = 100
+	_seed_pop(b, beggar_pop)   # leader + (beggar_pop-1) anon = beggar_pop（need = pop×2.4×3）
 	state.teams[0] = b
-	var target := TeamData.new(); target.team_id = 1; target.population = 10
+	var target := TeamData.new(); target.team_id = 1
 	target.resources["food"] = target_food; target.tile_pos = Vector2i(2, 2)
 	target.known_reputations[0] = rep
 	var tl := PersonData.new(); tl.id = 200
 	tl.values = { "義氣": t_honor, "貪婪": t_greed }
 	state.persons[200] = tl; target.leader_id = 200
+	_seed_pop(target, 10)   # leader + 9 anon = 10
 	state.teams[1] = target
 	return state
 
@@ -9218,7 +9240,7 @@ func _test_normal_tax_chronic_unrest() -> void:
 	print("--- Fief Task5a: 一般稅慢性不滿 ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.population = 10
+	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 10)
 	var lp := PersonData.new(); lp.id = 100; lp.team_id = 0
 	lp.values = { "順從": 0.5, "義氣": 0.5, "野心": 0.5 }   # tolerance = 0.35
 	lp.stress = 0.0
@@ -9261,10 +9283,10 @@ func _test_special_tax_spike() -> void:
 func _fief_make_special_payer(tax_rate: float) -> WorldState:
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var collector := TeamData.new(); collector.team_id = 0; collector.population = 5
+	var collector := TeamData.new(); collector.team_id = 0; _seed_pop(collector, 5)
 	collector.tile_pos = Vector2i(0, 0); collector.current_task = "徵收"
 	state.teams[0] = collector
-	var payer := TeamData.new(); payer.team_id = 1; payer.population = 10
+	var payer := TeamData.new(); payer.team_id = 1; _seed_pop(payer, 10)
 	payer.tags = [TeamData.TAG_PRODUCE]; payer.tile_pos = Vector2i(0, 0)
 	payer.tax_rate = tax_rate
 	payer.resources = { "food": 500.0 }
@@ -9286,7 +9308,7 @@ func _w4_make_dispatch_state(pub_mat: float, priv_mat: float, on_home: bool) -> 
 	tile.public_storage = { "material": pub_mat }
 	state.world.tiles[0] = tile
 	var team := TeamData.new(); team.team_id = 0; team.faction_id = 10
-	team.population = 30
+	_seed_pop(team, 30)
 	team.tile_pos = Vector2i(0, 0) if on_home else Vector2i(5, 5)
 	team.resources = { "material": priv_mat }
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
@@ -9366,7 +9388,7 @@ func _w4_make_solo_govern_state(caution: float, ambition: float, martial: float,
 	tile.public_storage = { "material": vault_mat }
 	state.world.tiles[0] = tile
 	var team := TeamData.new(); team.team_id = 0; team.faction_id = -1
-	team.population = 10; team.tile_pos = Vector2i(0, 0)
+	_seed_pop(team, 10); team.tile_pos = Vector2i(0, 0)
 	team.current_task = "idle"; team.combat_target = -1
 	team.resources = { "food": 100.0 }   # food_pc 高 → 不觸發逃跑
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
@@ -9474,7 +9496,7 @@ func _bootstrap_govern_state(leader_pos: Vector2i, vault_mat: float) -> WorldSta
 	home.public_storage = { "material": vault_mat }
 	state.world.tiles[0] = home
 	var team := TeamData.new(); team.team_id = 0
-	team.population = 10; team.tile_pos = leader_pos
+	_seed_pop(team, 10); team.tile_pos = leader_pos
 	team.current_task = "idle"; team.combat_target = -1
 	team.resources = {}   # 無私產 → 升級/擴建派工皆失敗 → 落到治理判定
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
@@ -9513,7 +9535,7 @@ func _test_govern_skip_when_vault_full() -> void:
 
 func _bootstrap_breed_team(pop: int, minor: int, food: float) -> TeamData:
 	var team := TeamData.new(); team.team_id = 0
-	team.population = pop; team.minor_population = minor
+	_seed_pop(team, pop); team.minor_population = minor
 	team.resources = { "food": food }
 	return team
 
@@ -9601,7 +9623,7 @@ func _test_no_passive_forage_food() -> void:
 	leader.skills = {"求生": 0.9}
 	state.persons[0] = leader
 	var team := TeamData.new()
-	team.team_id = 0; team.leader_id = 0; team.population = 3; team.tile_pos = Vector2i(4,4)
+	team.team_id = 0; team.leader_id = 0; _seed_pop(team, 3); team.tile_pos = Vector2i(4,4)
 	team.resources = {"food": 0.0}
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
@@ -9653,7 +9675,7 @@ func _mk_game_tile(state: WorldState, pos: Vector2i) -> void:
 
 func _mk_starving_team(tid: int, pop: int) -> TeamData:
 	var t := TeamData.new()
-	t.team_id = tid; t.population = pop; t.tile_pos = Vector2i(4, 4)
+	t.team_id = tid; _seed_pop(t, pop); t.tile_pos = Vector2i(4, 4)
 	t.resources = {"food": 0.0}
 	return t
 
@@ -9711,10 +9733,10 @@ func _test_solo_commitment() -> void:
 	# 兩個獨立鄰隊供 攻擊/掠奪/外交 target
 	for tid in [1, 2]:
 		var o := TeamData.new(); o.team_id = tid; o.tile_pos = Vector2i(4+tid, 4)
-		o.population = 3; o.faction_id = -1
+		_seed_pop(o, 3); o.faction_id = -1
 		state.teams[tid] = o
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
-	team.population = 8; team.tags = ["軍隊"]; team.current_task = "idle"
+	_seed_pop(team, 8); team.tags = ["軍隊"]; team.current_task = "idle"
 	team.solo_intent = "掠奪"   # 上次選掠奪
 	team.resources = {"food": 100.0}
 	state.teams[0] = team
@@ -9739,20 +9761,20 @@ func _test_solo_seek_home() -> void:
 	refugee.values = {"好戰": 0.2, "貪婪": 0.2, "野心": 0.4, "求生欲": 0.9, "慎重": 0.7}
 	state.persons[0] = refugee
 	var t0 := TeamData.new(); t0.team_id = 0; t0.leader_id = 0; t0.tile_pos = Vector2i(4,4)
-	t0.population = 4; t0.tags = ["流亡"]; t0.current_task = "idle"; t0.resources = {"food": 100.0}
+	_seed_pop(t0, 4); t0.tags = ["流亡"]; t0.current_task = "idle"; t0.resources = {"food": 100.0}
 	state.teams[0] = t0
 	fai._evaluate_solo(state, t0)
 	assert(t0.current_task == TeamData.TASK_CAMP or t0.current_task == "投靠",
 		"求生型流亡團應主動尋家，實際=%s" % t0.current_task)
 	# 好戰盜匪（有獵物）→ 掠奪壓過尋家（不找家）
 	var prey := TeamData.new(); prey.team_id = 9; prey.tile_pos = Vector2i(3,4)
-	prey.population = 2; prey.faction_id = -1; prey.resources = {"food": 30.0}
+	_seed_pop(prey, 2); prey.faction_id = -1; prey.resources = {"food": 30.0}
 	state.teams[9] = prey
 	var raider := PersonData.new(); raider.id = 1000; raider.team_id = 1
 	raider.values = {"好戰": 0.9, "貪婪": 0.9, "野心": 0.5, "求生欲": 0.5}
 	state.persons[1000] = raider
 	var t1 := TeamData.new(); t1.team_id = 1; t1.leader_id = 1000; t1.tile_pos = Vector2i(4,4)
-	t1.population = 10; t1.tags = ["軍隊"]; t1.current_task = "idle"; t1.resources = {"food": 100.0}
+	_seed_pop(t1, 10); t1.tags = ["軍隊"]; t1.current_task = "idle"; t1.resources = {"food": 100.0}
 	state.teams[1] = t1
 	state.team_discovered[1] = [9]   # _nearest_independent 需 discovered 名單
 	fai._evaluate_solo(state, t1)
@@ -9785,7 +9807,7 @@ func _test_precarity_dto() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0
-	team.population = 5; team.resources = {"food": 24.0}   # 5×2.4=12/day → 2 天
+	_seed_pop(team, 5); team.resources = {"food": 24.0}   # 5×2.4=12/day → 2 天
 	state.teams[0] = team
 	var ct: Dictionary = PlayerApiMapper.map_controlled_team(state)
 	assert(ct.has("food_days"), "controlled_team 應有 food_days")
@@ -9798,7 +9820,7 @@ func _test_player_camp() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 4
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 4)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {}   # 免材料:刻意空
 	pt.tags = ["流亡"]
 	state.teams[0] = pt
@@ -9932,10 +9954,10 @@ func _test_get_actions_recruit_anon_invite() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 10
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 10)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"coin": 500}
 	state.teams[0] = pt
-	var tgt := TeamData.new(); tgt.team_id = 1; tgt.population = 6
+	var tgt := TeamData.new(); tgt.team_id = 1; _seed_pop(tgt, 6)
 	tgt.tile_pos = Vector2i(4,4)
 	state.teams[1] = tgt
 	var cs := PlayerCommandSystem.new()
@@ -9980,7 +10002,7 @@ func _test_extract_treasury_conservation() -> void:
 	print("--- extract_treasury conservation ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var team := TeamData.new()
-	team.team_id = 0; team.population = 10; team.leader_id = 100
+	team.team_id = 0; team.leader_id = 100; _seed_pop(team, 10)
 	team.anon_treasury = 100.0; team.resources["coin"] = 0.0
 	state.teams[0] = team
 	state.player_state["extract_ratio"] = 0.3
@@ -9997,10 +10019,10 @@ func _test_trade_session_dto() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 5
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 5)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 20}
 	state.teams[0] = pt
-	var npc := TeamData.new(); npc.team_id = 1; npc.population = 5
+	var npc := TeamData.new(); npc.team_id = 1; _seed_pop(npc, 5)
 	# weapon_melee_low 碎量 0.5 → 不可交易，不得列出（防 ×0 幽靈列，02.png 玩測抓到）
 	npc.tile_pos = Vector2i(4,4); npc.resources = {"material": 30, "coin": 100, "weapon_melee_low": 0.5}
 	state.teams[1] = npc
@@ -10023,13 +10045,13 @@ func _test_player_beg() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var pl := PersonData.new(); pl.id = 0; pl.team_id = 0
 	state.persons[0] = pl; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 3
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 3)
 	pt.tile_pos = Vector2i(4, 4); pt.resources = { "food": 1.0 }   # 快餓死 → need 高
 	state.teams[0] = pt
 	var nl := PersonData.new(); nl.id = 10; nl.team_id = 1
 	nl.values = { "義氣": 1.0, "貪婪": 0.0 }   # 慷慨
 	state.persons[10] = nl
-	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 10; npc.population = 5
+	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 10; _seed_pop(npc, 5)
 	npc.tile_pos = Vector2i(4, 4); npc.resources = { "food": 500.0 }
 	npc.known_reputations = { 0: 0.6 }
 	state.teams[1] = npc
@@ -10089,7 +10111,7 @@ func _test_massacre_conservation() -> void:
 	var atk := TeamData.new(); atk.team_id = 0; atk.tile_pos = Vector2i(2, 2)
 	atk.resources = { "coin": 100 }; atk.anon_treasury = 20.0
 	state.teams[0] = atk
-	var res := TeamData.new(); res.team_id = 1; res.tile_pos = Vector2i(2, 2); res.population = 12
+	var res := TeamData.new(); res.team_id = 1; res.tile_pos = Vector2i(2, 2); _seed_pop(res, 12)
 	res.resources = { "coin": 30, "food": 50.0 }; res.anon_treasury = 40.0
 	state.teams[1] = res
 	var coin_before: float = atk.anon_treasury + float(atk.resources.get("coin", 0)) \
@@ -10107,12 +10129,12 @@ func _test_trade_conservation() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
-	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; pt.population = 5
+	var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 0; _seed_pop(pt, 5)
 	pt.tile_pos = Vector2i(4,4); pt.resources = {"food": 50.0, "coin": 20}
 	state.teams[0] = pt
 	var nl := PersonData.new(); nl.id = 10; nl.team_id = 1
 	state.persons[10] = nl
-	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 10; npc.population = 5
+	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 10; _seed_pop(npc, 5)
 	npc.tile_pos = Vector2i(4,4); npc.resources = {"material": 30.0, "coin": 100}
 	state.teams[1] = npc
 	var bp: Dictionary = PlayerTradeSystem.BASE_PRICE

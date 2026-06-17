@@ -24,7 +24,6 @@ func build_beast_team(state: WorldState, kind: String, pos: Vector2i) -> int:
 	t.tags = [TeamData.TAG_BEAST]
 	t.beast_kind = kind
 	t.beast_strength = float(prof["strength"])
-	t.population = int(prof["count"])
 	t.tile_pos = pos
 	t.faction_id = -1
 	t.leader_id = -1

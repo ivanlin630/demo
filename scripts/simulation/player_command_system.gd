@@ -1082,8 +1082,6 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 	var share: float = minf(tgt.anon_treasury / float(tgt_anon), tgt.anon_treasury)
 	tgt.anon_treasury -= share
 	pt.anon_treasury += share
-	tgt.population = maxi(tgt.population - 1, 1)
-	pt.population += 1
 	AnonTierSystem.transfer_proportional(tgt, pt, 1)
 	state.player_pending_targets.erase(target_id)
 	print("[Recruit] 匿名 Team%d←%d, 花%.0f coin, 新人口=%d" % [
@@ -1253,11 +1251,9 @@ func _recruit_named_internal(state: WorldState, pt: TeamData,
 	# 守恆：買人付給對方，coin 不蒸發
 	tgt4.resources["coin"] = float(tgt4.resources.get("coin", 0)) + RECRUIT_COST_NAMED
 	tgt4.named_members.erase(person_id)
-	tgt4.population = maxi(tgt4.population - 1, 1)
 	p.team_id = pt_id
 	p.loyalty  = 0.5
 	pt.named_members.append(person_id)
-	pt.population += 1
 	state.player_pending_targets.erase(from_team_id)
 	print("[Recruit] Named P%d (%s) Team%d→%d" % [
 		person_id, p.person_name, from_team_id, pt_id])

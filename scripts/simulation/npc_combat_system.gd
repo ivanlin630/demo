@@ -461,7 +461,6 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	team.named_members.erase(p.id)
 	if team.leader_id == p.id:
 		team.leader_id = -1
-	team.population = maxi(team.population - 1, 1)
 	var _death_grade: String = p.equipment["hand_1"].get("grade", "")
 	var _death_wtype: String = _death_grade.replace("weapon_", "") if _death_grade.begins_with("weapon_") else "none"
 	_equip.on_named_death(team, _death_wtype)

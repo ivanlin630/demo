@@ -82,8 +82,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	new_team.leader_id = new_leader.id
 	reset_loyalty_on_transfer(new_leader, "split_leader")
 	parent.named_members.erase(new_leader.id)
-	parent.population -= 1
-	new_team.population += 1
+	# population 為 getter：leader_id 設定 + named.erase 即反映，無須手動加減
 
 	# Hard dissenters（loyalty < 0.35）
 	for i in range(1, dissenters.size()):
@@ -92,8 +91,6 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 		new_team.named_members.append(p.id)
 		reset_loyalty_on_transfer(p, "split_hard")
 		parent.named_members.erase(p.id)
-		parent.population -= 1
-		new_team.population += 1
 
 	# Soft followers（loyalty 0.35–0.55，依魅力）
 	var charisma: float = float(new_leader.attributes.get("魅力", 0.5))
@@ -106,16 +103,12 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 				new_team.named_members.append(p.id)
 				reset_loyalty_on_transfer(p, "split_soft")
 				parent.named_members.erase(p.id)
-				parent.population -= 1
-				new_team.population += 1
 
 	# 匿名跟隨者（依統領×魅力）
 	var leadership: float = float(new_leader.skills.get("統領", 0.0))
 	var anon_in_parent: int = parent.population - parent.named_members.size() - 1
 	var anon_split: int = roundi(leadership * charisma * anon_in_parent * 0.3)
 	anon_split = mini(anon_split, parent.population / 3)
-	new_team.population += anon_split
-	parent.population   -= anon_split
 	AnonTierSystem.transfer_proportional(parent, new_team, anon_split)
 
 	state.teams[new_team.team_id]           = new_team

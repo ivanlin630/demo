@@ -190,7 +190,7 @@ static func _setup_random_player(state, config, rng) -> void:
 
 	var team := TeamData.new()
 	team.team_id = _next_team_id(state)
-	team.population = int(pcfg.get("population", 10))
+	var target_pop: int = int(pcfg.get("population", 10))
 	team.tags = ["統領"]
 	team.resources = _default_full_resources()
 	var starting: Dictionary = pcfg.get("starting_resources", {})
@@ -220,7 +220,7 @@ static func _setup_random_player(state, config, rng) -> void:
 		state.persons[m.id] = m
 		team.named_members.append(m.id)
 
-	_setup_anon_tiers(team, {})
+	_setup_anon_tiers(team, {}, target_pop)
 	state.teams[team.team_id] = team
 	state.team_known[team.team_id] = []
 	state.team_discovered[team.team_id] = []
@@ -335,11 +335,12 @@ static func _build_outpost_tile(state: WorldState, pos: Vector2i,
 	tile.outpost_level = level
 	tile.outpost_owner = owner_team_id
 
-static func _setup_anon_tiers(team: TeamData, cfg: Dictionary) -> void:
+static func _setup_anon_tiers(team: TeamData, cfg: Dictionary, target_pop: int) -> void:
+	# population 為 getter（leader+named+anon）→ 不可讀回算 anon；改傳 config 目標 pop。
 	var at: Dictionary = cfg.get("anon_tiers", {})
 	if at.is_empty():
 		var named_in: int = team.named_members.size() + (1 if team.leader_id != -1 else 0)
-		var anon_total: int = maxi(team.population - named_in - team.wounded, 0)
+		var anon_total: int = maxi(target_pop - named_in, 0)
 		AnonCohort.add(team.anon_cohorts, "平民", "healthy", anon_total)
 	else:
 		for tier in AnonTierSystem.TIER_ORDER:
@@ -368,7 +369,7 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 		named_ratio: float, richness_mult: float, preset_key: String) -> TeamData:
 	var team := TeamData.new()
 	team.team_id = _next_team_id(state)
-	team.population = rng.randi_range(pop_range[0], pop_range[1])
+	var target_pop: int = rng.randi_range(pop_range[0], pop_range[1])
 
 	match preset_key:
 		"faction_main":         team.tags = ["統領"]
@@ -384,14 +385,14 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 	state.persons[leader.id] = leader
 	team.leader_id = leader.id
 
-	var named_count: int = maxi(0, int(round(team.population * named_ratio)) - 1)
+	var named_count: int = maxi(0, int(round(target_pop * named_ratio)) - 1)
 	for _i in range(named_count):
 		var m := PersonGenerator.generate(state, rng.randi(), "member")
 		m.team_id = team.team_id
 		state.persons[m.id] = m
 		team.named_members.append(m.id)
 
-	_setup_anon_tiers(team, {})
+	_setup_anon_tiers(team, {}, target_pop)
 	state.teams[team.team_id] = team
 	state.team_known[team.team_id] = []
 	state.team_discovered[team.team_id] = []
@@ -443,7 +444,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 	team.team_id = int(t_cfg["id"])
 	var pos_arr: Array = t_cfg.get("tile_pos", [0, 0])
 	team.tile_pos = Vector2i(int(pos_arr[0]), int(pos_arr[1]))
-	team.population = int(t_cfg.get("population", 1))
+	var target_pop: int = int(t_cfg.get("population", 1))
 	team.tags = t_cfg.get("tags", []).duplicate()
 	team.faction_id = int(t_cfg.get("faction_id", -1))
 	var base_res: Dictionary = _default_full_resources()
@@ -461,7 +462,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 		var nm: PersonData = _make_person(team.team_id, nm_cfg, false)
 		state.persons[nm.id] = nm
 		team.named_members.append(nm.id)
-	_setup_anon_tiers(team, t_cfg)
+	_setup_anon_tiers(team, t_cfg, target_pop)
 	var op_cfg: Dictionary = t_cfg.get("outpost", {})
 	if not op_cfg.is_empty():
 		var tile_id: int = team.tile_pos.x * 1000 + team.tile_pos.y

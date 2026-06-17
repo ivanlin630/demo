@@ -158,7 +158,6 @@ func _apply_famine_attrition(state: WorldState, team: TeamData, day_fraction: fl
 		var actually: int = 0
 		for t in killed:
 			actually += killed[t]
-		team.population = maxi(team.population - actually, 1)   # pop 最小 1（leader 不在此死）
 		print("[Famine] Team%d 餓死 anon %d (famine=%.0f天)" % [team.team_id, actually, team.famine_days])
 
 # 日邊界：覓食累積彙整成 episode（只玩家隊發訊息，其餘僅歸零防 spam）。回傳產生的訊息文字陣列（供測試/UI）。

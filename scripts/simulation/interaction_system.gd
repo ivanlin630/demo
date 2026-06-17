@@ -168,8 +168,7 @@ func _treat_wounded(state: WorldState, team: TeamData) -> void:
 	var saved: int = int(round(float(to_treat) * save_rate))
 	var died: int  = to_treat - saved
 	AnonTierSystem.heal_random(team, saved)        # 救活：wounded → healthy
-	AnonTierSystem.kill_wounded(team, died)        # 治療失敗死：移除 wounded 桶
-	team.population = maxi(team.population - died, 1)
+	AnonTierSystem.kill_wounded(team, died)        # 治療失敗死：移除 wounded 桶（population getter 自動反映）
 	if died > 0:
 		print("[Treat] Team%d 治療 %d 傷兵：救 %d 死 %d (medicine=%.2f)" % [
 			team.team_id, to_treat, saved, died, best_medicine])

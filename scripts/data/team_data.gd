@@ -36,7 +36,12 @@ static func pop_cap_from_leadership(skill: float) -> int:
 var team_id: int = 0
 var leader_id: int = -1
 var named_members: Array = []
-var population: int = 1
+# 衍生：leader(0/1) + named + anon(含 wounded 桶)。唯讀，不可 drift。
+var population: int:
+	get:
+		return (1 if leader_id != -1 else 0) + named_members.size() + AnonTierSystem.total_pop(self)
+	set(_value):
+		pass
 var minor_population: int = 0
 var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰鬥 spawn）
 var famine_days: float = 0.0   # 連續斷糧（satisfaction<0.3）累積天數；飢餓致死鏈用（型別 float，語意=天）

@@ -239,13 +239,7 @@ static func check_starvation_deaths(state: WorldState) -> void:
 		team.named_members.erase(pid)
 		if team.leader_id == pid:
 			team.leader_id = -1
-		# 最後一人死（無 leader + 無 named + 無 anon）→ 允許 pop 0 → 觸發滅團清除；
-		# 否則 floor 1（避免中途 pop 0 的除零；faction_ai 滅團檢查負責 erase）
-		if team.leader_id == -1 and team.named_members.is_empty() \
-				and AnonTierSystem.total_pop(team) == 0:
-			team.population = 0
-		else:
-			team.population = maxi(team.population - 1, 1)
+		# population 為 getter（leader+named+anon）→ named/leader 移除後自動反映，無須手動扣。
 
 static func use_splint(state: WorldState, pid: int, part: String) -> bool:
 	var inv: Array = state.player_state.get("inventory", [])

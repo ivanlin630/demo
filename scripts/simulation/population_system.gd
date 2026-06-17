@@ -18,7 +18,6 @@ func _mature_minors(state: WorldState) -> void:
 		var n: int = maxi(int(team.minor_population * MATURE_RATE), 1)
 		n = mini(n, team.minor_population)
 		team.minor_population -= n
-		team.population += n
 		AnonTierSystem.add_anon(team, "平民", n)
 		print("[PopMgmt] Team%d %d 名未成年長大成人（平民）" % [tid, n])
 
@@ -59,7 +58,6 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 	ot.tile_pos     = origin.tile_pos
 	ot.faction_id   = -1
 	ot.tags         = ["流亡"]
-	ot.population   = overflow_pop
 	ot.current_task = TeamData.TASK_IDLE   # 新 team 建立豁免：overflow 流亡 idle + priority 0
 	ot.task_priority = 0
 	var frac: float = float(overflow_pop) / float(origin.population)
@@ -67,7 +65,6 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 		var amt: float = float(origin.resources.get(res, 0)) * frac
 		ot.resources[res]     = amt
 		origin.resources[res] = float(origin.resources.get(res, 0)) - amt
-	origin.population -= overflow_pop
 	AnonTierSystem.transfer_proportional(origin, ot, overflow_pop)
 	state.teams[ot.team_id]           = ot
 	state.team_known[ot.team_id]      = []

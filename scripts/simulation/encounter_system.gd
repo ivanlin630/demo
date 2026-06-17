@@ -1182,7 +1182,6 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		if t:
 			t.named_members.erase(u["person_id"])
 			if t.leader_id == u["person_id"]: t.leader_id = -1
-			t.population = maxi(t.population - 1, 0)   # named 死也減 pop（原只 anon 減 → named 死 pop over-count）
 
 	for team_id in [atk_id, def_id]:
 		var dead_anon: int = 0
@@ -1192,11 +1191,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			if is_dead(u, state): dead_anon += 1
 		var t: TeamData = state.teams.get(team_id)
 		if t:
-			var killed: Dictionary = AnonTierSystem.kill_random(t, dead_anon, "combat")
-			var actually: int = 0
-			for tier in killed:
-				actually += killed[tier]
-			t.population = maxi(t.population - actually, 0)   # 用實際移除數，非意圖數（kill_random 受 healthy 池上限）
+			AnonTierSystem.kill_random(t, dead_anon, "combat")   # cohort 唯一來源；population 為 getter
 
 	# 野獸結算：beast 不走人類 loot/subjugate/outpost；勝方獵獸得肉，獸隊戰畢清除。
 	var beast_atk: bool = (state.teams.get(atk_id) != null and state.teams[atk_id].beast_kind != "")
@@ -1428,5 +1423,4 @@ func _force_occupy(state: WorldState, attacker: TeamData, resident: TeamData,
 	tile.outpost_owner = attacker.team_id
 	var occ_dead: int = resident.population - int(float(resident.population) * 0.8)
 	AnonTierSystem.kill_random(resident, occ_dead, "occupy")
-	resident.population = int(float(resident.population) * 0.8)
 	print("[ForceOccupy] attacker=Team%d resident=Team%d 強佔 pop-20%%" % [attacker.team_id, resident.team_id])
