@@ -102,18 +102,21 @@
 
 ## team reference 契約
 
-team 之間的引用（`combat_target` / `order_target_id` / `parent_team_id` / `subteam_ids` / `faction.member_team_ids` / `faction.leader_team_id` / `team_known` / `team_discovered` 內元素）只准兩種狀態：
-- `-1` = 語意上的「無」（合法，須顯式處理）
-- 指向**保證存在**的 team（「指向已 erase 的 team」結構上不可能 —— `erase_team` chokepoint + `_check_no_dangling_team_id` audit 擔保）
+移除 team 一律走 `state.erase_team(tid)`（唯一 chokepoint，清光所有指向它的 ref）。但解析時分兩類 —— **實證後的區分**（2026-06-18 batch1 子 session 證偽「全部納管 ref 永遠活」）：
 
-**解析統一形狀**（納管 ref）：
+### A. 維護集合元素 → 保證活 → `require_team`
+`faction.member_team_ids` / `subteam_ids` / `team_known[obs]` / `team_discovered[obs]` 內的元素由 erase_team + 雙向 audit 持續維護，迭代時**每個元素必活**：
 ```
-if tid == -1:
-    # ...「無」分支...
-else:
+for tid in faction.member_team_ids:
     var t := state.require_team(tid)   # 保證活，不檢 null
 ```
-- 納管 ref **不可**寫 `if t == null` 防 dangling（dangling 不可能；寫了 = 死碼/遮蔽 bug）。
-- `require_team` 對不存在 assert（debug 抓、release 剝離）。
-- **不納管**（照舊 `teams.get()` + null 處理）：玩家輸入 tid、`teams.keys()` 快照迭代期間可能已 erase、persons/tiles/factions 等非 team-ref lookup。
-- 移除 team 一律走 `state.erase_team(tid)`（唯一 chokepoint，清光所有納管 ref）。
+這類**不可**寫 `if t == null`（dangling 不可能；寫了=死碼）。
+
+### B. 單一可變 target 欄位 → 可瞬時懸空 → 保留容忍/自癒
+`combat_target` / `order_target_id` / `parent_team_id` / `faction.leader_team_id` 是單欄位 target。**tick 內有瞬時懸空窗**：setter 可能從快照塞入「本 tick 稍早被 erase」的 id（setter 未驗存在）；erase_team 清得乾淨，但下個 setter 又塞 stale。月 audit 抓不到（自癒/cleanup 在取樣前清掉）。
+→ 這類**保留** `teams.get()` + null 容忍/自癒（`if t == null: 自癒清 -1`）。**那些 guard 是 load-bearing 處理真瞬時態，非壞味道，勿改 require_team**（會在瞬時態崩）。
+
+### 不納管（照舊 `teams.get()` + null）
+玩家輸入 tid、`teams.keys()` 快照迭代期間可能已 erase、persons/tiles/factions 等非 team-ref lookup。
+
+> `require_team` 對不存在 assert（debug 抓持久懸空 bug、release 剝離保韌性）。只用於 A 類。要讓 B 類也成立 = 修所有 setter 驗存在（大、收益邊際，因 guard 已正確處理瞬時態）→ 不建議。
