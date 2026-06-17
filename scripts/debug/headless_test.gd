@@ -38,6 +38,7 @@ func _initialize() -> void:
 	_test_update_armor_config()
 	_test_update_guard_ratio()
 	_test_faction_ai_run_calls_all_updates()
+	_test_set_team_faction()
 	_test_food_consumption_total()
 	_test_fatigue_accumulation()
 	_test_fatigue_recovery()
@@ -3581,6 +3582,25 @@ func _test_faction_ai_run_calls_all_updates() -> void:
 	assert(t.guard_ratio >= 0.15 and t.guard_ratio <= 0.5,
 		"evaluate_all() 後 guard_ratio 應在合理範圍，實際=%s" % str(t.guard_ratio))
 	print("S7 Task7 OK")
+
+func _test_set_team_faction() -> void:
+	var st := WorldState.new()
+	var t := TeamData.new(); t.team_id = 1; st.teams[1] = t
+	var fa := FactionData.new(); fa.faction_id = 10; st.factions[10] = fa
+	var fb := FactionData.new(); fb.faction_id = 20; st.factions[20] = fb
+	# 入 fa：兩側同步
+	st.set_team_faction(t, 10)
+	assert(t.faction_id == 10 and fa.member_team_ids.has(1), "入 fa 兩側同步")
+	# 換 fb：自動退 fa、入 fb
+	st.set_team_faction(t, 20)
+	assert(t.faction_id == 20 and not fa.member_team_ids.has(1) and fb.member_team_ids.has(1), "換 fb 退舊入新")
+	# 清空：退 fb
+	st.clear_team_faction(t)
+	assert(t.faction_id == -1 and not fb.member_team_ids.has(1), "清空退 fb")
+	# idempotent：重複入不重複 append
+	st.set_team_faction(t, 20); st.set_team_faction(t, 20)
+	assert(fb.member_team_ids.count(1) == 1, "重複入不重複 append")
+	print("[OK] _test_set_team_faction")
 
 func _test_food_consumption_total() -> void:
 	print("--- Cadence Task2: 食物消耗總量 ---")
