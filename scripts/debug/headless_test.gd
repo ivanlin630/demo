@@ -554,7 +554,7 @@ func _test_join_request_trigger_and_respond() -> void:
 	state.teams[0] = pt
 	# 絕境流民同格(food_days 低 → 應發投靠)
 	var ds := TeamData.new(); ds.team_id = 1; _seed_pop(ds, 3); ds.tile_pos = Vector2i(4,4)
-	ds.resources = {"food": 0.0}; ds.current_task = "乞食"
+	ds.resources = {"food": 0.0}; ds.current_task = TeamData.TASK_BEG
 	state.teams[1] = ds
 	var fai := FactionAISystem.new()
 	fai._maybe_request_join_player(state, ds)   # 絕境同格 → 寫 forced_event
@@ -1164,7 +1164,7 @@ func _run_sim_test() -> void:
 
 		# 移動目標設定
 		if t == 0:
-			team.current_task = "掠奪"
+			team.current_task = TeamData.TASK_LOOT
 			team.tags = ["統領"]
 			team.resources["weapon_melee_low"] = 40
 		elif t == 1:
@@ -1670,7 +1670,7 @@ func _run_sim_test() -> void:
 
 	# 場景 4：FactionAI 戰前集結
 	_f99.goals = ["攻擊"]
-	fb.current_task = "idle"; fb.order_target_id = -1; fb.move_target = Vector2i(-1, -1)
+	fb.current_task = TeamData.TASK_IDLE; fb.order_target_id = -1; fb.move_target = Vector2i(-1, -1)
 	_fai._assign_member_tasks(state, _f99)
 	print("=== FactionAI 戰前集結測試 ===")
 	if fb.current_task == TeamData.TASK_MERGE and fb.order_target_id == 22:
@@ -2248,7 +2248,7 @@ func _run_sim_test() -> void:
 
 	var _dns2 := DayNightSystem.new()
 	var _rest_team: TeamData = state.teams.get(2)
-	_rest_team.current_task = "rest"
+	_rest_team.current_task = TeamData.TASK_REST
 	_rest_team.guard_ratio = 0.0
 	var _cvr: int = _dns2.get_camp_vision_range(state, _rest_team)
 	assert(_cvr == 0, "無守夜 → camp_vision_range 應為 0")
@@ -3701,7 +3701,7 @@ func _test_fatigue_recovery() -> void:
 	team.team_id = 0
 	_seed_pop(team, 10)
 	team.fatigue = 1.0   # 從滿開始
-	team.current_task = "rest"   # 紮營
+	team.current_task = TeamData.TASK_REST   # 紮營
 	team.guard_ratio = 0.0       # 無哨兵，確保 rest_mult=1.0
 	team.tile_pos = Vector2i(0, 0)
 	var tile := HexTileData.new()
@@ -3940,8 +3940,8 @@ func _test_team_previous_task_field() -> void:
 	print("--- Survival Task1: TeamData.previous_task ---")
 	var t := TeamData.new()
 	assert(t.previous_task == "", "預設應為空字串，實際=%s" % t.previous_task)
-	t.previous_task = "貿易"
-	assert(t.previous_task == "貿易", "指派後應為 貿易")
+	t.previous_task = TeamData.TASK_TRADE
+	assert(t.previous_task == TeamData.TASK_TRADE, "指派後應為 貿易")
 	print("Survival Task1 OK")
 
 func _test_survival_trigger_urgent() -> void:
@@ -3953,7 +3953,7 @@ func _test_survival_trigger_urgent() -> void:
 	_seed_pop(team, 10)
 	team.resources["food"] = 0.0
 	team.tile_pos = Vector2i(0, 0)
-	team.current_task = "idle"
+	team.current_task = TeamData.TASK_IDLE
 	var leader := PersonData.new()
 	leader.id = 200
 	leader.team_id = 100
@@ -3975,13 +3975,13 @@ func _test_survival_sticky() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 101
-	team.current_task = "乞食"
-	team.previous_task = "貿易"
+	team.current_task = TeamData.TASK_BEG
+	team.previous_task = TeamData.TASK_TRADE
 	state.teams[101] = team
 	var fai := FactionAISystem.new()
 	fai._evaluate_survival(state, team)
-	assert(team.current_task == "乞食", "sticky 不應改變 task")
-	assert(team.previous_task == "貿易", "previous_task 不應變")
+	assert(team.current_task == TeamData.TASK_BEG, "sticky 不應改變 task")
+	assert(team.previous_task == TeamData.TASK_TRADE, "previous_task 不應變")
 	print("Survival Task2b OK")
 
 func _test_survival_helpers() -> void:
@@ -4044,7 +4044,7 @@ func _test_survival_decision_tree() -> void:
 	var tile1 := HexTileData.new(); tile1.tile_pos = Vector2i(3,3); tile1.outpost_level = 1; tile1.outpost_owner = 0
 	s1.world.tiles[3003] = tile1
 	fai._trigger_survival(s1, t1, "urgent")
-	assert(t1.current_task == "return_home", "Path 1 應 return_home，實際=%s" % t1.current_task)
+	assert(t1.current_task == TeamData.TASK_RETURN_HOME, "Path 1 應 return_home，實際=%s" % t1.current_task)
 	# (2) 殘忍 + 鄰弱 → 掠奪
 	var s2 := WorldState.new()
 	s2.world = WorldData.new()
@@ -4073,7 +4073,7 @@ func _test_survival_decision_tree() -> void:
 	s3.teams[0] = t3; s3.teams[1] = ally; s3.team_discovered[0] = [1]
 	t3.known_reputations[1] = 0.6
 	fai._trigger_survival(s3, t3, "urgent")
-	assert(t3.current_task == "投靠", "Path 3 應 投靠，實際=%s" % t3.current_task)
+	assert(t3.current_task == TeamData.TASK_JOIN, "Path 3 應 投靠，實際=%s" % t3.current_task)
 	# (4) 默認 → 乞食（pop > FORAGE_VIABLE_POP 跳覓食；周圍格皆有主 → 無法紮營 → 落到乞食）
 	var s4 := WorldState.new()
 	s4.world = WorldData.new()
@@ -4089,7 +4089,7 @@ func _test_survival_decision_tree() -> void:
 	aid.resources["food"] = 500
 	s4.teams[0] = t4; s4.teams[1] = aid; s4.team_discovered[0] = [1]
 	fai._trigger_survival(s4, t4, "urgent")
-	assert(t4.current_task == "乞食", "Path 4 應 乞食，實際=%s" % t4.current_task)
+	assert(t4.current_task == TeamData.TASK_BEG, "Path 4 應 乞食，實際=%s" % t4.current_task)
 	print("Survival Task4 OK")
 
 func _test_survival_prefs() -> void:
@@ -4213,8 +4213,8 @@ func _test_strategic_ai_respects_survival() -> void:
 	state.world = WorldData.new()
 	var t := TeamData.new()
 	t.team_id = 0; t.tile_pos = Vector2i(0,0); _seed_pop(t, 10)
-	t.current_task = "乞食"
-	t.previous_task = "貿易"
+	t.current_task = TeamData.TASK_BEG
+	t.previous_task = TeamData.TASK_TRADE
 	state.teams[0] = t
 	var leader := PersonData.new()
 	leader.id = 100
@@ -4227,7 +4227,7 @@ func _test_strategic_ai_respects_survival() -> void:
 	var sai := StrategicAiSystem.new()
 	state.world.current_tick = StrategicAiSystem.STRATEGIC_INTERVAL
 	sai.tick(state, f)
-	assert(t.current_task == "乞食",
+	assert(t.current_task == TeamData.TASK_BEG,
 		"sticky 應保持乞食 task，實際=%s" % t.current_task)
 	print("Survival Task5 OK")
 
@@ -4238,7 +4238,7 @@ func _test_resident_tax_with_stress() -> void:
 	# Owner Team 0
 	var owner := TeamData.new()
 	owner.team_id = 0; _seed_pop(owner, 5); owner.faction_id = 10
-	owner.current_task = "徵收"; owner.tile_pos = Vector2i(0, 0)
+	owner.current_task = TeamData.TASK_TRIBUTE; owner.tile_pos = Vector2i(0, 0)
 	state.teams[0] = owner
 	# Village Team 1 with PRODUCE tag + high tax
 	var v := TeamData.new()
@@ -4266,7 +4266,7 @@ func _test_aid_resolve_npc_accept() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 10); b.resources["food"] = 0
-	b.current_task = "乞食"; b.previous_task = "貿易"
+	b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_TRADE
 	b.combat_target = 1; b.tile_pos = Vector2i(2,2)
 	var b_leader := PersonData.new(); b_leader.id = 100; b_leader.team_id = 0
 	state.persons[100] = b_leader; b.leader_id = 100
@@ -4282,7 +4282,7 @@ func _test_aid_resolve_npc_accept() -> void:
 	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
 	assert(r.get("accepted", false), "高義氣應接受，msg=%s" % r.get("msg", ""))
 	assert(float(b.resources["food"]) > 0.0, "beggar food 應 > 0")
-	assert(b.current_task == "貿易", "beggar 應回 previous_task，實際=%s" % b.current_task)
+	assert(b.current_task == TeamData.TASK_TRADE, "beggar 應回 previous_task，實際=%s" % b.current_task)
 	print("Survival Task6a OK (給 %.1f food)" % r.get("amount", 0.0))
 
 func _test_aid_resolve_npc_refuse() -> void:
@@ -4290,7 +4290,7 @@ func _test_aid_resolve_npc_refuse() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 10); b.resources["food"] = 0
-	b.current_task = "乞食"; b.previous_task = "貿易"; b.combat_target = 1
+	b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_TRADE; b.combat_target = 1
 	var b_leader := PersonData.new(); b_leader.id = 100
 	state.persons[100] = b_leader; b.leader_id = 100
 	state.teams[0] = b
@@ -4304,7 +4304,7 @@ func _test_aid_resolve_npc_refuse() -> void:
 	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
 	assert(not r.get("accepted", true), "極吝嗇應拒絕")
 	assert(float(b.resources["food"]) == 0.0, "beggar food 應仍 0")
-	assert(b.current_task == "貿易", "拒絕後 beggar 仍回 previous_task")
+	assert(b.current_task == TeamData.TASK_TRADE, "拒絕後 beggar 仍回 previous_task")
 	print("Survival Task6b OK")
 
 func _test_aid_player_forced_event() -> void:
@@ -4319,8 +4319,8 @@ func _test_aid_player_forced_event() -> void:
 	var player := PersonData.new(); player.id = 200; player.team_id = 0
 	state.persons[200] = player
 	var b := TeamData.new(); b.team_id = 1; _seed_pop(b, 10)
-	b.resources["food"] = 0; b.combat_target = 0; b.current_task = "乞食"
-	b.previous_task = "idle"
+	b.resources["food"] = 0; b.combat_target = 0; b.current_task = TeamData.TASK_BEG
+	b.previous_task = TeamData.TASK_IDLE
 	var b_leader := PersonData.new(); b_leader.id = 300
 	state.persons[300] = b_leader; b.leader_id = 300
 	state.teams[1] = b
@@ -4343,7 +4343,7 @@ func _test_aid_player_response_give() -> void:
 	var player := PersonData.new(); player.id = 200; player.team_id = 0
 	state.persons[200] = player
 	var b := TeamData.new(); b.team_id = 1; _seed_pop(b, 10)
-	b.resources["food"] = 0; b.current_task = "乞食"; b.previous_task = "idle"
+	b.resources["food"] = 0; b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_IDLE
 	var b_leader := PersonData.new(); b_leader.id = 300
 	state.persons[300] = b_leader; b.leader_id = 300
 	state.teams[1] = b
@@ -4354,7 +4354,7 @@ func _test_aid_player_response_give() -> void:
 	assert(r.get("ok", false), "respond 應成功")
 	assert(float(b.resources["food"]) == 50.0, "beggar 應收 50 food，實際=%.1f" % float(b.resources["food"]))
 	assert(float(pt.resources["food"]) == 450.0, "玩家應扣 50 food，實際=%.1f" % float(pt.resources["food"]))
-	assert(b.current_task == "idle", "beggar 應回 previous_task，實際=%s" % b.current_task)
+	assert(b.current_task == TeamData.TASK_IDLE, "beggar 應回 previous_task，實際=%s" % b.current_task)
 	assert(state.player_forced_event.is_empty(), "forced_event 應清空")
 	print("Survival Task7b OK")
 
@@ -4376,7 +4376,7 @@ func _test_aid_repeated_annoyance() -> void:
 	var accepted_count: int = 0
 	for i in range(5):
 		b.resources["food"] = 0
-		b.current_task = "乞食"; b.previous_task = "idle"
+		b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_IDLE
 		b.combat_target = 1
 		var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
 		if r.get("accepted", false):
@@ -4390,7 +4390,7 @@ func _test_aid_stranger() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 5)
-	b.combat_target = 1; b.current_task = "乞食"; b.previous_task = "idle"
+	b.combat_target = 1; b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_IDLE
 	var b_leader := PersonData.new(); b_leader.id = 100
 	state.persons[100] = b_leader; b.leader_id = 100
 	state.teams[0] = b
@@ -4490,14 +4490,14 @@ func _test_resident_movement_lock() -> void:
 	var t := TeamData.new()
 	t.team_id = 0; t.tile_pos = Vector2i(0, 0); _seed_pop(t, 5)
 	t.faction_id = 10; t.tags = [TeamData.TAG_PRODUCE]
-	t.current_task = "生產"
+	t.current_task = TeamData.TASK_PRODUCE
 	t.move_target = Vector2i(3, 3)   # 想動但應被鎖
 	state.teams[0] = t
 	var mv: Object = load("res://scripts/simulation/movement_system.gd").new()
 	var _r: Dictionary = mv.process(state, [0], 1.0)
 	assert(t.tile_pos == Vector2i(0, 0), "居民應被鎖定不動，實際=%s" % str(t.tile_pos))
 	# 但 task=逃跑 應該可動
-	t.current_task = "逃跑"
+	t.current_task = TeamData.TASK_FLEE
 	_r = mv.process(state, [0], 1.0)
 	# tile_pos 是否變動需看實作；至少不被 lock skip
 	print("Resident Task4 OK")
@@ -4570,7 +4570,7 @@ func _test_subteam_settle() -> void:
 	var sub := TeamData.new()
 	sub.team_id = 1; sub.faction_id = 10; sub.parent_team_id = 0
 	sub.tile_pos = Vector2i(3, 3)
-	sub.tags = ["子團"]; sub.current_task = "安頓"
+	sub.tags = ["子團"]; sub.current_task = TeamData.TASK_SETTLE
 	state.teams[1] = sub
 	var inter := InteractionSystem.new()
 	inter._convert_to_resident(state, sub)
@@ -4603,7 +4603,7 @@ func _test_uprising_trigger() -> void:
 	state.teams[0] = v
 	var fai := FactionAISystem.new()
 	fai._evaluate_uprising(state, v)
-	assert(v.current_task == "起義", "應觸發起義，實際 task=%s" % v.current_task)
+	assert(v.current_task == TeamData.TASK_REVOLT, "應觸發起義，實際 task=%s" % v.current_task)
 	assert(v.faction_id == -1, "應脫離 faction")
 	assert(v.tags.has("流亡"), "應加流亡")
 	assert(not v.tags.has(TeamData.TAG_PRODUCE), "應 erase 生產")
@@ -4666,7 +4666,7 @@ func _test_pacify_subteam() -> void:
 	var l := PersonData.new(); l.id = 100; l.stress = 0.5; l.loyalty = 0.5
 	state.persons[100] = l; v.leader_id = 100; state.teams[0] = v
 	var pac := TeamData.new(); pac.team_id = 1; pac.faction_id = 10
-	pac.tile_pos = Vector2i(0, 0); pac.current_task = "安撫"
+	pac.tile_pos = Vector2i(0, 0); pac.current_task = TeamData.TASK_PACIFY
 	state.teams[1] = pac
 	var inter := InteractionSystem.new()
 	inter._resolve_pacify(state, pac, v)
@@ -6214,7 +6214,7 @@ func _test_survival_b_branch_near_outpost_return() -> void:
 	state.team_discovered[0] = [1]
 	var fas = FactionAISystem.new()
 	fas._trigger_survival(state, team, "urgent")
-	assert(team.current_task == "return_home", "近 outpost 應 return_home，實際=%s" % team.current_task)
+	assert(team.current_task == TeamData.TASK_RETURN_HOME, "近 outpost 應 return_home，實際=%s" % team.current_task)
 	print("Prosperity Task5b OK")
 
 # Task6 共用：建 attacker(0) + prey(1)擁 outpost(5,5) + resident(2)駐該 tile
@@ -6357,7 +6357,7 @@ func _test_process_on_move_triggers_combat() -> void:
 	# 攻擊團 A：與 prey 同格，但 move_target 指向遠處（途經，非 arrived）
 	var a := TeamData.new()
 	a.team_id = 0; a.tile_pos = Vector2i(1, 1); _seed_pop(a, 5)
-	a.faction_id = 0; a.current_task = "攻擊"; a.move_target = Vector2i(5, 5)
+	a.faction_id = 0; a.current_task = TeamData.TASK_ATTACK; a.move_target = Vector2i(5, 5)
 	var al := PersonData.new(); al.id = 10
 	state.persons[10] = al; a.leader_id = 10
 	state.teams[0] = a
@@ -6711,7 +6711,7 @@ func _test_breakout_distance_guard() -> void:
 	state.world = WorldData.new()
 	var self_team := TeamData.new()
 	self_team.team_id = 0; self_team.tile_pos = Vector2i(0, 0); self_team.faction_id = 1
-	self_team.current_task = "idle"
+	self_team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = self_team
 	# 2 enemy 都在 5 hex 外 → 不觸發 breakout
 	var e1 := TeamData.new(); e1.team_id = 1; e1.tile_pos = Vector2i(5, 0); e1.faction_id = 2
@@ -6797,7 +6797,7 @@ func _test_trade_net_dispatches() -> void:
 	state.factions[0] = f
 	var trader := TeamData.new()
 	trader.team_id = 0; trader.faction_id = 0; trader.tile_pos = Vector2i(0, 0)
-	trader.tags = ["商隊"]; trader.current_task = "idle"
+	trader.tags = ["商隊"]; trader.current_task = TeamData.TASK_IDLE
 	state.teams[0] = trader
 	var partner := TeamData.new()
 	partner.team_id = 1; partner.faction_id = -1; partner.tile_pos = Vector2i(3, 0)
@@ -7458,7 +7458,7 @@ func _test_resolve_market_absorbs_storage() -> void:
 	state.persons[10] = a_leader; a.leader_id = 10
 	state.teams[0] = a
 	var b := TeamData.new(); b.team_id = 1; b.faction_id = -1; b.tile_pos = Vector2i(0, 0)
-	_seed_pop(b, 5); b.current_task = "idle"
+	_seed_pop(b, 5); b.current_task = TeamData.TASK_IDLE
 	b.resources = { "coin": 0.0, "food": 0.0 }
 	var b_leader := PersonData.new(); b_leader.id = 11; b_leader.team_id = 1
 	state.persons[11] = b_leader; b.leader_id = 11
@@ -7573,7 +7573,7 @@ func _test_invite_high_commerce() -> void:
 	state.team_discovered[0] = [1]
 	var fai := FactionAISystem.new()
 	fai._try_dispatch_or_invite(state, owner, tile, leader)
-	assert(ex.current_task == "安頓", "高商業低野心應邀流亡安頓，實際=%s" % ex.current_task)
+	assert(ex.current_task == TeamData.TASK_SETTLE, "高商業低野心應邀流亡安頓，實際=%s" % ex.current_task)
 	print("Residency Task3b OK")
 
 func _test_dispatch_subteam_creates_subteam() -> void:
@@ -7600,7 +7600,7 @@ func _test_dispatch_subteam_creates_subteam() -> void:
 	assert(found != -1, "應創建子隊")
 	var sub: TeamData = state.teams[found]
 	assert(sub.tags.has("子團"), "子隊應有 子團 tag")
-	assert(sub.current_task == "安頓", "子隊 task 應為 安頓，實際=%s" % sub.current_task)
+	assert(sub.current_task == TeamData.TASK_SETTLE, "子隊 task 應為 安頓，實際=%s" % sub.current_task)
 	assert(sub.move_target == Vector2i(4, 4), "子隊 move_target 應為 outpost")
 	assert(sub.population == 5, "settler_count clamp 20/4=5，實際=%d" % sub.population)
 	print("Residency Task4 OK")
@@ -7624,7 +7624,7 @@ func _test_invite_exile_accept() -> void:
 	state.team_discovered[0] = [1]
 	var fai := FactionAISystem.new()
 	fai._try_invite_nearby_exile(state, owner, tile)
-	assert(ex.current_task == "安頓", "接受應 task=安頓")
+	assert(ex.current_task == TeamData.TASK_SETTLE, "接受應 task=安頓")
 	assert(ex.move_target == Vector2i(1, 1), "move_target 應為 outpost")
 	print("Residency Task5a OK")
 
@@ -7648,7 +7648,7 @@ func _test_invite_exile_reject_cooldown() -> void:
 	state.team_discovered[0] = [1]
 	var fai := FactionAISystem.new()
 	fai._try_invite_nearby_exile(state, owner, tile)
-	assert(ex.current_task != "安頓", "拒絕不應安頓")
+	assert(ex.current_task != TeamData.TASK_SETTLE, "拒絕不應安頓")
 	assert(int(owner.invite_cooldown.get(1, 0)) == 1000 + FactionAISystem.RESIDENCY_COOLDOWN, "應設 7 天冷卻")
 	print("Residency Task5b OK")
 
@@ -7872,7 +7872,7 @@ func _test_bridge_no_threat_no_hijack() -> void:
 	var team := _make_panic_team(state)
 	var rs := ReactionSystem.new()
 	rs.evaluate_all(state, [0])
-	assert(team.current_task != "逃跑", "無威脅 task 不應變逃跑，實際=%s" % team.current_task)
+	assert(team.current_task != TeamData.TASK_FLEE, "無威脅 task 不應變逃跑，實際=%s" % team.current_task)
 	assert(team.move_target == Vector2i(-1, -1), "move_target 不應被設")
 	print("Reaction Task6a OK")
 
@@ -7890,7 +7890,7 @@ func _test_bridge_with_threat_flees() -> void:
 	state.world.tiles[5000] = t5   # 反方向 (2,0)+(1,0)*3 = (5,0)
 	var rs := ReactionSystem.new()
 	rs.evaluate_all(state, [0])
-	assert(team.current_task == "逃跑", "應逃跑，實際=%s" % team.current_task)
+	assert(team.current_task == TeamData.TASK_FLEE, "應逃跑，實際=%s" % team.current_task)
 	assert(team.move_target == Vector2i(5, 0), "move_target 應 (5,0)，實際=%s" % str(team.move_target))
 	print("Reaction Task6b OK")
 
@@ -7927,8 +7927,8 @@ func _test_panic_skips_player_team() -> void:
 	state.player_id = 0
 	var rs := ReactionSystem.new()
 	rs.evaluate_all(state, [0, 1, 9])
-	assert(nt.current_task == "逃跑", "NPC 對照隊應觸發恐慌逃跑(測有效性前提),實際=%s" % nt.current_task)
-	assert(pt.current_task != "逃跑", "玩家主隊不該被設逃跑 task,實際=%s" % pt.current_task)
+	assert(nt.current_task == TeamData.TASK_FLEE, "NPC 對照隊應觸發恐慌逃跑(測有效性前提),實際=%s" % nt.current_task)
+	assert(pt.current_task != TeamData.TASK_FLEE, "玩家主隊不該被設逃跑 task,實際=%s" % pt.current_task)
 	print("恐慌橋跳過玩家主隊 OK")
 
 
@@ -7942,7 +7942,7 @@ func _test_arbiter_basic() -> void:
 	assert(t.task_priority == 0)
 	# idle 任何層可寫
 	assert(TaskArbiter.try_set(state, t, "貿易", Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH))
-	assert(t.current_task == "貿易" and t.task_priority == 50)
+	assert(t.current_task == TeamData.TASK_TRADE and t.task_priority == 50)
 	# 低蓋高 ✗
 	assert(not TaskArbiter.try_set(state, t, "攻擊", Vector2i(2, 2), TaskArbiter.PRIO_FACTION))
 	# 同層 ✗
@@ -7965,7 +7965,7 @@ func _test_arbiter_release_transition() -> void:
 	state.teams[0] = t
 	TaskArbiter.try_set(state, t, "安頓", Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH)
 	TaskArbiter.transition(t, "生產", TaskArbiter.PRIO_AMBIENT)
-	assert(t.current_task == "生產" and t.task_priority == 10)
+	assert(t.current_task == TeamData.TASK_PRODUCE and t.task_priority == 10)
 	TaskArbiter.release(t)
 	assert(t.current_task == TeamData.TASK_IDLE and t.task_priority == 0)
 	assert(t.move_target == Vector2i(-1, -1))
@@ -8073,7 +8073,7 @@ func _test_bridge_cannot_stomp_survival() -> void:
 	assert(TaskArbiter.try_set(state, team, "乞食", Vector2i(1, 0), TaskArbiter.PRIO_SURVIVAL))
 	var rs := ReactionSystem.new()
 	rs.evaluate_all(state, [0])
-	assert(team.current_task == "乞食", "bridge 不得蓋 survival，實際=%s" % team.current_task)
+	assert(team.current_task == TeamData.TASK_BEG, "bridge 不得蓋 survival，實際=%s" % team.current_task)
 	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL)
 	assert(team.move_target == Vector2i(1, 0), "move_target 不應被 bridge 改動")
 	print("Arbiter Task4 OK")
@@ -8583,7 +8583,7 @@ func _test_military_residency_dispatch_only() -> void:
 	state.team_discovered[0] = [5]
 	var fai := FactionAISystem.new()
 	fai._try_dispatch_or_invite(state, team, tile, leader)
-	assert(exile.current_task != "安頓", "military 不 invite 流亡")
+	assert(exile.current_task != TeamData.TASK_SETTLE, "military 不 invite 流亡")
 	assert(team.invite_cooldown.is_empty(), "不應觸發 invite cooldown")
 	assert(state.teams.size() == 2, "invite 傾向 leader → 軍屯不派也不邀")
 	# 高野心 leader → dispatch 子隊
@@ -9219,7 +9219,7 @@ func _test_special_tax_heavier() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var collector := TeamData.new(); collector.team_id = 0; _seed_pop(collector, 5)
-	collector.tile_pos = Vector2i(0, 0); collector.current_task = "徵收"
+	collector.tile_pos = Vector2i(0, 0); collector.current_task = TeamData.TASK_TRIBUTE
 	collector.resources = { "food": 0.0 }
 	state.teams[0] = collector
 	var payer := TeamData.new(); payer.team_id = 1
@@ -9268,7 +9268,7 @@ func _fief_make_aid_state(t_honor: float, t_greed: float, target_food: float,
 	state.world = WorldData.new()
 	var b := TeamData.new(); b.team_id = 0
 	b.resources["food"] = beggar_food
-	b.current_task = "乞食"; b.previous_task = "idle"; b.combat_target = 1
+	b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_IDLE; b.combat_target = 1
 	b.tile_pos = Vector2i(2, 2)
 	var bl := PersonData.new(); bl.id = 100; bl.team_id = 0
 	state.persons[100] = bl; b.leader_id = 100
@@ -9377,7 +9377,7 @@ func _fief_make_special_payer(tax_rate: float) -> WorldState:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var collector := TeamData.new(); collector.team_id = 0; _seed_pop(collector, 5)
-	collector.tile_pos = Vector2i(0, 0); collector.current_task = "徵收"
+	collector.tile_pos = Vector2i(0, 0); collector.current_task = TeamData.TASK_TRIBUTE
 	state.teams[0] = collector
 	var payer := TeamData.new(); payer.team_id = 1; _seed_pop(payer, 10)
 	payer.tags = [TeamData.TAG_PRODUCE]; payer.tile_pos = Vector2i(0, 0)
@@ -9482,7 +9482,7 @@ func _w4_make_solo_govern_state(caution: float, ambition: float, martial: float,
 	state.world.tiles[0] = tile
 	var team := TeamData.new(); team.team_id = 0; team.faction_id = -1
 	_seed_pop(team, 10); team.tile_pos = Vector2i(0, 0)
-	team.current_task = "idle"; team.combat_target = -1
+	team.current_task = TeamData.TASK_IDLE; team.combat_target = -1
 	team.resources = { "food": 100.0 }   # food_pc 高 → 不觸發逃跑
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
 	leader.values = { "慎重": caution, "野心": ambition, "好戰": martial,
@@ -9590,7 +9590,7 @@ func _bootstrap_govern_state(leader_pos: Vector2i, vault_mat: float) -> WorldSta
 	state.world.tiles[0] = home
 	var team := TeamData.new(); team.team_id = 0
 	_seed_pop(team, 10); team.tile_pos = leader_pos
-	team.current_task = "idle"; team.combat_target = -1
+	team.current_task = TeamData.TASK_IDLE; team.combat_target = -1
 	team.resources = {}   # 無私產 → 升級/擴建派工皆失敗 → 落到治理判定
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
 	leader.values = { "慎重": 0.5 }
@@ -9829,14 +9829,14 @@ func _test_solo_commitment() -> void:
 		_seed_pop(o, 3); o.faction_id = -1
 		state.teams[tid] = o
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
-	_seed_pop(team, 8); team.tags = ["軍隊"]; team.current_task = "idle"
-	team.solo_intent = "掠奪"   # 上次選掠奪
+	_seed_pop(team, 8); team.tags = ["軍隊"]; team.current_task = TeamData.TASK_IDLE
+	team.solo_intent = TeamData.TASK_LOOT   # 上次選掠奪
 	team.resources = {"food": 100.0}
 	state.teams[0] = team
 	state.team_discovered[0] = [1, 2]   # _nearest_independent 需 discovered 名單
 	fai._evaluate_solo(state, team)
-	assert(team.current_task == "掠奪", "有 solo_intent=掠奪 + 慣性 → 應續掠奪，實際=%s" % team.current_task)
-	assert(team.solo_intent == "掠奪", "選後 solo_intent 記錄")
+	assert(team.current_task == TeamData.TASK_LOOT, "有 solo_intent=掠奪 + 慣性 → 應續掠奪，實際=%s" % team.current_task)
+	assert(team.solo_intent == TeamData.TASK_LOOT, "選後 solo_intent 記錄")
 	print("solo commitment OK")
 
 func _test_solo_seek_home() -> void:
@@ -9854,10 +9854,10 @@ func _test_solo_seek_home() -> void:
 	refugee.values = {"好戰": 0.2, "貪婪": 0.2, "野心": 0.4, "求生欲": 0.9, "慎重": 0.7}
 	state.persons[0] = refugee
 	var t0 := TeamData.new(); t0.team_id = 0; t0.leader_id = 0; t0.tile_pos = Vector2i(4,4)
-	_seed_pop(t0, 4); t0.tags = ["流亡"]; t0.current_task = "idle"; t0.resources = {"food": 100.0}
+	_seed_pop(t0, 4); t0.tags = ["流亡"]; t0.current_task = TeamData.TASK_IDLE; t0.resources = {"food": 100.0}
 	state.teams[0] = t0
 	fai._evaluate_solo(state, t0)
-	assert(t0.current_task == TeamData.TASK_CAMP or t0.current_task == "投靠",
+	assert(t0.current_task == TeamData.TASK_CAMP or t0.current_task == TeamData.TASK_JOIN,
 		"求生型流亡團應主動尋家，實際=%s" % t0.current_task)
 	# 好戰盜匪（有獵物）→ 掠奪壓過尋家（不找家）
 	var prey := TeamData.new(); prey.team_id = 9; prey.tile_pos = Vector2i(3,4)
@@ -9867,11 +9867,11 @@ func _test_solo_seek_home() -> void:
 	raider.values = {"好戰": 0.9, "貪婪": 0.9, "野心": 0.5, "求生欲": 0.5}
 	state.persons[1000] = raider
 	var t1 := TeamData.new(); t1.team_id = 1; t1.leader_id = 1000; t1.tile_pos = Vector2i(4,4)
-	_seed_pop(t1, 10); t1.tags = ["軍隊"]; t1.current_task = "idle"; t1.resources = {"food": 100.0}
+	_seed_pop(t1, 10); t1.tags = ["軍隊"]; t1.current_task = TeamData.TASK_IDLE; t1.resources = {"food": 100.0}
 	state.teams[1] = t1
 	state.team_discovered[1] = [9]   # _nearest_independent 需 discovered 名單
 	fai._evaluate_solo(state, t1)
-	assert(t1.current_task == "掠奪" or t1.current_task == "攻擊",
+	assert(t1.current_task == TeamData.TASK_LOOT or t1.current_task == TeamData.TASK_ATTACK,
 		"好戰盜匪應 roving 非尋家，實際=%s" % t1.current_task)
 	print("solo seek home OK")
 
