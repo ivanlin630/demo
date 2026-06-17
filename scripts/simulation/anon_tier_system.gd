@@ -230,9 +230,11 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 	return count
 
 static func _training_cap(tact: float) -> String:
-	var cap: String = "新兵"
-	if tact > 0.4:
-		cap = "老兵"
-	if tact > 0.7:
-		cap = "菁英"
+	var cap: String = AnonCohort.TIER_SOLDIER   # floor=新兵（門檻 0.0）
+	var best: float = -1.0
+	for threshold in TRAINING_CAP_THRESHOLDS:
+		var th: float = float(threshold)
+		if tact > th and th > best:
+			best = th
+			cap = TRAINING_CAP_THRESHOLDS[threshold]
 	return cap
