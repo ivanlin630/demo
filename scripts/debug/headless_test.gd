@@ -39,6 +39,7 @@ func _initialize() -> void:
 	_test_update_guard_ratio()
 	_test_faction_ai_run_calls_all_updates()
 	_test_set_team_faction()
+	_test_set_subteam_parent()
 	_test_food_consumption_total()
 	_test_fatigue_accumulation()
 	_test_fatigue_recovery()
@@ -3601,6 +3602,21 @@ func _test_set_team_faction() -> void:
 	st.set_team_faction(t, 20); st.set_team_faction(t, 20)
 	assert(fb.member_team_ids.count(1) == 1, "重複入不重複 append")
 	print("[OK] _test_set_team_faction")
+
+func _test_set_subteam_parent() -> void:
+	var st := WorldState.new()
+	var pa := TeamData.new(); pa.team_id = 1; st.teams[1] = pa
+	var pb := TeamData.new(); pb.team_id = 2; st.teams[2] = pb
+	var c := TeamData.new(); c.team_id = 3; st.teams[3] = c
+	st.set_subteam_parent(c, 1)
+	assert(c.parent_team_id == 1 and pa.subteam_ids.has(3), "入 pa 兩側同步")
+	st.set_subteam_parent(c, 2)
+	assert(c.parent_team_id == 2 and not pa.subteam_ids.has(3) and pb.subteam_ids.has(3), "換 pb 退舊入新")
+	st.detach_subteam(c)
+	assert(c.parent_team_id == -1 and not pb.subteam_ids.has(3), "detach 退 pb")
+	st.set_subteam_parent(c, 2); st.set_subteam_parent(c, 2)
+	assert(pb.subteam_ids.count(3) == 1, "重複入不重複 append")
+	print("[OK] _test_set_subteam_parent")
 
 func _test_food_consumption_total() -> void:
 	print("--- Cadence Task2: 食物消耗總量 ---")
