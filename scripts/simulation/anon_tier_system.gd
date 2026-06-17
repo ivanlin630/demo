@@ -4,7 +4,7 @@ class_name AnonTierSystem
 # 集中 tier 屬性表、查詢、變動、升等、死亡分配。
 # team.anon_tiers / anon_exp 取代舊 scalar anon_combat_skill / anon_wage。
 
-const TIER_ORDER: Array = ["平民", "新兵", "老兵", "菁英"]
+const TIER_ORDER: Array = AnonCohort.TIER_ORDER
 
 const TIER_STATS: Dictionary = {
 	"平民": { "combat": 0.1, "speed": 0.7, "base_wage": 0.5 },

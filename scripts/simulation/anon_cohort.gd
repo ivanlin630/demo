@@ -3,7 +3,11 @@ class_name AnonCohort
 # 匿名人口統一容器：cohorts: Dictionary，鍵 "tier|health" → count（稀疏，只存非零桶）。
 # tier 數值沿用 AnonTierSystem.TIER_STATS（單一來源）。全 static 純函數，不持有狀態。
 
-const TIER_ORDER: Array   = ["平民", "新兵", "老兵", "菁英"]
+const TIER_PLEB: String    = "平民"
+const TIER_SOLDIER: String = "新兵"
+const TIER_VET: String     = "老兵"
+const TIER_ELITE: String   = "菁英"
+const TIER_ORDER: Array    = [TIER_PLEB, TIER_SOLDIER, TIER_VET, TIER_ELITE]
 const HEALTH_ORDER: Array = ["healthy", "wounded"]
 
 # ───── 鍵編解碼 ─────
