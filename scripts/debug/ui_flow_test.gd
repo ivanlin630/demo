@@ -25,6 +25,9 @@ func _initialize() -> void:
 	await _test_player_status_label()
 	await _test_train_action_reachable()
 	await _test_camp_action_reachable()
+	await _test_q7_3_take_loot_flow()
+	await _test_q7_5_dispatch_subteam_task()
+	await _test_q7_6_faction_gate_leader()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -339,6 +342,90 @@ func _test_player_status_label() -> void:
 	node._refresh()
 	var s: String = node._state_label.text
 	_check("狀態列用「狀態:」不用「任務:」", s.contains("狀態:") and not s.contains("任務:"))
+	await _free_ui(node)
+
+# Q7-3：戰後 loot_pool 非空 → [K]take_loot 經 bridge 真把戰利品入庫、清 last_encounter_result。
+func _test_q7_3_take_loot_flow() -> void:
+	print("\n── Q7-3 戰後 take_loot 端到端 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt = st.teams[ptid]
+	var before_food: float = float(pt.resources.get("food", 0))
+	# 敗隊持有食物 → loot_pool 取自其資源
+	var loser := TeamData.new(); loser.team_id = 7700; loser.population = 3
+	loser.resources["food"] = 100.0
+	st.teams[7700] = loser
+	# 模擬戰勝結算結果（玩家為 winner）
+	st.last_encounter_result = {
+		"winner_id": ptid, "loser_id": 7700,
+		"loot_pool": {"food": 30.0}, "can_subjugate": true,
+	}
+	# hint 應提示 [K]/[L]
+	var EncView = load("res://scripts/ui/encounter_view.gd")
+	var hint: String = EncView._post_combat_hint(st.last_encounter_result)
+	_check("post-combat hint 含 K/L 戰利品", hint.contains("K") and hint.contains("L"))
+	# 執行 take_loot command（encounter_view 的 [K] 派的就是這個）
+	var r = node._bridge.command_player("execute_action",
+		{"action_id": "take_loot", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+	_check("take_loot 經 bridge 成功", r.get("ok", false))
+	_check("玩家食物 +30 入庫", abs(float(pt.resources.get("food", 0)) - (before_food + 30.0)) < 0.01)
+	_check("敗隊食物 -30", abs(float(loser.resources.get("food", 0)) - 70.0) < 0.01)
+	_check("last_encounter_result 已清", st.last_encounter_result.is_empty())
+	await _free_ui(node)
+
+# Q7-5：子隊派遣可選非 IDLE 任務。command 介面不變,UI 經 set_player_input("sub_task", 選定) 真派出帶任務子隊。
+func _test_q7_5_dispatch_subteam_task() -> void:
+	print("\n── Q7-5 子隊派遣帶任務 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt = st.teams[ptid]
+	pt.population = 10
+	AnonTierSystem.add_anon(pt, "平民", 8)
+	# 注入命名非 leader 成員當子隊長
+	var m := PersonData.new(); m.id = 95001; m.team_id = ptid; m.skills["統領"] = 0.5
+	st.persons[95001] = m; pt.named_members.append(95001)
+	# 選單 index→task 映射正確（覓食非 idle）
+	_check("選單字串含覓食", TextUiMain._subteam_task_menu_str().contains("覓食"))
+	var forage_task: String = TextUiMain._subteam_task_from_index(2)
+	_check("index 2 → 覓食(非 idle)", forage_task == TeamData.TASK_FORAGE and forage_task != TeamData.TASK_IDLE)
+	# 經 set_player_input 帶任務派遣（與 UI callback 同路徑）
+	node._bridge.set_player_input("sub_leader_id", 95001)
+	node._bridge.set_player_input("sub_pop_count", 3)
+	node._bridge.set_player_input("sub_task", forage_task)
+	node._bridge.set_player_input("sub_move_q", pt.tile_pos.x)
+	node._bridge.set_player_input("sub_move_r", pt.tile_pos.y)
+	var r = node._bridge.command_player("execute_action",
+		{"action_id": "dispatch_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+	_check("dispatch_subteam 成功", r.get("ok", false))
+	# 經 parent.subteam_ids 找剛派出的子隊（command 不回傳 sub_id）
+	var sub_id: int = pt.subteam_ids[-1] if not pt.subteam_ids.is_empty() else -1
+	_check("子隊 current_task = 覓食（非寫死 IDLE）",
+		sub_id != -1 and st.teams.has(sub_id) and st.teams[sub_id].current_task == TeamData.TASK_FORAGE)
+	await _free_ui(node)
+
+# Q7-6：非 faction leader → 面板不顯 [A]目標 [B]徵收率（display 對齊 command 權限）；leader 則顯。
+func _test_q7_6_faction_gate_leader() -> void:
+	print("\n── Q7-6 faction 設定鈕 gate leader ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var fac := FactionData.new(); fac.faction_id = 556
+	# 另一隊當 leader → 玩家是普通成員
+	fac.leader_team_id = 99999
+	st.factions[556] = fac
+	st.teams[ptid].faction_id = 556
+	node._faction_mode = true
+	var s_member: String = node._build_faction_str()
+	_check("非 leader 不顯 [A]設定目標", not s_member.contains("[A]設定目標"))
+	_check("非 leader 不顯 [B]調整徵收率", not s_member.contains("[B]調整徵收率"))
+	_check("非 leader 仍可離開勢力 [C]", s_member.contains("[C]離開勢力"))
+	# 改玩家為 leader → 顯 [A]/[B]
+	fac.leader_team_id = ptid
+	var s_leader: String = node._build_faction_str()
+	_check("leader 顯 [A]設定目標", s_leader.contains("[A]設定目標"))
+	_check("leader 顯 [B]調整徵收率", s_leader.contains("[B]調整徵收率"))
 	await _free_ui(node)
 
 func _check(label: String, ok: bool) -> void:

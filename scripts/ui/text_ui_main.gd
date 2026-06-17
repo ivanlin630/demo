@@ -5,6 +5,31 @@ class_name TextUiMain
 var _runner: SimRunner
 var _bridge: SimBridge
 
+# Q7-5: 子隊派遣可選任務（合理子集；command 介面不變,已支援任意 sub_task）。
+# 每項 [任務常數, 顯示名]。1=idle 為預設。
+const SUBTEAM_TASK_CHOICES: Array = [
+	[TeamData.TASK_IDLE,   "待機"],
+	[TeamData.TASK_FORAGE, "覓食"],
+	[TeamData.TASK_SETTLE, "安頓"],
+	[TeamData.TASK_PATROL, "巡邏"],
+	[TeamData.TASK_BUILD,  "建設"],
+	[TeamData.TASK_SCOUT,  "偵查"],
+]
+
+# Q7-5: 子隊任務選單組字（static → 可單元測）。回傳如「1)待機 2)覓食 …」
+static func _subteam_task_menu_str() -> String:
+	var parts: Array = []
+	for i in range(SUBTEAM_TASK_CHOICES.size()):
+		parts.append("%d)%s" % [i + 1, SUBTEAM_TASK_CHOICES[i][1]])
+	return "  ".join(parts)
+
+# Q7-5: 由選單編號（1-based）取 task 常數；越界 → idle。
+static func _subteam_task_from_index(idx_1based: int) -> String:
+	var i: int = idx_1based - 1
+	if i < 0 or i >= SUBTEAM_TASK_CHOICES.size():
+		return TeamData.TASK_IDLE
+	return SUBTEAM_TASK_CHOICES[i][0]
+
 var _cursor: Vector2i = Vector2i(4, 4)
 var _selected: Vector2i = Vector2i(-1, -1)
 var _player_tid: int = 0
@@ -1531,30 +1556,38 @@ func _handle_subteam_mode(keycode: int) -> void:
 				_input_mode_callback = func(buf2: String):
 					var pop: int = int(buf2)
 					_bridge.set_player_input("sub_pop_count", pop)
-					_bridge.set_player_input("sub_task", TeamData.TASK_IDLE)
-					# 步驟 3：目標 q
+					# 步驟 3：選任務（Q7-5：非寫死 IDLE,開放合理子集）
 					_input_mode = true
 					_input_mode_type = "numeric"
-					_input_mode_prompt = "目標格 Q: "
+					_input_mode_prompt = "選任務 %s: " % _subteam_task_menu_str()
 					_input_buffer = ""
-					_input_mode_callback = func(buf3: String):
-						var dq: int = int(buf3)
-						_bridge.set_player_input("sub_move_q", dq)
-						# 步驟 4：目標 r → 執行
+					_input_mode_callback = func(buf_task: String):
+						var task_id: String = _subteam_task_from_index(int(buf_task))
+						_bridge.set_player_input("sub_task", task_id)
+						# 步驟 4：目標 q
 						_input_mode = true
 						_input_mode_type = "numeric"
-						_input_mode_prompt = "目標格 R: "
+						_input_mode_prompt = "目標格 Q: "
 						_input_buffer = ""
-						_input_mode_callback = func(buf4: String):
-							var dr: int = int(buf4)
-							_bridge.set_player_input("sub_move_r", dr)
-							var res := _bridge.command_player("execute_action", {
-								"action_id": "dispatch_subteam",
-								"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-							_log_event("[子隊] %s" % res.get("message", ""))
-							_set_feedback(res.get("ok", true), res.get("message", ""))
-						_input_bar.text = "目標格 R: _"
-					_input_bar.text = "目標格 Q: _"
+						_input_mode_callback = func(buf3: String):
+							var dq: int = int(buf3)
+							_bridge.set_player_input("sub_move_q", dq)
+							# 步驟 5：目標 r → 執行
+							_input_mode = true
+							_input_mode_type = "numeric"
+							_input_mode_prompt = "目標格 R: "
+							_input_buffer = ""
+							_input_mode_callback = func(buf4: String):
+								var dr: int = int(buf4)
+								_bridge.set_player_input("sub_move_r", dr)
+								var res := _bridge.command_player("execute_action", {
+									"action_id": "dispatch_subteam",
+									"target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+								_log_event("[子隊] %s" % res.get("message", ""))
+								_set_feedback(res.get("ok", true), res.get("message", ""))
+							_input_bar.text = "目標格 R: _"
+						_input_bar.text = "目標格 Q: _"
+					_input_bar.text = "選任務 %s: _" % _subteam_task_menu_str()
 				_input_bar.text = "派遣人數 (1~%d): _" % (max_pop - 1)
 			_input_bar.text = "選隊長 (1~%d): _" % candidates.size()
 			_refresh()
@@ -1583,15 +1616,23 @@ func _handle_subteam_mode(keycode: int) -> void:
 				_input_buffer = ""
 				_input_mode_callback = func(buf_r: String):
 					var r_val: int = int(buf_r)
-					_bridge.set_player_input("order_sub_id", sub_id_cap)
-					_bridge.set_player_input("sub_new_move_q", q_val)
-					_bridge.set_player_input("sub_new_move_r", r_val)
-					_bridge.set_player_input("sub_new_task", TeamData.TASK_IDLE)
-					var res := _bridge.command_player("execute_action",
-						{"action_id": "order_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
-					_log_event("[子隊] %s" % res.get("message", ""))
-					_set_feedback(res.get("ok", true), res.get("message", ""))
-					_subteam_selection = -1
+					# Q7-5：order 同樣開放任務選擇（非寫死 IDLE）
+					_input_mode = true
+					_input_mode_type = "numeric"
+					_input_mode_prompt = "選任務 %s: " % _subteam_task_menu_str()
+					_input_buffer = ""
+					_input_mode_callback = func(buf_t: String):
+						var new_task_id: String = _subteam_task_from_index(int(buf_t))
+						_bridge.set_player_input("order_sub_id", sub_id_cap)
+						_bridge.set_player_input("sub_new_move_q", q_val)
+						_bridge.set_player_input("sub_new_move_r", r_val)
+						_bridge.set_player_input("sub_new_task", new_task_id)
+						var res := _bridge.command_player("execute_action",
+							{"action_id": "order_subteam", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+						_log_event("[子隊] %s" % res.get("message", ""))
+						_set_feedback(res.get("ok", true), res.get("message", ""))
+						_subteam_selection = -1
+					_input_bar.text = "選任務 %s: _" % _subteam_task_menu_str()
 				_input_bar.text = "%s_" % _input_mode_prompt
 			_input_bar.text = "%s_" % _input_mode_prompt
 		KEY_B:
