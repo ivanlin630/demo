@@ -67,10 +67,10 @@
 ## Anon
 
 - anon 是 team-level 抽象集體，**無個體 entity**
-- 4 tier scalar（平民/新兵/老兵/菁英）儲存於 `team.anon_tiers` dict
-- 變動只透過 `AnonTierSystem` API：`add_anon` / `remove_anon` / `add_exp` / `kill_random` / `transfer_proportional` / `try_promote`
-- `anon_combat_skill` / `anon_wage` 為 computed getter（不可直接寫）
-- 入團時保留來源 tier（戰俘 / 投靠 帶原 tier 進入）
+- 統一儲存於 `team.anon_cohorts`（稀疏 dict，鍵 `"tier|health"`→count；tier ∈ 平民/新兵/老兵/菁英，health ∈ healthy/wounded）
+- 變動只透過 `AnonCohort`（add/move/remove）或 `AnonTierSystem`（add_anon/remove_anon/kill_random/wound_random/heal_random/kill_wounded/transfer_proportional/try_promote）
+- `population` / `wounded` / `anon_combat_skill` / `anon_wage` 為 computed getter（投影自 cohort，**不可直接寫**，舊 set no-op）
+- 入團時保留來源 tier（戰俘 / 投靠 帶原 tier 進入）；受傷 = move healthy→wounded；晉升 named/leader 從 anon 桶移除 1
 
 ## Task
 
@@ -92,3 +92,10 @@
 - 飢餓判定唯一來源 = 團糧（個人不另算飢餓）
 - 死亡順序：弱者先死（minor → anon → named）
 - 生育是生命事件（可與行動並行），不與行動反應競爭單一名額
+
+## 資料模型不變量規則（防散落純量 drift）
+
+1. **可衍生聚合 → computed getter，不存可變欄位**。任何 `= f(權威來源)` 的值用唯讀 getter（範本 `team_data.population` / `wounded` / `anon_combat_skill`）。物理上不可 drift；加人必須動真來源（named_members / anon_cohorts），不能偷改數字。
+2. **來源/雙向關係走單一入口**。anon 改動走 `AnonCohort`/`AnonTierSystem` 入口；勿直接 `anon_cohorts[k] = ...`。
+3. **不可衍生的真存量 / 不變量 → 註冊進 `InvariantAudit.check`**。真存守恆量（coin_eq）、cohort 自洽、faction/subteam 雙向等靠 audit 守。加新不變量 = 加一個 `_check_*` 並在 `check()` 呼叫。
+4. **改資料模型前讀本節。**
