@@ -79,7 +79,12 @@ var trade_task_start_tick: int = 0       # 貿易 task 起始 tick（timeout 防
 var task_reason: String = ""             # 最近一次 task 設定來源（TaskArbiter _source；遙測用）
 var task_start_tick: int = 0             # 最近一次 task 設定 tick（逃跑/survival timeout 用）
 var readiness: float   = 1.0
-var wounded: int       = 0
+# 傷兵數 = cohort wounded 桶投影（取代舊 int 累加器；唯讀，舊寫入走 AnonTierSystem wound/heal/kill_wounded）
+var wounded: int:
+	get:
+		return AnonCohort.by_health(anon_cohorts, "wounded")
+	set(_value):
+		pass
 var equip_order: Dictionary = {
 	"melee_low": 0, "melee_high": 0,
 	"ranged_low": 0, "ranged_high": 0,

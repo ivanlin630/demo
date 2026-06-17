@@ -7,6 +7,8 @@ func _initialize() -> void:
 	_test_anon_cohort_mutate()
 	_test_anon_cohort_counts()
 	_test_anon_cohort_stats()
+	_test_anon_wound_heal_kill()
+	_test_anon_transfer_carries_wounded()
 	_test_team_anon_tiers_default()
 	_test_anon_tier_queries()
 	_test_add_remove_anon()
@@ -6372,6 +6374,41 @@ func _test_anon_cohort_stats() -> void:
 	assert(abs(AnonCohort.avg_speed({}) - 1.0) < 0.0001, "空 avg_speed 預設 1.0")
 	assert(abs(AnonCohort.total_wage({}) - 0.0) < 0.0001, "空 total_wage 0.0")
 	print("[OK] _test_anon_cohort_stats")
+
+func _test_anon_wound_heal_kill() -> void:
+	var t := TeamData.new()
+	t.anon_cohorts = {}
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 10)
+	# wound 3：healthy 7 / wounded 3
+	var w: int = AnonTierSystem.wound_random(t, 3)
+	assert(w == 3, "wound 應 3，實際 %d" % w)
+	assert(AnonCohort.by_health(t.anon_cohorts, "healthy") == 7, "healthy 應 7")
+	assert(AnonCohort.by_health(t.anon_cohorts, "wounded") == 3, "wounded 應 3")
+	assert(t.wounded == 3, "wounded getter 應 3，實際 %d" % t.wounded)
+	# wound 超量受 healthy 上限約束（不膨脹）
+	var w2: int = AnonTierSystem.wound_random(t, 99)
+	assert(w2 == 7, "剩 7 healthy，wound 99 應只傷 7，實際 %d" % w2)
+	assert(AnonCohort.by_health(t.anon_cohorts, "healthy") == 0, "全傷後 healthy 0")
+	assert(t.wounded == 10, "wounded 上限 = anon 總數 10")
+	# heal 4
+	var h: int = AnonTierSystem.heal_random(t, 4)
+	assert(h == 4 and t.wounded == 6, "heal 4 後 wounded 6")
+	# kill_wounded 2
+	var k: int = AnonTierSystem.kill_wounded(t, 2)
+	assert(k == 2 and t.wounded == 4, "kill_wounded 2 後 wounded 4")
+	assert(AnonCohort.total(t.anon_cohorts) == 8, "總數 8（4 healthy + 4 wounded）")
+	print("[OK] _test_anon_wound_heal_kill")
+
+func _test_anon_transfer_carries_wounded() -> void:
+	var a := TeamData.new(); a.anon_cohorts = {}
+	var b := TeamData.new(); b.anon_cohorts = {}
+	AnonCohort.add(a.anon_cohorts, "新兵", "healthy", 6)
+	AnonCohort.add(a.anon_cohorts, "新兵", "wounded", 4)   # 共 10
+	AnonTierSystem.transfer_proportional(a, b, 10)         # 全搬
+	assert(AnonCohort.total(a.anon_cohorts) == 0, "來源清空")
+	assert(b.wounded == 4, "wounded 桶隨轉移帶走，實際 %d" % b.wounded)
+	assert(AnonCohort.by_health(b.anon_cohorts, "healthy") == 6, "healthy 6 帶走")
+	print("[OK] _test_anon_transfer_carries_wounded")
 
 func _test_team_anon_tiers_default() -> void:
 	var t := TeamData.new()

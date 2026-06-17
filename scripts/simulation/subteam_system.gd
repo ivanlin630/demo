@@ -79,12 +79,9 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	_merge_into(state, sub.parent_team_id, sub_id)
 	return true
 
-# 按比例搬 wounded + resources + anon_treasury 給 absorber；will_empty 時 treasury 全帶走（守恆）
-# 呼叫前 caller 應已決定 frac 與 will_empty（absorbed 是否將清空）；population/anon-tier 轉移由 caller 處理
+# 按比例搬 resources + anon_treasury 給 absorber；will_empty 時 treasury 全帶走（守恆）
+# 呼叫前 caller 應已決定 frac 與 will_empty（absorbed 是否將清空）；population/anon-tier（含 wounded 桶）轉移由 caller 經 transfer_proportional 處理
 func _transfer_proportional_assets(absorber: TeamData, absorbed: TeamData, frac: float, will_empty: bool) -> void:
-	var w_xfer: int = int(round(float(absorbed.wounded) * frac))
-	absorber.wounded += w_xfer
-	absorbed.wounded = maxi(absorbed.wounded - w_xfer, 0)
 	for res in absorbed.resources:
 		var amt: float = float(absorbed.resources.get(res, 0)) * frac
 		absorber.resources[res] = float(absorber.resources.get(res, 0)) + amt

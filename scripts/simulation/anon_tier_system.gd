@@ -98,7 +98,53 @@ static func kill_random(team: TeamData, count: int, _source: String) -> Dictiona
 				break
 	return killed
 
-# 按比例從 from 抽 count 人到 to（戰俘 / 投靠 / 拆團）。回各 tier 轉移數
+# 依某 health 桶各 tier count 加權隨機選一 tier（無人回 ""）
+static func _weighted_tier(team: TeamData, health: String) -> String:
+	var tot: int = AnonCohort.by_health(team.anon_cohorts, health)
+	if tot <= 0:
+		return ""
+	var roll: int = randi() % tot
+	var acc: int = 0
+	for tier in TIER_ORDER:
+		acc += int(team.anon_cohorts.get(AnonCohort._key(tier, health), 0))
+		if roll < acc:
+			return tier
+	return ""
+
+# 受傷 n 人：weighted 從 healthy 移到 wounded。回實際受傷數（受 healthy 池上限約束→不膨脹）
+static func wound_random(team: TeamData, n: int) -> int:
+	var done: int = 0
+	for _i in range(n):
+		var tier: String = _weighted_tier(team, "healthy")
+		if tier == "":
+			break
+		AnonCohort.move(team.anon_cohorts, tier, "healthy", tier, "wounded", 1)
+		done += 1
+	return done
+
+# 治癒 n 人：weighted 從 wounded 移回 healthy。回實際治癒數
+static func heal_random(team: TeamData, n: int) -> int:
+	var done: int = 0
+	for _i in range(n):
+		var tier: String = _weighted_tier(team, "wounded")
+		if tier == "":
+			break
+		AnonCohort.move(team.anon_cohorts, tier, "wounded", tier, "healthy", 1)
+		done += 1
+	return done
+
+# 傷兵死亡 n 人：weighted 從 wounded 桶移除。回實際移除數
+static func kill_wounded(team: TeamData, n: int) -> int:
+	var done: int = 0
+	for _i in range(n):
+		var tier: String = _weighted_tier(team, "wounded")
+		if tier == "":
+			break
+		AnonCohort.remove(team.anon_cohorts, tier, "wounded", 1)
+		done += 1
+	return done
+
+# 按比例從 from 抽 count 人到 to（戰俘 / 投靠 / 拆團）。health-aware：兩桶都搬，保 tier+health。回各 tier 轉移數
 static func transfer_proportional(from: TeamData, to: TeamData, count: int) -> Dictionary:
 	var moved: Dictionary = {}
 	for tier in TIER_ORDER:
@@ -108,28 +154,32 @@ static func transfer_proportional(from: TeamData, to: TeamData, count: int) -> D
 		return moved
 	var actual: int = mini(count, total)
 	var remaining: int = actual
-	# 第一輪：按比例 round
-	for tier in TIER_ORDER:
-		if remaining <= 0:
-			break
-		var avail: int = AnonCohort.by_tier(from.anon_cohorts, tier)
-		var n: int = mini(mini(int(round(float(avail) / float(total) * float(actual))), avail), remaining)
-		var real: int = AnonCohort.remove(from.anon_cohorts, tier, "healthy", n)
-		AnonCohort.add(to.anon_cohorts, tier, "healthy", real)
-		moved[tier] = real
-		remaining -= real
-	# 第二輪：round 後剩餘，順序補滿
-	if remaining > 0:
+	# 兩輪 × 兩 health：按比例搬，保各 tier|health 桶
+	for health in AnonCohort.HEALTH_ORDER:
 		for tier in TIER_ORDER:
 			if remaining <= 0:
 				break
-			var avail2: int = AnonCohort.by_tier(from.anon_cohorts, tier)
-			if avail2 > 0:
-				var take: int = mini(avail2, remaining)
-				var real2: int = AnonCohort.remove(from.anon_cohorts, tier, "healthy", take)
-				AnonCohort.add(to.anon_cohorts, tier, "healthy", real2)
-				moved[tier] += real2
-				remaining -= real2
+			var avail: int = int(from.anon_cohorts.get(AnonCohort._key(tier, health), 0))
+			if avail <= 0:
+				continue
+			var n: int = mini(mini(int(round(float(avail) / float(total) * float(actual))), avail), remaining)
+			var real: int = AnonCohort.remove(from.anon_cohorts, tier, health, n)
+			AnonCohort.add(to.anon_cohorts, tier, health, real)
+			moved[tier] += real
+			remaining -= real
+	# 補滿剩餘（順序）
+	if remaining > 0:
+		for health in AnonCohort.HEALTH_ORDER:
+			for tier in TIER_ORDER:
+				if remaining <= 0:
+					break
+				var avail2: int = int(from.anon_cohorts.get(AnonCohort._key(tier, health), 0))
+				if avail2 > 0:
+					var take: int = mini(avail2, remaining)
+					var real2: int = AnonCohort.remove(from.anon_cohorts, tier, health, take)
+					AnonCohort.add(to.anon_cohorts, tier, health, real2)
+					moved[tier] += real2
+					remaining -= real2
 	return moved
 
 # ───── 升等 ─────

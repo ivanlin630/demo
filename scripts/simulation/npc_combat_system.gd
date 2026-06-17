@@ -408,6 +408,7 @@ func _apply_casualties(state: WorldState, team_id: int, count: int) -> void:
 	var named_ids: Array = team.named_members.duplicate()   # MUST duplicate (Array by ref)
 	if team.leader_id != -1:
 		named_ids.append(team.leader_id)
+	var anon_wounded: int = 0
 	for i in range(count):
 		if not named_ids.is_empty() and randf() < float(named_ids.size()) / maxf(float(team.population), 1.0):
 			var idx: int = randi() % named_ids.size()
@@ -416,7 +417,8 @@ func _apply_casualties(state: WorldState, team_id: int, count: int) -> void:
 			if p != null:
 				_hit_person(state, team_id, p)
 		else:
-			team.wounded += 1
+			anon_wounded += 1
+	AnonTierSystem.wound_random(team, anon_wounded)
 	_equip.on_anon_casualties(team, count)
 
 func _hit_person(state: WorldState, team_id: int, p) -> void:

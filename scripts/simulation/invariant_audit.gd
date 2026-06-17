@@ -9,17 +9,17 @@ static func check(state: WorldState) -> Array[String]:
 	_check_subteam_bidir(state, violations)
 	return violations
 
-# population 不變量：== leader(0/1) + named + anon + wounded
+# population 不變量：== leader(0/1) + named + anon(含 wounded 桶)
 static func _check_population(state: WorldState, out: Array[String]) -> void:
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
 		var expected: int = (1 if t.leader_id != -1 else 0) \
-			+ t.named_members.size() + AnonTierSystem.total_pop(t) + t.wounded
+			+ t.named_members.size() + AnonTierSystem.total_pop(t)
 		if t.population != expected:
-			out.append("population drift Team%d: 欄位=%d 期望=%d (leader%d+named%d+anon%d+wounded%d)" % [
+			out.append("population drift Team%d: 欄位=%d 期望=%d (leader%d+named%d+anon%d)" % [
 				tid, t.population, expected,
 				(1 if t.leader_id != -1 else 0), t.named_members.size(),
-				AnonTierSystem.total_pop(t), t.wounded])
+				AnonTierSystem.total_pop(t)])
 
 # faction 雙向：member_team_ids 內每隊須回指此 faction；team.faction_id != -1 須在對應 member 列。
 static func _check_faction_bidir(state: WorldState, out: Array[String]) -> void:

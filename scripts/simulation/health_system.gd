@@ -159,6 +159,7 @@ static func resolve_negative_flags(state: WorldState, team: TeamData) -> void:
 static func resolve_anon_units(state: WorldState, team_id: int) -> void:
 	var team: TeamData = state.teams.get(team_id)
 	var anon_units: Array = []
+	var wounded_count: int = 0
 	for u in state.encounter_units:
 		if u["team_id"] == team_id and u.get("person_id", -1) == -1:
 			anon_units.append(u)
@@ -178,16 +179,20 @@ static func resolve_anon_units(state: WorldState, team_id: int) -> void:
 		for part in bp:
 			if bp[part].get("bleeding", "none") == "major": has_major = true
 			if bp[part].get("bleeding", "none") != "none":  has_bleed = true
+		var injured: bool = false
 		if has_bleed:
 			var cost: int = 2 if has_major else 1
 			if int(team.resources.get("medicine", 0)) >= cost:
 				team.resources["medicine"] = int(team.resources["medicine"]) - cost
 			else:
-				team.wounded += 1
+				injured = true
 		if bp.values().any(func(x): return x.get("fracture", false)):
-			team.wounded += 1
+			injured = true
 		elif bp.values().any(func(x): return x.get("status", "healthy") != "healthy"):
-			team.wounded += 1
+			injured = true
+		if injured:
+			wounded_count += 1
+	AnonTierSystem.wound_random(team, wounded_count)
 
 static func _is_unit_dead_bp(bp: Dictionary) -> bool:
 	return bp.get("torso", {}).get("status", "healthy") == "severed"
