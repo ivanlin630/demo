@@ -58,6 +58,10 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		parent.named_members.erase(aid)
 		advisor.team_id = sub.team_id
 		sub.named_members.append(aid)
+	# 補搬 anon：pop_count 扣掉已搬的 named（leader + advisors）= 應搬 anon 數
+	var named_in_sub: int = sub.named_members.size() + (1 if sub.leader_id != -1 else 0)
+	var anon_to_sub: int = maxi(pop_count - named_in_sub, 0)
+	AnonTierSystem.transfer_proportional(parent, sub, anon_to_sub)
 	parent.population -= pop_count
 	parent.subteam_ids.append(sub.team_id)
 	state.teams[sub.team_id]          = sub
