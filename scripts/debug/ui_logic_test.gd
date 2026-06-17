@@ -26,6 +26,11 @@ func _test_post_combat_hint() -> void:
 	_check("can_subjugate → 含「J收編」", hint_subj.contains("J") and hint_subj.contains("收編"))
 	_check("不可收編 → 僅按任意鍵（無 J）", not hint_no.contains("J"))
 	_check("提示永遠含「離開」字樣", hint_no.contains("離開") and hint_subj.contains("離開"))
+	# Q7-3: loot_pool 非空 → hint 含 [K]拿戰利品 [L]留下
+	var hint_loot: String = EncView._post_combat_hint({"can_subjugate": true, "loot_pool": {"food": 30.0}})
+	_check("有戰利品 → 含「K」拿戰利品", hint_loot.contains("K") and hint_loot.contains("戰利品"))
+	_check("有戰利品 → 含「L」留下", hint_loot.contains("L") and hint_loot.contains("留下"))
+	_check("無戰利品 → 不含「拿戰利品」", not hint_subj.contains("拿戰利品"))
 	var summ: String = EncView._post_combat_summary({"winner_id": 0, "loser_id": 1})
 	_check("戰果摘要含勝負隊", summ.contains("Team0") and summ.contains("Team1"))
 	_check("空結果摘要 fallback「結束」", EncView._post_combat_summary({}) == "結束")

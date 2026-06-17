@@ -345,8 +345,24 @@ func _input(event: InputEvent) -> void:
 			_mode = "idle"; _cursor = Vector2i(-1, -1); queue_redraw()
 
 func _handle_key(keycode: int) -> void:
-	# 戰後收編階段：任意鍵離開，[J] 則先收編再離開
+	# 戰後階段：[J]收編、[K]拿戰利品、[L]留下戰利品（皆留在畫面、刷新提示）；其餘任意鍵離開
 	if _post_combat:
+		if keycode == KEY_K:
+			var rk := _bridge.command_player("execute_action",
+				{"action_id": "take_loot",
+				 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log(rk.get("message", ""))
+			_refresh_ui()
+			queue_redraw()
+			return
+		if keycode == KEY_L:
+			var rl := _bridge.command_player("execute_action",
+				{"action_id": "leave_loot",
+				 "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1}})
+			_log(rl.get("message", ""))
+			_refresh_ui()
+			queue_redraw()
+			return
 		if keycode == KEY_J:
 			var r := _bridge.command_player("execute_action",
 				{"action_id": "subjugate_enemy",
@@ -570,6 +586,8 @@ static func _post_combat_hint(res: Dictionary) -> String:
 	var hint: String = "戰鬥結束。按任意鍵離開"
 	if res.get("can_subjugate", false):
 		hint += " / [J]收編敗者"
+	if not res.get("loot_pool", {}).is_empty():
+		hint += " / [K]拿戰利品 [L]留下"
 	return hint
 
 static func _post_combat_summary(res: Dictionary) -> String:
