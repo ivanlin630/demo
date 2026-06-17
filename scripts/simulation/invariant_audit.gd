@@ -8,6 +8,7 @@ static func check(state: WorldState) -> Array[String]:
 	_check_faction_bidir(state, violations)
 	_check_subteam_bidir(state, violations)
 	_check_anon_cohort(state, violations)
+	_check_no_dangling_team_id(state, violations)
 	return violations
 
 # population 不變量：== leader(0/1) + named + anon(含 wounded 桶)
@@ -65,3 +66,22 @@ static func _check_anon_cohort(state: WorldState, out: Array[String]) -> void:
 				out.append("cohort 非法鍵 Team%d: '%s'" % [tid, key])
 			if int(t.anon_cohorts[key]) <= 0:
 				out.append("cohort 桶非正 Team%d: '%s'=%d（稀疏應刪零桶）" % [tid, key, int(t.anon_cohorts[key])])
+
+# 無懸空 team_id：任何欄位/dict/list 指向不存在的 team = erase 漏清。
+static func _check_no_dangling_team_id(state: WorldState, out: Array[String]) -> void:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.combat_target != -1 and not state.teams.has(t.combat_target):
+			out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
+		if t.order_target_id != -1 and not state.teams.has(t.order_target_id):
+			out.append("懸空 Team%d.order_target_id=%d 不存在" % [tid, t.order_target_id])
+		for k in t.known_reputations:
+			if not state.teams.has(k):
+				out.append("懸空 Team%d.known_reputations 含死 Team%d" % [tid, k]); break
+		for k in t.strategic_assignments:
+			if k != -1 and not state.teams.has(k):
+				out.append("懸空 Team%d.strategic_assignments 含死 Team%d" % [tid, k]); break
+	for obs in state.team_discovered:
+		for did in state.team_discovered[obs]:
+			if not state.teams.has(did):
+				out.append("懸空 team_discovered[%d] 含死 Team%d" % [obs, did]); break
