@@ -1423,5 +1423,7 @@ func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
 func _force_occupy(state: WorldState, attacker: TeamData, resident: TeamData,
 		tile: HexTileData) -> void:
 	tile.outpost_owner = attacker.team_id
+	var occ_dead: int = resident.population - int(float(resident.population) * 0.8)
+	AnonTierSystem.kill_random(resident, occ_dead, "occupy")
 	resident.population = int(float(resident.population) * 0.8)
 	print("[ForceOccupy] attacker=Team%d resident=Team%d 強佔 pop-20%%" % [attacker.team_id, resident.team_id])
