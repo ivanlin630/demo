@@ -24,7 +24,6 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	var sub := TeamData.new()
 	sub.team_id          = _next_team_id(state)
 	sub.tile_pos         = parent.tile_pos
-	sub.faction_id       = parent.faction_id
 	sub.parent_team_id   = parent_id
 	sub.current_task     = task   # 新 team 建立豁免：dispatch 出的 task = PRIO_DISPATCH
 	sub.task_priority    = TaskArbiter.PRIO_DISPATCH if task != TeamData.TASK_IDLE else 0
@@ -63,6 +62,7 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	AnonTierSystem.transfer_proportional(parent, sub, anon_to_sub)
 	parent.subteam_ids.append(sub.team_id)
 	state.teams[sub.team_id]          = sub
+	state.set_team_faction(sub, parent.faction_id)   # 子隊繼承 parent faction 走入口（雙向同步 member_team_ids）
 	state.team_known[sub.team_id]     = []
 	state.team_discovered[sub.team_id] = []
 	print("[Sub] Team%d 派出子隊 Team%d leader=P%d advisors=%s (pop=%d cap=%d task=%s)" % [
