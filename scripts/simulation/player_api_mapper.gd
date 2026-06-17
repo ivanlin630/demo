@@ -144,7 +144,7 @@ static func _team_capabilities(state: WorldState, t: TeamData) -> Dictionary:
 		"hunt_chance":       hp["chance"],
 		"hunt_yield":        hp["yield"],
 		"combat_power":      combat,             # proxy：武裝數 + named 戰鬥技能和（與遭遇戰上場概念對齊）
-		"food_burn_per_day": float(t.population) * FOOD_PER_PERSON_PER_DAY,
+		"food_burn_per_day": float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
 	}
 
 # 武裝數 = named 成員（含 leader）+ anon 持武（anon 人口 × armed_anon_ratio）
@@ -153,9 +153,8 @@ static func _armed_count(t: TeamData) -> int:
 	var anon_pop: int = maxi(t.population - named_count, 0)
 	return named_count + roundi(float(anon_pop) * float(t.armed_anon_ratio))
 
-const FOOD_PER_PERSON_PER_DAY: float = 2.4
 static func _food_days(t: TeamData) -> float:
-	var burn: float = maxf(float(t.population) * FOOD_PER_PERSON_PER_DAY, 0.001)
+	var burn: float = maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 	return float(t.resources.get("food", 0)) / burn
 
 # ── Visible teams ──────────────────────────────────────────────────────────────

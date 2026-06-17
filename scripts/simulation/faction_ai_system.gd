@@ -42,7 +42,6 @@ static func _is_stuck(team: TeamData) -> bool:
 	return team.current_task in STUCK_TASKS and team.move_target == Vector2i(-1, -1)
 const CONTACT_TIMEOUT_DAYS: int = 30
 const OWNER_CHANGE_BUFFER_DAYS: int = 7
-const FOOD_PER_PERSON_PER_DAY_SURVIVAL: float = 2.4
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
 const SURVIVAL_RECOVER_DAYS: float = 7.0   # 糧恢復到此 → 脫離 survival（hysteresis 防抖）
@@ -90,7 +89,7 @@ static func calc_readiness(team: TeamData) -> float:
 	var pop_factor: float = clampf(float(team.population) / 10.0, 0.0, 1.0)
 	var skill: float = team.anon_combat_skill
 	var food_days: float = float(team.resources.get("food", 0)) \
-		/ maxf(float(team.population) * FOOD_PER_PERSON_PER_DAY_SURVIVAL, 0.001)
+		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 	var food_factor: float = clampf(food_days / 14.0, 0.0, 1.0)
 	var weapon: float = float(team.resources.get("weapon_melee_low", 0))
 	var weapon_factor: float = clampf(weapon / maxf(float(team.population), 1.0), 0.0, 1.0)
@@ -2001,7 +2000,7 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	var pop_eff: int = team.population
 	if pop_eff <= 0: return
 	var food: float = float(team.resources.get("food", 0))
-	var food_per_day: float = float(pop_eff) * FOOD_PER_PERSON_PER_DAY_SURVIVAL
+	var food_per_day: float = float(pop_eff) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	var days_left: float = food / maxf(food_per_day, 0.001)
 	# 紮營到達結算：在 TASK_CAMP 途中，腳下若為無主可農地即立 crude camp + 釋放（轉正常 collect）。
 	# 無現成 per-task 到達 hook，於此每輪求生評估檢查（plan Task 3 fallback）。
