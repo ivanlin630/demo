@@ -100,6 +100,21 @@ func set_team_faction(team: TeamData, fid: int) -> void:
 func clear_team_faction(team: TeamData) -> void:
 	set_team_faction(team, -1)
 
+# 雙向單一入口：child.parent_team_id ↔ parent.subteam_ids 一處同維護（規則3）。
+# 換 parent 自動退舊母、入新母；idempotent。
+func set_subteam_parent(child: TeamData, parent_id: int) -> void:
+	if child.parent_team_id == parent_id:
+		return
+	if child.parent_team_id != -1 and teams.has(child.parent_team_id):
+		teams[child.parent_team_id].subteam_ids.erase(child.team_id)
+	child.parent_team_id = parent_id
+	if parent_id != -1 and teams.has(parent_id):
+		if not teams[parent_id].subteam_ids.has(child.team_id):
+			teams[parent_id].subteam_ids.append(child.team_id)
+
+func detach_subteam(child: TeamData) -> void:
+	set_subteam_parent(child, -1)
+
 # ── 遭遇戰臨時狀態（active 期間使用，結束後清空） ──
 var encounter_active: bool        = false
 var encounter_units: Array        = []   # Array[Dictionary]
