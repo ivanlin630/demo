@@ -158,6 +158,14 @@ func erase_team(tid: int) -> void:
 	# 5. 移除
 	teams.erase(tid)
 
+
+# 解析「保證活」的 team ref（契約：納管 team-ref 非 -1 即指向活 team）。
+# caller 須先處理 -1（語意上的「無」）再呼叫。不存在 = 不變量被破 → assert
+# （debug 抓 bug；release 剝離 → 不崩，保 1000-tick 韌性）。
+func require_team(tid: int) -> TeamData:
+	assert(teams.has(tid), "require_team: Team%d 不存在（team-ref 不變量被破）" % tid)
+	return teams[tid]
+
 # ── 遭遇戰臨時狀態（active 期間使用，結束後清空） ──
 var encounter_active: bool        = false
 var encounter_units: Array        = []   # Array[Dictionary]

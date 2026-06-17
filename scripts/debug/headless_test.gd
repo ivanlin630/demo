@@ -380,6 +380,7 @@ func _initialize() -> void:
 	_test_invariant_subteam_bidir()
 	_test_invariant_anon_cohort()
 	_test_erase_team()
+	_test_require_team()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -474,6 +475,14 @@ func _test_erase_team() -> void:
 	assert(not st.team_known.has(1) and not st.team_discovered.has(1), "自身 registry 條目清")
 	assert(c.parent_team_id == -1, "子隊孤兒化")
 	print("[OK] _test_erase_team")
+
+func _test_require_team() -> void:
+	var st := WorldState.new()
+	var t := TeamData.new(); t.team_id = 7; st.teams[7] = t
+	assert(st.require_team(7) == t, "存在 → 回該 team")
+	# 不直接觸 assert crash（headless 會中止）；驗存在性前置即可
+	assert(st.teams.has(7) and not st.teams.has(99), "require_team 契約：非 -1 須存在（99 不存在 → 不該呼叫）")
+	print("[OK] _test_require_team")
 
 func _contains_substr(arr: Array, sub: String) -> bool:
 	for s in arr:
