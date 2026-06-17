@@ -68,6 +68,7 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 		ot.resources[res]     = amt
 		origin.resources[res] = float(origin.resources.get(res, 0)) - amt
 	origin.population -= overflow_pop
+	AnonTierSystem.transfer_proportional(origin, ot, overflow_pop)
 	state.teams[ot.team_id]           = ot
 	state.team_known[ot.team_id]      = []
 	state.team_discovered[ot.team_id] = []
