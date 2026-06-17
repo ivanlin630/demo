@@ -379,6 +379,7 @@ func _initialize() -> void:
 	_test_invariant_faction_bidir()
 	_test_invariant_subteam_bidir()
 	_test_invariant_anon_cohort()
+	_test_erase_team()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -452,6 +453,27 @@ func _test_invariant_anon_cohort() -> void:
 	var v2: Array = InvariantAudit.check(st)
 	assert(_contains_substr(v2, "cohort 桶非正"), "負桶應被抓")
 	print("[OK] _test_invariant_anon_cohort")
+
+func _test_erase_team() -> void:
+	var st := WorldState.new()
+	var a := TeamData.new(); a.team_id = 1; st.teams[1] = a; st.team_known[1] = []; st.team_discovered[1] = []
+	var b := TeamData.new(); b.team_id = 2; st.teams[2] = b; st.team_known[2] = [1]; st.team_discovered[2] = [1]
+	# b 指向 a 的各種 ref
+	b.combat_target = 1; b.order_target_id = 1
+	b.known_reputations[1] = 0.7; b.invite_cooldown[1] = 99
+	b.diplomacy_reject_cooldown[1] = 50; b.strategic_assignments[1] = Vector2i(0,0)
+	# a 有子隊 c
+	var c := TeamData.new(); c.team_id = 3; c.parent_team_id = 1; st.teams[3] = c
+	a.subteam_ids = [3]
+	st.erase_team(1)
+	assert(not st.teams.has(1), "a 已移除")
+	assert(b.combat_target == -1 and b.order_target_id == -1, "b 的 int ref 清空")
+	assert(not b.known_reputations.has(1) and not b.invite_cooldown.has(1), "b 的 dict 鍵清空")
+	assert(not b.diplomacy_reject_cooldown.has(1) and not b.strategic_assignments.has(1), "b 其餘 dict 清空")
+	assert(not st.team_discovered[2].has(1) and not st.team_known[2].has(1), "交叉 discovered/known 清 1")
+	assert(not st.team_known.has(1) and not st.team_discovered.has(1), "自身 registry 條目清")
+	assert(c.parent_team_id == -1, "子隊孤兒化")
+	print("[OK] _test_erase_team")
 
 func _contains_substr(arr: Array, sub: String) -> bool:
 	for s in arr:
