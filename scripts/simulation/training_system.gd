@@ -19,7 +19,7 @@ func process(state: WorldState, team_ids: Array) -> void:
 		if tact <= 0.0:
 			continue
 		for tier in AnonTierSystem.TIER_ORDER:
-			if tier == "菁英":
+			if tier == AnonCohort.TIER_ELITE:
 				continue
 			var n: int = int(team.anon_tiers.get(tier, 0))
 			if n <= 0:

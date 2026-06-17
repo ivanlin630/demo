@@ -1247,7 +1247,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	const EXP_SURVIVOR: float = 5.0
 	const EXP_VICTORY_BONUS: float = 5.0
 	for exp_tier in AnonTierSystem.TIER_ORDER:
-		if exp_tier == "菁英": continue
+		if exp_tier == AnonCohort.TIER_ELITE: continue
 		if winner_team != null and AnonTierSystem.tier_count(winner_team, exp_tier) > 0:
 			AnonTierSystem.add_exp(winner_team, exp_tier, EXP_SURVIVOR + EXP_VICTORY_BONUS)
 		if loser_team_exp != null and AnonTierSystem.tier_count(loser_team_exp, exp_tier) > 0:

@@ -19,7 +19,7 @@ func check(state: WorldState) -> void:
 	nl.skills = {"狩獵": 0.5, "求生": 0.5, "戰鬥": 0.4}   # 略偏堪用
 	nl.loyalty = 0.9                                       # 忠誠偏高
 	state.persons[nl.id] = nl; team.leader_id = nl.id
-	AnonTierSystem.add_anon(team, "平民", 3)               # 3 白丁(tier0)；population getter = leader1+anon3 = 4
+	AnonTierSystem.add_anon(team, AnonCohort.TIER_PLEB, 3)  # 3 白丁(tier0)；population getter = leader1+anon3 = 4
 	state.teams[tid] = team
 	state.player_forced_event = { "action": "join_request", "from_id": tid }
 	state.player_forced_event_id = str(randi())

@@ -187,7 +187,7 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 	pt.anon_treasury += TRAIN_COST_COIN   # 守恆：餉銀入公庫,不蒸發（coin_eq 不破）
 	var target_tier: String = ""
 	for tier in AnonTierSystem.TIER_ORDER:
-		if tier == "菁英": break
+		if tier == AnonCohort.TIER_ELITE: break
 		if int(pt.anon_tiers.get(tier, 0)) > 0:
 			target_tier = tier; break
 	if target_tier == "":
@@ -195,7 +195,7 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 	AnonTierSystem.add_exp(pt, target_tier, TRAIN_EXP_GAIN)
 	var promoted: int = 0
 	for tier in AnonTierSystem.TIER_ORDER:
-		if tier == "菁英": break
+		if tier == AnonCohort.TIER_ELITE: break
 		var n: int = int(pt.anon_tiers.get(tier, 0))
 		if n > 0:
 			promoted += AnonTierSystem.try_promote(state, pt, tier, n)

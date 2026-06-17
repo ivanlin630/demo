@@ -18,7 +18,7 @@ func _mature_minors(state: WorldState) -> void:
 		var n: int = maxi(int(team.minor_population * MATURE_RATE), 1)
 		n = mini(n, team.minor_population)
 		team.minor_population -= n
-		AnonTierSystem.add_anon(team, "平民", n)
+		AnonTierSystem.add_anon(team, AnonCohort.TIER_PLEB, n)
 		print("[PopMgmt] Team%d %d 名未成年長大成人（平民）" % [tid, n])
 
 func check_overflow_for_team(state: WorldState, tid: int) -> void:

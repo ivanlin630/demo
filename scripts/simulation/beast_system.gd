@@ -29,7 +29,7 @@ func build_beast_team(state: WorldState, kind: String, pos: Vector2i) -> int:
 	t.leader_id = -1
 	t.named_members = []
 	t.anon_cohorts = {}
-	AnonCohort.add(t.anon_cohorts, "平民", "healthy", int(prof["count"]))
+	AnonCohort.add(t.anon_cohorts, AnonCohort.TIER_PLEB, "healthy", int(prof["count"]))
 	t.resources = {}
 	t.armed_anon_ratio = 1.0   # 全員上場
 	state.teams[t.team_id] = t
