@@ -172,8 +172,7 @@ static func resolve_anon_units(state: WorldState, team_id: int) -> void:
 					bp[part]["hp"], bp[part].get("max_hp", 50.0), part)
 				bp[part]["poisoned"] = false
 		if _is_unit_dead_bp(bp):
-			team.population = maxi(team.population - 1, 0)
-			continue
+			continue   # 死亡 anon 由 encounter 結算 kill_random + population 扣統一處理（避免雙重扣）
 		var has_bleed: bool = false
 		var has_major: bool = false
 		for part in bp:
