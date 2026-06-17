@@ -27,6 +27,13 @@ const TASK_JOIN        := "投靠"
 const TASK_RETURN_HOME := "return_home"
 const TASK_REVOLT      := "起義"
 const TASK_REST        := "rest"
+const TASK_GOVERN      := "治理"
+const TASK_HOLD        := "守城"
+const TASK_MIGRATE     := "遷徙"
+const TASK_CONSTRUCT   := "建造"
+const TASK_UPGRADE     := "升級"
+const TASK_EXPAND      := "擴建"
+const TASK_TRIBUTE_OFFER := "tribute_offer"   # order_task（提供納貢），非 current_task
 
 const TAG_COMMAND  := "統領"
 const TAG_MILITARY := "軍隊"

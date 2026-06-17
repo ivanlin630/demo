@@ -197,7 +197,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		#（若有追兵，下次 cadence threat 評估會派逃跑）
 		TaskArbiter.release(team)
 		return
-	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_FLEE, "守城"]:
+	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_FLEE, TeamData.TASK_HOLD]:
 		# 威脅消失 → 釋放；或逃跑逾時（小地圖逃不到 5 格脫離 → 靠 timeout 重評，否則永逃）
 		var fled_too_long: bool = team.current_task == TeamData.TASK_FLEE \
 			and state.world.current_tick - team.task_start_tick > FLEE_TIMEOUT
@@ -277,7 +277,7 @@ func _dispatch_threat_response(state: WorldState, team: TeamData,
 					other.tile_pos, TaskArbiter.PRIO_THREAT, "threat"):
 				return
 			team.order_target_id = threat_id
-			team.order_task = "tribute_offer"
+			team.order_task = TeamData.TASK_TRIBUTE_OFFER
 	print("[ThreatResponse] Team%d → %s (threat=Team%d, score=%.2f)" % [
 		team.team_id, best, threat_id, best_score])
 
@@ -931,7 +931,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		var home_tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
 		var vault_mat: float = float(home_tile.public_storage.get("material", 0)) if home_tile else 0.0
 		if vault_mat < GOVERN_MATERIAL_TARGET:
-			scores["治理"] = (caution * 0.4 + amb_dev * 0.2 + 0.15) * _tag_weight(team, "治理")
+			scores[TeamData.TASK_GOVERN] = (caution * 0.4 + amb_dev * 0.2 + 0.15) * _tag_weight(team, TeamData.TASK_GOVERN)
 
 	# 主動尋家（僅無 own outpost 的流浪團）：純 value 加權，與 roving 競爭。
 	# 不乘 _tag_weight（該函數對「流亡」tag 回 0，會歸零最需尋家的流亡團）。
@@ -968,7 +968,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			var pid: int = _find_trade_target(state, team)
 			if pid == -1: return
 			solo_target = state.teams[pid].tile_pos
-		"治理":
+		TeamData.TASK_GOVERN:
 			solo_target = own_pos
 		TeamData.TASK_CAMP:
 			var cpos: Vector2i = _find_unowned_farmable_tile(state, team)
@@ -1486,7 +1486,7 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 			"pop 不足: %d < %d" % [leader_team.population, pop * 2], cost)
 		return false
 	var sub_id: int = SubteamSystem.new().dispatch(
-		state, leader_team.team_id, advisor_id, pop, "建造", target_pos)
+		state, leader_team.team_id, advisor_id, pop, TeamData.TASK_CONSTRUCT, target_pos)
 	if sub_id == -1:
 		_log_dispatch_fail(leader_team.faction_id, "subteam dispatch 失敗", cost)
 		return false
@@ -1517,7 +1517,7 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 	if advisor_id == -1: return false
 	if owner_team.population < 10: return false
 	var sub_id: int = SubteamSystem.new().dispatch(
-		state, owner_team.team_id, advisor_id, 5, "升級", outpost_pos)
+		state, owner_team.team_id, advisor_id, 5, TeamData.TASK_UPGRADE, outpost_pos)
 	if sub_id == -1: return false
 	_fund_subteam_cost(owner_team, state.teams[sub_id], tile, cost)
 	state.teams[sub_id].task_extra_data = { "target_level": target_level }
@@ -1637,7 +1637,7 @@ func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost
 	if advisor_id == -1: return false
 	if owner_team.population < 6: return false
 	var sub_id: int = SubteamSystem.new().dispatch(
-		state, owner_team.team_id, advisor_id, 3, "擴建", outpost_pos)
+		state, owner_team.team_id, advisor_id, 3, TeamData.TASK_EXPAND, outpost_pos)
 	if sub_id == -1: return false
 	_fund_subteam_cost(owner_team, state.teams[sub_id], tile, cost)
 	state.teams[sub_id].task_extra_data = { "facility_type": facility_type }
@@ -1820,7 +1820,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		var home_tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
 		var vault_mat: float = float(home_tile.public_storage.get("material", 0)) if home_tile else 0.0
 		if vault_mat < GOVERN_MATERIAL_TARGET and leader_team.current_task == TeamData.TASK_IDLE:
-			if TaskArbiter.try_set(state, leader_team, "治理", own_pos,
+			if TaskArbiter.try_set(state, leader_team, TeamData.TASK_GOVERN, own_pos,
 					TaskArbiter.PRIO_DISPATCH, "govern_accumulate"):
 				return
 	# (3) 蓋新 outpost
@@ -2353,7 +2353,7 @@ func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
 
 func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	if not _is_resident_team(state, team): return
-	if team.current_task in [TeamData.TASK_REVOLT, "守城"]: return
+	if team.current_task in [TeamData.TASK_REVOLT, TeamData.TASK_HOLD]: return
 	if team.current_task in SURVIVAL_TASKS: return
 	var avg_loy: float = _avg_named_loyalty(state, team)
 	if avg_loy >= 0.2: return
@@ -2372,7 +2372,7 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	var stand: bool = stand_score > flee_score
 	# 起義 = PRIO_THREAT (70)：反抗行為，玩家命令 (60) 壓不住；被擋（combat lock）→ 不執行後續副作用
 	if stand:
-		if not TaskArbiter.try_set(state, team, "守城", team.move_target,
+		if not TaskArbiter.try_set(state, team, TeamData.TASK_HOLD, team.move_target,
 				TaskArbiter.PRIO_THREAT, "uprising"):
 			return
 	else:

@@ -492,14 +492,14 @@ func begin_subteam_construction(state: WorldState, team: TeamData) -> bool:
 		return false
 	var extra: Dictionary = team.task_extra_data
 	match team.current_task:
-		"建造":
+		TeamData.TASK_CONSTRUCT:
 			var btype: String = str(extra.get("build_type", "civilian"))
 			var lvl: int = int(extra.get("level", 1))
 			return start_build(state, team, btype, lvl)
-		"升級":
+		TeamData.TASK_UPGRADE:
 			var tgt_lvl: int = int(extra.get("target_level", tile.outpost_level + 1))
 			return _subteam_upgrade_level(state, team, tile, tgt_lvl)
-		"擴建":
+		TeamData.TASK_EXPAND:
 			var fac: String = str(extra.get("facility_type", "farming"))
 			return _subteam_upgrade_facility(state, team, tile, fac)
 	return false

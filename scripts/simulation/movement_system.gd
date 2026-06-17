@@ -51,7 +51,7 @@ func process(state: WorldState, team_ids: Array,
 		if team.tags.has(TeamData.TAG_PRODUCE):
 			var fai := FactionAISystem.new()
 			if fai._is_resident_team(state, team) \
-					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_REVOLT, "遷徙", TeamData.TASK_PREPARE]:
+					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_REVOLT, TeamData.TASK_MIGRATE, TeamData.TASK_PREPARE]:
 				continue
 		if team.combat_target != -1:
 			continue
@@ -228,7 +228,7 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 		if own_tile.outpost_owner == team.team_id and own_tile.outpost_level > 0:
 			FactionAISystem.new()._evaluate_storage_visit(state, team, own_tile)
 	# C: 基建子隊抵達 → 依 task 啟動施工
-	if team.current_task in ["建造", "升級", "擴建"]:
+	if team.current_task in [TeamData.TASK_CONSTRUCT, TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]:
 		OutpostSystem.new().begin_subteam_construction(state, team)
 
 func _get_neighbors(pos: Vector2i) -> Array:
