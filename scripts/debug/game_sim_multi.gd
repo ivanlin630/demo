@@ -19,6 +19,7 @@ func _initialize() -> void:
 
 func _run_config(cfg_name: String) -> Dictionary:
 	print("\n======== Running config: %s ========" % cfg_name)
+	seed(hash(cfg_name))   # 固定 per-config seed → drift/數字可重現（量測閘；不影響 production sim）
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg_name)
