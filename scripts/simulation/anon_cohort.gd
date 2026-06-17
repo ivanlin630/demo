@@ -62,3 +62,32 @@ static func by_tier(cohorts: Dictionary, tier: String) -> int:
 		if _parse(k)[0] == tier:
 			s += int(cohorts[k])
 	return s
+
+# ───── 數值投影（沿用 AnonTierSystem.TIER_STATS）─────
+
+static func avg_combat(cohorts: Dictionary) -> float:
+	var tot: int = total(cohorts)
+	if tot <= 0:
+		return 0.1
+	var s: float = 0.0
+	for k in cohorts:
+		var tier: String = _parse(k)[0]
+		s += float(cohorts[k]) * float(AnonTierSystem.TIER_STATS[tier]["combat"])
+	return s / float(tot)
+
+static func avg_speed(cohorts: Dictionary) -> float:
+	var tot: int = total(cohorts)
+	if tot <= 0:
+		return 1.0
+	var s: float = 0.0
+	for k in cohorts:
+		var tier: String = _parse(k)[0]
+		s += float(cohorts[k]) * float(AnonTierSystem.TIER_STATS[tier]["speed"])
+	return s / float(tot)
+
+static func total_wage(cohorts: Dictionary) -> float:
+	var w: float = 0.0
+	for k in cohorts:
+		var tier: String = _parse(k)[0]
+		w += float(cohorts[k]) * float(AnonTierSystem.TIER_STATS[tier]["base_wage"])
+	return w

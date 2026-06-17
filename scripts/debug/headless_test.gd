@@ -6,6 +6,7 @@ func _initialize() -> void:
 	_test_anon_cohort_key()
 	_test_anon_cohort_mutate()
 	_test_anon_cohort_counts()
+	_test_anon_cohort_stats()
 	_test_team_anon_tiers_default()
 	_test_anon_tier_queries()
 	_test_add_remove_anon()
@@ -6349,6 +6350,22 @@ func _test_anon_cohort_counts() -> void:
 	# 空容器
 	assert(AnonCohort.total({}) == 0, "空容器 total 0")
 	print("[OK] _test_anon_cohort_counts")
+
+func _test_anon_cohort_stats() -> void:
+	# 全平民 10（含 1 wounded）：avg_combat 跨 health 加總 = 0.1
+	var c1: Dictionary = { "平民|healthy": 9, "平民|wounded": 1 }
+	assert(abs(AnonCohort.avg_combat(c1) - 0.1) < 0.0001, "全平民 avg_combat 應 0.1，實際 %f" % AnonCohort.avg_combat(c1))
+	assert(abs(AnonCohort.avg_speed(c1) - 0.7) < 0.0001, "全平民 avg_speed 應 0.7")
+	assert(abs(AnonCohort.total_wage(c1) - 5.0) < 0.0001, "10×0.5 應 5.0")
+	# 全菁英 10
+	var c2: Dictionary = { "菁英|healthy": 10 }
+	assert(abs(AnonCohort.avg_combat(c2) - 0.7) < 0.0001, "全菁英 avg_combat 應 0.7")
+	assert(abs(AnonCohort.total_wage(c2) - 25.0) < 0.0001, "10×2.5 應 25.0")
+	# 空容器預設
+	assert(abs(AnonCohort.avg_combat({}) - 0.1) < 0.0001, "空 avg_combat 預設 0.1")
+	assert(abs(AnonCohort.avg_speed({}) - 1.0) < 0.0001, "空 avg_speed 預設 1.0")
+	assert(abs(AnonCohort.total_wage({}) - 0.0) < 0.0001, "空 total_wage 0.0")
+	print("[OK] _test_anon_cohort_stats")
 
 func _test_team_anon_tiers_default() -> void:
 	var t := TeamData.new()
