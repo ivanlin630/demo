@@ -966,7 +966,7 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 	subteam.tags.erase(TeamData.TAG_SUBTEAM)
 	subteam.tags.erase("流亡")
 	TaskArbiter.transition(subteam, "生產", TaskArbiter.PRIO_AMBIENT)
-	subteam.parent_team_id = -1
+	state.detach_subteam(subteam)   # 變居民脫離母團（雙向同步）
 	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
 		subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])
 	# 流民變居民後，若同 tile 有 SUBTEAM+PRODUCE 子隊（暫派駐居民），觸發回母團

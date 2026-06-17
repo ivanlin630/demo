@@ -24,7 +24,6 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	var sub := TeamData.new()
 	sub.team_id          = _next_team_id(state)
 	sub.tile_pos         = parent.tile_pos
-	sub.parent_team_id   = parent_id
 	sub.current_task     = task   # 新 team 建立豁免：dispatch 出的 task = PRIO_DISPATCH
 	sub.task_priority    = TaskArbiter.PRIO_DISPATCH if task != TeamData.TASK_IDLE else 0
 	sub.move_target      = move_target
@@ -60,8 +59,8 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	var named_in_sub: int = sub.named_members.size() + (1 if sub.leader_id != -1 else 0)
 	var anon_to_sub: int = maxi(pop_count - named_in_sub, 0)
 	AnonTierSystem.transfer_proportional(parent, sub, anon_to_sub)
-	parent.subteam_ids.append(sub.team_id)
 	state.teams[sub.team_id]          = sub
+	state.set_subteam_parent(sub, parent_id)         # 母子關係走入口（雙向同步 subteam_ids）
 	state.set_team_faction(sub, parent.faction_id)   # 子隊繼承 parent faction 走入口（雙向同步 member_team_ids）
 	state.team_known[sub.team_id]     = []
 	state.team_discovered[sub.team_id] = []
@@ -169,17 +168,15 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		var es := EventSystem.new()
 		es.on_leader_death(state, absorbed)
 	if absorbed.population <= 0:
-		absorber.subteam_ids.erase(absorbed_id)
+		state.detach_subteam(absorbed)   # 滅團前脫離母關係（雙向同步）
 		_erase_absorbed_team(state, absorbed_id)
 		print("[Merge] Team%d ← Team%d 完全合併 (absorber_pop=%d)" % [
 			absorber_id, absorbed_id, absorber.population])
 	else:
-		absorbed.parent_team_id = absorber_id
+		state.set_subteam_parent(absorbed, absorber_id)   # absorbed 成 absorber 子隊走入口（雙向同步）
 		TaskArbiter.release(absorbed)
 		if not absorbed.tags.has(TeamData.TAG_SUBTEAM):
 			absorbed.tags.append(TeamData.TAG_SUBTEAM)
-		if not absorber.subteam_ids.has(absorbed_id):
-			absorber.subteam_ids.append(absorbed_id)
 		if total_xfer > 0:
 			print("[Merge] Team%d ← Team%d 部分合併 (absorber=%d absorbed=%d)" % [
 				absorber_id, absorbed_id, absorber.population, absorbed.population])
@@ -197,9 +194,8 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 
 	# 子隊回歸但母團已滿 → 獨立分團，不重試
 	if capacity <= 0 and absorbed.parent_team_id == absorber_id:
-		absorbed.parent_team_id = -1
+		state.detach_subteam(absorbed)   # 脫離母團 → 獨立（雙向同步）
 		absorbed.tags.erase(TeamData.TAG_SUBTEAM)
-		absorber.subteam_ids.erase(absorbed_id)
 		print("[Split] Team%d 回歸失敗（母團滿員），獨立為新分團" % absorbed_id)
 		return
 
@@ -227,7 +223,7 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 		roundi(float(AnonTierSystem.total_pop(absorbed)) * frac))
 	# named/leader 已搬、anon 已轉 → absorbed.population getter 即剩餘量
 	_transfer_proportional_assets(absorber, absorbed, frac, absorbed.population <= 0)
-	absorber.subteam_ids.erase(absorbed_id)
+	state.detach_subteam(absorbed)   # 合併後脫離母關係（雙向同步；殘留則獨立、滅團則 erase 前已清母側）
 	if absorbed.population <= 0:
 		_erase_absorbed_team(state, absorbed_id)
 		print("[Merge] Team%d ← Team%d 完全合併 (pop=%d)" % [absorber_id, absorbed_id, absorber.population])

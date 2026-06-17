@@ -840,10 +840,7 @@ func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 			count         += 1
 	var fail_chance: float = (1.0 - total_loyalty / count) * (total_stress / count) * DISCIPLINE_FAIL_BASE
 	if randf() < fail_chance:
-		var parent: TeamData = state.teams.get(sub.parent_team_id)
-		if parent != null:
-			parent.subteam_ids.erase(sub.team_id)
-		sub.parent_team_id = -1
+		state.detach_subteam(sub)   # 紀律失效脫離母團（雙向同步）
 		sub.tags.erase(TeamData.TAG_SUBTEAM)
 		TaskArbiter.release(sub)
 		print("[SubAI] Team%d 紀律失效，脫離成獨立" % sub.team_id)

@@ -310,10 +310,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 
 # C: 建造子隊完工後就地安頓為駐留 team（owner 已設為自己，加 tag、脫離母團）
 func _auto_settle_builder(state: WorldState, team: TeamData, tile: HexTileData) -> void:
-	var parent: TeamData = state.teams.get(team.parent_team_id)
-	if parent != null:
-		parent.subteam_ids.erase(team.team_id)
-	team.parent_team_id = -1
+	state.detach_subteam(team)   # 完工安頓脫離母團（雙向同步）
 	team.tags.erase(TeamData.TAG_SUBTEAM)
 	if tile.outpost_type == "civilian":
 		if not team.tags.has(TeamData.TAG_PRODUCE):
