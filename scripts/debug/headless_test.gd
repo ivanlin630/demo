@@ -376,6 +376,7 @@ func _initialize() -> void:
 	_test_invariant_audit()
 	_test_invariant_faction_bidir()
 	_test_invariant_subteam_bidir()
+	_test_invariant_anon_cohort()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -430,6 +431,31 @@ func _test_invariant_subteam_bidir() -> void:
 	child.parent_team_id = -1
 	assert("subteam" in str(InvariantAudit.check(state)), "subteam 雙向破應偵測")
 	print("InvariantAudit subteam 雙向 OK")
+
+func _test_invariant_anon_cohort() -> void:
+	var st := WorldState.new()
+	var t := TeamData.new(); t.team_id = 0
+	t.anon_cohorts = {}
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 3)
+	AnonCohort.add(t.anon_cohorts, "老兵", "wounded", 1)
+	st.teams[0] = t
+	assert(not _contains_substr(InvariantAudit.check(st), "cohort"), "正常 cohort 不該有 cohort 違反")
+	# 腐化：非法鍵
+	t.anon_cohorts["平民|sick"] = 2
+	var v: Array = InvariantAudit.check(st)
+	assert(_contains_substr(v, "cohort 非法鍵"), "非法鍵應被抓")
+	t.anon_cohorts.erase("平民|sick")
+	# 腐化：負桶
+	t.anon_cohorts["新兵|healthy"] = -1
+	var v2: Array = InvariantAudit.check(st)
+	assert(_contains_substr(v2, "cohort 桶非正"), "負桶應被抓")
+	print("[OK] _test_invariant_anon_cohort")
+
+func _contains_substr(arr: Array, sub: String) -> bool:
+	for s in arr:
+		if String(s).findn(sub) != -1:
+			return true
+	return false
 
 func _test_join_conservation() -> void:
 	print("--- 投靠守恆整合(coin_eq) ---")
