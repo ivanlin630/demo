@@ -147,16 +147,10 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 func _form_alliance(state: WorldState,
 		team_a: TeamData, team_b: TeamData) -> void:
 	if team_a.faction_id != -1:
-		team_b.faction_id = team_a.faction_id
-		var f: FactionData = state.factions.get(team_a.faction_id)
-		if f and not f.member_team_ids.has(team_b.team_id):
-			f.member_team_ids.append(team_b.team_id)
+		state.set_team_faction(team_b, team_a.faction_id)   # team_b 入 team_a faction（雙向同步）
 		state.snapshot_faction_member(team_b.team_id, state.world.current_tick)
 	elif team_b.faction_id != -1:
-		team_a.faction_id = team_b.faction_id
-		var f: FactionData = state.factions.get(team_b.faction_id)
-		if f and not f.member_team_ids.has(team_a.team_id):
-			f.member_team_ids.append(team_a.team_id)
+		state.set_team_faction(team_a, team_b.faction_id)   # team_a 入 team_b faction（雙向同步）
 		state.snapshot_faction_member(team_a.team_id, state.world.current_tick)
 	team_a.update_reputation(team_b.team_id, 0.2)
 	team_b.update_reputation(team_a.team_id, 0.2)
@@ -194,11 +188,7 @@ func consider_betrayal(state: WorldState, self_team: TeamData,
 
 func _execute_betrayal(state: WorldState, self_team: TeamData,
 		ally_team: TeamData) -> void:
-	# Remove from faction BEFORE clearing faction_id (need the id to find the faction)
-	var f_bt: FactionData = state.factions.get(self_team.faction_id)
-	if f_bt != null:
-		f_bt.member_team_ids.erase(self_team.team_id)
-	self_team.faction_id = -1
+	state.clear_team_faction(self_team)   # 背叛離團（雙向同步）
 	ally_team.update_reputation(self_team.team_id, -0.5)
 	var ally_leader: PersonData = state.persons.get(ally_team.leader_id)
 	if ally_leader:

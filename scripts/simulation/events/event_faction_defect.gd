@@ -21,8 +21,7 @@ func execute(state: WorldState, team: TeamData) -> Array:
 		team.faction_id = -1
 		return []
 	var f = state.factions[fid]
-	f.member_team_ids.erase(team.team_id)
-	team.faction_id = -1
+	state.clear_team_faction(team)   # 脫離 faction（雙向同步）
 	if f.member_team_ids.size() <= 1:
 		state.disband_faction(fid)
 	SimMessageSystem.new().emit_message(state, "faction_defect",

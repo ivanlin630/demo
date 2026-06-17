@@ -151,8 +151,7 @@ static func _generate_factions(state, plan, config, rng) -> void:
 		var faction_id: int = state.create_faction(first_team_id)
 
 		for tid in this_faction_team_ids.slice(1):
-			state.factions[faction_id].member_team_ids.append(tid)
-			state.teams[tid].faction_id = faction_id
+			state.set_team_faction(state.teams[tid], faction_id)   # 入 faction（雙向同步）
 
 		_build_outpost_tile(state, main_pos, main_type, 1, first_team_id)
 		for opos in outposts.slice(1):
@@ -243,11 +242,9 @@ static func _setup_random_player(state, config, rng) -> void:
 					team.tile_pos = old_leader_team.tile_pos
 				else:
 					team.tile_pos = _random_empty_tile(state, rng)
-				team.faction_id = weakest_fid
+				state.set_team_faction(team, weakest_fid)   # 玩家入 faction（雙向同步）
 				var old_leader_tid: int = faction.leader_team_id
 				faction.leader_team_id = team.team_id
-				if not faction.member_team_ids.has(team.team_id):
-					faction.member_team_ids.append(team.team_id)
 				print("[GameSetup] 玩家成為勢力 %d 統領（原 leader_team=%d 保留為下屬）" %
 					[weakest_fid, old_leader_tid])
 
@@ -255,8 +252,7 @@ static func _setup_random_player(state, config, rng) -> void:
 			if join_mode.begins_with("join:"):
 				var fi: int = int(join_mode.substr(5))
 				if state.factions.has(fi):
-					team.faction_id = fi
-					state.factions[fi].member_team_ids.append(team.team_id)
+					state.set_team_faction(team, fi)   # 入 faction（雙向同步）
 					var lt: TeamData = state.teams.get(state.factions[fi].leader_team_id)
 					if lt:
 						team.tile_pos = _random_near([lt.tile_pos], rng)
@@ -424,10 +420,7 @@ static func _setup_explicit_teams(state: WorldState, config: Dictionary) -> void
 		if t_cfg.get("is_faction_leader", false): continue
 		var tid: int = int(t_cfg["id"])
 		if state.factions.has(fid2) and state.teams.has(tid):
-			var f: FactionData = state.factions[fid2]
-			if not f.member_team_ids.has(tid):
-				f.member_team_ids.append(tid)
-			state.teams[tid].faction_id = fid2
+			state.set_team_faction(state.teams[tid], fid2)   # 入 faction（雙向同步）
 	for ta_cfg in teams_cfg:
 		var ta_id: int = int(ta_cfg["id"])
 		if not state.team_discovered.has(ta_id):
@@ -446,7 +439,9 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 	team.tile_pos = Vector2i(int(pos_arr[0]), int(pos_arr[1]))
 	var target_pop: int = int(t_cfg.get("population", 1))
 	team.tags = t_cfg.get("tags", []).duplicate()
-	team.faction_id = int(t_cfg.get("faction_id", -1))
+	# faction_id 不在此預設（factions 尚未建立）；leader 由 create_faction、非 leader 由第三段 set_team_faction 設
+	# 入口（set_team_faction）有 idempotent early-return：若此處先設 faction_id，第三段會早退而漏 append member。
+	team.faction_id = -1
 	var base_res: Dictionary = _default_full_resources()
 	for k in t_cfg.get("resources", {}):
 		base_res[k] = t_cfg["resources"][k]

@@ -2394,13 +2394,13 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 		print("[Uprising] cancel construction at (%d,%d)" % [team.tile_pos.x, team.tile_pos.y])
 	if stand:
 		# Path A 守城：奪取 outpost、自立（保留 PRODUCE 身分）
-		team.faction_id = -1
+		state.clear_team_faction(team)   # 起義脫離 faction（雙向同步）
 		if tile: tile.outpost_owner = team.team_id
 		print("[Uprising A] Team%d 守城（野心=%.2f，old owner=Team%d）" % [
 			team.team_id, ambition, old_owner_id])
 	else:
 		# Path B 流亡（原 spec E 邏輯）
-		team.faction_id = -1
+		state.clear_team_faction(team)   # 起義流亡脫離 faction（雙向同步）
 		team.tags.erase(TeamData.TAG_PRODUCE)
 		team.tags.append("流亡")
 		print("[Uprising B] Team%d 流亡（求生=%.2f，old owner=Team%d）" % [
@@ -2460,12 +2460,12 @@ func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: St
 		print("[Defection] Team%d path B: 投降強鄰" % team.team_id)
 		var strong_id: int = _find_strong_neighbor(state, team)
 		if strong_id != -1:
-			team.faction_id = state.teams[strong_id].faction_id
+			state.set_team_faction(team, state.teams[strong_id].faction_id)   # 投降強鄰 faction（雙向同步）
 		else:
-			team.faction_id = -1
+			state.clear_team_faction(team)
 	else:
 		print("[Defection] Team%d path C: 獨立" % team.team_id)
-		team.faction_id = -1
+		state.clear_team_faction(team)
 
 func _has_memory_type(person: PersonData, type: String) -> bool:
 	for m in person.memory:

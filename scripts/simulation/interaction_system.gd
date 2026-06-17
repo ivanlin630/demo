@@ -377,9 +377,7 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 	if fid == -1:
 		var strong_id: int = initiator_id if str_init >= str_tgt else target_id
 		fid = state.create_faction(strong_id)
-	if not state.factions[fid].member_team_ids.has(target_id):
-		state.factions[fid].member_team_ids.append(target_id)
-	target.faction_id = fid
+	state.set_team_faction(target, fid)   # target 入 faction（雙向同步）
 	state.snapshot_faction_member(target_id, state.world.current_tick)
 	TaskArbiter.release(initiator)
 	_msg.emit_message(state, "diplomacy",
@@ -941,14 +939,9 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 	if not t.tags.has(TeamData.TAG_PRODUCE):
 		t.tags.append(TeamData.TAG_PRODUCE)
 	t.tags.erase("流亡")
-	t.faction_id = faction_id
+	state.set_team_faction(t, faction_id)   # 安頓入 faction（雙向同步）
 	TaskArbiter.transition(t, "生產", TaskArbiter.PRIO_AMBIENT)
 	t.move_target = Vector2i(-1, -1)
-	# 加入 faction
-	if faction_id != -1 and state.factions.has(faction_id):
-		var f: FactionData = state.factions[faction_id]
-		if not f.member_team_ids.has(team_id):
-			f.member_team_ids.append(team_id)
 	# 若該 outpost 已有同 faction PRODUCE team → 嘗試合併
 	var existing: int = _find_existing_resident(state, outpost_pos, team_id, faction_id)
 	if existing != -1:

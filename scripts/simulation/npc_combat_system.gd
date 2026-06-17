@@ -498,9 +498,7 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var fid: int = winner.faction_id
 	if fid == -1:
 		fid = state.create_faction(winner_id)
-	else:
-		state.factions[fid].member_team_ids.append(loser_id)
-	loser.faction_id = fid
+	state.set_team_faction(loser, fid)   # 敗方入勝方 faction（雙向同步）
 	state.snapshot_faction_member(loser_id, state.world.current_tick)
 	_msg.emit_message(state, "subjugate",
 		TextBank.fmt("subjugate", "honest", {

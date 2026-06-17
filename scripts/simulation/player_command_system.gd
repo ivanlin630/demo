@@ -596,8 +596,7 @@ func _action_leave_faction(state: WorldState, _target_id: int, pt: TeamData, pt_
 		return { "ok": false, "msg": "勢力不存在" }
 	if f3.leader_team_id == pt_id:
 		return { "ok": false, "msg": "請使用 disband_faction（leader 不能普通離開）" }
-	pt.faction_id = -1
-	f3.member_team_ids.erase(pt_id)
+	state.clear_team_faction(pt)   # 玩家離開 faction（雙向同步）
 	var leader_team3: TeamData = state.teams.get(f3.leader_team_id)
 	if leader_team3 != null:
 		var leader_p3: PersonData = state.persons.get(leader_team3.leader_id)
@@ -617,8 +616,7 @@ func _action_betray_faction(state: WorldState, _target_id: int, pt: TeamData, pt
 		if tid4 == pt_id: continue
 		if not state.player_hostile_teams.has(tid4):
 			state.player_hostile_teams.append(tid4)
-	pt.faction_id = -1
-	f4.member_team_ids.erase(pt_id)
+	state.clear_team_faction(pt)   # 玩家背叛離開 faction（雙向同步）
 	state.player_state["betrayal_count"] = int(state.player_state.get("betrayal_count", 0)) + 1
 	var leader_team4: TeamData = state.teams.get(f4.leader_team_id)
 	if leader_team4 != null:
