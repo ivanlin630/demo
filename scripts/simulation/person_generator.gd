@@ -59,6 +59,7 @@ static func generate_for_team(state: WorldState, team: TeamData,
 		p.coin += bonus
 		team.anon_treasury -= bonus
 	state.persons[p.id] = p
+	AnonTierSystem.kill_random(team, 1, "promote")   # 晉升：1 anon 轉 named/leader → 從 anon 桶移除（cohort source）
 	return p
 
 static func _next_id(state: WorldState) -> int:
