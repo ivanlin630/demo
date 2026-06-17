@@ -99,3 +99,21 @@
 2. **來源/雙向關係走單一入口**。anon 改動走 `AnonCohort`/`AnonTierSystem` 入口；勿直接 `anon_cohorts[k] = ...`。
 3. **不可衍生的真存量 / 不變量 → 註冊進 `InvariantAudit.check`**。真存守恆量（coin_eq）、cohort 自洽、faction/subteam 雙向等靠 audit 守。加新不變量 = 加一個 `_check_*` 並在 `check()` 呼叫。
 4. **改資料模型前讀本節。**
+
+## team reference 契約
+
+team 之間的引用（`combat_target` / `order_target_id` / `parent_team_id` / `subteam_ids` / `faction.member_team_ids` / `faction.leader_team_id` / `team_known` / `team_discovered` 內元素）只准兩種狀態：
+- `-1` = 語意上的「無」（合法，須顯式處理）
+- 指向**保證存在**的 team（「指向已 erase 的 team」結構上不可能 —— `erase_team` chokepoint + `_check_no_dangling_team_id` audit 擔保）
+
+**解析統一形狀**（納管 ref）：
+```
+if tid == -1:
+    # ...「無」分支...
+else:
+    var t := state.require_team(tid)   # 保證活，不檢 null
+```
+- 納管 ref **不可**寫 `if t == null` 防 dangling（dangling 不可能；寫了 = 死碼/遮蔽 bug）。
+- `require_team` 對不存在 assert（debug 抓、release 剝離）。
+- **不納管**（照舊 `teams.get()` + null 處理）：玩家輸入 tid、`teams.keys()` 快照迭代期間可能已 erase、persons/tiles/factions 等非 team-ref lookup。
+- 移除 team 一律走 `state.erase_team(tid)`（唯一 chokepoint，清光所有納管 ref）。
