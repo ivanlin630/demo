@@ -3,6 +3,7 @@ extends SceneTree
 func _initialize() -> void:
 	_run_sim_test()
 	_test_anon_tier_const()
+	_test_anon_cohort_key()
 	_test_team_anon_tiers_default()
 	_test_anon_tier_queries()
 	_test_add_remove_anon()
@@ -6286,6 +6287,18 @@ func _test_anon_tier_const() -> void:
 	assert(AnonTierSystem.PROMOTION_EXP_THRESHOLD["老兵"] == 200.0)
 	assert(not AnonTierSystem.PROMOTION_EXP_THRESHOLD.has("菁英"))
 	print("AnonTier Task1 OK")
+
+func _test_anon_cohort_key() -> void:
+	assert(AnonCohort._key("老兵", "wounded") == "老兵|wounded", "key 編碼錯")
+	var parsed: Array = AnonCohort._parse("老兵|wounded")
+	assert(parsed[0] == "老兵" and parsed[1] == "wounded", "key 解析錯: %s" % str(parsed))
+	# round-trip 全組合
+	for tier in AnonCohort.TIER_ORDER:
+		for health in AnonCohort.HEALTH_ORDER:
+			var k: String = AnonCohort._key(tier, health)
+			var p: Array = AnonCohort._parse(k)
+			assert(p[0] == tier and p[1] == health, "round-trip 失敗: %s" % k)
+	print("[OK] _test_anon_cohort_key")
 
 func _test_team_anon_tiers_default() -> void:
 	var t := TeamData.new()
