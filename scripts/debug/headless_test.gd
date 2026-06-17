@@ -109,6 +109,9 @@ func _initialize() -> void:
 	_test_no_heir_game_over()
 	_test_choose_heir_action()
 	_test_choose_heir_invalid_candidate()
+	_test_forced_choose_heir()
+	_test_forced_aid_request()
+	_test_forced_options_label_no_drift()
 	_test_advance_tick_game_over_freeze()
 	_test_advance_tick_awaiting_heir_freeze()
 	_test_encounter_kills_player_triggers_heir()
@@ -5309,6 +5312,119 @@ func _test_choose_heir_invalid_candidate() -> void:
 	var r = cmd.execute_action(state, -1, "choose_heir")
 	assert(not r.get("ok", true), "非合法候選應 reject")
 	print("Death Task3b OK")
+
+# Q7-1 端到端：forced choose_heir → options 列候選 heir_<pid> → respond_to_forced 選一 → leader 接位 + forced 清（世界解凍）
+func _test_forced_choose_heir() -> void:
+	print("--- Q7-1: forced choose_heir 端到端 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100   # 玩家 leader 已死,player_id 還沒清
+	var pt := TeamData.new()
+	pt.team_id = 0; pt.leader_id = -1
+	pt.named_members = [101, 102]
+	state.teams[0] = pt
+	var heir1 := PersonData.new(); heir1.id = 101; heir1.team_id = 0; heir1.person_name = "繼承人甲"
+	state.persons[101] = heir1
+	var heir2 := PersonData.new(); heir2.id = 102; heir2.team_id = 0; heir2.person_name = "繼承人乙"
+	state.persons[102] = heir2
+	state.player_forced_event = { "action": "choose_heir", "team_id": 0, "candidates": [101, 102] }
+	state.player_forced_event_id = "heir-fe"
+	var cmd := PlayerCommandSystem.new()
+	# options：精確動態 id = heir_101 / heir_102（不再硬編）
+	var opts := cmd.get_forced_response_options(state)
+	assert(opts.has("heir_101") and opts.has("heir_102"),
+		"options 應列 heir_101/heir_102，實際=%s" % str(opts))
+	assert(opts.size() == 2, "options 應僅 2 候選")
+	# respond → 選 heir_102 → leader 接位 + player_id 換 + forced 清
+	var r := cmd.resolve_forced_response(state, "heir-fe", "heir_102")
+	assert(r.get("ok", false), "respond heir 應成功，msg=%s" % str(r.get("msg", "")))
+	assert(pt.leader_id == 102, "leader_id 應 = 102，實際=%d" % pt.leader_id)
+	assert(state.player_id == 102, "player_id 應接位 = 102")
+	assert(heir2.role == "leader", "heir2 role 應 leader")
+	assert(not pt.named_members.has(102), "heir2 應從 named_members 移除")
+	assert(state.player_forced_event.is_empty(), "forced_event 應清空（世界解凍）")
+	assert(state.player_forced_event_id == "", "forced_event_id 應清空")
+	print("Q7-1 OK")
+
+# Q7-2 端到端：forced aid_request → options ["give","refuse"] → give → 守恆轉糧 + forced 清
+func _test_forced_aid_request() -> void:
+	print("--- Q7-2: forced aid_request 端到端 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 200
+	var pt := TeamData.new(); pt.team_id = 0; _seed_pop(pt, 10)
+	pt.resources["food"] = 500.0; pt.leader_id = 200
+	state.teams[0] = pt
+	var player := PersonData.new(); player.id = 200; player.team_id = 0
+	state.persons[200] = player
+	var b := TeamData.new(); b.team_id = 1; _seed_pop(b, 10)
+	b.resources["food"] = 0; b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_IDLE
+	var b_leader := PersonData.new(); b_leader.id = 300
+	state.persons[300] = b_leader; b.leader_id = 300
+	state.teams[1] = b
+	state.player_forced_event = { "from_id": 1, "action": "aid_request" }
+	state.player_forced_event_id = "aid-fe"
+	var cmd := PlayerCommandSystem.new()
+	var opts := cmd.get_forced_response_options(state)
+	assert(opts.has("give") and opts.has("refuse"), "aid options 應 give/refuse，實際=%s" % str(opts))
+	var food_before: float = float(pt.resources["food"]) + float(b.resources["food"])
+	var r := cmd.resolve_forced_response(state, "aid-fe", "give")
+	assert(r.get("ok", false), "give 應成功，msg=%s" % str(r.get("msg", "")))
+	var give_amt: float = PlayerCommandSystem.AID_GIVE_DEFAULT
+	assert(float(b.resources["food"]) == give_amt,
+		"beggar 應收 %.0f food，實際=%.1f" % [give_amt, float(b.resources["food"])])
+	assert(float(pt.resources["food"]) == 500.0 - give_amt,
+		"玩家應扣 %.0f food，實際=%.1f" % [give_amt, float(pt.resources["food"])])
+	var food_after: float = float(pt.resources["food"]) + float(b.resources["food"])
+	assert(is_equal_approx(food_before, food_after), "food 守恆（轉移非銷毀）")
+	assert(state.player_forced_event.is_empty(), "forced_event 應清空")
+	print("Q7-2 OK")
+
+# Drift 防護：每 action，get_forced_response_options 的 id 集合 == map_forced_interaction.responses 的 id 集合
+func _test_forced_options_label_no_drift() -> void:
+	print("--- Q7 drift 防護：options ⟷ mapper responses id 集合一致 ---")
+	var cmd := PlayerCommandSystem.new()
+	# 各 action 一筆 fe 設定（diplomacy 兩種：both_independent 與否）
+	var cases: Array = [
+		{ "name": "diplomacy/both_independent", "fe": { "action": "diplomacy", "from_id": 1, "proposal": "alliance" }, "both_indep": true },
+		{ "name": "diplomacy/has_faction",      "fe": { "action": "diplomacy", "from_id": 1, "proposal": "demand_tribute" }, "both_indep": false },
+		{ "name": "extort",       "fe": { "action": "extort", "from_id": 1 }, "both_indep": false },
+		{ "name": "join_request", "fe": { "action": "join_request", "from_id": 1 }, "both_indep": false },
+		{ "name": "aid_request",  "fe": { "action": "aid_request", "from_id": 1 }, "both_indep": false },
+		{ "name": "choose_heir",  "fe": { "action": "choose_heir", "team_id": 0, "candidates": [101, 102] }, "both_indep": false },
+	]
+	for c in cases:
+		var state := WorldState.new()
+		state.world = WorldData.new()
+		state.player_id = 200
+		var pt := TeamData.new(); pt.team_id = 0; pt.leader_id = 200
+		state.teams[0] = pt
+		var player := PersonData.new(); player.id = 200; player.team_id = 0
+		state.persons[200] = player
+		# from team（diplomacy both_independent 需雙方 faction_id=-1）
+		var ft := TeamData.new(); ft.team_id = 1; ft.population = 5
+		ft.faction_id = -1 if c["both_indep"] else 0
+		pt.faction_id = -1 if c["both_indep"] else 0
+		state.teams[1] = ft
+		# heir 候選 person（choose_heir label 用）
+		var h1 := PersonData.new(); h1.id = 101; h1.person_name = "甲"; state.persons[101] = h1
+		var h2 := PersonData.new(); h2.id = 102; h2.person_name = "乙"; state.persons[102] = h2
+		state.player_forced_event = c["fe"]
+		state.player_forced_event_id = "drift-fe"
+		# options id 集合
+		var opt_ids: Array = []
+		for o in cmd.get_forced_response_options(state): opt_ids.append(o)
+		# mapper responses id 集合
+		var dto := PlayerApiMapper.map_forced_interaction(state)
+		var resp_ids: Array = []
+		for resp in dto["responses"]: resp_ids.append(resp["response_id"])
+		opt_ids.sort(); resp_ids.sort()
+		assert(opt_ids == resp_ids,
+			"[%s] options id != mapper responses id：opts=%s mapper=%s" % [c["name"], str(opt_ids), str(resp_ids)])
+		# 每 response 有非空 label
+		for resp in dto["responses"]:
+			assert(not str(resp["label"]).is_empty(), "[%s] response %s label 不可空" % [c["name"], resp["response_id"]])
+	print("Q7 drift 防護 OK")
 
 func _test_advance_tick_game_over_freeze() -> void:
 	print("--- Death Task4: advance_tick game_over 凍結 ---")

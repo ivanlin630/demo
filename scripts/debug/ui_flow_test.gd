@@ -18,6 +18,8 @@ func _initialize() -> void:
 	await _test_u15_overlay_input_guard()
 	await _test_capabilities_shown()
 	await _test_join_request_ui()
+	await _test_forced_choose_heir_ui()
+	await _test_forced_aid_request_ui()
 	await _test_interact_self_team_split()
 	await _test_recruit_named_reachable()
 	await _test_player_status_label()
@@ -101,6 +103,68 @@ func _test_join_request_ui() -> void:
 	node._process(0.1)   # U19 自動進 forced 模式
 	var s: String = node._event_label.text
 	_check("forced 顯收留選項", s.contains("收留") or s.contains("投靠") or s.contains("婉拒"))
+	await _free_ui(node)
+
+# Q7-1：forced choose_heir → UI DTO responses 列候選（非只拒絕）→ 選擇 → leader 接位 + forced 清
+func _test_forced_choose_heir_ui() -> void:
+	print("\n── Q7-1 forced choose_heir UI ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt = st.teams[ptid]
+	# 模擬玩家 leader 已死,擇繼承人。取兩名現有 named 當候選（或新建）
+	var cands: Array = []
+	for pid in pt.named_members:
+		if pid != pt.leader_id:
+			cands.append(pid)
+		if cands.size() >= 2: break
+	while cands.size() < 2:
+		var np := PersonData.new(); np.id = 90000 + cands.size(); np.team_id = ptid
+		np.person_name = "候選%d" % cands.size()
+		st.persons[np.id] = np; pt.named_members.append(np.id); cands.append(np.id)
+	pt.leader_id = -1
+	st.player_forced_event = { "action": "choose_heir", "team_id": ptid, "candidates": cands }
+	st.player_forced_event_id = "heir-ui"
+	node._bridge.request_advance(1)
+	node._process(0.1)
+	var fi: Dictionary = node._cached_snapshot.get("forced_interaction", {})
+	var resp_ids: Array = []
+	for r in fi.get("responses", []): resp_ids.append(r.get("response_id", ""))
+	_check("forced responses 列候選（非只拒絕）", resp_ids.size() == 2 and ("heir_%d" % int(cands[0])) in resp_ids)
+	# 驅動選第一候選（forced 回應 = num 0 → KEY_1,因 fe_count>0 時 idx 0 對應第一 response）
+	node._handle_interact_mode(KEY_1)
+	_check("choose_heir 後 leader 接位", st.teams[ptid].leader_id == int(cands[0]))
+	_check("choose_heir 後 forced 清除", st.player_forced_event.is_empty())
+	await _free_ui(node)
+
+# Q7-2：forced aid_request → UI DTO responses 含 give（非只拒絕）→ 選 give → 守恆轉糧 + forced 清
+func _test_forced_aid_request_ui() -> void:
+	print("\n── Q7-2 forced aid_request UI ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt = st.teams[ptid]
+	pt.resources["food"] = 100.0
+	var ppos = pt.tile_pos
+	var b := TeamData.new(); b.team_id = 8889; b.population = 4; b.tile_pos = ppos
+	b.resources["food"] = 0.0
+	var bl := PersonData.new(); bl.id = 88890; bl.team_id = 8889
+	st.persons[88890] = bl; b.leader_id = 88890
+	st.teams[8889] = b
+	st.player_forced_event = { "action": "aid_request", "from_id": 8889 }
+	st.player_forced_event_id = "aid-ui"
+	node._bridge.request_advance(1)
+	node._process(0.1)
+	var fi: Dictionary = node._cached_snapshot.get("forced_interaction", {})
+	var resp_ids: Array = []
+	for r in fi.get("responses", []): resp_ids.append(r.get("response_id", ""))
+	_check("forced responses 含 give（非只拒絕）", "give" in resp_ids and "refuse" in resp_ids)
+	# give 是第一 response（options ["give","refuse"]）→ KEY_1
+	var food_before: float = float(pt.resources["food"]) + float(b.resources["food"])
+	node._handle_interact_mode(KEY_1)
+	_check("aid give 後 beggar 收糧", float(b.resources["food"]) > 0.0)
+	_check("aid give 守恆", is_equal_approx(food_before, float(pt.resources["food"]) + float(b.resources["food"])))
+	_check("aid 後 forced 清除", st.player_forced_event.is_empty())
 	await _free_ui(node)
 
 # A-1：記名招募在 TextUI 主場景可達。
