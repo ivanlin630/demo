@@ -75,11 +75,12 @@ static func _check_no_dangling_team_id(state: WorldState, out: Array[String]) ->
 			out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
 		if t.order_target_id != -1 and not state.teams.has(t.order_target_id):
 			out.append("懸空 Team%d.order_target_id=%d 不存在" % [tid, t.order_target_id])
+		# known_reputations 鍵overload：tid(int)→聲望 + String 快取鍵(_cached_owner_leader_*)；只審 int 鍵
 		for k in t.known_reputations:
-			if not state.teams.has(k):
+			if k is int and not state.teams.has(k):
 				out.append("懸空 Team%d.known_reputations 含死 Team%d" % [tid, k]); break
 		for k in t.strategic_assignments:
-			if k != -1 and not state.teams.has(k):
+			if k is int and k != -1 and not state.teams.has(k):
 				out.append("懸空 Team%d.strategic_assignments 含死 Team%d" % [tid, k]); break
 	for obs in state.team_discovered:
 		for did in state.team_discovered[obs]:

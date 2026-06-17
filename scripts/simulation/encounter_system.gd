@@ -1412,11 +1412,7 @@ func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamDa
 	attacker.anon_treasury += resident.anon_treasury
 	resident.anon_treasury = 0.0
 	var rid: int = resident.team_id
-	# 滅團前退 faction（雙向同步），否則 member_team_ids 殘留已 erase 的 team → faction 懸空
-	if resident.faction_id != -1 and state.factions.has(resident.faction_id):
-		state.factions[resident.faction_id].known_member_states.erase(rid)
-	state.clear_team_faction(resident)
-	state.teams.erase(rid)
+	state.erase_team(rid)   # 清光所有 ref（faction 雙向 + known_member_states + 交叉 + 母子）
 	print("[Massacre] attacker=Team%d resident=Team%d 屠村，outpost空殼易主" % [attacker.team_id, rid])
 
 func _abandon_occupation(state: WorldState, tile: HexTileData) -> void:
