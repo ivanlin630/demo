@@ -134,6 +134,7 @@ func _setup_registry() -> void:
 		"hunt_beast":             _action_hunt_beast,
 		"train":                  _action_train,
 		"camp":                   _action_camp,
+		"promote_anon":           _action_promote_anon,
 	}
 
 # 執行玩家主動行動
@@ -205,6 +206,18 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 		msg += "，升階 %d 人" % promoted
 	msg += "）"
 	return { "ok": true, "msg": msg, "payload": {"promoted": promoted} }
+
+# 拔擢匿名→記名（對稱性）：玩家版走與 NPC 同一條路徑 PersonGenerator.generate_for_team
+# （已含「從 anon 桶移除 1 + treasury×3 bonus + 加 state.persons」）。command 只負責 append named_members。
+# population getter 自動守恆：anon-1 / named+1,總 pop 不變。NPC 缺 named 時自動拔擢,玩家無對應 → 全 anon 隊永遠卡(無法派子隊/任命),此 command 補上。
+func _action_promote_anon(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int) -> Dictionary:
+	if AnonTierSystem.total_pop(pt) <= 0:
+		return { "ok": false, "msg": "無匿名兵可拔擢" }
+	var p: PersonData = PersonGenerator.generate_for_team(state, pt, "member")
+	if p == null:
+		return { "ok": false, "msg": "拔擢失敗（無可拔擢 anon）" }
+	pt.named_members.append(p.id)   # caller 設 named（leader 不變,新增 named 成員）
+	return { "ok": true, "msg": "拔擢 %s 為記名成員" % p.person_name }
 
 # 紮營（Y 版,生存落腳）：免材料 + 無即時糧（只抬 cap）+ 距離 spacing + 限時施工。
 # 玩家發起的限時建造令（設玩家隊 task=建設,PRIO_PLAYER）→ construction 推進 → 完工釋放回 idle。
