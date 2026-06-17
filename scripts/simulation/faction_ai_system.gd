@@ -707,10 +707,10 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	for mid in f.member_team_ids:
 		if mid == f.leader_team_id: continue
-		var mt: TeamData = state.teams.get(mid)
+		var mt: TeamData = state.require_team(mid)
 		var snap: Dictionary = f.known_member_states.get(mid, {})
 		var known_task: String = snap.get("current_task", "idle")
-		if mt == null or mt.combat_target != -1 or known_task != "idle":
+		if mt.combat_target != -1 or known_task != "idle":
 			continue
 		if not mt.player_commanded_task.is_empty():
 			continue  # don't override player-commanded task
@@ -1256,8 +1256,7 @@ func _check_food_shortage(state: WorldState, faction) -> float:
 	var total_food: float = 0.0
 	var total_pop: int = 0
 	for tid in faction.member_team_ids:
-		var t: TeamData = state.teams.get(tid)
-		if t == null: continue
+		var t: TeamData = state.require_team(tid)
 		total_food += float(t.resources.get("food", 0))
 		total_pop += t.population
 	var per_capita: float = total_food / maxf(total_pop, 1)
@@ -1267,8 +1266,7 @@ func _check_food_shortage(state: WorldState, faction) -> float:
 func _check_goods_shortage(state: WorldState, faction) -> float:
 	var total_goods: float = 0.0
 	for tid in faction.member_team_ids:
-		var t: TeamData = state.teams.get(tid)
-		if t == null: continue
+		var t: TeamData = state.require_team(tid)
 		total_goods += float(t.resources.get("goods", 0))
 	# goods < 100 → 觸發
 	return clampf((100.0 - total_goods) / 100.0, 0.0, 1.0) * 50.0
@@ -1279,8 +1277,7 @@ func _check_mount_demand(state: WorldState, faction) -> float:
 	var total_mounts: int = 0
 	var has_demand_tag: bool = false
 	for tid in faction.member_team_ids:
-		var t: TeamData = state.teams.get(tid)
-		if t == null: continue
+		var t: TeamData = state.require_team(tid)
 		total_pop += t.population
 		total_mounts += int(t.resources.get("mounts", 0))
 		if "軍隊" in t.tags or "商隊" in t.tags:

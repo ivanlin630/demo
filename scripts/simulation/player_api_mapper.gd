@@ -611,8 +611,7 @@ static func map_faction_panel(state: WorldState) -> Dictionary:
 	var pending_orders: Dictionary = state.player_pending_orders
 	var member_orders: Array = []
 	for mid in f.member_team_ids:
-		var mt: TeamData = state.teams.get(mid)
-		if mt == null: continue
+		var mt: TeamData = state.require_team(mid)
 		var ml: PersonData = state.persons.get(mt.leader_id)
 		var name_str: String = ml.person_name if ml else "Team%d" % mid
 		var pending: Dictionary = pending_orders.get(str(mid), {})
