@@ -85,16 +85,17 @@ static func kill_random(team: TeamData, count: int, _source: String) -> Dictiona
 	for tier in TIER_ORDER:
 		killed[tier] = 0
 	for _i in range(count):
-		var total: int = AnonCohort.total(team.anon_cohorts)
-		if total <= 0:
+		# 只移 healthy（wounded 不在此死）→ roll 必須只按 healthy 桶加權，
+		# 且 killed 記實際移除數（remove 回傳），否則 caller 依虛報數扣純量 → drift。
+		var healthy_total: int = AnonCohort.by_health(team.anon_cohorts, "healthy")
+		if healthy_total <= 0:
 			break
-		var roll: int = randi() % total
+		var roll: int = randi() % healthy_total
 		var acc: int = 0
 		for tier in TIER_ORDER:
-			acc += AnonCohort.by_tier(team.anon_cohorts, tier)
+			acc += int(team.anon_cohorts.get(AnonCohort._key(tier, "healthy"), 0))
 			if roll < acc:
-				AnonCohort.remove(team.anon_cohorts, tier, "healthy", 1)
-				killed[tier] += 1
+				killed[tier] += AnonCohort.remove(team.anon_cohorts, tier, "healthy", 1)
 				break
 	return killed
 

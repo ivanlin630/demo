@@ -1192,8 +1192,11 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			if is_dead(u, state): dead_anon += 1
 		var t: TeamData = state.teams.get(team_id)
 		if t:
-			AnonTierSystem.kill_random(t, dead_anon, "combat")
-			t.population = maxi(t.population - dead_anon, 0)
+			var killed: Dictionary = AnonTierSystem.kill_random(t, dead_anon, "combat")
+			var actually: int = 0
+			for tier in killed:
+				actually += killed[tier]
+			t.population = maxi(t.population - actually, 0)   # 用實際移除數，非意圖數（kill_random 受 healthy 池上限）
 
 	# 野獸結算：beast 不走人類 loot/subjugate/outpost；勝方獵獸得肉，獸隊戰畢清除。
 	var beast_atk: bool = (state.teams.get(atk_id) != null and state.teams[atk_id].beast_kind != "")
