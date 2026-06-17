@@ -10283,7 +10283,7 @@ func _test_action_ui_coverage() -> void:
 		"beg": "interact-team",
 		"offer_surrender": "interact-team(encounter)",
 		"hunt": "interact-self", "hunt_beast": "interact-self", "establish_faction": "interact-self",
-		"train": "interact-self", "camp": "interact-self",
+		"train": "interact-self", "camp": "interact-self", "promote_anon": "interact-self",
 		"take_loot": "interact-self", "leave_loot": "interact-self", "subjugate_enemy": "interact-self",
 		"confirm_gather_intel": "interact-self",
 		"build_outpost": "outpost-panel", "upgrade_outpost": "outpost-panel",

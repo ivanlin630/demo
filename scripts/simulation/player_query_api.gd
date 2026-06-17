@@ -450,6 +450,16 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			"execute_action",
 			{ "action_id": "train", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
 
+	# promote_anon（self-action）：有匿名人口才列。拔擢 1 anon→named（對稱性,解全 anon 隊無法派子隊）。
+	if pt_train != null and AnonTierSystem.total_pop(pt_train) > 0:
+		actions.append(PlayerApiMapper.map_available_action(
+			"promote_anon", _action_label("promote_anon"), true, "",
+			{ "allowed_kinds": PackedStringArray(["none"]),
+			  "requires_visible_target": false, "requires_forced_interaction": false,
+			  "allows_self_target": false },
+			"execute_action",
+			{ "action_id": "promote_anon", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
+
 	return actions
 
 func pt_tile_self(state: WorldState, ptid: int) -> HexTileData:
@@ -503,6 +513,7 @@ func _action_label(action_id: String) -> String:
 		"hunt":                  return "狩獵"
 		"hunt_beast":            return "獵猛獸"
 		"train":                 return "訓練（-%d coin）" % int(PlayerCommandSystem.TRAIN_COST_COIN)
+		"promote_anon":          return "拔擢匿名→記名"
 		"camp":                  return "紮營"
 		"take_loot":             return "收割戰利品"
 		"leave_loot":            return "放棄戰利品"
