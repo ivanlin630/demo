@@ -40,3 +40,25 @@ static func move(cohorts: Dictionary, from_tier: String, from_health: String,
 	var moved: int = remove(cohorts, from_tier, from_health, n)
 	add(cohorts, to_tier, to_health, moved)
 	return moved
+
+# ───── 計數投影（純衍生）─────
+
+static func total(cohorts: Dictionary) -> int:
+	var s: int = 0
+	for k in cohorts:
+		s += int(cohorts[k])
+	return s
+
+static func by_health(cohorts: Dictionary, health: String) -> int:
+	var s: int = 0
+	for k in cohorts:
+		if _parse(k)[1] == health:
+			s += int(cohorts[k])
+	return s
+
+static func by_tier(cohorts: Dictionary, tier: String) -> int:
+	var s: int = 0
+	for k in cohorts:
+		if _parse(k)[0] == tier:
+			s += int(cohorts[k])
+	return s

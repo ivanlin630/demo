@@ -5,6 +5,7 @@ func _initialize() -> void:
 	_test_anon_tier_const()
 	_test_anon_cohort_key()
 	_test_anon_cohort_mutate()
+	_test_anon_cohort_counts()
 	_test_team_anon_tiers_default()
 	_test_anon_tier_queries()
 	_test_add_remove_anon()
@@ -6332,6 +6333,22 @@ func _test_anon_cohort_mutate() -> void:
 	assert(m2 == 3, "move 超量應只移現有 3，實際 %d" % m2)
 	assert(not c.has("老兵|healthy") and c.get("老兵|wounded", 0) == 4, "move 後 healthy 桶空、wounded4")
 	print("[OK] _test_anon_cohort_mutate")
+
+func _test_anon_cohort_counts() -> void:
+	var c: Dictionary = {
+		"平民|healthy": 3, "新兵|healthy": 2, "老兵|wounded": 1, "老兵|healthy": 4,
+	}
+	assert(AnonCohort.total(c) == 10, "total 應 10，實際 %d" % AnonCohort.total(c))
+	assert(AnonCohort.by_health(c, "healthy") == 9, "healthy 應 9")
+	assert(AnonCohort.by_health(c, "wounded") == 1, "wounded 應 1")
+	assert(AnonCohort.by_tier(c, "老兵") == 5, "老兵 跨 health 應 5")
+	assert(AnonCohort.by_tier(c, "菁英") == 0, "空 tier 應 0")
+	# total == healthy + wounded（投影自洽）
+	assert(AnonCohort.total(c) == AnonCohort.by_health(c, "healthy") + AnonCohort.by_health(c, "wounded"),
+		"total 應 == healthy + wounded")
+	# 空容器
+	assert(AnonCohort.total({}) == 0, "空容器 total 0")
+	print("[OK] _test_anon_cohort_counts")
 
 func _test_team_anon_tiers_default() -> void:
 	var t := TeamData.new()
