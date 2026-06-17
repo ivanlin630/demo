@@ -340,10 +340,10 @@ static func _setup_anon_tiers(team: TeamData, cfg: Dictionary) -> void:
 	if at.is_empty():
 		var named_in: int = team.named_members.size() + (1 if team.leader_id != -1 else 0)
 		var anon_total: int = maxi(team.population - named_in - team.wounded, 0)
-		team.anon_tiers["平民"] = anon_total
+		AnonCohort.add(team.anon_cohorts, "平民", "healthy", anon_total)
 	else:
 		for tier in AnonTierSystem.TIER_ORDER:
-			team.anon_tiers[tier] = int(at.get(tier, 0))
+			AnonCohort.add(team.anon_cohorts, tier, "healthy", int(at.get(tier, 0)))
 
 static func _default_full_resources() -> Dictionary:
 	return {

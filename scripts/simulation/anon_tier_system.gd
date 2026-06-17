@@ -40,59 +40,37 @@ const TRAINING_CAP_THRESHOLDS: Dictionary = {
 # ───── 查詢 ─────
 
 static func total_pop(team: TeamData) -> int:
-	var s: int = 0
-	for tier in TIER_ORDER:
-		s += int(team.anon_tiers.get(tier, 0))
-	return s
+	return AnonCohort.total(team.anon_cohorts)
 
 static func total_wage(team: TeamData) -> float:
-	var w: float = 0.0
-	for tier in TIER_ORDER:
-		w += float(team.anon_tiers.get(tier, 0)) * float(TIER_STATS[tier]["base_wage"])
-	return w
+	return AnonCohort.total_wage(team.anon_cohorts)
 
 static func avg_speed(team: TeamData) -> float:
-	var total: int = total_pop(team)
-	if total <= 0:
-		return 1.0
-	var s: float = 0.0
-	for tier in TIER_ORDER:
-		s += float(team.anon_tiers.get(tier, 0)) * float(TIER_STATS[tier]["speed"])
-	return s / float(total)
+	return AnonCohort.avg_speed(team.anon_cohorts)
 
 static func avg_combat_skill(team: TeamData) -> float:
-	var total: int = total_pop(team)
-	if total <= 0:
-		return 0.1
-	var s: float = 0.0
-	for tier in TIER_ORDER:
-		s += float(team.anon_tiers.get(tier, 0)) * float(TIER_STATS[tier]["combat"])
-	return s / float(total)
+	return AnonCohort.avg_combat(team.anon_cohorts)
 
 static func tier_count(team: TeamData, tier: String) -> int:
-	return int(team.anon_tiers.get(tier, 0))
+	return AnonCohort.by_tier(team.anon_cohorts, tier)
 
 static func tier_breakdown(team: TeamData) -> Dictionary:
-	return team.anon_tiers.duplicate()
+	var d: Dictionary = {}
+	for tier in TIER_ORDER:
+		d[tier] = AnonCohort.by_tier(team.anon_cohorts, tier)
+	return d
 
 # ───── 變動 ─────
 
 static func add_anon(team: TeamData, tier: String, count: int) -> void:
-	if count <= 0:
+	if count <= 0 or tier not in TIER_ORDER:
 		return
-	if not team.anon_tiers.has(tier):
-		return
-	team.anon_tiers[tier] = int(team.anon_tiers[tier]) + count
+	AnonCohort.add(team.anon_cohorts, tier, "healthy", count)
 
 static func remove_anon(team: TeamData, tier: String, count: int) -> int:
-	if count <= 0:
+	if count <= 0 or tier not in TIER_ORDER:
 		return 0
-	if not team.anon_tiers.has(tier):
-		return 0
-	var cur: int = int(team.anon_tiers[tier])
-	var removed: int = mini(cur, count)
-	team.anon_tiers[tier] = cur - removed
-	return removed
+	return AnonCohort.remove(team.anon_cohorts, tier, "healthy", count)
 
 static func add_exp(team: TeamData, tier: String, exp: float) -> void:
 	if tier == "菁英":
@@ -107,15 +85,15 @@ static func kill_random(team: TeamData, count: int, _source: String) -> Dictiona
 	for tier in TIER_ORDER:
 		killed[tier] = 0
 	for _i in range(count):
-		var total: int = total_pop(team)
+		var total: int = AnonCohort.total(team.anon_cohorts)
 		if total <= 0:
 			break
 		var roll: int = randi() % total
 		var acc: int = 0
 		for tier in TIER_ORDER:
-			acc += int(team.anon_tiers.get(tier, 0))
+			acc += AnonCohort.by_tier(team.anon_cohorts, tier)
 			if roll < acc:
-				team.anon_tiers[tier] = int(team.anon_tiers[tier]) - 1
+				AnonCohort.remove(team.anon_cohorts, tier, "healthy", 1)
 				killed[tier] += 1
 				break
 	return killed
@@ -125,7 +103,7 @@ static func transfer_proportional(from: TeamData, to: TeamData, count: int) -> D
 	var moved: Dictionary = {}
 	for tier in TIER_ORDER:
 		moved[tier] = 0
-	var total: int = total_pop(from)
+	var total: int = AnonCohort.total(from.anon_cohorts)
 	if total <= 0 or count <= 0:
 		return moved
 	var actual: int = mini(count, total)
@@ -134,25 +112,24 @@ static func transfer_proportional(from: TeamData, to: TeamData, count: int) -> D
 	for tier in TIER_ORDER:
 		if remaining <= 0:
 			break
-		var n: int = int(round(float(from.anon_tiers.get(tier, 0)) / float(total) * float(actual)))
-		n = mini(n, int(from.anon_tiers.get(tier, 0)))
-		n = mini(n, remaining)
-		moved[tier] = n
-		from.anon_tiers[tier] = int(from.anon_tiers[tier]) - n
-		to.anon_tiers[tier] = int(to.anon_tiers.get(tier, 0)) + n
-		remaining -= n
+		var avail: int = AnonCohort.by_tier(from.anon_cohorts, tier)
+		var n: int = mini(mini(int(round(float(avail) / float(total) * float(actual))), avail), remaining)
+		var real: int = AnonCohort.remove(from.anon_cohorts, tier, "healthy", n)
+		AnonCohort.add(to.anon_cohorts, tier, "healthy", real)
+		moved[tier] = real
+		remaining -= real
 	# 第二輪：round 後剩餘，順序補滿
 	if remaining > 0:
 		for tier in TIER_ORDER:
 			if remaining <= 0:
 				break
-			var avail: int = int(from.anon_tiers.get(tier, 0))
-			if avail > 0:
-				var take: int = mini(avail, remaining)
-				moved[tier] += take
-				from.anon_tiers[tier] = int(from.anon_tiers[tier]) - take
-				to.anon_tiers[tier] = int(to.anon_tiers.get(tier, 0)) + take
-				remaining -= take
+			var avail2: int = AnonCohort.by_tier(from.anon_cohorts, tier)
+			if avail2 > 0:
+				var take: int = mini(avail2, remaining)
+				var real2: int = AnonCohort.remove(from.anon_cohorts, tier, "healthy", take)
+				AnonCohort.add(to.anon_cohorts, tier, "healthy", real2)
+				moved[tier] += real2
+				remaining -= real2
 	return moved
 
 # ───── 升等 ─────
@@ -168,7 +145,7 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 		return 0
 	var to_tier: String = TIER_ORDER[idx + 1]
 	# 1. count 足
-	if int(team.anon_tiers.get(from_tier, 0)) < count:
+	if AnonCohort.by_tier(team.anon_cohorts, from_tier) < count:
 		return 0
 	# 2. exp 足（每升 1 人需 1 份 threshold；consume threshold × count）
 	var threshold: float = float(PROMOTION_EXP_THRESHOLD[from_tier])
@@ -188,7 +165,7 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 			return 0
 	# 5. 菁英武器需求（check 不消耗）
 	if to_tier == "菁英":
-		var future_elite: int = int(team.anon_tiers.get("菁英", 0)) + count
+		var future_elite: int = AnonCohort.by_tier(team.anon_cohorts, "菁英") + count
 		if int(team.resources.get(ELITE_WEAPON_REQ, 0)) < future_elite:
 			return 0
 	# 全過 → 執行
@@ -197,8 +174,7 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 		team.resources[res] = float(team.resources.get(res, 0)) - amt
 		if res == "coin":
 			team.anon_treasury += amt   # 守恆：訓練餉銀入公庫，不蒸發
-	team.anon_tiers[from_tier] = int(team.anon_tiers[from_tier]) - count
-	team.anon_tiers[to_tier] = int(team.anon_tiers.get(to_tier, 0)) + count
+	AnonCohort.move(team.anon_cohorts, from_tier, "healthy", to_tier, "healthy", count)
 	team.anon_exp[from_tier] = float(team.anon_exp[from_tier]) - threshold * float(count)
 	return count
 

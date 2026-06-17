@@ -29,7 +29,7 @@ func build_beast_team(state: WorldState, kind: String, pos: Vector2i) -> int:
 	t.faction_id = -1
 	t.leader_id = -1
 	t.named_members = []
-	t.anon_tiers = {}
+	t.anon_cohorts = {}
 	t.resources = {}
 	t.armed_anon_ratio = 1.0   # 全員上場
 	state.teams[t.team_id] = t

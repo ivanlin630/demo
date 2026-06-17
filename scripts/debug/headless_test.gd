@@ -5088,7 +5088,7 @@ func _test_controlled_team_armed() -> void:
 	state.persons[0] = leader; state.player_id = 0
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0
 	team.population = 10; team.armed_anon_ratio = 0.5
-	team.anon_tiers = {"平民": 9}
+	_seed_anon(team, {"平民": 9})
 	team.resources = {"weapon_melee_low": 5}
 	state.teams[0] = team
 	var ct: Dictionary = PlayerApiMapper.map_controlled_team(state)
@@ -5343,13 +5343,19 @@ func _test_manufacturing_to_storage() -> void:
 	assert(float(team.resources.get("goods", 0)) == 0, "goods 不應進 team")
 	print("CoinStorage Task5 OK")
 
+# 測試用：依 {tier: count} 把 anon 全設為 healthy 桶（取代舊 team.anon_tiers = {...}）
+func _seed_anon(t: TeamData, d: Dictionary) -> void:
+	t.anon_cohorts = {}
+	for tier in d:
+		AnonCohort.add(t.anon_cohorts, tier, "healthy", int(d[tier]))
+
 func _test_salary_to_treasury() -> void:
 	print("--- CoinStorage Task6: wage → treasury ---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0; team.population = 10; team.named_members = [101]
-	team.anon_tiers["新兵"] = 8   # total_wage = 8 × 1.0 = 8.0
+	AnonCohort.add(team.anon_cohorts, "新兵", "healthy", 8)   # total_wage = 8 × 1.0 = 8.0
 	team.resources["coin"] = 100.0
 	team.leader_id = 100
 	state.teams[0] = team
@@ -5871,7 +5877,7 @@ func _test_evaluate_prosperity_trigger() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
-	team.faction_id = 0; team.anon_tiers["菁英"] = 15  # avg_combat=0.7
+	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "菁英", "healthy", 15)  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -5899,7 +5905,7 @@ func _test_prosperity_low_ambition_skip() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
-	team.faction_id = 0; team.anon_tiers["菁英"] = 15  # avg_combat=0.7
+	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "菁英", "healthy", 15)  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -5922,7 +5928,7 @@ func _test_prosperity_low_readiness_skip() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 2
-	team.faction_id = 0; team.anon_tiers["平民"] = 2  # avg_combat=0.1
+	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "平民", "healthy", 2)  # avg_combat=0.1
 	team.resources = { "food": 10 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -5945,7 +5951,7 @@ func _test_prosperity_same_faction_skip() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 15
-	team.faction_id = 5; team.anon_tiers["菁英"] = 15  # avg_combat=0.7
+	team.faction_id = 5; AnonCohort.add(team.anon_cohorts, "菁英", "healthy", 15)  # avg_combat=0.7
 	team.resources = { "food": 200, "weapon_melee_low": 15 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -6008,7 +6014,7 @@ func _test_prosperity_cadence() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); team.population = 10
-	team.faction_id = -1; team.anon_tiers["老兵"] = 10  # avg_combat=0.5
+	team.faction_id = -1; AnonCohort.add(team.anon_cohorts, "老兵", "healthy", 10)  # avg_combat=0.5
 	team.resources = { "food": 200, "weapon_melee_low": 10 }
 	team.current_task = TeamData.TASK_IDLE
 	state.teams[0] = team
@@ -6377,7 +6383,7 @@ func _test_team_anon_tiers_default() -> void:
 
 func _test_anon_tier_queries() -> void:
 	var t := TeamData.new()
-	t.anon_tiers = { "平民": 5, "新兵": 3, "老兵": 2, "菁英": 0 }
+	_seed_anon(t, { "平民": 5, "新兵": 3, "老兵": 2, "菁英": 0 })
 	assert(AnonTierSystem.total_pop(t) == 10)
 	# wage: 5*0.5 + 3*1.0 + 2*1.5 = 8.5
 	assert(abs(AnonTierSystem.total_wage(t) - 8.5) < 0.01)
@@ -6409,7 +6415,7 @@ func _test_add_exp() -> void:
 
 func _test_kill_random_proportional() -> void:
 	var t := TeamData.new()
-	t.anon_tiers = { "平民": 50, "新兵": 30, "老兵": 20, "菁英": 0 }
+	_seed_anon(t, { "平民": 50, "新兵": 30, "老兵": 20, "菁英": 0 })
 	var killed = AnonTierSystem.kill_random(t, 10, "combat")
 	assert(killed["平民"] + killed["新兵"] + killed["老兵"] + killed["菁英"] == 10)
 	assert(AnonTierSystem.total_pop(t) == 90)
@@ -6418,7 +6424,7 @@ func _test_kill_random_proportional() -> void:
 func _test_transfer_proportional() -> void:
 	var src := TeamData.new()
 	var dst := TeamData.new()
-	src.anon_tiers = { "平民": 50, "新兵": 30, "老兵": 20, "菁英": 0 }
+	_seed_anon(src, { "平民": 50, "新兵": 30, "老兵": 20, "菁英": 0 })
 	var moved = AnonTierSystem.transfer_proportional(src, dst, 20)
 	assert(AnonTierSystem.total_pop(src) == 80)
 	assert(AnonTierSystem.total_pop(dst) == 20)
@@ -6439,7 +6445,7 @@ func _make_promote_team(state: WorldState, tact: float) -> TeamData:
 func _test_promote_success() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.5)
-	team.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
+	_seed_anon(team, { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 })
 	team.anon_exp["平民"] = 250.0   # ×count: 5 升等需 5×50
 	team.resources = { "coin": 100, "food": 200, "material": 50 }
 	var n = AnonTierSystem.try_promote(state, team, "平民", 5)
@@ -6455,7 +6461,7 @@ func _test_promote_success() -> void:
 func _test_promote_insufficient_exp() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.5)
-	team.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
+	_seed_anon(team, { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 })
 	team.anon_exp["平民"] = 30.0   # < 50
 	team.resources = { "coin": 100, "food": 200, "material": 50 }
 	var n = AnonTierSystem.try_promote(state, team, "平民", 5)
@@ -6467,7 +6473,7 @@ func _test_promote_insufficient_exp() -> void:
 func _test_promote_insufficient_resources() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.5)
-	team.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
+	_seed_anon(team, { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 })
 	team.anon_exp["平民"] = 250.0   # exp 夠（×count: 5×50）
 	team.resources = { "coin": 10, "food": 200, "material": 50 }   # coin 不夠 25
 	var n = AnonTierSystem.try_promote(state, team, "平民", 5)
@@ -6479,7 +6485,7 @@ func _test_promote_insufficient_resources() -> void:
 func _test_promote_elite_requires_weapon() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.8)   # cap 菁英
-	team.anon_tiers = { "平民": 0, "新兵": 0, "老兵": 10, "菁英": 0 }
+	_seed_anon(team, { "平民": 0, "新兵": 0, "老兵": 10, "菁英": 0 })
 	team.anon_exp["老兵"] = 1000.0   # ×count: 5×200
 	team.resources = { "coin": 1000, "food": 1000, "material": 1000, "weapon_melee_high": 0 }
 	var n0 = AnonTierSystem.try_promote(state, team, "老兵", 5)
@@ -6494,7 +6500,7 @@ func _test_promote_elite_requires_weapon() -> void:
 func _test_promote_leader_skill_cap() -> void:
 	var state := WorldState.new()
 	var team := _make_promote_team(state, 0.3)   # cap 新兵
-	team.anon_tiers = { "平民": 0, "新兵": 10, "老兵": 0, "菁英": 0 }
+	_seed_anon(team, { "平民": 0, "新兵": 10, "老兵": 0, "菁英": 0 })
 	team.anon_exp["新兵"] = 500.0   # ×count: 5×100（exp 夠，但 skill cap 應卡）
 	team.resources = { "coin": 1000, "food": 1000, "material": 1000 }
 	var n = AnonTierSystem.try_promote(state, team, "新兵", 5)
@@ -6507,7 +6513,7 @@ func _test_training_adds_exp() -> void:
 	var team := TeamData.new()
 	team.team_id = 0
 	team.current_task = TeamData.TASK_TRAIN
-	team.anon_tiers["平民"] = 10
+	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 10)
 	var leader := PersonData.new()
 	leader.id = 1
 	leader.skills = { "戰術": 0.5 }
@@ -6526,11 +6532,11 @@ func _test_anon_speed_tiers() -> void:
 	var ms = MovementSystem.new()
 	var t_pleb := TeamData.new()
 	t_pleb.team_id = 0; t_pleb.population = 10; t_pleb.leader_id = -1
-	t_pleb.anon_tiers = { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 }
+	_seed_anon(t_pleb, { "平民": 10, "新兵": 0, "老兵": 0, "菁英": 0 })
 	var sp_pleb = ms._compute_team_speed(state, t_pleb)
 	var t_elite := TeamData.new()
 	t_elite.team_id = 1; t_elite.population = 10; t_elite.leader_id = -1
-	t_elite.anon_tiers = { "平民": 0, "新兵": 0, "老兵": 0, "菁英": 10 }
+	_seed_anon(t_elite, { "平民": 0, "新兵": 0, "老兵": 0, "菁英": 10 })
 	var sp_elite = ms._compute_team_speed(state, t_elite)
 	assert(abs(sp_pleb - 0.7) < 0.01, "純平民隊速應 0.7，實際=%f" % sp_pleb)
 	assert(abs(sp_elite - 1.0) < 0.01, "純菁英隊速應 1.0，實際=%f" % sp_elite)
@@ -7645,7 +7651,7 @@ func _test_n1_leader_tier_sync() -> void:
 	print("--- Reaction Task5b: leader flee → anon tier 同步 -1 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var team := TeamData.new(); team.team_id = 0; team.population = 5
-	team.anon_tiers = { "平民": 4 }
+	_seed_anon(team, { "平民": 4 })
 	var p := PersonData.new(); p.id = 1; p.team_id = 0; p.stress = 0.9
 	team.leader_id = 1
 	state.teams[0] = team; state.persons[1] = p
@@ -8130,7 +8136,7 @@ func _test_n1_leader_no_anon_pop_stable() -> void:
 	rs._apply_reaction(state, leader, team, "N3_defect")
 	assert(team.population == 2, "N3 同理 pop 應 2，實際=%d" % team.population)
 	# 有 anon → 照舊扣 pop + tier -1
-	team.anon_tiers["平民"] = 1; team.population = 3
+	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 1); team.population = 3
 	leader.stress = 0.9
 	rs._apply_reaction(state, leader, team, "N1_flee")
 	assert(team.population == 2, "有 anon 應扣 pop=2，實際=%d" % team.population)
@@ -8485,7 +8491,7 @@ func _test_promotion_coin_to_treasury() -> void:
 	state.world = WorldData.new()
 	var team := TeamData.new()
 	team.team_id = 0; team.population = 12
-	team.anon_tiers = { "平民": 10 }
+	_seed_anon(team, { "平民": 10 })
 	team.anon_exp = { "平民": 999.0 }
 	team.resources = { "coin": 100.0, "food": 999.0, "material": 999.0 }
 	var leader := PersonData.new(); leader.id = 1
@@ -8513,7 +8519,7 @@ func _test_recruit_coin_to_target() -> void:
 	var pp := PersonData.new(); pp.id = 100; pp.team_id = 0
 	state.persons[100] = pp
 	var tgt := TeamData.new(); tgt.team_id = 1; tgt.population = 8
-	tgt.anon_tiers = { "平民": 7 }
+	_seed_anon(tgt, { "平民": 7 })
 	state.teams[1] = tgt
 	var cmd := PlayerCommandSystem.new()
 	var r: Dictionary = cmd._recruit_anon_internal(state, pt, tgt, 1)

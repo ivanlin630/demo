@@ -85,9 +85,19 @@ var equip_order: Dictionary = {
 	"ranged_low": 0, "ranged_high": 0,
 }
 # ── Anon Tier 系統（取代舊 scalar anon_combat_skill / anon_wage）──
-var anon_tiers: Dictionary = {
-	"平民": 0, "新兵": 0, "老兵": 0, "菁英": 0,
-}
+# Anon Cohort 統一容器（取代舊 anon_tiers）：鍵 "tier|health" → count，稀疏。
+# Phase 2a：只用 health="healthy" 桶；wounded 維度 Phase 2b 啟用。
+var anon_cohorts: Dictionary = {}
+# 向後相容唯讀 getter：回 4-tier breakdown（{tier: 該 tier 跨 health 總數}）。
+# 舊「讀」零改；舊「寫」（= / []=）走 set no-op → 強迫改走 AnonCohort 入口。
+var anon_tiers: Dictionary:
+	get:
+		var d: Dictionary = {}
+		for tier in AnonCohort.TIER_ORDER:
+			d[tier] = AnonCohort.by_tier(anon_cohorts, tier)
+		return d
+	set(_value):
+		pass
 var anon_exp: Dictionary = {
 	"平民": 0.0, "新兵": 0.0, "老兵": 0.0,
 }
