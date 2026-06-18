@@ -51,6 +51,16 @@ const TARGET_PER_POP: Dictionary = {
 	"wagons":             0.2,
 }
 const SURVIVAL_GOODS: Array = ["food", "medicine"]   # 飢荒不對稱 clamp 適用
+const FOOD_RESERVE_TICKS: float = 20.0   # TEST VALUE — food 最低自留（pop × 0.1 × N ticks）；單一源
+
+# 留底（不賣掉自己需要的）：food 按存糧 tick、coin 半留、其他按 target 需求。單一源。
+# NPC market 與 玩家路徑同用；武器留底統一走 target-based（TARGET_PER_POP[weapon]）。
+static func reserve(team: TeamData, res: String) -> float:
+	if res == "food":
+		return float(team.population) * 0.1 * FOOD_RESERVE_TICKS
+	if res == "coin":
+		return float(team.resources.get("coin", 0)) * 0.5
+	return float(team.population) * float(TARGET_PER_POP.get(res, 0.0))
 
 # 唯一 local_value：
 #   - coin 恆 face value（player_trade 的 coin guard，trade 守恆與單價無關，硬閘）

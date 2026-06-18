@@ -3,7 +3,7 @@ class_name InteractionSystem
 # ──────── 貿易常數 ────────
 # 估值表 BASE_PRICE / TARGET_PER_POP / SURVIVAL_GOODS 已移至 TradeValuation（單一真值源）。
 # 本檔估值改 delegate TradeValuation.local_value；表引用走 TradeValuation.BASE_PRICE 等。
-const FOOD_RESERVE_TICKS: float = 20.0   # TEST VALUE — food 最低自留（pop × 0.1 × N ticks）
+const FOOD_RESERVE_TICKS: float = TradeValuation.FOOD_RESERVE_TICKS   # 單一源 → TradeValuation
 const MAX_COIN_PER_TRADE: float = 300.0  # TEST VALUE — 每次交易買方預算上限
 
 const WOUNDED_TREATMENT_RATE: float  = 0.3
@@ -499,12 +499,8 @@ func local_value(team: TeamData, res: String) -> float:
 # ──────── 雙向 market 結算（取代舊 _resolve_trade）────────
 
 func _calc_reserve(team: TeamData, res: String) -> float:
-	if res == "food":
-		return float(team.population) * 0.1 * FOOD_RESERVE_TICKS
-	elif res == "coin":
-		return float(team.resources.get(res, 0)) * 0.5
-	# 其他資源：保留至 target 需求量，避免賣掉自己短缺的物資（否則雙向 market 會即買即賣）
-	return float(team.population) * float(TradeValuation.TARGET_PER_POP.get(res, 0.0))
+	# 留底邏輯收進 TradeValuation.reserve（單一源），NPC + 玩家路徑同用。
+	return TradeValuation.reserve(team, res)
 
 func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int, price: float) -> void:
 	seller.resources[res] = float(seller.resources.get(res, 0)) - qty
@@ -564,6 +560,7 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 	var a_coin_before: float = float(a.resources.get("coin", 0))
 	_attempt_trade_direction(state, a, b)
 	_attempt_trade_direction(state, b, a)
+	_attempt_barter(state, a, b)   # 缺幣互補：以物易物（coin 換完後）
 	if absf(float(a.resources.get("coin", 0)) - a_coin_before) > 0.001:
 		print("[Market] Team%d <-> Team%d 成交（公庫接入）" % [a.team_id, b.team_id])
 	_spill_back_public_storage(state, a, a_original)
@@ -611,6 +608,37 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 			buyer.merchant_inventory.append({
 				"grade": res, "qty": qty, "bought_at": ask, "bought_from": seller.team_id
 			})
+
+# 以物易物：a 的 surplus(b 想要) ↔ b 的 surplus(a 想要)，按 local_value 等值互換。
+# 處理缺幣團互補 surplus（coin 路徑換不了）。不碰 coin，coin_eq 守恆。
+func _attempt_barter(state: WorldState, a: TeamData, b: TeamData) -> void:
+	# a 可給的（a surplus 且 b 缺=b 想要）
+	for give_res in TradeValuation.BASE_PRICE.keys():
+		if give_res == "coin": continue
+		var a_surplus: float = maxf(float(a.resources.get(give_res, 0)) - TradeValuation.reserve(a, give_res), 0.0)
+		if a_surplus <= 0.0: continue
+		# b 是否想要（b 對該 res 估值 > a 對該 res 估值,即 b 較缺）
+		if TradeValuation.local_value(b, give_res) <= TradeValuation.local_value(a, give_res): continue
+		# 找 b 能回付的（b surplus 且 a 想要）
+		for pay_res in TradeValuation.BASE_PRICE.keys():
+			if pay_res == "coin" or pay_res == give_res: continue
+			var b_surplus: float = maxf(float(b.resources.get(pay_res, 0)) - TradeValuation.reserve(b, pay_res), 0.0)
+			if b_surplus <= 0.0: continue
+			if TradeValuation.local_value(a, pay_res) <= TradeValuation.local_value(b, pay_res): continue
+			# 等值互換：以雙方各自估值算可換量,取較小值的一筆
+			var give_val: float = TradeValuation.local_value(b, give_res)   # b 願付的單價
+			var pay_val: float  = TradeValuation.local_value(a, pay_res)    # a 願收的單價
+			var give_qty: int = int(minf(a_surplus, b_surplus * pay_val / maxf(give_val, 0.001)))
+			if give_qty <= 0: continue
+			var pay_qty: int = int(round(give_qty * give_val / maxf(pay_val, 0.001)))
+			if pay_qty <= 0 or pay_qty > int(b_surplus): continue
+			# 執行互換（不碰 coin）
+			a.resources[give_res] = float(a.resources.get(give_res, 0)) - give_qty
+			b.resources[give_res] = float(b.resources.get(give_res, 0)) + give_qty
+			b.resources[pay_res]  = float(b.resources.get(pay_res, 0)) - pay_qty
+			a.resources[pay_res]  = float(a.resources.get(pay_res, 0)) + pay_qty
+			print("[Barter] Team%d %dx%s <-> Team%d %dx%s" % [a.team_id, give_qty, give_res, b.team_id, pay_qty, pay_res])
+			break   # 一個 give_res 換一筆即可,下個 give_res
 
 func _grow_commerce_skill(state: WorldState, team: TeamData) -> void:
 	for pid in ([team.leader_id] as Array) + team.named_members:

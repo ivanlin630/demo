@@ -292,6 +292,8 @@ func _initialize() -> void:
 	_test_price_covers_input_cost()
 	_test_famine_price_spike()
 	_test_trade_valuation_single_source()
+	_test_trade_reserve_no_drain()
+	_test_npc_barter_coinless()
 
 	_test_site_diff_print()
 	_test_resume_requires_food()
@@ -8668,6 +8670,63 @@ func _test_trade_valuation_single_source() -> void:
 	# coin 硬閘：恆 face value 1.0（與短缺無關）
 	assert(is_equal_approx(TradeValuation.local_value(t, "coin"), 1.0), "coin 恆 face value 1.0")
 	print("[OK] _test_trade_valuation_single_source")
+
+func _test_trade_reserve_no_drain() -> void:
+	# 問題1：玩家買 NPC material — sellable 受 target reserve 限,不可掃 0。
+	print("--- Trade 問題1: reserve 單一源,玩家不可刷光 ---")
+	var pts := PlayerTradeSystem.new()
+	var t := TeamData.new(); t.team_id = 1; _seed_pop(t, 10)
+	# material 剛好 reserve 量（pop × TARGET_PER_POP）→ sellable ≈ 0（全留底）
+	var reserve_amt: float = 10.0 * float(TradeValuation.TARGET_PER_POP["material"])
+	t.resources["material"] = reserve_amt
+	assert(pts._sellable_qty(t, "material") < 1.0,
+		"material 在 reserve 量 → 不可賣（修刷光），實際 sellable=%.1f" % pts._sellable_qty(t, "material"))
+	# 單一源：delegate 結果須等於 TradeValuation.reserve
+	assert(is_equal_approx(pts._sellable_qty(t, "material"),
+		maxf(reserve_amt - TradeValuation.reserve(t, "material"), 0.0)),
+		"_sellable_qty 須 delegate TradeValuation.reserve（單一源）")
+	# 超 reserve 部分可賣
+	t.resources["material"] = reserve_amt + 50.0
+	assert(pts._sellable_qty(t, "material") > 40.0,
+		"超 reserve 部分可賣,實際=%.1f" % pts._sellable_qty(t, "material"))
+	print("[OK] _test_trade_reserve_no_drain (reserve=%.0f)" % reserve_amt)
+
+func _test_npc_barter_coinless() -> void:
+	# 問題2：兩缺幣團互補 surplus（a 多 food 缺 material,b 多 material 缺 food,coin=0）→ barter 成交。
+	# coin_eq 硬閘：barter 不碰 coin，雙方 coin 維持 0。
+	print("--- Trade 問題2: 缺幣 NPC barter 互補互換 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var a := TeamData.new()
+	a.team_id = 0; _seed_pop(a, 10)
+	a.resources["food"] = 500.0       # food surplus
+	a.resources["material"] = 0.0     # material 缺
+	a.resources["coin"] = 0.0         # 缺幣
+	a.current_task = TeamData.TASK_TRADE
+	state.teams[0] = a
+	var b := TeamData.new()
+	b.team_id = 1; _seed_pop(b, 10)
+	b.resources["food"] = 0.0         # food 缺
+	b.resources["material"] = 500.0   # material surplus
+	b.resources["coin"] = 0.0         # 缺幣
+	state.teams[1] = b
+	var a_food0: float = float(a.resources["food"])
+	var b_mat0: float  = float(b.resources["material"])
+	var inter := InteractionSystem.new()
+	inter._resolve_market(state, a, b)
+	# 缺幣下,coin 路徑換不了 → 須靠 barter：a 得 material、b 得 food
+	assert(float(a.resources.get("material", 0)) > 0.0,
+		"a 應經 barter 收到 material,實際=%.1f" % float(a.resources.get("material", 0)))
+	assert(float(b.resources.get("food", 0)) > 0.0,
+		"b 應經 barter 收到 food,實際=%.1f" % float(b.resources.get("food", 0)))
+	assert(float(a.resources["food"]) < a_food0, "a 應付出 food")
+	assert(float(b.resources["material"]) < b_mat0, "b 應付出 material")
+	# coin_eq 硬閘：barter 不碰 coin
+	assert(is_equal_approx(float(a.resources.get("coin", 0)), 0.0), "a coin 仍 0（barter 不碰 coin）")
+	assert(is_equal_approx(float(b.resources.get("coin", 0)), 0.0), "b coin 仍 0（barter 不碰 coin）")
+	print("[OK] _test_npc_barter_coinless (a material=%.0f, b food=%.0f, coins=%.0f/%.0f)" % [
+		float(a.resources.get("material", 0)), float(b.resources.get("food", 0)),
+		float(a.resources.get("coin", 0)), float(b.resources.get("coin", 0))])
 
 func _test_smeltery_separate() -> void:
 	print("--- Facility Task3d: 冶煉獨立設施 ---")

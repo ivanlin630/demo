@@ -3,23 +3,15 @@ class_name PlayerTradeSystem
 # ──────── Constants ────────
 # 估值表（BASE_PRICE / TARGET_PER_POP）+ 單價公式已移至 TradeValuation（單一真值源）。
 # 本系統估值改 delegate TradeValuation.local_value；白名單走 TradeValuation.BASE_PRICE。
-const FOOD_RESERVE_TICKS: float   = 20.0   # TEST VALUE
 const MAX_COIN_PER_TRADE: float   = 300.0  # TEST VALUE — reserved; player offers currently uncapped
-const WEAPON_RESERVE_RATIO: float = 0.5    # TEST VALUE — armed_anon_ratio fraction to keep
 
 var _msg: SimMessageSystem = SimMessageSystem.new()
 
 # ──────── Helpers ────────
 
+# 留底走 TradeValuation.reserve（單一源）：玩家路徑全資源留底，不再刷光 NPC（修問題1）。
 func _sellable_qty(team: TeamData, res: String) -> float:
-	var stock: float = float(team.resources.get(res, 0))
-	if res == "food":
-		var reserve: float = float(team.population) * 0.1 * FOOD_RESERVE_TICKS
-		return maxf(stock - reserve, 0.0)
-	if res.begins_with("weapon_"):
-		var reserve: float = float(team.population) * team.armed_anon_ratio * WEAPON_RESERVE_RATIO
-		return maxf(stock - reserve, 0.0)
-	return maxf(stock, 0.0)
+	return maxf(float(team.resources.get(res, 0)) - TradeValuation.reserve(team, res), 0.0)
 
 # ──────── Public API ────────
 
