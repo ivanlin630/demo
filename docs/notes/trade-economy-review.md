@@ -36,7 +36,7 @@ sr       = clamp(shortage, −0.5, 上限)          # 生存品 4.0 / 其他 1.0
 
 2. **NPC 無以物易物**：`_attempt_trade_direction` `if buyer_coin<=0: return`，每腿 coin 結算。缺幣團之間即使 surplus 完美互補也換不了 → 破對稱性（玩家能 barter、NPC 不能）+ 疑為 W2 trade 量低根因之一（缺幣不能換）。
 
-3. **兩份 `_local_value` 漂移 + DTO 內部不一致**：
+3. ✅ **已修（2026-06-19，TradeValuation 單一源）**：抽 `TradeValuation`（canonical 表取 interaction + 合併公式 survival 不對稱+coin guard），interaction/player_trade/DTO 三處 delegate → 天平==接受同源、BASE_PRICE/TARGET 雙副本 drift 消。coin_eq=0。~~兩份 `_local_value` 漂移 + DTO 內部不一致~~：
    - `player_trade_system._local_value` 無生存品非對稱（food cap 2×）；`interaction_system` 有（food 5×）。檔案註解明寫要 sync，實際沒。
    - DTO 天平 `give/want_value` 用 `interaction.local_value`（5×），`npc_would_accept` 呼 `evaluate_offer`→`player_trade._local_value`（2×）→ **食物/醫療交易,顯示天平與實際接受用不同公式** → 「單一真相」承諾對 survival goods 已破。
 
