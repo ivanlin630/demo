@@ -1,54 +1,8 @@
 class_name InteractionSystem
 
 # ──────── 貿易常數 ────────
-# 定價規則：成品價 ≥ 原料價值（Σ in × BASE_PRICE）× 1.2（工藝品 gem 路線豁免）
-const BASE_PRICE: Dictionary = {
-	"food":               2.0,
-	"material":           4.0,
-	"herb":               3.0,
-	"goods":             15.0,   # in 12
-	"gem":               20.0,
-	"ore_gold":          10.0,
-	"ore_silver":         5.0,
-	"ore_iron":           8.0,
-	"ore_steel":         24.0,   # in 20
-	"weapon_melee_low":  34.0,   # in 28
-	"weapon_melee_high": 72.0,   # in 60
-	"weapon_ranged_low": 39.0,   # in 32
-	"weapon_ranged_high": 77.0,  # in 64
-	"tools":             20.0,   # in 16
-	"arrows":             4.0,   # in 3.2
-	"armor_low":         30.0,   # in 24
-	"armor_high":        72.0,   # in 60
-	"horses":            15.0,
-	"mounts":            45.0,   # horses + 草料 + 軍設施 margin
-	"wagons":            72.0,   # in 59
-	"medicine":          12.0,   # in 6
-}
-const TARGET_PER_POP: Dictionary = {
-	"food":              10.0,
-	"material":           5.0,
-	"goods":              3.0,
-	"gem":                1.0,
-	"ore_gold":           2.0,
-	"ore_silver":         3.0,
-	"ore_iron":           3.0,
-	"ore_steel":          1.5,
-	"weapon_melee_low":   1.0,
-	"weapon_melee_high":  0.5,
-	"weapon_ranged_low":  0.8,
-	"weapon_ranged_high": 0.4,
-	"tools":              0.5,
-	"arrows":             2.0,
-	"armor_low":          0.3,
-	"armor_high":         0.15,
-	"horses":             0.5,
-	"medicine":           1.0,
-	"herb":               1.0,
-	"mounts":             0.2,
-	"wagons":             0.2,
-}
-const SURVIVAL_GOODS: Array = ["food", "medicine"]   # 飢荒不對稱 clamp 適用
+# 估值表 BASE_PRICE / TARGET_PER_POP / SURVIVAL_GOODS 已移至 TradeValuation（單一真值源）。
+# 本檔估值改 delegate TradeValuation.local_value；表引用走 TradeValuation.BASE_PRICE 等。
 const FOOD_RESERVE_TICKS: float = 20.0   # TEST VALUE — food 最低自留（pop × 0.1 × N ticks）
 const MAX_COIN_PER_TRADE: float = 300.0  # TEST VALUE — 每次交易買方預算上限
 
@@ -538,22 +492,9 @@ func _deliver_order(state: WorldState, messenger_id: int, target_id: int) -> voi
 
 # ──────── 貿易 ────────
 
-func _local_value(team: TeamData, res: String) -> float:
-	if not BASE_PRICE.has(res):
-		return 0.0
-	var pop: float    = maxf(float(team.population), 1.0)
-	var stock: float  = float(team.resources.get(res, 0))
-	var target: float = pop * float(TARGET_PER_POP.get(res, 1.0))
-	var shortage: float = (target - stock) / maxf(target, 1.0)   # ≤ 1.0
-	if res in SURVIVAL_GOODS and shortage > 0.5:
-		# 生存品短缺過半 → 急速攀升：0.5→1.0 區間映射 sr 1.0→4.0（饑荒價最高 5×）
-		shortage = 1.0 + (shortage - 0.5) * 6.0
-	var sr: float = clampf(shortage, -0.5, 4.0 if res in SURVIVAL_GOODS else 1.0)
-	return float(BASE_PRICE[res]) * (1.0 + sr)
-
-# 公開存取（DTO 估值用）：_local_value 私有，trade_session DTO 經此取單價
+# 公開存取（DTO 估值用）：估值單一源 TradeValuation，trade_session DTO 經此取單價
 func local_value(team: TeamData, res: String) -> float:
-	return _local_value(team, res)
+	return TradeValuation.local_value(team, res)
 
 # ──────── 雙向 market 結算（取代舊 _resolve_trade）────────
 
@@ -563,7 +504,7 @@ func _calc_reserve(team: TeamData, res: String) -> float:
 	elif res == "coin":
 		return float(team.resources.get(res, 0)) * 0.5
 	# 其他資源：保留至 target 需求量，避免賣掉自己短缺的物資（否則雙向 market 會即買即賣）
-	return float(team.population) * float(TARGET_PER_POP.get(res, 0.0))
+	return float(team.population) * float(TradeValuation.TARGET_PER_POP.get(res, 0.0))
 
 func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int, price: float) -> void:
 	seller.resources[res] = float(seller.resources.get(res, 0)) - qty
@@ -640,7 +581,7 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		var inv_copy: Array = seller.merchant_inventory.duplicate()
 		for item in inv_copy:
 			if int(item.get("bought_from", -1)) == buyer.team_id: continue
-			var inv_bid: float = _local_value(buyer, item["grade"])
+			var inv_bid: float = TradeValuation.local_value(buyer, item["grade"])
 			if inv_bid <= float(item["bought_at"]): continue
 			var inv_qty: int = mini(int(item["qty"]), int(buyer_coin / inv_bid))
 			if inv_qty <= 0: continue
@@ -652,13 +593,13 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		seller.merchant_inventory = seller.merchant_inventory.filter(
 			func(it): return int(it.get("qty", 0)) > 0)
 	# (2) 賣 surplus（保留最低儲備）
-	for res in BASE_PRICE.keys():
+	for res in TradeValuation.BASE_PRICE.keys():
 		var stock: float = float(seller.resources.get(res, 0))
 		var reserve: float = _calc_reserve(seller, res)
 		var surplus: float = maxf(stock - reserve, 0.0)
 		if surplus <= 0.0: continue
-		var ask: float = _local_value(seller, res) * (1.0 - commerce * 0.1)
-		var bid: float = _local_value(buyer, res)
+		var ask: float = TradeValuation.local_value(seller, res) * (1.0 - commerce * 0.1)
+		var bid: float = TradeValuation.local_value(buyer, res)
 		if ask <= 0.0 or ask >= bid: continue
 		var qty: int = mini(int(surplus), int(buyer_coin / ask))
 		if qty <= 0: continue

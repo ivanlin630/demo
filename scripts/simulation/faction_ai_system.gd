@@ -1165,7 +1165,6 @@ const MERCHANT_MAX_RANGE: int = 20
 func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 	var best_id: int = -1
 	var best_score: float = -1e9
-	var inter := InteractionSystem.new()
 	for tid in state.team_discovered.get(merchant.team_id, []):
 		if tid == merchant.team_id: continue
 		if not state.teams.has(tid): continue
@@ -1174,15 +1173,15 @@ func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 		if not catch_result.reachable: continue
 		var snap: Dictionary = state.team_intel.get(merchant.team_id, {}).get(tid, {})
 		var max_gap: float = 0.0
-		for res in InteractionSystem.BASE_PRICE:
-			var my_val: float = inter._local_value(merchant, res)
+		for res in TradeValuation.BASE_PRICE:
+			var my_val: float = TradeValuation.local_value(merchant, res)
 			var their_val_est: float = my_val
 			if snap.has(res) and res in ["food", "material"]:
 				var pop: int = int(snap.get("population", 10))
 				var stk: float = float(snap.get(res, 0))
-				var target: float = float(pop) * float(InteractionSystem.TARGET_PER_POP.get(res, 1.0))
+				var target: float = float(pop) * float(TradeValuation.TARGET_PER_POP.get(res, 1.0))
 				var sr: float = clampf((target - stk) / maxf(target, 1.0), -0.5, 1.0)
-				their_val_est = float(InteractionSystem.BASE_PRICE[res]) * (1.0 + sr)
+				their_val_est = float(TradeValuation.BASE_PRICE[res]) * (1.0 + sr)
 			var gap: float = absf(their_val_est - my_val)
 			if gap > max_gap: max_gap = gap
 		var score: float = max_gap / float(maxi(int(catch_result.eta) / 60, 1))
@@ -1912,7 +1911,7 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 		"workshop":
 			var worst: float = 1.0
 			for res in ["goods", "tools", "arrows"]:
-				var tgt: float = float(InteractionSystem.TARGET_PER_POP.get(res, 1.0)) * pop
+				var tgt: float = float(TradeValuation.TARGET_PER_POP.get(res, 1.0)) * pop
 				worst = minf(worst, float(team.resources.get(res, 0)) / maxf(tgt, 0.001))
 			return clampf(1.0 - worst, 0.0, 1.0)
 		"apothecary":
