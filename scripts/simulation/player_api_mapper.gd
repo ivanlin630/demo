@@ -771,6 +771,7 @@ static func map_subteam_panel(state: WorldState) -> Dictionary:
 		"actions_per_subteam": actions_per,
 		"dispatch_candidates": candidates,
 		"player_population": pt.population if pt != null else 0,
+		"anon_count": AnonTierSystem.total_pop(pt) if pt != null else 0,
 	}
 
 # ── Body slots ─────────────────────────────────────────────────────────────────

@@ -1681,7 +1681,11 @@ func _build_subteam_str() -> String:
 	lines.append("")
 	lines.append("── 可派遣隊長 ──")
 	if candidates.is_empty():
-		lines.append("（無：需命名非 leader 成員）")
+		# N-1: 全 anon 隊死路引導——有 anon 可拔擢時告知去互動選單 promote_anon（補 Q7-4 發現性）
+		if int(sp.get("anon_count", 0)) > 0:
+			lines.append("（無可用隊長——先到互動選單『拔擢匿名→記名』培養成員）")
+		else:
+			lines.append("（無：需命名非 leader 成員）")
 	for i in range(candidates.size()):
 		lines.append("  %d. %s" % [i + 1, candidates[i].get("name", "?")])
 	if not candidates.is_empty():

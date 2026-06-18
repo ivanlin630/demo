@@ -28,6 +28,7 @@ func _initialize() -> void:
 	await _test_q7_3_take_loot_flow()
 	await _test_q7_5_dispatch_subteam_task()
 	await _test_q7_6_faction_gate_leader()
+	await _test_n1_subteam_promote_anon_hint()
 	print("\n=== UI Flow Test DONE === errors: %d" % _errors)
 	quit()
 
@@ -426,6 +427,31 @@ func _test_q7_6_faction_gate_leader() -> void:
 	var s_leader: String = node._build_faction_str()
 	_check("leader 顯 [A]設定目標", s_leader.contains("[A]設定目標"))
 	_check("leader 顯 [B]調整徵收率", s_leader.contains("[B]調整徵收率"))
+	await _free_ui(node)
+
+# N-1：全 anon 隊（leader + anon,無命名非 leader 成員）開子隊面板 → 引導去互動選單 promote_anon。
+func _test_n1_subteam_promote_anon_hint() -> void:
+	print("\n── N-1 子隊面板 promote_anon 引導 ──")
+	var node = await _make_ui()
+	var st = node._bridge.get_state()
+	var ptid: int = st.persons[st.player_id].team_id
+	var pt = st.teams[ptid]
+	# 清空命名非 leader 成員（保留 leader）→ dispatch_candidates 空
+	for mid in pt.named_members.duplicate():
+		if mid != pt.leader_id:
+			pt.named_members.erase(mid)
+	AnonTierSystem.add_anon(pt, "平民", 5)   # 有 anon 可拔擢
+	node._subteam_mode = true
+	var s_anon: String = node._build_subteam_str()
+	_check("全 anon 隊面板含 promote_anon 引導", s_anon.contains("拔擢匿名"))
+	_check("不再只顯舊死路字（需命名非 leader 成員）", not s_anon.contains("（無：需命名非 leader 成員）"))
+	# 無 anon 時退回舊死路字（不誤導）：清光全 tier/health anon
+	for tier in AnonCohort.TIER_ORDER:
+		for health in AnonCohort.HEALTH_ORDER:
+			AnonCohort.remove(pt.anon_cohorts, tier, health, 999999)   # remove 自帶 clamp
+	_check("anon 已清空", AnonTierSystem.total_pop(pt) == 0)
+	var s_empty: String = node._build_subteam_str()
+	_check("無 anon 時退回舊死路字", s_empty.contains("（無：需命名非 leader 成員）"))
 	await _free_ui(node)
 
 func _check(label: String, ok: bool) -> void:
