@@ -1344,7 +1344,7 @@ func _check_player_wiped(state: WorldState) -> void:
 	if pp == null: return
 	var pt: TeamData = state.teams.get(pp.team_id)
 	if pt != null and pt.population <= 0:
-		FactionAISystem.new()._handle_player_leader_death(state, pt)
+		EventSystem.new().handle_player_succession(state, pt)
 
 # ──────── Prosperity: 攻佔 outpost 居民處置 ────────
 

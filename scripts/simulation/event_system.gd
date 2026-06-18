@@ -24,7 +24,12 @@ func process_events(state: WorldState, team_ids: Array) -> Array:
 func on_leader_death(state: WorldState, team: TeamData) -> bool:
 	# player team → choose_heir forced（凍世界）／絕後 game_over
 	if state.player_id != -1 and team.team_id == state.get_player_team_id():
-		return _handle_player_succession(state, team)
+		# 冪等：安全網每 tick 對 leaderless 重呼，已 pending choose_heir 不重設
+		if state.player_forced_event is Dictionary \
+				and state.player_forced_event.get("action", "") == "choose_heir" \
+				and int(state.player_forced_event.get("team_id", -1)) == team.team_id:
+			return true
+		return handle_player_succession(state, team)
 	# NPC: best named 無門檻晉升
 	var best_successor: PersonData = null
 	var best_command: float = -1.0
@@ -56,12 +61,10 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 	print("[Succession] Team %d 無繼承人，崩潰中（無匿名人口）" % team.team_id)
 	return false
 
-func _handle_player_succession(state: WorldState, team: TeamData) -> bool:
-	# 冪等：已有本 team 的 choose_heir pending → 不重設
-	if state.player_forced_event is Dictionary \
-			and state.player_forced_event.get("action", "") == "choose_heir" \
-			and int(state.player_forced_event.get("team_id", -1)) == team.team_id:
-		return true
+# player leader 死亡繼承（公開單一入口）。external caller 已知是 player team 時直呼此函數，
+# 繞過 on_leader_death 的自動偵測（player person 可能已 erase 致 get_player_team_id 查不到）。
+# 冪等性由 on_leader_death 的偵測分支負責（安全網每 tick 重呼）。
+func handle_player_succession(state: WorldState, team: TeamData) -> bool:
 	team.leader_id = -1
 	if team.named_members.is_empty():
 		state.game_over = true
