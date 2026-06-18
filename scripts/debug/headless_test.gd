@@ -49,6 +49,7 @@ func _initialize() -> void:
 	_test_setup_mode_explicit()
 	_test_full_config_load()
 	_test_s11_leader_succession()
+	_test_world_get_player_team_id()
 	_test_team_previous_task_field()
 	_test_survival_trigger_urgent()
 	_test_survival_sticky()
@@ -10509,3 +10510,24 @@ func _test_trade_conservation() -> void:
 	var after: float = coin_eq.call(pt) + coin_eq.call(npc)
 	assert(abs(after - before) < 0.01, "coin_eq 守恆：%.2f vs %.2f" % [before, after])
 	print("trade conservation OK")
+
+func _test_world_get_player_team_id() -> void:
+	print("--- WorldState.get_player_team_id 單一源 ---")
+	var s := WorldState.new()
+	s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 7
+	var p := PersonData.new(); p.id = 7000; p.team_id = 7
+	s.persons[p.id] = p
+	t.leader_id = p.id
+	s.teams[7] = t
+	s.player_id = p.id
+	assert(s.get_player_team_id() == 7, "player 在世 → team 7，實際=%d" % s.get_player_team_id())
+	# player 死亡（persons 移除），仍掛在 named_members → 反查
+	s.persons.erase(p.id)
+	t.leader_id = -1
+	t.named_members = [p.id]
+	assert(s.get_player_team_id() == 7, "player 死但掛 named → 反查 team 7，實際=%d" % s.get_player_team_id())
+	# 完全找不到 → -1
+	t.named_members = []
+	assert(s.get_player_team_id() == -1, "查無 → -1，實際=%d" % s.get_player_team_id())
+	print("get_player_team_id OK")

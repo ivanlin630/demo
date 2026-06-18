@@ -1036,16 +1036,7 @@ func _update_equip_order(state: WorldState, team: TeamData) -> void:
 			(int(team.resources.get("weapon_melee_low", 0)) + int(equipped_units["melee_low"])) / 2, guard_count)
 
 func _get_player_team_id(state: WorldState) -> int:
-	if state.player_id == -1: return -1
-	var p: PersonData = state.persons.get(state.player_id)
-	if p == null:
-		# 玩家已死，找 leader_id == player_id 或 player_id in named_members 的 team
-		for tid in state.teams:
-			var t: TeamData = state.teams[tid]
-			if t.leader_id == state.player_id or state.player_id in t.named_members:
-				return tid
-		return -1
-	return p.team_id
+	return state.get_player_team_id()
 
 func _handle_player_leader_death(state: WorldState, team: TeamData) -> void:
 	team.leader_id = -1

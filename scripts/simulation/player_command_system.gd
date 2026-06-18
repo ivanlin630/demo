@@ -1083,8 +1083,7 @@ func _get_player_team(state: WorldState) -> TeamData:
 	return state.teams.get(p.team_id)
 
 func _get_player_team_id(state: WorldState) -> int:
-	var p: PersonData = state.persons.get(state.player_id)
-	return p.team_id if p != null else -1
+	return state.get_player_team_id()
 
 func _can_trade(state: WorldState, pt: TeamData, tgt: TeamData) -> bool:
 	# 雙方任一有 coin 即可嘗試貿易（細節由 resolve_trade_direct 判定）
