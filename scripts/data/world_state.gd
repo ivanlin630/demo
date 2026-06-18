@@ -178,6 +178,19 @@ var last_encounter_result: Dictionary = {}
 # Format: { "winner_id": int, "loser_id": int, "loot_pool": Dictionary, "can_subjugate": bool }
 # Cleared after player takes/leaves loot.
 
+# Leader 繼承等用：player 所屬 team_id 單一源（player 死亡時反查掛載 team）。
+func get_player_team_id() -> int:
+	if player_id == -1:
+		return -1
+	var p = persons.get(player_id)
+	if p == null:
+		for tid in teams:
+			var t = teams[tid]
+			if t.leader_id == player_id or player_id in t.named_members:
+				return tid
+		return -1
+	return p.team_id
+
 func snapshot_faction_member(team_id: int, tick: int) -> void:
 	var t: TeamData = teams.get(team_id) as TeamData
 	if t == null or t.faction_id == -1:

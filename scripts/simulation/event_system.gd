@@ -1,7 +1,5 @@
 class_name EventSystem
 
-const COMMAND_SKILL_MIN: float = 0.3
-
 var _events: Array = []
 
 func _init() -> void:
@@ -22,34 +20,63 @@ func process_events(state: WorldState, team_ids: Array) -> Array:
 				new_teams.append_array(event.execute(state, team))
 	return new_teams
 
-# 由外部呼叫（Leader 死亡後繼承檢查）
+# 由外部呼叫（Leader 死亡/失效後繼承）。繼承邏輯單一 owner。
 func on_leader_death(state: WorldState, team: TeamData) -> bool:
+	# player team → choose_heir forced（凍世界）／絕後 game_over
+	if state.player_id != -1 and team.team_id == state.get_player_team_id():
+		# 冪等：安全網每 tick 對 leaderless 重呼，已 pending choose_heir 不重設
+		if state.player_forced_event is Dictionary \
+				and state.player_forced_event.get("action", "") == "choose_heir" \
+				and int(state.player_forced_event.get("team_id", -1)) == team.team_id:
+			return true
+		return handle_player_succession(state, team)
+	# NPC: best named 無門檻晉升
 	var best_successor: PersonData = null
-	var best_command: float = 0.0
-	for pid in state.persons:
-		var p: PersonData = state.persons[pid]
-		if p.team_id != team.team_id or p.id == team.leader_id:
+	var best_command: float = -1.0
+	for pid in team.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p == null:
 			continue
 		var cmd: float = float(p.skills.get("統領", 0.0))
 		if cmd > best_command:
 			best_command = cmd
 			best_successor = p
-	if best_successor != null and best_command >= COMMAND_SKILL_MIN:
-		print("[Event] Team %d 新領袖：Person %d（統領=%.2f）" % [
-			team.team_id, best_successor.id, best_command
-		])
+	if best_successor != null:
 		team.leader_id = best_successor.id
 		best_successor.role = "leader"
-		# 新 leader 統領不足時，委託 PopulationSystem 處理溢出（dispatch 或建流亡隊）
+		team.named_members.erase(best_successor.id)
+		print("[Succession] Team %d 新 leader: P%d（統領=%.2f）" % [
+			team.team_id, best_successor.id, best_command])
 		PopulationSystem.new().check_overflow_for_team(state, team.team_id)
 		return true
-	else:
-		var promoted := PersonGenerator.generate_for_team(state, team, "member")
-		if promoted != null:
-			team.leader_id  = promoted.id
-			promoted.role   = "leader"
-			print("[Event] Team%d 從匿名晉升新領袖 Person%d（統領=%.2f）" % [
-				team.team_id, promoted.id, float(promoted.skills.get("統領", 0.0))])
-			return true
-		print("[Event] Team %d 無繼承人，崩潰中（無匿名人口）" % team.team_id)
+	# 無 named → 從 anon 晉升
+	var promoted := PersonGenerator.generate_for_team(state, team, "member")
+	if promoted != null:
+		team.leader_id = promoted.id
+		promoted.role = "leader"
+		print("[Succession] Team %d 從匿名晉升新領袖 P%d（統領=%.2f）" % [
+			team.team_id, promoted.id, float(promoted.skills.get("統領", 0.0))])
+		PopulationSystem.new().check_overflow_for_team(state, team.team_id)
+		return true
+	print("[Succession] Team %d 無繼承人，崩潰中（無匿名人口）" % team.team_id)
+	return false
+
+# player leader 死亡繼承（公開單一入口）。external caller 已知是 player team 時直呼此函數，
+# 繞過 on_leader_death 的自動偵測（player person 可能已 erase 致 get_player_team_id 查不到）。
+# 冪等性由 on_leader_death 的偵測分支負責（安全網每 tick 重呼）。
+func handle_player_succession(state: WorldState, team: TeamData) -> bool:
+	team.leader_id = -1
+	if team.named_members.is_empty():
+		state.game_over = true
+		state.game_over_reason = "玩家絕後（Team%d 無繼承人）" % team.team_id
+		print("[GameOver] %s" % state.game_over_reason)
 		return false
+	state.player_forced_event = {
+		"action": "choose_heir",
+		"team_id": team.team_id,
+		"candidates": team.named_members.duplicate(),
+	}
+	state.player_forced_event_id = "heir_%d" % state.world.current_tick
+	print("[Heir] 玩家 leader 死亡，等待選繼承人 (Team%d, %d 候選)" % [
+		team.team_id, team.named_members.size()])
+	return true

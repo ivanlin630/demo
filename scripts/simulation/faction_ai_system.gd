@@ -498,9 +498,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if team.population <= 0:
 			_on_team_extinct(state, team)
 			continue
-		# S11: leader 死亡自動繼承（無 leader 但有 named members）
-		if team.leader_id == -1 and not team.named_members.is_empty():
-			_promote_successor(state, team)
+		# leader 失效 → 繼承單一 owner（含 anon fallback / player choose_heir）。唯一偵測點。
+		if team.leader_id == -1:
+			EventSystem.new().on_leader_death(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
 		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）
@@ -1036,61 +1036,7 @@ func _update_equip_order(state: WorldState, team: TeamData) -> void:
 			(int(team.resources.get("weapon_melee_low", 0)) + int(equipped_units["melee_low"])) / 2, guard_count)
 
 func _get_player_team_id(state: WorldState) -> int:
-	if state.player_id == -1: return -1
-	var p: PersonData = state.persons.get(state.player_id)
-	if p == null:
-		# 玩家已死，找 leader_id == player_id 或 player_id in named_members 的 team
-		for tid in state.teams:
-			var t: TeamData = state.teams[tid]
-			if t.leader_id == state.player_id or state.player_id in t.named_members:
-				return tid
-		return -1
-	return p.team_id
-
-func _handle_player_leader_death(state: WorldState, team: TeamData) -> void:
-	team.leader_id = -1
-	if team.named_members.is_empty():
-		state.game_over = true
-		state.game_over_reason = "玩家絕後（Team%d 無繼承人）" % team.team_id
-		print("[GameOver] %s" % state.game_over_reason)
-		return
-	state.player_forced_event = {
-		"action": "choose_heir",
-		"team_id": team.team_id,
-		"candidates": team.named_members.duplicate(),
-	}
-	state.player_forced_event_id = "heir_%d" % state.world.current_tick
-	print("[Heir] 玩家 leader 死亡，等待選繼承人 (Team%d, %d 候選)" % [
-		team.team_id, team.named_members.size()])
-
-func _promote_successor(state: WorldState, team: TeamData) -> void:
-	# H: 玩家 team 走 _handle_player_leader_death
-	var player_team_id: int = _get_player_team_id(state)
-	if state.player_id != -1 and team.team_id == player_team_id:
-		_handle_player_leader_death(state, team)
-		return
-	# 從 named_members 選統領技能最高者升任 leader（S11 fix）
-	var best_pid: int = -1
-	var best_cmd: float = -1.0
-	for pid in team.named_members:
-		var p: PersonData = state.persons.get(pid)
-		if p == null: continue
-		var cmd: float = float(p.skills.get("統領", 0.0))
-		if cmd > best_cmd:
-			best_cmd = cmd
-			best_pid = pid
-	if best_pid == -1:
-		return
-	var new_leader: PersonData = state.persons[best_pid]
-	new_leader.role = "leader"
-	team.leader_id = best_pid
-	team.named_members.erase(best_pid)
-	print("[Succession] Team%d 新 leader: P%d (%s) 統領=%.2f" % [
-		team.team_id, best_pid, new_leader.person_name, best_cmd])
-	# 若是玩家 team 且玩家死亡，state.player_id 同步轉移（D2 連動緩解）
-	if state.player_id == -1 or state.persons.get(state.player_id) == null:
-		# 不主動轉移玩家身分，D2 屬獨立議題
-		pass
+	return state.get_player_team_id()
 
 func _update_armor_config(team: TeamData) -> void:
 	var pop_threshold: float = maxf(team.population * 0.3, 1.0)

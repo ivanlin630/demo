@@ -49,6 +49,16 @@ func _initialize() -> void:
 	_test_setup_mode_explicit()
 	_test_full_config_load()
 	_test_s11_leader_succession()
+	_test_world_get_player_team_id()
+	_test_succession_npc_best_named()
+	_test_succession_low_named_no_threshold()
+	_test_succession_anon_fallback()
+	_test_succession_anon_exhausted()
+	_test_succession_weak_leader_overflow()
+	_test_succession_player_choose_heir()
+	_test_succession_player_extinct()
+	_test_succession_detection_net()
+	_test_succession_player_net_extinct()
 	_test_team_previous_task_field()
 	_test_survival_trigger_urgent()
 	_test_survival_sticky()
@@ -3470,8 +3480,8 @@ func _test_blood_zero_death() -> void:
 	assert(team.leader_id == -1, "leader 餓死 → leader_id=-1")
 	assert(team.population == 1, "pop 同步 -1 → 1，實際=%d" % team.population)
 	assert(leader.team_id == 0, "死者 team_id 不改（沿用戰死模型）")
-	# 既有繼承鏈
-	FactionAISystem.new()._promote_successor(state, team)
+	# 繼承單一 owner（NPC 路徑）
+	EventSystem.new().on_leader_death(state, team)
 	assert(team.leader_id == 11, "繼承 → 新 leader P11，實際=%d" % team.leader_id)
 	assert(11 not in team.named_members, "新 leader 已自 named_members 移出")
 	# 重複結算防護：死者已脫離編制 → 再呼叫不重扣
@@ -3496,8 +3506,8 @@ func _test_player_leader_starves() -> void:
 	state.persons[11] = heir
 	HealthSystem.check_starvation_deaths(state)
 	assert(team.leader_id == -1, "玩家 leader 餓死 → leader_id=-1")
-	# 既有偵測點：evaluate_all 偵測 leader_id==-1 → _promote_successor → 玩家走 _handle_player_leader_death
-	FactionAISystem.new()._promote_successor(state, team)
+	# 偵測點：faction_ai 安全網對 leader_id==-1 呼 on_leader_death → player 分支 choose_heir
+	EventSystem.new().on_leader_death(state, team)
 	assert(state.player_forced_event.get("action", "") == "choose_heir",
 		"玩家路徑應產生 choose_heir forced event，實際=%s" % str(state.player_forced_event))
 	print("Famine Task3c OK")
@@ -3922,8 +3932,7 @@ func _test_s11_leader_succession() -> void:
 	p3.skills = { "統領": 0.5 }
 	state.persons[3] = p3
 	team.named_members.append(3)
-	var fai := FactionAISystem.new()
-	fai._promote_successor(state, team)
+	EventSystem.new().on_leader_death(state, team)
 	assert(team.leader_id == 2,
 		"應升統領最高的 P2 (0.7)，實際=%d" % team.leader_id)
 	assert(not team.named_members.has(2),
@@ -3932,15 +3941,15 @@ func _test_s11_leader_succession() -> void:
 		"P2.role 應為 leader")
 	# 第二次 leader 死亡，應選 P3 (0.5)
 	team.leader_id = -1
-	fai._promote_successor(state, team)
+	EventSystem.new().on_leader_death(state, team)
 	assert(team.leader_id == 3,
 		"第二次應選 P3 (0.5 次高)，實際=%d" % team.leader_id)
-	# 無 named 時 no-op
+	# 無 named 無 anon → 滅團 no-op
 	var team2 := TeamData.new()
 	team2.team_id = 99
 	team2.leader_id = -1
-	fai._promote_successor(state, team2)
-	assert(team2.leader_id == -1, "無 named 不應升職")
+	EventSystem.new().on_leader_death(state, team2)
+	assert(team2.leader_id == -1, "無 named 無 anon 不應升職")
 	print("S11 OK")
 
 func _test_team_previous_task_field() -> void:
@@ -5249,8 +5258,7 @@ func _test_handle_player_leader_death() -> void:
 	# 模擬玩家死亡：persons 中移除
 	state.persons.erase(100)
 	pt.leader_id = -1
-	var fai := FactionAISystem.new()
-	fai._handle_player_leader_death(state, pt)
+	EventSystem.new().handle_player_succession(state, pt)
 	assert(not state.player_forced_event.is_empty(), "應寫入 forced_event")
 	assert(state.player_forced_event.get("action") == "choose_heir")
 	var cands: Array = state.player_forced_event.get("candidates", [])
@@ -5266,8 +5274,7 @@ func _test_no_heir_game_over() -> void:
 	pt.team_id = 0; pt.leader_id = -1
 	pt.named_members = []
 	state.teams[0] = pt
-	var fai := FactionAISystem.new()
-	fai._handle_player_leader_death(state, pt)
+	EventSystem.new().handle_player_succession(state, pt)
 	assert(state.game_over, "無 named 應 game_over")
 	assert(state.game_over_reason != "", "應有原因")
 	print("Death Task2b OK")
@@ -5534,9 +5541,8 @@ func _test_encounter_kills_player_triggers_heir() -> void:
 	# 但「不」從 state.persons 移除（死者 record 保留，body_parts 標記死亡）。
 	# 故 _get_player_team_id 仍可由 persons[100].team_id 反查到玩家 team。
 	pt.leader_id = -1   # 玩家戰死（leader_id 清空，person 保留於 state.persons）
-	# 跑 faction_ai _promote_successor
-	var fai := FactionAISystem.new()
-	fai._promote_successor(state, pt)
+	# 安全網偵測點：on_leader_death → player 分支（person 保留 → get_player_team_id 查得到）
+	EventSystem.new().on_leader_death(state, pt)
 	# 應有 forced_event 而非 auto-promote
 	assert(not state.player_forced_event.is_empty(), "玩家 team 應 forced event 而非 auto")
 	assert(state.player_forced_event.get("action") == "choose_heir")
@@ -10509,3 +10515,159 @@ func _test_trade_conservation() -> void:
 	var after: float = coin_eq.call(pt) + coin_eq.call(npc)
 	assert(abs(after - before) < 0.01, "coin_eq 守恆：%.2f vs %.2f" % [before, after])
 	print("trade conservation OK")
+
+func _test_world_get_player_team_id() -> void:
+	print("--- WorldState.get_player_team_id 單一源 ---")
+	var s := WorldState.new()
+	s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 7
+	var p := PersonData.new(); p.id = 7000; p.team_id = 7
+	s.persons[p.id] = p
+	t.leader_id = p.id
+	s.teams[7] = t
+	s.player_id = p.id
+	assert(s.get_player_team_id() == 7, "player 在世 → team 7，實際=%d" % s.get_player_team_id())
+	# player 死亡（persons 移除），仍掛在 named_members → 反查
+	s.persons.erase(p.id)
+	t.leader_id = -1
+	t.named_members = [p.id]
+	assert(s.get_player_team_id() == 7, "player 死但掛 named → 反查 team 7，實際=%d" % s.get_player_team_id())
+	# 完全找不到 → -1
+	t.named_members = []
+	assert(s.get_player_team_id() == -1, "查無 → -1，實際=%d" % s.get_player_team_id())
+	print("get_player_team_id OK")
+
+func _mk_succession_team(tid: int, named_cmds: Array, anon_n: int) -> Array:
+	# 回 [state, team]；named_cmds = 每個 named 的統領值（leader 另設）；anon_n = 平民 anon 數
+	var s := WorldState.new()
+	s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = tid; t.tile_pos = Vector2i(4, 4)
+	var leader := PersonData.new(); leader.id = tid * 1000; leader.team_id = tid
+	leader.skills = {"統領": 0.5}
+	s.persons[leader.id] = leader
+	t.leader_id = leader.id
+	var nidx: int = 1
+	for cmd in named_cmds:
+		var n := PersonData.new(); n.id = tid * 1000 + nidx; n.team_id = tid
+		n.skills = {"統領": float(cmd)}
+		s.persons[n.id] = n
+		t.named_members.append(n.id)
+		nidx += 1
+	if anon_n > 0:
+		AnonCohort.add(t.anon_cohorts, "平民", "healthy", anon_n)
+	s.teams[tid] = t
+	return [s, t]
+
+func _test_succession_npc_best_named() -> void:
+	print("--- 繼承：NPC 晉升 best named（無門檻）---")
+	var r := _mk_succession_team(1, [0.1, 0.7, 0.3], 0)  # 三 named，最高 0.7
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.persons.erase(t.leader_id); t.leader_id = -1   # 模擬 leader 死
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok, "有 named 應繼承成功")
+	assert(t.leader_id == 1 * 1000 + 2, "應選統領最高(0.7)的 named，實際 leader=%d" % t.leader_id)
+	assert(not t.named_members.has(t.leader_id), "新 leader 應從 named_members 移除")
+	print("succession best named OK")
+
+func _test_succession_low_named_no_threshold() -> void:
+	print("--- 繼承：低統領 named 仍硬上位（無門檻）---")
+	var r := _mk_succession_team(2, [0.05], 0)   # 唯一 named 統領僅 0.05
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.persons.erase(t.leader_id); t.leader_id = -1
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok and t.leader_id == 2 * 1000 + 1, "低統領 named 應硬上位，實際 leader=%d" % t.leader_id)
+	print("succession no threshold OK")
+
+func _test_succession_anon_fallback() -> void:
+	print("--- 繼承：無 named → anon 晉升 ---")
+	var r := _mk_succession_team(3, [], 4)   # 0 named，4 anon
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.persons.erase(t.leader_id); t.leader_id = -1
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok, "有 anon 應晉升成功")
+	assert(t.leader_id != -1 and s.persons.has(t.leader_id), "anon 晉升出新 named leader")
+	print("succession anon fallback OK")
+
+func _test_succession_anon_exhausted() -> void:
+	print("--- 繼承：無 named 無 anon → 滅團(false) ---")
+	var r := _mk_succession_team(4, [], 0)   # 0 named，0 anon
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.persons.erase(t.leader_id); t.leader_id = -1
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(not ok, "無繼承人應回 false")
+	print("succession exhausted OK")
+
+func _test_succession_weak_leader_overflow() -> void:
+	print("--- 繼承：弱 leader → pop_cap 溢出回饋 ---")
+	# 低統領 named 繼任 → pop_cap_from_leadership 低 → check_overflow 應觸發（pop > cap）
+	var r := _mk_succession_team(5, [0.05], 30)  # 1 弱 named + 30 anon，pop=32
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	# 加一格 tile 供 overflow 流亡隊落腳
+	var tile := HexTileData.new(); tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4)
+	tile.terrain = "plains"; s.world.tiles[tile.tile_id] = tile
+	s.persons.erase(t.leader_id); t.leader_id = -1
+	var cap: int = TeamData.pop_cap_from_leadership(0.05)
+	var teams_before: int = s.teams.size()
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok, "弱 named 應繼承")
+	# pop(32) > cap(弱統領) → overflow → dispatch 或 _create_overflow_team
+	assert(t.population <= cap or s.teams.size() > teams_before,
+		"溢出應減員或生流亡隊（cap=%d pop=%d teams=%d→%d）" % [cap, t.population, teams_before, s.teams.size()])
+	print("weak leader overflow OK")
+
+func _test_succession_player_choose_heir() -> void:
+	print("--- 繼承：player team → choose_heir forced ---")
+	var r := _mk_succession_team(6, [0.2, 0.4], 0)
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.player_id = t.leader_id          # 玩家是 leader
+	# 玩家 leader 死（person 尚在 persons：所有真實路徑呼 on_leader_death 時死者未 erase
+	# —— combat 在 erase 前呼、famine/encounter/安全網從不 erase）
+	t.leader_id = -1
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok, "player 有 named → pending(true)")
+	assert(s.player_forced_event.get("action", "") == "choose_heir", "應發 choose_heir forced")
+	assert(s.player_forced_event.get("team_id", -1) == 6, "forced team_id=6")
+	assert(s.player_forced_event.get("candidates", []).size() == 2, "2 候選")
+	# 冪等：再呼一次不應改變/重設
+	var fe_id_before = s.player_forced_event_id
+	var ok2: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok2 and s.player_forced_event_id == fe_id_before, "冪等：pending 時不重設 forced")
+	print("player choose_heir OK")
+
+func _test_succession_player_extinct() -> void:
+	print("--- 繼承：player named 空 → game_over ---")
+	var r := _mk_succession_team(8, [], 5)   # player 隊 0 named（只 anon）
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.player_id = t.leader_id
+	t.leader_id = -1   # person 尚在 persons（見 choose_heir 測試註）
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(not ok, "player 絕後 → false")
+	assert(s.game_over, "應設 game_over")
+	print("player extinct OK")
+
+func _test_succession_detection_net() -> void:
+	print("--- 繼承：faction_ai 安全網捕捉 leaderless（named 全滅）---")
+	# 複現 E-1：encounter 打到 named 全滅但 anon 在 → leader_id=-1, named 空
+	var r := _mk_succession_team(9, [], 6)   # 0 named, 6 anon
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	var tile := HexTileData.new(); tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4)
+	tile.terrain = "plains"; s.world.tiles[tile.tile_id] = tile
+	s.persons.erase(t.leader_id); t.leader_id = -1   # encounter 裸置後狀態
+	var fai := FactionAISystem.new()
+	# 直呼偵測點等價邏輯：主迴圈會對 leader_id==-1 呼 on_leader_death
+	if t.leader_id == -1:
+		EventSystem.new().on_leader_death(s, t)
+	assert(t.leader_id != -1, "安全網應從 anon 晉升新 leader，非永久 leaderless blob")
+	print("detection net OK")
+
+func _test_succession_player_net_extinct() -> void:
+	print("--- 繼承：player leaderless + named 空 → 安全網 game_over（修 latent）---")
+	var r := _mk_succession_team(11, [], 4)
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.player_id = t.leader_id
+	# 安全網場景（encounter/famine 不 erase 死者 person，見 single-source 設計）
+	t.leader_id = -1
+	if t.leader_id == -1:
+		EventSystem.new().on_leader_death(s, t)
+	assert(s.game_over, "player 絕後經安全網應 game_over（原 gate 漏此 case）")
+	print("player net extinct OK")

@@ -921,7 +921,7 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 				# team 由 fe.team_id 取(權威),勿靠可能已失效的 _get_player_team。
 				var dead_team: TeamData = state.teams.get(int(fe.get("team_id", -1)))
 				if dead_team != null:
-					FactionAISystem.new()._handle_player_leader_death(state, dead_team)
+					EventSystem.new().handle_player_succession(state, dead_team)
 				else:
 					state.game_over = true
 					state.game_over_reason = "玩家絕後（隊已滅,無繼承人）"
@@ -1083,8 +1083,7 @@ func _get_player_team(state: WorldState) -> TeamData:
 	return state.teams.get(p.team_id)
 
 func _get_player_team_id(state: WorldState) -> int:
-	var p: PersonData = state.persons.get(state.player_id)
-	return p.team_id if p != null else -1
+	return state.get_player_team_id()
 
 func _can_trade(state: WorldState, pt: TeamData, tgt: TeamData) -> bool:
 	# 雙方任一有 coin 即可嘗試貿易（細節由 resolve_trade_direct 判定）

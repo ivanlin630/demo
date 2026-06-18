@@ -217,8 +217,8 @@ static func tick_natural_regen(state: WorldState) -> void:
 
 # 日邊界結算：blood<=0 的 named → 死亡（通用死因：餓死/失血）。
 # named 死 = named_members.erase + pop-1（沿用戰死處理模式：person 留 state.persons，team_id 不改）。
-# leader 死 → leader_id=-1，交既有繼承鏈（faction_ai _promote_successor / 玩家 _handle_player_leader_death）。
-# 不 null team_id：保 _get_player_team_id 找得到玩家團 → 玩家 leader 餓死走 choose_heir forced event。
+# leader 死 → leader_id=-1，交繼承單一 owner（faction_ai 安全網 → EventSystem.on_leader_death）。
+# 不 null team_id：保 WorldState.get_player_team_id 找得到玩家團 → 玩家 leader 餓死走 choose_heir forced event。
 # 重複結算防護：只處理仍在編制（leader 或 named_members）的人；死後脫離編制即跳過。
 static func check_starvation_deaths(state: WorldState) -> void:
 	var dead: Array = []
