@@ -1,0 +1,61 @@
+# 00_roles.md — Session 角色與分工
+
+主 session 有**兩個並存的設計腦**，按領域分（WHAT vs HOW），不是按階層。
+加上 worktree 實作者。三者接力，不是並行競爭。
+
+## 三角色
+
+| 角色 | 管 | 不管 | 產物 |
+|---|---|---|---|
+| **藍圖**（Blueprint） | **WHAT**：玩什麼、玩家循環、feature 願景、平衡意圖 | 架構決定、code | `game-design.md`、feature/願景 docs |
+| **系統**（Systems） | **HOW**：seam、契約、所有權圖、invariant、tick pipeline、行政流程 | 遊戲願景、平衡意圖 | spec / plan / `invariants.md` |
+| **實作**（Implementer） | 在 worktree 寫 code、跑測試 | 設計決定 | code + handback |
+
+兩個設計 session 都在 `A:\GDS\demo` / `main`。實作在 `.worktrees/<feature>/` / `feat/<feature>`。
+
+## 接力流向（同一 feature 不同階段，非同時）
+
+```
+你 ──願景──> 藍圖(WHAT) ──設計意圖──> 系統(HOW) ──spec──> 實作 ──handback──> 系統
+```
+
+- 同一 feature 不會同時找兩個談：先藍圖定要什麼，再系統定怎麼架。
+- 你「找兩個」只在做**不同 feature 的不同階段** = pipeline，不是腦力衝突。
+
+## 三條釘死規則
+
+### 1. 邊界 = WHAT vs HOW
+- 藍圖不碰架構決定；系統不改遊戲願景。
+- 越界 → 呈報對方，不自決。
+
+### 2. 共用單例 owner（防檔案 race；同目錄同 branch 無 git 保護）
+
+| 檔 | owner |
+|---|---|
+| `game-design.md`、feature/願景 docs | 藍圖 |
+| `invariants.md`、架構/流程 docs、`progress.md`、`known_issues.md`、`CLAUDE.md`、`docs/process/*` | 系統 |
+| **auto-memory（`~/.claude/projects/A--GDS-demo/memory/` + MEMORY.md）** | **系統（單寫者）** |
+
+- 不碰對方 owner 的檔。要改 → 呈報 owner。
+- 藍圖的設計事實寫進 `game-design.md`（git），**不寫 auto-memory**。
+
+### 3. 衝突仲裁
+- 藍圖想要 X、架構撐不住 → **系統有可行性否決權**（不假裝架構支援不了的東西）。
+- 藍圖有 WHAT 決定權，系統有 HOW 決定權。
+- 喬不攏 → 你裁。
+
+## auto-memory 規則（承 §2）
+
+- **只有系統 session 寫** auto-memory。藍圖 / 實作只**讀**（harness 開頭自動注入，無需主動讀）。
+- 藍圖 / 實作學到的跨 session 教訓 → 寫進 handback（git doc）→ 系統提煉進 memory。
+- 單寫者 = 零 MEMORY.md race + 教訓經系統過濾，避免各記不一致。
+
+## 你的負擔
+
+| 對象 | 你做什麼 | 頻率 |
+|---|---|---|
+| 藍圖 | 願景討論、玩法取捨 | 按 feature |
+| 系統 | 架構討論、裁決、流程 | 按 feature |
+| 實作 | 貼一行啟動 + 收 handback | 機械、低腦力 |
+
+兩個設計腦不重複（異工），實作非同步跑（並行紅利）。
