@@ -291,6 +291,7 @@ func _initialize() -> void:
 	_test_recipe_input_scaling()
 	_test_price_covers_input_cost()
 	_test_famine_price_spike()
+	_test_trade_valuation_single_source()
 
 	_test_site_diff_print()
 	_test_resume_requires_food()
@@ -8613,34 +8614,60 @@ func _test_price_covers_input_cost() -> void:
 				continue   # 工藝品 = gem 觸媒高效路線，本就有利，豁免
 			var input_value: float = 0.0
 			for res in recipe["in"]:
-				assert(InteractionSystem.BASE_PRICE.has(res), "原料 %s 缺 BASE_PRICE" % res)
-				input_value += float(recipe["in"][res]) * float(InteractionSystem.BASE_PRICE[res])
-			var out_price: float = float(InteractionSystem.BASE_PRICE.get(recipe["out"], 0.0))
+				assert(TradeValuation.BASE_PRICE.has(res), "原料 %s 缺 BASE_PRICE" % res)
+				input_value += float(recipe["in"][res]) * float(TradeValuation.BASE_PRICE[res])
+			var out_price: float = float(TradeValuation.BASE_PRICE.get(recipe["out"], 0.0))
 			assert(out_price >= input_value * 1.2 - 0.0001,
 				"%s 價 %.1f < 原料 %.1f × 1.2" % [recipe["out"], out_price, input_value])
-	assert(InteractionSystem.BASE_PRICE.has("herb"), "herb 補價")
-	assert(InteractionSystem.BASE_PRICE.has("mounts"), "mounts 補價")
-	assert(InteractionSystem.BASE_PRICE.has("wagons"), "wagons 補價")
+	assert(TradeValuation.BASE_PRICE.has("herb"), "herb 補價")
+	assert(TradeValuation.BASE_PRICE.has("mounts"), "mounts 補價")
+	assert(TradeValuation.BASE_PRICE.has("wagons"), "wagons 補價")
 	print("Econ Task2a OK")
 
 func _test_famine_price_spike() -> void:
 	print("--- Econ Task2b: 飢荒不對稱 clamp ---")
-	var isys := InteractionSystem.new()
 	var team := TeamData.new()
 	_seed_pop(team, 10)
 	team.resources = {}
 	# 生存品 stock 0 → 5×；一般品 stock 0 → 2×
-	assert(is_equal_approx(isys._local_value(team, "food"),
-		float(InteractionSystem.BASE_PRICE["food"]) * 5.0), "food 饑荒應 5×")
-	assert(is_equal_approx(isys._local_value(team, "material"),
-		float(InteractionSystem.BASE_PRICE["material"]) * 2.0), "material 饑荒維持 2×")
+	assert(is_equal_approx(TradeValuation.local_value(team, "food"),
+		float(TradeValuation.BASE_PRICE["food"]) * 5.0), "food 饑荒應 5×")
+	assert(is_equal_approx(TradeValuation.local_value(team, "material"),
+		float(TradeValuation.BASE_PRICE["material"]) * 2.0), "material 饑荒維持 2×")
 	# 過剩下限 0.5× 兩者皆同
 	team.resources = { "food": 100000.0, "material": 100000.0 }
-	assert(is_equal_approx(isys._local_value(team, "food"),
-		float(InteractionSystem.BASE_PRICE["food"]) * 0.5), "food 過剩 0.5×")
-	assert(is_equal_approx(isys._local_value(team, "material"),
-		float(InteractionSystem.BASE_PRICE["material"]) * 0.5), "material 過剩 0.5×")
+	assert(is_equal_approx(TradeValuation.local_value(team, "food"),
+		float(TradeValuation.BASE_PRICE["food"]) * 0.5), "food 過剩 0.5×")
+	assert(is_equal_approx(TradeValuation.local_value(team, "material"),
+		float(TradeValuation.BASE_PRICE["material"]) * 0.5), "material 過剩 0.5×")
 	print("Econ Task2b OK")
+
+func _test_trade_valuation_single_source() -> void:
+	# 單一真值源：天平(DTO give/want)估值用的單價 == 接受(evaluate_offer/preview)判定用的單價。
+	# 三路同源於 TradeValuation.local_value：直接 / interaction.local_value / player_trade preview。
+	print("--- Trade: 估值單一真值源（天平==接受同源）---")
+	var state := WorldState.new()
+	var t := TeamData.new(); t.team_id = 1; _seed_pop(t, 10)
+	# 嚴重缺糧/缺藥 → survival shortage>0.5 → 5× 不對稱區生效
+	t.resources = { "food": 1.0, "medicine": 1.0, "coin": 1000.0 }
+	state.teams[1] = t
+	for res in ["food", "medicine", "goods"]:
+		var v_direct: float = TradeValuation.local_value(t, res)
+		var v_inter: float = InteractionSystem.new().local_value(t, res)
+		assert(is_equal_approx(v_direct, v_inter),
+			"%s：interaction.local_value 須 == TradeValuation（同源）" % res)
+		# 接受路徑（player_trade preview）：玩家「想要」res×1，wants_value 即接受判定用單價
+		var pt := PlayerTradeSystem.new()
+		var ev := pt.preview_offer(state, -1, 1,
+			{ "player_gives": {}, "player_wants": { res: 1.0 } })
+		assert(is_equal_approx(float(ev.get("wants_value", -999.0)), v_direct),
+			"%s：evaluate/preview 接受用單價 須 == 天平 TradeValuation 單價（天平==接受）" % res)
+	# survival 5× 區確認生效（缺糧不對稱應遠 >2× base）
+	assert(TradeValuation.local_value(t, "food") > TradeValuation.BASE_PRICE["food"] * 2.0,
+		"缺糧 survival 不對稱應 >2× base（驗 5× 區生效）")
+	# coin 硬閘：恆 face value 1.0（與短缺無關）
+	assert(is_equal_approx(TradeValuation.local_value(t, "coin"), 1.0), "coin 恆 face value 1.0")
+	print("[OK] _test_trade_valuation_single_source")
 
 func _test_smeltery_separate() -> void:
 	print("--- Facility Task3d: 冶煉獨立設施 ---")
@@ -9086,7 +9113,7 @@ func _test_medicine_recipe() -> void:
 	var med_before: float = float(tile.public_storage.get("medicine", 0))
 	ms.tick_all(state, [0])
 	assert(float(tile.public_storage.get("medicine", 0)) == med_before, "無 herb 不產")
-	assert(InteractionSystem.BASE_PRICE.has("horses") and InteractionSystem.BASE_PRICE.has("medicine"), "貿易價格表補 horses/medicine")
+	assert(TradeValuation.BASE_PRICE.has("horses") and TradeValuation.BASE_PRICE.has("medicine"), "貿易價格表補 horses/medicine")
 	print("Material Task4b OK")
 
 func _test_horses_loot() -> void:
@@ -10405,7 +10432,7 @@ func _test_trade_conservation() -> void:
 	var npc := TeamData.new(); npc.team_id = 1; npc.leader_id = 10; _seed_pop(npc, 5)
 	npc.tile_pos = Vector2i(4,4); npc.resources = {"material": 30.0, "coin": 100}
 	state.teams[1] = npc
-	var bp: Dictionary = PlayerTradeSystem.BASE_PRICE
+	var bp: Dictionary = TradeValuation.BASE_PRICE
 	var coin_eq := func(t: TeamData) -> float:
 		var s: float = 0.0
 		for r in t.resources:
