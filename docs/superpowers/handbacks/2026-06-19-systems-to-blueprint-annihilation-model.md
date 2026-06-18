@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: E-1 結構免疫 → 「打到死」殲滅模型 WHAT 待決（系統呈報，越界呈報你裁）
+ruling: 藍圖已裁，見 2026-06-19-blueprint-to-systems-e1-annihilation-ruling.md + game-design.md §戰鬥解算與敗北模型
 ---
 
 # 呈報：E-1 收斂模型是願景決策，請藍圖裁
