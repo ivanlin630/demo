@@ -391,6 +391,7 @@ func _initialize() -> void:
 	# ── E-1 殲滅退化修（結構免疫 + 武裝下限）──
 	_test_kill_random_survival_bias()
 	_test_e1_encounter_reserve_casualty()
+	_test_e1_npc_combat_loser_pop_loss()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10544,3 +10545,22 @@ func _test_e1_encounter_reserve_casualty() -> void:
 	assert(anon_after < anon_before - 8,
 		"reserve 應額外連坐（before=%d after=%d，僅扣 8 表免疫未修）" % [anon_before, anon_after])
 	print("E-1 encounter reserve casualty OK")
+
+func _test_e1_npc_combat_loser_pop_loss() -> void:
+	print("--- E-1：npc_combat 敗方 pop 損耗（對稱）---")
+	var nc := NpcCombatSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var winner := TeamData.new(); winner.team_id = 1
+	var wl := PersonData.new(); wl.id = 1000; wl.team_id = 1; wl.values = {"殘忍": 0.5}
+	s.persons[wl.id] = wl; winner.leader_id = wl.id
+	var loser := TeamData.new(); loser.team_id = 2
+	var ll := PersonData.new(); ll.id = 2000; ll.team_id = 2
+	s.persons[ll.id] = ll; loser.leader_id = ll.id
+	AnonCohort.add(loser.anon_cohorts, "平民", "healthy", 50)
+	s.teams[1] = winner; s.teams[2] = loser
+	winner.combat_target = 2; loser.combat_target = 1
+	var anon_before: int = AnonCohort.total(loser.anon_cohorts)
+	nc._end_combat(s, 1, 2)
+	assert(AnonCohort.total(loser.anon_cohorts) < anon_before,
+		"敗方 anon 應損耗（before=%d after=%d）" % [anon_before, AnonCohort.total(loser.anon_cohorts)])
+	print("E-1 npc_combat loser pop loss OK")

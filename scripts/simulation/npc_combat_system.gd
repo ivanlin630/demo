@@ -8,6 +8,8 @@ const MORALE_CASCADE_THRESHOLD: float = 0.3
 const COMBAT_ABANDON_THRESHOLD: float = 0.2
 const ROUND_READINESS_DRAIN: float    = 0.08
 const LOOT_RATE: float                = 0.3
+const LOSER_CASUALTY_RATE: float      = 0.2   # TEST VALUE：敗方 pop 損耗比例（複用 force_occupy 量級）
+const ARMED_RATIO_FLOOR: float        = 0.1   # TEST VALUE：最低參戰比，堵 0 武裝免疫（同 encounter）
 
 const HIT_WEIGHTS: Dictionary = {
 	"head": 0.10, "torso": 0.40,
@@ -271,6 +273,12 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		OutpostSystem.new().capture(state, winner_id, _tile)
 	_skill_sys.on_combat_end(state, winner)
 	_skill_sys.on_combat_end(state, loser)
+	# E-1：敗方 pop 損耗（對稱 encounter；tier 加權存活）
+	var loser_anon: int = AnonCohort.total(loser.anon_cohorts)
+	var loser_dead: int = roundi(float(loser_anon) * LOSER_CASUALTY_RATE)
+	if loser_dead > 0:
+		AnonTierSystem.kill_random(loser, loser_dead, "combat_defeat", AnonTierSystem.SURVIVAL_KILL_WEIGHT)
+		print("[E1Defeat] Team%d 敗方 pop 損耗 -%d" % [loser_id, loser_dead])
 	_apply_pursuit(state, winner_id, loser_id)
 	var _pp_end: PersonData = state.persons.get(state.player_id)
 	var _ptid_end: int = _pp_end.team_id if _pp_end else -1
