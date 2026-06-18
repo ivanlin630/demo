@@ -44,6 +44,36 @@
 - 藍圖有 WHAT 決定權，系統有 HOW 決定權。
 - 喬不攏 → 你裁。
 
+## 跨角色交接 channel（handback，泛用）
+
+§1 的「越界 → 呈報對方」實體地址 = `docs/superpowers/handbacks/`。藍圖/系統/實作三角色**並行 session 彼此不能直接對話**（只有 user 當人肉橋），口頭轉述易漏不留檔 → 一律走 git doc handback。
+
+**夾一套格式、任意角色對、雙向對稱**（非單向「實作→系統」）。
+
+命名：
+```
+docs/superpowers/handbacks/YYYY-MM-DD-<from>-to-<to>-<topic>.md
+  例：2026-06-19-systems-to-blueprint-annihilation-model.md
+      2026-06-19-blueprint-to-systems-goal-anchor-seam.md
+```
+（舊式 `YYYY-MM-DD-<topic>.md` 預設 = 實作→系統，沿用不溯改。）
+
+frontmatter：
+```
+from: <role>          # blueprint | systems | implementer
+to: <role>
+status: open | consumed
+topic: <一行>
+```
+
+生命週期：
+1. 發送方寫 `status: open`。
+2. **每 session 開頭掃 `handbacks/`，讀 `to: 本角色 / status: open` 的**（義務）。
+3. 消費後改 `status: consumed`（不刪檔，留軌跡）。
+4. 待決事項的**歸宿仍是 owner doc**：handback 只是載體。例：藍圖裁定殲滅模型 → 寫進 `game-design.md` → handback consumed。系統定 seam → 寫進 `invariants.md`/spec → consumed。
+
+channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統做；本節即首個 dogfood（`2026-06-19-blueprint-to-systems-handback-channel.md`）。
+
 ## auto-memory 規則（承 §2）
 
 - **只有系統 session 寫** auto-memory。藍圖 / 實作只**讀**（harness 開頭自動注入，無需主動讀）。

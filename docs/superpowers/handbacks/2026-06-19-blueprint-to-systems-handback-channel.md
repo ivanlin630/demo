@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 補定「系統↔藍圖」交接 channel（process gap）
 ---
 
