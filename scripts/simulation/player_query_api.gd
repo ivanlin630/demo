@@ -428,9 +428,13 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 				"execute_action",
 				{ "action_id": "hunt_beast", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
 
-	# camp（self-action,紮營）：腳下無主 + 非山地 + 未開發才列（免材料落腳 lvl1 outpost）。
+	# camp（self-action,紮營）：腳下無主 + 非山地 + 未開發 + 距離 spacing 通過才列（免材料落腳 lvl1 outpost）。
+	# N-3: 補 _action_camp 的 _check_distance 真 gate（否則距離太近恆列→選後才拒）。
+	var camp_type: String = str(state.player_state.get("build_type", "civilian"))
+	if camp_type not in ["civilian", "military"]: camp_type = "civilian"
 	if self_tile != null and self_tile.outpost_level == 0 and self_tile.outpost_owner == -1 \
-			and self_tile.terrain != "mountain":
+			and self_tile.terrain != "mountain" \
+			and OutpostSystem.new()._check_distance(state, self_tile.tile_pos, camp_type):
 		actions.append(PlayerApiMapper.map_available_action(
 			"camp", _action_label("camp"), true, "",
 			{ "allowed_kinds": PackedStringArray(["none"]),
@@ -439,9 +443,11 @@ func _build_available_actions(state: WorldState, cmd_sys: PlayerCommandSystem,
 			"execute_action",
 			{ "action_id": "camp", "target": {"kind": "none", "team_id": -1, "member_id": -1, "tile_q": -1, "tile_r": -1} }))
 
-	# train（self-action）：有匿名人口才列。一次性 coin→add_exp+try_promote。
+	# train（self-action）：有匿名人口 + coin >= TRAIN_COST_COIN 才列。一次性 coin→add_exp+try_promote。
+	# N-3: 補 _action_train 的 coin 真 gate（否則 coin 不足恆列→選後才拒）。
 	var pt_train: TeamData = state.teams.get(ptid) if ptid != -1 else null
-	if pt_train != null and AnonTierSystem.total_pop(pt_train) > 0:
+	if pt_train != null and AnonTierSystem.total_pop(pt_train) > 0 \
+			and float(pt_train.resources.get("coin", 0)) >= PlayerCommandSystem.TRAIN_COST_COIN:
 		actions.append(PlayerApiMapper.map_available_action(
 			"train", _action_label("train"), true, "",
 			{ "allowed_kinds": PackedStringArray(["none"]),

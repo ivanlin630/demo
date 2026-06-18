@@ -85,11 +85,25 @@ func _test_camp_action_reachable() -> void:
 	var tile = st.world.tiles.get(pt.tile_pos.x*1000 + pt.tile_pos.y)
 	if tile != null:
 		tile.outpost_level = 0; tile.outpost_owner = -1; tile.terrain = "plains"
+	# N-3: camp 現有 _check_distance 真 gate → 清掉附近既有 outpost 才能通過（gate 通過時仍可達）
+	for tid in st.world.tiles:
+		var t = st.world.tiles[tid]
+		if t != tile: t.outpost_level = 0; t.outpost_owner = -1
 	node._interact_mode = true; node._interact_target = -1
 	node._refresh()
 	var self_ids: Array = []
 	for a in node._interact_action_split()["self"]: self_ids.append(a.get("action_id",""))
-	_check("camp 在 self-actions", "camp" in self_ids)
+	_check("camp 在 self-actions（gate 通過時可達）", "camp" in self_ids)
+	# N-3 反向：腳下相鄰格放一個 outpost → 距離 gate 擋下 → camp 不列（消選後才拒）
+	var near_pos = Vector2i(pt.tile_pos.x + 1, pt.tile_pos.y)
+	var near = st.world.tiles.get(near_pos.x*1000 + near_pos.y)
+	if near == null:
+		near = HexTileData.new(); near.tile_pos = near_pos; st.world.tiles[near_pos.x*1000+near_pos.y] = near
+	near.outpost_level = 1; near.outpost_owner = 999; near.outpost_type = "civilian"
+	node._refresh()
+	var self_ids2: Array = []
+	for a in node._interact_action_split()["self"]: self_ids2.append(a.get("action_id",""))
+	_check("距離太近時 camp 不列（N-3 gate）", not ("camp" in self_ids2))
 	await _free_ui(node)
 
 func _test_join_request_ui() -> void:
