@@ -110,6 +110,7 @@ func _initialize() -> void:
 	_test_choose_heir_action()
 	_test_choose_heir_invalid_candidate()
 	_test_forced_choose_heir()
+	_test_forced_heir_stale()
 	_test_forced_aid_request()
 	_test_forced_options_label_no_drift()
 	_test_advance_tick_game_over_freeze()
@@ -5345,6 +5346,64 @@ func _test_forced_choose_heir() -> void:
 	assert(state.player_forced_event.is_empty(), "forced_event 應清空（世界解凍）")
 	assert(state.player_forced_event_id == "", "forced_event_id 應清空")
 	print("Q7-1 OK")
+
+# N-2：choose_heir 不吃 stale 候選。
+#  (a) raise→select 窗內單一候選死亡 → options 不含死者；選死者 respond ok=false 且不清 forced（可重選活的）。
+#  (b) 全候選死亡 → respond 走終局（game_over）並清 forced（不永久 leaderless）。
+func _test_forced_heir_stale() -> void:
+	print("--- N-2: choose_heir stale 候選 ---")
+	# (a) 單一 stale
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	state.player_id = 100   # 玩家 leader 已死,player_id 還沒清
+	var pt := TeamData.new()
+	pt.team_id = 0; pt.leader_id = -1
+	pt.named_members = [101, 102]
+	state.teams[0] = pt
+	var heir1 := PersonData.new(); heir1.id = 101; heir1.team_id = 0; heir1.person_name = "甲"
+	state.persons[101] = heir1
+	var heir2 := PersonData.new(); heir2.id = 102; heir2.team_id = 0; heir2.person_name = "乙"
+	state.persons[102] = heir2
+	state.player_forced_event = { "action": "choose_heir", "team_id": 0, "candidates": [101, 102] }
+	state.player_forced_event_id = "heir-fe"
+	var cmd := PlayerCommandSystem.new()
+	# 候選 101 在 raise→select 窗內死亡（移出 persons + named_members）
+	state.persons.erase(101)
+	pt.named_members.erase(101)
+	var opts := cmd.get_forced_response_options(state)
+	assert(not opts.has("heir_101"), "死者 heir_101 不應列，實際=%s" % str(opts))
+	assert(opts.has("heir_102"), "活候選 heir_102 應仍列，實際=%s" % str(opts))
+	# 選死者 → ok=false 且 forced 不清（可重選）
+	var r_dead := cmd.respond_to_forced(state, "heir_101")
+	assert(not r_dead.get("ok", true), "選死候選應 ok=false")
+	assert(not state.player_forced_event.is_empty(), "選死候選不應清 forced（讓重選）")
+	# 重選活的 → 成功 + 接位 + forced 清
+	var r_live := cmd.respond_to_forced(state, "heir_102")
+	assert(r_live.get("ok", false), "選活候選應成功，msg=%s" % str(r_live.get("msg", "")))
+	assert(pt.leader_id == 102, "leader_id 應 = 102")
+	assert(state.player_forced_event.is_empty(), "選活候選後 forced 應清")
+	# (b) 全死 → 終局
+	var st2 := WorldState.new()
+	st2.world = WorldData.new()
+	st2.player_id = 200
+	var pt2 := TeamData.new()
+	pt2.team_id = 0; pt2.leader_id = -1; pt2.named_members = [201]
+	st2.teams[0] = pt2
+	var h := PersonData.new(); h.id = 201; h.team_id = 0; h.person_name = "丙"
+	st2.persons[201] = h
+	st2.player_forced_event = { "action": "choose_heir", "team_id": 0, "candidates": [201] }
+	st2.player_forced_event_id = "heir-fe2"
+	var cmd2 := PlayerCommandSystem.new()
+	# 唯一候選死亡
+	st2.persons.erase(201)
+	pt2.named_members.erase(201)
+	assert(cmd2.get_forced_response_options(st2).is_empty(), "全死 → options 空")
+	# 任意 respond → 走終局（game_over）並清 forced（不永久 leaderless）
+	var r_term := cmd2.respond_to_forced(st2, "heir_201")
+	assert(r_term.get("ok", false), "全死 respond 應回 ok=true（終局已處理）")
+	assert(st2.game_over, "全死應 game_over")
+	assert(st2.player_forced_event.is_empty(), "全死終局後 forced 應清（世界解凍）")
+	print("N-2 OK")
 
 # Q7-2 端到端：forced aid_request → options ["give","refuse"] → give → 守恆轉糧 + forced 清
 func _test_forced_aid_request() -> void:

@@ -867,9 +867,14 @@ func get_forced_response_options(state: WorldState) -> Array[String]:
 		"aid_request":
 			return ["give", "refuse"] as Array[String]
 		"choose_heir":
+			# N-2: 重查活候選——只回「仍存在且仍在該隊 named_members」的 pid（消 raise→select 窗內死亡 stale）。
+			# team 由 fe.team_id 取(權威)：choose_heir 時玩家 person 已死,_get_player_team 可能 null。
 			var ids: Array[String] = []
+			var pt: TeamData = state.teams.get(int(fe.get("team_id", -1)))
 			for pid in fe.get("candidates", []):
-				ids.append("heir_%d" % int(pid))
+				var ip: int = int(pid)
+				if state.persons.has(ip) and pt != null and pt.named_members.has(ip):
+					ids.append("heir_%d" % ip)
 			return ids
 	return [] as Array[String]
 
@@ -909,10 +914,25 @@ func respond_to_forced(state: WorldState, response: String) -> Dictionary:
 				state.player_state["aid_response"] = { "refuse": true }
 			result = _action_respond_aid_request(state, -1, _get_player_team(state), _get_player_team_id(state))
 		"choose_heir":
-			# response_id = "heir_<pid>"
-			var hid: int = int(response.trim_prefix("heir_"))
-			state.player_state["heir_id"] = hid
-			result = _action_choose_heir(state, -1, _get_player_team(state), _get_player_team_id(state))
+			# N-2: 重查活候選——消 raise→select 窗內死亡 stale，避免永久 leaderless。
+			var live: Array[String] = get_forced_response_options(state)
+			if live.is_empty():
+				# 全候選已死 → 終局（mirror leader-death 無繼承）；fall through 清 forced。
+				# team 由 fe.team_id 取(權威),勿靠可能已失效的 _get_player_team。
+				var dead_team: TeamData = state.teams.get(int(fe.get("team_id", -1)))
+				if dead_team != null:
+					FactionAISystem.new()._handle_player_leader_death(state, dead_team)
+				else:
+					state.game_over = true
+					state.game_over_reason = "玩家絕後（隊已滅,無繼承人）"
+				result = { "ok": true, "msg": "無人可繼承,終局" }
+			elif not live.has(response):
+				# 單一 stale（選了已死候選）→ 不清 forced,讓玩家重選
+				return { "ok": false, "msg": "繼承人已不可用,請重選" }
+			else:
+				var hid: int = int(response.trim_prefix("heir_"))
+				state.player_state["heir_id"] = hid
+				result = _action_choose_heir(state, -1, _get_player_team(state), _get_player_team_id(state))
 		_:
 			result = { "ok": false, "msg": "未知強制事件類型" }
 	state.player_forced_event = {}
