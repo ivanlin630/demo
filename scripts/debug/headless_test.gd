@@ -392,6 +392,7 @@ func _initialize() -> void:
 	_test_kill_random_survival_bias()
 	_test_e1_encounter_reserve_casualty()
 	_test_e1_npc_combat_loser_pop_loss()
+	_test_e1_armed_floor()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10564,3 +10565,22 @@ func _test_e1_npc_combat_loser_pop_loss() -> void:
 	assert(AnonCohort.total(loser.anon_cohorts) < anon_before,
 		"敗方 anon 應損耗（before=%d after=%d）" % [anon_before, AnonCohort.total(loser.anon_cohorts)])
 	print("E-1 npc_combat loser pop loss OK")
+
+func _test_e1_armed_floor() -> void:
+	print("--- E-1：武裝下限 → 0 武裝隊仍 field anon ---")
+	var enc := EncounterSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var atk := TeamData.new(); atk.team_id = 0; atk.tile_pos = Vector2i(0,0)
+	var al := PersonData.new(); al.id = 0; al.team_id = 0; s.persons[0] = al; atk.leader_id = 0
+	atk.armed_anon_ratio = 0.0
+	AnonCohort.add(atk.anon_cohorts, "平民", "healthy", 50)
+	var def := TeamData.new(); def.team_id = 1; def.tile_pos = Vector2i(0,0)
+	var dl := PersonData.new(); dl.id = 1000; dl.team_id = 1; s.persons[1000] = dl; def.leader_id = 1000
+	def.armed_anon_ratio = 1.0; AnonCohort.add(def.anon_cohorts, "平民", "healthy", 5)
+	s.teams[0] = atk; s.teams[1] = def
+	enc.init_encounter(s, 0, 1, "normal")
+	var atk_anon_units: int = 0
+	for u in s.encounter_units:
+		if u["team_id"] == 0 and u["person_id"] == -1: atk_anon_units += 1
+	assert(atk_anon_units > 0, "0 武裝隊應因 floor 仍 field anon，實際=%d" % atk_anon_units)
+	print("E-1 armed floor OK")

@@ -246,8 +246,10 @@ func init_encounter(state: WorldState, attacker_id: int, defender_id: int,
 		atk_positions.shuffle()
 		_spawn_team_units(state, atk, atk_positions)
 	else:
-		var atk_anon: int = mini(int(float(atk.population) * atk.armed_anon_ratio), ANON_UNIT_CAP)
-		var def_anon: int = mini(int(float(def.population) * def.armed_anon_ratio), ANON_UNIT_CAP)
+		var atk_ratio: float = maxf(atk.armed_anon_ratio, ARMED_RATIO_FLOOR)
+		var def_ratio: float = maxf(def.armed_anon_ratio, ARMED_RATIO_FLOOR)
+		var atk_anon: int = mini(int(float(atk.population) * atk_ratio), ANON_UNIT_CAP)
+		var def_anon: int = mini(int(float(def.population) * def_ratio), ANON_UNIT_CAP)
 		var total_atk: int = atk.named_members.size() + 1 + atk_anon
 		var total_def: int = def.named_members.size() + 1 + def_anon
 		var atk_pos: Array = _get_spawn_positions(0, total_atk)
@@ -1070,7 +1072,8 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 		var unit: Dictionary = _create_named_unit(pid, team.team_id, pos, state)
 		_init_named_unit(unit, p, team, state)
 		state.encounter_units.append(unit)
-	var armed_count: int = int(float(team.population) * team.armed_anon_ratio)
+	var spawn_ratio: float = maxf(team.armed_anon_ratio, ARMED_RATIO_FLOOR)   # E-1：武裝下限堵 0 武裝免疫
+	var armed_count: int = int(float(team.population) * spawn_ratio)
 	var spawn_count: int = mini(armed_count, ANON_UNIT_CAP)
 	var weapon_queue: Array = _assign_anon_weapons(team, spawn_count)
 	var spawned_anon: int = 0

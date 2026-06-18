@@ -386,7 +386,8 @@ func _strength_raw(state: WorldState, team_id: int) -> float:
 	var anon_pop: int    = maxi(team.population - team.wounded - named_count, 0)
 	# tier-aware：avg_combat_skill 0.1~0.7 → 係數 0.34~0.58（avg 0.5 ≈ 舊 0.5）
 	var tier_mult: float = 0.3 + AnonTierSystem.avg_combat_skill(team) * 0.4
-	melee_str += float(anon_pop) * team.armed_anon_ratio * tier_mult
+	var floored_ratio: float = maxf(team.armed_anon_ratio, ARMED_RATIO_FLOOR)
+	melee_str += float(anon_pop) * floored_ratio * tier_mult
 
 	return (melee_str + ranged_str) * leadership_mult * tactics_mult
 
