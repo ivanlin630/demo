@@ -393,6 +393,7 @@ func _initialize() -> void:
 	_test_e1_encounter_reserve_casualty()
 	_test_e1_npc_combat_loser_pop_loss()
 	_test_e1_armed_floor()
+	_test_e1_converges()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10584,3 +10585,22 @@ func _test_e1_armed_floor() -> void:
 		if u["team_id"] == 0 and u["person_id"] == -1: atk_anon_units += 1
 	assert(atk_anon_units > 0, "0 武裝隊應因 floor 仍 field anon，實際=%d" % atk_anon_units)
 	print("E-1 armed floor OK")
+
+func _test_e1_converges() -> void:
+	print("--- E-1：弱隊反覆被打 → anon 趨減（收斂）---")
+	var nc := NpcCombatSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var strong := TeamData.new(); strong.team_id = 1
+	var sl := PersonData.new(); sl.id = 1000; sl.team_id = 1; sl.values = {"殘忍":0.5}
+	s.persons[1000] = sl; strong.leader_id = 1000
+	var weak := TeamData.new(); weak.team_id = 2
+	var wl := PersonData.new(); wl.id = 2000; wl.team_id = 2
+	s.persons[2000] = wl; weak.leader_id = 2000
+	AnonCohort.add(weak.anon_cohorts, "平民", "healthy", 30)
+	s.teams[1] = strong; s.teams[2] = weak
+	var before: int = AnonCohort.total(weak.anon_cohorts)
+	for _i in range(5):
+		nc._end_combat(s, 1, 2)   # 反覆敗北
+	assert(AnonCohort.total(weak.anon_cohorts) < before / 2,
+		"反覆敗北 anon 應大幅趨減（before=%d after=%d）" % [before, AnonCohort.total(weak.anon_cohorts)])
+	print("E-1 converges OK")
