@@ -388,6 +388,8 @@ func _initialize() -> void:
 	_test_invariant_anon_cohort()
 	_test_erase_team()
 	_test_require_team()
+	# ── E-1 殲滅退化修（結構免疫 + 武裝下限）──
+	_test_kill_random_survival_bias()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10509,3 +10511,19 @@ func _test_trade_conservation() -> void:
 	var after: float = coin_eq.call(pt) + coin_eq.call(npc)
 	assert(abs(after - before) < 0.01, "coin_eq 守恆：%.2f vs %.2f" % [before, after])
 	print("trade conservation OK")
+
+func _test_kill_random_survival_bias() -> void:
+	print("--- kill_random survival-bias：平民死多於菁英 ---")
+	var t := TeamData.new(); t.team_id = 1
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 50)
+	AnonCohort.add(t.anon_cohorts, "菁英", "healthy", 50)
+	var killed: Dictionary = AnonTierSystem.kill_random(t, 40, "test", AnonTierSystem.SURVIVAL_KILL_WEIGHT)
+	assert(killed.get("平民", 0) > killed.get("菁英", 0),
+		"平民應死多於菁英（實際 平民=%d 菁英=%d）" % [killed.get("平民",0), killed.get("菁英",0)])
+	# 空權重 = 現行為（約略均等，不偏）
+	var t2 := TeamData.new(); t2.team_id = 2
+	AnonCohort.add(t2.anon_cohorts, "平民", "healthy", 50)
+	AnonCohort.add(t2.anon_cohorts, "菁英", "healthy", 50)
+	var k2: Dictionary = AnonTierSystem.kill_random(t2, 40, "test")
+	assert(k2.get("平民",0) + k2.get("菁英",0) == 40, "空權重應如常移除 40")
+	print("kill_random survival-bias OK")
