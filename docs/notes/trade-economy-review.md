@@ -32,9 +32,9 @@ sr       = clamp(shortage, −0.5, 上限)          # 生存品 4.0 / 其他 1.0
 
 ## 發現的問題（淺→深）
 
-1. **玩家路徑可刷光 NPC**：`_sellable_qty` 只留 food+武器，其餘（material/ore/gem/tools/armor）無留底 → 用 coin 可掃到 0，價只封頂 2×。付 coin 側無自限（coin 永遠 face value 1.0、`MAX_COIN_PER_TRADE` 註解 uncapped）。NPC 路徑因全物留底+均衡+一次性，無此問題。
+1. ✅ **已修（2026-06-19）**：reserve 收進 `TradeValuation.reserve()` 單一源,玩家路徑全資源留底 → 不可刷光。~~玩家路徑可刷光 NPC~~：`_sellable_qty` 只留 food+武器，其餘（material/ore/gem/tools/armor）無留底 → 用 coin 可掃到 0，價只封頂 2×。付 coin 側無自限（coin 永遠 face value 1.0、`MAX_COIN_PER_TRADE` 註解 uncapped）。NPC 路徑因全物留底+均衡+一次性，無此問題。
 
-2. **NPC 無以物易物**：`_attempt_trade_direction` `if buyer_coin<=0: return`，每腿 coin 結算。缺幣團之間即使 surplus 完美互補也換不了 → 破對稱性（玩家能 barter、NPC 不能）+ 疑為 W2 trade 量低根因之一（缺幣不能換）。
+2. ✅ **已修（2026-06-19）**：`_resolve_market` 加 `_attempt_barter` pass,缺幣團互補 surplus 等值互換（coin_eq 中性）。~~NPC 無以物易物~~：`_attempt_trade_direction` `if buyer_coin<=0: return`，每腿 coin 結算。缺幣團之間即使 surplus 完美互補也換不了 → 破對稱性（玩家能 barter、NPC 不能）+ 疑為 W2 trade 量低根因之一（缺幣不能換）。
 
 3. ✅ **已修（2026-06-19，TradeValuation 單一源）**：抽 `TradeValuation`（canonical 表取 interaction + 合併公式 survival 不對稱+coin guard），interaction/player_trade/DTO 三處 delegate → 天平==接受同源、BASE_PRICE/TARGET 雙副本 drift 消。coin_eq=0。~~兩份 `_local_value` 漂移 + DTO 內部不一致~~：
    - `player_trade_system._local_value` 無生存品非對稱（food cap 2×）；`interaction_system` 有（food 5×）。檔案註解明寫要 sync，實際沒。
