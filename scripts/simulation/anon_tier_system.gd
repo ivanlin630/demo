@@ -6,6 +6,9 @@ class_name AnonTierSystem
 
 const TIER_ORDER: Array = AnonCohort.TIER_ORDER
 
+# 戰鬥敗方損耗的 tier 死亡權重（存活反比）。TEST VALUE。
+const SURVIVAL_KILL_WEIGHT: Dictionary = {"平民": 1.0, "新兵": 0.6, "老兵": 0.3, "菁英": 0.15}
+
 const TIER_STATS: Dictionary = {
 	"平民": { "combat": 0.1, "speed": 0.7, "base_wage": 0.5 },
 	"新兵": { "combat": 0.3, "speed": 0.8, "base_wage": 1.0 },
@@ -79,23 +82,33 @@ static func add_exp(team: TeamData, tier: String, exp: float) -> void:
 		return
 	team.anon_exp[tier] = float(team.anon_exp[tier]) + exp
 
-# weighted random 依各 tier count 抽，不減 named。回 { tier: 死亡數 }
-static func kill_random(team: TeamData, count: int, _source: String) -> Dictionary:
+# weighted random 依各 tier count（× 選用 tier_weight）抽，不減 named。回 { tier: 死亡數 }
+# tier_weight 空 = 現行 count 比例（不破既有 caller）；非空 = 各 tier 抽中權重 ∝ count × tier_weight[tier]。
+static func kill_random(team: TeamData, count: int, _source: String, tier_weight: Dictionary = {}) -> Dictionary:
 	var killed: Dictionary = {}
 	for tier in TIER_ORDER:
 		killed[tier] = 0
 	for _i in range(count):
-		# 只移 healthy（wounded 不在此死）→ roll 必須只按 healthy 桶加權，
-		# 且 killed 記實際移除數（remove 回傳），否則 caller 依虛報數扣純量 → drift。
-		var healthy_total: int = AnonCohort.by_health(team.anon_cohorts, "healthy")
-		if healthy_total <= 0:
-			break
-		var roll: int = randi() % healthy_total
-		var acc: int = 0
+		# 只移 healthy；按 healthy 桶 count×weight 加權
+		var weighted: Array = []   # [[tier, w_float], ...]
+		var total_w: float = 0.0
 		for tier in TIER_ORDER:
-			acc += int(team.anon_cohorts.get(AnonCohort._key(tier, "healthy"), 0))
+			var c: int = int(team.anon_cohorts.get(AnonCohort._key(tier, "healthy"), 0))
+			if c <= 0:
+				continue
+			var w: float = float(c) * float(tier_weight.get(tier, 1.0))
+			if w <= 0.0:
+				continue
+			weighted.append([tier, w])
+			total_w += w
+		if total_w <= 0.0:
+			break
+		var roll: float = randf() * total_w
+		var acc: float = 0.0
+		for pair in weighted:
+			acc += pair[1]
 			if roll < acc:
-				killed[tier] += AnonCohort.remove(team.anon_cohorts, tier, "healthy", 1)
+				killed[pair[0]] += AnonCohort.remove(team.anon_cohorts, pair[0], "healthy", 1)
 				break
 	return killed
 

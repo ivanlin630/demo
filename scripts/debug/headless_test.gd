@@ -398,6 +398,12 @@ func _initialize() -> void:
 	_test_invariant_anon_cohort()
 	_test_erase_team()
 	_test_require_team()
+	# ── E-1 殲滅退化修（結構免疫 + 武裝下限）──
+	_test_kill_random_survival_bias()
+	_test_e1_encounter_reserve_casualty()
+	_test_e1_npc_combat_loser_pop_loss()
+	_test_e1_armed_floor()
+	_test_e1_converges()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10671,3 +10677,92 @@ func _test_succession_player_net_extinct() -> void:
 		EventSystem.new().on_leader_death(s, t)
 	assert(s.game_over, "player 絕後經安全網應 game_over（原 gate 漏此 case）")
 	print("player net extinct OK")
+
+func _test_kill_random_survival_bias() -> void:
+	print("--- kill_random survival-bias：平民死多於菁英 ---")
+	var t := TeamData.new(); t.team_id = 1
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 50)
+	AnonCohort.add(t.anon_cohorts, "菁英", "healthy", 50)
+	var killed: Dictionary = AnonTierSystem.kill_random(t, 40, "test", AnonTierSystem.SURVIVAL_KILL_WEIGHT)
+	assert(killed.get("平民", 0) > killed.get("菁英", 0),
+		"平民應死多於菁英（實際 平民=%d 菁英=%d）" % [killed.get("平民",0), killed.get("菁英",0)])
+	# 空權重 = 現行為（約略均等，不偏）
+	var t2 := TeamData.new(); t2.team_id = 2
+	AnonCohort.add(t2.anon_cohorts, "平民", "healthy", 50)
+	AnonCohort.add(t2.anon_cohorts, "菁英", "healthy", 50)
+	var k2: Dictionary = AnonTierSystem.kill_random(t2, 40, "test")
+	assert(k2.get("平民",0) + k2.get("菁英",0) == 40, "空權重應如常移除 40")
+	print("kill_random survival-bias OK")
+
+func _test_e1_encounter_reserve_casualty() -> void:
+	print("--- E-1：encounter 敗方 reserve 連坐 ---")
+	# 大隊 pop 遠超 ANON_UNIT_CAP → 多數 anon 未上場；模擬上場高陣亡 → reserve 應跟著減
+	var enc := EncounterSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var loser := TeamData.new(); loser.team_id = 1
+	AnonCohort.add(loser.anon_cohorts, "平民", "healthy", 100)
+	s.teams[1] = loser
+	var anon_before: int = AnonCohort.total(loser.anon_cohorts)
+	# 模擬：上場 10 anon、陣亡 8（field_rate=0.8）→ reserve(90) 應折損 ~0.8×90
+	enc._apply_reserve_casualty(s, 1, 10, 8)   # (state, team_id, onfield_anon, dead_anon)
+	var anon_after: int = AnonCohort.total(loser.anon_cohorts)
+	assert(anon_after < anon_before - 8,
+		"reserve 應額外連坐（before=%d after=%d，僅扣 8 表免疫未修）" % [anon_before, anon_after])
+	print("E-1 encounter reserve casualty OK")
+
+func _test_e1_npc_combat_loser_pop_loss() -> void:
+	print("--- E-1：npc_combat 敗方 pop 損耗（對稱）---")
+	var nc := NpcCombatSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var winner := TeamData.new(); winner.team_id = 1
+	var wl := PersonData.new(); wl.id = 1000; wl.team_id = 1; wl.values = {"殘忍": 0.5}
+	s.persons[wl.id] = wl; winner.leader_id = wl.id
+	var loser := TeamData.new(); loser.team_id = 2
+	var ll := PersonData.new(); ll.id = 2000; ll.team_id = 2
+	s.persons[ll.id] = ll; loser.leader_id = ll.id
+	AnonCohort.add(loser.anon_cohorts, "平民", "healthy", 50)
+	s.teams[1] = winner; s.teams[2] = loser
+	winner.combat_target = 2; loser.combat_target = 1
+	var anon_before: int = AnonCohort.total(loser.anon_cohorts)
+	nc._end_combat(s, 1, 2)
+	assert(AnonCohort.total(loser.anon_cohorts) < anon_before,
+		"敗方 anon 應損耗（before=%d after=%d）" % [anon_before, AnonCohort.total(loser.anon_cohorts)])
+	print("E-1 npc_combat loser pop loss OK")
+
+func _test_e1_armed_floor() -> void:
+	print("--- E-1：武裝下限 → 0 武裝隊仍 field anon ---")
+	var enc := EncounterSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var atk := TeamData.new(); atk.team_id = 0; atk.tile_pos = Vector2i(0,0)
+	var al := PersonData.new(); al.id = 0; al.team_id = 0; s.persons[0] = al; atk.leader_id = 0
+	atk.armed_anon_ratio = 0.0
+	AnonCohort.add(atk.anon_cohorts, "平民", "healthy", 50)
+	var def := TeamData.new(); def.team_id = 1; def.tile_pos = Vector2i(0,0)
+	var dl := PersonData.new(); dl.id = 1000; dl.team_id = 1; s.persons[1000] = dl; def.leader_id = 1000
+	def.armed_anon_ratio = 1.0; AnonCohort.add(def.anon_cohorts, "平民", "healthy", 5)
+	s.teams[0] = atk; s.teams[1] = def
+	enc.init_encounter(s, 0, 1, "normal")
+	var atk_anon_units: int = 0
+	for u in s.encounter_units:
+		if u["team_id"] == 0 and u["person_id"] == -1: atk_anon_units += 1
+	assert(atk_anon_units > 0, "0 武裝隊應因 floor 仍 field anon，實際=%d" % atk_anon_units)
+	print("E-1 armed floor OK")
+
+func _test_e1_converges() -> void:
+	print("--- E-1：弱隊反覆被打 → anon 趨減（收斂）---")
+	var nc := NpcCombatSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var strong := TeamData.new(); strong.team_id = 1
+	var sl := PersonData.new(); sl.id = 1000; sl.team_id = 1; sl.values = {"殘忍":0.5}
+	s.persons[1000] = sl; strong.leader_id = 1000
+	var weak := TeamData.new(); weak.team_id = 2
+	var wl := PersonData.new(); wl.id = 2000; wl.team_id = 2
+	s.persons[2000] = wl; weak.leader_id = 2000
+	AnonCohort.add(weak.anon_cohorts, "平民", "healthy", 30)
+	s.teams[1] = strong; s.teams[2] = weak
+	var before: int = AnonCohort.total(weak.anon_cohorts)
+	for _i in range(5):
+		nc._end_combat(s, 1, 2)   # 反覆敗北
+	assert(AnonCohort.total(weak.anon_cohorts) < before / 2,
+		"反覆敗北 anon 應大幅趨減（before=%d after=%d）" % [before, AnonCohort.total(weak.anon_cohorts)])
+	print("E-1 converges OK")
