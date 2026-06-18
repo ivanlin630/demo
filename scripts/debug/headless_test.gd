@@ -50,6 +50,11 @@ func _initialize() -> void:
 	_test_full_config_load()
 	_test_s11_leader_succession()
 	_test_world_get_player_team_id()
+	_test_succession_npc_best_named()
+	_test_succession_low_named_no_threshold()
+	_test_succession_anon_fallback()
+	_test_succession_anon_exhausted()
+	_test_succession_weak_leader_overflow()
 	_test_team_previous_task_field()
 	_test_survival_trigger_urgent()
 	_test_survival_sticky()
@@ -10531,3 +10536,81 @@ func _test_world_get_player_team_id() -> void:
 	t.named_members = []
 	assert(s.get_player_team_id() == -1, "查無 → -1，實際=%d" % s.get_player_team_id())
 	print("get_player_team_id OK")
+
+func _mk_succession_team(tid: int, named_cmds: Array, anon_n: int) -> Array:
+	# 回 [state, team]；named_cmds = 每個 named 的統領值（leader 另設）；anon_n = 平民 anon 數
+	var s := WorldState.new()
+	s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = tid; t.tile_pos = Vector2i(4, 4)
+	var leader := PersonData.new(); leader.id = tid * 1000; leader.team_id = tid
+	leader.skills = {"統領": 0.5}
+	s.persons[leader.id] = leader
+	t.leader_id = leader.id
+	var nidx: int = 1
+	for cmd in named_cmds:
+		var n := PersonData.new(); n.id = tid * 1000 + nidx; n.team_id = tid
+		n.skills = {"統領": float(cmd)}
+		s.persons[n.id] = n
+		t.named_members.append(n.id)
+		nidx += 1
+	if anon_n > 0:
+		AnonCohort.add(t.anon_cohorts, "平民", "healthy", anon_n)
+	s.teams[tid] = t
+	return [s, t]
+
+func _test_succession_npc_best_named() -> void:
+	print("--- 繼承：NPC 晉升 best named（無門檻）---")
+	var r := _mk_succession_team(1, [0.1, 0.7, 0.3], 0)  # 三 named，最高 0.7
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.persons.erase(t.leader_id); t.leader_id = -1   # 模擬 leader 死
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok, "有 named 應繼承成功")
+	assert(t.leader_id == 1 * 1000 + 2, "應選統領最高(0.7)的 named，實際 leader=%d" % t.leader_id)
+	assert(not t.named_members.has(t.leader_id), "新 leader 應從 named_members 移除")
+	print("succession best named OK")
+
+func _test_succession_low_named_no_threshold() -> void:
+	print("--- 繼承：低統領 named 仍硬上位（無門檻）---")
+	var r := _mk_succession_team(2, [0.05], 0)   # 唯一 named 統領僅 0.05
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.persons.erase(t.leader_id); t.leader_id = -1
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok and t.leader_id == 2 * 1000 + 1, "低統領 named 應硬上位，實際 leader=%d" % t.leader_id)
+	print("succession no threshold OK")
+
+func _test_succession_anon_fallback() -> void:
+	print("--- 繼承：無 named → anon 晉升 ---")
+	var r := _mk_succession_team(3, [], 4)   # 0 named，4 anon
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.persons.erase(t.leader_id); t.leader_id = -1
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok, "有 anon 應晉升成功")
+	assert(t.leader_id != -1 and s.persons.has(t.leader_id), "anon 晉升出新 named leader")
+	print("succession anon fallback OK")
+
+func _test_succession_anon_exhausted() -> void:
+	print("--- 繼承：無 named 無 anon → 滅團(false) ---")
+	var r := _mk_succession_team(4, [], 0)   # 0 named，0 anon
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.persons.erase(t.leader_id); t.leader_id = -1
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(not ok, "無繼承人應回 false")
+	print("succession exhausted OK")
+
+func _test_succession_weak_leader_overflow() -> void:
+	print("--- 繼承：弱 leader → pop_cap 溢出回饋 ---")
+	# 低統領 named 繼任 → pop_cap_from_leadership 低 → check_overflow 應觸發（pop > cap）
+	var r := _mk_succession_team(5, [0.05], 30)  # 1 弱 named + 30 anon，pop=32
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	# 加一格 tile 供 overflow 流亡隊落腳
+	var tile := HexTileData.new(); tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4)
+	tile.terrain = "plains"; s.world.tiles[tile.tile_id] = tile
+	s.persons.erase(t.leader_id); t.leader_id = -1
+	var cap: int = TeamData.pop_cap_from_leadership(0.05)
+	var teams_before: int = s.teams.size()
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok, "弱 named 應繼承")
+	# pop(32) > cap(弱統領) → overflow → dispatch 或 _create_overflow_team
+	assert(t.population <= cap or s.teams.size() > teams_before,
+		"溢出應減員或生流亡隊（cap=%d pop=%d teams=%d→%d）" % [cap, t.population, teams_before, s.teams.size()])
+	print("weak leader overflow OK")
