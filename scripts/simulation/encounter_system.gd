@@ -2,6 +2,8 @@
 class_name EncounterSystem
 
 const ANON_UNIT_CAP: int          = 30   # TEST VALUE — 每隊匿名 unit 最多 30 個
+const RESERVE_CASUALTY_MULT: float = 1.0  # TEST VALUE：reserve 連坐比例（1.0=與上場同命運）
+const ARMED_RATIO_FLOOR: float    = 0.1   # TEST VALUE：最低參戰比，堵 0 武裝免疫
 const SPAWN_RADIUS: int           = 8    # Units spawn here; MAP_RADIUS-4 buffer to map edge
 const ESCORT_DETECT_RANGE: int    = 3    # TEST VALUE — 護送感知範圍
 const ESCORT_MAX_NEARBY_ENEMIES: int = 1 # TEST VALUE
@@ -1152,6 +1154,21 @@ func apply_mount_loot(state: WorldState, winner_id: int, loser_id: int) -> void:
 		print("[Loot] Team%d → Team%d horses +%d (kill_ratio=%.2f)" % [
 			loser_id, winner_id, hloot, kill_ratio])
 
+# 敗方未上場 anon 按上場陣亡率連坐（殺結構免疫；tier 加權存活）
+func _apply_reserve_casualty(state: WorldState, team_id: int, onfield_anon: int, dead_anon: int) -> void:
+	var t: TeamData = state.teams.get(team_id)
+	if t == null or onfield_anon <= 0 or dead_anon <= 0:
+		return
+	var field_rate: float = float(dead_anon) / float(onfield_anon)
+	# reserve = 全 anon − 上場總數（上場死亡已由 on-field kill_random 結算）
+	var total_anon: int = AnonCohort.total(t.anon_cohorts)
+	var reserve: int = maxi(total_anon - onfield_anon, 0)
+	var reserve_dead: int = roundi(field_rate * float(reserve) * RESERVE_CASUALTY_MULT)
+	if reserve_dead <= 0:
+		return
+	AnonTierSystem.kill_random(t, reserve_dead, "combat_reserve", AnonTierSystem.SURVIVAL_KILL_WEIGHT)
+	print("[E1Reserve] Team%d reserve 連坐 -%d（field_rate=%.2f reserve=%d）" % [team_id, reserve_dead, field_rate, reserve])
+
 func resolve_encounter_end(state: WorldState, result: String) -> void:
 	var atk_id: int = state.encounter_attacker_id
 	var def_id: int = state.encounter_defender_id
@@ -1183,15 +1200,24 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			t.named_members.erase(u["person_id"])
 			if t.leader_id == u["person_id"]: t.leader_id = -1
 
+	var loser_for_reserve: int = -1
+	if result == "attacker_win": loser_for_reserve = def_id
+	elif result == "defender_win": loser_for_reserve = atk_id
 	for team_id in [atk_id, def_id]:
 		var dead_anon: int = 0
+		var onfield_anon: int = 0
 		for u in state.encounter_units:
 			if u["team_id"] != team_id: continue
 			if u["person_id"] != -1: continue
+			onfield_anon += 1
 			if is_dead(u, state): dead_anon += 1
 		var t: TeamData = state.teams.get(team_id)
 		if t:
-			AnonTierSystem.kill_random(t, dead_anon, "combat")   # cohort 唯一來源；population 為 getter
+			# reserve 須在上場 kill_random 之前量（量 onfield_anon），故先記
+			AnonTierSystem.kill_random(t, dead_anon, "combat")   # 上場陣亡（cohort 唯一來源）
+			# 僅敗方 reserve 連坐（殺結構免疫）
+			if team_id == loser_for_reserve:
+				_apply_reserve_casualty(state, team_id, onfield_anon, dead_anon)
 
 	# 野獸結算：beast 不走人類 loot/subjugate/outpost；勝方獵獸得肉，獸隊戰畢清除。
 	var beast_atk: bool = (state.teams.get(atk_id) != null and state.teams[atk_id].beast_kind != "")

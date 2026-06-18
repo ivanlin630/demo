@@ -390,6 +390,7 @@ func _initialize() -> void:
 	_test_require_team()
 	# ── E-1 殲滅退化修（結構免疫 + 武裝下限）──
 	_test_kill_random_survival_bias()
+	_test_e1_encounter_reserve_casualty()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10527,3 +10528,19 @@ func _test_kill_random_survival_bias() -> void:
 	var k2: Dictionary = AnonTierSystem.kill_random(t2, 40, "test")
 	assert(k2.get("平民",0) + k2.get("菁英",0) == 40, "空權重應如常移除 40")
 	print("kill_random survival-bias OK")
+
+func _test_e1_encounter_reserve_casualty() -> void:
+	print("--- E-1：encounter 敗方 reserve 連坐 ---")
+	# 大隊 pop 遠超 ANON_UNIT_CAP → 多數 anon 未上場；模擬上場高陣亡 → reserve 應跟著減
+	var enc := EncounterSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var loser := TeamData.new(); loser.team_id = 1
+	AnonCohort.add(loser.anon_cohorts, "平民", "healthy", 100)
+	s.teams[1] = loser
+	var anon_before: int = AnonCohort.total(loser.anon_cohorts)
+	# 模擬：上場 10 anon、陣亡 8（field_rate=0.8）→ reserve(90) 應折損 ~0.8×90
+	enc._apply_reserve_casualty(s, 1, 10, 8)   # (state, team_id, onfield_anon, dead_anon)
+	var anon_after: int = AnonCohort.total(loser.anon_cohorts)
+	assert(anon_after < anon_before - 8,
+		"reserve 應額外連坐（before=%d after=%d，僅扣 8 表免疫未修）" % [anon_before, anon_after])
+	print("E-1 encounter reserve casualty OK")
