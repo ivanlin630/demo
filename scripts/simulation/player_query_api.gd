@@ -126,7 +126,7 @@ func get_trade_direct_preview(state: WorldState, target_team_id: int) -> Diction
 	var preview: Dictionary = InteractionSystem.new().preview_trade(state, pt_id, target_team_id)
 	return PlayerApiMapper.map_query_envelope(true, "ok", "", { "preview": preview })
 
-# 互動 offer-builder：雙方清單+估值+公平度 DTO（reuse evaluate_offer/_local_value）
+# 互動 offer-builder：雙方清單+估值+公平度 DTO（reuse evaluate_offer / TradeValuation.local_value）
 func get_trade_session(state: WorldState, target_id: int) -> Dictionary:
 	var check := _check_player_with_team(state)
 	if check["code"] != "ok":

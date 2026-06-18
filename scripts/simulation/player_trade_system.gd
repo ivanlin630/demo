@@ -1,45 +1,8 @@
 class_name PlayerTradeSystem
 
-# ──────── Constants (synced from interaction_system.gd) ────────
-# NOTE: Any update here must also be applied to InteractionSystem's copy.
-const BASE_PRICE: Dictionary = {
-	"food":              2.0,
-	"material":          4.0,
-	"goods":             5.0,
-	"gem":              20.0,
-	"ore_gold":         10.0,
-	"ore_silver":        5.0,
-	"ore_iron":          8.0,
-	"ore_steel":        12.0,
-	"weapon_melee_low":  8.0,
-	"weapon_melee_high": 18.0,
-	"weapon_ranged_low": 9.0,
-	"weapon_ranged_high": 20.0,
-	"tools":             6.0,
-	"arrows":            4.0,
-	"armor_low":        10.0,
-	"armor_high":       22.0,
-	"coin":              1.0,   # currency at face value (13th resource type)
-}
-const TARGET_PER_POP: Dictionary = {
-	"food":              10.0,
-	"material":           5.0,
-	"goods":              3.0,
-	"gem":                1.0,
-	"ore_gold":           2.0,
-	"ore_silver":         3.0,
-	"ore_iron":           3.0,
-	"ore_steel":          1.5,
-	"weapon_melee_low":   1.0,
-	"weapon_melee_high":  0.5,
-	"weapon_ranged_low":  0.8,
-	"weapon_ranged_high": 0.4,
-	"tools":              0.5,
-	"arrows":             2.0,
-	"armor_low":          0.3,
-	"armor_high":         0.15,
-	# coin excluded: not a consumable resource, no population target
-}
+# ──────── Constants ────────
+# 估值表（BASE_PRICE / TARGET_PER_POP）+ 單價公式已移至 TradeValuation（單一真值源）。
+# 本系統估值改 delegate TradeValuation.local_value；白名單走 TradeValuation.BASE_PRICE。
 const FOOD_RESERVE_TICKS: float   = 20.0   # TEST VALUE
 const MAX_COIN_PER_TRADE: float   = 300.0  # TEST VALUE — reserved; player offers currently uncapped
 const WEAPON_RESERVE_RATIO: float = 0.5    # TEST VALUE — armed_anon_ratio fraction to keep
@@ -47,15 +10,6 @@ const WEAPON_RESERVE_RATIO: float = 0.5    # TEST VALUE — armed_anon_ratio fra
 var _msg: SimMessageSystem = SimMessageSystem.new()
 
 # ──────── Helpers ────────
-
-func _local_value(team: TeamData, res: String) -> float:
-	if not BASE_PRICE.has(res): return 0.0
-	if res == "coin": return 1.0   # currency: always face value, no supply/demand modulation
-	var pop: float    = maxf(float(team.population), 1.0)
-	var stock: float  = float(team.resources.get(res, 0))
-	var target: float = pop * float(TARGET_PER_POP.get(res, 1.0))
-	var sr: float     = clampf((target - stock) / maxf(target, 1.0), -0.5, 1.0)
-	return float(BASE_PRICE[res]) * (1.0 + sr)
 
 func _sellable_qty(team: TeamData, res: String) -> float:
 	var stock: float = float(team.resources.get(res, 0))
@@ -83,14 +37,14 @@ func get_tradeable_resources(state: WorldState, pt_id: int, tgt_id: int) -> Dict
 			player_res[res] = pt.resources[res]
 
 	var sellable: Dictionary = {}
-	for res in BASE_PRICE.keys():
+	for res in TradeValuation.BASE_PRICE.keys():
 		var qty: float = _sellable_qty(tgt, res)
 		if qty > 0.0:
 			sellable[res] = qty
 
 	var prices: Dictionary = {}
-	for res in BASE_PRICE.keys():
-		prices[res] = _local_value(tgt, res)
+	for res in TradeValuation.BASE_PRICE.keys():
+		prices[res] = TradeValuation.local_value(tgt, res)
 
 	return {
 		"player":          player_res,
@@ -129,10 +83,10 @@ func evaluate_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionar
 	# Layer 2 — Economic fairness
 	var gives_value: float = 0.0
 	for res in player_gives:
-		gives_value += _local_value(tgt, res) * float(player_gives[res])
+		gives_value += TradeValuation.local_value(tgt, res) * float(player_gives[res])
 	var wants_value: float = 0.0
 	for res in player_wants:
-		wants_value += _local_value(tgt, res) * float(player_wants[res])
+		wants_value += TradeValuation.local_value(tgt, res) * float(player_wants[res])
 
 	var ratio: float = gives_value / maxf(wants_value, 0.01)
 
@@ -181,9 +135,9 @@ func preview_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionary
 	var wants_value: float = 0.0
 	if tgt != null:
 		for res in offer.get("player_gives", {}).keys():
-			gives_value += _local_value(tgt, res) * float(offer["player_gives"][res])
+			gives_value += TradeValuation.local_value(tgt, res) * float(offer["player_gives"][res])
 		for res in offer.get("player_wants", {}).keys():
-			wants_value += _local_value(tgt, res) * float(offer["player_wants"][res])
+			wants_value += TradeValuation.local_value(tgt, res) * float(offer["player_wants"][res])
 
 	return {
 		"accepted":    eval.get("accepted", false),

@@ -842,7 +842,7 @@ static func map_visible_teams_render(state: WorldState, observer_tid: int) -> Ar
 
 # ── Trade session DTO ────────────────────────────────────────────────────────
 # offer-builder 契約：雙方可交易清單 + 當前出價 + 天平(NPC 視角值) + NPC 接受預估。
-# 零新交易邏輯：估值 reuse InteractionSystem.local_value，接受 reuse PlayerTradeSystem.evaluate_offer。
+# 零新交易邏輯：估值 reuse TradeValuation.local_value（天平與接受同源），接受 reuse PlayerTradeSystem.evaluate_offer。
 # whose-value：天平/接受用 NPC(tgt) 估值；player_items unit_value 用玩家視角供參考。
 static func map_trade_session(state: WorldState, target_id: int) -> Dictionary:
 	var pid: int = state.player_id
@@ -854,17 +854,16 @@ static func map_trade_session(state: WorldState, target_id: int) -> Dictionary:
 			"offer": { "gives": {}, "wants": {} },
 			"give_value": 0.0, "want_value": 0.0, "npc_would_accept": false }
 	var feasible: bool = pt.tile_pos == tgt.tile_pos
-	var inter := InteractionSystem.new()
 	var p_items: Array = []
 	var t_items: Array = []
 	# 可交易白名單：限 BASE_PRICE 項（coin 另列 face value）
-	for res in InteractionSystem.BASE_PRICE:
+	for res in TradeValuation.BASE_PRICE:
 		if res == "coin":
 			continue
 		if int(pt.resources.get(res, 0)) >= 1:   # 整數 ≥1 才可交易，避免碎量顯示 ×0 幽靈列
-			p_items.append({ "grade": res, "qty": int(pt.resources[res]), "unit_value": inter.local_value(pt, res) })
+			p_items.append({ "grade": res, "qty": int(pt.resources[res]), "unit_value": TradeValuation.local_value(pt, res) })
 		if int(tgt.resources.get(res, 0)) >= 1:
-			t_items.append({ "grade": res, "qty": int(tgt.resources[res]), "unit_value": inter.local_value(tgt, res) })
+			t_items.append({ "grade": res, "qty": int(tgt.resources[res]), "unit_value": TradeValuation.local_value(tgt, res) })
 	if int(pt.resources.get("coin", 0)) > 0:
 		p_items.append({ "grade": "coin", "qty": int(pt.resources["coin"]), "unit_value": 1.0 })
 	if int(tgt.resources.get("coin", 0)) > 0:
@@ -874,10 +873,10 @@ static func map_trade_session(state: WorldState, target_id: int) -> Dictionary:
 	var wants: Dictionary = offer.get("player_wants", {})
 	var give_v: float = 0.0
 	for r in gives:
-		give_v += inter.local_value(tgt, r) * float(gives[r])   # NPC 視角(收 player 給)
+		give_v += TradeValuation.local_value(tgt, r) * float(gives[r])   # NPC 視角(收 player 給)，與 evaluate_offer 同源
 	var want_v: float = 0.0
 	for r in wants:
-		want_v += inter.local_value(tgt, r) * float(wants[r])   # NPC 視角(給出)
+		want_v += TradeValuation.local_value(tgt, r) * float(wants[r])   # NPC 視角(給出)，與 evaluate_offer 同源
 	var accept: bool = false
 	if not gives.is_empty() or not wants.is_empty():
 		var ev := PlayerTradeSystem.new().evaluate_offer(state, pt.team_id, target_id,
