@@ -17,5 +17,12 @@ tools/
 *_out.txt
 *_output.txt
 test_*.gd
-01.png
-01.png.import
+
+# Godot run logs (run artifacts)
+*.log
+
+# Root-level playtest screenshots（遊戲素材在 res:// 子目錄,不受影響）
+/*.png
+/*.PNG
+/*.png.import
+/*.PNG.import
