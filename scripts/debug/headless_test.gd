@@ -55,6 +55,8 @@ func _initialize() -> void:
 	_test_succession_anon_fallback()
 	_test_succession_anon_exhausted()
 	_test_succession_weak_leader_overflow()
+	_test_succession_player_choose_heir()
+	_test_succession_player_extinct()
 	_test_team_previous_task_field()
 	_test_survival_trigger_urgent()
 	_test_survival_sticky()
@@ -10614,3 +10616,33 @@ func _test_succession_weak_leader_overflow() -> void:
 	assert(t.population <= cap or s.teams.size() > teams_before,
 		"溢出應減員或生流亡隊（cap=%d pop=%d teams=%d→%d）" % [cap, t.population, teams_before, s.teams.size()])
 	print("weak leader overflow OK")
+
+func _test_succession_player_choose_heir() -> void:
+	print("--- 繼承：player team → choose_heir forced ---")
+	var r := _mk_succession_team(6, [0.2, 0.4], 0)
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.player_id = t.leader_id          # 玩家是 leader
+	# 玩家 leader 死（person 尚在 persons：所有真實路徑呼 on_leader_death 時死者未 erase
+	# —— combat 在 erase 前呼、famine/encounter/安全網從不 erase）
+	t.leader_id = -1
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok, "player 有 named → pending(true)")
+	assert(s.player_forced_event.get("action", "") == "choose_heir", "應發 choose_heir forced")
+	assert(s.player_forced_event.get("team_id", -1) == 6, "forced team_id=6")
+	assert(s.player_forced_event.get("candidates", []).size() == 2, "2 候選")
+	# 冪等：再呼一次不應改變/重設
+	var fe_id_before = s.player_forced_event_id
+	var ok2: bool = EventSystem.new().on_leader_death(s, t)
+	assert(ok2 and s.player_forced_event_id == fe_id_before, "冪等：pending 時不重設 forced")
+	print("player choose_heir OK")
+
+func _test_succession_player_extinct() -> void:
+	print("--- 繼承：player named 空 → game_over ---")
+	var r := _mk_succession_team(8, [], 5)   # player 隊 0 named（只 anon）
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	s.player_id = t.leader_id
+	t.leader_id = -1   # person 尚在 persons（見 choose_heir 測試註）
+	var ok: bool = EventSystem.new().on_leader_death(s, t)
+	assert(not ok, "player 絕後 → false")
+	assert(s.game_over, "應設 game_over")
+	print("player extinct OK")

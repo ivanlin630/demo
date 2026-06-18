@@ -22,7 +22,9 @@ func process_events(state: WorldState, team_ids: Array) -> Array:
 
 # 由外部呼叫（Leader 死亡/失效後繼承）。繼承邏輯單一 owner。
 func on_leader_death(state: WorldState, team: TeamData) -> bool:
-	# TODO(Task3): player team → _handle_player_succession
+	# player team → choose_heir forced（凍世界）／絕後 game_over
+	if state.player_id != -1 and team.team_id == state.get_player_team_id():
+		return _handle_player_succession(state, team)
 	# NPC: best named 無門檻晉升
 	var best_successor: PersonData = null
 	var best_command: float = -1.0
@@ -53,3 +55,25 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 		return true
 	print("[Succession] Team %d 無繼承人，崩潰中（無匿名人口）" % team.team_id)
 	return false
+
+func _handle_player_succession(state: WorldState, team: TeamData) -> bool:
+	# 冪等：已有本 team 的 choose_heir pending → 不重設
+	if state.player_forced_event is Dictionary \
+			and state.player_forced_event.get("action", "") == "choose_heir" \
+			and int(state.player_forced_event.get("team_id", -1)) == team.team_id:
+		return true
+	team.leader_id = -1
+	if team.named_members.is_empty():
+		state.game_over = true
+		state.game_over_reason = "玩家絕後（Team%d 無繼承人）" % team.team_id
+		print("[GameOver] %s" % state.game_over_reason)
+		return false
+	state.player_forced_event = {
+		"action": "choose_heir",
+		"team_id": team.team_id,
+		"candidates": team.named_members.duplicate(),
+	}
+	state.player_forced_event_id = "heir_%d" % state.world.current_tick
+	print("[Heir] 玩家 leader 死亡，等待選繼承人 (Team%d, %d 候選)" % [
+		team.team_id, team.named_members.size()])
+	return true
