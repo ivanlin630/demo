@@ -45,7 +45,7 @@ func resolve_inquiry(state: WorldState, player_team: TeamData,
 			var intel: Dictionary = state.team_intel.get(npc_team.team_id, {})
 			var locations: Array = []
 			for tid in intel:
-				var e: Dictionary = intel[tid]
+				var e: Dictionary = BeliefSystem.best_estimate(state, npc_team.team_id, tid)
 				var pos: Vector2i = e.get("tile_pos", Vector2i(-1,-1))
 				if not honest:
 					pos += Vector2i(randi_range(-3,3), randi_range(-3,3))
@@ -60,7 +60,7 @@ func resolve_inquiry(state: WorldState, player_team: TeamData,
 			for tid in state.team_intel.get(npc_team.team_id, {}):
 				var t: TeamData = state.teams.get(tid)
 				if t and t.faction_id != player_team.faction_id:
-					var e2: Dictionary = state.team_intel[npc_team.team_id][tid]
+					var e2: Dictionary = BeliefSystem.best_estimate(state, npc_team.team_id, tid)
 					enemy_intel.append({ "team_id": tid,
 						"tile_pos": e2.get("tile_pos", t.tile_pos),
 						"last_tick": e2.get("last_tick", 0) })
@@ -89,7 +89,7 @@ func _passes_filter(id: String, state: WorldState,
 			var intel: Dictionary = state.team_intel.get(player_team.team_id, {})
 			var fresh_count: int = 0
 			for tid in intel:
-				if int(intel[tid].get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
+				if int(BeliefSystem.best_estimate(state, player_team.team_id, tid).get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
 					fresh_count += 1
 			return fresh_count < 3
 		"ask_faction_status":

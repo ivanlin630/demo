@@ -38,8 +38,7 @@ static func _power_ratio(state: WorldState, self_team: TeamData,
 		other: TeamData) -> float:
 	var self_power: float = _team_power(self_team)
 	# 對方用 team_intel snapshot（NPC 不全知）
-	var intel: Dictionary = state.team_intel.get(self_team.team_id,
-		{}).get(other.team_id, {})
+	var intel: Dictionary = BeliefSystem.best_estimate(state, self_team.team_id, other.team_id)
 	var pop_est: int = int(intel.get("population_est", other.population))
 	# 無 combat skill in intel → 用 0.3 baseline 估算
 	var other_power: float = float(pop_est) * 0.3

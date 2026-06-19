@@ -184,8 +184,7 @@ func _refresh_attack_pursuit(state: WorldState, team: TeamData) -> void:
 		TaskArbiter.release(team)
 		return
 	# C: 攻擊追擊用攔截預測（朝 prey 移動方向提前 N 步），視野外/不動 fallback intel 最後已知
-	var last_pos: Vector2i = state.team_intel.get(team.team_id, {}).get(
-		team.prosperity_target_id, {}).get("tile_pos", prey.tile_pos)
+	var last_pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, team.prosperity_target_id).get("tile_pos", prey.tile_pos)
 	var predicted: Vector2i = PathSystem.predict_intercept(state, team, prey)
 	team.move_target = predicted if predicted != prey.tile_pos else last_pos
 
@@ -449,7 +448,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	for fid in state.factions:
 		var f = state.factions[fid]
 		for mid in f.member_team_ids:
-			var snap: Dictionary = state.team_intel.get(f.leader_team_id, {}).get(mid, {})
+			var snap: Dictionary = BeliefSystem.best_estimate(state, f.leader_team_id, mid)
 			if not snap.is_empty():
 				f.known_member_states[mid] = snap
 		_update_goals(state, f)
@@ -649,7 +648,7 @@ func _update_goals(state: WorldState, f) -> void:
 			and _tag_weight(leader_team, TeamData.TASK_ATTACK) > 0.0:
 		var target_id: int = _nearest_independent(state, leader_team)
 		if target_id != -1:
-			var tgt_snap: Dictionary = state.team_intel.get(f.leader_team_id, {}).get(target_id, {})
+			var tgt_snap: Dictionary = BeliefSystem.best_estimate(state, f.leader_team_id, target_id)
 			var tgt_armed: int = int(tgt_snap.get("armed_est", 999))  # 未知視為強敵
 			var own_armed: int = _calc_own_armed(state, leader_team)
 			for mid in f.known_member_states:
@@ -1157,7 +1156,7 @@ func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 		var t: TeamData = state.teams[tid]
 		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, merchant, tid)
 		if not catch_result.reachable: continue
-		var snap: Dictionary = state.team_intel.get(merchant.team_id, {}).get(tid, {})
+		var snap: Dictionary = BeliefSystem.best_estimate(state, merchant.team_id, tid)
 		var max_gap: float = 0.0
 		for res in TradeValuation.BASE_PRICE:
 			var my_val: float = TradeValuation.local_value(merchant, res)
@@ -2458,8 +2457,7 @@ func _evaluate_owner_contact(state: WorldState, team: TeamData) -> void:
 	if owner_id == -1 or not state.teams.has(owner_id):
 		_trigger_defection_evaluation(state, team, "owner_gone")
 		return
-	var intel: Dictionary = state.team_intel.get(team.team_id, {})
-	var snap: Dictionary = intel.get(owner_id, {})
+	var snap: Dictionary = BeliefSystem.best_estimate(state, team.team_id, owner_id)
 	var last_tick: int = int(snap.get("last_tick", -1))
 	if last_tick == -1:
 		return   # 從未接觸（剛建立可能）
