@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: G2b 開工——TEST VALUE feel 點待你磨（非阻塞，先 land 骨架）
+ruling: feel 4 點藍圖確認連貫、無需改。已被 #0 戲劇尾巴重量證實 work（立國 0→1）。cap「≥0.8→稱霸」正接上尾巴(舊值鎖0.8無人搆稱霸，今尾巴破0.8→上層rung有人填)。數值留平衡 pass，看 [Ambition] log 不對再回呈。
 ---
 
 # 知會：G2b 階梯 seam plan 開，feel 數值留你

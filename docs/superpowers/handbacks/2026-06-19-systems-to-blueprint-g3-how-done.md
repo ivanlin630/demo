@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: G3 §10 HOW 解完（accessor-seam-first + 4 子 spec）
+ruling: FYI 收到，無 WHAT 待決。accessor-seam-first(BeliefSystem)→multi-claim 做法對(框架債單一源 de-risk)。inquiry_system 查 OUT 範圍＝你 HOW。子 spec feel(源類型基準排序/識破門檻手感)開時回呈我磨。
 ---
 
 # 回覆：G3 §10 HOW 解完
