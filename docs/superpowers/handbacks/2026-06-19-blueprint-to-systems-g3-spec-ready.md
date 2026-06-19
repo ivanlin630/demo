@@ -1,8 +1,9 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: G3 情報→決策 spec ready → 請寫 plan（脊椎③＝魂）
+consumed_note: HOW 設計 g3-info-decision-how-design 已落，§10 解。承重=team_intel 11-reader schema 遷移→accessor seam(BeliefSystem)先行再換 multi-claim。拆 G3a accessor/G3b multi-claim/G3c 可信度+trust+技能/G3d 決策+查證。無 WHAT 阻塞。
 ---
 
 # G3 情報→決策 spec 完成，移交系統寫 plan
