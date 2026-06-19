@@ -424,7 +424,22 @@ func _initialize() -> void:
 	_test_rung_task_map()
 	_test_ambient_ladder_task()
 	_test_prosperity_gated_by_ladder()
+	# ── G3a belief accessor ──
+	_test_belief_accessor()
 	quit()
+
+func _test_belief_accessor() -> void:
+	print("--- G3a：BeliefSystem 讀 accessor（行為保留）---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	s.team_intel = {1: {2: {"population_est": 50, "confidence": 0.8, "last_pos": Vector2i(3,3)}}}
+	var be: Dictionary = BeliefSystem.best_estimate(s, 1, 2)
+	assert(be.get("population_est", -1) == 50, "accessor 回現 entry")
+	assert(BeliefSystem.has_belief(s, 1, 2), "有 belief")
+	assert(not BeliefSystem.has_belief(s, 1, 99), "無 belief")
+	assert(BeliefSystem.best_estimate(s, 9, 9).is_empty(), "查無回 {}")
+	assert(abs(BeliefSystem.uncertainty(s, 1, 2) - 0.2) < 0.01, "uncertainty=1-conf=0.2")
+	assert(abs(BeliefSystem.uncertainty(s, 9, 9) - 1.0) < 0.01, "無資料 uncertainty=1")
+	print("belief accessor OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")
