@@ -89,6 +89,11 @@ var move_tick_acc: int = 0
 var combat_target: int = -1
 var encounter_initial_pop: int = 0   # 遭遇戰開始時人口快照（mount loot kill_ratio 用）
 var prosperity_eval_next_tick: int = 0   # 下次 prosperity 評估 tick（cadence + 事件重評）
+# G2 野心階梯（leader values 衍生，單一真值源；見 AmbitionLadder）
+var ambition_archetype: String = ""   # 武力/商業/定居
+var ambition_cap: int = 0             # 終極野心封頂 rung
+var ambition_rung: int = 0            # 當前實際 rung（0 生存…4 稱霸）
+var ambition_eval_next_tick: int = 0
 var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）
 var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
 var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）

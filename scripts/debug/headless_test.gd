@@ -409,6 +409,9 @@ func _initialize() -> void:
 	_test_relation_graph_core()
 	_test_person_relation_edges_default()
 	_test_g2a_memory_writes_edges()
+	# ── G2b 野心階梯 ──
+	_test_ambition_derive()
+	_test_team_ambition_default()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10843,3 +10846,25 @@ func _test_g2a_memory_writes_edges() -> void:
 	ai.write_memory(p, "looted", -1, 100, 0.5)
 	assert(p.relation_edges.size() == before, "subject -1 不加邊")
 	print("G2a memory edges OK")
+
+# ── G2b 野心階梯 ──
+func _test_ambition_derive() -> void:
+	print("--- AmbitionLadder archetype/cap derive ---")
+	var warlord := PersonData.new()
+	warlord.values = {"野心": 0.9, "好戰": 0.8, "貪婪": 0.2, "義氣": 0.2, "慎重": 0.2}
+	assert(AmbitionLadder.derive_archetype(warlord) == "武力", "高野心好戰→武力")
+	assert(AmbitionLadder.derive_cap(warlord) == 4, "野心0.9→封頂稱霸(4)")
+	var merchant := PersonData.new()
+	merchant.values = {"野心": 0.4, "好戰": 0.2, "貪婪": 0.9, "義氣": 0.3, "慎重": 0.5}
+	assert(AmbitionLadder.derive_archetype(merchant) == "商業", "高貪婪→商業")
+	assert(AmbitionLadder.derive_cap(merchant) == 2, "野心0.4→封頂擴張(2)")
+	var settler := PersonData.new()
+	settler.values = {"野心": 0.2, "好戰": 0.1, "貪婪": 0.2, "義氣": 0.9, "慎重": 0.8}
+	assert(AmbitionLadder.derive_archetype(settler) == "定居", "高義氣慎重→定居")
+	print("ambition derive OK")
+
+func _test_team_ambition_default() -> void:
+	print("--- TeamData ambition 預設 ---")
+	var t := TeamData.new()
+	assert(t.ambition_rung == 0 and t.ambition_cap == 0 and t.ambition_archetype == "", "預設生存/空")
+	print("team ambition default OK")
