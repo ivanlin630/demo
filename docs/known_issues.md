@@ -6,6 +6,12 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。
 
 
+## G2 目標錨點進度
+
+- **G2a（關係圖 typed-edge）✅** + **G2b（野心階梯狀態 + strategic 衍生）✅**：`TeamData.ambition_rung/archetype/cap` 由 `AmbitionLadder` 從 leader values + 隊安全 derive（faction_ai cadence update）；`strategic_ai._update_faction_goals` 改讀階梯衍生 expand/trade（真 reader，非 dormant）。階梯門檻/權重全 TEST VALUE（待藍圖平衡 pass，handback `systems-to-blueprint-g2b-feel`）。
+- **待 G2c**：`get_goal_task_override` caller 接入 + rung→每階 task/tag 全表。
+- **待 G2d**：個人脫軌（私驅動 / 血仇 `killed` 死亡鏈）。
+
 ## 🔴 高優先（影響基本可玩性）
 
 ### P4 玩測批（2026-06-16 玩測抓,主 session harness 驗修中）
