@@ -84,12 +84,10 @@ func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 
 func _write_tier01(state: WorldState, obs_id: int, tgt_id: int,
 		tgt: TeamData, dist: int, dist_f: float) -> void:
-	if not state.team_intel.has(obs_id):
-		state.team_intel[obs_id] = {}
 	var noise: float = 1.0 - dist_f  # TEST VALUE
 	var pop_est: int = maxi(1, roundi(
 		tgt.population * randf_range(1.0 - noise, 1.0 + noise)))
-	var snap: Dictionary = state.team_intel[obs_id].get(tgt_id, {}).duplicate()
+	var snap: Dictionary = BeliefSystem.best_estimate(state, obs_id, tgt_id).duplicate()
 	snap["population_est"] = pop_est
 	snap["tile_pos"]       = tgt.tile_pos
 	snap["last_tick"]      = state.world.current_tick
@@ -107,4 +105,4 @@ func _write_tier01(state: WorldState, obs_id: int, tgt_id: int,
 		elif total_res >= 50.0:  scale = 1
 		scale = clampi(scale + randi_range(-1, 1), 0, 3)
 		snap["resource_scale"] = scale
-	state.team_intel[obs_id][tgt_id] = snap
+	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, 1.0, false)

@@ -654,9 +654,7 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 	var tgt: TeamData = state.teams.get(tgt_id) as TeamData
 	if tgt == null: return
 	var tgt_leader: PersonData = state.persons.get(tgt.leader_id) as PersonData
-	if not state.team_intel.has(obs_id):
-		state.team_intel[obs_id] = {}
-	var snap: Dictionary = state.team_intel[obs_id].get(tgt_id, {}).duplicate()
+	var snap: Dictionary = BeliefSystem.best_estimate(state, obs_id, tgt_id).duplicate()
 	snap["tier"]           = 2
 	snap["tile_pos"]       = tgt.tile_pos
 	snap["last_tick"]      = state.world.current_tick
@@ -698,7 +696,7 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 			snap["food_est"]     *= randf_range(0.3, 0.7)
 			snap["material_est"] *= randf_range(0.3, 0.7)
 			snap["goods_est"]    *= randf_range(0.3, 0.7)
-	state.team_intel[obs_id][tgt_id] = snap
+	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, 1.0, false)
 
 # 處決俘虜：呼叫者負責移除 NPC；此函數只結算目擊者 loyalty 懲罰
 func execute_prisoner(state: WorldState, team_id: int) -> void:
