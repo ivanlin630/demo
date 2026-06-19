@@ -1,6 +1,10 @@
 # 開發進度
 
-## 📍 當前狀態（2026-06-17）
+## 📍 當前狀態（2026-06-19）
+
+- **G1d 商隊訂單驅動 + 短缺買單 ✅（閉環 G1b）**：商業 archetype 隊 targeting 改讀 `team_known` 訂單（`OrderSystem.best_arbitrage_order`，殘缺/可失真情報），取代 `_find_trade_target` 的 `team_discovered` 上帝視角（後者降 fallback，最終應刪，符「目標決策讀殘缺情報」總則）；`tick_team_orders` 短缺發買單（料/武器 < `SHORTAGE_QTY`）→ G1b infra 半 inert 解除（賣盤有 reader、生產買單有來源）。到場履約走既有 interaction 同格 trade（守恆）。撲空 = 訂單 stale → `local_value` glut（emergent 無新機制）。headless 全綠、game_sim_multi 21600 tick 無崩潰、coin_eq=0、InvariantAudit 0。剩 refinement：部分履約記帳、distort×params、信用幣(③G3)、arbitrage 公式調平衡。詳見 known_issues G1。
+
+## 📍 前狀態（2026-06-17）
 
 - **玩家動作 parity 已 merge（`81e245b`）**：QA P5 走查重frame C-1~C-6（NPC task=AI 抽象 ≠ 玩家直接控,真對稱=動作 parity）。新 `_action_train`（一次性 coin 30→`add_exp`+`try_promote`,玩家版比 NPC 完整）+ `_action_camp`（紮營 Y版:免材料/無即時糧只抬cap/距離spacing/限時建造,reuse construction）+ **panic 收口**（reaction 恐慌橋加 `leader_id!=player_id` 守衛,玩家主隊不被劫持移動,其餘恐慌效果保留）+ 玩家隊狀態列「任務:」→「狀態:」。spec `2026-06-16-player-action-parity-design`、plan 同名、handback 同名。功能經 key-injection driver 端到端驗（訓練/招募/紮營）。
 - **QA P5 修復已 merge**：B-1 收留撞 pop_cap 守恆（食物按量測 delta 扣、msg 報實際併入,不謊報）+ A-1 記名招募在 TextUI 主場景可達（消費 recruit menu payload）。
