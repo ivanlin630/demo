@@ -3758,6 +3758,7 @@ func _run_sim_test() -> void:
 	_test_probe_accumulator()
 	_test_probe_ambush_check()
 	_test_probe_g1g2_hooks()
+	_test_spine_trace_dump()
 
 	print("=== DONE ===")
 
@@ -3780,6 +3781,18 @@ func _test_probe_accumulator() -> void:
 	assert(Probe.counts.is_empty(), "reset 清空")
 	Probe.enabled = false
 	print("probe accumulator OK")
+
+func _test_spine_trace_dump() -> void:
+	print("--- SpineTrace dump ---")
+	var s := WorldState.new(); s.world = WorldData.new(); s.world.current_tick = 240
+	s.teams = {}; s.persons = {}; s.team_intel = {}; s.team_discovered = {}
+	var t := TeamData.new(); t.team_id = 0; AnonTierSystem.add_anon(t, "平民", 8)
+	t.ambition_rung = 1; t.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE
+	var ld := PersonData.new(); ld.id = 100; ld.team_id = 0; t.leader_id = 100
+	ld.skills["計謀"] = 0.5; ld.values["野心"] = 0.7
+	s.teams[0] = t; s.persons[100] = ld; s.team_discovered[0] = []
+	SpineTrace.dump(s, 240)   # 不崩即過（純讀）
+	print("spine trace OK")
 
 func _test_probe_g1g2_hooks() -> void:
 	print("--- Probe G1/G2 打點 ---")
