@@ -525,6 +525,16 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		_refresh_attack_pursuit(state, team)
 		# D: 被動威脅評估（cadence 內部控管）
 		_evaluate_threat(state, team)
+		# G2d：私人脫軌（強血仇+衝動 leader 拉隊打仇人；生存/威脅擋得住，prosperity 擋不住）
+		# 置於 _evaluate_threat 後：threat 先在 idle 設 DEFEND/FLEE@70，vendetta@55 搶不動 → 威脅優先
+		var _vleader: PersonData = state.persons.get(team.leader_id)
+		if _vleader != null:
+			var _vfoe: int = NpcAiSystem.new().vendetta_target(state, _vleader)
+			if _vfoe != -1 and state.teams.has(_vfoe):
+				if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
+						state.teams[_vfoe].tile_pos, TaskArbiter.PRIO_VENDETTA, "vendetta"):
+					team.prosperity_target_id = _vfoe   # 追擊刷新復用
+					print("[Vendetta] Team%d leader 脫軌攻擊仇人 Team%d" % [team.team_id, _vfoe])
 		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）
 		if team.current_task == TeamData.TASK_TRADE \
 				and state.world.current_tick - team.trade_task_start_tick > TRADE_TIMEOUT:

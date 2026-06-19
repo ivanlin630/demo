@@ -8,6 +8,7 @@ const PRIO_COMBAT:   int = 100
 const PRIO_SURVIVAL: int = 80
 const PRIO_THREAT:   int = 70
 const PRIO_PLAYER:   int = 60
+const PRIO_VENDETTA: int = 55   # 私人脫軌（強仇+衝動）：生存(80)/威脅(70)下、prosperity(50)上
 const PRIO_DISPATCH: int = 50
 const PRIO_FACTION:  int = 30
 const PRIO_AMBIENT:  int = 10
