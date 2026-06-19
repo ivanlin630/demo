@@ -439,6 +439,7 @@ func _initialize() -> void:
 	# ── G3d-1 決策讀 uncertainty + 風險 gate ──
 	_test_confidence_gate()
 	_test_faction_attack_gate()
+	_test_diplomacy_hostile_gate()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -698,6 +699,52 @@ func _test_faction_attack_gate() -> void:
 	assert(tm_c.prosperity_target_id == 1 and tm_c.current_task == TeamData.TASK_ATTACK,
 		"慎重者親見確定→照常攻擊(不凍結)，實際 target=%d task=%s" % [tm_c.prosperity_target_id, tm_c.current_task])
 	print("attack gate OK")
+
+# 外交敵對(求貢)scenario builder。demander(team0,小)向 target(team1,大)求貢。
+# 慎重=2.0 → randf gate 必過(threshold 1.2)，孤立 uncertainty gate；gate caution clamp→1.0。
+func _diplomacy_hostile_scene() -> Array:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var demander := TeamData.new()
+	demander.team_id = 0; demander.tile_pos = Vector2i(0, 0); _seed_pop(demander, 4)
+	demander.faction_id = -1
+	demander.resources = { "food": 5000 }   # resource_need≈0，壓低 score 落 demand_tribute 區
+	state.teams[0] = demander
+	var dleader := PersonData.new()
+	dleader.id = 100
+	dleader.values = { "貪婪": 0.7, "慎重": 2.0, "義氣": 0.1, "信義": 0.1, "野心": 0.5 }
+	state.persons[100] = dleader
+	demander.leader_id = 100
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(0, 0); _seed_pop(target, 20)
+	target.faction_id = 1
+	state.teams[1] = target
+	var tleader := PersonData.new()
+	tleader.id = 101
+	tleader.values = { "義氣": 0.9, "慎重": 0.0 }   # 高傲低謹慎 → 必拒貢
+	state.persons[101] = tleader
+	target.leader_id = 101
+	state.team_discovered[0] = [1]
+	return [state, demander]
+
+func _test_diplomacy_hostile_gate() -> void:
+	print("--- G3d-1：外交敵對 gate ---")
+	var dip := DiplomaticAiSystem.new()
+	# A) 慎重 demander + 矛盾多源 belief → 求貢按兵（拒貢冷卻不被設）
+	var sa: Array = _diplomacy_hostile_scene()
+	var st_a: WorldState = sa[0]; var dm_a: TeamData = sa[1]
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
+	dip.try_proactive_diplomacy(st_a, dm_a)
+	assert(not dm_a.diplomacy_reject_cooldown.has(1),
+		"慎重者矛盾情報→敵對按兵(無求貢)，實際 cooldown=%s" % str(dm_a.diplomacy_reject_cooldown))
+	# B) 慎重 demander + 親見確定 belief → 照常求貢(被拒設冷卻) → gate 不凍結友/敵
+	var sb: Array = _diplomacy_hostile_scene()
+	var st_b: WorldState = sb[0]; var dm_b: TeamData = sb[1]
+	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 20}, 1.0, false)
+	dip.try_proactive_diplomacy(st_b, dm_b)
+	assert(dm_b.diplomacy_reject_cooldown.has(1),
+		"慎重者親見確定→照常求貢(不凍結)，實際 cooldown=%s" % str(dm_b.diplomacy_reject_cooldown))
+	print("diplomacy gate OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")

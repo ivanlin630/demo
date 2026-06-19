@@ -65,6 +65,10 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 		var power_gap: float = float(other.population - self_team.population) / \
 			maxf(self_team.population, 1.0)
 		if power_gap > 0.5 and self_leader.values.get("貪婪", 0.5) > 0.6:
+			# G3d-1 風險 gate：求貢=敵對行動(基於「對方弱可欺」)，不確定且慎重→按兵；結盟/求和不 gate
+			var _dcaution: float = float(self_leader.values.get("慎重", 0.5))
+			if not BeliefSystem.confident_enough(state, self_team.team_id, other.team_id, _dcaution):
+				continue
 			_send_diplomacy_message(state, self_team, other, "demand_tribute")
 			return
 
