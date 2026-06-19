@@ -27,6 +27,8 @@ const OBS_SKILL_NOISE_GAIN := 0.5     # TEST VALUE：低技能額外觀察噪
 # G3d-1 決策風險 gate
 const GATE_CONF_LOW := 0.0    # TEST VALUE：莽者門檻
 const GATE_CONF_HIGH := 0.6   # TEST VALUE：慎重者門檻
+# G3d-2 scout 主動查證
+const SCOUT_TIMEOUT := WorldState.TICKS_PER_DAY * 3   # TEST VALUE：斥候逾時未收斂 → 釋放回常規（防永 scout）
 
 # 寫時可信度（時不變部分）：類型基準 × 身份信任 × 跳數衰減。
 # 身份信任 = obs team known_reputations[source]（0..1，default 0.5）；親見 source==obs → 1.0。

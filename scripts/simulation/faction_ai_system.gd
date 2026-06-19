@@ -139,8 +139,15 @@ static func _is_border_adjacent(attacker: TeamData, prey: TeamData) -> bool:
 func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id and state.player_id != -1: return
 	if team.combat_target != -1: return
-	# stuck（task=攻擊/掠奪 但 move_target 已清）視為 idle，允許重評換目標
-	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
+	# G3d-2：scout 逾時未收斂 → 釋放回常規（防永 scout 卡死）
+	if team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout" \
+			and state.world.current_tick - team.task_start_tick > BeliefSystem.SCOUT_TIMEOUT:
+		TaskArbiter.release(team)
+	# stuck（task=攻擊/掠奪 但 move_target 已清）視為 idle，允許重評換目標。
+	# G3d-2：自家 scout(查證中) 亦允許重評 → 親見壓低 uncertainty 後可收斂轉攻。
+	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team) \
+			and not (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout"):
+		return
 	if team.current_task in SURVIVAL_TASKS: return
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
@@ -160,16 +167,26 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	var prey_id: int = find_prosperity_prey(state, team, leader)
 	if prey_id == -1: return
 
-	# G3d-1 風險 gate：對 prey 情報不確定且 leader 慎重 → 本 tick 不 commit（按兵，待親見壓低 uncertainty）。
-	# 莽者門檻低→照衝→假情報誘殺。下次 cadence 重評。
+	# G3d-1/2 風險 gate：對 prey 情報不確定且 leader 慎重 → 不直接攻，改主動派斥候查證。
+	# 莽者門檻低→照衝→假情報誘殺（不入此分支）。下次 cadence 重評。
 	var _caution: float = float(leader.values.get("慎重", 0.5))
 	if not BeliefSystem.confident_enough(state, team.team_id, prey_id, _caution):
+		# G3d-2：不確定 → 派斥候移向 prey best_estimate 位 → 親見壓謊 → 下 cadence uncertainty 塌 → 攻。
+		# 不設 combat_target（純觀察不交戰）。scout 與 attack 同 PRIO_DISPATCH，靠 release 換手。
+		var prey_t: TeamData = state.teams.get(prey_id)
+		var scout_pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, prey_id).get("tile_pos", prey_t.tile_pos) if prey_t else team.tile_pos
+		if team.current_task == TeamData.TASK_SCOUT and team.prosperity_target_id == prey_id:
+			team.move_target = scout_pos   # 追蹤刷新：prey 移動 → 朝最新 best_estimate（不重派/不 spam log）
+		elif TaskArbiter.try_set(state, team, TeamData.TASK_SCOUT, scout_pos, TaskArbiter.PRIO_DISPATCH, "scout"):
+			team.prosperity_target_id = prey_id   # try_set 已設 move_target=scout_pos
+			print("[Scout] team=%d → verify prey=%d" % [team.team_id, prey_id])
 		return
 
 	# combat_target 不預設：移動凍結 + interaction 早退會擋住交戰；
 	# 由 interaction_system 到達時 start_combat 設定。只給 task + move_target + 追擊目標。
-	if _is_stuck(team):
-		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評換目標
+	# G3d-2：confident 後若仍掛 scout(同 PRIO_DISPATCH 擋不住自身) → 先 release 讓 attack 設得進。
+	if _is_stuck(team) or (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout"):
+		TaskArbiter.release(team)
 	if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
 			state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "prosperity"):
 		team.prosperity_target_id = prey_id

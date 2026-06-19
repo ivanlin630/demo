@@ -678,14 +678,14 @@ func _attack_gate_scene(caution: float) -> Array:
 
 func _test_faction_attack_gate() -> void:
 	print("--- G3d-1：攻擊 commit gate ---")
-	# A) 慎重 leader + 矛盾多源 belief(高 uncertainty) → 按兵（target 不設）
+	# A) 慎重 leader + 矛盾多源 belief(高 uncertainty) → 主動派斥候查證(G3d-2，取代被動按兵)
 	var sa: Array = _attack_gate_scene(1.0)
 	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
 	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
 	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
 	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
-	assert(tm_a.prosperity_target_id == -1 and tm_a.current_task == TeamData.TASK_IDLE,
-		"慎重者矛盾情報→按兵，實際 target=%d task=%s" % [tm_a.prosperity_target_id, tm_a.current_task])
+	assert(tm_a.prosperity_target_id == 1 and tm_a.current_task == TeamData.TASK_SCOUT,
+		"慎重者矛盾情報→派斥候查證，實際 target=%d task=%s" % [tm_a.prosperity_target_id, tm_a.current_task])
 	# B) 莽者(慎重低) 同矛盾 belief → 照衝（target 設）
 	var sb: Array = _attack_gate_scene(0.0)
 	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
