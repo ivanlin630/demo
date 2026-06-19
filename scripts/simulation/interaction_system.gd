@@ -558,15 +558,32 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 	var a_original: Dictionary = _absorb_public_storage(state, a)
 	var b_original: Dictionary = _absorb_public_storage(state, b)
 	var a_coin_before: float = float(a.resources.get("coin", 0))
+	# 履約：交易窗前快照各隊 active_order 涉及的 res 持有（窗內 = 私有+吸入公庫 = 完整持有）
+	var a_before: Dictionary = _snapshot_order_res(a)
+	var b_before: Dictionary = _snapshot_order_res(b)
 	_attempt_trade_direction(state, a, b)
 	_attempt_trade_direction(state, b, a)
 	_attempt_barter(state, a, b)   # 缺幣互補：以物易物（coin 換完後）
+	# 履約結算（spillback 前，team.resources 仍 = 完整持有）
+	var _os := OrderSystem.new()
+	var a_prog: bool = _os.settle_orders(a, a_before, state.world.current_tick)
+	var b_prog: bool = _os.settle_orders(b, b_before, state.world.current_tick)
+	if (a_prog and b.tags.has(TeamData.TAG_MERCHANT)) or (b_prog and a.tags.has(TeamData.TAG_MERCHANT)):
+		Probe.bump("g1.arb_hit")
 	if absf(float(a.resources.get("coin", 0)) - a_coin_before) > 0.001:
 		print("[Market] Team%d <-> Team%d 成交（公庫接入）" % [a.team_id, b.team_id])
 	_spill_back_public_storage(state, a, a_original)
 	_spill_back_public_storage(state, b, b_original)
 	if a.current_task == TeamData.TASK_TRADE: TaskArbiter.release(a)
 	if b.current_task == TeamData.TASK_TRADE: TaskArbiter.release(b)
+
+func _snapshot_order_res(team: TeamData) -> Dictionary:
+	var snap: Dictionary = {}
+	for o in team.active_orders:
+		var res: String = o["res"]
+		if not snap.has(res):
+			snap[res] = float(team.resources.get(res, 0))
+	return snap
 
 func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamData) -> void:
 	var buyer_coin: float = float(buyer.resources.get("coin", 0))

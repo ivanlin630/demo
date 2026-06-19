@@ -3756,6 +3756,9 @@ func _run_sim_test() -> void:
 	_test_received_sell_and_arbitrage()
 	_test_merchant_order_targeting()
 
+	# ── #1 訂單履約結算 ──
+	_test_order_fulfillment()
+
 	# ── G3-targeting 攻擊/掠食選擇讀 belief（置尾：勿擾前段 unseeded RNG 序）──
 	_test_prey_select_reads_belief()
 	_test_survival_prey_reads_belief()
@@ -3870,6 +3873,33 @@ func _test_merchant_order_targeting() -> void:
 	var ok: bool = TaskArbiter.try_set(s, m, TeamData.TASK_TRADE, best["pos"], TaskArbiter.PRIO_DISPATCH, "merchant_order")
 	assert(ok and m.current_task == TeamData.TASK_TRADE and m.move_target == Vector2i(5,0), "趕赴訂單地")
 	print("merchant order targeting OK")
+
+func _test_order_fulfillment() -> void:
+	print("--- #1 訂單履約結算 ---")
+	var os := OrderSystem.new()
+	# buy 單：隊想進貨 material，窗內持有 +5 → 沖 5
+	var t := TeamData.new(); t.team_id = 0
+	t.active_orders = [{"order_id": 1, "kind": "buy", "res": "material", "qty_remaining": 8, "expire_tick": 9999}]
+	var before := {"material": 10.0}
+	t.resources["material"] = 15.0   # 窗後 = 15，淨 +5
+	var prog: bool = os.settle_orders(t, before, 100)
+	assert(prog == true, "有進貨應 progressed")
+	assert(int(t.active_orders[0]["qty_remaining"]) == 3, "8-5=3，實際=%d" % t.active_orders[0]["qty_remaining"])
+	# 填滿 → 移除
+	var before2 := {"material": 15.0}
+	t.resources["material"] = 20.0   # 再 +5 ≥ 剩 3
+	os.settle_orders(t, before2, 101)
+	assert(t.active_orders.is_empty(), "填滿應移除 order")
+	# sell 單：持有減才算；撲空（無變）不沖
+	var t2 := TeamData.new(); t2.team_id = 1
+	t2.active_orders = [{"order_id": 2, "kind": "sell", "res": "goods", "qty_remaining": 6, "expire_tick": 9999}]
+	var b3 := {"goods": 10.0}; t2.resources["goods"] = 10.0   # 無變
+	assert(os.settle_orders(t2, b3, 102) == false, "撲空不 progressed")
+	assert(int(t2.active_orders[0]["qty_remaining"]) == 6, "撲空 qty 不變")
+	var b4 := {"goods": 10.0}; t2.resources["goods"] = 6.0    # 賣出 4
+	os.settle_orders(t2, b4, 103)
+	assert(int(t2.active_orders[0]["qty_remaining"]) == 2, "6-4=2 sell 沖銷")
+	print("order fulfillment OK")
 
 func _test_order_post_and_read() -> void:
 	print("--- G1b：訂單發布 + 讀取 ---")
