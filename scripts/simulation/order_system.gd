@@ -24,7 +24,31 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 		"origin_team": team.team_id, "origin_pos": team.tile_pos,
 		"expire_tick": expire,
 	})
+	print("[Order] Team%d %s %s ×%d (oid=%d)" % [team.team_id, kind, res, qty, oid])
 	return oid
+
+# cadence：過期清理 + 餘量發賣盤（買單短缺驅動完整化 = G1c/G1d）。
+func tick_team_orders(state: WorldState, team: TeamData) -> void:
+	# 1. 過期清理
+	var kept: Array = []
+	for o in team.active_orders:
+		if int(o["expire_tick"]) > state.world.current_tick:
+			kept.append(o)
+	team.active_orders = kept
+	# 2. 餘量發賣盤（囤量遠超自用 → 餘 → 賣；TEST VALUE 門檻）
+	for res in _ORDER_ELIGIBLE_RES:
+		var qty: float = float(team.resources.get(res, 0))
+		if qty < 20.0:
+			continue
+		if _has_active(team, "sell", res):
+			continue
+		post_order(state, team, "sell", res, int(qty * 0.5))
+
+func _has_active(team: TeamData, kind: String, res: String) -> bool:
+	for o in team.active_orders:
+		if o["kind"] == kind and o["res"] == res:
+			return true
+	return false
 
 # 讀自隊收到的買單（team_known 的 order_buy message；殘缺=可失真副本）。
 func received_buy_orders(state: WorldState, team: TeamData) -> Array:

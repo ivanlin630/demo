@@ -3360,6 +3360,7 @@ func _run_sim_test() -> void:
 
 	# ── G1b 訂單系統 + 需求驅動生產 ──
 	_test_order_post_and_read()
+	_test_order_cadence_and_expire()
 
 	print("=== DONE ===")
 
@@ -3381,6 +3382,30 @@ func _test_order_post_and_read() -> void:
 	var recv: Array = os.received_buy_orders(s, seller)
 	assert(recv.size() >= 1 and recv[0]["res"] == "weapon_melee_low", "seller 讀到買單需求")
 	print("order post/read OK")
+
+func _test_order_cadence_and_expire() -> void:
+	print("--- G1b：訂單 cadence 發布 + 過期 ---")
+	var os := OrderSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
+	var l := PersonData.new(); l.id = 1000; l.team_id = 1; s.persons[1000] = l; t.leader_id = 1000
+	# 大量某資源 → 應發賣盤
+	t.resources = {"goods": 500.0}
+	s.teams[1] = t
+	os.tick_team_orders(s, t)
+	var has_sell: bool = false
+	for o in t.active_orders:
+		if o["kind"] == "sell": has_sell = true
+	assert(has_sell, "餘量應發賣盤")
+	# 過期清理
+	for o in t.active_orders: o["expire_tick"] = s.world.current_tick - 1
+	s.world.current_tick += 1
+	os.tick_team_orders(s, t)
+	var expired_gone: bool = true
+	for o in t.active_orders:
+		if o["expire_tick"] < s.world.current_tick: expired_gone = false
+	assert(expired_gone, "過期訂單應清")
+	print("order cadence/expire OK")
 
 func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
 	var state := WorldState.new()
