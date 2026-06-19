@@ -417,6 +417,10 @@ func _initialize() -> void:
 	_test_strategic_reads_ladder()
 	# ── G1a 鑄幣觀測 ──
 	_test_mint_conserving()
+	# ── G2c rung→task ──
+	_test_rung_task_map()
+	_test_ambient_ladder_task()
+	_test_prosperity_gated_by_ladder()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -6305,6 +6309,8 @@ func _test_evaluate_prosperity_trigger() -> void:
 	prey.last_tile_pos = prey.tile_pos
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
+	team.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE   # G2c gate：武力擴張才主動征服
+	team.ambition_rung = AmbitionLadder.RUNG_EXPAND
 	var fas = FactionAISystem.new()
 	fas._evaluate_prosperity_attack(state, team)
 	assert(team.current_task == TeamData.TASK_ATTACK, "應 TASK_ATTACK，實際=%s" % team.current_task)
@@ -7682,7 +7688,8 @@ func _test_trade_timeout() -> void:
 	state.persons[1] = leader; t.leader_id = 1
 	state.teams[0] = t
 	FactionAISystem.new().evaluate_all(state, [0])
-	assert(t.current_task == TeamData.TASK_IDLE, "超時應 idle，實際=%s" % t.current_task)
+	# 超時 release 後，G2c ambient ladder 可能即刻填 idle（最低優先常態行為）→ 只驗 zombie TRADE 已解除
+	assert(t.current_task != TeamData.TASK_TRADE, "超時應解除 TRADE，實際=%s" % t.current_task)
 	print("Engagement Task7b OK")
 
 # ──────── Trade 接公庫 ────────
@@ -11030,3 +11037,67 @@ func _test_mint_conserving() -> void:
 	assert(float(tile.public_storage.get("coin",0)) > coin0, "應鑄出 coin")
 	assert(abs(eq_after - eq_before) < 0.01, "鑄幣守恆 eq before=%.2f after=%.2f" % [eq_before, eq_after])
 	print("mint conserving OK")
+
+func _test_rung_task_map() -> void:
+	print("--- G2c：rung_task 映射 ---")
+	var al := AmbitionLadder
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 1
+	t.ambition_archetype = al.ARCHETYPE_TRADE; t.ambition_rung = al.RUNG_ACCUMULATE
+	s.teams[1] = t
+	assert(al.rung_task(s, t) == TeamData.TASK_TRADE, "商業積累→貿易")
+	t.ambition_archetype = al.ARCHETYPE_SETTLE; t.ambition_rung = al.RUNG_ACCUMULATE
+	assert(al.rung_task(s, t) == TeamData.TASK_PRODUCE, "定居積累→生產")
+	t.ambition_archetype = al.ARCHETYPE_FORCE; t.ambition_rung = al.RUNG_ACCUMULATE
+	assert(al.rung_task(s, t) == TeamData.TASK_TRAIN, "武力積累→訓練")
+	t.ambition_archetype = al.ARCHETYPE_FORCE; t.ambition_rung = al.RUNG_EXPAND
+	assert(al.rung_task(s, t) == "", "武力擴張→空(交 prosperity)")
+	t.ambition_rung = al.RUNG_SURVIVE
+	assert(al.rung_task(s, t) == "", "生存→空(交 survival)")
+	print("rung_task map OK")
+
+func _test_ambient_ladder_task() -> void:
+	print("--- G2c：ambient ladder 指派 + prosperity gate ---")
+	var fai := FactionAISystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var tile := HexTileData.new(); tile.tile_id = 0; tile.tile_pos = Vector2i(0,0); s.world.tiles[0] = tile
+	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
+	var l := PersonData.new(); l.id = 1; l.team_id = 1; l.values = {"貪婪": 0.9}
+	s.persons[1] = l; t.leader_id = 1
+	t.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	t.ambition_rung = AmbitionLadder.RUNG_ACCUMULATE
+	t.current_task = TeamData.TASK_IDLE
+	s.teams[1] = t
+	# ambient 指派（直呼等價邏輯）
+	var task: String = AmbitionLadder.rung_task(s, t)
+	assert(task == TeamData.TASK_TRADE, "前置：商業積累→貿易")
+	var ok: bool = TaskArbiter.try_set(s, t, task, t.tile_pos, TaskArbiter.PRIO_AMBIENT, "ambition")
+	assert(ok and t.current_task == TeamData.TASK_TRADE, "ambient 指派貿易")
+	# 生存壓過 ambient
+	TaskArbiter.try_set(s, t, TeamData.TASK_FORAGE, t.tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival")
+	assert(t.current_task == TeamData.TASK_FORAGE, "生存壓過 ambient ladder")
+	print("ambient ladder OK")
+
+func _test_prosperity_gated_by_ladder() -> void:
+	print("--- G2c：prosperity 僅武力擴張 ---")
+	# 商業 archetype 隊不該走 prosperity attack（即使 readiness 足）
+	# 構造商業 leader + rung<擴張 → _evaluate_prosperity_attack 應早退
+	# （結構性：archetype!=武力 或 rung<擴張 → 不設 ATTACK）
+	var fai := FactionAISystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
+	var l := PersonData.new(); l.id = 1; l.team_id = 1
+	l.values = {"野心": 0.9, "好戰": 0.9, "信義": 0.0}   # attack_score 高
+	s.persons[1] = l; t.leader_id = 1
+	t.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE   # 非武力 → gate 早退
+	t.ambition_rung = AmbitionLadder.RUNG_EXPAND
+	t.current_task = TeamData.TASK_IDLE
+	s.teams[1] = t
+	fai._evaluate_prosperity_attack(s, t)
+	assert(t.current_task != TeamData.TASK_ATTACK, "商業 archetype 不該 prosperity attack")
+	# 武力 + rung<擴張 → 同樣早退
+	t.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE
+	t.ambition_rung = AmbitionLadder.RUNG_ACCUMULATE
+	fai._evaluate_prosperity_attack(s, t)
+	assert(t.current_task != TeamData.TASK_ATTACK, "武力低 rung 不該 prosperity attack")
+	print("prosperity gated OK")

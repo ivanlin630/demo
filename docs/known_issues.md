@@ -9,8 +9,9 @@
 ## G2 目標錨點進度
 
 - **G2a（關係圖 typed-edge）✅** + **G2b（野心階梯狀態 + strategic 衍生）✅**：`TeamData.ambition_rung/archetype/cap` 由 `AmbitionLadder` 從 leader values + 隊安全 derive（faction_ai cadence update）；`strategic_ai._update_faction_goals` 改讀階梯衍生 expand/trade（真 reader，非 dormant）。階梯門檻/權重全 TEST VALUE（待藍圖平衡 pass，handback `systems-to-blueprint-g2b-feel`）。
-- **待 G2c**：`get_goal_task_override` caller 接入 + rung→每階 task/tag 全表。
+- **G2c（rung×archetype→task 映射）✅**：`AmbitionLadder.rung_task(archetype×rung)→既有 TASK_*`（零新 task）；faction_ai ambient caller 以 `PRIO_AMBIENT`(最低,只填 idle) 指派；prosperity attack 對齊（僅武力 archetype + rung>=擴張 才主動征服）。rung1-2 三 archetype（武力 TRAIN/→prosperity、商業 TRADE、定居 PRODUCE/BUILD）。立國/稱霸細節、商業遠程商隊(依 G1)、外交/徵收深做 = 後續 refinement。
 - **待 G2d**：個人脫軌（私驅動 / 血仇 `killed` 死亡鏈）。
+- **G2 主體（a/b/c/d）**：a/b/c 完成，d 進行中。
 
 ## G1 供應鏈進度
 

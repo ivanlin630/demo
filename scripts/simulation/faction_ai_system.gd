@@ -145,6 +145,11 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
 
+	# G2c：僅武力 archetype + rung>=擴張 才主動征服（對齊野心階梯）
+	if team.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE \
+			or team.ambition_rung < AmbitionLadder.RUNG_EXPAND:
+		return
+
 	var score: float = calc_attack_score(team, leader)
 	if score < ATTACK_SCORE_THRESHOLD: return
 
@@ -540,6 +545,11 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		_update_guard_ratio(team, state)
 		# 出征前自動從自家 outpost 公庫拉 mount
 		_auto_withdraw_mounts(state, team)
+		# G2c：野心階梯常態行為（最低優先，只填 idle）
+		if team.current_task == TeamData.TASK_IDLE:
+			var amb_task: String = AmbitionLadder.rung_task(state, team)
+			if amb_task != "":
+				TaskArbiter.try_set(state, team, amb_task, team.tile_pos, TaskArbiter.PRIO_AMBIENT, "ambition")
 
 # ──────── Tag 權限 ────────
 
