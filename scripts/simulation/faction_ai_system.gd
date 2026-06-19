@@ -155,6 +155,7 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	if team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout" \
 			and state.world.current_tick - team.task_start_tick > BeliefSystem.SCOUT_TIMEOUT:
 		TaskArbiter.release(team)
+		Probe.bump("g3.scout_timeout")
 	# stuck（task=攻擊/掠奪 但 move_target 已清）視為 idle，允許重評換目標。
 	# G3d-2：自家 scout(查證中) 亦允許重評 → 親見壓低 uncertainty 後可收斂轉攻。
 	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team) \
@@ -192,16 +193,19 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 		elif TaskArbiter.try_set(state, team, TeamData.TASK_SCOUT, scout_pos, TaskArbiter.PRIO_DISPATCH, "scout"):
 			team.prosperity_target_id = prey_id   # try_set 已設 move_target=scout_pos
 			print("[Scout] team=%d → verify prey=%d" % [team.team_id, prey_id])
+			Probe.bump("g3.scout_dispatch")
 		return
 
 	# combat_target 不預設：移動凍結 + interaction 早退會擋住交戰；
 	# 由 interaction_system 到達時 start_combat 設定。只給 task + move_target + 追擊目標。
 	# G3d-2：confident 後若仍掛 scout(同 PRIO_DISPATCH 擋不住自身) → 先 release 讓 attack 設得進。
+	var _was_scout: bool = (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout")
 	if _is_stuck(team) or (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout"):
 		TaskArbiter.release(team)
 	if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
 			state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "prosperity"):
 		team.prosperity_target_id = prey_id
+		if _was_scout: Probe.bump("g3.scout_converge")
 		print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
 			team.team_id, prey_id, score])
 
@@ -568,6 +572,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 				if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
 						state.teams[_vfoe].tile_pos, TaskArbiter.PRIO_VENDETTA, "vendetta"):
 					team.prosperity_target_id = _vfoe   # 追擊刷新復用
+					Probe.bump("g2.vendetta_trigger")
 					print("[Vendetta] Team%d leader 脫軌攻擊仇人 Team%d" % [team.team_id, _vfoe])
 		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）
 		if team.current_task == TeamData.TASK_TRADE \
@@ -1176,6 +1181,7 @@ func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
 	if team.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
 		var ord: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
 		if not ord.is_empty():
+			Probe.bump("g1.arb_attempt")
 			return ord["pos"]   # 履約走既有 interaction 同格 trade（到場供需若已變→撲空 emergent）
 	var pid: int = _find_trade_target(state, team)
 	if pid == -1:
@@ -2352,6 +2358,7 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 		{ "origin": str(f.leader_team_id), "name": f.faction_name })
 	print("[Faction] 立國：%s（leader=Team%d，%d teams）" % [
 		f.faction_name, f.leader_team_id, f.member_team_ids.size()])
+	Probe.bump("g2.faction_found")
 
 const OUTPOST_TAKEOVER_DAYS: int = 3
 

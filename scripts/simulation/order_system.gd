@@ -28,6 +28,7 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 		"expire_tick": expire,
 	})
 	print("[Order] Team%d %s %s ×%d (oid=%d)" % [team.team_id, kind, res, qty, oid])
+	Probe.bump("g1.order_placed")
 	return oid
 
 # cadence：過期清理 + 餘量發賣盤（買單短缺驅動完整化 = G1c/G1d）。
@@ -55,6 +56,7 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		# 僅對 team「該有」的資源發買單（proxy：武力隊徵武器/料；避免亂徵）TEST VALUE
 		if res in ["weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel"]:
 			post_order(state, team, "buy", res, int(SHORTAGE_QTY * 2))
+			Probe.bump("g1.shortage_buy")
 
 func _has_active(team: TeamData, kind: String, res: String) -> bool:
 	for o in team.active_orders:

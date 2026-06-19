@@ -1275,6 +1275,8 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 
 	var winner_id: int = atk_id if result == "attacker_win" else def_id
 	var loser_id: int  = def_id if result == "attacker_win" else atk_id
+	# 探針（純觀測）：攻方(發起者)戰敗 → 檢誘殺（信弱實強）
+	if loser_id == atk_id: Probe.ambush_check(state, loser_id, winner_id)
 	var winner_team: TeamData = state.teams.get(winner_id)
 	# 戰鬥存活 exp：倖存各 tier +5，勝方額外 +5
 	var loser_team_exp: TeamData = state.teams.get(loser_id)

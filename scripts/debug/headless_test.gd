@@ -3754,7 +3754,75 @@ func _run_sim_test() -> void:
 	_test_prey_select_reads_belief()
 	_test_survival_prey_reads_belief()
 
+	# ── 因果脊椎探針（純觀測，flag gated）──
+	_test_probe_accumulator()
+	_test_probe_ambush_check()
+	_test_probe_g1g2_hooks()
+	_test_spine_trace_dump()
+
 	print("=== DONE ===")
+
+func _test_probe_accumulator() -> void:
+	print("--- Probe 累計器 ---")
+	Probe.reset(); Probe.enabled = true
+	Probe.bump("g3.scout_dispatch")
+	Probe.bump("g3.scout_dispatch", 2)
+	Probe.bump("g3.scout_converge")
+	Probe.note("g3.claim_peak", 5.0)
+	Probe.note("g3.claim_peak", 3.0)
+	assert(Probe.counts.get("g3.scout_dispatch", 0) == 3, "bump 累加")
+	assert(Probe.counts.get("g3.scout_converge", 0) == 1, "bump 單")
+	assert(Probe.peaks.get("g3.claim_peak", 0.0) == 5.0, "note 取 max")
+	# gated：off → no-op
+	Probe.enabled = false
+	Probe.bump("g3.scout_dispatch")
+	assert(Probe.counts.get("g3.scout_dispatch", 0) == 3, "off 不累加")
+	Probe.reset()
+	assert(Probe.counts.is_empty(), "reset 清空")
+	Probe.enabled = false
+	print("probe accumulator OK")
+
+func _test_spine_trace_dump() -> void:
+	print("--- SpineTrace dump ---")
+	var s := WorldState.new(); s.world = WorldData.new(); s.world.current_tick = 240
+	s.teams = {}; s.persons = {}; s.team_intel = {}; s.team_discovered = {}
+	var t := TeamData.new(); t.team_id = 0; AnonTierSystem.add_anon(t, "平民", 8)
+	t.ambition_rung = 1; t.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE
+	var ld := PersonData.new(); ld.id = 100; ld.team_id = 0; t.leader_id = 100
+	ld.skills["計謀"] = 0.5; ld.values["野心"] = 0.7
+	s.teams[0] = t; s.persons[100] = ld; s.team_discovered[0] = []
+	SpineTrace.dump(s, 240)   # 不崩即過（純讀）
+	print("spine trace OK")
+
+func _test_probe_g1g2_hooks() -> void:
+	print("--- Probe G1/G2 打點 ---")
+	Probe.reset(); Probe.enabled = true
+	var os := OrderSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new(); s.teams = {}
+	var t := TeamData.new(); t.team_id = 1; s.teams[1] = t
+	os.post_order(s, t, "buy", "food", 50)
+	assert(Probe.counts.get("g1.order_placed", 0) >= 1, "post_order 打點")
+	Probe.enabled = false
+	print("probe g1g2 hooks OK")
+
+func _test_probe_ambush_check() -> void:
+	print("--- Probe 誘殺判定 ---")
+	Probe.reset(); Probe.enabled = true
+	var s := WorldState.new(); s.world = WorldData.new(); s.team_intel = {}
+	s.teams = {}
+	var atk := TeamData.new(); atk.team_id = 1; AnonTierSystem.add_anon(atk, "平民", 10); s.teams[1] = atk
+	var def := TeamData.new(); def.team_id = 2; AnonTierSystem.add_anon(def, "平民", 30); s.teams[2] = def  # 真強（pop=computed getter，須經 cohort）
+	# 攻方 belief：def 弱（armed_est 低報）
+	BeliefSystem.record_claim(s, 1, 2, 9, "流民", {"population_est": 5, "armed_est": 4}, 0.6, true)
+	Probe.ambush_check(s, 1, 2)   # 攻方信弱(4) 實強(30) → 誘殺
+	assert(Probe.counts.get("g3.ambush", 0) == 1, "信弱實強→誘殺計數")
+	# 對照：belief 接近真值 → 非誘殺
+	Probe.reset(); Probe.enabled = true
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 30, "armed_est": 28}, 1.0, false)
+	Probe.ambush_check(s, 1, 2)
+	assert(Probe.counts.get("g3.ambush", 0) == 0, "信實相符→非誘殺")
+	Probe.enabled = false
+	print("ambush check OK")
 
 func _test_received_sell_and_arbitrage() -> void:
 	print("--- G1d：賣盤讀取 + 套利挑單 ---")
