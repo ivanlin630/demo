@@ -12,6 +12,12 @@
 - **待 G2c**：`get_goal_task_override` caller 接入 + rung→每階 task/tag 全表。
 - **待 G2d**：個人脫軌（私驅動 / 血仇 `killed` 死亡鏈）。
 
+## G1 供應鏈進度
+
+- **G1a（鑄幣觀測：W8 機制已存 + log/驗）**、**G1b（訂單 infra + 餘→賣盤 + 需求驅動生產）✅**：訂單走 message（權威存發起隊 `active_orders`，emit 為可失真傳播副本）；`OrderSystem.tick_team_orders` faction_ai cadence 發賣盤 + 過期清；`manufacturing._run_recipe_group` 讀 `received_buy_orders` 偏向需求 recipe（訂單真 reader，非 dormant）。
+- **待 G1d**：商隊遠端套利/撲空（履約對副本核對發起隊 active_orders）、跨格交付、買單（短缺驅動）完整化。
+- ORDER_LIFETIME/cadence/SURPLUS 門檻/eligible res 全 TEST VALUE，待平衡。
+
 ## 🔴 高優先（影響基本可玩性）
 
 ### P4 玩測批（2026-06-16 玩測抓,主 session harness 驗修中）
