@@ -443,6 +443,8 @@ func _initialize() -> void:
 	# ── G3d-2 cred-weighted uncertainty + scout 查證 ──
 	_test_uncertainty_credweighted()
 	_test_scout_verification()
+	# ── world-gen 戲劇尾巴 ──
+	_test_world_gen_dramatic_tail()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -11721,3 +11723,26 @@ func _test_prosperity_gated_by_ladder() -> void:
 	fai._evaluate_prosperity_attack(s, t)
 	assert(t.current_task != TeamData.TASK_ATTACK, "武力低 rung 不該 prosperity attack")
 	print("prosperity gated OK")
+
+func _test_world_gen_dramatic_tail() -> void:
+	print("--- world-gen 戲劇尾巴 ---")
+	var s := WorldState.new()
+	var n := 200
+	var has_extreme_hi := false   # 任一 value >0.85
+	var has_extreme_lo := false   # 任一 value <0.15
+	var has_skill_tail := false   # 任一 skill >0.5
+	var normal_count := 0
+	for i in n:
+		var p := PersonGenerator.generate(s, 1000 + i, "member")
+		for v in p.values.values():
+			if v > 0.85: has_extreme_hi = true
+			if v < 0.15: has_extreme_lo = true
+		for sk in p.skills.values():
+			if sk > 0.5: has_skill_tail = true
+		# 凡人 proxy：野心在窄帶
+		if p.values["野心"] >= 0.3 and p.values["野心"] <= 0.7: normal_count += 1
+	assert(has_extreme_hi, "有極端高 value 尾巴")
+	assert(has_extreme_lo, "有極端低 value 尾巴")
+	assert(has_skill_tail, "有高 skill 尾巴(謀士/宿將)")
+	assert(normal_count > n / 2, "多數仍凡人(野心窄帶)")
+	print("dramatic tail OK (normal=%d/%d)" % [normal_count, n])
