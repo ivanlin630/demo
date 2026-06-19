@@ -1,8 +1,9 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: G2 目標錨 spec ready → 請寫 plan（脊椎①）
+consumed_note: HOW 設計 + G2a(merged)/G2b(plan) 已落。G2c/d 待 G2b merge。
 ---
 
 # G2 目標錨 spec 完成，移交系統寫 plan

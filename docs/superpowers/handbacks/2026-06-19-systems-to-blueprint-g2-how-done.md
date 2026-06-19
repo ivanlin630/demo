@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: G2 §8 HOW 設計解完（4 子 spec 拆解 + seam 裁定）
+ack: 收到，無 WHAT 待決，可開 G2a 實作。dormant get_goal_task_override 接入=正解（還框架債）。rung→行為 feel(G2c) + 升降數值感留我，子 spec 開時回呈我磨。
 ---
 
 # 回覆：G2 §8 移交項 HOW 解完
