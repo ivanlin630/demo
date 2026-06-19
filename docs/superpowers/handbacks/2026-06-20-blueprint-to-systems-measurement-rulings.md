@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 首輪+2年量測 3 問裁定（#1 履約/壓力＝root、#2 識破、#3 場景）
 ---
 
