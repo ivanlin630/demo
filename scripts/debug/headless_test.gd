@@ -137,6 +137,7 @@ func _initialize() -> void:
 	_test_manufacturing_to_storage()
 	_test_salary_to_treasury()
 	_test_promote_anon_takes_share()
+	_test_promote_tier_fidelity()
 	_test_extraction()
 	_test_player_extract_treasury()
 	_test_encounter_treasury_loot()
@@ -6299,6 +6300,31 @@ func _test_promote_anon_takes_share() -> void:
 	assert(promoted.coin > 0, "新 NPC 應有 coin (升階加成)")
 	assert(team.anon_treasury < 100.0, "treasury 應扣")
 	print("CoinStorage Task7 OK (新 NPC coin=%.0f, 剩 treasury=%.0f)" % [promoted.coin, team.anon_treasury])
+
+func _test_promote_tier_fidelity() -> void:
+	print("--- #0b 升 named 忠於 tier ---")
+	# 全菁英隊：升上來的 named 戰鬥簇應高
+	var s_elite := WorldState.new(); s_elite.world = WorldData.new()
+	var t_elite := TeamData.new()
+	t_elite.team_id = 0; t_elite.leader_id = -1; t_elite.named_members = []
+	AnonCohort.add(t_elite.anon_cohorts, "菁英", "healthy", 10)
+	s_elite.teams[0] = t_elite
+	var pe := PersonGenerator.generate_for_team(s_elite, t_elite, "member")
+	assert(pe != null, "菁英隊應產 named")
+	assert(pe.skills["戰鬥"] >= 0.7, "菁英升 named 戰鬥應≥0.7，實際=%.2f" % pe.skills["戰鬥"])
+	assert(pe.skills["統領"] >= 0.5, "菁英升 named 統領應≥0.5，實際=%.2f" % pe.skills["統領"])
+
+	# 全平民隊：升上來的 named 戰鬥簇應低（無加成）
+	var s_pleb := WorldState.new(); s_pleb.world = WorldData.new()
+	var t_pleb := TeamData.new()
+	t_pleb.team_id = 0; t_pleb.leader_id = -1; t_pleb.named_members = []
+	AnonCohort.add(t_pleb.anon_cohorts, "平民", "healthy", 10)
+	s_pleb.teams[0] = t_pleb
+	var pp := PersonGenerator.generate_for_team(s_pleb, t_pleb, "member")
+	assert(pp != null, "平民隊應產 named")
+	# 平民升 = generate 預設低值（容忍 archetype outlier 偶發；用低期望斷言均值面向）
+	assert(pp.skills["戰鬥"] <= 0.6, "平民升 named 戰鬥不應高，實際=%.2f" % pp.skills["戰鬥"])
+	print("#0b tier fidelity OK (菁英戰鬥=%.2f / 平民戰鬥=%.2f)" % [pe.skills["戰鬥"], pp.skills["戰鬥"]])
 
 func _test_extraction() -> void:
 	print("--- CoinStorage Task8: 徵用機制 ---")

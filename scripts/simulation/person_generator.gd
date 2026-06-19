@@ -29,6 +29,15 @@ const ARCHETYPES := {
 	"懦夫": { "hi_v": ["求生欲"],              "lo_v": ["好戰", "野心"], "hi_s": [] },
 }
 
+# #0b 升 named 忠於 tier：晉升偏好抽高 tier + 新 named 戰鬥簇技能讀來源 tier。
+const PROMOTE_TIER_WEIGHT := {"平民": 0.2, "新兵": 0.6, "老兵": 1.5, "菁英": 3.0}  # TEST VALUE
+const PROMOTE_TIER_SKILLS := {              # TEST VALUE：來源 tier → 戰鬥簇技能帶
+	"平民": {},
+	"新兵": {"戰鬥": [0.30, 0.50]},
+	"老兵": {"戰鬥": [0.50, 0.70], "戰術": [0.30, 0.50], "統領": [0.30, 0.50]},
+	"菁英": {"戰鬥": [0.70, 0.90], "戰術": [0.50, 0.70], "統領": [0.50, 0.70]},
+}
+
 # 生成一個 PersonData，seed_offset 決定隨機結果
 # role: "leader" / "member"（leader 技能 +0.1 bonus）
 static func generate(state: WorldState, seed_offset: int,
@@ -89,8 +98,28 @@ static func generate_for_team(state: WorldState, team: TeamData,
 		p.coin += bonus
 		team.anon_treasury -= bonus
 	state.persons[p.id] = p
-	AnonTierSystem.kill_random(team, 1, "promote")   # 晉升：1 anon 轉 named/leader → 從 anon 桶移除（cohort source）
+	# 晉升：抽 1 anon（偏高 tier = 提拔精銳）→ 轉 named；記實際來源 tier
+	var killed: Dictionary = AnonTierSystem.kill_random(team, 1, "promote", PROMOTE_TIER_WEIGHT)
+	var src_tier: String = ""
+	for tier in AnonCohort.TIER_ORDER:
+		if int(killed.get(tier, 0)) > 0:
+			src_tier = tier
+			break
+	if src_tier != "":
+		_apply_promotion_skills(p, src_tier, _team_seed(state, team, seed_offset))
 	return p
+
+# 來源 tier → 新 named 戰鬥簇技能下限（maxf 不蓋 archetype 尾巴）
+static func _apply_promotion_skills(p: PersonData, src_tier: String, seed: int) -> void:
+	var bands: Dictionary = PROMOTE_TIER_SKILLS.get(src_tier, {})
+	if bands.is_empty():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed * 31 + 7   # 與 generate 內部 rng 區隔，保可重現
+	for sk in bands:
+		var band: Array = bands[sk]
+		var v: float = rng.randf_range(float(band[0]), float(band[1]))
+		p.skills[sk] = maxf(float(p.skills.get(sk, 0.0)), v)
 
 static func _next_id(state: WorldState) -> int:
 	var max_id: int = -1
