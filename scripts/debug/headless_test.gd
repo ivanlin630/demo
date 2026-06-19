@@ -3757,6 +3757,7 @@ func _run_sim_test() -> void:
 	# ── 因果脊椎探針（純觀測，flag gated）──
 	_test_probe_accumulator()
 	_test_probe_ambush_check()
+	_test_probe_g1g2_hooks()
 
 	print("=== DONE ===")
 
@@ -3779,6 +3780,17 @@ func _test_probe_accumulator() -> void:
 	assert(Probe.counts.is_empty(), "reset 清空")
 	Probe.enabled = false
 	print("probe accumulator OK")
+
+func _test_probe_g1g2_hooks() -> void:
+	print("--- Probe G1/G2 打點 ---")
+	Probe.reset(); Probe.enabled = true
+	var os := OrderSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new(); s.teams = {}
+	var t := TeamData.new(); t.team_id = 1; s.teams[1] = t
+	os.post_order(s, t, "buy", "food", 50)
+	assert(Probe.counts.get("g1.order_placed", 0) >= 1, "post_order 打點")
+	Probe.enabled = false
+	print("probe g1g2 hooks OK")
 
 func _test_probe_ambush_check() -> void:
 	print("--- Probe 誘殺判定 ---")

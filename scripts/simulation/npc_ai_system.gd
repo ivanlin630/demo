@@ -39,6 +39,7 @@ func _write_relation_edge(p: PersonData, type: String, subject_id: int,
 	match type:
 		"betrayal", "looted", "extorted":
 			RelationGraph.add_edge(p.relation_edges, "feud", subject_id, intensity, tick)
+			Probe.bump("g2.feud_formed")
 		"kindness", "aided_in_battle":
 			RelationGraph.add_edge(p.relation_edges, "gratitude", subject_id, intensity, tick)
 		"master":

@@ -70,11 +70,13 @@ static func update(state: WorldState, team: TeamData) -> void:
 	var old: int = team.ambition_rung
 	if target < old:
 		team.ambition_rung = old - 1        # 安全崩：一步退（可連續退到生存）
+		Probe.bump("g2.ambition_demote")
 	elif target > old:
 		var amb: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
 		var prud: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
 		var reckless: bool = amb > 0.65 and prud < 0.4
 		team.ambition_rung = target if reckless else old + 1   # 躁進直跳 / 否則一步
+		Probe.bump("g2.ambition_promote")
 	team.ambition_eval_next_tick = state.world.current_tick + LADDER_EVAL_CADENCE
 	if team.ambition_rung != old:
 		print("[Ambition] Team%d rung %d→%d (%s cap=%d)" % [

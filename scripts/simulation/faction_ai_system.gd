@@ -572,6 +572,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 				if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
 						state.teams[_vfoe].tile_pos, TaskArbiter.PRIO_VENDETTA, "vendetta"):
 					team.prosperity_target_id = _vfoe   # 追擊刷新復用
+					Probe.bump("g2.vendetta_trigger")
 					print("[Vendetta] Team%d leader 脫軌攻擊仇人 Team%d" % [team.team_id, _vfoe])
 		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）
 		if team.current_task == TeamData.TASK_TRADE \
@@ -1180,6 +1181,7 @@ func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
 	if team.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
 		var ord: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
 		if not ord.is_empty():
+			Probe.bump("g1.arb_attempt")
 			return ord["pos"]   # 履約走既有 interaction 同格 trade（到場供需若已變→撲空 emergent）
 	var pid: int = _find_trade_target(state, team)
 	if pid == -1:
@@ -2356,6 +2358,7 @@ func _declare_established(state: WorldState, f, leader_team: TeamData) -> void:
 		{ "origin": str(f.leader_team_id), "name": f.faction_name })
 	print("[Faction] 立國：%s（leader=Team%d，%d teams）" % [
 		f.faction_name, f.leader_team_id, f.member_team_ids.size()])
+	Probe.bump("g2.faction_found")
 
 const OUTPOST_TAKEOVER_DAYS: int = 3
 
