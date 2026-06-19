@@ -110,5 +110,37 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 			best_score = gain2; best = {"kind": "buy", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	return best
 
+# 履約結算：按窗內 res 淨持有變化沖 active_orders（純記帳，不碰 resources）。
+# before = 交易窗前各 res 持有快照。回 progressed（任一單 qty 有減）。
+func settle_orders(team: TeamData, before: Dictionary, _tick: int) -> bool:
+	var progressed: bool = false
+	# 各 res 的 delta 池（一池只沖該 res 同向單，FIFO）
+	var pool: Dictionary = {}
+	for o in team.active_orders:
+		var res: String = o["res"]
+		if not pool.has(res):
+			pool[res] = float(team.resources.get(res, 0)) - float(before.get(res, 0))
+		var avail: float = pool[res]
+		var want: int = int(o["qty_remaining"])
+		var filled: int = 0
+		if o["kind"] == "buy" and avail > 0.0:
+			filled = clampi(int(round(avail)), 0, want)
+			pool[res] = avail - float(filled)
+		elif o["kind"] == "sell" and avail < 0.0:
+			filled = clampi(int(round(-avail)), 0, want)
+			pool[res] = avail + float(filled)
+		if filled > 0:
+			o["qty_remaining"] = want - filled
+			progressed = true
+	# 移除填滿單 + bump
+	var kept: Array = []
+	for o in team.active_orders:
+		if int(o["qty_remaining"]) <= 0:
+			Probe.bump("g1.order_fulfilled")
+		else:
+			kept.append(o)
+	team.active_orders = kept
+	return progressed
+
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	return int((abs(a.x - b.x) + abs(a.y - b.y) + abs(a.x + a.y - b.x - b.y)) / 2)
