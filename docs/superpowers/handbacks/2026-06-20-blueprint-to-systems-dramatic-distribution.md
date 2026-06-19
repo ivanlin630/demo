@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: world-gen 戲劇性尾巴 feel（#0 真因細化：value/skill 分佈 + tier 升階）
 ---
 

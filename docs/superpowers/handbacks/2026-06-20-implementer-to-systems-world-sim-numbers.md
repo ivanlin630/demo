@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 純 NPC 長期世界量測台 — 2 年全跑數字 + 90 天對照（emergent 魂仍未觸發）
 ---
 

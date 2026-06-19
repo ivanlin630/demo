@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 裁定 — A類血仇成因放寬 + B類場景分流(scout/ambush驗證/mint待#1) + #1 開
 ---
 

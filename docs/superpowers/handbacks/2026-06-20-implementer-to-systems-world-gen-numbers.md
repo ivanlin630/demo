@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: world-gen 戲劇尾巴實作完成 — generate outlier 尾巴 + config 種子狂人 + 2 年 world_sim emergent 0→非零對照
 plan: 2026-06-20-world-gen-dramatic-tail.md
 branch: feat/world-gen-tail
