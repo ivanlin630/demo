@@ -73,6 +73,7 @@ func _initialize() -> void:
 # ──────────────────────────────────────────────────────────────────
 func _run_game_sim_test() -> void:
 	print("=== game_sim_test: 從 config 讀取場景 ===")
+	Probe.enabled = true; Probe.reset()   # 探針 host（純觀測，flag on 場景）
 
 	var state := WorldState.new()
 	var runner := SimRunner.new()
@@ -148,6 +149,7 @@ func _run_game_sim_test() -> void:
 
 		if (tick + 1) % 240 == 0:
 			TeamTrace.dump(state, tick + 1)
+			SpineTrace.dump(state, tick + 1)
 			var pt: TeamData = state.teams.get(TEAM_PLAYER)
 			if pt != null:
 				print("[DBG named] tick=%d Team0 named_count=%d population=%d persons_total=%d" % [
@@ -177,6 +179,8 @@ func _run_game_sim_test() -> void:
 		print("  -- 違規詳情 --")
 		for m in _fail_msgs:
 			print("  ! %s" % m)
+	Probe.summary()
+	Probe.enabled = false   # 還原，避免污染同進程後續
 	print("=== game_sim_test DONE ===")
 
 
