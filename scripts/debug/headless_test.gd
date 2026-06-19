@@ -126,6 +126,7 @@ func _initialize() -> void:
 	_test_advance_tick_game_over_freeze()
 	_test_advance_tick_awaiting_heir_freeze()
 	_test_encounter_kills_player_triggers_heir()
+	_test_e3_player_edge_exit()
 	_test_controlled_team_armed()
 	_test_u10b_player_wiped()
 	# ── Coin Economy + Outpost Public Storage ──
@@ -5554,6 +5555,33 @@ func _test_encounter_kills_player_triggers_heir() -> void:
 	assert(state.player_forced_event.get("action") == "choose_heir")
 	assert(pt.leader_id == -1, "leader_id 不應自動升 (等玩家選)")
 	print("Death Task5 OK")
+
+func _test_e3_player_edge_exit() -> void:
+	print("--- E-3：玩家邊界往場外移動 → 離場 ---")
+	var enc := EncounterSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	# 兩隊各 1 named，玩家為 atk leader
+	var atk := TeamData.new(); atk.team_id = 0; atk.tile_pos = Vector2i(0,0)
+	var pl := PersonData.new(); pl.id = 500; pl.team_id = 0; s.persons[500] = pl; atk.leader_id = 500
+	var def := TeamData.new(); def.team_id = 1; def.tile_pos = Vector2i(0,0)
+	var dl := PersonData.new(); dl.id = 600; dl.team_id = 1; s.persons[600] = dl; def.leader_id = 600
+	s.teams[0] = atk; s.teams[1] = def
+	s.player_id = 500
+	enc.init_encounter(s, 0, 1, "normal")
+	# 找玩家 unit，置於邊界，設 pending 往場外
+	var pu_idx: int = -1
+	for i in range(s.encounter_units.size()):
+		if s.encounter_units[i].get("person_id", -1) == 500: pu_idx = i; break
+	assert(pu_idx >= 0, "找到玩家 unit")
+	var edge := Vector2i(EncounterSystem.MAP_RADIUS, 0)            # 邊界 hex
+	var offmap := Vector2i(EncounterSystem.MAP_RADIUS + 1, 0)      # 場外
+	s.encounter_units[pu_idx]["pos"] = edge
+	s.encounter_units[pu_idx]["action_timer"] = 0
+	s.encounter_units[pu_idx]["pending_action"] = {"type": "move", "move_to": offmap}
+	enc.advance_encounter_tick(s)   # 驅動一回合處理 pending（既有 _enc 測試用此入口）
+	assert(s.encounter_units[pu_idx].get("has_exited", false),
+		"玩家往場外移動應離場(has_exited)，實際=%s" % str(s.encounter_units[pu_idx].get("has_exited", false)))
+	print("E-3 player edge exit OK")
 
 # ── Coin Economy + Outpost Public Storage ──
 

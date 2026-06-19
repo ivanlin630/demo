@@ -78,7 +78,7 @@ func _build_layout() -> void:
 
 	right.add_child(_make_section_label("行動"))
 	_lbl_actions = Label.new()
-	_lbl_actions.text = "QWEASD:移動  R:攻擊\nZ:命令  F:投降  Space:待機"
+	_lbl_actions.text = "QWEASD:移動(邊界→離場)  R:攻擊\nZ:命令  F:投降  Space:待機"
 	right.add_child(_lbl_actions)
 
 	right.add_child(_make_section_label("雙方兵力"))
@@ -153,7 +153,7 @@ func _refresh_ui() -> void:
 
 	# action hints
 	var state_ui: WorldState = _bridge.get_state()
-	var action_hints: String = "QWEASD:移動  R:攻擊\nZ:命令  F:投降  Space:待機"
+	var action_hints: String = "QWEASD:移動(邊界→離場)  R:攻擊\nZ:命令  F:投降  Space:待機"
 	if not state_ui.encounter_active and state_ui.last_encounter_result.get("can_subjugate", false):
 		action_hints += "\nJ:收編敗者"
 	_lbl_actions.text = action_hints
@@ -397,8 +397,10 @@ func _handle_key(keycode: int) -> void:
 			elif HEX_DIRS.has(keycode):
 				var cur_pos: Vector2i = player_unit.get("pos", Vector2i.ZERO)
 				var target: Vector2i = _hex_neighbor(cur_pos, keycode)
-				if _is_in_map(target):   # P4-4:邊界 clamp,移動不走出戰場
+				if _is_in_map(target):
 					_do_move(player_unit, target, state)
+				else:
+					_do_exit(player_unit, target)   # E-3:邊界往場外 = 離場
 			elif keycode == KEY_R:
 				_mode = "attack_select"
 				_selected_part = "torso"   # reset to default each time
@@ -454,6 +456,13 @@ func _do_move(unit: Dictionary, target: Vector2i, state: WorldState) -> void:
 	# Use pending_action so encounter_system resets timer properly → NPCs get turns
 	unit["pending_action"] = { "type": "move", "target_idx": -1,
 		"move_to": target, "attack_part": "" }
+	_end_player_turn(unit)
+
+func _do_exit(unit: Dictionary, target: Vector2i) -> void:
+	# E-3：往場外移動 = 離場。pending move 帶場外座標，encounter_system 轉 retreat → has_exited。
+	unit["pending_action"] = { "type": "move", "target_idx": -1,
+		"move_to": target, "attack_part": "" }
+	_log("離開戰場…")
 	_end_player_turn(unit)
 
 func _do_attack_with_part(unit: Dictionary, target: Vector2i,

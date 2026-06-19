@@ -395,8 +395,13 @@ func _decide_action(unit_idx: int, state: WorldState,
 							"move_to": tgt["pos"],
 							"attack_part": pa.get("attack_part", _choose_attack_part(unit, state)) }
 			"move":
+				var mv: Vector2i = pa.get("move_to", unit["pos"])
+				# 往場外移動 = 離場（復用 retreat apply：hex_dist>MAP_RADIUS → has_exited）
+				if not _is_in_map(mv):
+					return { "type": "retreat", "target_idx": -1,
+						"move_to": mv, "attack_part": "" }
 				return { "type": "move", "target_idx": -1,
-					"move_to": pa.get("move_to", unit["pos"]), "attack_part": "" }
+					"move_to": mv, "attack_part": "" }
 			_:
 				pass  # wait / unknown → idle
 		return { "type": "idle", "target_idx": -1, "move_to": unit["pos"], "attack_part": "" }
