@@ -14,6 +14,11 @@
   - **OUT（後續）**：弱仇「偏置」（擴張優先挑仇人邊）= refinement；kin/家族樹 feud 傳播 = G2a 留骨架後續；`killed` 型別深用。
 - **G2 主體（a/b/c/d）全完成 ✅**。後續 = 上述各 refinement + 商業遠程依 G1d。
 
+## G3 殘缺情報進度
+
+- **G3a（belief accessor seam）✅**：`BeliefSystem.best_estimate/has_belief/uncertainty` 包 `team_intel` 單一讀 accessor；決策單 entry 讀者（diplomatic/strategic/threat/faction_ai/player_api_mapper/inquiry）全遷走它，**行為完全保留**（accessor 回現單 entry 語義，回歸零變）。de-risk G3b：屆時換 multi-claim 只改 accessor 內部，讀者零動。inquiry key 迭代（讀「對所有 tgt」）保留，僅取 entry 改 accessor。
+  - **OUT（待）**：G3b multi-claim 儲存 + 寫端遷移（message/vision/interaction 觀察記錄/傳播）+ uncertainty 實質（claim 分歧）；G3c 可信度 + trust + 技能；G3d 決策改讀 uncertainty + 查證。
+
 ## G1 供應鏈進度
 
 - **G1a（鑄幣觀測：W8 機制已存 + log/驗）**、**G1b（訂單 infra + 餘→賣盤 + 需求驅動生產）✅**：訂單走 message（權威存發起隊 `active_orders`，emit 為可失真傳播副本）；`OrderSystem.tick_team_orders` faction_ai cadence 發賣盤 + 過期清；`manufacturing._run_recipe_group` 讀 `received_buy_orders` 偏向需求 recipe（訂單真 reader，非 dormant）。

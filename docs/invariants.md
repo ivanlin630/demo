@@ -21,6 +21,10 @@
 - 訊息可能失真
 - 任何資訊命令都需傳遞 ,永不跨距離傳播,也不全知
 
+### belief 單一 accessor
+- 決策讀 `team_intel` 一律經 `BeliefSystem`（`best_estimate`/`uncertainty`/`has_belief`），**禁決策端直讀 `state.team_intel`**。
+- G3a：accessor 回現單 entry（行為保留）。G3b：內部換 multi-claim 聚合 + uncertainty（讀者零動）。寫端（觀察/傳播）G3b 遷。
+
 ## Simulation
 
 - Event = Consequence

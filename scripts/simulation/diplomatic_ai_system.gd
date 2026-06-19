@@ -6,7 +6,7 @@ const REJECT_COOLDOWN: int = WorldState.TICKS_PER_DAY * 7   # 被拒後同對象
 
 # T-02：從 team_intel 取人口估算；無資料 fallback = self_pop（謹慎：視對方與己等強）
 func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
-	return state.team_intel.get(obs_id, {}).get(tgt_id, {}).get("population_est", fallback)
+	return BeliefSystem.best_estimate(state, obs_id, tgt_id).get("population_est", fallback)
 
 func _calc_diplomacy_score(state: WorldState,
 		self_team: TeamData, other_team: TeamData) -> float:

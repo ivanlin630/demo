@@ -102,7 +102,7 @@ func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
     return best_id
 
 func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
-    return state.team_intel.get(obs_id, {}).get(tgt_id, {}).get("population_est", fallback)
+    return BeliefSystem.best_estimate(state, obs_id, tgt_id).get("population_est", fallback)
 
 func _find_weakest_member(state: WorldState, faction: FactionData) -> int:
     var weakest_id: int = -1; var weakest_pop: int = 9999
@@ -134,8 +134,7 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
     ]
     # T-02：用 leader 的 team_intel 取目標最後已知位置
     var leader_id: int = faction.leader_team_id
-    var target_pos: Vector2i = state.team_intel.get(leader_id, {}).get(
-        target_id, {}).get("tile_pos", target.tile_pos)
+    var target_pos: Vector2i = BeliefSystem.best_estimate(state, leader_id, target_id).get("tile_pos", target.tile_pos)
     for i in range(member_teams.size()):
         var t: TeamData = member_teams[i]
         if t.current_task in FactionAISystem.SURVIVAL_TASKS:

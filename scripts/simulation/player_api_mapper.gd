@@ -171,7 +171,7 @@ static func map_visible_teams(state: WorldState) -> Array:
 		var dt: TeamData = state.teams.get(dtid)
 		if dt == null:
 			continue
-		var intel: Dictionary = state.team_intel.get(tid, {}).get(dtid, {})
+		var intel: Dictionary = BeliefSystem.best_estimate(state, tid, dtid)
 		var pop_est: int = int(intel["population_est"]) if intel.has("population_est") else -1
 		result.append({
 			"id": dtid,
@@ -830,7 +830,7 @@ static func map_visible_teams_render(state: WorldState, observer_tid: int) -> Ar
 				"draw_mode": "current"
 			})
 		else:
-			var intel: Dictionary = state.team_intel.get(observer_tid, {}).get(tid, {})
+			var intel: Dictionary = BeliefSystem.best_estimate(state, observer_tid, tid)
 			if intel.has("tile_pos"):
 				result.append({
 					"team_id": tid, "tile_pos": intel["tile_pos"],
