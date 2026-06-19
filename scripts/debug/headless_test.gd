@@ -426,6 +426,8 @@ func _initialize() -> void:
 	_test_prosperity_gated_by_ladder()
 	# ── G3a belief accessor ──
 	_test_belief_accessor()
+	# ── G3b multi-claim ──
+	_test_belief_multiclaim()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -440,6 +442,35 @@ func _test_belief_accessor() -> void:
 	assert(abs(BeliefSystem.uncertainty(s, 1, 2) - 0.2) < 0.01, "uncertainty=1-conf=0.2")
 	assert(abs(BeliefSystem.uncertainty(s, 9, 9) - 1.0) < 0.01, "無資料 uncertainty=1")
 	print("belief accessor OK")
+
+func _test_belief_multiclaim() -> void:
+	print("--- G3b：multi-claim 儲存 ---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	s.team_intel = {}
+	# 親見：obs=1 對 tgt=2，源=自己
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見",
+		{"population_est": 50, "tile_pos": Vector2i(3,3), "last_tick": 0}, 1.0, false)
+	# 同源更新：累積欄、不新增 claim
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"armed_est": 10}, 1.0, false)
+	assert(BeliefSystem.claims(s, 1, 2).size() == 1, "同源更新非 append")
+	assert(BeliefSystem.best_estimate(s, 1, 2).get("population_est") == 50, "親見 pop 留")
+	assert(BeliefSystem.best_estimate(s, 1, 2).get("armed_est") == 10, "親見累積 armed")
+	# 跨源：giver=9 傳低可信不同值 → append 不覆蓋
+	BeliefSystem.record_claim(s, 1, 2, 9, "傳聞",
+		{"population_est": 200, "last_tick": 5}, 0.4, true)
+	assert(BeliefSystem.claims(s, 1, 2).size() == 2, "跨源 append 多源並存")
+	assert(BeliefSystem.best_estimate(s, 1, 2).get("population_est") == 50, "best=最高可信(親見1.0)")
+	assert(BeliefSystem.uncertainty(s, 1, 2) > 0.5, "分歧大→高不確定 (50 vs 200)")
+	# 讀容錯：舊式 Dict
+	s.team_intel[7] = {8: {"population_est": 30, "last_tick": 0}}
+	assert(BeliefSystem.best_estimate(s, 7, 8).get("population_est") == 30, "Dict coerce 讀")
+	assert(BeliefSystem.claims(s, 7, 8).size() == 1, "Dict coerce 單 claim")
+	# cap：第 5 源溢出剪最低可信
+	for src in [10, 11, 12]:
+		BeliefSystem.record_claim(s, 1, 2, src, "傳聞", {"population_est": 60}, 0.3, false)
+	assert(BeliefSystem.claims(s, 1, 2).size() <= BeliefSystem.MAX_CLAIMS_PER_TARGET, "cap 生效")
+	assert(BeliefSystem.best_estimate(s, 1, 2).get("population_est") == 50, "cap 後親見仍在(最高可信)")
+	print("multi-claim OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")
