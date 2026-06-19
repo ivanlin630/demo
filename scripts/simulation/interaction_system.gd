@@ -696,7 +696,8 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 			snap["food_est"]     *= randf_range(0.3, 0.7)
 			snap["material_est"] *= randf_range(0.3, 0.7)
 			snap["goods_est"]    *= randf_range(0.3, 0.7)
-	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, 1.0, false)
+	var cred: float = BeliefSystem.source_credibility(state, obs_id, "親見", obs_id, 0)
+	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, cred, false)
 
 # 處決俘虜：呼叫者負責移除 NPC；此函數只結算目擊者 loyalty 懲罰
 func execute_prisoner(state: WorldState, team_id: int) -> void:

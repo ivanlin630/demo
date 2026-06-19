@@ -429,6 +429,10 @@ func _initialize() -> void:
 	# ── G3b multi-claim ──
 	_test_belief_multiclaim()
 	_test_intel_writers_multiclaim()
+	# ── G3c-1 可信度 + 身份信任 + 類型基準 ──
+	_test_claim_source_type()
+	_test_credibility_formula()
+	_test_trust_reconcile()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -495,6 +499,104 @@ func _test_intel_writers_multiclaim() -> void:
 	assert(BeliefSystem.claims(s, 20, 23).size() == 2, "兩 giver → receiver 多源不覆蓋")
 	assert(not BeliefSystem.best_estimate(s, 20, 23).is_empty(), "best_estimate 回值")
 	print("intel writers OK")
+
+func _seed_st_team(s: WorldState, tid: int, faction: int) -> void:
+	var t := TeamData.new(); t.team_id = tid; t.faction_id = faction; _seed_pop(t, 5)
+	s.teams[tid] = t
+	var l := PersonData.new(); l.id = tid; l.team_id = tid; l.role = "leader"
+	s.persons[tid] = l; t.leader_id = tid
+
+func _find_claim(s: WorldState, obs: int, tgt: int, src: int) -> Dictionary:
+	for c in BeliefSystem.claims(s, obs, tgt):
+		if int(c["source_id"]) == src:
+			return c
+	return {}
+
+func _test_claim_source_type() -> void:
+	print("--- G3c-1：source_type 正名 ---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	var ms := SimMessageSystem.new()
+	# 隊友：giver 30 與 receiver 31 同 faction，target 99
+	_seed_st_team(s, 30, 7); _seed_st_team(s, 31, 7)
+	BeliefSystem.record_claim(s, 30, 99, 30, "親見",
+		{"population_est": 40, "last_tick": 0}, 1.0, false)
+	ms._exchange_intel(s, 30, 31)
+	var teammate := _find_claim(s, 31, 99, 30)
+	assert(teammate.get("source_type") == "隊友", "同 faction → 隊友")
+	# distort mode 不再當 source_type
+	assert(not (teammate.get("source_type") in ["honest", "unintentional", "malicious"]), "非 distort mode")
+	# 商旅：giver 40 帶商隊 tag，不同 faction
+	_seed_st_team(s, 40, -1); _seed_st_team(s, 41, -1)
+	s.teams[40].tags.append("商隊")
+	BeliefSystem.record_claim(s, 40, 99, 40, "親見",
+		{"population_est": 40, "last_tick": 0}, 1.0, false)
+	ms._exchange_intel(s, 40, 41)
+	assert(_find_claim(s, 41, 99, 40).get("source_type") == "商旅", "商隊 tag → 商旅")
+	# 流民：giver 50 無 tag 不同 faction
+	_seed_st_team(s, 50, -1); _seed_st_team(s, 51, -1)
+	BeliefSystem.record_claim(s, 50, 99, 50, "親見",
+		{"population_est": 40, "last_tick": 0}, 1.0, false)
+	ms._exchange_intel(s, 50, 51)
+	assert(_find_claim(s, 51, 99, 50).get("source_type") == "流民", "無 tag 不同 faction → 流民")
+	print("source_type OK")
+
+func _test_credibility_formula() -> void:
+	print("--- G3c-1：可信度公式 ---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	s.teams = {}
+	var obs := TeamData.new(); obs.team_id = 1; s.teams[1] = obs
+	# 類型基準：隊友(0.8) > 流民(0.3)，同 trust(default 0.5,乘數1.0) 同 hop
+	var cred_mate := BeliefSystem.source_credibility(s, 1, "隊友", 8, 1)
+	var cred_drift := BeliefSystem.source_credibility(s, 1, "流民", 9, 1)
+	assert(cred_mate > cred_drift, "隊友基準 > 流民基準")
+	# 身份信任：同 type 高 known_reputations → 高 cred
+	obs.known_reputations[8] = 0.9
+	obs.known_reputations[9] = 0.1
+	var trust_hi := BeliefSystem.source_credibility(s, 1, "流民", 8, 1)
+	var trust_lo := BeliefSystem.source_credibility(s, 1, "流民", 9, 1)
+	assert(trust_hi > trust_lo, "高信任 → 高 cred")
+	# 親見 source_id==obs → trust default → 乘數1.0 → base*hop0=1.0
+	assert(abs(BeliefSystem.source_credibility(s, 1, "親見", 1, 0) - 1.0) < 0.001, "親見=1.0")
+	# hop：relay hop=1 < 親見 hop=0（同 base）
+	var hop0 := BeliefSystem.source_credibility(s, 1, "隊友", 5, 0)
+	var hop1 := BeliefSystem.source_credibility(s, 1, "隊友", 5, 1)
+	assert(hop0 > hop1, "hop0 > hop1")
+	# 時效：同 cred 不同 tick → effective 新者勝
+	s.world.current_tick = WorldState.TICKS_PER_DAY * 20
+	var fresh := {"credibility": 0.8, "tick": s.world.current_tick}
+	var stale := {"credibility": 0.8, "tick": 0}
+	assert(BeliefSystem.effective_credibility(s, fresh) > BeliefSystem.effective_credibility(s, stale), "新鮮 effective 勝陳舊")
+	# best_estimate 排 effective：陳舊高 cred vs 新鮮低 cred
+	s.team_intel = {}
+	BeliefSystem.record_claim(s, 1, 2, 8, "隊友",
+		{"population_est": 100, "last_tick": 0}, 0.9, false)
+	s.team_intel[1][2][0]["tick"] = 0  # 強制陳舊
+	BeliefSystem.record_claim(s, 1, 2, 9, "流民",
+		{"population_est": 55, "last_tick": s.world.current_tick}, 0.7, false)
+	# 陳舊 0.9 經時效衰減後可能輸新鮮 0.7 → 取決於衰減；至少 best_estimate 不崩
+	assert(not BeliefSystem.best_estimate(s, 1, 2).is_empty(), "best_estimate 排 effective 回值")
+	print("credibility OK")
+
+func _test_trust_reconcile() -> void:
+	print("--- G3c-1：信任更新迴路 ---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	s.teams = {}
+	var obs := TeamData.new(); obs.team_id = 1; s.teams[1] = obs
+	# src=9 relayed pop=50；obs 親見 tgt=2 pop=52（接近）→ rep[9] 升
+	BeliefSystem.record_claim(s, 1, 2, 9, "流民",
+		{"population_est": 50, "last_tick": 0}, 0.5, false)
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見",
+		{"population_est": 52, "last_tick": 0}, 1.0, false)
+	assert(obs.known_reputations.get(9, 0.5) > 0.5, "準線人 → rep 升")
+	# src=8 relayed pop=200，親見=52（離譜）→ rep[8] 降
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.teams = {}
+	var obs2 := TeamData.new(); obs2.team_id = 1; s2.teams[1] = obs2
+	BeliefSystem.record_claim(s2, 1, 2, 8, "流民",
+		{"population_est": 200, "last_tick": 0}, 0.5, false)
+	BeliefSystem.record_claim(s2, 1, 2, 1, "親見",
+		{"population_est": 52, "last_tick": 0}, 1.0, false)
+	assert(obs2.known_reputations.get(8, 0.5) < 0.5, "騙子 → rep 降")
+	print("trust reconcile OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")

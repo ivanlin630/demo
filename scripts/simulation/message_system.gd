@@ -186,6 +186,14 @@ func _decide_exchange_mode(state: WorldState, giver: TeamData, receiver: TeamDat
 		return "unintentional"
 	return "silent"
 
+# 真來源類別（vs distort mode）：同 faction→隊友、商隊 tag→商旅、else→流民。
+func _claim_source_type(giver: TeamData, receiver: TeamData) -> String:
+	if giver.faction_id != -1 and giver.faction_id == receiver.faction_id:
+		return "隊友"
+	if giver.tags.has("商隊"):
+		return "商旅"
+	return "流民"
+
 func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void:
 	var giver: TeamData    = state.teams.get(giver_id)
 	var receiver: TeamData = state.teams.get(receiver_id)
@@ -217,9 +225,11 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 		var src_val: Dictionary = BeliefSystem.best_estimate(state, giver_id, tgt_id)
 		var entry: Dictionary = _distort_intel_entry(src_val, mode)
 		if entry.is_empty(): continue
-		var cred: float = (1.0 - HOP_DECAY) * float(entry.get("confidence", 0.5))
+		# 真來源類別 + 可信度公式（hop 只算一次 → 修 G3b relay 雙重 HOP debt）
+		var stype: String = _claim_source_type(giver, receiver)
+		var cred: float = BeliefSystem.source_credibility(state, receiver_id, stype, giver_id, 1)
 		var distorted: bool = mode in ["unintentional", "malicious"]
-		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, mode, entry, cred, distorted)
+		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)
 		# 偵查識破 → 標該 source claim 可疑（找 source_id==giver 的 claim）
 		var recv_leader: PersonData = state.persons.get(receiver.leader_id)
 		if recv_leader:

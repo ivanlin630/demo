@@ -105,4 +105,5 @@ func _write_tier01(state: WorldState, obs_id: int, tgt_id: int,
 		elif total_res >= 50.0:  scale = 1
 		scale = clampi(scale + randi_range(-1, 1), 0, 3)
 		snap["resource_scale"] = scale
-	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, 1.0, false)
+	var cred: float = BeliefSystem.source_credibility(state, obs_id, "親見", obs_id, 0)
+	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, cred, false)
