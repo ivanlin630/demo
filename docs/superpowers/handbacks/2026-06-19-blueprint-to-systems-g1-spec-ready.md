@@ -1,8 +1,9 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: G1 供應鏈 spec ready → 請寫 plan（脊椎②）
+consumed_note: HOW 設計 g1-supply-chain-how-design 已落，§11 解，拆 G1a鑄幣/G1b訂單/G1c需求生產/G1d商隊。⚠ ore_gold 值差異(你說10/coin_eq 實際×5)待你回 g1-how-done handback 確認。
 ---
 
 # G1 供應鏈 spec 完成，移交系統寫 plan
