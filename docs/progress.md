@@ -2,6 +2,7 @@
 
 ## 📍 當前狀態（2026-06-19）
 
+- **G3b multi-claim 儲存 ✅**：`team_intel[obs][tgt]` 單 dict → Array of claim（值/源/時效/可信度/失真，不覆蓋）。寫端（vision/interaction 親見、message 傳播）遷 `BeliefSystem.record_claim`：同源更新、跨源 append、停 confidence-max 覆蓋；`best_estimate` 聚合最高 credibility、`uncertainty` 換 claim 分歧、caps 剪枝。讀端 sim_bridge/inquiry 收尾走 accessor（`known_targets`）。讀容錯舊 Dict。改動全藏 BeliefSystem accessor 後（G3a de-risk）→ 決策讀者零動，但多源時值會變（行為非保留：多源不覆蓋 + 分歧不確定為真 WHAT 變化）。headless 全綠、coin_eq=0、InvariantAudit 0、1000 tick。TEST VALUE：MAX_CLAIMS_PER_TARGET=4 / PER_OBSERVER=200 / uncertainty 欄選 population_est / relay cred interim。下一步 G3c（可信度 trust 公式 + 技能）/ G3d（決策讀 uncertainty + 查證）。詳見 known_issues G3。
 - **G1d 商隊訂單驅動 + 短缺買單 ✅（閉環 G1b）**：商業 archetype 隊 targeting 改讀 `team_known` 訂單（`OrderSystem.best_arbitrage_order`，殘缺/可失真情報），取代 `_find_trade_target` 的 `team_discovered` 上帝視角（後者降 fallback，最終應刪，符「目標決策讀殘缺情報」總則）；`tick_team_orders` 短缺發買單（料/武器 < `SHORTAGE_QTY`）→ G1b infra 半 inert 解除（賣盤有 reader、生產買單有來源）。到場履約走既有 interaction 同格 trade（守恆）。撲空 = 訂單 stale → `local_value` glut（emergent 無新機制）。headless 全綠、game_sim_multi 21600 tick 無崩潰、coin_eq=0、InvariantAudit 0。剩 refinement：部分履約記帳、distort×params、信用幣(③G3)、arbitrage 公式調平衡。詳見 known_issues G1。
 
 ## 📍 前狀態（2026-06-17）
