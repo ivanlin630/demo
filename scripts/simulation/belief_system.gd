@@ -16,6 +16,15 @@ const CRED_AGE_FULL_DECAY := WorldState.TICKS_PER_DAY * 30  # TEST VALUE
 const CRED_TIME_FLOOR := 0.2         # TEST VALUE
 const TRUST_DELTA := 0.05            # TEST VALUE：親見比對 relayed → ±口碑步長
 
+# G3c-2 技能識破（信假/生疑/裁決）
+const DETECT_SCHEME_GAIN := 0.8       # TEST VALUE：對方計謀壓低我識破
+const DETECT_SUSPECT_T := 0.3         # TEST VALUE：生疑門檻
+const DETECT_ADJUDICATE_T := 0.6      # TEST VALUE：裁決門檻
+const DETECT_SUSPECT_MULT := 0.5      # TEST VALUE：生疑 cred 折扣
+const DETECT_ADJUDICATE_MULT := 0.2   # TEST VALUE：裁決 cred 折扣
+# G3c-2 觀察吃技能
+const OBS_SKILL_NOISE_GAIN := 0.5     # TEST VALUE：低技能額外觀察噪
+
 # 寫時可信度（時不變部分）：類型基準 × 身份信任 × 跳數衰減。
 # 身份信任 = obs team known_reputations[source]（0..1，default 0.5）；親見 source==obs → 1.0。
 static func source_credibility(state: WorldState, observer_id: int,
@@ -36,6 +45,20 @@ static func _time_decay(state: WorldState, tick: int) -> float:
 # 讀時可信度（排序用）= 寫時 cred × 時效衰減 → 新鮮勝陳舊。
 static func effective_credibility(state: WorldState, claim: Dictionary) -> float:
 	return float(claim["credibility"]) * _time_decay(state, int(claim["tick"]))
+
+# 識破分級（信假/生疑/裁決）：我理解力 vs 對方計謀 → cred 折扣 + 疑點 flag。
+# 非 un-distort（真值不隨行）：只壓對該謊的信任，不還原值。
+static func detection_discount(my_skill: float, their_scheme: float) -> Dictionary:
+	var detect: float = clampf(my_skill - their_scheme * DETECT_SCHEME_GAIN, 0.0, 1.0)
+	if detect >= DETECT_ADJUDICATE_T:
+		return { "discount": DETECT_ADJUDICATE_MULT, "suspicious": true }
+	if detect >= DETECT_SUSPECT_T:
+		return { "discount": DETECT_SUSPECT_MULT, "suspicious": true }
+	return { "discount": 1.0, "suspicious": false }
+
+# 觀察品質吃觀察者技能：base = 距離噪；低技能疊殘留噪（親見也錯，cred 仍 1.0）。
+static func observation_noise(base_noise: float, skill: float) -> float:
+	return clampf(base_noise + (1.0 - clampf(skill, 0.0, 1.0)) * OBS_SKILL_NOISE_GAIN, 0.0, 1.0)
 
 static func _coerce(raw) -> Array:
 	# Array → as-is；Dict（舊式/test）→ 單親見 claim；其餘 → []
