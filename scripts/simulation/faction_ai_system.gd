@@ -160,6 +160,12 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	var prey_id: int = find_prosperity_prey(state, team, leader)
 	if prey_id == -1: return
 
+	# G3d-1 風險 gate：對 prey 情報不確定且 leader 慎重 → 本 tick 不 commit（按兵，待親見壓低 uncertainty）。
+	# 莽者門檻低→照衝→假情報誘殺。下次 cadence 重評。
+	var _caution: float = float(leader.values.get("慎重", 0.5))
+	if not BeliefSystem.confident_enough(state, team.team_id, prey_id, _caution):
+		return
+
 	# combat_target 不預設：移動凍結 + interaction 早退會擋住交戰；
 	# 由 interaction_system 到達時 start_combat 設定。只給 task + move_target + 追擊目標。
 	if _is_stuck(team):
@@ -2116,7 +2122,9 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		)
 		if own_eta_days > 5.0 and ferocity_ok:
 			var prey_id: int = _find_weakest_prey(state, team)
-			if prey_id != -1:
+			# G3d-1 風險 gate：掠食弱目標前驗把握；慎重者面對矛盾情報→落回其他絕境路徑（回家），不凍結
+			var _scaution: float = float(leader.values.get("慎重", 0.5))
+			if prey_id != -1 and BeliefSystem.confident_enough(state, team.team_id, prey_id, _scaution):
 				# 同上：combat_target 不預設，到達由 interaction 起戰
 				if TaskArbiter.try_set(state, team, TeamData.TASK_LOOT,
 						state.teams[prey_id].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
