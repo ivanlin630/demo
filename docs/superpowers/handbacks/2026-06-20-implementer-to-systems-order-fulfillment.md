@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 date: 2026-06-20
 feature: order-fulfillment
 plan: docs/superpowers/plans/2026-06-20-order-fulfillment.md
