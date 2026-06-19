@@ -43,7 +43,7 @@
 
 ### P5 QA批（2026-06-16 QA session harness 系統遍歷，stage2 驗收抓）
 > ui_flow 31/31 全綠但漏抓——測試只驗「能呼叫/字串含關鍵字」，不驗端到端守恆與主場景路徑。
-- **B-1 收留撞 pop_cap：扣糧成功但 0 人併入 + msg 謊報**（高，守恆紅線）。`_accept_join_request`（player_command_system.gd:757/760/763）先用意圖值 `from_team.population` 算 cost/joined，再呼 `merge_teams`→`_merge_into`（capacity<=0 時 transfer=0 啥都不轉但仍 return）→ 食物已先扣（憑空蒸發）+ msg 謊報人數。修向：cost/joined 改 merge 後量測 delta；或 merge 前驗 capacity，0 容量直接拒。
+- **B-1 收留撞 pop_cap** ✅ 已修（驗證 2026-06-19，移 `archive/resolved_issues.md`）。merge 前驗容量拒收 + cost 改 merge 後量 delta，無蒸發/msg 誠實；`_test_join_request_cap_capped` 覆蓋。
 - **A-1 記名招募在主場景 TextUI 死路**（高，stage2 核心迴路斷）。`recruit` 回 payload menu(has_willing_named/anon_available)，但 `text_ui_main.gd` team-target handler（916-977）不消費此 menu，只 `_log_event` 後清 target。`recruit_named` 唯一路徑 `execute_action_with_target`（member-kind）text UI 從不呼 → 記名招募完全不可達。功能寫在停用的圖形 `main.gd`（show_recruit_panel:115-142）。`recruit_named` 不在 registry → `_test_action_ui_coverage` 抓不到。修向：把 recruit menu 消費搬進 text_ui_main。
 - **C-1~C-6 ✅ 2026-06-16 brainstorm 重frame + 實作（merged 81e245b）**。走查發現原框架混淆「NPC task(AI 抽象)」與「玩家能力(直接動作)」——玩家直接控,不需持續 auto-task,真對稱=動作 parity（見 spec `2026-06-16-player-action-parity-design.md`）：
   - **C-1 設自隊 task → 砍掉**（玩家不要 auto-task,reframe 非缺口）。

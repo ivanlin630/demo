@@ -6,6 +6,12 @@
 
 ---
 
+### B-1. 收留撞 pop_cap：扣糧成功但 0 人併入 + msg 謊報 ✅ 已修（驗證 2026-06-19 #3）
+- **症狀**：`_accept_join_request` 先用意圖值 `from_team.population` 算 cost/joined 再 merge；capacity<=0 時 merge transfer=0（沒人進）但食物已先扣 → 憑空蒸發 + msg 謊報併入人數（守恆紅線）。
+- **修**（player_command_system.gd:817-841，雙保險）：(1) merge 前驗容量 `will_join<=0 → return ok:false「隊伍已滿」`（撞滿直接拒，不扣糧）；(2) 實際 cost 改 merge 後量 delta（`joined = pt.population - pop_before`，`food -= JOIN_ONBOARD_MEAL × joined`）→ 食物按真實併入扣、msg 與 payload 報實際 joined。
+- **驗證**：`_test_join_request_cap_capped`（headless_test.gd:593，撞滿 → joined=0 / spent<0.01 / ok=false）+ 部分容量測試（joined 與 reported 一致）；headless 全綠、coin_eq 守恆。
+- **教訓**：守恆量測要綁「實際 mutation 後 delta」，不可用「意圖值」預扣——merge/transfer 受容量截斷時意圖≠實際。
+
 ### W5. Task latch 凍結世界 ✅ 大部分已修（2026-06-13）
 - **症狀**：TeamTrace 量測 90 天，92% team-time 卡在不釋放的 survival(return_home/乞食 p80) + panic(逃跑 p70)。生產性 task 僅 8%。世界非窮而是癱瘓（T1 囤 mat 1622 卻凍死、T2 糧 34 天坐死）。
 - **根因**：`_evaluate_survival` 一進 survival 就 early-return 不釋放；`_has_active_threat` dist_factor floor 0.1 + 小地圖逃不到 5 格 → 永威脅；乞食無施主空轉 latch；餓死團 pop floor 1 不清除成空殼。
