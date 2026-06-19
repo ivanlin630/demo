@@ -42,9 +42,8 @@ func resolve_inquiry(state: WorldState, player_team: TeamData,
 	var honest: bool = rel > 0.5
 	match inquiry_id:
 		"ask_team_location":
-			var intel: Dictionary = state.team_intel.get(npc_team.team_id, {})
 			var locations: Array = []
-			for tid in intel:
+			for tid in BeliefSystem.known_targets(state, npc_team.team_id):
 				var e: Dictionary = BeliefSystem.best_estimate(state, npc_team.team_id, tid)
 				var pos: Vector2i = e.get("tile_pos", Vector2i(-1,-1))
 				if not honest:
@@ -57,7 +56,7 @@ func resolve_inquiry(state: WorldState, player_team: TeamData,
 			result["food_tiles"] = food_tiles
 		"ask_enemy_movement":
 			var enemy_intel: Array = []
-			for tid in state.team_intel.get(npc_team.team_id, {}):
+			for tid in BeliefSystem.known_targets(state, npc_team.team_id):
 				var t: TeamData = state.teams.get(tid)
 				if t and t.faction_id != player_team.faction_id:
 					var e2: Dictionary = BeliefSystem.best_estimate(state, npc_team.team_id, tid)
@@ -86,9 +85,8 @@ func _passes_filter(id: String, state: WorldState,
 		player_team: TeamData, _npc_team: TeamData) -> bool:
 	match id:
 		"ask_team_location":
-			var intel: Dictionary = state.team_intel.get(player_team.team_id, {})
 			var fresh_count: int = 0
-			for tid in intel:
+			for tid in BeliefSystem.known_targets(state, player_team.team_id):
 				if int(BeliefSystem.best_estimate(state, player_team.team_id, tid).get("last_tick", 0)) > state.world.current_tick - WorldState.TICKS_PER_DAY * 10:
 					fresh_count += 1
 			return fresh_count < 3

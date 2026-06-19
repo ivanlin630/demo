@@ -9,6 +9,9 @@ static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictio
 static func has_belief(state: WorldState, obs_id: int, tgt_id: int) -> bool:
 	return not best_estimate(state, obs_id, tgt_id).is_empty()
 
+static func known_targets(state: WorldState, obs_id: int) -> Array:
+	return state.team_intel.get(obs_id, {}).keys()
+
 static func uncertainty(state: WorldState, obs_id: int, tgt_id: int) -> float:
 	var e: Dictionary = best_estimate(state, obs_id, tgt_id)
 	if e.is_empty():

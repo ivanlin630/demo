@@ -182,7 +182,7 @@ func has_tile_intel(q: int, r: int) -> bool:
 	var discovered: Array = _state.team_discovered.get(player_tid, [])
 	var pos := Vector2i(q, r)
 	for tid in discovered:
-		var intel: Dictionary = _state.team_intel.get(player_tid, {}).get(tid, {})
+		var intel: Dictionary = BeliefSystem.best_estimate(_state, player_tid, tid)
 		if intel.get("tile_pos", Vector2i(-999, -999)) == pos:
 			return true
 	return false
