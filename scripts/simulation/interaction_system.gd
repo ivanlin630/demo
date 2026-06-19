@@ -696,6 +696,11 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 			snap["food_est"]     *= randf_range(0.3, 0.7)
 			snap["material_est"] *= randf_range(0.3, 0.7)
 			snap["goods_est"]    *= randf_range(0.3, 0.7)
+	# G3c-2 觀察吃技能：observer 戰術低 → 看不懂武裝 → armed_est 疊誤判（cred 仍 1.0）
+	var obs_leader2: PersonData = state.persons.get((state.teams.get(obs_id) as TeamData).leader_id) if state.teams.has(obs_id) else null
+	var tactic: float = float(obs_leader2.skills.get("戰術", 0.0)) if obs_leader2 else 0.0
+	var armed_noise: float = BeliefSystem.observation_noise(0.0, tactic)
+	snap["armed_est"] = maxi(0, roundi(float(snap["armed_est"]) * randf_range(1.0 - armed_noise, 1.0 + armed_noise)))
 	var cred: float = BeliefSystem.source_credibility(state, obs_id, "親見", obs_id, 0)
 	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, cred, false)
 

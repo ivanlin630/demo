@@ -84,7 +84,13 @@ func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 
 func _write_tier01(state: WorldState, obs_id: int, tgt_id: int,
 		tgt: TeamData, dist: int, dist_f: float) -> void:
-	var noise: float = 1.0 - dist_f  # TEST VALUE
+	# G3c-2 觀察吃技能：距離噪疊觀察者偵查殘留噪（低偵查 → 親見也誤判，cred 仍 1.0）
+	var obs_team: TeamData = state.teams.get(obs_id)
+	var scout_skill: float = 0.0
+	if obs_team:
+		var obs_leader: PersonData = state.persons.get(obs_team.leader_id)
+		if obs_leader: scout_skill = float(obs_leader.skills.get("偵查", 0.0))
+	var noise: float = BeliefSystem.observation_noise(1.0 - dist_f, scout_skill)
 	var pop_est: int = maxi(1, roundi(
 		tgt.population * randf_range(1.0 - noise, 1.0 + noise)))
 	var snap: Dictionary = BeliefSystem.best_estimate(state, obs_id, tgt_id).duplicate()
