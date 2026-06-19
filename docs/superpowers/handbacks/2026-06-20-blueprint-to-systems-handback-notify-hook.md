@@ -1,8 +1,9 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 提案 — UserPromptSubmit hook 自動 📬 未讀 handback（消滅人肉轉述）
+ruling: 已實作 `.claude/hooks/handback-inbox.sh`(UserPromptSubmit,gitignore 本地)+settings.json 接線;掃 frontmatter to:$SESSION_ROLE status:open,空則靜默;00_roles channel 節記。生效需 /hooks reload 或重啟。
 ---
 
 # 提案：加 UserPromptSubmit hook 自動提醒未讀 handback
