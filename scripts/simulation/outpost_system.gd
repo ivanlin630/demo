@@ -215,6 +215,9 @@ func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 		var cap: float = _get_storage_cap(tile, "coin")
 		var cur_coin: float = float(tile.public_storage.get("coin", 0))
 		tile.public_storage["coin"] = minf(cur_coin + coin_added, cap)
+		if coin_added > 0.0:
+			print("[Mint] tile(%d,%d) gold→coin +%.1f (mint_lv=%d)" % [
+				tile.tile_pos.x, tile.tile_pos.y, coin_added, tile.mint_level])
 		return
 	var silver_qty: float = float(tile.public_storage.get("ore_silver", 0))
 	if silver_qty > 0.0:
@@ -224,6 +227,9 @@ func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 		var cap: float = _get_storage_cap(tile, "coin")
 		var cur_coin: float = float(tile.public_storage.get("coin", 0))
 		tile.public_storage["coin"] = minf(cur_coin + coin_added, cap)
+		if coin_added > 0.0:
+			print("[Mint] tile(%d,%d) silver→coin +%.1f (mint_lv=%d)" % [
+				tile.tile_pos.x, tile.tile_pos.y, coin_added, tile.mint_level])
 
 func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	# 找同格上所有 current_task == "建設" 的 team（接手機制）

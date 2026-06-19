@@ -415,6 +415,8 @@ func _initialize() -> void:
 	_test_ambition_rung_climb()
 	_test_ambition_cap_limits()
 	_test_strategic_reads_ladder()
+	# ── G1a 鑄幣觀測 ──
+	_test_mint_conserving()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10935,3 +10937,25 @@ func _test_strategic_reads_ladder() -> void:
 	for g in f.strategic_goals: if g["type"] == "expand": has_expand_high = true
 	assert(has_expand_high, "rung 擴張+武力 archetype 應 expand")
 	print("strategic reads ladder OK")
+
+func _test_mint_conserving() -> void:
+	print("--- G1a：鑄幣端到端守恆 ---")
+	var os := OutpostSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4)
+	tile.mint_level = 1
+	tile.public_storage = {"ore_gold": 10.0, "ore_silver": 20.0, "coin": 0.0}
+	s.world.tiles[tile.tile_id] = tile
+	# 鑄幣前 coin_eq（ore + coin 同口徑）
+	var ore_g0: float = float(tile.public_storage["ore_gold"])
+	var ore_s0: float = float(tile.public_storage["ore_silver"])
+	var coin0: float = float(tile.public_storage["coin"])
+	var eq_before: float = ore_g0 * OutpostSystem.GOLD_TO_COIN_RATIO + ore_s0 * OutpostSystem.SILVER_TO_COIN_RATIO + coin0
+	os._tick_mint(s, tile, null)
+	var eq_after: float = float(tile.public_storage.get("ore_gold",0)) * OutpostSystem.GOLD_TO_COIN_RATIO \
+		+ float(tile.public_storage.get("ore_silver",0)) * OutpostSystem.SILVER_TO_COIN_RATIO \
+		+ float(tile.public_storage.get("coin",0))
+	assert(float(tile.public_storage.get("coin",0)) > coin0, "應鑄出 coin")
+	assert(abs(eq_after - eq_before) < 0.01, "鑄幣守恆 eq before=%.2f after=%.2f" % [eq_before, eq_after])
+	print("mint conserving OK")
