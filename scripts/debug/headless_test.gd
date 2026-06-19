@@ -414,6 +414,7 @@ func _initialize() -> void:
 	_test_team_ambition_default()
 	_test_ambition_rung_climb()
 	_test_ambition_cap_limits()
+	_test_strategic_reads_ladder()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10904,3 +10905,33 @@ func _test_ambition_cap_limits() -> void:
 	for _i in range(5): AmbitionLadder.update(s, t)
 	assert(t.ambition_rung <= AmbitionLadder.RUNG_ACCUMULATE, "低野心卡 cap(積累)，實際=%d" % t.ambition_rung)
 	print("ambition cap OK")
+
+func _test_strategic_reads_ladder() -> void:
+	print("--- strategic_ai 讀階梯 gate ---")
+	var sai := StrategicAiSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var lt := TeamData.new(); lt.team_id = 1; lt.tile_pos = Vector2i(0,0)
+	var l := PersonData.new(); l.id = 1000; l.team_id = 1
+	l.values = {"野心": 0.9, "好戰": 0.8, "貪婪": 0.2}
+	s.persons[1000] = l; lt.leader_id = l.id
+	lt.ambition_archetype = "武力"
+	s.teams[1] = lt
+	var f := FactionData.new(); f.faction_id = 0; f.leader_team_id = 1; f.member_team_ids = [1]
+	s.factions[0] = f
+	# 獨立鄰團（可被 expand 鎖定）→ 讓 gate 真被走查
+	var ind := TeamData.new(); ind.team_id = 2; ind.faction_id = -1; ind.tile_pos = Vector2i(1,0)
+	s.teams[2] = ind
+	s.team_discovered[1] = [2]
+	# 低 rung(生存) → 不該 expand（即使有可選目標 + 高 raw 野心/好戰）
+	lt.ambition_rung = AmbitionLadder.RUNG_SURVIVE
+	sai._update_faction_goals(s, f)
+	var has_expand_low: bool = false
+	for g in f.strategic_goals: if g["type"] == "expand": has_expand_low = true
+	assert(not has_expand_low, "rung 生存不該 expand（階梯 gate）")
+	# 高 rung(擴張) + 武力 → 該 expand
+	lt.ambition_rung = AmbitionLadder.RUNG_EXPAND
+	sai._update_faction_goals(s, f)
+	var has_expand_high: bool = false
+	for g in f.strategic_goals: if g["type"] == "expand": has_expand_high = true
+	assert(has_expand_high, "rung 擴張+武力 archetype 應 expand")
+	print("strategic reads ladder OK")

@@ -47,12 +47,15 @@ func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
     if faction_leader == null: return
     var v := faction_leader.values
 
-    var expand_score: float = v.get("野心", 0.5) * 0.5 + v.get("好戰", 0.5) * 0.5
-    if expand_score > 0.4:
+    # G2b：戰略目標由 faction-leader 野心階梯衍生（取代 raw value 計分）
+    var rung: int = leader_team.ambition_rung
+    var arche: String = leader_team.ambition_archetype
+    # expand：武力 archetype + rung≥擴張
+    if arche == AmbitionLadder.ARCHETYPE_FORCE and rung >= AmbitionLadder.RUNG_EXPAND:
         var tgt_id: int = _nearest_independent(state, leader_team)
         if tgt_id != -1:
             faction.strategic_goals.append({ "type": "expand", "target_id": tgt_id,
-                "priority": expand_score })
+                "priority": 0.5 + float(v.get("野心", 0.5)) * 0.5 })
 
     if faction.member_team_ids.size() > 1:
         var weakest_id: int = _find_weakest_member(state, faction)
@@ -60,10 +63,10 @@ func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
             faction.strategic_goals.append({ "type": "defend", "target_id": weakest_id,
                 "priority": 0.7 })
 
-    var trade_score: float = v.get("貪婪", 0.5) * 0.4 + (1.0 - v.get("好戰", 0.5)) * 0.3
-    if trade_score > 0.35:
+    # trade_net：商業 archetype + rung≥積累
+    if arche == AmbitionLadder.ARCHETYPE_TRADE and rung >= AmbitionLadder.RUNG_ACCUMULATE:
         faction.strategic_goals.append({ "type": "trade_net", "target_id": -1,
-            "priority": trade_score })
+            "priority": 0.4 + float(v.get("貪婪", 0.5)) * 0.4 })
 
     faction.strategic_goals.sort_custom(func(a, b): return a["priority"] > b["priority"])
     if faction.strategic_goals.size() > 0:
