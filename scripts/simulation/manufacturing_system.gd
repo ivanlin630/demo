@@ -92,7 +92,7 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 			if level <= 0:
 				continue
 			var worker_rate: float = float(level) * pop_mult * (0.5 + avg_skill * 0.5)
-			var ran_recipe: String = _run_recipe_group(team, tile, level_key, worker_rate)
+			var ran_recipe: String = _run_recipe_group(state, team, tile, level_key, worker_rate)
 			if ran_recipe != "":
 				ran_any = true
 				print("[Manufacture] Team%d %s worker_rate=%.2f" % [tid, ran_recipe, worker_rate])
@@ -117,19 +117,27 @@ func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> 
 	else:
 		team.resources[res] = float(team.resources.get(res, 0)) + amt
 
-# 組內缺口排序：stock(out) / (TARGET_PER_POP × pop) 最低者先做；
+# 組內排序：①命中自隊收到買單(需求驅動)優先 ②其次缺口 stock/(TARGET×pop) 最低者；
 # 原料不足跳下一個；每設施每 tick 跑一條配方。回傳配方名（"" = 無可跑）。
-func _run_recipe_group(team: TeamData, tile: HexTileData, level_key: String,
+func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, level_key: String,
 		worker_rate: float) -> String:
 	var recipes: Array = RECIPE_GROUPS[level_key]
+	# 自隊收到的買單需求集（訂單真 reader → 非 dormant；殘缺/失真副本）
+	var demand: Dictionary = {}
+	for bo in OrderSystem.new().received_buy_orders(state, team):
+		demand[bo["res"]] = true
 	var order: Array = []
 	for i in range(recipes.size()):
 		var out: String = recipes[i]["out"]
 		var stock: float = float(team.resources.get(out, 0)) \
 			+ float(tile.public_storage.get(out, 0))
 		var target: float = float(TARGET_PER_POP.get(out, 1.0)) * float(maxi(team.population, 1))
-		order.append({ "idx": i, "ratio": stock / maxf(target, 0.001) })
-	order.sort_custom(func(a, b): return a.ratio < b.ratio)
+		order.append({ "idx": i, "ratio": stock / maxf(target, 0.001), "demand": demand.has(out) })
+	# 需求命中優先（demand=true 排前），其次缺口比最低先
+	order.sort_custom(func(a, b):
+		if a.demand != b.demand:
+			return a.demand
+		return a.ratio < b.ratio)
 	for entry in order:
 		var recipe: Dictionary = recipes[entry.idx]
 		var rate: float = float(RATES[recipe["rate_const"]])

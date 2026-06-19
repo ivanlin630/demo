@@ -94,6 +94,9 @@ var ambition_archetype: String = ""   # 武力/商業/定居
 var ambition_cap: int = 0             # 終極野心封頂 rung
 var ambition_rung: int = 0            # 當前實際 rung（0 生存…4 稱霸）
 var ambition_eval_next_tick: int = 0
+# G1 訂單系統：權威訂單（message 為可失真傳播副本）。{order_id, kind, res, qty_remaining, expire_tick}
+var active_orders: Array = []
+var order_eval_next_tick: int = 0   # 下次訂單 cadence 評估 tick
 var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）
 var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
 var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）

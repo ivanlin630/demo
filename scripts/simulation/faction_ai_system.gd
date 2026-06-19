@@ -504,6 +504,10 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		# G2b：野心階梯狀態更新（cadence）
 		if team.leader_id != -1 and state.world.current_tick >= team.ambition_eval_next_tick:
 			AmbitionLadder.update(state, team)
+		# G1b：訂單 cadence（餘發賣盤 / 過期清）
+		if team.leader_id != -1 and state.world.current_tick >= team.order_eval_next_tick:
+			OrderSystem.new().tick_team_orders(state, team)
+			team.order_eval_next_tick = state.world.current_tick + OrderSystem.ORDER_POST_CADENCE
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
 		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）

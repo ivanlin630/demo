@@ -3360,7 +3360,78 @@ func _run_sim_test() -> void:
 	_test_blood_zero_death()
 	_test_player_leader_starves()
 
+	# ── G1b 訂單系統 + 需求驅動生產 ──
+	_test_order_post_and_read()
+	_test_order_cadence_and_expire()
+	_test_demand_driven_production()
+
 	print("=== DONE ===")
+
+func _test_order_post_and_read() -> void:
+	print("--- G1b：訂單發布 + 讀取 ---")
+	var os := OrderSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var seller := TeamData.new(); seller.team_id = 1; seller.tile_pos = Vector2i(2,2)
+	var buyer := TeamData.new(); buyer.team_id = 2; buyer.tile_pos = Vector2i(2,2)
+	s.teams[1] = seller; s.teams[2] = buyer
+	var oid: int = os.post_order(s, buyer, "buy", "weapon_melee_low", 5)
+	assert(oid >= 0 and buyer.active_orders.size() == 1, "買單建在發起隊權威")
+	assert(buyer.active_orders[0]["kind"] == "buy" and buyer.active_orders[0]["res"] == "weapon_melee_low", "權威內容對")
+	# message 進 team_known（傳播副本）
+	assert(s.team_known.get(2, []).size() >= 1, "發 message 副本")
+	# seller 收到 buyer 的買單後可讀（模擬 propagate：手動把 buyer 的 message 塞 seller known）
+	for m in s.team_known[2]:
+		if m.type == "order_buy": s.team_known[1] = s.team_known.get(1, []) + [m]
+	var recv: Array = os.received_buy_orders(s, seller)
+	assert(recv.size() >= 1 and recv[0]["res"] == "weapon_melee_low", "seller 讀到買單需求")
+	print("order post/read OK")
+
+func _test_order_cadence_and_expire() -> void:
+	print("--- G1b：訂單 cadence 發布 + 過期 ---")
+	var os := OrderSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
+	var l := PersonData.new(); l.id = 1000; l.team_id = 1; s.persons[1000] = l; t.leader_id = 1000
+	# 大量某資源 → 應發賣盤
+	t.resources = {"goods": 500.0}
+	s.teams[1] = t
+	os.tick_team_orders(s, t)
+	var has_sell: bool = false
+	for o in t.active_orders:
+		if o["kind"] == "sell": has_sell = true
+	assert(has_sell, "餘量應發賣盤")
+	# 過期清理
+	for o in t.active_orders: o["expire_tick"] = s.world.current_tick - 1
+	s.world.current_tick += 1
+	os.tick_team_orders(s, t)
+	var expired_gone: bool = true
+	for o in t.active_orders:
+		if o["expire_tick"] < s.world.current_tick: expired_gone = false
+	assert(expired_gone, "過期訂單應清")
+	print("order cadence/expire OK")
+
+func _test_demand_driven_production() -> void:
+	print("--- G1b：需求驅動生產 ---")
+	# weaponsmith group: melee_low(idx0) / ranged_low(idx1) 缺口相等 → 預設選 melee。
+	# 塞「要 ranged_low」買單 → 偏好應翻轉成 ranged。
+	var mfg := ManufacturingSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
+	t.resources = {"ore_iron": 100.0, "material": 100.0,
+		"weapon_melee_low": 0.0, "weapon_ranged_low": 0.0}
+	s.teams[1] = t
+	var tile := HexTileData.new(); tile.outpost_level = 1; tile.weaponsmith_level = 1
+	# 控制組：無買單 → 預設順序選 melee_low
+	var none_pick: String = mfg._run_recipe_group(s, t, tile, "weaponsmith_level", 10.0)
+	assert(none_pick == "weapon_melee_low", "無需求時依預設順序選 melee_low，實得 %s" % none_pick)
+	# 實驗組：塞 ranged_low 買單 → 偏好翻轉
+	var buyer := TeamData.new(); buyer.team_id = 2; buyer.tile_pos = Vector2i(0,0); s.teams[2] = buyer
+	OrderSystem.new().post_order(s, buyer, "buy", "weapon_ranged_low", 5)
+	for m in s.team_known[2]:
+		if m.type == "order_buy": s.team_known[1] = s.team_known.get(1, []) + [m]
+	var demand_pick: String = mfg._run_recipe_group(s, t, tile, "weaponsmith_level", 10.0)
+	assert(demand_pick == "weapon_ranged_low", "需求驅動：應產買單需求 ranged_low，實得 %s" % demand_pick)
+	print("demand-driven production OK")
 
 func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
 	var state := WorldState.new()
