@@ -1448,6 +1448,9 @@ func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamDa
 	attacker.anon_treasury += resident.anon_treasury
 	resident.anon_treasury = 0.0
 	var rid: int = resident.team_id
+	# A feud：屠村 → resident faction 餘部繼承（erase 前，perp 當下已知）
+	NpcAiSystem.spread_feud(state, resident, attacker.leader_id,
+		NpcAiSystem.FEUD_SEVERITY["massacre"], state.world.current_tick)
 	state.erase_team(rid)   # 清光所有 ref（faction 雙向 + known_member_states + 交叉 + 母子）
 	print("[Massacre] attacker=Team%d resident=Team%d 屠村，outpost空殼易主" % [attacker.team_id, rid])
 
