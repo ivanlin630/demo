@@ -12,6 +12,18 @@ func write_memory(p: PersonData, type: String, subject_id: int,
 	_trim_memory(p)
 	_update_relations(p, type, subject_id, intensity)
 	_trigger_goals(p, type, subject_id)
+	_write_relation_edge(p, type, subject_id, tick, intensity)   # G2a：同步 typed 邊
+
+func _write_relation_edge(p: PersonData, type: String, subject_id: int,
+		tick: int, intensity: float) -> void:
+	# G2a additive：對齊 _trigger_goals 映射，填 typed 邊。reader 在 G2b/G2d。
+	match type:
+		"betrayal", "looted", "extorted":
+			RelationGraph.add_edge(p.relation_edges, "feud", subject_id, intensity, tick)
+		"kindness", "aided_in_battle":
+			RelationGraph.add_edge(p.relation_edges, "gratitude", subject_id, intensity, tick)
+		"master":
+			RelationGraph.add_edge(p.relation_edges, "protect", subject_id, intensity, tick)
 
 func _trim_memory(p: PersonData) -> void:
 	while p.memory.size() > MEMORY_MAX:

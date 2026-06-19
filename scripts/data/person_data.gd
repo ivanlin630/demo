@@ -58,6 +58,7 @@ var coin: float = 0.0
 var blood: float = 100.0
 var hunger: float = 0.0   # 個人飢餓累積 [0,1]；跟人走不跟團（中途加入不繼承團時鐘）；飢餓致死鏈用
 var relations: Dictionary = {}
+var relation_edges: Array = []   # G2 typed-edge 關係圖（feud/killed/protect/gratitude；見 RelationGraph）
 
 var body_parts: Dictionary = {
 	"head":      { "hp": 20.0, "max_hp": 20.0, "status": "healthy",
