@@ -433,6 +433,9 @@ func _initialize() -> void:
 	_test_claim_source_type()
 	_test_credibility_formula()
 	_test_trust_reconcile()
+	# ── G3c-2 技能識破 + 觀察吃技能 ──
+	_test_detection_discount()
+	_test_observation_noise()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -597,6 +600,34 @@ func _test_trust_reconcile() -> void:
 		{"population_est": 52, "last_tick": 0}, 1.0, false)
 	assert(obs2.known_reputations.get(8, 0.5) < 0.5, "騙子 → rep 降")
 	print("trust reconcile OK")
+
+func _test_detection_discount() -> void:
+	print("--- G3c-2：技能識破分級 ---")
+	# 信假：低技能 vs 高計謀 → discount==1.0, suspicious==false
+	var d0: Dictionary = BeliefSystem.detection_discount(0.1, 0.9)
+	assert(d0["discount"] == 1.0 and d0["suspicious"] == false, "低技能信假")
+	# 生疑：中
+	var d1: Dictionary = BeliefSystem.detection_discount(0.5, 0.1)  # detect≈0.42
+	assert(d1["discount"] < 1.0 and d1["discount"] > 0.3 and d1["suspicious"], "中技能生疑")
+	# 裁決：高技能 vs 低計謀
+	var d2: Dictionary = BeliefSystem.detection_discount(0.9, 0.0)  # detect=0.9
+	assert(d2["discount"] <= 0.2 and d2["suspicious"], "高技能裁決強折")
+	# 高計謀騙過中技能：my=0.5 their=0.6 → detect≈0.02 → 信假
+	var d3: Dictionary = BeliefSystem.detection_discount(0.5, 0.6)
+	assert(d3["discount"] == 1.0, "高計謀說謊家騙過")
+	print("detection OK")
+
+func _test_observation_noise() -> void:
+	print("--- G3c-2：觀察吃技能 ---")
+	# 高技能 → 趨近 base
+	assert(abs(BeliefSystem.observation_noise(0.0, 1.0) - 0.0) < 0.001, "滿技能無額外噪")
+	# 低技能 → 殘留噪（即使 base=0）
+	assert(BeliefSystem.observation_noise(0.0, 0.0) > 0.3, "零技能高殘留噪")
+	# 單調：低技能噪 > 高技能噪（同 base）
+	assert(BeliefSystem.observation_noise(0.2, 0.2) > BeliefSystem.observation_noise(0.2, 0.8), "技能↑噪↓")
+	# 限幅 ≤1
+	assert(BeliefSystem.observation_noise(1.0, 0.0) <= 1.0, "限幅")
+	print("observation OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")
