@@ -2,6 +2,25 @@
 class_name NpcAiSystem
 
 const MEMORY_MAX: int = 20   # TEST VALUE
+const VENDETTA_INTENSITY: float = 0.6     # TEST VALUE：脫軌的最低仇恨強度
+const VENDETTA_BELLIGERENCE: float = 0.6  # 好戰 ≥ 此
+const VENDETTA_PRUDENCE: float = 0.4      # 慎重 < 此
+
+# 強血仇 + 衝動 → 脫軌目標 team_id（否則 -1）。讀 G2a feud 邊。
+func vendetta_target(state: WorldState, leader: PersonData) -> int:
+	if leader == null:
+		return -1
+	if float(leader.values.get("好戰", 0.5)) < VENDETTA_BELLIGERENCE:
+		return -1
+	if float(leader.values.get("慎重", 0.5)) >= VENDETTA_PRUDENCE:
+		return -1
+	var edge: Dictionary = RelationGraph.strongest(leader.relation_edges, "feud")
+	if edge.is_empty() or float(edge.get("intensity", 0.0)) < VENDETTA_INTENSITY:
+		return -1
+	var foe: PersonData = state.persons.get(int(edge.get("target", -1)))
+	if foe == null or foe.team_id == leader.team_id or not state.teams.has(foe.team_id):
+		return -1
+	return foe.team_id
 
 func write_memory(p: PersonData, type: String, subject_id: int,
 		tick: int, intensity: float) -> void:
@@ -101,25 +120,6 @@ func _goal_task_delta(goal_type: String, task: String) -> float:
 		"protect":
 			if task in [TeamData.TASK_ATTACK]: return 0.008
 	return 0.0
-
-func get_goal_task_override(state: WorldState, p: PersonData) -> String:
-	for g in p.goals:
-		if not g.get("active", false): continue
-		match g["type"]:
-			"protect":
-				var tgt: PersonData = state.persons.get(g["target_id"])
-				if tgt != null and tgt.team_id != p.team_id:
-					return "move_to_protect"
-			"revenge":
-				var tgt: PersonData = state.persons.get(g["target_id"])
-				if tgt != null and tgt.team_id != p.team_id:
-					if randf() < p.values.get("好戰", 0.5) * 0.3:
-						return "攻擊"
-			"escape_war":
-				var team: TeamData = state.teams.get(p.team_id)
-				if team != null and float(team.resources.get("food", 0)) < 20:
-					return "逃跑"
-	return ""
 
 func cleanup_goals(state: WorldState, p: PersonData) -> void:
 	for g in p.goals:

@@ -415,6 +415,9 @@ func _initialize() -> void:
 	_test_ambition_rung_climb()
 	_test_ambition_cap_limits()
 	_test_strategic_reads_ladder()
+	# ── G2d 私人脫軌（血仇）──
+	_test_vendetta_target()
+	_test_vendetta_derail_task()
 	# ── G1a 鑄幣觀測 ──
 	_test_mint_conserving()
 	quit()
@@ -11008,6 +11011,53 @@ func _test_strategic_reads_ladder() -> void:
 	for g in f.strategic_goals: if g["type"] == "expand": has_expand_high = true
 	assert(has_expand_high, "rung 擴張+武力 archetype 應 expand")
 	print("strategic reads ladder OK")
+
+# ── G2d 私人脫軌（血仇）──
+func _test_vendetta_target() -> void:
+	print("--- G2d：vendetta_target 脫軌判定 ---")
+	var ai := NpcAiSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 1; leader.team_id = 1
+	leader.values = {"好戰": 0.8, "慎重": 0.2}   # 衝動
+	var foe := PersonData.new(); foe.id = 99; foe.team_id = 2
+	s.persons[1] = leader; s.persons[99] = foe
+	var t2 := TeamData.new(); t2.team_id = 2; s.teams[2] = t2
+	# 強 feud 邊 → 仇人 team 2
+	RelationGraph.add_edge(leader.relation_edges, "feud", 99, 0.8, 100)
+	assert(ai.vendetta_target(s, leader) == 2, "強仇+衝動→脫軌打 team2")
+	# 弱仇 → 不脫軌
+	var calm := PersonData.new(); calm.id = 3; calm.team_id = 1
+	calm.values = {"好戰": 0.8, "慎重": 0.2}
+	RelationGraph.add_edge(calm.relation_edges, "feud", 99, 0.3, 100)   # 強度不足
+	assert(ai.vendetta_target(s, calm) == -1, "弱仇不脫軌")
+	# 強仇但冷靜(高慎重) → 不脫軌
+	var prudent := PersonData.new(); prudent.id = 4; prudent.team_id = 1
+	prudent.values = {"好戰": 0.8, "慎重": 0.7}
+	RelationGraph.add_edge(prudent.relation_edges, "feud", 99, 0.9, 100)
+	assert(ai.vendetta_target(s, prudent) == -1, "冷靜不脫軌(隱忍)")
+	print("vendetta_target OK")
+
+func _test_vendetta_derail_task() -> void:
+	print("--- G2d：脫軌 caller 設 ATTACK ---")
+	var fai := FactionAISystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
+	var l := PersonData.new(); l.id = 1; l.team_id = 1
+	l.values = {"好戰": 0.8, "慎重": 0.2, "野心": 0.5}
+	s.persons[1] = l; t.leader_id = 1
+	var foe_t := TeamData.new(); foe_t.team_id = 2; foe_t.tile_pos = Vector2i(3,3)
+	var foe := PersonData.new(); foe.id = 99; foe.team_id = 2; s.persons[99] = foe
+	s.teams[1] = t; s.teams[2] = foe_t
+	RelationGraph.add_edge(l.relation_edges, "feud", 99, 0.8, 100)
+	# 直呼脫軌判定+try_set（等價 evaluate_all 內邏輯）
+	var vt: int = NpcAiSystem.new().vendetta_target(s, l)
+	assert(vt == 2, "前置：脫軌目標 team2")
+	var ok: bool = TaskArbiter.try_set(s, t, TeamData.TASK_ATTACK, foe_t.tile_pos, TaskArbiter.PRIO_VENDETTA, "vendetta")
+	assert(ok and t.current_task == TeamData.TASK_ATTACK and t.task_priority == TaskArbiter.PRIO_VENDETTA, "脫軌設 ATTACK@55")
+	# 生存(80) 擋得住脫軌
+	TaskArbiter.try_set(s, t, TeamData.TASK_FORAGE, Vector2i(0,0), TaskArbiter.PRIO_SURVIVAL, "survival")
+	assert(t.current_task == TeamData.TASK_FORAGE, "生存壓過脫軌")
+	print("vendetta derail OK")
 
 func _test_mint_conserving() -> void:
 	print("--- G1a：鑄幣端到端守恆 ---")
