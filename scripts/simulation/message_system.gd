@@ -212,21 +212,23 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 	var rep2: float = float(giver.known_reputations.get(receiver_id, 0.5))
 	if rep2 < 0.3 and (giver.faction_id == -1 or giver.faction_id != receiver.faction_id):
 		return
-	var giver_intel: Dictionary = state.team_intel.get(giver_id, {})
-	if not state.team_intel.has(receiver_id):
-		state.team_intel[receiver_id] = {}
-	for tgt_id in giver_intel:
+	for tgt_id in BeliefSystem.known_targets(state, giver_id):
 		if tgt_id == receiver_id: continue
-		var entry: Dictionary = _distort_intel_entry(giver_intel[tgt_id], mode)
+		var src_val: Dictionary = BeliefSystem.best_estimate(state, giver_id, tgt_id)
+		var entry: Dictionary = _distort_intel_entry(src_val, mode)
 		if entry.is_empty(): continue
-		var existing_conf: float = float(state.team_intel[receiver_id].get(tgt_id, {}).get("confidence", 0.0))
-		if entry.get("confidence", 0.0) > existing_conf:
-			state.team_intel[receiver_id][tgt_id] = entry
+		var cred: float = (1.0 - HOP_DECAY) * float(entry.get("confidence", 0.5))
+		var distorted: bool = mode in ["unintentional", "malicious"]
+		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, mode, entry, cred, distorted)
+		# 偵查識破 → 標該 source claim 可疑（找 source_id==giver 的 claim）
 		var recv_leader: PersonData = state.persons.get(receiver.leader_id)
 		if recv_leader:
 			var intel_skill: float = float(recv_leader.skills.get("偵查", 0.0))
 			if randf() < intel_skill * 0.5 and mode == "malicious":
-				state.team_intel[receiver_id][tgt_id]["is_suspicious"] = true
+				for c in BeliefSystem.claims(state, receiver_id, tgt_id):
+					if int(c["source_id"]) == giver_id:
+						(c["value"] as Dictionary)["is_suspicious"] = true
+						break
 
 # 實體接觸時交換訊息（需要明確呼叫，不自動）
 func exchange_messages(state: WorldState, from_team_id: int, to_team_id: int, person: PersonData) -> void:

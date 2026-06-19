@@ -426,6 +426,9 @@ func _initialize() -> void:
 	_test_prosperity_gated_by_ladder()
 	# ── G3a belief accessor ──
 	_test_belief_accessor()
+	# ── G3b multi-claim ──
+	_test_belief_multiclaim()
+	_test_intel_writers_multiclaim()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -440,6 +443,58 @@ func _test_belief_accessor() -> void:
 	assert(abs(BeliefSystem.uncertainty(s, 1, 2) - 0.2) < 0.01, "uncertainty=1-conf=0.2")
 	assert(abs(BeliefSystem.uncertainty(s, 9, 9) - 1.0) < 0.01, "無資料 uncertainty=1")
 	print("belief accessor OK")
+
+func _test_belief_multiclaim() -> void:
+	print("--- G3b：multi-claim 儲存 ---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	s.team_intel = {}
+	# 親見：obs=1 對 tgt=2，源=自己
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見",
+		{"population_est": 50, "tile_pos": Vector2i(3,3), "last_tick": 0}, 1.0, false)
+	# 同源更新：累積欄、不新增 claim
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"armed_est": 10}, 1.0, false)
+	assert(BeliefSystem.claims(s, 1, 2).size() == 1, "同源更新非 append")
+	assert(BeliefSystem.best_estimate(s, 1, 2).get("population_est") == 50, "親見 pop 留")
+	assert(BeliefSystem.best_estimate(s, 1, 2).get("armed_est") == 10, "親見累積 armed")
+	# 跨源：giver=9 傳低可信不同值 → append 不覆蓋
+	BeliefSystem.record_claim(s, 1, 2, 9, "傳聞",
+		{"population_est": 200, "last_tick": 5}, 0.4, true)
+	assert(BeliefSystem.claims(s, 1, 2).size() == 2, "跨源 append 多源並存")
+	assert(BeliefSystem.best_estimate(s, 1, 2).get("population_est") == 50, "best=最高可信(親見1.0)")
+	assert(BeliefSystem.uncertainty(s, 1, 2) > 0.5, "分歧大→高不確定 (50 vs 200)")
+	# 讀容錯：舊式 Dict
+	s.team_intel[7] = {8: {"population_est": 30, "last_tick": 0}}
+	assert(BeliefSystem.best_estimate(s, 7, 8).get("population_est") == 30, "Dict coerce 讀")
+	assert(BeliefSystem.claims(s, 7, 8).size() == 1, "Dict coerce 單 claim")
+	# cap：第 5 源溢出剪最低可信
+	for src in [10, 11, 12]:
+		BeliefSystem.record_claim(s, 1, 2, src, "傳聞", {"population_est": 60}, 0.3, false)
+	assert(BeliefSystem.claims(s, 1, 2).size() <= BeliefSystem.MAX_CLAIMS_PER_TARGET, "cap 生效")
+	assert(BeliefSystem.best_estimate(s, 1, 2).get("population_est") == 50, "cap 後親見仍在(最高可信)")
+	print("multi-claim OK")
+
+func _test_intel_writers_multiclaim() -> void:
+	print("--- G3b：寫端多源 ---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	var ms := SimMessageSystem.new()
+	# receiver R=20, givers G1=21/G2=22, target T=23 — 同 faction → honest 不失真
+	for tid in [20, 21, 22]:
+		var t := TeamData.new(); t.team_id = tid; t.faction_id = 1; _seed_pop(t, 5)
+		s.teams[tid] = t
+		var l := PersonData.new(); l.id = tid; l.team_id = tid; l.role = "leader"
+		s.persons[tid] = l; t.leader_id = tid
+	# 兩 giver 各自親見 T=23（不同估值）
+	BeliefSystem.record_claim(s, 21, 23, 21, "親見",
+		{"population_est": 40, "tile_pos": Vector2i(1,1), "last_tick": 0}, 1.0, false)
+	BeliefSystem.record_claim(s, 22, 23, 22, "親見",
+		{"population_est": 90, "tile_pos": Vector2i(2,2), "last_tick": 0}, 1.0, false)
+	assert(BeliefSystem.claims(s, 21, 23).size() == 1, "親見單源")
+	# 兩 giver 傳給 R=20 → 不覆蓋
+	ms._exchange_intel(s, 21, 20)
+	ms._exchange_intel(s, 22, 20)
+	assert(BeliefSystem.claims(s, 20, 23).size() == 2, "兩 giver → receiver 多源不覆蓋")
+	assert(not BeliefSystem.best_estimate(s, 20, 23).is_empty(), "best_estimate 回值")
+	print("intel writers OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")
@@ -1856,7 +1911,7 @@ func _run_sim_test() -> void:
 
 	_it_vis.tick_discovery(state, [70, 71])
 	print("=== IntelSystem Tier 0 驗證 ===")
-	var _it_snap0: Dictionary = state.team_intel.get(70, {}).get(71, {})
+	var _it_snap0: Dictionary = BeliefSystem.best_estimate(state, 70, 71)
 	if _it_snap0.get("tier", -1) == 0:
 		print("  [OK] tier=0")
 	else:
@@ -1871,7 +1926,7 @@ func _run_sim_test() -> void:
 	_it_a.tile_pos = Vector2i(5, 4)
 	_it_vis.tick_discovery(state, [70])
 	print("=== IntelSystem Tier 1 驗證 ===")
-	var _it_snap1: Dictionary = state.team_intel.get(70, {}).get(71, {})
+	var _it_snap1: Dictionary = BeliefSystem.best_estimate(state, 70, 71)
 	if _it_snap1.get("tier", -1) >= 1:
 		print("  [OK] tier≥1（dist=1 近接觸）")
 	else:
@@ -1883,10 +1938,10 @@ func _run_sim_test() -> void:
 		print("  [FAIL] resource_scale=%d（預期 0–2）" % _rscale)
 
 	# 快照持久：Team71 移出視野（dist=10），team_intel 應仍保留舊值
-	var _last_pop: int = int(state.team_intel.get(70, {}).get(71, {}).get("population_est", -1))
+	var _last_pop: int = int(BeliefSystem.best_estimate(state, 70, 71).get("population_est", -1))
 	_it_b.tile_pos = Vector2i(10, 0)
 	_it_vis.tick_discovery(state, [70])
-	var _it_snap_p: Dictionary = state.team_intel.get(70, {}).get(71, {})
+	var _it_snap_p: Dictionary = BeliefSystem.best_estimate(state, 70, 71)
 	print("=== IntelSystem 快照持久 驗證 ===")
 	if int(_it_snap_p.get("population_est", -1)) == _last_pop and _last_pop > 0:
 		print("  [OK] 快照保留（population_est=%d 不變）" % _last_pop)
@@ -1930,7 +1985,7 @@ func _run_sim_test() -> void:
 
 	_it_inter._write_tier2_intel(state, 72, 73)
 	print("=== IntelSystem Tier 2（高信義）===")
-	var _snap73: Dictionary = state.team_intel.get(72, {}).get(73, {})
+	var _snap73: Dictionary = BeliefSystem.best_estimate(state, 72, 73)
 	if _snap73.get("tier", -1) == 2:
 		print("  [OK] tier=2")
 	else:
@@ -1970,7 +2025,7 @@ func _run_sim_test() -> void:
 	var _deception_ok: bool = false
 	for _i in range(20):
 		_it_inter._write_tier2_intel(state, 72, 74)
-		var _s74: Dictionary = state.team_intel.get(72, {}).get(74, {})
+		var _s74: Dictionary = BeliefSystem.best_estimate(state, 72, 74)
 		if int(_s74.get("armed_est", 999)) < 4:
 			_deception_ok = true; break
 	print("=== IntelSystem Tier 2（低信義軍隊 偽裝平民）===")

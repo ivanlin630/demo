@@ -21,9 +21,14 @@
 - 訊息可能失真
 - 任何資訊命令都需傳遞 ,永不跨距離傳播,也不全知
 
-### belief 單一 accessor
-- 決策讀 `team_intel` 一律經 `BeliefSystem`（`best_estimate`/`uncertainty`/`has_belief`），**禁決策端直讀 `state.team_intel`**。
-- G3a：accessor 回現單 entry（行為保留）。G3b：內部換 multi-claim 聚合 + uncertainty（讀者零動）。寫端（觀察/傳播）G3b 遷。
+### belief 單一 accessor + multi-claim（G3b）
+- 決策/UI 讀 `team_intel` 一律經 `BeliefSystem`（best_estimate/uncertainty/claims/has_belief/known_targets），**禁直讀 state.team_intel**（含 UI/inquiry）。
+- storage = `team_intel[obs][tgt]` Array of claim（值/源/時效/可信度/失真）。寫端一律 `record_claim`。
+- **多源不覆蓋**：claim 按 source_id 保留，同源更新、跨源 append，**禁 confidence-max 跨源覆蓋**（否則矛盾無從察）。
+- **真值不隨行**：傳播失真寫 copy（`_distort_intel_entry` 回新 dict），原 claim 不被改。
+- best_estimate = 最高 credibility claim 的 value（G3b interim 可信度；G3c 換 trust 公式）。uncertainty = claim 分歧（≥2 claim 用 population_est `(max-min)/max`；單 claim `1-credibility`；無 1.0）。
+- caps：每 (r,t)≤MAX_CLAIMS_PER_TARGET、每 observer≤MAX_CLAIMS_PER_OBSERVER（TEST VALUE，剪低可信/最老）。
+- 讀容錯（transitional）：accessor 遇舊式 Dict（test 直設/漏遷）coerce 成單親見 claim。canonical 仍 Array，生產寫端強制 Array。G3c 可收緊。
 
 ## Simulation
 

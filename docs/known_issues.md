@@ -17,7 +17,9 @@
 ## G3 殘缺情報進度
 
 - **G3a（belief accessor seam）✅**：`BeliefSystem.best_estimate/has_belief/uncertainty` 包 `team_intel` 單一讀 accessor；決策單 entry 讀者（diplomatic/strategic/threat/faction_ai/player_api_mapper/inquiry）全遷走它，**行為完全保留**（accessor 回現單 entry 語義，回歸零變）。de-risk G3b：屆時換 multi-claim 只改 accessor 內部，讀者零動。inquiry key 迭代（讀「對所有 tgt」）保留，僅取 entry 改 accessor。
-  - **OUT（待）**：G3b multi-claim 儲存 + 寫端遷移（message/vision/interaction 觀察記錄/傳播）+ uncertainty 實質（claim 分歧）；G3c 可信度 + trust + 技能；G3d 決策改讀 uncertainty + 查證。
+- **G3b（multi-claim 儲存）✅**：`team_intel[obs][tgt]` 由單 dict → Array of claim（值/源/時效/可信度/失真）。寫端三處遷 `record_claim`（vision/interaction 親見 cred=1.0 同源 merge；message 傳播停 confidence-max 覆蓋 → 跨源 append 不覆蓋、同 giver 更新）。`best_estimate` 聚合最高 credibility claim、`uncertainty` 換 claim 分歧（≥2 用 population_est `(max-min)/max`）、caps 剪枝。讀端收尾 sim_bridge/inquiry（`known_targets` accessor）。讀容錯舊 Dict（test/transitional coerce 單親見 claim）。回歸：headless 全綠、coin_eq=0、InvariantAudit 0、1000 tick；行為非保留（多源/分歧為真 WHAT 變化）。
+  - **TEST VALUE**：`MAX_CLAIMS_PER_TARGET=4`、`MAX_CLAIMS_PER_OBSERVER=200`、uncertainty 分歧欄選 `population_est`、relay credibility interim `(1-HOP_DECAY)*entry.confidence`（G3c 換 類型×trust×跳數×時效）。
+  - **OUT（待）**：可信度完整公式 + trust 邊 + 技能識破 / 觀察吃技能（G3c）；決策改讀 uncertainty + 查證迴路（G3d）；team_known 事件謠言 claim 化（G3c/d）。本 plan 決策仍讀 best_estimate（多源時值改變、接口不變）。
 
 ## G1 供應鏈進度
 
