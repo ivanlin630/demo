@@ -13,10 +13,11 @@
 |---|---|---|
 | **G3a belief accessor seam** | 無 | `BeliefSystem.best_estimate/uncertainty/claims` 包 team_intel；遷 11 reader。**行為保留**（accessor 暫回現單值語義）。基礎 de-risk。 |
 | **G3b multi-claim 儲存** | G3a | accessor 後換多 sourced claim（值/源/時效/可信度/失真,不覆蓋）；message 停覆蓋改 append；best_estimate 聚合 + uncertainty(claim 分歧)；上限/剪枝/LOD。 |
-| **G3c 可信度 + 身份信任 + 技能識破** | G3b、G2a | 類型基準表×身份信任(RelationGraph `trust` 邊,動態更新)×跳數×時效；信假/生疑/裁決(技能 vs 計謀)；觀察吃技能(源頭親見也錯)。 |
+| **G3c-1 可信度 + 身份信任 + 類型基準** ✅ | G3b | 類型基準表 CRED_BASE × 身份信任(`TeamData.known_reputations`,動態更新) × 跳數 × 時效；source_type 正名；親見比對 relayed → ±口碑(被動查證)。 |
+| **G3c-2 技能識破 + 觀察吃技能** | G3c-1 | 信假/生疑/裁決(技能 vs 計謀)；觀察吃技能(源頭親見也錯)。 |
 | **G3d 決策讀 belief + 查證迴路** | G3b/c | 威脅/外交/攻擊/遷徙改讀 best+uncertainty；不確定→scout(vision Tier0)→親見壓謊；莽者跳過被誘殺。事件謠言(team_known)同套。 |
 
-G3a/b 不依賴 G1d（已 merged 無妨）。RelationGraph trust 邊(G3c)依賴 G2a(merged)。
+G3a/b 不依賴 G1d（已 merged 無妨）。**G3c-1 身份信任覆寫 = `TeamData.known_reputations`（非 RelationGraph trust 邊）**：claim source = giver **team**，known_reputations 正是 team→team 動態信任（WHAT §5 明列複用）；person-level trust 邊只在 per-信使信任才需，belief team-keyed 不需 → 免新型別 dormant。
 
 ## 2. G3a — belief accessor seam（基礎）
 
@@ -44,13 +45,24 @@ BeliefSystem.has_belief(state, observer_id, target_id) -> bool
 - **上限/LOD/剪枝**（§10 perf）：每 (r,t) cap N claim（剪最老/最低可信）；遠區/低 LOD NPC 聚合或不存（cap 每 observer 總 claim 數）。TEST VALUE。
 - **事件謠言 team_known 比照**：同套 claim 模型處理事件型謠言（§3「事件謠言是主味」）→ team_known message 也走可信度/多源（G3b 對齊或 G3c/d 接）。
 
-## 4. G3c — 可信度 + 身份信任 + 技能
+## 4. G3c-1 — 可信度 + 身份信任 + 類型基準（✅ 已實作）
 
 ### 可信度（§5 雙層×衰減）
-`credibility = 類型基準(§5表) × 身份信任(source) × 跳數衰減 × 時效衰減`。
-- 類型基準：親見>隊友>商旅>酒館>官方>書籍>流民（game-design 表，const）。
-- **身份信任**：RelationGraph 加 **`trust` 邊型別**（G2a 縫吃新型別零核心改）；`trust(observer→source)` 動態——查證對→↑、錯/騙→↓。「這個 X 準不準」非類別。
-- 跳數：既有 `strength *= 0.8`/hop；時效：tick 差衰減。
+拆寫時/讀時兩段：
+- 寫時 `source_credibility = clampf(類型基準 × (TRUST_FLOOR + trust) × pow(1-BELIEF_HOP_DECAY, hop), 0, 1.5)`，存進 claim.credibility（時不變）。
+- 讀時 `effective_credibility = credibility × time_decay(now-tick)`，best_estimate 改排它（新鮮勝陳舊）。
+- 類型基準 CRED_BASE：親見(1.0)>隊友(0.8)>商旅(0.6)>流民(0.3)（const，TEST VALUE；官方/酒館/書籍待 producer 再加）。
+- **身份信任 = `TeamData.known_reputations[source]`（覆寫 §7 trust 邊）**：claim source = giver team → 複用既有 team→team 動態信任（0..1，default 0.5），**不開 RelationGraph person 邊**。trust 0..1 → 乘數 0.5..1.5。覆寫理由見 §1。
+- 跳數：`pow(1-BELIEF_HOP_DECAY, hop)`，relay hop=1 算一次（修 G3b 雙重 HOP debt）；時效：`1 - age/CRED_AGE_FULL_DECAY` clamp `[CRED_TIME_FLOOR, 1]`。
+
+### source_type 正名
+G3b 誤存 distort mode（無 reader）→ 正名真來源類別：親見續傳「親見」；relay 依 giver 分類（同 faction→隊友、商隊 tag→商旅、else→流民）。失真另存 `distorted` flag（兩維度）。
+
+### 身份信任更新迴路（被動）
+record_claim 寫入親見後，比對同 tgt relayed claim 的 pop_est → `update_reputation(source, ±TRUST_DELTA)`（比值 r∈[0.7,1.3] 升、r<0.4/r>2.5/distorted 降）。被動偶遇既有 relayed 才跑（scout 主動查證 = G3d）。
+
+## 4b. G3c-2 — 技能識破 + 觀察吃技能（OUT，待實作）
+
 ### 技能識破（§6 b3）
 信假/生疑/裁決按 `我技能(偵查/計謀/戰術…) vs 對方計謀`分級（TEST VALUE 閾值）。**非單則 un-distort**（真值不隨行）；高計謀說謊家騙過多數。**觀察吃技能**：源頭 claim 正確性 = 觀察者相關技能函數（低技能親見也生錯 claim，高 confidence≠真值）。
 ### 身份信任更新迴路
@@ -67,21 +79,22 @@ BeliefSystem.has_belief(state, observer_id, target_id) -> bool
 |---|---|
 | multi-claim schema + 上限/剪枝/LOD | G3b：claim Array，cap N/observer，剪老低可信，遠區聚合 |
 | 失真模式擴充 | G3b/c：只補有 reader 的（designed:隱瞞/誇大/偏見） |
-| 可信度計算 | G3c：類型×trust邊×跳數×時效 |
-| 身份信任更新迴路 | G3c：RelationGraph `trust` 邊，查證對/錯回饋 |
+| 可信度計算 | G3c-1 ✅：類型 CRED_BASE × known_reputations × 跳數 × 時效（寫時/讀時兩段） |
+| 身份信任更新迴路 | G3c-1 ✅：`TeamData.known_reputations`，親見比對 relayed ±（被動） |
 | 技能 vs 計謀分級 | G3c：信假/生疑/裁決，TEST VALUE 閾值 |
 | 查證 wiring | G3d：不確定→scout(vision Tier0) |
 | 估值+不確定→風險調節 | G3d：個性×uncertainty |
 | 決策接入面改讀 belief | G3d：威脅/外交/攻擊/遷徙 |
 | 事件謠言同套 | G3b 對齊 team_known claim |
 | 觀察吃技能 | G3c：源頭 claim 正確性=觀察技能函數 |
-| trust 邊型別 | G3c：RelationGraph 加（縫吃新型別） |
+| trust 邊型別 | G3c-1 覆寫：用 `TeamData.known_reputations`（team-keyed claim 不需 person 邊）；RelationGraph trust 邊待 per-信使需求 |
 
 ## 7. invariants（隨子 spec）
 - **belief 單一 accessor = `BeliefSystem`**：禁直讀 `team_intel`（多 claim 聚合/不確定性只經 accessor）。
 - **真值不隨行**：失真寫傳播 copy，原 claim 不傳（資訊不對稱硬約束）。
 - **多源不覆蓋**：claim 按 source 保留，禁 confidence-max 跨源覆蓋（否則矛盾無從察）。
-- **trust 邊經 RelationGraph**：身份信任是 `trust` 型別邊，動態更新走查證迴路。
+- **身份信任 = `TeamData.known_reputations`（G3c-1 覆寫，非 RelationGraph trust 邊）**：team→team 動態，親見比對 relayed 走查證迴路 ±。原「trust 邊經 RelationGraph」覆寫——claim team-keyed 不需 person 邊；person-level trust 待 per-信使需求再開。
+- **可信度只經 BeliefSystem**：claim 排序用 `effective_credibility`（類型×信任×跳數×時效），禁在 BeliefSystem 外算。
 - **決策讀 belief 非 team_discovered**：威脅/外交/攻擊/遷徙讀 BeliefSystem（team_discovered 僅可見性,不作真值）。
 
 ## 8. 回歸閘（承藍圖 §11）
