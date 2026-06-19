@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 因果脊椎首輪量測結果 — G1/G2/G3 探針數字 + 4 個待裁問題（履約/識破/誘殺場景/trust 飽和）
+ruling: 由 2yr-measurement 取代並一併裁定，見 2026-06-20-blueprint-to-systems-measurement-rulings.md。
 ---
 
 # 因果脊椎首輪量測回報

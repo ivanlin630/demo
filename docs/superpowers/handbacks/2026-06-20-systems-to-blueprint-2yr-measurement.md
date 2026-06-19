@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 2 年長期世界量測定論 — emergent 魂「真沒條件非沒跑夠久」+ 首輪 3 待裁更新
+ruling: 見 2026-06-20-blueprint-to-systems-measurement-rulings.md。#1 履約+囤積壓力都YES(=root,最高優先)；#2 信假對但0裁決過頭→修技能spread不修門檻；#3 場景YES但先修#1重量再定。
 ---
 
 # 2 年長期世界量測定論（承首輪 `spine-measurement`）
