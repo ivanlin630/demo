@@ -3358,7 +3358,29 @@ func _run_sim_test() -> void:
 	_test_blood_zero_death()
 	_test_player_leader_starves()
 
+	# ── G1b 訂單系統 + 需求驅動生產 ──
+	_test_order_post_and_read()
+
 	print("=== DONE ===")
+
+func _test_order_post_and_read() -> void:
+	print("--- G1b：訂單發布 + 讀取 ---")
+	var os := OrderSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var seller := TeamData.new(); seller.team_id = 1; seller.tile_pos = Vector2i(2,2)
+	var buyer := TeamData.new(); buyer.team_id = 2; buyer.tile_pos = Vector2i(2,2)
+	s.teams[1] = seller; s.teams[2] = buyer
+	var oid: int = os.post_order(s, buyer, "buy", "weapon_melee_low", 5)
+	assert(oid >= 0 and buyer.active_orders.size() == 1, "買單建在發起隊權威")
+	assert(buyer.active_orders[0]["kind"] == "buy" and buyer.active_orders[0]["res"] == "weapon_melee_low", "權威內容對")
+	# message 進 team_known（傳播副本）
+	assert(s.team_known.get(2, []).size() >= 1, "發 message 副本")
+	# seller 收到 buyer 的買單後可讀（模擬 propagate：手動把 buyer 的 message 塞 seller known）
+	for m in s.team_known[2]:
+		if m.type == "order_buy": s.team_known[1] = s.team_known.get(1, []) + [m]
+	var recv: Array = os.received_buy_orders(s, seller)
+	assert(recv.size() >= 1 and recv[0]["res"] == "weapon_melee_low", "seller 讀到買單需求")
+	print("order post/read OK")
 
 func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
 	var state := WorldState.new()
