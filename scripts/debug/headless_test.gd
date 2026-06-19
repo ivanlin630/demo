@@ -2218,11 +2218,13 @@ func _run_sim_test() -> void:
 		print("  [OK] tier=0")
 	else:
 		print("  [FAIL] tier=%s（預期 0）" % str(_it_snap0.get("tier", "missing")))
+	# 偵查=0（觀察者）→ G3c-2 observation_noise 疊滿技能噪（base+0.5）→ pop20 估值封套放寬到 [1,40]。
+	# 原 10–30 帶未含 G3c-2 skill 噪 → unseeded 序偶破 31（flaky）。band 對齊 G3c-2 噪封套（非 RNG juggling）。
 	var _pop_est: int = int(_it_snap0.get("population_est", -1))
-	if _pop_est >= 10 and _pop_est <= 30:
-		print("  [OK] population_est=%d（範圍 10–30）" % _pop_est)
+	if _pop_est >= 1 and _pop_est <= 40:
+		print("  [OK] population_est=%d（偵查=0 噪封套 1–40）" % _pop_est)
 	else:
-		print("  [FAIL] population_est=%d（預期 10–30）" % _pop_est)
+		print("  [FAIL] population_est=%d（預期 1–40）" % _pop_est)
 
 	# Tier 1：Team70 移到 (5,4)，dist=1；Team71 total_res=110 → bucket=1，±1 → 0–2
 	_it_a.tile_pos = Vector2i(5, 4)
