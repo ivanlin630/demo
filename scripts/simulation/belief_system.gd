@@ -24,6 +24,9 @@ const DETECT_SUSPECT_MULT := 0.5      # TEST VALUE：生疑 cred 折扣
 const DETECT_ADJUDICATE_MULT := 0.2   # TEST VALUE：裁決 cred 折扣
 # G3c-2 觀察吃技能
 const OBS_SKILL_NOISE_GAIN := 0.5     # TEST VALUE：低技能額外觀察噪
+# G3d-1 決策風險 gate
+const GATE_CONF_LOW := 0.0    # TEST VALUE：莽者門檻
+const GATE_CONF_HIGH := 0.6   # TEST VALUE：慎重者門檻
 
 # 寫時可信度（時不變部分）：類型基準 × 身份信任 × 跳數衰減。
 # 身份信任 = obs team known_reputations[source]（0..1，default 0.5）；親見 source==obs → 1.0。
@@ -102,6 +105,13 @@ static func uncertainty(state: WorldState, obs_id: int, tgt_id: int) -> float:
 		lo = minf(lo, v); hi = maxf(hi, v)
 	if hi <= 0.0: return 0.0
 	return clampf((hi - lo) / hi, 0.0, 1.0)
+
+# 風險 gate：個性慎重 × 情報不確定性 → 是否夠把握 commit 攻擊性行動。
+# 莽者門檻低(照衝,假情報誘殺)；慎重者需高 confidence(矛盾情報按兵)。
+static func confident_enough(state: WorldState, observer_id: int, target_id: int, caution: float) -> bool:
+	var confidence: float = 1.0 - uncertainty(state, observer_id, target_id)
+	var threshold: float = lerpf(GATE_CONF_LOW, GATE_CONF_HIGH, clampf(caution, 0.0, 1.0))
+	return confidence >= threshold
 
 static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 		source_id: int, source_type: String, fields: Dictionary,

@@ -436,6 +436,10 @@ func _initialize() -> void:
 	# ── G3c-2 技能識破 + 觀察吃技能 ──
 	_test_detection_discount()
 	_test_observation_noise()
+	# ── G3d-1 決策讀 uncertainty + 風險 gate ──
+	_test_confidence_gate()
+	_test_faction_attack_gate()
+	_test_diplomacy_hostile_gate()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -628,6 +632,119 @@ func _test_observation_noise() -> void:
 	# 限幅 ≤1
 	assert(BeliefSystem.observation_noise(1.0, 0.0) <= 1.0, "限幅")
 	print("observation OK")
+
+func _test_confidence_gate() -> void:
+	print("--- G3d-1：confident_enough gate ---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	s.team_intel = {}
+	# 親見高 cred 單源 → uncertainty≈0 → 慎重者也過
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 50}, 1.0, false)
+	assert(BeliefSystem.confident_enough(s, 1, 2, 1.0), "親見確定→慎重者 commit")
+	# 矛盾多源 → uncertainty 高 → 慎重者按兵、莽者照衝
+	BeliefSystem.record_claim(s, 1, 2, 9, "流民", {"population_est": 200}, 0.4, true)
+	assert(BeliefSystem.uncertainty(s, 1, 2) > 0.5, "矛盾→高 uncertainty")
+	assert(not BeliefSystem.confident_enough(s, 1, 2, 1.0), "慎重者矛盾→按兵")
+	assert(BeliefSystem.confident_enough(s, 1, 2, 0.0), "莽者→照衝")
+	# 無 belief → uncertainty=1 → 慎重者按兵
+	assert(not BeliefSystem.confident_enough(s, 1, 99, 1.0), "無情報→慎重者按兵")
+	print("confidence gate OK")
+
+# 攻擊評估 scenario builder：強到必過 score/readiness，唯一變因 = 慎重 + belief uncertainty。
+func _attack_gate_scene(caution: float) -> Array:
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 20)
+	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "菁英", "healthy", 20)
+	team.resources = { "food": 2000, "weapon_melee_low": 20 }   # 高 readiness：排除 readiness_threshold 的慎重相依，孤立 gate
+	team.current_task = TeamData.TASK_IDLE
+	team.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE
+	team.ambition_rung = AmbitionLadder.RUNG_EXPAND
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.id = 100
+	leader.values = { "野心": 0.9, "好戰": 0.8, "信義": 0.1, "殘忍": 0.7, "貪婪": 0.6, "慎重": caution }
+	state.persons[100] = leader
+	team.leader_id = 100
+	var prey := TeamData.new()
+	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 4)
+	prey.faction_id = 1; prey.resources = { "coin": 200, "food": 100 }
+	prey.last_tile_pos = prey.tile_pos
+	state.teams[1] = prey
+	state.team_discovered[0] = [1]
+	return [state, team]
+
+func _test_faction_attack_gate() -> void:
+	print("--- G3d-1：攻擊 commit gate ---")
+	# A) 慎重 leader + 矛盾多源 belief(高 uncertainty) → 按兵（target 不設）
+	var sa: Array = _attack_gate_scene(1.0)
+	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
+	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
+	assert(tm_a.prosperity_target_id == -1 and tm_a.current_task == TeamData.TASK_IDLE,
+		"慎重者矛盾情報→按兵，實際 target=%d task=%s" % [tm_a.prosperity_target_id, tm_a.current_task])
+	# B) 莽者(慎重低) 同矛盾 belief → 照衝（target 設）
+	var sb: Array = _attack_gate_scene(0.0)
+	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
+	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(st_b, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
+	FactionAISystem.new()._evaluate_prosperity_attack(st_b, tm_b)
+	assert(tm_b.prosperity_target_id == 1 and tm_b.current_task == TeamData.TASK_ATTACK,
+		"莽者矛盾情報→照衝(誘殺)，實際 target=%d task=%s" % [tm_b.prosperity_target_id, tm_b.current_task])
+	# C) 慎重 leader + 親見確定 belief(uncertainty≈0) → 照常攻擊（gate 不凍結）
+	var sc: Array = _attack_gate_scene(1.0)
+	var st_c: WorldState = sc[0]; var tm_c: TeamData = sc[1]
+	BeliefSystem.record_claim(st_c, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
+	FactionAISystem.new()._evaluate_prosperity_attack(st_c, tm_c)
+	assert(tm_c.prosperity_target_id == 1 and tm_c.current_task == TeamData.TASK_ATTACK,
+		"慎重者親見確定→照常攻擊(不凍結)，實際 target=%d task=%s" % [tm_c.prosperity_target_id, tm_c.current_task])
+	print("attack gate OK")
+
+# 外交敵對(求貢)scenario builder。demander(team0,小)向 target(team1,大)求貢。
+# 慎重=2.0 → randf gate 必過(threshold 1.2)，孤立 uncertainty gate；gate caution clamp→1.0。
+func _diplomacy_hostile_scene() -> Array:
+	var state := WorldState.new(); state.world = WorldData.new()
+	var demander := TeamData.new()
+	demander.team_id = 0; demander.tile_pos = Vector2i(0, 0); _seed_pop(demander, 4)
+	demander.faction_id = -1
+	demander.resources = { "food": 5000 }   # resource_need≈0，壓低 score 落 demand_tribute 區
+	state.teams[0] = demander
+	var dleader := PersonData.new()
+	dleader.id = 100
+	dleader.values = { "貪婪": 0.7, "慎重": 2.0, "義氣": 0.1, "信義": 0.1, "野心": 0.5 }
+	state.persons[100] = dleader
+	demander.leader_id = 100
+	var target := TeamData.new()
+	target.team_id = 1; target.tile_pos = Vector2i(0, 0); _seed_pop(target, 20)
+	target.faction_id = 1
+	state.teams[1] = target
+	var tleader := PersonData.new()
+	tleader.id = 101
+	tleader.values = { "義氣": 0.9, "慎重": 0.0 }   # 高傲低謹慎 → 必拒貢
+	state.persons[101] = tleader
+	target.leader_id = 101
+	state.team_discovered[0] = [1]
+	return [state, demander]
+
+func _test_diplomacy_hostile_gate() -> void:
+	print("--- G3d-1：外交敵對 gate ---")
+	var dip := DiplomaticAiSystem.new()
+	# A) 慎重 demander + 矛盾多源 belief → 求貢按兵（拒貢冷卻不被設）
+	var sa: Array = _diplomacy_hostile_scene()
+	var st_a: WorldState = sa[0]; var dm_a: TeamData = sa[1]
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
+	dip.try_proactive_diplomacy(st_a, dm_a)
+	assert(not dm_a.diplomacy_reject_cooldown.has(1),
+		"慎重者矛盾情報→敵對按兵(無求貢)，實際 cooldown=%s" % str(dm_a.diplomacy_reject_cooldown))
+	# B) 慎重 demander + 親見確定 belief → 照常求貢(被拒設冷卻) → gate 不凍結友/敵
+	var sb: Array = _diplomacy_hostile_scene()
+	var st_b: WorldState = sb[0]; var dm_b: TeamData = sb[1]
+	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 20}, 1.0, false)
+	dip.try_proactive_diplomacy(st_b, dm_b)
+	assert(dm_b.diplomacy_reject_cooldown.has(1),
+		"慎重者親見確定→照常求貢(不凍結)，實際 cooldown=%s" % str(dm_b.diplomacy_reject_cooldown))
+	print("diplomacy gate OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")
@@ -6562,6 +6679,7 @@ func _test_evaluate_prosperity_trigger() -> void:
 	state.team_discovered[0] = [1]
 	team.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE   # G2c gate：武力擴張才主動征服
 	team.ambition_rung = AmbitionLadder.RUNG_EXPAND
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)  # G3d-1：親見確定 → gate 過
 	var fas = FactionAISystem.new()
 	fas._evaluate_prosperity_attack(state, team)
 	assert(team.current_task == TeamData.TASK_ATTACK, "應 TASK_ATTACK，實際=%s" % team.current_task)
@@ -6744,6 +6862,7 @@ func _test_survival_b_branch_far_outpost_loot() -> void:
 	prey.resources = { "food": 50 }
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 1}, 1.0, false)  # G3d-1：親見確定 → gate 過
 	var fas = FactionAISystem.new()
 	fas._trigger_survival(state, team, "urgent")
 	assert(team.current_task == TeamData.TASK_LOOT, "遠 outpost + 殘忍 應 TASK_LOOT，實際=%s" % team.current_task)
