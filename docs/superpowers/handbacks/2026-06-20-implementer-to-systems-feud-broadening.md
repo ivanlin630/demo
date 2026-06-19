@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 date: 2026-06-20
 feature: feud-broadening (A 類 feud 放寬)
 ---
