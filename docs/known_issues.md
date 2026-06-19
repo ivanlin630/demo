@@ -37,6 +37,7 @@
 - **G3-targeting（攻擊目標選擇讀 belief）✅**：G3d-2 揭的 `find_prosperity_prey`/`_find_weakest_prey` 直讀 prey 真 population/resources（god-view）缺口**已補**——選擇層 richness/weakness/pop 一律經 `BeliefSystem.best_estimate`，`has_belief` 守衛無情報不評估（禁 fallback 回真值）。weakness 吃 `armed_est`(偽裝載體,退 pop_est)、richness 經 `_belief_richness`(tier2 sum/100 → resource_scale 粗估 → 0)。自身真值照讀、位置 reachability 讀真位(物理 OUT)。**誘殺脊椎閉環**：選擇讀假 belief(本) + gate 把握(G3d-1) + scout 查證(G3d-2) + 戰鬥按真實力結算。回歸 headless 全綠、coin_eq=0、InvariantAudit 0、`[ProsperityAttack]`+`[SurvivalLoot]`+`[Scout]` 並見(不凍結)。
   - **TEST VALUE**：`_belief_richness` 粗細混排(tier2 sum/100 vs resource_scale 0-3 同尺度排序)、survival `_find_weakest_prey` food 門檻（belief 無 food_est 時不擋,以 pop 弱點為主）。
   - **OUT（延 post-measure）**：威脅(防禦)uncertainty、team_known claim 化、情報戰 C（同 G3d-2 OUT,本 plan 只攻擊選擇真值→belief 遷移）。
+- **⚠ [中] 懸空 known_reputations 死隊（world_sim 2 年揭，~2380 InvariantAudit violations，root cause 未定）**：隊死後存活隊 `known_reputations[死隊]` 重現懸空 entry。`erase_team`(world_state:147)死時清 known_reputations，但某路徑死後重注入死隊 id（疑 `update_reputation` caller 未驗 liveness；reconcile_firsthand sid / 外交其一）。**試補 `erase_team` 清 team_intel（belief store，G3b 加無登記此清理 choke = 框架債 [[project_framework_seams]]）→ violations 沒降 + 改了存活動態(8→3→5,清死隊 belief 影響決策)→ 猜錯已 revert**。行為良性（死隊聲望不再被查），但記憶體單調增 + audit 噪。只長跑+強審計(InvariantAudit.check)現形，game_sim_test 週期審較弱抓不到。**修需 systematic-debug 找重注入 caller，非猜**。
 
 ## G1 供應鏈進度
 
