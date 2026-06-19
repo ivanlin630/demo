@@ -3748,6 +3748,10 @@ func _run_sim_test() -> void:
 	_test_received_sell_and_arbitrage()
 	_test_merchant_order_targeting()
 
+	# ── G3-targeting 攻擊/掠食選擇讀 belief（置尾：勿擾前段 unseeded RNG 序）──
+	_test_prey_select_reads_belief()
+	_test_survival_prey_reads_belief()
+
 	print("=== DONE ===")
 
 func _test_received_sell_and_arbitrage() -> void:
@@ -4545,6 +4549,8 @@ func _test_survival_helpers() -> void:
 	state.teams[2] = t2
 	state.team_discovered[2] = [0]
 	state.team_discovered[1] = [0]
+	# G3-targeting：_find_weakest_prey 讀 belief → 須先有情報
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 3, "food_est": 50}, 1.0, false)
 	var fai := FactionAISystem.new()
 	var op_pos = fai._find_own_outpost(state, t0)
 	assert(op_pos == Vector2i(5, 5), "own outpost 應 (5,5)，實際=%s" % str(op_pos))
@@ -4586,6 +4592,7 @@ func _test_survival_decision_tree() -> void:
 	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(1,0); _seed_pop(prey, 3)
 	prey.resources["food"] = 50
 	s2.teams[0] = t2; s2.teams[1] = prey; s2.team_discovered[0] = [1]
+	BeliefSystem.record_claim(s2, 0, 1, 0, "親見", {"population_est": 3, "food_est": 50}, 1.0, false)  # G3-targeting：選擇讀 belief
 	fai._trigger_survival(s2, t2, "urgent")
 	assert(t2.current_task == TeamData.TASK_LOOT, "Path 2 應 掠奪，實際=%s" % t2.current_task)
 	# (3) 義氣 + 信義 → 投靠
@@ -6645,6 +6652,9 @@ func _test_ai_catch_up_filters_unreachable() -> void:
 	t2.resources["food"] = 50.0
 	state.teams[2] = t2
 	state.team_discovered[0] = [1, 2]
+	# G3-targeting：_find_weakest_prey 讀 belief → 兩 prey 皆須情報（t1 仍被 reachability 過濾）
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 2, "food_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 3, "food_est": 50}, 1.0, false)
 	var fai := FactionAISystem.new()
 	var prey = fai._find_weakest_prey(state, t0)
 	# t1 人更少但不可達 → 應被過濾，選可達的 t2
@@ -6694,9 +6704,77 @@ func _test_find_prosperity_prey() -> void:
 	ally.faction_id = 0
 	state.teams[2] = ally
 	state.team_discovered[0] = [1, 2]
+	# G3-targeting：選擇讀 belief → 須先有情報（親見），鏡射真值
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見",
+		{"population_est": 4, "armed_est": 4, "coin_est": 200, "food_est": 100, "material_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 3, "armed_est": 3}, 1.0, false)
 	var prey_id = FactionAISystem.find_prosperity_prey(state, team, leader)
 	assert(prey_id == 1, "應選 1 (rich_prey)，實際=%d" % prey_id)
 	print("Prosperity Task2 OK")
+
+func _test_prey_select_reads_belief() -> void:
+	print("--- G3-targeting：攻擊選擇讀 belief ---")
+	# team(強 pop20)。prey1 真強(pop50) 但 belief armed_est 低(偽裝=4) → 看似弱 → 被選（誘殺載體）。
+	# prey3 belief armed_est 高(50,看穿真強) → weakness 0 → 不選。
+	# candidate2 無 belief → has_belief 守衛跳過（禁 god-view）。
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 20); team.faction_id = 0
+	state.teams[0] = team
+	var leader := PersonData.new()
+	leader.values = { "貪婪": 0.0, "殘忍": 1.0, "野心": 0.0 }   # 孤立 weakness：score = weakness*殘忍
+	# prey1：真值強但 belief 偽裝弱
+	var prey1 := TeamData.new()
+	prey1.team_id = 1; prey1.tile_pos = Vector2i(2, 0); _seed_pop(prey1, 50); prey1.faction_id = 1
+	prey1.last_tile_pos = prey1.tile_pos
+	state.teams[1] = prey1
+	# candidate2：無 belief
+	var cand2 := TeamData.new()
+	cand2.team_id = 2; cand2.tile_pos = Vector2i(1, 0); _seed_pop(cand2, 3); cand2.faction_id = 1
+	cand2.last_tile_pos = cand2.tile_pos
+	state.teams[2] = cand2
+	# prey3：belief 誠實顯示真強
+	var prey3 := TeamData.new()
+	prey3.team_id = 3; prey3.tile_pos = Vector2i(3, 0); _seed_pop(prey3, 50); prey3.faction_id = 1
+	prey3.last_tile_pos = prey3.tile_pos
+	state.teams[3] = prey3
+	state.team_discovered[0] = [1, 2, 3]
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 50, "armed_est": 4}, 1.0, false)   # 偽裝低報
+	BeliefSystem.record_claim(state, 0, 3, 0, "親見", {"population_est": 50, "armed_est": 50}, 1.0, false)  # 誠實
+	var pick = FactionAISystem.find_prosperity_prey(state, team, leader)
+	assert(pick == 1, "偽裝弱 belief 應被選(誘殺)，看穿/無情報的不選，實際=%d" % pick)
+	# 全無 belief → 不評估任何目標（禁 god-view fallback）
+	var state2 := _prosperity_grid()
+	var team2 := TeamData.new()
+	team2.team_id = 0; team2.tile_pos = Vector2i(0, 0); _seed_pop(team2, 20); team2.faction_id = 0
+	state2.teams[0] = team2
+	var blind := TeamData.new()
+	blind.team_id = 5; blind.tile_pos = Vector2i(2, 0); _seed_pop(blind, 3); blind.faction_id = 1
+	blind.last_tile_pos = blind.tile_pos
+	state2.teams[5] = blind
+	state2.team_discovered[0] = [5]
+	assert(FactionAISystem.find_prosperity_prey(state2, team2, leader) == -1, "無 belief 不該評估目標")
+	print("prey select belief OK")
+
+func _test_survival_prey_reads_belief() -> void:
+	print("--- G3-targeting：survival 掠食選擇讀 belief ---")
+	# 絕境 team(pop10)。candidate1 真強(pop50) 但 belief pop_est 低(3,看似弱) → 被選。
+	# candidate2 無 belief → 跳過。
+	var state := _prosperity_grid()
+	var team := TeamData.new()
+	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10); team.faction_id = -1
+	state.teams[0] = team
+	var cand1 := TeamData.new()
+	cand1.team_id = 1; cand1.tile_pos = Vector2i(2, 0); _seed_pop(cand1, 50)
+	state.teams[1] = cand1
+	var cand2 := TeamData.new()
+	cand2.team_id = 2; cand2.tile_pos = Vector2i(1, 0); _seed_pop(cand2, 2)
+	state.teams[2] = cand2
+	state.team_discovered[0] = [1, 2]
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 3}, 1.0, false)  # 看似弱(無 food_est→不擋)
+	var prey = FactionAISystem.new()._find_weakest_prey(state, team)
+	assert(prey == 1, "belief 看似弱者被選，無情報者跳過，實際=%d" % prey)
+	print("survival prey belief OK")
 
 func _prosperity_grid() -> WorldState:
 	var state := WorldState.new()
@@ -6838,6 +6916,9 @@ func _test_prosperity_prey_personality_weight() -> void:
 	border.faction_id = 1; border.resources = {}; border.last_tile_pos = border.tile_pos
 	state.teams[2] = border
 	state.team_discovered[0] = [1, 2]
+	# G3-targeting：選擇讀 belief，鏡射真值（rich 富、border 窮）
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "armed_est": 5, "coin_est": 300}, 1.0, false)
+	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 5, "armed_est": 5}, 1.0, false)
 	var greedy := PersonData.new()
 	greedy.values = { "貪婪": 1.0, "野心": 0.0, "殘忍": 0.0 }
 	assert(FactionAISystem.find_prosperity_prey(state, team, greedy) == 1,

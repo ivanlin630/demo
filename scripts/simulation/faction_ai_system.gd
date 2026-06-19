@@ -115,13 +115,17 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		var prey: TeamData = state.teams.get(tid)
 		if prey == null: continue
 		if prey.faction_id != -1 and prey.faction_id == team.faction_id: continue
+		# G3-targeting：無情報 → 不評估（禁 god-view；不知道的打不了）
+		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
 		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid)
 		if not catch_result.reachable: continue
-		var richness: float = (float(prey.resources.get("coin", 0))
-			+ float(prey.resources.get("food", 0))
-			+ float(prey.resources.get("material", 0))) / 100.0
+		# 價值/弱點從 belief 估（偽裝低報 armed → 看似弱 → 誘殺載體）
+		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
+		var pop_est: float = float(bel.get("population_est", 0.0))
+		var armed_est: float = float(bel.get("armed_est", pop_est))
+		var richness: float = _belief_richness(bel)
 		var weakness: float = clampf(
-			1.0 - float(prey.population) / maxf(float(team.population), 1.0),
+			1.0 - armed_est / maxf(float(team.population), 1.0),
 			0.0, 1.0)
 		var border: float = 1.0 if _is_border_adjacent(team, prey) else 0.3
 		var eta_days: float = maxf(float(catch_result.eta) / 240.0, 1.0)
@@ -130,6 +134,14 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 			best_score = score
 			best_id = tid
 	return best_id
+
+# belief 財富估：tier2 有資源估 → sum/100；tier0/1 只有 resource_scale(0-3) → 粗估；皆無 → 0。TEST VALUE。
+static func _belief_richness(bel: Dictionary) -> float:
+	if bel.has("coin_est") or bel.has("food_est") or bel.has("material_est"):
+		return (float(bel.get("coin_est", 0.0)) + float(bel.get("food_est", 0.0)) + float(bel.get("material_est", 0.0))) / 100.0
+	if bel.has("resource_scale"):
+		return float(bel.get("resource_scale", 0))
+	return 0.0
 
 static func _is_border_adjacent(attacker: TeamData, prey: TeamData) -> bool:
 	var dx: int = prey.tile_pos.x - attacker.tile_pos.x
@@ -2258,16 +2270,20 @@ func _estimate_eta_to(state: WorldState, team: TeamData, target: Vector2i) -> in
 
 func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1
-	var best_pop: int = 999999
+	var best_pop: float = 999999.0
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
+		if not BeliefSystem.has_belief(state, team.team_id, tid): continue   # 無情報→不選
 		if not PathSystem.estimate_catch_up(state, team, tid).reachable: continue
-		if t.population >= int(float(team.population) * 0.7): continue
-		if float(t.resources.get("food", 0)) < 20.0: continue
-		if t.population < best_pop:
-			best_pop = t.population
+		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
+		var pop_est: float = float(bel.get("population_est", 0.0))
+		if pop_est >= float(team.population) * 0.7: continue   # belief 看似不夠弱→跳
+		# 食物門檻：tier2 有 food_est 才據；無估 → 不以食物擋（不知道→不排除，由 pop 弱點決定）
+		if bel.has("food_est") and float(bel.get("food_est", 0.0)) < 20.0: continue
+		if pop_est < best_pop:
+			best_pop = pop_est
 			best_id = tid
 	return best_id
 
