@@ -151,7 +151,7 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 | `faction_ai_system.gd` | 策略層 evaluate_all；values 整合；成員 task 指派；SoloAI；tag 過濾；discovered-only 目標；`_find_*_target`（trade/prey/strong/aid）用 `PathSystem.estimate_catch_up`（reachable 過濾 + eta score）；每 20 Tick 外交評估；每 BETRAY_CHECK_INTERVAL 背叛評估；`_evaluate_prosperity_attack`（野心驅動征服 cadence 3 日，軍隊 tag 加倍 1.5 日，個性公式 attack_score / readiness threshold / find_prosperity_prey）；`_trigger_survival` Path 1 B 分支（遠 outpost + 殘忍/好戰 → 改 TASK_LOOT）；stuck 視為 idle 允許重評（_is_stuck → STUCK_TASKS）|
 | `diplomatic_ai_system.gd` | _calc_diplomacy_score（5 因子）；try_proactive_diplomacy；handle_diplomacy_message（4 動作）；_form_alliance；_update_reputation；consider_betrayal；_execute_betrayal |
 | `strategic_ai_system.gd` | 戰略目標更新（expand/defend/trade_net）；包圍指派；突圍指派；威脅評估（team_discovered，非全知）；in-map check（off-map target → nearest_valid_tile）；ENCIRCLE_DIST=1 / BREAKOUT_DIST=2 / BREAKOUT_NEAREST_THRESHOLD=3；trade_net handler（dispatch idle 商隊找有 goods/coin 鄰商隊）|
-| `npc_ai_system.gd` | write_memory（修剪+relations+goals觸發）；generate_birth_goals（values 門檻）；check_goal_alignment（目標×任務 delta）；get_goal_task_override（待接入）；cleanup_goals（target 死後重定向） |
+| `npc_ai_system.gd` | write_memory（修剪+relations+goals觸發+G2a feud/gratitude/protect 邊）；generate_birth_goals（values 門檻）；check_goal_alignment（目標×任務 delta）；vendetta_target（G2d 讀 feud 邊+衝動 gate→脫軌仇人 team）；cleanup_goals（target 死後重定向） |
 | `salary_system.gd` | 每 30 Tick 結算；fair_salary = skills × 2.0；超付 → loyalty 上升 + kindness 記憶；欠付 → loyalty 下降；anon wage 改用 `AnonTierSystem.total_wage()` |
 | `anon_tier_system.gd` | 4 tier（平民/新兵/老兵/菁英）；TIER_STATS（combat/speed/base_wage）；PROMOTION_EXP_THRESHOLD + ×count；leader 戰術 cap 訓練上限；菁英需 weapon_melee_high；kill_random weighted；transfer_proportional；avg_speed/avg_combat_skill/total_wage computed |
 | `training_system.gd` | TASK_TRAIN team 每 tick 為 tier 累積 exp（速率 = leader 戰術 × n）|
@@ -209,7 +209,6 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 | 項目 | 說明 | 優先 |
 |---|---|---|
 | `_check_night_raid` 接入 | interaction_system 已有函數，尚未在 `_try_interact` 呼叫；遭遇戰 encounter-system 負責整合 combat_type="pursuit" | 中 |
-| `get_goal_task_override` 接入 | NpcAiSystem 已實作，尚未被任何系統呼叫；需在 faction_ai 或 sim_runner 決定呼叫點 | 中 |
 | 傳令兵 SubteamSystem 接口 | `_messenger_exit` 呼叫 SubteamSystem.create_subteam（不存在）；目前 has_method 保護為空殼 | 低 |
 | `generate_birth_goals` → world_generator | NpcAiSystem 已有邏輯，world_generator 另有初始化；兩套並行，可統一 | 低 |
 | `_evaluate_alliance_need` → 實際觸發外交 | 目前僅 print 警告；需呼叫 DiplomaticAiSystem._form_alliance | 低 |

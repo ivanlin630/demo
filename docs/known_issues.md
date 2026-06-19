@@ -9,8 +9,9 @@
 ## G2 目標錨點進度
 
 - **G2a（關係圖 typed-edge）✅** + **G2b（野心階梯狀態 + strategic 衍生）✅**：`TeamData.ambition_rung/archetype/cap` 由 `AmbitionLadder` 從 leader values + 隊安全 derive（faction_ai cadence update）；`strategic_ai._update_faction_goals` 改讀階梯衍生 expand/trade（真 reader，非 dormant）。階梯門檻/權重全 TEST VALUE（待藍圖平衡 pass，handback `systems-to-blueprint-g2b-feel`）。
-- **待 G2c**：`get_goal_task_override` caller 接入 + rung→每階 task/tag 全表。
-- **待 G2d**：個人脫軌（私驅動 / 血仇 `killed` 死亡鏈）。
+- **待 G2c**：rung→每階 task/tag 全表（rung→task 全表 + prosperity 接階梯，待藍圖 feel）。
+- **G2d（私人脫軌 / 血仇）✅**：`NpcAiSystem.vendetta_target` 讀 leader 最強 feud 邊 + 衝動 gate；`faction_ai` 以 `PRIO_VENDETTA`(55) 脫軌設 TASK_ATTACK（生存/威脅擋得住、prosperity 擋不住）。= G2a `relation_edges` 真行為 consumer（消 dormant）。框架債：pre-existing dormant `get_goal_task_override` 已刪（接 `project_framework_seams` dormant 清理）。
+  - **OUT（後續）**：弱仇「偏置」（擴張優先挑仇人邊）= refinement；kin/家族樹 feud 傳播 = G2a 留骨架後續；`killed` 型別深用。
 
 ## G1 供應鏈進度
 
