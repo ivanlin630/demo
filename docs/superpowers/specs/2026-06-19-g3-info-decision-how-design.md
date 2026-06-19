@@ -15,7 +15,7 @@
 | **G3b multi-claim 儲存** | G3a | accessor 後換多 sourced claim（值/源/時效/可信度/失真,不覆蓋）；message 停覆蓋改 append；best_estimate 聚合 + uncertainty(claim 分歧)；上限/剪枝/LOD。 |
 | **G3c-1 可信度 + 身份信任 + 類型基準** ✅ | G3b | 類型基準表 CRED_BASE × 身份信任(`TeamData.known_reputations`,動態更新) × 跳數 × 時效；source_type 正名；親見比對 relayed → ±口碑(被動查證)。 |
 | **G3c-2 技能識破 + 觀察吃技能** | G3c-1 | 信假/生疑/裁決(技能 vs 計謀)；觀察吃技能(源頭親見也錯)。 |
-| **G3d 決策讀 belief + 查證迴路** | G3b/c | 威脅/外交/攻擊/遷徙改讀 best+uncertainty；不確定→scout(vision Tier0)→親見壓謊；莽者跳過被誘殺。事件謠言(team_known)同套。 |
+| **G3d 決策讀 belief + 查證迴路**（拆 G3d-1 ✅ + G3d-2 ✅）| G3b/c | G3d-1：攻擊性 commit 讀 uncertainty 風險 gate(被動按兵)。G3d-2：uncertainty 改 cred-weighted + 不確定→scout(vision Tier0)→親見壓謊→收斂；莽者跳過被誘殺。威脅(防禦)gate / 事件謠言(team_known) 延 post-measure。 |
 
 G3a/b 不依賴 G1d（已 merged 無妨）。**G3c-1 身份信任覆寫 = `TeamData.known_reputations`（非 RelationGraph trust 邊）**：claim source = giver **team**，known_reputations 正是 team→team 動態信任（WHAT §5 明列複用）；person-level trust 邊只在 per-信使信任才需，belief team-keyed 不需 → 免新型別 dormant。
 
@@ -74,6 +74,16 @@ record_claim 寫入親見後，比對同 tgt relayed claim 的 pop_est → `upda
 - **風險調節**：個性(慎重)×不確定性 → 夠確定才動；矛盾大/沒把握 → 查證。
 - **查證迴路**：不確定 → dispatch scout（復用 vision Tier0 親見）→ 真相浮現 → 動。莽者(低慎重)跳過 → 被假情報誘殺。scout 有成本（斥候被抓/餵假 = C 情報戰,OUT）。
 
+### G3d 拆解（實作分兩 plan）
+- **G3d-1 決策讀 uncertainty + 風險 gate** ✅（merged）：攻擊性 commit（prosperity attack / survival loot / demand_tribute）commit 前經 `confident_enough`；不確定且慎重 → **被動按兵**（本 tick 不 commit，下 cadence 重評）。莽者門檻低→照衝→誘殺。只 gate 攻擊性主動選擇（威脅/vendetta/結盟不 gate）。
+- **G3d-2 scout 主動查證 + uncertainty cred-weighted** ✅（本 plan）：
+  - **uncertainty 重定義 = credibility-weighted**（`clamp((1−top_eff_cred)+cred 加權值分歧,0,1)`）：親見高 cred 主導壓謊→查證可收斂；舊 raw `(max-min)/max` 下親見壓不掉舊假 claim → scout 永不收斂（故為 scout 前提，先於 scout）。
+  - **scout dispatch**：G3d-1 的被動 return → gate-fail dispatch `TASK_SCOUT`(move_target=prey best_estimate 位，PRIO_DISPATCH，reason "scout")；斥候移入視野→親見→下 cadence uncertainty 塌→release scout→try_set ATTACK（同 PRIO_DISPATCH 須先 release 換手）。`SCOUT_TIMEOUT` 防永 scout。莽者跳過誘殺不變。
+- **延 post-measure（本 plan OUT，待 G3 核心迴路量測後評估）**：
+  - **威脅(防禦)uncertainty-gate**（§8 防禦極性與攻擊相反，enrichment）。
+  - **team_known 事件謠言 claim 化**（§3 主味，獨立 arc，碰 WHAT → 已告知藍圖呈報）。
+  - 斥候被抓/被餵假（C 情報戰）。
+
 ## 6. §10 決策點對照
 | §10 項 | HOW 裁定 |
 |---|---|
@@ -82,9 +92,9 @@ record_claim 寫入親見後，比對同 tgt relayed claim 的 pop_est → `upda
 | 可信度計算 | G3c-1 ✅：類型 CRED_BASE × known_reputations × 跳數 × 時效（寫時/讀時兩段） |
 | 身份信任更新迴路 | G3c-1 ✅：`TeamData.known_reputations`，親見比對 relayed ±（被動） |
 | 技能 vs 計謀分級 | G3c：信假/生疑/裁決，TEST VALUE 閾值 |
-| 查證 wiring | G3d：不確定→scout(vision Tier0) |
-| 估值+不確定→風險調節 | G3d：個性×uncertainty |
-| 決策接入面改讀 belief | G3d：威脅/外交/攻擊/遷徙 |
+| 查證 wiring | G3d-2 ✅：gate-fail→dispatch TASK_SCOUT(vision Tier0 親見)→收斂；SCOUT_TIMEOUT 防卡 |
+| 估值+不確定→風險調節 | G3d-1 ✅：個性×uncertainty(confident_enough)；uncertainty G3d-2 改 cred-weighted |
+| 決策接入面改讀 belief | G3d-1 ✅：攻擊/掠奪/求貢；威脅(防禦)延 post-measure |
 | 事件謠言同套 | G3b 對齊 team_known claim |
 | 觀察吃技能 | G3c：源頭 claim 正確性=觀察技能函數 |
 | trust 邊型別 | G3c-1 覆寫：用 `TeamData.known_reputations`（team-keyed claim 不需 person 邊）；RelationGraph trust 邊待 per-信使需求 |

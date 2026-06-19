@@ -27,6 +27,8 @@ const OBS_SKILL_NOISE_GAIN := 0.5     # TEST VALUE：低技能額外觀察噪
 # G3d-1 決策風險 gate
 const GATE_CONF_LOW := 0.0    # TEST VALUE：莽者門檻
 const GATE_CONF_HIGH := 0.6   # TEST VALUE：慎重者門檻
+# G3d-2 scout 主動查證
+const SCOUT_TIMEOUT := WorldState.TICKS_PER_DAY * 3   # TEST VALUE：斥候逾時未收斂 → 釋放回常規（防永 scout）
 
 # 寫時可信度（時不變部分）：類型基準 × 身份信任 × 跳數衰減。
 # 身份信任 = obs team known_reputations[source]（0..1，default 0.5）；親見 source==obs → 1.0。
@@ -94,17 +96,25 @@ static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictio
 			best = c; best_eff = eff
 	return best["value"]
 
+# credibility-weighted（G3d-2）：(1−最強源 eff_cred) + cred 加權值分歧。
+# 親見高 cred 主導 → top→1 + 假源時效衰權重低 → spread 小 → 壓低不確定（查證可收斂）。
+# 無 claim → 1.0；純未驗 relay → (1−cred) 高；真打架(雙新鮮高 cred 矛盾) → spread 高。
 static func uncertainty(state: WorldState, obs_id: int, tgt_id: int) -> float:
 	var cs: Array = claims(state, obs_id, tgt_id)
 	if cs.is_empty(): return 1.0
-	if cs.size() == 1:
-		return clampf(1.0 - float(cs[0]["credibility"]), 0.0, 1.0)
-	var lo := INF; var hi := -INF
+	var best_val: float = float(best_estimate(state, obs_id, tgt_id).get("population_est", 0.0))
+	var top := 0.0
+	var wsum := 0.0
+	var num := 0.0
 	for c in cs:
-		var v: float = float((c["value"] as Dictionary).get("population_est", 0))
-		lo = minf(lo, v); hi = maxf(hi, v)
-	if hi <= 0.0: return 0.0
-	return clampf((hi - lo) / hi, 0.0, 1.0)
+		var w: float = effective_credibility(state, c)
+		top = maxf(top, w)
+		wsum += w
+		num += w * absf(float((c["value"] as Dictionary).get("population_est", best_val)) - best_val)
+	var spread := 0.0
+	if wsum > 0.0001 and best_val > 0.0001:
+		spread = num / (wsum * best_val)
+	return clampf((1.0 - top) + spread, 0.0, 1.0)
 
 # 風險 gate：個性慎重 × 情報不確定性 → 是否夠把握 commit 攻擊性行動。
 # 莽者門檻低(照衝,假情報誘殺)；慎重者需高 confidence(矛盾情報按兵)。
