@@ -168,14 +168,13 @@
 - **狀態**：text_ui 已清（P1）；圖形 UI 未清。text-UI-only 階段不影響
 - **優先**：M — 若推圖形 UI 或全面套 UI 邊界 invariant 才需解耦（範圍大,涉 encounter tactical view）。另案
 
-### W8. coin 產出鏈完全休眠 — 經濟純零和集中（2026-06-17 量測新發現）
-- **量測**：2yr×4config，純 coin 鑄造Δ=**0**、ore-eq 挖礦Δ=**0**（地下金銀從沒被挖）。coin supply = 初始固定池（game_sim_test 4100），**零生成**。
-- **症狀**：coin 只靠 loot/tribute 零和重分配 → 贏家單調集中（單隊 1090 vs 中位 7.5，~25% 時點團 coin=0）。輸家**無法生 coin 翻身**（不挖礦、不鑄幣，只能靠贏戰搶）。
-- **根因（W4 同型休眠）**：產出鏈（挖金銀礦 → 鑄幣廠 `_tick_mint` ore→coin）**機制完整但 NPC 從不觸發**——不採金銀 ore、不蓋鑄幣廠。`_tick_mint` 無 print（故先前 grep 誤判）。
-- **連帶**：roadmap「金銀挖完→通縮→勢力發券」敘事**空轉**（金銀根本沒開挖）。
-- **不破壞**：減薪=0、無死、世界穩（coin 對生存非必要,團跑 lean 仍活）。屬**經濟深度**缺口非穩定性 bug。
-- **修向（需 spec）**：激活 NPC 採金銀 ore + 蓋鑄幣廠決策（faction_ai 加礦點評估 + mint 需求迴路）→ coin 真生成 + 窮團翻身路 + 緩解集中。屬 NPC AI 深化（memory:不追 NPC 完美化 → 僅在要經濟深度玩法層才做）。
-- **優先**：M（經濟深度想做才做;世界穩不急）。
+### W8. coin 鑄造實機罕見 — 鑄幣**機制 ✅ 已存在且守恆**，缺實機觸發（2026-06-19 G1a 更正）
+- **機制 ✅（G1a 驗證）**：鑄幣鏈**完整且守恆**——world_gen 放金銀礦 → resource harvest 進 `public_storage` → `OutpostSystem._tick_mint` ore→coin（`GOLD_TO_COIN_RATIO=20`/`SILVER_TO_COIN_RATIO=5`）→ `tick_all` 已 wired。`_test_mint_conserving`（headless）證 coin_eq delta=0。**非機制 bug**。
+- **先前誤判更正**：原「coin 鑄造Δ=0 = 產出鏈完全休眠」≈ **無觀測 log 致錯覺** + 實機建造罕見。`_tick_mint` 現已加 `[Mint] tile(x,y) ore→coin +N` log（觀測藍圖 §12「coin 被鑄 Δ>0」）。
+- **殘留（屬經濟平衡, 非機制）**：實機 NPC 罕採金銀 ore / 罕蓋鑄幣廠 → coin 生成稀 → 經濟偏零和集中（贏家集中、窮團翻身路弱）。此為**建造/經濟平衡**問題，另案。
+- **不破壞**：減薪=0、無死、世界穩（coin 對生存非必要,團跑 lean 仍活）。
+- **修向**：實機鑄幣頻率 = 平衡 / **G1c 需求驅動生產**接上後再觀察（需求迴路驅動蓋鑄幣廠 + 採礦）。屬經濟深度玩法層。
+- **優先**：M（機制已綠；頻率待 G1c 後量測）。
 
 ### W7. 覓食 vs 乞食 仲裁（forage-foundation 遺留）
 - **症狀**：`_find_forage_tile` 周圍無食物時仍回本格 → 小隊（pop≤15）恆覓食、不到乞食 Path4。枯竭區小隊空覓而非乞食富鄰
