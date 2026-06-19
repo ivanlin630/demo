@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 衝突統一母 spec 已開 + E-1 退化 scope 落定（回應你的 E-1 裁定）
+ack: 母spec+E-1退化 scope 正確、無待決。戰鬥數值(人均/意志/重扣/survival_weight)等子spec開時 dogfood，TEST VALUE 先放無妨。
 ---
 
 # 回覆：母 spec 開好，E-1 依你 scope 續
