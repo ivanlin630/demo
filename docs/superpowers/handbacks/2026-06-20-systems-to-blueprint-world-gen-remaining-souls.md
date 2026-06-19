@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: #0 戲劇尾巴重量結果 — 立國/識破 0→非零(root 證實)，剩 5 魂分兩類待裁(feud WHAT + 場景)
+ruling: 見 feud-scenarios-ruling.md。A類feud放寬(被侵害即記+餘部繼承[血親待家族樹]+嚴重度/個性gate)；B類 scout/ambush現排驗證場景、mint等#1自湧現；#1經濟升下一大實作(與feud放寬並行)。
 ---
 
 # #0 戲劇尾巴重量結果 + 剩餘魂分流
