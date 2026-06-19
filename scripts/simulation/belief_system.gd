@@ -143,6 +143,7 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 		v.merge(fields, true)
 		cs.append({ "value": v, "source_id": source_id, "source_type": source_type,
 			"tick": int(state.world.current_tick), "credibility": credibility, "distorted": distorted })
+	Probe.note("g3.claim_peak", float(cs.size()))
 	_cap_target(cs)
 	state.team_intel[obs_id][tgt_id] = cs
 	_cap_observer(state, obs_id)
@@ -169,8 +170,10 @@ static func reconcile_firsthand(state: WorldState, obs_id: int, tgt_id: int) -> 
 		var r: float = rep / truth
 		if r >= 0.7 and r <= 1.3:
 			obs_team.update_reputation(sid, TRUST_DELTA)
+			Probe.bump("g3.trust_up")
 		elif r < 0.4 or r > 2.5 or bool(c.get("distorted", false)):
 			obs_team.update_reputation(sid, -TRUST_DELTA)
+			Probe.bump("g3.trust_down")
 
 static func _cap_target(cs: Array) -> void:
 	while cs.size() > MAX_CLAIMS_PER_TARGET:

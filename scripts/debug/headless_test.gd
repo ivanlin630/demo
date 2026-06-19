@@ -3756,6 +3756,7 @@ func _run_sim_test() -> void:
 
 	# ── 因果脊椎探針（純觀測，flag gated）──
 	_test_probe_accumulator()
+	_test_probe_ambush_check()
 
 	print("=== DONE ===")
 
@@ -3778,6 +3779,25 @@ func _test_probe_accumulator() -> void:
 	assert(Probe.counts.is_empty(), "reset 清空")
 	Probe.enabled = false
 	print("probe accumulator OK")
+
+func _test_probe_ambush_check() -> void:
+	print("--- Probe 誘殺判定 ---")
+	Probe.reset(); Probe.enabled = true
+	var s := WorldState.new(); s.world = WorldData.new(); s.team_intel = {}
+	s.teams = {}
+	var atk := TeamData.new(); atk.team_id = 1; AnonTierSystem.add_anon(atk, "平民", 10); s.teams[1] = atk
+	var def := TeamData.new(); def.team_id = 2; AnonTierSystem.add_anon(def, "平民", 30); s.teams[2] = def  # 真強（pop=computed getter，須經 cohort）
+	# 攻方 belief：def 弱（armed_est 低報）
+	BeliefSystem.record_claim(s, 1, 2, 9, "流民", {"population_est": 5, "armed_est": 4}, 0.6, true)
+	Probe.ambush_check(s, 1, 2)   # 攻方信弱(4) 實強(30) → 誘殺
+	assert(Probe.counts.get("g3.ambush", 0) == 1, "信弱實強→誘殺計數")
+	# 對照：belief 接近真值 → 非誘殺
+	Probe.reset(); Probe.enabled = true
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 30, "armed_est": 28}, 1.0, false)
+	Probe.ambush_check(s, 1, 2)
+	assert(Probe.counts.get("g3.ambush", 0) == 0, "信實相符→非誘殺")
+	Probe.enabled = false
+	print("ambush check OK")
 
 func _test_received_sell_and_arbitrage() -> void:
 	print("--- G1d：賣盤讀取 + 套利挑單 ---")

@@ -155,6 +155,7 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	if team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout" \
 			and state.world.current_tick - team.task_start_tick > BeliefSystem.SCOUT_TIMEOUT:
 		TaskArbiter.release(team)
+		Probe.bump("g3.scout_timeout")
 	# stuck（task=攻擊/掠奪 但 move_target 已清）視為 idle，允許重評換目標。
 	# G3d-2：自家 scout(查證中) 亦允許重評 → 親見壓低 uncertainty 後可收斂轉攻。
 	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team) \
@@ -192,16 +193,19 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 		elif TaskArbiter.try_set(state, team, TeamData.TASK_SCOUT, scout_pos, TaskArbiter.PRIO_DISPATCH, "scout"):
 			team.prosperity_target_id = prey_id   # try_set 已設 move_target=scout_pos
 			print("[Scout] team=%d → verify prey=%d" % [team.team_id, prey_id])
+			Probe.bump("g3.scout_dispatch")
 		return
 
 	# combat_target 不預設：移動凍結 + interaction 早退會擋住交戰；
 	# 由 interaction_system 到達時 start_combat 設定。只給 task + move_target + 追擊目標。
 	# G3d-2：confident 後若仍掛 scout(同 PRIO_DISPATCH 擋不住自身) → 先 release 讓 attack 設得進。
+	var _was_scout: bool = (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout")
 	if _is_stuck(team) or (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout"):
 		TaskArbiter.release(team)
 	if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
 			state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "prosperity"):
 		team.prosperity_target_id = prey_id
+		if _was_scout: Probe.bump("g3.scout_converge")
 		print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
 			team.team_id, prey_id, score])
 

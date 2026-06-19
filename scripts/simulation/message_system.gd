@@ -241,6 +241,9 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 			var det: Dictionary = BeliefSystem.detection_discount(my_skill, their_scheme)
 			cred *= float(det["discount"])
 			entry["is_suspicious"] = bool(det["suspicious"])
+			if det["discount"] == BeliefSystem.DETECT_ADJUDICATE_MULT: Probe.bump("g3.detect_裁決")
+			elif det["discount"] == BeliefSystem.DETECT_SUSPECT_MULT: Probe.bump("g3.detect_生疑")
+			else: Probe.bump("g3.detect_信假")
 		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)
 
 # 實體接觸時交換訊息（需要明確呼叫，不自動）
