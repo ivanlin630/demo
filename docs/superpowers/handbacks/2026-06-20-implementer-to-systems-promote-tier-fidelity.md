@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: #0b 升 named 忠於來源 tier — 實作完成 + world_sim 重量（含 world_sim 非確定性發現）
 ---
 
