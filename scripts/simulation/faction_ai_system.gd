@@ -784,10 +784,10 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			TaskArbiter.try_set(state, mt, TeamData.TASK_MANUFACTURE,
 				mt.move_target, TaskArbiter.PRIO_DISPATCH, "member_manufacture")
 		elif _can_trade(state, mt):
-			var pid: int = _find_trade_target(state, mt)
-			if pid != -1:
+			var ttarget: Vector2i = _merchant_trade_target(state, mt)
+			if ttarget != Vector2i(-1, -1):
 				if TaskArbiter.try_set(state, mt, TeamData.TASK_TRADE,
-						state.teams[pid].tile_pos, TaskArbiter.PRIO_DISPATCH, "member_trade"):
+						ttarget, TaskArbiter.PRIO_DISPATCH, "member_trade"):
 					mt.trade_task_start_tick = state.world.current_tick
 
 func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
@@ -992,9 +992,9 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		TeamData.TASK_MANUFACTURE:
 			pass  # 製造在原地進行
 		TeamData.TASK_TRADE:
-			var pid: int = _find_trade_target(state, team)
-			if pid == -1: return
-			solo_target = state.teams[pid].tile_pos
+			var ttarget: Vector2i = _merchant_trade_target(state, team)
+			if ttarget == Vector2i(-1, -1): return
+			solo_target = ttarget
 		TeamData.TASK_GOVERN:
 			solo_target = own_pos
 		TeamData.TASK_CAMP:
@@ -1134,6 +1134,19 @@ func _can_trade(state: WorldState, team: TeamData) -> bool:
 	return false
 
 const MERCHANT_MAX_RANGE: int = 20
+
+# G1d：商業 archetype 隊優先讀「收到的訂單」(殘缺/可失真情報) 定貿易目標，
+# 非 team_discovered 上帝視角（接「目標決策讀殘缺情報」總則）。回目標格；無回 (-1,-1)。
+# _find_trade_target(team_discovered) 降為無訂單時的 fallback。
+func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
+	if team.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
+		var ord: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
+		if not ord.is_empty():
+			return ord["pos"]   # 履約走既有 interaction 同格 trade（到場供需若已變→撲空 emergent）
+	var pid: int = _find_trade_target(state, team)
+	if pid == -1:
+		return Vector2i(-1, -1)
+	return state.teams[pid].tile_pos
 
 func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 	var best_id: int = -1

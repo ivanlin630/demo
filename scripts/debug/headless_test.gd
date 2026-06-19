@@ -3372,7 +3372,52 @@ func _run_sim_test() -> void:
 	_test_order_cadence_and_expire()
 	_test_demand_driven_production()
 
+	# ── G1d 商隊訂單履約/套利 ──
+	_test_received_sell_and_arbitrage()
+	_test_merchant_order_targeting()
+
 	print("=== DONE ===")
+
+func _test_received_sell_and_arbitrage() -> void:
+	print("--- G1d：賣盤讀取 + 套利挑單 ---")
+	var os := OrderSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var merchant := TeamData.new(); merchant.team_id = 1; merchant.tile_pos = Vector2i(0,0)
+	var seller := TeamData.new(); seller.team_id = 2; seller.tile_pos = Vector2i(2,0)
+	s.teams[1] = merchant; s.teams[2] = seller
+	# seller 發賣盤 goods，傳到 merchant known
+	var oid: int = os.post_order(s, seller, "sell", "goods", 10)
+	for m in s.team_known.get(2, []):
+		if m.type == "order_sell": s.team_known[1] = s.team_known.get(1, []) + [m]
+	var sells: Array = os.received_sell_orders(s, merchant)
+	assert(sells.size() >= 1 and sells[0]["res"] == "goods", "讀到賣盤")
+	var best: Dictionary = os.best_arbitrage_order(s, merchant)
+	assert(not best.is_empty() and best["origin_team"] == 2, "挑出套利單→seller")
+	print("received_sell + arbitrage OK")
+
+func _test_merchant_order_targeting() -> void:
+	print("--- G1d：商隊追訂單(殘缺情報非上帝視角) ---")
+	var fai := FactionAISystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var m := TeamData.new(); m.team_id = 1; m.tile_pos = Vector2i(0,0)
+	var ml := PersonData.new(); ml.id = 1; ml.team_id = 1; ml.values = {"貪婪": 0.9}
+	s.persons[1] = ml; m.leader_id = 1
+	m.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	m.resources = {"goods": 50.0}   # 有貨可賣
+	m.current_task = TeamData.TASK_IDLE
+	var buyer := TeamData.new(); buyer.team_id = 2; buyer.tile_pos = Vector2i(5,0)
+	s.teams[1] = m; s.teams[2] = buyer
+	# buyer 發買單 goods → 傳到 merchant known
+	var os := OrderSystem.new()
+	os.post_order(s, buyer, "buy", "goods", 10)
+	for msg in s.team_known.get(2, []):
+		if msg.type == "order_buy": s.team_known[1] = s.team_known.get(1, []) + [msg]
+	# 直呼商隊 targeting 等價邏輯
+	var best: Dictionary = os.best_arbitrage_order(s, m)
+	assert(not best.is_empty() and best["pos"] == Vector2i(5,0), "套利目標=買單發起地(殘缺情報)")
+	var ok: bool = TaskArbiter.try_set(s, m, TeamData.TASK_TRADE, best["pos"], TaskArbiter.PRIO_DISPATCH, "merchant_order")
+	assert(ok and m.current_task == TeamData.TASK_TRADE and m.move_target == Vector2i(5,0), "趕赴訂單地")
+	print("merchant order targeting OK")
 
 func _test_order_post_and_read() -> void:
 	print("--- G1b：訂單發布 + 讀取 ---")
