@@ -3754,7 +3754,30 @@ func _run_sim_test() -> void:
 	_test_prey_select_reads_belief()
 	_test_survival_prey_reads_belief()
 
+	# ── 因果脊椎探針（純觀測，flag gated）──
+	_test_probe_accumulator()
+
 	print("=== DONE ===")
+
+func _test_probe_accumulator() -> void:
+	print("--- Probe 累計器 ---")
+	Probe.reset(); Probe.enabled = true
+	Probe.bump("g3.scout_dispatch")
+	Probe.bump("g3.scout_dispatch", 2)
+	Probe.bump("g3.scout_converge")
+	Probe.note("g3.claim_peak", 5.0)
+	Probe.note("g3.claim_peak", 3.0)
+	assert(Probe.counts.get("g3.scout_dispatch", 0) == 3, "bump 累加")
+	assert(Probe.counts.get("g3.scout_converge", 0) == 1, "bump 單")
+	assert(Probe.peaks.get("g3.claim_peak", 0.0) == 5.0, "note 取 max")
+	# gated：off → no-op
+	Probe.enabled = false
+	Probe.bump("g3.scout_dispatch")
+	assert(Probe.counts.get("g3.scout_dispatch", 0) == 3, "off 不累加")
+	Probe.reset()
+	assert(Probe.counts.is_empty(), "reset 清空")
+	Probe.enabled = false
+	print("probe accumulator OK")
 
 func _test_received_sell_and_arbitrage() -> void:
 	print("--- G1d：賣盤讀取 + 套利挑單 ---")
