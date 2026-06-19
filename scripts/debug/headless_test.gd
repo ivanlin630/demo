@@ -436,6 +436,8 @@ func _initialize() -> void:
 	# ── G3c-2 技能識破 + 觀察吃技能 ──
 	_test_detection_discount()
 	_test_observation_noise()
+	# ── G3d-1 決策讀 uncertainty + 風險 gate ──
+	_test_confidence_gate()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -628,6 +630,22 @@ func _test_observation_noise() -> void:
 	# 限幅 ≤1
 	assert(BeliefSystem.observation_noise(1.0, 0.0) <= 1.0, "限幅")
 	print("observation OK")
+
+func _test_confidence_gate() -> void:
+	print("--- G3d-1：confident_enough gate ---")
+	var s := WorldState.new(); s.world = WorldData.new()
+	s.team_intel = {}
+	# 親見高 cred 單源 → uncertainty≈0 → 慎重者也過
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 50}, 1.0, false)
+	assert(BeliefSystem.confident_enough(s, 1, 2, 1.0), "親見確定→慎重者 commit")
+	# 矛盾多源 → uncertainty 高 → 慎重者按兵、莽者照衝
+	BeliefSystem.record_claim(s, 1, 2, 9, "流民", {"population_est": 200}, 0.4, true)
+	assert(BeliefSystem.uncertainty(s, 1, 2) > 0.5, "矛盾→高 uncertainty")
+	assert(not BeliefSystem.confident_enough(s, 1, 2, 1.0), "慎重者矛盾→按兵")
+	assert(BeliefSystem.confident_enough(s, 1, 2, 0.0), "莽者→照衝")
+	# 無 belief → uncertainty=1 → 慎重者按兵
+	assert(not BeliefSystem.confident_enough(s, 1, 99, 1.0), "無情報→慎重者按兵")
+	print("confidence gate OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")
