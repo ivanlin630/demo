@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 藍圖規劃 session 收束 — roadmap 狀態 + measure-first 決定（記錄供續接）
 ---
 
