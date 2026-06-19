@@ -501,6 +501,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		# leader 失效 → 繼承單一 owner（含 anon fallback / player choose_heir）。唯一偵測點。
 		if team.leader_id == -1:
 			EventSystem.new().on_leader_death(state, team)
+		# G2b：野心階梯狀態更新（cadence）
+		if team.leader_id != -1 and state.world.current_tick >= team.ambition_eval_next_tick:
+			AmbitionLadder.update(state, team)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
 		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）

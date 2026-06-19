@@ -412,6 +412,8 @@ func _initialize() -> void:
 	# ── G2b 野心階梯 ──
 	_test_ambition_derive()
 	_test_team_ambition_default()
+	_test_ambition_rung_climb()
+	_test_ambition_cap_limits()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10868,3 +10870,37 @@ func _test_team_ambition_default() -> void:
 	var t := TeamData.new()
 	assert(t.ambition_rung == 0 and t.ambition_cap == 0 and t.ambition_archetype == "", "預設生存/空")
 	print("team ambition default OK")
+
+func _mk_ambition_team(amb: float, prudence: float, food: float, pop: int) -> Array:
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 1
+	var l := PersonData.new(); l.id = 1000; l.team_id = 1
+	l.values = {"野心": amb, "好戰": 0.6, "貪婪": 0.3, "義氣": 0.3, "慎重": prudence}
+	s.persons[1000] = l; t.leader_id = l.id
+	if pop > 1: AnonCohort.add(t.anon_cohorts, "平民", "healthy", pop - 1)
+	t.resources = {"food": food}
+	s.teams[1] = t
+	return [s, t]
+
+func _test_ambition_rung_climb() -> void:
+	print("--- AmbitionLadder rung 升降 ---")
+	# 高野心低慎重(躁進) + 足糧 + 夠人 → 快爬
+	var r := _mk_ambition_team(0.9, 0.1, 9999.0, 12)
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	AmbitionLadder.update(s, t)
+	assert(t.ambition_archetype != "" and t.ambition_cap == 4, "derive 生效")
+	assert(t.ambition_rung >= AmbitionLadder.RUNG_EXPAND, "躁進+足糧足人應達擴張+，實際=%d" % t.ambition_rung)
+	# 安全崩（無糧）→ 退階
+	t.resources["food"] = 0.0
+	AmbitionLadder.update(s, t)
+	assert(t.ambition_rung < AmbitionLadder.RUNG_EXPAND, "無糧應退階，實際=%d" % t.ambition_rung)
+	print("ambition rung climb OK")
+
+func _test_ambition_cap_limits() -> void:
+	print("--- AmbitionLadder cap 封頂 ---")
+	# 低野心(cap=積累) 即使足糧足人 → 卡 cap
+	var r := _mk_ambition_team(0.2, 0.5, 9999.0, 20)
+	var s: WorldState = r[0]; var t: TeamData = r[1]
+	for _i in range(5): AmbitionLadder.update(s, t)
+	assert(t.ambition_rung <= AmbitionLadder.RUNG_ACCUMULATE, "低野心卡 cap(積累)，實際=%d" % t.ambition_rung)
+	print("ambition cap OK")

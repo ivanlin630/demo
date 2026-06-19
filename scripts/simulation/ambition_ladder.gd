@@ -40,3 +40,42 @@ static func derive_cap(leader: PersonData) -> int:
 	if amb < 0.55: return RUNG_EXPAND
 	if amb < 0.8: return RUNG_STATE
 	return RUNG_HEGEMON
+
+# 安全門檻達到的最高 rung（capped by ambition_cap）。proxy 指標 TEST VALUE。
+static func target_rung(state: WorldState, team: TeamData, leader: PersonData) -> int:
+	var rung: int = RUNG_SURVIVE
+	var pop: int = team.population
+	var food: float = float(team.resources.get("food", 0))
+	var surplus_need: float = float(pop) * 2.4 * SURPLUS_DAYS   # 2.4 = 日餐量量級(對齊既有)
+	# 積累：糧盈餘
+	if food >= surplus_need:
+		rung = RUNG_ACCUMULATE
+		# 擴張：盈餘 + 夠人
+		if pop >= EXPAND_MIN_POP:
+			rung = RUNG_EXPAND
+			# 立國/稱霸：faction 規模
+			if team.faction_id != -1 and state.factions.has(team.faction_id):
+				var fteams: int = state.factions[team.faction_id].member_team_ids.size()
+				if fteams >= STATE_MIN_FACTION_TEAMS:
+					rung = RUNG_STATE
+				if fteams >= HEGEMON_MIN_FACTION_TEAMS:
+					rung = RUNG_HEGEMON
+	return mini(rung, team.ambition_cap)
+
+static func update(state: WorldState, team: TeamData) -> void:
+	var leader: PersonData = state.persons.get(team.leader_id)
+	team.ambition_archetype = derive_archetype(leader)
+	team.ambition_cap = derive_cap(leader)
+	var target: int = target_rung(state, team, leader)
+	var old: int = team.ambition_rung
+	if target < old:
+		team.ambition_rung = old - 1        # 安全崩：一步退（可連續退到生存）
+	elif target > old:
+		var amb: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
+		var prud: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
+		var reckless: bool = amb > 0.65 and prud < 0.4
+		team.ambition_rung = target if reckless else old + 1   # 躁進直跳 / 否則一步
+	team.ambition_eval_next_tick = state.world.current_tick + LADDER_EVAL_CADENCE
+	if team.ambition_rung != old:
+		print("[Ambition] Team%d rung %d→%d (%s cap=%d)" % [
+			team.team_id, old, team.ambition_rung, team.ambition_archetype, team.ambition_cap])
