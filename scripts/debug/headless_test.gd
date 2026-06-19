@@ -440,6 +440,9 @@ func _initialize() -> void:
 	_test_confidence_gate()
 	_test_faction_attack_gate()
 	_test_diplomacy_hostile_gate()
+	# ── G3d-2 cred-weighted uncertainty + scout 查證 ──
+	_test_uncertainty_credweighted()
+	_test_scout_verification()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -745,6 +748,55 @@ func _test_diplomacy_hostile_gate() -> void:
 	assert(dm_b.diplomacy_reject_cooldown.has(1),
 		"慎重者親見確定→照常求貢(不凍結)，實際 cooldown=%s" % str(dm_b.diplomacy_reject_cooldown))
 	print("diplomacy gate OK")
+
+func _test_uncertainty_credweighted() -> void:
+	print("--- G3d-2：cred-weighted uncertainty ---")
+	# 親見單源(cred 1) → top=1, spread=0 → ~0（確定）
+	var s := WorldState.new(); s.world = WorldData.new(); s.team_intel = {}
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 50}, 1.0, false)
+	assert(BeliefSystem.uncertainty(s, 1, 2) < 0.05, "親見確定→~0")
+	# 純 relay 單源低 cred → 高（未驗→不確定，慎重者 scout）
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.team_intel = {}
+	BeliefSystem.record_claim(s2, 1, 2, 9, "流民", {"population_est": 50}, 0.4, false)
+	assert(BeliefSystem.uncertainty(s2, 1, 2) > 0.4, "純 relay→不確定")
+	# 親見 + 時效衰減的舊假流民 → 親見高 cred 主導 → 壓低（scout 收斂關鍵）
+	var s4 := WorldState.new(); s4.world = WorldData.new(); s4.team_intel = {}
+	BeliefSystem.record_claim(s4, 1, 2, 9, "流民", {"population_est": 300}, 0.3, true)  # tick 0
+	s4.world.current_tick = BeliefSystem.CRED_AGE_FULL_DECAY   # 假源時效全衰 → 權重塌至 floor
+	BeliefSystem.record_claim(s4, 1, 2, 1, "親見", {"population_est": 50}, 1.0, false)  # fresh
+	assert(BeliefSystem.uncertainty(s4, 1, 2) < 0.3, "親見壓舊假→低(收斂)")
+	# 兩新鮮高 cred 矛盾 → 高（真打架→查證）
+	var s3 := WorldState.new(); s3.world = WorldData.new(); s3.team_intel = {}
+	BeliefSystem.record_claim(s3, 1, 2, 8, "隊友", {"population_est": 50}, 0.8, false)
+	BeliefSystem.record_claim(s3, 1, 2, 7, "隊友", {"population_est": 200}, 0.8, false)
+	assert(BeliefSystem.uncertainty(s3, 1, 2) > 0.4, "高 cred 矛盾→高")
+	print("cred-weighted uncertainty OK")
+
+func _test_scout_verification() -> void:
+	print("--- G3d-2：scout 查證迴路 ---")
+	# 慎重 leader：對 prey 僅持未驗 relay（單源低 cred）→ uncertainty 高 → 不攻、改派斥候
+	var sa: Array = _attack_gate_scene(1.0)
+	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
+	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民",
+		{"population_est": 4, "tile_pos": Vector2i(2, 0)}, 0.4, false)
+	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
+	assert(tm_a.current_task == TeamData.TASK_SCOUT and tm_a.prosperity_target_id == 1,
+		"慎重者未驗情報→派斥候，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
+	assert(tm_a.move_target == Vector2i(2, 0), "斥候移向 prey best_estimate 位，實際 %s" % str(tm_a.move_target))
+	# 斥候抵達親見（注入確定 claim）→ uncertainty 塌 → 下次評估轉攻擊（迴路收斂）
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
+	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
+	assert(tm_a.current_task == TeamData.TASK_ATTACK and tm_a.prosperity_target_id == 1,
+		"親見壓低 uncertainty→收斂轉攻，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
+	# 莽者(慎重低)同 belief → 直接攻擊（不 scout，假情報誘殺路徑）
+	var sb: Array = _attack_gate_scene(0.0)
+	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
+	BeliefSystem.record_claim(st_b, 0, 1, 9, "流民",
+		{"population_est": 4, "tile_pos": Vector2i(2, 0)}, 0.4, false)
+	FactionAISystem.new()._evaluate_prosperity_attack(st_b, tm_b)
+	assert(tm_b.current_task == TeamData.TASK_ATTACK and tm_b.prosperity_target_id == 1,
+		"莽者→直接攻不查證，實際 task=%s" % tm_b.current_task)
+	print("scout verification OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")
