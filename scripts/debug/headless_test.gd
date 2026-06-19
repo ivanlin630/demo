@@ -419,6 +419,9 @@ func _initialize() -> void:
 	# ── G2d 私人脫軌（血仇）──
 	_test_vendetta_target()
 	_test_vendetta_derail_task()
+	# ── A 類 feud 放寬 ──
+	_test_feud_gate()
+	_test_feud_spread()
 	# ── G1a 鑄幣觀測 ──
 	_test_mint_conserving()
 	# ── G2c rung→task ──
@@ -11516,6 +11519,7 @@ func _test_g2a_memory_writes_edges() -> void:
 	print("--- G2a：write_memory 同步填 typed 邊 ---")
 	var ai := NpcAiSystem.new()
 	var p := PersonData.new(); p.id = 1
+	p.values["義氣"] = 0.9   # A feud gate：高義氣使 looted severity 跨 FEUD_MIN 閾
 	ai.write_memory(p, "looted", 9, 100, 0.7)      # → feud
 	ai.write_memory(p, "aided_in_battle", 10, 100, 0.5)  # → gratitude
 	ai.write_memory(p, "master", 11, 100, 0.6)     # → protect
@@ -11663,6 +11667,53 @@ func _test_vendetta_derail_task() -> void:
 	TaskArbiter.try_set(s, t, TeamData.TASK_FORAGE, Vector2i(0,0), TaskArbiter.PRIO_SURVIVAL, "survival")
 	assert(t.current_task == TeamData.TASK_FORAGE, "生存壓過脫軌")
 	print("vendetta derail OK")
+
+func _test_feud_gate() -> void:
+	print("--- A feud: severity×個性 gate ---")
+	# 高義氣受害 + massacre severity → 結深仇
+	var honorbound := PersonData.new(); honorbound.id = 1
+	honorbound.values["義氣"] = 0.9; honorbound.values["好戰"] = 0.5
+	assert(NpcAiSystem.form_feud(honorbound, 99, 1.0, 10) == true, "高義氣+屠族應結仇")
+	var e: Dictionary = RelationGraph.strongest(honorbound.relation_edges, "feud")
+	assert(not e.is_empty() and e["target"] == 99, "應有對 99 的 feud 邊")
+	# 寬厚受害 + 例行劫掠 severity → 放下（不結仇）
+	var forgiving := PersonData.new(); forgiving.id = 2
+	forgiving.values["義氣"] = 0.2; forgiving.values["好戰"] = 0.2
+	assert(NpcAiSystem.form_feud(forgiving, 99, 0.35, 10) == false, "寬厚+例行劫掠應放下")
+	assert(RelationGraph.strongest(forgiving.relation_edges, "feud").is_empty(), "不應有 feud 邊")
+	# 自己不結仇自己
+	assert(NpcAiSystem.form_feud(honorbound, 1, 1.0, 10) == false, "perp==self 應 false")
+	print("feud gate OK")
+
+func _test_feud_spread() -> void:
+	print("--- A feud: 滅族 faction 餘部繼承 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# faction 0：victim team0(滅) + remnant team1（餘部）
+	var victim := TeamData.new(); victim.team_id = 0; victim.faction_id = 0; victim.leader_id = 10
+	var remnant := TeamData.new(); remnant.team_id = 1; remnant.faction_id = 0; remnant.leader_id = 11
+	var rl := PersonData.new(); rl.id = 11; rl.values["義氣"] = 0.9; rl.values["好戰"] = 0.6
+	state.teams[0] = victim; state.teams[1] = remnant; state.persons[11] = rl
+	var fac := FactionData.new(); fac.faction_id = 0; fac.member_team_ids = [0, 1]
+	state.factions[0] = fac
+	# 加害方 perp leader 99（不同 faction）
+	var perp := PersonData.new(); perp.id = 99; perp.team_id = 5
+	state.persons[99] = perp
+	NpcAiSystem.spread_feud(state, victim, 99, NpcAiSystem.FEUD_SEVERITY["massacre"], 10)
+	var e: Dictionary = RelationGraph.strongest(rl.relation_edges, "feud")
+	assert(not e.is_empty() and e["target"] == 99, "餘部 leader 應繼承對 99 的 feud")
+	print("feud spread OK (餘部 intensity=%.2f)" % e["intensity"])
+	# 整合：經 _massacre_residents 真路徑 → resident faction 餘部得仇
+	var attacker := TeamData.new(); attacker.team_id = 7; attacker.leader_id = 70
+	var ap := PersonData.new(); ap.id = 70; ap.team_id = 7; state.persons[70] = ap
+	state.teams[7] = attacker
+	# resident(team0) 仍在 faction0，remnant(team1) 為餘部；清掉前一段 rl 的邊重驗
+	rl.relation_edges.clear()
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0)
+	EncounterSystem.new()._massacre_residents(state, attacker, victim, tile)
+	assert(not state.teams.has(0), "屠村後 resident 已 erase")
+	var e2: Dictionary = RelationGraph.strongest(rl.relation_edges, "feud")
+	assert(not e2.is_empty() and e2["target"] == 70, "屠村餘部 leader 應對 attacker leader 結仇")
+	print("feud massacre wiring OK")
 
 func _test_mint_conserving() -> void:
 	print("--- G1a：鑄幣端到端守恆 ---")

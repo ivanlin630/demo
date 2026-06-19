@@ -235,6 +235,10 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		if vp:
 			_npc_ai_loot.write_memory(vp, "looted", winner.leader_id,
 				state.world.current_tick, 0.7)
+	# A feud：戰敗 faction 餘部繼承（滅團=massacre 級，倖存=looted 級）
+	var sev_key: String = "massacre" if maxi(loser.population - loser.wounded, 0) <= 1 else "looted"
+	NpcAiSystem.spread_feud(state, loser, winner.leader_id,
+		NpcAiSystem.FEUD_SEVERITY[sev_key], state.world.current_tick)
 	# 勝方 aided_in_battle 記憶：支援護衛 team 全員
 	var _npc_ai_aid := NpcAiSystem.new()
 	for escort_id in state.teams:
@@ -507,6 +511,13 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var fid: int = winner.faction_id
 	if fid == -1:
 		fid = state.create_faction(winner_id)
+	# A feud：吞併 → loser leader 結仇 + 原 faction 餘部繼承。
+	# 必在 set_team_faction 前（否則 loser 已入勝方 faction，抓錯餘部）。
+	var loser_leader: PersonData = state.persons.get(loser.leader_id)
+	NpcAiSystem.form_feud(loser_leader, winner.leader_id,
+		NpcAiSystem.FEUD_SEVERITY["subjugated"], state.world.current_tick)
+	NpcAiSystem.spread_feud(state, loser, winner.leader_id,
+		NpcAiSystem.FEUD_SEVERITY["subjugated"], state.world.current_tick)
 	state.set_team_faction(loser, fid)   # 敗方入勝方 faction（雙向同步）
 	state.snapshot_faction_member(loser_id, state.world.current_tick)
 	_msg.emit_message(state, "subjugate",
