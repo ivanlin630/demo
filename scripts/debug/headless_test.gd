@@ -405,6 +405,10 @@ func _initialize() -> void:
 	_test_e1_npc_combat_loser_pop_loss()
 	_test_e1_armed_floor()
 	_test_e1_converges()
+	# ── G2a 關係圖 typed-edge ──
+	_test_relation_graph_core()
+	_test_person_relation_edges_default()
+	_test_g2a_memory_writes_edges()
 	quit()
 
 func _test_invariant_audit() -> void:
@@ -10794,3 +10798,48 @@ func _test_e1_converges() -> void:
 	assert(AnonCohort.total(weak.anon_cohorts) < before / 2,
 		"反覆敗北 anon 應大幅趨減（before=%d after=%d）" % [before, AnonCohort.total(weak.anon_cohorts)])
 	print("E-1 converges OK")
+
+func _test_relation_graph_core() -> void:
+	print("--- RelationGraph 核心 ---")
+	var edges: Array = []
+	RelationGraph.add_edge(edges, "feud", 7, 0.5, 100)
+	RelationGraph.add_edge(edges, "gratitude", 8, 0.3, 100)
+	assert(edges.size() == 2, "兩條邊")
+	# 同 type+target → 取 max intensity，不新增
+	RelationGraph.add_edge(edges, "feud", 7, 0.9, 120)
+	assert(edges.size() == 2, "同邊不重複新增")
+	assert(RelationGraph.strongest(edges, "feud")["intensity"] == 0.9, "取 max intensity")
+	assert(RelationGraph.strongest(edges, "feud")["tick"] == 120, "tick 更新")
+	# 較低 intensity 不覆蓋
+	RelationGraph.add_edge(edges, "feud", 7, 0.2, 130)
+	assert(RelationGraph.strongest(edges, "feud")["intensity"] == 0.9, "低值不蓋")
+	# 查詢
+	assert(RelationGraph.edges_of_type(edges, "feud").size() == 1, "feud 1 條")
+	assert(RelationGraph.edges_to(edges, 8).size() == 1, "指向 8 的 1 條")
+	assert(RelationGraph.strongest(edges, "protect").is_empty(), "無 protect 回 {}")
+	print("RelationGraph core OK")
+
+func _test_person_relation_edges_default() -> void:
+	print("--- PersonData.relation_edges 預設 ---")
+	var p := PersonData.new()
+	assert(p.relation_edges is Array and p.relation_edges.is_empty(), "預設空 Array")
+	print("relation_edges default OK")
+
+func _test_g2a_memory_writes_edges() -> void:
+	print("--- G2a：write_memory 同步填 typed 邊 ---")
+	var ai := NpcAiSystem.new()
+	var p := PersonData.new(); p.id = 1
+	ai.write_memory(p, "looted", 9, 100, 0.7)      # → feud
+	ai.write_memory(p, "aided_in_battle", 10, 100, 0.5)  # → gratitude
+	ai.write_memory(p, "master", 11, 100, 0.6)     # → protect
+	assert(RelationGraph.strongest(p.relation_edges, "feud").get("target", -1) == 9, "looted→feud→9")
+	assert(RelationGraph.strongest(p.relation_edges, "gratitude").get("target", -1) == 10, "aided→gratitude→10")
+	assert(RelationGraph.strongest(p.relation_edges, "protect").get("target", -1) == 11, "master→protect→11")
+	# 既有行為不變：flat relations + goals 照常
+	assert(p.relations.has(9), "扁平 relations 仍寫")
+	assert(p.goals.size() >= 1, "goals 仍觸發")
+	# subject_id -1 不寫邊
+	var before: int = p.relation_edges.size()
+	ai.write_memory(p, "looted", -1, 100, 0.5)
+	assert(p.relation_edges.size() == before, "subject -1 不加邊")
+	print("G2a memory edges OK")
