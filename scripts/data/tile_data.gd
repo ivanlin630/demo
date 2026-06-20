@@ -26,6 +26,10 @@ var prisoners: Array = []           # person_ids
 
 # 公庫 / 經濟
 var public_storage: Dictionary = {}   # 公庫，所有 resource keys
+# WS-2b：市集訂單看板（outpost tile 上的公開訂單登錄；隊抵達此 tile 才親讀得到 = firsthand honest）。
+# entry = {order_id, kind, res, qty_remaining, origin_team, expire_tick}。
+# 看板是發起隊 active_orders 的可見性鏡像，權威仍在 active_orders；過期/滿足須同步清。
+var market_orders: Array = []
 var abandoned_coin: float = 0.0       # 滅團遺財（無 outpost）
 var mint_level: int = 0               # mint 設施等級
 var predator_infamy: int = 0          # 掠食者致死計數（輕量 hook；持久惡獸實體屬任務系統）
