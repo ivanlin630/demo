@@ -86,10 +86,11 @@ static func calc_readiness_threshold(team: TeamData, leader: PersonData) -> floa
 		threshold -= 0.1
 	return clampf(threshold, 0.3, 0.85)
 
-static func calc_readiness(team: TeamData) -> float:
+static func calc_readiness(state: WorldState, team: TeamData) -> float:
 	var pop_factor: float = clampf(float(team.population) / 10.0, 0.0, 1.0)
 	var skill: float = team.anon_combat_skill
-	var food_days: float = float(team.resources.get("food", 0)) \
+	# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→food_factor=0→誤判戰備不足。
+	var food_days: float = ResourceSystem.effective_food(state, team) \
 		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 	var food_factor: float = clampf(food_days / 14.0, 0.0, 1.0)
 	var weapon: float = float(team.resources.get("weapon_melee_low", 0))
@@ -175,7 +176,7 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	if score < ATTACK_SCORE_THRESHOLD: return
 
 	var threshold: float = calc_readiness_threshold(team, leader)
-	var readiness: float = calc_readiness(team)
+	var readiness: float = calc_readiness(state, team)
 	if readiness < threshold: return
 
 	var prey_id: int = find_prosperity_prey(state, team, leader)
@@ -646,7 +647,8 @@ func _update_goals(state: WorldState, f) -> void:
 	var honor:    float = float(leader_p.values.get("義氣",   0.5)) if leader_p else 0.5
 	var martial:  float = float(leader_p.values.get("好戰",   0.5)) if leader_p else 0.5
 
-	var food_per_cap: float = float(leader_team.resources.get("food", 0)) / maxf(leader_team.population, 1)
+	# WS-2c：有效糧(私產+自家糧倉)，否則定居 leader 隊 food 在糧倉→永誤判缺糧→恆觸急徵稅。
+	var food_per_cap: float = ResourceSystem.effective_food(state, leader_team) / maxf(leader_team.population, 1)
 	var effective_emergency: float = FOOD_EMERGENCY * (0.7 + survival * 0.6) \
 		* clampf(1.0 - honor * HONOR_EMERGENCY_DISC, 0.5, 1.0)
 	var effective_interval:  int   = maxi(
@@ -998,7 +1000,9 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	scores[TeamData.TASK_ATTACK] = (ambition * 0.4 + martial * 0.4) * _tag_weight(team, TeamData.TASK_ATTACK)
 	scores[TeamData.TASK_LOOT] = (greed * 0.5 + martial * 0.3)    * _tag_weight(team, TeamData.TASK_LOOT)
 	scores[TeamData.TASK_DIPLOMACY] = maxf(ambition * 0.4 - martial * 0.2, 0.0) * _tag_weight(team, TeamData.TASK_DIPLOMACY)
-	var food_pc: float = float(team.resources.get("food", 0)) / maxf(team.population, 1)
+	# WS-2c：有效糧(私產+自家糧倉)，否則定居商隊 food=0→food_pc=0→FLEE 分數爆高蓋過 trade
+	# (商隊永逃不貿易元兇之一)。真絕境(皆空)food_pc 仍 0→FLEE，絕境不貿易不變。
+	var food_pc: float = ResourceSystem.effective_food(state, team) / maxf(team.population, 1)
 	if food_pc < 2.0:
 		scores[TeamData.TASK_FLEE] = survival * 0.8
 	if _can_manufacture(state, team):
@@ -1324,7 +1328,8 @@ func _check_food_shortage(state: WorldState, faction) -> float:
 	var total_pop: int = 0
 	for tid in faction.member_team_ids:
 		var t: TeamData = state.require_team(tid)
-		total_food += float(t.resources.get("food", 0))
+		# WS-2c：有效糧(私產+自家糧倉)，否則定居 faction 成員 food 在糧倉→整勢力誤判缺糧→過建農。
+		total_food += ResourceSystem.effective_food(state, t)
 		total_pop += t.population
 	var per_capita: float = total_food / maxf(total_pop, 1)
 	# 缺糧（< 10 天份）→ 高 priority
@@ -1607,7 +1612,8 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 		if t.combat_target != -1: continue
 		if t.leader_id == state.player_id and state.player_id != -1: continue
 		# 糧 < 3 天不復工（餓肚子不搬磚 — 否則和 survival 搶人 ping-pong）
-		var days_left: float = float(t.resources.get("food", 0)) \
+		# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→誤判餓→永不復工建造。
+		var days_left: float = ResourceSystem.effective_food(state, t) \
 			/ maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 		if days_left < 3.0: continue
 		var is_owner: bool = t.team_id == tile.outpost_owner
@@ -1903,7 +1909,8 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		leader: PersonData) -> Dictionary:
 	var slot_full: bool = OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile)
-	var hungry: bool = float(team.resources.get("food", 0)) \
+	# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→恆 hungry→永優先建農。
+	var hungry: bool = ResourceSystem.effective_food(state, team) \
 		< float(team.population) * 2.4 * 7.0
 	# 飢餓 override：缺糧 → 農田最優先（slot 滿可拆遷搶 slot）
 	if hungry and tile.outpost_type == "civilian" \
@@ -1976,7 +1983,8 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 	match facility:
 		"farming":
 			var target: float = pop * 2.4 * 14.0
-			return clampf((target - float(team.resources.get("food", 0))) / target, 0.0, 1.0)
+			# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→缺口恆滿→永想擴農。
+			return clampf((target - ResourceSystem.effective_food(state, team)) / target, 0.0, 1.0)
 		"workshop":
 			var worst: float = 1.0
 			for res in ["goods", "tools", "arrows"]:
@@ -2067,7 +2075,9 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 		return
 	var pop_eff: int = team.population
 	if pop_eff <= 0: return
-	var food: float = float(team.resources.get("food", 0))
+	# WS-2c：讀有效糧（私產+自家糧倉），否則定居隊 food 在糧倉→誤判餓→永卡 survival。
+	# 釋放檢查(下方 days_left>=RECOVER)同變數自動受惠。真絕境(皆空)仍正確進 survival。
+	var food: float = ResourceSystem.effective_food(state, team)
 	var food_per_day: float = float(pop_eff) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	var days_left: float = food / maxf(food_per_day, 0.001)
 	# 紮營到達結算：在 TASK_CAMP 途中，腳下若為無主可農地即立 crude camp + 釋放（轉正常 collect）。
@@ -2506,7 +2516,8 @@ func _avg_named_loyalty(state: WorldState, team: TeamData) -> float:
 func _count_stress_sources(state: WorldState, team: TeamData) -> int:
 	var sources: int = 0
 	if team.tax_rate > 0.5: sources += 1
-	if float(team.resources.get("food", 0)) < float(team.population) * 7.0: sources += 1
+	# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→恆計缺糧 stress 源。
+	if ResourceSystem.effective_food(state, team) < float(team.population) * 7.0: sources += 1
 	if team.unrest_turns > 40: sources += 1
 	return sources
 
