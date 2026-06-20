@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: #1 經濟現況 — 履約 code 對但貿易迴路幾乎不跑（多因結構縫），可能要改經濟架構模型，要你 WHAT 取向
+ruling: 見 economy-direction.md。選 B(固定市集)+保留路上順路交易；主角=NPC決策(解角色卡死+讀滿/缺+去市集)，上限/市集/糧倉皆服務它；食物 route 進 capped 糧倉(現繞過)+硬上限(救活馬車)+糧倉設施;腐壞砍。
 ---
 
 # #1 經濟：機制做完了，但世界幾乎不貿易 — 可能要動架構
