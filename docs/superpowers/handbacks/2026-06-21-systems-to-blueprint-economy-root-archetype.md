@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 經濟死的真根（完整 trace 證實）= 商隊 tag 與人格 archetype 矛盾（你早先 defer 的 tag-vs-人格題）— 要你裁 (a)硬鎖/(b)偏置
+ruling: 不選 a/b。真根更深=AI 決策框架不統一(子系統各自 latch 互搏)，影響全行為類型。決定做「統一決策框架」大 arc，tag/人格/hoist/survival 全 fold 成決策輸入。見 unified-decision-framework.md。
 ---
 
 # 經濟真根 = 目標錨矛盾，不是市集模型。要你裁 tag-vs-人格
