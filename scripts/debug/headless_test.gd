@@ -449,6 +449,10 @@ func _initialize() -> void:
 	_test_scout_verification()
 	# ── world-gen 戲劇尾巴 ──
 	_test_world_gen_dramatic_tail()
+	# ── 經濟 WS-2：市集節點 + 解角色卡死 ──
+	_test_order_market_routing()
+	_test_merchant_trade_dispatch()
+	_test_trade_chain_end_to_end()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -11853,3 +11857,96 @@ func _test_world_gen_dramatic_tail() -> void:
 	assert(has_skill_tail, "有高 skill 尾巴(謀士/宿將)")
 	assert(normal_count > n / 2, "多數仍凡人(野心窄帶)")
 	print("dramatic tail OK (normal=%d/%d)" % [normal_count, n])
+
+# ──────── 經濟 WS-2：市集節點 + 解角色卡死 ────────
+
+func _test_order_market_routing() -> void:
+	print("--- WS-2 訂單 route 到市集 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 下單隊有自家 outpost 在 (3,3)，但隊本身移到 (9,9)
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(9,9)
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(3,3); tile.outpost_owner = 0; tile.outpost_level = 1
+	state.world.tiles[3*1000+3] = tile
+	state.teams[0] = t
+	var os := OrderSystem.new()
+	os.post_order(state, t, "sell", "goods", 10)
+	# message 的 origin_pos 應 = outpost (3,3) 非隊位 (9,9)
+	var msg = state.global_messages[-1]
+	assert(msg.params["origin_pos"] == Vector2i(3,3), "order pos 應 route 到 outpost(3,3)，實際=%s" % str(msg.params["origin_pos"]))
+	# 無 outpost 隊 → fallback 隊位
+	var t2 := TeamData.new(); t2.team_id = 1; t2.tile_pos = Vector2i(5,5)
+	state.teams[1] = t2
+	os.post_order(state, t2, "buy", "material", 6)
+	assert(state.global_messages[-1].params["origin_pos"] == Vector2i(5,5), "無 outpost → fallback 隊位")
+	print("order market routing OK")
+
+func _mk_order_msg(type: String, res: String, qty: int, origin: int, pos: Vector2i) -> MessageData:
+	var md := MessageData.new()
+	md.type = type
+	md.is_distorted = false
+	md.params = {"res": res, "qty": qty, "origin_team": origin, "origin_pos": pos, "order_id": 1}
+	return md
+
+func _test_merchant_trade_dispatch() -> void:
+	print("--- WS-2 商隊解卡死 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fai := FactionAISystem.new()
+	# 獨立商隊：有貨(goods 50>min)、有 arb 單可挑、非絕境(food 充足) → 應派 TASK_TRADE
+	var m := TeamData.new(); m.team_id = 0; m.tags = ["商隊"]; m.tile_pos = Vector2i(5,5)
+	m.faction_id = -1; m.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	m.resources = {"goods": 50.0, "food": 100.0, "coin": 200.0}
+	var ml := PersonData.new(); ml.id = 10; ml.values["貪婪"] = 0.7
+	state.persons[10] = ml; m.leader_id = 10
+	_seed_pop(m, 5)
+	state.teams[0] = m
+	# 注入一張 received sell order（material 便宜可搬）在 (5,6) 近處
+	state.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(5,6))]
+	fai._evaluate_solo(state, m)
+	assert(m.current_task == TeamData.TASK_TRADE, "商隊有 surplus+arb+非絕境 應派貿易，實際=%s" % m.current_task)
+	print("merchant trade dispatch OK")
+
+func _test_trade_chain_end_to_end() -> void:
+	print("--- WS-2 確定性貿易整鏈 ---")
+	var prev_enabled: bool = Probe.enabled
+	Probe.enabled = true
+	Probe.reset()
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 定居賣家：有自家 outpost 在 (3,3)、surplus goods、發 sell 單 route 到 outpost
+	var seller := TeamData.new(); seller.team_id = 0; seller.tile_pos = Vector2i(3,3)
+	var sl := PersonData.new(); sl.id = 100; state.persons[100] = sl; seller.leader_id = 100
+	_seed_pop(seller, 5)
+	seller.resources = {"goods": 200.0, "coin": 50.0}
+	var s_tile := HexTileData.new(); s_tile.tile_pos = Vector2i(3,3)
+	s_tile.outpost_owner = 0; s_tile.outpost_level = 1
+	state.world.tiles[3*1000+3] = s_tile
+	state.teams[0] = seller
+	# 商隊買家：缺 goods、有 coin、archetype TRADE
+	var buyer := TeamData.new(); buyer.team_id = 1; buyer.tags = ["商隊"]
+	buyer.tile_pos = Vector2i(3,3)   # 已抵達市集 outpost（co-locate）
+	buyer.faction_id = -1; buyer.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	var bl := PersonData.new(); bl.id = 101; state.persons[101] = bl; buyer.leader_id = 101
+	_seed_pop(buyer, 5)
+	buyer.resources = {"goods": 0.0, "coin": 500.0}
+	state.teams[1] = buyer
+	# 賣家發 sell 單（route 到 outpost 3,3）。qty 須 ≤ 本次成交量 → 整單沖銷 fulfilled bump。
+	var os := OrderSystem.new()
+	os.post_order(state, seller, "sell", "goods", 30)
+	var posted = state.global_messages[-1]
+	assert(posted.params["origin_pos"] == Vector2i(3,3), "sell 單 route 到 outpost")
+	var seller_goods_before: float = float(seller.resources["goods"])
+	var buyer_goods_before: float = float(buyer.resources["goods"])
+	# co-locate 成交 → _resolve_market（含 settle_orders 沖 sell 單）
+	var inter := InteractionSystem.new()
+	inter._resolve_market(state, seller, buyer)
+	assert(int(Probe.counts.get("g1.order_fulfilled", 0)) > 0, "sell 單應被履約沖銷, fulfilled=%d" % int(Probe.counts.get("g1.order_fulfilled", 0)))
+	assert(float(seller.resources["goods"]) < seller_goods_before, "賣家 goods 減(守恆)")
+	assert(float(buyer.resources.get("goods", 0)) + _merchant_inv_qty(buyer, "goods") > buyer_goods_before, "買家 goods 增(守恆)")
+	Probe.enabled = prev_enabled
+	print("trade chain end-to-end OK (fulfilled=%d)" % int(Probe.counts.get("g1.order_fulfilled", 0)))
+
+func _merchant_inv_qty(team: TeamData, grade: String) -> float:
+	var q: float = 0.0
+	for item in team.merchant_inventory:
+		if item.get("grade", "") == grade:
+			q += float(item.get("qty", 0))
+	return q

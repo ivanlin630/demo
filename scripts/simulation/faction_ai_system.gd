@@ -15,6 +15,7 @@ const MANUFACTURE_MATERIAL_MIN: float = 30.0
 const GOVERN_MATERIAL_TARGET: float = 75.0   # TEST VALUE — 公庫建材達標就放手擴張
 const TRADE_MIN_STOCK: float          = 10.0   # 商隊最低持貨（有貨才出門）
 const TRADE_MIN_COIN: float           = 5.0    # 買方最低 coin 門檻
+const MERCHANT_TRADE_BONUS: float     = 0.5    # WS-2 TEST VALUE：商隊-tag solo trade 分數加成(勝 CAMP，但 FLEE 仍優先)
 const HONOR_INTERVAL_MULT: float  = 0.5   # honor=1.0 → 徵收週期 ×1.5（義氣高 → 少收稅）
 const HONOR_EMERGENCY_DISC: float = 0.3   # honor=1.0 → emergency 門檻 ×0.7（義氣高 → 緊急門檻降低）
 const LOOT_SCORE_THRESHOLD: float = 0.35  # TEST VALUE — 掠奪 goal 分數門檻
@@ -781,6 +782,16 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			continue  # don't override player-commanded task
 		if mt.current_task in SURVIVAL_TASKS:
 			continue  # 生存 sticky：不蓋過 survival task
+		# WS-2 解角色卡死（hoist）：商隊-tag member 若可貿易且有「真 arb 單」→
+		# 貿易意圖優先於徵收/外交 preempt。僅商隊 tag（軍隊/生產不變）；
+		# 無 arb 單 → 落回原鏈做徵收/外交（不浪費 faction goal）。
+		if mt.tags.has(TeamData.TAG_MERCHANT) and _can_trade(state, mt) \
+				and not OrderSystem.new().best_arbitrage_order(state, mt).is_empty():
+			var tt: Vector2i = _merchant_trade_target(state, mt)
+			if tt != Vector2i(-1, -1) and TaskArbiter.try_set(state, mt, TeamData.TASK_TRADE,
+					tt, TaskArbiter.PRIO_DISPATCH, "member_trade"):
+				mt.trade_task_start_tick = state.world.current_tick
+				continue
 		var absorber_id: int = _find_absorber(state, mt, f)
 		if absorber_id != -1:
 			var mt_leader = state.persons.get(mt.leader_id)
@@ -989,6 +1000,10 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		scores[TeamData.TASK_MANUFACTURE] = (greed * 0.4 + 0.2) * _tag_weight(team, TeamData.TASK_MANUFACTURE)
 	if _can_trade(state, team):
 		scores[TeamData.TASK_TRADE] = (greed * 0.5 + 0.3) * _tag_weight(team, TeamData.TASK_TRADE)
+		# WS-2 解角色卡死：商隊-tag 隊 surplus+arb 時 trade 加成 → 勝 CAMP/尋家
+		# （FLEE 生存仍應贏：food_pc<2.0 的 FLEE 分數不動，絕境不貿易）
+		if team.tags.has(TeamData.TAG_MERCHANT):
+			scores[TeamData.TASK_TRADE] += MERCHANT_TRADE_BONUS
 	# W4 A：駐家治理傾向 — 慎重/野心高 leader 在自家 outpost 攢公庫（建材未達標才積極）
 	var own_pos: Vector2i = _find_own_outpost(state, team)
 	if own_pos != Vector2i(-1, -1):
