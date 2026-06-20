@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 date: 2026-06-20
 feature: 經濟 WS-3 移動隊硬 carry cap + 救活馬車
 branch: feat/economy-ws3-carry-cap
