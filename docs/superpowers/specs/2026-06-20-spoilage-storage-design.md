@@ -1,4 +1,9 @@
-# #1 經濟閉環 — Plan 2：腐壞 / 儲限 HOW design（DRAFT — 未 dispatch）
+# #1 經濟閉環 — Plan 2：腐壞 / 儲限 HOW design（❌ 作廢 — SUPERSEDED）
+
+> **❌ 作廢（2026-06-20）**：藍圖 ruling `2026-06-20-blueprint-to-systems-economy-direction` **砍腐壞**——硬儲存上限已結構封頂囤貨，腐壞只剩「沒滿也慢慢壞」realism 點綴 = YAGNI。本 spec 不實作。囤糧壓力改由**硬儲限 + 糧倉 cap** 解（見 `2026-06-20-economy-marketplace-caps-design`）。保留存檔僅供「為何不做腐壞」軌跡。
+>
+> ---
+> （以下原 DRAFT 內容，作廢前留存）
 
 > 來源：ruling `2026-06-20-blueprint-to-systems-feud-scenarios-ruling`（§3 #1：履約 + **腐壞/儲限**，食物囤 4-5萬無壓力）。
 > **狀態：DRAFT，未派子 session。** dispatch 前置：① plan-1 履約 merge（序）② **rate/allowance feel 建議請藍圖 confirm**（腐壞影響飢荒 feel，類比 #0 dramatic-distribution 走 feel ruling；rate 太兇會餓死世界）。

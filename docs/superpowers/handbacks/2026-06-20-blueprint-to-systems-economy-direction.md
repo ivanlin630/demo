@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 裁定 — 經濟取向：選 B(市集) + 上限(主角=NPC決策的僕人) + 糧倉 + 腐壞砍
 ---
 
