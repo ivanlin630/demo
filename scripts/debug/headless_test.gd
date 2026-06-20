@@ -3771,6 +3771,10 @@ func _run_sim_test() -> void:
 	_test_true_desperation_still_survival()
 	_test_solo_trade_not_starved()
 
+	# ── 經濟 WS-2d：旅途乾糧（解糧倉拴住商隊）──
+	_test_travel_provisions()
+	_test_provisioned_merchant_not_tethered()
+
 	# ── G1d 商隊訂單履約/套利 ──
 	_test_received_sell_and_arbitrage()
 	_test_merchant_order_targeting()
@@ -4261,6 +4265,61 @@ func _test_solo_trade_not_starved() -> void:
 	assert(t.solo_intent != TeamData.TASK_FLEE, \
 		"solo_intent 不該為 FLEE，實際=%s" % t.solo_intent)
 	print("solo trade not starved OK")
+
+# ── 經濟 WS-2d：旅途乾糧（解糧倉拴住商隊）──
+
+func _test_travel_provisions() -> void:
+	print("--- WS-2d 旅途乾糧補給 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	_seed_pop(t, 5)
+	t.resources = {"food": 0.0}    # 無 carried
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 1000.0}
+	state.world.tiles[2*1000+2] = tile
+	var ldr := PersonData.new(); ldr.id = 100; ldr.team_id = 0; state.persons[100] = ldr
+	state.teams[0] = t
+	var rs := ResourceSystem.new()
+	var granary_before: float = 1000.0
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	# 消耗後應補 carried buffer（5人×2.4×PROVISION_DAYS）
+	var buffer: float = 5.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY * ResourceSystem.PROVISION_DAYS
+	assert(float(t.resources["food"]) >= buffer * 0.9, "應補 carried 乾糧 buffer，實際=%.1f 期望~%.1f" % [t.resources["food"], buffer])
+	# 守恆：糧倉 + carried 總量 = 原 - 當日消耗（無生成）
+	var total_after: float = float(t.resources["food"]) + float(tile.public_storage["food"])
+	var consumed: float = 5.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+	assert(abs(total_after - (granary_before - consumed)) < 1.0, "守恆：糧倉+carried = 原-消耗，實際 total=%.1f" % total_after)
+	print("travel provisions OK (carried=%.1f 糧倉剩=%.1f)" % [t.resources["food"], tile.public_storage["food"]])
+
+func _test_provisioned_merchant_not_tethered() -> void:
+	print("--- WS-2d 帶乾糧商隊離家不被糧倉拴回 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 居家補乾糧
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	_seed_pop(t, 5)
+	t.resources = {"food": 0.0}
+	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2)
+	home.outpost_owner = 0; home.outpost_level = 1; home.outpost_type = "civilian"
+	home.public_storage = {"food": 1000.0}
+	state.world.tiles[2*1000+2] = home
+	var ldr := PersonData.new(); ldr.id = 100; ldr.team_id = 0; state.persons[100] = ldr
+	state.teams[0] = t
+	var rs := ResourceSystem.new()
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	var carried: float = float(t.resources["food"])
+	assert(carried > 0.0, "居家應補到 carried 乾糧，實際=%.1f" % carried)
+	# 出門：移到非自家格（無 outpost）→ effective_food = carried buffer（旅途夠活）
+	t.tile_pos = Vector2i(8,8)   # 離家，腳下無 tile/outpost
+	assert(absf(ResourceSystem.effective_food(state, t) - carried) < 0.01, \
+		"離家 effective_food 應 = carried 乾糧，實際=%.1f" % ResourceSystem.effective_food(state, t))
+	# survival 不該因離家誤觸 return_home（buffer 旅途夠活）
+	var fai := FactionAISystem.new()
+	t.current_task = TeamData.TASK_IDLE
+	fai._evaluate_survival(state, t)
+	assert(t.current_task != TeamData.TASK_RETURN_HOME, \
+		"帶乾糧商隊離家不該被糧倉拴回(return_home)，實際=%s" % t.current_task)
+	print("provisioned merchant not tethered OK (carried=%.1f)" % carried)
 
 func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
 	var state := WorldState.new()

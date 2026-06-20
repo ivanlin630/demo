@@ -2,6 +2,7 @@ class_name ResourceSystem
 
 const FOOD_PER_PERSON_PER_DAY: float = 2.4   # TEST VALUE — 2.4食物/人/天（原 0.1×24）
 const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
+const PROVISION_DAYS: float = 10.0           # TEST VALUE — 旅途乾糧天數（自家 outpost 補 carried buffer）
 
 # 採集係數：每次 collect 取 tile 池的比例（馬爾薩斯 tune R1: 0.01→0.05 —
 # 池常駐 cap，遠區村 income ≈ cap×rate×mults×2.4次/日，0.01 時 7/day << burn 28.8）
@@ -152,6 +153,21 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 			if food_after < float(team.population) * FOOD_PER_PERSON_PER_DAY \
 					and team.anon_treasury > 0.0:
 				FactionAISystem.new()._extract_treasury(state, team, 0.3, "飢餓緊急")
+
+		# WS-2d 旅途乾糧：隊在自家 outpost → 從糧倉補 carried food 到 buffer（出門帶著走，
+		# 不被糧倉拴住）。糧倉→team 同隊轉移(守恆)。buffer 小(N天份)不破囤糧 cap。
+		# 真絕境(糧倉空)→avail=0→無糧可補→carried 不變→仍正確進 survival。
+		var gtile: HexTileData = own_granary_tile(state, team)
+		if gtile != null:
+			var buffer: float = float(team.population + team.minor_population) \
+				* FOOD_PER_PERSON_PER_DAY * PROVISION_DAYS
+			var carried: float = float(team.resources.get("food", 0))
+			var need: float = buffer - carried
+			if need > 0.0:
+				var avail: float = float(gtile.public_storage.get("food", 0))
+				var move: float = minf(need, avail)
+				team.resources["food"] = carried + move
+				gtile.public_storage["food"] = avail - move
 
 # grace 期後每日餓死：先死 minor，minor 耗盡才死 anon。
 # cadence 多次/日 → 用 famine_days 跨整數日偵測，只在跨日當次結算（避免重複殺）。
