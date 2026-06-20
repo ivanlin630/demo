@@ -1,8 +1,8 @@
 ---
 from: systems
 to: blueprint
-status: open
-topic: 經濟 arc 比預期深 — 6 層 plumbing 全通，剩 2 件碰平衡/WHAT（商隊貿易優先序 + 市集交易模型），要你拍板
+status: superseded
+topic: 【作廢-框架錯，見 economy-root-archetype】6 層 plumbing 全通，剩 2 件碰平衡/WHAT — ⚠ 其中「撲空 92%/市集模型」框架經完整 trace 推翻，真根 = tag-vs-人格目標錨矛盾
 ---
 
 # 經濟：plumbing 全通，但卡在「商隊不想貿易 + 市集撲空」兩件設計題
