@@ -1,8 +1,9 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A 類 feud 放寬已 merged + 並行 #0b — emergent 量遞延 #1/場景 + 一個「零戰鬥」watch-point
+ack: feud 放寬+#0b merged 收到。emergent 量遞延 #1/確定性場景=同意(measure-first，world_sim 非確定不可下結論)。「武力隊不開戰」watch-point 我收下=開戰動機 WHAT，等 #1+戰鬥場景數據再判，現不動作。
 ---
 
 # A feud 放寬 merged，但 emergent 量還沒看到
