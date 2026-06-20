@@ -103,14 +103,27 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 			team.resources["food"] = maxf(0.0, float(team.resources.get("food", 0)) - horse_food)
 		var total_pop: int = team.population + team.minor_population
 		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY * day_fraction
-		var food_available: float = float(team.resources.get("food", 0))
+		# WS-1：定居隊 food 在自家糧倉（public_storage）。消耗從「team.resources + 自家糧倉」
+		# 合併池提領（先 team 後糧倉）→ food 在哪都不誤餓。消耗是 sink，從哪扣都守恆。
+		var granary: HexTileData = _own_granary_tile(state, team)
+		var team_food: float = float(team.resources.get("food", 0))
+		var granary_food: float = float(granary.public_storage.get("food", 0)) if granary != null else 0.0
+		var food_available: float = team_food + granary_food
 
 		if food_available >= food_needed:
-			team.resources["food"] = food_available - food_needed
+			# 先扣 team.resources，不足再扣糧倉
+			var from_team: float = minf(team_food, food_needed)
+			team.resources["food"] = team_food - from_team
+			var rem: float = food_needed - from_team
+			if rem > 0.0 and granary != null:
+				granary.public_storage["food"] = granary_food - rem
 			_update_person_needs(state, tid, "food", 1.0, day_fraction)
 			team.famine_days = 0.0   # 吃飽 → 斷糧計時歸零
 		else:
+			# 池耗盡：team 與糧倉 food 都歸零
 			team.resources["food"] = 0.0
+			if granary != null:
+				granary.public_storage["food"] = 0.0
 			var satisfaction: float = food_available / food_needed if food_needed > 0.0 else 0.0
 			_update_person_needs(state, tid, "food", satisfaction, day_fraction)
 			# 團級斷糧累積 + grace 後 minor/anon 耗損
@@ -200,16 +213,20 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 				gain *= (1.0 + eng_skill * 0.3)
 			"ore_gold", "ore_silver":
 				gain *= (1.0 + eng_skill * 0.5)
-		if res in PUBLIC_RESOURCES:
-			# 礦進自家 outpost 公庫
+		if res in PUBLIC_RESOURCES or res == "food":
+			# 礦/主糧進腳下 outpost 公庫（糧倉），over-cap drop = sink。
+			# food 進糧倉 = 等義「自己存自己村庫」（採集者即 owner→自存村庫），
+			# 故 food 不入 gained → 不再走一般稅 split（避免重複入庫）。
 			var dst_tile: HexTileData = state.world.tiles.get(_pos_to_tile_id(team.tile_pos))
 			if dst_tile != null and dst_tile.outpost_level > 0:
 				var cap: float = OutpostSystem.new()._get_storage_cap(dst_tile, res)
 				var stored: float = float(dst_tile.public_storage.get(res, 0))
 				dst_tile.public_storage[res] = minf(stored + gain, cap)
 			else:
-				# 無 outpost fallback 進 team
+				# 無 outpost fallback 進 team（小隊；food 仍記 gained 供一般稅）
 				team.resources[res] = float(team.resources.get(res, 0)) + gain
+				if res == "food":
+					gained[res] = float(gained.get(res, 0)) + gain
 		else:
 			team.resources[res] = float(team.resources.get(res, 0)) + gain
 			gained[res] = float(gained.get(res, 0)) + gain   # 私產所得 → 一般稅基數
@@ -300,6 +317,14 @@ func _update_person_needs(state: WorldState, team_id: int, need: String, value: 
 					* (FAMINE_SATISFACTION_THRESHOLD - value) / FAMINE_SATISFACTION_THRESHOLD, 1.0)
 			else:
 				person.hunger = maxf(person.hunger - HUNGER_RECOVER_PER_DAY * day_fraction, 0.0)
+
+# WS-1：team 站在自家 outpost tile → 回該 tile（糧倉）；否則 null。
+# 消耗合併池用：定居隊 food 在糧倉，需從此提領。
+func _own_granary_tile(state: WorldState, team: TeamData) -> HexTileData:
+	var tile: HexTileData = state.world.tiles.get(_pos_to_tile_id(team.tile_pos))
+	if tile != null and tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
+		return tile
+	return null
 
 func _pos_to_tile_id(pos: Vector2i) -> int:
 	return pos.x * 1000 + pos.y

@@ -140,6 +140,13 @@ const OUTPOST_STORAGE_CAP: Dictionary = {
 # mount 公庫專屬容量（index = level-1）
 const MOUNT_STORAGE_CAP: Array = [10.0, 30.0, 80.0]
 
+# 食物（主糧 staple）公庫專屬容量（index = level-1）。TEST VALUE：比通用大，
+# 避免 L3 通用 1500 ≈ 定居隊數天就餓死。糧倉 = 據點戰略儲量（WS-4 設施再拉高）。
+const FOOD_STORAGE_CAP: Dictionary = {
+	"civilian": [2000.0, 6000.0, 18000.0],
+	"military": [1500.0, 4500.0, 12000.0],
+}
+
 # 公開 wrapper：UI/查詢層讀公庫容量（不直呼私有 _get_storage_cap）
 func storage_cap(tile: HexTileData, res: String) -> float:
 	return _get_storage_cap(tile, res)
@@ -147,6 +154,9 @@ func storage_cap(tile: HexTileData, res: String) -> float:
 func _get_storage_cap(tile: HexTileData, res: String) -> float:
 	if res == "mounts" or res == "horses":
 		return MOUNT_STORAGE_CAP[clampi(tile.outpost_level - 1, 0, 2)]
+	if res == "food":
+		var farr: Array = FOOD_STORAGE_CAP.get(tile.outpost_type, [2000.0, 6000.0, 18000.0])
+		return float(farr[clampi(tile.outpost_level - 1, 0, 2)])
 	var arr: Array = OUTPOST_STORAGE_CAP.get(tile.outpost_type, [100.0, 300.0, 800.0])
 	return float(arr[clampi(tile.outpost_level - 1, 0, 2)])
 
