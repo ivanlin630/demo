@@ -453,6 +453,10 @@ func _initialize() -> void:
 	_test_order_market_routing()
 	_test_merchant_trade_dispatch()
 	_test_trade_chain_end_to_end()
+	# ── 經濟 WS-3：移動隊硬 carry cap + 救活馬車 ──
+	_test_carry_cap_trade()
+	_test_carry_cap_forage()
+	_test_trade_throughput_wagon()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -12028,3 +12032,95 @@ func _merchant_inv_qty(team: TeamData, grade: String) -> float:
 		if item.get("grade", "") == grade:
 			q += float(item.get("qty", 0))
 	return q
+
+func _test_carry_cap_trade() -> void:
+	print("--- WS-3 trade 受 carry 限 + 馬車 ---")
+	var ms := MovementSystem.new()
+	# 小隊(pop 2)無馬車：carry = 2×BASE_CARRY=20；裝滿 goods(weight 1.0) → 空間 ~20
+	var t := TeamData.new(); t.team_id = 0
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 2)
+	t.resources = {"goods": 0.0}
+	var space0: float = ms.remaining_carry_space(t)
+	assert(space0 >= 19.0 and space0 <= 21.0, "pop2 carry 空間應~20，實際=%.1f" % space0)
+	# 加馬車 → 空間大增（WAGON_BONUS=40）
+	t.resources["wagons"] = 1.0
+	var space1: float = ms.remaining_carry_space(t)
+	assert(space1 > space0 + 30.0, "馬車應增載量，前=%.1f 後=%.1f" % [space0, space1])
+	# 裝貨後空間縮
+	t.resources["goods"] = 15.0
+	var space2: float = ms.remaining_carry_space(t)
+	assert(space2 < space1 - 14.0, "裝 15 goods 後空間應縮，實際=%.1f" % space2)
+	# carry_space_for_res：weight 0 的工具 res → 不誤限（回大數）
+	assert(ms.carry_space_for_res(t, "wagons") > 1000000, "weight0 res 不該被限")
+	print("carry cap trade OK (空間 pop2=%.1f +馬車=%.1f 裝貨後=%.1f)" % [space0, space1, space2])
+
+func _test_carry_cap_forage() -> void:
+	print("--- WS-3 forage intake 受 carry 限 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2)
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 2)   # carry≈20，無 outpost
+	t.resources = {"material": 0.0}
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.resources = {"material": 99999.0}; tile.productivity = 1.0   # 無 outpost_level
+	state.world.tiles[2*1000+2] = tile
+	state.teams[0] = t
+	var rs := ResourceSystem.new()
+	for i in 50:
+		rs._collect_from_tile(state, t, tile, 1.0, 1.0, 0.0, 0.0)
+	var ms := MovementSystem.new()
+	# material(weight 1.0) 不該超 carry cap 太多（硬上限，非無限囤）
+	assert(ms.calc_total_weight(t) <= ms.get_carry_capacity(t) + 1.0, "移動隊總重應≤carry cap，實際 weight=%.1f cap=%.1f" % [ms.calc_total_weight(t), ms.get_carry_capacity(t)])
+	# tile 的 material 留著（intake 留來源，守恆）
+	assert(float(tile.resources["material"]) > 90000.0, "超額應留 tile")
+	print("carry cap forage OK (weight=%.1f/cap=%.1f)" % [ms.calc_total_weight(t), ms.get_carry_capacity(t)])
+
+# 確定性 throughput：賣家滿貨 + 買方大量 coin → 進貨量受 carry 空間限（非 coin）；加馬車 → 進貨顯著增。
+func _test_trade_throughput_wagon() -> void:
+	print("--- WS-3 trade throughput (carry-bound + 馬車) ---")
+	var ms := MovementSystem.new()
+	var bp: Dictionary = TradeValuation.BASE_PRICE
+	var coin_eq := func(t: TeamData) -> float:
+		var s: float = 0.0
+		for r in t.resources:
+			s += float(t.resources[r]) * float(bp.get(r, 0.0))
+		return s
+	# ── 場景 1：無馬車買家 ──
+	var st := WorldState.new(); st.world = WorldData.new()
+	var sl := PersonData.new(); sl.id = 100; st.persons[100] = sl
+	var seller := TeamData.new(); seller.team_id = 0; seller.leader_id = 100; seller.tile_pos = Vector2i(5,5)
+	_seed_pop(seller, 5)
+	seller.resources = {"material": 500.0, "coin": 0.0}   # 海量 surplus
+	st.teams[0] = seller
+	var bl := PersonData.new(); bl.id = 101; st.persons[101] = bl
+	var buyer := TeamData.new(); buyer.team_id = 1; buyer.leader_id = 101; buyer.tile_pos = Vector2i(5,5)
+	_seed_pop(buyer, 5)   # carry = 5×10 = 50；material weight 1.0 → 空間 50
+	buyer.resources = {"material": 0.0, "coin": 100000.0}   # coin 充足→非 coin 上限
+	st.teams[1] = buyer
+	var before1: float = coin_eq.call(seller) + coin_eq.call(buyer)
+	var inter := InteractionSystem.new()
+	inter._attempt_trade_direction(st, seller, buyer)
+	var got_no_wagon: float = float(buyer.resources.get("material", 0))
+	var cap_no_wagon: float = ms.get_carry_capacity(buyer)
+	# 進貨量 ≈ carry 空間（非 coin 上限）；買方滿載即止買
+	assert(got_no_wagon <= cap_no_wagon + 1.0, "進貨應受 carry 限，got=%.1f cap=%.1f" % [got_no_wagon, cap_no_wagon])
+	assert(got_no_wagon >= cap_no_wagon - 2.0, "應幾乎裝滿(coin 充足)，got=%.1f cap=%.1f" % [got_no_wagon, cap_no_wagon])
+	# 守恆：seller 出貨=buyer 進貨、coin 對稱
+	var after1: float = coin_eq.call(seller) + coin_eq.call(buyer)
+	assert(absf(after1 - before1) < 0.01, "coin_eq 守恆 before=%.2f after=%.2f" % [before1, after1])
+	assert(absf(float(seller.resources.get("material",0)) - (500.0 - got_no_wagon)) < 0.01, "seller 出貨=buyer 進貨")
+	# ── 場景 2：加馬車 → throughput 顯著增 ──
+	var st2 := WorldState.new(); st2.world = WorldData.new()
+	var sl2 := PersonData.new(); sl2.id = 200; st2.persons[200] = sl2
+	var seller2 := TeamData.new(); seller2.team_id = 0; seller2.leader_id = 200; seller2.tile_pos = Vector2i(5,5)
+	_seed_pop(seller2, 5)
+	seller2.resources = {"material": 500.0, "coin": 0.0}
+	st2.teams[0] = seller2
+	var bl2 := PersonData.new(); bl2.id = 201; st2.persons[201] = bl2
+	var buyer2 := TeamData.new(); buyer2.team_id = 1; buyer2.leader_id = 201; buyer2.tile_pos = Vector2i(5,5)
+	_seed_pop(buyer2, 5)
+	buyer2.resources = {"material": 0.0, "coin": 100000.0, "wagons": 2.0}   # 2 馬車 → +80 載量
+	st2.teams[1] = buyer2
+	inter._attempt_trade_direction(st2, seller2, buyer2)
+	var got_wagon: float = float(buyer2.resources.get("material", 0))
+	assert(got_wagon > got_no_wagon + 30.0, "馬車應顯著增 throughput，無車=%.1f 有車=%.1f" % [got_no_wagon, got_wagon])
+	print("trade throughput OK (無車進貨=%.1f 有車進貨=%.1f)" % [got_no_wagon, got_wagon])

@@ -588,6 +588,7 @@ func _snapshot_order_res(team: TeamData) -> Dictionary:
 func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamData) -> void:
 	var buyer_coin: float = float(buyer.resources.get("coin", 0))
 	if buyer_coin <= 0.0: return
+	var ms := MovementSystem.new()   # WS-3：buyer 進貨受 carry 空間限（throughput + 馬車 load-bearing）
 	var s_leader = state.persons.get(seller.leader_id)
 	var commerce: float = float(s_leader.skills.get("商業", 0.0)) if s_leader else 0.0
 	# (1) seller 商隊優先賣 inventory（買低賣高賺差價）
@@ -598,6 +599,7 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 			var inv_bid: float = TradeValuation.local_value(buyer, item["grade"])
 			if inv_bid <= float(item["bought_at"]): continue
 			var inv_qty: int = mini(int(item["qty"]), int(buyer_coin / inv_bid))
+			inv_qty = mini(inv_qty, ms.carry_space_for_res(buyer, item["grade"]))   # WS-3 carry 限
 			if inv_qty <= 0: continue
 			buyer.resources[item["grade"]] = float(buyer.resources.get(item["grade"], 0)) + inv_qty
 			buyer.resources["coin"]  = float(buyer.resources.get("coin", 0)) - inv_qty * inv_bid
@@ -616,6 +618,7 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		var bid: float = TradeValuation.local_value(buyer, res)
 		if ask <= 0.0 or ask >= bid: continue
 		var qty: int = mini(int(surplus), int(buyer_coin / ask))
+		qty = mini(qty, ms.carry_space_for_res(buyer, res))   # WS-3 carry 限（買方滿載即止買）
 		if qty <= 0: continue
 		_execute_transfer(seller, buyer, res, qty, ask)
 		buyer_coin -= qty * ask
