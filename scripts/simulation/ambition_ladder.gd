@@ -45,7 +45,8 @@ static func derive_cap(leader: PersonData) -> int:
 static func target_rung(state: WorldState, team: TeamData, leader: PersonData) -> int:
 	var rung: int = RUNG_SURVIVE
 	var pop: int = team.population
-	var food: float = float(team.resources.get("food", 0))
+	# WS-2c：有效糧(私產+自家糧倉)。否則定居隊 food 在糧倉→誤判無盈餘→永卡 RUNG_SURVIVE。
+	var food: float = ResourceSystem.effective_food(state, team)
 	var surplus_need: float = float(pop) * 2.4 * SURPLUS_DAYS   # 2.4 = 日餐量量級(對齊既有)
 	# 積累：糧盈餘
 	if food >= surplus_need:
