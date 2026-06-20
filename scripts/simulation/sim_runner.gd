@@ -133,6 +133,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 			_player_cmd.clear_pending_targets(state)
 		_step3_propagate_messages(state, moved_near, near_teams)
 		_step3b_exchange_intel(state, moved_near, near_teams)
+		_step3c_read_market_board(state, arrived_near)
 		_step4_resolve_interactions(state, moved_near, near_teams)
 		_step4b_outpost_tick(state)
 		_step4e_faction_snapshot(state, near_teams)
@@ -167,6 +168,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		var moved_far: Array = move_far["moved"]
 		_step3_propagate_messages(state, moved_far, far_teams)
 		_step3b_exchange_intel(state, moved_far, far_teams)
+		_step3c_read_market_board(state, arrived_far)
 		_step4_resolve_interactions(state, moved_far, far_teams)
 		_step4e_faction_snapshot(state, far_teams)
 		_step_ambush_check(state, far_teams)
@@ -218,6 +220,15 @@ func _step3_propagate_messages(state: WorldState, arrived_ids: Array, all_ids: A
 
 func _step3b_exchange_intel(state: WorldState, arrived_ids: Array, all_team_ids: Array) -> void:
 	_message_system.exchange_intel_on_arrival(state, arrived_ids, all_team_ids)
+
+# WS-2b：抵達某 tile 的隊，若該 tile 是市集 outpost → 親讀看板（firsthand honest，破訂單可見性死鎖）。
+# 站在市集才讀得到（read_market_board 內守 outpost_level>0 = 無在場可見）；轉述他隊仍走既有 propagate。
+func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
+	var os := OrderSystem.new()
+	for tid in arrived_ids:
+		if not state.teams.has(tid):
+			continue
+		os.read_market_board(state, state.teams[tid])
 
 func _step4_resolve_interactions(state: WorldState, moved_ids: Array, all_ids: Array) -> void:
 	_interaction_system.process_on_move(state, moved_ids, all_ids)
