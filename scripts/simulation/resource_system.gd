@@ -105,7 +105,7 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY * day_fraction
 		# WS-1：定居隊 food 在自家糧倉（public_storage）。消耗從「team.resources + 自家糧倉」
 		# 合併池提領（先 team 後糧倉）→ food 在哪都不誤餓。消耗是 sink，從哪扣都守恆。
-		var granary: HexTileData = _own_granary_tile(state, team)
+		var granary: HexTileData = own_granary_tile(state, team)
 		var team_food: float = float(team.resources.get("food", 0))
 		var granary_food: float = float(granary.public_storage.get("food", 0)) if granary != null else 0.0
 		var food_available: float = team_food + granary_food
@@ -325,12 +325,20 @@ func _update_person_needs(state: WorldState, team_id: int, need: String, value: 
 				person.hunger = maxf(person.hunger - HUNGER_RECOVER_PER_DAY * day_fraction, 0.0)
 
 # WS-1：team 站在自家 outpost tile → 回該 tile（糧倉）；否則 null。
-# 消耗合併池用：定居隊 food 在糧倉，需從此提領。
-func _own_granary_tile(state: WorldState, team: TeamData) -> HexTileData:
+# 消耗合併池 + WS-2c effective_food 決策讀者共用。static：accessor 與決策讀者皆免實例。
+static func own_granary_tile(state: WorldState, team: TeamData) -> HexTileData:
 	var tile: HexTileData = state.world.tiles.get(_pos_to_tile_id(team.tile_pos))
 	if tile != null and tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
 		return tile
 	return null
 
-func _pos_to_tile_id(pos: Vector2i) -> int:
+# WS-2c：本隊「有效糧」= 私產 food + 自家糧倉 food（決策讀者單源；消耗扣除走 resolve_consumption）。
+# WS-1 把定居隊 food 搬進糧倉(team.resources food=0)只改了消耗，漏改決策讀者 →
+# 定居隊/商隊 AI 誤判餓。決策讀者（survival/trade/ambition gate）一律經此。
+static func effective_food(state: WorldState, team: TeamData) -> float:
+	var g: HexTileData = own_granary_tile(state, team)
+	var gf: float = float(g.public_storage.get("food", 0)) if g != null else 0.0
+	return float(team.resources.get("food", 0)) + gf
+
+static func _pos_to_tile_id(pos: Vector2i) -> int:
 	return pos.x * 1000 + pos.y

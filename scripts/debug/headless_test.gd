@@ -3765,6 +3765,12 @@ func _run_sim_test() -> void:
 	_test_consume_from_granary()
 	_test_food_surplus_sell()
 
+	# ── 經濟 WS-2c：effective_food accessor 單源（破商隊 survival 二階死鎖）──
+	_test_effective_food_accessor()
+	_test_survival_reads_granary()
+	_test_true_desperation_still_survival()
+	_test_solo_trade_not_starved()
+
 	# ── G1d 商隊訂單履約/套利 ──
 	_test_received_sell_and_arbitrage()
 	_test_merchant_order_targeting()
@@ -4160,6 +4166,101 @@ func _test_food_surplus_sell() -> void:
 		if o["kind"] == "sell" and o["res"] == "food": has_food_sell = true
 	assert(has_food_sell, "糧倉滿應發 food sell 單(滿了→賣決策)")
 	print("food surplus sell OK")
+
+# ── 經濟 WS-2c：effective_food accessor 單源 ──
+
+func _test_effective_food_accessor() -> void:
+	print("--- WS-2c effective_food accessor ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2)
+	_seed_pop(t, 5)
+	t.resources = {"food": 30.0}   # team 私產有少量糧
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 1000.0}   # 糧在糧倉
+	state.world.tiles[2*1000+2] = tile
+	state.teams[0] = t
+	# 合併池 = team 30 + 糧倉 1000 = 1030
+	assert(ResourceSystem.effective_food(state, t) >= 1029.0, \
+		"effective_food 應 = team+糧倉，實際=%.1f" % ResourceSystem.effective_food(state, t))
+	# 非自家糧倉不算（owner 非本隊）
+	tile.outpost_owner = 99
+	assert(absf(ResourceSystem.effective_food(state, t) - 30.0) < 0.01, \
+		"非自家糧倉不該計入，實際=%.1f" % ResourceSystem.effective_food(state, t))
+	print("effective_food accessor OK")
+
+func _test_survival_reads_granary() -> void:
+	print("--- WS-2c survival 讀糧倉不誤判 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	_seed_pop(t, 5)
+	t.resources = {"food": 0.0}    # team 無糧
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 1000.0}   # 糧在糧倉(充足)
+	state.world.tiles[2*1000+2] = tile
+	var ldr := PersonData.new(); ldr.id = 100; ldr.team_id = 0; state.persons[100] = ldr
+	state.teams[0] = t
+	# accessor 應回合併池 = 1000
+	assert(ResourceSystem.effective_food(state, t) >= 999.0, \
+		"effective_food 應含糧倉，實際=%.1f" % ResourceSystem.effective_food(state, t))
+	# survival 不該因 team food=0 誤觸（糧倉充足 → 非絕境）
+	var fai := FactionAISystem.new()
+	t.current_task = TeamData.TASK_IDLE
+	fai._evaluate_survival(state, t)
+	assert(t.current_task != TeamData.TASK_RETURN_HOME, \
+		"糧倉充足不該誤觸 survival/return_home，實際=%s" % t.current_task)
+	assert(not (t.current_task in fai.SURVIVAL_TASKS), \
+		"糧倉充足不該進任何 survival task，實際=%s" % t.current_task)
+	print("survival reads granary OK")
+
+func _test_true_desperation_still_survival() -> void:
+	print("--- WS-2c 真絕境(team+糧倉皆空)仍進 survival ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	_seed_pop(t, 5)
+	t.resources = {"food": 0.0}    # team 無糧
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 0.0}   # 糧倉也空 → 真絕境
+	state.world.tiles[2*1000+2] = tile
+	var ldr := PersonData.new(); ldr.id = 100; ldr.team_id = 0; state.persons[100] = ldr
+	state.teams[0] = t
+	assert(ResourceSystem.effective_food(state, t) < 0.01, \
+		"team+糧倉皆空 effective_food 應≈0，實際=%.1f" % ResourceSystem.effective_food(state, t))
+	var fai := FactionAISystem.new()
+	t.current_task = TeamData.TASK_IDLE
+	fai._evaluate_survival(state, t)
+	# accessor 不掩真飢荒：仍須改變 task（進某 survival 路徑），不可仍停在 IDLE
+	assert(t.current_task != TeamData.TASK_IDLE, \
+		"真絕境應觸發 survival(離開 IDLE)，實際=%s" % t.current_task)
+	print("true desperation still survival OK")
+
+func _test_solo_trade_not_starved() -> void:
+	print("--- WS-2c 定居商隊不因 team food=0 誤判覓食/逃 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	t.tags = [TeamData.TAG_MERCHANT]
+	_seed_pop(t, 5)
+	t.resources = {"food": 0.0, "goods": 200.0}   # team food=0、有貨
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 1000.0}   # 糧在糧倉(充足)
+	state.world.tiles[2*1000+2] = tile
+	# 高求生欲 leader → 未修前 food_pc=0<2.0 → FLEE 分數 = survival*0.8 高
+	var ldr := PersonData.new(); ldr.id = 100; ldr.team_id = 0
+	ldr.values = {"求生欲": 0.9, "貪婪": 0.6, "野心": 0.5, "好戰": 0.3}
+	state.persons[100] = ldr
+	state.teams[0] = t
+	t.current_task = TeamData.TASK_IDLE
+	var fai := FactionAISystem.new()
+	fai._evaluate_solo(state, t)
+	# 糧倉充足 → 不該誤判餓 → 不派 FLEE（覓食/逃壓過 trade 的元兇）
+	assert(t.current_task != TeamData.TASK_FLEE, \
+		"糧倉充足商隊不該誤判餓→FLEE，實際=%s" % t.current_task)
+	assert(t.solo_intent != TeamData.TASK_FLEE, \
+		"solo_intent 不該為 FLEE，實際=%s" % t.solo_intent)
+	print("solo trade not starved OK")
 
 func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
 	var state := WorldState.new()

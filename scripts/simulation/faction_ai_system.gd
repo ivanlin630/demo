@@ -2067,7 +2067,9 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 		return
 	var pop_eff: int = team.population
 	if pop_eff <= 0: return
-	var food: float = float(team.resources.get("food", 0))
+	# WS-2c：讀有效糧（私產+自家糧倉），否則定居隊 food 在糧倉→誤判餓→永卡 survival。
+	# 釋放檢查(下方 days_left>=RECOVER)同變數自動受惠。真絕境(皆空)仍正確進 survival。
+	var food: float = ResourceSystem.effective_food(state, team)
 	var food_per_day: float = float(pop_eff) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	var days_left: float = food / maxf(food_per_day, 0.001)
 	# 紮營到達結算：在 TASK_CAMP 途中，腳下若為無主可農地即立 crude camp + 釋放（轉正常 collect）。
