@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 經濟 WS-1 食物糧倉 route + 硬上限 + 滿了賣決策 — 囤糧崩 + food sell 單 fire
 ---
 
