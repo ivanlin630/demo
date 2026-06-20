@@ -98,6 +98,17 @@ func calc_total_weight(team: TeamData) -> float:
 		total += maxf(float(team.resources[key]), 0.0) * _resource_weight(key)
 	return total
 
+# 剩餘載重空間（weight 單位）= carry_cap − 當前總重，floor 0（防負/除零）。
+func remaining_carry_space(team: TeamData) -> float:
+	return maxf(get_carry_capacity(team) - calc_total_weight(team), 0.0)
+
+# 某 res 還能裝幾個（依 _resource_weight；重量 0 的工具→大數不設限）。
+func carry_space_for_res(team: TeamData, res: String) -> int:
+	var w: float = _resource_weight(res)
+	if w <= 0.0:
+		return 1 << 30
+	return int(remaining_carry_space(team) / w)
+
 func _resource_weight(key: String) -> float:
 	match key:
 		"food":              return 0.1
@@ -106,6 +117,7 @@ func _resource_weight(key: String) -> float:
 		"armor_low":         return 4.0
 		"armor_high":        return 7.0
 		"mounts", "wagons":  return 0.0  # 搬運工具本身不計重
+		"coin":              return 0.0  # 錢幣不計入載重（WS-3 carry cap 不能因囤 coin 卡死進貨）
 		_:                   return 1.0
 
 func _move_cost(state: WorldState, team: TeamData, time_mult: float = 1.0) -> int:
