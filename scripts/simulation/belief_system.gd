@@ -165,6 +165,7 @@ static func reconcile_firsthand(state: WorldState, obs_id: int, tgt_id: int) -> 
 	for c in cs:
 		var sid: int = int(c["source_id"])
 		if sid == obs_id or c["source_type"] == "親見": continue
+		if not state.teams.has(sid): continue   # 死 source（claim 存活過來源隊）→ 不更新口碑，免 known_reputations 重注入死 id（dangling 根因）
 		var rep: float = float((c["value"] as Dictionary).get("population_est", -1.0))
 		if rep <= 0.0: continue
 		var r: float = rep / truth

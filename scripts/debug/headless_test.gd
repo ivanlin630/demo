@@ -437,6 +437,7 @@ func _initialize() -> void:
 	_test_claim_source_type()
 	_test_credibility_formula()
 	_test_trust_reconcile()
+	_test_reconcile_skips_dead_source()
 	# ── G3c-2 技能識破 + 觀察吃技能 ──
 	_test_detection_discount()
 	_test_observation_noise()
@@ -606,6 +607,7 @@ func _test_trust_reconcile() -> void:
 	var s := WorldState.new(); s.world = WorldData.new()
 	s.teams = {}
 	var obs := TeamData.new(); obs.team_id = 1; s.teams[1] = obs
+	var src9 := TeamData.new(); src9.team_id = 9; s.teams[9] = src9   # source 須活著(WS reconcile 跳死 source)
 	# src=9 relayed pop=50；obs 親見 tgt=2 pop=52（接近）→ rep[9] 升
 	BeliefSystem.record_claim(s, 1, 2, 9, "流民",
 		{"population_est": 50, "last_tick": 0}, 0.5, false)
@@ -615,12 +617,27 @@ func _test_trust_reconcile() -> void:
 	# src=8 relayed pop=200，親見=52（離譜）→ rep[8] 降
 	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.teams = {}
 	var obs2 := TeamData.new(); obs2.team_id = 1; s2.teams[1] = obs2
+	var src8 := TeamData.new(); src8.team_id = 8; s2.teams[8] = src8   # source 須活著
 	BeliefSystem.record_claim(s2, 1, 2, 8, "流民",
 		{"population_est": 200, "last_tick": 0}, 0.5, false)
 	BeliefSystem.record_claim(s2, 1, 2, 1, "親見",
 		{"population_est": 52, "last_tick": 0}, 1.0, false)
 	assert(obs2.known_reputations.get(8, 0.5) < 0.5, "騙子 → rep 降")
 	print("trust reconcile OK")
+
+func _test_reconcile_skips_dead_source() -> void:
+	print("--- known_reputations dangling 修：reconcile 跳死 source ---")
+	var s := WorldState.new(); s.world = WorldData.new(); s.teams = {}
+	var obs := TeamData.new(); obs.team_id = 1; s.teams[1] = obs
+	# relayed claim 來源 sid=99 = 死隊（不在 s.teams，模擬來源隊死後 claim 仍留存）
+	BeliefSystem.record_claim(s, 1, 2, 99, "流民",
+		{"population_est": 50, "last_tick": 0}, 0.5, false)
+	# 親見 claim 觸發 reconcile_firsthand → 迭代 claims（含死 source 99）
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見",
+		{"population_est": 52, "last_tick": 0}, 1.0, false)
+	# reconcile 不該對死 source 99 呼 update_reputation → 不建 dangling key
+	assert(not obs.known_reputations.has(99), "死 source 不該被注入 known_reputations（dangling 根因）")
+	print("reconcile skips dead source OK")
 
 func _test_detection_discount() -> void:
 	print("--- G3c-2：技能識破分級 ---")
