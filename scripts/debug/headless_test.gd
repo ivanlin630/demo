@@ -3752,6 +3752,11 @@ func _run_sim_test() -> void:
 	_test_order_cadence_and_expire()
 	_test_demand_driven_production()
 
+	# ── 經濟 WS-1：食物糧倉 route + 硬上限 + 滿了賣決策 ──
+	_test_food_granary_cap()
+	_test_consume_from_granary()
+	_test_food_surplus_sell()
+
 	# ── G1d 商隊訂單履約/套利 ──
 	_test_received_sell_and_arbitrage()
 	_test_merchant_order_targeting()
@@ -3966,6 +3971,66 @@ func _test_demand_driven_production() -> void:
 	var demand_pick: String = mfg._run_recipe_group(s, t, tile, "weaponsmith_level", 10.0)
 	assert(demand_pick == "weapon_ranged_low", "需求驅動：應產買單需求 ranged_low，實得 %s" % demand_pick)
 	print("demand-driven production OK")
+
+# ──────── 經濟 WS-1：食物糧倉 route + 硬上限 + 滿了賣決策 ────────
+
+func _test_food_granary_cap() -> void:
+	print("--- WS-1 食物糧倉硬上限 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2)
+	_seed_pop(t, 5); t.work_morale = 1.0
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.resources = {"food": 99999.0}; tile.productivity = 1.0; tile.harvest_factor = 1.0
+	state.world.tiles[2*1000+2] = tile
+	state.teams[0] = t
+	var rs := ResourceSystem.new()
+	# 大量採集多次
+	for i in 50:
+		rs._collect_from_tile(state, t, tile, 1.0, 1.0, 0.0, 0.0)
+	var cap: float = OutpostSystem.new()._get_storage_cap(tile, "food")
+	# 食物進糧倉 capped，team.resources food 不該爆量囤積
+	assert(float(tile.public_storage.get("food", 0)) <= cap + 0.01, "糧倉 food 應 ≤ cap(%.0f)，實際=%.0f" % [cap, tile.public_storage.get("food",0)])
+	assert(float(t.resources.get("food", 0)) < cap, "food 不應 uncapped 囤 team.resources，實際=%.0f" % t.resources.get("food",0))
+	print("food granary cap OK (糧倉=%.0f/cap=%.0f)" % [tile.public_storage.get("food",0), cap])
+
+func _test_consume_from_granary() -> void:
+	print("--- WS-1 消耗從糧倉提領 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2)
+	_seed_pop(t, 10)   # 10 人
+	t.resources = {"food": 0.0}   # team 無糧
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 500.0}   # 糧在糧倉
+	state.world.tiles[2*1000+2] = tile
+	state.teams[0] = t
+	var rs := ResourceSystem.new()
+	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
+	# 消耗應從糧倉扣(10人×2.4=24)，非餓死
+	assert(float(tile.public_storage["food"]) < 500.0, "應從糧倉提領消耗，實際糧倉=%.1f" % tile.public_storage["food"])
+	assert(t.famine_days == 0.0, "有糧倉糧不該記飢荒，實際 famine_days=%.1f" % t.famine_days)
+	print("consume from granary OK (糧倉剩=%.1f)" % tile.public_storage["food"])
+
+func _test_food_surplus_sell() -> void:
+	print("--- WS-1 糧倉滿→賣決策 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2)
+	_seed_pop(t, 5)
+	var l := PersonData.new(); l.id = 5000; l.team_id = 0; state.persons[5000] = l; t.leader_id = 5000
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 1800.0}   # 近 cap(2000) 巨量糧
+	state.world.tiles[2*1000+2] = tile
+	state.teams[0] = t
+	var os := OrderSystem.new()
+	os.tick_team_orders(state, t)
+	# 糧倉滿 → 應發 food sell 單
+	var has_food_sell := false
+	for o in t.active_orders:
+		if o["kind"] == "sell" and o["res"] == "food": has_food_sell = true
+	assert(has_food_sell, "糧倉滿應發 food sell 單(滿了→賣決策)")
+	print("food surplus sell OK")
 
 func _famine_make_state(pop: int, minor: int, food: float) -> WorldState:
 	var state := WorldState.new()
@@ -6220,11 +6285,19 @@ func _test_storage_cap() -> void:
 	var tile := HexTileData.new()
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
 	var os := OutpostSystem.new()
-	assert(os._get_storage_cap(tile, "food") == 200.0, "civilian L1 應 200")
+	# WS-1：food 改用 FOOD_STORAGE_CAP（staple 放大）；通用 cap 改驗 material
+	assert(os._get_storage_cap(tile, "material") == 200.0, "civilian L1 material 應 200")
 	tile.outpost_level = 3
-	assert(os._get_storage_cap(tile, "food") == 1500.0, "civilian L3 應 1500")
+	assert(os._get_storage_cap(tile, "material") == 1500.0, "civilian L3 material 應 1500")
 	tile.outpost_type = "military"; tile.outpost_level = 2
-	assert(os._get_storage_cap(tile, "food") == 800.0, "military L2 應 800")
+	assert(os._get_storage_cap(tile, "material") == 800.0, "military L2 material 應 800")
+	# food staple cap（FOOD_STORAGE_CAP）
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	assert(os._get_storage_cap(tile, "food") == 2000.0, "civilian L1 food 應 2000")
+	tile.outpost_level = 3
+	assert(os._get_storage_cap(tile, "food") == 18000.0, "civilian L3 food 應 18000")
+	tile.outpost_type = "military"; tile.outpost_level = 2
+	assert(os._get_storage_cap(tile, "food") == 4500.0, "military L2 food 應 4500")
 	print("CoinStorage Task2 OK")
 
 func _test_collect_ore_to_storage() -> void:
@@ -6244,7 +6317,9 @@ func _test_collect_ore_to_storage() -> void:
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
-	assert(float(team.resources.get("food", 0)) > 0, "food 應進 team")
+	# WS-1：food 改走糧倉 route（像礦）→ 進公庫、不進 team
+	assert(float(src_tile.public_storage.get("food", 0)) > 0, "food 應進公庫（糧倉）")
+	assert(float(team.resources.get("food", 0)) == 0, "food 不應進 team（已糧倉）")
 	assert(float(src_tile.public_storage.get("ore_gold", 0)) > 0, "ore 應進公庫")
 	assert(float(team.resources.get("ore_gold", 0)) == 0, "ore 不應進 team")
 	print("CoinStorage Task3 OK")
@@ -8369,17 +8444,17 @@ func _test_spill_back_with_cap_overflow() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var tile := HexTileData.new()
 	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 0
-	tile.outpost_type = "civilian"; tile.outpost_level = 1   # cap food = 200
-	tile.public_storage = { "food": 180.0 }
+	tile.outpost_type = "civilian"; tile.outpost_level = 1   # WS-1 food cap = 2000
+	tile.public_storage = { "food": 1980.0 }
 	state.world.tiles[0] = tile
 	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
 	team.resources = { "food": 0.0 }
 	state.teams[0] = team
 	var orig: Dictionary = InteractionSystem._absorb_public_storage(state, team)
-	# 模擬 trade 後 team food 多 100（180 借出 + 100 賺）
-	team.resources["food"] = 280.0
+	# 模擬 trade 後 team food 多 100（1980 借出 + 100 賺 = 2080）
+	team.resources["food"] = 2080.0
 	InteractionSystem._spill_back_public_storage(state, team, orig)
-	assert(float(tile.public_storage["food"]) == 200.0, "公庫應補到 cap=200，實際 %.1f" % float(tile.public_storage["food"]))
+	assert(float(tile.public_storage["food"]) == 2000.0, "公庫應補到 cap=2000，實際 %.1f" % float(tile.public_storage["food"]))
 	assert(float(team.resources["food"]) == 80.0, "超 cap 的 80 應留 team，實際 %.1f" % float(team.resources["food"]))
 	print("TradePublic Task1c OK")
 
@@ -10095,8 +10170,11 @@ func _test_construction_timeout() -> void:
 
 # ──────── Fief Economy: 一般稅自動進公庫（Task 1）────────
 
+# WS-1：food 改走糧倉 route（不再入 gained→一般稅 split）。一般稅 split 機制
+# 改用 material 驗（仍 NORMAL_TAX_RES、仍走 gained，機制與舊 food 路徑相同；
+# gain 數字相同：material eng_skill=0 → ×1，同 food farming0/harvest1）。
 func _fief_make_tax_state(owner_id: int, collector_id: int, rate: float,
-		ground_food: float, pub_food: float = 0.0) -> WorldState:
+		ground_mat: float, pub_mat: float = 0.0) -> WorldState:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var tile := HexTileData.new()
@@ -10108,9 +10186,9 @@ func _fief_make_tax_state(owner_id: int, collector_id: int, rate: float,
 	tile.productivity = 1.0
 	tile.farming_level = 0
 	tile.harvest_factor = 1.0
-	tile.resources = { "food": ground_food }
-	tile.resource_cap = { "food": 9999.0 }
-	tile.public_storage = { "food": pub_food }
+	tile.resources = { "material": ground_mat }
+	tile.resource_cap = { "material": 9999.0 }
+	tile.public_storage = { "material": pub_mat }
 	state.world.tiles[0] = tile
 	# owner team（若 != collector）
 	if owner_id != collector_id:
@@ -10121,7 +10199,7 @@ func _fief_make_tax_state(owner_id: int, collector_id: int, rate: float,
 	var ct := TeamData.new(); ct.team_id = collector_id
 	_seed_pop(ct, 5); ct.work_morale = 1.0; ct.tax_rate = rate
 	ct.tile_pos = Vector2i(0, 0)
-	ct.resources = { "food": 0.0 }
+	ct.resources = { "material": 0.0 }
 	state.teams[collector_id] = ct
 	return state
 
@@ -10133,9 +10211,9 @@ func _test_normal_tax_to_vault() -> void:
 	var team: TeamData = state.teams[0]
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
-	var pub: float = float(tile.public_storage.get("food", 0))
-	var priv: float = float(team.resources.get("food", 0))
-	var ground_left: float = float(tile.resources.get("food", 0))
+	var pub: float = float(tile.public_storage.get("material", 0))
+	var priv: float = float(team.resources.get("material", 0))
+	var ground_left: float = float(tile.resources.get("material", 0))
 	# gain = 5.0；tax = 5*0.3 = 1.5 進公庫，私產 = 3.5
 	assert(absf(pub - 1.5) < 0.01, "公庫應 1.5，實際=%.3f" % pub)
 	assert(absf(priv - 3.5) < 0.01, "私產應 3.5，實際=%.3f" % priv)
@@ -10152,22 +10230,22 @@ func _test_normal_tax_owner_vault() -> void:
 	team.tax_rate = 0.1   # 採集者自身 tax_rate 不應被用（用 owner 的 0.5）
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
-	var pub: float = float(tile.public_storage.get("food", 0))
-	var priv: float = float(team.resources.get("food", 0))
+	var pub: float = float(tile.public_storage.get("material", 0))
+	var priv: float = float(team.resources.get("material", 0))
 	assert(absf(pub - 2.5) < 0.01, "owner rate 0.5 → 公庫 2.5，實際=%.3f" % pub)
 	assert(absf(priv - 2.5) < 0.01, "私產 2.5，實際=%.3f" % priv)
 	print("Fief Task1b OK (公庫=%.2f 私產=%.2f)" % [pub, priv])
 
 func _test_normal_tax_vault_cap() -> void:
 	print("--- Fief Task1c: 公庫 cap 不溢出 ---")
-	# civilian Lv1 cap = 200；預存 199.5 → 空間 0.5；tax 1.5 → 只進 0.5
+	# civilian Lv1 material cap = 200；預存 199.5 → 空間 0.5；tax 1.5 → 只進 0.5
 	var state := _fief_make_tax_state(0, 0, 0.3, 100.0, 199.5)
 	var tile: HexTileData = state.world.tiles[0]
 	var team: TeamData = state.teams[0]
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
-	var pub: float = float(tile.public_storage.get("food", 0))
-	var priv: float = float(team.resources.get("food", 0))
+	var pub: float = float(tile.public_storage.get("material", 0))
+	var priv: float = float(team.resources.get("material", 0))
 	assert(absf(pub - 200.0) < 0.01, "公庫應卡 cap 200，實際=%.3f" % pub)
 	# gain 5.0，只課 0.5 進公庫 → 私產 4.5
 	assert(absf(priv - 4.5) < 0.01, "溢出部分留私產 4.5，實際=%.3f" % priv)

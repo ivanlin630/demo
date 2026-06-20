@@ -4,10 +4,14 @@ const ORDER_LIFETIME: int = 5 * WorldState.TICKS_PER_DAY    # 訂單壽命
 const ORDER_POST_CADENCE: int = 12 * WorldState.TICKS_PER_HOUR
 const SURPLUS_RESERVE_MULT: float = 2.0   # 超過 reserve×此 = 餘 → 發賣盤
 
-const _ORDER_ELIGIBLE_RES: Array = ["goods", "weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel"]
+const _ORDER_ELIGIBLE_RES: Array = ["goods", "weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel", "food"]
 
 const SHORTAGE_QTY: float = 3.0   # TEST VALUE：低於此視為短缺,發買單
 const MERCHANT_MAX_RANGE: int = 20
+
+# WS-1：糧倉「滿」信號門檻 = food cap × 此比例。糧倉 > 門檻 → 發 food sell 單
+# （滿了→賣決策 fire；鐵則：cap 須改變 NPC 決策）。TEST VALUE。
+const FOOD_SELL_RESERVE_RATIO: float = 0.5   # 賣到剩 cap×此（保留半倉自用）
 
 var _msg := SimMessageSystem.new()
 
@@ -41,6 +45,10 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 	team.active_orders = kept
 	# 2. 餘量發賣盤（囤量遠超自用 → 餘 → 賣；TEST VALUE 門檻）
 	for res in _ORDER_ELIGIBLE_RES:
+		if res == "food":
+			# WS-1：food 對定居隊在糧倉（非 team.resources）→ 糧倉「滿」信號發 sell。
+			_tick_food_granary_sell(state, team)
+			continue
 		var qty: float = float(team.resources.get(res, 0))
 		if qty < 20.0:
 			continue
@@ -57,6 +65,25 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		if res in ["weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel"]:
 			post_order(state, team, "buy", res, int(SHORTAGE_QTY * 2))
 			Probe.bump("g1.shortage_buy")
+
+# WS-1：定居隊糧倉「滿」信號 → 發 food sell 單（cap 改變 NPC 決策；鐵則）。
+# 讀自家 outpost public_storage food；> cap×reserve → 賣超量的一半（保留半倉自用）。
+func _tick_food_granary_sell(state: WorldState, team: TeamData) -> void:
+	if _has_active(team, "sell", "food"):
+		return
+	var tid: int = team.tile_pos.x * 1000 + team.tile_pos.y
+	var tile: HexTileData = state.world.tiles.get(tid)
+	if tile == null or tile.outpost_level == 0 or tile.outpost_owner != team.team_id:
+		return   # 非定居隊（無自家糧倉）→ 不發 food 賣盤
+	var granary: float = float(tile.public_storage.get("food", 0))
+	var cap: float = OutpostSystem.new()._get_storage_cap(tile, "food")
+	var reserve: float = cap * FOOD_SELL_RESERVE_RATIO
+	if granary <= reserve:
+		return   # 未滿門檻 → 自用，不賣
+	var sell_qty: int = int((granary - reserve) * 0.5)
+	if sell_qty <= 0:
+		return
+	post_order(state, team, "sell", "food", sell_qty)
 
 func _has_active(team: TeamData, kind: String, res: String) -> bool:
 	for o in team.active_orders:
