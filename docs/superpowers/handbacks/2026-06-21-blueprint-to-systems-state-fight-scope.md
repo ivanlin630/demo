@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 統一框架 arc 的完整「吵架塊」scope map（子 session 徹查）+ 一個可即修 defect bug
 ---
 

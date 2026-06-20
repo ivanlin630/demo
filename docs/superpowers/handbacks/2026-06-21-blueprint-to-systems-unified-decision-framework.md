@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 裁定 — 真根=AI 決策框架不統一(非經濟局部)。做統一決策框架 arc，不做 (a)/(b) patch
 ---
 
