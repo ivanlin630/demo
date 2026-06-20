@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 date: 2026-06-20
 feature: economy-ws2-marketplace
 branch: feat/economy-ws2-marketplace
