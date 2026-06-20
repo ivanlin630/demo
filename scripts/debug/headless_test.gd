@@ -3769,6 +3769,12 @@ func _run_sim_test() -> void:
 	_test_received_sell_and_arbitrage()
 	_test_merchant_order_targeting()
 
+	# ── 經濟 WS-2b：市集訂單可見性（破死鎖）──
+	_test_market_board_register()
+	_test_market_board_read()
+	_test_merchant_seek_market()
+	_test_market_trade_chain()
+
 	# ── #1 訂單履約結算 ──
 	_test_order_fulfillment()
 
@@ -3886,6 +3892,121 @@ func _test_merchant_order_targeting() -> void:
 	var ok: bool = TaskArbiter.try_set(s, m, TeamData.TASK_TRADE, best["pos"], TaskArbiter.PRIO_DISPATCH, "merchant_order")
 	assert(ok and m.current_task == TeamData.TASK_TRADE and m.move_target == Vector2i(5,0), "趕赴訂單地")
 	print("merchant order targeting OK")
+
+func _test_market_board_register() -> void:
+	print("--- WS-2b 訂單登錄市集看板 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(3,3)
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(3,3); tile.outpost_owner = 0; tile.outpost_level = 1
+	state.world.tiles[3*1000+3] = tile
+	state.teams[0] = t
+	var os := OrderSystem.new()
+	os.post_order(state, t, "sell", "goods", 10)
+	# 訂單應登錄到市集 tile 看板
+	assert(tile.market_orders.size() == 1, "看板應有 1 單，實際=%d" % tile.market_orders.size())
+	assert(tile.market_orders[0]["res"] == "goods", "看板單 res 對")
+	assert(tile.market_orders[0]["origin_team"] == 0, "看板單 origin_team 對")
+	# 漫遊隊（位非 outpost）→ 不登錄（回退既有碰面傳播）
+	var t2 := TeamData.new(); t2.team_id = 1; t2.tile_pos = Vector2i(7,7)
+	state.teams[1] = t2
+	os.post_order(state, t2, "buy", "material", 6)
+	assert(tile.market_orders.size() == 1, "漫遊隊無市集 → 不登錄他人看板")
+	print("market board register OK")
+
+func _test_market_board_read() -> void:
+	print("--- WS-2b 抵達市集親讀看板 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 賣家 T0 在市集(3,3)掛 sell 單；商隊 T1 抵達(3,3)
+	var t0 := TeamData.new(); t0.team_id = 0; t0.tile_pos = Vector2i(3,3)
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(3,3); tile.outpost_owner = 0; tile.outpost_level = 1
+	state.world.tiles[3*1000+3] = tile; state.teams[0] = t0
+	var t1 := TeamData.new(); t1.team_id = 1; t1.tile_pos = Vector2i(3,3); t1.tags = ["商隊"]
+	state.teams[1] = t1; state.team_known[1] = []
+	var os := OrderSystem.new()
+	os.post_order(state, t0, "sell", "material", 20)
+	# T1 抵達市集 → 親讀看板 → team_known 應有該 sell 單(非自己的)
+	os.read_market_board(state, t1)
+	var rs := os.received_sell_orders(state, t1)
+	var got := false
+	for o in rs:
+		if o["origin_team"] == 0 and o["res"] == "material": got = true
+	assert(got, "抵達市集應親讀到 T0 的 sell 單(跨隊可見)")
+	# firsthand = 不失真
+	for m in state.team_known[1]:
+		if m.type == "order_sell": assert(not m.is_distorted, "親讀看板應 honest 不失真")
+	# 去重：再讀一次不重複
+	var before_n: int = state.team_known[1].size()
+	os.read_market_board(state, t1)
+	assert(state.team_known[1].size() == before_n, "重讀同單應去重(by order_id)")
+	# 不在市集 tile 的隊 → 讀不到（無在場可見）
+	var t2 := TeamData.new(); t2.team_id = 2; t2.tile_pos = Vector2i(9,9); state.teams[2] = t2; state.team_known[2] = []
+	os.read_market_board(state, t2)
+	assert(state.team_known[2].is_empty(), "不在市集 tile → 讀不到(禁全域/無在場可見)")
+	print("market board read OK")
+
+func _test_merchant_seek_market() -> void:
+	print("--- WS-2b 商隊無 arb 巡市集 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fai := FactionAISystem.new()
+	# 市集 outpost 在(8,8)；商隊在(5,5)無任何已知單
+	var mkt := HexTileData.new(); mkt.tile_pos = Vector2i(8,8); mkt.outpost_owner = 9; mkt.outpost_level = 1
+	state.world.tiles[8*1000+8] = mkt
+	var m := TeamData.new(); m.team_id = 0; m.tags = ["商隊"]; m.tile_pos = Vector2i(5,5)
+	m.faction_id = -1; m.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	m.resources = {"goods": 50.0, "food": 100.0, "coin": 200.0}
+	var ml := PersonData.new(); ml.id = 10; ml.values["貪婪"] = 0.7; state.persons[10] = ml; m.leader_id = 10
+	state.teams[0] = m; state.team_known[0] = []
+	var tgt: Vector2i = fai._merchant_trade_target(state, m)
+	assert(tgt == Vector2i(8,8), "無 arb 應巡最近市集(8,8)，實際=%s" % str(tgt))
+	print("merchant seek market OK")
+
+func _test_market_trade_chain() -> void:
+	print("--- WS-2b 確定性市集整鏈 ---")
+	var prev_enabled: bool = Probe.enabled
+	Probe.enabled = true; Probe.reset()
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 賣家定居市集(3,3)掛 sell 單(登錄看板)
+	var seller := TeamData.new(); seller.team_id = 0; seller.tile_pos = Vector2i(3,3)
+	var sl := PersonData.new(); sl.id = 100; state.persons[100] = sl; seller.leader_id = 100
+	_seed_pop(seller, 5)
+	seller.resources = {"goods": 200.0, "coin": 50.0}
+	var s_tile := HexTileData.new(); s_tile.tile_pos = Vector2i(3,3)
+	s_tile.outpost_owner = 0; s_tile.outpost_level = 1
+	state.world.tiles[3*1000+3] = s_tile
+	state.teams[0] = seller
+	# 商隊遠處(9,9)無 arb（team_known 空）
+	var buyer := TeamData.new(); buyer.team_id = 1; buyer.tags = ["商隊"]; buyer.tile_pos = Vector2i(9,9)
+	buyer.faction_id = -1; buyer.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	var bl := PersonData.new(); bl.id = 101; state.persons[101] = bl; buyer.leader_id = 101
+	_seed_pop(buyer, 5)
+	buyer.resources = {"goods": 0.0, "coin": 500.0}
+	state.teams[1] = buyer; state.team_known[1] = []
+	var os := OrderSystem.new()
+	os.post_order(state, seller, "sell", "goods", 30)
+	assert(s_tile.market_orders.size() == 1, "sell 單登錄市集看板")
+	var fai := FactionAISystem.new()
+	# 無 arb → 巡最近市集(3,3)
+	var tgt: Vector2i = fai._merchant_trade_target(state, buyer)
+	assert(tgt == Vector2i(3,3), "無 arb → 巡市集(3,3)，實際=%s" % str(tgt))
+	# 商隊抵達市集 → 親讀看板 → 取得跨隊 arb
+	buyer.tile_pos = Vector2i(3,3)
+	os.read_market_board(state, buyer)
+	var arb: Dictionary = os.best_arbitrage_order(state, buyer)
+	assert(not arb.is_empty() and arb["origin_team"] == 0, "親讀後應有跨隊 arb")
+	# co-locate 成交 → _resolve_market（含 settle_orders 沖 sell 單）
+	var seller_goods_before: float = float(seller.resources["goods"])
+	var inter := InteractionSystem.new()
+	inter._resolve_market(state, seller, buyer)
+	assert(int(Probe.counts.get("g1.order_fulfilled", 0)) > 0, "sell 單應履約沖銷, fulfilled=%d" % int(Probe.counts.get("g1.order_fulfilled", 0)))
+	assert(float(seller.resources["goods"]) < seller_goods_before, "賣家 goods 減(守恆)")
+	# board 同步清：sell 單已滿足 → 看板對應 entry 移除（不留幽靈單）
+	os.tick_team_orders(state, seller)
+	var ghost := false
+	for e in s_tile.market_orders:
+		if int(e.get("qty_remaining", 1)) <= 0: ghost = true
+	assert(not ghost, "已滿足單應從看板同步清(不留幽靈)")
+	Probe.enabled = prev_enabled
+	print("market trade chain OK (fulfilled=%d)" % int(Probe.counts.get("g1.order_fulfilled", 0)))
 
 func _test_order_fulfillment() -> void:
 	print("--- #1 訂單履約結算 ---")
