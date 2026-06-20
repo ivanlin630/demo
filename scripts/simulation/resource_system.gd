@@ -228,6 +228,12 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 				if res == "food":
 					gained[res] = float(gained.get(res, 0)) + gain
 		else:
+			# WS-3：移動無 outpost 隊 intake 受 carry 空間硬限（超額留 tile = conservation-safe）。
+			# weight 0 的 res（mounts/wagons）→ carry_space_for_res 回大數 → 不誤限。
+			var space_qty: int = MovementSystem.new().carry_space_for_res(team, res)
+			gain = minf(gain, float(space_qty))
+			if gain <= 0.0:
+				continue   # 滿載不採 → 留 tile，tile 不扣
 			team.resources[res] = float(team.resources.get(res, 0)) + gain
 			gained[res] = float(gained.get(res, 0)) + gain   # 私產所得 → 一般稅基數
 		# 從 tile 扣除（food/material 最終由 regenerate_tiles 補回；ore/gem 有限）
