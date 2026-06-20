@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 date: 2026-06-21
 feature: economy-ws2b-market-visibility
 branch: feat/economy-ws2b-market-visibility
