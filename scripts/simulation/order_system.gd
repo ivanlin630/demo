@@ -22,9 +22,11 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 		"qty_remaining": qty, "expire_tick": expire,
 	})
 	var desc: String = "Team%d %s %s ×%d" % [team.team_id, ("徵" if kind == "buy" else "售"), res, qty]
+	# WS-2：訂單會合 pos route 到下單隊最近自家 outpost 市集（固定點，非隨隊移動的舊 snapshot）。
+	# active_orders 內部記帳不變；只改傳播副本的會合 pos。
 	_msg.emit_message(state, "order_" + kind, desc, team, {
 		"order_id": oid, "res": res, "qty": qty,
-		"origin_team": team.team_id, "origin_pos": team.tile_pos,
+		"origin_team": team.team_id, "origin_pos": _market_pos(state, team),
 		"expire_tick": expire,
 	})
 	print("[Order] Team%d %s %s ×%d (oid=%d)" % [team.team_id, kind, res, qty, oid])
@@ -141,6 +143,21 @@ func settle_orders(team: TeamData, before: Dictionary, _tick: int) -> bool:
 			kept.append(o)
 	team.active_orders = kept
 	return progressed
+
+# WS-2：訂單會合市集 pos = 下單隊最近自家 outpost tile（固定會合點，商隊去得到、人在那）。
+# god-view scan = 下單隊「自家」outpost，屬自知資訊（非偷看他隊）。無 outpost → fallback team.tile_pos。
+func _market_pos(state: WorldState, team: TeamData) -> Vector2i:
+	var best_pos: Vector2i = team.tile_pos
+	var best_d: int = 1 << 30
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_owner != team.team_id or tile.outpost_level <= 0:
+			continue
+		var d: int = _hex_dist(team.tile_pos, tile.tile_pos)
+		if d < best_d:
+			best_d = d
+			best_pos = tile.tile_pos
+	return best_pos
 
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	return int((abs(a.x - b.x) + abs(a.y - b.y) + abs(a.x + a.y - b.x - b.y)) / 2)
