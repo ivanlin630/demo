@@ -781,12 +781,17 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		if not mt.player_commanded_task.is_empty():
 			continue  # don't override player-commanded task
 		if mt.current_task in SURVIVAL_TASKS:
+			# WS-2b 量測旗（觀測）：商隊卡 survival → 永不出門巡市集 = world_sim 履約 0 的真壓制因。
+			# 本 WS 不硬修 survival（plan 次要旗標）；留此探針供下一個 measure-first WS。
+			if mt.tags.has(TeamData.TAG_MERCHANT):
+				Probe.bump("g1.merchant_survival")
 			continue  # 生存 sticky：不蓋過 survival task
-		# WS-2 解角色卡死（hoist）：商隊-tag member 若可貿易且有「真 arb 單」→
-		# 貿易意圖優先於徵收/外交 preempt。僅商隊 tag（軍隊/生產不變）；
-		# 無 arb 單 → 落回原鏈做徵收/外交（不浪費 faction goal）。
-		if mt.tags.has(TeamData.TAG_MERCHANT) and _can_trade(state, mt) \
-				and not OrderSystem.new().best_arbitrage_order(state, mt).is_empty():
+		# WS-2 解角色卡死（hoist）：商隊-tag member 可貿易 → 貿易意圖優先於徵收/外交 preempt。
+		# WS-2b 破死鎖（對齊 solo 路徑）：有 arb → 趕赴訂單地；無 arb → _merchant_trade_target
+		# 回最近市集 outpost（巡市集），抵達後親讀看板取得 arb。**不再卡 arb 非空**（否則商隊永不出門
+		# →永不碰看板→永無 arb，即 world_sim 履約 0 的真因）。僅商隊 tag（軍隊/生產不變）。
+		# 無任何市集可巡且無 arb → _merchant_trade_target 回 (-1,-1) → 落回原鏈做徵收/外交。
+		if mt.tags.has(TeamData.TAG_MERCHANT) and _can_trade(state, mt):
 			var tt: Vector2i = _merchant_trade_target(state, mt)
 			if tt != Vector2i(-1, -1) and TaskArbiter.try_set(state, mt, TeamData.TASK_TRADE,
 					tt, TaskArbiter.PRIO_DISPATCH, "member_trade"):
@@ -1198,10 +1203,33 @@ func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
 		if not ord.is_empty():
 			Probe.bump("g1.arb_attempt")
 			return ord["pos"]   # 履約走既有 interaction 同格 trade（到場供需若已變→撲空 emergent）
+	# WS-2b 破死鎖：無 arb（沒讀過任何別隊單）→ 巡最近市集 outpost（公開地標）→ 抵達親讀看板取得 arb。
+	# 有理由出門 → 碰得到看板 → 下輪有 arb → 正常套利。市集是公開地標（非偷看他隊內部）。
+	var mkt: Vector2i = _nearest_market_outpost(state, team)
+	if mkt != Vector2i(-1, -1):
+		Probe.bump("g1.seek_market")
+		return mkt
 	var pid: int = _find_trade_target(state, team)
 	if pid == -1:
 		return Vector2i(-1, -1)
 	return state.teams[pid].tile_pos
+
+# WS-2b：找最近「有看板的市集 outpost」（outpost_level>0、非自家）。
+# scan tile = 公開地標（市集告示是公開），確定性（無 RNG）。無 → (-1,-1)。
+func _nearest_market_outpost(state: WorldState, team: TeamData) -> Vector2i:
+	var best_pos: Vector2i = Vector2i(-1, -1)
+	var best_d: int = 1 << 30
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level <= 0:
+			continue
+		if tile.outpost_owner == team.team_id:
+			continue   # 自家據點看板只有自己的單，去也無跨隊 arb
+		var d: int = _hex_dist(team.tile_pos, tile.tile_pos)
+		if d < best_d:
+			best_d = d
+			best_pos = tile.tile_pos
+	return best_pos
 
 func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 	var best_id: int = -1

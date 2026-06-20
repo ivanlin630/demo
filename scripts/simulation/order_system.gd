@@ -33,9 +33,55 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 		"origin_team": team.team_id, "origin_pos": _market_pos(state, team),
 		"expire_tick": expire,
 	})
+	# WS-2b：登錄市集看板（破可見性死鎖）。在 _market_pos 對應的市集 outpost tile 上掛一筆 board entry，
+	# 與 active_orders 同資料。隊抵達該 tile 才親讀得到（firsthand honest）。
+	# 無自家市集 tile（漫遊隊，_market_pos == team.tile_pos 且該 tile 非自家 outpost）→ 不登錄，回退既有碰面傳播。
+	_register_on_board(state, team, oid, kind, res, qty, expire)
 	print("[Order] Team%d %s %s ×%d (oid=%d)" % [team.team_id, kind, res, qty, oid])
 	Probe.bump("g1.order_placed")
 	return oid
+
+# WS-2b：把訂單登錄到發起隊最近自家市集 outpost tile 的看板（可見性鏡像）。
+func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: String, res: String, qty: int, expire: int) -> void:
+	var mpos: Vector2i = _market_pos(state, team)
+	var tid: int = mpos.x * 1000 + mpos.y
+	var tile: HexTileData = state.world.tiles.get(tid)
+	# 僅在「自家市集 outpost」掛單；漫遊隊（無 outpost → _market_pos 回隊位、該 tile 非自家 outpost）不登錄。
+	if tile == null or tile.outpost_level <= 0 or tile.outpost_owner != team.team_id:
+		return
+	tile.market_orders.append({
+		"order_id": oid, "kind": kind, "res": res,
+		"qty_remaining": qty, "origin_team": team.team_id, "expire_tick": expire,
+	})
+	Probe.bump("g1.board_register")
+
+# WS-2b：把 team 在其市集 outpost tile 的看板 entry 與 active_orders（權威）對齊：
+# 已過期/已滿足(qty_remaining≤0)/已不在 active_orders 的本隊 entry → 移除；存活的更新 qty_remaining。
+# 他隊 entry 不動（由各自 tick_team_orders 維護）。
+func _sync_board(state: WorldState, team: TeamData) -> void:
+	var mpos: Vector2i = _market_pos(state, team)
+	var tid: int = mpos.x * 1000 + mpos.y
+	var tile: HexTileData = state.world.tiles.get(tid)
+	if tile == null or tile.outpost_level <= 0 or tile.outpost_owner != team.team_id:
+		return
+	# 權威：oid → qty_remaining（仍存活的本隊單）
+	var live: Dictionary = {}
+	for o in team.active_orders:
+		live[int(o["order_id"])] = int(o["qty_remaining"])
+	var kept: Array = []
+	for e in tile.market_orders:
+		if int(e["origin_team"]) != team.team_id:
+			kept.append(e)   # 他隊 entry：本隊不碰
+			continue
+		var eid: int = int(e["order_id"])
+		if not live.has(eid):
+			continue   # 過期/已從 active_orders 移除 → 看板清
+		var rem: int = int(live[eid])
+		if rem <= 0:
+			continue   # 已滿足 → 看板清（不留幽靈）
+		e["qty_remaining"] = rem
+		kept.append(e)
+	tile.market_orders = kept
 
 # cadence：過期清理 + 餘量發賣盤（買單短缺驅動完整化 = G1c/G1d）。
 func tick_team_orders(state: WorldState, team: TeamData) -> void:
@@ -45,6 +91,8 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		if int(o["expire_tick"]) > state.world.current_tick:
 			kept.append(o)
 	team.active_orders = kept
+	# WS-2b：同步市集看板（鏡像權威）——過期/已滿足/已消失單從看板清，避免商隊讀幽靈單撲空。
+	_sync_board(state, team)
 	# 2. 餘量發賣盤（囤量遠超自用 → 餘 → 賣；TEST VALUE 門檻）
 	for res in _ORDER_ELIGIBLE_RES:
 		if res == "food":
@@ -118,6 +166,49 @@ func received_sell_orders(state: WorldState, team: TeamData) -> Array:
 			"order_id": m.params.get("order_id", -1), "distorted": m.is_distorted,
 		})
 	return out
+
+# WS-2b：抵達市集 outpost tile → 親讀看板（firsthand honest）。
+# 把該 tile market_orders 中**非自己**的單，轉成 honest（is_distorted=false）order_buy/order_sell
+# message 注入自己的 team_known（去重 by order_id；origin_pos = 市集 tile）。
+# 親眼讀公開看板 = 同 vision 親見真值（守 G3：物理在場才得；轉述他隊仍走既有 propagate 失真，零改）。
+# 隊不在 outpost tile（無在場）→ 讀不到（禁全域/無在場可見）。
+func read_market_board(state: WorldState, team: TeamData) -> void:
+	var tid: int = team.tile_pos.x * 1000 + team.tile_pos.y
+	var tile: HexTileData = state.world.tiles.get(tid)
+	if tile == null or tile.outpost_level <= 0:
+		return   # 不在市集 outpost → 無在場可見
+	Probe.bump("g1.market_arrive")   # WS-2b 觀測：隊抵達市集 outpost（讀看板的前提）
+	if not state.team_known.has(team.team_id):
+		state.team_known[team.team_id] = []
+	# 已知 order_id（去重）
+	var known_ids: Dictionary = {}
+	for m in state.team_known[team.team_id]:
+		if m.type == "order_buy" or m.type == "order_sell":
+			known_ids[int(m.params.get("order_id", -1))] = true
+	for e in tile.market_orders:
+		if int(e["origin_team"]) == team.team_id:
+			continue   # 自己的單不讀
+		var oid: int = int(e["order_id"])
+		if known_ids.has(oid):
+			continue   # 去重
+		var msg := MessageData.new()
+		msg.id = state.global_messages.size()
+		msg.type = "order_" + String(e["kind"])
+		msg.description = "[Board] Team%d %s %s ×%d" % [int(e["origin_team"]), String(e["kind"]), String(e["res"]), int(e["qty_remaining"])]
+		msg.source_pos = tile.tile_pos
+		msg.origin_team_id = int(e["origin_team"])
+		msg.origin_tick = state.world.current_tick
+		msg.strength = 1.0
+		msg.is_distorted = false   # firsthand 親讀 = honest 不失真
+		msg.params = {
+			"order_id": oid, "res": e["res"], "qty": int(e["qty_remaining"]),
+			"origin_team": int(e["origin_team"]), "origin_pos": tile.tile_pos,
+			"expire_tick": int(e["expire_tick"]),
+		}
+		state.global_messages.append(msg)
+		state.team_known[team.team_id].append(msg)
+		known_ids[oid] = true
+		Probe.bump("g1.board_read")
 
 # 套利挑單：sell盤(便宜買)/buy單(高價賣) 取 local_value 差最大者（殘缺情報，讀 received）。
 func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
