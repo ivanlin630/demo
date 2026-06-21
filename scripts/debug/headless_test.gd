@@ -337,6 +337,8 @@ func _initialize() -> void:
 	_test_pick_military_tools_stock()
 	_test_govern_faction_leader()
 	_test_govern_skip_when_vault_full()
+	_test_person_sex()
+	_test_breed_needs_both_sexes()
 	_test_breed_decoupled()
 	_test_breed_life_event()
 	_test_breed_parallel_with_action()
@@ -11089,6 +11091,48 @@ func _bootstrap_breed_person(safety: float, food_need: float) -> PersonData:
 	var p := PersonData.new(); p.id = 1; p.team_id = 0
 	p.needs = { "safety": safety, "food": food_need }
 	return p
+
+func _test_person_sex() -> void:
+	print("--- 性別資料生成 ---")
+	# generate 簽名 = generate(state, seed_offset, role)；無 rng 參數，內部用 seed_offset 生 rng。
+	# 用不同 seed_offset 取樣，驗證兩性皆出現且大致均衡。
+	var state := WorldState.new(); state.world = WorldData.new()
+	var males := 0; var females := 0
+	for i in 200:
+		var p: PersonData = PersonGenerator.generate(state, 1000 + i, "member")
+		assert(p.sex in ["male", "female"], "sex 應 male/female，實際=%s" % p.sex)
+		if p.sex == "male": males += 1
+		else: females += 1
+	assert(males > 50 and females > 50, "200 抽應兩性皆有(≈均衡)，男=%d 女=%d" % [males, females])
+	print("person sex OK (男=%d 女=%d)" % [males, females])
+
+func _test_breed_needs_both_sexes() -> void:
+	print("--- 生育需兩性(全男隊不繁衍) ---")
+	var rs := ReactionSystem.new()
+	# 全男隊：anon_female_ratio=0 → anon 全男 → breed_balance=0（不繁衍）
+	var t_m := TeamData.new(); t_m.team_id = 0
+	_seed_pop(t_m, 10); t_m.anon_female_ratio = 0.0
+	# 兩性隊：ratio=0.5 → anon 兩性 → breed_balance>0
+	var t_b := TeamData.new(); t_b.team_id = 1
+	_seed_pop(t_b, 10); t_b.anon_female_ratio = 0.5
+	assert(rs._breed_balance(t_m) == 0.0, "全男隊 breed_balance 應 0(不繁衍)，實際=%.3f" % rs._breed_balance(t_m))
+	assert(rs._breed_balance(t_b) > 0.0, "兩性隊 breed_balance 應 >0，實際=%.3f" % rs._breed_balance(t_b))
+	# breeder 自身 sex 計入：全男隊內一個 female breeder 仍只一方>0 → 但 anon 全男 → 仍需另一性 anon
+	# 全男隊 + breeder female → female 側=1, male 側=anon → 兩性皆有 → >0（breeder 補足平衡）
+	assert(rs._breed_balance(t_m, "female") > 0.0, "全男 anon + female breeder → 兩性皆有應 >0")
+	# 全男隊 + breeder male → 仍全男 → 0
+	assert(rs._breed_balance(t_m, "male") == 0.0, "全男 anon + male breeder → 仍全男應 0")
+	# 端到端：全男隊 + male breeder → _evaluate_life_events 不出 P5_breed（即使足糧足安全未滿 cap）
+	t_m.minor_population = 0
+	t_m.resources = { "food": 100000.0 }
+	var p_m := PersonData.new(); p_m.id = 1; p_m.team_id = 0; p_m.sex = "male"
+	p_m.needs = { "safety": 1.0, "food": 1.0 }
+	var bred: bool = false
+	for i in 200:
+		if "P5_breed" in rs._evaluate_life_events(p_m, t_m):
+			bred = true; break
+	assert(not bred, "全男隊(anon全男+male breeder)不應出 P5_breed")
+	print("breed needs both sexes OK")
 
 func _test_breed_decoupled() -> void:
 	print("--- Bootstrap Task3: 生育分層 ---")
