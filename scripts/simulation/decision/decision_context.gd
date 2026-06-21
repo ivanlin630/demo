@@ -15,6 +15,7 @@ var ambition_gap: int = 0
 var strongest_feud: float = 0.0
 var has_own_outpost: bool = false
 var is_merchant: bool = false
+var has_home_outpost: bool = false
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -33,6 +34,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.strongest_feud = float(fe.get("intensity", 0.0)) if not fe.is_empty() else 0.0
 	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
+	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
 	# threat：商隊切片威脅 term 次要，初版 0；他域遷入時補（_find_strong_neighbor / 鄰敵 strength）。
 	c.threat = 0.0
 	return c
