@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 玩家迴路 vision 錨定（game-design.md）— 定「世界做到哪夠」+ G3 升級為玩家核心
 ---
 

@@ -44,7 +44,8 @@ func uses_unified(team: TeamData) -> bool:
 ### 2. `applicable()` 角色正確化
 `decision/options.gd`，現況守衛問題：
 - **貿易**：現 `if ctx.has_goods or ctx.has_arb`。生產隊有貨就會選貿易 → 棄據點 roam → 撲空因。
-  **改**：貿易 = **roam-trade，只給無自家據點隊**（商隊）。加守衛 `not ctx.has_own_outpost`（賣方原地掛單賣，不親自巡市集）。
+  **改**：貿易 = **roam-trade，只給商隊角色**。加守衛 `ctx.is_merchant`（賣方=生產隊原地掛單賣，不親自巡市集）。
+  > 判別子用 **tag/角色（`is_merchant`）非據點**：商隊在測試/world_gen 也可能有自家 outpost（`_mk_merchant_team` 即 `outpost_owner=0`），用 `not has_own_outpost` 會誤殺商隊貿易、爆 TC1/TC7。角色（商隊 vs 生產）是隊功能的結構事實，合法當守衛輸入；人格仍在 term 權重內分歧。
 - **建設**：現 `if ctx.has_own_outpost`（與生產/駐守同 gate）。**錯**——無據點生產隊拿不到建設 → 被困（只剩覓食/survival）。
   **改**：建設 = **無據點時可 bootstrap**（`not ctx.has_own_outpost` 或可升級），無據點生產隊 → 建設 → 取得據點 → 駐守/生產。
 - **生產 / 駐守**：維持 `has_own_outpost`。
@@ -58,8 +59,8 @@ func uses_unified(team: TeamData) -> bool:
 
 > 註：建設守衛需細分「無據點建新」vs「有據點升級」——`applicable_options` 守衛初版可二者皆收（有/無據點都候選建設），plan 階段定形。核心是**無據點隊必有建設候選**。
 
-### 3. `DecisionContext` 補欄位（若需）
-角色守衛靠 `has_own_outpost`（已有）。**初版不需新欄位**——`has_own_outpost` + 既有 term 足夠。若 plan 發現建設 bootstrap 需「可建 tile / 有材料」判斷，再補 `can_build` 欄位（複用既有 `_find_unowned_farmable_tile` / 材料檢查）。
+### 3. `DecisionContext` 補欄位
+貿易守衛需 `is_merchant` → 補 `var is_merchant: bool`，`gather()` 設 `team.tags.has(TeamData.TAG_MERCHANT)`。建設 bootstrap 靠既有 `has_own_outpost`，**不需 `can_build` 欄位**（無據點靠 TASK_BUILD 造，YAGNI）。
 
 ### 4. 下單路徑確認（不改，僅驗）
 `OrderSystem.tick_team_orders`（`faction_ai_system.gd:~554`，`_assign_tasks` 內）對所有隊跑，**不在決策切片內** → produce 隊納引擎後仍自動掛賣單。驗：produce 隊原地駐守時 `_register_on_board` 成功（需 `tile.outpost_owner == team_id` 且 `team.tile_pos == 據點`，駐守保證 co-location）。
@@ -94,7 +95,7 @@ func uses_unified(team: TeamData) -> bool:
 
 - **生產隊無據點又建不了 → 被困覓食/survival**：建設 bootstrap guard（無據點必有建設候選）；plan 驗無據點 produce 隊能取得據點。
 - **商隊仍撲空（賣方跳 survival/forage 離場）**：survival/覓食只在糧危機高權重；承諾慣性釘住駐守。非硬閘，量測旗驗撲空率降。
-- **貿易守衛改動誤傷商隊**：商隊 `has_own_outpost=false` → 貿易仍候選（守衛 `not has_own_outpost` 對商隊為 true）。TC1/TC7 回歸驗商隊不退化。
+- **貿易守衛改動誤傷商隊**：守衛改 `is_merchant`（非據點）→ 商隊恆候選貿易，與是否有 outpost 無關。TC1/TC7 回歸驗商隊不退化（已手算：建設/貿易/駐守 3 分歧仍成立）。
 - **空窗碎隊增（consolidate 掉）**：接受，過渡期；B 補合併 option。world_sim 觀測碎隊數，異常才提前處理。
 - **不碰守恆**：本塊只改決策面（task 選擇 + applicable 守衛），不碰 resources/coin/state 池 → coin_eq/InvariantAudit 無關。
 
