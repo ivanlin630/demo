@@ -1,6 +1,7 @@
 class_name DecisionTerms
 
 const RESTOCK_DAYS: float = 5.0   # TEST VALUE：商隊糧低於此 → proactive 返家補給(> WARNING 3)
+const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-trade 軟壓(能但很少)
 
 # 統一決策引擎：term 函式庫 + w_term 人格映射。
 # eval：驅力強度（0..~1.5），term × opt 對應；不適用 opt 回 0。
@@ -22,7 +23,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return ctx.threat
 		"economic_opp":
 			if opt != "貿易": return 0.0
-			return (0.8 if ctx.has_goods else 0.2) * (1.0 if ctx.has_arb else 0.3)
+			var role: float = 1.0 if ctx.is_merchant else NON_MERCHANT_TRADE_FACTOR
+			return (0.8 if ctx.has_goods else 0.2) * (1.0 if ctx.has_arb else 0.3) * role
 		"produce_need":
 			if opt != "生產": return 0.0
 			return 0.3 if ctx.has_goods else 0.6   # 已有貨→低

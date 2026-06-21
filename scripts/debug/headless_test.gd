@@ -3829,6 +3829,7 @@ func _run_sim_test() -> void:
 	_test_tc6_multi_drive()
 	_test_tc7_divergence()
 	_test_role_applicable()
+	_test_merchant_gate_weight()
 	_test_merchant_restock()
 	_test_survival_magnitude()
 	_test_unified_survival_boundary()
@@ -12659,7 +12660,7 @@ func _test_role_applicable() -> void:
 	var ctx_p: DecisionContext = DecisionContext.gather(s2, p)
 	assert(not ctx_p.is_merchant, "生產隊 is_merchant 應 false")
 	var ap: Array = DecisionOptions.applicable(ctx_p)
-	assert("貿易" not in ap, "生產隊不 roam-trade(無貿易候選)，實際=%s" % str(ap))
+	assert("貿易" in ap, "gate→權重後生產隊貿易應入候選(軟壓非禁)，實際=%s" % str(ap))
 	assert("駐守" in ap and "生產" in ap and "建設" in ap, "生產隊有 生產/駐守/建設 候選，實際=%s" % str(ap))
 	# 生產隊無據點 → 建設(bootstrap) 候選；生產/駐守 不候選
 	var s3 := WorldState.new(); s3.world = WorldData.new()
@@ -12670,6 +12671,18 @@ func _test_role_applicable() -> void:
 	assert("建設" in ap2, "無據點生產隊 → 建設 bootstrap 候選，實際=%s" % str(ap2))
 	assert("生產" not in ap2 and "駐守" not in ap2, "無據點 → 無 生產/駐守，實際=%s" % str(ap2))
 	print("role applicable OK")
+
+func _test_merchant_gate_weight() -> void:
+	print("--- 貿易 gate→軟權重(生產隊能但很少) ---")
+	# 生產隊(非商隊)有貨 → 貿易入候選，但 economic_opp < 商隊(×0.3)
+	var c_pro := DecisionContext.new(); c_pro.is_merchant = false; c_pro.has_goods = true; c_pro.has_arb = true
+	var c_mer := DecisionContext.new(); c_mer.is_merchant = true; c_mer.has_goods = true; c_mer.has_arb = true
+	var e_pro: float = DecisionTerms.eval("economic_opp", c_pro, "貿易")
+	var e_mer: float = DecisionTerms.eval("economic_opp", c_mer, "貿易")
+	assert(e_pro > 0.0, "生產隊 economic_opp 應 >0(能 trade)")
+	assert(e_pro < e_mer, "生產隊 economic_opp 應 < 商隊(軟壓)，pro=%.2f mer=%.2f" % [e_pro, e_mer])
+	assert(abs(e_pro - e_mer * 0.3) < 0.01, "非商隊應 ×0.3，pro=%.2f mer=%.2f" % [e_pro, e_mer])
+	print("merchant gate→weight OK")
 
 func _test_merchant_restock() -> void:
 	print("--- 商隊返家補給 option ---")
