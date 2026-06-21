@@ -17,8 +17,8 @@ static func applicable(ctx: DecisionContext) -> Array:
 	for opt in REGISTRY:
 		match opt:
 			"貿易":
-				# roam-trade = 商隊角色（棄不棄據點巡市集）。生產隊原地掛單賣，不列候選。
-				if (ctx.has_goods or ctx.has_arb) and ctx.is_merchant: out.append(opt)
+				# roam-trade：商隊主力；生產隊也可(軟壓低 via economic_opp 角色因子,非禁)。
+				if ctx.has_goods or ctx.has_arb: out.append(opt)
 			"生產", "駐守":
 				if ctx.has_own_outpost: out.append(opt)
 			"建設":
