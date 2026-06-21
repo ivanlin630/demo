@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 知會 — 統一隊 survival 切片:survival 靠 util 量級支配(非 latch),曲線意圖 + 切片缺口
 ---
 
