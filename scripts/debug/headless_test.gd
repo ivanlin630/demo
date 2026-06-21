@@ -3829,6 +3829,7 @@ func _run_sim_test() -> void:
 	_test_tc7_divergence()
 	_test_role_applicable()
 	_test_merchant_restock()
+	_test_survival_magnitude()
 
 	print("=== DONE ===")
 
@@ -12701,3 +12702,47 @@ func _test_merchant_restock() -> void:
 	assert("返家補給" not in DecisionOptions.applicable(DecisionContext.gather(s4, p)), \
 		"生產隊不走返家補給(原地,非商隊)")
 	print("merchant restock OK")
+
+func _test_survival_magnitude() -> void:
+	print("--- survival-class term 量級支配 ---")
+	# eval 重標度驗算
+	var c := DecisionContext.new()
+	c.food_days = 4.0
+	assert(DecisionTerms.eval("survival_pressure", c, "覓食") == 0.0, "food4(≥3)→survival_pressure 0")
+	c.food_days = 2.0
+	assert(abs(DecisionTerms.eval("survival_pressure", c, "覓食") - 4.0) < 0.01, "food2→survival_pressure 4.0")
+	assert(abs(DecisionTerms.eval("restock_need", c, "返家補給") - 4.5) < 0.01, "food2→restock_need 4.5")
+	c.threat = 0.0
+	assert(DecisionTerms.eval("threat_pressure", c, "survival") == 0.0, "threat0→threat_pressure 0(休眠)")
+
+	# decide：糧危無家商隊 → 覓食(survival_pressure 4.0 碾壓 trade)
+	var s1 := WorldState.new(); s1.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = Vector2i(5,5); t.leader_id = 100; t.current_option = ""
+	_seed_pop(t, 5); t.resources = {"food": 24.0, "goods": 50.0}   # days=2、有貨
+	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.5}
+	s1.persons[100] = ldr; s1.teams[0] = t
+	s1.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(5,6))]  # 有 arb
+	var opt1: String = DecisionEngine.decide(s1, t)
+	assert(opt1 == "覓食", "糧危(food2)無家商隊應覓食(survival碾壓貿易)，實際=%s" % opt1)
+
+	# decide：糧危有家商隊 → 返家補給(restock 4.5 > 覓食 4.0)
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tags = [TeamData.TAG_MERCHANT]
+	t2.tile_pos = Vector2i(5,5); t2.leader_id = 100; t2.current_option = ""
+	_seed_pop(t2, 5); t2.resources = {"food": 24.0, "goods": 50.0}
+	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2); home.outpost_owner = 0
+	home.outpost_level = 1; home.public_storage = {"food": 500.0}; s2.world.tiles[2*1000+2] = home
+	var l2 := PersonData.new(); l2.id = 100; l2.values = {"貪婪": 0.5}; s2.persons[100] = l2; s2.teams[0] = t2
+	var opt2: String = DecisionEngine.decide(s2, t2)
+	assert(opt2 == "返家補給", "糧危(food2)有家商隊應返家補給(restock>覓食)，實際=%s" % opt2)
+
+	# decide：吃飽商隊 → 貿易(survival 0、restock 不適用)
+	var s3 := WorldState.new(); s3.world = WorldData.new()
+	var t3 := TeamData.new(); t3.team_id = 0; t3.tags = [TeamData.TAG_MERCHANT]
+	t3.tile_pos = Vector2i(5,5); t3.leader_id = 100; t3.current_option = ""
+	_seed_pop(t3, 5); t3.resources = {"food": 240.0, "goods": 50.0}   # days=20
+	var l3 := PersonData.new(); l3.id = 100; l3.values = {"貪婪": 0.5}; s3.persons[100] = l3; s3.teams[0] = t3
+	s3.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(5,6))]
+	assert(DecisionEngine.decide(s3, t3) == "貿易", "吃飽商隊應貿易")
+	print("survival magnitude OK")
