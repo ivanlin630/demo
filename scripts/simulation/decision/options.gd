@@ -9,6 +9,7 @@ const REGISTRY: Dictionary = {
 	"覓食":   [["survival_pressure", "survival_pressure"]],
 	"survival":[["survival_pressure", "survival_pressure"]],
 	"駐守":   [["settle_fit", "settle"]],
+	"返家補給":[["restock_need", "survival_pressure"]],
 }
 
 static func applicable(ctx: DecisionContext) -> Array:
@@ -22,6 +23,10 @@ static func applicable(ctx: DecisionContext) -> Array:
 				if ctx.has_own_outpost: out.append(opt)
 			"建設":
 				out.append(opt)   # bootstrap(無據點建新) + 升級(有據點) 皆候選 → 無據點生產隊不被困
+			"返家補給":
+				# 商隊 proactive 補給：糧低於 RESTOCK 且有家可回 → 回家補 carried(避 survival latch)。
+				if ctx.is_merchant and ctx.food_days < DecisionTerms.RESTOCK_DAYS and ctx.has_home_outpost:
+					out.append(opt)
 			"覓食", "survival":
 				out.append(opt)   # 恆候選（survival 靠權重，非守衛）
 	return out
@@ -38,4 +43,5 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		"覓食":   return {"task": TeamData.TASK_FORAGE, "target": team.move_target}
 		"survival": return {"task": TeamData.TASK_FLEE, "target": Vector2i(-1,-1)}
 		"駐守":   return {"task": TeamData.TASK_GOVERN, "target": team.tile_pos}
+		"返家補給": return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.new()._find_own_outpost(state, team)}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

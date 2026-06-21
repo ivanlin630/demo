@@ -3828,6 +3828,7 @@ func _run_sim_test() -> void:
 	_test_tc6_multi_drive()
 	_test_tc7_divergence()
 	_test_role_applicable()
+	_test_merchant_restock()
 
 	print("=== DONE ===")
 
@@ -12648,3 +12649,55 @@ func _test_role_applicable() -> void:
 	assert("建設" in ap2, "無據點生產隊 → 建設 bootstrap 候選，實際=%s" % str(ap2))
 	assert("生產" not in ap2 and "駐守" not in ap2, "無據點 → 無 生產/駐守，實際=%s" % str(ap2))
 	print("role applicable OK")
+
+func _test_merchant_restock() -> void:
+	print("--- 商隊返家補給 option ---")
+	# 旅途商隊(@遠處,無當地據點)、carried 低、家有 outpost → 應有「返家補給」候選
+	var s1 := WorldState.new(); s1.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = Vector2i(5,5); t.leader_id = 100
+	_seed_pop(t, 5); t.resources = {"food": 24.0}   # 5人 days=24/12=2 < RESTOCK(5)
+	# 家 outpost 在別處(2,2)
+	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2)
+	home.outpost_owner = 0; home.outpost_level = 1; home.outpost_type = "civilian"
+	home.public_storage = {"food": 500.0}; s1.world.tiles[2*1000+2] = home
+	var ldr := PersonData.new(); ldr.id = 100; ldr.team_id = 0; s1.persons[100] = ldr; s1.teams[0] = t
+	var ctx: DecisionContext = DecisionContext.gather(s1, t)
+	assert(ctx.is_merchant and ctx.has_home_outpost and not ctx.has_own_outpost, \
+		"前置:商隊/有家可回/不站家上 — home=%s own=%s" % [str(ctx.has_home_outpost), str(ctx.has_own_outpost)])
+	assert(ctx.food_days < DecisionTerms.RESTOCK_DAYS, "前置:糧低 days=%.1f" % ctx.food_days)
+	var ap: Array = DecisionOptions.applicable(ctx)
+	assert("返家補給" in ap, "糧低旅途商隊應有返家補給候選，實際=%s" % str(ap))
+	var td: Dictionary = DecisionOptions.to_task(s1, t, "返家補給")
+	assert(td["task"] == TeamData.TASK_RETURN_HOME and td["target"] == Vector2i(2,2), \
+		"返家補給→RETURN_HOME 回家(2,2)，實際=%s" % str(td))
+
+	# 糧足商隊 → 無返家補給
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tags = [TeamData.TAG_MERCHANT]
+	t2.tile_pos = Vector2i(5,5); t2.leader_id = 100
+	_seed_pop(t2, 5); t2.resources = {"food": 120.0}   # days=10 > RESTOCK
+	var home2 := HexTileData.new(); home2.tile_pos = Vector2i(2,2)
+	home2.outpost_owner = 0; home2.outpost_level = 1; home2.public_storage = {"food": 500.0}
+	s2.world.tiles[2*1000+2] = home2
+	var l2 := PersonData.new(); l2.id = 100; s2.persons[100] = l2; s2.teams[0] = t2
+	assert("返家補給" not in DecisionOptions.applicable(DecisionContext.gather(s2, t2)), \
+		"糧足商隊不該返家補給")
+
+	# 無家流民商隊(糧低但無 outpost) → 無返家補給(守護欄:該餓仍餓)
+	var s3 := WorldState.new(); s3.world = WorldData.new()
+	var t3 := TeamData.new(); t3.team_id = 0; t3.tags = [TeamData.TAG_MERCHANT]
+	t3.tile_pos = Vector2i(5,5); t3.leader_id = 100
+	_seed_pop(t3, 5); t3.resources = {"food": 12.0}
+	var l3 := PersonData.new(); l3.id = 100; s3.persons[100] = l3; s3.teams[0] = t3
+	var ctx3: DecisionContext = DecisionContext.gather(s3, t3)
+	assert(not ctx3.has_home_outpost, "前置:無家")
+	assert("返家補給" not in DecisionOptions.applicable(ctx3), "無家商隊不該返家補給(該走survival)")
+
+	# 非商隊(生產隊)糧低 → 無返家補給(返家補給限商隊)
+	var s4 := WorldState.new(); s4.world = WorldData.new()
+	var p := _mk_produce_team(s4, {"義氣": 0.6}, 0.0, true)  # 有家但 granary food=0
+	p.resources = {"food": 12.0}
+	assert("返家補給" not in DecisionOptions.applicable(DecisionContext.gather(s4, p)), \
+		"生產隊不走返家補給(原地,非商隊)")
+	print("merchant restock OK")

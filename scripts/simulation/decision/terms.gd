@@ -1,5 +1,7 @@
 class_name DecisionTerms
 
+const RESTOCK_DAYS: float = 5.0   # TEST VALUE：商隊糧低於此 → proactive 返家補給(> WARNING 3)
+
 # 統一決策引擎：term 函式庫 + w_term 人格映射。
 # eval：驅力強度（0..~1.5），term × opt 對應；不適用 opt 回 0。
 # weight：leader 人格 → term 權重（分歧來源；bar #4，嚴禁抹平）。
@@ -10,6 +12,9 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"survival_pressure":
 			# 糧 days 越少越高；<3 天爆高（危機）
 			return clampf((6.0 - ctx.food_days) / 6.0, 0.0, 1.5)
+		"restock_need":
+			if opt != "返家補給": return 0.0
+			return clampf((RESTOCK_DAYS - ctx.food_days) / RESTOCK_DAYS, 0.0, 1.5)
 		"economic_opp":
 			if opt != "貿易": return 0.0
 			return (0.8 if ctx.has_goods else 0.2) * (1.0 if ctx.has_arb else 0.3)
