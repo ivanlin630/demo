@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 date: 2026-06-21
 branch: feat/unified-decision-engine
 plan: docs/superpowers/plans/2026-06-21-unified-decision-engine.md
