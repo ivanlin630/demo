@@ -268,7 +268,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 		"build":
 			tile.outpost_type  = tile.construction_target["type"]
 			tile.outpost_level = tile.construction_target["level"]
-			tile.outpost_owner = tile.construction_team_id
+			OutpostOwnerBank.set_owner(tile, tile.construction_team_id, "construct")
 			var n: String = get_outpost_name(tile.outpost_type, tile.outpost_level)
 			SimMessageSystem.new().emit_message(state, "outpost_built",
 				TextBank.fmt("outpost_built", "honest", {
@@ -298,7 +298,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			# 玩家紮營完工（Y 版）：免材料,只抬 food cap（regen 才產糧）,絕不送即時糧（去剝削）
 			tile.outpost_type  = str(tile.construction_target.get("type", "civilian"))
 			tile.outpost_level = 1
-			tile.outpost_owner = int(tile.construction_target.get("owner", team.team_id))
+			OutpostOwnerBank.set_owner(tile, int(tile.construction_target.get("owner", team.team_id)), "construct")
 			tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), 40.0)   # = PlayerCommandSystem.CAMP_FOOD_CAP
 			var camp_tag: String = TeamData.TAG_MILITARY if tile.outpost_type == "military" else TeamData.TAG_PRODUCE
 			if not team.tags.has(camp_tag):
@@ -313,7 +313,7 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				tile.tile_pos.x, tile.tile_pos.y])
 			tile.outpost_type  = ""
 			tile.outpost_level = 0
-			tile.outpost_owner = -1
+			OutpostOwnerBank.set_owner(tile, -1, "demolish")
 			for fac_name in FACILITY_DEF:
 				tile.set(FACILITY_DEF[fac_name]["current_level_key"], 0)
 			tile.stable_progress = 0.0
@@ -589,7 +589,7 @@ func demolish_with_control(state: WorldState, team: TeamData) -> bool:
 func capture(state: WorldState, winner_id: int, tile: HexTileData) -> void:
 	if tile.outpost_level > 0 and tile.outpost_owner != winner_id:
 		var old_owner: int = tile.outpost_owner
-		tile.outpost_owner = winner_id
+		OutpostOwnerBank.set_owner(tile, winner_id, "capture")
 		print("[Outpost] Team%d 佔領 %s（原 Team%d）at (%d,%d)" % [
 			winner_id, get_outpost_name(tile.outpost_type, tile.outpost_level),
 			old_owner, tile.tile_pos.x, tile.tile_pos.y])

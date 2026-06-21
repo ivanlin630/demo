@@ -532,7 +532,7 @@ func _action_abandon_outpost(state: WorldState, _target_id: int, _pt: TeamData, 
 		return { "ok": false, "msg": "目標無 outpost" }
 	if tile.outpost_owner != pt_id:
 		return { "ok": false, "msg": "非自家 outpost" }
-	tile.outpost_owner = -1
+	OutpostOwnerBank.set_owner(tile, -1, "abandon")
 	return { "ok": true, "msg": "已棄置 outpost (%d,%d)" % [pos.x, pos.y] }
 
 func _action_dispatch_subteam(state: WorldState, _target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
