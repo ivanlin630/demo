@@ -3839,6 +3839,7 @@ func _run_sim_test() -> void:
 	_test_unified_survival_boundary()
 	_test_dispatch_fallback()
 	_test_loyalty_bank()
+	_test_anon_treasury_bank()
 
 	print("=== DONE ===")
 
@@ -5764,6 +5765,28 @@ func _test_loyalty_bank() -> void:
 	LoyaltyBank.set_baseline(p, 0.25, "conquered")
 	assert(abs(p.loyalty - 0.25) < 0.001, "set_baseline 0.25，實際=%.3f" % p.loyalty)
 	print("loyalty bank OK")
+
+func _test_anon_treasury_bank() -> void:
+	print("--- AnonTreasuryBank 守恆 banker ---")
+	var a := TeamData.new(); a.anon_treasury = 100.0
+	var b := TeamData.new(); b.anon_treasury = 30.0
+	AnonTreasuryBank.deposit(a, 50.0, "salary")
+	assert(abs(a.anon_treasury - 150.0) < 0.001, "deposit →150")
+	var got: float = AnonTreasuryBank.withdraw(a, 40.0, "extract")
+	assert(abs(got - 40.0) < 0.001 and abs(a.anon_treasury - 110.0) < 0.001, "withdraw 40 →110")
+	# 守恆：transfer 總和不變
+	var before: float = a.anon_treasury + b.anon_treasury
+	AnonTreasuryBank.transfer(a, b, 60.0, "share")
+	assert(abs((a.anon_treasury + b.anon_treasury) - before) < 0.001, "transfer 守恆(總和不變)")
+	assert(abs(b.anon_treasury - 90.0) < 0.001, "b 收 60 →90")
+	# transfer_all：全移
+	AnonTreasuryBank.transfer_all(a, b, "absorb")
+	assert(a.anon_treasury == 0.0, "transfer_all src→0")
+	# withdraw 不透支
+	var c := TeamData.new(); c.anon_treasury = 10.0
+	var g2: float = AnonTreasuryBank.withdraw(c, 999.0, "x")
+	assert(abs(g2 - 10.0) < 0.001 and c.anon_treasury == 0.0, "withdraw clamp min(amt,bal)")
+	print("anon treasury bank OK")
 
 # ════════════ Merchant Trade (A) + Outpost Capture (D) ════════════
 

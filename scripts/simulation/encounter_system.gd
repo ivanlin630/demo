@@ -1124,17 +1124,14 @@ func _loot_treasury_share(_state: WorldState, loser: TeamData, winner: TeamData,
 	if loser.anon_treasury <= 0: return
 	if original_anon <= 0:
 		# 全給 winner
-		winner.anon_treasury += loser.anon_treasury
-		loser.anon_treasury = 0.0
+		AnonTreasuryBank.transfer_all(loser, winner, "loot_full")
 		return
 	var ratio: float = clampf(float(anon_lost) / float(original_anon), 0.0, 1.0)
 	var amt: float = loser.anon_treasury * ratio
-	loser.anon_treasury -= amt
-	winner.anon_treasury += amt
+	AnonTreasuryBank.transfer(loser, winner, amt, "loot_share")
 	# 全滅補拿剩餘
 	if loser.population == 0:
-		winner.anon_treasury += loser.anon_treasury
-		loser.anon_treasury = 0.0
+		AnonTreasuryBank.transfer_all(loser, winner, "loot_wipe")
 
 # mount loot：勝方擄獲 loser_mounts × kill_ratio（kill_ratio = 陣亡/初始人口）
 func apply_mount_loot(state: WorldState, winner_id: int, loser_id: int) -> void:
@@ -1445,8 +1442,7 @@ func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamDa
 	for k in resident.resources:
 		attacker.resources[k] = attacker.resources.get(k, 0) + resident.resources[k]
 	# 守恆(Bug10)：接收 resident 公庫（原 erase 前未轉 → 銷毀）；移除原 `+= pop×5` 憑空鑄幣
-	attacker.anon_treasury += resident.anon_treasury
-	resident.anon_treasury = 0.0
+	AnonTreasuryBank.transfer_all(resident, attacker, "massacre")
 	var rid: int = resident.team_id
 	# A feud：屠村 → resident faction 餘部繼承（erase 前，perp 當下已知）
 	NpcAiSystem.spread_feud(state, resident, attacker.leader_id,

@@ -186,7 +186,7 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
 		return { "ok": false, "msg": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN }
 	pt.resources["coin"] = float(pt.resources.get("coin", 0)) - TRAIN_COST_COIN
-	pt.anon_treasury += TRAIN_COST_COIN   # 守恆：餉銀入公庫,不蒸發（coin_eq 不破）
+	AnonTreasuryBank.deposit(pt, TRAIN_COST_COIN, "train_salary")   # 守恆：餉銀入公庫,不蒸發（coin_eq 不破）
 	var target_tier: String = ""
 	for tier in AnonTierSystem.TIER_ORDER:
 		if tier == AnonCohort.TIER_ELITE: break
@@ -1142,8 +1142,7 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 	var tgt_named: int = tgt.named_members.size() + (1 if tgt.leader_id != -1 else 0)
 	var tgt_anon: int = maxi(tgt.population - tgt_named, 1)
 	var share: float = minf(tgt.anon_treasury / float(tgt_anon), tgt.anon_treasury)
-	tgt.anon_treasury -= share
-	pt.anon_treasury += share
+	AnonTreasuryBank.transfer(tgt, pt, share, "recruit_share")
 	AnonTierSystem.transfer_proportional(tgt, pt, 1)
 	state.player_pending_targets.erase(target_id)
 	print("[Recruit] 匿名 Team%d←%d, 花%.0f coin, 新人口=%d" % [

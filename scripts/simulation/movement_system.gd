@@ -230,7 +230,7 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 		# 撿 abandoned_coin（有 owner 則僅 owner 可撿）
 		if tile.abandoned_coin > 0.0:
 			if tile.outpost_owner == -1 or tile.outpost_owner == team.team_id:
-				team.anon_treasury += tile.abandoned_coin
+				AnonTreasuryBank.deposit(team, tile.abandoned_coin, "pickup_abandoned")
 				print("[Coin] Team%d 撿 %.0f 遺財" % [team.team_id, tile.abandoned_coin])
 				tile.abandoned_coin = 0.0
 	print("[Move] Team %d 抵達 (%d,%d)" % [team.team_id, team.tile_pos.x, team.tile_pos.y])
