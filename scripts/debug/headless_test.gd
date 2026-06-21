@@ -3781,6 +3781,7 @@ func _run_sim_test() -> void:
 	_test_food_granary_cap()
 	_test_consume_from_granary()
 	_test_food_surplus_sell()
+	_test_food_buy_order()
 
 	# ── 經濟 WS-2c：effective_food accessor 單源（破商隊 survival 二階死鎖）──
 	_test_effective_food_accessor()
@@ -4207,6 +4208,29 @@ func _test_food_surplus_sell() -> void:
 		if o["kind"] == "sell" and o["res"] == "food": has_food_sell = true
 	assert(has_food_sell, "糧倉滿應發 food sell 單(滿了→賣決策)")
 	print("food surplus sell OK")
+
+func _test_food_buy_order() -> void:
+	print("--- food 買單(缺糧隊) ---")
+	var os := OrderSystem.new()
+	# 缺糧隊(team food低、無糧倉) → 發 food buy
+	var s1 := WorldState.new(); s1.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(3,3); t.leader_id = 100
+	_seed_pop(t, 5); t.resources = {"food": 12.0}   # days=12/(5*2.4)=1.0 < FOOD_BUY_DAYS(4)
+	var ldr := PersonData.new(); ldr.id = 100; s1.persons[100] = ldr; s1.teams[0] = t
+	os.tick_team_orders(s1, t)
+	var has_food_buy := false
+	for o in t.active_orders:
+		if o["kind"] == "buy" and o["res"] == "food": has_food_buy = true
+	assert(has_food_buy, "缺糧隊應發 food buy 單，active=%s" % str(t.active_orders))
+	# 飽糧隊 → 不發
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(3,3); t2.leader_id = 100
+	_seed_pop(t2, 5); t2.resources = {"food": 240.0}   # days=20 > 4
+	var l2 := PersonData.new(); l2.id = 100; s2.persons[100] = l2; s2.teams[0] = t2
+	os.tick_team_orders(s2, t2)
+	for o in t2.active_orders:
+		assert(not (o["kind"] == "buy" and o["res"] == "food"), "飽糧隊不該發 food buy")
+	print("food buy order OK")
 
 # ── 經濟 WS-2c：effective_food accessor 單源 ──
 
