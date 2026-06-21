@@ -1387,7 +1387,7 @@ func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: 
 	ratio = clampf(ratio, 0.0, 1.0)
 	var amt: float = team.anon_treasury * ratio
 	if amt < 1.0: return   # 忽略可忽略額度，避免空徵用噪音 + 虛增 unrest
-	team.anon_treasury -= amt
+	AnonTreasuryBank.withdraw(team, amt, "extract")
 	team.resources["coin"] = float(team.resources.get("coin", 0)) + amt
 	var is_emergency: bool = (reason == "飢餓緊急")
 	var stress_pen: float = (0.05 if is_emergency else 0.15) * ratio
@@ -1453,7 +1453,8 @@ func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 	if tile == null:
 		tile = _nearest_valid_tile(state, team.tile_pos)
 		if tile == null:
-			team.anon_treasury = 0.0
+			# 邊緣洩漏：地圖全無有效格(radius 12) → coin 無處可路由,憑空丟失(pre-existing)。
+			AnonTreasuryBank.reset(team, "extinct_no_tile_LEAK")
 			team.resources.clear()
 			return
 	if tile.outpost_level > 0:
@@ -1484,7 +1485,8 @@ func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 			+ float(team.resources.get("ore_gold", 0))
 		tile.resources["ore_silver"] = float(tile.resources.get("ore_silver", 0)) \
 			+ float(team.resources.get("ore_silver", 0))
-	team.anon_treasury = 0.0
+	# coin 已先路由(public_storage/abandoned_coin) → 此 reset 為合法歸零(非洩漏)
+	AnonTreasuryBank.reset(team, "extinct_routed")
 	team.resources.clear()
 
 # ──────── NPC 自動領存公庫 ────────
