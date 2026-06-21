@@ -36,8 +36,8 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	var frac: float = float(pop_count) / float(parent.population)
 	for res in parent.resources:
 		var amt: float = float(parent.resources[res]) * frac
-		sub.resources[res]    = amt
-		parent.resources[res] = float(parent.resources.get(res, 0)) - amt
+		ResourceBank.set_amt(sub, res, amt, "subteam_split_in")
+		ResourceBank.add(parent, res, -amt, "subteam_split_out")
 	# 公庫 treasury 按比例帶走（sub 新建 treasury=0 → transfer 等價原邏輯，守恆）
 	AnonTreasuryBank.transfer(parent, sub, parent.anon_treasury * frac, "subteam_split")
 
@@ -84,15 +84,15 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 func _transfer_proportional_assets(absorber: TeamData, absorbed: TeamData, frac: float, will_empty: bool) -> void:
 	for res in absorbed.resources:
 		var amt: float = float(absorbed.resources.get(res, 0)) * frac
-		absorber.resources[res] = float(absorber.resources.get(res, 0)) + amt
-		absorbed.resources[res] = float(absorbed.resources.get(res, 0)) - amt
+		ResourceBank.add(absorber, res, amt, "merge_share_in")
+		ResourceBank.add(absorbed, res, -amt, "merge_share_out")
 	AnonTreasuryBank.transfer(absorbed, absorber, absorbed.anon_treasury * frac, "merge_share")
 	if will_empty:
 		# absorbed 將被 erase → 掃光殘餘 resources（非僅 frac）+ treasury，否則殘餘 coin 隨 erase 漏失。
 		# （population getter 後，frac 可能在 leader/named 已搬出時算得=0 → resources 完全沒搬）
 		for res in absorbed.resources:
-			absorber.resources[res] = float(absorber.resources.get(res, 0)) + float(absorbed.resources.get(res, 0))
-			absorbed.resources[res] = 0.0
+			ResourceBank.add(absorber, res, float(absorbed.resources.get(res, 0)), "merge_absorb_in")
+			ResourceBank.set_amt(absorbed, res, 0.0, "merge_absorb_out")
 		AnonTreasuryBank.transfer_all(absorbed, absorber, "merge_absorb")
 
 # 滅團清理：統一走 erase_team chokepoint（faction member/known_member_states + registry + 交叉 ref）
