@@ -12512,8 +12512,9 @@ func _test_decision_commitment() -> void:
 func _test_unified_seam() -> void:
 	print("--- 決策引擎 Task5: 切片 seam ---")
 	var fai := FactionAISystem.new()
-	assert(fai.uses_unified(_mk_team_tag("商隊")), "商隊-tag → 切片(走新引擎)")
-	assert(not fai.uses_unified(_mk_team_tag("軍隊")), "軍隊 → 非切片(舊系統)")
+	assert(fai.uses_unified(_mk_team_tag(TeamData.TAG_MERCHANT)), "商隊-tag → 切片(走新引擎)")
+	assert(fai.uses_unified(_mk_team_tag(TeamData.TAG_PRODUCE)), "生產-tag → 切片(走新引擎)")
+	assert(not fai.uses_unified(_mk_team_tag(TeamData.TAG_MILITARY)), "軍隊 → 非切片(舊系統)")
 	print("unified seam OK")
 
 func _mk_team_tag(tag: String) -> TeamData:
