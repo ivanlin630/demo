@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: TC7 分歧硬 bar 與「角色正確化」相容性 — 請裁驗收套件調整
 ---
 
