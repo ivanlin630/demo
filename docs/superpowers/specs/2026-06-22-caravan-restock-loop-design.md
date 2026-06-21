@@ -16,18 +16,13 @@
 
 部分卡 survival 的商隊（無自家 outpost 的流民商隊，trace 中 T6）= 真餓死，**正確擬真，非 bug**。
 
-## 修：角色正確化 + 返家補給 Option（全在統一引擎內）
+> 🔧 **藍圖裁定修訂（2026-06-22，`tc7-ruling`/`defer-a-gate`）**：**不加角色硬 gate**。角色 = 權重輸入非 pre-filter——商隊桌上仍有建設/治理，靠人格+情境**軟壓低**（能蓋但很少蓋），富野心商隊終會蓋城=湧現角色轉換。故本塊**只加返家補給 option，不動 applicable 角色守衛**。TC7 原樣（商隊建設/治理仍在桌→3 leader 仍分歧）。gate 經系統判定**非餓死修 load-bearing**（返家補給才是真修）。定調原則：角色=權重輸入，現存 `is_merchant` 硬 gate（含 sub-project A 的貿易 gate）皆過渡債，框架完成塊統一遷成權重。
 
-對稱 sub-project A（A 把**貿易**從生產隊拿掉）：本塊把**定居者 option 從商隊拿掉** + 加商隊補給迴路。**全在 `scripts/simulation/decision/`，不脫統一架構——是補完它。**
+## 修：返家補給 Option（全在統一引擎內，無 gate）
 
-### 改 1：駐守/生產/建設 = 定居者專屬（商隊不選）
-`options.gd applicable()` 守衛加 `and not ctx.is_merchant`：
-- 駐守、生產：`has_own_outpost and not ctx.is_merchant`
-- 建設：`not ctx.is_merchant`（商隊不蓋據點；建設仍給無 merchant 的生產隊 bootstrap）
+**全在 `scripts/simulation/decision/`，不脫統一架構——是補完它。** 餓死修真核 = 補給迴路；糧低時返家補給 util（restock_need × survival 權重）壓過治理/貿易 → 商隊回家補糧，**不靠禁定居 option**（全集 option 下照樣有效）。角色分化靠人格權重（商人人格 settle 權重低 → 少治理）+ 湧現漂移。
 
-→ 商隊候選只剩：貿易 / 覓食 / survival / **返家補給(新)**。商隊不再被派治理空據點餓死。
-
-### 改 2：新 Option「返家補給」（caravan 迴路）
+### 新 Option「返家補給」（caravan 迴路）
 商隊貿易途中 carried 糧低 → 回自家糧倉 outpost 補 carried（WS-2d ration 在到家時自動補）→ 補滿再出門貿易。
 
 ```
@@ -66,13 +61,12 @@ proactive 補給（food_days < RESTOCK ~5）在**舊 survival 觸發(WARNING 3)�
 ## 驗收
 
 - **履約脫 0（主目標）**：world_sim ≥1000 tick，`g1.order_fulfilled > 0`、`[Market]成交` 常態、`merchant_survival` 大降、商隊出現「貿易↔返家補給」迴路（trace 抽樣一支見 carried 週期回補、不再 drift 餓死）。
-- **角色正確**：商隊不再 task=治理/生產（trace 無商隊 GOVERN/MANUFACTURE）。
-- **believability**：無家商隊 / 瀕餓商隊仍走 survival（單測 + trace）。
-- 回歸：TC1/4/6/7 + sub-project A 測 + 既有 survival/飢荒測全綠、headless 全綠、coin_eq=0、InvariantAudit 0。
+- **believability（藍圖守則，拔 gate 後盯這條）**：商隊 task 分布**貿易占多數**（沒崩 specialization mush）；無家商隊 / 瀕餓商隊仍走 survival（單測 + trace）；觀測是否有商隊湧現蓋城（富野心→建設爬過，正常）。
+- 回歸：**TC1/4/6/7 原樣全綠**（options.gd 角色守衛不動 → 商隊建設/治理仍在桌、TC7 3 分歧不變）、sub-project A 測 + 既有 survival/飢荒測全綠、headless 全綠、coin_eq=0、InvariantAudit 0。
 
 ## 檔案
 
-- `scripts/simulation/decision/options.gd`：applicable 駐守/生產/建設 加 `not is_merchant`；REGISTRY 加「返家補給」row；to_task 加「返家補給」→ TASK_RETURN_HOME + `_find_own_outpost`。
+- `scripts/simulation/decision/options.gd`：REGISTRY 加「返家補給」row；applicable 加「返家補給」守衛；to_task 加「返家補給」→ TASK_RETURN_HOME + `_find_own_outpost`。**applicable 角色守衛（駐守/生產/建設）不動**（無 gate）。
 - `scripts/simulation/decision/terms.gd`：eval 加 `restock_need`。
 - `scripts/simulation/decision/decision_context.gd`：加 `has_home_outpost` 欄位 + gather。
 - `scripts/debug/headless_test.gd`：新測（商隊糧低→返家補給 option / 商隊不選治理 / 無家商隊不選返家補給 / 補滿→貿易）。

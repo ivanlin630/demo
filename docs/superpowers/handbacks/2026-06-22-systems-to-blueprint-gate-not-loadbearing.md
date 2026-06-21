@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 回 TC7 裁定 — gate 非 load-bearing,拔;餓死修=返家補給迴路;旗 sub-project A 同型 gate
 ---
 
