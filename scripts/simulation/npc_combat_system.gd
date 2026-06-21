@@ -226,8 +226,8 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 				"weapon_melee_low", "weapon_melee_high",
 				"weapon_ranged_low", "weapon_ranged_high"]:
 		var taken: float = float(loser.resources.get(res, 0)) * effective_loot
-		winner.resources[res] = float(winner.resources.get(res, 0)) + taken
-		loser.resources[res]  = float(loser.resources.get(res, 0)) - taken
+		ResourceBank.add(winner, res, taken, "npc_loot_in")
+		ResourceBank.add(loser, res, -taken, "npc_loot_out")
 	# 戰敗 looted 記憶：敗方全員記住勝方 leader
 	var _npc_ai_loot := NpcAiSystem.new()
 	for pid in ([loser.leader_id] as Array) + loser.named_members:
@@ -480,7 +480,7 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	p.equipment["hand_1"] = { "type": "none", "grade": "" }
 	# 守恆：死者隨身 coin 退回團（否則 persons.erase 連 coin 一起銷毀）
 	if p.coin > 0.0:
-		team.resources["coin"] = float(team.resources.get("coin", 0)) + p.coin
+		ResourceBank.add(team, "coin", p.coin, "death_coin_return")
 		p.coin = 0.0
 	state.persons.erase(p.id)
 

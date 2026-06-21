@@ -185,7 +185,7 @@ func _action_train(state: WorldState, _target_id: int, pt: TeamData, _pt_id: int
 		return { "ok": false, "msg": "無匿名人口可訓練" }
 	if float(pt.resources.get("coin", 0)) < TRAIN_COST_COIN:
 		return { "ok": false, "msg": "coin 不足訓練（需 %.0f）" % TRAIN_COST_COIN }
-	pt.resources["coin"] = float(pt.resources.get("coin", 0)) - TRAIN_COST_COIN
+	ResourceBank.add(pt, "coin", -TRAIN_COST_COIN, "player_train")
 	AnonTreasuryBank.deposit(pt, TRAIN_COST_COIN, "train_salary")   # 守恆：餉銀入公庫,不蒸發（coin_eq 不破）
 	var target_tier: String = ""
 	for tier in AnonTierSystem.TIER_ORDER:
@@ -257,7 +257,7 @@ func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData
 	var stored: float = float(tile.public_storage.get(res, 0))
 	if stored < amount: return { "ok": false, "msg": "公庫不足" }
 	tile.public_storage[res] = stored - amount
-	pt.resources[res] = float(pt.resources.get(res, 0)) + amount
+	ResourceBank.add(pt, res, amount, "withdraw_storage")
 	return { "ok": true, "msg": "取 %s × %.0f" % [res, amount] }
 
 func _action_deposit_to_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:
@@ -272,7 +272,7 @@ func _action_deposit_to_storage(state: WorldState, _target: int, pt: TeamData, p
 	var stored: float = float(tile.public_storage.get(res, 0))
 	if stored + amount > cap: return { "ok": false, "msg": "公庫已滿" }
 	tile.public_storage[res] = stored + amount
-	pt.resources[res] = have - amount
+	ResourceBank.set_amt(pt, res, have - amount, "deposit_storage")
 	return { "ok": true, "msg": "存 %s × %.0f" % [res, amount] }
 
 func _action_trade(state: WorldState, target_id: int, _pt: TeamData, _pt_id: int) -> Dictionary:
@@ -305,8 +305,8 @@ func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt
 	state.player_pending_targets.erase(target_id)
 	if resp == "accept":
 		var amount: float = float(tgt.resources.get("coin", 0)) * 0.1  # TEST VALUE
-		tgt.resources["coin"] = float(tgt.resources.get("coin", 0)) - amount
-		pt.resources["coin"]  = float(pt.resources.get("coin", 0)) + amount
+		ResourceBank.add(tgt, "coin", -amount, "demand_tribute_out")
+		ResourceBank.add(pt, "coin", amount, "demand_tribute_in")
 		print("[PlayerCmd] 索貢成功 Team%d→玩家 %.0f coin" % [target_id, amount])
 		return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
 	else:
@@ -385,8 +385,8 @@ func _action_take_loot(state: WorldState, _target_id: int, pt: TeamData, pt_id: 
 	for rk in loot:
 		var amount: float = float(loot[rk])
 		if loser_team != null:
-			loser_team.resources[rk] = maxf(float(loser_team.resources.get(rk, 0)) - amount, 0)
-		pt.resources[rk] = float(pt.resources.get(rk, 0)) + amount
+			ResourceBank.remove(loser_team, rk, amount, "collect_loot_out")
+		ResourceBank.add(pt, rk, amount, "collect_loot_in")
 	state.last_encounter_result = {}
 	print("[PlayerCmd] 收取戰利品: %s" % str(loot))
 	return { "ok": true, "msg": "收取戰利品成功",
@@ -667,8 +667,8 @@ func _action_disband_faction(state: WorldState, _target_id: int, pt: TeamData, p
 func _transfer_surrender_assets(from: TeamData, to: TeamData) -> void:
 	for res in SURRENDER_TRANSFER_RES:
 		var amt: float = float(from.resources.get(res, 0)) * 0.3
-		from.resources[res] = float(from.resources.get(res, 0)) - amt
-		to.resources[res]   = float(to.resources.get(res, 0)) + amt
+		ResourceBank.add(from, res, -amt, "surrender_out")
+		ResourceBank.add(to, res, amt, "surrender_in")
 
 func _action_offer_surrender(state: WorldState, target_id: int, pt: TeamData, pt_id: int) -> Dictionary:
 	var tgt6: TeamData = state.teams.get(target_id)
@@ -836,7 +836,7 @@ func _accept_join_request(state: WorldState, from_id: int) -> Dictionary:
 	SubteamSystem.new().merge_teams(state, pt.team_id, from_id)         # 整團併入：pop/named/tier/treasury 守恆
 	var joined: int = pt.population - pop_before
 	var actual_cost: float = JOIN_ONBOARD_MEAL * float(joined)
-	pt.resources["food"] = float(pt.resources.get("food", 0)) - actual_cost   # 餵他們進來：吃掉,食物非守恆
+	ResourceBank.add(pt, "food", -actual_cost, "join_onboard_meal")   # 餵他們進來：吃掉,食物非守恆
 	return { "ok": true, "msg": "收留 %d 人（食物 -%.1f）" % [joined, actual_cost],
 		"payload": {"joined": joined, "food_cost": actual_cost} }
 
@@ -1003,8 +1003,8 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 				"玩家無餘糧援助 Team%d" % beggar_id, pt,
 				{ "origin": str(pt_id), "target": str(beggar_id) })
 		else:
-			pt.resources["food"] = float(pt.resources.get("food", 0)) - actual
-			beggar.resources["food"] = float(beggar.resources.get("food", 0)) + actual
+			ResourceBank.add(pt, "food", -actual, "player_aid_out")
+			ResourceBank.add(beggar, "food", actual, "player_aid_in")
 			msg_sys.emit_message(state, "aid_given",
 				"玩家援助 Team%d %.0f 食物" % [beggar_id, actual], pt,
 				{ "origin": str(pt_id), "target": str(beggar_id),
@@ -1135,9 +1135,9 @@ func _recruit_anon_internal(state: WorldState, pt: TeamData,
 	if tgt.population <= 1:
 		state.player_pending_targets.erase(target_id)
 		return { "ok": false, "msg": "目標人口不足" }
-	pt.resources["coin"] = coin - RECRUIT_COST_ANON
+	ResourceBank.set_amt(pt, "coin", coin - RECRUIT_COST_ANON, "recruit_anon_pay")
 	# 守恆：買人付給對方，coin 不蒸發
-	tgt.resources["coin"] = float(tgt.resources.get("coin", 0)) + RECRUIT_COST_ANON
+	ResourceBank.add(tgt, "coin", RECRUIT_COST_ANON, "recruit_anon_receive")
 	# 被招募 anon 帶走在原團的 treasury 份額
 	var tgt_named: int = tgt.named_members.size() + (1 if tgt.leader_id != -1 else 0)
 	var tgt_anon: int = maxi(tgt.population - tgt_named, 1)
@@ -1273,8 +1273,8 @@ func _action_equip_member(state: WorldState, target: Dictionary, pt: TeamData) -
 	# 先卸原槽（pool 裝備還回池）
 	var cur: Dictionary = m.equipment.get(slot, {})
 	if cur.get("type", "none") == "pool" and cur.get("grade", "") != "":
-		pt.resources[cur["grade"]] = int(pt.resources.get(cur["grade"], 0)) + 1
-	pt.resources[grade] = int(pt.resources[grade]) - 1
+		ResourceBank.add(pt, cur["grade"], 1, "equip_swap_return")
+	ResourceBank.add(pt, grade, -1, "equip_swap_take")
 	m.equipment[slot] = { "type": "pool", "grade": grade }
 	if ItemAttributes.is_2h(grade):
 		m.equipment["hand_2"] = { "type": "2h_ref" }
@@ -1308,9 +1308,9 @@ func _recruit_named_internal(state: WorldState, pt: TeamData,
 		return { "ok": false, "msg": "金幣不足（named 需%d）" % int(RECRUIT_COST_NAMED) }
 	# 轉移
 	var pt_id: int = _get_player_team_id(state)
-	pt.resources["coin"] = coin - RECRUIT_COST_NAMED
+	ResourceBank.set_amt(pt, "coin", coin - RECRUIT_COST_NAMED, "recruit_named_pay")
 	# 守恆：買人付給對方，coin 不蒸發
-	tgt4.resources["coin"] = float(tgt4.resources.get("coin", 0)) + RECRUIT_COST_NAMED
+	ResourceBank.add(tgt4, "coin", RECRUIT_COST_NAMED, "recruit_named_receive")
 	tgt4.named_members.erase(person_id)
 	p.team_id = pt_id
 	LoyaltyBank.set_baseline(p, 0.5, "recruit")

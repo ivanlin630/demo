@@ -482,7 +482,7 @@ func _auto_withdraw_mounts(state: WorldState, team: TeamData) -> void:
 	var take: int = mini(need, available)
 	if take > 0:
 		tile.public_storage["mounts"] = available - take
-		team.resources["mounts"] = current + take
+		ResourceBank.set_amt(team, "mounts", current + take, "auto_withdraw_mounts")
 		print("[Mount] Team%d auto-withdraw %d mounts" % [team.team_id, take])
 
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
@@ -1388,7 +1388,7 @@ func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: 
 	var amt: float = team.anon_treasury * ratio
 	if amt < 1.0: return   # 忽略可忽略額度，避免空徵用噪音 + 虛增 unrest
 	AnonTreasuryBank.withdraw(team, amt, "extract")
-	team.resources["coin"] = float(team.resources.get("coin", 0)) + amt
+	ResourceBank.add(team, "coin", amt, "extract_treasury")
 	var is_emergency: bool = (reason == "飢餓緊急")
 	var stress_pen: float = (0.05 if is_emergency else 0.15) * ratio
 	var loyalty_pen: float = (0.02 if is_emergency else 0.08) * ratio
@@ -1455,7 +1455,7 @@ func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 		if tile == null:
 			# 邊緣洩漏：地圖全無有效格(radius 12) → coin 無處可路由,憑空丟失(pre-existing)。
 			AnonTreasuryBank.reset(team, "extinct_no_tile_LEAK")
-			team.resources.clear()
+			ResourceBank.clear_all(team, "extinct_no_tile_LEAK")
 			return
 	if tile.outpost_level > 0:
 		var os := OutpostSystem.new()
@@ -1487,7 +1487,7 @@ func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 			+ float(team.resources.get("ore_silver", 0))
 	# coin 已先路由(public_storage/abandoned_coin) → 此 reset 為合法歸零(非洩漏)
 	AnonTreasuryBank.reset(team, "extinct_routed")
-	team.resources.clear()
+	ResourceBank.clear_all(team, "extinct_routed")
 
 # ──────── NPC 自動領存公庫 ────────
 
@@ -1515,14 +1515,14 @@ func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileDat
 			var take: float = minf(stored, needed - team_have)
 			if take > 0.0:
 				tile.public_storage[res] = stored - take
-				team.resources[res] = team_have + take
+				ResourceBank.set_amt(team, res, team_have + take, "npc_withdraw_vault")
 		elif team_have > needed * 2.0:
 			var cap: float = os._get_storage_cap(tile, res)
 			var deposit_max: float = cap - stored
 			var deposit: float = minf(team_have - needed, deposit_max)
 			if deposit > 0.0:
 				tile.public_storage[res] = stored + deposit
-				team.resources[res] = team_have - deposit
+				ResourceBank.set_amt(team, res, team_have - deposit, "npc_deposit_vault")
 
 # ──────── 基建 dispatch ────────
 
@@ -1684,8 +1684,8 @@ func _fund_subteam_cost(owner_team: TeamData, sub: TeamData, tile, cost: Diction
 		var need: float = maxf(float(cost[k]) - have, 0.0)
 		if need <= 0.0: continue
 		var transfer: float = minf(need, float(owner_team.resources.get(k, 0)))
-		sub.resources[k] = float(sub.resources.get(k, 0)) + transfer
-		owner_team.resources[k] = float(owner_team.resources.get(k, 0)) - transfer
+		ResourceBank.add(sub, k, transfer, "fund_sub_in")
+		ResourceBank.add(owner_team, k, -transfer, "fund_sub_out")
 
 # 腳下公庫撥付（caravan-load 新據點）：home_tile 公庫優先裝車，差額補 owner 私產。
 # 新據點目標格無公庫 → 子隊背 cost 上路，抵達後 start_build fallback 子隊私產扣款。守恆純轉移。
@@ -1700,12 +1700,12 @@ func _fund_subteam_from_vault(_state: WorldState, owner: TeamData, sub: TeamData
 		var from_vault: float = minf(need, float(vault.get(k, 0)))
 		if from_vault > 0.0:
 			vault[k] = float(vault.get(k, 0)) - from_vault
-			sub.resources[k] = float(sub.resources.get(k, 0)) + from_vault
+			ResourceBank.add(sub, k, from_vault, "fund_vault_in")
 			need -= from_vault
 		if need > 0.0:
 			var t: float = minf(need, float(owner.resources.get(k, 0)))
-			owner.resources[k] = float(owner.resources.get(k, 0)) - t
-			sub.resources[k] = float(sub.resources.get(k, 0)) + t
+			ResourceBank.add(owner, k, -t, "fund_vault_owner_out")
+			ResourceBank.add(sub, k, t, "fund_vault_owner_in")
 
 # 派擴建子隊（task="擴建"，附 facility_type）
 func _dispatch_facility_builder(state: WorldState, owner_team: TeamData, outpost_pos: Vector2i,

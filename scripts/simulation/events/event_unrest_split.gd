@@ -65,14 +65,8 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	new_team.team_id   = _next_team_id(state)
 	new_team.tile_pos  = parent.tile_pos
 	new_team.faction_id = -1
-	new_team.resources = {
-		"food": 0.0, "material": 0, "coin": 0, "goods": 0, "gem": 0,
-		"ore_gold": 0, "ore_silver": 0, "ore_iron": 0, "ore_steel": 0,
-		"weapon_melee_low": 0, "weapon_melee_high": 0,
-		"weapon_ranged_low": 0, "weapon_ranged_high": 0,
-		"mounts": 0, "wagons": 0, "arrows": 0, "medicine": 0, "tools": 0,
-		"armor_low": 0, "armor_high": 0,
-	}
+	# 新團 resources 全 0 = 空池（downstream 一律 .get(k,0)）→ clear_all 等價且不憑空生
+	ResourceBank.clear_all(new_team, "split_init")
 	new_team.tags = []
 
 	# 選 new leader

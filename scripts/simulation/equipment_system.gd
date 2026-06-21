@@ -41,7 +41,7 @@ func _update_equipment(state: WorldState, team: TeamData) -> void:
 				if p.equipment["hand_1"].get("type", "none") == "none":
 					p.equipment["hand_1"] = { "type": "pool", "grade": pool_key }
 					equipped_count += 1
-			team.resources[pool_key] = pool - equipped_count * UNITS_PER_EQUIP
+			ResourceBank.set_amt(team, pool_key, pool - equipped_count * UNITS_PER_EQUIP, "equip_named")
 			if equipped_count > 0:
 				print("[Equip] Team%d 裝備 %s ×%d" % [team.team_id, wtype, equipped_count])
 
@@ -57,7 +57,7 @@ func _update_equipment(state: WorldState, team: TeamData) -> void:
 					p.equipment["hand_1"] = { "type": "none", "grade": "" }
 					unequipped_count += 1
 			var pool: int = int(team.resources.get(pool_key, 0))
-			team.resources[pool_key] = pool + unequipped_count * UNITS_PER_EQUIP
+			ResourceBank.set_amt(team, pool_key, pool + unequipped_count * UNITS_PER_EQUIP, "unequip_named")
 
 func _update_anon_ratio(state: WorldState, team: TeamData) -> void:
 	var named_ids: Array = _get_named_ids(team)
@@ -77,7 +77,7 @@ func on_named_death(team: TeamData, wtype: String) -> void:
 		return
 	var pool_key: String = "weapon_" + wtype
 	var recovered: int = 2 if randf() < 0.5 else 0
-	team.resources[pool_key] = int(team.resources.get(pool_key, 0)) + recovered
+	ResourceBank.add(team, pool_key, recovered, "weapon_recover_named")
 
 func on_anon_casualties(team: TeamData, anon_casualties: int) -> void:
 	var armed_dead: int = int(float(anon_casualties) * team.armed_anon_ratio)
@@ -94,7 +94,7 @@ func on_anon_casualties(team: TeamData, anon_casualties: int) -> void:
 		if cur <= 0:
 			continue
 		var share: int = cur * recovered_units / pool_total
-		team.resources[pool_key] = cur + share
+		ResourceBank.set_amt(team, pool_key, cur + share, "weapon_recover_anon")
 
 func _weapon_pool_total(team: TeamData) -> int:
 	var total: int = 0
