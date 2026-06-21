@@ -788,17 +788,11 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			if mt.tags.has(TeamData.TAG_MERCHANT):
 				Probe.bump("g1.merchant_survival")
 			continue  # 生存 sticky：不蓋過 survival task
-		# WS-2 解角色卡死（hoist）：商隊-tag member 可貿易 → 貿易意圖優先於徵收/外交 preempt。
-		# WS-2b 破死鎖（對齊 solo 路徑）：有 arb → 趕赴訂單地；無 arb → _merchant_trade_target
-		# 回最近市集 outpost（巡市集），抵達後親讀看板取得 arb。**不再卡 arb 非空**（否則商隊永不出門
-		# →永不碰看板→永無 arb，即 world_sim 履約 0 的真因）。僅商隊 tag（軍隊/生產不變）。
-		# 無任何市集可巡且無 arb → _merchant_trade_target 回 (-1,-1) → 落回原鏈做徵收/外交。
-		if mt.tags.has(TeamData.TAG_MERCHANT) and _can_trade(state, mt):
-			var tt: Vector2i = _merchant_trade_target(state, mt)
-			if tt != Vector2i(-1, -1) and TaskArbiter.try_set(state, mt, TeamData.TASK_TRADE,
-					tt, TaskArbiter.PRIO_DISPATCH, "member_trade"):
-				mt.trade_task_start_tick = state.world.current_tick
-				continue
+		# 統一決策引擎切片：商隊-tag member 走 DecisionEngine（取代舊 member trade hoist）。
+		# 舊 WS-2/2b 的 member 貿易 hoist 被引擎的「貿易 option」涵蓋 → 移除商隊分支（不雙重觸發）。
+		if uses_unified(mt):
+			_decide_unified(state, mt)
+			continue
 		var absorber_id: int = _find_absorber(state, mt, f)
 		if absorber_id != -1:
 			var mt_leader = state.persons.get(mt.leader_id)
@@ -846,6 +840,23 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 				if TaskArbiter.try_set(state, mt, TeamData.TASK_TRADE,
 						ttarget, TaskArbiter.PRIO_DISPATCH, "member_trade"):
 					mt.trade_task_start_tick = state.world.current_tick
+
+# ──────── 統一決策引擎切片 seam ────────
+# 首切片 = 商隊-tag 隊：macro 決策走 DecisionEngine（舊 member hoist / solo 生產者跳過，單一 owner）。
+# 非切片隊（軍隊/生產…）舊系統原封不動（零影響 = de-risk）。
+func uses_unified(team: TeamData) -> bool:
+	return team.tags.has(TeamData.TAG_MERCHANT)
+
+# 切片隊走引擎決策 → 設 task（取代舊 member/solo 派工）。
+func _decide_unified(state: WorldState, team: TeamData) -> void:
+	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
+		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
+	var opt: String = DecisionEngine.decide(state, team)
+	var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+	var tgt: Vector2i = td["target"]
+	if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+		return   # 無有效目標 → 不強設
+	TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
 
 func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 	var best_id: int = -1
@@ -991,6 +1002,11 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	var leader_p = state.persons.get(team.leader_id)
 	if leader_p == null: return
 
+	# 統一決策引擎切片：商隊-tag solo 隊走 DecisionEngine（取代舊 solo 計分 + MERCHANT_TRADE_BONUS）。
+	if uses_unified(team):
+		_decide_unified(state, team)
+		return
+
 	var martial:  float = float(leader_p.values.get("好戰",   0.5))
 	var greed:    float = float(leader_p.values.get("貪婪",   0.5))
 	var ambition: float = float(leader_p.values.get("野心",   0.5))
@@ -1009,10 +1025,8 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		scores[TeamData.TASK_MANUFACTURE] = (greed * 0.4 + 0.2) * _tag_weight(team, TeamData.TASK_MANUFACTURE)
 	if _can_trade(state, team):
 		scores[TeamData.TASK_TRADE] = (greed * 0.5 + 0.3) * _tag_weight(team, TeamData.TASK_TRADE)
-		# WS-2 解角色卡死：商隊-tag 隊 surplus+arb 時 trade 加成 → 勝 CAMP/尋家
-		# （FLEE 生存仍應贏：food_pc<2.0 的 FLEE 分數不動，絕境不貿易）
-		if team.tags.has(TeamData.TAG_MERCHANT):
-			scores[TeamData.TASK_TRADE] += MERCHANT_TRADE_BONUS
+		# 統一決策引擎接管後，商隊-tag solo 隊已在函式開頭 return → 此處只剩非商隊隊。
+		# 舊 MERCHANT_TRADE_BONUS hoist（商隊分支）由引擎的「貿易 option」取代，移除（不雙重觸發）。
 	# W4 A：駐家治理傾向 — 慎重/野心高 leader 在自家 outpost 攢公庫（建材未達標才積極）
 	var own_pos: Vector2i = _find_own_outpost(state, team)
 	if own_pos != Vector2i(-1, -1):

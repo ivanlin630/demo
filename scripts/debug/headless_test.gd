@@ -3815,6 +3815,19 @@ func _run_sim_test() -> void:
 	_test_probe_g1g2_hooks()
 	_test_spine_trace_dump()
 
+	# ── 統一決策引擎 (sub-project 1) ──
+	_test_decision_context_gather()
+	_test_decision_terms()
+	_test_decision_options()
+	_test_decision_engine_decide()
+	_test_decision_commitment()
+	_test_unified_seam()
+	# 驗證套件 TC1/4/6/7（believability 行為測試）
+	_test_tc1_no_oscillation()
+	_test_tc4_ambition_drive()
+	_test_tc6_multi_drive()
+	_test_tc7_divergence()
+
 	print("=== DONE ===")
 
 func _test_probe_accumulator() -> void:
@@ -12422,3 +12435,174 @@ func _test_trade_throughput_wagon() -> void:
 	var got_wagon: float = float(buyer2.resources.get("material", 0))
 	assert(got_wagon > got_no_wagon + 30.0, "馬車應顯著增 throughput，無車=%.1f 有車=%.1f" % [got_no_wagon, got_wagon])
 	print("trade throughput OK (無車進貨=%.1f 有車進貨=%.1f)" % [got_no_wagon, got_wagon])
+
+# ════════════════════════════════════════════════════════════
+# 統一決策引擎 sub-project 1（utility weigh + 商隊經濟切片）
+# ════════════════════════════════════════════════════════════
+
+func _test_decision_context_gather() -> void:
+	print("--- 決策引擎 Task1: DecisionContext ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tags = ["商隊"]; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	_seed_pop(t, 5); t.resources = {"goods": 50.0, "food": 100.0, "coin": 200.0}
+	var ldr := PersonData.new(); ldr.id = 100; ldr.values["貪婪"] = 0.7; ldr.values["野心"] = 0.4
+	state.persons[100] = ldr; state.teams[0] = t
+	var ctx: DecisionContext = DecisionContext.gather(state, t)
+	assert(ctx.leader_values.get("貪婪", 0.0) == 0.7, "ctx 應載 leader 人格")
+	assert(ctx.food_days > 0.0, "ctx 應算 food_days(effective_food)")
+	assert(ctx.has_goods == true, "ctx 有貨")
+	print("decision context OK (food_days=%.1f)" % ctx.food_days)
+
+func _test_decision_terms() -> void:
+	print("--- 決策引擎 Task2: Term + 人格權重 ---")
+	var ctx := DecisionContext.new()
+	ctx.food_days = 1.0   # 危機
+	assert(DecisionTerms.eval("survival_pressure", ctx, "survival") > 0.8, "糧危 survival term 應高")
+	ctx.food_days = 30.0
+	assert(DecisionTerms.eval("survival_pressure", ctx, "survival") < 0.2, "糧足 survival term 低")
+	var greedy := {"貪婪": 0.9}
+	var meek := {"貪婪": 0.1}
+	assert(DecisionTerms.weight("economic", greedy) > DecisionTerms.weight("economic", meek), "貪婪高→經濟權重高")
+	var fierce := {"好戰": 0.9}
+	assert(DecisionTerms.weight("attack", fierce) > DecisionTerms.weight("attack", meek), "好戰高→攻擊權重高")
+	print("decision terms OK")
+
+func _test_decision_options() -> void:
+	print("--- 決策引擎 Task3: Option 表 ---")
+	var ctx := DecisionContext.new(); ctx.has_goods = true; ctx.has_arb = true; ctx.food_days = 20.0
+	var opts: Array = DecisionOptions.applicable(ctx)
+	assert("貿易" in opts, "有貨+arb → 貿易候選")
+	assert("survival" in opts, "survival 恆候選")
+	var terms: Array = DecisionOptions.terms_of("貿易")
+	var has_eco := false
+	for tw in terms:
+		if tw[0] == "economic_opp": has_eco = true
+	assert(has_eco, "貿易 option 應含 economic_opp term")
+	print("decision options OK")
+
+func _test_decision_engine_decide() -> void:
+	print("--- 決策引擎 Task4: decide ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tags = ["商隊"]; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	_seed_pop(t, 5)
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2); tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 500.0}; state.world.tiles[2*1000+2] = tile
+	t.resources = {"goods": 50.0, "coin": 200.0}   # 有貨、糧在糧倉
+	var ldr := PersonData.new(); ldr.id = 100; ldr.values["貪婪"] = 0.8   # 商人
+	state.persons[100] = ldr; state.teams[0] = t
+	# 注入 arb（有單可做）
+	state.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(2,3))]
+	var opt: String = DecisionEngine.decide(state, t)
+	assert(opt == "貿易", "商人+有貨+arb+糧足 → 應選貿易，實際=%s" % opt)
+	print("decide OK (選=%s)" % opt)
+
+func _test_decision_commitment() -> void:
+	print("--- 決策引擎 Task4: 承諾慣性 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tags = ["商隊"]; t.leader_id = 100
+	_seed_pop(t, 5); t.resources = {"goods": 50.0, "food": 100.0}
+	t.current_option = "貿易"   # 已承諾貿易
+	var ldr := PersonData.new(); ldr.id = 100; ldr.values["貪婪"] = 0.5
+	state.persons[100] = ldr; state.teams[0] = t
+	var opt: String = DecisionEngine.decide(state, t)
+	assert(opt == "貿易", "承諾慣性應守住現行貿易(非每 tick 翻)，實際=%s" % opt)
+	print("commitment OK")
+
+func _test_unified_seam() -> void:
+	print("--- 決策引擎 Task5: 切片 seam ---")
+	var fai := FactionAISystem.new()
+	assert(fai.uses_unified(_mk_team_tag("商隊")), "商隊-tag → 切片(走新引擎)")
+	assert(not fai.uses_unified(_mk_team_tag("軍隊")), "軍隊 → 非切片(舊系統)")
+	print("unified seam OK")
+
+func _mk_team_tag(tag: String) -> TeamData:
+	var t := TeamData.new(); t.tags = [tag]; return t
+
+# ── 共用：建一支商隊（自家 outpost + 糧倉 + 指定 leader 人格）──
+func _mk_merchant_team(state: WorldState, leader_vals: Dictionary, has_arb: bool, food: float) -> TeamData:
+	var t := TeamData.new(); t.team_id = 0; t.tags = ["商隊"]; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	t.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	_seed_pop(t, 5); t.resources = {"goods": 50.0, "coin": 200.0}
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2); tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": food}; state.world.tiles[2*1000+2] = tile
+	var ldr := PersonData.new(); ldr.id = 100
+	for k in leader_vals: ldr.values[k] = leader_vals[k]
+	state.persons[100] = ldr; state.teams[0] = t
+	if has_arb:
+		state.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(2,3))]
+	return t
+
+func _test_tc1_no_oscillation() -> void:
+	print("--- 決策引擎 TC1: 精神分裂震盪消失 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 商隊 tag + 定居人格(義氣.7/貪婪.4) + outpost + 糧足 + 有 arb
+	var t := _mk_merchant_team(state, {"義氣": 0.7, "貪婪": 0.4, "野心": 0.3}, true, 500.0)
+	t.ambition_cap = 2; t.ambition_rung = 1
+	var seq: Array = []
+	for i in 50:
+		seq.append(DecisionEngine.decide(state, t))
+	var changes: int = 0
+	for i in range(1, seq.size()):
+		if seq[i] != seq[i-1]: changes += 1
+	assert(changes <= 3, "TC1：50 tick option 變化應 <=3(非每2tick翻)，實際=%d 序首=%s" % [changes, str(seq[0])])
+	print("TC1 no-oscillation OK (changes=%d, opt=%s)" % [changes, seq[seq.size()-1]])
+
+func _test_tc4_ambition_drive() -> void:
+	print("--- 決策引擎 TC4: 野心有牙 ---")
+	# 安全(糧足/無威脅) + 野心.9 + ambition_gap>0 → 成長 option
+	var s1 := WorldState.new(); s1.world = WorldData.new()
+	var hi := _mk_merchant_team(s1, {"野心": 0.9, "貪婪": 0.3, "慎重": 0.3}, false, 500.0)
+	hi.ambition_cap = 4; hi.ambition_rung = 0
+	var opt_hi: String = DecisionEngine.decide(s1, hi)
+	# 對照 野心.3 同安全 → 知足(偏駐守/低活動)
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var lo := _mk_merchant_team(s2, {"野心": 0.2, "貪婪": 0.3, "慎重": 0.8}, false, 500.0)
+	lo.ambition_cap = 4; lo.ambition_rung = 0
+	var opt_lo: String = DecisionEngine.decide(s2, lo)
+	assert(opt_hi in ["生產", "建設", "貿易"], "TC4：野心高安全 → 成長 option，實際=%s" % opt_hi)
+	assert(opt_hi != opt_lo, "TC4：野心.9 vs .2 option 應不同(高野心爬階/低野心知足)，hi=%s lo=%s" % [opt_hi, opt_lo])
+	print("TC4 ambition-drive OK (野心高=%s 野心低=%s)" % [opt_hi, opt_lo])
+
+func _test_tc6_multi_drive() -> void:
+	print("--- 決策引擎 TC6: 多驅力權衡 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 糧中等 + 野心中 + 小 feud
+	var t := _mk_merchant_team(state, {"野心": 0.5, "貪婪": 0.5, "好戰": 0.4}, true, 80.0)
+	t.ambition_cap = 3; t.ambition_rung = 1
+	# 注入小 feud 邊到 leader
+	var ldr: PersonData = state.persons[100]
+	RelationGraph.add_edge(ldr.relation_edges, "feud", 999, 0.3, 0)
+	var opt: String = DecisionEngine.decide(state, t)
+	# dump term 分解（bar #5 讀得出為何）
+	var ctx: DecisionContext = DecisionContext.gather(state, t)
+	for o in DecisionOptions.applicable(ctx):
+		var u: float = 0.0
+		for tw in DecisionOptions.terms_of(o):
+			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, o)
+		print("  [TC6] option=%s util=%.3f" % [o, u])
+	assert(opt != "", "TC6：應出一個 option(不崩)")
+	assert(opt != "survival", "TC6：糧中等非危機 → 不該 survival，實際=%s" % opt)
+	print("TC6 multi-drive OK (選=%s)" % opt)
+
+func _test_tc7_divergence() -> void:
+	print("--- 決策引擎 TC7: 分歧硬 bar (過不了=框架失敗) ---")
+	# 同情境（同隊狀態：安全/有貨/有 arb/ambition_gap>0）放 3 種 leader
+	var opts: Array = []
+	var labels := ["霸主", "商人", "隱士"]
+	var profiles := [
+		{"野心": 0.95, "好戰": 0.9, "貪婪": 0.4, "慎重": 0.2},   # 霸主：爬階(生產/建設)
+		{"貪婪": 0.9, "野心": 0.4, "好戰": 0.2, "慎重": 0.4},    # 商人：貿易
+		{"義氣": 0.9, "慎重": 0.8, "野心": 0.2, "貪婪": 0.2},    # 隱士：駐守/低活動
+	]
+	for p in profiles:
+		var s := WorldState.new(); s.world = WorldData.new()
+		var t := _mk_merchant_team(s, p, true, 500.0)
+		t.ambition_cap = 4; t.ambition_rung = 0
+		opts.append(DecisionEngine.decide(s, t))
+	for i in 3:
+		print("  [TC7] %s → %s" % [labels[i], opts[i]])
+	# 3 個不同 option（切片內可分歧 3 動作）
+	var uniq := {}
+	for o in opts: uniq[o] = true
+	assert(uniq.size() == 3, "TC7 分歧硬 bar：3 leader 應 3 不同 option，實際=%s (過不了=框架失敗)" % str(opts))
+	print("TC7 divergence OK (3 leader 3 option: %s)" % str(opts))
