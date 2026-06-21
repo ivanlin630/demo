@@ -397,6 +397,7 @@ func _initialize() -> void:
 	_test_join_conservation()
 	_test_player_train()
 	# ── 不變量審計框架 Phase1 ──
+	_test_resource_bank()
 	_test_invariant_audit()
 	_test_invariant_faction_bidir()
 	_test_invariant_subteam_bidir()
@@ -831,6 +832,21 @@ func _test_scout_verification() -> void:
 	assert(tm_b.current_task == TeamData.TASK_ATTACK and tm_b.prosperity_target_id == 1,
 		"莽者→直接攻不查證，實際 task=%s" % tm_b.current_task)
 	print("scout verification OK")
+
+func _test_resource_bank() -> void:
+	print("--- ResourceBank ---")
+	var t := TeamData.new(); t.resources = {}
+	ResourceBank.add(t, "food", 50.0, "test")
+	assert(float(t.resources.get("food",0)) == 50.0, "add →50")
+	var got: float = ResourceBank.remove(t, "food", 20.0, "test")
+	assert(got == 20.0 and float(t.resources["food"]) == 30.0, "remove 20 →30")
+	got = ResourceBank.remove(t, "food", 999.0, "test")
+	assert(got == 30.0 and float(t.resources["food"]) == 0.0, "remove 不透支 →clamp")
+	ResourceBank.set_amt(t, "coin", 100.0, "test")
+	assert(float(t.resources["coin"]) == 100.0, "set_amt →100")
+	ResourceBank.clear_all(t, "test")
+	assert(t.resources.is_empty(), "clear_all →空")
+	print("resource bank OK")
 
 func _test_invariant_audit() -> void:
 	print("--- InvariantAudit 框架 + population ---")
