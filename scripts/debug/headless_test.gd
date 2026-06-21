@@ -3832,6 +3832,7 @@ func _run_sim_test() -> void:
 	_test_merchant_restock()
 	_test_survival_magnitude()
 	_test_unified_survival_boundary()
+	_test_dispatch_fallback()
 
 	print("=== DONE ===")
 
@@ -12789,3 +12790,24 @@ func _test_unified_survival_boundary() -> void:
 	fai._evaluate_survival(s2, t2)
 	assert(t2.current_task != TeamData.TASK_IDLE, "非 unified 隊舊 survival 應觸發(離 IDLE)，實際=%s" % t2.current_task)
 	print("unified survival boundary OK")
+
+func _test_dispatch_fallback() -> void:
+	print("--- _decide_unified 退次佳可派(覓食無格→返家補給) ---")
+	var fai := FactionAISystem.new()
+	# 深危有家商隊@遠處、無覓食格(世界空,無wild_game) → argmax 覓食(無格)→應退返家補給
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = Vector2i(5,5); t.leader_id = 100; t.current_task = TeamData.TASK_IDLE; t.current_option = ""
+	_seed_pop(t, 5); t.resources = {"food": 12.0}   # days=1,深危
+	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2); home.outpost_owner = 0
+	home.outpost_level = 1; home.public_storage = {"food": 500.0}; s.world.tiles[2*1000+2] = home
+	var ldr := PersonData.new(); ldr.id = 100; s.persons[100] = ldr; s.teams[0] = t
+	# 確認 argmax 首選覓食(無格,untargetable)
+	var ranked: Array = DecisionEngine.rank(s, t)
+	assert(DecisionOptions.to_task(s, t, ranked[0])["target"] == Vector2i(-1,-1) or ranked[0] == "覓食", \
+		"前置:rank 首應覓食且無格(untargetable)，rank=%s" % str(ranked))
+	fai._decide_unified(s, t)
+	assert(t.current_task == TeamData.TASK_RETURN_HOME, \
+		"覓食無格 → 應退返家補給(RETURN_HOME)不凍，實際=%s" % t.current_task)
+	assert(t.current_option == "返家補給", "current_option 應追蹤實際派出=返家補給，實際=%s" % t.current_option)
+	print("dispatch fallback OK")
