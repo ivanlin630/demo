@@ -407,7 +407,7 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			if p == null:
 				continue
 			p.stress  = minf(p.stress  + stress_gain,  1.0)
-			p.loyalty = maxf(p.loyalty - loyalty_loss, 0.0)
+			LoyaltyBank.adjust(p, -loyalty_loss, "extort")
 			p.fear    = minf(p.fear    + fear_gain,    1.0)
 		if rate > 0.5:
 			UnrestBank.add(payer, 1, "tax")
@@ -732,7 +732,7 @@ func execute_prisoner(state: WorldState, team_id: int) -> void:
 		var p: PersonData = state.persons.get(pid)
 		if p == null: continue
 		var yi_qi: float = float(p.values.get("義氣", 0.5))
-		p.loyalty -= yi_qi * 0.08
+		LoyaltyBank.adjust(p, -yi_qi * 0.08, "atrocity")
 	print("[Atrocity] Team%d 處決俘虜，目擊者 loyalty 懲罰" % team_id)
 
 # ──────── 玩家直接呼叫接口（繞過 current_task 檢查）────────
@@ -979,5 +979,5 @@ func _resolve_pacify(state: WorldState, pacifier: TeamData, village: TeamData) -
 		var p = state.persons.get(pid)
 		if p:
 			p.stress = maxf(p.stress - 0.05, 0.0)
-			p.loyalty = minf(p.loyalty + 0.02, 1.0)
+			LoyaltyBank.adjust(p, 0.02, "pacify")
 	UnrestBank.reduce(village, 1, "pacify")

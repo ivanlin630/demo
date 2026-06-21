@@ -296,7 +296,7 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 		if team.fatigue >= 1.0:
 			for pid in team.named_members:
 				var p: PersonData = state.persons.get(pid)
-				if p: p.loyalty -= FATIGUE_LOYALTY_PENALTY
+				if p: LoyaltyBank.adjust(p, -FATIGUE_LOYALTY_PENALTY, "fatigue")
 
 
 func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:

@@ -263,7 +263,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		var p: PersonData = state.persons.get(pid)
 		if p == null: continue
 		var yi_qi: float = float(p.values.get("義氣", 0.5))
-		p.loyalty -= (1.0 - yi_qi) * 0.05
+		LoyaltyBank.adjust(p, -(1.0 - yi_qi) * 0.05, "betrayal")
 	_msg.emit_message(state, "combat_end",
 		"Team %d 擊潰 Team %d" % [winner_id, loser_id], winner,
 		{ "origin": str(winner_id), "loser": str(loser_id),

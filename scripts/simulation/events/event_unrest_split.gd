@@ -119,12 +119,12 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 
 func reset_loyalty_on_transfer(p: PersonData, transfer_type: String) -> void:
 	match transfer_type:
-		"split_hard":   p.loyalty = 0.5
-		"split_soft":   p.loyalty = 0.65
-		"split_leader": p.loyalty = 1.0
-		"conquered":    p.loyalty = 0.25
-		"voluntary":    p.loyalty = 0.5
-		"master":       p.loyalty = 0.9
+		"split_hard":   LoyaltyBank.set_baseline(p, 0.5, "split_hard")
+		"split_soft":   LoyaltyBank.set_baseline(p, 0.65, "split_soft")
+		"split_leader": LoyaltyBank.set_baseline(p, 1.0, "split_leader")
+		"conquered":    LoyaltyBank.set_baseline(p, 0.25, "conquered")
+		"voluntary":    LoyaltyBank.set_baseline(p, 0.5, "voluntary")
+		"master":       LoyaltyBank.set_baseline(p, 0.9, "master")
 
 func _next_team_id(state: WorldState) -> int:
 	var max_id: int = 0

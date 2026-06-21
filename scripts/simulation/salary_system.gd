@@ -65,12 +65,12 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		team.resources["coin"] = maxf(float(team.resources.get("coin", 0)) - paid, 0.0)
 		p.coin += paid
 		if ratio >= 1.0:
-			p.loyalty = minf(p.loyalty + (ratio - 1.0) * OVERPAY_BONUS, MAX_LOYALTY)
+			LoyaltyBank.adjust(p, (ratio - 1.0) * OVERPAY_BONUS, "overpay", MAX_LOYALTY)
 			var intensity: float = clampf((ratio - 1.0) * 0.5, 0.05, 0.8)  # TEST VALUE
 			_npc_ai.write_memory(p, "kindness", team.leader_id,
 				state.world.current_tick, intensity)
 		else:
-			p.loyalty -= (1.0 - ratio) * SALARY_LOYALTY_PENALTY
+			LoyaltyBank.adjust(p, -(1.0 - ratio) * SALARY_LOYALTY_PENALTY, "underpay")
 	var anon_paid: float = anon_total * budget_ratio
 	team.resources["coin"] = maxf(float(team.resources.get("coin", 0)) - anon_paid, 0.0)
 	team.anon_treasury += anon_paid   # 匿名薪水沉澱公庫（非消失）

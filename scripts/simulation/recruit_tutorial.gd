@@ -17,7 +17,7 @@ func check(state: WorldState) -> void:
 	var nl := PersonData.new(); nl.id = _next_person_id(state)
 	nl.team_id = tid; nl.person_name = "投奔者"; nl.role = "leader"
 	nl.skills = {"狩獵": 0.5, "求生": 0.5, "戰鬥": 0.4}   # 略偏堪用
-	nl.loyalty = 0.9                                       # 忠誠偏高
+	LoyaltyBank.set_baseline(nl, 0.9, "init")             # 忠誠偏高
 	state.persons[nl.id] = nl; team.leader_id = nl.id
 	AnonTierSystem.add_anon(team, AnonCohort.TIER_PLEB, 3)  # 3 白丁(tier0)；population getter = leader1+anon3 = 4
 	state.teams[tid] = team

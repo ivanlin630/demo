@@ -330,7 +330,7 @@ func _update_person_needs(state: WorldState, team_id: int, need: String, value: 
 		if need == "food":
 			if value < 0.3:
 				person.fear    = minf(person.fear + 0.05, 1.0)
-				person.loyalty = maxf(person.loyalty - 0.02, 0.0)
+				LoyaltyBank.adjust(person, -0.02, "hunger")
 			else:
 				person.fear = maxf(person.fear - 0.02, 0.0)
 			# 個人飢餓累積（斷糧越深累積越快；吃飽則回復）
