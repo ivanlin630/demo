@@ -3822,6 +3822,7 @@ func _run_sim_test() -> void:
 	_test_decision_engine_decide()
 	_test_decision_commitment()
 	_test_unified_seam()
+	_test_engine_rank()
 	# 驗證套件 TC1/4/6/7（believability 行為測試）
 	_test_tc1_no_oscillation()
 	_test_tc4_ambition_drive()
@@ -12519,6 +12520,23 @@ func _test_unified_seam() -> void:
 	assert(fai.uses_unified(_mk_team_tag(TeamData.TAG_PRODUCE)), "生產-tag → 切片(走新引擎)")
 	assert(not fai.uses_unified(_mk_team_tag(TeamData.TAG_MILITARY)), "軍隊 → 非切片(舊系統)")
 	print("unified seam OK")
+
+func _test_engine_rank() -> void:
+	print("--- 決策引擎 rank 降序 + decide=rank[0] ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# 吃飽商隊有貨+arb → 貿易應 rank 首；rank 回 Array 且首=decide
+	var t := _mk_merchant_team(state, {"貪婪": 0.6}, true, 500.0)
+	t.current_option = ""
+	var ranked: Array = DecisionEngine.rank(state, t)
+	assert(ranked.size() >= 1, "rank 應回非空")
+	assert(ranked[0] == "貿易", "吃飽有貨商隊 rank 首應貿易，實際=%s" % str(ranked))
+	# decide == rank[0]（行為不變）
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var t3 := _mk_merchant_team(s2, {"貪婪": 0.6}, true, 500.0); t3.current_option = ""
+	var r0: String = DecisionEngine.rank(s2, t3)[0]
+	t3.current_option = ""
+	assert(DecisionEngine.decide(s2, t3) == r0, "decide 應 == rank[0]")
+	print("engine rank OK")
 
 func _mk_team_tag(tag: String) -> TeamData:
 	var t := TeamData.new(); t.tags = [tag]; return t
