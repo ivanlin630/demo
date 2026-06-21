@@ -13,6 +13,9 @@ const MERCHANT_MAX_RANGE: int = 20
 # （滿了→賣決策 fire；鐵則：cap 須改變 NPC 決策）。TEST VALUE。
 const FOOD_SELL_RESERVE_RATIO: float = 0.5   # 賣到剩 cap×此（保留半倉自用）
 
+const FOOD_BUY_DAYS: float = 4.0          # TEST VALUE：effective_food 低於此天數 → 發 food 買單
+const FOOD_BUY_TARGET_DAYS: float = 8.0   # TEST VALUE：買到此 buffer
+
 var _msg := SimMessageSystem.new()
 
 # 發訂單：權威存發起隊 active_orders + emit message 傳播副本。回 order_id。
@@ -115,6 +118,15 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		if res in ["weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel"]:
 			post_order(state, team, "buy", res, int(SHORTAGE_QTY * 2))
 			Probe.bump("g1.shortage_buy")
+	# food 買單：缺糧隊表達糧需求(effective_food=私產+自家糧倉,WS-2c 單源)→商隊運糧
+	if not _has_active(team, "buy", "food"):
+		var burn: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		var fdays: float = ResourceSystem.effective_food(state, team) / burn
+		if fdays < FOOD_BUY_DAYS:
+			var need: int = int((FOOD_BUY_TARGET_DAYS - fdays) * burn)
+			if need > 0:
+				post_order(state, team, "buy", "food", need)
+				Probe.bump("g1.food_buy")
 
 # WS-1：定居隊糧倉「滿」信號 → 發 food sell 單（cap 改變 NPC 決策；鐵則）。
 # 讀自家 outpost public_storage food；> cap×reserve → 賣超量的一半（保留半倉自用）。
