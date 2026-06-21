@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 性別 WHAT 預想（備著）— 基礎資料 + 生育配對，非 Trait 縫機器（獨立小改、不卡框架）
 ---
 
