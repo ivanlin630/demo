@@ -14,6 +14,7 @@ var threat: float = 0.0
 var ambition_gap: int = 0
 var strongest_feud: float = 0.0
 var has_own_outpost: bool = false
+var is_merchant: bool = false
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -31,6 +32,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		fe = RelationGraph.strongest(ldr.relation_edges, "feud")
 	c.strongest_feud = float(fe.get("intensity", 0.0)) if not fe.is_empty() else 0.0
 	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
+	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	# threat：商隊切片威脅 term 次要，初版 0；他域遷入時補（_find_strong_neighbor / 鄰敵 strength）。
 	c.threat = 0.0
 	return c
