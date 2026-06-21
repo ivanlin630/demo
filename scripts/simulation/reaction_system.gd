@@ -255,7 +255,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		"P2_produce":
 			pass   # 效果改由 work_morale 係數體現（evaluate_all 統計）
 		"P4_expand":
-			team.unrest_turns = maxi(team.unrest_turns - 1, 0)
+			UnrestBank.reduce(team, 1, "recover")
 		"N1_flee":
 			if team.population <= 1 and person.id == team.leader_id:
 				return   # solo 無處可逃：不變化、stress 不洩壓（持續高壓餵 N2/N3）
@@ -269,7 +269,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 				_anon_actually_left(team, "flee")
 			# 非 named/leader（anon 無個體）→ 無 cohort 來源可動，population getter 不變
 		"N2_riot":
-			team.unrest_turns += 1
+			UnrestBank.add(team, 1, "reaction")
 		"N3_defect":
 			if team.population <= 1 and person.id == team.leader_id:
 				return   # solo leader 無從叛逃自己

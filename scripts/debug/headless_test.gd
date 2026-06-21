@@ -93,6 +93,7 @@ func _initialize() -> void:
 	_test_defection_paths()
 	_test_owner_contact_timeout()
 	_test_pacify_subteam()
+	_test_unrest_bank()
 	# ── Merchant Trade (A) + Outpost Capture (D) ──
 	_test_merchant_capture_fields()
 	_test_resolve_market_bidirectional()
@@ -5734,6 +5735,19 @@ func _test_pacify_subteam() -> void:
 	assert(l.loyalty > 0.5, "安撫應升 loyalty")
 	assert(v.unrest_turns < 10, "安撫應降 unrest")
 	print("Resident Task12 OK")
+
+func _test_unrest_bank() -> void:
+	print("--- UnrestBank 單一 owner ---")
+	var t := TeamData.new(); t.unrest_turns = 0
+	UnrestBank.add(t, 3, "test")
+	assert(t.unrest_turns == 3, "add 3 →3，實際=%d" % t.unrest_turns)
+	UnrestBank.reduce(t, 1, "test")
+	assert(t.unrest_turns == 2, "reduce 1 →2，實際=%d" % t.unrest_turns)
+	UnrestBank.reduce(t, 10, "test")
+	assert(t.unrest_turns == 0, "reduce 超量 →clamp 0，實際=%d" % t.unrest_turns)
+	UnrestBank.add(t, 5, "test"); UnrestBank.reset(t, "split")
+	assert(t.unrest_turns == 0, "reset →0，實際=%d" % t.unrest_turns)
+	print("unrest bank OK")
 
 # ════════════ Merchant Trade (A) + Outpost Capture (D) ════════════
 

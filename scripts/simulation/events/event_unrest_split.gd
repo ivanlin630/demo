@@ -19,7 +19,7 @@ func execute(state: WorldState, team: TeamData) -> Array:
 	var new_team := _split_team(state, team, dissenters)
 	if new_team == null:
 		return []
-	team.unrest_turns = 0
+	UnrestBank.reset(team, "split")
 	print("[Event] Team %d 分裂 → 新 Team %d（%d人）" % [
 		team.team_id, new_team.team_id, new_team.population
 	])
@@ -114,7 +114,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	state.teams[new_team.team_id]           = new_team
 	state.team_known[new_team.team_id]      = []
 	state.team_discovered[new_team.team_id] = []
-	parent.unrest_turns = 0
+	UnrestBank.reset(parent, "split")
 	return new_team
 
 func reset_loyalty_on_transfer(p: PersonData, transfer_type: String) -> void:

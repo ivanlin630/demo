@@ -733,7 +733,7 @@ func _assign_tasks(state: WorldState, f) -> void:
 			TaskArbiter.try_set(state, t_cmd, t_cmd.player_commanded_task,
 				t_cmd.move_target, TaskArbiter.PRIO_PLAYER, "player_command")
 		else:
-			t_cmd.unrest_turns += 1
+			UnrestBank.add(t_cmd, 1, "faction")
 			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])
 
 	if "徵收" in f.goals and leader_team.current_task != TeamData.TASK_TRIBUTE:
@@ -1398,7 +1398,7 @@ func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: 
 		p.stress = minf(p.stress + stress_pen, 1.0)
 		p.loyalty = maxf(p.loyalty - loyalty_pen, 0.0)
 	if not is_emergency:
-		team.unrest_turns += 1
+		UnrestBank.add(team, 1, "faction")
 	print("[Extract] Team%d 徵用 %.0f coin (%s)" % [team.team_id, amt, reason])
 
 func _consider_extraction(state: WorldState, team: TeamData) -> void:

@@ -306,7 +306,7 @@ func _apply_chronic_tax_unrest(state: WorldState, team: TeamData, rate: float) -
 		p.stress = minf(p.stress + p_stress, 1.0)
 	# 慢性累積：leader 長期高壓 → 緩升 unrest（暴政自毀的下行通道）
 	if lp.stress > 0.7:
-		team.unrest_turns += 1
+		UnrestBank.add(team, 1, "famine")
 
 func _get_adjacent_tiles(state: WorldState, center: Vector2i) -> Array:
 	var result: Array = []

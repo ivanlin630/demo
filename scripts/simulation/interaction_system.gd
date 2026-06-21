@@ -410,7 +410,7 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			p.loyalty = maxf(p.loyalty - loyalty_loss, 0.0)
 			p.fear    = minf(p.fear    + fear_gain,    1.0)
 		if rate > 0.5:
-			payer.unrest_turns += 1
+			UnrestBank.add(payer, 1, "tax")
 		TaskArbiter.release(collector)
 		_msg.emit_message(state, "tribute",
 			TextBank.fmt("tribute", "honest", {
@@ -980,4 +980,4 @@ func _resolve_pacify(state: WorldState, pacifier: TeamData, village: TeamData) -
 		if p:
 			p.stress = maxf(p.stress - 0.05, 0.0)
 			p.loyalty = minf(p.loyalty + 0.02, 1.0)
-	village.unrest_turns = maxi(village.unrest_turns - 1, 0)
+	UnrestBank.reduce(village, 1, "pacify")

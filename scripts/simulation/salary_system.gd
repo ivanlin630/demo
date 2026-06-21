@@ -75,7 +75,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 	team.resources["coin"] = maxf(float(team.resources.get("coin", 0)) - anon_paid, 0.0)
 	team.anon_treasury += anon_paid   # 匿名薪水沉澱公庫（非消失）
 	if budget_ratio < 1.0:
-		team.unrest_turns += 1
+		UnrestBank.add(team, 1, "salary")
 		print("[Salary] Team%d 減薪 %.0f%%（coin 不足）" % [team.team_id, (1.0 - budget_ratio) * 100.0])
 	print("[Salary] Team%d 薪水結算 coin=%.1f" % [team.team_id, float(team.resources.get("coin", 0))])
 
