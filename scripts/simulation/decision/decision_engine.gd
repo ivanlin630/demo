@@ -5,19 +5,28 @@ class_name DecisionEngine
 # + 現行 option 承諾 bonus → argmax。平手 → 保持現行（承諾慣性防震盪）。
 const COMMITMENT_BONUS: float = 0.3   # TEST VALUE：承諾慣性（防震盪）
 
-static func decide(state: WorldState, team: TeamData) -> String:
+# options 依 util 降序（index tiebreak：util 相等→applicable 順序在前者勝，同 argmax strict >）。
+static func rank(state: WorldState, team: TeamData) -> Array:
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
-	var best_opt: String = team.current_option
-	var best_u: float = -1e9
+	var scored: Array = []
+	var idx: int = 0
 	for opt in DecisionOptions.applicable(ctx):
 		var u: float = 0.0
 		for tw in DecisionOptions.terms_of(opt):
-			var term_name: String = tw[0]
-			var weight_key: String = tw[1]
-			u += DecisionTerms.weight(weight_key, ctx.leader_values) * DecisionTerms.eval(term_name, ctx, opt)
+			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
 		if opt == team.current_option:
 			u += COMMITMENT_BONUS
-		if u > best_u:
-			best_u = u; best_opt = opt
-	team.current_option = best_opt
-	return best_opt
+		scored.append({"u": u, "i": idx, "opt": opt})
+		idx += 1
+	scored.sort_custom(func(a, b):
+		if a["u"] != b["u"]: return a["u"] > b["u"]
+		return a["i"] < b["i"])   # tiebreak：applicable 順序
+	var out: Array = []
+	for e in scored: out.append(e["opt"])
+	return out
+
+static func decide(state: WorldState, team: TeamData) -> String:
+	var r: Array = rank(state, team)
+	if r.is_empty(): return team.current_option
+	team.current_option = r[0]
+	return r[0]

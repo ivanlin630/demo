@@ -845,14 +845,17 @@ func uses_unified(team: TeamData) -> bool:
 func _decide_unified(state: WorldState, team: TeamData) -> void:
 	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
-	var opt: String = DecisionEngine.decide(state, team)
-	if opt == "返家補給": Probe.bump("g1.restock_chosen")
-	elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
-	var td: Dictionary = DecisionOptions.to_task(state, team, opt)
-	var tgt: Vector2i = td["target"]
-	if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
-		return   # 無有效目標 → 不強設
-	TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+	for opt in DecisionEngine.rank(state, team):
+		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		var tgt: Vector2i = td["target"]
+		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+			continue   # 不可派 → 試次佳(修凍死)
+		team.current_option = opt   # 承諾追蹤實際派出
+		if opt == "返家補給": Probe.bump("g1.restock_chosen")
+		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
+		TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		return
+	# 全不可派 → 保持現行(no-op)
 
 func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 	var best_id: int = -1
