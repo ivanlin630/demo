@@ -200,7 +200,7 @@ func produce_stable_day(state: WorldState, tile: HexTileData, day_fraction: floa
 	var food_cost: float = STABLE_FOOD_PER_DAY[lvl_idx] * day_fraction
 	if float(owner.resources.get("food", 0)) < food_cost:
 		return   # 草料不足，本次不訓
-	owner.resources["food"] = float(owner.resources.get("food", 0)) - food_cost
+	ResourceBank.add(owner, "food", -food_cost, "stable_feed")
 	tile.stable_progress += STABLE_PRODUCE_PER_DAY[lvl_idx] * day_fraction
 	# epsilon 吸收浮點累加誤差（30×0.3 = 8.999… → 9）
 	if tile.stable_progress >= 1.0 - 1e-9:
@@ -478,7 +478,7 @@ func check_construction_timeout(state: WorldState, tile: HexTileData) -> bool:
 	if ct != null:
 		for k in cost:
 			if k == "ticks": continue
-			ct.resources[k] = float(ct.resources.get(k, 0)) + float(cost[k]) * 0.5
+			ResourceBank.add(ct, k, float(cost[k]) * 0.5, "construction_refund")
 	tile.construction_team_id = -1
 	tile.construction_ticks_left = 0
 	tile.construction_target = {}
@@ -645,4 +645,4 @@ func _deduct_cost(team: TeamData, tile: HexTileData, cost: Dictionary) -> void:
 		tile.public_storage[res] = float(tile.public_storage.get(res, 0)) - from_vault
 		var rem: float = need - from_vault
 		if rem > 0.0:
-			team.resources[res] = maxf(float(team.resources.get(res, 0)) - rem, 0.0)
+			ResourceBank.remove(team, res, rem, "construction_pay")

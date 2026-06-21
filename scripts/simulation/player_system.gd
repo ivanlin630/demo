@@ -43,7 +43,7 @@ func take_from_team(state: WorldState, grade: String, qty: int) -> bool:
     var cur: int = int(team.resources.get(grade, 0))
     if cur < qty: return false
     if not _can_add_item(state, grade): return false
-    team.resources[grade] = cur - qty
+    ResourceBank.set_amt(team, grade, cur - qty, "player_take")
     add_to_inventory(state, grade, qty)
     return true
 
@@ -55,7 +55,7 @@ func deposit_to_team(state: WorldState, grade: String, qty: int) -> bool:
             if inv[i]["qty"] <= 0: inv.remove_at(i)
             var team: TeamData = _get_player_team(state)
             if team:
-                team.resources[grade] = int(team.resources.get(grade, 0)) + qty
+                ResourceBank.add(team, grade, qty, "player_deposit")
             return true
     return false
 

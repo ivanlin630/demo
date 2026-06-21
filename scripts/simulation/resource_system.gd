@@ -96,12 +96,12 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 		var em: int = ms.get_effective_mounts(team)
 		if em > 0:
 			var mount_food: float = float(em) * FOOD_PER_MOUNT_PER_DAY * day_fraction
-			team.resources["food"] = maxf(0.0, float(team.resources.get("food", 0)) - mount_food)
+			ResourceBank.remove(team, "food", mount_food, "mount_feed")
 		# 馴馬（horses）草料：×0.5/day，馴馬不騎 → 不受 effective（pop）限制
 		var horses_n: float = float(team.resources.get("horses", 0))
 		if horses_n > 0.0:
 			var horse_food: float = horses_n * FOOD_PER_MOUNT_PER_DAY * day_fraction
-			team.resources["food"] = maxf(0.0, float(team.resources.get("food", 0)) - horse_food)
+			ResourceBank.remove(team, "food", horse_food, "horse_feed")
 		var total_pop: int = team.population + team.minor_population
 		var food_needed: float = float(total_pop) * FOOD_PER_PERSON_PER_DAY * day_fraction
 		# WS-1：定居隊 food 在自家糧倉（public_storage）。消耗從「team.resources + 自家糧倉」
@@ -114,7 +114,7 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 		if food_available >= food_needed:
 			# 先扣 team.resources，不足再扣糧倉
 			var from_team: float = minf(team_food, food_needed)
-			team.resources["food"] = team_food - from_team
+			ResourceBank.set_amt(team, "food", team_food - from_team, "eat_team")
 			var rem: float = food_needed - from_team
 			if rem > 0.0 and granary != null:
 				granary.public_storage["food"] = granary_food - rem
@@ -122,7 +122,7 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 			team.famine_days = 0.0   # 吃飽 → 斷糧計時歸零
 		else:
 			# 池耗盡：team 與糧倉 food 都歸零
-			team.resources["food"] = 0.0
+			ResourceBank.set_amt(team, "food", 0.0, "eat_depleted")
 			if granary != null:
 				granary.public_storage["food"] = 0.0
 			var satisfaction: float = food_available / food_needed if food_needed > 0.0 else 0.0
@@ -166,7 +166,7 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 			if need > 0.0:
 				var avail: float = float(gtile.public_storage.get("food", 0))
 				var move: float = minf(need, avail)
-				team.resources["food"] = carried + move
+				ResourceBank.set_amt(team, "food", carried + move, "provision_carry")
 				gtile.public_storage["food"] = avail - move
 
 # grace 期後每日餓死：先死 minor，minor 耗盡才死 anon。
@@ -240,7 +240,7 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 				dst_tile.public_storage[res] = minf(stored + gain, cap)
 			else:
 				# 無 outpost fallback 進 team（小隊；food 仍記 gained 供一般稅）
-				team.resources[res] = float(team.resources.get(res, 0)) + gain
+				ResourceBank.add(team, res, gain, "harvest_intake")
 				if res == "food":
 					gained[res] = float(gained.get(res, 0)) + gain
 		else:
@@ -250,7 +250,7 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 			gain = minf(gain, float(space_qty))
 			if gain <= 0.0:
 				continue   # 滿載不採 → 留 tile，tile 不扣
-			team.resources[res] = float(team.resources.get(res, 0)) + gain
+			ResourceBank.add(team, res, gain, "harvest_carry")
 			gained[res] = float(gained.get(res, 0)) + gain   # 私產所得 → 一般稅基數
 		# 從 tile 扣除（food/material 最終由 regenerate_tiles 補回；ore/gem 有限）
 		src_tile.resources[res] = maxf(current - gain, 0.0)
@@ -278,7 +278,7 @@ func _apply_normal_tax(state: WorldState, team: TeamData, tile: HexTileData,
 		var actual: float = minf(tax, space)          # cap 滿 → 多的留私產
 		if actual <= 0.0:
 			continue
-		team.resources[res] = float(team.resources.get(res, 0)) - actual
+		ResourceBank.add(team, res, -actual, "normal_tax")
 		tile.public_storage[res] = cur + actual
 	_apply_chronic_tax_unrest(state, team, rate)
 

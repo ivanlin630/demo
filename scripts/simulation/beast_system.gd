@@ -30,7 +30,7 @@ func build_beast_team(state: WorldState, kind: String, pos: Vector2i) -> int:
 	t.named_members = []
 	t.anon_cohorts = {}
 	AnonCohort.add(t.anon_cohorts, AnonCohort.TIER_PLEB, "healthy", int(prof["count"]))
-	t.resources = {}
+	ResourceBank.clear_all(t, "beast_spawn_init")
 	t.armed_anon_ratio = 1.0   # 全員上場
 	state.teams[t.team_id] = t
 	state.team_known[t.team_id] = []
@@ -43,10 +43,10 @@ func reward_and_cleanup(state: WorldState, winner_id: int, beast_id: int) -> voi
 	var winner: TeamData = state.teams.get(winner_id)
 	if beast != null and winner != null:
 		var prof: Dictionary = BEAST_PROFILE.get(beast.beast_kind, {})
-		winner.resources["food"] = float(winner.resources.get("food", 0)) + float(prof.get("meat", 0))
+		ResourceBank.add(winner, "food", float(prof.get("meat", 0)), "beast_reward")
 		winner.forage_today = float(winner.forage_today) + float(prof.get("meat", 0))
 		if float(prof.get("hide", 0)) > 0:
-			winner.resources["material"] = float(winner.resources.get("material", 0)) + float(prof["hide"])
+			ResourceBank.add(winner, "material", float(prof["hide"]), "beast_reward")
 		# 獵勝得戰鬥 exp（勝方 leader/named）
 		for pid in ([winner.leader_id] as Array) + winner.named_members:
 			var p: PersonData = state.persons.get(pid)

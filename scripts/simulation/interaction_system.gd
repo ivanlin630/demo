@@ -98,7 +98,7 @@ func _tick_readiness(state: WorldState, team_ids: Array) -> void:
 		var food_needed: float  = deficit * float(team.population) * READINESS_FOOD_COST
 		var food_avail: float   = float(team.resources.get("food", 0))
 		var food_used: float    = minf(food_needed, food_avail)
-		team.resources["food"]  = food_avail - food_used
+		ResourceBank.set_amt(team, "food", food_avail - food_used, "readiness_food")
 		var resource_factor: float = 0.3 + 0.7 * (food_used / maxf(food_needed, 0.001))
 		var leader = state.persons.get(team.leader_id)
 		var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
@@ -296,8 +296,8 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 	for res in ["food", "material", "goods", "coin"]:
 		var tribute: float = float(def.resources.get(res, 0)) * TRIBUTE_RATE
 		if tribute > 0.0:
-			atk.resources[res] = float(atk.resources.get(res, 0)) + tribute
-			def.resources[res] = float(def.resources.get(res, 0)) - tribute
+			ResourceBank.add(atk, res, tribute, "extort_in")
+			ResourceBank.add(def, res, -tribute, "extort_out")
 			gained[res] = tribute
 	_msg.emit_message(state, "extortion",
 		"Team %d 向 Team %d 收過路費" % [atk_id, def_id], atk,
@@ -382,8 +382,8 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			var take: float = surplus * rate
 			if take <= 0.0:
 				continue
-			payer.resources[res]     = stock - take
-			collector.resources[res] = float(collector.resources.get(res, 0)) + take
+			ResourceBank.set_amt(payer, res, stock - take, "raid_out")
+			ResourceBank.add(collector, res, take, "raid_in")
 			total_take += take
 		# 尖峰強度：本次搜刮占居民總庫存比例
 		var taken_ratio: float = total_take / maxf(total_stock, 1.0)
@@ -441,8 +441,8 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 		var amount: float = float(payer.resources.get(res, 0)) * base_rate
 		if amount <= 0.0:
 			continue
-		payer.resources[res]     = float(payer.resources.get(res, 0)) - amount
-		collector.resources[res] = float(collector.resources.get(res, 0)) + amount
+		ResourceBank.add(payer, res, -amount, "tribute_out")
+		ResourceBank.add(collector, res, amount, "tribute_in")
 	TaskArbiter.release(collector)
 	_msg.emit_message(state, "tribute",
 		TextBank.fmt("tribute", "honest", {
@@ -503,10 +503,10 @@ func _calc_reserve(team: TeamData, res: String) -> float:
 	return TradeValuation.reserve(team, res)
 
 func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int, price: float) -> void:
-	seller.resources[res] = float(seller.resources.get(res, 0)) - qty
-	buyer.resources[res]  = float(buyer.resources.get(res, 0)) + qty
-	buyer.resources["coin"]  = float(buyer.resources.get("coin", 0)) - qty * price
-	seller.resources["coin"] = float(seller.resources.get("coin", 0)) + qty * price
+	ResourceBank.add(seller, res, -qty, "trade_goods_out")
+	ResourceBank.add(buyer, res, qty, "trade_goods_in")
+	ResourceBank.add(buyer, "coin", -(qty * price), "trade_coin_out")
+	ResourceBank.add(seller, "coin", qty * price, "trade_coin_in")
 
 # 「村長代管公庫」：居民團（PRODUCE+在自家 faction outpost）或 outpost owner team
 # 在 outpost tile 上時，absorb public_storage 進 team.resources（臨時）
@@ -525,7 +525,7 @@ static func _absorb_public_storage(state: WorldState, team: TeamData) -> Diction
 		if public_amount <= 0: continue
 		var team_amount: float = float(team.resources.get(res, 0))
 		original[res] = team_amount
-		team.resources[res] = team_amount + public_amount
+		ResourceBank.set_amt(team, res, team_amount + public_amount, "borrow_public")
 		tile.public_storage[res] = 0.0   # MOVE 出公庫（避免雙重存在，spill_back 再分流回去）
 	return original
 
@@ -548,11 +548,11 @@ static func _spill_back_public_storage(state: WorldState, team: TeamData,
 			var space: float = maxf(cap - stored, 0.0)
 			var deposit: float = minf(diff, space)
 			tile.public_storage[res] = stored + deposit
-			team.resources[res] = orig + (diff - deposit)
+			ResourceBank.set_amt(team, res, orig + (diff - deposit), "spill_back")
 		else:
 			# team 賣掉超過借出的公庫量（連自家底貨也動了）→ 公庫歸零，team 保留實際剩餘（不憑空生）
 			tile.public_storage[res] = maxf(stored + diff, 0.0)
-			team.resources[res] = current
+			ResourceBank.set_amt(team, res, current, "spill_back_overdraw")
 
 func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 	var a_original: Dictionary = _absorb_public_storage(state, a)
@@ -601,9 +601,9 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 			var inv_qty: int = mini(int(item["qty"]), int(buyer_coin / inv_bid))
 			inv_qty = mini(inv_qty, ms.carry_space_for_res(buyer, item["grade"]))   # WS-3 carry 限
 			if inv_qty <= 0: continue
-			buyer.resources[item["grade"]] = float(buyer.resources.get(item["grade"], 0)) + inv_qty
-			buyer.resources["coin"]  = float(buyer.resources.get("coin", 0)) - inv_qty * inv_bid
-			seller.resources["coin"] = float(seller.resources.get("coin", 0)) + inv_qty * inv_bid
+			ResourceBank.add(buyer, item["grade"], inv_qty, "market_inv_in")
+			ResourceBank.add(buyer, "coin", -(inv_qty * inv_bid), "market_inv_coin_out")
+			ResourceBank.add(seller, "coin", inv_qty * inv_bid, "market_inv_coin_in")
 			item["qty"] = int(item["qty"]) - inv_qty
 			buyer_coin -= inv_qty * inv_bid
 		seller.merchant_inventory = seller.merchant_inventory.filter(
@@ -624,7 +624,7 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		buyer_coin -= qty * ask
 		# 買方若是商隊 → 物品移到 inventory（之後高價賣出）
 		if buyer.tags.has(TeamData.TAG_MERCHANT):
-			buyer.resources[res] = float(buyer.resources.get(res, 0)) - qty
+			ResourceBank.add(buyer, res, -qty, "merchant_stock")
 			buyer.merchant_inventory.append({
 				"grade": res, "qty": qty, "bought_at": ask, "bought_from": seller.team_id
 			})
@@ -653,10 +653,10 @@ func _attempt_barter(state: WorldState, a: TeamData, b: TeamData) -> void:
 			var pay_qty: int = int(round(give_qty * give_val / maxf(pay_val, 0.001)))
 			if pay_qty <= 0 or pay_qty > int(b_surplus): continue
 			# 執行互換（不碰 coin）
-			a.resources[give_res] = float(a.resources.get(give_res, 0)) - give_qty
-			b.resources[give_res] = float(b.resources.get(give_res, 0)) + give_qty
-			b.resources[pay_res]  = float(b.resources.get(pay_res, 0)) - pay_qty
-			a.resources[pay_res]  = float(a.resources.get(pay_res, 0)) + pay_qty
+			ResourceBank.add(a, give_res, -give_qty, "barter_give_out")
+			ResourceBank.add(b, give_res, give_qty, "barter_give_in")
+			ResourceBank.add(b, pay_res, -pay_qty, "barter_pay_out")
+			ResourceBank.add(a, pay_res, pay_qty, "barter_pay_in")
 			print("[Barter] Team%d %dx%s <-> Team%d %dx%s" % [a.team_id, give_qty, give_res, b.team_id, pay_qty, pay_res])
 			break   # 一個 give_res 換一筆即可,下個 give_res
 
@@ -881,8 +881,8 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 			{ "origin": str(target_id), "target": str(beggar_id) })
 		_clear_aid_task(beggar)
 		return { "ok": true, "accepted": false, "msg": "無餘糧" }
-	target.resources["food"] = target_food - give
-	beggar.resources["food"] = float(beggar.resources.get("food", 0)) + give
+	ResourceBank.set_amt(target, "food", target_food - give, "aid_out")
+	ResourceBank.add(beggar, "food", give, "aid_in")
 	_msg.emit_message(state, "aid_given",
 		"Team%d 援助 Team%d %.0f 食物" % [target_id, beggar_id, give], target,
 		{ "origin": str(target_id), "target": str(beggar_id), "amount": "%.0f" % give })

@@ -167,15 +167,15 @@ func execute_offer(state: WorldState, pt_id: int, tgt_id: int, offer: Dictionary
 	for res in player_gives:
 		var qty: float = float(player_gives[res])
 		if res == "coin": qty = floorf(qty)   # coin must be integer
-		pt.resources[res]  = float(pt.resources.get(res, 0))  - qty
-		tgt.resources[res] = float(tgt.resources.get(res, 0)) + qty
+		ResourceBank.add(pt, res, -qty, "ptrade_gives_out")
+		ResourceBank.add(tgt, res, qty, "ptrade_gives_in")
 
 	# Transfer player_wants: NPC → player
 	for res in player_wants:
 		var qty: float = float(player_wants[res])
 		if res == "coin": qty = floorf(qty)   # coin must be integer
-		tgt.resources[res] = float(tgt.resources.get(res, 0)) - qty
-		pt.resources[res]  = float(pt.resources.get(res, 0))  + qty
+		ResourceBank.add(tgt, res, -qty, "ptrade_wants_out")
+		ResourceBank.add(pt, res, qty, "ptrade_wants_in")
 
 	_msg.emit_message(state, "trade_done",
 		"Player(Team%d)↔Team%d 貿易完成" % [pt_id, tgt_id], pt)

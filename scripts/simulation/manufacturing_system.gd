@@ -115,7 +115,7 @@ func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> 
 		var current: float = float(tile.public_storage.get(res, 0))
 		tile.public_storage[res] = minf(current + amt, cap)
 	else:
-		team.resources[res] = float(team.resources.get(res, 0)) + amt
+		ResourceBank.add(team, res, amt, "manufacture_output")
 
 # 組內排序：①命中自隊收到買單(需求驅動)優先 ②其次缺口 stock/(TARGET×pop) 最低者；
 # 原料不足跳下一個；每設施每 tick 跑一條配方。回傳配方名（"" = 無可跑）。
@@ -147,8 +147,7 @@ func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, lev
 		if not _can_consume_scaled(team, recipe["in"], q):
 			continue
 		for res in recipe["in"]:
-			team.resources[res] = float(team.resources.get(res, 0)) \
-				- float(recipe["in"][res]) * q     # 投入隨產量縮放（in = 每單位成品原料）
+			ResourceBank.add(team, res, -(float(recipe["in"][res]) * q), "manufacture_input")     # 投入隨產量縮放（in = 每單位成品原料）；原無 clamp 保可負
 		_add_output(team, tile, recipe["out"], q)
 		return recipe["out"]
 	return ""

@@ -929,25 +929,25 @@ func _init_named_unit(unit: Dictionary, p: PersonData,
 				"weapon_ranged_low", "weapon_ranged_high"]:
 			if int(team.resources.get(grade, 0)) > 0:
 				unit["equipment"]["hand_1"] = { "type": "pool", "grade": grade }
-				team.resources[grade] = int(team.resources[grade]) - 1
+				ResourceBank.add(team, grade, -1, "equip_named_weapon")
 				break
 	if unit["equipment"]["torso"].get("type", "none") in ["none", ""]:
 		var cfg: String = team.armor_config.get("torso", "none")
 		if cfg == "low" and int(team.resources.get("armor_low", 0)) > 0:
 			unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_low" }
-			team.resources["armor_low"] -= 1
+			ResourceBank.add(team, "armor_low", -1, "equip_named_torso")
 		elif cfg == "high" and int(team.resources.get("armor_high", 0)) > 0:
 			unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_high" }
-			team.resources["armor_high"] -= 1
+			ResourceBank.add(team, "armor_high", -1, "equip_named_torso")
 	for slot in ["head", "right_arm", "left_arm", "right_leg", "left_leg"]:
 		if unit["equipment"][slot].get("type", "none") in ["none", ""]:
 			var cfg2: String = team.armor_config.get(slot, "none")
 			if cfg2 == "low" and int(team.resources.get("armor_low", 0)) > 0:
 				unit["equipment"][slot] = { "type": "pool", "grade": "armor_low" }
-				team.resources["armor_low"] -= 1
+				ResourceBank.add(team, "armor_low", -1, "equip_named_slot")
 			elif cfg2 == "high" and int(team.resources.get("armor_high", 0)) > 0:
 				unit["equipment"][slot] = { "type": "pool", "grade": "armor_high" }
-				team.resources["armor_high"] -= 1
+				ResourceBank.add(team, "armor_high", -1, "equip_named_slot")
 	unit["inventory"] = []
 	EncounterTemplates.fill_inventory(unit, team, state)
 
@@ -967,7 +967,7 @@ func _assign_anon_weapons(team: TeamData, count: int) -> Array:
 					"weapon_ranged_low", "weapon_ranged_high"]:
 				if int(team.resources.get(grade, 0)) > 0:
 					assigned = grade
-					team.resources[grade] = int(team.resources[grade]) - 1
+					ResourceBank.add(team, grade, -1, "equip_anon_weapon")
 					break
 			queue.append(assigned)
 		return queue
@@ -980,7 +980,7 @@ func _assign_anon_weapons(team: TeamData, count: int) -> Array:
 		var give: int   = mini(mini(want, avail), count - queue.size())
 		for _j in range(give):
 			queue.append(key)
-		team.resources[key] = int(team.resources.get(key, 0)) - give
+		ResourceBank.add(team, key, -give, "equip_anon_distribute")
 		if queue.size() >= count: break
 
 	# Pad with unarmed if equip_order exhausted before all slots filled
@@ -997,10 +997,10 @@ func _init_anon_unit(unit: Dictionary, team: TeamData,
 	var cfg: String = team.armor_config.get("torso", "none")
 	if cfg == "low" and int(team.resources.get("armor_low", 0)) > 0:
 		unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_low" }
-		team.resources["armor_low"] -= 1
+		ResourceBank.add(team, "armor_low", -1, "equip_anon_torso")
 	elif cfg == "high" and int(team.resources.get("armor_high", 0)) > 0:
 		unit["equipment"]["torso"] = { "type": "pool", "grade": "armor_high" }
-		team.resources["armor_high"] -= 1
+		ResourceBank.add(team, "armor_high", -1, "equip_anon_torso")
 	EncounterTemplates.fill_inventory(unit, team, state)
 
 func _has_arrows(unit: Dictionary) -> bool:
@@ -1053,13 +1053,12 @@ func _sync_back_units(state: WorldState, team_id: int) -> void:
 			for slot in unit.get("equipment", {}):
 				var s: Dictionary = unit["equipment"][slot]
 				if s.get("type") == "pool" and s.get("grade", "") != "":
-					team.resources[s["grade"]] = \
-						int(team.resources.get(s["grade"], 0)) + 1
+					ResourceBank.add(team, s["grade"], 1, "equip_return")
 		for item in unit.get("inventory", []):
 			if item.get("type") == "pool":
 				var g: String = item.get("grade", "")
 				if g != "":
-					team.resources[g] = int(team.resources.get(g, 0)) + item.get("qty", 0)
+					ResourceBank.add(team, g, item.get("qty", 0), "inventory_return")
 
 func _spawn_team_units(state: WorldState, team: TeamData,
 		positions: Array) -> void:
@@ -1094,7 +1093,7 @@ func _spawn_team_units(state: WorldState, team: TeamData,
 	for j in range(spawned_anon, weapon_queue.size()):
 		var grade: String = weapon_queue[j]
 		if grade != "":
-			team.resources[grade] = int(team.resources.get(grade, 0)) + 1
+			ResourceBank.add(team, grade, 1, "spawn_overflow_return")
 	print("[Encounter] Team%d spawn: %d具名 + %d匿名（武裝率%.0f%%，人口%d）" % [
 		team.team_id, named_ids.size(), spawn_count,
 		team.armed_anon_ratio * 100, team.population])
@@ -1146,16 +1145,16 @@ func apply_mount_loot(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var loser_mounts: int = int(loser.resources.get("mounts", 0))
 	var loot: int = roundi(float(loser_mounts) * kill_ratio)
 	if loot > 0:
-		loser.resources["mounts"] = loser_mounts - loot
-		winner.resources["mounts"] = int(winner.resources.get("mounts", 0)) + loot
+		ResourceBank.set_amt(loser, "mounts", loser_mounts - loot, "loot_mounts_out")
+		ResourceBank.add(winner, "mounts", loot, "loot_mounts_in")
 		print("[Loot] Team%d → Team%d mounts +%d (kill_ratio=%.2f)" % [
 			loser_id, winner_id, loot, kill_ratio])
 	# horses（馴馬）同公式
 	var loser_horses: int = int(loser.resources.get("horses", 0))
 	var hloot: int = roundi(float(loser_horses) * kill_ratio)
 	if hloot > 0:
-		loser.resources["horses"] = loser_horses - hloot
-		winner.resources["horses"] = int(winner.resources.get("horses", 0)) + hloot
+		ResourceBank.set_amt(loser, "horses", loser_horses - hloot, "loot_horses_out")
+		ResourceBank.add(winner, "horses", hloot, "loot_horses_in")
 		print("[Loot] Team%d → Team%d horses +%d (kill_ratio=%.2f)" % [
 			loser_id, winner_id, hloot, kill_ratio])
 
@@ -1195,7 +1194,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	for tid in arrows_used:
 		var t: TeamData = state.teams.get(tid)
 		if t:
-			t.resources["arrows"] = maxi(int(t.resources.get("arrows", 0)) - arrows_used[tid], 0)
+			ResourceBank.remove(t, "arrows", arrows_used[tid], "arrows_spent")
 
 	for u in state.encounter_units:
 		if u["person_id"] == -1: continue
@@ -1440,7 +1439,7 @@ func _massacre_residents(state: WorldState, attacker: TeamData, resident: TeamDa
 		tile: HexTileData) -> void:
 	OutpostOwnerBank.set_owner(tile, attacker.team_id, "capture")
 	for k in resident.resources:
-		attacker.resources[k] = attacker.resources.get(k, 0) + resident.resources[k]
+		ResourceBank.add(attacker, k, float(resident.resources[k]), "massacre_loot")
 	# 守恆(Bug10)：接收 resident 公庫（原 erase 前未轉 → 銷毀）；移除原 `+= pop×5` 憑空鑄幣
 	AnonTreasuryBank.transfer_all(resident, attacker, "massacre")
 	var rid: int = resident.team_id

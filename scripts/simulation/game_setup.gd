@@ -195,9 +195,9 @@ static func _setup_random_player(state, config, rng) -> void:
 	var starting: Dictionary = pcfg.get("starting_resources", {})
 	for k in starting:
 		if k in FLOAT_RES_KEYS:
-			team.resources[k] = float(starting[k]) * richness_mult
+			ResourceBank.set_amt(team, k, float(starting[k]) * richness_mult, "init_starting")
 		else:
-			team.resources[k] = int(round(float(starting[k]) * richness_mult))
+			ResourceBank.set_amt(team, k, int(round(float(starting[k]) * richness_mult)), "init_starting")
 
 	var leader := PersonData.new()
 	leader.id = _next_person_id(state)
@@ -357,9 +357,9 @@ static func _apply_preset_resources(team: TeamData, preset_key: String,
 	var preset: Dictionary = TEAM_RESOURCE_PRESET[preset_key]
 	for k in preset:
 		if k in FLOAT_RES_KEYS:
-			team.resources[k] = float(preset[k]) * richness_mult
+			ResourceBank.set_amt(team, k, float(preset[k]) * richness_mult, "init_preset")
 		else:
-			team.resources[k] = int(round(float(preset[k]) * richness_mult))
+			ResourceBank.set_amt(team, k, int(round(float(preset[k]) * richness_mult)), "init_preset")
 
 static func _create_team(state: WorldState, rng, pop_range: Array,
 		named_ratio: float, richness_mult: float, preset_key: String) -> TeamData:
