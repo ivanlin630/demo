@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 統一決策框架的 believability 驗證套件 + 6 條魂觸發場景（框架落地即驗）
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 戰俘 WHAT 預想（備著，戰俘子 spec 開時用）— 持久持有 + 命運裁決 + guard-cap
 ---
 
