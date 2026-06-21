@@ -6,6 +6,10 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。
 
 
+## 守恆
+
+- **anon_treasury 滅隊 off-map leak（既有,degenerate only,2026-06-22 AnonTreasuryBank 揭）**：`faction_ai_system.gd:~1456`——隊死於 off-map 且 `_nearest_valid_tile`(radius-12)找不到 tile → 公庫 coin 無處傾倒、靜默丟失（命名 `AnonTreasuryBank.reset(team,"extinct_no_tile_LEAK")`）。**coin_eq/CoinAudit 抓不到**（隊正被 erase，丟的是「該路由到 tile 的」非「留在隊的」，audit 對 state.teams 求和 delta 仍 0）。正常地圖不觸發（radius-12 內必有 tile）。**小修方向**：找不到 tile 時擴大搜尋 / 倒入全域 sink / 記 ledger。非阻塞。
+
 ## G2 目標錨點進度
 
 - **G2a（關係圖 typed-edge）✅** + **G2b（野心階梯狀態 + strategic 衍生）✅**：`TeamData.ambition_rung/archetype/cap` 由 `AmbitionLadder` 從 leader values + 隊安全 derive（faction_ai cadence update）；`strategic_ai._update_faction_goals` 改讀階梯衍生 expand/trade（真 reader，非 dormant）。階梯門檻/權重全 TEST VALUE（待藍圖平衡 pass，handback `systems-to-blueprint-g2b-feel`）。
