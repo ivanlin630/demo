@@ -45,6 +45,17 @@
 - **⚠ [量測基建] world_sim 非確定性 — ProbeSummary 不可作回歸/歸因閘（#0b 實證）**：handoff #5「seed 77 可重現」**不成立**。同一 branch 跑兩次 ProbeSummary 大幅分歧（promote 35↔71、trust_up 14735↔3690、feud 1↔0、末月存活 8↔7），run-to-run 噪聲**遠大於** pre/post 差 → 無法對任何改動做 emergent 因果歸因。擴展既有 [[reference_multi_sanity_unseeded]]（multi drift 不可重現）至 world_sim。**系統裁定**：world_sim = **不可重現煙霧台**（驗「不崩 + ProbeSummary 仍印 + faction_found≥1」），**非平衡/回歸證據**；emergent 因果一律走**確定性 headless 場景 + 定向探針斷言**（如 #0/#0b 重量證 root 走的是 headless 階梯差，非 world_sim drift）。**含 feud plan Task3**：其 world_sim `feud_formed 對照前次` 同屬煙霧，真驗收 = gate/spread 單測（確定）。**選用後續（不阻塞）**：若要 world_sim 可作閘 → 補種子化（全 `randf()`/`randi()` 走 seeded rng）= 大改（散落多系統），post-#1 評估。
 - **✅ 懸空 known_reputations 死隊已修（`2933563`，systematic-debug）**：root = `belief_system.reconcile_firsthand`(165-176) 迭代 claims 對每個 `sid`(來源隊) 呼 `update_reputation(sid)` **無 liveness 檢查**；claim 存活過來源隊（隊死後其轉述仍留別隊 team_intel）→ reconcile 跑到死隊 claim → `update_reputation(dead_sid)`(team_data:174 建 key) → 重注入死 id。`erase_team:147` 死時清了但 reconcile 死後重注入。**修 = `reconcile_firsthand` 加 `if not state.teams.has(sid): continue`**（死 source 不更新口碑）。world_sim InvariantViolation **556→0**。先前「補 erase_team 清 team_intel」猜錯方向（症狀非根）。**教訓**：藍圖 `state-fight-scope` 指 event_faction_defect:21 是另一回事（faction bidir，world_sim 0 violation，防禦清理非 bug）——reproduce 校正 pointer，[[feedback_verify_backlog_fresh]]。
 
+## 框架驗證套件（2026-06-22 framework-validation 子 session）
+
+- **Part 2 魂觸發 harness（`scripts/debug/framework_validation.gd`）✅**：每魂最小場景 setup→觸發→斷言 probe>0。**全 7 魂 PASS**（S1 立國/S2a feud/S2b vendetta/S3 scout/S4 ambush/S5 mint/S6 order_fulfilled）= 6 子系統魂的 plumbing 全可觸發，**無 code-level dormancy**。
+- **dormant-in-default backlog（魂在預設 2yr world_sim 不觸發，非壞 = 場景稀有 / TEST VALUE 門檻高）**：定向 harness 證可 fire，但預設世界 run 計數為 0 —— 觸發鏈正確但**自然發生條件罕見**。各魂初判：
+  - **`g2.vendetta_trigger`（world_sim=0，harness PASS）**：vendetta@55 被 threat@70 系統性擋住（設計優先序）。自然只在「強隊 leader 對**已不構成現役威脅的弱小舊仇**」才觸發（仇敵須被發現但 ThreatAssessment score < 門檻）。預設世界血仇多伴隨現役敵對 → threat 先佔 → vendetta 罕見。**非 bug**（符合「威脅優先於私仇」invariant）；若藍圖要 vendetta 更常見 → 調 VENDETTA_* 門檻或弱仇偏置（G2d OUT 已列）。
+  - **`g3.scout_dispatch/converge/timeout`（world_sim=0，harness PASS）**：需 FORCE archetype + rung≥擴張 + attack_score≥.3 + readiness 過 + **prey belief 不確定 + leader 慎重**全同時成立。預設世界多為親見高 cred（uncertainty 低→直接攻不 scout）或莽者（低慎重恆過 gate 不 scout）。場景稀有，鏈正確。
+  - **`g1.mint`（world_sim=0，harness PASS）**：需 tile `mint_level>0` + 居民 PRODUCE 隊 + `ore_gold/ore_silver>0` 同時。預設 config 無金/銀礦 tile 或無鑄幣廠設施 → 鏈空轉。**初判 = 場景/config 缺供給端**（金銀礦生成 + 鑄幣廠建造路徑未在預設世界出現）；接 G1a 鑄幣 arc，待 config 補金礦 + AI 蓋鑄幣廠評估。
+  - **`g3.ambush`（world_sim=0，harness PASS）**：`Probe.ambush_check`（觀測點）僅在 encounter 敗方=攻方時呼（attacker 誤判弱敵踢鐵板）。預設 2yr 該 run 無「攻方低估 belief 且戰敗」事件 → 0。純觀測探針（不 gate AI），誘殺脊椎成立才會自然累計。
+  - **fire-in-default（對照）**：`g2.faction_found=1`、`g2.feud_formed=3`、`g1.order_fulfilled=4`（+ g1/g3 經濟/belief 大量活動）在預設 2yr 自然觸發。
+  - **量測注意**：world_sim 非確定性（見 §「量測基建」），上述 0/非0 為單 run 快照，run-to-run 會抖；harness 為確定性證據（魂可 fire），world_sim 計數僅佐證自然頻率粗略級別。
+
 ## G1 供應鏈進度
 
 - **G1a（鑄幣觀測：W8 機制已存 + log/驗）**、**G1b（訂單 infra + 餘→賣盤 + 需求驅動生產）✅**：訂單走 message（權威存發起隊 `active_orders`，emit 為可失真傳播副本）；`OrderSystem.tick_team_orders` faction_ai cadence 發賣盤 + 過期清；`manufacturing._run_recipe_group` 讀 `received_buy_orders` 偏向需求 recipe（訂單真 reader，非 dormant）。
