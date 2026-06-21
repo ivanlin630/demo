@@ -3848,6 +3848,8 @@ func _run_sim_test() -> void:
 	_test_tc4_ambition_drive()
 	_test_tc6_multi_drive()
 	_test_tc7_divergence()
+	_test_tc2_survival_input()
+	_test_tc5_economy_intel()
 	_test_role_applicable()
 	_test_merchant_gate_weight()
 	_test_merchant_restock()
@@ -12791,6 +12793,33 @@ func _test_tc7_divergence() -> void:
 	for o in opts: uniq[o] = true
 	assert(uniq.size() == 3, "TC7 分歧硬 bar：3 leader 應 3 不同 option，實際=%s (過不了=框架失敗)" % str(opts))
 	print("TC7 divergence OK (3 leader 3 option: %s)" % str(opts))
+
+func _test_tc2_survival_input() -> void:
+	print("--- TC2 survival=高權重輸入(非latch) ---")
+	# 糧近0 隊 → survival-class(覓食/survival/返家補給) util 壓過貿易(survival 是輸入贏,非硬閘)
+	var s := WorldState.new(); s.world = WorldData.new()
+	var t := _mk_merchant_team(s, {"義氣": 0.8, "貪婪": 0.3}, true, 0.0)  # 糧倉空
+	t.resources["food"] = 0.0; t.current_option = ""
+	var opt: String = DecisionEngine.decide(s, t)
+	assert(opt in ["覓食", "返家補給", "survival"], "TC2:糧0→survival-class(輸入贏),實際=%s" % opt)
+	print("TC2 survival-input OK (%s)" % opt)
+	# TC3 卡他域(引擎攻擊 option)→skip
+	print("TC3 SKIP: feud→脫軌攻擊需引擎攻擊 option(他域,未決)")
+
+func _test_tc5_economy_intel() -> void:
+	print("--- TC5 經濟+情報為輸入 ---")
+	# 商業隊有貨 + belief 有 arb 單 → 貿易;belief 無單 → 不選貿易(撲空)
+	var s1 := WorldState.new(); s1.world = WorldData.new()
+	var t1 := _mk_merchant_team(s1, {"貪婪": 0.7}, true, 500.0)  # has_arb=true
+	t1.current_option = ""
+	assert(DecisionEngine.decide(s1, t1) == "貿易", "TC5:有貨+arb情報→貿易")
+	# 無 arb 情報(belief 空) → economic_opp 低 → 非貿易為首(視糧/其他)
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var t2 := _mk_merchant_team(s2, {"貪婪": 0.7}, false, 500.0)  # has_arb=false(無單情報)
+	t2.resources["goods"] = 0.0   # 無貨無 arb → 貿易 util≈0(且不入候選)
+	t2.current_option = ""
+	assert(DecisionEngine.decide(s2, t2) != "貿易", "TC5:無貨無arb情報→不撲空式貿易")
+	print("TC5 economy-intel OK")
 
 func _test_role_applicable() -> void:
 	print("--- sub-A Task1: 角色守衛 (貿易=商隊/建設=bootstrap) ---")
