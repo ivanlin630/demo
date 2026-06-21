@@ -842,8 +842,8 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 					mt.trade_task_start_tick = state.world.current_tick
 
 # ──────── 統一決策引擎切片 seam ────────
-# 首切片 = 商隊-tag 隊：macro 決策走 DecisionEngine（舊 member hoist / solo 生產者跳過，單一 owner）。
-# 非切片隊（軍隊/生產…）舊系統原封不動（零影響 = de-risk）。
+# 切片 = 商隊 + 生產 tag 隊：macro 決策走 DecisionEngine（舊 member hoist / solo 生產者跳過，單一 owner）。
+# 非切片隊（軍隊/統領/宗教…）舊系統原封不動（零影響 = de-risk）。後續域遷入逐擴 tag。
 func uses_unified(team: TeamData) -> bool:
 	return team.tags.has(TeamData.TAG_MERCHANT) or team.tags.has(TeamData.TAG_PRODUCE)
 
