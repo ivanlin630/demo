@@ -776,23 +776,17 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 	for mid in f.member_team_ids:
 		if mid == f.leader_team_id: continue
 		var mt: TeamData = state.require_team(mid)
+		if mt.combat_target != -1: continue          # 戰鬥覆蓋(全隊)
+		if not mt.player_commanded_task.is_empty(): continue  # 玩家(全隊)
+		if uses_unified(mt):                          # ← hoist:引擎每 cadence 重評(unified 退 latch)
+			_decide_unified(state, mt); continue
+		# ↓ 以下僅非 unified 隊(原邏輯原樣)
 		var snap: Dictionary = f.known_member_states.get(mid, {})
 		var known_task: String = snap.get("current_task", TeamData.TASK_IDLE)
 		if mt.combat_target != -1 or known_task != TeamData.TASK_IDLE:
 			continue
-		if not mt.player_commanded_task.is_empty():
-			continue  # don't override player-commanded task
 		if mt.current_task in SURVIVAL_TASKS:
-			# WS-2b 量測旗（觀測）：商隊卡 survival → 永不出門巡市集 = world_sim 履約 0 的真壓制因。
-			# 本 WS 不硬修 survival（plan 次要旗標）；留此探針供下一個 measure-first WS。
-			if mt.tags.has(TeamData.TAG_MERCHANT):
-				Probe.bump("g1.merchant_survival")
-			continue  # 生存 sticky：不蓋過 survival task
-		# 統一決策引擎切片：商隊-tag member 走 DecisionEngine（取代舊 member trade hoist）。
-		# 舊 WS-2/2b 的 member 貿易 hoist 被引擎的「貿易 option」涵蓋 → 移除商隊分支（不雙重觸發）。
-		if uses_unified(mt):
-			_decide_unified(state, mt)
-			continue
+			continue  # 生存 sticky(非 unified)：不蓋過 survival task
 		var absorber_id: int = _find_absorber(state, mt, f)
 		if absorber_id != -1:
 			var mt_leader = state.persons.get(mt.leader_id)
@@ -852,6 +846,8 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
 	var opt: String = DecisionEngine.decide(state, team)
+	if opt == "返家補給": Probe.bump("g1.restock_chosen")
+	elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
 	var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 	var tgt: Vector2i = td["target"]
 	if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
@@ -997,15 +993,14 @@ func _evaluate_idle_subteam(state: WorldState, sub: TeamData, merge_queue: Array
 func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id: return   # 玩家隊不受 SoloAI 控制
 	if team.combat_target != -1: return
-	# stuck 視為 idle，允許重評（task 保留意圖直到重新派發）
-	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
 	var leader_p = state.persons.get(team.leader_id)
 	if leader_p == null: return
-
 	# 統一決策引擎切片：商隊-tag solo 隊走 DecisionEngine（取代舊 solo 計分 + MERCHANT_TRADE_BONUS）。
-	if uses_unified(team):
+	if uses_unified(team):                          # ← hoist 到 IDLE gate 前(unified 退 latch)
 		_decide_unified(state, team)
 		return
+	# stuck 視為 idle，允許重評（task 保留意圖直到重新派發）
+	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
 
 	var martial:  float = float(leader_p.values.get("好戰",   0.5))
 	var greed:    float = float(leader_p.values.get("貪婪",   0.5))
@@ -2087,6 +2082,8 @@ func _richest_member(state: WorldState, f) -> int:
 func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id and state.player_id != -1:
 		return
+	if uses_unified(team):
+		return   # unified 隊求生改由 DecisionEngine 決(切片);舊系統不雙觸發
 	var pop_eff: int = team.population
 	if pop_eff <= 0: return
 	# WS-2c：讀有效糧（私產+自家糧倉），否則定居隊 food 在糧倉→誤判餓→永卡 survival。

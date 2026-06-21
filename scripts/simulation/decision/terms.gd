@@ -10,11 +10,16 @@ const RESTOCK_DAYS: float = 5.0   # TEST VALUE：商隊糧低於此 → proactiv
 static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 	match term:
 		"survival_pressure":
-			# 糧 days 越少越高；<3 天爆高（危機）
-			return clampf((6.0 - ctx.food_days) / 6.0, 0.0, 1.5)
+			# 重標度：吃飽(≥WARNING 3)→0 不蓋過 trade；糧危陡升量級支配(food2→4/food0→12)。
+			if ctx.food_days >= 3.0: return 0.0
+			return 4.0 * (3.0 - ctx.food_days)
 		"restock_need":
 			if opt != "返家補給": return 0.0
-			return clampf((RESTOCK_DAYS - ctx.food_days) / RESTOCK_DAYS, 0.0, 1.5)
+			# proactive 回家：~food4 起、量級隨糧降攀升(無上限,壓過覓食使有家偏好回家)。
+			return maxf(0.0, 1.5 * (RESTOCK_DAYS - ctx.food_days))
+		"threat_pressure":
+			# survival(FLEE)=威脅驅動(與 hunger 分離)；threat 目前 0=休眠,他域遷入補。
+			return ctx.threat
 		"economic_opp":
 			if opt != "貿易": return 0.0
 			return (0.8 if ctx.has_goods else 0.2) * (1.0 if ctx.has_arb else 0.3)
