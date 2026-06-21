@@ -3830,6 +3830,7 @@ func _run_sim_test() -> void:
 	_test_role_applicable()
 	_test_merchant_restock()
 	_test_survival_magnitude()
+	_test_unified_survival_boundary()
 
 	print("=== DONE ===")
 
@@ -12746,3 +12747,27 @@ func _test_survival_magnitude() -> void:
 	s3.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(5,6))]
 	assert(DecisionEngine.decide(s3, t3) == "貿易", "吃飽商隊應貿易")
 	print("survival magnitude OK")
+
+func _test_unified_survival_boundary() -> void:
+	print("--- 統一隊 survival 切片邊界 ---")
+	var fai := FactionAISystem.new()
+	# B1：unified 隊(商隊)糧危 → _evaluate_survival 早退(不設舊 survival task)
+	var s1 := WorldState.new(); s1.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = Vector2i(5,5); t.leader_id = 100; t.current_task = TeamData.TASK_IDLE
+	_seed_pop(t, 5); t.resources = {"food": 0.0}   # 絕糧
+	# 腳下無主可農地：非 unified 隊 urgent 必紮營(離 IDLE) → 使 B1 早退真有對照(否則空世界亦 IDLE)
+	var farm1 := HexTileData.new(); farm1.tile_pos = Vector2i(5,5); s1.world.tiles[5*1000+5] = farm1
+	var ldr := PersonData.new(); ldr.id = 100; s1.persons[100] = ldr; s1.teams[0] = t
+	fai._evaluate_survival(s1, t)
+	assert(t.current_task == TeamData.TASK_IDLE, "B1:unified 隊舊 survival 應早退(不設 task)，實際=%s" % t.current_task)
+	# 非 unified 隊(軍隊)糧危 → 舊 survival 照觸發(離開 IDLE)
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tags = [TeamData.TAG_MILITARY]
+	t2.tile_pos = Vector2i(5,5); t2.leader_id = 100; t2.current_task = TeamData.TASK_IDLE
+	_seed_pop(t2, 5); t2.resources = {"food": 0.0}
+	var farm2 := HexTileData.new(); farm2.tile_pos = Vector2i(5,5); s2.world.tiles[5*1000+5] = farm2
+	var l2 := PersonData.new(); l2.id = 100; s2.persons[100] = l2; s2.teams[0] = t2
+	fai._evaluate_survival(s2, t2)
+	assert(t2.current_task != TeamData.TASK_IDLE, "非 unified 隊舊 survival 應觸發(離 IDLE)，實際=%s" % t2.current_task)
+	print("unified survival boundary OK")
