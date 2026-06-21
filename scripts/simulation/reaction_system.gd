@@ -23,7 +23,7 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 			if state.world.current_tick % GOAL_CHECK_INTERVAL == 0:
 				_update_goals(person)
 				var alignment: float = _npc_ai.check_goal_alignment(person, team.current_task)
-				person.loyalty = clampf(person.loyalty + alignment, 0.0, 1.0)
+				LoyaltyBank.adjust(person, alignment, "goal_alignment")
 			var reaction: String = _evaluate_person(person, team)
 			if reaction != "none":
 				_apply_reaction(state, person, team, reaction)
@@ -73,7 +73,7 @@ func on_attack_defeat(state: WorldState, team_id: int, pop_loss_ratio: float) ->
 	for pid in team.named_members:
 		var p: PersonData = state.persons.get(int(pid))
 		if p == null: continue
-		p.loyalty = clampf(p.loyalty + loyalty_delta, 0.0, 1.0)
+		LoyaltyBank.adjust(p, loyalty_delta, "attack_defeat")
 	leader.stress = clampf(leader.stress + stress_delta, 0.0, 1.0)
 	print("[AttackDefeat] Team%d 戰敗 loss=%.2f loyalty_d=%.3f stress_d=%.3f" % [
 		team_id, pop_loss_ratio, loyalty_delta, stress_delta])
@@ -251,7 +251,7 @@ func _score_extort(p: PersonData, _t: TeamData) -> float:
 func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reaction: String) -> void:
 	match reaction:
 		"P1_comply":
-			person.loyalty = minf(person.loyalty + 0.01, 1.0)
+			LoyaltyBank.adjust(person, 0.01, "comply")
 		"P2_produce":
 			pass   # 效果改由 work_morale 係數體現（evaluate_all 統計）
 		"P4_expand":
@@ -273,7 +273,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 		"N3_defect":
 			if team.population <= 1 and person.id == team.leader_id:
 				return   # solo leader 無從叛逃自己
-			person.loyalty = 0.0
+			LoyaltyBank.set_baseline(person, 0.0, "defect")
 			if team.named_members.has(person.id):
 				team.named_members.erase(person.id)
 				person.team_id = -1

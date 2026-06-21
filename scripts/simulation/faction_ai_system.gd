@@ -1396,7 +1396,7 @@ func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: 
 		var p: PersonData = state.persons.get(pid)
 		if p == null: continue
 		p.stress = minf(p.stress + stress_pen, 1.0)
-		p.loyalty = maxf(p.loyalty - loyalty_pen, 0.0)
+		LoyaltyBank.adjust(p, -loyalty_pen, "faction_strain")
 	if not is_emergency:
 		UnrestBank.add(team, 1, "faction")
 	print("[Extract] Team%d 徵用 %.0f coin (%s)" % [team.team_id, amt, reason])

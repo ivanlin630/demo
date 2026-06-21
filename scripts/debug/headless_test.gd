@@ -3838,6 +3838,7 @@ func _run_sim_test() -> void:
 	_test_survival_magnitude()
 	_test_unified_survival_boundary()
 	_test_dispatch_fallback()
+	_test_loyalty_bank()
 
 	print("=== DONE ===")
 
@@ -5748,6 +5749,21 @@ func _test_unrest_bank() -> void:
 	UnrestBank.add(t, 5, "test"); UnrestBank.reset(t, "split")
 	assert(t.unrest_turns == 0, "reset →0，實際=%d" % t.unrest_turns)
 	print("unrest bank OK")
+
+func _test_loyalty_bank() -> void:
+	print("--- LoyaltyBank 單一 owner ---")
+	var p := PersonData.new(); p.loyalty = 0.5
+	LoyaltyBank.adjust(p, 0.3, "test")
+	assert(abs(p.loyalty - 0.8) < 0.001, "adjust +0.3 →0.8，實際=%.3f" % p.loyalty)
+	LoyaltyBank.adjust(p, 0.5, "test")
+	assert(abs(p.loyalty - 1.0) < 0.001, "adjust 超 →clamp 1.0，實際=%.3f" % p.loyalty)
+	LoyaltyBank.adjust(p, 0.5, "overpay", 0.95)
+	assert(abs(p.loyalty - 0.95) < 0.001, "cap=0.95 →0.95，實際=%.3f" % p.loyalty)
+	LoyaltyBank.adjust(p, -2.0, "test")
+	assert(p.loyalty == 0.0, "adjust 大負 →clamp 0，實際=%.3f" % p.loyalty)
+	LoyaltyBank.set_baseline(p, 0.25, "conquered")
+	assert(abs(p.loyalty - 0.25) < 0.001, "set_baseline 0.25，實際=%.3f" % p.loyalty)
+	print("loyalty bank OK")
 
 # ════════════ Merchant Trade (A) + Outpost Capture (D) ════════════
 

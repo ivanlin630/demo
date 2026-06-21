@@ -615,7 +615,7 @@ func _action_leave_faction(state: WorldState, _target_id: int, pt: TeamData, pt_
 	if leader_team3 != null:
 		var leader_p3: PersonData = state.persons.get(leader_team3.leader_id)
 		if leader_p3:
-			leader_p3.loyalty = maxf(leader_p3.loyalty - 0.15, 0.0)
+			LoyaltyBank.adjust(leader_p3, -0.15, "faction_leave")
 	print("[PlayerCmd] 玩家離開勢力%d" % fid3)
 	return { "ok": true, "msg": "已離開勢力" }
 
@@ -659,7 +659,7 @@ func _action_disband_faction(state: WorldState, _target_id: int, pt: TeamData, p
 		if mt5 == null: continue
 		var lp5: PersonData = state.persons.get(mt5.leader_id)
 		if lp5:
-			lp5.loyalty = maxf(lp5.loyalty - 0.3, 0.0)
+			LoyaltyBank.adjust(lp5, -0.3, "faction_disband")
 	state.disband_faction(fid5)
 	return { "ok": true, "msg": "勢力已解散" }
 
@@ -1314,7 +1314,7 @@ func _recruit_named_internal(state: WorldState, pt: TeamData,
 	tgt4.resources["coin"] = float(tgt4.resources.get("coin", 0)) + RECRUIT_COST_NAMED
 	tgt4.named_members.erase(person_id)
 	p.team_id = pt_id
-	p.loyalty  = 0.5
+	LoyaltyBank.set_baseline(p, 0.5, "recruit")
 	pt.named_members.append(person_id)
 	state.player_pending_targets.erase(from_team_id)
 	print("[Recruit] Named P%d (%s) Team%d→%d" % [

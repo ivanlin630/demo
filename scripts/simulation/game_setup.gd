@@ -205,7 +205,7 @@ static func _setup_random_player(state, config, rng) -> void:
 	leader.role = "leader"
 	leader.team_id = team.team_id
 	leader.age = 30
-	leader.loyalty = 1.0
+	LoyaltyBank.set_baseline(leader, 1.0, "init")
 	# 統領初始值需支撐起始人口：pop_cap_from_leadership(0.15) = 10
 	leader.skills["統領"] = 0.15
 	state.persons[leader.id] = leader
@@ -482,7 +482,7 @@ static func _make_person(team_id: int, p_cfg: Dictionary, is_leader: bool) -> Pe
 	p.role = "leader" if is_leader else "civilian"
 	p.team_id = team_id
 	p.age = int(p_cfg.get("age", 30))
-	p.loyalty = float(p_cfg.get("loyalty", 0.8))
+	LoyaltyBank.set_baseline(p, float(p_cfg.get("loyalty", 0.8)), "init")
 	p.stress = float(p_cfg.get("stress", 0.0))
 	p.salary = float(p_cfg.get("salary", 0.0))
 	for k in p_cfg.get("skills", {}):
