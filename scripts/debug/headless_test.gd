@@ -3840,6 +3840,7 @@ func _run_sim_test() -> void:
 	_test_dispatch_fallback()
 	_test_loyalty_bank()
 	_test_anon_treasury_bank()
+	_test_outpost_owner_bank()
 
 	print("=== DONE ===")
 
@@ -5787,6 +5788,15 @@ func _test_anon_treasury_bank() -> void:
 	var g2: float = AnonTreasuryBank.withdraw(c, 999.0, "x")
 	assert(abs(g2 - 10.0) < 0.001 and c.anon_treasury == 0.0, "withdraw clamp min(amt,bal)")
 	print("anon treasury bank OK")
+
+func _test_outpost_owner_bank() -> void:
+	print("--- OutpostOwnerBank 單一 owner ---")
+	var tile := HexTileData.new(); tile.outpost_owner = -1
+	OutpostOwnerBank.set_owner(tile, 5, "capture")
+	assert(tile.outpost_owner == 5, "set_owner →5，實際=%d" % tile.outpost_owner)
+	OutpostOwnerBank.set_owner(tile, -1, "abandon")
+	assert(tile.outpost_owner == -1, "set_owner -1(棄守) →-1")
+	print("outpost owner bank OK")
 
 # ════════════ Merchant Trade (A) + Outpost Capture (D) ════════════
 

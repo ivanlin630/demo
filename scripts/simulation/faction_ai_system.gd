@@ -2187,7 +2187,7 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	var is_military: bool = (martial > 0.6 or ambition > 0.7)   # TEST VALUE 門檻
 	tile.outpost_type = "military" if is_military else "civilian"
 	tile.outpost_level = 1
-	tile.outpost_owner = team.team_id
+	OutpostOwnerBank.set_owner(tile, team.team_id, "camp")
 	# 只抬 food cap（regen 才產糧）,不送即時糧。2026-06-16 A/B 量測:即時糧非 load-bearing
 	# （拿掉後 2yr×4config died=0、pop 不掉）→ 移除以恢復絕境稀缺,與玩家紮營版一致。
 	tile.resource_cap["food"] = maxf(float(tile.resource_cap.get("food", 0)), CRUDE_CAMP_FOOD_SEED)
@@ -2447,7 +2447,7 @@ func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
 		team.occupying_outpost_since = state.world.current_tick
 		return
 	if state.world.current_tick - team.occupying_outpost_since >= OUTPOST_TAKEOVER_DAYS * WorldState.TICKS_PER_DAY:
-		tile.outpost_owner = team.team_id
+		OutpostOwnerBank.set_owner(tile, team.team_id, "takeover")
 		team.occupying_outpost_since = -1
 		print("[Takeover] Team%d 接管無人 outpost (%d,%d)" % [
 			team.team_id, team.tile_pos.x, team.tile_pos.y])
@@ -2489,7 +2489,7 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	if stand:
 		# Path A 守城：奪取 outpost、自立（保留 PRODUCE 身分）
 		state.clear_team_faction(team)   # 起義脫離 faction（雙向同步）
-		if tile: tile.outpost_owner = team.team_id
+		if tile: OutpostOwnerBank.set_owner(tile, team.team_id, "takeover")
 		print("[Uprising A] Team%d 守城（野心=%.2f，old owner=Team%d）" % [
 			team.team_id, ambition, old_owner_id])
 	else:

@@ -172,7 +172,7 @@ static func _generate_independent_teams(state, plan, config, rng) -> void:
 				named_ratio, richness_mult, "independent_settled")
 			team.tile_pos = opos
 			var key: int = opos.x * 1000 + opos.y
-			state.world.tiles[key].outpost_owner = team.team_id
+			OutpostOwnerBank.set_owner(state.world.tiles[key], team.team_id, "init")
 
 	var roving_range: Array = indep_cfg.get("roving_count_range", [2, 4])
 	var roving_count: int = rng.randi_range(roving_range[0], roving_range[1])
@@ -329,7 +329,7 @@ static func _build_outpost_tile(state: WorldState, pos: Vector2i,
 	if tile == null: return
 	tile.outpost_type  = type_str
 	tile.outpost_level = level
-	tile.outpost_owner = owner_team_id
+	OutpostOwnerBank.set_owner(tile, owner_team_id, "init")
 
 static func _setup_anon_tiers(team: TeamData, cfg: Dictionary, target_pop: int) -> void:
 	# population 為 getter（leader+named+anon）→ 不可讀回算 anon；改傳 config 目標 pop。
@@ -467,7 +467,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 				tile.terrain = String(op_cfg["terrain"])   # explicit 場景可釘地形（如村莊放可農平原）
 			tile.outpost_type = op_cfg.get("type", "civilian")
 			tile.outpost_level = int(op_cfg.get("level", 1))
-			tile.outpost_owner = team.team_id
+			OutpostOwnerBank.set_owner(tile, team.team_id, "init")
 			if op_cfg.has("tile_food_init"):
 				var f: float = float(op_cfg["tile_food_init"])
 				tile.resources["food"] = f

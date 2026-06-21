@@ -164,7 +164,7 @@ func _form_alliance(state: WorldState,
 		var tile: HexTileData = state.world.tiles.get(team_b.tile_pos.x * 1000 + team_b.tile_pos.y)
 		if tile != null and tile.outpost_level > 0 and tile.outpost_owner != team_a.team_id:
 			var old_owner: int = tile.outpost_owner
-			tile.outpost_owner = team_a.team_id
+			OutpostOwnerBank.set_owner(tile, team_a.team_id, "alliance")
 			print("[Surrender] 居民團 Team%d 投降，outpost (%d,%d) %d→%d" % [
 				team_b.team_id, team_b.tile_pos.x, team_b.tile_pos.y, old_owner, team_a.team_id])
 
