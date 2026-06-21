@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 統一框架 sub-project A done（生產隊納引擎）— 履約最後一哩=商隊 survival latch，roadmap 序調整知會
 ---
 

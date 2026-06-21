@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 topic: 藍圖 session 交接（2026-06-19~21）— 3 脊椎 + 統一框架真根 + 玩家錨
 ---
 
