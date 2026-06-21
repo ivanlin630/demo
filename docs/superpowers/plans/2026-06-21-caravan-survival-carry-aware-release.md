@@ -1,3 +1,5 @@
+> ⛔ **SUPERSEDED（2026-06-21，根因錯誤作廢，未實作）**。上游 spec 根因算術錯（food weight=0.1 → carry latch 不存在），本 plan carry-aware 釋放為 no-op、測試案A 不可滿足。子 session BLOCKER 抓出停工。實測真根見 spec SUPERSEDED banner + `handbacks/2026-06-21-caravan-survival-carry-aware-release.md`。重修走新 brainstorm。
+
 # 商隊 survival latch 修 — carry-aware 釋放 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.

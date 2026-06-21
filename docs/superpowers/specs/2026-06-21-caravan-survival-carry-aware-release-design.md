@@ -1,3 +1,9 @@
+> ⛔ **SUPERSEDED（2026-06-21，根因錯誤作廢）**。本 spec 根因前提算術錯：`carry-cap-in-days=BASE_CARRY/FOOD_PER_PERSON_PER_DAY=10/2.4≈4.17` **隱含假設 food weight=1，但實際 `_resource_weight("food")=0.1`**（movement_system.gd:114）→ carry 實裝 ~100 食物/人 ≈ 41.7 天 ≫ RECOVER(7)，**carry latch 不存在**，carry-aware 釋放為 no-op。子 session BLOCKER 正確抓出（`handbacks/2026-06-21-caravan-survival-carry-aware-release.md`）。
+>
+> **實測真根（merchant_survival_probe trace）**：商隊**離家時無可靠糧源**——`effective_food` 只在站自家糧倉 tile 才算糧倉（`own_granary_tile` 要 `tile_pos==outpost`）；商隊離家（貿易/被引擎派駐守治理 parked 別 tile/return_home）→ carried 旅途糧緩耗 → 到別處無糧源 → 終究 survival。跟 carry cap / 釋放閾**皆無關**。
+>
+> **教訓**：見 `[[feedback_avoid_rabbithole]]`——根因建在算術公式上必先讀碼驗每個常數 + trace 實測，別憑公式定 spec。重修走新 brainstorm（provisioning / effective_food 旅途語意 / 引擎別 park 商隊離家）。
+
 # 商隊 survival latch 修 — carry-aware 釋放（履約脫 0 最後一哩）
 
 > 承 sub-project A（`2026-06-21-economy-settle-unified-design.md`，merge `e6433e9`）：生產側經濟環備好，但履約卡商隊 survival latch。
