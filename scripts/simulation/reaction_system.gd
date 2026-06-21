@@ -282,12 +282,11 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 				_anon_actually_left(team, "defect")   # 走的是 anon；population getter 自動反映
 			# 非 named/leader（anon 無個體）→ 無 cohort 來源可動，population getter 不變
 		"N4_shirk":
-			var f: float = float(team.resources.get("food", 0))
-			team.resources["food"] = maxf(f - 1.0, 0.0)
+			ResourceBank.remove(team, "food", 1.0, "shirk")
 		"N5_extort":
 			var money: float = float(team.resources.get("coin", 0))
 			var steal: float = minf(money, 5.0)
-			team.resources["coin"] = money - steal
+			ResourceBank.add(team, "coin", -steal, "extort")
 			person.coin += steal   # 守恆：偷進私囊
 
 	_maybe_write_memory(person, reaction, state.world.current_tick)

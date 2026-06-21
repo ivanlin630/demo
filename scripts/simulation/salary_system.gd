@@ -62,7 +62,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 			p.salary = fair * npc_salary_mult
 		var paid: float = p.salary * budget_ratio
 		var ratio: float = paid / maxf(fair, 0.01)
-		team.resources["coin"] = maxf(float(team.resources.get("coin", 0)) - paid, 0.0)
+		ResourceBank.remove(team, "coin", paid, "salary_named")
 		p.coin += paid
 		if ratio >= 1.0:
 			LoyaltyBank.adjust(p, (ratio - 1.0) * OVERPAY_BONUS, "overpay", MAX_LOYALTY)
@@ -72,7 +72,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		else:
 			LoyaltyBank.adjust(p, -(1.0 - ratio) * SALARY_LOYALTY_PENALTY, "underpay")
 	var anon_paid: float = anon_total * budget_ratio
-	team.resources["coin"] = maxf(float(team.resources.get("coin", 0)) - anon_paid, 0.0)
+	ResourceBank.remove(team, "coin", anon_paid, "salary_anon")
 	AnonTreasuryBank.deposit(team, anon_paid, "salary")   # 匿名薪水沉澱公庫（非消失）
 	if budget_ratio < 1.0:
 		UnrestBank.add(team, 1, "salary")

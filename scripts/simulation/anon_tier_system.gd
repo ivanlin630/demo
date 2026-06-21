@@ -235,7 +235,7 @@ static func try_promote(state: WorldState, team: TeamData, from_tier: String, co
 	# 全過 → 執行
 	for res in cost:
 		var amt: float = float(cost[res]) * float(count)
-		team.resources[res] = float(team.resources.get(res, 0)) - amt
+		ResourceBank.add(team, res, -amt, "train_cost")
 		if res == "coin":
 			AnonTreasuryBank.deposit(team, amt, "train_salary")   # 守恆：訓練餉銀入公庫，不蒸發
 	AnonCohort.move(team.anon_cohorts, from_tier, "healthy", to_tier, "healthy", count)

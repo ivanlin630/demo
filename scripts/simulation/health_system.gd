@@ -125,7 +125,7 @@ static func resolve_negative_flags(state: WorldState, team: TeamData) -> void:
 			var bp = p.body_parts[part]
 			if bp.get("bleeding") == "major":
 				if int(team.resources.get("medicine", 0)) >= 2:
-					team.resources["medicine"] = int(team.resources["medicine"]) - 2
+					ResourceBank.add(team, "medicine", -2, "heal_major")
 				elif randf() < best_med * 0.5:
 					pass
 				else:
@@ -133,7 +133,7 @@ static func resolve_negative_flags(state: WorldState, team: TeamData) -> void:
 				bp["bleeding"] = "none"
 			if bp.get("bleeding") == "minor":
 				if int(team.resources.get("medicine", 0)) >= 1:
-					team.resources["medicine"] = int(team.resources["medicine"]) - 1
+					ResourceBank.add(team, "medicine", -1, "heal_minor")
 				elif randf() < best_med * 0.5:
 					pass
 				else:
@@ -141,7 +141,7 @@ static func resolve_negative_flags(state: WorldState, team: TeamData) -> void:
 				bp["bleeding"] = "none"
 			if bp.get("poisoned", false):
 				if int(team.resources.get("medicine", 0)) >= 3:
-					team.resources["medicine"] = int(team.resources["medicine"]) - 3
+					ResourceBank.add(team, "medicine", -3, "heal_poison")
 				elif randf() < best_med * 0.5:
 					pass
 				else:
@@ -153,7 +153,7 @@ static func resolve_negative_flags(state: WorldState, team: TeamData) -> void:
 				bp["poisoned"] = false
 			if bp.get("fracture", false):
 				if int(team.resources.get("tools", 0)) >= 1:
-					team.resources["tools"] = int(team.resources["tools"]) - 1
+					ResourceBank.add(team, "tools", -1, "heal_fracture")
 					bp["fracture"] = false
 
 static func resolve_anon_units(state: WorldState, team_id: int) -> void:
@@ -182,7 +182,7 @@ static func resolve_anon_units(state: WorldState, team_id: int) -> void:
 		if has_bleed:
 			var cost: int = 2 if has_major else 1
 			if int(team.resources.get("medicine", 0)) >= cost:
-				team.resources["medicine"] = int(team.resources["medicine"]) - cost
+				ResourceBank.add(team, "medicine", -cost, "heal_anon_bleed")
 			else:
 				injured = true
 		if bp.values().any(func(x): return x.get("fracture", false)):
