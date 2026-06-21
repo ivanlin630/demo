@@ -57,6 +57,7 @@ var population: int:
 	set(_value):
 		pass
 var minor_population: int = 0
+var anon_female_ratio: float = 0.5   # anon 女性占比(metadata,不影響 pop count);戰損可扭斜(combat他域後)
 var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰鬥 spawn）
 var famine_days: float = 0.0   # 連續斷糧（satisfaction<0.3）累積天數；飢餓致死鏈用（型別 float，語意=天）
 var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，日邊界歸零）

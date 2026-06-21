@@ -176,6 +176,21 @@ func _score_breed(p: PersonData, t: TeamData) -> float:
 	base += float(p.skills.get("醫療", 0.0)) * 0.1
 	return base
 
+# 兩性平衡因子(0..1)：全單性→0(不繁衍);越平衡越高。
+# anon 用 team.anon_female_ratio 估男女數;named 性別取不到 state.persons(本系統簽名 (p,t) 無 state)，
+# 退而用 breeder 自身 sex 近似計入一方(approximation;系統可後續改簽名傳 state 精修)。
+func _breed_balance(team: TeamData, breeder_sex: String = "") -> float:
+	var anon_total: int = AnonTierSystem.total_pop(team)
+	var m: float = float(anon_total) * (1.0 - team.anon_female_ratio)
+	var f: float = float(anon_total) * team.anon_female_ratio
+	if breeder_sex == "male":
+		m += 1.0
+	elif breeder_sex == "female":
+		f += 1.0
+	if minf(m, f) <= 0.0:
+		return 0.0
+	return minf(m, f) / maxf((m + f) / 2.0, 1.0)
+
 # 生命事件層（與行動反應並行，winner-take-all 不適用）
 func _evaluate_life_events(p: PersonData, t: TeamData) -> Array:
 	var events: Array = []
@@ -185,7 +200,10 @@ func _evaluate_life_events(p: PersonData, t: TeamData) -> Array:
 		> float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
 	var cap: int = maxi(1, int(t.population * 0.25))
 	if safe and fed and surplus_ok and t.minor_population < cap:
-		var chance: float = BREED_BASE_CHANCE + float(p.skills.get("醫療", 0.0)) * 0.1
+		var balance: float = _breed_balance(t, p.sex)   # 全單性→0→不繁衍
+		if balance <= 0.0:
+			return events
+		var chance: float = (BREED_BASE_CHANCE + float(p.skills.get("醫療", 0.0)) * 0.1) * balance
 		if randf() < chance:
 			events.append("P5_breed")
 	return events
