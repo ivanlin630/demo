@@ -50,6 +50,7 @@ static func generate(state: WorldState, seed_offset: int,
 	p.person_name = _random_name(rng, state)
 	p.role = role
 	p.age = rng.randi_range(18, 50)
+	p.sex = "female" if rng.randf() < 0.5 else "male"   # 50/50（seeded，可重現）
 	p.loyalty = 1.0 if role == "leader" else rng.randf_range(0.5, 1.0)
 	p.stress = 0.0
 	p.fear = 0.0

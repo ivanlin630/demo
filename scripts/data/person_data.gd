@@ -5,6 +5,7 @@ var person_name: String = ""
 var role: String = "civilian"
 var team_id: int = -1
 var age: int = 20
+var sex: String = "male"   # "male"/"female"（④Trait 前置資料；anon 用 team.anon_female_ratio）
 
 var needs: Dictionary = { "food": 1.0, "safety": 1.0, "belonging": 1.0 }
 var stress: float = 0.0

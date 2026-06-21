@@ -337,6 +337,7 @@ func _initialize() -> void:
 	_test_pick_military_tools_stock()
 	_test_govern_faction_leader()
 	_test_govern_skip_when_vault_full()
+	_test_person_sex()
 	_test_breed_decoupled()
 	_test_breed_life_event()
 	_test_breed_parallel_with_action()
@@ -11089,6 +11090,20 @@ func _bootstrap_breed_person(safety: float, food_need: float) -> PersonData:
 	var p := PersonData.new(); p.id = 1; p.team_id = 0
 	p.needs = { "safety": safety, "food": food_need }
 	return p
+
+func _test_person_sex() -> void:
+	print("--- 性別資料生成 ---")
+	# generate 簽名 = generate(state, seed_offset, role)；無 rng 參數，內部用 seed_offset 生 rng。
+	# 用不同 seed_offset 取樣，驗證兩性皆出現且大致均衡。
+	var state := WorldState.new(); state.world = WorldData.new()
+	var males := 0; var females := 0
+	for i in 200:
+		var p: PersonData = PersonGenerator.generate(state, 1000 + i, "member")
+		assert(p.sex in ["male", "female"], "sex 應 male/female，實際=%s" % p.sex)
+		if p.sex == "male": males += 1
+		else: females += 1
+	assert(males > 50 and females > 50, "200 抽應兩性皆有(≈均衡)，男=%d 女=%d" % [males, females])
+	print("person sex OK (男=%d 女=%d)" % [males, females])
 
 func _test_breed_decoupled() -> void:
 	print("--- Bootstrap Task3: 生育分層 ---")
