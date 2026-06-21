@@ -42,7 +42,7 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		if leader != null:
 			# 壓抑：慾望轉 stress/unrest（餵既有叛變管線；stress 進 desire 公式 → 憋多了爆）
 			leader.stress = minf(leader.stress + 0.05, 1.0)
-			team.unrest_turns += 1
+			UnrestBank.add(team, 1, "task")
 	return false
 
 

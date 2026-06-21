@@ -310,7 +310,7 @@ func _action_demand_tribute(state: WorldState, target_id: int, pt: TeamData, _pt
 		print("[PlayerCmd] 索貢成功 Team%d→玩家 %.0f coin" % [target_id, amount])
 		return { "ok": true, "msg": "索貢成功（獲得%.0f coin）" % amount }
 	else:
-		tgt.unrest_turns += 2
+		UnrestBank.add(tgt, 2, "player")
 		var leader_p: PersonData = state.persons.get(tgt.leader_id)
 		if leader_p:
 			leader_p.memory.append({
@@ -338,7 +338,7 @@ func _action_extort(state: WorldState, target_id: int, _pt: TeamData, pt_id: int
 	if not extort_result.get("accepted", true):
 		var tgt2: TeamData = state.teams.get(target_id)
 		if tgt2:
-			tgt2.unrest_turns += 1
+			UnrestBank.add(tgt2, 1, "player")
 		print("[PlayerCmd] 勒索遭拒 Team%d unrest+1" % target_id)
 	return { "ok": extort_result.get("ok", false), "msg": extort_result.get("msg", "") }
 
