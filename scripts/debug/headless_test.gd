@@ -3827,6 +3827,7 @@ func _run_sim_test() -> void:
 	_test_tc4_ambition_drive()
 	_test_tc6_multi_drive()
 	_test_tc7_divergence()
+	_test_role_applicable()
 
 	print("=== DONE ===")
 
@@ -12469,9 +12470,9 @@ func _test_decision_terms() -> void:
 
 func _test_decision_options() -> void:
 	print("--- 決策引擎 Task3: Option 表 ---")
-	var ctx := DecisionContext.new(); ctx.has_goods = true; ctx.has_arb = true; ctx.food_days = 20.0
+	var ctx := DecisionContext.new(); ctx.has_goods = true; ctx.has_arb = true; ctx.food_days = 20.0; ctx.is_merchant = true
 	var opts: Array = DecisionOptions.applicable(ctx)
-	assert("貿易" in opts, "有貨+arb → 貿易候選")
+	assert("貿易" in opts, "商隊有貨+arb → 貿易候選")
 	assert("survival" in opts, "survival 恆候選")
 	var terms: Array = DecisionOptions.terms_of("貿易")
 	var has_eco := false
@@ -12530,6 +12531,19 @@ func _mk_merchant_team(state: WorldState, leader_vals: Dictionary, has_arb: bool
 	state.persons[100] = ldr; state.teams[0] = t
 	if has_arb:
 		state.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(2,3))]
+	return t
+
+# ── 共用：建一支生產隊（TAG_PRODUCE + 可選自家 outpost）──
+func _mk_produce_team(state: WorldState, leader_vals: Dictionary, food: float, with_outpost: bool) -> TeamData:
+	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_PRODUCE]; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	_seed_pop(t, 5); t.resources = {"food": 100.0}
+	if with_outpost:
+		var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2); tile.outpost_owner = 0
+		tile.outpost_level = 1; tile.outpost_type = "civilian"; tile.public_storage = {"food": food}
+		state.world.tiles[2*1000+2] = tile
+	var ldr := PersonData.new(); ldr.id = 100
+	for k in leader_vals: ldr.values[k] = leader_vals[k]
+	state.persons[100] = ldr; state.teams[0] = t
 	return t
 
 func _test_tc1_no_oscillation() -> void:
@@ -12606,3 +12620,30 @@ func _test_tc7_divergence() -> void:
 	for o in opts: uniq[o] = true
 	assert(uniq.size() == 3, "TC7 分歧硬 bar：3 leader 應 3 不同 option，實際=%s (過不了=框架失敗)" % str(opts))
 	print("TC7 divergence OK (3 leader 3 option: %s)" % str(opts))
+
+func _test_role_applicable() -> void:
+	print("--- sub-A Task1: 角色守衛 (貿易=商隊/建設=bootstrap) ---")
+	# 商隊(有貨+據點) → is_merchant，貿易 候選（行為不變）
+	var s1 := WorldState.new(); s1.world = WorldData.new()
+	var m := _mk_merchant_team(s1, {"貪婪": 0.7}, true, 500.0)
+	var ctx_m: DecisionContext = DecisionContext.gather(s1, m)
+	assert(ctx_m.is_merchant, "商隊 is_merchant 應 true")
+	assert("貿易" in DecisionOptions.applicable(ctx_m), "商隊有貨/arb → 貿易候選")
+	# 生產隊(有貨+據點,非商隊) → 無貿易；有 生產/駐守/建設
+	var s2 := WorldState.new(); s2.world = WorldData.new()
+	var p := _mk_produce_team(s2, {"義氣": 0.6}, 500.0, true)
+	p.resources["goods"] = 50.0
+	var ctx_p: DecisionContext = DecisionContext.gather(s2, p)
+	assert(not ctx_p.is_merchant, "生產隊 is_merchant 應 false")
+	var ap: Array = DecisionOptions.applicable(ctx_p)
+	assert("貿易" not in ap, "生產隊不 roam-trade(無貿易候選)，實際=%s" % str(ap))
+	assert("駐守" in ap and "生產" in ap and "建設" in ap, "生產隊有 生產/駐守/建設 候選，實際=%s" % str(ap))
+	# 生產隊無據點 → 建設(bootstrap) 候選；生產/駐守 不候選
+	var s3 := WorldState.new(); s3.world = WorldData.new()
+	var p2 := _mk_produce_team(s3, {"義氣": 0.6}, 500.0, false)
+	var ctx_p2: DecisionContext = DecisionContext.gather(s3, p2)
+	assert(not ctx_p2.has_own_outpost, "p2 應無據點")
+	var ap2: Array = DecisionOptions.applicable(ctx_p2)
+	assert("建設" in ap2, "無據點生產隊 → 建設 bootstrap 候選，實際=%s" % str(ap2))
+	assert("生產" not in ap2 and "駐守" not in ap2, "無據點 → 無 生產/駐守，實際=%s" % str(ap2))
+	print("role applicable OK")
