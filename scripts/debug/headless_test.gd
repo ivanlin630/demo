@@ -462,6 +462,9 @@ func _initialize() -> void:
 	_test_carry_cap_trade()
 	_test_carry_cap_forage()
 	_test_trade_throughput_wagon()
+	# ── G1a 礦村：礦脈保證 + 建址 ──
+	_test_g1a_ore_guarantee()
+	_test_g1a_mining_site()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -13000,3 +13003,81 @@ func _test_dispatch_fallback() -> void:
 		"覓食無格 → 應退返家補給(RETURN_HOME)不凍，實際=%s" % t.current_task)
 	assert(t.current_option == "返家補給", "current_option 應追蹤實際派出=返家補給，實際=%s" % t.current_option)
 	print("dispatch fallback OK")
+
+# ── G1a 礦村 ──
+
+func _force_gold_mountain(state: WorldState, pos: Vector2i) -> HexTileData:
+	# helper: 建含金礦山地 tile 並插入 state.world.tiles
+	var tile := HexTileData.new()
+	tile.tile_id = pos.x * 1000 + pos.y; tile.tile_pos = pos
+	tile.terrain = "mountain"; tile.productivity = 0.7
+	tile.resources["ore_gold"] = 50.0; tile.resource_cap["ore_gold"] = 50.0
+	state.world.tiles[tile.tile_id] = tile
+	return tile
+
+func _mk_team_with_greedy_leader(state: WorldState, pos: Vector2i) -> TeamData:
+	var team := TeamData.new()
+	team.team_id = 900; team.tile_pos = pos; team.faction_id = -1
+	_seed_pop(team, 10)
+	var ldr := PersonData.new(); ldr.id = 9000; ldr.team_id = 900
+	ldr.values["貪婪"] = 0.9; ldr.values["野心"] = 0.9
+	state.persons[9000] = ldr; team.leader_id = 9000
+	state.teams[900] = team
+	return team
+
+func _mk_team_with_meek_leader(state: WorldState, pos: Vector2i) -> TeamData:
+	var team := TeamData.new()
+	team.team_id = 901; team.tile_pos = pos; team.faction_id = -1
+	_seed_pop(team, 10)
+	var ldr := PersonData.new(); ldr.id = 9001; ldr.team_id = 901
+	ldr.values["貪婪"] = 0.2; ldr.values["野心"] = 0.2
+	state.persons[9001] = ldr; team.leader_id = 9001
+	state.teams[901] = team
+	return team
+
+func _test_g1a_ore_guarantee() -> void:
+	print("--- G1a T1: 礦脈保證 ---")
+	# 小圖多次生成，每次至少 1 金礦 tile（消 RNG 槓龜）
+	for seed_i in range(20):
+		var state := WorldState.new()
+		var cfg := {"map": {"radius": 4, "resource_richness": 5}}
+		GameSetup.setup(state, cfg)
+		var gold := 0
+		var has_mountain := false
+		for tid in state.world.tiles:
+			var t = state.world.tiles[tid]
+			if t.terrain == "mountain": has_mountain = true
+			if float(t.resources.get("ore_gold", 0)) > 0.0: gold += 1
+		if has_mountain:
+			assert(gold >= 1, "[g1a] 小圖無金礦 tile (seed_i=%d)" % seed_i)
+	print("[g1a] ore guarantee OK")
+
+func _test_g1a_mining_site() -> void:
+	print("--- G1a T2: 含礦山地建址 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# 貪婪 leader 在 (0,0)；放含金礦山 (3,0) 和競爭平原 (0,3)
+	var greedy_team := _mk_team_with_greedy_leader(state, Vector2i(0, 0))
+	_force_gold_mountain(state, Vector2i(3, 0))
+	var plains_t := HexTileData.new()
+	plains_t.tile_id = 0 * 1000 + 3; plains_t.tile_pos = Vector2i(0, 3)
+	plains_t.terrain = "plains"; plains_t.productivity = 1.2
+	state.world.tiles[plains_t.tile_id] = plains_t
+	var fai := FactionAISystem.new()
+	var best: Dictionary = fai._evaluate_new_outpost_location(state, greedy_team)
+	assert(not best.is_empty(), "[g1a] 貪婪 leader 無選址")
+	assert(best.tile.terrain == "mountain", "[g1a] 貪婪 leader 未選含礦山, 選了 %s (score=%.0f)" % [best.tile.terrain, best.score])
+	# 對照：普通 leader — 新 state，同場景
+	var state2 := WorldState.new()
+	state2.world = WorldData.new()
+	var meek_team := _mk_team_with_meek_leader(state2, Vector2i(0, 0))
+	_force_gold_mountain(state2, Vector2i(3, 0))
+	var plains_t2 := HexTileData.new()
+	plains_t2.tile_id = 0 * 1000 + 3; plains_t2.tile_pos = Vector2i(0, 3)
+	plains_t2.terrain = "plains"; plains_t2.productivity = 1.2
+	state2.world.tiles[plains_t2.tile_id] = plains_t2
+	var fai2 := FactionAISystem.new()
+	var best2: Dictionary = fai2._evaluate_new_outpost_location(state2, meek_team)
+	if not best2.is_empty():
+		assert(best2.tile.terrain != "mountain", "[g1a] 普通 leader 竟選含礦山(破稀有), 選了 %s (score=%.0f)" % [best2.tile.terrain, best2.score])
+	print("[g1a] mining site OK")

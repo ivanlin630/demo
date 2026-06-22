@@ -50,6 +50,8 @@ func generate(state: WorldState, config: Dictionary) -> void:
 			tile.terrain  = _random_terrain(rng)
 			_apply_resources(tile, rng, mult)
 			state.world.tiles[tile.tile_id] = tile
+	# S1 礦脈保證：全圖無金礦 tile 時，挑一座山地注入（消小圖 RNG 槓龜，保 mint 魂有燃料）
+	_ensure_min_ore(state.world.tiles, rng, "ore_gold", 5, 30, mult)
 
 func _apply_resources(tile, rng: RandomNumberGenerator, mult: float = 1.0) -> void:
 	tile.resources = {}
@@ -110,6 +112,19 @@ func _apply_resources(tile, rng: RandomNumberGenerator, mult: float = 1.0) -> vo
 				tile.resources["predator_density"] = rng.randi_range(1, PREDATOR_MAX)
 	if int(tile.resources.get("predator_density", 0)) > 0:
 		tile.resource_cap["predator_density"] = int(tile.resources["predator_density"])
+
+# S1 礦脈保證：全圖無 res tile 時挑一座山地注入（消小圖 RNG 槓龜）# TEST VALUE
+func _ensure_min_ore(tiles_ref: Dictionary, rng: RandomNumberGenerator, res: String, lo: int, hi: int, mult: float) -> void:
+	var mountains: Array = []
+	for tid in tiles_ref:
+		var t = tiles_ref[tid]
+		if t.terrain == "mountain": mountains.append(t)
+		if float(t.resources.get(res, 0)) > 0.0: return   # 已有，不動
+	if mountains.is_empty(): return   # 無山地（極端小圖）→ 跳過
+	var pick = mountains[rng.randi() % mountains.size()]
+	var amt: float = float(rng.randi_range(lo, hi)) * mult
+	pick.resources[res] = amt
+	pick.resource_cap[res] = amt
 
 func _random_terrain(rng: RandomNumberGenerator) -> String:
 	var roll: int = rng.randi_range(0, 99)
