@@ -2,6 +2,14 @@
 
 ## 📍 當前狀態（2026-06-22）
 
+- **🏛 他域遷入 ruling 到 + HOW 序定（未開工）**：藍圖裁 `otherdomain-ruling`（consumed）解鎖全卡項。**協調=混合**（stakes-to-faction→頂層協同 faction_duty 壓人格；team 日常 op→個體人格）；**believability 守則**（頂層決 WHETHER 人格染 HOW + 脫軌逃閥非 100% 服從）；**主動開戰=稀有+蓄意+吃 belief**（霸主決策、readiness 門檻）；**mint 現在排 G1a**（覆前判緩做）。**HOW 序**（小切片先、dependency-correct，每 Phase spec→plan→worktree→跑驗證套件 TC+S 魂）：
+  - **P0 G1a mint**（獨立，可平行）：金礦 tile 生成 + AI 建鑄幣廠 engine option。補 S5 mint 供給 gap。
+  - **P1 個體域 options**（不需 faction seam，最廉）：scout（既有 TASK_SCOUT→option）/ 小掠奪（survival loot→option）/ 小徵收。**解鎖 loot option**。
+  - **P2 survival 全隊退役 + loot/join 還經濟隊**（依 P1 loot）：退役舊 `_evaluate_survival` 雙 owner、loot/join/camp/beg/hunt 遷引擎+全隊化。閉框架完成塊③ + 經濟↔衝突橋（藍圖標記1債）。
+  - **P3 混合協調 seam**（重塊）：`faction_duty` term（霸主 directive→成員協同；stakes 高權壓人格/日常弱 term）+ 霸主頂層決策步 + believability 兩不變量寫 invariants.md。
+  - **P4 頂層 stakes options**（架 P3 上）：主動開戰攻擊（稀有+蓄意+吃belief+readiness gate）→結盟/外交→立國深做→大徵收動員。**解鎖 TC3 + 誘殺閉環**。
+  - **P5 戰俘**（耦合 combat-unification E-2 撤退門檻/意志，跨 arc）。
+  - standing flag（非阻塞）：履約脫 0 unseeded → 經濟底 🟡，待 seeded harness 確認穩定成交。
 - **🏛 框架驗證套件實作完成（B，merge `1a5eee3`）**：Part1 TC2(survival=高權重輸入非latch)/TC5(經濟+情報為輸入) headless 行為測過（TC1/4/6/7 早過；**TC3 feud→脫軌攻擊需引擎攻擊 option=他域 skip**）。Part2 `scripts/debug/framework_validation.gd` harness — S1立國/S2feud+vendetta/S3scout/S4ambush/S5mint/S6經濟閉環 **全 PASS（證 6 魂可 fire）**。default world_sim fire:faction_found/feud/order_fulfilled；vendetta/scout/mint/ambush default 休眠（harness 證可觸發,記 known_issues backlog）。**S5 mint 揭真 gap**：碼可運作(harness mint=1)但 default 無金礦 tile + 無 AI 建鑄幣廠路徑=供給斷（G1a mint arc）。回歸全綠。
 - **🏛 Pattern B 所有權 banker 全 5 池完成（autonomous goal-run）**：state-fight-scope Pattern B（一值多寫、delta vs 絕對 set 無銀行）全收編——各池單一 owner banker + 禁裸寫(grep 驗) + coin_eq/InvariantAudit 守恆閘：① **UnrestBank**(`3a883a6`,unrest_turns 14 寫)② **LoyaltyBank**(`6bfc719`,loyalty 25 寫,cap 參數保 clamp)③ **AnonTreasuryBank**(`05ba648`,anon_treasury 24 寫,原子 transfer 守恆;揭既有 off-map leak 記 known_issues)④ **OutpostOwnerBank**(`7631aa3`,outpost_owner 16 寫,集中化保 last-writer-wins)⑤ **ResourceBank**(`3a72fc9`,team.resources 124 寫/21 檔,簡 wrapper 保原數學=守恆 by construction)。各跑 2yr world_sim invariants=0。**Pattern B 完成 = 框架債「所有權圖縫」收編**。refinement：outpost race-policy/pending_owner_change_tick 退役、coin_eq 註冊進 InvariantAudit、transfer 原子抽象（非守恆必需）。
 - **🏛 框架 arc 後續 goal-run（autonomous，照藍圖）**：① **gate→權重**（merge `b15297a`）貿易去 is_merchant 硬 gate+economic_opp 角色因子 0.3=清藍圖 gate 債第一條（生產隊能 roam-trade 但很少）。② **food 買單側**（merge `a4c4cf8`）缺糧隊發 food buy=食物雙向市集（補 WS-1 只賣）。③ **性別資料+生育需兩性**（merge `e3828d4`）PersonData.sex+anon_female_ratio+balance gate=全男隊內部不繁衍 emergent（④Trait 前置）。各跑 2yr world_sim+回歸全綠+coin_eq/InvariantAudit 0。**⏸ 他域遷入（攻擊/掠奪/徵收/結盟/立國/scout/誘殺/鑄幣）= 未決**：撞協調語意 WHAT（faction-goal 頂層 vs 個體人格驅動 + 主動開戰 feel）→ handback 藍圖求裁（`otherdomain-coordination`），暫緩。**耦合他域待 ruling**：戰俘（capture 需 combat）、survival 全隊退役+loot/join 還經濟隊、驗證套件 TC2/3/5+S 魂場景（隨域驗）。
