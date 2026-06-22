@@ -280,6 +280,9 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				  "x": str(tile.tile_pos.x), "y": str(tile.tile_pos.y) })
 			print("[Outpost] Team%d 建成 %s（Lv%d）at (%d,%d)" % [
 				team.team_id, n, tile.outpost_level, tile.tile_pos.x, tile.tile_pos.y])
+			# G1a 探針：含礦山地 outpost 建成 → mine_founded
+			if tile.terrain == "mountain" and float(tile.resources.get("ore_gold", 0)) > 0.0:
+				Probe.bump("g1.mine_founded")
 			# C: NPC 建造子隊完工 → 就地安頓（脫離母團、加駐留 tag），outpost 持續存在
 			if team.parent_team_id != -1:
 				_auto_settle_builder(state, team, tile)

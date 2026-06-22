@@ -192,28 +192,40 @@ func _scenario_S4_ambush() -> void:
 	Probe.ambush_check(s, 0, 1)
 	_record("S4", "g3.ambush")
 
-# ──────── S5 mint ────────
-# tile mint_level>0 + 居民 PRODUCE 隊 + ore_gold>0 → tick_all 鑄幣
+# ──────── S5 mint（真礦村迴路）────────
+# 含礦山 civilian outpost + PRODUCE 隊 + bootstrap 糧 + material/tools
+# → collect 採 ore → vault ore>10 → _pick_facility 選 mint → 建造 → _tick_mint 鑄幣
 func _scenario_S5_mint() -> void:
-	print("\n--- S5 mint ---")
+	print("\n--- S5 mint (真礦村迴路) ---")
 	Probe.reset()
 	var s := _new_state()
-	var pos := Vector2i(0, 0)
+	var pos := Vector2i(2, 0)
+	# 含金礦山地 tile
 	var tile := _tile(s, pos)
-	tile.outpost_owner = 0
-	tile.outpost_level = 1
-	tile.outpost_type = "civilian"
-	tile.mint_level = 1
-	tile.public_storage = {"ore_gold": 100.0, "coin": 0.0}
-	# 居民 PRODUCE 隊（mint gate：tile 上有 PRODUCE tag 隊才生產）
-	var resident := TeamData.new(); resident.team_id = 0; resident.tile_pos = pos
-	resident.tags = [TeamData.TAG_PRODUCE]
-	var r_ldr := PersonData.new(); r_ldr.id = 1; s.persons[1] = r_ldr; resident.leader_id = 1
-	_seed_pop(resident, 5); resident.resources = {"food": 100.0}
-	s.teams[0] = resident
-	var op := OutpostSystem.new()
-	for i in 3:
-		op.tick_all(s)
+	tile.terrain = "mountain"
+	tile.productivity = 0.7
+	tile.resources["ore_gold"] = 50.0; tile.resource_cap["ore_gold"] = 50.0
+	# civilian outpost L1
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	# 預種足夠 ore 進 vault 讓 _pick_facility 即時通過 mint deficit gate
+	tile.public_storage["ore_gold"] = 20.0
+	# PRODUCE 駐留隊 + 貪婪 leader
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = pos
+	team.tags = [TeamData.TAG_PRODUCE]
+	var ldr := PersonData.new(); ldr.id = 1; ldr.values["貪婪"] = 0.8; ldr.values["野心"] = 0.6
+	s.persons[1] = ldr; team.leader_id = 1
+	_seed_pop(team, 10)
+	team.resources = {"food": 500.0, "material": 200.0, "tools": 20.0}
+	s.teams[0] = team
+	tile.outpost_owner = team.team_id
+	# 建立 faction（讓 _evaluate_infrastructure 能用 faction.leader_team_id）
+	var f := FactionData.new(); f.faction_id = 0
+	f.leader_team_id = 0; f.member_team_ids = [0]
+	s.factions[0] = f; team.faction_id = 0
+	# 跑真迴路：collect→pick_facility→build→mint
+	var runner := SimRunner.new()
+	for _i in range(3000):
+		runner.advance_tick(s, pos)
 		if int(Probe.counts.get("g1.mint", 0)) > 0: break
 	_record("S5", "g1.mint")
 
