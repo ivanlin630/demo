@@ -462,9 +462,10 @@ func _initialize() -> void:
 	_test_carry_cap_trade()
 	_test_carry_cap_forage()
 	_test_trade_throughput_wagon()
-	# ── G1a 礦村：礦脈保證 + 建址 ──
+	# ── G1a 礦村：礦脈保證 + 建址 + 採礦鑄幣 ──
 	_test_g1a_ore_guarantee()
 	_test_g1a_mining_site()
+	_test_g1a_mining_to_coin()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -13081,3 +13082,55 @@ func _test_g1a_mining_site() -> void:
 	if not best2.is_empty():
 		assert(best2.tile.terrain != "mountain", "[g1a] 普通 leader 竟選含礦山(破稀有), 選了 %s (score=%.0f)" % [best2.tile.terrain, best2.score])
 	print("[g1a] mining site OK")
+
+func _mk_produce_team_on(state: WorldState, pos: Vector2i) -> TeamData:
+	# helper: 建 PRODUCE 隊駐指定 pos，讓 outpost 有生產人力
+	var team := TeamData.new()
+	team.team_id = 800; team.tile_pos = pos; team.faction_id = -1
+	team.tags.append(TeamData.TAG_PRODUCE)
+	_seed_pop(team, 10)
+	var ldr := PersonData.new(); ldr.id = 8000; ldr.team_id = 800
+	ldr.values["貪婪"] = 0.8; ldr.values["野心"] = 0.6
+	state.persons[8000] = ldr; team.leader_id = 8000
+	state.teams[800] = team
+	return team
+
+func _team_coin_total(state: WorldState) -> float:
+	var total: float = 0.0
+	for tid in state.teams:
+		total += float(state.teams[tid].resources.get("coin", 0))
+	for tile_id in state.world.tiles:
+		total += float(state.world.tiles[tile_id].public_storage.get("coin", 0))
+	return total
+
+func _test_g1a_mining_to_coin() -> void:
+	print("--- G1a T3: 礦村採礦→鑄幣 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var pos := Vector2i(2, 0)
+	# 建含金礦山 + L1 civilian outpost
+	var tile := _force_gold_mountain(state, pos)
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	# 建生產隊駐留（提供生產人力，讓 mint tick 跑）
+	var team := _mk_produce_team_on(state, pos)
+	tile.outpost_owner = team.team_id
+	# bootstrap：給足 food + material + tools + 預種 ore 進 vault
+	team.resources["food"] = 500.0
+	team.resources["material"] = 200.0
+	team.resources["tools"] = 20.0
+	tile.public_storage["ore_gold"] = 20.0   # 超過 mint deficit gate(>10)，讓 _pick_facility 立刻選 mint
+	# 建立 faction（讓 _evaluate_infrastructure 能用 faction.leader_team_id）
+	state.create_faction(team.team_id)
+	var coin0: float = _team_coin_total(state)
+	# 用 player_pos = pos 讓 mining tile 在近區（才跑 outpost tick + collect）
+	var runner := SimRunner.new()
+	for _i in range(3000):
+		runner.advance_tick(state, pos)
+	# 斷言：mint 建成 OR coin 增加（任一成立即為成功端到端）
+	var vault_ore: float = float(tile.public_storage.get("ore_gold", 0))
+	var coin_delta: float = _team_coin_total(state) - coin0
+	assert(tile.mint_level > 0 or coin_delta > 0, \
+		"[g1a] 礦村未鑄幣: mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
+		[tile.mint_level, coin_delta, vault_ore])
+	print("[g1a] mining→coin OK mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
+		[tile.mint_level, coin_delta, vault_ore])
