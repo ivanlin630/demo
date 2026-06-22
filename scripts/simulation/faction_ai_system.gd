@@ -1741,6 +1741,8 @@ const TERRAIN_BUILD_BONUS: Dictionary = {
 	"plains": 20.0, "forest": 10.0, "mountain": -10.0,
 }
 
+const MINING_GREED_WEIGHT: float = 1.5   # TEST VALUE — 礦村建址貪婪加權；過頻調低/魂不 fire 調高
+
 # 選址資源權重（候選格本格 + 鄰 6 格，每點資源出現一次加一次）TEST VALUES
 const SITE_RES_BONUS: Dictionary = {
 	"herb": 30.0, "wild_horses": 25.0, "ore_iron": 20.0,
@@ -1772,6 +1774,14 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 		score -= float(dist) * 5.0
 		score += clampf(10.0 - float(dist), 0.0, 10.0) * 2.0
 		score += _site_resource_bonus(state, tile.tile_pos)
+		# S2 礦村：含礦山地對貪婪/野心 leader 加權 ore bonus（壓過山地懲罰=蓄意富裕擴張；普通 leader 不選=稀有擬真）
+		if tile.terrain == "mountain":
+			var ore_here: float = _site_resource_bonus_ore_only(state, tile.tile_pos)
+			if ore_here > 0.0:
+				var ldr: PersonData = state.persons.get(leader_team.leader_id)
+				var greed: float = float(ldr.values.get("貪婪", 0.5)) if ldr != null else 0.5
+				var ambition: float = float(ldr.values.get("野心", 0.5)) if ldr != null else 0.5
+				score += ore_here * (greed + ambition) * MINING_GREED_WEIGHT   # TEST VALUE
 		var min_enemy_dist: int = _min_dist_to_enemy_outpost(state, leader_team, tile.tile_pos)
 		if min_enemy_dist < 5: score -= float(5 - min_enemy_dist) * 10.0
 		if score >= MIN_BUILD_SCORE:
@@ -1795,6 +1805,18 @@ func _site_resource_bonus(state: WorldState, pos: Vector2i) -> float:
 		for res in SITE_RES_BONUS:
 			if float(ntile.resources.get(res, 0)) > 0:
 				bonus += float(SITE_RES_BONUS[res])
+	return bonus
+
+# S2 礦村：只計 ore_gold/silver（避免 herb/horse 干擾礦村加權判定）
+func _site_resource_bonus_ore_only(state: WorldState, pos: Vector2i) -> float:
+	var bonus: float = 0.0
+	for d in ([Vector2i.ZERO] as Array) + PathSystem.HEX_DIRS:
+		var npos: Vector2i = pos + d
+		var ntile: HexTileData = state.world.tiles.get(npos.x * 1000 + npos.y)
+		if ntile == null: continue
+		for res in ["ore_gold", "ore_silver"]:
+			if float(ntile.resources.get(res, 0)) > 0:
+				bonus += float(SITE_RES_BONUS.get(res, 0))
 	return bonus
 
 # 選址 log 用：本格+鄰 6 格的權重資源彙總
