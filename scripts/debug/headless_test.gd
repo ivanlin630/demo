@@ -462,10 +462,11 @@ func _initialize() -> void:
 	_test_carry_cap_trade()
 	_test_carry_cap_forage()
 	_test_trade_throughput_wagon()
-	# ── G1a 礦村：礦脈保證 + 建址 + 採礦鑄幣 ──
+	# ── G1a 礦村：礦脈保證 + 建址 + 採礦鑄幣 + 外部供糧 ──
 	_test_g1a_ore_guarantee()
 	_test_g1a_mining_site()
 	_test_g1a_mining_to_coin()
+	_test_g1a_mining_food_supply()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -13134,3 +13135,23 @@ func _test_g1a_mining_to_coin() -> void:
 		[tile.mint_level, coin_delta, vault_ore])
 	print("[g1a] mining→coin OK mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
 		[tile.mint_level, coin_delta, vault_ore])
+
+func _test_g1a_mining_food_supply() -> void:
+	print("--- G1a T4: 礦村外部供糧(food buy) ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var pos := Vector2i(2, 0)
+	var tile := _force_gold_mountain(state, pos)
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	var team := _mk_produce_team_on(state, pos)
+	tile.outpost_owner = team.team_id
+	team.resources["food"] = 30.0   # 低糧(1.25天) → 應觸發 food buy(gate=4天)
+	team.resources["coin"] = 200.0  # 有 coin 可買
+	var os := OrderSystem.new()
+	os.tick_team_orders(state, team)
+	var has_food_buy := false
+	for o in team.active_orders:
+		if o["kind"] == "buy" and o["res"] == "food":
+			has_food_buy = true
+	assert(has_food_buy, "[g1a] 礦村低糧未發 food buy 單（active_orders=%s）" % str(team.active_orders))
+	print("[g1a] mining food supply OK (active_orders=%d)" % team.active_orders.size())
