@@ -10,6 +10,14 @@
 
 - **anon_treasury 滅隊 off-map leak（既有,degenerate only,2026-06-22 AnonTreasuryBank 揭）**：`faction_ai_system.gd:~1456`——隊死於 off-map 且 `_nearest_valid_tile`(radius-12)找不到 tile → 公庫 coin 無處傾倒、靜默丟失（命名 `AnonTreasuryBank.reset(team,"extinct_no_tile_LEAK")`）。**coin_eq/CoinAudit 抓不到**（隊正被 erase，丟的是「該路由到 tile 的」非「留在隊的」，audit 對 state.teams 求和 delta 仍 0）。正常地圖不觸發（radius-12 內必有 tile）。**小修方向**：找不到 tile 時擴大搜尋 / 倒入全域 sink / 記 ledger。非阻塞。
 
+- **mint coin-cap 燒 ore off-ledger（pre-existing，G1a 首 fire 才浮現，2026-06-23 opus 終審揭）**：`outpost_system.gd:~228/241` `_tick_mint` 用 `minf(cur_coin+coin_added, cap)` clamp coin 到 storage cap——若鑄幣 tile 的 coin vault 飽和，ore 被消耗但 coin 被 clamp 截掉 → coin_eq 損失（ore 燒掉沒換 coin）。G1a 前 mint 從沒 fire 故未觸；G1a 讓 mint 真 fire → 長跑可能浮現。**小修**：coin 滿 cap 時跳過/部分消耗 ore（別燒）。非阻塞（現 run delta=0）。
+
+## G1a 礦村（鑄幣脈絡）backlog
+
+- **礦村稀有邊際**：非貪婪 leader 在無 in-range 平原勝 MIN_BUILD_SCORE 時，ore +35 仍可把含礦山推過建址下限 → 偶founds 礦村。可信（山是唯一選項）非守恆問題，稍寬「稀有」。量測註記。
+- **dense map distance 免疫未測**：`_check_distance` 含礦山 civilian 免疫（同 tick 多寫/密圖）未驗。
+- **default 自然 fire 4/5（unseeded）**：礦村魂 default.json 自然 fire 但非每 run（tail 行為）；world_sim(buffed) 1/1。看機制 fire 非絕對閾 [[reference_multi_sanity_unseeded]]。
+
 ## G2 目標錨點進度
 
 - **G2a（關係圖 typed-edge）✅** + **G2b（野心階梯狀態 + strategic 衍生）✅**：`TeamData.ambition_rung/archetype/cap` 由 `AmbitionLadder` 從 leader values + 隊安全 derive（faction_ai cadence update）；`strategic_ai._update_faction_goals` 改讀階梯衍生 expand/trade（真 reader，非 dormant）。階梯門檻/權重全 TEST VALUE（待藍圖平衡 pass，handback `systems-to-blueprint-g2b-feel`）。
