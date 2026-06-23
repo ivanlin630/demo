@@ -3868,6 +3868,7 @@ func _run_sim_test() -> void:
 	# ── P1 掠奪 option ──
 	_test_p1_loot_term()
 	_test_p1_loot_option()
+	_test_p1_loot_believability()
 
 	print("=== DONE ===")
 
@@ -13314,3 +13315,23 @@ func _test_p1_loot_option() -> void:
 	assert(meek.current_task != TeamData.TASK_LOOT,
 		"[p1] 溫和 unified 隊竟掠奪 task=%s" % meek.current_task)
 	print("[p1] loot option OK (raider→TASK_LOOT combat_target=%d, meek→%s)" % [raider.combat_target, meek.current_task])
+
+func _test_p1_loot_believability() -> void:
+	print("--- P1 掠奪 believability ---")
+	var fa := FactionAISystem.new()
+	# (a) 危時：殘忍 unified 隊缺糧 + 有獵場 + 鄰弱獵物 → survival(覓食) 贏，非掠奪做日常
+	# food_days < 2.5 → survival_pressure = 4*(3-fd) >> loot_util(~0.79) → 覓食勝
+	var state := WorldState.new(); state.world = WorldData.new()
+	var hungry := _mk_unified_cruel_team(state, Vector2i(2, 2))
+	var prey := _mk_weak_prey_team(state, Vector2i(3, 2))
+	_p1_set_belief(state, hungry.team_id, prey)
+	hungry.resources["food"] = 2.0   # food_days = 2/(10×2.4) ≈ 0.08 → pressure ≈ 11.7
+	# 給鄰格一個 wild_game tile，讓覓食有地可去（否則 to_task 找不到 → skip → fallthrough）
+	var game_tile := HexTileData.new()
+	game_tile.tile_id = 1 * 1000 + 2; game_tile.tile_pos = Vector2i(1, 2); game_tile.terrain = "plains"
+	game_tile.resources = {"wild_game": 5}
+	state.world.tiles[game_tile.tile_id] = game_tile
+	fa._decide_unified(state, hungry)
+	assert(hungry.current_task != TeamData.TASK_LOOT,
+		"[p1] 餓隊竟做日常掠奪非求生 task=%s" % hungry.current_task)
+	print("[p1] loot believability OK (hungry→%s, not TASK_LOOT)" % hungry.current_task)
