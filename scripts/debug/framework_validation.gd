@@ -194,22 +194,21 @@ func _scenario_S4_ambush() -> void:
 
 # ──────── S5 mint（真礦村迴路）────────
 # 含礦山 civilian outpost + PRODUCE 隊 + bootstrap 糧 + material/tools
-# → collect 採 ore → vault ore>10 → _pick_facility 選 mint → 建造 → _tick_mint 鑄幣
+# → collect 採 ore（ground only）→ vault ore>10 → _pick_facility 選 mint → 建造 → _tick_mint 鑄幣
+# FIX5：礦石僅存 resources/resource_cap（山地）；不預種 vault（否則短路採礦鏈）
 func _scenario_S5_mint() -> void:
 	print("\n--- S5 mint (真礦村迴路) ---")
 	Probe.reset()
 	var s := _new_state()
 	var pos := Vector2i(2, 0)
-	# 含金礦山地 tile
+	# 含金礦山地 tile（礦石在山地 resources，vault 空）
 	var tile := _tile(s, pos)
 	tile.terrain = "mountain"
 	tile.productivity = 0.7
 	tile.resources["ore_gold"] = 50.0; tile.resource_cap["ore_gold"] = 50.0
 	# civilian outpost L1
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
-	# 預種足夠 ore 進 vault 讓 _pick_facility 即時通過 mint deficit gate
-	tile.public_storage["ore_gold"] = 20.0
-	# PRODUCE 駐留隊 + 貪婪 leader
+	# PRODUCE 駐留隊 + 貪婪 leader（vault 無預種礦，真採礦鏈）
 	var team := TeamData.new(); team.team_id = 0; team.tile_pos = pos
 	team.tags = [TeamData.TAG_PRODUCE]
 	var ldr := PersonData.new(); ldr.id = 1; ldr.values["貪婪"] = 0.8; ldr.values["野心"] = 0.6
@@ -222,9 +221,9 @@ func _scenario_S5_mint() -> void:
 	var f := FactionData.new(); f.faction_id = 0
 	f.leader_team_id = 0; f.member_team_ids = [0]
 	s.factions[0] = f; team.faction_id = 0
-	# 跑真迴路：collect→pick_facility→build→mint
+	# 跑真迴路：collect→pick_facility→build→mint（6000 ticks ≈ 25 天給採礦累積）
 	var runner := SimRunner.new()
-	for _i in range(3000):
+	for _i in range(6000):
 		runner.advance_tick(s, pos)
 		if int(Probe.counts.get("g1.mint", 0)) > 0: break
 	_record("S5", "g1.mint")

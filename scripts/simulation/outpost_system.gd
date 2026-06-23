@@ -178,18 +178,6 @@ func tick_all(state: WorldState) -> void:
 			continue
 		_tick_construction(state, tile)
 
-# S8 遠區施工推進：遠區不跑 tick_all（生產/鑄幣按近區頻率），但施工須持續；
-# 每 FAR_ZONE_INTERVAL 叫一次，construction_team 在遠區的格照樣計工。
-func tick_construction_far(state: WorldState) -> void:
-	for tile_id in state.world.tiles:
-		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.construction_team_id == -1:
-			continue
-		# 僅處理施工隊在遠區的格（近區已由 tick_all 覆蓋）
-		var builder: TeamData = state.teams.get(tile.construction_team_id)
-		if builder == null:
-			continue
-		_tick_construction(state, tile)
 
 # tile 上是否有 PRODUCE（居民）team（軍屯子隊同 tag）
 func _has_resident_on_tile(state: WorldState, tile: HexTileData) -> bool:
@@ -621,13 +609,16 @@ func get_outpost_name(type: String, level: int) -> String:
 # ──────── 輔助 ────────
 
 func _check_distance(state: WorldState, pos: Vector2i, type: String) -> bool:
-	# S2 礦村：含礦山地距離免疫（礦脈常緊鄰既有據點；同類距離規則也豁免，礦村是特化聚落）
-	var target_tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
-	var is_ore_mountain: bool = target_tile != null and target_tile.terrain == "mountain" \
-		and (float(target_tile.resources.get("ore_gold", 0)) > 0.0 \
-			or float(target_tile.resources.get("ore_silver", 0)) > 0.0)
-	if is_ore_mountain:
-		return true   # 礦村 tile：跳過所有距離限制（礦山位置不可選擇，強制允建）
+	# S2 礦村：civilian 且目標格 resource_cap 有礦 → 距離免疫（礦山位置不可選擇）。
+	# 條件限 type=="civilian" 防軍事 outpost / 玩家紮營繞過距離限制；
+	# 用 resource_cap（永不耗盡）而非 resources（採集後可能 =0）判礦脈存在。
+	if type == "civilian":
+		var target_tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+		var is_ore_mountain: bool = target_tile != null and target_tile.terrain == "mountain" \
+			and (float(target_tile.resource_cap.get("ore_gold", 0)) > 0.0 \
+				or float(target_tile.resource_cap.get("ore_silver", 0)) > 0.0)
+		if is_ore_mountain:
+			return true   # 礦村 tile：跳過距離限制（礦山位置不可選擇，強制允建）
 	for tile_id in state.world.tiles:
 		var t: HexTileData = state.world.tiles[tile_id]
 		if t.outpost_level == 0:

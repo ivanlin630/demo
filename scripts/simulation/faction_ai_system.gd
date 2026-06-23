@@ -885,7 +885,15 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	if sub.current_task == TeamData.TASK_BUILD:
 		return  # C: 施工中（建設），不打斷、不召回
 	# S7 建造/升級/擴建子隊在途：TASK_CONSTRUCT/UPGRADE/EXPAND = 正前往目標格；不得紀律檢查或召回
+	# 例外：抵達後（move_target==-1）長時間仍未轉 TASK_BUILD → start_build 必曾失敗 → zombie 恢復
 	if sub.current_task in [TeamData.TASK_CONSTRUCT, TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]:
+		if sub.move_target == Vector2i(-1, -1):
+			# 已到目標但未轉 BUILD：給一次重試，再逾時才 release
+			const CONSTRUCT_TRANSIT_TIMEOUT: int = 10 * WorldState.TICKS_PER_DAY  # TEST VALUE — 10 天
+			if state.world.current_tick - sub.task_start_tick > CONSTRUCT_TRANSIT_TIMEOUT:
+				print("[FactionAI] CONSTRUCT 子隊 Team%d 抵達後逾時未開工 → 強制 release/merge" % sub.team_id)
+				TaskArbiter.release(sub)
+				merge_queue.append(sub.team_id)
 		return
 	if sub.current_task == TeamData.TASK_SETTLE:
 		# 抵達自家 faction outpost → 就地安頓（無需 co-located team；獨自抵達即轉居民）
@@ -2141,15 +2149,13 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 			return clampf((s_tgt - float(team.resources.get("ore_steel", 0))) \
 				/ maxf(s_tgt, 0.001), 0.0, 1.0)
 		"mint":
-			# public_storage：鑄幣廠 input 槽；team 私產：剛採集未入庫；resource_cap：礦脈存在標記
-			# 三者取最大，避免「採到但未入庫」時誤判 mint 無燃料 → 永選 farming
+			# TILE-bound ore only：public_storage（採後入庫）+ resource_cap（礦脈存在標記）。
+			# 不含 team.resources：持有 looted/traded ore 的非礦村 outpost 不應觸發 mint 建造。
 			var ore_pub: float = float(tile.public_storage.get("ore_gold", 0)) \
 				+ float(tile.public_storage.get("ore_silver", 0))
-			var ore_priv: float = float(team.resources.get("ore_gold", 0)) \
-				+ float(team.resources.get("ore_silver", 0))
 			var ore_cap: float = float(tile.resource_cap.get("ore_gold", 0)) \
 				+ float(tile.resource_cap.get("ore_silver", 0))
-			var ore: float = maxf(maxf(ore_pub, ore_priv), ore_cap * 0.5)
+			var ore: float = maxf(ore_pub, ore_cap * 0.5)
 			return 1.0 if ore > 10.0 else 0.0
 		"stable":
 			var m_tgt: float = pop * MOUNT_TARGET_RATIO

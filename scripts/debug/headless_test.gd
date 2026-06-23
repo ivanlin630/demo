@@ -467,6 +467,7 @@ func _initialize() -> void:
 	_test_g1a_mining_site()
 	_test_g1a_mining_to_coin()
 	_test_g1a_mining_food_supply()
+	_test_g1a_construct_zombie_recovery()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -13105,30 +13106,44 @@ func _team_coin_total(state: WorldState) -> float:
 	return total
 
 func _test_g1a_mining_to_coin() -> void:
-	print("--- G1a T3: 礦村採礦→鑄幣 ---")
+	# FIX5: 礦石 ONLY 在山地 resources/resource_cap，不預種 vault，
+	# 必須走完 mountain-ground-ore→vault→mint→coin 完整鏈。
+	print("--- G1a T3: 礦村採礦→鑄幣（真鏈驗證）---")
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var pos := Vector2i(2, 0)
 	# 建含金礦山 + L1 civilian outpost
 	var tile := _force_gold_mountain(state, pos)
+	# 確認：vault 無預種礦（真採礦鏈要求）
+	tile.public_storage.erase("ore_gold")
+	tile.public_storage.erase("ore_silver")
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
-	# 建生產隊駐留（提供生產人力，讓 mint tick 跑）
+	# 建生產隊駐留（提供生產人力，讓 collect + mint tick 跑）
 	var team := _mk_produce_team_on(state, pos)
 	tile.outpost_owner = team.team_id
-	# bootstrap：給足 food + material + tools + 預種 ore 進 vault
+	# bootstrap food/material/tools 只，不給礦
 	team.resources["food"] = 500.0
 	team.resources["material"] = 200.0
 	team.resources["tools"] = 20.0
-	tile.public_storage["ore_gold"] = 20.0   # 超過 mint deficit gate(>10)，讓 _pick_facility 立刻選 mint
 	# 建立 faction（讓 _evaluate_infrastructure 能用 faction.leader_team_id）
 	state.create_faction(team.team_id)
 	var coin0: float = _team_coin_total(state)
 	# 用 player_pos = pos 讓 mining tile 在近區（才跑 outpost tick + collect）
 	var runner := SimRunner.new()
-	for _i in range(3000):
+	# 跑 6000 ticks（約 25 天）——採礦需幾天累積 >10 ore 才觸發 mint 建造
+	for _i in range(6000):
 		runner.advance_tick(state, pos)
-	# 斷言：mint 建成 OR coin 增加（任一成立即為成功端到端）
-	var vault_ore: float = float(tile.public_storage.get("ore_gold", 0))
+	# 中間斷言 1：礦石必須已從 mountain 採進 vault（resource_cap 初始 50 → 有採集才使 vault>0）
+	var vault_ore: float = float(tile.public_storage.get("ore_gold", 0)) \
+		+ float(tile.public_storage.get("ore_silver", 0))
+	var ground_ore: float = float(tile.resources.get("ore_gold", 0)) \
+		+ float(tile.resources.get("ore_silver", 0))
+	var ore_cap_total: float = float(tile.resource_cap.get("ore_gold", 0)) \
+		+ float(tile.resource_cap.get("ore_silver", 0))
+	# 礦石被採代表 ground_ore < 初始 ore_cap（50），或 vault > 0
+	assert(vault_ore > 0.0 or ground_ore < ore_cap_total, \
+		"[g1a] 礦石未被採集: vault=%.0f ground=%.0f cap=%.0f" % [vault_ore, ground_ore, ore_cap_total])
+	# 最終斷言：mint 建成 OR coin 增加（鏈末端）
 	var coin_delta: float = _team_coin_total(state) - coin0
 	assert(tile.mint_level > 0 or coin_delta > 0, \
 		"[g1a] 礦村未鑄幣: mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
@@ -13155,3 +13170,44 @@ func _test_g1a_mining_food_supply() -> void:
 			has_food_buy = true
 	assert(has_food_buy, "[g1a] 礦村低糧未發 food buy 單（active_orders=%s）" % str(team.active_orders))
 	print("[g1a] mining food supply OK (active_orders=%d)" % team.active_orders.size())
+
+func _test_g1a_construct_zombie_recovery() -> void:
+	# FIX3：CONSTRUCT 子隊抵達後 begin_subteam_construction 失敗（tile 已佔）
+	# → 子隊在 move_target=(-1,-1)、task=TASK_CONSTRUCT 狀態卡住
+	# → CONSTRUCT_TRANSIT_TIMEOUT 後應 release + merge_queue 完成恢復
+	print("--- G1a T5: CONSTRUCT zombie 恢復 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var target_pos := Vector2i(5, 5)
+	# target tile 已有 outpost（start_build 會失敗）
+	var target_tile := HexTileData.new()
+	target_tile.tile_id = 5 * 1000 + 5; target_tile.tile_pos = target_pos
+	target_tile.terrain = "plains"; target_tile.outpost_type = "civilian"; target_tile.outpost_level = 1
+	state.world.tiles[target_tile.tile_id] = target_tile
+	# 母隊
+	var parent := TeamData.new(); parent.team_id = 200; parent.tile_pos = target_pos
+	parent.faction_id = 10
+	_seed_pop(parent, 12)
+	var p_ldr := PersonData.new(); p_ldr.id = 2000; p_ldr.team_id = 200
+	state.persons[2000] = p_ldr; parent.leader_id = 2000
+	state.teams[200] = parent
+	# 子隊：TASK_CONSTRUCT + move_target=(-1,-1)（模擬已抵達但 start_build 失敗）
+	var sub := TeamData.new(); sub.team_id = 201; sub.tile_pos = target_pos
+	sub.faction_id = 10; sub.parent_team_id = 200
+	sub.current_task = TeamData.TASK_CONSTRUCT
+	sub.move_target = Vector2i(-1, -1)
+	# task_start_tick 設為很久以前（超過 10 天 CONSTRUCT_TRANSIT_TIMEOUT）
+	sub.task_start_tick = -(11 * WorldState.TICKS_PER_DAY)
+	_seed_pop(sub, 4)
+	var s_ldr := PersonData.new(); s_ldr.id = 2001; s_ldr.team_id = 201
+	state.persons[2001] = s_ldr; sub.leader_id = 2001
+	sub.tags = [TeamData.TAG_SUBTEAM]
+	parent.subteam_ids = [201]
+	state.teams[201] = sub
+	# 呼叫 _evaluate_subteam 一次（單步驗證恢復邏輯）
+	var merge_queue: Array = []
+	FactionAISystem.new()._evaluate_subteam(state, sub, merge_queue)
+	# 斷言：子隊被推入 merge_queue 或 task 已 release
+	assert(merge_queue.has(201) or sub.current_task == TeamData.TASK_IDLE, \
+		"[g1a] CONSTRUCT zombie 子隊未恢復: task=%s merge_queue=%s" % [sub.current_task, str(merge_queue)])
+	print("[g1a] CONSTRUCT zombie 恢復 OK (merged=%s task=%s)" % [str(merge_queue.has(201)), sub.current_task])
