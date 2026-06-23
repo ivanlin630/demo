@@ -71,8 +71,14 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	var sub: TeamData = state.teams.get(sub_id)
 	if sub == null or sub.parent_team_id == -1:
 		return false
-	if sub.current_task == TeamData.TASK_SETTLE:
-		return false   # 派駐安頓任務中不 merge_back（避免 spam dispatch）
+	# 移動中施工/升級/擴建 → 不 merge_back（子隊在 parent tile 出發前避免立即被吸回）
+	# TASK_BUILD/TASK_SETTLE 已到目標格，讓正常邏輯（到 parent 格才 merge）處理即可
+	var _TRANSIT_TASKS: Array = [
+		TeamData.TASK_SETTLE, TeamData.TASK_CONSTRUCT,
+		TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND
+	]
+	if sub.current_task in _TRANSIT_TASKS:
+		return false
 	var parent: TeamData = state.teams.get(sub.parent_team_id)
 	if parent == null or parent.tile_pos != sub.tile_pos:
 		return false

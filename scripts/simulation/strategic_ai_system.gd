@@ -135,10 +135,15 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
     # T-02：用 leader 的 team_intel 取目標最後已知位置
     var leader_id: int = faction.leader_team_id
     var target_pos: Vector2i = BeliefSystem.best_estimate(state, leader_id, target_id).get("tile_pos", target.tile_pos)
+    # S9 建造/升級/擴建子隊豁免：正前往施工目標，不得被包圍戰略覆蓋 move_target
+    var _BUILDER_TASKS_SA: Array = [TeamData.TASK_CONSTRUCT, TeamData.TASK_BUILD,
+        TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]
     for i in range(member_teams.size()):
         var t: TeamData = member_teams[i]
         if t.current_task in FactionAISystem.SURVIVAL_TASKS:
             continue
+        if t.current_task in _BUILDER_TASKS_SA:
+            continue   # S9 施工子隊不參與包圍
         var dir: Vector2i = dirs[i % dirs.size()]
         var sa_pos: Vector2i = target_pos + dir * ENCIRCLE_DIST
         sa_pos = _nearest_valid_tile(state, sa_pos, target_pos)

@@ -5,12 +5,12 @@
   "map": { "radius": 4, "resource_richness": 5 },
   "teams": [
     {
-      "id": 0, "name": "統領城", "tile_pos": [4, 4], "population": 8,
+      "id": 0, "name": "統領城", "tile_pos": [4, 4], "population": 30,
       "tags": ["統領"], "faction_id": 0, "is_faction_leader": true,
-      "anon_tiers": { "平民": 3, "新兵": 2, "老兵": 1 },
+      "anon_tiers": { "平民": 14, "新兵": 8, "老兵": 6 },
       "resources": {
-        "food": 96.0, "material": 200, "coin": 600, "weapon_melee_low": 12,
-        "armor_low": 8, "medicine": 10, "tools": 5, "goods": 50
+        "food": 400.0, "material": 500, "coin": 600, "weapon_melee_low": 12,
+        "armor_low": 8, "medicine": 10, "tools": 20, "goods": 50
       },
       "leader": {
         "name": "T0_Leader", "age": 30, "loyalty": 0.9,
@@ -19,10 +19,11 @@
       },
       "named_members": [
         { "name": "T0_M1", "loyalty": 0.7, "salary": 3.0,
-          "skills": { "戰鬥": 0.3 } },
+          "skills": { "戰鬥": 0.3, "統領": 0.5, "工程": 0.4 } },
         { "name": "T0_M2", "loyalty": 0.7, "salary": 3.0,
-          "skills": { "戰鬥": 0.3 } }
-      ]
+          "skills": { "戰鬥": 0.3, "統領": 0.4 } }
+      ],
+      "outpost": { "type": "military", "level": 1, "tile_food_init": 500 }
     },
     {
       "id": 1, "name": "友軍商隊", "tile_pos": [5, 4], "population": 6,

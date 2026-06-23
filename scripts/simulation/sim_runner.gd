@@ -170,6 +170,7 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step3b_exchange_intel(state, moved_far, far_teams)
 		_step3c_read_market_board(state, arrived_far)
 		_step4_resolve_interactions(state, moved_far, far_teams)
+		_outpost_system.tick_construction_far(state)   # S8 遠區施工推進（tick_all 僅近區）
 		_step4e_faction_snapshot(state, far_teams)
 		_step_ambush_check(state, far_teams)
 		_step5_collect_resources(state, far_teams)

@@ -97,11 +97,15 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 	# WS-2b：同步市集看板（鏡像權威）——過期/已滿足/已消失單從看板清，避免商隊讀幽靈單撲空。
 	_sync_board(state, team)
 	# 2. 餘量發賣盤（囤量遠超自用 → 餘 → 賣；TEST VALUE 門檻）
+	# 建造/施工隊不賣資源（背負建材上路，賣光→抵達建不了）
+	var is_constructing: bool = team.current_task in [TeamData.TASK_CONSTRUCT, TeamData.TASK_BUILD, TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]
 	for res in _ORDER_ELIGIBLE_RES:
 		if res == "food":
 			# WS-1：food 對定居隊在糧倉（非 team.resources）→ 糧倉「滿」信號發 sell。
 			_tick_food_granary_sell(state, team)
 			continue
+		if is_constructing:
+			continue   # 施工隊保留建材，不賣
 		var qty: float = float(team.resources.get(res, 0))
 		if qty < 20.0:
 			continue

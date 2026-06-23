@@ -178,6 +178,19 @@ func tick_all(state: WorldState) -> void:
 			continue
 		_tick_construction(state, tile)
 
+# S8 遠區施工推進：遠區不跑 tick_all（生產/鑄幣按近區頻率），但施工須持續；
+# 每 FAR_ZONE_INTERVAL 叫一次，construction_team 在遠區的格照樣計工。
+func tick_construction_far(state: WorldState) -> void:
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.construction_team_id == -1:
+			continue
+		# 僅處理施工隊在遠區的格（近區已由 tick_all 覆蓋）
+		var builder: TeamData = state.teams.get(tile.construction_team_id)
+		if builder == null:
+			continue
+		_tick_construction(state, tile)
+
 # tile 上是否有 PRODUCE（居民）team（軍屯子隊同 tag）
 func _has_resident_on_tile(state: WorldState, tile: HexTileData) -> bool:
 	for tid in state.teams:
@@ -280,8 +293,10 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				  "x": str(tile.tile_pos.x), "y": str(tile.tile_pos.y) })
 			print("[Outpost] Team%d 建成 %s（Lv%d）at (%d,%d)" % [
 				team.team_id, n, tile.outpost_level, tile.tile_pos.x, tile.tile_pos.y])
-			# G1a 探針：含礦山地 outpost 建成 → mine_founded
-			if tile.terrain == "mountain" and float(tile.resources.get("ore_gold", 0)) > 0.0:
+			# G1a 探針：含礦山地 outpost 建成 → mine_founded（gold 或 silver）
+			# resource_cap 記初始礦量（永不清零），比 resources 更可靠（施工期已被採集可能 =0）
+			if tile.terrain == "mountain" and (float(tile.resource_cap.get("ore_gold", 0)) > 0.0 \
+					or float(tile.resource_cap.get("ore_silver", 0)) > 0.0):
 				Probe.bump("g1.mine_founded")
 			# C: NPC 建造子隊完工 → 就地安頓（脫離母團、加駐留 tag），outpost 持續存在
 			if team.parent_team_id != -1:
@@ -606,6 +621,13 @@ func get_outpost_name(type: String, level: int) -> String:
 # ──────── 輔助 ────────
 
 func _check_distance(state: WorldState, pos: Vector2i, type: String) -> bool:
+	# S2 礦村：含礦山地距離免疫（礦脈常緊鄰既有據點；同類距離規則也豁免，礦村是特化聚落）
+	var target_tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	var is_ore_mountain: bool = target_tile != null and target_tile.terrain == "mountain" \
+		and (float(target_tile.resources.get("ore_gold", 0)) > 0.0 \
+			or float(target_tile.resources.get("ore_silver", 0)) > 0.0)
+	if is_ore_mountain:
+		return true   # 礦村 tile：跳過所有距離限制（礦山位置不可選擇，強制允建）
 	for tile_id in state.world.tiles:
 		var t: HexTileData = state.world.tiles[tile_id]
 		if t.outpost_level == 0:
