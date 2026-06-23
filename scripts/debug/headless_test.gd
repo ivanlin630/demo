@@ -3865,6 +3865,8 @@ func _run_sim_test() -> void:
 	_test_loyalty_bank()
 	_test_anon_treasury_bank()
 	_test_outpost_owner_bank()
+	# ── P1 掠奪 option ──
+	_test_p1_loot_term()
 
 	print("=== DONE ===")
 
@@ -13211,3 +13213,13 @@ func _test_g1a_construct_zombie_recovery() -> void:
 	assert(merge_queue.has(201) or sub.current_task == TeamData.TASK_IDLE, \
 		"[g1a] CONSTRUCT zombie 子隊未恢復: task=%s merge_queue=%s" % [sub.current_task, str(merge_queue)])
 	print("[g1a] CONSTRUCT zombie 恢復 OK (merged=%s task=%s)" % [str(merge_queue.has(201)), sub.current_task])
+
+func _test_p1_loot_term() -> void:
+	print("--- P1 掠奪 term/weight ---")
+	var cruel := {"殘忍": 0.9, "好戰": 0.8, "貪婪": 0.5}
+	var meek  := {"殘忍": 0.1, "好戰": 0.1, "貪婪": 0.2}
+	var w_cruel: float = DecisionTerms.weight("loot", cruel)
+	var w_meek:  float = DecisionTerms.weight("loot", meek)
+	assert(w_cruel > 0.6, "[p1] 殘忍 loot weight 太低 %.2f" % w_cruel)
+	assert(w_meek  < 0.2, "[p1] 溫和 loot weight 太高 %.2f" % w_meek)
+	print("[p1] loot term/weight OK cruel=%.2f meek=%.2f" % [w_cruel, w_meek])

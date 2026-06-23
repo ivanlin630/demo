@@ -16,6 +16,8 @@ var strongest_feud: float = 0.0
 var has_own_outpost: bool = false
 var is_merchant: bool = false
 var has_home_outpost: bool = false
+var has_weak_prey: bool = false
+var weak_prey_pos: Vector2i = Vector2i(-1, -1)
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -37,4 +39,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
 	# threat：商隊切片威脅 term 次要，初版 0；他域遷入時補（_find_strong_neighbor / 鄰敵 strength）。
 	c.threat = 0.0
+	var _prey: int = FactionAISystem.new()._find_weakest_prey(state, team)
+	c.has_weak_prey = _prey != -1
+	c.weak_prey_pos = state.teams[_prey].tile_pos if c.has_weak_prey else Vector2i(-1, -1)
 	return c
