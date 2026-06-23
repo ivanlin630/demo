@@ -10,6 +10,7 @@ const REGISTRY: Dictionary = {
 	"survival":[["threat_pressure", "survival_pressure"]],
 	"駐守":   [["settle_fit", "settle"]],
 	"返家補給":[["restock_need", "survival_pressure"]],
+	"掠奪":   [["loot_drive", "loot"]],
 }
 
 static func applicable(ctx: DecisionContext) -> Array:
@@ -29,6 +30,8 @@ static func applicable(ctx: DecisionContext) -> Array:
 					out.append(opt)
 			"覓食", "survival":
 				out.append(opt)   # 恆候選（survival 靠權重，非守衛）
+			"掠奪":
+				if ctx.has_weak_prey: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -44,4 +47,8 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		"survival": return {"task": TeamData.TASK_FLEE, "target": Vector2i(-1,-1)}
 		"駐守":   return {"task": TeamData.TASK_GOVERN, "target": team.tile_pos}
 		"返家補給": return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.new()._find_own_outpost(state, team)}
+		"掠奪":
+			var pid: int = FactionAISystem.new()._find_weakest_prey(state, team)
+			if pid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_LOOT, "target": state.teams[pid].tile_pos, "combat_target": pid}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

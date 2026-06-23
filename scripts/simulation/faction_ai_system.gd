@@ -856,6 +856,9 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
 		TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		# 掠奪 option：設 combat_target 才會交戰（非只移動）
+		if td.has("combat_target"):
+			team.combat_target = int(td["combat_target"])
 		return
 	# 全不可派 → 保持現行(no-op)
 

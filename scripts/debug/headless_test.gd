@@ -3865,6 +3865,10 @@ func _run_sim_test() -> void:
 	_test_loyalty_bank()
 	_test_anon_treasury_bank()
 	_test_outpost_owner_bank()
+	# ── P1 掠奪 option ──
+	_test_p1_loot_term()
+	_test_p1_loot_option()
+	_test_p1_loot_believability()
 
 	print("=== DONE ===")
 
@@ -13211,3 +13215,123 @@ func _test_g1a_construct_zombie_recovery() -> void:
 	assert(merge_queue.has(201) or sub.current_task == TeamData.TASK_IDLE, \
 		"[g1a] CONSTRUCT zombie 子隊未恢復: task=%s merge_queue=%s" % [sub.current_task, str(merge_queue)])
 	print("[g1a] CONSTRUCT zombie 恢復 OK (merged=%s task=%s)" % [str(merge_queue.has(201)), sub.current_task])
+
+func _test_p1_loot_term() -> void:
+	print("--- P1 掠奪 term/weight ---")
+	var cruel := {"殘忍": 0.9, "好戰": 0.8, "貪婪": 0.5}
+	var meek  := {"殘忍": 0.1, "好戰": 0.1, "貪婪": 0.2}
+	var w_cruel: float = DecisionTerms.weight("loot", cruel)
+	var w_meek:  float = DecisionTerms.weight("loot", meek)
+	assert(w_cruel > 0.6, "[p1] 殘忍 loot weight 太低 %.2f" % w_cruel)
+	assert(w_meek  < 0.2, "[p1] 溫和 loot weight 太高 %.2f" % w_meek)
+	print("[p1] loot term/weight OK cruel=%.2f meek=%.2f" % [w_cruel, w_meek])
+
+# ── P1 helpers：建隊 + 設 belief + 放 tile ──
+
+# 建一張 plains tile
+func _p1_place_tile(state: WorldState, pos: Vector2i) -> void:
+	var t := HexTileData.new()
+	t.tile_id = pos.x * 1000 + pos.y; t.tile_pos = pos; t.terrain = "plains"
+	state.world.tiles[t.tile_id] = t
+
+# 殘忍/好戰 unified merchant 隊（id=900）
+func _mk_unified_cruel_team(state: WorldState, pos: Vector2i) -> TeamData:
+	var t := TeamData.new(); t.team_id = 900; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = pos; t.leader_id = 9000
+	_seed_pop(t, 10)
+	t.resources = {"food": 500.0, "goods": 50.0, "coin": 100.0}
+	state.teams[900] = t
+	state.team_discovered[900] = []
+	state.team_intel[900] = {}
+	var ldr := PersonData.new(); ldr.id = 9000; ldr.team_id = 900
+	ldr.values = {"殘忍": 0.9, "好戰": 0.8, "貪婪": 0.6, "野心": 0.3, "慎重": 0.3}
+	state.persons[9000] = ldr
+	_p1_place_tile(state, pos)
+	return t
+
+# 溫和 unified merchant 隊（id=901）
+func _mk_unified_meek_team(state: WorldState, pos: Vector2i) -> TeamData:
+	var t := TeamData.new(); t.team_id = 901; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = pos; t.leader_id = 9010
+	_seed_pop(t, 10)
+	t.resources = {"food": 500.0, "goods": 50.0, "coin": 100.0}
+	state.teams[901] = t
+	state.team_discovered[901] = []
+	state.team_intel[901] = {}
+	var ldr := PersonData.new(); ldr.id = 9010; ldr.team_id = 901
+	ldr.values = {"殘忍": 0.1, "好戰": 0.1, "貪婪": 0.2, "野心": 0.3, "慎重": 0.7}
+	state.persons[9010] = ldr
+	_p1_place_tile(state, pos)
+	return t
+
+# 弱獵物隊（id=902）：pop 少 + 有 food_est≥20 + belief 設定
+func _mk_weak_prey_team(state: WorldState, pos: Vector2i) -> TeamData:
+	var t := TeamData.new(); t.team_id = 902; t.tags = [TeamData.TAG_PRODUCE]
+	t.tile_pos = pos; t.leader_id = 9020
+	_seed_pop(t, 3)   # pop=3 < 10×0.7=7 → 弱
+	t.resources = {"food": 200.0}
+	state.teams[902] = t
+	_p1_place_tile(state, pos)
+	var ldr2 := PersonData.new(); ldr2.id = 9020; ldr2.team_id = 902
+	state.persons[9020] = ldr2
+	return t
+
+# 為 observer 設對 prey 的 belief（直接寫 team_intel 舊格式，has_belief→true）
+func _p1_set_belief(state: WorldState, obs_id: int, prey: TeamData) -> void:
+	if not state.team_discovered.has(obs_id):
+		state.team_discovered[obs_id] = []
+	if not state.team_discovered[obs_id].has(prey.team_id):
+		state.team_discovered[obs_id].append(prey.team_id)
+	if not state.team_intel.has(obs_id):
+		state.team_intel[obs_id] = {}
+	# 親見格式（legacy Dictionary path in _coerce）→ has_belief=true
+	state.team_intel[obs_id][prey.team_id] = {
+		"population_est": float(prey.population),
+		"food_est": 200.0,
+		"tile_pos": prey.tile_pos,
+		"confidence": 1.0,
+		"last_tick": 0,
+	}
+
+func _test_p1_loot_option() -> void:
+	print("--- P1 掠奪 option 選擇 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var raider := _mk_unified_cruel_team(state, Vector2i(2, 2))
+	var prey   := _mk_weak_prey_team(state, Vector2i(3, 2))
+	_p1_place_tile(state, Vector2i(3, 2))   # ensure prey tile exists (already done in mk)
+	_p1_set_belief(state, raider.team_id, prey)
+	var fa := FactionAISystem.new()
+	fa._decide_unified(state, raider)
+	assert(raider.current_task == TeamData.TASK_LOOT,
+		"[p1] 殘忍 unified 隊未選掠奪, task=%s" % raider.current_task)
+	assert(raider.combat_target == prey.team_id,
+		"[p1] 掠奪未設 combat_target got=%d" % raider.combat_target)
+	# 溫和隊同情境 → 不掠奪
+	var state2 := WorldState.new(); state2.world = WorldData.new()
+	var meek := _mk_unified_meek_team(state2, Vector2i(2, 2))
+	var prey2 := _mk_weak_prey_team(state2, Vector2i(3, 2))
+	_p1_set_belief(state2, meek.team_id, prey2)
+	fa._decide_unified(state2, meek)
+	assert(meek.current_task != TeamData.TASK_LOOT,
+		"[p1] 溫和 unified 隊竟掠奪 task=%s" % meek.current_task)
+	print("[p1] loot option OK (raider→TASK_LOOT combat_target=%d, meek→%s)" % [raider.combat_target, meek.current_task])
+
+func _test_p1_loot_believability() -> void:
+	print("--- P1 掠奪 believability ---")
+	var fa := FactionAISystem.new()
+	# (a) 危時：殘忍 unified 隊缺糧 + 有獵場 + 鄰弱獵物 → survival(覓食) 贏，非掠奪做日常
+	# food_days < 2.5 → survival_pressure = 4*(3-fd) >> loot_util(~0.79) → 覓食勝
+	var state := WorldState.new(); state.world = WorldData.new()
+	var hungry := _mk_unified_cruel_team(state, Vector2i(2, 2))
+	var prey := _mk_weak_prey_team(state, Vector2i(3, 2))
+	_p1_set_belief(state, hungry.team_id, prey)
+	hungry.resources["food"] = 2.0   # food_days = 2/(10×2.4) ≈ 0.08 → pressure ≈ 11.7
+	# 給鄰格一個 wild_game tile，讓覓食有地可去（否則 to_task 找不到 → skip → fallthrough）
+	var game_tile := HexTileData.new()
+	game_tile.tile_id = 1 * 1000 + 2; game_tile.tile_pos = Vector2i(1, 2); game_tile.terrain = "plains"
+	game_tile.resources = {"wild_game": 5}
+	state.world.tiles[game_tile.tile_id] = game_tile
+	fa._decide_unified(state, hungry)
+	assert(hungry.current_task != TeamData.TASK_LOOT,
+		"[p1] 餓隊竟做日常掠奪非求生 task=%s" % hungry.current_task)
+	print("[p1] loot believability OK (hungry→%s, not TASK_LOOT)" % hungry.current_task)

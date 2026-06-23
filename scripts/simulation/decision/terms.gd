@@ -2,6 +2,7 @@ class_name DecisionTerms
 
 const RESTOCK_DAYS: float = 5.0   # TEST VALUE：商隊糧低於此 → proactive 返家補給(> WARNING 3)
 const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-trade 軟壓(能但很少)
+const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× weight(loot 0..1) → loot util ≈ 0..1，危時不碾壓 survival(≥2)
 
 # 統一決策引擎：term 函式庫 + w_term 人格映射。
 # eval：驅力強度（0..~1.5），term × opt 對應；不適用 opt 回 0。
@@ -33,6 +34,9 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 貿易移出 → 野心 magnitude 不再同步抬貿易，霸主(野心高)與商人(貪婪高)才分得開。
 			if opt not in ["生產", "建設"]: return 0.0
 			return clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
+		"loot_drive":
+			if opt != "掠奪": return 0.0
+			return LOOT_DRIVE_BASE if ctx.has_weak_prey else 0.0   # TEST VALUE
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"settle_fit":
@@ -56,4 +60,6 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"ambition":          return clampf(float(v.get("野心", 0.5)) - 0.2, 0.0, 1.0) * 1.5
 		"settle":            return float(v.get("義氣", 0.5)) * 0.5 + float(v.get("慎重", 0.5)) * 0.5
 		"feud":              return 0.3 + float(v.get("好戰", 0.5)) * 0.5
+		"loot":              return float(v.get("殘忍", 0.5)) * 0.5 \
+			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("貪婪", 0.5)) * 0.2
 		_:                   return 0.5
