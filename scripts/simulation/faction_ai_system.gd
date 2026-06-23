@@ -509,8 +509,10 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			for tid in f.member_team_ids.duplicate():  # duplicate: _execute_betrayal may erase during iteration
 				if tid == f.leader_team_id: continue
 				var member_team: TeamData = state.teams.get(tid)
-				if member_team:
-					DiplomaticAiSystem.new().consider_betrayal(state, member_team, leader_team_b)
+				if member_team == null: continue
+				# 子隊（TAG_SUBTEAM）不評估背叛：在途建造/安頓子隊若被叛出會廢棄任務且造成孤立 zombie。
+				if member_team.tags.has(TeamData.TAG_SUBTEAM): continue
+				DiplomaticAiSystem.new().consider_betrayal(state, member_team, leader_team_b)
 
 	var merge_queue: Array = []
 	for tid in state.teams:
@@ -1828,7 +1830,9 @@ const TERRAIN_BUILD_BONUS: Dictionary = {
 	"plains": 20.0, "forest": 10.0, "mountain": -10.0,
 }
 
-const MINING_GREED_WEIGHT: float = 1.5   # TEST VALUE — 礦村建址貪婪加權；過頻調低/魂不 fire 調高
+const MINING_GREED_WEIGHT: float = 2.5   # TEST VALUE — 礦村建址貪婪加權；過頻調低/魂不 fire 調高
+const MINING_GREED_THRESHOLD: float = 1.1  # TEST VALUE — 貪婪+野心 >= 此值才觸發礦山首選（普通 leader 不建礦=稀有擬真）
+const ORE_MOUNTAIN_MAX_DIST: int = 7    # TEST VALUE — 貪婪 leader 搜索礦山距離（大地圖 r=8 礦山可能遠於普通 dist=5）
 
 # 選址資源權重（候選格本格 + 鄰 6 格，每點資源出現一次加一次）TEST VALUES
 const SITE_RES_BONUS: Dictionary = {
@@ -1838,6 +1842,7 @@ const SITE_RES_BONUS: Dictionary = {
 
 # 回傳最佳候選 { "pos": Vector2i, "score": float, "tile": HexTileData }，無則 {}。
 # 多中心滾動拓殖：候選 = 任一 center（leader 所在 + faction 所有 outpost）dist 2-5。
+# S2 修：貪婪/野心 leader（greed+ambition >= MINING_GREED_THRESHOLD）搜索距離擴至 ORE_MOUNTAIN_MAX_DIST。
 func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) -> Dictionary:
 	var candidates: Array = []
 	var centers: Array = [leader_team.tile_pos]
@@ -1848,6 +1853,11 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 		if o != null and o.faction_id == leader_team.faction_id and leader_team.faction_id != -1:
 			if not centers.has(t.tile_pos):
 				centers.append(t.tile_pos)
+	# 預計算 leader 貪婪+野心（決定是否擴大礦山搜索範圍）
+	var ldr: PersonData = state.persons.get(leader_team.leader_id)
+	var ldr_greed: float = float(ldr.values.get("貪婪", 0.5)) if ldr != null else 0.5
+	var ldr_ambition: float = float(ldr.values.get("野心", 0.5)) if ldr != null else 0.5
+	var is_greedy_leader: bool = (ldr_greed + ldr_ambition) >= MINING_GREED_THRESHOLD
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0: continue
@@ -1861,20 +1871,20 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 			and (float(tile.resource_cap.get("ore_gold", 0)) > 0.0 \
 				or float(tile.resource_cap.get("ore_silver", 0)) > 0.0)
 		var min_dist: int = 1 if is_ore_mountain else 2
-		if dist > 5 or dist < min_dist: continue
+		# S2 礦村搜索擴距：貪婪 leader 對礦山搜索 dist 擴至 ORE_MOUNTAIN_MAX_DIST（r=8 礦山常在邊陲）
+		var max_dist: int = ORE_MOUNTAIN_MAX_DIST if (is_ore_mountain and is_greedy_leader) else 5
+		if dist > max_dist or dist < min_dist: continue
 		var score: float = float(tile.productivity) * 100.0
 		score += float(TERRAIN_BUILD_BONUS.get(tile.terrain, 0))
 		score -= float(dist) * 5.0
 		score += clampf(10.0 - float(dist), 0.0, 10.0) * 2.0
 		score += _site_resource_bonus(state, tile.tile_pos)
 		# S2 礦村：含礦山地對貪婪/野心 leader 加權 ore bonus（壓過山地懲罰=蓄意富裕擴張；普通 leader 不選=稀有擬真）
-		if tile.terrain == "mountain":
+		# 門檻 MINING_GREED_THRESHOLD：greed+ambition 須達此值才觸發（避免凡人 leader 也選礦山）
+		if tile.terrain == "mountain" and is_greedy_leader:
 			var ore_here: float = _site_resource_bonus_ore_only(state, tile.tile_pos)
 			if ore_here > 0.0:
-				var ldr: PersonData = state.persons.get(leader_team.leader_id)
-				var greed: float = float(ldr.values.get("貪婪", 0.5)) if ldr != null else 0.5
-				var ambition: float = float(ldr.values.get("野心", 0.5)) if ldr != null else 0.5
-				score += ore_here * (greed + ambition) * MINING_GREED_WEIGHT   # TEST VALUE
+				score += ore_here * (ldr_greed + ldr_ambition) * MINING_GREED_WEIGHT   # TEST VALUE
 		var min_enemy_dist: int = _min_dist_to_enemy_outpost(state, leader_team, tile.tile_pos)
 		if min_enemy_dist < 5: score -= float(5 - min_enemy_dist) * 10.0
 		if score >= MIN_BUILD_SCORE:
@@ -1885,18 +1895,23 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 	var sig: String = "%d_%d" % [best.pos.x, best.pos.y]
 	if _last_site_sig.get(leader_team.faction_id, "") != sig:
 		_last_site_sig[leader_team.faction_id] = sig
-		print("[Site] 選址 %s score=%.0f 周邊資源=%s" % [
-			str(best.pos), best.score, str(_site_resources_nearby(state, best.pos))])
+		print("[Site] 選址 %s score=%.0f 周邊資源=%s terrain=%s" % [
+			str(best.pos), best.score, str(_site_resources_nearby(state, best.pos)), best.tile.terrain])
 	return best
 
 func _site_resource_bonus(state: WorldState, pos: Vector2i) -> float:
 	var bonus: float = 0.0
+	# S2 修：ore_gold/silver 改用 resource_cap（永不清零），避免採集後相鄰 plains 評分大幅掉分
+	# 其他資源（herb/wild_horses/ore_iron）仍用 resources（現存量影響農業選址合理）
+	var ore_res: Array = ["ore_gold", "ore_silver"]
 	for d in ([Vector2i.ZERO] as Array) + PathSystem.HEX_DIRS:
 		var npos: Vector2i = pos + d
 		var ntile: HexTileData = state.world.tiles.get(npos.x * 1000 + npos.y)
 		if ntile == null: continue
 		for res in SITE_RES_BONUS:
-			if float(ntile.resources.get(res, 0)) > 0:
+			var amt: float = float(ntile.resource_cap.get(res, 0)) \
+				if res in ore_res else float(ntile.resources.get(res, 0))
+			if amt > 0:
 				bonus += float(SITE_RES_BONUS[res])
 	return bonus
 
@@ -2218,6 +2233,23 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 		return
 	if uses_unified(team):
 		return   # unified 隊求生改由 DecisionEngine 決(切片);舊系統不雙觸發
+	# S2 礦村：建造子隊在途或施工中（TASK_CONSTRUCT/TASK_BUILD + parent 存在）→ 豁免求生打斷。
+	# 背景：礦山偏遠、FAR 區 LOD 移動慢，bootstrap food 在途中耗盡；famine grace 7天。
+	# builder 到達後立即起建（BUILD），山地 ore harvest 可快速補糧，不會死亡殭屍。
+	# 限制：僅當建築地點有礦（ore mountain）時才豁免；普通 civilian 建造仍正常觸發求生。
+	if team.parent_team_id != -1 \
+			and team.current_task in [TeamData.TASK_CONSTRUCT, TeamData.TASK_BUILD]:
+		var my_tile: HexTileData = state.world.tiles.get(
+			team.tile_pos.x * 1000 + team.tile_pos.y)
+		var tgt_tile: HexTileData = null
+		if team.move_target != Vector2i(-1, -1):
+			tgt_tile = state.world.tiles.get(team.move_target.x * 1000 + team.move_target.y)
+		else:
+			tgt_tile = my_tile   # 已到達，在建設格
+		if tgt_tile != null and tgt_tile.terrain == "mountain" \
+				and (float(tgt_tile.resource_cap.get("ore_gold", 0)) > 0.0 \
+					or float(tgt_tile.resource_cap.get("ore_silver", 0)) > 0.0):
+			return   # 礦山 builder/施工隊：豁免所有求生打斷（famine grace 保護）
 	var pop_eff: int = team.population
 	if pop_eff <= 0: return
 	# WS-2c：讀有效糧（私產+自家糧倉），否則定居隊 food 在糧倉→誤判餓→永卡 survival。

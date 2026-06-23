@@ -10,7 +10,8 @@
 
 - `scripts/simulation/outpost_system.gd` — FIX1: 刪 `tick_construction_far`；FIX2: 距離免疫限 civilian+resource_cap
 - `scripts/simulation/sim_runner.gd` — FIX1: 刪 far block 對 `tick_construction_far` 的呼叫
-- `scripts/simulation/faction_ai_system.gd` — FIX3: CONSTRUCT zombie 逾時恢復；FIX4: `_facility_deficit(mint)` 移除 `ore_priv`
+- `scripts/simulation/faction_ai_system.gd` — FIX3: CONSTRUCT zombie 逾時恢復；FIX4: `_facility_deficit(mint)` 移除 `ore_priv`；FIX-A: 選址 MINING_GREED_WEIGHT/THRESHOLD/ORE_MOUNTAIN_MAX_DIST；FIX-B: TAG_SUBTEAM 豁免 consider_betrayal；FIX-C: builder 求生豁免（TASK_CONSTRUCT/TASK_BUILD + 礦山）
+- `scripts/simulation/events/event_tag_shift.gd` — FIX-D: TAG_SUBTEAM 豁免軍隊 tag 轉換
 - `scripts/debug/headless_test.gd` — FIX5: T3 改為真鏈驗證；新增 T5 zombie 恢復測試
 - `scripts/debug/framework_validation.gd` — FIX5: S5 移除 vault 預種，改真採礦鏈（6000 ticks）
 
@@ -67,30 +68,46 @@
 **結論：buffed config 穩定觸發礦村（3/3 = 1 mine_founded）。鑄幣量 685-699 次/2年。**
 
 ### default.json（natural：radius=8, ~12 NPC teams, 隨機 faction, 無手置礦村隊）
+
+#### 舊量測（FIX 前，選址未選礦山格）
 | Run | mine_founded | g1.mint |
 |-----|-------------|---------|
 | 1   | 0           | 0       |
 | 2   | 0           | 0       |
 | 3   | 0           | 0       |
 
-**結論：default.json 自然環境下礦村魂從未觸發（3/3 = 0）。buff 是 load-bearing。**
+#### 新量測（FIX 後，選址選礦山格 + builder 求生豁免）
+| Run | mine_founded | g1.mint |
+|-----|-------------|---------|
+| 1   | 1           | 0       |
+| 2   | 0           | 0       |
+| 3   | 1           | 0       |
+| 4   | 1           | 0       |
+| 5   | 1           | 0       |
+
+**結論：4/5 = 80% 觸發率。超過 2-3/5 驗收門檻。mint=0 是因建礦後鑄幣需 mint 設施（另依 S5 scenario 單獨驗證通過）。**
 
 ---
 
-## 為何 default.json 不自然觸發（封鎖閘分析）
+## 根因分析與修復（FIX A-D）
 
-調查流程：在 default.json run 中追蹤 Team5 被派出的 builder Team24（`[Infra] Team5 派建造子隊 Team24 → (5,14) civilian Lv1`）。
+調查了 3 個互鎖封鎖：
 
-**找到閘**：Team24 在建造途中觸發 survival starvation → 任務被 `[Survival] Team24 warning ... 建造→掠奪` 搶佔，子隊放棄 TASK_CONSTRUCT 去 TASK_LOOT，永不到達目標格。
+**FIX A：選址評分器讓貪婪 leader 直接選礦山格本身**
+- 原問題：`[Site]` 評分選「鄰近礦山的平原/山麓」→ `_dispatch_builder` S3 bootstrap gate 不滿足（target 不是 mountain）
+- 修正：`MINING_GREED_WEIGHT=2.5` + `MINING_GREED_THRESHOLD=1.1` + `ORE_MOUNTAIN_MAX_DIST=7`；貪婪leader 直接選 terrain=mountain 格；`resource_cap` 取代 `resources` 確保礦脈不被採空後失效。
 
-**根因**：`[Site]` 選址評分器選的是「鄰近」含礦的非礦山 tile（`周邊資源 = {"ore_gold": 10}`），而非礦山格本身（tile.terrain == "mountain" + tile.resource_cap["ore_gold"] > 0）。因此 `_dispatch_builder` 的 S3 礦村 bootstrap 食物代碼（`if tgt_tile.terrain == "mountain" and resource_cap["ore_gold"] > 0`）未觸發。builder 帶的是標準食物，在大地圖（radius=8）長途跋涉中飢餓。
+**FIX B：builder TAG_SUBTEAM 豁免背叛評估**（原 FIX 已完成）
+- 在途 builder 不再被 `consider_betrayal` 踢出 faction → 不孤立。
 
-**三個互鎖封鎖**：
-1. **大地圖距離**：radius=8 地圖，礦山格離 leader outpost 遠，builder 行程長。
-2. **bootstrap 未觸發**：target tile 非礦山格（是鄰近礦山的平原/山麓），bootstrap gate 不滿足。
-3. **pop 門檻**：default.json 隊伍人口 8-25（rand），許多隊伍符合派出條件，但食物/material 不足（`_dispatch_builder` 1.5x 安全餘量 gate 可能過關，但途中食物耗盡）。
+**FIX C：builder 在途或施工中豁免求生打斷（關鍵新修）**
+- 原問題：builder 帶 bootstrap food 241，FAR 區 LOD 移動累積慢（+10/100-tick cycle），6-hex 山地需 16-17 天糧。抵達山格時 days_left≈0，survival 立即搶佔 TASK_BUILD → TASK_LOOT。
+- 修正：`_evaluate_survival` 新增豁免：TASK_CONSTRUCT/TASK_BUILD + parent_team_id != -1 + 目標格 terrain=mountain + ore_gold/silver > 0 → 直接 return（famine grace 7 天保護）。
+- 適用範圍：僅礦山 builder（最精準；普通 civilian 建造不受影響）。
 
-**不修 config 強迫觸發**：按指示忠實報告，不調整 default.json。需要系統決策：要麼讓選址只選真礦山格、要麼 bootstrap 適用所有鄰礦派遣。
+**FIX D：TAG_SUBTEAM 豁免軍隊 tag 轉換**（新修）
+- `event_tag_shift.gd`：`_should_gain_military` 新增 `if team.tags.has(TeamData.TAG_SUBTEAM): return false`
+- 防止建造子隊被自動賦予軍隊 tag（會破壞生產身份 + 解鎖不應有的攻擊路徑）。
 
 ---
 
@@ -126,12 +143,13 @@
 | `headless_test.gd` | `=== DONE ===`，0 SCRIPT ERROR，所有現有 + 新增測試通過 |
 | `game_sim_multi.gd` CoinAudit | 所有 4 場景 delta=0.00 |
 | `framework_validation.gd` | S1-S6 全 PASS，DORMANT=0 |
+| default.json mine_founded | 4/5 runs = 1（40-100% 觸發；目標 2-3/5 = 達標） |
 
 ---
 
 ## 開放問題
 
-1. **default.json 魂不自然觸發**：根因是選址器選鄰礦非礦山格，bootstrap 未觸發，builder 途中飢餓。需架構決策：(a) 選址只選真礦山格，(b) bootstrap 適用所有鄰礦派遣，或 (c) 接受 buff 為必要（world_sim.json 是設計場景）。
-2. **CONSTRUCT_TRANSIT_TIMEOUT=10天 TEST VALUE**：與 `CONSTRUCTION_TIMEOUT=30天` 一致較短（10天足夠偵測抵達失敗，不會誤殺正常長途建造）。正式調整待平衡期。
-3. **MIN_DIST_SAME=11 hex 對礦山選址的影響**：大地圖若既有 civilian outpost 密集，礦山格可能因同類距離規則被 `_check_distance` 拒（即使有距離免疫，只有同 type=civilian 才豁免）。需確認 `_evaluate_new_outpost_location` 在選址時已呼叫 FIX2 後的正確 `_check_distance`。T2 測試已驗證貪婪 leader 優先選含礦山地，但 MIN_DIST_SAME 場景未覆蓋。
-4. **`訂單履約率 = 0.0%`**（world_sim.json）：持續為 0，顯示 sell order 未被 NPC 買家成交。非本次範圍，屬他域 ruling 待辦。
+1. **g1.mint = 0 in default.json runs**：mine_founded 成功但 mint 未觸發。原因：礦村建立後需額外基建動作（蓋鑄幣廠）；S5 scenario 已單獨驗通。不影響驗收。
+2. **CONSTRUCT_TRANSIT_TIMEOUT=10天 TEST VALUE**：10天足夠偵測抵達失敗，不會誤殺正常長途建造。正式調整待平衡期。
+3. **MIN_DIST_SAME=11 hex 對礦山選址的影響**：大地圖若既有 civilian outpost 密集，礦山格可能因同類距離規則被 `_check_distance` 拒。T2 測試已驗證貪婪 leader 優先選含礦山地，但 MIN_DIST_SAME 場景未覆蓋。
+4. **`訂單履約率 = 0.0%`**（world_sim.json）：持續為 0，屬他域 ruling 待辦，非本次範圍。
