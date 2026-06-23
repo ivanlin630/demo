@@ -462,6 +462,12 @@ func _initialize() -> void:
 	_test_carry_cap_trade()
 	_test_carry_cap_forage()
 	_test_trade_throughput_wagon()
+	# ── G1a 礦村：礦脈保證 + 建址 + 採礦鑄幣 + 外部供糧 ──
+	_test_g1a_ore_guarantee()
+	_test_g1a_mining_site()
+	_test_g1a_mining_to_coin()
+	_test_g1a_mining_food_supply()
+	_test_g1a_construct_zombie_recovery()
 	quit()
 
 func _test_belief_accessor() -> void:
@@ -13000,3 +13006,208 @@ func _test_dispatch_fallback() -> void:
 		"覓食無格 → 應退返家補給(RETURN_HOME)不凍，實際=%s" % t.current_task)
 	assert(t.current_option == "返家補給", "current_option 應追蹤實際派出=返家補給，實際=%s" % t.current_option)
 	print("dispatch fallback OK")
+
+# ── G1a 礦村 ──
+
+func _force_gold_mountain(state: WorldState, pos: Vector2i) -> HexTileData:
+	# helper: 建含金礦山地 tile 並插入 state.world.tiles
+	var tile := HexTileData.new()
+	tile.tile_id = pos.x * 1000 + pos.y; tile.tile_pos = pos
+	tile.terrain = "mountain"; tile.productivity = 0.7
+	tile.resources["ore_gold"] = 50.0; tile.resource_cap["ore_gold"] = 50.0
+	state.world.tiles[tile.tile_id] = tile
+	return tile
+
+func _mk_team_with_greedy_leader(state: WorldState, pos: Vector2i) -> TeamData:
+	var team := TeamData.new()
+	team.team_id = 900; team.tile_pos = pos; team.faction_id = -1
+	_seed_pop(team, 10)
+	var ldr := PersonData.new(); ldr.id = 9000; ldr.team_id = 900
+	ldr.values["貪婪"] = 0.9; ldr.values["野心"] = 0.9
+	state.persons[9000] = ldr; team.leader_id = 9000
+	state.teams[900] = team
+	return team
+
+func _mk_team_with_meek_leader(state: WorldState, pos: Vector2i) -> TeamData:
+	var team := TeamData.new()
+	team.team_id = 901; team.tile_pos = pos; team.faction_id = -1
+	_seed_pop(team, 10)
+	var ldr := PersonData.new(); ldr.id = 9001; ldr.team_id = 901
+	ldr.values["貪婪"] = 0.2; ldr.values["野心"] = 0.2
+	state.persons[9001] = ldr; team.leader_id = 9001
+	state.teams[901] = team
+	return team
+
+func _test_g1a_ore_guarantee() -> void:
+	print("--- G1a T1: 礦脈保證 ---")
+	# 小圖多次生成，每次至少 1 金礦 tile（消 RNG 槓龜）
+	for seed_i in range(20):
+		var state := WorldState.new()
+		var cfg := {"map": {"radius": 4, "resource_richness": 5}}
+		GameSetup.setup(state, cfg)
+		var gold := 0
+		var has_mountain := false
+		for tid in state.world.tiles:
+			var t = state.world.tiles[tid]
+			if t.terrain == "mountain": has_mountain = true
+			if float(t.resources.get("ore_gold", 0)) > 0.0: gold += 1
+		if has_mountain:
+			assert(gold >= 1, "[g1a] 小圖無金礦 tile (seed_i=%d)" % seed_i)
+	print("[g1a] ore guarantee OK")
+
+func _test_g1a_mining_site() -> void:
+	print("--- G1a T2: 含礦山地建址 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# 貪婪 leader 在 (0,0)；放含金礦山 (3,0) 和競爭平原 (0,3)
+	var greedy_team := _mk_team_with_greedy_leader(state, Vector2i(0, 0))
+	_force_gold_mountain(state, Vector2i(3, 0))
+	var plains_t := HexTileData.new()
+	plains_t.tile_id = 0 * 1000 + 3; plains_t.tile_pos = Vector2i(0, 3)
+	plains_t.terrain = "plains"; plains_t.productivity = 1.2
+	state.world.tiles[plains_t.tile_id] = plains_t
+	var fai := FactionAISystem.new()
+	var best: Dictionary = fai._evaluate_new_outpost_location(state, greedy_team)
+	assert(not best.is_empty(), "[g1a] 貪婪 leader 無選址")
+	assert(best.tile.terrain == "mountain", "[g1a] 貪婪 leader 未選含礦山, 選了 %s (score=%.0f)" % [best.tile.terrain, best.score])
+	# 對照：普通 leader — 新 state，同場景
+	var state2 := WorldState.new()
+	state2.world = WorldData.new()
+	var meek_team := _mk_team_with_meek_leader(state2, Vector2i(0, 0))
+	_force_gold_mountain(state2, Vector2i(3, 0))
+	var plains_t2 := HexTileData.new()
+	plains_t2.tile_id = 0 * 1000 + 3; plains_t2.tile_pos = Vector2i(0, 3)
+	plains_t2.terrain = "plains"; plains_t2.productivity = 1.2
+	state2.world.tiles[plains_t2.tile_id] = plains_t2
+	var fai2 := FactionAISystem.new()
+	var best2: Dictionary = fai2._evaluate_new_outpost_location(state2, meek_team)
+	if not best2.is_empty():
+		assert(best2.tile.terrain != "mountain", "[g1a] 普通 leader 竟選含礦山(破稀有), 選了 %s (score=%.0f)" % [best2.tile.terrain, best2.score])
+	print("[g1a] mining site OK")
+
+func _mk_produce_team_on(state: WorldState, pos: Vector2i) -> TeamData:
+	# helper: 建 PRODUCE 隊駐指定 pos，讓 outpost 有生產人力
+	var team := TeamData.new()
+	team.team_id = 800; team.tile_pos = pos; team.faction_id = -1
+	team.tags.append(TeamData.TAG_PRODUCE)
+	_seed_pop(team, 10)
+	var ldr := PersonData.new(); ldr.id = 8000; ldr.team_id = 800
+	ldr.values["貪婪"] = 0.8; ldr.values["野心"] = 0.6
+	state.persons[8000] = ldr; team.leader_id = 8000
+	state.teams[800] = team
+	return team
+
+func _team_coin_total(state: WorldState) -> float:
+	var total: float = 0.0
+	for tid in state.teams:
+		total += float(state.teams[tid].resources.get("coin", 0))
+	for tile_id in state.world.tiles:
+		total += float(state.world.tiles[tile_id].public_storage.get("coin", 0))
+	return total
+
+func _test_g1a_mining_to_coin() -> void:
+	# FIX5: 礦石 ONLY 在山地 resources/resource_cap，不預種 vault，
+	# 必須走完 mountain-ground-ore→vault→mint→coin 完整鏈。
+	print("--- G1a T3: 礦村採礦→鑄幣（真鏈驗證）---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var pos := Vector2i(2, 0)
+	# 建含金礦山 + L1 civilian outpost
+	var tile := _force_gold_mountain(state, pos)
+	# 確認：vault 無預種礦（真採礦鏈要求）
+	tile.public_storage.erase("ore_gold")
+	tile.public_storage.erase("ore_silver")
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	# 建生產隊駐留（提供生產人力，讓 collect + mint tick 跑）
+	var team := _mk_produce_team_on(state, pos)
+	tile.outpost_owner = team.team_id
+	# bootstrap food/material/tools 只，不給礦
+	team.resources["food"] = 500.0
+	team.resources["material"] = 200.0
+	team.resources["tools"] = 20.0
+	# 建立 faction（讓 _evaluate_infrastructure 能用 faction.leader_team_id）
+	state.create_faction(team.team_id)
+	var coin0: float = _team_coin_total(state)
+	# 用 player_pos = pos 讓 mining tile 在近區（才跑 outpost tick + collect）
+	var runner := SimRunner.new()
+	# 跑 6000 ticks（約 25 天）——採礦需幾天累積 >10 ore 才觸發 mint 建造
+	for _i in range(6000):
+		runner.advance_tick(state, pos)
+	# 中間斷言 1：礦石必須已從 mountain 採進 vault（resource_cap 初始 50 → 有採集才使 vault>0）
+	var vault_ore: float = float(tile.public_storage.get("ore_gold", 0)) \
+		+ float(tile.public_storage.get("ore_silver", 0))
+	var ground_ore: float = float(tile.resources.get("ore_gold", 0)) \
+		+ float(tile.resources.get("ore_silver", 0))
+	var ore_cap_total: float = float(tile.resource_cap.get("ore_gold", 0)) \
+		+ float(tile.resource_cap.get("ore_silver", 0))
+	# 礦石被採代表 ground_ore < 初始 ore_cap（50），或 vault > 0
+	assert(vault_ore > 0.0 or ground_ore < ore_cap_total, \
+		"[g1a] 礦石未被採集: vault=%.0f ground=%.0f cap=%.0f" % [vault_ore, ground_ore, ore_cap_total])
+	# 最終斷言：mint 建成 OR coin 增加（鏈末端）
+	var coin_delta: float = _team_coin_total(state) - coin0
+	assert(tile.mint_level > 0 or coin_delta > 0, \
+		"[g1a] 礦村未鑄幣: mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
+		[tile.mint_level, coin_delta, vault_ore])
+	print("[g1a] mining→coin OK mint_level=%d coin_delta=%.0f vault_ore=%.0f" % \
+		[tile.mint_level, coin_delta, vault_ore])
+
+func _test_g1a_mining_food_supply() -> void:
+	print("--- G1a T4: 礦村外部供糧(food buy) ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var pos := Vector2i(2, 0)
+	var tile := _force_gold_mountain(state, pos)
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	var team := _mk_produce_team_on(state, pos)
+	tile.outpost_owner = team.team_id
+	team.resources["food"] = 30.0   # 低糧(1.25天) → 應觸發 food buy(gate=4天)
+	team.resources["coin"] = 200.0  # 有 coin 可買
+	var os := OrderSystem.new()
+	os.tick_team_orders(state, team)
+	var has_food_buy := false
+	for o in team.active_orders:
+		if o["kind"] == "buy" and o["res"] == "food":
+			has_food_buy = true
+	assert(has_food_buy, "[g1a] 礦村低糧未發 food buy 單（active_orders=%s）" % str(team.active_orders))
+	print("[g1a] mining food supply OK (active_orders=%d)" % team.active_orders.size())
+
+func _test_g1a_construct_zombie_recovery() -> void:
+	# FIX3：CONSTRUCT 子隊抵達後 begin_subteam_construction 失敗（tile 已佔）
+	# → 子隊在 move_target=(-1,-1)、task=TASK_CONSTRUCT 狀態卡住
+	# → CONSTRUCT_TRANSIT_TIMEOUT 後應 release + merge_queue 完成恢復
+	print("--- G1a T5: CONSTRUCT zombie 恢復 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var target_pos := Vector2i(5, 5)
+	# target tile 已有 outpost（start_build 會失敗）
+	var target_tile := HexTileData.new()
+	target_tile.tile_id = 5 * 1000 + 5; target_tile.tile_pos = target_pos
+	target_tile.terrain = "plains"; target_tile.outpost_type = "civilian"; target_tile.outpost_level = 1
+	state.world.tiles[target_tile.tile_id] = target_tile
+	# 母隊
+	var parent := TeamData.new(); parent.team_id = 200; parent.tile_pos = target_pos
+	parent.faction_id = 10
+	_seed_pop(parent, 12)
+	var p_ldr := PersonData.new(); p_ldr.id = 2000; p_ldr.team_id = 200
+	state.persons[2000] = p_ldr; parent.leader_id = 2000
+	state.teams[200] = parent
+	# 子隊：TASK_CONSTRUCT + move_target=(-1,-1)（模擬已抵達但 start_build 失敗）
+	var sub := TeamData.new(); sub.team_id = 201; sub.tile_pos = target_pos
+	sub.faction_id = 10; sub.parent_team_id = 200
+	sub.current_task = TeamData.TASK_CONSTRUCT
+	sub.move_target = Vector2i(-1, -1)
+	# task_start_tick 設為很久以前（超過 10 天 CONSTRUCT_TRANSIT_TIMEOUT）
+	sub.task_start_tick = -(11 * WorldState.TICKS_PER_DAY)
+	_seed_pop(sub, 4)
+	var s_ldr := PersonData.new(); s_ldr.id = 2001; s_ldr.team_id = 201
+	state.persons[2001] = s_ldr; sub.leader_id = 2001
+	sub.tags = [TeamData.TAG_SUBTEAM]
+	parent.subteam_ids = [201]
+	state.teams[201] = sub
+	# 呼叫 _evaluate_subteam 一次（單步驗證恢復邏輯）
+	var merge_queue: Array = []
+	FactionAISystem.new()._evaluate_subteam(state, sub, merge_queue)
+	# 斷言：子隊被推入 merge_queue 或 task 已 release
+	assert(merge_queue.has(201) or sub.current_task == TeamData.TASK_IDLE, \
+		"[g1a] CONSTRUCT zombie 子隊未恢復: task=%s merge_queue=%s" % [sub.current_task, str(merge_queue)])
+	print("[g1a] CONSTRUCT zombie 恢復 OK (merged=%s task=%s)" % [str(merge_queue.has(201)), sub.current_task])

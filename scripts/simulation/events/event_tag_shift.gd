@@ -21,6 +21,8 @@ func execute(state: WorldState, team: TeamData) -> Array:
 
 func _should_gain_military(state: WorldState, team: TeamData) -> bool:
 	if team.tags.has("軍隊"): return false
+	# 子隊（建造/安頓/升級）不得切換軍隊 tag：會破壞生產身份 + 解鎖不應有的攻擊路徑。
+	if team.tags.has(TeamData.TAG_SUBTEAM): return false
 	var lp = state.persons.get(team.leader_id)
 	if lp == null: return false
 	return float(lp.values.get("好戰", 0.5)) > 0.7 \

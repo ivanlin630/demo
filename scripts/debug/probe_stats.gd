@@ -43,6 +43,8 @@ static func summary() -> void:
 	for k in peaks:
 		print("[ProbeSummary] %-28s peak= %.1f" % [k, float(peaks[k])])
 	# 衍生率
+	print("[ProbeSummary] 礦村建立次數  = %d" % int(counts.get("g1.mine_founded", 0)))
+	print("[ProbeSummary] 鑄幣次數     = %d" % int(counts.get("g1.mint", 0)))
 	print("[ProbeSummary] 訂單履約率   = %s" % _rate("g1.order_fulfilled", "g1.order_placed"))
 	print("[ProbeSummary] 套利命中率   = %s" % _rate("g1.arb_hit", "g1.arb_attempt"))
 	print("[ProbeSummary] scout 收斂率 = %s" % _rate("g3.scout_converge", "g3.scout_dispatch"))

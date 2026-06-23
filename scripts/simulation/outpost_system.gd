@@ -178,6 +178,7 @@ func tick_all(state: WorldState) -> void:
 			continue
 		_tick_construction(state, tile)
 
+
 # tile 上是否有 PRODUCE（居民）team（軍屯子隊同 tag）
 func _has_resident_on_tile(state: WorldState, tile: HexTileData) -> bool:
 	for tid in state.teams:
@@ -280,6 +281,11 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 				  "x": str(tile.tile_pos.x), "y": str(tile.tile_pos.y) })
 			print("[Outpost] Team%d 建成 %s（Lv%d）at (%d,%d)" % [
 				team.team_id, n, tile.outpost_level, tile.tile_pos.x, tile.tile_pos.y])
+			# G1a 探針：含礦山地 outpost 建成 → mine_founded（gold 或 silver）
+			# resource_cap 記初始礦量（永不清零），比 resources 更可靠（施工期已被採集可能 =0）
+			if tile.terrain == "mountain" and (float(tile.resource_cap.get("ore_gold", 0)) > 0.0 \
+					or float(tile.resource_cap.get("ore_silver", 0)) > 0.0):
+				Probe.bump("g1.mine_founded")
 			# C: NPC 建造子隊完工 → 就地安頓（脫離母團、加駐留 tag），outpost 持續存在
 			if team.parent_team_id != -1:
 				_auto_settle_builder(state, team, tile)
@@ -603,6 +609,16 @@ func get_outpost_name(type: String, level: int) -> String:
 # ──────── 輔助 ────────
 
 func _check_distance(state: WorldState, pos: Vector2i, type: String) -> bool:
+	# S2 礦村：civilian 且目標格 resource_cap 有礦 → 距離免疫（礦山位置不可選擇）。
+	# 條件限 type=="civilian" 防軍事 outpost / 玩家紮營繞過距離限制；
+	# 用 resource_cap（永不耗盡）而非 resources（採集後可能 =0）判礦脈存在。
+	if type == "civilian":
+		var target_tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+		var is_ore_mountain: bool = target_tile != null and target_tile.terrain == "mountain" \
+			and (float(target_tile.resource_cap.get("ore_gold", 0)) > 0.0 \
+				or float(target_tile.resource_cap.get("ore_silver", 0)) > 0.0)
+		if is_ore_mountain:
+			return true   # 礦村 tile：跳過距離限制（礦山位置不可選擇，強制允建）
 	for tile_id in state.world.tiles:
 		var t: HexTileData = state.world.tiles[tile_id]
 		if t.outpost_level == 0:

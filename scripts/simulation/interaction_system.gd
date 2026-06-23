@@ -426,6 +426,12 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 		return
 	if not f.member_team_ids.has(payer_id):
 		return
+	# S6 施工子隊豁免：建造/升級/擴建子隊是 collector 自己的派遣隊，不得逆向抽稅
+	var _BUILDER_TASKS: Array = [TeamData.TASK_CONSTRUCT, TeamData.TASK_BUILD,
+		TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]
+	if payer.tags.has(TeamData.TAG_SUBTEAM) and payer.parent_team_id == collector_id \
+			and payer.current_task in _BUILDER_TASKS:
+		return
 	var payer_p = state.persons.get(payer.leader_id)
 	var base_rate: float = f.tribute_rate
 	if payer_p != null:
