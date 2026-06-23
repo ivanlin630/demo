@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 求裁(未決) — 他域遷入的協調語意:faction-goal 頂層 vs 個體人格驅動 + 主動開戰 feel
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 統一框架 arc 大推進總結（給藍圖）— 經濟活了+believability 守則達標+6魂驗fire;待你他域 ruling 解鎖剩餘
 ---
 

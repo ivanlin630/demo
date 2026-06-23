@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 知會 — 標記2(無凍死)達標;履約脫0機制活但 order_fulfilled unseeded 變異;標記1債仍欠
 ---
 
