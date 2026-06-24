@@ -852,6 +852,12 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # 不可派 → 試次佳(修凍死)
+		# 投靠玩家：走 forced_event（玩家決定收留），不自動 merge（對稱 + UX）
+		if opt == "投靠" and td.has("combat_target"):
+			var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
+			if pp != null and int(td["combat_target"]) == pp.team_id:
+				if _maybe_request_join_player(state, team):
+					return
 		team.current_option = opt   # 承諾追蹤實際派出
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
@@ -2234,6 +2240,20 @@ func _richest_member(state: WorldState, f) -> int:
 func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id and state.player_id != -1:
 		return
+	# 紮營到達結算（W1 hoist）：在 TASK_CAMP 途中，腳下若為無主可農地即立 crude camp + 釋放。
+	# 移到 unified gate 前 → unified 隊（引擎派 TASK_CAMP）到達亦能立營。不依賴 days_left，
+	# 對所有持 TASK_CAMP 隊成立；non-unified 隊行為不變（原即走到此）。
+	if team.current_task == TeamData.TASK_CAMP:
+		if establish_crude_camp(state, team):
+			TaskArbiter.release(team)
+			team.previous_task = ""
+			return
+		# 主動紮營到達目標格卻無法立營（該格已被占/變更）→ 釋放重評，避免凍結
+		# （invariant：進得去出得來；主動 camp 免糧恢復釋放，故須補此到達兜底）
+		if team.task_priority == TaskArbiter.PRIO_DISPATCH and team.tile_pos == team.move_target:
+			TaskArbiter.release(team)
+			team.previous_task = ""
+			return
 	if uses_unified(team):
 		return   # unified 隊求生改由 DecisionEngine 決(切片);舊系統不雙觸發
 	# S2 礦村：建造子隊在途或施工中（TASK_CONSTRUCT/TASK_BUILD + parent 存在）→ 豁免求生打斷。
@@ -2260,19 +2280,6 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	var food: float = ResourceSystem.effective_food(state, team)
 	var food_per_day: float = float(pop_eff) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	var days_left: float = food / maxf(food_per_day, 0.001)
-	# 紮營到達結算：在 TASK_CAMP 途中，腳下若為無主可農地即立 crude camp + 釋放（轉正常 collect）。
-	# 無現成 per-task 到達 hook，於此每輪求生評估檢查（plan Task 3 fallback）。
-	if team.current_task == TeamData.TASK_CAMP:
-		if establish_crude_camp(state, team):
-			TaskArbiter.release(team)
-			team.previous_task = ""
-			return
-		# 主動紮營到達目標格卻無法立營（該格已被占/變更）→ 釋放重評，避免凍結
-		# （invariant：進得去出得來；主動 camp 免糧恢復釋放，故須補此到達兜底）
-		if team.task_priority == TaskArbiter.PRIO_DISPATCH and team.tile_pos == team.move_target:
-			TaskArbiter.release(team)
-			team.previous_task = ""
-			return
 	# 已在 survival task：糧恢復(hysteresis)→ 釋放回 idle，讓建造/生產/攻擊接手
 	# （核心修：原本 early-return 永不釋放 → return_home/乞食 永久 p80 凍結）
 	# 例外：SoloAI 主動紮營（PRIO_DISPATCH）本就在不缺糧時觸發，不可被「糧足」釋放 →
