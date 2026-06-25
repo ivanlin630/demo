@@ -13452,7 +13452,7 @@ func _test_p1_loot_believability() -> void:
 
 func _test_p2a_survival_terms() -> void:
 	print("--- P2a survival term/weight ---")
-	# weight 人格分流（複用 _join_pref/_camp_pref 公式）
+	# weight 人格分流（DecisionTerms.weight 單一 owner；舊 _join_pref/_camp_pref 已刪）
 	var loyal := {"義氣": 0.9, "信義": 0.8, "求生欲": 0.7}
 	var ambitious := {"野心": 0.9, "統領": 0.8, "求生欲": 0.7}
 	var w_join: float = DecisionTerms.weight("join", loyal)
