@@ -16,6 +16,9 @@ const REGISTRY: Dictionary = {
 	"乞食":   [["beg_drive",  "beg"]],
 }
 
+# survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
+const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "投靠", "紮營", "乞食"]
+
 static func applicable(ctx: DecisionContext) -> Array:
 	var out: Array = []
 	for opt in REGISTRY:
@@ -29,10 +32,17 @@ static func applicable(ctx: DecisionContext) -> Array:
 				out.append(opt)   # bootstrap(無據點建新) + 升級(有據點) 皆候選 → 無據點生產隊不被困
 			"返家補給":
 				# 商隊 proactive 補給：糧低於 RESTOCK 且有家可回 → 回家補 carried(避 survival latch)。
-				if ctx.is_merchant and ctx.food_days < DecisionTerms.RESTOCK_DAYS and ctx.has_home_outpost:
+				# P2b-1 generalize：任何有家隊絕境(food<DESPERATION)→回家(保 non-unified 1037 熱路徑)。
+				if ctx.has_home_outpost and ( \
+						(ctx.is_merchant and ctx.food_days < DecisionTerms.RESTOCK_DAYS) \
+						or ctx.food_days < DecisionTerms.DESPERATION_DAYS):
 					out.append(opt)
-			"覓食", "survival":
-				out.append(opt)   # 恆候選（survival 靠權重，非守衛）
+			"覓食":
+				# P2b-1：viable-pop 守衛移入 applicable（舊 _trigger_survival forage 限 pop≤此值）。
+				if ctx.population <= FactionAISystem.FORAGE_VIABLE_POP:
+					out.append(opt)
+			"survival":
+				out.append(opt)   # 恆候選（FLEE 靠 threat 權重，非守衛）
 			"掠奪":
 				if ctx.has_weak_prey: out.append(opt)
 			"投靠":

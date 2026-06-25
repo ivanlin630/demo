@@ -65,6 +65,7 @@ func _initialize() -> void:
 	_test_survival_helpers()
 	_test_survival_decision_tree()
 	_test_survival_prefs()
+	_test_p2b1_rank_survival()
 	_test_find_unowned_farmable()
 	_test_crude_camp()
 	_test_npc_promote_via_training()
@@ -5203,6 +5204,59 @@ func _test_survival_prefs() -> void:
 	assert(fai._join_pref(honorable) > fai._join_pref(ferocious), "義氣者投靠 pref 較高")
 	assert(fai._camp_pref(ambitious) > fai._camp_pref(ferocious), "野心者紮營 pref 較高")
 	print("survival prefs OK")
+
+# === P2b-1 survival 選擇統一 helpers ===
+var _p2b1_tid: int = 700
+var _p2b1_pid: int = 7000
+
+# 有家絕境隊：pop>FORAGE_VIABLE_POP(排除覓食競爭)、food0、自有 outpost。
+func _mk_homed_desperate_team(state: WorldState, pos: Vector2i, tags: Array, values: Dictionary) -> TeamData:
+	var t := TeamData.new()
+	t.team_id = _p2b1_tid; _p2b1_tid += 1
+	t.tile_pos = pos
+	for tg in tags: t.tags.append(tg)
+	var l := PersonData.new(); l.id = _p2b1_pid; _p2b1_pid += 1
+	l.values = values.duplicate()
+	state.persons[l.id] = l; t.leader_id = l.id
+	_seed_pop(t, 20)   # > FORAGE_VIABLE_POP(15)：覓食不入榜
+	t.resources["food"] = 0.0
+	state.teams[t.team_id] = t
+	if not state.team_discovered.has(t.team_id): state.team_discovered[t.team_id] = []
+	# 自有遠端 outpost（_find_own_outpost 找 outpost_owner==team_id；本格非據點）
+	var op := pos + Vector2i(1, 0)
+	var tile := HexTileData.new(); tile.tile_pos = op
+	tile.outpost_level = 1; tile.outpost_owner = t.team_id
+	state.world.tiles[op.x * 1000 + op.y] = tile
+	return t
+
+# 無家絕境隊：pop>FORAGE_VIABLE_POP、food0、無 outpost。
+func _mk_homeless_desperate_team(state: WorldState, pos: Vector2i, tags: Array, values: Dictionary) -> TeamData:
+	var t := TeamData.new()
+	t.team_id = _p2b1_tid; _p2b1_tid += 1
+	t.tile_pos = pos
+	for tg in tags: t.tags.append(tg)
+	var l := PersonData.new(); l.id = _p2b1_pid; _p2b1_pid += 1
+	l.values = values.duplicate()
+	state.persons[l.id] = l; t.leader_id = l.id
+	_seed_pop(t, 20)
+	t.resources["food"] = 0.0
+	state.teams[t.team_id] = t
+	if not state.team_discovered.has(t.team_id): state.team_discovered[t.team_id] = []
+	return t
+
+func _test_p2b1_rank_survival() -> void:
+	print("--- P2b-1 rank_survival ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# (a) 返家補給 generalize：非商隊(軍隊)有家+絕境 → 返家補給 applicable
+	var soldier := _mk_homed_desperate_team(state, Vector2i(3,3), ["軍隊"], {"好戰":0.7})
+	var ranked: Array = DecisionEngine.rank_survival(state, soldier)
+	assert("返家補給" in ranked, "[p2b1] 非商隊絕境無返家補給 option")
+	# rank_survival 只回 survival 子集（無 貿易/生產/建設/駐守/survival(FLEE)）
+	for o in ranked:
+		assert(o in DecisionOptions.SURVIVAL_OPTION_SET, "[p2b1] rank_survival 含非 survival option %s" % o)
+	# (b) 有家絕境隊：返家補給 量級支配（restock_need 碾壓）
+	assert(ranked[0] == "返家補給", "[p2b1] 有家絕境隊首選非返家補給 = %s" % ranked[0])
+	print("[p2b1] rank_survival OK top=%s n=%d" % [ranked[0], ranked.size()])
 
 func _test_find_unowned_farmable() -> void:
 	print("--- 找無主可農地 ---")
@@ -12920,12 +12974,26 @@ func _test_merchant_restock() -> void:
 	assert(not ctx3.has_home_outpost, "前置:無家")
 	assert("返家補給" not in DecisionOptions.applicable(ctx3), "無家商隊不該返家補給(該走survival)")
 
-	# 非商隊(生產隊)糧低 → 無返家補給(返家補給限商隊)
+	# 非商隊(生產隊)絕境(food<DESPERATION)有家 → 返家補給 applicable
+	# （P2b-1 generalize：保 non-unified 1037 熱路徑；任何有家隊絕境皆返家）
 	var s4 := WorldState.new(); s4.world = WorldData.new()
 	var p := _mk_produce_team(s4, {"義氣": 0.6}, 0.0, true)  # 有家但 granary food=0
-	p.resources = {"food": 12.0}
-	assert("返家補給" not in DecisionOptions.applicable(DecisionContext.gather(s4, p)), \
-		"生產隊不走返家補給(原地,非商隊)")
+	p.resources = {"food": 12.0}   # pop5 → days=1.0 < DESPERATION(3)
+	var ctx4: DecisionContext = DecisionContext.gather(s4, p)
+	assert(ctx4.food_days < DecisionTerms.DESPERATION_DAYS and not ctx4.is_merchant, \
+		"前置:非商隊絕境 days=%.1f" % ctx4.food_days)
+	assert("返家補給" in DecisionOptions.applicable(ctx4), \
+		"非商隊絕境有家應返家補給(P2b-1 generalize 保熱路徑)")
+	# 非商隊輕飢(DESPERATION≤food<RESTOCK)有家 → 無返家補給(proactive 補給限商隊)
+	var s5 := WorldState.new(); s5.world = WorldData.new()
+	var p5 := _mk_produce_team(s5, {"義氣": 0.6}, 0.0, true)
+	p5.resources = {"food": 48.0}   # pop5 → days=4.0 ∈ [DESPERATION 3, RESTOCK 5)
+	var ctx5: DecisionContext = DecisionContext.gather(s5, p5)
+	assert(ctx5.food_days >= DecisionTerms.DESPERATION_DAYS \
+			and ctx5.food_days < DecisionTerms.RESTOCK_DAYS and not ctx5.is_merchant, \
+		"前置:非商隊輕飢 days=%.1f" % ctx5.food_days)
+	assert("返家補給" not in DecisionOptions.applicable(ctx5), \
+		"非商隊輕飢不proactive返家(返家 proactive 限商隊；非商隊僅絕境)")
 	print("merchant restock OK")
 
 func _test_survival_magnitude() -> void:

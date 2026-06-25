@@ -7,6 +7,7 @@ class_name DecisionContext
 
 var leader_values: Dictionary = {}
 var food_days: float = 0.0
+var population: int = 0
 var has_goods: bool = false
 var has_arb: bool = false
 var team_strength: float = 0.0
@@ -33,6 +34,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.leader_values = ldr.values.duplicate() if ldr != null else {}
 	var ef: float = ResourceSystem.effective_food(state, team)
 	c.food_days = ef / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	c.population = team.population
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
 	c.has_arb = not OrderSystem.new().best_arbitrage_order(state, team).is_empty()
 	c.team_strength = NpcCombatSystem.new().team_strength(state, team.team_id)
