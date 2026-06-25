@@ -12,6 +12,14 @@
 
 - **mint coin-cap 燒 ore off-ledger（pre-existing，G1a 首 fire 才浮現，2026-06-23 opus 終審揭）**：`outpost_system.gd:~228/241` `_tick_mint` 用 `minf(cur_coin+coin_added, cap)` clamp coin 到 storage cap——若鑄幣 tile 的 coin vault 飽和，ore 被消耗但 coin 被 clamp 截掉 → coin_eq 損失（ore 燒掉沒換 coin）。G1a 前 mint 從沒 fire 故未觸；G1a 讓 mint 真 fire → 長跑可能浮現。**小修**：coin 滿 cap 時跳過/部分消耗 ore（別燒）。非阻塞（現 run delta=0）。
 
+## 統一決策框架 / survival backlog（P2b-1 揭）
+
+- **attacker 輕飢 churn（pre-existing，P2b-1 world_sim 量測揭）**：~927 次/2yr 攻擊隊輕飢→`_evaluate_survival`→survival 評估無可派 option→`release`→idle→再攻 → churn。**非 P2b-1 引入**（baseline 927→after 932 幾乎不變）= 既有獨立問題。spec measure-first 把 1037 `[Survival]` 誤解為 return_home 熱路徑，實為此 churn 主導。**修向**：survival entry 對「無可派 option 之輕飢攻擊隊」早退不進 survival 評估 / 或攻擊 task 對輕飢更黏。待排序。
+- **restock_need 非距離感知（P2b-1 距離 nuance 丟失）**：舊 `_trigger_survival` home-path「遠 outpost(eta>5天)+殘忍/好戰→就近掠」隨委派移除（`返家補給` 一律返家）。loot 稀有(11/2yr)，影響小。**後補向**：`restock_need` 加距離衰減 → 遠家殘忍隊重獲就近掠傾向。
+- **survival 掠奪 option 無 G3d-1 confident_enough gate**：`掠奪` option（P1 建，P2b-1 沿用）的 `_find_weakest_prey` 只 has_belief 守衛，**未過 `confident_enough`**（invariants §決策風險 gate 列 survival loot 應 gate）。= 與舊 homeless loot parity（舊亦無 gate）、與舊 remote-loot Path1（有 gate，已隨 P2b-1 刪）不一致。後果：慎重 leader 絕境掠奪可能中假弱誘殺（無 scout 保護）。非 P2b-1 引入（P1 既存）。**修向**：`掠奪` applicable 或 to_task 前過 confident_enough（慎重者不確定→不選/scout）。
+- **`_evaluate_solo` survival 仍雙 owner（P2b-1 範圍外）**：solo AI 的 camp/join survival scoring（`faction_ai_system.gd:~1058-1099`）仍手寫，未統一進 `rank_survival`。P2b-1 只統一 `_trigger_survival`。並 P2b-2 或獨立塊清。
+- **`返家補給` 站家上 edge（P2b-1 generalize 擴大觸及）**：隊站自家(空)outpost 上絕境 → `返家補給` target=當前格 → return_home 原地。舊 Path1 同行為，未新增 latch，但 generalize 擴大觸及面 → 留意 world_sim 是否現原地空轉。
+
 ## G1a 礦村（鑄幣脈絡）backlog
 
 - **礦村稀有邊際**：非貪婪 leader 在無 in-range 平原勝 MIN_BUILD_SCORE 時，ore +35 仍可把含礦山推過建址下限 → 偶founds 礦村。可信（山是唯一選項）非守恆問題，稍寬「稀有」。量測註記。
