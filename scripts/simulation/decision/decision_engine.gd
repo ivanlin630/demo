@@ -25,6 +25,30 @@ static func rank(state: WorldState, team: TeamData) -> Array:
 	for e in scored: out.append(e["opt"])
 	return out
 
+# survival-class 子集排序（P2b-1：non-unified _trigger_survival 委派用）。
+# 同 rank()，但 applicable 過濾到 SURVIVAL_OPTION_SET；不寫 team.current_option
+# （non-unified 隊 current_option 由 faction_ai 非-survival 行為管，survival dispatch 不奪）。
+# 承諾慣性比對 team.current_task（non-unified 無 current_option 語意）。
+static func rank_survival(state: WorldState, team: TeamData) -> Array:
+	var ctx: DecisionContext = DecisionContext.gather(state, team)
+	var scored: Array = []
+	var idx: int = 0
+	for opt in DecisionOptions.applicable(ctx):
+		if opt not in DecisionOptions.SURVIVAL_OPTION_SET: continue
+		var u: float = 0.0
+		for tw in DecisionOptions.terms_of(opt):
+			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
+		if DecisionOptions.to_task(state, team, opt).get("task") == team.current_task:
+			u += COMMITMENT_BONUS
+		scored.append({"u": u, "i": idx, "opt": opt})
+		idx += 1
+	scored.sort_custom(func(a, b):
+		if a["u"] != b["u"]: return a["u"] > b["u"]
+		return a["i"] < b["i"])
+	var out: Array = []
+	for e in scored: out.append(e["opt"])
+	return out
+
 static func decide(state: WorldState, team: TeamData) -> String:
 	var r: Array = rank(state, team)
 	if r.is_empty(): return team.current_option

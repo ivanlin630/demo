@@ -65,6 +65,8 @@ func _initialize() -> void:
 	_test_survival_helpers()
 	_test_survival_decision_tree()
 	_test_survival_prefs()
+	_test_p2b1_rank_survival()
+	_test_p2b1_nonunified_survival_delegation()
 	_test_find_unowned_farmable()
 	_test_crude_camp()
 	_test_npc_promote_via_training()
@@ -5143,17 +5145,20 @@ func _test_survival_decision_tree() -> void:
 	fai._trigger_survival(s1, t1, "urgent")
 	assert(t1.current_task == TeamData.TASK_RETURN_HOME, "Path 1 應 return_home，實際=%s" % t1.current_task)
 	# (2) 殘忍 + 鄰弱 → 掠奪
+	# P2b-1：委派後 camp_drive/beg_drive 隨絕境放大、loot_drive 平坦 → 需隔離 loot 才測得人格傾向：
+	#   tile 標有主(排紮營) + prey 低糧(非 aid，排乞食) → 掠奪為唯一可派絕境 option。
 	var s2 := WorldState.new()
 	s2.world = WorldData.new()
 	s2.world.current_tick = 810
 	_fill_plains(s2, -1, 4, -1, 2)
+	for _t2 in s2.world.tiles: s2.world.tiles[_t2].outpost_owner = 7   # 標有主 → 排除紮營
 	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(0,0); _seed_pop(t2, 10); t2.resources["food"] = 0
 	var l2 := PersonData.new(); l2.id = 100; l2.values = { "殘忍": 0.7, "好戰": 0.5 }
 	s2.persons[100] = l2; t2.leader_id = 100
 	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(1,0); _seed_pop(prey, 3)
-	prey.resources["food"] = 50
+	prey.resources["food"] = 40   # ≤ pop×14=42 → 非 aid 目標(排乞食)；belief food_est≥20 → 可掠
 	s2.teams[0] = t2; s2.teams[1] = prey; s2.team_discovered[0] = [1]
-	BeliefSystem.record_claim(s2, 0, 1, 0, "親見", {"population_est": 3, "food_est": 50}, 1.0, false)  # G3-targeting：選擇讀 belief
+	BeliefSystem.record_claim(s2, 0, 1, 0, "親見", {"population_est": 3, "food_est": 40}, 1.0, false)  # G3-targeting：選擇讀 belief
 	fai._trigger_survival(s2, t2, "urgent")
 	assert(t2.current_task == TeamData.TASK_LOOT, "Path 2 應 掠奪，實際=%s" % t2.current_task)
 	# (3) 義氣 + 信義 → 投靠
@@ -5191,18 +5196,102 @@ func _test_survival_decision_tree() -> void:
 	print("Survival Task4 OK")
 
 func _test_survival_prefs() -> void:
-	print("--- 生存選項 pref ---")
-	var fai := FactionAISystem.new()
-	var ferocious := PersonData.new()
-	ferocious.values = {"殘忍": 0.9, "好戰": 0.8, "義氣": 0.1, "野心": 0.2, "求生欲": 0.5}
-	var honorable := PersonData.new()
-	honorable.values = {"殘忍": 0.1, "好戰": 0.1, "義氣": 0.9, "信義": 0.8, "野心": 0.2}
-	var ambitious := PersonData.new()
-	ambitious.values = {"殘忍": 0.2, "野心": 0.9, "統領": 0.6, "求生欲": 0.7, "義氣": 0.3}
-	assert(fai._loot_pref(ferocious) > fai._loot_pref(honorable), "兇者掠奪 pref 較高")
-	assert(fai._join_pref(honorable) > fai._join_pref(ferocious), "義氣者投靠 pref 較高")
-	assert(fai._camp_pref(ambitious) > fai._camp_pref(ferocious), "野心者紮營 pref 較高")
+	print("--- 生存選項人格分流（weight 單一 owner）---")
+	# P2b-1：pref helper 已刪，選擇傾向統一由 DecisionTerms.weight 表達（消雙 owner）。
+	var ferocious := {"殘忍": 0.9, "好戰": 0.8, "義氣": 0.1, "野心": 0.2, "求生欲": 0.5}
+	var honorable := {"殘忍": 0.1, "好戰": 0.1, "義氣": 0.9, "信義": 0.8, "野心": 0.2}
+	var ambitious := {"殘忍": 0.2, "野心": 0.9, "統領": 0.6, "求生欲": 0.7, "義氣": 0.3}
+	assert(DecisionTerms.weight("loot", ferocious) > DecisionTerms.weight("loot", honorable), "兇者掠奪 weight 較高")
+	assert(DecisionTerms.weight("join", honorable) > DecisionTerms.weight("join", ferocious), "義氣者投靠 weight 較高")
+	assert(DecisionTerms.weight("camp", ambitious) > DecisionTerms.weight("camp", ferocious), "野心者紮營 weight 較高")
 	print("survival prefs OK")
+
+# === P2b-1 survival 選擇統一 helpers ===
+var _p2b1_tid: int = 700
+var _p2b1_pid: int = 7000
+
+# 有家絕境隊：pop>FORAGE_VIABLE_POP(排除覓食競爭)、food0、自有 outpost。
+func _mk_homed_desperate_team(state: WorldState, pos: Vector2i, tags: Array, values: Dictionary) -> TeamData:
+	var t := TeamData.new()
+	t.team_id = _p2b1_tid; _p2b1_tid += 1
+	t.tile_pos = pos
+	for tg in tags: t.tags.append(tg)
+	var l := PersonData.new(); l.id = _p2b1_pid; _p2b1_pid += 1
+	l.values = values.duplicate()
+	state.persons[l.id] = l; t.leader_id = l.id
+	_seed_pop(t, 20)   # > FORAGE_VIABLE_POP(15)：覓食不入榜
+	t.resources["food"] = 0.0
+	state.teams[t.team_id] = t
+	if not state.team_discovered.has(t.team_id): state.team_discovered[t.team_id] = []
+	# 自有遠端 outpost（_find_own_outpost 找 outpost_owner==team_id；本格非據點）
+	var op := pos + Vector2i(1, 0)
+	var tile := HexTileData.new(); tile.tile_pos = op
+	tile.outpost_level = 1; tile.outpost_owner = t.team_id
+	state.world.tiles[op.x * 1000 + op.y] = tile
+	return t
+
+# 無家絕境隊：food0、無 outpost。pop 預設 20(>FORAGE_VIABLE_POP)；強鄰測傳小 pop。
+func _mk_homeless_desperate_team(state: WorldState, pos: Vector2i, tags: Array, values: Dictionary, pop: int = 20) -> TeamData:
+	var t := TeamData.new()
+	t.team_id = _p2b1_tid; _p2b1_tid += 1
+	t.tile_pos = pos
+	for tg in tags: t.tags.append(tg)
+	var l := PersonData.new(); l.id = _p2b1_pid; _p2b1_pid += 1
+	l.values = values.duplicate()
+	state.persons[l.id] = l; t.leader_id = l.id
+	_seed_pop(t, pop)
+	t.resources["food"] = 0.0
+	state.teams[t.team_id] = t
+	if not state.team_discovered.has(t.team_id): state.team_discovered[t.team_id] = []
+	return t
+
+func _test_p2b1_rank_survival() -> void:
+	print("--- P2b-1 rank_survival ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# (a) 返家補給 generalize：非商隊(軍隊)有家+絕境 → 返家補給 applicable
+	var soldier := _mk_homed_desperate_team(state, Vector2i(3,3), ["軍隊"], {"好戰":0.7})
+	var ranked: Array = DecisionEngine.rank_survival(state, soldier)
+	assert("返家補給" in ranked, "[p2b1] 非商隊絕境無返家補給 option")
+	# rank_survival 只回 survival 子集（無 貿易/生產/建設/駐守/survival(FLEE)）
+	for o in ranked:
+		assert(o in DecisionOptions.SURVIVAL_OPTION_SET, "[p2b1] rank_survival 含非 survival option %s" % o)
+	# (b) 有家絕境隊：返家補給 量級支配（restock_need 碾壓）
+	assert(ranked[0] == "返家補給", "[p2b1] 有家絕境隊首選非返家補給 = %s" % ranked[0])
+	print("[p2b1] rank_survival OK top=%s n=%d" % [ranked[0], ranked.size()])
+
+func _test_p2b1_nonunified_survival_delegation() -> void:
+	print("--- P2b-1 non-unified survival 委派 ---")
+	var fa := FactionAISystem.new()
+	# (a) 熱路徑：非 unified 有家絕境隊 → TASK_RETURN_HOME（返家補給）
+	var sa := WorldState.new(); sa.world = WorldData.new()
+	var homed := _mk_homed_desperate_team(sa, Vector2i(3,3), ["軍隊"], {"好戰":0.5})
+	fa._trigger_survival(sa, homed, "urgent")
+	assert(homed.current_task == TeamData.TASK_RETURN_HOME, \
+		"[p2b1] 有家絕境隊未返家 task=%s" % homed.current_task)
+	# (b) homeless 分流：殘忍 non-unified 隊 + 弱獵物(低糧→非aid) + 無可農地 → 掠奪
+	var sb := WorldState.new(); sb.world = WorldData.new()
+	_fill_plains(sb, 0, 4, 0, 4)
+	for _tb in sb.world.tiles: sb.world.tiles[_tb].outpost_owner = 7   # 標有主 → 排除紮營
+	var raider := _mk_homeless_desperate_team(sb, Vector2i(1,1), ["軍隊"], {"殘忍":0.9,"好戰":0.8})
+	var prey := TeamData.new(); prey.team_id = 990; prey.tile_pos = Vector2i(2,1); _seed_pop(prey, 3)
+	prey.resources["food"] = 30.0   # ≤ pop×14=42 → 非 aid；belief food_est≥20 → 可掠
+	sb.teams[990] = prey
+	sb.team_discovered[raider.team_id] = [990]
+	BeliefSystem.record_claim(sb, raider.team_id, 990, 0, "親見", \
+		{"population_est": 3, "food_est": 30}, 1.0, false)
+	fa._trigger_survival(sb, raider, "urgent")
+	assert(raider.current_task == TeamData.TASK_LOOT, \
+		"[p2b1] 殘忍 homeless 隊未掠奪 task=%s" % raider.current_task)
+	# (c) 義氣 homeless(小 pop) + 強鄰 → 投靠
+	var sc := WorldState.new(); sc.world = WorldData.new()
+	var joiner := _mk_homeless_desperate_team(sc, Vector2i(7,7), ["軍隊"], \
+		{"義氣":0.9,"信義":0.8,"求生欲":0.8}, 10)
+	_p2a_place_tile(sc, Vector2i(7,7))
+	_mk_strong_neighbor_team(sc, Vector2i(8,7), joiner)   # pop30 > 1.5×10 → 強鄰
+	fa._trigger_survival(sc, joiner, "urgent")
+	assert(joiner.current_task == TeamData.TASK_JOIN, \
+		"[p2b1] 義氣 homeless 隊未投靠 task=%s" % joiner.current_task)
+	print("[p2b1] non-unified survival delegation OK")
 
 func _test_find_unowned_farmable() -> void:
 	print("--- 找無主可農地 ---")
@@ -7628,8 +7717,11 @@ func _survival_corridor() -> WorldState:
 			state.world.tiles[x * 1000 + y] = tile
 	return state
 
+# P2b-1：舊 B 分支（遠 outpost + 殘忍 → 就近掠）已隨委派移除（restock_need 非距離感知）。
+# 新行為：有家絕境隊一律 返家補給 → return_home（距離 nuance 丟失，已知可接受；loot 稀有）。
+# backlog：「restock_need 距離衰減」可後補使遠家殘忍隊重獲就近掠傾向。
 func _test_survival_b_branch_far_outpost_loot() -> void:
-	print("--- Prosperity Task5: B 分支 遠 outpost + 殘忍 → 掠 ---")
+	print("--- Prosperity Task5: 遠 outpost + 殘忍 → 返家(P2b-1 距離 nuance 移除) ---")
 	var state := _survival_corridor()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 5)
@@ -7653,9 +7745,9 @@ func _test_survival_b_branch_far_outpost_loot() -> void:
 	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 1}, 1.0, false)  # G3d-1：親見確定 → gate 過
 	var fas = FactionAISystem.new()
 	fas._trigger_survival(state, team, "urgent")
-	assert(team.current_task == TeamData.TASK_LOOT, "遠 outpost + 殘忍 應 TASK_LOOT，實際=%s" % team.current_task)
-	assert(team.move_target == Vector2i(2, 0), "move_target 應指向 prey tile，實際=%s" % str(team.move_target))
-	print("Prosperity Task5 OK")
+	assert(team.current_task == TeamData.TASK_RETURN_HOME, "遠 outpost 絕境 應 返家(委派 restock_need 支配)，實際=%s" % team.current_task)
+	assert(team.move_target == Vector2i(26, 0), "move_target 應指向 own outpost，實際=%s" % str(team.move_target))
+	print("Prosperity Task5 OK (距離 nuance 移除 → 返家)")
 
 func _test_survival_b_branch_near_outpost_return() -> void:
 	print("--- Prosperity Task5b: 近 outpost → 回家 ---")
@@ -12920,12 +13012,26 @@ func _test_merchant_restock() -> void:
 	assert(not ctx3.has_home_outpost, "前置:無家")
 	assert("返家補給" not in DecisionOptions.applicable(ctx3), "無家商隊不該返家補給(該走survival)")
 
-	# 非商隊(生產隊)糧低 → 無返家補給(返家補給限商隊)
+	# 非商隊(生產隊)絕境(food<DESPERATION)有家 → 返家補給 applicable
+	# （P2b-1 generalize：保 non-unified 1037 熱路徑；任何有家隊絕境皆返家）
 	var s4 := WorldState.new(); s4.world = WorldData.new()
 	var p := _mk_produce_team(s4, {"義氣": 0.6}, 0.0, true)  # 有家但 granary food=0
-	p.resources = {"food": 12.0}
-	assert("返家補給" not in DecisionOptions.applicable(DecisionContext.gather(s4, p)), \
-		"生產隊不走返家補給(原地,非商隊)")
+	p.resources = {"food": 12.0}   # pop5 → days=1.0 < DESPERATION(3)
+	var ctx4: DecisionContext = DecisionContext.gather(s4, p)
+	assert(ctx4.food_days < DecisionTerms.DESPERATION_DAYS and not ctx4.is_merchant, \
+		"前置:非商隊絕境 days=%.1f" % ctx4.food_days)
+	assert("返家補給" in DecisionOptions.applicable(ctx4), \
+		"非商隊絕境有家應返家補給(P2b-1 generalize 保熱路徑)")
+	# 非商隊輕飢(DESPERATION≤food<RESTOCK)有家 → 無返家補給(proactive 補給限商隊)
+	var s5 := WorldState.new(); s5.world = WorldData.new()
+	var p5 := _mk_produce_team(s5, {"義氣": 0.6}, 0.0, true)
+	p5.resources = {"food": 48.0}   # pop5 → days=4.0 ∈ [DESPERATION 3, RESTOCK 5)
+	var ctx5: DecisionContext = DecisionContext.gather(s5, p5)
+	assert(ctx5.food_days >= DecisionTerms.DESPERATION_DAYS \
+			and ctx5.food_days < DecisionTerms.RESTOCK_DAYS and not ctx5.is_merchant, \
+		"前置:非商隊輕飢 days=%.1f" % ctx5.food_days)
+	assert("返家補給" not in DecisionOptions.applicable(ctx5), \
+		"非商隊輕飢不proactive返家(返家 proactive 限商隊；非商隊僅絕境)")
 	print("merchant restock OK")
 
 func _test_survival_magnitude() -> void:
@@ -13346,7 +13452,7 @@ func _test_p1_loot_believability() -> void:
 
 func _test_p2a_survival_terms() -> void:
 	print("--- P2a survival term/weight ---")
-	# weight 人格分流（複用 _join_pref/_camp_pref 公式）
+	# weight 人格分流（DecisionTerms.weight 單一 owner；舊 _join_pref/_camp_pref 已刪）
 	var loyal := {"義氣": 0.9, "信義": 0.8, "求生欲": 0.7}
 	var ambitious := {"野心": 0.9, "統領": 0.8, "求生欲": 0.7}
 	var w_join: float = DecisionTerms.weight("join", loyal)

@@ -30,10 +30,8 @@ const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed 
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
 const SURVIVAL_TASKS: Array = [TeamData.TASK_RETURN_HOME, TeamData.TASK_BEG, TeamData.TASK_JOIN, TeamData.TASK_FORAGE, TeamData.TASK_CAMP]
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
-# desperation × values：warning 用個性門檻；urgent ×gate_mult=0 解閘（人人有活路）
-const LOOT_GATE: float = 0.55   # TEST VALUE
-const JOIN_GATE: float = 0.55   # TEST VALUE
-const CAMP_GATE: float = 0.50   # TEST VALUE
+# P2b-1：LOOT_GATE/JOIN_GATE/CAMP_GATE + _loot_pref/_join_pref/_camp_pref 已刪
+# （survival 選擇統一委派 DecisionEngine.rank_survival → DecisionTerms weight，消雙 owner）
 const SOLO_COMMITMENT_BONUS: float = 0.15   # TEST VALUE — SoloAI 慣性加成（止 flip-flop，非鎖死）
 const CRUDE_CAMP_FOOD_SEED: float = 40.0   # TEST VALUE — 紮營種子糧（+同抬 cap）
 # stuck: task 仍是進攻型但 move_target 已被 movement 清掉（off-map / 無路徑）→ 視為 idle 允許重評
@@ -2316,22 +2314,6 @@ func try_hunt_predator(state: WorldState, team: TeamData) -> bool:
 	NpcCombatSystem.new().start_combat(state, team.team_id, bid)
 	return true
 
-# 生存選項個性傾向（0~1），values 線性組合（非決策樹）。TEST VALUE 權重待量測。
-func _loot_pref(leader: PersonData) -> float:
-	return clampf(float(leader.values.get("殘忍", 0.5)) * 0.5
-		+ float(leader.values.get("好戰", 0.5)) * 0.3
-		+ float(leader.values.get("貪婪", 0.5)) * 0.2, 0.0, 1.0)
-
-func _join_pref(leader: PersonData) -> float:
-	return clampf(float(leader.values.get("義氣", 0.5)) * 0.4
-		+ float(leader.values.get("信義", 0.5)) * 0.3
-		+ float(leader.values.get("求生欲", 0.5)) * 0.3, 0.0, 1.0)
-
-func _camp_pref(leader: PersonData) -> float:
-	return clampf(float(leader.values.get("野心", 0.5)) * 0.4
-		+ float(leader.values.get("統領", 0.0)) * 0.3
-		+ float(leader.values.get("求生欲", 0.5)) * 0.3, 0.0, 1.0)
-
 # 找本格+鄰格 無主(owner==-1, level==0) 可農(plains/forest) tile；無 → (-1,-1)。
 func _find_unowned_farmable_tile(state: WorldState, team: TeamData) -> Vector2i:
 	var dirs: Array = [Vector2i.ZERO, Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1),
@@ -2387,94 +2369,36 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			team.previous_task = ""
 			return
 
-	# Path 1: 有 own outpost → 回家（B 分支：遠 outpost + 殘忍/好戰 → 就近掠）
-	var own_pos: Vector2i = _find_own_outpost(state, team)
-	if own_pos != Vector2i(-1, -1):
-		var own_eta_days: float = float(_estimate_eta_to(state, team, own_pos)) / 240.0
-		var ferocity_ok: bool = (
-			float(leader.values.get("殘忍", 0.5)) > 0.5
-			or float(leader.values.get("好戰", 0.5)) > 0.6
-		)
-		if own_eta_days > 5.0 and ferocity_ok:
-			var prey_id: int = _find_weakest_prey(state, team)
-			# G3d-1 風險 gate：掠食弱目標前驗把握；慎重者面對矛盾情報→落回其他絕境路徑（回家），不凍結
-			var _scaution: float = float(leader.values.get("慎重", 0.5))
-			if prey_id != -1 and BeliefSystem.confident_enough(state, team.team_id, prey_id, _scaution):
-				# 同上：combat_target 不預設，到達由 interaction 起戰
-				if TaskArbiter.try_set(state, team, TeamData.TASK_LOOT,
-						state.teams[prey_id].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
-					team.prosperity_target_id = prey_id
-					print("[SurvivalLoot] team=Team%d 遠 outpost(%.1f日) → 掠 Team%d" % [
-						team.team_id, own_eta_days, prey_id])
-				return
-		if severity == "warning" and not _should_abandon_current_task(team, own_pos):
-			team.previous_task = ""
+	# === 委派 engine survival-option scoring（單一 owner = DecisionTerms/DecisionOptions）===
+	# 取代舊手寫 desperation×values branch（Path1 return/remote-loot + homeless loot/join/camp
+	# + fallback forage/beg）。選擇全經 rank_survival → DecisionTerms weight × drive。
+	# severity 不再對選擇加 gate（食物量級由 drive 自然表達）；entry gate(_evaluate_survival)
+	# 仍用 WARNING/URGENCY 判何時進。承諾比對 current_task（non-unified 無 current_option 語意）。
+	for opt in DecisionEngine.rank_survival(state, team):
+		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		var tgt: Vector2i = td["target"]
+		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+			continue   # finder 撲空（無可派目標）→ 試次佳 option
+		# 投靠對象是玩家隊 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge（同 P2a W2）
+		if opt == "投靠" and td.has("combat_target"):
+			var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
+			if pp != null and int(td["combat_target"]) == pp.team_id:
+				if _maybe_request_join_player(state, team):
+					return
+		if TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival"):
+			if td.has("combat_target"):
+				team.combat_target = int(td["combat_target"])
+			match opt:   # 保留分流診斷 marker（world_sim 量測 homeless 分流）
+				"掠奪": print("[SurvivalLoot] team=Team%d → 掠 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
+				"投靠": print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
+				"紮營": print("[SurvivalCamp] team=Team%d → 紮營 @(%d,%d)" % [team.team_id, tgt.x, tgt.y])
+				"覓食": print("[SurvivalForage] team=Team%d pop=%d → 覓食 @(%d,%d)" % [team.team_id, team.population, tgt.x, tgt.y])
 			return
-		TaskArbiter.try_set(state, team, TeamData.TASK_RETURN_HOME, own_pos,
-			TaskArbiter.PRIO_SURVIVAL, "survival")
-		return
-
-	# === desperation × values 分流（取代舊 Path 2/3 + 併 3.4/3.5/4）===
-	# warning：個性門檻把關（pref ≥ *_GATE 才走）；urgent：gate=0 解閘，人人有活路。
-	var gate: float = 1.0 if severity == "warning" else 0.0
-
-	var options: Array = []   # [{pref, gate_min, kind}]
-	options.append({"pref": _loot_pref(leader), "gate_min": LOOT_GATE, "kind": "loot"})
-	options.append({"pref": _join_pref(leader), "gate_min": JOIN_GATE, "kind": "join"})
-	options.append({"pref": _camp_pref(leader), "gate_min": CAMP_GATE, "kind": "camp"})
-	options.sort_custom(func(a, b): return a["pref"] > b["pref"])
-
-	for opt in options:
-		if opt["pref"] < opt["gate_min"] * gate:
-			continue   # 個性門檻未過（warning）；urgent gate=0 → 必過
-		match opt["kind"]:
-			"loot":
-				var prey_id: int = _find_weakest_prey(state, team)
-				if prey_id != -1 and TaskArbiter.try_set(state, team, TeamData.TASK_LOOT,
-						state.teams[prey_id].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
-					team.combat_target = prey_id
-					print("[SurvivalLoot] team=Team%d → 掠 Team%d" % [team.team_id, prey_id])
-					return
-			"join":
-				var ally_id: int = _find_strong_neighbor(state, team)
-				if ally_id == -1:
-					continue
-				# 投靠對象是玩家隊且同格 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge
-				var p_join: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
-				if p_join != null and ally_id == p_join.team_id:
-					if _maybe_request_join_player(state, team):
-						return
-				if TaskArbiter.try_set(state, team, TeamData.TASK_JOIN,
-						state.teams[ally_id].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
-					team.combat_target = ally_id
-					print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, ally_id])
-					return
-			"camp":
-				var camp_pos: Vector2i = _find_unowned_farmable_tile(state, team)
-				if camp_pos != Vector2i(-1, -1) and TaskArbiter.try_set(state, team,
-						TeamData.TASK_CAMP, camp_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
-					print("[SurvivalCamp] team=Team%d → 紮營 @(%d,%d)" % [
-						team.team_id, camp_pos.x, camp_pos.y])
-					return
-
-	# 墊底序：主動獵獸 → 覓食 → 乞食 → idle（不受 values gate，誰都能墊）
+	# 全不可派（無 spendable option）→ hunt fallback（無 TASK 不能 option 化，留 wrapper）→ release
 	if try_hunt_predator(state, team):
 		print("[BeastHunt] team=Team%d 主動獵腳下掠食者" % team.team_id)
 		return
-	if team.population <= FORAGE_VIABLE_POP:
-		var forage_pos: Vector2i = _find_forage_tile(state, team)
-		if forage_pos != Vector2i(-1, -1) and TaskArbiter.try_set(state, team,
-				TeamData.TASK_FORAGE, forage_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
-			print("[SurvivalForage] team=Team%d pop=%d → 覓食 @(%d,%d)" % [
-				team.team_id, team.population, forage_pos.x, forage_pos.y])
-			return
-	var aid_target: int = _find_aid_target(state, team)
-	if aid_target != -1 and TaskArbiter.try_set(state, team, TeamData.TASK_BEG,
-			state.teams[aid_target].tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival"):
-		team.combat_target = aid_target
-		return
-	# 全失敗（無人可乞）→ 不空轉乞食 latch（原 bug：mt=-1 釘死 p80，餓死 husk）。
-	# 釋放回 idle → solo AI 覓食/遷徙/掠奪，或真無糧則 famine 收場。
+	# 全失敗 → 釋放回 idle（避空轉 latch；solo AI 接手或 famine 收場）
 	TaskArbiter.release(team)
 	team.previous_task = ""
 
