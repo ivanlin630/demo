@@ -11,6 +11,9 @@ const REGISTRY: Dictionary = {
 	"駐守":   [["settle_fit", "settle"]],
 	"返家補給":[["restock_need", "survival_pressure"]],
 	"掠奪":   [["loot_drive", "loot"]],
+	"投靠":   [["join_drive", "join"]],
+	"紮營":   [["camp_drive", "camp"]],
+	"乞食":   [["beg_drive",  "beg"]],
 }
 
 static func applicable(ctx: DecisionContext) -> Array:
@@ -32,6 +35,13 @@ static func applicable(ctx: DecisionContext) -> Array:
 				out.append(opt)   # 恆候選（survival 靠權重，非守衛）
 			"掠奪":
 				if ctx.has_weak_prey: out.append(opt)
+			"投靠":
+				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_strong_neighbor: out.append(opt)
+			"紮營":
+				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_farmable_tile \
+						and not ctx.has_own_outpost: out.append(opt)
+			"乞食":
+				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_aid_target: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -51,4 +61,16 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			var pid: int = FactionAISystem.new()._find_weakest_prey(state, team)
 			if pid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_LOOT, "target": state.teams[pid].tile_pos, "combat_target": pid}
+		"投靠":
+			var sn: int = FactionAISystem.new()._find_strong_neighbor(state, team)
+			if sn == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_JOIN, "target": state.teams[sn].tile_pos, "combat_target": sn}
+		"紮營":
+			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
+			if ft == Vector2i(-1,-1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_CAMP, "target": ft}
+		"乞食":
+			var aid: int = FactionAISystem.new()._find_aid_target(state, team)
+			if aid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_BEG, "target": state.teams[aid].tile_pos, "combat_target": aid}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

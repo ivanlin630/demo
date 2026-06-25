@@ -3869,6 +3869,12 @@ func _run_sim_test() -> void:
 	_test_p1_loot_term()
 	_test_p1_loot_option()
 	_test_p1_loot_believability()
+	# ── P2a 絕境 option（投靠/紮營/乞食） ──
+	_test_p2a_survival_terms()
+	_test_p2a_survival_options()
+	_test_p2a_camp_arrival()
+	_test_p2a_join_player_forced()
+	_test_p2a_survival_priority()
 
 	print("=== DONE ===")
 
@@ -13335,3 +13341,148 @@ func _test_p1_loot_believability() -> void:
 	assert(hungry.current_task != TeamData.TASK_LOOT,
 		"[p1] 餓隊竟做日常掠奪非求生 task=%s" % hungry.current_task)
 	print("[p1] loot believability OK (hungry→%s, not TASK_LOOT)" % hungry.current_task)
+
+# ════════════ P2a 絕境 option（投靠/紮營/乞食） ════════════
+
+func _test_p2a_survival_terms() -> void:
+	print("--- P2a survival term/weight ---")
+	# weight 人格分流（複用 _join_pref/_camp_pref 公式）
+	var loyal := {"義氣": 0.9, "信義": 0.8, "求生欲": 0.7}
+	var ambitious := {"野心": 0.9, "統領": 0.8, "求生欲": 0.7}
+	var w_join: float = DecisionTerms.weight("join", loyal)
+	var w_camp: float = DecisionTerms.weight("camp", ambitious)
+	assert(w_join > 0.7, "[p2a] join weight 太低 %.2f" % w_join)    # 0.9*0.4+0.8*0.3+0.7*0.3=0.81
+	assert(w_camp > 0.7, "[p2a] camp weight 太低 %.2f" % w_camp)    # 0.9*0.4+0.8*0.3+0.7*0.3=0.81
+	# drive：吃飽→0（健康隊不選）、危時>0
+	var ctx_full := DecisionContext.new()
+	ctx_full.food_days = 5.0; ctx_full.has_strong_neighbor = true
+	var ctx_crisis := DecisionContext.new()
+	ctx_crisis.food_days = 0.5; ctx_crisis.has_strong_neighbor = true
+	assert(DecisionTerms.eval("join_drive", ctx_full, "投靠") == 0.0, "[p2a] 健康隊 join_drive 非 0")
+	assert(DecisionTerms.eval("join_drive", ctx_crisis, "投靠") > 0.0, "[p2a] 危時 join_drive=0")
+	# beg < join（墊底）同 ctx
+	ctx_crisis.has_aid_target = true
+	assert(DecisionTerms.eval("beg_drive", ctx_crisis, "乞食") \
+		< DecisionTerms.eval("join_drive", ctx_crisis, "投靠"), "[p2a] beg 未低於 join")
+	print("[p2a] survival terms OK join_w=%.2f camp_w=%.2f" % [w_join, w_camp])
+
+# ── P2a helpers（manual WorldState 風格，仿 P1） ──
+
+func _p2a_place_tile(state: WorldState, pos: Vector2i, terrain: String = "plains") -> void:
+	var t := HexTileData.new()
+	t.tile_id = pos.x * 1000 + pos.y; t.tile_pos = pos; t.terrain = terrain
+	state.world.tiles[t.tile_id] = t
+
+# 無家深危 unified merchant 隊：food_days=1<DESPERATION、leader 給 values、本格 plains（可農）
+func _mk_unified_desperate_team(state: WorldState, pos: Vector2i, values: Dictionary) -> TeamData:
+	var tid: int = 700 + state.teams.size()
+	var t := TeamData.new(); t.team_id = tid; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = pos; t.leader_id = tid * 10
+	_seed_pop(t, 10)
+	t.resources = {"food": 24.0, "goods": 0.0, "coin": 0.0}   # 24/(10×2.4)=1 day < 3
+	state.teams[tid] = t
+	state.team_discovered[tid] = []
+	state.team_intel[tid] = {}
+	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
+	ldr.values = values
+	state.persons[ldr.id] = ldr
+	_p2a_place_tile(state, pos)
+	return t
+
+# 強鄰：pop>1.5×目標、入目標 team_discovered、rep 預設 0.5、可達、獨立 faction、food 低（非 aid 目標）
+func _mk_strong_neighbor_team(state: WorldState, pos: Vector2i, target: TeamData) -> TeamData:
+	var tid: int = 700 + state.teams.size()
+	var t := TeamData.new(); t.team_id = tid; t.tile_pos = pos; t.faction_id = -1
+	_seed_pop(t, 30)   # > 1.5×10
+	t.resources = {"food": 100.0}   # < pop×14=420 → 非 aid 目標
+	state.teams[tid] = t
+	_p2a_place_tile(state, pos)
+	if not state.team_discovered.has(target.team_id):
+		state.team_discovered[target.team_id] = []
+	state.team_discovered[target.team_id].append(tid)
+	return t
+
+# 玩家強隊：state.player_id + leader=player + strong
+func _mk_player_strong_team(state: WorldState, pos: Vector2i) -> TeamData:
+	var tid: int = 700 + state.teams.size()
+	var t := TeamData.new(); t.team_id = tid; t.tile_pos = pos; t.faction_id = -1
+	_seed_pop(t, 30)
+	t.resources = {"food": 100.0}
+	state.teams[tid] = t
+	_p2a_place_tile(state, pos)
+	var pl := PersonData.new(); pl.id = 99999; pl.team_id = tid
+	state.persons[99999] = pl
+	t.leader_id = 99999
+	state.player_id = 99999
+	return t
+
+# 給遠端自家據點（has_home_outpost=true；本格非據點 → has_own_outpost 仍 false）
+func _give_home_outpost(state: WorldState, team: TeamData, pos: Vector2i) -> void:
+	_p2a_place_tile(state, pos)
+	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
+	tile.outpost_level = 1
+	tile.outpost_owner = team.team_id
+
+func _test_p2a_survival_options() -> void:
+	print("--- P2a survival options ---")
+	# (a) 無家深危 + 義氣高 unified 隊 + 鄰強鄰 → 投靠
+	var state := WorldState.new(); state.world = WorldData.new()
+	var joiner := _mk_unified_desperate_team(state, Vector2i(2,2), {"義氣":0.9,"信義":0.8,"求生欲":0.8})
+	_mk_strong_neighbor_team(state, Vector2i(3,2), joiner)
+	var fa := FactionAISystem.new()
+	fa._decide_unified(state, joiner)
+	assert(joiner.current_task == TeamData.TASK_JOIN, "[p2a] 義氣隊未投靠 task=%s" % joiner.current_task)
+	assert(joiner.combat_target != -1, "[p2a] 投靠未設 combat_target")
+	# (b) 無家深危 + 野心高 + 鄰有無主可農地 + 無強鄰 → 紮營
+	var state2 := WorldState.new(); state2.world = WorldData.new()
+	var camper := _mk_unified_desperate_team(state2, Vector2i(6,6), {"野心":0.9,"統領":0.8,"求生欲":0.8})
+	fa._decide_unified(state2, camper)
+	assert(camper.current_task == TeamData.TASK_CAMP, "[p2a] 野心隊未紮營 task=%s" % camper.current_task)
+	# (c) 健康 unified 隊（food 足）+ 同情境 → 不選絕境 option
+	var state3 := WorldState.new(); state3.world = WorldData.new()
+	var healthy := _mk_unified_desperate_team(state3, Vector2i(2,2), {"義氣":0.9})
+	healthy.resources["food"] = 9999.0   # food_days >> DESPERATION
+	_mk_strong_neighbor_team(state3, Vector2i(3,2), healthy)
+	fa._decide_unified(state3, healthy)
+	assert(healthy.current_task != TeamData.TASK_JOIN, "[p2a] 健康隊竟投靠")
+	print("[p2a] survival options OK (joiner→JOIN, camper→CAMP, healthy→%s)" % healthy.current_task)
+
+func _test_p2a_camp_arrival() -> void:
+	print("--- P2a camp arrival hoist (W1) ---")
+	# unified 隊持 TASK_CAMP 站在無主可農地 → _evaluate_survival 立營（hoist 到 unified gate 前）
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fa := FactionAISystem.new()
+	var t := _mk_unified_desperate_team(state, Vector2i(1,1), {"野心":0.9})
+	t.current_task = TeamData.TASK_CAMP
+	t.move_target = Vector2i(1,1)
+	t.task_priority = TaskArbiter.PRIO_DISPATCH
+	fa._evaluate_survival(state, t)
+	var tile: HexTileData = state.world.tiles.get(1*1000 + 1)
+	assert(tile.outpost_owner == t.team_id, "[p2a] unified 隊 camp 到達未立營（W1 hoist 失敗）owner=%d" % tile.outpost_owner)
+	print("[p2a] camp arrival hoist OK")
+
+func _test_p2a_join_player_forced() -> void:
+	print("--- P2a join player forced (W2) ---")
+	# unified NPC 同格玩家投靠 → forced_event 非自動 merge
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fa := FactionAISystem.new()
+	var pteam := _mk_player_strong_team(state, Vector2i(2,2))
+	var npc := _mk_unified_desperate_team(state, Vector2i(2,2), {"義氣":0.9,"信義":0.8,"求生欲":0.8})
+	# npc 發現玩家隊（同格 → 可達 → strong neighbor）
+	state.team_discovered[npc.team_id].append(pteam.team_id)
+	fa._decide_unified(state, npc)
+	assert(not state.player_forced_event.is_empty(), "[p2a] 投靠玩家未寫 forced_event（W2）")
+	assert(state.player_forced_event.get("action") == "join_request", "[p2a] forced_event 非 join_request")
+	print("[p2a] join player forced OK")
+
+func _test_p2a_survival_priority() -> void:
+	print("--- P2a survival priority ---")
+	# 有家深危 unified 隊 → 返家補給量級支配（非 join/camp）
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fa := FactionAISystem.new()
+	var homed := _mk_unified_desperate_team(state, Vector2i(2,2), {"義氣":0.9})
+	_give_home_outpost(state, homed, Vector2i(0,0))
+	_mk_strong_neighbor_team(state, Vector2i(3,2), homed)
+	fa._decide_unified(state, homed)
+	assert(homed.current_task == TeamData.TASK_RETURN_HOME, "[p2a] 有家危隊未返家補給 task=%s" % homed.current_task)
+	print("[p2a] survival priority OK")

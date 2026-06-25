@@ -3,6 +3,9 @@ class_name DecisionTerms
 const RESTOCK_DAYS: float = 5.0   # TEST VALUE：商隊糧低於此 → proactive 返家補給(> WARNING 3)
 const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-trade 軟壓(能但很少)
 const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× weight(loot 0..1) → loot util ≈ 0..1，危時不碾壓 survival(≥2)
+const DESPERATION_DAYS: float = 3.0    # TEST VALUE — 食物低於此才入絕境 option（對齊 WARNING_DAYS）
+const DESPERATION_SCALE: float = 1.2   # TEST VALUE — 絕境 drive 量級（對齊 survival-class 域，不碾壓 forage/restock）
+const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略低於 join/camp）
 
 # 統一決策引擎：term 函式庫 + w_term 人格映射。
 # eval：驅力強度（0..~1.5），term × opt 對應；不適用 opt 回 0。
@@ -37,6 +40,15 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"loot_drive":
 			if opt != "掠奪": return 0.0
 			return LOOT_DRIVE_BASE if ctx.has_weak_prey else 0.0   # TEST VALUE
+		"join_drive":
+			if opt != "投靠" or not ctx.has_strong_neighbor: return 0.0
+			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+		"camp_drive":
+			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
+			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+		"beg_drive":
+			if opt != "乞食" or not ctx.has_aid_target: return 0.0
+			return DESPERATION_SCALE * BEG_FLOOR_FACTOR * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"settle_fit":
@@ -62,4 +74,9 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"feud":              return 0.3 + float(v.get("好戰", 0.5)) * 0.5
 		"loot":              return float(v.get("殘忍", 0.5)) * 0.5 \
 			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("貪婪", 0.5)) * 0.2
+		"join":              return float(v.get("義氣", 0.5)) * 0.4 \
+			+ float(v.get("信義", 0.5)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
+		"camp":              return float(v.get("野心", 0.5)) * 0.4 \
+			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
+		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		_:                   return 0.5
