@@ -3881,8 +3881,79 @@ func _run_sim_test() -> void:
 	_test_p3_faction_duty_term()
 	_test_p3_attack_option()
 	_test_p3_war_believability()
+	# ── 買糧 survival option（Phase 1） ──
+	_test_buyfood_term_and_option()
+	_test_buyfood_integration()
 
 	print("=== DONE ===")
+
+# ── 買糧 survival option（Phase 1）──
+func _test_buyfood_term_and_option() -> void:
+	print("--- 買糧 term/option (Phase1) ---")
+	# (a) buyfood_drive：餓+有市集+有 specie → >0；無 specie → 0；近市集 util > 遠市集
+	var near := DecisionContext.new()
+	near.food_days = 0.5; near.has_food_market = true; near.has_specie = true; near.food_market_dist = 1
+	var far := DecisionContext.new()
+	far.food_days = 0.5; far.has_food_market = true; far.has_specie = true; far.food_market_dist = 20
+	var poor := DecisionContext.new()
+	poor.food_days = 0.5; poor.has_food_market = true; poor.has_specie = false; poor.food_market_dist = 1
+	assert(DecisionTerms.eval("buyfood_drive", near, "買糧") > DecisionTerms.eval("buyfood_drive", far, "買糧"), \
+		"[buyfood] 近市集 util 未高於遠（旅費折扣失效）")
+	assert(DecisionTerms.eval("buyfood_drive", poor, "買糧") == 0.0, "[buyfood] 無錢竟買糧 drive>0")
+	# (b) weight：商隊 > 非商隊
+	assert(DecisionTerms.weight("buyfood", {"_is_merchant": true}) > DecisionTerms.weight("buyfood", {"_is_merchant": false}), \
+		"[buyfood] 商隊買糧 weight 未高於非商隊")
+	# (c) 買糧 in SURVIVAL_OPTION_SET（全隊化）
+	assert("買糧" in DecisionOptions.SURVIVAL_OPTION_SET, "[buyfood] 買糧未入 survival 子集")
+	print("[buyfood] term/option OK")
+
+func _buyfood_tile(s: WorldState, pos: Vector2i) -> HexTileData:
+	var key: int = pos.x * 1000 + pos.y
+	if not s.world.tiles.has(key):
+		var t := HexTileData.new(); t.tile_pos = pos; t.terrain = "plains"
+		s.world.tiles[key] = t
+	return s.world.tiles[key]
+
+# 餓商隊：TAG_MERCHANT、food 低使 food_days<3、pop>15(排覓食)、無 home、coin 參數。
+func _mk_starving_merchant(state: WorldState, pos: Vector2i, coin: float) -> TeamData:
+	var m := TeamData.new(); m.team_id = 0; m.tile_pos = pos; m.faction_id = -1
+	m.tags = [TeamData.TAG_MERCHANT]
+	var ldr := PersonData.new(); ldr.id = 1; ldr.team_id = 0
+	ldr.values = {"貪婪": 0.7, "好戰": 0.2, "殘忍": 0.1, "野心": 0.4}; ldr.loyalty = 0.5
+	state.persons[1] = ldr; m.leader_id = 1
+	_seed_pop(m, 20)
+	m.resources = {"food": 5.0, "coin": coin, "goods": 5.0}
+	state.teams[0] = m
+	return m
+
+# 鄰市集 outpost（level≥1 + 非該隊 owner + 售糧）
+func _mk_market_outpost(state: WorldState, pos: Vector2i) -> void:
+	var mkt := _buyfood_tile(state, pos)
+	mkt.outpost_level = 2; mkt.outpost_owner = 99
+	mkt.public_storage = {"food": 5000.0}
+	var seller := TeamData.new(); seller.team_id = 99; seller.tile_pos = pos; seller.faction_id = -1
+	var s_ldr := PersonData.new(); s_ldr.id = 990; s_ldr.team_id = 99
+	state.persons[990] = s_ldr; seller.leader_id = 990
+	_seed_pop(seller, 10); seller.resources = {"food": 5000.0, "coin": 100.0}
+	state.teams[99] = seller
+
+func _test_buyfood_integration() -> void:
+	print("--- 買糧 integration (Phase1) ---")
+	# (a) 餓商隊 + coin + 鄰市集 → 買糧（TASK_TRADE）
+	var s1 := WorldState.new(); s1.world = WorldData.new(); s1.player_id = -1
+	var fa := FactionAISystem.new()
+	var rich := _mk_starving_merchant(s1, Vector2i(0,0), 500.0)
+	_mk_market_outpost(s1, Vector2i(1,0))
+	fa._decide_unified(s1, rich)
+	assert(rich.current_task == TeamData.TASK_TRADE, "[buyfood] 餓商隊有錢未買糧 task=%s" % rich.current_task)
+	# (b) 無錢餓商隊 + 鄰市集 → 非買糧（落乞食/紮營）
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
+	var broke := _mk_starving_merchant(s2, Vector2i(0,0), 0.0)
+	broke.resources = {"food": 5.0, "coin": 0.0, "goods": 5.0}   # has_specie=false
+	_mk_market_outpost(s2, Vector2i(1,0))
+	fa._decide_unified(s2, broke)
+	assert(broke.current_task != TeamData.TASK_TRADE, "[buyfood] 無錢隊竟買糧 task=%s" % broke.current_task)
+	print("[buyfood] integration OK (rich=%s broke=%s)" % [rich.current_task, broke.current_task])
 
 func _test_probe_accumulator() -> void:
 	print("--- Probe 累計器 ---")

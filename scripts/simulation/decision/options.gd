@@ -15,10 +15,11 @@ const REGISTRY: Dictionary = {
 	"紮營":   [["camp_drive", "camp"]],
 	"乞食":   [["beg_drive",  "beg"]],
 	"攻擊":   [["faction_duty", "faction_duty"], ["attack_drive", "attack"]],
+	"買糧":   [["buyfood_drive", "buyfood"]],
 }
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
-const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "投靠", "紮營", "乞食"]
+const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "投靠", "紮營", "乞食", "買糧"]
 
 static func applicable(ctx: DecisionContext) -> Array:
 	var out: Array = []
@@ -56,6 +57,10 @@ static func applicable(ctx: DecisionContext) -> Array:
 			"攻擊":
 				# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
 				if ctx.faction_directive == "攻擊" and ctx.faction_attack_target != -1: out.append(opt)
+			"買糧":
+				# 餓 + 有市集 + 有錢 → 買糧候選（無錢=乞食真語意，不入）。
+				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market and ctx.has_specie:
+					out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -92,4 +97,9 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			var atid: int = FactionAISystem.new()._nearest_independent(state, team)
 			if atid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			return {"task": TeamData.TASK_ATTACK, "target": state.teams[atid].tile_pos, "combat_target": atid}
+		"買糧":
+			# 到最近市集 outpost 走既有 TASK_TRADE；到場 _resolve_market 餓隊 food local_value 高→買 food。
+			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost(state, team)
+			if mp == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_TRADE, "target": mp}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

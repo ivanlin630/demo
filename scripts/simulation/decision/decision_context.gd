@@ -27,6 +27,11 @@ var farmable_pos: Vector2i = Vector2i(-1, -1)
 var has_aid_target: bool = false
 var aid_target_id: int = -1
 var aid_target_pos: Vector2i = Vector2i(-1, -1)
+# 買糧（Phase 1）：最近市集 outpost + 是否有錢（specie）。
+var has_food_market: bool = false
+var food_market_pos: Vector2i = Vector2i(-1, -1)
+var food_market_dist: int = -1
+var has_specie: bool = false
 # P3 混合協調：派系 stakes directive（本塊只認 攻擊）。
 var faction_directive: String = ""
 var faction_attack_target: int = -1
@@ -74,6 +79,13 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	# `_` 前綴非人格值，既有 term match 不誤讀，leader_values 已 duplicate 不污染 PersonData）。
 	c.leader_loyalty = ldr.loyalty if ldr != null else 0.5
 	c.leader_values["_loyalty"] = c.leader_loyalty
+	# 買糧（Phase 1）：注入 _is_merchant（weight("buyfood") 讀，同 _loyalty 法）+ 最近市集 + 有錢。
+	c.leader_values["_is_merchant"] = c.is_merchant
+	var _mkt: Vector2i = _fa._nearest_market_outpost(state, team)
+	c.has_food_market = _mkt != Vector2i(-1, -1)
+	c.food_market_pos = _mkt
+	c.food_market_dist = _fa._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1
+	c.has_specie = float(team.resources.get("coin", 0)) > 0.0 or float(team.resources.get("goods", 0)) >= 10.0
 	# 派系 stakes directive（本塊只認 攻擊；後續擴徵收/外交/立國）。
 	if team.faction_id != -1:
 		var f = state.factions.get(team.faction_id)
