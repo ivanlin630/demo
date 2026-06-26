@@ -137,7 +137,7 @@ func _run() -> void:
 		print("  %-16s loy=%.2f 好戰=%.1f → task=%-8s attack_util=%.2f %s" % [
 			m["tag"], m["loy"], m["war"], _task(tt), u, "[參戰]" if atk else "[不參戰]"])
 		print("       [diag] faction_id=%d directive='%s' atk_target=%d discovered=%s 攻擊applic=%s" % [
-			tt.faction_id, ctx.faction_directive, ctx.faction_attack_target,
+			tt.faction_id, str(ctx.faction_stakes), ctx.faction_attack_target,
 			str(s.team_discovered.get(tt.team_id, [])), "攻擊" in applic])
 	print("  → 跟戰隊數 = %d / 4" % attackers)
 

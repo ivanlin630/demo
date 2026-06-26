@@ -9,6 +9,7 @@ const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略
 const FACTION_DUTY_DRIVE: float = 1.5   # TEST VALUE — stakes 協同量級（高壓日常 term，但 weight 受 loyalty 調=非無限）
 const DEFECT_AMBITION_K: float = 1.0    # TEST VALUE — 野心折損 faction_duty 權重斜率（脫軌逃閥）
 const ATTACK_DRIVE_BASE: float = 0.3    # TEST VALUE — 個人參戰基值；× attack weight(好戰/殘忍)=染色 HOW
+const STAKES_DRIVE_BASE: float = 0.3    # TEST VALUE — 徵收/外交 個人 drive 基值（沿用 ATTACK_DRIVE_BASE 值，獨立便調）
 const BUYFOOD_DIST_FULL: float = 6.0    # TEST VALUE — 買糧旅費折扣基準距離（≤此距離不折扣，遠則衰減）
 
 # 脫軌逃閥因子：忠誠 − 野心溢出折損（loy 高→1，低忠誠高野心→0）。
@@ -68,15 +69,25 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"faction_duty":
 			# 派系 stakes directive 響應（頂層決 WHETHER）；weight 受 loyalty 調=脫軌逃閥。
-			if opt == "攻擊" and ctx.faction_directive == "攻擊" and ctx.faction_attack_target != -1:
-				return FACTION_DUTY_DRIVE
+			match opt:
+				"攻擊": return FACTION_DUTY_DRIVE if ("攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1) else 0.0
+				"徵收": return FACTION_DUTY_DRIVE if ("徵收" in ctx.faction_stakes and ctx.faction_tribute_target != -1) else 0.0
+				"外交": return FACTION_DUTY_DRIVE if ("外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1) else 0.0
 			return 0.0
 		"attack_drive":
 			# 個人參戰 drive（人格染 HOW）；× attack weight=好戰/殘忍染色。受 loyalty 調=叛離者不參戰。
-			if opt != "攻擊" or ctx.faction_directive != "攻擊": return 0.0
+			if opt != "攻擊" or "攻擊" not in ctx.faction_stakes: return 0.0
 			var loy: float = float(ctx.leader_values.get("_loyalty", 0.5))
 			var amb: float = float(ctx.leader_values.get("野心", 0.5))
 			return ATTACK_DRIVE_BASE * _duty_factor(loy, amb)
+		"levy_drive":
+			# 徵收個人 drive（貪婪/好戰染 HOW）；受 loyalty 調=叛離者不徵收。
+			if opt != "徵收" or "徵收" not in ctx.faction_stakes: return 0.0
+			return STAKES_DRIVE_BASE * _duty_factor(float(ctx.leader_values.get("_loyalty", 0.5)), float(ctx.leader_values.get("野心", 0.5)))
+		"diplo_drive":
+			# 外交個人 drive（義氣/計謀染 HOW）；受 loyalty 調=叛離者不外交。
+			if opt != "外交" or "外交" not in ctx.faction_stakes: return 0.0
+			return STAKES_DRIVE_BASE * _duty_factor(float(ctx.leader_values.get("_loyalty", 0.5)), float(ctx.leader_values.get("野心", 0.5)))
 		"settle_fit":
 			# 駐守 = 純知足（settle 主導，無 ambition pull）→ 給高 base，使低野心 leader 選它
 			# 而非 建設/生產（後者另含 ambition_drive，野心 leader 才被推上去）。
@@ -99,6 +110,8 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"settle":            return float(v.get("義氣", 0.5)) * 0.5 + float(v.get("慎重", 0.5)) * 0.5
 		"feud":              return 0.3 + float(v.get("好戰", 0.5)) * 0.5
 		"faction_duty":      return _duty_factor(float(v.get("_loyalty", 0.5)), float(v.get("野心", 0.5)))
+		"levy":              return 0.2 + float(v.get("貪婪", 0.5)) * 0.5 + float(v.get("好戰", 0.5)) * 0.3
+		"diplo":             return 0.2 + float(v.get("義氣", 0.5)) * 0.5 + float(v.get("計謀", 0.5)) * 0.3
 		"loot":              return float(v.get("殘忍", 0.5)) * 0.5 \
 			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("貪婪", 0.5)) * 0.2
 		"join":              return float(v.get("義氣", 0.5)) * 0.4 \

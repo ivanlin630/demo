@@ -15,6 +15,8 @@ const REGISTRY: Dictionary = {
 	"紮營":   [["camp_drive", "camp"]],
 	"乞食":   [["beg_drive",  "beg"]],
 	"攻擊":   [["faction_duty", "faction_duty"], ["attack_drive", "attack"]],
+	"徵收":   [["faction_duty", "faction_duty"], ["levy_drive", "levy"]],
+	"外交":   [["faction_duty", "faction_duty"], ["diplo_drive", "diplo"]],
 	"買糧":   [["buyfood_drive", "buyfood"]],
 }
 
@@ -56,7 +58,13 @@ static func applicable(ctx: DecisionContext) -> Array:
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_aid_target: out.append(opt)
 			"攻擊":
 				# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
-				if ctx.faction_directive == "攻擊" and ctx.faction_attack_target != -1: out.append(opt)
+				if "攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1: out.append(opt)
+			"徵收":
+				# 派系 directive=徵收 且有更富 member target → 候選。
+				if "徵收" in ctx.faction_stakes and ctx.faction_tribute_target != -1: out.append(opt)
+			"外交":
+				# 派系 directive=外交 且有獨立鄰 target → 候選。
+				if "外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1: out.append(opt)
 			"買糧":
 				# 餓 + 有市集 + 有錢 → 買糧候選（無錢=乞食真語意，不入）。
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market and ctx.has_specie:
@@ -97,6 +105,18 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			var atid: int = FactionAISystem.new()._nearest_independent(state, team)
 			if atid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			return {"task": TeamData.TASK_ATTACK, "target": state.teams[atid].tile_pos, "combat_target": atid}
+		"徵收":
+			# 派系指定最富 member 徵貢（非戰，不設 combat_target）。排除自身（_richest_member 未排）。
+			var f4 = state.factions.get(team.faction_id)
+			if f4 == null: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			var rt: int = FactionAISystem.new()._richest_member(state, f4)
+			if rt == -1 or rt == team.team_id: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_TRIBUTE, "target": state.teams[rt].tile_pos}
+		"外交":
+			# 派系指定最近獨立隊外交（非戰，不設 combat_target）。
+			var dt: int = FactionAISystem.new()._nearest_independent(state, team)
+			if dt == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_DIPLOMACY, "target": state.teams[dt].tile_pos}
 		"買糧":
 			# 到最近市集 outpost 走既有 TASK_TRADE；到場 _resolve_market 餓隊 food local_value 高→買 food。
 			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost(state, team)
