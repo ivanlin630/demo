@@ -3877,6 +3877,10 @@ func _run_sim_test() -> void:
 	_test_p2a_camp_arrival()
 	_test_p2a_join_player_forced()
 	_test_p2a_survival_priority()
+	# ── P3 混合協調（faction stakes 攻擊 directive） ──
+	_test_p3_faction_duty_term()
+	_test_p3_attack_option()
+	_test_p3_war_believability()
 
 	print("=== DONE ===")
 
@@ -13592,3 +13596,119 @@ func _test_p2a_survival_priority() -> void:
 	fa._decide_unified(state, homed)
 	assert(homed.current_task == TeamData.TASK_RETURN_HOME, "[p2a] 有家危隊未返家補給 task=%s" % homed.current_task)
 	print("[p2a] survival priority OK")
+
+# ════════════ P3 混合協調（faction stakes 攻擊 directive） ════════════
+
+func _test_p3_faction_duty_term() -> void:
+	print("--- P3 faction_duty term/weight ---")
+	# faction_duty weight 脫軌逃閥：高忠誠→高、低忠誠+高野心→壓低
+	var loyal := {"野心": 0.5, "_loyalty": 0.9}
+	var rebel := {"野心": 0.9, "_loyalty": 0.2}
+	var w_loyal: float = DecisionTerms.weight("faction_duty", loyal)
+	var w_rebel: float = DecisionTerms.weight("faction_duty", rebel)
+	assert(w_loyal > 0.8, "[p3] 忠誠 faction_duty weight 太低 %.2f" % w_loyal)     # 0.9-0=0.9
+	assert(w_rebel < 0.3, "[p3] 叛逆 faction_duty weight 太高 %.2f" % w_rebel)     # 0.2-0.4=0(clamp)
+	# faction_duty drive：directive=攻擊+有 target → >0；else 0
+	var ctx_war := DecisionContext.new()
+	ctx_war.faction_directive = "攻擊"; ctx_war.faction_attack_target = 5
+	var ctx_peace := DecisionContext.new()
+	assert(DecisionTerms.eval("faction_duty", ctx_war, "攻擊") > 0.0, "[p3] 戰時 faction_duty drive=0")
+	assert(DecisionTerms.eval("faction_duty", ctx_peace, "攻擊") == 0.0, "[p3] 平時 faction_duty drive 非 0")
+	assert(DecisionTerms.eval("faction_duty", ctx_war, "貿易") == 0.0, "[p3] faction_duty 染到非攻擊 option")
+	print("[p3] faction_duty term OK loyal=%.2f rebel=%.2f" % [w_loyal, w_rebel])
+
+# ── P3 helpers（manual WorldState 風格，仿 P2a） ──
+
+# 統一隊 faction member：建/共用 faction 600、f.goals=goals、TAG_PRODUCE、leader 給 values+loyalty。
+# values 中 "_loyalty" 抽出設 ldr.loyalty（gather 再注入 leader_values["_loyalty"]）。
+func _mk_unified_faction_member(state: WorldState, pos: Vector2i, values: Dictionary, goals: Array = ["攻擊"]) -> TeamData:
+	var fid: int = 600
+	if not state.factions.has(fid):
+		var f := FactionData.new(); f.faction_id = fid; f.leader_team_id = -1
+		state.factions[fid] = f
+	state.factions[fid].goals = goals.duplicate()
+	var tid: int = 600 + state.teams.size()
+	var vals: Dictionary = values.duplicate()
+	var loy: float = float(vals.get("_loyalty", 1.0))
+	vals.erase("_loyalty")
+	var t := TeamData.new(); t.team_id = tid; t.tags = [TeamData.TAG_PRODUCE]
+	t.tile_pos = pos; t.faction_id = fid; t.leader_id = tid * 10
+	_seed_pop(t, 10)
+	t.resources = {"food": 200.0, "goods": 0.0, "coin": 0.0}   # 糧足 → survival 不支配
+	state.teams[tid] = t
+	state.team_discovered[tid] = []
+	state.team_intel[tid] = {}
+	# 發現既有獨立隊（cross-link 兩向，避建序問題）
+	for other_tid in state.teams:
+		var ot: TeamData = state.teams[other_tid]
+		if other_tid != tid and ot.faction_id == -1:
+			state.team_discovered[tid].append(other_tid)
+	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
+	ldr.values = vals; ldr.loyalty = loy
+	state.persons[ldr.id] = ldr
+	_p2a_place_tile(state, pos)
+	return t
+
+# 獨立攻擊目標：faction_id=-1、可達、入所有既有隊 team_discovered（_nearest_independent 找得到）。
+func _mk_independent_target(state: WorldState, pos: Vector2i) -> TeamData:
+	var tid: int = 600 + state.teams.size()
+	var t := TeamData.new(); t.team_id = tid; t.tile_pos = pos; t.faction_id = -1
+	_seed_pop(t, 5)
+	t.resources = {"food": 100.0}
+	state.teams[tid] = t
+	_p2a_place_tile(state, pos)
+	for other_tid in state.teams:
+		if other_tid == tid: continue
+		if not state.team_discovered.has(other_tid):
+			state.team_discovered[other_tid] = []
+		if not state.team_discovered[other_tid].has(tid):
+			state.team_discovered[other_tid].append(tid)
+	return t
+
+func _test_p3_attack_option() -> void:
+	print("--- P3 attack option ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fa := FactionAISystem.new()
+	# 忠誠好戰 unified member（faction directive=攻擊、有獨立 target）→ 選 攻擊
+	var soldier := _mk_unified_faction_member(state, Vector2i(3,3), {"好戰":0.8,"_loyalty":0.9})
+	_mk_independent_target(state, Vector2i(4,3))
+	fa._decide_unified(state, soldier)
+	assert(soldier.current_task == TeamData.TASK_ATTACK, "[p3] 忠誠好戰 member 未響應派系攻擊 task=%s" % soldier.current_task)
+	assert(soldier.combat_target != -1, "[p3] 攻擊未設 combat_target")
+	# 脫軌逃閥：低忠誠高野心 member 同 directive → 不選攻擊（faction_duty/attack_drive 受 loyalty 壓低）
+	var rebel := _mk_unified_faction_member(state, Vector2i(3,3), {"野心":0.9,"_loyalty":0.15,"貪婪":0.8})
+	rebel.resources["goods"] = 50   # 給貿易誘因（個人驅力蓋過 faction_duty）
+	fa._decide_unified(state, rebel)
+	assert(rebel.current_task != TeamData.TASK_ATTACK, "[p3] 叛逆 member 竟服從派系攻擊（逃閥失效）task=%s" % rebel.current_task)
+	# 無 directive → 不攻擊
+	var peace := _mk_unified_faction_member(state, Vector2i(3,3), {"好戰":0.8,"_loyalty":0.9}, [])
+	fa._decide_unified(state, peace)
+	assert(peace.current_task != TeamData.TASK_ATTACK, "[p3] 無 directive 竟攻擊 task=%s" % peace.current_task)
+	print("[p3] attack option OK (soldier→ATTACK ct=%d, rebel→%s, peace→%s)" % [soldier.combat_target, rebel.current_task, peace.current_task])
+
+func _test_p3_war_believability() -> void:
+	print("--- P3 war believability ---")
+	var fa := FactionAISystem.new()
+	# (a) 人格染 HOW：同 directive+忠誠，好戰 vs 慎重溫和 → 攻擊染色 好戰 > 溫和
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fierce := _mk_unified_faction_member(state, Vector2i(3,3), {"好戰":0.9,"殘忍":0.7,"_loyalty":0.8})
+	var meek := _mk_unified_faction_member(state, Vector2i(3,3), {"好戰":0.2,"殘忍":0.1,"_loyalty":0.8})
+	_mk_independent_target(state, Vector2i(4,3))
+	var ctx_f := DecisionContext.gather(state, fierce)
+	var ctx_m := DecisionContext.gather(state, meek)
+	var u_f: float = DecisionTerms.weight("attack", ctx_f.leader_values) * DecisionTerms.eval("attack_drive", ctx_f, "攻擊")
+	var u_m: float = DecisionTerms.weight("attack", ctx_m.leader_values) * DecisionTerms.eval("attack_drive", ctx_m, "攻擊")
+	assert(u_f > u_m, "[p3] 好戰 member 攻擊染色未高於溫和 f=%.3f m=%.3f" % [u_f, u_m])
+	# (b) 危時不參戰：忠誠好戰 member 但糧危 → survival(覓食) 贏，非攻擊
+	var state2 := WorldState.new(); state2.world = WorldData.new()
+	var starving := _mk_unified_faction_member(state2, Vector2i(3,3), {"好戰":0.9,"_loyalty":0.9})
+	starving.resources["food"] = 1.0   # food_days<1
+	_mk_independent_target(state2, Vector2i(4,3))
+	# 鄰格 wild_game tile → 覓食有地可去（否則 to_task 撲空 fallthrough）
+	var game := HexTileData.new()
+	game.tile_id = 2 * 1000 + 3; game.tile_pos = Vector2i(2,3); game.terrain = "plains"
+	game.resources = {"wild_game": 5}
+	state2.world.tiles[game.tile_id] = game
+	fa._decide_unified(state2, starving)
+	assert(starving.current_task != TeamData.TASK_ATTACK, "[p3] 餓 member 竟為派系打仗 task=%s" % starving.current_task)
+	print("[p3] war believability OK (u_f=%.3f u_m=%.3f starving→%s)" % [u_f, u_m, starving.current_task])

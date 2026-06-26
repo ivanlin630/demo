@@ -14,6 +14,7 @@ const REGISTRY: Dictionary = {
 	"投靠":   [["join_drive", "join"]],
 	"紮營":   [["camp_drive", "camp"]],
 	"乞食":   [["beg_drive",  "beg"]],
+	"攻擊":   [["faction_duty", "faction_duty"], ["attack_drive", "attack"]],
 }
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
@@ -52,6 +53,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 						and not ctx.has_own_outpost: out.append(opt)
 			"乞食":
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_aid_target: out.append(opt)
+			"攻擊":
+				# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
+				if ctx.faction_directive == "攻擊" and ctx.faction_attack_target != -1: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -83,4 +87,9 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			var aid: int = FactionAISystem.new()._find_aid_target(state, team)
 			if aid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			return {"task": TeamData.TASK_BEG, "target": state.teams[aid].tile_pos, "combat_target": aid}
+		"攻擊":
+			# 混合協調：對派系指定的最近獨立隊發動攻擊（combat_target 接線複用 _decide_unified:864）。
+			var atid: int = FactionAISystem.new()._nearest_independent(state, team)
+			if atid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_ATTACK, "target": state.teams[atid].tile_pos, "combat_target": atid}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
