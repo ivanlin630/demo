@@ -9,6 +9,7 @@ const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略
 const FACTION_DUTY_DRIVE: float = 1.5   # TEST VALUE — stakes 協同量級（高壓日常 term，但 weight 受 loyalty 調=非無限）
 const DEFECT_AMBITION_K: float = 1.0    # TEST VALUE — 野心折損 faction_duty 權重斜率（脫軌逃閥）
 const ATTACK_DRIVE_BASE: float = 0.3    # TEST VALUE — 個人參戰基值；× attack weight(好戰/殘忍)=染色 HOW
+const BUYFOOD_DIST_FULL: float = 6.0    # TEST VALUE — 買糧旅費折扣基準距離（≤此距離不折扣，遠則衰減）
 
 # 脫軌逃閥因子：忠誠 − 野心溢出折損（loy 高→1，低忠誠高野心→0）。
 # faction_duty weight 與 attack_drive drive 共用 = 叛離者既無 duty 亦無個人參戰驅力（「這不是我的仗」）。
@@ -57,6 +58,12 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"beg_drive":
 			if opt != "乞食" or not ctx.has_aid_target: return 0.0
 			return DESPERATION_SCALE * BEG_FLOOR_FACTOR * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+		"buyfood_drive":
+			# 餓 + 有市集 + 有錢 → 買糧 drive；旅費折扣（近市集勝遠市集）。無錢=0（乞食真語意）。
+			if opt != "買糧" or not ctx.has_food_market or not ctx.has_specie: return 0.0
+			var hunger: float = DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+			var dist_disc: float = BUYFOOD_DIST_FULL / maxf(float(ctx.food_market_dist), BUYFOOD_DIST_FULL)
+			return hunger * dist_disc
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"faction_duty":
@@ -99,4 +106,5 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"camp":              return float(v.get("野心", 0.5)) * 0.4 \
 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
+		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		_:                   return 0.5
