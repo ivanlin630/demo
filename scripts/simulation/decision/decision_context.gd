@@ -32,10 +32,16 @@ var has_food_market: bool = false
 var food_market_pos: Vector2i = Vector2i(-1, -1)
 var food_market_dist: int = -1
 var has_specie: bool = false
-# P3 混合協調：派系 stakes directive（本塊只認 攻擊）。
-var faction_directive: String = ""
+# P3/P4 混合協調：派系 stakes directive 集合（攻擊/徵收/外交）。
+# 立國=leader-level（_declare_established，非 member option）；掠奪=日常個體（非 stakes）。
+const STAKES_SET: Array = ["攻擊", "徵收", "外交"]
+var faction_stakes: Array = []
 var faction_attack_target: int = -1
 var faction_attack_target_pos: Vector2i = Vector2i(-1, -1)
+var faction_tribute_target: int = -1
+var faction_tribute_target_pos: Vector2i = Vector2i(-1, -1)
+var faction_diplo_target: int = -1
+var faction_diplo_target_pos: Vector2i = Vector2i(-1, -1)
 var leader_loyalty: float = 0.5
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
@@ -86,13 +92,23 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.food_market_pos = _mkt
 	c.food_market_dist = _fa._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1
 	c.has_specie = float(team.resources.get("coin", 0)) > 0.0 or float(team.resources.get("goods", 0)) >= 10.0
-	# 派系 stakes directive（本塊只認 攻擊；後續擴徵收/外交/立國）。
+	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:
 		var f = state.factions.get(team.faction_id)
-		if f != null and "攻擊" in f.goals:
-			c.faction_directive = "攻擊"
-	if c.faction_directive == "攻擊":
-		var _at: int = _fa._nearest_independent(state, team)   # 複用既有 _fa（gather 內已 new）
-		c.faction_attack_target = _at
-		c.faction_attack_target_pos = state.teams[_at].tile_pos if _at != -1 else Vector2i(-1, -1)
+		if f != null:
+			for g in STAKES_SET:
+				if g in f.goals: c.faction_stakes.append(g)
+			if "攻擊" in c.faction_stakes:
+				var _at: int = _fa._nearest_independent(state, team)
+				c.faction_attack_target = _at
+				c.faction_attack_target_pos = state.teams[_at].tile_pos if _at != -1 else Vector2i(-1, -1)
+			if "徵收" in c.faction_stakes:
+				var _rt: int = _fa._richest_member(state, f)
+				if _rt == team.team_id: _rt = -1   # 不對自己徵收（_richest_member 未排自身）
+				c.faction_tribute_target = _rt
+				c.faction_tribute_target_pos = state.teams[_rt].tile_pos if _rt != -1 else Vector2i(-1, -1)
+			if "外交" in c.faction_stakes:
+				var _dt: int = _fa._nearest_independent(state, team)
+				c.faction_diplo_target = _dt
+				c.faction_diplo_target_pos = state.teams[_dt].tile_pos if _dt != -1 else Vector2i(-1, -1)
 	return c

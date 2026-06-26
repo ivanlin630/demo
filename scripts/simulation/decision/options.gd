@@ -56,7 +56,7 @@ static func applicable(ctx: DecisionContext) -> Array:
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_aid_target: out.append(opt)
 			"攻擊":
 				# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
-				if ctx.faction_directive == "攻擊" and ctx.faction_attack_target != -1: out.append(opt)
+				if "攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1: out.append(opt)
 			"買糧":
 				# 餓 + 有市集 + 有錢 → 買糧候選（無錢=乞食真語意，不入）。
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market and ctx.has_specie:

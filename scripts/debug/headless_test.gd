@@ -3881,6 +3881,10 @@ func _run_sim_test() -> void:
 	_test_p3_faction_duty_term()
 	_test_p3_attack_option()
 	_test_p3_war_believability()
+	# ── P4 頂層 stakes（徵收/外交 directive） ──
+	_test_p4_stakes_terms()
+	_test_p4_stakes_options()
+	_test_p4_stakes_believability()
 	# ── 買糧 survival option（Phase 1） ──
 	_test_buyfood_term_and_option()
 	_test_buyfood_integration()
@@ -13681,7 +13685,7 @@ func _test_p3_faction_duty_term() -> void:
 	assert(w_rebel < 0.3, "[p3] 叛逆 faction_duty weight 太高 %.2f" % w_rebel)     # 0.2-0.4=0(clamp)
 	# faction_duty drive：directive=攻擊+有 target → >0；else 0
 	var ctx_war := DecisionContext.new()
-	ctx_war.faction_directive = "攻擊"; ctx_war.faction_attack_target = 5
+	ctx_war.faction_stakes = ["攻擊"]; ctx_war.faction_attack_target = 5
 	var ctx_peace := DecisionContext.new()
 	assert(DecisionTerms.eval("faction_duty", ctx_war, "攻擊") > 0.0, "[p3] 戰時 faction_duty drive=0")
 	assert(DecisionTerms.eval("faction_duty", ctx_peace, "攻擊") == 0.0, "[p3] 平時 faction_duty drive 非 0")
@@ -13783,3 +13787,98 @@ func _test_p3_war_believability() -> void:
 	fa._decide_unified(state2, starving)
 	assert(starving.current_task != TeamData.TASK_ATTACK, "[p3] 餓 member 竟為派系打仗 task=%s" % starving.current_task)
 	print("[p3] war believability OK (u_f=%.3f u_m=%.3f starving→%s)" % [u_f, u_m, starving.current_task])
+
+# ── P4 helpers ──
+
+# 同 faction、更富（food_est 高）、非 leader、非自身 → ref_team 的 _richest_member 目標。
+# ref_team 的 faction 必須先存在（由 _mk_unified_faction_member 建）。
+func _mk_richer_member(state: WorldState, pos: Vector2i, ref_team: TeamData) -> TeamData:
+	var fid: int = ref_team.faction_id
+	var tid: int = 600 + state.teams.size()
+	var t := TeamData.new(); t.team_id = tid; t.tags = [TeamData.TAG_PRODUCE]
+	t.tile_pos = pos; t.faction_id = fid; t.leader_id = tid * 10
+	_seed_pop(t, 8)
+	t.resources = {"food": 999.0, "goods": 0.0, "coin": 0.0}
+	state.teams[tid] = t
+	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
+	ldr.values = {}; ldr.loyalty = 1.0
+	state.persons[ldr.id] = ldr
+	_p2a_place_tile(state, pos)
+	# faction.member_team_ids + known_member_states.food_est（_richest_member 讀 snap）
+	var f = state.factions[fid]
+	if not f.member_team_ids.has(tid): f.member_team_ids.append(tid)
+	if not f.member_team_ids.has(ref_team.team_id): f.member_team_ids.append(ref_team.team_id)
+	f.known_member_states[tid] = {"food_est": 999.0}
+	f.known_member_states[ref_team.team_id] = {"food_est": 10.0}
+	return t
+
+func _test_p4_stakes_terms() -> void:
+	print("--- P4 stakes terms ---")
+	# faction_duty 泛化：攻擊/徵收/外交 各匹配 stakes + target
+	var ctx_levy := DecisionContext.new()
+	ctx_levy.faction_stakes = ["徵收"]; ctx_levy.faction_tribute_target = 5
+	assert(DecisionTerms.eval("faction_duty", ctx_levy, "徵收") > 0.0, "[p4] 徵收 faction_duty=0")
+	assert(DecisionTerms.eval("faction_duty", ctx_levy, "攻擊") == 0.0, "[p4] 無攻擊 stake 竟 faction_duty>0")
+	var ctx_dip := DecisionContext.new()
+	ctx_dip.faction_stakes = ["外交"]; ctx_dip.faction_diplo_target = 5
+	assert(DecisionTerms.eval("faction_duty", ctx_dip, "外交") > 0.0, "[p4] 外交 faction_duty=0")
+	# 人格染色：貪婪 member 徵收 weight > 溫和；義氣 member 外交 weight > 寡情
+	assert(DecisionTerms.weight("levy", {"貪婪":0.9,"好戰":0.7}) > DecisionTerms.weight("levy", {"貪婪":0.1,"好戰":0.1}), "[p4] 貪婪徵收 weight 未較高")
+	assert(DecisionTerms.weight("diplo", {"義氣":0.9,"計謀":0.7}) > DecisionTerms.weight("diplo", {"義氣":0.1,"計謀":0.1}), "[p4] 義氣外交 weight 未較高")
+	# P3 攻擊不回歸：faction_stakes=["攻擊"]+target → faction_duty 仍 fire
+	var ctx_war := DecisionContext.new()
+	ctx_war.faction_stakes = ["攻擊"]; ctx_war.faction_attack_target = 5
+	assert(DecisionTerms.eval("faction_duty", ctx_war, "攻擊") > 0.0, "[p4] P3 攻擊回歸")
+	print("[p4] stakes terms OK")
+
+func _test_p4_stakes_options() -> void:
+	print("--- P4 stakes options ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fa := FactionAISystem.new()
+	# 派系 directive=徵收（有更富 member）→ 忠誠 unified member 選 徵收
+	var levier := _mk_unified_faction_member(state, Vector2i(3,3), {"貪婪":0.8,"_loyalty":0.9}, ["徵收"])
+	_mk_richer_member(state, Vector2i(4,3), levier)
+	fa._decide_unified(state, levier)
+	assert(levier.current_task == TeamData.TASK_TRIBUTE, "[p4] 忠誠 member 未響應徵收 task=%s" % levier.current_task)
+	# 外交：directive=外交 + 獨立鄰 → TASK_DIPLOMACY
+	var state2 := WorldState.new(); state2.world = WorldData.new()
+	var envoy := _mk_unified_faction_member(state2, Vector2i(3,3), {"義氣":0.8,"_loyalty":0.9}, ["外交"])
+	_mk_independent_target(state2, Vector2i(4,3))
+	fa._decide_unified(state2, envoy)
+	assert(envoy.current_task == TeamData.TASK_DIPLOMACY, "[p4] 忠誠 member 未響應外交 task=%s" % envoy.current_task)
+	# 脫軌逃閥：低忠+高野 member 派系徵收 → 不參與
+	var state3 := WorldState.new(); state3.world = WorldData.new()
+	var rebel := _mk_unified_faction_member(state3, Vector2i(3,3), {"野心":0.9,"_loyalty":0.15,"貪婪":0.8}, ["徵收"])
+	rebel.resources["goods"] = 50
+	_mk_richer_member(state3, Vector2i(4,3), rebel)
+	fa._decide_unified(state3, rebel)
+	assert(rebel.current_task != TeamData.TASK_TRIBUTE, "[p4] 叛逆 member 竟服從徵收 task=%s" % rebel.current_task)
+	print("[p4] stakes options OK (levier→%s envoy→%s rebel→%s)" % [levier.current_task, envoy.current_task, rebel.current_task])
+
+func _test_p4_stakes_believability() -> void:
+	print("--- P4 stakes believability ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fa := FactionAISystem.new()
+	# 人格染色：貪婪 member 徵收 util > 溫和（同 directive+忠誠）
+	var greedy := _mk_unified_faction_member(state, Vector2i(3,3), {"貪婪":0.9,"好戰":0.6,"_loyalty":0.8}, ["徵收"])
+	var mild := _mk_unified_faction_member(state, Vector2i(3,3), {"貪婪":0.1,"好戰":0.1,"_loyalty":0.8}, ["徵收"])
+	_mk_richer_member(state, Vector2i(4,3), greedy)
+	_mk_richer_member(state, Vector2i(4,4), mild)
+	var cg := DecisionContext.gather(state, greedy)
+	var cm := DecisionContext.gather(state, mild)
+	var ug: float = DecisionTerms.weight("levy", cg.leader_values) * DecisionTerms.eval("levy_drive", cg, "徵收")
+	var um: float = DecisionTerms.weight("levy", cm.leader_values) * DecisionTerms.eval("levy_drive", cm, "徵收")
+	assert(ug > um, "[p4] 貪婪徵收染色未高於溫和 g=%.3f m=%.3f" % [ug, um])
+	# 危時不參與：糧危 member 派系徵收 → survival 贏
+	var state2 := WorldState.new(); state2.world = WorldData.new()
+	var starving := _mk_unified_faction_member(state2, Vector2i(3,3), {"貪婪":0.8,"_loyalty":0.9}, ["徵收"])
+	starving.resources["food"] = 1.0
+	_mk_richer_member(state2, Vector2i(4,3), starving)
+	# 鄰格 wild_game tile → 覓食有地可去
+	var game := HexTileData.new()
+	game.tile_id = 2 * 1000 + 3; game.tile_pos = Vector2i(2,3); game.terrain = "plains"
+	game.resources = {"wild_game": 5}
+	state2.world.tiles[game.tile_id] = game
+	fa._decide_unified(state2, starving)
+	assert(starving.current_task != TeamData.TASK_TRIBUTE, "[p4] 餓 member 竟為派系徵收 task=%s" % starving.current_task)
+	print("[p4] stakes believability OK (ug=%.3f um=%.3f starving→%s)" % [ug, um, starving.current_task])
