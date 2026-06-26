@@ -6,6 +6,14 @@ const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× wei
 const DESPERATION_DAYS: float = 3.0    # TEST VALUE — 食物低於此才入絕境 option（對齊 WARNING_DAYS）
 const DESPERATION_SCALE: float = 1.2   # TEST VALUE — 絕境 drive 量級（對齊 survival-class 域，不碾壓 forage/restock）
 const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略低於 join/camp）
+const FACTION_DUTY_DRIVE: float = 1.5   # TEST VALUE — stakes 協同量級（高壓日常 term，但 weight 受 loyalty 調=非無限）
+const DEFECT_AMBITION_K: float = 1.0    # TEST VALUE — 野心折損 faction_duty 權重斜率（脫軌逃閥）
+const ATTACK_DRIVE_BASE: float = 0.3    # TEST VALUE — 個人參戰基值；× attack weight(好戰/殘忍)=染色 HOW
+
+# 脫軌逃閥因子：忠誠 − 野心溢出折損（loy 高→1，低忠誠高野心→0）。
+# faction_duty weight 與 attack_drive drive 共用 = 叛離者既無 duty 亦無個人參戰驅力（「這不是我的仗」）。
+static func _duty_factor(loy: float, amb: float) -> float:
+	return clampf(loy - maxf(0.0, amb - 0.5) * DEFECT_AMBITION_K, 0.0, 1.0)
 
 # 統一決策引擎：term 函式庫 + w_term 人格映射。
 # eval：驅力強度（0..~1.5），term × opt 對應；不適用 opt 回 0。
@@ -51,6 +59,17 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return DESPERATION_SCALE * BEG_FLOOR_FACTOR * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
+		"faction_duty":
+			# 派系 stakes directive 響應（頂層決 WHETHER）；weight 受 loyalty 調=脫軌逃閥。
+			if opt == "攻擊" and ctx.faction_directive == "攻擊" and ctx.faction_attack_target != -1:
+				return FACTION_DUTY_DRIVE
+			return 0.0
+		"attack_drive":
+			# 個人參戰 drive（人格染 HOW）；× attack weight=好戰/殘忍染色。受 loyalty 調=叛離者不參戰。
+			if opt != "攻擊" or ctx.faction_directive != "攻擊": return 0.0
+			var loy: float = float(ctx.leader_values.get("_loyalty", 0.5))
+			var amb: float = float(ctx.leader_values.get("野心", 0.5))
+			return ATTACK_DRIVE_BASE * _duty_factor(loy, amb)
 		"settle_fit":
 			# 駐守 = 純知足（settle 主導，無 ambition pull）→ 給高 base，使低野心 leader 選它
 			# 而非 建設/生產（後者另含 ambition_drive，野心 leader 才被推上去）。
@@ -72,6 +91,7 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"ambition":          return clampf(float(v.get("野心", 0.5)) - 0.2, 0.0, 1.0) * 1.5
 		"settle":            return float(v.get("義氣", 0.5)) * 0.5 + float(v.get("慎重", 0.5)) * 0.5
 		"feud":              return 0.3 + float(v.get("好戰", 0.5)) * 0.5
+		"faction_duty":      return _duty_factor(float(v.get("_loyalty", 0.5)), float(v.get("野心", 0.5)))
 		"loot":              return float(v.get("殘忍", 0.5)) * 0.5 \
 			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("貪婪", 0.5)) * 0.2
 		"join":              return float(v.get("義氣", 0.5)) * 0.4 \

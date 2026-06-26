@@ -27,6 +27,11 @@ var farmable_pos: Vector2i = Vector2i(-1, -1)
 var has_aid_target: bool = false
 var aid_target_id: int = -1
 var aid_target_pos: Vector2i = Vector2i(-1, -1)
+# P3 混合協調：派系 stakes directive（本塊只認 攻擊）。
+var faction_directive: String = ""
+var faction_attack_target: int = -1
+var faction_attack_target_pos: Vector2i = Vector2i(-1, -1)
+var leader_loyalty: float = 0.5
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -65,4 +70,17 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_aid_target = _aid != -1
 	c.aid_target_id = _aid
 	c.aid_target_pos = state.teams[_aid].tile_pos if _aid != -1 else Vector2i(-1, -1)
+	# P3 混合協調：loyalty 注入 leader_values（weight("faction_duty") 讀，避擴 weight 簽名；
+	# `_` 前綴非人格值，既有 term match 不誤讀，leader_values 已 duplicate 不污染 PersonData）。
+	c.leader_loyalty = ldr.loyalty if ldr != null else 0.5
+	c.leader_values["_loyalty"] = c.leader_loyalty
+	# 派系 stakes directive（本塊只認 攻擊；後續擴徵收/外交/立國）。
+	if team.faction_id != -1:
+		var f = state.factions.get(team.faction_id)
+		if f != null and "攻擊" in f.goals:
+			c.faction_directive = "攻擊"
+	if c.faction_directive == "攻擊":
+		var _at: int = _fa._nearest_independent(state, team)   # 複用既有 _fa（gather 內已 new）
+		c.faction_attack_target = _at
+		c.faction_attack_target_pos = state.teams[_at].tile_pos if _at != -1 else Vector2i(-1, -1)
 	return c
