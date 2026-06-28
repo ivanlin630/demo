@@ -451,6 +451,7 @@ func _initialize() -> void:
 	_test_confidence_gate()
 	_test_cmd_intent_select()
 	_test_cmd_means_end_emit()
+	_test_cmd_viability_hysteresis()
 	_test_faction_attack_gate()
 	_test_diplomacy_hostile_gate()
 	# ── G3d-2 cred-weighted uncertainty + scout 查證 ──
@@ -800,6 +801,36 @@ func _test_cmd_means_end_emit() -> void:
 	for g in f.goals:
 		assert(f.goal_drivers.has(g), "[cmd] 無因令 %s(無 driver)" % g)
 	print("[cmd] means-end emit OK goals=%s" % str(f.goals))
+
+func _test_cmd_viability_hysteresis() -> void:
+	print("--- commander-v2：viability / hysteresis / 緊急徵收 override ---")
+	var fai := FactionAISystem.new()
+	# (1) viability：好戰但敵顯強(無補力餘裕) → 不發攻擊令（退守成/致富，不打不贏）
+	var s1 := WorldState.new(); s1.world = WorldData.new(); s1.player_id = -1
+	var f1 := _setup_conquer_faction(s1, false)   # leader armed 滿，但無攻擊 task 補力
+	# 改 belief：敵 armed 顯強(50) → 我獨力(~12)×0.8 湊不出 → 不 viable
+	BeliefSystem.record_claim(s1, 0, 9, 90, "親見",
+		{"population_est": 60.0, "armed_est": 50.0, "tile_pos": Vector2i(2, 0)}, 1.0, false)
+	fai._update_goals(s1, f1)
+	assert("攻擊" not in f1.goals, "[cmd] 打不贏仍發攻擊令(viability 失效) goals=%s" % str(f1.goals))
+	assert(f1.intent.get("type") != "征服", "[cmd] 打不贏仍選征服 intent=%s" % str(f1.intent))
+	# (2) hysteresis：committed 征服 + 情勢不變 → 連評不翻
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
+	var f2 := _setup_conquer_faction(s2, true)
+	fai._update_goals(s2, f2)
+	var first_intent: String = f2.intent.get("type", "")
+	assert(first_intent == "征服", "[cmd] 征服 setup 首評未選征服 intent=%s" % str(f2.intent))
+	fai._update_goals(s2, f2)   # 再評（情勢不變）
+	assert(f2.intent.get("type") == "征服", "[cmd] hysteresis 失效，征服翻成 %s" % str(f2.intent))
+	# (3) 緊急徵收 override：food<emergency → ["徵收"] driver=survival
+	var s3 := WorldState.new(); s3.world = WorldData.new(); s3.player_id = -1
+	var f3 := _setup_conquer_faction(s3, true)
+	s3.teams[0].resources["food"] = 1.0   # 缺糧 → emergency
+	fai._update_goals(s3, f3)
+	assert(f3.goals == ["徵收"], "[cmd] 緊急徵收 override 未獨佔 goals=%s" % str(f3.goals))
+	assert(f3.goal_drivers.get("徵收", {}).get("mode") == "survival",
+		"[cmd] 緊急徵收 driver 非 survival %s" % str(f3.goal_drivers.get("徵收", {})))
+	print("[cmd] viability/hysteresis OK")
 
 func _test_faction_attack_gate() -> void:
 	print("--- G3d-1：攻擊 commit gate ---")

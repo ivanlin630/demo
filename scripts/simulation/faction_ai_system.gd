@@ -749,7 +749,7 @@ func _update_goals(state: WorldState, f) -> void:
 		* clampf(1.0 - honor * HONOR_EMERGENCY_DISC, 0.5, 1.0)
 	if food_per_cap < effective_emergency:
 		f.strategy = "緊急徵收"
-		_emit_goal(f, "徵收", "守成", "survival", "levy")  # survival override：driver=求生
+		_emit_goal(f, "徵收", "守成", "缺糧 survival override", "survival")  # driver mode=survival
 		return
 
 	# 立國 gate（既有分離，非意圖集；不在 means-end argmax）
