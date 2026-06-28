@@ -450,6 +450,7 @@ func _initialize() -> void:
 	# ── G3d-1 決策讀 uncertainty + 風險 gate ──
 	_test_confidence_gate()
 	_test_cmd_intent_select()
+	_test_cmd_means_end_emit()
 	_test_faction_attack_gate()
 	_test_diplomacy_hostile_gate()
 	# ── G3d-2 cred-weighted uncertainty + scout 查證 ──
@@ -743,6 +744,62 @@ func _test_cmd_intent_select() -> void:
 	var i_commit: Dictionary = fai._score_intents({"野心":0.6,"好戰":0.5,"義氣":0.3}, true, true, true, "征服")
 	assert(i_commit.get("type") == "征服", "[cmd] hysteresis 失效，committed 征服未黏住 %s" % str(i_commit))
 	print("[cmd] intent select OK")
+
+# commander-v2：建 established 征服派系。force_deficit=true → leader 獨力不足但有攻擊 task member 補力(intent viable)。
+func _setup_conquer_faction(state: WorldState, force_deficit: bool) -> FactionData:
+	# 獨立鄰 target（弱）
+	var ind := TeamData.new(); ind.team_id = 9; ind.tile_pos = Vector2i(2, 0); ind.faction_id = -1
+	var i_ldr := PersonData.new(); i_ldr.id = 90; state.persons[90] = i_ldr; ind.leader_id = 90
+	_seed_pop(ind, 4); ind.resources = {"food": 100.0}; state.teams[9] = ind
+	# leader 隊（好戰霸主）
+	var lt := TeamData.new(); lt.team_id = 0; lt.tile_pos = Vector2i(0, 0)
+	lt.faction_id = 1; lt.readiness = 1.0; lt.tags = [TeamData.TAG_MILITARY]
+	var ldr := PersonData.new(); ldr.id = 1
+	ldr.values = {"野心": 0.9, "好戰": 0.9, "義氣": 0.5, "貪婪": 0.6, "求生欲": 0.4}
+	ldr.skills = {"統領": 0.7}
+	state.persons[1] = ldr; lt.leader_id = 1; _seed_pop(lt, 12)
+	lt.resources = {"food": 99999.0, "material": 200.0, "weapon_melee_low": 30.0}
+	# force_deficit：leader 獨力 armed 比例壓低 → 獨力 < 敵；補力 member 在攻擊 task 拉到 viable
+	lt.armed_anon_ratio = 0.1 if force_deficit else 1.0
+	state.teams[0] = lt
+	state.team_discovered[0] = [9]
+	# belief：target armed=2（弱）
+	BeliefSystem.record_claim(state, 0, 9, 90, "親見",
+		{"population_est": 4.0, "armed_est": 2.0, "tile_pos": Vector2i(2, 0)}, 1.0, false)
+	# 富 member（供徵收補力 target）
+	var m1 := TeamData.new(); m1.team_id = 1; m1.tile_pos = Vector2i(1, 0); m1.faction_id = 1
+	var m1l := PersonData.new(); m1l.id = 11; state.persons[11] = m1l; m1.leader_id = 11
+	_seed_pop(m1, 6); m1.resources = {"food": 5000.0}; state.teams[1] = m1
+	var f := FactionData.new(); f.faction_id = 1; f.leader_team_id = 0
+	f.member_team_ids = [0, 1]; f.is_established = true
+	# 補力 member 在攻擊 task（intent viable 含餘裕；force_deficit 時拉 own_armed 過 viable 線）
+	f.known_member_states = {1: {"food_est": 5000.0,
+		"current_task": (TeamData.TASK_ATTACK if force_deficit else "idle"),
+		"armed_est": (8 if force_deficit else 0)}}
+	state.factions[1] = f
+	return f
+
+func _test_cmd_means_end_emit() -> void:
+	print("--- commander-v2：means-end 子需求分解 + filler + driver emit ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	# fill 小地圖（_richest_member/_nearest_independent 需 teams）
+	var fai := FactionAISystem.new()
+	var f := _setup_conquer_faction(state, true)
+	fai._update_goals(state, f)
+	# 征服 → 主令攻擊
+	assert("攻擊" in f.goals, "[cmd] 征服未發主令攻擊 goals=%s" % str(f.goals))
+	assert(f.goal_drivers.get("攻擊", {}).get("intent") == "征服",
+		"[cmd] 攻擊令無 driver 連回征服 %s" % str(f.goal_drivers.get("攻擊", {})))
+	# 軍力不足 → 有補力肢（結盟/徵收），driver why 含「補力」
+	var has_boost := false
+	for g in f.goals:
+		if f.goal_drivers.get(g, {}).get("why", "").contains("補力"):
+			has_boost = true
+	assert(has_boost, "[cmd] 軍力不足未開補力肢 goals=%s drivers=%s" % [str(f.goals), str(f.goal_drivers)])
+	# 無無因令：每令都有 driver
+	for g in f.goals:
+		assert(f.goal_drivers.has(g), "[cmd] 無因令 %s(無 driver)" % g)
+	print("[cmd] means-end emit OK goals=%s" % str(f.goals))
 
 func _test_faction_attack_gate() -> void:
 	print("--- G3d-1：攻擊 commit gate ---")

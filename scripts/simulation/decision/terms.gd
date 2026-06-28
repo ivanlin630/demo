@@ -6,8 +6,7 @@ const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× wei
 const DESPERATION_DAYS: float = 3.0    # TEST VALUE — 食物低於此才入絕境 option（對齊 WARNING_DAYS）
 const DESPERATION_SCALE: float = 1.2   # TEST VALUE — 絕境 drive 量級（對齊 survival-class 域，不碾壓 forage/restock）
 const BEG_FLOOR_FACTOR: float = 0.5    # TEST VALUE — 乞食墊底（drive 略低於 join/camp）
-const FACTION_DUTY_DRIVE: float = 1.5   # TEST VALUE — 攻擊(存亡級戰事)協同量級（高壓日常 term，但 weight 受 loyalty 調=非無限）
-const FACTION_DUTY_DRIVE_LESSER: float = 1.0   # TEST VALUE — 徵收/外交(次級 stakes)協同量級 < 攻擊。多 stakes 共存時戰事優先（守 ruling A「忠誠=連勉強也到場」，防溫和 member 因個性轉外交 skip 戰爭）
+const FACTION_DUTY_DRIVE: float = 1.5   # TEST VALUE — 派系協同量級（攻擊/徵收/外交同級；commander-v2 單意圖後成員一次服務一意圖的子命令=無同級矛盾，war-priority LESSER 已 revert）
 const DEFECT_AMBITION_K: float = 1.0    # TEST VALUE — 野心折損 faction_duty 權重斜率（脫軌逃閥）
 const ATTACK_DRIVE_BASE: float = 0.3    # TEST VALUE — 個人參戰基值；× attack weight(好戰/殘忍)=染色 HOW
 const STAKES_DRIVE_BASE: float = 0.3    # TEST VALUE — 徵收/外交 個人 drive 基值（沿用 ATTACK_DRIVE_BASE 值，獨立便調）
@@ -72,8 +71,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 派系 stakes directive 響應（頂層決 WHETHER）；weight 受 loyalty 調=脫軌逃閥。
 			match opt:
 				"攻擊": return FACTION_DUTY_DRIVE if ("攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1) else 0.0
-				"徵收": return FACTION_DUTY_DRIVE_LESSER if ("徵收" in ctx.faction_stakes and ctx.faction_tribute_target != -1) else 0.0
-				"外交": return FACTION_DUTY_DRIVE_LESSER if ("外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1) else 0.0
+				"徵收": return FACTION_DUTY_DRIVE if ("徵收" in ctx.faction_stakes and ctx.faction_tribute_target != -1) else 0.0
+				"外交": return FACTION_DUTY_DRIVE if ("外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1) else 0.0
 			return 0.0
 		"attack_drive":
 			# 個人參戰 drive（人格染 HOW）；× attack weight=好戰/殘忍染色。受 loyalty 調=叛離者不參戰。
