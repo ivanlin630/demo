@@ -23,7 +23,8 @@
   - **壓迫 cascade/削弱屬民**（徵收有 stress/loyalty hit，無「缺糧→餓→忠誠崩」spiral）。
   - **城防/威望/產能升級**（建設只 mint/stable/倉儲，無守備加成/招募吸引/製造佇列）。
   - **互防/離間**（結盟只 faction merge，無自動戰鬥支援）。**戰俘 ransom/勞役**（prisoner_population 欄存在未用）。
-- **影響**：v2 means-end commander **真 affordance 可跑**（征服X→攻擊+結盟/徵收 補軍力，depth-1 回推）；但**欺敵/貿易戰 deception 層=債**（玩家錨 C richness 待 sim 建）。建欺敵機制 = 後續獨立 arc（撐真模擬效果才掛 affordance）。
+- **影響**：v2 means-end commander **真 affordance 可跑**（征服X→攻擊+結盟/徵收 補軍力，depth-1 回推）；欺敵/貿易戰 deception 層 = 下列承諾 arc。
+- **★ 欺敵 sim arc = anchored-pre-player 承諾 arc（藍圖裁 A，2026-06-28，非一般債）**：欺敵=玩家錨 C 心臟（看 action 反推 driver 全靠它）。**硬綁「玩家面開工之前必落地」**。內容=假和/斷供-貿易戰/離間/緩兵 sim 機制 → 建好**插回 commander 既有 means-end 機器**（affordance 由孤兒轉真、自動進匹配）。時序：commander-v2 → **欺敵 arc(玩家面前)** → 其餘孤兒 richness pipeline（壓迫 cascade/城防-威望-產能/戰俘 ransom，按 player-visibility）→ 玩家面。**禁無限延**（承諾 arc 非 cosmetic）。
 
 ## 統一決策框架 / survival backlog（P2b-1 揭）
 
