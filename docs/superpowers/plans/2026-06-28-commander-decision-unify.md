@@ -162,3 +162,6 @@ git commit -m "refactor(decision): revert war-priority OK繃(統領單令後 moo
 - **P3/P4 不回歸 + war-priority 移除** = 統領單令→成員響應 by construction（Task 2 Step 4 war_scenario 3/4）。
 - 風險：war_scenario 需確認統領單令模式下構造出攻擊姿態（leader 好戰→攻擊）→ Task 2 Step 4 調 scenario。
 - 風險：hysteresis 過硬（情勢變不調）→ gate fail 釋放（敵消失/belief 變）；world_sim 量穩定 vs 適應。
+
+
+> ⚠ **SUPERSEDED 2026-06-28**：單姿態方向被藍圖作廢（`intent-driver-invariant` handback）。改意圖驅動（戰略意圖→協同子命令，多令服務同一意圖+每令帶 driver）。見 spec v2 `2026-06-28-commander-decision-unify-design.md`。本 plan 作廢，v2 plan 待 acceptance 標準確認後寫。

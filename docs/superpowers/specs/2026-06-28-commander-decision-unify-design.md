@@ -1,109 +1,126 @@
-# 統一統領決策 — `_update_goals` 多閾值並行 → 單一連貫戰略姿態（統一 arc 另一半）
+# 統一統領決策 v2 — 意圖驅動（戰略意圖→協同子命令，每令帶 why）
 
-> 系統 HOW spec。承藍圖 ruling `2026-06-28-...-unify-commander-decision`（真根=統領層仍多閾值 latch，不要 war-priority OK繃，直接統一統領決策）。
-> 統一決策框架 arc 的**另一半**：隊層已統一（DecisionEngine），統領層 `_update_goals` 仍舊病。**排玩家面之前**（連貫派系=玩家在霧裡讀的對象）。
+> 系統 HOW spec。承藍圖 ruling `2026-06-28-...-intent-driver-invariant`（**修正：單姿態方向作廢**，改意圖驅動推理多重性）+ 新北極星不變量「凡 named 意圖必有可解釋驅動」（已納 invariants.md）。
+> **v1 單姿態 spec 作廢**（branch `feat/commander-decision-unify` 不 merge，僅 Task 2 revert war-priority 部分理念保留）。統一決策 arc 另一半（統領層），排玩家面之前。
 
-## 真根 + measure 基準
+## 真根 + 願景修正
 
-`_update_goals`（faction_ai:632-712）= **多閾值並行 append**：徵收/立國/外交/攻擊/掠奪 各算分過閾值**全發** → 同時下矛盾令。
+`_update_goals`（faction_ai:632-712）= 多閾值並行 append：各大事過閾全發。**measure 基準**（`commander_directive_measure` merge `8c6781d`）：每 persona 同發 ≥2 令、好戰霸主 4 令。
 
-**measure-first 基準**（`commander_directive_measure.gd` merge `8c6781d`）：各 persona leader 同發 stakes 數——好戰/貪婪/野心霸主=**4**（徵收+外交+攻擊+掠奪）、溫和/均衡=**2**（徵收+外交）。**每 persona 皆 ≥2 矛盾令**=普遍病非邊際。P4 撞的「打+談矛盾」是此症狀；war-priority（成員側 1.5>1.0）只掰成員端、統領仍下矛盾令=OK繃。
+**v1 誤判**：以為病在「發多令」→ 收斂單姿態。**藍圖校正**：氣點不是發兩令，是**令無法解釋從哪來、為什麼**（閾值憑空跳、無父意圖）。**多令 OK 甚至嚮往**——主戰統領發「攻擊+外交」是對的，只要外交是**服務戰爭的欺敵 feint**（可解釋）。
 
-= 整條 arc 在殺的同隻病（決策不統一、latch 互搏），隊層修了統領沒遷。
+= 北極星不變量：**凡 named 意圖必有可解釋驅動**（追回 need/value/belief/父意圖）。統領層 = 第一處落實。
 
-## 裁定（藍圖）：統領跑統一引擎原則 = 單一連貫姿態 argmax
+## 願景（藍圖 A，類深度 AI 推理）
 
-統領每 cadence 秤戰略姿態當競爭 option（utility argmax），挑**一個主姿態**，非並行閾值。
+1. **意圖驅動**：統領先 utility 選一個**戰略意圖**（征服敵X / 防衛 / 致富 / 擴張 / 守成）。
+2. **意圖生成協同子命令**：征服X → 攻擊X（手段）+ 對X盟友外交（欺敵拖住）+ 徵收（籌軍費）= 多令服務同一意圖。
+3. **每令帶 why**（連回父意圖）：外交不是獨立閾值跳出，是**因為**服務征服X、且是**不真心戰術外交**。
+4. **連貫來自共享意圖，非單一命令**。多重性是 feature。
+5. 意圖要 commitment-hysteresis（統領最該硬）、吃人格、吃 belief 非真相；成熟並行軌（多意圖同時）= 制度化擴充（未來）。
 
 ## 範圍
 
-**做**：refactor `_update_goals` 從多閾值 append → **單一姿態 argmax**（persona-weighted utility + belief + 承諾 hysteresis）。輸出 `f.goals = [單一姿態]` → 成員照 P3/P4 混合協調響應（單令=無打+談矛盾）。
+**做**：refactor `_update_goals` 從多閾值 append → **意圖 argmax → 協同子命令生成（帶 driver）**。
+- 統領每 cadence utility 選**一個戰略意圖**（persona×belief×條件 + 承諾 hysteresis）。
+- 意圖 → 確定性展開**協同子命令集** `f.goals`（可多令），每令記**父意圖 + why**（driver metadata，滿足北極星不變量）。
+- 成員照 P3/P4 混合協調響應子命令（按人格分配到攻擊/欺敵外交/徵收 = 多重性 feature，非衝突）。
 
-**姿態集**：`{守成(default), 攻擊, 徵收, 外交}`。
-- **掠奪移除**（ruling=日常個體）：team-level P1 `掠奪` option 已覆蓋機會打劫；統領不另下掠奪令。
-- **立國 = 分離的成長 gate**（非競爭姿態）：未立國+ready → `_declare_established`（precondition，established 後才有姿態競爭）。
-- **結盟 ⊂ 外交**（diplomacy→alliance）。**大徵收 = 徵收**（強度）。
+**意圖集（v1 姿態集升級）**：`{守成(default), 征服X, 防衛, 致富, 擴張}`。
+- **征服X** → {攻擊X, 外交(X盟友,欺敵), 徵收(軍費)}。
+- **防衛** → {守成/徵收(備戰)}（威脅高時）。
+- **致富** → {徵收, 外交(貿易締約,真心)}。
+- **擴張** → {立國(若未established) / 攻擊(弱鄰) / 建設}。
+- **守成** → {}（無 stakes 令，default）。
 
 **非目標**（明文）：
-- **不碰成員側 P3/P4 option**（攻擊/徵收/外交 engine option 原樣；只改統領「下什麼令」）。
-- **不碰 `strategic_ai._update_faction_goals`**（expand/defend/trade_net 另層，ambition 衍生，本塊不動）。
-- **不做成熟派系並行軌**（多戰線 = P3 擴充軸 #3 制度化，藍圖明定未來；現在=單一姿態）。
-- **緊急徵收（food emergency）保留為 override**（survival 級，非姿態競爭——餓了必徵糧不論姿態）。
-- 不新 TASK_*、不改 f.goals 消費端（leader dispatch 739-771 / member 802-827 / unified faction_stakes 仍讀 `X in f.goals`，單令照樣 work）。
+- **不收斂單一命令**（v1 錯）：意圖單一，子命令可多。
+- **不碰成員側 P3/P4 option**（攻擊/徵收/外交 engine option 原樣）；成員按人格分配到子命令=多重性。
+- **war-priority 移除**（FACTION_DUTY_DRIVE_LESSER revert）：成員選欺敵外交 ≠ skip 戰爭（driver=征服）→ 無需戰>和分級。
+- **不碰 `strategic_ai._update_faction_goals`**（expand/defend/trade_net 另層）。
+- **成熟並行軌（多意圖同發）= 未來**（制度化擴充，P3 軸#3）；現在單一意圖。
+- **不給所有 action 塞 driver 欄重寫**（範圍紀律）：**只統領層落實 driver**；其餘審計鏡頭逐步補。
+- 緊急徵收（food emergency）= survival override（意圖前 return）。立國 = 擴張意圖的子命令 or 分離 gate（plan 定）。不新 TASK_*。
 
-## 設計：`_update_goals` 重構
+## 設計
 
-### 結構（取代 632-712 多 append）
+### 1. FactionData：意圖 + driver
+```gdscript
+var intent: Dictionary = {}   # {type:"征服"/"防衛"/..., target_id:int(-1), why:String} 戰略意圖（承諾追蹤）
+# f.goals 保 Array[String]（成員消費端不變：X in f.goals）
+var goal_drivers: Dictionary = {}   # goal(String) → {intent:String, why:String} 每令的 driver（北極星：可解釋）
+```
+> 成員消費端（leader dispatch / member 802-827 / unified faction_stakes）讀 `X in f.goals` **不變**。`goal_drivers` = legibility/audit/玩家 C metadata（UI/inquiry 可讀，本塊先存不強求 UI）。
+
+### 2. `_update_goals` 重構（意圖 argmax → 子命令展開）
 ```
 _update_goals(state, f):
-    1. player_goal_override → f.goals=[override]（保留）
-    2. 立國 gate（未 established + 統領/野心/readiness）→ _declare_established（分離，不入姿態 argmax）
-    3. 緊急徵收 override（food < emergency）→ f.goals=["徵收"]、strategy="緊急徵收"、return（survival 級，不競爭）
-    4. ELSE 姿態 argmax：
-        score 每姿態 = Σ(人格權重 × 驅力) + 承諾 bonus(== f 現姿態)
-        argmax → f.goals = [姿態]（守成 → f.goals=[] 或 ["守成"]，無 stakes 令）
+    f.goals.clear(); f.goal_drivers.clear()
+    leader / leader_p
+    1. player override（保留）
+    2. 緊急徵收 override（food<emergency）→ f.goals=["徵收"]; goal_drivers["徵收"]={intent:"survival",why:"飢荒籌糧"}; return
+    3. 意圖 argmax：score 每意圖 = Σ(人格權重×驅力) + 承諾 bonus(==f.intent.type)
+        征服:  好戰/野心 × belief-弱敵存在 × readiness（既有 attack gate→有合格 target 才 score>0）
+        防衛:  威脅(鄰強敵) × 慎重
+        致富:  貪婪 × (有貿易對象/富 member)
+        擴張:  野心 × (未established or 有弱鄰/建設空間)
+        守成:  default base（知足/低野心，TEST VALUE）
+        argmax → f.intent = {type, target_id, why}
+    4. 意圖展開子命令（確定性，每令記 driver）：
+        match f.intent.type:
+            "征服": _emit("攻擊", intent="征服X", why="攻取X")
+                    if X 有盟友: _emit("外交", intent="征服X", why="欺敵拖住X盟友", insincere=true)
+                    if 軍費不足: _emit("徵收", intent="征服X", why="籌軍費")
+            "防衛": _emit("守成"/"徵收", why="備戰")
+            "致富": _emit("徵收", why="斂財"); _emit("外交", why="貿易締約"(真心))
+            "擴張": 未established→立國; else _emit("攻擊"弱鄰/"建設", why="拓土")
+            "守成": （無令）
+    （_emit(goal, intent, why) = f.goals.append(goal) + f.goal_drivers[goal]={intent,why}）
 ```
+- **承諾 hysteresis**（WHAT#5，統領最該硬）：意圖 argmax 對 `==f.intent.type` 加 `COMMANDER_COMMITMENT_BONUS`（>隊層 0.3）。情勢無實質變不翻意圖（防戰略反覆）。釋放：意圖條件 gate fail（敵消失/readiness 掉/belief 變）。
+- **吃 belief**（WHAT#4）：征服意圖的 target/strength 用 `BeliefSystem.best_estimate`（既有 attack gate 保留）→ 按以為的敵強度選征服。
+- **欺敵嵌入北極星**：外交子命令 driver=「服務征服、不真心」→ 玩家見「攻擊X + 外交X盟友」可推「征服X、外交是 feint」；賭錯被咬。
 
-### 姿態 scoring（persona-weighted + belief + 條件 gate）
-| 姿態 | 驅力（utility 輸入） | 人格權重 | gate（條件） |
-|---|---|---|---|
-| **攻擊** | belief 敵弱 + readiness | 好戰/野心（既有 attack_score 0.4野心+0.4好戰-0.4義氣）| established + 有獨立 target + readiness≥MIN + own_armed≥敵×0.8（既有 belief gate，**保留**=吃 belief 非真相 WHAT#4）|
-| **徵收** | 戰爭基金需求（material 低）| 貪婪/好戰 | established + 有更富 member |
-| **外交** | 有獨立鄰 | 義氣/計謀 | established + readiness≥diplo_min + 有獨立 |
-| **守成** | default base（知足）| 慎重/低野心 | 恆候選（無 stakes 條件時的 fallback）|
+### 3. war-priority OK繃移除
+意圖驅動下，成員選欺敵外交 = 服務征服（driver 正當）非 skip 戰爭 → 戰>和分級 moot。**revert** `FACTION_DUTY_DRIVE_LESSER`（徵收/外交 drive 回 1.5）。成員按人格分配到子命令（好戰→攻擊、義氣/計謀→欺敵外交、貪婪→徵收）= 多重性 feature。
 
-> 量級對齊：argmax 選最高。好戰霸主→攻擊姿態勝；貪婪→徵收；義氣/計謀→外交；慎重低野心→守成。**姿態選擇即染人格**（WHAT#3，不只執行染）。複用既有 attack_score/loot_score/diplo gate 的條件，重組為 scoring 而非並行 append。
-
-### 承諾 hysteresis（WHAT#2，統領層最該硬）
-- `f.strategy`（既有 String）或新 `f.posture` 存當前姿態。argmax 時對「== 現姿態」加 `COMMANDER_COMMITMENT_BONUS`（> 隊層 COMMITMENT_BONUS 0.3，戰略承諾更硬）。
-- 一旦 committed 開戰，材料情勢無實質變 → 不翻（防 攻擊↔外交 每 cadence 抖=churn 病統領版，戰略反覆最蠢）。
-- 釋放：姿態條件 gate fail（如敵消失/readiness 掉）→ 重 argmax；belief 變（敵顯強）→ 攻擊姿態自然落選。
-
-### war-priority OK繃移除（藍圖明定）
-單一姿態後，成員一次只見一個 stakes 令 → P3/P4 的 `FACTION_DUTY_DRIVE` vs `FACTION_DUTY_DRIVE_LESSER` 區分 **moot**（無同時多 stakes 競爭）→ **revert** `FACTION_DUTY_DRIVE_LESSER`（徵收/外交 drive 回 1.5 = 全 stakes 等量級，由統領單令決定哪個 active）。不留死 OK繃。
-
-## believability（守 ruling 5 規格）
-1. **單一主姿態**：統領挑一個（攻擊 xor 徵收 xor 外交 xor 守成），外交=不打時才做、守成=default。✓
-2. **承諾 hysteresis**：統領不每 cadence 翻姿態（commitment bonus）。✓
-3. **姿態吃人格**：好戰→攻擊、貪婪→徵收、義氣/計謀→外交、慎重→守成。✓
-4. **吃 belief 非真相**：攻擊姿態用 belief 敵強度（既有 gate 保留）。✓
-5. **並行軌=未來**：單姿態 now，多戰線=制度化擴充（P3 軸#3）標願景債。
-
-→ **成員端無打+談矛盾**（統領下單令）→ P3 跟戰自然 3/4（不需 war-priority）。
+## believability（守 ruling A + 北極星）
+- **意圖可解釋**：每令追回父意圖（f.goal_drivers）→ 北極星不變量滿足（統領層）。
+- **多重性=feature**：征服→攻擊+欺敵外交+徵收，連貫來自共享意圖。
+- **承諾**：意圖不每 cadence 翻。**吃人格**：好戰→征服、貪婪→致富、慎重→防衛/守成。**吃 belief**：按以為的敵強度征服。
+- **欺敵=玩家 C**：driver 真（征服）+ action 假（外交 feint）→ 情報遊戲。
 
 ## 驗收
-- **單令**：`commander_directive_measure` 重跑——各 persona 同發 stakes 數 **4/2 → 1**（守成 leader=0 stakes，純守）。好戰霸主→[攻擊]、貪婪→[徵收]、義氣→[外交]、溫和→[守成/空]。
-- **姿態吃人格**：好戰 vs 商業 leader 姿態分歧（攻擊 vs 外交/守成）。
-- **承諾 hysteresis**：連續 cadence 姿態不抖（committed 開戰隊不每 tick 翻外交）。headless 多 tick 驗姿態穩定。
-- **緊急徵收 override**：food<emergency leader → 不論姿態強制徵收（survival）。
-- **立國分離**：未 established + ready → 立國（established 後才姿態競爭）。
-- **P3/P4 不回歸**：`p3_war_scenario` 跟戰 **3/4**（統領單令攻擊→成員響應；war-priority 移除後靠單令非 drive 分級）。P4 徵收/外交 member 測：directive 單一時仍響應。
-- **non-unified 不變**：802-827 讀 f.goals 單令照樣 dispatch。
-- **war-priority 移除**：`FACTION_DUTY_DRIVE_LESSER` revert，全 stakes drive 1.5；headless 驗無回歸。
-- **守恆 + 魂驗**：coin_eq 0、InvariantAudit 0、framework S1-S6 PASS（S1 立國/S2 feud 仍 fire）。
-- **world_sim**：2yr 不崩、派系下單令（無同發矛盾）、戰略姿態穩（無反覆）、攻擊仍稀有（多數派系守成/外交/徵收）。
+- **意圖單一、子命令協同帶 driver**：`commander_directive_measure` 重跑（擴量 driver）——好戰霸主→意圖「征服X」+ 子令[攻擊X(why攻取),外交(why欺敵),徵收(why軍費)]，**每令有 goal_drivers**。商業 leader→意圖「致富」+[徵收,外交(真心貿易)]。溫和→「守成」(無令)。**無無因令**（每令追回意圖）。
+- **承諾 hysteresis**：committed 征服隊連續 cadence 不翻意圖（情勢不變）。
+- **吃人格/belief**：好戰→征服 vs 商業→致富分歧；敵 belief 顯強→不選征服。
+- **P3/P4 不回歸 + war-priority 移除**：`p3_war_scenario` 跟戰——統領「征服」下攻擊+欺敵外交，好戰 member→攻擊、義氣 member→欺敵外交（**driver=征服故非 skip**）；跟戰數記錄（可能非 3/4，但**每個選擇可解釋**=新驗收標準，非硬湊 3/4）。P4 徵收/外交 member 響應在意圖子命令下成立。
+- **緊急徵收 override**：food<emergency → 強制徵收(driver=survival)，不論意圖。
+- **守恆+魂驗**：coin_eq 0、InvariantAudit 0、framework S1-S6 PASS（S1 立國=擴張意圖子命令/S2 feud 仍 fire）。
+- **world_sim**：2yr 不崩、派系下協同令（有 driver）、意圖穩定（無反覆）、征服稀有（多數守成/致富）。
 
 ## 檔案
-- `scripts/simulation/faction_ai_system.gd`：`_update_goals` 重構（多 append→單姿態 argmax + 緊急徵收 override + 立國分離 + 承諾 hysteresis）。可能抽 `_score_posture` helper。
-- `scripts/data/faction_data.gd`：可能 `f.posture` 欄（或複用 `f.strategy`）存承諾姿態。
-- `scripts/simulation/decision/terms.gd`：revert `FACTION_DUTY_DRIVE_LESSER`（徵收/外交 drive 回 FACTION_DUTY_DRIVE）。
-- `docs/invariants.md`：「隊目標單一 owner」/「混合協調」段更新——統領下**單一連貫姿態**（非並行閾值）；姿態 argmax + 承諾；掠奪=日常個體非統領令。
-- `scripts/debug/headless_test.gd`：新測（單姿態 argmax + 人格分歧 + hysteresis + 緊急徵收 override + 立國分離 + war-priority 移除不回歸）。
-- `scripts/debug/commander_directive_measure.gd`：重跑驗 4/2→1。
-- `scripts/debug/p3_war_scenario.gd`：跟戰 3/4（統領單令版）。
+- `scripts/simulation/faction_ai_system.gd`：`_update_goals` 重構（意圖 argmax + 子命令展開 + driver tagging + 承諾 hysteresis + 緊急徵收 override）；helper `_score_intent`/`_emit_goal`。
+- `scripts/data/faction_data.gd`：`intent: Dictionary` + `goal_drivers: Dictionary`。
+- `scripts/simulation/decision/terms.gd`：revert `FACTION_DUTY_DRIVE_LESSER`。
+- `docs/invariants.md`：意圖驅動段已納（北極星）；「隊目標單一 owner」段補統領=意圖→協同子命令（非並行閾值/非收斂單一）。
+- `scripts/debug/headless_test.gd`：新測（意圖 argmax + 子命令帶 driver + 每令可解釋 + hysteresis + 人格/belief 分歧 + 緊急徵收 override + war-priority 移除不回歸）。
+- `scripts/debug/commander_directive_measure.gd`：擴量 driver（每令印 intent+why、驗無無因令）。
+- `scripts/debug/p3_war_scenario.gd`：意圖模式下跟戰 + driver 可解釋。
 
 ## 風險 + 緩解
-- **P3/P4 回歸（移除 war-priority + 改統領令）**：統領單令攻擊 → 成員響應攻擊（無外交競爭）→ 跟戰 3/4 by construction（非靠 drive 分級）。驗：war_scenario + P3/P4 測。**war_scenario 需確認統領單令模式下仍構造出攻擊姿態**（leader 好戰→攻擊姿態，給弱敵 belief）。
-- **承諾 hysteresis 過硬/過鬆**：過硬=情勢變不調（敵強了還打）；過鬆=抖。`COMMANDER_COMMITMENT_BONUS` TEST VALUE + gate fail 釋放（敵消失/belief 變）。world_sim 量姿態穩定度 vs 適應性。
-- **緊急徵收 vs 姿態邊界**：food emergency override 必須在姿態 argmax 前（survival 優先）。確認不被姿態蓋。
-- **立國時機**：立國分離後，未 established 派系不參與姿態競爭（只成長）→ 確認立國 gate 不被姿態邏輯吃掉。
-- **scope sprawl**：明文不碰成員 option / strategic_ai / 並行軌 / TASK_*。只 `_update_goals` 重構 + faction_data 一欄 + terms revert + 測。
-- **掠奪移除影響**：統領不下掠奪令 → 機會打劫全靠 team-level P1（unified 隊）；non-unified 軍隊的掠奪？確認 P1/team 層覆蓋，否則記 backlog（非本塊擴）。
+- **過度設計（driver 欄滿天飛）**：範圍紀律——**只統領層** f.intent/goal_drivers，不擴全 action。其餘審計鏡頭。
+- **欺敵外交真消費**：外交子命令 driver=欺敵，但執行走既有 TASK_DIPLOMACY（成員到場斡旋）。「不真心」目前 = driver metadata（玩家 C 用）；外交實際效果（締約 vs 拖延）= 既有 interaction，本塊不改其結算（記 backlog：欺敵外交的真戰術效果=未來）。
+- **P3/P4 跟戰非 3/4**：意圖驅動下成員分配到子命令（攻擊/欺敵外交）→ 跟戰可能 <3/4，但**每選擇可解釋**=新標準。驗收改「無無因令 + 每令追回意圖」，非硬湊跟戰數。**若藍圖要特定跟戰 feel → 回報**。
+- **承諾過硬/鬆**：`COMMANDER_COMMITMENT_BONUS` TEST VALUE + gate fail 釋放。
+- **scope sprawl**：只 `_update_goals` + faction_data 2 欄 + terms revert + 測。不碰成員 option/strategic_ai/並行軌/外交結算。
+- **v1 branch 處置**：`feat/commander-decision-unify`（單姿態）不 merge（作廢方向）；本 v2 重實作。Task 2 的 war-priority revert 理念保留。
 
 ## 開放細節（plan 定）
-- `f.posture` 新欄 vs 複用 `f.strategy`。
-- 姿態 scoring 量級（複用 attack_score/loot_score 公式重組）。
-- `COMMANDER_COMMITMENT_BONUS` 值（> 0.3）。
-- 守成姿態 = f.goals=[] vs ["守成"]（消費端容忍空？確認 leader dispatch/member 無令時 fallback 正常）。
-- 掠奪 non-unified 覆蓋確認。
-- war_scenario 統領單令模式重構（leader 直接好戰→攻擊姿態）。
+- 意圖集最終（征服/防衛/致富/擴張/守成）+ 各 score 公式（複用 attack_score/loot_score/threat 重組）。
+- 子命令展開規則（征服→哪些子令的條件：有盟友才欺敵外交、軍費不足才徵收）。
+- `f.intent`/`goal_drivers` 結構 + 消費端（先存，UI/inquiry 讀=後續）。
+- `COMMANDER_COMMITMENT_BONUS`/`SETTLE_BASE` 量級。
+- 立國 = 擴張子命令 vs 分離 gate。
+- 欺敵外交真效果（本塊 driver-only vs 結算改）= 傾向 driver-only（範圍紀律），結算記 backlog。
+- 跟戰 feel 是否需對齊特定數（傾向否，改「可解釋」標準，但回報藍圖）。

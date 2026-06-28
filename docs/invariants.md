@@ -64,6 +64,13 @@
 - 禁止 Scripted Outcome
 - **遍歷 id 快照前必驗存在**：team/person id 陣列是 tick 開頭的快照，元素可能在本 tick 內滅團/死亡被移除；存取 dict 前先驗 `.has(id)`，否則 Invalid get index
 
+## ★ 意圖驅動完備（believability 北極星，藍圖 2026-06-28）
+
+- **凡 named 意圖必有可解釋驅動**：每個 named 意圖（派系令 / 隊 task / 人物 action / 野心階）**必追得回根驅動**——need / value / belief / **父意圖**。**追不出驅動 = bug**（閾值/tag/latch 憑空跳出=該病）。
+- **連貫來自共享父意圖，非收斂單一**：多重命令 OK 甚至嚮往——只要可解釋。統領先 utility 選**戰略意圖**（征服敵X / 防衛 / 致富 / 擴張），意圖**生成協同子命令**（征服X → 攻擊X[手段] + 對X盟友外交[欺敵拖住] + 徵收[籌軍費]＝多令服務同一意圖）。**每令帶「為什麼」（連回父意圖）**。欺敵 = driver 真實（服務征服X）+ action 不真心（戰術外交）。
+- **= 因果脊椎 + 統一決策合一**（[[project_causal_spine]] / [[project_unified_decision_framework]]）：驅動鏈 = 因果脊椎顯化 + 強制。直接定義玩家錨 C——世界 driver-complete → 玩家情報遊戲 = 從看得到的 action 反推看不到的 driver（外交=真結盟還是欺敵？囤糧=遠征還是投機？）。亦是 believability 審計鏡（走任一意圖問 driver，答不出=洞）。
+- **範圍紀律**：北極星 + 不變量，**非現在停下給所有 action 塞 driver 欄重寫**。**統領層現在落實**（commander-unify 第一處）；其餘 = 審計鏡頭，按 player-visibility 排序逐步補——新工作須滿足，舊工作照洞補。**禁鑽牛角尖**（[[feedback_avoid_rabbithole]]）。
+
 ## 關鍵設計規則
 
 - **不直接 script 結果**：所有行為從 NPC values/skills/stress/loyalty 計算產生
