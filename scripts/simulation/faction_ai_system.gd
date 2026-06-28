@@ -28,6 +28,25 @@ const ATTACK_SCORE_THRESHOLD:  float = 0.3   # minimum attack_score to pursue �
 const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
+# commander-v2 means-end：意圖承諾 hysteresis 加成（戰略別每 cadence 翻；情勢不變則黏住）。TEST VALUE
+const COMMANDER_COMMITMENT_BONUS: float = 0.15
+# 意圖 = 目標 predicate（小集；立國=既有分離 gate 不在此）
+const INTENTS: Dictionary = {
+	"征服": {"main_action": "攻擊", "needs_target": true},   # target 不再獨立
+	"致富": {"main_action": "",   "needs_target": false},  # treasury 增（多行動服務，無單一 main）
+	"防衛": {"main_action": "徵收", "needs_target": false}, # 領土不失（備戰籌資）
+	"守成": {"main_action": "",   "needs_target": false},  # default 維持
+}
+# 行動 schema：前提(precond) + 真 affordance（只掛 sim 真產出，孤兒不掛）
+# affordance: {goal:服務的子需求, mode:語義模式}
+const ACTIONS: Dictionary = {
+	"攻擊": {"preconds": ["force_ge_target", "can_reach"],
+		"affordances": [{"goal": "削敵", "mode": "combat"}]},
+	"徵收": {"preconds": ["has_richer_member"],
+		"affordances": [{"goal": "致富", "mode": "levy"}, {"goal": "補力", "mode": "fund_war"}]},
+	"外交": {"preconds": [],
+		"affordances": [{"goal": "補力", "mode": "ally"}]},
+}
 const SURVIVAL_TASKS: Array = [TeamData.TASK_RETURN_HOME, TeamData.TASK_BEG, TeamData.TASK_JOIN, TeamData.TASK_FORAGE, TeamData.TASK_CAMP]
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
 # P2b-1：LOOT_GATE/JOIN_GATE/CAMP_GATE + _loot_pref/_join_pref/_camp_pref 已刪
@@ -626,6 +645,81 @@ func _tag_weight(team: TeamData, task: String) -> float:
 	for tag in required:
 		if team.tags.has(tag): return 1.0
 	return 0.0 if team.tags.size() > 0 else 0.5
+
+# ──────── commander-v2 means-end：意圖選擇（人格×belief×viability×hysteresis）────────
+
+# 從 leader values + 世界量出意圖適性 + 可行性 → argmax 主意圖（單一，不並行）。
+# weak_enemy = belief 認為最近獨立 target 可打贏（征服 viable）。committed = 上次承諾意圖（hysteresis）。
+func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
+		can_levy: bool, committed: String) -> Dictionary:
+	var ambition: float = float(values.get("野心", 0.5))
+	var greed:    float = float(values.get("貪婪", 0.5))
+	var honor:    float = float(values.get("義氣", 0.5))
+	var martial:  float = float(values.get("好戰", 0.5))
+	var caution:  float = float(values.get("慎重", 0.5))
+	# 人格適性（既有 attack_score 結構複用：征服←野心.4+好戰.4-義氣.4）
+	var scores: Dictionary = {
+		"守成": 0.25,  # default base
+		"征服": ambition * 0.4 + martial * 0.4 - honor * 0.4,
+		"致富": greed * 0.6 + ambition * 0.1,
+		"防衛": caution * 0.4 + honor * 0.2,
+	}
+	# viability：征服只在 established + 能湊出實打力(weak_enemy)；湊不出 → 壓到地板(resource-aware 退更小意圖)
+	if not established or not weak_enemy:
+		scores["征服"] = -1.0
+	# 致富主手段=徵收 levy；湊不出 richer member → 仍可（守成/貿易 fallback），不壓死
+	if not can_levy:
+		scores["致富"] = scores["致富"] * 0.6
+	# 承諾 hysteresis：情勢未變時黏住上次意圖
+	if committed != "" and scores.has(committed) and scores[committed] > -0.5:
+		scores[committed] += COMMANDER_COMMITMENT_BONUS
+	# argmax
+	var best_type: String = "守成"
+	var best_score: float = -INF
+	for t in scores:
+		if scores[t] > best_score:
+			best_score = scores[t]; best_type = t
+	return {"type": best_type, "score": best_score}
+
+# 統領意圖選擇（接 state）：量 viability(belief 敵力 vs 我力)、can_levy(富 member)、hysteresis(f.intent)。
+func _select_intent(state: WorldState, f) -> Dictionary:
+	var leader_team: TeamData = state.teams.get(f.leader_team_id)
+	if leader_team == null: return {"type": "守成", "target_id": -1, "why": ""}
+	var leader_p = state.persons.get(leader_team.leader_id)
+	var values: Dictionary = leader_p.values if leader_p else {}
+	# 征服 target + viability（複用既有 attack readiness/strength gate + belief 敵力）
+	var target_id: int = _nearest_independent(state, leader_team)
+	var weak_enemy: bool = false
+	if target_id != -1 and leader_team.readiness >= ATTACK_READINESS_MIN \
+			and _tag_weight(leader_team, TeamData.TASK_ATTACK) > 0.0:
+		weak_enemy = _conquest_viable(state, f, leader_team, target_id)
+	var can_levy: bool = _richest_member(state, f) != -1
+	var committed: String = f.intent.get("type", "")
+	var picked: Dictionary = _score_intents(values, f.is_established, weak_enemy, can_levy, committed)
+	var why: String = ""
+	match picked["type"]:
+		"征服": why = "野心/好戰驅動，belief 評 target%d 可打贏" % target_id
+		"致富": why = "貪婪驅動，treasury 增"
+		"防衛": why = "慎重/威脅驅動，備戰守土"
+		"守成": why = "無強驅動，維持現狀"
+	return {
+		"type": picked["type"],
+		"target_id": target_id if picked["type"] == "征服" else -1,
+		"why": why,
+	}
+
+# 征服 viability：我力(含可補力餘裕粗估) >= belief 敵力 × strength ratio。複用既有 attack gate。
+func _conquest_viable(state: WorldState, f, leader_team: TeamData, target_id: int) -> bool:
+	var tgt_snap: Dictionary = BeliefSystem.best_estimate(state, f.leader_team_id, target_id)
+	var tgt_armed: int = int(tgt_snap.get("armed_est", 999))  # 未知視為強敵 → 不 viable
+	var own_armed: int = _calc_own_armed(state, leader_team)
+	# 可補力餘裕：同 faction member 在攻擊 task 的 armed（既有 _update_goals 邏輯）
+	for mid in f.known_member_states:
+		if mid == f.leader_team_id: continue
+		var ms: Dictionary = f.known_member_states[mid]
+		if ms.get("current_task", "") == TeamData.TASK_ATTACK:
+			own_armed += int(ms.get("armed_est", 0))
+	return float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO
 
 # ──────── 目標評估 ────────
 

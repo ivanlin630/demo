@@ -449,6 +449,7 @@ func _initialize() -> void:
 	_test_observation_noise()
 	# ── G3d-1 決策讀 uncertainty + 風險 gate ──
 	_test_confidence_gate()
+	_test_cmd_intent_select()
 	_test_faction_attack_gate()
 	_test_diplomacy_hostile_gate()
 	# ── G3d-2 cred-weighted uncertainty + scout 查證 ──
@@ -718,6 +719,30 @@ func _attack_gate_scene(caution: float) -> Array:
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
 	return [state, team]
+
+# commander-v2：意圖選擇 helper（直驅 _score_intents 純函式）
+func _select_intent_for(values: Dictionary, established: bool, weak_enemy: bool) -> Dictionary:
+	return FactionAISystem.new()._score_intents(values, established, weak_enemy, true, "")
+
+func _test_cmd_intent_select() -> void:
+	print("--- commander-v2：意圖選擇（人格×viability×hysteresis）---")
+	# 好戰霸主 + 可打弱敵 → 征服
+	var i_war: Dictionary = _select_intent_for({"野心":0.9,"好戰":0.9,"義氣":0.1}, true, true)
+	assert(i_war.get("type") == "征服", "[cmd] 好戰霸主未選征服 %s" % str(i_war))
+	# 商業貪婪 → 致富
+	var i_rich: Dictionary = _select_intent_for({"貪婪":0.9,"好戰":0.2,"野心":0.5}, true, false)
+	assert(i_rich.get("type") == "致富", "[cmd] 貪婪未選致富 %s" % str(i_rich))
+	# 溫和慎重 → 守成/防衛（非征服/致富）
+	var i_calm: Dictionary = _select_intent_for({"野心":0.2,"好戰":0.1,"義氣":0.8,"慎重":0.7,"貪婪":0.2}, true, false)
+	assert(i_calm.get("type") in ["守成", "防衛"], "[cmd] 溫和慎重未選守成/防衛 %s" % str(i_calm))
+	# viability：好戰但敵 belief 顯強(湊不出力, weak_enemy=false) → 不選征服
+	var i_weak: Dictionary = _select_intent_for({"野心":0.9,"好戰":0.9}, true, false)
+	assert(i_weak.get("type") != "征服", "[cmd] 打不贏仍選征服(viability 失效) %s" % str(i_weak))
+	# hysteresis：committed 征服(可打) + 同情勢 → 黏住
+	var fai := FactionAISystem.new()
+	var i_commit: Dictionary = fai._score_intents({"野心":0.6,"好戰":0.5,"義氣":0.3}, true, true, true, "征服")
+	assert(i_commit.get("type") == "征服", "[cmd] hysteresis 失效，committed 征服未黏住 %s" % str(i_commit))
+	print("[cmd] intent select OK")
 
 func _test_faction_attack_gate() -> void:
 	print("--- G3d-1：攻擊 commit gate ---")
