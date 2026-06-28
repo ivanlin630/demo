@@ -449,6 +449,9 @@ func _initialize() -> void:
 	_test_observation_noise()
 	# ── G3d-1 決策讀 uncertainty + 風險 gate ──
 	_test_confidence_gate()
+	_test_cmd_intent_select()
+	_test_cmd_means_end_emit()
+	_test_cmd_viability_hysteresis()
 	_test_faction_attack_gate()
 	_test_diplomacy_hostile_gate()
 	# ── G3d-2 cred-weighted uncertainty + scout 查證 ──
@@ -718,6 +721,116 @@ func _attack_gate_scene(caution: float) -> Array:
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
 	return [state, team]
+
+# commander-v2：意圖選擇 helper（直驅 _score_intents 純函式）
+func _select_intent_for(values: Dictionary, established: bool, weak_enemy: bool) -> Dictionary:
+	return FactionAISystem.new()._score_intents(values, established, weak_enemy, true, "")
+
+func _test_cmd_intent_select() -> void:
+	print("--- commander-v2：意圖選擇（人格×viability×hysteresis）---")
+	# 好戰霸主 + 可打弱敵 → 征服
+	var i_war: Dictionary = _select_intent_for({"野心":0.9,"好戰":0.9,"義氣":0.1}, true, true)
+	assert(i_war.get("type") == "征服", "[cmd] 好戰霸主未選征服 %s" % str(i_war))
+	# 商業貪婪 → 致富
+	var i_rich: Dictionary = _select_intent_for({"貪婪":0.9,"好戰":0.2,"野心":0.5}, true, false)
+	assert(i_rich.get("type") == "致富", "[cmd] 貪婪未選致富 %s" % str(i_rich))
+	# 溫和慎重 → 守成/防衛（非征服/致富）
+	var i_calm: Dictionary = _select_intent_for({"野心":0.2,"好戰":0.1,"義氣":0.8,"慎重":0.7,"貪婪":0.2}, true, false)
+	assert(i_calm.get("type") in ["守成", "防衛"], "[cmd] 溫和慎重未選守成/防衛 %s" % str(i_calm))
+	# viability：好戰但敵 belief 顯強(湊不出力, weak_enemy=false) → 不選征服
+	var i_weak: Dictionary = _select_intent_for({"野心":0.9,"好戰":0.9}, true, false)
+	assert(i_weak.get("type") != "征服", "[cmd] 打不贏仍選征服(viability 失效) %s" % str(i_weak))
+	# hysteresis：committed 征服(可打) + 同情勢 → 黏住
+	var fai := FactionAISystem.new()
+	var i_commit: Dictionary = fai._score_intents({"野心":0.6,"好戰":0.5,"義氣":0.3}, true, true, true, "征服")
+	assert(i_commit.get("type") == "征服", "[cmd] hysteresis 失效，committed 征服未黏住 %s" % str(i_commit))
+	print("[cmd] intent select OK")
+
+# commander-v2：建 established 征服派系。force_deficit=true → leader 獨力不足但有攻擊 task member 補力(intent viable)。
+func _setup_conquer_faction(state: WorldState, force_deficit: bool) -> FactionData:
+	# 獨立鄰 target（弱）
+	var ind := TeamData.new(); ind.team_id = 9; ind.tile_pos = Vector2i(2, 0); ind.faction_id = -1
+	var i_ldr := PersonData.new(); i_ldr.id = 90; state.persons[90] = i_ldr; ind.leader_id = 90
+	_seed_pop(ind, 4); ind.resources = {"food": 100.0}; state.teams[9] = ind
+	# leader 隊（好戰霸主）
+	var lt := TeamData.new(); lt.team_id = 0; lt.tile_pos = Vector2i(0, 0)
+	lt.faction_id = 1; lt.readiness = 1.0; lt.tags = [TeamData.TAG_MILITARY]
+	var ldr := PersonData.new(); ldr.id = 1
+	ldr.values = {"野心": 0.9, "好戰": 0.9, "義氣": 0.5, "貪婪": 0.6, "求生欲": 0.4}
+	ldr.skills = {"統領": 0.7}
+	state.persons[1] = ldr; lt.leader_id = 1; _seed_pop(lt, 12)
+	lt.resources = {"food": 99999.0, "material": 200.0, "weapon_melee_low": 30.0}
+	# force_deficit：leader 獨力 armed 比例壓低 → 獨力 < 敵；補力 member 在攻擊 task 拉到 viable
+	lt.armed_anon_ratio = 0.1 if force_deficit else 1.0
+	state.teams[0] = lt
+	state.team_discovered[0] = [9]
+	# belief：target armed=2（弱）
+	BeliefSystem.record_claim(state, 0, 9, 90, "親見",
+		{"population_est": 4.0, "armed_est": 2.0, "tile_pos": Vector2i(2, 0)}, 1.0, false)
+	# 富 member（供徵收補力 target）
+	var m1 := TeamData.new(); m1.team_id = 1; m1.tile_pos = Vector2i(1, 0); m1.faction_id = 1
+	var m1l := PersonData.new(); m1l.id = 11; state.persons[11] = m1l; m1.leader_id = 11
+	_seed_pop(m1, 6); m1.resources = {"food": 5000.0}; state.teams[1] = m1
+	var f := FactionData.new(); f.faction_id = 1; f.leader_team_id = 0
+	f.member_team_ids = [0, 1]; f.is_established = true
+	# 補力 member 在攻擊 task（intent viable 含餘裕；force_deficit 時拉 own_armed 過 viable 線）
+	f.known_member_states = {1: {"food_est": 5000.0,
+		"current_task": (TeamData.TASK_ATTACK if force_deficit else "idle"),
+		"armed_est": (8 if force_deficit else 0)}}
+	state.factions[1] = f
+	return f
+
+func _test_cmd_means_end_emit() -> void:
+	print("--- commander-v2：means-end 子需求分解 + filler + driver emit ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	# fill 小地圖（_richest_member/_nearest_independent 需 teams）
+	var fai := FactionAISystem.new()
+	var f := _setup_conquer_faction(state, true)
+	fai._update_goals(state, f)
+	# 征服 → 主令攻擊
+	assert("攻擊" in f.goals, "[cmd] 征服未發主令攻擊 goals=%s" % str(f.goals))
+	assert(f.goal_drivers.get("攻擊", {}).get("intent") == "征服",
+		"[cmd] 攻擊令無 driver 連回征服 %s" % str(f.goal_drivers.get("攻擊", {})))
+	# 軍力不足 → 有補力肢（結盟/徵收），driver why 含「補力」
+	var has_boost := false
+	for g in f.goals:
+		if f.goal_drivers.get(g, {}).get("why", "").contains("補力"):
+			has_boost = true
+	assert(has_boost, "[cmd] 軍力不足未開補力肢 goals=%s drivers=%s" % [str(f.goals), str(f.goal_drivers)])
+	# 無無因令：每令都有 driver
+	for g in f.goals:
+		assert(f.goal_drivers.has(g), "[cmd] 無因令 %s(無 driver)" % g)
+	print("[cmd] means-end emit OK goals=%s" % str(f.goals))
+
+func _test_cmd_viability_hysteresis() -> void:
+	print("--- commander-v2：viability / hysteresis / 緊急徵收 override ---")
+	var fai := FactionAISystem.new()
+	# (1) viability：好戰但敵顯強(無補力餘裕) → 不發攻擊令（退守成/致富，不打不贏）
+	var s1 := WorldState.new(); s1.world = WorldData.new(); s1.player_id = -1
+	var f1 := _setup_conquer_faction(s1, false)   # leader armed 滿，但無攻擊 task 補力
+	# 改 belief：敵 armed 顯強(50) → 我獨力(~12)×0.8 湊不出 → 不 viable
+	BeliefSystem.record_claim(s1, 0, 9, 90, "親見",
+		{"population_est": 60.0, "armed_est": 50.0, "tile_pos": Vector2i(2, 0)}, 1.0, false)
+	fai._update_goals(s1, f1)
+	assert("攻擊" not in f1.goals, "[cmd] 打不贏仍發攻擊令(viability 失效) goals=%s" % str(f1.goals))
+	assert(f1.intent.get("type") != "征服", "[cmd] 打不贏仍選征服 intent=%s" % str(f1.intent))
+	# (2) hysteresis：committed 征服 + 情勢不變 → 連評不翻
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
+	var f2 := _setup_conquer_faction(s2, true)
+	fai._update_goals(s2, f2)
+	var first_intent: String = f2.intent.get("type", "")
+	assert(first_intent == "征服", "[cmd] 征服 setup 首評未選征服 intent=%s" % str(f2.intent))
+	fai._update_goals(s2, f2)   # 再評（情勢不變）
+	assert(f2.intent.get("type") == "征服", "[cmd] hysteresis 失效，征服翻成 %s" % str(f2.intent))
+	# (3) 緊急徵收 override：food<emergency → ["徵收"] driver=survival
+	var s3 := WorldState.new(); s3.world = WorldData.new(); s3.player_id = -1
+	var f3 := _setup_conquer_faction(s3, true)
+	s3.teams[0].resources["food"] = 1.0   # 缺糧 → emergency
+	fai._update_goals(s3, f3)
+	assert(f3.goals == ["徵收"], "[cmd] 緊急徵收 override 未獨佔 goals=%s" % str(f3.goals))
+	assert(f3.goal_drivers.get("徵收", {}).get("mode") == "survival",
+		"[cmd] 緊急徵收 driver 非 survival %s" % str(f3.goal_drivers.get("徵收", {})))
+	print("[cmd] viability/hysteresis OK")
 
 func _test_faction_attack_gate() -> void:
 	print("--- G3d-1：攻擊 commit gate ---")

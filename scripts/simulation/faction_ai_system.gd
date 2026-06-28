@@ -28,6 +28,25 @@ const ATTACK_SCORE_THRESHOLD:  float = 0.3   # minimum attack_score to pursue �
 const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
+# commander-v2 means-end：意圖承諾 hysteresis 加成（戰略別每 cadence 翻；情勢不變則黏住）。TEST VALUE
+const COMMANDER_COMMITMENT_BONUS: float = 0.15
+# 意圖 = 目標 predicate（小集；立國=既有分離 gate 不在此）
+const INTENTS: Dictionary = {
+	"征服": {"main_action": "攻擊", "needs_target": true},   # target 不再獨立
+	"致富": {"main_action": "",   "needs_target": false},  # treasury 增（多行動服務，無單一 main）
+	"防衛": {"main_action": "徵收", "needs_target": false}, # 領土不失（備戰籌資）
+	"守成": {"main_action": "",   "needs_target": false},  # default 維持
+}
+# 行動 schema：前提(precond) + 真 affordance（只掛 sim 真產出，孤兒不掛）
+# affordance: {goal:服務的子需求, mode:語義模式}
+const ACTIONS: Dictionary = {
+	"攻擊": {"preconds": ["force_ge_target", "can_reach"],
+		"affordances": [{"goal": "削敵", "mode": "combat"}]},
+	"徵收": {"preconds": ["has_richer_member"],
+		"affordances": [{"goal": "致富", "mode": "levy"}, {"goal": "補力", "mode": "fund_war"}]},
+	"外交": {"preconds": [],
+		"affordances": [{"goal": "補力", "mode": "ally"}]},
+}
 const SURVIVAL_TASKS: Array = [TeamData.TASK_RETURN_HOME, TeamData.TASK_BEG, TeamData.TASK_JOIN, TeamData.TASK_FORAGE, TeamData.TASK_CAMP]
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
 # P2b-1：LOOT_GATE/JOIN_GATE/CAMP_GATE + _loot_pref/_join_pref/_camp_pref 已刪
@@ -627,10 +646,88 @@ func _tag_weight(team: TeamData, task: String) -> float:
 		if team.tags.has(tag): return 1.0
 	return 0.0 if team.tags.size() > 0 else 0.5
 
+# ──────── commander-v2 means-end：意圖選擇（人格×belief×viability×hysteresis）────────
+
+# 從 leader values + 世界量出意圖適性 + 可行性 → argmax 主意圖（單一，不並行）。
+# weak_enemy = belief 認為最近獨立 target 可打贏（征服 viable）。committed = 上次承諾意圖（hysteresis）。
+func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
+		can_levy: bool, committed: String) -> Dictionary:
+	var ambition: float = float(values.get("野心", 0.5))
+	var greed:    float = float(values.get("貪婪", 0.5))
+	var honor:    float = float(values.get("義氣", 0.5))
+	var martial:  float = float(values.get("好戰", 0.5))
+	var caution:  float = float(values.get("慎重", 0.5))
+	# 人格適性（既有 attack_score 結構複用：征服←野心.4+好戰.4-義氣.4）
+	var scores: Dictionary = {
+		"守成": 0.25,  # default base
+		"征服": ambition * 0.4 + martial * 0.4 - honor * 0.4,
+		"致富": greed * 0.6 + ambition * 0.1,
+		"防衛": caution * 0.4 + honor * 0.2,
+	}
+	# viability：征服只在 established + 能湊出實打力(weak_enemy)；湊不出 → 壓到地板(resource-aware 退更小意圖)
+	if not established or not weak_enemy:
+		scores["征服"] = -1.0
+	# 致富主手段=徵收 levy；湊不出 richer member → 仍可（守成/貿易 fallback），不壓死
+	if not can_levy:
+		scores["致富"] = scores["致富"] * 0.6
+	# 承諾 hysteresis：情勢未變時黏住上次意圖
+	if committed != "" and scores.has(committed) and scores[committed] > -0.5:
+		scores[committed] += COMMANDER_COMMITMENT_BONUS
+	# argmax
+	var best_type: String = "守成"
+	var best_score: float = -INF
+	for t in scores:
+		if scores[t] > best_score:
+			best_score = scores[t]; best_type = t
+	return {"type": best_type, "score": best_score}
+
+# 統領意圖選擇（接 state）：量 viability(belief 敵力 vs 我力)、can_levy(富 member)、hysteresis(f.intent)。
+func _select_intent(state: WorldState, f) -> Dictionary:
+	var leader_team: TeamData = state.teams.get(f.leader_team_id)
+	if leader_team == null: return {"type": "守成", "target_id": -1, "why": ""}
+	var leader_p = state.persons.get(leader_team.leader_id)
+	var values: Dictionary = leader_p.values if leader_p else {}
+	# 征服 target + viability（複用既有 attack readiness/strength gate + belief 敵力）
+	var target_id: int = _nearest_independent(state, leader_team)
+	var weak_enemy: bool = false
+	if target_id != -1 and leader_team.readiness >= ATTACK_READINESS_MIN \
+			and _tag_weight(leader_team, TeamData.TASK_ATTACK) > 0.0:
+		weak_enemy = _conquest_viable(state, f, leader_team, target_id)
+	var can_levy: bool = _richest_member(state, f) != -1
+	var committed: String = f.intent.get("type", "")
+	var picked: Dictionary = _score_intents(values, f.is_established, weak_enemy, can_levy, committed)
+	var why: String = ""
+	match picked["type"]:
+		"征服": why = "野心/好戰驅動，belief 評 target%d 可打贏" % target_id
+		"致富": why = "貪婪驅動，treasury 增"
+		"防衛": why = "慎重/威脅驅動，備戰守土"
+		"守成": why = "無強驅動，維持現狀"
+	return {
+		"type": picked["type"],
+		"target_id": target_id if picked["type"] == "征服" else -1,
+		"why": why,
+	}
+
+# 征服 viability：我力(含可補力餘裕粗估) >= belief 敵力 × strength ratio。複用既有 attack gate。
+func _conquest_viable(state: WorldState, f, leader_team: TeamData, target_id: int) -> bool:
+	var tgt_snap: Dictionary = BeliefSystem.best_estimate(state, f.leader_team_id, target_id)
+	var tgt_armed: int = int(tgt_snap.get("armed_est", 999))  # 未知視為強敵 → 不 viable
+	var own_armed: int = _calc_own_armed(state, leader_team)
+	# 可補力餘裕：同 faction member 在攻擊 task 的 armed（既有 _update_goals 邏輯）
+	for mid in f.known_member_states:
+		if mid == f.leader_team_id: continue
+		var ms: Dictionary = f.known_member_states[mid]
+		if ms.get("current_task", "") == TeamData.TASK_ATTACK:
+			own_armed += int(ms.get("armed_est", 0))
+	return float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO
+
 # ──────── 目標評估 ────────
 
+# commander-v2 means-end 重構：意圖 predicate → 子需求現算(深度1) → 真 affordance 匹配 → 每令帶 driver。
+# 北極星：凡 named 意圖必有可解釋驅動（f.goal_drivers[goal]={intent,why,mode}）。
 func _update_goals(state: WorldState, f) -> void:
 	f.goals.clear()
+	f.goal_drivers.clear()
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
 	if leader_team == null:
 		return
@@ -642,75 +739,125 @@ func _update_goals(state: WorldState, f) -> void:
 
 	var leader_p = state.persons.get(leader_team.leader_id)
 	var ambition: float = float(leader_p.values.get("野心",   0.5)) if leader_p else 0.5
-	var greed:    float = float(leader_p.values.get("貪婪",   0.5)) if leader_p else 0.5
 	var survival: float = float(leader_p.values.get("求生欲", 0.5)) if leader_p else 0.5
 	var honor:    float = float(leader_p.values.get("義氣",   0.5)) if leader_p else 0.5
-	var martial:  float = float(leader_p.values.get("好戰",   0.5)) if leader_p else 0.5
 
+	# ── 步驟 1：survival override（意圖前）＋立國 gate（既有分離）──
 	# WS-2c：有效糧(私產+自家糧倉)，否則定居 leader 隊 food 在糧倉→永誤判缺糧→恆觸急徵稅。
 	var food_per_cap: float = ResourceSystem.effective_food(state, leader_team) / maxf(leader_team.population, 1)
 	var effective_emergency: float = FOOD_EMERGENCY * (0.7 + survival * 0.6) \
 		* clampf(1.0 - honor * HONOR_EMERGENCY_DISC, 0.5, 1.0)
-	var effective_interval:  int   = maxi(
-		int(COLLECT_INTERVAL * (1.5 - greed) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
+	if food_per_cap < effective_emergency:
+		f.strategy = "緊急徵收"
+		_emit_goal(f, "徵收", "守成", "缺糧 survival override", "survival")  # driver mode=survival
+		return
 
-	# 戰爭基金：野心/好戰高 + 建材低 → 額外加徵特別稅（非缺糧驅動）
+	# 立國 gate（既有分離，非意圖集；不在 means-end argmax）
+	if not f.is_established and f.member_team_ids.size() >= 2 and leader_p != null:
+		var cmd: float = float(leader_p.skills.get("統領", 0.0))
+		var ambition_discount: float = (ambition - 0.5) * 0.2
+		if cmd >= ESTABLISH_COMMAND - ambition_discount \
+				and ambition >= ESTABLISH_AMBITION - 0.1 \
+				and leader_team.readiness >= ESTABLISH_READINESS:
+			_emit_goal(f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
+
+	# ── 步驟 2：意圖選擇（resource-aware + 人格 + belief + hysteresis）──
+	var intent: Dictionary = _select_intent(state, f)
+	f.intent = intent
+	f.strategy = intent["type"]
+	var itype: String = intent["type"]
+
+	# 戰爭基金（跨意圖籌餉 sub-need）：野心/好戰高 + 建材枯 → 特別稅備戰（driver=備戰籌餉）。
+	# 非缺糧 survival；意圖無關（想武裝起來）。保留既有經濟行為，附 driver 連回意圖。
+	var martial: float = float(leader_p.values.get("好戰", 0.5)) if leader_p else 0.5
 	var war_chest_need: bool = (ambition > 0.6 or martial > 0.6) \
 		and float(leader_team.resources.get("material", 0)) < WAR_CHEST_MIN
-	if food_per_cap < effective_emergency:
-		f.goals.append("徵收")
-		f.strategy = "緊急徵收"
-	elif war_chest_need:
-		f.goals.append("徵收")
+	if war_chest_need:
 		f.strategy = "戰爭基金"
-	elif state.world.current_tick % effective_interval == 0:
-		f.goals.append("徵收")
-		f.strategy = "定期徵收"
-	else:
-		f.strategy = "idle"
+		_emit_goal(f, "徵收", itype, "備戰籌餉(建材枯)", "fund_war")
 
-	if not f.is_established and f.member_team_ids.size() >= 2:
-		if leader_p != null:
-			var cmd: float = float(leader_p.skills.get("統領", 0.0))
-			var ambition_discount: float = (ambition - 0.5) * 0.2
-			if cmd >= ESTABLISH_COMMAND - ambition_discount \
-					and ambition >= ESTABLISH_AMBITION - 0.1 \
-					and leader_team.readiness >= ESTABLISH_READINESS:
-				f.goals.append("立國")
+	# ── 步驟 3+4：分解子需求(深度1) + 匹配 filler + emit（每令 driver）──
+	match itype:
+		"征服":
+			# 主行動=攻擊 target；補力肢從未滿足前提(force_ge_target)現算
+			_emit_goal(f, "攻擊", "征服", "主手段取 target%d" % intent["target_id"], "combat")
+			var open_needs: Array = _decompose_needs(state, f, leader_team, "攻擊", intent["target_id"])
+			_match_fillers(state, f, leader_team, open_needs, "征服")
+		"致富":
+			# 無單一 main_action → 最高 util 致富行動（徵收 levy；無富 member 則守成）
+			if _richest_member(state, f) != -1:
+				_emit_goal(f, "徵收", "致富", "籌資增 treasury", "levy")
+			# 致富亦可外交結盟拓商路（真 affordance ally；輔助，從人格餘裕）
+			if _has_independent(state, f.leader_team_id) and leader_team.readiness >= DIPLOMACY_READINESS_MIN:
+				_emit_goal(f, "外交", "致富", "結盟拓勢", "ally")
+		"防衛":
+			# 領土不失 → 備戰籌資（徵收 fund_war）
+			if _richest_member(state, f) != -1:
+				_emit_goal(f, "徵收", "防衛", "備戰籌餉", "fund_war")
+		"守成":
+			# default：無 stakes 令；僅維持經濟 cadence（定期徵收，仍帶 driver）
+			var greed_s: float = float(leader_p.values.get("貪婪", 0.5)) if leader_p else 0.5
+			var effective_interval: int = maxi(
+				int(COLLECT_INTERVAL * (1.5 - greed_s) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
+			if state.world.current_tick % effective_interval == 0 and _richest_member(state, f) != -1:
+				_emit_goal(f, "徵收", "守成", "定期維持 treasury", "levy")
+	# 掠奪 = team option（P1）非統領令；war-priority 移除（單意圖後 moot）。
 
-	var diplomacy_readiness: float = clampf(
-		DIPLOMACY_READINESS_MIN - (ambition - 0.5) * DIPLOMACY_AMBITION_DISC, 0.3, 0.9)
-	if f.is_established and leader_team.readiness >= diplomacy_readiness:
-		if _has_independent(state, f.leader_team_id):
-			f.goals.append("外交")
+# 子需求分解（深度1）：主行動未滿足前提 vs live 世界 → open needs（每 need = 子目標 String）。
+# 只回推主行動前提，不遞迴填補行動自己的前提。
+func _decompose_needs(state: WorldState, f, leader_team: TeamData, main_action: String, target_id: int) -> Array:
+	var open: Array = []
+	var schema: Dictionary = ACTIONS.get(main_action, {})
+	for pre in schema.get("preconds", []):
+		if not _precond_met(state, f, leader_team, pre, target_id):
+			match pre:
+				"force_ge_target": open.append("補力")   # 軍力不足 → 需補力
+				# can_reach 失敗=擋敵盟需「欺敵」filler→孤兒(無真 affordance)→不開該 need(spec 欺敵孤兒洞)
+				_: pass
+	return open
 
-	var attack_score: float = ambition * 0.4 + martial * 0.4 - honor * 0.4
-	if f.is_established and attack_score > ATTACK_SCORE_THRESHOLD \
-			and leader_team.readiness >= ATTACK_READINESS_MIN \
-			and _has_independent(state, f.leader_team_id) \
-			and _tag_weight(leader_team, TeamData.TASK_ATTACK) > 0.0:
-		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1:
-			var tgt_snap: Dictionary = BeliefSystem.best_estimate(state, f.leader_team_id, target_id)
-			var tgt_armed: int = int(tgt_snap.get("armed_est", 999))  # 未知視為強敵
+# 前提 check（複用既有 gate）。深度1：只查主行動自身前提。
+func _precond_met(state: WorldState, f, leader_team: TeamData, pre: String, target_id: int) -> bool:
+	match pre:
+		"force_ge_target":
+			# 嚴格：leader 隊「當前」獨力軍力已 ≥ 敵（不含補力餘裕）→ 滿足，不開補力肢。
+			# 不足但 intent 仍 viable（含餘裕）→ 開「補力」need 抽輔助肢（這正是 means-end 思考）。
+			if target_id == -1: return true
+			var snap: Dictionary = BeliefSystem.best_estimate(state, f.leader_team_id, target_id)
+			var tgt_armed: int = int(snap.get("armed_est", 999))
 			var own_armed: int = _calc_own_armed(state, leader_team)
-			for mid in f.known_member_states:
-				if mid == f.leader_team_id: continue
-				var ms: Dictionary = f.known_member_states[mid]
-				if ms.get("current_task", "") == TeamData.TASK_ATTACK:
-					own_armed += int(ms.get("armed_est", 0))
-			if float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO:
-				f.goals.append("攻擊")
-		else:
-			f.goals.append("攻擊")
+			return float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO
+		"can_reach":
+			return target_id != -1 and _hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999
+		"has_richer_member":
+			return _richest_member(state, f) != -1
+	return true
 
-	var loot_score: float = greed * 0.5 + martial * 0.3 - honor * 0.3
-	if f.is_established and loot_score > LOOT_SCORE_THRESHOLD \
-			and leader_team.readiness >= LOOT_READINESS_MIN \
-			and _has_independent(state, f.leader_team_id) \
-			and _tag_weight(leader_team, TeamData.TASK_LOOT) > 0.0:
-		f.goals.append("掠奪")
-	# TODO: "合併" goal — 由 leader 手動指派 order_target_id，FactionAI 目前不自動觸發
+# filler 匹配：util = affordance∩need × 人格適性 × viable；從人格餘裕抽輔助肢（非硬塞）。
+# 補力 need ← 結盟(外交 ally) / 徵收(fund_war)；命中即 emit driver。
+func _match_fillers(state: WorldState, f, leader_team: TeamData, open_needs: Array, intent_type: String) -> void:
+	var leader_p = state.persons.get(leader_team.leader_id)
+	var honor: float = float(leader_p.values.get("義氣", 0.5)) if leader_p else 0.5
+	var greed: float = float(leader_p.values.get("貪婪", 0.5)) if leader_p else 0.5
+	for need in open_needs:
+		if need == "補力":
+			# 結盟(外交 ally)：義氣高 leader 偏好；需有獨立鄰可結盟
+			var ally_ok: bool = _has_independent(state, f.leader_team_id) \
+				and leader_team.readiness >= DIPLOMACY_READINESS_MIN
+			var ally_util: float = (0.3 + honor * 0.5) if ally_ok else -1.0
+			# 徵收(fund_war 籌餉練兵)：貪婪/務實 leader 偏好；需富 member
+			var levy_ok: bool = _richest_member(state, f) != -1
+			var levy_util: float = (0.3 + greed * 0.4) if levy_ok else -1.0
+			if ally_util >= levy_util and ally_util > 0.0:
+				_emit_goal(f, "外交", intent_type, "補力(結盟拖住/壯盟)", "ally")
+			elif levy_util > 0.0:
+				_emit_goal(f, "徵收", intent_type, "補力(籌餉練兵)", "fund_war")
+
+# emit 一令 + 記 driver（北極星：每令連回意圖）。goal token 用既有消費詞彙(攻擊/徵收/外交/立國)。
+func _emit_goal(f, goal: String, intent_type: String, why: String, mode: String) -> void:
+	if goal not in f.goals:
+		f.goals.append(goal)
+	f.goal_drivers[goal] = {"intent": intent_type, "why": why, "mode": mode}
 
 # ──────── 任務指派 ────────
 
