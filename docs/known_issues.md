@@ -12,6 +12,19 @@
 
 - **mint coin-cap 燒 ore off-ledger（pre-existing，G1a 首 fire 才浮現，2026-06-23 opus 終審揭）**：`outpost_system.gd:~228/241` `_tick_mint` 用 `minf(cur_coin+coin_added, cap)` clamp coin 到 storage cap——若鑄幣 tile 的 coin vault 飽和，ore 被消耗但 coin 被 clamp 截掉 → coin_eq 損失（ore 燒掉沒換 coin）。G1a 前 mint 從沒 fire 故未觸；G1a 讓 mint 真 fire → 長跑可能浮現。**小修**：coin 滿 cap 時跳過/部分消耗 ore（別燒）。非阻塞（現 run delta=0）。
 
+## affordance 真實性債（commander-unify v2 盤點，2026-06-28）
+
+> 北極星「凡 named 意圖必有可解釋驅動」+ affordance 真實性 invariant：宣稱效果模擬不出=孤兒 affordance=假。commander v2 **只掛真 affordance**，下列孤兒=暫不掛、列債（撐起來才掛）。盤點 = action-effect 審計（7 action/47 真效果/29 孤兒）。
+
+- **真 affordance（v2 可掛）**：攻擊=削軍力(`npc_combat`casualty)+掠奪得資源(30% loot)；徵收=籌資(resource transfer)+壓迫(stress/loyalty hit)；外交=真結盟(faction merge)+背叛(betrayal 65%)；貿易=致富(+coin/換貨)；建設=mint(ore→coin)/stable(練騎)/倉儲;結盟=faction merge。
+- **孤兒 affordance（藍圖願景但 sim 不產出 → 債）**：
+  - **欺敵外交/離間/緩兵**（外交只有真結盟+背叛，無假和/離間第三方/緩兵機制）→ 玩家錨 C「拋外交=真心還是欺敵」的欺敵層**需先建欺敵機制**。
+  - **貿易戰=砸敵經濟**（貿易只 local +coin/換貨，無供應斷鏈/壟斷收購/傾銷崩價）→ 需建供應鏈缺貨傳導（撐在既有市集/order plumbing 上）。
+  - **壓迫 cascade/削弱屬民**（徵收有 stress/loyalty hit，無「缺糧→餓→忠誠崩」spiral）。
+  - **城防/威望/產能升級**（建設只 mint/stable/倉儲，無守備加成/招募吸引/製造佇列）。
+  - **互防/離間**（結盟只 faction merge，無自動戰鬥支援）。**戰俘 ransom/勞役**（prisoner_population 欄存在未用）。
+- **影響**：v2 means-end commander **真 affordance 可跑**（征服X→攻擊+結盟/徵收 補軍力，depth-1 回推）；但**欺敵/貿易戰 deception 層=債**（玩家錨 C richness 待 sim 建）。建欺敵機制 = 後續獨立 arc（撐真模擬效果才掛 affordance）。
+
 ## 統一決策框架 / survival backlog（P2b-1 揭）
 
 - **attacker 輕飢 churn（pre-existing，P2b-1 world_sim 量測揭）**：~927 次/2yr 攻擊隊輕飢→`_evaluate_survival`→survival 評估無可派 option→`release`→idle→再攻 → churn。**非 P2b-1 引入**（baseline 927→after 932 幾乎不變）= 既有獨立問題。spec measure-first 把 1037 `[Survival]` 誤解為 return_home 熱路徑，實為此 churn 主導。**修向**：survival entry 對「無可派 option 之輕飢攻擊隊」早退不進 survival 評估 / 或攻擊 task 對輕飢更黏。待排序。
