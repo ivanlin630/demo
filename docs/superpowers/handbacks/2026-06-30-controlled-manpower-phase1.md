@@ -31,7 +31,10 @@
 
 ## (a) 量測（climb / warring seed）
 
-> 量測在背景跑（climb 12 sim-yr / warring 172800 tick，wrapper 需 `GODOT_TIMEOUT` 拉高）。**結果見下方「待補/誠實標」——若數字未及填，主 session 重跑驗收。**
+> **誠實標：(a) climb/warring seed 量測未完成。** climb_diagnose（12 sim-yr=86400 tick）+ warring_states_seed（172800 tick）在子 session 內背景跑逾 5+ 分鐘未收斂（sim 極重），子 session 未取得 CONQUER/能人 pop 累積數字。**主 session 必須重跑驗收 (a)**：
+> - `$env:GODOT_TIMEOUT=1500; .\tools\godot.ps1 --headless --script scripts/debug/climb_diagnose.gd`（讀「能人最高 rung 分布」是否突破 rung2＋pop 累積）
+> - `$env:GODOT_TIMEOUT=3000; .\tools\godot.ps1 --headless --script scripts/debug/warring_states_seed.gd`（讀意圖分布 CONQUER 0→? ＋ probe p1.assimilate/revolt/flee）
+> 子 session **未**宣稱 (a) 已解——只證機制就位 + 守恆。**(a) 數字驗收待主 session。**
 
 - **機制就位驗證**（headless + believability 測證）：征服→吸收（npc_combat 插入，[P1Absorb] print）→ 厚待同化（[P1Assim]，captive→free pop，征服 pay）/ 苛待暴動逃（[P1Revolt]/[P1Flee]）全跑通。
 - **CONQUER 0→?**：warring seed 意圖直方圖 + p1.assimilate probe（背景量測；見下誠實標）。
