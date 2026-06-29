@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 知會 — P2b-1 survival 選擇統一落地;3 個 believability 行為微變需你確認願景接受;measure 揭一 pre-existing churn
 ---
 

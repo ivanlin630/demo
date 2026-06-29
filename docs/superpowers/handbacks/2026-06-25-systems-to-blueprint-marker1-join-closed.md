@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 知會 — 標記1 之 join（敗商隊投靠）債閉;P2a 絕境 option 落地;loot 已 P1,join 今補,camp/beg 完整化
 ---
 

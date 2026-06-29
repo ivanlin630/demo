@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 求認可 — P4 徵收/外交 落地;實作中發現多 stakes 衝突,我依你 A 裁定原則做了 war-priority(攻擊>徵收/外交),請你確認或重排
 ---
 

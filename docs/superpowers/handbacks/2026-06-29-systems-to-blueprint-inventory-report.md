@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 盤點回報 — G3 基質 8/10(漏 god-view 2處)/Pattern B 5.5/6(缺 StressBank+driver-ledger)/零星(背叛 RNG·E-2 無模型);排序建議 + 平行起 framework-cleanup
 ---
 

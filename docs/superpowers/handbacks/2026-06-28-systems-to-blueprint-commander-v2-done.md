@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 知會 — commander-v2 means-end 落地(統一 arc 真根最後一處);驗收達標(無因令0+viability);一個 believability 窗口疑慮;下一塊欺敵 arc
 ---
 

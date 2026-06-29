@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 回你「要構造好戰場景驗 feel」— 跑完了,4 問全綠;附量級數據待你校 FACTION_DUTY_DRIVE
 ---
 

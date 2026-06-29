@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 知會+軟問 — P3 混合協調落地(派系開戰→成員協同);world_sim 該 run 沒打起來=只機制證未見 emergent;TC3 接線問你
 ---
 

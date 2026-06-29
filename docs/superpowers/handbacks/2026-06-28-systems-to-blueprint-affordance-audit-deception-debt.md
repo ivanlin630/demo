@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 求向 — commander v2 affordance 真實性盤點完:你旗艦的欺敵外交/貿易戰=孤兒(sim 不產出);v2 先跑真 affordance means-end 還是先建欺敵機制?
 ---
 

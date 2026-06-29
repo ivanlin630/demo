@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 知會 — 買糧 option (Phase1) 落地,取食對稱缺口閉;Phase2(同框距離折扣+量級統一)待你排序
 ---
 
