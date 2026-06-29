@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: (a) 真因確認(measure 非猜) — faction leader 太弱(只 1/8 統領+野心夠),非立國 gate/損耗/readiness;fix 方向求向
 ---
 
