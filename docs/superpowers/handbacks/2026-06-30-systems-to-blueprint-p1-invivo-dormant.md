@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: P1 (a) 量測誠實報 — 機制+守恆綠但活世界 100% dormant;真瓶頸在上游(npc_combat 起戰0決勝→無征服→吸收never fire);更正我前一個錯猜
 ---
 

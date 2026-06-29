@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★真因量出來了(非待量) — NPC 戰鬥設計上不決勝(撤退先於殲滅,0擊潰),故征服→吸收→(a)全斷;fix 方向求向
 ---
 

@@ -30,6 +30,23 @@ entry 通道全按 **entry-condition 分類**，新通道歸某類、零改碼�
 
 **設計只定 5 類介面 + deposit 機制**；建 anon 吸收（強迫類）先，其餘隨後。
 
+## 3b. 俘虜 entry = 失能-capture（統一 player + NPC，控地權）
+
+俘虜這條 entry 通道**統一 player 遭遇戰 + NPC 戰**，同一原則，免兩套漂走（現況已分岔：encounter 失能→`is_prisoner`/存 `prisoner_population`；npc_combat 吸收只掛近全滅 `_end_combat`→never fire）。
+
+**統一原則：失能者被俘 = 控地權**（誰控制他倒下的地方）。**非「一失能就被俘」（太嚴）、非擲骰（太隨意）。**
+- **player 遭遇戰（個體 LOD）**：失能個體 + 鄰敵控格 + 守衛沒超載 → 被俘；隊友緊鄰無敵看守 → 解救。（已有，保留）
+- **NPC 戰（聚合 LOD）**：敗方潰逃丟戰場 → 勝方控地 → 俘敗方 `wounded`（失能聚合）的**一比例**：
+  ```
+  俘虜比例 = 敗方 wounded × 潰逃嚴重度 × 勝方 guard 餘力
+    有序撤退抬走傷員 → 俘少 ｜ 崩潰潰逃丟下 → 俘多 ｜ guard 滿 → 俘不下
+  ```
+- **確定性、非 RNG**（driver-complete：被俘因=敵控地+有餘力，非憑空）。兩 LOD 同語意、LOD 適配實作，非硬塞單函式。
+- **修 (a) 上游真因**：NPC 吸收從「近全滅才觸發」改「失能者被俘（潰逃留下的 wounded）」→ 戰鬥決勝不再需殲滅 → 征服 pay。**「決勝在潰逃非對撞」**：潰得越慘、控地越徹底、俘越多。
+- **#3 E-2 投降** = 失能-capture 的士氣版（整隊士氣崩→降→被俘），後續豐富。**否「放寬決勝門檻」**（那是全滅端，反失能-capture、反個體不自殺）。
+
+**存儲統一**：encounter 俘虜（`prisoner_population`）+ NPC captive → **同一受控人力 captive 表示**（受控狀態欄），非兩個池。
+
 ## 4. 受控狀態欄（子團 ↔ 主團 軌跡）
 
 一個 **受控狀態欄**（free / captive / slave / conscript / mercenary）掛在 subteam（跟隨子隊）/anon cohort 上。複用既有「被吸收 anon → 跟隨子隊」。**非奴隸特例 class**。
