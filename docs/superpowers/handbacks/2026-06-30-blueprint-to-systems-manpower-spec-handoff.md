@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 受控人力統一系統 spec 移交 — HOW+分階(P1 anon吸收解(a));吃掉(a)吸收片;rung2→3 另案;接 climb-stall measure
 ---
 
