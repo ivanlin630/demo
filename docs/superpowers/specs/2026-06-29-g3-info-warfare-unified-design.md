@@ -89,6 +89,15 @@
 - **戰國 seed 驗**：離間拆盟、被識破騙子口碑崩、慎重者查證/莽者誘殺 — 活世界量到。
 - **回歸閘**：headless 1000+ tick 無錯 + coin/pop 守恆（coin_eq delta=0）。不用 multi drift。
 
+## 5b. ★ 統一/可擴充 硬要求（HOW 沒守會退回非統一）
+
+本機制 = 專案核心，統一且可擴充 by construction，但兩點若 HOW 偷懶就破功，列**硬要求**：
+
+1. **植假 primitive 必須通用**：`plant(target, 任意 subject, 假值, claimed_provenance, scheme)`。假和/離間/緩兵 = 三個**實例**（不同 subject：己方意圖 / 第三方忠誠 / 威脅時程），**非三個 hardcoded 函式**。加新欺敵招 = 新 (subject,value)、零改碼。
+2. **relay 失真必須走統一 driver 模型**：中間商加料 = 意圖驅動 action（凡失真必有可解釋 driver，過既有決策/means-end），**非 bolt-on 失真亂數 roll**。偷懶寫獨立 roll = 信息域又長一個非統一 latch（正是全 arc 在殺的病）。
+
+**可擴充邊界（刻意的牆）**：擴充在「multi-claim + 可信度」範式**內**。完整認知模擬（每 NPC 世界觀模型 + 推理鏈）故意 OUT（measure-first 擋 AI 完美化）。超牆 = 鑽進不可玩，非缺陷。
+
 ## 6. 給系統 HOW（移交重點）
 
 - `source_type` → claimed-provenance（可謊報，與真相分離）；感知可信度公式去真-hop、改 claimed 權重；真 hop 模擬側管失真。
