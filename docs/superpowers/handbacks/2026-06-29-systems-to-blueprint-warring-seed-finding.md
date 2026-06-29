@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 戰國 seed 全 2yr 跑完 — 揭活世界從不進征服 regime(全防衛/established 卡 1);commander 征服協同活世界從不 fire;bed 需強化或揭 balance 真根
 ---
 
