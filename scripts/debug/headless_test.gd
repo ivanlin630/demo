@@ -28,6 +28,7 @@ func _initialize() -> void:
 	_test_add_exp()
 	_test_kill_random_proportional()
 	_test_transfer_proportional()
+	_test_mp1_absorb_conserves()
 	_test_promote_success()
 	_test_promote_insufficient_exp()
 	_test_promote_insufficient_resources()
@@ -12991,6 +12992,34 @@ func _test_engine_rank() -> void:
 
 func _mk_team_tag(tag: String) -> TeamData:
 	var t := TeamData.new(); t.tags = [tag]; return t
+
+# ── 受控人力 P1 helpers ──
+func _mk_mp_team(state: WorldState, tid: int, anon_pop: int) -> TeamData:
+	var t := TeamData.new(); t.team_id = tid; t.leader_id = -1
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", anon_pop)
+	state.teams[tid] = t
+	return t
+
+# Task1：吸收守恆（loser↓ == holder captive↑）+ captive 不入戰力 pop + 同化漲 pop
+func _test_mp1_absorb_conserves() -> void:
+	var state := WorldState.new()
+	var winner := _mk_mp_team(state, 1, 10)
+	var loser  := _mk_mp_team(state, 2, 20)
+	var loser_pop0: int = loser.population
+	var winner_pop0: int = winner.population
+	AnonTierSystem.absorb_as_captive(state, winner, loser, 0.5)
+	assert(winner.population == winner_pop0, "[mp1] captive 竟入勝方戰力 pop(該隔離)")
+	assert(loser.population < loser_pop0, "[mp1] 敗方 pop 未掉(吸收非轉移)")
+	var captured: int = AnonCohort.total(winner.captive_groups[0].get("cohorts", {}))
+	assert(loser_pop0 - loser.population == captured, "[mp1] pop 不守恆 loser掉%d != captured%d" % [loser_pop0 - loser.population, captured])
+	# captive 不入 InvariantAudit population 期望（cohort 自洽仍綠）
+	assert(not _contains_substr(InvariantAudit.check(state), "population drift"), "[mp1] captive 破 population invariant")
+	# 同化 → captive 轉 holder free pop
+	AnonTierSystem.assimilate_captives(winner, winner.captive_groups[0])
+	assert(winner.population == winner_pop0 + captured, "[mp1] 同化後戰力 pop 未漲(=解 (a))")
+	assert(winner.captive_groups.is_empty(), "[mp1] 同化後 captive_group 未清")
+	assert(not _contains_substr(InvariantAudit.check(state), "cohort"), "[mp1] 同化後 cohort 不自洽")
+	print("[mp1] absorb conserves OK captured=%d" % captured)
 
 # ── 共用：建一支商隊（自家 outpost + 糧倉 + 指定 leader 人格）──
 func _mk_merchant_team(state: WorldState, leader_vals: Dictionary, has_arb: bool, food: float) -> TeamData:

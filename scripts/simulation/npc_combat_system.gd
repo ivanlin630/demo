@@ -283,6 +283,10 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	if loser_dead > 0:
 		AnonTierSystem.kill_random(loser, loser_dead, "combat_defeat", AnonTierSystem.SURVIVAL_KILL_WEIGHT)
 		print("[E1Defeat] Team%d 敗方 pop 損耗 -%d" % [loser_id, loser_dead])
+	# 受控人力 P1：征服吸收敗方殘餘 anon → 勝方 captive_group（守恆：loser anon→holder captive；隔離非戰力）
+	var _captured: int = AnonTierSystem.absorb_as_captive(state, winner, loser, AnonTierSystem.CAPTURE_RATE)
+	if _captured > 0:
+		print("[P1Absorb] Team%d 吸收 Team%d 殘餘 anon → captive +%d" % [winner_id, loser_id, _captured])
 	_apply_pursuit(state, winner_id, loser_id)
 	var _pp_end: PersonData = state.persons.get(state.player_id)
 	var _ptid_end: int = _pp_end.team_id if _pp_end else -1
