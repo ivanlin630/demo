@@ -9,6 +9,10 @@ const TIER_ORDER: Array = AnonCohort.TIER_ORDER
 # 戰鬥敗方損耗的 tier 死亡權重（存活反比）。TEST VALUE。
 const SURVIVAL_KILL_WEIGHT: Dictionary = {"平民": 1.0, "新兵": 0.6, "老兵": 0.3, "菁英": 0.15}
 
+# ───── 受控人力 Phase 1：征服吸收常數（全 TEST VALUE）─────
+const CAPTURE_RATE: float        = 0.5    # 征服吸收敗方殘餘 anon 比例
+const CAPTIVE_INIT_MORALE: float = 0.25   # 吸收 captive 初始 morale（低忠，entry=吸收 強迫類）
+
 const TIER_STATS: Dictionary = {
 	"平民": { "combat": 0.1, "speed": 0.7, "base_wage": 0.5 },
 	"新兵": { "combat": 0.3, "speed": 0.8, "base_wage": 1.0 },
@@ -195,6 +199,93 @@ static func transfer_proportional(from: TeamData, to: TeamData, count: int) -> D
 					moved[tier] += real2
 					remaining -= real2
 	return moved
+
+# ───── 受控人力 Phase 1：吸收 / 同化（守恆轉移，純 anon）─────
+
+# 征服吸收：按 rate 從 loser.anon_cohorts remove → 組成 captive_group append 到 holder.captive_groups。
+# 守恆：loser anon 移除量 == captive_group cohorts 總量（轉移非憑空）。captive 不入 holder.anon_cohorts（非戰力）。
+# 保留來源 tier|health 鍵。回擄走總數。
+static func absorb_as_captive(_state: WorldState, holder: TeamData, loser: TeamData, rate: float) -> int:
+	if holder == null or loser == null or rate <= 0.0:
+		return 0
+	var captured: Dictionary = {}   # "tier|health" → count
+	var total_captured: int = 0
+	# 逐桶按 rate 取整 remove（health-aware，保 tier+health）
+	for key in loser.anon_cohorts.keys():
+		var parts: Array = AnonCohort._parse(key)
+		var tier: String = parts[0]
+		var health: String = parts[1]
+		var avail: int = int(loser.anon_cohorts[key])
+		if avail <= 0:
+			continue
+		var take: int = int(floor(float(avail) * rate))
+		if take <= 0:
+			continue
+		var real: int = AnonCohort.remove(loser.anon_cohorts, tier, health, take)
+		if real > 0:
+			captured[key] = int(captured.get(key, 0)) + real
+			total_captured += real
+	if total_captured <= 0:
+		return 0
+	holder.captive_groups.append({
+		"cohorts": captured,
+		"morale": CAPTIVE_INIT_MORALE,
+		"origin_faction": loser.faction_id,
+		"entry": "吸收",
+		"treatment_history": [],
+	})
+	return total_captured
+
+# 同化：captive_group.cohorts 各桶 AnonCohort.add 進 holder.anon_cohorts（captive → free pop，守恆）。
+# 解 (a)：同化後 holder.population getter 漲（captive 轉戰力 pop）。erase 該 group。回同化總數。
+static func assimilate_captives(holder: TeamData, group: Dictionary) -> int:
+	if holder == null or group == null:
+		return 0
+	var moved: int = 0
+	var cohorts: Dictionary = group.get("cohorts", {})
+	for key in cohorts.keys():
+		var parts: Array = AnonCohort._parse(key)
+		var tier: String = parts[0]
+		var health: String = parts[1]
+		var n: int = int(cohorts[key])
+		if n <= 0:
+			continue
+		AnonCohort.add(holder.anon_cohorts, tier, health, n)
+		moved += n
+	holder.captive_groups.erase(group)
+	return moved
+
+# 暴動/逃：captive_group 部分（fraction）脫離 holder（從 group.cohorts remove）。
+# 守恆：回脫離的 cohorts dict（caller 路由成獨立隊/流民/戰損，非憑空消）。group 清空則 erase。
+static func detach_captives(holder: TeamData, group: Dictionary, fraction: float) -> Dictionary:
+	var detached: Dictionary = {}
+	if holder == null or group == null or fraction <= 0.0:
+		return detached
+	var cohorts: Dictionary = group.get("cohorts", {})
+	for key in cohorts.keys():
+		var avail: int = int(cohorts[key])
+		if avail <= 0:
+			continue
+		var take: int = int(ceil(float(avail) * minf(fraction, 1.0)))
+		take = mini(take, avail)
+		if take <= 0:
+			continue
+		var left: int = avail - take
+		if left <= 0:
+			cohorts.erase(key)
+		else:
+			cohorts[key] = left
+		detached[key] = int(detached.get(key, 0)) + take
+	if AnonCohort.total(cohorts) <= 0:
+		holder.captive_groups.erase(group)
+	return detached
+
+# 受控人力查詢：holder 全 captive 群總人數（不入 population；遙測/guard-cap 用）。
+static func total_captives(team: TeamData) -> int:
+	var s: int = 0
+	for g in team.captive_groups:
+		s += AnonCohort.total(g.get("cohorts", {}))
+	return s
 
 # ───── 升等 ─────
 

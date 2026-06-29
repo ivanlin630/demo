@@ -59,6 +59,10 @@ var population: int:
 var minor_population: int = 0
 var anon_female_ratio: float = 0.5   # anon 女性占比(metadata,不影響 pop count);戰損可扭斜(combat他域後)
 var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰鬥 spawn）
+# 受控人力 Phase 1：captive 群（征服吸收敗方 anon）。元素 Dict:
+#   { cohorts: { "tier|health": count }, morale: float, origin_faction: int, entry: String, treatment_history: Array }
+# 隔離持有（非戰力，不入 population getter，直到同化）。守恆轉移只經 AnonTierSystem.absorb_as_captive/assimilate_captives。
+var captive_groups: Array = []
 var famine_days: float = 0.0   # 連續斷糧（satisfaction<0.3）累積天數；飢餓致死鏈用（型別 float，語意=天）
 var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，日邊界歸零）
 var solo_intent: String = ""   # 上次 SoloAI 選的策略方向（承諾慣性用）

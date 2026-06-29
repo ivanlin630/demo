@@ -183,8 +183,13 @@ func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
 		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
+	_step_captives(state)
 	_step_cleanup_extinct_teams(state)
 	return ""   # non-encounter tick
+
+# 受控人力 P1：captive 待遇決策 + 軌跡（cadence 內部 gate，全域；同化/暴動/逃 守恆）
+func _step_captives(state: WorldState) -> void:
+	ManpowerSystem.tick_all(state)
 
 func _step_ambush_check(state: WorldState, team_ids: Array) -> void:
 	_ambush_system.check_ambush(state, team_ids)

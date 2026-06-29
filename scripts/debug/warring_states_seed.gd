@@ -58,5 +58,8 @@ func _run() -> void:
 	# emergent probes（commander 協同 + 信息域驗證床）
 	for k in ["g2.faction_found", "g2.feud_formed", "g2.vendetta_trigger", "g3.scout_dispatch"]:
 		print("[戰國] probe %s=%d" % [k, int(Probe.counts.get(k, 0))])
+	# 受控人力 P1 (a)：吸收→同化(pop 累積)/暴動/逃 emergent
+	for k in ["p1.assimilate", "p1.revolt", "p1.flee"]:
+		print("[戰國] probe %s=%d" % [k, int(Probe.counts.get(k, 0))])
 	Probe.enabled = false
 	print("=== warring_states seed DONE ===")

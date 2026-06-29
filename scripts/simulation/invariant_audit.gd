@@ -8,6 +8,7 @@ static func check(state: WorldState) -> Array[String]:
 	_check_faction_bidir(state, violations)
 	_check_subteam_bidir(state, violations)
 	_check_anon_cohort(state, violations)
+	_check_captive_cohort(state, violations)
 	_check_no_dangling_team_id(state, violations)
 	return violations
 
@@ -66,6 +67,21 @@ static func _check_anon_cohort(state: WorldState, out: Array[String]) -> void:
 				out.append("cohort 非法鍵 Team%d: '%s'" % [tid, key])
 			if int(t.anon_cohorts[key]) <= 0:
 				out.append("cohort 桶非正 Team%d: '%s'=%d（稀疏應刪零桶）" % [tid, key, int(t.anon_cohorts[key])])
+
+# 受控人力 P1：captive_groups cohorts 自洽（鍵合法、count>0）。captive 隔離不入 population，
+# 故 _check_population 看不到；此網守 captive cohorts 結構（吸收/同化/暴動/逃守恆的底層完整性）。
+static func _check_captive_cohort(state: WorldState, out: Array[String]) -> void:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		for group in t.captive_groups:
+			var cohorts: Dictionary = group.get("cohorts", {})
+			for key in cohorts:
+				var parts: Array = AnonCohort._parse(key)
+				if parts.size() != 2 or parts[0] not in AnonCohort.TIER_ORDER \
+						or parts[1] not in AnonCohort.HEALTH_ORDER:
+					out.append("captive cohort 非法鍵 Team%d: '%s'" % [tid, key])
+				if int(cohorts[key]) <= 0:
+					out.append("captive cohort 桶非正 Team%d: '%s'=%d（稀疏應刪零桶）" % [tid, key, int(cohorts[key])])
 
 # 無懸空 team_id：任何欄位/dict/list 指向不存在的 team = erase 漏清。
 static func _check_no_dangling_team_id(state: WorldState, out: Array[String]) -> void:

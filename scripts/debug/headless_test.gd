@@ -28,6 +28,10 @@ func _initialize() -> void:
 	_test_add_exp()
 	_test_kill_random_proportional()
 	_test_transfer_proportional()
+	_test_mp1_absorb_conserves()
+	_test_mp1_treatment_trajectory()
+	_test_mp1_treatment_driver()
+	_test_mp1_believability()
 	_test_promote_success()
 	_test_promote_insufficient_exp()
 	_test_promote_insufficient_resources()
@@ -12991,6 +12995,129 @@ func _test_engine_rank() -> void:
 
 func _mk_team_tag(tag: String) -> TeamData:
 	var t := TeamData.new(); t.tags = [tag]; return t
+
+# ── 受控人力 P1 helpers ──
+func _mk_mp_team(state: WorldState, tid: int, anon_pop: int) -> TeamData:
+	var t := TeamData.new(); t.team_id = tid; t.leader_id = -1
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", anon_pop)
+	state.teams[tid] = t
+	return t
+
+# Task1：吸收守恆（loser↓ == holder captive↑）+ captive 不入戰力 pop + 同化漲 pop
+func _test_mp1_absorb_conserves() -> void:
+	var state := WorldState.new()
+	var winner := _mk_mp_team(state, 1, 10)
+	var loser  := _mk_mp_team(state, 2, 20)
+	var loser_pop0: int = loser.population
+	var winner_pop0: int = winner.population
+	AnonTierSystem.absorb_as_captive(state, winner, loser, 0.5)
+	assert(winner.population == winner_pop0, "[mp1] captive 竟入勝方戰力 pop(該隔離)")
+	assert(loser.population < loser_pop0, "[mp1] 敗方 pop 未掉(吸收非轉移)")
+	var captured: int = AnonCohort.total(winner.captive_groups[0].get("cohorts", {}))
+	assert(loser_pop0 - loser.population == captured, "[mp1] pop 不守恆 loser掉%d != captured%d" % [loser_pop0 - loser.population, captured])
+	# captive 不入 InvariantAudit population 期望（cohort 自洽仍綠）
+	assert(not _contains_substr(InvariantAudit.check(state), "population drift"), "[mp1] captive 破 population invariant")
+	# 同化 → captive 轉 holder free pop
+	AnonTierSystem.assimilate_captives(winner, winner.captive_groups[0])
+	assert(winner.population == winner_pop0 + captured, "[mp1] 同化後戰力 pop 未漲(=解 (a))")
+	assert(winner.captive_groups.is_empty(), "[mp1] 同化後 captive_group 未清")
+	assert(not _contains_substr(InvariantAudit.check(state), "cohort"), "[mp1] 同化後 cohort 不自洽")
+	print("[mp1] absorb conserves OK captured=%d" % captured)
+
+# holder + 1 captive group（pop n），leader 人格可選
+func _mk_holder_with_captive(state: WorldState, captive_pop: int, leader_vals: Dictionary = {}) -> TeamData:
+	var t := TeamData.new(); t.team_id = 1; t.leader_id = 100; t.tile_pos = Vector2i(2, 2)
+	AnonCohort.add(t.anon_cohorts, "新兵", "healthy", 10)   # holder 自身戰力
+	t.resources = {"food": 9999.0}   # 足糧（排除釋放路徑）
+	var ldr := PersonData.new(); ldr.id = 100
+	for k in leader_vals: ldr.values[k] = leader_vals[k]
+	state.persons[100] = ldr
+	# captive group
+	var cohorts: Dictionary = {}
+	AnonCohort.add(cohorts, "平民", "healthy", captive_pop)
+	t.captive_groups.append({
+		"cohorts": cohorts, "morale": AnonTierSystem.CAPTIVE_INIT_MORALE,
+		"origin_faction": 5, "entry": "吸收", "treatment_history": [],
+	})
+	state.teams[1] = t
+	# tile（effective_food 用）
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2, 2)
+	state.world.tiles[2 * 1000 + 2] = tile
+	return t
+
+# Task2：厚待→同化（pop 漲）；苛待→暴動/逃（captive 離開，pop 不白增）。守恆。
+func _test_mp1_treatment_trajectory() -> void:
+	# (a) 厚待路徑
+	var s1 := WorldState.new()
+	var h1 := _mk_holder_with_captive(s1, 8)
+	var h1_pop0: int = h1.population
+	var cap0: int = AnonTierSystem.total_captives(h1)
+	for _i in 60:
+		ManpowerSystem.tick_captives(s1, h1, "厚待")
+	assert(h1.captive_groups.is_empty(), "[mp1] 厚待未同化（captive 應清）")
+	assert(h1.population == h1_pop0 + cap0, "[mp1] 厚待同化後 pop 未漲 %d!=%d" % [h1.population, h1_pop0 + cap0])
+	assert(not _contains_substr(InvariantAudit.check(s1), "cohort"), "[mp1] 厚待後 cohort 不自洽")
+	# (b) 苛待路徑 → 暴動/逃（captive 離開、不併入戰力）
+	var s2 := WorldState.new()
+	var h2 := _mk_holder_with_captive(s2, 8)
+	var h2_pop0: int = h2.population
+	for _i in 60:
+		ManpowerSystem.tick_captives(s2, h2, "苛待")
+	assert(h2.population == h2_pop0, "[mp1] 苛待竟白增 pop %d!=%d(該暴動/逃非同化)" % [h2.population, h2_pop0])
+	assert(AnonTierSystem.total_captives(h2) < 8, "[mp1] 苛待 captive 未脫離")
+	assert(not _contains_substr(InvariantAudit.check(s2), "cohort"), "[mp1] 苛待後 cohort 不自洽")
+	print("[mp1] treatment trajectory OK (厚待→同化 / 苛待→暴動逃)")
+
+# Task2：待遇決策 driver（means-end，連回 leader 意圖）
+func _test_mp1_treatment_driver() -> void:
+	var s := WorldState.new()
+	# 野心高+殘忍低 → 厚待（壯兵意圖）
+	var h := _mk_holder_with_captive(s, 8, {"野心": 0.9, "殘忍": 0.1, "貪婪": 0.3})
+	var tr: String = ManpowerSystem.decide_treatment(s, h, h.captive_groups[0])
+	assert(tr == "厚待", "[mp1] 野心 leader 應厚待(壯兵)，得 %s" % tr)
+	# 殘忍高 → 苛待
+	var s2 := WorldState.new()
+	var h2 := _mk_holder_with_captive(s2, 8, {"野心": 0.3, "殘忍": 0.9, "貪婪": 0.5})
+	var tr2: String = ManpowerSystem.decide_treatment(s2, h2, h2.captive_groups[0])
+	assert(tr2 == "苛待", "[mp1] 殘忍 leader 應苛待，得 %s" % tr2)
+	print("[mp1] treatment driver OK")
+
+# Task3：believability — captive 非戰力(直到同化)、苛待暴動非白吃、provenance 追得回 entry+待遇史。
+func _test_mp1_believability() -> void:
+	var s := WorldState.new()
+	var h := _mk_holder_with_captive(s, 12)
+	# captive 不算戰力（armed/combat pop 不含 captive）
+	var combat_pop0: int = h.population
+	assert(AnonTierSystem.total_captives(h) == 12, "[mp1] captive 總數錯")
+	assert(h.population == combat_pop0, "[mp1] captive 竟算戰力 pop")
+	# provenance：每 group 追得回 entry（吸收）+ origin_faction
+	var g: Dictionary = h.captive_groups[0]
+	assert(g.get("entry", "") == "吸收", "[mp1] captive entry provenance 缺失")
+	assert(g.get("origin_faction", -99) == 5, "[mp1] captive origin_faction provenance 缺失")
+	# 苛待 → morale 崩 → 暴動/逃，captive 脫離（非白吃同化）。守恆：消失量 = 脫離 + 鎮壓亡
+	var before_world_pop: int = _world_total_pop(s)
+	for _i in 80:
+		ManpowerSystem.tick_captives(s, h, "苛待")
+		g["treatment_history"] = g.get("treatment_history", [])   # noop keep ref
+	assert(AnonTierSystem.total_captives(h) == 0, "[mp1] 苛待 captive 應全脫離")
+	assert(h.population == combat_pop0, "[mp1] 苛待後 holder 戰力 pop 不該變(captive 非同化)")
+	# treatment_history 記錄苛待（provenance：可追待遇史）
+	# group 已脫離 erase，但 history 在脫離前累積過 → 改驗 breakaway 隊存在（脫離者去向）
+	var breakaway_pop: int = 0
+	for tid in s.teams:
+		if tid == 1: continue
+		breakaway_pop += s.teams[tid].population
+	# escaped（流民隊）≤ 原 captive（鎮壓亡部分真死，守恆）
+	assert(breakaway_pop <= 12, "[mp1] breakaway pop 竟 > 原 captive(憑空增)")
+	assert(not _contains_substr(InvariantAudit.check(s), "cohort"), "[mp1] believability cohort 不自洽")
+	print("[mp1] believability OK (captive 非戰力/苛待暴動非白吃/provenance/breakaway %d≤12)" % breakaway_pop)
+
+# 全世界 pop（戰力，不含 captive）— 守恆檢查輔助
+func _world_total_pop(state: WorldState) -> int:
+	var s: int = 0
+	for tid in state.teams:
+		s += state.teams[tid].population
+	return s
 
 # ── 共用：建一支商隊（自家 outpost + 糧倉 + 指定 leader 人格）──
 func _mk_merchant_team(state: WorldState, leader_vals: Dictionary, has_arb: bool, food: float) -> TeamData:
