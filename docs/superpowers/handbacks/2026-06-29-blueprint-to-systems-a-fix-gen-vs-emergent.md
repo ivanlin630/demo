@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: (a) fix 裁定 — ★攀爬動力才是核心(measure 卡點別猜);gen-authored vs ongoing-honest不buff;稀有度=攀爬通後的旋鈕;升「凡位置必有可解釋上位路徑」原則
 ---
 
