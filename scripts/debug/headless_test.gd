@@ -29,6 +29,8 @@ func _initialize() -> void:
 	_test_kill_random_proportional()
 	_test_transfer_proportional()
 	_test_mp1_absorb_conserves()
+	_test_mp1_treatment_trajectory()
+	_test_mp1_treatment_driver()
 	_test_promote_success()
 	_test_promote_insufficient_exp()
 	_test_promote_insufficient_resources()
@@ -13020,6 +13022,64 @@ func _test_mp1_absorb_conserves() -> void:
 	assert(winner.captive_groups.is_empty(), "[mp1] 同化後 captive_group 未清")
 	assert(not _contains_substr(InvariantAudit.check(state), "cohort"), "[mp1] 同化後 cohort 不自洽")
 	print("[mp1] absorb conserves OK captured=%d" % captured)
+
+# holder + 1 captive group（pop n），leader 人格可選
+func _mk_holder_with_captive(state: WorldState, captive_pop: int, leader_vals: Dictionary = {}) -> TeamData:
+	var t := TeamData.new(); t.team_id = 1; t.leader_id = 100; t.tile_pos = Vector2i(2, 2)
+	AnonCohort.add(t.anon_cohorts, "新兵", "healthy", 10)   # holder 自身戰力
+	t.resources = {"food": 9999.0}   # 足糧（排除釋放路徑）
+	var ldr := PersonData.new(); ldr.id = 100
+	for k in leader_vals: ldr.values[k] = leader_vals[k]
+	state.persons[100] = ldr
+	# captive group
+	var cohorts: Dictionary = {}
+	AnonCohort.add(cohorts, "平民", "healthy", captive_pop)
+	t.captive_groups.append({
+		"cohorts": cohorts, "morale": AnonTierSystem.CAPTIVE_INIT_MORALE,
+		"origin_faction": 5, "entry": "吸收", "treatment_history": [],
+	})
+	state.teams[1] = t
+	# tile（effective_food 用）
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2, 2)
+	state.world.tiles[2 * 1000 + 2] = tile
+	return t
+
+# Task2：厚待→同化（pop 漲）；苛待→暴動/逃（captive 離開，pop 不白增）。守恆。
+func _test_mp1_treatment_trajectory() -> void:
+	# (a) 厚待路徑
+	var s1 := WorldState.new()
+	var h1 := _mk_holder_with_captive(s1, 8)
+	var h1_pop0: int = h1.population
+	var cap0: int = AnonTierSystem.total_captives(h1)
+	for _i in 60:
+		ManpowerSystem.tick_captives(s1, h1, "厚待")
+	assert(h1.captive_groups.is_empty(), "[mp1] 厚待未同化（captive 應清）")
+	assert(h1.population == h1_pop0 + cap0, "[mp1] 厚待同化後 pop 未漲 %d!=%d" % [h1.population, h1_pop0 + cap0])
+	assert(not _contains_substr(InvariantAudit.check(s1), "cohort"), "[mp1] 厚待後 cohort 不自洽")
+	# (b) 苛待路徑 → 暴動/逃（captive 離開、不併入戰力）
+	var s2 := WorldState.new()
+	var h2 := _mk_holder_with_captive(s2, 8)
+	var h2_pop0: int = h2.population
+	for _i in 60:
+		ManpowerSystem.tick_captives(s2, h2, "苛待")
+	assert(h2.population == h2_pop0, "[mp1] 苛待竟白增 pop %d!=%d(該暴動/逃非同化)" % [h2.population, h2_pop0])
+	assert(AnonTierSystem.total_captives(h2) < 8, "[mp1] 苛待 captive 未脫離")
+	assert(not _contains_substr(InvariantAudit.check(s2), "cohort"), "[mp1] 苛待後 cohort 不自洽")
+	print("[mp1] treatment trajectory OK (厚待→同化 / 苛待→暴動逃)")
+
+# Task2：待遇決策 driver（means-end，連回 leader 意圖）
+func _test_mp1_treatment_driver() -> void:
+	var s := WorldState.new()
+	# 野心高+殘忍低 → 厚待（壯兵意圖）
+	var h := _mk_holder_with_captive(s, 8, {"野心": 0.9, "殘忍": 0.1, "貪婪": 0.3})
+	var tr: String = ManpowerSystem.decide_treatment(s, h, h.captive_groups[0])
+	assert(tr == "厚待", "[mp1] 野心 leader 應厚待(壯兵)，得 %s" % tr)
+	# 殘忍高 → 苛待
+	var s2 := WorldState.new()
+	var h2 := _mk_holder_with_captive(s2, 8, {"野心": 0.3, "殘忍": 0.9, "貪婪": 0.5})
+	var tr2: String = ManpowerSystem.decide_treatment(s2, h2, h2.captive_groups[0])
+	assert(tr2 == "苛待", "[mp1] 殘忍 leader 應苛待，得 %s" % tr2)
+	print("[mp1] treatment driver OK")
 
 # ── 共用：建一支商隊（自家 outpost + 糧倉 + 指定 leader 人格）──
 func _mk_merchant_team(state: WorldState, leader_vals: Dictionary, has_arb: bool, food: float) -> TeamData:
