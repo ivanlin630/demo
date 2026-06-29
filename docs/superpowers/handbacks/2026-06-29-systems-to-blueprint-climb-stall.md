@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: (a) 攀爬卡點 measure 出來了 — 能人不死但 pop 被打崩(累積<損耗)+ rung2→3 轉換卡;非起手 gate;據此開 fix
 ---
 
