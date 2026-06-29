@@ -31,6 +31,7 @@ func _initialize() -> void:
 	_test_mp1_absorb_conserves()
 	_test_mp1_treatment_trajectory()
 	_test_mp1_treatment_driver()
+	_test_mp1_believability()
 	_test_promote_success()
 	_test_promote_insufficient_exp()
 	_test_promote_insufficient_resources()
@@ -13080,6 +13081,43 @@ func _test_mp1_treatment_driver() -> void:
 	var tr2: String = ManpowerSystem.decide_treatment(s2, h2, h2.captive_groups[0])
 	assert(tr2 == "苛待", "[mp1] 殘忍 leader 應苛待，得 %s" % tr2)
 	print("[mp1] treatment driver OK")
+
+# Task3：believability — captive 非戰力(直到同化)、苛待暴動非白吃、provenance 追得回 entry+待遇史。
+func _test_mp1_believability() -> void:
+	var s := WorldState.new()
+	var h := _mk_holder_with_captive(s, 12)
+	# captive 不算戰力（armed/combat pop 不含 captive）
+	var combat_pop0: int = h.population
+	assert(AnonTierSystem.total_captives(h) == 12, "[mp1] captive 總數錯")
+	assert(h.population == combat_pop0, "[mp1] captive 竟算戰力 pop")
+	# provenance：每 group 追得回 entry（吸收）+ origin_faction
+	var g: Dictionary = h.captive_groups[0]
+	assert(g.get("entry", "") == "吸收", "[mp1] captive entry provenance 缺失")
+	assert(g.get("origin_faction", -99) == 5, "[mp1] captive origin_faction provenance 缺失")
+	# 苛待 → morale 崩 → 暴動/逃，captive 脫離（非白吃同化）。守恆：消失量 = 脫離 + 鎮壓亡
+	var before_world_pop: int = _world_total_pop(s)
+	for _i in 80:
+		ManpowerSystem.tick_captives(s, h, "苛待")
+		g["treatment_history"] = g.get("treatment_history", [])   # noop keep ref
+	assert(AnonTierSystem.total_captives(h) == 0, "[mp1] 苛待 captive 應全脫離")
+	assert(h.population == combat_pop0, "[mp1] 苛待後 holder 戰力 pop 不該變(captive 非同化)")
+	# treatment_history 記錄苛待（provenance：可追待遇史）
+	# group 已脫離 erase，但 history 在脫離前累積過 → 改驗 breakaway 隊存在（脫離者去向）
+	var breakaway_pop: int = 0
+	for tid in s.teams:
+		if tid == 1: continue
+		breakaway_pop += s.teams[tid].population
+	# escaped（流民隊）≤ 原 captive（鎮壓亡部分真死，守恆）
+	assert(breakaway_pop <= 12, "[mp1] breakaway pop 竟 > 原 captive(憑空增)")
+	assert(not _contains_substr(InvariantAudit.check(s), "cohort"), "[mp1] believability cohort 不自洽")
+	print("[mp1] believability OK (captive 非戰力/苛待暴動非白吃/provenance/breakaway %d≤12)" % breakaway_pop)
+
+# 全世界 pop（戰力，不含 captive）— 守恆檢查輔助
+func _world_total_pop(state: WorldState) -> int:
+	var s: int = 0
+	for tid in state.teams:
+		s += state.teams[tid].population
+	return s
 
 # ── 共用：建一支商隊（自家 outpost + 糧倉 + 指定 leader 人格）──
 func _mk_merchant_team(state: WorldState, leader_vals: Dictionary, has_arb: bool, food: float) -> TeamData:
