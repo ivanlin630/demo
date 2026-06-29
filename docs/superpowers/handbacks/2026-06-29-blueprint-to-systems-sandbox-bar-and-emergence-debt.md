@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★ 尺 reframe(沙盒無玩家也要好玩) + (a)世界產不出征服者=必解核心bar非pre-player債 + greenlight bed變體 + 請更新 player-loop-anchor memory
 ---
 
