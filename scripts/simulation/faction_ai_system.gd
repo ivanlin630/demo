@@ -888,6 +888,13 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
 
+	# ── defer to prosperity（修 S3 回歸）──
+	# 有 belief-弱 prey 可攻 + 是 prosperity 候選 → 讓 prosperity-attack 處理：它有 G3d scout gate
+	# （慎重者對不確定 prey 先 scout 不盲攻），且勝→npc_combat subjugate→create_faction 也達建國。
+	# 獨立戰略只管「無征服目標、靠結盟」的建國 → 避免吞併路繞過 scout gate（S3 cautious 獨立 attacker 該 scout）。
+	if _is_prosperity_candidate(state, team) and _find_weakest_prey(state, team) != -1:
+		return
+
 	# ── gate 1：野心（普世驅力，但建國門檻）──
 	var ambition: float = float(leader.values.get("野心", 0.5))
 	if ambition < AMBITION_FOUND_MIN: return

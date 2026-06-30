@@ -4014,7 +4014,7 @@ func _run_sim_test() -> void:
 	_test_indep_strategic_found()
 	_test_indep_low_ambition_no_found()
 	_test_indep_isolated_no_found()
-	_test_indep_subjugate_dispatch()
+	_test_indep_defers_conquest_to_prosperity()
 	_test_indep_found_to_faction()
 
 	print("=== DONE ===")
@@ -4258,22 +4258,28 @@ func _test_indep_isolated_no_found() -> void:
 		"[indep] 孤立隊竟建國 task=%s" % loner.current_task)
 	print("[indep] isolated no-found OK (守成 累積; task=%s)" % loner.current_task)
 
-func _test_indep_subjugate_dispatch() -> void:
-	print("--- 獨立戰略層：殘忍野心隊建國→吞併 ---")
+func _test_indep_defers_conquest_to_prosperity() -> void:
+	# 獨立戰略遇「prosperity 候選 + 有 belief-弱 prey」→ defer（讓 prosperity-attack 處理：
+	# 它有 G3d scout gate[慎重者對不確定 prey 先 scout]，且勝→subjugate→create_faction 也達建國）。
+	# = 修 S3 回歸：吞併-founding 不繞過 scout gate。獨立戰略只管「無征服目標靠結盟」建國。
+	print("--- 獨立戰略層：有 prey → defer 給 prosperity(保 scout gate) ---")
 	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
 	var brute := _mk_ambitious_independent(state, Vector2i(3, 3), 805)
-	# 殘忍/好戰高 + 義氣低 → 吞併 util 勝結盟
 	state.persons[805 * 10].values = {"野心": 0.8, "義氣": 0.1, "好戰": 0.8, "殘忍": 0.9, "慎重": 0.2}
+	# brute 需是 prosperity 候選（武力 archetype + rung≥擴張）才 defer
+	brute.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE
+	brute.ambition_rung = AmbitionLadder.RUNG_EXPAND
 	var prey := _mk_independent_team(state, Vector2i(4, 3), 806)
-	_seed_pop(prey, 3)   # pop=3 < brute.pop(12)×0.7 → belief 弱 → _find_weakest_prey 選
+	_seed_pop(prey, 3)
 	_indep_discover(state, brute, prey, 3.0)   # belief pop_est=3 弱
 	var fa := FactionAISystem.new()
 	fa._evaluate_independent_strategy(state, brute)
-	assert(brute.current_task == TeamData.TASK_ATTACK,
-		"[indep] 殘忍野心隊未秤建國/吞併 task=%s" % brute.current_task)
-	assert(brute.tags.has("統領"), "[indep] 吞併建國未自立統領 tag（subjugate gate 需）")
-	assert(brute.prosperity_target_id == prey.team_id, "[indep] 吞併未設追擊目標")
-	print("[indep] subjugate dispatch OK (brute→ATTACK prey=%d, 統領 tag set)" % prey.team_id)
+	# defer：獨立戰略不 dispatch 建國 task（讓 prosperity scout-gated 接手 → 不繞過 G3d）
+	assert(brute.current_task != TeamData.TASK_ATTACK or brute.task_reason != "found_subjugate",
+		"[indep] 有 prey 仍走獨立戰略吞併(繞過 scout gate) task=%s reason=%s" % [brute.current_task, brute.task_reason])
+	assert(brute.solo_intent != "建國",
+		"[indep] 有 prey 該 defer prosperity 非建國 intent=%s" % brute.solo_intent)
+	print("[indep] defer conquest to prosperity OK (有 prey→不繞 scout,prosperity 接手)")
 
 func _test_indep_found_to_faction() -> void:
 	print("--- 獨立戰略層：結盟→create_faction→fid -1→正（整環前半哩） ---")
