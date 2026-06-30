@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 經濟底真根=食物模型沒統一(累積閘死地形regen) — 統一修非補丁;糧來源無關餵累積;保交易摩擦/地形;乾淨bed驗整環;🟡維持到證累積
 ---
 
