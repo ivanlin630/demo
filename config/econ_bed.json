@@ -1,0 +1,59 @@
+{
+  "seed": 4242,
+  "mode": "explicit",
+  "max_ticks": 50000,
+  "map": { "radius": 5, "resource_richness": 7 },
+  "teams": [
+    {
+      "id": 0, "name": "林業村", "tile_pos": [5, 5], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": {
+        "food": 30.0, "material": 400.0, "coin": 200.0, "goods": 0.0
+      },
+      "leader": {
+        "name": "Forest_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [
+        { "name": "F_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } }
+      ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "forest", "tile_food_init": 150 }
+    },
+    {
+      "id": 1, "name": "平原糧鎮", "tile_pos": [6, 5], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": {
+        "food": 200.0, "material": 50.0, "coin": 800.0, "goods": 0.0
+      },
+      "leader": {
+        "name": "Plains_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [
+        { "name": "P_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } }
+      ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 2000 }
+    },
+    {
+      "id": 2, "name": "中立商隊", "tile_pos": [6, 5], "population": 5,
+      "tags": ["商隊"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": {
+        "food": 60.0, "material": 0.0, "coin": 1000.0, "goods": 80.0
+      },
+      "leader": {
+        "name": "Caravan_Leader", "age": 40, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.5, "商業": 0.8 },
+        "values": { "貪婪": 0.8, "慎重": 0.6, "信義": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [
+        { "name": "C_M1", "loyalty": 0.8, "skills": { "商業": 0.5 } }
+      ]
+    }
+  ],
+  "player": { "team_id": -1, "is_leader": false }
+}
