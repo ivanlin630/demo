@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 統一食物 merged — 結構 bug 修好(forest 能長 pop),但 trade loop 不 fire(覓食勝買糧);🟡 判定求向(能長 vs 須交易)
 ---
 
