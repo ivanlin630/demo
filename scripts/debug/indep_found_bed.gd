@@ -46,7 +46,7 @@ func _run() -> void:
 	var est0: int = _established_count(state)
 	print("[bed] init teams=%d factions=%d established=%d 獨立隊=%d" % [
 		state.teams.size(), fac0, est0, indep0])
-	var months: int = 4   # 輕量；不夠則主 session 拉長/接 warring full
+	var months: int = 5   # 整環：建國→成 faction→爬 established（commander-v2 gate 需時間）
 	for month in range(months):
 		for _t in range(240 * 30):
 			runner.advance_tick(state, no_player)
@@ -66,5 +66,13 @@ func _run() -> void:
 		fac0, state.factions.size()])
 	print("[bed] 判讀：established 漲=獨立建國通；CONQUER>0=征服候選湧現；")
 	print("[bed]   建國 dispatch 總 << 獨立隊數=稀有(非建國潮 over-found)。")
+	print("[bed] funnel: ambitious=%d → fail[pop=%d food=%d busy=%d nopath=%d] → path_ok=%d → dispatch=%d" % [
+		int(Probe.counts.get("indep.gate_ambitious", 0)),
+		int(Probe.counts.get("indep.gate_fail_pop", 0)),
+		int(Probe.counts.get("indep.gate_fail_food", 0)),
+		int(Probe.counts.get("indep.gate_fail_busy", 0)),
+		int(Probe.counts.get("indep.gate_fail_nopath", 0)),
+		int(Probe.counts.get("indep.gate_path_ok", 0)),
+		found_total])
 	Probe.enabled = false
 	print("=== indep found bed DONE ===")

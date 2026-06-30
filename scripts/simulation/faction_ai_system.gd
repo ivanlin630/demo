@@ -545,6 +545,12 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if team.parent_team_id != -1:
 			_evaluate_subteam(state, team, merge_queue)
 		elif team.faction_id == -1:
+			# 獨立戰略層（統一決策第三塊）：野心獨立隊秤建國 intent，**置於 _evaluate_solo 前**——
+			# 戰略意圖（建國）優先於個體日常（SoloAI 貿易/紮營）。建國 dispatch(PRIO_DISPATCH) 後
+			# SoloAI 見非 idle 自動跳過（不雙寫）；守成(不 dispatch)則 SoloAI 照常跑既有個體決策。
+			# 不另設 cadence gate：與 SoloAI 同「每 idle tick 評估」節奏（否則 SoloAI 每 tick 搶走 idle
+			# →戰略層 cadence tick 永遠撞非 idle=漏觸發）。內部三閘(野心+累積+路徑)+hysteresis 自限稀有。
+			_evaluate_independent_strategy(state, team)
 			_evaluate_solo(state, team)
 
 	var sub_sys := SubteamSystem.new()
@@ -582,12 +588,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			team.order_eval_next_tick = state.world.current_tick + OrderSystem.ORDER_POST_CADENCE
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
-		# 獨立戰略層（統一決策第三塊）：野心獨立隊秤建國 intent → 結盟/吞併 means-end → create_faction。
-		# 置於 survival 後（survival sticky 不被蓋）、prosperity 前（建國 dispatch 後 prosperity 早退不重派）。
-		# cadence 沿用 prosperity_eval_next_tick 量級的獨立計時器。
-		if team.faction_id == -1 and team.parent_team_id == -1 \
-				and state.world.current_tick >= team.prosperity_eval_next_tick:
-			_evaluate_independent_strategy(state, team)
+		# 獨立戰略層（建國 intent）已在前段 solo 迴圈評估（_evaluate_solo 前，不雙寫）。
 		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）
 		if _is_prosperity_candidate(state, team) \
 				and state.world.current_tick >= team.prosperity_eval_next_tick:
@@ -884,28 +885,45 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	if team.faction_id != -1: return            # 只獨立隊（成 faction 後 commander-v2 接手）
 	if team.parent_team_id != -1: return        # 子隊不自建國
 	if team.combat_target != -1: return         # 戰鬥中不重評
-	# 不打斷生存/威脅/戰鬥型高優先 task（只在 idle 或 stuck 時秤建國；mirror prosperity gate）
-	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
-	if team.current_task in SURVIVAL_TASKS: return
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
 
 	# ── gate 1：野心（普世驅力，但建國門檻）──
 	var ambition: float = float(leader.values.get("野心", 0.5))
 	if ambition < AMBITION_FOUND_MIN: return
+	# 以下 = 野心夠的獨立隊（funnel 起點，量 over/under-found gate）
+	Probe.bump("indep.gate_ambitious")
 
 	# ── gate 2：累積夠（pop ≥ EXPAND_MIN_POP + 食盈餘 = 已達 rung EXPAND 才有本錢拉班底）──
-	if team.population < AmbitionLadder.EXPAND_MIN_POP: return
+	if team.population < AmbitionLadder.EXPAND_MIN_POP:
+		Probe.bump("indep.gate_fail_pop"); return
 	var surplus_need: float = float(team.population) \
 		* ResourceSystem.FOOD_PER_PERSON_PER_DAY * FOUND_FOOD_SURPLUS_DAYS
-	if ResourceSystem.effective_food(state, team) < surplus_need: return
+	if ResourceSystem.effective_food(state, team) < surplus_need:
+		Probe.bump("indep.gate_fail_food"); return
+
+	# 已在建國 task 進行中（朝 ally/prey 移動）→ 不重評不 churn（讓它跑完到場觸發 create_faction）。
+	# 須 current_task 仍非 IDLE（release 不清 task_reason → 只看 reason 會永久早退）。
+	if team.current_task != TeamData.TASK_IDLE \
+			and (team.task_reason == "found_ally" or team.task_reason == "found_subjugate"):
+		return
+	# 只讓位高優先 task（生存 80 / 威脅 70 / 戰鬥 / vendetta 55 / player 60）——這些 = 危急或玩家令，
+	# 建國戰略不該打斷。但**允許打斷個體日常**（SoloAI 貿易/紮營/govern @PRIO_DISPATCH、ambient @10）：
+	# 戰略意圖（建國）優先於日常 op（mirror commander-v2 stakes 打斷 member 日常）。
+	# 原因：measure 證累積夠(pop+7日食盈餘)的獨立隊=成功定居/治理隊，恆跑日常 task 永不 idle
+	#   → 卡 IDLE-gate=漏觸發。survival_tasks/combat/高優先仍護住（危時不建國）。
+	if team.current_task in SURVIVAL_TASKS \
+			or team.task_priority > TaskArbiter.PRIO_DISPATCH:
+		Probe.bump("indep.gate_fail_busy"); return
 
 	# ── 秤 建國 vs 守成（means-end util，argmax + hysteresis）──
 	# 子行動候選 viability（measure：結盟最順、吞併機會）：
 	var ally_id: int = _nearest_independent(state, team)   # 結盟候選（可達獨立鄰）
 	var prey_id: int = _find_weakest_prey(state, team)     # 吞併候選（belief 弱可達鄰）
 	# founding 路徑不可達（無獨立鄰 + 無弱鄰）→ 孤立野心隊，宣告(solo) defer → 守成累積（backlog）
-	if ally_id == -1 and prey_id == -1: return
+	if ally_id == -1 and prey_id == -1:
+		Probe.bump("indep.gate_fail_nopath"); return
+	Probe.bump("indep.gate_path_ok")
 
 	var honor:   float = float(leader.values.get("義氣", 0.5))
 	var cruelty: float = float(leader.values.get("殘忍", 0.5))
@@ -927,10 +945,13 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 
 	# ── 建國 intent → dispatch means-end 子行動（argmax；結盟 vs 吞併）──
 	team.solo_intent = "建國"
+	# 建國勝過守成 → 讓位日常 task（busy-gate 已濾掉高優先；此處只剩 idle/stuck/日常 @≤DISPATCH）。
+	# 釋放後 founding @PRIO_DISPATCH 才設得進（同層 tie 需先 release 換手，mirror prosperity scout→attack）。
+	if team.current_task != TeamData.TASK_IDLE:
+		TaskArbiter.release(team)
 	if ally_util >= subj_util:
 		# 結盟（primary）：TASK_DIPLOMACY 朝獨立鄰 → interaction:333 兩獨立 create_faction
 		# 單方有 drive 不保證成 faction（對方意願 emergent；被拒則下 cadence 重評/改吞併）
-		if _is_stuck(team): TaskArbiter.release(team)
 		if TaskArbiter.try_set(state, team, TeamData.TASK_DIPLOMACY,
 				state.teams[ally_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_ally"):
 			team.order_task = ""   # 結盟提案（非求和 tribute）
@@ -942,7 +963,6 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 		# subjugate gate 需 winner 統領 tag：committing 建國-by-conquest = 自立為統領（means-end driver=建國）
 		if not team.tags.has("統領"):
 			team.tags.append("統領")
-		if _is_stuck(team): TaskArbiter.release(team)
 		if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
 				state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_subjugate"):
 			team.prosperity_target_id = prey_id   # 追擊刷新復用
