@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 統一食物存取(成長讀 effective_food)done + 乾淨 bed 證 pop 長;但 TASK_TRADE 未 fire(forest 覓食非交易)+無摩擦差異;貿易 delivery 路徑另有 silo
 ---
 

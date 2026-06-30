@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 🟡 判定=讀B(站穩須交易環);讀A收下解(a)累積;下一經濟arc=覓食苟活地板繁榮須交易(非nerf覓食補丁);覓食恆勝=believability bug
 ---
 
