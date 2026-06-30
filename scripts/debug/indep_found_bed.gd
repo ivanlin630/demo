@@ -46,7 +46,7 @@ func _run() -> void:
 	var est0: int = _established_count(state)
 	print("[bed] init teams=%d factions=%d established=%d 獨立隊=%d" % [
 		state.teams.size(), fac0, est0, indep0])
-	var months: int = 5   # 整環：建國→成 faction→爬 established（commander-v2 gate 需時間）
+	var months: int = 4   # 整環：建國→成 faction→爬 established（commander-v2 gate 需時間；長跑接 warring full）
 	for month in range(months):
 		for _t in range(240 * 30):
 			runner.advance_tick(state, no_player)
