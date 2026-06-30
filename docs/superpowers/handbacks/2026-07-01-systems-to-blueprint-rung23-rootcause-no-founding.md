@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★rung2→3 真根量出(碼證) — 能人是獨立隊(fid=-1),rung3 需 faction但獨立無自建派系 intent;EXPAND→STATE 缺 founding drive;修根方向求向
 ---
 
