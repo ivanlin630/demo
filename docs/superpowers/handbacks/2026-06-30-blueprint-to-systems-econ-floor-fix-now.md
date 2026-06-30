@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 經濟底 = 確定就修(別再measure來回) — 閉特化-交易-換糧環;別nerf地形;TOP優先;診斷併進修
 ---
 
