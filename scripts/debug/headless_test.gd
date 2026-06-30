@@ -4010,6 +4010,12 @@ func _run_sim_test() -> void:
 	# ── 經濟底 閉特化-交易-換糧環 ──
 	_test_econ_empty_home_no_return()
 	_test_econ_believability()
+	# ── 獨立戰略層（野心獨立隊建國 intent；統一決策 arc 第三塊） ──
+	_test_indep_strategic_found()
+	_test_indep_low_ambition_no_found()
+	_test_indep_isolated_no_found()
+	_test_indep_subjugate_dispatch()
+	_test_indep_found_to_faction()
 
 	print("=== DONE ===")
 
@@ -4163,6 +4169,131 @@ func _test_econ_believability() -> void:
 	assert(not ctxb.has_specie, "[econ] 真窮卻 has_specie=true")
 	assert("買糧" not in DecisionOptions.applicable(ctxb), "[econ] 真窮隊竟能買糧（無籌碼）")
 	print("[econ] believability OK")
+
+# ════════════ 獨立戰略層（野心獨立隊建國 intent；統一決策 arc 第三塊） ════════════
+
+# 野心獨立能人（fid=-1, 野心高 + 統領 + 累積夠 pop/食盈餘）。可結盟獨立鄰已 discovered。
+func _mk_ambitious_independent(state: WorldState, pos: Vector2i, tid: int = 800) -> TeamData:
+	var t := TeamData.new(); t.team_id = tid; t.tags = ["獨立軍隊"]
+	t.tile_pos = pos; t.leader_id = tid * 10; t.faction_id = -1
+	_seed_pop(t, 12)
+	t.resources = {"food": 5000.0}   # 12×2.4×7=201.6 盈餘門檻 → 遠超 → 累積夠
+	state.teams[tid] = t
+	state.team_discovered[tid] = []
+	state.team_intel[tid] = {}
+	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
+	ldr.values = {"野心": 0.8, "義氣": 0.7, "好戰": 0.4, "殘忍": 0.2, "慎重": 0.4}
+	ldr.skills = {"統領": 0.5}
+	state.persons[tid * 10] = ldr
+	_p1_place_tile(state, pos)
+	return t
+
+# 普通獨立隊（fid=-1，可作結盟鄰；可給野心參數調低/高）
+func _mk_independent_team(state: WorldState, pos: Vector2i, tid: int, ambition: float = 0.3) -> TeamData:
+	var t := TeamData.new(); t.team_id = tid; t.tags = []
+	t.tile_pos = pos; t.leader_id = tid * 10; t.faction_id = -1
+	_seed_pop(t, 12)
+	t.resources = {"food": 5000.0}
+	state.teams[tid] = t
+	state.team_discovered[tid] = []
+	state.team_intel[tid] = {}
+	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
+	ldr.values = {"野心": ambition, "義氣": 0.5, "好戰": 0.2, "殘忍": 0.1, "慎重": 0.6}
+	ldr.skills = {"統領": 0.1}
+	state.persons[tid * 10] = ldr
+	_p1_place_tile(state, pos)
+	return t
+
+# observer 對 neighbor discovered + belief（has_belief→true，供 _nearest_independent/_find_weakest_prey）
+func _indep_discover(state: WorldState, obs: TeamData, other: TeamData, pop_est: float = 12.0) -> void:
+	if not state.team_discovered.has(obs.team_id):
+		state.team_discovered[obs.team_id] = []
+	if not state.team_discovered[obs.team_id].has(other.team_id):
+		state.team_discovered[obs.team_id].append(other.team_id)
+	if not state.team_intel.has(obs.team_id):
+		state.team_intel[obs.team_id] = {}
+	state.team_intel[obs.team_id][other.team_id] = {
+		"population_est": pop_est, "armed_est": pop_est,
+		"food_est": 200.0, "tile_pos": other.tile_pos,
+		"confidence": 1.0, "last_tick": 0,
+	}
+
+func _test_indep_strategic_found() -> void:
+	print("--- 獨立戰略層：野心獨立隊建國→結盟 ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var founder := _mk_ambitious_independent(state, Vector2i(3, 3))
+	var ally := _mk_independent_team(state, Vector2i(4, 3), 801)
+	_indep_discover(state, founder, ally)   # founder 看得到可結盟獨立鄰
+	var fa := FactionAISystem.new()
+	fa._evaluate_independent_strategy(state, founder)
+	# 義氣高(0.7)+殘忍低 → 結盟 util 勝吞併 → TASK_DIPLOMACY 朝 ally
+	assert(founder.current_task == TeamData.TASK_DIPLOMACY,
+		"[indep] 野心獨立隊未秤建國/結盟 task=%s" % founder.current_task)
+	assert(founder.move_target == ally.tile_pos,
+		"[indep] 結盟未朝 ally got=%s" % str(founder.move_target))
+	assert(founder.solo_intent == "建國", "[indep] solo_intent 未記建國 got=%s" % founder.solo_intent)
+	print("[indep] strategic found OK (founder→DIPLOMACY ally=%d)" % ally.team_id)
+
+func _test_indep_low_ambition_no_found() -> void:
+	print("--- 獨立戰略層：低野心獨立隊不建國 ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var meek := _mk_independent_team(state, Vector2i(3, 3), 802, 0.3)   # 野心 0.3 < 0.55
+	var ally := _mk_independent_team(state, Vector2i(4, 3), 803)
+	_indep_discover(state, meek, ally)
+	var fa := FactionAISystem.new()
+	fa._evaluate_independent_strategy(state, meek)
+	assert(meek.current_task != TeamData.TASK_DIPLOMACY and meek.current_task != TeamData.TASK_ATTACK,
+		"[indep] 低野心隊竟建國 task=%s" % meek.current_task)
+	assert(meek.solo_intent != "建國", "[indep] 低野心隊 solo_intent=建國")
+	print("[indep] low ambition no-found OK (task=%s)" % meek.current_task)
+
+func _test_indep_isolated_no_found() -> void:
+	print("--- 獨立戰略層：孤立野心隊無路→守成（宣告 defer） ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var loner := _mk_ambitious_independent(state, Vector2i(3, 3), 804)
+	# 無 discovered 鄰 → ally_id=-1 且 prey_id=-1 → 守成（孤立洞 = 宣告 defer backlog）
+	var fa := FactionAISystem.new()
+	fa._evaluate_independent_strategy(state, loner)
+	assert(loner.current_task != TeamData.TASK_DIPLOMACY and loner.current_task != TeamData.TASK_ATTACK,
+		"[indep] 孤立隊竟建國 task=%s" % loner.current_task)
+	print("[indep] isolated no-found OK (守成 累積; task=%s)" % loner.current_task)
+
+func _test_indep_subjugate_dispatch() -> void:
+	print("--- 獨立戰略層：殘忍野心隊建國→吞併 ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var brute := _mk_ambitious_independent(state, Vector2i(3, 3), 805)
+	# 殘忍/好戰高 + 義氣低 → 吞併 util 勝結盟
+	state.persons[805 * 10].values = {"野心": 0.8, "義氣": 0.1, "好戰": 0.8, "殘忍": 0.9, "慎重": 0.2}
+	var prey := _mk_independent_team(state, Vector2i(4, 3), 806)
+	_seed_pop(prey, 3)   # pop=3 < brute.pop(12)×0.7 → belief 弱 → _find_weakest_prey 選
+	_indep_discover(state, brute, prey, 3.0)   # belief pop_est=3 弱
+	var fa := FactionAISystem.new()
+	fa._evaluate_independent_strategy(state, brute)
+	assert(brute.current_task == TeamData.TASK_ATTACK,
+		"[indep] 殘忍野心隊未秤建國/吞併 task=%s" % brute.current_task)
+	assert(brute.tags.has("統領"), "[indep] 吞併建國未自立統領 tag（subjugate gate 需）")
+	assert(brute.prosperity_target_id == prey.team_id, "[indep] 吞併未設追擊目標")
+	print("[indep] subjugate dispatch OK (brute→ATTACK prey=%d, 統領 tag set)" % prey.team_id)
+
+func _test_indep_found_to_faction() -> void:
+	print("--- 獨立戰略層：結盟→create_faction→fid -1→正（整環前半哩） ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var founder := _mk_ambitious_independent(state, Vector2i(3, 3), 807)
+	var ally := _mk_independent_team(state, Vector2i(3, 3), 808)   # 同格（直接觸發 interaction）
+	# ally leader 義氣/信義高 → 接受結盟（_try_diplomacy accept gate）
+	state.persons[808 * 10].values = {"野心": 0.3, "義氣": 0.9, "信義": 0.9, "好戰": 0.1, "殘忍": 0.1, "慎重": 0.6}
+	_indep_discover(state, founder, ally)
+	var fa := FactionAISystem.new()
+	fa._evaluate_independent_strategy(state, founder)
+	assert(founder.current_task == TeamData.TASK_DIPLOMACY, "[indep] 未 dispatch 結盟")
+	# 同格 → interaction _try_diplomacy 兩獨立 create_faction
+	var inter := InteractionSystem.new()
+	inter._try_diplomacy(state, founder.team_id, ally.team_id)
+	assert(founder.faction_id != -1, "[indep] 結盟後 founder 仍 fid=-1（create_faction 未觸發）")
+	var f = state.factions.get(founder.faction_id)
+	assert(f != null, "[indep] faction 未建")
+	assert(ally.faction_id == founder.faction_id, "[indep] ally 未入新 faction")
+	print("[indep] found→faction OK (fid -1→%d, members=%d)" % [founder.faction_id, f.member_team_ids.size()])
 
 func _test_probe_accumulator() -> void:
 	print("--- Probe 累計器 ---")

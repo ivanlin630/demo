@@ -30,6 +30,14 @@ const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed 
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
 # commander-v2 means-end：意圖承諾 hysteresis 加成（戰略別每 cadence 翻；情勢不變則黏住）。TEST VALUE
 const COMMANDER_COMMITMENT_BONUS: float = 0.15
+# ── 獨立戰略層（野心獨立隊建國 intent；mirror commander-v2 _select_intent，輕量）──
+# 統一決策 arc 第三塊：野心是普世驅力，不被 faction-gate。獨立 ambitious leader 也秤戰略意圖。
+# 建國 = means-end 秤的 option（driver=野心），非「夠 pop→自動 create_faction」fiat。複用既有 create_faction
+# （結盟 interaction:333 / 吞併 npc_combat:524）。意圖集只 {建國,守成}（征服等成 faction 後 commander-v2 給）。
+const INDEP_STRATEGY_CADENCE: int = 720         # 3 天評估一次（沿用 prosperity cadence 量級）
+const AMBITION_FOUND_MIN: float = 0.55          # TEST VALUE — 建國野心門檻（對齊 ambition_cap STATE 門檻 0.55）
+const FOUND_COMMITMENT_BONUS: float = 0.15      # TEST VALUE — 建國意圖承諾 hysteresis（mirror commander）
+const FOUND_FOOD_SURPLUS_DAYS: float = 7.0      # TEST VALUE — 累積夠 = 有 ≥7 天糧盈餘（已達 EXPAND）
 # 意圖 = 目標 predicate（小集；立國=既有分離 gate 不在此）
 const INTENTS: Dictionary = {
 	"征服": {"main_action": "攻擊", "needs_target": true},   # target 不再獨立
@@ -574,6 +582,12 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			team.order_eval_next_tick = state.world.current_tick + OrderSystem.ORDER_POST_CADENCE
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		# 獨立戰略層（統一決策第三塊）：野心獨立隊秤建國 intent → 結盟/吞併 means-end → create_faction。
+		# 置於 survival 後（survival sticky 不被蓋）、prosperity 前（建國 dispatch 後 prosperity 早退不重派）。
+		# cadence 沿用 prosperity_eval_next_tick 量級的獨立計時器。
+		if team.faction_id == -1 and team.parent_team_id == -1 \
+				and state.world.current_tick >= team.prosperity_eval_next_tick:
+			_evaluate_independent_strategy(state, team)
 		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）
 		if _is_prosperity_candidate(state, team) \
 				and state.world.current_tick >= team.prosperity_eval_next_tick:
@@ -858,6 +872,83 @@ func _emit_goal(f, goal: String, intent_type: String, why: String, mode: String)
 	if goal not in f.goals:
 		f.goals.append(goal)
 	f.goal_drivers[goal] = {"intent": intent_type, "why": why, "mode": mode}
+
+# ──────── 獨立戰略層（野心獨立隊建國 intent）────────
+
+# mirror commander-v2 _select_intent（輕量）：fid=-1 野心獨立隊秤「建國 vs 守成」→ means-end 子行動
+# 結盟(primary)/吞併(機會) → 複用既有 create_faction（不新 founding 機制）。守成=不 dispatch（繼續既有個體決策）。
+# 觸發 gate：fid=-1 + 野心≥AMBITION_FOUND_MIN + 累積夠（pop≥EXPAND_MIN_POP + 食盈餘）+ founding 路徑可達。
+# 稀有 by construction：野心高 + 累積 + 路徑三閘 → 多數獨立隊守成（非建國潮）。
+func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
+	if team.leader_id == state.player_id and state.player_id != -1: return
+	if team.faction_id != -1: return            # 只獨立隊（成 faction 後 commander-v2 接手）
+	if team.parent_team_id != -1: return        # 子隊不自建國
+	if team.combat_target != -1: return         # 戰鬥中不重評
+	# 不打斷生存/威脅/戰鬥型高優先 task（只在 idle 或 stuck 時秤建國；mirror prosperity gate）
+	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
+	if team.current_task in SURVIVAL_TASKS: return
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+
+	# ── gate 1：野心（普世驅力，但建國門檻）──
+	var ambition: float = float(leader.values.get("野心", 0.5))
+	if ambition < AMBITION_FOUND_MIN: return
+
+	# ── gate 2：累積夠（pop ≥ EXPAND_MIN_POP + 食盈餘 = 已達 rung EXPAND 才有本錢拉班底）──
+	if team.population < AmbitionLadder.EXPAND_MIN_POP: return
+	var surplus_need: float = float(team.population) \
+		* ResourceSystem.FOOD_PER_PERSON_PER_DAY * FOUND_FOOD_SURPLUS_DAYS
+	if ResourceSystem.effective_food(state, team) < surplus_need: return
+
+	# ── 秤 建國 vs 守成（means-end util，argmax + hysteresis）──
+	# 子行動候選 viability（measure：結盟最順、吞併機會）：
+	var ally_id: int = _nearest_independent(state, team)   # 結盟候選（可達獨立鄰）
+	var prey_id: int = _find_weakest_prey(state, team)     # 吞併候選（belief 弱可達鄰）
+	# founding 路徑不可達（無獨立鄰 + 無弱鄰）→ 孤立野心隊，宣告(solo) defer → 守成累積（backlog）
+	if ally_id == -1 and prey_id == -1: return
+
+	var honor:   float = float(leader.values.get("義氣", 0.5))
+	var cruelty: float = float(leader.values.get("殘忍", 0.5))
+	var martial: float = float(leader.values.get("好戰", 0.5))
+	# 子行動 util = viability × 人格（結盟←義氣，對齊 _match_fillers ally_util；吞併←殘忍/好戰）
+	var ally_util: float = (0.3 + honor * 0.5) if ally_id != -1 else -1.0
+	var subj_util: float = (0.2 + cruelty * 0.4 + martial * 0.3) if prey_id != -1 else -1.0
+	# 建國意圖 score = 最佳子行動 util × 野心（野心放大建國驅力）；守成 = base
+	var best_sub_util: float = maxf(ally_util, subj_util)
+	var found_score: float = best_sub_util * (0.6 + ambition * 0.6)
+	var hold_score: float = 0.35   # 守成 base（多數獨立隊 default）
+	# hysteresis：上次承諾建國 → 黏住（戰略別每 cadence 翻）
+	if team.solo_intent == "建國":
+		found_score += FOUND_COMMITMENT_BONUS
+
+	if found_score <= hold_score:
+		team.solo_intent = "守成"
+		return   # 守成 = 不 dispatch，繼續既有個體決策（SoloAI/survival/ambient）
+
+	# ── 建國 intent → dispatch means-end 子行動（argmax；結盟 vs 吞併）──
+	team.solo_intent = "建國"
+	if ally_util >= subj_util:
+		# 結盟（primary）：TASK_DIPLOMACY 朝獨立鄰 → interaction:333 兩獨立 create_faction
+		# 單方有 drive 不保證成 faction（對方意願 emergent；被拒則下 cadence 重評/改吞併）
+		if _is_stuck(team): TaskArbiter.release(team)
+		if TaskArbiter.try_set(state, team, TeamData.TASK_DIPLOMACY,
+				state.teams[ally_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_ally"):
+			team.order_task = ""   # 結盟提案（非求和 tribute）
+			print("[IndepStrategy] Team%d 野心建國→結盟 Team%d (野心=%.2f)" % [
+				team.team_id, ally_id, ambition])
+			Probe.bump("indep.found_ally")
+	else:
+		# 吞併（機會，殘忍/好戰染）：TASK_ATTACK 朝弱鄰 → 勝→npc_combat subjugate:524 create_faction
+		# subjugate gate 需 winner 統領 tag：committing 建國-by-conquest = 自立為統領（means-end driver=建國）
+		if not team.tags.has("統領"):
+			team.tags.append("統領")
+		if _is_stuck(team): TaskArbiter.release(team)
+		if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
+				state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_subjugate"):
+			team.prosperity_target_id = prey_id   # 追擊刷新復用
+			print("[IndepStrategy] Team%d 野心建國→吞併 Team%d (野心=%.2f)" % [
+				team.team_id, prey_id, ambition])
+			Probe.bump("indep.found_subjugate")
 
 # ──────── 任務指派 ────────
 
