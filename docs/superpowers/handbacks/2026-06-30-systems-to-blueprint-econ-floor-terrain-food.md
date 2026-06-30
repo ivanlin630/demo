@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★餓死真因量出(碼證) — 食物累積地形閘(plains regen8/forest3,糧倉1991 vs 0);非plains隊餬口無盈餘爬不了;久掛經濟底🟡定位=特化→換糧trade loop沒閉
 ---
 
