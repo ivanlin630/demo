@@ -312,6 +312,13 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	_skill_sys.on_combat_end(state, retreater)
 	_skill_sys.on_combat_end(state, pursuer)
 	_apply_pursuit(state, pursuer_id, retreater_id)
+	# 失能-capture（spec §3b）：潰逃丟下的 wounded → 控地勝方俘一比例 → captive_group（P1 吸收 fire 的路徑）。
+	# 決勝在潰逃非對撞：潰得越慘(低 readiness)、控地越徹底、俘越多。確定性、守恆（wounded→captive 轉移）。
+	if state.teams.has(pursuer_id) and state.teams.has(retreater_id):
+		var _cap: int = AnonTierSystem.capture_wounded_as_captive(state, state.teams[pursuer_id], retreater)
+		if _cap > 0:
+			print("[Capture] Team%d 控地俘 Team%d 潰逃 wounded +%d (rd=%.2f)" % [
+				pursuer_id, retreater_id, _cap, retreater.readiness])
 	var _pp_fr: PersonData = state.persons.get(state.player_id)
 	var _ptid_fr: int = _pp_fr.team_id if _pp_fr else -1
 	if _ptid_fr == -1 or pursuer_id != _ptid_fr:
