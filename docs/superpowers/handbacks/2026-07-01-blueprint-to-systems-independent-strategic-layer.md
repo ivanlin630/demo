@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: rung2→3 修根=下放戰略意圖層到獨立野心隊(補完統一決策arc第三塊)非founding補丁;野心普世不該被faction-gate;複用create_faction;(a)最後一哩
 ---
 
