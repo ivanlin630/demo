@@ -4005,6 +4005,9 @@ func _run_sim_test() -> void:
 	# ── 買糧 survival option（Phase 1） ──
 	_test_buyfood_term_and_option()
 	_test_buyfood_integration()
+	# ── 經濟底 閉特化-交易-換糧環 ──
+	_test_econ_empty_home_no_return()
+	_test_econ_believability()
 
 	print("=== DONE ===")
 
@@ -4075,6 +4078,89 @@ func _test_buyfood_integration() -> void:
 	fa._decide_unified(s2, broke)
 	assert(broke.current_task != TeamData.TASK_TRADE, "[buyfood] 無錢隊竟買糧 task=%s" % broke.current_task)
 	print("[buyfood] integration OK (rich=%s broke=%s)" % [rich.current_task, broke.current_task])
+
+# === 經濟底 閉特化-交易-換糧環 helpers/tests ===
+# forest 隊：food危(food_days<3) + 自家糧倉空(home_food=0) + 有 material(換糧籌碼) + 無 coin/goods
+#   + 遠端自家 outpost(空糧倉) + pop>15(排覓食)。home_granary 參數控空/滿。
+func _mk_forest_team(state: WorldState, pos: Vector2i, home_granary: float) -> TeamData:
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = pos; t.faction_id = -1
+	var ldr := PersonData.new(); ldr.id = 1; ldr.team_id = 0
+	ldr.values = {"野心": 0.5, "貪婪": 0.5, "好戰": 0.2, "殘忍": 0.1}; ldr.loyalty = 0.5
+	state.persons[1] = ldr; t.leader_id = 1
+	_seed_pop(t, 20)   # > FORAGE_VIABLE_POP(15)：覓食不入榜
+	# food 低（food_days<3）、material 充（surplus 遠 > reserve=pop×5；換糧籌碼）、無 coin/goods（has_specie 只靠 material）
+	t.resources = {"food": 5.0, "coin": 0.0, "goods": 0.0, "material": 300.0}
+	state.teams[0] = t
+	if not state.team_discovered.has(0): state.team_discovered[0] = []
+	# 遠端自家 outpost（forest 家）：granary 由參數控（0=空家、≥RESTOCK_MIN=有糧）
+	var op := pos + Vector2i(2, 0)
+	var tile := HexTileData.new(); tile.tile_pos = op; tile.terrain = "forest"
+	tile.outpost_level = 1; tile.outpost_owner = 0
+	tile.public_storage = {"food": home_granary}
+	state.world.tiles[op.x * 1000 + op.y] = tile
+	return t
+
+func _test_econ_empty_home_no_return() -> void:
+	print("--- 經濟底 空家 gate + material specie ---")
+	# (a) 空家 forest 隊 + material + 鄰市集 → 不返空家、選買糧(換糧 TASK_TRADE)
+	var s1 := WorldState.new(); s1.world = WorldData.new(); s1.player_id = -1
+	var fa := FactionAISystem.new()
+	var forester := _mk_forest_team(s1, Vector2i(2,2), 0.0)   # 家糧倉空
+	_mk_market_outpost(s1, Vector2i(3,2))                     # 鄰市集（owner 99）
+	var ctx := DecisionContext.gather(s1, forester)
+	assert(ctx.home_food < 1.0, "[econ] 前置:家糧倉非空 home_food=%.1f" % ctx.home_food)
+	assert(ctx.has_specie, "[econ] material 充卻 has_specie=false(未納特產)")
+	var applic := DecisionOptions.applicable(ctx)
+	assert("返家補給" not in applic, "[econ] 空家仍 offer 返家補給(該 gate 掉) applic=%s" % str(applic))
+	assert("買糧" in applic, "[econ] 有 material+市集卻不能買糧 applic=%s" % str(applic))
+	fa._decide_unified(s1, forester)
+	assert(forester.current_task == TeamData.TASK_TRADE, "[econ] forest 隊未去換糧 task=%s" % forester.current_task)
+	# (b) 對照：家有糧(≥RESTOCK_MIN) → 返家補給 仍 applicable
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
+	var homed := _mk_forest_team(s2, Vector2i(2,2), 200.0)    # 家糧倉滿
+	var ctx2 := DecisionContext.gather(s2, homed)
+	assert(ctx2.home_food >= DecisionTerms.RESTOCK_MIN, "[econ] 對照家糧倉未滿 home_food=%.1f" % ctx2.home_food)
+	assert("返家補給" in DecisionOptions.applicable(ctx2), "[econ] 家有糧竟不返(返家補給 被誤 gate)")
+	print("[econ] empty-home gate + material specie OK (空家task=%s)" % forester.current_task)
+
+func _test_econ_believability() -> void:
+	print("--- 經濟底 believability ---")
+	var fa := FactionAISystem.new()
+	# (a) forest 隊賣 material 換糧：到場 _resolve_market barter material→food（量足否，守恆）
+	#     用無 coin 賣家 → 強制走 barter 路徑（material↔food）= 驗藍圖風險「barter 換糧量夠不夠」。
+	var s1 := WorldState.new(); s1.world = WorldData.new(); s1.player_id = -1
+	var forester := _mk_forest_team(s1, Vector2i(0,0), 0.0)
+	forester.tile_pos = Vector2i(1,0)   # 移到市集格（同格才能 _resolve_market）
+	_mk_market_outpost(s1, Vector2i(1,0))
+	s1.teams[99].resources = {"food": 5000.0, "coin": 0.0}   # 賣家無 coin → 缺幣互補走 barter
+	var mat_before: float = float(forester.resources.get("material", 0))
+	var food_before: float = float(forester.resources.get("food", 0))
+	InteractionSystem.new()._resolve_market(s1, forester, s1.teams[99])
+	var mat_after: float = float(forester.resources.get("material", 0))
+	var food_after: float = float(forester.resources.get("food", 0))
+	assert(food_after > food_before, "[econ] barter 未換得糧 food %.0f→%.0f（換糧量不足?）" % [food_before, food_after])
+	assert(mat_after < mat_before, "[econ] barter 未付出 material（守恆異常）")
+	print("[econ] barter 換糧 OK material %.0f→%.0f food %.0f→%.0f" % [mat_before, mat_after, food_before, food_after])
+	# (a2) 賣家有 coin → forest 賣 material 得 coin（specie）→ 下輪可買糧（閉環另一半）
+	var s1b := WorldState.new(); s1b.world = WorldData.new(); s1b.player_id = -1
+	var fr2 := _mk_forest_team(s1b, Vector2i(0,0), 0.0); fr2.tile_pos = Vector2i(1,0)
+	_mk_market_outpost(s1b, Vector2i(1,0))   # 賣家 coin=100
+	var coin_before: float = float(fr2.resources.get("coin", 0))
+	InteractionSystem.new()._resolve_market(s1b, fr2, s1b.teams[99])
+	var coin_after: float = float(fr2.resources.get("coin", 0))
+	var food2_after: float = float(fr2.resources.get("food", 0))
+	assert(coin_after > coin_before or food2_after > 5.0, \
+		"[econ] forest 在 coin 市集既未得 coin 亦未得糧 coin %.0f→%.0f food=%.0f" % [coin_before, coin_after, food2_after])
+	print("[econ] coin 市集 forest material→coin/food OK coin %.0f→%.0f food=%.0f" % [coin_before, coin_after, food2_after])
+	# (b) 真窮(無 material 無 coin) forest 隊 → 不買糧（落乞食/紮營/覓食真語意）
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
+	var broke := _mk_forest_team(s2, Vector2i(2,2), 0.0)
+	broke.resources = {"food": 5.0, "coin": 0.0, "goods": 0.0, "material": 0.0}   # has_specie=false
+	_mk_market_outpost(s2, Vector2i(3,2))
+	var ctxb := DecisionContext.gather(s2, broke)
+	assert(not ctxb.has_specie, "[econ] 真窮卻 has_specie=true")
+	assert("買糧" not in DecisionOptions.applicable(ctxb), "[econ] 真窮隊竟能買糧（無籌碼）")
+	print("[econ] believability OK")
 
 func _test_probe_accumulator() -> void:
 	print("--- Probe 累計器 ---")
@@ -4525,8 +4611,12 @@ func _test_true_desperation_still_survival() -> void:
 	t.resources = {"food": 0.0}    # team 無糧
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
 	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
-	tile.public_storage = {"food": 0.0}   # 糧倉也空 → 真絕境
+	tile.public_storage = {"food": 0.0}   # 糧倉也空 → 真絕境（家無糧 → 返家補給被 home-empty gate 擋）
 	state.world.tiles[2*1000+2] = tile
+	# 鄰格可覓食（wild_game）→ 真絕境隊改走覓食（非返空家乾耗）= 不掩飢荒仍有出路
+	var forage := HexTileData.new(); forage.tile_pos = Vector2i(3,2); forage.terrain = "plains"
+	forage.resources = {"wild_game": 50}
+	state.world.tiles[3*1000+2] = forage
 	var ldr := PersonData.new(); ldr.id = 100; ldr.team_id = 0; state.persons[100] = ldr
 	state.teams[0] = t
 	assert(ResourceSystem.effective_food(state, t) < 0.01, \
@@ -5337,6 +5427,7 @@ func _test_survival_decision_tree() -> void:
 	s1.persons[100] = l1; t1.leader_id = 100
 	s1.teams[0] = t1; s1.team_discovered[0] = []
 	var tile1 := HexTileData.new(); tile1.tile_pos = Vector2i(3,3); tile1.outpost_level = 1; tile1.outpost_owner = 0
+	tile1.public_storage = {"food": 200.0}   # 家糧倉有糧 → 返家補給 home-empty gate 過
 	s1.world.tiles[3003] = tile1
 	fai._trigger_survival(s1, t1, "urgent")
 	assert(t1.current_task == TeamData.TASK_RETURN_HOME, "Path 1 應 return_home，實際=%s" % t1.current_task)
@@ -5423,6 +5514,7 @@ func _mk_homed_desperate_team(state: WorldState, pos: Vector2i, tags: Array, val
 	var op := pos + Vector2i(1, 0)
 	var tile := HexTileData.new(); tile.tile_pos = op
 	tile.outpost_level = 1; tile.outpost_owner = t.team_id
+	tile.public_storage = {"food": 200.0}   # 家糧倉有糧（≥RESTOCK_MIN）→ 返家補給 home-empty gate 過
 	state.world.tiles[op.x * 1000 + op.y] = tile
 	return t
 
@@ -7931,6 +8023,7 @@ func _test_survival_b_branch_far_outpost_loot() -> void:
 	# own outpost 遠（dist 26 → ETA 26*48=1248 > 1200 = 5 日）
 	var op_tile: HexTileData = state.world.tiles[26 * 1000 + 0]
 	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
+	op_tile.public_storage = {"food": 200.0}   # 家糧倉有糧 → 返家補給 home-empty gate 過
 	# 近且弱 prey（reachable）
 	var prey := TeamData.new()
 	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 1)
@@ -7960,6 +8053,7 @@ func _test_survival_b_branch_near_outpost_return() -> void:
 	# own outpost 近（dist 2 → ETA 240 < 1200）
 	var op_tile: HexTileData = state.world.tiles[2 * 1000 + 0]
 	op_tile.outpost_level = 1; op_tile.outpost_owner = 0
+	op_tile.public_storage = {"food": 200.0}   # 家糧倉有糧 → 返家補給 home-empty gate 過
 	var prey := TeamData.new()
 	prey.team_id = 1; prey.tile_pos = Vector2i(3, 0); _seed_pop(prey, 1)
 	prey.faction_id = 1; prey.last_tile_pos = prey.tile_pos
@@ -13333,12 +13427,19 @@ func _test_merchant_restock() -> void:
 
 	# 非商隊(生產隊)絕境(food<DESPERATION)有家 → 返家補給 applicable
 	# （P2b-1 generalize：保 non-unified 1037 熱路徑；任何有家隊絕境皆返家）
+	# 隊離家在外(5,5)+自帶糧空 → 絕境；遠端家糧倉滿(≥RESTOCK_MIN) → home-empty gate 過 → 返家補給。
 	var s4 := WorldState.new(); s4.world = WorldData.new()
-	var p := _mk_produce_team(s4, {"義氣": 0.6}, 0.0, true)  # 有家但 granary food=0
-	p.resources = {"food": 12.0}   # pop5 → days=1.0 < DESPERATION(3)
+	var p := TeamData.new(); p.team_id = 0; p.tags = [TeamData.TAG_PRODUCE]
+	p.tile_pos = Vector2i(5,5); p.leader_id = 100
+	_seed_pop(p, 5); p.resources = {"food": 12.0}   # 自帶 pop5 → days=1.0 < DESPERATION(3)；遠端家糧不算 effective_food
+	var home4 := HexTileData.new(); home4.tile_pos = Vector2i(2,2)
+	home4.outpost_owner = 0; home4.outpost_level = 1; home4.public_storage = {"food": 500.0}
+	s4.world.tiles[2*1000+2] = home4
+	var l4 := PersonData.new(); l4.id = 100; l4.values = {"義氣": 0.6}; s4.persons[100] = l4; s4.teams[0] = p
 	var ctx4: DecisionContext = DecisionContext.gather(s4, p)
 	assert(ctx4.food_days < DecisionTerms.DESPERATION_DAYS and not ctx4.is_merchant, \
 		"前置:非商隊絕境 days=%.1f" % ctx4.food_days)
+	assert(ctx4.home_food >= DecisionTerms.RESTOCK_MIN, "前置:遠端家糧倉應滿 home_food=%.1f" % ctx4.home_food)
 	assert("返家補給" in DecisionOptions.applicable(ctx4), \
 		"非商隊絕境有家應返家補給(P2b-1 generalize 保熱路徑)")
 	# 非商隊輕飢(DESPERATION≤food<RESTOCK)有家 → 無返家補給(proactive 補給限商隊)
@@ -13847,6 +13948,7 @@ func _give_home_outpost(state: WorldState, team: TeamData, pos: Vector2i) -> voi
 	var tile: HexTileData = state.world.tiles.get(pos.x * 1000 + pos.y)
 	tile.outpost_level = 1
 	tile.outpost_owner = team.team_id
+	tile.public_storage = {"food": 200.0}   # 家糧倉有糧（≥RESTOCK_MIN）→ 返家補給 home-empty gate 過
 
 func _test_p2a_survival_options() -> void:
 	print("--- P2a survival options ---")

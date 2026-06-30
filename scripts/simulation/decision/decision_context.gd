@@ -32,6 +32,8 @@ var has_food_market: bool = false
 var food_market_pos: Vector2i = Vector2i(-1, -1)
 var food_market_dist: int = -1
 var has_specie: bool = false
+# 經濟底：自家糧倉 food（含遠端家，team 不在家也讀得到）→ 返家補給 home-empty gate 用。
+var home_food: float = 0.0
 # P3/P4 混合協調：派系 stakes directive 集合（攻擊/徵收/外交）。
 # 立國=leader-level（_declare_established，非 member option）；掠奪=日常個體（非 stakes）。
 const STAKES_SET: Array = ["攻擊", "徵收", "外交"]
@@ -91,7 +93,13 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_food_market = _mkt != Vector2i(-1, -1)
 	c.food_market_pos = _mkt
 	c.food_market_dist = _fa._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1
-	c.has_specie = float(team.resources.get("coin", 0)) > 0.0 or float(team.resources.get("goods", 0)) >= 10.0
+	# has_specie 廣義納可交易特產：coin / goods / material / ore（forest=木材 mountain=礦 換糧籌碼）。
+	c.has_specie = float(team.resources.get("coin", 0)) > 0.0 \
+		or float(team.resources.get("goods", 0)) >= 10.0 \
+		or float(team.resources.get("material", 0)) >= DecisionTerms.MATERIAL_TRADE_MIN \
+		or float(team.resources.get("ore_iron", 0)) + float(team.resources.get("ore_gold", 0)) >= DecisionTerms.MATERIAL_TRADE_MIN
+	# home_food：自家糧倉 food（掃自有 outpost tile，team 不在家也讀得到 → 空家判定）。
+	c.home_food = DecisionContext._home_granary_food(state, team)
 	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:
 		var f = state.factions.get(team.faction_id)
@@ -112,3 +120,13 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 				c.faction_diplo_target = _dt
 				c.faction_diplo_target_pos = state.teams[_dt].tile_pos if _dt != -1 else Vector2i(-1, -1)
 	return c
+
+# 自家糧倉 food：掃自有 outpost tile（owner==team_id）取 public_storage food。
+# own_granary_tile 只在 team 站在自家據點時回傳；返家補給 gate 須在「離家」時也讀得到家糧 →
+# 仿 _find_own_outpost 掃法（不限本格），無自家 outpost → 0。
+static func _home_granary_food(state: WorldState, team: TeamData) -> float:
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level > 0 and tile.outpost_owner == team.team_id:
+			return float(tile.public_storage.get("food", 0))
+	return 0.0

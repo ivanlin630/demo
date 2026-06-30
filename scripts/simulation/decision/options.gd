@@ -37,7 +37,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 			"返家補給":
 				# 商隊 proactive 補給：糧低於 RESTOCK 且有家可回 → 回家補 carried(避 survival latch)。
 				# P2b-1 generalize：任何有家隊絕境(food<DESPERATION)→回家(保 non-unified 1037 熱路徑)。
-				if ctx.has_home_outpost and ( \
+				# 經濟底 home-empty gate：家糧倉 < RESTOCK_MIN（空家）→ 不 offer（返空家乾耗無意義）
+				#   → 讓 買糧/交易/覓食 接手（forest 隊賣特產換糧而非返空家）。
+				if ctx.has_home_outpost and ctx.home_food >= DecisionTerms.RESTOCK_MIN and ( \
 						(ctx.is_merchant and ctx.food_days < DecisionTerms.RESTOCK_DAYS) \
 						or ctx.food_days < DecisionTerms.DESPERATION_DAYS):
 					out.append(opt)
