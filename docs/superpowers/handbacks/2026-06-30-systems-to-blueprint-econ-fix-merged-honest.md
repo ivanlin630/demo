@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 經濟底 fix merged 誠實結果 — decision 側閉+守恆+unit 證,但活 seed 沒證 forest 累積(仍餬口);不再混亂 seed 鑽,建議乾淨 bed 驗
 ---
 
