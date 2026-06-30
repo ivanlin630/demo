@@ -3932,6 +3932,7 @@ func _run_sim_test() -> void:
 	_test_survival_reads_granary()
 	_test_true_desperation_still_survival()
 	_test_solo_trade_not_starved()
+	_test_econ_growth_reads_coherent_food()
 
 	# ── 經濟 WS-2d：旅途乾糧（解糧倉拴住商隊）──
 	_test_travel_provisions()
@@ -4577,6 +4578,61 @@ func _test_effective_food_accessor() -> void:
 	assert(absf(ResourceSystem.effective_food(state, t) - 30.0) < 0.01, \
 		"非自家糧倉不該計入，實際=%.1f" % ResourceSystem.effective_food(state, t))
 	print("effective_food accessor OK")
+
+# ── 經濟食物統一：成長/擴張/生育 surplus gate 讀 effective_food（私產+糧倉）──
+# 定居隊糧在糧倉(私產=0) → gate 該認糧倉(effective_food)而非私產 silo。
+func _mk_settled_team_granary_food(state: WorldState, pos: Vector2i) -> TeamData:
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = pos; t.leader_id = 100
+	_seed_pop(t, 10)
+	t.resources = {"food": 0.0}          # 私產 silo 空（糧搬進糧倉）
+	t.tags = ["統領"]                     # 擴張需統領
+	var tile := HexTileData.new(); tile.tile_pos = pos
+	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
+	tile.public_storage = {"food": 500.0}  # 糧倉充足
+	state.world.tiles[pos.x*1000 + pos.y] = tile
+	var ldr := PersonData.new(); ldr.id = 100; ldr.team_id = 0; ldr.sex = "male"
+	ldr.needs = {"safety": 1.0, "food": 1.0}
+	ldr.stress = 0.0
+	state.persons[100] = ldr
+	t.anon_female_ratio = 0.5             # 兩性 → breed_balance > 0
+	state.teams[0] = t
+	return t
+
+func _test_econ_growth_reads_coherent_food() -> void:
+	print("--- 經濟食物統一: 成長讀 coherent food(私產+糧倉) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := _mk_settled_team_granary_food(state, Vector2i(1,1))
+	var leader: PersonData = state.persons[100]
+	# 前置：effective_food=500 >> 生育 7 天 buffer(10×2.4×7=168)
+	assert(ResourceSystem.effective_food(state, t) > 168.0, \
+		"[econ] 前置:effective_food 不足，實際=%.1f" % ResourceSystem.effective_food(state, t))
+	# 私產 silo=0 → 舊邏輯 surplus_ok=false → 不生育；統一後讀 effective_food=500 → 該生育
+	var bred: bool = false
+	for i in 300:
+		if "P5_breed" in rs_evaluate_life_events_for_test(state, leader, t):
+			bred = true; break
+	assert(bred, "[econ] 糧倉足卻不生育(仍讀私產 silo=0)")
+	# 擴張：糧倉足 + 統領 + 低壓 → food gate 該認 effective_food → 高分(>0.5)
+	var rs := ReactionSystem.new()
+	var expand_score: float = rs._score_expand(state, leader, t)
+	assert(expand_score > 0.5, \
+		"[econ] 糧倉足卻擴張 food gate fail(score=%.2f,應>0.5)" % expand_score)
+	# 反向不誤放寬：私產+糧倉皆空 → effective_food=0 → 仍 fail
+	t.tile_pos = Vector2i(9,9)            # 離開糧倉格 → 無自家糧倉
+	assert(ResourceSystem.effective_food(state, t) < 0.01, "[econ] 前置:離家後 effective_food 該≈0")
+	var starved_bred: bool = false
+	for i in 300:
+		if "P5_breed" in rs_evaluate_life_events_for_test(state, leader, t):
+			starved_bred = true; break
+	assert(not starved_bred, "[econ] 真餓隊(私產+糧倉皆空)仍不該生育")
+	# gate fail → base 0.05（vs pass 0.55）；leader 預設 野心0.5→+0.15 → 上限約0.2 < 0.3
+	assert(rs._score_expand(state, leader, t) < 0.3, "[econ] 真餓隊擴張 food gate 該 fail")
+	print("[econ] growth reads coherent food OK")
+
+# 測試入口：直呼私有 _evaluate_life_events（簽名含 state）
+func rs_evaluate_life_events_for_test(state: WorldState, p: PersonData, t: TeamData) -> Array:
+	var rs := ReactionSystem.new()
+	return rs._evaluate_life_events(state, p, t)
 
 func _test_survival_reads_granary() -> void:
 	print("--- WS-2c survival 讀糧倉不誤判 ---")
@@ -9539,7 +9595,7 @@ func _test_p3_removed() -> void:
 	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 5)
 	var p := PersonData.new(); p.id = 1; p.team_id = 0
 	p.values = { "野心": 0.9, "貪婪": 0.9 }   # 舊 P3 高分個性
-	var r: String = rs._evaluate_person(p, team)
+	var r: String = rs._evaluate_person(_no_granary_state(), p, team)
 	assert(r != "P3_recruit", "P3 應已刪除，實際=%s" % r)
 	print("Reaction Task1b OK")
 
@@ -9600,15 +9656,16 @@ func _test_p5_needs_surplus() -> void:
 	team.resources = { "food": 50.0 }   # 50 < 10*2.4*7=168
 	var p := PersonData.new(); p.id = 1; p.team_id = 0   # needs 預設 safe/fed
 	var rs := ReactionSystem.new()
+	var st := _no_granary_state()
 	var bad: bool = false
 	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(p, team):
+		if "P5_breed" in rs._evaluate_life_events(st, p, team):
 			bad = true; break
 	assert(not bad, "糧不足不生")
 	team.resources["food"] = 200.0
 	var got: bool = false
 	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(p, team):
+		if "P5_breed" in rs._evaluate_life_events(st, p, team):
 			got = true; break
 	assert(got, "盈餘該生")
 	print("Reaction Task4a OK")
@@ -11560,6 +11617,11 @@ func _test_govern_skip_when_vault_full() -> void:
 
 # ──────── Economy Bootstrap Task3：生育反應分層 ────────
 
+# 統一食物後 reaction 簽名含 state；無糧倉的測試隊 → effective_food == team.resources["food"]
+func _no_granary_state() -> WorldState:
+	var s := WorldState.new(); s.world = WorldData.new()
+	return s
+
 func _bootstrap_breed_team(pop: int, minor: int, food: float) -> TeamData:
 	var team := TeamData.new(); team.team_id = 0
 	_seed_pop(team, pop); team.minor_population = minor
@@ -11608,7 +11670,7 @@ func _test_breed_needs_both_sexes() -> void:
 	p_m.needs = { "safety": 1.0, "food": 1.0 }
 	var bred: bool = false
 	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(p_m, t_m):
+		if "P5_breed" in rs._evaluate_life_events(_no_granary_state(), p_m, t_m):
 			bred = true; break
 	assert(not bred, "全男隊(anon全男+male breeder)不應出 P5_breed")
 	print("breed needs both sexes OK")
@@ -11620,7 +11682,7 @@ func _test_breed_decoupled() -> void:
 	var team := _bootstrap_breed_team(10, 0, 1000.0)
 	var p := _bootstrap_breed_person(1.0, 1.0)
 	p.loyalty = 0.0; p.stress = 0.0   # 舊邏輯下 P5_breed(0.4) 會勝出
-	var r: String = rs._evaluate_person(p, team)
+	var r: String = rs._evaluate_person(_no_granary_state(), p, team)
 	assert(r != "P5_breed", "行動反應不應含 P5_breed，實際=%s" % r)
 	print("Bootstrap Task3a OK")
 
@@ -11629,15 +11691,16 @@ func _test_breed_life_event() -> void:
 	var rs := ReactionSystem.new()
 	var team := _bootstrap_breed_team(10, 0, 1000.0)
 	var p := _bootstrap_breed_person(1.0, 1.0)
+	var st := _no_granary_state()
 	var got: bool = false
 	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(p, team):
+		if "P5_breed" in rs._evaluate_life_events(st, p, team):
 			got = true; break
 	assert(got, "條件滿足多次抽樣應出現 P5_breed")
 	p.needs["safety"] = 0.0
 	var bad: bool = false
 	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(p, team):
+		if "P5_breed" in rs._evaluate_life_events(st, p, team):
 			bad = true; break
 	assert(not bad, "不安全不應生育")
 	print("Bootstrap Task3b OK")
@@ -11648,11 +11711,12 @@ func _test_breed_parallel_with_action() -> void:
 	var team := _bootstrap_breed_team(10, 0, 1000.0)
 	var p := _bootstrap_breed_person(1.0, 1.0)
 	p.loyalty = 1.0; p.stress = 0.0   # → 行動反應 P1_comply 勝出
-	var action: String = rs._evaluate_person(p, team)
+	var st := _no_granary_state()
+	var action: String = rs._evaluate_person(st, p, team)
 	assert(action == "P1_comply", "高忠誠應 P1_comply，實際=%s" % action)
 	var got: bool = false
 	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(p, team):
+		if "P5_breed" in rs._evaluate_life_events(st, p, team):
 			got = true; break
 	assert(got, "行動與生育應並行")
 	print("Bootstrap Task3c OK")
@@ -11661,16 +11725,17 @@ func _test_breed_cap() -> void:
 	# pop=4 → cap=maxi(1,int(4×0.25))=1；pop=20 → cap=5
 	var rs := ReactionSystem.new()
 	var p := _bootstrap_breed_person(1.0, 1.0)
+	var st := _no_granary_state()
 	var t4 := _bootstrap_breed_team(4, 1, 1000.0)   # minor 已達 cap=1
 	var capped: bool = false
 	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(p, t4):
+		if "P5_breed" in rs._evaluate_life_events(st, p, t4):
 			capped = true; break
 	assert(not capped, "達 cap 不應生育 (pop=4 cap=1 minor=1)")
 	var t20 := _bootstrap_breed_team(20, 4, 1000.0)   # cap=5 minor=4
 	var ok: bool = false
 	for i in 200:
-		if "P5_breed" in rs._evaluate_life_events(p, t20):
+		if "P5_breed" in rs._evaluate_life_events(st, p, t20):
 			ok = true; break
 	assert(ok, "pop=20 cap=5 minor=4 應可生育")
 	print("Bootstrap Task3d OK")
