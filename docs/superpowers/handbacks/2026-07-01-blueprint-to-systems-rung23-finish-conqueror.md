@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ①失能-capture驗收通過 ②排rung2→3收尾征服者(measure立國卡點別猜,修根非補丁) — binding constraint;讀B/G3平行
 ---
 
