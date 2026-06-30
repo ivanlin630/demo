@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 失能-capture merged 量證 — P1 captive 從 dormant→fire(capture5/assimilate2,(a)機制活);但 CONQUER 意圖仍0、established 仍1=蓄意征服未湧現(下游);求向
 ---
 
