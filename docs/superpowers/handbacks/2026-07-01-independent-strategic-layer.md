@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 獨立戰略層(野心獨立隊建國 intent)實作完成；機制通+稀有+守恆,但 established 1→多 未在 bed 窗內顯現(誠實標,交主 session 長跑/評估)
 ---
 
