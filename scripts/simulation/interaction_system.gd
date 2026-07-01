@@ -870,17 +870,17 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 	var annoyance: float = _count_recent_begs(target_leader, beggar_id) * 0.2
 	var give_score: float = honor + rep - greed * 0.5 - annoyance
 	# 需求 + 乞丐是否將餓死（人性底線判定）
-	var need: float = float(beggar.population) * 2.4 * 3.0 \
+	var need: float = float(beggar.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 3.0 \
 		- float(beggar.resources.get("food", 0))
 	var beggar_starving: bool = float(beggar.resources.get("food", 0)) \
-		< float(beggar.population) * 2.4
-	var mercy_amount: float = float(beggar.population) * 2.4   # 1 天份
+		< float(beggar.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+	var mercy_amount: float = float(beggar.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 1 天份
 	# 慷慨光譜：留存(reserve)與給予比例(give_fraction)由個性兩極決定（取代 flat AID_RESERVE_DAYS）
 	# 守財奴(高貪低義) hoard→1 → reserve 近 60 天、give_fraction≈0；聖人(高義低貪) → reserve 2 天、可動 reserve
 	var hoard: float = greed - honor                           # [-1,1]
 	var reserve_days: float = lerpf(2.0, 60.0, (hoard + 1.0) / 2.0)
 	var target_food: float = float(target.resources.get("food", 0))
-	var reserve: float = float(target.population) * reserve_days * 2.4
+	var reserve: float = float(target.population) * reserve_days * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	var give_fraction: float = clampf(honor - greed * 0.5 + rep * 0.3 - annoyance, 0.0, 1.2)
 	var surplus: float = maxf(target_food - reserve, 0.0)
 	var give: float = minf(need, surplus * give_fraction)

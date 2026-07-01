@@ -1560,7 +1560,7 @@ func _test_team_capabilities_dto() -> void:
 	var cap: Dictionary = d.get("capabilities", {})
 	assert(cap.has("hunt_chance") and cap.has("hunt_yield"), "獵率/產出")
 	assert(cap.has("combat_power"), "戰力")
-	assert(abs(cap.get("food_burn_per_day", 0.0) - 4 * 2.4) < 0.01, "日耗 pop×2.4")
+	assert(abs(cap.get("food_burn_per_day", 0.0) - 4 * ResourceSystem.FOOD_PER_PERSON_PER_DAY) < 0.01, "日耗 pop×const")
 	assert(cap.get("hunt_survival", 0.0) > 0.4, "求生平均反映 leader 求生")
 	print("隊能力 DTO OK")
 
@@ -5185,19 +5185,21 @@ func _test_econ_growth_reads_coherent_food() -> void:
 	# 前置：effective_food=500 >> 生育 7 天 buffer(10×2.4×7=168)
 	assert(ResourceSystem.effective_food(state, t) > 168.0, \
 		"[econ] 前置:effective_food 不足，實際=%.1f" % ResourceSystem.effective_food(state, t))
-	# 私產 silo=0 → 舊邏輯 surplus_ok=false → 不生育；統一後讀 effective_food=500 → 該生育
+	# R2 flow-not-stock：生育讀 food_flow_avg（持續淨盈餘），非 stock。設正向 flow → 該生育。
+	t.food_flow_avg = ReactionSystem.BREED_FLOW_MIN + 5.0
 	var bred: bool = false
 	for i in 300:
 		if "P5_breed" in rs_evaluate_life_events_for_test(state, leader, t):
 			bred = true; break
-	assert(bred, "[econ] 糧倉足卻不生育(仍讀私產 silo=0)")
+	assert(bred, "[econ] 持續淨盈餘 flow 卻不生育")
 	# 擴張：糧倉足 + 統領 + 低壓 → food gate 該認 effective_food → 高分(>0.5)
 	var rs := ReactionSystem.new()
 	var expand_score: float = rs._score_expand(state, leader, t)
 	assert(expand_score > 0.5, \
 		"[econ] 糧倉足卻擴張 food gate fail(score=%.2f,應>0.5)" % expand_score)
-	# 反向不誤放寬：私產+糧倉皆空 → effective_food=0 → 仍 fail
+	# 反向不誤放寬：無淨食物流盈餘（flow≤0）→ 仍不生育
 	t.tile_pos = Vector2i(9,9)            # 離開糧倉格 → 無自家糧倉
+	t.food_flow_avg = 0.0                 # 無持續淨盈餘
 	assert(ResourceSystem.effective_food(state, t) < 0.01, "[econ] 前置:離家後 effective_food 該≈0")
 	var starved_bred: bool = false
 	for i in 300:
@@ -5687,10 +5689,11 @@ func _test_food_consumption_total() -> void:
 	# 模擬跑 1 天（240 tick），每 NEAR_CADENCE=10 call 一次 → 24 calls
 	for _i in range(24):
 		rs.resolve_consumption(state, [0], 10)
-	# 預期消耗：10 × 2.4 = 24 食物/天 → 剩 2376
+	# 預期消耗：10 × FOOD_PER_PERSON/天 → 剩 2400 − 10×const
+	var expected_rem: float = 2400.0 - 10.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	var remaining: float = float(team.resources["food"])
-	assert(remaining >= 2375.0 and remaining <= 2377.0,
-		"1 天後應剩 ~2376，實際=%s" % str(remaining))
+	assert(abs(remaining - expected_rem) <= 1.0,
+		"1 天後應剩 ~%.1f，實際=%s" % [expected_rem, str(remaining)])
 	print("Cadence Task2 OK")
 
 func _test_fatigue_accumulation() -> void:
@@ -9405,9 +9408,12 @@ func _test_mount_food_consumption() -> void:
 	var rs := ResourceSystem.new()
 	# 跑 1 天份消耗（cadence = TICKS_PER_DAY）
 	rs.resolve_consumption(state, [0], WorldState.TICKS_PER_DAY)
-	# 人口：10 × 2.4 = 24；mount：10 × 0.5 = 5 → 共 29
+	# 人口：10 × FOOD_PER_PERSON；mount：10 × 0.5 → 共
+	var expected_consumed: float = 10.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
+		+ 10.0 * ResourceSystem.FOOD_PER_MOUNT_PER_DAY
 	var consumed: float = 1000.0 - float(team.resources["food"])
-	assert(abs(consumed - 29.0) < 0.01, "1天應耗 29 food (24人+5馬), 實際 %.2f" % consumed)
+	assert(abs(consumed - expected_consumed) < 0.01,
+		"1天應耗 %.1f food (人+馬), 實際 %.2f" % [expected_consumed, consumed])
 	print("Mount Task2 OK")
 
 func _test_stable_facility_def() -> void:
@@ -10288,7 +10294,9 @@ func _test_collect_uses_morale() -> void:
 func _test_p5_needs_surplus() -> void:
 	print("--- Reaction Task4a: P5 需糧食盈餘（生命事件層）---")
 	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 10)
-	team.resources = { "food": 50.0 }   # 50 < 10*2.4*7=168
+	# R2 flow-not-stock：生育讀持續淨食物流 food_flow_avg，非 stock。無正向 flow → 不生。
+	team.resources = { "food": 50.0 }
+	team.food_flow_avg = 0.0   # 無淨盈餘（覓食/爆倉 net~0）→ 不生
 	var p := PersonData.new(); p.id = 1; p.team_id = 0   # needs 預設 safe/fed
 	var rs := ReactionSystem.new()
 	var st := _no_granary_state()
@@ -10296,8 +10304,8 @@ func _test_p5_needs_surplus() -> void:
 	for i in 200:
 		if "P5_breed" in rs._evaluate_life_events(st, p, team):
 			bad = true; break
-	assert(not bad, "糧不足不生")
-	team.resources["food"] = 200.0
+	assert(not bad, "無淨食物盈餘不生")
+	team.food_flow_avg = ReactionSystem.BREED_FLOW_MIN + 5.0   # 持續淨盈餘 → 該生
 	var got: bool = false
 	for i in 200:
 		if "P5_breed" in rs._evaluate_life_events(st, p, team):
@@ -11930,8 +11938,9 @@ func _test_aid_saint() -> void:
 	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
 	assert(r.get("accepted", false), "聖人應接受，msg=%s" % r.get("msg", ""))
 	var amt: float = float(r.get("amount", 0))
-	# need = 10*2.4*3 = 72；surplus 充足 → 給滿 need
-	assert(absf(amt - 72.0) < 1.0, "聖人應給滿 need 72，實際=%.1f" % amt)
+	# need = 10*FOOD_PER_PERSON*3；surplus 充足 → 給滿 need
+	var saint_need: float = 10.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 3.0
+	assert(absf(amt - saint_need) < 1.0, "聖人應給滿 need %.1f，實際=%.1f" % [saint_need, amt])
 	assert(float(b.resources["food"]) > 0.0, "乞丐獲食")
 	print("Fief Task4b OK (給 %.1f food)" % amt)
 
@@ -11943,8 +11952,9 @@ func _test_aid_mercy_floor() -> void:
 	var inter := InteractionSystem.new()
 	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
 	assert(r.get("accepted", false), "honor>0.1 遇將餓死者應給 mercy，msg=%s" % r.get("msg", ""))
-	assert(absf(float(b.resources["food"]) - 12.0) < 0.5,
-		"mercy 應給 1 天份 5*2.4=12，實際=%.2f" % float(b.resources["food"]))
+	var mercy_expect: float = 5.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 1 天份
+	assert(absf(float(b.resources["food"]) - mercy_expect) < 0.5,
+		"mercy 應給 1 天份 5*const=%.1f，實際=%.2f" % [mercy_expect, float(b.resources["food"])])
 	# 真禽獸 honor 0.05 → 不給
 	var state2 := _fief_make_aid_state(0.05, 0.9, 1000.0, 0.0, 5)
 	var b2: TeamData = state2.teams[0]
@@ -12261,6 +12271,9 @@ func _bootstrap_breed_team(pop: int, minor: int, food: float) -> TeamData:
 	var team := TeamData.new(); team.team_id = 0
 	_seed_pop(team, pop); team.minor_population = minor
 	team.resources = { "food": food }
+	# R2 flow-not-stock：生育 gate 讀 food_flow_avg（持續淨盈餘）。food 參數大 = 有盈餘 →
+	# 設正向 flow 使 surplus_ok=true，讓測試專注驗其他生育條件（兩性/安全/cap/並行）。
+	team.food_flow_avg = food / 100.0
 	return team
 
 func _bootstrap_breed_person(safety: float, food_need: float) -> PersonData:
@@ -12301,6 +12314,7 @@ func _test_breed_needs_both_sexes() -> void:
 	# 端到端：全男隊 + male breeder → _evaluate_life_events 不出 P5_breed（即使足糧足安全未滿 cap）
 	t_m.minor_population = 0
 	t_m.resources = { "food": 100000.0 }
+	t_m.food_flow_avg = 100.0   # R2：正向 flow → surplus_ok=true，使 no-breed 純因全男(非 flow 缺)
 	var p_m := PersonData.new(); p_m.id = 1; p_m.team_id = 0; p_m.sex = "male"
 	p_m.needs = { "safety": 1.0, "food": 1.0 }
 	var bred: bool = false
@@ -12576,7 +12590,7 @@ func _test_precarity_dto() -> void:
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	state.persons[0] = leader; state.player_id = 0
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0
-	_seed_pop(team, 5); team.resources = {"food": 24.0}   # 5×2.4=12/day → 2 天
+	_seed_pop(team, 5); team.resources = {"food": 8.0}   # 5×0.8=4/day → 2 天
 	state.teams[0] = team
 	var ct: Dictionary = PlayerApiMapper.map_controlled_team(state)
 	assert(ct.has("food_days"), "controlled_team 應有 food_days")
@@ -13246,6 +13260,8 @@ func _mk_ambition_team(amb: float, prudence: float, food: float, pop: int) -> Ar
 	s.persons[1000] = l; t.leader_id = l.id
 	if pop > 1: AnonCohort.add(t.anon_cohorts, "平民", "healthy", pop - 1)
 	t.resources = {"food": food}
+	# R2 flow-not-stock：積累 rung 讀 food_flow_avg（持續淨盈餘）。food 大 = 有盈餘 → 正向 flow。
+	t.food_flow_avg = food / 100.0
 	s.teams[1] = t
 	return [s, t]
 
@@ -13257,10 +13273,10 @@ func _test_ambition_rung_climb() -> void:
 	AmbitionLadder.update(s, t)
 	assert(t.ambition_archetype != "" and t.ambition_cap == 4, "derive 生效")
 	assert(t.ambition_rung >= AmbitionLadder.RUNG_EXPAND, "躁進+足糧足人應達擴張+，實際=%d" % t.ambition_rung)
-	# 安全崩（無糧）→ 退階
-	t.resources["food"] = 0.0
+	# 安全崩（食物流轉負，淨赤字）→ 退階
+	t.food_flow_avg = -1.0
 	AmbitionLadder.update(s, t)
-	assert(t.ambition_rung < AmbitionLadder.RUNG_EXPAND, "無糧應退階，實際=%d" % t.ambition_rung)
+	assert(t.ambition_rung < AmbitionLadder.RUNG_EXPAND, "食物赤字應退階，實際=%d" % t.ambition_rung)
 	print("ambition rung climb OK")
 
 func _test_ambition_cap_limits() -> void:
@@ -14238,7 +14254,7 @@ func _test_merchant_restock() -> void:
 	var s1 := WorldState.new(); s1.world = WorldData.new()
 	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]
 	t.tile_pos = Vector2i(5,5); t.leader_id = 100
-	_seed_pop(t, 5); t.resources = {"food": 24.0}   # 5人 days=24/12=2 < RESTOCK(5)
+	_seed_pop(t, 5); t.resources = {"food": 8.0}   # 5人 days=8/(5×0.8)=2 < RESTOCK(5)
 	# 家 outpost 在別處(2,2)
 	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2)
 	home.outpost_owner = 0; home.outpost_level = 1; home.outpost_type = "civilian"
@@ -14282,7 +14298,7 @@ func _test_merchant_restock() -> void:
 	var s4 := WorldState.new(); s4.world = WorldData.new()
 	var p := TeamData.new(); p.team_id = 0; p.tags = [TeamData.TAG_PRODUCE]
 	p.tile_pos = Vector2i(5,5); p.leader_id = 100
-	_seed_pop(p, 5); p.resources = {"food": 12.0}   # 自帶 pop5 → days=1.0 < DESPERATION(3)；遠端家糧不算 effective_food
+	_seed_pop(p, 5); p.resources = {"food": 8.0}   # 自帶 pop5 → days=8/(5×0.8)=2 < DESPERATION(3)；遠端家糧不算 effective_food
 	var home4 := HexTileData.new(); home4.tile_pos = Vector2i(2,2)
 	home4.outpost_owner = 0; home4.outpost_level = 1; home4.public_storage = {"food": 500.0}
 	s4.world.tiles[2*1000+2] = home4
@@ -14296,7 +14312,7 @@ func _test_merchant_restock() -> void:
 	# 非商隊輕飢(DESPERATION≤food<RESTOCK)有家 → 無返家補給(proactive 補給限商隊)
 	var s5 := WorldState.new(); s5.world = WorldData.new()
 	var p5 := _mk_produce_team(s5, {"義氣": 0.6}, 0.0, true)
-	p5.resources = {"food": 48.0}   # pop5 → days=4.0 ∈ [DESPERATION 3, RESTOCK 5)
+	p5.resources = {"food": 16.0}   # pop5 → days=16/(5×0.8)=4.0 ∈ [DESPERATION 3, RESTOCK 5)
 	var ctx5: DecisionContext = DecisionContext.gather(s5, p5)
 	assert(ctx5.food_days >= DecisionTerms.DESPERATION_DAYS \
 			and ctx5.food_days < DecisionTerms.RESTOCK_DAYS and not ctx5.is_merchant, \
@@ -14321,7 +14337,7 @@ func _test_survival_magnitude() -> void:
 	var s1 := WorldState.new(); s1.world = WorldData.new()
 	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]
 	t.tile_pos = Vector2i(5,5); t.leader_id = 100; t.current_option = ""
-	_seed_pop(t, 5); t.resources = {"food": 24.0, "goods": 50.0}   # days=2、有貨
+	_seed_pop(t, 5); t.resources = {"food": 8.0, "goods": 50.0}   # days=8/(5×0.8)=2、有貨
 	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.5}
 	s1.persons[100] = ldr; s1.teams[0] = t
 	s1.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(5,6))]  # 有 arb
@@ -14332,7 +14348,7 @@ func _test_survival_magnitude() -> void:
 	var s2 := WorldState.new(); s2.world = WorldData.new()
 	var t2 := TeamData.new(); t2.team_id = 0; t2.tags = [TeamData.TAG_MERCHANT]
 	t2.tile_pos = Vector2i(5,5); t2.leader_id = 100; t2.current_option = ""
-	_seed_pop(t2, 5); t2.resources = {"food": 24.0, "goods": 50.0}
+	_seed_pop(t2, 5); t2.resources = {"food": 8.0, "goods": 50.0}   # days=2
 	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2); home.outpost_owner = 0
 	home.outpost_level = 1; home.public_storage = {"food": 500.0}; s2.world.tiles[2*1000+2] = home
 	var l2 := PersonData.new(); l2.id = 100; l2.values = {"貪婪": 0.5}; s2.persons[100] = l2; s2.teams[0] = t2
@@ -14380,7 +14396,7 @@ func _test_dispatch_fallback() -> void:
 	var s := WorldState.new(); s.world = WorldData.new()
 	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]
 	t.tile_pos = Vector2i(5,5); t.leader_id = 100; t.current_task = TeamData.TASK_IDLE; t.current_option = ""
-	_seed_pop(t, 5); t.resources = {"food": 12.0}   # days=1,深危
+	_seed_pop(t, 5); t.resources = {"food": 4.0}   # days=4/(5×0.8)=1,深危
 	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2); home.outpost_owner = 0
 	home.outpost_level = 1; home.public_storage = {"food": 500.0}; s.world.tiles[2*1000+2] = home
 	var ldr := PersonData.new(); ldr.id = 100; s.persons[100] = ldr; s.teams[0] = t
@@ -14756,7 +14772,7 @@ func _mk_unified_desperate_team(state: WorldState, pos: Vector2i, values: Dictio
 	var t := TeamData.new(); t.team_id = tid; t.tags = [TeamData.TAG_MERCHANT]
 	t.tile_pos = pos; t.leader_id = tid * 10
 	_seed_pop(t, 10)
-	t.resources = {"food": 24.0, "goods": 0.0, "coin": 0.0}   # 24/(10×2.4)=1 day < 3
+	t.resources = {"food": 8.0, "goods": 0.0, "coin": 0.0}   # 8/(10×0.8)=1 day < DESPERATION(3)
 	state.teams[tid] = t
 	state.team_discovered[tid] = []
 	state.team_intel[tid] = {}
