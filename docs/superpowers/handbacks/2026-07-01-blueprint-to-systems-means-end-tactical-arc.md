@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 下燒=means-end接戰術層(查表→規劃,第一增量四關驗);涵蓋致富→貿易囤貨/征服→偵破吞/匱乏→征服搶資源;願景進化(逐步逼近完整AI節流閥)請更memory
 ---
 
