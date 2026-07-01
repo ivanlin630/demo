@@ -118,6 +118,8 @@ static func _check_no_dangling_team_id(state: WorldState, out: Array[String]) ->
 		var t: TeamData = state.teams[tid]
 		if t.combat_target != -1 and not state.teams.has(t.combat_target):
 			out.append("懸空 Team%d.combat_target=%d 不存在" % [tid, t.combat_target])
+		if t.social_target != -1 and not state.teams.has(t.social_target):
+			out.append("懸空 Team%d.social_target=%d 不存在" % [tid, t.social_target])
 		if t.order_target_id != -1 and not state.teams.has(t.order_target_id):
 			out.append("懸空 Team%d.order_target_id=%d 不存在" % [tid, t.order_target_id])
 		if t.parent_team_id != -1 and not state.teams.has(t.parent_team_id):

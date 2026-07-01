@@ -211,6 +211,24 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	if a.current_task == TeamData.TASK_TRADE or b.current_task == TeamData.TASK_TRADE:
 		_resolve_market(state, a, b)
 		return
+	# 社交 resolver（BEG/JOIN）置於 same_faction 塊之前：aid/強鄰 finder 多偏好同 faction 對象
+	# （_find_aid_target same_faction +1000），若置後 → same_faction 塊 early-return 吃掉 → 死路。
+	# 社交跨/同 faction 均可 resolve（同 TRADE 跨勢力語意）。social_target 對上才 resolve。
+	if a.current_task == TeamData.TASK_BEG and a.social_target == id_b:
+		Probe.bump("beg.resolve")   # 死路探針：到此=NPC-NPC resolver 實呼（player 分支已提早 return）
+		_resolve_aid_request(state, id_a, id_b)
+		return
+	if b.current_task == TeamData.TASK_BEG and b.social_target == id_a:
+		Probe.bump("beg.resolve")
+		_resolve_aid_request(state, id_b, id_a)
+		return
+	# JOIN resolver（新 handler）：投靠者全併入強鄰（複用 merge_teams full absorb，pop 守恆）。
+	if a.current_task == TeamData.TASK_JOIN and a.social_target == id_b:
+		_resolve_join(state, id_a, id_b)
+		return
+	if b.current_task == TeamData.TASK_JOIN and b.social_target == id_a:
+		_resolve_join(state, id_b, id_a)
+		return
 	var same_faction: bool = a.faction_id != -1 and a.faction_id == b.faction_id
 	if same_faction:
 		if a.current_task == TeamData.TASK_TRIBUTE:
@@ -254,14 +272,6 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		return
 	if b.current_task == TeamData.TASK_DIPLOMACY:
 		_try_diplomacy(state, id_b, id_a)
-		return
-	if a.current_task == TeamData.TASK_BEG and a.combat_target == id_b:
-		Probe.bump("beg.resolve")   # 死路探針：到此=NPC-NPC resolver 實呼（player 分支已提早 return）
-		_resolve_aid_request(state, id_a, id_b)
-		return
-	if b.current_task == TeamData.TASK_BEG and b.combat_target == id_a:
-		Probe.bump("beg.resolve")
-		_resolve_aid_request(state, id_b, id_a)
 		return
 	if a.current_task == TeamData.TASK_ATTACK:
 		_combat.start_combat(state, id_a, id_b)
@@ -897,14 +907,14 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 			state.world.current_tick, 0.5)
 		_npc_ai.write_memory(target_leader, "begged_at_me", beggar_id,
 			state.world.current_tick, 0.3)
-		_clear_aid_task(beggar)
+		_clear_aid_task(state, beggar)
 		return { "ok": true, "accepted": false, "msg": "拒絕" }
 	# 有給予意願但 reserve 吃光 surplus → 無餘糧
 	if give <= 0.0:
 		_msg.emit_message(state, "aid_refused",
 			"Team%d 無餘糧 Team%d" % [target_id, beggar_id], target,
 			{ "origin": str(target_id), "target": str(beggar_id) })
-		_clear_aid_task(beggar)
+		_clear_aid_task(state, beggar)
 		return { "ok": true, "accepted": false, "msg": "無餘糧" }
 	ResourceBank.set_amt(target, "food", target_food - give, "aid_out")
 	ResourceBank.add(beggar, "food", give, "aid_in")
@@ -917,7 +927,7 @@ func _resolve_aid_request(state: WorldState, beggar_id: int, target_id: int) -> 
 		state.world.current_tick, intensity)
 	_npc_ai.write_memory(target_leader, "begged_at_me", beggar_id,
 		state.world.current_tick, 0.2)
-	_clear_aid_task(beggar)
+	_clear_aid_task(state, beggar)
 	return { "ok": true, "accepted": true, "amount": give, "msg": "獲援助" }
 
 func _count_recent_begs(leader: PersonData, beggar_id: int) -> int:
@@ -939,8 +949,21 @@ func _count_recent_special_tax(leader: PersonData, collector_id: int) -> int:
 			count += 1
 	return count
 
-func _clear_aid_task(beggar: TeamData) -> void:
-	beggar.combat_target = -1
+# 投靠 resolver：joiner 全併入 host（複用既有 merge_teams full absorb，pop 守恆轉移）。
+# host = joiner 的 social_target（強鄰）。joiner 完全併入後滅團（merge_teams 內走 erase_team）。
+func _resolve_join(state: WorldState, joiner_id: int, host_id: int) -> void:
+	var joiner: TeamData = state.teams.get(joiner_id)
+	var host: TeamData = state.teams.get(host_id)
+	if joiner == null or host == null:
+		return
+	Probe.bump("join.resolve")   # 死路探針：JOIN handler 實呼（前 62/66 靜默 fall-through）
+	var all_npcs: Array = []
+	if joiner.leader_id != -1: all_npcs.append(joiner.leader_id)
+	all_npcs.append_array(joiner.named_members)
+	SubteamSystem.new().merge_teams(state, host_id, joiner_id, all_npcs)
+
+func _clear_aid_task(state: WorldState, beggar: TeamData) -> void:
+	state.clear_social_target(beggar)
 	if beggar.previous_task != "" and beggar.previous_task != TeamData.TASK_IDLE:
 		# 恢復 survival 前的原 task（就地轉換，move_target 保留）
 		TaskArbiter.transition(beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)

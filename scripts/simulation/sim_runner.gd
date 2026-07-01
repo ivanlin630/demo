@@ -141,7 +141,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 						beggar_t.known_reputations[pt_t.team_id] = clampf(cur_rep - 0.1, 0.0, 1.0)
 						NpcAiSystem.new().write_memory(b_leader_t, "rejected_aid",
 							pt_t.team_id, state.world.current_tick, 0.5)
-					beggar_t.combat_target = -1
+					state.clear_social_target(beggar_t)   # BEG 現走 social_target（非 combat_target）
 					if beggar_t.previous_task != "" and beggar_t.previous_task != TeamData.TASK_IDLE:
 						TaskArbiter.transition(beggar_t, beggar_t.previous_task,
 							TaskArbiter.PRIO_DISPATCH)

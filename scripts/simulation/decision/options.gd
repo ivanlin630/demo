@@ -103,7 +103,8 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		"投靠":
 			var sn: int = FactionAISystem.new()._find_strong_neighbor(state, team)
 			if sn == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			return {"task": TeamData.TASK_JOIN, "target": state.teams[sn].tile_pos, "combat_target": sn}
+			# 社交意圖：設 social_target 非 combat_target（否則 _try_interact:197 早退擋死 JOIN resolver）
+			return {"task": TeamData.TASK_JOIN, "target": state.teams[sn].tile_pos, "social_target": sn}
 		"紮營":
 			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
 			if ft == Vector2i(-1,-1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
@@ -111,7 +112,8 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		"乞食":
 			var aid: int = FactionAISystem.new()._find_aid_target(state, team)
 			if aid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			return {"task": TeamData.TASK_BEG, "target": state.teams[aid].tile_pos, "combat_target": aid}
+			# 社交意圖：設 social_target 非 combat_target（resolver 讀 social_target）
+			return {"task": TeamData.TASK_BEG, "target": state.teams[aid].tile_pos, "social_target": aid}
 		"攻擊":
 			# 混合協調：對派系指定的最近獨立隊發動攻擊（combat_target 接線複用 _decide_unified:864）。
 			var atid: int = FactionAISystem.new()._nearest_independent(state, team)
