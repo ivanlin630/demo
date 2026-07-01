@@ -472,6 +472,9 @@ func _initialize() -> void:
 	# ── G3d-2 cred-weighted uncertainty + scout 查證 ──
 	_test_uncertainty_credweighted()
 	_test_scout_verification()
+	# ── specimen tracer（觀測 only，全候選/intent/決策/狀態捕 + 非 specimen 零捕）──
+	_test_specimen_tracer()
+	_test_specimen_no_capture()
 	# ── world-gen 戲劇尾巴 ──
 	_test_world_gen_dramatic_tail()
 	# ── 經濟 WS-2：市集節點 + 解角色卡死 ──
@@ -1103,6 +1106,72 @@ func _test_scout_verification() -> void:
 	assert(tm_b.current_task == TeamData.TASK_ATTACK and tm_b.prosperity_target_id == 1,
 		"莽者→直接攻不查證，實際 task=%s" % tm_b.current_task)
 	print("scout verification OK")
+
+func _make_specimen_merchant(state: WorldState, tid: int, pid: int, pos: Vector2i) -> TeamData:
+	var m := TeamData.new(); m.team_id = tid; m.tags = [TeamData.TAG_MERCHANT]; m.tile_pos = pos
+	m.faction_id = -1; m.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	m.resources = {"goods": 50.0, "food": 100.0, "coin": 200.0, "material": 30.0}
+	var ml := PersonData.new(); ml.id = pid; ml.values["貪婪"] = 0.7
+	state.persons[pid] = ml; m.leader_id = pid
+	_seed_pop(m, 5)
+	state.teams[tid] = m
+	return m
+
+func _test_specimen_tracer() -> void:
+	print("--- Specimen tracer：全候選/intent/決策/狀態捕 ---")
+	SpecimenTracer.reset()
+	SpecimenTracer.enabled = true
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var m: TeamData = _make_specimen_merchant(state, 0, 10, Vector2i(5, 5))
+	state.specimen_team_ids = [0]
+	# capture_options：rank → tracer 捕到全候選 {opt,util}（非只 winner）
+	var ranked: Array = DecisionEngine.rank(state, m)
+	assert(not ranked.is_empty(), "[specimen] rank 空，無候選可捕")
+	var cands: Array = SpecimenTracer._pending.get(0, {}).get("candidates", [])
+	assert(cands.size() == ranked.size(),
+		"[specimen] 候選數≠rank 全候選 %d vs %d" % [cands.size(), ranked.size()])
+	for c in cands:
+		assert(c.has("opt") and c.has("util"), "[specimen] 候選缺 opt/util %s" % str(c))
+	# capture_intent：commander/solo intent 捕到
+	SpecimenTracer.capture_intent(state, 0, "致富", "測試致富意圖", "levy")
+	assert(SpecimenTracer._pending[0]["intent"]["intent"] == "致富", "[specimen] intent 未捕")
+	# capture_decision：組完整 timeline entry（想什麼/做什麼/狀態齊）
+	SpecimenTracer.capture_decision(state, m, "貿易", TeamData.TASK_TRADE, Vector2i(5, 6))
+	assert(SpecimenTracer.entries.size() == 1, "[specimen] 決策未成 entry")
+	var e: Dictionary = SpecimenTracer.entries[0]
+	assert(e.has("tick") and e["team_id"] == 0, "[specimen] entry 缺 tick/team_id")
+	assert(e["想什麼"]["intent"]["intent"] == "致富", "[specimen] entry intent 錯 %s" % str(e["想什麼"]["intent"]))
+	assert(not e["想什麼"]["candidates"].is_empty(), "[specimen] entry 無 candidates")
+	assert(e["做什麼"]["winner_opt"] == "貿易" and e["做什麼"]["task"] == TeamData.TASK_TRADE,
+		"[specimen] entry winner/task 錯 %s" % str(e["做什麼"]))
+	for k in ["pop", "food_private", "food_granary", "effective_food",
+			"consume_per_day", "rung", "faction_id", "coin", "material"]:
+		assert(e["狀態"].has(k), "[specimen] 狀態缺欄位 %s" % k)
+	assert(e["狀態"]["consume_per_day"] == 5.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY,
+		"[specimen] consume_per_day 算錯 %s" % str(e["狀態"]["consume_per_day"]))
+	SpecimenTracer.reset()
+	print("specimen tracer OK")
+
+func _test_specimen_no_capture() -> void:
+	print("--- Specimen tracer：非 specimen 零捕 ---")
+	SpecimenTracer.reset()
+	SpecimenTracer.enabled = true
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var s: TeamData = _make_specimen_merchant(state, 0, 10, Vector2i(5, 5))
+	var n: TeamData = _make_specimen_merchant(state, 7, 70, Vector2i(1, 1))
+	state.specimen_team_ids = [0]   # 只 team0 是 specimen
+	DecisionEngine.rank(state, n)   # 非 specimen team7
+	assert(not SpecimenTracer._pending.has(7), "[specimen] 非 specimen 團被捕 options")
+	SpecimenTracer.capture_intent(state, 7, "致富", "x", "y")
+	assert(not SpecimenTracer._pending.has(7), "[specimen] 非 specimen intent 被捕")
+	SpecimenTracer.capture_decision(state, n, "貿易", TeamData.TASK_TRADE, Vector2i(1, 2))
+	assert(SpecimenTracer.entries.is_empty(), "[specimen] 非 specimen 決策成 entry")
+	# enabled=false → 即使是 specimen 也零捕（一般跑 no-op）
+	SpecimenTracer.enabled = false
+	DecisionEngine.rank(state, s)
+	assert(not SpecimenTracer._pending.has(0), "[specimen] enabled=false 仍捕")
+	SpecimenTracer.reset()
+	print("specimen no-capture OK")
 
 func _test_resource_bank() -> void:
 	print("--- ResourceBank ---")

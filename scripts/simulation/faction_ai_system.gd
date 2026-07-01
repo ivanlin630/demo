@@ -764,7 +764,7 @@ func _update_goals(state: WorldState, f) -> void:
 		* clampf(1.0 - honor * HONOR_EMERGENCY_DISC, 0.5, 1.0)
 	if food_per_cap < effective_emergency:
 		f.strategy = "緊急徵收"
-		_emit_goal(f, "徵收", "守成", "缺糧 survival override", "survival")  # driver mode=survival
+		_emit_goal(state, f, "徵收", "守成", "缺糧 survival override", "survival")  # driver mode=survival
 		return
 
 	# 立國 gate（既有分離，非意圖集；不在 means-end argmax）
@@ -774,7 +774,7 @@ func _update_goals(state: WorldState, f) -> void:
 		if cmd >= ESTABLISH_COMMAND - ambition_discount \
 				and ambition >= ESTABLISH_AMBITION - 0.1 \
 				and leader_team.readiness >= ESTABLISH_READINESS:
-			_emit_goal(f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
+			_emit_goal(state, f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
 
 	# ── 步驟 2：意圖選擇（resource-aware + 人格 + belief + hysteresis）──
 	var intent: Dictionary = _select_intent(state, f)
@@ -789,33 +789,33 @@ func _update_goals(state: WorldState, f) -> void:
 		and float(leader_team.resources.get("material", 0)) < WAR_CHEST_MIN
 	if war_chest_need:
 		f.strategy = "戰爭基金"
-		_emit_goal(f, "徵收", itype, "備戰籌餉(建材枯)", "fund_war")
+		_emit_goal(state, f, "徵收", itype, "備戰籌餉(建材枯)", "fund_war")
 
 	# ── 步驟 3+4：分解子需求(深度1) + 匹配 filler + emit（每令 driver）──
 	match itype:
 		"征服":
 			# 主行動=攻擊 target；補力肢從未滿足前提(force_ge_target)現算
-			_emit_goal(f, "攻擊", "征服", "主手段取 target%d" % intent["target_id"], "combat")
+			_emit_goal(state, f, "攻擊", "征服", "主手段取 target%d" % intent["target_id"], "combat")
 			var open_needs: Array = _decompose_needs(state, f, leader_team, "攻擊", intent["target_id"])
 			_match_fillers(state, f, leader_team, open_needs, "征服")
 		"致富":
 			# 無單一 main_action → 最高 util 致富行動（徵收 levy；無富 member 則守成）
 			if _richest_member(state, f) != -1:
-				_emit_goal(f, "徵收", "致富", "籌資增 treasury", "levy")
+				_emit_goal(state, f, "徵收", "致富", "籌資增 treasury", "levy")
 			# 致富亦可外交結盟拓商路（真 affordance ally；輔助，從人格餘裕）
 			if _has_independent(state, f.leader_team_id) and leader_team.readiness >= DIPLOMACY_READINESS_MIN:
-				_emit_goal(f, "外交", "致富", "結盟拓勢", "ally")
+				_emit_goal(state, f, "外交", "致富", "結盟拓勢", "ally")
 		"防衛":
 			# 領土不失 → 備戰籌資（徵收 fund_war）
 			if _richest_member(state, f) != -1:
-				_emit_goal(f, "徵收", "防衛", "備戰籌餉", "fund_war")
+				_emit_goal(state, f, "徵收", "防衛", "備戰籌餉", "fund_war")
 		"守成":
 			# default：無 stakes 令；僅維持經濟 cadence（定期徵收，仍帶 driver）
 			var greed_s: float = float(leader_p.values.get("貪婪", 0.5)) if leader_p else 0.5
 			var effective_interval: int = maxi(
 				int(COLLECT_INTERVAL * (1.5 - greed_s) * (1.0 + honor * HONOR_INTERVAL_MULT)), 10)
 			if state.world.current_tick % effective_interval == 0 and _richest_member(state, f) != -1:
-				_emit_goal(f, "徵收", "守成", "定期維持 treasury", "levy")
+				_emit_goal(state, f, "徵收", "守成", "定期維持 treasury", "levy")
 	# 掠奪 = team option（P1）非統領令；war-priority 移除（單意圖後 moot）。
 
 # 子需求分解（深度1）：主行動未滿足前提 vs live 世界 → open needs（每 need = 子目標 String）。
@@ -864,15 +864,17 @@ func _match_fillers(state: WorldState, f, leader_team: TeamData, open_needs: Arr
 			var levy_ok: bool = _richest_member(state, f) != -1
 			var levy_util: float = (0.3 + greed * 0.4) if levy_ok else -1.0
 			if ally_util >= levy_util and ally_util > 0.0:
-				_emit_goal(f, "外交", intent_type, "補力(結盟拖住/壯盟)", "ally")
+				_emit_goal(state, f, "外交", intent_type, "補力(結盟拖住/壯盟)", "ally")
 			elif levy_util > 0.0:
-				_emit_goal(f, "徵收", intent_type, "補力(籌餉練兵)", "fund_war")
+				_emit_goal(state, f, "徵收", intent_type, "補力(籌餉練兵)", "fund_war")
 
 # emit 一令 + 記 driver（北極星：每令連回意圖）。goal token 用既有消費詞彙(攻擊/徵收/外交/立國)。
-func _emit_goal(f, goal: String, intent_type: String, why: String, mode: String) -> void:
+func _emit_goal(state: WorldState, f, goal: String, intent_type: String, why: String, mode: String) -> void:
 	if goal not in f.goals:
 		f.goals.append(goal)
 	f.goal_drivers[goal] = {"intent": intent_type, "why": why, "mode": mode}
+	# specimen tap：commander goal → capture intent（leader team 是 specimen 時）
+	SpecimenTracer.capture_intent(state, f.leader_team_id, intent_type, why, mode)
 
 # ──────── 獨立戰略層（野心獨立隊建國 intent）────────
 
@@ -952,6 +954,10 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 
 	# ── 建國 intent → dispatch means-end 子行動（argmax；結盟 vs 吞併）──
 	team.solo_intent = "建國"
+	# specimen tap：solo 建國 intent（子行動 mode = 結盟/吞併）
+	SpecimenTracer.capture_intent(state, team.team_id, "建國",
+		"野心建國(score=%.2f>hold=%.2f)" % [found_score, hold_score],
+		"found_ally" if ally_util >= subj_util else "found_subjugate")
 	# 建國勝過守成 → 讓位日常 task（busy-gate 已濾掉高優先；此處只剩 idle/stuck/日常 @≤DISPATCH）。
 	# 釋放後 founding @PRIO_DISPATCH 才設得進（同層 tie 需先 release 換手，mirror prosperity scout→attack）。
 	if team.current_task != TeamData.TASK_IDLE:
@@ -1124,6 +1130,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		team.current_option = opt   # 承諾追蹤實際派出
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
+		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
 		# 掠奪 option：設 combat_target 才會交戰（非只移動）
 		if td.has("combat_target"):
@@ -2651,6 +2658,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 				if _maybe_request_join_player(state, team):
 					return
 		if TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival"):
+			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)   # specimen tap
 			if td.has("combat_target"):
 				team.combat_target = int(td["combat_target"])
 			match opt:   # 保留分流診斷 marker（world_sim 量測 homeless 分流）
