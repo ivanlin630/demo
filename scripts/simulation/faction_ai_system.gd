@@ -397,7 +397,9 @@ func _is_resident_team(state: WorldState, team: TeamData) -> bool:
 
 # tile 上是否已有 PRODUCE（居民）team（任一 faction）
 func _has_resident_team_on_tile(state: WorldState, tile: HexTileData) -> bool:
-	for tid in state.teams:
+	# 空間索引：同格查取代全掃。live 復驗 has + tile_pos 保零行為變。
+	for tid in state.teams_on_tile(tile.tile_pos):
+		if not state.teams.has(tid): continue
 		var t: TeamData = state.teams[tid]
 		if t.tile_pos != tile.tile_pos: continue
 		if "生產" in t.tags: return true
@@ -1453,8 +1455,10 @@ func _update_armor_config(team: TeamData) -> void:
 		team.armor_config["torso"] = "low"
 
 func _has_hostile_within(state: WorldState, team: TeamData, range_hex: int) -> bool:
-	for tid in state.teams:
+	# 空間索引：只掃鄰域候選（超集）取代全隊掃 → 收 O(N²)/hr。live 復驗 has + hex_dist 保零行為變。
+	for tid in state.teams_within(team.tile_pos, range_hex):
 		if tid == team.team_id: continue
+		if not state.teams.has(tid): continue
 		var other: TeamData = state.teams[tid]
 		if other.faction_id == team.faction_id and team.faction_id != -1: continue
 		# 高聲望盟友過濾（rep >= 0.7 視為友軍，預設 0.5；結盟後 +0.2 → 達標）
