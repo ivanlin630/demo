@@ -67,6 +67,31 @@ var game_over_reason: String = ""
 var ticks_per_day: int:
 	get: return TICKS_PER_DAY
 
+# ── Pattern B driver-ledger（第3不變量：凡 state 變化必有可解釋 driver）──────
+# 5 bank 的 reason 參數 → record_driver 真記（現丟棄）。預設 off（enabled=false）→
+# record no-op、僅一次 bool 檢查＝正常 run 零成本。debug / audit / 強制閘時開。
+# ring-buffer（cap）→ 開時亦 bounded，避無界成長（連 scaling）。
+static var driver_ledger: Array = []          # Array[Dictionary] {tick,entity,field,delta,reason}
+static var driver_ledger_enabled: bool = false
+static var driver_ledger_cap: int = 4096      # TEST VALUE
+static var driver_tick_hint: int = 0          # sim_runner 開 ledger 時填當前 tick；off 不動
+
+static func record_driver(entity, field: String, delta: float, reason: String) -> void:
+	if not driver_ledger_enabled:
+		return
+	driver_ledger.append({
+		"tick":   driver_tick_hint,
+		"entity": entity,
+		"field":  field,
+		"delta":  delta,
+		"reason": reason,
+	})
+	while driver_ledger.size() > driver_ledger_cap:
+		driver_ledger.pop_front()
+
+static func clear_driver_ledger() -> void:
+	driver_ledger.clear()
+
 func create_faction(leader_team_id: int) -> int:
 	if not teams.has(leader_team_id):
 		push_warning("[create_faction] leader_team_id=%d 不存在於 state.teams，跳過" % leader_team_id)
@@ -122,6 +147,25 @@ func set_subteam_parent(child: TeamData, parent_id: int) -> void:
 
 func detach_subteam(child: TeamData) -> void:
 	set_subteam_parent(child, -1)
+
+# 雙向單一入口：team.named_members ↔ person.team_id 一處同維護（規則2 roster 版）。
+# add=入隊（append if absent + team_id 回指）；remove=離隊（erase[+清 team_id]）。
+# 類比 set_team_faction。idempotent。以 pid 收參（多數 site 只持 id；person 缺席容忍）。
+# clear_team_id=false：離開 named 但仍屬本隊 →「晉升 leader」/「死亡留屍不改籍」
+#   （health famine 蓄意保 team_id 供 get_player_team_id）→ 不清 team_id。
+func add_member(team: TeamData, pid: int) -> void:
+	if not team.named_members.has(pid):
+		team.named_members.append(pid)
+	var p: PersonData = persons.get(pid)
+	if p != null:
+		p.team_id = team.team_id
+
+func remove_member(team: TeamData, pid: int, clear_team_id: bool = true) -> void:
+	team.named_members.erase(pid)
+	if clear_team_id:
+		var p: PersonData = persons.get(pid)
+		if p != null:
+			p.team_id = -1
 
 # 單一 team 移除 chokepoint：清光所有指向 tid 的 ref，使「無懸空 team_id」成不變量。
 # 所有 team 移除（滅團/合併/野獸清除）都須走此入口。

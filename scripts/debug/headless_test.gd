@@ -418,6 +418,9 @@ func _initialize() -> void:
 	_test_invariant_audit()
 	_test_invariant_faction_bidir()
 	_test_invariant_subteam_bidir()
+	_test_invariant_roster_bidir()
+	_test_roster_chokepoint()
+	_test_driver_ledger()
 	_test_invariant_anon_cohort()
 	_test_erase_team()
 	_test_require_team()
@@ -1343,6 +1346,91 @@ func _test_invariant_subteam_bidir() -> void:
 	child.parent_team_id = -1
 	assert("subteam" in str(InvariantAudit.check(state)), "subteam 雙向破應偵測")
 	print("InvariantAudit subteam 雙向 OK")
+
+func _test_invariant_roster_bidir() -> void:
+	print("--- InvariantAudit roster 雙向 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var lead := PersonData.new(); lead.id = 0; lead.team_id = 0
+	var m := PersonData.new(); m.id = 1; m.team_id = 0
+	state.persons[0] = lead; state.persons[1] = m
+	var t := TeamData.new(); t.team_id = 0; t.leader_id = 0; t.named_members = [1]
+	state.teams[0] = t
+	assert(not _contains_substr(InvariantAudit.check(state), "roster"), "一致不該 roster 違反:%s" % str(InvariantAudit.check(state)))
+	# 破口：named 成員 team_id 指他隊
+	m.team_id = 99
+	assert(_contains_substr(InvariantAudit.check(state), "roster"), "roster named 破口應偵測")
+	m.team_id = 0
+	# 破口：leader team_id 錯
+	lead.team_id = 88
+	assert(_contains_substr(InvariantAudit.check(state), "roster"), "roster leader 破口應偵測")
+	print("InvariantAudit roster 雙向 OK")
+
+func _test_roster_chokepoint() -> void:
+	print("--- roster chokepoint add/remove bidir ---")
+	var s := WorldState.new()
+	var p := PersonData.new(); p.id = 1; p.team_id = -1
+	s.persons[1] = p
+	var t := TeamData.new(); t.team_id = 5
+	s.teams[5] = t
+	# add → both set
+	s.add_member(t, 1)
+	assert(t.named_members.has(1), "add → named_members")
+	assert(p.team_id == 5, "add → team_id 回指")
+	# idempotent add
+	s.add_member(t, 1)
+	assert(t.named_members.count(1) == 1, "add idempotent 不重複")
+	# remove → both clear
+	s.remove_member(t, 1)
+	assert(not t.named_members.has(1), "remove → named_members clear")
+	assert(p.team_id == -1, "remove → team_id clear")
+	# remove(clear_team_id=false) → 保留 team_id（晉升/死亡留屍語意）
+	s.add_member(t, 1)
+	s.remove_member(t, 1, false)
+	assert(not t.named_members.has(1), "remove(false) → named clear")
+	assert(p.team_id == 5, "remove(false) → team_id 保留")
+	# idempotent remove（不在編制再移無害）
+	s.remove_member(t, 1)
+	assert(not t.named_members.has(1), "remove idempotent")
+	print("roster chokepoint OK")
+
+func _test_driver_ledger() -> void:
+	print("--- Pattern B driver-ledger ---")
+	var t := TeamData.new(); t.team_id = 0
+	# off（default）→ 零記錄零成本
+	WorldState.driver_ledger_enabled = false
+	WorldState.clear_driver_ledger()
+	ResourceBank.add(t, "food", 5.0, "test_off")
+	assert(WorldState.driver_ledger.is_empty(), "off 時零記錄")
+	# on → 記錄該筆 reason/field/delta
+	WorldState.driver_ledger_enabled = true
+	WorldState.clear_driver_ledger()
+	ResourceBank.add(t, "food", 5.0, "test_add")
+	assert(WorldState.driver_ledger.size() == 1, "on 記一筆")
+	var e: Dictionary = WorldState.driver_ledger[0]
+	assert(e["reason"] == "test_add", "reason 記錄")
+	assert(e["field"] == "food" and e["delta"] == 5.0, "field/delta 記錄")
+	# 5 bank 各真記
+	WorldState.clear_driver_ledger()
+	AnonTreasuryBank.deposit(t, 10.0, "treas")
+	LoyaltyBank.adjust(PersonData.new(), 0.1, "loy")
+	UnrestBank.add(t, 2, "unr")
+	var tile := HexTileData.new(); tile.outpost_owner = -1
+	OutpostOwnerBank.set_owner(tile, 3, "outp")
+	var reasons: Array = []
+	for x in WorldState.driver_ledger: reasons.append(x["reason"])
+	assert("treas" in reasons and "loy" in reasons and "unr" in reasons and "outp" in reasons,
+		"5 bank 各 reason 就位:%s" % str(reasons))
+	# ring-buffer bounded
+	WorldState.clear_driver_ledger()
+	var old_cap: int = WorldState.driver_ledger_cap
+	WorldState.driver_ledger_cap = 3
+	for i in range(10): ResourceBank.add(t, "food", 1.0, "spam")
+	assert(WorldState.driver_ledger.size() == 3, "ring-buffer cap bound")
+	WorldState.driver_ledger_cap = old_cap
+	# 復位 off（避污染後續測 / 生產）
+	WorldState.driver_ledger_enabled = false
+	WorldState.clear_driver_ledger()
+	print("driver-ledger OK")
 
 func _test_invariant_anon_cohort() -> void:
 	var st := WorldState.new()
