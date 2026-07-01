@@ -57,4 +57,11 @@ static func summary() -> void:
 	print("[ProbeSummary] 訂單履約率   = %s" % _rate("g1.order_fulfilled", "g1.order_placed"))
 	print("[ProbeSummary] 套利命中率   = %s" % _rate("g1.arb_hit", "g1.arb_attempt"))
 	print("[ProbeSummary] scout 收斂率 = %s" % _rate("g3.scout_converge", "g3.scout_dispatch"))
+	# 征服名實斷點：想=征服(conq.intent) 的隊在 _decide_unified 實際 winner 分布 + 掠奪達 capture 率
+	print("[ProbeSummary] 征服intent winner: loot=%s prosp=%s other=%s none=%s" % [
+		_rate("conq.winner_loot", "conq.intent"), _rate("conq.winner_prosperity", "conq.intent"),
+		_rate("conq.winner_other", "conq.intent"), _rate("conq.winner_none", "conq.intent")])
+	print("[ProbeSummary] prosperity-attack 走到 = %d 次" % int(counts.get("conq.prosperity_reached", 0)))
+	print("[ProbeSummary] 掠奪達capture率(占總capture) = %s (by_attack=%d)" % [
+		_rate("loot.achieved_capture", "capture.total"), int(counts.get("capture.by_attack", 0))])
 	print("====================================")
