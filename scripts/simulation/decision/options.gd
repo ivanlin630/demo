@@ -3,21 +3,23 @@ class_name DecisionOptions
 # 統一決策引擎：Option 註冊表 + applicable 守衛 + to_task 對映。
 # 商隊切片首批 option → [[term_name, weight_key], ...]。加候選 = 加 row（bar #2）。
 const REGISTRY: Dictionary = {
-	"貿易":   [["economic_opp", "economic"]],
+	"貿易":   [["economic_opp", "economic"], ["intent_fit", "intent_fit"]],
 	"生產":   [["produce_need", "settle"], ["ambition_drive", "ambition"]],
 	"建設":   [["settle_fit", "settle"], ["ambition_drive", "ambition"]],
 	"覓食":   [["survival_pressure", "survival_pressure"]],
 	"survival":[["threat_pressure", "survival_pressure"]],
 	"駐守":   [["settle_fit", "settle"]],
 	"返家補給":[["restock_need", "survival_pressure"]],
-	"掠奪":   [["loot_drive", "loot"]],
+	"掠奪":   [["loot_drive", "loot"], ["intent_fit", "intent_fit"]],
 	"投靠":   [["join_drive", "join"]],
 	"紮營":   [["camp_drive", "camp"]],
 	"乞食":   [["beg_drive",  "beg"]],
-	"攻擊":   [["faction_duty", "faction_duty"], ["attack_drive", "attack"]],
+	"攻擊":   [["faction_duty", "faction_duty"], ["attack_drive", "attack"], ["intent_fit", "intent_fit"]],
 	"徵收":   [["faction_duty", "faction_duty"], ["levy_drive", "levy"]],
 	"外交":   [["faction_duty", "faction_duty"], ["diplo_drive", "diplo"]],
 	"買糧":   [["buyfood_drive", "buyfood"]],
+	# means-end：致富+餘糧 → 蓋倉囤貨低買高賣（複用 TASK_TRADE 到市集 hub，非新機制）。
+	"囤貨":   [["intent_fit", "intent_fit"]],
 }
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
@@ -60,7 +62,15 @@ static func applicable(ctx: DecisionContext) -> Array:
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_aid_target: out.append(opt)
 			"攻擊":
 				# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
-				if "攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1: out.append(opt)
+				# means-end：征服 intent 隊亦開攻擊（非只 faction_stakes），target=intent_target/weak_prey。
+				if ("攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1) \
+						or (ctx.intent == "征服" and ctx.intent_target != -1):
+					out.append(opt)
+			"囤貨":
+				# means-end：致富 intent + 有餘糧 + 有貿易機會(arb/市集) → 蓋倉囤貨候選。
+				if ctx.intent == "致富" and ctx.food_days >= DecisionTerms.SURPLUS_FOOD_DAYS \
+						and (ctx.has_arb or ctx.has_food_market):
+					out.append(opt)
 			"徵收":
 				# 派系 directive=徵收 且有更富 member target → 候選。
 				if "徵收" in ctx.faction_stakes and ctx.faction_tribute_target != -1: out.append(opt)
@@ -124,4 +134,11 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost(state, team)
 			if mp == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			return {"task": TeamData.TASK_TRADE, "target": mp}
+		"囤貨":
+			# 致富囤貨：到市集 hub 低買囤積（複用 TASK_TRADE，target=市集 outpost）；無市集則退貿易對象。
+			var hub: Vector2i = FactionAISystem.new()._nearest_market_outpost(state, team)
+			if hub == Vector2i(-1, -1):
+				hub = FactionAISystem.new()._merchant_trade_target(state, team)
+			if hub == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_TRADE, "target": hub}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

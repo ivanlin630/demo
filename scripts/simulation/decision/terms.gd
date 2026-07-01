@@ -13,6 +13,10 @@ const STAKES_DRIVE_BASE: float = 0.3    # TEST VALUE — 徵收/外交 個人 dr
 const BUYFOOD_DIST_FULL: float = 6.0    # TEST VALUE — 買糧旅費折扣基準距離（≤此距離不折扣，遠則衰減）
 const RESTOCK_MIN: float = 10.0         # TEST VALUE — 家糧倉至少這麼多 food 才值得返家補給（空家不返）
 const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量即視為可換糧籌碼（forest/mountain 特產）
+# ── means-end 戰術層（2026-07-01）：intent → 子需求 → option 貢獻打分（mirror FACTION_DUTY_DRIVE）──
+const INTENT_FIT_DRIVE: float = 1.5     # TEST VALUE — 意圖反應量級（mirror faction_duty；戰術層 reshape 強度）
+const SURPLUS_FOOD_DAYS: float = 7.0    # TEST VALUE — 「有餘糧」門檻（致富→囤貨/貿易 子需求觸發）
+const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/好戰門檻（防 over-war：溫和窮隊不搶）
 
 # 脫軌逃閥因子：忠誠 − 野心溢出折損（loy 高→1，低忠誠高野心→0）。
 # faction_duty weight 與 attack_drive drive 共用 = 叛離者既無 duty 亦無個人參戰驅力（「這不是我的仗」）。
@@ -97,8 +101,37 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 				"駐守":        return 0.6
 				"生產", "建設": return 0.4
 				_:             return 0.0
+		"intent_fit":
+			# means-end 戰術層：team 自己戰略 intent → 子需求 → boost 對應 option（貢獻打分,非 flat）。
+			# 人格染色（野心/貪婪/好戰）在 eval baked（mirror attack_drive 法）；weight("intent_fit")=1.0。
+			return _intent_fit(ctx, opt)
 		_:
 			return 0.0
+
+# intent_fit：意圖→子需求→option 貢獻。三症狀（致富→貿易/囤貨、征服→攻擊、匱乏→搶）。
+# 匱乏→搶獨立於 intent 類別（致富/生存皆可）但 gate（野心/好戰門檻 + 稀有 has_weak_prey）防 over-war。
+static func _intent_fit(ctx: DecisionContext, opt: String) -> float:
+	var amb: float = float(ctx.leader_values.get("野心", 0.5))
+	var greed: float = float(ctx.leader_values.get("貪婪", 0.5))
+	var martial: float = float(ctx.leader_values.get("好戰", 0.5))
+	# ── 匱乏→搶（自平衡關鍵：窮則搶）──：低糧 + 野心/好戰過門檻 + 有弱 prey → 掠奪/攻擊 boost。
+	# 溫和窮隊（amb/martial 皆低）→ 0 → 仍走 survival（不全民劫掠潮）。scale 隨飢餓（對齊 desperation 域）。
+	if ctx.food_days < DESPERATION_DAYS and (amb >= SCARCITY_RAID_MIN or martial >= SCARCITY_RAID_MIN):
+		var hunger: float = maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+		if opt == "掠奪" and ctx.has_weak_prey:
+			# 搶=既有掠奪 affordance boost（非升級全面攻擊 → 不 over-war）。
+			return INTENT_FIT_DRIVE * hunger * (0.5 + maxf(amb, greed) * 0.5)
+	# ── 意圖類別 reshape ──
+	match ctx.intent:
+		"致富":
+			# 有餘糧 → 囤貨低買高賣子需求 → 貿易 + 囤貨 boost（症狀 a：建設碾貿易 → 貿易勝出）。
+			if ctx.food_days >= SURPLUS_FOOD_DAYS and opt in ["貿易", "囤貨"]:
+				return INTENT_FIT_DRIVE * (0.5 + greed * 0.5)
+		"征服":
+			# 削敵→俘虜→守 子需求 → 攻擊 boost（症狀 b：征服真驅乾淨攻擊鏈）。
+			if opt == "攻擊" and (ctx.intent_target != -1 or ctx.has_weak_prey):
+				return INTENT_FIT_DRIVE * (0.5 + maxf(amb, martial) * 0.5)
+	return 0.0
 
 static func weight(term: String, leader_values: Dictionary) -> float:
 	var v := leader_values
@@ -122,4 +155,5 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
+		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
 		_:                   return 0.5

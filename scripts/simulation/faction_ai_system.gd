@@ -1191,6 +1191,14 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	if _conq: Probe.bump("conq.intent")
 	for e in ranked:
 		var opt: String = e["opt"]
+		# means-end 統一攻擊：征服 intent 驅動的攻擊 → route 到 scout-gated prosperity（削敵→俘虜→守），
+		# 非粗 _nearest_independent 直取。消「兩條攻擊路徑」（faction directive 攻擊維持指定 target 路徑）。
+		if opt == "攻擊" and _solo_type(team) == "征服" and team.faction_id == -1:
+			if _is_prosperity_candidate(state, team):
+				SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_ATTACK, team.tile_pos)
+				_evaluate_prosperity_attack(state, team)   # scout→打垮→capture 乾淨鏈
+				return
+			continue   # 無 prosperity 資格 → 試次佳（不落回粗攻擊）
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:

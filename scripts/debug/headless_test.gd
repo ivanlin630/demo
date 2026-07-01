@@ -4463,6 +4463,10 @@ func _run_sim_test() -> void:
 	_test_decision_commitment()
 	_test_unified_seam()
 	_test_engine_rank()
+	# ── means-end 戰術層（intent_fit 三症狀）──
+	_test_intent_fit_term()
+	_test_intent_fit_gather_and_options()
+	_test_intent_fit_enrich_beats_build()
 	# 驗證套件 TC1/4/6/7（believability 行為測試）
 	_test_tc1_no_oscillation()
 	_test_tc4_ambition_drive()
@@ -13988,6 +13992,64 @@ func _test_engine_rank() -> void:
 	t3.current_option = ""
 	assert(DecisionEngine.decide(s2, t3) == r0, "decide 應 == rank[0]")
 	print("engine rank OK")
+
+# ── means-end 戰術層（2026-07-01）：intent_fit 機制 + 三症狀 ──
+func _test_intent_fit_term() -> void:
+	print("--- means-end Task1: intent_fit term 機制 ---")
+	# 致富 + 餘糧 → 貿易/囤貨 boost；建設 不受影響（非 match）。
+	var c := DecisionContext.new()
+	c.intent = "致富"; c.food_days = 20.0; c.leader_values = {"貪婪": 0.8}
+	assert(DecisionTerms.eval("intent_fit", c, "貿易") > 0.0, "致富+餘糧 → 貿易 intent_fit>0")
+	assert(DecisionTerms.eval("intent_fit", c, "囤貨") > 0.0, "致富+餘糧 → 囤貨 intent_fit>0")
+	assert(DecisionTerms.eval("intent_fit", c, "建設") == 0.0, "建設 非 intent match → 0")
+	# 無 intent → 零影響（斷點：非 intent 不 reshape）。
+	var c0 := DecisionContext.new(); c0.food_days = 20.0; c0.leader_values = {"貪婪": 0.8}
+	assert(DecisionTerms.eval("intent_fit", c0, "貿易") == 0.0, "無 intent → intent_fit 零影響")
+	# 征服 + target → 攻擊 boost。
+	var cc := DecisionContext.new()
+	cc.intent = "征服"; cc.intent_target = 5; cc.food_days = 20.0; cc.leader_values = {"野心": 0.8, "好戰": 0.7}
+	assert(DecisionTerms.eval("intent_fit", cc, "攻擊") > 0.0, "征服+target → 攻擊 intent_fit>0")
+	# 匱乏 + 野心高 + 有弱 prey → 掠奪 boost；溫和窮隊 → 0（防 over-war）。
+	var cs := DecisionContext.new()
+	cs.food_days = 1.0; cs.has_weak_prey = true; cs.leader_values = {"野心": 0.8}
+	assert(DecisionTerms.eval("intent_fit", cs, "掠奪") > 0.0, "匱乏+野心+prey → 掠奪 intent_fit>0")
+	var cm := DecisionContext.new()
+	cm.food_days = 1.0; cm.has_weak_prey = true; cm.leader_values = {"野心": 0.2, "好戰": 0.2}
+	assert(DecisionTerms.eval("intent_fit", cm, "掠奪") == 0.0, "匱乏+溫和 → 掠奪 intent_fit=0（不全民搶）")
+	print("intent_fit term OK")
+
+func _test_intent_fit_gather_and_options() -> void:
+	print("--- means-end Task1: gather intent 注入 + applicable ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.tags = ["商隊"]; t.tile_pos = Vector2i(2,2); t.leader_id = 100
+	t.faction_id = -1; t.solo_intent = {"type": "致富", "why": "test", "mode": "trade"}
+	_seed_pop(t, 5); t.resources = {"goods": 50.0, "food": 500.0, "coin": 200.0}
+	var ldr := PersonData.new(); ldr.id = 100; ldr.values["貪婪"] = 0.7
+	state.persons[100] = ldr; state.teams[0] = t
+	state.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(2,3))]
+	var ctx: DecisionContext = DecisionContext.gather(state, t)
+	assert(ctx.intent == "致富", "獨立隊 solo_intent → ctx.intent=致富，實際=%s" % ctx.intent)
+	assert("囤貨" in DecisionOptions.applicable(ctx), "致富+餘糧+arb → 囤貨 applicable")
+	# 征服 intent + target → 攻擊 applicable（非只 faction_stakes）。
+	var c2 := DecisionContext.new(); c2.intent = "征服"; c2.intent_target = 9
+	assert("攻擊" in DecisionOptions.applicable(c2), "征服+target → 攻擊 applicable（非只 faction_stakes）")
+	print("intent gather + options OK")
+
+func _test_intent_fit_enrich_beats_build() -> void:
+	print("--- means-end Task2: 致富商隊 貿易/囤貨 util > 建設 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := _mk_merchant_team(state, {"貪婪": 0.7, "野心": 0.4}, true, 500.0)
+	t.faction_id = -1; t.solo_intent = {"type": "致富", "why": "test", "mode": "trade"}
+	t.current_option = ""
+	var scored: Array = DecisionEngine.rank_scored(state, t)
+	var u_trade: float = -1.0; var u_stock: float = -1.0; var u_build: float = -1.0
+	for e in scored:
+		if e["opt"] == "貿易": u_trade = e["u"]
+		elif e["opt"] == "囤貨": u_stock = e["u"]
+		elif e["opt"] == "建設": u_build = e["u"]
+	assert(maxf(u_trade, u_stock) > u_build,
+		"致富商隊 貿易(%.2f)/囤貨(%.2f) 應 > 建設(%.2f)" % [u_trade, u_stock, u_build])
+	print("enrich beats build OK (貿易=%.2f 囤貨=%.2f 建設=%.2f)" % [u_trade, u_stock, u_build])
 
 func _mk_team_tag(tag: String) -> TeamData:
 	var t := TeamData.new(); t.tags = [tag]; return t
