@@ -167,6 +167,28 @@ func remove_member(team: TeamData, pid: int, clear_team_id: bool = true) -> void
 		if p != null:
 			p.team_id = -1
 
+# 雙向單一入口：team.leader_id ↔ person.team_id（leader 屬本隊）+ role 同步（規則2 leader 版）。
+# 統一 leader 指派 chokepoint，mirror add_member/set_team_faction：所有 team.leader_id= 直寫改走此。
+# 新 leader：出 named_members（leader 與 named 分職）+ team_id 回指本隊 + role="leader"
+#   （即使新 leader 曾持 stale team_id 亦強制修正 → 根修 leader/team_id desync）。
+# old_leader_action: "member"=舊 leader 留隊降 named（team_id 已本隊、補回 named + role="member"）；
+#   "none"(default)=舊 leader 已死/已他處理，不動（succession/建國 常態）。
+# pid=-1 允許（清空 leader，transient；不設 role/team_id）。idempotent。
+func set_leader(team: TeamData, pid: int, old_leader_action: String = "none") -> void:
+	var old_id: int = team.leader_id
+	if old_id != -1 and old_id != pid and old_leader_action == "member":
+		var op: PersonData = persons.get(old_id)
+		if op != null:
+			op.role = "member"
+		add_member(team, old_id)   # 舊 leader 降 named（team_id 已本隊；idempotent）
+	team.leader_id = pid
+	if pid != -1:
+		team.named_members.erase(pid)   # leader 出 named（與 named 分職）
+		var p: PersonData = persons.get(pid)
+		if p != null:
+			p.team_id = team.team_id     # 強制回指本隊（修 stale desync）
+			p.role = "leader"
+
 # 單一 team 移除 chokepoint：清光所有指向 tid 的 ref，使「無懸空 team_id」成不變量。
 # 所有 team 移除（滅團/合併/野獸清除）都須走此入口。
 func erase_team(tid: int) -> void:

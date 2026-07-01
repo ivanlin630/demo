@@ -4,6 +4,7 @@ var id: int = 0
 var person_name: String = ""
 var role: String = "civilian"
 var team_id: int = -1
+var is_dead: bool = false   # 死亡留屍標記：named 死後 person 仍留 state.persons + team_id 不清（供 get_player_team_id），此 flag 供反向 roster audit 跳過（不誤報屍）
 var age: int = 20
 var sex: String = "male"   # "male"/"female"（④Trait 前置資料；anon 用 team.anon_female_ratio）
 

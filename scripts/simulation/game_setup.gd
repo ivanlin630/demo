@@ -209,7 +209,7 @@ static func _setup_random_player(state, config, rng) -> void:
 	# 統領初始值需支撐起始人口：pop_cap_from_leadership(0.15) = 10
 	leader.skills["統領"] = 0.15
 	state.persons[leader.id] = leader
-	team.leader_id = leader.id
+	state.set_leader(team, leader.id)   # chokepoint：leader_id+team_id+role（建國）
 	state.player_id = leader.id
 
 	var named_count: int = int(pcfg.get("starting_named_count", 1))
@@ -379,7 +379,7 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 	var leader := PersonGenerator.generate(state, rng.randi(), "leader")
 	leader.team_id = team.team_id
 	state.persons[leader.id] = leader
-	team.leader_id = leader.id
+	state.set_leader(team, leader.id)   # chokepoint：leader_id+team_id+role（建國）
 
 	var named_count: int = maxi(0, int(round(target_pop * named_ratio)) - 1)
 	for _i in range(named_count):
@@ -452,7 +452,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 	var leader_cfg: Dictionary = t_cfg.get("leader", {})
 	var leader: PersonData = _make_person(team.team_id, leader_cfg, true)
 	state.persons[leader.id] = leader
-	team.leader_id = leader.id
+	state.set_leader(team, leader.id)   # chokepoint：leader_id+team_id+role（建國）
 	for nm_cfg in t_cfg.get("named_members", []):
 		var nm: PersonData = _make_person(team.team_id, nm_cfg, false)
 		state.persons[nm.id] = nm
