@@ -46,8 +46,11 @@ func process_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Arr
 		var arrived: TeamData = state.teams[arrived_id]
 		if arrived.current_task == TeamData.TASK_ESCORT:
 			continue
-		for other_id in state.teams:
+		# 空間索引：同格查取代全掃。live 復驗 has + tile_pos 保零行為變（容 mid-loop erase）。
+		for other_id in state.teams_on_tile(arrived.tile_pos):
 			if other_id == arrived_id:
+				continue
+			if not state.teams.has(other_id):
 				continue
 			var other: TeamData = state.teams[other_id]
 			if other.tile_pos != arrived.tile_pos:
@@ -71,8 +74,11 @@ func process_on_move(state: WorldState, moved_ids: Array, all_team_ids: Array) -
 		var moved: TeamData = state.teams[moved_id]
 		if moved.current_task == TeamData.TASK_ESCORT:
 			continue
-		for other_id in state.teams:
+		# 空間索引：同格查取代全掃。live 復驗 has + tile_pos 保零行為變（容 mid-loop erase）。
+		for other_id in state.teams_on_tile(moved.tile_pos):
 			if other_id == moved_id:
+				continue
+			if not state.teams.has(other_id):
 				continue
 			var other: TeamData = state.teams[other_id]
 			if other.tile_pos != moved.tile_pos:

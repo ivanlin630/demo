@@ -26,6 +26,10 @@ var team_intel: Dictionary = {}
 # }}}
 var factions: Dictionary = {}
 var teams_pending_erase: Array = []   # 滅團延遲清除：tick 末單點 erase（中途 erase 不安全）
+# P0 加固：tile→teams 共用空間索引（sim_runner 每次移動後 rebuild，O(N) 一次）。
+# 消費端（hostile-within / co-location / 居民查）以鄰域查取代全掃 → 收 O(N²)/hr。
+# 純加速結構、非真值源：消費端仍 live 復驗 tile_pos/hex_dist（容 key 碰撞 + 建後瞬時態）。
+var teams_by_tile: Dictionary = {}   # tile_id(int = x*1000+y) → Array[int] team_ids
 var _next_faction_id: int = 0
 var player_id: int = -1
 var player_state: Dictionary = {}
@@ -158,6 +162,11 @@ func erase_team(tid: int) -> void:
 		team_known[obs].erase(tid)
 	for obs in team_discovered:
 		team_discovered[obs].erase(tid)
+	# 4b. team_intel prune（top memory leak 修）：死 tid 的 observer row + 各 observer 對其 target claim
+	# 皆清（否則 observer dict + 死 target claim rows 隨世界年齡無界成長）。同 chokepoint。
+	team_intel.erase(tid)
+	for obs in team_intel:
+		team_intel[obs].erase(tid)
 	# 5. 移除
 	teams.erase(tid)
 
@@ -168,6 +177,36 @@ func erase_team(tid: int) -> void:
 func require_team(tid: int) -> TeamData:
 	assert(teams.has(tid), "require_team: Team%d 不存在（team-ref 不變量被破）" % tid)
 	return teams[tid]
+
+# ── P0 tile→teams 空間索引 ─────────────────────────────────
+# rebuild：O(N) 全掃一次重建（sim_runner 每次 _step2_move 後呼，使消費端見 post-move 位置）。
+func rebuild_team_tile_index() -> void:
+	teams_by_tile.clear()
+	for tid in teams:
+		var key: int = _tile_key(teams[tid].tile_pos)
+		if not teams_by_tile.has(key):
+			teams_by_tile[key] = []
+		teams_by_tile[key].append(int(tid))
+
+# 同格查詢：回 tile_pos 上所有 team_id（消費端仍須 live 復驗 tile_pos 以容碰撞/瞬時態）。
+func teams_on_tile(tile_pos: Vector2i) -> Array:
+	return teams_by_tile.get(_tile_key(tile_pos), [])
+
+# 鄰域查詢：回 hex_dist(center, tile) ≤ range_hex 的 tile 上所有 team_id（軸座標鄰域枚舉）。
+# 回傳為候選超集（枚舉的鄰域 tile 保證 hex_dist≤range，但 key 碰撞可能混入他格）→ 消費端復驗 hex_dist。
+func teams_within(center: Vector2i, range_hex: int) -> Array:
+	var out: Array = []
+	for dq in range(-range_hex, range_hex + 1):
+		var lo: int = maxi(-range_hex, -dq - range_hex)
+		var hi: int = mini(range_hex, -dq + range_hex)
+		for dr in range(lo, hi + 1):
+			var key: int = (center.x + dq) * 1000 + (center.y + dr)
+			if teams_by_tile.has(key):
+				out.append_array(teams_by_tile[key])
+	return out
+
+func _tile_key(pos: Vector2i) -> int:
+	return pos.x * 1000 + pos.y
 
 # ── 遭遇戰臨時狀態（active 期間使用，結束後清空） ──
 var encounter_active: bool        = false

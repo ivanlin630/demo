@@ -488,7 +488,66 @@ func _initialize() -> void:
 	_test_g1a_mining_to_coin()
 	_test_g1a_mining_food_supply()
 	_test_g1a_construct_zombie_recovery()
+	# ── P0 scaling 加固：空間索引 + team_intel prune ──
+	_test_teams_by_tile_index()
+	_test_team_intel_prune_on_erase()
 	quit()
+
+# Task 3：tile→teams 共用空間索引一致性（索引查 == 全掃結果，零行為變前提）
+func _test_teams_by_tile_index() -> void:
+	print("--- Task3: teams_by_tile 空間索引一致性(索引==全掃) ---")
+	var st := WorldState.new(); st.world = WorldData.new()
+	var positions: Array = [Vector2i(5,5), Vector2i(5,5), Vector2i(6,5),
+		Vector2i(7,7), Vector2i(5,7), Vector2i(20,20)]   # 同格/鄰近/遠 混合
+	for i in range(positions.size()):
+		var t := TeamData.new(); t.team_id = 100 + i; t.tile_pos = positions[i]
+		st.teams[t.team_id] = t
+	st.rebuild_team_tile_index()
+	# 同格查詢 == 全掃同格
+	for center in positions:
+		var idx_on: Array = _srt(st.teams_on_tile(center))
+		var scan_on: Array = []
+		for tid in st.teams:
+			if st.teams[tid].tile_pos == center: scan_on.append(int(tid))
+		scan_on.sort()
+		assert(idx_on == scan_on, "teams_on_tile == 全掃 @ %s (idx=%s scan=%s)" % [center, idx_on, scan_on])
+	# 範圍查詢（filter hex_dist）== 全掃 hex_dist
+	for center in [Vector2i(5,5), Vector2i(6,6), Vector2i(20,20)]:
+		for r in [0, 1, 3]:
+			var idx_in: Array = []
+			for tid in st.teams_within(center, r):
+				if _hexd(st.teams[tid].tile_pos, center) <= r: idx_in.append(int(tid))
+			idx_in = _srt(idx_in)
+			var scan_in: Array = []
+			for tid in st.teams:
+				if _hexd(st.teams[tid].tile_pos, center) <= r: scan_in.append(int(tid))
+			scan_in.sort()
+			assert(idx_in == scan_in, "teams_within == 全掃 @ %s r=%d (idx=%s scan=%s)" % [center, r, idx_in, scan_in])
+	print("[OK] _test_teams_by_tile_index")
+
+func _srt(arr) -> Array:
+	var out: Array = []
+	for x in arr: out.append(int(x))
+	out.sort()
+	return out
+
+func _hexd(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x; var dy: int = b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+# Task 4：erase_team 後 team_intel 無死 tid（observer row + 各 observer 對其 target claim 皆清）
+func _test_team_intel_prune_on_erase() -> void:
+	print("--- Task4: erase_team → team_intel prune(死 tid 無殘留) ---")
+	var st := WorldState.new(); st.world = WorldData.new()
+	var a := TeamData.new(); a.team_id = 1; st.teams[1] = a; st.team_known[1] = []; st.team_discovered[1] = []
+	var b := TeamData.new(); b.team_id = 2; st.teams[2] = b; st.team_known[2] = []; st.team_discovered[2] = []
+	# a 是 observer 且是 target；b observe a
+	st.team_intel[1] = {2: {"population_est": 9, "last_tick": 0}}
+	st.team_intel[2] = {1: {"population_est": 8, "last_tick": 0}}
+	st.erase_team(1)
+	assert(not st.team_intel.has(1), "erase 後 team_intel observer row(1) 清除")
+	assert(not st.team_intel.get(2, {}).has(1), "其他 observer(2) 對死 target(1) 的 claim 清除")
+	print("[OK] _test_team_intel_prune_on_erase")
 
 func _test_belief_accessor() -> void:
 	print("--- G3a：BeliefSystem 讀 accessor（行為保留）---")
@@ -5352,11 +5411,13 @@ func _test_update_guard_ratio() -> void:
 	t_enemy.faction_id = 20  # 不同 faction
 	t_enemy.tile_pos = Vector2i(6, 6)  # distance ~1
 	state.teams[101] = t_enemy
+	state.rebuild_team_tile_index()   # 空間索引前置（production 由 sim_runner post-move 建）
 	fai._update_guard_ratio(t_mil, state)
 	assert(t_mil.guard_ratio >= 0.35,
 		"MILITARY 鄰敵 應 >=0.35，實際=%s" % str(t_mil.guard_ratio))
 	# 場景 B：current_task=攻擊 → 0.1
 	t_mil.current_task = TeamData.TASK_ATTACK
+	state.rebuild_team_tile_index()
 	fai._update_guard_ratio(t_mil, state)
 	assert(t_mil.guard_ratio <= 0.15,
 		"攻擊中 應 <=0.15，實際=%s" % str(t_mil.guard_ratio))
@@ -5367,6 +5428,7 @@ func _test_update_guard_ratio() -> void:
 	t_pro.faction_id = 30
 	t_pro.tile_pos = Vector2i(-20, -20)
 	state.teams[102] = t_pro
+	state.rebuild_team_tile_index()
 	fai._update_guard_ratio(t_pro, state)
 	assert(t_pro.guard_ratio <= 0.2,
 		"PRODUCE 無威脅 應 <=0.2，實際=%s" % str(t_pro.guard_ratio))
@@ -5376,6 +5438,7 @@ func _test_update_guard_ratio() -> void:
 	t_def.faction_id = 40
 	t_def.tile_pos = Vector2i(-30, -30)
 	state.teams[103] = t_def
+	state.rebuild_team_tile_index()
 	fai._update_guard_ratio(t_def, state)
 	assert(t_def.guard_ratio >= 0.15 and t_def.guard_ratio <= 0.25,
 		"default 無威脅 應 ~0.2，實際=%s" % str(t_def.guard_ratio))
@@ -5391,6 +5454,7 @@ func _test_update_guard_ratio() -> void:
 	t_ally_a.known_reputations[105] = 0.8   # 高聲望
 	state.teams[104] = t_ally_a
 	state.teams[105] = t_ally_b
+	state.rebuild_team_tile_index()
 	fai._update_guard_ratio(t_ally_a, state)
 	assert(t_ally_a.guard_ratio <= 0.25,
 		"鄰格盟友（rep=0.8）不應觸發威脅 guard_ratio，實際=%s" % str(t_ally_a.guard_ratio))
@@ -8638,6 +8702,7 @@ func _test_process_on_move_triggers_combat() -> void:
 	state.persons[20] = pl; p.leader_id = 20
 	state.teams[1] = p
 	state.team_discovered[0] = [1]; state.team_discovered[1] = [0]
+	state.rebuild_team_tile_index()   # 空間索引前置（production 由 sim_runner post-move 建）
 	InteractionSystem.new().process_on_move(state, [0], [0, 1])
 	assert(a.combat_target == 1, "途經同格應 start_combat（combat_target=1），實際=%d" % a.combat_target)
 	print("Combat Task2 OK")
@@ -9785,14 +9850,17 @@ func _test_has_resident_team_check() -> void:
 	state.world.tiles[5005] = tile
 	var fai := FactionAISystem.new()
 	# 無 team → false
+	state.rebuild_team_tile_index()   # 空間索引前置（production 由 sim_runner post-move 建）
 	assert(not fai._has_resident_team_on_tile(state, tile), "無 team 應 false")
 	# 非 PRODUCE team 在 tile → false
 	var m := TeamData.new(); m.team_id = 1; m.tile_pos = Vector2i(5, 5); m.tags = ["軍隊"]
 	state.teams[1] = m
+	state.rebuild_team_tile_index()
 	assert(not fai._has_resident_team_on_tile(state, tile), "非 PRODUCE 應 false")
 	# PRODUCE team 在 tile → true
 	var r := TeamData.new(); r.team_id = 2; r.tile_pos = Vector2i(5, 5); r.tags = ["生產"]
 	state.teams[2] = r
+	state.rebuild_team_tile_index()
 	assert(fai._has_resident_team_on_tile(state, tile), "PRODUCE 應 true")
 	print("Residency Task2 OK")
 

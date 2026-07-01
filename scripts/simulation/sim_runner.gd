@@ -154,6 +154,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_step1c_update_equipment(state, near_teams)
 		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
 		var move_near: Dictionary = _step2_move_teams(state, near_teams, time_speed_mult)
+		state.rebuild_team_tile_index()   # post-move rebuild → 下游 co-location/hostile 查見 post-move 位置
 		var arrived_near: Array = move_near["arrived"]
 		var moved_near: Array = move_near["moved"]
 		if _get_player_tile_pos(state) != _player_old_pos:
@@ -191,6 +192,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_step1b_update_vision(state, far_teams, time_vision_mult)
 		_step1c_update_equipment(state, far_teams)
 		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult)
+		state.rebuild_team_tile_index()   # post-move rebuild（far 隊移動後刷新，near 隊位置本 tick 不再變）
 		var arrived_far: Array = move_far["arrived"]
 		var moved_far: Array = move_far["moved"]
 		_step3_propagate_messages(state, moved_far, far_teams)
