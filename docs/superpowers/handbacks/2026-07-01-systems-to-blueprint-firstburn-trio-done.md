@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 首三軌 merged 合體綠——★致富錨接上(specimen 想=致富→做=貿易,經濟真根解)+CONQUER 0→1;coin 全池 audit+單寫者;BEG/JOIN 量到 JOIN=中空轉;誠實標征服名vs實斷點=follow-up
 ---
 
