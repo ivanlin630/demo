@@ -482,7 +482,7 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 			var f = state.factions[team.faction_id]
 			if f.leader_team_id == team.team_id:
 				state.disband_faction(team.faction_id)
-	team.named_members.erase(p.id)
+	state.remove_member(team, p.id, false)   # 戰死：出 named（隨後 persons.erase，team_id 免清）
 	if team.leader_id == p.id:
 		team.leader_id = -1
 	var _death_grade: String = p.equipment["hand_1"].get("grade", "")

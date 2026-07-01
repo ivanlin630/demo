@@ -216,7 +216,7 @@ func _action_promote_anon(state: WorldState, _target_id: int, pt: TeamData, _pt_
 	var p: PersonData = PersonGenerator.generate_for_team(state, pt, "member")
 	if p == null:
 		return { "ok": false, "msg": "拔擢失敗（無可拔擢 anon）" }
-	pt.named_members.append(p.id)   # caller 設 named（leader 不變,新增 named 成員）
+	state.add_member(pt, p.id)   # 拔擢 anon→named（leader 不變,新增 named 成員）
 	return { "ok": true, "msg": "拔擢 %s 為記名成員" % p.person_name }
 
 # 紮營（Y 版,生存落腳）：免材料 + 無即時糧（只抬 cap）+ 距離 spacing + 限時施工。
@@ -1038,7 +1038,7 @@ func _action_choose_heir(state: WorldState, _target: int, _pt: TeamData, _pt_id:
 	if team == null or heir == null:
 		return { "ok": false, "msg": "team/person 失效" }
 	team.leader_id = heir_id
-	team.named_members.erase(heir_id)
+	state.remove_member(team, heir_id, false)   # 繼任 leader：出 named 仍屬本隊
 	heir.role = "leader"
 	state.player_id = heir_id
 	state.player_forced_event = {}
@@ -1311,10 +1311,10 @@ func _recruit_named_internal(state: WorldState, pt: TeamData,
 	ResourceBank.set_amt(pt, "coin", coin - RECRUIT_COST_NAMED, "recruit_named_pay")
 	# 守恆：買人付給對方，coin 不蒸發
 	ResourceBank.add(tgt4, "coin", RECRUIT_COST_NAMED, "recruit_named_receive")
-	tgt4.named_members.erase(person_id)
-	p.team_id = pt_id
+	state.remove_member(tgt4, person_id, false)   # 出原隊 roster（team_id 由 add 設 pt）
 	LoyaltyBank.set_baseline(p, 0.5, "recruit")
-	pt.named_members.append(person_id)
+	state.add_member(pt, person_id)               # 入玩家隊 + team_id=pt
+
 	state.player_pending_targets.erase(from_team_id)
 	print("[Recruit] Named P%d (%s) Team%d→%d" % [
 		person_id, p.person_name, from_team_id, pt_id])

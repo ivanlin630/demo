@@ -236,7 +236,7 @@ static func check_starvation_deaths(state: WorldState) -> void:
 		if team == null: continue
 		var cause: String = "餓死" if p.hunger >= 0.7 else "失血而亡"
 		print("[Death] Person%d (team%d) %s" % [pid, p.team_id, cause])
-		team.named_members.erase(pid)
+		state.remove_member(team, pid, false)   # 死亡留屍不改籍（保 get_player_team_id）
 		if team.leader_id == pid:
 			team.leader_id = -1
 		# population 為 getter（leader+named+anon）→ named/leader 移除後自動反映，無須手動扣。

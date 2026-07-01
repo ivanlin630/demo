@@ -1201,7 +1201,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 		if not is_dead(u, state): continue
 		var t: TeamData = state.teams.get(u["team_id"])
 		if t:
-			t.named_members.erase(u["person_id"])
+			state.remove_member(t, u["person_id"], false)   # 戰死：出 named（team_id 留，同 famine）
 			if t.leader_id == u["person_id"]: t.leader_id = -1
 
 	var loser_for_reserve: int = -1

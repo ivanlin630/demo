@@ -75,16 +75,15 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	new_leader.role    = "leader"
 	new_team.leader_id = new_leader.id
 	reset_loyalty_on_transfer(new_leader, "split_leader")
-	parent.named_members.erase(new_leader.id)
+	state.remove_member(parent, new_leader.id, false)   # 出母 roster（team_id 已=new_team）
 	# population 為 getter：leader_id 設定 + named.erase 即反映，無須手動加減
 
 	# Hard dissenters（loyalty < 0.35）
 	for i in range(1, dissenters.size()):
 		var p: PersonData = dissenters[i]
-		p.team_id = new_team.team_id
-		new_team.named_members.append(p.id)
+		state.add_member(new_team, p.id)               # 入新隊 + team_id
 		reset_loyalty_on_transfer(p, "split_hard")
-		parent.named_members.erase(p.id)
+		state.remove_member(parent, p.id, false)       # 出母 roster（team_id 已=new_team）
 
 	# Soft followers（loyalty 0.35–0.55，依魅力）
 	var charisma: float = float(new_leader.attributes.get("魅力", 0.5))
@@ -93,10 +92,9 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 		if p == null: continue
 		if p.loyalty >= 0.35 and p.loyalty <= 0.55:
 			if randf() < charisma * 0.6:
-				p.team_id = new_team.team_id
-				new_team.named_members.append(p.id)
+				state.add_member(new_team, p.id)               # 入新隊 + team_id
 				reset_loyalty_on_transfer(p, "split_soft")
-				parent.named_members.erase(p.id)
+				state.remove_member(parent, p.id, false)       # 出母 roster（team_id 已=new_team）
 
 	# 匿名跟隨者（依統領×魅力）
 	var leadership: float = float(new_leader.skills.get("統領", 0.0))

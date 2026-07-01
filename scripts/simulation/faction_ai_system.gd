@@ -464,7 +464,7 @@ func _dispatch_subteam_settle(state: WorldState, owner: TeamData, tile: HexTileD
 		var new_leader: PersonData = PersonGenerator.generate_for_team(
 			state, owner, "member")
 		if new_leader != null:
-			owner.named_members.append(new_leader.id)
+			state.add_member(owner, new_leader.id)   # 拔擢 anon→named
 			sub_leader_id = new_leader.id
 	if sub_leader_id == -1: return
 	var subteam_id: int = SubteamSystem.new().dispatch(
@@ -2103,7 +2103,7 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 	var new_advisor: PersonData = PersonGenerator.generate_for_team(state, team, "member")
 	if new_advisor == null:
 		return -1
-	team.named_members.append(new_advisor.id)
+	state.add_member(team, new_advisor.id)   # 拔擢 anon→named 工頭
 	return new_advisor.id
 
 # 撥付建造款：公庫優先。目標 tile 公庫足 → 子隊不需補（抵達後 _deduct_cost 自扣公庫）；
