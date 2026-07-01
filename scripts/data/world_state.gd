@@ -69,10 +69,13 @@ func create_faction(leader_team_id: int) -> int:
 	var f = load("res://scripts/data/faction_data.gd").new()
 	f.faction_id = _next_faction_id
 	f.leader_team_id = leader_team_id
-	f.member_team_ids = [leader_team_id]
+	f.member_team_ids = []   # 由 set_team_faction bidir-safe 補入 leader（退舊籍後）
 	factions[f.faction_id] = f
 	_next_faction_id += 1
-	teams[leader_team_id].faction_id = f.faction_id
+	# bidir-safe：若 leader 原屬他 faction（成員/獨立隊建國），先退舊 member_team_ids
+	# 再入新——否則舊 faction 陣列殘留懸空 id，該隊日後 erase 時 faction_id-gated
+	# cleanup 只清新 faction，舊 faction 懸空 → _assign_member_tasks require_team crash。
+	set_team_faction(teams[leader_team_id], f.faction_id)
 	return f.faction_id
 
 func disband_faction(faction_id: int) -> void:
