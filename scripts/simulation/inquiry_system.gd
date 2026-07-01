@@ -99,7 +99,7 @@ func _score_option(id: String, state: WorldState,
 	match id:
 		"ask_food_source":
 			var food: float   = float(player_team.resources.get("food", 0))
-			var daily: float  = float(player_team.population) * 2.4
+			var daily: float  = float(player_team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 			var days: float   = food / maxf(daily, 1.0)
 			return clampf(2.0 - days * 0.1, 0.0, 2.0)
 		"ask_enemy_movement":

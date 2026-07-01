@@ -13,6 +13,9 @@ const ARCHETYPE_SETTLE: String = "定居"
 const LADDER_EVAL_CADENCE: int = 10 * WorldState.TICKS_PER_HOUR
 # 安全門檻 proxy（TEST VALUE）
 const SURPLUS_DAYS: float = 7.0
+# R2 flow-not-stock：積累 rung 讀持續淨食物流盈餘（食物/天），非 stale 滿倉 stock。
+# 有真盈餘可積累才升 rung；覓食/爆倉 net~0 隊卡生存（苟活）。TEST VALUE，bed 校。
+const ACCUMULATE_FLOW_MIN: float = 0.5   # TEST VALUE — 升積累 rung 所需日均淨食物盈餘
 const EXPAND_MIN_POP: int = 8
 const STATE_MIN_FACTION_TEAMS: int = 2
 const HEGEMON_MIN_FACTION_TEAMS: int = 4
@@ -45,11 +48,10 @@ static func derive_cap(leader: PersonData) -> int:
 static func target_rung(state: WorldState, team: TeamData, leader: PersonData) -> int:
 	var rung: int = RUNG_SURVIVE
 	var pop: int = team.population
-	# WS-2c：有效糧(私產+自家糧倉)。否則定居隊 food 在糧倉→誤判無盈餘→永卡 RUNG_SURVIVE。
-	var food: float = ResourceSystem.effective_food(state, team)
-	var surplus_need: float = float(pop) * 2.4 * SURPLUS_DAYS   # 2.4 = 日餐量量級(對齊既有)
-	# 積累：糧盈餘
-	if food >= surplus_need:
+	# R2 flow-not-stock：積累讀持續淨食物流盈餘（income−consumption 日均），非 stale 滿倉。
+	# 定居隊爆倉但 net~0 → 不誤判積累；plains net>0 / 交易 net>0 → 升 rung。
+	# 積累：糧盈餘（flow）
+	if team.food_flow_avg >= ACCUMULATE_FLOW_MIN:
 		rung = RUNG_ACCUMULATE
 		# 擴張：盈餘 + 夠人
 		if pop >= EXPAND_MIN_POP:

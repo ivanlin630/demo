@@ -65,6 +65,11 @@ var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰
 var captive_groups: Array = []
 var famine_days: float = 0.0   # 連續斷糧（satisfaction<0.3）累積天數；飢餓致死鏈用（型別 float，語意=天）
 var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，日邊界歸零）
+# R2 食物流訊號（flow-not-stock 成長）：日均淨食物流 (income − consumption) EMA。
+# 成長 gate（生育/野心 accumulate）讀此，非 stale 滿倉 stock → 爆倉不再驅動成長。
+# 由 ResourceSystem.resolve_consumption 每 cadence 更新（見 _update_food_flow）。
+var food_flow_avg: float = 0.0    # 日均淨食物流 EMA（食物/天）
+var food_flow_last: float = -1.0   # 上次取樣 effective_food（sentinel -1 = 未初始化，首取樣不計流）
 # 統一戰略意圖 struct {type,why,mode}（F-D4：廢一槽兩義）。戰略層(獨立建國/致富/征服/守成)寫；
 # 空 {} = 無戰略意圖。SoloAI 日常 task 承諾改用 solo_task_last（下方），不再共用此槽。
 var solo_intent: Dictionary = {}

@@ -168,8 +168,8 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_step4e_faction_snapshot(state, near_teams)
 		_step_ambush_check(state, near_teams)
 		if state.encounter_active: return "player_turn"   # 伏擊起 encounter → 交還 bridge
-		_step5_collect_resources(state, near_teams)
-		_step5a_regenerate_tiles(state)
+		_step5_collect_resources(state, near_teams, NEAR_CADENCE)
+		_step5a_regenerate_tiles(state, NEAR_CADENCE)   # 全 tile 全域再生（每小時）→ 覆蓋 far 區 tile
 		_step5b_manufacture(state, near_teams)
 		_step6_resolve_consumption(state, near_teams, NEAR_CADENCE)
 		_step6c_salary(state, near_teams)
@@ -202,8 +202,8 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_step4_resolve_interactions(state, moved_far, far_teams)
 		_step4e_faction_snapshot(state, far_teams)
 		_step_ambush_check(state, far_teams)
-		_step5_collect_resources(state, far_teams)
-		_step5a_regenerate_tiles(state)
+		_step5_collect_resources(state, far_teams, FAR_ZONE_INTERVAL)
+		# R1：tile 再生已由 near 分支每小時全域跑（覆蓋 far tile）→ 此處不重複再生（原為 24× 雙記元凶之一）
 		_step5b_manufacture(state, far_teams)
 		_step6_resolve_consumption(state, far_teams, FAR_ZONE_INTERVAL)
 		_step6c_salary(state, far_teams)
@@ -295,11 +295,11 @@ func _step4e_faction_snapshot(state: WorldState, team_ids: Array) -> void:
 func _step4c_harvest_tick(state: WorldState) -> void:
 	_harvest_system.tick_all(state)   # 外層已做頻率判斷
 
-func _step5_collect_resources(state: WorldState, team_ids: Array) -> void:
-	_resource_system.collect_resources(state, team_ids)
+func _step5_collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
+	_resource_system.collect_resources(state, team_ids, cadence_ticks)
 
-func _step5a_regenerate_tiles(state: WorldState) -> void:
-	_resource_system.regenerate_tiles(state)
+func _step5a_regenerate_tiles(state: WorldState, cadence_ticks: int) -> void:
+	_resource_system.regenerate_tiles(state, cadence_ticks)
 
 func _step5b_manufacture(state: WorldState, team_ids: Array) -> void:
 	_manufacturing_system.tick_all(state, team_ids)

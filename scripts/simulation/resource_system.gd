@@ -1,10 +1,14 @@
 class_name ResourceSystem
 
-const FOOD_PER_PERSON_PER_DAY: float = 2.4   # TEST VALUE — 2.4食物/人/天（原 0.1×24）
+const FOOD_PER_PERSON_PER_DAY: float = 0.8   # TEST VALUE — R1 張力校準：供給÷24 後配降耗
+# （原 2.4 配 24× 供給 bug；R1 修 cadence 後穩態食物 income≈regen[plains 8/forest 3 per day]，
+#  0.8 使 plains op1 養小鎮微盈餘[繁榮]、forest op1 微赤[苟活須交易]、赤字溫和不成餓死潮）
 # 讀B：覓食 = 苟活地板。覓食來源食物淨貢獻上限 = 幾日餬口（超額不 bank、不耗 wild_game）。
 const FORAGE_FLOOR_DAYS: float = 1.5         # TEST VALUE — 覓食淨貢獻上限=幾日餬口
 const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
 const PROVISION_DAYS: float = 10.0           # TEST VALUE — 旅途乾糧天數（自家 outpost 補 carried buffer）
+# R2 flow-not-stock：日均淨食物流 EMA 平滑窗（天）。cadence 無關（α=day_fraction/window）。
+const FLOW_WINDOW_DAYS: float = 5.0          # TEST VALUE — 食物流平滑窗
 
 # 採集係數：每次 collect 取 tile 池的比例（馬爾薩斯 tune R1: 0.01→0.05 —
 # 池常駐 cap，遠區村 income ≈ cap×rate×mults×2.4次/日，0.01 時 7/day << burn 28.8）
@@ -38,7 +42,9 @@ const HEX_DIRS: Array = [
 	Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1),
 ]
 
-func collect_resources(state: WorldState, team_ids: Array) -> void:
+func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = WorldState.TICKS_PER_DAY) -> void:
+	# R1：harvest 與 consumption 同 cadence 基準（day_fraction）。修 24× 不對稱 bug（供給每小時全速）。
+	var day_fraction: float = float(cadence_ticks) / float(WorldState.TICKS_PER_DAY)
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue
@@ -61,21 +67,24 @@ func collect_resources(state: WorldState, team_ids: Array) -> void:
 		# 本格+鄰格採集所得聚合（私產部分），用於課一般稅（稅進站立 tile 公庫）
 		var gained: Dictionary = {}
 		if tile.outpost_level == 3:
-			_collect_from_tile(state, team, tile, 2.0, pop_mult, prod_skill, eng_skill, gained)
+			_collect_from_tile(state, team, tile, 2.0, pop_mult, prod_skill, eng_skill, gained, day_fraction)
 			for neighbor in _get_adjacent_tiles(state, team.tile_pos):
-				_collect_from_tile(state, team, neighbor, 0.5, pop_mult, prod_skill, eng_skill, gained)
+				_collect_from_tile(state, team, neighbor, 0.5, pop_mult, prod_skill, eng_skill, gained, day_fraction)
 		else:
 			var outpost_mult: float = [1.0, 1.4][tile.outpost_level - 1]
-			_collect_from_tile(state, team, tile, outpost_mult, pop_mult, prod_skill, eng_skill, gained)
+			_collect_from_tile(state, team, tile, outpost_mult, pop_mult, prod_skill, eng_skill, gained, day_fraction)
 
 		_apply_normal_tax(state, team, tile, gained)
 
-func regenerate_tiles(state: WorldState) -> void:
+func regenerate_tiles(state: WorldState, cadence_ticks: int = WorldState.TICKS_PER_DAY) -> void:
+	# R1：food regen 乘 day_fraction（與 consumption 同 cadence 基準）→ REGEN_RATE 值成真 per-day
+	# （forest 3/day marginal，不再秘密×24）。material regen 不縮放（pool cap-bound，harvest ÷24 才是節流）。
+	var day_fraction: float = float(cadence_ticks) / float(WorldState.TICKS_PER_DAY)
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		var rates = REGEN_RATE.get(tile.terrain, { "food": 2.0, "material": 1.0 })
 		# food 再生受 harvest_factor 調節（季節性植物生長）
-		var food_regen: float = float(rates["food"]) * tile.harvest_factor
+		var food_regen: float = float(rates["food"]) * tile.harvest_factor * day_fraction
 		tile.resources["food"] = minf(
 			float(tile.resources.get("food", 0)) + food_regen,
 			float(tile.resource_cap.get("food", 0))
@@ -171,6 +180,25 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 				ResourceBank.set_amt(team, "food", carried + move, "provision_carry")
 				gtile.public_storage["food"] = avail - move
 
+		# R2：本 cadence 末更新食物流訊號（income − consumption 的日均 EMA）。
+		_update_food_flow(state, team, day_fraction)
+
+# R2 flow-not-stock：日均淨食物流 EMA。net = effective_food(末) − 上次取樣；除 day_fraction → 日率；
+# α=day_fraction/FLOW_WINDOW_DAYS → 時間常數平滑（near/far cadence 無關）。首取樣只 seed 不計流。
+# 離開自家糧倉 → effective_food 跌（糧倉不計）→ 一次負脈衝壓低 flow → 偏向不成長（安全方向，
+# 絕不假陽性成長）；重新定居後 EMA 於窗內回復。移動隊本不是成長候選（生育須安定+盈餘）。
+func _update_food_flow(state: WorldState, team: TeamData, day_fraction: float) -> void:
+	if day_fraction <= 0.0:
+		return
+	var post_food: float = effective_food(state, team)
+	if team.food_flow_last < 0.0:
+		team.food_flow_last = post_food   # 首取樣 seed，不計流
+		return
+	var daily_rate: float = (post_food - team.food_flow_last) / day_fraction
+	var alpha: float = clampf(day_fraction / FLOW_WINDOW_DAYS, 0.0, 1.0)
+	team.food_flow_avg += alpha * (daily_rate - team.food_flow_avg)
+	team.food_flow_last = post_food
+
 # grace 期後每日餓死：先死 minor，minor 耗盡才死 anon。
 # cadence 多次/日 → 用 famine_days 跨整數日偵測，只在跨日當次結算（避免重複殺）。
 func _apply_famine_attrition(state: WorldState, team: TeamData, day_fraction: float) -> void:
@@ -212,14 +240,16 @@ func flush_forage_episodes(state: WorldState, team_ids: Array) -> Array:
 
 func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData,
 		outpost_mult: float, pop_mult: float,
-		prod_skill: float, eng_skill: float, gained: Dictionary = {}) -> void:
+		prod_skill: float, eng_skill: float, gained: Dictionary = {},
+		day_fraction: float = 1.0) -> void:
 	for res in src_tile.resources.keys():
 		if res == "wild_horses" or res == "wild_game":
 			continue   # 活物不走 generic 採集（野馬日捕在 HarvestSystem；野味走 HuntSystem）
 		var current: float = float(src_tile.resources.get(res, 0))
 		if current <= 0.0:
 			continue
-		var gain: float = src_tile.productivity * current * COLLECT_RATE
+		# R1：harvest 乘 day_fraction（與 consumption 同 cadence 基準，修 24× 供給不對稱）
+		var gain: float = src_tile.productivity * current * COLLECT_RATE * day_fraction
 		gain *= outpost_mult * pop_mult
 		gain *= team.work_morale
 		match res:

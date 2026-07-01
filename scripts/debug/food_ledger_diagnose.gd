@@ -53,7 +53,8 @@ func _run() -> void:
 	print("--- t0 ---")
 	for tid in capable: print("  " + _ledger(state, tid, snap))
 
-	for month in range(8):
+	var months: int = int(OS.get_environment("LEDGER_MONTHS")) if OS.get_environment("LEDGER_MONTHS") != "" else 8
+	for month in range(months):
 		var fam_before: Dictionary = {}
 		for tid in capable:
 			fam_before[tid] = int(state.teams[tid].famine_days) if state.teams.has(tid) else -1

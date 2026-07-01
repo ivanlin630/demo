@@ -2,6 +2,9 @@ class_name ReactionSystem
 
 const GOAL_CHECK_INTERVAL: int = 10 * WorldState.TICKS_PER_HOUR  # 每 10 小時
 const BREED_BASE_CHANCE: float = 0.15   # TEST VALUE
+# R2 flow-not-stock：生育 gate 讀持續淨食物流盈餘（食物/天），非 stale 滿倉 stock。
+# 門檻 ≈ 半人份日餐 → 有真盈餘養新口才生（爆倉不再驅動）。TEST VALUE，bed 校。
+const BREED_FLOW_MIN: float = 1.2   # TEST VALUE — 生育所需日均淨食物盈餘
 
 var _npc_ai: NpcAiSystem
 
@@ -197,9 +200,9 @@ func _evaluate_life_events(state: WorldState, p: PersonData, t: TeamData) -> Arr
 	var events: Array = []
 	var safe: bool = float(p.needs.get("safety", 1.0)) > 0.7
 	var fed: bool = float(p.needs.get("food", 1.0)) > 0.7
-	# 統一食物：生育 surplus gate 讀 coherent 食物(私產+自家糧倉)，非私產 silo (econ-food-unify)
-	var surplus_ok: bool = ResourceSystem.effective_food(state, t) \
-		> float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
+	# R2 flow-not-stock：生育讀持續淨食物流盈餘，非 stale 滿倉 → 爆倉不再驅動成長。
+	# 覓食/爆倉 net~0 → 不生；賣特產換糧 net>0（致富 intent 驅動）→ 才長。
+	var surplus_ok: bool = t.food_flow_avg > BREED_FLOW_MIN
 	var cap: int = maxi(1, int(t.population * 0.25))
 	if safe and fed and surplus_ok and t.minor_population < cap:
 		var balance: float = _breed_balance(t, p.sex)   # 全單性→0→不繁衍

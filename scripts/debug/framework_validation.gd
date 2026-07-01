@@ -151,6 +151,9 @@ func _scenario_S3_scout() -> void:
 	s.persons[1] = ldr; atk.leader_id = 1; _seed_pop(atk, 10)
 	# readiness：pop10(1.0)+skill+food14d+weapon>=pop → 足夠過 .52
 	atk.resources = {"food": 99999.0, "weapon_melee_low": 20.0}
+	# R2 flow-not-stock：野心 rung 讀 food_flow_avg（持續淨盈餘）。設正向 flow → 維持 EXPAND
+	# rung（否則 ladder 依 flow=0 降至 SURVIVE → prosperity-attack 不評 → scout 不 dispatch）。
+	atk.food_flow_avg = 100.0
 	s.teams[0] = atk
 	# prey 隊（鄰格 → border + reachable）
 	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(1, 0)

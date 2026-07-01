@@ -2458,7 +2458,7 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 	var slot_full: bool = OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile)
 	# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→恆 hungry→永優先建農。
 	var hungry: bool = ResourceSystem.effective_food(state, team) \
-		< float(team.population) * 2.4 * 7.0
+		< float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
 	# 飢餓 override：缺糧 → 農田最優先（slot 滿可拆遷搶 slot）
 	if hungry and tile.outpost_type == "civilian" \
 			and int(tile.farming_level) == 0:
@@ -2529,7 +2529,7 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 	var pop: float = maxf(float(team.population), 1.0)
 	match facility:
 		"farming":
-			var target: float = pop * 2.4 * 14.0
+			var target: float = pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 14.0
 			# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→缺口恆滿→永想擴農。
 			return clampf((target - ResourceSystem.effective_food(state, team)) / target, 0.0, 1.0)
 		"workshop":
