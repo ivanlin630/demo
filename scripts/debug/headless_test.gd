@@ -14263,26 +14263,32 @@ func _test_cap_retreat_captures_wounded() -> void:
 	loser.readiness = 0.1                                   # 潰逃（低 readiness=嚴重）
 	var w_pop0: int = winner.population
 	var loser_wnd0: int = loser.wounded
+	var loser_healthy0: int = AnonCohort.by_health(loser.anon_cohorts, "healthy")
 	var loser_pop0: int = loser.population
-	var captured: int = AnonTierSystem.capture_wounded_as_captive(state, winner, loser)
-	assert(captured > 0, "[cap] 潰逃未俘 wounded")
+	var captured: int = AnonTierSystem.capture_routed_as_captive(state, winner, loser)
+	assert(captured > 0, "[cap] 潰逃未俘殘部")
 	assert(winner.population == w_pop0, "[cap] 俘虜竟入勝方戰力(該隔離) %d!=%d" % [winner.population, w_pop0])
-	assert(loser.wounded == loser_wnd0 - captured, "[cap] wounded 不守恆 loser掉%d != captured%d" % [loser_wnd0 - loser.wounded, captured])
-	assert(loser.population == loser_pop0 - captured, "[cap] loser pop 不守恆（轉移非憑空）")
+	# 潰逃俘擴：wounded（失能丟下）+ healthy（落單）皆俘 → 兩桶皆降；pop 守恆（轉移非憑空）
+	assert(loser.wounded < loser_wnd0, "[cap] wounded 未被俘")
+	assert(AnonCohort.by_health(loser.anon_cohorts, "healthy") < loser_healthy0, "[cap] healthy 落單者未被俘（rout 擴俘）")
+	assert(loser.population == loser_pop0 - captured, "[cap] loser pop 不守恆 掉%d != captured%d" % [loser_pop0 - loser.population, captured])
 	# 入 captive_groups + entry 標記
-	assert(winner.captive_groups.size() > 0 and winner.captive_groups[-1].get("entry") == "失能-capture", "[cap] 俘虜未入 captive_group(entry)")
+	assert(winner.captive_groups.size() > 0 and winner.captive_groups[-1].get("entry") == "潰逃-capture", "[cap] 俘虜未入 captive_group(entry)")
 	# 確定性：同輸入同俘虜數（無 RNG）
 	var s2 := WorldState.new(); var w2 := _mk_cap_winner(s2, 1, 20); var l2 := _mk_team_with_wounded(s2, 2, 15, 8); l2.readiness = 0.1
-	assert(AnonTierSystem.capture_wounded_as_captive(s2, w2, l2) == captured, "[cap] 非確定性(RNG?)")
+	assert(AnonTierSystem.capture_routed_as_captive(s2, w2, l2) == captured, "[cap] 非確定性(RNG?)")
 	# guard 滿 → 俘不下
 	var s3 := WorldState.new()
 	var winner_full := _mk_cap_winner(s3, 1, 1, 0.0)   # cap=1, pop=1 → 無餘力
 	var l3 := _mk_team_with_wounded(s3, 2, 15, 8); l3.readiness = 0.1
-	assert(AnonTierSystem.capture_wounded_as_captive(s3, winner_full, l3) == 0, "[cap] guard 滿仍俘")
+	assert(AnonTierSystem.capture_routed_as_captive(s3, winner_full, l3) == 0, "[cap] guard 滿仍俘")
 	# 有序撤退（高 readiness）→ 俘少於 潰逃
 	var s4 := WorldState.new(); var w4 := _mk_cap_winner(s4, 1, 20); var l4 := _mk_team_with_wounded(s4, 2, 15, 8); l4.readiness = 0.9
-	assert(AnonTierSystem.capture_wounded_as_captive(s4, w4, l4) < captured, "[cap] 有序撤退俘虜未少於潰逃")
-	print("[cap] retreat captures wounded OK captured=%d" % captured)
+	assert(AnonTierSystem.capture_routed_as_captive(s4, w4, l4) < captured, "[cap] 有序撤退俘虜未少於潰逃")
+	# wnd=0 也俘（純 healthy 潰逃 → 前修主崩：5/7 潰逃 wnd=0 俘 0；今 rout 擴俘 healthy）
+	var s5 := WorldState.new(); var w5 := _mk_cap_winner(s5, 1, 20); var l5 := _mk_team_with_wounded(s5, 2, 15, 0); l5.readiness = 0.1
+	assert(AnonTierSystem.capture_routed_as_captive(s5, w5, l5) > 0, "[cap] 純 healthy 潰逃未俘（rout 擴俘失效）")
+	print("[cap] rout captures wounded+healthy OK captured=%d" % captured)
 
 # 全世界 pop（戰力，不含 captive）— 守恆檢查輔助
 func _world_total_pop(state: WorldState) -> int:

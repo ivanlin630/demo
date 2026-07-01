@@ -54,6 +54,11 @@ func _run() -> void:
 	var keys := ["conq.declared", "conq.declared_unified", "conq.declared_nonunified",
 		"conq.intent", "conq.winner_loot", "conq.winner_prosperity",
 		"conq.winner_other", "conq.winner_none", "conq.prosperity_reached",
+		# Task0 漏斗：攻擊→戰鬥→決勝/潰逃→吸收/不吸收
+		"conq.combat_entered", "conq.combat_decisive", "conq.combat_retreat",
+		"conq.win_absorbed", "conq.win_no_absorb",
+		"conq.no_absorb_no_anon", "conq.no_absorb_rate_floor",
+		"conq.retreat_captured", "conq.retreat_no_capture",
 		"capture.total", "loot.achieved_capture", "capture.by_attack", "capture.by_other"]
 	for k in keys:
 		print("[measure] %-26s = %d" % [k, int(Probe.counts.get(k, 0))])
