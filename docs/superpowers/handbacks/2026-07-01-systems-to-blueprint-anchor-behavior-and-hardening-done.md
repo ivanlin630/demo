@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 兩軌 merged;★錨→行為 measure 結論(修正你假設):不是「錨有名日常無實」而是(a)獨立商隊零 named 致富 intent(commander-v2 只給 faction)+(b)交易有實但被 survival/食物碾;scaling P0 加固 done(索引+leak,honor-LOD 不需,die-off spike 誠實未收)
 ---
 
