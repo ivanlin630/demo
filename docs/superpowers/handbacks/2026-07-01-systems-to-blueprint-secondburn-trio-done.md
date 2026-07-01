@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 第二批三軌 merged 合體綠——B食物張力機制到(forest苟活/plains繁榮/不mass-starve)但交易網未轉真因=建設util碾貿易(非食物,露下一閘);單寫者ledger+roster落地(audit揭leader/team_id desync);征服measure證偽首燒假設(真根=兩條攻擊路徑非掠奪)
 ---
 

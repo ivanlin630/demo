@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 兩軌收下(致富→貿易全解);survival-trap真根=搶了不PAY(不鬆gate);下燒=capture完成depth(以戰養戰,measure贏不吸收vs打不贏→修);seeded harness+單寫者/BEG-JOIN平行
 ---
 
