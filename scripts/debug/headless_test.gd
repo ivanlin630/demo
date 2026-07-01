@@ -362,6 +362,10 @@ func _initialize() -> void:
 	_test_wild_game_regen()
 	_test_hunt_small_game()
 	_test_passive_hunt_on_forage()
+	# ── 讀B：覓食 = 苟活地板（產出 capped）──
+	_test_forage_subsistence_cap()
+	_test_forage_no_growth()
+	_test_settled_still_grows()
 	_test_find_game_tile()
 	_test_player_hunt_action()
 	# ── 階段1 Plan 2b-1 野獸戰鬥核心 ──
@@ -1488,6 +1492,86 @@ func _test_passive_hunt_on_forage() -> void:
 		"覓食 tick 應被動獵掉部分 wild_game，實際=%d" % int(tile.resources["wild_game"]))
 	assert(float(team.resources.get("food", 0)) > 0.0, "有 wild_game 應靠被動小獵得食物")
 	print("passive hunt OK")
+
+# 讀B：覓食 = 苟活地板。team 覓食來源食物 latch 在 subsistence buffer，超額不 bank、不耗 wild_game。
+func _test_forage_subsistence_cap() -> void:
+	print("--- 覓食 subsistence cap + wild_game 守恆 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "plains"
+	tile.outpost_level = 0
+	tile.resources = {"food": 200.0, "wild_game": 100}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"求生": 0.9}
+	state.persons[0] = leader
+	var team := TeamData.new()
+	team.team_id = 0; team.leader_id = 0; _seed_pop(team, 5); team.tile_pos = Vector2i(4,4)
+	team.resources = {"food": 0.0}
+	state.teams[0] = team
+	var hunt := HuntSystem.new()
+	var buffer: float = ResourceSystem._forage_subsist_buffer(team)
+	for _i in range(200):
+		hunt.hunt_small_game(state, team, tile, true)
+	# net-bank latch 在 buffer（clamp 到 buffer 差額 → 恰滿）
+	assert(float(team.resources["food"]) <= buffer + 0.001,
+		"覓食 net-bank 應 ≤ buffer=%.1f，實際=%.1f" % [buffer, team.resources["food"]])
+	assert(is_equal_approx(float(team.resources["food"]), buffer),
+		"覓食應填至 buffer=%.1f，實際=%.1f" % [buffer, team.resources["food"]])
+	# 已達 buffer → 續獵不耗 wild_game（守恆：不憑空滅世界資源）
+	var game_at_cap: int = int(tile.resources["wild_game"])
+	for _i in range(20):
+		var r: Dictionary = hunt.hunt_small_game(state, team, tile, true)
+		assert(not r["success"], "食物已達 buffer 不應成功獵")
+	assert(int(tile.resources["wild_game"]) == game_at_cap,
+		"超 buffer 覓食不應消耗 wild_game，before=%d after=%d" % [game_at_cap, int(tile.resources["wild_game"])])
+	print("forage subsistence cap OK")
+
+# 讀B 驗收面：純覓食隊食物 latch，遠低於 breed(7日) 門檻 → surplus 不由覓食驅動。
+func _test_forage_no_growth() -> void:
+	print("--- 純覓食隊不推 surplus ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "plains"
+	tile.outpost_level = 0
+	tile.resources = {"food": 200.0, "wild_game": 100}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	leader.skills = {"求生": 0.9}
+	state.persons[0] = leader
+	var team := TeamData.new()
+	team.team_id = 0; team.leader_id = 0; _seed_pop(team, 5); team.tile_pos = Vector2i(4,4)
+	team.resources = {"food": 0.0}
+	state.teams[0] = team
+	var hunt := HuntSystem.new()
+	for _i in range(200):
+		hunt.hunt_small_game(state, team, tile, true)
+	var breed_thr: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
+	assert(ResourceSystem.effective_food(state, team) <= breed_thr,
+		"覓食 effective_food=%.1f 不應達 breed 門檻=%.1f（surplus 不由覓食驅動）"
+		% [ResourceSystem.effective_food(state, team), breed_thr])
+	print("forage no growth OK")
+
+# 讀B 驗收面：定居隊 granary surplus 不受覓食 cap 誤傷 → 仍能 breed。
+func _test_settled_still_grows() -> void:
+	print("--- 定居隊 granary surplus 不受 cap 誤傷 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 4*1000+4; tile.tile_pos = Vector2i(4,4); tile.terrain = "plains"
+	tile.outpost_level = 2; tile.outpost_owner = 0
+	tile.resources = {"food": 100.0}
+	state.world.tiles[tile.tile_id] = tile
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
+	state.persons[0] = leader
+	var team := TeamData.new()
+	team.team_id = 0; team.leader_id = 0; _seed_pop(team, 5); team.tile_pos = Vector2i(4,4)
+	team.resources = {"food": 0.0}
+	state.teams[0] = team
+	var threshold: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
+	tile.public_storage = {"food": threshold + 50.0}
+	var eff: float = ResourceSystem.effective_food(state, team)
+	assert(eff > threshold, "定居隊 granary surplus 應超 7 日 breed 門檻（cap 只封覓食非 granary），eff=%.1f thr=%.1f" % [eff, threshold])
+	print("settled still grows OK")
 
 func _test_find_game_tile() -> void:
 	print("--- forage path 找 wild_game 格 ---")

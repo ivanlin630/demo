@@ -1,6 +1,8 @@
 class_name ResourceSystem
 
 const FOOD_PER_PERSON_PER_DAY: float = 2.4   # TEST VALUE — 2.4食物/人/天（原 0.1×24）
+# 讀B：覓食 = 苟活地板。覓食來源食物淨貢獻上限 = 幾日餬口（超額不 bank、不耗 wild_game）。
+const FORAGE_FLOOR_DAYS: float = 1.5         # TEST VALUE — 覓食淨貢獻上限=幾日餬口
 const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
 const PROVISION_DAYS: float = 10.0           # TEST VALUE — 旅途乾糧天數（自家 outpost 補 carried buffer）
 
@@ -351,6 +353,11 @@ static func own_granary_tile(state: WorldState, team: TeamData) -> HexTileData:
 # WS-2c：本隊「有效糧」= 私產 food + 自家糧倉 food（決策讀者單源；消耗扣除走 resolve_consumption）。
 # WS-1 把定居隊 food 搬進糧倉(team.resources food=0)只改了消耗，漏改決策讀者 →
 # 定居隊/商隊 AI 誤判餓。決策讀者（survival/trade/ambition gate）一律經此。
+# 讀B：覓食 subsistence buffer = pop × 食/人/日 × FORAGE_FLOOR_DAYS。覓食來源食物 net-bank 上限。
+# 只封覓食（team.resources food）非 granary → 定居隊繁榮不受誤傷。hunt_system 累積前查此。
+static func _forage_subsist_buffer(team: TeamData) -> float:
+	return float(team.population) * FOOD_PER_PERSON_PER_DAY * FORAGE_FLOOR_DAYS
+
 static func effective_food(state: WorldState, team: TeamData) -> float:
 	var g: HexTileData = own_granary_tile(state, team)
 	var gf: float = float(g.public_storage.get("food", 0)) if g != null else 0.0
