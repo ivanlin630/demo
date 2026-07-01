@@ -1,7 +1,9 @@
-# 統一矩陣稽核 — 實體 × 領域全貌（統一地圖）
+# 統一矩陣稽核 — 實體 × 領域結構圖（first-pass，非逐行窮盡）
 
 > 系統產出（藍圖 `unification-matrix-program` task 1）。grep 實碼 4-domain fan-out 綜合。每格 **統一 / 補丁 / 缺口**。
-> **止驚喜**：第一次知道還有多少格沒統一。據此逐格燒。
+> **⚠ 覆蓋誠實標記（別當窮盡稽核）**：方法 = 4 Explore agent 用 **grep pattern + 讀關鍵 function 節選**（非逐行逆向）。碰到 core AI/決策/互動/資源/戰鬥 **~25/66 sim 檔**;**沒碰/薄**：`events/*`、order_system、movement、health、outpost 片段、skill、world_generator、player 讀側片段、**全部 data/ui/debug（53 檔）**。
+> **信心**：4 大 fork 區（思考決策/player-NPC/單寫者/俘虜）= **高**（grep-backed，在該住的核心掃到）;**63 格完整性 = 中**（部分格 NA/by-design 未深驗，fork 可能藏在沒掃系統=(B) 缺口風險本身）。
+> → 夠挑首燒（intent-forming fork 明確），**不夠喊「不再驚喜」**。要真窮盡需逐檔 sweep（見末段）。
 
 ## ★ 結構總洞察
 **所有 team 型（team/subteam/faction-member/獨立/player）= 同 `TeamData` class** → for teams 多數領域**自動統一**（population/anon/breeding/resource-read/belief-substrate 都因同 class 免費統一）。真系統性 fork **聚在 4 區**：
@@ -74,3 +76,11 @@
 ## 強制閘 + checklist（program ②③，守住+少犯）
 - **強制閘**：intent/決策/state-change 點沒在統一路徑 → CI FAIL（比照「無因令=0」）。首批守 F-D（戰略合併後）+ F-S2（driver-ledger）。
 - **設計 checklist**：新決策/狀態/意圖/互動系統必列「涵蓋哪些實體型」+ 誠實標記（補丁叫補丁）。納 `docs/process/01_architect.md`。
+
+## 覆蓋缺口 + 真窮盡 sweep（若要「不再驚喜」）
+本稿 = grep+節選 first-pass，非逐行。要保證完整需**逐檔 sweep**：
+- 枚舉全 119 .gd（非只 25/66 sim），每檔標「觸哪些 實體×領域格 + 統一/補丁/缺口」。
+- cross-check 每個 site 類：全部 `.resources[`/`public_storage[` 寫（F-S1 只數了 53，需逐一歸類）、全部 decision/intent emit 點、全部 state-mutation、全部 interaction verb dispatch。
+- 特查沒掃系統：`events/*`(defect/tag_shift/unrest×3)、order_system、movement、health、skill、world_generator、outpost 全體、player 讀側(api_mapper/query 1400+行)。
+- 產出：每格附「已驗檔清單」→ 空白格=真缺口 vs 未查。**成本**：per-file pass ~119 檔，可 fan-out（按目錄/系統分批 agent）。
+- **建議**：首燒（intent-forming）已明確可先開，**逐檔 sweep 平行補**（不阻塞首燒，但補完才敢喊窮盡 + 才立得起可靠強制閘）。

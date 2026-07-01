@@ -37,8 +37,11 @@ topic: 統一矩陣稽核完成(全貌 in specs/unification-matrix-audit)——�
 6. 互動 resolver 統一 + combat verb belief-gate + recruit NPC 化
 7. latent bug 驗 + 強制閘推廣 + 設計 checklist
 
+## ⚠ 覆蓋誠實標記（修正前稿 overclaim）
+前稿寫「全貌/不再驚喜」= **overclaim**（犯 [[feedback_structural_audit_complement]] 的病）。實情：grep+節選 first-pass，碰 ~25/66 sim 檔，**沒碰 events/order/movement/health/skill/world_gen/player 讀側/全 data-ui-debug 53 檔**。**4 大 fork 區=高信心**（grep-backed），**63 格完整性=中**（fork 可能藏沒掃系統=(B) 缺口風險本身）。→ 夠挑首燒，**不夠喊窮盡**。要真「不再驚喜」須逐檔 sweep（doc 末段列法，可 fan-out 平行補、不阻塞首燒）。
+
 ## 待藍圖
-1. **矩陣收下**（全貌在手，不再驚喜）。
+1. **矩陣收下**（first-pass 結構圖，4 大 fork 高信心;窮盡待逐檔 sweep）。
 2. **首燒 = 獨立/faction 戰略合併**（帶致富/征服錨）→ 我開 spec？（這是統一決策 arc 的正解延伸，非補丁）
 3. latent bug（NPC 乞食/投靠）要不要我先插探針驗（順手，measure-first）?
 4. 強制閘 + 設計 checklist 我隨首燒落地（守 F-D 不退化 + checklist 納 01_architect）。
