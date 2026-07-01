@@ -4406,6 +4406,7 @@ func _run_sim_test() -> void:
 	_test_indep_isolated_no_found()
 	_test_indep_defers_conquest_to_prosperity()
 	_test_indep_found_to_faction()
+	_test_indep_full_menu_anchors()
 
 	print("=== DONE ===")
 
@@ -4690,6 +4691,41 @@ func _test_indep_found_to_faction() -> void:
 	assert(f != null, "[indep] faction 未建")
 	assert(ally.faction_id == founder.faction_id, "[indep] ally 未入新 faction")
 	print("[indep] found→faction OK (fid -1→%d, members=%d)" % [founder.faction_id, f.member_team_ids.size()])
+
+# 首燒 Task2：獨立隊接統一菜單（致富錨 + 征服錨）。
+func _test_indep_full_menu_anchors() -> void:
+	print("--- 首燒 Task2：獨立隊全菜單（致富→貿易 / 征服→攻擊 錨）---")
+	var fa := FactionAISystem.new()
+	# (a) 致富 anchor：貪婪獨立商隊(野心<建國門檻,無弱 prey) → 致富 intent，不 dispatch(委由貿易 affordance)
+	var s1 := WorldState.new(); s1.world = WorldData.new(); s1.player_id = -1
+	var merch := TeamData.new(); merch.team_id = 820; merch.tags = [TeamData.TAG_MERCHANT]
+	merch.tile_pos = Vector2i(3, 3); merch.leader_id = 8200; merch.faction_id = -1
+	_seed_pop(merch, 12); merch.resources = {"food": 5000.0, "goods": 50.0}
+	s1.teams[820] = merch; s1.team_discovered[820] = []; s1.team_intel[820] = {}
+	var ml := PersonData.new(); ml.id = 8200; ml.team_id = 820
+	ml.values = {"野心": 0.4, "貪婪": 0.9, "義氣": 0.3, "好戰": 0.2, "殘忍": 0.1, "慎重": 0.3}
+	ml.skills = {"統領": 0.3, "商業": 0.6}
+	s1.persons[8200] = ml
+	_p1_place_tile(s1, merch.tile_pos)
+	fa._evaluate_independent_strategy(s1, merch)
+	assert(merch.solo_intent == "致富", "[indep] 貪婪商隊未選致富 intent got=%s" % merch.solo_intent)
+	assert(merch.current_task == TeamData.TASK_IDLE,
+		"[indep] 致富竟搶 task(該委貿易 affordance) task=%s" % merch.current_task)
+	print("[indep] 致富 anchor OK (intent=致富,未搶 task→委貿易 affordance)")
+	# (b) 征服 anchor：好戰獨立 + belief-弱 prey → 征服 intent + defer prosperity(不繞 scout,不 founding-吞併)
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
+	var warlord := _mk_ambitious_independent(s2, Vector2i(3, 3), 821)
+	s2.persons[8210].values = {"野心": 0.9, "好戰": 0.9, "義氣": 0.1, "殘忍": 0.6, "慎重": 0.2}
+	warlord.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE
+	warlord.ambition_rung = AmbitionLadder.RUNG_EXPAND
+	var prey := _mk_independent_team(s2, Vector2i(4, 3), 822)
+	_seed_pop(prey, 3)
+	_indep_discover(s2, warlord, prey, 3.0)   # belief pop_est=3 弱
+	fa._evaluate_independent_strategy(s2, warlord)
+	assert(warlord.solo_intent == "征服", "[indep] 好戰獨立+弱 prey 未選征服 got=%s" % warlord.solo_intent)
+	assert(not (warlord.current_task == TeamData.TASK_ATTACK and warlord.task_reason == "found_subjugate"),
+		"[indep] 征服竟走 founding-吞併(繞 scout gate) task=%s reason=%s" % [warlord.current_task, warlord.task_reason])
+	print("[indep] 征服 anchor OK (intent=征服,defer prosperity 保 scout gate)")
 
 func _test_probe_accumulator() -> void:
 	print("--- Probe 累計器 ---")
