@@ -459,6 +459,7 @@ func _initialize() -> void:
 	# ── G3d-1 決策讀 uncertainty + 風險 gate ──
 	_test_confidence_gate()
 	_test_cmd_intent_select()
+	_test_unified_scorer()
 	_test_cmd_means_end_emit()
 	_test_cmd_viability_hysteresis()
 	_test_faction_attack_gate()
@@ -856,6 +857,42 @@ func _setup_conquer_faction(state: WorldState, force_deficit: bool) -> FactionDa
 		"armed_est": (8 if force_deficit else 0)}}
 	state.factions[1] = f
 	return f
+
+# 首燒 F-D2：泛化統一 scorer select_strategic_intent（任何有 leader 的隊一套菜單）。
+func _test_unified_scorer() -> void:
+	print("--- 首燒：統一 scorer select_strategic_intent（全菜單 argmax）---")
+	var fai := FactionAISystem.new()
+	var st := WorldState.new(); st.world = WorldData.new(); st.player_id = -1
+	var dummy := TeamData.new()   # scorer 不讀 team 內部（純吃 ctx），dummy 即可
+	# 好戰霸主 + established + weak_enemy → 征服
+	var war: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"野心":0.9,"好戰":0.9,"義氣":0.1},
+		"established": true, "weak_enemy": true, "can_levy": true, "target_id": 9})
+	assert(war.get("type") == "征服", "[unified] 好戰霸主未選征服 %s" % str(war))
+	assert(war.get("target_id") == 9, "[unified] 征服未帶 target %s" % str(war))
+	# 貪婪 → 致富
+	var rich: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"貪婪":0.9,"好戰":0.2,"野心":0.5},
+		"established": true, "weak_enemy": false, "can_levy": true})
+	assert(rich.get("type") == "致富", "[unified] 貪婪未選致富 %s" % str(rich))
+	# 獨立(fid==-1) + 野心 + 累積夠(can_found + 高 found_score) → 建國
+	var found: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"野心":0.9,"義氣":0.7,"好戰":0.2},
+		"established": false, "weak_enemy": false, "can_levy": false,
+		"can_found": true, "found_score": 0.9})
+	assert(found.get("type") == "建國", "[unified] 野心+累積未選建國 %s" % str(found))
+	# 敵強(weak_enemy=false)+無建國路(can_found=false)+溫和 → 守成
+	var hold: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"野心":0.3,"好戰":0.6,"義氣":0.5,"慎重":0.3,"貪婪":0.2},
+		"established": true, "weak_enemy": false, "can_levy": false, "can_found": false})
+	assert(hold.get("type") == "守成", "[unified] 敵強無路未選守成 %s" % str(hold))
+	# 建國 gate：同高 found_score 但 can_found=false（已立國 faction）→ 不選建國
+	var no_found: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"野心":0.9,"義氣":0.7},
+		"established": true, "weak_enemy": false, "can_levy": false,
+		"can_found": false, "found_score": 0.9})
+	assert(no_found.get("type") != "建國", "[unified] established faction 竟選建國 %s" % str(no_found))
+	print("[unified] scorer OK (征服/致富/建國/守成 argmax + 建國 gate)")
 
 func _test_cmd_means_end_emit() -> void:
 	print("--- commander-v2：means-end 子需求分解 + filler + driver emit ---")

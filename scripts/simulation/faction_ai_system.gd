@@ -38,6 +38,9 @@ const INDEP_STRATEGY_CADENCE: int = 720         # 3 天評估一次（沿用 pro
 const AMBITION_FOUND_MIN: float = 0.55          # TEST VALUE — 建國野心門檻（對齊 ambition_cap STATE 門檻 0.55）
 const FOUND_COMMITMENT_BONUS: float = 0.15      # TEST VALUE — 建國意圖承諾 hysteresis（mirror commander）
 const FOUND_FOOD_SURPLUS_DAYS: float = 7.0      # TEST VALUE — 累積夠 = 有 ≥7 天糧盈餘（已達 EXPAND）
+# 統一戰略意圖菜單（統一矩陣首燒 F-D1/D2）：任何有 leader 的隊（faction leader / 獨立 team）
+# 對同一菜單 argmax。實體型只決定 gate/scale（建國僅 fid==-1；擴張 Task3 折入），非另起菜單。
+const STRATEGIC_INTENTS: Array = ["致富", "擴張", "征服", "防衛", "守成", "建國"]
 # 意圖 = 目標 predicate（小集；立國=既有分離 gate 不在此）
 const INTENTS: Dictionary = {
 	"征服": {"main_action": "攻擊", "needs_target": true},   # target 不再獨立
@@ -665,10 +668,10 @@ func _tag_weight(team: TeamData, task: String) -> float:
 
 # ──────── commander-v2 means-end：意圖選擇（人格×belief×viability×hysteresis）────────
 
-# 從 leader values + 世界量出意圖適性 + 可行性 → argmax 主意圖（單一，不並行）。
-# weak_enemy = belief 認為最近獨立 target 可打贏（征服 viable）。committed = 上次承諾意圖（hysteresis）。
-func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
-		can_levy: bool, committed: String) -> Dictionary:
+# 人格意圖 raw 分（4 項；不含 hysteresis / argmax）。統一 scorer 與 _score_intents 共用（DRY）。
+# weak_enemy = belief 認為最近獨立 target 可打贏（征服 viable）。
+func _intent_scores(values: Dictionary, established: bool, weak_enemy: bool,
+		can_levy: bool) -> Dictionary:
 	var ambition: float = float(values.get("野心", 0.5))
 	var greed:    float = float(values.get("貪婪", 0.5))
 	var honor:    float = float(values.get("義氣", 0.5))
@@ -687,16 +690,55 @@ func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
 	# 致富主手段=徵收 levy；湊不出 richer member → 仍可（守成/貿易 fallback），不壓死
 	if not can_levy:
 		scores["致富"] = scores["致富"] * 0.6
-	# 承諾 hysteresis：情勢未變時黏住上次意圖
+	return scores
+
+# argmax + hysteresis：committed 情勢未變時黏住。共用於 _score_intents / select_strategic_intent。
+func _argmax_intent(scores: Dictionary, committed: String) -> Dictionary:
 	if committed != "" and scores.has(committed) and scores[committed] > -0.5:
 		scores[committed] += COMMANDER_COMMITMENT_BONUS
-	# argmax
 	var best_type: String = "守成"
 	var best_score: float = -INF
 	for t in scores:
 		if scores[t] > best_score:
 			best_score = scores[t]; best_type = t
 	return {"type": best_type, "score": best_score}
+
+# 從 leader values + 世界量出意圖適性 + 可行性 → argmax 主意圖（單一，不並行）。
+# committed = 上次承諾意圖（hysteresis）。純函式（保留單測入口）。
+func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
+		can_levy: bool, committed: String) -> Dictionary:
+	return _argmax_intent(_intent_scores(values, established, weak_enemy, can_levy), committed)
+
+# ──────── 統一戰略 scorer（首燒 F-D2：任何有 leader 的隊一套菜單）────────
+# 泛化 _select_intent/_score_intents：輸入 leader values + ctx(gate/scale/viability/建國) → argmax 全菜單。
+# ctx 欄位：leader_values, established, weak_enemy, can_levy, committed,
+#   can_found(bool, 僅 fid==-1), found_score(float), target_id(int)。
+# 輸出 {type, target_id, why}（type = 選中意圖；target_id 僅征服帶）。
+func select_strategic_intent(state: WorldState, _team: TeamData, ctx: Dictionary) -> Dictionary:
+	var values: Dictionary = ctx.get("leader_values", {})
+	var scores: Dictionary = _intent_scores(values,
+		bool(ctx.get("established", false)), bool(ctx.get("weak_enemy", false)),
+		bool(ctx.get("can_levy", false)))
+	# 建國（實體型 gate）：僅 fid==-1 可選；score = found_score（累積+路徑+人格 已由 caller 折入）。
+	if bool(ctx.get("can_found", false)):
+		scores["建國"] = float(ctx.get("found_score", 0.0))
+	# 擴張：Task3（F-D3）折入 strategic_ai expand；此版不評分（faction 回歸不變）。
+	var picked: Dictionary = _argmax_intent(scores, String(ctx.get("committed", "")))
+	var target_id: int = int(ctx.get("target_id", -1))
+	return {
+		"type": picked["type"],
+		"target_id": target_id if picked["type"] == "征服" else -1,
+		"why": _intent_why(picked["type"], target_id),
+	}
+
+func _intent_why(itype: String, target_id: int) -> String:
+	match itype:
+		"征服": return "野心/好戰驅動，belief 評 target%d 可打贏" % target_id
+		"致富": return "貪婪驅動，treasury 增"
+		"防衛": return "慎重/威脅驅動，備戰守土"
+		"建國": return "野心驅動，累積夠+路徑可達→立勢力"
+		"守成": return "無強驅動，維持現狀"
+	return ""
 
 # 統領意圖選擇（接 state）：量 viability(belief 敵力 vs 我力)、can_levy(富 member)、hysteresis(f.intent)。
 func _select_intent(state: WorldState, f) -> Dictionary:
@@ -710,20 +752,17 @@ func _select_intent(state: WorldState, f) -> Dictionary:
 	if target_id != -1 and leader_team.readiness >= ATTACK_READINESS_MIN \
 			and _tag_weight(leader_team, TeamData.TASK_ATTACK) > 0.0:
 		weak_enemy = _conquest_viable(state, f, leader_team, target_id)
-	var can_levy: bool = _richest_member(state, f) != -1
-	var committed: String = f.intent.get("type", "")
-	var picked: Dictionary = _score_intents(values, f.is_established, weak_enemy, can_levy, committed)
-	var why: String = ""
-	match picked["type"]:
-		"征服": why = "野心/好戰驅動，belief 評 target%d 可打贏" % target_id
-		"致富": why = "貪婪驅動，treasury 增"
-		"防衛": why = "慎重/威脅驅動，備戰守土"
-		"守成": why = "無強驅動，維持現狀"
-	return {
-		"type": picked["type"],
-		"target_id": target_id if picked["type"] == "征服" else -1,
-		"why": why,
+	# faction leader 走統一 scorer（established faction 已立國 → can_found=false，不重複建國）。
+	var ctx: Dictionary = {
+		"leader_values": values,
+		"established": f.is_established,
+		"weak_enemy": weak_enemy,
+		"can_levy": _richest_member(state, f) != -1,
+		"committed": f.intent.get("type", ""),
+		"can_found": false,
+		"target_id": target_id,
 	}
+	return select_strategic_intent(state, leader_team, ctx)
 
 # 征服 viability：我力(含可補力餘裕粗估) >= belief 敵力 × strength ratio。複用既有 attack gate。
 func _conquest_viable(state: WorldState, f, leader_team: TeamData, target_id: int) -> bool:
