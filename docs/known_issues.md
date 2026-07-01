@@ -16,6 +16,9 @@
 - memory 其他：`player_alerts` headless 無 poll leak(diplomatic 未 dedup)、`person_data.gd:54 memory` 繞過 `_trim_memory` 路徑(reaction:369/diplomacy/trade/command)可超 MEMORY_MAX=20。其餘結構全有 cap/TTL/erase-prune 界住。
 - **nit**:`world_state.gd:157-158 team_known[obs].erase(tid)` no-op(array 存 MessageData 非 int)→ 意圖 cleanup 沒跑;無害(TTL 覆蓋)該修對。
 - **加固排序建議**：granary(定世界規模)→ P0(faction AI honor LOD + tile→teams 共用空間索引 + team_intel erase-prune)配 #2/#3 探針/計時 + scaling bed 驗 → 長跑觀 emergence。
+- **P0 加固進度（2026-07-01 merged）**：✅ **tile→teams 索引 done**(co-location O(N²)→O(N)、hostile-within/residency sparse tail 收) + ✅ **team_intel erase-prune done**(top leak 修) + ✅ tick 計時 instrument + scaling bed。**honor-LOD 未觸發**(量到 evaluate_all 誠實 O(N)、索引已足;行為變 measure-gated 沒量到不做)。⚠ **die-off erase O(N) ref-sweep spike 仍 open**(不在 P0;大滅團潮 K×O(N) 放大器=長跑滅團潮若量到 freeze 再另案:erase 索引化/批次)。scaling bed sparse+high-movement near-zone 場景待加(整合 TickPerf 顯 co-location 增益)。
+- **★致富非 named intent（specimen tracer 揭，經濟真根，2026-07-01）**：獨立商隊決策全走 DecisionEngine per-tick utility 標「日常」,**零 named 致富 intent**(commander-v2 只給 faction intent、獨立隊無致富意圖節點)→ 交易純 emergent、被 survival/食物壓力碾成覓食/買糧(無複利)。**修向（待藍圖）**：致富要不要成 named 意圖=給獨立隊致富 intent 節點(統一決策 arc 延伸);且食物壓力(R1,緩)是掐致富直接手。
+- **specimen tracer scope 缺口（非 bug）**：`capture_decision` 只 tap unified+survival winner commit,**prosperity-attack(`_evaluate_prosperity_attack`)+faction-goal-dispatch(~faction_ai:1090) TASK_ATTACK commit 不捕** → 「征服 intent→攻擊 action」鏈那段 tracer 看不到。要完整 trace 需增這兩點 capture。
 
 ## 讀B/G3 Phase E backlog（2026-07-01 平行軌）
 
