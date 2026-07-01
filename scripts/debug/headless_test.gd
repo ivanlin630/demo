@@ -437,6 +437,7 @@ func _initialize() -> void:
 	_test_ambition_rung_climb()
 	_test_ambition_cap_limits()
 	_test_strategic_reads_ladder()
+	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
 	_test_vendetta_target()
 	_test_vendetta_derail_task()
@@ -465,6 +466,7 @@ func _initialize() -> void:
 	# ── G3d-1 決策讀 uncertainty + 風險 gate ──
 	_test_confidence_gate()
 	_test_cmd_intent_select()
+	_test_unified_scorer()
 	_test_cmd_means_end_emit()
 	_test_cmd_viability_hysteresis()
 	_test_faction_attack_gate()
@@ -862,6 +864,42 @@ func _setup_conquer_faction(state: WorldState, force_deficit: bool) -> FactionDa
 		"armed_est": (8 if force_deficit else 0)}}
 	state.factions[1] = f
 	return f
+
+# 首燒 F-D2：泛化統一 scorer select_strategic_intent（任何有 leader 的隊一套菜單）。
+func _test_unified_scorer() -> void:
+	print("--- 首燒：統一 scorer select_strategic_intent（全菜單 argmax）---")
+	var fai := FactionAISystem.new()
+	var st := WorldState.new(); st.world = WorldData.new(); st.player_id = -1
+	var dummy := TeamData.new()   # scorer 不讀 team 內部（純吃 ctx），dummy 即可
+	# 好戰霸主 + established + weak_enemy → 征服
+	var war: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"野心":0.9,"好戰":0.9,"義氣":0.1},
+		"established": true, "weak_enemy": true, "can_levy": true, "target_id": 9})
+	assert(war.get("type") == "征服", "[unified] 好戰霸主未選征服 %s" % str(war))
+	assert(war.get("target_id") == 9, "[unified] 征服未帶 target %s" % str(war))
+	# 貪婪 → 致富
+	var rich: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"貪婪":0.9,"好戰":0.2,"野心":0.5},
+		"established": true, "weak_enemy": false, "can_levy": true})
+	assert(rich.get("type") == "致富", "[unified] 貪婪未選致富 %s" % str(rich))
+	# 獨立(fid==-1) + 野心 + 累積夠(can_found + 高 found_score) → 建國
+	var found: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"野心":0.9,"義氣":0.7,"好戰":0.2},
+		"established": false, "weak_enemy": false, "can_levy": false,
+		"can_found": true, "found_score": 0.9})
+	assert(found.get("type") == "建國", "[unified] 野心+累積未選建國 %s" % str(found))
+	# 敵強(weak_enemy=false)+無建國路(can_found=false)+溫和 → 守成
+	var hold: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"野心":0.3,"好戰":0.6,"義氣":0.5,"慎重":0.3,"貪婪":0.2},
+		"established": true, "weak_enemy": false, "can_levy": false, "can_found": false})
+	assert(hold.get("type") == "守成", "[unified] 敵強無路未選守成 %s" % str(hold))
+	# 建國 gate：同高 found_score 但 can_found=false（已立國 faction）→ 不選建國
+	var no_found: Dictionary = fai.select_strategic_intent(st, dummy, {
+		"leader_values": {"野心":0.9,"義氣":0.7},
+		"established": true, "weak_enemy": false, "can_levy": false,
+		"can_found": false, "found_score": 0.9})
+	assert(no_found.get("type") != "建國", "[unified] established faction 竟選建國 %s" % str(no_found))
+	print("[unified] scorer OK (征服/致富/建國/守成 argmax + 建國 gate)")
 
 func _test_cmd_means_end_emit() -> void:
 	print("--- commander-v2：means-end 子需求分解 + filler + driver emit ---")
@@ -4383,6 +4421,7 @@ func _run_sim_test() -> void:
 	_test_indep_isolated_no_found()
 	_test_indep_defers_conquest_to_prosperity()
 	_test_indep_found_to_faction()
+	_test_indep_full_menu_anchors()
 
 	print("=== DONE ===")
 
@@ -4598,7 +4637,7 @@ func _test_indep_strategic_found() -> void:
 		"[indep] 野心獨立隊未秤建國/結盟 task=%s" % founder.current_task)
 	assert(founder.move_target == ally.tile_pos,
 		"[indep] 結盟未朝 ally got=%s" % str(founder.move_target))
-	assert(founder.solo_intent == "建國", "[indep] solo_intent 未記建國 got=%s" % founder.solo_intent)
+	assert(founder.solo_intent.get("type","") == "建國", "[indep] solo_intent 未記建國 got=%s" % str(founder.solo_intent))
 	print("[indep] strategic found OK (founder→DIPLOMACY ally=%d)" % ally.team_id)
 
 func _test_indep_low_ambition_no_found() -> void:
@@ -4611,7 +4650,7 @@ func _test_indep_low_ambition_no_found() -> void:
 	fa._evaluate_independent_strategy(state, meek)
 	assert(meek.current_task != TeamData.TASK_DIPLOMACY and meek.current_task != TeamData.TASK_ATTACK,
 		"[indep] 低野心隊竟建國 task=%s" % meek.current_task)
-	assert(meek.solo_intent != "建國", "[indep] 低野心隊 solo_intent=建國")
+	assert(meek.solo_intent.get("type","") != "建國", "[indep] 低野心隊 solo_intent=建國")
 	print("[indep] low ambition no-found OK (task=%s)" % meek.current_task)
 
 func _test_indep_isolated_no_found() -> void:
@@ -4644,8 +4683,8 @@ func _test_indep_defers_conquest_to_prosperity() -> void:
 	# defer：獨立戰略不 dispatch 建國 task（讓 prosperity scout-gated 接手 → 不繞過 G3d）
 	assert(brute.current_task != TeamData.TASK_ATTACK or brute.task_reason != "found_subjugate",
 		"[indep] 有 prey 仍走獨立戰略吞併(繞過 scout gate) task=%s reason=%s" % [brute.current_task, brute.task_reason])
-	assert(brute.solo_intent != "建國",
-		"[indep] 有 prey 該 defer prosperity 非建國 intent=%s" % brute.solo_intent)
+	assert(brute.solo_intent.get("type","") != "建國",
+		"[indep] 有 prey 該 defer prosperity 非建國 intent=%s" % str(brute.solo_intent))
 	print("[indep] defer conquest to prosperity OK (有 prey→不繞 scout,prosperity 接手)")
 
 func _test_indep_found_to_faction() -> void:
@@ -4667,6 +4706,41 @@ func _test_indep_found_to_faction() -> void:
 	assert(f != null, "[indep] faction 未建")
 	assert(ally.faction_id == founder.faction_id, "[indep] ally 未入新 faction")
 	print("[indep] found→faction OK (fid -1→%d, members=%d)" % [founder.faction_id, f.member_team_ids.size()])
+
+# 首燒 Task2：獨立隊接統一菜單（致富錨 + 征服錨）。
+func _test_indep_full_menu_anchors() -> void:
+	print("--- 首燒 Task2：獨立隊全菜單（致富→貿易 / 征服→攻擊 錨）---")
+	var fa := FactionAISystem.new()
+	# (a) 致富 anchor：貪婪獨立商隊(野心<建國門檻,無弱 prey) → 致富 intent，不 dispatch(委由貿易 affordance)
+	var s1 := WorldState.new(); s1.world = WorldData.new(); s1.player_id = -1
+	var merch := TeamData.new(); merch.team_id = 820; merch.tags = [TeamData.TAG_MERCHANT]
+	merch.tile_pos = Vector2i(3, 3); merch.leader_id = 8200; merch.faction_id = -1
+	_seed_pop(merch, 12); merch.resources = {"food": 5000.0, "goods": 50.0}
+	s1.teams[820] = merch; s1.team_discovered[820] = []; s1.team_intel[820] = {}
+	var ml := PersonData.new(); ml.id = 8200; ml.team_id = 820
+	ml.values = {"野心": 0.4, "貪婪": 0.9, "義氣": 0.3, "好戰": 0.2, "殘忍": 0.1, "慎重": 0.3}
+	ml.skills = {"統領": 0.3, "商業": 0.6}
+	s1.persons[8200] = ml
+	_p1_place_tile(s1, merch.tile_pos)
+	fa._evaluate_independent_strategy(s1, merch)
+	assert(merch.solo_intent.get("type","") == "致富", "[indep] 貪婪商隊未選致富 intent got=%s" % str(merch.solo_intent))
+	assert(merch.current_task == TeamData.TASK_IDLE,
+		"[indep] 致富竟搶 task(該委貿易 affordance) task=%s" % merch.current_task)
+	print("[indep] 致富 anchor OK (intent=致富,未搶 task→委貿易 affordance)")
+	# (b) 征服 anchor：好戰獨立 + belief-弱 prey → 征服 intent + defer prosperity(不繞 scout,不 founding-吞併)
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
+	var warlord := _mk_ambitious_independent(s2, Vector2i(3, 3), 821)
+	s2.persons[8210].values = {"野心": 0.9, "好戰": 0.9, "義氣": 0.1, "殘忍": 0.6, "慎重": 0.2}
+	warlord.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE
+	warlord.ambition_rung = AmbitionLadder.RUNG_EXPAND
+	var prey := _mk_independent_team(s2, Vector2i(4, 3), 822)
+	_seed_pop(prey, 3)
+	_indep_discover(s2, warlord, prey, 3.0)   # belief pop_est=3 弱
+	fa._evaluate_independent_strategy(s2, warlord)
+	assert(warlord.solo_intent.get("type","") == "征服", "[indep] 好戰獨立+弱 prey 未選征服 got=%s" % str(warlord.solo_intent))
+	assert(not (warlord.current_task == TeamData.TASK_ATTACK and warlord.task_reason == "found_subjugate"),
+		"[indep] 征服竟走 founding-吞併(繞 scout gate) task=%s reason=%s" % [warlord.current_task, warlord.task_reason])
+	print("[indep] 征服 anchor OK (intent=征服,defer prosperity 保 scout gate)")
 
 func _test_probe_accumulator() -> void:
 	print("--- Probe 累計器 ---")
@@ -5212,8 +5286,8 @@ func _test_solo_trade_not_starved() -> void:
 	# 糧倉充足 → 不該誤判餓 → 不派 FLEE（覓食/逃壓過 trade 的元兇）
 	assert(t.current_task != TeamData.TASK_FLEE, \
 		"糧倉充足商隊不該誤判餓→FLEE，實際=%s" % t.current_task)
-	assert(t.solo_intent != TeamData.TASK_FLEE, \
-		"solo_intent 不該為 FLEE，實際=%s" % t.solo_intent)
+	assert(t.solo_task_last != TeamData.TASK_FLEE, \
+		"solo_task_last 不該為 FLEE，實際=%s" % t.solo_task_last)
 	print("solo trade not starved OK")
 
 # ── 經濟 WS-2d：旅途乾糧（解糧倉拴住商隊）──
@@ -12432,13 +12506,13 @@ func _test_solo_commitment() -> void:
 		state.teams[tid] = o
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
 	_seed_pop(team, 8); team.tags = ["軍隊"]; team.current_task = TeamData.TASK_IDLE
-	team.solo_intent = TeamData.TASK_LOOT   # 上次選掠奪
+	team.solo_task_last = TeamData.TASK_LOOT   # 上次選掠奪（F-D4：task 承諾槽）
 	team.resources = {"food": 100.0}
 	state.teams[0] = team
 	state.team_discovered[0] = [1, 2]   # _nearest_independent 需 discovered 名單
 	fai._evaluate_solo(state, team)
-	assert(team.current_task == TeamData.TASK_LOOT, "有 solo_intent=掠奪 + 慣性 → 應續掠奪，實際=%s" % team.current_task)
-	assert(team.solo_intent == TeamData.TASK_LOOT, "選後 solo_intent 記錄")
+	assert(team.current_task == TeamData.TASK_LOOT, "有 solo_task_last=掠奪 + 慣性 → 應續掠奪，實際=%s" % team.current_task)
+	assert(team.solo_task_last == TeamData.TASK_LOOT, "選後 solo_task_last 記錄")
 	print("solo commitment OK")
 
 func _test_solo_seek_home() -> void:
@@ -13199,34 +13273,69 @@ func _test_ambition_cap_limits() -> void:
 	print("ambition cap OK")
 
 func _test_strategic_reads_ladder() -> void:
-	print("--- strategic_ai 讀階梯 gate ---")
+	# F-D3：strategic_ai 不再自產 intent，改讀統一 intent(f.intent)。階梯經統一 scorer 選擴張 →
+	# strategic_ai 映射 expand。測全鏈：ladder → fai._update_goals 選 intent → sai 映射 goal。
+	print("--- strategic_ai 讀統一 intent（F-D3 單一源）---")
+	var fai := FactionAISystem.new()
 	var sai := StrategicAiSystem.new()
-	var s := WorldState.new(); s.world = WorldData.new()
+	var s := WorldState.new(); s.world = WorldData.new(); s.player_id = -1
 	var lt := TeamData.new(); lt.team_id = 1; lt.tile_pos = Vector2i(0,0)
+	lt.resources = {"food": 99999.0, "material": 300.0}   # 足糧(避急徵 override) + 足建材(避 war_chest 干擾)
 	var l := PersonData.new(); l.id = 1000; l.team_id = 1
 	l.values = {"野心": 0.9, "好戰": 0.8, "貪婪": 0.2}
 	s.persons[1000] = l; lt.leader_id = l.id
 	lt.ambition_archetype = "武力"
 	s.teams[1] = lt
 	var f := FactionData.new(); f.faction_id = 0; f.leader_team_id = 1; f.member_team_ids = [1]
+	f.is_established = true
 	s.factions[0] = f
-	# 獨立鄰團（可被 expand 鎖定）→ 讓 gate 真被走查
+	# 獨立鄰團（可被 expand 鎖定；無 belief → 征服不 viable → 走擴張）
 	var ind := TeamData.new(); ind.team_id = 2; ind.faction_id = -1; ind.tile_pos = Vector2i(1,0)
 	s.teams[2] = ind
 	s.team_discovered[1] = [2]
-	# 低 rung(生存) → 不該 expand（即使有可選目標 + 高 raw 野心/好戰）
+	# 低 rung(生存) → 統一 scorer 不選擴張 → 無 expand goal
 	lt.ambition_rung = AmbitionLadder.RUNG_SURVIVE
-	sai._update_faction_goals(s, f)
+	fai._update_goals(s, f); sai._update_faction_goals(s, f)
 	var has_expand_low: bool = false
 	for g in f.strategic_goals: if g["type"] == "expand": has_expand_low = true
-	assert(not has_expand_low, "rung 生存不該 expand（階梯 gate）")
-	# 高 rung(擴張) + 武力 → 該 expand
+	assert(not has_expand_low, "rung 生存不該 expand（統一 scorer 未選擴張）intent=%s" % str(f.intent))
+	# 高 rung(擴張) + 武力 → 統一 scorer 選擴張 → strategic_ai 映射 expand
 	lt.ambition_rung = AmbitionLadder.RUNG_EXPAND
-	sai._update_faction_goals(s, f)
+	fai._update_goals(s, f); sai._update_faction_goals(s, f)
+	assert(f.intent.get("type","") == "擴張", "rung 擴張+武力 未選擴張 intent, got=%s" % str(f.intent))
 	var has_expand_high: bool = false
 	for g in f.strategic_goals: if g["type"] == "expand": has_expand_high = true
-	assert(has_expand_high, "rung 擴張+武力 archetype 應 expand")
-	print("strategic reads ladder OK")
+	assert(has_expand_high, "擴張 intent 未映射 expand goal")
+	print("strategic reads unified intent OK (擴張→expand)")
+
+func _test_threat_unstub() -> void:
+	# F-D6：DecisionContext.threat 從死 stub(恆 0) un-stub → 近逼敵威脅 register → threat_pressure 真驅動。
+	print("--- F-D6：DecisionContext.threat un-stub ---")
+	var s := WorldState.new(); s.world = WorldData.new(); s.player_id = -1
+	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2); t.leader_id = 1
+	t.tags = [TeamData.TAG_MERCHANT]; _seed_pop(t, 8); t.resources = {"food": 500.0}
+	var l := PersonData.new(); l.id = 1; l.team_id = 0; s.persons[1] = l
+	s.teams[0] = t
+	var enemy := TeamData.new(); enemy.team_id = 9; enemy.tile_pos = Vector2i(3,2); enemy.faction_id = -1
+	_seed_pop(enemy, 30); s.teams[9] = enemy
+	var el := PersonData.new(); el.id = 90; el.team_id = 9; s.persons[90] = el; enemy.leader_id = 90
+	s.team_discovered[0] = [9]
+	t.known_reputations[9] = 0.1   # 高敵意(hostility)
+	BeliefSystem.record_claim(s, 0, 9, 90, "親見",
+		{"population_est": 30.0, "tile_pos": Vector2i(3,2)}, 1.0, false)
+	var ctx := DecisionContext.gather(s, t)
+	assert(ctx.threat > 0.0, "[F-D6] 近逼敵威脅仍 0（threat 死 stub 未 un-stub）threat=%.2f" % ctx.threat)
+	var tp: float = DecisionTerms.eval("threat_pressure", ctx, "survival")
+	assert(tp > 0.0, "[F-D6] threat_pressure term 未讀到 threat tp=%.2f" % tp)
+	# 對照：無敵 discovered → threat 回 0（不是恆正 stub）
+	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
+	var t2 := TeamData.new(); t2.team_id = 0; t2.tile_pos = Vector2i(2,2); t2.leader_id = 1
+	t2.tags = [TeamData.TAG_MERCHANT]; _seed_pop(t2, 8); t2.resources = {"food": 500.0}
+	var l2 := PersonData.new(); l2.id = 1; l2.team_id = 0; s2.persons[1] = l2
+	s2.teams[0] = t2; s2.team_discovered[0] = []
+	var ctx2 := DecisionContext.gather(s2, t2)
+	assert(ctx2.threat == 0.0, "[F-D6] 無敵竟有威脅 threat=%.2f" % ctx2.threat)
+	print("[F-D6] threat un-stub OK (敵 threat=%.2f→tp=%.2f;無敵=0)" % [ctx.threat, tp])
 
 # ── G2d 私人脫軌（血仇）──
 func _test_vendetta_target() -> void:

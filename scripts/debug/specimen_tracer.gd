@@ -43,7 +43,8 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 		task: String, target: Vector2i) -> void:
 	if not is_specimen(state, team.team_id): return
 	var scr: Dictionary = _scratch(team.team_id)
-	var intent = scr.get("intent", team.solo_intent if team.solo_intent != "" else "日常")
+	var _solo_t: String = String(team.solo_intent.get("type", "")) if team.solo_intent is Dictionary else ""
+	var intent = scr.get("intent", _solo_t if _solo_t != "" else "日常")
 	# 該 action target 的 best_estimate（beliefs 不存 → 這裡 re-query action target 一條）
 	var beliefs: Array = []
 	var tgt_team_id: int = _target_team_id(state, target)

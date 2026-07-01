@@ -7,15 +7,22 @@ extends SceneTree
 func _initialize() -> void:
 	_run(); quit()
 
-# ascii label（避 CP950 terminal garbled）：征服=CONQUER 致富=RICH 防衛=DEFEND 守成=HOLD
-const _INTENT_ASCII: Dictionary = {"征服": "CONQUER", "致富": "RICH", "防衛": "DEFEND", "守成": "HOLD"}
+# ascii label（避 CP950 terminal garbled）：征服=CONQUER 致富=RICH 防衛=DEFEND 守成=HOLD 擴張=EXPAND 建國=FOUND
+const _INTENT_ASCII: Dictionary = {"征服": "CONQUER", "致富": "RICH", "防衛": "DEFEND",
+	"守成": "HOLD", "擴張": "EXPAND", "建國": "FOUND"}
+# 首燒：統一 intent 分布 = faction commander(f.intent) + 獨立隊(solo_intent struct，F-D4)。
+# 一套菜單跨實體型 → 獨立商隊 RICH / 好戰獨立 CONQUER 顯化（前僅 faction 計 → CONQUER 恆 0 假象）。
 func _intent_histogram(state: WorldState) -> Dictionary:
-	var h: Dictionary = {"CONQUER": 0, "RICH": 0, "DEFEND": 0, "HOLD": 0, "NONE": 0}
+	var h: Dictionary = {"CONQUER": 0, "RICH": 0, "DEFEND": 0, "HOLD": 0, "EXPAND": 0, "FOUND": 0, "NONE": 0}
 	for fid in state.factions:
 		var f = state.factions[fid]
 		var it: String = f.intent.get("type", "") if f.intent is Dictionary else ""
-		var key: String = _INTENT_ASCII.get(it, "NONE")
-		h[key] = int(h.get(key, 0)) + 1
+		h[_INTENT_ASCII.get(it, "NONE")] += 1
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.faction_id != -1 or t.parent_team_id != -1: continue   # 只獨立隊（非子隊）
+		var si: String = String(t.solo_intent.get("type", "")) if t.solo_intent is Dictionary else ""
+		h[_INTENT_ASCII.get(si, "NONE")] += 1
 	return h
 
 func _established_count(state: WorldState) -> int:

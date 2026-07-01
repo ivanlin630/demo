@@ -38,6 +38,9 @@ const INDEP_STRATEGY_CADENCE: int = 720         # 3 天評估一次（沿用 pro
 const AMBITION_FOUND_MIN: float = 0.55          # TEST VALUE — 建國野心門檻（對齊 ambition_cap STATE 門檻 0.55）
 const FOUND_COMMITMENT_BONUS: float = 0.15      # TEST VALUE — 建國意圖承諾 hysteresis（mirror commander）
 const FOUND_FOOD_SURPLUS_DAYS: float = 7.0      # TEST VALUE — 累積夠 = 有 ≥7 天糧盈餘（已達 EXPAND）
+# 統一戰略意圖菜單（統一矩陣首燒 F-D1/D2）：任何有 leader 的隊（faction leader / 獨立 team）
+# 對同一菜單 argmax。實體型只決定 gate/scale（建國僅 fid==-1；擴張 Task3 折入），非另起菜單。
+const STRATEGIC_INTENTS: Array = ["致富", "擴張", "征服", "防衛", "守成", "建國"]
 # 意圖 = 目標 predicate（小集；立國=既有分離 gate 不在此）
 const INTENTS: Dictionary = {
 	"征服": {"main_action": "攻擊", "needs_target": true},   # target 不再獨立
@@ -665,10 +668,10 @@ func _tag_weight(team: TeamData, task: String) -> float:
 
 # ──────── commander-v2 means-end：意圖選擇（人格×belief×viability×hysteresis）────────
 
-# 從 leader values + 世界量出意圖適性 + 可行性 → argmax 主意圖（單一，不並行）。
-# weak_enemy = belief 認為最近獨立 target 可打贏（征服 viable）。committed = 上次承諾意圖（hysteresis）。
-func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
-		can_levy: bool, committed: String) -> Dictionary:
+# 人格意圖 raw 分（4 項；不含 hysteresis / argmax）。統一 scorer 與 _score_intents 共用（DRY）。
+# weak_enemy = belief 認為最近獨立 target 可打贏（征服 viable）。
+func _intent_scores(values: Dictionary, established: bool, weak_enemy: bool,
+		can_levy: bool) -> Dictionary:
 	var ambition: float = float(values.get("野心", 0.5))
 	var greed:    float = float(values.get("貪婪", 0.5))
 	var honor:    float = float(values.get("義氣", 0.5))
@@ -687,16 +690,60 @@ func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
 	# 致富主手段=徵收 levy；湊不出 richer member → 仍可（守成/貿易 fallback），不壓死
 	if not can_levy:
 		scores["致富"] = scores["致富"] * 0.6
-	# 承諾 hysteresis：情勢未變時黏住上次意圖
+	return scores
+
+# argmax + hysteresis：committed 情勢未變時黏住。共用於 _score_intents / select_strategic_intent。
+func _argmax_intent(scores: Dictionary, committed: String) -> Dictionary:
 	if committed != "" and scores.has(committed) and scores[committed] > -0.5:
 		scores[committed] += COMMANDER_COMMITMENT_BONUS
-	# argmax
 	var best_type: String = "守成"
 	var best_score: float = -INF
 	for t in scores:
 		if scores[t] > best_score:
 			best_score = scores[t]; best_type = t
 	return {"type": best_type, "score": best_score}
+
+# 從 leader values + 世界量出意圖適性 + 可行性 → argmax 主意圖（單一，不並行）。
+# committed = 上次承諾意圖（hysteresis）。純函式（保留單測入口）。
+func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
+		can_levy: bool, committed: String) -> Dictionary:
+	return _argmax_intent(_intent_scores(values, established, weak_enemy, can_levy), committed)
+
+# ──────── 統一戰略 scorer（首燒 F-D2：任何有 leader 的隊一套菜單）────────
+# 泛化 _select_intent/_score_intents：輸入 leader values + ctx(gate/scale/viability/建國) → argmax 全菜單。
+# ctx 欄位：leader_values, established, weak_enemy, can_levy, committed,
+#   can_found(bool, 僅 fid==-1), found_score(float), target_id(int)。
+# 輸出 {type, target_id, why}（type = 選中意圖；target_id 僅征服帶）。
+func select_strategic_intent(state: WorldState, _team: TeamData, ctx: Dictionary) -> Dictionary:
+	var values: Dictionary = ctx.get("leader_values", {})
+	var scores: Dictionary = _intent_scores(values,
+		bool(ctx.get("established", false)), bool(ctx.get("weak_enemy", false)),
+		bool(ctx.get("can_levy", false)))
+	# 建國（實體型 gate）：僅 fid==-1 可選；score = found_score（累積+路徑+人格 已由 caller 折入）。
+	if bool(ctx.get("can_found", false)):
+		scores["建國"] = float(ctx.get("found_score", 0.0))
+	# 擴張（F-D3 折入 strategic_ai expand）：force archetype + rung≥EXPAND + 有 target 才可選。
+	# 征服(可打贏弱敵)通常勝擴張；無 viable 弱敵時擴張補位(領土 pressure)→ strategic_ai 包圍。
+	if bool(ctx.get("can_expand", false)):
+		scores["擴張"] = 0.3 + float(values.get("野心", 0.5)) * 0.3
+	var picked: Dictionary = _argmax_intent(scores, String(ctx.get("committed", "")))
+	var target_id: int = int(ctx.get("target_id", -1))
+	var needs_target: bool = picked["type"] == "征服" or picked["type"] == "擴張"
+	return {
+		"type": picked["type"],
+		"target_id": target_id if needs_target else -1,
+		"why": _intent_why(picked["type"], target_id),
+	}
+
+func _intent_why(itype: String, target_id: int) -> String:
+	match itype:
+		"征服": return "野心/好戰驅動，belief 評 target%d 可打贏" % target_id
+		"擴張": return "武力階梯≥擴張，領土 pressure target%d(包圍)" % target_id
+		"致富": return "貪婪驅動，treasury 增"
+		"防衛": return "慎重/威脅驅動，備戰守土"
+		"建國": return "野心驅動，累積夠+路徑可達→立勢力"
+		"守成": return "無強驅動，維持現狀"
+	return ""
 
 # 統領意圖選擇（接 state）：量 viability(belief 敵力 vs 我力)、can_levy(富 member)、hysteresis(f.intent)。
 func _select_intent(state: WorldState, f) -> Dictionary:
@@ -710,20 +757,21 @@ func _select_intent(state: WorldState, f) -> Dictionary:
 	if target_id != -1 and leader_team.readiness >= ATTACK_READINESS_MIN \
 			and _tag_weight(leader_team, TeamData.TASK_ATTACK) > 0.0:
 		weak_enemy = _conquest_viable(state, f, leader_team, target_id)
-	var can_levy: bool = _richest_member(state, f) != -1
-	var committed: String = f.intent.get("type", "")
-	var picked: Dictionary = _score_intents(values, f.is_established, weak_enemy, can_levy, committed)
-	var why: String = ""
-	match picked["type"]:
-		"征服": why = "野心/好戰驅動，belief 評 target%d 可打贏" % target_id
-		"致富": why = "貪婪驅動，treasury 增"
-		"防衛": why = "慎重/威脅驅動，備戰守土"
-		"守成": why = "無強驅動，維持現狀"
-	return {
-		"type": picked["type"],
-		"target_id": target_id if picked["type"] == "征服" else -1,
-		"why": why,
+	# 擴張 gate（F-D3）：武力 archetype + rung≥擴張 + 有 target → 可選擴張（折入 strategic_ai expand）。
+	var can_expand: bool = leader_team.ambition_archetype == AmbitionLadder.ARCHETYPE_FORCE \
+		and leader_team.ambition_rung >= AmbitionLadder.RUNG_EXPAND and target_id != -1
+	# faction leader 走統一 scorer（established faction 已立國 → can_found=false，不重複建國）。
+	var ctx: Dictionary = {
+		"leader_values": values,
+		"established": f.is_established,
+		"weak_enemy": weak_enemy,
+		"can_levy": _richest_member(state, f) != -1,
+		"committed": f.intent.get("type", ""),
+		"can_found": false,
+		"can_expand": can_expand,
+		"target_id": target_id,
 	}
+	return select_strategic_intent(state, leader_team, ctx)
 
 # 征服 viability：我力(含可補力餘裕粗估) >= belief 敵力 × strength ratio。複用既有 attack gate。
 func _conquest_viable(state: WorldState, f, leader_team: TeamData, target_id: int) -> bool:
@@ -807,6 +855,11 @@ func _update_goals(state: WorldState, f) -> void:
 			# 致富亦可外交結盟拓商路（真 affordance ally；輔助，從人格餘裕）
 			if _has_independent(state, f.leader_team_id) and leader_team.readiness >= DIPLOMACY_READINESS_MIN:
 				_emit_goal(state, f, "外交", "致富", "結盟拓勢", "ally")
+		"擴張":
+			# 領土 pressure（F-D3）：空間包圍由 strategic_ai encirclement 執行（讀 f.intent）；
+			# commander 層備戰籌餉（徵收 fund_war），不發直接攻擊令（擴張≠殲滅，靠包圍施壓吸收）。
+			if _richest_member(state, f) != -1:
+				_emit_goal(state, f, "徵收", "擴張", "備戰籌餉(領土 pressure)", "fund_war")
 		"防衛":
 			# 領土不失 → 備戰籌資（徵收 fund_war）
 			if _richest_member(state, f) != -1:
@@ -880,6 +933,14 @@ func _emit_goal(state: WorldState, f, goal: String, intent_type: String, why: St
 
 # ──────── 獨立戰略層（野心獨立隊建國 intent）────────
 
+# F-D4：solo_intent 統一 intent struct 讀/寫 helper（廢一槽兩義；driver-complete parity）。
+static func _solo_type(team: TeamData) -> String:
+	return String(team.solo_intent.get("type", "")) if team.solo_intent is Dictionary else ""
+
+func _set_solo(state: WorldState, team: TeamData, itype: String, why: String, mode: String) -> void:
+	team.solo_intent = {"type": itype, "why": why, "mode": mode}   # 每令帶 driver（連回意圖，北極星）
+	SpecimenTracer.capture_intent(state, team.team_id, itype, why, mode)
+
 # mirror commander-v2 _select_intent（輕量）：fid=-1 野心獨立隊秤「建國 vs 守成」→ means-end 子行動
 # 結盟(primary)/吞併(機會) → 複用既有 create_faction（不新 founding 機制）。守成=不 dispatch（繼續既有個體決策）。
 # 觸發 gate：fid=-1 + 野心≥AMBITION_FOUND_MIN + 累積夠（pop≥EXPAND_MIN_POP + 食盈餘）+ founding 路徑可達。
@@ -891,99 +952,99 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	if team.combat_target != -1: return         # 戰鬥中不重評
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
+	var lv: Dictionary = leader.values
 
-	# ── defer to prosperity（修 S3 回歸）──
-	# 有 belief-弱 prey 可攻 + 是 prosperity 候選 → 讓 prosperity-attack 處理：它有 G3d scout gate
-	# （慎重者對不確定 prey 先 scout 不盲攻），且勝→npc_combat subjugate→create_faction 也達建國。
-	# 獨立戰略只管「無征服目標、靠結盟」的建國 → 避免吞併路繞過 scout gate（S3 cautious 獨立 attacker 該 scout）。
-	if _is_prosperity_candidate(state, team) and _find_weakest_prey(state, team) != -1:
-		return
-
-	# ── gate 1：野心（普世驅力，但建國門檻）──
-	var ambition: float = float(leader.values.get("野心", 0.5))
-	if ambition < AMBITION_FOUND_MIN: return
-	# 以下 = 野心夠的獨立隊（funnel 起點，量 over/under-found gate）
-	Probe.bump("indep.gate_ambitious")
-
-	# ── gate 2：累積夠（pop ≥ EXPAND_MIN_POP + 食盈餘 = 已達 rung EXPAND 才有本錢拉班底）──
-	if team.population < AmbitionLadder.EXPAND_MIN_POP:
-		Probe.bump("indep.gate_fail_pop"); return
-	var surplus_need: float = float(team.population) \
-		* ResourceSystem.FOOD_PER_PERSON_PER_DAY * FOUND_FOOD_SURPLUS_DAYS
-	if ResourceSystem.effective_food(state, team) < surplus_need:
-		Probe.bump("indep.gate_fail_food"); return
-
-	# 已在建國 task 進行中（朝 ally/prey 移動）→ 不重評不 churn（讓它跑完到場觸發 create_faction）。
-	# 須 current_task 仍非 IDLE（release 不清 task_reason → 只看 reason 會永久早退）。
+	# 建國 in-flight（朝 ally/prey 移動）→ 不重評不 churn（讓它跑完到場觸發 create_faction）。
 	if team.current_task != TeamData.TASK_IDLE \
 			and (team.task_reason == "found_ally" or team.task_reason == "found_subjugate"):
 		return
-	# 只讓位高優先 task（生存 80 / 威脅 70 / 戰鬥 / vendetta 55 / player 60）——這些 = 危急或玩家令，
-	# 建國戰略不該打斷。但**允許打斷個體日常**（SoloAI 貿易/紮營/govern @PRIO_DISPATCH、ambient @10）：
-	# 戰略意圖（建國）優先於日常 op（mirror commander-v2 stakes 打斷 member 日常）。
-	# 原因：measure 證累積夠(pop+7日食盈餘)的獨立隊=成功定居/治理隊，恆跑日常 task 永不 idle
-	#   → 卡 IDLE-gate=漏觸發。survival_tasks/combat/高優先仍護住（危時不建國）。
-	if team.current_task in SURVIVAL_TASKS \
-			or team.task_priority > TaskArbiter.PRIO_DISPATCH:
-		Probe.bump("indep.gate_fail_busy"); return
 
-	# ── 秤 建國 vs 守成（means-end util，argmax + hysteresis）──
-	# 子行動候選 viability（measure：結盟最順、吞併機會）：
+	# ── 征服 affordance（獨立 solo-scale = prosperity attack，G3d scout-gated）──
+	# 有 belief-弱 prey + prosperity 候選 → 讓 prosperity-attack 執行（慎重者對不確定 prey 先 scout，
+	# 勝→npc_combat subjugate→create_faction 也達建國）。此處 defer + capture 征服 anchor
+	# （首燒：好戰獨立 → 征服 intent 顯化，CONQUER 分布不再恆 0）。避 建國-吞併 繞過 scout gate（S3 回歸）。
+	if _is_prosperity_candidate(state, team) and _find_weakest_prey(state, team) != -1:
+		var prey0: int = _find_weakest_prey(state, team)
+		# 統一 scorer 秤：給 viable 弱敵，此 leader 是否戰略偏好征服（一致複用菜單，非另判斷）
+		var conq: Dictionary = select_strategic_intent(state, team, {
+			"leader_values": lv, "established": true, "weak_enemy": true,
+			"can_levy": true, "target_id": prey0, "committed": _solo_type(team)})
+		if conq["type"] == "征服":
+			_set_solo(state, team, "征服", String(conq["why"]), "prosperity")   # driver：獨立征服→prosperity 攻擊 affordance
+		return   # defer to prosperity（scout-gated；不在此 dispatch 攻擊）
+
+	# ── 全菜單 scorer（征服已由 prosperity 處理 → weak_enemy=false；建國 gate 折入 can_found）──
+	var ambition: float = float(lv.get("野心", 0.5))
+	var busy: bool = team.current_task in SURVIVAL_TASKS \
+		or team.task_priority > TaskArbiter.PRIO_DISPATCH
+	# 建國子行動候選（結盟 primary；吞併已由 prosperity 收 → 此分支 prey 恆 -1）：
 	var ally_id: int = _nearest_independent(state, team)   # 結盟候選（可達獨立鄰）
-	var prey_id: int = _find_weakest_prey(state, team)     # 吞併候選（belief 弱可達鄰）
-	# founding 路徑不可達（無獨立鄰 + 無弱鄰）→ 孤立野心隊，宣告(solo) defer → 守成累積（backlog）
-	if ally_id == -1 and prey_id == -1:
-		Probe.bump("indep.gate_fail_nopath"); return
-	Probe.bump("indep.gate_path_ok")
-
-	var honor:   float = float(leader.values.get("義氣", 0.5))
-	var cruelty: float = float(leader.values.get("殘忍", 0.5))
-	var martial: float = float(leader.values.get("好戰", 0.5))
-	# 子行動 util = viability × 人格（結盟←義氣，對齊 _match_fillers ally_util；吞併←殘忍/好戰）
+	var prey_id: int = _find_weakest_prey(state, team)     # 恆 -1（上面 return），保留 symmetry
+	var honor:   float = float(lv.get("義氣", 0.5))
+	var cruelty: float = float(lv.get("殘忍", 0.5))
+	var martial: float = float(lv.get("好戰", 0.5))
 	var ally_util: float = (0.3 + honor * 0.5) if ally_id != -1 else -1.0
 	var subj_util: float = (0.2 + cruelty * 0.4 + martial * 0.3) if prey_id != -1 else -1.0
-	# 建國意圖 score = 最佳子行動 util × 野心（野心放大建國驅力）；守成 = base
 	var best_sub_util: float = maxf(ally_util, subj_util)
 	var found_score: float = best_sub_util * (0.6 + ambition * 0.6)
-	var hold_score: float = 0.35   # 守成 base（多數獨立隊 default）
-	# hysteresis：上次承諾建國 → 黏住（戰略別每 cadence 翻）
-	if team.solo_intent == "建國":
-		found_score += FOUND_COMMITMENT_BONUS
+	if _solo_type(team) == "建國":
+		found_score += FOUND_COMMITMENT_BONUS   # hysteresis（戰略別每 cadence 翻）
+	# 建國 gate（fid==-1 + 野心 + 累積[pop+7日食盈餘] + 路徑[ally] + 非危時）→ can_found
+	var accum_ok: bool = team.population >= AmbitionLadder.EXPAND_MIN_POP \
+		and ResourceSystem.effective_food(state, team) >= float(team.population) \
+			* ResourceSystem.FOOD_PER_PERSON_PER_DAY * FOUND_FOOD_SURPLUS_DAYS
+	var path_ok: bool = ally_id != -1 or prey_id != -1
+	var can_found: bool = ambition >= AMBITION_FOUND_MIN and accum_ok and path_ok and not busy
+	# Probe funnel（保 warring/bed 診斷語意）
+	if ambition >= AMBITION_FOUND_MIN:
+		Probe.bump("indep.gate_ambitious")
+		if not accum_ok:
+			Probe.bump("indep.gate_fail_pop" if team.population < AmbitionLadder.EXPAND_MIN_POP else "indep.gate_fail_food")
+		elif busy:
+			Probe.bump("indep.gate_fail_busy")
+		elif not path_ok:
+			Probe.bump("indep.gate_fail_nopath")
+		else:
+			Probe.bump("indep.gate_path_ok")
 
-	if found_score <= hold_score:
-		team.solo_intent = "守成"
-		return   # 守成 = 不 dispatch，繼續既有個體決策（SoloAI/survival/ambient）
-
-	# ── 建國 intent → dispatch means-end 子行動（argmax；結盟 vs 吞併）──
-	team.solo_intent = "建國"
-	# specimen tap：solo 建國 intent（子行動 mode = 結盟/吞併）
-	SpecimenTracer.capture_intent(state, team.team_id, "建國",
-		"野心建國(score=%.2f>hold=%.2f)" % [found_score, hold_score],
-		"found_ally" if ally_util >= subj_util else "found_subjugate")
-	# 建國勝過守成 → 讓位日常 task（busy-gate 已濾掉高優先；此處只剩 idle/stuck/日常 @≤DISPATCH）。
-	# 釋放後 founding @PRIO_DISPATCH 才設得進（同層 tie 需先 release 換手，mirror prosperity scout→attack）。
-	if team.current_task != TeamData.TASK_IDLE:
-		TaskArbiter.release(team)
-	if ally_util >= subj_util:
-		# 結盟（primary）：TASK_DIPLOMACY 朝獨立鄰 → interaction:333 兩獨立 create_faction
-		# 單方有 drive 不保證成 faction（對方意願 emergent；被拒則下 cadence 重評/改吞併）
-		if TaskArbiter.try_set(state, team, TeamData.TASK_DIPLOMACY,
-				state.teams[ally_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_ally"):
-			team.order_task = ""   # 結盟提案（非求和 tribute）
-			print("[IndepStrategy] Team%d 野心建國→結盟 Team%d (野心=%.2f)" % [
-				team.team_id, ally_id, ambition])
-			Probe.bump("indep.found_ally")
-	else:
-		# 吞併（機會，殘忍/好戰染）：TASK_ATTACK 朝弱鄰 → 勝→npc_combat subjugate:524 create_faction
-		# subjugate gate 需 winner 統領 tag：committing 建國-by-conquest = 自立為統領（means-end driver=建國）
-		if not team.tags.has("統領"):
-			team.tags.append("統領")
-		if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
-				state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_subjugate"):
-			team.prosperity_target_id = prey_id   # 追擊刷新復用
-			print("[IndepStrategy] Team%d 野心建國→吞併 Team%d (野心=%.2f)" % [
-				team.team_id, prey_id, ambition])
-			Probe.bump("indep.found_subjugate")
+	# ── 全菜單 argmax（致富/建國/防衛/守成；征服已 defer）──
+	var intent: Dictionary = select_strategic_intent(state, team, {
+		"leader_values": lv, "established": false, "weak_enemy": false,
+		"can_levy": true, "committed": _solo_type(team),
+		"can_found": can_found, "found_score": found_score, "target_id": -1})
+	var itype: String = intent["type"]
+	match itype:
+		"建國":
+			_set_solo(state, team, "建國", "野心建國(found_score=%.2f)" % found_score,
+				"found_ally" if ally_util >= subj_util else "found_subjugate")
+			# 讓位日常 task（busy 已濾高優先；此處只剩 idle/日常 @≤DISPATCH）→ founding @PRIO_DISPATCH 設得進
+			if team.current_task != TeamData.TASK_IDLE:
+				TaskArbiter.release(team)
+			if ally_util >= subj_util and ally_id != -1:
+				# 結盟（primary）：TASK_DIPLOMACY 朝獨立鄰 → interaction 兩獨立 create_faction
+				if TaskArbiter.try_set(state, team, TeamData.TASK_DIPLOMACY,
+						state.teams[ally_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_ally"):
+					team.order_task = ""   # 結盟提案（非求和 tribute）
+					print("[IndepStrategy] Team%d 野心建國→結盟 Team%d (野心=%.2f)" % [
+						team.team_id, ally_id, ambition])
+					Probe.bump("indep.found_ally")
+			elif prey_id != -1:
+				# 吞併 fallback（此分支現不觸；weak prey 已由 prosperity defer 收）。保留 symmetry。
+				if not team.tags.has("統領"):
+					team.tags.append("統領")
+				if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
+						state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_subjugate"):
+					team.prosperity_target_id = prey_id
+					print("[IndepStrategy] Team%d 野心建國→吞併 Team%d (野心=%.2f)" % [
+						team.team_id, prey_id, ambition])
+					Probe.bump("indep.found_subjugate")
+		"致富":
+			# 致富 anchor：獨立商隊致富 intent → 委由既有貿易 affordance（SoloAI/unified 貿易 option）。
+			# 不 dispatch（不搶 task）→ SoloAI/_decide_unified 接手成交（首燒：致富→貿易 錨接上）。
+			_set_solo(state, team, "致富", String(intent["why"]), "trade")
+		_:
+			# 守成/防衛/擴張 = 不 dispatch，繼續既有個體決策（SoloAI/survival/ambient）
+			_set_solo(state, team, itype, String(intent["why"]), "hold")
 
 # ──────── 任務指派 ────────
 
@@ -1338,9 +1399,9 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if _find_strong_neighbor(state, team) != -1:
 			scores[TeamData.TASK_JOIN] = float(leader_p.values.get("義氣", 0.5)) * 0.4 + survival * 0.4
 
-	# 承諾慣性：上次方向加分（非明顯更優不換）
-	if team.solo_intent != "" and scores.has(team.solo_intent):
-		scores[team.solo_intent] = float(scores[team.solo_intent]) + SOLO_COMMITMENT_BONUS
+	# 承諾慣性：上次 task 加分（非明顯更優不換）。F-D4：用 solo_task_last（與戰略 intent 分離）。
+	if team.solo_task_last != "" and scores.has(team.solo_task_last):
+		scores[team.solo_task_last] = float(scores[team.solo_task_last]) + SOLO_COMMITMENT_BONUS
 
 	var best_task := TeamData.TASK_IDLE
 	var best_score: float = 0.0
@@ -1382,7 +1443,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		return
 	if best_task == TeamData.TASK_TRADE:
 		team.trade_task_start_tick = state.world.current_tick
-	team.solo_intent = best_task
+	team.solo_task_last = best_task   # F-D4：task 承諾記此槽（solo_intent 保留戰略 intent）
 	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
 
 func _update_equip_order(state: WorldState, team: TeamData) -> void:

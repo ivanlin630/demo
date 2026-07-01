@@ -81,8 +81,9 @@ func _run_config(cfg_name: String) -> Dictionary:
 				var tk: String = state.teams[tid2].current_task
 				if tk == "": tk = "idle"
 				task_hist[tk] = int(task_hist.get(tk, 0)) + 1
-				# ②目標錨量測:solo_intent thrash（roving/solo 隊的長弧連貫性）
-				var si: String = state.teams[tid2].solo_intent
+				# ②目標錨量測:solo_intent thrash（roving/solo 隊的長弧連貫性）。F-D4：solo_intent 為 struct，讀 type。
+				var _si_d: Dictionary = state.teams[tid2].solo_intent
+				var si: String = String(_si_d.get("type", "")) if _si_d is Dictionary else ""
 				if si != "":
 					intent_samples += 1
 					if intent_last.has(tid2) and intent_last[tid2] != si:

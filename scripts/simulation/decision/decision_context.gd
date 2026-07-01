@@ -65,8 +65,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
-	# threat：商隊切片威脅 term 次要，初版 0；他域遷入時補（_find_strong_neighbor / 鄰敵 strength）。
-	c.threat = 0.0
+	# threat（F-D6 un-stub）：視野內最高敵威脅（belief-based ThreatAssessment，含逼近/敵意/距離衰減）。
+	# 餵 threat_pressure term → unified 隊(商隊/生產)遇逼近敵會 FLEE（威脅真驅動非死 stub）。
+	c.threat = DecisionContext._max_threat(state, team)
 	var _fa := FactionAISystem.new()
 	var _prey: int = _fa._find_weakest_prey(state, team)
 	c.has_weak_prey = _prey != -1
@@ -120,6 +121,23 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 				c.faction_diplo_target = _dt
 				c.faction_diplo_target_pos = state.teams[_dt].tile_pos if _dt != -1 else Vector2i(-1, -1)
 	return c
+
+# 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
+# belief-based（認知非全知）；dist≥5 衰減 0（遠敵不算）。
+# **只算 distrusted(rep<neutral) 敵**：neutral/盟(投靠對象)不算威脅 → threat 不壓過 join/camp。
+# **clamp 上限 1**：threat = 次要 survival 信號（threat_pressure term），不碾壓 starvation/join/camp 絕境。
+static func _max_threat(state: WorldState, team: TeamData) -> float:
+	var best: float = 0.0
+	for tid in state.team_discovered.get(team.team_id, []):
+		var other: TeamData = state.teams.get(tid)
+		if other == null: continue
+		if other.faction_id == team.faction_id and team.faction_id != -1: continue
+		if float(team.known_reputations.get(tid, ThreatAssessment.REPUTATION_NEUTRAL)) \
+				>= ThreatAssessment.REPUTATION_NEUTRAL:
+			continue   # neutral/盟不算威脅（避 threat 壓過 join/camp 絕境）
+		var t: float = ThreatAssessment.score(state, team, other)
+		if t > best: best = t
+	return clampf(best, 0.0, 1.0)
 
 # 自家糧倉 food：掃自有 outpost tile（owner==team_id）取 public_storage food。
 # own_granary_tile 只在 team 站在自家據點時回傳；返家補給 gate 須在「離家」時也讀得到家糧 →
