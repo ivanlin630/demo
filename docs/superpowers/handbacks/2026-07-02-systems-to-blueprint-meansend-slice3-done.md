@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: means-end 接戰術層 merged——★症狀a(致富→貿易)全解、機制落地(願景進化第一深化過②③關,①④部分);症狀b征服route 6.6×但capture完成depth低、conqueror食物survival-trap;症狀c匱乏→搶gated;單寫者slice3 leader desync根修
 ---
 
