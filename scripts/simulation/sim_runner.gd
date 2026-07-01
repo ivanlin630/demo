@@ -104,6 +104,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / WorldState.TICKS_PER_DAY))
 		_message_system.prune_old_messages(state, state.world.current_tick)
+		SpecimenTracer.flush()   # specimen 日邊界 flush（enabled 才印，一般 no-op；防 entries 膨脹）
 		# 飢餓致死鏈：日邊界結算 blood<=0 死亡（leader 死交既有繼承/玩家 forced event）
 		HealthSystem.check_starvation_deaths(state)
 		# 覓食 episode 日彙整：歸零各隊 forage_today，玩家隊產訊息（防 per-tick spam）
@@ -370,7 +371,9 @@ func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:
 	var result: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
-		if _hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS:
+		# specimen LOD-exempt：一律納 near（每 near-cadence 全 pipeline，完整 trace），mirror player 豁免
+		if tid in state.specimen_team_ids \
+				or _hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS:
 			result.append(tid)
 	return result
 
@@ -378,6 +381,9 @@ func _get_far_teams(state: WorldState, player_pos: Vector2i) -> Array:
 	var result: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
+		# specimen 已納 near → 不入 far（避免雙跑）
+		if tid in state.specimen_team_ids:
+			continue
 		if _hex_distance(team.tile_pos, player_pos) > LOD_NEAR_RADIUS:
 			result.append(tid)
 	return result

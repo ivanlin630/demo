@@ -21,6 +21,7 @@ static func rank(state: WorldState, team: TeamData) -> Array:
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])   # tiebreak：applicable 順序
+	SpecimenTracer.capture_options(state, team, scored)   # specimen tap（no-op-unless-specimen）
 	var out: Array = []
 	for e in scored: out.append(e["opt"])
 	return out
@@ -45,6 +46,7 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])
+	SpecimenTracer.capture_options(state, team, scored)   # specimen tap（no-op-unless-specimen）
 	var out: Array = []
 	for e in scored: out.append(e["opt"])
 	return out
