@@ -90,6 +90,7 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 		"Team %d 對 Team %d 宣戰" % [atk_id, def_id], atk,
 		{ "origin": str(atk_id), "target": str(def_id) })
 	print("[Combat Start] Team%d vs Team%d" % [atk_id, def_id])
+	if Probe.enabled: Probe.bump("conq.combat_entered")
 	_resolve_volley(state, atk_id, def_id)
 
 func team_strength(state: WorldState, team_id: int) -> float:
@@ -221,13 +222,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		return
 	var winner_p = state.persons.get(winner.leader_id)
 	var cruelty: float = float(winner_p.values.get("殘忍", 0.5)) if winner_p else 0.5
-	var effective_loot: float = LOOT_RATE * (1.0 + cruelty * 0.7)
-	for res in ["food", "material", "coin", "goods",
-				"weapon_melee_low", "weapon_melee_high",
-				"weapon_ranged_low", "weapon_ranged_high"]:
-		var taken: float = float(loser.resources.get(res, 0)) * effective_loot
-		ResourceBank.add(winner, res, taken, "npc_loot_in")
-		ResourceBank.add(loser, res, -taken, "npc_loot_out")
+	_loot_resources(winner, loser, cruelty)
 	# 戰敗 looted 記憶：敗方全員記住勝方 leader
 	var _npc_ai_loot := NpcAiSystem.new()
 	for pid in ([loser.leader_id] as Array) + loser.named_members:
@@ -284,7 +279,19 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		AnonTierSystem.kill_random(loser, loser_dead, "combat_defeat", AnonTierSystem.SURVIVAL_KILL_WEIGHT)
 		print("[E1Defeat] Team%d 敗方 pop 損耗 -%d" % [loser_id, loser_dead])
 	# 受控人力 P1：征服吸收敗方殘餘 anon → 勝方 captive_group（守恆：loser anon→holder captive；隔離非戰力）
+	# Task0 漏斗：決勝戰（殲滅）記 decisive；absorb 成敗 + no_absorb 原因（敗方殘 anon 打光）
+	var _loser_anon_pre_absorb: int = AnonCohort.total(loser.anon_cohorts)
 	var _captured: int = AnonTierSystem.absorb_as_captive(state, winner, loser, AnonTierSystem.CAPTURE_RATE)
+	if Probe.enabled:
+		Probe.bump("conq.combat_decisive")
+		if _captured > 0:
+			Probe.bump("conq.win_absorbed")
+		elif _loser_anon_pre_absorb <= 0:
+			Probe.bump("conq.win_no_absorb")
+			Probe.bump("conq.no_absorb_no_anon")   # 原因：敗方 anon 已 casualty 打光，沒得吸
+		else:
+			Probe.bump("conq.win_no_absorb")
+			Probe.bump("conq.no_absorb_rate_floor")   # 原因：有殘 anon 但 rate*avail floor→0
 	if _captured > 0:
 		print("[P1Absorb] Team%d 吸收 Team%d 殘餘 anon → captive +%d" % [winner_id, loser_id, _captured])
 		_probe_capture_by_task(winner)   # 征服名實：掠奪隊 vs 攻擊隊 誰達成 capture
@@ -313,12 +320,20 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	_skill_sys.on_combat_end(state, retreater)
 	_skill_sys.on_combat_end(state, pursuer)
 	_apply_pursuit(state, pursuer_id, retreater_id)
-	# 失能-capture（spec §3b）：潰逃丟下的 wounded → 控地勝方俘一比例 → captive_group（P1 吸收 fire 的路徑）。
-	# 決勝在潰逃非對撞：潰得越慘(低 readiness)、控地越徹底、俘越多。確定性、守恆（wounded→captive 轉移）。
+	# 以戰養戰 PAY（下燒）：潰逃=控地勝方掃過戰場 → loot 撤退者補給（食+資源，rout drop）。
+	# 前僅 _end_combat(殲滅) loot；但潰逃佔多數戰局 → 不 loot = 主流戰果零 PAY = 以戰養戰崩。控地即得補給。
+	var pursuer_p = state.persons.get(pursuer.leader_id)
+	var pursuer_cruelty: float = float(pursuer_p.values.get("殘忍", 0.5)) if pursuer_p else 0.5
+	_loot_resources(pursuer, retreater, pursuer_cruelty)
+	# 潰逃-capture（spec 下燒：潰逃俘擴）：潰逃殘部（wounded 丟下 + healthy 落單）→ 控地勝方俘一比例。
+	# 決勝在潰逃非對撞：潰得越慘(低 readiness)、控地越徹底、俘越多。確定性、守恆（anon→captive 轉移）。
 	if state.teams.has(pursuer_id) and state.teams.has(retreater_id):
-		var _cap: int = AnonTierSystem.capture_wounded_as_captive(state, state.teams[pursuer_id], retreater)
+		var _cap: int = AnonTierSystem.capture_routed_as_captive(state, state.teams[pursuer_id], retreater)
+		if Probe.enabled:
+			Probe.bump("conq.combat_retreat")   # Task0 漏斗：戰不決勝（潰逃）非殲滅
+			Probe.bump("conq.retreat_captured" if _cap > 0 else "conq.retreat_no_capture")
 		if _cap > 0:
-			print("[Capture] Team%d 控地俘 Team%d 潰逃 wounded +%d (rd=%.2f)" % [
+			print("[Capture] Team%d 控地俘 Team%d 潰逃殘部 +%d (rd=%.2f)" % [
 				pursuer_id, retreater_id, _cap, retreater.readiness])
 			_probe_capture_by_task(state.teams[pursuer_id])   # 征服名實：掠奪 vs 攻擊 capture 歸因
 	var _pp_fr: PersonData = state.persons.get(state.player_id)
@@ -335,6 +350,19 @@ func _probe_capture_by_task(capturer: TeamData) -> void:
 		TeamData.TASK_LOOT:   Probe.bump("loot.achieved_capture")
 		TeamData.TASK_ATTACK: Probe.bump("capture.by_attack")
 		_:                    Probe.bump("capture.by_other")
+
+# 戰場 loot（以戰養戰 PAY）：勝方按 effective_loot 比例奪敗方資源（食+材+幣+貨+武）。守恆走 ResourceBank（in/out 對稱）。
+# 殲滅(_end_combat)與潰逃控地(_force_retreat)共用（潰逃佔多數戰局，兩路皆 PAY 才閉以戰養戰環）。
+func _loot_resources(winner: TeamData, loser: TeamData, cruelty: float) -> void:
+	var effective_loot: float = LOOT_RATE * (1.0 + cruelty * 0.7)
+	for res in ["food", "material", "coin", "goods",
+				"weapon_melee_low", "weapon_melee_high",
+				"weapon_ranged_low", "weapon_ranged_high"]:
+		var taken: float = float(loser.resources.get(res, 0)) * effective_loot
+		if taken <= 0.0:
+			continue
+		ResourceBank.add(winner, res, taken, "npc_loot_in")
+		ResourceBank.add(loser, res, -taken, "npc_loot_out")
 
 func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 	if not state.teams.has(winner_id) or not state.teams.has(loser_id):

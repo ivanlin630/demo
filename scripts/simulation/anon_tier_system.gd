@@ -15,6 +15,7 @@ const CAPTIVE_INIT_MORALE: float = 0.25   # 吸收 captive 初始 morale（低�
 # 失能-capture（潰逃勝方俘敗方 wounded）：俘虜比例 = (1-readiness)[潰逃嚴重度] × FACTOR，cap by RATE_MAX。全 TEST VALUE。
 const CAPTURE_GUARD_FACTOR: float = 0.8   # 潰逃嚴重度→俘虜比例 係數
 const CAPTURE_RATE_MAX: float     = 0.7   # 俘虜比例上限（即便全崩潰也非全俘）
+const HEALTHY_ROUT_FACTOR: float  = 0.35  # 潰逃 healthy 隨隊逃，較 wounded 難俘 → rate 折扣（rout 落單者才擒）
 
 const TIER_STATS: Dictionary = {
 	"平民": { "combat": 0.1, "speed": 0.7, "base_wage": 0.5 },
@@ -239,16 +240,19 @@ static func absorb_as_captive(_state: WorldState, holder: TeamData, loser: TeamD
 	})
 	return total_captured
 
-# 失能-capture（spec §3b）：潰逃時勝方控地 → 俘 retreater 的 wounded（失能聚合，潰逃丟下）一比例。
+# 潰逃-capture（spec 下燒：潰逃俘擴，讓贏方真得人）：潰逃時勝方控地 → 俘 retreater 殘部一比例。
+# wounded（失能，丟下）全 rate 俘；healthy（隨隊逃，落單者才擒）rate×HEALTHY_ROUT_FACTOR 折扣俘。
 # 確定性、非 RNG：俘虜比例 = (1-readiness)[潰逃嚴重度] × CAPTURE_GUARD_FACTOR，cap by CAPTURE_RATE_MAX。
-# guard 餘力 cap = max(0, winner pop_cap − winner.population − total_captives)（守衛容量，滿則俘不下）。
-# 守恆：從 retreater wounded 桶 remove == winner.captive_groups add（轉移非憑空）。captive 不入 winner 戰力 pop（隔離）。
-# healthy 隨隊撤走（不俘）。回實際俘虜數。
-static func capture_wounded_as_captive(state: WorldState, winner: TeamData, retreater: TeamData) -> int:
+# guard 餘力 cap = max(0, winner pop_cap − winner.population − total_captives)（守衛容量，滿則俘不下）；
+#   wounded/healthy 共用 guard budget（wounded 優先）。
+# 守恆：從 retreater 桶 remove == winner.captive_groups add（轉移非憑空）。captive 不入 winner 戰力 pop（隔離）。
+# 回實際俘虜數。
+static func capture_routed_as_captive(state: WorldState, winner: TeamData, retreater: TeamData) -> int:
 	if winner == null or retreater == null:
 		return 0
 	var wounded_total: int = AnonCohort.by_health(retreater.anon_cohorts, "wounded")
-	if wounded_total <= 0:
+	var healthy_total: int = AnonCohort.by_health(retreater.anon_cohorts, "healthy")
+	if wounded_total <= 0 and healthy_total <= 0:
 		return 0
 	# 潰逃嚴重度 → 俘虜比例（確定性）
 	var rate: float = clampf((1.0 - retreater.readiness) * CAPTURE_GUARD_FACTOR, 0.0, CAPTURE_RATE_MAX)
@@ -258,50 +262,67 @@ static func capture_wounded_as_captive(state: WorldState, winner: TeamData, retr
 	var leader = state.persons.get(winner.leader_id) if state != null else null
 	var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
 	var pop_cap: int = TeamData.pop_cap_from_leadership(cmd)
-	var guard_room: int = maxi(pop_cap - winner.population - total_captives(winner), 0)
-	if guard_room <= 0:
+	var budget: int = maxi(pop_cap - winner.population - total_captives(winner), 0)
+	if budget <= 0:
 		return 0
-	var want: int = mini(int(round(float(wounded_total) * rate)), guard_room)
-	if want <= 0:
-		return 0
-	# 從 retreater 各 tier 的 wounded 桶按 count 比例 remove（守恆，最大桶吸收餘數）
-	var captured: Dictionary = {}   # "tier|wounded" → count
+	var captured: Dictionary = {}   # "tier|health" → count
 	var total_captured: int = 0
-	var remaining: int = want
-	var wounded_keys: Array = []
-	for key in retreater.anon_cohorts.keys():
-		if AnonCohort._parse(key)[1] == "wounded" and int(retreater.anon_cohorts[key]) > 0:
-			wounded_keys.append(key)
-	for i in range(wounded_keys.size()):
-		if remaining <= 0:
-			break
-		var key: String = wounded_keys[i]
-		var tier: String = AnonCohort._parse(key)[0]
-		var avail: int = int(retreater.anon_cohorts[key])
-		var take: int
-		if i == wounded_keys.size() - 1:
-			take = remaining   # 最後一桶吸收餘數（守恆，不丟人）
-		else:
-			take = int(floor(float(want) * float(avail) / float(wounded_total)))
-		take = mini(take, avail)
-		take = mini(take, remaining)
-		if take <= 0:
-			continue
-		var real: int = AnonCohort.remove(retreater.anon_cohorts, tier, "wounded", take)
-		if real > 0:
-			captured[key] = int(captured.get(key, 0)) + real
-			total_captured += real
-			remaining -= real
+	# wounded 優先（失能，最易俘）→ healthy 落單者（折扣 rate）
+	if wounded_total > 0 and budget > 0:
+		var w_want: int = mini(int(round(float(wounded_total) * rate)), budget)
+		var got_w: int = _capture_from_health(retreater.anon_cohorts, "wounded", w_want, captured)
+		total_captured += got_w
+		budget -= got_w
+	if healthy_total > 0 and budget > 0:
+		var h_want: int = mini(int(round(float(healthy_total) * rate * HEALTHY_ROUT_FACTOR)), budget)
+		var got_h: int = _capture_from_health(retreater.anon_cohorts, "healthy", h_want, captured)
+		total_captured += got_h
 	if total_captured <= 0:
 		return 0
 	winner.captive_groups.append({
 		"cohorts": captured,
 		"morale": CAPTIVE_INIT_MORALE,
 		"origin_faction": retreater.faction_id,
-		"entry": "失能-capture",
+		"entry": "潰逃-capture",
 		"treatment_history": [],
 	})
 	return total_captured
+
+# 從 source 的指定 health 各 tier 桶按 count 比例 remove want 人（守恆，最後桶吸收餘數）。
+# 累加進 captured_out（"tier|health"→count），回實際 remove 總數。
+static func _capture_from_health(source: Dictionary, health: String, want: int, captured_out: Dictionary) -> int:
+	if want <= 0:
+		return 0
+	var keys: Array = []
+	var avail_total: int = 0
+	for key in source.keys():
+		if AnonCohort._parse(key)[1] == health and int(source[key]) > 0:
+			keys.append(key)
+			avail_total += int(source[key])
+	if avail_total <= 0:
+		return 0
+	var total: int = 0
+	var remaining: int = mini(want, avail_total)
+	for i in range(keys.size()):
+		if remaining <= 0:
+			break
+		var key: String = keys[i]
+		var tier: String = AnonCohort._parse(key)[0]
+		var avail: int = int(source[key])
+		var take: int
+		if i == keys.size() - 1:
+			take = remaining   # 最後一桶吸收餘數（守恆，不丟人）
+		else:
+			take = int(floor(float(want) * float(avail) / float(avail_total)))
+		take = mini(mini(take, avail), remaining)
+		if take <= 0:
+			continue
+		var real: int = AnonCohort.remove(source, tier, health, take)
+		if real > 0:
+			captured_out[key] = int(captured_out.get(key, 0)) + real
+			total += real
+			remaining -= real
+	return total
 
 # 同化：captive_group.cohorts 各桶 AnonCohort.add 進 holder.anon_cohorts（captive → free pop，守恆）。
 # 解 (a)：同化後 holder.population getter 漲（captive 轉戰力 pop）。erase 該 group。回同化總數。
