@@ -1,5 +1,26 @@
 # 開發進度
 
+## 🗺 進度快照 dashboard（藍圖 2026-07-02，視覺總覽；細節見下方系統 log）
+
+```
+【沙盒三維度 = 遊戲活起來沒】
+  經濟  ████████▓░  戲成 ✓  交易網轉、商隊想致富真去貿易
+  征服  ██████░░░░  差一哩  機制到 route×6.6，差 capture 完成
+  資訊  ███░░░░░░░  地基好  Phase E done、Phase D 欺敵(玩家錨C) queued
+
+【統一矩陣 burn-down】
+  思考決策 ████████▓░ 85%  ★旗艦燒完→致富/征服錨活、交易轉
+  單寫者   ███▓░░░░░░ 35%  coin/ledger/roster/leader done；剩 8/12(強制閘前提)
+  belief   ████░░░░░░ 40%  Phase E；剩 known_states/audit
+  互動     ██░░░░░░░░ 20%  BEG/JOIN 驗死待修；剩多 resolver 統一
+  人力俘虜 ██░░░░░░░░ 20%  失能-capture；剩雙模型/prisoner 死路
+  玩家面   ▓░░░░░░░░░  5%  幾乎未動(大 arc)
+  強制閘   ▓░░░░░░░░░ 起步  ledger 有牙；待單寫者撐
+
+【方法論/願景 定型 ✓】沙盒 bar｜AI 深度節流閥｜兩隻眼(measure+矩陣)｜3 不變量
+【NOW】capture 收征服者 ‖ 單寫者剩餘 ‖ seeded harness  【queued】玩家面/G3-D
+```
+
 ## 📍 當前狀態（2026-07-01）
 
 - **🏛 沙盒 bar arc（(a) 崛起/經濟底）— 連串 measure→fix**：commander-v2 後戰國 seed 揭 default 龜縮（CONQUER=0/established 卡1）。measure-first 逐層挖（別猜）：能人 pop 崩=**飢餓非戰敗** → ①**戰鬥不決勝**(0 擊潰，撤退先於殲滅，吸收掛 `_end_combat` never fire) ②**食物模型沒統一**(成長 surplus gate 讀私產 silo→糧倉/交易糧餵不到成長→非 plains 注定餬口)。
@@ -28,6 +49,7 @@
   - **⚔ 征服名實 measure ✅（merge，measure-first 證偽首燒假設）**：量到 **首燒假設錯**——征服隊 **100% 非-unified**（`_decide_unified` 對它不跑、`conq.declared_unified=0`）、舊 solo path 征服 winner **96.8% 攻擊非掠奪**（「想征服做掠奪」在此 seed 假）。**真斷點=攻擊→capture 轉化崩**（243 攻擊決策→1 capture）:**兩條攻擊路徑**（舊 solo 粗攻擊 `_nearest_independent` 無 scout/rung gate vs `_evaluate_prosperity_attack` 細攻擊 weakest-prey/scout-gated/導 subjugate）,粗的優先觸發淹沒細的。**修向=統一征服攻擊路徑**（非-unified 好戰隊 TASK_ATTACK 委派 prosperity）,**非動掠奪**（打錯靶）。follow-up spec（measure 支持）。spec/plan `2026-07-01-conquest-name-vs-deed-measure`。
   - **🧠 means-end 接戰術層 ✅（merge）= 願景進化第一深化（三症狀同根=查表非規劃）**：斷點 measure 確認**戰術層 flat/intent-blind**（`DecisionEngine` util=人格×context,從不讀 team 自己戰略 intent;唯一 goal→tactical hook=faction_stakes→faction_duty 只給 faction 成員、獨立隊 solo_intent reshape 零）。修=**generalize faction_duty → `intent_fit` term**（inject `intent` 進 `DecisionContext` + intent→子需求→貢獻打分 reshape option util）。**★症狀 a（致富→貿易）全解**（貿易 2.08/囤貨 1.27>建設 0.20,前建設碾;merchant specimen 想=致富→做=貿易 100%）+ 新 `囤貨` option。**症狀 b（征服→攻擊統一）機制成**（征服 intent→scored `攻擊`→route scout-gated prosperity,route 6.6×[13→86]）**但 capture 轉化未升**（吞併完成 depth 低=combat/subjugate 完成率 pre-existing、scope 外）;conqueror specimen food_days≈3 survival-trap→掠奪(「餓則搶」emergence 但食物軌壓過戰略層)。**症狀 c（匱乏→搶）gated**（匱乏+野心→掠奪、溫和不搶,防 over-war;over-war 4pp 落 unseeded 噪）。**四關**:①④部分(capture 未升)②③PASS。守恆全綠 framework 7/7、coin_eq 全池 0、北極星 holds（intent_fit boost 帶 driver）。TEST VALUE 待校。spec/plan `2026-07-01-meansend-tactical`。**移動標靶下一步**:capture 完成 depth + conqueror 食物 survival-trap（跨食物軌）。
   - **🔐 單寫者 slice3 ✅（merge，leader desync 根修）**：`set_leader` chokepoint（leader_id↔person.team_id force-sync,**根修 slice2 audit 揭的 leader/team_id desync**）+ `is_dead` 留屍標記 + **反向 roster audit**（person→roster,is_dead/team 不存在跳）+ `driver_tick_hint` 接線（ledger tick 溯源真）。game_sim_multi ×3 全配置 forward+反向 roster InvariantSummary=0（含 warzone）。**結構保證**（chokepoint 強制同步 + 反向 audit 常駐）非 case 復現（merchant desync unseeded 間歇）。納 invariants（規則 2 set_leader / 規則 3 反向 / 所有權域 desync 根修）。combat_target/tile-bank 延後 slice。spec/plan `2026-07-01-singlewriter-slice3-leader-desync`。
+  - **🎯 combat_target/social_target chokepoint + BEG/JOIN 死路修 ✅（merge，2026-07-02,下燒平行軌）**：**social_target 拆 combat_target**（語意:社交投靠/乞食 ≠ 戰鬥）+ `set_combat_target`/`set_social_target` chokepoint（F-S4,mirror set_leader,dangling audit）。BEG/JOIN dispatch 改 social_target → 過 `_try_interact:197` 戰鬥早退;**新 JOIN resolver**（merge_teams full absorb）+ BEG/JOIN resolver 上移過 same_faction 塊。**F-I3 死路消**（join.resolve 0→4、arrived_no_handler 0;beg unit 決定性驗）。combat_target 9 site 遷 chokepoint（thin wrapper 零戰鬥變）。framework 7/7、coin 全池守恆、InvariantAudit（含 social_target dangling）OK。**行為變=絕境投靠/乞食復活**（藍圖 marker1）。納 invariants（規則 2 combat/social_target + 所有權域）。spec/plan `2026-07-02-combat-target-social-split`。**下燒另兩軌（capture 完成 depth / seeded harness）在飛**。
   - **🍞 B 食物張力（R1 cadence + R2 flow-not-stock）✅（子 session，branch `feat/food-tension` 未 merge）**：granary爆倉 真根修。**R1**：`regenerate_tiles`(food_regen)+`_collect_from_tile`(harvest gain) 乘 day_fraction（與 consumption 同基準，修 24× 供給不對稱 bug）+ **移除 far 分支冗餘 `regenerate_tiles`**（near 分支已每小時全域再生所有 tile，far 重複=24× 雙記元凶之一）→ 供給真 per-day（forest regen 3/day marginal，REGEN_RATE 常數未動）。**張力校準**：`FOOD_PER_PERSON_PER_DAY 2.4→0.8`（穩態食物 income≈regen[plains op1 ~8/day]；0.8 使 plains op1 養小鎮微盈餘=繁榮、forest op1 微赤=苟活須交易；赤字溫和不成餓死潮）。**R2**：成長讀 flow 非 stock——`team_data.food_flow_avg`（日均淨食物流 EMA，`resource_system._update_food_flow` 每 cadence 更新）、生育 gate(`reaction:201`)+野心積累 rung(`ambition_ladder:52`) 讀 `food_flow_avg` 非 `effective_food` → **granary 爆倉不再驅動成長**（滿倉但 net~0→不長）。**bed 驗每步**：econ_bed **forest pop 6→7 苟活(不死/food_buy=Y 想交易)、plains 6→8 繁榮**（前 forest 6→12 純爆倉）；warring 1月 famine=69(1-anon-at-a-time 涓滴,非潮;能人 25→4 但活且回充/T18 forest 24→19 較 pre 24→6 溫和/T32 9→9 持平)=**不 mass-starve**。headless 全綠(修 ~18 assert:breed/rung 改設 flow、消耗/beg/food_days 數值×const)、framework **7/7 PASS**、coin_eq/InvariantAudit 綠。**誠實標經濟維度 emergence**：**致富→交易→成長鏈未接**——specimen 商隊 想=致富262/263 但 winner=**建設**263/263(建設0.79>貿易0.26)，**從不貿易**。granary爆倉閘已拆，露出下一閘=**建設 util 碾壓貿易(決策層權重,非本軌 scope)**。spec/plan `2026-07-01-food-tension`。**待主 session 裁**：①野心 rung 改讀 flow → 新隊/marginal 隊 flow=0 起步暫 SURVIVE(需持續盈餘才升 rung/prosperity-attack)＝**戰略層行為變**(founding 用獨立 stock gate 未動,S1 PASS;但 prosperity 侵略需經濟盈餘)；②warring 8月全窗跑不完(健康隊多=sim 變重,600s timeout,反證不 mass-starve);③FOOD_PER_PERSON 0.8/flow 門檻皆 TEST VALUE 待平衡 pass。
 
 - **🪖 受控人力統一系統 Phase 1（anon 吸收解 (a)）✅（merge）**：(a) 攀爬卡點 measure 揭「征服只 loot 不長 pop → 戰爭非累積 → turtle-world」。fix = 征服**吸收敗方殘餘 anon pop** 成隔離 captive（低忠，不入 population getter=非戰力）→ 待遇 means-end 決策（厚待/苛待/釋放，driver=holder leader 野心/殘忍/缺糧意圖）→ 軌跡：**厚待→morale 升→同化（captive→holder free pop，population getter 漲＝解 (a)）/ 苛待→morale 崩→暴動（脫離+鎮壓戰損+holder unrest）/ 低 morale+機會→逃（脫離成流民隊）**。**純 anon、零跨域（Phase 2/3 後續）**。**架構**：captive 持有 = `TeamData.captive_groups: Array`（**非 subteam**——subteam dispatch 強制 named leader + cohort 鍵固化，純 anon captive 走 holder 上獨立結構）。**守恆（命脈）**：吸收/同化/暴動/逃全經 `AnonTierSystem.absorb_as_captive/assimilate_captives/detach_captives`（pop 轉移非憑空；暴動鎮壓亡=真死亡路由非消失）。`absorb_as_captive` 插入 npc_combat `_end_combat`（敗方陣亡結算後、erase 前）。`ManpowerSystem.tick_all` sim_runner 每日 cadence。`InvariantAudit` 加 captive cohort 自洽網。**driver-complete**：captive group 帶 `entry/origin_faction/treatment_history`（provenance 追得回吸收+待遇史）。**結果**：headless 4 mp1 測（吸收守恆/待遇軌跡/decide driver/believability）+ 全綠、framework S1-S6 PASS、game_sim_multi InvariantViolation=0 + coin_eq delta=0（含 warzone 戰鬥場景）。常數全 TEST VALUE（CAPTURE_RATE=0.5/CAPTIVE_INIT_MORALE=0.25/ASSIM_T=0.75/REVOLT_T=0.08）。spec/plan `2026-06-30-controlled-manpower-*`。**待主 session**：(a) climb/warring seed 量測解讀（CONQUER 0→? 能人 pop 累積否 不 over-war 否）、常數平衡、Phase 2 named 俘虜起點、rung2→3 另案。

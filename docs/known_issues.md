@@ -26,7 +26,7 @@
 
 ### 第三批燒進度（2026-07-02 means-end + slice3 merged）
 - ✅ **means-end 接戰術層 done（intent_fit,願景進化第一深化）**：戰術層 intent-blind 修（intent 注入 ctx + intent_fit reshape option util）。**症狀 a（致富→貿易）全解**。**follow-up（移動標靶下一步）**：①**capture 完成 depth 低**（征服→攻擊 route 6.6×成、但吞併完成率未升 3→1=combat/subjugate 完成度,pre-existing;需 measure「打不贏 vs 贏了不吸收」→修 combat/subjugate depth）②**conqueror 食物 survival-trap**（高野心獨立隊 food_days≈3→困 survival-loot、發不出乾淨征服=食物軌張力壓過戰略層;裁「餓則搶」emergence 收 or 戰略層對高野心鬆 survival gate,跨食物軌）③**over-war 4pp 落 unseeded 噪**（要硬證不 over-war 需 **seeded warring 回歸 harness**,現 conquest_measure 無 seed [[reference_multi_sanity_unseeded]]）④**防衛/守成/建國/擴張 intent uplift**（後增量,本增量只致富/征服/匱乏）⑤TEST VALUE（INTENT_FIT_DRIVE 1.5/SURPLUS_FOOD_DAYS 7/SCARCITY_RAID_MIN 0.55）待校。
-- ✅ **單寫者 slice3 done（leader desync 根修）**：`set_leader` chokepoint + 反向 roster audit + ledger tick 接線。**F-S3 leader/team_id desync 結構性關閉**（chokepoint 強制同步 + 反向 audit 常駐;merchant desync unseeded 間歇未在此環境復現,結構保證非 case repro,seeded 復現=backlog）。**follow-up**：combat_target chokepoint（means-end 攻擊路徑定後綁 BEG/JOIN 社交語意拆）、tile-granary-bank/tile.resources bank（剩餘單寫者 slice）。
+- ✅ **單寫者 slice3 done（leader desync 根修）**：`set_leader` chokepoint + 反向 roster audit + ledger tick 接線。**F-S3 leader/team_id desync 結構性關閉**（chokepoint 強制同步 + 反向 audit 常駐;merchant desync unseeded 間歇未在此環境復現,結構保證非 case repro,seeded 復現=backlog）。**follow-up**：~~combat_target chokepoint + BEG/JOIN 社交語意拆~~ **✅ done（2026-07-02,social_target 拆 + JOIN resolver,join.resolve 0→4 死路消,F-S4+F-I3 收）**、tile-granary-bank/tile.resources bank（剩餘單寫者 slice）。
 
 ## 後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07-01-late-game-scaling-assessment`）
 
