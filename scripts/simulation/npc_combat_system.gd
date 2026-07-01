@@ -492,7 +492,7 @@ func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	# 守恆：死者隨身 coin 退回團（否則 persons.erase 連 coin 一起銷毀）
 	if p.coin > 0.0:
 		ResourceBank.add(team, "coin", p.coin, "death_coin_return")
-		p.coin = 0.0
+		ResourceBank.adjust_person_coin(p, -p.coin, "death_coin_return")
 	state.persons.erase(p.id)
 
 func _best_medicine(state: WorldState, team: TeamData) -> float:

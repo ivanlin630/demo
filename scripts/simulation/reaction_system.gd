@@ -289,7 +289,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			var money: float = float(team.resources.get("coin", 0))
 			var steal: float = minf(money, 5.0)
 			ResourceBank.add(team, "coin", -steal, "extort")
-			person.coin += steal   # 守恆：偷進私囊
+			ResourceBank.adjust_person_coin(person, steal, "extort")   # 守恆：偷進私囊
 
 	_maybe_write_memory(person, reaction, state.world.current_tick)
 
