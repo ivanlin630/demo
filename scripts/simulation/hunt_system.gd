@@ -10,6 +10,12 @@ func hunt_small_game(state: WorldState, team: TeamData, tile: HexTileData, activ
 	var game: int = int(tile.resources.get("wild_game", 0))
 	if game <= 0:
 		return { "success": false, "food": 0.0, "msg": "無獵物" }
+	# 讀B：覓食 = 苟活地板。team 覓食來源食物（team.resources food）latch 在 subsistence buffer。
+	# 已達 buffer → 不獵（不擲骰、不耗 wild_game、不 bank）→ 守恆乾淨、不憑空滅世界資源。
+	var buffer: float = ResourceSystem._forage_subsist_buffer(team)
+	var cur_food: float = float(team.resources.get("food", 0))
+	if cur_food >= buffer:
+		return { "success": false, "food": 0.0, "msg": "食物已足（苟活封頂）" }
 	var survival: float = _avg_survival(state, team)
 	var base: float = ACTIVE_BASE_CHANCE if active else PASSIVE_BASE_CHANCE
 	var chance: float = clampf(base + survival * 0.4, 0.0, 0.95)
@@ -17,9 +23,11 @@ func hunt_small_game(state: WorldState, team: TeamData, tile: HexTileData, activ
 		return { "success": false, "food": 0.0, "msg": "空手而回" }
 	tile.resources["wild_game"] = game - 1   # 枯竭 1 隻
 	var food: float = FOOD_PER_GAME * (1.0 + survival * 0.3)
-	ResourceBank.add(team, "food", food, "hunt")
-	team.forage_today = float(team.forage_today) + food   # 併入覓食 episode 日彙整
-	return { "success": true, "food": food, "msg": "獵得野味 +%d 糧" % int(round(food)) }
+	# 超 buffer 部分不 bank（苟活地板；剩肉腐敗=sink，非憑空生糧）。
+	var banked: float = minf(food, buffer - cur_food)
+	ResourceBank.add(team, "food", banked, "hunt")
+	team.forage_today = float(team.forage_today) + banked   # 併入覓食 episode 日彙整
+	return { "success": true, "food": banked, "msg": "獵得野味 +%d 糧" % int(round(banked)) }
 
 func _avg_survival(state: WorldState, team: TeamData) -> float:
 	var total: float = 0.0; var count: int = 0
