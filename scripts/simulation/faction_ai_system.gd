@@ -236,6 +236,8 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 			state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "prosperity"):
 		team.prosperity_target_id = prey_id
 		if _was_scout: Probe.bump("g3.scout_converge")
+		# 征服名實探針：真征服鏈起點（prosperity-attack→失能-capture→吸收）走到。
+		Probe.bump("conq.prosperity_reached")
 		print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
 			team.team_id, prey_id, score])
 
@@ -1179,7 +1181,12 @@ func uses_unified(team: TeamData) -> bool:
 func _decide_unified(state: WorldState, team: TeamData) -> void:
 	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
-	for opt in DecisionEngine.rank(state, team):
+	var ranked: Array = DecisionEngine.rank_scored(state, team)
+	# 征服名實探針（純觀測）：solo_intent=征服 的隊在此實際 winner 分類（想征服 vs 做掠奪）。
+	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
+	if _conq: Probe.bump("conq.intent")
+	for e in ranked:
+		var opt: String = e["opt"]
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
@@ -1193,6 +1200,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		team.current_option = opt   # 承諾追蹤實際派出
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
+		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
 		# 掠奪 option：設 combat_target 才會交戰（非只移動）
@@ -1200,6 +1208,32 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			team.combat_target = int(td["combat_target"])
 		return
 	# 全不可派 → 保持現行(no-op)
+	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner
+
+# 征服名實探針：分類 _decide_unified 的實際 winner + 記 util 排序根（no-op unless enabled）。
+# 掠奪 = 機會搶資源（非奪地/俘虜）；攻擊 = faction directive（獨立隊不觸）；其餘 = other。
+# prosperity-attack 不是 _decide_unified option（分離 gate 路徑，跑在此之後）→ winner_prosperity ≈ 0
+# 由 construction，恰證「_decide_unified 無征服 option、掠奪搶排序」= 名實斷點根。
+func _probe_conq_winner(winner_opt: String, ranked: Array) -> void:
+	match winner_opt:
+		"掠奪": Probe.bump("conq.winner_loot")
+		"攻擊": Probe.bump("conq.winner_prosperity")
+		_:      Probe.bump("conq.winner_other")
+	# util 排序根：掠奪 option util vs 最佳非掠奪 option util（掠奪領先多少 = 搶排序證據）。
+	var loot_u: float = 0.0
+	var best_other_u: float = 0.0
+	var has_loot: bool = false
+	var has_other: bool = false
+	for e in ranked:
+		if String(e["opt"]) == "掠奪":
+			loot_u = float(e["u"]); has_loot = true
+		else:
+			best_other_u = maxf(best_other_u, float(e["u"])) if has_other else float(e["u"])
+			has_other = true
+	if has_loot:
+		Probe.note("conq.loot_util", loot_u)
+		if has_other:
+			Probe.note("conq.loot_lead", loot_u - best_other_u)   # 掠奪領先次佳的最大幅度
 
 func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 	var best_id: int = -1

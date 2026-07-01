@@ -6,7 +6,9 @@ class_name DecisionEngine
 const COMMITMENT_BONUS: float = 0.3   # TEST VALUE：承諾慣性（防震盪）
 
 # options 依 util 降序（index tiebreak：util 相等→applicable 順序在前者勝，同 argmax strict >）。
-static func rank(state: WorldState, team: TeamData) -> Array:
+# 排序後帶 util 的 scored 陣列 [{u,i,opt}, ...]（降序）。rank() 只取 opt；
+# 量測探針（征服名實）要讀 util 排序根 → 走此無損 accessor（不重算 term loop）。
+static func rank_scored(state: WorldState, team: TeamData) -> Array:
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
 	var scored: Array = []
 	var idx: int = 0
@@ -22,8 +24,11 @@ static func rank(state: WorldState, team: TeamData) -> Array:
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])   # tiebreak：applicable 順序
 	SpecimenTracer.capture_options(state, team, scored)   # specimen tap（no-op-unless-specimen）
+	return scored
+
+static func rank(state: WorldState, team: TeamData) -> Array:
 	var out: Array = []
-	for e in scored: out.append(e["opt"])
+	for e in rank_scored(state, team): out.append(e["opt"])
 	return out
 
 # survival-class 子集排序（P2b-1：non-unified _trigger_survival 委派用）。

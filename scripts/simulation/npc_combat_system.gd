@@ -287,6 +287,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var _captured: int = AnonTierSystem.absorb_as_captive(state, winner, loser, AnonTierSystem.CAPTURE_RATE)
 	if _captured > 0:
 		print("[P1Absorb] Team%d 吸收 Team%d 殘餘 anon → captive +%d" % [winner_id, loser_id, _captured])
+		_probe_capture_by_task(winner)   # 征服名實：掠奪隊 vs 攻擊隊 誰達成 capture
 	_apply_pursuit(state, winner_id, loser_id)
 	var _pp_end: PersonData = state.persons.get(state.player_id)
 	var _ptid_end: int = _pp_end.team_id if _pp_end else -1
@@ -319,10 +320,21 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 		if _cap > 0:
 			print("[Capture] Team%d 控地俘 Team%d 潰逃 wounded +%d (rd=%.2f)" % [
 				pursuer_id, retreater_id, _cap, retreater.readiness])
+			_probe_capture_by_task(state.teams[pursuer_id])   # 征服名實：掠奪 vs 攻擊 capture 歸因
 	var _pp_fr: PersonData = state.persons.get(state.player_id)
 	var _ptid_fr: int = _pp_fr.team_id if _pp_fr else -1
 	if _ptid_fr == -1 or pursuer_id != _ptid_fr:
 		_try_subjugate(state, pursuer_id, retreater_id)
+
+# 征服名實探針（純觀測）：capture 事件按勝方 task 歸因。掠奪(TASK_LOOT)達 capture 預期 ~0
+# （掠奪=機會搶資源、不奪地俘虜）；真 capture 應來自 prosperity-attack(TASK_ATTACK)。
+func _probe_capture_by_task(capturer: TeamData) -> void:
+	if not Probe.enabled or capturer == null: return
+	Probe.bump("capture.total")
+	match capturer.current_task:
+		TeamData.TASK_LOOT:   Probe.bump("loot.achieved_capture")
+		TeamData.TASK_ATTACK: Probe.bump("capture.by_attack")
+		_:                    Probe.bump("capture.by_other")
 
 func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 	if not state.teams.has(winner_id) or not state.teams.has(loser_id):
