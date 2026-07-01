@@ -63,5 +63,9 @@ func _run() -> void:
 	# 受控人力 P1 (a)：吸收→同化(pop 累積)/暴動/逃 emergent
 	for k in ["p1.assimilate", "p1.revolt", "p1.flee"]:
 		print("[戰國] probe %s=%d" % [k, int(Probe.counts.get(k, 0))])
+	# BEG/JOIN 死路探針（F-I3）：NPC-NPC 絕境乞食/投靠 dispatch vs resolve 死路量化
+	for k in ["beg.dispatch", "beg.early_return_197", "beg.resolve",
+			"join.dispatch", "join.arrived_no_handler", "join.resolve"]:
+		print("[戰國] probe %s=%d" % [k, int(Probe.counts.get(k, 0))])
 	Probe.enabled = false
 	print("=== warring_states seed DONE ===")
