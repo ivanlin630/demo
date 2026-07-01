@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: granary 定位完成——真根≠net0,是 supply/demand cadence 24× 不對稱(regen+harvest 未 day-scale、consumption 有)→ forest 秘密 net-positive、整個世界食物太鬆;修=economy-wide 收緊 = 大 rebalance,需你 WHAT sign-off(非我單決)
 ---
 

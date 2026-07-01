@@ -6,6 +6,17 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。
 
 
+## 後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07-01-late-game-scaling-assessment`）
+
+> LOD infra 存在且對 movement/economy 正確,但重認知系統 defeat LOD → O(N²)/hr。沙盒長跑須加固(否則大戲跑不到)。非重寫,P0 三項 targeted。
+- **★compute top:`faction_ai_system.gd:513 evaluate_all` 忽略 LOD 參數 → O(N²)/小時**：`evaluate_all(_team_ids)` 的 subset 被 `_` 忽略、對全 `state.teams` 跑;`_has_hostile_within:1455` 每隊掃全隊無空間索引 = 主 O(N²)/hr。修=honor LOD / 加 tile→teams 索引。
+- **★compute:`world_state.gd:123 erase_team` O(N)/erase → die-off O(K·N)≈O(N²)**：3× 全隊/registry ref-sweep × `cleanup_extinct_teams` 每 tick;大滅團潮 = late-game 崩塌直接放大器 = **最可能卡死觸發**（且正是沙盒最想看的大戲時刻）。
+- compute 其他 O(N²)/O(N·T)/hr：`_evaluate_outpost_residency:419`(全 tile/隊)、`vision_system.gd:22 tick_discovery`(inner 全 N)、`interaction_system.gd:74`(co-location 全掃,修 pattern 已存 `sim_runner.gd:247` pos_map)、`outpost_system.gd:168 tick_all`。
+- **★memory top leak:`world_state.gd:17 team_intel` observer rows O(世界年齡無界)**：`erase_team` 從不 prune team_intel → 每個曾存在的隊留永久 observer dict + 死 target claim rows。per-obs 200 claim cap 有、observer row 無。修=erase_team 加 `team_intel.erase(tid)` + 掃 observer 清死 target（同 create_faction chokepoint）。
+- memory 其他：`player_alerts` headless 無 poll leak(diplomatic 未 dedup)、`person_data.gd:54 memory` 繞過 `_trim_memory` 路徑(reaction:369/diplomacy/trade/command)可超 MEMORY_MAX=20。其餘結構全有 cap/TTL/erase-prune 界住。
+- **nit**:`world_state.gd:157-158 team_known[obs].erase(tid)` no-op(array 存 MessageData 非 int)→ 意圖 cleanup 沒跑;無害(TTL 覆蓋)該修對。
+- **加固排序建議**：granary(定世界規模)→ P0(faction AI honor LOD + tile→teams 共用空間索引 + team_intel erase-prune)配 #2/#3 探針/計時 + scaling bed 驗 → 長跑觀 emergence。
+
 ## 讀B/G3 Phase E backlog（2026-07-01 平行軌）
 
 - **★次閘：定居隊 granary 自填 = trade loop 不 fire 真閘（讀B 覓食 cap 後 measure 揭）**：覓食 subsistence cap 正確封住覓食成長路徑（unit 測 + priv food 壓低證），但 econ_bed baseline 對照顯 **forest 定居隊（regen food=3）granary 月1 即填至 ~cap（gran≈1999）並維持**，pop 成長由 granary（eff_food≈2200）驅動非覓食（priv≈150-288）→ cap 對定居成長影響小 → **trade loop 沒需求驅動、不 fire**。「繁榮須交易」emergence 未到（覓食封了、granary 旁路未封）。屬 **granary/harvest 域**（食物統一 arc 下一 slice），非覓食 cap scope。**修向（待藍圖排序 + measure）**：查 forest regen 3 為何 granary 也填滿（harvest 產出 / storage cap / tile 食物池 init 來源）→ 定居隊 granary 亦須「特化受限」才逼交易。覓食 cap 是必要地板層（granary 修好後覓食不能 backfill 成長）。
