@@ -3,6 +3,12 @@ class_name DiplomaticAiSystem
 
 const BETRAY_CHECK_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時
 const REJECT_COOLDOWN: int = WorldState.TICKS_PER_DAY * 7   # 被拒後同對象冷卻 7 天
+# G3-E Task3：背叛 belief 驅動化常數（TEST VALUE）
+const BETRAY_ADVANTAGE_GAIN: float = 0.6   # belief「盟弱我利」→ 背叛動機加成
+const BETRAY_CONF_MIN: float = 0.5         # belief 篤定度下限：不憑不確定情報背叛（慎重）
+const BETRAY_DRIVE_MIN: float = 0.65       # 背叛動機門檻（承接舊 score>0.65 語意）
+const BETRAY_DRIVE_HARD: float = 0.9       # 動機極高 → 幾乎必觸發（deterministic）
+const BETRAY_MARGIN_CHANCE: float = 0.3    # MIN..HARD 之間 stochastic tie-break 上限（非主驅）
 
 # T-02：從 team_intel 取人口估算；無資料 fallback = self_pop（謹慎：視對方與己等強）
 func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
@@ -62,7 +68,9 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 			_send_diplomacy_message(state, self_team, other, "propose_trade")
 			return
 
-		var power_gap: float = float(other.population - self_team.population) / \
+		# G3-E leak 1a：power_gap 讀 belief 非 god-view 真值（無估→fallback self_pop=保守等強→gap0→不求貢）
+		var _other_pop_est: int = _get_pop_est(state, self_team.team_id, other.team_id, self_team.population)
+		var power_gap: float = float(_other_pop_est - self_team.population) / \
 			maxf(self_team.population, 1.0)
 		if power_gap > 0.5 and self_leader.values.get("貪婪", 0.5) > 0.6:
 			# G3d-1 風險 gate：求貢=敵對行動(基於「對方弱可欺」)，不確定且慎重→按兵；結盟/求和不 gate
@@ -128,7 +136,9 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 			var leader: PersonData = state.persons.get(self_team.leader_id) if self_team.leader_id != -1 else null
 			var pride:   float = float(leader.values.get("義氣", 0.5)) if leader else 0.5
 			var caution: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
-			var power_r: float = float(sender_team.population) / maxf(float(self_team.population), 1.0)
+			# G3-E leak 1d：收貢方對 sender 實力讀 belief 非真值（無估→fallback self_pop=保守等強）
+			var _sender_pop_est: int = _get_pop_est(state, self_team.team_id, sender_team.team_id, self_team.population)
+			var power_r: float = float(_sender_pop_est) / maxf(float(self_team.population), 1.0)
 			# 接受分：強弱差大 + 謹慎 → 傾向接受；義氣高 → 傾向拒絕
 			var d_score: float = (power_r - 1.0) * 0.4 + caution * 0.3 - pride * 0.3
 			print("[DiplomacyAI] demand_tribute score=%.2f (power_r=%.2f, caution=%.2f, pride=%.2f)" % [d_score, power_r, caution, pride])
@@ -168,27 +178,58 @@ func _form_alliance(state: WorldState,
 			print("[Surrender] 居民團 Team%d 投降，outpost (%d,%d) %d→%d" % [
 				team_b.team_id, team_b.tile_pos.x, team_b.tile_pos.y, old_owner, team_a.team_id])
 
-func consider_betrayal(state: WorldState, self_team: TeamData,
-		ally_team: TeamData) -> bool:
+# G3-E Task3+1e：背叛評估純函數（無 RNG，供決策與測試）。
+# driver = 人格(野心/背信/薄義) + belief power advantage（盟弱我利→動機↑）；
+# ally 實力估：優先 faction snapshot（同 faction 協調豁免=共享情報），次 belief est，
+# 皆無 → 最保守（視盟不明→不背叛）。confidence = 1−belief uncertainty（不憑不確定情報背叛）。
+func betrayal_assessment(state: WorldState, self_team: TeamData,
+		ally_team: TeamData) -> Dictionary:
 	var self_leader: PersonData = state.persons.get(self_team.leader_id)
-	if self_leader == null: return false
-	var betrayal_score: float = \
+	if self_leader == null:
+		return { "would_betray": false, "advantage": 0.0, "confidence": 0.0, "driver": 0.0, "power_gap": 0.0 }
+	var personality: float = \
 		self_leader.values.get("野心", 0.5) * 0.4 + \
 		(1.0 - self_leader.values.get("信義", 0.5)) * 0.4 + \
 		(1.0 - self_leader.values.get("義氣", 0.5)) * 0.2
-	# T-02：從 faction_snapshot 讀盟友人口（非直讀 WorldState）
-	var ally_pop: int = ally_team.population  # fallback
+	# ally 實力估（非 god-view 真值）
+	var ally_pop_est := -1.0
 	if self_team.faction_id != -1:
 		var f: FactionData = state.factions.get(self_team.faction_id)
-		if f:
-			ally_pop = f.known_member_states.get(ally_team.team_id, {}).get("population", ally_team.population)
-	var power_gap: float = float(ally_pop - self_team.population) / \
-		maxf(self_team.population, 1.0)
-	if power_gap > 0.5: betrayal_score -= 0.3
-	if betrayal_score > 0.65 and randf() < 0.1:
-		_execute_betrayal(state, self_team, ally_team)
-		return true
-	return false
+		if f and f.known_member_states.has(ally_team.team_id):
+			ally_pop_est = float(f.known_member_states[ally_team.team_id].get("population", -1.0))
+	var has_bel: bool = BeliefSystem.has_belief(state, self_team.team_id, ally_team.team_id)
+	if ally_pop_est < 0.0 and has_bel:
+		ally_pop_est = float(BeliefSystem.best_estimate(state, self_team.team_id, ally_team.team_id).get("population_est", -1.0))
+	if ally_pop_est < 0.0:
+		# 無 snapshot 且無 belief → 最保守：不背叛
+		return { "would_betray": false, "advantage": 0.0, "confidence": 0.0, "driver": personality, "power_gap": 0.0 }
+	var power_gap: float = (ally_pop_est - float(self_team.population)) / \
+		maxf(float(self_team.population), 1.0)
+	var advantage: float = clampf(-power_gap, 0.0, 1.0)   # 盟弱我強 → advantage>0（可解釋 driver）
+	var driver: float = personality + advantage * BETRAY_ADVANTAGE_GAIN
+	if power_gap > 0.5: driver -= 0.3   # 盟強 → 抑制
+	# 篤定度：belief 有情報用 uncertainty；純 snapshot（同 faction 共享）視為篤定
+	var confidence := 1.0
+	if has_bel:
+		confidence = 1.0 - BeliefSystem.uncertainty(state, self_team.team_id, ally_team.team_id)
+	var would: bool = driver >= BETRAY_DRIVE_MIN and confidence >= BETRAY_CONF_MIN
+	return { "would_betray": would, "advantage": advantage, "confidence": confidence,
+		"driver": driver, "power_gap": power_gap }
+
+func consider_betrayal(state: WorldState, self_team: TeamData,
+		ally_team: TeamData) -> bool:
+	var a: Dictionary = betrayal_assessment(state, self_team, ally_team)
+	if not a["would_betray"]: return false
+	# driver 為主驅；接近門檻保留小 stochastic tie-break（非主驅，去純 RNG）
+	var driver: float = float(a["driver"])
+	var trigger: bool = driver >= BETRAY_DRIVE_HARD
+	if not trigger:
+		var margin: float = clampf((driver - BETRAY_DRIVE_MIN) / \
+			maxf(BETRAY_DRIVE_HARD - BETRAY_DRIVE_MIN, 0.001), 0.0, 1.0)
+		trigger = randf() < margin * BETRAY_MARGIN_CHANCE
+	if not trigger: return false
+	_execute_betrayal(state, self_team, ally_team)
+	return true
 
 func _execute_betrayal(state: WorldState, self_team: TeamData,
 		ally_team: TeamData) -> void:
@@ -212,4 +253,5 @@ func _execute_betrayal(state: WorldState, self_team: TeamData,
 					"tick": state.world.current_tick,
 					"data": { "betrayer_id": self_team.team_id }
 				})
+	Probe.bump("g3.betrayal")   # Phase-E：背叛率可觀測（belief 驅動 vs 舊純 RNG）
 	print("[Diplomacy] Team%d 背叛 Team%d" % [self_team.team_id, ally_team.team_id])

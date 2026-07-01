@@ -459,6 +459,12 @@ func _initialize() -> void:
 	_test_cmd_viability_hysteresis()
 	_test_faction_attack_gate()
 	_test_diplomacy_hostile_gate()
+	# ── G3 Phase E：enforce（belief 真正驅動決策，god-view leak 補）──
+	_test_leak_tribute_powergap_belief()
+	_test_leak_tribute_response_belief()
+	_test_leak_strong_neighbor_belief()
+	_test_leak_aid_target_belief()
+	_test_betrayal_belief_driven()
 	# ── G3d-2 cred-weighted uncertainty + scout 查證 ──
 	_test_uncertainty_credweighted()
 	_test_scout_verification()
@@ -910,7 +916,142 @@ func _test_diplomacy_hostile_gate() -> void:
 		"慎重者親見確定→照常求貢(不凍結)，實際 cooldown=%s" % str(dm_b.diplomacy_reject_cooldown))
 	print("diplomacy gate OK")
 
+# G3 Phase E leak 1a：demand_tribute 的 power_gap 讀 belief 非真值。
+# 真值≠belief 兩向：真強belief弱→不求貢；真弱belief強→求貢。莽者(caution 高繞 RNG，親見確定→gate 過)。
+# demander pop4 貪婪，caution 2.0 繞 RNG、義氣/信義低壓 score 落求貢區；target_real_pop=真值，belief_pop=植入估
+func _tribute_leak_scene(target_real_pop: int, belief_pop: int) -> Array:
+	var st := WorldState.new(); st.world = WorldData.new()
+	var dm := TeamData.new(); dm.team_id = 0; dm.tile_pos = Vector2i(0,0); _seed_pop(dm, 4)
+	dm.faction_id = -1; dm.resources = { "food": 5000 }
+	st.teams[0] = dm
+	var dl := PersonData.new(); dl.id = 100
+	dl.values = { "貪婪": 0.7, "慎重": 2.0, "義氣": 0.1, "信義": 0.1, "野心": 0.5 }
+	st.persons[100] = dl; dm.leader_id = 100
+	var tg := TeamData.new(); tg.team_id = 1; tg.tile_pos = Vector2i(0,0); _seed_pop(tg, target_real_pop)
+	tg.faction_id = 1; st.teams[1] = tg
+	var tl := PersonData.new(); tl.id = 101; tl.values = { "義氣": 0.9, "慎重": 0.0 }
+	st.persons[101] = tl; tg.leader_id = 101
+	st.team_discovered[0] = [1]
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": belief_pop}, 1.0, false)
+	return [st, dm]
+
+func _test_leak_tribute_powergap_belief() -> void:
+	print("--- G3-E leak 1a：求貢 power_gap 讀 belief ---")
+	var dip := DiplomaticAiSystem.new()
+	# A) 真強(pop20) 但 belief 弱(3)：god-view 會求貢(gap4>0.5)，belief 說不值 → 不求貢
+	var sa: Array = _tribute_leak_scene(20, 3)
+	dip.try_proactive_diplomacy(sa[0], sa[1])
+	assert(not (sa[1] as TeamData).diplomacy_reject_cooldown.has(1),
+		"真強belief弱→依 belief 不求貢，實際 cooldown=%s" % str((sa[1] as TeamData).diplomacy_reject_cooldown))
+	# B) 真弱(pop4) 但 belief 強(50)：god-view 不求貢，belief 說可欺 → 求貢
+	var sb: Array = _tribute_leak_scene(4, 50)
+	dip.try_proactive_diplomacy(sb[0], sb[1])
+	assert((sb[1] as TeamData).diplomacy_reject_cooldown.has(1),
+		"真弱belief強→依 belief 求貢，實際 cooldown=%s" % str((sb[1] as TeamData).diplomacy_reject_cooldown))
+	print("leak 1a tribute power_gap belief OK")
+
+# G3 Phase E leak 1d：收貢方評 sender 實力讀 belief 非真值。
+func _test_leak_tribute_response_belief() -> void:
+	print("--- G3-E leak 1d：收貢回應讀 sender belief ---")
+	var dip := DiplomaticAiSystem.new()
+	var st := WorldState.new(); st.world = WorldData.new()
+	# 收貢方(recipient)=self pop10；sender 真強 pop50 但 recipient 的 belief 弱(5)
+	var recv := TeamData.new(); recv.team_id = 0; recv.tile_pos = Vector2i(0,0); _seed_pop(recv, 10)
+	st.teams[0] = recv
+	var rl := PersonData.new(); rl.id = 200; rl.values = { "義氣": 0.5, "慎重": 0.5 }
+	st.persons[200] = rl; recv.leader_id = 200
+	var sender := TeamData.new(); sender.team_id = 1; sender.tile_pos = Vector2i(0,0); _seed_pop(sender, 50)
+	st.teams[1] = sender
+	var sl := PersonData.new(); sl.id = 201; st.persons[201] = sl; sender.leader_id = 201
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 5}, 1.0, false)  # recipient 眼中 sender 弱
+	var resp: String = dip.handle_diplomacy_message(st, recv, sender, "demand_tribute")
+	# god-view: power_r=5 → d_score≈1.6 → accept；belief: power_r=0.5 → d_score<0 → refuse
+	assert(resp == "refuse", "sender belief 弱→拒貢(不畏)，實際=%s" % resp)
+	print("leak 1d tribute response belief OK")
+
+# G3 Phase E leak 1b：_find_strong_neighbor 讀 belief 非真值。
+func _test_leak_strong_neighbor_belief() -> void:
+	print("--- G3-E leak 1b：強鄰投靠讀 belief ---")
+	var fai := FactionAISystem.new()
+	var st := _prosperity_grid()
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0,0); _seed_pop(team, 10)
+	team.faction_id = -1; st.teams[0] = team
+	# n1 真強(pop50) 但 belief 弱(5)→不合格；n2 真弱(pop8) 但 belief 強(50)→合格；n3 無 belief→跳
+	var n1 := TeamData.new(); n1.team_id = 1; n1.tile_pos = Vector2i(1,0); _seed_pop(n1, 50); n1.last_tile_pos = n1.tile_pos; st.teams[1] = n1
+	var n2 := TeamData.new(); n2.team_id = 2; n2.tile_pos = Vector2i(2,0); _seed_pop(n2, 8); n2.last_tile_pos = n2.tile_pos; st.teams[2] = n2
+	var n3 := TeamData.new(); n3.team_id = 3; n3.tile_pos = Vector2i(1,1); _seed_pop(n3, 50); n3.last_tile_pos = n3.tile_pos; st.teams[3] = n3
+	team.known_reputations = { 1: 0.5, 2: 0.5, 3: 0.5 }
+	st.team_discovered[0] = [1, 2, 3]
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 5}, 1.0, false)
+	BeliefSystem.record_claim(st, 0, 2, 0, "親見", {"population_est": 50}, 1.0, false)
+	var pick: int = fai._find_strong_neighbor(st, team)
+	assert(pick == 2, "belief 強者(n2)被選，真強belief弱(n1)/無情報(n3)不選，實際=%d" % pick)
+	print("leak 1b strong neighbor belief OK")
+
+# G3 Phase E leak 1c：_find_aid_target 讀 belief pop+food 非真值。
+func _test_leak_aid_target_belief() -> void:
+	print("--- G3-E leak 1c：施援目標讀 belief ---")
+	var fai := FactionAISystem.new()
+	var st := _prosperity_grid()
+	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0,0); _seed_pop(team, 10)
+	team.faction_id = -1; st.teams[0] = team
+	# c1 真富(food海量) 但 belief food_est 低→不合格；c2 belief 顯示有餘糧→合格；c3 無 food_est→保守跳
+	var c1 := TeamData.new(); c1.team_id = 1; c1.tile_pos = Vector2i(1,0); _seed_pop(c1, 5); c1.last_tile_pos = c1.tile_pos
+	c1.resources = { "food": 100000 }; st.teams[1] = c1
+	var c2 := TeamData.new(); c2.team_id = 2; c2.tile_pos = Vector2i(2,0); _seed_pop(c2, 5); c2.last_tile_pos = c2.tile_pos
+	c2.resources = { "food": 0 }; st.teams[2] = c2
+	var c3 := TeamData.new(); c3.team_id = 3; c3.tile_pos = Vector2i(1,1); _seed_pop(c3, 5); c3.last_tile_pos = c3.tile_pos
+	c3.resources = { "food": 100000 }; st.teams[3] = c3
+	team.known_reputations = { 1: 0.5, 2: 0.5, 3: 0.5 }
+	st.team_discovered[0] = [1, 2, 3]
+	# reserve = pop_est*14 = 5*14 = 70。c1 belief food 10<70→跳；c2 belief food 500>70→合格；c3 無 food_est→跳
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 5, "food_est": 10}, 1.0, false)
+	BeliefSystem.record_claim(st, 0, 2, 0, "親見", {"population_est": 5, "food_est": 500}, 1.0, false)
+	BeliefSystem.record_claim(st, 0, 3, 0, "親見", {"population_est": 5}, 1.0, false)
+	var pick: int = fai._find_aid_target(st, team)
+	assert(pick == 2, "belief 有餘糧者(c2)被選，真富belief窮(c1)/無 food_est(c3)不選，實際=%d" % pick)
+	print("leak 1c aid target belief OK")
+
+# self pop20，treacherous leader(野心0.9/信義0.1/義氣0.1)，ally 同 faction；植 belief 估
+func _betrayal_scene(ally_belief_pop: int, second_belief_pop: int) -> Array:
+	var st := WorldState.new(); st.world = WorldData.new()
+	var self_t := TeamData.new(); self_t.team_id = 0; _seed_pop(self_t, 20); self_t.faction_id = 7
+	st.teams[0] = self_t
+	var sl := PersonData.new(); sl.id = 300
+	sl.values = { "野心": 0.9, "信義": 0.1, "義氣": 0.1 }
+	st.persons[300] = sl; self_t.leader_id = 300
+	var ally := TeamData.new(); ally.team_id = 1; _seed_pop(ally, 20); ally.faction_id = 7
+	st.teams[1] = ally
+	var f := FactionData.new(); f.faction_id = 7; f.leader_team_id = 1
+	f.member_team_ids = [0, 1]; st.factions[7] = f
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": ally_belief_pop}, 1.0, false)
+	if second_belief_pop > 0:
+		BeliefSystem.record_claim(st, 0, 1, 9, "流民", {"population_est": second_belief_pop}, 0.4, true)
+	return [st, self_t, ally]
+
+# G3 Phase E Task3+1e：背叛讀 belief power_gap、driver 可解釋、confidence gate、去純 RNG。
+func _test_betrayal_belief_driven() -> void:
+	print("--- G3-E Task3：背叛 belief 驅動化 ---")
+	var dip := DiplomaticAiSystem.new()
+	# A) 盟弱 belief(5) → advantage 高、driver 高 → would_betray
+	var sa: Array = _betrayal_scene(5, 0)
+	var aa: Dictionary = dip.betrayal_assessment(sa[0], sa[1], sa[2])
+	assert(float(aa["advantage"]) > 0.3, "盟弱→advantage 高，實際=%.2f" % aa["advantage"])
+	assert(aa["would_betray"], "盟弱belief+treacherous→動機足可背叛")
+	# B) 盟強 belief(100) → power_gap>0.5 抑制、advantage 0 → 不背叛
+	var sb: Array = _betrayal_scene(100, 0)
+	var ab: Dictionary = dip.betrayal_assessment(sb[0], sb[1], sb[2])
+	assert(float(ab["advantage"]) < 0.05, "盟強→無 advantage，實際=%.2f" % ab["advantage"])
+	assert(not ab["would_betray"], "盟強→不背叛")
+	# C) 情報矛盾(5 vs 500 高分歧) → confidence 低 → confidence gate 擋(不憑不確定情報背叛)
+	var sc: Array = _betrayal_scene(5, 500)
+	var ac: Dictionary = dip.betrayal_assessment(sc[0], sc[1], sc[2])
+	assert(float(ac["confidence"]) < 0.6, "矛盾情報→confidence 低，實際=%.2f" % ac["confidence"])
+	assert(not ac["would_betray"], "不確定情報→慎重不背叛(confidence gate)")
+	print("betrayal belief-driven OK")
+
 func _test_uncertainty_credweighted() -> void:
+	print("--- G3d-2：cred-weighted uncertainty ---")
 	print("--- G3d-2：cred-weighted uncertainty ---")
 	# 親見單源(cred 1) → top=1, spread=0 → ~0（確定）
 	var s := WorldState.new(); s.world = WorldData.new(); s.team_intel = {}
@@ -5594,6 +5735,7 @@ func _test_survival_helpers() -> void:
 	state.team_discovered[1] = [0]
 	# G3-targeting：_find_weakest_prey 讀 belief → 須先有情報
 	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 3, "food_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 20, "food_est": 500}, 1.0, false)  # Phase-E：strong/aid 讀 belief
 	var fai := FactionAISystem.new()
 	var op_pos = fai._find_own_outpost(state, t0)
 	assert(op_pos == Vector2i(5, 5), "own outpost 應 (5,5)，實際=%s" % str(op_pos))
@@ -5656,6 +5798,7 @@ func _test_survival_decision_tree() -> void:
 	s3.persons[200] = ally_leader; ally.leader_id = 200
 	s3.teams[0] = t3; s3.teams[1] = ally; s3.team_discovered[0] = [1]
 	t3.known_reputations[1] = 0.6
+	BeliefSystem.record_claim(s3, 0, 1, 0, "親見", {"population_est": 20}, 1.0, false)  # Phase-E：強鄰投靠讀 belief
 	fai._trigger_survival(s3, t3, "urgent")
 	assert(t3.current_task == TeamData.TASK_JOIN, "Path 3 應 投靠，實際=%s" % t3.current_task)
 	# (4) 默認 → 乞食（pop > FORAGE_VIABLE_POP 跳覓食；周圍格皆有主 → 無法紮營 → 落到乞食）
@@ -5672,6 +5815,7 @@ func _test_survival_decision_tree() -> void:
 	var aid := TeamData.new(); aid.team_id = 1; aid.tile_pos = Vector2i(2,0); _seed_pop(aid, 18)
 	aid.resources["food"] = 500
 	s4.teams[0] = t4; s4.teams[1] = aid; s4.team_discovered[0] = [1]
+	BeliefSystem.record_claim(s4, 0, 1, 0, "親見", {"population_est": 18, "food_est": 500}, 1.0, false)  # Phase-E：乞食(_find_aid_target)讀 belief
 	fai._trigger_survival(s4, t4, "urgent")
 	assert(t4.current_task == TeamData.TASK_BEG, "Path 4 應 乞食，實際=%s" % t4.current_task)
 	print("Survival Task4 OK")
@@ -14182,6 +14326,9 @@ func _mk_strong_neighbor_team(state: WorldState, pos: Vector2i, target: TeamData
 	if not state.team_discovered.has(target.team_id):
 		state.team_discovered[target.team_id] = []
 	state.team_discovered[target.team_id].append(tid)
+	# Phase-E：_find_strong_neighbor 讀 belief → 供投靠決策看見「強鄰」
+	BeliefSystem.record_claim(state, target.team_id, tid, target.team_id, "親見",
+		{"population_est": 30}, 1.0, false)
 	return t
 
 # 玩家強隊：state.player_id + leader=player + strong
@@ -14253,6 +14400,8 @@ func _test_p2a_join_player_forced() -> void:
 	var npc := _mk_unified_desperate_team(state, Vector2i(2,2), {"義氣":0.9,"信義":0.8,"求生欲":0.8})
 	# npc 發現玩家隊（同格 → 可達 → strong neighbor）
 	state.team_discovered[npc.team_id].append(pteam.team_id)
+	BeliefSystem.record_claim(state, npc.team_id, pteam.team_id, npc.team_id, "親見",
+		{"population_est": 30}, 1.0, false)  # Phase-E：強鄰投靠讀 belief
 	fa._decide_unified(state, npc)
 	assert(not state.player_forced_event.is_empty(), "[p2a] 投靠玩家未寫 forced_event（W2）")
 	assert(state.player_forced_event.get("action") == "join_request", "[p2a] forced_event 非 join_request")

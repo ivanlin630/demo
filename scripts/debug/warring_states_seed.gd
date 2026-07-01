@@ -57,6 +57,7 @@ func _run() -> void:
 	print("[戰國] 意圖分布=%s" % str(_intent_histogram(state)))
 	# emergent probes（commander 協同 + 信息域驗證床）
 	for k in ["g2.faction_found", "g2.feud_formed", "g2.vendetta_trigger", "g3.scout_dispatch",
+			"g3.betrayal", "g3.trust_up", "g3.trust_down",
 			"indep.found_ally", "indep.found_subjugate"]:
 		print("[戰國] probe %s=%d" % [k, int(Probe.counts.get(k, 0))])
 	# 受控人力 P1 (a)：吸收→同化(pop 累積)/暴動/逃 emergent

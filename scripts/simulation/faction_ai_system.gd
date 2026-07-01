@@ -2747,9 +2747,12 @@ func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
 		if t.faction_id != -1 and t.faction_id == team.faction_id: continue
 		var rep: float = float(team.known_reputations.get(tid, 0.5))
 		if rep <= 0.3: continue
-		if t.population <= int(float(team.population) * 1.5): continue
-		if t.population > best_pop:
-			best_pop = t.population
+		# G3-E leak 1b：強鄰實力讀 belief 非真值；無情報→不列 candidate（禁 god-view fallback）
+		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
+		var pop_est: int = int(BeliefSystem.best_estimate(state, team.team_id, tid).get("population_est", 0))
+		if pop_est <= int(float(team.population) * 1.5): continue
+		if pop_est > best_pop:
+			best_pop = pop_est
 			best_id = tid
 	return best_id
 
@@ -2759,8 +2762,12 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
-		var reserve: float = float(t.population) * 14.0
-		if float(t.resources.get("food", 0)) <= reserve: continue
+		# G3-E leak 1c：施援目標 pop+food 讀 belief 非真值；無情報 / 無 food_est→保守跳過
+		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
+		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
+		if not bel.has("food_est"): continue   # 不知有無餘糧 → 保守不列
+		var reserve: float = float(bel.get("population_est", 0.0)) * 14.0
+		if float(bel.get("food_est", 0.0)) <= reserve: continue
 		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid)
 		if not catch_result.reachable: continue
 		var same_faction: bool = (t.faction_id != -1 and t.faction_id == team.faction_id)
