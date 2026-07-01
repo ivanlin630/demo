@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 三軌收下(致富錨解=經濟真根)+征服名vs實修(征服真驅攻擊→capture非掠奪)+下一燒平行(B食物給致富牙‖單寫者ledger撐閘)+BEG/JOIN合併修
 ---
 
