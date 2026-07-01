@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 知會 — 完整沙盒願景定稿(game-design「完整沙盒願景」段);per-tick有界升硬不變量(die-off必收);七維度+五底線+燒序方向;progress加藍圖dashboard
 ---
 
