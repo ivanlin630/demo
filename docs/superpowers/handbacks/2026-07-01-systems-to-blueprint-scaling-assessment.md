@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 後期 scaling 評估完成(#4)——會爆但非重寫;主根=faction AI 忽略 LOD O(N²)/hr + die-off erase O(N²) + team_intel leak;P0 三項 targeted 收大部分;排序建議 granary→加固→長跑觀 emergence
 ---
 
