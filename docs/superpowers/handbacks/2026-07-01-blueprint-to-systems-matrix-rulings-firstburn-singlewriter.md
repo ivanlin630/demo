@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 窮盡矩陣收下+首燒開spec(獨立/faction戰略合併帶致富/征服錨)+單寫者arc拉高(強制閘前提,含coin守恆)+BEG/JOIN探針驗+閘/checklist隨落
 ---
 
