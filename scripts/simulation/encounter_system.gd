@@ -1248,7 +1248,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 			if beast_def: bs._cleanup(state, def_id)
 		for tid_b in [atk_id, def_id]:
 			var tb: TeamData = state.teams.get(tid_b)
-			if tb: tb.combat_target = -1
+			if tb: state.clear_combat_target(tb)
 		print("[Encounter] 野獸遭遇戰結算 result=%s" % result)
 		_check_player_wiped(state)
 		state.encounter_units.clear()
@@ -1261,7 +1261,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 	if result == "draw":
 		for team_id in [atk_id, def_id]:
 			var t: TeamData = state.teams.get(team_id)
-			if t: t.combat_target = -1
+			if t: state.clear_combat_target(t)
 		print("[Encounter] 遭遇戰結算完成 result=%s" % result)
 		_check_player_wiped(state)
 		# 清理 encounter state（draw 也要清，否則 encounter_active 永遠 true）
@@ -1300,7 +1300,7 @@ func resolve_encounter_end(state: WorldState, result: String) -> void:
 
 	for team_id in [atk_id, def_id]:
 		var t: TeamData = state.teams.get(team_id)
-		if t: t.combat_target = -1
+		if t: state.clear_combat_target(t)
 
 	# 公庫 treasury 按 anon 損失比例 loot
 	var loser_team_treasury: TeamData = state.teams.get(loser_id)

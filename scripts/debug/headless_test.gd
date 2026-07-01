@@ -88,7 +88,8 @@ func _initialize() -> void:
 	_test_aid_player_response_give()
 	_test_aid_repeated_annoyance()
 	_test_aid_stranger()
-	_test_beg_join_deadpath_probe()
+	_test_beg_join_social_resolve()
+	_test_target_chokepoint()
 	_test_resident_fields()
 	_test_is_resident_detection()
 	_test_resident_pop_cap_overflow()
@@ -6680,49 +6681,82 @@ func _test_aid_stranger() -> void:
 	assert(r.get("accepted", false), "陌生 + 高義氣 target 應接受")
 	print("Survival Task9b OK")
 
-func _test_beg_join_deadpath_probe() -> void:
-	# 死路探針：BEG 恆設 combat_target → _try_interact:197 早退先於 :247 resolver → resolver 不可達。
-	# JOIN 無 interaction handler。純觀測，證探針就位 + 死路量化。
-	print("--- BEG/JOIN 死路探針 ---")
+func _test_beg_join_social_resolve() -> void:
+	# F-I3 死路修：BEG/JOIN 走 social_target（非 combat_target）→ 過 _try_interact:197 → resolver 真跑。
+	# dispatch social_target + JOIN 新 handler + BEG 讀 social_target + combat_target 仍擋戰鬥中隊。
+	print("--- BEG/JOIN social_target resolve (F-I3) ---")
 	Probe.enabled = true; Probe.reset()
-	# BEG：beggar combat_target 設 → 197 早退吃掉，247 resolver 死路
 	var state := WorldState.new()
 	state.world = WorldData.new()
-	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 8); b.resources["food"] = 0
-	b.current_task = TeamData.TASK_BEG; b.combat_target = 1; b.tile_pos = Vector2i(3, 3)
+	# BEG：beggar social_target=1（combat_target=-1）→ 不 197 早退 → aid resolver 實跑。
+	# beggar/target 設同 faction（=aid finder 偏好對象）：驗 resolver 上移 same_faction 塊前，
+	# 同 faction BEG 不再被 same_faction early-return(:251) 吃掉（relocation 保護測）。
+	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 8); b.resources["food"] = 0; b.faction_id = 7
+	b.current_task = TeamData.TASK_BEG; b.social_target = 1; b.tile_pos = Vector2i(3, 3)
 	var bl := PersonData.new(); bl.id = 100; bl.team_id = 0
 	state.persons[100] = bl; b.leader_id = 100
 	state.teams[0] = b
-	var tgt := TeamData.new(); tgt.team_id = 1; _seed_pop(tgt, 10)
+	var tgt := TeamData.new(); tgt.team_id = 1; _seed_pop(tgt, 10); tgt.faction_id = 7
 	tgt.resources["food"] = 500.0; tgt.tile_pos = Vector2i(3, 3)
 	var tl := PersonData.new(); tl.id = 200; tl.values = { "義氣": 0.8, "貪婪": 0.2 }
 	state.persons[200] = tl; tgt.leader_id = 200
 	state.teams[1] = tgt
 	var inter := InteractionSystem.new()
 	inter._try_interact(state, 0, 1)
-	assert(int(Probe.counts.get("beg.dispatch", 0)) >= 1, "BEG dispatch 應計數")
-	assert(int(Probe.counts.get("beg.early_return_197", 0)) >= 1, "BEG 應被 197 早退吃掉")
-	assert(int(Probe.counts.get("beg.resolve", 0)) == 0, "BEG resolver 死路：不應被呼到")
-	# JOIN：無 handler，combat_target 設 → 197 早退，永不 resolve
-	var j := TeamData.new(); j.team_id = 2; _seed_pop(j, 6)
-	j.current_task = TeamData.TASK_JOIN; j.combat_target = 3; j.tile_pos = Vector2i(4, 4)
+	assert(int(Probe.counts.get("beg.early_return_197", 0)) == 0, "BEG combat_target=-1 → 不該 197 早退")
+	assert(int(Probe.counts.get("beg.resolve", 0)) >= 1, "BEG resolver 應被呼到（死路消）")
+	assert(float(b.resources["food"]) > 0.0, "beggar 應獲援助食物")
+	assert(b.social_target == -1, "resolve 後 social_target 清")
+	# combat_target 仍擋（真戰鬥中 team 不社交）：另設 combat_target → 197 早退，不 resolve
+	Probe.reset()
+	var b2 := TeamData.new(); b2.team_id = 4; _seed_pop(b2, 5); b2.resources["food"] = 0
+	b2.current_task = TeamData.TASK_BEG; b2.social_target = 1; b2.combat_target = 1; b2.tile_pos = Vector2i(3, 3)
+	var b2l := PersonData.new(); b2l.id = 500; b2l.team_id = 4
+	state.persons[500] = b2l; b2.leader_id = 500
+	state.teams[4] = b2
+	inter._try_interact(state, 4, 1)
+	assert(int(Probe.counts.get("beg.resolve", 0)) == 0, "戰鬥中(combat_target≠-1) → 197 擋 → 不 resolve")
+	# JOIN：joiner social_target=host → 過 197 → 新 handler merge（pop 守恆）
+	Probe.reset()
+	var j := TeamData.new(); j.team_id = 2; _seed_pop(j, 6); j.faction_id = 8   # 同 faction 亦 resolve（relocation 保護）
+	j.current_task = TeamData.TASK_JOIN; j.social_target = 3; j.tile_pos = Vector2i(5, 5)
 	var jl := PersonData.new(); jl.id = 300; jl.team_id = 2
 	state.persons[300] = jl; j.leader_id = 300
 	state.teams[2] = j
-	var ally := TeamData.new(); ally.team_id = 3; _seed_pop(ally, 10)
-	ally.tile_pos = Vector2i(4, 4)
-	var al := PersonData.new(); al.id = 400
-	state.persons[400] = al; ally.leader_id = 400
-	state.teams[3] = ally
+	var host := TeamData.new(); host.team_id = 3; _seed_pop(host, 10); host.faction_id = 8; host.tile_pos = Vector2i(5, 5)
+	var hl := PersonData.new(); hl.id = 400; hl.skills = { "統領": 0.8 }   # 高統領 → pop_cap 足容 joiner
+	state.persons[400] = hl; host.leader_id = 400
+	state.teams[3] = host
+	var host_pop0: int = host.population
+	var join_pop0: int = j.population
 	inter._try_interact(state, 2, 3)
-	assert(int(Probe.counts.get("join.dispatch", 0)) >= 1, "JOIN dispatch 應計數")
-	assert(int(Probe.counts.get("join.arrived_no_handler", 0)) >= 1, "JOIN 無 handler 應計數")
-	assert(int(Probe.counts.get("join.resolve", 0)) == 0, "JOIN 無 resolver：恆 0")
-	print("BEG/JOIN 死路探針 OK (beg.dispatch=%d early197=%d resolve=%d | join.dispatch=%d nohandler=%d)" % [
-		int(Probe.counts.get("beg.dispatch", 0)), int(Probe.counts.get("beg.early_return_197", 0)),
-		int(Probe.counts.get("beg.resolve", 0)), int(Probe.counts.get("join.dispatch", 0)),
-		int(Probe.counts.get("join.arrived_no_handler", 0))])
+	assert(int(Probe.counts.get("join.resolve", 0)) >= 1, "JOIN resolver 應被呼到（新 handler）")
+	assert(not state.teams.has(2), "joiner 全併入 host → 滅團")
+	assert(host.population == host_pop0 + join_pop0,
+		"pop 守恆：host 吸收 joiner 全員 (%d+%d 期望=%d 實際=%d)" % [host_pop0, join_pop0, host_pop0 + join_pop0, host.population])
+	print("BEG/JOIN social resolve OK (beg.resolve>0, join.resolve>0, pop守恆)")
 	Probe.enabled = false; Probe.reset()
+
+func _test_target_chokepoint() -> void:
+	# F-S4：combat_target/social_target 單寫者 chokepoint + erase 清懸空 + audit dangling 檢。
+	print("--- combat/social_target chokepoint (F-S4) ---")
+	var st := WorldState.new()
+	var a := TeamData.new(); a.team_id = 1; st.teams[1] = a
+	var b := TeamData.new(); b.team_id = 2; st.teams[2] = b
+	st.set_combat_target(a, 2); assert(a.combat_target == 2, "set_combat_target")
+	st.clear_combat_target(a); assert(a.combat_target == -1, "clear_combat_target")
+	st.set_social_target(a, 2); assert(a.social_target == 2, "set_social_target")
+	st.clear_social_target(a); assert(a.social_target == -1, "clear_social_target")
+	# erase_team 清懸空 combat_target + social_target（B 類單欄 target）
+	st.set_combat_target(b, 1); st.set_social_target(b, 1)
+	st.erase_team(1)
+	assert(b.combat_target == -1, "erase 清懸空 combat_target")
+	assert(b.social_target == -1, "erase 清懸空 social_target")
+	# InvariantAudit 抓懸空 social_target（直設繞 chokepoint 模擬腐化）
+	var c := TeamData.new(); c.team_id = 3; st.teams[3] = c
+	c.social_target = 99
+	assert(_contains_substr(InvariantAudit.check(st), "social_target=99"), "audit 抓懸空 social_target")
+	print("[OK] _test_target_chokepoint")
 
 func _test_resident_fields() -> void:
 	print("--- Resident Task1: TeamData 新欄位 ---")
@@ -15040,7 +15074,9 @@ func _test_p2a_survival_options() -> void:
 	var fa := FactionAISystem.new()
 	fa._decide_unified(state, joiner)
 	assert(joiner.current_task == TeamData.TASK_JOIN, "[p2a] 義氣隊未投靠 task=%s" % joiner.current_task)
-	assert(joiner.combat_target != -1, "[p2a] 投靠未設 combat_target")
+	# 社交 target 拆：投靠設 social_target 非 combat_target（過 _try_interact:197 到 JOIN resolver）
+	assert(joiner.social_target != -1, "[p2a] 投靠未設 social_target")
+	assert(joiner.combat_target == -1, "[p2a] 投靠不該設 combat_target（社交≠戰鬥）")
 	# (b) 無家深危 + 野心高 + 鄰有無主可農地 + 無強鄰 → 紮營
 	var state2 := WorldState.new(); state2.world = WorldData.new()
 	var camper := _mk_unified_desperate_team(state2, Vector2i(6,6), {"野心":0.9,"統領":0.8,"求生欲":0.8})

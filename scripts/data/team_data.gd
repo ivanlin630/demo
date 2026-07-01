@@ -101,6 +101,10 @@ var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
 var last_tile_pos: Vector2i = Vector2i(-999, -999)   # 上一移動步位置（observe_velocity 用）
 var move_tick_acc: int = 0
 var combat_target: int = -1
+# 社交互動目標（投靠/乞食），語意 ≠ combat_target（戰鬥中 flag）。
+# BEG/JOIN dispatch 設此、interaction resolver 讀此；_try_interact:197 早退只看 combat_target
+# → 社交隊 combat_target=-1 過 197 到 resolver。走 WorldState.set/clear_social_target chokepoint。
+var social_target: int = -1
 var encounter_initial_pop: int = 0   # 遭遇戰開始時人口快照（mount loot kill_ratio 用）
 var prosperity_eval_next_tick: int = 0   # 下次 prosperity 評估 tick（cadence + 事件重評）
 # G2 野心階梯（leader values 衍生，單一真值源；見 AmbitionLadder）

@@ -40,11 +40,11 @@ func process_ongoing_combat(state: WorldState, all_team_ids: Array) -> void:
 		var enemy_id: int = team.combat_target
 		if enemy_id == -1 or not state.teams.has(enemy_id):
 			if enemy_id != -1:
-				team.combat_target = -1
+				state.clear_combat_target(team)
 			continue
 		var enemy: TeamData = state.teams[enemy_id]
 		if enemy.combat_target != tid:
-			team.combat_target = -1
+			state.clear_combat_target(team)
 			continue
 		processed[tid]      = true
 		processed[enemy_id] = true
@@ -84,8 +84,8 @@ func tick_critical_npcs(state: WorldState, all_team_ids: Array) -> void:
 func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 	var atk: TeamData = state.teams[atk_id]
 	var def: TeamData = state.teams[def_id]
-	atk.combat_target = def_id
-	def.combat_target = atk_id
+	state.set_combat_target(atk, def_id)
+	state.set_combat_target(def, atk_id)
 	_msg.emit_message(state, "combat_start",
 		"Team %d 對 Team %d 宣戰" % [atk_id, def_id], atk,
 		{ "origin": str(atk_id), "target": str(def_id) })
@@ -207,8 +207,8 @@ func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var winner: TeamData = state.teams[winner_id]
 	var loser: TeamData  = state.teams[loser_id]
-	winner.combat_target = -1
-	loser.combat_target  = -1
+	state.clear_combat_target(winner)
+	state.clear_combat_target(loser)
 	# 野獸結算：不走人類 loot/subjugate/capture/pursuit
 	if loser.beast_kind != "" or winner.beast_kind != "":
 		if loser.beast_kind != "" and winner.beast_kind == "":
@@ -297,8 +297,8 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> void:
 	var retreater: TeamData = state.teams[retreater_id]
 	var pursuer: TeamData   = state.teams[pursuer_id]
-	retreater.combat_target = -1
-	pursuer.combat_target   = -1
+	state.clear_combat_target(retreater)
+	state.clear_combat_target(pursuer)
 	# 野獸退場：不走人類 capture/subjugate/pursuit，僅清除參戰獸隊
 	if retreater.beast_kind != "" or pursuer.beast_kind != "":
 		if retreater.beast_kind != "": BeastSystem.new()._cleanup(state, retreater_id)
@@ -361,8 +361,8 @@ func _try_retreat(state: WorldState, team_id: int, enemy_id: int) -> void:
 	var retreat_chance: float = survival * 0.5 + (1.0 - minf(str_ratio, 1.0)) * 0.3
 	if randf() < retreat_chance:
 		var enemy: TeamData = state.teams[enemy_id]
-		team.combat_target  = -1
-		enemy.combat_target = -1
+		state.clear_combat_target(team)
+		state.clear_combat_target(enemy)
 		print("[Retreat] Team%d 成功撤退 (rd=%.2f wnd=%d)" % [team_id, team.readiness, team.wounded])
 
 func _terrain_defense_mult(state: WorldState, team: TeamData) -> float:

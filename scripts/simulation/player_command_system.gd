@@ -1012,7 +1012,7 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 			beggar.update_reputation(pt_id, 0.15)
 			if b_leader: npc_ai.write_memory(b_leader, "benefactor", pt_id,
 				state.world.current_tick, clampf(actual / 50.0, 0.1, 1.0))
-	beggar.combat_target = -1
+	state.clear_social_target(beggar)   # BEG 現走 social_target（非 combat_target）
 	if beggar.previous_task != "" and beggar.previous_task != TeamData.TASK_IDLE:
 		TaskArbiter.transition(beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)
 	else:

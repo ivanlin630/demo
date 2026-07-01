@@ -148,6 +148,23 @@ func set_subteam_parent(child: TeamData, parent_id: int) -> void:
 func detach_subteam(child: TeamData) -> void:
 	set_subteam_parent(child, -1)
 
+# combat_target 單寫者 chokepoint（F-S4）：戰鬥中 flag（戰鬥起設、結束清）。
+# 所有 team.combat_target= 直寫改走此/clear_combat_target；erase_team 續清懸空（B 類單欄 target 瞬時態容忍）。
+# 語意純戰鬥；社交（投靠/乞食）走 set_social_target。mirror set_leader/set_team_faction。
+func set_combat_target(team: TeamData, tid: int) -> void:
+	team.combat_target = tid
+
+func clear_combat_target(team: TeamData) -> void:
+	team.combat_target = -1
+
+# social_target 單寫者 chokepoint：社交互動目標（投靠/乞食），語意 ≠ combat_target。
+# BEG/JOIN dispatch 設此；interaction resolver 讀此；erase_team 續清懸空。mirror set_combat_target。
+func set_social_target(team: TeamData, tid: int) -> void:
+	team.social_target = tid
+
+func clear_social_target(team: TeamData) -> void:
+	team.social_target = -1
+
 # 雙向單一入口：team.named_members ↔ person.team_id 一處同維護（規則2 roster 版）。
 # add=入隊（append if absent + team_id 回指）；remove=離隊（erase[+清 team_id]）。
 # 類比 set_team_faction。idempotent。以 pid 收參（多數 site 只持 id；person 缺席容忍）。
@@ -216,6 +233,8 @@ func erase_team(tid: int) -> void:
 		var o: TeamData = teams[otid]
 		if o.combat_target == tid:
 			o.combat_target = -1
+		if o.social_target == tid:
+			o.social_target = -1
 		if o.order_target_id == tid:
 			o.order_target_id = -1
 		o.known_reputations.erase(tid)

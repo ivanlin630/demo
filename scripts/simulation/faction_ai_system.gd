@@ -1204,9 +1204,9 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # 不可派 → 試次佳(修凍死)
 		# 投靠玩家：走 forced_event（玩家決定收留），不自動 merge（對稱 + UX）
-		if opt == "投靠" and td.has("combat_target"):
+		if opt == "投靠" and td.has("social_target"):
 			var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
-			if pp != null and int(td["combat_target"]) == pp.team_id:
+			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
 		team.current_option = opt   # 承諾追蹤實際派出
@@ -1215,9 +1215,11 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
-		# 掠奪 option：設 combat_target 才會交戰（非只移動）
+		# 掠奪/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（社交 resolver 讀）
 		if td.has("combat_target"):
-			team.combat_target = int(td["combat_target"])
+			state.set_combat_target(team, int(td["combat_target"]))
+		if td.has("social_target"):
+			state.set_social_target(team, int(td["social_target"]))
 		return
 	# 全不可派 → 保持現行(no-op)
 	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner
@@ -1493,7 +1495,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			var ally: int = _find_strong_neighbor(state, team)
 			if ally == -1: return
 			solo_target = state.teams[ally].tile_pos
-			team.combat_target = ally
+			state.set_social_target(team, ally)   # 社交意圖非戰鬥（resolver 讀 social_target）
 	if _is_stuck(team):
 		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評
 	if not TaskArbiter.try_set(state, team, best_task, solo_target,
@@ -2775,18 +2777,20 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # finder 撲空（無可派目標）→ 試次佳 option
 		# 投靠對象是玩家隊 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge（同 P2a W2）
-		if opt == "投靠" and td.has("combat_target"):
+		if opt == "投靠" and td.has("social_target"):
 			var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
-			if pp != null and int(td["combat_target"]) == pp.team_id:
+			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
 		if TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival"):
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)   # specimen tap
 			if td.has("combat_target"):
-				team.combat_target = int(td["combat_target"])
+				state.set_combat_target(team, int(td["combat_target"]))
+			if td.has("social_target"):
+				state.set_social_target(team, int(td["social_target"]))
 			match opt:   # 保留分流診斷 marker（world_sim 量測 homeless 分流）
 				"掠奪": print("[SurvivalLoot] team=Team%d → 掠 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
-				"投靠": print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
+				"投靠": print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, int(td.get("social_target", -1))])
 				"紮營": print("[SurvivalCamp] team=Team%d → 紮營 @(%d,%d)" % [team.team_id, tgt.x, tgt.y])
 				"覓食": print("[SurvivalForage] team=Team%d pop=%d → 覓食 @(%d,%d)" % [team.team_id, team.population, tgt.x, tgt.y])
 			return
