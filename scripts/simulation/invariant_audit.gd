@@ -7,6 +7,7 @@ static func check(state: WorldState) -> Array[String]:
 	_check_population(state, violations)
 	_check_faction_bidir(state, violations)
 	_check_subteam_bidir(state, violations)
+	_check_roster_bidir(state, violations)
 	_check_anon_cohort(state, violations)
 	_check_captive_cohort(state, violations)
 	_check_no_dangling_team_id(state, violations)
@@ -53,6 +54,22 @@ static func _check_subteam_bidir(state: WorldState, out: Array[String]) -> void:
 				out.append("subteam 懸空 Team%d.subteam_ids 含已不存在 Team%d" % [pid, cid])
 			elif child.parent_team_id != pid:
 				out.append("subteam 雙向破 Team%d 列子隊 Team%d 但其 parent_team_id=%d" % [pid, cid, child.parent_team_id])
+
+# roster 雙向（forward）：named_members / leader_id 內每人 team_id 須回指本隊。
+# = 「凡在編制者必認本隊」。單值 team_id → 亦擋一人列兩隊（至多一隊對得上）。
+# add_member/remove_member chokepoint 維護此向。反向（person→roster）不審：health famine
+# 蓄意留屍保 team_id（不在任何 roster 卻 team_id!=-1）→ 反向會誤報，見 handback。
+static func _check_roster_bidir(state: WorldState, out: Array[String]) -> void:
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		for pid in t.named_members:
+			var p: PersonData = state.persons.get(pid)
+			if p != null and p.team_id != tid:
+				out.append("roster 雙向破 Team%d 列 named P%d 但其 team_id=%d" % [tid, pid, p.team_id])
+		if t.leader_id != -1:
+			var lp: PersonData = state.persons.get(t.leader_id)
+			if lp != null and lp.team_id != tid:
+				out.append("roster 雙向破 Team%d leader P%d 但其 team_id=%d" % [tid, t.leader_id, lp.team_id])
 
 # anon cohort 自洽：每桶 count>0、鍵合法（tier ∈ TIER_ORDER、health ∈ HEALTH_ORDER）。
 # count<0 或非法鍵 = AnonCohort 入口被繞過或腐化。population getter 已是恆等式（total_pop），

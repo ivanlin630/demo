@@ -217,7 +217,7 @@ static func _setup_random_player(state, config, rng) -> void:
 		var m := PersonGenerator.generate(state, rng.randi(), "member")
 		m.team_id = team.team_id
 		state.persons[m.id] = m
-		team.named_members.append(m.id)
+		state.add_member(team, m.id)
 
 	_setup_anon_tiers(team, {}, target_pop)
 	state.teams[team.team_id] = team
@@ -386,7 +386,7 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 		var m := PersonGenerator.generate(state, rng.randi(), "member")
 		m.team_id = team.team_id
 		state.persons[m.id] = m
-		team.named_members.append(m.id)
+		state.add_member(team, m.id)
 
 	_setup_anon_tiers(team, {}, target_pop)
 	state.teams[team.team_id] = team
@@ -456,7 +456,7 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 	for nm_cfg in t_cfg.get("named_members", []):
 		var nm: PersonData = _make_person(team.team_id, nm_cfg, false)
 		state.persons[nm.id] = nm
-		team.named_members.append(nm.id)
+		state.add_member(team, nm.id)
 	_setup_anon_tiers(team, t_cfg, target_pop)
 	var op_cfg: Dictionary = t_cfg.get("outpost", {})
 	if not op_cfg.is_empty():

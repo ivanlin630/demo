@@ -263,8 +263,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 				return   # solo 無處可逃：不變化、stress 不洩壓（持續高壓餵 N2/N3）
 			person.stress = maxf(person.stress - 0.3, 0.0)
 			if team.named_members.has(person.id):
-				team.named_members.erase(person.id)
-				person.team_id = -1
+				state.remove_member(team, person.id)   # 離隊：erase + team_id=-1
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
 				# leader 留下，實際走的是 anon（kill_random 移 anon 桶）；population getter 自動反映
@@ -277,8 +276,7 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 				return   # solo leader 無從叛逃自己
 			LoyaltyBank.set_baseline(person, 0.0, "defect")
 			if team.named_members.has(person.id):
-				team.named_members.erase(person.id)
-				person.team_id = -1
+				state.remove_member(team, person.id)   # 離隊：erase + team_id=-1
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
 				_anon_actually_left(team, "defect")   # 走的是 anon；population getter 自動反映
@@ -333,8 +331,7 @@ func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) 
 		var t: TeamData = state.teams[tid]
 		if t.tile_pos != pos: continue
 		if not ("流亡" in t.tags): continue
-		t.named_members.append(person.id)
-		person.team_id = t.team_id
+		state.add_member(t, person.id)   # 入隊：append + team_id 回指
 		return
 	var ot := TeamData.new()
 	ot.team_id = _next_team_id(state)

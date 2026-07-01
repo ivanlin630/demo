@@ -44,7 +44,7 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 	if best_successor != null:
 		team.leader_id = best_successor.id
 		best_successor.role = "leader"
-		team.named_members.erase(best_successor.id)
+		state.remove_member(team, best_successor.id, false)   # 晉升 leader：出 named 仍屬本隊
 		print("[Succession] Team %d 新 leader: P%d（統領=%.2f）" % [
 			team.team_id, best_successor.id, best_command])
 		PopulationSystem.new().check_overflow_for_team(state, team.team_id)

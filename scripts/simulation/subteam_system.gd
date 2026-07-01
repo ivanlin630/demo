@@ -41,7 +41,7 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	# 公庫 treasury 按比例帶走（sub 新建 treasury=0 → transfer 等價原邏輯，守恆）
 	AnonTreasuryBank.transfer(parent, sub, parent.anon_treasury * frac, "subteam_split")
 
-	parent.named_members.erase(sub_leader_id)
+	state.remove_member(parent, sub_leader_id, false)   # 出母 roster；team_id 由下行設 sub
 	sub_leader.team_id = sub.team_id
 	for aid in extra_advisor_ids:
 		if aid == sub_leader_id:
@@ -51,9 +51,8 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		var advisor = state.persons.get(aid)
 		if advisor == null:
 			continue
-		parent.named_members.erase(aid)
-		advisor.team_id = sub.team_id
-		sub.named_members.append(aid)
+		state.remove_member(parent, aid, false)   # 轉隊：出母（team_id 由 add 設 sub）
+		state.add_member(sub, aid)                 # 入子：append + team_id=sub
 	# 補搬 anon：pop_count 扣掉已搬的 named（leader + advisors）= 應搬 anon 數
 	var named_in_sub: int = sub.named_members.size() + (1 if sub.leader_id != -1 else 0)
 	var anon_to_sub: int = maxi(pop_count - named_in_sub, 0)
@@ -150,12 +149,10 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		if pid == absorbed.leader_id:
 			absorbed_leader_moved = true
 			absorbed.leader_id = -1
-			if not absorber.named_members.has(pid):
-				absorber.named_members.append(pid)
+			state.add_member(absorber, pid)   # 入吸收隊（team_id 已於上設 absorber）
 		else:
-			absorbed.named_members.erase(pid)
-			if not absorber.named_members.has(pid):
-				absorber.named_members.append(pid)
+			state.remove_member(absorbed, pid, false)   # 出被吸隊 roster（team_id 已=absorber）
+			state.add_member(absorber, pid)             # 入吸收隊
 	AnonTierSystem.transfer_proportional(absorbed, absorber, anon_xfer)
 	_transfer_proportional_assets(absorber, absorbed, frac, absorbed.population <= 0)
 	if absorbed_leader_moved and absorbed.population > 0:
@@ -197,19 +194,14 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	if absorbed.parent_team_id == absorber_id and absorbed.leader_id != -1:
 		var sub_leader = state.persons.get(absorbed.leader_id)
 		if sub_leader != null:
-			sub_leader.team_id = absorber_id
-			if not absorber.named_members.has(absorbed.leader_id):
-				absorber.named_members.append(absorbed.leader_id)
+			state.add_member(absorber, absorbed.leader_id)   # sub_leader 歸還母 roster + team_id
 		absorbed.leader_id = -1   # leader 已歸還 absorber → 清空，否則 population getter 仍計 1 phantom leader 擋滅團
 	# 歸還 sub.named_members
 	if absorbed.parent_team_id == absorber_id:
 		for aid in absorbed.named_members:
-			var advisor = state.persons.get(aid)
-			if advisor != null:
-				advisor.team_id = absorber_id
-				if not absorber.named_members.has(aid):
-					absorber.named_members.append(aid)
-		absorbed.named_members.clear()
+			if state.persons.get(aid) != null:
+				state.add_member(absorber, aid)   # 歸還母 roster + team_id（persons 缺席者原亦跳過）
+		absorbed.named_members.clear()             # bulk 出被吸隊 roster（人已轉，team_id 皆=absorber）
 
 	var transfer: int = mini(absorbed.population, capacity)
 	var frac: float   = float(transfer) / float(absorbed.population) if absorbed.population > 0 else 0.0
