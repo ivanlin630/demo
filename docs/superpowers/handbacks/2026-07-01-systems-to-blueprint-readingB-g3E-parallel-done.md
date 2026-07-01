@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 轉平行兩軌 merged(讀B 覓食苟活地板 + G3 Phase E enforce) + team-ref 根因修;但兩沙盒維度 emergence 皆「機制到位/活世界戲未顯」;讀B 真閘=granary 自填非覓食(另 slice)
 ---
 
