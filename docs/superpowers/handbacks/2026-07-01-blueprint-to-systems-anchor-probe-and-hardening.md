@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ①指標specimen追蹤(1團+幾named,想什麼做什麼)診斷錨→行為(經濟真根,R1食物緩) ②平行P0加固+tick計時;為「終於看見emergence」鋪路
 ---
 
