@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: #1 granary先(定位measure→修根結構非補丁) + 探針加強(process追蹤非只end-state) + 每-tick計時 + 後期scaling卡死評估(=沙盒bar長跑要求)
 ---
 
