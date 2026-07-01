@@ -36,6 +36,11 @@ var _training_system: TrainingSystem
 var _player_cmd: PlayerCommandSystem
 var _ambush_system: AmbushSystem
 
+# #3 tick 計時 instrument：累積本 day 的 tick wall-time，日邊界 flush（無 per-tick spam）
+var _perf_accum_us: int = 0
+var _perf_count: int = 0
+var _perf_max_us: int = 0
+
 func _init() -> void:
 	_resource_system      = ResourceSystem.new()
 	_reaction_system      = ReactionSystem.new()
@@ -62,11 +67,33 @@ func _init() -> void:
 	_ambush_system       = AmbushSystem.new()
 
 func advance_tick(state: WorldState, player_pos: Vector2i) -> String:
-	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick
+	# H: game_over / 等待選繼承人 → 凍結世界，不推進 tick（不計時，非真 tick）
 	if state.game_over:
 		return "game_over"
 	if state.player_forced_event.get("action", "") == "choose_heir":
 		return "awaiting_heir"
+	# #3 tick 計時：包真 tick 工作的 wall-time（含 encounter / ambush / 常規三路徑）
+	var _perf_t0: int = Time.get_ticks_usec()
+	var _perf_result: String = _advance_tick_body(state, player_pos)
+	_record_tick_perf(state, Time.get_ticks_usec() - _perf_t0)
+	return _perf_result
+
+# #3 tick 計時：本 tick wall-time 累積 + 日邊界 flush（`[TickPerf] avg/max us, teams/factions`）
+func _record_tick_perf(state: WorldState, dt_us: int) -> void:
+	_perf_accum_us += dt_us
+	_perf_count += 1
+	if dt_us > _perf_max_us:
+		_perf_max_us = dt_us
+	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:
+		var avg_us: int = _perf_accum_us / _perf_count
+		print("[TickPerf] day=%d avg=%d us max=%d us ticks=%d teams=%d factions=%d" % [
+			state.world.current_tick / WorldState.TICKS_PER_DAY, avg_us, _perf_max_us,
+			_perf_count, state.teams.size(), state.factions.size()])
+		_perf_accum_us = 0
+		_perf_count = 0
+		_perf_max_us = 0
+
+func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if state.encounter_active:
 		var result: String = _encounter_system.advance_encounter_tick(state)
 		if result not in ["ongoing", "player_turn"]:
