@@ -973,6 +973,10 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 			"can_levy": true, "target_id": prey0, "committed": _solo_type(team)})
 		if conq["type"] == "征服":
 			_set_solo(state, team, "征服", String(conq["why"]), "prosperity")   # driver：獨立征服→prosperity 攻擊 affordance
+			# 征服名實探針：征服 intent 宣告 + 該隊是否走 _decide_unified（uses_unified）→ 解釋名實斷點路徑。
+			if Probe.enabled:
+				Probe.bump("conq.declared")
+				Probe.bump("conq.declared_unified" if uses_unified(team) else "conq.declared_nonunified")
 		return   # defer to prosperity（scout-gated；不在此 dispatch 攻擊）
 
 	# ── 全菜單 scorer（征服已由 prosperity 處理 → weak_enemy=false；建國 gate 折入 can_found）──
@@ -1443,6 +1447,18 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if float(scores[t]) > best_score:
 			best_score = float(scores[t])
 			best_task = t
+
+	# 征服名實探針：警戒——好戰征服 intent 隊多為非 unified → 走此舊 solo path（非 _decide_unified）。
+	# 這裡才是「想=征服 做=掠奪」真競場：TASK_LOOT vs TASK_ATTACK argmax。
+	if Probe.enabled and _solo_type(team) == "征服":
+		Probe.bump("conq.intent")
+		match best_task:
+			TeamData.TASK_LOOT:   Probe.bump("conq.winner_loot")
+			TeamData.TASK_ATTACK: Probe.bump("conq.winner_prosperity")   # 舊 solo 的征服手段=TASK_ATTACK
+			_:                    Probe.bump("conq.winner_other")
+		if scores.has(TeamData.TASK_LOOT) and scores.has(TeamData.TASK_ATTACK):
+			# util 排序根（舊 solo 計分）：掠奪領先攻擊多少 = 掠奪搶排序證據
+			Probe.note("conq.loot_lead", float(scores[TeamData.TASK_LOOT]) - float(scores[TeamData.TASK_ATTACK]))
 
 	if best_task == TeamData.TASK_IDLE: return
 	var solo_target: Vector2i = team.move_target
