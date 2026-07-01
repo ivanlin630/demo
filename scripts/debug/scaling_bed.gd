@@ -29,16 +29,26 @@ func _run_scale(n: int) -> void:
 	print("[ScalingBed] --- N=%d seeded teams=%d tiles=%d ---" % [
 		n, state.teams.size(), state.world.tiles.size()])
 
-	# 指標1：evaluate_all 核心（faction AI hourly O(N²) 目標）
+	# 指標1：evaluate_all 核心（faction AI hourly，含 _has_hostile_within）
 	var fai: Object = runner._faction_ai_system
 	var team_ids: Array = state.teams.keys()
 	var eval_total: int = 0
 	for _r in range(EVAL_REPS):
+		_reindex(state)   # 直呼 evaluate_all 須自建索引（production 由 sim_runner post-move 建）
 		var t0: int = Time.get_ticks_usec()
 		fai.evaluate_all(state, team_ids)
 		eval_total += Time.get_ticks_usec() - t0
 	print("[ScalingBed] N=%d evaluate_all avg=%d us (reps=%d, teams=%d)" % [
 		n, eval_total / EVAL_REPS, EVAL_REPS, state.teams.size()])
+
+	# 指標1b：interaction co-location（same-tile 掃 = 全掃 O(N²) 無 early-return；索引 → O(k)）。
+	# 全隊當 mover 掃自格 = worst-case。此路徑最貼索引真目標（hostile 有 early-return，co-location 無）。
+	var colo_ids: Array = state.teams.keys()
+	_reindex(state)
+	var c0: int = Time.get_ticks_usec()
+	runner._interaction_system.process_on_move(state, colo_ids, colo_ids)
+	print("[ScalingBed] N=%d co-location(process_on_move all) = %d us (teams=%d)" % [
+		n, Time.get_ticks_usec() - c0, state.teams.size()])
 
 	# 指標3：整合 advance_tick（TickPerf 日 flush 會印 [TickPerf] ...）
 	var pp: Vector2i = _center_pos(state)
@@ -47,6 +57,11 @@ func _run_scale(n: int) -> void:
 
 	# 指標2：滅團潮 erase 尖峰（erase_team O(N) 放大器）
 	_measure_dieoff(state, n)
+
+# 索引重建（guard：加固前 source 無此 method → no-op，使同一 bed 可量 before/after）
+func _reindex(state: WorldState) -> void:
+	if state.has_method("rebuild_team_tile_index"):
+		state.rebuild_team_tile_index()
 
 func _gen_map(state: WorldState) -> void:
 	var gen: Object = load("res://scripts/simulation/world_generator.gd").new()
