@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 獨立戰略層 done(統一決策 arc 第三塊)+S3 回歸我抓修;(a) 機制三源全活;活世界 emergence 待平衡非機制缺;下一向求裁
 ---
 
