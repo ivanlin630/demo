@@ -88,6 +88,7 @@ func _initialize() -> void:
 	_test_aid_player_response_give()
 	_test_aid_repeated_annoyance()
 	_test_aid_stranger()
+	_test_beg_join_deadpath_probe()
 	_test_resident_fields()
 	_test_is_resident_detection()
 	_test_resident_pop_cap_overflow()
@@ -6435,6 +6436,50 @@ func _test_aid_stranger() -> void:
 	var r: Dictionary = inter._resolve_aid_request(state, 0, 1)
 	assert(r.get("accepted", false), "陌生 + 高義氣 target 應接受")
 	print("Survival Task9b OK")
+
+func _test_beg_join_deadpath_probe() -> void:
+	# 死路探針：BEG 恆設 combat_target → _try_interact:197 早退先於 :247 resolver → resolver 不可達。
+	# JOIN 無 interaction handler。純觀測，證探針就位 + 死路量化。
+	print("--- BEG/JOIN 死路探針 ---")
+	Probe.enabled = true; Probe.reset()
+	# BEG：beggar combat_target 設 → 197 早退吃掉，247 resolver 死路
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 8); b.resources["food"] = 0
+	b.current_task = TeamData.TASK_BEG; b.combat_target = 1; b.tile_pos = Vector2i(3, 3)
+	var bl := PersonData.new(); bl.id = 100; bl.team_id = 0
+	state.persons[100] = bl; b.leader_id = 100
+	state.teams[0] = b
+	var tgt := TeamData.new(); tgt.team_id = 1; _seed_pop(tgt, 10)
+	tgt.resources["food"] = 500.0; tgt.tile_pos = Vector2i(3, 3)
+	var tl := PersonData.new(); tl.id = 200; tl.values = { "義氣": 0.8, "貪婪": 0.2 }
+	state.persons[200] = tl; tgt.leader_id = 200
+	state.teams[1] = tgt
+	var inter := InteractionSystem.new()
+	inter._try_interact(state, 0, 1)
+	assert(int(Probe.counts.get("beg.dispatch", 0)) >= 1, "BEG dispatch 應計數")
+	assert(int(Probe.counts.get("beg.early_return_197", 0)) >= 1, "BEG 應被 197 早退吃掉")
+	assert(int(Probe.counts.get("beg.resolve", 0)) == 0, "BEG resolver 死路：不應被呼到")
+	# JOIN：無 handler，combat_target 設 → 197 早退，永不 resolve
+	var j := TeamData.new(); j.team_id = 2; _seed_pop(j, 6)
+	j.current_task = TeamData.TASK_JOIN; j.combat_target = 3; j.tile_pos = Vector2i(4, 4)
+	var jl := PersonData.new(); jl.id = 300; jl.team_id = 2
+	state.persons[300] = jl; j.leader_id = 300
+	state.teams[2] = j
+	var ally := TeamData.new(); ally.team_id = 3; _seed_pop(ally, 10)
+	ally.tile_pos = Vector2i(4, 4)
+	var al := PersonData.new(); al.id = 400
+	state.persons[400] = al; ally.leader_id = 400
+	state.teams[3] = ally
+	inter._try_interact(state, 2, 3)
+	assert(int(Probe.counts.get("join.dispatch", 0)) >= 1, "JOIN dispatch 應計數")
+	assert(int(Probe.counts.get("join.arrived_no_handler", 0)) >= 1, "JOIN 無 handler 應計數")
+	assert(int(Probe.counts.get("join.resolve", 0)) == 0, "JOIN 無 resolver：恆 0")
+	print("BEG/JOIN 死路探針 OK (beg.dispatch=%d early197=%d resolve=%d | join.dispatch=%d nohandler=%d)" % [
+		int(Probe.counts.get("beg.dispatch", 0)), int(Probe.counts.get("beg.early_return_197", 0)),
+		int(Probe.counts.get("beg.resolve", 0)), int(Probe.counts.get("join.dispatch", 0)),
+		int(Probe.counts.get("join.arrived_no_handler", 0))])
+	Probe.enabled = false; Probe.reset()
 
 func _test_resident_fields() -> void:
 	print("--- Resident Task1: TeamData 新欄位 ---")

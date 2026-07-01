@@ -36,6 +36,7 @@ func _line(state: WorldState, tid: int) -> String:
 
 func _run() -> void:
 	print("=== econ bed diagnose: 特化→累積→長 pop 整環 (econ-food-unify) ===")
+	Probe.enabled = true; Probe.reset()   # BEG/JOIN 死路探針 host（純觀測）
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config := GameSetup.load_config("res://config/econ_bed.json")
@@ -83,4 +84,9 @@ func _run() -> void:
 		float(ResourceSystem.REGEN_RATE["forest"]["food"]),
 		float(ResourceSystem.REGEN_RATE["forest"]["material"]),
 		float(ResourceSystem.REGEN_RATE["plains"]["food"])])
+	# BEG/JOIN 死路探針（F-I3）
+	for k in ["beg.dispatch", "beg.early_return_197", "beg.resolve",
+			"join.dispatch", "join.arrived_no_handler", "join.resolve"]:
+		print("[bed] probe %s=%d" % [k, int(Probe.counts.get(k, 0))])
+	Probe.enabled = false
 	print("=== econ bed diagnose DONE ===")

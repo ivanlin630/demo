@@ -194,7 +194,18 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 					return
 	var a: TeamData = state.teams[id_a]
 	var b: TeamData = state.teams[id_b]
+	# 死路探針（純觀測，no-op unless Probe.enabled）：NPC-NPC BEG/JOIN 生命週期。
+	# 此點在 player 分支之後 → 恆 NPC-NPC。dispatch = 到達核心互動的 BEG/JOIN 隊。
+	if a.current_task == TeamData.TASK_BEG or b.current_task == TeamData.TASK_BEG:
+		Probe.bump("beg.dispatch")
+	if a.current_task == TeamData.TASK_JOIN or b.current_task == TeamData.TASK_JOIN:
+		Probe.bump("join.dispatch")
 	if a.combat_target != -1 or b.combat_target != -1:
+		# 197 早退先於 247 BEG resolver。BEG/JOIN 恆設 combat_target → 恆走此路 → resolver 死路。
+		if a.current_task == TeamData.TASK_BEG or b.current_task == TeamData.TASK_BEG:
+			Probe.bump("beg.early_return_197")
+		if a.current_task == TeamData.TASK_JOIN or b.current_task == TeamData.TASK_JOIN:
+			Probe.bump("join.arrived_no_handler")
 		return
 	# 貿易：跨勢力均可，優先於外交/攻擊判斷
 	if a.current_task == TeamData.TASK_TRADE or b.current_task == TeamData.TASK_TRADE:
@@ -245,9 +256,11 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		_try_diplomacy(state, id_b, id_a)
 		return
 	if a.current_task == TeamData.TASK_BEG and a.combat_target == id_b:
+		Probe.bump("beg.resolve")   # 死路探針：到此=NPC-NPC resolver 實呼（player 分支已提早 return）
 		_resolve_aid_request(state, id_a, id_b)
 		return
 	if b.current_task == TeamData.TASK_BEG and b.combat_target == id_a:
+		Probe.bump("beg.resolve")
 		_resolve_aid_request(state, id_b, id_a)
 		return
 	if a.current_task == TeamData.TASK_ATTACK:
