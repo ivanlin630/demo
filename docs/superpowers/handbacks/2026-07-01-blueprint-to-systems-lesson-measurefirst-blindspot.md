@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 教訓（請提煉進 memory）— measure-first 抓近端不抓架構;架構缺口躲在行為症狀後;過早喊done主動誤導;需結構矩陣+誠實標記為互補
 ---
 

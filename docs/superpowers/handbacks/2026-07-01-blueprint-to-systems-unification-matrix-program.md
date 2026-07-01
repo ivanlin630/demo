@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★不KILL,走refactor;開統一矩陣program(實體×領域稽核+強制閘+設計checklist)止打地鼠;首燒格=獨立/faction戰略合併(帶出致富/征服錨);B R1食物張力隨後
 ---
 
