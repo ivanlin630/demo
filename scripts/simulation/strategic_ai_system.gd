@@ -40,6 +40,9 @@ func tick(state: WorldState, faction: FactionData) -> void:
         _evaluate_alliance_need(state, faction)
 
 func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
+    # F-D3：strategic_ai 降為**空間 affordance 層**——讀統一 intent(commander _select_intent 單一源，
+    # 已由 faction_ai.evaluate_all 先於本 tick 設 f.intent)，映射空間 goal(encirclement/trade_net/defend)。
+    # 不再自產 intent(舊 rung/archetype 計分 = 第2 producer，已移除)。單一 intent source。
     faction.strategic_goals.clear()
     var leader_team: TeamData = state.teams.get(faction.leader_team_id)
     if leader_team == null: return
@@ -47,24 +50,26 @@ func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
     if faction_leader == null: return
     var v := faction_leader.values
 
-    # G2b：戰略目標由 faction-leader 野心階梯衍生（取代 raw value 計分）
-    var rung: int = leader_team.ambition_rung
-    var arche: String = leader_team.ambition_archetype
-    # expand：武力 archetype + rung≥擴張
-    if arche == AmbitionLadder.ARCHETYPE_FORCE and rung >= AmbitionLadder.RUNG_EXPAND:
-        var tgt_id: int = _nearest_independent(state, leader_team)
+    var it: String = String(faction.intent.get("type", "")) if faction.intent is Dictionary else ""
+    var it_target: int = int(faction.intent.get("target_id", -1)) if faction.intent is Dictionary else -1
+
+    # 征服/擴張 → expand(空間包圍)：target 讀統一 intent，缺則就近獨立鄰
+    if it == "征服" or it == "擴張":
+        var tgt_id: int = it_target
+        if tgt_id == -1: tgt_id = _nearest_independent(state, leader_team)
         if tgt_id != -1:
             faction.strategic_goals.append({ "type": "expand", "target_id": tgt_id,
                 "priority": 0.5 + float(v.get("野心", 0.5)) * 0.5 })
 
+    # defend：有弱 member = 純空間支援 affordance(保護弱者，非 intent producer)
     if faction.member_team_ids.size() > 1:
         var weakest_id: int = _find_weakest_member(state, faction)
         if weakest_id != -1 and weakest_id != faction.leader_team_id:
             faction.strategic_goals.append({ "type": "defend", "target_id": weakest_id,
                 "priority": 0.7 })
 
-    # trade_net：商業 archetype + rung≥積累
-    if arche == AmbitionLadder.ARCHETYPE_TRADE and rung >= AmbitionLadder.RUNG_ACCUMULATE:
+    # 致富 → trade_net(空間商路 affordance)
+    if it == "致富":
         faction.strategic_goals.append({ "type": "trade_net", "target_id": -1,
             "priority": 0.4 + float(v.get("貪婪", 0.5)) * 0.4 })
 

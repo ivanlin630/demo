@@ -65,7 +65,10 @@ var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰
 var captive_groups: Array = []
 var famine_days: float = 0.0   # 連續斷糧（satisfaction<0.3）累積天數；飢餓致死鏈用（型別 float，語意=天）
 var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，日邊界歸零）
-var solo_intent: String = ""   # 上次 SoloAI 選的策略方向（承諾慣性用）
+# 統一戰略意圖 struct {type,why,mode}（F-D4：廢一槽兩義）。戰略層(獨立建國/致富/征服/守成)寫；
+# 空 {} = 無戰略意圖。SoloAI 日常 task 承諾改用 solo_task_last（下方），不再共用此槽。
+var solo_intent: Dictionary = {}
+var solo_task_last: String = ""   # SoloAI 上次選的 task（承諾慣性；與戰略 intent 分離，F-D4）
 var current_option: String = ""   # 統一決策引擎承諾用（現行 option 名）
 var beast_kind: String = ""       # 非空 = 此 team 為野獸 pseudo-team（鹿/野豬/熊/狼群）
 var beast_strength: float = 0.0   # npc_combat 用：beast team 的整體戰鬥力
