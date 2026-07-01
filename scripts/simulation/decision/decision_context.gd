@@ -45,6 +45,12 @@ var faction_tribute_target_pos: Vector2i = Vector2i(-1, -1)
 var faction_diplo_target: int = -1
 var faction_diplo_target_pos: Vector2i = Vector2i(-1, -1)
 var leader_loyalty: float = 0.5
+# means-end 戰術層（2026-07-01）：team 自己戰略 intent 進 ctx（mirror faction_stakes）。
+# 獨立=solo_intent.type / faction leader=f.intent.type（member 已有 faction_stakes → 不重覆）。
+# intent_fit term 讀此把「意圖→子需求」reshape 戰術 option util（斷點：獨立隊 solo reshape 零）。
+var intent: String = ""
+var intent_target: int = -1
+var intent_target_pos: Vector2i = Vector2i(-1, -1)
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -120,6 +126,22 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 				var _dt: int = _fa._nearest_independent(state, team)
 				c.faction_diplo_target = _dt
 				c.faction_diplo_target_pos = state.teams[_dt].tile_pos if _dt != -1 else Vector2i(-1, -1)
+	# team 自己戰略 intent（means-end 戰術層）：獨立=solo_intent / faction leader=f.intent。
+	# member 已由 faction_stakes 供 tactical 訊號 → 不重覆注入（避雙寫同義）。
+	if team.faction_id == -1:
+		c.intent = FactionAISystem._solo_type(team)
+	else:
+		var fi = state.factions.get(team.faction_id)
+		if fi != null and fi.leader_team_id == team.team_id and fi.intent is Dictionary:
+			c.intent = String(fi.intent.get("type", ""))
+			c.intent_target = int(fi.intent.get("target_id", -1))
+	# 征服意圖 target 位（faction leader 帶 target_id；獨立 fallback weak_prey）→ intent_fit 攻擊路徑用。
+	if c.intent == "征服":
+		if c.intent_target != -1 and state.teams.has(c.intent_target):
+			c.intent_target_pos = state.teams[c.intent_target].tile_pos
+		elif c.has_weak_prey:
+			c.intent_target = _prey
+			c.intent_target_pos = c.weak_prey_pos
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
