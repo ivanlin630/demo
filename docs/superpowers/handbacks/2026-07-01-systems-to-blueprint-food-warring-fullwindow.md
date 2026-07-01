@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 食物軌 warring 全窗補驗——不 mass-starve✓/founding✓/致富錨活(RICH主導),但★CONQUER=0全程/established卡1/EXPAND=0=征服擴張 emergence 被壓平(食物 rung-flow-gate + 攻擊路徑分裂 雙重壓制);排下燒前該知
 ---
 
