@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: G3 統一信息域/情報戰 spec 移交 — HOW+分階 plan(E→D→P);2 硬要求守統一可擴充;納 provenance 不變量
 ---
 

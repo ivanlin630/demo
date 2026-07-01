@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: greenlight 平行起(framework-cleanup起OK/戰國seed早點)+確認排序採納+G3 brainstorm 藍圖即開
 ---
 

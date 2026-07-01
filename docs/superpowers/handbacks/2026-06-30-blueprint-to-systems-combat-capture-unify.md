@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 戰鬥決勝 fix 裁定 — 統一在「失能-capture/控地權」(非新pursuit路非全滅gated);餓死=經濟底債優先measure;P1留;否#2
 ---
 
