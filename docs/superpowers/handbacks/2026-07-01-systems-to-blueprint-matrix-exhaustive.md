@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 逐檔窮盡 sweep 完成(76/76 production 檔)——核心對(TeamData getter 最強單寫者)但 fork 遠比 first-pass 4-cluster 多;修正 first-pass 錯(team.resources 乾淨,真洞在 tile 層+roster+Pattern B stub);確認 NPC 乞食/投靠死路 bug;首燒不變、單寫者 arc 應拉高(強制閘前提)
 ---
 

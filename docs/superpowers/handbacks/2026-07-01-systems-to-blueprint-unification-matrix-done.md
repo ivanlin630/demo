@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 統一矩陣稽核完成(全貌 in specs/unification-matrix-audit)——真 fork 聚 4 區(思考決策/player-vs-NPC/單寫者/俘虜);首燒獨立-faction 戰略合併確認直中;揭 latent bug 疑點(NPC 乞食/投靠 task 路徑疑死,需驗)
 ---
 
