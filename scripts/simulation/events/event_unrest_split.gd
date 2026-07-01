@@ -71,9 +71,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 
 	# 選 new leader
 	var new_leader: PersonData = dissenters[0]
-	new_leader.team_id = new_team.team_id
-	new_leader.role    = "leader"
-	new_team.leader_id = new_leader.id
+	state.set_leader(new_team, new_leader.id)   # chokepoint：leader_id+team_id(=new_team)+role
 	reset_loyalty_on_transfer(new_leader, "split_leader")
 	state.remove_member(parent, new_leader.id, false)   # 出母 roster（team_id 已=new_team）
 	# population 為 getter：leader_id 設定 + named.erase 即反映，無須手動加減

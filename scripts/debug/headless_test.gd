@@ -419,7 +419,9 @@ func _initialize() -> void:
 	_test_invariant_faction_bidir()
 	_test_invariant_subteam_bidir()
 	_test_invariant_roster_bidir()
+	_test_invariant_reverse_roster()
 	_test_roster_chokepoint()
+	_test_set_leader_chokepoint()
 	_test_driver_ledger()
 	_test_invariant_anon_cohort()
 	_test_erase_team()
@@ -1310,7 +1312,7 @@ func _test_invariant_audit() -> void:
 	assert(t.population == 5, "getter = leader1+named1+anon3 = 5，實際=%d" % t.population)
 	assert(InvariantAudit.check(state).is_empty(), "正常隊不該有違反:%s" % str(InvariantAudit.check(state)))
 	# 移除 named → getter 自動降為 leader1+named0+anon3 = 4（無獨立純量可脫鉤）
-	t.named_members = []
+	state.remove_member(t, 1)   # 離隊走 chokepoint（清 team_id）→ 反向 roster audit 一致
 	assert(t.population == 4, "named 移除後 getter 自動 = 4，實際=%d" % t.population)
 	assert(InvariantAudit.check(state).is_empty(), "getter 模型不可能 drift:%s" % str(InvariantAudit.check(state)))
 	print("InvariantAudit population OK")
@@ -1365,6 +1367,59 @@ func _test_invariant_roster_bidir() -> void:
 	assert(_contains_substr(InvariantAudit.check(state), "roster"), "roster leader 破口應偵測")
 	print("InvariantAudit roster 雙向 OK")
 
+func _test_invariant_reverse_roster() -> void:
+	print("--- InvariantAudit roster 反向(person→roster) ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var lead := PersonData.new(); lead.id = 0; lead.team_id = 0
+	var m := PersonData.new(); m.id = 1; m.team_id = 0
+	state.persons[0] = lead; state.persons[1] = m
+	var t := TeamData.new(); t.team_id = 0; t.leader_id = 0; t.named_members = [1]
+	state.teams[0] = t
+	assert(not _contains_substr(InvariantAudit.check(state), "roster"), "一致不誤報:%s" % str(InvariantAudit.check(state)))
+	# 死者留屍：team_id 保留但不在 roster（famine/戰死留屍）→ is_dead 跳過，不誤報
+	var corpse := PersonData.new(); corpse.id = 2; corpse.team_id = 0; corpse.is_dead = true
+	state.persons[2] = corpse
+	assert(not _contains_substr(InvariantAudit.check(state), "roster"), "dead 留屍不誤報:%s" % str(InvariantAudit.check(state)))
+	# 活人 team_id 指本隊但不在該隊 roster（真 desync）→ 反向抓
+	var ghost := PersonData.new(); ghost.id = 3; ghost.team_id = 0
+	state.persons[3] = ghost
+	assert(_contains_substr(InvariantAudit.check(state), "roster"), "活人 person→wrong-roster 反向應抓")
+	print("InvariantAudit roster 反向 OK")
+
+func _test_set_leader_chokepoint() -> void:
+	print("--- set_leader chokepoint ---")
+	var s := WorldState.new()
+	# 舊 leader 死亡留屍（is_dead）：succession "none" 情境——舊 leader 已死不動
+	var old_l := PersonData.new(); old_l.id = 1; old_l.team_id = 5; old_l.role = "leader"; old_l.is_dead = true
+	var new_l := PersonData.new(); new_l.id = 2; new_l.team_id = 5   # 已在本隊 named
+	s.persons[1] = old_l; s.persons[2] = new_l
+	var t := TeamData.new(); t.team_id = 5; t.leader_id = 1; t.named_members = [2]
+	s.teams[5] = t
+	# 預設 old_leader_action="none"（舊 leader 已死/他處理，不動）
+	s.set_leader(t, 2)
+	assert(t.leader_id == 2, "leader_id 更新")
+	assert(new_l.team_id == 5, "新 leader team_id 本隊")
+	assert(new_l.role == "leader", "role=leader")
+	assert(not t.named_members.has(2), "新 leader 出 named")
+	assert(not _contains_substr(InvariantAudit.check(s), "roster"), "forward roster 一致:%s" % str(InvariantAudit.check(s)))
+	# idempotent
+	s.set_leader(t, 2)
+	assert(t.leader_id == 2 and new_l.team_id == 5, "idempotent")
+	# 新 leader team_id 曾指他隊 → set_leader 修正（desync 根修）
+	var stray := PersonData.new(); stray.id = 3; stray.team_id = 99
+	s.persons[3] = stray
+	s.set_leader(t, 3)
+	assert(stray.team_id == 5, "set_leader 修正 stray team_id")
+	assert(t.leader_id == 3, "leader=3")
+	# old_leader_action="member"：舊 leader(3) 降 named，team_id 保本隊
+	s.set_leader(t, 2, "member")
+	assert(t.named_members.has(3), "舊 leader 降 named")
+	assert(stray.team_id == 5, "舊 leader team_id 保本隊")
+	assert(stray.role == "member", "舊 leader role=member")
+	assert(t.leader_id == 2, "新 leader=2")
+	assert(not _contains_substr(InvariantAudit.check(s), "roster"), "member 降級後 roster 一致:%s" % str(InvariantAudit.check(s)))
+	print("set_leader chokepoint OK")
+
 func _test_roster_chokepoint() -> void:
 	print("--- roster chokepoint add/remove bidir ---")
 	var s := WorldState.new()
@@ -1409,6 +1464,12 @@ func _test_driver_ledger() -> void:
 	var e: Dictionary = WorldState.driver_ledger[0]
 	assert(e["reason"] == "test_add", "reason 記錄")
 	assert(e["field"] == "food" and e["delta"] == 5.0, "field/delta 記錄")
+	# driver_tick_hint 溯源：record 帶當前 tick
+	WorldState.driver_tick_hint = 4242
+	WorldState.clear_driver_ledger()
+	ResourceBank.add(t, "food", 1.0, "tick_test")
+	assert(WorldState.driver_ledger[0]["tick"] == 4242, "record 帶真 tick 溯源:%d" % int(WorldState.driver_ledger[0]["tick"]))
+	WorldState.driver_tick_hint = 0
 	# 5 bank 各真記
 	WorldState.clear_driver_ledger()
 	AnonTreasuryBank.deposit(t, 10.0, "treas")

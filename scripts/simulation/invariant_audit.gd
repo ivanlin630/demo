@@ -55,10 +55,12 @@ static func _check_subteam_bidir(state: WorldState, out: Array[String]) -> void:
 			elif child.parent_team_id != pid:
 				out.append("subteam 雙向破 Team%d 列子隊 Team%d 但其 parent_team_id=%d" % [pid, cid, child.parent_team_id])
 
-# roster 雙向（forward）：named_members / leader_id 內每人 team_id 須回指本隊。
-# = 「凡在編制者必認本隊」。單值 team_id → 亦擋一人列兩隊（至多一隊對得上）。
-# add_member/remove_member chokepoint 維護此向。反向（person→roster）不審：health famine
-# 蓄意留屍保 team_id（不在任何 roster 卻 team_id!=-1）→ 反向會誤報，見 handback。
+# roster 雙向：named_members / leader_id 內每人 team_id 須回指本隊（forward）；
+# 且凡 person.team_id!=-1 須在該隊 roster（leader 或 named）（reverse，slice3）。
+# = 「凡在編制者必認本隊」+「凡認隊者必在編制」。單值 team_id → 亦擋一人列兩隊。
+# add_member/remove_member/set_leader chokepoint 維護此。
+# reverse 跳 is_dead：health famine/戰死蓄意留屍保 team_id（不在 roster 卻 team_id!=-1）→
+#   標 is_dead → 反向不誤報（活人 person→wrong-roster 才是真 desync）。
 static func _check_roster_bidir(state: WorldState, out: Array[String]) -> void:
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
@@ -70,6 +72,16 @@ static func _check_roster_bidir(state: WorldState, out: Array[String]) -> void:
 			var lp: PersonData = state.persons.get(t.leader_id)
 			if lp != null and lp.team_id != tid:
 				out.append("roster 雙向破 Team%d leader P%d 但其 team_id=%d" % [tid, t.leader_id, lp.team_id])
+	# reverse：person.team_id → 須在該隊 roster（活人）；dead 留屍跳過
+	for pid in state.persons:
+		var p: PersonData = state.persons[pid]
+		if p.team_id == -1 or p.is_dead:
+			continue
+		var t: TeamData = state.teams.get(p.team_id)
+		if t == null:
+			continue   # 懸空 team_id 由 remove_member 語意保證不生（此網不重複審）
+		if t.leader_id != pid and pid not in t.named_members:
+			out.append("roster 反向破 P%d team_id=%d 但不在該隊 roster(leader/named)" % [pid, p.team_id])
 
 # anon cohort 自洽：每桶 count>0、鍵合法（tier ∈ TIER_ORDER、health ∈ HEALTH_ORDER）。
 # count<0 或非法鍵 = AnonCohort 入口被繞過或腐化。population getter 已是恆等式（total_pop），

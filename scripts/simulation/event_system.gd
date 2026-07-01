@@ -42,9 +42,7 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 			best_command = cmd
 			best_successor = p
 	if best_successor != null:
-		team.leader_id = best_successor.id
-		best_successor.role = "leader"
-		state.remove_member(team, best_successor.id, false)   # 晉升 leader：出 named 仍屬本隊
+		state.set_leader(team, best_successor.id)   # chokepoint：leader_id+team_id+role+出 named
 		print("[Succession] Team %d 新 leader: P%d（統領=%.2f）" % [
 			team.team_id, best_successor.id, best_command])
 		PopulationSystem.new().check_overflow_for_team(state, team.team_id)
@@ -52,8 +50,7 @@ func on_leader_death(state: WorldState, team: TeamData) -> bool:
 	# 無 named → 從 anon 晉升
 	var promoted := PersonGenerator.generate_for_team(state, team, "member")
 	if promoted != null:
-		team.leader_id = promoted.id
-		promoted.role = "leader"
+		state.set_leader(team, promoted.id)   # chokepoint：leader_id+team_id+role
 		print("[Succession] Team %d 從匿名晉升新領袖 P%d（統領=%.2f）" % [
 			team.team_id, promoted.id, float(promoted.skills.get("統領", 0.0))])
 		PopulationSystem.new().check_overflow_for_team(state, team.team_id)

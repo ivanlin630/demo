@@ -240,6 +240,9 @@ func _step1c_update_equipment(state: WorldState, team_ids: Array) -> void:
 
 func _step1_advance_time(state: WorldState) -> void:
 	state.world.current_tick += 1
+	# driver-ledger tick 溯源：開 ledger 時填當前 tick（off 跳，避 hot path 每 tick 寫）
+	if WorldState.driver_ledger_enabled:
+		WorldState.driver_tick_hint = state.world.current_tick
 	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:  # 每 6 小時
 		state.world.current_turn += 1
 
