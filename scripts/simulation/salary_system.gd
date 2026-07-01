@@ -63,7 +63,7 @@ func _pay_salary(state: WorldState, team: TeamData) -> void:
 		var paid: float = p.salary * budget_ratio
 		var ratio: float = paid / maxf(fair, 0.01)
 		ResourceBank.remove(team, "coin", paid, "salary_named")
-		p.coin += paid
+		ResourceBank.adjust_person_coin(p, paid, "salary_named")
 		if ratio >= 1.0:
 			LoyaltyBank.adjust(p, (ratio - 1.0) * OVERPAY_BONUS, "overpay", MAX_LOYALTY)
 			var intensity: float = clampf((ratio - 1.0) * 0.5, 0.05, 0.8)  # TEST VALUE

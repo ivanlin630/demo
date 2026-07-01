@@ -5,6 +5,7 @@ class_name Probe
 static var enabled: bool = false
 static var counts: Dictionary = {}
 static var peaks: Dictionary = {}
+static var amounts: Dictionary = {}   # 浮點累計器（如鑄幣 coin 總量 ledger）
 
 const AMBUSH_UNDEREST := 0.5   # TEST VALUE：belief 武力低估 < 真值 50% → 視為被誤導
 
@@ -16,8 +17,16 @@ static func note(event: String, value: float) -> void:
 	if not enabled: return
 	peaks[event] = maxf(float(peaks.get(event, 0.0)), value)
 
+# 浮點累計（sum，非 peak）。ledger 用（鑄幣總量守恆審計）。
+static func add_amount(event: String, value: float) -> void:
+	if not enabled: return
+	amounts[event] = float(amounts.get(event, 0.0)) + value
+
+static func amount(event: String) -> float:
+	return float(amounts.get(event, 0.0))
+
 static func reset() -> void:
-	counts = {}; peaks = {}
+	counts = {}; peaks = {}; amounts = {}
 
 static func ambush_check(state: WorldState, attacker_id: int, defender_id: int) -> void:
 	if not enabled: return

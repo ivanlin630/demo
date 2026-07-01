@@ -271,6 +271,11 @@ func _initialize() -> void:
 	_test_trade_session_dto()
 	_test_trade_conservation()
 	_test_massacre_conservation()
+	# ── coin 單寫者 / 全池守恆（slice 1）──
+	_test_salary_coin_conserved()
+	_test_promote_bonus_coin_conserved()
+	_test_death_coin_conserved()
+	_test_mint_no_cap_burn()
 	_test_action_ui_coverage()
 	_test_player_camp()
 	_test_player_beg()
@@ -1379,13 +1384,8 @@ func _test_join_conservation() -> void:
 	print("投靠守恆整合 OK")
 
 func _coin_eq_sum(state: WorldState) -> float:
-	var total: float = 0.0
-	for tid in state.teams:
-		var t: TeamData = state.teams[tid]
-		total += float(t.resources.get("coin", 0)) + t.anon_treasury
-		total += float(t.resources.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
-		total += float(t.resources.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
-	return total
+	# 全 coin 池（純 coin，含 person/tile-vault/abandoned）。ore 非 coin-eq（採集產出非守恆）。
+	return CoinAudit.total(state)
 
 func _test_recruit_tutorial() -> void:
 	print("--- tutorial onboarding ---")
@@ -2936,6 +2936,10 @@ func _run_sim_test() -> void:
 	print("Team1 目標: (4,4)  Team2 無目標，駐守 (6,4)  player_pos=(6,4)")
 	var player_pos := Vector2i(6, 4)
 
+	# ── coin 全池守恆閘：run 前後 CoinAudit.total delta 須 == Σ minted（mint 為唯一 coin 來源）──
+	var _coin_before: float = CoinAudit.total(state)
+	Probe.reset(); Probe.enabled = true
+
 	for tick in range(200):
 		runner.advance_tick(state, player_pos)
 		if (tick + 1) % 20 == 0:
@@ -2952,6 +2956,15 @@ func _run_sim_test() -> void:
 					t.combat_target,
 					t.readiness
 				])
+
+	# coin 全池守恆驗收（含 salary/晉升/死亡/掠奪/滅團路由/鑄幣）
+	var _coin_after: float = CoinAudit.total(state)
+	var _minted: float = Probe.amount("mint_coin")
+	Probe.enabled = false
+	print("[CoinAudit] 200-tick 全池 coin before=%.2f after=%.2f minted=%.2f delta=%.2f" % [
+		_coin_before, _coin_after, _minted, (_coin_after - _coin_before) - _minted])
+	assert(absf((_coin_after - _coin_before) - _minted) < 0.5,
+		"coin 全池守恆破：before=%.2f after=%.2f minted=%.2f" % [_coin_before, _coin_after, _minted])
 
 	# Team9 商隊結果
 	if state.teams.has(9):
@@ -13308,6 +13321,69 @@ func _test_feud_spread() -> void:
 	var e2: Dictionary = RelationGraph.strongest(rl.relation_edges, "feud")
 	assert(not e2.is_empty() and e2["target"] == 70, "屠村餘部 leader 應對 attacker leader 結仇")
 	print("feud massacre wiring OK")
+
+func _test_salary_coin_conserved() -> void:
+	print("--- coin 單寫者：發薪全池守恆 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0; leader.skills = {"統領": 0.5}
+	state.persons[0] = leader
+	var m := PersonData.new(); m.id = 1; m.team_id = 0; m.skills = {"戰鬥": 1.0}; m.salary = 5.0
+	state.persons[1] = m
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0
+	team.named_members = [1]; _seed_pop(team, 5)
+	team.resources = {"coin": 100.0}
+	state.teams[0] = team
+	var before: float = CoinAudit.total(state)
+	SalarySystem.new()._pay_salary(state, team)
+	var after: float = CoinAudit.total(state)
+	assert(m.coin > 0.0, "named 應領到薪資（走 adjust_person_coin），實際=%.2f" % m.coin)
+	assert(absf(after - before) < 0.01, "發薪全池 coin 守恆 before=%.2f after=%.2f" % [before, after])
+	print("salary coin conserved OK (m.coin=%.2f)" % m.coin)
+
+func _test_promote_bonus_coin_conserved() -> void:
+	print("--- coin 單寫者：晉升 bonus 全池守恆 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = -1
+	_seed_pop(team, 5); team.anon_treasury = 60.0
+	state.teams[0] = team
+	var before: float = CoinAudit.total(state)
+	var p := PersonGenerator.generate_for_team(state, team, "member")
+	var after: float = CoinAudit.total(state)
+	assert(p != null, "應生成 named")
+	assert(p.coin > 0.0, "晉升應帶 bonus coin（走 adjust_person_coin），實際=%.2f" % p.coin)
+	assert(absf(after - before) < 0.01, "晉升 bonus 全池守恆 before=%.2f after=%.2f" % [before, after])
+	print("promote bonus conserved OK (p.coin=%.2f treasury=%.2f)" % [p.coin, team.anon_treasury])
+
+func _test_death_coin_conserved() -> void:
+	print("--- coin 單寫者：死亡 coin 退團全池守恆 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0; team.leader_id = -1
+	_seed_pop(team, 3); team.resources = {"coin": 10.0}
+	state.teams[0] = team
+	var p := PersonData.new(); p.id = 1; p.team_id = 0; p.coin = 25.0
+	p.equipment = {"hand_1": {"type": "none", "grade": ""}}
+	team.named_members = [1]; state.persons[1] = p
+	var before: float = CoinAudit.total(state)
+	NpcCombatSystem.new()._kill_named_npc(state, 0, p)
+	var after: float = CoinAudit.total(state)
+	assert(not state.persons.has(1), "死者應 erase")
+	assert(absf(after - before) < 0.01, "死亡 coin 全池守恆 before=%.2f after=%.2f" % [before, after])
+	print("death coin conserved OK (team coin=%.2f)" % float(team.resources.get("coin", 0)))
+
+func _test_mint_no_cap_burn() -> void:
+	print("--- 鑄幣滿 cap 不燒 ore（守恆，修 known_issues）---")
+	var os := OutpostSystem.new()
+	var s := WorldState.new(); s.world = WorldData.new()
+	var tile := HexTileData.new(); tile.tile_id = 4004; tile.tile_pos = Vector2i(4, 4)
+	tile.mint_level = 1
+	tile.public_storage = {"ore_gold": 10.0, "coin": 100.0}   # coin 已滿 bare-tile cap=100
+	s.world.tiles[tile.tile_id] = tile
+	var ore_before: float = float(tile.public_storage["ore_gold"])
+	os._tick_mint(s, tile, null)
+	assert(absf(float(tile.public_storage.get("ore_gold", 0)) - ore_before) < 0.001,
+		"滿 cap 不得燒 ore，ore %.2f→%.2f" % [ore_before, float(tile.public_storage.get("ore_gold", 0))])
+	assert(float(tile.public_storage.get("coin", 0)) <= 100.0 + 0.001, "coin 不超 cap")
+	print("mint no cap-burn OK")
 
 func _test_mint_conserving() -> void:
 	print("--- G1a：鑄幣端到端守恆 ---")

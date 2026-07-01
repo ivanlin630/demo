@@ -96,7 +96,7 @@ static func generate_for_team(state: WorldState, team: TeamData,
 	if anon_pop > 0 and team.anon_treasury > 0.0:
 		var per_share: float = team.anon_treasury / float(anon_pop)
 		var bonus: float = minf(per_share * 3.0, team.anon_treasury)
-		p.coin += bonus
+		ResourceBank.adjust_person_coin(p, bonus, "promote_bonus")
 		AnonTreasuryBank.withdraw(team, bonus, "promote_bonus")
 	state.persons[p.id] = p
 	# 晉升：抽 1 anon（偏高 tier = 提拔精銳）→ 轉 named；記實際來源 tier

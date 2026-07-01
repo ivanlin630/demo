@@ -218,31 +218,34 @@ func produce_stable_day(state: WorldState, tile: HexTileData, day_fraction: floa
 func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 	if tile.mint_level == 0: return
 	var rate: float = float(tile.mint_level) * MINT_BASE_RATE
+	# coin 容量餘裕：只鑄能容下的量 → 不燒 ore（守恆，修 known_issues「mint coin-cap 燒 ore off-ledger」）
+	var cap: float = _get_storage_cap(tile, "coin")
+	var cur_coin: float = float(tile.public_storage.get("coin", 0))
+	var room: float = maxf(cap - cur_coin, 0.0)
+	if room <= 0.0: return
 	var gold_qty: float = float(tile.public_storage.get("ore_gold", 0))
 	if gold_qty > 0.0:
-		var convert: float = minf(gold_qty, rate / GOLD_TO_COIN_RATIO)
-		tile.public_storage["ore_gold"] = gold_qty - convert
+		var convert: float = minf(gold_qty, minf(rate, room) / GOLD_TO_COIN_RATIO)
 		var coin_added: float = convert * GOLD_TO_COIN_RATIO
-		var cap: float = _get_storage_cap(tile, "coin")
-		var cur_coin: float = float(tile.public_storage.get("coin", 0))
-		tile.public_storage["coin"] = minf(cur_coin + coin_added, cap)
+		tile.public_storage["ore_gold"] = gold_qty - convert
+		tile.public_storage["coin"] = cur_coin + coin_added
 		if coin_added > 0.0:
 			print("[Mint] tile(%d,%d) gold→coin +%.1f (mint_lv=%d)" % [
 				tile.tile_pos.x, tile.tile_pos.y, coin_added, tile.mint_level])
 			Probe.bump("g1.mint")
+			Probe.add_amount("mint_coin", coin_added)   # 鑄幣 ledger（coin 唯一來源，供 CoinAudit 認得增發）
 		return
 	var silver_qty: float = float(tile.public_storage.get("ore_silver", 0))
 	if silver_qty > 0.0:
-		var convert: float = minf(silver_qty, rate / SILVER_TO_COIN_RATIO)
-		tile.public_storage["ore_silver"] = silver_qty - convert
+		var convert: float = minf(silver_qty, minf(rate, room) / SILVER_TO_COIN_RATIO)
 		var coin_added: float = convert * SILVER_TO_COIN_RATIO
-		var cap: float = _get_storage_cap(tile, "coin")
-		var cur_coin: float = float(tile.public_storage.get("coin", 0))
-		tile.public_storage["coin"] = minf(cur_coin + coin_added, cap)
+		tile.public_storage["ore_silver"] = silver_qty - convert
+		tile.public_storage["coin"] = cur_coin + coin_added
 		if coin_added > 0.0:
 			print("[Mint] tile(%d,%d) silver→coin +%.1f (mint_lv=%d)" % [
 				tile.tile_pos.x, tile.tile_pos.y, coin_added, tile.mint_level])
 			Probe.bump("g1.mint")
+			Probe.add_amount("mint_coin", coin_added)   # 鑄幣 ledger
 
 func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	# 找同格上所有 current_task == "建設" 的 team（接手機制）

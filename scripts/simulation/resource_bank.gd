@@ -15,3 +15,8 @@ static func set_amt(team: TeamData, res: String, amt: float, reason: String = ""
 
 static func clear_all(team: TeamData, reason: String = "") -> void:
 	team.resources.clear()
+
+# person.coin 單一寫者（Pattern B 所有權：私產 coin 唯一入口，保 CoinAudit 全池覆蓋）。
+# 私產流動一律轉移（team/treasury↔person）→ delta 對稱、守恆 by construction。
+static func adjust_person_coin(person: PersonData, delta: float, reason: String = "") -> void:
+	person.coin = maxf(person.coin + delta, 0.0)
