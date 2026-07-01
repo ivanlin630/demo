@@ -6,6 +6,13 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。
 
 
+## 統一矩陣窮盡稽核揭項（2026-07-01，全貌 `specs/2026-07-01-unification-matrix-audit`）
+
+- **★確認 bug：NPC-NPC 乞食(BEG)/投靠(JOIN) task 路徑死**：`interaction_system.gd:197` `if a.combat_target != -1 or b.combat_target != -1: return` **先於** BEG resolver(`:247`);BEG/JOIN dispatch 恆設 `combat_target`(options.gd:96/104、faction_ai:1377)→ 早退不可達;**TASK_JOIN 根本無 `_try_interact` handler**。NPC 絕境「乞食/投靠」(P2a option)walk 到目標被 197 殺、無 resolve;player 版直呼 `_resolve_aid_request` 繞過故沒露。**影響**：P2a 絕境 repertoire NPC 側可能空轉。**先 measure**(插探針量 NPC BEG/JOIN 實際 dispatch+resolve 率)再修,別直接當實([[feedback_avoid_rabbithole]])。修向：BEG/JOIN resolver 移到 197 早退前 or combat_target 語意拆(社交 target ≠ 戰鬥 target)。
+- **★第3不變量單寫者大面積未實現（強制閘前提）**：`team.resources` 乾淨(全 ResourceBank,first-pass「53直寫」修正=錯)。真洞：**tile.public_storage(granary)+tile.resources 全無 bank**(22+直寫)、**coin 憑空鑄入 public_storage 無 treasury bank**(outpost:228/241)、**named_members roster 無 chokepoint**(59 site/17 檔)、**combat_target/tags/solo_intent/faction.leader_team_id/person.coin/fatigue/armed_anon_ratio 無主**、**Pattern B driver-ledger=全 5 bank stub(reason 丟棄)**。team-creation 無 chokepoint(vs erase_team 有)、succession 三重手寫、faction_id=-1 6 處直寫繞 set_team_faction。= 統一矩陣「單寫者」領域最空,撐強制閘的前提。
+- **守恆盲區**：person.coin `+=` raw(salary:66)+ coin 憑空鑄 public_storage → coin_eq audit(對 team.resources 求和)看不到。
+- **其餘 fork（全 30+ 條見 audit doc）**：思考決策 5 scorer/threat term 死 stub(DecisionContext.threat=0.0)/雙 faction-goal producer;互動 2 diplomacy resolver(god-view vs belief)/3 tribute 公式/3 deception 引擎/RelationGraph orphaned;人力雙 skill/injury/equipment 模型;player 48 handler 4 缺口(demand_tribute/recruit×2/betray 全平行)+ UI god-view 洩漏。**燒序見 audit doc**（首燒=獨立/faction 戰略合併）。
+
 ## 後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07-01-late-game-scaling-assessment`）
 
 > LOD infra 存在且對 movement/economy 正確,但重認知系統 defeat LOD → O(N²)/hr。沙盒長跑須加固(否則大戲跑不到)。非重寫,P0 三項 targeted。
