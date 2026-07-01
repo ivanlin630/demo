@@ -32,7 +32,11 @@ func _established_count(state: WorldState) -> int:
 	return n
 
 func _run() -> void:
-	print("=== warring_states seed: 多派系活世界（commander 協同驗證床）===")
+	# WARRING_SEED env（default 1337）→ seed() 播 global RNG + config.seed 播 setup RNG → 逐 tick 逐隊重現。
+	# 同 seed 兩跑逐點相同（見 headless _test_seeded_warring_reproducible）。RNG 盤點見 warring_harness.gd 檔頭。
+	var world_seed: int = int(OS.get_environment("WARRING_SEED")) if OS.has_environment("WARRING_SEED") else 1337
+	seed(world_seed)
+	print("=== warring_states seed: 多派系活世界（commander 協同驗證床）seed=%d ===" % world_seed)
 	Probe.enabled = true
 	Probe.reset()
 	var state := WorldState.new()
@@ -40,6 +44,7 @@ func _run() -> void:
 	var config := GameSetup.load_config("res://config/warring_states.json")
 	if config.is_empty():
 		print("[FAIL] config 載入失敗"); Probe.enabled = false; return
+	config["seed"] = world_seed
 	GameSetup.setup(state, config)
 	var max_ticks: int = int(config.get("max_ticks", 172800))
 	print("[戰國] max_ticks=%d (%.1f 年) teams=%d factions=%d" % [

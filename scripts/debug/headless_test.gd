@@ -508,6 +508,8 @@ func _initialize() -> void:
 	# ── P0 scaling 加固：空間索引 + team_intel prune ──
 	_test_teams_by_tile_index()
 	_test_team_intel_prune_on_erase()
+	# ── seeded warring harness：同 seed 逐點重現 ──
+	_test_seeded_warring_reproducible()
 	quit()
 
 # Task 3：tile→teams 共用空間索引一致性（索引查 == 全掃結果，零行為變前提）
@@ -15343,3 +15345,19 @@ func _test_p4_stakes_believability() -> void:
 	fa._decide_unified(state2, starving)
 	assert(starving.current_task != TeamData.TASK_TRIBUTE, "[p4] 餓 member 竟為派系徵收 task=%s" % starving.current_task)
 	print("[p4] stakes believability OK (ug=%.3f um=%.3f starving→%s)" % [ug, um, starving.current_task])
+
+# seeded warring harness：同 seed 兩跑 → curve/intent/probe 逐點相同（重現性證）。
+# 未 seed 時 run 2 續 run 1 的 global RNG 流 → metric drift → 本測抓得住。
+func _test_seeded_warring_reproducible() -> void:
+	print("--- seeded warring harness：同 seed 逐點重現 ---")
+	var ticks: int = 1200   # 短窗，僅需夠 RNG 被消費以顯 drift
+	var a: Dictionary = WarringHarness.run(1337, ticks)
+	var b: Dictionary = WarringHarness.run(1337, ticks)
+	assert(not a.is_empty(), "harness run a 空（config 載入失敗？）")
+	assert(not b.is_empty(), "harness run b 空")
+	# 逐點：curve（月快照 teams/factions/established/pop/intent）+ final intent + probe 子集
+	var sa: String = JSON.stringify({"curve": a["curve"], "intent": a["intent"], "probe": a["probe"], "final": a["final"]})
+	var sb: String = JSON.stringify({"curve": b["curve"], "intent": b["intent"], "probe": b["probe"], "final": b["final"]})
+	assert(sa == sb, "同 seed 兩跑 metric 不一致（未確定）：\n a=%s\n b=%s" % [sa, sb])
+	print("seeded warring reproducible OK (seed=1337 ticks=%d final=%s probe_capture=%d)" % [
+		ticks, str(a["final"]), int(a["probe"].get("capture.total", 0))])
