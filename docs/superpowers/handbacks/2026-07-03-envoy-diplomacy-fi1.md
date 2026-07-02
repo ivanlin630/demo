@@ -3,6 +3,7 @@
 Spec：`docs/superpowers/specs/2026-07-03-envoy-diplomacy-fi1-design.md`
 Plan：`docs/superpowers/plans/2026-07-03-envoy-diplomacy-fi1.md`
 Branch：`feat/envoy-diplomacy-fi1`
+> Status: consumed（2026-07-03 merged,系統收編）
 
 ## 實作摘要（每檔一行）
 
