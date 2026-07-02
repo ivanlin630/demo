@@ -689,18 +689,8 @@ func _tag_weight(team: TeamData, task: String) -> float:
 # weak_enemy = belief 認為最近獨立 target 可打贏（征服 viable）。
 func _intent_scores(values: Dictionary, established: bool, weak_enemy: bool,
 		can_levy: bool) -> Dictionary:
-	var ambition: float = float(values.get("野心", 0.5))
-	var greed:    float = float(values.get("貪婪", 0.5))
-	var honor:    float = float(values.get("義氣", 0.5))
-	var martial:  float = float(values.get("好戰", 0.5))
-	var caution:  float = float(values.get("慎重", 0.5))
-	# 人格適性（既有 attack_score 結構複用：征服←野心.4+好戰.4-義氣.4）
-	var scores: Dictionary = {
-		"守成": 0.25,  # default base
-		"征服": ambition * 0.4 + martial * 0.4 - honor * 0.4,
-		"致富": greed * 0.6 + ambition * 0.1,
-		"防衛": caution * 0.4 + honor * 0.2,
-	}
+	# R2 共源：人格層 = AmbitionLadder.disposition_scores（intent/archetype 單一公式），此處只疊 viability。
+	var scores: Dictionary = AmbitionLadder.disposition_scores(values)
 	# viability：征服只在 established + 能湊出實打力(weak_enemy)；湊不出 → 壓到地板(resource-aware 退更小意圖)
 	if not established or not weak_enemy:
 		scores["征服"] = -1.0

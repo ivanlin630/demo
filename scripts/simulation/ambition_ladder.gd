@@ -20,19 +20,35 @@ const EXPAND_MIN_POP: int = 8
 const STATE_MIN_FACTION_TEAMS: int = 2
 const HEGEMON_MIN_FACTION_TEAMS: int = 4
 
-# leader values 最高軸 → archetype（平手序 武力>商業>定居）。TEST VALUE 權重。
+# R2 單一人格傾向公式（intent/archetype 共源）：_intent_scores 人格層原式搬家（數字不動）。
+# viability 疊加（established/weak_enemy/can_levy）留在 FactionAISystem._intent_scores。TEST VALUE 權重。
+static func disposition_scores(values: Dictionary) -> Dictionary:
+	var ambition: float = float(values.get("野心", 0.5))
+	var greed:    float = float(values.get("貪婪", 0.5))
+	var honor:    float = float(values.get("義氣", 0.5))
+	var martial:  float = float(values.get("好戰", 0.5))
+	var caution:  float = float(values.get("慎重", 0.5))
+	return {
+		"守成": 0.25,  # default base
+		"征服": ambition * 0.4 + martial * 0.4 - honor * 0.4,
+		"致富": greed * 0.6 + ambition * 0.1,
+		"防衛": caution * 0.4 + honor * 0.2,
+	}
+
+# R2：委派 argmax(disposition_scores) → archetype 映射（征服→武力、致富→商業、防衛|守成→定居）。
+# 平手序 武力>商業>定居（等分先 FORCE）。與 intent scorer 共源 → desync 結構歸零。
 static func derive_archetype(leader: PersonData) -> String:
 	if leader == null:
 		return ARCHETYPE_SETTLE
-	var v: Dictionary = leader.values
-	var force: float = float(v.get("野心", 0.5)) * 0.5 + float(v.get("好戰", 0.5)) * 0.5
-	var trade: float = float(v.get("貪婪", 0.5))
-	var settle: float = float(v.get("義氣", 0.5)) * 0.5 + float(v.get("慎重", 0.5)) * 0.5
-	if force >= trade and force >= settle:
-		return ARCHETYPE_FORCE
-	if trade >= settle:
-		return ARCHETYPE_TRADE
-	return ARCHETYPE_SETTLE
+	var scores: Dictionary = disposition_scores(leader.values)
+	var best: String = "征服"
+	for key in ["征服", "致富", "防衛", "守成"]:   # 順序=平手序（前者贏）
+		if scores[key] > scores[best]:
+			best = key
+	match best:
+		"征服": return ARCHETYPE_FORCE
+		"致富": return ARCHETYPE_TRADE
+	return ARCHETYPE_SETTLE   # 防衛|守成
 
 # 野心 → 封頂 rung（TEST VALUE）
 static func derive_cap(leader: PersonData) -> int:

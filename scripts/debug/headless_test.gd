@@ -510,6 +510,10 @@ func _initialize() -> void:
 	_test_team_intel_prune_on_erase()
 	# ── seeded warring harness：同 seed 逐點重現 ──
 	_test_seeded_warring_reproducible()
+	# ── R2 intent/archetype 共源（desync=0）+ 分布 sanity ──
+	_test_r2_disposition_delegation()
+	_test_r2_archetype_tiebreak()
+	_test_r2_archetype_distribution()
 	quit()
 
 # Task 3：tile→teams 共用空間索引一致性（索引查 == 全掃結果，零行為變前提）
@@ -15367,3 +15371,72 @@ func _test_seeded_warring_reproducible() -> void:
 	assert(sa == sb, "同 seed 兩跑 metric 不一致（未確定）：\n a=%s\n b=%s" % [sa, sb])
 	print("seeded warring reproducible OK (seed=1337 ticks=%d final=%s probe_capture=%d)" % [
 		ticks, str(a["final"]), int(a["probe"].get("capture.total", 0))])
+
+# ════════════════════════════════════════════════════════════
+# R2：intent/archetype 共源（disposition_scores 單一公式）
+# ════════════════════════════════════════════════════════════
+
+func _mk_leader_with_values(vals: Dictionary) -> PersonData:
+	var p := PersonData.new()
+	p.id = 900
+	for k in vals:
+		p.values[k] = vals[k]
+	return p
+
+# desync=0：disposition_scores argmax → derive_archetype 映射一致（同公式共源）
+func _test_r2_disposition_delegation() -> void:
+	print("--- R2: disposition 共源 → derive_archetype 委派（desync=0）---")
+	# 各構造一組 values 使 argmax 確定為 征服/致富/防衛
+	var cases: Array = [
+		[{"野心": 0.9, "好戰": 0.9, "義氣": 0.0, "貪婪": 0.1, "慎重": 0.1},
+			"征服", AmbitionLadder.ARCHETYPE_FORCE],
+		[{"野心": 0.2, "好戰": 0.1, "義氣": 0.5, "貪婪": 0.9, "慎重": 0.3},
+			"致富", AmbitionLadder.ARCHETYPE_TRADE],
+		[{"野心": 0.1, "好戰": 0.1, "義氣": 0.9, "貪婪": 0.1, "慎重": 0.9},
+			"防衛", AmbitionLadder.ARCHETYPE_SETTLE],
+	]
+	for c in cases:
+		var scores: Dictionary = AmbitionLadder.disposition_scores(c[0])
+		# 驗前提：argmax 確為預期意圖
+		var best: String = "征服"
+		for key in ["征服", "致富", "防衛", "守成"]:
+			if scores[key] > scores[best]: best = key
+		assert(best == c[1], "前提：argmax 應=%s，實得 %s（scores=%s）" % [c[1], best, scores])
+		var arch: String = AmbitionLadder.derive_archetype(_mk_leader_with_values(c[0]))
+		assert(arch == c[2], "desync：%s 傾向應映 %s，實得 %s" % [c[1], c[2], arch])
+	# leader==null → SETTLE（現行為保留）
+	assert(AmbitionLadder.derive_archetype(null) == AmbitionLadder.ARCHETYPE_SETTLE, "null leader → SETTLE")
+	print("[OK] _test_r2_disposition_delegation")
+
+# 平手序：征服=致富=防衛 同分（0.4，fp 精確）→ FORCE 先
+func _test_r2_archetype_tiebreak() -> void:
+	print("--- R2: archetype 平手序（三軸同分 → FORCE）---")
+	# 征服 = 1*0.4+0-0 = 0.4；致富 = 0.5*0.6+1*0.1 = 0.4；防衛 = 1*0.4+0 = 0.4（皆 fp 精確）
+	var vals: Dictionary = {"野心": 1.0, "好戰": 0.0, "義氣": 0.0, "貪婪": 0.5, "慎重": 1.0}
+	var scores: Dictionary = AmbitionLadder.disposition_scores(vals)
+	assert(scores["征服"] == scores["致富"] and scores["致富"] == scores["防衛"],
+		"前提：三軸應同分（scores=%s）" % scores)
+	assert(AmbitionLadder.derive_archetype(_mk_leader_with_values(vals)) == AmbitionLadder.ARCHETYPE_FORCE,
+		"平手 → FORCE（武力>商業>定居）")
+	print("[OK] _test_r2_archetype_tiebreak")
+
+# 分布 sanity：seeded leader 生成 → 三型各 >10%、無單型 >80%
+func _test_r2_archetype_distribution() -> void:
+	print("--- R2: archetype 分布 sanity（三型各>10%，無單型>80%）---")
+	var s := WorldState.new()
+	var n: int = 300
+	var counts: Dictionary = {
+		AmbitionLadder.ARCHETYPE_FORCE: 0,
+		AmbitionLadder.ARCHETYPE_TRADE: 0,
+		AmbitionLadder.ARCHETYPE_SETTLE: 0,
+	}
+	for i in n:
+		var p := PersonGenerator.generate(s, 20000 + i, "leader")
+		counts[AmbitionLadder.derive_archetype(p)] += 1
+	for arch in counts:
+		var share: float = float(counts[arch]) / float(n)
+		assert(share > 0.10, "archetype %s 佔比 %.1f%% 應>10%%（counts=%s）" % [arch, share * 100.0, counts])
+		assert(share < 0.80, "archetype %s 佔比 %.1f%% 應<80%%（counts=%s）" % [arch, share * 100.0, counts])
+	print("archetype distribution OK (FORCE=%d TRADE=%d SETTLE=%d / %d)" % [
+		counts[AmbitionLadder.ARCHETYPE_FORCE], counts[AmbitionLadder.ARCHETYPE_TRADE],
+		counts[AmbitionLadder.ARCHETYPE_SETTLE], n])
