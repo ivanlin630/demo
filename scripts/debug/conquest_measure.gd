@@ -108,7 +108,9 @@ func _run() -> void:
 		"conq.retreat_captured", "conq.retreat_no_capture",
 		"capture.total", "loot.achieved_capture", "capture.by_attack", "capture.by_other",
 		# R1 驗收哨：絕境仍搏 + ③管住（獨立隊攻 believed-owned 應低）
-		"surv.loot_dispatch", "conq.indep_atk_believed_owned"]
+		"surv.loot_dispatch", "conq.indep_atk_believed_owned",
+		# R2 desync 真回歸哨（征服 intent 被 archetype 擋,共源後結構應恆 0）
+		"prosp.desync_conq_blocked"]
 	for k in keys:
 		print("[measure] %-26s = %d" % [k, int(Probe.counts.get(k, 0))])
 	print("[measure] %-26s peak= %.3f" % ["conq.loot_util", float(Probe.peaks.get("conq.loot_util", 0.0))])

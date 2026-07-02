@@ -2,7 +2,7 @@
 
 > Plan：`docs/superpowers/plans/2026-07-02-r1-threeband-r2-judge-retire.md`
 > Branch：`feat/r1-threeband-r2-judge-retire`（worktree `.worktrees/r1-threeband-r2-judge-retire`）
-> Status: open
+> Status: consumed
 
 ## 實作摘要（各 Task 結果）
 

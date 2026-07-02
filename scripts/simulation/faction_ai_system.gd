@@ -231,6 +231,9 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 		if Probe.enabled:
 			Probe.bump("prosp.gate_archetype")
 			Probe.note("prosp.blocked_rung", float(team.ambition_rung))
+			# 真 desync 回歸哨：征服 intent 隊被 archetype 擋 = R2 共源破（結構上應恆 0）。
+			# gate_archetype 本身含 ambient 隊（TRADE/SETTLE 被正確擋）不能當哨。
+			if _solo_type(team) == "征服": Probe.bump("prosp.desync_conq_blocked")
 		return
 
 	var score: float = calc_attack_score(team, leader)

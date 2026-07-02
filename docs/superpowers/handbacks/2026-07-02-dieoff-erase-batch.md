@@ -1,6 +1,6 @@
 # Hand Back: die-off erase spike 批次化（實作→系統）
 
-status: open
+status: consumed
 plan: `docs/superpowers/plans/2026-07-02-dieoff-erase-batch.md`
 branch: `feat/dieoff-erase-batch`（未 merge，等主 session 確認）
 
