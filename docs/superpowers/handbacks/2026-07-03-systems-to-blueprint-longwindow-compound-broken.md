@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 長窗6月+斷②zoom——複利弧未成立三斷鏈;★zoom拆斷②=②a found_ally無timeout凍結bug(4-6月)+②b readiness=隱藏food閘鎖餬口狼(雞生蛋殘留)+②c prey「food<20」濾掉搶糧目標(設計矛盾);深化二觸發=假陽性暫不開;asm結構斷5:1;裁②b/②c WHAT+斷①+asm修
 ---
 
