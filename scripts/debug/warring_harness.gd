@@ -23,6 +23,8 @@ const PROBE_KEYS: Array = [
 	"conq.intent", "conq.prosperity_reached",
 	"p1.assimilate", "p1.revolt", "p1.flee",
 	"beg.dispatch", "beg.resolve", "join.dispatch", "join.resolve",
+	# R1 驗收（三帶+logistics）：絕境仍搏 / ③管住獨立隊攻屬村 / 貿易量（guard ④）
+	"surv.loot_dispatch", "conq.indep_atk_believed_owned", "g1.arb_hit",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。

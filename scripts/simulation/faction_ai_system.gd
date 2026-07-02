@@ -278,6 +278,11 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 		if _was_scout: Probe.bump("g3.scout_converge")
 		# 征服名實探針：真征服鏈起點（prosperity-attack→失能-capture→吸收）走到。
 		Probe.bump("conq.prosperity_reached")
+		# R1b 驗收哨：獨立隊攻 believed-faction-owned 目標（③own 罰應壓低此量，非歸零）
+		if Probe.enabled and team.faction_id == -1:
+			var _bel_own: Dictionary = BeliefSystem.best_estimate(state, team.team_id, prey_id)
+			if _bel_own.has("faction_id") and int(_bel_own.get("faction_id", -1)) != -1:
+				Probe.bump("conq.indep_atk_believed_owned")
 		print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
 			team.team_id, prey_id, score])
 
@@ -2819,7 +2824,9 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			if td.has("social_target"):
 				state.set_social_target(team, int(td["social_target"]))
 			match opt:   # 保留分流診斷 marker（world_sim 量測 homeless 分流）
-				"掠奪": print("[SurvivalLoot] team=Team%d → 掠 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
+				"掠奪":
+					Probe.bump("surv.loot_dispatch")   # R1 驗收哨：絕境仍搏（拔閘後 survival loot 不降）
+					print("[SurvivalLoot] team=Team%d → 掠 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
 				"投靠": print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, int(td.get("social_target", -1))])
 				"紮營": print("[SurvivalCamp] team=Team%d → 紮營 @(%d,%d)" % [team.team_id, tgt.x, tgt.y])
 				"覓食": print("[SurvivalForage] team=Team%d pop=%d → 覓食 @(%d,%d)" % [team.team_id, team.population, tgt.x, tgt.y])
