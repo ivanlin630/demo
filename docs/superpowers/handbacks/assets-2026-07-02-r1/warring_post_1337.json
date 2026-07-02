@@ -1,0 +1,83 @@
+{
+  "1337": {
+    "attrition_pct": 41.1357340720222,
+    "curve": [
+      {
+        "established": 1,
+        "factions": 9,
+        "intent": {
+          "CONQUER": 4,
+          "DEFEND": 19,
+          "EXPAND": 0,
+          "FOUND": 1,
+          "HOLD": 1,
+          "NONE": 6,
+          "RICH": 26
+        },
+        "month": 1,
+        "pop": 625,
+        "teams": 100
+      },
+      {
+        "established": 1,
+        "factions": 10,
+        "intent": {
+          "CONQUER": 1,
+          "DEFEND": 18,
+          "EXPAND": 0,
+          "FOUND": 2,
+          "HOLD": 1,
+          "NONE": 3,
+          "RICH": 23
+        },
+        "month": 2,
+        "pop": 425,
+        "teams": 78
+      }
+    ],
+    "end_pop": 425,
+    "final": {
+      "established": 1,
+      "factions": 10,
+      "pop": 425,
+      "teams": 78
+    },
+    "intent": {
+      "CONQUER": 1,
+      "DEFEND": 18,
+      "EXPAND": 0,
+      "FOUND": 2,
+      "HOLD": 1,
+      "NONE": 3,
+      "RICH": 23
+    },
+    "probe": {
+      "beg.dispatch": 1,
+      "beg.resolve": 1,
+      "capture.by_attack": 1,
+      "capture.total": 6,
+      "conq.indep_atk_believed_owned": 0,
+      "conq.intent": 126,
+      "conq.prosperity_reached": 4,
+      "g1.arb_hit": 0,
+      "g2.faction_found": 1,
+      "g2.feud_formed": 14,
+      "g2.vendetta_trigger": 0,
+      "g3.betrayal": 15,
+      "g3.scout_dispatch": 2,
+      "g3.trust_down": 19798,
+      "g3.trust_up": 16437,
+      "indep.found_ally": 4,
+      "indep.found_subjugate": 0,
+      "join.dispatch": 39,
+      "join.resolve": 13,
+      "p1.assimilate": 1,
+      "p1.flee": 2,
+      "p1.revolt": 3,
+      "surv.loot_dispatch": 201
+    },
+    "seed": 1337,
+    "start_pop": 722,
+    "total_ticks": 14400
+  }
+}
