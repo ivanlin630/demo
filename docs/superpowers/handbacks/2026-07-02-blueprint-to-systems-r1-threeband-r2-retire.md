@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: R1 裁定=三帶模型(敘述性,嚴禁新band判斷器,判斷器−1非+1);攻擊gate按driver分(絕境塌/戰略三問);食物盈餘只管立國;R2=收編退役舊judge非第三仲裁;checklist補「既存judge盤點」
 ---
 
