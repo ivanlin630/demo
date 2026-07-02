@@ -103,6 +103,11 @@ const OUTPOST_POP_CAP: Dictionary = {
 }
 
 # ── Prosperity helpers（static，純函數，可單測）──
+
+# R1b logistics 因子常數（全 TEST VALUE）——連續因子乘進 score，非 filter/classifier
+const TRIP_FOOD_FLOOR: float = 0.2      # TEST VALUE — ②路程糧下限：糧緊只壓權重，絕不歸零
+const OWN_UNKNOWN_FACTION: float = 0.5  # TEST VALUE — ③歸屬欄缺席=未知→保守（盲 raid 壓、誘因 scout，Phase E 慣例）
+const WAR_COST_BASE: float = 0.15       # TEST VALUE — ③believed 屬 faction 基準罰（獨立餬口隊幾乎不中選）
 static func calc_readiness_threshold(team: TeamData, leader: PersonData) -> float:
 	var ferocity: float = maxf(
 		float(leader.values.get("殘忍", 0.5)),
@@ -159,7 +164,30 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 			0.0, 1.0)
 		var border: float = 1.0 if _is_border_adjacent(team, prey) else 0.3
 		var eta_days: float = maxf(float(catch_result.eta) / 240.0, 1.0)
-		var score: float = (richness * greed + weakness * cruelty + border * ambition) / eta_days
+		# R1b means-end logistics（②路程糧 × ③目標歸屬，單一連續因子乘進 score）
+		# ②路程糧：單程到 prey 的糧需 vs 有效糧；夠→1.0，緊→往下滑但絕不歸零（既有信號讀取）
+		var trip_need: float = eta_days * float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+		var trip: float = clampf(
+			ResourceSystem.effective_food(state, team) / maxf(trip_need, 0.001),
+			TRIP_FOOD_FLOOR, 1.0)
+		# ③歸屬（belief claim 語意，可傳/可過時/可騙）：禁讀 prey.faction_id 真值——
+		# belief 錯 → 照打（捅馬蜂窩）/被嚇阻 = G3 戲劇，不防呆。
+		var own: float
+		if not bel.has("faction_id"):
+			own = OWN_UNKNOWN_FACTION   # 欄位缺席（tier0/1 無此欄）= 未知 → 保守
+		elif int(bel.get("faction_id", -1)) == -1:
+			own = 1.0                   # believed 獨立：一次 raid，可打
+		else:
+			# believed 屬 faction：基準罰 + 攻擊者戰爭能力減免（全既有信號讀取，無新後勤 state）
+			var att_established: bool = team.faction_id != -1 \
+				and state.factions.has(team.faction_id) \
+				and state.factions[team.faction_id].is_established
+			var war_capability: float = (0.3 if att_established else 0.0) \
+				+ float(team.ambition_rung) / float(AmbitionLadder.RUNG_HEGEMON) * 0.3
+			own = minf(WAR_COST_BASE + war_capability, 1.0)
+		var logistics: float = trip * own
+		var score: float = (richness * greed + weakness * cruelty + border * ambition) \
+			/ eta_days * logistics
 		if score > best_score:
 			best_score = score
 			best_id = tid

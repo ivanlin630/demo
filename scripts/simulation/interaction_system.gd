@@ -762,6 +762,14 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 			snap["food_est"]     *= randf_range(0.3, 0.7)
 			snap["material_est"] *= randf_range(0.3, 0.7)
 			snap["goods_est"]    *= randf_range(0.3, 0.7)
+	# R1b ③可騙 channel：弱獨立隊謊稱屬大勢力（faction_id 誤報 → 攻擊者 own 罰被嚇阻）。
+	# 同 deceive 塊一欄非新系統；機率沿用 deceive_chance（人格驅動）。TEST VALUE 門檻。
+	if tgt.faction_id == -1 \
+			and float(actual_armed) / maxf(float(tgt.population), 1.0) < 0.5 \
+			and randf() < deceive_chance:
+		var bluff_fid: int = _biggest_established_faction(state)
+		if bluff_fid != -1:
+			snap["faction_id"] = bluff_fid
 	# G3c-2 觀察吃技能：observer 戰術低 → 看不懂武裝 → armed_est 疊誤判（cred 仍 1.0）
 	var obs_leader2: PersonData = state.persons.get((state.teams.get(obs_id) as TeamData).leader_id) if state.teams.has(obs_id) else null
 	var tactic: float = float(obs_leader2.skills.get("戰術", 0.0)) if obs_leader2 else 0.0
@@ -769,6 +777,18 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 	snap["armed_est"] = maxi(0, roundi(float(snap["armed_est"]) * randf_range(1.0 - armed_noise, 1.0 + armed_noise)))
 	var cred: float = BeliefSystem.source_credibility(state, obs_id, "親見", obs_id, 0)
 	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, cred, false)
+
+# R1b：faction_id 誤報用——最大 established faction（謊稱誰最能嚇阻）。無則 -1（不誤報）。
+static func _biggest_established_faction(state: WorldState) -> int:
+	var best_fid: int = -1
+	var best_n: int = -1
+	for fid in state.factions:
+		var f: FactionData = state.factions[fid]
+		if not f.is_established: continue
+		if f.member_team_ids.size() > best_n:
+			best_n = f.member_team_ids.size()
+			best_fid = fid
+	return best_fid
 
 # 處決俘虜：呼叫者負責移除 NPC；此函數只結算目擊者 loyalty 懲罰
 func execute_prisoner(state: WorldState, team_id: int) -> void:

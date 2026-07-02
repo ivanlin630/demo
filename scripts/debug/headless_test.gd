@@ -516,6 +516,11 @@ func _initialize() -> void:
 	_test_r2_archetype_distribution()
 	# ── R1a：rung-food 攻擊閘已拔（人格 gate 獨留）──
 	_test_r1a_rung_gate_removed()
+	# ── R1b：means-end logistics 因子（②路程糧 × ③目標歸屬）──
+	_test_r1b_ownership_ordering()
+	_test_r1b_war_capability_relief()
+	_test_r1b_trip_food_floor()
+	_test_r1b_faction_id_deceive()
 	quit()
 
 # Task 3：tile→teams 共用空間索引一致性（索引查 == 全掃結果，零行為變前提）
@@ -15466,3 +15471,126 @@ func _test_r1a_rung_gate_removed() -> void:
 		"非 FORCE 應被人格 gate 擋，實際 target=%d task=%s" % [
 			tm_b.prosperity_target_id, tm_b.current_task])
 	print("[OK] _test_r1a_rung_gate_removed")
+
+# ════════════════════════════════════════════════════════════
+# R1b：means-end logistics 因子（②路程糧 × ③目標歸屬）
+# ════════════════════════════════════════════════════════════
+
+# 獨立餬口攻擊者 scene（faction=-1, rung=SURVIVE, 糧充足）
+func _r1b_scene() -> Array:
+	var st := _prosperity_grid()
+	var atk := TeamData.new()
+	atk.team_id = 0; atk.tile_pos = Vector2i(0, 0); _seed_pop(atk, 10)
+	atk.faction_id = -1
+	atk.ambition_rung = AmbitionLadder.RUNG_SURVIVE
+	atk.resources = {"food": 500}
+	st.teams[0] = atk
+	var lp := PersonData.new(); lp.id = 100
+	lp.values = {"貪婪": 0.5, "殘忍": 0.5, "野心": 0.5}
+	st.persons[100] = lp
+	atk.leader_id = 100
+	return [st, atk]
+
+func _r1b_add_prey(st: WorldState, tid: int, pos: Vector2i, true_fid: int) -> void:
+	var p := TeamData.new()
+	p.team_id = tid; p.tile_pos = pos; p.last_tile_pos = pos; _seed_pop(p, 5)
+	p.faction_id = true_fid
+	st.teams[tid] = p
+
+# ③歸屬 score 階序：believed 獨立 > 欄位缺席(未知0.5) > believed 屬村。真值故意與 belief 相反（belief 驅動非 god-view）。
+func _test_r1b_ownership_ordering() -> void:
+	print("--- R1b: ③歸屬階序（獨立 > 未知 > 屬村，belief 驅動）---")
+	var sa: Array = _r1b_scene()
+	var st: WorldState = sa[0]; var atk: TeamData = sa[1]
+	var lp: PersonData = st.persons[100]
+	# 三 prey 同距同弱同富，只差 believed 歸屬；prey1 真值屬7 但 believed 獨立（禁 god-view 驗證）
+	_r1b_add_prey(st, 1, Vector2i(2, 0), 7)
+	_r1b_add_prey(st, 2, Vector2i(0, 2), -1)
+	_r1b_add_prey(st, 3, Vector2i(-2, 2), -1)
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": -1}, 1.0, false)
+	BeliefSystem.record_claim(st, 0, 2, 0, "親見", {"population_est": 4, "armed_est": 4}, 1.0, false)
+	BeliefSystem.record_claim(st, 0, 3, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": 7}, 1.0, false)
+	st.team_discovered[0] = [1, 2, 3]
+	var pick1: int = FactionAISystem.find_prosperity_prey(st, atk, lp)
+	assert(pick1 == 1, "believed 獨立應最優（own=1.0），實得 %d" % pick1)
+	st.team_discovered[0] = [2, 3]
+	var pick2: int = FactionAISystem.find_prosperity_prey(st, atk, lp)
+	assert(pick2 == 2, "欄位缺席(未知0.5)應勝 believed 屬村(0.15)，實得 %d" % pick2)
+	st.team_discovered[0] = [3]
+	var pick3: int = FactionAISystem.find_prosperity_prey(st, atk, lp)
+	assert(pick3 == 3, "believed 屬村罰壓低但非零（唯一候選仍中選），實得 %d" % pick3)
+	print("[OK] _test_r1b_ownership_ordering")
+
+# ③戰爭能力減免：富屬村 vs 貧獨立——獨立餬口者選貧獨立（罰壓死）；established+HEGEMON 選富屬村（開得起戰爭）
+func _test_r1b_war_capability_relief() -> void:
+	print("--- R1b: established+高rung 攻屬村罰減輕 ---")
+	# A) 獨立餬口攻擊者 → 選貧獨立
+	var sa: Array = _r1b_scene()
+	var st_a: WorldState = sa[0]; var atk_a: TeamData = sa[1]
+	_r1b_add_prey(st_a, 1, Vector2i(2, 0), 7)
+	_r1b_add_prey(st_a, 2, Vector2i(0, 2), -1)
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": 7, "coin_est": 300.0}, 1.0, false)
+	BeliefSystem.record_claim(st_a, 0, 2, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": -1}, 1.0, false)
+	st_a.team_discovered[0] = [1, 2]
+	var pick_a: int = FactionAISystem.find_prosperity_prey(st_a, atk_a, st_a.persons[100])
+	assert(pick_a == 2, "獨立餬口者應避富屬村選貧獨立，實得 %d" % pick_a)
+	# B) established faction + HEGEMON rung 攻擊者 → 富屬村罰減輕（仍可中選）
+	var sb: Array = _r1b_scene()
+	var st_b: WorldState = sb[0]; var atk_b: TeamData = sb[1]
+	atk_b.faction_id = 0
+	atk_b.ambition_rung = AmbitionLadder.RUNG_HEGEMON
+	var f0 := FactionData.new(); f0.faction_id = 0; f0.is_established = true; f0.member_team_ids = [0]
+	st_b.factions[0] = f0
+	_r1b_add_prey(st_b, 1, Vector2i(2, 0), 7)
+	_r1b_add_prey(st_b, 2, Vector2i(0, 2), -1)
+	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": 7, "coin_est": 300.0}, 1.0, false)
+	BeliefSystem.record_claim(st_b, 0, 2, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": -1}, 1.0, false)
+	st_b.team_discovered[0] = [1, 2]
+	var pick_b: int = FactionAISystem.find_prosperity_prey(st_b, atk_b, st_b.persons[100])
+	assert(pick_b == 1, "established+HEGEMON 應可選富屬村（own=0.75），實得 %d" % pick_b)
+	print("[OK] _test_r1b_war_capability_relief")
+
+# ②路程糧：糧 0 → trip 壓到下限 0.2 但非零 → 仍可中選（絕不歸零，糧緊只壓權重）
+func _test_r1b_trip_food_floor() -> void:
+	print("--- R1b: ②路程糧下限（糧 0 仍非零，可中選）---")
+	var sa: Array = _r1b_scene()
+	var st: WorldState = sa[0]; var atk: TeamData = sa[1]
+	atk.resources = {"food": 0}
+	_r1b_add_prey(st, 1, Vector2i(2, 0), -1)
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": -1}, 1.0, false)
+	st.team_discovered[0] = [1]
+	var pick: int = FactionAISystem.find_prosperity_prey(st, atk, st.persons[100])
+	assert(pick == 1, "糧 0 → trip=下限 0.2（非零）→ 仍中選，實得 %d" % pick)
+	print("[OK] _test_r1b_trip_food_floor")
+
+# ③可騙 channel：弱獨立村（不誠實 leader）tier2 寫入可誤報 faction_id=大勢力 → 攻擊者按假歸屬計 own（嚇阻）
+func _test_r1b_faction_id_deceive() -> void:
+	print("--- R1b: deceive faction_id 誤報 → 嚇阻生效 ---")
+	var sa: Array = _r1b_scene()
+	var st: WorldState = sa[0]; var atk: TeamData = sa[1]
+	# 被冒名的大 established faction
+	var bigf := FactionData.new(); bigf.faction_id = 9; bigf.is_established = true; bigf.member_team_ids = [8]
+	st.factions[9] = bigf
+	# 弱獨立 target：不誠實高計謀 leader（deceive_chance = 0.5+0.2 = 0.7）
+	_r1b_add_prey(st, 1, Vector2i(2, 0), -1)
+	var tl := PersonData.new(); tl.id = 101
+	tl.values["信義"] = 0.0
+	tl.skills["計謀"] = 1.0
+	st.persons[101] = tl
+	st.teams[1].leader_id = 101
+	var inter := InteractionSystem.new()
+	var hit: bool = false
+	for i in 40:   # P(全 miss) = 0.3^40 ≈ 0，statistically 必中
+		inter._write_tier2_intel(st, 0, 1)
+		if int(BeliefSystem.best_estimate(st, 0, 1).get("faction_id", -1)) == 9:
+			hit = true
+			break
+	assert(hit, "40 次 tier2 寫入應至少一次 faction_id 誤報（弱獨立村謊稱屬 faction 9）")
+	# 嚇阻生效：同等誠實獨立村並列 → 攻擊者按假歸屬避開誤報村
+	_r1b_add_prey(st, 2, Vector2i(0, 2), -1)
+	BeliefSystem.record_claim(st, 0, 2, 0, "親見",
+		{"population_est": st.teams[1].population, "armed_est": 4, "faction_id": -1}, 1.0, false)
+	st.team_discovered[0] = [1, 2]
+	var pick: int = FactionAISystem.find_prosperity_prey(st, atk, st.persons[100])
+	assert(pick == 2, "誤報村 own=0.15 應被避開（嚇阻生效），實得 %d" % pick)
+	print("[OK] _test_r1b_faction_id_deceive")
