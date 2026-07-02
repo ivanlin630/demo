@@ -195,25 +195,40 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
 
+	if Probe.enabled: Probe.bump("prosp.entered")   # 漏斗探針：prosperity-attack 評估入口
 	# G2c：僅武力 archetype + rung>=擴張 才主動征服（對齊野心階梯）
 	if team.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE \
 			or team.ambition_rung < AmbitionLadder.RUNG_EXPAND:
+		if Probe.enabled:
+			# 拆 OR：archetype 錯 vs rung 未達（修法不同：前=intent/archetype desync，後=食物/pop 爬階閘）
+			if team.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE:
+				Probe.bump("prosp.gate_archetype")
+			else:
+				Probe.bump("prosp.gate_rung")   # archetype=FORCE 但 rung<EXPAND（食物 flow/pop 爬不上）
+			Probe.note("prosp.blocked_rung", float(team.ambition_rung))
 		return
 
 	var score: float = calc_attack_score(team, leader)
-	if score < ATTACK_SCORE_THRESHOLD: return
+	if score < ATTACK_SCORE_THRESHOLD:
+		if Probe.enabled: Probe.bump("prosp.gate_score")
+		return
 
 	var threshold: float = calc_readiness_threshold(team, leader)
 	var readiness: float = calc_readiness(state, team)
-	if readiness < threshold: return
+	if readiness < threshold:
+		if Probe.enabled: Probe.bump("prosp.gate_readiness")
+		return
 
 	var prey_id: int = find_prosperity_prey(state, team, leader)
-	if prey_id == -1: return
+	if prey_id == -1:
+		if Probe.enabled: Probe.bump("prosp.gate_noprey")
+		return
 
 	# G3d-1/2 風險 gate：對 prey 情報不確定且 leader 慎重 → 不直接攻，改主動派斥候查證。
 	# 莽者門檻低→照衝→假情報誘殺（不入此分支）。下次 cadence 重評。
 	var _caution: float = float(leader.values.get("慎重", 0.5))
 	if not BeliefSystem.confident_enough(state, team.team_id, prey_id, _caution):
+		if Probe.enabled: Probe.bump("prosp.gate_scout_defer")   # 情報不足 → 派斥候查證（延後攻擊）
 		# G3d-2：不確定 → 派斥候移向 prey best_estimate 位 → 親見壓謊 → 下 cadence uncertainty 塌 → 攻。
 		# 不設 combat_target（純觀察不交戰）。scout 與 attack 同 PRIO_DISPATCH，靠 release 換手。
 		var prey_t: TeamData = state.teams.get(prey_id)

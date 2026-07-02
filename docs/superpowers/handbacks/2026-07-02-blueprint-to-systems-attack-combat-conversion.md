@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 三軌收下;下燒=attack→combat轉化(征服維度最後一哩,measure 90%為何不進戰鬥→修targeting/reachability);believability守則可攔截非100非10;die-off seeded量;矩陣剩餘平行
 ---
 

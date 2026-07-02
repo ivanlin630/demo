@@ -200,6 +200,17 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		Probe.bump("beg.dispatch")
 	if a.current_task == TeamData.TASK_JOIN or b.current_task == TeamData.TASK_JOIN:
 		Probe.bump("join.dispatch")
+	# attack→combat 漏斗探針（純觀測）：攻擊姿態隊到達同格 = 接觸事件。
+	# reached = 到達可開打（combat_target==-1，下方 276 branch 會 start_combat）；
+	# blocked_ct = 到達但 combat_target 已設 → 197 早退擋掉開打（路徑 B 凍死副作用）。
+	if Probe.enabled:
+		var a_atk: bool = a.current_task == TeamData.TASK_ATTACK or a.current_task == TeamData.TASK_LOOT
+		var b_atk: bool = b.current_task == TeamData.TASK_ATTACK or b.current_task == TeamData.TASK_LOOT
+		if a_atk or b_atk:
+			if a.combat_target != -1 or b.combat_target != -1:
+				Probe.bump("atk.blocked_ct_197")   # 同格但 combat_target 早退擋開打
+			else:
+				Probe.bump("atk.reached")           # 同格可開打（→ 276 branch）
 	if a.combat_target != -1 or b.combat_target != -1:
 		# 197 早退先於 247 BEG resolver。BEG/JOIN 恆設 combat_target → 恆走此路 → resolver 死路。
 		if a.current_task == TeamData.TASK_BEG or b.current_task == TeamData.TASK_BEG:
