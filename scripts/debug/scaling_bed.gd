@@ -98,13 +98,23 @@ func _center_pos(state: WorldState) -> Vector2i:
 func _measure_dieoff(state: WorldState, n: int) -> void:
 	var ids: Array = state.teams.keys()
 	var kill: int = int(ids.size() * DIEOFF_RATIO)
+	var half: int = kill / 2
+	# 前半：逐隊 erase_team = K 趟全掃（舊 cleanup die-off 路徑複雜度 O(K·N)）
 	var t0: int = Time.get_ticks_usec()
-	var erased: int = 0
-	for i in range(kill):
+	var loop_erased: int = 0
+	for i in range(half):
 		if state.teams.has(ids[i]):
 			state.erase_team(ids[i])
-			erased += 1
-	var dt: int = Time.get_ticks_usec() - t0
-	var per: float = float(dt) / maxf(erased, 1)
-	print("[ScalingBed] N=%d die-off erased=%d in %d us (%.1f us/erase, remaining=%d)" % [
-		n, erased, dt, per, state.teams.size()])
+			loop_erased += 1
+	var dt_loop: int = Time.get_ticks_usec() - t0
+	# 後半：單次 erase_teams 批次（新 cleanup 路徑 O(N+K)）
+	var batch: Array = []
+	for i in range(half, kill):
+		if state.teams.has(ids[i]):
+			batch.append(ids[i])
+	var t1: int = Time.get_ticks_usec()
+	state.erase_teams(batch)
+	var dt_batch: int = Time.get_ticks_usec() - t1
+	print("[ScalingBed] N=%d die-off loop erased=%d in %d us (%.1f us/erase) | batch erased=%d in %d us (%.1f us/erase, remaining=%d)" % [
+		n, loop_erased, dt_loop, float(dt_loop) / maxf(loop_erased, 1),
+		batch.size(), dt_batch, float(dt_batch) / maxf(batch.size(), 1), state.teams.size()])
