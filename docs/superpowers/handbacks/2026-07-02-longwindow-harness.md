@@ -2,6 +2,7 @@
 
 Plan：`docs/superpowers/plans/2026-07-02-longwindow-harness.md`
 Branch：`feat/longwindow-harness`
+> Status: consumed（2026-07-03 merged,長窗 6 月主 session 跑中）
 
 ## 實作摘要
 
