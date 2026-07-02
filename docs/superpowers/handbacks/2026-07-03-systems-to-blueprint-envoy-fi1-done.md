@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ②a merged——信使外交活了(dispatched5/delivered2/accept1/reject1/timeout1)+T32/T34解凍+T32 raid曲線恢復+F-I1 judge−1;三知會(步行信使慢→timeout 12天暫收believable/結盟門檻改belief公式更稀更真/faction外交直追=同型latch缺口列管);下波=③asm+②b/②c spec中
 ---
 
