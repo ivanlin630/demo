@@ -96,7 +96,7 @@ func _run() -> void:
 		"conq.intent", "conq.winner_loot", "conq.winner_prosperity",
 		"conq.winner_other", "conq.winner_none", "conq.prosperity_reached",
 		# prosperity-attack dispatch gate ladder（93 intent 到底卡哪關才沒派出攻擊）
-		"prosp.entered", "prosp.gate_archetype", "prosp.gate_rung", "prosp.gate_score", "prosp.gate_readiness",
+		"prosp.entered", "prosp.gate_archetype", "prosp.gate_score", "prosp.gate_readiness",
 		"prosp.gate_noprey", "prosp.gate_scout_defer", "conq.prosperity_reached",
 		"g3.scout_dispatch", "g3.scout_converge", "g3.scout_timeout",
 		# attack→combat 接觸漏斗：到達同格(reached) vs 同格被 combat_target 早退擋(blocked_ct_197)

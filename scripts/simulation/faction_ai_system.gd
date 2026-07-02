@@ -196,15 +196,12 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 	if leader == null: return
 
 	if Probe.enabled: Probe.bump("prosp.entered")   # 漏斗探針：prosperity-attack 評估入口
-	# G2c：僅武力 archetype + rung>=擴張 才主動征服（對齊野心階梯）
-	if team.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE \
-			or team.ambition_rung < AmbitionLadder.RUNG_EXPAND:
+	# R1a：只留人格 gate（武力傾向才主動征服）。rung-food 閘已拔——rung 職權收窄為
+	# 立國/坐穩/擴編（can_expand/accum_ok/rung_task），餬口帶狼性隊可進 prey 評估。
+	# R2 後 archetype 與 intent 共源 → 此 gate 殘量≈0（>入口 5% = desync 回歸）。
+	if team.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE:
 		if Probe.enabled:
-			# 拆 OR：archetype 錯 vs rung 未達（修法不同：前=intent/archetype desync，後=食物/pop 爬階閘）
-			if team.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE:
-				Probe.bump("prosp.gate_archetype")
-			else:
-				Probe.bump("prosp.gate_rung")   # archetype=FORCE 但 rung<EXPAND（食物 flow/pop 爬不上）
+			Probe.bump("prosp.gate_archetype")
 			Probe.note("prosp.blocked_rung", float(team.ambition_rung))
 		return
 

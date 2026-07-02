@@ -514,6 +514,8 @@ func _initialize() -> void:
 	_test_r2_disposition_delegation()
 	_test_r2_archetype_tiebreak()
 	_test_r2_archetype_distribution()
+	# ── R1a：rung-food 攻擊閘已拔（人格 gate 獨留）──
+	_test_r1a_rung_gate_removed()
 	quit()
 
 # Task 3：tile→teams 共用空間索引一致性（索引查 == 全掃結果，零行為變前提）
@@ -15440,3 +15442,27 @@ func _test_r2_archetype_distribution() -> void:
 	print("archetype distribution OK (FORCE=%d TRADE=%d SETTLE=%d / %d)" % [
 		counts[AmbitionLadder.ARCHETYPE_FORCE], counts[AmbitionLadder.ARCHETYPE_TRADE],
 		counts[AmbitionLadder.ARCHETYPE_SETTLE], n])
+
+# R1a：rung-food 閘已拔——FORCE + rung=SURVIVE（餬口帶）過 gate 進 prey 評估；非 FORCE 仍擋
+func _test_r1a_rung_gate_removed() -> void:
+	print("--- R1a: rung-food 攻擊閘已拔（FORCE 餬口隊可攻，非 FORCE 仍擋）---")
+	# A) FORCE + rung=SURVIVE + 莽者(慎重0，跳過 scout defer) → 過閘 → 派攻擊
+	var sa: Array = _attack_gate_scene(0.0)
+	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
+	tm_a.ambition_rung = AmbitionLadder.RUNG_SURVIVE
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
+	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
+	assert(tm_a.prosperity_target_id == 1 and tm_a.current_task == TeamData.TASK_ATTACK,
+		"FORCE 餬口隊(rung=SURVIVE)應過閘攻擊，實際 target=%d task=%s" % [
+			tm_a.prosperity_target_id, tm_a.current_task])
+	# B) 非 FORCE（TRADE）同條件 → 人格 gate 仍擋
+	var sb: Array = _attack_gate_scene(0.0)
+	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
+	tm_b.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	tm_b.ambition_rung = AmbitionLadder.RUNG_SURVIVE
+	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
+	FactionAISystem.new()._evaluate_prosperity_attack(st_b, tm_b)
+	assert(tm_b.prosperity_target_id == -1 and tm_b.current_task == TeamData.TASK_IDLE,
+		"非 FORCE 應被人格 gate 擋，實際 target=%d task=%s" % [
+			tm_b.prosperity_target_id, tm_b.current_task])
+	print("[OK] _test_r1a_rung_gate_removed")
