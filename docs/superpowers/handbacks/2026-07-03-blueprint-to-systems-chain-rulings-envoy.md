@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 長窗斷鏈四裁(②b餓降搶糧門檻/②c濾改分/斷①打草穀=既有分界/斷③照spec做深)+②a完整修=timeout+zoom+F-I1訊息外交提前燒(信使=單騎最速實體)+原則「入勢力不換腦」+規則「凡latch必timeout」
 ---
 
