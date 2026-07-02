@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 下燒三軌全 merged(capture PAY/combat_target+BEG-JOIN/seeded harness);★capture measure 揭征服者下一瓶頸=attack→combat 轉化(~10%,targeting/reachability 上游);per-tick 有界不變量已納+die-off 升必收;sandbox-vision 收下對齊
 ---
 
