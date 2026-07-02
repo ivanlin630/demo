@@ -12,10 +12,14 @@ extends SceneTree
 #   LW_SEED    world seed（default 1337）
 #   LW_MONTHS  跑幾月（default 6；1 月 = smoke；6-12 月長窗 → GODOT_TIMEOUT 拉大 + 背景跑）
 #   LW_PHASE   =1 開 SimRunner 相位計時（spike tick 印 [PhaseSpike]/[FaiPhase] 相位拆解）
+#   LW_DIAG    =1 開 per-wolf gate 歸因（[WolfGate] 逐月複算 prosperity 鏈+prey 濾鏈殺數;
+#              ⚠ estimate_catch_up 內含 observe randf → 擾 RNG 流,與非 DIAG 跑數字不逐點同,勿混 baseline）
 
 const RAID_TASKS: Array = [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
 const WOLF_FOOD_FLOW_MAX: float = 0.5   # 狼餬口門檻：日均淨食物流 < 此 = 積累不起（餬口）
 const GATE_WAIT_MONTHS: int = 2         # 連續 N 月「想 raid 未 raid + 有弱鄰」→ 標 [GateWait]
+
+var _diag_on: bool = false              # LW_DIAG=1：per-wolf gate 歸因（擾 RNG,勿混 baseline）
 
 func _initialize() -> void:
 	_run(); quit()
@@ -27,8 +31,9 @@ func _run() -> void:
 	var phase: bool = OS.get_environment("LW_PHASE") == "1"
 	if phase:
 		SimRunner.phase_timing = true
-	print("=== longwindow_bed: seed=%d months=%d (ticks=%d) phase=%s ===" % [
-		world_seed, months, total_ticks, str(phase)])
+	_diag_on = OS.get_environment("LW_DIAG") == "1"
+	print("=== longwindow_bed: seed=%d months=%d (ticks=%d) phase=%s diag=%s ===" % [
+		world_seed, months, total_ticks, str(phase), str(_diag_on)])
 
 	seed(world_seed)   # 同 WarringHarness：播 global RNG（runtime bare randf/randi）→ 逐 tick 確定
 	Probe.enabled = true
@@ -209,6 +214,63 @@ func _record_month(state: WorldState, w: Dictionary, month: int, gate_delta: Dic
 		snap["gate_delta"] = gate_delta.duplicate()
 	else:
 		w["gate_wait_streak"] = 0
+	# 斷② zoom：逐月複算 prosperity 鏈 + prey 濾鏈殺數,定「想 raid 未 raid」卡哪關（read-only 診斷）
+	_diag_gate(state, t, w, month)
+
+# 複算 _evaluate_prosperity_attack 入口鏈（:191 task 早退/survival/候選/archetype/score/readiness）
+# + _find_weakest_prey 濾鏈（bel缺/不可達/不夠弱/food<20）逐關殺數。god-view 僅診斷。
+# ⚠ estimate_catch_up 內 observe randf → 擾 RNG 流 → 只在 LW_DIAG=1 專跑,勿混 pointwise baseline。
+func _diag_gate(state: WorldState, t: TeamData, w: Dictionary, month: int) -> void:
+	if not _diag_on:
+		return
+	var fai := FactionAISystem.new()
+	var leader: PersonData = state.persons.get(t.leader_id)
+	if leader == null:
+		print("[WolfGate] 月%d T%d 無leader" % [month, t.team_id]); return
+	var parts: Array = []
+	parts.append("task=%s(%s)" % [t.current_task if t.current_task != "" else "idle", t.task_reason])
+	if t.current_task in FactionAISystem.SURVIVAL_TASKS:
+		parts.append("★survival域佔用")
+	elif t.current_task != TeamData.TASK_IDLE and not FactionAISystem._is_stuck(t) \
+			and not (t.current_task == TeamData.TASK_SCOUT and t.task_reason == "scout"):
+		parts.append("★task佔用(非idle非stuck)")
+	if not fai._is_prosperity_candidate(state, t):
+		parts.append("★非候選(fid=%d parent=%d)" % [t.faction_id, t.parent_team_id])
+	if t.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE:
+		parts.append("★archetype=%s" % t.ambition_archetype)
+	var score: float = FactionAISystem.calc_attack_score(t, leader)
+	if score < FactionAISystem.ATTACK_SCORE_THRESHOLD:
+		parts.append("★score=%.2f<%.2f" % [score, FactionAISystem.ATTACK_SCORE_THRESHOLD])
+	var rthr: float = FactionAISystem.calc_readiness_threshold(t, leader)
+	var readi: float = FactionAISystem.calc_readiness(state, t)
+	if readi < rthr:
+		parts.append("★readiness=%.2f<%.2f" % [readi, rthr])
+	# prey 濾鏈逐關殺數（複刻 _find_weakest_prey 序）
+	var disc: Array = state.team_discovered.get(t.team_id, [])
+	var k_nobel: int = 0
+	var k_unreach: int = 0
+	var k_notweak: int = 0
+	var k_food: int = 0
+	var viable: int = 0
+	var scout_block: int = 0
+	for tid in disc:
+		if tid == t.team_id or not state.teams.has(tid):
+			continue
+		if not BeliefSystem.has_belief(state, t.team_id, tid):
+			k_nobel += 1; continue
+		if not PathSystem.estimate_catch_up(state, t, tid).reachable:
+			k_unreach += 1; continue
+		var bel: Dictionary = BeliefSystem.best_estimate(state, t.team_id, tid)
+		if float(bel.get("population_est", 0.0)) >= float(t.population) * 0.7:
+			k_notweak += 1; continue
+		if bel.has("food_est") and float(bel.get("food_est", 0.0)) < 20.0:
+			k_food += 1; continue
+		viable += 1
+		if not BeliefSystem.confident_enough(state, t.team_id, tid, float(leader.values.get("慎重", 0.5))):
+			scout_block += 1
+	parts.append("prey掃:disc=%d bel缺=%d 不可達=%d 不夠弱=%d food<20=%d viable=%d(scout擋%d)" % [
+		disc.size(), k_nobel, k_unreach, k_notweak, k_food, viable, scout_block])
+	print("[WolfGate] 月%d T%d(%s) %s" % [month, t.team_id, w["role"], " | ".join(parts)])
 
 # 地圖有弱鄰（可解目標）：存在獨立活隊 pop 顯著低於自己（harness god-view，僅診斷）。
 func _has_weak_neighbor(state: WorldState, t: TeamData) -> bool:

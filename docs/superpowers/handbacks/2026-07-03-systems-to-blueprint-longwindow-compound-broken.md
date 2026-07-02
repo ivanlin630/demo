@@ -2,7 +2,7 @@
 from: systems
 to: blueprint
 status: open
-topic: 長窗6月出爐——複利弧未成立,三處斷鏈(狼入faction即停raid/餬口狼GateWait 3-5月=深化二觸發命中/capture.by_attack=0+asm結構斷5:1);裁②數據=結構性(completed那隻24天=不慢,是斷);裁①a/b懸置,先裁斷鏈燒序
+topic: 長窗6月+斷②zoom——複利弧未成立三斷鏈;★zoom拆斷②=②a found_ally無timeout凍結bug(4-6月)+②b readiness=隱藏food閘鎖餬口狼(雞生蛋殘留)+②c prey「food<20」濾掉搶糧目標(設計矛盾);深化二觸發=假陽性暫不開;asm結構斷5:1;裁②b/②c WHAT+斷①+asm修
 ---
 
 # 長窗 6 月：複利弧未成立 — 三斷鏈 + 深化二觸發命中
@@ -53,12 +53,30 @@ surv.loot=319（絕境仍搏）  indep_atk_believed_owned=0（③管住,6 月`�
 
 median 237us / p99 237ms / max 1.04s / spike(>3×median) 10.4%——spike 全屬已 queue 殘餘案（far.total/orders_ambition,cadence-spike-fix handback 已 quantify）。faction_ai in-scope 收斂維持。
 
-## 待你裁
+## ★ 斷② zoom 完成（per-wolf 逐月 gate 歸因,`LW_DIAG=1`,拆成三子根）
 
-1. **斷①**（WHAT）:麾下武將個體 raid 該不該存在?（继續打草穀=believable vs faction 統籌=紀律）
-2. **斷② 深化二開燒否**:觸發條件命中;我先 zoom 卡點（可能是 bug）,zoom 完若真缺「blocker→子需求」再開。
-3. **斷③ assimilate 結構修**:裁②按你分流紀律=結構性→下一燒;means-end 同化因子方向認可否。
-4. 裁①a/b:懸置至三斷修後重量（複利弧通了才有量級可裁）。
-5. 燒序建議:**② zoom（我,measure,快）→ ③ assimilate 結構修（影響最明確）→ ①（你裁完 WHAT）**。平行照舊:矩陣剩餘/G3 Phase D。
+```
+T32(野心.92): 月1-2 真在 raid(prey 掃「不可達」殺 5/7) → 月3-6 卡『外交(found_ally)』4 個月
+T34(絕境):    全 6 月卡『外交(found_ally)』
+T36(野心.65): score=0.27<0.30 恆定 + readiness=0.23<0.42 恆定,全 6 月
+T29(知足):    治理/survival churn,archetype 正確排除 ✓（蹲 by design,無誤傷）
+```
 
-弧斷在哪全量出來了。你裁。
+**②a found_ally 凍結 = bug 級（HOW 我修,知會）**：建國結盟 dispatch 後 in-flight guard（faction_ai「建國 in-flight 不重評」）**無 timeout**——scout 有 SCOUT_TIMEOUT、FLEE 有 FLEE_TIMEOUT、TRADE 有 TRADE_TIMEOUT,found_ally 沒有 → 外交追不上/不 resolve 就永凍。T32 唯一跑出複利前段的狼死在這;T34 整整 6 月。= latch-無-timeout 缺口,我修（加 timeout+release,對齊既有 pattern）。
+
+**②b readiness = 隱藏 food 閘（WHAT 你裁）**：T36 餬口狼 readiness 恆 0.23<0.42（readiness 恢復吃糧+morale→餓隊恆低）→ 戰略 raid 永不 fire。**R1 拔了 rung-food 閘,readiness 這道又把餬口狼鎖回雞生蛋**（要打才有糧、要糧才能打）。絕境 survival-loot 不看 readiness、戰略 raid 看 → 中間帶死區。選項:a) raid-for-food 降 readiness 門檻（餓越狠越豁出去,連續信號非新閘）b) readiness 門檻維持=軍紀擬真,餬口狼本該先苟。**另 score=0.27<0.30 恆定**:野心 0.65 武力狼人格分永不過 0.30——攻擊分佈想要多寬你裁（TEST VALUE）。
+**②c prey「food<20」濾 = 設計矛盾（WHAT 你裁）**：餓世界弱目標全 food<20 → **搶糧的目標被「他沒糧」濾掉**（T36 的 prey 全滅於此濾）。原意=別搶沒油水的;但 raid 收益現含 capture 人力+coin/裝備,非只糧。選項:濾降權非硬濾（併入 richness score）/ 保留。
+**deep-dive 順帶**：「不可達」殺數 dominant（T32 5/7）——`estimate_catch_up` 語意=追得上（含速度）非只有路;對定居村應恆可達,對移動隊追不上=正確。我再拆語意佔比,非阻塞。
+
+**深化二判定=假陽性,暫不開**：狼卡的不是「可解 gate 乾等」——②a 是 bug、②b/②c 是硬閘（blocker→子需求解不了「人格分不夠」「readiness 要糧」）。修完 bug+裁完閘再看有無真「可解 gate 乾等」殘量。GateWait 訊號本身保留（修後回歸量測用）。
+
+## 待你裁（更新版）
+
+1. **②b readiness/score 閘**（WHAT）:raid-for-food 該不該降 readiness 門檻（a 豁出去連續信號 / b 維持軍紀）+ score 0.30 攻擊分佈寬度。
+2. **②c food<20 prey 濾**（WHAT）:硬濾改降權（raid 收益=人力+coin 非只糧）or 保留。
+3. **斷①**（WHAT）:麾下武將個體 raid 該不該存在?（打草穀 believable vs faction 統籌紀律）
+4. **斷③ assimilate 結構修**:數據=結構性（revolt/escape 斷鏈,非慢）→ means-end 同化因子（餵養/相處/看守）方向認可否。
+5. 裁①a/b 量級:懸置至斷鏈修後重量。
+6. 燒序建議:**②a bug 修（我,不等裁）→ ③ asm 結構修 + ②b/②c（裁完一波燒）→ ①**。深化二暫不開（假陽性）。
+
+弧斷在哪、為什麼斷,全部量出來了。你裁。
