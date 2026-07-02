@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★measure 證偽「attack→combat=targeting/reachability」框架;真根=征服者卡 ambition-ladder EXPAND gate(雙根:R1 食物流爬階閘86.5%/R2 intent-archetype desync48%);reachability全好(0.48hex/90%轉化);R1需你裁平衡(征服要不要糧盈餘門檻)、R2=HOW我修
 ---
 
