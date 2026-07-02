@@ -206,55 +206,81 @@ func set_leader(team: TeamData, pid: int, old_leader_action: String = "none") ->
 			p.team_id = team.team_id     # 強制回指本隊（修 stale desync）
 			p.role = "leader"
 
-# 單一 team 移除 chokepoint：清光所有指向 tid 的 ref，使「無懸空 team_id」成不變量。
-# 所有 team 移除（滅團/合併/野獸清除）都須走此入口。
+# 單一 team 移除 chokepoint：語意 = erase_teams([tid])（薄 wrapper，呼叫端零改動）。
+# 所有 team 移除（滅團/合併/野獸清除）都須走此/erase_teams 入口。
 func erase_team(tid: int) -> void:
-	var team: TeamData = teams.get(tid)
-	if team == null:
+	erase_teams([tid])
+
+# 批次 team 移除 chokepoint：清光所有指向 dead set 的 ref，使「無懸空 team_id」成不變量。
+# die-off 潮 K 隊逐隊 erase = K 趟 O(N) 全掃 spike（違效能域「早晚期成本無延遲差」）
+# → 批次收斂：每隊局部步驟（步1 母子/步2 faction）照原順序逐隊做（語意/連鎖順序不變）；
+# 步3/4/4b 合一單趟：dead set Dictionary O(1) membership，一趟 teams + 一趟 known/discovered/intel
+# （每 observer row 逐 dead tid erase，row 內 O(1)）。O(K·N) → O(N + K)。
+func erase_teams(tids: Array) -> void:
+	var dead: Dictionary = {}
+	var dead_list: Array = []
+	for tid in tids:
+		if teams.has(tid) and not dead.has(tid):
+			dead[tid] = true
+			dead_list.append(tid)
+	if dead_list.is_empty():
 		return
-	# 1. 母子：脫離 parent + 孤兒化自己的子隊
-	if team.parent_team_id != -1:
-		detach_subteam(team)
-	for cid in team.subteam_ids.duplicate():
-		if teams.has(cid):
-			teams[cid].parent_team_id = -1
-	team.subteam_ids.clear()
-	# 2. faction：退成員 + known_member_states + 若為盟主則解散
-	if team.faction_id != -1 and factions.has(team.faction_id):
-		var f = factions[team.faction_id]
-		f.member_team_ids.erase(tid)
-		f.known_member_states.erase(tid)
-		if f.leader_team_id == tid:
-			disband_faction(team.faction_id)
-	# 3. 其他隊指向 tid 的 ref 全清
+	for tid in dead_list:
+		var team: TeamData = teams[tid]
+		# 1. 母子：脫離 parent + 孤兒化自己的子隊
+		if team.parent_team_id != -1:
+			detach_subteam(team)
+		for cid in team.subteam_ids.duplicate():
+			if teams.has(cid):
+				teams[cid].parent_team_id = -1
+		team.subteam_ids.clear()
+		# 2. faction：退成員 + known_member_states + 若為盟主則解散
+		if team.faction_id != -1 and factions.has(team.faction_id):
+			var f = factions[team.faction_id]
+			f.member_team_ids.erase(tid)
+			f.known_member_states.erase(tid)
+			if f.leader_team_id == tid:
+				disband_faction(team.faction_id)
+	# 3. 其他隊指向任一 dead tid 的 ref 單趟全清（死隊間互指不清：隨 teams.erase 一併消失）
 	for otid in teams:
-		if otid == tid:
+		if dead.has(otid):
 			continue
 		var o: TeamData = teams[otid]
-		if o.combat_target == tid:
+		if dead.has(o.combat_target):
 			o.combat_target = -1
-		if o.social_target == tid:
+		if dead.has(o.social_target):
 			o.social_target = -1
-		if o.order_target_id == tid:
+		if dead.has(o.order_target_id):
 			o.order_target_id = -1
-		o.known_reputations.erase(tid)
-		o.invite_cooldown.erase(tid)
-		o.diplomacy_reject_cooldown.erase(tid)
-		o.strategic_assignments.erase(tid)
-	# 4. registry：自身條目 + 交叉 discovered/known
-	team_known.erase(tid)
-	team_discovered.erase(tid)
+		for dtid in dead_list:
+			o.known_reputations.erase(dtid)
+			o.invite_cooldown.erase(dtid)
+			o.diplomacy_reject_cooldown.erase(dtid)
+			o.strategic_assignments.erase(dtid)
+	# 4. registry 交叉：discovered/known 每 observer row 逐 dead tid erase
 	for obs in team_known:
-		team_known[obs].erase(tid)
+		if dead.has(obs):
+			continue
+		for dtid in dead_list:
+			team_known[obs].erase(dtid)
 	for obs in team_discovered:
-		team_discovered[obs].erase(tid)
+		if dead.has(obs):
+			continue
+		for dtid in dead_list:
+			team_discovered[obs].erase(dtid)
 	# 4b. team_intel prune（top memory leak 修）：死 tid 的 observer row + 各 observer 對其 target claim
 	# 皆清（否則 observer dict + 死 target claim rows 隨世界年齡無界成長）。同 chokepoint。
-	team_intel.erase(tid)
 	for obs in team_intel:
-		team_intel[obs].erase(tid)
-	# 5. 移除
-	teams.erase(tid)
+		if dead.has(obs):
+			continue
+		for dtid in dead_list:
+			team_intel[obs].erase(dtid)
+	# 5. 自身條目（known/discovered/intel row）+ 移除，逐 dead tid 收尾
+	for dtid in dead_list:
+		team_known.erase(dtid)
+		team_discovered.erase(dtid)
+		team_intel.erase(dtid)
+		teams.erase(dtid)
 
 
 # 解析「保證活」的 team ref（契約：納管 team-ref 非 -1 即指向活 team）。

@@ -1876,15 +1876,19 @@ func _on_team_extinct(state: WorldState, team: TeamData) -> void:
 		state.teams_pending_erase.append(team.team_id)
 
 # tick 末單點：路由遺財（守恆）+ erase。中途 erase 不安全（多系統持 team_ids 快照）
+# die-off 潮批次：遺財路由迴圈照舊逐隊（守恆），結尾一次 erase_teams（K 趟 O(N) 全掃 → 單趟）。
+# route 只讀 team 資產+tile、erase 只清 ref → route-all→erase-all 與逐隊交錯語意等價。
 func cleanup_extinct_teams(state: WorldState) -> void:
 	if state.teams_pending_erase.is_empty():
 		return
+	var routed: Array = []
 	for tid in state.teams_pending_erase:
 		if not state.teams.has(tid):
 			continue
-		var team: TeamData = state.teams[tid]
-		_route_extinct_assets(state, team)
-		state.erase_team(tid)   # 清光所有 ref（含 detach、registry、交叉）
+		_route_extinct_assets(state, state.teams[tid])
+		routed.append(tid)
+	state.erase_teams(routed)   # 批次清光所有 ref（含 detach、registry、交叉）
+	for tid in routed:
 		print("[Extinct] Team%d 滅團清除（遺財已路由）" % tid)
 	state.teams_pending_erase.clear()
 
