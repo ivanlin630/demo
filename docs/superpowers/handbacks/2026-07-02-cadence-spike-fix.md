@@ -1,5 +1,7 @@
 # Hand Back: cadence tick spike 收斂（cadence-spike-fix）
 
+> Status: consumed（2026-07-02 merged,系統收編;殘餘 far.total/orders_ambition 入 known_issues queue）
+
 ## 實作摘要
 
 ### Task 1 — zoom 定罪（函數級 → 呼叫級）
