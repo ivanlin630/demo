@@ -152,7 +152,7 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		if prey.faction_id != -1 and prey.faction_id == team.faction_id: continue
 		# G3-targeting：無情報 → 不評估（禁 god-view；不知道的打不了）
 		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
-		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid)
+		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid, true)
 		if not catch_result.reachable: continue
 		# 價值/弱點從 belief 估（偽裝低報 armed → 看似弱 → 誘殺載體）
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
@@ -572,6 +572,12 @@ func _fai_pht(name: String, t0: int) -> int:
 	_fai_ph[name] = int(_fai_ph.get(name, 0)) + (now - t0)
 	return now
 
+# static 版（DecisionContext.gather 等 static callee 標相位用）
+static func _fai_pht_s(name: String, t0: int) -> int:
+	var now: int = Time.get_ticks_usec()
+	_fai_ph[name] = int(_fai_ph.get(name, 0)) + (now - t0)
+	return now
+
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 	var _zt: int = 0
 	var _zoom: bool = SimRunner.phase_timing
@@ -608,11 +614,13 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# C: 每 INFRA_INTERVAL 評估一次基建（蓋/升級/擴建）
 		if state.world.current_tick % INFRA_INTERVAL == 0:
 			_evaluate_infrastructure(state, f)
+		if SimRunner.phase_timing: _tf = _fai_pht("loop1.infra", _tf)
 		# 每 20 小時評估一次主動外交
 		if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
 			var _leader_team: TeamData = state.teams.get(f.leader_team_id)
 			if _leader_team != null:
 				DiplomaticAiSystem.new().try_proactive_diplomacy(state, _leader_team)
+		if SimRunner.phase_timing: _tf = _fai_pht("loop1.diplo", _tf)
 		# 每 BETRAY_CHECK_INTERVAL tick 評估結盟 team 背叛
 		if state.world.current_tick % DiplomaticAiSystem.BETRAY_CHECK_INTERVAL == 0:
 			var leader_team_b: TeamData = state.teams.get(f.leader_team_id)
@@ -624,6 +632,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 				# 子隊（TAG_SUBTEAM）不評估背叛：在途建造/安頓子隊若被叛出會廢棄任務且造成孤立 zombie。
 				if member_team.tags.has(TeamData.TAG_SUBTEAM): continue
 				DiplomaticAiSystem.new().consider_betrayal(state, member_team, leader_team_b)
+		if SimRunner.phase_timing: _fai_pht("loop1.betray", _tf)
 
 	if SimRunner.phase_timing: _t = _fai_pht("loop1.factions", _t)
 	var merge_queue: Array = []
@@ -1151,9 +1160,12 @@ func _assign_tasks(state: WorldState, f) -> void:
 		return
 	# 生存 sticky：leader 在 survival task 中不蓋過（仍跑 member 指派）
 	if leader_team.current_task in SURVIVAL_TASKS:
+		var _tas: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		_assign_member_tasks(state, f)
+		if SimRunner.phase_timing: _fai_pht("assign.members", _tas)
 		return
 
+	var _ta: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	# G-09：檢查 player_commanded_task（loyalty 門檻）
 	for tid_cmd in f.member_team_ids:
 		var t_cmd: TeamData = state.teams.get(tid_cmd)
@@ -1166,6 +1178,7 @@ func _assign_tasks(state: WorldState, f) -> void:
 		else:
 			UnrestBank.add(t_cmd, 1, "faction")
 			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])
+	if SimRunner.phase_timing: _ta = _fai_pht("assign.player_cmd", _ta)
 
 	if "徵收" in f.goals and leader_team.current_task != TeamData.TASK_TRIBUTE:
 		var best_tid: int = _richest_member(state, f)
@@ -1200,7 +1213,9 @@ func _assign_tasks(state: WorldState, f) -> void:
 		if target_id != -1 and TaskArbiter.try_set(state, leader_team, TeamData.TASK_LOOT,
 				state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
 			print("[FactionAI] Team%d 主動掠奪 Team%d" % [f.leader_team_id, target_id])
+	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_goals", _ta)
 	_assign_member_tasks(state, f)
+	if SimRunner.phase_timing: _fai_pht("assign.members", _ta)
 
 func _assign_member_tasks(state: WorldState, f) -> void:
 	var leader_team: TeamData = state.teams.get(f.leader_team_id)
@@ -1210,7 +1225,13 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		if mt.combat_target != -1: continue          # 戰鬥覆蓋(全隊)
 		if not mt.player_commanded_task.is_empty(): continue  # 玩家(全隊)
 		if uses_unified(mt):                          # ← hoist:引擎每 cadence 重評(unified 退 latch)
-			_decide_unified(state, mt); continue
+			if SimRunner.phase_timing:
+				var _tu: int = Time.get_ticks_usec()
+				_decide_unified(state, mt)
+				_fai_pht("member.unified", _tu)
+			else:
+				_decide_unified(state, mt)
+			continue
 		# ↓ 以下僅非 unified 隊(原邏輯原樣)
 		var snap: Dictionary = f.known_member_states.get(mid, {})
 		var known_task: String = snap.get("current_task", TeamData.TASK_IDLE)
@@ -1218,7 +1239,9 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			continue
 		if mt.current_task in SURVIVAL_TASKS:
 			continue  # 生存 sticky(非 unified)：不蓋過 survival task
+		var _tm: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		var absorber_id: int = _find_absorber(state, mt, f)
+		if SimRunner.phase_timing: _tm = _fai_pht("member.absorber", _tm)
 		if absorber_id != -1:
 			var mt_leader = state.persons.get(mt.leader_id)
 			var mt_cmd: float = float(mt_leader.skills.get("統領", 0.0)) if mt_leader else 0.0
@@ -1260,11 +1283,14 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			TaskArbiter.try_set(state, mt, TeamData.TASK_MANUFACTURE,
 				mt.move_target, TaskArbiter.PRIO_DISPATCH, "member_manufacture")
 		elif _can_trade(state, mt):
+			var _tt: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 			var ttarget: Vector2i = _merchant_trade_target(state, mt)
+			if SimRunner.phase_timing: _fai_pht("member.trade_target", _tt)
 			if ttarget != Vector2i(-1, -1):
 				if TaskArbiter.try_set(state, mt, TeamData.TASK_TRADE,
 						ttarget, TaskArbiter.PRIO_DISPATCH, "member_trade"):
 					mt.trade_task_start_tick = state.world.current_tick
+		if SimRunner.phase_timing: _fai_pht("member.finders", _tm)
 
 # ──────── 統一決策引擎切片 seam ────────
 # 切片 = 商隊 + 生產 tag 隊：macro 決策走 DecisionEngine（舊 member hoist / solo 生產者跳過，單一 owner）。
@@ -1276,7 +1302,9 @@ func uses_unified(team: TeamData) -> bool:
 func _decide_unified(state: WorldState, team: TeamData) -> void:
 	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
+	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
+	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank", _tr)
 	# 征服名實探針（純觀測）：solo_intent=征服 的隊在此實際 winner 分類（想征服 vs 做掠奪）。
 	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
 	if _conq: Probe.bump("conq.intent")
@@ -1287,10 +1315,17 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if opt == "攻擊" and _solo_type(team) == "征服" and team.faction_id == -1:
 			if _is_prosperity_candidate(state, team):
 				SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_ATTACK, team.tile_pos)
-				_evaluate_prosperity_attack(state, team)   # scout→打垮→capture 乾淨鏈
+				if SimRunner.phase_timing:
+					var _tp: int = Time.get_ticks_usec()
+					_evaluate_prosperity_attack(state, team)
+					_fai_pht("unified.prosp", _tp)
+				else:
+					_evaluate_prosperity_attack(state, team)   # scout→打垮→capture 乾淨鏈
 				return
 			continue   # 無 prosperity 資格 → 試次佳（不落回粗攻擊）
+		var _t2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		if SimRunner.phase_timing: _fai_pht("unified.to_task", _t2)
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # 不可派 → 試次佳(修凍死)
@@ -1762,7 +1797,7 @@ func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 		if tid == merchant.team_id: continue
 		if not state.teams.has(tid): continue
 		var t: TeamData = state.teams[tid]
-		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, merchant, tid)
+		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, merchant, tid, true)
 		if not catch_result.reachable: continue
 		var snap: Dictionary = BeliefSystem.best_estimate(state, merchant.team_id, tid)
 		var max_gap: float = 0.0
@@ -2357,6 +2392,8 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 	var ldr_greed: float = float(ldr.values.get("貪婪", 0.5)) if ldr != null else 0.5
 	var ldr_ambition: float = float(ldr.values.get("野心", 0.5)) if ldr != null else 0.5
 	var is_greedy_leader: bool = (ldr_greed + ldr_ambition) >= MINING_GREED_THRESHOLD
+	# 敵 outpost 位置一次收集（hoist：原每 candidate 全圖掃 = O(tiles²) → 500-tick infra spike 根）
+	var enemy_outposts: Array = _enemy_outpost_positions(state, leader_team)
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level > 0: continue
@@ -2384,7 +2421,10 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 			var ore_here: float = _site_resource_bonus_ore_only(state, tile.tile_pos)
 			if ore_here > 0.0:
 				score += ore_here * (ldr_greed + ldr_ambition) * MINING_GREED_WEIGHT   # TEST VALUE
-		var min_enemy_dist: int = _min_dist_to_enemy_outpost(state, leader_team, tile.tile_pos)
+		var min_enemy_dist: int = 9999
+		for ep in enemy_outposts:
+			var ed: int = _hex_dist(tile.tile_pos, ep)
+			if ed < min_enemy_dist: min_enemy_dist = ed
 		if min_enemy_dist < 5: score -= float(5 - min_enemy_dist) * 10.0
 		if score >= MIN_BUILD_SCORE:
 			candidates.append({ "pos": tile.tile_pos, "score": score, "tile": tile })
@@ -2440,17 +2480,18 @@ func _site_resources_nearby(state: WorldState, pos: Vector2i) -> Dictionary:
 				found[res] = float(found.get(res, 0)) + amt
 	return found
 
-func _min_dist_to_enemy_outpost(state: WorldState, leader_team: TeamData, pos: Vector2i) -> int:
-	var min_dist: int = 9999
+# 敵 outpost 位置集（非同 faction 的有主據點）。選址迴圈 hoist 用：候選 tile 對此小集取
+# min-dist，取代原 per-candidate 全圖掃（同集合同 min 值 = 行為不變，純複雜度收斂）。
+func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array:
+	var out: Array = []
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level == 0: continue
 		var owner: TeamData = state.teams.get(tile.outpost_owner)
 		if owner == null: continue
 		if owner.faction_id == leader_team.faction_id and owner.faction_id != -1: continue
-		var d: int = _hex_dist(pos, tile.tile_pos)
-		if d < min_dist: min_dist = d
-	return min_dist
+		out.append(tile.tile_pos)
+	return out
 
 # ──────── 基建主決策 ────────
 
@@ -2487,13 +2528,16 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	# 玩家 leader → 不自動決策（後續用 AdvisorSystem.push_outpost_advice）
 	if leader_team.leader_id == state.player_id and state.player_id != -1:
 		return
+	var _ti: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	# (1) 升級既有 outpost
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_owner != leader_team.team_id: continue
 		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue
 		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
+			if SimRunner.phase_timing: _fai_pht("infra.upgrade", _ti)
 			return
+	if SimRunner.phase_timing: _ti = _fai_pht("infra.upgrade", _ti)
 	# (2) 擴建設施（faction 內所有 outpost；owner 以自身 local 資料評估，
 	#     就地施工優先：owner 在場 > 居民團 > 派擴建子隊）
 	for tile_id in state.world.tiles:
@@ -2521,6 +2565,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 		if owner_team.tile_pos == tile.tile_pos and owner_team.combat_target == -1 \
 				and owner_team.current_task != TeamData.TASK_BUILD:
 			if OutpostSystem.new()._subteam_upgrade_facility(state, owner_team, tile, pick["facility"]):
+				if SimRunner.phase_timing: _fai_pht("infra.facility", _ti)
 				return
 		# tile 上同 faction 居民團出工出料
 		var resident: TeamData = _resident_team_for_construction(state, tile)
@@ -2529,9 +2574,12 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 				print("[Infra] Team%d 令居民 Team%d 就地擴建 %s at (%d,%d)" % [
 					owner_team.team_id, resident.team_id, pick["facility"],
 					tile.tile_pos.x, tile.tile_pos.y])
+				if SimRunner.phase_timing: _fai_pht("infra.facility", _ti)
 				return
 		if _dispatch_facility_builder(state, owner_team, tile.tile_pos, pick["facility"]):
+			if SimRunner.phase_timing: _fai_pht("infra.facility", _ti)
 			return
+	if SimRunner.phase_timing: _ti = _fai_pht("infra.facility", _ti)
 	# (3) 蓋新 outpost 前：公庫不足 + leader 不在家 + idle → 回家治理攢公庫
 	var own_pos: Vector2i = _find_own_outpost(state, leader_team)
 	if own_pos != Vector2i(-1, -1) and leader_team.tile_pos != own_pos:
@@ -2543,6 +2591,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 				return
 	# (3) 蓋新 outpost
 	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
+	if SimRunner.phase_timing: _ti = _fai_pht("infra.new_loc", _ti)
 	if loc.is_empty(): return
 	var outpost_type: String = _pick_outpost_type(state, leader_team, leader)
 	# S2 礦村：含礦山地 → 強制 civilian（mint 只允 civilian；軍鎮不採礦=無意義）
@@ -2943,7 +2992,7 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
 		if not BeliefSystem.has_belief(state, team.team_id, tid): continue   # 無情報→不選
-		if not PathSystem.estimate_catch_up(state, team, tid).reachable: continue
+		if not PathSystem.estimate_catch_up(state, team, tid, true).reachable: continue
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
 		var pop_est: float = float(bel.get("population_est", 0.0))
 		if pop_est >= float(team.population) * 0.7: continue   # belief 看似不夠弱→跳
@@ -2975,7 +3024,7 @@ func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
 		if t == null: continue
-		if not PathSystem.estimate_catch_up(state, team, tid).reachable: continue
+		if not PathSystem.estimate_catch_up(state, team, tid, true).reachable: continue
 		if t.faction_id != -1 and t.faction_id == team.faction_id: continue
 		var rep: float = float(team.known_reputations.get(tid, 0.5))
 		if rep <= 0.3: continue
@@ -3000,7 +3049,7 @@ func _find_aid_target(state: WorldState, team: TeamData) -> int:
 		if not bel.has("food_est"): continue   # 不知有無餘糧 → 保守不列
 		var reserve: float = float(bel.get("population_est", 0.0)) * 14.0
 		if float(bel.get("food_est", 0.0)) <= reserve: continue
-		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid)
+		var catch_result: Dictionary = PathSystem.estimate_catch_up(state, team, tid, true)
 		if not catch_result.reachable: continue
 		var same_faction: bool = (t.faction_id != -1 and t.faction_id == team.faction_id)
 		var rep: float = float(team.known_reputations.get(tid, 0.5))

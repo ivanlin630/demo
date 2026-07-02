@@ -16,6 +16,82 @@ const HEX_DIRS: Array = [
 
 static var _path_cache: Dictionary = {}
 
+# ── estimate_catch_up 加速：per-source SSSP（Dijkstra）永續 cache ──
+# terrain 只在 world gen / game_setup 寫，runtime 永不變 → cost 圖靜態 → 單源最短路
+# 算一次永續有效。estimate_catch_up 消費端只讀 reachable/eta（.path 無 consumer）→
+# 以 SSSP cost 取代 per-pair A*：最優 cost = 同一 float path-sum 集合的 min（Dijkstra 與
+# A* 沿 path 同序累加）→ bit-exact 等值；randf（observe_velocity）呼叫條件不動
+# （SSSP 可達 ⟺ A* path 非空 = 同 component）→ 行為逐點不變。
+# movement 等其他 find_path 呼叫者不走此（A* tie-order 影響實際走位，勿混）。
+# cache 以 world instance id 分層（headless 測試多世界同座標互不污染）。
+# 若未來 runtime 改地形，須呼 clear_sssp()。
+static var _sssp_cache: Dictionary = {}   # world_iid → { from_key → { to_key → cost } }
+
+static func clear_sssp() -> void:
+	_sssp_cache.clear()
+
+# from→to 最短 cost；INF = 不可達（同 A* path empty 條件）。
+static func catch_cost(state: WorldState, from: Vector2i, to: Vector2i) -> float:
+	if from == to:
+		return 0.0   # 對齊 _astar from==to 短路（不查圖）
+	var wid: int = state.world.get_instance_id()
+	var per_world: Dictionary = _sssp_cache.get(wid, {})
+	if per_world.is_empty():
+		_sssp_cache[wid] = per_world
+	var fk: int = from.x * 1000 + from.y
+	var dist: Dictionary = per_world.get(fk, {})
+	if dist.is_empty():
+		dist = _dijkstra(state, from)
+		per_world[fk] = dist
+	return float(dist.get(to.x * 1000 + to.y, INF))
+
+# 單源 Dijkstra（binary heap，lazy deletion）→ {tile_key: 最短 cost}（不可達不含鍵）。
+static func _dijkstra(state: WorldState, from: Vector2i) -> Dictionary:
+	var fk: int = from.x * 1000 + from.y
+	var best: Dictionary = { fk: 0.0 }
+	var settled: Dictionary = {}
+	var heap: Array = [[0.0, fk, from]]   # [cost, key, pos]
+	while not heap.is_empty():
+		# pop 最小（sift-down）
+		var top: Array = heap[0]
+		var last: Array = heap.pop_back()
+		if not heap.is_empty():
+			heap[0] = last
+			var i: int = 0
+			var n: int = heap.size()
+			while true:
+				var l: int = i * 2 + 1
+				var r: int = l + 1
+				var m: int = i
+				if l < n and float(heap[l][0]) < float(heap[m][0]): m = l
+				if r < n and float(heap[r][0]) < float(heap[m][0]): m = r
+				if m == i: break
+				var tmp: Array = heap[i]; heap[i] = heap[m]; heap[m] = tmp
+				i = m
+		var ck: int = int(top[1])
+		if settled.has(ck): continue
+		settled[ck] = true
+		var cc: float = float(top[0])
+		var cpos: Vector2i = top[2]
+		for d in HEX_DIRS:
+			var npos: Vector2i = cpos + d
+			var nk: int = npos.x * 1000 + npos.y
+			if settled.has(nk): continue
+			var tile: HexTileData = state.world.tiles.get(nk)
+			if tile == null: continue
+			var nc: float = cc + TERRAIN_COST.get(tile.terrain, 1.0)
+			if nc < float(best.get(nk, INF)):
+				best[nk] = nc
+				# push（sift-up）
+				heap.append([nc, nk, npos])
+				var j: int = heap.size() - 1
+				while j > 0:
+					var p: int = (j - 1) / 2
+					if float(heap[p][0]) <= float(heap[j][0]): break
+					var tmp2: Array = heap[j]; heap[j] = heap[p]; heap[p] = tmp2
+					j = p
+	return best
+
 # ────────── A* ──────────
 
 static func find_path(state: WorldState, from: Vector2i, to: Vector2i) -> Dictionary:
@@ -85,8 +161,11 @@ static func _team_speed_mult(team: TeamData) -> float:
 
 # ────────── 觀察行軍速度 ──────────
 
-static func observe_velocity(state: WorldState, observer: TeamData, target: TeamData) -> Dictionary:
-	if not state.team_discovered.get(observer.team_id, []).has(target.team_id):
+# trusted=true：caller 已保證 target 在 observer 的 team_discovered（finder 迴圈迭代同一 array）
+# → 跳 O(n) Array.has（O(n²) fan-out 根之一）。回傳值恆等（檢查恆真）、randf 流不動。
+static func observe_velocity(state: WorldState, observer: TeamData, target: TeamData,
+		trusted: bool = false) -> Dictionary:
+	if not trusted and not state.team_discovered.get(observer.team_id, []).has(target.team_id):
 		return { "visible": false }
 	var dist: int = _hex_dist(observer.tile_pos, target.tile_pos)
 	var noise_factor: float = clampf(float(dist) / float(VisionSystem.VISION_RADIUS), 0.0, 1.0)
@@ -106,16 +185,18 @@ static func observe_velocity(state: WorldState, observer: TeamData, target: Team
 
 # ────────── catch-up ──────────
 
-static func estimate_catch_up(state: WorldState, self_team: TeamData, target_id: int) -> Dictionary:
-	if not state.team_discovered.get(self_team.team_id, []).has(target_id):
+static func estimate_catch_up(state: WorldState, self_team: TeamData, target_id: int,
+		trusted: bool = false) -> Dictionary:
+	if not trusted and not state.team_discovered.get(self_team.team_id, []).has(target_id):
 		return { "reachable": false, "reason": "out_of_sight" }
 	var target_team: TeamData = state.teams.get(target_id)
 	if target_team == null:
 		return { "reachable": false, "reason": "team_missing" }
-	var path: Dictionary = find_path(state, self_team.tile_pos, target_team.tile_pos)
-	if path.path.is_empty():
+	# SSSP cost（bit-exact 同 A* 最優 cost；.path 無 consumer → 不再回傳）
+	var cost: float = catch_cost(state, self_team.tile_pos, target_team.tile_pos)
+	if cost == INF:
 		return { "reachable": false, "reason": "no_path" }
-	var obs: Dictionary = observe_velocity(state, self_team, target_team)
+	var obs: Dictionary = observe_velocity(state, self_team, target_team, trusted)
 	var self_speed: float = _team_speed_mult(self_team)
 	var target_speed: float = float(obs.get("speed", 0.0))
 	var direction: Vector2i = obs.get("direction", Vector2i.ZERO)
@@ -123,10 +204,10 @@ static func estimate_catch_up(state: WorldState, self_team: TeamData, target_id:
 	if moving_away and target_speed >= self_speed:
 		return { "reachable": false, "reason": "too_fast" }
 	var relative_speed: float = (self_speed - target_speed) if moving_away else self_speed
-	var eta: int = int(float(path.cost) * float(MovementSystem.BASE_MOVE_TICKS) / maxf(relative_speed, 0.1))
+	var eta: int = int(cost * float(MovementSystem.BASE_MOVE_TICKS) / maxf(relative_speed, 0.1))
 	if eta > AI_ETA_LIMIT:
 		return { "reachable": false, "reason": "too_far", "eta": eta }
-	return { "reachable": true, "eta": eta, "path": path.path }
+	return { "reachable": true, "eta": eta }
 
 static func _is_moving_away_observed(self_team: TeamData, target_team: TeamData,
 		observed_direction: Vector2i) -> bool:

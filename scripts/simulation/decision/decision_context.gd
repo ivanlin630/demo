@@ -54,6 +54,7 @@ var intent_target_pos: Vector2i = Vector2i(-1, -1)
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
+	var _tg: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var ldr: PersonData = state.persons.get(team.leader_id)
 	c.leader_values = ldr.values.duplicate() if ldr != null else {}
 	var ef: float = ResourceSystem.effective_food(state, team)
@@ -62,6 +63,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
 	c.has_arb = not OrderSystem.new().best_arbitrage_order(state, team).is_empty()
 	c.team_strength = NpcCombatSystem.new().team_strength(state, team.team_id)
+	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.head", _tg)
 	c.ambition_gap = maxi(team.ambition_cap - team.ambition_rung, 0)
 	# feud 邊掛 leader person（relation_edges 屬 PersonData，非 TeamData）。
 	var fe: Dictionary = {}
@@ -74,10 +76,12 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	# threat（F-D6 un-stub）：視野內最高敵威脅（belief-based ThreatAssessment，含逼近/敵意/距離衰減）。
 	# 餵 threat_pressure term → unified 隊(商隊/生產)遇逼近敵會 FLEE（威脅真驅動非死 stub）。
 	c.threat = DecisionContext._max_threat(state, team)
+	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.threat", _tg)
 	var _fa := FactionAISystem.new()
 	var _prey: int = _fa._find_weakest_prey(state, team)
 	c.has_weak_prey = _prey != -1
 	c.weak_prey_pos = state.teams[_prey].tile_pos if c.has_weak_prey else Vector2i(-1, -1)
+	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.weak_prey", _tg)
 	# P2a 絕境目標欄（複用 finder，仿 _find_weakest_prey 風格）
 	var _sn: int = _fa._find_strong_neighbor(state, team)
 	c.has_strong_neighbor = _sn != -1
@@ -86,10 +90,12 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)
 	c.farmable_pos = _ft
+	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.strong_farm", _tg)
 	var _aid: int = _fa._find_aid_target(state, team)
 	c.has_aid_target = _aid != -1
 	c.aid_target_id = _aid
 	c.aid_target_pos = state.teams[_aid].tile_pos if _aid != -1 else Vector2i(-1, -1)
+	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.aid", _tg)
 	# P3 混合協調：loyalty 注入 leader_values（weight("faction_duty") 讀，避擴 weight 簽名；
 	# `_` 前綴非人格值，既有 term match 不誤讀，leader_values 已 duplicate 不污染 PersonData）。
 	c.leader_loyalty = ldr.loyalty if ldr != null else 0.5
@@ -100,6 +106,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_food_market = _mkt != Vector2i(-1, -1)
 	c.food_market_pos = _mkt
 	c.food_market_dist = _fa._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1
+	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.market", _tg)
 	# has_specie 廣義納可交易特產：coin / goods / material / ore（forest=木材 mountain=礦 換糧籌碼）。
 	c.has_specie = float(team.resources.get("coin", 0)) > 0.0 \
 		or float(team.resources.get("goods", 0)) >= 10.0 \
@@ -107,6 +114,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		or float(team.resources.get("ore_iron", 0)) + float(team.resources.get("ore_gold", 0)) >= DecisionTerms.MATERIAL_TRADE_MIN
 	# home_food：自家糧倉 food（掃自有 outpost tile，team 不在家也讀得到 → 空家判定）。
 	c.home_food = DecisionContext._home_granary_food(state, team)
+	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)
 	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:
 		var f = state.factions.get(team.faction_id)
