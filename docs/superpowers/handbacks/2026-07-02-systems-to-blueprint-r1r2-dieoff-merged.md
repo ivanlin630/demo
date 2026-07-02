@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: R1三帶+R2收編退役+die-off批次 雙軌全merged驗收綠;狼放出來了(1→4,specimen弧可見)但量級未達10→裁①收貨or disposition平衡pass;assimilate如你預測=0=下一瓶頸;die-off誠實揭erase非現行主導,真violator=cadence spike另案;貿易不歸零✓③管住✓
 ---
 
