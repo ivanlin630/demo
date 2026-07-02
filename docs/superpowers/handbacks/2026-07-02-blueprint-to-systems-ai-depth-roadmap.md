@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 知會 — AI 深度 roadmap 落 game-design(深化二=blocker→子需求,長窗觸發;經驗=自己的claim fold進belief,G3擴充帶上);請列管非現在做
 ---
 

@@ -565,15 +565,46 @@ func _auto_withdraw_mounts(state: WorldState, team: TeamData) -> void:
 		ResourceBank.set_amt(team, "mounts", current + take, "auto_withdraw_mounts")
 		print("[Mount] Team%d auto-withdraw %d mounts" % [team.team_id, take])
 
+# ── evaluate_all 子相位計時（opt-in 掛 SimRunner.phase_timing;cadence spike 歸因 zoom）──
+static var _fai_ph: Dictionary = {}
+func _fai_pht(name: String, t0: int) -> int:
+	var now: int = Time.get_ticks_usec()
+	_fai_ph[name] = int(_fai_ph.get(name, 0)) + (now - t0)
+	return now
+
 func evaluate_all(state: WorldState, _team_ids: Array) -> void:
+	var _zt: int = 0
+	var _zoom: bool = SimRunner.phase_timing
+	if _zoom:
+		_fai_ph.clear()
+		_zt = Time.get_ticks_usec()
+	_evaluate_all_body(state, _team_ids)
+	if _zoom:
+		var total: int = Time.get_ticks_usec() - _zt
+		if total > 100_000:   # 同 PHASE_SPIKE_US 量級
+			var parts: Array = []
+			for ph in _fai_ph:
+				parts.append({"n": ph, "us": int(_fai_ph[ph])})
+			parts.sort_custom(func(a, b): return int(a["us"]) > int(b["us"]))
+			var top: String = ""
+			for i in range(mini(8, parts.size())):
+				top += "%s=%dus " % [parts[i]["n"], parts[i]["us"]]
+			print("[FaiPhase] tick=%d total=%d us | %s" % [state.world.current_tick, total, top])
+
+func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
+	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	for fid in state.factions:
 		var f = state.factions[fid]
+		var _tf: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		for mid in f.member_team_ids:
 			var snap: Dictionary = BeliefSystem.best_estimate(state, f.leader_team_id, mid)
 			if not snap.is_empty():
 				f.known_member_states[mid] = snap
+		if SimRunner.phase_timing: _tf = _fai_pht("loop1.member_snap", _tf)
 		_update_goals(state, f)
+		if SimRunner.phase_timing: _tf = _fai_pht("loop1.update_goals", _tf)
 		_assign_tasks(state, f)
+		if SimRunner.phase_timing: _tf = _fai_pht("loop1.assign_tasks", _tf)
 		# C: 每 INFRA_INTERVAL 評估一次基建（蓋/升級/擴建）
 		if state.world.current_tick % INFRA_INTERVAL == 0:
 			_evaluate_infrastructure(state, f)
@@ -594,6 +625,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 				if member_team.tags.has(TeamData.TAG_SUBTEAM): continue
 				DiplomaticAiSystem.new().consider_betrayal(state, member_team, leader_team_b)
 
+	if SimRunner.phase_timing: _t = _fai_pht("loop1.factions", _t)
 	var merge_queue: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
@@ -605,9 +637,17 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			# SoloAI 見非 idle 自動跳過（不雙寫）；守成(不 dispatch)則 SoloAI 照常跑既有個體決策。
 			# 不另設 cadence gate：與 SoloAI 同「每 idle tick 評估」節奏（否則 SoloAI 每 tick 搶走 idle
 			# →戰略層 cadence tick 永遠撞非 idle=漏觸發）。內部三閘(野心+累積+路徑)+hysteresis 自限稀有。
-			_evaluate_independent_strategy(state, team)
-			_evaluate_solo(state, team)
+			if SimRunner.phase_timing:
+				var _ts: int = Time.get_ticks_usec()
+				_evaluate_independent_strategy(state, team)
+				_ts = _fai_pht("loop2.indep_strategy", _ts)
+				_evaluate_solo(state, team)
+				_fai_pht("loop2.solo", _ts)
+			else:
+				_evaluate_independent_strategy(state, team)
+				_evaluate_solo(state, team)
 
+	if SimRunner.phase_timing: _t = Time.get_ticks_usec()
 	var sub_sys := SubteamSystem.new()
 	for sub_id in merge_queue:
 		if not state.teams.has(sub_id):
@@ -623,6 +663,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			if parent != null:
 				sub.move_target = parent.tile_pos
 
+	if SimRunner.phase_timing: _t = _fai_pht("loop2b.merge", _t)
 	for tid in state.teams.keys():   # keys() 快照 → 滅團可安全 erase
 		if not state.teams.has(tid):
 			continue
@@ -631,6 +672,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if team.population <= 0:
 			_on_team_extinct(state, team)
 			continue
+		var _t3: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		# leader 失效 → 繼承單一 owner（含 anon fallback / player choose_heir）。唯一偵測點。
 		if team.leader_id == -1:
 			EventSystem.new().on_leader_death(state, team)
@@ -641,8 +683,10 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if team.leader_id != -1 and state.world.current_tick >= team.order_eval_next_tick:
 			OrderSystem.new().tick_team_orders(state, team)
 			team.order_eval_next_tick = state.world.current_tick + OrderSystem.ORDER_POST_CADENCE
+		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.orders_ambition", _t3)
 		# B: 生存決策（在其他 update 前評估，task 改完後 strategic_ai 看到 sticky 不蓋）
 		_evaluate_survival(state, team)
+		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.survival", _t3)
 		# 獨立戰略層（建國 intent）已在前段 solo 迴圈評估（_evaluate_solo 前，不雙寫）。
 		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）
 		if _is_prosperity_candidate(state, team) \
@@ -650,10 +694,13 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			_evaluate_prosperity_attack(state, team)
 			var cad: int = PROSPERITY_CADENCE_MILITARY if "軍隊" in team.tags else PROSPERITY_CADENCE
 			team.prosperity_eval_next_tick = state.world.current_tick + cad
+		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.prosperity", _t3)
 		# 追擊刷新（攻擊/掠奪 中移動目標會跑，每 tick 對齊 intel）
 		_refresh_attack_pursuit(state, team)
+		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.pursuit", _t3)
 		# D: 被動威脅評估（cadence 內部控管）
 		_evaluate_threat(state, team)
+		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.threat", _t3)
 		# G2d：私人脫軌（強血仇+衝動 leader 拉隊打仇人；生存/威脅擋得住，prosperity 擋不住）
 		# 置於 _evaluate_threat 後：threat 先在 idle 設 DEFEND/FLEE@70，vendetta@55 搶不動 → 威脅優先
 		var _vleader: PersonData = state.persons.get(team.leader_id)
@@ -665,6 +712,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 					team.prosperity_target_id = _vfoe   # 追擊刷新復用
 					Probe.bump("g2.vendetta_trigger")
 					print("[Vendetta] Team%d leader 脫軌攻擊仇人 Team%d" % [team.team_id, _vfoe])
+		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.vendetta", _t3)
 		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）
 		if team.current_task == TeamData.TASK_TRADE \
 				and state.world.current_tick - team.trade_task_start_tick > TRADE_TIMEOUT:
@@ -679,6 +727,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 		if _is_resident_team(state, team):
 			_evaluate_uprising(state, team)
 			_evaluate_owner_contact(state, team)
+		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.outpost", _t3)
 		_update_equip_order(state, team)
 		# anon_combat_skill / anon_wage 改 computed（AnonTierSystem），不再主動更新
 		_update_armor_config(team)
@@ -690,6 +739,7 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			var amb_task: String = AmbitionLadder.rung_task(state, team)
 			if amb_task != "":
 				TaskArbiter.try_set(state, team, amb_task, team.tile_pos, TaskArbiter.PRIO_AMBIENT, "ambition")
+		if SimRunner.phase_timing: _fai_pht("loop3.misc", _t3)
 
 # ──────── Tag 權限 ────────
 
@@ -1003,8 +1053,11 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	# 有 belief-弱 prey + prosperity 候選 → 讓 prosperity-attack 執行（慎重者對不確定 prey 先 scout，
 	# 勝→npc_combat subjugate→create_faction 也達建國）。此處 defer + capture 征服 anchor
 	# （首燒：好戰獨立 → 征服 intent 顯化，CONQUER 分布不再恆 0）。避 建國-吞併 繞過 scout gate（S3 回歸）。
-	if _is_prosperity_candidate(state, team) and _find_weakest_prey(state, team) != -1:
-		var prey0: int = _find_weakest_prey(state, team)
+	var _tw: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	var _prey_probe: int = _find_weakest_prey(state, team) if _is_prosperity_candidate(state, team) else -1
+	if SimRunner.phase_timing: _tw = _fai_pht("indep.weakest_prey", _tw)
+	if _prey_probe != -1:
+		var prey0: int = _prey_probe   # 單呼（原雙呼 _find_weakest_prey 同 tick 同結果,zoom 順手收）
 		# 統一 scorer 秤：給 viable 弱敵，此 leader 是否戰略偏好征服（一致複用菜單，非另判斷）
 		var conq: Dictionary = select_strategic_intent(state, team, {
 			"leader_values": lv, "established": true, "weak_enemy": true,

@@ -84,6 +84,17 @@ func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 	_perf_count += 1
 	if dt_us > _perf_max_us:
 		_perf_max_us = dt_us
+	# 相位計時（opt-in）：spike tick 立即 dump 相位拆解（cadence spike 歸因用）
+	if phase_timing and dt_us > PHASE_SPIKE_US:
+		var parts: Array = []
+		for ph in _ph:
+			parts.append({"n": ph, "us": int(_ph[ph])})
+		parts.sort_custom(func(a, b): return int(a["us"]) > int(b["us"]))
+		var top: String = ""
+		for i in range(mini(6, parts.size())):
+			top += "%s=%dus " % [parts[i]["n"], parts[i]["us"]]
+		print("[PhaseSpike] tick=%d dt=%d us teams=%d | %s" % [
+			state.world.current_tick, dt_us, state.teams.size(), top])
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0 and _perf_count > 0:
 		var avg_us: int = _perf_accum_us / _perf_count
 		print("[TickPerf] day=%d avg=%d us max=%d us ticks=%d teams=%d factions=%d" % [
@@ -93,14 +104,29 @@ func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 		_perf_count = 0
 		_perf_max_us = 0
 
+# ── 相位計時儀器（opt-in，預設 off = 零成本零行為變；cadence spike 歸因量測）──
+static var phase_timing: bool = false
+const PHASE_SPIKE_US: int = 100_000   # TEST VALUE：spike 門檻（>此值 dump 相位拆解）
+var _ph: Dictionary = {}              # 本 tick 相位 → 累積 us
+
+# 標記一段相位結束：累積 (now - t0) 到 name，回傳 now（鏈式計時下一段）
+func _pht(name: String, t0: int) -> int:
+	var now: int = Time.get_ticks_usec()
+	_ph[name] = int(_ph.get(name, 0)) + (now - t0)
+	return now
+
 func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
+	if phase_timing: _ph.clear()   # 相位計時：每 tick 重置
 	if state.encounter_active:
+		var _te: int = Time.get_ticks_usec() if phase_timing else 0
 		var result: String = _encounter_system.advance_encounter_tick(state)
 		if result not in ["ongoing", "player_turn"]:
 			_encounter_system.resolve_encounter_end(state, result)
 		_step1_advance_time(state)
+		if phase_timing: _pht("encounter", _te)
 		return result    # propagate to bridge
 	_step1_advance_time(state)
+	var _t: int = Time.get_ticks_usec() if phase_timing else 0   # 相位計時鏈起點
 	if state.world.current_tick % WorldState.TICKS_PER_DAY == 0:
 		print("[DayNight] Day %d 開始" % (state.world.current_tick / WorldState.TICKS_PER_DAY))
 		_message_system.prune_old_messages(state, state.world.current_tick)
@@ -113,6 +139,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 			print("[ForageEpisode] %s" % fm)
 	if state.world.current_tick % PopulationSystem.OVERFLOW_CHECK_INTERVAL == 0:
 		_step1d_overflow(state)
+	if phase_timing: _t = _pht("day_boundary", _t)
 
 	var time_speed_mult: float = _day_night_system.get_speed_mult(state)
 	var time_vision_mult: float = _day_night_system.get_vision_mult(state)
@@ -151,8 +178,11 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 			print("[PlayerCmd] forced_event 超時自動拒絕: %s" % str(state.player_forced_event))
 			state.player_forced_event = {}
 			state.player_forced_event_id = ""
+		if phase_timing: _t = _pht("near.forced_event", _t)
 		_step1b_update_vision(state, near_teams, time_vision_mult)
+		if phase_timing: _t = _pht("near.vision", _t)
 		_step1c_update_equipment(state, near_teams)
+		if phase_timing: _t = _pht("near.equip", _t)
 		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
 		var move_near: Dictionary = _step2_move_teams(state, near_teams, time_speed_mult)
 		state.rebuild_team_tile_index()   # post-move rebuild → 下游 co-location/hostile 查見 post-move 位置
@@ -160,33 +190,44 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		var moved_near: Array = move_near["moved"]
 		if _get_player_tile_pos(state) != _player_old_pos:
 			_player_cmd.clear_pending_targets(state)
+		if phase_timing: _t = _pht("near.move", _t)
 		_step3_propagate_messages(state, moved_near, near_teams)
 		_step3b_exchange_intel(state, moved_near, near_teams)
 		_step3c_read_market_board(state, arrived_near)
+		if phase_timing: _t = _pht("near.messages", _t)
 		_step4_resolve_interactions(state, moved_near, near_teams)
+		if phase_timing: _t = _pht("near.interact", _t)
 		_step4b_outpost_tick(state)
 		_step4e_faction_snapshot(state, near_teams)
 		_step_ambush_check(state, near_teams)
+		if phase_timing: _t = _pht("near.outpost_ambush", _t)
 		if state.encounter_active: return "player_turn"   # 伏擊起 encounter → 交還 bridge
 		_step5_collect_resources(state, near_teams, NEAR_CADENCE)
 		_step5a_regenerate_tiles(state, NEAR_CADENCE)   # 全 tile 全域再生（每小時）→ 覆蓋 far 區 tile
 		_step5b_manufacture(state, near_teams)
+		if phase_timing: _t = _pht("near.economy", _t)
 		_step6_resolve_consumption(state, near_teams, NEAR_CADENCE)
 		_step6c_salary(state, near_teams)
 		_step6d_fatigue(state, near_teams, NEAR_CADENCE)
+		if phase_timing: _t = _pht("near.consume", _t)
 		_step6b_faction_ai(state, near_teams)
+		if phase_timing: _t = _pht("near.faction_ai", _t)
 		_step6f_training(state, near_teams)
 		_step6e_strategic_ai(state)
+		if phase_timing: _t = _pht("near.strategic_ai", _t)
 		_step7_person_reactions(state, near_teams)
 		_step7b_npc_goal_cleanup(state, near_teams)
+		if phase_timing: _t = _pht("near.reactions", _t)
 		_step8_generate_events(state, near_teams)
 		_step9_emit_messages(state)
 		# 階段2 tutorial onboarding：玩家食物盈餘 → 一次性送投奔者小隊（check 內守 forced_event 非空跳過）
 		RecruitTutorial.new().check(state)
+		if phase_timing: _t = _pht("near.events_emit", _t)
 
 	# Harvest：每 6 小時（TICKS_PER_DAY / 4）
 	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
 		_step4c_harvest_tick(state)
+	if phase_timing: _t = _pht("harvest", _t)
 
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
@@ -213,8 +254,10 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_step6e_strategic_ai(state)
 		_step8_generate_events(state, far_teams)
 		_step9_emit_messages(state)
+	if phase_timing: _t = _pht("far.total", _t)
 	_step_captives(state)
 	_step_cleanup_extinct_teams(state)
+	if phase_timing: _t = _pht("captives_cleanup", _t)
 	return ""   # non-encounter tick
 
 # 受控人力 P1：captive 待遇決策 + 軌跡（cadence 內部 gate，全域；同化/暴動/逃 守恆）

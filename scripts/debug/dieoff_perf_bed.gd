@@ -10,6 +10,7 @@ extends SceneTree
 # 用法（env）：
 #   DIEOFF_SEED    world seed（default 1337）
 #   DIEOFF_MONTHS  跑幾月（default 12；GODOT_TIMEOUT 拉大 + 背景跑）
+#   DIEOFF_PHASE   =1 開 SimRunner 相位計時（spike tick 印 [PhaseSpike] 相位拆解，cadence spike 歸因）
 
 func _initialize() -> void:
 	_run(); quit()
@@ -18,7 +19,10 @@ func _run() -> void:
 	var world_seed: int = int(OS.get_environment("DIEOFF_SEED")) if OS.has_environment("DIEOFF_SEED") else 1337
 	var months: int = int(OS.get_environment("DIEOFF_MONTHS")) if OS.has_environment("DIEOFF_MONTHS") else 12
 	var total_ticks: int = maxi(months, 1) * WorldState.TICKS_PER_MONTH
-	print("=== dieoff_perf_bed：seed=%d months=%d (ticks=%d) ===" % [world_seed, months, total_ticks])
+	if OS.get_environment("DIEOFF_PHASE") == "1":
+		SimRunner.phase_timing = true   # spike tick 印 [PhaseSpike] 相位拆解
+	print("=== dieoff_perf_bed：seed=%d months=%d (ticks=%d) phase=%s ===" % [
+		world_seed, months, total_ticks, str(SimRunner.phase_timing)])
 
 	seed(world_seed)   # 同 WarringHarness：播 global RNG（runtime bare randf/randi）
 	var state := WorldState.new()

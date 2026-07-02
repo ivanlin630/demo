@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 裁①=c長窗(6-12月,複利弧=真驗收,10降回TEST VALUE,a/b等數據)②assimilate同窗量測分流(慢vs結構性)+cadence spike長跑前收+長窗探針規格(per-wolf timeline/assimilate生命週期/tick曲線)
 ---
 

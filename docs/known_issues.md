@@ -49,6 +49,9 @@
 - **★次閘：定居隊 granary 自填 = trade loop 不 fire 真閘（讀B 覓食 cap 後 measure 揭）**：覓食 subsistence cap 正確封住覓食成長路徑（unit 測 + priv food 壓低證），但 econ_bed baseline 對照顯 **forest 定居隊（regen food=3）granary 月1 即填至 ~cap（gran≈1999）並維持**，pop 成長由 granary（eff_food≈2200）驅動非覓食（priv≈150-288）→ cap 對定居成長影響小 → **trade loop 沒需求驅動、不 fire**。「繁榮須交易」emergence 未到（覓食封了、granary 旁路未封）。屬 **granary/harvest 域**（食物統一 arc 下一 slice），非覓食 cap scope。**修向（待藍圖排序 + measure）**：查 forest regen 3 為何 granary 也填滿（harvest 產出 / storage cap / tile 食物池 init 來源）→ 定居隊 granary 亦須「特化受限」才逼交易。覓食 cap 是必要地板層（granary 修好後覓食不能 backfill 成長）。
 - **`FORAGE_FLOOR_DAYS=1.5` = TEST VALUE**：econ_bed/warring 顯覓食隊苟活不死、不膨脹；正式平衡再校（太低=餓死潮、太高=仍自足）。覓食 cap 對玩家 active hunt 同樣生效（對稱），玩家面手感待真人玩測。
 - **G3「自信地錯」emergence 需 Phase D + 專屬 probe 才量得到**：Phase E enforce 機制到位（決策真讀 belief、欺敵可有後果、回歸測綠），但**未加專屬「按假 belief 行動並被咬」計數器** → 短窗 seed 無法量化 emergence。需 Phase D（植假 primitive）+ probe。本 phase 只證「決策跟 belief 走」。
+- **[列管·藍圖知會 2026-07-02 `ai-depth-roadmap`,非現在做] AI 深度兩項**（roadmap 落 game-design「AI 深度 roadmap」段,藍圖 owner）：
+  - **深化二 blocker→子需求**：目標被 gate 擋 → AI 讀 gate-ladder 探針信號把 blocker 變子需求（想立國卡糧→攢糧）+選擇性遞迴一層。零新判斷器（AI 當既有探針 reader）。**觸發條件=長窗數據見「狼卡可解 gate 前乾等」**（長窗回報時順帶標此訊號）。守四關。
+  - **經驗=自己的 claim**：被伏擊→「那山谷危險」=一條親見高信 claim,fold 進 belief 域零新學習系統。**G3 Phase D/belief 擴充時帶上**（一行 backlog）。劇烈經驗塑人格=Trait 縫照舊排隊。
 - **headless baseline 既有 FAIL：`[FAIL] 弱目標未加入攻擊 goal`（pre-existing，非 G3/讀B 引入）**：已驗 main dd26f67 baseline 即此 1 FAIL（G3/foraging 兩 branch 皆 1 FAIL 同源）。locus = commander-v2 `_update_goals` 攻擊 goal 未對弱目標開（belief/goal-emit 相關，非本輪 5 leak）。待另案追（確認為 bug or 刻意行為）。
 - **G3 1c 施援同 faction snapshot 豁免 = 可選增益（裁定：維持 belief-strict）**：`_find_aid_target` 對同 faction 成員現走 belief-strict（無本隊 team_intel belief→跳過），未讀 faction `known_member_states` snapshot（leader 共享 belief）。**不違 provenance 不變量**（snapshot 本身 = best_estimate 派生、非 god-view）→ 現行正確且保守。snapshot 豁免=增益非修正，列可選後續，不擴 scope。
 
