@@ -26,3 +26,4 @@ test_*.gd
 /*.PNG
 /*.png.import
 /*.PNG.import
+*.stackdump
