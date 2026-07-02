@@ -36,16 +36,20 @@
 **檔**：`scripts/simulation/faction_ai_system.gd`（`find_prosperity_prey`）
 
 1. score 乘上 `logistics` 因子（**乘進 score，非 filter，非 classifier**）：
-   - **②路程糧**：`trip_ratio = ResourceSystem.effective_food(state,team) / (eta_days × pop × FOOD_PER_PERSON_PER_DAY)`，`trip = clampf(trip_ratio, 0.2, 1.0)`（TEST VALUE 下限——絕不歸零，糧緊只壓權重）。
-   - **③歸屬**：`bel_fid = bel.get("faction_id", -1)`（tier2 已寫此欄 interaction:728；tier0/1 無 → -1 → 視為獨立）。
-     - `bel_fid == -1` → `own = 1.0`。
-     - `bel_fid != -1` → `own = WAR_COST_BASE + war_capability`，`war_capability = (自身 established faction ? 0.3 : 0.0) + rung/RUNG_HEGEMON*0.3`（clamp ≤1.0）。`WAR_COST_BASE = 0.15`（TEST VALUE）——獨立餬口隊對屬村 score×~0.15 幾乎不中選；established+高 rung faction 攻屬村接近全值（開得起戰爭）。
+   - **②路程糧**：`trip_ratio = ResourceSystem.effective_food(state,team) / (eta_days × pop × FOOD_PER_PERSON_PER_DAY)`，`trip = clampf(trip_ratio, 0.2, 1.0)`（TEST VALUE 下限——絕不歸零，糧緊只壓權重）。**既有信號讀取,嚴禁新後勤 state（guard ②）。**
+   - **③歸屬（belief claim,guard ①）**：`bel_fid = bel.get("faction_id", ABSENT)`——**區分「欄位缺席」與「值 -1(獨立)」**（tier2 寫 faction_id=-1 = believed 獨立;tier0/1 snapshot 無此欄 = 未知）。
+     - believed 獨立（欄位在且 == -1）→ `own = 1.0`。
+     - **欄位缺席（未知）→ `own = 0.5`（TEST VALUE,保守 fallback,Phase E 慣例）**——盲 raid 壓、誘因 scout。
+     - believed 屬 faction → `own = WAR_COST_BASE + war_capability`，`war_capability = (自身 established faction ? 0.3 : 0.0) + rung/RUNG_HEGEMON*0.3`（clamp ≤1.0）。`WAR_COST_BASE = 0.15`（TEST VALUE）。
    - `logistics = trip × own`；`score = (richness*貪 + weakness*殘 + border*野) / eta_days × logistics`。
-   - **禁讀 `prey.faction_id` 真值**——belief 錯 → 照打 → 捅馬蜂窩 = G3 戲劇，不防呆。
+   - **確認 `best_estimate` 透傳 `faction_id` 欄**（tier2 snap 有寫但 merge/estimate 可能濾欄——不透傳則補透傳，非另建管道）。
+   - **可騙 channel**：interaction_system:741 既有 deceive 塊補 faction_id 誤報欄（弱村謊稱屬大勢力嚇阻,TEST VALUE 機率,同塊一欄非新系統）。
+   - **禁讀 `prey.faction_id` 真值**——belief 錯 → 照打/被嚇阻 = G3 戲劇，不防呆。
 2. headless 新測：
-   - 同 prey 兩版：believed 獨立 vs believed 屬 faction（tier2 intel 寫入）→ 獨立餬口攻擊者對後者 score 顯著低（不中選）。
+   - 同 prey 三版：believed 獨立 / 欄位缺席（未知→0.5） / believed 屬 faction → score 階序 獨立 > 未知 > 屬村（獨立餬口攻擊者）。
    - established faction + 高 rung 攻擊者 → 屬村罰減輕（仍可中選）。
    - 路程糧不足 → score 壓低但非零。
+   - deceive faction_id 誤報 → 攻擊者按假歸屬計 own（嚇阻生效）。
 3. 所有新常數標 TEST VALUE 註解。
 
 **驗**：headless 全綠。
@@ -61,7 +65,9 @@
    - 獨立隊攻 believed-faction-owned 目標次數低（③管住）。
    - `SurvivalLoot` 仍 fire（絕境仍搏）。
 3. specimen trace（specimen_bed）：狼性餬口隊 想=征服→做=raid 弧可見（trace print 佐證即可）。
-4. 回歸：headless（1 FAIL pre-existing「弱目標未加入攻擊 goal」容忍）+ 0 SCRIPT ERROR、framework 7/7 DORMANT=0、coin_eq 全池 delta=0、InvariantAudit 0。
+4. **貿易量不歸零（guard ④）**：seeded harness R1 前後 `[Market]` 成交/`g1.arb_hit` 對比記進 handback。被吃殘 → **呈報**（護衛/保護費 affordance 藍圖議），不自行實作。
+5. **assimilate 預標（guard ④）**：handback 記 `conq.win_absorbed`/`P1Absorb` 數。低=可預測下一瓶頸（manpower cadence），記錄即可非本波修。
+6. 回歸：headless（1 FAIL pre-existing「弱目標未加入攻擊 goal」容忍）+ 0 SCRIPT ERROR、framework 7/7 DORMANT=0、coin_eq 全池 delta=0、InvariantAudit 0。
 
 ## Handback
 

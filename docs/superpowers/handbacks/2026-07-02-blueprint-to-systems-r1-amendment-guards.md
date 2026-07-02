@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: R1 補充(加法非翻案,趕在 dispatch 前)——③歸屬=belief claim 非god-view/③後勤=既有信號嚴禁新系統/die-off 同波修/驗收加貿易量不歸零+assimilate 預標
 ---
 

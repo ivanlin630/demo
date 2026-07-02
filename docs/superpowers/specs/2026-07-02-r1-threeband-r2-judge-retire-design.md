@@ -49,10 +49,11 @@
 新增 **一個連續 `logistics` 因子**乘進 score（非 filter、非分類器）：
 - **②路程糧**：`trip_food_ok = effective_food(state,team) 對 eta_days × pop × FOOD_PER_PERSON_PER_DAY 的比值`，clamp 連續（糧夠→1.0，半途餓→往 0 滑）。raid 級輕量：只算單程到 prey，不算佔領後勤。
 - **③目標歸屬（吃 belief，禁 god-view）**：prey 的 believed faction 歸屬：
-  - believed 獨立（或無歸屬情報）→ 1.0（一次 raid，可打）。
-  - believed 屬 faction → 罰項 `war_cost`（連續）：基準罰 × 攻擊者戰爭能力減免（自身 established faction + rung 高 → 罰輕 = 開得起戰爭）。母勢力規模加權罰 = 若 belief 有信號才用，無則基準罰即可（raid 級輕量,別為此建 faction 級 belief）。**獨立餬口隊對強勢力屬村 → score 被壓到幾乎不中選 = ③管住 over-war**。
-  - belief 錯（過期/謊報歸屬）→ 照 belief 行動 → 捅馬蜂窩 = G3 戲劇，**設計要的，不做真值防呆**。
-- **belief 已有歸屬欄位**：tier2 intel 已寫 `snap["faction_id"]`（interaction_system:728）→ ③直讀 `bel.get("faction_id", -1)`，tier0/1 無此欄 → 未知 → 視為獨立（1.0）。**禁 fallback 讀 prey.faction_id 真值。**
+  - believed 獨立 → 1.0（一次 raid，可打）。
+  - believed 屬 faction → 罰項 `war_cost`（連續）：基準罰 × 攻擊者戰爭能力減免。**戰爭能力=既有信號讀取組合（藍圖 guard ②，嚴禁新後勤系統/state）**：established faction、rung、有無根據地 outpost、`effective_food`/`food_flow_avg`——選其中夠用的最小組合,全是讀取非新 gate。母勢力規模加權罰 = 若 belief 有信號才用，無則基準罰即可。**獨立餬口隊對強勢力屬村 → score 被壓到幾乎不中選 = ③管住 over-war**。
+  - **無歸屬情報 → 保守 fallback（藍圖 guard ①,Phase E 慣例「未知=危險」）**：`own = 0.5`（TEST VALUE,介於獨立與屬村間）——盲 raid 被壓、誘因去 scout。**非視為獨立。**
+  - **歸屬=claim 語意（可傳/可過時/可騙）**：tier2 intel 已寫 `snap["faction_id"]`（interaction_system:728,隨 snapshot 過時+傳播）；**可騙**接既有 deceive 塊（interaction_system:741 同塊補 faction_id 誤報欄——如弱村謊稱屬大勢力嚇阻狼,同塊一欄非新系統,TEST VALUE 機率）。確認 `best_estimate` 透傳此欄（不透傳則補透傳,非另建管道）。
+  - belief 錯（過期/謊報歸屬）→ 照 belief 行動 → 捅馬蜂窩/被嚇阻 = G3 戲劇，**設計要的，不做真值防呆**。**禁 fallback 讀 prey.faction_id 真值。**
 - 常數全標 TEST VALUE。
 
 ### 不做（scope guard）
@@ -71,6 +72,8 @@
    - 知足/溫和 leader 隊仍蹲（非 FORCE 傾向不進 prosperity）→ 世界不全員開戰、隊數不雪崩。
    - 強勢力屬村不被獨立餬口隊亂捅（③罰項壓住）——量「獨立隊攻擊 believed-faction-owned 目標」次數低。
 3. **絕境仍搏**：survival loot 路徑計數不降（`SurvivalLoot` 探針/print 仍見）。
+3b. **貿易量不歸零（藍圖 guard ④）**：商隊=獨立弱目標=狼的合法獵物。seeded harness 量 R1 前後貿易量（`[Market]` 成交 / `g1.arb_hit`）。**被吃殘 → 呈報藍圖**（中期「護衛/保護費」affordance,勒索機制已有可接）,**不自行實作保護機制**。
+3c. **assimilate 數預標（藍圖 guard ④）**：handback 記 `conq.win_absorbed`/`P1Absorb` 計數。**低=可預測的下一瓶頸**（manpower assimilate cadence,已知慢:morale 0.25→0.75 ~25天）——記錄呈報,非本波修。
 4. **specimen trace**：狼性餬口隊「想=征服→做=raid→積累→（盈餘→擴張）」弧在 trace 可見。
 5. **R2 desync=0**：單測——同 values 下 `select_strategic_intent` 選征服 ⟹ `derive_archetype`=FORCE（公式共源，測 argmax 映射一致）。
 6. **回歸**：headless 全綠（1 FAIL pre-existing 弱目標容忍）+ 0 SCRIPT ERROR、framework 7/7 DORMANT=0、coin_eq 全池 delta=0、InvariantAudit 0、archetype 分布 sanity 新測過。
