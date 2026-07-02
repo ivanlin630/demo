@@ -278,6 +278,14 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		elif b.current_task == TeamData.TASK_PACIFY and a.tags.has(TeamData.TAG_PRODUCE):
 			_resolve_pacify(state, b, a)
 		return
+	# ②a 信使外交送達：envoy（HERALD + envoy_proposal）遇 order_target → 委派 belief resolver。
+	# 信使 faction 恆 ≠ target（建國兩獨立 or 母隊招募）→ 不入上方 same_faction herald 分支。
+	if a.current_task == TeamData.TASK_HERALD and a.task_reason == "envoy_proposal" and a.order_target_id == id_b:
+		_deliver_envoy_proposal(state, id_a, id_b)
+		return
+	if b.current_task == TeamData.TASK_HERALD and b.task_reason == "envoy_proposal" and b.order_target_id == id_a:
+		_deliver_envoy_proposal(state, id_b, id_a)
+		return
 	if a.current_task == TeamData.TASK_DIPLOMACY:
 		_try_diplomacy(state, id_a, id_b)
 		return
@@ -350,37 +358,76 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 func subjugate_team(state: WorldState, winner_id: int, loser_id: int) -> void:
 	_combat.subjugate_team(state, winner_id, loser_id)
 
+# F-I1 統一：接受判定退役 god-view team_strength 公式，一律委派 handle_diplomacy_message
+# （belief+人格，單一 judge）。同格偶遇談判 = 送達管道之一，決策公式與信使送達同源。
+# faction 招募/建國動作由 _form_alliance 完成（handle_diplomacy_message accept 內呼）。
 func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> void:
 	var initiator: TeamData = state.teams[initiator_id]
 	var target: TeamData    = state.teams[target_id]
 	if initiator.faction_id != -1 and initiator.faction_id == target.faction_id:
 		return
-	var target_leader = state.persons.get(target.leader_id)
-	if target_leader == null:
+	if state.persons.get(target.leader_id) == null:
 		return
-	var honor: float     = float(target_leader.values.get("義氣",  0.5))
-	var trust: float     = float(target_leader.values.get("信義", 0.5))
-	var str_init: float  = _combat.team_strength(state, initiator_id)
-	var str_tgt: float   = _combat.team_strength(state, target_id)
-	var str_ratio: float = str_init / maxf(str_tgt, 0.01)
-	var accept: float    = honor * 0.5 + trust * 0.3 + maxf(str_ratio - 1.0, 0.0) * 0.2
-	if accept < 0.35:
+	var resp: String = DiplomaticAiSystem.new().handle_diplomacy_message(
+		state, target, initiator, "propose_alliance")
+	if resp != "accept":
+		# 拒 → 發起方 cooldown（防同對象連發），不成盟
+		initiator.diplomacy_reject_cooldown[target_id] = \
+			state.world.current_tick + DiplomaticAiSystem.REJECT_COOLDOWN
 		return
-	# initiator 已有勢力 → 直接招募 target；否則以強者為 leader 建新勢力
-	var fid: int = initiator.faction_id
-	if fid == -1:
-		var strong_id: int = initiator_id if str_init >= str_tgt else target_id
-		fid = state.create_faction(strong_id)
-	state.set_team_faction(target, fid)   # target 入 faction（雙向同步）
-	state.snapshot_faction_member(target_id, state.world.current_tick)
+	# accept：faction 動作（create_faction/招募）已由 _form_alliance 完成。release + 訊息（telemetry）。
 	TaskArbiter.release(initiator)
 	_msg.emit_message(state, "diplomacy",
 		TextBank.fmt("diplomacy", "honest", {
 			"origin": str(initiator_id), "target": str(target_id)
 		}),
 		initiator,
-		{ "origin": str(initiator_id), "target": str(target_id), "faction": str(fid) })
-	print("[Faction] Team%d 外交 Team%d → 勢力%d" % [initiator_id, target_id, fid])
+		{ "origin": str(initiator_id), "target": str(target_id), "faction": str(target.faction_id) })
+	print("[Faction] Team%d 外交 Team%d accept → 勢力%d" % [initiator_id, target_id, target.faction_id])
+
+# ②a 信使送達：envoy 遇 target → 委派 belief resolver（同 judge，與同格偶遇同源）。
+# 冗餘去重：母隊 pending_proposal 為權威，proposal_id 首達生效、後到 no-op。送達後信使歸隊。
+func _deliver_envoy_proposal(state: WorldState, envoy_id: int, target_id: int) -> void:
+	var envoy: TeamData = state.teams[envoy_id]
+	var target: TeamData = state.teams[target_id]
+	var mother: TeamData = state.teams.get(envoy.parent_team_id)
+	var carried_pid: String = String(envoy.task_extra_data.get("proposal_id", ""))
+	# 去重：母隊消失 / pending 已清（他騎首達）/ proposal_id 不符 → no-op，信使歸隊
+	if mother == null or mother.pending_proposal.is_empty() \
+			or String(mother.pending_proposal.get("proposal_id", "")) != carried_pid:
+		_recall_envoy_home(state, envoy)
+		return
+	if state.persons.get(target.leader_id) == null:
+		_recall_envoy_home(state, envoy)
+		return
+	Probe.bump("envoy.delivered")
+	# 決策委派 belief judge（accept 內 _form_alliance 完成 create_faction/招募）。
+	# 現僅 alliance 提案；未來提案型別擴充在此 map 到對應 verb。
+	var resp: String = DiplomaticAiSystem.new().handle_diplomacy_message(
+		state, target, mother, "propose_alliance")
+	if resp == "accept":
+		Probe.bump("envoy.accept")
+		print("[Envoy] Team%d 提案送達 Team%d → accept（發起 Team%d）" % [
+			envoy_id, target_id, mother.team_id])
+	else:
+		Probe.bump("envoy.reject")
+		mother.diplomacy_reject_cooldown[target_id] = \
+			state.world.current_tick + DiplomaticAiSystem.REJECT_COOLDOWN
+		print("[Envoy] Team%d 提案送達 Team%d → reject" % [envoy_id, target_id])
+	mother.pending_proposal = {}   # 消費提案（首達生效，後到騎 no-op）
+	_recall_envoy_home(state, envoy)
+
+# 信使送達/落空後歸隊：釋放 task + 朝母隊移動（到母格 process_on_arrival try_merge_back 併回）。
+func _recall_envoy_home(state: WorldState, envoy: TeamData) -> void:
+	TaskArbiter.release(envoy)
+	envoy.task_reason = "envoy_recall"
+	envoy.order_target_id = -1
+	var parent: TeamData = state.teams.get(envoy.parent_team_id)
+	if parent != null:
+		envoy.move_target = parent.tile_pos
+	else:
+		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（非 zombie）
+		envoy.tags.erase(TeamData.TAG_SUBTEAM)
 
 func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 	var a: TeamData = state.teams[id_a]

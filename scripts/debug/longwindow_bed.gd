@@ -368,6 +368,14 @@ func _print_funnel(wolves: Array) -> void:
 	print("[funnel] → assimilate completed   = %d  (%s of created)" % [asm_done, _rate(asm_done, asm_c)])
 	print("[funnel] → wolf pop growth(Σ狼)   = %+d" % wolf_growth)
 	print("[funnel] → found faction          = %d" % found)
+	# ②a founding 段：信使外交漏斗（proposal 發→送達→accept/reject / 死結局分佈）
+	print("[funnel] ── founding 段（②a 信使外交）──")
+	print("[funnel] indep.found_ally=%d  indep.found_timeout=%d" % [
+		_c("indep.found_ally"), _c("indep.found_timeout")])
+	print("[funnel] envoy: dispatched=%d delivered=%d accept=%d reject=%d" % [
+		_c("envoy.dispatched"), _c("envoy.delivered"), _c("envoy.accept"), _c("envoy.reject")])
+	print("[funnel] envoy 死結局: timeout=%d target_dead=%d" % [
+		_c("envoy.timeout"), _c("envoy.target_dead")])
 	print("[funnel] CONQUER intent winner 分布: loot=%d prosp=%d other=%d none=%d" % [
 		_c("conq.winner_loot"), _c("conq.winner_prosperity"),
 		_c("conq.winner_other"), _c("conq.winner_none")])

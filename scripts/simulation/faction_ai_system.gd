@@ -38,6 +38,15 @@ const INDEP_STRATEGY_CADENCE: int = 720         # 3 天評估一次（沿用 pro
 const AMBITION_FOUND_MIN: float = 0.55          # TEST VALUE — 建國野心門檻（對齊 ambition_cap STATE 門檻 0.55）
 const FOUND_COMMITMENT_BONUS: float = 0.15      # TEST VALUE — 建國意圖承諾 hysteresis（mirror commander）
 const FOUND_FOOD_SURPLUS_DAYS: float = 7.0      # TEST VALUE — 累積夠 = 有 ≥7 天糧盈餘（已達 EXPAND）
+# ── ②a 信使外交（envoy）+ founding timeout（保險網）──
+# timeout=保險網非死常數：按距離/移速估往返時間（新 invariant「凡 in-flight latch 必有 timeout」）。
+# 往返裕度係數：單程 ETA × 此。信使追「移動」target（非靜止）→ 步行信使僅 named>anon 微速差，
+# 收斂需遠多於直線 ETA（量測：3.0/2天 floor → delivery=0；6.0/12天 floor → accept>0）。
+# 有馬則 3× 速→秒到，此裕度變寬鬆 slack。TEST VALUE（平衡 pass 調；mount 經濟成熟後可縮）。
+const FOUNDING_TIMEOUT_MULT: float = 6.0
+const FOUNDING_TIMEOUT_FLOOR_DAYS: int = 12       # TEST VALUE — 步行信使追移動 target 的收斂下限
+const ENVOY_POP: int = 1                          # TEST VALUE — 信使子隊人數（最小分隊）
+const ENVOY_REDUNDANCY_FOUNDING: int = 2          # TEST VALUE — 建國提案冗餘騎數（亂世信使會死，多騎首達生效）
 # 統一戰略意圖菜單（統一矩陣首燒 F-D1/D2）：任何有 leader 的隊（faction leader / 獨立 team）
 # 對同一菜單 argmax。實體型只決定 gate/scale（建國僅 fid==-1；擴張 Task3 折入），非另起菜單。
 const STRATEGIC_INTENTS: Array = ["致富", "擴張", "征服", "防衛", "守成", "建國"]
@@ -1053,9 +1062,24 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	if leader == null: return
 	var lv: Dictionary = leader.values
 
-	# 建國 in-flight（朝 ally/prey 移動）→ 不重評不 churn（讓它跑完到場觸發 create_faction）。
-	if team.current_task != TeamData.TASK_IDLE \
-			and (team.task_reason == "found_ally" or team.task_reason == "found_subjugate"):
+	# 建國 in-flight guard（②a 保險網：凡 in-flight latch 必有 timeout/release）。
+	# A. 結盟提案在途（信使送信中，權威 pending_proposal）→ 等結果；逾時清 pending + cooldown（信使死/迷路）。
+	if not team.pending_proposal.is_empty():
+		var pp: Dictionary = team.pending_proposal
+		if state.world.current_tick - int(pp.get("issued_tick", 0)) > int(pp.get("timeout", 2 * WorldState.TICKS_PER_DAY)):
+			var tgt: int = int(pp.get("target_id", -1))
+			if tgt != -1:
+				team.diplomacy_reject_cooldown[tgt] = state.world.current_tick + DiplomaticAiSystem.REJECT_COOLDOWN
+			team.pending_proposal = {}
+			Probe.bump("envoy.timeout")
+			Probe.bump("indep.found_timeout")
+		return   # 提案在途/剛清 → 本 cadence 不重評（等信使結果或下 cadence 重來）
+	# B. 吞併 task 在途（TASK_ATTACK 建國）→ 逾時 release（此分支 prey 已 defer 至 prosperity，殘留 symmetry）。
+	if team.current_task != TeamData.TASK_IDLE and team.task_reason == "found_subjugate":
+		if state.world.current_tick - team.task_start_tick \
+				> _founding_timeout(_hex_dist(team.tile_pos, team.move_target)):
+			TaskArbiter.release(team)
+			Probe.bump("indep.found_timeout")
 		return
 
 	# ── 征服 affordance（獨立 solo-scale = prosperity attack，G3d scout-gated）──
@@ -1123,18 +1147,17 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 		"建國":
 			_set_solo(state, team, "建國", "野心建國(found_score=%.2f)" % found_score,
 				"found_ally" if ally_util >= subj_util else "found_subjugate")
-			# 讓位日常 task（busy 已濾高優先；此處只剩 idle/日常 @≤DISPATCH）→ founding @PRIO_DISPATCH 設得進
-			if team.current_task != TeamData.TASK_IDLE:
-				TaskArbiter.release(team)
 			if ally_util >= subj_util and ally_id != -1:
-				# 結盟（primary）：TASK_DIPLOMACY 朝獨立鄰 → interaction 兩獨立 create_faction
-				if TaskArbiter.try_set(state, team, TeamData.TASK_DIPLOMACY,
-						state.teams[ally_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_ally"):
-					team.order_task = ""   # 結盟提案（非求和 tribute）
-					print("[IndepStrategy] Team%d 野心建國→結盟 Team%d (野心=%.2f)" % [
+				# 結盟（primary）：②a 改派信使——不再自己整隊追（追移動隊永談不成=荒謬）。
+				# 派信使子隊送提案 → 對方按 belief 回覆 → 母隊 release 回日常等結果（pending_proposal 權威）。
+				if _dispatch_envoy(state, team, ally_id, "alliance"):
+					print("[IndepStrategy] Team%d 野心建國→派信使結盟 Team%d (野心=%.2f)" % [
 						team.team_id, ally_id, ambition])
 					Probe.bump("indep.found_ally")
 			elif prey_id != -1:
+				# 讓位日常 task（busy 已濾高優先；此處只剩 idle/日常 @≤DISPATCH）→ founding @PRIO_DISPATCH 設得進
+				if team.current_task != TeamData.TASK_IDLE:
+					TaskArbiter.release(team)
 				# 吞併 fallback（此分支現不觸；weak prey 已由 prosperity defer 收）。保留 symmetry。
 				if not team.tags.has("統領"):
 					team.tags.append("統領")
@@ -1151,6 +1174,103 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 		_:
 			# 守成/防衛/擴張 = 不 dispatch，繼續既有個體決策（SoloAI/survival/ambient）
 			_set_solo(state, team, itype, String(intent["why"]), "hold")
+
+# ──────── ②a 信使外交（envoy）helpers ────────
+
+# timeout=保險網（非死常數）：單程 hex 距離 × 每格 tick 成本估（BASE_MOVE_TICKS，speed=1 基準）
+# × 往返裕度係數；下限 2 天（防近距離秒 release）。信使 task 與母隊 pending 共用此估算。
+func _founding_timeout(dist: int) -> int:
+	return maxi(int(float(dist) * float(MovementSystem.BASE_MOVE_TICKS) * FOUNDING_TIMEOUT_MULT),
+		FOUNDING_TIMEOUT_FLOOR_DAYS * WorldState.TICKS_PER_DAY)
+
+# 派信使子隊送提案（復用 SubteamSystem/herald/mounts/movement/belief 既有信號，零新系統）。
+# 提案權威存母隊 pending_proposal；信使帶 proposal_id ref（task_extra_data）。冗餘多騎首達生效。
+# 回 true = 至少派出 1 信使（母隊 release 回日常等結果）；false = 無法派（無 spare named）。
+func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype: String) -> bool:
+	var target: TeamData = state.teams.get(target_id)
+	if target == null:
+		return false
+	# 目標位讀 belief best_estimate（非上帝視角真位；對齊決策讀情報總則）
+	var target_pos: Vector2i = BeliefSystem.best_estimate(state, mother.team_id, target_id).get("tile_pos", target.tile_pos)
+	var dist: int = _hex_dist(mother.tile_pos, target_pos)
+	var budget: int = _founding_timeout(dist)
+	var proposal_id: String = "%d_%d_%d" % [mother.team_id, target_id, state.world.current_tick]
+	var sub_sys := SubteamSystem.new()
+	var sent: int = 0
+	for _i in range(ENVOY_REDUNDANCY_FOUNDING):
+		if mother.population <= 1:
+			break   # 不掏空母隊（保 leader + ≥1）
+		var sub_leader: int = sub_sys._pick_subteam_leader(state, mother, TeamData.TASK_HERALD)
+		if sub_leader == -1 or sub_leader == mother.leader_id:
+			break   # 無 spare named → 無法派信使（稀有 by construction，退守成）
+		var envoy_id: int = sub_sys.dispatch(state, mother.team_id, sub_leader, ENVOY_POP,
+			TeamData.TASK_HERALD, target_pos, target_id, "")
+		if envoy_id == -1:
+			break
+		var envoy: TeamData = state.teams[envoy_id]
+		envoy.task_reason = "envoy_proposal"
+		envoy.task_start_tick = state.world.current_tick   # dispatch 直賦 task 未設 → timeout 基準
+		envoy.task_extra_data = {"proposal_id": proposal_id, "timeout": budget}
+		_equip_envoy_mounts(state, mother, envoy)   # 馬：撥至 pop×1（有幾配幾，無馬照走）
+		sent += 1
+		Probe.bump("envoy.dispatched")
+	if sent == 0:
+		return false
+	# 提案權威存母隊（對齊 active_orders pattern）
+	mother.pending_proposal = {
+		"type": ptype, "target_id": target_id, "target_pos": target_pos,
+		"issued_tick": state.world.current_tick, "proposal_id": proposal_id, "timeout": budget,
+	}
+	# 母隊不再自己追（release 回日常，等結果；pending 期間不重派）
+	if mother.current_task != TeamData.TASK_IDLE and mother.task_priority <= TaskArbiter.PRIO_DISPATCH:
+		TaskArbiter.release(mother)
+	return true
+
+# 馬：從母隊 resources 撥 mounts 至信使 pop×1（有幾配幾，無馬走路=慢但能送）。守恆（母隊扣、信使加）。
+func _equip_envoy_mounts(state: WorldState, mother: TeamData, envoy: TeamData) -> void:
+	var want: int = envoy.population
+	var have_envoy: int = int(envoy.resources.get("mounts", 0))
+	var need: int = maxi(want - have_envoy, 0)
+	if need <= 0:
+		return
+	var from_mother: int = mini(need, int(mother.resources.get("mounts", 0)))
+	if from_mother <= 0:
+		return
+	ResourceBank.add(mother, "mounts", -from_mother, "envoy_mount_out")
+	ResourceBank.add(envoy, "mounts", from_mother, "envoy_mount_in")
+
+# 信使每 tick：追蹤刷新 target best_estimate（對齊 scout pursuit）+ 自配 timeout + target 死偵測。
+func _tick_envoy(state: WorldState, envoy: TeamData, merge_queue: Array) -> void:
+	if state.teams.get(envoy.parent_team_id) == null:   # 母隊已亡 → 脫離成獨立（非 zombie）
+		_recall_envoy(state, envoy)
+		return
+	var target_id: int = envoy.order_target_id
+	var target: TeamData = state.teams.get(target_id)
+	if target == null:   # 目標已滅 → 提案落空，信使歸隊
+		Probe.bump("envoy.target_dead")
+		_recall_envoy(state, envoy)
+		return
+	var budget: int = int(envoy.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+	if state.world.current_tick - envoy.task_start_tick > budget:
+		Probe.bump("envoy.timeout")
+		_recall_envoy(state, envoy)
+		return
+	# 追蹤刷新：攔截預測（朝 target 移動方向提前，破 pursuit-lag 永 1 格差）+ best_estimate fallback。
+	# 對齊 _refresh_attack_pursuit（攻擊追擊 land combat 同機制）：可見且動→lead，靜/不可見→最後已知位。
+	var est_pos: Vector2i = BeliefSystem.best_estimate(state, envoy.team_id, target_id).get("tile_pos", target.tile_pos)
+	var predicted: Vector2i = PathSystem.predict_intercept(state, envoy, target)
+	envoy.move_target = predicted if predicted != target.tile_pos else est_pos
+
+# 信使歸隊：釋放 task + 朝母隊移動 → 到母格 try_merge_back（復用 merge）。母隊 pending 靠自身 timeout 清。
+func _recall_envoy(state: WorldState, envoy: TeamData) -> void:
+	TaskArbiter.release(envoy)   # → IDLE, move_target=-1
+	envoy.task_reason = "envoy_recall"
+	var parent: TeamData = state.teams.get(envoy.parent_team_id)
+	if parent != null:
+		envoy.move_target = parent.tile_pos   # 下 tick _evaluate_idle_subteam 路由回家/併回
+	else:
+		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（正常 AI 接手，非 zombie）
+		envoy.tags.erase(TeamData.TAG_SUBTEAM)
 
 # ──────── 任務指派 ────────
 
@@ -1400,6 +1520,10 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 # ──────── 子團自主 AI ────────
 
 func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	# ②a 信使外交：envoy_proposal 子隊追蹤刷新 target best_estimate + 自配 timeout（新 invariant 自守）
+	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "envoy_proposal":
+		_tick_envoy(state, sub, merge_queue)
+		return
 	if sub.current_task == TeamData.TASK_BUILD:
 		return  # C: 施工中（建設），不打斷、不召回
 	# S7 建造/升級/擴建子隊在途：TASK_CONSTRUCT/UPGRADE/EXPAND = 正前往目標格；不得紀律檢查或召回

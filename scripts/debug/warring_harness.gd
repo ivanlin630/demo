@@ -19,7 +19,10 @@ const PROBE_KEYS: Array = [
 	"capture.total", "capture.by_attack",
 	"g2.faction_found", "g2.feud_formed", "g2.vendetta_trigger",
 	"g3.scout_dispatch", "g3.betrayal", "g3.trust_up", "g3.trust_down",
-	"indep.found_ally", "indep.found_subjugate",
+	"indep.found_ally", "indep.found_subjugate", "indep.found_timeout",
+	# ②a 信使外交結局分佈（藍圖要的「怎麼沒結盟」fail 分佈）
+	"envoy.dispatched", "envoy.delivered", "envoy.accept", "envoy.reject",
+	"envoy.timeout", "envoy.target_dead",
 	"conq.intent", "conq.prosperity_reached",
 	"p1.assimilate", "p1.revolt", "p1.flee",
 	"beg.dispatch", "beg.resolve", "join.dispatch", "join.resolve",

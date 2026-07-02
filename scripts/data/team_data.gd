@@ -120,6 +120,9 @@ var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
 var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻
+# 信使外交提案（權威存發起隊，對齊 active_orders pattern）。空 {} = 無在途提案。
+# {type:"alliance", target_id, target_pos, issued_tick, proposal_id, timeout} — 信使帶 proposal_id ref。
+var pending_proposal: Dictionary = {}
 var trade_task_start_tick: int = 0       # 貿易 task 起始 tick（timeout 防 zombie）
 var task_reason: String = ""             # 最近一次 task 設定來源（TaskArbiter _source；遙測用）
 var task_start_tick: int = 0             # 最近一次 task 設定 tick（逃跑/survival timeout 用）

@@ -4761,6 +4761,14 @@ func _mk_ambitious_independent(state: WorldState, pos: Vector2i, tid: int = 800)
 	_p1_place_tile(state, pos)
 	return t
 
+# 給隊補一個 named 成員（②a 信使需 spare named 才能派 envoy 子隊）
+func _indep_add_named(state: WorldState, team: TeamData, pid: int) -> void:
+	var p := PersonData.new(); p.id = pid; p.team_id = team.team_id
+	p.values = {"義氣": 0.5, "信義": 0.5}
+	p.skills = {"統領": 0.2, "交涉": 0.3}
+	state.persons[pid] = p
+	team.named_members.append(pid)
+
 # 普通獨立隊（fid=-1，可作結盟鄰；可給野心參數調低/高）
 func _mk_independent_team(state: WorldState, pos: Vector2i, tid: int, ambition: float = 0.3) -> TeamData:
 	var t := TeamData.new(); t.team_id = tid; t.tags = []
@@ -4792,20 +4800,29 @@ func _indep_discover(state: WorldState, obs: TeamData, other: TeamData, pop_est:
 	}
 
 func _test_indep_strategic_found() -> void:
-	print("--- 獨立戰略層：野心獨立隊建國→結盟 ---")
+	print("--- 獨立戰略層：野心獨立隊建國→派信使結盟 ---")
 	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
 	var founder := _mk_ambitious_independent(state, Vector2i(3, 3))
+	_indep_add_named(state, founder, 8009)   # spare named → 可派信使子隊
 	var ally := _mk_independent_team(state, Vector2i(4, 3), 801)
 	_indep_discover(state, founder, ally)   # founder 看得到可結盟獨立鄰
 	var fa := FactionAISystem.new()
 	fa._evaluate_independent_strategy(state, founder)
-	# 義氣高(0.7)+殘忍低 → 結盟 util 勝吞併 → TASK_DIPLOMACY 朝 ally
-	assert(founder.current_task == TeamData.TASK_DIPLOMACY,
-		"[indep] 野心獨立隊未秤建國/結盟 task=%s" % founder.current_task)
-	assert(founder.move_target == ally.tile_pos,
-		"[indep] 結盟未朝 ally got=%s" % str(founder.move_target))
+	# 義氣高(0.7)+殘忍低 → 結盟 util 勝吞併 → 派信使（②a：不再自己整隊追）
 	assert(founder.solo_intent.get("type","") == "建國", "[indep] solo_intent 未記建國 got=%s" % str(founder.solo_intent))
-	print("[indep] strategic found OK (founder→DIPLOMACY ally=%d)" % ally.team_id)
+	assert(not founder.pending_proposal.is_empty(), "[indep] 建國未派信使（pending_proposal 空）")
+	assert(int(founder.pending_proposal.get("target_id", -1)) == ally.team_id,
+		"[indep] pending target 非 ally got=%s" % str(founder.pending_proposal))
+	# 信使子隊存在：HERALD + envoy_proposal，order_target=ally
+	var envoy_found := false
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id == founder.team_id and t.task_reason == "envoy_proposal":
+			envoy_found = true
+			assert(t.current_task == TeamData.TASK_HERALD, "[indep] 信使 task 非 HERALD got=%s" % t.current_task)
+			assert(t.order_target_id == ally.team_id, "[indep] 信使 order_target 非 ally got=%d" % t.order_target_id)
+	assert(envoy_found, "[indep] 未派出信使子隊")
+	print("[indep] strategic found OK (founder→派信使 ally=%d)" % ally.team_id)
 
 func _test_indep_low_ambition_no_found() -> void:
 	print("--- 獨立戰略層：低野心獨立隊不建國 ---")
@@ -4855,24 +4872,36 @@ func _test_indep_defers_conquest_to_prosperity() -> void:
 	print("[indep] defer conquest to prosperity OK (有 prey→不繞 scout,prosperity 接手)")
 
 func _test_indep_found_to_faction() -> void:
-	print("--- 獨立戰略層：結盟→create_faction→fid -1→正（整環前半哩） ---")
+	print("--- 獨立戰略層：信使送達→belief accept→create_faction→fid -1→正 ---")
 	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
 	var founder := _mk_ambitious_independent(state, Vector2i(3, 3), 807)
-	var ally := _mk_independent_team(state, Vector2i(3, 3), 808)   # 同格（直接觸發 interaction）
-	# ally leader 義氣/信義高 → 接受結盟（_try_diplomacy accept gate）
+	_indep_add_named(state, founder, 8079)   # spare named → 可派信使
+	var ally := _mk_independent_team(state, Vector2i(3, 3), 808)   # 同格（信使就地送達）
+	# ally leader 義氣/信義高 + 缺糧 + 對 founder 口碑高 → handle_diplomacy_message score>0.55 accept
 	state.persons[808 * 10].values = {"野心": 0.3, "義氣": 0.9, "信義": 0.9, "好戰": 0.1, "殘忍": 0.1, "慎重": 0.6}
+	ally.resources = {"food": 10.0}                       # 缺糧 → resource_need 高
+	ally.update_reputation(founder.team_id, 0.5)          # 口碑→1.0
+	state.persons[808 * 10].relations[founder.leader_id] = 0.5   # 有交情
 	_indep_discover(state, founder, ally)
+	_indep_discover(state, ally, founder)                 # ally 對 founder 也有 belief（否則 fallback self_pop）
 	var fa := FactionAISystem.new()
 	fa._evaluate_independent_strategy(state, founder)
-	assert(founder.current_task == TeamData.TASK_DIPLOMACY, "[indep] 未 dispatch 結盟")
-	# 同格 → interaction _try_diplomacy 兩獨立 create_faction
+	assert(not founder.pending_proposal.is_empty(), "[indep] 未派信使")
+	# 找信使 → 模擬抵達 ally 格 → 送達
+	var envoy_id := -1
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == founder.team_id and state.teams[tid].task_reason == "envoy_proposal":
+			envoy_id = tid
+	assert(envoy_id != -1, "[indep] 無信使")
+	state.teams[envoy_id].tile_pos = ally.tile_pos
 	var inter := InteractionSystem.new()
-	inter._try_diplomacy(state, founder.team_id, ally.team_id)
-	assert(founder.faction_id != -1, "[indep] 結盟後 founder 仍 fid=-1（create_faction 未觸發）")
+	inter._deliver_envoy_proposal(state, envoy_id, ally.team_id)
+	assert(founder.faction_id != -1, "[indep] 送達 accept 後 founder 仍 fid=-1（create_faction 未觸發）")
 	var f = state.factions.get(founder.faction_id)
 	assert(f != null, "[indep] faction 未建")
 	assert(ally.faction_id == founder.faction_id, "[indep] ally 未入新 faction")
-	print("[indep] found→faction OK (fid -1→%d, members=%d)" % [founder.faction_id, f.member_team_ids.size()])
+	assert(founder.pending_proposal.is_empty(), "[indep] 送達後 pending 未清")
+	print("[indep] envoy→faction OK (fid -1→%d, members=%d)" % [founder.faction_id, f.member_team_ids.size()])
 
 # 首燒 Task2：獨立隊接統一菜單（致富錨 + 征服錨）。
 func _test_indep_full_menu_anchors() -> void:

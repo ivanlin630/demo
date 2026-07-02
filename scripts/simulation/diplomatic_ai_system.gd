@@ -160,12 +160,26 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 
 func _form_alliance(state: WorldState,
 		team_a: TeamData, team_b: TeamData) -> void:
+	# team_a = 收提案方, team_b = 發起方（handle_diplomacy_message 呼叫序）
 	if team_a.faction_id != -1:
 		state.set_team_faction(team_b, team_a.faction_id)   # team_b 入 team_a faction（雙向同步）
 		state.snapshot_faction_member(team_b.team_id, state.world.current_tick)
 	elif team_b.faction_id != -1:
 		state.set_team_faction(team_a, team_b.faction_id)   # team_a 入 team_b faction（雙向同步）
 		state.snapshot_faction_member(team_a.team_id, state.world.current_tick)
+	else:
+		# 兩獨立 → create_faction（強者 leader，建國）。F-I1 搬家：以 population 取代 god-view team_strength
+		#（建國=兩隊同意的結構性合意動作，非敵對評估；沿 _try_diplomacy 原「強者為 leader」語意）。
+		var strong_id: int = team_a.team_id if team_a.population >= team_b.population else team_b.team_id
+		var weak_id: int = team_b.team_id if strong_id == team_a.team_id else team_a.team_id
+		var fid: int = state.create_faction(strong_id)
+		if fid == -1:
+			return
+		state.set_team_faction(state.teams[weak_id], fid)   # 弱者入新 faction（雙向同步）
+		state.snapshot_faction_member(strong_id, state.world.current_tick)
+		state.snapshot_faction_member(weak_id, state.world.current_tick)
+		print("[Diplomacy] Team%d + Team%d 建國 → 勢力%d（leader=Team%d）" % [
+			team_a.team_id, team_b.team_id, fid, strong_id])
 	team_a.update_reputation(team_b.team_id, 0.2)
 	team_b.update_reputation(team_a.team_id, 0.2)
 	print("[Diplomacy] Team%d 與 Team%d 結盟" % [team_a.team_id, team_b.team_id])
