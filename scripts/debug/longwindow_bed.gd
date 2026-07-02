@@ -242,15 +242,21 @@ func _diag_gate(state: WorldState, t: TeamData, w: Dictionary, month: int) -> vo
 	if score < FactionAISystem.ATTACK_SCORE_THRESHOLD:
 		parts.append("★score=%.2f<%.2f" % [score, FactionAISystem.ATTACK_SCORE_THRESHOLD])
 	var rthr: float = FactionAISystem.calc_readiness_threshold(t, leader)
+	# ②b：prosperity 路吃 hunger_relief（越餓門檻越低）→ diag 複刻 threshold_eff，勿用 raw rthr 誤判卡點。
+	var _fd: float = ResourceSystem.effective_food(state, t) \
+		/ maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var _relief: float = clampf(_fd / FactionAISystem.HUNGER_SLIDE_DAYS, FactionAISystem.RELIEF_FLOOR, 1.0)
+	var rthr_eff: float = rthr * _relief
 	var readi: float = FactionAISystem.calc_readiness(state, t)
-	if readi < rthr:
-		parts.append("★readiness=%.2f<%.2f" % [readi, rthr])
+	if readi < rthr_eff:
+		parts.append("★readiness=%.2f<%.2f(relief%.2f)" % [readi, rthr_eff, _relief])
 	# prey 濾鏈逐關殺數（複刻 _find_weakest_prey 序）
 	var disc: Array = state.team_discovered.get(t.team_id, [])
 	var k_nobel: int = 0
 	var k_unreach: int = 0
 	var k_notweak: int = 0
-	var k_food: int = 0
+	var k_food: int = 0     # ②c：food<20 硬濾已刪 → 此關殺數恆 0（保留欄位=回歸哨）
+	var poor: int = 0       # 資訊：viable 中的窮村（food<20），仍可俘
 	var viable: int = 0
 	var scout_block: int = 0
 	for tid in disc:
@@ -263,13 +269,14 @@ func _diag_gate(state: WorldState, t: TeamData, w: Dictionary, month: int) -> vo
 		var bel: Dictionary = BeliefSystem.best_estimate(state, t.team_id, tid)
 		if float(bel.get("population_est", 0.0)) >= float(t.population) * 0.7:
 			k_notweak += 1; continue
+		# ②c：食物不再淘汰（窮村可俘）→ 只記 poor，不 continue。
 		if bel.has("food_est") and float(bel.get("food_est", 0.0)) < 20.0:
-			k_food += 1; continue
+			poor += 1
 		viable += 1
 		if not BeliefSystem.confident_enough(state, t.team_id, tid, float(leader.values.get("慎重", 0.5))):
 			scout_block += 1
-	parts.append("prey掃:disc=%d bel缺=%d 不可達=%d 不夠弱=%d food<20=%d viable=%d(scout擋%d)" % [
-		disc.size(), k_nobel, k_unreach, k_notweak, k_food, viable, scout_block])
+	parts.append("prey掃:disc=%d bel缺=%d 不可達=%d 不夠弱=%d food<20殺=%d(窮村poor=%d仍可俘) viable=%d(scout擋%d)" % [
+		disc.size(), k_nobel, k_unreach, k_notweak, k_food, poor, viable, scout_block])
 	print("[WolfGate] 月%d T%d(%s) %s" % [month, t.team_id, w["role"], " | ".join(parts)])
 
 # 地圖有弱鄰（可解目標）：存在獨立活隊 pop 顯著低於自己（harness god-view，僅診斷）。
