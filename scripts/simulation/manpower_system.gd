@@ -64,6 +64,11 @@ static func _apply_treatment(group: Dictionary, treatment: String) -> void:
 # 軌跡 check（守恆）：morale 閾 → 同化 / 暴動 / 逃 / 釋放。
 static func _check_trajectory(state: WorldState, holder: TeamData, group: Dictionary, treatment: String) -> void:
 	var morale: float = float(group.get("morale", 0.0))
+	# [longwindow probe] captive lifecycle：首次觀測此 group = created（純觀測，Probe.enabled guard 零成本、零行為變）
+	if Probe.enabled and not group.has("_lw_created_tick"):
+		group["_lw_created_tick"] = state.world.current_tick
+		Probe.bump("asm.created")
+		Probe.add_amount("asm.created_morale_sum", float(group.get("morale", 0.0)))
 	# 釋放：立即脫離（流民路由，守恆）
 	if treatment == "釋放":
 		_flee(state, holder, group, 1.0, "released")
@@ -73,6 +78,11 @@ static func _check_trajectory(state: WorldState, holder: TeamData, group: Dictio
 		var n: int = AnonTierSystem.assimilate_captives(holder, group)
 		if n > 0:
 			Probe.bump("p1.assimilate")
+			# [longwindow probe] completed + 耗時（tick）→ 裁② 慢 vs 結構性分流
+			if Probe.enabled:
+				Probe.bump("asm.completed")
+				Probe.add_amount("asm.completed_dur_sum",
+					float(state.world.current_tick - int(group.get("_lw_created_tick", state.world.current_tick))))
 			print("[P1Assim] Team%d 同化 captive +%d → free pop" % [holder.team_id, n])
 		return
 	# 暴動（morale 崩）→ 脫離 + 部分戰損 + holder unrest
@@ -95,6 +105,7 @@ static func _revolt(state: WorldState, holder: TeamData, group: Dictionary) -> v
 	var escaped: int = total - slain
 	UnrestBank.add(holder, 5, "captive_revolt")
 	Probe.bump("p1.revolt")
+	if Probe.enabled: Probe.bump("asm.interrupted_scatter")   # [longwindow probe] 暴動散 = 結構性中斷
 	print("[P1Revolt] Team%d captive 暴動：脫離%d（鎮壓亡%d/逃散%d）→ holder unrest" % [
 		holder.team_id, total, slain, escaped])
 	# escaped 部分 → 流民隊（reuse split 概念：成獨立無 faction 隊）；slain = 真死亡（路由消滅）
@@ -108,6 +119,8 @@ static func _flee(state: WorldState, holder: TeamData, group: Dictionary, fracti
 	if total <= 0:
 		return
 	Probe.bump("p1.flee")
+	# [longwindow probe] 逃/釋放分流：released=holder 養不起主動放、fled=低 morale 機會逃
+	if Probe.enabled: Probe.bump("asm.released" if reason == "released" else "asm.escaped")
 	print("[P1Flee] Team%d captive %s 脫離%d → 流民隊" % [holder.team_id, reason, total])
 	_spawn_breakaway(state, holder, detached, total, 0)
 
