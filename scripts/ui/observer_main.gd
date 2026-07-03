@@ -22,6 +22,14 @@ var _inspect: ObserverInspectPanel
 var _hitch_max_ms: float = 0.0
 var _hitch_over150: int = 0
 var _frames: int = 0
+# 截圖 harness（bar 第 5 條依賴）
+var _harness: bool = false
+var _shots: Array = []        # 升冪 tick
+var _shot_idx: int = 0
+var _end_tick: int = 0
+var _out_dir: String = "."
+var _obs_seed: int = 1337
+var _capturing: bool = false
 
 func _ready() -> void:
 	var args: Dictionary = _parse_obs_args()
@@ -36,6 +44,21 @@ func _ready() -> void:
 	_build_ui()
 	_refresh_ui()
 	print("[Observer] ready seed=%d teams=%d" % [world_seed, _state.teams.size()])
+	if args.has("obs-shots") or args.has("obs-run-months"):
+		_harness = true
+		_obs_seed = world_seed
+		_out_dir = String(args.get("obs-out", "."))
+		DirAccess.make_dir_recursive_absolute(_out_dir)
+		for tok in String(args.get("obs-shots", "")).split(",", false):
+			if tok.strip_edges().is_valid_int():
+				_shots.append(int(tok.strip_edges()))
+		_shots.sort()
+		var months: int = int(args.get("obs-run-months", 0))
+		_end_tick = months * WorldState.TICKS_PER_MONTH
+		if _end_tick == 0 and not _shots.is_empty():
+			_end_tick = _shots[-1]
+		_on_speed(3)   # max
+		print("[Observer] harness shots=%s end=%d out=%s" % [str(_shots), _end_tick, _out_dir])
 
 func _parse_obs_args() -> Dictionary:
 	var out: Dictionary = {}
@@ -106,6 +129,11 @@ func _process(delta: float) -> void:
 	var ms: float = delta * 1000.0
 	if ms > _hitch_max_ms: _hitch_max_ms = ms
 	if ms > 150.0: _hitch_over150 += 1
+	if _harness:
+		if _capturing:
+			return
+		_harness_step()
+		return
 	var tps: float = SPEED_TPS[_speed_idx]
 	var did: int = 0
 	if tps < 0.0:
@@ -120,6 +148,39 @@ func _process(delta: float) -> void:
 	if did > 0 and _ui_accum >= UI_REFRESH_SEC:
 		_ui_accum = 0.0
 		_refresh_ui()
+
+# harness 步進：跑到下一 shot tick（不 overshoot、預算內攤 frame）→ 截圖 → 跑滿 end_tick 印統計 quit
+func _harness_step() -> void:
+	var now: int = _bridge.current_tick()
+	var next_stop: int = _end_tick
+	if _shot_idx < _shots.size():
+		next_stop = mini(_shots[_shot_idx], _end_tick)
+	if now < next_stop:
+		_bridge.tick_step(next_stop - now)
+		_ui_accum += get_process_delta_time()
+		if _ui_accum >= UI_REFRESH_SEC:
+			_ui_accum = 0.0
+			_refresh_ui()
+		return
+	if _shot_idx < _shots.size() and now >= _shots[_shot_idx]:
+		_capture(_shots[_shot_idx])
+		_shot_idx += 1
+		return
+	if now >= _end_tick:
+		print("[Observer] harness done tick=%d frames=%d hitch_max=%.0fms over150=%d" % [
+			now, _frames, _hitch_max_ms, _hitch_over150])
+		get_tree().quit()
+
+func _capture(tick: int) -> void:
+	_capturing = true
+	_refresh_ui()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var img: Image = get_viewport().get_texture().get_image()
+	var path: String = _out_dir.path_join("obs_s%d_t%d.png" % [_obs_seed, tick])
+	var err: int = img.save_png(path)
+	print("[Observer] shot t=%d → %s (err=%d)" % [tick, path, err])
+	_capturing = false
 
 func _refresh_ui() -> void:
 	var tick: int = _bridge.current_tick()

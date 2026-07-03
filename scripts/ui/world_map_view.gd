@@ -154,7 +154,7 @@ func pixel_to_hex(screen_pos: Vector2) -> Vector2i:
 # ── drawing ───────────────────────────────────────────────
 
 func _draw() -> void:
-	if _bridge == null: return
+	if (_obridge if _observer else _bridge) == null: return
 	var player_pos: Vector2i = _render_ctx.get("player_tile_pos", Vector2i(-1, -1))
 	var disc_positions: Array = _render_ctx.get("discovered_team_positions", [])
 	var vision_r: int = _render_ctx.get("vision_radius", 3)

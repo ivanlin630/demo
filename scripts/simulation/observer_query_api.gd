@@ -7,6 +7,8 @@ static func team_label(state: WorldState, tid: int) -> String:
 	var t: TeamData = state.teams.get(tid)
 	if t == null:
 		return "隊%d(已滅)" % tid
+	if t.beast_kind != "":
+		return "%s(獸)" % t.beast_kind
 	var leader: PersonData = state.persons.get(t.leader_id)
 	if leader != null and leader.person_name != "":
 		return "%s隊(%d)" % [leader.person_name, tid]
