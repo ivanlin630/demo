@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★軌3二考=世界活了——default 兩seed 全鏈fire(立國0→2/1,prosperity 0→2/3,by_attack 0→1/4,同化0→67%/43%暴動0,狼弧雙向可追:Team16 raid爬rung3入faction、Team19 轉糧引擎=雙引擎分流真發生)+緩坡無滅團潮;殘1=envoy delivered 0(結盟弧默,立國靠subjugate);管線→GUI輕slice
 ---
 
