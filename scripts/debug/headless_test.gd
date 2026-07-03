@@ -189,6 +189,9 @@ func _initialize() -> void:
 	_test_occupy_massacre()
 	_test_occupy_abandon()
 	_test_occupy_force()
+	_test_conquest_flip_governance()
+	_test_conquest_margin_gate()
+	_test_conquest_collection_loop()
 	_test_attack_defeat_reaction()
 	# ── Combat Engagement ──
 	_test_movement_returns_moved_and_arrived()
@@ -9148,6 +9151,121 @@ func _test_occupy_force() -> void:
 	assert(state.teams.has(2), "強佔後居民團應存活")
 	assert(state.teams[2].population == 8, "強佔 pop 應 10→8，實際=%d" % state.teams[2].population)
 	print("Prosperity Task6d OK")
+
+func _test_conquest_flip_governance() -> void:
+	print("--- Conquest Task1: 翻旗接治權（以戰立國 + works_tile 放行）---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# winner 獨立無統領 tag；loser=獨立村隊
+	var winner := TeamData.new(); winner.team_id = 0; winner.tile_pos = Vector2i(0, 0)
+	winner.faction_id = -1; winner.tags = []
+	var wl := PersonData.new(); wl.id = 10; wl.team_id = 0
+	state.persons[10] = wl; winner.leader_id = 10
+	_seed_pop(winner, 12)
+	state.teams[0] = winner
+	var village := TeamData.new(); village.team_id = 1; village.tile_pos = Vector2i(0, 0)
+	village.faction_id = -1
+	var vl := PersonData.new(); vl.id = 11; vl.team_id = 1
+	state.persons[11] = vl; village.leader_id = 11
+	_seed_pop(village, 10)
+	state.teams[1] = village
+	# tile：村格，已 capture 翻旗給 winner（combat 已翻旗，此驗治權隨旗語意）
+	var tile := HexTileData.new(); tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 1
+	OutpostOwnerBank.set_owner(tile, 0, "test_capture")
+	state.world.tiles[0] = tile
+	# 治權隨旗：on_captured_tile=true
+	NpcCombatSystem.new()._try_subjugate(state, 0, 1, true)
+	assert(winner.tags.has("統領"), "勝方獨立→以戰立國應授統領 tag")
+	assert(winner.faction_id != -1, "應 create_faction 立國")
+	assert(village.faction_id == winner.faction_id,
+		"治權隨旗:村隊應入勝方 faction，實際 v=%d w=%d" % [village.faction_id, winner.faction_id])
+	# works_tile 放行：同 faction 村隊代 owner 生產＝收益鏈點火
+	var works: bool = ManufacturingSystem.new()._team_works_tile(state, village, tile)
+	assert(works, "同 faction 後村隊應可代工（works_tile 放行）")
+	# 去重：再呼一次（trailing 一般路 on_captured_tile=false）不應改變 faction
+	var fid_before: int = village.faction_id
+	NpcCombatSystem.new()._try_subjugate(state, 0, 1, false)
+	assert(village.faction_id == fid_before, "去重:已同 faction 不應雙 subjugate")
+	print("Conquest Task1 OK (faction=%d)" % winner.faction_id)
+
+func _test_conquest_margin_gate() -> void:
+	print("--- Conquest Task2: 佔村 margin gate（弱狼不圍/壯狼圍）---")
+	var fa := FactionAISystem.new()
+	# 弱狼：pop 過 pop_ratio 但真 armed≈0 → margin gate 擋
+	var weak_state := _occupy_margin_state(0.02)
+	assert(fa._find_occupy_target(weak_state, weak_state.teams[0]) == -1,
+		"弱狼(真 armed 不足)不應選佔村目標")
+	# 壯狼：同 pop 但高 armed → 過 margin
+	var strong_state := _occupy_margin_state(0.6)
+	assert(fa._find_occupy_target(strong_state, strong_state.teams[0]) == 1,
+		"壯狼(armed 夠)應選佔村目標")
+	print("Conquest Task2 OK")
+
+func _occupy_margin_state(wolf_armed_ratio: float) -> WorldState:
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	for x in range(-3, 4):
+		for y in range(-3, 4):
+			var tile := HexTileData.new()
+			tile.tile_pos = Vector2i(x, y); tile.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tile
+	# 狼 team 0：pop 18（過 pop_ratio：10 < 18×0.6=10.8），armed_anon_ratio 變數；leader 無武
+	var wolf := TeamData.new(); wolf.team_id = 0; wolf.tile_pos = Vector2i(0, 0)
+	var wleader := PersonData.new(); wleader.id = 10; wleader.team_id = 0
+	wleader.equipment = {"hand_1": {"type": "none"}}
+	state.persons[10] = wleader; wolf.leader_id = 10
+	_seed_pop(wolf, 18); wolf.armed_anon_ratio = wolf_armed_ratio; wolf.faction_id = -1
+	state.teams[0] = wolf
+	# 村 team 1：pop 10，站自家 outpost（村格），靜止 → reachable
+	var village := TeamData.new(); village.team_id = 1; village.tile_pos = Vector2i(1, 0)
+	village.last_tile_pos = Vector2i(1, 0); _seed_pop(village, 10); village.faction_id = -1
+	state.teams[1] = village
+	var vtile: HexTileData = state.world.tiles[1 * 1000 + 0]
+	vtile.outpost_type = "civilian"; vtile.outpost_level = 1
+	OutpostOwnerBank.set_owner(vtile, 1, "test")
+	state.team_discovered[0] = [1]
+	# belief：pop_est 10（過 pop_ratio）、armed_est 3（過 armed_est gate 3<9）
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見",
+		{"population_est": 10, "armed_est": 3}, 1.0, false)
+	return state
+
+func _test_conquest_collection_loop() -> void:
+	print("--- Conquest Task3: 佔村收取閉環（村產出→公庫→owner effective_food / 異地 home_food）---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# owner wolf 0 佔村，站村格 (0,0)；村隊 1 同 faction resident
+	var owner := TeamData.new(); owner.team_id = 0; owner.tile_pos = Vector2i(0, 0)
+	owner.faction_id = 5; _seed_pop(owner, 6)
+	state.teams[0] = owner
+	var village := TeamData.new(); village.team_id = 1; village.tile_pos = Vector2i(0, 0)
+	village.faction_id = 5; village.work_morale = 1.0; _seed_pop(village, 10)
+	state.teams[1] = village
+	# 村格 outpost owner=0（已佔），帶 food 資源可採
+	var tile := HexTileData.new(); tile.tile_id = 0; tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2
+	tile.terrain = "plains"; tile.harvest_factor = 1.0; tile.farming_level = 1
+	tile.productivity = 1.0; tile.resources = {"food": 500.0}
+	OutpostOwnerBank.set_owner(tile, 0, "test")
+	state.world.tiles[0] = tile
+	# (a) owner 站村上：村產出入 tile 公庫 → effective_food 讀得到
+	var ef_before: float = ResourceSystem.effective_food(state, owner)
+	var rs := ResourceSystem.new()
+	rs._collect_from_tile(state, village, tile, 1.0, 1.0, 0.5, 0.5, {}, 1.0)
+	var granary: float = float(tile.public_storage.get("food", 0))
+	assert(granary > 0.0, "村產出應入 tile 公庫（owner 糧倉）")
+	var ef_after: float = ResourceSystem.effective_food(state, owner)
+	assert(ef_after > ef_before,
+		"佔村 owner 站村上：effective_food 應增（%.1f→%.1f）" % [ef_before, ef_after])
+	# (b) owner 異地 roam：effective_food 現格制（不含遠村庫），但 home_food 決策讀者含 → 返家補給環閉
+	owner.tile_pos = Vector2i(3, 3)
+	assert(ResourceSystem.own_granary_tile(state, owner) == null,
+		"異地時 own_granary_tile 應為 null（現格制）")
+	var home_food: float = DecisionContext._home_granary_food(state, owner)
+	assert(absf(home_food - granary) < 0.001,
+		"異地 home_food 決策讀者應含遠村庫 %.1f（返家補給環）實際=%.1f" % [granary, home_food])
+	print("Conquest Task3 OK (granary=%.1f effective %.1f→%.1f home_food=%.1f)" % [
+		granary, ef_before, ef_after, home_food])
 
 func _test_attack_defeat_reaction() -> void:
 	print("--- Prosperity Task7: 戰敗 reaction ---")

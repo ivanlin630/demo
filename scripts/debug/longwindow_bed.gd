@@ -411,9 +411,13 @@ func _print_raid_dissection() -> void:
 		_c("raid.capture_flip_civilian"), _c("raid.capture_flip_wolf_firstbase")])
 	print("[occupy] 佔村 option dispatch=%d → capture_flip=%d（雙引擎咬合：奪據點事件）" % [
 		_c("occupy.dispatch"), _c("occupy.capture_flip")])
-	print("[occupy DIAG] scan: outpost候選=%d (kill: nobel=%d unreach=%d notweak=%d) passed=%d" % [
+	print("[occupy DIAG] scan: outpost候選=%d (kill: nobel=%d unreach=%d notweak=%d margin=%d) passed=%d" % [
 		_c("occupy.scan_outpost_target"), _c("occupy.scan_kill_nobel"),
-		_c("occupy.scan_kill_unreach"), _c("occupy.scan_kill_notweak"), _c("occupy.scan_passed")])
+		_c("occupy.scan_kill_unreach"), _c("occupy.scan_kill_notweak"),
+		_c("occupy.scan_kill_margin"), _c("occupy.scan_passed")])
+	# Task1 A 收益鏈：翻旗接治權 + works_tile 放行（村民代 owner 生產＝糧引擎點火證據）
+	print("[yield 收益鏈] flip_with_rule(翻旗接治權)=%d flip_ghost(鬼村僅翻旗)=%d works_tile_pass(同faction代工)=%d" % [
+		_c("yield.flip_with_rule"), _c("yield.flip_ghost"), _c("yield.works_tile_pass")])
 	print("[occupy DIAG] ctx_hastarget=%d appl(kill: pop=%d hasbase=%d)=applicable=%d" % [
 		_c("occupy.ctx_hastarget"), _c("occupy.appl_kill_pop"),
 		_c("occupy.appl_kill_hasbase"), _c("occupy.applicable")])

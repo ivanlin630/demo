@@ -106,7 +106,11 @@ func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> b
 	var owner: TeamData = state.teams.get(tile.outpost_owner)
 	if owner == null:
 		return false
-	return owner.faction_id == team.faction_id and team.faction_id != -1
+	var allowed: bool = owner.faction_id == team.faction_id and team.faction_id != -1
+	# Task1 A 探針：同 faction 代工放行（治權隨旗後村民代 owner 生產＝收益鏈點火）
+	if allowed and Probe.enabled:
+		Probe.bump("yield.works_tile_pass")
+	return allowed
 
 # 成品流向公庫（tile 為自家 outpost）；無 outpost fallback 進 team
 func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> void:
