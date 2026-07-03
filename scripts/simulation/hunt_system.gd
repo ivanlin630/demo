@@ -21,7 +21,7 @@ func hunt_small_game(state: WorldState, team: TeamData, tile: HexTileData, activ
 	var chance: float = clampf(base + survival * 0.4, 0.0, 0.95)
 	if randf() >= chance:
 		return { "success": false, "food": 0.0, "msg": "空手而回" }
-	tile.resources["wild_game"] = game - 1   # 枯竭 1 隻
+	TileBank.pool_set(tile, "wild_game", game - 1, "hunt_deplete")   # 枯竭 1 隻
 	var food: float = FOOD_PER_GAME * (1.0 + survival * 0.3)
 	# 超 buffer 部分不 bank（苟活地板；剩肉腐敗=sink，非憑空生糧）。
 	var banked: float = minf(food, buffer - cur_food)

@@ -115,9 +115,7 @@ func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> b
 # 成品流向公庫（tile 為自家 outpost）；無 outpost fallback 進 team
 func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> void:
 	if tile != null and tile.outpost_level > 0:
-		var cap: float = OutpostSystem.new()._get_storage_cap(tile, res)
-		var current: float = float(tile.public_storage.get(res, 0))
-		tile.public_storage[res] = minf(current + amt, cap)
+		TileBank.deposit(tile, res, amt, "manufacture_output")   # capped add，溢出 drop = sink
 	else:
 		ResourceBank.add(team, res, amt, "manufacture_output")
 

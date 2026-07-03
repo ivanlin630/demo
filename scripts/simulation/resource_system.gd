@@ -85,15 +85,15 @@ func regenerate_tiles(state: WorldState, cadence_ticks: int = WorldState.TICKS_P
 		var rates = REGEN_RATE.get(tile.terrain, { "food": 2.0, "material": 1.0 })
 		# food 再生受 harvest_factor 調節（季節性植物生長）
 		var food_regen: float = float(rates["food"]) * tile.harvest_factor * day_fraction
-		tile.resources["food"] = minf(
+		TileBank.pool_set(tile, "food", minf(
 			float(tile.resources.get("food", 0)) + food_regen,
 			float(tile.resource_cap.get("food", 0))
-		)
+		), "regen_food")
 		var mat_regen: float = float(rates["material"])
-		tile.resources["material"] = minf(
+		TileBank.pool_set(tile, "material", minf(
 			float(tile.resources.get("material", 0)) + mat_regen,
 			float(tile.resource_cap.get("material", 0))
-		)
+		), "regen_material")
 		# ore / gem 不再生
 
 func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
@@ -128,14 +128,14 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 			ResourceBank.set_amt(team, "food", team_food - from_team, "eat_team")
 			var rem: float = food_needed - from_team
 			if rem > 0.0 and granary != null:
-				granary.public_storage["food"] = granary_food - rem
+				TileBank.set_amt(granary, "food", granary_food - rem, "eat_granary")
 			_update_person_needs(state, tid, "food", 1.0, day_fraction)
 			team.famine_days = 0.0   # 吃飽 → 斷糧計時歸零
 		else:
 			# 池耗盡：team 與糧倉 food 都歸零
 			ResourceBank.set_amt(team, "food", 0.0, "eat_depleted")
 			if granary != null:
-				granary.public_storage["food"] = 0.0
+				TileBank.set_amt(granary, "food", 0.0, "eat_granary_depleted")
 			var satisfaction: float = food_available / food_needed if food_needed > 0.0 else 0.0
 			_update_person_needs(state, tid, "food", satisfaction, day_fraction)
 			# 團級斷糧累積 + grace 後 minor/anon 耗損
@@ -178,7 +178,7 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 				var avail: float = float(gtile.public_storage.get("food", 0))
 				var move: float = minf(need, avail)
 				ResourceBank.set_amt(team, "food", carried + move, "provision_carry")
-				gtile.public_storage["food"] = avail - move
+				TileBank.set_amt(gtile, "food", avail - move, "provision_granary_out")
 
 		# R2：本 cadence 末更新食物流訊號（income − consumption 的日均 EMA）。
 		_update_food_flow(state, team, day_fraction)
@@ -267,9 +267,7 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 			# 故 food 不入 gained → 不再走一般稅 split（避免重複入庫）。
 			var dst_tile: HexTileData = state.world.tiles.get(_pos_to_tile_id(team.tile_pos))
 			if dst_tile != null and dst_tile.outpost_level > 0:
-				var cap: float = OutpostSystem.new()._get_storage_cap(dst_tile, res)
-				var stored: float = float(dst_tile.public_storage.get(res, 0))
-				dst_tile.public_storage[res] = minf(stored + gain, cap)
+				TileBank.deposit(dst_tile, res, gain, "harvest_intake_vault")   # capped，over-cap drop = sink
 			else:
 				# 無 outpost fallback 進 team（小隊；food 仍記 gained 供一般稅）
 				ResourceBank.add(team, res, gain, "harvest_intake")
@@ -285,7 +283,7 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 			ResourceBank.add(team, res, gain, "harvest_carry")
 			gained[res] = float(gained.get(res, 0)) + gain   # 私產所得 → 一般稅基數
 		# 從 tile 扣除（food/material 最終由 regenerate_tiles 補回；ore/gem 有限）
-		src_tile.resources[res] = maxf(current - gain, 0.0)
+		TileBank.pool_set(src_tile, res, maxf(current - gain, 0.0), "harvest_deplete")
 
 # 一般稅：採集所得按 owner tax_rate 撥腳下 tile 公庫（守恆轉移：私產減=公庫增）。
 # 公庫滿 cap → 多的留採集者私產（不溢出）。稅率 = tile owner 的 tax_rate；
@@ -311,7 +309,7 @@ func _apply_normal_tax(state: WorldState, team: TeamData, tile: HexTileData,
 		if actual <= 0.0:
 			continue
 		ResourceBank.add(team, res, -actual, "normal_tax")
-		tile.public_storage[res] = cur + actual
+		TileBank.set_amt(tile, res, cur + actual, "normal_tax_vault")
 	_apply_chronic_tax_unrest(state, team, rate)
 
 # 一般稅慢性不滿：tax_rate 超容忍閾值 → 居民 leader/named stress 緩增；超久 → unrest_turns。

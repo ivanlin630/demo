@@ -134,34 +134,14 @@ const PRISONER_CAP: Dictionary = {
 const MIN_DIST_ANY:  int = 2    # 任意兩據點最小 hex 距離
 const MIN_DIST_SAME: int = 11   # 同類型最小 hex 距離
 
-# 公庫容量（index = level-1）
-const OUTPOST_STORAGE_CAP: Dictionary = {
-	"civilian": [200.0, 500.0, 1500.0],
-	"military": [300.0, 800.0, 2500.0],
-}
-
-# mount 公庫專屬容量（index = level-1）
-const MOUNT_STORAGE_CAP: Array = [10.0, 30.0, 80.0]
-
-# 食物（主糧 staple）公庫專屬容量（index = level-1）。TEST VALUE：比通用大，
-# 避免 L3 通用 1500 ≈ 定居隊數天就餓死。糧倉 = 據點戰略儲量（WS-4 設施再拉高）。
-const FOOD_STORAGE_CAP: Dictionary = {
-	"civilian": [2000.0, 6000.0, 18000.0],
-	"military": [1500.0, 4500.0, 12000.0],
-}
+# 公庫容量常數 + 計算已搬入 TileBank（單點）。以下委派保留既有呼叫端（os._get_storage_cap / storage_cap）不動。
 
 # 公開 wrapper：UI/查詢層讀公庫容量（不直呼私有 _get_storage_cap）
 func storage_cap(tile: HexTileData, res: String) -> float:
-	return _get_storage_cap(tile, res)
+	return TileBank.cap(tile, res)
 
 func _get_storage_cap(tile: HexTileData, res: String) -> float:
-	if res == "mounts" or res == "horses":
-		return MOUNT_STORAGE_CAP[clampi(tile.outpost_level - 1, 0, 2)]
-	if res == "food":
-		var farr: Array = FOOD_STORAGE_CAP.get(tile.outpost_type, [2000.0, 6000.0, 18000.0])
-		return float(farr[clampi(tile.outpost_level - 1, 0, 2)])
-	var arr: Array = OUTPOST_STORAGE_CAP.get(tile.outpost_type, [100.0, 300.0, 800.0])
-	return float(arr[clampi(tile.outpost_level - 1, 0, 2)])
+	return TileBank.cap(tile, res)
 
 # ──────── Tick 驅動 ────────
 
@@ -218,7 +198,7 @@ func _breed_stable_mounts(tile: HexTileData, owner: TeamData, lvl_idx: int, day_
 	if tile.stable_progress >= 1.0 - 1e-9:
 		var bred: int = int(tile.stable_progress + 1e-9)
 		tile.stable_progress -= float(bred)
-		tile.public_storage["mounts"] = minf(stored + float(bred), cap)
+		TileBank.set_amt(tile, "mounts", minf(stored + float(bred), cap), "stable_breed")
 		if bred > 0:
 			print("[Stable] 產馬帶 %s 繁育戰馬 +%d" % [str(tile.tile_pos), bred])
 
@@ -236,10 +216,10 @@ func _train_stable_mounts(tile: HexTileData, owner: TeamData, lvl_idx: int, day_
 		var trained: int = int(tile.stable_progress + 1e-9)
 		trained = mini(trained, int(horses_avail))
 		tile.stable_progress -= float(trained)
-		tile.public_storage["horses"] = horses_avail - float(trained)
+		TileBank.set_amt(tile, "horses", horses_avail - float(trained), "stable_train_horse_out")
 		var cap: float = _get_storage_cap(tile, "mounts")
 		var stored: float = float(tile.public_storage.get("mounts", 0))
-		tile.public_storage["mounts"] = minf(stored + float(trained), cap)
+		TileBank.set_amt(tile, "mounts", minf(stored + float(trained), cap), "stable_train_mount")
 		if trained > 0:
 			print("[Stable] Outpost %s 訓練戰馬 +%d" % [str(tile.tile_pos), trained])
 
@@ -711,8 +691,7 @@ func _deduct_cost(team: TeamData, tile: HexTileData, cost: Dictionary) -> void:
 		var need: float = float(cost.get(res, 0))
 		if need <= 0.0:
 			continue
-		var from_vault: float = minf(need, float(tile.public_storage.get(res, 0)))
-		tile.public_storage[res] = float(tile.public_storage.get(res, 0)) - from_vault
+		var from_vault: float = TileBank.withdraw(tile, res, need, "construction_pay_vault")
 		var rem: float = need - from_vault
 		if rem > 0.0:
 			ResourceBank.remove(team, res, rem, "construction_pay")

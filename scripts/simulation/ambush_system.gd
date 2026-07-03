@@ -53,7 +53,7 @@ func _on_detected(state: WorldState, team: TeamData, tile: HexTileData) -> void:
 
 func _trigger_ambush(state: WorldState, team: TeamData, tile: HexTileData) -> void:
 	var kind: String = "bear" if tile.terrain == "mountain" else "boar"
-	tile.resources["predator_density"] = int(tile.resources["predator_density"]) - 1
+	TileBank.pool_set(tile, "predator_density", int(tile.resources["predator_density"]) - 1, "ambush_predator")
 	var bs := BeastSystem.new()
 	var bid: int = bs.build_beast_team(state, kind, team.tile_pos)
 	var leader = state.persons.get(team.leader_id)

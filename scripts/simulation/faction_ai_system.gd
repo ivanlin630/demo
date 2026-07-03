@@ -602,7 +602,7 @@ func _auto_withdraw_mounts(state: WorldState, team: TeamData) -> void:
 	var need: int = maxi(target - current, 0)
 	var take: int = mini(need, available)
 	if take > 0:
-		tile.public_storage["mounts"] = available - take
+		TileBank.set_amt(tile, "mounts", available - take, "auto_withdraw_mounts_out")
 		ResourceBank.set_amt(team, "mounts", current + take, "auto_withdraw_mounts")
 		print("[Mount] Team%d auto-withdraw %d mounts" % [team.team_id, take])
 
@@ -2201,7 +2201,7 @@ func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 		var coin_cap: float = os._get_storage_cap(tile, "coin")
 		var coin_room: float = maxf(coin_cap - float(tile.public_storage.get("coin", 0)), 0.0)
 		var coin_in: float = minf(coin_total, coin_room)
-		tile.public_storage["coin"] = float(tile.public_storage.get("coin", 0)) + coin_in
+		TileBank.set_amt(tile, "coin", float(tile.public_storage.get("coin", 0)) + coin_in, "extinct_route_coin")
 		tile.abandoned_coin += coin_total - coin_in
 		# 其他資源：進公庫至 cap。ore_gold/silver 溢出落地面（coin_eq 守恆）；非有限資源溢出消失
 		for res in team.resources:
@@ -2212,16 +2212,16 @@ func _route_extinct_assets(state: WorldState, team: TeamData) -> void:
 			var stored: float = float(tile.public_storage.get(res, 0))
 			var room: float = maxf(cap - stored, 0.0)
 			var put: float = minf(amt, room)
-			tile.public_storage[res] = stored + put
+			TileBank.set_amt(tile, res, stored + put, "extinct_route_res")
 			if res in ["ore_gold", "ore_silver"]:
-				tile.resources[res] = float(tile.resources.get(res, 0)) + (amt - put)
+				TileBank.pool_set(tile, res, float(tile.resources.get(res, 0)) + (amt - put), "extinct_route_ore_ground")
 	else:
 		# 無 outpost → coin+treasury 進 abandoned、ore 落地面（守恆：coin_eq 全算）；其他無容器消失
 		tile.abandoned_coin += team.anon_treasury + float(team.resources.get("coin", 0))
-		tile.resources["ore_gold"] = float(tile.resources.get("ore_gold", 0)) \
-			+ float(team.resources.get("ore_gold", 0))
-		tile.resources["ore_silver"] = float(tile.resources.get("ore_silver", 0)) \
-			+ float(team.resources.get("ore_silver", 0))
+		TileBank.pool_set(tile, "ore_gold", float(tile.resources.get("ore_gold", 0)) \
+			+ float(team.resources.get("ore_gold", 0)), "extinct_ore_ground")
+		TileBank.pool_set(tile, "ore_silver", float(tile.resources.get("ore_silver", 0)) \
+			+ float(team.resources.get("ore_silver", 0)), "extinct_ore_ground")
 	# coin 已先路由(public_storage/abandoned_coin) → 此 reset 為合法歸零(非洩漏)
 	AnonTreasuryBank.reset(team, "extinct_routed")
 	ResourceBank.clear_all(team, "extinct_routed")
@@ -2251,14 +2251,14 @@ func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileDat
 		if team_have < needed:
 			var take: float = minf(stored, needed - team_have)
 			if take > 0.0:
-				tile.public_storage[res] = stored - take
+				TileBank.set_amt(tile, res, stored - take, "npc_withdraw_vault_out")
 				ResourceBank.set_amt(team, res, team_have + take, "npc_withdraw_vault")
 		elif team_have > needed * 2.0:
 			var cap: float = os._get_storage_cap(tile, res)
 			var deposit_max: float = cap - stored
 			var deposit: float = minf(team_have - needed, deposit_max)
 			if deposit > 0.0:
-				tile.public_storage[res] = stored + deposit
+				TileBank.set_amt(tile, res, stored + deposit, "npc_deposit_vault_in")
 				ResourceBank.set_amt(team, res, team_have - deposit, "npc_deposit_vault")
 
 # ──────── 基建 dispatch ────────
@@ -2346,7 +2346,7 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 			if home_tile != null and home_tile.outpost_owner == leader_team.team_id:
 				from_vault = minf(need, float(home_tile.public_storage.get("food", 0)))
 				if from_vault > 0.0:
-					home_tile.public_storage["food"] = float(home_tile.public_storage.get("food", 0)) - from_vault
+					TileBank.set_amt(home_tile, "food", float(home_tile.public_storage.get("food", 0)) - from_vault, "mine_bootstrap_vault_out")
 					ResourceBank.add(sub, "food", from_vault, "mine_bootstrap_vault")
 					need -= from_vault
 			if need > 0.0:
@@ -2368,7 +2368,7 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 			if home_tile != null and home_tile.outpost_owner == leader_team.team_id:
 				rfrom_vault = minf(rneed, float(home_tile.public_storage.get(rname, 0)))
 				if rfrom_vault > 0.0:
-					home_tile.public_storage[rname] = float(home_tile.public_storage.get(rname, 0)) - rfrom_vault
+					TileBank.set_amt(home_tile, rname, float(home_tile.public_storage.get(rname, 0)) - rfrom_vault, "mine_bootstrap_vault_out")
 					ResourceBank.add(sub, rname, rfrom_vault, "mine_bootstrap_vault")
 					rneed -= rfrom_vault
 			if rneed > 0.0:
@@ -2413,7 +2413,7 @@ func _dispatch_upgrader(state: WorldState, owner_team: TeamData, outpost_pos: Ve
 		if up_home_tile != null and up_home_tile.outpost_owner == owner_team.team_id:
 			up_from_vault = minf(up_need, float(up_home_tile.public_storage.get("food", 0)))
 			if up_from_vault > 0.0:
-				up_home_tile.public_storage["food"] = float(up_home_tile.public_storage.get("food", 0)) - up_from_vault
+				TileBank.set_amt(up_home_tile, "food", float(up_home_tile.public_storage.get("food", 0)) - up_from_vault, "upgrade_bootstrap_vault_out")
 				ResourceBank.add(up_sub, "food", up_from_vault, "upgrade_bootstrap_vault")
 				up_need -= up_from_vault
 		if up_need > 0.0:
@@ -3040,7 +3040,7 @@ func try_hunt_predator(state: WorldState, team: TeamData) -> bool:
 	if team.population < 8 or combat < 0.3:
 		return false
 	var kind: String = "bear" if tile.terrain == "mountain" else "boar"
-	tile.resources["predator_density"] = int(tile.resources["predator_density"]) - 1
+	TileBank.pool_set(tile, "predator_density", int(tile.resources["predator_density"]) - 1, "hunt_predator")
 	var bid: int = BeastSystem.new().build_beast_team(state, kind, team.tile_pos)
 	NpcCombatSystem.new().start_combat(state, team.team_id, bid)
 	return true

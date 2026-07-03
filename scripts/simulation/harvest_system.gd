@@ -41,7 +41,7 @@ func _regen_wild_horses(state: WorldState) -> void:
 		if int(tile.resources.get("wild_horses", 0)) >= cap:
 			continue
 		if randf() < WILD_HORSE_REGEN_CHANCE:
-			tile.resources["wild_horses"] = int(tile.resources.get("wild_horses", 0)) + 1
+			TileBank.pool_set(tile, "wild_horses", int(tile.resources.get("wild_horses", 0)) + 1, "regen_wild_horses")
 
 const WILD_GAME_REGEN_CHANCE: float = 0.30   # TEST VALUE — 每月增長機率（比野馬快，獵物繁殖快）
 
@@ -58,7 +58,7 @@ func _regen_wild_game(state: WorldState) -> void:
 		if cur >= cap:
 			continue
 		if randf() < WILD_GAME_REGEN_CHANCE:
-			tile.resources["wild_game"] = cur + 1
+			TileBank.pool_set(tile, "wild_game", cur + 1, "regen_wild_game")
 
 const PREDATOR_REGEN_CHANCE: float = 0.10   # TEST VALUE — 猛獸再生較慢（繁殖慢）
 
@@ -77,7 +77,7 @@ func _regen_predator(state: WorldState) -> void:
 		if cur >= cap:
 			continue
 		if randf() < PREDATOR_REGEN_CHANCE:
-			tile.resources["predator_density"] = cur + 1
+			TileBank.pool_set(tile, "predator_density", cur + 1, "regen_predator")
 
 # 每月（month 邊界）herb +1 至 resource_cap["herb"]（生成初始值）
 func _regen_herb(state: WorldState) -> void:
@@ -90,7 +90,7 @@ func _regen_herb(state: WorldState) -> void:
 			continue
 		var cur: int = int(tile.resources.get("herb", 0))
 		if cur < cap:
-			tile.resources["herb"] = cur + 1
+			TileBank.pool_set(tile, "herb", cur + 1, "regen_herb")
 
 # hex 軸座標六方向
 const HEX_DIRS: Array = [
@@ -128,8 +128,8 @@ func _collect_wild_horses_by_outposts(state: WorldState) -> void:
 			if taken > 0:
 				caught += taken
 				stored += float(taken)
-				ntile.resources["wild_horses"] = wh - taken
-				tile.public_storage["horses"] = stored
+				TileBank.pool_set(ntile, "wild_horses", wh - taken, "harvest_horse_catch")
+				TileBank.set_amt(tile, "horses", stored, "harvest_horse_store")
 				print("[Horse] Outpost %s 捕野馬 +%d" % [str(tile.tile_pos), taken])
 
 func _check_famine_warnings(state: WorldState) -> void:

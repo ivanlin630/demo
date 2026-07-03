@@ -651,7 +651,7 @@ static func _absorb_public_storage(state: WorldState, team: TeamData) -> Diction
 		var team_amount: float = float(team.resources.get(res, 0))
 		original[res] = team_amount
 		ResourceBank.set_amt(team, res, team_amount + public_amount, "borrow_public")
-		tile.public_storage[res] = 0.0   # MOVE 出公庫（避免雙重存在，spill_back 再分流回去）
+		TileBank.set_amt(tile, res, 0.0, "borrow_public_out")   # MOVE 出公庫（避免雙重存在，spill_back 再分流回去）
 	return original
 
 # trade 結束後，多出來的存回 public_storage（cap 限制；超量留 team）
@@ -672,11 +672,11 @@ static func _spill_back_public_storage(state: WorldState, team: TeamData,
 		if diff >= 0:
 			var space: float = maxf(cap - stored, 0.0)
 			var deposit: float = minf(diff, space)
-			tile.public_storage[res] = stored + deposit
+			TileBank.set_amt(tile, res, stored + deposit, "spill_back")
 			ResourceBank.set_amt(team, res, orig + (diff - deposit), "spill_back")
 		else:
 			# team 賣掉超過借出的公庫量（連自家底貨也動了）→ 公庫歸零，team 保留實際剩餘（不憑空生）
-			tile.public_storage[res] = maxf(stored + diff, 0.0)
+			TileBank.set_amt(tile, res, maxf(stored + diff, 0.0), "spill_back_overdraw")
 			ResourceBank.set_amt(team, res, current, "spill_back_overdraw")
 
 func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
