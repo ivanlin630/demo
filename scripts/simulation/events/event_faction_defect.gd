@@ -18,7 +18,7 @@ func check(state: WorldState, team: TeamData) -> bool:
 func execute(state: WorldState, team: TeamData) -> Array:
 	var fid: int = team.faction_id
 	if not state.factions.has(fid):
-		team.faction_id = -1
+		state.clear_team_faction(team)   # S11：faction 已不存在防禦路徑，走 chokepoint（語意等同 =-1，無懸空可修）
 		return []
 	var f = state.factions[fid]
 	state.clear_team_faction(team)   # 脫離 faction（雙向同步）
