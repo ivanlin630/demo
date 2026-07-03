@@ -10,6 +10,7 @@ const ROUND_READINESS_DRAIN: float    = 0.08
 const LOOT_RATE: float                = 0.3
 const LOSER_CASUALTY_RATE: float      = 0.2   # TEST VALUE：敗方 pop 損耗比例（複用 force_occupy 量級）
 const ARMED_RATIO_FLOOR: float        = 0.1   # TEST VALUE：最低參戰比，堵 0 武裝免疫（同 encounter）
+const GOVERN_SURVIVE_MIN: int         = 3     # TEST VALUE：翻旗後敗方村隊存活 pop 下限，達此→治權隨旗；不足→鬼村（僅翻旗）
 
 const HIT_WEIGHTS: Dictionary = {
 	"head": 0.10, "torso": 0.40,
@@ -268,8 +269,12 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		winner.wounded, loser.wounded])
 	var _tile_id: int = winner.tile_pos.x * 1000 + winner.tile_pos.y
 	var _tile: HexTileData = state.world.tiles.get(_tile_id)
+	var _pre_owner: int = _tile.outpost_owner if _tile != null else -1
 	if _tile != null:
 		OutpostSystem.new().capture(state, winner_id, _tile)
+	# Task1 A：此 tile 原 resident=loser 且已翻旗給 winner → 決勝於村（治權隨旗判定於 subjugate 呼叫處）
+	var _flip_on_loser_village: bool = _tile != null and _pre_owner == loser_id \
+		and _tile.outpost_owner == winner_id
 	_skill_sys.on_combat_end(state, winner)
 	_skill_sys.on_combat_end(state, loser)
 	# E-1：敗方 pop 損耗（對稱 encounter；tier 加權存活）
@@ -299,7 +304,13 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var _pp_end: PersonData = state.persons.get(state.player_id)
 	var _ptid_end: int = _pp_end.team_id if _pp_end else -1
 	if _ptid_end == -1 or winner_id != _ptid_end:
-		_try_subjugate(state, winner_id, loser_id)
+		# Task1 A：決勝於村且敗方村隊存活 → 治權隨旗；滅/走光 → 鬼村（僅翻旗，residency 接手）
+		var _village_survives: bool = _flip_on_loser_village \
+			and state.teams.has(loser_id) \
+			and state.teams[loser_id].population >= GOVERN_SURVIVE_MIN
+		if _flip_on_loser_village and not _village_survives and Probe.enabled:
+			Probe.bump("yield.flip_ghost")
+		_try_subjugate(state, winner_id, loser_id, _village_survives)
 
 func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> void:
 	var retreater: TeamData = state.teams[retreater_id]
@@ -315,8 +326,12 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 		retreater_id, retreater.readiness, retreater.wounded])
 	var _tile_id: int = pursuer.tile_pos.x * 1000 + pursuer.tile_pos.y
 	var _tile: HexTileData = state.world.tiles.get(_tile_id)
+	var _pre_owner_fr: int = _tile.outpost_owner if _tile != null else -1
 	if _tile != null:
 		OutpostSystem.new().capture(state, pursuer_id, _tile)
+	# Task1 A：此 tile 原 resident=retreater 且已翻旗給 pursuer → 決勝於村
+	var _flip_on_retreater_village: bool = _tile != null and _pre_owner_fr == retreater_id \
+		and _tile.outpost_owner == pursuer_id
 	_skill_sys.on_combat_end(state, retreater)
 	_skill_sys.on_combat_end(state, pursuer)
 	_apply_pursuit(state, pursuer_id, retreater_id)
@@ -339,7 +354,13 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	var _pp_fr: PersonData = state.persons.get(state.player_id)
 	var _ptid_fr: int = _pp_fr.team_id if _pp_fr else -1
 	if _ptid_fr == -1 or pursuer_id != _ptid_fr:
-		_try_subjugate(state, pursuer_id, retreater_id)
+		# Task1 A：決勝於村且敗方村隊存活 → 治權隨旗；滅/走光 → 鬼村（僅翻旗，residency 接手）
+		var _village_survives_fr: bool = _flip_on_retreater_village \
+			and state.teams.has(retreater_id) \
+			and state.teams[retreater_id].population >= GOVERN_SURVIVE_MIN
+		if _flip_on_retreater_village and not _village_survives_fr and Probe.enabled:
+			Probe.bump("yield.flip_ghost")
+		_try_subjugate(state, pursuer_id, retreater_id, _village_survives_fr)
 
 # 征服名實探針（純觀測）：capture 事件按勝方 task 歸因。掠奪(TASK_LOOT)達 capture 預期 ~0
 # （掠奪=機會搶資源、不奪地俘虜）；真 capture 應來自 prosperity-attack(TASK_ATTACK)。
@@ -554,14 +575,22 @@ func _check_night_raid(state: WorldState, attacker: TeamData, defender: TeamData
 	if dns.get_camp_vision_range(state, defender) > 0: return false
 	return true
 
-func _try_subjugate(state: WorldState, winner_id: int, loser_id: int) -> void:
+func _try_subjugate(state: WorldState, winner_id: int, loser_id: int, on_captured_tile: bool = false) -> void:
 	var winner: TeamData = state.teams[winner_id]
 	var loser:  TeamData = state.teams[loser_id]
-	if loser.faction_id != -1 or not winner.tags.has("統領"):
+	# Task1 A：翻旗接治權——決勝於村（on_captured_tile）治權隨旗：勝方獨立→以戰立國（授統領 tag），
+	# 敗方村隊跨 faction 亦轉入勝方（set_team_faction bidir-safe 退舊入新）→ 同 faction 後 works_tile 放行。
+	# 一般吞併（非佔村）維持原 gate：只吞獨立敗方且勝方為統領。
+	if on_captured_tile:
+		if not winner.tags.has("統領"):
+			winner.tags.append("統領")
+	elif loser.faction_id != -1 or not winner.tags.has("統領"):
 		return
 	var fid: int = winner.faction_id
 	if fid == -1:
 		fid = state.create_faction(winner_id)
+	if fid == -1 or loser.faction_id == fid:
+		return   # 立國失敗 / 已同 faction（與翻旗接治權去重，勿雙 subjugate）
 	# A feud：吞併 → loser leader 結仇 + 原 faction 餘部繼承。
 	# 必在 set_team_faction 前（否則 loser 已入勝方 faction，抓錯餘部）。
 	var loser_leader: PersonData = state.persons.get(loser.leader_id)
@@ -571,10 +600,13 @@ func _try_subjugate(state: WorldState, winner_id: int, loser_id: int) -> void:
 		NpcAiSystem.FEUD_SEVERITY["subjugated"], state.world.current_tick)
 	state.set_team_faction(loser, fid)   # 敗方入勝方 faction（雙向同步）
 	state.snapshot_faction_member(loser_id, state.world.current_tick)
+	if Probe.enabled and on_captured_tile:
+		Probe.bump("yield.flip_with_rule")   # 翻旗+治權接上（同 faction → 村民代 owner 生產）
 	_msg.emit_message(state, "subjugate",
 		TextBank.fmt("subjugate", "honest", {
 			"origin": str(winner_id), "loser": str(loser_id), "faction": str(fid)
 		}),
 		winner,
 		{ "origin": str(winner_id), "loser": str(loser_id), "faction": str(fid) })
-	print("[Faction] Team%d 主服 Team%d → 勢力%d" % [winner_id, loser_id, fid])
+	print("[Faction] Team%d 主服 Team%d → 勢力%d%s" % [
+		winner_id, loser_id, fid, "（佔村立治）" if on_captured_tile else ""])

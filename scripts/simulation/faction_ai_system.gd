@@ -108,6 +108,8 @@ const MIN_PARENT_POP_AFTER_DISPATCH: int = 10
 # 佔村 target 濾（打得到+守得住，防自殺圍城）
 const OCCUPY_ETA_MAX: int = 720      # TEST VALUE — 佔村目標最遠 eta（≈3 日；遠村久圍乾耗餓死→不選）
 const OCCUPY_POP_RATIO: float = 0.6  # TEST VALUE — 目標 believed pop 須 < 我方 ×此（明顯小才圍，防小狼打大村）
+const OCCUPY_WIN_MARGIN: float = 1.3        # TEST VALUE — 佔村勝算 margin：己方真 armed 須 ≥ 估村防下限 ×此
+const OCCUPY_DEF_ARMED_FLOOR: float = 0.1   # TEST VALUE — 估村防武裝下限比（村全員守，mirror combat ARMED_RATIO_FLOOR）
 
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
@@ -3230,6 +3232,12 @@ func _find_occupy_target(state: WorldState, team: TeamData) -> int:
 		var armed_est: float = float(bel.get("armed_est", pop_est))
 		if armed_est >= float(team.population) * 0.5:
 			Probe.bump("occupy.scan_kill_notweak"); continue
+		# Task2 B：真打得贏 margin（解循環依賴）——己方真 armed ≥ 估村防下限 × margin。
+		# 村防下限估 = believed pop_est × 武裝下限比（村全員守，用 belief pop 非 armed_est 表象）。
+		# 弱狼（真 armed 不足）不自殺圍城；狼走成長序列（captive→同化→armed 長）過此才 fire。
+		var own_armed: int = _calc_own_armed(state, team)
+		if float(own_armed) < pop_est * OCCUPY_DEF_ARMED_FLOOR * OCCUPY_WIN_MARGIN:
+			Probe.bump("occupy.scan_kill_margin"); continue
 		Probe.bump("occupy.scan_passed")   # DIAG：通過全 gate 的可據可勝弱村
 		if pop_est < best_pop:   # 挑最弱（pop_est 最低）可據村
 			best_pop = pop_est
