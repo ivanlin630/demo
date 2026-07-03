@@ -18,7 +18,8 @@ const REVOLT_COMBAT_LOSS: float = 0.4   # 暴動脫離時戰損比例（鎮壓�
 const FLEE_FRACTION: float  = 0.5    # 逃時脫離比例
 const CAPTIVE_CADENCE: int  = WorldState.TICKS_PER_DAY   # 每日決策/tick 一次（tick_all 用）
 # ③ asm 做深（全 TEST VALUE）
-const CAPTIVE_FOOD_RATE: float = 0.5   # 厚待每 captive/日撥糧（< free pop 標準口糧 FOOD_PER_PERSON_PER_DAY=0.8）
+const CAPTIVE_FOOD_RATE: float = 0.3   # 厚待每 captive/日撥糧（藍圖裁 0.5→0.3:俘虜吃稀=亂世真實,食貧狼付得起）
+const INTENT_ARMY_KIND_BONUS: float = 0.3   # 壯兵 intent(征服/擴張/建國)→厚待加權（待遇接回 means-end,TEST VALUE）
 const FEED_FAIL_Q: float    = 0.3    # feed_quality < → 厚待失效（餓著=虐待，delta=MORALE_HARSH×0.5）
 const GUARD_RATIO_MAX: float = 0.5   # 看守撥比上限
 const GUARD_CAUTION_W: float = 0.3   # guard_ratio = clampf(慎重×此 + load×GUARD_LOAD_W, 0, MAX)
@@ -44,6 +45,13 @@ static func decide_treatment(state: WorldState, holder: TeamData, group: Diction
 		return {"treatment": "釋放", "guard_ratio": guard_ratio}
 	# 厚待 util（壯兵意圖）vs 苛待 util（殘忍/速用）
 	var kind_util: float  = 0.3 + ambition * 0.6 - cruelty * 0.4
+	# 壯兵 intent→厚待加權（藍圖 2026-07-03 asm-knobs：待遇接回 means-end——征服/擴張/建國要兵=消化俘虜;
+	# 殘忍者 harsh_util 仍可勝出=照屠,分流靠人格+意圖非全員厚待）
+	var itype: String = FactionAISystem._solo_type(holder)
+	if itype == "" and holder.faction_id != -1 and state.factions.has(holder.faction_id):
+		itype = String(state.factions[holder.faction_id].intent.get("type", ""))
+	if itype in ["征服", "擴張", "建國"]:
+		kind_util += INTENT_ARMY_KIND_BONUS
 	var harsh_util: float = 0.2 + cruelty * 0.7 - ambition * 0.3
 	var treatment: String = "厚待" if kind_util >= harsh_util else "苛待"
 	return {"treatment": treatment, "guard_ratio": guard_ratio}

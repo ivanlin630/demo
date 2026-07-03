@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 旋鈕組合全收(FOOD 0.3/INIT 0.35/壯兵厚待加權=接回means-end/25天不動)+asm驗收改三帶框(糧正狼同化成/純餬口敗=believable)+斷①准+奴役=合法終態(觸發=長窗見中間選項缺)+spec補§4b(看守dial/named寧死不為奴)
 ---
 

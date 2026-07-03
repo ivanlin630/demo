@@ -11,7 +11,7 @@ const SURVIVAL_KILL_WEIGHT: Dictionary = {"平民": 1.0, "新兵": 0.6, "老兵"
 
 # ───── 受控人力 Phase 1：征服吸收常數（全 TEST VALUE）─────
 const CAPTURE_RATE: float        = 0.5    # 征服吸收敗方殘餘 anon 比例
-const CAPTIVE_INIT_MORALE: float = 0.25   # 吸收 captive 初始 morale（低忠，entry=吸收 強迫類）
+const CAPTIVE_INIT_MORALE: float = 0.35   # 吸收 captive 初始 morale（藍圖裁 0.25→0.35:剛被俘多認命,離 flee 域遠給救援窗）
 # 失能-capture（潰逃勝方俘敗方 wounded）：俘虜比例 = (1-readiness)[潰逃嚴重度] × FACTOR，cap by RATE_MAX。全 TEST VALUE。
 const CAPTURE_GUARD_FACTOR: float = 0.8   # 潰逃嚴重度→俘虜比例 係數
 const CAPTURE_RATE_MAX: float     = 0.7   # 俘虜比例上限（即便全崩潰也非全俘）
