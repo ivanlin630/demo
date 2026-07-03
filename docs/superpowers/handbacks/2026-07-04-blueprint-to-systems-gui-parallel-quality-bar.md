@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 序更新(用戶裁)——GUI輕slice開燒‖矩陣剩餘平行;★GUI品質bar=用戶親眼看,半成品=失望;寧砍範圍不上糙貨;交付前離屏截圖自驗
 ---
 
