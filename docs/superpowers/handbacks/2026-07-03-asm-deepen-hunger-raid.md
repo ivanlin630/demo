@@ -3,6 +3,7 @@
 > Spec `docs/superpowers/specs/2026-07-03-asm-deepen-hunger-raid-design.md`
 > Plan `docs/superpowers/plans/2026-07-03-asm-deepen-hunger-raid.md`
 > Branch `feat/asm-deepen-hunger-raid`
+> Status: consumed（2026-07-03 merged,值旋鈕升藍圖）
 
 ## 實作摘要
 
