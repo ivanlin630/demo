@@ -17,6 +17,9 @@ const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量�
 const INTENT_FIT_DRIVE: float = 1.5     # TEST VALUE — 意圖反應量級（mirror faction_duty；戰術層 reshape 強度）
 const SURPLUS_FOOD_DAYS: float = 7.0    # TEST VALUE — 「有餘糧」門檻（致富→囤貨/貿易 子需求觸發）
 const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/好戰門檻（防 over-war：溫和窮隊不搶）
+# ── 佔村（雙引擎咬合：奪據點→據點產糧養兵，複用 capture+residency）──
+const OCCUPY_DRIVE_BASE: float = 1.2    # TEST VALUE — 佔村驅力基值（× occupy weight ≈ 0.4-0.7 → util 略勝 loot，要根據地的狼優先打村）
+const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守得住+夠日後分駐 settler，對齊 _dispatch_subteam_settle pop 需求）
 
 # 脫軌逃閥因子：忠誠 − 野心溢出折損（loy 高→1，低忠誠高野心→0）。
 # faction_duty weight 與 attack_drive drive 共用 = 叛離者既無 duty 亦無個人參戰驅力（「這不是我的仗」）。
@@ -56,6 +59,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"loot_drive":
 			if opt != "掠奪": return 0.0
 			return LOOT_DRIVE_BASE if ctx.has_weak_prey else 0.0   # TEST VALUE
+		"occupy_drive":
+			# 佔村 = 要根據地：無自家 outpost 的流浪狼最需要（base_need=1），有 outpost 但征服 intent 弱驅（0.3）。
+			# 連續 util，與掠奪同 menu 秤 argmax（零新判斷器）。人格染色走 weight("occupy")。
+			# 要根據地驅力（純野心 base_need；匱乏→奪產村的 hunger boost 走 intent_fit term，與掠奪 parallel）。
+			# 人格染色走 weight("occupy")。無 outpost 流浪狼 base_need=1（最需要），有 outpost 弱驅 0.3。
+			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
+			return OCCUPY_DRIVE_BASE * (1.0 if not ctx.has_own_outpost else 0.3)
 		"join_drive":
 			if opt != "投靠" or not ctx.has_strong_neighbor: return 0.0
 			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
@@ -121,6 +131,9 @@ static func _intent_fit(ctx: DecisionContext, opt: String) -> float:
 		if opt == "掠奪" and ctx.has_weak_prey:
 			# 搶=既有掠奪 affordance boost（非升級全面攻擊 → 不 over-war）。
 			return INTENT_FIT_DRIVE * hunger * (0.5 + maxf(amb, greed) * 0.5)
+		if opt == "佔村" and ctx.has_occupy_target:
+			# 佔=奪產村解糧（與掠奪 parallel 同 boost；狼在此秤「搶了就走 vs 佔住」，佔的 base_need edge 在 occupy_drive）。
+			return INTENT_FIT_DRIVE * hunger * (0.5 + maxf(amb, martial) * 0.5)
 	# ── 意圖類別 reshape ──
 	match ctx.intent:
 		"致富":
@@ -149,6 +162,8 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"diplo":             return 0.2 + float(v.get("義氣", 0.5)) * 0.5 + float(v.get("計謀", 0.5)) * 0.3
 		"loot":              return float(v.get("殘忍", 0.5)) * 0.5 \
 			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("貪婪", 0.5)) * 0.2
+		"occupy":            return float(v.get("野心", 0.5)) * 0.5 \
+			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("統領", 0.0)) * 0.2
 		"join":              return float(v.get("義氣", 0.5)) * 0.4 \
 			+ float(v.get("信義", 0.5)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
 		"camp":              return float(v.get("野心", 0.5)) * 0.4 \

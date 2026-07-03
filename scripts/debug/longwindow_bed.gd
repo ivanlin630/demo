@@ -113,6 +113,7 @@ func _run() -> void:
 	_print_gatewait(wolves)
 	_print_asm_lifecycle(asm_death)
 	_print_funnel(wolves)
+	_print_raid_dissection()
 	_print_tick_curve(dts)
 	print("\n=== longwindow_bed DONE ===")
 	Probe.enabled = false
@@ -395,6 +396,33 @@ func _print_funnel(wolves: Array) -> void:
 	print("[funnel] surv.loot_dispatch=%d indep_atk_believed_owned=%d g1.arb_hit=%d" % [
 		_c("surv.loot_dispatch"), _c("conq.indep_atk_believed_owned"), _c("g1.arb_hit")])
 	print("=================================================================")
+
+# Task1（佔村 spec）：raid 解剖分佈 → 定機制斷 vs 權重斷。
+func _print_raid_dissection() -> void:
+	var resolve: int = _c("raid.resolve")
+	print("\n========== [Task1] raid 解剖分佈（佔村 spec：機制斷 vs 權重斷）==========")
+	print("[raid] resolve 總=%d：extort=%d combat_at_outpost=%d combat_open_field=%d loot_noresolve=%d" % [
+		resolve, _c("raid.extort"), _c("raid.combat_at_outpost"),
+		_c("raid.combat_open_field"), _c("raid.loot_noresolve")])
+	print("[raid] prey 組成：resident村隊=%d 流浪隊=%d" % [
+		_c("raid.prey_resident"), _c("raid.prey_wanderer")])
+	print("[raid] capture 翻旗=%d（by_loot=%d civilian村格=%d 流浪狼首據點=%d）" % [
+		_c("raid.capture_flip"), _c("raid.capture_flip_by_loot"),
+		_c("raid.capture_flip_civilian"), _c("raid.capture_flip_wolf_firstbase")])
+	print("[occupy] 佔村 option dispatch=%d → capture_flip=%d（雙引擎咬合：奪據點事件）" % [
+		_c("occupy.dispatch"), _c("occupy.capture_flip")])
+	print("[occupy DIAG] scan: outpost候選=%d (kill: nobel=%d unreach=%d notweak=%d) passed=%d" % [
+		_c("occupy.scan_outpost_target"), _c("occupy.scan_kill_nobel"),
+		_c("occupy.scan_kill_unreach"), _c("occupy.scan_kill_notweak"), _c("occupy.scan_passed")])
+	print("[occupy DIAG] ctx_hastarget=%d appl(kill: pop=%d hasbase=%d)=applicable=%d" % [
+		_c("occupy.ctx_hastarget"), _c("occupy.appl_kill_pop"),
+		_c("occupy.appl_kill_hasbase"), _c("occupy.applicable")])
+	var combat_total: int = _c("raid.combat_at_outpost") + _c("raid.combat_open_field")
+	print("[raid] 戰鬥落村格率=%s（低→追擊撞開闊地→capture no-op=機制斷；高但翻旗少→權重/收益斷）" % \
+		_rate(_c("raid.combat_at_outpost"), combat_total))
+	print("[raid] 弱村 prey resident 率=%s（低→prey 多流浪隊，追擊開闊地 by construction）" % \
+		_rate(_c("raid.prey_resident"), resolve))
+	print("=====================================================================")
 
 func _print_tick_curve(dts: Array) -> void:
 	if dts.is_empty():

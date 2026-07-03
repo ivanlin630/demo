@@ -19,6 +19,10 @@ var is_merchant: bool = false
 var has_home_outpost: bool = false
 var has_weak_prey: bool = false
 var weak_prey_pos: Vector2i = Vector2i(-1, -1)
+# 佔村（means-end：要根據地的狼打「有據點的弱村」而非追流浪隊）：可據 stationary 弱村。
+var has_occupy_target: bool = false
+var occupy_target_id: int = -1
+var occupy_target_pos: Vector2i = Vector2i(-1, -1)
 var has_strong_neighbor: bool = false
 var strong_neighbor_id: int = -1
 var strong_neighbor_pos: Vector2i = Vector2i(-1, -1)
@@ -81,6 +85,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _prey: int = _fa._find_weakest_prey(state, team)
 	c.has_weak_prey = _prey != -1
 	c.weak_prey_pos = state.teams[_prey].tile_pos if c.has_weak_prey else Vector2i(-1, -1)
+	# 佔村 target（可據 stationary 弱村；belief-driven weakness，可見性物理判可據）
+	var _occ: int = _fa._find_occupy_target(state, team)
+	c.has_occupy_target = _occ != -1
+	c.occupy_target_id = _occ
+	c.occupy_target_pos = state.teams[_occ].tile_pos if _occ != -1 else Vector2i(-1, -1)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.weak_prey", _tg)
 	# P2a 絕境目標欄（複用 finder，仿 _find_weakest_prey 風格）
 	var _sn: int = _fa._find_strong_neighbor(state, team)

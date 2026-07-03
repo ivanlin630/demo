@@ -103,6 +103,9 @@ const TRADE_TIMEOUT: int = 1440   # 貿易 task 6 日未成交 → 放棄（防 
 const RESIDENCY_CADENCE: int = 720    # 3 天 評估一次 outpost 居民派駐
 const RESIDENCY_COOLDOWN: int = 1680  # 7 天 邀請被拒後冷卻
 const MIN_PARENT_POP_AFTER_DISPATCH: int = 10
+# 佔村 target 濾（打得到+守得住，防自殺圍城）
+const OCCUPY_ETA_MAX: int = 720      # TEST VALUE — 佔村目標最遠 eta（≈3 日；遠村久圍乾耗餓死→不選）
+const OCCUPY_POP_RATIO: float = 0.6  # TEST VALUE — 目標 believed pop 須 < 我方 ×此（明顯小才圍，防小狼打大村）
 
 const TRADEABLE_RES: Array = [
 	"food", "material", "goods", "gem",
@@ -1498,6 +1501,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		team.current_option = opt   # 承諾追蹤實際派出
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
+		elif opt == "佔村": Probe.bump("occupy.dispatch")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
@@ -3100,6 +3104,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 				"掠奪":
 					Probe.bump("surv.loot_dispatch")   # R1 驗收哨：絕境仍搏（拔閘後 survival loot 不降）
 					print("[SurvivalLoot] team=Team%d → 掠 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
+				"佔村":
+					team.current_option = "佔村"   # capture 歸因用（survival 路不設 current_option → 補）
+					Probe.bump("occupy.dispatch"); Probe.bump("occupy.dispatch_survival")
+					print("[SurvivalOccupy] team=Team%d → 佔 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
 				"投靠": print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, int(td.get("social_target", -1))])
 				"紮營": print("[SurvivalCamp] team=Team%d → 紮營 @(%d,%d)" % [team.team_id, tgt.x, tgt.y])
 				"覓食": print("[SurvivalForage] team=Team%d pop=%d → 覓食 @(%d,%d)" % [team.team_id, team.population, tgt.x, tgt.y])
@@ -3168,6 +3176,43 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 				or (absf(pop_est - best_pop) <= PREY_POP_TIE_EPS and food_est > best_food):
 			best_pop = pop_est
 			best_food = food_est
+			best_id = tid
+	return best_id
+
+# 佔村 target 選擇（means-end：要據點的狼打「有據點的弱村」而非追流浪隊 → 戰落村格=capture 可翻+可據）。
+# 可據信號=目標站在自家 outpost（村格；可見性物理，capture 落點=此格）；weakness 讀 belief（非 god-view）。
+# 回最弱（belief pop_est 最低）可據村 team_id，無則 -1。
+func _find_occupy_target(state: WorldState, team: TeamData) -> int:
+	var best_id: int = -1
+	var best_pop: float = 999999.0
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		if t.faction_id != -1 and t.faction_id == team.faction_id: continue
+		# 可據=站在自家 outpost 的定居村（村格）；已是自己的不算
+		var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
+		if tile == null or tile.outpost_level == 0 or tile.outpost_owner != tid: continue
+		if tile.outpost_owner == team.team_id: continue
+		Probe.bump("occupy.scan_outpost_target")   # DIAG：站自家 outpost 的候選
+		if not BeliefSystem.has_belief(state, team.team_id, tid):
+			Probe.bump("occupy.scan_kill_nobel"); continue   # 無情報→不選（禁 god-view）
+		# 近才佔：eta 超 OCCUPY_ETA_MAX 的遠村不選（久圍=乾耗餓死；佔村要打得到守得住）。
+		var reach: Dictionary = PathSystem.estimate_catch_up(state, team, tid, true)
+		if not reach.reachable or int(reach.get("eta", 999999)) > OCCUPY_ETA_MAX:
+			Probe.bump("occupy.scan_kill_unreach"); continue
+		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
+		var pop_est: float = float(bel.get("population_est", 0.0))
+		# 真守得住才佔：村防守用全 pop（civilian armed_floor）→ 用 pop_est 嚴格比（非只 armed_est）。
+		# 需明顯小於我方（OCCUPY_POP_RATIO）→ 小狼不圍打不過的大村（防自殺圍城）。armed_est 為次濾。
+		if pop_est >= float(team.population) * OCCUPY_POP_RATIO:
+			Probe.bump("occupy.scan_kill_notweak"); continue
+		var armed_est: float = float(bel.get("armed_est", pop_est))
+		if armed_est >= float(team.population) * 0.5:
+			Probe.bump("occupy.scan_kill_notweak"); continue
+		Probe.bump("occupy.scan_passed")   # DIAG：通過全 gate 的可據可勝弱村
+		if pop_est < best_pop:   # 挑最弱（pop_est 最低）可據村
+			best_pop = pop_est
 			best_id = tid
 	return best_id
 

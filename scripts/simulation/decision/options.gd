@@ -11,6 +11,9 @@ const REGISTRY: Dictionary = {
 	"駐守":   [["settle_fit", "settle"]],
 	"返家補給":[["restock_need", "survival_pressure"]],
 	"掠奪":   [["loot_drive", "loot"], ["intent_fit", "intent_fit"]],
+	# 佔村：奪據點+搬進去（雙引擎咬合）。與掠奪同 menu 秤 util argmax（零新判斷器）。
+	# intent_fit=匱乏→奪產村 boost（與掠奪 parallel）；occupy_drive=野心 base_need edge（決定佔 vs 搶）。
+	"佔村":   [["occupy_drive", "occupy"], ["intent_fit", "intent_fit"]],
 	"投靠":   [["join_drive", "join"]],
 	"紮營":   [["camp_drive", "camp"]],
 	"乞食":   [["beg_drive",  "beg"]],
@@ -23,7 +26,7 @@ const REGISTRY: Dictionary = {
 }
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
-const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "投靠", "紮營", "乞食", "買糧"]
+const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "投靠", "紮營", "乞食", "買糧"]
 
 static func applicable(ctx: DecisionContext) -> Array:
 	var out: Array = []
@@ -53,6 +56,17 @@ static func applicable(ctx: DecisionContext) -> Array:
 				out.append(opt)   # 恆候選（FLEE 靠 threat 權重，非守衛）
 			"掠奪":
 				if ctx.has_weak_prey: out.append(opt)
+			"佔村":
+				# means-end：要根據地的狼（無自家 outpost 最需要 / 或征服 intent）+ 有可據弱村 + pop 夠守+分駐。
+				if ctx.has_occupy_target:
+					Probe.bump("occupy.ctx_hastarget")
+					if ctx.population < DecisionTerms.OCCUPY_MIN_POP:
+						Probe.bump("occupy.appl_kill_pop")
+					elif ctx.has_own_outpost and ctx.intent != "征服":
+						Probe.bump("occupy.appl_kill_hasbase")
+					else:
+						Probe.bump("occupy.applicable")
+						out.append(opt)
 			"投靠":
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_strong_neighbor: out.append(opt)
 			"紮營":
@@ -100,6 +114,12 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			var pid: int = FactionAISystem.new()._find_weakest_prey(state, team)
 			if pid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_LOOT, "target": state.teams[pid].tile_pos, "combat_target": pid}
+		"佔村":
+			# 攻取據村：TASK_ATTACK 到村格 → 戰勝 capture 自動翻旗（既有）→ 次 cadence has_own_outpost
+			# → 生產/駐守 + _evaluate_outpost_residency 派駐（既有）接手 → 食引擎點火。不新造據點系統。
+			var vid: int = FactionAISystem.new()._find_occupy_target(state, team)
+			if vid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_ATTACK, "target": state.teams[vid].tile_pos, "combat_target": vid}
 		"投靠":
 			var sn: int = FactionAISystem.new()._find_strong_neighbor(state, team)
 			if sn == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
