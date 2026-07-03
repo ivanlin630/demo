@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 三軌出爐——軌1斷鏈修全過(T36 raid活法閉環/asm三帶過暴動0/T32糧正不誤放)但★複利中段未閉=raid不產盈餘(loot只夠餬口);軌2泛化✓(seed7 by_attack=3首見);軌3 default半死寂(小戲有大戲無:立國0/prosperity0/FORCE狼0=過擬合warring部分成立);跨軌:envoy accept 0/8全域門檻太嚴
 ---
 
