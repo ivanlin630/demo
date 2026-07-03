@@ -9,11 +9,22 @@ topic: 序裁(用戶)——已定管線收完(佔村/誘因/馬/default measure/
 
 用戶裁定執行序，鎖定如下。
 
-## 1. 先收「目前已定」管線
+## 1. 先收「目前已定」管線（用戶明示：**含統一矩陣剩餘**）
 ```
 眼前批：佔村 measure→修 ‖ 誘因結盟 ‖ 馬最小 slice
   → default 組成/健康 measure → 裁生成參數 → 軌3 二考（自然世界考沙盒 bar）
 + cadence spike（per-tick 不變量,長跑前必收,照 queue）
++ ★ 統一矩陣剩餘燒完：
+    單寫者收齊    tile-bank(S1)/tags(S5)/無主欄(S6)/team建立(S9)/
+                  succession(S10)/faction_id繞(S11)/reputation(S12)
+                  → 強制閘全立 + checklist 落 01_architect
+    互動統一      tribute 3公式(F-I2)/deception 3引擎(F-I4)/
+                  RelationGraph 接線(F-I5)/combat verb god-view 尾巴(F-I7)
+    人力收斂      prisoner_population 死路(F-M1)/skill·injury·equipment
+                  雙模型(F-M2-4)/scalar silo(F-M5-7)
+    belief 尾巴   known_member_states(F-B1)/audit 補(F-B4)
+例外：F-P cluster（player-vs-NPC dispatch）留給玩家面 arc——
+  現在燒=對將重工的玩家系統做投機重構,玩家面開工時一起(你有異議可提)
 ```
 
 ## 2. ★ 然後：觀測 GUI 輕 slice（用戶要看模擬過程）
