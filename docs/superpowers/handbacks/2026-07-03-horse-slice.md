@@ -1,5 +1,6 @@
 # Hand Back: 馬經濟最小 slice
 
+> Status: consumed（2026-07-03 merged,系統收編）
 > Plan `docs/superpowers/plans/2026-07-03-horse-slice.md` / Spec §B。branch `feat/horse-slice`。
 
 ## 實作摘要

@@ -1,5 +1,6 @@
 # Hand Back: 誘因結盟（gift alliance）
 
+> Status: consumed（2026-07-03 merged,系統收編）
 Spec §A `2026-07-03-gift-alliance-horse-slice-design.md`、Plan `2026-07-03-gift-alliance.md` 全 3 Task 完成。
 
 ## 實作摘要（改檔）

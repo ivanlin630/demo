@@ -1,5 +1,6 @@
 # Hand Back: 佔村 option（雙引擎複利咬合點）
 
+> Status: consumed（2026-07-03 merged,系統收編）
 分支：`feat/occupy-village`。Spec：`docs/superpowers/specs/2026-07-03-occupy-village-design.md`。Plan：`docs/superpowers/plans/2026-07-03-occupy-village.md`。
 
 ## TL;DR

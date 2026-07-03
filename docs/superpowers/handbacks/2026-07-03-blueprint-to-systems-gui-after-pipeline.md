@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 序裁(用戶)——已定管線收完(佔村/誘因/馬/default measure/軌3二考+cadence spike)→觀測GUI輕slice(事件ticker/隊伍inspect/速度控制,畫既有探針資料)→願景大塊維持凍結
 ---
 
