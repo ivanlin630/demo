@@ -26,6 +26,7 @@ var team_intel: Dictionary = {}
 # }}}
 var factions: Dictionary = {}
 var teams_pending_erase: Array = []   # 滅團延遲清除：tick 末單點 erase（中途 erase 不安全）
+var offmap_extinct_coin: float = 0.0  # off-map 滅團（radius 全無有效格）coin 顯性 sink；CoinAudit 全池計 → 守恆閉合非靜默丟失
 # P0 加固：tile→teams 共用空間索引（sim_runner 每次移動後 rebuild，O(N) 一次）。
 # 消費端（hostile-within / co-location / 居民查）以鄰域查取代全掃 → 收 O(N²)/hr。
 # 純加速結構、非真值源：消費端仍 live 復驗 tile_pos/hex_dist（容 key 碰撞 + 建後瞬時態）。

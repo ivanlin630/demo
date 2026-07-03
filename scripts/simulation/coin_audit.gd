@@ -4,9 +4,10 @@ class_name CoinAudit
 # ore_gold/ore_silver 是「採集產出」(productivity×skill 乘數 → 非守恆量，見 resource_system 採集)，
 # 不可當 coin-equivalent；coin 唯一來源 = 鑄幣(mint)。
 # 守恆律：CoinAudit.total(end) − CoinAudit.total(start) == Σ minted（本 run 鑄出 coin）。
-# 池：team.resources.coin + team.anon_treasury + person.coin + tile.public_storage.coin + tile.abandoned_coin。
+# 池：team.resources.coin + team.anon_treasury + person.coin + tile.public_storage.coin
+#     + tile.abandoned_coin + state.offmap_extinct_coin（off-map 滅團無處落地的顯性 sink）。
 static func total(state: WorldState) -> float:
-	var sum: float = 0.0
+	var sum: float = state.offmap_extinct_coin
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
 		sum += float(t.resources.get("coin", 0)) + t.anon_treasury

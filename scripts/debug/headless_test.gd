@@ -157,6 +157,7 @@ func _initialize() -> void:
 	_test_u12_trade_direct_preview()
 	_test_on_team_extinct_to_storage()
 	_test_mint_cap_no_ore_burn()
+	_test_extinct_offmap_coin_ledger()
 	_test_pickup_abandoned_coin()
 	_test_subteam_treasury_split()
 	_test_npc_auto_withdraw()
@@ -8415,6 +8416,27 @@ func _test_mint_cap_no_ore_burn() -> void:
 	assert(absf((after - before) - minted) < 1e-6, "coin 全池 delta==minted：delta=%.4f minted=%.4f" % [after - before, minted])
 	assert(minted > 0.0, "minted 軌記正確")
 	print("mint cap/ledger OK (minted=%.2f)" % minted)
+
+func _test_extinct_offmap_coin_ledger() -> void:
+	print("--- Extinct off-map: coin 顯性 sink（守恆非靜默丟失）---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# 唯一 tile 在 (0,0)；team 死在遠離 radius 12 的 off-map 格 → _nearest_valid_tile 回 null
+	var far_tile := HexTileData.new()
+	far_tile.tile_pos = Vector2i(0, 0); far_tile.outpost_owner = -1
+	state.world.tiles[0] = far_tile
+	var team := TeamData.new()
+	team.team_id = 5; team.tile_pos = Vector2i(500, 500)
+	team.resources = { "coin": 25.0 }; team.anon_treasury = 15.0
+	state.teams[5] = team
+	var before: float = CoinAudit.total(state)
+	var fai := FactionAISystem.new()
+	fai._route_extinct_assets(state, team)
+	var after: float = CoinAudit.total(state)
+	assert(absf(state.offmap_extinct_coin - 40.0) < 1e-6, "off-map coin 入 sink=40，實際=%.2f" % state.offmap_extinct_coin)
+	assert(absf(after - before) < 1e-6, "全池 coin 守恆（team→sink）：before=%.2f after=%.2f" % [before, after])
+	assert(team.anon_treasury == 0.0 and float(team.resources.get("coin", 0)) == 0.0, "team coin 已清")
+	print("extinct off-map ledger OK (sink=%.1f)" % state.offmap_extinct_coin)
 
 func _test_subteam_treasury_split() -> void:
 	print("--- CoinStorage Task12: 子隊帶 treasury ---")
