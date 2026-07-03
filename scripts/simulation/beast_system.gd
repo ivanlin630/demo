@@ -21,20 +21,18 @@ func build_beast_team(state: WorldState, kind: String, pos: Vector2i) -> int:
 	var t := TeamData.new()
 	t.team_id = _next_beast_id
 	_next_beast_id -= 1
-	t.tags = [TeamData.TAG_BEAST]
+	state.set_team_tags(t, [TeamData.TAG_BEAST], "beast_spawn")
 	t.beast_kind = kind
 	t.beast_strength = float(prof["strength"])
 	t.tile_pos = pos
-	t.faction_id = -1
+	state.set_team_faction(t, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
 	t.leader_id = -1
 	t.named_members = []
 	t.anon_cohorts = {}
 	AnonCohort.add(t.anon_cohorts, AnonCohort.TIER_PLEB, "healthy", int(prof["count"]))
 	ResourceBank.clear_all(t, "beast_spawn_init")
 	t.armed_anon_ratio = 1.0   # 全員上場
-	state.teams[t.team_id] = t
-	state.team_known[t.team_id] = []
-	state.team_discovered[t.team_id] = []
+	state.create_team(t)   # S9 chokepoint：註冊 + known/discovered init
 	return t.team_id
 
 # 獸戰結束：勝方得肉(food)+皮(material)，清除獸隊。

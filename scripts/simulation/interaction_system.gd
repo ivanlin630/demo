@@ -110,7 +110,7 @@ func _tick_readiness(state: WorldState, team_ids: Array) -> void:
 		var cmd: float = float(leader.skills.get("統領", 0.0)) if leader else 0.0
 		var excess: float = clampf((cmd - 0.8) / 0.2, 0.0, 1.0)
 		var recovery: float = READINESS_RECOVERY_BASE * (1.0 + excess * 0.5)
-		team.readiness = minf(team.readiness + recovery * morale_factor * resource_factor, 1.0)
+		state.set_readiness(team, minf(team.readiness + recovery * morale_factor * resource_factor, 1.0), "recovery")
 
 func _treat_wounded(state: WorldState, team: TeamData) -> void:
 	var best_medicine: float = 0.0
@@ -459,7 +459,7 @@ func _recall_envoy_home(state: WorldState, envoy: TeamData) -> void:
 		envoy.move_target = parent.tile_pos
 	else:
 		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（非 zombie）
-		envoy.tags.erase(TeamData.TAG_SUBTEAM)
+		state.remove_tag(envoy, TeamData.TAG_SUBTEAM, "envoy_orphan")
 
 func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 	var a: TeamData = state.teams[id_a]
@@ -1088,8 +1088,8 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 	if t == null: return
 	t.tile_pos = outpost_pos
 	if not t.tags.has(TeamData.TAG_PRODUCE):
-		t.tags.append(TeamData.TAG_PRODUCE)
-	t.tags.erase("流亡")
+		state.add_tag(t, TeamData.TAG_PRODUCE, "settle")
+	state.remove_tag(t, "流亡", "settle")
 	state.set_team_faction(t, faction_id)   # 安頓入 faction（雙向同步）
 	TaskArbiter.transition(t, "生產", TaskArbiter.PRIO_AMBIENT)
 	t.move_target = Vector2i(-1, -1)
@@ -1113,9 +1113,9 @@ func _find_existing_resident(state: WorldState, pos: Vector2i, exclude_id: int, 
 
 func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 	if not subteam.tags.has(TeamData.TAG_PRODUCE):
-		subteam.tags.append(TeamData.TAG_PRODUCE)
-	subteam.tags.erase(TeamData.TAG_SUBTEAM)
-	subteam.tags.erase("流亡")
+		state.add_tag(subteam, TeamData.TAG_PRODUCE, "convert_resident")
+	state.remove_tag(subteam, TeamData.TAG_SUBTEAM, "convert_resident")
+	state.remove_tag(subteam, "流亡", "convert_resident")
 	TaskArbiter.transition(subteam, "生產", TaskArbiter.PRIO_AMBIENT)
 	state.detach_subteam(subteam)   # 變居民脫離母團（雙向同步）
 	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [

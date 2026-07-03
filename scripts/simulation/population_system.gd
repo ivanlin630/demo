@@ -56,8 +56,8 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 	var ot := TeamData.new()
 	ot.team_id      = _next_team_id(state)
 	ot.tile_pos     = origin.tile_pos
-	ot.faction_id   = -1
-	ot.tags         = ["流亡"]
+	state.set_team_faction(ot, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
+	state.set_team_tags(ot, ["流亡"], "overflow_split")
 	ot.current_task = TeamData.TASK_IDLE   # 新 team 建立豁免：overflow 流亡 idle + priority 0
 	ot.task_priority = 0
 	var frac: float = float(overflow_pop) / float(origin.population)
@@ -66,9 +66,7 @@ func _create_overflow_team(state: WorldState, origin: TeamData, overflow_pop: in
 		ResourceBank.set_amt(ot, res, amt, "overflow_split")
 		ResourceBank.add(origin, res, -amt, "overflow_split")
 	AnonTierSystem.transfer_proportional(origin, ot, overflow_pop)
-	state.teams[ot.team_id]           = ot
-	state.team_known[ot.team_id]      = []
-	state.team_discovered[ot.team_id] = []
+	state.create_team(ot)   # S9 chokepoint：註冊 + known/discovered init
 	var promoted := PersonGenerator.generate_for_team(state, ot, "member")
 	if promoted != null:
 		ot.leader_id  = promoted.id

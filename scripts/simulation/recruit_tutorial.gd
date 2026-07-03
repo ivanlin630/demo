@@ -20,7 +20,7 @@ func check(state: WorldState) -> void:
 	LoyaltyBank.set_baseline(nl, 0.9, "init")             # 忠誠偏高
 	state.persons[nl.id] = nl; team.leader_id = nl.id
 	AnonTierSystem.add_anon(team, AnonCohort.TIER_PLEB, 3)  # 3 白丁(tier0)；population getter = leader1+anon3 = 4
-	state.teams[tid] = team
+	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init（原漏 init known/discovered = desync 病例）
 	state.player_forced_event = { "action": "join_request", "from_id": tid }
 	state.player_forced_event_id = str(randi())
 	state.player_state["recruit_tutorial_fired"] = true

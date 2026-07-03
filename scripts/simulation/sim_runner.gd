@@ -164,8 +164,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 						_message_system.emit_message(state, "aid_refused",
 							"玩家未回應，視同拒絕援助 Team%d" % beggar_id_t, pt_t,
 							{ "origin": str(pt_t.team_id), "target": str(beggar_id_t) })
-						var cur_rep: float = float(beggar_t.known_reputations.get(pt_t.team_id, 0.5))
-						beggar_t.known_reputations[pt_t.team_id] = clampf(cur_rep - 0.1, 0.0, 1.0)
+						beggar_t.update_reputation(pt_t.team_id, -0.1)   # S12 chokepoint（等價 clampf(cur-0.1,0,1)）
 						NpcAiSystem.new().write_memory(b_leader_t, "rejected_aid",
 							pt_t.team_id, state.world.current_tick, 0.5)
 					state.clear_social_target(beggar_t)   # BEG 現走 social_target（非 combat_target）

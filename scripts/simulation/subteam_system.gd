@@ -30,8 +30,8 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	sub.order_target_id  = order_target_id
 	sub.order_task       = order_task
 	sub.leader_id        = sub_leader_id
-	sub.readiness        = parent.readiness
-	sub.tags             = [TeamData.TAG_SUBTEAM]
+	state.set_readiness(sub, parent.readiness, "subteam_init")
+	state.set_team_tags(sub, [TeamData.TAG_SUBTEAM], "subteam_init")
 
 	var frac: float = float(pop_count) / float(parent.population)
 	for res in parent.resources:
@@ -57,11 +57,9 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 	var named_in_sub: int = sub.named_members.size() + (1 if sub.leader_id != -1 else 0)
 	var anon_to_sub: int = maxi(pop_count - named_in_sub, 0)
 	AnonTierSystem.transfer_proportional(parent, sub, anon_to_sub)
-	state.teams[sub.team_id]          = sub
+	state.create_team(sub)   # S9 chokepoint：註冊 + known/discovered init
 	state.set_subteam_parent(sub, parent_id)         # 母子關係走入口（雙向同步 subteam_ids）
 	state.set_team_faction(sub, parent.faction_id)   # 子隊繼承 parent faction 走入口（雙向同步 member_team_ids）
-	state.team_known[sub.team_id]     = []
-	state.team_discovered[sub.team_id] = []
 	print("[Sub] Team%d 派出子隊 Team%d leader=P%d advisors=%s (pop=%d cap=%d task=%s)" % [
 		parent_id, sub.team_id, sub_leader_id, str(sub.named_members), pop_count, sub_cap, task])
 	return sub.team_id
@@ -167,7 +165,7 @@ func merge_teams(state: WorldState, absorber_id: int, absorbed_id: int,
 		state.set_subteam_parent(absorbed, absorber_id)   # absorbed 成 absorber 子隊走入口（雙向同步）
 		TaskArbiter.release(absorbed)
 		if not absorbed.tags.has(TeamData.TAG_SUBTEAM):
-			absorbed.tags.append(TeamData.TAG_SUBTEAM)
+			state.add_tag(absorbed, TeamData.TAG_SUBTEAM, "partial_merge")
 		if total_xfer > 0:
 			print("[Merge] Team%d ← Team%d 部分合併 (absorber=%d absorbed=%d)" % [
 				absorber_id, absorbed_id, absorber.population, absorbed.population])
@@ -186,7 +184,7 @@ func _merge_into(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
 	# 子隊回歸但母團已滿 → 獨立分團，不重試
 	if capacity <= 0 and absorbed.parent_team_id == absorber_id:
 		state.detach_subteam(absorbed)   # 脫離母團 → 獨立（雙向同步）
-		absorbed.tags.erase(TeamData.TAG_SUBTEAM)
+		state.remove_tag(absorbed, TeamData.TAG_SUBTEAM, "merge_full_split")
 		print("[Split] Team%d 回歸失敗（母團滿員），獨立為新分團" % absorbed_id)
 		return
 
