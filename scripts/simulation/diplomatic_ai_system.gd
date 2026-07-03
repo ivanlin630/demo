@@ -9,13 +9,17 @@ const BETRAY_CONF_MIN: float = 0.5         # belief 篤定度下限：不憑不�
 const BETRAY_DRIVE_MIN: float = 0.65       # 背叛動機門檻（承接舊 score>0.65 語意）
 const BETRAY_DRIVE_HARD: float = 0.9       # 動機極高 → 幾乎必觸發（deterministic）
 const BETRAY_MARGIN_CHANCE: float = 0.3    # MIN..HARD 之間 stochastic tie-break 上限（非主驅）
+# 誘因結盟（gift）常數（TEST VALUE，seeded 校）
+const ALLIANCE_ACCEPT_THRESHOLD: float = 0.55  # 結盟 accept 門檻（原硬編碼 0.55，提出成常數便於 seeded 微校）
+const GIFT_NEED_FOOD_PER_POP: float = 10.0     # 「滿禮」基準：目標每人約 10 糧的禮視為足量（禮值/需求縮放分母）
+const GIFT_TERM_MAX: float = 0.4               # 禮對 diplomacy score 最大貢獻（雪中送炭可推過門檻）
 
 # T-02：從 team_intel 取人口估算；無資料 fallback = self_pop（謹慎：視對方與己等強）
 func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
 	return BeliefSystem.best_estimate(state, obs_id, tgt_id).get("population_est", fallback)
 
 func _calc_diplomacy_score(state: WorldState,
-		self_team: TeamData, other_team: TeamData) -> float:
+		self_team: TeamData, other_team: TeamData, gift: Dictionary = {}) -> float:
 	var self_leader: PersonData = state.persons.get(self_team.leader_id)
 	if self_leader == null: return 0.0
 
@@ -37,12 +41,22 @@ func _calc_diplomacy_score(state: WorldState,
 	var self_peace: float = self_leader.values.get("義氣", 0.5) * \
 		self_leader.values.get("信義", 0.5)
 
+	# 誘因結盟：gift term（禮值/目標需求 縮放——目標缺糧糧禮權重高=雪中送炭，連續信號）。
+	# 白嘴（gift 空）→ term=0 → score 不變（仍難）；缺糧目標收足量糧禮 → term 推過門檻。
+	var gift_term: float = 0.0
+	var gift_food: float = float(gift.get("food", 0))
+	if gift_food > 0.0:
+		var need_scale: float = maxf(float(self_team.population) * GIFT_NEED_FOOD_PER_POP, 1.0)
+		var gift_ratio: float = clampf(gift_food / need_scale, 0.0, 1.0)
+		gift_term = gift_ratio * (0.4 + 0.6 * resource_need) * GIFT_TERM_MAX
+
 	return clampf(
 		resource_need * 0.3 +
 		power_gap     * 0.2 +
 		rep           * 0.2 +
 		relation      * 0.15 +
-		self_peace    * 0.15,
+		self_peace    * 0.15 +
+		gift_term,
 		0.0, 1.0)
 
 func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
@@ -118,11 +132,11 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 		print("[Diplomacy] Team%d 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05" % target.team_id)
 
 func handle_diplomacy_message(state: WorldState, self_team: TeamData,
-		sender_team: TeamData, action: String) -> String:
-	var score: float = _calc_diplomacy_score(state, self_team, sender_team)
+		sender_team: TeamData, action: String, gift: Dictionary = {}) -> String:
+	var score: float = _calc_diplomacy_score(state, self_team, sender_team, gift)
 	match action:
 		"propose_alliance":
-			if score > 0.55:
+			if score > ALLIANCE_ACCEPT_THRESHOLD:
 				_form_alliance(state, self_team, sender_team)
 				return "accept"
 			return "reject"

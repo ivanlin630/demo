@@ -4594,6 +4594,7 @@ func _run_sim_test() -> void:
 	_test_indep_defers_conquest_to_prosperity()
 	_test_indep_found_to_faction()
 	_test_indep_full_menu_anchors()
+	_test_gift_alliance()
 
 	print("=== DONE ===")
 
@@ -4909,6 +4910,85 @@ func _test_indep_found_to_faction() -> void:
 	print("[indep] envoy→faction OK (fid -1→%d, members=%d)" % [founder.faction_id, f.member_team_ids.size()])
 
 # 首燒 Task2：獨立隊接統一菜單（致富錨 + 征服錨）。
+# 誘因結盟：gift 扣/送達轉移/沉沒 三路守恆 + diplomacy score gift term。
+func _test_gift_alliance() -> void:
+	print("--- 誘因結盟：gift 扣/轉移/沉沒 三路守恆 + score term ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var founder := _mk_ambitious_independent(state, Vector2i(3, 3), 830)
+	_indep_add_named(state, founder, 8309)
+	var ally := _mk_independent_team(state, Vector2i(3, 3), 831)   # 同格→信使就地送達
+	# ally 缺糧 → resource_need 高（雪中送炭）；義氣/信義偏低 + 無口碑/交情 → 白嘴 base<門檻，靠禮跨門檻
+	state.persons[8310].values = {"野心": 0.3, "義氣": 0.4, "信義": 0.4, "好戰": 0.1, "殘忍": 0.1, "慎重": 0.6}
+	ally.resources = {"food": 10.0}
+	_indep_discover(state, founder, ally)
+	_indep_discover(state, ally, founder)
+
+	# score term 單元：加禮 > 白嘴；缺糧目標 term > 飽足目標（need 縮放）
+	var dip := DiplomaticAiSystem.new()
+	var s_nogift := dip._calc_diplomacy_score(state, ally, founder, {})
+	var s_gift := dip._calc_diplomacy_score(state, ally, founder, {"food": 100.0})
+	assert(s_gift > s_nogift, "[gift] 禮未抬升 score (nogift=%.3f gift=%.3f)" % [s_nogift, s_gift])
+	assert(s_nogift <= DiplomaticAiSystem.ALLIANCE_ACCEPT_THRESHOLD,
+		"[gift] 白嘴 base 已過門檻，測不出禮效果 (nogift=%.3f)" % s_nogift)
+	var fed := _mk_independent_team(state, Vector2i(9, 9), 832)   # 飽足對照
+	fed.resources = {"food": 5000.0}
+	var s_fed_d := dip._calc_diplomacy_score(state, fed, founder, {"food": 100.0}) \
+		- dip._calc_diplomacy_score(state, fed, founder, {})
+	assert((s_gift - s_nogift) > s_fed_d,
+		"[gift] 缺糧 term 未高於飽足 (hungry_d=%.3f fed_d=%.3f)" % [s_gift - s_nogift, s_fed_d])
+
+	# 掏禮：發起即扣（守恆——發起方陣營[母隊+信使子隊]糧減 = 禮 escrow paid；信使 split 的糧仍在陣營內）
+	var founder_food0 := float(founder.resources.get("food", 0))   # 派信使前僅母隊持糧
+	var ally_food0 := float(ally.resources.get("food", 0))
+	var fa := FactionAISystem.new()
+	fa._evaluate_independent_strategy(state, founder)
+	assert(not founder.pending_proposal.is_empty(), "[gift] 未派信使")
+	var gift: Dictionary = founder.pending_proposal.get("gift", {})
+	var paid := float(gift.get("food", 0))
+	assert(paid > 0.0, "[gift] 盈餘充足卻未掏禮 gift=%s" % str(gift))
+	var founder_side := float(founder.resources.get("food", 0))
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == founder.team_id:
+			founder_side += float(state.teams[tid].resources.get("food", 0))
+	assert(abs(founder_side - (founder_food0 - paid)) < 0.5,
+		"[gift] 陣營糧減≠禮 escrow (減=%.2f paid=%.2f)" % [founder_food0 - founder_side, paid])
+
+	# 送達：禮轉移目標（守恆——ally food 增 = paid；禮抬 score → accept）
+	var envoy_id := -1
+	for tid in state.teams:
+		if state.teams[tid].parent_team_id == founder.team_id and state.teams[tid].task_reason == "envoy_proposal":
+			envoy_id = tid
+	assert(envoy_id != -1, "[gift] 無信使")
+	state.teams[envoy_id].tile_pos = ally.tile_pos
+	var inter := InteractionSystem.new()
+	inter._deliver_envoy_proposal(state, envoy_id, ally.team_id)
+	var ally_food1 := float(ally.resources.get("food", 0))
+	assert(abs((ally_food1 - ally_food0) - paid) < 0.01,
+		"[gift] 送達轉移≠paid (增=%.2f paid=%.2f)" % [ally_food1 - ally_food0, paid])
+	assert(abs((founder_food0 - founder_side) - (ally_food1 - ally_food0)) < 0.5, "[gift] 守恆破（發起扣≠目標收）")
+	assert(founder.faction_id != -1, "[gift] 加禮仍未 accept（score term 未生效？）")
+	print("[gift] 掏禮=%.1f 轉移=%.1f accept OK（守恆:扣=收）" % [paid, ally_food1 - ally_food0])
+
+	# 沉沒路：遠格提案，模擬 timeout 清 pending（無送達）→ 禮已扣不退、目標未收（押鏢沉沒）
+	var st2 := WorldState.new(); st2.world = WorldData.new(); st2.player_id = -1
+	var f2 := _mk_ambitious_independent(st2, Vector2i(3, 3), 833)
+	_indep_add_named(st2, f2, 8339)
+	var a2 := _mk_independent_team(st2, Vector2i(20, 20), 834)
+	_indep_discover(st2, f2, a2)
+	_indep_discover(st2, a2, f2)
+	var f2_food0 := float(f2.resources.get("food", 0))
+	FactionAISystem.new()._evaluate_independent_strategy(st2, f2)
+	var paid2 := float(f2.pending_proposal.get("gift", {}).get("food", 0))
+	assert(paid2 > 0.0, "[gift] sink 情境未掏禮")
+	f2.pending_proposal = {}   # 模擬 timeout（faction_ai timeout 分支清 pending 不退禮）
+	var f2_side := float(f2.resources.get("food", 0))
+	for tid in st2.teams:
+		if st2.teams[tid].parent_team_id == f2.team_id:
+			f2_side += float(st2.teams[tid].resources.get("food", 0))
+	assert(abs(f2_side - (f2_food0 - paid2)) < 0.5, "[gift] sink：陣營糧減≠禮 escrow（該扣不退）")
+	assert(abs(float(a2.resources.get("food", 0)) - 5000.0) < 0.01, "[gift] sink：目標竟收禮（該沉沒）")
+	print("[gift] 沉沒路 OK（f2 陣營扣 %.1f，a2 未收=押鏢沉沒）" % paid2)
+
 func _test_indep_full_menu_anchors() -> void:
 	print("--- 首燒 Task2：獨立隊全菜單（致富→貿易 / 征服→攻擊 錨）---")
 	var fa := FactionAISystem.new()

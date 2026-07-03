@@ -124,7 +124,8 @@ var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tic
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻
 # 信使外交提案（權威存發起隊，對齊 active_orders pattern）。空 {} = 無在途提案。
-# {type:"alliance", target_id, target_pos, issued_tick, proposal_id, timeout} — 信使帶 proposal_id ref。
+# {type:"alliance", target_id, target_pos, issued_tick, proposal_id, timeout, gift} — 信使帶 proposal_id ref。
+# gift = 誘因 payload 通用 {res: amount}（發起時已扣，送達轉移目標；本 slice 僅 food，聯姻/財槽未來直插）。
 var pending_proposal: Dictionary = {}
 var trade_task_start_tick: int = 0       # 貿易 task 起始 tick（timeout 防 zombie）
 var task_reason: String = ""             # 最近一次 task 設定來源（TaskArbiter _source；遙測用）

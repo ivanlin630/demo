@@ -425,10 +425,18 @@ func _deliver_envoy_proposal(state: WorldState, envoy_id: int, target_id: int) -
 		_recall_envoy_home(state, envoy)
 		return
 	Probe.bump("envoy.delivered")
-	# 決策委派 belief judge（accept 內 _form_alliance 完成 create_faction/招募）。
-	# 現僅 alliance 提案；未來提案型別擴充在此 map 到對應 verb。
+	# 誘因結盟：禮隨提案送達（權威存母隊 pending_proposal.gift，發起時已扣）。
+	# 決策委派 belief judge（禮值入 score→雪中送炭推過門檻；accept 內 _form_alliance 完成 create_faction）。
+	# 禮轉移目標（守恆:發起扣=送達收）——accept/reject 皆轉（拒者白得=亂世，reject 不退禮，最小 slice 無口碑鉤）。
+	# 信使死/timeout=禮沉沒（pending 清時已扣不退，不走此路）。冗餘去重（line 396）保證只轉一次。
+	var gift: Dictionary = mother.pending_proposal.get("gift", {})
 	var resp: String = DiplomaticAiSystem.new().handle_diplomacy_message(
-		state, target, mother, "propose_alliance")
+		state, target, mother, "propose_alliance", gift)
+	for res in gift:
+		var amt: float = float(gift[res])
+		if amt > 0.0:
+			ResourceBank.add(target, res, amt, "alliance_gift")
+			Probe.bump("envoy.gift_delivered")
 	if resp == "accept":
 		Probe.bump("envoy.accept")
 		print("[Envoy] Team%d 提案送達 Team%d → accept（發起 Team%d）" % [
