@@ -4,7 +4,7 @@ const ORDER_LIFETIME: int = 5 * WorldState.TICKS_PER_DAY    # 訂單壽命
 const ORDER_POST_CADENCE: int = 12 * WorldState.TICKS_PER_HOUR
 const SURPLUS_RESERVE_MULT: float = 2.0   # 超過 reserve×此 = 餘 → 發賣盤
 
-const _ORDER_ELIGIBLE_RES: Array = ["goods", "weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel", "food"]
+const _ORDER_ELIGIBLE_RES: Array = ["goods", "weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel", "food", "mounts"]
 
 const SHORTAGE_QTY: float = 3.0   # TEST VALUE：低於此視為短缺,發買單
 const MERCHANT_MAX_RANGE: int = 20
