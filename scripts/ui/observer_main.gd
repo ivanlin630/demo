@@ -16,6 +16,7 @@ var _ui_accum: float = 0.0
 var _speed_btns: Array = []
 var _time_label: Label
 var _map: Node2D
+var _ticker: ObserverTickerPanel
 # Task4 hitch 量測
 var _hitch_max_ms: float = 0.0
 var _hitch_over150: int = 0
@@ -67,6 +68,19 @@ func _build_ui() -> void:
 	_time_label = Label.new()
 	_time_label.text = ""
 	top.add_child(_time_label)
+	# 右側欄（inspect 上 / ticker 下）
+	var right := VBoxContainer.new()
+	right.name = "RightPanel"
+	right.anchor_left = 1.0
+	right.anchor_right = 1.0
+	right.anchor_bottom = 1.0
+	right.offset_left = -420.0
+	right.offset_top = 44.0
+	add_child(right)
+	_ticker = ObserverTickerPanel.new()
+	_ticker.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right.add_child(_ticker)
+	_ticker.setup(_bridge)
 
 func _on_speed(idx: int) -> void:
 	_speed_idx = idx
@@ -100,3 +114,4 @@ func _refresh_ui() -> void:
 	var day: int = (tick % WorldState.TICKS_PER_MONTH) / WorldState.TICKS_PER_DAY + 1
 	_time_label.text = "  月%d 日%d（tick %d）  hitch max %.0fms" % [month, day, tick, _hitch_max_ms]
 	_map.refresh()
+	_ticker.poll()

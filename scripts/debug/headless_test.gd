@@ -524,6 +524,7 @@ func _initialize() -> void:
 	# ── observer slice：ambient 事件（Task0）+ query/bridge（Task1）──
 	_test_observer_ambient_events()
 	_test_observer_query_and_bridge()
+	_test_observer_event_text()
 	# ── R2 intent/archetype 共源（desync=0）+ 分布 sanity ──
 	_test_r2_disposition_delegation()
 	_test_r2_archetype_tiebreak()
@@ -16143,3 +16144,34 @@ func _test_observer_query_and_bridge() -> void:
 	assert(got[0].type == "captives_taken" and got[1].type == "combat_start", "consume 升冪合併錯")
 	assert(bridge.consume_messages(wm + 2).is_empty(), "水位後該空")
 	print("observer query+bridge OK")
+
+# observer slice Task2b：formatter 人話（無 probe dump）、隊過濾集
+func _test_observer_event_text() -> void:
+	print("--- observer Task2b：event formatter ---")
+	var state := WorldState.new()
+	var t := TeamData.new()
+	t.team_id = 19
+	state.teams[19] = t
+	var lead := PersonData.new()
+	lead.id = 5
+	lead.person_name = "李霸"
+	state.persons[5] = lead
+	t.leader_id = 5
+	var m := MessageData.new()
+	m.type = "captives_taken"
+	m.origin_team_id = 19
+	m.origin_tick = WorldState.TICKS_PER_MONTH + WorldState.TICKS_PER_DAY * 3   # 月2日4
+	m.params = {"origin": "19", "loser": "3", "count": 4}
+	var s: String = ObserverEventText.render(state, m)
+	assert(s.begins_with("[月2日4]"), "時間戳錯：%s" % s)
+	assert("李霸" in s and "4 人" in s, "人話缺人名/數字：%s" % s)
+	assert(not ("Team19" in s), "probe 味未改寫：%s" % s)
+	var rel: Array = ObserverEventText.related_teams(m)
+	assert(19 in rel and 3 in rel, "隊過濾集錯：%s" % str(rel))
+	# 未知 type fallback description
+	var m2 := MessageData.new()
+	m2.type = "weird_type"
+	m2.origin_team_id = 19
+	m2.description = "某事發生"
+	assert("某事發生" in ObserverEventText.render(state, m2), "fallback 失效")
+	print("observer event text OK")
