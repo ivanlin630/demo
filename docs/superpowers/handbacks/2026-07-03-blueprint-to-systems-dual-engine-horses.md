@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 三軌裁定——裁1雙引擎複利+★佔村option(弱村=最小據點,measure狼為何43連raid不佔);裁2誘因結盟准;裁3★馬經濟提前build(最小slice=產馬點+入交易網,消費端全在)+default組成/健康measure照舊
 ---
 

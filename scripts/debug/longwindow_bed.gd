@@ -208,7 +208,11 @@ func _record_month(state: WorldState, w: Dictionary, month: int, gate_delta: Dic
 	w["raid_month"] = 0
 
 	# GateWait：FORCE+野心 想 raid 但本月 0 raid + 地圖有弱鄰（可解卻乾等）
-	var wants_raid: bool = w["archetype"] == AmbitionLadder.ARCHETYPE_FORCE and float(w["ambition"]) >= 0.5
+	# 糧足者不標（三軌揭假陽性:T32 糧正=本不該餓搶,hunger_relief 正確不放=非乾等）
+	var _hungry: bool = t.food_flow_avg < WOLF_FOOD_FLOW_MAX \
+		and ResourceSystem.effective_food(state, t) < float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 14.0
+	var wants_raid: bool = w["archetype"] == AmbitionLadder.ARCHETYPE_FORCE \
+		and float(w["ambition"]) >= 0.5 and _hungry
 	if wants_raid and raid == 0 and _has_weak_neighbor(state, t):
 		w["gate_wait_streak"] = int(w["gate_wait_streak"]) + 1
 		w["gate_wait_max"] = maxi(int(w["gate_wait_max"]), int(w["gate_wait_streak"]))
