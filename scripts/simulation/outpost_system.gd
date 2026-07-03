@@ -235,8 +235,8 @@ func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 	if gold_qty > 0.0:
 		var convert: float = minf(gold_qty, minf(rate, room) / GOLD_TO_COIN_RATIO)
 		var coin_added: float = convert * GOLD_TO_COIN_RATIO
-		tile.public_storage["ore_gold"] = gold_qty - convert
-		tile.public_storage["coin"] = cur_coin + coin_added
+		TileBank.set_amt(tile, "ore_gold", gold_qty - convert, "mint_consume_gold")
+		TileBank.set_amt(tile, "coin", cur_coin + coin_added, "mint")   # coin 唯一來源，room-cap 前已限量→不燒 ore
 		if coin_added > 0.0:
 			print("[Mint] tile(%d,%d) gold→coin +%.1f (mint_lv=%d)" % [
 				tile.tile_pos.x, tile.tile_pos.y, coin_added, tile.mint_level])
@@ -247,8 +247,8 @@ func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 	if silver_qty > 0.0:
 		var convert: float = minf(silver_qty, minf(rate, room) / SILVER_TO_COIN_RATIO)
 		var coin_added: float = convert * SILVER_TO_COIN_RATIO
-		tile.public_storage["ore_silver"] = silver_qty - convert
-		tile.public_storage["coin"] = cur_coin + coin_added
+		TileBank.set_amt(tile, "ore_silver", silver_qty - convert, "mint_consume_silver")
+		TileBank.set_amt(tile, "coin", cur_coin + coin_added, "mint")
 		if coin_added > 0.0:
 			print("[Mint] tile(%d,%d) silver→coin +%.1f (mint_lv=%d)" % [
 				tile.tile_pos.x, tile.tile_pos.y, coin_added, tile.mint_level])

@@ -156,6 +156,7 @@ func _initialize() -> void:
 	_test_encounter_treasury_loot()
 	_test_u12_trade_direct_preview()
 	_test_on_team_extinct_to_storage()
+	_test_mint_cap_no_ore_burn()
 	_test_pickup_abandoned_coin()
 	_test_subteam_treasury_split()
 	_test_npc_auto_withdraw()
@@ -8382,6 +8383,38 @@ func _test_pickup_abandoned_coin() -> void:
 	assert(float(team.anon_treasury) == 40.0, "應撿 40 遺財")
 	assert(float(tile.abandoned_coin) == 0.0, "abandoned_coin 清空")
 	print("CoinStorage Task11b OK")
+
+func _test_mint_cap_no_ore_burn() -> void:
+	print("--- Mint: 滿 coin-cap 不燒 ore + 走 TileBank + minted 守恆 ---")
+	var os := OutpostSystem.new()
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	# civilian lv2 → coin cap = 500（OUTPOST_STORAGE_CAP.civilian[1]）
+	var tile := HexTileData.new()
+	tile.tile_pos = Vector2i(0, 0)
+	tile.outpost_type = "civilian"; tile.outpost_level = 2; tile.mint_level = 1
+	state.world.tiles[0] = tile   # 入池，CoinAudit.total 才算得到此 tile coin
+	var cap: float = TileBank.cap(tile, "coin")
+	assert(cap == 500.0, "coin cap=500，實際=%.1f" % cap)
+	# Case A：coin 滿 cap → 不鑄不燒 ore（守恆，修 off-ledger burn）
+	tile.public_storage = { "coin": cap, "ore_gold": 100.0 }
+	os._tick_mint(state, tile, null)
+	assert(float(tile.public_storage["ore_gold"]) == 100.0, "滿 cap 不燒 ore，實際=%.2f" % float(tile.public_storage["ore_gold"]))
+	assert(float(tile.public_storage["coin"]) == cap, "滿 cap coin 不變")
+	# Case B：有餘裕 → 鑄入走 TileBank；coin 增量 == minted（Probe），ore 按比例耗
+	tile.public_storage = { "coin": 0.0, "ore_gold": 100.0 }
+	Probe.reset(); Probe.enabled = true
+	var before: float = CoinAudit.total(state)
+	os._tick_mint(state, tile, null)
+	var after: float = CoinAudit.total(state)
+	var minted: float = Probe.amount("mint_coin")
+	Probe.enabled = false
+	# rate=10, room=500 → convert=min(10,500)/20=0.5 → coin+=10, ore-=0.5
+	assert(absf(float(tile.public_storage["coin"]) - 10.0) < 1e-6, "鑄 coin=10，實際=%.4f" % float(tile.public_storage["coin"]))
+	assert(absf(float(tile.public_storage["ore_gold"]) - 99.5) < 1e-6, "ore 按比例耗 0.5，實際=%.4f" % float(tile.public_storage["ore_gold"]))
+	assert(absf((after - before) - minted) < 1e-6, "coin 全池 delta==minted：delta=%.4f minted=%.4f" % [after - before, minted])
+	assert(minted > 0.0, "minted 軌記正確")
+	print("mint cap/ledger OK (minted=%.2f)" % minted)
 
 func _test_subteam_treasury_split() -> void:
 	print("--- CoinStorage Task12: 子隊帶 treasury ---")
