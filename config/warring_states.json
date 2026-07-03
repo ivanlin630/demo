@@ -8,8 +8,10 @@
     "resource_richness": 5
   },
 
+  "opening_granary_food": 800,
+
   "outposts": {
-    "total_count": 30,
+    "total_count": 42,
     "type_ratio": { "civilian": 0.7, "military": 0.3 },
     "independent_ratio": 0.35,
     "min_spacing": 2
@@ -22,11 +24,11 @@
   },
 
   "independent_teams": {
-    "roving_count_range": [4, 8]
+    "roving_count_range": [6, 10]
   },
 
   "teams": {
-    "population_range": [8, 25],
+    "population_range": [8, 10],
     "named_ratio": 0.3
   },
 

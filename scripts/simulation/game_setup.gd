@@ -18,7 +18,7 @@ const TEAM_RESOURCE_PRESET: Dictionary = {
 		"food": 320.0, "material": 60.0, "coin": 20
 	},
 	"independent_roving": {
-		"food": 120.0, "coin": 8, "weapon_melee_low": 2
+		"food": 180.0, "coin": 8, "weapon_melee_low": 2
 	}
 }
 
@@ -127,6 +127,7 @@ static func _generate_factions(state, plan, config, rng) -> void:
 	var named_ratio: float = float(tcfg.get("named_ratio", 0.3))
 	var richness_mult: float = RICHNESS_MULT.get(
 		int(config.get("map", {}).get("resource_richness", 5)), 1.0)
+	var granary: float = float(config.get("opening_granary_food", 0.0))
 
 	for fi in plan.faction_outposts:
 		var outposts: Array = plan.faction_outposts[fi]
@@ -153,9 +154,9 @@ static func _generate_factions(state, plan, config, rng) -> void:
 		for tid in this_faction_team_ids.slice(1):
 			state.set_team_faction(state.teams[tid], faction_id)   # 入 faction（雙向同步）
 
-		_build_outpost_tile(state, main_pos, main_type, 1, first_team_id)
+		_build_outpost_tile(state, main_pos, main_type, 1, first_team_id, granary)
 		for opos in outposts.slice(1):
-			_build_outpost_tile(state, opos, plan.outpost_types[opos], 1, first_team_id)
+			_build_outpost_tile(state, opos, plan.outpost_types[opos], 1, first_team_id, granary)
 
 static func _generate_independent_teams(state, plan, config, rng) -> void:
 	var indep_cfg: Dictionary = config.get("independent_teams", {})
@@ -164,15 +165,19 @@ static func _generate_independent_teams(state, plan, config, rng) -> void:
 	var named_ratio: float = float(tcfg.get("named_ratio", 0.3))
 	var richness_mult: float = RICHNESS_MULT.get(
 		int(config.get("map", {}).get("resource_richness", 5)), 1.0)
+	var granary: float = float(config.get("opening_granary_food", 0.0))
 
 	for opos in plan.independent_outposts:
-		_build_outpost_tile(state, opos, plan.outpost_types[opos], 1, -1)
+		_build_outpost_tile(state, opos, plan.outpost_types[opos], 1, -1, granary)
 		if rng.randf() < 0.5:
 			var team: TeamData = _create_team(state, rng, pop_range,
 				named_ratio, richness_mult, "independent_settled")
 			team.tile_pos = opos
 			var key: int = opos.x * 1000 + opos.y
 			OutpostOwnerBank.set_owner(state.world.tiles[key], team.team_id, "init")
+			# 補注 granary：據點方入主（_build_outpost_tile 時 owner=-1 未注）→ 有主才給 buffer。
+			if granary > 0.0:
+				TileBank.deposit(state.world.tiles[key], "food", granary, "gen_seed")
 
 	var roving_range: Array = indep_cfg.get("roving_count_range", [2, 4])
 	var roving_count: int = rng.randi_range(roving_range[0], roving_range[1])
@@ -321,13 +326,21 @@ static func _random_empty_tile(state: WorldState, rng) -> Vector2i:
 	return Vector2i(keys[0] / 1000, keys[0] % 1000)
 
 static func _build_outpost_tile(state: WorldState, pos: Vector2i,
-		type_str: String, level: int, owner_team_id: int) -> void:
+		type_str: String, level: int, owner_team_id: int,
+		granary_food: float = 0.0) -> void:
 	var key: int = pos.x * 1000 + pos.y
 	var tile: HexTileData = state.world.tiles.get(key)
 	if tile == null: return
 	tile.outpost_type  = type_str
 	tile.outpost_level = level
 	OutpostOwnerBank.set_owner(tile, owner_team_id, "init")
+	# 開局糧倉 buffer（緩坡旋鈕，TEST VALUE）：注入公庫 food（effective_food 讀 own granary
+	# → 開局幾月不餓崩，讓 pop 從初始緩降至穩態而非懸崖）。走 TileBank.deposit（bootstrap
+	# 亦走 bank，reason="gen_seed" → driver-ledger 可查；deposit 自帶 FOOD_STORAGE_CAP clamp）。
+	# 只注入「有主」outpost——無主（owner=-1）據點 effective_food 讀不到（需 outpost_owner==team），
+	# 注了=鬼糧浪費 buffer + 白送 raider。無主 indep 據點的 granary 由呼叫端在 set_owner 後補注。
+	if granary_food > 0.0 and owner_team_id != -1:
+		TileBank.deposit(tile, "food", granary_food, "gen_seed")
 
 static func _setup_anon_tiers(team: TeamData, cfg: Dictionary, target_pop: int) -> void:
 	# population 為 getter（leader+named+anon）→ 不可讀回算 anon；改傳 config 目標 pop。
