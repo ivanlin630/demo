@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 長窗二跑升級三軌驗證——軌1 warring1337(對照連續)+軌2 其他seed×2(泛化,防1337過擬合)+軌3 ★default自然世界(沙盒bar真考場,修完後首考)
 ---
 

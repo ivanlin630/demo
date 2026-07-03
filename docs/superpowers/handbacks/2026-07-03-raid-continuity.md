@@ -3,6 +3,7 @@
 Spec：`docs/superpowers/specs/2026-07-03-raid-continuity-identity-weight-design.md`
 Plan：`docs/superpowers/plans/2026-07-03-raid-continuity-identity-weight.md`
 Branch：`feat/raid-continuity-identity-weight`
+> Status: consumed（2026-07-03 merged;PRIO 誤述已補正 spec,反向 race 裁可接受）
 
 ## 實作摘要
 

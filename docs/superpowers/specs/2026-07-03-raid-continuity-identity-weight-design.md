@@ -28,6 +28,7 @@
   - `can_found=false`（已在 faction;建國 gate 本就 fid==-1）。
   - 征服 intent → 照 defer prosperity（打草穀路,A/B 已管住 target 紀律）。
   - 守成/防衛/致富=個人日常傾向,**執行層被 PRIO_FACTION 壓**（faction directive 在 → arbiter 擋個人 dispatch=大事壓日常,既有機制零新碼）。
+  - **⚠ 修正（2026-07-03 實作 handback 抓錯,系統確認）**:上行「PRIO_FACTION 壓」**誤述**——實碼 `PRIO_DISPATCH=50 > PRIO_FACTION=30`（數值大者高）。**真 enforce = `_evaluate_prosperity_attack` idle-guard**（directive 先下→成員非 idle→raid 早退）+ 急件層（survival 80/threat 70/combat 100）恆壓 raid。殘留反向 race（成員 raid@50 先設→新 directive@30 搶不動,至 raid release 收斂）=系統裁**可接受**（raid 短 op+directive 每 cadence 重發+急件仍壓;長窗三軌若見成員抗令→再調 PRIO 或 enforce 機制）。
 - **scope 紀律**:本波只開「戰略 intent 層+raid 路」給成員;`_evaluate_solo` 全域（貿易/紮營/治理個人日常）給成員=後續矩陣格（F-D 傘）,不在本波——避免與 `_assign_tasks` 派工大面積互搏,一次一縫。
 - found in-flight guard/timeout（②a 已修）照吃。
 

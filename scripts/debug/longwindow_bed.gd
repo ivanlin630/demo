@@ -32,17 +32,19 @@ func _run() -> void:
 	if phase:
 		SimRunner.phase_timing = true
 	_diag_on = OS.get_environment("LW_DIAG") == "1"
-	print("=== longwindow_bed: seed=%d months=%d (ticks=%d) phase=%s diag=%s ===" % [
-		world_seed, months, total_ticks, str(phase), str(_diag_on)])
+	# 軌3 default 自然世界（藍圖 longwindow2-three-tracks）：LW_CONFIG 換 config（預設 warring_states）
+	var cfg_name: String = OS.get_environment("LW_CONFIG") if OS.has_environment("LW_CONFIG") else "warring_states"
+	print("=== longwindow_bed: seed=%d months=%d (ticks=%d) phase=%s diag=%s config=%s ===" % [
+		world_seed, months, total_ticks, str(phase), str(_diag_on), cfg_name])
 
 	seed(world_seed)   # 同 WarringHarness：播 global RNG（runtime bare randf/randi）→ 逐 tick 確定
 	Probe.enabled = true
 	Probe.reset()
 	var state := WorldState.new()
 	var runner := SimRunner.new()
-	var config: Dictionary = GameSetup.load_config("res://config/warring_states.json")
+	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg_name)
 	if config.is_empty():
-		print("[FAIL] warring config 載入失敗"); Probe.enabled = false; return
+		print("[FAIL] config %s 載入失敗" % cfg_name); Probe.enabled = false; return
 	config["seed"] = world_seed
 	GameSetup.setup(state, config)
 
