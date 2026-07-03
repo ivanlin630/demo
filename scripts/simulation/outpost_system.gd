@@ -32,6 +32,9 @@ const CONSTRUCTION_TIMEOUT: int = 30 * WorldState.TICKS_PER_DAY
 # 馬廄各等級每日產出 mounts / 消耗 food（index = level-1）
 const STABLE_PRODUCE_PER_DAY: Array = [0.3, 0.7, 1.0]
 const STABLE_FOOD_PER_DAY: Array    = [5.0, 10.0, 15.0]
+# 產馬帶育馬：resource_cap["mounts"]>0 的良質牧地上，stable 直接繁育戰馬（不需捕獲 horses）。
+# 比訓練快（專業牧地），仍耗草料（守恆錨；mounts=非守恆採集產出,同 ore/food farm 語意）。TEST VALUE。
+const STABLE_BREED_PER_DAY: Array   = [0.5, 1.1, 2.2]
 
 # slot 制：每設施類型佔 1 slot（level 深度不佔額外）；index = outpost_level-1。TEST VALUES
 const FACILITY_SLOTS: Dictionary = {
@@ -187,17 +190,42 @@ func _has_resident_on_tile(state: WorldState, tile: HexTileData) -> bool:
 		if TeamData.TAG_PRODUCE in t.tags: return true
 	return false
 
-# 馬廄雙態：military = 訓練（公庫 horses + owner 草料 → 公庫 mounts）；
-# civilian = 無產出（捕獲加成在 HarvestSystem 日捕端）。B 期廢 food→mounts 魔法。
+# 馬廄產出：兩路互斥（by tile）——
+#   產馬帶（resource_cap["mounts"]>0）= 良質牧地,直接繁育（不需捕獲 horses,含 civilian ranch）。
+#   否則 military = 訓練（公庫 horses + owner 草料 → 公庫 mounts）。B 期廢 food→mounts 魔法。
+# 兩路皆用 tile.stable_progress（互斥,不雙記）;皆入 public_storage（owner 公庫,非 owner.resources）。
 # day_fraction = 本次 tick 佔一天的比例；測試可直接以 day_fraction=1.0 模擬整天。
 func produce_stable_day(state: WorldState, tile: HexTileData, day_fraction: float) -> void:
 	if tile.stable_level <= 0: return
-	if tile.outpost_type != "military": return
 	var owner: TeamData = state.teams.get(tile.outpost_owner)
 	if owner == null: return
+	var lvl_idx: int = clampi(tile.stable_level - 1, 0, 2)
+	if float(tile.resource_cap.get("mounts", 0)) > 0.0:
+		_breed_stable_mounts(tile, owner, lvl_idx, day_fraction)
+	elif tile.outpost_type == "military":
+		_train_stable_mounts(tile, owner, lvl_idx, day_fraction)
+
+# 產馬帶育馬：牧地 + 草料 → 公庫 mounts（不消耗 horses；resource_cap 為良質牧地標記,永在）。
+func _breed_stable_mounts(tile: HexTileData, owner: TeamData, lvl_idx: int, day_fraction: float) -> void:
+	var cap: float = _get_storage_cap(tile, "mounts")
+	var stored: float = float(tile.public_storage.get("mounts", 0))
+	if stored >= cap: return   # 滿廄 → 不再耗草料育馬
+	var food_cost: float = STABLE_FOOD_PER_DAY[lvl_idx] * day_fraction
+	if float(owner.resources.get("food", 0)) < food_cost:
+		return   # 草料不足，本次不育
+	ResourceBank.add(owner, "food", -food_cost, "stable_breed_feed")
+	tile.stable_progress += STABLE_BREED_PER_DAY[lvl_idx] * day_fraction
+	if tile.stable_progress >= 1.0 - 1e-9:
+		var bred: int = int(tile.stable_progress + 1e-9)
+		tile.stable_progress -= float(bred)
+		tile.public_storage["mounts"] = minf(stored + float(bred), cap)
+		if bred > 0:
+			print("[Stable] 產馬帶 %s 繁育戰馬 +%d" % [str(tile.tile_pos), bred])
+
+# military 訓練：公庫 horses + owner 草料 → 公庫 mounts。
+func _train_stable_mounts(tile: HexTileData, owner: TeamData, lvl_idx: int, day_fraction: float) -> void:
 	var horses_avail: float = float(tile.public_storage.get("horses", 0))
 	if horses_avail < 1.0: return   # 無馴馬可訓
-	var lvl_idx: int = clampi(tile.stable_level - 1, 0, 2)
 	var food_cost: float = STABLE_FOOD_PER_DAY[lvl_idx] * day_fraction
 	if float(owner.resources.get("food", 0)) < food_cost:
 		return   # 草料不足，本次不訓

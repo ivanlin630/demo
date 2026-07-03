@@ -210,6 +210,9 @@ func _initialize() -> void:
 	_test_outpost_collect_wild_horses()
 	_test_outpost_collect_no_outpost_skip()
 	_test_outpost_collect_cap_limit()
+	_test_horse_band_generation()
+	_test_stable_breeds_on_horse_band()
+	_test_mounts_trade_one_flow()
 	_test_auto_withdraw_on_active_task()
 	_test_no_withdraw_when_idle()
 	# ── Encounter Engagement ──
@@ -9937,6 +9940,89 @@ func _test_outpost_collect_cap_limit() -> void:
 	assert(int(tile_op.public_storage.get("horses", 0)) == 10, "滿庫不增")
 	assert(int(ntile.resources.get("wild_horses", 0)) == 2, "野馬保留")
 	print("MountStorage Task3c OK")
+
+# ──────── HorseSlice：產馬帶來源 ────────
+
+# Task1：產馬帶生成 = 世界有 resource_cap["mounts"]>0 tile,且集中成帶（非均撒）。
+func _test_horse_band_generation() -> void:
+	print("--- HorseSlice Task1: 產馬帶生成+集中 ---")
+	var GenClass = load("res://scripts/simulation/world_generator.gd")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	GenClass.new().generate(state, { "radius": 12, "seed": 7 })
+	var xs: Array = []
+	for tid in state.world.tiles:
+		var t: HexTileData = state.world.tiles[tid]
+		if float(t.resource_cap.get("mounts", 0)) > 0.0:
+			assert(t.terrain == "plains", "產馬地必 plains")
+			xs.append(int(t.tile_pos.x))
+	assert(xs.size() > 0, "世界應有產馬帶 tile（mounts source 非 dormant）")
+	# 集中：所有產馬地 tile_pos.x 落在 2×half_width 帶寬內
+	var lo: int = xs.min(); var hi: int = xs.max()
+	var band_w: int = 2 * int(GenClass.HORSE_BAND_HALF_WIDTH)
+	assert(hi - lo <= band_w, "產馬地應集中成帶（x 跨度 %d ≤ 帶寬 %d）" % [hi - lo, band_w])
+	print("HorseSlice Task1 OK (tiles=%d, x∈[%d,%d])" % [xs.size(), lo, hi])
+
+# Task2：產馬帶 stable 直接繁育 mounts（不需捕獲 horses;civilian ranch 亦可）。
+func _test_stable_breeds_on_horse_band() -> void:
+	print("--- HorseSlice Task2: 產馬帶 stable 繁育 ---")
+	var state := WorldState.new()
+	state.world = WorldData.new()
+	var tile := HexTileData.new()
+	tile.tile_id = 5 * 1000 + 5; tile.tile_pos = Vector2i(5, 5); tile.terrain = "plains"
+	tile.outpost_type = "civilian"; tile.outpost_level = 1; tile.outpost_owner = 0
+	tile.stable_level = 1
+	tile.resource_cap["mounts"] = 8   # 良質牧地標記（無 public horses）
+	state.world.tiles[tile.tile_id] = tile
+	var owner := TeamData.new()
+	owner.team_id = 0; _seed_pop(owner, 10); owner.resources = { "food": 1000.0 }
+	state.teams[0] = owner
+	var os := OutpostSystem.new()
+	# 0.5/day → 3 天累積 1.5 → ≥1 mount，且不需 public horses
+	for _d in range(4):
+		os.produce_stable_day(state, tile, 1.0)
+	assert(int(tile.public_storage.get("mounts", 0)) >= 1,
+		"產馬帶繁育應 ≥1，實際=%d" % int(tile.public_storage.get("mounts", 0)))
+	assert(int(tile.public_storage.get("horses", 0)) == 0, "繁育不需 horses（未消耗/未生）")
+	assert(int(owner.resources.get("mounts", 0)) == 0, "mounts 入公庫非 owner.resources")
+	assert(float(owner.resources["food"]) < 1000.0, "繁育耗草料")
+	print("HorseSlice Task2 OK (bred=%d)" % int(tile.public_storage.get("mounts", 0)))
+
+# Task3：mounts 入交易網 — 賣盤含 mounts → 他隊買 → 到手（守恆）。
+func _test_mounts_trade_one_flow() -> void:
+	print("--- HorseSlice Task3: mounts 貿易一單流通 ---")
+	assert("mounts" in OrderSystem._ORDER_ELIGIBLE_RES, "mounts 應入 order eligible")
+	var prev_enabled: bool = Probe.enabled
+	Probe.enabled = true; Probe.reset()
+	var state := WorldState.new(); state.world = WorldData.new()
+	var seller := TeamData.new(); seller.team_id = 0; seller.tile_pos = Vector2i(3, 3)
+	var sl := PersonData.new(); sl.id = 100; state.persons[100] = sl; seller.leader_id = 100
+	_seed_pop(seller, 5)
+	seller.resources = { "mounts": 30.0, "coin": 50.0 }
+	var s_tile := HexTileData.new(); s_tile.tile_pos = Vector2i(3, 3)
+	s_tile.outpost_owner = 0; s_tile.outpost_level = 1
+	state.world.tiles[3 * 1000 + 3] = s_tile
+	state.teams[0] = seller
+	# 買家 = 缺馬的一般消費隊（非商隊：買到的馬留在 resources 供騎乘,非轉手 inventory）
+	var buyer := TeamData.new(); buyer.team_id = 1; buyer.tile_pos = Vector2i(3, 3)
+	var bl := PersonData.new(); bl.id = 101; state.persons[101] = bl; buyer.leader_id = 101
+	_seed_pop(buyer, 5)
+	buyer.resources = { "mounts": 0.0, "coin": 2000.0 }
+	state.teams[1] = buyer; state.team_known[1] = []
+	var coin_before: float = float(seller.resources["coin"]) + float(buyer.resources["coin"])
+	var os := OrderSystem.new()
+	os.post_order(state, seller, "sell", "mounts", 20)
+	assert(s_tile.market_orders.size() == 1, "mounts sell 單登錄看板")
+	# 同格成交：缺馬買家 bid（短缺→高值）> 賣家 ask → 轉移；賣家 sell 單經 settle 沖銷
+	var inter := InteractionSystem.new()
+	inter._resolve_market(state, seller, buyer)
+	assert(float(buyer.resources.get("mounts", 0)) > 0.0,
+		"買家應到手 mounts，實際=%.1f" % float(buyer.resources.get("mounts", 0)))
+	assert(float(seller.resources["mounts"]) < 30.0, "賣家 mounts 減（守恆）")
+	var coin_after: float = float(seller.resources["coin"]) + float(buyer.resources["coin"])
+	assert(abs(coin_after - coin_before) < 0.001, "coin 守恆 %.2f→%.2f" % [coin_before, coin_after])
+	Probe.enabled = prev_enabled
+	print("HorseSlice Task3 OK (buyer mounts=%.1f)" % float(buyer.resources.get("mounts", 0)))
 
 func _test_auto_withdraw_on_active_task() -> void:
 	print("--- MountStorage Task4a: active task 自動 withdraw ---")
