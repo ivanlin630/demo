@@ -63,6 +63,9 @@ var prisoner_population: int = 0   # 俘虜（上限 = population；不計入戰
 #   { cohorts: { "tier|health": count }, morale: float, origin_faction: int, entry: String, treatment_history: Array }
 # 隔離持有（非戰力，不入 population getter，直到同化）。守恆轉移只經 AnonTierSystem.absorb_as_captive/assimilate_captives。
 var captive_groups: Array = []
+# ③ asm 看守強度：holder 撥多少比例 anon 當看守（連續 0..0.5，ManpowerSystem 每日決策寫）。
+# 驅動 flee 機率 + guard-cap（captive 上限 ∝ guard_n）。TEST VALUE 公式見 ManpowerSystem。
+var captive_guard_ratio: float = 0.0
 var famine_days: float = 0.0   # 連續斷糧（satisfaction<0.3）累積天數；飢餓致死鏈用（型別 float，語意=天）
 var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，日邊界歸零）
 # R2 食物流訊號（flow-not-stock 成長）：日均淨食物流 (income − consumption) EMA。

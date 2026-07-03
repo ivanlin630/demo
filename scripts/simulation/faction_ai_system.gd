@@ -24,7 +24,12 @@ const DEVIATION_RATE: float       = 0.05  # TEST VALUE — 子團偏離基礎概
 const SMALL_TEAM_RATIO: float     = 0.3   # TEST VALUE — pop < cap×0.3 視為小隊
 const SMALL_VS_LARGE: float       = 0.33  # TEST VALUE — pop < absorber.pop×0.33 才觸發合併
 const CONSOLIDATE_MAX_DIST: int   = 3     # TEST VALUE — 戰前集結距離上限（hex）
-const ATTACK_SCORE_THRESHOLD:  float = 0.3   # minimum attack_score to pursue 攻擊 goal
+const ATTACK_SCORE_THRESHOLD:  float = 0.25  # TEST VALUE — ②b 稍寬（0.30→0.25，餬口狼偶爾動手；archetype gate 仍擋知足者）
+# ②b 飢餓下修搶糧 readiness（僅獨立 prosperity raid 路；faction campaign/can_expand/directives 不吃）。TEST VALUE。
+const HUNGER_SLIDE_DAYS: float = 7.0   # food_days ≥ 此 → hunger_relief=1.0（正常門檻）；越餓越低
+const RELIEF_FLOOR: float      = 0.4   # hunger_relief 下限（餓兵搶糧最多把門檻降到 0.4×）
+# ②c prey 濾改分：同弱者（pop_est 近似）food_est 高者優先的 tie 帶寬。TEST VALUE。
+const PREY_POP_TIE_EPS: float  = 0.5
 const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
@@ -251,8 +256,15 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 		return
 
 	var threshold: float = calc_readiness_threshold(team, leader)
+	# ②b hunger_relief：只在此獨立 raid（prosperity）路降門檻——越餓越豁出去搶糧。
+	# faction 級開戰/campaign（commander directives / can_expand / faction goal 攻擊）維持原門檻，不吃此。
+	# 連續信號、零新閘：food_days ≥ HUNGER_SLIDE_DAYS → relief=1.0（原門檻）；餓 → 滑降至 RELIEF_FLOOR×。
+	var food_days: float = ResourceSystem.effective_food(state, team) \
+		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var hunger_relief: float = clampf(food_days / HUNGER_SLIDE_DAYS, RELIEF_FLOOR, 1.0)
+	var threshold_eff: float = threshold * hunger_relief
 	var readiness: float = calc_readiness(state, team)
-	if readiness < threshold:
+	if readiness < threshold_eff:
 		if Probe.enabled: Probe.bump("prosp.gate_readiness")
 		return
 
@@ -3111,6 +3123,7 @@ func _estimate_eta_to(state: WorldState, team: TeamData, target: Vector2i) -> in
 func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1
 	var best_pop: float = 999999.0
+	var best_food: float = -1.0
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
@@ -3120,10 +3133,13 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
 		var pop_est: float = float(bel.get("population_est", 0.0))
 		if pop_est >= float(team.population) * 0.7: continue   # belief 看似不夠弱→跳
-		# 食物門檻：tier2 有 food_est 才據；無估 → 不以食物擋（不知道→不排除，由 pop 弱點決定）
-		if bel.has("food_est") and float(bel.get("food_est", 0.0)) < 20.0: continue
-		if pop_est < best_pop:
+		# ②c：刪 food<20 硬濾（餓世界目標仍可俘——raid 收益=糧+人力+coin+裝備，窮村仍有人可俘）。
+		# 弱點主排序不變（pop_est 最低）；同弱者（pop 近似，PREY_POP_TIE_EPS 帶寬內）food_est 高者優先（輕 tie-break，不蓋 pop 主序）。
+		var food_est: float = float(bel.get("food_est", 0.0))
+		if pop_est < best_pop - PREY_POP_TIE_EPS \
+				or (absf(pop_est - best_pop) <= PREY_POP_TIE_EPS and food_est > best_food):
 			best_pop = pop_est
+			best_food = food_est
 			best_id = tid
 	return best_id
 

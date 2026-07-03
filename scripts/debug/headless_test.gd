@@ -32,6 +32,9 @@ func _initialize() -> void:
 	_test_mp1_treatment_trajectory()
 	_test_mp1_treatment_driver()
 	_test_mp1_believability()
+	_test_asm_feed_starve()
+	_test_asm_guard_flee()
+	_test_asm_guard_cap()
 	_test_cap_retreat_captures_wounded()
 	_test_promote_success()
 	_test_promote_insufficient_exp()
@@ -14268,12 +14271,12 @@ func _test_mp1_treatment_driver() -> void:
 	var s := WorldState.new()
 	# 野心高+殘忍低 → 厚待（壯兵意圖）
 	var h := _mk_holder_with_captive(s, 8, {"野心": 0.9, "殘忍": 0.1, "貪婪": 0.3})
-	var tr: String = ManpowerSystem.decide_treatment(s, h, h.captive_groups[0])
+	var tr: String = ManpowerSystem.decide_treatment(s, h, h.captive_groups[0])["treatment"]
 	assert(tr == "厚待", "[mp1] 野心 leader 應厚待(壯兵)，得 %s" % tr)
 	# 殘忍高 → 苛待
 	var s2 := WorldState.new()
 	var h2 := _mk_holder_with_captive(s2, 8, {"野心": 0.3, "殘忍": 0.9, "貪婪": 0.5})
-	var tr2: String = ManpowerSystem.decide_treatment(s2, h2, h2.captive_groups[0])
+	var tr2: String = ManpowerSystem.decide_treatment(s2, h2, h2.captive_groups[0])["treatment"]
 	assert(tr2 == "苛待", "[mp1] 殘忍 leader 應苛待，得 %s" % tr2)
 	print("[mp1] treatment driver OK")
 
@@ -14306,6 +14309,62 @@ func _test_mp1_believability() -> void:
 	assert(breakaway_pop <= 12, "[mp1] breakaway pop 竟 > 原 captive(憑空增)")
 	assert(not _contains_substr(InvariantAudit.check(s), "cohort"), "[mp1] believability cohort 不自洽")
 	print("[mp1] believability OK (captive 非戰力/苛待暴動非白吃/provenance/breakaway %d≤12)" % breakaway_pop)
+
+# ③ asm 做深：厚待+糧足→同化如期(且真掏糧)；厚待+斷糧→feed_quality 低→morale 掉(厚待失效)。
+func _test_asm_feed_starve() -> void:
+	# (a) 糧足：厚待同化 + holder 食實際被扣（captive 真吃糧）
+	var s := WorldState.new()
+	var h := _mk_holder_with_captive(s, 8)   # resources food=9999
+	var food0: float = float(h.resources.get("food", 0.0))
+	var cap0: int = AnonTierSystem.total_captives(h)
+	var pop0: int = h.population
+	for _i in 60:
+		ManpowerSystem.tick_captives(s, h, "厚待")
+	assert(h.captive_groups.is_empty(), "[asm] 糧足厚待未同化")
+	assert(h.population == pop0 + cap0, "[asm] 糧足厚待同化後 pop 未漲")
+	assert(float(h.resources.get("food", 0.0)) < food0, "[asm] 厚待未真掏糧(食未扣=免費 flag 回潮)")
+	# (b) 斷糧：厚待名存實亡 → morale 掉（不升）
+	var s2 := WorldState.new()
+	var h2 := _mk_holder_with_captive(s2, 8)
+	h2.resources = {"food": 0.0}   # 斷糧
+	var m0: float = float(h2.captive_groups[0].get("morale", 0.0))
+	for _i in 5:
+		if h2.captive_groups.is_empty(): break
+		ManpowerSystem.tick_captives(s2, h2, "厚待")
+	# group 仍在（5 tick 未到 revolt/flee 閾）且 morale 下降（斷糧厚待=虐待）
+	assert(not h2.captive_groups.is_empty(), "[asm] 斷糧 5tick 內不應脫離")
+	assert(float(h2.captive_groups[0].get("morale", 0.0)) < m0, "[asm] 斷糧厚待 morale 竟未掉(feed_quality 未咬)")
+	print("[asm] feed/starve OK (糧足同化真掏糧 / 斷糧厚待失效 morale 掉)")
+
+# ③ asm 做深：看守厚 → 逃機率壓低（連續，非開關）。
+func _test_asm_guard_flee() -> void:
+	var s := WorldState.new()
+	var h := _mk_holder_with_captive(s, 8)   # total_pop(戰力)=10、captive=8
+	var morale: float = 0.1
+	h.captive_guard_ratio = 0.5   # 看守厚
+	var p_high: float = ManpowerSystem._flee_probability(h, morale)
+	h.captive_guard_ratio = 0.0   # 看守薄
+	var p_low: float = ManpowerSystem._flee_probability(h, morale)
+	assert(p_high < p_low, "[asm] 看守厚未壓低逃機率 %.3f≮%.3f" % [p_high, p_low])
+	assert(p_high >= 0.0 and p_low <= ManpowerSystem.P_FLEE_MAX, "[asm] 逃機率越界")
+	print("[asm] guard→flee OK (看守厚 p=%.3f < 看守薄 p=%.3f)" % [p_high, p_low])
+
+# ③ asm 做深：guard-cap — captive 超 cap 強制處置超額（逼決策別囤），守恆。
+func _test_asm_guard_cap() -> void:
+	var s := WorldState.new()
+	var h := _mk_holder_with_captive(s, 12)   # total_pop=10、captive=12
+	h.captive_guard_ratio = 0.1   # guard_n=10×0.1=1 → cap=floor(1×3)=3
+	var world_pop0: int = _world_total_pop(s)   # holder 戰力 + captive（captive 不入 population，但 _world_total_pop 只計 population）
+	ManpowerSystem._enforce_guard_cap(s, h)
+	var after: int = AnonTierSystem.total_captives(h)
+	assert(after <= 3, "[asm] guard-cap 未壓到 cap：total_captives=%d > 3" % after)
+	assert(after >= 1, "[asm] guard-cap 竟清空（過度處置）：%d" % after)
+	# 守恆：脫離者去向=流民隊(breakaway)或鎮壓亡(真死)，不憑空。cohort 自洽。
+	assert(not _contains_substr(InvariantAudit.check(s), "cohort"), "[asm] guard-cap 後 cohort 不自洽")
+	# breakaway 隊釋放 pop（進 world population）≤ 被處置量
+	var breakaway_pop: int = _world_total_pop(s) - world_pop0
+	assert(breakaway_pop >= 0 and breakaway_pop <= 12, "[asm] guard-cap breakaway pop 越界 %d" % breakaway_pop)
+	print("[asm] guard-cap OK (12 captive → cap 3，處置後留 %d，釋放 %d)" % [after, breakaway_pop])
 
 # ── 失能-capture helpers (Task1: 潰逃勝方俘敗方 wounded) ──
 # winner：leader 統領足 → pop_cap 大（guard 餘力足）；anon healthy 補到 pop n
