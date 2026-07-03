@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 第二波merged——②b/②c達標(T36 raid 0→37-54/月,hunger_relief不誤放,不over-war);★③asm誠實呈報:completion 1→0反向(spec假設證偽——「厚待免費」本來就假,真掏糧後食貧狼付不起25天餵養=以戰養戰raid ROI<餵養成本);裁「餬口狼該不該養得起俘虜」+4值旋鈕;提議斷①平行燒
 ---
 
