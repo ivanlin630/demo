@@ -521,6 +521,8 @@ func _initialize() -> void:
 	_test_team_intel_prune_on_erase()
 	# ── seeded warring harness：同 seed 逐點重現 ──
 	_test_seeded_warring_reproducible()
+	# ── observer slice：ambient 事件（Task0）──
+	_test_observer_ambient_events()
 	# ── R2 intent/archetype 共源（desync=0）+ 分布 sanity ──
 	_test_r2_disposition_delegation()
 	_test_r2_archetype_tiebreak()
@@ -16069,3 +16071,30 @@ func _test_r1b_faction_id_deceive() -> void:
 	var pick: int = FactionAISystem.find_prosperity_prey(st, atk, st.persons[100])
 	assert(pick == 2, "誤報村 own=0.15 應被避開（嚇阻生效），實得 %d" % pick)
 	print("[OK] _test_r1b_faction_id_deceive")
+
+# ════════════════════════════════════════════════════════════
+# observer slice（觀測 GUI）：Task0 emit_ambient 隔離
+# ════════════════════════════════════════════════════════════
+
+# observer slice Task0：emit_ambient 進 global_messages、不進 team_known（RNG 隔離前提）
+func _test_observer_ambient_events() -> void:
+	print("--- observer Task0：emit_ambient 隔離 ---")
+	var state := WorldState.new()
+	var t := TeamData.new()
+	t.team_id = 7
+	t.tile_pos = Vector2i(3, 3)
+	state.teams[7] = t
+	var before_known: int = state.team_known.get(7, []).size() if state.team_known.has(7) else 0
+	var m: MessageData = SimMessageSystem.new().emit_ambient(state, "captives_taken",
+		"Team7 俘獲 Team8 5人", t, {"origin": "7", "loser": "8", "count": 5})
+	assert(state.observer_messages.size() == 1, "emit_ambient 未進 observer_messages")
+	assert(state.global_messages.is_empty(),
+		"emit_ambient 竟進 global_messages（size 被借作 order_id 空間，會擾訂單行為）")
+	assert(m.type == "captives_taken" and m.params["count"] == 5, "emit_ambient 欄位錯")
+	var after_known: int = state.team_known.get(7, []).size() if state.team_known.has(7) else 0
+	assert(after_known == before_known, "emit_ambient 竟進 team_known（會擾 RNG 流）")
+	assert(SimMessageSystem.MSG_TTL_BY_TYPE.has("assim_complete")
+		and SimMessageSystem.MSG_TTL_BY_TYPE.has("revolt")
+		and SimMessageSystem.MSG_TTL_BY_TYPE.has("flee")
+		and SimMessageSystem.MSG_TTL_BY_TYPE.has("captives_taken"), "TTL key 缺")
+	print("observer ambient events OK")
