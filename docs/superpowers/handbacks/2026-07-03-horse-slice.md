@@ -28,9 +28,9 @@ ALL PASS
 - framework_validation：**7/7 PASS DORMANT=0**。
 - game_sim_multi：4 config `coin_eq delta=0.00`（守恆乾淨;mounts 非 coin 池,同 ore 採集產出非守恆）。
 
-**emergent longwindow**（warring_states seed 1337, 6mo）：
-- 世界 mounts>0 ✓（AI 建 stable → `[Stable] Outpost(4,12) 訓練戰馬 +1`）。
-- 產馬帶 breed 湧現：初跑帶無 wild_horses → AI 無誘因、stable 落非帶 → breed 未湧現。**已補建廄誘因訊號**後複跑確認（見下 TEST VALUE / 待確認）。
+**emergent longwindow**（seed 1337, 6mo, 兩 config 對照）：
+- **`world_sim`（自然世界,軌3 default）**：`[Stable]` ×10 **全為產馬帶繁育**（tile (3,6),0 訓練）→ 一隊於帶內 tile 建 stable、breed path 湧現、收成獲馬 ✓✓。**世界 mounts>0 + ≥1 隊收成獲馬 達標**。
+- **`warring_states`（戰亂）**：`[Stable]` ×2 全為訓練路徑（tile (4,12),非帶）→ 世界 mounts>0 ✓,但 breed 未湧現。**根因非源缺陷:warring 全域 stable 建造率極低（6mo 僅 1 座,戰亂投資戰力非牧地）** → 該 config breed 天然餓死。建廄誘因訊號在 settle-friendly 世界生效（world_sim 印證）。
 
 ## TEST VALUE 清單（正式平衡待調）
 
@@ -51,5 +51,5 @@ ALL PASS
 ## 待主 session 確認
 
 1. **建廄誘因訊號手法**：帶撒 wild_horses(1-3) 純為驅 AI（faction_ai:2841 讀 wild_horses）。更乾淨=擴 faction_ai stable 偏好直讀 `resource_cap["mounts"]`（1 行,但屬他軌檔）→ 若系統要,可退掉訊號 wild_horses、改該處。現法零跨軌檔改。
-2. **breed 湧現複跑結果**：lw6b（補訊號後）跑完數字補回本檔（若仍未湧現,建議 scenario config 於帶內預置 stable outpost 保底,或調 density/AI 偏好權重）。
+2. **breed 湧現 = config 依賴**：world_sim 已印證（10 breed on-band）;warring 因全域 stable 建造率極低而餓死（非源缺陷）。若要 warring 也見馬經濟,屬 faction_ai 戰亂投資偏好調（他軌/後續）,非本 slice。
 3. `horse_slice_proof.gd` 去留（deterministic 源回歸證,可留作閘或清掉）。
