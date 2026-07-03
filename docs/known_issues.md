@@ -16,7 +16,7 @@
 ### 燒進度（2026-07-01 首三軌 merged）
 - ✅ **首燒 戰略 intent 統一 done**（F-D1/D2/D3/D4/D6 收；致富錨接上、CONQUER 0→1）。**follow-up**：①**征服名vs實斷點**(unified 好戰獨立 想=征服但 winner=掠奪,`_decide_unified` 掠奪 option 搶在 prosperity attack 前 → 需讓征服 intent 真驅乾淨攻擊 or 掠奪納征服 affordance) ②**F-D5 unified-tag subteam 進不了 engine**(未收) ③擴張 scorer TEST VALUE(0.3+野心*0.3)待平衡校 ④solo driver 未進全隊持久 ledger(Pattern B 所有權域另軌)。
 - ✅ **單寫者 slice1 coin 守恆 done**（F-S8/S1 coin 部分：全池 audit + person.coin 單寫者 + mint ledger；順修 mint-cap 燒 ore 舊項）。**follow-up**：`_route_extinct_assets` no-tile LEAK(`faction_ai:1753`,radius 全無有效格 coin 憑空丟失,正常小地圖不觸發)納下 slice or 標永久豁免。
-- **單寫者剩餘 slice（未做，第3不變量 enforce 前提）**：tile.public_storage/tile.resources 一般資源 bank(granary/自然池)、**Pattern B 全域 driver-ledger 落地**(現全 5 bank reason stub)、roster(named_members 59 site)/combat_target/tags/team-creation chokepoint、succession 統一。
+- **單寫者剩餘 slice（第3不變量 enforce 前提）**：~~tile.public_storage/tile.resources 一般資源 bank(granary/自然池)~~ **✅ done（2026-07-03 S1 tile-bank，TileBank chokepoint 收編 ~40 直寫站點 + mint 守恆 connect + off-map sink，pointwise CLEAN×3 seed）**、**Pattern B 全域 driver-ledger 落地**(現全 6 bank reason stub;TileBank 已帶 record_driver reason)、roster(named_members 59 site)/combat_target/tags/team-creation chokepoint、succession 統一。**剩餘另型欄位（非資源量,未納 TileBank）**：facility levels(outpost/mint/stable/farming_level)、stable_progress、construction_team_id、abandoned_coin(scalar,已 CoinAudit)、resource_cap(靜態)。
 - **BEG/JOIN 修（follow-up，探針已證）**：JOIN=中(66/月空轉,需新 resolver + combat_target 社交語意拆)、BEG=低(被197擋)。**建議合併一次修**(combat_target「社交 target≠戰鬥 target」=共根)。BEG endgame-scarcity runtime 頻率未實測(機制已證死,頻率次要)。
 
 ### 第二批燒進度（2026-07-01 三軌 merged）
@@ -64,9 +64,9 @@
 - **headless baseline 既有 FAIL：`[FAIL] 弱目標未加入攻擊 goal`（pre-existing，非 G3/讀B 引入）**：已驗 main dd26f67 baseline 即此 1 FAIL（G3/foraging 兩 branch 皆 1 FAIL 同源）。locus = commander-v2 `_update_goals` 攻擊 goal 未對弱目標開（belief/goal-emit 相關，非本輪 5 leak）。待另案追（確認為 bug or 刻意行為）。
 - **G3 1c 施援同 faction snapshot 豁免 = 可選增益（裁定：維持 belief-strict）**：`_find_aid_target` 對同 faction 成員現走 belief-strict（無本隊 team_intel belief→跳過），未讀 faction `known_member_states` snapshot（leader 共享 belief）。**不違 provenance 不變量**（snapshot 本身 = best_estimate 派生、非 god-view）→ 現行正確且保守。snapshot 豁免=增益非修正，列可選後續，不擴 scope。
 
-- **anon_treasury 滅隊 off-map leak（既有,degenerate only,2026-06-22 AnonTreasuryBank 揭）**：`faction_ai_system.gd:~1456`——隊死於 off-map 且 `_nearest_valid_tile`(radius-12)找不到 tile → 公庫 coin 無處傾倒、靜默丟失（命名 `AnonTreasuryBank.reset(team,"extinct_no_tile_LEAK")`）。**coin_eq/CoinAudit 抓不到**（隊正被 erase，丟的是「該路由到 tile 的」非「留在隊的」，audit 對 state.teams 求和 delta 仍 0）。正常地圖不觸發（radius-12 內必有 tile）。**小修方向**：找不到 tile 時擴大搜尋 / 倒入全域 sink / 記 ledger。非阻塞。
+- ✅ **anon_treasury 滅隊 off-map leak（已修 2026-07-03 S1 tile-bank Task3）**：`_route_extinct_assets` no-tile 分支改記顯性 sink `WorldState.offmap_extinct_coin`（reason=`extinct_no_tile` + record_driver），`CoinAudit.total` 全池納此池 → 守恆閉合、不再靜默丟失。測 `_test_extinct_offmap_coin_ledger`。（原：隊死於 off-map 且 `_nearest_valid_tile` radius-12 找不到 tile → coin 憑空丟失，degenerate only。）
 
-- **mint coin-cap 燒 ore off-ledger（pre-existing，G1a 首 fire 才浮現，2026-06-23 opus 終審揭）**：`outpost_system.gd:~228/241` `_tick_mint` 用 `minf(cur_coin+coin_added, cap)` clamp coin 到 storage cap——若鑄幣 tile 的 coin vault 飽和，ore 被消耗但 coin 被 clamp 截掉 → coin_eq 損失（ore 燒掉沒換 coin）。G1a 前 mint 從沒 fire 故未觸；G1a 讓 mint 真 fire → 長跑可能浮現。**小修**：coin 滿 cap 時跳過/部分消耗 ore（別燒）。非阻塞（現 run delta=0）。
+- ✅ **mint coin-cap 燒 ore off-ledger（已修 + 固化 2026-07-03 S1 tile-bank Task2）**：`_tick_mint` 前置 room-cap（`if room<=0: return` + `convert` 由 `minf(rate,room)/RATIO` 限量）→ 滿 cap 不燒 ore、有餘裕按可鑄量部分耗 ore。coin/ore 寫入收編走 `TileBank.set_amt`（reason=mint/mint_consume_*）。測 `_test_mint_cap_no_ore_burn` 固化（滿 cap 不燒 + delta==minted）。
 
 ## affordance 真實性債（commander-unify v2 盤點，2026-06-28）
 
