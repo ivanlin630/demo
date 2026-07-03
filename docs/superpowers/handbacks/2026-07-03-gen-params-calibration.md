@@ -1,4 +1,5 @@
 # Hand Back: gen 參數校準（狼密度 + 開局緩坡）
+> Status: consumed（2026-07-03 merged;月2/3 餘裕薄=系統裁收[15%閘是系統 TEST 判準,藍圖 bar=定性緩坡無滅團潮,seed-robust 於二考第二 seed 驗];warring -28% 收[考試賽道非校準軌]）
 
 Plan: `docs/superpowers/plans/2026-07-03-gen-params-calibration.md`
 Branch: `feat/gen-params-calibration`
