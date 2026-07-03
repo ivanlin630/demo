@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: gen 參數裁——①狼密度=a(roving拉高,TEST VALUE校,每seed≥1狼且知足仍多數;仍荒才議b)②開局饑荒=c實作形(pop~1.2×+糧倉buffer緩坡,開局屠殺=無因果噪音非戲);強制閘CI-scan續推→軌3二考
 ---
 
