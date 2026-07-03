@@ -1,4 +1,5 @@
 # Hand Back: 征服收益鏈（佔村點火）
+> Status: consumed（2026-07-03 merged,系統收編）
 
 分支：`feat/conquest-yield-chain`　commit `afe72de`
 

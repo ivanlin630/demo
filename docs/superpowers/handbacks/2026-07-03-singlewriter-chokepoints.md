@@ -1,4 +1,5 @@
 # Hand Back: 單寫者收齊 B — chokepoint 掃收（S5/S6/S9/S11/S12）
+> Status: consumed（2026-07-03 merged,系統收編）
 
 branch: `feat/singlewriter-chokepoints`（3 commits + 本 handback）
 spec/plan: `2026-07-03-singlewriter-chokepoints-{design,}.md`
