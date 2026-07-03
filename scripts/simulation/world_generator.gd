@@ -32,11 +32,15 @@ const PREDATOR_MAX: int = 2
 
 # 產馬帶（strategic 不對稱地基：戰馬集中一「帶」而非均撒 → 中原缺馬 vs 邊地產馬）。
 # resource_cap["mounts"] = 良質牧地標記（stable 直接繁育戰馬,見 OutpostSystem.produce_stable_day）。
-# 不動 wild_horses 分佈（那條有獨立稀有度不變量）——本帶自足走 breed path。全 TEST VALUE。
+# 另撒「一般」wild_horses(1-3,無 resource_cap)= 純 AI 建馬廄誘因訊號（faction_ai stable
+# 需求偏好讀 `_nearby_resource(wild_horses)>0`）→ 驅 NPC 於帶內建 stable → breed path 有機會醒。
+# 訊號量刻意 <4 = 非富點,不入 resource_cap → 不擾「野馬草原 ~3%」稀有度不變量。全 TEST VALUE。
 const HORSE_BAND_HALF_WIDTH: int = 2         # 產馬帶半寬（tile_pos.x 欄）
 const HORSE_BAND_DENSITY: float = 0.55       # 帶內 plains 成產馬地機率
 const HORSE_BAND_CAP_MIN: int = 6            # resource_cap["mounts"] 下限
 const HORSE_BAND_CAP_MAX: int = 12           # resource_cap["mounts"] 上限
+const HORSE_BAND_SIGNAL_WILD_MIN: int = 1    # 帶內建廄誘因訊號 wild_horses 下限（<4 = 非富點）
+const HORSE_BAND_SIGNAL_WILD_MAX: int = 3    # 上限
 
 func generate(state: WorldState, config: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
@@ -160,6 +164,9 @@ func _apply_horse_band(tiles_ref: Dictionary, rng: RandomNumberGenerator, radius
 
 func _seed_horse_tile(t, rng: RandomNumberGenerator, mult: float) -> void:
 	t.resource_cap["mounts"] = int(rng.randi_range(HORSE_BAND_CAP_MIN, HORSE_BAND_CAP_MAX) * mult)
+	# 建廄誘因訊號：僅在 tile 無既有 wild_horses 時撒「一般」量（保留既有富點,不入 resource_cap）
+	if int(t.resources.get("wild_horses", 0)) == 0:
+		t.resources["wild_horses"] = rng.randi_range(HORSE_BAND_SIGNAL_WILD_MIN, HORSE_BAND_SIGNAL_WILD_MAX)
 
 func _random_terrain(rng: RandomNumberGenerator) -> String:
 	var roll: int = rng.randi_range(0, 99)
