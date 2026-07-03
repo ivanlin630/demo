@@ -524,6 +524,8 @@ func _initialize() -> void:
 	_test_r1b_war_capability_relief()
 	_test_r1b_trip_food_floor()
 	_test_r1b_faction_id_deceive()
+	# ── 斷①：打草穀 + 不換腦 enforce ──
+	_test_raid_continuity_member()
 	quit()
 
 # Task 3：tile→teams 共用空間索引一致性（索引查 == 全掃結果，零行為變前提）
@@ -15622,12 +15624,13 @@ func _test_r1b_war_capability_relief() -> void:
 	st_a.team_discovered[0] = [1, 2]
 	var pick_a: int = FactionAISystem.find_prosperity_prey(st_a, atk_a, st_a.persons[100])
 	assert(pick_a == 2, "獨立餬口者應避富屬村選貧獨立，實得 %d" % pick_a)
-	# B) established faction + HEGEMON rung 攻擊者 → 富屬村罰減輕（仍可中選）
+	# B) established faction LEADER + HEGEMON rung 攻擊者 → 富屬村罰減輕（統領扛得起戰爭 → 仍可中選）
+	# ★斷①B：war_capability 減免只給 faction leader（統領本人）或獨立隊——leader_team_id==team_id 才減免。
 	var sb: Array = _r1b_scene()
 	var st_b: WorldState = sb[0]; var atk_b: TeamData = sb[1]
 	atk_b.faction_id = 0
 	atk_b.ambition_rung = AmbitionLadder.RUNG_HEGEMON
-	var f0 := FactionData.new(); f0.faction_id = 0; f0.is_established = true; f0.member_team_ids = [0]
+	var f0 := FactionData.new(); f0.faction_id = 0; f0.is_established = true; f0.member_team_ids = [0]; f0.leader_team_id = 0
 	st_b.factions[0] = f0
 	_r1b_add_prey(st_b, 1, Vector2i(2, 0), 7)
 	_r1b_add_prey(st_b, 2, Vector2i(0, 2), -1)
@@ -15635,8 +15638,53 @@ func _test_r1b_war_capability_relief() -> void:
 	BeliefSystem.record_claim(st_b, 0, 2, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": -1}, 1.0, false)
 	st_b.team_discovered[0] = [1, 2]
 	var pick_b: int = FactionAISystem.find_prosperity_prey(st_b, atk_b, st_b.persons[100])
-	assert(pick_b == 1, "established+HEGEMON 應可選富屬村（own=0.75），實得 %d" % pick_b)
+	assert(pick_b == 1, "established+HEGEMON LEADER 應可選富屬村（own=0.75），實得 %d" % pick_b)
+	# C) 同 established+HEGEMON 但攻擊者為【非 leader 成員】 → 無戰爭能力減免（own=WAR_COST_BASE）→ 避富屬村選貧獨立
+	# ★斷①B 核心：部將 day-op 打別家屬村=拖全派系下水，須走統領令；個體 raid 對 believed-owned 幾乎不中選。
+	var sc: Array = _r1b_scene()
+	var st_c: WorldState = sc[0]; var atk_c: TeamData = sc[1]
+	atk_c.faction_id = 0
+	atk_c.ambition_rung = AmbitionLadder.RUNG_HEGEMON
+	var fc := FactionData.new(); fc.faction_id = 0; fc.is_established = true; fc.member_team_ids = [0, 5]; fc.leader_team_id = 5
+	st_c.factions[0] = fc   # leader = team5（≠ 攻擊者 team0）→ 攻擊者是成員非 leader
+	_r1b_add_prey(st_c, 1, Vector2i(2, 0), 7)
+	_r1b_add_prey(st_c, 2, Vector2i(0, 2), -1)
+	BeliefSystem.record_claim(st_c, 0, 1, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": 7, "coin_est": 300.0}, 1.0, false)
+	BeliefSystem.record_claim(st_c, 0, 2, 0, "親見", {"population_est": 4, "armed_est": 4, "faction_id": -1}, 1.0, false)
+	st_c.team_discovered[0] = [1, 2]
+	var pick_c: int = FactionAISystem.find_prosperity_prey(st_c, atk_c, st_c.persons[100])
+	assert(pick_c == 2, "非 leader 成員無減免 → 避富屬村選貧獨立，實得 %d" % pick_c)
 	print("[OK] _test_r1b_war_capability_relief")
+
+# 斷①：打草穀（faction 成員 raid 連續性）+ 不換腦（directive idle-guard 壓個人 raid）
+func _test_raid_continuity_member() -> void:
+	print("--- 斷①: 打草穀(成員候選) + 不換腦(directive 壓 raid) ---")
+	var fai := FactionAISystem.new()
+	# A) 打草穀：faction 成員(非 leader)過 prosperity 候選；子隊(parent≠-1)擋；獨立過
+	var st0 := WorldState.new()
+	var m := TeamData.new(); m.team_id = 1; m.faction_id = 3; m.parent_team_id = -1
+	var sub := TeamData.new(); sub.team_id = 2; sub.faction_id = 3; sub.parent_team_id = 1
+	var ind := TeamData.new(); ind.team_id = 4; ind.faction_id = -1; ind.parent_team_id = -1
+	assert(fai._is_prosperity_candidate(st0, m), "faction 成員應過候選（打草穀）")
+	assert(not fai._is_prosperity_candidate(st0, sub), "子隊(parent≠-1)不主動發動")
+	assert(fai._is_prosperity_candidate(st0, ind), "獨立隊過候選")
+	# B1) 不換腦：無 directive（idle）→ 成員 raid 設得進
+	var sa: Array = _attack_gate_scene(0.0)   # team0 faction_id=0 FORCE 高 readiness
+	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
+	fai._evaluate_prosperity_attack(st_a, tm_a)
+	assert(tm_a.current_task == TeamData.TASK_ATTACK and tm_a.prosperity_target_id == 1,
+		"無 directive → 成員 raid 設得進，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
+	# B2) 不換腦：faction directive 在（成員非 idle）→ idle-guard 擋個人 raid（task 不變）
+	# ★執行壓層零新碼：directive 於 loop1 先設 task → 成員 loop3 非 idle → _evaluate_prosperity_attack 早退。
+	var sb: Array = _attack_gate_scene(0.0)
+	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
+	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
+	TaskArbiter.try_set(st_b, tm_b, TeamData.TASK_ATTACK, Vector2i(5, 5), TaskArbiter.PRIO_FACTION, "faction_goal")
+	fai._evaluate_prosperity_attack(st_b, tm_b)
+	assert(tm_b.task_reason == "faction_goal" and tm_b.move_target == Vector2i(5, 5),
+		"faction directive 在 → 成員個人 raid 被 idle-guard 壓（task 不變），實際 reason=%s move=%s" % [tm_b.task_reason, str(tm_b.move_target)])
+	print("[OK] _test_raid_continuity_member")
 
 # ②路程糧：糧 0 → trip 壓到下限 0.2 但非零 → 仍可中選（絕不歸零，糧緊只壓權重）
 func _test_r1b_trip_food_floor() -> void:

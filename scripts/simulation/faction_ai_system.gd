@@ -192,13 +192,24 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		elif int(bel.get("faction_id", -1)) == -1:
 			own = 1.0                   # believed 獨立：一次 raid，可打
 		else:
-			# believed 屬 faction：基準罰 + 攻擊者戰爭能力減免（全既有信號讀取，無新後勤 state）
-			var att_established: bool = team.faction_id != -1 \
-				and state.factions.has(team.faction_id) \
-				and state.factions[team.faction_id].is_established
-			var war_capability: float = (0.3 if att_established else 0.0) \
-				+ float(team.ambition_rung) / float(AmbitionLadder.RUNG_HEGEMON) * 0.3
-			own = minf(WAR_COST_BASE + war_capability, 1.0)
+			# believed 屬 faction：基準罰 + 戰爭能力減免。
+			# ★統領令語意（斷①B，非身分切路徑）：war_capability 減免只給「扛得起 faction 級戰爭後果的人」——
+			# faction leader（統領本人，令即他出）或獨立隊（自家 stakes 自家扛）。非 leader 成員 day-op 對
+			# believed-owned 恆 WAR_COST_BASE（幾乎不中選）＝打別家屬村＝拖全派系下水，須走統領令
+			# （faction directive 指定 target，不經 find_prosperity_prey）。誰扛得起後果誰才減免＝
+			# 連續 means-end 權重，非按身分切決策路徑。
+			var can_bear_war: bool = team.faction_id == -1 \
+				or (state.factions.has(team.faction_id) \
+					and state.factions[team.faction_id].leader_team_id == team.team_id)
+			if can_bear_war:
+				var att_established: bool = team.faction_id != -1 \
+					and state.factions.has(team.faction_id) \
+					and state.factions[team.faction_id].is_established
+				var war_capability: float = (0.3 if att_established else 0.0) \
+					+ float(team.ambition_rung) / float(AmbitionLadder.RUNG_HEGEMON) * 0.3
+				own = minf(WAR_COST_BASE + war_capability, 1.0)
+			else:
+				own = WAR_COST_BASE   # 非 leader 成員：無戰爭能力減免（day-op 幾乎不打屬村）
 		var logistics: float = trip * own
 		var score: float = (richness * greed + weakness * cruelty + border * ambition) \
 			/ eta_days * logistics
@@ -302,11 +313,13 @@ func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
 		if _was_scout: Probe.bump("g3.scout_converge")
 		# 征服名實探針：真征服鏈起點（prosperity-attack→失能-capture→吸收）走到。
 		Probe.bump("conq.prosperity_reached")
-		# R1b 驗收哨：獨立隊攻 believed-faction-owned 目標（③own 罰應壓低此量，非歸零）
-		if Probe.enabled and team.faction_id == -1:
+		# R1b 驗收哨：攻 believed-faction-owned 目標（③own 罰應壓低此量，非歸零）。
+		# 獨立隊 vs faction 成員分計（斷①B：成員 day-op 對 believed-owned 恆 WAR_COST_BASE=幾乎不中選 → 應≈0）。
+		if Probe.enabled:
 			var _bel_own: Dictionary = BeliefSystem.best_estimate(state, team.team_id, prey_id)
 			if _bel_own.has("faction_id") and int(_bel_own.get("faction_id", -1)) != -1:
-				Probe.bump("conq.indep_atk_believed_owned")
+				Probe.bump("conq.indep_atk_believed_owned" if team.faction_id == -1 \
+					else "conq.member_atk_believed_owned")
 		print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
 			team.team_id, prey_id, score])
 
@@ -433,11 +446,11 @@ func _flee_target(state: WorldState, team: TeamData, threat: TeamData) -> Vector
 		return pos
 	return team.tile_pos
 
-func _is_prosperity_candidate(state: WorldState, team: TeamData) -> bool:
-	if team.parent_team_id != -1: return false   # 子隊不主動發動
-	if team.faction_id == -1: return true          # 獨立團
-	var f = state.factions.get(team.faction_id)
-	return f != null and f.leader_team_id == team.team_id
+func _is_prosperity_candidate(_state: WorldState, team: TeamData) -> bool:
+	# 打草穀（斷①A）：faction 成員也過候選（部將個體 raid=五代常態）。子隊(parent≠-1)仍擋——
+	# 子隊非自主 leader。領導/成員之別不切候選路徑；stakes 歸屬語意在 find_prosperity_prey 的 ③own 權重管
+	# （非 leader 成員 day-op 對 believed-owned 恆 WAR_COST_BASE=幾乎不中選，打屬村須走統領令 directive）。
+	return team.parent_team_id == -1
 
 # 事件觸發立即重評（新發現 / pop 暴跌 / 性格改變）
 static func mark_prosperity_recheck(state: WorldState, observer_team_id: int) -> void:
@@ -676,6 +689,18 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			else:
 				_evaluate_independent_strategy(state, team)
 				_evaluate_solo(state, team)
+		else:
+			# faction 成員（非子隊，斷①C「入勢力不換腦」）：個人戰略層對每個 leader 永遠跑——
+			# faction 身分=context/term（faction_duty），非決策路徑開關。只跑戰略 intent 層
+			# （建國 gate 對成員 can_found=false；征服 intent → defer 打草穀 raid 路），**不呼
+			# _evaluate_solo**（個人日常全域=後續 F-D 矩陣格，避與 _assign_tasks 派工大面積互搏，一次一縫）。
+			# 執行壓層零新碼：faction directive 在 → 成員非 idle → _evaluate_prosperity_attack idle-guard 擋。
+			if SimRunner.phase_timing:
+				var _ts: int = Time.get_ticks_usec()
+				_evaluate_independent_strategy(state, team)
+				_fai_pht("loop2.member_strategy", _ts)
+			else:
+				_evaluate_independent_strategy(state, team)
 
 	if SimRunner.phase_timing: _t = Time.get_ticks_usec()
 	var sub_sys := SubteamSystem.new()
@@ -1067,7 +1092,9 @@ func _set_solo(state: WorldState, team: TeamData, itype: String, why: String, mo
 # 稀有 by construction：野心高 + 累積 + 路徑三閘 → 多數獨立隊守成（非建國潮）。
 func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id and state.player_id != -1: return
-	if team.faction_id != -1: return            # 只獨立隊（成 faction 後 commander-v2 接手）
+	# 斷①C「入勢力不換腦」：個人戰略層對每個 leader 永遠跑（含 faction 成員）——身分=權重非路徑切換。
+	# 成員的建國由 can_found=false 擋（fid≠-1 不重複建國）；征服 intent → defer 打草穀 raid 路。
+	# 執行壓層：faction directive 在 → 成員非 idle → _evaluate_prosperity_attack idle-guard 擋個人 raid（零新碼）。
 	if team.parent_team_id != -1: return        # 子隊不自建國
 	if team.combat_target != -1: return         # 戰鬥中不重評
 	var leader: PersonData = state.persons.get(team.leader_id)
@@ -1136,7 +1163,8 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 		and ResourceSystem.effective_food(state, team) >= float(team.population) \
 			* ResourceSystem.FOOD_PER_PERSON_PER_DAY * FOUND_FOOD_SURPLUS_DAYS
 	var path_ok: bool = ally_id != -1 or prey_id != -1
-	var can_found: bool = ambition >= AMBITION_FOUND_MIN and accum_ok and path_ok and not busy
+	# 成員 can_found=false（fid≠-1 不重複建國，雙保險；建國 = 獨立隊專屬 gate）
+	var can_found: bool = team.faction_id == -1 and ambition >= AMBITION_FOUND_MIN and accum_ok and path_ok and not busy
 	# Probe funnel（保 warring/bed 診斷語意）
 	if ambition >= AMBITION_FOUND_MIN:
 		Probe.bump("indep.gate_ambitious")
