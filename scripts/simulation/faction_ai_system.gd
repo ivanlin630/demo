@@ -52,6 +52,8 @@ const FOUNDING_TIMEOUT_MULT: float = 6.0
 const FOUNDING_TIMEOUT_FLOOR_DAYS: int = 12       # TEST VALUE — 步行信使追移動 target 的收斂下限
 const ENVOY_POP: int = 1                          # TEST VALUE — 信使子隊人數（最小分隊）
 const ENVOY_REDUNDANCY_FOUNDING: int = 2          # TEST VALUE — 建國提案冗餘騎數（亂世信使會死，多騎首達生效）
+const GIFT_FRACTION_MIN: float = 0.10             # TEST VALUE — 掏禮佔糧盈餘下限（低野心=保守掏）
+const GIFT_FRACTION_MAX: float = 0.30             # TEST VALUE — 上限（高野心=急迫掏多）
 # 統一戰略意圖菜單（統一矩陣首燒 F-D1/D2）：任何有 leader 的隊（faction leader / 獨立 team）
 # 對同一菜單 argmax。實體型只決定 gate/scale（建國僅 fid==-1；擴張 Task3 折入），非另起菜單。
 const STRATEGIC_INTENTS: Array = ["致富", "擴張", "征服", "防衛", "守成", "建國"]
@@ -1256,10 +1258,28 @@ func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype:
 		Probe.bump("envoy.dispatched")
 	if sent == 0:
 		return false
+	# 誘因（糧禮先行）：急迫（野心）×付得起（effective_food 盈餘）→ 掏禮，發起即扣（守恆:送達轉移目標）。
+	# 窮狼掏不出（無盈餘）→ gift 空 → 白嘴照舊難。禮沉沒風險=亂世押鏢（信使死/reject 不退，Task2）。
+	# 結構通用 {res: amount}（聯姻槽未來直插）；本 slice 僅糧。dispatch 後算（母隊剩糧為準）。
+	var gift: Dictionary = {}
+	var mleader: PersonData = state.persons.get(mother.leader_id)
+	if mleader != null and ptype == "alliance":
+		var amb: float = float(mleader.values.get("野心", 0.5))
+		var reserve: float = float(mother.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * FOUND_FOOD_SURPLUS_DAYS
+		var surplus: float = maxf(ResourceSystem.effective_food(state, mother) - reserve, 0.0)
+		var frac: float = lerpf(GIFT_FRACTION_MIN, GIFT_FRACTION_MAX, amb)
+		var want: int = int(surplus * frac)
+		if want > 0:
+			# remove 從 team.resources 扣（clamp 至實有→不透支；granary 糧不在此扣=保守）
+			var paid: float = ResourceBank.remove(mother, "food", float(want), "alliance_gift")
+			if paid > 0.0:
+				gift = {"food": paid}
+				Probe.bump("envoy.gift_sent")
 	# 提案權威存母隊（對齊 active_orders pattern）
 	mother.pending_proposal = {
 		"type": ptype, "target_id": target_id, "target_pos": target_pos,
 		"issued_tick": state.world.current_tick, "proposal_id": proposal_id, "timeout": budget,
+		"gift": gift,
 	}
 	# 母隊不再自己追（release 回日常，等結果；pending 期間不重派）
 	if mother.current_task != TeamData.TASK_IDLE and mother.task_priority <= TaskArbiter.PRIO_DISPATCH:

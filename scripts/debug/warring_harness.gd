@@ -23,6 +23,7 @@ const PROBE_KEYS: Array = [
 	# ②a 信使外交結局分佈（藍圖要的「怎麼沒結盟」fail 分佈）
 	"envoy.dispatched", "envoy.delivered", "envoy.accept", "envoy.reject",
 	"envoy.timeout", "envoy.target_dead",
+	"envoy.gift_sent", "envoy.gift_delivered",
 	"conq.intent", "conq.prosperity_reached",
 	"p1.assimilate", "p1.revolt", "p1.flee",
 	"beg.dispatch", "beg.resolve", "join.dispatch", "join.resolve",
