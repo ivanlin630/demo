@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: default 組成/健康 measure 出爐——①狼候選 0.4/seed(半數世界零主角,獨立 65% 商業)②兩 config 同收斂承載力 42-43%(gen 初始 pop=2.3× 承載力→開局必大饑荒);裁生成參數(狼密度 a/b/c+開局饑荒=戲 or 調)→軌3 二考;管線另報:S1 tile-bank 齊=第3不變量大塊全立
 ---
 
