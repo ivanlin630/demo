@@ -17,6 +17,7 @@ var _speed_btns: Array = []
 var _time_label: Label
 var _map: Node2D
 var _ticker: ObserverTickerPanel
+var _inspect: ObserverInspectPanel
 # Task4 hitch 量測
 var _hitch_max_ms: float = 0.0
 var _hitch_over150: int = 0
@@ -77,10 +78,22 @@ func _build_ui() -> void:
 	right.offset_left = -420.0
 	right.offset_top = 44.0
 	add_child(right)
+	_inspect = ObserverInspectPanel.new()
+	_inspect.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right.add_child(_inspect)
+	_inspect.setup(_bridge)
 	_ticker = ObserverTickerPanel.new()
 	_ticker.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right.add_child(_ticker)
 	_ticker.setup(_bridge)
+	# 三方同步：map ↔ inspect ↔ ticker filter
+	_map.team_picked.connect(func(tid: int):
+		_inspect.select_team(tid)
+		_ticker.set_filter_team(tid))
+	_inspect.team_selected.connect(func(tid: int):
+		_map.select_team(tid)
+		_ticker.set_filter_team(tid))
+	_inspect.follow_toggled.connect(func(on: bool): _map.set_follow(on))
 
 func _on_speed(idx: int) -> void:
 	_speed_idx = idx
@@ -115,3 +128,4 @@ func _refresh_ui() -> void:
 	_time_label.text = "  月%d 日%d（tick %d）  hitch max %.0fms" % [month, day, tick, _hitch_max_ms]
 	_map.refresh()
 	_ticker.poll()
+	_inspect.refresh()
