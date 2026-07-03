@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ②a收下(信使活/凍結結構性不可能/F-I1 judge−1);三知會回應(12天timeout收/結盟稀真收/latch CI掃收);★馬經濟升vision標記(戰略資源+地形特化貿易品,經濟深化時做);下波放行
 ---
 
