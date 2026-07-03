@@ -339,16 +339,14 @@ func _spawn_exile_or_join(state: WorldState, person: PersonData, pos: Vector2i) 
 	var ot := TeamData.new()
 	ot.team_id = _next_team_id(state)
 	ot.tile_pos = pos
-	ot.faction_id = -1
-	ot.tags = ["流亡"]
+	state.set_team_faction(ot, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
+	state.set_team_tags(ot, ["流亡"], "solo_exile")
 	ot.current_task = TeamData.TASK_IDLE   # 新 team 建立豁免：直接賦值 + priority 0
 	ot.task_priority = 0
 	ot.leader_id = person.id
 	person.team_id = ot.team_id
 	person.role = "leader"
-	state.teams[ot.team_id] = ot
-	state.team_known[ot.team_id] = []
-	state.team_discovered[ot.team_id] = []
+	state.create_team(ot)   # S9 chokepoint：註冊 + known/discovered init
 	print("[Reaction] Person%d 離團自立流亡 Team%d at (%d,%d)" % [
 		person.id, ot.team_id, pos.x, pos.y])
 

@@ -191,8 +191,8 @@ static func _spawn_breakaway(state: WorldState, holder: TeamData, detached: Dict
 	var nt := TeamData.new()
 	nt.team_id = _next_team_id(state)
 	nt.tile_pos = holder.tile_pos
-	nt.faction_id = -1
-	nt.tags = [TeamData.TAG_EXILE]
+	state.set_team_faction(nt, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
+	state.set_team_tags(nt, [TeamData.TAG_EXILE], "captive_breakaway")
 	ResourceBank.clear_all(nt, "captive_breakaway")
 	# detached cohorts 按比例放入新隊（keep_n / total），其餘 = 鎮壓亡（不入任何隊，守恆=真死亡）
 	var total: int = AnonCohort.total(detached)
@@ -214,9 +214,7 @@ static func _spawn_breakaway(state: WorldState, holder: TeamData, detached: Dict
 			placed += 1
 	if AnonCohort.total(nt.anon_cohorts) <= 0:
 		return
-	state.teams[nt.team_id] = nt
-	state.team_known[nt.team_id] = []
-	state.team_discovered[nt.team_id] = []
+	state.create_team(nt)   # S9 chokepoint：註冊 + known/discovered init
 
 static func _next_team_id(state: WorldState) -> int:
 	var max_id: int = 0

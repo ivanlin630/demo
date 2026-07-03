@@ -190,7 +190,7 @@ static func _setup_random_player(state, config, rng) -> void:
 	var team := TeamData.new()
 	team.team_id = _next_team_id(state)
 	var target_pop: int = int(pcfg.get("population", 10))
-	team.tags = ["統領"]
+	state.set_team_tags(team, ["統領"], "player_init")
 	team.resources = _default_full_resources()
 	var starting: Dictionary = pcfg.get("starting_resources", {})
 	for k in starting:
@@ -220,9 +220,7 @@ static func _setup_random_player(state, config, rng) -> void:
 		state.add_member(team, m.id)
 
 	_setup_anon_tiers(team, {}, target_pop)
-	state.teams[team.team_id] = team
-	state.team_known[team.team_id] = []
-	state.team_discovered[team.team_id] = []
+	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init
 	state.player_state = { "inventory": [],
 	                       "coin": float(starting.get("coin", 0)) }
 
@@ -368,10 +366,10 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 	var target_pop: int = rng.randi_range(pop_range[0], pop_range[1])
 
 	match preset_key:
-		"faction_main":         team.tags = ["統領"]
-		"faction_branch":       team.tags = ["獨立軍隊"]
-		"independent_settled":  team.tags = []
-		"independent_roving":   team.tags = ["獨立軍隊"]
+		"faction_main":         state.set_team_tags(team, ["統領"], "gen_preset")
+		"faction_branch":       state.set_team_tags(team, ["獨立軍隊"], "gen_preset")
+		"independent_settled":  state.set_team_tags(team, [], "gen_preset")
+		"independent_roving":   state.set_team_tags(team, ["獨立軍隊"], "gen_preset")
 
 	team.resources = _default_full_resources()
 	_apply_preset_resources(team, preset_key, richness_mult)
@@ -389,9 +387,7 @@ static func _create_team(state: WorldState, rng, pop_range: Array,
 		state.add_member(team, m.id)
 
 	_setup_anon_tiers(team, {}, target_pop)
-	state.teams[team.team_id] = team
-	state.team_known[team.team_id] = []
-	state.team_discovered[team.team_id] = []
+	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init
 	return team
 
 # ── explicit mode ─────────────────────────────────────────────────
@@ -438,17 +434,15 @@ static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
 	var pos_arr: Array = t_cfg.get("tile_pos", [0, 0])
 	team.tile_pos = Vector2i(int(pos_arr[0]), int(pos_arr[1]))
 	var target_pop: int = int(t_cfg.get("population", 1))
-	team.tags = t_cfg.get("tags", []).duplicate()
+	state.set_team_tags(team, t_cfg.get("tags", []).duplicate(), "explicit_init")
 	# faction_id 不在此預設（factions 尚未建立）；leader 由 create_faction、非 leader 由第三段 set_team_faction 設
-	# 入口（set_team_faction）有 idempotent early-return：若此處先設 faction_id，第三段會早退而漏 append member。
-	team.faction_id = -1
+	# 入口（set_team_faction）有 idempotent early-return：fresh team faction_id 已 -1 → no-op，第三段照常 append。
+	state.set_team_faction(team, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
 	var base_res: Dictionary = _default_full_resources()
 	for k in t_cfg.get("resources", {}):
 		base_res[k] = t_cfg["resources"][k]
 	team.resources = base_res
-	state.teams[team.team_id] = team
-	state.team_known[team.team_id] = []
-	state.team_discovered[team.team_id] = []
+	state.create_team(team)   # S9 chokepoint：註冊 + known/discovered init
 	var leader_cfg: Dictionary = t_cfg.get("leader", {})
 	var leader: PersonData = _make_person(team.team_id, leader_cfg, true)
 	state.persons[leader.id] = leader

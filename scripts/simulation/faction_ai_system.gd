@@ -1090,7 +1090,7 @@ static func _solo_type(team: TeamData) -> String:
 	return String(team.solo_intent.get("type", "")) if team.solo_intent is Dictionary else ""
 
 func _set_solo(state: WorldState, team: TeamData, itype: String, why: String, mode: String) -> void:
-	team.solo_intent = {"type": itype, "why": why, "mode": mode}   # 每令帶 driver（連回意圖，北極星）
+	state.set_solo_intent(team, itype, why, mode, "solo:" + itype)   # S6 chokepoint：每令帶 driver（連回意圖，北極星）
 	SpecimenTracer.capture_intent(state, team.team_id, itype, why, mode)
 
 # mirror commander-v2 _select_intent（輕量）：fid=-1 野心獨立隊秤「建國 vs 守成」→ means-end 子行動
@@ -1207,7 +1207,7 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 					TaskArbiter.release(team)
 				# 吞併 fallback（此分支現不觸；weak prey 已由 prosperity defer 收）。保留 symmetry。
 				if not team.tags.has("統領"):
-					team.tags.append("統領")
+					state.add_tag(team, "統領", "found_subjugate")
 				if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
 						state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_subjugate"):
 					team.prosperity_target_id = prey_id
@@ -1335,7 +1335,7 @@ func _recall_envoy(state: WorldState, envoy: TeamData) -> void:
 		envoy.move_target = parent.tile_pos   # 下 tick _evaluate_idle_subteam 路由回家/併回
 	else:
 		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（正常 AI 接手，非 zombie）
-		envoy.tags.erase(TeamData.TAG_SUBTEAM)
+		state.remove_tag(envoy, TeamData.TAG_SUBTEAM, "envoy_orphan")
 
 # ──────── 任務指派 ────────
 
@@ -1653,7 +1653,7 @@ func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 	var fail_chance: float = (1.0 - total_loyalty / count) * (total_stress / count) * DISCIPLINE_FAIL_BASE
 	if randf() < fail_chance:
 		state.detach_subteam(sub)   # 紀律失效脫離母團（雙向同步）
-		sub.tags.erase(TeamData.TAG_SUBTEAM)
+		state.remove_tag(sub, TeamData.TAG_SUBTEAM, "discipline_fail")
 		TaskArbiter.release(sub)
 		print("[SubAI] Team%d 紀律失效，脫離成獨立" % sub.team_id)
 		return true
@@ -3078,8 +3078,8 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 	# 身分躍遷（比照 _auto_settle_builder）：升軍/生產 tag、清流亡（流浪→定居，非一律生產）
 	var new_tag: String = TeamData.TAG_MILITARY if is_military else TeamData.TAG_PRODUCE
 	if not team.tags.has(new_tag):
-		team.tags.append(new_tag)
-	team.tags.erase("流亡")
+		state.add_tag(team, new_tag, "crude_camp_settle")
+	state.remove_tag(team, "流亡", "crude_camp_settle")
 	print("[CrudeCamp] Team%d 紮營 @(%d,%d) → %s" % [
 		team.team_id, team.tile_pos.x, team.tile_pos.y, tile.outpost_type])
 	return true
@@ -3384,8 +3384,8 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	else:
 		# Path B 流亡（原 spec E 邏輯）
 		state.clear_team_faction(team)   # 起義流亡脫離 faction（雙向同步）
-		team.tags.erase(TeamData.TAG_PRODUCE)
-		team.tags.append("流亡")
+		state.remove_tag(team, TeamData.TAG_PRODUCE, "uprising_exile")
+		state.add_tag(team, "流亡", "uprising_exile")
 		print("[Uprising B] Team%d 流亡（求生=%.2f，old owner=Team%d）" % [
 			team.team_id, survival, old_owner_id])
 	if old_owner_id != -1:

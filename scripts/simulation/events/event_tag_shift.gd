@@ -7,15 +7,15 @@ func check(state: WorldState, team: TeamData) -> bool:
 
 func execute(state: WorldState, team: TeamData) -> Array:
 	if _should_gain_military(state, team) and not team.tags.has("軍隊"):
-		team.tags.append("軍隊")
-		team.tags.erase("生產")
+		state.add_tag(team, "軍隊", "tag_shift:gain_military")
+		state.remove_tag(team, "生產", "tag_shift:gain_military")
 		print("[Tag] Team%d +軍隊 -生產" % team.team_id)
 	if _should_gain_exile(team) and not team.tags.has("流亡"):
-		team.tags.append("流亡")
-		team.tags.erase("軍隊")
+		state.add_tag(team, "流亡", "tag_shift:gain_exile")
+		state.remove_tag(team, "軍隊", "tag_shift:gain_exile")
 		print("[Tag] Team%d +流亡 -軍隊" % team.team_id)
 	if _should_lose_exile(team):
-		team.tags.erase("流亡")
+		state.remove_tag(team, "流亡", "tag_shift:lose_exile")
 		print("[Tag] Team%d -流亡（恢復）" % team.team_id)
 	return []
 

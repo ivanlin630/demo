@@ -206,6 +206,52 @@ func set_leader(team: TeamData, pid: int, old_leader_action: String = "none") ->
 			p.team_id = team.team_id     # 強制回指本隊（修 stale desync）
 			p.role = "leader"
 
+# ── S5 tags 單寫者 chokepoint ─────────────────────────────────
+# load-bearing tags（軍隊/生產/流亡，movement 讀決策）＝真值源保護點。reason 供 driver-ledger 審計。
+# 所有 team.tags= / .append / .erase 直寫改走此三入口（outpost_system 暫豁免＝平行紀律：
+#   conquest-yield-chain 在飛同機改 outpost，避 merge 撞；該波 merge 後補收）。
+# 語意鏡射原直寫（append/erase 無條件，不加 dedup）→ pointwise 位元不變；原有 site-guard 保留於呼叫端。
+# CI-scan: grep -nE '\.tags *=[^=]|\.tags\.append|\.tags\.erase|\.tags\.clear' scripts/simulation scripts/data
+#   → 除 world_state.gd / outpost_system.gd 應為 0。
+func set_team_tags(team: TeamData, tags: Array, reason: String = "") -> void:
+	team.tags = tags
+	record_driver(team, "tags", 0.0, reason)
+
+func add_tag(team: TeamData, tag, reason: String = "") -> void:
+	team.tags.append(tag)
+	record_driver(team, "tags", 1.0, reason)
+
+func remove_tag(team: TeamData, tag, reason: String = "") -> void:
+	team.tags.erase(tag)
+	record_driver(team, "tags", -1.0, reason)
+
+# ── S6 高風險無主欄 chokepoint（本波收 readiness + solo_intent，非全欄）──────
+# readiness：戰鬥/恢復多系統寫 → 單寫者 + reason。值計算留呼叫端（此只賦值+記，pointwise 不變）。
+#   npc_combat_system drain 暫豁免＝平行紀律（conquest-yield-chain 在飛），該波 merge 後補收。
+# CI-scan: grep -nE '\.readiness *=[^=]' scripts/simulation scripts/data
+#   → 除 world_state.gd / npc_combat_system.gd 應為 0。
+func set_readiness(team: TeamData, val: float, reason: String = "") -> void:
+	team.readiness = val
+	record_driver(team, "readiness", 0.0, reason)
+
+# solo_intent：獨立隊戰略 intent struct（type/why/mode，driver-complete）。faction_ai._set_solo 升格呼此（消旁寫）。
+# CI-scan: grep -nE '\.solo_intent *=' scripts → 除 world_state.gd 應為 0。
+func set_solo_intent(team: TeamData, itype: String, why: String, mode: String, reason: String = "") -> void:
+	team.solo_intent = {"type": itype, "why": why, "mode": mode}
+	record_driver(team, "solo_intent", 0.0, reason)
+
+# 單一 team 建立 chokepoint（S9，erase_team 對稱）：teams 註冊 + known/discovered row init。
+# 所有 `state.teams[id] = team` 直寫（世界gen/beast/subteam/manpower/population/reaction/split/tutorial）改走此，
+# 一處保證 registry 完整 → 根除「建隊漏 init known/discovered → 後續查詢 desync」病例（recruit_tutorial 曾漏）。
+# 刻意不碰：tile 索引由 rebuild_team_tile_index 每 _step2_move 重建（此不預插，保 pointwise）；
+#   team_intel row 由 belief_system lazy init（此不碰）。known/discovered 用無條件 = []（mirror 原 10 站點無條件寫）。
+# CI-scan（強制閘地基）: grep -n 'state\.teams\[.*\] *=' scripts/simulation scripts/data
+#   → 除 world_state.gd 自身應為 0（debug/ fixture 除外）。
+func create_team(team: TeamData) -> void:
+	teams[team.team_id] = team
+	team_known[team.team_id] = []
+	team_discovered[team.team_id] = []
+
 # 單一 team 移除 chokepoint：語意 = erase_teams([tid])（薄 wrapper，呼叫端零改動）。
 # 所有 team 移除（滅團/合併/野獸清除）都須走此/erase_teams 入口。
 func erase_team(tid: int) -> void:

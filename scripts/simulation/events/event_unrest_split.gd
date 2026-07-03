@@ -64,10 +64,10 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	var new_team := TeamData.new()
 	new_team.team_id   = _next_team_id(state)
 	new_team.tile_pos  = parent.tile_pos
-	new_team.faction_id = -1
+	state.set_team_faction(new_team, -1)   # S11 chokepoint（fresh team，no-op；單寫者一致）
 	# 新團 resources 全 0 = 空池（downstream 一律 .get(k,0)）→ clear_all 等價且不憑空生
 	ResourceBank.clear_all(new_team, "split_init")
-	new_team.tags = []
+	state.set_team_tags(new_team, [], "split_init")
 
 	# 選 new leader
 	var new_leader: PersonData = dissenters[0]
@@ -101,9 +101,7 @@ func _split_team(state: WorldState, parent: TeamData, dissenters: Array) -> Team
 	anon_split = mini(anon_split, parent.population / 3)
 	AnonTierSystem.transfer_proportional(parent, new_team, anon_split)
 
-	state.teams[new_team.team_id]           = new_team
-	state.team_known[new_team.team_id]      = []
-	state.team_discovered[new_team.team_id] = []
+	state.create_team(new_team)   # S9 chokepoint：註冊 + known/discovered init
 	UnrestBank.reset(parent, "split")
 	return new_team
 
