@@ -298,14 +298,22 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		_combat.start_combat(state, id_b, id_a)
 	elif a.current_task == TeamData.TASK_LOOT and a.readiness >= COMBAT_THRESHOLD:
 		if _should_pay_tribute(state, id_b, id_a):
+			_probe_raid(state, a, b, "extort")
 			_resolve_extortion(state, id_a, id_b)
 		elif _should_attack(state, id_a, id_b):
+			_probe_raid(state, a, b, "combat")
 			_combat.start_combat(state, id_a, id_b)
+		else:
+			_probe_raid(state, a, b, "noop")
 	elif b.current_task == TeamData.TASK_LOOT and b.readiness >= COMBAT_THRESHOLD:
 		if _should_pay_tribute(state, id_a, id_b):
+			_probe_raid(state, b, a, "extort")
 			_resolve_extortion(state, id_b, id_a)
 		elif _should_attack(state, id_b, id_a):
+			_probe_raid(state, b, a, "combat")
 			_combat.start_combat(state, id_b, id_a)
+		else:
+			_probe_raid(state, b, a, "noop")
 
 # ──────── 決策函式 ────────
 
@@ -352,6 +360,22 @@ func _resolve_extortion(state: WorldState, atk_id: int, def_id: int) -> Dictiona
 		{ "origin": str(atk_id), "target": str(def_id) })
 	print("[Extort] Team%d 勒索 Team%d，Team%d 妥協給付" % [atk_id, def_id, def_id])
 	return gained
+
+# Task1 measure（純觀測，佔村 spec）：raid（TASK_LOOT）解決分佈探針。
+# extort（無戰）/ combat_at_outpost（落點村格 → capture 可翻）/ combat_open_field（開闊地 → capture no-op）/ noop（想搶未成）。
+# + prey residency：resident 村隊（TAG_PRODUCE 且站自家 outpost）vs 流浪隊 → 驗「追擊撞開闊地=capture 永 no-op」假說。
+func _probe_raid(state: WorldState, raider: TeamData, prey: TeamData, mode: String) -> void:
+	if not Probe.enabled: return
+	Probe.bump("raid.resolve")
+	var tile: HexTileData = state.world.tiles.get(prey.tile_pos.x * 1000 + prey.tile_pos.y)
+	var at_outpost: bool = tile != null and tile.outpost_level > 0
+	match mode:
+		"extort": Probe.bump("raid.extort")
+		"combat": Probe.bump("raid.combat_at_outpost" if at_outpost else "raid.combat_open_field")
+		"noop":   Probe.bump("raid.loot_noresolve")
+	var prey_resident: bool = prey.tags.has(TeamData.TAG_PRODUCE) and tile != null \
+		and tile.outpost_owner == prey.team_id
+	Probe.bump("raid.prey_resident" if prey_resident else "raid.prey_wanderer")
 
 # ──────── 勢力互動 ────────
 

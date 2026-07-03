@@ -598,10 +598,33 @@ func demolish_with_control(state: WorldState, team: TeamData) -> bool:
 func capture(state: WorldState, winner_id: int, tile: HexTileData) -> void:
 	if tile.outpost_level > 0 and tile.outpost_owner != winner_id:
 		var old_owner: int = tile.outpost_owner
+		if Probe.enabled:
+			_probe_capture_flip(state, winner_id, tile)   # 掃須在 set_owner 前（讀翻旗前狀態）
 		OutpostOwnerBank.set_owner(tile, winner_id, "capture")
 		print("[Outpost] Team%d 佔領 %s（原 Team%d）at (%d,%d)" % [
 			winner_id, get_outpost_name(tile.outpost_type, tile.outpost_level),
 			old_owner, tile.tile_pos.x, tile.tile_pos.y])
+
+# Task1 measure（純觀測，佔村 spec）：capture 真翻旗分佈。須在 set_owner 前呼（讀翻旗前狀態）。
+# by_loot（掠奪狼翻旗）/ civilian（村格）/ wolf_firstbase（流浪狼奪首據點=雙引擎咬合點）。
+func _probe_capture_flip(state: WorldState, winner_id: int, tile: HexTileData) -> void:
+	Probe.bump("raid.capture_flip")
+	var w: TeamData = state.teams.get(winner_id)
+	if w == null: return
+	if w.current_task == TeamData.TASK_LOOT:
+		Probe.bump("raid.capture_flip_by_loot")
+	if w.current_option == "佔村":
+		Probe.bump("occupy.capture_flip")   # 佔村 option 驅動的翻旗（雙引擎咬合證據）
+	if tile.outpost_type == "civilian":
+		Probe.bump("raid.capture_flip_civilian")
+	if w.faction_id == -1:
+		var had_base: bool = false
+		for tid in state.world.tiles:
+			var t: HexTileData = state.world.tiles[tid]
+			if t.outpost_level > 0 and t.outpost_owner == winner_id:
+				had_base = true; break
+		if not had_base:
+			Probe.bump("raid.capture_flip_wolf_firstbase")
 
 func get_outpost_name(type: String, level: int) -> String:
 	var names: Array = OUTPOST_NAMES.get(type, [])
