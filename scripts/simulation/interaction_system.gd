@@ -674,6 +674,13 @@ static func _spill_back_public_storage(state: WorldState, team: TeamData,
 			ResourceBank.set_amt(team, res, current, "spill_back_overdraw")
 
 func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
+	# 漏斗站5/6探針（純觀測）：TRADE 隊同格會合分類（到點 vs 途中被截胡）
+	if Probe.enabled:
+		for _pt in [a, b]:
+			if _pt.current_task == TeamData.TASK_TRADE:
+				Probe.bump("trade.meet")
+				if _pt.move_target != Vector2i(-1, -1) and _pt.tile_pos != _pt.move_target:
+					Probe.bump("trade.meet_midroute")
 	var a_original: Dictionary = _absorb_public_storage(state, a)
 	var b_original: Dictionary = _absorb_public_storage(state, b)
 	var a_coin_before: float = float(a.resources.get("coin", 0))
@@ -689,12 +696,28 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 	var b_prog: bool = _os.settle_orders(b, b_before, state.world.current_tick)
 	if (a_prog and b.tags.has(TeamData.TAG_MERCHANT)) or (b_prog and a.tags.has(TeamData.TAG_MERCHANT)):
 		Probe.bump("g1.arb_hit")
-	if absf(float(a.resources.get("coin", 0)) - a_coin_before) > 0.001:
+	var _dealt: bool = absf(float(a.resources.get("coin", 0)) - a_coin_before) > 0.001
+	if _dealt:
 		print("[Market] Team%d <-> Team%d 成交（公庫接入）" % [a.team_id, b.team_id])
+		# 漏斗站6探針：成交主體分流（商隊跑單 vs resident 互售）
+		Probe.bump("trade.deal")
+		if a.tags.has(TeamData.TAG_MERCHANT) or b.tags.has(TeamData.TAG_MERCHANT):
+			Probe.bump("trade.deal_merchant")
+		else:
+			Probe.bump("trade.deal_resident")
+	elif Probe.enabled and (a.current_task == TeamData.TASK_TRADE or b.current_task == TeamData.TASK_TRADE):
+		Probe.bump("trade.meet_nodeal")   # 漏斗站6：會合但零成交（撲空/沒貨/價差不成）
 	_spill_back_public_storage(state, a, a_original)
 	_spill_back_public_storage(state, b, b_original)
-	if a.current_task == TeamData.TASK_TRADE: TaskArbiter.release(a)
-	if b.current_task == TeamData.TASK_TRADE: TaskArbiter.release(b)
+	# 漏斗站5探針：release 分類（途中被截 = 永遠到不了單點的證據）
+	if a.current_task == TeamData.TASK_TRADE:
+		if Probe.enabled:
+			Probe.bump("trade.release_midroute" if (a.move_target != Vector2i(-1, -1) and a.tile_pos != a.move_target) else "trade.release_at_dest")
+		TaskArbiter.release(a)
+	if b.current_task == TeamData.TASK_TRADE:
+		if Probe.enabled:
+			Probe.bump("trade.release_midroute" if (b.move_target != Vector2i(-1, -1) and b.tile_pos != b.move_target) else "trade.release_at_dest")
+		TaskArbiter.release(b)
 
 func _snapshot_order_res(team: TeamData) -> Dictionary:
 	var snap: Dictionary = {}
@@ -777,6 +800,7 @@ func _attempt_barter(state: WorldState, a: TeamData, b: TeamData) -> void:
 			ResourceBank.add(b, pay_res, -pay_qty, "barter_pay_out")
 			ResourceBank.add(a, pay_res, pay_qty, "barter_pay_in")
 			print("[Barter] Team%d %dx%s <-> Team%d %dx%s" % [a.team_id, give_qty, give_res, b.team_id, pay_qty, pay_res])
+			Probe.bump("trade.barter_deal")   # 漏斗站6：以物易物成交（coin 路徑外）
 			break   # 一個 give_res 換一筆即可,下個 give_res
 
 func _grow_commerce_skill(state: WorldState, team: TeamData) -> void:

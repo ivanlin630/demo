@@ -778,6 +778,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）
 		if team.current_task == TeamData.TASK_TRADE \
 				and state.world.current_tick - team.trade_task_start_tick > TRADE_TIMEOUT:
+			Probe.bump("trade.timeout")   # 漏斗站5：timeout 放棄（含 stale start_tick 誤殺）
 			TaskArbiter.release(team)
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
@@ -800,7 +801,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if team.current_task == TeamData.TASK_IDLE:
 			var amb_task: String = AmbitionLadder.rung_task(state, team)
 			if amb_task != "":
-				TaskArbiter.try_set(state, team, amb_task, team.tile_pos, TaskArbiter.PRIO_AMBIENT, "ambition")
+				var _amb_ok: bool = TaskArbiter.try_set(state, team, amb_task, team.tile_pos, TaskArbiter.PRIO_AMBIENT, "ambition")
+				if _amb_ok and amb_task == TeamData.TASK_TRADE:
+					Probe.bump("trade.dispatch.ambient")   # 漏斗站4（target=自格，原地貿易姿態）
 		if SimRunner.phase_timing: _fai_pht("loop3.misc", _t3)
 
 # ──────── Tag 權限 ────────
@@ -1475,6 +1478,7 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 				if TaskArbiter.try_set(state, mt, TeamData.TASK_TRADE,
 						ttarget, TaskArbiter.PRIO_DISPATCH, "member_trade"):
 					mt.trade_task_start_tick = state.world.current_tick
+					Probe.bump("trade.dispatch.member_trade")   # 漏斗站4
 		if SimRunner.phase_timing: _fai_pht("member.finders", _tm)
 
 # ──────── 統一決策引擎切片 seam ────────
@@ -1526,7 +1530,11 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		elif opt == "佔村": Probe.bump("occupy.dispatch")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
-		TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		# 漏斗站4探針（純觀測）：unified 路徑 TRADE 實派計數（分 opt）。
+		# ⚠已知嫌疑：此路不設 trade_task_start_tick（member_trade/trade_net 有設）→ stale timeout 誤殺，由 trade.timeout 定罪。
+		if _set_ok and td["task"] == TeamData.TASK_TRADE:
+			Probe.bump("trade.dispatch.unified_" + opt)
 		# 掠奪/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（社交 resolver 讀）
 		if td.has("combat_target"):
 			state.set_combat_target(team, int(td["combat_target"]))
