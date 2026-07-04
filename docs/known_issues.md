@@ -1,9 +1,9 @@
 # Known Issues
 
-> 最後更新：2026-06-16 | **本檔只列開放項**。已修項（✅）移 `docs/archive/resolved_issues.md`（保留根因/修法/教訓,可搜尋）。
+> 最後更新：2026-07-04 | **本檔只列開放項**。已修項（✅）移 `docs/archive/resolved_issues.md`（保留根因/修法/教訓,可搜尋）。
 > 來源：動態測試 + code review + QA harness 遍歷。
 > **仍有效真 backlog**：Bug2(salary floor 後果)、Bug5(休眠)、W4(NPC promote/train + leader 駐留)、W3(dist tune)。（P5 C-1~C-6 對稱缺口 ✅ 2026-06-16 reframe+實作,見下 P5 段。）
-> **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。
+> **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
 ## 統一矩陣窮盡稽核揭項（2026-07-01，全貌 `specs/2026-07-01-unification-matrix-audit`）
@@ -12,6 +12,9 @@
 - **★第3不變量單寫者大面積未實現（強制閘前提）**：`team.resources` 乾淨(全 ResourceBank,first-pass「53直寫」修正=錯)。真洞：**tile.public_storage(granary)+tile.resources 全無 bank**(22+直寫)、**coin 憑空鑄入 public_storage 無 treasury bank**(outpost:228/241)、**named_members roster 無 chokepoint**(59 site/17 檔)、**combat_target/tags/solo_intent/faction.leader_team_id/person.coin/fatigue/armed_anon_ratio 無主**、**Pattern B driver-ledger=全 5 bank stub(reason 丟棄)**。team-creation 無 chokepoint(vs erase_team 有)、succession 三重手寫、faction_id=-1 6 處直寫繞 set_team_faction。= 統一矩陣「單寫者」領域最空,撐強制閘的前提。
 - **守恆盲區**：person.coin `+=` raw(salary:66)+ coin 憑空鑄 public_storage → coin_eq audit(對 team.resources 求和)看不到。
 - **其餘 fork（全 30+ 條見 audit doc）**：思考決策 5 scorer/threat term 死 stub(DecisionContext.threat=0.0)/雙 faction-goal producer;互動 2 diplomacy resolver(god-view vs belief)/~~3 tribute 公式/3 deception 引擎/RelationGraph orphaned~~（✅ 2026-07-04 互動統一軌收:F-I2/I4/I5/I6/I7，見 handback）;人力雙 skill/injury/equipment 模型;player 48 handler 4 缺口(demand_tribute/recruit×2/betray 全平行)+ UI god-view 洩漏。**燒序見 audit doc**（首燒=獨立/faction 戰略合併）。
+- **finder 濾鏈 C 類候選（2026-07-04 互動軌順盤，排軌候選）**：①`faction_ai.find_prosperity_prey` vs `_find_weakest_prey`＝同「belief 弱者掃描」骨架（has_belief 守衛+armed_est weakness+距離濾）雙處各自維護,差 richness 項/絕境語境。②`faction_ai._find_trade_target`（team_discovered god-view fallback,invariants 已標「最終應刪」）vs `strategic_ai._find_trade_partner` 雙貿易 finder。輕度：`_find_strong_neighbor`/`_find_aid_target`/`_find_occupy_target` 各自重寫「候選迭代+belief 守衛+距離濾+argmax」樣板,可待 DecisionEngine finder helper 收,非急。
+- **TRIBUTE_* 統一公式權重 = TEST VALUE（2026-07-04 F-I2）**：threshold 0.1/power_r cap 3.0/feud -0.3×int/gratitude +0.2×int/fear/survival 項,保守推導自三舊公式未跑平衡 pass。**屈服率整體上移**（threat 正向項）→ LOOT extort:combat:noop 分佈變,`raid.*` probe 可追,平衡 pass 與 TRIBUTE_* 一起校。
+- **merchant seeded 時間線分岔終局（watch,非 bug）**：互動統一後 game_sim_multi merchant config `GameOver 玩家絕後 @tick 849`（RNG 分岔正常終局,coin_eq 守恆）。現無 gate 斷言玩家存活;要追蹤需 seeded 玩家劇本 harness（backlog,要不要做待裁）。
 - **RelationGraph dormant edge types（2026-07-04 F-I5 measure 揭）**：`killed` 零 writer/reader（僅 person_data 註解提及）；`protect` writer-dead——"master" memory 全 codebase 無人寫 → `npc_ai._write_relation_edge` "master" arm + `salary._has_master_memory` 讀 = dead chain（12k tick ×2 config 實測 0 條邊）。feud/gratitude 已接線（tribute_accept 權重項）。修向：master/收徒機制實作時復活，或刪 type + salary 讀（salary 在互動軌 scope 外未動）。
 
 ### 燒進度（2026-07-01 首三軌 merged）
@@ -37,6 +40,13 @@
   - **★平行紀律殘量（conquest-yield-chain 在飛，禁碰 → 該波 merge 後補收）**：`outpost_system.gd` tags 5 站（342/343/369/372/375）、`npc_combat_system.gd` readiness drain 2 站（183/184）暫豁免。CI-scan pattern 已註記於各 chokepoint（強制閘地基）。
   - **★stale-spec 校正**：spec 標 `event_faction_defect:21` 為「懸空 member_team_ids 行為修（pointwise DIRTY 預期）」= **過時**。現 code line 24 `clear_team_faction`（faction 存在健康路徑）已修懸空；line 21 僅 faction-missing 防禦路徑（known_issues 138/160 證 world_sim 0 violation）→ 改走 `clear_team_faction` = 純 refactor（faction 不存在時語意等同 `=-1`，無懸空可修），**非行為修、pointwise CLEAN**。既有「defect:21 待 systematic-debug」項可結（機制已明：非 bug）。
   - **未收殘欄（本波 scope 外，backlog）**：S6 其餘無主欄（fatigue/work_morale/current_option/strategic_assignments/ambition_*）；`faction_ai:3479` `known_reputations[str_key]=owner_leader` = **cache 濫用 known_reputations dict（string key 存 leader id，非 reputation）**，非 S12 對象，宜獨立改名/搬 cache 欄（呈報系統）。
+
+## 觀測 GUI 揭項（2026-07-04 observer slice，純觀測揭露、sim 未動）
+
+- **★beast pseudo-team 洩入人類系統**：獸隊（id -1000000 段）走 `order_system.tick_team_orders` 張貼收購武器訂單、message 系統對人宣戰帶隊名——兩處未排除 `beast_kind != ""`。另 beast leader_id=-1 → faction_ai 繼承安全網會不會給獸隊晉升人名 leader 待驗。UI 層已標「X(獸)」,sim 側修=order/message 入口加 beast 濾（小）＋安全網 beast 豁免驗證。
+- **ticker 同 tick 雙 channel 排序**：global_messages 先於 observer_messages 穩定合併 → 同 tick「收服」顯示先於「俘獲」（code 時序相反）。同日戳可讀性無傷;要嚴格時序需 per-tick 序號（未做,minor）。
+- **MAX 速 ticker 滅團標示**：事件主已滅團顯示「隊N(已滅)」=消費時 state,誠實但可讀性小傷（1×/4× 幾乎不見,minor）。
+- **observer_messages 無 TTL**：cap 2000 裁尾,sim 零讀無行為風險,僅記憶體上界（by design,記錄備查）。
 
 ## 後期 scaling / late-game 卡死風險（2026-07-01 評估，全報告 `specs/2026-07-01-late-game-scaling-assessment`）
 

@@ -3,6 +3,8 @@
 # 截圖 harness：-- --obs-seed=N --obs-run-months=M --obs-shots=t1,t2 --obs-out=dir
 extends Control
 
+const SHOW_PERF_DEBUG := false
+
 const SPEED_LABELS: Array = ["暫停", "1x", "4x", "MAX"]
 const SPEED_TPS: Array = [0.0, 240.0, 960.0, -1.0]   # ticks/sec；-1 = 預算內盡量
 const UI_REFRESH_SEC: float = 0.25   # 面板/地圖重繪節流（sim 推進不受此限）
@@ -195,7 +197,9 @@ func _refresh_ui() -> void:
 	var tick: int = _bridge.current_tick()
 	var month: int = tick / WorldState.TICKS_PER_MONTH + 1
 	var day: int = (tick % WorldState.TICKS_PER_MONTH) / WorldState.TICKS_PER_DAY + 1
-	_time_label.text = "  月%d 日%d（tick %d）  hitch max %.0fms" % [month, day, tick, _hitch_max_ms]
+	_time_label.text = "  月%d 日%d（tick %d）" % [month, day, tick]
+	if SHOW_PERF_DEBUG:
+		_time_label.text += "  hitch max %.0fms" % _hitch_max_ms
 	_map.refresh()
 	_ticker.poll()
 	_inspect.refresh()

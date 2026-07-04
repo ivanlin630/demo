@@ -18,12 +18,14 @@
   強制閘   ▓░░░░░░░░░ 起步  ledger 有牙；待單寫者撐
 
 【方法論/願景 定型 ✓】沙盒 bar｜AI 深度節流閥｜兩隻眼(measure+矩陣)｜3 不變量
-【NOW】capture 收征服者 ‖ 單寫者剩餘 ‖ seeded harness  【queued】玩家面/G3-D
+【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
 ## 📍 當前狀態（2026-07-01）
 
 - **👁 觀測 GUI 輕 slice ✅（feat/observer-gui-slice，2026-07-04）**：三件全上（事件 ticker 人話+隊過濾 / 隊伍 inspect+地圖三方同步 / 速度四檔+時間）+ god-view 地圖（archetype 色+faction 環+outpost 標）+ 截圖 harness（`--obs-seed/run-months/shots/select/out`）。Task0 事件補洞（assim/revolt/flee/captives_taken）走新 `emit_ambient`→`observer_messages` 獨立 channel（global_messages.size() 被 order_system 借作 oid 空間，append 會擾訂單行為——逐點 diff 實測抓到後改道，total_diffs=0）。玩家路徑零 diff、seeded warring 同 hash、framework 7/0。bar 場景 seed 1337/2674 六月跑滿，狼弧鏈畫面可讀。hitch 偶發（≈1/月，delta clamp 蓋幅度）→ far.total 不動。handback `2026-07-04-observer-gui-slice`。
+
+- **🤝 互動統一 F-I2/I4/I5/I7+I6 ✅（feat/interaction-unification-fi，2026-07-04）**：屈服單一公式 `tribute_accept`（belief-gated+feud/gratitude 邊權重，三舊公式退役）、失真單引擎 `DistortionEngine`（三引擎+dormant 第4退役）、F-I5 judge=接線（feud/gratitude 活;killed/protect dormant 入 known_issues）、F-I7 `_should_attack` 轉 belief（無估→保守不攻）、F-I6 type 欄補。C 類退役不並存全程。seeded finals 量級不崩（hash 變=預期）、coin_eq 0、framework 7/0。TRIBUTE_* TEST VALUE 待平衡 pass。互動格矩陣殘=F-I8（NPC recruit 個體）。handback `2026-07-04-interaction-unification-fi`。
 
 - **🏛 沙盒 bar arc（(a) 崛起/經濟底）— 連串 measure→fix**：commander-v2 後戰國 seed 揭 default 龜縮（CONQUER=0/established 卡1）。measure-first 逐層挖（別猜）：能人 pop 崩=**飢餓非戰敗** → ①**戰鬥不決勝**(0 擊潰，撤退先於殲滅，吸收掛 `_end_combat` never fire) ②**食物模型沒統一**(成長 surplus gate 讀私產 silo→糧倉/交易糧餵不到成長→非 plains 注定餬口)。
   - **🍞 統一食物存取 ✅（merge）**：`reaction_system` `_score_expand`/`_evaluate_life_events` surplus gate → `ResourceSystem.effective_food`(coherent，對齊 ambition_ladder)。統一非補丁、不 nerf regen、保交易摩擦。乾淨 bed forest pop 6→12（原餬口）。coin_eq 0/framework PASS/餓隊不誤放寬。**藍圖 🟡：讀 A（非 plains 能累積）收下＝(a) 攀爬「累積」段解凍；讀 B（特化-交易環真轉）未到＝下一經濟 arc**（trade loop 沒 fire＝覓食勝買糧）。plan `2026-07-01-econ-food-unify`。

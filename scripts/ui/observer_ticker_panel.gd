@@ -7,9 +7,10 @@ const MAX_ENTRIES: int = 500
 
 var _bridge: ObserverBridge
 var _since_tick: int = -1
-var _entries: Array = []   # {text: String, teams: Array}
+var _entries: Array = []   # {text: String, teams: Array, type: String}
 var _filter_tid: int = -1
 var _filter_check: CheckBox
+var _hide_orders_check: CheckBox
 var _log: RichTextLabel
 
 func setup(bridge: ObserverBridge) -> void:
@@ -23,6 +24,11 @@ func setup(bridge: ObserverBridge) -> void:
 	_filter_check.disabled = true
 	_filter_check.toggled.connect(func(_on): _render())
 	head.add_child(_filter_check)
+	_hide_orders_check = CheckBox.new()
+	_hide_orders_check.text = "隱藏訂單"
+	_hide_orders_check.button_pressed = true
+	_hide_orders_check.toggled.connect(func(_on): _render())
+	head.add_child(_hide_orders_check)
 	add_child(head)
 	_log = RichTextLabel.new()
 	_log.scroll_following = true
@@ -54,6 +60,7 @@ func poll() -> void:
 		_entries.append({
 			"text": ObserverEventText.render(state, msg),
 			"teams": ObserverEventText.related_teams(msg),
+			"type": String(msg.type),
 		})
 	if _entries.size() > MAX_ENTRIES:
 		_entries = _entries.slice(_entries.size() - MAX_ENTRIES)
@@ -62,8 +69,11 @@ func poll() -> void:
 func _render() -> void:
 	var lines: Array = []
 	var filtering: bool = _filter_check.button_pressed and _filter_tid != -1
+	var hide_orders: bool = _hide_orders_check.button_pressed
 	for e in _entries:
 		if filtering and not (e["teams"] as Array).has(_filter_tid):
+			continue
+		if hide_orders and e.get("type", "") in ["order_buy", "order_sell"]:
 			continue
 		lines.append(e["text"])
 	_log.text = "\n".join(lines)
