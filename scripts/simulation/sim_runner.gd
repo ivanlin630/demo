@@ -308,6 +308,9 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 	for tid in arrived_ids:
 		if not state.teams.has(tid):
 			continue
+		# 漏斗站5探針（純觀測）：TRADE 隊走到 move_target（arrived = 本 tick 到點）
+		if Probe.enabled and state.teams[tid].current_task == TeamData.TASK_TRADE:
+			Probe.bump("trade.arrive")
 		os.read_market_board(state, state.teams[tid])
 
 func _step4_resolve_interactions(state: WorldState, moved_ids: Array, all_ids: Array) -> void:

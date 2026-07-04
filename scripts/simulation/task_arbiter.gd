@@ -22,6 +22,10 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 	if team.combat_target != -1:
 		return false   # 戰鬥鎖絕對（combat 結束流程清 combat_target）
 	if team.current_task == TeamData.TASK_IDLE or priority > team.task_priority:
+		# 漏斗站4探針（純觀測）：TRADE 在途被搶 → 記誰搶走（new_task|source）
+		if Probe.enabled and team.current_task == TeamData.TASK_TRADE \
+				and new_task != TeamData.TASK_TRADE:
+			Probe.bump("trade.preempt.%s|%s" % [new_task, _source])
 		team.current_task = new_task
 		team.move_target = move_target
 		team.task_priority = priority

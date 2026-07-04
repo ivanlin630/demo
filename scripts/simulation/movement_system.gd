@@ -26,6 +26,12 @@ const WAGON_TERRAIN_MULT: Dictionary = {
 	"plains": 0.9, "forest": 0.4, "mountain": 0.2
 }
 
+# ⚠ 已知世界模型級 debt（2026-07-04 貿易漏斗定罪，修法上交系統 session 裁）：
+# 此處 move_tick_acc 硬編 +TICKS_PER_HOUR，但 far 區每 FAR_ZONE_INTERVAL(100 tick) 才跑一次
+# → far 隊移速被稀釋 10×（1 hex≈3 天）。無玩家世界全隊=far → envoy 馬鏈 6 月未貫通 +
+# 貿易旅程永不到場同根（一修雙解實測：elapsed 修正後 seed1337 成交 6→30、arrive 0→43=33.9%，
+# 但世界節奏×10 → pop -60% 塌房=gen 校準全失效）。修=process 收 elapsed_ticks 參數（near=
+# NEAR_CADENCE、far=FAR_ZONE_INTERVAL），須配套節奏重校準，故不在貿易 slice 內落地。
 func process(state: WorldState, team_ids: Array,
 		time_mult: float = 1.0) -> Dictionary:
 	# 護衛：每 tick 追蹤目標位置

@@ -1,9 +1,16 @@
 # scripts/ui/observer_main.gd — 觀測 GUI 根（三件：ticker/inspect/速度）。
 # 玩家路徑零 diff：main scene 不換，跑法 godot.ps1 res://scenes/ObserverMain.tscn
 # 截圖 harness：-- --obs-seed=N --obs-run-months=M --obs-shots=t1,t2 --obs-out=dir
+# 戲感審計素材（QA 反轉三層之③）：-- --obs-ticker-dump=<file> 跑完把 ticker 全量事件流落檔
+#   （tick\ttype\tteams\ttext，機器可讀）→ 系統 session 讀流做「世界句子審計」。
 extends Control
 
 const SHOW_PERF_DEBUG := false
+
+# ③dump 模式：每 frame 一大塊快跑（去 GUI framerate 節流開銷），塊夠小使 drain 頻繁
+# → observer_messages(cap 2000)/global_messages(TTL) 排空前不被裁。TEST VALUE。
+const DUMP_CHUNK_TICKS: int = 300
+const DUMP_FRAME_BUDGET_MS: float = 100000.0   # 實質不限（一塊跑滿 chunk 才回 frame）
 
 const SPEED_LABELS: Array = ["暫停", "1x", "4x", "MAX"]
 const SPEED_TPS: Array = [0.0, 240.0, 960.0, -1.0]   # ticks/sec；-1 = 預算內盡量
@@ -33,6 +40,10 @@ var _out_dir: String = "."
 var _obs_seed: int = 1337
 var _capturing: bool = false
 var _obs_select: int = -1   # harness：截圖前選中此隊（驗過濾/inspect/同步 path）
+# ③戲感審計素材：ticker dump（跑完全量事件流落檔，機器可讀）
+var _dump_path: String = ""
+var _dump_since: int = -1        # 獨立水位（不干擾 ticker panel 自己的 _since_tick）
+var _dump_lines: PackedStringArray = PackedStringArray()
 
 func _ready() -> void:
 	var args: Dictionary = _parse_obs_args()
@@ -40,14 +51,16 @@ func _ready() -> void:
 	seed(world_seed)   # 同 WarringHarness：播 global RNG → 與 headless bed 同流
 	_state = WorldState.new()
 	_runner = SimRunner.new()
-	var config: Dictionary = GameSetup.load_config("res://config/warring_states.json")
+	# config 預設 warring_states（既有）；harness ③審計可 --obs-config=default 跑真產品世界讀流
+	var cfg_name: String = String(args.get("obs-config", "warring_states"))
+	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg_name)
 	config["seed"] = world_seed
 	GameSetup.setup(_state, config)
 	_bridge = ObserverBridge.new(_runner, _state)
 	_build_ui()
 	_refresh_ui()
 	print("[Observer] ready seed=%d teams=%d" % [world_seed, _state.teams.size()])
-	if args.has("obs-shots") or args.has("obs-run-months"):
+	if args.has("obs-shots") or args.has("obs-run-months") or args.has("obs-ticker-dump"):
 		_harness = true
 		_obs_seed = world_seed
 		_out_dir = String(args.get("obs-out", "."))
@@ -60,10 +73,14 @@ func _ready() -> void:
 		_end_tick = months * WorldState.TICKS_PER_MONTH
 		if _end_tick == 0 and not _shots.is_empty():
 			_end_tick = _shots[-1]
+		# ③ticker dump：無 shots/run-months 但要 dump → 預設跑 6 月供落檔
+		_dump_path = String(args.get("obs-ticker-dump", ""))
+		if _dump_path != "" and _end_tick == 0:
+			_end_tick = 6 * WorldState.TICKS_PER_MONTH
 		_obs_select = int(args.get("obs-select", -1))
 		_on_speed(3)   # max
-		print("[Observer] harness shots=%s end=%d out=%s select=%d" % [
-			str(_shots), _end_tick, _out_dir, _obs_select])
+		print("[Observer] harness shots=%s end=%d out=%s select=%d dump=%s" % [
+			str(_shots), _end_tick, _out_dir, _obs_select, _dump_path])
 
 func _parse_obs_args() -> Dictionary:
 	var out: Dictionary = {}
@@ -161,7 +178,13 @@ func _harness_step() -> void:
 	if _shot_idx < _shots.size():
 		next_stop = mini(_shots[_shot_idx], _end_tick)
 	if now < next_stop:
-		_bridge.tick_step(next_stop - now)
+		# ③dump 模式：大 budget + 小 chunk 快跑（去 12ms/frame 節流，headless 才跑得完月級）
+		if _dump_path != "":
+			next_stop = mini(next_stop, now + DUMP_CHUNK_TICKS)
+			_bridge.tick_step(next_stop - now, DUMP_FRAME_BUDGET_MS)
+		else:
+			_bridge.tick_step(next_stop - now)
+		_drain_dump()   # ③每步排空事件流（chunk 有界 << TTL/cap，不漏段）
 		_ui_accum += get_process_delta_time()
 		if _ui_accum >= UI_REFRESH_SEC:
 			_ui_accum = 0.0
@@ -172,9 +195,39 @@ func _harness_step() -> void:
 		_shot_idx += 1
 		return
 	if now >= _end_tick:
+		_drain_dump()
+		_write_dump()
 		print("[Observer] harness done tick=%d frames=%d hitch_max=%.0fms over150=%d" % [
 			now, _frames, _hitch_max_ms, _hitch_over150])
 		get_tree().quit()
+
+# ③排空 ticker 事件到 dump buffer（獨立水位，格式 tick\ttype\tteams\ttext）。
+func _drain_dump() -> void:
+	if _dump_path == "":
+		return
+	var fresh: Array = _bridge.consume_messages(_dump_since)
+	_dump_since = _bridge.current_tick()
+	for msg in fresh:
+		var teams: Array = ObserverEventText.related_teams(msg)
+		var text: String = ObserverEventText.render(_state, msg)
+		_dump_lines.append("%d\t%s\t%s\t%s" % [
+			int(msg.origin_tick), String(msg.type),
+			",".join(PackedStringArray(teams.map(func(t): return str(t)))), text])
+
+# ③落檔（機器可讀 TSV；header 首行）。
+func _write_dump() -> void:
+	if _dump_path == "":
+		return
+	var f := FileAccess.open(_dump_path, FileAccess.WRITE)
+	if f == null:
+		print("[Observer] ticker-dump 開檔失敗: %s (err=%d)" % [_dump_path, FileAccess.get_open_error()])
+		return
+	f.store_line("# tick\ttype\tteams\ttext  seed=%d end=%d events=%d" % [
+		_obs_seed, _end_tick, _dump_lines.size()])
+	for ln in _dump_lines:
+		f.store_line(ln)
+	f.close()
+	print("[Observer] ticker-dump → %s (%d events)" % [_dump_path, _dump_lines.size()])
 
 func _capture(tick: int) -> void:
 	_capturing = true

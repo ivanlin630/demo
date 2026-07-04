@@ -416,6 +416,7 @@
 
 ## Movement
 
+- **★far 區移速稀釋 10×（世界模型級,2026-07-04 貿易漏斗定罪,裁權=系統 session）**：`movement_system.process` `move_tick_acc += TICKS_PER_HOUR` 硬編,但 far 區每 `FAR_ZONE_INTERVAL`(100 tick) 才跑一次 → far 隊 1 hex≈3 天（10× 稀釋）。無玩家世界**全隊=far** → 跨格物流全癱：**envoy 馬鏈 6 月未貫通 + 貿易旅程永不到場同根**（藍圖「一修雙解」假說 ✅ 實測定罪）。姊妹系統（collect/consumption）皆傳 elapsed,唯 movement 不一致；違「大地圖與遭遇戰共用時間尺度」invariant。**修法已驗**：process 收 `elapsed_ticks` 參數（near=NEAR_CADENCE、far=FAR_ZONE_INTERVAL）→ seed1337 6 月成交 6→30、TRADE 到場 0→43(33.9%)——**但世界節奏×10 → pop 172→68(-60%) 塌房=gen 校準全失效** → revert,修須配套節奏重校準（FAR_ZONE_INTERVAL/移速常數/gen 參數一起裁）。diff 見 handback `2026-07-04-trade-loop-ignition`。
 - **mounts/wagons 速度**：⚠ 部分修（2026-06-15 驗證）。`_compute_team_speed`(`movement:138`) 現已 `× _compute_mount_bonus(team) × _compute_wagon_penalty(team)` → mount 加速、wagon 拖速**已有**。
   - **遺留**：speed_class（步兵/騎兵/輜重分類）仍缺——同隊內騎/步未分速,只算隊級平均 bonus。完整 unit-level speed_class 待 spec。
   - **發現**：2026-06-10 combat-engagement；2026-06-15 驗證 mount/wagon bonus 已實作

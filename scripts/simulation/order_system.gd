@@ -42,6 +42,7 @@ func post_order(state: WorldState, team: TeamData, kind: String, res: String, qt
 	_register_on_board(state, team, oid, kind, res, qty, expire)
 	print("[Order] Team%d %s %s ×%d (oid=%d)" % [team.team_id, kind, res, qty, oid])
 	Probe.bump("g1.order_placed")
+	Probe.bump("trade.post_" + kind)   # 漏斗站1：張貼 buy/sell 分流（純觀測）
 	return oid
 
 # WS-2b：把訂單登錄到發起隊最近自家市集 outpost tile 的看板（可見性鏡像）。
@@ -158,6 +159,8 @@ func _has_active(team: TeamData, kind: String, res: String) -> bool:
 	return false
 
 # 讀自隊收到的買單（team_known 的 order_buy message；殘缺=可失真副本）。
+# 不濾過期副本＝設計（G1d 撲空 emergent）：追舊單=有理由出門→到市集讀板撞活單。
+# （漏斗 r3 實證：濾掉後 arb 崩 2.7%/0.4%、旅程消失、成交 15→6/5→0——別再加濾。）
 func received_buy_orders(state: WorldState, team: TeamData) -> Array:
 	var out: Array = []
 	for m in state.team_known.get(team.team_id, []):
@@ -228,22 +231,33 @@ func read_market_board(state: WorldState, team: TeamData) -> void:
 
 # 套利挑單：sell盤(便宜買)/buy單(高價賣) 取 local_value 差最大者（殘缺情報，讀 received）。
 func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
+	Probe.bump("trade.arb_call")   # 漏斗站3：呼叫次數（含 DecisionContext has_arb 建構）
 	var best: Dictionary = {}
 	var best_score: float = 0.0   # 僅正套利
 	for o in received_sell_orders(state, merchant):
 		if o["origin_team"] == merchant.team_id: continue
-		if _hex_dist(merchant.tile_pos, o["pos"]) > MERCHANT_MAX_RANGE: continue
+		Probe.bump("trade.arb_sell_seen")
+		if _hex_dist(merchant.tile_pos, o["pos"]) > MERCHANT_MAX_RANGE:
+			Probe.bump("trade.arb_kill_range")
+			continue
 		var gain: float = TradeValuation.local_value(merchant, o["res"]) * float(o["qty"]) * 0.1   # proxy：自評值高→值得搬回
 		if gain > best_score:
 			best_score = gain; best = {"kind": "sell", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	for o in received_buy_orders(state, merchant):
 		if o["origin_team"] == merchant.team_id: continue
-		if _hex_dist(merchant.tile_pos, o["pos"]) > MERCHANT_MAX_RANGE: continue
+		Probe.bump("trade.arb_buy_seen")
+		if _hex_dist(merchant.tile_pos, o["pos"]) > MERCHANT_MAX_RANGE:
+			Probe.bump("trade.arb_kill_range")
+			continue
 		var stock: float = float(merchant.resources.get(o["res"], 0))
-		if stock <= 0.0: continue   # 沒貨可賣給買單
+		if stock <= 0.0:
+			Probe.bump("trade.arb_kill_nostock")   # 有買單無貨可賣
+			continue
 		var gain2: float = TradeValuation.local_value(merchant, o["res"]) * minf(stock, float(o["qty"])) * 0.1
 		if gain2 > best_score:
 			best_score = gain2; best = {"kind": "buy", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
+	if not best.is_empty():
+		Probe.bump("trade.arb_pick")   # 漏斗站3：選中非空
 	return best
 
 # 履約結算：按窗內 res 淨持有變化沖 active_orders（純記帳，不碰 resources）。
