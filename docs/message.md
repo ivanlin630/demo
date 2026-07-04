@@ -90,9 +90,15 @@ SimMessageSystem.new().emit_message(state, type, description, team)
 | `malicious` | 嚴重扭曲，強度 × 0.5，竄改 origin_team_id 或 source_pos | 計謀 × 0.7 - 義氣 × 0.4 |
 | `silent` | 不傳 | 慎重 × 0.3 + fear × 0.3 |
 
-### 手動交換（`exchange_messages`）
+### 統一失真引擎（`DistortionEngine`，F-I4）
 
-保留供未來玩家手動觸發（按 E 接觸 NPC），不自動呼叫。
+**所有「失真怎麼算」單一 owner** = `scripts/simulation/distortion_engine.gd`（static class）。call site 只選 mode / 傳 context：
+
+- `distort_message(state, msg, mode)`：訊息內容失真（unintentional=40% 鄰格漂移；malicious=50/50 身分誤報或位置偏移＋惡意改寫描述）。caller：`_exchange_one_way`、`_exchange_intel` 訊息迴圈。
+- `distort_intel_entry(entry, mode, hop_decay)`：intel 估值失真（pop 擾動 / tile 偏移 / 任務謠傳 / confidence 衰減；silent → `{}`）。caller：`_exchange_intel`。
+- `apply_observation_deception(state, snap, tgt, tgt_leader, actual_armed)`：親見觀察欺敵（偽裝平民 / 虛張聲勢 / 謊稱勢力，被觀察方人格驅動 deceive_chance）。caller：`interaction._write_tier2_intel`（寫點不動，僅欺敵計算搬入）。
+
+C 類退役：舊 `_distort_content` / `_distort_intel_entry` / tier2 內嵌欺敵塊已刪；dormant `exchange_messages`（第 4 引擎，零 caller）與其孤兒 `_time_decay_factor` 一併刪除。
 
 ### 待處理佇列（`process_pending`）
 
@@ -122,10 +128,7 @@ Team 抵達新格（MovementSystem.process → arrived）
   → SimRunner._step3_propagate_messages(arrived, all_teams)
     → propagate_on_arrival()
       → 找同格 Teams → _exchange_one_way()
-        → 去重 + 衰減 + 傳播模式抽樣 → 寫入 target.team_known
-
-玩家接觸實體（未來）
-  → exchange_messages() → 複製到 player_known
+        → 去重 + 衰減 + 傳播模式抽樣（失真計算 → DistortionEngine）→ 寫入 target.team_known
 ```
 
 ---

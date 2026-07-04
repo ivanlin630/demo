@@ -297,7 +297,8 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	elif b.current_task == TeamData.TASK_ATTACK:
 		_combat.start_combat(state, id_b, id_a)
 	elif a.current_task == TeamData.TASK_LOOT and a.readiness >= COMBAT_THRESHOLD:
-		if _should_pay_tribute(state, id_b, id_a):
+		# F-I2：屈服判斷統一走 DiplomaticAiSystem.tribute_accept（同格勒索=兵臨城下 threat=raider readiness）
+		if DiplomaticAiSystem.tribute_accept(state, b, a, a.readiness):
 			_probe_raid(state, a, b, "extort")
 			_resolve_extortion(state, id_a, id_b)
 		elif _should_attack(state, id_a, id_b):
@@ -306,7 +307,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		else:
 			_probe_raid(state, a, b, "noop")
 	elif b.current_task == TeamData.TASK_LOOT and b.readiness >= COMBAT_THRESHOLD:
-		if _should_pay_tribute(state, id_a, id_b):
+		if DiplomaticAiSystem.tribute_accept(state, a, b, b.readiness):
 			_probe_raid(state, b, a, "extort")
 			_resolve_extortion(state, id_b, id_a)
 		elif _should_attack(state, id_b, id_a):
@@ -317,31 +318,24 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 
 # ──────── 決策函式 ────────
 
-func _should_pay_tribute(state: WorldState, def_id: int, atk_id: int) -> bool:
-	var def: TeamData = state.teams[def_id]
-	if def.current_task == TeamData.TASK_FLEE:
-		return true
-	var leader: PersonData = state.persons.get(def.leader_id)
-	if leader == null:
-		return false
-	var survival: float = float(leader.values.get("求生欲", 0.5))
-	var caution: float  = float(leader.values.get("慎重", 0.5))
-	var honor: float    = float(leader.values.get("義氣", 0.5))
-	var weakness: float = _combat.team_strength(state, def_id) / maxf(_combat.team_strength(state, atk_id), 0.01)
-	var score: float    = survival * 0.4 + caution * 0.3 - honor * 0.3 + (1.0 - weakness) * 0.3
-	return score > 0.4
-
 func _should_attack(state: WorldState, atk_id: int, def_id: int) -> bool:
 	var atk: TeamData = state.teams[atk_id]
 	var leader: PersonData = state.persons.get(atk.leader_id)
 	if leader == null:
 		return false
+	# F-I7 belief-gate：無情報 → 保守不攻（G3-E「無估 fallback=不行動」，不偷看真值）
+	if not BeliefSystem.has_belief(state, atk_id, def_id):
+		return false
 	var ambition: float  = float(leader.values.get("野心", 0.5))
 	var caution: float   = float(leader.values.get("慎重", 0.5))
 	var greed: float     = float(leader.values.get("貪婪", 0.5))
 	var martial: float   = float(leader.values.get("好戰", 0.5))
-	var str_ratio: float = _combat.team_strength(state, atk_id) / maxf(_combat.team_strength(state, def_id), 0.01)
-	var score: float     = ambition * 0.3 + martial * 0.3 + greed * 0.2 + (str_ratio - 1.0) * 0.2 - caution * 0.5
+	# F-I7：對方實力讀 believed armed_est（tier2 偽裝/虛張在此咬），退 pop_est；自身讀真 armed
+	var bel: Dictionary = BeliefSystem.best_estimate(state, atk_id, def_id)
+	var own_armed: float = maxf(float(_combat.calc_armed(state, atk)), 1.0)
+	var def_est: float = float(bel.get("armed_est", bel.get("population_est", own_armed)))
+	var str_ratio: float = own_armed / maxf(def_est, 1.0)
+	var score: float = ambition * 0.3 + martial * 0.3 + greed * 0.2 + (str_ratio - 1.0) * 0.2 - caution * 0.5
 	return score > 0.0
 
 
@@ -813,42 +807,8 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 	snap["goods_est"]      = float(tgt.resources.get("goods",    0.0))
 	var actual_armed: int  = _combat.calc_armed(state, tgt)
 	snap["armed_est"]      = actual_armed
-	var honor: float   = float(tgt_leader.values.get("信義",  0.5)) if tgt_leader else 0.5
-	var scheme: float  = float(tgt_leader.skills.get("計謀",  0.0)) if tgt_leader else 0.0
-	var martial: float = float(tgt_leader.values.get("好戰",  0.5)) if tgt_leader else 0.5
-	var caution: float = float(tgt_leader.values.get("慎重",  0.5)) if tgt_leader else 0.5
-	var deceive_chance: float = (1.0 - honor) * 0.5 + scheme * 0.2  # TEST VALUE
-	var disguise_tags: Array  = ["統領", "軍隊", "流亡", "子團"]
-	var has_disguise_tag: bool = false
-	for dtag in disguise_tags:
-		if tgt.tags.has(dtag): has_disguise_tag = true; break
-	if has_disguise_tag and randf() < deceive_chance:
-		# 偽裝平民：低報武器，高報其他資源
-		snap["armed_est"]    = roundi(actual_armed * randf_range(0.2, 0.4))
-		snap["food_est"]     *= randf_range(1.5, 2.5)
-		snap["material_est"] *= randf_range(1.5, 2.5)
-		snap["goods_est"]    *= randf_range(1.5, 2.5)
-	else:
-		var is_bluff_task:     bool = tgt.current_task in [TeamData.TASK_ATTACK, TeamData.TASK_LOOT]
-		var is_bluff_martial:  bool = martial > 0.6
-		var is_bluff_merchant: bool = tgt.tags.has("商隊") and caution > 0.5
-		var armed_ratio: float = float(actual_armed) / maxf(float(tgt.population), 1.0)
-		if (is_bluff_task or is_bluff_martial or is_bluff_merchant) \
-				and armed_ratio < 0.6 and randf() < deceive_chance:
-			# 虛張聲勢：高報武器，低報其他資源
-			var bluffed: int  = roundi(actual_armed * randf_range(2.0, 4.0))
-			snap["armed_est"] = maxi(0, mini(bluffed, tgt.population - 1))
-			snap["food_est"]     *= randf_range(0.3, 0.7)
-			snap["material_est"] *= randf_range(0.3, 0.7)
-			snap["goods_est"]    *= randf_range(0.3, 0.7)
-	# R1b ③可騙 channel：弱獨立隊謊稱屬大勢力（faction_id 誤報 → 攻擊者 own 罰被嚇阻）。
-	# 同 deceive 塊一欄非新系統；機率沿用 deceive_chance（人格驅動）。TEST VALUE 門檻。
-	if tgt.faction_id == -1 \
-			and float(actual_armed) / maxf(float(tgt.population), 1.0) < 0.5 \
-			and randf() < deceive_chance:
-		var bluff_fid: int = _biggest_established_faction(state)
-		if bluff_fid != -1:
-			snap["faction_id"] = bluff_fid
+	# F-I4：欺敵三塊（偽裝平民/虛張聲勢/謊稱勢力）收斂至 DistortionEngine（單一失真 owner）
+	DistortionEngine.apply_observation_deception(state, snap, tgt, tgt_leader, actual_armed)
 	# G3c-2 觀察吃技能：observer 戰術低 → 看不懂武裝 → armed_est 疊誤判（cred 仍 1.0）
 	var obs_leader2: PersonData = state.persons.get((state.teams.get(obs_id) as TeamData).leader_id) if state.teams.has(obs_id) else null
 	var tactic: float = float(obs_leader2.skills.get("戰術", 0.0)) if obs_leader2 else 0.0
@@ -856,18 +816,6 @@ func _write_tier2_intel(state: WorldState, obs_id: int, tgt_id: int) -> void:
 	snap["armed_est"] = maxi(0, roundi(float(snap["armed_est"]) * randf_range(1.0 - armed_noise, 1.0 + armed_noise)))
 	var cred: float = BeliefSystem.source_credibility(state, obs_id, "親見", obs_id, 0)
 	BeliefSystem.record_claim(state, obs_id, tgt_id, obs_id, "親見", snap, cred, false)
-
-# R1b：faction_id 誤報用——最大 established faction（謊稱誰最能嚇阻）。無則 -1（不誤報）。
-static func _biggest_established_faction(state: WorldState) -> int:
-	var best_fid: int = -1
-	var best_n: int = -1
-	for fid in state.factions:
-		var f: FactionData = state.factions[fid]
-		if not f.is_established: continue
-		if f.member_team_ids.size() > best_n:
-			best_n = f.member_team_ids.size()
-			best_fid = fid
-	return best_fid
 
 # 處決俘虜：呼叫者負責移除 NPC；此函數只結算目擊者 loyalty 懲罰
 func execute_prisoner(state: WorldState, team_id: int) -> void:
@@ -938,16 +886,9 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 	var player_p: PersonData = state.persons.get(state.player_id)
 	var player_team_id: int  = player_p.team_id if player_p != null else -1
 	if aggressor_id == player_team_id:
-		var leader: PersonData = state.persons.get(to_t.leader_id) if to_t.leader_id != -1 else null
-		var caution: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
-		var pride:   float = float(leader.values.get("義氣", 0.5)) if leader else 0.5
-		var fear:    float = leader.fear if leader else 0.3
-		var power_r: float = float(from_t.population) / maxf(float(to_t.population), 1.0)
-		var score:   float = (power_r - 1.0) * 0.4 + caution * 0.2 \
-		                   - pride * 0.3 + fear * 0.2 + from_t.readiness * 0.2
-		var accepted: bool = score > 0.5   # TEST VALUE
-		if not accepted:
-			print("[Extort] Team%d 拒絕勒索 (score=%.2f)" % [target_id, score])
+		# F-I2 統一公式（同格勒索=兵臨城下 threat=aggressor readiness）
+		if not DiplomaticAiSystem.tribute_accept(state, to_t, from_t, from_t.readiness):
+			print("[Extort] Team%d 拒絕勒索" % target_id)
 			return { "ok": true, "accepted": false, "msg": "對方拒絕勒索" }
 
 	# 資源轉移

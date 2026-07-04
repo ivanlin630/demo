@@ -107,15 +107,12 @@ func _exchange_one_way(state: WorldState, from_id: int, to_id: int, carrier: Per
 			"unintentional":
 				copy.is_distorted = true
 				copy.strength *= 0.8
-				if randf() < 0.4:
-					var offsets := [Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1),
-									Vector2i(0,-1), Vector2i(1,-1), Vector2i(-1,1)]
-					copy.source_pos += offsets[randi() % offsets.size()]
+				DistortionEngine.distort_message(state, copy, "unintentional")
 				state.team_known[to_id].append(copy)
 			"malicious":
 				copy.is_distorted = true
 				copy.strength *= 0.5
-				_distort_content(state, copy)
+				DistortionEngine.distort_message(state, copy, "malicious")
 				state.team_known[to_id].append(copy)
 			"silent":
 				pass
@@ -140,24 +137,6 @@ func _decide_propagation_mode(carrier: PersonData) -> String:
 	if roll < w_malicious: return "malicious"
 	return "silent"
 
-func _distort_content(state: WorldState, msg: MessageData) -> void:
-	if randf() < 0.5:
-		var ids: Array = state.teams.keys()
-		ids.erase(msg.origin_team_id)
-		if not ids.is_empty():
-			msg.origin_team_id = ids[randi() % ids.size()]
-			msg.params["origin"] = str(msg.origin_team_id)
-	else:
-		var offsets: Array = [
-			Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1), Vector2i(0,-1),
-			Vector2i(1,-1), Vector2i(-1,1), Vector2i(2,0), Vector2i(-2,0)
-		]
-		msg.source_pos += offsets[randi() % offsets.size()]
-		msg.params["x"] = str(msg.source_pos.x)
-		msg.params["y"] = str(msg.source_pos.y)
-	if TextBank.TEMPLATES.has(msg.type):
-		msg.description = TextBank.fmt(msg.type, "malicious", msg.params)
-
 func exchange_intel_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Array) -> void:
 	for arrived_id in arrived_ids:
 		var arrived: TeamData = state.teams.get(arrived_id)
@@ -168,31 +147,6 @@ func exchange_intel_on_arrival(state: WorldState, arrived_ids: Array, all_team_i
 			if other == null or other.tile_pos != arrived.tile_pos: continue
 			_exchange_intel(state, arrived_id, other_id)
 			_exchange_intel(state, other_id, arrived_id)
-
-func _distort_intel_entry(entry: Dictionary, mode: String) -> Dictionary:
-	var e: Dictionary = entry.duplicate()
-	match mode:
-		"honest":
-			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(0.9, 1.1))
-		"unintentional":
-			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(0.6, 1.5))
-			e["tile_pos"] = e.get("tile_pos", Vector2i.ZERO) + \
-				Vector2i(randi_range(-2, 2), randi_range(-2, 2))
-			if randf() < 0.3:
-				var tasks: Array = ["idle", "攻擊", "貿易", "生產", "偵查"]
-				e["current_task"] = tasks[randi() % tasks.size()]
-		"malicious":
-			e["population_est"] = roundi(float(e.get("population_est", 0)) * randf_range(0.2, 3.0))
-			e["tile_pos"] = e.get("tile_pos", Vector2i.ZERO) + \
-				Vector2i(randi_range(-6, 6), randi_range(-6, 6))
-			if randf() < 0.4:
-				var tasks2: Array = ["idle", "攻擊", "貿易", "生產", "偵查"]
-				e["current_task"] = tasks2[randi() % tasks2.size()]
-		"silent":
-			return {}
-	e["confidence"]    = clampf(float(e.get("confidence", 1.0)) * (1.0 - HOP_DECAY), 0.0, 1.0)
-	e["is_suspicious"] = false
-	return e
 
 func _decide_exchange_mode(state: WorldState, giver: TeamData, receiver: TeamData) -> String:
 	if state.player_hostile_teams.has(receiver.team_id):
@@ -240,7 +194,9 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 		if mode in ["unintentional", "malicious"]:
 			copy.is_distorted = true
 			copy.strength *= 0.8
-			_distort_content(state, copy)
+			# F-I4 統一：mode 語意一致（unintentional=位置漂移、malicious=身分/位置誤報），
+			# 原此處 unintentional 也走 malicious 級 _distort_content = fork 差異，統一後收斂
+			DistortionEngine.distort_message(state, copy, mode)
 		state.team_known[receiver_id].append(copy)
 
 	var rep2: float = float(giver.known_reputations.get(receiver_id, 0.5))
@@ -249,7 +205,7 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 	for tgt_id in BeliefSystem.known_targets(state, giver_id):
 		if tgt_id == receiver_id: continue
 		var src_val: Dictionary = BeliefSystem.best_estimate(state, giver_id, tgt_id)
-		var entry: Dictionary = _distort_intel_entry(src_val, mode)
+		var entry: Dictionary = DistortionEngine.distort_intel_entry(src_val, mode, HOP_DECAY)
 		if entry.is_empty(): continue
 		# 真來源類別 + 可信度公式（hop 只算一次 → 修 G3b relay 雙重 HOP debt）
 		var stype: String = _claim_source_type(giver, receiver)
@@ -272,39 +228,9 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 			else: Probe.bump("g3.detect_信假")
 		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)
 
-# 實體接觸時交換訊息（需要明確呼叫，不自動）
-func exchange_messages(state: WorldState, from_team_id: int, to_team_id: int, person: PersonData) -> void:
-	if not state.team_known.has(from_team_id):
-		return
-	if not state.team_known.has(to_team_id):
-		state.team_known[to_team_id] = []
-
-	var age_factor := _time_decay_factor(state, from_team_id)
-
-	for msg in state.team_known[from_team_id]:
-		var copy := _copy_message(msg)
-		# 熵增失真：hop 衰減 × 時間老化
-		copy.strength *= (1.0 - HOP_DECAY) * age_factor
-		# 人為失真：依 NPC loyalty 計算
-		if randf() > person.loyalty:
-			copy.is_distorted = true
-			copy.description = "[失真] " + copy.description
-		if copy.strength > 0.05:
-			state.team_known[to_team_id].append(copy)
-
 func process_pending(_state: WorldState) -> void:
 	# 未來：處理 pending delivery queue（據點同步、信使到達）
 	pass
-
-func _time_decay_factor(state: WorldState, team_id: int) -> float:
-	if not state.team_known.has(team_id) or state.team_known[team_id].is_empty():
-		return 1.0
-	var oldest_tick: int = state.world.current_tick
-	for msg in state.team_known[team_id]:
-		if msg.origin_tick < oldest_tick:
-			oldest_tick = msg.origin_tick
-	var age := state.world.current_tick - oldest_tick
-	return maxf(1.0 - age * TIME_DECAY_PER_TICK, 0.1)
 
 func _copy_message(original: MessageData) -> MessageData:
 	var copy := MessageData.new()
