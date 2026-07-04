@@ -983,6 +983,7 @@ func _update_goals(state: WorldState, f) -> void:
 	f.intent = intent
 	f.strategy = intent["type"]
 	var itype: String = intent["type"]
+	if Probe.enabled and itype != "": Probe.bump("intent.sel_" + itype)
 
 	# 戰爭基金（跨意圖籌餉 sub-need）：野心/好戰高 + 建材枯 → 特別稅備戰（driver=備戰籌餉）。
 	# 非缺糧 survival；意圖無關（想武裝起來）。保留既有經濟行為，附 driver 連回意圖。
@@ -1080,6 +1081,7 @@ func _emit_goal(state: WorldState, f, goal: String, intent_type: String, why: St
 	if goal not in f.goals:
 		f.goals.append(goal)
 	f.goal_drivers[goal] = {"intent": intent_type, "why": why, "mode": mode}
+	if Probe.enabled: Probe.bump("intent.goal_emit")
 	# specimen tap：commander goal → capture intent（leader team 是 specimen 時）
 	SpecimenTracer.capture_intent(state, f.leader_team_id, intent_type, why, mode)
 
@@ -1091,6 +1093,7 @@ static func _solo_type(team: TeamData) -> String:
 
 func _set_solo(state: WorldState, team: TeamData, itype: String, why: String, mode: String) -> void:
 	state.set_solo_intent(team, itype, why, mode, "solo:" + itype)   # S6 chokepoint：每令帶 driver（連回意圖，北極星）
+	if Probe.enabled and itype != "": Probe.bump("intent.sel_" + itype)
 	SpecimenTracer.capture_intent(state, team.team_id, itype, why, mode)
 
 # mirror commander-v2 _select_intent（輕量）：fid=-1 野心獨立隊秤「建國 vs 守成」→ means-end 子行動
