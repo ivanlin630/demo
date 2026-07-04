@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 藍圖主動盲點掃描產出(用戶裁序)——#3觀看節奏/#4世界間多樣性/#5新鮮度衰減→QA戲感審計量測軸;#6立國後高原=願景註記;存檔/終局=sim好之前最低優先;藍圖自檢制+行為教訓寫memory
 ---
 

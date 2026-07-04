@@ -10,7 +10,11 @@
 
 1. **`scripts/debug/sufficiency_bed.gd`**：default 自然世界（seed 1337+2674，各 6 月）自跑，輸出**全系統率表**。
 2. **輸出格式強制（R3+矛盾三元組）**：每列 `分子/分母=率`＋月切面＋**想要/可行/發生 三元組**（可行=條件滿足計數：有供給/有路/有對象，各鏈自定義並在輸出註明定義）；裸計數=違規。表尾 machine-readable 區塊（JSON 一行/列），供之後固化常駐回歸（縮減版每 merge 跑）。
-3. **事件流 dump**：跑完把 `global_messages`+`observer_messages` 全量落檔（headless 直讀 state，不依賴 observer GUI dump——與貿易軌 `--obs-ticker-dump` 互補不撞檔）。
+3. **事件流 dump**：跑完把 `global_messages`+`observer_messages` 全量落檔（headless 直讀 state，帶 origin_tick，不依賴 observer GUI dump——與貿易軌 `--obs-ticker-dump` 互補不撞檔）。
+4. **三軸素材（blindspot-axes，機器只出素材、判歸 QA）**：
+   - **觀看節奏**：dump 帶 tick 即可（QA 按速度檔 tps 換算每真實分鐘事件數）；bed 另印 per-型 per-月 counts 表。
+   - **世界間多樣性**：per-seed JSON 各自完整輸出＋表尾跨 seed 差異摘要（各率/主導 archetype/事件型分佈 delta）。
+   - **新鮮度衰減**：bed 印事件型 first-seen 表（每型首次出現 tick）→ 覆蓋耗盡曲線 QA 直接讀。
 
 ## 率表列（至少，藍圖清單照收）
 
