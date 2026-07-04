@@ -3371,9 +3371,27 @@ func _run_sim_test() -> void:
 		"SEASON_LENGTH 應 = TICKS_PER_SEASON")
 	assert(PopulationSystem.OVERFLOW_CHECK_INTERVAL == WorldState.TICKS_PER_DAY,
 		"OVERFLOW_CHECK_INTERVAL 應 = TICKS_PER_DAY")
-	print("TimeConstants OK — TICKS_PER_DAY=%d MONTH=%d SEASON=%d YEAR=%d" % [
+	# TimeScale 骨架（time-scale wave slice A）
+	assert(TimeScale.TICK_PER_DAY == WorldState.TICKS_PER_DAY,
+		"TimeScale.TICK_PER_DAY 應承 WorldState.TICKS_PER_DAY")
+	assert(TimeScale.ENCOUNTER_MAP_SCALE == EncounterSystem.MAP_DIAMETER,
+		"TimeScale.ENCOUNTER_MAP_SCALE 應承 EncounterSystem.MAP_DIAMETER(錨②)")
+	assert(TimeScale.MOVE_TICKS_PER_HEX == TimeScale.BASE_ACTION_TICKS * TimeScale.ENCOUNTER_MAP_SCALE,
+		"MOVE_TICKS_PER_HEX 必為 BASE_ACTION × ENCOUNTER_MAP_SCALE 連動（錨①,禁倍率）")
+	assert(TimeScale.MOVE_TICKS_PER_HEX == 240,
+		"MOVE_TICKS_PER_HEX 應 = 240 = 1天/hex")
+	assert(TimeScale.MOVE_TICKS_PER_HEX == TimeScale.TICK_PER_DAY,
+		"移動 1 world-hex 應 = 1 天（錨①連動值）")
+	assert(MovementSystem.BASE_MOVE_TICKS == TimeScale.MOVE_TICKS_PER_HEX,
+		"MovementSystem.BASE_MOVE_TICKS 唯一讀站應走 TimeScale 連動式")
+	assert(TimeScale.days(3) == 3 * WorldState.TICKS_PER_DAY,
+		"TimeScale.days(3) 語意 helper 錯")
+	assert(TimeScale.hours(1) == WorldState.TICKS_PER_HOUR,
+		"TimeScale.hours(1) 應 = TICKS_PER_HOUR")
+	print("TimeConstants OK — TICKS_PER_DAY=%d MONTH=%d SEASON=%d YEAR=%d MOVE/hex=%d" % [
 		WorldState.TICKS_PER_DAY, WorldState.TICKS_PER_MONTH,
-		WorldState.TICKS_PER_SEASON, WorldState.TICKS_PER_YEAR])
+		WorldState.TICKS_PER_SEASON, WorldState.TICKS_PER_YEAR,
+		TimeScale.MOVE_TICKS_PER_HEX])
 
 	print("[DataStruct] named_members 非空: Team0=%d" % state.teams[0].named_members.size())
 	print("[DataStruct] person.salary 型別: %s" % typeof(state.persons[0].salary))
@@ -8653,8 +8671,8 @@ func _test_eta_ticks() -> void:
 	var team := TeamData.new()
 	_seed_pop(team, 5); team.fatigue = 0.0
 	var eta = PathSystem.eta_ticks(team, 5.0)
-	# BASE_MOVE_TICKS = 48, speed_mult = 1.0 → eta = 5 * 48 = 240
-	assert(eta == 240, "eta 應 240，實際=%d" % eta)
+	# BASE_MOVE_TICKS = 240（TimeScale 骨架,×5→1）, speed_mult = 1.0 → eta = 5 * 240 = 1200
+	assert(eta == 1200, "eta 應 1200，實際=%d" % eta)
 	team.fatigue = 0.5   # speed reduced
 	var eta2 = PathSystem.eta_ticks(team, 5.0)
 	assert(eta2 > eta, "fatigue 應延長 ETA")
