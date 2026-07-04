@@ -30,6 +30,12 @@ func setup(bridge: ObserverBridge) -> void:
 	_log.fit_content = false
 	add_child(_log)
 
+# 過濾開關（等同勾「只看選中隊」；harness 截圖驗證用同一 path）
+func enable_filter(on: bool) -> void:
+	if _filter_tid != -1:
+		_filter_check.button_pressed = on
+	_render()
+
 # 選中隊變更（inspect/地圖同步呼）。tid=-1 清除。
 func set_filter_team(tid: int) -> void:
 	_filter_tid = tid

@@ -30,6 +30,7 @@ var _end_tick: int = 0
 var _out_dir: String = "."
 var _obs_seed: int = 1337
 var _capturing: bool = false
+var _obs_select: int = -1   # harness：截圖前選中此隊（驗過濾/inspect/同步 path）
 
 func _ready() -> void:
 	var args: Dictionary = _parse_obs_args()
@@ -57,8 +58,10 @@ func _ready() -> void:
 		_end_tick = months * WorldState.TICKS_PER_MONTH
 		if _end_tick == 0 and not _shots.is_empty():
 			_end_tick = _shots[-1]
+		_obs_select = int(args.get("obs-select", -1))
 		_on_speed(3)   # max
-		print("[Observer] harness shots=%s end=%d out=%s" % [str(_shots), _end_tick, _out_dir])
+		print("[Observer] harness shots=%s end=%d out=%s select=%d" % [
+			str(_shots), _end_tick, _out_dir, _obs_select])
 
 func _parse_obs_args() -> Dictionary:
 	var out: Dictionary = {}
@@ -173,6 +176,12 @@ func _harness_step() -> void:
 
 func _capture(tick: int) -> void:
 	_capturing = true
+	if _obs_select != -1:
+		# 走真同步 path（同 inspect team_selected 接線）：map 高亮 + ticker 過濾 + 詳情
+		_inspect.select_team(_obs_select)
+		_map.select_team(_obs_select)
+		_ticker.set_filter_team(_obs_select)
+		_ticker.enable_filter(true)
 	_refresh_ui()
 	await get_tree().process_frame
 	await get_tree().process_frame
