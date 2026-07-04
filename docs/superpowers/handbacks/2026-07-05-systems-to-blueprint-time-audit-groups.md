@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 時間常數分組表回報(wave步驟1)——~80常數/21檔,無TimeScale骨架,兩根(TICKS_PER_DAY+BASE_ACTION_TICKS);×5唯一讀站=BASE_MOVE_TICKS(food/fatigue÷24是獨立手校痕);分7組;待你裁5個骨架具體值(移動格耗/遭遇尺度/cadence語意天數/後勤走一格帳/觀看確認)
 ---
 
