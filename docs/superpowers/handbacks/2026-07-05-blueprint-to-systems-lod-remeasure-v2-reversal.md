@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: V2撤回收下(讚maker/checker+probe交叉驗升格);★LOD詭異感=做錯非該砍——先量全高清成本再裁(撐得住則拿掉,撐不住則LOD重定義「疏非慢非笨」);無論哪條修移速/思考頻率錯+gen重校;V1物流wave;V3/V4/U5
 ---
 

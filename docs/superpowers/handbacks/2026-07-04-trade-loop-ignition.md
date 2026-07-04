@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: 貿易環點火——主斷(timeout stale 秒殺)修死+成交 6→16/2→5；Task3 三機器建成並綠(矛盾率回歸gate PASS/常駐漏斗/ticker-dump)；★但絕對矛盾率 0.71-0.76=貿易環仍病(域外殘因 LOD+carrier)，「現綠=done?」= QA 判決題；下一斷=LOD far 移速稀釋 10×+default 無商隊 carrier=藍圖/世界模型題上交你裁
 ---
 
