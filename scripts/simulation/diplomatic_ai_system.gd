@@ -13,10 +13,58 @@ const BETRAY_MARGIN_CHANCE: float = 0.3    # MIN..HARD 之間 stochastic tie-bre
 const ALLIANCE_ACCEPT_THRESHOLD: float = 0.55  # 結盟 accept 門檻（原硬編碼 0.55，提出成常數便於 seeded 微校）
 const GIFT_NEED_FOOD_PER_POP: float = 10.0     # 「滿禮」基準：目標每人約 10 糧的禮視為足量（禮值/需求縮放分母）
 const GIFT_TERM_MAX: float = 0.4               # 禮對 diplomacy score 最大貢獻（雪中送炭可推過門檻）
+# F-I2 統一貢金/勒索屈服公式權重（TEST VALUE，seeded 校）。單一 owner：三 caller
+#（LOOT 同格勒索 / 外交 demand_tribute / 玩家直接勒索）全走 tribute_accept，
+# 情境差異=輸入權重（threat），非分叉公式。
+const TRIBUTE_W_POWER: float = 0.4      # believed 實力比（沿舊 demand_tribute 權重）
+const TRIBUTE_W_CAUTION: float = 0.3
+const TRIBUTE_W_HONOR: float = 0.3      # 義氣抗屈服
+const TRIBUTE_W_SURVIVAL: float = 0.2   # 求生欲傾向屈服（沿舊 _should_pay_tribute）
+const TRIBUTE_W_FEAR: float = 0.2       # 恐懼傾向屈服（沿舊 resolve_extortion_direct）
+const TRIBUTE_W_THREAT: float = 0.2     # 兵臨城下壓力（caller 輸入：同格=aggressor readiness、遠程外交=0）
+const TRIBUTE_W_FEUD: float = 0.3       # F-I5 接線：血仇不屈
+const TRIBUTE_W_GRATITUDE: float = 0.2  # F-I5 接線：恩義軟化
+const TRIBUTE_ACCEPT_THRESHOLD: float = 0.1
+const TRIBUTE_POWER_R_CAP: float = 3.0
 
 # T-02：從 team_intel 取人口估算；無資料 fallback = self_pop（謹慎：視對方與己等強）
 func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) -> int:
 	return BeliefSystem.best_estimate(state, obs_id, tgt_id).get("population_est", fallback)
+
+# F-I2 統一屈服公式（C 類：舊 interaction._should_pay_tribute / 本檔 demand_tribute 內嵌分 /
+# interaction.resolve_extortion_direct 內嵌分全退役）。
+# F-I7：aggressor 實力讀 believed pop（無估 fallback=self pop=視為等強，保守不偷看真值）。
+# F-I5：consult feud/gratitude typed 邊當權重項。
+static func tribute_accept(state: WorldState, defender: TeamData, aggressor: TeamData,
+		threat: float) -> bool:
+	if defender.current_task == TeamData.TASK_FLEE:
+		return true
+	var leader: PersonData = state.persons.get(defender.leader_id) if defender.leader_id != -1 else null
+	if leader == null:
+		return false
+	var caution: float  = float(leader.values.get("慎重", 0.5))
+	var honor: float    = float(leader.values.get("義氣", 0.5))
+	var survival: float = float(leader.values.get("求生欲", 0.5))
+	var agg_pop_est: int = BeliefSystem.best_estimate(state, defender.team_id, aggressor.team_id) \
+		.get("population_est", defender.population)
+	var power_r: float = clampf(float(agg_pop_est) / maxf(float(defender.population), 1.0),
+		0.0, TRIBUTE_POWER_R_CAP)
+	var score: float = (power_r - 1.0) * TRIBUTE_W_POWER \
+		+ caution * TRIBUTE_W_CAUTION - honor * TRIBUTE_W_HONOR \
+		+ survival * TRIBUTE_W_SURVIVAL + leader.fear * TRIBUTE_W_FEAR \
+		+ clampf(threat, 0.0, 1.0) * TRIBUTE_W_THREAT
+	if aggressor.leader_id != -1:
+		score -= _edge_intensity_to(leader.relation_edges, "feud", aggressor.leader_id) * TRIBUTE_W_FEUD
+		score += _edge_intensity_to(leader.relation_edges, "gratitude", aggressor.leader_id) * TRIBUTE_W_GRATITUDE
+	return score > TRIBUTE_ACCEPT_THRESHOLD
+
+# typed 邊 reader（指定 type+target 最強 intensity；無邊 0）。加 reader 不改 RelationGraph 核心。
+static func _edge_intensity_to(edges: Array, type: String, target: int) -> float:
+	var best: float = 0.0
+	for e in RelationGraph.edges_of_type(edges, type):
+		if int(e.get("target", -1)) == target:
+			best = maxf(best, float(e.get("intensity", 0.0)))
+	return best
 
 func _calc_diplomacy_score(state: WorldState,
 		self_team: TeamData, other_team: TeamData, gift: Dictionary = {}) -> float:
@@ -122,11 +170,9 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 	if action == "demand_tribute" and response == "refuse":
 		var sender_leader: PersonData = state.persons.get(sender.leader_id) if sender.leader_id >= 0 else null
 		if sender_leader != null:
-			sender_leader.memory.append({
-				"event_id":  state.world.current_tick,
-				"intensity": "minor",
-				"reaction":  "tribute_refused"
-			})
+			# F-I6：走 write_memory 統一 schema（type 欄 → type-scan counter 可見）。0.2 TEST VALUE
+			NpcAiSystem.new().write_memory(sender_leader, "tribute_refused",
+				target.leader_id, state.world.current_tick, 0.2)
 		sender.update_reputation(target.team_id, -0.1)
 		target.update_reputation(sender.team_id, -0.05)
 		print("[Diplomacy] Team%d 拒絕進貢 → demander memory tribute_refused, rep -0.1/-0.05" % target.team_id)
@@ -147,16 +193,8 @@ func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 				return "accept"
 			return "reject"
 		"demand_tribute":
-			var leader: PersonData = state.persons.get(self_team.leader_id) if self_team.leader_id != -1 else null
-			var pride:   float = float(leader.values.get("義氣", 0.5)) if leader else 0.5
-			var caution: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
-			# G3-E leak 1d：收貢方對 sender 實力讀 belief 非真值（無估→fallback self_pop=保守等強）
-			var _sender_pop_est: int = _get_pop_est(state, self_team.team_id, sender_team.team_id, self_team.population)
-			var power_r: float = float(_sender_pop_est) / maxf(float(self_team.population), 1.0)
-			# 接受分：強弱差大 + 謹慎 → 傾向接受；義氣高 → 傾向拒絕
-			var d_score: float = (power_r - 1.0) * 0.4 + caution * 0.3 - pride * 0.3
-			print("[DiplomacyAI] demand_tribute score=%.2f (power_r=%.2f, caution=%.2f, pride=%.2f)" % [d_score, power_r, caution, pride])
-			return "accept" if d_score > 0.0 else "refuse"
+			# F-I2 統一公式（遠程外交無兵臨壓力 threat=0）
+			return "accept" if tribute_accept(state, self_team, sender_team, 0.0) else "refuse"
 		"offer_surrender":
 			if score > 0.3:
 				return "accept"

@@ -491,6 +491,7 @@ func _initialize() -> void:
 	# ── G3 Phase E：enforce（belief 真正驅動決策，god-view leak 補）──
 	_test_leak_tribute_powergap_belief()
 	_test_leak_tribute_response_belief()
+	_test_tribute_unified_edges()
 	_test_leak_strong_neighbor_belief()
 	_test_leak_aid_target_belief()
 	_test_betrayal_belief_driven()
@@ -1110,6 +1111,26 @@ func _test_leak_tribute_response_belief() -> void:
 	# god-view: power_r=5 → d_score≈1.6 → accept；belief: power_r=0.5 → d_score<0 → refuse
 	assert(resp == "refuse", "sender belief 弱→拒貢(不畏)，實際=%s" % resp)
 	print("leak 1d tribute response belief OK")
+
+# F-I2+F-I5：統一公式 consult feud/gratitude 邊。同 belief 同人格，僅差 feud 邊 → accept 翻 refuse。
+func _test_tribute_unified_edges() -> void:
+	print("--- F-I2/I5 統一公式 typed 邊權重 ---")
+	var st := WorldState.new(); st.world = WorldData.new()
+	var agg := TeamData.new(); agg.team_id = 1; agg.tile_pos = Vector2i(0,0); _seed_pop(agg, 15)
+	st.teams[1] = agg
+	var al := PersonData.new(); al.id = 301; st.persons[301] = al; agg.leader_id = 301
+	var def_t := TeamData.new(); def_t.team_id = 0; def_t.tile_pos = Vector2i(0,0); _seed_pop(def_t, 10)
+	st.teams[0] = def_t
+	var dl := PersonData.new(); dl.id = 300
+	dl.values = { "慎重": 0.5, "義氣": 0.5, "求生欲": 0.5 }
+	st.persons[300] = dl; def_t.leader_id = 300
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 15}, 1.0, false)
+	# base：power_r=1.5 → score=0.2+0.15-0.15+0.1=0.3 > 0.1 → accept
+	assert(DiplomaticAiSystem.tribute_accept(st, def_t, agg, 0.0), "無邊 → 屈服")
+	# feud 邊 1.0 → score 0.3-0.3=0.0 < 0.1 → refuse（血仇不屈）
+	RelationGraph.add_edge(dl.relation_edges, "feud", 301, 1.0, 0)
+	assert(not DiplomaticAiSystem.tribute_accept(st, def_t, agg, 0.0), "feud 邊 → 不屈")
+	print("tribute unified edges OK")
 
 # G3 Phase E leak 1b：_find_strong_neighbor 讀 belief 非真值。
 func _test_leak_strong_neighbor_belief() -> void:
