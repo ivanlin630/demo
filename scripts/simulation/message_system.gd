@@ -42,6 +42,7 @@ func emit_message(state: WorldState, type: String, description: String,
 	if not state.team_known.has(team.team_id):
 		state.team_known[team.team_id] = []
 	state.team_known[team.team_id].append(msg)
+	Probe.bump("msg.sent")
 	return msg
 
 # 觀測事件（observer slice Task0 補洞）：進 observer_messages 獨立 channel。
@@ -95,6 +96,7 @@ func _exchange_one_way(state: WorldState, from_id: int, to_id: int, carrier: Per
 	for msg in state.team_known[from_id]:
 		if known_ids.has(msg.id):
 			continue
+		Probe.bump("msg.prop_candidate")
 		var age: int = state.world.current_tick - msg.origin_tick
 		var time_factor: float = maxf(1.0 - float(age) * TIME_DECAY_PER_TICK, 0.1)
 		var copy := _copy_message(msg)
@@ -104,16 +106,19 @@ func _exchange_one_way(state: WorldState, from_id: int, to_id: int, carrier: Per
 		match _decide_propagation_mode(carrier):
 			"honest":
 				state.team_known[to_id].append(copy)
+				Probe.bump("msg.prop_done"); Probe.bump("msg.delivered")
 			"unintentional":
 				copy.is_distorted = true
 				copy.strength *= 0.8
 				DistortionEngine.distort_message(state, copy, "unintentional")
 				state.team_known[to_id].append(copy)
+				Probe.bump("msg.prop_done"); Probe.bump("msg.delivered"); Probe.bump("msg.distorted")
 			"malicious":
 				copy.is_distorted = true
 				copy.strength *= 0.5
 				DistortionEngine.distort_message(state, copy, "malicious")
 				state.team_known[to_id].append(copy)
+				Probe.bump("msg.prop_done"); Probe.bump("msg.delivered"); Probe.bump("msg.distorted")
 			"silent":
 				pass
 
@@ -214,6 +219,7 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 		# G3c-2 技能識破：distorted claim 按「我理解力 vs 對方計謀」折 cred + 標疑點。
 		# 非 un-distort：claim.value 不動，只壓信（best_estimate cred 排序吃）。
 		if distorted:
+			Probe.bump("g3.lie_claim")
 			var recv_leader: PersonData = state.persons.get(receiver.leader_id)
 			var giver_leader: PersonData = state.persons.get(giver.leader_id)
 			var my_skill: float = 0.0
