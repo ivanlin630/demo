@@ -1,6 +1,7 @@
 class_name EventSystem
 
 var _events: Array = []
+var _event_names: Array = []
 
 func _init() -> void:
 	# 分裂優先於替換（分裂後 unrest_turns 歸零，替換事件不再觸發）
@@ -8,6 +9,9 @@ func _init() -> void:
 	_events.append(load("res://scripts/simulation/events/event_unrest_replace.gd").new())
 	_events.append(load("res://scripts/simulation/events/event_faction_defect.gd").new())
 	_events.append(load("res://scripts/simulation/events/event_tag_shift.gd").new())
+	# 預算各 event 名（避免 per-tick 字串處理；counter 用）
+	for e in _events:
+		_event_names.append(String(e.get_script().resource_path.get_file()).get_basename())
 
 func process_events(state: WorldState, team_ids: Array) -> Array:
 	var new_teams: Array = []
@@ -15,8 +19,11 @@ func process_events(state: WorldState, team_ids: Array) -> Array:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
-		for event in _events:
+		for i in range(_events.size()):
+			var event = _events[i]
+			if Probe.enabled: Probe.bump("evt.%s.check" % _event_names[i])
 			if event.check(state, team):
+				if Probe.enabled: Probe.bump("evt.%s.fire" % _event_names[i])
 				new_teams.append_array(event.execute(state, team))
 	return new_teams
 
