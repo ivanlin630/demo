@@ -104,6 +104,11 @@ func _record_tick_perf(state: WorldState, dt_us: int) -> void:
 		_perf_count = 0
 		_perf_max_us = 0
 
+# ── 全高清 perf toggle（opt-in，預設 off = 零行為變；LOD 拿掉 vs 重定義裁決量測）──
+# on：_get_near_teams 回全隊、_get_far_teams 回空 → 全隊每 near-cadence 走完整 pipeline（無 far 批次降頻）。
+# 僅供 lod_perf_bed tick-time 對照；勿在正式跑開（會改世界節奏=移速/思考頻率恢復全速，需配 gen 重校）。
+static var force_full_hd: bool = false
+
 # ── 相位計時儀器（opt-in，預設 off = 零成本零行為變；cadence spike 歸因量測）──
 static var phase_timing: bool = false
 const PHASE_SPIKE_US: int = 100_000   # TEST VALUE：spike 門檻（>此值 dump 相位拆解）
@@ -416,6 +421,8 @@ func _get_player_team_sr(state: WorldState) -> TeamData:
 	return state.teams.get(p.team_id)
 
 func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:
+	if force_full_hd:
+		return state.teams.keys()   # perf 對照：全隊 near（無 LOD 分區）
 	var result: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
@@ -426,6 +433,8 @@ func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:
 	return result
 
 func _get_far_teams(state: WorldState, player_pos: Vector2i) -> Array:
+	if force_full_hd:
+		return []                   # perf 對照：無 far 批次
 	var result: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]

@@ -1,0 +1,44 @@
+{
+  "seed": 1337,
+  "mode": "random",
+  "max_ticks": 172800,
+
+  "_note": "perf 量測專用：拉大到 ~百隊真世界(faction 結構完整,壓 evaluate_all O(N^2) 熱點),供 lod_perf_bed 全高清 vs LOD tick-time 對照。勿當遊戲平衡 config。",
+
+  "map": {
+    "radius": 24,
+    "resource_richness": 5
+  },
+
+  "opening_granary_food": 800,
+
+  "outposts": {
+    "total_count": 90,
+    "type_ratio": { "civilian": 0.7, "military": 0.3 },
+    "independent_ratio": 0.35,
+    "min_spacing": 2
+  },
+
+  "factions": {
+    "count": 20,
+    "weights": [5, 4, 4, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1],
+    "teams_per_faction_range": [3, 5]
+  },
+
+  "independent_teams": {
+    "roving_count_range": [12, 18]
+  },
+
+  "teams": {
+    "population_range": [8, 10],
+    "named_ratio": 0.3
+  },
+
+  "player": {
+    "join_mode": "independent",
+    "population": 10,
+    "starting_named_count": 1,
+    "starting_resources": { "food": 50.0, "material": 5.0, "coin": 50, "weapon_melee_low": 5 },
+    "leader_name": "玩家"
+  }
+}
