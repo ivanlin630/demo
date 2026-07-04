@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 topic: V2「征服脊椎斷」判決撤回——QA 機器獨立複現(seed1337 6月)坐實假陽性:happened=2、下游捕俘3+同化2 全 fire、征服脊椎未斷;真🔴矛盾縮為 V1貿易/V3提案accept/V4envoy;新增🟡未知(commander-directive 征服路 0 貢獻);裁修序去 V2
 ---
 

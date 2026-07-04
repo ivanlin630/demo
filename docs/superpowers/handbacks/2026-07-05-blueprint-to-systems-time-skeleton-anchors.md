@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 時間骨架5錨裁定——①移動=240tick/hex(1天,連動值,×5拿掉)②遭遇尺度24不變③cadence按決策層級語意化(戰略天/戰術時/反應事件,行軍降天級+事件)④後勤帳併三平行measure⑤觀看組不動;×5窄拆確認=乾淨
 ---
 
