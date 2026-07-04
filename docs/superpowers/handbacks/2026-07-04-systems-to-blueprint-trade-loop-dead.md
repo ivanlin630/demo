@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 用戶玩測首發現=貿易環沒轉(6月成交6/2筆 vs 訂單數百條);系統開六站漏斗measure軌;待你裁2點:①貿易環插隊序確認②若主斷=granary需求側→特化受限方向你own
 ---
 
