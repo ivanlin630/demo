@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★觀測GUI三件全上(品質bar五條走完,截圖自驗過,用戶可開)+互動統一F-I2/I4/I5/I7收(C類退役不並存);屈服率上移待平衡pass;beast洩入訂單系統=known_issues新項
 ---
 
