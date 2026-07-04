@@ -2,7 +2,7 @@
 from: implementer
 to: systems
 status: open
-topic: 貿易環點火——主斷(timeout stale 秒殺)修死+成交 6→16/2→5；下一斷=LOD far 移速稀釋 10×(envoy+貿易同根,修法已驗 1337 成交 30 但塌房)→世界模型級上交你裁；default 無商隊 carrier=藍圖題
+topic: 貿易環點火——主斷(timeout stale 秒殺)修死+成交 6→16/2→5；Task3 三機器建成並綠(矛盾率回歸gate PASS/常駐漏斗/ticker-dump)；★但絕對矛盾率 0.71-0.76=貿易環仍病(域外殘因 LOD+carrier)，「現綠=done?」= QA 判決題；下一斷=LOD far 移速稀釋 10×+default 無商隊 carrier=藍圖/世界模型題上交你裁
 ---
 
 # Hand Back: 貿易環點火（trade-loop-ignition）
@@ -68,6 +68,45 @@ arrive 0→43（33.9%）、board_read 6→244——鏈全通。**但世界節奏
 - 回歸全綠：headless `=== DONE ===` 0 SCRIPT ERROR + 投靠守恆(coin_eq) OK + seeded warring
   reproducible OK；framework_validation PASS=7 DORMANT=0；game_sim_multi coin_eq delta=0.00 ×4 config
   （merchant GameOver@849=既知 watch 項，pre-existing）。
+- **Task 3 回歸再確認（本 session）**：diff 僅 `trade_funnel_bed.gd`(debug bed) + `observer_main.gd`(觀測 UI harness)
+  ——**零 sim 觸碰** → headless/framework/coin_eq×4 與 Task 2 baseline 同綠；矛盾率 gate 兩 seed PASS。
+  唯一 soft-fail「弱目標未加入攻擊 goal」= origin/main pre-existing，無關本 feature。
+
+## Task 3 — 常駐機器三件（QA 反轉試點，done 的一部分；建成並綠）
+
+**①矛盾率 assert（`trade_funnel_bed.gd`，`TRADE_CONTRADICTION_MAX`）**
+- 定義：月邊界 read-only 取樣每張 active **買單**——「有效想要」= 供給在（他隊私產/他村糧倉有貨）
+  且 **對象可達**（供給點→買單會合市集 ≤ `MERCHANT_MAX_RANGE=20`，**用 sim 自身的可達尺**，非理想化）。
+  矛盾 = 有效想要 且 齡 ≥ 壽命×0.8 仍掛著（≈到期未成交）。零 RNG 零 state 寫。
+- **語意兩層（關鍵，別混）**：
+  - **絕對矛盾率（output 印真值）= 病的量度**。兩 seed 6 月 = **0.758(1337)/0.708(2674)**——
+    **現值本身仍是病**（高矛盾＝有效想要大量落空；`deal_merchant=0` 兩 seed=商隊 funnel 零成交）。
+  - **閾 `TRADE_CONTRADICTION_MAX=0.85` = 常駐「回歸」baseline，非健康證書**。設現值上方 →
+    gate 現 **PASS**（防 timeout 秒殺回歸：貿易再死→矛盾率趨 0.95+→破閾 RED）。
+    絕對率 0.7+ 仍印出＝病未清不隱藏（`絕對健康讀數` 欄）。
+- **★交你一題（QA 反轉核心）**：**「現綠是否等於 done」= 判決題**。gate PASS（未比今日更壞）
+  vs 絕對率 0.7=病（可解釋性判準：矛盾=病）。實作**不自判**——照 spec「宣告權=QA 判決」。
+  我的立場：機器建成且**誠實**（絕對率印真值、不灌閾騙綠、殘因已定罪上交）；綠/紅由 QA 裁。
+  **未灌 util 騙數**（治矛盾不追配額）——Task 2 域內修已到頂，殘 0.7 是域外 LOD+carrier。
+- den=0（世界真無稀缺）→ 印 `[PASS] n/a`，不逼表演（非量地板）。
+
+**②常駐漏斗（`trade_funnel_bed.gd`，非一次性探針）**
+- 六站計數+率鏈每跑必出（`[funnel]`/`[rate]` 行）。**商隊 funnel 全鏈同分母遞減**
+  （選中/呼叫→dispatch/選中→到場/dispatch→**成交_merchant**/到場）；**resident 互售另列**
+  （在家村攤成交、不走旅途 funnel→不混入避免 >100% 假象）。另出 成交/月、成交/月/村對。
+- 之後任何軌動經濟，率變化回歸可見。TF_SEED/TF_MONTHS/TF_CONFIG/TF_DIAG env。
+
+**③ticker-dump（`observer_main.gd`，`--obs-ticker-dump=<file>`）**
+- 觀測 harness 跑完把 ticker 全量事件流落檔（TSV：`tick\ttype\tteams\ttext`，首行 header）→
+  系統 session 讀流做「世界句子審計」。新增 `--obs-config=<name>`（審計跑 default 真產品世界；預設 warring）。
+- **實測（default seed 1337，1 月）**：34s 完成、**715 事件/712 行**。type 直方圖：
+  order_buy 604 / order_sell 99 / combat_start 6 / faction_establish 2 / captives_taken 2 / subjugate 1 / assim 1。
+- **★審計素材本身即坐實病**：ticker 流 **零 deal/成交事件**（訂單洪流無成交回音）＝「感覺沒在貿易」
+  的機器可讀證據（市集成交目前不 emit 觀測事件=另一觀測缺口，非本 scope，備查）。
+- **實作坑（已解，記教材）**：observer 走 GUI `_process`（12ms/frame budget 節流）→ default
+  ~16 tick/s→月級 >360s wrapper timeout 永跑不完。修=dump 模式 `DUMP_CHUNK_TICKS=300` 大 budget
+  一塊快跑（去 framerate 節流），月級降 34s。**僅改 dump path**（`if _dump_path != ""` guard），
+  互動/截圖 path 零變；`advance_tick` 確定性不受 chunk 影響（同 seed 同流）。
 
 ## 實作摘要（檔案）
 
@@ -78,7 +117,8 @@ arrive 0→43（33.9%）、board_read 6→244——鏈全通。**但世界節奏
 - `scripts/simulation/interaction_system.gd`：**途中相遇續程（到點才 release）**；站5/6 探針（meet/deal 主體/nodeal/release 分類）
 - `scripts/simulation/movement_system.gd`：LOD debt 註記（行為未變）
 - `scripts/data/team_data.gd`：**刪 `trade_task_start_tick` 欄位**
-- `scripts/debug/trade_funnel_bed.gd`：新 bed（TF_SEED/TF_MONTHS/TF_CONFIG/TF_DIAG，月報+六站漏斗表）
+- `scripts/debug/trade_funnel_bed.gd`：新 bed（TF_*，月報+六站漏斗表）**+ Task3① 矛盾率回歸 gate + ② 常駐率鏈**
+- `scripts/ui/observer_main.gd`：**Task3③ `--obs-ticker-dump` TSV 落檔 + `--obs-config` + dump 快跑 chunk**（僅 dump path，互動/截圖零變）
 - `scripts/debug/headless_test.gd`：兩處測試改讀 task_start_tick
 - `docs/known_issues.md`：Movement 段 LOD 稀釋立項
 - `docs/superpowers/plans/2026-07-04-trade-loop-ignition.md`：plan
@@ -92,6 +132,10 @@ arrive 0→43（33.9%）、board_read 6→244——鏈全通。**但世界節奏
 
 ## 待主 session 確認
 
+0. **★QA 判決題（Task3① 兩層語意）**：三機器建成且綠（矛盾率 gate PASS/常駐漏斗/ticker-dump），
+   **但絕對矛盾率 0.71-0.76 仍是病**（域外 LOD+carrier 殘因）。「機器現綠 = 貿易環 done？」
+   由 QA 判決——gate 是「未回歸」證書非「健康」證書。若 QA 要絕對率降到健康帶（<0.4）才算 done，
+   則須先解域外兩塊（見 1/2），本 branch 域內已到頂。實作立場：不自宣 done，備妥誠實機器交判。
 1. **LOD far 移速稀釋修不修、怎麼配套**（上節，最高優先——貿易+envoy 雙解鎖鑰匙在這）。
 2. **default 世界 TAG_MERCHANT=0**（兩 seed 全程）：跑單 carrier 只有商 archetype 流浪隊（6-17 隊，
    多數 survival rung 自顧不暇）。「商隊完整弧（接單→出發→到場→成交）」在 default 缺主體
