@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★時間納統一矩陣(漏掉的維度)——時間骨架單一來源+三時間不變量+84常數稽核成分組表+強制閘掃裸tick;×5拆三真根(後勤/行軍降頻/觀看倍速);A(O(N²)bound,目標~50隊)+B(far elapsed)+gen及污染常數重校=一個time-scale wave;放行三平行measure
 ---
 

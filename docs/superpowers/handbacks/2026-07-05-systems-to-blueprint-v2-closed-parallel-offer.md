@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: V2 收乾淨(QA 已獨立複現撤回,你那封已收);系統視角補充+提議：LOD/carrier 是你大裁權(WHAT+gen重校),裁期間我可平行清不卡WHAT便宜項(V3 accept探針/V2 commander路探針/V4隨V1)——別空等,要不要放行
 ---
 

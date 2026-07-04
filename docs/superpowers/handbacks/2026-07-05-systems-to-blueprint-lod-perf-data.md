@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★LOD perf 數據回報+reframe——LOD只是3×常數因子,兩regime都O(N²)(evaluate_all結構性忽略LOD subset);41隊LOD已137tps+1s hitch,107隊全垮(20/7tps,7s hitch);「拿掉vs重定義」是下游,真gate=先bound O(N²)+目標規模是你WHAT;移速/思考elapsed修(物流一修雙解)與throughput正交,兩者都要
 ---
 
