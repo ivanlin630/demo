@@ -8,5 +8,5 @@
 
 | # | 日期 | 缺陷（用戶原話/現象） | 該抓層 | 為何漏 | 補的機器 | 機器狀態 |
 |---|---|---|---|---|---|---|
-| 1 | 2026-07-04 | 「感覺沒有在貿易」——數百條訂單（想要）+供給在（可行）vs 成交 6/2 筆（沒發生）=**自我矛盾** | ①矛盾偵測 | 「Market fire ✓」當布林讀,沒做除法;病=矛盾非量小（判準修正 audit-explainability-bar） | 貿易環軌 Task 3：`TRADE_CONTRADICTION_MAX` bed assert + 常駐六站漏斗率 | 🔨 in-flight（feat/trade-loop-ignition） |
-| 2 | 2026-07-04 | 獸隊張貼收購武器訂單/對人宣戰（ticker 揭） | ③戲感審計 | 無人以觀者身分讀 default 事件流;probe 不會覺得「荒謬」 | ticker-dump（貿易環軌 Task 3-3）+ 系統世界句子審計成常規步驟（交付前必跑） | 🔨 in-flight（dump flag 同軌） |
+| 1 | 2026-07-04 | 「感覺沒有在貿易」——數百條訂單（想要）+供給在（可行）vs 成交 6/2 筆（沒發生）=**自我矛盾** | ①矛盾偵測 | 「Market fire ✓」當布林讀,沒做除法;病=矛盾非量小（判準修正 audit-explainability-bar） | ✅ 機器建成：`TRADE_CONTRADICTION_MAX` gate（merged）+ 常駐六站漏斗。**病本體半修**：主斷(timeout秒殺)修死成交 6→16/2→5,絕對矛盾率仍 0.71-0.76=殘因域外(LOD+carrier,已報藍圖)。「現綠=done?」=QA 判決題 | 🟡 機器綠·病未清（域外殘因移交藍圖+QA） |
+| 2 | 2026-07-04 | 獸隊張貼收購武器訂單/對人宣戰（ticker 揭） | ③戲感審計 | 無人以觀者身分讀 default 事件流;probe 不會覺得「荒謬」 | ✅ 機器建成：`--obs-ticker-dump` TSV 落檔（merged）→ 世界句子審計素材就緒。缺陷本體（order/message 排除 beast）待修 | 🟡 機器綠·缺陷本體待 QA 判決後排修 |
