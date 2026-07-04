@@ -8,5 +8,5 @@
 
 | # | 日期 | 缺陷（用戶原話/現象） | 該抓層 | 為何漏 | 補的機器 | 機器狀態 |
 |---|---|---|---|---|---|---|
-| 1 | 2026-07-04 | 「感覺沒有在貿易」——6 月成交 6/2 筆 vs 訂單數百條（率≈1-2%,每村~14月一交易） | ①充足性 | 「Market fire ✓」當布林讀,沒做除法;戲存在性≠戲充足性 | 貿易環軌 Task 3：`TRADE_SUFFICIENCY_MIN` bed assert + 常駐六站漏斗率 | 🔨 in-flight（feat/trade-loop-ignition） |
+| 1 | 2026-07-04 | 「感覺沒有在貿易」——數百條訂單（想要）+供給在（可行）vs 成交 6/2 筆（沒發生）=**自我矛盾** | ①矛盾偵測 | 「Market fire ✓」當布林讀,沒做除法;病=矛盾非量小（判準修正 audit-explainability-bar） | 貿易環軌 Task 3：`TRADE_CONTRADICTION_MAX` bed assert + 常駐六站漏斗率 | 🔨 in-flight（feat/trade-loop-ignition） |
 | 2 | 2026-07-04 | 獸隊張貼收購武器訂單/對人宣戰（ticker 揭） | ③戲感審計 | 無人以觀者身分讀 default 事件流;probe 不會覺得「荒謬」 | ticker-dump（貿易環軌 Task 3-3）+ 系統世界句子審計成常規步驟（交付前必跑） | 🔨 in-flight（dump flag 同軌） |

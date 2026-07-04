@@ -29,6 +29,7 @@ default seed 1337+2674 各 6 月（gen 校準後世界），量六站漏斗 per-
 - 若斷在 **5 到場**：距離/馬/路徑（與 envoy 馬鏈同型物流問題，一起診）。
 - 若斷在 **2 傳播**：order message TTL/傳播半徑。
 - **禁**：加「貿易 bonus」補丁 hack；身分切路徑；新 judge。統一秤內調權重/修機制斷。
+- **★修理協議（audit-explainability-bar）**：治矛盾不追配額——修=接通斷鏈，禁灌 util 讓數字達標；**修一環全環對照**：fix 後全率表前後對照（率表 harness 軌先 merge 供此用），貿易通了但掠奪率/人格分流/知足者行為變形=fail。
 
 ## 硬約束
 
@@ -38,7 +39,7 @@ default seed 1337+2674 各 6 月（gen 校準後世界），量六站漏斗 per-
 
 ## Task 3 — 常駐機器（QA 反轉三層，done 的一部分非附加）
 
-1. **①充足性閾值**：seeded bed 加 assert——`成交/月 ≥ TRADE_SUFFICIENCY_MIN`（TEST VALUE，漏斗後定;帶率非裸計數）。低於閾值=bed FAIL，非 print 了事。
+1. **①矛盾偵測 assert（判準修正 audit-explainability-bar：可解釋性非量級，廢量配額）**：seeded bed assert=**矛盾率**——「有效想要（訂單存在+供給在+對象可達）而長期未成交」比率 ≤ `TRADE_CONTRADICTION_MAX`（TEST VALUE）。**非** `成交/月≥X` 量地板（世界真無稀缺時貿易 0=健康，不逼表演）。
 2. **②常駐漏斗**：六站漏斗計數+率進 seeded bed 常駐輸出（非一次性探針拆掉）——之後任何軌動到經濟，漏斗率變化回歸可見。
 3. **③戲感審計素材**：observer harness 加 `--obs-ticker-dump=<file>`（跑完把 ticker 全量事件流落檔,機器可讀）——供系統 session 跑 default 讀流做「世界句子審計」（統計唸成句子問怪不怪），**審計綠了才輪到用戶**。
 

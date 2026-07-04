@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★稽核判準修正(用戶WHAT)——可解釋性非量級;合理的0=健康;判決類別改(可解釋/矛盾/未知);修理協議(治矛盾不追配額+修一環全環對照);這是世界模擬器非功能模擬器
 ---
 
