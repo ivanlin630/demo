@@ -16,6 +16,10 @@ const MSG_TTL_BY_TYPE: Dictionary = {
 	"subjugate":         MSG_TTL_LONG,
 	"faction_establish": MSG_TTL_LONG,
 	"outpost_built":     MSG_TTL_LONG,
+	"captives_taken":    MSG_TTL_LONG,
+	"assim_complete":    MSG_TTL_MEDIUM,
+	"revolt":            MSG_TTL_LONG,
+	"flee":              MSG_TTL_MEDIUM,
 }
 const MSG_TTL_DEFAULT: int = MSG_TTL_MEDIUM
 
@@ -38,6 +42,28 @@ func emit_message(state: WorldState, type: String, description: String,
 	if not state.team_known.has(team.team_id):
 		state.team_known[team.team_id] = []
 	state.team_known[team.team_id].append(msg)
+	return msg
+
+# 觀測事件（observer slice Task0 補洞）：進 observer_messages 獨立 channel。
+# 不進 global_messages（其 size() 被 order_system 借作 order_id 空間，append 會位移
+# oid 流 = 擾動訂單行為）、不進 team_known（_exchange_one_way 逐訊息 randf）
+# → 零 RNG 消耗、零行為變、seeded warring 流不擾。append-only，單寫者格局不變。
+const OBSERVER_MSG_CAP: int = 2000   # 上限裁尾（observer 消費為 tick 水位增量，不吃舊段）
+func emit_ambient(state: WorldState, type: String, description: String,
+		team: TeamData, params: Dictionary = {}) -> MessageData:
+	var msg := MessageData.new()
+	msg.id = state.observer_messages.size()
+	msg.type = type
+	msg.description = description
+	msg.source_pos = team.tile_pos
+	msg.origin_team_id = team.team_id
+	msg.origin_tick = state.world.current_tick
+	msg.strength = 1.0
+	msg.params = params
+	state.observer_messages.append(msg)
+	if state.observer_messages.size() > OBSERVER_MSG_CAP:
+		state.observer_messages = state.observer_messages.slice(
+			state.observer_messages.size() - OBSERVER_MSG_CAP)
 	return msg
 
 func propagate_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Array) -> void:

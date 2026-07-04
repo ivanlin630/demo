@@ -132,6 +132,9 @@ static func _check_trajectory(state: WorldState, holder: TeamData, group: Dictio
 				Probe.add_amount("asm.completed_dur_sum",
 					float(state.world.current_tick - int(group.get("_lw_created_tick", state.world.current_tick))))
 			print("[P1Assim] Team%d 同化 captive +%d → free pop" % [holder.team_id, n])
+			SimMessageSystem.new().emit_ambient(state, "assim_complete",
+				"Team%d 同化俘虜 %d 人" % [holder.team_id, n], holder,
+				{"origin": str(holder.team_id), "count": n})
 		return
 	# 暴動（morale 崩）→ 脫離 + 部分戰損 + holder unrest
 	if morale <= REVOLT_T:
@@ -158,6 +161,9 @@ static func _revolt(state: WorldState, holder: TeamData, group: Dictionary) -> v
 	if Probe.enabled: Probe.bump("asm.interrupted_scatter")   # [longwindow probe] 暴動散 = 結構性中斷
 	print("[P1Revolt] Team%d captive 暴動：脫離%d（鎮壓亡%d/逃散%d）→ holder unrest" % [
 		holder.team_id, total, slain, escaped])
+	SimMessageSystem.new().emit_ambient(state, "revolt",
+		"Team%d 俘虜暴動 脫離%d 鎮壓亡%d" % [holder.team_id, total, slain], holder,
+		{"origin": str(holder.team_id), "total": total, "slain": slain, "escaped": escaped})
 	# escaped 部分 → 流民隊（reuse split 概念：成獨立無 faction 隊）；slain = 真死亡（路由消滅）
 	if escaped > 0:
 		_spawn_breakaway(state, holder, detached, escaped, slain)
@@ -172,6 +178,9 @@ static func _flee(state: WorldState, holder: TeamData, group: Dictionary, fracti
 	# [longwindow probe] 逃/釋放分流：released=holder 養不起主動放、fled=低 morale 機會逃
 	if Probe.enabled: Probe.bump("asm.released" if reason == "released" else "asm.escaped")
 	print("[P1Flee] Team%d captive %s 脫離%d → 流民隊" % [holder.team_id, reason, total])
+	SimMessageSystem.new().emit_ambient(state, "flee",
+		"Team%d 俘虜%s %d人" % [holder.team_id, reason, total], holder,
+		{"origin": str(holder.team_id), "count": total, "reason": reason})
 	_spawn_breakaway(state, holder, detached, total, 0)
 
 # 逃機率（連續）：看守 anon = total_pop × guard_ratio；p = captive/(guard_n+1) × (1-morale) × FLEE_COEF。

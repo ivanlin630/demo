@@ -23,6 +23,8 @@
 
 ## 📍 當前狀態（2026-07-01）
 
+- **👁 觀測 GUI 輕 slice ✅（feat/observer-gui-slice，2026-07-04）**：三件全上（事件 ticker 人話+隊過濾 / 隊伍 inspect+地圖三方同步 / 速度四檔+時間）+ god-view 地圖（archetype 色+faction 環+outpost 標）+ 截圖 harness（`--obs-seed/run-months/shots/select/out`）。Task0 事件補洞（assim/revolt/flee/captives_taken）走新 `emit_ambient`→`observer_messages` 獨立 channel（global_messages.size() 被 order_system 借作 oid 空間，append 會擾訂單行為——逐點 diff 實測抓到後改道，total_diffs=0）。玩家路徑零 diff、seeded warring 同 hash、framework 7/0。bar 場景 seed 1337/2674 六月跑滿，狼弧鏈畫面可讀。hitch 偶發（≈1/月，delta clamp 蓋幅度）→ far.total 不動。handback `2026-07-04-observer-gui-slice`。
+
 - **🏛 沙盒 bar arc（(a) 崛起/經濟底）— 連串 measure→fix**：commander-v2 後戰國 seed 揭 default 龜縮（CONQUER=0/established 卡1）。measure-first 逐層挖（別猜）：能人 pop 崩=**飢餓非戰敗** → ①**戰鬥不決勝**(0 擊潰，撤退先於殲滅，吸收掛 `_end_combat` never fire) ②**食物模型沒統一**(成長 surplus gate 讀私產 silo→糧倉/交易糧餵不到成長→非 plains 注定餬口)。
   - **🍞 統一食物存取 ✅（merge）**：`reaction_system` `_score_expand`/`_evaluate_life_events` surplus gate → `ResourceSystem.effective_food`(coherent，對齊 ambition_ladder)。統一非補丁、不 nerf regen、保交易摩擦。乾淨 bed forest pop 6→12（原餬口）。coin_eq 0/framework PASS/餓隊不誤放寬。**藍圖 🟡：讀 A（非 plains 能累積）收下＝(a) 攀爬「累積」段解凍；讀 B（特化-交易環真轉）未到＝下一經濟 arc**（trade loop 沒 fire＝覓食勝買糧）。plan `2026-07-01-econ-food-unify`。
   - **⚔ 失能-capture（戰不決勝 fix）= (a)-征服鏈 keystone ✅（merge）**：藍圖裁「失能者被俘=控地權」。measure 證 NPC 戰 0 擊潰（撤退先於殲滅）→P1 吸收掛 `_end_combat` never fire。修：npc_combat `_force_retreat`（潰逃）勝方控地俘敗方 **wounded 一比例**（=(1−readiness)×FACTOR cap，確定性非 RNG，guard 餘力限）→ captive_groups（P1 複用）。**決勝在潰逃非對撞**。warring 量證 **[Capture] 0→5、p1.assimilate 0→2**（captive dormant→fire）。守恆綠。plan `2026-07-01-incapacitation-capture`。存儲統一（prisoner_population）=Phase 2。

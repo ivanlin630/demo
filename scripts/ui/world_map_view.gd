@@ -22,6 +22,24 @@ var _cached_tiles: Dictionary = {}   # tile_key(int) → render dict
 var _cached_teams: Array = []        # from query_visible_teams_render
 var _render_ctx: Dictionary = {}     # player_tile_pos, discovered_team_positions, vision_radius
 
+# ── observer god-view 模式（ObserverMain 用；player 路徑零行為變）──
+var _obridge: ObserverBridge = null
+var _observer: bool = false
+var _selected_team: int = -1
+var _follow: bool = false
+
+const ARCHETYPE_COLOR: Dictionary = {
+	"武力": Color(0.85, 0.25, 0.2),
+	"商業": Color(0.9, 0.75, 0.2),
+	"定居": Color(0.3, 0.7, 0.35),
+}
+const FACTION_PALETTE: Array = [
+	Color(0.2, 0.5, 0.9), Color(0.9, 0.4, 0.1), Color(0.6, 0.2, 0.8),
+	Color(0.1, 0.7, 0.7), Color(0.85, 0.2, 0.5), Color(0.5, 0.65, 0.1),
+	Color(0.7, 0.45, 0.25), Color(0.35, 0.35, 0.85),
+]
+signal team_picked(tid: int)
+
 const SCROLL_SPEED: float = 8.0
 var _scroll_keys: Dictionary = {
 	KEY_W: Vector2( 0,  1),
@@ -37,7 +55,44 @@ func setup(bridge: SimBridge) -> void:
 	_center_on_player()
 	queue_redraw()
 
+func setup_observer(ob: ObserverBridge) -> void:
+	_obridge = ob
+	_observer = true
+	_refresh_cache()
+	_center_on_map()
+	queue_redraw()
+
+func _center_on_map() -> void:
+	var mid := Vector2.ZERO
+	var n: int = 0
+	for key in _cached_tiles:
+		var tpos: Vector2i = _cached_tiles[key].get("tile_pos", Vector2i.ZERO)
+		mid += _hex_center(tpos.x, tpos.y)
+		n += 1
+	if n > 0:
+		mid /= float(n)
+	_camera = get_viewport_rect().size * 0.5 - mid * _zoom
+
+func select_team(tid: int) -> void:
+	_selected_team = tid
+	queue_redraw()
+
+func set_follow(on: bool) -> void:
+	_follow = on
+
 func _refresh_cache() -> void:
+	if _observer:
+		if _obridge == null: return
+		_cached_tiles = _obridge.query_map_tiles()
+		_cached_teams = _obridge.query_map_teams()
+		_render_ctx = {}
+		if _follow and _selected_team != -1:
+			for td in _cached_teams:
+				if int(td["id"]) == _selected_team:
+					var wc: Vector2 = _hex_center(td["tile_pos"].x, td["tile_pos"].y)
+					_camera = get_viewport_rect().size * 0.5 - wc * _zoom
+					break
+		return
 	if _bridge == null: return
 	_cached_tiles = _bridge.query_world_tiles()
 	_cached_teams = _bridge.query_visible_teams_render()
@@ -99,7 +154,7 @@ func pixel_to_hex(screen_pos: Vector2) -> Vector2i:
 # ── drawing ───────────────────────────────────────────────
 
 func _draw() -> void:
-	if _bridge == null: return
+	if (_obridge if _observer else _bridge) == null: return
 	var player_pos: Vector2i = _render_ctx.get("player_tile_pos", Vector2i(-1, -1))
 	var disc_positions: Array = _render_ctx.get("discovered_team_positions", [])
 	var vision_r: int = _render_ctx.get("vision_radius", 3)
@@ -115,10 +170,35 @@ func _draw() -> void:
 		draw_colored_polygon(pts, base_color)
 		draw_polyline(pts + PackedVector2Array([pts[0]]), BORDER_COLOR, 1.0)
 
-		if not _is_tile_visible(tpos, player_pos, disc_positions, vision_r):
+		if _observer and tile_data.get("outpost_type", "") != "":
+			var oc: Color = Color(0.45, 0.3, 0.15) if tile_data["outpost_type"] == "civilian" else Color(0.25, 0.25, 0.3)
+			var s: float = (4.0 + 2.0 * float(tile_data.get("outpost_level", 0))) * _zoom
+			draw_rect(Rect2(center - Vector2(s, s) * 0.5, Vector2(s, s)), oc)
+
+		if not _observer and not _is_tile_visible(tpos, player_pos, disc_positions, vision_r):
 			draw_colored_polygon(pts, FOG_COLOR)
 
-	# draw teams
+	# draw teams — observer god-view 分支（archetype 填色 + faction 外環）
+	if _observer:
+		for td in _cached_teams:
+			var tp: Vector2i = td["tile_pos"]
+			var c: Vector2 = _world_to_screen(_hex_center(tp.x, tp.y))
+			if td.get("is_beast", false):
+				draw_circle(c, 4.0 * _zoom, Color(0.15, 0.1, 0.05))
+				continue
+			var fid: int = int(td.get("faction_id", -1))
+			var ring: Color = FACTION_PALETTE[fid % FACTION_PALETTE.size()] if fid >= 0 else Color(0.45, 0.45, 0.45)
+			var fill: Color = ARCHETYPE_COLOR.get(td.get("archetype", ""), Color(0.7, 0.7, 0.7))
+			draw_circle(c, 9.0 * _zoom, ring)
+			draw_circle(c, 6.0 * _zoom, fill)
+			if int(td["id"]) == _selected_team:
+				draw_arc(c, 13.0 * _zoom, 0.0, TAU, 24, Color.WHITE, 2.0)
+		if _selected.x >= 0:
+			var sc: Vector2 = _world_to_screen(_hex_center(_selected.x, _selected.y))
+			var spts: PackedVector2Array = _hex_points(sc.x, sc.y)
+			draw_polyline(spts + PackedVector2Array([spts[0]]), Color.WHITE, 2.0)
+		return
+
 	var player_faction_id: int = -1
 	for td in _cached_teams:
 		if td.get("is_player", false):
@@ -185,6 +265,23 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			if _observer:
+				var hex_o: Vector2i = pixel_to_hex(get_local_mouse_position())
+				var here: Array = []
+				for td in _cached_teams:
+					if (td["tile_pos"] as Vector2i) == hex_o and not td.get("is_beast", false):
+						here.append(int(td["id"]))
+				if here.is_empty():
+					_selected = hex_o
+					queue_redraw()
+					tile_selected.emit(hex_o)
+					return
+				var idx: int = here.find(_selected_team)
+				_selected_team = here[(idx + 1) % here.size()]
+				_selected = Vector2i(-1, -1)
+				queue_redraw()
+				team_picked.emit(_selected_team)
+				return
 			var hex: Vector2i = pixel_to_hex(get_local_mouse_position())
 			_selected = hex
 			queue_redraw()

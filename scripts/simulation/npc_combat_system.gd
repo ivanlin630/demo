@@ -299,6 +299,9 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 			Probe.bump("conq.no_absorb_rate_floor")   # 原因：有殘 anon 但 rate*avail floor→0
 	if _captured > 0:
 		print("[P1Absorb] Team%d 吸收 Team%d 殘餘 anon → captive +%d" % [winner_id, loser_id, _captured])
+		_msg.emit_ambient(state, "captives_taken",
+			"Team%d 俘獲 Team%d %d人" % [winner_id, loser_id, _captured], winner,
+			{"origin": str(winner_id), "loser": str(loser_id), "count": _captured})
 		_probe_capture_by_task(winner)   # 征服名實：掠奪隊 vs 攻擊隊 誰達成 capture
 	_apply_pursuit(state, winner_id, loser_id)
 	var _pp_end: PersonData = state.persons.get(state.player_id)
@@ -350,6 +353,10 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 		if _cap > 0:
 			print("[Capture] Team%d 控地俘 Team%d 潰逃殘部 +%d (rd=%.2f)" % [
 				pursuer_id, retreater_id, _cap, retreater.readiness])
+			_msg.emit_ambient(state, "captives_taken",
+				"Team%d 俘獲 Team%d 潰逃殘部 %d人" % [pursuer_id, retreater_id, _cap],
+				state.teams[pursuer_id],
+				{"origin": str(pursuer_id), "loser": str(retreater_id), "count": _cap})
 			_probe_capture_by_task(state.teams[pursuer_id])   # 征服名實：掠奪 vs 攻擊 capture 歸因
 	var _pp_fr: PersonData = state.persons.get(state.player_id)
 	var _ptid_fr: int = _pp_fr.team_id if _pp_fr else -1

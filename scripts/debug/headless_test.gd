@@ -521,6 +521,10 @@ func _initialize() -> void:
 	_test_team_intel_prune_on_erase()
 	# ── seeded warring harness：同 seed 逐點重現 ──
 	_test_seeded_warring_reproducible()
+	# ── observer slice：ambient 事件（Task0）+ query/bridge（Task1）──
+	_test_observer_ambient_events()
+	_test_observer_query_and_bridge()
+	_test_observer_event_text()
 	# ── R2 intent/archetype 共源（desync=0）+ 分布 sanity ──
 	_test_r2_disposition_delegation()
 	_test_r2_archetype_tiebreak()
@@ -16069,3 +16073,105 @@ func _test_r1b_faction_id_deceive() -> void:
 	var pick: int = FactionAISystem.find_prosperity_prey(st, atk, st.persons[100])
 	assert(pick == 2, "誤報村 own=0.15 應被避開（嚇阻生效），實得 %d" % pick)
 	print("[OK] _test_r1b_faction_id_deceive")
+
+# ════════════════════════════════════════════════════════════
+# observer slice（觀測 GUI）：Task0 emit_ambient 隔離
+# ════════════════════════════════════════════════════════════
+
+# observer slice Task0：emit_ambient 進 global_messages、不進 team_known（RNG 隔離前提）
+func _test_observer_ambient_events() -> void:
+	print("--- observer Task0：emit_ambient 隔離 ---")
+	var state := WorldState.new()
+	var t := TeamData.new()
+	t.team_id = 7
+	t.tile_pos = Vector2i(3, 3)
+	state.teams[7] = t
+	var before_known: int = state.team_known.get(7, []).size() if state.team_known.has(7) else 0
+	var m: MessageData = SimMessageSystem.new().emit_ambient(state, "captives_taken",
+		"Team7 俘獲 Team8 5人", t, {"origin": "7", "loser": "8", "count": 5})
+	assert(state.observer_messages.size() == 1, "emit_ambient 未進 observer_messages")
+	assert(state.global_messages.is_empty(),
+		"emit_ambient 竟進 global_messages（size 被借作 order_id 空間，會擾訂單行為）")
+	assert(m.type == "captives_taken" and m.params["count"] == 5, "emit_ambient 欄位錯")
+	var after_known: int = state.team_known.get(7, []).size() if state.team_known.has(7) else 0
+	assert(after_known == before_known, "emit_ambient 竟進 team_known（會擾 RNG 流）")
+	assert(SimMessageSystem.MSG_TTL_BY_TYPE.has("assim_complete")
+		and SimMessageSystem.MSG_TTL_BY_TYPE.has("revolt")
+		and SimMessageSystem.MSG_TTL_BY_TYPE.has("flee")
+		and SimMessageSystem.MSG_TTL_BY_TYPE.has("captives_taken"), "TTL key 缺")
+	print("observer ambient events OK")
+
+# observer slice Task1：god-view DTO + bridge 推進（預算截斷）/ 增量消費（雙 channel 水位）
+func _test_observer_query_and_bridge() -> void:
+	print("--- observer Task1：query api + bridge ---")
+	seed(1337)
+	var state := WorldState.new()
+	var runner := SimRunner.new()
+	var config: Dictionary = GameSetup.load_config("res://config/warring_states.json")
+	assert(not config.is_empty(), "warring_states config 載入失敗")
+	config["seed"] = 1337
+	GameSetup.setup(state, config)
+	var bridge := ObserverBridge.new(runner, state)
+	var t0: int = bridge.current_tick()
+	var did: int = bridge.tick_step(240, 100000.0)   # 預算放大：一口氣 240 tick
+	assert(did == 240, "tick_step 未推滿 240（did=%d）" % did)
+	assert(bridge.current_tick() == t0 + 240, "current_tick 未同步")
+	# 預算截斷：0.001ms 預算 → 只推得動 1 tick
+	var did2: int = bridge.tick_step(100, 0.001)
+	assert(did2 == 1, "預算截斷失效（did2=%d）" % did2)
+	# DTO 欄位齊
+	var all_teams: Array = bridge.query_all_teams()
+	assert(all_teams.size() > 0, "query_all_teams 空")
+	var first: Dictionary = all_teams[0]
+	for k in ["id", "label", "pop", "rung", "archetype", "task", "faction_id", "tile_pos"]:
+		assert(first.has(k), "all_teams 缺欄 %s" % k)
+	var detail: Dictionary = bridge.query_team(int(first["id"]))
+	for k in ["leader_name", "pop_named", "pop_anon", "pop_minor", "pop_captive",
+			"food", "food_flow", "rung", "archetype", "faction", "task",
+			"solo_intent", "readiness", "fatigue"]:
+		assert(detail.has(k), "query_team 缺欄 %s" % k)
+	assert(bridge.query_team(999999).is_empty(), "不存在隊該回空 dict")
+	# 增量消費：雙 channel 水位後只回新訊息、升冪
+	var wm: int = bridge.current_tick()
+	var t: TeamData = state.teams[state.teams.keys()[0]]
+	var msys := SimMessageSystem.new()
+	msys.emit_ambient(state, "captives_taken", "x", t, {"origin": "0", "count": 1})
+	state.observer_messages[-1].origin_tick = wm + 1   # 模擬下一 tick 發生
+	msys.emit_message(state, "combat_start", "y", t, {"origin": "0", "target": "1"})
+	state.global_messages[-1].origin_tick = wm + 2
+	var got: Array = bridge.consume_messages(wm)
+	assert(got.size() == 2, "consume 雙 channel 應回 2（got=%d）" % got.size())
+	assert(got[0].type == "captives_taken" and got[1].type == "combat_start", "consume 升冪合併錯")
+	assert(bridge.consume_messages(wm + 2).is_empty(), "水位後該空")
+	print("observer query+bridge OK")
+
+# observer slice Task2b：formatter 人話（無 probe dump）、隊過濾集
+func _test_observer_event_text() -> void:
+	print("--- observer Task2b：event formatter ---")
+	var state := WorldState.new()
+	var t := TeamData.new()
+	t.team_id = 19
+	state.teams[19] = t
+	var lead := PersonData.new()
+	lead.id = 5
+	lead.person_name = "李霸"
+	state.persons[5] = lead
+	t.leader_id = 5
+	var m := MessageData.new()
+	m.type = "captives_taken"
+	m.origin_team_id = 19
+	m.origin_tick = WorldState.TICKS_PER_MONTH + WorldState.TICKS_PER_DAY * 3   # 月2日4
+	m.params = {"origin": "19", "loser": "3", "count": 4}
+	var s: String = ObserverEventText.render(state, m)
+	assert(s.begins_with("[月2日4]"), "時間戳錯：%s" % s)
+	assert("李霸" in s and "4 人" in s, "人話缺人名/數字：%s" % s)
+	assert(not ("Team19" in s), "probe 味未改寫：%s" % s)
+	var rel: Array = ObserverEventText.related_teams(m)
+	assert(19 in rel and 3 in rel, "隊過濾集錯：%s" % str(rel))
+	# 未知 type fallback description
+	var m2 := MessageData.new()
+	m2.type = "weird_type"
+	m2.origin_team_id = 19
+	m2.description = "某事發生"
+	assert("某事發生" in ObserverEventText.render(state, m2), "fallback 失效")
+	print("observer event text OK")
