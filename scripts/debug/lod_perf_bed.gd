@@ -22,7 +22,7 @@ func _initialize() -> void:
 	_run(); quit()
 
 func _run() -> void:
-	var ladder_raw: String = OS.get_environment("LOD_PERF_LADDER") if OS.has_environment("LOD_PERF_LADDER") else "default,warring,perf_scale"
+	var ladder_raw: String = OS.get_environment("LOD_PERF_LADDER") if OS.has_environment("LOD_PERF_LADDER") else "default,warring_states,perf_scale"
 	var world_seed: int = int(OS.get_environment("LOD_PERF_SEED")) if OS.has_environment("LOD_PERF_SEED") else 1337
 	var months: int = int(OS.get_environment("LOD_PERF_MONTHS")) if OS.has_environment("LOD_PERF_MONTHS") else 2
 	var total_ticks: int = maxi(months, 1) * WorldState.TICKS_PER_MONTH
@@ -61,6 +61,7 @@ func _run() -> void:
 func _run_one(cfg_name: String, world_seed: int, total_ticks: int, full_hd: bool) -> Dictionary:
 	seed(world_seed)
 	SimRunner.force_full_hd = full_hd
+	SimRunner.phase_timing = (OS.get_environment("LOD_PERF_PHASE") == "1")   # spike tick 印相位拆解=點名 O(N^2) 熱點
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config("res://config/%s.json" % cfg_name)
