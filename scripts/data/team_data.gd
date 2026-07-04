@@ -127,9 +127,8 @@ var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } �
 # {type:"alliance", target_id, target_pos, issued_tick, proposal_id, timeout, gift} — 信使帶 proposal_id ref。
 # gift = 誘因 payload 通用 {res: amount}（發起時已扣，送達轉移目標；本 slice 僅 food，聯姻/財槽未來直插）。
 var pending_proposal: Dictionary = {}
-var trade_task_start_tick: int = 0       # 貿易 task 起始 tick（timeout 防 zombie）
 var task_reason: String = ""             # 最近一次 task 設定來源（TaskArbiter _source；遙測用）
-var task_start_tick: int = 0             # 最近一次 task 設定 tick（逃跑/survival timeout 用）
+var task_start_tick: int = 0             # 最近一次 task 設定 tick（逃跑/survival/貿易 timeout 用）
 var readiness: float   = 1.0
 # 傷兵數 = cohort wounded 桶投影（取代舊 int 累加器；唯讀，舊寫入走 AnonTierSystem wound/heal/kill_wounded）
 var wounded: int:

@@ -238,8 +238,7 @@ func _dispatch_trade_net(state: WorldState, faction: FactionData) -> void:
         if partner_info.is_empty(): continue
         if not TaskArbiter.try_set(state, t, TeamData.TASK_TRADE,
                 partner_info["outpost_pos"], TaskArbiter.PRIO_DISPATCH, "trade_net"):
-            continue   # 被擋 → 不設 trade_task_start_tick
-        t.trade_task_start_tick = state.world.current_tick
+            continue   # 被擋 → 不派（timeout 起算由 try_set 蓋章 task_start_tick）
         Probe.bump("trade.dispatch.trade_net")   # 漏斗站4
         print("[StrategicAI] Faction%d 商隊 Team%d → trade Team%d @ outpost %s" % [
             faction.faction_id, t.team_id, int(partner_info["team_id"]), str(partner_info["outpost_pos"])])

@@ -34,6 +34,8 @@ static func applicable(ctx: DecisionContext) -> Array:
 		match opt:
 			"貿易":
 				# roam-trade：商隊主力；生產隊也可(軟壓低 via economic_opp 角色因子,非禁)。
+				# 駐村隊（movement 居民鎖）不濾：掛 TRADE 站自家村=擺攤營業（來客觸發 _resolve_market
+				# + absorb 糧倉賣餘糧=需求側環實體）。漏斗 r3 實證：濾掉→村攤關門→成交崩，勿再加鎖。
 				if ctx.has_goods or ctx.has_arb: out.append(opt)
 			"生產", "駐守":
 				if ctx.has_own_outpost: out.append(opt)
@@ -82,6 +84,7 @@ static func applicable(ctx: DecisionContext) -> Array:
 					out.append(opt)
 			"囤貨":
 				# means-end：致富 intent + 有餘糧 + 有貿易機會(arb/市集) → 蓋倉囤貨候選。
+				# 駐村隊不濾（同「貿易」註：TRADE 姿態=村攤營業，非 zombie）。
 				if ctx.intent == "致富" and ctx.food_days >= DecisionTerms.SURPLUS_FOOD_DAYS \
 						and (ctx.has_arb or ctx.has_food_market):
 					out.append(opt)
@@ -93,6 +96,7 @@ static func applicable(ctx: DecisionContext) -> Array:
 				if "外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1: out.append(opt)
 			"買糧":
 				# 餓 + 有市集 + 有錢 → 買糧候選（無錢=乞食真語意，不入）。
+				# 駐村隊不濾（同「貿易」註：餓村掛 TRADE 姿態=向來客買糧）。
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market and ctx.has_specie:
 					out.append(opt)
 	return out

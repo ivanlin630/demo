@@ -99,7 +99,10 @@ const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score
 
 # ── Threat response（被動威脅反應）──
 const THREAT_CADENCE: int = 240   # 1 日 評估一次威脅
-const TRADE_TIMEOUT: int = 1440   # 貿易 task 6 日未成交 → 放棄（防 zombie）
+const TRADE_TIMEOUT: int = 1440           # 貿易 task base timeout 6 日（防 zombie）
+# timeout 按距離估（invariants：timeout 別死常數——按距離/移速估合理往返時間）：
+# base + 殘距×per_hex。慢地形(forest 0.7×/mountain 0.4×)下 1 hex 最壞 ~0.7 日 → 0.5 日/hex 餘裕。TEST VALUE。
+const TRADE_TIMEOUT_PER_HEX: int = 120
 
 # ── Outpost 居民派駐 AI ──
 const RESIDENCY_CADENCE: int = 720    # 3 天 評估一次 outpost 居民派駐
@@ -775,11 +778,18 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 					Probe.bump("g2.vendetta_trigger")
 					print("[Vendetta] Team%d leader 脫軌攻擊仇人 Team%d" % [team.team_id, _vfoe])
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.vendetta", _t3)
-		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）
-		if team.current_task == TeamData.TASK_TRADE \
-				and state.world.current_tick - team.trade_task_start_tick > TRADE_TIMEOUT:
-			Probe.bump("trade.timeout")   # 漏斗站5：timeout 放棄（含 stale start_tick 誤殺）
-			TaskArbiter.release(team)
+		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）。
+		# 起算讀 TaskArbiter 單源 task_start_tick（try_set 恆蓋章）——舊平行欄位 trade_task_start_tick
+		# 只有 member_trade/trade_net/舊 solo 三路寫，unified/ambient 派 TRADE 拿 stale 0 → 派出即被
+		# 此檢查秒殺（漏斗兩 seed 定罪：dispatch 5.6萬、arrive=0、timeout=3.7萬）。欄位已廢。
+		# 額度按殘距估（死常數 6 日 ≈ 20 hex 平原上限，慢地形必死）；到點/擺攤（move_target 清）= base。
+		if team.current_task == TeamData.TASK_TRADE:
+			var _trade_allow: int = TRADE_TIMEOUT
+			if team.move_target != Vector2i(-1, -1):
+				_trade_allow += _hex_dist(team.tile_pos, team.move_target) * TRADE_TIMEOUT_PER_HEX
+			if state.world.current_tick - team.task_start_tick > _trade_allow:
+				Probe.bump("trade.timeout")   # 漏斗站5：timeout 放棄
+				TaskArbiter.release(team)
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			_consider_extraction(state, team)
@@ -801,9 +811,17 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if team.current_task == TeamData.TASK_IDLE:
 			var amb_task: String = AmbitionLadder.rung_task(state, team)
 			if amb_task != "":
-				var _amb_ok: bool = TaskArbiter.try_set(state, team, amb_task, team.tile_pos, TaskArbiter.PRIO_AMBIENT, "ambition")
+				# 貿易 target 走訂單鏈（_merchant_trade_target：arb 單→巡市集→fallback），非一律自格。
+				# ambient 舊行為對所有 task 派 team.tile_pos → 商業 archetype 隊被派「原地貿易」永不出發
+				# （漏斗兩 seed 定罪：站5 arrive=0、ambient 佔 dispatch 大宗）。無單無市集 → 原地擺攤（舊行為）。
+				var amb_target: Vector2i = team.tile_pos
+				if amb_task == TeamData.TASK_TRADE:
+					var tt: Vector2i = _merchant_trade_target(state, team)
+					if tt != Vector2i(-1, -1):
+						amb_target = tt
+				var _amb_ok: bool = TaskArbiter.try_set(state, team, amb_task, amb_target, TaskArbiter.PRIO_AMBIENT, "ambition")
 				if _amb_ok and amb_task == TeamData.TASK_TRADE:
-					Probe.bump("trade.dispatch.ambient")   # 漏斗站4（target=自格，原地貿易姿態）
+					Probe.bump("trade.dispatch.ambient")   # 漏斗站4
 		if SimRunner.phase_timing: _fai_pht("loop3.misc", _t3)
 
 # ──────── Tag 權限 ────────
@@ -1477,7 +1495,6 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 			if ttarget != Vector2i(-1, -1):
 				if TaskArbiter.try_set(state, mt, TeamData.TASK_TRADE,
 						ttarget, TaskArbiter.PRIO_DISPATCH, "member_trade"):
-					mt.trade_task_start_tick = state.world.current_tick
 					Probe.bump("trade.dispatch.member_trade")   # 漏斗站4
 		if SimRunner.phase_timing: _fai_pht("member.finders", _tm)
 
@@ -1532,7 +1549,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
 		# 漏斗站4探針（純觀測）：unified 路徑 TRADE 實派計數（分 opt）。
-		# ⚠已知嫌疑：此路不設 trade_task_start_tick（member_trade/trade_net 有設）→ stale timeout 誤殺，由 trade.timeout 定罪。
+		# timeout 起算已改讀 try_set 蓋章的 task_start_tick（單源），此路不需另外蓋章。
 		if _set_ok and td["task"] == TeamData.TASK_TRADE:
 			Probe.bump("trade.dispatch.unified_" + opt)
 		# 掠奪/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（社交 resolver 讀）
@@ -1826,7 +1843,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			TaskArbiter.PRIO_DISPATCH, "solo"):
 		return
 	if best_task == TeamData.TASK_TRADE:
-		team.trade_task_start_tick = state.world.current_tick
+		Probe.bump("trade.dispatch.solo")   # 漏斗站4（timeout 起算由 try_set 蓋章 task_start_tick）
 	team.solo_task_last = best_task   # F-D4：task 承諾記此槽（solo_intent 保留戰略 intent）
 	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
 

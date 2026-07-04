@@ -709,15 +709,21 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 		Probe.bump("trade.meet_nodeal")   # 漏斗站6：會合但零成交（撲空/沒貨/價差不成）
 	_spill_back_public_storage(state, a, a_original)
 	_spill_back_public_storage(state, b, b_original)
-	# 漏斗站5探針：release 分類（途中被截 = 永遠到不了單點的證據）
+	# 途中相遇=機會交易，交易完續程（不棄單）；到點（move_target 已清/同格）才 release 重評。
+	# 舊行為任意同格相遇即 release → 商隊途中碰任何隊=棄單（漏斗 release_midroute 定罪）。
+	# 續程仍有界：TRADE_TIMEOUT 6 日 + 高優先 task 可搶（latch 必 timeout 守住）。
 	if a.current_task == TeamData.TASK_TRADE:
-		if Probe.enabled:
-			Probe.bump("trade.release_midroute" if (a.move_target != Vector2i(-1, -1) and a.tile_pos != a.move_target) else "trade.release_at_dest")
-		TaskArbiter.release(a)
+		if a.move_target == Vector2i(-1, -1) or a.tile_pos == a.move_target:
+			Probe.bump("trade.release_at_dest")
+			TaskArbiter.release(a)
+		else:
+			Probe.bump("trade.continue_midroute")   # 漏斗站5：機會交易後續程
 	if b.current_task == TeamData.TASK_TRADE:
-		if Probe.enabled:
-			Probe.bump("trade.release_midroute" if (b.move_target != Vector2i(-1, -1) and b.tile_pos != b.move_target) else "trade.release_at_dest")
-		TaskArbiter.release(b)
+		if b.move_target == Vector2i(-1, -1) or b.tile_pos == b.move_target:
+			Probe.bump("trade.release_at_dest")
+			TaskArbiter.release(b)
+		else:
+			Probe.bump("trade.continue_midroute")
 
 func _snapshot_order_res(team: TeamData) -> Dictionary:
 	var snap: Dictionary = {}

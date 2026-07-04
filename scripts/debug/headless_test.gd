@@ -10392,7 +10392,7 @@ func _test_task_defend_prepare_const() -> void:
 	assert(TeamData.TASK_PREPARE == "備戰")
 	var t := TeamData.new()
 	assert(t.threat_eval_next_tick == 0)
-	assert(t.trade_task_start_tick == 0)
+	assert(t.task_start_tick == 0)   # TRADE timeout 起算=arbiter 單源（trade_task_start_tick 已廢）
 	print("Engagement Task3 OK")
 
 func _eng_make_leader(state: WorldState, team: TeamData, vals: Dictionary) -> void:
@@ -10539,7 +10539,7 @@ func _test_trade_timeout() -> void:
 	state.world.tiles[0] = tile
 	var t := TeamData.new(); t.team_id = 0; t.faction_id = -1; t.tile_pos = Vector2i(0, 0)
 	_seed_pop(t, 2); t.resources["food"] = 100.0; t.tags = [TeamData.TAG_MERCHANT]
-	t.current_task = TeamData.TASK_TRADE; t.trade_task_start_tick = 0
+	t.current_task = TeamData.TASK_TRADE; t.task_start_tick = 0
 	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0
 	leader.values = { "求生欲": 0.5 }
 	state.persons[1] = leader; t.leader_id = 1

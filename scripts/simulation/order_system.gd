@@ -159,6 +159,8 @@ func _has_active(team: TeamData, kind: String, res: String) -> bool:
 	return false
 
 # 讀自隊收到的買單（team_known 的 order_buy message；殘缺=可失真副本）。
+# 不濾過期副本＝設計（G1d 撲空 emergent）：追舊單=有理由出門→到市集讀板撞活單。
+# （漏斗 r3 實證：濾掉後 arb 崩 2.7%/0.4%、旅程消失、成交 15→6/5→0——別再加濾。）
 func received_buy_orders(state: WorldState, team: TeamData) -> Array:
 	var out: Array = []
 	for m in state.team_known.get(team.team_id, []):
