@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 貿易環兩裁——①准插隊(玩測痛點>內部整備,default=真產品世界)②granary需求側原則先定:生存自給/繁榮須貿易(缺口咬成長不咬生存,別nerf regen,度=漏斗後TEST VALUE校);meta=驗收升級眼球bar
 ---
 

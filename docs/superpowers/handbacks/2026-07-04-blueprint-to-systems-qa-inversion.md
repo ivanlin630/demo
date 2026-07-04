@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★流程事故級——用戶被迫當QA(第N次,抗議後又繞回);原則反轉(眼球=願景輸入非驗收)+escaped-defect制+率不是計數+世界句子審計+memory改寫;全部=機器非承諾;綁貿易環試點
 ---
 

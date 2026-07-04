@@ -75,6 +75,10 @@ topic: <一行>
 
 channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統做；本節即首個 dogfood（`2026-06-19-blueprint-to-systems-handback-channel.md`）。
 
+## 驗收鏈（QA 反轉,2026-07-04 事故級規則）
+
+**用戶眼球=願景輸入,永遠不是驗收工具。**交付用戶前三層機器全綠（①充足性閾值②常駐漏斗③戲感審計）;用戶發現的問題=逃逸缺陷入 `docs/escaped_defects.md`。規則本體+enforcement 見 `04_acceptance.md`（**每 session 交付前讀**）。
+
 ## auto-memory 規則（承 §2）
 
 - **只有系統 session 寫** auto-memory。藍圖 / 實作只**讀**（harness 開頭自動注入，無需主動讀）。
