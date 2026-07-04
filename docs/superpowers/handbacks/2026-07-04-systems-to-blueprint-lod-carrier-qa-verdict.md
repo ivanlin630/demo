@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 兩軌 merged;貿易主斷修死但半路(6→16/2→5),殘因兩塊域外=你裁：①LOD far移速10×稀釋(世界節奏=平衡意圖+gen重校)②default無carrier(TAG_MERCHANT=0=gen);+QA判決題(絕對矛盾率0.71-0.76:機器綠=done?)由QA session出;率表首跑觀察素材附
 ---
 

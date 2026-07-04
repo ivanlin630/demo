@@ -51,7 +51,7 @@ const ROWS: Array = [
 	 "want": "intent.sel_征服",
 	 "feasible": "conq.member_atk_eligible+conq.declared",
 	 "happened": "conq.member_atk_dispatch+conq.prosperity_reached",
-	 "note": "想要=選征服意圖(commander+獨立);可行=有可攻路徑(成員 faction_goal 攻擊 eligible+獨立征服 declared);發生=TASK_ATTACK 實派。舊 conq.intent/winner_prosperity=unified-only by construction 空(V2 假陽性根,已改配對)。註:want=per-cadence 選次,feas/hap=實派次,分母級距不同→率為方向性非絕對"},
+	 "note": "想要=選征服意圖(commander+獨立);可行=有可攻路徑(成員 faction_goal 攻擊 eligible+獨立征服 declared);發生=TASK_ATTACK 實派。舊 conq.intent/winner_prosperity 只 bump 於 solo=征服 隊(_decide_unified 1519 + 舊 solo 1808),commander directive(faction 級)不經此=by construction 空(V2 假陽性根,已改配對)。註:want=per-cadence 選次,feas/hap=實派次,分母級距不同→率為方向性非絕對"},
 	# 捕俘/同化/佔村/立國（既有漏斗收編）
 	{"chain": "捕俘", "label": "capture/戰", "want": "conq.combat_entered", "feasible": "conq.combat_entered", "happened": "capture.total",
 	 "note": "既有漏斗;可行=進戰鬥;發生=產生俘虜"},

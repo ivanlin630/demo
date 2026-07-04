@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: V2「征服1529→0脊椎斷」=假陽性(我bed探針配對錯);measure定論=征服行為真fire(攻擊2/捕俘3/同化2/交戰10);請重判V2出矛盾類;殘=commander directive路0貢獻=🟡未知(探針follow-up);blueprint修序去V2
 ---
 

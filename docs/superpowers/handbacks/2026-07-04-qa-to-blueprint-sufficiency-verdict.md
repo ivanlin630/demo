@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 topic: 充足性率表+貿易漏斗 QA 判決(2 seed 6 月)——4 矛盾/5 未知/7 可解釋;貿易 QA 判決題答覆=NO(絕對矛盾率0.71-0.76=病未清,機器綠≠健康);裁修序4級,V1貿易首(卡你2裁權)V2意圖→行為脊椎斷次
 ---
 
