@@ -1484,10 +1484,16 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 				TaskArbiter.try_set(state, mt, TeamData.TASK_DIPLOMACY,
 					state.teams[target_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "member_diplomacy")
 		elif "攻擊" in f.goals and _tag_weight(mt, "攻擊") > 0.0:
+			# 征服名實探針（純觀測）：commander 征服 intent → 成員攻擊派出路徑（faction_goal）。
+			# 舊 conq.intent/winner_prosperity 只量 unified 隊 solo 征服=by construction 空 → 此路才是
+			# commander 征服轉化主幹（V2 假陽性根：率表誤採 unified-only 探針）。
+			var _cq: bool = Probe.enabled and String(f.goal_drivers.get("攻擊", {}).get("intent", "")) == "征服"
+			if _cq: Probe.bump("conq.member_atk_eligible")
 			var target_id: int = _nearest_independent(state, mt)
 			if target_id != -1:
-				TaskArbiter.try_set(state, mt, TeamData.TASK_ATTACK,
-					state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal")
+				if TaskArbiter.try_set(state, mt, TeamData.TASK_ATTACK,
+						state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
+					if _cq: Probe.bump("conq.member_atk_dispatch")
 		elif _can_manufacture(state, mt):
 			TaskArbiter.try_set(state, mt, TeamData.TASK_MANUFACTURE,
 				mt.move_target, TaskArbiter.PRIO_DISPATCH, "member_manufacture")

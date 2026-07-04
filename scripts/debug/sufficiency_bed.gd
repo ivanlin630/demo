@@ -47,8 +47,11 @@ const ROWS: Array = [
 	{"chain": "RelationGraph", "label": "邊改結果/含邊評估", "want": "rel.tribute_eval", "feasible": "rel.tribute_with_edge", "happened": "rel.tribute_edge_flipped",
 	 "note": "可行=tribute_accept 評估含 feud/gratitude 邊;發生=去邊後門檻結果反轉(邊真咬)"},
 	# 意圖→行為
-	{"chain": "意圖→行為", "label": "征服 想=做", "want": "intent.sel_征服", "feasible": "conq.intent", "happened": "conq.winner_prosperity",
-	 "note": "想要=選征服意圖;可行=_decide_unified 見征服隊;發生=實派 prosperity 攻擊 winner。其餘 intent 見 sel_<type>/goal_emit(未到 task 層,QA 素材)"},
+	{"chain": "意圖→行為", "label": "征服 想=做",
+	 "want": "intent.sel_征服",
+	 "feasible": "conq.member_atk_eligible+conq.declared",
+	 "happened": "conq.member_atk_dispatch+conq.prosperity_reached",
+	 "note": "想要=選征服意圖(commander+獨立);可行=有可攻路徑(成員 faction_goal 攻擊 eligible+獨立征服 declared);發生=TASK_ATTACK 實派。舊 conq.intent/winner_prosperity=unified-only by construction 空(V2 假陽性根,已改配對)。註:want=per-cadence 選次,feas/hap=實派次,分母級距不同→率為方向性非絕對"},
 	# 捕俘/同化/佔村/立國（既有漏斗收編）
 	{"chain": "捕俘", "label": "capture/戰", "want": "conq.combat_entered", "feasible": "conq.combat_entered", "happened": "capture.total",
 	 "note": "既有漏斗;可行=進戰鬥;發生=產生俘虜"},
@@ -176,6 +179,11 @@ func _msgs_to_array(msgs: Array) -> Array:
 	return out
 
 func _cnt(counts: Dictionary, key: String) -> int:
+	# 支援 "a+b+c" 求和 key（跨路徑合計，如 commander+獨立征服路徑）。
+	if key.find("+") != -1:
+		var s: int = 0
+		for k in key.split("+", false): s += int(counts.get(k.strip_edges(), 0))
+		return s
 	return int(counts.get(key, 0))
 
 func _happened_val(counts: Dictionary, row: Dictionary) -> int:
