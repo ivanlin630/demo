@@ -492,6 +492,7 @@ func _initialize() -> void:
 	_test_leak_tribute_powergap_belief()
 	_test_leak_tribute_response_belief()
 	_test_tribute_unified_edges()
+	_test_combat_verb_belief_gate()
 	_test_leak_strong_neighbor_belief()
 	_test_leak_aid_target_belief()
 	_test_betrayal_belief_driven()
@@ -1131,6 +1132,30 @@ func _test_tribute_unified_edges() -> void:
 	RelationGraph.add_edge(dl.relation_edges, "feud", 301, 1.0, 0)
 	assert(not DiplomaticAiSystem.tribute_accept(st, def_t, agg, 0.0), "feud 邊 → 不屈")
 	print("tribute unified edges OK")
+
+# F-I7：combat verb 讀 belief。無情報→保守不攻；誤報 believed strength→決策跟 belief 走。
+func _test_combat_verb_belief_gate() -> void:
+	print("--- F-I7 combat verb belief-gate ---")
+	var st := WorldState.new(); st.world = WorldData.new()
+	var inter := InteractionSystem.new()
+	var atk := TeamData.new(); atk.team_id = 0; atk.tile_pos = Vector2i(0,0); _seed_pop(atk, 20)
+	atk.armed_anon_ratio = 1.0; st.teams[0] = atk
+	# 中性人格（全 0.5）：base=0.15，ratio 項 ±決定攻不攻（0.9 全開會人格碾壓 ratio 上限 → 測不到 belief）
+	var al := PersonData.new(); al.id = 400
+	al.values = { "野心": 0.5, "好戰": 0.5, "貪婪": 0.5, "慎重": 0.5 }
+	st.persons[400] = al; atk.leader_id = 400
+	var def_t := TeamData.new(); def_t.team_id = 1; def_t.tile_pos = Vector2i(0,0); _seed_pop(def_t, 3)
+	st.teams[1] = def_t
+	var dl2 := PersonData.new(); dl2.id = 401; st.persons[401] = dl2; def_t.leader_id = 401
+	# A) 真弱(pop3) 無 belief → 保守不攻（不偷看真值）
+	assert(not inter._should_attack(st, 0, 1), "無情報 → 保守不攻")
+	# B) 誤報超強（armed_est 200，真弱）→ 依 belief 不攻
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 200, "armed_est": 200}, 1.0, false)
+	assert(not inter._should_attack(st, 0, 1), "belief 強 → 不攻（跟 belief 走）")
+	# C) 改報超弱 → 依 belief 攻（同源覆寫 claim）
+	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 2, "armed_est": 1}, 1.0, false)
+	assert(inter._should_attack(st, 0, 1), "belief 弱 → 攻（跟 belief 走）")
+	print("combat verb belief gate OK")
 
 # G3 Phase E leak 1b：_find_strong_neighbor 讀 belief 非真值。
 func _test_leak_strong_neighbor_belief() -> void:

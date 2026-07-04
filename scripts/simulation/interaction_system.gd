@@ -297,7 +297,8 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	elif b.current_task == TeamData.TASK_ATTACK:
 		_combat.start_combat(state, id_b, id_a)
 	elif a.current_task == TeamData.TASK_LOOT and a.readiness >= COMBAT_THRESHOLD:
-		if _should_pay_tribute(state, id_b, id_a):
+		# F-I2：屈服判斷統一走 DiplomaticAiSystem.tribute_accept（同格勒索=兵臨城下 threat=raider readiness）
+		if DiplomaticAiSystem.tribute_accept(state, b, a, a.readiness):
 			_probe_raid(state, a, b, "extort")
 			_resolve_extortion(state, id_a, id_b)
 		elif _should_attack(state, id_a, id_b):
@@ -306,7 +307,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		else:
 			_probe_raid(state, a, b, "noop")
 	elif b.current_task == TeamData.TASK_LOOT and b.readiness >= COMBAT_THRESHOLD:
-		if _should_pay_tribute(state, id_a, id_b):
+		if DiplomaticAiSystem.tribute_accept(state, a, b, b.readiness):
 			_probe_raid(state, b, a, "extort")
 			_resolve_extortion(state, id_b, id_a)
 		elif _should_attack(state, id_b, id_a):
@@ -317,31 +318,24 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 
 # ──────── 決策函式 ────────
 
-func _should_pay_tribute(state: WorldState, def_id: int, atk_id: int) -> bool:
-	var def: TeamData = state.teams[def_id]
-	if def.current_task == TeamData.TASK_FLEE:
-		return true
-	var leader: PersonData = state.persons.get(def.leader_id)
-	if leader == null:
-		return false
-	var survival: float = float(leader.values.get("求生欲", 0.5))
-	var caution: float  = float(leader.values.get("慎重", 0.5))
-	var honor: float    = float(leader.values.get("義氣", 0.5))
-	var weakness: float = _combat.team_strength(state, def_id) / maxf(_combat.team_strength(state, atk_id), 0.01)
-	var score: float    = survival * 0.4 + caution * 0.3 - honor * 0.3 + (1.0 - weakness) * 0.3
-	return score > 0.4
-
 func _should_attack(state: WorldState, atk_id: int, def_id: int) -> bool:
 	var atk: TeamData = state.teams[atk_id]
 	var leader: PersonData = state.persons.get(atk.leader_id)
 	if leader == null:
 		return false
+	# F-I7 belief-gate：無情報 → 保守不攻（G3-E「無估 fallback=不行動」，不偷看真值）
+	if not BeliefSystem.has_belief(state, atk_id, def_id):
+		return false
 	var ambition: float  = float(leader.values.get("野心", 0.5))
 	var caution: float   = float(leader.values.get("慎重", 0.5))
 	var greed: float     = float(leader.values.get("貪婪", 0.5))
 	var martial: float   = float(leader.values.get("好戰", 0.5))
-	var str_ratio: float = _combat.team_strength(state, atk_id) / maxf(_combat.team_strength(state, def_id), 0.01)
-	var score: float     = ambition * 0.3 + martial * 0.3 + greed * 0.2 + (str_ratio - 1.0) * 0.2 - caution * 0.5
+	# F-I7：對方實力讀 believed armed_est（tier2 偽裝/虛張在此咬），退 pop_est；自身讀真 armed
+	var bel: Dictionary = BeliefSystem.best_estimate(state, atk_id, def_id)
+	var own_armed: float = maxf(float(_combat.calc_armed(state, atk)), 1.0)
+	var def_est: float = float(bel.get("armed_est", bel.get("population_est", own_armed)))
+	var str_ratio: float = own_armed / maxf(def_est, 1.0)
+	var score: float = ambition * 0.3 + martial * 0.3 + greed * 0.2 + (str_ratio - 1.0) * 0.2 - caution * 0.5
 	return score > 0.0
 
 
@@ -938,16 +932,9 @@ func resolve_extortion_direct(state: WorldState, aggressor_id: int, target_id: i
 	var player_p: PersonData = state.persons.get(state.player_id)
 	var player_team_id: int  = player_p.team_id if player_p != null else -1
 	if aggressor_id == player_team_id:
-		var leader: PersonData = state.persons.get(to_t.leader_id) if to_t.leader_id != -1 else null
-		var caution: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
-		var pride:   float = float(leader.values.get("義氣", 0.5)) if leader else 0.5
-		var fear:    float = leader.fear if leader else 0.3
-		var power_r: float = float(from_t.population) / maxf(float(to_t.population), 1.0)
-		var score:   float = (power_r - 1.0) * 0.4 + caution * 0.2 \
-		                   - pride * 0.3 + fear * 0.2 + from_t.readiness * 0.2
-		var accepted: bool = score > 0.5   # TEST VALUE
-		if not accepted:
-			print("[Extort] Team%d 拒絕勒索 (score=%.2f)" % [target_id, score])
+		# F-I2 統一公式（同格勒索=兵臨城下 threat=aggressor readiness）
+		if not DiplomaticAiSystem.tribute_accept(state, to_t, from_t, from_t.readiness):
+			print("[Extort] Team%d 拒絕勒索" % target_id)
 			return { "ok": true, "accepted": false, "msg": "對方拒絕勒索" }
 
 	# 資源轉移
