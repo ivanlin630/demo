@@ -79,13 +79,18 @@ static func claims(state: WorldState, obs_id: int, tgt_id: int) -> Array:
 	return _coerce(state.team_intel.get(obs_id, {}).get(tgt_id, null))
 
 static func has_belief(state: WorldState, obs_id: int, tgt_id: int) -> bool:
-	return not claims(state, obs_id, tgt_id).is_empty()
+	var r: bool = not claims(state, obs_id, tgt_id).is_empty()
+	if Probe.enabled:
+		Probe.bump("bel.has_belief_call")
+		if r: Probe.bump("bel.has_belief_true")
+	return r
 
 static func known_targets(state: WorldState, obs_id: int) -> Array:
 	return state.team_intel.get(obs_id, {}).keys()
 
 static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictionary:
 	var cs: Array = claims(state, obs_id, tgt_id)
+	if Probe.enabled: Probe.bump("bel.best_call")
 	if cs.is_empty(): return {}
 	var best: Dictionary = cs[0]
 	var best_eff: float = effective_credibility(state, best)
@@ -94,6 +99,12 @@ static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictio
 		if eff > best_eff \
 				or (eff == best_eff and int(c["tick"]) > int(best["tick"])):
 			best = c; best_eff = eff
+	if Probe.enabled:
+		Probe.bump("bel.best_hit")
+		var age: int = state.world.current_tick - int(best["tick"])
+		if age < WorldState.TICKS_PER_MONTH: Probe.bump("bel.claim_fresh")
+		elif age < 3 * WorldState.TICKS_PER_MONTH: Probe.bump("bel.claim_mid")
+		else: Probe.bump("bel.claim_stale")
 	return best["value"]
 
 # credibility-weighted（G3d-2）：(1−最強源 eff_cred) + cred 加權值分歧。
@@ -162,12 +173,14 @@ static func reconcile_firsthand(state: WorldState, obs_id: int, tgt_id: int) -> 
 		if c["source_type"] == "親見" and int(c["source_id"]) == obs_id:
 			truth = float((c["value"] as Dictionary).get("population_est", -1.0)); break
 	if truth <= 0.0: return
+	if Probe.enabled: Probe.bump("bel.reconcile_opportunity")
 	for c in cs:
 		var sid: int = int(c["source_id"])
 		if sid == obs_id or c["source_type"] == "親見": continue
 		if not state.teams.has(sid): continue   # 死 source（claim 存活過來源隊）→ 不更新口碑，免 known_reputations 重注入死 id（dangling 根因）
 		var rep: float = float((c["value"] as Dictionary).get("population_est", -1.0))
 		if rep <= 0.0: continue
+		if Probe.enabled: Probe.bump("bel.reconcile_compared")
 		var r: float = rep / truth
 		if r >= 0.7 and r <= 1.3:
 			obs_team.update_reputation(sid, TRUST_DELTA)

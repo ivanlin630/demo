@@ -53,9 +53,20 @@ static func tribute_accept(state: WorldState, defender: TeamData, aggressor: Tea
 		+ caution * TRIBUTE_W_CAUTION - honor * TRIBUTE_W_HONOR \
 		+ survival * TRIBUTE_W_SURVIVAL + leader.fear * TRIBUTE_W_FEAR \
 		+ clampf(threat, 0.0, 1.0) * TRIBUTE_W_THREAT
+	var score_no_edge: float = score
+	var had_edge: bool = false
 	if aggressor.leader_id != -1:
-		score -= _edge_intensity_to(leader.relation_edges, "feud", aggressor.leader_id) * TRIBUTE_W_FEUD
-		score += _edge_intensity_to(leader.relation_edges, "gratitude", aggressor.leader_id) * TRIBUTE_W_GRATITUDE
+		var feud_i: float = _edge_intensity_to(leader.relation_edges, "feud", aggressor.leader_id)
+		var grat_i: float = _edge_intensity_to(leader.relation_edges, "gratitude", aggressor.leader_id)
+		score -= feud_i * TRIBUTE_W_FEUD
+		score += grat_i * TRIBUTE_W_GRATITUDE
+		had_edge = feud_i > 0.0 or grat_i > 0.0
+	if Probe.enabled:
+		Probe.bump("rel.tribute_eval")
+		if had_edge:
+			Probe.bump("rel.tribute_with_edge")
+			if (score > TRIBUTE_ACCEPT_THRESHOLD) != (score_no_edge > TRIBUTE_ACCEPT_THRESHOLD):
+				Probe.bump("rel.tribute_edge_flipped")
 	return score > TRIBUTE_ACCEPT_THRESHOLD
 
 # typed 邊 reader（指定 type+target 最強 intensity；無邊 0）。加 reader 不改 RelationGraph 核心。
@@ -161,6 +172,7 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 				print("[Diplomacy] Team%d 向玩家發起 %s → 寫入 forced_event" % [sender.team_id, action])
 			return
 	print("[Diplomacy] Team%d → Team%d: %s" % [sender.team_id, target.team_id, action])
+	Probe.bump("dip.proposal_sent")
 	var response: String = handle_diplomacy_message(state, target, sender, action)
 	print("[Diplomacy] Team%d 回應: %s" % [target.team_id, response])
 	if response == "reject" or response == "refuse":
@@ -179,24 +191,30 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 
 func handle_diplomacy_message(state: WorldState, self_team: TeamData,
 		sender_team: TeamData, action: String, gift: Dictionary = {}) -> String:
+	if Probe.enabled: Probe.bump("dip.proposal_handled")
 	var score: float = _calc_diplomacy_score(state, self_team, sender_team, gift)
 	match action:
 		"propose_alliance":
 			if score > ALLIANCE_ACCEPT_THRESHOLD:
 				_form_alliance(state, self_team, sender_team)
+				if Probe.enabled: Probe.bump("dip.proposal_accept")
 				return "accept"
 			return "reject"
 		"propose_trade":
 			if score > 0.4:
 				self_team.update_reputation(sender_team.team_id, 0.05)
 				sender_team.update_reputation(self_team.team_id, 0.05)
+				if Probe.enabled: Probe.bump("dip.proposal_accept")
 				return "accept"
 			return "reject"
 		"demand_tribute":
 			# F-I2 統一公式（遠程外交無兵臨壓力 threat=0）
-			return "accept" if tribute_accept(state, self_team, sender_team, 0.0) else "refuse"
+			var _acc: bool = tribute_accept(state, self_team, sender_team, 0.0)
+			if _acc and Probe.enabled: Probe.bump("dip.proposal_accept")
+			return "accept" if _acc else "refuse"
 		"offer_surrender":
 			if score > 0.3:
+				if Probe.enabled: Probe.bump("dip.proposal_accept")
 				return "accept"
 			return "reject"
 		"invite_settle":
