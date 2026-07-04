@@ -3,7 +3,8 @@
 > **定義**：用戶發現的任何問題=逃逸缺陷=流程事故。每筆立檔：哪層該抓而沒抓 → 補那層機器。
 > **三層驗收鏈**（全綠才交付用戶）：①充足性閾值（帶分母的率 assert）②常駐漏斗（分階段轉化率回歸可見）③戲感審計（系統以觀者身分讀 default 世界流,統計唸成句子問怪不怪）。
 > **承諾邊界**：湧現系統會出新型失誤;本制保證=**同類永不第二次**（每筆逃逸缺陷變一層機器）。
-> 源：`handbacks/2026-07-04-blueprint-to-systems-qa-inversion.md`（R1-R6）。流程規則本體見 `docs/process/04_acceptance.md`。
+> 源：`handbacks/2026-07-04-blueprint-to-systems-qa-inversion.md`（R1-R6）。流程規則本體見 `docs/process/05_acceptance.md`。
+> **ledger 管理者=驗收官（QA session，`04_qa.md` 第三職）**；系統/藍圖可 append 候選，判層歸 QA。
 
 | # | 日期 | 缺陷（用戶原話/現象） | 該抓層 | 為何漏 | 補的機器 | 機器狀態 |
 |---|---|---|---|---|---|---|

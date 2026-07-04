@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: QA 角色復活升級(用戶裁)——04_qa 從UI掃描器升「驗收官」(稽核判決/戲感觀者/release gate+ledger);寫進硬流程(00_roles 第四角+交用戶前QA必綠);充足性稽核=復活首戰(判決由QA出,非系統自判)
 ---
 

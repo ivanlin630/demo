@@ -48,7 +48,7 @@ default seed 1337+2674 各 6 月（gen 校準後世界），量六站漏斗 per-
 2. fix 後 default 兩 seed 6 月：**成交率量級起跳**（成交/月、成交/月/村對 皆報;目標=ticker 上「X 以 Y 換 Z」持續發生）；商隊 specimen 可追一條「接單→出發→到場→成交」完整弧。
 3. 不塌房：不 mass-starve、狼弧仍在（立國/raid 鏈照 fire）、緩坡照舊。
 4. 回歸：headless+framework+coin_eq 綠。
-5. **Task 3 三件機器存在並綠**（閾值 assert 過+常駐漏斗輸出+ticker dump 可用）。宣告權=系統跑完世界句子審計後。
+5. **Task 3 三件機器存在並綠**（閾值 assert 過+常駐漏斗輸出+ticker dump 可用）。宣告權=**QA 驗收官判決**（qa-role-revival 後生效;系統備機器不自判）。
 
 ## 檔案 scope
 

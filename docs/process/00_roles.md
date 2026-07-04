@@ -1,15 +1,18 @@
 # 00_roles.md — Session 角色與分工
 
 主 session 有**兩個並存的設計腦**，按領域分（WHAT vs HOW），不是按階層。
-加上 worktree 實作者。三者接力，不是並行競爭。
+加上 worktree 實作者與**驗收官（QA）**。接力，不是並行競爭。
 
-## 三角色
+## 四角色
 
 | 角色 | 管 | 不管 | 產物 |
 |---|---|---|---|
 | **藍圖**（Blueprint） | **WHAT**：玩什麼、玩家循環、feature 願景、平衡意圖 | 架構決定、code | `game-design.md`、feature/願景 docs |
 | **系統**（Systems） | **HOW**：seam、契約、所有權圖、invariant、tick pipeline、行政流程 | 遊戲願景、平衡意圖 | spec / plan / `invariants.md` |
 | **實作**（Implementer） | 在 worktree 寫 code、跑測試 | 設計決定 | code + handback |
+| **驗收官**（QA） | 充足性判決/戲感觀者/release gate/UI 落差（`04_qa.md` 四職）；**maker/checker 分離=非蓋房者的腦** | 修 code、裁 WHAT、修 HOW | 判決表/落差清單 + `escaped_defects.md` 管理 |
+
+**★硬閘：任何東西交用戶之前，QA 必綠**（三層驗收鏈見 `05_acceptance.md`）。充足性判決由 QA 出——系統不自判自己蓋的世界。
 
 兩個設計 session 都在 `A:\GDS\demo` / `main`。實作在 `.worktrees/<feature>/` / `feat/<feature>`。
 
@@ -34,6 +37,7 @@
 |---|---|
 | `game-design.md`、feature/願景 docs | 藍圖 |
 | `invariants.md`、架構/流程 docs、`progress.md`、`known_issues.md`、`CLAUDE.md`、`docs/process/*` | 系統 |
+| `escaped_defects.md`、判決表 | 驗收官（QA） |
 | **auto-memory（`~/.claude/projects/A--GDS-demo/memory/` + MEMORY.md）** | **系統（單寫者）** |
 
 - 不碰對方 owner 的檔。要改 → 呈報 owner。
@@ -60,7 +64,7 @@ docs/superpowers/handbacks/YYYY-MM-DD-<from>-to-<to>-<topic>.md
 
 frontmatter：
 ```
-from: <role>          # blueprint | systems | implementer
+from: <role>          # blueprint | systems | implementer | qa
 to: <role>
 status: open | consumed
 topic: <一行>
@@ -77,7 +81,7 @@ channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統�
 
 ## 驗收鏈（QA 反轉,2026-07-04 事故級規則）
 
-**用戶眼球=願景輸入,永遠不是驗收工具。**交付用戶前三層機器全綠（①充足性閾值②常駐漏斗③戲感審計）;用戶發現的問題=逃逸缺陷入 `docs/escaped_defects.md`。規則本體+enforcement 見 `04_acceptance.md`（**每 session 交付前讀**）。
+**用戶眼球=願景輸入,永遠不是驗收工具。**交付用戶前三層機器全綠（①充足性閾值②常駐漏斗③戲感審計）,**判決由驗收官（QA）出**;用戶發現的問題=逃逸缺陷入 `docs/escaped_defects.md`（QA 管理）。規則本體+enforcement 見 `05_acceptance.md`（**每 session 交付前讀**）。
 
 ## auto-memory 規則（承 §2）
 

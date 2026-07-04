@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★全面回溯充足性稽核(=①②③機器首跑)——default自然世界全系統率表(帶分母)+世界句子判決+按荒謬度排修;驗的是fire率非重建;貿易漏斗併入其中一列
 ---
 
