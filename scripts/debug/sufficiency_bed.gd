@@ -175,15 +175,15 @@ func _msgs_to_array(msgs: Array) -> Array:
 		})
 	return out
 
-func _get(counts: Dictionary, key: String) -> int:
+func _cnt(counts: Dictionary, key: String) -> int:
 	return int(counts.get(key, 0))
 
 func _happened_val(counts: Dictionary, row: Dictionary) -> int:
 	if row.has("happened_sum"):
 		var s: int = 0
-		for k in row["happened_sum"]: s += _get(counts, k)
+		for k in row["happened_sum"]: s += _cnt(counts, k)
 		return s
-	return _get(counts, row.get("happened", ""))
+	return _cnt(counts, row.get("happened", ""))
 
 func _rate_str(hap: int, feas: int) -> String:
 	if feas == 0: return "n/a"
@@ -201,8 +201,8 @@ func _print_rate_table(s: int, r: Dictionary) -> void:
 		if _is_placeholder(row):
 			print("%-14s %-18s %8s   [%s]" % [row["chain"], row["label"], "—", row["note"]])
 			continue
-		var want: int = _get(counts, row.get("want", ""))
-		var feas: int = _get(counts, row.get("feasible", ""))
+		var want: int = _cnt(counts, row.get("want", ""))
+		var feas: int = _cnt(counts, row.get("feasible", ""))
 		var hap: int = _happened_val(counts, row)
 		print("%-14s %-18s %8s   %d/%d/%d   %s" % [
 			row["chain"], row["label"], _rate_str(hap, feas), want, feas, hap, row["note"]])
@@ -213,8 +213,8 @@ func _print_rate_table(s: int, r: Dictionary) -> void:
 		if String(k).begins_with("evt.") and String(k).ends_with(".check"):
 			evt_names[String(k).trim_prefix("evt.").trim_suffix(".check")] = true
 	for name in evt_names:
-		var chk: int = _get(counts, "evt.%s.check" % name)
-		var fire: int = _get(counts, "evt.%s.fire" % name)
+		var chk: int = _cnt(counts, "evt.%s.check" % name)
+		var fire: int = _cnt(counts, "evt.%s.fire" % name)
 		print("%-14s %-18s %8s   %d/%d/%d   可行=eligibility 檢查;發生=fire" % [
 			"事件", name, _rate_str(fire, chk), chk, chk, fire])
 	# 月切面
@@ -232,8 +232,8 @@ func _print_json_block(all_results: Dictionary) -> void:
 		for row in ROWS:
 			if _is_placeholder(row):
 				continue
-			var want: int = _get(counts, row.get("want", ""))
-			var feas: int = _get(counts, row.get("feasible", ""))
+			var want: int = _cnt(counts, row.get("want", ""))
+			var feas: int = _cnt(counts, row.get("feasible", ""))
 			var hap: int = _happened_val(counts, row)
 			rows_out.append({
 				"chain": row["chain"], "label": row["label"],
