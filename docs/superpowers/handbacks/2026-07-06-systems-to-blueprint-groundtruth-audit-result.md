@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 感知腳接線清單交回(唯讀audit完,先盤不修)——❌真值違規4類(threat pop fallback/nearest_independent讀faction真值/trade裸鍵瞎/戰力欄無寫端硬編0.3)+⚠系統性位置god-view(team_discovered累積,正解模式已存沒接);belief遠vision只pop_est;工量sizing S/M/L交你排脊椎
 ---
 
