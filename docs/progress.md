@@ -395,6 +395,17 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - **融合驗綠**：rung repertoire（訓練/貿易/生產/建設/讓位）+ threat（新 live-seam）+ solo 全 ALL PASS；framework PASS=7；gate PASS 32（rung_task 回字串無 TaskArbiter→不在指紋）。
 - **seeded 52→48/8/1/380**（QA wave 判；pop/factions/established 守恆；48–56 帶繞 52）。**watch（藍圖/QA）**：世界變靜（threat 遭遇↓）是否過龜縮（反龜縮 bar）。
 
+### 憲法溶入 arc — wave1 序3.5 threat-preempt done（2026-07-05，merged 4afbcaf）
+
+反龜縮 seam 修：忙碌目標對逼近攻擊者盲（`_evaluate_threat` idle-gate，measure 坐實 IDLE 反應/BUSY 不反應）→ 強威脅 preempt 非緊急進行中 task。**接 approach→感知→反應因果脊椎，非新機制。**
+- `_evaluate_threat` idle-gate 改三分支：idle→原路；busy-preemptible + threat_react≥`threat_threshold+PREEMPT_MARGIN(2.0)`→打斷派 defensive；busy-urgent→不評。`PREEMPTIBLE_TASKS`=生產/製造/建設/貿易/治理/訓練/覓食/紮營（8）。PRIO_THREAT(70)>DISPATCH(50) 打得斷。
+- **PREEMPT_MARGIN=2.0**（measure 校，非初設 0.5）：threat_react 的 approach/hostility(weight 1.0)壓過 power(0.5)→逼近但弱敵=1.49、碾壓=5.52→margin 2.0 要 power_ratio≳5 才觸=天然「能傷你」。TEST VALUE 待 wave QA 校抖動。
+- **★TASK_PRODUCE 納入**（follow-up，系統確認定居 resident 生產隊 `interaction:1065` 進 TASK_PRODUCE 非 MANUFACTURE）→ 藍圖核心「犁田遇劫匪放犁」case 接上。
+- **感知鐵律守**（北極星）：preempt 門檻只讀 threat_react（belief 表象+known_reputations+approach），**禁讀 tag**。反向守 3+③ case（弱/中立/帶刀商隊/逼近弱→續 task）由低 threat_react 自然滿足，非 tag 打折。
+- **融合驗雙關+③ ALL PASS**：該出現（忙碌/定居隊遇壓境→放 task 反應）+ 反向守（不抖動）+ resident guard（居民迎戰排除→給逃跑不卡死）。
+- **反龜縮 flee 0→12**（defensive threat 對忙碌目標顯化）。**seeded 48→52/9/1/381**（factions 8→9=defensive 反應活化世界；QA wave 判）。
+- **殘（watch）**：preempt→威脅退→release 回 idle 非續原 task→頻繁遭遇下潛在 churn（THREAT_CADENCE 1日緩解，實測 12 FLEE/1200t 無暴 churn）；PREEMPT_MARGIN=2.0 TEST。
+
 ### 憲法溶入 arc — wave1 序4 vendetta done（2026-07-05，merged 2506e6e）
 
 hand vendetta dispatch（`faction_ai:733-741` 直塞 TASK_ATTACK@PRIO_VENDETTA）撕除 → `feud_pull` term（已存在未掛）掛進 攻擊 option。**優先序→權重序**：血仇>致富攻擊=feud_pull weight（`strongest_feud×(0.3+好戰×0.5)`）讓攻擊贏 rank；威脅>血仇=PRIO_THREAT(70)>DISPATCH(50) + rank 內 survival util 碾壓。
