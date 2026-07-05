@@ -23,6 +23,11 @@ const REGISTRY: Dictionary = {
 	"買糧":   [["buyfood_drive", "buyfood"]],
 	# means-end：致富+餘糧 → 蓋倉囤貨低買高賣（複用 TASK_TRADE 到市集 hub，非新機制）。
 	"囤貨":   [["intent_fit", "intent_fit"]],
+	# 融合 threat（序1 溶入）：4 反應 repertoire 中的 3（FLEE=既有 survival option）。
+	# threat-gated（applicable 讀 threat_react≥threshold），人格秤 argmax（撕除舊手算）。
+	"備戰":   [["prepare_drive", "prepare"]],
+	"迎戰":   [["defend_drive", "defend"]],
+	"求和":   [["pacify_drive", "pacify"]],
 }
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
@@ -99,6 +104,14 @@ static func applicable(ctx: DecisionContext) -> Array:
 				# 駐村隊不濾（同「貿易」註：餓村掛 TRADE 姿態=向來客買糧）。
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market and ctx.has_specie:
 					out.append(opt)
+			# ── 融合 threat：threat-gated（威脅過門檻才候選）──
+			"備戰":
+				if ctx.threat_react >= ctx.threat_threshold: out.append(opt)
+			"迎戰":
+				# 居民團不可迎戰（鏡射舊 _dispatch_threat_response is_resident 排除）。
+				if ctx.threat_react >= ctx.threat_threshold and not ctx.is_resident: out.append(opt)
+			"求和":
+				if ctx.threat_react >= ctx.threat_threshold: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -167,4 +180,18 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 				hub = FactionAISystem.new()._merchant_trade_target(state, team)
 			if hub == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			return {"task": TeamData.TASK_TRADE, "target": hub}
+		# ── 融合 threat：3 反應映射（threat_pos/id 需 ctx → 局部 gather，避改 to_task 簽名 17 caller）──
+		"備戰":
+			# 備戰=原地整軍，無 target。
+			return {"task": TeamData.TASK_PREPARE, "target": Vector2i(-1, -1)}
+		"迎戰":
+			var _dc: DecisionContext = DecisionContext.gather(state, team)
+			if _dc.threat_id == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_DEFEND, "target": _dc.threat_pos,
+				"prosperity_target": _dc.threat_id}
+		"求和":
+			var _pc: DecisionContext = DecisionContext.gather(state, team)
+			if _pc.threat_id == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_DIPLOMACY, "target": _pc.threat_pos,
+				"order_target": _pc.threat_id, "order_task": TeamData.TASK_TRIBUTE_OFFER}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

@@ -230,10 +230,8 @@ func _initialize() -> void:
 	_test_task_defend_prepare_const()
 	_test_evaluate_threat_finds_hostile()
 	_test_evaluate_threat_cadence()
-	_test_dispatch_flee_high_survival()
-	_test_dispatch_defend_high_martial_non_resident()
-	_test_dispatch_prepare_resident()
-	_test_dispatch_tribute_high_business()
+	# 序1 threat 溶入：4 反應 repertoire 驗移至 threat_dissolution_check.gd（rank_threat 原型表）。
+	# 舊 _dispatch_flee/defend/prepare/tribute（直呼已刪的 _dispatch_threat_response）退役。
 	_test_resident_lock_prepare_allowed()
 	_test_find_trade_partner_outpost_only()
 	_test_trade_timeout()
@@ -10461,55 +10459,9 @@ func _test_evaluate_threat_cadence() -> void:
 	assert(team.threat_eval_next_tick == 480, "240 應評，next=480，實際=%d" % team.threat_eval_next_tick)
 	print("Engagement Task4b OK")
 
-func _eng_dispatch_setup(vals: Dictionary, resident: bool) -> Array:
-	var state := WorldState.new(); state.world = WorldData.new()
-	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
-	_seed_pop(team, 5)
-	if resident:
-		var tile := HexTileData.new()
-		tile.tile_pos = Vector2i(0, 0); tile.outpost_level = 1
-		tile.outpost_type = "civilian"; tile.outpost_owner = 0
-		state.world.tiles[0] = tile
-		team.tags = [TeamData.TAG_PRODUCE]
-	var leader := PersonData.new(); leader.id = 1; leader.team_id = 0; leader.values = vals
-	state.persons[1] = leader; team.leader_id = 1
-	state.teams[0] = team
-	var other := TeamData.new(); other.team_id = 1; other.tile_pos = Vector2i(1, 0)
-	state.teams[1] = other
-	return [state, team]
-
-func _test_dispatch_flee_high_survival() -> void:
-	print("--- Engagement Task5a: 求生欲高 → 逃跑 ---")
-	var r := _eng_dispatch_setup({ "求生欲": 0.9, "好戰": 0.1, "慎重": 0.1,
-		"貪婪": 0.1, "信義": 0.1 }, false)
-	FactionAISystem.new()._dispatch_threat_response(r[0], r[1], 1, 0.6)
-	assert(r[1].current_task == TeamData.TASK_FLEE, "應逃跑，實際=%s" % r[1].current_task)
-	print("Engagement Task5a OK")
-
-func _test_dispatch_defend_high_martial_non_resident() -> void:
-	print("--- Engagement Task5b: 好戰高+非居民 → 迎戰 ---")
-	var r := _eng_dispatch_setup({ "求生欲": 0.2, "好戰": 0.9, "慎重": 0.2,
-		"貪婪": 0.1, "信義": 0.1 }, false)
-	FactionAISystem.new()._dispatch_threat_response(r[0], r[1], 1, 0.3)
-	assert(r[1].current_task == TeamData.TASK_DEFEND, "應迎戰，實際=%s" % r[1].current_task)
-	print("Engagement Task5b OK")
-
-func _test_dispatch_prepare_resident() -> void:
-	print("--- Engagement Task5c: 好戰高+居民 → 備戰（不可迎戰）---")
-	var r := _eng_dispatch_setup({ "求生欲": 0.2, "好戰": 0.9, "慎重": 0.2,
-		"貪婪": 0.1, "信義": 0.1 }, true)
-	FactionAISystem.new()._dispatch_threat_response(r[0], r[1], 1, 0.3)
-	assert(r[1].current_task == TeamData.TASK_PREPARE, "居民應備戰，實際=%s" % r[1].current_task)
-	print("Engagement Task5c OK")
-
-func _test_dispatch_tribute_high_business() -> void:
-	print("--- Engagement Task5d: 貪婪+信義高 → 求和外交 ---")
-	var r := _eng_dispatch_setup({ "求生欲": 0.2, "好戰": 0.1, "慎重": 0.1,
-		"貪婪": 0.9, "信義": 0.7 }, false)
-	FactionAISystem.new()._dispatch_threat_response(r[0], r[1], 1, 0.3)
-	assert(r[1].current_task == TeamData.TASK_DIPLOMACY, "應外交，實際=%s" % r[1].current_task)
-	assert(r[1].order_task == "tribute_offer", "應 tribute_offer，實際=%s" % r[1].order_task)
-	print("Engagement Task5d OK")
+# 序1 threat 溶入：_eng_dispatch_setup + 4 _test_dispatch_* 已退役（直呼已刪的 _dispatch_threat_response）。
+# 4 反應 repertoire 驗（求生欲→逃跑 / 好戰非居民→迎戰 / 好戰居民→備戰 / 貪婪信義→求和）
+# 移至 threat_dissolution_check.gd（rank_threat 原型表，設計正確性閘）。
 
 func _test_resident_lock_prepare_allowed() -> void:
 	print("--- Engagement Task6: 居民 task=備戰 不被鎖 ---")

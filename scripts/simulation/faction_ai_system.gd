@@ -373,22 +373,29 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		return
 	# 不打斷其他進行中 task（只有 idle 才主動評威脅）
 	if team.current_task != TeamData.TASK_IDLE: return
-	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
-	var caution: float = float(leader.values.get("慎重", 0.5))
-	var threshold: float = ThreatAssessment.THREAT_BASE_THRESHOLD + caution * 0.3
-	var best_threat: float = 0.0
-	var best_id: int = -1
-	for tid in state.team_discovered.get(team.team_id, []):
-		if tid == team.team_id: continue
-		var other: TeamData = state.teams.get(tid)
-		if other == null: continue
-		var t: float = ThreatAssessment.score(state, team, other)
-		if t > best_threat:
-			best_threat = t
-			best_id = tid
-	if best_threat < threshold: return
-	_dispatch_threat_response(state, team, best_id, best_threat)
+	# unified 隊（商隊/生產）threat 反應由 _decide_unified 主 rank 處理（鏡射 survival unified 排除，
+	# 見 _evaluate_survival:3023）→ 不雙觸發。release 檢查（上方 DEFEND/PREPARE/FLEE）仍對其成立。
+	if uses_unified(team): return
+	# 手算 argmax 撕除 → 引擎 rank_threat 秤（融合非刪）。threat_react/threshold 由 ctx 鏡射舊掃描。
+	var ctx: DecisionContext = DecisionContext.gather(state, team)
+	if ctx.threat_react < ctx.threat_threshold: return
+	for opt in DecisionEngine.rank_threat(ctx):
+		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		var tk = td.get("task", TeamData.TASK_IDLE)
+		if tk == TeamData.TASK_IDLE: continue
+		var tgt: Vector2i = td.get("target", Vector2i(-1, -1))
+		if not TaskArbiter.try_set(state, team, tk, tgt, TaskArbiter.PRIO_THREAT, "threat"): continue
+		_wire_threat_task(team, td)
+		Probe.bump("threat.dispatch." + opt)   # 融合驗率表（該出現還出現）
+		print("[ThreatResponse] Team%d → %s (threat=Team%d, u-rank)" % [team.team_id, opt, ctx.threat_id])
+		break
+
+# 融合 threat：threat option 的 aux target 接線（DEFEND=prosperity_target / 求和=order_target+order_task）。
+# _evaluate_threat（non-unified）與 _decide_unified（unified）共用 → 兩路 threat 反應接線一致（DRY）。
+func _wire_threat_task(team: TeamData, td: Dictionary) -> void:
+	if td.has("prosperity_target"): team.prosperity_target_id = int(td["prosperity_target"])
+	if td.has("order_target"): team.order_target_id = int(td["order_target"])
+	if td.has("order_task"): team.order_task = td["order_task"]
 
 func _has_active_threat(state: WorldState, team: TeamData) -> bool:
 	for tid in state.team_discovered.get(team.team_id, []):
@@ -399,62 +406,9 @@ func _has_active_threat(state: WorldState, team: TeamData) -> bool:
 			return true
 	return false
 
-# 依 leader 性格評 4 反應（逃跑/備戰/求和/迎戰），居民團不可迎戰。
-func _dispatch_threat_response(state: WorldState, team: TeamData,
-		threat_id: int, threat_score: float) -> void:
-	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
-	var survival: float = float(leader.values.get("求生欲", 0.5))
-	var martial: float = float(leader.values.get("好戰", 0.5))
-	var caution: float = float(leader.values.get("慎重", 0.5))
-	var greed: float = float(leader.values.get("貪婪", 0.5))
-	var honor: float = float(leader.values.get("信義", 0.5))
-	var is_resident: bool = _is_resident_team(state, team)
-	var scores: Dictionary = {
-		TeamData.TASK_FLEE: survival * 0.8 + (threat_score - 0.5) * 0.3,
-		TeamData.TASK_PREPARE: caution * 0.6 + martial * 0.3,
-		"求和": greed * 0.5 + honor * 0.3 - martial * 0.3,
-	}
-	if not is_resident:
-		scores[TeamData.TASK_DEFEND] = martial * 0.7 + (1.0 - threat_score) * 0.2
-	var best: String = ""
-	var best_score: float = -INF
-	for action in scores:
-		if scores[action] > best_score:
-			best_score = scores[action]
-			best = action
-	var other: TeamData = state.teams.get(threat_id)
-	if other == null: return
-	match best:
-		TeamData.TASK_FLEE:
-			if not TaskArbiter.try_set(state, team, TeamData.TASK_FLEE,
-					_flee_target(state, team, other), TaskArbiter.PRIO_THREAT, "threat"):
-				return
-		TeamData.TASK_DEFEND:
-			if not TaskArbiter.try_set(state, team, TeamData.TASK_DEFEND,
-					other.tile_pos, TaskArbiter.PRIO_THREAT, "threat"):
-				return
-			team.prosperity_target_id = threat_id
-		TeamData.TASK_PREPARE:
-			if not TaskArbiter.try_set(state, team, TeamData.TASK_PREPARE,
-					Vector2i(-1, -1), TaskArbiter.PRIO_THREAT, "threat"):
-				return
-		"求和":
-			if not TaskArbiter.try_set(state, team, TeamData.TASK_DIPLOMACY,
-					other.tile_pos, TaskArbiter.PRIO_THREAT, "threat"):
-				return
-			team.order_target_id = threat_id
-			team.order_task = TeamData.TASK_TRIBUTE_OFFER
-	print("[ThreatResponse] Team%d → %s (threat=Team%d, score=%.2f)" % [
-		team.team_id, best, threat_id, best_score])
-
-func _flee_target(state: WorldState, team: TeamData, threat: TeamData) -> Vector2i:
-	# 朝反方向走 3 hex
-	var dir: Vector2i = team.tile_pos - threat.tile_pos
-	var pos: Vector2i = team.tile_pos + Vector2i(sign(dir.x), sign(dir.y)) * 3
-	if state.world.tiles.has(pos.x * 1000 + pos.y):
-		return pos
-	return team.tile_pos
+# _dispatch_threat_response / _flee_target 已溶入引擎（序1）：
+#   4 反應（逃跑/備戰/迎戰/求和）→ REGISTRY option（survival/備戰/迎戰/求和），DecisionEngine.rank_threat 秤。
+#   FLEE target 由 mover 算（survival to_task target=-1，同 unified survival 路徑），故 _flee_target 一併刪。
 
 func _is_prosperity_candidate(_state: WorldState, team: TeamData) -> bool:
 	# 打草穀（斷①A）：faction 成員也過候選（部將個體 raid=五代常態）。子隊(parent≠-1)仍擋——
@@ -475,6 +429,11 @@ func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
 	return int(arr[clampi(tile.outpost_level - 1, 0, 2)])
 
 func _is_resident_team(state: WorldState, team: TeamData) -> bool:
+	return FactionAISystem.is_resident_static(state, team)
+
+# static 版供 DecisionContext.gather 呼叫（避免 ctx 依賴 FactionAISystem 實例）。
+# 本體 = 舊 _is_resident_team（居民 = 生產隊 + 站自家/同 faction outpost）。
+static func is_resident_static(state: WorldState, team: TeamData) -> bool:
 	if not team.tags.has(TeamData.TAG_PRODUCE):
 		return false
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
@@ -1566,6 +1525,8 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			state.set_combat_target(team, int(td["combat_target"]))
 		if td.has("social_target"):
 			state.set_social_target(team, int(td["social_target"]))
+		# 融合 threat：unified 隊選 迎戰/求和 時亦接 aux target（prosperity/order），與 non-unified 路徑一致。
+		_wire_threat_task(team, td)
 		return
 	# 全不可派 → 保持現行(no-op)
 	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner
