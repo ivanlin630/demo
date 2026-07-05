@@ -1459,6 +1459,15 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	# 征服名實探針（純觀測）：solo_intent=征服 的隊在此實際 winner 分類（想征服 vs 做掠奪）。
 	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
 	if _conq: Probe.bump("conq.intent")
+	# 序6 probe 遷移：faction 成員征服 dispatch（舊 hand-cascade conq.member_atk_* 已刪 → 引擎路重掛）。
+	# eligible = 成員 + faction 攻擊令 intent=征服 + 攻擊 option 在 ranked（可攻路徑存在，供 sufficiency_bed 征服「想=做」）。
+	var _fac = state.factions.get(team.faction_id) if team.faction_id != -1 else null
+	var _mconq: bool = Probe.enabled and _fac != null \
+		and String((_fac.goal_drivers.get("攻擊", {}) as Dictionary).get("intent", "")) == "征服"
+	if _mconq:
+		for _e in ranked:
+			if _e["opt"] == "攻擊":
+				Probe.bump("conq.member_atk_eligible"); break
 	for e in ranked:
 		var opt: String = e["opt"]
 		# means-end 統一攻擊：征服 intent 驅動的攻擊 → dispatch-time scout-verify scaffolding
@@ -1490,6 +1499,9 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
 		elif opt == "佔村": Probe.bump("occupy.dispatch")
+		# 序6 probe 遷移：成員征服攻擊實派 + 徵收實派（舊 hand-cascade 探針已刪 → 引擎路重掛，供驗魂）。
+		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
+		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
