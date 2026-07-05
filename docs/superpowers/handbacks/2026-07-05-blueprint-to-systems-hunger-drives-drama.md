@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ④承載力裁——世界一直在餓(60%負流/20%斷糧,速度無關)但別灌糧澆熄引擎;補量「20%斷糧隊在幹嘛」(搶/投靠=好的餓保留 vs 靜默死=修行動線);A2拆A2a(承載力待此刀)+A2b(×5→1+補給,B後);行軍餓等B後量準
 ---
 

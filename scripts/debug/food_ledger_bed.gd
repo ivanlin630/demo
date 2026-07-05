@@ -45,6 +45,10 @@ func _run_one(world_seed: int, total_ticks: int) -> void:
 	var march_dist: Array = []       # 行軍隊 旅途 hex 距（pos→move_target）
 	var march_carry_days: Array = [] # 行軍隊 carry 食可撐幾天（food / (pop×0.8)）
 	var months_sampled: int = 0
+	# ★斷糧隊行為（藍圖 hunger-drives-drama：好的餓=匱乏驅動行動 vs 壞的餓=靜默死）
+	var starving_task: Dictionary = {}   # current_task → count（famine_days>0 隊）
+	var starving_struggle: int = 0       # 搏命（搶/投靠/覓食/遷徙/逃/交易/回家）
+	var starving_silent: int = 0         # 靜默（idle/治理/生產/紮營…原地不解餓）
 
 	for tick in range(total_ticks):
 		runner.advance_tick(state, no_player)
@@ -65,11 +69,24 @@ func _run_one(world_seed: int, total_ticks: int) -> void:
 				else:
 					settled_net.append(t.food_flow_avg)
 					settled_famine.append(t.famine_days)
+				# ★斷糧隊在幹嘛（含 settled+moving，famine_days>0）
+				if t.famine_days > 0.0:
+					var tk: String = t.current_task
+					starving_task[tk] = int(starving_task.get(tk, 0)) + 1
+					if tk in [TeamData.TASK_LOOT, TeamData.TASK_ATTACK, TeamData.TASK_BEG,
+							TeamData.TASK_JOIN, TeamData.TASK_FORAGE, TeamData.TASK_MIGRATE,
+							TeamData.TASK_RETURN_HOME, TeamData.TASK_FLEE, TeamData.TASK_TRADE,
+							TeamData.TASK_SCOUT]:
+						starving_struggle += 1
+					else:
+						starving_silent += 1
 		if state.teams.is_empty(): break
 
-	_report(world_seed, months_sampled, settled_net, settled_famine, march_dist, march_carry_days)
+	_report(world_seed, months_sampled, settled_net, settled_famine, march_dist, march_carry_days,
+		starving_task, starving_struggle, starving_silent)
 
-func _report(s: int, mo: int, s_net: Array, s_fam: Array, m_dist: Array, m_carry: Array) -> void:
+func _report(s: int, mo: int, s_net: Array, s_fam: Array, m_dist: Array, m_carry: Array,
+		starving_task: Dictionary, struggle: int, silent: int) -> void:
 	print("\n────────── [食物收支] seed=%d（%d 月取樣）──────────" % [s, mo])
 	# ① 駐紮隊 承載力
 	if s_net.is_empty():
@@ -95,6 +112,21 @@ func _report(s: int, mo: int, s_net: Array, s_fam: Array, m_dist: Array, m_carry
 			m_dist.size(), _median(m_dist), _median(m_carry), 100.0 * over_carry / m_dist.size()])
 		print("   → ×1 每格糧耗 5× ×5;乾糧 PROVISION_DAYS=10=10格;>10格founding/trade斷糧（=A2沿途補給對象）")
 	print("   ★caveat：A1=×5 下 far 移速稀釋(B未修)→行軍樣本可能偏少/偏近;B merge 後重量更準。")
+	# ★斷糧隊在幹嘛（好的餓 vs 壞的餓）
+	var tot: int = struggle + silent
+	if tot == 0:
+		print("③ 斷糧隊行為：無斷糧隊取樣")
+	else:
+		print("③ 斷糧隊在幹嘛（famine>0,%d 樣本）：搏命=%.0f%%(搶/投靠/覓食/遷徙/逃/交易/偵查) 靜默=%.0f%%(idle/治理/生產/紮營…原地)" % [
+			tot, 100.0 * struggle / tot, 100.0 * silent / tot])
+		# task 明細（降序）
+		var pairs: Array = []
+		for k in starving_task: pairs.append([String(k), int(starving_task[k])])
+		pairs.sort_custom(func(a, b): return a[1] > b[1])
+		var line: String = "   明細："
+		for p in pairs: line += "%s=%d " % [p[0], p[1]]
+		print(line)
+		print("   → 多數搏命=好的餓(稀缺引擎在跑,A2a只 recalibrate ×1不升糧) / 多數靜默=壞的餓(餓→行動 trigger 斷,修 trigger 非灌糧)")
 
 func _parse_seeds() -> Array:
 	var raw: String = OS.get_environment("FL_SEEDS") if OS.has_environment("FL_SEEDS") else "1337,2674"
