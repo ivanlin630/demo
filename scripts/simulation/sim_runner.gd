@@ -149,11 +149,9 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	var time_speed_mult: float = _day_night_system.get_speed_mult(state)
 	var time_vision_mult: float = _day_night_system.get_vision_mult(state)
 
-	var near_teams := _get_near_teams(state, player_pos)
-	var far_teams := _get_far_teams(state, player_pos)
-
 	# 近區：每小時執行
 	if state.world.current_tick % NEAR_CADENCE == 0:
+		var near_teams := _get_near_teams(state, player_pos)
 		# forced_event 超時自動拒絕（上一 hour-tick 寫入，本 tick 未回應即清除）
 		# H: choose_heir 不超時（advance_tick 開頭已凍結，此處為防禦）
 		if not state.player_forced_event.is_empty() \
@@ -235,6 +233,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
+		var far_teams := _get_far_teams(state, player_pos)
 		_step1b_update_vision(state, far_teams, time_vision_mult)
 		_step1c_update_equipment(state, far_teams)
 		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult, FAR_ZONE_INTERVAL)
