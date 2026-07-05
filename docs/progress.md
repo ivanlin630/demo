@@ -378,6 +378,14 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - 憲法閘：`_dispatch_threat_response` 指紋 removed=arc 進度；dispatch 移入保留的 `_evaluate_threat`（sites=32 不變，PASS）。
 - **殘（watch，known_issues）**：unified 隊 迎戰/求和 下游 resolver（DEFEND prosperity_target 消費 / tribute_offer 外交鏈）未端到端驗；survival option 雙語意（主 rank reputation-filtered soft / rank_threat raw hard，刻意分離已註釋）。
 
+### 憲法溶入 arc — wave1 序2 solo done（2026-07-05，merged f7ce320）
+
+`_evaluate_solo` 非-unified 手算 argmax 撕除 → 引擎 `rank_scored`（鏡射 `_decide_unified`）；去 `_tag_weight` hard-gate（tag 不硬鎖）；attack/loot **capability-grounded**（藍圖 tag-soft-ruling）。
+- **capability-grounding**：`ctx.self_armed_ratio = _calc_own_armed / pop`（equipped 戰力，storage 武器不算）；loot_drive/_intent_fit 攻擊 × `capability_factor = clampf(ratio/VIABLE_ARMED_RATIO[0.3])`；prey-weakness 改比 self **ARMED** 非 POP。→ 無牙商隊掠奪 util **0.000**（rank[0]=貿易，非劫匪化）；重甲商隊絕境可揮刀；軍隊 rank[0]=攻擊。**憲法**：戰力歸零=送死=世界事實（非 tag-label 禁攻）。
+- **融合驗雙關綠 + 反向**（`solo_dissolution_check.gd`）：repertoire 9 各達 + 反向 3（商隊≠劫匪/重甲可揮刀/軍隊≠雜貨商）+ unified 守恆 3。threat 融合驗仍綠（共用 eval 未破）、threat 率 18 守恆（loop3 未餓死，measure 證）。
+- **seeded 48/8/1/382 → 52/8/1/380**（QA wave 級判；factions/established 守恆、無滅團潮）。
+- **★框架債揭（重要，見 known_issues + [[project_framework_seams]]）**：`_tag_weight` 是 solo/prosperity **隱形去衝突閘**——舊靠 `=0` 讓 FORCE 隊 attack 歸零→留 idle→loop3 prosperity 接精算征服鏈。去它 + 引擎「建設」option 恆 applicable→solo 每 idle tick 必派→餓死 loop3-idle-gated 路（S3 scout 一度 DORMANT）。實作加 **yield 閘補**（FORCE 征服候選 cadence 到期 return 讓 loop3）=橋，真結構修在序6（loop3 dispatch subsystem 溶入）。軍隊攻擊 occupancy 0%→22.5%（QA 判過度侵略否）。獨立隊 ambition-diplomacy 具體行為流失（engine 外交需 faction_stakes；獨立隊走 _evaluate_independent_strategy 結盟/建國+threat 求和；藍圖判要否保）。
+
 ### 待開發（大功能）
 
 | 項目 | 狀態 | 說明 |
