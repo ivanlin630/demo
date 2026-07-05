@@ -16,6 +16,8 @@ scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy
 scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure
 # 序5 prosperity
 scripts/simulation/faction_ai_system.gd::_evaluate_prosperity_attack
+# 序5 prosperity（scout-verify scaffolding：cascade 溶解後保留的 means-end 機制 dispatch 落點）
+scripts/simulation/faction_ai_system.gd::_commit_conquest_attack
 # 序2 solo
 scripts/simulation/faction_ai_system.gd::_evaluate_solo
 # 序1 threat 溶入後 dispatch 落點（trigger/release scaffolding 保留=世界機制，argmax 已撕→引擎 rank_threat）

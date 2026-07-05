@@ -366,6 +366,49 @@ func _refresh_attack_pursuit(state: WorldState, team: TeamData) -> void:
 	var predicted: Vector2i = PathSystem.predict_intercept(state, team, prey)
 	team.move_target = predicted if predicted != prey.tile_pos else last_pos
 
+# ──────── 征服攻擊 dispatch-time scout-verify scaffolding（序5 溶入）────────
+# cascade 決策已溶進引擎 攻擊 option（intent_fit 征服 × readiness/富 prey，見 terms/ctx）；
+# 此 helper = 保留的 means-end 機制（世界規則非判斷器，合憲法「高風險行動前降不確定」如 threat trigger）。
+# engine rank 出 攻擊(征服) → dispatch 前經此：對 prey 情報不確定且 leader 慎重 → 派斥候查證（延後攻擊，
+# 純觀察不設 combat_target）；莽者(慎重低)→confident_enough 恆真→照衝→假情報誘殺(S4)保。confident → TASK_ATTACK。
+# 回 true=已 dispatch（scout 或 attack），false=prey 無效/leader 缺/未派（呼叫端試次佳）。
+func _commit_conquest_attack(state: WorldState, team: TeamData, prey_id: int) -> bool:
+	if prey_id == -1 or not state.teams.has(prey_id): return false
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return false
+	var _caution: float = float(leader.values.get("慎重", 0.5))
+	# G3d-1/2 風險 gate：不確定 + 慎重 → 派斥候移向 prey best_estimate 位 → 親見壓謊 → 下次收斂。
+	if not BeliefSystem.confident_enough(state, team.team_id, prey_id, _caution):
+		var prey_t: TeamData = state.teams.get(prey_id)
+		var scout_pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, prey_id).get("tile_pos", prey_t.tile_pos) if prey_t else team.tile_pos
+		if team.current_task == TeamData.TASK_SCOUT and team.prosperity_target_id == prey_id:
+			team.move_target = scout_pos   # 追蹤刷新：prey 移動 → 朝最新 best_estimate（不重派/不 spam log）
+			return true
+		if TaskArbiter.try_set(state, team, TeamData.TASK_SCOUT, scout_pos, TaskArbiter.PRIO_DISPATCH, "scout"):
+			team.prosperity_target_id = prey_id   # try_set 已設 move_target=scout_pos
+			print("[Scout] team=%d → verify prey=%d" % [team.team_id, prey_id])
+			Probe.bump("g3.scout_dispatch")
+			return true
+		return false
+	# confident → 攻擊。若仍掛 scout（同 PRIO_DISPATCH 擋不住自身）→ 先 release 換手。
+	# combat_target 不預設：移動凍結 + interaction 早退會擋交戰；由 interaction_system 到達 start_combat 設。
+	var _was_scout: bool = (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout")
+	if _is_stuck(team) or _was_scout:
+		TaskArbiter.release(team)
+	if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
+			state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "prosperity"):
+		team.prosperity_target_id = prey_id
+		if _was_scout: Probe.bump("g3.scout_converge")
+		Probe.bump("conq.prosperity_reached")   # 征服鏈起點（prosperity-attack→失能-capture→吸收）走到
+		if Probe.enabled:
+			var _bel_own: Dictionary = BeliefSystem.best_estimate(state, team.team_id, prey_id)
+			if _bel_own.has("faction_id") and int(_bel_own.get("faction_id", -1)) != -1:
+				Probe.bump("conq.indep_atk_believed_owned" if team.faction_id == -1 \
+					else "conq.member_atk_believed_owned")
+		print("[ProsperityAttack] attacker=Team%d prey=Team%d" % [team.team_id, prey_id])
+		return true
+	return false
+
 # ──────── D: 被動威脅反應 ────────
 
 # 威脅評估（cadence）：找視野內最高 threat，超門檻 → dispatch 反應。
