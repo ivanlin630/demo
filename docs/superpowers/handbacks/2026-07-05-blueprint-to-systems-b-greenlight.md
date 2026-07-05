@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: A1收下(讚雙向自檢);B放行spawn(far elapsed=疏非慢非笨,附:B改seeded=預期,merge後重立baseline);B後QA重跑充足性驗物流三病脫0(R7全環對照);④食物收支bed一起開(B平行不撞);A2等④數據
 ---
 
