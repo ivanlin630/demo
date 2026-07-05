@@ -400,6 +400,21 @@ func _wire_threat_task(team: TeamData, td: Dictionary) -> void:
 	if td.has("order_target"): team.order_target_id = int(td["order_target"])
 	if td.has("order_task"): team.order_task = td["order_task"]
 
+# 序4 vendetta 溶入：引擎純血仇攻擊 dispatch → bump g2.vendetta_trigger（framework S2b 驗魂 + 融合驗率表）。
+# 純血仇 = feud 過門檻 且 非 faction directive 攻擊 且 非征服 intent（後二者有各自 driver，非私仇脫軌）。
+# 於 _evaluate_solo/_decide_unified 派「攻擊」成功後呼。
+func _probe_vendetta_dispatch(state: WorldState, team: TeamData) -> void:
+	var ldr: PersonData = state.persons.get(team.leader_id)
+	if ldr == null: return
+	var fe: Dictionary = RelationGraph.strongest(ldr.relation_edges, "feud")
+	var feud: float = float(fe.get("intensity", 0.0)) if not fe.is_empty() else 0.0
+	if feud < DecisionOptions.FEUD_ATTACK_MIN: return
+	if team.faction_id != -1:
+		var f = state.factions.get(team.faction_id)
+		if f != null and "攻擊" in f.goals: return   # faction directive 驅（非私仇）
+	if _solo_type(team) == "征服": return              # 征服 intent 驅（非私仇）
+	Probe.bump("g2.vendetta_trigger")
+
 func _has_active_threat(state: WorldState, team: TeamData) -> bool:
 	for tid in state.team_discovered.get(team.team_id, []):
 		var other: TeamData = state.teams.get(tid)
@@ -728,18 +743,11 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# D: 被動威脅評估（cadence 內部控管）
 		_evaluate_threat(state, team)
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.threat", _t3)
-		# G2d：私人脫軌（強血仇+衝動 leader 拉隊打仇人；生存/威脅擋得住，prosperity 擋不住）
-		# 置於 _evaluate_threat 後：threat 先在 idle 設 DEFEND/FLEE@70，vendetta@55 搶不動 → 威脅優先
-		var _vleader: PersonData = state.persons.get(team.leader_id)
-		if _vleader != null:
-			var _vfoe: int = NpcAiSystem.new().vendetta_target(state, _vleader)
-			if _vfoe != -1 and state.teams.has(_vfoe):
-				if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
-						state.teams[_vfoe].tile_pos, TaskArbiter.PRIO_VENDETTA, "vendetta"):
-					team.prosperity_target_id = _vfoe   # 追擊刷新復用
-					Probe.bump("g2.vendetta_trigger")
-					print("[Vendetta] Team%d leader 脫軌攻擊仇人 Team%d" % [team.team_id, _vfoe])
-		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.vendetta", _t3)
+		# G2d：私人脫軌（血仇）已溶入引擎——hand dispatch 撕除（序4 vendetta 溶入）。
+			# feud_pull term 掛進 攻擊 option → 血仇成攻擊的 weight 驅力（衝動 leader 血仇高→攻擊贏 rank，
+			# 走 _evaluate_solo/_decide_unified 主 rank@PRIO_DISPATCH）。優先序保：威脅反應同在 rank 競秤
+			# （survival_pressure 碾壓 feud）+ loop3 PRIO_THREAT(70)>engine PRIO_DISPATCH(50)。
+			# g2.vendetta_trigger probe 移至引擎純血仇攻擊 dispatch（_probe_vendetta_dispatch）。
 		# W2: 貿易 task timeout 防 zombie（追不到 / 對方消失）。
 		# 起算讀 TaskArbiter 單源 task_start_tick（try_set 恆蓋章）——舊平行欄位 trade_task_start_tick
 		# 只有 member_trade/trade_net/舊 solo 三路寫，unified/ambient 派 TRADE 拿 stale 0 → 派出即被
@@ -1529,6 +1537,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			state.set_combat_target(team, int(td["combat_target"]))
 		if td.has("social_target"):
 			state.set_social_target(team, int(td["social_target"]))
+		if opt == "攻擊": _probe_vendetta_dispatch(state, team)   # 序4：純血仇攻擊驗魂
 		# 融合 threat：unified 隊選 迎戰/求和 時亦接 aux target（prosperity/order），與 non-unified 路徑一致。
 		_wire_threat_task(team, td)
 		return
@@ -1755,6 +1764,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		# 掠奪/佔村/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（鏡射 _decide_unified）
 		if td.has("combat_target"): state.set_combat_target(team, int(td["combat_target"]))
 		if td.has("social_target"): state.set_social_target(team, int(td["social_target"]))
+		if opt == "攻擊": _probe_vendetta_dispatch(state, team)   # 序4：純血仇攻擊驗魂
 		_wire_threat_task(team, td)   # 迎戰/求和 aux target（prosperity/order）
 		team.solo_task_last = td["task"]   # F-D4：task 承諾記此槽（solo_intent 保留戰略 intent）
 		team.current_option = opt          # 承諾慣性：引擎 COMMITMENT_BONUS 讀

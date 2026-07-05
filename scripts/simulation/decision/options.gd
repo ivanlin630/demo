@@ -17,7 +17,8 @@ const REGISTRY: Dictionary = {
 	"投靠":   [["join_drive", "join"]],
 	"紮營":   [["camp_drive", "camp"]],
 	"乞食":   [["beg_drive",  "beg"]],
-	"攻擊":   [["faction_duty", "faction_duty"], ["attack_drive", "attack"], ["intent_fit", "intent_fit"]],
+	# 序4 vendetta 溶入：feud_pull term 掛入 → 血仇成攻擊的一個 weight 驅力（衝動 leader 血仇高→攻擊贏 rank）。
+	"攻擊":   [["faction_duty", "faction_duty"], ["attack_drive", "attack"], ["intent_fit", "intent_fit"], ["feud_pull", "feud"]],
 	"徵收":   [["faction_duty", "faction_duty"], ["levy_drive", "levy"]],
 	"外交":   [["faction_duty", "faction_duty"], ["diplo_drive", "diplo"]],
 	"買糧":   [["buyfood_drive", "buyfood"]],
@@ -35,6 +36,9 @@ const REGISTRY: Dictionary = {
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
 const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "投靠", "紮營", "乞食", "買糧"]
+
+# 序4 vendetta 溶入：血仇開打門檻（防輕微不快即戰）。TEST VALUE。
+const FEUD_ATTACK_MIN := 0.5
 
 static func applicable(ctx: DecisionContext) -> Array:
 	var out: Array = []
@@ -87,8 +91,10 @@ static func applicable(ctx: DecisionContext) -> Array:
 			"攻擊":
 				# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
 				# means-end：征服 intent 隊亦開攻擊（非只 faction_stakes），target=intent_target/weak_prey。
+				# 序4 血仇路：強血仇(≥FEUD_ATTACK_MIN)+可見仇敵 → 攻擊 applicable（衝動 leader 拉隊打仇人）。
 				if ("攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1) \
-						or (ctx.intent == "征服" and ctx.intent_target != -1):
+						or (ctx.intent == "征服" and ctx.intent_target != -1) \
+						or (ctx.strongest_feud >= FEUD_ATTACK_MIN and ctx.feud_target_id != -1):
 					out.append(opt)
 			"囤貨":
 				# means-end：致富 intent + 有餘糧 + 有貿易機會(arb/市集) → 蓋倉囤貨候選。
@@ -158,9 +164,14 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			# 社交意圖：設 social_target 非 combat_target（resolver 讀 social_target）
 			return {"task": TeamData.TASK_BEG, "target": state.teams[aid].tile_pos, "social_target": aid}
 		"攻擊":
-			# 混合協調：對派系指定的最近獨立隊發動攻擊（combat_target 接線複用 _decide_unified:864）。
-			var atid: int = FactionAISystem.new()._nearest_independent(state, team)
-			if atid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			# 多源攻擊 target（優先序 faction directive > 征服 intent > 血仇 fallback）。序4 vendetta 溶入：
+			# 純血仇驅動時 target=仇敵（feud_target_id），非粗取 _nearest_independent。ctx gather 取三源
+			# （鏡射 迎戰/求和 局部 gather 法，避改 to_task 簽名 17 caller）。
+			var _ac: DecisionContext = DecisionContext.gather(state, team)
+			var atid: int = _ac.faction_attack_target if _ac.faction_attack_target != -1 \
+				else (_ac.intent_target if _ac.intent_target != -1 else _ac.feud_target_id)
+			if atid == -1 or not state.teams.has(atid):
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			return {"task": TeamData.TASK_ATTACK, "target": state.teams[atid].tile_pos, "combat_target": atid}
 		"徵收":
 			# 派系指定最富 member 徵貢（非戰，不設 combat_target）。排除自身（_richest_member 未排）。
