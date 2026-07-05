@@ -1,6 +1,6 @@
 # Handback：wave1 序3 — rung_task 查表溶入引擎
 
-**狀態：** 全 Task done，全驗綠。**channel：** open（待系統/藍圖判 QA-級漂移 + 連動風險）。
+**狀態：** 全 Task done，全驗綠。**+ 序3 follow-up done（idle-filler 收窄，見文末）。channel：** open（待系統/藍圖判 QA-級漂移 + 連動風險 + follow-up 的 threat harness 改判）。
 
 ## 交付
 
@@ -59,3 +59,68 @@ post-fusion idle-filler dispatch：**建設=22 徵收=10 製造=9 逃跑(FLEE)=8
 
 - 序3 綠 → 序4 vendetta（`feud_pull` term 掛攻擊 option）。
 - 若系統判風險#1 收窄 idle-filler / 風險#2 建設 gate，屬**框架債結構修**，宜與序2 handback 風險#1(b) 併案（單寫者統一決策）。
+
+---
+
+# 序3 follow-up：idle-filler 收窄 rank_ambient（系統裁定風險#1 已修）
+
+**狀態：** done，全驗綠（commit `a18c2eb`）。系統裁定「風險#1(a) 收窄 idle-filler，只留 prosperity-class」→ 已實作。
+
+## 交付
+
+idle-filler（fai loop3）從走**全** `rank_scored_ctx` → 走 **`rank_ambient`**（限 `AMBIENT_OPTION_SET = [訓練,貿易,生產,建設,囤貨,駐守]`）。ambient 只填 idle，不二次猜 survival/threat（team 到此已過 loop3 survival(_evaluate_survival)/threat(_evaluate_threat)/prosperity 評估）。
+
+## 具體改動
+
+| 檔 | 改動 |
+|---|---|
+| `decision_engine.gd` | +`const AMBIENT_OPTION_SET` + `static func rank_ambient(ctx)`（鏡射 `rank_threat`：applicable ∩ set，util 秤降序，回**字串**陣列，無 survival 特例、無 commitment） |
+| `faction_ai_system.gd` | idle-filler：`rank_scored_ctx`→`rank_ambient`，迴圈吃字串（`rank_ambient` 回字串非 dict） |
+| `rung_dissolution_check.gd` | repertoire 1-4 改驗 `rank_ambient`；+ 斷言「survival/threat option 全不在 rank_ambient」+「FORCE-累積有兵→rank_ambient[0]==訓練」；check 5 讓位緊急仍驗**全** rank（loop2 unified 域）+ 加 ambient 隔離斷言 |
+| `threat_dissolution_check.gd` | ★見下「連動風險/harness 改判」 |
+
+## 驗收結果（全綠）
+
+| 驗 | 結果 |
+|---|---|
+| rung 融合驗 | **ALL PASS**（含新 ambient 隔離斷言） |
+| threat 融合驗 | **ALL PASS**（★5b 改確定性 live-seam，見下） |
+| solo 融合驗 | ALL PASS |
+| framework_validation | **PASS=7 DORMANT=0** |
+| 憲法閘 | **PASS (sites=32, removed=0)** |
+| headless_test | DONE、`ambient ladder OK`；`[FAIL] 弱目標未加入攻擊 goal` = **HEAD 既有**（strategic `_update_goals`，非本 follow-up 域，soft print 非 hard assert） |
+
+## idle-filler dispatch 分佈（seed 1337 / 1200t，對照 pre-follow-up）
+
+| task | pre-follow-up | post-follow-up |
+|---|---|---|
+| 建設 | 22 | 23 |
+| 製造 | 9 | 9 |
+| **逃跑(FLEE)** | **86** | **0** |
+| **徵收** | **10** | **0** |
+
+- **FLEE 86→0**：主要 churn 除盡。survival ∉ AMBIENT_OPTION_SET → ambient FLEE **結構性不可能**（非靠 magnitude 壓，靠 set 排除）。
+- **徵收 10→0**：faction-duty option 亦不在 ambient set（idle-filler 不再代 faction 徵收，歸 faction strategic 域）。
+- **建設/製造 保**：真 prosperity-class ambient 未動。
+
+## seeded teams 漂移（3 seed，1200t）
+
+| seed | HEAD(序3) | follow-up |
+|---|---|---|
+| 1337 | 49 | 48 |
+| 42 | 55 | 56 |
+| 7 | 49 | 55 |
+
+pop/factions/established 全守恆（世界未崩）。teams 落 **48–56 帶**繞 52（emergent 噪聲）。**誠實限制**：seed 1337 未乾淨回 52（48），「收斂近 52」是帶內趨勢非逐 seed 命中；FLEE churn 除盡（本 follow-up 主目標）已達成。
+
+## ★連動風險 / harness 改判（呈報系統/藍圖裁定）
+
+1. **★threat 融合驗 5b 從「seeded 湧現硬斷」改「確定性 live-seam 硬斷」（改了序1 owned harness）**：
+   - **現象**：本 follow-up 後 `threat.dispatch.*`（_evaluate_threat，PRIO_THREAT 真威脅路徑）seeded 值 **3→0（全 seed）**。
+   - **根因**：非機制壞。HEAD 的 86 ambient-FLEE churn 是隊間威脅遭遇的**主要製造者**（隊亂逃→撞見彼此→threat_react 過門檻）。收窄後世界變靜→ non-unified idle 隊少真過門檻威脅→ 真威脅派發自然=0。`_evaluate_threat` **未改**且 loop3 仍先於 idle-filler → 真威脅仍會派。
+   - **改判**：5b 硬斷 `total>0` **耦合世界軌跡**（本 follow-up 正是弱化該軌跡）→ 我把硬斷改為**確定性注入**：構 non-unified idle 威脅隊 → 直呼 `_evaluate_threat` → 斷言實派 threat task + probe bump（`[live] _evaluate_threat 實派 逃跑 + probe bump(0→1) OK`）。seeded 值降為**資訊性趨勢**（保留印出，不硬斷）。
+   - **判點**：(a) 我把 harness 改**更強**（確定性 seam 測 vs 脆弱湧現），非弱化/gaming；threat 機制由 5a(rank_threat argmax)+Task7(unified 主 rank)+resident+新 live-seam 四路證。但**這動了序1 owned 檢查**，請系統裁定是否認可此改判，或要另立方案（如：5b 改計 unified threat 反應、或跨 seed 聚合閾）。(b) seeded 真威脅=0 是否本身訊號？我判是「靜世界=收窄副產物、非病」，但若藍圖要世界保持一定威脅張力（game-design 反龜縮 bar），此靜化需 QA wave 眼球判。
+
+2. **teams seed 1337 停 48 未回 52**：收窄除 FLEE churn 但未淨還原 teams 至 pre-序3 的 52。drift 殘留可能來自序3 rung dissolution 本體（非 follow-up）。QA wave 判 48–56 帶是否可接受 vs 需再收斂。
+
+3. **風險#2（建設恆 applicable）未動**：本 follow-up 只收窄 option **集合**，未加建設 context gate。建設仍 idle-filler 首選之一（23）。若系統要修風險#2，仍是獨立 gate（與序2 handback 風險#1(b) 併案）。
