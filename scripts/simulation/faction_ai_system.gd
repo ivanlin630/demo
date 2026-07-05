@@ -104,10 +104,12 @@ const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威
 # 天然實現「能傷你」語意：power_ratio 貢獻 (ratio-1)·0.5，須 ratio≳5 才把 react 推過此門檻（見 threat_assessment.gd:19）。
 const PREEMPT_MARGIN: float = 2.0
 const PREEMPTIBLE_TASKS: Array = [
-	TeamData.TASK_MANUFACTURE, TeamData.TASK_BUILD, TeamData.TASK_TRADE,
+	TeamData.TASK_PRODUCE, TeamData.TASK_MANUFACTURE, TeamData.TASK_BUILD, TeamData.TASK_TRADE,
 	TeamData.TASK_GOVERN, TeamData.TASK_TRAIN, TeamData.TASK_FORAGE,
 	TeamData.TASK_CAMP,
 ]   # 不含：ATTACK/LOOT(戰鬥)、FLEE/DEFEND/PREPARE/HOLD(已 threat)、REVOLT、JOIN/BEG(social)、survival。
+    # TASK_PRODUCE：定居 resident 生產隊常態 task（interaction:1065 transition 進），非緊急可打斷（見
+    # interruptible fai:2398）→ 藍圖「犁田遇劫匪放犁」核心 case 靠它接。
     # 註：無 TASK_MOVE 常數（移動走各 task 內 move_target）→ 不列（spec 誤列，實碼無此 task）。
 const TRADE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 6   # 貿易 task base timeout 6 日（防 zombie）
 # timeout 按距離估（invariants：timeout 別死常數——按距離/移速估合理往返時間）：
