@@ -67,6 +67,12 @@ var threat_id: int = -1
 var threat_pos: Vector2i = Vector2i(-1, -1)
 var threat_threshold: float = 0.0
 var is_resident: bool = false
+# 野心階梯（序3 rung_task 溶入）：archetype/rung 當 weight 驅動 option（非查表塞 task）。
+# ambient_train_drive = FORCE-archetype 累積/擴張階練兵 base（低 magnitude 讓位緊急決策）。
+var archetype: String = ""
+var rung: int = 0
+var has_trainable: bool = false
+var ambient_train_drive: float = 0.0
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -192,6 +198,13 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		elif c.has_weak_prey:
 			c.intent_target = _prey
 			c.intent_target_pos = c.weak_prey_pos
+	# 野心階梯（序3 rung_task 溶入）：archetype/rung 成 weight context；FORCE 累積/擴張階 → 練兵 base。
+	c.archetype = team.ambition_archetype
+	c.rung = team.ambition_rung
+	c.has_trainable = not team.anon_cohorts.is_empty()   # 有 anon 可練
+	if c.archetype == AmbitionLadder.ARCHETYPE_FORCE \
+			and team.ambition_rung in [AmbitionLadder.RUNG_ACCUMULATE, AmbitionLadder.RUNG_EXPAND]:
+		c.ambient_train_drive = 0.5   # TEST VALUE — 低 magnitude 讓位緊急決策
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
