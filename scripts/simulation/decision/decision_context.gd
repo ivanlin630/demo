@@ -14,6 +14,9 @@ var team_strength: float = 0.0
 var threat: float = 0.0
 var ambition_gap: int = 0
 var strongest_feud: float = 0.0
+# 序4 vendetta 溶入：血仇仇敵 team id（NpcAiSystem.vendetta_target 回值，鏡射舊 hand dispatch 掃描）。
+# 攻擊 applicable 血仇路 + to_task 血仇 target fallback 讀此。內含衝動 gate + 可見/存在守衛。
+var feud_target_id: int = -1
 var has_own_outpost: bool = false
 var is_merchant: bool = false
 var has_home_outpost: bool = false
@@ -92,6 +95,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if ldr != null:
 		fe = RelationGraph.strongest(ldr.relation_edges, "feud")
 	c.strongest_feud = float(fe.get("intensity", 0.0)) if not fe.is_empty() else 0.0
+	# 序4：仇敵 id（衝動 gate + 可見/存在守衛在 vendetta_target 內）。攻擊 applicable/to_task 血仇路用。
+	var _vfoe: int = NpcAiSystem.new().vendetta_target(state, ldr) if ldr != null else -1
+	c.feud_target_id = _vfoe if (_vfoe != -1 and state.teams.has(_vfoe)) else -1
 	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
