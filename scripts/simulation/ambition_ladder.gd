@@ -101,17 +101,5 @@ static func update(state: WorldState, team: TeamData) -> void:
 		print("[Ambition] Team%d rung %d→%d (%s cap=%d)" % [
 			team.team_id, old, team.ambition_rung, team.ambition_archetype, team.ambition_cap])
 
-# (archetype, rung) → ambient 常態 task。""=不指派(交 survival/prosperity/faction strategic)。TEST VALUE。
-static func rung_task(_state: WorldState, team: TeamData) -> String:
-	match team.ambition_rung:
-		RUNG_ACCUMULATE:
-			match team.ambition_archetype:
-				ARCHETYPE_FORCE:  return TeamData.TASK_TRAIN
-				ARCHETYPE_TRADE:  return TeamData.TASK_TRADE
-				ARCHETYPE_SETTLE: return TeamData.TASK_PRODUCE
-		RUNG_EXPAND:
-			match team.ambition_archetype:
-				ARCHETYPE_FORCE:  return ""                    # 交 _evaluate_prosperity_attack
-				ARCHETYPE_TRADE:  return TeamData.TASK_TRADE    # G1 未上線→近程 TRADE
-				ARCHETYPE_SETTLE: return TeamData.TASK_BUILD
-	return ""   # 生存/立國/稱霸 → 交 survival / faction strategic
+# 序3：rung_task (archetype,rung)→task 查表已溶入決策引擎（archetype/rung 當 weight context，
+# 訓練 option + train_drive term 驅動；idle-filler 走 DecisionEngine.rank_scored_ctx）。融合驗見 rung_dissolution_check.gd。
