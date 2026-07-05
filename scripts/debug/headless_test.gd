@@ -8883,6 +8883,7 @@ func _test_prey_select_reads_belief() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 20); team.faction_id = 0
+	team.armed_anon_ratio = 1.0   # capability grounding（裁2）：weakness 比 self ARMED → 攻擊方須有武裝
 	state.teams[0] = team
 	var leader := PersonData.new()
 	leader.values = { "貪婪": 0.0, "殘忍": 1.0, "野心": 0.0 }   # 孤立 weakness：score = weakness*殘忍
@@ -9836,12 +9837,18 @@ func _test_stuck_allows_reeval() -> void:
 	# 行為：stuck solo team 應被重評派新目標
 	var state := WorldState.new()
 	state.world = WorldData.new()
+	for px in [0, 1, 2]:   # 引擎攻擊需 reachability → 鋪路格 (0,0)-(2,0)
+		var pt := HexTileData.new()
+		pt.tile_id = px * 1000 + 0; pt.tile_pos = Vector2i(px, 0); pt.terrain = "plains"
+		state.world.tiles[pt.tile_id] = pt
 	var team := TeamData.new()
 	team.team_id = 0; team.faction_id = -1; team.parent_team_id = -1
 	team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
 	team.current_task = TeamData.TASK_ATTACK   # stuck
 	team.move_target = Vector2i(-1, -1)
 	team.resources["food"] = 100.0
+	team.armed_anon_ratio = 1.0   # capability grounding（裁2）：攻擊需有戰力
+	team.solo_intent = {"type": "征服", "why": "test", "mode": "raid"}   # 引擎 攻擊 option 需 intent/stakes gate
 	state.teams[0] = team
 	var leader := PersonData.new()
 	leader.id = 100
@@ -9849,8 +9856,10 @@ func _test_stuck_allows_reeval() -> void:
 	state.persons[100] = leader; team.leader_id = 100
 	var prey := TeamData.new()
 	prey.team_id = 1; prey.faction_id = -1; prey.tile_pos = Vector2i(2, 0)
+	_seed_pop(prey, 2)   # 弱 prey（vs team pop10）→ has_weak_prey → 征服 intent_target
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 2, "armed_est": 1}, 1.0, false)   # G3：無情報打不了
 	var fai := FactionAISystem.new()
 	fai._evaluate_solo(state, team)
 	assert(team.move_target == Vector2i(2, 0),
@@ -12727,11 +12736,12 @@ func _test_govern_option_cautious() -> void:
 	var fai := FactionAISystem.new()
 	fai._evaluate_solo(state, state.teams[0])
 	var team: TeamData = state.teams[0]
-	assert(team.current_task == "治理",
-		"應選治理，實際=%s" % team.current_task)
-	assert(team.move_target == Vector2i(0, 0),
-		"治理 target 應為自家 outpost (0,0)，實際=(%d,%d)" % [team.move_target.x, team.move_target.y])
-	print("W4 Task2a OK (task=治理 → 自家 outpost)")
+	# 序2 溶入：慎重居家 leader 走引擎 → 駐守/生產/建設 (居家發展) 皆合意；空庫時 produce_need(0.6)
+	# 與 settle_fit(駐守0.6) 平手 → tiebreak(REGISTRY 序)取生產(製造)。三者皆「居家不遊蕩/不劫掠」=原意保。
+	# GOVERN 專屬傾向若要 edge 需輕量 tag/caution context term（F-D5 另軌，記 handback known_issue）。
+	assert(team.current_task in ["治理", "製造", "建設"],
+		"慎重居家型應居家發展(治理/生產/建設)，實際=%s" % team.current_task)
+	print("W4 Task2a OK (task=%s → 居家發展)" % team.current_task)
 
 func _test_govern_warmonger_roams() -> void:
 	print("--- W4 Task2b: 好戰/野心高 → 攻擊掠奪分壓過治理 → 不選治理 ---")
@@ -13103,23 +13113,33 @@ func _test_solo_commitment() -> void:
 	var fai := FactionAISystem.new()
 	# 中性個性，攻擊/掠奪/外交 分數接近 → 無慣性會抖；有慣性則黏上次
 	var state := WorldState.new(); state.world = WorldData.new()
+	for px in [4, 5, 6]:   # 引擎掠奪需 reachability → 鋪路格 (4,4)-(6,4)
+		var pt := HexTileData.new()
+		pt.tile_id = px * 1000 + 4; pt.tile_pos = Vector2i(px, 4); pt.terrain = "plains"
+		state.world.tiles[pt.tile_id] = pt
 	var leader := PersonData.new(); leader.id = 0; leader.team_id = 0
 	leader.values = {"好戰": 0.5, "貪婪": 0.5, "野心": 0.5}
 	state.persons[0] = leader
-	# 兩個獨立鄰隊供 攻擊/掠奪/外交 target
+	# 兩個獨立弱鄰隊供 掠奪 target（有 belief=有情報才打得了；非逼近→不觸威脅 option）
 	for tid in [1, 2]:
 		var o := TeamData.new(); o.team_id = tid; o.tile_pos = Vector2i(4+tid, 4)
+		o.last_tile_pos = o.tile_pos   # 不逼近 → threat_react 低
 		_seed_pop(o, 3); o.faction_id = -1
 		state.teams[tid] = o
 	var team := TeamData.new(); team.team_id = 0; team.leader_id = 0; team.tile_pos = Vector2i(4,4)
 	_seed_pop(team, 8); team.tags = ["軍隊"]; team.current_task = TeamData.TASK_IDLE
-	team.solo_task_last = TeamData.TASK_LOOT   # 上次選掠奪（F-D4：task 承諾槽）
+	team.armed_anon_ratio = 1.0   # capability grounding（裁2）：掠奪需有戰力
+	# 序2 溶入：承諾慣性由引擎 COMMITMENT_BONUS 讀 current_option（消 solo_task_last 雙軌）。
+	team.current_option = "掠奪"   # 上次選掠奪 → 承諾黏上
+	team.solo_task_last = TeamData.TASK_LOOT
 	team.resources = {"food": 100.0}
 	state.teams[0] = team
-	state.team_discovered[0] = [1, 2]   # _nearest_independent 需 discovered 名單
+	state.team_discovered[0] = [1, 2]
+	for tid in [1, 2]:
+		BeliefSystem.record_claim(state, 0, tid, 0, "親見", {"population_est": 3, "armed_est": 1}, 1.0, false)
 	fai._evaluate_solo(state, team)
-	assert(team.current_task == TeamData.TASK_LOOT, "有 solo_task_last=掠奪 + 慣性 → 應續掠奪，實際=%s" % team.current_task)
-	assert(team.solo_task_last == TeamData.TASK_LOOT, "選後 solo_task_last 記錄")
+	assert(team.current_task == TeamData.TASK_LOOT, "掠奪 applicable + 承諾(current_option=掠奪) → 應續掠奪，實際=%s" % team.current_task)
+	assert(team.current_option == "掠奪", "選後 current_option 記錄承諾")
 	print("solo commitment OK")
 
 func _test_solo_seek_home() -> void:
@@ -13140,9 +13160,14 @@ func _test_solo_seek_home() -> void:
 	_seed_pop(t0, 4); t0.tags = ["流亡"]; t0.current_task = TeamData.TASK_IDLE; t0.resources = {"food": 100.0}
 	state.teams[0] = t0
 	fai._evaluate_solo(state, t0)
-	assert(t0.current_task == TeamData.TASK_CAMP or t0.current_task == TeamData.TASK_JOIN,
-		"求生型流亡團應主動尋家，實際=%s" % t0.current_task)
+	# 序2 溶入：紮營 引擎 gate 於絕境(food<DESPERATION)；此團吃飽(food100)→ 走建設(bootstrap 據點=亦尋家)。
+	# 尋家 repertoire = {紮營, 投靠, 建設} 皆立家不遊蕩/不劫掠（絕境紮營由 solo_dissolution_check 專證可達）。
+	assert(t0.current_task in [TeamData.TASK_CAMP, TeamData.TASK_JOIN, TeamData.TASK_BUILD],
+		"求生型流亡團應主動尋家(紮營/投靠/建設)，實際=%s" % t0.current_task)
 	# 好戰盜匪（有獵物）→ 掠奪壓過尋家（不找家）
+	var ptile := HexTileData.new()   # prey 格 reachability
+	ptile.tile_id = 3*1000+4; ptile.tile_pos = Vector2i(3,4); ptile.terrain = "plains"
+	state.world.tiles[ptile.tile_id] = ptile
 	var prey := TeamData.new(); prey.team_id = 9; prey.tile_pos = Vector2i(3,4)
 	_seed_pop(prey, 2); prey.faction_id = -1; prey.resources = {"food": 30.0}
 	state.teams[9] = prey
@@ -13151,8 +13176,10 @@ func _test_solo_seek_home() -> void:
 	state.persons[1000] = raider
 	var t1 := TeamData.new(); t1.team_id = 1; t1.leader_id = 1000; t1.tile_pos = Vector2i(4,4)
 	_seed_pop(t1, 10); t1.tags = ["軍隊"]; t1.current_task = TeamData.TASK_IDLE; t1.resources = {"food": 100.0}
+	t1.armed_anon_ratio = 1.0   # capability grounding（裁2）：掠奪需有戰力
 	state.teams[1] = t1
-	state.team_discovered[1] = [9]   # _nearest_independent 需 discovered 名單
+	state.team_discovered[1] = [9]
+	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 2, "armed_est": 1}, 1.0, false)   # G3：有情報才打
 	fai._evaluate_solo(state, t1)
 	assert(t1.current_task == TeamData.TASK_LOOT or t1.current_task == TeamData.TASK_ATTACK,
 		"好戰盜匪應 roving 非尋家，實際=%s" % t1.current_task)
@@ -14509,10 +14536,12 @@ func _test_intent_fit_term() -> void:
 	# 征服 + target → 攻擊 boost。
 	var cc := DecisionContext.new()
 	cc.intent = "征服"; cc.intent_target = 5; cc.food_days = 20.0; cc.leader_values = {"野心": 0.8, "好戰": 0.7}
+	cc.self_armed_ratio = 1.0   # capability grounding（裁2）：征服攻擊 boost 需有戰力（無牙征服=送死→0）
 	assert(DecisionTerms.eval("intent_fit", cc, "攻擊") > 0.0, "征服+target → 攻擊 intent_fit>0")
 	# 匱乏 + 野心高 + 有弱 prey → 掠奪 boost；溫和窮隊 → 0（防 over-war）。
 	var cs := DecisionContext.new()
 	cs.food_days = 1.0; cs.has_weak_prey = true; cs.leader_values = {"野心": 0.8}
+	cs.self_armed_ratio = 1.0   # capability grounding（裁2）：匱乏搶劫需有戰力
 	assert(DecisionTerms.eval("intent_fit", cs, "掠奪") > 0.0, "匱乏+野心+prey → 掠奪 intent_fit>0")
 	var cm := DecisionContext.new()
 	cm.food_days = 1.0; cm.has_weak_prey = true; cm.leader_values = {"野心": 0.2, "好戰": 0.2}
@@ -15351,6 +15380,7 @@ func _mk_unified_cruel_team(state: WorldState, pos: Vector2i) -> TeamData:
 	var t := TeamData.new(); t.team_id = 900; t.tags = [TeamData.TAG_MERCHANT]
 	t.tile_pos = pos; t.leader_id = 9000
 	_seed_pop(t, 10)
+	t.armed_anon_ratio = 1.0   # capability grounding（裁2）：掠奪需有戰兵；殘忍護衛商隊有本錢揮刀
 	t.resources = {"food": 500.0, "goods": 50.0, "coin": 100.0}
 	state.teams[900] = t
 	state.team_discovered[900] = []

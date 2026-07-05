@@ -20,6 +20,9 @@ const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/�
 # ── 佔村（雙引擎咬合：奪據點→據點產糧養兵，複用 capture+residency）──
 const OCCUPY_DRIVE_BASE: float = 1.2    # TEST VALUE — 佔村驅力基值（× occupy weight ≈ 0.4-0.7 → util 略勝 loot，要根據地的狼優先打村）
 const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守得住+夠日後分駐 settler，對齊 _dispatch_subteam_settle pop 需求）
+# capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
+# 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
+const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
 
 # 脫軌逃閥因子：忠誠 − 野心溢出折損（loy 高→1，低忠誠高野心→0）。
 # faction_duty weight 與 attack_drive drive 共用 = 叛離者既無 duty 亦無個人參戰驅力（「這不是我的仗」）。
@@ -58,7 +61,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
 		"loot_drive":
 			if opt != "掠奪": return 0.0
-			return LOOT_DRIVE_BASE if ctx.has_weak_prey else 0.0   # TEST VALUE
+			if not ctx.has_weak_prey: return 0.0
+			# capability grounding：無牙→cap≈0 壓平（送死沒人幹）；武裝足→cap=1。
+			var cap: float = clampf(ctx.self_armed_ratio / VIABLE_ARMED_RATIO, 0.0, 1.0)
+			return LOOT_DRIVE_BASE * cap   # TEST VALUE
 		"occupy_drive":
 			# 佔村 = 要根據地：無自家 outpost 的流浪狼最需要（base_need=1），有 outpost 但征服 intent 弱驅（0.3）。
 			# 連續 util，與掠奪同 menu 秤 argmax（零新判斷器）。人格染色走 weight("occupy")。
@@ -141,13 +147,15 @@ static func _intent_fit(ctx: DecisionContext, opt: String) -> float:
 	var amb: float = float(ctx.leader_values.get("野心", 0.5))
 	var greed: float = float(ctx.leader_values.get("貪婪", 0.5))
 	var martial: float = float(ctx.leader_values.get("好戰", 0.5))
+	# capability grounding（裁2）：攻擊/掠奪 boost 疊 self 戰力閘（無牙→0，武裝足→1）。佔村非純戰(奪據)不閘。
+	var cap: float = clampf(ctx.self_armed_ratio / VIABLE_ARMED_RATIO, 0.0, 1.0)
 	# ── 匱乏→搶（自平衡關鍵：窮則搶）──：低糧 + 野心/好戰過門檻 + 有弱 prey → 掠奪/攻擊 boost。
 	# 溫和窮隊（amb/martial 皆低）→ 0 → 仍走 survival（不全民劫掠潮）。scale 隨飢餓（對齊 desperation 域）。
 	if ctx.food_days < DESPERATION_DAYS and (amb >= SCARCITY_RAID_MIN or martial >= SCARCITY_RAID_MIN):
 		var hunger: float = maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 		if opt == "掠奪" and ctx.has_weak_prey:
-			# 搶=既有掠奪 affordance boost（非升級全面攻擊 → 不 over-war）。
-			return INTENT_FIT_DRIVE * hunger * (0.5 + maxf(amb, greed) * 0.5)
+			# 搶=既有掠奪 affordance boost（非升級全面攻擊 → 不 over-war）。無牙→cap≈0（餓也搶不動）。
+			return INTENT_FIT_DRIVE * hunger * (0.5 + maxf(amb, greed) * 0.5) * cap
 		if opt == "佔村" and ctx.has_occupy_target:
 			# 佔=奪產村解糧（與掠奪 parallel 同 boost；狼在此秤「搶了就走 vs 佔住」，佔的 base_need edge 在 occupy_drive）。
 			return INTENT_FIT_DRIVE * hunger * (0.5 + maxf(amb, martial) * 0.5)
@@ -158,9 +166,9 @@ static func _intent_fit(ctx: DecisionContext, opt: String) -> float:
 			if ctx.food_days >= SURPLUS_FOOD_DAYS and opt in ["貿易", "囤貨"]:
 				return INTENT_FIT_DRIVE * (0.5 + greed * 0.5)
 		"征服":
-			# 削敵→俘虜→守 子需求 → 攻擊 boost（症狀 b：征服真驅乾淨攻擊鏈）。
+			# 削敵→俘虜→守 子需求 → 攻擊 boost（症狀 b：征服真驅乾淨攻擊鏈）。無牙→cap≈0（無牙征服=送死）。
 			if opt == "攻擊" and (ctx.intent_target != -1 or ctx.has_weak_prey):
-				return INTENT_FIT_DRIVE * (0.5 + maxf(amb, martial) * 0.5)
+				return INTENT_FIT_DRIVE * (0.5 + maxf(amb, martial) * 0.5) * cap
 	return 0.0
 
 static func weight(term: String, leader_values: Dictionary) -> float:
