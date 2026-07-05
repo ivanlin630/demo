@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: tick60運算頻率安全證(硬前置PASS)——唯1個O(N)真違規(_get_near/far每tick無gate需cadence化,順帶餵A-arc);10裸cadence/timeout常數導出+eta/240+FLEE硬編240=時間閘該抓;★PRISONER_CHECK藍圖誤判(凍結遭遇戰框不爆,measure翻);取整全除盡唯eta/240漂移;空間維度散落點=game_setup/encounter;建議切60=3機械修後安全
 ---
 
