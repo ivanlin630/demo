@@ -56,6 +56,24 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	for e in scored: out.append(e["opt"])
 	return out
 
+# 融合 threat 子集排序（序1 溶入：non-unified _evaluate_threat 委派用，鏡射 rank_survival）。
+# 取 ctx（呼叫端已 gather，避重算）→ applicable ∩ THREAT_OPTION_SET → util 秤 → 降序。
+# 無 commitment bonus（鏡射舊 _dispatch_threat_response 純 argmax；threat 每 cadence idle 才重觸發）。
+const THREAT_OPTION_SET: Array = ["survival", "備戰", "迎戰", "求和"]   # survival=FLEE(逃跑)
+
+static func rank_threat(ctx: DecisionContext) -> Array:
+	var scored: Array = []
+	for opt in DecisionOptions.applicable(ctx):
+		if opt not in THREAT_OPTION_SET: continue
+		var u: float = 0.0
+		for tw in DecisionOptions.terms_of(opt):
+			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
+		scored.append({"opt": opt, "u": u})
+	scored.sort_custom(func(a, b): return a["u"] > b["u"])
+	var out: Array = []
+	for s in scored: out.append(s["opt"])
+	return out
+
 static func decide(state: WorldState, team: TeamData) -> String:
 	var r: Array = rank(state, team)
 	if r.is_empty(): return team.current_option
