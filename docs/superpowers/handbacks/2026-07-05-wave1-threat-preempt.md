@@ -14,7 +14,19 @@ status: open
 
 1. **PREEMPT_MARGIN = 2.0，非 plan 建議的 0.5**。plan 假設 0.5 足以分離「壓境」與「弱敵」。實測 threat_react 組成 `approach·1 + hostility·1 + (power_ratio−1)·0.5`（threat_assessment.gd:19），approach/hostility 各 weight 1.0 壓過 power（0.5）→ **逼近但弱+敵意** 敵 react≈1.49（approach 1 + hostility 0.95 主導，power 負貢獻小），margin 0.5（門檻 0.86）會誤觸 preempt，破反向守 ②c。measured：該出現(碾壓)react=5.52、②c(逼近但弱)=1.49 → margin 須 ∈(1.13, 5.16)，取 **2.0**（門檻 2.36，雙側留餘裕）。語意：power_ratio 須 ≳5（碾壓）才把 react 推過門檻 = 天然「能傷你」。**margin=TEST VALUE，待 wave QA 校抖動 vs 靈敏。**
 
-2. **`TeamData.TASK_MOVE` 不存在**（spec §4a/plan Step1 誤列）→ 未列入 PREEMPTIBLE_TASKS（引用不存在常數＝編譯錯）。實碼無「移動」task，移動走各 task 內 `move_target`。PREEMPTIBLE_TASKS = 製造/建設/貿易/治理/訓練/覓食/紮營（7 項）。**若藍圖意指生產隊常態 `TASK_PRODUCE`(生產)，該常數亦未列**——目前只列 spec 明列集；生產隊(unified TASK_PRODUCE)是否納 preempt 需藍圖確認（見下風險）。
+2. **`TeamData.TASK_MOVE` 不存在**（spec §4a/plan Step1 誤列）→ 未列入 PREEMPTIBLE_TASKS（引用不存在常數＝編譯錯）。實碼無「移動」task，移動走各 task 內 `move_target`。
+
+## Follow-up 修（系統確認：定居生產隊 seam 未接）
+
+初版 PREEMPTIBLE_TASKS 缺 `TASK_PRODUCE`。定居 resident 生產隊經 `interaction_system:1065 transition("生產"=TASK_PRODUCE)` 進 TASK_PRODUCE（**非** TASK_MANUFACTURE）→ 藍圖核心「犁田遇劫匪放犁」case（定居村挨打）仍盲。TASK_PRODUCE 已在 interruptible(fai:2398)、PRIO_AMBIENT(10) 低優先 → 該 preemptible。
+
+**修**：
+- `PREEMPTIBLE_TASKS` 加 `TeamData.TASK_PRODUCE`（現 8 項：生產/製造/建設/貿易/治理/訓練/覓食/紮營）。
+- harness 加 ③（unified 生產隊 + resident guard）：
+  - **③a 該出現**：定居生產隊（TASK_PRODUCE、TAG_PRODUCE=unified）遇壓境(react=5.52) → 放下生產派**逃跑**。unified 忙碌隊走 preempt path 確證。
+  - **③b resident guard**：居民生產隊（自家 outpost，`is_resident`→迎戰排除）遇壓境 → 派**非迎戰** defensive（逃跑），迎戰排除後 rank_threat 仍給反應**不卡死**。✓
+  - **③c 反向守**：TASK_PRODUCE + 弱(0.69)/中立帶刀(0.91) 非逼近 → 續生產。✓
+- 全回歸重跑綠（下表更新）。**seeded 不變 52/9/1/381**（TASK_PRODUCE seeded-neutral）；**rerise flee=12 不變**——WarringHarness 世界無「resident 生產隊挨壓境攻擊」情境，TASK_PRODUCE seam 由確定性 harness ③ 證活，非 seeded 湧現。定居村挨打的 defensive 顯化需真有壓境攻擊定居點的世界軌跡（wave QA live 觀察）。
 
 ## 融合驗結果（雙關，ALL PASS）
 
@@ -45,5 +57,5 @@ status: open
 ## 連動風險 / 待藍圖
 
 1. **preempt task churn / 抖動**：preempt 走 PRIO_THREAT(70) 打斷 PRIO_DISPATCH(50) task。release 檢查（威脅消失）回 **idle** 非原 task → 忙碌隊被 preempt 後威脅退，回 idle 由主 AI 重派（非自動續原製造）。頻繁遭遇下可能 製造→逃→idle→製造 churn。THREAT_CADENCE=1 日 限重評頻率，緩解。實測 seeded 未見暴 churn（僅 12 FLEE/1200t），但 margin 調低會放大——wave QA 觀察點。
-2. **unified 生產隊 preempt 覆蓋**：現 gate 對 busy unified 走 preempt path，但 PREEMPTIBLE_TASKS 只含 TASK_MANUFACTURE 未含 TASK_PRODUCE(生產)。real 生產隊多在 TASK_PRODUCE（interaction_system:1065 transition"生產"）→ **可能仍盲**。需藍圖確認生產隊常態 task 名，決定是否納 TASK_PRODUCE（藍圖 WHAT bar 講「犁田遇劫匪」＝生產隊，此縫可能未完全接）。
+2. **unified 生產隊 preempt 覆蓋** — ✅ 已修（見上 Follow-up）。TASK_PRODUCE 納入，harness ③a/③b 證 unified 生產隊 + resident guard 皆正確 preempt。
 3. **PREEMPT_MARGIN=TEST VALUE**：2.0 由本 harness 4 點校，非世界實跑分佈。wave QA 需看 seeded/live 抖動率定案。
