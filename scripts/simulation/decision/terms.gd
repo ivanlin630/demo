@@ -171,8 +171,13 @@ static func _intent_fit(ctx: DecisionContext, opt: String) -> float:
 				return INTENT_FIT_DRIVE * (0.5 + greed * 0.5)
 		"征服":
 			# 削敵→俘虜→守 子需求 → 攻擊 boost（症狀 b：征服真驅乾淨攻擊鏈）。無牙→cap≈0（無牙征服=送死）。
+			# 序5 溶入：× readiness factor（沒本錢→趨0=readiness 閘，合憲法「狀態=權重非硬閘」）+ 信義 penalty
+			# （對齊舊 cascade attack_score 野心+好戰−信義；高信義者不屑掠人）。readiness_thr_eff 含慎重+hunger_relief。
 			if opt == "攻擊" and (ctx.intent_target != -1 or ctx.has_weak_prey):
-				return INTENT_FIT_DRIVE * (0.5 + maxf(amb, martial) * 0.5) * cap
+				var honor: float = float(ctx.leader_values.get("信義", 0.5))
+				var conq_person: float = clampf(0.5 + maxf(amb, martial) * 0.5 - honor * 0.4, 0.0, 1.5)
+				var readiness_factor: float = clampf(ctx.readiness / maxf(ctx.readiness_thr_eff, 0.01), 0.0, 1.0)
+				return INTENT_FIT_DRIVE * conq_person * cap * readiness_factor
 	return 0.0
 
 static func weight(term: String, leader_values: Dictionary) -> float:
