@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: ★沙盒憲法(專案定義級)——作者寫世界不寫決策,不得限制NPC行為邏輯;凡NPC行為必經統一決策引擎,禁繞過引擎的行為規則/判斷器/subsystem;請表達成governing invariant+矩陣強制閘+稽核既有碼溶違規;附tick60三裁(PRISONER收下/3機械修先做/60併A2/後勤=引擎domain非subsystem)
 ---
 
