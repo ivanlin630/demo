@@ -187,7 +187,7 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 			1.0 - armed_est / maxf(float(team.population), 1.0),
 			0.0, 1.0)
 		var border: float = 1.0 if _is_border_adjacent(team, prey) else 0.3
-		var eta_days: float = maxf(float(catch_result.eta) / 240.0, 1.0)
+		var eta_days: float = maxf(float(catch_result.eta) / float(WorldState.TICKS_PER_DAY), 1.0)
 		# R1b means-end logistics（②路程糧 × ③目標歸屬，單一連續因子乘進 score）
 		# ②路程糧：單程到 prey 的糧需 vs 有效糧；夠→1.0，緊→往下滑但絕不歸零（既有信號讀取）
 		var trip_need: float = eta_days * float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
