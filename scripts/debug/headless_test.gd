@@ -3498,10 +3498,13 @@ func _run_sim_test() -> void:
 	var _dip2 := DiplomaticAiSystem.new()
 	# Team6（商隊）主動提外交
 	_dip2.try_proactive_diplomacy(state, state.teams[6])
-	# 攻擊後信譽下降
+	# 攻擊後信譽下降（顯式立已知前值，解耦 emergent 漂移：序6 成員走引擎後世界軌跡變，
+	# teams[0] 對 3 的 rep 可能已被 sim 抬高 → 測 update_reputation 減量性質須立基線非賴預設 0.5）
+	var _rep_before: float = 0.5
+	state.teams[0].known_reputations[3] = _rep_before
 	state.teams[0].update_reputation(3, -0.3)
 	var _rep: float = float(state.teams[0].known_reputations.get(3, 0.5))
-	assert(_rep < 0.5, "攻擊後 known_reputations 應下降")
+	assert(_rep < _rep_before, "攻擊後 known_reputations 應下降")
 	print("[Diplomacy] known_reputations 更新驗證通過")
 
 	var _strat := StrategicAiSystem.new()
