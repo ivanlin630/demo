@@ -1722,103 +1722,37 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	# stuck 視為 idle，允許重評（task 保留意圖直到重新派發）
 	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
 
-	var martial:  float = float(leader_p.values.get("好戰",   0.5))
-	var greed:    float = float(leader_p.values.get("貪婪",   0.5))
-	var ambition: float = float(leader_p.values.get("野心",   0.5))
-	var survival: float = float(leader_p.values.get("求生欲", 0.5))
-
-	var scores: Dictionary = { TeamData.TASK_IDLE: 0.1 }
-	scores[TeamData.TASK_ATTACK] = (ambition * 0.4 + martial * 0.4) * _tag_weight(team, TeamData.TASK_ATTACK)
-	scores[TeamData.TASK_LOOT] = (greed * 0.5 + martial * 0.3)    * _tag_weight(team, TeamData.TASK_LOOT)
-	scores[TeamData.TASK_DIPLOMACY] = maxf(ambition * 0.4 - martial * 0.2, 0.0) * _tag_weight(team, TeamData.TASK_DIPLOMACY)
-	# WS-2c：有效糧(私產+自家糧倉)，否則定居商隊 food=0→food_pc=0→FLEE 分數爆高蓋過 trade
-	# (商隊永逃不貿易元兇之一)。真絕境(皆空)food_pc 仍 0→FLEE，絕境不貿易不變。
-	var food_pc: float = ResourceSystem.effective_food(state, team) / maxf(team.population, 1)
-	if food_pc < 2.0:
-		scores[TeamData.TASK_FLEE] = survival * 0.8
-	if _can_manufacture(state, team):
-		scores[TeamData.TASK_MANUFACTURE] = (greed * 0.4 + 0.2) * _tag_weight(team, TeamData.TASK_MANUFACTURE)
-	if _can_trade(state, team):
-		scores[TeamData.TASK_TRADE] = (greed * 0.5 + 0.3) * _tag_weight(team, TeamData.TASK_TRADE)
-		# 統一決策引擎接管後，商隊-tag solo 隊已在函式開頭 return → 此處只剩非商隊隊。
-		# 舊 MERCHANT_TRADE_BONUS hoist（商隊分支）由引擎的「貿易 option」取代，移除（不雙重觸發）。
-	# W4 A：駐家治理傾向 — 慎重/野心高 leader 在自家 outpost 攢公庫（建材未達標才積極）
-	var own_pos: Vector2i = _find_own_outpost(state, team)
-	if own_pos != Vector2i(-1, -1):
-		var caution: float = float(leader_p.values.get("慎重", 0.5))
-		var amb_dev: float = float(leader_p.values.get("野心", 0.5))
-		var home_tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
-		var vault_mat: float = float(home_tile.public_storage.get("material", 0)) if home_tile else 0.0
-		if vault_mat < GOVERN_MATERIAL_TARGET:
-			scores[TeamData.TASK_GOVERN] = (caution * 0.4 + amb_dev * 0.2 + 0.15) * _tag_weight(team, TeamData.TASK_GOVERN)
-
-	# 主動尋家（僅無 own outpost 的流浪團）：純 value 加權，與 roving 競爭。
-	# 不乘 _tag_weight（該函數對「流亡」tag 回 0，會歸零最需尋家的流亡團）。
-	if own_pos == Vector2i(-1, -1):
-		if _find_unowned_farmable_tile(state, team) != Vector2i(-1, -1):
-			scores[TeamData.TASK_CAMP] = survival * 0.3 \
-				+ float(leader_p.values.get("慎重", 0.5)) * 0.3 + ambition * 0.3
-		if _find_strong_neighbor(state, team) != -1:
-			scores[TeamData.TASK_JOIN] = float(leader_p.values.get("義氣", 0.5)) * 0.4 + survival * 0.4
-
-	# 承諾慣性：上次 task 加分（非明顯更優不換）。F-D4：用 solo_task_last（與戰略 intent 分離）。
-	if team.solo_task_last != "" and scores.has(team.solo_task_last):
-		scores[team.solo_task_last] = float(scores[team.solo_task_last]) + SOLO_COMMITMENT_BONUS
-
-	var best_task := TeamData.TASK_IDLE
-	var best_score: float = 0.0
-	for t in scores:
-		if float(scores[t]) > best_score:
-			best_score = float(scores[t])
-			best_task = t
-
-	# 征服名實探針：警戒——好戰征服 intent 隊多為非 unified → 走此舊 solo path（非 _decide_unified）。
-	# 這裡才是「想=征服 做=掠奪」真競場：TASK_LOOT vs TASK_ATTACK argmax。
-	if Probe.enabled and _solo_type(team) == "征服":
-		Probe.bump("conq.intent")
-		match best_task:
-			TeamData.TASK_LOOT:   Probe.bump("conq.winner_loot")
-			TeamData.TASK_ATTACK: Probe.bump("conq.winner_prosperity")   # 舊 solo 的征服手段=TASK_ATTACK
-			_:                    Probe.bump("conq.winner_other")
-		if scores.has(TeamData.TASK_LOOT) and scores.has(TeamData.TASK_ATTACK):
-			# util 排序根（舊 solo 計分）：掠奪領先攻擊多少 = 掠奪搶排序證據
-			Probe.note("conq.loot_lead", float(scores[TeamData.TASK_LOOT]) - float(scores[TeamData.TASK_ATTACK]))
-
-	if best_task == TeamData.TASK_IDLE: return
-	var solo_target: Vector2i = team.move_target
-	match best_task:
-		TeamData.TASK_ATTACK, TeamData.TASK_LOOT, TeamData.TASK_DIPLOMACY:
-			var tid: int = _nearest_independent(state, team)
-			if tid == -1: return
-			solo_target = state.teams[tid].tile_pos
-		TeamData.TASK_FLEE:
-			solo_target = Vector2i(-1, -1)
-		TeamData.TASK_MANUFACTURE:
-			pass  # 製造在原地進行
-		TeamData.TASK_TRADE:
-			var ttarget: Vector2i = _merchant_trade_target(state, team)
-			if ttarget == Vector2i(-1, -1): return
-			solo_target = ttarget
-		TeamData.TASK_GOVERN:
-			solo_target = own_pos
-		TeamData.TASK_CAMP:
-			var cpos: Vector2i = _find_unowned_farmable_tile(state, team)
-			if cpos == Vector2i(-1, -1): return
-			solo_target = cpos
-		TeamData.TASK_JOIN:
-			var ally: int = _find_strong_neighbor(state, team)
-			if ally == -1: return
-			solo_target = state.teams[ally].tile_pos
-			state.set_social_target(team, ally)   # 社交意圖非戰鬥（resolver 讀 social_target）
+	# 序2 solo 溶入：手算 argmax 撕除 → 引擎 rank_scored（融合非刪；鏡射 _decide_unified）。
+	# 去 _tag_weight hard-gate（tag 不硬鎖，藍圖裁1）；attack/loot 由 capability grounding（裁2）
+	# + 人格 weight 承載傾向。9 反應 repertoire 全走 REGISTRY option（無新 option）。
+	# scaffolding 保留：idle-gate（上面）、承諾慣性（引擎 COMMITMENT_BONUS 讀 current_option）、
+	# solo_task_last、征服名實 Probe（_probe_conq_winner，保 winner+loot_lead 語意）。
 	if _is_stuck(team):
-		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評
-	if not TaskArbiter.try_set(state, team, best_task, solo_target,
-			TaskArbiter.PRIO_DISPATCH, "solo"):
+		TaskArbiter.release(team)   # stuck 釋放讓位，同層才能重評（保留舊 solo 行為）
+	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
+	if _conq: Probe.bump("conq.intent")
+	var ranked: Array = DecisionEngine.rank_scored(state, team)
+	for e in ranked:
+		var opt: String = e["opt"]
+		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE: continue
+		var tgt: Vector2i = td["target"]
+		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
+		if not TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "solo"):
+			continue
+		# 掠奪/佔村/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（鏡射 _decide_unified）
+		if td.has("combat_target"): state.set_combat_target(team, int(td["combat_target"]))
+		if td.has("social_target"): state.set_social_target(team, int(td["social_target"]))
+		_wire_threat_task(team, td)   # 迎戰/求和 aux target（prosperity/order）
+		team.solo_task_last = td["task"]   # F-D4：task 承諾記此槽（solo_intent 保留戰略 intent）
+		team.current_option = opt          # 承諾慣性：引擎 COMMITMENT_BONUS 讀
+		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
+		if td["task"] == TeamData.TASK_TRADE:
+			Probe.bump("trade.dispatch.solo")   # 漏斗站4（timeout 起算由 try_set 蓋章 task_start_tick）
+		print("[SoloAI] Team%d → %s (%s)" % [team.team_id, td["task"], opt])
 		return
-	if best_task == TeamData.TASK_TRADE:
-		Probe.bump("trade.dispatch.solo")   # 漏斗站4（timeout 起算由 try_set 蓋章 task_start_tick）
-	team.solo_task_last = best_task   # F-D4：task 承諾記此槽（solo_intent 保留戰略 intent）
-	print("[SoloAI] Team%d → %s" % [team.team_id, best_task])
+	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner
 
 func _update_equip_order(state: WorldState, team: TeamData) -> void:
 	# 已裝備武器離開 storage pool；target 若只看 storage 會隨裝備行為縮放
