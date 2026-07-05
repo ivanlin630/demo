@@ -11,6 +11,7 @@
 ## Global Constraints
 - **WHAT bar（藍圖，雙關驗）**：①該出現——忙碌+壓境能殺攻擊者→放 task 反應 ②反向守——忙碌+路過弱/中立/帶刀商隊→**續 task 不抖動**。兩關綠。禁「見武裝就 preempt」。
 - **preempt 門檻鎖「能傷你」由 threat_react 訊號滿足**（power_ratio+approach+hostility），禁另加 tag/label 判斷。
+- **★感知鐵律（藍圖 encounter-north-star）**：preempt/反向守禁讀逼近者 `tags`/意圖。反向守（弱/中立/帶刀商隊不 preempt）由 threat_react 低分**自然**滿足（弱=power_ratio<1、中立=hostility≈0、路過=approach≤0），Task 1 反向 case 用 belief 表象+rep+非逼近設定，**禁設 tag 打折**。
 - 不 preempt 已緊急（戰鬥/FLEE/DEFEND/PREPARE/survival）。
 - seeded 漂移允許（現 48/8/1/380，defensive 反應升→漂移，QA wave 判）；framework PASS=7；threat/solo/rung 融合驗+live-seam 不破；憲法閘 PASS。
 - wrapper 跑測試；`>` 用 Select-String；`--import` 新 class。

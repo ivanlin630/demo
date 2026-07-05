@@ -13,6 +13,7 @@
 - preempt 門檻吃**相對戰力壓制+逼近+敵意**（序1 `threat_react` = `ThreatAssessment.score` 已含 approach+hostility+(power_ratio−1)·0.5，×dist_factor）→ 高門檻天然要求「能真傷你」才觸發。
 - 反面守：禁「見武裝就 preempt」（task 抖動+單調恐慌，比龜縮糟）。
 - 不 preempt 已緊急（戰鬥/逃/守/survival）。
+- **★感知鐵律（藍圖 encounter-north-star，硬約束）**：preempt 門檻只讀 `threat_react`（=belief 表象 pop/armed_est + `known_reputations` 敵意 + observe_velocity 逼近）——**禁偷讀逼近者 `tags`（商隊/軍隊）或意圖打折**（「喔商隊放鬆」=把可信度弄回 bug）。反向守（弱/中立/帶刀商隊不 preempt）**必須由 threat_react 低分自然滿足**（弱=power_ratio<1、中立=hostility≈0、路過=approach≤0），**非讀 tag 判**。融合驗反向 case 的「帶刀商隊」設定用 rep+武器+非逼近表象，不設 tag 打折。
 
 ## 4. 設計（改 _evaluate_threat gate，序1 scaffolding 擴充）
 
