@@ -39,7 +39,7 @@ const COMMANDER_COMMITMENT_BONUS: float = 0.15
 # 統一決策 arc 第三塊：野心是普世驅力，不被 faction-gate。獨立 ambitious leader 也秤戰略意圖。
 # 建國 = means-end 秤的 option（driver=野心），非「夠 pop→自動 create_faction」fiat。複用既有 create_faction
 # （結盟 interaction:333 / 吞併 npc_combat:524）。意圖集只 {建國,守成}（征服等成 faction 後 commander-v2 給）。
-const INDEP_STRATEGY_CADENCE: int = 720         # 3 天評估一次（沿用 prosperity cadence 量級）
+const INDEP_STRATEGY_CADENCE: int = TimeScale.TICK_PER_DAY * 3   # 3 天評估一次（沿用 prosperity cadence 量級）
 const AMBITION_FOUND_MIN: float = 0.55          # TEST VALUE — 建國野心門檻（對齊 ambition_cap STATE 門檻 0.55）
 const FOUND_COMMITMENT_BONUS: float = 0.15      # TEST VALUE — 建國意圖承諾 hysteresis（mirror commander）
 const FOUND_FOOD_SURPLUS_DAYS: float = 7.0      # TEST VALUE — 累積夠 = 有 ≥7 天糧盈餘（已達 EXPAND）
@@ -90,26 +90,26 @@ const OWNER_CHANGE_BUFFER_DAYS: int = 7
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
 const SURVIVAL_RECOVER_DAYS: float = 7.0   # 糧恢復到此 → 脫離 survival（hysteresis 防抖）
-const FLEE_TIMEOUT: int = 5 * 240          # 逃跑逾時（5 天無戰鬥 → 釋放重評，小地圖防永逃）
+const FLEE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 5   # 逃跑逾時 5 天（修硬編 240，跟根）→ 釋放重評，小地圖防永逃
 
 # ── Prosperity attack（野心驅動主動征服）──
-const PROSPERITY_CADENCE: int = 720           # 3 天 評估一次
-const PROSPERITY_CADENCE_MILITARY: int = 360  # 軍隊 tag 1.5 天
+const PROSPERITY_CADENCE: int = TimeScale.TICK_PER_DAY * 3            # 3 天 評估一次
+const PROSPERITY_CADENCE_MILITARY: int = TimeScale.TICK_PER_DAY * 36 / 24  # 軍隊 tag 1.5 天 = 36h
 const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score +0.1
 
 # ── Threat response（被動威脅反應）──
-const THREAT_CADENCE: int = 240   # 1 日 評估一次威脅
-const TRADE_TIMEOUT: int = 1440           # 貿易 task base timeout 6 日（防 zombie）
+const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威脅
+const TRADE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 6   # 貿易 task base timeout 6 日（防 zombie）
 # timeout 按距離估（invariants：timeout 別死常數——按距離/移速估合理往返時間）：
 # base + 殘距×per_hex。慢地形(forest 0.7×/mountain 0.4×)下 1 hex 最壞 ~0.7 日 → 0.5 日/hex 餘裕。TEST VALUE。
-const TRADE_TIMEOUT_PER_HEX: int = 120
+const TRADE_TIMEOUT_PER_HEX: int = TimeScale.TICK_PER_DAY * 12 / 24  # 12h/hex
 
 # ── Outpost 居民派駐 AI ──
-const RESIDENCY_CADENCE: int = 720    # 3 天 評估一次 outpost 居民派駐
-const RESIDENCY_COOLDOWN: int = 1680  # 7 天 邀請被拒後冷卻
+const RESIDENCY_CADENCE: int = TimeScale.TICK_PER_DAY * 3    # 3 天 評估一次 outpost 居民派駐
+const RESIDENCY_COOLDOWN: int = TimeScale.TICK_PER_DAY * 7   # 7 天 邀請被拒後冷卻
 const MIN_PARENT_POP_AFTER_DISPATCH: int = 10
 # 佔村 target 濾（打得到+守得住，防自殺圍城）
-const OCCUPY_ETA_MAX: int = 720      # TEST VALUE — 佔村目標最遠 eta（≈3 日；遠村久圍乾耗餓死→不選）
+const OCCUPY_ETA_MAX: int = TimeScale.TICK_PER_DAY * 3   # TEST VALUE — 佔村目標最遠 eta（≈3 日；遠村久圍乾耗餓死→不選）
 const OCCUPY_POP_RATIO: float = 0.6  # TEST VALUE — 目標 believed pop 須 < 我方 ×此（明顯小才圍，防小狼打大村）
 const OCCUPY_WIN_MARGIN: float = 1.3        # TEST VALUE — 佔村勝算 margin：己方真 armed 須 ≥ 估村防下限 ×此
 const OCCUPY_DEF_ARMED_FLOOR: float = 0.1   # TEST VALUE — 估村防武裝下限比（村全員守，mirror combat ARMED_RATIO_FLOOR）
@@ -187,7 +187,7 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 			1.0 - armed_est / maxf(float(team.population), 1.0),
 			0.0, 1.0)
 		var border: float = 1.0 if _is_border_adjacent(team, prey) else 0.3
-		var eta_days: float = maxf(float(catch_result.eta) / 240.0, 1.0)
+		var eta_days: float = maxf(float(catch_result.eta) / float(WorldState.TICKS_PER_DAY), 1.0)
 		# R1b means-end logistics（②路程糧 × ③目標歸屬，單一連續因子乘進 score）
 		# ②路程糧：單程到 prey 的糧需 vs 有效糧；夠→1.0，緊→往下滑但絕不歸零（既有信號讀取）
 		var trip_need: float = eta_days * float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
