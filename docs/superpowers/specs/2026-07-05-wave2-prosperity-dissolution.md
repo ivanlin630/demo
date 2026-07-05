@@ -52,9 +52,11 @@ means-end「高風險行動前降不確定」= 世界機制（合憲法，如 th
 ## 6. 憲法閘
 cascade 刪 → `faction_ai_system.gd::_evaluate_prosperity_attack` 指紋消（removed=arc 進度）。scout dispatch 移入 helper（新指紋 or 併既有 func）→ 實作跑閘定 removed/add，同 commit 更新 baseline 標 `# 序5 prosperity`。
 
-## 7. ★待藍圖（balance，非阻塞實作但影響驗收）
-1. **征服率 shift + gen 重校**：dissolve 改征服分佈 → 世界征服/滅團率變 → **gen 承載力/野心參數重校**（audit「+gen 重校壓此後」）。= **follow-up landing**（序5 綠 + 征服率 measure 後，據 shift 定 gen 重校，非序5 內）。藍圖 wave QA 判新征服率是否健康（多強並立 vs 雪球/龜縮）。
-2. **plan de-risk 分階**（系統定）：Task 先 **upgrade engine 攻擊到 cascade parity**（readiness/富prey/scout-verify 加，cascade 仍在=雙路暫存跑對照）→ 驗 parity → **再拆 cascade + yield**（結構變）。避免一次拆到位炸征服鏈。
+## 7. 藍圖裁定（seq5-greenlight，2026-07-05）—— 序5 已 greenlit
+1. **★征服率尺重框**：**雪球/一統≠fail**（軍事易得，正統難守，傳承更難=容易的一章非結局）；動盪由未開的**正統/繼承/叛亂維度**製造，**非靠壓征服率**。**唯一真 fail=龜縮凍死**。established count 不執著=**有動有起落**（churn）即健康。→ **序5 的活=融合非刪 yes/no**；征服率絕對值 wave QA 只看「有沒有凍死」，不追某數。**parity 哨降級**：只驗征服鏈**不歸零**（repertoire 沒少），**不需保 rate**（暴衝也 OK=雪球非 fail）。
+2. **gen 重校 = churn 目標非 rate 目標**（follow-up）：據序5 後 measure 定，目標=世界別凍死（有 churn），非湊某征服%/並立數。
+3. **★B 照妖鏡（決策模型/孿生條驗收標準）**：序5 引入的閾（`readiness_thr_eff`/`FEUD_ATTACK_MIN`/`VIABLE_ARMED_RATIO`）——凡塑造行為者，歸宿=人格/記憶/現況 or 世界代價，非全域常數。`readiness_thr_eff` 已含慎重（`calc_readiness_threshold` 用慎重）=部分人格化✓。殘餘全域常數標 B-債（arc 尾/另軌「常數人格化」收，不擋序5）。**驗收隱性標準**：征服行為真穿過人格(野心/好戰/慎重)/現況(readiness/capability)的秤，非全域 gate 直達。
+4. **plan de-risk 分階**（系統 HOW）：Phase1 upgrade engine 攻擊到 parity（cascade 雙路對照）→ Phase2 拆。藍圖認可。
 
 ## 8. 後序
 spec → plan（分階 de-risk，征服鏈 parity 驗 first）→ 子 session。序5 綠 + 征服率 measure → gen 重校 follow-up → 序6 faction dispatch（loop3 全溶，框架債縫#3 結清）。

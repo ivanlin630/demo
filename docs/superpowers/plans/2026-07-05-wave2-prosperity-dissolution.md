@@ -10,7 +10,8 @@
 
 ## Global Constraints
 - **融合非刪 + 征服鏈 parity**：repertoire——FORCE 好戰野心隊 ready+富弱prey+情報夠→攻擊；readiness 閘（沒本錢不出征）；scout-verify（慎重不足→斥候/莽者→照衝 S4 誘殺）；富 prey 選；hunger_relief。該出現——seeded `conq.prosperity_reached` 不歸零、framework S3 scout/S4 ambush 不 DORMANT。
-- **★征服率 shift 記錄**：dissolve 改征服分佈 → 記 before/after `conq.prosperity_reached` 率 + seeded 滅團/征服 → gen 重校 follow-up 依此。不機械守恆。
+- **★征服率尺（藍圖 seq5-greenlight 重框）**：**雪球/一統/暴衝≠fail**（軍事易得非結局）；唯一 fail=龜縮凍死。**parity 哨只驗征服鏈不歸零**（repertoire 沒少），**不需保 rate、暴衝 OK**。記 before/after `conq.prosperity_reached` 率供 gen churn 重校 follow-up 參考（非守恆目標）。
+- **★B 照妖鏡（決策模型驗收）**：征服行為須真穿過人格(野心/好戰/慎重)/現況(readiness/capability)的秤，非全域 gate/margin 直達。新閾（readiness_thr_eff 已含慎重✓/FEUD_ATTACK_MIN/VIABLE_ARMED_RATIO）殘全域者標 B-債（不擋序5，arc 尾收）。
 - **感知鐵律**：prey 選/readiness/scout 只讀 belief 表象+known relations+self state，禁讀對方 tag。
 - seeded 漂移允許（現 52/9/1/381，QA wave 判）；framework PASS=7；threat/solo/rung/vendetta/preempt 融合驗+live-seam 不破；憲法閘 PASS。
 - wrapper 跑測試；`>` Select-String；`--import` 新 class。
