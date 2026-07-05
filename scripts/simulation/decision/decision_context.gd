@@ -19,6 +19,10 @@ var is_merchant: bool = false
 var has_home_outpost: bool = false
 var has_weak_prey: bool = false
 var weak_prey_pos: Vector2i = Vector2i(-1, -1)
+# capability grounding（藍圖 tag-soft-ruling 裁2）：self 有效武裝比（armed / pop）。
+# attack/loot eval 讀此→「打得動嗎」的世界事實（無牙商隊 attack eval 趨 0=送死沒人幹，非被禁）。
+# Task2 於 gather 填值（_calc_own_armed / pop）；terms.gd loot_drive/_intent_fit 疊 capability_factor。
+var self_armed_ratio: float = 0.0
 # 佔村（means-end：要根據地的狼打「有據點的弱村」而非追流浪隊）：可據 stationary 弱村。
 var has_occupy_target: bool = false
 var occupy_target_id: int = -1
