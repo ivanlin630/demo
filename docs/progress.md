@@ -395,6 +395,14 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - **融合驗綠**：rung repertoire（訓練/貿易/生產/建設/讓位）+ threat（新 live-seam）+ solo 全 ALL PASS；framework PASS=7；gate PASS 32（rung_task 回字串無 TaskArbiter→不在指紋）。
 - **seeded 52→48/8/1/380**（QA wave 判；pop/factions/established 守恆；48–56 帶繞 52）。**watch（藍圖/QA）**：世界變靜（threat 遭遇↓）是否過龜縮（反龜縮 bar）。
 
+### 憲法溶入 arc — wave1 序4 vendetta done（2026-07-05，merged 2506e6e）
+
+hand vendetta dispatch（`faction_ai:733-741` 直塞 TASK_ATTACK@PRIO_VENDETTA）撕除 → `feud_pull` term（已存在未掛）掛進 攻擊 option。**優先序→權重序**：血仇>致富攻擊=feud_pull weight（`strongest_feud×(0.3+好戰×0.5)`）讓攻擊贏 rank；威脅>血仇=PRIO_THREAT(70)>DISPATCH(50) + rank 內 survival util 碾壓。
+- 加 `ctx.feud_target_id`（vendetta_target 掃描）+ 攻擊 applicable 血仇路（`strongest_feud≥FEUD_ATTACK_MIN(0.5) and feud_target_id≠-1`）+ to_task 攻擊多源 target（faction directive>征服 intent>血仇）。`g2.vendetta_trigger` probe 移引擎 dispatch。
+- **融合驗 4 錨 ALL PASS**（攻擊 rank[0]、血仇>致富、target=仇敵、威脅>血仇）；framework PASS=7（★S2b vendetta_trigger=1 不 DORMANT）；threat/solo/rung 綠；gate PASS；**seeded 零漂移 48/8/1/380**（feud 攻擊 repertoire 加項、此 seed 罕觸）。
+- **感知鐵律守**：feud=已知關係（feud memory/known_reputations），合法。
+- **殘（watch/藍圖）**：feud_pull **無 capability gate**（無牙血仇仍攻=送死；舊 hand dispatch 亦無 cap→語意保；血仇=衝動非理性 arguably 對，vs 序2 loot/attack 的 cap grounding 不一致=藍圖裁）；攻擊 target 多源（私仇被 faction 令蓋=directive 優先，藍圖確認要否私仇覆蓋）；FEUD_ATTACK_MIN=0.5 TEST。
+
 ### 待開發（大功能）
 
 | 項目 | 狀態 | 說明 |
