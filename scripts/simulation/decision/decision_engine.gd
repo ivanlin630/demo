@@ -86,6 +86,25 @@ static func rank_threat(ctx: DecisionContext) -> Array:
 	for s in scored: out.append(s["opt"])
 	return out
 
+# 融合 ambient 子集排序（序3 follow-up：idle-filler 委派用，鏡射 rank_threat）。
+# 取 ctx（呼叫端已 gather，避重算）→ applicable ∩ AMBIENT_OPTION_SET → util 秤 → 降序 → opt 字串陣列。
+# 無 survival 特例、無 commitment：ambient 只填 idle；team 到此已過 loop3 survival/threat/prosperity 評估，
+# ambient 不該二次猜生存/威脅 → 排除 survival/FLEE/threat option（收窄 idle 隊次門檻 FLEE churn）。
+const AMBIENT_OPTION_SET: Array = ["訓練", "貿易", "生產", "建設", "囤貨", "駐守"]
+
+static func rank_ambient(ctx: DecisionContext) -> Array:
+	var scored: Array = []
+	for opt in DecisionOptions.applicable(ctx):
+		if opt not in AMBIENT_OPTION_SET: continue
+		var u: float = 0.0
+		for tw in DecisionOptions.terms_of(opt):
+			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
+		scored.append({"opt": opt, "u": u})
+	scored.sort_custom(func(a, b): return a["u"] > b["u"])
+	var out: Array = []
+	for s in scored: out.append(s["opt"])
+	return out
+
 static func decide(state: WorldState, team: TeamData) -> String:
 	var r: Array = rank(state, team)
 	if r.is_empty(): return team.current_option

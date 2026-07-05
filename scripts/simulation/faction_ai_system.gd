@@ -771,12 +771,14 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		_auto_withdraw_mounts(state, team)
 		# G2c：野心階梯常態行為（最低優先，只填 idle）。
 		# 序3：rung_task 查表撕除 → 引擎 rank（archetype/rung 當 weight，train_drive 讀之）。
+		# 序3 follow-up：rank_scored_ctx → rank_ambient（收窄至 AMBIENT_OPTION_SET）。ambient 不二次猜
+		# survival/threat（team 到此已過 loop3 survival/threat/prosperity）→ 除次門檻 FLEE churn。
 		# 取首個 dispatchable option（非 IDLE）走 PRIO_AMBIENT；貿易 target 已在 to_task「貿易」內
 		# （_merchant_trade_target：arb 單→巡市集→fallback）→ ambient 語意保。
 		if team.current_task == TeamData.TASK_IDLE:
 			var _ctx := DecisionContext.gather(state, team)
-			for _e in DecisionEngine.rank_scored_ctx(_ctx):
-				var _td: Dictionary = DecisionOptions.to_task(state, team, String(_e["opt"]))
+			for _opt in DecisionEngine.rank_ambient(_ctx):
+				var _td: Dictionary = DecisionOptions.to_task(state, team, String(_opt))
 				var _tk: String = String(_td.get("task", TeamData.TASK_IDLE))
 				if _tk == TeamData.TASK_IDLE: continue
 				if TaskArbiter.try_set(state, team, _tk, _td.get("target", Vector2i(-1, -1)), TaskArbiter.PRIO_AMBIENT, "ambition"):
