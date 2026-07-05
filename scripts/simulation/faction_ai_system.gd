@@ -99,6 +99,18 @@ const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score
 
 # ── Threat response（被動威脅反應）──
 const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威脅
+# preempt：忙碌隊只有「壓境能傷你」威脅才打斷進行中 task（門檻 = threat_threshold + 此加成）。
+# TEST VALUE=2.0（measured：逼近但弱敵 react≈1.5 須守住、壓境碾壓敵 react≈5.5 須觸發 → margin∈(1.1,5.2)，取 2.0 雙側留餘裕）。
+# 天然實現「能傷你」語意：power_ratio 貢獻 (ratio-1)·0.5，須 ratio≳5 才把 react 推過此門檻（見 threat_assessment.gd:19）。
+const PREEMPT_MARGIN: float = 2.0
+const PREEMPTIBLE_TASKS: Array = [
+	TeamData.TASK_PRODUCE, TeamData.TASK_MANUFACTURE, TeamData.TASK_BUILD, TeamData.TASK_TRADE,
+	TeamData.TASK_GOVERN, TeamData.TASK_TRAIN, TeamData.TASK_FORAGE,
+	TeamData.TASK_CAMP,
+]   # 不含：ATTACK/LOOT(戰鬥)、FLEE/DEFEND/PREPARE/HOLD(已 threat)、REVOLT、JOIN/BEG(social)、survival。
+    # TASK_PRODUCE：定居 resident 生產隊常態 task（interaction:1065 transition 進），非緊急可打斷（見
+    # interruptible fai:2398）→ 藍圖「犁田遇劫匪放犁」核心 case 靠它接。
+    # 註：無 TASK_MOVE 常數（移動走各 task 內 move_target）→ 不列（spec 誤列，實碼無此 task）。
 const TRADE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 6   # 貿易 task base timeout 6 日（防 zombie）
 # timeout 按距離估（invariants：timeout 別死常數——按距離/移速估合理往返時間）：
 # base + 殘距×per_hex。慢地形(forest 0.7×/mountain 0.4×)下 1 hex 最壞 ~0.7 日 → 0.5 日/hex 餘裕。TEST VALUE。
@@ -374,14 +386,22 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		if not _has_active_threat(state, team) or fled_too_long:
 			TaskArbiter.release(team)
 		return
-	# 不打斷其他進行中 task（只有 idle 才主動評威脅）
-	if team.current_task != TeamData.TASK_IDLE: return
-	# unified 隊（商隊/生產）threat 反應由 _decide_unified 主 rank 處理（鏡射 survival unified 排除，
-	# 見 _evaluate_survival:3023）→ 不雙觸發。release 檢查（上方 DEFEND/PREPARE/FLEE）仍對其成立。
-	if uses_unified(team): return
+	# 忙碌 gate（序3.5 preempt）：idle → 原路；busy-preemptible + 壓境威脅 → 打斷 task 反應；
+	# busy-urgent（戰鬥/social/緊急）→ 不評（原行為）。
+	var _busy_preemptible: bool = team.current_task in PREEMPTIBLE_TASKS
+	if team.current_task != TeamData.TASK_IDLE and not _busy_preemptible:
+		return   # 忙且不可 preempt → 原行為
 	# 手算 argmax 撕除 → 引擎 rank_threat 秤（融合非刪）。threat_react/threshold 由 ctx 鏡射舊掃描。
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
-	if ctx.threat_react < ctx.threat_threshold: return
+	if team.current_task == TeamData.TASK_IDLE:
+		# unified 隊（商隊/生產）idle threat 反應由 _decide_unified 主 rank 處理（鏡射 survival unified 排除，
+		# 見 _evaluate_survival:3023）→ 不雙觸發。release 檢查（上方 DEFEND/PREPARE/FLEE）仍對其成立。
+		if uses_unified(team): return
+		if ctx.threat_react < ctx.threat_threshold: return   # 一般門檻
+	else:
+		# busy-preemptible：高門檻，只壓境「能傷你」威脅才打斷工作（unified 忙碌隊亦走此——
+		# _decide_unified 忙碌時不重跑 rank，preempt 是唯一即時感知路）。
+		if ctx.threat_react < ctx.threat_threshold + PREEMPT_MARGIN: return
 	for opt in DecisionEngine.rank_threat(ctx):
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tk = td.get("task", TeamData.TASK_IDLE)
