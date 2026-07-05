@@ -151,6 +151,9 @@ func _scenario_S3_scout() -> void:
 	s.persons[1] = ldr; atk.leader_id = 1; _seed_pop(atk, 10)
 	# readiness：pop10(1.0)+skill+food14d+weapon>=pop → 足夠過 .52
 	atk.resources = {"food": 99999.0, "weapon_melee_low": 20.0}
+	# 序5 溶入：征服攻擊走主 rank（intent_fit 征服 × capability cap）→ 需有武裝 anon（cap>0 才 rank 得贏建設/訓練）。
+	# 舊 cascade 無 capability 閘故 scenario 未武裝；dissolve 後 cap=self_armed_ratio → 需 armed_anon_ratio。
+	atk.armed_anon_ratio = 1.0
 	# R2 flow-not-stock：野心 rung 讀 food_flow_avg（持續淨盈餘）。設正向 flow → 維持 EXPAND
 	# rung（否則 ladder 依 flow=0 降至 SURVIVE → prosperity-attack 不評 → scout 不 dispatch）。
 	atk.food_flow_avg = 100.0

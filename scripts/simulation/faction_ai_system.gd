@@ -256,98 +256,6 @@ static func _is_border_adjacent(attacker: TeamData, prey: TeamData) -> bool:
 	var dy: int = prey.tile_pos.y - attacker.tile_pos.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2 <= 2
 
-func _evaluate_prosperity_attack(state: WorldState, team: TeamData) -> void:
-	if team.leader_id == state.player_id and state.player_id != -1: return
-	if team.combat_target != -1: return
-	# G3d-2：scout 逾時未收斂 → 釋放回常規（防永 scout 卡死）
-	if team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout" \
-			and state.world.current_tick - team.task_start_tick > BeliefSystem.SCOUT_TIMEOUT:
-		TaskArbiter.release(team)
-		Probe.bump("g3.scout_timeout")
-	# stuck（task=攻擊/掠奪 但 move_target 已清）視為 idle，允許重評換目標。
-	# G3d-2：自家 scout(查證中) 亦允許重評 → 親見壓低 uncertainty 後可收斂轉攻。
-	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team) \
-			and not (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout"):
-		return
-	if team.current_task in SURVIVAL_TASKS: return
-	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
-
-	if Probe.enabled: Probe.bump("prosp.entered")   # 漏斗探針：prosperity-attack 評估入口
-	# R1a：只留人格 gate（武力傾向才主動征服）。rung-food 閘已拔——rung 職權收窄為
-	# 立國/坐穩/擴編（can_expand/accum_ok/rung_task），餬口帶狼性隊可進 prey 評估。
-	# R2 後 archetype 與 intent 共源 → 此 gate 殘量≈0（>入口 5% = desync 回歸）。
-	if team.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE:
-		if Probe.enabled:
-			Probe.bump("prosp.gate_archetype")
-			Probe.note("prosp.blocked_rung", float(team.ambition_rung))
-			# 真 desync 回歸哨：征服 intent 隊被 archetype 擋 = R2 共源破（結構上應恆 0）。
-			# gate_archetype 本身含 ambient 隊（TRADE/SETTLE 被正確擋）不能當哨。
-			if _solo_type(team) == "征服": Probe.bump("prosp.desync_conq_blocked")
-		return
-
-	var score: float = calc_attack_score(team, leader)
-	if score < ATTACK_SCORE_THRESHOLD:
-		if Probe.enabled: Probe.bump("prosp.gate_score")
-		return
-
-	var threshold: float = calc_readiness_threshold(team, leader)
-	# ②b hunger_relief：只在此獨立 raid（prosperity）路降門檻——越餓越豁出去搶糧。
-	# faction 級開戰/campaign（commander directives / can_expand / faction goal 攻擊）維持原門檻，不吃此。
-	# 連續信號、零新閘：food_days ≥ HUNGER_SLIDE_DAYS → relief=1.0（原門檻）；餓 → 滑降至 RELIEF_FLOOR×。
-	var food_days: float = ResourceSystem.effective_food(state, team) \
-		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
-	var hunger_relief: float = clampf(food_days / HUNGER_SLIDE_DAYS, RELIEF_FLOOR, 1.0)
-	var threshold_eff: float = threshold * hunger_relief
-	var readiness: float = calc_readiness(state, team)
-	if readiness < threshold_eff:
-		if Probe.enabled: Probe.bump("prosp.gate_readiness")
-		return
-
-	var prey_id: int = find_prosperity_prey(state, team, leader)
-	if prey_id == -1:
-		if Probe.enabled: Probe.bump("prosp.gate_noprey")
-		return
-
-	# G3d-1/2 風險 gate：對 prey 情報不確定且 leader 慎重 → 不直接攻，改主動派斥候查證。
-	# 莽者門檻低→照衝→假情報誘殺（不入此分支）。下次 cadence 重評。
-	var _caution: float = float(leader.values.get("慎重", 0.5))
-	if not BeliefSystem.confident_enough(state, team.team_id, prey_id, _caution):
-		if Probe.enabled: Probe.bump("prosp.gate_scout_defer")   # 情報不足 → 派斥候查證（延後攻擊）
-		# G3d-2：不確定 → 派斥候移向 prey best_estimate 位 → 親見壓謊 → 下 cadence uncertainty 塌 → 攻。
-		# 不設 combat_target（純觀察不交戰）。scout 與 attack 同 PRIO_DISPATCH，靠 release 換手。
-		var prey_t: TeamData = state.teams.get(prey_id)
-		var scout_pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, prey_id).get("tile_pos", prey_t.tile_pos) if prey_t else team.tile_pos
-		if team.current_task == TeamData.TASK_SCOUT and team.prosperity_target_id == prey_id:
-			team.move_target = scout_pos   # 追蹤刷新：prey 移動 → 朝最新 best_estimate（不重派/不 spam log）
-		elif TaskArbiter.try_set(state, team, TeamData.TASK_SCOUT, scout_pos, TaskArbiter.PRIO_DISPATCH, "scout"):
-			team.prosperity_target_id = prey_id   # try_set 已設 move_target=scout_pos
-			print("[Scout] team=%d → verify prey=%d" % [team.team_id, prey_id])
-			Probe.bump("g3.scout_dispatch")
-		return
-
-	# combat_target 不預設：移動凍結 + interaction 早退會擋住交戰；
-	# 由 interaction_system 到達時 start_combat 設定。只給 task + move_target + 追擊目標。
-	# G3d-2：confident 後若仍掛 scout(同 PRIO_DISPATCH 擋不住自身) → 先 release 讓 attack 設得進。
-	var _was_scout: bool = (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout")
-	if _is_stuck(team) or (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout"):
-		TaskArbiter.release(team)
-	if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
-			state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "prosperity"):
-		team.prosperity_target_id = prey_id
-		if _was_scout: Probe.bump("g3.scout_converge")
-		# 征服名實探針：真征服鏈起點（prosperity-attack→失能-capture→吸收）走到。
-		Probe.bump("conq.prosperity_reached")
-		# R1b 驗收哨：攻 believed-faction-owned 目標（③own 罰應壓低此量，非歸零）。
-		# 獨立隊 vs faction 成員分計（斷①B：成員 day-op 對 believed-owned 恆 WAR_COST_BASE=幾乎不中選 → 應≈0）。
-		if Probe.enabled:
-			var _bel_own: Dictionary = BeliefSystem.best_estimate(state, team.team_id, prey_id)
-			if _bel_own.has("faction_id") and int(_bel_own.get("faction_id", -1)) != -1:
-				Probe.bump("conq.indep_atk_believed_owned" if team.faction_id == -1 \
-					else "conq.member_atk_believed_owned")
-		print("[ProsperityAttack] attacker=Team%d prey=Team%d score=%.2f" % [
-			team.team_id, prey_id, score])
-
 # 追擊：攻擊/掠奪 中每 tick 依 intel 最後已知位置刷新 move_target（移動目標會跑）
 # 與 strategic_ai 的 team_intel 追蹤同模式（strategic_ai_system.gd:107）
 func _refresh_attack_pursuit(state: WorldState, team: TeamData) -> void:
@@ -408,6 +316,24 @@ func _commit_conquest_attack(state: WorldState, team: TeamData, prey_id: int) ->
 		print("[ProsperityAttack] attacker=Team%d prey=Team%d" % [team.team_id, prey_id])
 		return true
 	return false
+
+# 征服 scout 生命週期（序5：cascade 溶解後保留的 scout scaffolding tick，鏡射舊 cascade 的 scout timeout/
+# 自家 scout 重評段）。只對「查證中」隊動作：prey 消失/逾時 → 釋放；否則重評（親見壓 uncertainty → 收斂轉攻，
+# 或刷新 scout 位）。latch-timeout 不變量：scout 有 SCOUT_TIMEOUT release（防永 scout 卡死）。
+func _tick_conquest_scout(state: WorldState, team: TeamData) -> void:
+	if team.current_task != TeamData.TASK_SCOUT or team.task_reason != "scout": return
+	if team.combat_target != -1: return
+	var prey_id: int = team.prosperity_target_id
+	if prey_id == -1 or not state.teams.has(prey_id):
+		TaskArbiter.release(team)   # prey 已滅 → 收手回常規
+		team.prosperity_target_id = -1
+		return
+	if state.world.current_tick - team.task_start_tick > BeliefSystem.SCOUT_TIMEOUT:
+		TaskArbiter.release(team)   # 逾時未收斂 → 釋放（防永 scout 卡死）
+		Probe.bump("g3.scout_timeout")
+		return
+	# 重評：confident（親見壓低 uncertainty）→ release+轉攻；仍不確定 → 刷新 scout 位追 prey。
+	_commit_conquest_attack(state, team, prey_id)
 
 # ──────── D: 被動威脅反應 ────────
 
@@ -742,9 +668,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		else:
 			# faction 成員（非子隊，斷①C「入勢力不換腦」）：個人戰略層對每個 leader 永遠跑——
 			# faction 身分=context/term（faction_duty），非決策路徑開關。只跑戰略 intent 層
-			# （建國 gate 對成員 can_found=false；征服 intent → defer 打草穀 raid 路），**不呼
+			# （建國 gate 對成員 can_found=false；征服 intent 只宣告），**不呼
 			# _evaluate_solo**（個人日常全域=後續 F-D 矩陣格，避與 _assign_tasks 派工大面積互搏，一次一縫）。
-			# 執行壓層零新碼：faction directive 在 → 成員非 idle → _evaluate_prosperity_attack idle-guard 擋。
+			# 序5 dissolve：舊 loop3 cascade 成員打草穀 raid 路已刪；成員征服 intent 現無獨立 dispatch 路
+			# （不呼 _evaluate_solo）→ 打草穀 raid 待 序6 loop3 全溶接回（框架債縫#3）。
 			if SimRunner.phase_timing:
 				var _ts: int = Time.get_ticks_usec()
 				_evaluate_independent_strategy(state, team)
@@ -793,12 +720,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		_evaluate_survival(state, team)
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.survival", _t3)
 		# 獨立戰略層（建國 intent）已在前段 solo 迴圈評估（_evaluate_solo 前，不雙寫）。
-		# A: prosperity attack（野心驅動主動征服，cadence + 軍隊加速）
-		if _is_prosperity_candidate(state, team) \
-				and state.world.current_tick >= team.prosperity_eval_next_tick:
-			_evaluate_prosperity_attack(state, team)
-			var cad: int = PROSPERITY_CADENCE_MILITARY if "軍隊" in team.tags else PROSPERITY_CADENCE
-			team.prosperity_eval_next_tick = state.world.current_tick + cad
+		# 序5 dissolve：prosperity attack 決策已溶進主 rank（solo/unified 攻擊 option）——loop3 cascade invoke 刪。
+		# 保留的 scout scaffolding 生命週期（逾時釋放 / prey 消失 / 收斂轉攻）走 _tick_conquest_scout。
+		_tick_conquest_scout(state, team)
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.prosperity", _t3)
 		# 追擊刷新（攻擊/掠奪 中移動目標會跑，每 tick 對齊 intel）
 		_refresh_attack_pursuit(state, team)
@@ -1158,8 +1082,8 @@ func _set_solo(state: WorldState, team: TeamData, itype: String, why: String, mo
 func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id and state.player_id != -1: return
 	# 斷①C「入勢力不換腦」：個人戰略層對每個 leader 永遠跑（含 faction 成員）——身分=權重非路徑切換。
-	# 成員的建國由 can_found=false 擋（fid≠-1 不重複建國）；征服 intent → defer 打草穀 raid 路。
-	# 執行壓層：faction directive 在 → 成員非 idle → _evaluate_prosperity_attack idle-guard 擋個人 raid（零新碼）。
+	# 成員的建國由 can_found=false 擋（fid≠-1 不重複建國）；征服 intent 只宣告。
+	# 序5 dissolve：成員打草穀 raid 舊走 loop3 cascade（已刪）；征服 intent 現無獨立 dispatch 路 → 待 序6 loop3 全溶。
 	if team.parent_team_id != -1: return        # 子隊不自建國
 	if team.combat_target != -1: return         # 戰鬥中不重評
 	var leader: PersonData = state.persons.get(team.leader_id)
@@ -1559,19 +1483,19 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	if _conq: Probe.bump("conq.intent")
 	for e in ranked:
 		var opt: String = e["opt"]
-		# means-end 統一攻擊：征服 intent 驅動的攻擊 → route 到 scout-gated prosperity（削敵→俘虜→守），
-		# 非粗 _nearest_independent 直取。消「兩條攻擊路徑」（faction directive 攻擊維持指定 target 路徑）。
+		# means-end 統一攻擊：征服 intent 驅動的攻擊 → dispatch-time scout-verify scaffolding
+		# （_commit_conquest_attack：不確定→斥候、confident→打；削敵→俘虜→守乾淨鏈）。序5 dissolve：
+		# cascade 決策已溶進 攻擊 option（intent_fit 征服 × readiness/富prey）→ 此處只走 scaffolding。
+		# faction directive 攻擊維持指定 target 路徑（非征服 intent，不入此分支）。
 		if opt == "攻擊" and _solo_type(team) == "征服" and team.faction_id == -1:
 			if _is_prosperity_candidate(state, team):
+				var _pid: int = int(DecisionOptions.to_task(state, team, opt).get("combat_target", -1))
 				SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_ATTACK, team.tile_pos)
-				if SimRunner.phase_timing:
-					var _tp: int = Time.get_ticks_usec()
-					_evaluate_prosperity_attack(state, team)
-					_fai_pht("unified.prosp", _tp)
-				else:
-					_evaluate_prosperity_attack(state, team)   # scout→打垮→capture 乾淨鏈
-				return
-			continue   # 無 prosperity 資格 → 試次佳（不落回粗攻擊）
+				var _tp: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+				var _done: bool = _commit_conquest_attack(state, team, _pid)
+				if SimRunner.phase_timing: _fai_pht("unified.prosp", _tp)
+				if _done: return
+			continue   # 無 prosperity 資格/prey → 試次佳（不落回粗攻擊）
 		var _t2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		if SimRunner.phase_timing: _fai_pht("unified.to_task", _t2)
@@ -1795,15 +1719,9 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	# stuck 視為 idle，允許重評（task 保留意圖直到重新派發）
 	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
 
-	# 序2 溶入連動：去 _tag_weight 後 solo 不再自然讓位（舊 tag_weight=0 使 FORCE 隊 attack 分歸零→留 idle→
-	# prosperity_attack 接手 scout→打垮→capture 精算征服鏈）。engine 恆有 建設 option → solo 每 idle tick 必派
-	# → 餓死 prosperity 路（loop3 idle-guard 見非 idle 跳過）。顯式讓位：FORCE 征服候選隊在其 prosperity
-	# cadence 到期 tick 讓給 prosperity_attack（loop3 同 tick 跑，精算鏈優先於 solo opportunistic loot/建設；
-	# 對齊 spec「消兩條攻擊路徑」）。非到期 tick solo 照跑日常。非 FORCE 隊(prosperity archetype-gate 本就擋)不受影響。
-	if _is_prosperity_candidate(state, team) \
-			and team.ambition_archetype == AmbitionLadder.ARCHETYPE_FORCE \
-			and state.world.current_tick >= team.prosperity_eval_next_tick:
-		return
+	# 序5 dissolve：舊「FORCE 隊 cadence tick 讓給 loop3 prosperity_attack」yield 閘已刪——
+	# 征服攻擊決策溶進主 rank（攻擊 option: intent_fit 征服 × readiness/富prey），FORCE 隊直接主 rank
+	# 選攻擊 → _commit_conquest_attack scout-verify（下方迴圈）。cascade 雙路徑消除（框架債縫#3 部分結清）。
 
 	# 序2 solo 溶入：手算 argmax 撕除 → 引擎 rank_scored（融合非刪；鏡射 _decide_unified）。
 	# 去 _tag_weight hard-gate（tag 不硬鎖，藍圖裁1）；attack/loot 由 capability grounding（裁2）
@@ -1817,6 +1735,15 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
 	for e in ranked:
 		var opt: String = e["opt"]
+		# 序5 dissolve：征服 intent 攻擊 → dispatch-time scout-verify scaffolding（不確定→斥候、confident→打；
+		# 削敵→俘虜→守乾淨鏈）。純血仇攻擊(非征服 intent)照走下方 raw dispatch（confidence 脫軌，不 scout-gate）。
+		if opt == "攻擊" and _solo_type(team) == "征服" and team.faction_id == -1 \
+				and _is_prosperity_candidate(state, team):
+			var _pid: int = int(DecisionOptions.to_task(state, team, opt).get("combat_target", -1))
+			if _commit_conquest_attack(state, team, _pid):
+				if _conq: _probe_conq_winner(opt, ranked)
+				return
+			continue   # 無 prey/未派 → 試次佳（不落回粗攻擊）
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE: continue
 		var tgt: Vector2i = td["target"]

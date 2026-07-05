@@ -14,9 +14,8 @@ scripts/simulation/faction_ai_system.gd::_evaluate_all_body
 scripts/simulation/faction_ai_system.gd::_evaluate_idle_subteam
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy
 scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure
-# 序5 prosperity
-scripts/simulation/faction_ai_system.gd::_evaluate_prosperity_attack
-# 序5 prosperity（scout-verify scaffolding：cascade 溶解後保留的 means-end 機制 dispatch 落點）
+# 序5 prosperity（cascade _evaluate_prosperity_attack 已溶解刪除；保留 scout-verify scaffolding
+# _commit_conquest_attack = 溶解後的 means-end 機制 dispatch 落點，dispatch-time 降不確定非判斷器）
 scripts/simulation/faction_ai_system.gd::_commit_conquest_attack
 # 序2 solo
 scripts/simulation/faction_ai_system.gd::_evaluate_solo
