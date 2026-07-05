@@ -141,7 +141,69 @@ func _check_reverse() -> void:
 		_fails += 1
 		print("[FAIL] 軍隊反應異常：rank[0]=%s 非攻擊/掠奪（ranked=%s）" % [top_s, str(_opts(cs))])
 
-# ── Task4：unified 守恆（有牙 unified 商隊不被 capability grounding 誤癱瘓）──
-# 佔位（Task4 Step1 填實）：先宣告，Task1 red 階段 no-op。
+# ── Task4：unified 守恆（capability grounding 進共用 eval → unified 隊也受影響；驗有牙不誤癱瘓、無牙一致）──
+# 真世界 setup（rank_scored(state,team) 走真 gather，非手構 ctx）：同情境健康 unified 商隊 + 弱prey，
+# 只差 armed_anon_ratio → 驗 grounding 按戰力分辨（有牙掠奪 util>0=可揮刀；無牙≈0=同 solo 反向一致）。
 func _check_unified_conservation() -> void:
-	pass
+	print("--- Task4 unified 守恆 (capability grounding 不誤癱瘓有牙 unified 商隊) ---")
+	var armed_loot: float = _merchant_loot_util(0.6)    # 有牙 unified 商隊
+	var unarmed_loot: float = _merchant_loot_util(0.0)  # 無牙 unified 商隊
+	print("[unified] 掠奪 util 有牙=%.3f 無牙=%.3f" % [armed_loot, unarmed_loot])
+	# 無牙 unified 商隊：掠奪 被 capability 壓平（≈0）→ 與 solo 反向一致（無牙不劫匪化，跨路徑同理）。
+	if unarmed_loot > 0.01:
+		_fails += 1
+		print("[FAIL] 無牙 unified 商隊 掠奪 util=%.3f 未被壓平（grounding 未生效於 unified 共用 eval）" % unarmed_loot)
+	else:
+		print("[unified] 無牙 unified 商隊 掠奪 util≈0 OK（同 solo 反向一致）")
+	# 有牙 unified 商隊：掠奪 未被誤癱瘓（有本錢→util>0，可揮刀；grounding 對有牙透明=行為守恆）。
+	if armed_loot <= unarmed_loot:
+		_fails += 1
+		print("[FAIL] 有牙 unified 商隊 掠奪 被誤癱瘓（armed=%.3f ≤ unarmed=%.3f）" % [armed_loot, unarmed_loot])
+	else:
+		print("[unified] 有牙 unified 商隊 掠奪 util>0 未癱瘓 OK（capability 對有牙透明）")
+	# 有牙 unified 商隊健康有貨 → 貿易本業 option 仍在 rank（非因 grounding 全走劫掠）。
+	var armed_opts: Array = _merchant_rank_opts(0.6)
+	if "貿易" in armed_opts:
+		print("[unified] 有牙 unified 商隊 貿易本業 option 仍在 rank OK: %s" % str(armed_opts))
+	else:
+		_fails += 1
+		print("[FAIL] 有牙 unified 商隊 貿易 option 消失（本業失守，ranked=%s）" % str(armed_opts))
+
+func _build_merchant(armed_ratio: float) -> Array:
+	var state := WorldState.new(); state.world = WorldData.new()
+	for px in [5, 6, 7]:   # reachability 路格 (5,5)-(7,5)
+		var pt := HexTileData.new()
+		pt.tile_id = px * 1000 + 5; pt.tile_pos = Vector2i(px, 5); pt.terrain = "plains"
+		state.world.tiles[pt.tile_id] = pt
+	var tid := 700
+	var t := TeamData.new(); t.team_id = tid; t.tags = [TeamData.TAG_MERCHANT]
+	t.tile_pos = Vector2i(5, 5); t.leader_id = tid * 10; t.faction_id = -1
+	AnonTierSystem.add_anon(t, "平民", 12); t.armed_anon_ratio = armed_ratio
+	t.resources = {"food": 400.0, "goods": 50.0, "coin": 100.0}   # 健康有貨（貿易本業）
+	state.teams[tid] = t
+	state.team_discovered[tid] = []
+	state.team_intel[tid] = {}
+	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
+	ldr.values = {"貪婪": 0.7, "好戰": 0.3, "殘忍": 0.5, "野心": 0.4, "慎重": 0.4}
+	state.persons[ldr.id] = ldr
+	# 弱 prey + belief（G3：有情報才可掠奪）；非逼近 → 不觸威脅 option。
+	var pid := 701
+	var p := TeamData.new(); p.team_id = pid; p.tile_pos = Vector2i(7, 5); p.faction_id = -1
+	p.last_tile_pos = p.tile_pos
+	AnonTierSystem.add_anon(p, "平民", 3)
+	state.teams[pid] = p
+	state.team_discovered[tid].append(pid)
+	BeliefSystem.record_claim(state, tid, pid, tid, "親見", {"population_est": 3, "armed_est": 1}, 1.0, false)
+	return [state, t]
+
+func _merchant_loot_util(armed_ratio: float) -> float:
+	var pair: Array = _build_merchant(armed_ratio)
+	for e in DecisionEngine.rank_scored(pair[0], pair[1]):
+		if String(e["opt"]) == "掠奪": return float(e["u"])
+	return 0.0   # 掠奪 不 applicable/不在 rank → 視為 0
+
+func _merchant_rank_opts(armed_ratio: float) -> Array:
+	var pair: Array = _build_merchant(armed_ratio)
+	var out: Array = []
+	for e in DecisionEngine.rank_scored(pair[0], pair[1]): out.append(e["opt"])
+	return out
