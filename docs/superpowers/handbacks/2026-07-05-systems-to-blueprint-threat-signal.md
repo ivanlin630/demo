@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: wave1 threat 溶入 spec 好了(融合非刪,鏡射survival雙路);一個WHAT鄰接叉待你——中立-rep但逼近的未知軍算威脅嗎?spec預設「算」(保舊repertoire)不擋實作,你若要「僅敵意才威脅」回一句我切訊號源
 ---
 
