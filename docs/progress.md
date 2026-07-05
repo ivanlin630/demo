@@ -395,6 +395,17 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - **融合驗綠**：rung repertoire（訓練/貿易/生產/建設/讓位）+ threat（新 live-seam）+ solo 全 ALL PASS；framework PASS=7；gate PASS 32（rung_task 回字串無 TaskArbiter→不在指紋）。
 - **seeded 52→48/8/1/380**（QA wave 判；pop/factions/established 守恆；48–56 帶繞 52）。**watch（藍圖/QA）**：世界變靜（threat 遭遇↓）是否過龜縮（反龜縮 bar）。
 
+### 憲法溶入 arc — wave2 序5 prosperity done（2026-07-05，merged 16ab3bc）★arc 最大 slice
+
+`_evaluate_prosperity_attack` gate cascade（archetype/attack_score/readiness/find_prey 硬閘 prescribe TASK_ATTACK）決策溶進引擎 攻擊 option。
+- **readiness→權重**：`_intent_fit` 征服 × `readiness_factor=clampf(readiness/readiness_thr_eff)`（沒本錢 util 趨 0=capability grounding，非硬閘）+ 信義 penalty（對齊舊 attack_score 野心+好戰−信義）。富 prey targeting（find_prosperity_prey 經 ctx.intent_target）。
+- **scout-verify 保 scaffolding**（`_commit_conquest_attack`：不確定+慎重→TASK_SCOUT/confident/莽者→TASK_ATTACK；`_tick_conquest_scout` 生命週期）——means-end 非 option（派斥候探底 option 排 trade/diplomacy 溶）。**S3 scout=1/S4 ambush=1 誘殺保**。
+- 刪 cascade + 序2 yield 閘（框架債縫#3 部分結清）+ unified reroute → FORCE 隊征服走主 rank。
+- **融合驗 6 錨 ALL PASS**（repertoire/readiness閘/斥候/照衝/hunger_relief/富prey）；framework PASS=7；gate PASS；seeded 52/9/1/381→**52/8/1/380**（非凍死，churn 在）。
+- **★征服率發現（gen 重校輸入）**：征服 intent 隊 rank **掠奪(小承諾)壓過攻擊(出征)** → prosperity_reached 2→0=「沒本錢征服隊改掠奪」=合設計；ready+armed 隊攻擊會贏。conquest 仍經 loot→combat→capture（combat_entered=15）。**非 fail**（藍圖：雪球≠fail 唯凍死=fail，churn 在）。
+- **★interim gap（序6-bound）**：舊 loop3 cascade 對 faction 成員也跑打草穀 raid；序5 刪 loop3→成員征服只宣告無 dispatch 路→**成員 raid 暫失**（獨立 FORCE 隊征服鏈完整=主交付）。序6 loop3 全溶接回（縫#3 結清）。
+- **殘（arc 尾清）**：orphaned `calc_attack_score`/`ATTACK_SCORE_THRESHOLD`/`PROSPERITY_CADENCE(_MILITARY)`；cascade 單元測遷移/退役。**B 債**：`VIABLE_ARMED_RATIO`/`INTENT_FIT_DRIVE`/信義 k=0.4 待人格化（`readiness_thr_eff` 已含慎重✓）。
+
 ### 憲法溶入 arc — wave1 序3.5 threat-preempt done（2026-07-05，merged 4afbcaf）
 
 反龜縮 seam 修：忙碌目標對逼近攻擊者盲（`_evaluate_threat` idle-gate，measure 坐實 IDLE 反應/BUSY 不反應）→ 強威脅 preempt 非緊急進行中 task。**接 approach→感知→反應因果脊椎，非新機制。**
