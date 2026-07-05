@@ -368,6 +368,16 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - **★憲法 site-freeze 防閘**（`constitution_gate.gd`+`constitution_baseline.txt`）：鎖 `TaskArbiter.transition/try_set` 面（32 指紋凍結，8 known 違憲標 `# 序N`）。current⊆baseline，新增=FAIL、移除(arc溶解)=PASS。**限制**：不覆蓋 return-task-字串式違憲（coverage 誠實聲明，見 invariants）；**未掛常駐鏈**（known_issues 追）。
 - **根值未動**：`TICKS_PER_DAY` 仍 240，60 切換綁 A2（×5→1+補給+FOOD+gen 四件一 landing）。本 slice 為 A2 鋪好導出面。
 
+### 憲法溶入 arc — wave1 序1 threat done（2026-07-05，merged 804432e）
+
+**溶=融合非刪** 首張。threat 手算 argmax（`_dispatch_threat_response`）撕除 → 引擎 `rank_threat` 秤：
+- 4 反應成 REGISTRY option（FLEE 複用 `survival`；補 備戰/迎戰/求和 + eval term + weight key 人格 crosswalk）。**term = additive personality-dominant**（weight=1.0，人格 baked in eval，同既有 intent_fit/attack_drive 法）——因 `threat_react` unbounded（power_ratio 達 3.27）multiplicative 會爆量壓過 survival 絕境；additive 忠實鏡射舊公式，非 hack。
+- 架構鏡射既有 survival 雙路：unified 隊 threat option 進主 rank（`_decide_unified`）；non-unified 隊 loop3 `_evaluate_threat` 保 trigger/release，內部換 `rank_threat`。trigger/release scaffolding（idle-gate/cadence/FLEE_TIMEOUT）保留=世界機制。
+- **融合驗雙關綠**（`threat_dissolution_check.gd`）：①repertoire 4 原型各達（FLEE/DEFEND/PREPARE/求和）+ 居民守衛 ②率表 flee13/prepare4/defend1/pacify0=18>0（non-unified 逐類 bit-identical，該出現還出現）。
+- **seeded 漂移 46/8/1/380 → 48/8/1/382**（新 baseline）：漂移純來自 unified 隊 threat option 進主 rank 微調軌跡（non-unified 逐類零變）；factions/established 守恆、pop 穩、無滅團潮 = **合理非退化**（交 QA 覆判，wave 級交付前）。
+- 憲法閘：`_dispatch_threat_response` 指紋 removed=arc 進度；dispatch 移入保留的 `_evaluate_threat`（sites=32 不變，PASS）。
+- **殘（watch，known_issues）**：unified 隊 迎戰/求和 下游 resolver（DEFEND prosperity_target 消費 / tribute_offer 外交鏈）未端到端驗；survival option 雙語意（主 rank reputation-filtered soft / rank_threat raw hard，刻意分離已註釋）。
+
 ### 待開發（大功能）
 
 | 項目 | 狀態 | 說明 |

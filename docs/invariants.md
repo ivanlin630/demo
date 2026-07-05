@@ -12,6 +12,7 @@
   - ❌ **行為規則（腳本，禁）**：`if 食物<X then 塞糧`、判斷器（prescribe 而非 weigh）、替 NPC 決定的行為 subsystem = 違憲。描述「NPC 該怎麼選」。
 - **強制閘**：掃「替 NPC 決定的碼」——引擎外硬編 action selection / 判斷器 prescribe / 行為 subsystem = fail。
   - **機械實體（序0 立，2026-07-05）= site-freeze 防閘**：`scripts/debug/constitution_gate.gd` 掃 `scripts/simulation/` 的 `TaskArbiter.transition/try_set` 呼叫面（= 引擎外 task 指派落點），指紋 `<relpath>::<enclosing_func>` 比對 `constitution_baseline.txt`（32 指紋凍結，8 known 違憲以 `# 序N` 標 arc 溶入序）。**契約**：current ⊆ baseline，新增=FAIL、移除(arc 溶解)=PASS（印 `removed` 作 arc 進度信號）。
+  - **arc 溶入進度**：**序1 threat done ✅**（2026-07-05 merged 804432e，`_dispatch_threat_response` 手算 argmax→引擎 `rank_threat`；融合驗雙關綠 repertoire 4/4+率表；seeded baseline 46/8/1/380→**48/8/1/382**）。剩 序2 solo / 序3 rung_task / 序4 vendetta / 序5 prosperity / 序6 dispatch / 序7 reaction / 序8 灰項。融合非刪守則：每張驗 repertoire 沒少 + 該出現還出現，seeded 漂移允許但 QA 判合理非退化。
   - **coverage 誠實限制**：閘只鎖 TaskArbiter mutation 面，**不**覆蓋「return task 字串供他處消費」式違憲（如 `ambition_ladder.rung_task`）——那類靠 arc 逐張溶解 + review，非機械閘。閘目標=「無新增引擎外 task 指派」，非完備語意偵測。
   - **arc 期間硬掛（藍圖 wave1-order-gate 裁定提前）**：本地 `.git/hooks/pre-commit`——staged 含 `scripts/simulation/*.gd` 時跑閘，FAIL 拒 commit（worktree 共用 → 實作 commit 也擋）。**arc 尾**轉常駐全掃鏈並撤此 hook。hook 在 `.git`（本地非版控，arc-temporary）。
 - **零例外**：絕境=survival utility 在引擎內支配（非 override 繞過）；遠方=疏非慢非笨（引擎決策，非變笨）。此二處驗沒偷寫行為腳本。
