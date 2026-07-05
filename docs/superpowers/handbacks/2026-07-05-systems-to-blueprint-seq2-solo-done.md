@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序2 solo done(merged f7ce320)——capability-grounded生效(無牙商隊掠奪util 0.0≠劫匪);融合+反向驗綠;但揭2件要你判:①獨立隊ambition-diplomacy行為流失(repertoire,保否)②軍隊攻擊0→22.5%(過度侵略否);+框架債報備(不擋)
 ---
 
