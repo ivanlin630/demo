@@ -76,6 +76,13 @@ var archetype: String = ""
 var rung: int = 0
 var has_trainable: bool = false
 var ambient_train_drive: float = 0.0
+# 征服溶入（序5 prosperity）：軍力就緒度（pop/skill/food/weapon mean）+ 有效門檻（含慎重 + hunger_relief 滑降）
+# + 富 prey target（find_prosperity_prey：richness×貪婪 + weakness×殘忍 + border×野心 / eta×logistics）。
+# intent_fit 征服路 × readiness_factor（沒本錢趨0=readiness 閘，合憲法權重非硬閘）；攻擊 target 用 prosperity_prey_id。
+# 三者鏡射舊 cascade G3/G4（calc_readiness/calc_readiness_threshold/find_prosperity_prey 已 static，ctx 呼）。
+var readiness: float = 0.0
+var readiness_thr_eff: float = 0.0
+var prosperity_prey_id: int = -1
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -211,6 +218,23 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if c.archetype == AmbitionLadder.ARCHETYPE_FORCE \
 			and team.ambition_rung in [AmbitionLadder.RUNG_ACCUMULATE, AmbitionLadder.RUNG_EXPAND]:
 		c.ambient_train_drive = 0.5   # TEST VALUE — 低 magnitude 讓位緊急決策
+	# 征服溶入（序5）：readiness/thr_eff/富 prey（鏡射舊 cascade G3/G4，helper 已 static）。
+	# readiness_thr_eff = threshold × hunger_relief（越餓門檻越低=豁出去搶糧；連續信號零新閘）。
+	if ldr != null:
+		c.readiness = FactionAISystem.calc_readiness(state, team)
+		var _thr: float = FactionAISystem.calc_readiness_threshold(team, ldr)
+		var _hunger_relief: float = clampf(c.food_days / FactionAISystem.HUNGER_SLIDE_DAYS, \
+			FactionAISystem.RELIEF_FLOOR, 1.0)
+		c.readiness_thr_eff = _thr * _hunger_relief
+		# 富 prey target（find_prosperity_prey：has_belief/reachable 守衛在內；征服攻擊 target 用此非 _nearest）。
+		c.prosperity_prey_id = FactionAISystem.find_prosperity_prey(state, team, ldr)
+		# 征服攻擊 target 改用富 prey（取代 weak_prey fallback；faction leader 指定 target 不覆蓋）。
+		# 4b：richness/border/logistics 富選勝「只挑最弱」。無富 prey → 保留 weak_prey fallback（intent 段已設）。
+		if c.intent == "征服" and c.prosperity_prey_id != -1 \
+				and (c.intent_target == -1 or c.intent_target == _prey):
+			c.intent_target = c.prosperity_prey_id
+			c.intent_target_pos = state.teams[c.prosperity_prey_id].tile_pos
+	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.readiness_prey", _tg)
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
