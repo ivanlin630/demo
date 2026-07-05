@@ -28,6 +28,9 @@ const REGISTRY: Dictionary = {
 	"備戰":   [["prepare_drive", "prepare"]],
 	"迎戰":   [["defend_drive", "defend"]],
 	"求和":   [["pacify_drive", "pacify"]],
+	# 野心階梯溶入（序3）：FORCE-archetype 累積階練兵（原 rung_task ACCUMULATE×FORCE→TASK_TRAIN）。
+	# archetype/rung 當 weight（ambient_train_drive）驅動，非查表塞 task。
+	"訓練":   [["train_drive", "train"]],
 }
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
@@ -112,6 +115,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 				if ctx.threat_react >= ctx.threat_threshold and not ctx.is_resident: out.append(opt)
 			"求和":
 				if ctx.threat_react >= ctx.threat_threshold: out.append(opt)
+			# 野心階梯溶入（序3）：FORCE-archetype + 有 anon 可練 → 練兵候選。
+			"訓練":
+				if ctx.archetype == AmbitionLadder.ARCHETYPE_FORCE and ctx.has_trainable: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -194,4 +200,6 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			if _pc.threat_id == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_DIPLOMACY, "target": _pc.threat_pos,
 				"order_target": _pc.threat_id, "order_task": TeamData.TASK_TRIBUTE_OFFER}
+		# 野心階梯溶入（序3）：練兵=原地 TASK_TRAIN（training_system 累積階兵）。
+		"訓練":   return {"task": TeamData.TASK_TRAIN, "target": team.tile_pos}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
