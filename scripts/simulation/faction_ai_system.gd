@@ -1722,6 +1722,16 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	# stuck 視為 idle，允許重評（task 保留意圖直到重新派發）
 	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
 
+	# 序2 溶入連動：去 _tag_weight 後 solo 不再自然讓位（舊 tag_weight=0 使 FORCE 隊 attack 分歸零→留 idle→
+	# prosperity_attack 接手 scout→打垮→capture 精算征服鏈）。engine 恆有 建設 option → solo 每 idle tick 必派
+	# → 餓死 prosperity 路（loop3 idle-guard 見非 idle 跳過）。顯式讓位：FORCE 征服候選隊在其 prosperity
+	# cadence 到期 tick 讓給 prosperity_attack（loop3 同 tick 跑，精算鏈優先於 solo opportunistic loot/建設；
+	# 對齊 spec「消兩條攻擊路徑」）。非到期 tick solo 照跑日常。非 FORCE 隊(prosperity archetype-gate 本就擋)不受影響。
+	if _is_prosperity_candidate(state, team) \
+			and team.ambition_archetype == AmbitionLadder.ARCHETYPE_FORCE \
+			and state.world.current_tick >= team.prosperity_eval_next_tick:
+		return
+
 	# 序2 solo 溶入：手算 argmax 撕除 → 引擎 rank_scored（融合非刪；鏡射 _decide_unified）。
 	# 去 _tag_weight hard-gate（tag 不硬鎖，藍圖裁1）；attack/loot 由 capability grounding（裁2）
 	# + 人格 weight 承載傾向。9 反應 repertoire 全走 REGISTRY option（無新 option）。
