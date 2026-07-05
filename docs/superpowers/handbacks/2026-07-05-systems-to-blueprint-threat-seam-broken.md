@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: threat-tension seam 查完=★斷(measure坐實)——忙碌目標對逼近攻擊者盲(idle-gate);IDLE反應/BUSY同威脅不反應;修向=強威脅preempt非緊急task(接approach→感知→反應因果脊椎,非新機制);要你裁slotting(arc內小slice建議)
 ---
 
