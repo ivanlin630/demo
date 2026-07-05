@@ -395,6 +395,17 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - **融合驗綠**：rung repertoire（訓練/貿易/生產/建設/讓位）+ threat（新 live-seam）+ solo 全 ALL PASS；framework PASS=7；gate PASS 32（rung_task 回字串無 TaskArbiter→不在指紋）。
 - **seeded 52→48/8/1/380**（QA wave 判；pop/factions/established 守恆；48–56 帶繞 52）。**watch（藍圖/QA）**：世界變靜（threat 遭遇↓）是否過龜縮（反龜縮 bar）。
 
+### 憲法溶入 arc — wave2 序6 faction 成員 dispatch done（2026-07-06，merged 2b4a427）★最高收斂動主幹
+
+`_assign_member_tasks` goal→task if/elif hand-dispatch（含 V2-cmd 徵收 shadow 攻擊）撕除 → faction **成員**（非 subteam）走 `_decide_unified`（引擎 rank_scored 競秤）。
+- **★只改成員 dispatch gate（`parent_team_id==-1`），不動全域 `uses_unified`**（陷阱：uses_unified 兼 `_evaluate_threat` skip，擴全域會繞過序3.5 preempt scaffolding=反龜縮又斷）→ 成員 macro 走引擎 + threat/preempt/survival loop3 scaffolding 保。**教訓同序2 `_tag_weight` 隱形去衝突閘：去/擴多職 gate 前先問它兼哪些職。**
+- **★V2-cmd 自消**：`rank_scored_ctx` argmax（非 if/elif 短路）→ {徵收,攻擊} 雙 goal 競秤，好戰成員攻擊 util(1.91)>徵收(1.67) 贏、貪婪成員反轉（分歧非抹平）→ 攻擊-eligible 成員不再被徵收 elif 序死。
+- **★成員打草穀 raid 接回**（掠奪 option has_weak_prey 自然競秤，序5 待項）+ **框架債縫#3 完全結清**（成員退 loop3-idle-gate，主 rank 每 cadence 重評）。外交 goal 對軍隊現通（舊 tag_weight=0 走不到）。
+- subteam guard 補（`parent_team_id==-1`，防 loop1/loop2 雙寫，現缺）；MERGE consolidate→`_try_consolidate_merge` scaffolding（faction 整併非個體決策）；probe 遷移引擎路。
+- **融合驗 6 錨 ALL PASS**（repertoire/V2-cmd 解/raid/preempt 保/subteam/本業）；threat-preempt/prosperity/threat/solo/rung/vendetta 全綠；framework PASS=7；gate PASS 32（`_assign_member_tasks` 指紋刪=arc 進度）。
+- **seeded 52→49/8/1/381**（成員 raid+V2-cmd 解→分佈變，逐點重現）。**★gen 重校 follow-up ripe**（藍圖 seq5-judgment：等序6 全溶對完整征服/掠奪圖調——現完整）。
+- **殘（watch）**：MERGE 現對商隊/生產成員亦 eligible（罕觸，誤併→加 tag guard）；member_atk seeded=0=結構（此 seed 無 faction 攻擊 directive，harness 確定性已證解）；leader dispatch=序6b defer。
+
 ### 憲法溶入 arc — wave2 序5 prosperity done（2026-07-05，merged 16ab3bc）★arc 最大 slice
 
 `_evaluate_prosperity_attack` gate cascade（archetype/attack_score/readiness/find_prey 硬閘 prescribe TASK_ATTACK）決策溶進引擎 攻擊 option。
