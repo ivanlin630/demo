@@ -258,9 +258,8 @@ func _initialize() -> void:
 	_test_n1_leader_tier_sync()
 	_test_n1_named_spawns_exile()
 	_test_n3_joins_existing_exile()
-	_test_bridge_no_threat_no_hijack()
-	_test_bridge_with_threat_flees()
-	_test_panic_skips_player_team()
+	# 序7 reaction 溶入：bridge panic-flee 撕除 → 集體恐慌走引擎 survival option（ctx.team_panic）。
+	# 舊 _test_bridge_* / _test_panic_skips_player_team 已移除（融合驗改由 reaction_dissolution_check.gd）。
 	# ── Task Arbiter ──
 	_test_arbiter_basic()
 	_test_arbiter_combat_lock()
@@ -270,7 +269,7 @@ func _initialize() -> void:
 	_test_arbiter_suppression_burst()
 	_test_arbiter_survival_beats_dispatch()
 	_test_arbiter_dispatch_beats_faction_goal()
-	_test_bridge_cannot_stomp_survival()
+	# 序7：_test_bridge_cannot_stomp_survival 移除（bridge 撕除，三源序改 PRIO 結構保 + reaction_dissolution_check ②驗）
 	# ── Economy / Spam Fixes ──
 	_test_salary_budget_ratio()
 	_test_salary_full_pay_unchanged()
@@ -10929,86 +10928,6 @@ func _test_n3_joins_existing_exile() -> void:
 	assert(state.teams.size() == 2, "不應另建 team")
 	print("Reaction Task5d OK")
 
-func _make_panic_team(state: WorldState) -> TeamData:
-	# pop=3 全 named 高壓低忠誠 → 全員 N1_flee
-	var team := TeamData.new(); team.team_id = 0; _seed_pop(team, 3)
-	team.tile_pos = Vector2i(2, 0)
-	state.teams[0] = team
-	for i in range(3):
-		var p := PersonData.new(); p.id = 1 + i; p.team_id = 0
-		p.stress = 1.0; p.loyalty = 0.0; p.fear = 0.0
-		p.values = { "求生欲": 1.0, "慎重": 0.0 }
-		state.persons[1 + i] = p
-		if i == 0: team.leader_id = p.id
-		else: team.named_members.append(p.id)
-	return team
-
-func _test_bridge_no_threat_no_hijack() -> void:
-	print("--- Reaction Task6a: 無威脅不劫持 task ---")
-	var state := WorldState.new(); state.world = WorldData.new()
-	var team := _make_panic_team(state)
-	var rs := ReactionSystem.new()
-	rs.evaluate_all(state, [0])
-	assert(team.current_task != TeamData.TASK_FLEE, "無威脅 task 不應變逃跑，實際=%s" % team.current_task)
-	assert(team.move_target == Vector2i(-1, -1), "move_target 不應被設")
-	print("Reaction Task6a OK")
-
-func _test_bridge_with_threat_flees() -> void:
-	print("--- Reaction Task6b: 真威脅 → 逃跑 + 反方向目標 ---")
-	var state := WorldState.new(); state.world = WorldData.new()
-	var team := _make_panic_team(state)
-	var threat := TeamData.new(); threat.team_id = 9; _seed_pop(threat, 20)
-	threat.tile_pos = Vector2i(0, 0); threat.last_tile_pos = Vector2i(-1, 0)   # 朝我來
-	state.teams[9] = threat
-	team.known_reputations = { 9: 0.1 }   # 高敵意
-	state.team_discovered[0] = [9]
-	state.team_intel[0] = { 9: { "population_est": 20 } }
-	var t5 := HexTileData.new(); t5.tile_pos = Vector2i(5, 0)
-	state.world.tiles[5000] = t5   # 反方向 (2,0)+(1,0)*3 = (5,0)
-	var rs := ReactionSystem.new()
-	rs.evaluate_all(state, [0])
-	assert(team.current_task == TeamData.TASK_FLEE, "應逃跑，實際=%s" % team.current_task)
-	assert(team.move_target == Vector2i(5, 0), "move_target 應 (5,0)，實際=%s" % str(team.move_target))
-	print("Reaction Task6b OK")
-
-func _test_panic_skips_player_team() -> void:
-	print("--- 恐慌橋跳過玩家主隊（NPC 對照）---")
-	var state := WorldState.new(); state.world = WorldData.new()
-	# 共用威脅敵隊 9（朝兩隊方向逼近，高敵意）
-	var enemy := TeamData.new(); enemy.team_id = 9; enemy.leader_id = 90
-	enemy.tile_pos = Vector2i(5, 4); enemy.last_tile_pos = Vector2i(6, 4); _seed_pop(enemy, 50)
-	state.teams[9] = enemy
-	state.persons[90] = PersonData.new(); state.persons[90].id = 90; state.persons[90].team_id = 9
-	enemy.named_members.append(90)
-	# 反方向逃跑目標 tile：(4,4)-(5,4)=(-1,0) → (4,4)+(-1,0)*3 = (1,4)，key=1*1000+4
-	var flee_tile := HexTileData.new(); flee_tile.tile_pos = Vector2i(1, 4)
-	state.world.tiles[1004] = flee_tile
-	var mk_team = func(tid: int) -> TeamData:
-		var t := TeamData.new(); t.team_id = tid; t.tile_pos = Vector2i(4, 4)   # leader+4 named = pop 5, 0 anon
-		var ld := PersonData.new(); ld.id = tid * 100; ld.team_id = tid
-		ld.loyalty = 0.0; ld.stress = 1.0; ld.fear = 1.0
-		ld.values = { "求生欲": 1.0, "慎重": 0.0 }
-		state.persons[ld.id] = ld; t.leader_id = ld.id
-		for i in range(4):
-			var m := PersonData.new(); m.id = tid * 100 + 1 + i; m.team_id = tid
-			m.loyalty = 0.0; m.stress = 1.0; m.fear = 1.0
-			m.values = { "求生欲": 1.0, "慎重": 0.0 }
-			state.persons[m.id] = m; t.named_members.append(m.id)
-		state.teams[tid] = t
-		t.known_reputations = { 9: 0.1 }              # 高敵意
-		state.team_discovered[tid] = [9]
-		state.team_intel[tid] = { 9: { "population_est": 50 } }
-		return t
-	var pt: TeamData = mk_team.call(0)
-	var nt: TeamData = mk_team.call(1)
-	state.player_id = 0
-	var rs := ReactionSystem.new()
-	rs.evaluate_all(state, [0, 1, 9])
-	assert(nt.current_task == TeamData.TASK_FLEE, "NPC 對照隊應觸發恐慌逃跑(測有效性前提),實際=%s" % nt.current_task)
-	assert(pt.current_task != TeamData.TASK_FLEE, "玩家主隊不該被設逃跑 task,實際=%s" % pt.current_task)
-	print("恐慌橋跳過玩家主隊 OK")
-
-
 # ══ Task Arbiter ══════════════════════════════════════════════
 
 func _test_arbiter_basic() -> void:
@@ -11132,28 +11051,6 @@ func _test_arbiter_dispatch_beats_faction_goal() -> void:
 		"faction goal(30) 不得蓋 貿易(50)")
 	assert(team.current_task == TeamData.TASK_TRADE, "貿易應保留")
 	print("Arbiter Task2b OK")
-func _test_bridge_cannot_stomp_survival() -> void:
-	print("--- Arbiter Task4: bridge(70) 蓋不動 survival 乞食(80) ---")
-	# = 逃跑↔乞食 ping-pong 結構性消失
-	var state := WorldState.new(); state.world = WorldData.new()
-	var team := _make_panic_team(state)
-	# 真威脅在場（同 Task6b 設定）
-	var threat := TeamData.new(); threat.team_id = 9; _seed_pop(threat, 20)
-	threat.tile_pos = Vector2i(0, 0); threat.last_tile_pos = Vector2i(-1, 0)
-	state.teams[9] = threat
-	team.known_reputations = { 9: 0.1 }
-	state.team_discovered[0] = [9]
-	state.team_intel[0] = { 9: { "population_est": 20 } }
-	var t5 := HexTileData.new(); t5.tile_pos = Vector2i(5, 0)
-	state.world.tiles[5000] = t5
-	# team 已在 survival 乞食 (80)
-	assert(TaskArbiter.try_set(state, team, "乞食", Vector2i(1, 0), TaskArbiter.PRIO_SURVIVAL))
-	var rs := ReactionSystem.new()
-	rs.evaluate_all(state, [0])
-	assert(team.current_task == TeamData.TASK_BEG, "bridge 不得蓋 survival，實際=%s" % team.current_task)
-	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL)
-	assert(team.move_target == Vector2i(1, 0), "move_target 不應被 bridge 改動")
-	print("Arbiter Task4 OK")
 
 # ──────── Economy / Spam Fixes ────────
 
