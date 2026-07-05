@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序3 rung_task done(merged 50dc86f)——查表溶入+訓練option;但收窄idle-filler揭★序1「threat率18」部分是churn假象→世界比想像靜(threat遭遇seed 3→0);機制沒壞(live-seam證),但要你判世界張力夠否(反龜縮bar)
 ---
 
