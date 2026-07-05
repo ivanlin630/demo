@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 斷糧行為量完——★好的餓為主(搏命89-96%:覓食/投靠/回家補給/搶),靜默僅4-11%且多正當mid-task→餓→行動trigger健康,稀缺引擎在跑;A2a=只recalibrate ×1(不升糧不修trigger);A2b行軍補給等B後量準
 ---
 

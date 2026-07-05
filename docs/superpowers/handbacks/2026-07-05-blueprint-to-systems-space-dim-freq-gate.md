@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 定位釘清(補tick-resolution)——空間尺度=矩陣新維度(時間的空間孿生,永久統一格,非一次性調參);運算頻率=非維度,是per-tick有界+時間量必導出兩既有不變量的強制閘檢查(裸tick常數=閘直接應用)
 ---
 

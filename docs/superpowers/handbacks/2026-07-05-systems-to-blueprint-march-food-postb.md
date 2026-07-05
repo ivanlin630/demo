@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: B後④行軍表(準)——行軍×1斷糧率38-47%(pre-B 29-37%確認低估);但中位距仍短2-3格(多數短程安全)→斷糧集中少數長journey(founding跨圖/trade全圖)=沿途補給該針對長征非blanket;承載力/斷糧行為與pre-B一致
 ---
 

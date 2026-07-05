@@ -54,3 +54,17 @@ TTL：`MSG_TTL_SHORT/MEDIUM/LONG`(1680/3360/7200)、`MSG_TTL_BY_TYPE`、`CRED_AG
 5. 觀看組確認不動（已分離）。
 
 裁完 → HOW：TimeScale 單源類 + 3 時間不變量入 invariants + 裸 tick→語意導出 + CI 掃 + ×5→1 連動 + 重校。
+
+## ★ tick-60 解析度安全分類（藍圖 tick-resolution-60，2026-07-05 掃證）
+
+`TICKS_PER_HOUR` 10→60 = 動根 `TICKS_PER_DAY 240→1440`。運算頻率=per-tick 有界+時間量必導出兩既有不變量的閘（非新維度）。
+
+**per-tick 有界閘（每 tick 無條件跑掃，sim_runner `_advance_tick_body`）**：僅 5 項。4 項 O(1) 廉價安全（`_step1_advance_time`/`get_speed_mult`/`get_vision_mult`/captives·cleanup 早退）。**唯一 O(N) 違規 = `_get_near_teams`/`_get_far_teams`(sim_runner:152-153)**——每 tick 無 gate 全掃 teams、結果只 cadence-gate 內消費（60 下 60:1 浪費）→ **需 cadence 化**（零行為+餵 A-arc O(N²)）。near/far pipeline 全 cadence-gate（隨 TICKS_PER_HOUR 縮放=同真實頻率）。
+
+**時間量必導出閘（裸 tick 常數）**：10 個 cadence/timeout 不動=爆頻×6 或時長÷6 → 全導出。爆頻：`INDEP_STRATEGY/PROSPERITY_CADENCE`(720)、`_MILITARY`(360)、`THREAT_CADENCE`(240)、`RESIDENCY_CADENCE`(720)。時長÷6：`RESIDENCY_COOLDOWN`(1680)、`TRADE_TIMEOUT`(1440)/`_PER_HEX`(120)、`FLEE_TIMEOUT`(5×**240硬編**bug)、`OCCUPY_ETA_MAX`(720)。**`PRISONER_CHECK_INTERVAL=5` 非違規**（gate `encounter_tick` 凍結遭遇戰框,measure 翻藍圖定性）。
+
+**取整驗（1440 下）**：整數除法全除盡（/24=60/4=360）、float day_fraction 自動縮放。**唯一漂移=`faction_ai:190 eta/240.0`**（硬編 240→應 `/TICKS_PER_DAY`）。
+
+**空間尺度散落（新維度）**：`game_setup:66/73/74`(config radius/count/spacing)、`encounter:174/175`(MAP_RADIUS/DIAMETER)、`SPAWN_RADIUS`——world-hex 與時間正交，統一=從遭遇戰錨連動導出（invariants「空間尺度骨架」）。時間-空間橋=`MOVE_TICKS_PER_HEX/TICKS_PER_HOUR`=60 下 4h/格。
+
+**切 60 = 3 機械修後安全**（見 handback `tick60-safety`）：①`_get_near/far` cadence 化 ②10 裸常數導出+FLEE ③eta/240 修。60 根切換建議併 A2（都動移動時間尺度,一起重校 gen）。

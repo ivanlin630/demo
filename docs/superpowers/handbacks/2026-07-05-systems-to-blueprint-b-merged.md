@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: B merged+合體全綠——一修多解confirmed(trade arrive3→21/deal16→42、envoy delivered大漲、V3 accept0→1)、不塌房pop反升、perf+28%無新spike;post-B baseline=46/8/1/380;殘因正交(carrier/accept決策端);待QA重跑充足性驗物流脫0
 ---
 
