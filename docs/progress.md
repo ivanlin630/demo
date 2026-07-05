@@ -386,6 +386,15 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - **seeded 48/8/1/382 → 52/8/1/380**（QA wave 級判；factions/established 守恆、無滅團潮）。
 - **★框架債揭（重要，見 known_issues + [[project_framework_seams]]）**：`_tag_weight` 是 solo/prosperity **隱形去衝突閘**——舊靠 `=0` 讓 FORCE 隊 attack 歸零→留 idle→loop3 prosperity 接精算征服鏈。去它 + 引擎「建設」option 恆 applicable→solo 每 idle tick 必派→餓死 loop3-idle-gated 路（S3 scout 一度 DORMANT）。實作加 **yield 閘補**（FORCE 征服候選 cadence 到期 return 讓 loop3）=橋，真結構修在序6（loop3 dispatch subsystem 溶入）。軍隊攻擊 occupancy 0%→22.5%（QA 判過度侵略否）。獨立隊 ambition-diplomacy 具體行為流失（engine 外交需 faction_stakes；獨立隊走 _evaluate_independent_strategy 結盟/建國+threat 求和；藍圖判要否保）。
 
+### 憲法溶入 arc — wave1 序3 rung_task done（2026-07-05，merged 50dc86f）
+
+`ambition_ladder.rung_task` `(archetype,rung)→task` 查表判斷器撕除 → archetype/rung 當 weight（`ctx.ambient_train_drive` 等）驅動 option。
+- **冗餘識別**：rung_task 7 mapping，6 條既有 option 已覆蓋（TRADE→貿易/SETTLE→生產/建設/等），**唯一真缺=訓練 option**（FORCE 累積階練兵）→ 補之。刪查表。
+- **idle-filler 走 `rank_ambient`**（收窄，系統裁定風險#1）：loop3 野心階梯 idle-filler 原 spec 走全 `rank_scored`→誤派 FLEE 86 次/1200t（team 到此已過 loop3 survival/threat 評估，ambient 不該二次猜）。修=`AMBIENT_OPTION_SET=[訓練,貿易,生產,建設,囤貨,駐守]` + `rank_ambient`（鏡射 rank_threat）。**FLEE churn 86→0（結構除，非壓 magnitude）、徵收 10→0**。
+- **★序1 threat「率18」部分是 churn 假象（重要 measure 洞察）**：86 ambient-FLEE 隨機逃跑=隊間威脅遭遇主要製造者→序1 驗的 threat 率 18 部分虛胖。churn 除盡→seeded threat.dispatch 3→0（世界變靜）。`_evaluate_threat` 未改、仍 loop3 先跑、真威脅仍派。→ **threat 融合驗 5b 從「seeded 湧現硬斷」改「確定性 live-seam 硬斷」**（構威脅隊直呼 _evaluate_threat 斷言實派+probe bump=更 robust，seeded 值降資訊性）。教訓：湧現率斷言可被無關 churn 虛胖，確定性 seam 測才穩。
+- **融合驗綠**：rung repertoire（訓練/貿易/生產/建設/讓位）+ threat（新 live-seam）+ solo 全 ALL PASS；framework PASS=7；gate PASS 32（rung_task 回字串無 TaskArbiter→不在指紋）。
+- **seeded 52→48/8/1/380**（QA wave 判；pop/factions/established 守恆；48–56 帶繞 52）。**watch（藍圖/QA）**：世界變靜（threat 遭遇↓）是否過龜縮（反龜縮 bar）。
+
 ### 待開發（大功能）
 
 | 項目 | 狀態 | 說明 |
