@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 topic: 藍圖 session 交接——本 session 從「GUI 貿易死」滾成 時間/空間統一維度 + 沙盒憲法(NPC行為湧現非腳本)兩大定案;物流 B merged 三病同解;憲法=統一決策 arc finish line(8 違憲溶入,融合非刪);待:系統跑 wave1 threat/solo + tempo(3機械修→A2/60) + 據點密度/A2 承載力值待我裁
 ---
 

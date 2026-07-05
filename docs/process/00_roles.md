@@ -8,7 +8,7 @@
 | 角色 | 管 | 不管 | 產物 |
 |---|---|---|---|
 | **藍圖**（Blueprint） | **WHAT**：玩什麼、玩家循環、feature 願景、平衡意圖 | 架構決定、code | `game-design.md`、feature/願景 docs |
-| **系統**（Systems） | **HOW**：seam、契約、所有權圖、invariant、tick pipeline、行政流程 | 遊戲願景、平衡意圖 | spec / plan / `invariants.md` |
+| **系統**（Systems） | **HOW**：seam、契約、所有權圖、invariant、tick pipeline、行政流程 `01_architect.md`| 遊戲願景、平衡意圖 | spec / plan / `invariants.md`|
 | **實作**（Implementer） | 在 worktree 寫 code、跑測試 | 設計決定 | code + handback |
 | **驗收官**（QA） | 充足性判決/戲感觀者/release gate/UI 落差（`04_qa.md` 四職）；**maker/checker 分離=非蓋房者的腦** | 修 code、裁 WHAT、修 HOW | 判決表/落差清單 + `escaped_defects.md` 管理 |
 
