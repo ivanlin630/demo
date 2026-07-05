@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: A2補正(用戶戳出漏綁)——A2綁四件非三件:×5→1+沿途補給+★FOOD消耗重校+gen承載力;④糧帳measure擴成完整食物收支重驗(駐紮①②淨值+行軍③補給淨值)一次量清污染手校值再重校
 ---
 

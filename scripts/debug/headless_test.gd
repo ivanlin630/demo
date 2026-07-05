@@ -3376,12 +3376,12 @@ func _run_sim_test() -> void:
 		"TimeScale.TICK_PER_DAY 應承 WorldState.TICKS_PER_DAY")
 	assert(TimeScale.ENCOUNTER_MAP_SCALE == EncounterSystem.MAP_DIAMETER,
 		"TimeScale.ENCOUNTER_MAP_SCALE 應承 EncounterSystem.MAP_DIAMETER(錨②)")
-	assert(TimeScale.MOVE_TICKS_PER_HEX == TimeScale.BASE_ACTION_TICKS * TimeScale.ENCOUNTER_MAP_SCALE,
-		"MOVE_TICKS_PER_HEX 必為 BASE_ACTION × ENCOUNTER_MAP_SCALE 連動（錨①,禁倍率）")
-	assert(TimeScale.MOVE_TICKS_PER_HEX == 240,
-		"MOVE_TICKS_PER_HEX 應 = 240 = 1天/hex")
-	assert(TimeScale.MOVE_TICKS_PER_HEX == TimeScale.TICK_PER_DAY,
-		"移動 1 world-hex 應 = 1 天（錨①連動值）")
+	# A1（×5 先留,零行為）：MOVE = BASE_ACTION × MAP_SCALE / WORLD_SPEED_MULT = 240/5 = 48。
+	# A2（×5→1,綁補給+FOOD+gen）拿掉 mult 後終值 = 240 = 1天/hex（屆時改此 assert）。
+	assert(TimeScale.MOVE_TICKS_PER_HEX == TimeScale.BASE_ACTION_TICKS * TimeScale.ENCOUNTER_MAP_SCALE / TimeScale.WORLD_SPEED_MULT,
+		"MOVE_TICKS_PER_HEX 必為 BASE_ACTION × ENCOUNTER_MAP_SCALE / WORLD_SPEED_MULT 連動（錨①）")
+	assert(TimeScale.MOVE_TICKS_PER_HEX == 48,
+		"A1：MOVE_TICKS_PER_HEX 應 = 48（×5 先留;A2 拿掉 mult→240）")
 	assert(MovementSystem.BASE_MOVE_TICKS == TimeScale.MOVE_TICKS_PER_HEX,
 		"MovementSystem.BASE_MOVE_TICKS 唯一讀站應走 TimeScale 連動式")
 	assert(TimeScale.days(3) == 3 * WorldState.TICKS_PER_DAY,
@@ -8671,8 +8671,8 @@ func _test_eta_ticks() -> void:
 	var team := TeamData.new()
 	_seed_pop(team, 5); team.fatigue = 0.0
 	var eta = PathSystem.eta_ticks(team, 5.0)
-	# BASE_MOVE_TICKS = 240（TimeScale 骨架,×5→1）, speed_mult = 1.0 → eta = 5 * 240 = 1200
-	assert(eta == 1200, "eta 應 1200，實際=%d" % eta)
+	# A1：BASE_MOVE_TICKS = 48（×5 留）, speed_mult = 1.0 → eta = 5 * 48 = 240（A2 ×5→1 後 = 1200）
+	assert(eta == 240, "eta 應 240，實際=%d" % eta)
 	team.fatigue = 0.5   # speed reduced
 	var eta2 = PathSystem.eta_ticks(team, 5.0)
 	assert(eta2 > eta, "fatigue 應延長 ETA")

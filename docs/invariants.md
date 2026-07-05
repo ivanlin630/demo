@@ -21,10 +21,10 @@
 凡延遲/timeout/cadence  以語意單位（TimeScale.days(N)/hours(N)，非裸 720）
 ```
 - **單一權威源 = `TimeScale`**（`scripts/simulation/time_scale.gd`）。承既有根：`TICK_PER_DAY`←WorldState、`BASE_ACTION_TICKS`/`ENCOUNTER_MAP_SCALE`←EncounterSystem。**單向依賴 TimeScale→{WorldState,EncounterSystem}，反向禁**（循環）。新碼一律 `TimeScale.*`。
-- **錨①（移動連動,釘死）**：`MOVE_TICKS_PER_HEX = BASE_ACTION_TICKS × ENCOUNTER_MAP_SCALE = 240 = 1 天/hex`。`MovementSystem.BASE_MOVE_TICKS` 唯一讀站走此連動式，**禁再塞世界速度倍率**（`WORLD_SPEED_MULT` 已刪）。
+- **錨①（移動連動,釘死）**：`MOVE_TICKS_PER_HEX = BASE_ACTION_TICKS × ENCOUNTER_MAP_SCALE / WORLD_SPEED_MULT`。`MovementSystem.BASE_MOVE_TICKS` 唯一讀站走此連動式。**★A1/A2 拆片（藍圖 timewave-five-rulings）**：**A1（現行）= ×5 先留 → MOVE=240/5=48（零行為變,骨架 refactor 即 merge）**；**A2 = 拿掉 `WORLD_SPEED_MULT`(×5→1)→ MOVE=240=1天/hex**，綁 ④沿途補給+FOOD 消耗重校+gen 承載力重校 **四件一個 landing**（缺補給裸切 ×1=餓死潮,已 measure 證 10 格斷糧）。A2 落地後此錨終值=240、mult 刪、禁再塞倍率。
 - **錨②**：`ENCOUNTER_MAP_SCALE = EncounterSystem.MAP_DIAMETER = 24`（遭遇戰地圖尺度,不變）。
 - **錨⑤（觀看組不碰物理）**：倍速靠 GUI（TICKS_PER_SECOND/TURN/DUMP 橋），非改時間尺度。
-- **enforce 進度**：本 slice 立骨架 + 移動連動（headless `_test` time-invariant assert 守）；③cadence 裸字面（720/360/240）收編 `TimeScale.days`=slice B；CI 掃裸 tick/倍率=slice C。**FOOD/FATIGUE per-day 率不因移速變，本 slice 留原值**；跨格旅途糧耗 5× 增=④後勤 measure 對象。
+- **enforce 進度**：**A1 立骨架單源（×5 留,零行為;headless time-invariant assert 守 MOVE=48）**；A2=×5→1+補給+FOOD+gen 四件；B=far elapsed（最高優先,一修 V1 trade+V4 envoy+V3 帶禮結盟）；③cadence 裸字面（720/360/240）收編 `TimeScale.days`=後段;CI 掃裸 tick/倍率=後段。**FOOD/FATIGUE per-day 率=A2 重校對象（×5 手校痕）**；跨格旅途糧耗（×1 下 5× 增）=④完整食物收支 measure。
 
 ## Information
 

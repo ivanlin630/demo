@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 時間wave五裁——B最高(一修解V1+V4+V3禮)/★A拆A1骨架(零行為即merge)+A2(×5→1+沿途補給+gen重校綁一起防餓死潮)/④沿途補給主動化(禁cap禁砍糧耗)/V3(b)合理0/V2-cmd真病低急(2probe→修elif→物流wave後)
 ---
 

@@ -23,13 +23,13 @@
 
 ## 移動速度
 
-> 2026-07-05 update（time-scale wave slice A）：`WORLD_SPEED_MULT` 已刪（×5→1）。BASE_MOVE_TICKS 走 `TimeScale.MOVE_TICKS_PER_HEX = BASE_ACTION_TICKS × ENCOUNTER_MAP_SCALE = 240 = 1 天/hex`（錨①連動,禁另塞倍率）。移動 5× 慢=世界節奏劇變、跨格糧耗 5× 增（=④後勤 measure）。
+> 2026-07-05 update（time-scale wave **slice A1**：骨架單源,×5 先留=零行為）：BASE_MOVE_TICKS 走 `TimeScale.MOVE_TICKS_PER_HEX = BASE_ACTION_TICKS × ENCOUNTER_MAP_SCALE / WORLD_SPEED_MULT(5) = 48`（連動）。**A2（×5→1→MOVE 240）綁 ④沿途補給+FOOD 重校+gen 重校四件一 landing**（藍圖 timewave-five-rulings,防餓死潮）。
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 |
 |---|---|---|---|---|
-| `BASE_MOVE_TICKS` | `movement_system.gd:5` | **240**（= TimeScale.MOVE_TICKS_PER_HEX = 10 × 24）| 平原 speed_mult=1.0：240 tick/hex = 1 天 | — |
-| `MIN_MOVE_TICKS` | `movement_system.gd:6` | **80**（= BASE/3）| 最快：80 tick/hex | — |
-| `MAX_MOVE_TICKS` | `movement_system.gd:7` | **720**（= BASE×3）| 最慢：720 tick/hex | — |
+| `BASE_MOVE_TICKS` | `movement_system.gd:5` | **48**（= TimeScale.MOVE_TICKS_PER_HEX = 10×24/5）| 平原 speed_mult=1.0：48 tick/hex = 0.2 天（A1 ×5留;A2→240=1天）| A2 |
+| `MIN_MOVE_TICKS` | `movement_system.gd:6` | **16**（= BASE/3）| 最快：16 tick/hex | A2 |
+| `MAX_MOVE_TICKS` | `movement_system.gd:7` | **144**（= BASE×3）| 最慢：144 tick/hex | A2 |
 | `NAMED_WEIGHT` | `movement_system.gd:?` | **3** | named 個人 speed 在 team avg 中加權 ×3 | — |
 | `TERRAIN_SPEED_MULT` plains | `movement_system.gd:?` | 1.0 | 平原 ×1 | — |
 | `TERRAIN_SPEED_MULT` forest | `movement_system.gd:?` | 0.7 | 林地 ×0.7 | — |
