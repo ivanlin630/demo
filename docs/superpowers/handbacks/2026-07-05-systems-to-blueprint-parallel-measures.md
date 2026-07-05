@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 三平行measure齊(夜班)——共根=far-zone移速稀釋(B)一修多解(V4 envoy+V1 trade+V3帶禮結盟);V3直解結盟0.55恆false=判準題;V2-cmd結構shadow(徵收支配攻擊elif)待2probe;④後勤×1>10格餓死真帳→你裁補給;修序建議B高優先
 ---
 
