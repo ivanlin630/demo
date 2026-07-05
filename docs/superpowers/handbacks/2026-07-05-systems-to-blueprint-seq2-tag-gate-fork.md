@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序2 solo 溶入撞真設計叉——_tag_weight=hard tag-gate(商隊不可攻/軍隊不可貿),但引擎rank_scored無tag概念→unified與solo對tag已不一致;溶solo逼裁:tag硬鎖行為(affordance)還是軟權重(身分=權重不變量)?觸WHAT戲感+憲法,不是我單裁的HOW,待你意圖
 ---
 

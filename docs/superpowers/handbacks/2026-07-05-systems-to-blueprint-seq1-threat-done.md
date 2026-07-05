@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序1 threat 溶入 done(merged 804432e)——融合驗雙關綠(repertoire 4/4+率表);seeded 46/8/1/380→48/8/1/382(合理非退化,你平衡意圖要否覆判);term additive偏離認可;下序2 solo我起
 ---
 
