@@ -475,6 +475,11 @@ func _outpost_pop_cap(state: WorldState, pos: Vector2i) -> int:
 	return int(arr[clampi(tile.outpost_level - 1, 0, 2)])
 
 func _is_resident_team(state: WorldState, team: TeamData) -> bool:
+	return FactionAISystem.is_resident_static(state, team)
+
+# static 版供 DecisionContext.gather 呼叫（避免 ctx 依賴 FactionAISystem 實例）。
+# 本體 = 舊 _is_resident_team（居民 = 生產隊 + 站自家/同 faction outpost）。
+static func is_resident_static(state: WorldState, team: TeamData) -> bool:
 	if not team.tags.has(TeamData.TAG_PRODUCE):
 		return false
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)

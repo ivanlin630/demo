@@ -55,6 +55,14 @@ var leader_loyalty: float = 0.5
 var intent: String = ""
 var intent_target: int = -1
 var intent_target_pos: Vector2i = Vector2i(-1, -1)
+# 融合 threat（序1 溶入）：鏡射舊 _evaluate_threat 掃描（raw score over ALL discovered，
+# 含 approach/power 非純 hostility；≠ ctx.threat 的 reputation-filtered _max_threat）。
+# threat option（備戰/迎戰/求和）的 applicable gate + eval 讀此。
+var threat_react: float = 0.0
+var threat_id: int = -1
+var threat_pos: Vector2i = Vector2i(-1, -1)
+var threat_threshold: float = 0.0
+var is_resident: bool = false
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -80,6 +88,24 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	# threat（F-D6 un-stub）：視野內最高敵威脅（belief-based ThreatAssessment，含逼近/敵意/距離衰減）。
 	# 餵 threat_pressure term → unified 隊(商隊/生產)遇逼近敵會 FLEE（威脅真驅動非死 stub）。
 	c.threat = DecisionContext._max_threat(state, team)
+	# 融合 threat：鏡射舊 _evaluate_threat 掃描（raw score over ALL discovered，含 approach/power 非純 hostility）。
+	var _caution: float = float(c.leader_values.get("慎重", 0.5))
+	c.threat_threshold = ThreatAssessment.THREAT_BASE_THRESHOLD + _caution * 0.3
+	var _best_t: float = 0.0
+	var _best_id: int = -1
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var _other: TeamData = state.teams.get(tid)
+		if _other == null: continue
+		var _t: float = ThreatAssessment.score(state, team, _other)
+		if _t > _best_t:
+			_best_t = _t; _best_id = tid
+	c.threat_react = _best_t
+	c.threat_id = _best_id
+	if _best_id != -1:
+		var _ot: TeamData = state.teams.get(_best_id)
+		if _ot != null: c.threat_pos = _ot.tile_pos
+	c.is_resident = FactionAISystem.is_resident_static(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.threat", _tg)
 	var _fa := FactionAISystem.new()
 	var _prey: int = _fa._find_weakest_prey(state, team)
