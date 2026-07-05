@@ -138,6 +138,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "求和": return 0.0
 			return float(ctx.leader_values.get("貪婪", 0.5)) * 0.5 + float(ctx.leader_values.get("信義", 0.5)) * 0.3 \
 				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
+		"train_drive":
+			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
+			if opt != "訓練": return 0.0
+			return ctx.ambient_train_drive
 		_:
 			return 0.0
 
@@ -198,4 +202,6 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
 		# ── 融合 threat：人格已 baked 進 eval（additive，鏡射舊 scores）→ weight=1.0（同 intent_fit）──
 		"prepare", "defend", "pacify": return 1.0
+		# 野心階梯溶入（序3）：練兵傾向=好戰/野心染色（ambient 低 magnitude 由 eval 壓，讓位緊急）。
+		"train":             return 0.3 + float(v.get("好戰", 0.5)) * 0.4 + float(v.get("野心", 0.5)) * 0.2
 		_:                   return 0.5

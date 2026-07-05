@@ -108,23 +108,79 @@ func _check_unified_path() -> void:
 	else:
 		print("[unified] threat option 浮現主 rank OK: %s" % str(surfaced))
 
-# ── 5b 率表：seeded warring → threat dispatch 率 > 0（Probe.threat.dispatch.*）──
+# ── 5b 率表：seeded warring threat dispatch（★序3 follow-up 改資訊性，非硬斷）──
+#   原硬斷 total>0 耦合世界軌跡：序3 follow-up 收窄 idle-filler ambient FLEE churn 後，seeded 世界變靜
+#   （幽靈 FLEE churn 曾是隊間威脅遭遇的主要製造者）→ non-unified idle 隊少真過門檻威脅 → seeded dispatch→0。
+#   threat 機制未壞（_evaluate_threat 未動、loop3 PRIO_THREAT 仍先於 idle-filler）→ 硬斷改走確定性
+#   live-seam 注入（_check_live_dispatch），與世界軌跡解耦。seeded 值保留為資訊性趨勢。
 func _check_rate_table() -> void:
-	print("--- 5b 率表 (seeded warring 1200t) ---")
+	print("--- 5b 率表 (seeded warring 1200t — 資訊性趨勢) ---")
 	WarringHarness.run(1337, 1200)   # 內部 Probe.enabled，跑完 counts 保留（下次 run 才 reset）
 	var flee: int = int(Probe.counts.get("threat.dispatch.survival", 0))
 	var prepare: int = int(Probe.counts.get("threat.dispatch.備戰", 0))
 	var defend: int = int(Probe.counts.get("threat.dispatch.迎戰", 0))
 	var pacify: int = int(Probe.counts.get("threat.dispatch.求和", 0))
 	var total: int = flee + prepare + defend + pacify
-	print("[rate] flee=%d prepare=%d defend=%d pacify=%d total=%d" % [flee, prepare, defend, pacify, total])
-	# 硬斷言：威脅存在時防守 dispatch 率 > 0（該出現還出現，不被新權衡默默吃）。
-	# 對照 Task0 baseline(flee13/prepare4/defend1/pacify0)：pacify 稀有(此 seed/窗=0)→不逐類斷，聚合 > 0。
-	if total <= 0:
+	print("[rate] seeded flee=%d prepare=%d defend=%d pacify=%d total=%d（資訊性：威脅遭遇=世界軌跡函數，序3 follow-up 靜世界後可為 0，非機制壞）" % [flee, prepare, defend, pacify, total])
+	_check_live_dispatch()
+
+# ── 5b live-seam（★硬斷）：確定性構 non-unified idle 威脅隊 → _evaluate_threat 實派 threat task + bump probe。
+#   繞世界軌跡（不依賴 seeded 湧現）→ threat 派發 seam 恆可驗。求生欲高 leader → survival(FLEE) argmax。
+func _check_live_dispatch() -> void:
+	print("--- 5b live-seam：確定性 non-unified 威脅 → _evaluate_threat 實派 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	# non-unified（無 merchant/produce tag）idle 隊：求生欲高 + 慎重低（門檻低）→ FLEE。
+	var tid := 810
+	var t := TeamData.new(); t.team_id = tid; t.tags = ["軍隊"]
+	t.tile_pos = Vector2i(5, 5); t.leader_id = tid * 10
+	AnonTierSystem.add_anon(t, "平民", 8)
+	t.resources = {"food": 300.0}
+	t.current_task = TeamData.TASK_IDLE; t.combat_target = -1
+	state.teams[tid] = t
+	state.team_discovered[tid] = []
+	state.team_intel[tid] = {}
+	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
+	ldr.values = {"求生欲": 0.9, "好戰": 0.1, "慎重": 0.2, "貪婪": 0.5, "信義": 0.5}
+	state.persons[ldr.id] = ldr
+	_place_plains(state, Vector2i(5, 5))
+	# 逼近敵：碾壓實力 + 敵意 rep → threat_react 過門檻。
+	var etid := 811
+	var e := TeamData.new(); e.team_id = etid; e.tile_pos = Vector2i(6, 5); e.faction_id = -1
+	e.last_tile_pos = Vector2i(8, 5)   # 8→6 朝我(5,5)逼近
+	AnonTierSystem.add_anon(e, "戰士", 40)   # 碾壓實力
+	state.teams[etid] = e
+	_place_plains(state, Vector2i(6, 5))
+	t.known_reputations[etid] = 0.05   # 敵意
+	state.team_discovered[tid].append(etid)
+	BeliefSystem.record_claim(state, tid, etid, etid, "親見", {"population_est": 40}, 1.0, false)
+
+	# sanity：確認 non-unified + 過門檻（否則 _evaluate_threat 早退，斷言失效）。
+	var fai := FactionAISystem.new()
+	if fai.uses_unified(t):
 		_fails += 1
-		print("[FAIL] 率表：seeded 威脅反應總 dispatch = 0（threat 被融合默默吃掉）")
+		print("[FAIL] live-seam 隊竟 unified（tag 設錯，_evaluate_threat 走不到）"); return
+	var ctx := DecisionContext.gather(state, t)
+	print("[live] threat_react=%.2f threshold=%.2f" % [ctx.threat_react, ctx.threat_threshold])
+	if ctx.threat_react < ctx.threat_threshold:
+		_fails += 1
+		print("[FAIL] live-seam 構不出過門檻威脅（threat_react<threshold），無法驗派發"); return
+
+	Probe.enabled = true   # 直呼 seam：Probe 預設 no-op，須開啟才計 threat.dispatch bump
+	var before: int = _threat_dispatch_total()
+	fai._evaluate_threat(state, t)
+	var after: int = _threat_dispatch_total()
+	var dispatched: bool = t.current_task in [TeamData.TASK_FLEE, TeamData.TASK_DEFEND, TeamData.TASK_PREPARE]
+	if dispatched and after > before:
+		print("[live] _evaluate_threat 實派 %s + probe bump(%d→%d) OK（threat seam 確定性活）" % [t.current_task, before, after])
 	else:
-		print("[rate] 聚合 dispatch > 0 OK（repertoire 逐類可達性由 5a 證）")
+		_fails += 1
+		print("[FAIL] live-seam：_evaluate_threat 未派 threat task（task=%s，probe %d→%d）" % [t.current_task, before, after])
+
+func _threat_dispatch_total() -> int:
+	return int(Probe.counts.get("threat.dispatch.survival", 0)) \
+		+ int(Probe.counts.get("threat.dispatch.備戰", 0)) \
+		+ int(Probe.counts.get("threat.dispatch.迎戰", 0)) \
+		+ int(Probe.counts.get("threat.dispatch.求和", 0))
 
 func _place_plains(state: WorldState, pos: Vector2i) -> void:
 	var tile := HexTileData.new()

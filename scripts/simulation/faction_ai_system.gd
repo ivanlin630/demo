@@ -769,21 +769,22 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		_update_guard_ratio(team, state)
 		# 出征前自動從自家 outpost 公庫拉 mount
 		_auto_withdraw_mounts(state, team)
-		# G2c：野心階梯常態行為（最低優先，只填 idle）
+		# G2c：野心階梯常態行為（最低優先，只填 idle）。
+		# 序3：rung_task 查表撕除 → 引擎 rank（archetype/rung 當 weight，train_drive 讀之）。
+		# 序3 follow-up：rank_scored_ctx → rank_ambient（收窄至 AMBIENT_OPTION_SET）。ambient 不二次猜
+		# survival/threat（team 到此已過 loop3 survival/threat/prosperity）→ 除次門檻 FLEE churn。
+		# 取首個 dispatchable option（非 IDLE）走 PRIO_AMBIENT；貿易 target 已在 to_task「貿易」內
+		# （_merchant_trade_target：arb 單→巡市集→fallback）→ ambient 語意保。
 		if team.current_task == TeamData.TASK_IDLE:
-			var amb_task: String = AmbitionLadder.rung_task(state, team)
-			if amb_task != "":
-				# 貿易 target 走訂單鏈（_merchant_trade_target：arb 單→巡市集→fallback），非一律自格。
-				# ambient 舊行為對所有 task 派 team.tile_pos → 商業 archetype 隊被派「原地貿易」永不出發
-				# （漏斗兩 seed 定罪：站5 arrive=0、ambient 佔 dispatch 大宗）。無單無市集 → 原地擺攤（舊行為）。
-				var amb_target: Vector2i = team.tile_pos
-				if amb_task == TeamData.TASK_TRADE:
-					var tt: Vector2i = _merchant_trade_target(state, team)
-					if tt != Vector2i(-1, -1):
-						amb_target = tt
-				var _amb_ok: bool = TaskArbiter.try_set(state, team, amb_task, amb_target, TaskArbiter.PRIO_AMBIENT, "ambition")
-				if _amb_ok and amb_task == TeamData.TASK_TRADE:
-					Probe.bump("trade.dispatch.ambient")   # 漏斗站4
+			var _ctx := DecisionContext.gather(state, team)
+			for _opt in DecisionEngine.rank_ambient(_ctx):
+				var _td: Dictionary = DecisionOptions.to_task(state, team, String(_opt))
+				var _tk: String = String(_td.get("task", TeamData.TASK_IDLE))
+				if _tk == TeamData.TASK_IDLE: continue
+				if TaskArbiter.try_set(state, team, _tk, _td.get("target", Vector2i(-1, -1)), TaskArbiter.PRIO_AMBIENT, "ambition"):
+					if _tk == TeamData.TASK_TRADE:
+						Probe.bump("trade.dispatch.ambient")   # 漏斗站4
+					break
 		if SimRunner.phase_timing: _fai_pht("loop3.misc", _t3)
 
 # ──────── Tag 權限 ────────

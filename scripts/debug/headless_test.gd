@@ -461,8 +461,7 @@ func _initialize() -> void:
 	_test_feud_spread()
 	# ── G1a 鑄幣觀測 ──
 	_test_mint_conserving()
-	# ── G2c rung→task ──
-	_test_rung_task_map()
+	# ── G2c rung→task（序3：rung_task 查表溶入引擎 rank；lookup 測退役，融合驗見 rung_dissolution_check）──
 	_test_ambient_ladder_task()
 	_test_prosperity_gated_by_ladder()
 	# ── G3a belief accessor ──
@@ -14152,40 +14151,19 @@ func _test_mint_conserving() -> void:
 	assert(abs(eq_after - eq_before) < 0.01, "鑄幣守恆 eq before=%.2f after=%.2f" % [eq_before, eq_after])
 	print("mint conserving OK")
 
-func _test_rung_task_map() -> void:
-	print("--- G2c：rung_task 映射 ---")
-	var al := AmbitionLadder
-	var s := WorldState.new(); s.world = WorldData.new()
-	var t := TeamData.new(); t.team_id = 1
-	t.ambition_archetype = al.ARCHETYPE_TRADE; t.ambition_rung = al.RUNG_ACCUMULATE
-	s.teams[1] = t
-	assert(al.rung_task(s, t) == TeamData.TASK_TRADE, "商業積累→貿易")
-	t.ambition_archetype = al.ARCHETYPE_SETTLE; t.ambition_rung = al.RUNG_ACCUMULATE
-	assert(al.rung_task(s, t) == TeamData.TASK_PRODUCE, "定居積累→生產")
-	t.ambition_archetype = al.ARCHETYPE_FORCE; t.ambition_rung = al.RUNG_ACCUMULATE
-	assert(al.rung_task(s, t) == TeamData.TASK_TRAIN, "武力積累→訓練")
-	t.ambition_archetype = al.ARCHETYPE_FORCE; t.ambition_rung = al.RUNG_EXPAND
-	assert(al.rung_task(s, t) == "", "武力擴張→空(交 prosperity)")
-	t.ambition_rung = al.RUNG_SURVIVE
-	assert(al.rung_task(s, t) == "", "生存→空(交 survival)")
-	print("rung_task map OK")
-
 func _test_ambient_ladder_task() -> void:
-	print("--- G2c：ambient ladder 指派 + prosperity gate ---")
-	var fai := FactionAISystem.new()
+	# 序3：rung_task 查表溶入引擎 rank；此測留 TaskArbiter 優先序（ambient<survival）不變量。
+	# rung/archetype→option 融合驗移至 rung_dissolution_check.gd。
+	print("--- G2c：ambient ladder 指派 + survival override ---")
 	var s := WorldState.new(); s.world = WorldData.new()
 	var tile := HexTileData.new(); tile.tile_id = 0; tile.tile_pos = Vector2i(0,0); s.world.tiles[0] = tile
 	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
 	var l := PersonData.new(); l.id = 1; l.team_id = 1; l.values = {"貪婪": 0.9}
 	s.persons[1] = l; t.leader_id = 1
-	t.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
-	t.ambition_rung = AmbitionLadder.RUNG_ACCUMULATE
 	t.current_task = TeamData.TASK_IDLE
 	s.teams[1] = t
-	# ambient 指派（直呼等價邏輯）
-	var task: String = AmbitionLadder.rung_task(s, t)
-	assert(task == TeamData.TASK_TRADE, "前置：商業積累→貿易")
-	var ok: bool = TaskArbiter.try_set(s, t, task, t.tile_pos, TaskArbiter.PRIO_AMBIENT, "ambition")
+	# ambient 指派（PRIO_AMBIENT）
+	var ok: bool = TaskArbiter.try_set(s, t, TeamData.TASK_TRADE, t.tile_pos, TaskArbiter.PRIO_AMBIENT, "ambition")
 	assert(ok and t.current_task == TeamData.TASK_TRADE, "ambient 指派貿易")
 	# 生存壓過 ambient
 	TaskArbiter.try_set(s, t, TeamData.TASK_FORAGE, t.tile_pos, TaskArbiter.PRIO_SURVIVAL, "survival")
