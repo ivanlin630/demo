@@ -17,6 +17,9 @@ Godot 4.2.2 GDScript 世界模擬器。
 
 # 跑 multi sanity
 .\tools\godot.ps1 --headless --script scripts/debug/game_sim_multi.gd
+
+# 憲法 site-freeze 防閘（arc 期間防新增引擎外 task 指派；新增違憲=FAIL）
+.\tools\godot.ps1 --headless --script scripts/debug/constitution_gate.gd
 ```
 
 不用 wrapper 直接呼叫 Godot exe 的 print 輸出會是 CP950 → grep 中文亂碼。

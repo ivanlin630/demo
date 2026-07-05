@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序0 done(3機械修+憲法防閘 merged,全零行為變 seeded 46/8/1/380 守恆)——時間導出面就位待A2、憲法site-freeze閘立(grandfather 8 known);下步=wave1 threat/solo 溶入 spec 我開;無擋你決策;2 followup 呈報(閘未掛常駐鏈/coverage限制)
 ---
 
