@@ -386,6 +386,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		var tgt: Vector2i = td.get("target", Vector2i(-1, -1))
 		if not TaskArbiter.try_set(state, team, tk, tgt, TaskArbiter.PRIO_THREAT, "threat"): continue
 		_wire_threat_task(team, td)
+		Probe.bump("threat.dispatch." + opt)   # 融合驗率表（該出現還出現）
 		print("[ThreatResponse] Team%d → %s (threat=Team%d, u-rank)" % [team.team_id, opt, ctx.threat_id])
 		break
 
