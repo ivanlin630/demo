@@ -3,9 +3,12 @@
 # 8 known 違憲以 # 序N 標於對應指紋上方（threat 序1/solo 序2/vendetta 序4/prosperity 序5/dispatch 序6/reaction 序7）。
 # coverage 聲明：本閘只鎖 TaskArbiter.transition/try_set 呼叫面；return-task-字串式違憲（rung_task 等）不在集內，靠 arc 逐張溶解。
 # 產生：constitution_gate.gd record（2026-07-05 序0）。
-# 序6 dispatch
-scripts/simulation/faction_ai_system.gd::_assign_member_tasks
-# 序6 dispatch
+# 序6 dispatch：_assign_member_tasks goal→task if/elif cascade 溶解（指紋 removed=arc 進度，
+# 成員走引擎 _decide_unified）；_try_consolidate_merge = 保留的 faction 整併 scaffolding
+# （小隊併大隊=faction-level 機制非個體 utility 決策，故不入引擎 option，鏡射 _commit_conquest_attack
+#  /_evaluate_threat 保留法）。
+scripts/simulation/faction_ai_system.gd::_try_consolidate_merge
+# 序6b dispatch（leader _assign_tasks 立國/subteam-tribute 特殊語意，defer 序6b）
 scripts/simulation/faction_ai_system.gd::_assign_tasks
 scripts/simulation/faction_ai_system.gd::_check_deviation
 scripts/simulation/faction_ai_system.gd::_decide_unified
