@@ -188,7 +188,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_step1c_update_equipment(state, near_teams)
 		if phase_timing: _t = _pht("near.equip", _t)
 		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
-		var move_near: Dictionary = _step2_move_teams(state, near_teams, time_speed_mult)
+		var move_near: Dictionary = _step2_move_teams(state, near_teams, time_speed_mult, NEAR_CADENCE)
 		state.rebuild_team_tile_index()   # post-move rebuild → 下游 co-location/hostile 查見 post-move 位置
 		var arrived_near: Array = move_near["arrived"]
 		var moved_near: Array = move_near["moved"]
@@ -237,7 +237,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
 		_step1b_update_vision(state, far_teams, time_vision_mult)
 		_step1c_update_equipment(state, far_teams)
-		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult)
+		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult, FAR_ZONE_INTERVAL)
 		state.rebuild_team_tile_index()   # post-move rebuild（far 隊移動後刷新，near 隊位置本 tick 不再變）
 		var arrived_far: Array = move_far["arrived"]
 		var moved_far: Array = move_far["moved"]
@@ -294,8 +294,8 @@ func _step1_advance_time(state: WorldState) -> void:
 		state.world.current_turn += 1
 
 func _step2_move_teams(state: WorldState, team_ids: Array,
-		time_speed_mult: float = 1.0) -> Dictionary:
-	return _movement_system.process(state, team_ids, time_speed_mult)
+		time_speed_mult: float = 1.0, elapsed_ticks: int = WorldState.TICKS_PER_HOUR) -> Dictionary:
+	return _movement_system.process(state, team_ids, time_speed_mult, elapsed_ticks)
 
 func _get_time_fatigue_mult(state: WorldState) -> float:
 	return _day_night_system.get_fatigue_mult(state)
