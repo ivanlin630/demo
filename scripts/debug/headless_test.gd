@@ -8883,6 +8883,7 @@ func _test_prey_select_reads_belief() -> void:
 	var state := _prosperity_grid()
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 20); team.faction_id = 0
+	team.armed_anon_ratio = 1.0   # capability grounding（裁2）：weakness 比 self ARMED → 攻擊方須有武裝
 	state.teams[0] = team
 	var leader := PersonData.new()
 	leader.values = { "貪婪": 0.0, "殘忍": 1.0, "野心": 0.0 }   # 孤立 weakness：score = weakness*殘忍
@@ -14509,10 +14510,12 @@ func _test_intent_fit_term() -> void:
 	# 征服 + target → 攻擊 boost。
 	var cc := DecisionContext.new()
 	cc.intent = "征服"; cc.intent_target = 5; cc.food_days = 20.0; cc.leader_values = {"野心": 0.8, "好戰": 0.7}
+	cc.self_armed_ratio = 1.0   # capability grounding（裁2）：征服攻擊 boost 需有戰力（無牙征服=送死→0）
 	assert(DecisionTerms.eval("intent_fit", cc, "攻擊") > 0.0, "征服+target → 攻擊 intent_fit>0")
 	# 匱乏 + 野心高 + 有弱 prey → 掠奪 boost；溫和窮隊 → 0（防 over-war）。
 	var cs := DecisionContext.new()
 	cs.food_days = 1.0; cs.has_weak_prey = true; cs.leader_values = {"野心": 0.8}
+	cs.self_armed_ratio = 1.0   # capability grounding（裁2）：匱乏搶劫需有戰力
 	assert(DecisionTerms.eval("intent_fit", cs, "掠奪") > 0.0, "匱乏+野心+prey → 掠奪 intent_fit>0")
 	var cm := DecisionContext.new()
 	cm.food_days = 1.0; cm.has_weak_prey = true; cm.leader_values = {"野心": 0.2, "好戰": 0.2}
@@ -15351,6 +15354,7 @@ func _mk_unified_cruel_team(state: WorldState, pos: Vector2i) -> TeamData:
 	var t := TeamData.new(); t.team_id = 900; t.tags = [TeamData.TAG_MERCHANT]
 	t.tile_pos = pos; t.leader_id = 9000
 	_seed_pop(t, 10)
+	t.armed_anon_ratio = 1.0   # capability grounding（裁2）：掠奪需有戰兵；殘忍護衛商隊有本錢揮刀
 	t.resources = {"food": 500.0, "goods": 50.0, "coin": 100.0}
 	state.teams[900] = t
 	state.team_discovered[900] = []

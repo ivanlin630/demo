@@ -115,6 +115,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _prey: int = _fa._find_weakest_prey(state, team)
 	c.has_weak_prey = _prey != -1
 	c.weak_prey_pos = state.teams[_prey].tile_pos if c.has_weak_prey else Vector2i(-1, -1)
+	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
+	# 無牙商隊 armed≈0 → ratio≈0 → loot_drive/intent_fit capability_factor 壓平（送死沒人幹，非被禁）。
+	c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(float(team.population), 1.0)
 	# 佔村 target（可據 stationary 弱村；belief-driven weakness，可見性物理判可據）
 	var _occ: int = _fa._find_occupy_target(state, team)
 	c.has_occupy_target = _occ != -1

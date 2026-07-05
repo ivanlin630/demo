@@ -183,8 +183,11 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		var pop_est: float = float(bel.get("population_est", 0.0))
 		var armed_est: float = float(bel.get("armed_est", pop_est))
 		var richness: float = _belief_richness(bel)
+		# capability grounding（裁2）：弱點比 self ARMED 非 self POP → 無牙商隊 self_armed≈0 →
+		# 任何有武裝 prey 皆非「相對弱」→ weakness→0（不再被誘攻；鎖來自戰力非 tag-label）。
+		var self_armed_f: float = float(NpcCombatSystem.new().calc_armed(state, team))
 		var weakness: float = clampf(
-			1.0 - armed_est / maxf(float(team.population), 1.0),
+			1.0 - armed_est / maxf(self_armed_f, 1.0),
 			0.0, 1.0)
 		var border: float = 1.0 if _is_border_adjacent(team, prey) else 0.3
 		var eta_days: float = maxf(float(catch_result.eta) / float(WorldState.TICKS_PER_DAY), 1.0)
