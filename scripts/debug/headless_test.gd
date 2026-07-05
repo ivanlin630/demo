@@ -179,12 +179,9 @@ func _initialize() -> void:
 	_test_readiness_threshold()
 	_test_find_prosperity_prey()
 	_test_evaluate_prosperity_trigger()
-	_test_prosperity_low_ambition_skip()
-	_test_prosperity_low_readiness_skip()
-	_test_prosperity_same_faction_skip()
+	_test_prosperity_same_faction_skip()   # 序5：low_ambition/low_readiness 硬閘測已刪（溶成 engine 權重）
 	_test_prosperity_treasury_bonus()
-	_test_prosperity_prey_personality_weight()
-	_test_prosperity_cadence()
+	_test_prosperity_prey_personality_weight()   # 序5：_test_prosperity_cadence 已刪（cadence 機制溶解）
 	_test_survival_b_branch_far_outpost_loot()
 	_test_survival_b_branch_near_outpost_return()
 	_test_occupy_resident_accept()
@@ -463,7 +460,7 @@ func _initialize() -> void:
 	_test_mint_conserving()
 	# ── G2c rung→task（序3：rung_task 查表溶入引擎 rank；lookup 測退役，融合驗見 rung_dissolution_check）──
 	_test_ambient_ladder_task()
-	_test_prosperity_gated_by_ladder()
+	# 序5：_test_prosperity_gated_by_ladder 已刪（archetype/rung 硬閘溶成 engine 權重）
 	# ── G3a belief accessor ──
 	_test_belief_accessor()
 	# ── G3b multi-claim ──
@@ -528,8 +525,7 @@ func _initialize() -> void:
 	_test_r2_disposition_delegation()
 	_test_r2_archetype_tiebreak()
 	_test_r2_archetype_distribution()
-	# ── R1a：rung-food 攻擊閘已拔（人格 gate 獨留）──
-	_test_r1a_rung_gate_removed()
+	# 序5：_test_r1a_rung_gate_removed 已刪（cascade rung/archetype 早退驗，溶成 engine 權重）
 	# ── R1b：means-end logistics 因子（②路程糧 × ③目標歸屬）──
 	_test_r1b_ownership_ordering()
 	_test_r1b_war_capability_relief()
@@ -995,7 +991,7 @@ func _test_faction_attack_gate() -> void:
 	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
 	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
 	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
-	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
+	FactionAISystem.new()._commit_conquest_attack(st_a, tm_a, 1)   # 序5：scout-verify scaffolding（prey=1）
 	assert(tm_a.prosperity_target_id == 1 and tm_a.current_task == TeamData.TASK_SCOUT,
 		"慎重者矛盾情報→派斥候查證，實際 target=%d task=%s" % [tm_a.prosperity_target_id, tm_a.current_task])
 	# B) 莽者(慎重低) 同矛盾 belief → 照衝（target 設）
@@ -1003,14 +999,14 @@ func _test_faction_attack_gate() -> void:
 	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
 	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
 	BeliefSystem.record_claim(st_b, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
-	FactionAISystem.new()._evaluate_prosperity_attack(st_b, tm_b)
+	FactionAISystem.new()._commit_conquest_attack(st_b, tm_b, 1)   # 序5：莽者→照衝（prey=1）
 	assert(tm_b.prosperity_target_id == 1 and tm_b.current_task == TeamData.TASK_ATTACK,
 		"莽者矛盾情報→照衝(誘殺)，實際 target=%d task=%s" % [tm_b.prosperity_target_id, tm_b.current_task])
 	# C) 慎重 leader + 親見確定 belief(uncertainty≈0) → 照常攻擊（gate 不凍結）
 	var sc: Array = _attack_gate_scene(1.0)
 	var st_c: WorldState = sc[0]; var tm_c: TeamData = sc[1]
 	BeliefSystem.record_claim(st_c, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
-	FactionAISystem.new()._evaluate_prosperity_attack(st_c, tm_c)
+	FactionAISystem.new()._commit_conquest_attack(st_c, tm_c, 1)   # 序5：確定→照常攻擊（prey=1）
 	assert(tm_c.prosperity_target_id == 1 and tm_c.current_task == TeamData.TASK_ATTACK,
 		"慎重者親見確定→照常攻擊(不凍結)，實際 target=%d task=%s" % [tm_c.prosperity_target_id, tm_c.current_task])
 	print("attack gate OK")
@@ -1270,13 +1266,13 @@ func _test_scout_verification() -> void:
 	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
 	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民",
 		{"population_est": 4, "tile_pos": Vector2i(2, 0)}, 0.4, false)
-	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
+	FactionAISystem.new()._commit_conquest_attack(st_a, tm_a, 1)   # 序5：慎重未驗→派斥候（prey=1）
 	assert(tm_a.current_task == TeamData.TASK_SCOUT and tm_a.prosperity_target_id == 1,
 		"慎重者未驗情報→派斥候，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
 	assert(tm_a.move_target == Vector2i(2, 0), "斥候移向 prey best_estimate 位，實際 %s" % str(tm_a.move_target))
 	# 斥候抵達親見（注入確定 claim）→ uncertainty 塌 → 下次評估轉攻擊（迴路收斂）
 	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
-	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
+	FactionAISystem.new()._commit_conquest_attack(st_a, tm_a, 1)   # 序5：親見壓 uncertainty→收斂轉攻（prey=1）
 	assert(tm_a.current_task == TeamData.TASK_ATTACK and tm_a.prosperity_target_id == 1,
 		"親見壓低 uncertainty→收斂轉攻，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
 	# 莽者(慎重低)同 belief → 直接攻擊（不 scout，假情報誘殺路徑）
@@ -1284,7 +1280,7 @@ func _test_scout_verification() -> void:
 	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
 	BeliefSystem.record_claim(st_b, 0, 1, 9, "流民",
 		{"population_est": 4, "tile_pos": Vector2i(2, 0)}, 0.4, false)
-	FactionAISystem.new()._evaluate_prosperity_attack(st_b, tm_b)
+	FactionAISystem.new()._commit_conquest_attack(st_b, tm_b, 1)   # 序5：莽者→直接攻不查證（prey=1）
 	assert(tm_b.current_task == TeamData.TASK_ATTACK and tm_b.prosperity_target_id == 1,
 		"莽者→直接攻不查證，實際 task=%s" % tm_b.current_task)
 	print("scout verification OK")
@@ -8974,57 +8970,15 @@ func _test_evaluate_prosperity_trigger() -> void:
 	team.ambition_rung = AmbitionLadder.RUNG_EXPAND
 	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)  # G3d-1：親見確定 → gate 過
 	var fas = FactionAISystem.new()
-	fas._evaluate_prosperity_attack(state, team)
+	fas._commit_conquest_attack(state, team, 1)   # 序5：cascade 溶解後 scout-verify scaffolding（prey=1，親見→confident→attack）
 	assert(team.current_task == TeamData.TASK_ATTACK, "應 TASK_ATTACK，實際=%s" % team.current_task)
 	assert(team.move_target == Vector2i(2, 0), "move_target 應指向 prey tile，實際=%s" % str(team.move_target))
 	assert(team.combat_target == -1, "combat_target 不預設（到達才起戰），實際=%d" % team.combat_target)
 	print("Prosperity Task3 OK")
 
-func _test_prosperity_low_ambition_skip() -> void:
-	print("--- Prosperity Task3b: 低野心不評估 ---")
-	var state := _prosperity_grid()
-	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 15)
-	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "菁英", "healthy", 15)  # avg_combat=0.7
-	team.resources = { "food": 200, "weapon_melee_low": 15 }
-	team.current_task = TeamData.TASK_IDLE
-	state.teams[0] = team
-	var leader := PersonData.new()
-	leader.id = 100
-	leader.values = { "野心": 0.1, "好戰": 0.1, "信義": 0.5, "殘忍": 0.5, "貪婪": 0.5, "慎重": 0.5 }
-	state.persons[100] = leader
-	team.leader_id = 100
-	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 4)
-	prey.faction_id = 1; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
-	state.teams[1] = prey
-	state.team_discovered[0] = [1]
-	FactionAISystem.new()._evaluate_prosperity_attack(state, team)
-	assert(team.current_task == TeamData.TASK_IDLE, "score 太低應跳過，實際=%s" % team.current_task)
-	print("Prosperity Task3b OK")
-
-func _test_prosperity_low_readiness_skip() -> void:
-	print("--- Prosperity Task3c: 低 readiness 不評估 ---")
-	var state := _prosperity_grid()
-	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 2)
-	team.faction_id = 0; AnonCohort.add(team.anon_cohorts, "平民", "healthy", 2)  # avg_combat=0.1
-	team.resources = { "food": 10 }
-	team.current_task = TeamData.TASK_IDLE
-	state.teams[0] = team
-	var leader := PersonData.new()
-	leader.id = 100
-	leader.values = { "野心": 0.9, "好戰": 0.8, "信義": 0.1, "殘忍": 0.7, "貪婪": 0.6, "慎重": 0.3 }
-	state.persons[100] = leader
-	team.leader_id = 100
-	var prey := TeamData.new()
-	prey.team_id = 1; prey.tile_pos = Vector2i(2, 0); _seed_pop(prey, 4)
-	prey.faction_id = 1; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
-	state.teams[1] = prey
-	state.team_discovered[0] = [1]
-	FactionAISystem.new()._evaluate_prosperity_attack(state, team)
-	assert(team.current_task == TeamData.TASK_IDLE, "readiness 太低應跳過，實際=%s" % team.current_task)
-	print("Prosperity Task3c OK")
+# 序5 dissolve：_test_prosperity_low_ambition_skip（score 硬閘）/ _test_prosperity_low_readiness_skip
+# （readiness 硬閘）已刪——兩硬閘溶成 engine 權重（信義 penalty + readiness_factor，intent_fit 征服），
+# 覆蓋移至 prosperity_dissolution_check.gd ②readiness 閘 + solo_dissolution_check repertoire。
 
 func _test_prosperity_same_faction_skip() -> void:
 	print("--- Prosperity Task3d: 同 faction 排除 ---")
@@ -9045,8 +8999,9 @@ func _test_prosperity_same_faction_skip() -> void:
 	prey.faction_id = 5; prey.resources = { "coin": 200 }; prey.last_tile_pos = prey.tile_pos
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
-	FactionAISystem.new()._evaluate_prosperity_attack(state, team)
-	assert(team.current_task == TeamData.TASK_IDLE, "唯一 prey 同 faction 應跳過，實際=%s" % team.current_task)
+	# 序5 dissolve：同 faction 排除仍在 find_prosperity_prey（保留 helper）→ 無 prey → 引擎不 dispatch 攻擊。
+	var prey_pick: int = FactionAISystem.find_prosperity_prey(state, team, leader)
+	assert(prey_pick == -1, "唯一 prey 同 faction 應被 find_prosperity_prey 排除，實際 pick=%d" % prey_pick)
 	print("Prosperity Task3d OK")
 
 func _test_prosperity_treasury_bonus() -> void:
@@ -9092,38 +9047,8 @@ func _test_prosperity_prey_personality_weight() -> void:
 		"高野心應選接壤 prey(2)")
 	print("Prosperity Task14 OK")
 
-func _test_prosperity_cadence() -> void:
-	print("--- Prosperity Task4: cadence ---")
-	var state := _prosperity_grid()
-	var team := TeamData.new()
-	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
-	team.faction_id = -1; AnonCohort.add(team.anon_cohorts, "老兵", "healthy", 10)  # avg_combat=0.5
-	team.resources = { "food": 200, "weapon_melee_low": 10 }
-	team.current_task = TeamData.TASK_IDLE
-	state.teams[0] = team
-	var leader := PersonData.new()
-	leader.id = 100
-	leader.values = { "野心": 0.5, "好戰": 0.5, "信義": 0.5, "殘忍": 0.5, "貪婪": 0.5, "慎重": 0.5 }
-	state.persons[100] = leader
-	team.leader_id = 100
-	state.team_discovered[0] = []   # 無 prey → 不觸發攻擊，只看 cadence
-	var fas = FactionAISystem.new()
-	state.world.current_tick = 0
-	fas.evaluate_all(state, [0])
-	assert(team.prosperity_eval_next_tick == 720, "tick0 後 next 應 720，實際=%d" % team.prosperity_eval_next_tick)
-	state.world.current_tick = 360
-	fas.evaluate_all(state, [0])
-	assert(team.prosperity_eval_next_tick == 720, "tick360 應跳過，next 仍 720，實際=%d" % team.prosperity_eval_next_tick)
-	state.world.current_tick = 720
-	fas.evaluate_all(state, [0])
-	assert(team.prosperity_eval_next_tick == 1440, "tick720 後 next 應 1440，實際=%d" % team.prosperity_eval_next_tick)
-	# 軍隊 tag → cadence 360
-	team.tags = ["軍隊"]
-	team.prosperity_eval_next_tick = 720
-	state.world.current_tick = 720
-	fas.evaluate_all(state, [0])
-	assert(team.prosperity_eval_next_tick == 1080, "軍隊 cadence 應 +360 → 1080，實際=%d" % team.prosperity_eval_next_tick)
-	print("Prosperity Task4 OK")
+# 序5 dissolve：_test_prosperity_cadence 已刪——prosperity_eval_next_tick cadence 機制溶解
+# （征服決策現走主 rank 每 tick，無獨立 cadence gate；PROSPERITY_CADENCE 常數 orphaned）。
 
 func _survival_corridor() -> WorldState:
 	# 走廊 grid：x 0..27, y -1..1，連通供 A* 找路（足夠製造 >5 日 ETA 場景）
@@ -14170,29 +14095,9 @@ func _test_ambient_ladder_task() -> void:
 	assert(t.current_task == TeamData.TASK_FORAGE, "生存壓過 ambient ladder")
 	print("ambient ladder OK")
 
-func _test_prosperity_gated_by_ladder() -> void:
-	print("--- G2c：prosperity 僅武力擴張 ---")
-	# 商業 archetype 隊不該走 prosperity attack（即使 readiness 足）
-	# 構造商業 leader + rung<擴張 → _evaluate_prosperity_attack 應早退
-	# （結構性：archetype!=武力 或 rung<擴張 → 不設 ATTACK）
-	var fai := FactionAISystem.new()
-	var s := WorldState.new(); s.world = WorldData.new()
-	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
-	var l := PersonData.new(); l.id = 1; l.team_id = 1
-	l.values = {"野心": 0.9, "好戰": 0.9, "信義": 0.0}   # attack_score 高
-	s.persons[1] = l; t.leader_id = 1
-	t.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE   # 非武力 → gate 早退
-	t.ambition_rung = AmbitionLadder.RUNG_EXPAND
-	t.current_task = TeamData.TASK_IDLE
-	s.teams[1] = t
-	fai._evaluate_prosperity_attack(s, t)
-	assert(t.current_task != TeamData.TASK_ATTACK, "商業 archetype 不該 prosperity attack")
-	# 武力 + rung<擴張 → 同樣早退
-	t.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE
-	t.ambition_rung = AmbitionLadder.RUNG_ACCUMULATE
-	fai._evaluate_prosperity_attack(s, t)
-	assert(t.current_task != TeamData.TASK_ATTACK, "武力低 rung 不該 prosperity attack")
-	print("prosperity gated OK")
+# 序5 dissolve：_test_prosperity_gated_by_ladder（archetype/rung 硬閘早退）已刪——archetype/rung 溶成
+# engine 權重（非 FORCE 隊由 _evaluate_independent_strategy 不給 征服 intent → 攻擊 option 非 applicable）。
+# 覆蓋移至 solo_dissolution_check（無征服 intent → 攻擊 不 applicable）+ prosperity_dissolution_check。
 
 func _test_world_gen_dramatic_tail() -> void:
 	print("--- world-gen 戲劇尾巴 ---")
@@ -14515,6 +14420,7 @@ func _test_intent_fit_term() -> void:
 	var cc := DecisionContext.new()
 	cc.intent = "征服"; cc.intent_target = 5; cc.food_days = 20.0; cc.leader_values = {"野心": 0.8, "好戰": 0.7}
 	cc.self_armed_ratio = 1.0   # capability grounding（裁2）：征服攻擊 boost 需有戰力（無牙征服=送死→0）
+	cc.readiness = 0.8; cc.readiness_thr_eff = 0.5   # 序5 溶入：征服攻擊吃 readiness 閘（沒本錢→趨0）
 	assert(DecisionTerms.eval("intent_fit", cc, "攻擊") > 0.0, "征服+target → 攻擊 intent_fit>0")
 	# 匱乏 + 野心高 + 有弱 prey → 掠奪 boost；溫和窮隊 → 0（防 over-war）。
 	var cs := DecisionContext.new()
@@ -15905,29 +15811,9 @@ func _test_r2_archetype_distribution() -> void:
 		counts[AmbitionLadder.ARCHETYPE_FORCE], counts[AmbitionLadder.ARCHETYPE_TRADE],
 		counts[AmbitionLadder.ARCHETYPE_SETTLE], n])
 
-# R1a：rung-food 閘已拔——FORCE + rung=SURVIVE（餬口帶）過 gate 進 prey 評估；非 FORCE 仍擋
-func _test_r1a_rung_gate_removed() -> void:
-	print("--- R1a: rung-food 攻擊閘已拔（FORCE 餬口隊可攻，非 FORCE 仍擋）---")
-	# A) FORCE + rung=SURVIVE + 莽者(慎重0，跳過 scout defer) → 過閘 → 派攻擊
-	var sa: Array = _attack_gate_scene(0.0)
-	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
-	tm_a.ambition_rung = AmbitionLadder.RUNG_SURVIVE
-	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
-	FactionAISystem.new()._evaluate_prosperity_attack(st_a, tm_a)
-	assert(tm_a.prosperity_target_id == 1 and tm_a.current_task == TeamData.TASK_ATTACK,
-		"FORCE 餬口隊(rung=SURVIVE)應過閘攻擊，實際 target=%d task=%s" % [
-			tm_a.prosperity_target_id, tm_a.current_task])
-	# B) 非 FORCE（TRADE）同條件 → 人格 gate 仍擋
-	var sb: Array = _attack_gate_scene(0.0)
-	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
-	tm_b.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
-	tm_b.ambition_rung = AmbitionLadder.RUNG_SURVIVE
-	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
-	FactionAISystem.new()._evaluate_prosperity_attack(st_b, tm_b)
-	assert(tm_b.prosperity_target_id == -1 and tm_b.current_task == TeamData.TASK_IDLE,
-		"非 FORCE 應被人格 gate 擋，實際 target=%d task=%s" % [
-			tm_b.prosperity_target_id, tm_b.current_task])
-	print("[OK] _test_r1a_rung_gate_removed")
+# 序5 dissolve：_test_r1a_rung_gate_removed（cascade rung/archetype 早退驗）已刪——rung/archetype
+# 溶成 engine 權重（征服 intent 由 _evaluate_independent_strategy 依 archetype 給/不給 → 攻擊 applicable 分野）。
+# 覆蓋移至 prosperity_dissolution_check ①repertoire + solo_dissolution_check。
 
 # ════════════════════════════════════════════════════════════
 # R1b：means-end logistics 因子（②路程糧 × ③目標歸屬）
@@ -16032,26 +15918,13 @@ func _test_raid_continuity_member() -> void:
 	var m := TeamData.new(); m.team_id = 1; m.faction_id = 3; m.parent_team_id = -1
 	var sub := TeamData.new(); sub.team_id = 2; sub.faction_id = 3; sub.parent_team_id = 1
 	var ind := TeamData.new(); ind.team_id = 4; ind.faction_id = -1; ind.parent_team_id = -1
-	assert(fai._is_prosperity_candidate(st0, m), "faction 成員應過候選（打草穀）")
+	assert(fai._is_prosperity_candidate(st0, m), "faction 成員應過候選（打草穀，_is_prosperity_candidate 保留）")
 	assert(not fai._is_prosperity_candidate(st0, sub), "子隊(parent≠-1)不主動發動")
 	assert(fai._is_prosperity_candidate(st0, ind), "獨立隊過候選")
-	# B1) 不換腦：無 directive（idle）→ 成員 raid 設得進
-	var sa: Array = _attack_gate_scene(0.0)   # team0 faction_id=0 FORCE 高 readiness
-	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
-	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
-	fai._evaluate_prosperity_attack(st_a, tm_a)
-	assert(tm_a.current_task == TeamData.TASK_ATTACK and tm_a.prosperity_target_id == 1,
-		"無 directive → 成員 raid 設得進，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
-	# B2) 不換腦：faction directive 在（成員非 idle）→ idle-guard 擋個人 raid（task 不變）
-	# ★執行壓層零新碼：directive 於 loop1 先設 task → 成員 loop3 非 idle → _evaluate_prosperity_attack 早退。
-	var sb: Array = _attack_gate_scene(0.0)
-	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
-	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
-	TaskArbiter.try_set(st_b, tm_b, TeamData.TASK_ATTACK, Vector2i(5, 5), TaskArbiter.PRIO_FACTION, "faction_goal")
-	fai._evaluate_prosperity_attack(st_b, tm_b)
-	assert(tm_b.task_reason == "faction_goal" and tm_b.move_target == Vector2i(5, 5),
-		"faction directive 在 → 成員個人 raid 被 idle-guard 壓（task 不變），實際 reason=%s move=%s" % [tm_b.task_reason, str(tm_b.move_target)])
-	print("[OK] _test_raid_continuity_member")
+	# 序5 dissolve：B1/B2（成員打草穀 raid 經 loop3 cascade dispatch + directive idle-guard 壓）已刪——
+	# loop3 cascade 溶解，成員征服 intent 現無獨立 dispatch 路（不呼 _evaluate_solo）→ 打草穀 raid 待 序6
+	# loop3 全溶接回（框架債縫#3）。_is_prosperity_candidate 候選判定（A）保留仍測。
+	print("[OK] _test_raid_continuity_member (A only; B1/B2 待序6 loop3 全溶)")
 
 # ②路程糧：糧 0 → trip 壓到下限 0.2 但非零 → 仍可中選（絕不歸零，糧緊只壓權重）
 func _test_r1b_trip_food_floor() -> void:
