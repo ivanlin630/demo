@@ -359,6 +359,15 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 | 生育機率 | ReactionSystem BREED_BASE_CHANCE=0.15（+醫療×0.1）；minor cap=maxi(1,int(pop×0.25))（2026-06-13 economy-bootstrap）|
 | 治理門檻 | FactionAISystem GOVERN_MATERIAL_TARGET=75（公庫達標放手擴張）|
 
+### 序0 憲法防閘 + 時間 hygiene（2026-07-05 done，merged 3f2765f）
+
+時間統一 wave 與憲法溶入 arc 的鋪路 slice，4 Task 全零 sim 行為變（seeded 46/8/1/380 守恆、framework PASS=7）：
+- **修1 near/far hoist**（`sim_runner.gd`）：per-tick 無條件 O(N)×2 team scan 搬進各自 cadence gate（命中才算），消 gate-miss 純浪費，順減 O(N²)。
+- **修2 十常數導出**（`faction_ai_system.gd`）：10 裸 cadence/timeout const → `TimeScale.TICK_PER_DAY*N`（跨類別 const 引用，非 `days()` static func）；順修 `FLEE_TIMEOUT` 硬編 `5*240` → 跟根。`time_const_check.gd` 斷言值不變。
+- **修3 eta 除數**（`faction_ai:190`）：`/240.0` → `/float(TICKS_PER_DAY)`，殺硬編漂移。
+- **★憲法 site-freeze 防閘**（`constitution_gate.gd`+`constitution_baseline.txt`）：鎖 `TaskArbiter.transition/try_set` 面（32 指紋凍結，8 known 違憲標 `# 序N`）。current⊆baseline，新增=FAIL、移除(arc溶解)=PASS。**限制**：不覆蓋 return-task-字串式違憲（coverage 誠實聲明，見 invariants）；**未掛常駐鏈**（known_issues 追）。
+- **根值未動**：`TICKS_PER_DAY` 仍 240，60 切換綁 A2（×5→1+補給+FOOD+gen 四件一 landing）。本 slice 為 A2 鋪好導出面。
+
 ### 待開發（大功能）
 
 | 項目 | 狀態 | 說明 |
