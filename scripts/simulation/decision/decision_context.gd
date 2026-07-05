@@ -12,6 +12,13 @@ var has_goods: bool = false
 var has_arb: bool = false
 var team_strength: float = 0.0
 var threat: float = 0.0
+# 序7 reaction 溶入：團潰散信號（兵卒集體恐慌）。= 高 stress 低 loyalty named 成員比例聚合。
+# ctx 首讀 person stress/loyalty state（決策模型情緒腳首個接線起步；memory 腳完整接=backlog）。
+# threat_pressure term 疊 team_panic × PANIC_WEIGHT → survival option（FLEE）util 升 → 潰散壓過 leader 勇氣。
+# 鏡射舊 bridge panic-flee（flee_count/pop≥PANIC_RATIO）但取 state 聚合，非跑 reaction argmax。
+var team_panic: float = 0.0
+const PANIC_STRESS: float = 0.6   # TEST VALUE — 成員 stress 過此才算恐慌源
+const PANIC_LOY: float = 0.4      # TEST VALUE — 成員 loyalty 低於此才算恐慌源（高忠不潰）
 var ambition_gap: int = 0
 var strongest_feud: float = 0.0
 # 序4 vendetta 溶入：血仇仇敵 team id（NpcAiSystem.vendetta_target 回值，鏡射舊 hand dispatch 掃描）。
@@ -111,6 +118,15 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	# threat（F-D6 un-stub）：視野內最高敵威脅（belief-based ThreatAssessment，含逼近/敵意/距離衰減）。
 	# 餵 threat_pressure term → unified 隊(商隊/生產)遇逼近敵會 FLEE（威脅真驅動非死 stub）。
 	c.threat = DecisionContext._max_threat(state, team)
+	# 序7 reaction 溶入：team_panic = 高 stress 低 loyalty named 成員比例（anon 無個體 state 不計；
+	# 迭 named_members 非全 persons=O(named) 非 O(N²)）。集體潰散→survival option 自然驅動 FLEE。
+	var _panic_n: int = 0
+	for _ppid in team.named_members:
+		var _pp: PersonData = state.persons.get(int(_ppid))
+		if _pp == null: continue
+		if _pp.stress > PANIC_STRESS and _pp.loyalty < PANIC_LOY:
+			_panic_n += 1
+	c.team_panic = clampf(float(_panic_n) / maxf(float(team.population), 1.0), 0.0, 1.0)
 	# 融合 threat：鏡射舊 _evaluate_threat 掃描（raw score over ALL discovered，含 approach/power 非純 hostility）。
 	var _caution: float = float(c.leader_values.get("慎重", 0.5))
 	c.threat_threshold = ThreatAssessment.THREAT_BASE_THRESHOLD + _caution * 0.3
