@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 尺度真旋鈕=TICKS_PER_HOUR 10→60(非動遭遇戰動作10=守速度鑑別度);60下遭遇戰動作24→10分合理+一格1天→4小時(據點密度合理化);★運算頻率安全證:cadence多已導出(頻率不變)、真雷=裸tick常數(PRISONER_CHECK=5等)爆頻+每tick無條件迴圈;要全tick參數表+頻率安全掃+裸常數導出+取整驗
 ---
 
