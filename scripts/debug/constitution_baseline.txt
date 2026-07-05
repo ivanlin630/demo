@@ -1,0 +1,44 @@
+# 沙盒憲法 site-freeze baseline（凍結引擎外 task 指派面）。
+# 契約：current ⊆ 本檔。新增指紋 = FAIL。移除（arc 溶解）= PASS。
+# 8 known 違憲以 # 序N 標於對應指紋上方（threat 序1/solo 序2/vendetta 序4/prosperity 序5/dispatch 序6/reaction 序7）。
+# coverage 聲明：本閘只鎖 TaskArbiter.transition/try_set 呼叫面；return-task-字串式違憲（rung_task 等）不在集內，靠 arc 逐張溶解。
+# 產生：constitution_gate.gd record（2026-07-05 序0）。
+# 序6 dispatch
+scripts/simulation/faction_ai_system.gd::_assign_member_tasks
+# 序6 dispatch
+scripts/simulation/faction_ai_system.gd::_assign_tasks
+scripts/simulation/faction_ai_system.gd::_check_deviation
+scripts/simulation/faction_ai_system.gd::_decide_unified
+# 序1 threat
+scripts/simulation/faction_ai_system.gd::_dispatch_threat_response
+# 序4 vendetta（try_set @775，enclosing func = _evaluate_all_body）
+scripts/simulation/faction_ai_system.gd::_evaluate_all_body
+scripts/simulation/faction_ai_system.gd::_evaluate_idle_subteam
+scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy
+scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure
+# 序5 prosperity
+scripts/simulation/faction_ai_system.gd::_evaluate_prosperity_attack
+# 序2 solo
+scripts/simulation/faction_ai_system.gd::_evaluate_solo
+scripts/simulation/faction_ai_system.gd::_evaluate_uprising
+scripts/simulation/faction_ai_system.gd::_trigger_defection_evaluation
+scripts/simulation/faction_ai_system.gd::_trigger_survival
+scripts/simulation/faction_ai_system.gd::_try_invite_nearby_exile
+scripts/simulation/faction_ai_system.gd::_try_resume_construction
+scripts/simulation/interaction_system.gd::_clear_aid_task
+scripts/simulation/interaction_system.gd::_convert_to_resident
+scripts/simulation/interaction_system.gd::_deliver_order
+scripts/simulation/interaction_system.gd::_execute_settlement
+scripts/simulation/outpost_system.gd::_begin_facility_construction
+scripts/simulation/outpost_system.gd::_subteam_upgrade_level
+scripts/simulation/outpost_system.gd::demolish_with_control
+scripts/simulation/outpost_system.gd::start_build
+scripts/simulation/outpost_system.gd::start_demolish
+scripts/simulation/outpost_system.gd::start_upgrade_level
+scripts/simulation/player_command_system.gd::_action_camp
+scripts/simulation/player_command_system.gd::_action_order_subteam
+scripts/simulation/player_command_system.gd::_action_respond_aid_request
+# 序7 reaction
+scripts/simulation/reaction_system.gd::evaluate_all
+scripts/simulation/sim_runner.gd::_advance_tick_body
+scripts/simulation/strategic_ai_system.gd::_dispatch_trade_net
