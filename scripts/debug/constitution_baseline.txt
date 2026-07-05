@@ -9,8 +9,6 @@ scripts/simulation/faction_ai_system.gd::_assign_member_tasks
 scripts/simulation/faction_ai_system.gd::_assign_tasks
 scripts/simulation/faction_ai_system.gd::_check_deviation
 scripts/simulation/faction_ai_system.gd::_decide_unified
-# 序1 threat
-scripts/simulation/faction_ai_system.gd::_dispatch_threat_response
 # 序4 vendetta（try_set @775，enclosing func = _evaluate_all_body）
 scripts/simulation/faction_ai_system.gd::_evaluate_all_body
 scripts/simulation/faction_ai_system.gd::_evaluate_idle_subteam
@@ -20,6 +18,8 @@ scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure
 scripts/simulation/faction_ai_system.gd::_evaluate_prosperity_attack
 # 序2 solo
 scripts/simulation/faction_ai_system.gd::_evaluate_solo
+# 序1 threat 溶入後 dispatch 落點（trigger/release scaffolding 保留=世界機制，argmax 已撕→引擎 rank_threat）
+scripts/simulation/faction_ai_system.gd::_evaluate_threat
 scripts/simulation/faction_ai_system.gd::_evaluate_uprising
 scripts/simulation/faction_ai_system.gd::_trigger_defection_evaluation
 scripts/simulation/faction_ai_system.gd::_trigger_survival

@@ -116,16 +116,22 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 人格染色（野心/貪婪/好戰）在 eval baked（mirror attack_drive 法）；weight("intent_fit")=1.0。
 			return _intent_fit(ctx, opt)
 		# ── 融合 threat（序1 溶入）：4 反應 repertoire（FLEE=survival / 備戰 / 迎戰 / 求和）──
-		# threat-scaled；opt-gated（mirror attack_drive 法）。人格染色走 weight("prepare"/"defend"/"pacify")。
+		# 人格染色 baked in eval（mirror intent_fit/attack_drive 法；weight=1.0）。additive personality-dominant
+		# 鏡射舊 _dispatch_threat_response scores（threat_react 只作小係數 modifier，非碾壓量級）——
+		# 否則 threat_react unbounded(power_ratio 可大)會壓過 survival 絕境 drive。threat 有無由 applicable gate 管。
 		"prepare_drive":
-			# 備戰 = 威脅越大越想備（慎重/好戰在 weight）。
-			return ctx.threat_react if opt == "備戰" else 0.0
+			# 備戰 = 純人格（鏡射舊 caution*0.6 + martial*0.3）。
+			if opt != "備戰": return 0.0
+			return float(ctx.leader_values.get("慎重", 0.5)) * 0.6 + float(ctx.leader_values.get("好戰", 0.5)) * 0.3
 		"defend_drive":
-			# 迎戰 = 威脅越小越敢正面迎（弱敵才硬碰；好戰在 weight）。地板 0.3 保好戰者恆有迎戰驅力。
-			return maxf(1.0 - ctx.threat_react * 0.5, 0.3) if opt == "迎戰" else 0.0
+			# 迎戰 = 好戰驅動，威脅越大越不敢正面（鏡射舊 martial*0.7 + (1−threat)*0.2）。
+			if opt != "迎戰": return 0.0
+			return float(ctx.leader_values.get("好戰", 0.5)) * 0.7 + (1.0 - ctx.threat_react) * 0.2
 		"pacify_drive":
-			# 求和 = 威脅越大越想低頭納貢（貪婪/信義在 weight）。
-			return ctx.threat_react if opt == "求和" else 0.0
+			# 求和 = 貪婪/信義驅動，好戰者不屑低頭（鏡射舊 greed*0.5 + honor*0.3 − martial*0.3）。
+			if opt != "求和": return 0.0
+			return float(ctx.leader_values.get("貪婪", 0.5)) * 0.5 + float(ctx.leader_values.get("信義", 0.5)) * 0.3 \
+				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
 		_:
 			return 0.0
 
@@ -182,10 +188,6 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
-		# ── 融合 threat 人格 crosswalk（clamp≥0；鏡射舊 _dispatch_threat_response scores 公式）──
-		# 舊：PREPARE=慎重*0.6+好戰*0.3 / DEFEND=好戰*0.7 / 求和=貪婪*0.5+信義*0.3−好戰*0.3。
-		"prepare":           return 0.3 + float(v.get("慎重", 0.5)) * 0.6 + float(v.get("好戰", 0.5)) * 0.3
-		"defend":            return 0.2 + float(v.get("好戰", 0.5)) * 0.7
-		"pacify":            return 0.2 + float(v.get("貪婪", 0.5)) * 0.5 + float(v.get("信義", 0.5)) * 0.3 \
-			+ maxf(0.3 - float(v.get("好戰", 0.5)) * 0.3, 0.0)
+		# ── 融合 threat：人格已 baked 進 eval（additive，鏡射舊 scores）→ weight=1.0（同 intent_fit）──
+		"prepare", "defend", "pacify": return 1.0
 		_:                   return 0.5

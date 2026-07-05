@@ -66,8 +66,14 @@ static func rank_threat(ctx: DecisionContext) -> Array:
 	for opt in DecisionOptions.applicable(ctx):
 		if opt not in THREAT_OPTION_SET: continue
 		var u: float = 0.0
-		for tw in DecisionOptions.terms_of(opt):
-			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
+		if opt == "survival":
+			# threat repertoire FLEE：鏡射舊 _dispatch survival*0.8 + (threat_react−0.5)*0.3。
+			# 用 raw threat_react（非 threat_pressure term 的 reputation-filtered ctx.threat，該 term 服務主 rank
+			# unified survival，語意較軟）→ 高 raw 威脅 survival leader 恆逃（faithful to old）。
+			u = float(ctx.leader_values.get("求生欲", 0.5)) * 0.8 + (ctx.threat_react - 0.5) * 0.3
+		else:
+			for tw in DecisionOptions.terms_of(opt):
+				u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
 		scored.append({"opt": opt, "u": u})
 	scored.sort_custom(func(a, b): return a["u"] > b["u"])
 	var out: Array = []
