@@ -51,10 +51,11 @@ func _expect(label: String, c: DecisionContext, expected: String) -> void:
 func _check_repertoire() -> void:
 	print("--- 6a repertoire (9 反應) ---")
 
-	# 1) 攻擊：好戰野心高 + 有戰兵 + 弱prey + 征服 intent
+	# 1) 攻擊：好戰野心高 + 有戰兵 + 弱prey + 征服 intent + ready（序5：征服攻擊吃 readiness 閘，沒本錢不出征）
 	var c1 := _ctx({"好戰": 0.9, "野心": 0.9, "貪婪": 0.5})
 	c1.self_armed_ratio = 0.5; c1.has_weak_prey = true
 	c1.intent = "征服"; c1.intent_target = 1
+	c1.readiness = 0.8; c1.readiness_thr_eff = 0.5   # 序5 溶入：readiness factor（否則趨0=送死沒本錢）
 	_expect("攻擊", c1, "攻擊")
 
 	# 2) 掠奪：貪婪高 + 弱prey + 有戰兵（無征服 intent → 攻擊 不 applicable）

@@ -14515,6 +14515,7 @@ func _test_intent_fit_term() -> void:
 	var cc := DecisionContext.new()
 	cc.intent = "征服"; cc.intent_target = 5; cc.food_days = 20.0; cc.leader_values = {"野心": 0.8, "好戰": 0.7}
 	cc.self_armed_ratio = 1.0   # capability grounding（裁2）：征服攻擊 boost 需有戰力（無牙征服=送死→0）
+	cc.readiness = 0.8; cc.readiness_thr_eff = 0.5   # 序5 溶入：征服攻擊吃 readiness 閘（沒本錢→趨0）
 	assert(DecisionTerms.eval("intent_fit", cc, "攻擊") > 0.0, "征服+target → 攻擊 intent_fit>0")
 	# 匱乏 + 野心高 + 有弱 prey → 掠奪 boost；溫和窮隊 → 0（防 over-war）。
 	var cs := DecisionContext.new()
