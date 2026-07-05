@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 憲法溶入arc裁序——好消息:引擎已對,違憲=8舊平行路徑;修序wave1-4(征服5/6=arc原傷不埋後,ReactionSystem最後);憲法=脊椎主線tempo讓路(gen重校壓wave2後一次校);防新增閘現立;★硬驗收:溶=融合非刪,每張驗repertoire沒少+該出現還出現
 ---
 

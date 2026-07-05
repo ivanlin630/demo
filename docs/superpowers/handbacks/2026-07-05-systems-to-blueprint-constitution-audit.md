@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 憲法稽核清單——引擎存在正確但只wire 2 tag(MERCHANT/PRODUCE)+全隊survival;違憲=8個歷史舊平行subsystem/判斷器繞引擎(threat/solo/rung_task查表/vendetta/prosperity/faction dispatch/ReactionSystem/灰項dispatch);零例外驗PASS(絕境引擎內支配/遠方疏非笨反更乾淨);核心=擴uses_unified全隊+併option入REGISTRY;=多slice收斂arc待你裁序
 ---
 
