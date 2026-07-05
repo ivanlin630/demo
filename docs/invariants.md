@@ -14,6 +14,18 @@
 
 - 大地圖與遭遇戰共用時間尺度
 
+### ★ TimeScale 骨架三不變量（time-scale wave slice A，2026-07-05，enforce 起步）
+```
+凡時間量              必從 TimeScale 骨架導出（禁裸硬編 tick）
+凡移動                大地圖格 = 遭遇戰動作 × 遭遇戰地圖尺度（連動,不准倍率打破）  ← 錨①②
+凡延遲/timeout/cadence  以語意單位（TimeScale.days(N)/hours(N)，非裸 720）
+```
+- **單一權威源 = `TimeScale`**（`scripts/simulation/time_scale.gd`）。承既有根：`TICK_PER_DAY`←WorldState、`BASE_ACTION_TICKS`/`ENCOUNTER_MAP_SCALE`←EncounterSystem。**單向依賴 TimeScale→{WorldState,EncounterSystem}，反向禁**（循環）。新碼一律 `TimeScale.*`。
+- **錨①（移動連動,釘死）**：`MOVE_TICKS_PER_HEX = BASE_ACTION_TICKS × ENCOUNTER_MAP_SCALE = 240 = 1 天/hex`。`MovementSystem.BASE_MOVE_TICKS` 唯一讀站走此連動式，**禁再塞世界速度倍率**（`WORLD_SPEED_MULT` 已刪）。
+- **錨②**：`ENCOUNTER_MAP_SCALE = EncounterSystem.MAP_DIAMETER = 24`（遭遇戰地圖尺度,不變）。
+- **錨⑤（觀看組不碰物理）**：倍速靠 GUI（TICKS_PER_SECOND/TURN/DUMP 橋），非改時間尺度。
+- **enforce 進度**：本 slice 立骨架 + 移動連動（headless `_test` time-invariant assert 守）；③cadence 裸字面（720/360/240）收編 `TimeScale.days`=slice B；CI 掃裸 tick/倍率=slice C。**FOOD/FATIGUE per-day 率不因移速變，本 slice 留原值**；跨格旅途糧耗 5× 增=④後勤 measure 對象。
+
 ## Information
 
 - 認知不等於真實

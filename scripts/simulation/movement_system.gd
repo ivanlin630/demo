@@ -1,8 +1,8 @@
 ﻿class_name MovementSystem
 
-# world-hex 移動成本 = encounter-hex 動作時間 × 地圖直徑 / 世界速度倍率
-const WORLD_SPEED_MULT: int = 5    # TEST VALUE — 倍率=5 → 0.2天/hex 菁英 / 0.29天/hex 平民（normal speed, plains, daytime）
-const BASE_MOVE_TICKS: int = EncounterSystem.BASE_ACTION_TICKS * EncounterSystem.MAP_DIAMETER / WORLD_SPEED_MULT
+# world-hex 移動成本 = 遭遇戰動作時間 × 遭遇戰地圖尺度（TimeScale 骨架連動，錨①，=240=1天/hex）
+# 禁另塞倍率（invariant Time#2）；倍速靠 GUI 觀看組不碰物理。
+const BASE_MOVE_TICKS: int = TimeScale.MOVE_TICKS_PER_HEX
 const MIN_MOVE_TICKS: int  = BASE_MOVE_TICKS / 3
 const MAX_MOVE_TICKS: int  = BASE_MOVE_TICKS * 3
 const NAMED_WEIGHT: int    = 3   # named 成員速度加權（隊速 = named×3 + 健康匿名×1 + 傷兵×0.5 的平均）
