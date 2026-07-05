@@ -26,14 +26,14 @@ const WAGON_TERRAIN_MULT: Dictionary = {
 	"plains": 0.9, "forest": 0.4, "mountain": 0.2
 }
 
-# ⚠ 已知世界模型級 debt（2026-07-04 貿易漏斗定罪，修法上交系統 session 裁）：
-# 此處 move_tick_acc 硬編 +TICKS_PER_HOUR，但 far 區每 FAR_ZONE_INTERVAL(100 tick) 才跑一次
-# → far 隊移速被稀釋 10×（1 hex≈3 天）。無玩家世界全隊=far → envoy 馬鏈 6 月未貫通 +
-# 貿易旅程永不到場同根（一修雙解實測：elapsed 修正後 seed1337 成交 6→30、arrive 0→43=33.9%，
-# 但世界節奏×10 → pop -60% 塌房=gen 校準全失效）。修=process 收 elapsed_ticks 參數（near=
-# NEAR_CADENCE、far=FAR_ZONE_INTERVAL），須配套節奏重校準，故不在貿易 slice 內落地。
+# elapsed 積分（time-scale wave slice B，2026-07-05）：`move_tick_acc += elapsed_ticks`（真經過時間，
+# near=NEAR_CADENCE=10、far=FAR_ZONE_INTERVAL=100，caller 傳實際 cadence 非硬編）→ far 每 100-tick
+# 呼叫補回 100 tick 的移動預算 = 與 near 同速（修 far 10× 稀釋，envoy/trade 跨格旅程到得了）。
+# 多格步進（疏非慢非笨）：一次呼叫 acc>=cost 時迴圈步進多格、每步 acc-=cost 保餘數（非 acc=0 丟零頭）。
+# ★RNG 流神聖：迴圈多次呼 _step_team → randf 消耗序改變 = 預期行為變（far 移對＝世界不同）；
+#   確定性仍守（同 seed 同結果）。禁在迴圈內先濾後算/memoize 重排 randf 消耗序。
 func process(state: WorldState, team_ids: Array,
-		time_mult: float = 1.0) -> Dictionary:
+		time_mult: float = 1.0, elapsed_ticks: int = WorldState.TICKS_PER_HOUR) -> Dictionary:
 	# 護衛：每 tick 追蹤目標位置
 	for tid in team_ids:
 		if not state.teams.has(tid):
@@ -72,13 +72,28 @@ func process(state: WorldState, team_ids: Array,
 				team.move_target = sa_target
 		if team.move_target == Vector2i(-1, -1):
 			continue
-		var cost: int = _move_cost(state, team, time_mult)
-		team.move_tick_acc += WorldState.TICKS_PER_HOUR
-		if team.move_tick_acc < cost:
-			continue
-		team.move_tick_acc = 0
+		team.move_tick_acc += elapsed_ticks
 		var old_target: Vector2i = team.move_target
-		if _step_team(state, team):
+		# 多格迴圈：acc>=cost 逐格步進、每步 acc-=cost 保餘數（疏非慢非笨）。
+		# max_steps 上限 = elapsed/MIN_MOVE_TICKS（cost 恒 clamp≥MIN → 防病態無限迴圈）。
+		var max_steps: int = maxi(1, elapsed_ticks / MIN_MOVE_TICKS)
+		var did_move: bool = false
+		var steps: int = 0
+		while steps < max_steps:
+			var cost: int = _move_cost(state, team, time_mult)   # 每格重算（地形變）
+			if team.move_tick_acc < cost:
+				break
+			team.move_tick_acc -= cost
+			if _step_team(state, team):
+				did_move = true
+			steps += 1
+			# 到達/stuck → _step_team 清 move_target → 停（既有到點/相遇語意保留）
+			if team.move_target == Vector2i(-1, -1):
+				break
+		# cost 上限節流下 acc 可能仍 ≥cost（本 window 已步不動）→ clamp 至 MAX_MOVE_TICKS
+		# 只留最多一格昂貴地形的餘數，丟不可能兌現的超額（非丟合法零頭）。
+		team.move_tick_acc = mini(team.move_tick_acc, MAX_MOVE_TICKS)
+		if did_move:
 			moved.append(tid)
 			# arrived = 走到原 move_target（_step_team 內到達會清 move_target）
 			if team.tile_pos == old_target:
