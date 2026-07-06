@@ -267,7 +267,7 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 | `person_generator.gd` | 從匿名人口晉升記名 NPC；tag 屬性/技能偏移 |
 | `faction_ai_system.gd` | 策略層 evaluate_all；values 整合；成員 task 指派；SoloAI；tag 過濾；discovered-only 目標；`_find_*_target`（trade/prey/strong/aid）用 `PathSystem.estimate_catch_up`（reachable 過濾 + eta score）；每 20 Tick 外交評估；每 BETRAY_CHECK_INTERVAL 背叛評估；`_evaluate_prosperity_attack`（野心驅動征服 cadence 3 日，軍隊 tag 加倍 1.5 日，個性公式 attack_score / readiness threshold / find_prosperity_prey）；`_trigger_survival` Path 1 B 分支（遠 outpost + 殘忍/好戰 → 改 TASK_LOOT）；stuck 視為 idle 允許重評（_is_stuck → STUCK_TASKS）|
 | `diplomatic_ai_system.gd` | _calc_diplomacy_score（5 因子）；try_proactive_diplomacy；handle_diplomacy_message（4 動作）；_form_alliance；_update_reputation；consider_betrayal；_execute_betrayal |
-| `strategic_ai_system.gd` | 戰略目標更新（expand/defend/trade_net）；包圍指派；突圍指派；威脅評估（team_discovered，非全知）；in-map check（off-map target → nearest_valid_tile）；ENCIRCLE_DIST=1 / BREAKOUT_DIST=2 / BREAKOUT_NEAREST_THRESHOLD=3；trade_net handler（dispatch idle 商隊找有 goods/coin 鄰商隊）|
+| `strategic_ai_system.gd` | 戰略目標更新（expand/defend/trade_net）；包圍指派；突圍指派；威脅評估（team_discovered，非全知）；in-map check（off-map target → nearest_valid_tile）；ENCIRCLE_DIST=1 / BREAKOUT_DIST=2 / BREAKOUT_NEAREST_THRESHOLD=3（trade_net dispatch 序8 溶入引擎已刪，致富交易走引擎貿易/買糧/囤貨 option）|
 | `npc_ai_system.gd` | write_memory（修剪+relations+goals觸發+G2a feud/gratitude/protect 邊）；generate_birth_goals（values 門檻）；check_goal_alignment（目標×任務 delta）；vendetta_target（G2d 讀 feud 邊+衝動 gate→脫軌仇人 team）；cleanup_goals（target 死後重定向） |
 | `salary_system.gd` | 每 30 Tick 結算；fair_salary = skills × 2.0；超付 → loyalty 上升 + kindness 記憶；欠付 → loyalty 下降；anon wage 改用 `AnonTierSystem.total_wage()` |
 | `anon_tier_system.gd` | 4 tier（平民/新兵/老兵/菁英）；TIER_STATS（combat/speed/base_wage）；PROMOTION_EXP_THRESHOLD + ×count；leader 戰術 cap 訓練上限；菁英需 weapon_melee_high；kill_random weighted；transfer_proportional；avg_speed/avg_combat_skill/total_wage computed |
@@ -395,6 +395,14 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - **★序1 threat「率18」部分是 churn 假象（重要 measure 洞察）**：86 ambient-FLEE 隨機逃跑=隊間威脅遭遇主要製造者→序1 驗的 threat 率 18 部分虛胖。churn 除盡→seeded threat.dispatch 3→0（世界變靜）。`_evaluate_threat` 未改、仍 loop3 先跑、真威脅仍派。→ **threat 融合驗 5b 從「seeded 湧現硬斷」改「確定性 live-seam 硬斷」**（構威脅隊直呼 _evaluate_threat 斷言實派+probe bump=更 robust，seeded 值降資訊性）。教訓：湧現率斷言可被無關 churn 虛胖，確定性 seam 測才穩。
 - **融合驗綠**：rung repertoire（訓練/貿易/生產/建設/讓位）+ threat（新 live-seam）+ solo 全 ALL PASS；framework PASS=7；gate PASS 32（rung_task 回字串無 TaskArbiter→不在指紋）。
 - **seeded 52→48/8/1/380**（QA wave 判；pop/factions/established 守恆；48–56 帶繞 52）。**watch（藍圖/QA）**：世界變靜（threat 遭遇↓）是否過龜縮（反龜縮 bar）。
+
+### ★★憲法溶入 arc 完成 — 序8 灰項 done（2026-07-06，merged 57f7d39）= 8 違憲全溶
+
+`strategic_ai::_dispatch_trade_net`（唯一剩餘引擎外 task-dispatch 灰項，序6 後致富成員走引擎已成死路 trade.dispatch.trade_net=0）撕除 → 致富交易走引擎貿易/買糧/囤貨 option。gap 檢無淨增（純買家囤貨/買糧覆蓋）。gate sites 31→30 全為保留 scaffolding。融合驗綠、framework PASS=7（S6 order 不 DORMANT）、seeded 49/8/1/381 零漂移。
+- **★★憲法 8 違憲全溶完（序1 threat / 序2 solo / 序3 rung / 序3.5 preempt / 序4 vendetta / 序5 prosperity / 序6 dispatch / 序7 reaction / 序8 灰項）**——「決策不統一」根因 arc 完成。所有 NPC macro 行為經統一決策引擎（DecisionEngine util weigh + 人格調製），憲法閘鎖 30 sites 全為 world-mechanic dispatch/scaffolding（非個體 utility 判斷器）。
+- **arc 尾待**：撤 pre-commit site-freeze 閘 → 轉全掃常駐鏈（另 slice）。
+- **arc 後平行軌**：gen readiness recalibrate（probe slice→重跑 baseline→調，待藍圖）；決策模型接線脊椎（感知腳 audit done、情緒腳序7 起步、位置god-view/戰力欄/記憶腳待）；全 pipeline 工作流切換（脊椎開軌時）。
+- **殘（follow-up）**：C 類貿易 finder dedup（`_find_trade_partner` god-view vs `_find_trade_target`）；player_command trade_net override 語意（正交，另議）。
 
 ### 憲法溶入 arc — 序7 ReactionSystem 行為選擇溶入 done（2026-07-06，merged 2edf120）★reframe=其實小
 
