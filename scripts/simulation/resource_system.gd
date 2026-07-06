@@ -208,6 +208,7 @@ func _apply_famine_attrition(state: WorldState, team: TeamData, day_fraction: fl
 		var md: int = ceili(float(team.minor_population) * FAMINE_MINOR_DEATH_RATE)
 		md = mini(md, team.minor_population)
 		team.minor_population -= md
+		if Probe.enabled: Probe.bump("death.starve_minor", md)
 		print("[Famine] Team%d 餓死 minor %d (famine=%.0f天)" % [team.team_id, md, team.famine_days])
 		return
 	var anon_total: int = AnonTierSystem.total_pop(team)
@@ -217,6 +218,7 @@ func _apply_famine_attrition(state: WorldState, team: TeamData, day_fraction: fl
 		var actually: int = 0
 		for t in killed:
 			actually += killed[t]
+		if Probe.enabled: Probe.bump("death.starve_anon", actually)
 		print("[Famine] Team%d 餓死 anon %d (famine=%.0f天)" % [team.team_id, actually, team.famine_days])
 
 # 日邊界：覓食累積彙整成 episode（只玩家隊發訊息，其餘僅歸零防 spam）。回傳產生的訊息文字陣列（供測試/UI）。
