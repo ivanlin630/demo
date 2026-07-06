@@ -1,6 +1,7 @@
 # 沙盒憲法 site-freeze baseline（凍結引擎外 task 指派面）。
 # 契約：current ⊆ 本檔。新增指紋 = FAIL。移除（arc 溶解）= PASS。
-# 8 known 違憲以 # 序N 標於對應指紋上方（threat 序1/solo 序2/vendetta 序4/prosperity 序5/dispatch 序6/reaction 序7）。
+# 8 known 違憲以 # 序N 標於對應指紋上方（threat 序1/solo 序2/vendetta 序4/prosperity 序5/dispatch 序6/reaction 序7/灰項trade_net 序8）。
+# ★序8 = 憲法溶入 arc 末張：8 known 違憲全溶完（序1-8）。此後 arc 尾轉全掃常駐 + 撤 pre-commit（另 slice）。
 # coverage 聲明：本閘只鎖 TaskArbiter.transition/try_set 呼叫面；return-task-字串式違憲（rung_task 等）不在集內，靠 arc 逐張溶解。
 # 產生：constitution_gate.gd record（2026-07-05 序0）。
 # 序7 reaction：evaluate_all bridge panic-flee try_set 撕除（指紋 removed=arc 進度，集體恐慌→
@@ -46,4 +47,6 @@ scripts/simulation/player_command_system.gd::_action_camp
 scripts/simulation/player_command_system.gd::_action_order_subteam
 scripts/simulation/player_command_system.gd::_action_respond_aid_request
 scripts/simulation/sim_runner.gd::_advance_tick_body
-scripts/simulation/strategic_ai_system.gd::_dispatch_trade_net
+# 序8 灰項 trade_net：_dispatch_trade_net（try_set TASK_TRADE 繞引擎）已溶解刪除（指紋 removed=arc 進度，
+# 致富交易走引擎 _decide_unified 貿易/買糧/囤貨 option）。_find_trade_partner/_tile_has_resident =
+# 保留純查詢 scaffolding（無 try_set 不入閘），god-view fallback dedup 另歸 C 類 finder（FI handback）。
