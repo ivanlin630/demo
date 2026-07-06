@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序7 ReactionSystem measure reframe——audit標「最大最難」但坐實=其實小(9反應apply幾乎全state-effect,唯一行為選擇=聚合panic-flee bridge);序7=拆1個bridge+保9反應(合你arc-order情緒/後果保留);2 finding:記憶染價值腳dormant(引擎不讀memory=決策模型gap)、反應零probe觀測空白
 ---
 

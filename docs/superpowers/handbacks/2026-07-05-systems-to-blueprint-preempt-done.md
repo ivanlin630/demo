@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序3.5 threat-preempt done(merged 4afbcaf)——反龜縮 seam 修好;忙碌目標現會對壓境攻擊放下工作反應;犁田遇劫匪(定居村TASK_PRODUCE)接上;flee 0→12,seeded 48→52/9/1/381(factions 8→9);PREEMPT_MARGIN=2.0 measure校待wave QA
 ---
 

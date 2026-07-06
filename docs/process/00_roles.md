@@ -1,5 +1,7 @@
 # 00_roles.md — Session 角色與分工
 
+> **★2026-07-06 全 pipeline 切換**：本 doc 的「並存設計腦 + 人肉接力 session」模型由 `06_pipeline_orchestration.md` 取代——**藍圖 orchestrator spawn 系統/實作/QA subagent（ephemeral），用戶只跟藍圖談 WHAT**。**下列角色職責 / owner 表 / 邊界規則仍全有效**（誰管什麼不變），變的只是 session 形態（常駐 session → orchestrator 調度的 ephemeral step）。**auto-memory 單寫者 → 藍圖 orchestrator session**（見 §auto-memory）。QA 獨立 adversarial + 用戶最終驗收硬閘不變（`04_qa`/`05_acceptance`）。
+
 主 session 有**兩個並存的設計腦**，按領域分（WHAT vs HOW），不是按階層。
 加上 worktree 實作者與**驗收官（QA）**。接力，不是並行競爭。
 
@@ -85,7 +87,8 @@ channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統�
 
 ## auto-memory 規則（承 §2）
 
-- **只有系統 session 寫** auto-memory。藍圖 / 實作只**讀**（harness 開頭自動注入，無需主動讀）。
+- **★pipeline 切換後（2026-07-06）：auto-memory 單寫者 = 藍圖 orchestrator session**（持久、序列化寫入=天然單寫，看全局）。系統/實作 subagent ephemeral 不寫 memory，教訓走 handback → orchestrator 提煉入 memory。以下「系統 session 寫」= 切換前模型（存參照）。
+- **（切換前）只有系統 session 寫** auto-memory。藍圖 / 實作只**讀**（harness 開頭自動注入，無需主動讀）。
 - 藍圖 / 實作學到的跨 session 教訓 → 寫進 handback（git doc）→ 系統提煉進 memory。
 - 單寫者 = 零 MEMORY.md race + 教訓經系統過濾，避免各記不一致。
 

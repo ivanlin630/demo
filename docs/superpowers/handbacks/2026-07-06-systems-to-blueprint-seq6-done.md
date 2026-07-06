@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序6 faction 成員dispatch done(merged 2b4a427,最高收斂動主幹)——V2-cmd自消+成員raid接回+縫#3結清+序3.5 preempt保;seeded 52→49/8/1/381;★gen重校完整征服圖現ripe(你等的完整圖到了),要不要現在對完整圖裁gen方向
 ---
 

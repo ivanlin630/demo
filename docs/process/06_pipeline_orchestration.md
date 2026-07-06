@@ -31,13 +31,15 @@
 ## 5. handback channel 在新模型
 `00_roles §跨角色 handback` 的 git doc channel **保留**（=共享大腦本體），但「並行 session 不能對話→人肉橋」的原因消失（orchestrator 直接串）。handback 仍寫（audit trail），status open/consumed 由 orchestrator 管。
 
-## 6. 切換 checklist（切點到時執行）
-- [ ] 憲法 arc + 序7/8 + probe slice + gen recalibrate 全落 merged（在飛的零）。
-- [ ] 本 doc + `00_roles`/`01_architect`/`03_implementer` 更新指向 orchestrator 模型。
-- [ ] CLAUDE.md「Session 工作流」段改（見下草案，protected→用戶過目才落）。
-- [ ] auto-memory 單寫者改藍圖 orchestrator。
-- [ ] 撤 `.git/hooks/pre-commit`＋憲法閘進 orchestrator merge-gate 步。
-- [ ] 首個 pipeline slice（決策模型脊椎首張）dogfood 驗流程。
+## 6. 切換 checklist（2026-07-06 執行）
+- [x] 憲法 arc + 序7/8 + probe slice + gen（readiness kill knob，food defer）全落 merged（在飛的零滿足；gen readiness 軌駁倒轉脊椎②，非在飛）。
+- [x] 本 doc + `00_roles` 更新指向 orchestrator（角色職責/owner 表不變，session 形態變；`01_architect`/`03_implementer` 職責本體仍有效，被 orchestrator 調度）。
+- [x] CLAUDE.md「Session 工作流」段改（用戶核准照落）+ 常用指令 constitution_gate 註改 merge-gate。
+- [x] auto-memory 單寫者改藍圖 orchestrator（`00_roles §auto-memory` + CLAUDE.md）。
+- [x] 撤 `.git/hooks/pre-commit`（arc-temporary）；憲法閘=orchestrator merge-gate 步（CLAUDE.md 常用指令 + 本 doc §4.4）。
+- [ ] **首個 pipeline slice = combat_decisive=0 診斷（藍圖 execute-switch 指定 dogfood）**——由 orchestrator spawn，驗流程。**此後系統/實作/QA 走 subagent，用戶只跟藍圖。**
+
+**★切換完成後（本 commit）：持久系統 session 交棒 orchestrator。下一個動作起，藍圖 orchestrator 調度 subagent。**
 
 ---
 

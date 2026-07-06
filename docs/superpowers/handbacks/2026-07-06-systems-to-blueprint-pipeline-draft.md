@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: pipeline工作流process-doc草案好了(docs/process/06_pipeline_orchestration.md)——orchestrator序列化寫入=天然單寫者/QA獨立保留/深工餵厚context/憲法閘轉orchestrator merge-gate撤pre-commit;auto-memory改藍圖orchestrator session;CLAUDE.md段改草案在doc內(未動CLAUDE.md,protected交你→用戶過目);切點前不動現狀
 ---
 

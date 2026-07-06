@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 多seed征服measure完整圖(8seed×6月post-序6)——★prosperity_reached=0全seed(劫掠→出征階梯卡死=readiness太重,你seq5標的param recalibrate信號);2/8凍死(龜縮);6/8死亡潮重(attr56-68%腰斬);capture走faction-attack在4seed活;征服未全死只prosperity鏈死;要你裁gen方向
 ---
 

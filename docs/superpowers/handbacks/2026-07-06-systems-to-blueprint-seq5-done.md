@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序5 prosperity done(merged 16ab3bc,arc最大)——融合非刪達成6錨綠+S3/S4誘殺保;★發現unready征服隊改掠奪(小承諾)非出征=capability grounding,prosperity_reached→0但非凍死(conquest走loot→combat→capture,churn在);成員打草穀raid暫失待序6;gen重校follow-up觸發(你wave QA判)
 ---
 

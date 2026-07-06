@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序4 vendetta done(merged 2506e6e,seeded零漂移,融合驗4錨綠);2 件輕判(不擋序5)——①feud無capability gate(無牙血仇仍攻送死,舊亦無,血仇=衝動非理性?vs序2 cap grounding)②私仇被faction攻擊令蓋(directive優先)要否覆蓋
 ---
 

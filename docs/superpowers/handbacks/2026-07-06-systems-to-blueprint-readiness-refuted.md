@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★readiness假設被單旋鈕測試駁倒——激進降threshold(0.55→0.30/floor0.3→0.2)winner_prosperity仍0全seed+死因仍100%餓死+prosperity_reached仍0=readiness非綁定閘;真閘在下游:①engine征服path恆0(winner_prosperity=0,belief-fog無prey我次觀察)②attacks有dispatch進combat但combat_decisive=0/win_absorbed=0(不解成capture);gen方向重議,疑戰力欄/感知脊椎才是真解非gen param;實驗已revert未commit
 ---
 

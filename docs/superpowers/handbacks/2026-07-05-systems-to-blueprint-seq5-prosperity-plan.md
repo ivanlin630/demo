@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 序5 prosperity spec+plan好(arc最大最險,觸征服鏈核心);de-risk分階(先加engine攻擊到parity→再拆cascade);★征服率shift→gen重校=follow-up landing;要你知會+wave QA判新征服率;可spawn但風險級想給你一眼
 ---
 

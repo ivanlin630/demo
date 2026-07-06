@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: full-probe baseline決定性結果——★你假設坐實:死因100%餓死(combat/defect=0全seed),死亡潮=純餓死非征服;★征服名實斷點:winner 100%other(建設/survival),非loot非attack,attack util 0.13<建設=readiness太重;→readiness recalibrate方向驗證(單旋鈕),要你給降幅方向;次觀察:winner建設非loot疑belief-fog戰力欄缺(連感知audit)
 ---
 

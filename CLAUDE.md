@@ -18,7 +18,7 @@ Godot 4.2.2 GDScript 世界模擬器。
 # 跑 multi sanity
 .\tools\godot.ps1 --headless --script scripts/debug/game_sim_multi.gd
 
-# 憲法 site-freeze 防閘（arc 期間防新增引擎外 task 指派；新增違憲=FAIL）
+# 憲法 site-freeze 防閘（merge-gate：禁新增引擎外 task 指派；新增違憲=FAIL）——orchestrator merge 前跑
 .\tools\godot.ps1 --headless --script scripts/debug/constitution_gate.gd
 ```
 
@@ -66,18 +66,15 @@ docs/
 ```
 ---
 
-## Session 工作流
+## Session 工作流（全 pipeline，2026-07-06 切）
 
-角色與分工（WHAT/HOW 雙設計腦 + 實作）詳見 `docs/process/00_roles.md`，**每 session 開頭讀**。
+用戶只跟**藍圖 orchestrator**（持久人工 session）談 WHAT。藍圖裁定後 spawn subagent 執行下游。詳 `docs/process/06_pipeline_orchestration.md`（+ `00_roles`/`01_architect`/`03_implementer`/`04_qa`/`05_acceptance` 仍為角色職責/驗收本體）。
 
-**設計 session**（`A:\GDS\demo`，`main` branch，兩個並存）：
-- **藍圖**（WHAT）：遊戲願景 / feature / 平衡意圖。owner = `game-design.md`。
-- **系統**（HOW）：seam / 契約 / invariant / 流程。owner = `invariants.md` / 流程 docs / `progress.md` / `CLAUDE.md` / **auto-memory 單寫者**。嚴格遵守 `docs/process/01_architect.md`。
-- 邊界：藍圖不碰架構、系統不改願景；越界呈報對方。喬不攏你裁。
-- 禁止廢話與恭維用語。
-
-**子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：
-- 如果你在 `.worktrees/` 路徑下，你是實作 session
-- 嚴格遵守`docs/process/03_implementer.md`
-
-**auto-memory：只有系統 session 寫；藍圖 / 實作只讀（開頭自動注入），教訓走 handback 呈報系統。**
+- **藍圖 orchestrator**（WHAT，人工）：與用戶談願景/平衡；一裁定→fan-out spawn 下游。owner = `game-design.md`。
+- **系統 subagent**（HOW，ephemeral）：spec/plan（讀 `invariants`/`game-design`）。owner doc = `invariants.md`/流程 docs/`progress.md`/`CLAUDE.md`。
+- **實作 subagent**（worktree，ephemeral）：建+測→handback。
+- **QA subagent**（★獨立 adversarial，非藍圖自蓋自判）：判決。**用戶=最終驗收權威**（交用戶前 QA 綠=硬閘）。
+- **git doc = 共享大腦**：handback + `game-design`/`invariants`/`progress` 持久狀態；ephemeral subagent 直讀 doc 得 context。owner 表語意不變，**寫手 = orchestrator 序列化（天然單寫，無並發）**。
+- **auto-memory 單寫者 = 藍圖 orchestrator session**（持久、序列化、看全局）。
+- **憲法閘/融合驗/framework = orchestrator merge-gate 步**（merge 前 spawn 跑，綠才 merge）；pre-commit site-freeze 閘已撤（arc-temporary）。
+- 邊界：藍圖不碰架構細節、系統不改願景；越界呈報。禁廢話恭維。深架構 slice 餵厚 context（ephemeral 比老兵淺）。

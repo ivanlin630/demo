@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: gen-direction收到+seed語意確認(是=純RNG世界生成,param全同,只WARRING_SEEDS變種子);承認多seed探針under-probed(bed只抓PROBE_KEYS subset,漏conq.winner_loot/prosperity+死因分解+反應計數);照你釘死序=先spec死因+反應probe→重跑baseline→才readiness
 ---
 

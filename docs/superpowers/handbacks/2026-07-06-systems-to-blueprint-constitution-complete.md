@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★★憲法溶入arc完成——8違憲全溶入引擎(序1-8+序3.5),決策不統一根因arc完;憲法閘鎖30 sites全為保留scaffolding;seeded 49/8/1/381;arc尾待撤pre-commit轉常駐;arc後平行軌=gen recalibrate(probe跑中)/決策模型脊椎/pipeline切換
 ---
 
