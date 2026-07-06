@@ -29,6 +29,16 @@ const PROBE_KEYS: Array = [
 	"beg.dispatch", "beg.resolve", "join.dispatch", "join.resolve",
 	# R1 驗收（三帶+logistics）：絕境仍搏 / ③管住獨立隊攻屬村 / 貿易量（guard ④）
 	"surv.loot_dispatch", "conq.indep_atk_believed_owned", "g1.arb_hit",
+	# 征服 winner funnel（引擎實選：loot vs 攻擊=直接看階梯；bump 點多已存在 code，此擴收）
+	"conq.declared", "conq.winner_loot", "conq.winner_prosperity", "conq.winner_other", "conq.winner_none",
+	"conq.member_atk_eligible", "conq.member_atk_dispatch",
+	"conq.combat_entered", "conq.combat_decisive", "conq.win_absorbed", "conq.win_no_absorb",
+	# 死因分解（Task1：餓/戰/叛離縮編/滅團分類）
+	"death.starve_minor", "death.starve_anon", "death.combat_pop", "death.combat_named", "death.defect_leave",
+	"extinct.starve", "extinct.combat", "extinct.other",
+	# 反應計數（Task2：9 反應 apply winner）
+	"reaction.P1_comply", "reaction.P2_produce", "reaction.P4_expand", "reaction.N1_flee",
+	"reaction.N2_riot", "reaction.N3_defect", "reaction.N4_shirk", "reaction.N5_extort", "reaction.breed",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。

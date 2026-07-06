@@ -282,6 +282,7 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var loser_dead: int = roundi(float(loser_anon) * LOSER_CASUALTY_RATE)
 	if loser_dead > 0:
 		AnonTierSystem.kill_random(loser, loser_dead, "combat_defeat", AnonTierSystem.SURVIVAL_KILL_WEIGHT)
+		if Probe.enabled: Probe.bump("death.combat_pop", loser_dead)
 		print("[E1Defeat] Team%d 敗方 pop 損耗 -%d" % [loser_id, loser_dead])
 	# 受控人力 P1：征服吸收敗方殘餘 anon → 勝方 captive_group（守恆：loser anon→holder captive；隔離非戰力）
 	# Task0 漏斗：決勝戰（殲滅）記 decisive；absorb 成敗 + no_absorb 原因（敗方殘 anon 打光）
@@ -542,6 +543,7 @@ func _random_part() -> String:
 
 func _kill_named_npc(state: WorldState, team_id: int, p) -> void:
 	var team: TeamData = state.teams[team_id]
+	if Probe.enabled: Probe.bump("death.combat_named")
 	print("[Death] Person%d (%s) 死亡 (Team%d)" % [p.id, p.person_name, team_id])
 	if team.leader_id == p.id:
 		var event_system = load("res://scripts/simulation/event_system.gd").new()

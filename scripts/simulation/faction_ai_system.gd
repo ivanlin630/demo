@@ -2081,6 +2081,11 @@ func _consider_extraction(state: WorldState, team: TeamData) -> void:
 
 # 滅團標記：清 faction 引用 + 排入延遲清除（資產路由延到 erase 當下，捕捉時序間加回的 coin）
 func _on_team_extinct(state: WorldState, team: TeamData) -> void:
+	if Probe.enabled:
+		# 滅團死因分類（盡力，無完美標記→extinct.other 兜底）：餓死計時>0=餓主因，否則戰鬥標記，否則其他
+		if team.famine_days > 0.0: Probe.bump("extinct.starve")
+		elif team.combat_target != -1: Probe.bump("extinct.combat")
+		else: Probe.bump("extinct.other")
 	if team.faction_id != -1 and state.factions.has(team.faction_id):
 		var f = state.factions[team.faction_id]
 		f.member_team_ids.erase(team.team_id)
