@@ -30,6 +30,29 @@ const GATE_CONF_HIGH := 0.6   # TEST VALUE：慎重者門檻
 # G3d-2 scout 主動查證
 const SCOUT_TIMEOUT := WorldState.TICKS_PER_DAY * 3   # TEST VALUE：斥候逾時未收斂 → 釋放回常規（防永 scout）
 
+# ── 戰力迷霧 fallback（未偵察武裝 → 人格化尺寸代理，非埋死「陌生=滿武裝」常數）──
+# 基準武裝比＝世界參數（第三家）：村多平民 → 未偵察目標的武裝占比明顯 <1（measure 調）。
+const ARMED_FRACTION_BASE := 0.35        # TEST VALUE：中性領袖對未知目標估的武裝/人口比（<1）
+const ARMED_FRACTION_CAUTION_SKEW := 0.3 # TEST VALUE：慎重抬高（高估防禦、保守觀望）
+const ARMED_FRACTION_CRUELTY_SKEW := 0.25 # TEST VALUE：殘忍壓低（把陌生者當軟柿）
+
+# 期望武裝比（第一家：讀 leader 人格）：基準（世界參數）× 脾性偏移。
+# 慎重↑ → 抬（高估對方防禦，保守）；殘忍↑ → 壓（軟柿讀，激進）。中性(0.5/0.5)→約基準。
+static func expected_armed_fraction(leader_values: Dictionary) -> float:
+	var caution: float = float(leader_values.get("慎重", 0.5))
+	var cruelty: float = float(leader_values.get("殘忍", 0.5))
+	var frac: float = ARMED_FRACTION_BASE \
+		+ (caution - 0.5) * ARMED_FRACTION_CAUTION_SKEW \
+		- (cruelty - 0.5) * ARMED_FRACTION_CRUELTY_SKEW
+	return clampf(frac, 0.05, 1.0)
+
+# 單 owner 戰力估計：有 armed_est belief 用它；否則 pop_est × 人格化期望武裝比（迷霧 fallback）。
+# 消滅 finder 內 inline `.get("armed_est", pop_est)`（＝假設陌生=滿武裝 → 違三個家）。
+static func estimate_armed(bel: Dictionary, pop_est: float, leader_values: Dictionary) -> float:
+	if bel.has("armed_est"):
+		return float(bel["armed_est"])
+	return pop_est * expected_armed_fraction(leader_values)
+
 # 寫時可信度（時不變部分）：類型基準 × 身份信任 × 跳數衰減。
 # 身份信任 = obs team known_reputations[source]（0..1，default 0.5）；親見 source==obs → 1.0。
 static func source_credibility(state: WorldState, observer_id: int,
