@@ -1479,10 +1479,13 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				var _pid: int = int(DecisionOptions.to_task(state, team, opt).get("combat_target", -1))
 				SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_ATTACK, team.tile_pos)
 				var _tp: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
-				var _done: bool = _commit_conquest_attack(state, team, _pid)
+				_commit_conquest_attack(state, team, _pid)
 				if SimRunner.phase_timing: _fai_pht("unified.prosp", _tp)
-				if _done: return
-			continue   # 無 prosperity 資格/prey → 試次佳（不落回粗攻擊）
+				# 憲法（融合非刪）：引擎選 攻擊 → 驗證攻擊路徑（斥候/攻擊/prey 消失暫緩）獨佔此決策。
+				# 舊 `continue` 於 scaffolding 未派時落次佳 option（建設…）＝dispatch 層替 NPC 否決統一秤 #1，
+				# 已撕除；未派＝暫緩本 cadence，下輪重評（prey 真消失→攻擊 option 自然退榜，秤選次佳非 dispatch 替換）。
+				return
+			continue   # 非候選（子隊=非自主 leader）→ 試次佳
 		var _t2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		if SimRunner.phase_timing: _fai_pht("unified.to_task", _t2)
@@ -1732,8 +1735,9 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			var _pid: int = int(DecisionOptions.to_task(state, team, opt).get("combat_target", -1))
 			if _commit_conquest_attack(state, team, _pid):
 				if _conq: _probe_conq_winner(opt, ranked)
-				return
-			continue   # 無 prey/未派 → 試次佳（不落回粗攻擊）
+			# 憲法（融合非刪）：引擎選 攻擊 → 驗證攻擊路徑獨佔此決策，未派＝暫緩本 cadence 下輪重評，
+			# 不落次佳 option 替換 NPC 選擇（舊 `continue`＝dispatch 層否決統一秤 #1）。
+			return
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE: continue
 		var tgt: Vector2i = td["target"]
