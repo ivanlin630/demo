@@ -16,7 +16,6 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 		var team: TeamData = state.teams.get(tid)
 		if team == null:
 			continue
-		var flee_count: int = 0
 		var morale_acc: float = 0.0
 		var morale_n: int = 0
 		for pid in state.persons:
@@ -35,8 +34,6 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 			# 生命事件（獨立於行動反應，可並行）
 			for ev in _evaluate_life_events(state, person, team):
 				_apply_life_event(state, person, team, ev)
-			if reaction == "N1_flee":
-				flee_count += 1
 			match reaction:
 				"P2_produce": morale_acc += 1.0; morale_n += 1
 				"N4_shirk":   morale_acc -= 1.0; morale_n += 1
@@ -45,19 +42,9 @@ func evaluate_all(state: WorldState, team_ids: Array, skill_sys: Object = null) 
 		if morale_n > 0:
 			var target_morale: float = clampf(1.0 + (morale_acc / float(morale_n)) * 0.5, 0.5, 1.5)
 			team.work_morale = clampf(lerpf(team.work_morale, target_morale, 0.1), 0.5, 1.5)
-		if flee_count > 0 and float(flee_count) / maxf(team.population, 1) >= 0.3 \
-				and team.leader_id != state.player_id:   # 玩家主隊直接控,不被恐慌劫持 task
-			if team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_ESCORT]:
-				var threat_id: int = _find_top_threat(state, team)
-				if threat_id != -1:
-					var threat: TeamData = state.teams[threat_id]
-					# 恐慌逃跑 = PRIO_THREAT (70)：蓋不動 survival (80) → ping-pong 結構性消失
-					if TaskArbiter.try_set(state, team, TeamData.TASK_FLEE,
-							_flee_target_simple(state, team, threat),
-							TaskArbiter.PRIO_THREAT, "bridge_panic"):
-						print("[ReactionBridge] Team%d 逃跑（%d/%d 人）← threat Team%d" % [
-							tid, flee_count, team.population, threat_id])
-				# 無威脅 → 不劫持 task（內心恐慌但無處可逃）
+		# 序7 reaction 溶入：bridge panic-flee try_set 撕除 → 集體恐慌現由引擎 survival option
+		# 驅動（ctx.team_panic → threat_pressure → FLEE，faction_ai 主 rank/threat 路派發，PRIO 語意保）。
+		# 個體反應 apply（下方 _apply_reaction/_apply_life_event）= consequence scaffolding，全不動。
 
 # 主動攻擊戰敗 → named 成員忠誠降、leader 壓力升（無硬性 cooldown，純 reaction）
 func on_attack_defeat(state: WorldState, team_id: int, pop_loss_ratio: float) -> void:
@@ -299,26 +286,6 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			state.world.current_tick, person.id, person.role, person.team_id,
 			reaction, person.stress, person.loyalty])
 	person.last_reaction = reaction
-
-func _find_top_threat(state: WorldState, team: TeamData) -> int:
-	var best_id: int = -1
-	var best: float = ThreatAssessment.THREAT_BASE_THRESHOLD
-	for tid in state.team_discovered.get(team.team_id, []):
-		var other: TeamData = state.teams.get(tid)
-		if other == null: continue
-		var s: float = ThreatAssessment.score(state, team, other)
-		if s > best:
-			best = s
-			best_id = tid
-	return best_id
-
-# 朝威脅反方向 3 hex（in-map check；仿 faction_ai._flee_target）
-func _flee_target_simple(state: WorldState, team: TeamData, threat: TeamData) -> Vector2i:
-	var dir: Vector2i = team.tile_pos - threat.tile_pos
-	var pos: Vector2i = team.tile_pos + Vector2i(signi(dir.x), signi(dir.y)) * 3
-	if state.world.tiles.has(pos.x * 1000 + pos.y):
-		return pos
-	return team.tile_pos
 
 # leader 流失 anon：kill_random 實際有殺到人才回 true（anon=0 時無人可走）
 func _anon_actually_left(team: TeamData, source: String) -> bool:

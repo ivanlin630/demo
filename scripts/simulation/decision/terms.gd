@@ -23,6 +23,11 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
+# 序7 reaction 溶入：team_panic → threat_pressure 疊加權重（潰散→survival util）。
+# ★B 照妖鏡：team-state 驅（非全域行為常數），尚可；殘全域標 B 債（該由這隊膽識算，backlog）。
+# 校準：max 0.5（team_panic∈[0,1]）遠 < survival_pressure 絕境量級（食0→12）→ panic 不喧賓奪主，
+# 真 survival 絕境恆壓過 panic-only FLEE（三源序 survival 80 > panic 70 結構保）。
+const PANIC_WEIGHT: float = 0.5   # TEST VALUE / B 債
 
 # 脫軌逃閥因子：忠誠 − 野心溢出折損（loy 高→1，低忠誠高野心→0）。
 # faction_duty weight 與 attack_drive drive 共用 = 叛離者既無 duty 亦無個人參戰驅力（「這不是我的仗」）。
@@ -45,8 +50,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# proactive 回家：~food4 起、量級隨糧降攀升(無上限,壓過覓食使有家偏好回家)。
 			return maxf(0.0, 1.5 * (RESTOCK_DAYS - ctx.food_days))
 		"threat_pressure":
-			# survival(FLEE)=威脅驅動(與 hunger 分離)；threat 目前 0=休眠,他域遷入補。
-			return ctx.threat
+			# survival(FLEE)=威脅驅動(與 hunger 分離)。序7 reaction 溶入：疊 team_panic（集體潰散=感知威脅放大，
+			# 潰散抬 survival util 壓過 leader 勇氣）。★三源序保：panic 疊加 ≤ 真絕境（PANIC_WEIGHT 校，
+			# max 0.5 << survival_pressure 量級 12），panic-only FLEE 走主 rank PRIO_DISPATCH(50)/threat 路 70,
+			# 皆 < 真 survival-class PRIO_SURVIVAL(80) → 不喧賓奪主。
+			return ctx.threat + ctx.team_panic * PANIC_WEIGHT
 		"economic_opp":
 			if opt != "貿易": return 0.0
 			var role: float = 1.0 if ctx.is_merchant else NON_MERCHANT_TRADE_FACTOR

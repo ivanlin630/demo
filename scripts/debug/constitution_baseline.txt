@@ -3,6 +3,9 @@
 # 8 known 違憲以 # 序N 標於對應指紋上方（threat 序1/solo 序2/vendetta 序4/prosperity 序5/dispatch 序6/reaction 序7）。
 # coverage 聲明：本閘只鎖 TaskArbiter.transition/try_set 呼叫面；return-task-字串式違憲（rung_task 等）不在集內，靠 arc 逐張溶解。
 # 產生：constitution_gate.gd record（2026-07-05 序0）。
+# 序7 reaction：evaluate_all bridge panic-flee try_set 撕除（指紋 removed=arc 進度，集體恐慌→
+# ctx.team_panic→threat_pressure→引擎 survival option FLEE）；個體反應 apply=state-effect consequence
+# scaffolding（無 try_set 不在閘內，全保留）。reaction_system 現零 TaskArbiter 呼叫面。
 # 序6 dispatch：_assign_member_tasks goal→task if/elif cascade 溶解（指紋 removed=arc 進度，
 # 成員走引擎 _decide_unified）；_try_consolidate_merge = 保留的 faction 整併 scaffolding
 # （小隊併大隊=faction-level 機制非個體 utility 決策，故不入引擎 option，鏡射 _commit_conquest_attack
@@ -42,7 +45,5 @@ scripts/simulation/outpost_system.gd::start_upgrade_level
 scripts/simulation/player_command_system.gd::_action_camp
 scripts/simulation/player_command_system.gd::_action_order_subteam
 scripts/simulation/player_command_system.gd::_action_respond_aid_request
-# 序7 reaction
-scripts/simulation/reaction_system.gd::evaluate_all
 scripts/simulation/sim_runner.gd::_advance_tick_body
 scripts/simulation/strategic_ai_system.gd::_dispatch_trade_net
