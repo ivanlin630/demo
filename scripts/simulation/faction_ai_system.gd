@@ -193,7 +193,8 @@ static func find_prosperity_prey(state: WorldState, team: TeamData, leader: Pers
 		# 價值/弱點從 belief 估（偽裝低報 armed → 看似弱 → 誘殺載體）
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
 		var pop_est: float = float(bel.get("population_est", 0.0))
-		var armed_est: float = float(bel.get("armed_est", pop_est))
+		# 無 armed_est belief → 人格化迷霧 fallback（讀 leader 人格，非埋死「陌生=滿武裝」）
+		var armed_est: float = BeliefSystem.estimate_armed(bel, pop_est, leader.values)
 		var richness: float = _belief_richness(bel)
 		# capability grounding（裁2）：弱點比 self ARMED 非 self POP → 無牙商隊 self_armed≈0 →
 		# 任何有武裝 prey 皆非「相對弱」→ weakness→0（不再被誘攻；鎖來自戰力非 tag-label）。
@@ -3148,6 +3149,8 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 func _find_occupy_target(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1
 	var best_pop: float = 999999.0
+	var _occ_leader: PersonData = state.persons.get(team.leader_id)
+	var leader_values: Dictionary = _occ_leader.values if _occ_leader != null else {}
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
@@ -3170,7 +3173,8 @@ func _find_occupy_target(state: WorldState, team: TeamData) -> int:
 		# 需明顯小於我方（OCCUPY_POP_RATIO）→ 小狼不圍打不過的大村（防自殺圍城）。armed_est 為次濾。
 		if pop_est >= float(team.population) * OCCUPY_POP_RATIO:
 			Probe.bump("occupy.scan_kill_notweak"); continue
-		var armed_est: float = float(bel.get("armed_est", pop_est))
+		# 無 armed_est belief → 人格化迷霧 fallback（讀 leader 人格，非埋死「陌生=滿武裝」）
+		var armed_est: float = BeliefSystem.estimate_armed(bel, pop_est, leader_values)
 		if armed_est >= float(team.population) * 0.5:
 			Probe.bump("occupy.scan_kill_notweak"); continue
 		# Task2 B：真打得贏 margin（解循環依賴）——己方真 armed ≥ 估村防下限 × margin。
