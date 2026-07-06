@@ -1,5 +1,11 @@
 class_name PathSystem
 
+# 觀測儀器旗標（純診斷）：true 時 observe_velocity 略過 randf 速度噪 → 該路徑零 RNG 消耗。
+# sim 常態恆 false → 行為 bit-identical（唯 hand_obeys_brain_bed 采樣期間暫開，采完復原）。
+# 存在理由：手聽腦儀器每 cadence 對每隊多算一次 rank（需 gather→ThreatAssessment/estimate_catch_up
+# →observe_velocity），若消耗 global RNG 會擾動 sim 軌跡。此旗標保證觀測非擾動。
+static var suppress_observe_noise: bool = false
+
 const TERRAIN_COST: Dictionary = {
 	"plains":   1.0,
 	"forest":   1.0 / 0.7,
@@ -174,8 +180,10 @@ static func observe_velocity(state: WorldState, observer: TeamData, target: Team
 	if target.last_tile_pos != Vector2i(-999, -999):
 		actual_velocity = target.tile_pos - target.last_tile_pos
 	var actual_speed: float = float(_hex_dist(Vector2i.ZERO, actual_velocity))
-	# 雜訊：距離越遠 speed 估越粗
-	var observed_speed: float = actual_speed * (1.0 + (randf() - 0.5) * noise_factor)
+	# 雜訊：距離越遠 speed 估越粗（觀測儀器采樣期間 suppress → 零 RNG，非擾動）
+	var observed_speed: float = actual_speed
+	if not suppress_observe_noise:
+		observed_speed = actual_speed * (1.0 + (randf() - 0.5) * noise_factor)
 	return {
 		"visible": true,
 		"speed": observed_speed,
