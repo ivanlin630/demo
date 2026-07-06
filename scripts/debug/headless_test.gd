@@ -84,7 +84,6 @@ func _initialize() -> void:
 	_test_breakout_distance_guard()
 	_test_stuck_allows_reeval()
 	_test_survival_reeval_in_loot()
-	_test_trade_net_dispatches()
 	_test_aid_resolve_npc_accept()
 	_test_aid_resolve_npc_refuse()
 	_test_aid_player_forced_event()
@@ -3511,7 +3510,9 @@ func _run_sim_test() -> void:
 	if _f0:
 		_strat._update_faction_goals(state, _f0)
 		print("[StrategicAI] Faction0 strategic_goals=%d" % _f0.strategic_goals.size())
-		assert(_f0.strategic_goals.size() > 0, "Faction0 應有至少一個戰略目標")
+		# 序8 灰項溶入：致富 intent 不再產 trade_net strategic_goal（改走引擎 _decide_unified 交易）→
+		# goal 數 intent-dependent，致富/無 expand target/無弱 member ⇒ 合法 0 goal。原「≥1」硬 assert
+		# 隨 trade_net 溶解移除（曾靠 trade_net append 保底）。expand 分支（下）仍獨立守衛。
 
 	if _f0 and _f0.strategic_goals.size() > 0 and _f0.strategic_goals[0]["type"] == "expand":
 		_strat._assign_encirclement(state, _f0, _f0.strategic_goals[0]["target_id"])
@@ -9817,33 +9818,8 @@ func _test_survival_reeval_in_loot() -> void:
 		"survival 應進入評估（previous_task=掠奪），實際=%s" % team.previous_task)
 	print("Wakeup Task4 OK")
 
-func _test_trade_net_dispatches() -> void:
-	print("--- Wakeup Task5: trade_net dispatch ---")
-	var state := WorldState.new()
-	state.world = WorldData.new()
-	var f := FactionData.new()
-	f.faction_id = 0; f.member_team_ids = [0]; f.leader_team_id = 0
-	state.factions[0] = f
-	var trader := TeamData.new()
-	trader.team_id = 0; trader.faction_id = 0; trader.tile_pos = Vector2i(0, 0)
-	trader.tags = ["商隊"]; trader.current_task = TeamData.TASK_IDLE
-	state.teams[0] = trader
-	var partner := TeamData.new()
-	partner.team_id = 1; partner.faction_id = -1; partner.tile_pos = Vector2i(3, 0)
-	partner.resources["goods"] = 50.0
-	partner.tags = ["生產"]   # EcoFix Task2: outpost tile 須有居民團才派
-	state.teams[1] = partner
-	# W2: trade partner 須有 outpost（靜止目標才追得上）
-	var p_tile := HexTileData.new()
-	p_tile.tile_pos = Vector2i(3, 0); p_tile.outpost_owner = 1
-	state.world.tiles[3 * 1000 + 0] = p_tile
-	state.team_discovered[0] = [1]
-	var sai := StrategicAiSystem.new()
-	sai._dispatch_trade_net(state, f)
-	assert(trader.current_task == TeamData.TASK_TRADE,
-		"商隊應派 trade，實際=%s" % trader.current_task)
-	assert(trader.move_target == Vector2i(3, 0), "move_target 應指 partner")
-	print("Wakeup Task5 OK")
+# 序8 灰項溶入：_test_trade_net_dispatches 隨 _dispatch_trade_net 撕除（憲法 arc 末張）。
+# 致富交易走引擎 _decide_unified（融合驗見 greylist_dissolution_check.gd）。
 
 # ──────── Mounts / Wagons 速度系統 ────────
 

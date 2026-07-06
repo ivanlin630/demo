@@ -31,8 +31,6 @@ func tick(state: WorldState, faction: FactionData) -> void:
         match top["type"]:
             "expand":
                 _assign_encirclement(state, faction, top["target_id"])
-            "trade_net":
-                _dispatch_trade_net(state, faction)
     for tid in faction.member_team_ids:
         var t: TeamData = state.teams.get(tid)
         if t: _assign_breakout(state, t)
@@ -68,10 +66,9 @@ func _update_faction_goals(state: WorldState, faction: FactionData) -> void:
             faction.strategic_goals.append({ "type": "defend", "target_id": weakest_id,
                 "priority": 0.7 })
 
-    # 致富 → trade_net(空間商路 affordance)
-    if it == "致富":
-        faction.strategic_goals.append({ "type": "trade_net", "target_id": -1,
-            "priority": 0.4 + float(v.get("貪婪", 0.5)) * 0.4 })
+    # 序8 灰項溶入：致富 → trade_net dispatch 撕除（_dispatch_trade_net 繞引擎 try_set，6月零派發=冗餘死路）。
+    # 致富 faction 商隊成員改走引擎 _decide_unified（貿易/買糧/囤貨 option 承接交易，融合驗 greylist_dissolution_check）。
+    # strategic_goal "trade_net" 唯一消費者=已刪的 _dispatch_trade_net → goal append 一併清（無其他消費）。
 
     faction.strategic_goals.sort_custom(func(a, b): return a["priority"] > b["priority"])
     if faction.strategic_goals.size() > 0:
@@ -227,22 +224,10 @@ func _faction_total_pop(state: WorldState, faction: FactionData) -> int:
             total += t.population
     return total
 
-# trade_net goal：派 idle 商隊去有 outpost 的對象交易（move_target 設 outpost tile_pos，靜止點必到；同格由 interaction 成交，採購也可）
-func _dispatch_trade_net(state: WorldState, faction: FactionData) -> void:
-    for tid in faction.member_team_ids:
-        var t: TeamData = state.teams.get(tid)
-        if t == null: continue
-        if not ("商隊" in t.tags): continue
-        if t.current_task != TeamData.TASK_IDLE: continue
-        var partner_info: Dictionary = _find_trade_partner(state, t)
-        if partner_info.is_empty(): continue
-        if not TaskArbiter.try_set(state, t, TeamData.TASK_TRADE,
-                partner_info["outpost_pos"], TaskArbiter.PRIO_DISPATCH, "trade_net"):
-            continue   # 被擋 → 不派（timeout 起算由 try_set 蓋章 task_start_tick）
-        Probe.bump("trade.dispatch.trade_net")   # 漏斗站4
-        print("[StrategicAI] Faction%d 商隊 Team%d → trade Team%d @ outpost %s" % [
-            faction.faction_id, t.team_id, int(partner_info["team_id"]), str(partner_info["outpost_pos"])])
-
+# 序8 灰項溶入：_dispatch_trade_net（idle 商隊 → try_set TASK_TRADE 繞引擎）已撕除
+# （憲法溶入 arc 末張，8 違憲全溶完）。致富交易改走引擎 _decide_unified（貿易/買糧/囤貨 option）。
+# 下方 _find_trade_partner / _tile_has_resident 為純查詢 scaffolding（無 TaskArbiter 呼叫，非違憲），
+# 仍供 headless_test 覆蓋；god-view fallback 去留另歸 C 類 finder dedup（FI handback 已標）。
 # 回 { "team_id": int, "outpost_pos": Vector2i } 或空 dict 表無
 func _find_trade_partner(state: WorldState, trader: TeamData) -> Dictionary:
     for tid in state.team_discovered.get(trader.team_id, []):
