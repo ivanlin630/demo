@@ -118,6 +118,7 @@ func _evaluate_person(state: WorldState, person: PersonData, team: TeamData) -> 
 		if s > best_score:
 			best_score = s
 			best = key
+	if Probe.enabled: Probe.bump("reaction." + best)   # winner 反應計數（序7 觀測空白補）
 	return best
 
 func _goal_bonus(person: PersonData, reaction: String) -> float:
@@ -198,6 +199,7 @@ func _evaluate_life_events(state: WorldState, p: PersonData, t: TeamData) -> Arr
 		var chance: float = (BREED_BASE_CHANCE + float(p.skills.get("醫療", 0.0)) * 0.1) * balance
 		if randf() < chance:
 			events.append("P5_breed")
+			if Probe.enabled: Probe.bump("reaction.breed")
 	return events
 
 func _apply_life_event(_state: WorldState, _person: PersonData, team: TeamData, ev: String) -> void:
@@ -254,10 +256,12 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			person.stress = maxf(person.stress - 0.3, 0.0)
 			if team.named_members.has(person.id):
 				state.remove_member(team, person.id)   # 離隊：erase + team_id=-1
+				if Probe.enabled: Probe.bump("death.defect_leave")
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
 				# leader 留下，實際走的是 anon（kill_random 移 anon 桶）；population getter 自動反映
-				_anon_actually_left(team, "flee")
+				if _anon_actually_left(team, "flee"):
+					if Probe.enabled: Probe.bump("death.defect_leave")
 			# 非 named/leader（anon 無個體）→ 無 cohort 來源可動，population getter 不變
 		"N2_riot":
 			UnrestBank.add(team, 1, "reaction")
@@ -267,9 +271,11 @@ func _apply_reaction(state: WorldState, person: PersonData, team: TeamData, reac
 			LoyaltyBank.set_baseline(person, 0.0, "defect")
 			if team.named_members.has(person.id):
 				state.remove_member(team, person.id)   # 離隊：erase + team_id=-1
+				if Probe.enabled: Probe.bump("death.defect_leave")
 				_spawn_exile_or_join(state, person, team.tile_pos)
 			elif person.id == team.leader_id:
-				_anon_actually_left(team, "defect")   # 走的是 anon；population getter 自動反映
+				if _anon_actually_left(team, "defect"):   # 走的是 anon；population getter 自動反映
+					if Probe.enabled: Probe.bump("death.defect_leave")
 			# 非 named/leader（anon 無個體）→ 無 cohort 來源可動，population getter 不變
 		"N4_shirk":
 			ResourceBank.remove(team, "food", 1.0, "shirk")
