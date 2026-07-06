@@ -396,6 +396,15 @@ TeamTrace 遙測（`scripts/debug/team_trace.gd`，gated game_sim_test 每日 du
 - **融合驗綠**：rung repertoire（訓練/貿易/生產/建設/讓位）+ threat（新 live-seam）+ solo 全 ALL PASS；framework PASS=7；gate PASS 32（rung_task 回字串無 TaskArbiter→不在指紋）。
 - **seeded 52→48/8/1/380**（QA wave 判；pop/factions/established 守恆；48–56 帶繞 52）。**watch（藍圖/QA）**：世界變靜（threat 遭遇↓）是否過龜縮（反龜縮 bar）。
 
+### 憲法溶入 arc — 序7 ReactionSystem 行為選擇溶入 done（2026-07-06，merged 2edf120）★reframe=其實小
+
+audit 標「最大最難」，**measure reframe=其實小**：9 反應 apply 幾乎全 state-effect（情緒/loyalty/unrest/離隊 spawn/生育/memory 後果）——**唯一行為選擇改 task=聚合 panic-flee bridge**（`reaction:48-60` 兵卒大量恐慌整隊裹挾潰逃 try_set TASK_FLEE）。
+- **溶=拆 1 bridge + 保 9 反應**（合藍圖 arc-order「拆行為 vs 情緒/離隊/生育後果保留」）：bridge 撤 → `ctx.team_panic`（高 stress 低 loyalty named 成員/pop 聚合）→ `threat_pressure` eval 疊 `team_panic×PANIC_WEIGHT(0.5)` → 引擎 survival option 自然 FLEE（潰散由統一秤輸出非旁路）。個體反應 apply 全不動=consequence scaffolding。
+- **★FLEE 三源序保**：真絕境 survival util(12) >> panic-only(0.4)，PANIC_WEIGHT 不喧賓奪主。
+- **★ctx 首讀 person stress/loyalty = 決策模型情緒腳首個接線起步。**
+- **融合驗 4 錨 ALL PASS**（行為溶入/FLEE 三源序/反向/個體後果保）；threat/preempt/faction-dispatch/全融合驗綠；framework PASS=7；**gate sites 32→31**（evaluate_all 指紋 removed=reaction 零 TaskArbiter 面）；**seeded 49/8/1/381 零漂移**（bridge 此 seed dormant）。
+- **殘（backlog）**：PANIC_WEIGHT/PANIC_STRESS/PANIC_LOY=B 債（該由膽識算，常數人格化軌）；記憶染價值腳 dormant（引擎不讀 memory=決策模型 gap，接線脊椎軌）；反應零 probe=觀測空白；玩家隊 FLEE 保護靠既有 per-path 玩家 guard（實作驗玩家到不了引擎 survival dispatch）。
+
 ### 憲法溶入 arc — wave2 序6 faction 成員 dispatch done（2026-07-06，merged 2b4a427）★最高收斂動主幹
 
 `_assign_member_tasks` goal→task if/elif hand-dispatch（含 V2-cmd 徵收 shadow 攻擊）撕除 → faction **成員**（非 subteam）走 `_decide_unified`（引擎 rank_scored 競秤）。
