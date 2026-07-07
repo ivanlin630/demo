@@ -1,0 +1,6 @@
+{
+  "verdict": "clean",
+  "premise_contradiction": false,
+  "issues": [],
+  "note": "全斷言過 code 查證。設計=真根治非移閥：equal-priority self-replace(task_arbiter.gd:45-58，兩側 engine-owned gate)=引擎 rank[0] 覆蓋自派 task 的閉迴路；四駐地 task timeout(faction_ai:761-764)=補上 in-flight latch 缺的 release，反而是修 invariants.md:168 latch-timeout 不變量的既存違反，非新增 latch。護欄實在：combat 鎖 :28 首檢、PLAYER@60 不可能進 equal 分支(兩側須==50)、scout∉ENGINE_SOURCES 保 G3d-2 scout-verify 收斂迴路(headless_test:10968-69 斷言)。issue#1 修已落 code：reaffirm 蓋 move_target(:49) 但不重蓋 task_start_tick(:50)→W2 TRADE zombie 防護不破。transition 加 state 蓋 task_start_tick(:91)、14 呼叫點全傳 state、簽名變不動指紋(gate PASS sites=30 removed=0)。STATION_TASKS=[TRAIN,MANUFACTURE,GOVERN,PRODUCE](faction_ai:122)、無距離項(駐地原地)合理。issue#2 殘留(transition@PRIO_DISPATCH 的 BUILD×8+beggar 恢復現任 reason=transition∉白名單→引擎同層換不動)為 spec 明示揭露+有界(STATION/TRADE timeout 兜底+strict-greater 可搶+task 自完成)+正確 scope-defer 至 A1b 恢復路徑範圍，非本 slice 缺陷。無隱藏漏洞、無前提被 code 打臉。"
+}

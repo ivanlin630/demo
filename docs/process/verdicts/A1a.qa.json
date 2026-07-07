@@ -1,0 +1,17 @@
+{
+  "verdict": "issues",
+  "premise_contradiction": false,
+  "issues": [
+    {
+      "claim": "驗收#5 方向：bed arbiter_latch 76 (4.6%) vs baseline 270 (16.9%) = -72%",
+      "file_line": "docs/superpowers/handbacks/2026-07-07-implementer-to-qa-A1a.md:43",
+      "truth": "此 QA session godot 執行被權限閘擋(non-interactive 無法批准)，無法重跑產出 HEAD rate 表。唯一 commit 的基線 bed_baseline.txt:10018 顯示 arbiter_latch=437 (8.1%)、no_release_latch=83——與 handback 引的 270/16.9% 不符(不同 config：baseline=3-seed 4-month，handback=1-seed)。而 handback #4 註明的 direction 對照原檔 bed_before.txt/bed_after.txt 皆為 0 行(EMPTY，wc -l=0)。∴ -72% 磁量在 repo artifact 中無可重現證據。註：非 code 缺陷——equal-priority self-replace 路徑經 file:line 證實接上活引擎 rank(faction_ai_system.gd:1525 unified / :1761 solo @PRIO_DISPATCH)，護欄完整，bed 分類條件(:183-187)正是新分支消除者，方向對 covered subset 演繹上必降；缺的是可觀測的實跑 rate 表。"
+    },
+    {
+      "claim": "驗收#4 非退化：headless_test pre-existing FAIL 弱目標未加入攻擊 goal，baseline==A1a FAIL count 未變壞",
+      "file_line": "docs/superpowers/handbacks/2026-07-07-implementer-to-qa-A1a.md:62",
+      "truth": "static 支持(faction_ai A1a diff 只碰 STATION_TASKS const+timeout 塊+2 transition 簽名，未觸 _update_goals/goal 邏輯；headless_test.gd:3161-3180 弱目標測試未被 A1a 改動觸及)，但 baseline vs HEAD 的 FAIL count 相等此 session 無法親跑重現(godot 被擋)。屬 pre-existing 誠實揭露、非本 slice 回歸的判定成立於靜態證據，非 QA 親驗。"
+    }
+  ],
+  "note": "Code↔spec 零漂移、路徑接活引擎 rank、護欄與 issue#1 修均 file:line 證實——code 本體 clean。判 issues 唯一因：驗收#4/#5 需親跑 bed 讀 rate 表，但此非互動 session godot 執行被權限閘擋且 implementer direction 證據檔(bed_before/after)為空，-72% 磁量無可重現 artifact。建議 orchestrator merge-gate 重跑 hand_obeys_brain_bed 確認方向後再收。"
+}

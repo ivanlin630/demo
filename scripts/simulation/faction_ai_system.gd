@@ -115,6 +115,14 @@ const TRADE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 6   # 貿易 task base timeo
 # timeout 按距離估（invariants：timeout 別死常數——按距離/移速估合理往返時間）：
 # base + 殘距×per_hex。慢地形(forest 0.7×/mountain 0.4×)下 1 hex 最壞 ~0.7 日 → 0.5 日/hex 餘裕。TEST VALUE。
 const TRADE_TIMEOUT_PER_HEX: int = TimeScale.TICK_PER_DAY * 12 / 24  # 12h/hex
+# A1a 拆閥（spec 2026-07-07-A1a-arbiter-valve）：四 no-release 駐地 task timeout release——
+# 原永不 release=永久 latch（bed no_release_latch 桶）。駐地原地 task 無距離項 → 純 base 額度；
+# 到點 release 回 idle，下 cadence 重新競爭（腦仍最想做→重派同 task；不是→rank[0] 換手=閉迴路）。
+# TEST VALUE（照妖鏡債，A1 spec 裁5：合理 test-value + measure 調）。
+const STATION_TASKS: Array = [
+	TeamData.TASK_TRAIN, TeamData.TASK_MANUFACTURE, TeamData.TASK_GOVERN, TeamData.TASK_PRODUCE,
+]
+const STATION_TIMEOUT: int = TimeScale.TICK_PER_DAY * 4
 
 # ── Outpost 居民派駐 AI ──
 const RESIDENCY_CADENCE: int = TimeScale.TICK_PER_DAY * 3    # 3 天 評估一次 outpost 居民派駐
@@ -747,6 +755,12 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 				_trade_allow += _hex_dist(team.tile_pos, team.move_target) * TRADE_TIMEOUT_PER_HEX
 			if state.world.current_tick - team.task_start_tick > _trade_allow:
 				Probe.bump("trade.timeout")   # 漏斗站5：timeout 放棄
+				TaskArbiter.release(team)
+		# A1a: 四 no-release 駐地 task timeout（transition 進場已由 arbiter 蓋 task_start_tick）。
+		# PLAYER@60 現任豁免（護欄：引擎 timeout 不清玩家命令；四 task 現無 player command 入口，防未來）。
+		elif team.current_task in STATION_TASKS and team.task_priority < TaskArbiter.PRIO_PLAYER:
+			if state.world.current_tick - team.task_start_tick > STATION_TIMEOUT:
+				Probe.bump("station.timeout")
 				TaskArbiter.release(team)
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
@@ -2404,7 +2418,7 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 			candidates.append(t)
 	if candidates.is_empty(): return
 	var worker: TeamData = candidates[0]
-	TaskArbiter.transition(worker, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, worker, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	worker.move_target = tile.tile_pos
 	print("[Infra] Team%d 復工 at (%d,%d)%s" % [worker.team_id,
 		tile.tile_pos.x, tile.tile_pos.y,
@@ -3388,7 +3402,7 @@ func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: St
 	if a_score >= b_score and a_score >= c_score:
 		print("[Defection] Team%d path A: 留 faction (原因=%s)" % [team.team_id, reason])
 		# faction_id 不變，task=待命新領主（隨時可被高層蓋 → AMBIENT 就地轉換）
-		TaskArbiter.transition(team, "等待新領主", TaskArbiter.PRIO_AMBIENT)
+		TaskArbiter.transition(state, team, "等待新領主", TaskArbiter.PRIO_AMBIENT)
 	elif b_score >= c_score:
 		print("[Defection] Team%d path B: 投降強鄰" % team.team_id)
 		var strong_id: int = _find_strong_neighbor(state, team)

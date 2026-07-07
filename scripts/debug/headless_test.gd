@@ -263,6 +263,7 @@ func _initialize() -> void:
 	_test_arbiter_basic()
 	_test_arbiter_combat_lock()
 	_test_arbiter_release_transition()
+	_test_arbiter_engine_self_replace()
 	_test_arbiter_defiance()
 	_test_arbiter_suppression()
 	_test_arbiter_suppression_burst()
@@ -10936,12 +10937,44 @@ func _test_arbiter_release_transition() -> void:
 	var t := TeamData.new(); t.team_id = 0
 	state.teams[0] = t
 	TaskArbiter.try_set(state, t, "安頓", Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH)
-	TaskArbiter.transition(t, "生產", TaskArbiter.PRIO_AMBIENT)
+	TaskArbiter.transition(state, t, "生產", TaskArbiter.PRIO_AMBIENT)
 	assert(t.current_task == TeamData.TASK_PRODUCE and t.task_priority == 10)
 	TaskArbiter.release(t)
 	assert(t.current_task == TeamData.TASK_IDLE and t.task_priority == 0)
 	assert(t.move_target == Vector2i(-1, -1))
 	print("Arbiter Task1c OK")
+
+# A1a 拆閥：source-gated equal-priority self-replace（spec 2026-07-07-A1a-arbiter-valve）
+func _test_arbiter_engine_self_replace() -> void:
+	print("--- Arbiter A1a: 引擎同層換自己的 task ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0
+	state.teams[0] = t
+	# 引擎派 TRADE@50
+	state.world.current_tick = 100
+	assert(TaskArbiter.try_set(state, t, TeamData.TASK_TRADE, Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH, "unified"))
+	assert(t.task_start_tick == 100)
+	# ① 引擎重申同 task → true 但不重蓋章（timeout 起算不歸零）
+	state.world.current_tick = 200
+	assert(TaskArbiter.try_set(state, t, TeamData.TASK_TRADE, Vector2i(1, 1), TaskArbiter.PRIO_DISPATCH, "unified"))
+	assert(t.task_start_tick == 100, "同 task 重申不得重蓋 task_start_tick")
+	# ② 引擎 re-rank 換 task（unified→solo 亦引擎）→ 同層放行 + 蓋章
+	assert(TaskArbiter.try_set(state, t, TeamData.TASK_FORAGE, Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH, "solo"))
+	assert(t.current_task == TeamData.TASK_FORAGE and t.task_start_tick == 200)
+	# ③ 外部子系統同層 stomp 引擎 ✗（source 不在白名單）
+	assert(not TaskArbiter.try_set(state, t, TeamData.TASK_ATTACK, Vector2i(3, 3), TaskArbiter.PRIO_DISPATCH, "herald_order"))
+	# ④ 引擎同層 stomp 非引擎現任 ✗（incumbent reason 不在白名單：換自己的 task 才放行）
+	TaskArbiter.release(t)
+	assert(TaskArbiter.try_set(state, t, TeamData.TASK_SCOUT, Vector2i(4, 4), TaskArbiter.PRIO_DISPATCH, "scout"))
+	assert(not TaskArbiter.try_set(state, t, TeamData.TASK_TRADE, Vector2i(5, 5), TaskArbiter.PRIO_DISPATCH, "unified"),
+		"引擎不得同層 stomp scout scaffolding 現任")
+	# ⑤ 抗命贏來的引擎 task（defy_ 前綴）視同 engine-owned
+	TaskArbiter.release(t)
+	t.current_task = "巡邏"
+	t.task_priority = TaskArbiter.PRIO_DISPATCH
+	t.task_reason = "defy_unified"
+	assert(TaskArbiter.try_set(state, t, TeamData.TASK_FORAGE, Vector2i(6, 6), TaskArbiter.PRIO_DISPATCH, "unified"))
+	print("Arbiter A1a OK")
 
 func _test_arbiter_defiance() -> void:
 	print("--- Arbiter Task1d: 抗命/壓抑 ---")
@@ -11260,6 +11293,7 @@ func _test_facility_def_v2() -> void:
 
 func _test_facility_slots() -> void:
 	print("--- Facility Task1b: slot 制 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
 	var tile := HexTileData.new()
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
 	assert(OutpostSystem.slot_cap(tile) == 2)
@@ -11274,13 +11308,13 @@ func _test_facility_slots() -> void:
 	team.resources = { "material": 999.0, "tools": 99.0 }
 	tile.outpost_owner = 0; tile.construction_team_id = -1
 	var os := OutpostSystem.new()
-	assert(not os._begin_facility_construction(team, tile, "smeltery"), "slot 滿應失敗")
+	assert(not os._begin_facility_construction(state, team, tile, "smeltery"), "slot 滿應失敗")
 	# 升級不佔 slot：weaponsmith Lv2 → Lv3 應可
-	assert(os._begin_facility_construction(team, tile, "weaponsmith"), "升級不佔 slot 應成功")
+	assert(os._begin_facility_construction(state, team, tile, "weaponsmith"), "升級不佔 slot 應成功")
 	assert(tile.construction_target.get("facility", "") == "weaponsmith")
 	# allowed_outpost gate：military tile 蓋 civilian 設施失敗
 	tile.construction_team_id = -1; tile.construction_target = {}
-	assert(not os._begin_facility_construction(team, tile, "mint"), "military 蓋 mint 應失敗")
+	assert(not os._begin_facility_construction(state, team, tile, "mint"), "military 蓋 mint 應失敗")
 	print("Facility Task1b OK")
 
 func _test_outpost_cost_no_finite() -> void:

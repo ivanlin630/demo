@@ -381,7 +381,7 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 	tile.construction_target    = { "action": "build", "type": type, "level": level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
-	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 開始建 %s Lv%d at (%d,%d)（需 %d person-ticks）" % [
 		team.team_id, type, level, tile.tile_pos.x, tile.tile_pos.y,
 		tile.construction_ticks_left])
@@ -403,7 +403,7 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 	tile.construction_target    = { "action": "upgrade_level", "level": new_level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
-	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 升級 → Lv%d at (%d,%d)" % [
 		team.team_id, new_level, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -415,7 +415,7 @@ func start_upgrade_facility(state: WorldState, team: TeamData, facility: String)
 		return false
 	if tile.outpost_owner != team.team_id or tile.construction_team_id != -1:
 		return false
-	return _begin_facility_construction(team, tile, facility)
+	return _begin_facility_construction(state, team, tile, facility)
 
 func start_upgrade_farming(state: WorldState, team: TeamData) -> bool:
 	return start_upgrade_facility(state, team, "farming")
@@ -424,7 +424,7 @@ func start_upgrade_manufacturing(state: WorldState, team: TeamData) -> bool:
 	return start_upgrade_facility(state, team, "workshop")
 
 # 共用 gate + 扣款 + 排程（呼叫端先驗 owner/faction 與 construction 空檔）
-func _begin_facility_construction(team: TeamData, tile: HexTileData, facility: String) -> bool:
+func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTileData, facility: String) -> bool:
 	if not FACILITY_DEF.has(facility):
 		return false
 	var def: Dictionary = FACILITY_DEF[facility]
@@ -444,7 +444,7 @@ func _begin_facility_construction(team: TeamData, tile: HexTileData, facility: S
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = int(cost["ticks"])
 	tile.construction_target    = { "action": "upgrade_facility", "facility": facility }
-	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 設施施工 %s → Lv%d at (%d,%d)" % [
 		team.team_id, facility, cur + 1, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -458,7 +458,7 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][tile.outpost_level - 1] / 2
 	tile.construction_target    = { "action": "demolish" }
-	TaskArbiter.transition(team, "建設", TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 拆除 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
@@ -563,7 +563,7 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	tile.construction_target    = { "action": "upgrade_level", "level": target_level }
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
-	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] 子隊 Team%d 開始升級 → Lv%d at (%d,%d)" % [
 		team.team_id, target_level, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -573,7 +573,7 @@ func _subteam_upgrade_facility(state: WorldState, team: TeamData, tile: HexTileD
 		return false
 	if not _faction_owns(state, team, tile) or tile.construction_team_id != -1:
 		return false
-	return _begin_facility_construction(team, tile, facility)
+	return _begin_facility_construction(state, team, tile, facility)
 
 func _has_control(state: WorldState, team_id: int, tile: HexTileData) -> bool:
 	if tile.outpost_owner == team_id: return true
@@ -599,7 +599,7 @@ func demolish_with_control(state: WorldState, team: TeamData) -> bool:
 	tile.construction_team_id   = team.team_id
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][tile.outpost_level - 1] / 2
 	tile.construction_target    = { "action": "demolish" }
-	TaskArbiter.transition(team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	print("[Outpost] Team%d 拆除（control）at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 

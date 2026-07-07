@@ -1047,7 +1047,7 @@ func _clear_aid_task(state: WorldState, beggar: TeamData) -> void:
 	state.clear_social_target(beggar)
 	if beggar.previous_task != "" and beggar.previous_task != TeamData.TASK_IDLE:
 		# 恢復 survival 前的原 task（就地轉換，move_target 保留）
-		TaskArbiter.transition(beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)
+		TaskArbiter.transition(state, beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)
 	else:
 		TaskArbiter.release(beggar)
 	beggar.previous_task = ""
@@ -1062,7 +1062,7 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 		state.add_tag(t, TeamData.TAG_PRODUCE, "settle")
 	state.remove_tag(t, "流亡", "settle")
 	state.set_team_faction(t, faction_id)   # 安頓入 faction（雙向同步）
-	TaskArbiter.transition(t, "生產", TaskArbiter.PRIO_AMBIENT)
+	TaskArbiter.transition(state, t, "生產", TaskArbiter.PRIO_AMBIENT)
 	t.move_target = Vector2i(-1, -1)
 	# 若該 outpost 已有同 faction PRODUCE team → 嘗試合併
 	var existing: int = _find_existing_resident(state, outpost_pos, team_id, faction_id)
@@ -1087,7 +1087,7 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 		state.add_tag(subteam, TeamData.TAG_PRODUCE, "convert_resident")
 	state.remove_tag(subteam, TeamData.TAG_SUBTEAM, "convert_resident")
 	state.remove_tag(subteam, "流亡", "convert_resident")
-	TaskArbiter.transition(subteam, "生產", TaskArbiter.PRIO_AMBIENT)
+	TaskArbiter.transition(state, subteam, "生產", TaskArbiter.PRIO_AMBIENT)
 	state.detach_subteam(subteam)   # 變居民脫離母團（雙向同步）
 	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
 		subteam.team_id, subteam.tile_pos.x, subteam.tile_pos.y])
