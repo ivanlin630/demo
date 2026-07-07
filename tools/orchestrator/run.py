@@ -56,46 +56,49 @@ def _studio_url(url):
     return url.replace("http://", "https://smith.langchain.com/studio/?baseUrl=http://")
 
 
+def _save_ids(slice_id, tid, rid):
+    os.makedirs(RUNS_DIR, exist_ok=True)
+    open(os.path.join(RUNS_DIR, f"{slice_id}.thread"), "w").write(f"{tid}\n{rid}")
+
+def _load_ids(slice_id):
+    parts = open(os.path.join(RUNS_DIR, f"{slice_id}.thread")).read().split("\n")
+    return parts[0].strip(), (parts[1].strip() if len(parts) > 1 else None)
+
+
 def run_server(a):
-    """發動即返回（不卡對話）。server 背景跑；監視由 --watch（我背景 poll）或 Studio。"""
+    """發動即返回（不卡對話）。server 背景跑；監視由 --watch（事件驅動 join）或 Studio。"""
     from langgraph_sdk import get_sync_client
     c = get_sync_client(url=a.url)
-    tf = os.path.join(RUNS_DIR, f"{a.slice}.thread"); os.makedirs(RUNS_DIR, exist_ok=True)
     if a.resume is not None:
-        tid = open(tf).read().strip()
+        tid, _ = _load_ids(a.slice)
         run = c.runs.create(tid, a.graph, command={"resume": a.resume})
     else:
         wt, initial = _prep(a)
-        tid = c.threads.create()["thread_id"]; open(tf, "w").write(tid)
+        tid = c.threads.create()["thread_id"]
         run = c.runs.create(tid, a.graph, input=initial)
+    rid = str(run.get("run_id", ""))
+    _save_ids(a.slice, tid, rid)
     print(f"[run] 🚀 已發動 {a.slice}（mode={a.mode}）——背景在 server 跑，不卡對話。")
-    print(f"[run] thread={tid[:8]} run={str(run.get('run_id',''))[:8]}")
+    print(f"[run] thread={tid[:8]} run={rid[:8]}")
     print(f"[run] ★Studio 即時看：{_studio_url(a.url)}")
-    print(f"[run] 進度：藍圖(我)背景盯著，暫停/完成回報你。")
+    print(f"[run] 進度：藍圖(我)事件驅動盯著，暫停/完成才叫醒我回報你。")
 
 
 def watch_server(a):
-    """背景 poll thread，印新完成的站；暫停(interrupt)或完成時報告並退出。（藍圖在背景跑這個）"""
-    import time
+    """事件驅動：join 阻塞到 run 暫停/完成才返回（中間不打），然後報告。（藍圖背景跑；外層 timeout 兜底）"""
     from langgraph_sdk import get_sync_client
     c = get_sync_client(url=a.url)
-    tid = open(os.path.join(RUNS_DIR, f"{a.slice}.thread")).read().strip()
-    seen = set()
-    for _ in range(240):  # 上限 ~1 小時
-        st = c.threads.get_state(tid)
-        vals = st.get("values", {}) or {}
-        for node in (vals.get("verdicts") or {}):
-            if node not in seen:
-                seen.add(node)
-                v = vals["verdicts"][node]
-                print(f"[watch] ✓ {node}  verdict={v.get('verdict')}")
-        status = c.threads.get(tid).get("status")
-        if status != "busy":
-            ints = [it.get("value") for t in st.get("tasks", []) for it in t.get("interrupts", [])]
-            _report(st.get("next"), ints, vals, a.slice)
-            return
-        time.sleep(15)
-    print("[watch] 逾時未結束（可能卡住），去 Studio 看或貼給我")
+    tid, rid = _load_ids(a.slice)
+    try:
+        c.runs.join(tid, rid)   # 阻塞直到 run 到終態（完成 or interrupted）——事件驅動，零 busy-poll
+    except Exception as e:
+        print(f"[watch] join 中斷：{type(e).__name__} {str(e)[:120]}")
+    st = c.threads.get_state(tid)
+    vals = st.get("values", {}) or {}
+    for node, v in (vals.get("verdicts") or {}).items():
+        print(f"[watch] ✓ {node}  verdict={v.get('verdict')}")
+    ints = [it.get("value") for t in st.get("tasks", []) for it in t.get("interrupts", [])]
+    _report(st.get("next"), ints, vals, a.slice)
 
 
 def run_local(a):
