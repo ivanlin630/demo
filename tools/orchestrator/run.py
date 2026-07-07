@@ -254,6 +254,57 @@ def _report(nxt, interrupts, values, slice_id):
     print("[run] 帳單：docs/process/metrics.jsonl")
 
 
+def cmd_decompose(a):
+    """批次2 分解階段：feature A → 子片 briefs + 依賴/並行圖(01 架構師)。"""
+    import nodes, bus
+    wt = create_worktree(a.slice)
+    brief = open(a.brief_file, encoding="utf-8").read() if a.brief_file else (a.brief or "")
+    bus.write_handback("blueprint", "systems", f"{a.slice} feature 工單", brief, repo=wt)
+    nodes.write_node("systems", a.slice,
+        task="你是架構師(01)。把此 feature 分解成可獨立實作+驗收的子片(A1~An)。"
+             "①每子片寫自足工單 tools/orchestrator/briefs/" + a.slice + ".<sub>.md"
+             "(WHAT+file:line改點+驗收；學 A1a 教訓:自足、不引用未merge的東西)。"
+             "②宣告每子片 touch_files(會碰的檔) + depends_on(前置子片)。"
+             "③寫 docs/process/verdicts/" + a.slice + ".decompose.json："
+             "{sub_slices:[{id,brief_file,touch_files,depends_on}], parallel_groups:[[可同跑的子片],...], note}。"
+             "★並行判斷:touch_files 不相交且無依賴=同組(可並行);相交或有依賴=不同組(序列)。commit。★別跑 godot、別改 scripts/。",
+        reads="feature 工單 + 相關 code + docs/invariants.md",
+        worktree=wt, out_handback_to="blueprint")
+    d = bus.read_verdict(a.slice, "decompose", repo=wt)
+    if not d:
+        print(f"[decompose] {a.slice} 未產出 decompose.json（看 worktree {wt}）"); return
+    print(f"[decompose] {a.slice} → {len(d.get('sub_slices', []))} 子片：")
+    for s in d.get("sub_slices", []):
+        print(f"  {s.get('id')}  deps={s.get('depends_on')}  touch={s.get('touch_files')}")
+    print(f"[decompose] 並行組: {d.get('parallel_groups')}")
+    print(f"[decompose] 藍圖審過 → --fan-out --slice {a.slice} 發第一並行組")
+
+
+def cmd_fanout(a):
+    """批次2：讀 decompose.json，發第一並行組(無依賴的子片,各自 fire_local 並行)。"""
+    import bus, copy
+    wt = os.path.join(MAIN_REPO, ".worktrees", f"machine-{a.slice}")
+    d = bus.read_verdict(a.slice, "decompose", repo=wt)
+    if not d:
+        print(f"[fan-out] 沒 {a.slice}.decompose.json，先 --decompose"); return
+    subs = {s["id"]: s for s in d.get("sub_slices", [])}
+    groups = d.get("parallel_groups") or [list(subs.keys())]
+    first = groups[0]
+    print(f"[fan-out] 發第一並行組(無依賴): {first}")
+    briefs_dir = os.path.join(os.path.dirname(__file__), "briefs")
+    for sid in first:
+        sub = subs.get(sid)
+        if not sub:
+            continue
+        aa = copy.copy(a)
+        aa.slice = sid
+        aa.brief_file = os.path.join(briefs_dir, os.path.basename(sub.get("brief_file", f"{sid}.md")))
+        aa.resume = None
+        fire_local(aa)
+    if len(groups) > 1:
+        print(f"[fan-out] 後續組(有依賴，前組 merge 後再 --fan-out or 手動發): {groups[1:]}")
+
+
 def fire_local(a):
     """發動 local detached worker：背景跑(不阻塞 `!`)、sqlite 持久、VS Code 關也活。"""
     import subprocess
@@ -302,6 +353,8 @@ def main():
     ap.add_argument("--watch", action="store_true", help="背景盯一條已發動的 run（藍圖用）")
     ap.add_argument("--status", action="store_true", help="看板：所有 run 狀態+花費")
     ap.add_argument("--cancel", action="store_true", help="控制：取消 run+殺 node（--slice X 取消該條；無 slice 清全部殭屍）")
+    ap.add_argument("--decompose", action="store_true", help="批次2：feature A 分解成子片+並行圖")
+    ap.add_argument("--fan-out", dest="fanout", action="store_true", help="批次2：發分解後的第一並行組")
     ap.add_argument("--_worker", dest="worker", action="store_true", help="(內部) detached worker 實跑 graph")
     a = ap.parse_args()
 
@@ -309,6 +362,10 @@ def main():
         cmd_status(a)
     elif a.cancel:
         cmd_cancel(a)
+    elif a.decompose:
+        cmd_decompose(a)
+    elif a.fanout:
+        cmd_fanout(a)
     elif a.worker:
         run_local(a)                 # 內部：detached worker 在此實跑(sqlite 持久)
     elif a.watch:
