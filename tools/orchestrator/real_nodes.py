@@ -35,6 +35,7 @@ class SliceState(TypedDict, total=False):
     resolution: str
     done: bool
     inject: dict
+    systems_session: str   # 批次1.6：systems_spec 的 session_id，供 systems_plan --resume 續(同角色免重讀)
 
 
 def _mv(state, node, v):
@@ -72,7 +73,9 @@ def rn_systems_spec(state: SliceState):
         reads="工單 handback + docs/invariants.md + 相關 code",
         worktree=state["worktree"], out_handback_to="reviewer")
     _freeze_if_api(r, "systems_spec")
-    return {"spec_path": f"specs/{state['slice_id']}", "stage": "spec"}
+    # 批次1.6：存 session_id 供 plan 節點同角色 --resume 續（帶 spec context，免重讀）
+    return {"spec_path": f"specs/{state['slice_id']}", "stage": "spec",
+            "systems_session": r.get("session_id")}
 
 def rn_review(state: SliceState):
     """02②：對抗審 spec（設計健不健全，讀廣一點抓跨系統）。"""
@@ -112,9 +115,10 @@ def rn_systems_plan(state: SliceState):
     """01②：spec 審過了才寫 plan（fail-early，爛 spec 不浪費 plan）。"""
     import nodes
     r = nodes.write_node("systems", state["slice_id"],
-        task="spec 已審過。用 writing-plans 技能出正式 plan(docs/superpowers/plans/)：task 分解，每 task 可獨立驗、對到 spec 的 file:line 改點。commit。★別跑 godot、別改 scripts/ code。",
-        reads="本 slice 的 spec + scope.json",
-        worktree=state["worktree"], out_handback_to="implementer")
+        task="spec 已審過(你剛寫的,有 context)。用 writing-plans 技能出正式 plan(docs/superpowers/plans/)：task 分解，每 task 可獨立驗、對到 spec 的 file:line 改點。commit。★別跑 godot、別改 scripts/ code。",
+        reads="你剛寫的 spec + scope.json（已在 context，不用重讀全 code）",
+        worktree=state["worktree"], out_handback_to="implementer",
+        resume_session=state.get("systems_session"))  # 批次1.6：續 spec session,帶 context 免重讀
     _freeze_if_api(r, "systems_plan")
     return {"stage": "planned"}
 

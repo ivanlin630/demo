@@ -47,12 +47,14 @@ def run_role(
     effort: Optional[str] = None,
     add_dirs: Optional[list[str]] = None,
     append_system_prompt: Optional[str] = None,
+    resume_session: Optional[str] = None,
     timeout: int = 600,
 ) -> RoleResult:
     """一個節點 = 一次 headless claude 呼叫。
 
     output_format="json" → 回 claude 的 result envelope，解析出 .result / .session_id / .total_cost_usd。
     permission_mode="bypassPermissions" → 節點能自主寫檔/commit（自動流程無人批准）。
+    resume_session → 續前一次同角色 session（--resume，帶前次 context，免重讀；批次1.6 同角色續）。
     """
     env = dict(os.environ)
     env["SESSION_ROLE"] = role
@@ -60,6 +62,8 @@ def run_role(
     cmd = ["claude", "-p", prompt,
            "--permission-mode", permission_mode,
            "--output-format", output_format]
+    if resume_session:
+        cmd += ["--resume", resume_session]
     if model:
         cmd += ["--model", model]
     if effort:

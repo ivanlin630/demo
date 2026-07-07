@@ -83,7 +83,8 @@ def judge_node(role: str, slice_id: str, node_name: str, task: str,
 
 # ── 共用②：寫檔節點（讀 spec→建造→commit）──
 def write_node(role: str, slice_id: str, task: str, reads: str, worktree: str,
-               out_handback_to: str = "systems", model=None, effort=None, timeout=1800) -> dict:
+               out_handback_to: str = "systems", model=None, effort=None, timeout=1800,
+               resume_session=None) -> dict:
     """headless claude 在 worktree 寫檔/建造，commit，寫 handback。回 {ok, commit_before/after, handback}。
 
     effect-check = worktree 有新 commit。
@@ -112,15 +113,17 @@ def write_node(role: str, slice_id: str, task: str, reads: str, worktree: str,
 4. 完成回 DONE。若遇設計矛盾停下、在 handback 記疑點呈報，別硬幹。"""
 
     res = run_node(PROFILE_WRITE, role, prompt, scope_dir=worktree,
-                   output_format="json", model=model, effort=effort, timeout=timeout)
+                   output_format="json", model=model, effort=effort, timeout=timeout,
+                   resume_session=resume_session)
     after = _head()
     made_commit = bool(before and after and before != after)
     effect_check(res, lambda: made_commit)
     bus.log_metric({
         "slice": slice_id, "node": role, "role": role,
         "ok": res.ok, "effect_ok": res.effect_ok, "dur_s": round(res.duration_s, 1),
-        "cost_usd": res.cost_usd, "made_commit": made_commit,
+        "cost_usd": res.cost_usd, "made_commit": made_commit, "resumed": bool(resume_session),
         "commit_before": before, "commit_after": after,
     })
     return {"ok": res.ok, "made_commit": made_commit, "api_error": is_api_error(res),
-            "commit_after": after, "effect_ok": res.effect_ok, "error": res.error}
+            "commit_after": after, "effect_ok": res.effect_ok, "error": res.error,
+            "session_id": res.session_id}
