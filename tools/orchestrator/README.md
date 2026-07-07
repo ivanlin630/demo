@@ -38,6 +38,36 @@
 
 ---
 
+## 1b. 瀏覽器監視（Studio 詳解）
+
+Studio = 生產線的**視覺化俯視圖**。
+
+### 開啟
+1. server 開著（`run_studio.ps1`，那個 PowerShell 視窗別關）。
+2. 瀏覽器貼：`https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024`
+3. 首次要登入免費 LangSmith 帳號。
+   - 不想登：改開 `http://127.0.0.1:2024/docs`（陽春 API 頁，零登入）。
+4. 想在 VS Code 裡看：`Ctrl+Shift+P` → `Simple Browser: Show` → 貼上面網址（官方 UI 長在 VS Code 分頁裡）。
+
+### 你看得到什麼
+- **節點圖**：整條線的形狀（哪站接哪站、interrupt 岔路一眼看全）。
+- **按 Run + 填 `slice_id`** → 看節點一站站亮（**紙板 stub = 免費、瞬間**），熟悉畫面。
+  - 輸入只填 `slice_id`（例 `demo1`），其他留空。或按 `View Raw` 貼 `{"slice_id":"demo1"}`。
+- **點任一節點** → 那一刻的 state（verdict、stage 等）。
+- **左邊 threads** = 每次跑的歷史，點進去重播、逐步看。
+- **interrupt** → 畫面顯示暫停，可直接在 UI 填 resume 值繼續。
+
+### 隱私
+Studio 網頁是 LangChain 的，但**指向你本機 server**（127.0.0.1）。graph 在**本地跑**，`.env` 已關 tracing → 跑的資料**不上雲**。
+
+### ★誠實的限制（重要，別誤會）
+- 你按的 **GO（`! run.py`）是行程內跑**，進度**印在對話裡**，**Studio 看不到這一條**。
+- Studio 目前最適合三件事：**看拓撲形狀、跑 stub demo 熟悉畫面、翻歷史 thread 的 state**。
+- 要 Studio **即時看「真線」跑**（真工人在畫面上一站站亮）→ 得把觸發改成投給 server（不是行程內）。**要的話跟我說，我接這塊**（多一小塊工，你就能在瀏覽器即時盯真工人）。
+- 目前預設：**真線看對話裡的 console 輸出**（可靠、在同一個地方）；**Studio 看形狀/demo/歷史**。
+
+---
+
 ## 2. 日常怎麼用
 
 ### 小事（一行修、改參數、typo）
