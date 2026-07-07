@@ -10,8 +10,6 @@ import os, json
 from runner import run_node, effect_check, PROFILE_REVIEW, PROFILE_WRITE, MAIN_REPO
 import bus
 
-VERDICT_DIRABS = os.path.join(MAIN_REPO, bus.VERDICT_DIR)
-
 
 # ── 共用①：判決節點（讀+判→verdict）──
 def judge_node(role: str, slice_id: str, node_name: str, task: str,
@@ -19,10 +17,11 @@ def judge_node(role: str, slice_id: str, node_name: str, task: str,
                model=None, effort=None, timeout=900) -> dict:
     """headless claude 讀 code、判決、寫 verdict JSON。回 verdict dict（router 讀它分流）。
 
+    verdict 寫在 scope_dir/docs/process/verdicts/（整條線同 worktree → 不跨 repo）。
     verdict schema：{verdict:"clean"|"issues", premise_contradiction:bool,
                      issues:[{claim,file_line,truth}], note:str}
     """
-    vpath = os.path.join(VERDICT_DIRABS, f"{slice_id}.{node_name}.json")
+    vpath = os.path.join(scope_dir, bus.VERDICT_DIR, f"{slice_id}.{node_name}.json")
     os.makedirs(os.path.dirname(vpath), exist_ok=True)
     if os.path.exists(vpath):
         os.remove(vpath)
@@ -48,7 +47,7 @@ def judge_node(role: str, slice_id: str, node_name: str, task: str,
     res = run_node(PROFILE_REVIEW, role, prompt, scope_dir=scope_dir,
                    output_format="json", model=model, effort=effort, timeout=timeout)
 
-    verdict = bus.read_verdict(slice_id, node_name)
+    verdict = bus.read_verdict(slice_id, node_name, repo=scope_dir)
     effect_check(res, lambda: verdict is not None and "verdict" in verdict)
     bus.log_metric({
         "slice": slice_id, "node": node_name, "role": role,
