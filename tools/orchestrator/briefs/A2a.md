@@ -19,6 +19,12 @@
 - 別碰 leader（A2b）、別碰成員/solo（已好）。
 - 別重造閥（A1a 拆的閥別回來）。
 
+## ★量測特判（review 上輪抓到的坑，必守）
+- **「回歸」/ return_home 是 lifecycle move，不是 task 決策——別 capture 成 obey/violation。**
+- `TASK_RETURN_HOME="return_home"` 是 task 值；「回歸」只是 option label，全庫無處把 current_task 設為「回歸」。
+- 若把回歸決策登記進 HandBrainProbe（winner_task="回歸"），obey 比對 `result_task=="回歸"` **恆 false** → 每次回歸都算違規 → subteam 背離率被灌高 → **量出比修之前更差、誤導 QA**。
+- 正解：子隊的 lifecycle move（回歸/歸建/解散）**不進單點 obey/violation 統計**；只有真正的 task-dispatch 決策才 capture。實作決定怎麼特判（不 capture、或 capture 時傳實際 result_task、或 probe 認 lifecycle-move 為 obey）。
+
 ## 驗收（用 main 現有工具，量測員跑）
 1. 無 GDScript 錯誤；constitution_gate 綠；sanity（headless ≥1000 tick 無崩、關鍵 print）。
 2. **單點 bed（HandBrainProbe，seed 1337, 1月）：subteam category 背離率 / subteam_bypass 機制計數應大幅掉**（對照 A2a 前 baseline）。

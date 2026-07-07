@@ -105,44 +105,62 @@ def _cancel_others(c, keep_tid=None):
 
 
 def cmd_status(a):
-    """看板：所有 thread/run 狀態 + 本 slice 進度 + 花費。"""
-    from langgraph_sdk import get_sync_client
-    c = get_sync_client(url=a.url)
-    print("[status] threads（新→舊）:")
-    for t in c.threads.search(limit=12):
-        rs = [r.get("status") for r in c.runs.list(t["thread_id"])]
-        flag = " ⚠stuck" if "running" in rs or "pending" in rs else ""
-        print(f"  {t['thread_id'][:8]} thread={t.get('status'):12} runs={rs}{flag}")
-    import os as _os, json as _json
-    mp = _os.path.join(MAIN_REPO, "docs/process/metrics.jsonl")
-    if a.slice and _os.path.exists(mp):
-        tot = 0.0; last = None
+    """看板：本地 slice(log)進度 + 花費；server 若開也列。(本地優先，server 死也能用)"""
+    import glob, json as _json
+    # 本地 slice：讀 runs/*.log 末狀態
+    print("[status] 本地 slice（runs/*.log）:")
+    for lg in sorted(glob.glob(os.path.join(RUNS_DIR, "*.log"))):
+        sid = os.path.basename(lg)[:-4]
+        txt = open(lg, encoding="utf-8", errors="replace").read()
+        state = "✅完成" if "✅ 完成" in txt else ("⏸停下等你" if "⏸ 停下等你" in txt else "🔄跑中")
+        last = [l for l in txt.splitlines() if l.startswith("[run] ✓")]
+        print(f"  {sid:8} {state}  {last[-1] if last else ''}")
+    # 花費
+    mp = os.path.join(MAIN_REPO, "docs/process/metrics.jsonl")
+    if os.path.exists(mp):
+        cost = {}
         for l in open(mp, encoding="utf-8"):
-            try:
-                d = _json.loads(l)
-            except Exception:
-                continue
-            if d.get("slice") == a.slice:
-                tot += d.get("cost_usd") or 0; last = d.get("node")
-        print(f"[status] {a.slice}：累計 ${round(tot,2)}，最後節點={last}")
+            try: d = _json.loads(l)
+            except Exception: continue
+            cost[d.get("slice")] = cost.get(d.get("slice"), 0) + (d.get("cost_usd") or 0)
+        if a.slice:
+            print(f"[status] {a.slice} 累計 ${round(cost.get(a.slice,0),2)}")
+        else:
+            print("[status] 花費:", {k: round(v, 2) for k, v in cost.items() if v})
+    # server（選配）
+    if server_up(a.url):
+        from langgraph_sdk import get_sync_client
+        c = get_sync_client(url=a.url)
+        stuck = [t["thread_id"][:8] for t in c.threads.search(limit=15)
+                 for r in c.runs.list(t["thread_id"]) if r.get("status") in ("running", "pending")]
+        if stuck:
+            print(f"[status] server 上還在跑/卡: {stuck}")
 
 
 def cmd_cancel(a):
-    """控制：取消 run + 殺 node 行程。--slice X 取消該條；不帶 slice 清全部殭屍。"""
-    from langgraph_sdk import get_sync_client
-    c = get_sync_client(url=a.url)
-    if a.slice:
-        try:
-            tid, rid = _load_ids(a.slice)
-            c.runs.cancel(tid, rid, wait=False)
-            print(f"[cancel] {a.slice} run 已取消")
-        except Exception as e:
-            print(f"[cancel] {a.slice} err: {str(e)[:80]}")
-    else:
-        n = _cancel_others(c)
-        print(f"[cancel] 清了 {n} 條 running/pending run")
-    _kill_node_procs()
-    print("[cancel] 殺了 node 行程（best-effort）。可重新發動了。")
+    """控制：停 run + 殺 worker/node 行程。--slice X 停該條；不帶 slice 清全部。"""
+    import subprocess
+    # 殺 detached worker（--_worker 帶 slice）+ node（職責正典）
+    marker = f"--slice {a.slice}" if a.slice else "--_worker"
+    ps = (f"Get-CimInstance Win32_Process | Where-Object {{ $_.CommandLine -match '職責正典' "
+          f"-or ($_.CommandLine -match '--_worker' -and $_.CommandLine -match '{marker}') }} | "
+          f"ForEach-Object {{ Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }}")
+    try:
+        subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, timeout=30)
+    except Exception:
+        pass
+    # server 若開也 cancel
+    if server_up(a.url):
+        from langgraph_sdk import get_sync_client
+        c = get_sync_client(url=a.url)
+        if a.slice:
+            try:
+                tid, rid = _load_ids(a.slice); c.runs.cancel(tid, rid, wait=False)
+            except Exception:
+                pass
+        else:
+            _cancel_others(c)
+    print(f"[cancel] 停了 {a.slice or '全部'}（worker+node 殺，server run 若有也取消）。可重發。")
 
 
 def _save_ids(slice_id, tid, rid):
@@ -236,6 +254,41 @@ def _report(nxt, interrupts, values, slice_id):
     print("[run] 帳單：docs/process/metrics.jsonl")
 
 
+def fire_local(a):
+    """發動 local detached worker：背景跑(不阻塞 `!`)、sqlite 持久、VS Code 關也活。"""
+    import subprocess
+    os.makedirs(RUNS_DIR, exist_ok=True)
+    log = os.path.join(RUNS_DIR, f"{a.slice}.log")
+    cmd = [sys.executable, os.path.abspath(__file__), "--_worker", "--slice", a.slice, "--mode", a.mode]
+    if a.brief_file: cmd += ["--brief-file", a.brief_file]
+    if a.brief: cmd += ["--brief", a.brief]
+    if a.resume is not None: cmd += ["--resume", a.resume]
+    flags = 0
+    if os.name == "nt":
+        flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
+    env = dict(os.environ); env["PYTHONUTF8"] = "1"
+    lf = open(log, "w", encoding="utf-8")
+    subprocess.Popen(cmd, stdout=lf, stderr=subprocess.STDOUT, creationflags=flags,
+                     close_fds=True, env=env)
+    print(f"[run] 🚀 已發動 {a.slice}（mode={a.mode}）——本地 detached 背景跑，不卡對話、VS Code 關也活、sqlite 持久。")
+    print(f"[run] log: {log}")
+    print(f"[run] 進度：藍圖(我)讀 log+git 判決盯著，暫停/完成報你。")
+
+
+def watch_local(a):
+    """讀 log 到出現終態行(完成/停下等你)才報告。（藍圖背景跑；外層 timeout 兜底）"""
+    import time
+    log = os.path.join(RUNS_DIR, f"{a.slice}.log")
+    for _ in range(500):
+        if os.path.exists(log):
+            txt = open(log, encoding="utf-8", errors="replace").read()
+            if "✅ 完成" in txt or "⏸ 停下等你" in txt:
+                # 印 log 末段(從最後一個節點區塊起)
+                print(txt[-2500:]); return
+        time.sleep(8)
+    print(f"[watch] 逾時，log: {log}")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--slice")
@@ -244,26 +297,32 @@ def main():
     ap.add_argument("--resume")
     ap.add_argument("--url", default="http://127.0.0.1:2025")
     ap.add_argument("--graph", default="pipeline_real")
-    ap.add_argument("--local", action="store_true", help="強制本地跑（不投 server）")
+    ap.add_argument("--local", action="store_true", help="(已成預設) 本地 detached 跑")
+    ap.add_argument("--server", action="store_true", help="改投 server（要 Studio live 圖時；需先開 run_studio.ps1）")
     ap.add_argument("--watch", action="store_true", help="背景盯一條已發動的 run（藍圖用）")
     ap.add_argument("--status", action="store_true", help="看板：所有 run 狀態+花費")
     ap.add_argument("--cancel", action="store_true", help="控制：取消 run+殺 node（--slice X 取消該條；無 slice 清全部殭屍）")
+    ap.add_argument("--_worker", dest="worker", action="store_true", help="(內部) detached worker 實跑 graph")
     a = ap.parse_args()
 
     if a.status:
         cmd_status(a)
     elif a.cancel:
         cmd_cancel(a)
+    elif a.worker:
+        run_local(a)                 # 內部：detached worker 在此實跑(sqlite 持久)
     elif a.watch:
-        watch_server(a)
+        (watch_server if a.server else watch_local)(a)
     elif not a.slice:
         print("[run] 要 --slice（發動）或 --status/--cancel（控制）")
-    elif not a.local and server_up(a.url):
-        run_server(a)
+    elif a.server:
+        if server_up(a.url):
+            run_server(a)            # 選配：投 server(Studio live)
+        else:
+            print("[run] --server 但 server 沒開 → 改本地 detached")
+            fire_local(a)
     else:
-        if not a.local:
-            print("[run] server 沒開 → 本地跑（要 Studio 就先開 run_studio.ps1）")
-        run_local(a)
+        fire_local(a)                # ★預設：本地 detached(不阻塞/sqlite持久/VS Code關也活)
 
 
 if __name__ == "__main__":
