@@ -52,9 +52,12 @@ def rn_factcheck(state: SliceState):
 def rn_systems(state: SliceState):
     import nodes
     r = nodes.write_node("systems", state["slice_id"],
-        task="讀工單+invariants → 出兩樣：①精確 spec(docs/superpowers/specs/，含 file:line 改點+驗收法) ②正式 plan("
-             "docs/superpowers/plans/，用 writing-plans 技能做 task 分解，每 task 可獨立驗)。已有則精修。commit。"
-             "★別跑 godot/測試(那是 implementer 的事)——你只出 spec+plan。",
+        task="讀工單+invariants → 出三樣：①精確 spec(docs/superpowers/specs/，含 file:line 改點+驗收法) ②正式 plan("
+             "docs/superpowers/plans/，用 writing-plans 技能做 task 分解，每 task 可獨立驗) "
+             "③★觸及集宣告寫進 docs/process/verdicts/" + state["slice_id"] + ".scope.json"
+             "(欄位:touch_files=[會改的檔路徑], touch_systems=[碰的系統], depends_on=[前置 slice], "
+             "parallel_safe=true/false+理由)——這決定本片能否跟別片並行/merge 序。已有則精修。commit。"
+             "★別跑 godot/測試(那是 implementer 的事)——你只出 spec+plan+scope。",
         reads="工單 handback + docs/invariants.md + 相關 code",
         worktree=state["worktree"], out_handback_to="reviewer")
     _freeze_if_api(r, "systems")
