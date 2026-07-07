@@ -52,26 +52,50 @@ def _prep(a):
                 "brief_path": os.path.relpath(bp, wt).replace("\\", "/")}
 
 
+def _studio_url(url):
+    return url.replace("http://", "https://smith.langchain.com/studio/?baseUrl=http://")
+
+
 def run_server(a):
+    """發動即返回（不卡對話）。server 背景跑；監視由 --watch（我背景 poll）或 Studio。"""
     from langgraph_sdk import get_sync_client
     c = get_sync_client(url=a.url)
     tf = os.path.join(RUNS_DIR, f"{a.slice}.thread"); os.makedirs(RUNS_DIR, exist_ok=True)
     if a.resume is not None:
         tid = open(tf).read().strip()
-        stream = c.runs.stream(tid, a.graph, command={"resume": a.resume}, stream_mode="updates")
+        run = c.runs.create(tid, a.graph, command={"resume": a.resume})
     else:
         wt, initial = _prep(a)
         tid = c.threads.create()["thread_id"]; open(tf, "w").write(tid)
-        print(f"[run] slice={a.slice} mode={a.mode}  (server：Studio 即時可看)")
-        print(f"[run] ★Studio：{a.url.replace('http://', 'https://smith.langchain.com/studio/?baseUrl=http://')}")
-        stream = c.runs.stream(tid, a.graph, input=initial, stream_mode="updates")
-    for ch in stream:
-        if ch.event == "updates" and ch.data:
-            for node, upd in ch.data.items(): _print_node(node, upd)
-    st = c.threads.get_state(tid)
-    _report(st.get("next"),
-            [it.get("value") for t in st.get("tasks", []) for it in t.get("interrupts", [])],
-            st.get("values", {}), a.slice)
+        run = c.runs.create(tid, a.graph, input=initial)
+    print(f"[run] 🚀 已發動 {a.slice}（mode={a.mode}）——背景在 server 跑，不卡對話。")
+    print(f"[run] thread={tid[:8]} run={str(run.get('run_id',''))[:8]}")
+    print(f"[run] ★Studio 即時看：{_studio_url(a.url)}")
+    print(f"[run] 進度：藍圖(我)背景盯著，暫停/完成回報你。")
+
+
+def watch_server(a):
+    """背景 poll thread，印新完成的站；暫停(interrupt)或完成時報告並退出。（藍圖在背景跑這個）"""
+    import time
+    from langgraph_sdk import get_sync_client
+    c = get_sync_client(url=a.url)
+    tid = open(os.path.join(RUNS_DIR, f"{a.slice}.thread")).read().strip()
+    seen = set()
+    for _ in range(240):  # 上限 ~1 小時
+        st = c.threads.get_state(tid)
+        vals = st.get("values", {}) or {}
+        for node in (vals.get("verdicts") or {}):
+            if node not in seen:
+                seen.add(node)
+                v = vals["verdicts"][node]
+                print(f"[watch] ✓ {node}  verdict={v.get('verdict')}")
+        status = c.threads.get(tid).get("status")
+        if status != "busy":
+            ints = [it.get("value") for t in st.get("tasks", []) for it in t.get("interrupts", [])]
+            _report(st.get("next"), ints, vals, a.slice)
+            return
+        time.sleep(15)
+    print("[watch] 逾時未結束（可能卡住），去 Studio 看或貼給我")
 
 
 def run_local(a):
@@ -115,9 +139,12 @@ def main():
     ap.add_argument("--url", default="http://127.0.0.1:2025")
     ap.add_argument("--graph", default="pipeline_real")
     ap.add_argument("--local", action="store_true", help="強制本地跑（不投 server）")
+    ap.add_argument("--watch", action="store_true", help="背景盯一條已發動的 run（藍圖用）")
     a = ap.parse_args()
 
-    if not a.local and server_up(a.url):
+    if a.watch:
+        watch_server(a)
+    elif not a.local and server_up(a.url):
         run_server(a)
     else:
         if not a.local:
