@@ -79,6 +79,30 @@ headless_test 跑出 **1 個** `[FAIL]`：
    （direction 對照原始輸出）與已改未 commit 的 `docs/process/verdicts/A1a.review.json`
    （查證員 clean verdict）——非 code，QA/orchestrator 決定是否收編/清理。
 
+## ★ 補件：QA issue#1 方向證據可重現化（回應 `A1a.qa.json`）
+
+QA verdict = `issues`（**非 code 缺陷**，QA 自證 code↔spec 零漂移、路徑接活引擎 rank）。
+唯一 issue：驗收#4/#5 需親跑 bed 讀 rate 表，但 QA session godot 被權限閘擋（non-interactive
+無法批准），且我上一輪的 direction 對照檔 `bed_before.txt`/`bed_after.txt` **提交時為空**、
+committed `bed_baseline.txt` 是**另一 config（3-seed 4-month）+ `[GODOT TIMEOUT 360s]` 中斷**
+→ −72% 磁量無可重現 artifact。
+
+本節點 godot **可執行**，已在**同 config**（`HOB_MONTHS=1 HOB_SEEDS=1337`）兩側親跑補齊：
+
+| bucket | before `0a908f5`（A1a 主體前） | after `e3175e6`（HEAD） | 方向 |
+|---|---|---|---|
+| `arbiter_latch` | 270 (16.9%) | 76 (4.6%) | **↓ −72%** |
+| `no_release_latch` | 40 (2.5%) | 42 (2.6%) | flat（噪音） |
+| 總 viol | 715 (44.8%) | 567 (34.6%) | ↓ |
+
+兩側跑到 `=== hand_obeys_brain_bed DONE ===`、`SCRIPT ERROR=0`。詳 `docs/process/verdicts/A1a.direction.md`
+（含重現指令）。原始長輸出 `bed_before.txt`/`bed_after.txt` 已填實（留 worktree scratch）；
+誤導 QA 的 stale `bed_baseline.txt` 已移除。
+
+∴ QA issue#1 的「−72% 無可重現 artifact」**已消**：handback 引的 270→76 = −72% 現有同 config
+可重現對照。issue#2（#4 非退化的 baseline==HEAD FAIL count）仍為靜態證據結論（bed 不觸
+`_update_goals`；headless_test 弱目標測試未被 A1a 觸及），屬 pre-existing 誠實揭露，非本 slice 回歸。
+
 ## commit 序（本 slice 全歷史，死也丟最少）
 - `fef3702` feat(A1a): 拆閥主體——equal-priority self-replace + 四駐地 timeout release
 - `c855f11` fix(A1a): reaffirm 蓋 move_target（issue#1）
