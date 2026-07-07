@@ -1,0 +1,37 @@
+{
+  "verdict": "issues",
+  "premise_contradiction": true,
+  "issues": [
+    {
+      "claim": "team_data.gd 無 ambition_archetype",
+      "file_line": "scripts/data/team_data.gd:114",
+      "truth": "存在：var ambition_archetype: String = \"\"   # 武力/商業/定居"
+    },
+    {
+      "claim": "team_data.gd 無 ambition_rung",
+      "file_line": "scripts/data/team_data.gd:116",
+      "truth": "存在：var ambition_rung: int = 0            # 當前實際 rung（0 生存…4 稱霸）"
+    },
+    {
+      "claim": "team_data.gd 無 solo_intent",
+      "file_line": "scripts/data/team_data.gd:78",
+      "truth": "存在：var solo_intent: Dictionary = {}"
+    },
+    {
+      "claim": "faction_data.gd 無 intent",
+      "file_line": "scripts/data/faction_data.gd:15",
+      "truth": "存在：var intent: Dictionary = {} — {type, target_id, why} 承諾追蹤（hysteresis）"
+    },
+    {
+      "claim": "faction_data.gd 無 goals",
+      "file_line": "scripts/data/faction_data.gd:11",
+      "truth": "存在：var goals: Array = [] — 另有 goal_drivers(:16)、strategic_goals(:38)、player_goal_override(:33)"
+    },
+    {
+      "claim": "faction_data.gd 無 strategy",
+      "file_line": "scripts/data/faction_data.gd:12",
+      "truth": "存在：var strategy: String = \"idle\""
+    }
+  ],
+  "note": "藍圖斷言「目標錨不存在、要新建」為假：全部六個欄位已在 code 存在，此為既有架構，非新大件。"
+}
