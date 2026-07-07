@@ -61,18 +61,23 @@
 
 ---
 
-## 4. 生產線的站（每站一個 AI 節點）
-
-| 站 | 幹嘛 | 抓什麼 |
+## 4. 生產線的站（每站一個 AI 節點；v2 流程）
+```
+factcheck → systems_spec → review(02②) → 【①bp_review 00審】 → systems_plan
+  → implementer → measure → qa → 【②qa_review 你判】 → merge
+```
+| 站 | 幹嘛 | 模型 |
 |---|---|---|
-| 查證 factcheck | grep 驗工單每個 code 斷言 | 我唬爛（如引用不存在的東西） |
-| 系統 systems | 出 spec + **plan**(writing-plans 技能) + **scope**(觸及集/可否並行) | — |
-| 挑毛病 review | 對抗審 spec | 設計不健全、量測坑 |
-| 建造 implementer | **TDD** 寫 code+測+commit（worktree） | — |
-| **量測員 measurer** | 跑全探針/bed（單點/憲法/sanity/抖動檢） | 出真數字餵 QA |
-| QA | **讀量測員數字**判 green/red | 沒真修好、退化、抖動 |
+| 查證 factcheck | grep 驗工單斷言 | haiku |
+| 系統 systems_spec | 只出 spec+scope+**重點handback**（先不plan） | opus |
+| 挑毛病 review(02②) | 對抗審 spec（讀廣抓跨系統） | sonnet |
+| **①bp_review（00審）** | 藍圖讀重點+02findings+願景判對齊；**concern才找你** | opus |
+| 系統 systems_plan | 審過才寫 plan（fail-early；續 spec session 免重讀） | opus |
+| 建造 implementer | TDD 寫code+測+commit | opus |
+| 量測員 measurer | 跑全探針/bed 出數字 | haiku |
+| QA | 讀量測數字判 green/red | haiku |
 
-**你不跟中間節點對話。** 只在 halt/merge前，我轉告你判。
+**兩個 checkpoint 經 00(我)**：①spec後(怪才找你) + ②結果(你判)。**你不跟中間節點對話。**
 
 ---
 
@@ -89,11 +94,18 @@
 
 ---
 
-## 7. 並行 & 分解（現況 + 待建）
-- **並行執行**：各 slice 各自 worktree + process → 同跑安全。
-- **能不能並行 = systems 的 scope.json 判**（touch_files/depends_on/parallel_safe）。觸及集相交 → merge 要排序。
-- **★分解階段（A→A1~A5 + 並行圖）= 待建（批次2）**。目前藍圖(我)手動切 slice + 判並行。
-- **Studio（選配）**：想看 live 圖 → 開 `.\tools\orchestrator\run_studio.ps1`（server, port 2025, N_JOBS=4 並行）+ 發動時加 `--server`。server 死=run 狀態丟（in-memory），不如 --local 硬。
+## 7. 並行 & 分解（批次2 已建）
+大 feature A 要拆成 A1~A5 + 判並行：
+```
+! python A:/GDS/demo/tools/orchestrator/run.py --decompose --slice A --brief-file briefs/A.md
+    → 01 架構師拆 A→A1~A5 + 各子片 brief + touch_files/depends_on + 並行圖(A.decompose.json)
+    → 我(00)審分解合不合理(⓪)，好 →
+! python A:/GDS/demo/tools/orchestrator/run.py --fan-out --slice A
+    → 發第一並行組(無依賴子片,各自 fire_local 並行);後續組前組 merge 後再發
+```
+- **並行執行**：各子片各自 worktree+process → 同跑安全。**並行安全 = touch_files 不相交**（01 在 decompose.json 判）。
+- 每子片各走 §4 的 pipeline。merge 按依賴序。
+- **Studio（選配）**：想看 live 圖 → `.\tools\orchestrator\run_studio.ps1`（server, N_JOBS=4）+ 發動加 `--server`。server 死=狀態丟，不如 --local 硬。
 
 ---
 
