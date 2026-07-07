@@ -46,7 +46,8 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 			and _source in ENGINE_SOURCES \
 			and team.task_reason.trim_prefix("defy_") in ENGINE_SOURCES:
 		if new_task == team.current_task:
-			return true   # 腦重申同 task＝已聽腦；不重蓋章（task_start_tick 單源，timeout 不歸零）
+			team.move_target = move_target   # A1a: 同 task 但新 target（換更好市場/新 prey 位）→ 手跟腦更新目標
+			return true   # 不重蓋 task_start_tick（單源，timeout 不歸零）；move_target 更新無關 timeout
 		if Probe.enabled and team.current_task == TeamData.TASK_TRADE:
 			Probe.bump("trade.preempt.%s|%s" % [new_task, _source])   # 漏斗站4 parity
 		team.current_task = new_task
