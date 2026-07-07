@@ -1,0 +1,17 @@
+{
+  "verdict": "issues",
+  "premise_contradiction": false,
+  "issues": [
+    {
+      "claim": "spec 改點1「同 task 重申 = no-op return true」只保 task_start_tick 單源，無其他代價",
+      "file_line": "scripts/simulation/task_arbiter.gd:48",
+      "truth": "no-op 分支連 move_target 也不更新：引擎 rank[0] 選同 task 但新目標（如 TRADE 換更好市場、unified 換 prey 位）時，新 move_target 被靜默丟棄且回 true（caller 以為已設）——這正是 A1a 要治的「手不聽腦」殘留形態，只是從 task 級縮到 target 級。緩解存在（ATTACK 有 _refresh_attack_pursuit faction_ai_system.gd:737 每 tick 對齊、TRADE 有 timeout faction_ai_system.gd:752-758 兜底），但 spec 未記載此 trade-off；可改為「同 task 新 target 時只蓋 move_target 不蓋 task_start_tick」兩全，spec 未考慮。低嚴重度，建議 handback 記錄或補修"
+    },
+    {
+      "claim": "spec 改點2 連動修：transition 加蓋 task_start_tick 的副作用只有 beggar timeout 重新起算（spec 已接受）",
+      "file_line": "scripts/simulation/task_arbiter.gd:86-89",
+      "truth": "還有一個 spec 未列的副作用：transition 現在把 task_reason 蓋成 _source（預設 \"transition\"）。beggar 恢復 previous_task 路徑（interaction_system.gd:1050、player_command_system.gd:1017、sim_runner.gd:175）以 PRIO_DISPATCH 恢復原引擎 task 後，task_reason=\"transition\" 不在 ENGINE_SOURCES（task_arbiter.gd:20）→ 引擎 rank[0] 對它 50==50 換不動 → 乞討恢復路徑重開一小類 arbiter_latch（直到 task 自然完成或 TRADE/STATION timeout 兜底）。保守方向、非破壞性，但屬「latch 搬小位子」殘留，spec 副作用清單漏列"
+    }
+  ],
+  "note": "前提全查實：pre-change try_set 嚴格大於(HEAD~1 task_arbiter)、unified/solo source(faction_ai:1511/1747)、scout/prosperity 排除理由(:296/307)、四 task 零 release(grep 證)、transition 14 呼叫點、COMMITMENT_BONUS 防抖動(:37/81)、loop3 全隊覆蓋(faction_ai:708)、production 產出綁 tile 非 task(resource_system:45-77，PRODUCE release 不斷糧)——設計是真閉迴路非移閥，timeout 符合 latch-timeout 不變量(invariants:168)、駐地無距離項豁免「別死常數」合理；僅兩個低嚴重度殘留缺口（reaffirm 丟 move_target、transition 蓋 reason 重開乞討路徑小 latch），不擋 merge，建議記 handback。"
+}
