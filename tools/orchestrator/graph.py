@@ -117,7 +117,8 @@ def route_gate(state: SliceState):
     return "merge" if state["verdicts"]["gate"].get("verdict") == "pass" else "implementer"
 
 
-def build(checkpointer=None):
+def make_graph():
+    """未編譯 StateGraph（langgraph Studio / CLI 載這個，平台自帶 persistence）。"""
     g = StateGraph(SliceState)
     for name, fn in [("blueprint", n0_blueprint), ("factcheck", n1_factcheck),
                      ("systems", n2_systems), ("review", n3_review),
@@ -139,4 +140,9 @@ def build(checkpointer=None):
                             {"merge": "merge", "implementer": "implementer"})
     g.add_edge("merge", END)
     g.add_edge("interrupt", END)   # stub：resume 後結束；真機器 resolution 導回對應節點
-    return g.compile(checkpointer=checkpointer or MemorySaver())
+    return g
+
+
+def build(checkpointer=None):
+    """自用（run.py / 測試）：編譯後的 graph，帶 checkpointer。"""
+    return make_graph().compile(checkpointer=checkpointer or MemorySaver())

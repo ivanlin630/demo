@@ -1,0 +1,7 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "pipeline": "./graph.py:make_graph"
+  },
+  "env": ".env"
+}
