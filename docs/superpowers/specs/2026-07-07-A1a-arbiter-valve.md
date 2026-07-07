@@ -25,8 +25,11 @@ rank[0] 在同層（PRIO_DISPATCH=50 vs 50）被靜默丟 = arbiter latch（bed 
   - incumbent 也要求 engine-owned（`task_reason` 檢查）＝工單「只放行引擎換**自己的** task」：
     herald_order/merchant_order/scout 等同層現任不被 stomp。
   - `defy_unified`/`defy_solo`（抗命贏來的引擎 task）視同 engine-owned（trim_prefix）。
-- **同 task 重申 = no-op return true**：`new_task == team.current_task` 時不重蓋章——
-  保 `task_start_tick` 起算單源（W2 TRADE timeout 不被每 cadence 重申歸零 → zombie 防護不破）。
+- **同 task 重申 = 蓋 move_target、不蓋 task_start_tick**：`new_task == team.current_task`
+  時仍更新 `move_target`（引擎換更好市場/新 prey 位 → 手跟腦到 target 級），但不重蓋
+  `task_start_tick`——保起算單源（W2 TRADE timeout 不被每 cadence 重申歸零 → zombie 防護不破）；
+  move_target 更新無關 timeout。（初版 reaffirm 靜默丟 move_target = A1a 病從 task 縮到 target
+  級殘留，查證員 A1a.review issue#1 抓到 → commit c855f11 修。）
 - TRADE 在途被搶的 Probe（`trade.preempt.*`）在新分支鏡射（觀測 parity）。
 
 **護欄（不動）**：combat 物理鎖 `task_arbiter.gd:22-23`；PLAYER@60 天花板（equal 分支要求
@@ -60,8 +63,20 @@ timeout 秒殺（W2 漏斗定罪過同型 bug，`faction_ai:740-742` 註解）�
 `player_command_system:1017`、`sim_runner:175`、`interaction_system:1050,1065,1090`、
 `headless_test:10939`。簽名變不動呼叫點位置 → constitution gate 指紋（relpath::func）不變。
 
-**已知行為副作用（接受，記 handback）**：beggar 恢復 previous_task（transition 路徑）
-現在重新起算 timeout——比舊 stale 起算（恢復即可能秒殺）更正確。
+**已知行為副作用（接受，記 handback）**：
+- beggar 恢復 previous_task（transition 路徑）現在重新起算 timeout——比舊 stale 起算
+  （恢復即可能秒殺）更正確。
+- **殘留缺口（查證員 A1a.review issue#2，本 slice 不修，defer follow-up）**：`transition`
+  預設 `_source="transition"` ∉ `ENGINE_SOURCES` → 所有 transition@PRIO_DISPATCH 進場的 task
+  （outpost BUILD ×8：`outpost_system:384/406/447/461/566/602`、`faction_ai:2421`；beggar
+  恢復 ×3：`interaction:1050`/`player_command:1017`/`sim_runner:175`）現任 reason 不是
+  engine-owned → 引擎 rank[0] 同層換不動（equal branch 要求 incumbent 在白名單）。**判定**：
+  - BUILD 的 un-swappable = **合意保守**（引擎不該每 cadence 把建造隊拉去做別的；跑到完成/
+    survival@80 threat@70 嚴格大於仍能搶）。
+  - beggar 恢復的 = 小 latch 殘留（恢復的引擎 task 引擎換不掉），但**有界非永久**：
+    STATION/TRADE timeout 兜底 + 高優先事件嚴格大於可搶 + task 自然完成。低嚴重度。
+  - 正解需「targeted restore-source」（beggar 3 點傳專屬 engine-owned source，不動 BUILD 保守
+    pin）＝觸及 beggar 恢復語意 → 屬 A1b 恢復路徑範圍。工單「只做兩件事、別擴張」→ 本 slice defer。
 
 ## 驗收（main 現有工具，工單 5 條）
 
