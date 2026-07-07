@@ -139,6 +139,22 @@ def run_node(
         raise ValueError(f"未知 profile: {profile}")
 
 
+_API_ERR_MARKS = ("rate limit", "rate_limit", "ratelimit", "quota", "usage limit",
+                  "overloaded", "429", "529", "too many requests", "insufficient", "credit")
+
+def is_api_error(res: RoleResult) -> bool:
+    """API 限流/超時判定（裁3：這類禁自動重試，原地定格）。網路瞬斷另計不在此。"""
+    if res.timed_out:
+        return True
+    err = (res.error or "").lower()
+    if not res.ok and any(m in err for m in _API_ERR_MARKS):
+        return True
+    # claude -p 撞額度常回 rc!=0 + 零花費 + 空輸出（底層重試耗盡）
+    if not res.ok and (res.cost_usd in (0, None)) and not str(res.result).strip():
+        return True
+    return False
+
+
 def effect_check(res: RoleResult, predicate: Callable[[], bool]) -> RoleResult:
     """驗 effect 發生（檔/commit 出現）。predicate 拋錯=視為 False（保守）。
 

@@ -85,20 +85,31 @@ def run_server(a):
 
 
 def watch_server(a):
-    """事件驅動：join 阻塞到 run 暫停/完成才返回（中間不打），然後報告。（藍圖背景跑；外層 timeout 兜底）"""
+    """事件驅動：loop join 直到『真終態』(有 interrupt task ∨ 跑完)才報告。
+    修:next 非空只是『有待跑節點』(正常執行中)≠ interrupt；只有 tasks 帶 interrupts 才是真暫停。"""
+    import time
     from langgraph_sdk import get_sync_client
     c = get_sync_client(url=a.url)
     tid, rid = _load_ids(a.slice)
-    try:
-        c.runs.join(tid, rid)   # 阻塞直到 run 到終態（完成 or interrupted）——事件驅動，零 busy-poll
-    except Exception as e:
-        print(f"[watch] join 中斷：{type(e).__name__} {str(e)[:120]}")
-    st = c.threads.get_state(tid)
-    vals = st.get("values", {}) or {}
-    for node, v in (vals.get("verdicts") or {}).items():
-        print(f"[watch] ✓ {node}  verdict={v.get('verdict')}")
-    ints = [it.get("value") for t in st.get("tasks", []) for it in t.get("interrupts", [])]
-    _report(st.get("next"), ints, vals, a.slice)
+    for _ in range(200):
+        try:
+            c.runs.join(tid, rid)   # 阻塞到這個 run 結束
+        except Exception as e:
+            print(f"[watch] join：{type(e).__name__} {str(e)[:80]}")
+        st = c.threads.get_state(tid)
+        vals = st.get("values", {}) or {}
+        ints = [it.get("value") for t in st.get("tasks", []) for it in t.get("interrupts", [])]
+        status = c.threads.get(tid).get("status")
+        if ints:                                   # 真 interrupt（有人要答）
+            for node, v in (vals.get("verdicts") or {}).items():
+                print(f"[watch] ✓ {node}  verdict={v.get('verdict')}")
+            _report(True, ints, vals, a.slice); return
+        if status != "busy" and not st.get("next"):  # 真跑完
+            for node, v in (vals.get("verdicts") or {}).items():
+                print(f"[watch] ✓ {node}  verdict={v.get('verdict')}")
+            _report(None, [], vals, a.slice); return
+        time.sleep(5)                              # 還在跑(next 有待跑但無 interrupt)→ 續等
+    print("[watch] loop 上限，去 Studio 看")
 
 
 def run_local(a):

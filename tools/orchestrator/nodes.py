@@ -7,7 +7,7 @@ N0 藍圖=互動(你我)非 headless；N6 閘=script(gate.py)非 claude。
 """
 from __future__ import annotations
 import os, json
-from runner import run_node, effect_check, PROFILE_REVIEW, PROFILE_WRITE, MAIN_REPO
+from runner import run_node, effect_check, is_api_error, PROFILE_REVIEW, PROFILE_WRITE, MAIN_REPO
 import bus
 
 
@@ -57,6 +57,9 @@ def judge_node(role: str, slice_id: str, node_name: str, task: str,
         "premise_contradiction": (verdict or {}).get("premise_contradiction"),
         "found_issue": bool((verdict or {}).get("issues")),
     })
+    # 裁3：API 限流/超時 → 定格（api_error 旗標，節點會 interrupt 凍住，不當 issues 誤重寫）
+    if is_api_error(res):
+        return {"api_error": True, "note": f"API 限流/超時，定格：{res.error}"}
     # effect 沒發生（verdict 沒寫成）= 硬 fail，當 issues+contradiction 逼 interrupt（不悶頭過）
     if not res.effect_ok:
         return {"verdict": "issues", "premise_contradiction": True,
@@ -105,5 +108,5 @@ def write_node(role: str, slice_id: str, task: str, reads: str, worktree: str,
         "cost_usd": res.cost_usd, "made_commit": made_commit,
         "commit_before": before, "commit_after": after,
     })
-    return {"ok": res.ok, "made_commit": made_commit,
+    return {"ok": res.ok, "made_commit": made_commit, "api_error": is_api_error(res),
             "commit_after": after, "effect_ok": res.effect_ok, "error": res.error}
