@@ -11,7 +11,7 @@
 ## 改動（spec 已在，精修+實作）
 完整設計見 `docs/superpowers/specs/2026-07-07-A1-pipeline-collapse.md`（讀「★總綱：閉迴路」+ A1a 段）。要點：
 1. `task_arbiter.gd:24` `>` → `>=`，**source-gate 引擎**：只有引擎自己的 dispatch（reason=="unified"/PRIO_DISPATCH）用 `>=`（equal-priority self-replace）；外部子系統仍嚴格大於，不能 stomp 引擎。
-2. `TRAIN/MANUFACTURE/GOVERN` 加 release（仿 `TRADE_TIMEOUT`），不再永久 latch。
+2. **四個 no-release task 全加 release**（仿 `TRADE_TIMEOUT`）：`TASK_TRAIN / TASK_MANUFACTURE / TASK_GOVERN / TASK_PRODUCE`（PRODUCE 是第四個 latch，bed `NO_RELEASE` 清單含它，同類同治），不再永久 latch。
 
 ## 兩護欄（別做壞）
 - 別把閥改成「引擎永遠贏」——外部子系統（strategic/diplomatic/player@60）仍要能合法壓過。只放行「引擎換自己的 task」。
