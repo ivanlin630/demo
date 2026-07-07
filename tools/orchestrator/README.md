@@ -31,7 +31,7 @@
 # 在 A:\GDS\demo 開 PowerShell，跑：
 .\tools\orchestrator\run_studio.ps1
 # 這個視窗別關。Studio 網址：
-# https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024
+# https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2025
 # 第一次要登入免費 LangSmith 帳號。
 ```
 不想碰 Studio = 完全不用做這步。按 GO 的輸出直接在對話裡看。
@@ -44,9 +44,9 @@ Studio = 生產線的**視覺化俯視圖**。
 
 ### 開啟
 1. server 開著（`run_studio.ps1`，那個 PowerShell 視窗別關）。
-2. 瀏覽器貼：`https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2024`
+2. 瀏覽器貼：`https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2025`
 3. 首次要登入免費 LangSmith 帳號。
-   - 不想登：改開 `http://127.0.0.1:2024/docs`（陽春 API 頁，零登入）。
+   - 不想登：改開 `http://127.0.0.1:2025/docs`（陽春 API 頁，零登入）。
 4. 想在 VS Code 裡看：`Ctrl+Shift+P` → `Simple Browser: Show` → 貼上面網址（官方 UI 長在 VS Code 分頁裡）。
 
 ### 你看得到什麼
@@ -60,11 +60,11 @@ Studio = 生產線的**視覺化俯視圖**。
 ### 隱私
 Studio 網頁是 LangChain 的，但**指向你本機 server**（127.0.0.1）。graph 在**本地跑**，`.env` 已關 tracing → 跑的資料**不上雲**。
 
-### ★誠實的限制（重要，別誤會）
-- 你按的 **GO（`! run.py`）是行程內跑**，進度**印在對話裡**，**Studio 看不到這一條**。
-- Studio 目前最適合三件事：**看拓撲形狀、跑 stub demo 熟悉畫面、翻歷史 thread 的 state**。
-- 要 Studio **即時看「真線」跑**（真工人在畫面上一站站亮）→ 得把觸發改成投給 server（不是行程內）。**要的話跟我說，我接這塊**（多一小塊工，你就能在瀏覽器即時盯真工人）。
-- 目前預設：**真線看對話裡的 console 輸出**（可靠、在同一個地方）；**Studio 看形狀/demo/歷史**。
+### 即時看真線（已接好）
+- 你按的 **GO（`! run.py`）投給 server 跑** → **Studio 即時顯示真工人一站站亮、卡哪**。
+- **同時** console（對話裡）也串流每站進度。兩邊都看得到。
+- 按 GO 後 run.py 會印出該次的 Studio 網址（帶 baseUrl）——開它就看得到這條真線。
+- 前提：server 開著（`run_studio.ps1`，port 2025）。沒開 = 按 GO 會連不上。
 
 ---
 
