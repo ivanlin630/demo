@@ -2,7 +2,8 @@
 .godot/
 
 # Local tools (executables, not source)
-tools/
+tools/*
+!tools/orchestrator/
 
 # Claude Code local config
 .claude/
