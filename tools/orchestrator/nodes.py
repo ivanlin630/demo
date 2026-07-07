@@ -14,6 +14,7 @@ import bus
 ROLE_DOC = {
     "reviewer": "02_reviewer.md", "systems": "01_architect.md",
     "implementer": "03_implementer.md", "qa": "04_qa.md", "blueprint": "00_roles.md",
+    "measurer": "04_qa.md",  # 量測員：跑探針餵 QA，職責近 QA
 }
 
 def _role_preamble(role: str) -> str:

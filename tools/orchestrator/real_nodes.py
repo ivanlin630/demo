@@ -80,11 +80,25 @@ def rn_implementer(state: SliceState):
     return {"stage": "built", "verdicts": _mv(state, "impl",
             {"made_commit": r.get("made_commit"), "effect_ok": r.get("effect_ok")})}
 
+# 量測員：跑全探針/bed(godot)出數字，餵 QA。藍圖(我)不自己跑 godot=時刻待命。
+def rn_measure(state: SliceState):
+    import nodes, bus
+    r = nodes.write_node("measurer", state["slice_id"],
+        task="量測本 slice 改動(★別改 scripts/ code，只跑探針+寫報告)。跑：①hand_obeys_brain_bed 單點(HOB_SEEDS=1337 HOB_MONTHS=1)抓 obey%/arbiter_latch/各機制/determinism ②constitution_gate ③sanity(headless_test 或 game_sim_test 無崩+關鍵print) ④TeamTrace 抖動檢(game_sim_test 看 member 隊 task 穩定 vs 每 cadence 亂換)。"
+             "★可行則 before/after 對照(main vs 本 worktree 同 seed)。結果寫 JSON 到 docs/process/verdicts/" + state["slice_id"] + ".measure.json"
+             "(欄位:obey_pct,arbiter_latch,mechanisms,determinism,constitution,thrash,before_after,summary)。commit 該檔。",
+        reads="worktree 本 slice commits + scripts/debug/ 的 bed",
+        worktree=state["worktree"], out_handback_to="qa")
+    _freeze_if_api(r, "measure")
+    m = bus.read_verdict(state["slice_id"], "measure", repo=state["worktree"])
+    return {"verdicts": _mv(state, "measure", m or {"summary": "measure 未產出(godot 可能失敗)"}), "stage": "measured"}
+
 def rn_qa(state: SliceState):
     import nodes
     v = nodes.judge_node("qa", state["slice_id"], "qa",
-        task="對抗驗已 commit 的改動：行為真變了嗎(非只能力存在)？跑相關 bed 讀率表。green=效果發生+無退化。red 列缺。★分清『真 bug』vs『godot 框架噪音』寫進 note。",
-        reads="git diff (worktree 本 slice commits) + 相關 debug bed 輸出",
+        task="對抗驗已 commit 的改動。★讀『量測員』寫的 docs/process/verdicts/" + state["slice_id"] + ".measure.json 的真數字(obey/arbiter_latch/determinism/thrash/before_after)當證據——你別自己跑 godot(量測員跑過了)。"
+             "判 green=效果真發生(數字證)+無退化+無抖動；red=數字沒動/退化/抖動。★分清『真 bug』vs『godot 框架噪音』(如 determinism 讀取失敗)寫進 note。",
+        reads="量測員的 .measure.json + git diff(worktree 本 slice commits)",
         scope_dir=state["worktree"])
     _freeze_if_api(v, "qa")
     vv = {"verdict": "green" if v.get("verdict") == "clean" else "red", **v}
@@ -146,6 +160,7 @@ def make_real_graph():
     g.add_node("systems", rn_systems)
     g.add_node("review", rn_review)
     g.add_node("implementer", rn_implementer)
+    g.add_node("measure", rn_measure)
     g.add_node("qa", rn_qa)
     g.add_node("qa_review", rn_qa_review)
     g.add_node("halt", rn_halt)
@@ -155,7 +170,8 @@ def make_real_graph():
     g.add_conditional_edges("factcheck", route_factcheck, {"systems": "systems", "halt": "halt"})
     g.add_edge("systems", "review")
     g.add_conditional_edges("review", route_review, {"implementer": "implementer", "halt": "halt"})
-    g.add_edge("implementer", "qa")
+    g.add_edge("implementer", "measure")          # 量測員跑全探針
+    g.add_edge("measure", "qa")                   # QA 讀量測數字判
     g.add_edge("qa", "qa_review")                 # 裁2：無 gate，直接人判
     g.add_conditional_edges("qa_review", route_resolution, {"merge": "merge", "end": END})
     g.add_edge("halt", END)
