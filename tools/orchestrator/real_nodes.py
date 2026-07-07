@@ -52,7 +52,9 @@ def rn_factcheck(state: SliceState):
 def rn_systems(state: SliceState):
     import nodes
     r = nodes.write_node("systems", state["slice_id"],
-        task="讀工單+invariants，把 WHAT 轉成精確 spec 寫 docs/superpowers/specs/(含 file:line 改點+驗收法)；已有對應 spec 則精修。commit。★別跑 godot/測試(那是 implementer 的事)。",
+        task="讀工單+invariants → 出兩樣：①精確 spec(docs/superpowers/specs/，含 file:line 改點+驗收法) ②正式 plan("
+             "docs/superpowers/plans/，用 writing-plans 技能做 task 分解，每 task 可獨立驗)。已有則精修。commit。"
+             "★別跑 godot/測試(那是 implementer 的事)——你只出 spec+plan。",
         reads="工單 handback + docs/invariants.md + 相關 code",
         worktree=state["worktree"], out_handback_to="reviewer")
     _freeze_if_api(r, "systems")
@@ -70,8 +72,9 @@ def rn_review(state: SliceState):
 def rn_implementer(state: SliceState):
     import nodes
     r = nodes.write_node("implementer", state["slice_id"],
-        task="讀 spec，實作改動(Read/Edit/Write)，跑 godot import+測試驗，逐步 commit，寫 handback。遇矛盾停下記疑點。",
-        reads="spec + 相關 scripts/ code",
+        task="照 systems 的 plan(docs/superpowers/plans/)逐 task 做，用 TDD(test-first：先寫/想驗證再改)。"
+             "讀 spec+plan，實作(Read/Edit/Write)，跑 godot import+測試驗，逐步 commit，寫 handback。遇矛盾停下記疑點。",
+        reads="spec + plan + 相關 scripts/ code",
         worktree=state["worktree"], out_handback_to="qa")
     _freeze_if_api(r, "implementer")
     return {"stage": "built", "verdicts": _mv(state, "impl",

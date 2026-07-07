@@ -10,6 +10,19 @@ import os, json
 from runner import run_node, effect_check, is_api_error, PROFILE_REVIEW, PROFILE_WRITE, MAIN_REPO
 import bus
 
+# 角色 → 職責正典 doc（單一來源，2026-07-07 接上）
+ROLE_DOC = {
+    "reviewer": "02_reviewer.md", "systems": "01_architect.md",
+    "implementer": "03_implementer.md", "qa": "04_qa.md", "blueprint": "00_roles.md",
+}
+
+def _role_preamble(role: str) -> str:
+    doc = ROLE_DOC.get(role, "00_roles.md")
+    return (f"★先讀你的職責正典 `docs/process/{doc}`（+ `docs/process/00_roles.md` 總表）當你這角色的行為準則。\n"
+            f"★若有 superpowers 技能可用（brainstorming / writing-plans / test-driven-development / "
+            f"systematic-debugging / 等），依你的角色與任務性質使用（例：systems 用 writing-plans 出 plan、"
+            f"implementer 用 TDD）。沒有就照職責 doc 做。\n\n")
+
 
 # ── 共用①：判決節點（讀+判→verdict）──
 def judge_node(role: str, slice_id: str, node_name: str, task: str,
@@ -27,7 +40,7 @@ def judge_node(role: str, slice_id: str, node_name: str, task: str,
         os.remove(vpath)
     rel_v = os.path.relpath(vpath, scope_dir).replace("\\", "/")
 
-    prompt = f"""你是 pipeline 的「{role}」對抗審查節點（slice={slice_id}）。skeptical、預設反駁、只信 file:line 證據。
+    prompt = _role_preamble(role) + f"""你是 pipeline 的「{role}」對抗審查節點（slice={slice_id}）。skeptical、預設反駁、只信 file:line 證據。
 
 任務：{task}
 
@@ -84,7 +97,7 @@ def write_node(role: str, slice_id: str, task: str, reads: str, worktree: str,
 
     before = _head()
     hb_name = f"{slice_id}-{role}-handback"
-    prompt = f"""你是 pipeline 的「{role}」節點（slice={slice_id}），在 git worktree 工作。
+    prompt = _role_preamble(role) + f"""你是 pipeline 的「{role}」節點（slice={slice_id}），在 git worktree 工作。
 
 任務：{task}
 
