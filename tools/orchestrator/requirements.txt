@@ -1,0 +1,6 @@
+# 生產線機器依賴（python 3.11）。裝：python -m pip install --user -r requirements.txt
+# 註：Windows 全域 site-packages 可能無寫入權 → 用 --user。
+langgraph>=1.2
+langgraph-sdk
+langgraph-cli[inmem]
+langgraph-checkpoint-sqlite
