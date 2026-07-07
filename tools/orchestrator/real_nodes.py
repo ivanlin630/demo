@@ -1,10 +1,9 @@
-"""真節點 graph（07；含 2026-07-07 三裁定）。
+"""真節點 graph（machine v2；docs/process/08_machine_workflow_v2.md）。
 
-★註冊安全：模組載入時零 sibling import（SliceState/router 內聯、nodes/gate 延遲 import）。
-三裁定（今天 A1a 燒錢教訓）：
-  裁1 退回不 silent 重試 → halt 中斷通知藍圖。
-  裁2 刪 GATE → QA 後強制中斷，藍圖判(真 bug vs godot 框架噪音)，approve 才 merge。
-  裁3 API 限流/超時 → 原地定格(interrupt)，保留狀態，不自動重試。
+★註冊安全：模組載入時零 sibling import（SliceState/router 內聯、nodes 延遲 import）。
+三裁定：裁1 退回→halt / 裁2 刪gate QA後人判 / 裁3 API異常→定格。
+v2 流程：factcheck→systems_spec→review(02②)→bp_review(①00審)→systems_plan→implementer→measure→qa→qa_review(②)→merge。
+成本：判斷節點 haiku/sonnet；opus 只給 spec/plan/實作/bp_review(願景判)。scope 限讀。
 """
 from __future__ import annotations
 import sys, os
@@ -13,6 +12,16 @@ from typing import TypedDict
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import interrupt
+
+# 成本分層（用戶定：判斷節點便宜，opus 只給寫作+願景判）。
+# factcheck/qa/measure=haiku(機械/讀數字)；review=sonnet(對抗設計審,要夠利,catch A2a那種深坑)；
+# systems_spec/plan/implementer/bp_review=opus(寫作/願景,default 不傳 model)。
+MODELS = {"factcheck": "haiku", "review": "sonnet", "qa": "haiku", "measure": "haiku"}
+
+# scope 限讀通用指示（節點只讀 touch_files + 工作需要，別盲掃全庫）
+def _scope_hint(slice_id):
+    return (f"★scope 限讀：先讀 docs/process/verdicts/{slice_id}.scope.json 的 touch_files（若有），"
+            f"只讀那些檔 + 你工作直接需要的，別盲掃整個 scripts/（省 token）。")
 
 
 class SliceState(TypedDict, total=False):
@@ -33,65 +42,103 @@ def _mv(state, node, v):
 
 
 def _freeze_if_api(v, node):
-    """裁3：撞 API 限流/超時 → 原地定格。resume(額度回來後)會重跑本站，不自動重試。"""
+    """裁3：撞 API 限流/超時 → 原地定格。resume(額度回來後)重跑本站，不自動重試。"""
     if isinstance(v, dict) and v.get("api_error"):
         interrupt({"frozen": True, "node": node, "detail": v.get("note"),
-                   "msg": f"API 限流/超時於 {node}，原地定格保留狀態。額度恢復後 resume 續跑（重跑本站），不自動重試。"})
+                   "msg": f"API 限流/超時於 {node}，原地定格。額度恢復後 resume 續跑（重跑本站），不自動重試。"})
 
 
-# ── 真節點（nodes/gate 延遲 import）──
+# ── 節點 ──
 def rn_factcheck(state: SliceState):
     import nodes
     v = nodes.judge_node("reviewer", state["slice_id"], "factcheck",
         task="驗工單每個 code 事實斷言(file:line)。前提被 code 打臉(如『X不存在』但 grep 到)→premise_contradiction=true。",
         reads=f"{state.get('brief_path','工單 handback')} + 引用的 scripts/ code",
-        scope_dir=state["worktree"])
+        scope_dir=state["worktree"], model=MODELS["factcheck"])
     _freeze_if_api(v, "factcheck")
     return {"verdicts": _mv(state, "factcheck", v), "stage": "factchecked"}
 
-def rn_systems(state: SliceState):
+def rn_systems_spec(state: SliceState):
+    """01①：只出 spec + scope + 重點 handback（先不 plan，fail-early）。"""
     import nodes
     r = nodes.write_node("systems", state["slice_id"],
-        task="讀工單+invariants → 出三樣：①精確 spec(docs/superpowers/specs/，含 file:line 改點+驗收法) ②正式 plan("
-             "docs/superpowers/plans/，用 writing-plans 技能做 task 分解，每 task 可獨立驗) "
-             "③★觸及集宣告寫進 docs/process/verdicts/" + state["slice_id"] + ".scope.json"
-             "(欄位:touch_files=[會改的檔路徑], touch_systems=[碰的系統], depends_on=[前置 slice], "
-             "parallel_safe=true/false+理由)——這決定本片能否跟別片並行/merge 序。已有則精修。commit。"
-             "★別跑 godot/測試(那是 implementer 的事)——你只出 spec+plan+scope。",
+        task="讀工單+invariants → 出三樣（★只 spec，先不寫 plan——等審過才寫）："
+             "①精確 spec(docs/superpowers/specs/，含 file:line 改點+驗收法) "
+             "②觸及集 docs/process/verdicts/" + state["slice_id"] + ".scope.json"
+             "(touch_files/touch_systems/depends_on/parallel_safe+理由) "
+             "③★『重點』handback(docs/superpowers/handbacks/，from:systems to:blueprint)："
+             "濃縮給藍圖審——做了啥設計決定、風險點、要不要批的疑慮（藍圖只看這份，不啃全 spec）。commit。"
+             "★別跑 godot、★別寫 plan(那是審過後的事)。",
         reads="工單 handback + docs/invariants.md + 相關 code",
         worktree=state["worktree"], out_handback_to="reviewer")
-    _freeze_if_api(r, "systems")
+    _freeze_if_api(r, "systems_spec")
     return {"spec_path": f"specs/{state['slice_id']}", "stage": "spec"}
 
 def rn_review(state: SliceState):
+    """02②：對抗審 spec（設計健不健全，讀廣一點抓跨系統）。"""
     import nodes
     v = nodes.judge_node("reviewer", state["slice_id"], "review",
-        task="對抗審 spec：設計健不健全？真根治還是把問題搬位子(如閉迴路 vs 移閥)？漏洞/退化風險？違反 invariants？",
-        reads="spec + docs/invariants.md + docs/game-design.md 相關段",
-        scope_dir=state["worktree"])
+        task="對抗審 spec：設計健不健全？真根治還是把問題搬位子(如閉迴路 vs 移閥)？漏洞/退化風險？"
+             "跨系統會不會踩(讀廣一點,不只 touch_files)？違反 invariants？量測方法有沒有坑(如把 lifecycle move 當決策)？",
+        reads="spec + docs/invariants.md + docs/game-design.md 相關段 + 觸及系統的互動點",
+        scope_dir=state["worktree"], model=MODELS["review"])
     _freeze_if_api(v, "review")
     return {"verdicts": _mv(state, "review", v), "stage": "reviewed"}
+
+def rn_bp_review(state: SliceState):
+    """★檢查點①：藍圖(00)審。讀 spec重點+02findings+願景 → 對齊?嚴重? concern 才 interrupt 找用戶。"""
+    import nodes
+    v = nodes.judge_node("blueprint", state["slice_id"], "bp_review",
+        task="你是藍圖(00,願景守護)。讀 systems 的『重點』handback + 02 review verdict + docs/game-design.md 願景。"
+             "判：spec 對齊願景嗎？02 的 concern 嚴不嚴重？"
+             "verdict='clean'(對齊、可放行寫 plan) 或 'concern'(踩願景/02 concern 嚴重，要藍圖裁)。note 說為什麼。"
+             "★你只看重點 handback + verdict + 願景，不啃全 spec。",
+        reads="systems→blueprint 重點 handback + review verdict + docs/game-design.md",
+        scope_dir=state["worktree"])  # opus(default)：願景判要準
+    _freeze_if_api(v, "bp_review")
+    concern = v.get("verdict") == "concern" or v.get("premise_contradiction")
+    upd = {"verdicts": _mv(state, "bp_review", v), "stage": "bp_reviewed"}
+    if concern:
+        decision = interrupt({
+            "checkpoint": "① spec 後藍圖審——有疑慮",
+            "slice": state["slice_id"], "concern": v.get("note"),
+            "review": state["verdicts"].get("review", {}).get("note"),
+            "msg": "spec 疑慮(踩願景 or 02 concern)。藍圖裁：approve=放行寫plan / reject=停(修spec重跑)。",
+        })
+        upd["resolution"] = str(decision)
+    return upd
+
+def rn_systems_plan(state: SliceState):
+    """01②：spec 審過了才寫 plan（fail-early，爛 spec 不浪費 plan）。"""
+    import nodes
+    r = nodes.write_node("systems", state["slice_id"],
+        task="spec 已審過。用 writing-plans 技能出正式 plan(docs/superpowers/plans/)：task 分解，每 task 可獨立驗、對到 spec 的 file:line 改點。commit。★別跑 godot、別改 scripts/ code。",
+        reads="本 slice 的 spec + scope.json",
+        worktree=state["worktree"], out_handback_to="implementer")
+    _freeze_if_api(r, "systems_plan")
+    return {"stage": "planned"}
 
 def rn_implementer(state: SliceState):
     import nodes
     r = nodes.write_node("implementer", state["slice_id"],
-        task="照 systems 的 plan(docs/superpowers/plans/)逐 task 做，用 TDD(test-first：先寫/想驗證再改)。"
+        task=_scope_hint(state["slice_id"]) +
+             "照 systems 的 plan(docs/superpowers/plans/)逐 task 做，用 TDD(test-first)。"
              "讀 spec+plan，實作(Read/Edit/Write)，跑 godot import+測試驗，逐步 commit，寫 handback。遇矛盾停下記疑點。",
-        reads="spec + plan + 相關 scripts/ code",
-        worktree=state["worktree"], out_handback_to="qa")
+        reads="spec + plan + scope.json 的 touch_files",
+        worktree=state["worktree"], out_handback_to="measurer")
     _freeze_if_api(r, "implementer")
     return {"stage": "built", "verdicts": _mv(state, "impl",
             {"made_commit": r.get("made_commit"), "effect_ok": r.get("effect_ok")})}
 
-# 量測員：跑全探針/bed(godot)出數字，餵 QA。藍圖(我)不自己跑 godot=時刻待命。
 def rn_measure(state: SliceState):
+    """量測員：跑全探針/bed(godot)出數字餵 QA。藍圖不蹲 godot。"""
     import nodes, bus
     r = nodes.write_node("measurer", state["slice_id"],
-        task="量測本 slice 改動(★別改 scripts/ code，只跑探針+寫報告)。跑：①hand_obeys_brain_bed 單點(HOB_SEEDS=1337 HOB_MONTHS=1)抓 obey%/arbiter_latch/各機制/determinism ②constitution_gate ③sanity(headless_test 或 game_sim_test 無崩+關鍵print) ④TeamTrace 抖動檢(game_sim_test 看 member 隊 task 穩定 vs 每 cadence 亂換)。"
-             "★可行則 before/after 對照(main vs 本 worktree 同 seed)。結果寫 JSON 到 docs/process/verdicts/" + state["slice_id"] + ".measure.json"
-             "(欄位:obey_pct,arbiter_latch,mechanisms,determinism,constitution,thrash,before_after,summary)。commit 該檔。",
+        task="量測本 slice 改動(★別改 scripts/ code，只跑探針+寫報告)。跑：①hand_obeys_brain_bed 單點(HOB_SEEDS=1337 HOB_MONTHS=1)抓 obey%/arbiter_latch/各機制/determinism ②constitution_gate ③sanity(headless_test/game_sim_test 無崩+關鍵print) ④TeamTrace 抖動檢。"
+             "★可行則 before/after 對照(main vs 本 worktree 同 seed)。寫 JSON 到 docs/process/verdicts/" + state["slice_id"] + ".measure.json"
+             "(obey_pct,arbiter_latch,mechanisms,determinism,constitution,thrash,before_after,summary)。commit。",
         reads="worktree 本 slice commits + scripts/debug/ 的 bed",
-        worktree=state["worktree"], out_handback_to="qa")
+        worktree=state["worktree"], out_handback_to="qa", model=MODELS["measure"])
     _freeze_if_api(r, "measure")
     m = bus.read_verdict(state["slice_id"], "measure", repo=state["worktree"])
     return {"verdicts": _mv(state, "measure", m or {"summary": "measure 未產出(godot 可能失敗)"}), "stage": "measured"}
@@ -99,34 +146,31 @@ def rn_measure(state: SliceState):
 def rn_qa(state: SliceState):
     import nodes
     v = nodes.judge_node("qa", state["slice_id"], "qa",
-        task="對抗驗已 commit 的改動。★讀『量測員』寫的 docs/process/verdicts/" + state["slice_id"] + ".measure.json 的真數字(obey/arbiter_latch/determinism/thrash/before_after)當證據——你別自己跑 godot(量測員跑過了)。"
-             "判 green=效果真發生(數字證)+無退化+無抖動；red=數字沒動/退化/抖動。★分清『真 bug』vs『godot 框架噪音』(如 determinism 讀取失敗)寫進 note。",
-        reads="量測員的 .measure.json + git diff(worktree 本 slice commits)",
-        scope_dir=state["worktree"])
+        task="對抗驗已 commit 的改動。★讀量測員的 docs/process/verdicts/" + state["slice_id"] + ".measure.json 真數字當證據(別自己跑 godot)。"
+             "green=效果真發生(數字證)+無退化+無抖動；red=數字沒動/退化/抖動。★分清真 bug vs godot 框架噪音寫進 note。",
+        reads="量測員 .measure.json + git diff(worktree 本 slice commits)",
+        scope_dir=state["worktree"], model=MODELS["qa"])
     _freeze_if_api(v, "qa")
     vv = {"verdict": "green" if v.get("verdict") == "clean" else "red", **v}
     return {"verdicts": _mv(state, "qa", vv), "stage": "qa"}
 
-# 裁2：刪 gate。QA 後強制中斷，藍圖判(真 bug vs godot 框架噪音)，approve→merge。
 def rn_qa_review(state: SliceState):
+    """檢查點②：QA 後強制人判(裁2)。approve→merge。"""
     qa = state["verdicts"].get("qa", {})
     decision = interrupt({
-        "checkpoint": "QA 後強制中斷（裁2：GATE 已刪，人判）",
-        "slice": state["slice_id"],
-        "qa_verdict": qa.get("verdict"),
-        "qa_note": qa.get("note"),
-        "impl": state["verdicts"].get("impl"),
-        "msg": "藍圖判定：QA 若紅，是真 bug 還是 godot 框架噪音？approve=merge進main / reject=停(修後重跑)。",
+        "checkpoint": "② QA 後強制中斷（裁2：人判 真bug vs godot噪音）",
+        "slice": state["slice_id"], "qa_verdict": qa.get("verdict"), "qa_note": qa.get("note"),
+        "measure": state["verdicts"].get("measure", {}).get("summary"),
+        "msg": "藍圖+你判：approve=merge進main / reject=停(修後重跑)。",
     })
     return {"resolution": str(decision)}
 
-# 裁1：退回(查證/挑毛病 issues)=中斷通知藍圖，不 silent 重試。
 def rn_halt(state: SliceState):
+    """裁1：退回=中斷通知藍圖，不 silent 重試。"""
     decision = interrupt({
-        "halt": True, "slice": state["slice_id"],
-        "stage": state.get("stage"),
+        "halt": True, "slice": state["slice_id"], "stage": state.get("stage"),
         "verdicts": state.get("verdicts"),
-        "msg": "查證/挑毛病退回——已暫停通知藍圖(不自動重試)。藍圖修 brief/spec 後重跑，或 override 續。",
+        "msg": "退回——已暫停通知藍圖(不自動重試)。修 brief/spec 後重跑，或 override 續。",
     })
     return {"resolution": str(decision)}
 
@@ -144,14 +188,21 @@ def rn_merge(state: SliceState):
     return {"done": True, "stage": "merged"}
 
 
-# ── 內聯 router（退回一律 → halt，無 silent 重試迴圈）──
+# ── router ──
 def route_factcheck(state: SliceState):
     v = state["verdicts"]["factcheck"]
-    return "halt" if (v.get("premise_contradiction") or v.get("verdict") == "issues") else "systems"
+    return "halt" if (v.get("premise_contradiction") or v.get("verdict") == "issues") else "systems_spec"
 
 def route_review(state: SliceState):
     v = state["verdicts"]["review"]
-    return "halt" if (v.get("premise_contradiction") or v.get("verdict") == "issues") else "implementer"
+    return "halt" if (v.get("premise_contradiction") or v.get("verdict") == "issues") else "bp_review"
+
+def route_bp_review(state: SliceState):
+    v = state["verdicts"]["bp_review"]
+    concern = v.get("verdict") == "concern" or v.get("premise_contradiction")
+    if concern and not str(state.get("resolution", "")).lower().startswith("approve"):
+        return "halt"          # 藍圖 reject(或沒 approve) → 停
+    return "systems_plan"      # 對齊 or 藍圖 approve → 寫 plan
 
 def route_resolution(state: SliceState):
     return "merge" if str(state.get("resolution", "")).lower().startswith("approve") else "end"
@@ -159,23 +210,22 @@ def route_resolution(state: SliceState):
 
 def make_real_graph():
     g = StateGraph(SliceState)
-    g.add_node("factcheck", rn_factcheck)
-    g.add_node("systems", rn_systems)
-    g.add_node("review", rn_review)
-    g.add_node("implementer", rn_implementer)
-    g.add_node("measure", rn_measure)
-    g.add_node("qa", rn_qa)
-    g.add_node("qa_review", rn_qa_review)
-    g.add_node("halt", rn_halt)
-    g.add_node("merge", rn_merge)
+    for name, fn in [("factcheck", rn_factcheck), ("systems_spec", rn_systems_spec),
+                     ("review", rn_review), ("bp_review", rn_bp_review),
+                     ("systems_plan", rn_systems_plan), ("implementer", rn_implementer),
+                     ("measure", rn_measure), ("qa", rn_qa), ("qa_review", rn_qa_review),
+                     ("halt", rn_halt), ("merge", rn_merge)]:
+        g.add_node(name, fn)
 
     g.add_edge(START, "factcheck")
-    g.add_conditional_edges("factcheck", route_factcheck, {"systems": "systems", "halt": "halt"})
-    g.add_edge("systems", "review")
-    g.add_conditional_edges("review", route_review, {"implementer": "implementer", "halt": "halt"})
-    g.add_edge("implementer", "measure")          # 量測員跑全探針
-    g.add_edge("measure", "qa")                   # QA 讀量測數字判
-    g.add_edge("qa", "qa_review")                 # 裁2：無 gate，直接人判
+    g.add_conditional_edges("factcheck", route_factcheck, {"systems_spec": "systems_spec", "halt": "halt"})
+    g.add_edge("systems_spec", "review")
+    g.add_conditional_edges("review", route_review, {"bp_review": "bp_review", "halt": "halt"})
+    g.add_conditional_edges("bp_review", route_bp_review, {"systems_plan": "systems_plan", "halt": "halt"})
+    g.add_edge("systems_plan", "implementer")
+    g.add_edge("implementer", "measure")
+    g.add_edge("measure", "qa")
+    g.add_edge("qa", "qa_review")
     g.add_conditional_edges("qa_review", route_resolution, {"merge": "merge", "end": END})
     g.add_edge("halt", END)
     g.add_edge("merge", END)
