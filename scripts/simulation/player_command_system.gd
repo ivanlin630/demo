@@ -1014,7 +1014,7 @@ func _action_respond_aid_request(state: WorldState, _target_id: int, pt: TeamDat
 				state.world.current_tick, clampf(actual / 50.0, 0.1, 1.0))
 	state.clear_social_target(beggar)   # BEG 現走 social_target（非 combat_target）
 	if beggar.previous_task != "" and beggar.previous_task != TeamData.TASK_IDLE:
-		TaskArbiter.transition(beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)
+		TaskArbiter.transition(state, beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)
 	else:
 		TaskArbiter.release(beggar)
 	beggar.previous_task = ""

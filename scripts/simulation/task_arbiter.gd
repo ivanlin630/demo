@@ -13,6 +13,12 @@ const PRIO_DISPATCH: int = 50
 const PRIO_FACTION:  int = 30
 const PRIO_AMBIENT:  int = 10
 
+# A1a 拆閥（spec 2026-07-07-A1a-arbiter-valve）：引擎主 rank 的 dispatch source 白名單。
+# 這兩面（_decide_unified / _evaluate_solo）的 rank[0] 允許同層換掉引擎自己派的 task
+#（equal-priority self-replace，閉迴路）。scout/prosperity scaffolding 自帶 release 換手
+# 不入列；ambition@AMBIENT 被嚴格大於覆蓋不需入列。外部子系統/PLAYER 不在列=仍嚴格大於。
+const ENGINE_SOURCES: Array = ["unified", "solo"]
+
 
 # 嘗試設 task。優先權嚴格大於現任才搶得動（同層先到先得）。
 # state 供抗命判定讀 leader；回 true = 已設；false = 被現任擋下。
@@ -26,6 +32,23 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		if Probe.enabled and team.current_task == TeamData.TASK_TRADE \
 				and new_task != TeamData.TASK_TRADE:
 			Probe.bump("trade.preempt.%s|%s" % [new_task, _source])
+		team.current_task = new_task
+		team.move_target = move_target
+		team.task_priority = priority
+		team.task_reason = _source
+		team.task_start_tick = state.world.current_tick
+		return true
+	# A1a source-gated equal-priority self-replace：引擎每 cadence 的 rank[0] 同層換掉
+	# 引擎自己派的 task（腦選、手無條件執行）。兩側都要 engine-owned：新 source 在白名單、
+	# 現任 task_reason 也在（defy_ 前綴=抗命贏來的引擎 task，視同）→ herald/merchant/scout
+	# 等同層現任不被 stomp。防抖動由引擎 COMMITMENT_BONUS 承擔（rank 前已偏置現任 option）。
+	if priority == PRIO_DISPATCH and team.task_priority == PRIO_DISPATCH \
+			and _source in ENGINE_SOURCES \
+			and team.task_reason.trim_prefix("defy_") in ENGINE_SOURCES:
+		if new_task == team.current_task:
+			return true   # 腦重申同 task＝已聽腦；不重蓋章（task_start_tick 單源，timeout 不歸零）
+		if Probe.enabled and team.current_task == TeamData.TASK_TRADE:
+			Probe.bump("trade.preempt.%s|%s" % [new_task, _source])   # 漏斗站4 parity
 		team.current_task = new_task
 		team.move_target = move_target
 		team.task_priority = priority
@@ -57,11 +80,14 @@ static func release(team: TeamData) -> void:
 	team.task_priority = 0
 
 
-# 不改釋放流程、就地轉換 task 的欄位同步（如 安頓→生產）
-static func transition(team: TeamData, new_task: String, priority: int, _source: String = "transition") -> void:
+# 不改釋放流程、就地轉換 task 的欄位同步（如 安頓→生產）。
+# A1a：蓋 task_start_tick（與 try_set 同源）——否則 transition 進場的 task（如 PRODUCE）
+# 拿 stale 起算，timeout 檢查派出即秒殺（W2 TRADE 漏斗定罪過同型 bug）。
+static func transition(state: WorldState, team: TeamData, new_task: String, priority: int, _source: String = "transition") -> void:
 	team.current_task = new_task
 	team.task_priority = priority
 	team.task_reason = _source
+	team.task_start_tick = state.world.current_tick
 
 
 # 抗命判定：確定性，無 RNG。desire > obedience + 0.3 → 抗命

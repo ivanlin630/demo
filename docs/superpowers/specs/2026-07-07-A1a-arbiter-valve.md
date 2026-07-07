@@ -45,8 +45,11 @@ rank[0] 在同層（PRIO_DISPATCH=50 vs 50）被靜默丟 = arbiter latch（bed 
   - `STATION_TIMEOUT: int = TimeScale.TICK_PER_DAY * 4`（TEST VALUE，照妖鏡債，裁5；
     駐地原地 task 無距離項 → 純 base，不需 per-hex 項）。
 - loop3 TRADE timeout 塊（:744-750）後加對應塊：
-  `current_task in STATION_TASKS and tick - task_start_tick > STATION_TIMEOUT`
+  `current_task in STATION_TASKS and task_priority < PRIO_PLAYER
+   and tick - task_start_tick > STATION_TIMEOUT`
   → `Probe.bump("station.timeout")` + `TaskArbiter.release(team)`。
+  PLAYER@60 現任豁免（護欄：引擎 timeout 不得清玩家命令；四 task 現無 player command
+  入口，guard 防未來）。
   release 回 idle → 下 cadence 重新競爭（腦仍最想做→重派同 task；不是→rank[0] 換手＝閉迴路）。
 
 **連動修（timeout 正確性前提）**：`TaskArbiter.transition` 不蓋 `task_start_tick`——
