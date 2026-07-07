@@ -5,6 +5,7 @@
 # Then open:  https://smith.langchain.com/studio/?baseUrl=http://127.0.0.1:2025
 $env:PYTHONUTF8 = "1"
 $env:PYTHONIOENCODING = "utf-8"
+$env:N_JOBS_PER_WORKER = "4"   # 並行：最多 4 條 slice 同跑(各自 worktree,非衝突安全)。預設 1=單線。
 Set-Location $PSScriptRoot
 
 # best-effort: free port 2025 first

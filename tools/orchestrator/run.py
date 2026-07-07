@@ -56,6 +56,95 @@ def _studio_url(url):
     return url.replace("http://", "https://smith.langchain.com/studio/?baseUrl=http://")
 
 
+def _kill_node_procs():
+    """殺 node claude -p 子行程（以角色 preamble『職責正典』為記認，非我 session）。Windows best-effort。"""
+    import subprocess
+    ps = ("Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match '職責正典' } | "
+          "ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }")
+    try:
+        subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, timeout=30)
+    except Exception:
+        pass
+
+
+def _count_live_nodes():
+    """數活的 node claude -p（職責正典 marker）。查不到回 -1。"""
+    import subprocess
+    ps = "@(Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match '職責正典' }).Count"
+    try:
+        r = subprocess.run(["powershell", "-NoProfile", "-Command", ps],
+                           capture_output=True, text=True, timeout=20)
+        return int((r.stdout or "0").strip() or 0)
+    except Exception:
+        return -1
+
+
+def _reap_zombies(c):
+    """只清殭屍：零活 node 但有 running/pending run = 全殭屍 → 清。有活 node(或查不到)→保守不動(保留並行)。"""
+    if _count_live_nodes() != 0:
+        return 0
+    n = _cancel_others(c)
+    if n:
+        print(f"[run] 清了 {n} 條殭屍 run（零活 node 卻掛 running）")
+    return n
+
+
+def _cancel_others(c, keep_tid=None):
+    """取消所有 running/pending run(除 keep_tid)——清殭屍解堵(server 併發有限,卡住的 run 堵後面)。"""
+    n = 0
+    for t in c.threads.search(limit=30):
+        if keep_tid and t["thread_id"] == keep_tid:
+            continue
+        for r in c.runs.list(t["thread_id"]):
+            if r.get("status") in ("running", "pending"):
+                try:
+                    c.runs.cancel(t["thread_id"], r["run_id"], wait=False); n += 1
+                except Exception:
+                    pass
+    return n
+
+
+def cmd_status(a):
+    """看板：所有 thread/run 狀態 + 本 slice 進度 + 花費。"""
+    from langgraph_sdk import get_sync_client
+    c = get_sync_client(url=a.url)
+    print("[status] threads（新→舊）:")
+    for t in c.threads.search(limit=12):
+        rs = [r.get("status") for r in c.runs.list(t["thread_id"])]
+        flag = " ⚠stuck" if "running" in rs or "pending" in rs else ""
+        print(f"  {t['thread_id'][:8]} thread={t.get('status'):12} runs={rs}{flag}")
+    import os as _os, json as _json
+    mp = _os.path.join(MAIN_REPO, "docs/process/metrics.jsonl")
+    if a.slice and _os.path.exists(mp):
+        tot = 0.0; last = None
+        for l in open(mp, encoding="utf-8"):
+            try:
+                d = _json.loads(l)
+            except Exception:
+                continue
+            if d.get("slice") == a.slice:
+                tot += d.get("cost_usd") or 0; last = d.get("node")
+        print(f"[status] {a.slice}：累計 ${round(tot,2)}，最後節點={last}")
+
+
+def cmd_cancel(a):
+    """控制：取消 run + 殺 node 行程。--slice X 取消該條；不帶 slice 清全部殭屍。"""
+    from langgraph_sdk import get_sync_client
+    c = get_sync_client(url=a.url)
+    if a.slice:
+        try:
+            tid, rid = _load_ids(a.slice)
+            c.runs.cancel(tid, rid, wait=False)
+            print(f"[cancel] {a.slice} run 已取消")
+        except Exception as e:
+            print(f"[cancel] {a.slice} err: {str(e)[:80]}")
+    else:
+        n = _cancel_others(c)
+        print(f"[cancel] 清了 {n} 條 running/pending run")
+    _kill_node_procs()
+    print("[cancel] 殺了 node 行程（best-effort）。可重新發動了。")
+
+
 def _save_ids(slice_id, tid, rid):
     os.makedirs(RUNS_DIR, exist_ok=True)
     open(os.path.join(RUNS_DIR, f"{slice_id}.thread"), "w").write(f"{tid}\n{rid}")
@@ -73,6 +162,9 @@ def run_server(a):
         tid, _ = _load_ids(a.slice)
         run = c.runs.create(tid, a.graph, command={"resume": a.resume})
     else:
+        # 不 cancel 別的 run（保留並行紅利：非衝突 slice 各自 worktree 可同跑）。
+        # 殭屍(死 node 卡 running)由 --status 看、--cancel 手動清，或 _reap_zombies 只清死的。
+        _reap_zombies(c)   # 只收「node 已死但 run 還 running」的殭屍，不動健康並行 run
         wt, initial = _prep(a)
         tid = c.threads.create()["thread_id"]
         run = c.runs.create(tid, a.graph, input=initial)
@@ -146,7 +238,7 @@ def _report(nxt, interrupts, values, slice_id):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--slice", required=True)
+    ap.add_argument("--slice")
     ap.add_argument("--brief-file"); ap.add_argument("--brief")
     ap.add_argument("--mode", default="B", choices=["B", "C"])
     ap.add_argument("--resume")
@@ -154,10 +246,18 @@ def main():
     ap.add_argument("--graph", default="pipeline_real")
     ap.add_argument("--local", action="store_true", help="強制本地跑（不投 server）")
     ap.add_argument("--watch", action="store_true", help="背景盯一條已發動的 run（藍圖用）")
+    ap.add_argument("--status", action="store_true", help="看板：所有 run 狀態+花費")
+    ap.add_argument("--cancel", action="store_true", help="控制：取消 run+殺 node（--slice X 取消該條；無 slice 清全部殭屍）")
     a = ap.parse_args()
 
-    if a.watch:
+    if a.status:
+        cmd_status(a)
+    elif a.cancel:
+        cmd_cancel(a)
+    elif a.watch:
         watch_server(a)
+    elif not a.slice:
+        print("[run] 要 --slice（發動）或 --status/--cancel（控制）")
     elif not a.local and server_up(a.url):
         run_server(a)
     else:
