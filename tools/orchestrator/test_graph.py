@@ -3,6 +3,8 @@
 跑：python tools/orchestrator/test_graph.py
 """
 import sys
+try: sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
+except Exception: pass
 from graph import build, SliceState
 from langgraph.types import Command
 

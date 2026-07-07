@@ -3,6 +3,8 @@
 跑：python tools/orchestrator/test_bus.py
 """
 import sys, tempfile, os
+try: sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
+except Exception: pass
 import bus
 
 

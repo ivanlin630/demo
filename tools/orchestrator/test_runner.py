@@ -6,6 +6,8 @@ effect_check 抓「claude 回了但沒真寫」的差（驗效果非能力）。
 跑：python tools/orchestrator/test_runner.py <一個可寫的空 cwd>
 """
 import sys, os, tempfile, shutil
+try: sys.stdout.reconfigure(encoding="utf-8"); sys.stderr.reconfigure(encoding="utf-8")
+except Exception: pass
 from pathlib import Path
 from runner import run_node, effect_check, PROFILE_WRITE
 
