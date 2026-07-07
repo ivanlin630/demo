@@ -1382,6 +1382,7 @@ func _assign_tasks(state: WorldState, f) -> void:
 				state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
 			print("[FactionAI] Team%d 主動掠奪 Team%d" % [f.leader_team_id, target_id])
 	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_goals", _ta)
+	HandBrainProbe.note_bypass(state, leader_team, "leader")   # 手聽腦：leader 手寫 cascade 繞引擎計數（A2）
 	_assign_member_tasks(state, f)
 	if SimRunner.phase_timing: _fai_pht("assign.members", _ta)
 
@@ -1521,6 +1522,9 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if opt == "攻擊": _probe_vendetta_dispatch(state, team)   # 序4：純血仇攻擊驗魂
 		# 融合 threat：unified 隊選 迎戰/求和 時亦接 aux target（prosperity/order），與 non-unified 路徑一致。
 		_wire_threat_task(team, td)
+		# 手聽腦單點同-tick 探針（純觀測，env-gated 預設關 → byte-identical）：敲定 winner + try_set + 副作用後、
+		# return 前，同 state 比腦(ranked[0]/winner)vs 手(current_task)。
+		HandBrainProbe.capture(state, team, "unified", String(ranked[0]["opt"]), opt, td["task"], _set_ok)
 		return
 	# 全不可派 → 保持現行(no-op)
 	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner
@@ -1661,6 +1665,7 @@ func _check_deviation(state: WorldState, sub: TeamData) -> bool:
 			if TaskArbiter.try_set(state, sub, TeamData.TASK_LOOT,
 					state.teams[loot_target].tile_pos, TaskArbiter.PRIO_DISPATCH, "deviation"):
 				print("[SubAI] Team%d 偏離掠奪 Team%d" % [sub.team_id, loot_target])
+				HandBrainProbe.note_bypass(state, sub, "subteam")   # 手聽腦：子隊手寫 argmax 繞引擎（A2）
 				return true
 			return false
 		TaskArbiter.release(sub)
@@ -1696,6 +1701,7 @@ func _evaluate_idle_subteam(state: WorldState, sub: TeamData, merge_queue: Array
 			if TaskArbiter.try_set(state, sub, best_task,
 					state.teams[tid].tile_pos, TaskArbiter.PRIO_DISPATCH, "subteam_idle"):
 				print("[SubAI] Team%d idle→%s (Team%d)" % [sub.team_id, best_task, tid])
+				HandBrainProbe.note_bypass(state, sub, "subteam")   # 手聽腦：子隊手寫 argmax 繞引擎（A2）
 		else:
 			sub.move_target = parent.tile_pos
 
@@ -1756,6 +1762,8 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		if td["task"] == TeamData.TASK_TRADE:
 			Probe.bump("trade.dispatch.solo")   # 漏斗站4（timeout 起算由 try_set 蓋章 task_start_tick）
+		# 手聽腦單點探針（此路 try_set 已成功→set_ok 恆真；rank[0] 被跳→次佳=subset_fallthrough）
+		HandBrainProbe.capture(state, team, "solo", String(ranked[0]["opt"]), opt, td["task"], true)
 		print("[SoloAI] Team%d → %s (%s)" % [team.team_id, td["task"], opt])
 		return
 	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner
