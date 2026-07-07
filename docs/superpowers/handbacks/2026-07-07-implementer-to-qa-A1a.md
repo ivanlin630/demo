@@ -100,8 +100,18 @@ committed `bed_baseline.txt` 是**另一 config（3-seed 4-month）+ `[GODOT TIM
 誤導 QA 的 stale `bed_baseline.txt` 已移除。
 
 ∴ QA issue#1 的「−72% 無可重現 artifact」**已消**：handback 引的 270→76 = −72% 現有同 config
-可重現對照。issue#2（#4 非退化的 baseline==HEAD FAIL count）仍為靜態證據結論（bed 不觸
-`_update_goals`；headless_test 弱目標測試未被 A1a 觸及），屬 pre-existing 誠實揭露，非本 slice 回歸。
+可重現對照。
+
+QA issue#2（#4 非退化的 baseline==HEAD FAIL count）本節點亦**親跑轉活**（不再僅靜態）：
+
+| 版本 | headless_test | constitution_gate |
+|---|---|---|
+| after `e3175e6`（HEAD） | 1×`[FAIL] 弱目標未加入攻擊 goal`、`=== DONE ===`、SCRIPT ERROR=0 | `PASS (sites=30, removed=0)` |
+| before `0a908f5`（baseline） | 1×`[FAIL] 弱目標未加入攻擊 goal`、`=== DONE ===` | — |
+
+baseline==HEAD FAIL count=1 = **非退化親驗成立**（非僅靜態）。該 FAIL = pre-existing（`_update_goals`
+弱目標 goal 判定 vs 測試斷言不一致，範圍在 goal 系統），A1a diff 未觸 → 誠實揭露、非本 slice 回歸，
+建議另立 issue，勿併 A1a arc。
 
 ## commit 序（本 slice 全歷史，死也丟最少）
 - `fef3702` feat(A1a): 拆閥主體——equal-priority self-replace + 四駐地 timeout release
