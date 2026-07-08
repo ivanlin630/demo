@@ -107,14 +107,23 @@ def _cancel_others(c, keep_tid=None):
 def cmd_status(a):
     """看板：本地 slice(log)進度 + 花費；server 若開也列。(本地優先，server 死也能用)"""
     import glob, json as _json
-    # 本地 slice：讀 runs/*.log 末狀態
-    print("[status] 本地 slice（runs/*.log）:")
+    # 每 slice 最後完成的站(讀 metrics,可靠,不受 log buffer 影響)
+    mp = os.path.join(MAIN_REPO, "docs/process/metrics.jsonl")
+    lastnode = {}
+    if os.path.exists(mp):
+        for l in open(mp, encoding="utf-8"):
+            try: d = _json.loads(l)
+            except Exception: continue
+            lastnode[d.get("slice")] = (d.get("node"), d.get("effect_ok"), d.get("cost_usd"))
+    # 本地 slice：log 末狀態(完成/停下) + metrics 最後站
+    print("[status] 本地 slice:")
     for lg in sorted(glob.glob(os.path.join(RUNS_DIR, "*.log"))):
         sid = os.path.basename(lg)[:-4]
         txt = open(lg, encoding="utf-8", errors="replace").read()
         state = "✅完成" if "✅ 完成" in txt else ("⏸停下等你" if "⏸ 停下等你" in txt else "🔄跑中")
-        last = [l for l in txt.splitlines() if l.startswith("[run] ✓")]
-        print(f"  {sid:8} {state}  {last[-1] if last else ''}")
+        ln = lastnode.get(sid)
+        lnstr = f"最後站={ln[0]}(eff={ln[1]})" if ln else ""
+        print(f"  {sid:8} {state}  {lnstr}")
     # 花費
     mp = os.path.join(MAIN_REPO, "docs/process/metrics.jsonl")
     if os.path.exists(mp):
@@ -333,7 +342,7 @@ def fire_local(a):
     flags = 0
     if os.name == "nt":
         flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NEW_PROCESS_GROUP
-    env = dict(os.environ); env["PYTHONUTF8"] = "1"
+    env = dict(os.environ); env["PYTHONUTF8"] = "1"; env["PYTHONUNBUFFERED"] = "1"  # log 即時寫(非buffer到結束)
     lf = open(log, "w", encoding="utf-8")
     subprocess.Popen(cmd, stdout=lf, stderr=subprocess.STDOUT, creationflags=flags,
                      close_fds=True, env=env)
