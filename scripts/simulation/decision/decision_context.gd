@@ -90,6 +90,9 @@ var ambient_train_drive: float = 0.0
 var readiness: float = 0.0
 var readiness_thr_eff: float = 0.0
 var prosperity_prey_id: int = -1
+# A2a 子隊旗（一旗兩用）：parent_team_id != -1 → ①服從母團(歸建 duty option) ②不自主發起戰略 option(戰略-gate)。
+# 非子隊 is_subteam=false → 歸建 option/戰略-gate 對其無效（零成員/solo 行為變）。
+var is_subteam: bool = false
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -99,6 +102,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var ef: float = ResourceSystem.effective_food(state, team)
 	c.food_days = ef / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 	c.population = team.population
+	c.is_subteam = team.parent_team_id != -1   # A2a：子隊旗（歸建 directive + 戰略-gate）
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
 	c.has_arb = not OrderSystem.new().best_arbitrage_order(state, team).is_empty()
 	c.team_strength = NpcCombatSystem.new().team_strength(state, team.team_id)

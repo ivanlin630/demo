@@ -32,7 +32,14 @@ const REGISTRY: Dictionary = {
 	# 野心階梯溶入（序3）：FORCE-archetype 累積階練兵（原 rung_task ACCUMULATE×FORCE→TASK_TRAIN）。
 	# archetype/rung 當 weight（ambient_train_drive）驅動，非查表塞 task。
 	"訓練":   [["train_drive", "train"]],
+	# A2a 子隊溶入：歸建＝服從母團權威/回母團集結（duty 驅，通用 row，非子隊專屬 term）。
+	# faction_duty weight 已 _duty_factor(loyalty,野心)→忠誠子隊聽令回母團；不忠→掠奪(greed)贏 rank。
+	"歸建":   [["faction_duty", "faction_duty"]],
 }
+
+# A2a 通用戰略-gate：子隊不自主發起「擴張自身戰略足跡」的 option（立據/奪據/練兵＝leader/faction 決定；
+# 母團命令走 pre-set lifecycle task，引擎點結構上無 strategic directive）。新增戰略 option 入 SET 自動涵蓋。
+const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練"]
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
 const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "投靠", "紮營", "乞食", "買糧"]
@@ -43,6 +50,11 @@ const FEUD_ATTACK_MIN := 0.5
 static func applicable(ctx: DecisionContext) -> Array:
 	var out: Array = []
 	for opt in REGISTRY:
+		# A2a 通用戰略-gate（match 前，一條規則管全部）：子隊不自主發起戰略級 option
+		# （立據/奪據/練兵＝leader/faction 決定；母團戰略令走 pre-set lifecycle task）。
+		# 非子隊 is_subteam=false → 不觸 → 行為零變。
+		if ctx.is_subteam and opt in STRATEGIC_SELFINIT_SET:
+			continue
 		match opt:
 			"貿易":
 				# roam-trade：商隊主力；生產隊也可(軟壓低 via economic_opp 角色因子,非禁)。
@@ -124,6 +136,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 			# 野心階梯溶入（序3）：FORCE-archetype + 有 anon 可練 → 練兵候選。
 			"訓練":
 				if ctx.archetype == AmbitionLadder.ARCHETYPE_FORCE and ctx.has_trainable: out.append(opt)
+			# A2a 子隊：歸建＝服從母團，僅子隊候選（duty↔掠奪 rank 競秤，忠誠→歸建贏）。
+			"歸建":
+				if ctx.is_subteam: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -213,4 +228,7 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 				"order_target": _pc.threat_id, "order_task": TeamData.TASK_TRIBUTE_OFFER}
 		# 野心階梯溶入（序3）：練兵=原地 TASK_TRAIN（training_system 累積階兵）。
 		"訓練":   return {"task": TeamData.TASK_TRAIN, "target": team.tile_pos}
+		# A2a 歸建：由 _decide_subteam 特判為 lifecycle move（set move_target + merge_queue），
+		# 不進 to_task 標準派工；此 fallback 為安全（若誤入標準路 → IDLE）。
+		"歸建":   return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

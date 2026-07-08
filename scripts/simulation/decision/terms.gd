@@ -103,6 +103,9 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 				"攻擊": return FACTION_DUTY_DRIVE if ("攻擊" in ctx.faction_stakes and ctx.faction_attack_target != -1) else 0.0
 				"徵收": return FACTION_DUTY_DRIVE if ("徵收" in ctx.faction_stakes and ctx.faction_tribute_target != -1) else 0.0
 				"外交": return FACTION_DUTY_DRIVE if ("外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1) else 0.0
+				# A2a 歸建：子隊服從母團權威 = duty 驅（同一 duty/loyalty 機制，零子隊專屬 term）。
+				# weight 已 _duty_factor(loyalty,野心)→忠誠子隊歸建 util 高；不忠→塌，掠奪贏。
+				"歸建": return FACTION_DUTY_DRIVE if ctx.is_subteam else 0.0
 			return 0.0
 		"attack_drive":
 			# 個人參戰 drive（人格染 HOW）；× attack weight=好戰/殘忍染色。受 loyalty 調=叛離者不參戰。
