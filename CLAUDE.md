@@ -80,8 +80,8 @@ langgraph 機器（`tools/orchestrator/`）**少用**，只大/並行活才上�
 - **量測員**：maker 側產獨立數字餵 QA（≠QA≠implementer）。**留 main dir**，`godot --path .worktrees/<slice>` 對 branch code 跑 beds（★禁原地 checkout）。守 `03b_measurer.md`。
 - 邊界：藍圖不碰架構、系統不改願景；越界呈報。喬不攏你裁。禁廢話恭維。
 
-**worktree worker session**（`.worktrees/<feature>/` / `feat/<feature>`，別 dir、不 arm，走 plan/機器領活）：
-- **實作**：照 plan 做+TDD+handback，守 `03_implementer.md`。（唯一真在 worktree 的角色——它改 code。）
+**worktree worker session**（`.worktrees/<feature>/` / `feat/<feature>`，唯一真在 worktree 的角色——它改 code）：
+- **實作**：照 plan 做+TDD，守 `03_implementer.md`。**code 寫 worktree、handback 寫唯一 main mailbox 絕對路徑**（`<main-repo>/docs/superpowers/handbacks/`）→ 下一站 live 收。也 arm inbox-watch（hook 指 main mailbox）→ systems→implementer 也自動讀。
 
 **★信箱主動觸發（免人肉轉述）**：各持久角色開場 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`
 ——別的角色寫 `to:<我> && status:open` 信 ~20s 內主動喚醒。寄件=Write handback（frontmatter from/to/status/topic），動完改 `status:consumed`。

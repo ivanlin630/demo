@@ -53,7 +53,11 @@ test: 測試新增/更新
 git push -u origin feat/<feature>
 ```
 
-2. 寫 hand-back 文件到 `docs/superpowers/handbacks/YYYY-MM-DD-<feature>.md`：
+2. 寫 hand-back 到 **★唯一 main mailbox 的絕對路徑**（不是你 worktree 的！）：
+   `<main-repo>/docs/superpowers/handbacks/YYYY-MM-DD-implementer-to-<to>-<feature>.md`，frontmatter `from: implementer / to: <measurer|systems|qa> / status: open / topic:`。
+   - main-repo 算法：`git rev-parse --path-format=absolute --git-common-dir` 去掉尾 `/.git`（從 worktree 也算得出）。
+   - **★為何**：信箱靠實體資料夾共享，你 worktree 的 `docs/handbacks/` 是**另一個資料夾**、下一站 main dir session 看不到。寫 main mailbox 才 live 觸發下一站。**code 留 worktree、handback 寫 main mailbox。**
+   - 開場也 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`（hook 已指 main mailbox）→ systems 寫 to:implementer 的信你也自動讀。
 
 3. 回報分支給user
 

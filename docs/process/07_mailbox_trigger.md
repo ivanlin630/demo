@@ -13,13 +13,12 @@
 
 ## 角色 = 持久 session
 
-- 各角色（blueprint / systems / reviewer / qa / **measurer**）開自己的 claude 視窗，`SESSION_ROLE` 環境變數設好（`session-role.sh` SessionStart hook 檢查）。arm 名單 = 這 5 個。
-- **main dir 角色（bp/systems/reviewer/qa/measurer）全開在 `A:\GDS\demo`（main）** → 信箱即時互見，免 commit，全在 live 信箱。
-- **★measurer 留 main dir、不 checkout**：跑 godot 驗 branch code 用 `godot --path .worktrees/<slice>`（driver 跑 worktree code，人在 main dir 留 live 信箱）。**QA 也留 main dir**：讀 `git diff main..<branch>`/`git show <branch>:file`+`.measure.json` 判，不 checkout。
-- **implementer = 唯一真 worktree worker**（改 code），不 arm，走 plan/機器領活。
+- **★★信箱 = 唯一一個實體資料夾** `<main-repo>/docs/superpowers/handbacks/`（＝`A:\GDS\demo\...`）。**可見性靠實體資料夾共享，跟 git branch 無關**——branch 只影響 checkout 時 tracked 檔的內容，不藏工作樹裡現有的檔。所以誰寫進這資料夾、誰掃這資料夾，就通。
+- **6 角色全 arm**（blueprint/systems/reviewer/qa/measurer/**implementer**）：`SESSION_ROLE` 設好，hook 已把信箱路徑指向 **main repo**（`git rev-parse --git-common-dir` 從 worktree 也算得出）→ **worktree 的 implementer 也 watch 同一 main mailbox → 每站自動讀**（含 systems→implementer）。
+- **寄件統一寫 main mailbox**：main dir 角色寫 `docs/superpowers/handbacks/`（相對＝main）；**implementer 在 worktree，handback 寫 main mailbox 絕對路徑**（`<main-repo>/docs/superpowers/handbacks/`，非它 worktree 的）。**code 分 worktree、comms 統一 main mailbox。**
+- **留 main dir、別 checkout**：measurer 用 `godot --path .worktrees/<slice>` 跑 branch code；QA 用 `git diff main..<branch>`/`git show <branch>:file`+`.measure.json` 判。**只 implementer 真在 worktree**（改 code）。
 - **★絕禁在 `A:\GDS\demo` 原地 `git checkout <branch>`**（2026-07-09 事故：換掉所有共用此 dir session 的 branch → commit 落錯支）。要 branch code 用 `--path`/`git show`，改 code 才用 worktree。
-- 信箱 = `docs/superpowers/handbacks/*.md`，frontmatter `from: / to: / status: / topic:`。
-- 信箱 = `docs/superpowers/handbacks/*.md`，frontmatter `from: / to: / status: / topic:`。
+- 信箱檔 frontmatter：`from: / to: / status: / topic:`。
 
 ## 兩個 hook（互補，別混）
 
