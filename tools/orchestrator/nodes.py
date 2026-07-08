@@ -58,37 +58,45 @@ def judge_node(role: str, slice_id: str, node_name: str, task: str,
 }}
 只寫這個 JSON 檔，別的都別做。寫完回 DONE。"""
 
-    res = run_node(PROFILE_REVIEW, role, prompt, scope_dir=scope_dir,
-                   output_format="json", model=model, effort=effort, timeout=timeout)
+    def _once():
+        r = run_node(PROFILE_REVIEW, role, prompt, scope_dir=scope_dir,
+                     output_format="json", model=model, effort=effort, timeout=timeout)
+        v = bus.read_verdict(slice_id, node_name, repo=scope_dir)
+        effect_check(r, lambda: v is not None and "verdict" in v)
+        return r, v
 
-    # ★trace：judge 節點的 raw 輸出寫 debug 檔（看 model 到底做了啥——寫檔?回文字?）
+    res, verdict = _once()
+    retried = False
+    # effect-fail(跑了 ok 但沒產出 verdict、非限流)=可能 transient(API連線/model偶爾漏)→執行重試一次。
+    # 這是「執行重試」非裁1「判斷不重試」(那是對抗退回迴圈)——沒產出不是判斷,是沒做完。
+    if not res.effect_ok and not is_api_error(res):
+        retried = True
+        res, verdict = _once()
+
+    # ★trace：raw 輸出寫 debug 檔
     try:
         _rawdir = os.path.join(MAIN_REPO, "docs/process/verdicts")
         os.makedirs(_rawdir, exist_ok=True)
         with open(os.path.join(_rawdir, f"{slice_id}.{node_name}.raw.txt"), "w", encoding="utf-8") as _f:
-            _f.write(f"model={model} ok={res.ok} effect_pending cost={res.cost_usd} dur={res.duration_s}\n")
-            _f.write(f"--- result(final msg) ---\n{str(res.result)[:3000]}\n")
-            _f.write(f"--- raw envelope head ---\n{res.raw[:2000]}\n")
+            _f.write(f"model={model} ok={res.ok} effect_ok={res.effect_ok} retried={retried} cost={res.cost_usd} dur={res.duration_s}\n")
+            _f.write(f"--- result ---\n{str(res.result)[:3000]}\n--- raw head ---\n{res.raw[:1500]}\n")
     except Exception:
         pass
 
-    verdict = bus.read_verdict(slice_id, node_name, repo=scope_dir)
-    effect_check(res, lambda: verdict is not None and "verdict" in verdict)
     bus.log_metric({
-        "slice": slice_id, "node": node_name, "role": role,
+        "slice": slice_id, "node": node_name, "role": role, "retried": retried,
         "ok": res.ok, "effect_ok": res.effect_ok, "dur_s": round(res.duration_s, 1),
         "cost_usd": res.cost_usd,
         "verdict": (verdict or {}).get("verdict"),
         "premise_contradiction": (verdict or {}).get("premise_contradiction"),
         "found_issue": bool((verdict or {}).get("issues")),
     })
-    # 裁3：API 限流/超時 → 定格（api_error 旗標，節點會 interrupt 凍住，不當 issues 誤重寫）
     if is_api_error(res):
         return {"api_error": True, "note": f"API 限流/超時，定格：{res.error}"}
-    # effect 沒發生（verdict 沒寫成）= 硬 fail，當 issues+contradiction 逼 interrupt（不悶頭過）
+    # 重試後仍沒產出 = 真 effect-fail → issues 逼 interrupt(不悶頭過)
     if not res.effect_ok:
         return {"verdict": "issues", "premise_contradiction": True,
-                "note": f"節點 effect 失敗（verdict 未寫成）：ok={res.ok} err={res.error}"}
+                "note": f"節點 effect 失敗（重試後 verdict 仍未寫成）：ok={res.ok} err={res.error}"}
     return verdict
 
 
