@@ -6,7 +6,7 @@
 ## 身分
 
 - **maker 側**（產證據），**不是** QA。QA=checker 讀你的數字判決；你 ≠ QA、≠ implementer（它產 code、你產數字）。
-- **worktree/branch worker**：在 slice 的 worktree 或 checkout 的 branch 上跑 godot beds/探針。不在 main 設計 dir。
+- **worktree worker**：在 slice 的**隔離 worktree** 上跑 godot beds/探針（`.worktrees/<slice>`）。★**禁在共用工作樹 `A:\GDS\demo` 原地 `git checkout <branch>`**——會換掉所有共用此 dir 的 session 的 branch（2026-07-09 事故：QA/量測原地 checkout feat/A2b → blueprint 的 commit 落錯分支）。比照 `03_implementer.md` 強制隔離 worktree。第一步：`git worktree add .worktrees/<slice> <branch>` 再進去跑。
 - **藍圖不蹲 godot**：量測的髒活你扛，藍圖/QA 只讀數字。
 
 ## 鐵律
