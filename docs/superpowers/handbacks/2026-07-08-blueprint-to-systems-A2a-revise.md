@@ -2,34 +2,34 @@
 from: blueprint
 to: systems
 status: consumed
-topic: A2a revise round-3——真 un-patch：共用 join-helper + 通用戰略-gate（取代逐點複製/逐 option gate）
+topic: A2a revise round-4——收尾(scope B)：子隊路走正確 helper，不碰既有 3 處，既有 join bug 立案 follow-up
 ---
 
-# 藍圖裁定 round-3（★優先於 review 字面）
+# 藍圖裁定 round-4（★優先於 review 字面，這是收尾輪）
 
-核心設計早驗證過（D3/D6 收尾到位）。round-3 = 把 review 抓的兩點用**真 un-patch** 收——**不是加補丁**。★用戶明示要 A（做對的 un-patch，減既有債，A2a scope 可擴）。
+核心設計早驗證（round-3 review 明說「D1-D3/D5-D7 與 code 相符、真統一、無繞引擎分支」）。★用戶裁定 **B（scope）**：A2a 不修 P2a 既有 join 債，只把自己的新路做對，既有 bug 立案。
 
-## D4：抽共用 helper，別複製第 4 份 guard
-- 現況「投靠玩家→forced_event 請求、不自動併」的 guard **複製在 3 處派工點**（`_decide_unified:1511-1516`、`_trigger_survival`、prosperity `:3085`）＝既有 seam。
-- ★**別再複製第 4 份**。抽一個共用 helper（faction_ai_system.gd，名如 `_try_join_target(state, team, target_id)`）：
-  - 內含：`if target 是玩家隊 → _maybe_request_join_player(寫 forced_event，不 try_set)；else → try_set(TASK_JOIN,...)`。
-  - **四條派工路徑（既有 3 + A2a 子隊新路）全呼它。**
-  - ★**順手把既有 3 處 inline guard 改成呼 helper**（減既有債，一份實作）。
-- 為何 helper 非塞進 merge_teams choke point：choke 會變「到場才問」，改了 ask-before-travel 語意；helper 保留現行語意。
-- 保留玩家排除：`_find_strong_neighbor` 若對子隊也可能回玩家隊，靠 helper 攔（不靠 finder 排除，集中一處）。
+## D4 收尾（scope B）：子隊路走正確 helper，別碰既有 3 處
+- A2a 子隊納框架後「投靠」target 可能是玩家隊（`_find_strong_neighbor` 對子隊可能回玩家）→ **必須 guard**。
+- 做法：新 helper（faction_ai_system.gd，如 `_try_join_target(state, team, target_id)`）：
+  - `if target 是玩家隊 → _maybe_request_join_player（寫 forced_event）且 ★return/不 fallthrough 到 try_set；else → try_set(TASK_JOIN, target)`。
+  - ★**只有 A2a 子隊派工路呼它**（正確版：請求後不掉下去自動 join）。
+- ★**不要動既有 3 處**（`_decide_unified:1513-1517`、`_trigger_survival`、`_evaluate_solo:1767`）——保 P2a settled code 不變，A2a 零回歸。
+- helper 是未來 consolidation 的錨（follow-up 再遷移既有 3 處）。A2a 引入正確 pattern、不複製錯的，就夠。
 
-## 通用戰略-gate：一條規則取代逐 option gate
-- review 抓「訓練」和先前「建設/佔村」都是「子隊憑空多出自主戰略行為」。**別逐 option 加 gate（補丁苗頭）。**
-- ★立**一條通用規則**：子隊（`parent_team_id != -1`）**不自主發起戰略級 option**，除非有母團 directive。
-  - `STRATEGIC_SELFINIT_SET`（const，options.gd 或 decision_terms）= `{建設, 佔村, 訓練}`（自建據點/奪據點/練兵＝擴張自身戰略足跡的活動，屬 leader/faction 決定）。
-  - applicable() **一個 guard**：`if ctx.is_subteam and opt in STRATEGIC_SELFINIT_SET and not <該 opt 有母團 directive> → 不候選`。一條件管全部，新增戰略 option 自動涵蓋。
-  - **把 D3 的建設/佔村 gate 併進這條通用規則**（別留獨立 D3 gate + 訓練另一條）。
-- 不 gate 的（子隊該能做，別誤攔）：survival/投機（掠奪/覓食/返家/買糧/乞食/紮營/投靠）、被動防禦（迎戰/備戰/求和）、攻擊（已 directive/血仇 gated）。ctx 需要 `is_subteam` 旗（parent_team_id!=-1）。
+## ★立案 follow-up（spec future-work 段明記）
+review 挖出的既有 P2a join 債（**非 A2a 職責，另 slice 修**）：
+1. `_evaluate_solo:1767` 投靠玩家**無 guard**（第 3 條派工路）。
+2. 既有 2 處 guard 在 `_maybe_request_join_player` 回 false 時**fallthrough 到 try_set(JOIN,玩家)** → 到場 `_resolve_join` 自動併。
+- spec future-work 段記：「join-consent-consolidation：全 join-player 派工路徑遷移到 `_try_join_target` helper + 修 _evaluate_solo 無 guard + 修 fallthrough。藍圖驗證後另 slice。」
 
-## 驗收法加（配 un-patch）
-- 子隊投靠玩家 → **走 forced_event 請求、非自動 merge**（回歸檢：P2a W2 坑不復現）。
-- 子隊 idle 無 directive → **建設/佔村/訓練 皆不候選**（通用 gate 生效）；有母團 directive → 對應 option 可候選。
-- 既有：核心行為/perf tick-time/憲法/sanity 不退化。
+## 修 spec premise
+- 別再寫「既有 guard=2 處」。改述：既有有 3 條投靠玩家派工路（2 帶 inline guard 但有 fallthrough、_evaluate_solo 無 guard），**A2a 不修既有、只讓自己新路走正確 helper，既有債立 follow-up**。
+
+## 驗收法（配 scope B）
+- 子隊投靠玩家 → **走 forced_event 請求、不自動 merge、不 fallthrough**（A2a 新路正確）。
+- **既有 3 處不變**（A2a 零改動 → 零回歸；grep 驗 A2a diff 不 touch 那 3 處 guard 邏輯）。
+- 既有：核心行為/perf/憲法/sanity 不退化。
 
 ## 交付
-改 spec + scope + 重點 handback：①D4 共用 helper（+既有 3 處改呼）②通用戰略-gate（併 D3、涵蓋訓練）③驗收加上兩項。**核心設計不動。★重讀當前 code 查證所有 file:line（尤其既有 3 處 guard 位置、_resolve_join、options applicable）。** commit。
+改 spec + scope + 重點 handback：①子隊路走 `_try_join_target` helper（正確、不 fallthrough、不碰既有 3 處）②future-work 記 join-consent-consolidation follow-up ③修 premise（3 路實況、A2a scope B）④驗收上述。**核心設計不動。★重讀 code 查證 file:line。** commit。
