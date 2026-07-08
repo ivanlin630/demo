@@ -1369,41 +1369,15 @@ func _assign_tasks(state: WorldState, f) -> void:
 			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])
 	if SimRunner.phase_timing: _ta = _fai_pht("assign.player_cmd", _ta)
 
-	if "徵收" in f.goals and leader_team.current_task != TeamData.TASK_TRIBUTE:
-		var best_tid: int = _richest_member(state, f)
-		if best_tid != -1:
-			var target_pos: Vector2i = state.teams[best_tid].tile_pos
-			var dist: int = _hex_dist(leader_team.tile_pos, target_pos)
-			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 3 \
-					and leader_team.named_members.size() > 0:
-				var _sub_sys_pick := SubteamSystem.new()
-				var sub_leader_id: int = _sub_sys_pick._pick_subteam_leader(state, leader_team, TeamData.TASK_TRIBUTE)
-				if sub_leader_id == -1: sub_leader_id = leader_team.named_members[0]
-				var pop_count: int = maxi(leader_team.population / 4, 2)
-				_sub_sys_pick.dispatch(state, f.leader_team_id, sub_leader_id,
-					pop_count, TeamData.TASK_TRIBUTE, target_pos)
-			else:
-				TaskArbiter.try_set(state, leader_team, TeamData.TASK_TRIBUTE, target_pos,
-					TaskArbiter.PRIO_DISPATCH, "faction_tribute")
+	# A2b：立國=結構性 lifecycle gate（非戰術 option，不入引擎；同 A2a 戰略足跡=leader/faction 決定）。
 	if "立國" in f.goals:
 		_declare_established(state, f, leader_team)
-	if "外交" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK]:
-		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1:
-			TaskArbiter.try_set(state, leader_team, TeamData.TASK_DIPLOMACY,
-				state.teams[target_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "faction_diplomacy")
-	if "攻擊" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK]:
-		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1 and TaskArbiter.try_set(state, leader_team, TeamData.TASK_ATTACK,
-				state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
-			print("[FactionAI] Team%d 主動攻擊 Team%d" % [f.leader_team_id, target_id])
-	if "掠奪" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK, TeamData.TASK_LOOT]:
-		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1 and TaskArbiter.try_set(state, leader_team, TeamData.TASK_LOOT,
-				state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
-			print("[FactionAI] Team%d 主動掠奪 Team%d" % [f.leader_team_id, target_id])
-	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_goals", _ta)
-	HandBrainProbe.note_bypass(state, leader_team, "leader")   # 手聽腦：leader 手寫 cascade 繞引擎計數（A2）
+	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_lifecycle", _ta)
+	# A2b：leader 隊戰術執行走統一引擎（取代 徵收/外交/攻擊/掠奪 手 cascade + note_bypass）。
+	# 徵收/外交(faction_duty)+攻擊(faction_duty+intent_fit 加成)+貿易/囤貨/生產/駐守/survival/threat 全 rank_scored 競秤。
+	# 立國(上)已 pre-empt；player_cmd(上)PRIO_PLAYER 已蓋。conquest scaffolding faction_id==-1 leader 不觸。
+	_decide_unified(state, leader_team)
+	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_unified", _ta)
 	_assign_member_tasks(state, f)
 	if SimRunner.phase_timing: _fai_pht("assign.members", _ta)
 
