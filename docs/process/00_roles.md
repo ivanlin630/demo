@@ -92,6 +92,23 @@ channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統�
 - 藍圖 / 實作學到的跨 session 教訓 → 寫進 handback（git doc）→ 系統提煉進 memory。
 - 單寫者 = 零 MEMORY.md race + 教訓經系統過濾，避免各記不一致。
 
+## 流程文件地圖（掛勾）
+
+角色/職責/owner/邊界本體在本 doc；細流程分檔：
+- `01_architect.md` — 系統(HOW) 職責 / spec / plan 本體
+- `02_reviewer.md` — 對抗式審查者（factcheck 驗前提 / 審 spec）
+- `03_implementer.md` — worktree 實作 + TDD + handback
+- `04_qa.md` — QA 四職判決（充足性/戲感/release gate/UI 落差）
+- `05_acceptance.md` — ★交付前驗收鏈（三層機器全綠=硬閘）
+- `06_pipeline_orchestration.md` — pipeline 編排（藍圖 spawn 下游 subagent）
+- `07_mailbox_trigger.md` — ★信箱主動觸發（多終端 relay，Monitor 喚醒收件 session）
+- `07_orchestrator_machine.md` — langgraph 機器編排說明
+- `08_machine_workflow_v2.md` — 機器 v2 流程 + 01 下游軌（`--from-impl`）
+
+## ★現行偏好（2026-07-08）：多終端信箱 > LG 機器
+
+用戶現**傾向多終端信箱 relay 為主軌**（各角色持久 session + Monitor 主動觸發，見 `07_mailbox_trigger.md`），**langgraph 機器少用**——只在大/並行活才上；輕/序列/設計來回一律走信箱。動機：機器誤判（A2a 假 perf reject）+ 燒錢（$27/slice）。兩軌並存但預設走信箱。
+
 ## 你的負擔
 
 | 對象 | 你做什麼 | 頻率 |
