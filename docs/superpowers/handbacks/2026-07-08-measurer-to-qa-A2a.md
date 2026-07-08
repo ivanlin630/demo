@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: A2a 量測報告（子隊統一框架）— 基礎驗收綠，HOB 效能懸疑待診
 slice: A2a
 verdict_file: docs/process/verdicts/A2a.measure.json

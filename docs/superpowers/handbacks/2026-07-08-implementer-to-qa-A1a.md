@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: qa
-status: open
+status: consumed
 topic: A1a 拆閥 — implementer 節點(2026-07-08 re-spawn)獨立 live 重驗 5 條驗收 + 呈報 qa.json 未提交 verdict flip 越界 landmine
 ---
 

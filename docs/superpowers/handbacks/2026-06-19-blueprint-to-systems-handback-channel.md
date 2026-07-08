@@ -30,7 +30,7 @@ docs/superpowers/handbacks/YYYY-MM-DD-<from>-to-<to>-<topic>.md
 ```
 from: <role>
 to: <role>
-status: open | consumed
+status: consumed | consumed
 topic: <一行>
 ```
 

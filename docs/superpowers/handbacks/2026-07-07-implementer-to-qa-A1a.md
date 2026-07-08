@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: qa
-status: open
+status: consumed
 topic: A1a 拆閥 — 實作驗收交 QA（code 對 spec + 5 條驗收全綠 + 一個 pre-existing FAIL 誠實揭露）
 ---
 

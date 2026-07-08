@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: ★pipeline切換setup完成,持久系統session交棒orchestrator(c685261)——CLAUDE.md/00_roles/06改/pre-commit撤/auto-memory改orchestrator全落;此後你orchestrator spawn subagent;開放狀態=首slice combat_decisive dogfood+脊椎②戰力欄(征服真解)+gen food defer+三軌
 ---
 
