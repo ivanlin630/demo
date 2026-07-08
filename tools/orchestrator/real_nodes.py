@@ -18,8 +18,9 @@ MODELS = {"factcheck": "haiku", "review": "sonnet", "qa": "haiku", "measure": "h
 
 # scope 限讀通用指示（節點只讀 touch_files + 工作需要，別盲掃全庫）
 def _scope_hint(slice_id):
-    return (f"★scope 限讀：先讀 docs/process/verdicts/{slice_id}.scope.json 的 touch_files（若有），"
-            f"只讀那些檔 + 你工作直接需要的，別盲掃整個 scripts/（省 token）。")
+    return (f"★scope 限讀（省 token 但★別漏跨系統）：讀 docs/process/verdicts/{slice_id}.scope.json 的 touch_files "
+            f"+ ★它們的直接互動面——grep 誰呼叫你要改的函式/常數(callers)、你的改動會影響誰(callees)。"
+            f"跨系統互動一定要讀到(否則會踩別系統);不相關的系統/測試檔才別讀。不確定就讀，別為省 token 漏。")
 
 
 class SliceState(TypedDict, total=False):
