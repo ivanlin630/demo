@@ -26,7 +26,7 @@
     },
     {
       "path": "scripts/simulation/faction_ai_system.gd",
-      "why": "加 _decide_subteam(cadence-gated 全框架 rank dispatch)+SUBTEAM_CADENCE const；加 _try_join_target join-helper(near 3220，玩家→forced_event return 不 fallthrough) — ★scope B：只子隊新路呼，既有 3 處 join 路(_decide_unified:1513-1517/_trigger_survival/_evaluate_solo:1767)零碰；改 _evaluate_subteam tail(1627-1635)；刪 _check_deviation(1669)/_evaluate_idle_subteam(1688)/DEVIATION_RATE(23)；改註解 1332",
+      "why": "加 _decide_subteam(cadence-gated 全框架 rank dispatch)+SUBTEAM_CADENCE const；加 _try_join_target join-helper(near 3220，玩家→forced_event return 不 fallthrough) — ★scope B：只子隊新路呼，既有 3 處 join 路(_decide_unified:1513-1517/_trigger_survival/_evaluate_solo:1767)零碰；★round-5：投靠玩家 forced_event 分支不呼 capture(if current_task==TASK_JOIN 守，比照歸建，守量測特判)；改 _evaluate_subteam tail(1627-1635)；刪 _check_deviation(1669)/_evaluate_idle_subteam(1688)/DEVIATION_RATE(23)；改註解 1332",
       "risk": "high — 核心 AI 檔，subteam dispatch 語意；lifecycle guard 需原封保留；★既有 3 處 join 路零改動(scope B，零回歸)；conquest 分支結構性不觸子隊(intent 空+faction_id!=-1)"
     },
     {
