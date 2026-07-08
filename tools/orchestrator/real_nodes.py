@@ -176,15 +176,28 @@ def rn_qa(state: SliceState):
     return {"verdicts": _mv(state, "qa", vv), "stage": "qa"}
 
 def rn_qa_review(state: SliceState):
-    """檢查點②：QA 後強制人判(裁2)。approve→merge。"""
+    """檢查點②：QA 後強制人判(裁2)。approve→merge / redo→回實作 / revise→回 spec / reject→停。"""
     qa = state["verdicts"].get("qa", {})
+    rd = state.get("revise_round", 0)
     decision = interrupt({
         "checkpoint": "② QA 後強制中斷（裁2：人判 真bug vs godot噪音）",
         "slice": state["slice_id"], "qa_verdict": qa.get("verdict"), "qa_note": qa.get("note"),
         "measure": state["verdicts"].get("measure", {}).get("summary"),
-        "msg": "藍圖+你判：approve=merge進main / redo=回實作重跑下游(spec好但實作/量測/qa掛,如限額) / reject=停。",
+        "msg": "藍圖+你判：approve=merge / redo=回實作重跑下游(實作/量測/qa掛,如限額) "
+               "/ revise=回 spec重寫(QA揭露spec設計缺陷) / reject=停。",
     })
-    return {"resolution": str(decision)}
+    d = str(decision).lower()
+    out = {"resolution": str(decision)}
+    if d.startswith("revise"):   # ② 揭 spec 缺陷 → 回 spec（鏡射 halt 的 revise）
+        vs = state.get("verdicts") or {}
+        parts = []
+        for k in ("qa", "measure", "review"):
+            vv = vs.get(k)
+            if vv:
+                parts.append(f"[{k}] {vv.get('note') or vv.get('summary','')}")
+        out["revise_feedback"] = "\n".join(parts) or "(② QA 後藍圖要求 re-spec，見藍圖 handback)"
+        out["revise_round"] = rd + 1
+    return out
 
 MAX_REVISE = 5   # revise 軟上限（藍圖每輪閘，這只防打架失控）
 
@@ -244,10 +257,11 @@ def route_resolution(state: SliceState):
     return "merge" if str(state.get("resolution", "")).lower().startswith("approve") else "end"
 
 def route_qa_review(state: SliceState):
-    """②：approve→merge / redo→回 implementer(重跑 impl→measure→qa,救 spec好但下游掛(限額/godot)) / else→停。"""
+    """②：approve→merge / redo→implementer(下游掛,救) / revise→systems_spec(QA揭spec缺陷) / else→停。"""
     d = str(state.get("resolution", "")).lower()
     if d.startswith("approve"): return "merge"
     if d.startswith("redo"): return "implementer"
+    if d.startswith("revise") and state.get("revise_round", 0) <= MAX_REVISE: return "systems_spec"
     return "end"
 
 def route_halt(state: SliceState):
@@ -277,7 +291,8 @@ def make_real_graph():
     g.add_edge("measure", "qa")
     g.add_edge("qa", "qa_review")
     g.add_conditional_edges("qa_review", route_qa_review,
-                            {"merge": "merge", "implementer": "implementer", "end": END})  # redo→重跑下游
+                            {"merge": "merge", "implementer": "implementer",
+                             "systems_spec": "systems_spec", "end": END})  # redo→下游 / revise→spec
     g.add_conditional_edges("halt", route_halt, {"systems_spec": "systems_spec", "end": END})  # revise 迴圈
     g.add_edge("merge", END)
     return g
