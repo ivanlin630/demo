@@ -114,7 +114,10 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		if opt == "投靠":
 			if _try_join_target(state, sub, int(td.get("social_target", -1))):
 				sub.current_option = opt
-				HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
+				# ★量測特判（round-5）：只有 NPC 投靠真 try_set(JOIN) 才 capture；玩家 forced_event 分支
+				# 未 try_set → current_task 仍 IDLE(≠winner) → 若 capture 會誤記 violation，故比照歸建**不 capture 直接 return**。
+				if sub.current_task == TeamData.TASK_JOIN:
+					HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
 				return
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
 		if not TaskArbiter.try_set(state, sub, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "subteam"):
@@ -227,7 +230,8 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 **回歸/歸建/解散/detach = lifecycle，禁進 obey/violation 統計。** by construction：
 - `歸建` winner → `_decide_subteam` 特判（set move_target + merge_queue + `return`）**在呼 `capture` 前**，永不進單點統計。無 `winner_task=="回歸"` 恆-false 灌違規坑。
 - 所有 lifecycle 出口（parent null / 無 leader / 全不可派 / merge-on-arrival / discipline detach）皆不呼 capture。
-- 只有真 task-dispatch（掠奪/攻擊/迎戰/備戰/求和/survival）try_set 成功才 `capture(src="subteam")`。
+- **★投靠玩家 forced_event 分支（round-5）＝非真派工，不 capture**：`_try_join_target` 對玩家 target 只寫 forced_event 不 try_set → `current_task` 仍 IDLE。若 capture(...,true) 會 result_task(IDLE)≠winner_task(JOIN) → 誤記 `_violation("other")` 灌 subteam 背離率（違本鐵律 + 破驗收 §4）。故 D4 pseudocode 以 `if sub.current_task == TASK_JOIN` 守 capture：**唯 NPC 投靠真 try_set(JOIN) 成功才 capture；玩家 forced_event 分支直接 return 不 capture**（比照歸建）。
+- 只有真 task-dispatch（掠奪/攻擊/迎戰/備戰/求和/survival/**NPC 投靠**）try_set 成功才 `capture(src="subteam")`。
 
 ## 驗收法（QA/量測員跑；systems 不跑 godot）
 
@@ -243,6 +247,7 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 7. **非退化**：member/solo/leader category 背離不暴增；`arbiter_latch` 維持 A1a 後低檔；seeded final 漂移允許但 QA 判合理非退化。
 8. **效果發生**（subteam 背離真降 + bypass→0）非只「改了 code」。
 9. **★子隊投靠玩家走 forced_event 非自動併、不 fallthrough**（round-4 D4b，scope B）：構造子隊投靠 target=玩家隊 → `_try_join_target` 寫 forced_event（`_maybe_request_join_player`），**不 `try_set(JOIN)`、不移動過去、不 `merge_teams`**；斷言無自動 merge、有 forced_event、子隊未 dispatch JOIN task。
+9b. **★forced_event 分支不進 HandBrainProbe 統計**（round-5 量測特判）：子隊投靠玩家請求成功 → **不呼 `HandBrainProbe.capture`**（比照歸建）→ 不進 obey/violation。驗：grep D4 pseudocode 確認 forced_event 分支（`current_task != TASK_JOIN`）無 capture；bed 跑不因玩家投靠請求灌高 subteam `_violation("other")`。
 10. **★既有 3 條 join 路零改動**（scope B 硬約束）：`git diff` A2a 不 touch `_decide_unified:1513-1517`/`_trigger_survival:3082-3086`/`_evaluate_solo:1762-1771` 的 join/guard 邏輯 → 既有行為（含 P2a 殘缺）原樣 → 零回歸。
 11. **★通用戰略-gate 生效**（round-3 D3）：子隊 idle 無母團 directive → `建設/佔村/訓練` 三者**皆不候選**（`applicable` 不含）；非子隊（member/solo）同場景 → 照候選（零影響）。
 
@@ -250,6 +255,7 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 
 - **通用戰略-gate（round-3 D3）取代逐 option gate**：一條 `is_subteam and opt in STRATEGIC_SELFINIT_SET` 管建設/佔村/訓練，新增戰略 option 入 SET 自動涵蓋（併掉 round-2 兩獨立 gate）。正當性=既有 leader-dispatch settle 現況（非借「立國」）。「除非母團 directive」逃生口＝母團戰略令走 pre-set lifecycle task，引擎點結構無 → hook 預留。
 - **join-guard（round-4 D4b，scope B）**：A2a 子隊新路走 `_try_join_target`（玩家→forced_event、return 不 fallthrough）；**既有 3 條 join 路不碰**（P2a settled，零回歸）。premise 修正：既有=3 路（含被漏的 `_evaluate_solo:1767` 零 guard），非 round-3 誤稱的 2 路。
+- **forced_event 分支不 capture（round-5）**：投靠玩家請求＝非真派工，`if current_task==TASK_JOIN` 守 capture → 只 NPC 投靠進 probe、玩家請求不灌 violation（守量測特判）。
 - **mid-mission 投機叛逃移除＝藍圖明示接受**（round-2 D6，見 D6 段明示接受段）：非「系統自認超範圍」。完整「抗命」行為 deferred 另 slice（D6 future work 明記）。
 - 子隊離家 starve 走 survival option（full rank 自帶覓食/投靠/買糧）＝**比 v1 多拿到的 believable 行為**（紀律單位也會求生），符藍圖「納框架自動拿到」意圖。
 - `SUBTEAM_CADENCE=1 日` / `FACTION_DUTY_DRIVE` 對子隊量級＝TEST VALUE，平衡 pass 調。
