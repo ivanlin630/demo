@@ -562,6 +562,10 @@ func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> vo
 			continue
 		ResourceBank.add(payer, res, -amount, "tribute_out")
 		ResourceBank.add(collector, res, amount, "tribute_in")
+	# A2b 守衛 B：遠距 dispatch 的貢賦真結算 → 對帳計數 + 清 ledger。
+	if FactionAISystem._a2b_remote_tribute_payers.has(payer_id):
+		Probe.bump("a2b.remote_tribute_settle")
+		FactionAISystem._a2b_remote_tribute_payers.erase(payer_id)
 	TaskArbiter.release(collector)
 	_msg.emit_message(state, "tribute",
 		TextBank.fmt("tribute", "honest", {

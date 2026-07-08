@@ -3,6 +3,8 @@ class_name FactionAISystem
 const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
 const DISPATCH_DIST_THRESHOLD: int   = 2
+
+static var _a2b_remote_tribute_payers: Dictionary = {}   # A2b 守衛 B：遠距徵收 dispatch 的 payer id（settle 對帳）
 const FOOD_EMERGENCY: float          = 3.0
 # 戰爭基金：野心/好戰高 leader material 低於此 → 非缺糧也觸發特別稅徵收。TEST VALUE
 const WAR_CHEST_MIN: float           = 200.0
@@ -1515,6 +1517,20 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if td.has("social_target"):
 			state.set_social_target(team, int(td["social_target"]))
 		if opt == "攻擊": _probe_vendetta_dispatch(state, team)   # 序4：純血仇攻擊驗魂
+		# A2b 守衛 A：leader 隊經引擎發起攻擊計數（稀有非零；成員不計）。
+		if _set_ok and opt == "攻擊" and team.faction_id != -1 \
+				and state.factions.has(team.faction_id) \
+				and state.factions[team.faction_id].leader_team_id == team.team_id:
+			Probe.bump("a2b.leader_attack")
+		# A2b 守衛 B：leader 遠距徵收 dispatch → 記 payer，settle 對帳（證遠距貢真收到）。
+		if _set_ok and opt == "徵收" and team.faction_id != -1 \
+				and state.factions.has(team.faction_id) \
+				and state.factions[team.faction_id].leader_team_id == team.team_id:
+			var _rt: int = _richest_member(state, state.factions[team.faction_id])
+			if _rt != -1 and _rt != team.team_id \
+					and _hex_dist(team.tile_pos, state.teams[_rt].tile_pos) > DISPATCH_DIST_THRESHOLD:
+				Probe.bump("a2b.remote_tribute_dispatch")
+				_a2b_remote_tribute_payers[_rt] = true
 		# 融合 threat：unified 隊選 迎戰/求和 時亦接 aux target（prosperity/order），與 non-unified 路徑一致。
 		_wire_threat_task(team, td)
 		# 手聽腦單點同-tick 探針（純觀測，env-gated 預設關 → byte-identical）：敲定 winner + try_set + 副作用後、
