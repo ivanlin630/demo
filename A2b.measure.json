@@ -1,0 +1,110 @@
+{
+  "A2b_measurement": {
+    "timestamp": "2026-07-09",
+    "branch": "feat/A2b-impl",
+    "base": "origin/feat/A2b@3235228",
+    "measurer_role": "量測員只產數字，非判決（QA判決）",
+    "beds": {
+      "hand_obeys_brain_bed": {
+        "status": "PASS",
+        "seed": 1337,
+        "decisions_total": 15820,
+        "decisions_by_src": {
+          "unified": 15765,
+          "solo": 48,
+          "subteam": 7
+        },
+        "obey_rate": "92.7% (14673/15820)",
+        "violations": {
+          "count": 441,
+          "pct_of_decisions": "2.8%",
+          "arbiter_latch": {
+            "count": 682,
+            "pct_of_decisions": "4.3%",
+            "pct_of_violations": "96.6%"
+          },
+          "subset_fallthrough": {
+            "count": 24,
+            "pct_of_decisions": "0.2%",
+            "pct_of_violations": "3.4%"
+          }
+        },
+        "background_rate_by_src": {
+          "unified": "4.5% (702/15765)",
+          "solo": "6.3% (3/48)",
+          "subteam": "14.3% (1/7)"
+        },
+        "leader_bypass": 0,
+        "subteam_bypass": 0,
+        "determinism": "PASS (seed 1337 前後逐事件相同)",
+        "note": "leader_bypass→0 達成（A2b 核心目標）；unified src 居主（15765/15820=99.7%）"
+      },
+      "constitution_gate": {
+        "status": "PASS",
+        "sites_checked": 30,
+        "removed": 0,
+        "current_subset_baseline": true,
+        "note": "A2b 無新增違憲 try_set 落點"
+      },
+      "game_sim_multi": {
+        "status": "PASS",
+        "configs": [
+          {
+            "name": "game_sim_test",
+            "ticks": 3340,
+            "teams": 11,
+            "persons": 24,
+            "died": "no",
+            "max_treasury": 7,
+            "min_coin": 0,
+            "pop_init": 68,
+            "pop_final": 50
+          },
+          {
+            "name": "tyrant",
+            "ticks": 21600,
+            "teams": 6,
+            "persons": 28,
+            "died": "no",
+            "max_treasury": 92,
+            "min_coin": 0,
+            "pop_init": 92,
+            "pop_final": 40
+          },
+          {
+            "name": "merchant",
+            "ticks": 21600,
+            "teams": 5,
+            "persons": 16,
+            "died": "no",
+            "max_treasury": 66,
+            "min_coin": 0,
+            "pop_init": 51,
+            "pop_final": 35
+          },
+          {
+            "name": "warzone",
+            "ticks": 21600,
+            "teams": 9,
+            "persons": 33,
+            "died": "no",
+            "max_treasury": 136,
+            "min_coin": 0,
+            "pop_init": 135,
+            "pop_final": 64
+          }
+        ],
+        "min_ticks": 3340,
+        "max_ticks": 21600,
+        "crashes": false,
+        "note": "所有配置 ≥3340 tick 無崩潰；leader 已走統一引擎"
+      }
+    },
+    "qa_guard_notes": {
+      "guard_A_稀有性": "awaiting_qa_seeded_verification",
+      "guard_B_遠距貢賦": "awaiting_qa_seeded_verification",
+      "spec_issue_3_target保真": "awaiting_qa_seeded_verification",
+      "spec_issue_3_prio_regression": "awaiting_qa_seeded_verification"
+    }
+  }
+}
