@@ -99,6 +99,6 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 4. **交付（task 完成）**：寫 handback（X-to-Y frontmatter）到**唯一 main mailbox 絕對路徑**（見上 §2）→ **`cd` 回主目錄 `A:\GDS\demo`**（確認 `git branch --show-current`=**main**；worktree 的 feat 分支不動、只 shell 回家；★絕不在主目錄 checkout feat）。
 5. **★hold warm 等裁決（完成判定歸 01，非自判）**：**先別清 ctx**。task 是否真完成由**下游裁決**（measure→QA→01/②判），因為 QA 可能 redo。context held warm、待命等 `to:implementer` 的裁決信：
    - **`[REDO]` 信**（要改）→ 你 context 還在，直接改 → 新 handback（回步 4）。**不冷啟**。
-   - **`[DONE]` 信**（approved/merged）→ 這時才收尾：**consume 該信 → 用戶 `/clear`**（★`/clear` 是用戶鍵入，agent 不能自 issue；Stop-hook 會提醒）→ `/clear` 自動重觸 SessionStart → **職責自動重載** → 重 arm → 待命下一 task。
+   - **`[DONE]` 信**（approved/merged）→ 這時才收尾：**consume 該信 → cd 回主目錄 → 重 arm inbox-watch → 待命下一 task**。**ctx 不用手動清**（`/clear` 是用戶鍵入、agent/hook 不能自 issue → 不強制）；context 累積到滿 Claude Code **自動 compact**，`/compact` 重觸 SessionStart(source=compact) → **職責自動重載**。Stop-hook `implementer-cleanup.sh` 偵 `[DONE]` 逼你做這幾步。
 
-∴ 完成判定歸 01（防過早清 ctx→redo 冷啟）、主目錄恆 main、worktree 隔離改 code、handback 走 main mailbox 自動觸發下一站、職責 /clear 後自動重載。
+∴ 完成判定歸 01（防過早清 ctx→redo 冷啟）、主目錄恆 main、worktree 隔離改 code、handback 走 main mailbox 自動觸發下一站、職責 compact 後自動重載、**零手動鍵入**。

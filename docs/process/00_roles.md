@@ -73,7 +73,7 @@ status: open | consumed
 topic: <一行>
 ```
 
-**★裁決信 marker（給 implementer 的完成判定，2026-07-09）**：task 是否完成**由 01/②判決，非 implementer 自判**（QA 可能 redo）。01 判完寫 `to:implementer` 的信，topic 帶 marker：`[DONE]`（approved/merged→implementer 收尾清 ctx）或 `[REDO]`（要改→implementer 還 warm 直接改）。**Stop-hook `implementer-cleanup.sh` 據 `[DONE]` 逼收尾**（見 `03_implementer.md §5` lifecycle）。
+**★裁決信 marker（給 implementer 的完成判定，2026-07-09）**：task 是否完成**由 01/②判決，非 implementer 自判**（QA 可能 redo）。01 判完寫 `to:implementer` 的信，topic 帶 marker：`[DONE]`（approved/merged→implementer 收尾：consume+cd 回主目錄+重 arm；**ctx 靠 auto-compact 不手動清**）或 `[REDO]`（要改→implementer 還 warm 直接改）。**Stop-hook `implementer-cleanup.sh` 據 `[DONE]` 逼收尾**（見 `03_implementer.md §5`）。`/clear` 是用戶鍵入 agent 不能自 issue → 全流程零手動鍵入靠 auto-compact。
 
 生命週期：
 1. 發送方寫 `status: open`。
