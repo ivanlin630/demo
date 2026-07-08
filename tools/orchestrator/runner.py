@@ -133,6 +133,16 @@ def run_node(
             raise ValueError("PROFILE_WRITE 必須帶 scope_dir（worktree）")
         if os.path.abspath(scope_dir) == MAIN_REPO:
             raise ValueError(f"PROFILE_WRITE 禁止 scope 到 main repo root（{MAIN_REPO}）；自主寫節點只能在 worktree")
+        # ★防洩漏 guard：scope_dir 必須是真 git worktree（toplevel==自己）。裸目錄會被 git 往上解析到 main
+        # → commit 洩漏到 main（A2a revise 教訓）。toplevel != 自己 = 假 worktree，拒。
+        try:
+            top = subprocess.run(["git", "-C", scope_dir, "rev-parse", "--show-toplevel"],
+                                 capture_output=True, text=True, timeout=15).stdout.strip()
+        except Exception:
+            top = ""
+        if not top or os.path.abspath(top) != os.path.abspath(scope_dir):
+            raise ValueError(f"scope_dir 非真 git worktree（git toplevel={top!r} != {scope_dir}）"
+                             f"——拒絕寫節點（防 commit 洩漏到 main）。先建真 worktree。")
         return run_role(role, prompt, cwd=scope_dir,
                         permission_mode="bypassPermissions",
                         add_dirs=[scope_dir], **kw)
