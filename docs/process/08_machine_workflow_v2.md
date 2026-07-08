@@ -74,4 +74,4 @@
 - **並行**：A2a 重跑（工單已補回歸-capture 特判）+ 續 A2b(leader) 等。
 
 ## 角色↔doc
-00 藍圖 / 01 systems(01_architect) / 02 reviewer(02_reviewer) / 03 implementer(03_implementer) / 量測員(近04) / 04 QA(04_qa)。節點 prompt 載職責正典 + superpowers 技能(已驗上線)。
+00 藍圖 / 01 systems(01_architect) / 02 reviewer(02_reviewer) / 03 implementer(03_implementer) / 量測員(00_roles 量測員行；★maker 側產數字≠QA 判，非 QA 角色) / 04 QA(04_qa)。節點 prompt 載職責正典 + superpowers 技能(已驗上線)。
