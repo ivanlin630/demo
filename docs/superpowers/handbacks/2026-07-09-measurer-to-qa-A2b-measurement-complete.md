@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: blocked_on_data
 topic: A2b 量測完成，交付驗收判決（守衛A/B + target保真 + prio回歸）
 ---
 
@@ -68,6 +68,24 @@ topic: A2b 量測完成，交付驗收判決（守衛A/B + target保真 + prio�
 
 ---
 
+## 邏輯驗收前置阻擋（2026-07-09 增補）
+
+QA 要求守衛A/B 的**精確計數**（leader 攻擊 count、遠距貢賦 $amount）。現有工具：
+- HOB：只產決策 obey/背離 率，無 task 詳分
+- seeded_warring_bed：long-run 框架，但 print 不含守衛 A/B 指標
+- game_sim_multi：短配置，無長 run seeded
+
+**缺口**：
+1. leader 主動攻擊計數——需在 faction_ai 或 probe 層增 counter（print 或 ledger）
+2. 遠距貢賦流入——需 dist-check + treasury delta 追蹤
+
+**量測員邊界**：產數字、不改 code、不裁決。此二項需系統(HOW) session 定 seam + probe，非量測工具層能做。
+
+**建議流向**：
+- 系統 session：定義 probe spec（leader_attack_count、remote_tribute_sum）
+- 實作 worktree：加 probe 邏輯
+- 量測員：重跑 seeded → 產新指標 → QA 驗
+
 ## Handback 收件方式
 
-QA 檢驗完 5 項，改 `status: consumed` + 新建判決表（`escaped_defects.md` / 驗收簽證）。
+目前 status: blocked_on_data（機械量測綠，邏輯前置缺工具）。QA/系統決策後，量測員重跑產數字。
