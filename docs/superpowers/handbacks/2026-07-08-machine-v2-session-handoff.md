@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 topic: machine v2 大強化 + A2a 打磨(實作正確但 perf爆炸,②reject,留分支)——壓縮後從 A2a perf-fix pass 續
 ---
 

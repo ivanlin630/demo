@@ -1,11 +1,13 @@
 ---
 from: systems
 to: blueprint
-status: open
-topic: A2a spec 審——子隊決策路由進引擎(D7)；子集{掠奪,攻擊}秤+回歸=lifecycle fallback(不 capture)；兩取捨要你裁：①子集 vs 全 menu ②deviation randf 存廢
+status: consumed
+topic: A2a spec rev2 審——子隊決策路由進引擎(D7)；★三取捨要你裁：①子集 vs 全 menu ②子隊攻擊觸發面塌陷是否可接受(新，審回饋揭) ③deviation randf 存廢
 ---
 
 # A2a Spec 重點（給藍圖審，別啃全 spec）
+
+> **rev2（審回饋後）**：reviewer 抓兩點——(1) commitment 防抖機制矛盾＝我的錯已修（rank_subteam 改疊 COMMITMENT_BONUS）；(2) **子隊「攻擊」觸發面遷入後大幅收窄可能塌陷**＝新增要你裁的 #2 + 補硬量測。詳 `2026-07-08-systems-to-reviewer-A2a.md`。下方新增 §裁 #2。
 
 全文 `docs/superpowers/specs/2026-07-08-A2a-subteam-decision-routing.md`。觸及集 `docs/process/verdicts/A2a.scope.json`。
 
@@ -19,15 +21,17 @@ topic: A2a spec 審——子隊決策路由進引擎(D7)；子集{掠奪,攻擊}
 4. 憲法閘 baseline +`_decide_subteam`（引擎 path，同 `_decide_unified` 正當）；舊兩 site 標 removed=arc 進度。
 
 ## 風險點
-- **子隊野外行為忠實度**：子集擋掉了全 menu 會冒出的野外建設/練兵/貿易（無條件 applicable 的 `建設` 尤其）＝守「lifecycle 不動、最小改」。代價：子隊統一度只到 loot/attack，非全引擎。
-- **抖動**：拆手寫最怕子隊每 cadence 亂換 task → 靠 `sub.current_option`+COMMITMENT_BONUS 防震（bed 抖動檢驗）。
-- **deviation 語意微移**：舊=脫韁恆 loot；新=脫韁後引擎秤（有 prey→掠奪、無→漂回家）。近似但非逐位元同。
+- **★子隊攻擊觸發面塌陷（rev2 新，reviewer 揭）**：舊碼夠好戰即打最近獨立隊（`_tag_weight`=1.0 無方向、target 無條件）；新引擎「攻擊」需 faction 戰 / 征服 intent / 血仇≥0.5 三選一，子隊 intent 恆空、僅 parent 開戰或有血仇才成立→一般離家子隊攻擊可能近乎消失。=重演 invariants.md:15 序5/6 raid 暫失舊坑。**已補硬量測 #4b（攻擊/掠奪派工前後對照，ATTACK→0 未經批=FAIL）+ 升為要你裁 #2。**
+- **子隊野外行為忠實度**：子集擋掉全 menu 會冒的野外建設/練兵/貿易（`建設` 無條件 applicable 尤險）＝守「lifecycle 不動」。代價：子隊統一度只到 loot/attack。
+- **抖動**：rev2 修正——`rank_subteam` 疊 COMMITMENT_BONUS（鏡射 rank_scored 非無 commitment 的 rank_ambient）→掠奪↔攻擊真防震。
+- **deviation 語意微移**：舊=脫韁恆 loot；新=脫韁後引擎秤（有 prey→掠奪、無→漂回家）。
 
-## ★要你批的兩疑慮（只此兩點，其餘 HOW 我定）
-1. **子集 {掠奪,攻擊} vs 全 `rank_scored`**？我取子集（忠實/安全/可量 bypass 歸零）。全 menu=最大統一但子隊野外長新行為（違最小護欄）。**你要更純的全 menu 我就改，但那超出 A2a「只換怎麼決定、不動 lifecycle」的縮範圍**。
-2. **deviation randf 存廢**？我保留（世界機制/對稱 discipline）。全刪=更純但需引擎每 cadence 重評在途子隊=抖動風險+超 A2a 範圍（那是「引擎中斷任務」另 arc）。
+## ★要你批的三疑慮
+1. **子集 {掠奪,攻擊} vs 全 `rank_scored`**？我取子集（忠實/安全/可量 bypass 歸零）。全 menu=最大統一但子隊野外長新行為（違最小護欄）。
+2. **★子隊攻擊觸發面塌陷是否可接受（rev2 新）**？系統立場：舊「純好戰打最近獨立隊、無 belief 無理由」本身=hand raid script，溶進引擎後攻擊需理由（faction戰/征服/血仇）＝**更可信**；多數子隊轉掠奪/回歸、攻擊留給有理由者。**建議接受收窄，以 #4b（主動出擊不得歸 0）為硬閘**。你若要保舊觸發面→需加子隊攻擊路徑（=搬回 hand script，違憲精神）。**#4b 數據會說話：若子隊本就極少攻擊（多為 settle/construct 保護任務），塌陷影響本就小。**
+3. **deviation randf 存廢**？我保留（世界機制/對稱 discipline）。全刪=超 A2a 範圍。
 
-兩點都傾向「本 slice 忠實最小、更純的留給後續」。你點頭我就寫 plan → 實作。
+三點都傾向「本 slice 忠實最小、更純留後續」。#1/#3 你點頭 + #2 你裁（或等 #4b 數據）我才寫 plan → 實作。
 
 ## 殘留（非本 slice）
 - 子隊離家 starve 不接 survival option＝忠實現況，backlog。
