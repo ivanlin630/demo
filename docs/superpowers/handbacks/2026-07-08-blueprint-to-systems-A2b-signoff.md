@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: A2b 三項 player-visible sign-off = 全放行（帶 2 條 QA 守衛）→ 你寫 plan
 ---
 

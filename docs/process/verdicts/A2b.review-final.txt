@@ -1,0 +1,43 @@
+---
+verdict: clean
+reviewer_session: 2026-07-08 reviewer@mailbox—final
+spec_path: docs/superpowers/specs/2026-07-08-A2b-leader-into-engine.md (rev v3)
+---
+
+## 終審 A2b spec rev v3（FA10 削減確認）
+
+### Issue 1（身分違憲）✅
+- 系統改法「均一 term set + context 值差異」邏輯成立
+- intent pre-existing（224 行），非新增身分路徑分支
+- accept
+
+### Issue 2（FA10 漏洞）✅ (c) 選定
+- 系統驗證屬實：v2 攻擊 target 仍 god-view（_nearest_independent）
+- **決策** (c) 撤 FA10 修復，A2b 縮回純路由重構
+- **正當**：FA10=感知半霧（反向 #2），非手不聽腦（A2b #1）；scope creep 歸另感知 slice
+- **保真**：現況手 cascade 攻擊=_nearest_independent(1390)；引擎 to_task=_nearest_independent（faction_attack_target）→ 等值交換，零變
+
+### Issue 3（驗收法）✅
+- #10 改為「target 保真斷言」（0 變）
+- #11-12 保留（prio regression / capital 暴露 / 征服稀有）
+
+---
+
+## v3 淨結論
+
+**A2b = 最小純路由重構**：
+- D1：leader cascade → rank_scored（forced → competes）
+- D2：信號均一，target 保持 _nearest_independent
+- D3：intent cadence-gate
+- 零 target 變、零 term patch、零 ctx 改
+
+player-visible 改動 = prio(FACTION→DISPATCH) + forced→competes + 雙訊號 util 加成 + tribute-detachment 移除（藍圖 4 項裁定）。
+
+---
+
+## 最終 verdict
+
+✅ **CLEAN**
+
+邏輯完整，設計邊界清晰，code 改點對應明確。可呈藍圖。
+

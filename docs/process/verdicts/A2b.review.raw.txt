@@ -1,0 +1,84 @@
+---
+verdict: issues
+reviewer_session: 2026-07-08 reviewer@mailbox
+spec_path: docs/superpowers/specs/2026-07-08-A2b-leader-into-engine.md
+handback_from: systems
+---
+
+## 對抗② review（spec 設計健全性 + 跨系統盲點）
+
+### 事實確認（對抗①factcheck，無 premise_contradiction）
+✓ intent_fit term 已存在（terms.gd:131+161），讀 ctx.intent
+✓ ctx.intent = f.intent.type 已接 leader（decision_context.gd:224）
+✓ _assign_tasks 1366-1398 手 cascade + note_bypass 屬實（line 1400）
+✓ 成員/子隊已走引擎（_decide_unified/_decide_subteam），leader 未走
+
+前提成立，進設計審查。
+
+---
+
+## Issues
+
+### Issue 1: D2 身分判斷違憲風險
+**file:line**：spec D2 定義；code 落實在 decision_context.gd:200-217 + terms.gd 430-439（faction_duty eval）
+
+**claim**：Spec 說「D2 非路徑分支，同 rank_scored；對齊既有設計註」（member→stakes / leader→intent）。
+但實際上 member 讀 faction_duty（攻擊），leader 讀 intent_fit（攻擊）= 同 option 由異 term 驅動。
+
+**truth**：
+- 成員攻擊驅力 = faction_duty.eval 讀 faction_stakes（条件「'攻擊' in ctx.faction_stakes"」）→ 如果 stakes 有攻擊，eval 返 FACTION_DUTY_DRIVE
+- leader 攻擊驅力 = intent_fit.eval 讀 ctx.intent（條件「opt==攻擊 and intent==征服」）→ 無論 stakes，if intent=征服 then eval boost
+- 決策路徑不同（讀 ctx.faction_stakes vs ctx.intent），選項權重權源也不同，導致目標選擇差異（faction_attack_target vs prosperity_prey）
+
+**verdict**：違反憲法「身分=權重非路徑切換」。路徑切換 = conditionally read different term。補救需在 ctx 層或 term 層明示 leader-only 邏輯。
+
+---
+
+### Issue 2: D2 改點遺漏（D1 實施時需同步）
+**file:line**：
+- spec D2：「decision_context.gd:200-217 改，leader 隊（f.leader_team_id == team.team_id）跳過'攻擊'。一行 guard」
+- 觸及檔表：spec 137 無列 decision_context.gd 改點（only 132 faction_ai_system.gd, 135 decision_context.gd 但無明確 D2 改行號）
+- code 現況：decision_context.gd:203-204 無條件 append 所有 stakes 到 faction_stakes
+
+**claim**：spec D2 要「leader faction_stakes 只含徵收/外交」。
+**truth**：code 無此實作，leader gather 時會讀全 stakes（包括攻擊）。D1 實施後 leader 進 _decide_unified，會讀含攻擊的 stakes，導致 faction_duty("攻擊") 有效，與 D2「intent_fit 擁攻擊」衝突 → 雙訊號（contradiction）。
+
+**所需改點**（D1 commit 前必須）：
+```gd
+// decision_context.gd:203-204
+for g in STAKES_SET:
+    if f.leader_team_id == team.team_id and g == "攻擊": continue  # D2: leader 排除攻擊(intent_fit 已擁)
+    if g in f.goals: c.faction_stakes.append(g)
+```
+
+---
+
+### Issue 3: 呈報藍圖三岔路（項目2/3/4）定位模糊、驗證缺稿
+**file:line**：spec D2、呈報藍圖段（line 144-154）
+
+**claim**：系統列出三項 player-visible 改動（項2 target→prosperity_prey、項3 prio→PRIO_DISPATCH、項4 tribute-detachment）供藍圖 sign-off。
+**truth**：
+- 項2「prosperity_prey 對齊 #1 湧現自秤」——涉及 god-view FA10 漏洞修復，邏輯合理。但選 prey 的新參數（richness×貪婪+weakness×殘忍+border×野心/eta）有無額外效果漂移？需游走查（未提供前/後對比）。
+- 項3「prio PRIO_DISPATCH 合 #1 非高 prio 強派」——邏輯是 leader 征服攻擊由 intent 秤不是手派，故 prio 降。但「leader 開戰不再壓過同級」若平衡文案依賴 leader 高 prio 強派，會變 regression。系統說「預設無礙」但無遊走驗證。
+- 項4「tribute-detachment 移除→leader 自行徵收，engine 自然節制」——假設 leader 選徵收 task 時會對 threat/飢餓有自然節制（rank 競秤）。但「leader 離家徵收」有無造成 capital 暴露（abandon-capital 連鎖）？spec 說成員/子隊已有此節制，leader 復用同 engine，理論成立。但呼叫用於 leader 時效能成本（+1 rank/faction/tick）未量測。
+
+**summary**：三項改動都有合理性指稱，但缺乏 before/after 遊走驗證或 profiling 證據。藍圖若要 sign-off，應索求①佈景對比（美工截圖或行為 log），②效能量測，③edge-case 檢查（capital 暴露 case）。
+
+---
+
+## 呈報藍圖建議
+
+1. **澄清 D2 身分定位**：目前設計跨越「權重 vs 路徑」邊界。可選方案：
+   - (a) 明示「leader 系身分異 member，決策路徑不同是設計意圖」→ 修訂憲法條款或例外紀錄。
+   - (b) 統一路徑：faction_duty term 改「member-only」(ctx.is_leader=false 返 0)，leader 攻擊全由 intent_fit 承載。[系統推薦，維持簡潔]
+
+2. **確認 D2 改點實施清單**：觸及檔表應明列 decision_context.gd 的具體改行號（203-204）。D1 與 D2 必須同步提交（D1 alone 會破壞 D2 目標）。
+
+3. **項目2/3/4 遊走驗證**：QA 階段應提供①美工截圖（conquest target 改變可見？），②seeded 遊走前後 log 對比（prosperity_prey vs nearest_independent 差異量），③leader 離家徵收的 threat 自然節制檢查（capital 有無持續暴露）。預設「無礙」未足，需數據背書。
+
+---
+
+## 邊界檢查
+- 不越 code 建議邊界（越界由系統決定是否改架構）
+- D3 cadence-gate（本verdict不審——實作上的 perf 決定，QA 驗 sanity）
+- 征服 scaffolding faction_id==-1 gate（已驗 _commit_conquest_attack 尾部有，leader 天然不觸，非退化）
