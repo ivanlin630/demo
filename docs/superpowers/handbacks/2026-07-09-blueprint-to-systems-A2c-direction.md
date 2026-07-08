@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: A2c 方向——faction 剩餘平行權威折入統一引擎(保湧現,深化留 A2d);切法你自決
 ---
 
