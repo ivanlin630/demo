@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 topic: 交接——A2a merged(perf誤判翻案)+工作流兩軌信箱觸發全建好+A2b設計走查到#1;重開後續走 A2b #2
 ---
 
