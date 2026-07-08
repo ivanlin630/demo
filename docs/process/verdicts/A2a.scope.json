@@ -6,17 +6,17 @@
   "touch_files": [
     {
       "path": "scripts/simulation/decision/decision_context.gd",
-      "why": "加 has_parent_directive/parent_team_pos 欄 + gather 填（母團 directive，結構鏡射 faction_stakes block ~195-213）",
-      "risk": "low — 純加欄 + 一個 parent 存在填值；非子隊 has_parent_directive=false 零影響"
+      "why": "加 is_subteam 欄(=parent_team_id!=-1，一旗兩用:歸建 directive + 戰略-gate) + gather 填。round-3 合併掉 v2 的 has_parent_directive/parent_team_pos",
+      "risk": "low — 純加一 bool 欄 + 填值；非子隊 is_subteam=false 零影響"
     },
     {
       "path": "scripts/simulation/decision/options.gd",
-      "why": "加 歸建 REGISTRY row(faction_duty term) + applicable + to_task fallback；建設/佔村 applicable 加 not has_parent_directive 世界規則 gate(附屬單位不自立據)",
-      "risk": "med — 動全域 REGISTRY/applicable；但兩 gate 對 has_parent_directive=false(成員/solo)恆真→零行為變，只子隊受限"
+      "why": "加 歸建 REGISTRY row(faction_duty term) + applicable(is_subteam) + to_task fallback；加 STRATEGIC_SELFINIT_SET const + applicable loop 頭一個通用戰略-gate guard(is_subteam and opt in SET→不候選，併建設/佔村+涵蓋訓練)",
+      "risk": "med — 動全域 REGISTRY/applicable；但 gate 對 is_subteam=false(成員/solo)不觸→零行為變，只子隊受限"
     },
     {
       "path": "scripts/simulation/decision/terms.gd",
-      "why": "faction_duty eval 加 歸建 case(FACTION_DUTY_DRIVE if has_parent_directive)；weight 已 _duty_factor(loyalty,野心) 免動",
+      "why": "faction_duty eval 加 歸建 case(FACTION_DUTY_DRIVE if is_subteam)；weight 已 _duty_factor(loyalty,野心) 免動",
       "risk": "low — 加 match case，不動 _duty_factor/既有 攻擊/徵收/外交 case"
     },
     {
@@ -26,8 +26,8 @@
     },
     {
       "path": "scripts/simulation/faction_ai_system.gd",
-      "why": "加 _decide_subteam(cadence-gated 全框架 rank dispatch)+SUBTEAM_CADENCE const；改 _evaluate_subteam tail(1627-1635)；刪 _check_deviation(1669)/_evaluate_idle_subteam(1688)/DEVIATION_RATE(23)；改註解 1332",
-      "risk": "high — 核心 AI 檔，subteam dispatch 語意；lifecycle guard 需原封保留；conquest 分支結構性不觸子隊(intent 空+faction_id!=-1)"
+      "why": "加 _decide_subteam(cadence-gated 全框架 rank dispatch)+SUBTEAM_CADENCE const；加 _try_join_target 共用 join-helper(near 3220) + 既有 2 處 inline join guard(1512-1516/3082-3086)改呼(round-3 un-patch)；改 _evaluate_subteam tail(1627-1635)；刪 _check_deviation(1669)/_evaluate_idle_subteam(1688)/DEVIATION_RATE(23)；改註解 1332",
+      "risk": "high — 核心 AI 檔，subteam dispatch 語意；lifecycle guard 需原封保留；既有 2 處 join guard 改呼須維持 forced_event 語意(P2a W2)；conquest 分支結構性不觸子隊(intent 空+faction_id!=-1)"
     },
     {
       "path": "scripts/debug/constitution_baseline.txt",
@@ -46,11 +46,13 @@
   "no_touch": [
     "掠奪 term(零 patch，loyalty-gate 靠 歸建↔掠奪 rank 競秤湧現，非改 loot_drive)",
     "faction_duty _duty_factor / 攻擊/徵收/外交 既有 case",
+    "_find_strong_neighbor(不加玩家排除，玩家攔集中 _try_join_target helper)",
+    "_maybe_request_join_player / _resolve_join / merge_teams(join-helper 復用，不動 choke 語意，保 ask-before-travel)",
     "子隊 lifecycle: detach_subteam / merge_queue / settle / construct / escort / herald / discipline-fail",
     "_tag_weight (904/1893 仍用，非死碼)",
     "hand_brain_probe.gd (SUBTEAM_BYPASS_REASONS 變不可達但無害留)",
     "leader dispatch (=A2b)",
-    "member/solo _decide_unified/_evaluate_solo (A1a 已清；has_parent_directive=false 保零變)",
+    "member/solo 決策路徑(A1a 已清；is_subteam=false 保零變；既有 2 處 join guard 只改呼 helper=語意等價 refactor)",
     "A1a 拆的閥 (別回退)"
   ],
   "depends_on": [
