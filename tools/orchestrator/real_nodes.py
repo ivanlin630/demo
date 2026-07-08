@@ -34,7 +34,9 @@ class SliceState(TypedDict, total=False):
     resolution: str
     done: bool
     inject: dict
-    systems_session: str   # 批次1.6：systems_spec 的 session_id，供 systems_plan --resume 續(同角色免重讀)
+    systems_session: str    # systems_spec 的 session_id，feature 級 01 session（spec/plan/revise 全續，免重讀）
+    revise_feedback: str    # revise 輪：注入 systems_spec 的 review/藍圖 反饋
+    revise_round: int        # revise 次數（軟上限防打架）
 
 
 def _mv(state, node, v):
@@ -59,22 +61,34 @@ def rn_factcheck(state: SliceState):
     return {"verdicts": _mv(state, "factcheck", v), "stage": "factchecked"}
 
 def rn_systems_spec(state: SliceState):
-    """01①：只出 spec + scope + 重點 handback（先不 plan，fail-early）。"""
+    """01①：出 spec + scope + 重點 handback（fail-early）。revise 輪=resume 原 01 session 帶 ctx 改。"""
     import nodes
-    r = nodes.write_node("systems", state["slice_id"],
-        task="讀工單+invariants → 出三樣（★只 spec，先不寫 plan——等審過才寫）："
-             "①精確 spec(docs/superpowers/specs/，含 file:line 改點+驗收法) "
-             "②觸及集 docs/process/verdicts/" + state["slice_id"] + ".scope.json"
-             "(touch_files/touch_systems/depends_on/parallel_safe+理由) "
-             "③★『重點』handback(docs/superpowers/handbacks/，from:systems to:blueprint)："
-             "濃縮給藍圖審——做了啥設計決定、風險點、要不要批的疑慮（藍圖只看這份，不啃全 spec）。commit。"
-             "★別跑 godot、★別寫 plan(那是審過後的事)。",
-        reads="工單 handback + docs/invariants.md + 相關 code",
-        worktree=state["worktree"], out_handback_to="reviewer")
+    fb = state.get("revise_feedback")
+    if fb:
+        # ★revise 輪：續原 01 session（feature 級 ctx，記得自己 spec 推理）+ 注入 review/藍圖 反饋 → 改 spec。
+        task = ("你先前寫了本 slice 的 spec（你有原 context）。審查/藍圖回饋要你修：\n" + fb +
+                "\n照回饋改 spec + scope.json + 重點 handback（覆蓋原檔）。"
+                "★用 Read/Grep 重讀當前 code 查證每個改點（別憑記憶，code 可能已變——這是鐵律）。"
+                "★別跑 godot、★別寫 plan。commit。")
+        r = nodes.write_node("systems", state["slice_id"], task=task,
+            reads="你的原 spec + 回饋涉及的 code（重讀查證）",
+            worktree=state["worktree"], out_handback_to="reviewer",
+            resume_session=state.get("systems_session"))
+    else:
+        r = nodes.write_node("systems", state["slice_id"],
+            task="讀工單+invariants → 出三樣（★只 spec，先不寫 plan——等審過才寫）："
+                 "①精確 spec(docs/superpowers/specs/，含 file:line 改點+驗收法) "
+                 "②觸及集 docs/process/verdicts/" + state["slice_id"] + ".scope.json"
+                 "(touch_files/touch_systems/depends_on/parallel_safe+理由) "
+                 "③★『重點』handback(docs/superpowers/handbacks/，from:systems to:blueprint)："
+                 "濃縮給藍圖審——做了啥設計決定、風險點、要不要批的疑慮（藍圖只看這份，不啃全 spec）。commit。"
+                 "★別跑 godot、★別寫 plan(那是審過後的事)。",
+            reads="工單 handback + docs/invariants.md + 相關 code",
+            worktree=state["worktree"], out_handback_to="reviewer")
     _freeze_if_api(r, "systems_spec")
-    # 批次1.6：存 session_id 供 plan 節點同角色 --resume 續（帶 spec context，免重讀）
+    # feature 級 01 session：存 session_id 供 plan/revise 續（帶 ctx 免重讀）；resume 保留原 id
     return {"spec_path": f"specs/{state['slice_id']}", "stage": "spec",
-            "systems_session": r.get("session_id")}
+            "systems_session": r.get("session_id") or state.get("systems_session")}
 
 def rn_review(state: SliceState):
     """02②：對抗審 spec（設計健不健全，讀廣一點抓跨系統）。"""
@@ -168,14 +182,29 @@ def rn_qa_review(state: SliceState):
     })
     return {"resolution": str(decision)}
 
+MAX_REVISE = 5   # revise 軟上限（藍圖每輪閘，這只防打架失控）
+
 def rn_halt(state: SliceState):
-    """裁1：退回=中斷通知藍圖，不 silent 重試。"""
+    """裁1：退回=中斷通知藍圖，不 silent 重試。resume 'revise'=丟回原 01 session 帶 ctx 改 spec。"""
+    rd = state.get("revise_round", 0)
     decision = interrupt({
         "halt": True, "slice": state["slice_id"], "stage": state.get("stage"),
-        "verdicts": state.get("verdicts"),
-        "msg": "退回——已暫停通知藍圖(不自動重試)。修 brief/spec 後重跑，或 override 續。",
+        "verdicts": state.get("verdicts"), "revise_round": rd,
+        "msg": "退回——暫停通知藍圖(不自動重試)。resume：revise=丟回原01(帶feature ctx)照審查反饋改spec / reject=停(手動修後重跑)。",
     })
-    return {"resolution": str(decision)}
+    d = str(decision).lower()
+    out = {"resolution": str(decision)}
+    if d.startswith("revise"):
+        # 蒐集 review/bp_review/factcheck 的 issues+note 當反饋 → 注入原 01 session 改 spec
+        vs = state.get("verdicts") or {}
+        parts = []
+        for k in ("factcheck", "review", "bp_review"):
+            vv = vs.get(k)
+            if vv and (vv.get("verdict") in ("issues", "concern") or vv.get("premise_contradiction")):
+                parts.append(f"[{k}] {vv.get('note','')}｜issues={vv.get('issues')}")
+        out["revise_feedback"] = "\n".join(parts) or "(審查有疑，見 verdicts)"
+        out["revise_round"] = rd + 1
+    return out
 
 def rn_merge(state: SliceState):
     import subprocess
@@ -210,6 +239,13 @@ def route_bp_review(state: SliceState):
 def route_resolution(state: SliceState):
     return "merge" if str(state.get("resolution", "")).lower().startswith("approve") else "end"
 
+def route_halt(state: SliceState):
+    """halt resume 'revise'=丟回 systems_spec(原 01 session 帶 ctx 改)；其他=停。軟上限防打架。"""
+    d = str(state.get("resolution", "")).lower()
+    if d.startswith("revise") and state.get("revise_round", 0) <= MAX_REVISE:
+        return "systems_spec"
+    return "end"
+
 
 def make_real_graph():
     g = StateGraph(SliceState)
@@ -230,7 +266,7 @@ def make_real_graph():
     g.add_edge("measure", "qa")
     g.add_edge("qa", "qa_review")
     g.add_conditional_edges("qa_review", route_resolution, {"merge": "merge", "end": END})
-    g.add_edge("halt", END)
+    g.add_conditional_edges("halt", route_halt, {"systems_spec": "systems_spec", "end": END})  # revise 迴圈
     g.add_edge("merge", END)
     return g
 
