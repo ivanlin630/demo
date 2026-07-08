@@ -2,33 +2,39 @@
 from: systems
 to: reviewer
 status: open
-topic: A2a spec round-2——你兩點成立，藍圖裁定收尾(D6 明示接受移除+抗命 deferred;D3 引用改 leader-dispatch);核心設計不動
+topic: A2a spec round-3——真 un-patch:共用 join-helper(既有2處改呼)+通用戰略-gate(併建設/佔村/訓練);核心不動
 ---
 
-# A2a spec round-2 回覆（給 reviewer）
+# A2a spec round-3 回覆（給 reviewer）
 
-你這輪兩真疑點**都成立**，藍圖 round-2 裁定（`blueprint-to-systems-A2a-revise.md`，優先於 review 字面）：**核心框架設計（directive/faction_duty 複用、cadence gate、量測特判）你已確認查證屬實合理、無 premise 造假＝過了，不動**。只收尾兩點 + citation。逐點回：
+你兩點成立，藍圖 round-3 裁定用**真 un-patch** 收（★用戶明示要 A：做對的、減既有債、A2a scope 可擴，非加補丁）。**核心設計（directive/faction_duty/cadence/量測特判/D3 引用/D6 明示接受）你已確認過＝不動。** 逐點回：
 
-## D6（mid-mission 投機叛逃移除，未走明示接受）→ 藍圖明示接受移除
-你對——`_check_deviation` 是**執行任務中**（`current_task≠IDLE` 移動中，`1629-1631` 逐 tick）判「半路轉搶劫不脫離」，v2 改 active-transit sticky＝此分支移除，我上輪定性「超範圍」自行帶過，不合 review#1 攻擊窄化的「明示接受」標準。**已修**：
-- spec D6 段加 **「藍圖明示接受移除」** 段（比照 review#1），三理由：①脫離出口保留（`_check_discipline` desert→獨立自由搶）②投機出口保留（idle 掠奪搬進 duty↔greed，loyalty-gated）③執行中 sticky=任務承諾+省效能+更紀律，合「紀律至上」。
-- 殘留疑點段從「系統自認超範圍」改成「藍圖明示接受移除」。
-- **加 future work（deferred 非遺漏）**：完整「**抗命**」行為（mid-mission 動態抗命/違令，非只脫離/idle 掠奪）延後另 slice。
+## review #1（D4 派工漏「投靠玩家 forced_event guard」→ 重引 P2a W2 自動併坑）
+你對，是同 bug class 具體回歸。**修法＝抽共用 helper，非複製第 N 份 guard**（藍圖裁定 + 減既有債）：
+- 新 `_try_join_target(state, team, target_id, prio, reason) -> bool`（`faction_ai_system.gd` near `_maybe_request_join_player:3220`）：玩家 target→`_maybe_request_join_player`（寫 forced_event，不 try_set，不自動併）；NPC→`try_set(TASK_JOIN)`+`set_social_target`。
+- **四條派工路徑全呼**：A2a `_decide_subteam` 新路 + **既有 2 處 inline guard 改呼**（減既有債，一份實作）。
+- **玩家排除集中 helper 一處**：`_find_strong_neighbor` 不動（不加 finder 排除，藍圖裁定「集中一處攔」）。helper 不塞 `merge_teams` choke（choke 會變到場才問＝改 ask-before-travel 語意）。
+- **★citation 修正（重讀 code 查證）**：既有 join guard 是 **2 處**非 review 說的 3——`_decide_unified:1512-1516` + `_trigger_survival:3082-3086`；review 引的「prosperity :3085」即 `_trigger_survival` 內同一處（3085 ∈ 該 func 3055-3104，`_maybe_request_join_player` 全庫僅 2 call site:1515/3085）。修法不變（抽 helper），計數更正。
 
-## D3（invariant 引用文不對題）→ gate 保留，只改引用
-你對——「立國=leader-level」（invariants:325）講 faction 建國（`create_faction`/`_declare_established`），跟 建設(TASK_BUILD)/佔村(TASK_ATTACK 奪據點)不同機制，引用不精確。但你也認底層顧慮站得住。**已修**（藍圖裁定 gate 保留，只換引用）：
-- spec D3 引用改指 **既有 leader-dispatch settle 機制**：grep 重驗子隊建造/安頓現行**皆由母團/leader 派遣 pre-set task**（`faction_ai_system.gd:525 _dispatch_subteam_settle → :540 try_set TASK_SETTLE`、`:2292 dispatch TASK_CONSTRUCT`），**從未子隊 idle 自選**。gate＝防子隊納 rank_scored 後憑空多出「附屬單位自建據點」新路徑（違護欄「子隊生命週期不動」）。明示非借「立國」。
+## review #2（「訓練」新湧現，D3 只 gate 建設/佔村＝spec 內部不一致）
+你對。**修法＝立一條通用規則取代逐 option gate**（藍圖裁定，別補丁苗頭）：
+- `options.gd` 加 `const STRATEGIC_SELFINIT_SET = ["建設","佔村","訓練"]`（自建據/奪據/練兵＝擴張自身戰略足跡）。
+- `applicable()` loop 頭**一個 guard**：`if ctx.is_subteam and opt in STRATEGIC_SELFINIT_SET: continue`。**一條件管全部**，新增戰略 option 入 SET 自動涵蓋。
+- **併掉 round-2 的建設/佔村 獨立 gate**（別留兩套）。訓練查證屬實：loop2b `AmbitionLadder.update`（`708-722`）對全 team 跑無 parent 排除→子隊有 archetype/rung→`訓練` applicable（`options.gd:125-126`）→ 現被通用 gate 統一擋。
+- **「除非母團 directive」逃生口**：母團戰略令走 pre-set lifecycle task（TASK_SETTLE/CONSTRUCT，engine 前 lifecycle guard 早退）→ 引擎點子隊結構無 strategic directive → guard 對子隊無條件成立。hook 預留（日後母團經引擎下戰略令再加 per-opt 檢查）。
+- 不 gate（子隊該能做）：survival/投機（掠奪/覓食/返家/買糧/乞食/紮營/投靠）、被動防禦（迎戰/備戰/求和）、攻擊（已 directive/血仇 gated）。
 
-## citation drift
-`_evaluate_solo` 現況 `:1724`（spec 誤寫 1749）→ **已改**。
+## 順手（round-3）
+- ctx `has_parent_directive`+`parent_team_pos` → 合併單一 **`is_subteam`** 旗（一旗兩用：歸建 directive + 戰略-gate）；`parent_team_pos` 無用刪。
+- 驗收法加 §9（投靠玩家→forced_event 非自動併，P2a W2 回歸檢）、§10（子隊 idle 無 directive→建設/佔村/訓練 皆不候選）。
 
 ## 驗了啥
-- 純 spec（systems，不跑 godot、不寫 plan＝審過才寫）。**核心設計零改**（只 D6 段+D3 引用+行號）。
-- **重讀當前 code 查證行號**（鐵律）：`_dispatch_subteam_settle:525`→`TASK_SETTLE:540`✓、`TASK_CONSTRUCT dispatch:2292`✓、`_evaluate_solo:1724`✓。
+- 純 spec/scope（systems，不跑 godot、不寫 plan）。**核心設計零改**（只加 helper/gate/is_subteam + 驗收）。
+- **重讀當前 code 查證**（鐵律）：join guard 2 處 `1512-1516`/`3082-3086`✓、`_maybe_request_join_player:3220`✓、`_find_strong_neighbor:3232`(不排玩家)✓、`_resolve_join` interaction:1035 無條件 merge✓、`訓練` applicable `125-126`✓、loop2b AmbitionLadder 無 parent 排除 `708-722`✓、`_dispatch_subteam_settle:525→540`/`TASK_CONSTRUCT:2292`✓。
 
 ## 殘留疑點（呈報）
-- 「抗命」完整行為 deferred（D6 future work 明記）＝已知缺口非遺漏。
-- D3 gate 若實作發現太像子隊特例，備案＝`_decide_subteam` skip 該兩 opt（同 lifecycle 護欄）。
-- `SUBTEAM_CADENCE`/`FACTION_DUTY_DRIVE` 對子隊量級＝TEST VALUE。
+- 「除非母團 directive」逃生口現為結構空（母團戰略令走 lifecycle task 非引擎）→ hook 預留，非現實作。
+- 「抗命」完整行為 deferred（D6 future work）。
+- `SUBTEAM_CADENCE`/`FACTION_DUTY_DRIVE`/`STRATEGIC_SELFINIT_SET` 內容＝TEST VALUE/可擴。
 
 審過我才寫 plan → 實作。
