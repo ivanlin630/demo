@@ -26,8 +26,8 @@
     },
     {
       "path": "scripts/simulation/faction_ai_system.gd",
-      "why": "加 _decide_subteam(cadence-gated 全框架 rank dispatch)+SUBTEAM_CADENCE const；加 _try_join_target 共用 join-helper(near 3220) + 既有 2 處 inline join guard(1512-1516/3082-3086)改呼(round-3 un-patch)；改 _evaluate_subteam tail(1627-1635)；刪 _check_deviation(1669)/_evaluate_idle_subteam(1688)/DEVIATION_RATE(23)；改註解 1332",
-      "risk": "high — 核心 AI 檔，subteam dispatch 語意；lifecycle guard 需原封保留；既有 2 處 join guard 改呼須維持 forced_event 語意(P2a W2)；conquest 分支結構性不觸子隊(intent 空+faction_id!=-1)"
+      "why": "加 _decide_subteam(cadence-gated 全框架 rank dispatch)+SUBTEAM_CADENCE const；加 _try_join_target join-helper(near 3220，玩家→forced_event return 不 fallthrough) — ★scope B：只子隊新路呼，既有 3 處 join 路(_decide_unified:1513-1517/_trigger_survival/_evaluate_solo:1767)零碰；改 _evaluate_subteam tail(1627-1635)；刪 _check_deviation(1669)/_evaluate_idle_subteam(1688)/DEVIATION_RATE(23)；改註解 1332",
+      "risk": "high — 核心 AI 檔，subteam dispatch 語意；lifecycle guard 需原封保留；★既有 3 處 join 路零改動(scope B，零回歸)；conquest 分支結構性不觸子隊(intent 空+faction_id!=-1)"
     },
     {
       "path": "scripts/debug/constitution_baseline.txt",
@@ -46,8 +46,9 @@
   "no_touch": [
     "掠奪 term(零 patch，loyalty-gate 靠 歸建↔掠奪 rank 競秤湧現，非改 loot_drive)",
     "faction_duty _duty_factor / 攻擊/徵收/外交 既有 case",
-    "_find_strong_neighbor(不加玩家排除，玩家攔集中 _try_join_target helper)",
-    "_maybe_request_join_player / _resolve_join / merge_teams(join-helper 復用，不動 choke 語意，保 ask-before-travel)",
+    "★既有 3 條 join-player 派工路(_decide_unified:1513-1517 / _trigger_survival:3082-3086 / _evaluate_solo:1762-1771)=A2a 零改動(scope B，保 P2a settled，零回歸；既有債立 follow-up join-consent-consolidation)",
+    "_find_strong_neighbor(不加玩家排除，子隊路靠 _try_join_target helper 攔)",
+    "_maybe_request_join_player / _resolve_join / merge_teams(helper 復用，不動 choke 語意，保 ask-before-travel)",
     "子隊 lifecycle: detach_subteam / merge_queue / settle / construct / escort / herald / discipline-fail",
     "_tag_weight (904/1893 仍用，非死碼)",
     "hand_brain_probe.gd (SUBTEAM_BYPASS_REASONS 變不可達但無害留)",
@@ -71,5 +72,9 @@
     "concern": "review #2: 子隊逐 tick 呼 DecisionContext.gather(掃全 world tiles + finders + threat loop) 取代 O(1) 手算，LOD O(N²)/50 隊擴編敏感",
     "mitigation": "SUBTEAM_CADENCE(1 日) gate 攤平 gather；lifecycle guard(O(1)) 仍逐 tick",
     "acceptance": "驗收法 §6：before/after per-tick tick-time 不顯著退化(phase_timing bucket 或 headless wall-time，同 seed，≤5%)"
+  },
+  "follow_up": {
+    "join-consent-consolidation": "既有 P2a join 債(非 A2a 職責，scope B，藍圖驗證後另 slice)：全 join-player 派工路遷 _try_join_target + 修 _evaluate_solo:1767 無 guard + 修既有 2 處 _maybe_request_join_player 回 false fallthrough 到 try_set(JOIN,玩家)→自動併。A2a 只引入正確 helper pattern 當 consolidation 錨。",
+    "抗命": "mid-mission 動態違令(round-2 D6 deferred)，另 slice。"
   }
 }
