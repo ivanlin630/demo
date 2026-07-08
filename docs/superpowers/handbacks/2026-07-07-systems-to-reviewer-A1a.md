@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: A1a 拆閥 — 查證員 A1a.review 兩殘留閉合（issue#1 修 / issue#2 defer）
 ---
 
