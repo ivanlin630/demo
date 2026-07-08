@@ -2,40 +2,31 @@
 from: blueprint
 to: blueprint
 status: open
-topic: machine v2 建完(批次1.5/1.6/2+操作修)——A2a 正跑 v2 首次真跑;壓縮後從盯 A2a 續
+topic: machine v2 大強化 + A2a 打磨(實作正確但 perf爆炸,②reject,留分支)——壓縮後從 A2a perf-fix pass 續
 ---
 
-# 交接：machine v2 + A2a 首跑（2026-07-08）
+# 交接：machine v2 強化 + A2a（2026-07-08 晚）
 
-## ★立刻要做：A2a 停在 review(有真發現)——處理 review 的 2 個盲點再重跑
-**A2a v2 首跑結果**（--local，worktree `.worktrees/machine-A2a`，已結束非在跑）：
-- 跑了 factcheck(haiku,clean,$0.28)→systems_spec(opus,$3.51,spec commit 9e84c14)→**review(sonnet,issues,$1.75)**→halt。**共 ~$5.5，遠低於 A1a 同段。**
-- **review(sonnet)抓到真深盲點(halt)**：spec 設計方向健全,但①宣稱的 commitment 防抖若真鏡射 rank_ambient 就不存在 ②子集內攻擊 option applicable 閘比舊手寫嚴,**子隊攻擊觸發率可能塌陷,驗收法沒量這個**。→ **sonnet review 有價值、tiering work。**
-- **但 run_local 曾崩**(interrupt chunk tuple 當 dict)——**已修 committed**。
-**下一步**：藍圖裁 review 發現→修 A2a spec/工單(補 commitment 機制講清 + 加子隊攻擊觸發率驗收)→重跑。或先問用戶要不要照 review 改。**這是 halt=藍圖判的檢查點。**
+## ★立刻要做：A2a perf-fix pass
+**A2a 實作正確但 perf 爆炸，② reject 收掉，留在 `feat/machine-A2a` 分支（未 merge、未丟）。**
+- **正確處**：integrity PASS、13 assertions 綠、憲法/sanity 綠、spec 完整實作（子隊決策納統一 DecisionEngine、舊 hand-argmax 刪、量測 guard、strategic-gate、join helper）。
+- **blocker**：HOB bed + team_trace **都 360s timeout**，sim 核心 O(?) 爆炸（非 probe 噪音）。
+- **cause 已縮**（★別再猜逐 tick）：**非 gather**（只加 `is_subteam` bool O(1)）、**非子隊決策頻率**（`_decide_subteam` 有 cadence 閘 `faction_ai_system.gd:1676` `if current_tick < subteam_eval_next_tick: return`，1日/次）→ **在 faction_ai_system.gd 那 120 行改動**（疑：子隊現流過更重的 per-tick 主迴圈 loop3 _evaluate_survival/_tick_conquest_scout/_refresh_attack_pursuit/_evaluate_threat，或新 O(N²)）。
+- **下步**：正經 **profile**（`scripts/debug/lod_perf_bed.gd` / `SimRunner.phase_timing`+`_fai_pht` 各相位計時；比 main vs `feat/machine-A2a`）→ pin 出爆的相位/行 → fix。**我 worktree godot 直接跑一直失敗（import lock?），要弄對 profiling 法。**
+- **修完怎麼收**：fire `--resume redo`（回 implementer 重跑下游）或新起。實作分支在，別重跑 5 輪 revise。
+- 教訓：我一度「逐 tick」猜錯被用戶戳（gate 在 1676）——★守 measure-first、別憑 review 字面猜。
 
-## v2 首跑驗到的（正面）
-- haiku factcheck 能做(變異;重試已加)、sonnet review 夠利抓深 bug、opus spec 正常、成本大降(~$5.5 vs A1a $27)。
-- 崩點=run_local 沒處理 interrupt(修了);session-resume/量測員/①bp_review 還沒走到(review 就 halt 了)。
+## machine v2 本 session 大強化（全 committed）
+- **★pause-poll 工作流（用戶要，已驗）**：worker interrupt **暫停不退**，寫 `runs/<slice>.pause` + poll `runs/<slice>.decision`；**藍圖 Write decision 檔（approve/redo/revise/reject）即續、免 re-fire**（classifier 不擋 Write）。逾時 2h 退。★`!` 只用在初次啟動；checkpoint 藍圖寫檔驅動。
+- **is_api_error 修（關鍵）**：429/session-limit 在 result/raw envelope（`"api_error_status":429`/"session limit"）非 stderr → 原漏偵測 → pipeline 空跑到 ②垃圾。改掃 raw 結構標記 + result/error。→ **死在某節點=freeze 在那、resume 從那重跑（非從頭）**。
+- **② qa_review 三路**：approve→merge / redo→implementer(下游掛救,如限額/godot) / revise→systems_spec(QA揭spec缺陷) / reject→停。
+- **revise 迴圈 + feature 級 01 session**：halt/①/② resume `revise`→systems_spec，續原 01 session（`systems_session`，記得自己 spec）+ 注入藍圖方向 handback（`blueprint-to-systems-<slice>-revise`，優先 review 字面）。MAX_REVISE=5。
+- **其他修**：judge effect-fail 重試1次、--cancel 可靠殺 worker、fire 防 double-fire、PYTHONUNBUFFERED、--status 文字路線圖（loop 後 stale 待修）、run_local 處理 __interrupt__、寫節點 guard（scope_dir 必真 worktree，防 commit 洩漏 main）。
 
-## machine v2 全貌（全 committed；設計 `docs/process/08_machine_workflow_v2.md`）
-流程：`factcheck→systems_spec→review(02②)→①bp_review(00審)→systems_plan→implementer→measure→qa→②qa_review→merge`；退回→halt。
-- **批次1.5**：spec/plan節點拆(fail-early)+rn_bp_review(①,concern才interrupt)+MODELS成本分層(判斷=haiku/sonnet,寫作+願景=opus)+scope限讀(讀touch_files+callers/callees,不確定就讀)。
-- **批次1.6**：session-resume(systems_spec→plan --resume同session免重讀;跨角色斷)。
-- **批次2**：`--decompose`(01拆feature→子片brief+A.decompose.json並行圖)+`--fan-out`(發第一並行組);⓪藍圖審=看--decompose輸出好才--fan-out。
-- **操作修**：judge effect-fail重試一次(transient)、--cancel可靠殺worker、fire防呆(不double-fire)、PYTHONUNBUFFERED(log即時)、--status路線圖。
-
-## 本 session 關鍵發現/教訓
-- **haiku 能做 factcheck**(用戶戳:1失敗樣本判死太急;重測 17turns/$0.13 判得好)。變異非無能→加 effect-fail 重試一次(執行重試,非裁1判斷不重試)。
-- **double-fire 撞車**：--cancel 沒殺 detached worker→殘留→兩 worker 踩同 worktree/sqlite/log(log 空)。修了。
-- **scope 限讀怕漏**：改「touch_files+直接互動面(callers/callees)+不確定就讀」;兩層兜底=02②讀廣+量測員跑全sim。
-- **--local vs --server**：local(預設,穩,VS Code關也活,只文字status)/server(Studio路線圖但server死=in-memory丟)。想看圖 fire 加 --server。
-
-## 待接（A2a 跑完後）
-1. **量 A2a v2 token 分佈**：session-resume省了沒?haiku穩不穩?01還是不是成本大戶?有數據才決定要不要用戶的「01 handoff(decompose→子片架構交接+寫回progress)」優化。
-2. A2a merge 後：續 A2b(leader入引擎) 或用 --decompose 拆大 feature 試分解階段。
-3. 殘留 worktree 鎖(A2a舊的)偶爾要 reboot 清;--cancel 已改可靠。
-4. A1a 已 merged+驗(arbiter_latch 30.1%→0.1%);單點 probe 已 merged。
+## 其他 follow-up（memory `project_future_improvements`）
+- **join-consent-consolidation**：投靠玩家 3 路（`_evaluate_solo:1767` 無 guard + 既有 2 處 fallthrough auto-merge）——A2a scope-B 沒修，立案另 slice。
+- **子隊抗命完整行為**：A2a 移了 mid-mission 投機叛逃（藍圖明示接受），完整抗命延後。
+- **--status 路線圖 loop-stale**：redo/revise 後 log 累積跨輪 ✓ → route-map 顯示亂，按輪次分段修。
 
 ## 全 durable
-記憶 `project_orchestrator_machine.md`(單寫者藍圖);設計 08 doc;A2a工單 `briefs/A2a.md`(已補回歸-capture特判)。壓縮後讀這份+memory+08 doc 即接回。
+記憶 `project_orchestrator_machine`（單寫者藍圖，接續錨已更新）+ `project_future_improvements`；設計 `docs/process/08_machine_workflow_v2.md`。壓縮後讀這份 + memory 即接回。**A2a 實作在 feat/machine-A2a 分支。**
