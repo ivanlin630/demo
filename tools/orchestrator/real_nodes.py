@@ -156,6 +156,7 @@ def rn_measure(state: SliceState):
     import nodes, bus
     r = nodes.write_node("measurer", state["slice_id"],
         task="量測本 slice 改動(★別改 scripts/ code，只跑探針+寫報告)。跑：①hand_obeys_brain_bed 單點(HOB_SEEDS=1337 HOB_MONTHS=1)抓 obey%/arbiter_latch/各機制/determinism ②constitution_gate ③sanity(headless_test/game_sim_test 無崩+關鍵print) ④TeamTrace 抖動檢。"
+             "★★HOB bed 慢(跑 4×一個月 warring≈500s)：**先設 $env:GODOT_TIMEOUT='600' 再跑**，否則 wrapper 360s 預設會誤殺→假 perf 迴歸→假 reject(A2a 血教訓)。timeout 被殺≠迴歸，要區分。"
              "★可行則 before/after 對照(main vs 本 worktree 同 seed)。寫 JSON 到 docs/process/verdicts/" + state["slice_id"] + ".measure.json"
              "(obey_pct,arbiter_latch,mechanisms,determinism,constitution,thrash,before_after,summary)。commit。",
         reads="worktree 本 slice commits + scripts/debug/ 的 bed",
