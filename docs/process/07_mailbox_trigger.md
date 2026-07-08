@@ -14,9 +14,10 @@
 ## 角色 = 持久 session
 
 - 各角色（blueprint / systems / reviewer / qa / **measurer**）開自己的 claude 視窗，`SESSION_ROLE` 環境變數設好（`session-role.sh` SessionStart hook 檢查）。arm 名單 = 這 5 個。
-- **main dir 角色（bp/systems/reviewer/qa）全開在 `A:\GDS\demo`** → 信箱即時互見，免 commit。
-- **measurer 在 branch 上跑**：開在 **main dir(checkout branch)** → live 信箱通（推薦）；開在 worktree(別 dir) → 只見同 worktree 的信（implementer→measurer 通），跨 main 需 commit。
-- **implementer = 純 worktree worker**，不 arm，走 plan/機器領活。
+- **main dir 角色（bp/systems/reviewer/qa/measurer）全開在 `A:\GDS\demo`（main）** → 信箱即時互見，免 commit，全在 live 信箱。
+- **★measurer 留 main dir、不 checkout**：跑 godot 驗 branch code 用 `godot --path .worktrees/<slice>`（driver 跑 worktree code，人在 main dir 留 live 信箱）。**QA 也留 main dir**：讀 `git diff main..<branch>`/`git show <branch>:file`+`.measure.json` 判，不 checkout。
+- **implementer = 唯一真 worktree worker**（改 code），不 arm，走 plan/機器領活。
+- **★絕禁在 `A:\GDS\demo` 原地 `git checkout <branch>`**（2026-07-09 事故：換掉所有共用此 dir session 的 branch → commit 落錯支）。要 branch code 用 `--path`/`git show`，改 code 才用 worktree。
 - 信箱 = `docs/superpowers/handbacks/*.md`，frontmatter `from: / to: / status: / topic:`。
 - 信箱 = `docs/superpowers/handbacks/*.md`，frontmatter `from: / to: / status: / topic:`。
 

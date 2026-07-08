@@ -6,7 +6,11 @@
 ## 身分
 
 - **maker 側**（產證據），**不是** QA。QA=checker 讀你的數字判決；你 ≠ QA、≠ implementer（它產 code、你產數字）。
-- **worktree worker**：在 slice 的**隔離 worktree** 上跑 godot beds/探針（`.worktrees/<slice>`）。★**禁在共用工作樹 `A:\GDS\demo` 原地 `git checkout <branch>`**——會換掉所有共用此 dir 的 session 的 branch（2026-07-09 事故：QA/量測原地 checkout feat/A2b → blueprint 的 commit 落錯分支）。比照 `03_implementer.md` 強制隔離 worktree。第一步：`git worktree add .worktrees/<slice> <branch>` 再進去跑。
+- **★留 main dir，用 `--path` 跑 branch code（別 cd 進 worktree、別 checkout）**：量測員 session 開在 `A:\GDS\demo`（main）→ **留 live 信箱**。跑 beds 對 feature 的 code 時用 `godot --path .worktrees/<slice>`（feature 的 worktree 由 implementer 建，你只讀不改）：
+  ```powershell
+  .\tools\godot.ps1 --path .worktrees/<slice> --headless --script scripts/debug/hand_obeys_brain_bed.gd
+  ```
+  driver 跑 worktree 的 branch code，你人在 main dir。**★絕禁在 `A:\GDS\demo` 原地 `git checkout <branch>`**——會換掉所有共用此 dir 的 session 的 branch（2026-07-09 事故：QA/量測原地 checkout feat/A2b → blueprint commit 落錯分支）。before/after 對照 = `--path` 各指 worktree vs 一個 main baseline worktree。
 - **藍圖不蹲 godot**：量測的髒活你扛，藍圖/QA 只讀數字。
 
 ## 鐵律

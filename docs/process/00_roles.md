@@ -3,7 +3,7 @@
 > **★2026-07-08 切回多終端為主軌**（見下 §現行偏好）：pipeline/orchestrator（`06`）曾於 2026-07-06 取代多終端，但機器誤判(A2a 假 reject)+燒錢後**切回多終端信箱 relay 為預設**——各角色**持久 session 平行開** + 信箱主動觸發（`07_mailbox_trigger.md`），langgraph 機器只大/並行才上。**下列角色職責 / owner 表 / 邊界規則全有效**。**auto-memory 單寫者 = 藍圖 session**（見 §auto-memory）。QA 獨立 adversarial + 用戶最終驗收硬閘不變（`04_qa`/`05_acceptance`）。
 
 主 session 有**兩個並存的設計腦**，按領域分（WHAT vs HOW），不是按階層。
-加上 worktree 實作者、**量測員**與**驗收官（QA）**。接力，不是並行競爭。
+加上 worktree 實作者，與 main dir 的**量測員**（`--path` 跑 branch）、**驗收官（QA）**（讀 diff/show）。接力，不是並行競爭。
 
 ## 五角色
 
@@ -12,7 +12,7 @@
 | **藍圖**（Blueprint） | **WHAT**：玩什麼、玩家循環、feature 願景、平衡意圖 | 架構決定、code | `game-design.md`、feature/願景 docs |
 | **系統**（Systems） | **HOW**：seam、契約、所有權圖、invariant、tick pipeline、行政流程 `01_architect.md`| 遊戲願景、平衡意圖 | spec / plan / `invariants.md`|
 | **實作**（Implementer） | worktree 寫 code、跑 sanity 測試 | 設計決定 | code + handback |
-| **量測員**（Measurer） | branch 跑 HOB/探針/beds **＋ spec §驗收法客製守衛** 出**獨立**數字餵 QA（藍圖不蹲 godot）。職責正典 `03b_measurer.md` | 判決、改 code、裁設計 | `.measure.json` + handback to:QA |
+| **量測員**（Measurer） | **留 main dir**（`godot --path .worktrees/<slice>` 對 branch code）跑 HOB/探針/beds **＋ spec §驗收法客製守衛** 出**獨立**數字餵 QA（藍圖不蹲 godot；★禁原地 checkout）。職責正典 `03b_measurer.md` | 判決、改 code、裁設計 | `.measure.json` + handback to:QA |
 | **驗收官**（QA） | 充足性判決/戲感觀者/release gate/UI 落差（`04_qa.md` 四職）；**maker/checker 分離=非蓋房者的腦**，★讀量測員數字判、不自產 | 修 code、裁 WHAT、修 HOW、**自產數字** | 判決表/落差清單 + `escaped_defects.md` 管理 |
 
 **★硬閘：任何東西交用戶之前，QA 必綠**（三層驗收鏈見 `05_acceptance.md`）。充足性判決由 QA 出——系統不自判自己蓋的世界。
@@ -88,7 +88,8 @@ channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統�
 
 ## auto-memory 規則（承 §2）
 
-- **★pipeline 切換後（2026-07-06）：auto-memory 單寫者 = 藍圖 orchestrator session**（持久、序列化寫入=天然單寫，看全局）。系統/實作 subagent ephemeral 不寫 memory，教訓走 handback → orchestrator 提煉入 memory。以下「系統 session 寫」= 切換前模型（存參照）。
+- **★★兩軌切回後（2026-07-08，現行權威）：auto-memory 單寫者 = 系統 session**（HOW owner，持久、序列化天然單寫）。理由：pipeline 只有藍圖一持久 session（故彼時單寫=藍圖）；兩軌恢復持久角色 session（bp/systems/qa/reviewer）→ 單寫者回系統（承 §2 owner 表 + 原始模型）。**別角色（藍圖/QA/reviewer/實作）教訓走 handback → 系統提煉入 memory**。
+- （下記 pipeline 段=歷史參照，非現行）**pipeline 切換期（2026-07-06~08）：auto-memory 單寫者 = 藍圖 orchestrator session**（持久、序列化=天然單寫）。系統/實作 subagent ephemeral 不寫 memory，教訓走 handback → orchestrator 提煉。以下「系統 session 寫」= 切換前=兩軌後模型（現行）。
 - **（切換前）只有系統 session 寫** auto-memory。藍圖 / 實作只**讀**（harness 開頭自動注入，無需主動讀）。
 - 藍圖 / 實作學到的跨 session 教訓 → 寫進 handback（git doc）→ 系統提煉進 memory。
 - 單寫者 = 零 MEMORY.md race + 教訓經系統過濾，避免各記不一致。

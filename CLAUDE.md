@@ -76,12 +76,12 @@ langgraph 機器（`tools/orchestrator/`）**少用**，只大/並行活才上�
 - **藍圖**（WHAT）：願景/feature/平衡意圖。owner=`game-design.md`。
 - **系統**（HOW）：seam/契約/invariant/流程。owner=`invariants.md`/流程 docs/`progress.md`/`CLAUDE.md`/`docs/process/*`。守 `01_architect.md`。
 - **審查**（02 對抗）：factcheck/審 spec，skeptical/只信 file:line。守 `02_reviewer.md`。
-- **QA 驗收官**：★獨立 adversarial 判決 + release gate（交用戶前 QA 綠=硬閘）。守 `04_qa.md`/`05_acceptance.md`。
+- **QA 驗收官**：★獨立 adversarial 判決 + release gate（交用戶前 QA 綠=硬閘）。**留 main dir 讀 `git diff/show`+`.measure.json` 判、不 checkout**。守 `04_qa.md`/`05_acceptance.md`。
+- **量測員**：maker 側產獨立數字餵 QA（≠QA≠implementer）。**留 main dir**，`godot --path .worktrees/<slice>` 對 branch code 跑 beds（★禁原地 checkout）。守 `03b_measurer.md`。
 - 邊界：藍圖不碰架構、系統不改願景；越界呈報。喬不攏你裁。禁廢話恭維。
 
-**worktree worker session**（`.worktrees/<feature>/` / `feat/<feature>`，別 dir、信箱 live 看不到 → 不 arm，走 plan/branch/機器領活）：
-- **實作**：照 plan 做+TDD+handback，守 `03_implementer.md`。
-- **量測員**：在 branch 跑 HOB/探針/beds 出**獨立**數字 → handback to:QA（藍圖不蹲 godot；maker/checker：產數字≠判數字，故 ≠QA、≠implementer）。
+**worktree worker session**（`.worktrees/<feature>/` / `feat/<feature>`，別 dir、不 arm，走 plan/機器領活）：
+- **實作**：照 plan 做+TDD+handback，守 `03_implementer.md`。（唯一真在 worktree 的角色——它改 code。）
 
 **★信箱主動觸發（免人肉轉述）**：各持久角色開場 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`
 ——別的角色寫 `to:<我> && status:open` 信 ~20s 內主動喚醒。寄件=Write handback（frontmatter from/to/status/topic），動完改 `status:consumed`。
