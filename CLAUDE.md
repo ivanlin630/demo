@@ -78,3 +78,4 @@ docs/
 - **auto-memory 單寫者 = 藍圖 orchestrator session**（持久、序列化、看全局）。
 - **憲法閘/融合驗/framework = orchestrator merge-gate 步**（merge 前 spawn 跑，綠才 merge）；pre-commit site-freeze 閘已撤（arc-temporary）。
 - 邊界：藍圖不碰架構細節、系統不改願景；越界呈報。禁廢話恭維。深架構 slice 餵厚 context（ephemeral 比老兵淺）。
+- **工作流兩軌並存（2026-07-08）**：小/序列活+設計討論走**信箱 relay**（各角色持久 session + git handback 信箱 + Monitor 主動觸發，開場 arm `inbox-watch.sh`；詳 `docs/process/07_mailbox_trigger.md`）；大/並行活走 **langgraph 機器**（`tools/orchestrator/`，詳 `docs/process/08_machine_workflow_v2.md`）。
