@@ -13,10 +13,8 @@ from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.types import interrupt
 
-# 成本分層。★A2a 首跑教訓：haiku 太弱做不了 agentic 判決(grep+寫verdict檔)——
-# factcheck haiku $0.04/25.7s ok但沒寫檔。改判斷節點=sonnet(夠力寫檔+判,仍<opus)；
-# opus 只給寫作+願景(spec/plan/implementer/bp_review,default 不傳 model)。
-MODELS = {"factcheck": "sonnet", "review": "sonnet", "qa": "sonnet", "measure": "sonnet"}
+# 成本分層。★再試 haiku(用戶要重測)+trace。首跑 factcheck haiku $0.04/25.7s ok但沒寫verdict檔。
+MODELS = {"factcheck": "haiku", "review": "sonnet", "qa": "haiku", "measure": "haiku"}
 
 # scope 限讀通用指示（節點只讀 touch_files + 工作需要，別盲掃全庫）
 def _scope_hint(slice_id):

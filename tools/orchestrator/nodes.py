@@ -61,6 +61,17 @@ def judge_node(role: str, slice_id: str, node_name: str, task: str,
     res = run_node(PROFILE_REVIEW, role, prompt, scope_dir=scope_dir,
                    output_format="json", model=model, effort=effort, timeout=timeout)
 
+    # ★trace：judge 節點的 raw 輸出寫 debug 檔（看 model 到底做了啥——寫檔?回文字?）
+    try:
+        _rawdir = os.path.join(MAIN_REPO, "docs/process/verdicts")
+        os.makedirs(_rawdir, exist_ok=True)
+        with open(os.path.join(_rawdir, f"{slice_id}.{node_name}.raw.txt"), "w", encoding="utf-8") as _f:
+            _f.write(f"model={model} ok={res.ok} effect_pending cost={res.cost_usd} dur={res.duration_s}\n")
+            _f.write(f"--- result(final msg) ---\n{str(res.result)[:3000]}\n")
+            _f.write(f"--- raw envelope head ---\n{res.raw[:2000]}\n")
+    except Exception:
+        pass
+
     verdict = bus.read_verdict(slice_id, node_name, repo=scope_dir)
     effect_check(res, lambda: verdict is not None and "verdict" in verdict)
     bus.log_metric({
