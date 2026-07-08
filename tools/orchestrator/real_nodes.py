@@ -66,12 +66,16 @@ def rn_systems_spec(state: SliceState):
     fb = state.get("revise_feedback")
     if fb:
         # ★revise 輪：續原 01 session（feature 級 ctx，記得自己 spec 推理）+ 注入 review/藍圖 反饋 → 改 spec。
-        task = ("你先前寫了本 slice 的 spec（你有原 context）。審查/藍圖回饋要你修：\n" + fb +
-                "\n照回饋改 spec + scope.json + 重點 handback（覆蓋原檔）。"
-                "★用 Read/Grep 重讀當前 code 查證每個改點（別憑記憶，code 可能已變——這是鐵律）。"
+        task = ("你先前寫了本 slice 的 spec（你有原 context）。要修。\n"
+                "★先讀藍圖裁定的設計方向 handback：docs/superpowers/handbacks/ 內檔名含 "
+                "'blueprint-to-systems' + slice + 'revise' 的那份（★這是藍圖對 review 的裁定，"
+                "優先於下面 review 字面——照藍圖方向改，別自行詮釋 review）。\n"
+                "review/factcheck 原始反饋（參考，藍圖方向為準）：\n" + fb +
+                "\n照藍圖方向改 spec + scope.json + 重點 handback（覆蓋原檔）。"
+                "★用 Read/Grep 重讀當前 code 查證每個改點（別憑記憶，code 可能已變——鐵律）。"
                 "★別跑 godot、★別寫 plan。commit。")
         r = nodes.write_node("systems", state["slice_id"], task=task,
-            reads="你的原 spec + 回饋涉及的 code（重讀查證）",
+            reads="藍圖方向 handback（優先）+ 你的原 spec + 回饋涉及的 code（重讀查證）",
             worktree=state["worktree"], out_handback_to="reviewer",
             resume_session=state.get("systems_session"))
     else:
