@@ -1393,15 +1393,7 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		if mt.parent_team_id != -1: continue
 		if mt.combat_target != -1: continue          # 戰鬥覆蓋(全隊)
 		if not mt.player_commanded_task.is_empty(): continue  # 玩家(全隊)
-		# ── MERGE consolidate scaffolding（faction 整併＝小隊併大隊，非個體決策）──
-		# 序6：從成員 cascade 抽出為 dispatch 前置 scaffolding（gate 前跑，命中則 pre-empt engine，
-		# 鏡射 survival-sticky）。生存 sticky：不打斷 survival task 去 merge。
-		var _tm: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
-		if not (mt.current_task in SURVIVAL_TASKS and mt.current_task != TeamData.TASK_IDLE):
-			if _try_consolidate_merge(state, mt, f, leader_team):
-				if SimRunner.phase_timing: _fai_pht("member.consolidate", _tm)
-				continue
-		if SimRunner.phase_timing: _tm = _fai_pht("member.consolidate", _tm)
+		# ── ★A2c-1：consolidate pre-gate 拆除（FA5 折入引擎「整併」option 競秤）──
 		# ── ★序6 gate：全非-subteam 成員走引擎 macro（_decide_unified 每 cadence 重評，退 latch）──
 		# 撕除舊 goal→task if/elif cascade（含 V2-cmd 徵收 shadow）；徵收/攻擊/掠奪/生產/貿易/生存
 		# 引擎 rank_scored 競秤（tag 只影響 weight 非路徑）。★不動全域 uses_unified → 成員仍走 loop3
@@ -1413,11 +1405,12 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		else:
 			_decide_unified(state, mt)
 
-# faction 整併 scaffolding（序6：從成員 cascade 抽出，pre-gate 前置；命中 set TASK_MERGE 回 true）。
-# 語意保留原樣：小隊(pop<cap×ratio 且 <absorber×ratio)近有容量成員 → 併之；或攻擊 goal 下近 leader 集結。
-# = faction-level 機制（非個體 utility 決策），故不入引擎 option，走 scaffolding。
-func _try_consolidate_merge(state: WorldState, mt: TeamData, f, leader_team: TeamData) -> bool:
-	var absorber_id: int = _find_absorber(state, mt, f)
+# A2c-1：consolidate target 決策抽出（非 dispatch，供 DecisionContext.gather 算 consolidate_target_id）。
+# 逐條件鏡射 _try_consolidate_merge:1421-1442（target 兩支）；回 absorber_id / leader_team_id / -1。
+static func consolidate_target_of(state: WorldState, mt: TeamData, f) -> int:
+	var fai := FactionAISystem.new()
+	var leader_team: TeamData = state.teams.get(f.leader_team_id)
+	var absorber_id: int = fai._find_absorber(state, mt, f)
 	if absorber_id != -1:
 		var mt_leader = state.persons.get(mt.leader_id)
 		var mt_cmd: float = float(mt_leader.skills.get("統領", 0.0)) if mt_leader else 0.0
@@ -1425,22 +1418,16 @@ func _try_consolidate_merge(state: WorldState, mt: TeamData, f, leader_team: Tea
 		var small_b: bool = mt.population < int(float(mt_cap) * SMALL_TEAM_RATIO)
 		var small_c: bool = float(mt.population) < float(state.teams[absorber_id].population) * SMALL_VS_LARGE
 		if small_b and small_c:
-			if TaskArbiter.try_set(state, mt, TeamData.TASK_MERGE,
-					state.teams[absorber_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "consolidate"):
-				mt.order_target_id = absorber_id
-			return true
+			return absorber_id
 	if "攻擊" in f.goals and leader_team != null:
-		var dist_to_leader: int = _hex_dist(mt.tile_pos, leader_team.tile_pos)
-		if dist_to_leader > 1 and dist_to_leader <= CONSOLIDATE_MAX_DIST:
+		var d: int = fai._hex_dist(mt.tile_pos, leader_team.tile_pos)
+		if d > 1 and d <= CONSOLIDATE_MAX_DIST:
 			var ldr_leader = state.persons.get(leader_team.leader_id)
 			var ldr_cmd: float = float(ldr_leader.skills.get("統領", 0.0)) if ldr_leader else 0.0
 			var ldr_cap: int = TeamData.pop_cap_from_leadership(ldr_cmd) - leader_team.population
 			if ldr_cap > 0:
-				if TaskArbiter.try_set(state, mt, TeamData.TASK_MERGE,
-						leader_team.tile_pos, TaskArbiter.PRIO_DISPATCH, "consolidate"):
-					mt.order_target_id = f.leader_team_id
-				return true
-	return false
+				return f.leader_team_id
+	return -1
 
 # ──────── 統一決策引擎切片 seam ────────
 # 切片 = 商隊 + 生產 tag 隊：macro 決策走 DecisionEngine（舊 member hoist / solo 生產者跳過，單一 owner）。

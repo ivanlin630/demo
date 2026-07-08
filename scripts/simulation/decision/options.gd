@@ -35,6 +35,8 @@ const REGISTRY: Dictionary = {
 	# A2a 子隊溶入：歸建＝服從母團權威/回母團集結（duty 驅，通用 row，非子隊專屬 term）。
 	# faction_duty weight 已 _duty_factor(loyalty,野心)→忠誠子隊聽令回母團；不忠→掠奪(greed)贏 rank。
 	"歸建":   [["faction_duty", "faction_duty"]],
+	# A2c-1（FA5 折入）：faction 整併（小隊併大隊/戰前向 leader 集結）降 rank_scored 競秤 option。
+	"整併":   [["consolidate_drive", "consolidate_drive"]],
 }
 
 # A2a 通用戰略-gate：子隊不自主發起「擴張自身戰略足跡」的 option（立據/奪據/練兵＝leader/faction 決定；
@@ -139,6 +141,10 @@ static func applicable(ctx: DecisionContext) -> Array:
 			# A2a 子隊：歸建＝服從母團，僅子隊候選（duty↔掠奪 rank 競秤，忠誠→歸建贏）。
 			"歸建":
 				if ctx.is_subteam: out.append(opt)
+			# A2c-1（FA5 折入）：faction 非-leader 成員 + 有整併 target（容量吸收 or 戰前向 leader 集結）→ 候選。
+			# 觸發條件保真（consolidate_target_id 於 gather 依現行 _find_absorber/rally 兩支算）。
+			"整併":
+				if ctx.consolidate_target_id != -1: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -231,4 +237,12 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		# A2a 歸建：由 _decide_subteam 特判為 lifecycle move（set move_target + merge_queue），
 		# 不進 to_task 標準派工；此 fallback 為安全（若誤入標準路 → IDLE）。
 		"歸建":   return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+		"整併":
+			# A2c-1（FA5）：向 target(absorber/leader)行軍 merge；TASK_MERGE 由 interaction_system:261 消費
+			# （抵達→併解）。局部 gather 取 target（避改 to_task 簽名 17-caller，鏡射「攻擊」法）。
+			var _cc: DecisionContext = DecisionContext.gather(state, team)
+			var ctid: int = _cc.consolidate_target_id
+			if ctid == -1 or not state.teams.has(ctid):
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_MERGE, "target": state.teams[ctid].tile_pos, "order_target": ctid}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

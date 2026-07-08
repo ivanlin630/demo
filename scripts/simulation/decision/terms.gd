@@ -20,6 +20,12 @@ const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/�
 # ── 佔村（雙引擎咬合：奪據點→據點產糧養兵，複用 capture+residency）──
 const OCCUPY_DRIVE_BASE: float = 1.2    # TEST VALUE — 佔村驅力基值（× occupy weight ≈ 0.4-0.7 → util 略勝 loot，要根據地的狼優先打村）
 const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守得住+夠日後分駐 settler，對齊 _dispatch_subteam_settle pop 需求）
+# A2c-1（FA5 折入）：整併驅力（faction-level 機制，非個人 utility → flat 高量級，保真「現行恆 fire」）。
+# 量級須 > mundane(生產/駐守/貿易 ≈0.3-0.6) + threat option(備戰/迎戰/求和 ≈0.5-0.9) → 現行 pre-gate
+# 「除 survival-sticky 外恆 fire」保真。survival-sticky 由 TaskArbiter priority-gate 保（非 rank_scored 內
+# 競秤）：獨立 _trigger_survival 設 PRIO_SURVIVAL(80) task → 整併走 _decide_unified PRIO_DISPATCH(50)
+# 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
+const CONSOLIDATE_DRIVE: float = 2.0    # TEST VALUE — warring-bed total_diffs=0 校準
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
@@ -149,6 +155,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "求和": return 0.0
 			return float(ctx.leader_values.get("貪婪", 0.5)) * 0.5 + float(ctx.leader_values.get("信義", 0.5)) * 0.3 \
 				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
+		"consolidate_drive":
+			# A2c-1（FA5 折入）：整併 target 存在才 fire；flat 高量級（faction-level 機制非個人染色）。
+			if opt != "整併" or ctx.consolidate_target_id == -1: return 0.0
+			return CONSOLIDATE_DRIVE
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0
@@ -216,6 +226,7 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
+		"consolidate_drive": return 1.0   # A2c-1：faction 機制非人格染色（mirror intent_fit/faction_duty flat）
 		# ── 融合 threat：人格已 baked 進 eval（additive，鏡射舊 scores）→ weight=1.0（同 intent_fit）──
 		"prepare", "defend", "pacify": return 1.0
 		# 野心階梯溶入（序3）：練兵傾向=好戰/野心染色（ambient 低 magnitude 由 eval 壓，讓位緊急）。
