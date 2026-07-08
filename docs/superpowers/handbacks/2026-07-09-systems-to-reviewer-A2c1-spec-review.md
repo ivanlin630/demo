@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 審 A2c-1 spec（FA5 consolidate 折入引擎 option）——對抗審 seam/保真/dispatch-key
 ---
 

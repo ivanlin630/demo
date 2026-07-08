@@ -93,13 +93,7 @@ faction **成員** 走統一引擎（`_decide_unified`），**但整併(MERGE)�
         return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
     return {"task": TeamData.TASK_MERGE, "target": state.teams[ctid].tile_pos, "order_target": ctid}
 ```
-- **★dispatch-key 缺口（grep 實證 2026-07-09）**：`_decide_unified` dispatch 段（`faction_ai:1515-1518`）**只認 `combat_target`/`social_target`，不認 `order_target`**。TASK_MERGE 由 `interaction_system:261` 查 `a.order_target_id == id_b` 解 → **必須設 `order_target_id`**。∴ **D1 加最小 dispatch-key 消費**（鏡射 combat/social_target 既有處理，additive）：
-```gdscript
-# _decide_unified dispatch，td.has("social_target") 分支旁：
-if td.has("order_target"):
-    team.order_target_id = int(td["order_target"])
-```
-（options.gd:228 threat return 的 order_target 走 threat 特殊分支非標準 dispatch，故標準路確缺；此為 additive dispatch-key，非決策邏輯改。）
+- **★`order_target` 已被既有 seam 消費（reviewer 反證修正 v2）**：`to_task` 回 `"order_target": ctid` → `_decide_unified:1535` 既有 `_wire_threat_task(team, td)`（`faction_ai:401-403` 泛用消費 `order_target`/`order_task`/`prosperity_target`，non-unified/unified 兩路共用 DRY）**已無條件設** `team.order_target_id = int(td["order_target"])`（同 td、combat/social_target 後、return 前）。TASK_MERGE 靠 `interaction_system:261` 的 `order_target_id == id_b` 解 → **零新增 dispatch-key，直接依賴 `_wire_threat_task`**。（`options.gd:228` 求和 option 亦已回 order_target 走同路，非本 spec 首引入。）
 
 ### D2. 新 term `consolidate_drive`（`decision/terms.gd`）
 
@@ -107,8 +101,9 @@ if td.has("order_target"):
 "consolidate_drive":
     # FA5 折入：faction 整併驅力（faction-level 機制，非個人 utility → flat 高量級，保真「現行恆 fire」）。
     # 校準：量級須 > mundane(生產/駐守/貿易 ≈0.3-0.6) + threat option(備戰/迎戰/求和 ≈0.5-0.9) → 現行
-    #   pre-gate「除 survival-sticky 外恆 fire」保真；survival_pressure(食0→12,PRIO_SURVIVAL 80) 自然壓過
-    #   = 同現行 survival-sticky guard。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
+    #   pre-gate「除 survival-sticky 外恆 fire」保真。survival-sticky 由 TaskArbiter priority-gate 保
+    #   （非 rank_scored 內競秤；見 D4）：獨立 _trigger_survival 設 PRIO_SURVIVAL(80) task → 整併走
+    #   _decide_unified PRIO_DISPATCH(50) 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
     if opt != "整併" or ctx.consolidate_target_id == -1: return 0.0
     return CONSOLIDATE_DRIVE   # TEST VALUE（初值 2.0；warring-bed total_diffs=0 校準）
 ```
@@ -126,26 +121,31 @@ if team.faction_id != -1 and team.parent_team_id == -1:
     if _f != null and team.team_id != _f.leader_team_id:
         consolidate_target_id = FactionAISystem.consolidate_target_of(state, team, _f)
 ```
-- 新 static helper `FactionAISystem.consolidate_target_of(state, mt, f) -> int`：抽 `_try_consolidate_merge` 的 **target 決策**（非 dispatch），回 absorber_id（branch1 條件成立）／leader_team_id（branch2 條件成立）／-1：
+- 新 helper `FactionAISystem.consolidate_target_of(state, mt, f) -> int`：抽 `_try_consolidate_merge` 的 **target 決策**（非 dispatch），回 absorber_id（branch1 條件成立）／leader_team_id（branch2 條件成立）／-1。內部**沿用既有 instance-call 慣例**（`decision_context.gd:121/153`、`options.gd:150` 同法）複用 `_find_absorber`/`_hex_dist`，不新造 static 雙生：
 ```gdscript
 static func consolidate_target_of(state, mt, f) -> int:
-    var leader_team = state.teams.get(f.leader_team_id)
-    # branch1 容量吸收
-    var absorber_id: int = _find_absorber_s(state, mt, f)
+    var fai := FactionAISystem.new()
+    var leader_team: TeamData = state.teams.get(f.leader_team_id)
+    # branch1 容量吸收（逐條件鏡射 _try_consolidate_merge:1421-1427）
+    var absorber_id: int = fai._find_absorber(state, mt, f)
     if absorber_id != -1:
-        var mt_cap := TeamData.pop_cap_from_leadership(<mt 統領>)
-        if mt.population < int(mt_cap * SMALL_TEAM_RATIO) \
+        var mt_leader = state.persons.get(mt.leader_id)
+        var mt_cmd: float = float(mt_leader.skills.get("統領", 0.0)) if mt_leader else 0.0
+        var mt_cap: int = TeamData.pop_cap_from_leadership(mt_cmd)
+        if mt.population < int(float(mt_cap) * SMALL_TEAM_RATIO) \
                 and float(mt.population) < float(state.teams[absorber_id].population) * SMALL_VS_LARGE:
             return absorber_id
-    # branch2 戰前集結
+    # branch2 戰前集結（逐條件鏡射 1432-1442）
     if "攻擊" in f.goals and leader_team != null:
-        var d := _hex_dist_s(mt.tile_pos, leader_team.tile_pos)
+        var d: int = fai._hex_dist(mt.tile_pos, leader_team.tile_pos)
         if d > 1 and d <= CONSOLIDATE_MAX_DIST:
-            var ldr_cap := TeamData.pop_cap_from_leadership(<leader 統領>) - leader_team.population
+            var ldr_leader = state.persons.get(leader_team.leader_id)
+            var ldr_cmd: float = float(ldr_leader.skills.get("統領", 0.0)) if ldr_leader else 0.0
+            var ldr_cap: int = TeamData.pop_cap_from_leadership(ldr_cmd) - leader_team.population
             if ldr_cap > 0: return f.leader_team_id
     return -1
 ```
-- `_find_absorber`/`_hex_dist` 現為 instance method → 提為 static（或 `consolidate_target_of` 內 `FactionAISystem.new()` 呼，鏡射 options.gd 既有 `FactionAISystem.new()._x` 法；擇 static 較淨）。**實作選其一，行為需等價現行**。
+- **行為需逐條件等價現行 `_try_consolidate_merge`**（QA #5 驗）。
 
 ### D4. 拆 pre-gate（`faction_ai_system.gd:_assign_member_tasks`）
 
@@ -162,7 +162,7 @@ func _assign_member_tasks(state, f):
 ```
 - **刪除**：1396-1404 的 `_try_consolidate_merge` 呼叫 + `continue` + phase_timing 包裹。
 - **保留 helper**：`_try_consolidate_merge`（1419-1443）若無他呼叫者 → 刪；target 邏輯已抽 `consolidate_target_of`。`_find_absorber`（1568）保留/提 static（供 `consolidate_target_of`）。grep 確認 `_try_consolidate_merge` 無他 caller 再刪。
-- **survival-sticky 保真**：舊 guard（1400 `if not survival task`）→ 引擎 survival option（PRIO_SURVIVAL 80 > 整併 PRIO_DISPATCH 50）自然壓過；`_decide_unified:1453` survival-sticky pass 亦保。→ 餓/危成員選 survival 非整併，**同現行**。
+- **survival-sticky 保真（機制：TaskArbiter priority-gate，非 rank_scored 內競秤）**：舊 guard（1400 `if not survival task`）→ 拆除後靠 arbiter 保：獨立 `_trigger_survival`（`rank_survival`，`faction_ai:3067-3099`）設 `PRIO_SURVIVAL(80)` task；整併經 `_decide_unified` 統一以 `PRIO_DISPATCH(50)` try_set，`TaskArbiter.try_set`（`task_arbiter.gd:30` `priority > team.task_priority` 才覆寫）**結構上寫不進** 已在 survival task 的隊 → 餓/危成員停在 survival 非整併，**與整併是否入 option 無關、同現行**。`_decide_unified:1453` survival-sticky pass 亦保。
 
 ### D5. 憲法閘 baseline（`scripts/debug/constitution_baseline.txt`）
 
@@ -179,7 +179,7 @@ func _assign_member_tasks(state, f):
 | `scripts/simulation/decision/options.gd` | REGISTRY +`"整併":["consolidate_drive"]`；`applicable` +`"整併"` 分支（`ctx.consolidate_target_id != -1`）；`to_task` +`"整併"`（TASK_MERGE, target=target tile, order_target=ctid，局部 gather） | D1 |
 | `scripts/simulation/decision/terms.gd` | `eval` +`"consolidate_drive"`；`const CONSOLIDATE_DRIVE=2.0`；w_term 映射 +`"consolidate_drive":1.0` | D2 |
 | `scripts/simulation/decision/decision_context.gd` | +欄 `consolidate_target_id:int=-1`；`gather` 內算（非-leader 成員/非子隊 → `consolidate_target_of`） | D3 |
-| `scripts/simulation/faction_ai_system.gd` | 拆 `_assign_member_tasks` consolidate pre-gate(1396-1404)；`_decide_unified` dispatch +`order_target` key 消費(1515 旁,additive)；+static `consolidate_target_of`（抽 target 邏輯）；`_find_absorber`/`_hex_dist` 提 static 或複用；`_try_consolidate_merge` 無他 caller 則刪 | D1/D3/D4 |
+| `scripts/simulation/faction_ai_system.gd` | 拆 `_assign_member_tasks` consolidate pre-gate(1396-1404)；+`consolidate_target_of(state,mt,f)`（抽 target 兩支邏輯，內以 `FactionAISystem.new()._find_absorber(...)`/`._hex_dist(...)` instance-call 複用既有，不新造 static 雙生）；`_try_consolidate_merge` 無他 caller 則刪 | D1/D3/D4 |
 | `scripts/debug/constitution_baseline.txt` | `_assign_member_tasks`/`_try_consolidate_merge` 註記更新（pre-gate→引擎 option） | D5 |
 
 **不碰**：`_decide_unified` 決策邏輯（rank/survival-sticky 不改；唯 additive +`order_target` dispatch-key）、survival/threat/faction_duty/intent_fit term（零 patch）、`interaction_system` TASK_MERGE 消費端（target/order_target_id 語意不變）、觸發三常數（`SMALL_TEAM_RATIO`/`SMALL_VS_LARGE`/`CONSOLIDATE_MAX_DIST` 保）、leader 路（A2b）、子隊路（A2a）、solo、FA6/FA7/FA8（另 slice）。
