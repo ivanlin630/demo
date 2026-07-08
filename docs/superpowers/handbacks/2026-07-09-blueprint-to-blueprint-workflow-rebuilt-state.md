@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 topic: 現狀交接——多終端工作流全重建+A2b待量測守衛;本session非法(無role)已關,重開00接
 ---
 
