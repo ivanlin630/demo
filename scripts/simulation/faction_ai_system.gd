@@ -3,6 +3,8 @@ class_name FactionAISystem
 const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
 const DISPATCH_DIST_THRESHOLD: int   = 2
+
+static var _a2b_remote_tribute_payers: Dictionary = {}   # A2b 守衛 B：遠距徵收 dispatch 的 payer id（settle 對帳）
 const FOOD_EMERGENCY: float          = 3.0
 # 戰爭基金：野心/好戰高 leader material 低於此 → 非缺糧也觸發特別稅徵收。TEST VALUE
 const WAR_CHEST_MIN: float           = 200.0
@@ -98,6 +100,8 @@ const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score
 
 # ── Threat response（被動威脅反應）──
 const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威脅
+# A2b intent 重選 cadence（藍圖 #3：戰略每 tick 重秤=雜訊；1 日重評，cadence 內沿用 f.intent）。TEST VALUE。
+const INTENT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日
 # A2a 子隊決策 cadence（效能：全框架 gather+rank 非逐 tick，攤平 O(N²) LOD 成本，鏡射 THREAT_CADENCE）。
 const SUBTEAM_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 子隊決策一次（TEST VALUE，平衡 pass 調）
 # preempt：忙碌隊只有「壓境能傷你」威脅才打斷進行中 task（門檻 = threat_threshold + 此加成）。
@@ -973,9 +977,13 @@ func _update_goals(state: WorldState, f) -> void:
 				and leader_team.readiness >= ESTABLISH_READINESS:
 			_emit_goal(state, f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
 
-	# ── 步驟 2：意圖選擇（resource-aware + 人格 + belief + hysteresis）──
-	var intent: Dictionary = _select_intent(state, f)
-	f.intent = intent
+	# ── 步驟 2：意圖選擇（cadence-gate，藍圖 #3：1 日重選，cadence 內沿用 f.intent）──
+	if state.world.current_tick >= f.intent_eval_next_tick:
+		f.intent = _select_intent(state, f)
+		f.intent_eval_next_tick = state.world.current_tick + INTENT_CADENCE
+	# else：沿用上次 f.intent（committed hysteresis 已在 _select_intent，cadence 再加穩定層）
+	var intent: Dictionary = f.intent if f.intent is Dictionary and not f.intent.is_empty() \
+		else {"type": "守成", "target_id": -1, "why": ""}
 	f.strategy = intent["type"]
 	var itype: String = intent["type"]
 	if Probe.enabled and itype != "": Probe.bump("intent.sel_" + itype)
@@ -1363,41 +1371,15 @@ func _assign_tasks(state: WorldState, f) -> void:
 			print("[FactionAI] Team%d 抗拒玩家指令（loyalty=%.2f）" % [tid_cmd, loyalty_cmd])
 	if SimRunner.phase_timing: _ta = _fai_pht("assign.player_cmd", _ta)
 
-	if "徵收" in f.goals and leader_team.current_task != TeamData.TASK_TRIBUTE:
-		var best_tid: int = _richest_member(state, f)
-		if best_tid != -1:
-			var target_pos: Vector2i = state.teams[best_tid].tile_pos
-			var dist: int = _hex_dist(leader_team.tile_pos, target_pos)
-			if dist > DISPATCH_DIST_THRESHOLD and leader_team.population >= 3 \
-					and leader_team.named_members.size() > 0:
-				var _sub_sys_pick := SubteamSystem.new()
-				var sub_leader_id: int = _sub_sys_pick._pick_subteam_leader(state, leader_team, TeamData.TASK_TRIBUTE)
-				if sub_leader_id == -1: sub_leader_id = leader_team.named_members[0]
-				var pop_count: int = maxi(leader_team.population / 4, 2)
-				_sub_sys_pick.dispatch(state, f.leader_team_id, sub_leader_id,
-					pop_count, TeamData.TASK_TRIBUTE, target_pos)
-			else:
-				TaskArbiter.try_set(state, leader_team, TeamData.TASK_TRIBUTE, target_pos,
-					TaskArbiter.PRIO_DISPATCH, "faction_tribute")
+	# A2b：立國=結構性 lifecycle gate（非戰術 option，不入引擎；同 A2a 戰略足跡=leader/faction 決定）。
 	if "立國" in f.goals:
 		_declare_established(state, f, leader_team)
-	if "外交" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK]:
-		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1:
-			TaskArbiter.try_set(state, leader_team, TeamData.TASK_DIPLOMACY,
-				state.teams[target_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "faction_diplomacy")
-	if "攻擊" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK]:
-		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1 and TaskArbiter.try_set(state, leader_team, TeamData.TASK_ATTACK,
-				state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
-			print("[FactionAI] Team%d 主動攻擊 Team%d" % [f.leader_team_id, target_id])
-	if "掠奪" in f.goals and leader_team.current_task not in [TeamData.TASK_TRIBUTE, TeamData.TASK_DIPLOMACY, TeamData.TASK_ATTACK, TeamData.TASK_LOOT]:
-		var target_id: int = _nearest_independent(state, leader_team)
-		if target_id != -1 and TaskArbiter.try_set(state, leader_team, TeamData.TASK_LOOT,
-				state.teams[target_id].tile_pos, TaskArbiter.PRIO_FACTION, "faction_goal"):
-			print("[FactionAI] Team%d 主動掠奪 Team%d" % [f.leader_team_id, target_id])
-	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_goals", _ta)
-	HandBrainProbe.note_bypass(state, leader_team, "leader")   # 手聽腦：leader 手寫 cascade 繞引擎計數（A2）
+	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_lifecycle", _ta)
+	# A2b：leader 隊戰術執行走統一引擎（取代 徵收/外交/攻擊/掠奪 手 cascade + note_bypass）。
+	# 徵收/外交(faction_duty)+攻擊(faction_duty+intent_fit 加成)+貿易/囤貨/生產/駐守/survival/threat 全 rank_scored 競秤。
+	# 立國(上)已 pre-empt；player_cmd(上)PRIO_PLAYER 已蓋。conquest scaffolding faction_id==-1 leader 不觸。
+	_decide_unified(state, leader_team)
+	if SimRunner.phase_timing: _ta = _fai_pht("assign.leader_unified", _ta)
 	_assign_member_tasks(state, f)
 	if SimRunner.phase_timing: _fai_pht("assign.members", _ta)
 
@@ -1535,6 +1517,20 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if td.has("social_target"):
 			state.set_social_target(team, int(td["social_target"]))
 		if opt == "攻擊": _probe_vendetta_dispatch(state, team)   # 序4：純血仇攻擊驗魂
+		# A2b 守衛 A：leader 隊經引擎發起攻擊計數（稀有非零；成員不計）。
+		if _set_ok and opt == "攻擊" and team.faction_id != -1 \
+				and state.factions.has(team.faction_id) \
+				and state.factions[team.faction_id].leader_team_id == team.team_id:
+			Probe.bump("a2b.leader_attack")
+		# A2b 守衛 B：leader 遠距徵收 dispatch → 記 payer，settle 對帳（證遠距貢真收到）。
+		if _set_ok and opt == "徵收" and team.faction_id != -1 \
+				and state.factions.has(team.faction_id) \
+				and state.factions[team.faction_id].leader_team_id == team.team_id:
+			var _rt: int = _richest_member(state, state.factions[team.faction_id])
+			if _rt != -1 and _rt != team.team_id \
+					and _hex_dist(team.tile_pos, state.teams[_rt].tile_pos) > DISPATCH_DIST_THRESHOLD:
+				Probe.bump("a2b.remote_tribute_dispatch")
+				_a2b_remote_tribute_payers[_rt] = true
 		# 融合 threat：unified 隊選 迎戰/求和 時亦接 aux target（prosperity/order），與 non-unified 路徑一致。
 		_wire_threat_task(team, td)
 		# 手聽腦單點同-tick 探針（純觀測，env-gated 預設關 → byte-identical）：敲定 winner + try_set + 副作用後、

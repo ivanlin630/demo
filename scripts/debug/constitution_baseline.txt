@@ -12,7 +12,7 @@
 # （小隊併大隊=faction-level 機制非個體 utility 決策，故不入引擎 option，鏡射 _commit_conquest_attack
 #  /_evaluate_threat 保留法）。
 scripts/simulation/faction_ai_system.gd::_try_consolidate_merge
-# 序6b dispatch（leader _assign_tasks 立國/subteam-tribute 特殊語意，defer 序6b）
+# A2b: leader 戰術→_decide_unified（引擎競秤）；_assign_tasks 本體只留 player_cmd(PRIO_PLAYER)+立國 lifecycle-gate（tactical cascade 已拆，note_bypass 移除）
 scripts/simulation/faction_ai_system.gd::_assign_tasks
 scripts/simulation/faction_ai_system.gd::_decide_unified
 # 序A2a subteam 溶入引擎（rank_scored 全框架；正當性同 _decide_unified/_evaluate_solo）；

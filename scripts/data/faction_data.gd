@@ -13,6 +13,7 @@ var strategy: String = "idle"
 
 # commander-v2 means-end：意圖驅動 + 每令 driver（北極星：named 意圖必有可解釋驅動）
 var intent: Dictionary = {}        # {type:String, target_id:int, why:String} 承諾追蹤（hysteresis）
+var intent_eval_next_tick: int = 0   # 下次 intent 重選 tick（cadence，A2b #3；鏡射 team threat/subteam_eval_next_tick）
 var goal_drivers: Dictionary = {}  # goal(String) → {intent:String, why:String, mode:String} 每令連回意圖
 
 # 跨勢力關係（立國號才有意義；未立國號留空）

@@ -53,6 +53,7 @@ func _run() -> void:
 func _run_seed(world_seed: int, ticks: int) -> Dictionary:
 	seed(world_seed)
 	Probe.enabled = true; Probe.reset()          # 引擎自身 probe 照跑（byte-identical）
+	FactionAISystem._a2b_remote_tribute_payers.clear()   # A2b 守衛 B ledger 每 run 重置（防跨 run 污染）
 	HandBrainProbe.enabled = true; HandBrainProbe.reset()
 	var state := WorldState.new()
 	var runner := SimRunner.new()

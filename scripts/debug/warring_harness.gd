@@ -48,6 +48,7 @@ static func run(world_seed: int, total_ticks: int,
 	seed(world_seed)   # 播 global RNG（runtime 72 處 bare randf/randi）→ 每跑重置流、逐 tick 確定
 	Probe.enabled = true
 	Probe.reset()
+	FactionAISystem._a2b_remote_tribute_payers.clear()   # A2b 守衛 B ledger 每 run 重置（防跨 run 污染）
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config(config_path)

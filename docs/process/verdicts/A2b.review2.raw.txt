@@ -1,0 +1,68 @@
+---
+verdict: issues
+reviewer_session: 2026-07-08 reviewer@mailbox—rev2
+spec_path: docs/superpowers/specs/2026-07-08-A2b-leader-into-engine.md (rev v2)
+ref: docs/process/verdicts/A2b.review.raw.txt
+---
+
+## 複審 A2b spec rev v2（系統回應三議題）
+
+### 對抗① Issue 1（身分違憲）
+
+**系統新論據**：撤 v1「leader 排除 stakes-攻擊」，改為「leader 讀全 stakes+intent（均一），攻擊 target 由 intent-conditional to_task 決定」。
+論據：intent 是 pre-existing context 值差異（decision_context:224 我未 flag），非新增身分路徑分支。
+
+**verdict**：接納此論點。
+- 224 行（ctx.intent = f.intent.type）pre-existing，我 factcheck 時驗了未 flag，無妨。
+- 系統新解「均一 term set + context 值差異」邏輯紮實（非路徑分支）。
+- 攻擊雙訊號（faction_duty + intent_fit）於征服 leader = 合理（兩視角同決策，稀有性 gate 上游 intent-selection cadence）。
+
+**但新風險**：leader 攻擊 util 多疊 intent_fit boost（readiness×conq_person×cap），vs 成員無此 boost。
+- leader 攻擊選擇時機/頻率 vs 成員，會否因多一層 intent_fit 驅力導致不對稱（leader 更好戰）？
+- spec 驗收#9 聲稱「非退化」，需實際 seeded 遊走驗證（同 Issue3-12 邊界檢查）。
+
+**小綠點**：Issue 1 本質改為「pre-existing 風險 vs A2b 新增風險」邊界劃分，範圍超 A2b。系統論據同意。
+
+---
+
+### 對抗② Issue 2（D2/D3 改點清單）
+
+**系統澄清**：
+- D2 改點移至 options.gd:181-190 intent-conditional reorder（非 decision_context 排除 guard）
+- D3 cadence-gate 加欄 + const（FactionData + INTENT_CADENCE）
+- 觸及檔表已明列行號
+
+**但發現細節漏洞**：spec D2（108 行）承諾「攻擊 target=prosperity（修 FA10 god-view）」，但改 code options.gd:98 用 intent_target。
+- 而 intent_target = f.intent.get("target_id", -1)
+- 而 f.intent.target_id = _select_intent 返值（902 行）= _nearest_independent（仍是 god-view）
+- 未達「prosperity_prey」改進
+
+**效果**：系統改點只是「if intent==征服 then intent_target else faction_attack_target」，并未修 FA10 god-view 漏洞。目標 target 選擇改為：
+- leader 征服 → _nearest_independent（from intent.target_id），非 prosperity_prey
+- 成員 → _nearest_independent（from faction_attack_target）
+- 行為零變
+
+**issue**：spec 說修 FA10，實作未達。需澄清：
+- (a) 改 _select_intent 用 prosperity_prey（改 902 行）？
+- (b) 改 to_task 用 prosperity_prey_id（改 options:98 行 intent_target → prosperity_prey_id + intent 判斷）？
+- (c) 放棄修 FA10，接納仍用 _nearest_independent？
+
+---
+
+### 對抗③ Issue 3（呈報缺驗證）— 全納驗收法
+
+系統已納 #10-12 為驗收法硬項。綠。（同 v1）
+
+---
+
+## 結論
+
+**v2 對 Issue 1 的回應**：論據成立，accept（pre-existing 風險邊界外）。
+**v2 對 Issue 2 的回應**：改點清單澄清，但發現「prosperity_prey 承諾未達」細節漏洞。需澄清改法或放棄 FA10 修復。
+**v2 對 Issue 3 的回應**：綠。
+
+**沿案決策**：
+- 若澄清 (a)/(b) → 再改 code + spec 文
+- 若決策 (c) → 撤 spec D2（108 行）的「修 FA10」宣稱，改為「intent-conditional target 保持原序」
+
+建議系統澄清後再上藍圖審。
