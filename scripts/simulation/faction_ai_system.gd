@@ -98,6 +98,8 @@ const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score
 
 # ── Threat response（被動威脅反應）──
 const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威脅
+# A2b intent 重選 cadence（藍圖 #3：戰略每 tick 重秤=雜訊；1 日重評，cadence 內沿用 f.intent）。TEST VALUE。
+const INTENT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日
 # A2a 子隊決策 cadence（效能：全框架 gather+rank 非逐 tick，攤平 O(N²) LOD 成本，鏡射 THREAT_CADENCE）。
 const SUBTEAM_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 子隊決策一次（TEST VALUE，平衡 pass 調）
 # preempt：忙碌隊只有「壓境能傷你」威脅才打斷進行中 task（門檻 = threat_threshold + 此加成）。
@@ -973,9 +975,13 @@ func _update_goals(state: WorldState, f) -> void:
 				and leader_team.readiness >= ESTABLISH_READINESS:
 			_emit_goal(state, f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
 
-	# ── 步驟 2：意圖選擇（resource-aware + 人格 + belief + hysteresis）──
-	var intent: Dictionary = _select_intent(state, f)
-	f.intent = intent
+	# ── 步驟 2：意圖選擇（cadence-gate，藍圖 #3：1 日重選，cadence 內沿用 f.intent）──
+	if state.world.current_tick >= f.intent_eval_next_tick:
+		f.intent = _select_intent(state, f)
+		f.intent_eval_next_tick = state.world.current_tick + INTENT_CADENCE
+	# else：沿用上次 f.intent（committed hysteresis 已在 _select_intent，cadence 再加穩定層）
+	var intent: Dictionary = f.intent if f.intent is Dictionary and not f.intent.is_empty() \
+		else {"type": "守成", "target_id": -1, "why": ""}
 	f.strategy = intent["type"]
 	var itype: String = intent["type"]
 	if Probe.enabled and itype != "": Probe.bump("intent.sel_" + itype)
