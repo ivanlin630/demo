@@ -66,16 +66,25 @@ docs/
 ```
 ---
 
-## Session 工作流（全 pipeline，2026-07-06 切）
+## Session 工作流（多終端為主軌，2026-07-08 切回）
 
-用戶只跟**藍圖 orchestrator**（持久人工 session）談 WHAT。藍圖裁定後 spawn subagent 執行下游。詳 `docs/process/06_pipeline_orchestration.md`（+ `00_roles`/`01_architect`/`03_implementer`/`04_qa`/`05_acceptance` 仍為角色職責/驗收本體）。
+★預設 = **多終端信箱 relay**（各角色持久 session 平行開，git handback 信箱 + Monitor 主動觸發）。
+langgraph 機器（`tools/orchestrator/`）**少用**，只大/並行活才上（機器誤判 A2a 假 reject + 燒錢 $27/slice 是動機）。
+詳 `docs/process/00_roles.md`（角色/owner/邊界本體）+ `07_mailbox_trigger.md`（信箱）+ `08_machine_workflow_v2.md`（機器軌）。
 
-- **藍圖 orchestrator**（WHAT，人工）：與用戶談願景/平衡；一裁定→fan-out spawn 下游。owner = `game-design.md`。
-- **系統 subagent**（HOW，ephemeral）：spec/plan（讀 `invariants`/`game-design`）。owner doc = `invariants.md`/流程 docs/`progress.md`/`CLAUDE.md`。
-- **實作 subagent**（worktree，ephemeral）：建+測→handback。
-- **QA subagent**（★獨立 adversarial，非藍圖自蓋自判）：判決。**用戶=最終驗收權威**（交用戶前 QA 綠=硬閘）。
-- **git doc = 共享大腦**：handback + `game-design`/`invariants`/`progress` 持久狀態；ephemeral subagent 直讀 doc 得 context。owner 表語意不變，**寫手 = orchestrator 序列化（天然單寫，無並發）**。
-- **auto-memory 單寫者 = 藍圖 orchestrator session**（持久、序列化、看全局）。
-- **憲法閘/融合驗/framework = orchestrator merge-gate 步**（merge 前 spawn 跑，綠才 merge）；pre-commit site-freeze 閘已撤（arc-temporary）。
-- 邊界：藍圖不碰架構細節、系統不改願景；越界呈報。禁廢話恭維。深架構 slice 餵厚 context（ephemeral 比老兵淺）。
-- **工作流兩軌並存（2026-07-08）**：小/序列活+設計討論走**信箱 relay**（各角色持久 session + git handback 信箱 + Monitor 主動觸發，開場 arm `inbox-watch.sh`；詳 `docs/process/07_mailbox_trigger.md`）；大/並行活走 **langgraph 機器**（`tools/orchestrator/`，詳 `docs/process/08_machine_workflow_v2.md`）。
+**持久設計/驗收 session（`A:\GDS\demo` / `main`，平行開）**——啟動 `$env:SESSION_ROLE='<role>'; claude`：
+- **藍圖**（WHAT）：願景/feature/平衡意圖。owner=`game-design.md`。
+- **系統**（HOW）：seam/契約/invariant/流程。owner=`invariants.md`/流程 docs/`progress.md`/`CLAUDE.md`/`docs/process/*`。守 `01_architect.md`。
+- **審查**（02 對抗）：factcheck/審 spec，skeptical/只信 file:line。守 `02_reviewer.md`。
+- **QA 驗收官**：★獨立 adversarial 判決 + release gate（交用戶前 QA 綠=硬閘）。守 `04_qa.md`/`05_acceptance.md`。
+- 邊界：藍圖不碰架構、系統不改願景；越界呈報。喬不攏你裁。禁廢話恭維。
+
+**實作 session**（`.worktrees/<feature>/` / `feat/<feature>`）：worktree 照 plan 做+TDD+handback，守 `03_implementer.md`。
+（worktree 別 dir、信箱 live 看不到 → 不 arm，走 plan/機器領活。）
+
+**★信箱主動觸發（免人肉轉述）**：各持久角色開場 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`
+——別的角色寫 `to:<我> && status:open` 信 ~20s 內主動喚醒。寄件=Write handback（frontmatter from/to/status/topic），動完改 `status:consumed`。
+
+- **git doc = 共享大腦**：handback + `game-design`/`invariants`/`progress` 持久狀態。owner 表語意不變。
+- **auto-memory 單寫者 = 藍圖 session**（持久、看全局；別角色教訓走 handback → 藍圖提煉入 memory）。
+- **憲法閘/融合驗/framework = merge 前跑**（綠才 merge）。
