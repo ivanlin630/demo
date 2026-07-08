@@ -88,3 +88,18 @@ topic: <功能名稱> 實作交付 — <一句摘要>
 3. Commit hand-back 文件，不要直接 merge 到 main，等主 session 確認。
 
 4. **finishing-a-development-branch skill 彈出選單時，直接選 Option 3（Keep the branch as-is），不向用戶提問。**主 session 負責 merge。
+
+## ★每-task lifecycle（待命↔worktree，2026-07-09 用戶定）
+
+implementer 是**主目錄 standby session**，per-task 進 worktree 做、做完回主目錄，**主目錄永遠停在 main**（防共用 dir 卡 feature branch 的事故）。
+
+1. **待命**：session 在主目錄 `A:\GDS\demo`（main branch）、arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`，等 `to:implementer` 信。
+2. **接 task**：收信 → `git worktree add .worktrees/<feature> -b feat/<feature>`（已存在則 `cd` 進）→ `cd .worktrees/<feature>`。所有實作/commit/push 在此。
+3. **做**：照 plan TDD、逐 task commit、跑 godot 驗。
+4. **★收尾（每 task 完成）**：
+   - 寫 handback（X-to-Y frontmatter）到**唯一 main mailbox 絕對路徑**（見上 §2）。
+   - **`cd` 回主目錄 `A:\GDS\demo`**，確認 `git branch --show-current` = **main**（worktree 的 feat 分支不動、只你 shell 回家）。**★絕不在主目錄 checkout feat 分支。**
+   - **清 ctx**（`/clear` 或起新 session）→ 下 task 乾淨起、不累積。
+   - **待命**（重 arm inbox-watch，等下一封）。
+
+∴ 主目錄恆 main、每 task ctx 隔離、worktree 隔離改 code、handback 走 main mailbox 自動觸發下一站。
