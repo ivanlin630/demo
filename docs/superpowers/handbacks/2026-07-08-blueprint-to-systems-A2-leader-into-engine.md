@@ -39,6 +39,13 @@ reverse-findings：faction「leader 零引擎 + 5 平行權威 + 優先權倒置
 
 ---
 
+## 附帶：清 memory 單寫者 doc drift（順手，非 A2 本體）
+用戶點出矛盾：**信箱兩軌(現行)下 memory 單寫者 = systems**（我藍圖只讀、教訓走 handback），但舊 pipeline 遺字仍寫「藍圖 orchestrator = 單寫者」。請把下列對齊「兩軌下 systems 單寫」：
+- `00_roles.md` §auto-memory(§90 附近)
+- `CLAUDE.md` 相關句
+- memory `[[feedback_pipeline_workflow]]`（若還寫「memory 單寫者改 orchestrator」）
+原因：pipeline 模型只有藍圖一持久 session(故單寫)；兩軌恢復持久角色 session → 單寫者回 systems。這兩檔 owner=你。
+
 ## 流程
 - 你(系統)寫 spec(A2b 先，A2c 可同 spec 分段或另開)→ reviewer(02 對抗)審 → 回 blueprint。走信箱(`07_mailbox_trigger.md`)。
 - owner：invariants/spec/progress/known_issues = 你；game-design 願景事實我補。
