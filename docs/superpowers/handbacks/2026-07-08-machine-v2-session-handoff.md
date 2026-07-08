@@ -7,13 +7,16 @@ topic: machine v2 建完(批次1.5/1.6/2+操作修)——A2a 正跑 v2 首次真
 
 # 交接：machine v2 + A2a 首跑（2026-07-08）
 
-## ★立刻要做：盯 A2a v2 首跑
-- **A2a 正在跑 v2 全流程**（--local detached，worktree `.worktrees/machine-A2a`）。
-- 位置：`systems_spec`(opus 寫 spec) 進行中（factcheck haiku $0.28 clean 過了）。花費累計 ~$6.6。
-- **watch 背景跑著**（`python run.py --slice A2a --watch`）——到 **①bp_review 有 concern / ②qa_review merge前 / halt / 完成** 會叫醒藍圖。
-- 看進度：`! python tools/orchestrator/run.py --status`（顯最後站 + 路線圖；A2a log buffered 故路線圖不準,看「最後站」）。
-- **到 ①**：藍圖讀 concern → 怪才轉告用戶。**到 ②**：報 QA 數字+帳單 → 用戶 approve/reject。
-- **A2a 目的**：驗 v2 全流程(①我審/session-resume/量測員/haiku)真動沒 + 看真 token 分佈(vs A1a $27)。
+## ★立刻要做：A2a 停在 review(有真發現)——處理 review 的 2 個盲點再重跑
+**A2a v2 首跑結果**（--local，worktree `.worktrees/machine-A2a`，已結束非在跑）：
+- 跑了 factcheck(haiku,clean,$0.28)→systems_spec(opus,$3.51,spec commit 9e84c14)→**review(sonnet,issues,$1.75)**→halt。**共 ~$5.5，遠低於 A1a 同段。**
+- **review(sonnet)抓到真深盲點(halt)**：spec 設計方向健全,但①宣稱的 commitment 防抖若真鏡射 rank_ambient 就不存在 ②子集內攻擊 option applicable 閘比舊手寫嚴,**子隊攻擊觸發率可能塌陷,驗收法沒量這個**。→ **sonnet review 有價值、tiering work。**
+- **但 run_local 曾崩**(interrupt chunk tuple 當 dict)——**已修 committed**。
+**下一步**：藍圖裁 review 發現→修 A2a spec/工單(補 commitment 機制講清 + 加子隊攻擊觸發率驗收)→重跑。或先問用戶要不要照 review 改。**這是 halt=藍圖判的檢查點。**
+
+## v2 首跑驗到的（正面）
+- haiku factcheck 能做(變異;重試已加)、sonnet review 夠利抓深 bug、opus spec 正常、成本大降(~$5.5 vs A1a $27)。
+- 崩點=run_local 沒處理 interrupt(修了);session-resume/量測員/①bp_review 還沒走到(review 就 halt 了)。
 
 ## machine v2 全貌（全 committed；設計 `docs/process/08_machine_workflow_v2.md`）
 流程：`factcheck→systems_spec→review(02②)→①bp_review(00審)→systems_plan→implementer→measure→qa→②qa_review→merge`；退回→halt。
