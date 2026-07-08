@@ -67,17 +67,19 @@ docs/superpowers/handbacks/YYYY-MM-DD-<from>-to-<to>-<topic>.md
 
 frontmatter：
 ```
-from: <role>          # blueprint | systems | implementer | qa
+from: <role>          # blueprint | systems | implementer | qa | measurer | reviewer
 to: <role>
 status: open | consumed
 topic: <一行>
 ```
 
+**★裁決信 marker（給 implementer 的完成判定，2026-07-09）**：task 是否完成**由 01/②判決，非 implementer 自判**（QA 可能 redo）。01 判完寫 `to:implementer` 的信，topic 帶 marker：`[DONE]`（approved/merged→implementer 收尾清 ctx）或 `[REDO]`（要改→implementer 還 warm 直接改）。**Stop-hook `implementer-cleanup.sh` 據 `[DONE]` 逼收尾**（見 `03_implementer.md §5` lifecycle）。
+
 生命週期：
 1. 發送方寫 `status: open`。
 2. **每 session 開頭掃 `handbacks/`，讀 `to: 本角色 / status: open` 的**（義務）。
    - **自動 📬（hook，gitignore 本地）**：`SessionStart → session-role.sh`（開頭掃一次）+ `UserPromptSubmit → handback-inbox.sh`（**每 turn 掃**，補 session 中途別角色寫的；空則靜默）。掃 frontmatter `to:$SESSION_ROLE status:open` = 讀真值源，免 QUEUE.md drift。消滅人肉轉述。
-   - **★`/clear` 後必重讀職責正典**：`/clear`（或 /compact）**不重觸 SessionStart hook** → 角色 context 被清掉。任何角色清 ctx 後接下一活前，先重讀自己的 `0X_<role>.md` + `00_roles.md` + 重 arm inbox-watch。（implementer per-task lifecycle 尤其，見 `03_implementer.md`。）
+   - **★`/clear`·`/compact` 會重觸 SessionStart hook**（`source="clear"/"compact"`）→ `session-role.sh` **自動重注入職責 + arm 指令**。∴ 清 ctx 後職責**自動重載、忘不了**，agent 只需重 arm inbox-watch。**注意**：`/clear` 本身是**用戶鍵入動作**（agent/hook 都不能自 issue）。
 3. 消費後改 `status: consumed`（不刪檔，留軌跡）。
 4. 待決事項的**歸宿仍是 owner doc**：handback 只是載體。例：藍圖裁定殲滅模型 → 寫進 `game-design.md` → handback consumed。系統定 seam → 寫進 `invariants.md`/spec → consumed。
 
