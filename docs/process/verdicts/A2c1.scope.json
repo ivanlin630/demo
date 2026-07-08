@@ -1,0 +1,66 @@
+{
+  "slice": "A2c1",
+  "title": "faction consolidate 整併 pre-gate 折入統一引擎 option（FA5）",
+  "spec": "docs/superpowers/specs/2026-07-09-A2c1-consolidate-into-engine.md",
+  "plan": "docs/superpowers/plans/2026-07-09-A2c1-consolidate-into-engine.md",
+  "rev": 1,
+  "touch_files": [
+    {
+      "path": "scripts/simulation/decision/decision_context.gd",
+      "why": "+欄 consolidate_target_id:int=-1；gather 內算（非-leader faction 成員/非子隊 → consolidate_target_of）",
+      "risk": "low — 純加 ctx 欄 + gather 一段"
+    },
+    {
+      "path": "scripts/simulation/faction_ai_system.gd",
+      "why": "+static consolidate_target_of（抽 _try_consolidate_merge target 兩支，逐條件等價 1421-1442，內用 FactionAISystem.new()._find_absorber/._hex_dist）；拆 _assign_member_tasks consolidate pre-gate(1396-1404 的呼叫+continue+phase_timing)；_try_consolidate_merge(1419-1443) 無他 caller 則刪；_find_absorber(1568) 保留",
+      "risk": "high — 核心 AI 檔；拆 pre-gate 需保 survival-sticky（靠 TaskArbiter priority-gate 非 rank 內競秤）+ 逐條件等價"
+    },
+    {
+      "path": "scripts/simulation/decision/terms.gd",
+      "why": "+const CONSOLIDATE_DRIVE=2.0；eval +consolidate_drive 分支（flat 高量級,保現行 fire 恆勝）；w_term 映射 +consolidate_drive:1.0",
+      "risk": "low — 純加 term + const；量級 measure 校準"
+    },
+    {
+      "path": "scripts/simulation/decision/options.gd",
+      "why": "REGISTRY +整併:[consolidate_drive]；applicable +整併分支(ctx.consolidate_target_id!=-1)；to_task +整併(局部 gather → TASK_MERGE + target tile + order_target=ctid)",
+      "risk": "low — 純加 option（不動既有 applicable 閘）"
+    },
+    {
+      "path": "scripts/debug/constitution_baseline.txt",
+      "why": "移除 _try_consolidate_merge 兩 try_set(1428/1439) 指紋；_assign_member_tasks 註記更新(pre-gate→引擎 option)。漏改=merge-gate FAIL",
+      "risk": "med — 憲法閘契約檔"
+    },
+    {
+      "path": "scripts/debug/a2c1_consolidate_bed.gd",
+      "why": "新 TDD bed：consolidate_target_of 等價現行 + term/option 斷言 + 整合(整併經引擎達成)+ survival 保。純測試,不動 sim",
+      "risk": "low — debug bed"
+    }
+  ],
+  "touch_systems": [
+    "decision_engine (整併 option/term/ctx — 統一決策引擎)",
+    "faction_ai (_assign_member_tasks consolidate pre-gate 拆除)"
+  ],
+  "no_touch": [
+    "_decide_unified 決策邏輯（rank/survival-sticky 不改；order_target 靠既有 _wire_threat_task:1535 消費）",
+    "survival/threat/faction_duty/intent_fit term（零 patch）",
+    "interaction_system TASK_MERGE 消費端（261/461 — target/order_target_id 語意不變）",
+    "觸發三常數 SMALL_TEAM_RATIO/SMALL_VS_LARGE/CONSOLIDATE_MAX_DIST（保現值）",
+    "leader 路（A2b）、子隊路（A2a）、solo _evaluate_solo",
+    "FA6 strategic 包圍/breakout（=A2c-2）、FA8 diplomatic（=A2c-3）、FA7/FA10-leader god-view（arc3）"
+  ],
+  "depends_on": [
+    {
+      "slice": "A2b",
+      "why": "A2b(leader 納引擎) 已 merged main d213893；A2c-1 動同檔 faction_ai_system.gd，須 A2b 進 main 免 stale base"
+    }
+  ],
+  "parallel_safe": false,
+  "parallel_notes": "撞 faction_ai_system.gd + constitution_baseline.txt + decision/* → 與 A2c-2(FA6)/A2c-3(FA8) 序列非並行。",
+  "constitution_gate": {
+    "baseline_delta": "removed: _try_consolidate_merge 兩 try_set(TASK_MERGE consolidate); 整併 dispatch 現走 _decide_unified→to_task 引擎落點(既有)",
+    "contract": "current ⊆ baseline；整併 try_set 從 pre-gate → 引擎 dispatch，無新 off-engine 落點"
+  },
+  "blueprint_decisions_pending": [
+    "A2c-1 sign-off GRANTED（blueprint 2026-07-09）：無依賴整併恆 pre-empt 威脅 → 純折入放行；威脅下整併語意劃 A2d。唯 total_diffs≠0 才需回報。"
+  ]
+}

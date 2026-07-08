@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c-1 spec 鎖定 sign-off——FA5 consolidate 折入引擎（reviewer CLEAN）；一項體感確認
 ---
 
