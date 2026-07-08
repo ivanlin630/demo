@@ -62,6 +62,12 @@ git push -u origin feat/<feature>
 3. 回報分支給user
 
 ```markdown
+---
+from: implementer
+to: measurer          # 下一站(量測員)；也可 systems/qa 視流程
+status: open
+topic: <功能名稱> 實作交付 — <一句摘要>
+---
 # Hand Back: <功能名稱>
 
 ## 實作摘要
@@ -69,14 +75,15 @@ git push -u origin feat/<feature>
 - 與 spec 的差異（若有）
 
 ## 連動風險
-列出其他系統可能受影響的部分，主 session 決定是否補修：
+列出其他系統可能受影響的部分，收件方決定是否補修：
 - `系統A`：說明為何可能受影響
 - （無則寫「無已知連動風險」）
 
-## 待主 session 確認
+## 待確認
 - 設計決策（實作中遇到 spec 未覆蓋的情況）
 - 建議後續 task（發現的潛在問題或改進點）
 ```
+★**frontmatter 必帶 `from/to/status/topic`**——否則沒 `to:` = 信箱掃不到 = 下一站不會自動讀（舊式純 topic 已淘汰）。
 
 3. Commit hand-back 文件，不要直接 merge 到 main，等主 session 確認。
 
