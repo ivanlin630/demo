@@ -162,7 +162,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 | `scripts/simulation/decision/decision_context.gd` | +`has_parent_directive`/`parent_team_pos` 欄 + gather 填（D1） |
 | `scripts/simulation/decision/options.gd` | +`歸建` REGISTRY row + applicable + to_task fallback（D2）；建設/佔村 applicable +`not has_parent_directive` gate（D3） |
 | `scripts/simulation/decision/terms.gd` | `faction_duty` eval +`歸建` case（D2） |
-| `scripts/simulation/data/team_data.gd` | +`subteam_eval_next_tick` 欄（D5） |
+| `scripts/data/team_data.gd` | +`subteam_eval_next_tick` 欄（≈line 123，鏡射 `threat_eval_next_tick`）（D5） |
 | `scripts/simulation/faction_ai_system.gd` | +`_decide_subteam` + `SUBTEAM_CADENCE`；改 `_evaluate_subteam` tail；刪 `_check_deviation`/`_evaluate_idle_subteam`/`DEVIATION_RATE`（D4/D5/D6） |
 | `scripts/debug/constitution_baseline.txt` | -2 site +`_decide_subteam`（D7） |
 

@@ -1,51 +1,73 @@
 {
   "slice": "A2a",
-  "title": "子隊決策路由進統一引擎（D7 手不聽腦）",
+  "title": "子隊決策納統一框架（母團 directive + faction_duty，D7 手不聽腦）",
   "spec": "docs/superpowers/specs/2026-07-08-A2a-subteam-decision-routing.md",
+  "revise_ruling": "docs/superpowers/handbacks/2026-07-08-blueprint-to-systems-A2a-revise.md",
   "touch_files": [
     {
-      "path": "scripts/simulation/faction_ai_system.gd",
-      "why": "新增 _decide_subteam(引擎 dispatch)；改 _evaluate_idle_subteam(1688)、_check_deviation(1669) 撕除手寫 argmax/randf-loot → 改接引擎",
-      "risk": "high — 核心 AI 檔，subteam dispatch 語意；lifecycle guard 需原封保留"
+      "path": "scripts/simulation/decision/decision_context.gd",
+      "why": "加 has_parent_directive/parent_team_pos 欄 + gather 填（母團 directive，結構鏡射 faction_stakes block ~195-213）",
+      "risk": "low — 純加欄 + 一個 parent 存在填值；非子隊 has_parent_directive=false 零影響"
     },
     {
       "path": "scripts/simulation/decision/options.gd",
-      "why": "加 SUBTEAM_OPTION_SET = [掠奪, 攻擊]（子集 narrowing，鏡射 SURVIVAL/AMBIENT_OPTION_SET）",
-      "risk": "low — 純加常數，不動既有 REGISTRY/applicable/to_task"
+      "why": "加 歸建 REGISTRY row(faction_duty term) + applicable + to_task fallback；建設/佔村 applicable 加 not has_parent_directive 世界規則 gate(附屬單位不自立據)",
+      "risk": "med — 動全域 REGISTRY/applicable；但兩 gate 對 has_parent_directive=false(成員/solo)恆真→零行為變，只子隊受限"
     },
     {
-      "path": "scripts/simulation/decision/decision_engine.gd",
-      "why": "加 rank_subteam(ctx)，逐字鏡射 rank_ambient（applicable ∩ 子集 → util 降序）",
-      "risk": "low — 純加 static func，不動 rank_scored/rank_ambient/rank_threat"
+      "path": "scripts/simulation/decision/terms.gd",
+      "why": "faction_duty eval 加 歸建 case(FACTION_DUTY_DRIVE if has_parent_directive)；weight 已 _duty_factor(loyalty,野心) 免動",
+      "risk": "low — 加 match case，不動 _duty_factor/既有 攻擊/徵收/外交 case"
+    },
+    {
+      "path": "scripts/data/team_data.gd",
+      "why": "加 subteam_eval_next_tick 欄（~line 123，鏡射 threat_eval_next_tick，cadence gate 用）",
+      "risk": "low — 純加欄"
+    },
+    {
+      "path": "scripts/simulation/faction_ai_system.gd",
+      "why": "加 _decide_subteam(cadence-gated 全框架 rank dispatch)+SUBTEAM_CADENCE const；改 _evaluate_subteam tail(1627-1635)；刪 _check_deviation(1669)/_evaluate_idle_subteam(1688)/DEVIATION_RATE(23)；改註解 1332",
+      "risk": "high — 核心 AI 檔，subteam dispatch 語意；lifecycle guard 需原封保留；conquest 分支結構性不觸子隊(intent 空+faction_id!=-1)"
     },
     {
       "path": "scripts/debug/constitution_baseline.txt",
-      "why": "加 _decide_subteam 指紋(引擎 path，同 _decide_unified 正當)；否則新 try_set site = gate FAIL。舊 _check_deviation/_evaluate_idle_subteam site 標 removed",
+      "why": "移除 _check_deviation(17)/_evaluate_idle_subteam(21) 指紋(arc 溶解 removed)；加 _decide_subteam(引擎落點，同 _decide_unified 正當)。否則新 try_set = gate FAIL",
       "risk": "med — 憲法閘契約檔；漏改則 merge-gate FAIL"
     }
   ],
   "touch_systems": [
-    "faction_ai (子隊自主 AI _evaluate_subteam 分支)",
-    "decision_engine (子集 ranker)"
+    "faction_ai (子隊自主 AI _evaluate_subteam 分支 + cadence)",
+    "decision_context (母團 directive 欄)",
+    "decision_options (歸建 row + 世界規則 gate)",
+    "decision_terms (faction_duty 歸建 case)",
+    "team_data (cadence 欄)",
+    "constitution_gate baseline"
   ],
   "no_touch": [
+    "掠奪 term(零 patch，loyalty-gate 靠 歸建↔掠奪 rank 競秤湧現，非改 loot_drive)",
+    "faction_duty _duty_factor / 攻擊/徵收/外交 既有 case",
     "子隊 lifecycle: detach_subteam / merge_queue / settle / construct / escort / herald / discipline-fail",
     "_tag_weight (904/1893 仍用，非死碼)",
-    "hand_brain_probe.gd (subteam_bypass 常數變不可達但無害留)",
+    "hand_brain_probe.gd (SUBTEAM_BYPASS_REASONS 變不可達但無害留)",
     "leader dispatch (=A2b)",
-    "member/solo _decide_unified/_evaluate_solo (A1a 已清)",
+    "member/solo _decide_unified/_evaluate_solo (A1a 已清；has_parent_directive=false 保零變)",
     "A1a 拆的閥 (別回退)"
   ],
   "depends_on": [
     {
       "slice": "A1a",
-      "why": "工單: A1a 修完引擎內閥後 subteam bypass 才浮上來為最大宗；A2a baseline/背離量測以 A1a 後低檔為對照基準"
+      "why": "工單: A1a 修完引擎內閥後 subteam bypass 才浮上來為最大宗；A2a 背離量測以 A1a 後低檔為對照基準"
     }
   ],
   "parallel_safe": false,
-  "parallel_notes": "與 A2b(leader) 撞同檔 faction_ai_system.gd + constitution_baseline.txt → 序列做非並行。與不觸 faction_ai/決策引擎/憲法閘的 slice 可並行。單寫者 orchestrator 序列化天然無並發，但 A2a/A2b 邏輯上須 A2a 先(縮範圍確認 subteam 路乾淨再上 leader)。",
+  "parallel_notes": "與 A2b(leader) 撞同檔 faction_ai_system.gd + constitution_baseline.txt → 序列非並行(A2a 先，縮範圍確認 subteam 路乾淨再上 leader)。與不觸 faction_ai/決策引擎(context/options/terms)/team_data/憲法閘的 slice 可並行。單寫者 orchestrator 序列化天然無並發。",
   "constitution_gate": {
-    "baseline_delta": "+faction_ai_system.gd::_decide_subteam (序A2a 引擎溶入); removed: _check_deviation, _evaluate_idle_subteam 的 try_set site",
+    "baseline_delta": "+faction_ai_system.gd::_decide_subteam (序A2a 引擎溶入); removed: _check_deviation, _evaluate_idle_subteam",
     "contract": "current ⊆ baseline；新 try_set 未收編 baseline = FAIL"
+  },
+  "perf": {
+    "concern": "review #2: 子隊逐 tick 呼 DecisionContext.gather(掃全 world tiles + finders + threat loop) 取代 O(1) 手算，LOD O(N²)/50 隊擴編敏感",
+    "mitigation": "SUBTEAM_CADENCE(1 日) gate 攤平 gather；lifecycle guard(O(1)) 仍逐 tick",
+    "acceptance": "驗收法 §6：before/after per-tick tick-time 不顯著退化(phase_timing bucket 或 headless wall-time，同 seed，≤5%)"
   }
 }
