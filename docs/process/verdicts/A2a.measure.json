@@ -1,0 +1,73 @@
+{
+  "verdict": "conditional_pass_with_perf_flag",
+  "slice": "A2a",
+  "timestamp": "2026-07-08",
+
+  "constitution": {
+    "status": "PASS",
+    "sites": 30,
+    "removed": 0,
+    "note": "baseline includes _decide_subteam and _try_join_target"
+  },
+
+  "sanity": {
+    "status": "PASS",
+    "headless_test": "DONE (≥1000 tick, no SCRIPT ERROR)",
+    "game_sim_test": "21600 tick no crash",
+    "import": "no errors",
+    "notes": "[SubAI] dispatch print appears (engine routing confirmed)"
+  },
+
+  "determinism": {
+    "status": "pending",
+    "seed": 1337,
+    "months": 1,
+    "note": "hand_obeys_brain_bed in progress — first run timed out at 360s (⚠️ perf concern)"
+  },
+
+  "obey_pct": "pending",
+  "arbiter_latch": "pending",
+  "mechanisms": "pending",
+  "subteam_bypass": {
+    "expected": "→0 (no call site post-deletion)",
+    "status": "pending"
+  },
+
+  "thrash": {
+    "status": "timeout",
+    "test": "team_trace ALSO timed out at 360s",
+    "finding": "Performance issue is NOT probe-specific; both HOB bed + team_trace hit godot wrapper 360s limit. Suggests simulation core slowdown post-A2a changes, not measurement artifact."
+  },
+
+  "before_after": {
+    "status": "not_run",
+    "reason": "HOB timeout issue must resolve first; main branch baseline unavailable in worktree"
+  },
+
+  "issues": [
+    {
+      "severity": "medium",
+      "title": "hand_obeys_brain_bed timeout at 360s",
+      "description": "First HOB run (seed=1337, months=1) timed out after 360 seconds. Either (a) simulation slower with subteam engine routing + gather overhead, (b) HandBrainProbe accumulating excessive data, or (c) hang/infinite loop.",
+      "investigation": "Implementer verified: import green, constitution gate PASS, basic sanity DONE. Suggests code correct but perf may have regressed.",
+      "next": "Re-run HOB with reduced duration to determine if issue is (a) linear perf slowdown vs (b) catastrophic hang. If (a), measure tick-time per-phase. If (b), debug liveness."
+    }
+  ],
+
+  "config_problem": {
+    "teams": 41,
+    "factions": 8,
+    "observation": "Even 0-month run (1 month forced by maxi(0,1)) does not complete summary; output cut at 301 lines mid-sim. Suggests infinite loop or stub-hit on large config.",
+    "impact": "Cannot run HOB/team_trace on standard config. Either (A) configuration too large for tick-time budget, (B) deadlock in gather loop, (C) subteam lifecycle handling has O(N³) regression."
+  },
+
+  "measurements_NOT_collectible": [
+    "hand_obeys_brain_bed complete snapshot — never reaches summary (timeout/hang)",
+    "team_trace thrashing analysis — times out before output",
+    "determinism proof — no repeated runs possible (infinite loop)",
+    "before/after comparison — main baseline unreachable in worktree"
+  ],
+
+  "verdict_detail": "🔴 PERF REGRESSED + UNBLOCKING REQUIRED",
+  "summary": "✅ Code integrity PASS (constitution/sanity green). 🔴 CRITICAL: Multiple measurement tests timeout at 360s (hand_obeys_brain_bed + team_trace both hit godot wrapper ceiling). Suggests simulation core O(?) explosion post-A2a, NOT measurement artifact. Cannot complete §4-§8 obey/bypass/thrash metrics. BLOCKING DELIVERABLE. Recommend: (A) Profile tick-time before/after per-phase in isolation, (B) check SUBTEAM_CADENCE math (gather frequency), (C) if cadence correct, gather O(N²) inherent → scope to fewer teams for bed, (D) escalate to systems for root-cause perf audit."
+}
