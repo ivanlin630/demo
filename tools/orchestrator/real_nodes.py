@@ -168,13 +168,27 @@ def rn_measure(state: SliceState):
 
 def rn_qa(state: SliceState):
     import nodes
+    # ★完整性 gate 前置（code-level，不靠 haiku 自覺）：measure 標 incomplete / 未產出
+    # → 部分報告不能綠（鏡射手動信箱「measurer 全量才寄一封」規則；LG 順序無 append race，
+    #   但仍有「measure 產不齊→qa 拿部分判綠」風險，此 gate 補上）。
+    mv = state["verdicts"].get("measure", {}) or {}
+    incomplete = mv.get("incomplete") or []
+    measure_missing = (not mv) or ("未產出" in str(mv.get("summary", "")))
     v = nodes.judge_node("qa", state["slice_id"], "qa",
         task="對抗驗已 commit 的改動。★讀量測員的 docs/process/verdicts/" + state["slice_id"] + ".measure.json 真數字當證據(別自己跑 godot)。"
-             "green=效果真發生(數字證)+無退化+無抖動；red=數字沒動/退化/抖動。★分清真 bug vs godot 框架噪音寫進 note。",
+             "★★完整性 gate：measure.json 的 incomplete[] 非空 或 spec 守衛/標準床數字缺 = **不完整不能綠**，判 red 並註明缺哪項。"
+             "green=效果真發生(數字證)+無退化+無抖動+measure 完整；red=數字沒動/退化/抖動/measure 不完整。★分清真 bug vs godot 框架噪音寫進 note。",
         reads="量測員 .measure.json + git diff(worktree 本 slice commits)",
         scope_dir=state["worktree"], model=MODELS["qa"])
     _freeze_if_api(v, "qa")
-    vv = {"verdict": "green" if v.get("verdict") == "clean" else "red", **v}
+    if incomplete or measure_missing:
+        # override 鍵放 **v 之後 → 保底強制 red（haiku 若誤綠也蓋掉）
+        vv = {**v, "verdict": "red", "completeness_gate": True,
+              "note": "★完整性 gate 強制 red：measure 不完整 incomplete=%s（不完整驗證不能綠；"
+                      "qa_review 判 redo 重量測補齊 或藍圖裁）。原 qa note: %s"
+                      % (incomplete or "measure未產出", str(v.get("note", "")))}
+    else:
+        vv = {**v, "verdict": "green" if v.get("verdict") == "clean" else "red"}
     return {"verdicts": _mv(state, "qa", vv), "stage": "qa"}
 
 def rn_qa_review(state: SliceState):

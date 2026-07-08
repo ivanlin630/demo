@@ -21,6 +21,7 @@
 3. **`[GODOT TIMEOUT]` = bed 被殺 ≠ 迴歸。** 區分「量到迴歸」vs「沒量到（工具超時/flake）」。沒量到 → 報「量測不完整」給藍圖 halt，**別當迴歸、別讓 QA 拿空報告判**。
 4. **perf 比 per-tick 同規模、不撞絕對門檻**：warring 天生慢是 pre-existing（main 也有）。比「本 branch 同 tick/同隊數 ≤ main」；wall 差可能只是世界岔開（存活隊多），非單位變慢（A2a 教訓）。
 5. **只跑探針+寫報告，不改 `scripts/` code、不判決。**
+6. **★一次量完 → 一封完整信（禁分批/append，用戶定 2026-07-09）**：**全部**（spec §驗收法守衛 + 標準床 HOB/const/sanity/teamtrace + perf baseline）**都跑完才寄一封涵蓋所有數字的信**。禁分批、禁 append 到已寄信。**理由=信箱競態**：QA 讀第一封即 `consumed`（義務只掃 `to:我 && status:open`），晚到的第二批補在原信後/後續新信 → **靜默漏看 → 用不完整驗證 merge**。缺任一守衛/床 → **不寄**，或寄 `status:open` 明標 `incomplete:[…]` 報藍圖等補齊，**絕不寄一封讓 QA 誤以為齊全的部分信**。
 
 ## Scope：要產哪些數字
 
@@ -46,7 +47,7 @@
 
 1. **`docs/process/verdicts/<slice>.measure.json`**：
    `{obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。
-2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-qa-<slice>.md`（`from:measurer to:qa status:open`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + 誠實揭 timeout≠迴歸 / 未量到項。
+2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-qa-<slice>.md`（`from:measurer to:qa status:open`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**
 
 ## 交接
 

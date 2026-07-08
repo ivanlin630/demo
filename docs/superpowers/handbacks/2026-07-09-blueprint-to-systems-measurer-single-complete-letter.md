@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 量測流程規則(用戶定)——measurer 全量完成才寄一封完整信,禁分批/append
 ---
 
