@@ -115,15 +115,35 @@ def cmd_status(a):
             try: d = _json.loads(l)
             except Exception: continue
             lastnode[d.get("slice")] = (d.get("node"), d.get("effect_ok"), d.get("cost_usd"))
-    # 本地 slice：log 末狀態(完成/停下) + metrics 最後站
+    # 本地 slice：狀態 + 文字路線圖(讀 log 的 ✓ 行,node 名精確)
     print("[status] 本地 slice:")
     for lg in sorted(glob.glob(os.path.join(RUNS_DIR, "*.log"))):
         sid = os.path.basename(lg)[:-4]
         txt = open(lg, encoding="utf-8", errors="replace").read()
         state = "✅完成" if "✅ 完成" in txt else ("⏸停下等你" if "⏸ 停下等你" in txt else "🔄跑中")
         ln = lastnode.get(sid)
-        lnstr = f"最後站={ln[0]}(eff={ln[1]})" if ln else ""
+        lnstr = f"最後站={ln[0]}" if ln else ""
         print(f"  {sid:8} {state}  {lnstr}")
+        print(f"           {_route_map(txt, state)}")
+
+
+_STAGES = ["factcheck", "systems_spec", "review", "bp_review", "systems_plan",
+           "implementer", "measure", "qa", "qa_review", "merge"]
+
+def _route_map(log_txt, state):
+    """文字路線圖：讀 log 的『✓ <node>』標完成,現正在跑的標●(或停下⏸),未到的暗。"""
+    done = {s for s in _STAGES if f"✓ {s}" in log_txt}
+    cur = next((s for s in _STAGES if s not in done), None)
+    out = []
+    for s in _STAGES:
+        short = s.replace("systems_", "sys_").replace("implementer", "impl").replace("qa_review", "②判").replace("bp_review", "①審")
+        if s in done:
+            out.append(f"{short}✓")
+        elif s == cur:
+            out.append(f"[{short}{'⏸' if state == '⏸停下等你' else '●'}]")
+        else:
+            out.append(short)
+    return " → ".join(out)
     # 花費
     mp = os.path.join(MAIN_REPO, "docs/process/metrics.jsonl")
     if os.path.exists(mp):
