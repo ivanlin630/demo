@@ -271,7 +271,12 @@ def run_local(a):
             print(f"[run] slice={a.slice} mode={a.mode}  (本地跑：console 印這，無 Studio)")
             stream = app.stream(initial, cfg, stream_mode="updates")
         for ch in stream:
-            for node, upd in (ch or {}).items(): _print_node(node, upd)
+            if not isinstance(ch, dict):
+                continue
+            for node, upd in ch.items():
+                if node == "__interrupt__" or not isinstance(upd, dict):
+                    continue                    # interrupt chunk 的值是 tuple,非節點更新→跳過(修 local halt 崩)
+                _print_node(node, upd)
         snap = app.get_state(cfg)
         ints = [it.value for t in snap.tasks for it in getattr(t, "interrupts", [])]
         _report(snap.next, ints, snap.values, a.slice)
