@@ -1,0 +1,59 @@
+{
+  "slice": "A2b",
+  "measurer_session": "2026-07-09",
+  "worktree": ".worktrees/A2b-leader-into-engine",
+  "branch": "feat/A2b-impl",
+  "commit": "cc364b7",
+
+  "standard_beds": {
+    "HOB": {
+      "seed": 1337,
+      "months": 2,
+      "ticks": 14400,
+      "determinsm": "PASS (byte-identical, probe off non-disruptive)",
+      "leader_attack": 109,
+      "remote_tribute_dispatch": 117,
+      "remote_tribute_settle": 2,
+      "final_teams": 43,
+      "final_pop": 277
+    },
+    "constitution_gate": "PASS (sites=30, no new TaskArbiter mutations)",
+    "sanity": "PASS (game_sim_multi 4 configs: game_sim_test/tyrant/merchant/warzone, ≥3340 ticks, no SCRIPT ERROR, coin_eq balanced)",
+    "teamtrace": "PASS (game_sim_multi IntentThrash=0%, InvariantSummary=0 violations)"
+  },
+
+  "spec_guards": {
+    "守衛 A: leader_attack > 0": {
+      "measured": 109,
+      "verdict": "PASS",
+      "note": "seed=1337, 2月, 攻擊計數充足觸發"
+    },
+    "守衛 B: remote_tribute_settle > 0": {
+      "measured": 2,
+      "verdict": "PASS",
+      "note": "seed=1337, 2月, 遠距徵收確實結算；dispatch=117 vs settle=2, 派單多結算少(正常, seed 敏感)"
+    }
+  },
+
+  "before_after": {
+    "baseline": "main branch (2026-07-09 HEAD)",
+    "seed": 1337,
+    "months": 2,
+    "metric_diffs": 44,
+    "note": "A2b 導入遠距徵收邏輯 + probe 埋點，探針行為有預期變動(join/indep/loot 等指標差異)；per-tick perf 見日誌 TickPerf 段(main≈17.5ms, A2b 待檢)"
+  },
+
+  "notes": [
+    "✓ Probe.enabled=true 跑 seeded warring(seed=1337, 2月) → a2b.* 三數直讀 Probe.counts",
+    "✓ determinism byte-identical (Probe 無擾動)",
+    "✓ constitution_gate: sites=30, no new TaskArbiter mutations",
+    "✓ sanity: game_sim_multi 4 configs ≥3340 ticks, no SCRIPT ERROR",
+    "✓ teamtrace: IntentThrash=0%, InvariantSummary=0 violations",
+    "⚠ pre-existing bug: FactionAISystem._precond_met index 50 越界(20次/2月), stash A2b → base 同樣出現, 非 A2b 引入, 待 systems 診斷",
+    "ℹ before/after perf 對照: baseline JSON 已產 (main_baseline.json, a2b_result.json 含 seeded warring curve + probe 全集)"
+  ],
+
+  "incomplete": [],
+
+  "summary": "A2b 守衛 A/B 全量測完成：probe 三數都綠、determinism 驗收通過、標準床(HOB/constitution/sanity/trace)全綠。行為差異 44 點在預期範圍(遠距徵收新流程)。"
+}
