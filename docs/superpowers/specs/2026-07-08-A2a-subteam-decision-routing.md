@@ -14,7 +14,7 @@
 1. **`faction_ai_system.gd:1688 _evaluate_idle_subteam`**：`scores={回歸:0.3, LOOT:(greed·0.5+martial·0.2)·_tag_weight, ATTACK:(martial·0.4+greed·0.2)·_tag_weight}` → 手 argmax → `try_set(...,"subteam_idle")`。
 2. **`faction_ai_system.gd:1669 _check_deviation`**：`greed·(1-loyalty)·DEVIATION_RATE` randf → 手選 `_nearest_independent` → `try_set(TASK_LOOT,...,"deviation")`。
 
-對照乾淨縫：成員 `_assign_member_tasks:1428→_decide_unified→rank_scored`；solo `_evaluate_solo:1749`。
+對照乾淨縫：成員 `_assign_member_tasks:1428→_decide_unified→rank_scored`；solo `_evaluate_solo:1724`。
 
 ## ★裁定方向（藍圖 revise，取代 v1 子集 narrowing）
 
@@ -66,7 +66,7 @@ if team.parent_team_id != -1:
 
 ### D3. 子隊不自立/佔據點（世界規則 gate，非 suppress 分支）
 
-全 `rank_scored` 會讓子隊碰 `建設`（options.gd:55 無條件 applicable）/`佔村`（有 target 即候選）＝自建/奪據點=生命週期突變（工單護欄禁；invariants「立國=leader-level」）。`options.gd` applicable 兩 row 加**世界規則**謂詞（附屬單位無自主權立據，非「if subteam suppress」）：
+全 `rank_scored` 會讓子隊碰 `建設`（options.gd:55 無條件 applicable）/`佔村`（有 target 即候選）＝自建/奪據點=生命週期突變（工單護欄禁）。**正當性＝既有 leader-dispatch settle 機制**（藍圖 round-2 D3 裁定）：grep 證實子隊建造/安頓現行**皆由母團/leader 主動派遣既有 subteam 帶 pre-set task 發起**（`faction_ai_system.gd:525 _dispatch_subteam_settle → :540 try_set TASK_SETTLE`、`:2292 dispatch TASK_CONSTRUCT`），**從未由子隊自己 idle 決策發起**。子隊納 `rank_scored` 後，若不 gate，任一子隊會自主選「建設/佔村」＝憑空多出「附屬單位自建據點」新路徑，違工單護欄「子隊生命週期不動」。（**非借 invariants「立國=leader-level」**——那是 faction 建國 `create_faction`/`_declare_established`，文不對題。）`options.gd` applicable 兩 row 加**世界規則**謂詞（附屬單位不自主立據，對齊上述 leader-dispatch 現況，非「if subteam suppress」）：
 ```
 "建設": if not ctx.has_parent_directive: out.append(opt)   # 現為無條件 append
 "佔村": ... and not ctx.has_parent_directive:               # 現有 pop/outpost 條件末 AND
@@ -143,6 +143,13 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 	# active-transit 已派 task → sticky（執行命令中 duty 壓制投機＝任務優先；到達自歸建 / discipline 自 detach）
 ```
 - 刪 `_check_deviation`(1669-1686)：randf 中途叛離 = 手寫門檻，語意搬進 歸建(duty)↔掠奪(greed) 框架競秤（idle 時）。「執行命令中→duty 壓制投機」＝ active-transit task sticky（不 re-eval 去 loot）。
+
+**★藍圖明示接受：移除「mid-mission 投機叛逃」（round-2 D6 裁定，比照 review#1 攻擊窄化標準）。**
+現況 `_check_deviation` 是**執行任務中**（`current_task≠IDLE` 且移動中，`1629-1631` 逐 tick）判「半路轉去搶劫但不脫離」。v2 改成 active-transit sticky（只 idle 才 `_decide_subteam`）＝此行為分支**移除**。**藍圖裁定接受移除**，理由：
+1. **脫離出口保留**：`_check_discipline`（discipline_fail）不動 → 中途嚴重不紀律仍 desert→獨立→自由搶。
+2. **投機出口保留**：idle 掠奪搬進 duty↔greed 框架（loyalty-gated）→ 貪婪不忠子隊 idle 仍投機。
+3. **執行中 sticky = 任務承諾 + 省效能 + 更紀律**，合「紀律至上」願景（紀律單位執行命令中不半路溜去搶）。
+- **future work（deferred，非遺漏）**：完整「**抗命**」行為（mid-mission 動態抗命/違令，非只脫離/idle 掠奪）延後，日後另 slice 補。此處明記為 deferred。
 - 刪 `_evaluate_idle_subteam`(1688-1720)。
 - 刪 const `DEVIATION_RATE`(line 23，僅 `_check_deviation` 用，grep 驗)。`DISCIPLINE_FAIL_BASE`/`_check_discipline` 保留。
 - `_tag_weight` **保留**（line 904/1893 仍用）；子隊路不再呼。
@@ -191,7 +198,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 
 ## 殘留疑點（呈報 reviewer，見 handback）
 
-- **D3 世界規則 gate 味道**：`建設/佔村 applicable +not has_parent_directive` 是「附屬單位不立據」世界規則謂詞（非 suppress 分支，成員零變），但技術上是 has_parent_directive 條件 → 若 reviewer 判太像子隊特例，備案=`_decide_subteam` dispatch loop 內 skip 該兩 opt（同 lifecycle 護欄語意，不動全域 options）。傾向前者（applicable 是 gate 的正位）。
-- **active-transit 不 re-eval**：忠實現況「執行命令中 task sticky」；mid-mission duty 動態翻轉（忠誠度中途變→回頭）不建模（超範圍）。
+- **D3 gate＝藍圖裁定保留**（round-2）：`建設/佔村 applicable +not has_parent_directive`＝對齊既有 leader-dispatch settle 現況（子隊建據皆 leader 派 pre-set task，非子隊 idle 自選）的世界規則謂詞，非 suppress 分支、成員零變。引用已從 invariants「立國」改指 leader-dispatch 機制（D3 段）。備案（若實作發現太像特例）=`_decide_subteam` dispatch loop skip 該兩 opt，同 lifecycle 護欄語意。
+- **mid-mission 投機叛逃移除＝藍圖明示接受**（round-2 D6，見 D6 段明示接受段）：非「系統自認超範圍」。完整「抗命」行為 deferred 另 slice（D6 future work 明記）。
 - 子隊離家 starve 走 survival option（full rank 自帶覓食/投靠/買糧）＝**比 v1 多拿到的 believable 行為**（紀律單位也會求生），符藍圖「納框架自動拿到」意圖。
 - `SUBTEAM_CADENCE=1 日` / `FACTION_DUTY_DRIVE` 對子隊量級＝TEST VALUE，平衡 pass 調。
