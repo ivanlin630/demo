@@ -1,0 +1,51 @@
+{
+  "slice": "A2a",
+  "title": "子隊決策路由進統一引擎（D7 手不聽腦）",
+  "spec": "docs/superpowers/specs/2026-07-08-A2a-subteam-decision-routing.md",
+  "touch_files": [
+    {
+      "path": "scripts/simulation/faction_ai_system.gd",
+      "why": "新增 _decide_subteam(引擎 dispatch)；改 _evaluate_idle_subteam(1688)、_check_deviation(1669) 撕除手寫 argmax/randf-loot → 改接引擎",
+      "risk": "high — 核心 AI 檔，subteam dispatch 語意；lifecycle guard 需原封保留"
+    },
+    {
+      "path": "scripts/simulation/decision/options.gd",
+      "why": "加 SUBTEAM_OPTION_SET = [掠奪, 攻擊]（子集 narrowing，鏡射 SURVIVAL/AMBIENT_OPTION_SET）",
+      "risk": "low — 純加常數，不動既有 REGISTRY/applicable/to_task"
+    },
+    {
+      "path": "scripts/simulation/decision/decision_engine.gd",
+      "why": "加 rank_subteam(ctx)，逐字鏡射 rank_ambient（applicable ∩ 子集 → util 降序）",
+      "risk": "low — 純加 static func，不動 rank_scored/rank_ambient/rank_threat"
+    },
+    {
+      "path": "scripts/debug/constitution_baseline.txt",
+      "why": "加 _decide_subteam 指紋(引擎 path，同 _decide_unified 正當)；否則新 try_set site = gate FAIL。舊 _check_deviation/_evaluate_idle_subteam site 標 removed",
+      "risk": "med — 憲法閘契約檔；漏改則 merge-gate FAIL"
+    }
+  ],
+  "touch_systems": [
+    "faction_ai (子隊自主 AI _evaluate_subteam 分支)",
+    "decision_engine (子集 ranker)"
+  ],
+  "no_touch": [
+    "子隊 lifecycle: detach_subteam / merge_queue / settle / construct / escort / herald / discipline-fail",
+    "_tag_weight (904/1893 仍用，非死碼)",
+    "hand_brain_probe.gd (subteam_bypass 常數變不可達但無害留)",
+    "leader dispatch (=A2b)",
+    "member/solo _decide_unified/_evaluate_solo (A1a 已清)",
+    "A1a 拆的閥 (別回退)"
+  ],
+  "depends_on": [
+    {
+      "slice": "A1a",
+      "why": "工單: A1a 修完引擎內閥後 subteam bypass 才浮上來為最大宗；A2a baseline/背離量測以 A1a 後低檔為對照基準"
+    }
+  ],
+  "parallel_safe": false,
+  "parallel_notes": "與 A2b(leader) 撞同檔 faction_ai_system.gd + constitution_baseline.txt → 序列做非並行。與不觸 faction_ai/決策引擎/憲法閘的 slice 可並行。單寫者 orchestrator 序列化天然無並發，但 A2a/A2b 邏輯上須 A2a 先(縮範圍確認 subteam 路乾淨再上 leader)。",
+  "constitution_gate": {
+    "baseline_delta": "+faction_ai_system.gd::_decide_subteam (序A2a 引擎溶入); removed: _check_deviation, _evaluate_idle_subteam 的 try_set site",
+    "contract": "current ⊆ baseline；新 try_set 未收編 baseline = FAIL"
+  }
+}
