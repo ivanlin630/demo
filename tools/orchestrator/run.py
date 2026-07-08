@@ -312,6 +312,18 @@ def cmd_fanout(a):
 def fire_local(a):
     """發動 local detached worker：背景跑(不阻塞 `!`)、sqlite 持久、VS Code 關也活。"""
     import subprocess
+    # ★防呆：已有同 slice worker 在跑 → 別 double-fire(會撞同 worktree/sqlite)。
+    if os.name == "nt" and a.resume is None:
+        chk = ("@(Get-CimInstance Win32_Process | Where-Object { $_.Name -match 'python' "
+               f"-and $_.CommandLine -match '_worker' -and $_.CommandLine -match '{a.slice}' }}).Count")
+        try:
+            r = subprocess.run(["powershell", "-NoProfile", "-Command", chk],
+                               capture_output=True, text=True, timeout=15)
+            if int((r.stdout or "0").strip() or 0) > 0:
+                print(f"[run] ⚠ {a.slice} 已有 worker 在跑——不 double-fire(會撞)。先 --cancel --slice {a.slice} 再發，或用別的 slice 名。")
+                return
+        except Exception:
+            pass
     os.makedirs(RUNS_DIR, exist_ok=True)
     log = os.path.join(RUNS_DIR, f"{a.slice}.log")
     cmd = [sys.executable, os.path.abspath(__file__), "--_worker", "--slice", a.slice, "--mode", a.mode]
