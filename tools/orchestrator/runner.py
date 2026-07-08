@@ -154,16 +154,25 @@ def run_node(
 
 
 _API_ERR_MARKS = ("rate limit", "rate_limit", "ratelimit", "quota", "usage limit",
-                  "overloaded", "429", "529", "too many requests", "insufficient", "credit")
+                  "session limit", "overloaded", "too many requests", "insufficient", "credit")
 
 def is_api_error(res: RoleResult) -> bool:
-    """API 限流/超時判定（裁3：這類禁自動重試，原地定格）。網路瞬斷另計不在此。"""
+    """API 限流/超時/額度判定（裁3：這類禁自動重試，原地定格）。網路瞬斷另計不在此。
+
+    ★A2a 教訓：429/session-limit 訊息在 result/raw envelope（"api_error_status":429、"session limit"），
+    不在 stderr。原本只掃 stderr → 漏 → 整條 pipeline 空跑到 ②垃圾。改：掃 raw 結構標記 + result/error 訊息。
+    """
     if res.timed_out:
         return True
-    err = (res.error or "").lower()
-    if not res.ok and any(m in err for m in _API_ERR_MARKS):
+    raw = str(res.raw or "")
+    # 結構標記（明確，不誤判）：claude -p 的 4xx/5xx error envelope
+    if '"is_error":true' in raw and ('"api_error_status":4' in raw or '"api_error_status":5' in raw):
         return True
-    # claude -p 撞額度常回 rc!=0 + 零花費 + 空輸出（底層重試耗盡）
+    # 訊息標記：掃 result + error（不掃 raw 全文，避 quota/credit 等字在正常內容誤判）
+    msg = (str(res.result or "") + " " + str(res.error or "")).lower()
+    if any(m in msg for m in _API_ERR_MARKS):
+        return True
+    # 零花費+失敗+空輸出（底層重試耗盡）
     if not res.ok and (res.cost_usd in (0, None)) and not str(res.result).strip():
         return True
     return False
