@@ -13,8 +13,11 @@
 
 ## 角色 = 持久 session
 
-- 各角色（blueprint / systems / qa）開自己的 claude 視窗，`SESSION_ROLE` 環境變數設好（`session-role.sh` SessionStart hook 檢查）。
-- **全開在同一工作目錄 `A:\GDS\demo`** → 信箱檔寫入即時互見，免 commit。（implementer 在 worktree = 例外，走 commit + machine 或手動同步。）
+- 各角色（blueprint / systems / reviewer / qa / **measurer**）開自己的 claude 視窗，`SESSION_ROLE` 環境變數設好（`session-role.sh` SessionStart hook 檢查）。arm 名單 = 這 5 個。
+- **main dir 角色（bp/systems/reviewer/qa）全開在 `A:\GDS\demo`** → 信箱即時互見，免 commit。
+- **measurer 在 branch 上跑**：開在 **main dir(checkout branch)** → live 信箱通（推薦）；開在 worktree(別 dir) → 只見同 worktree 的信（implementer→measurer 通），跨 main 需 commit。
+- **implementer = 純 worktree worker**，不 arm，走 plan/機器領活。
+- 信箱 = `docs/superpowers/handbacks/*.md`，frontmatter `from: / to: / status: / topic:`。
 - 信箱 = `docs/superpowers/handbacks/*.md`，frontmatter `from: / to: / status: / topic:`。
 
 ## 兩個 hook（互補，別混）
