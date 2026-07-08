@@ -56,5 +56,5 @@ FactionAISystem._a2b_remote_tribute_payers.clear()
 - `.\tools\godot.ps1 --headless --script scripts/debug/hand_obeys_brain_bed.gd` determinism PASS（Probe off 時 byte-identical）。
 - commit + push `feat/A2b-impl`。
 
-## 回報
-補完 handback `to: systems`（或 to: measurer 直接請重跑）。消費本信改 status: consumed。
+## 回報（★對象固定 to: systems）
+補完 push `feat/A2b-impl` 後，handback **`to: systems`**（別寫 measurer——measurer=haiku 沒法終端自動醒）。systems 收到即自動點火 lg measure 軌（`--from-measure --base origin/feat/A2b-impl`）跑 measure→qa→merge，免人肉 GO。消費本信改 status: consumed。

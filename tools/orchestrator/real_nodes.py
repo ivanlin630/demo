@@ -327,3 +327,27 @@ def make_impl_graph():
 
 def build_impl(checkpointer=None):
     return make_impl_graph().compile(checkpointer=checkpointer or MemorySaver())
+
+
+def make_measure_graph():
+    """★measure-only 下游軌（--from-measure）：opus 手動 impl 已 push code，機器只跑
+    measure→qa→②qa_review→merge（省 implementer）。動機：QA/measure=haiku 沒法當持久終端
+    自動喚醒（信箱 relay 靠 opus idle-armed）→ 手動 impl 後的驗收段進機器自動跑。
+    worktree off 手動 impl branch → 拿已 push 的 code。
+    qa_review：approve→merge / redo/revise/reject→END（無 impl 節點；code 需修=回手動 impl session）。"""
+    g = StateGraph(SliceState)
+    for name, fn in [("measure", rn_measure), ("qa", rn_qa),
+                     ("qa_review", rn_qa_review), ("merge", rn_merge)]:
+        g.add_node(name, fn)
+    g.add_edge(START, "measure")
+    g.add_edge("measure", "qa")
+    g.add_edge("qa", "qa_review")
+    g.add_conditional_edges("qa_review", route_qa_review,
+                            {"merge": "merge", "implementer": END,
+                             "systems_spec": END, "end": END})  # redo/revise→END（回手動 impl/spec）
+    g.add_edge("merge", END)
+    return g
+
+
+def build_measure(checkpointer=None):
+    return make_measure_graph().compile(checkpointer=checkpointer or MemorySaver())

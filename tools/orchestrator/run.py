@@ -17,10 +17,15 @@ MAIN_REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 RUNS_DIR = os.path.join(os.path.dirname(__file__), "runs")
 
 
-def create_worktree(slice_id: str) -> str:
+def create_worktree(slice_id: str, base: str = "HEAD") -> str:
+    # base = worktree 起點（預設 HEAD）；--from-measure 傳手動 impl branch（如 origin/feat/A2b-impl）
+    # 讓 measure 拿到已 push 的 code。base 是 origin/* 時先 fetch 保新鮮。
+    if base.startswith("origin/"):
+        subprocess.run(["git", "fetch", "origin", base.split("/", 1)[1]], cwd=MAIN_REPO,
+                       capture_output=True, text=True)
     wt = os.path.join(MAIN_REPO, ".worktrees", f"machine-{slice_id}")
     if not os.path.exists(wt):
-        r = subprocess.run(["git", "worktree", "add", "-b", f"feat/machine-{slice_id}", wt, "HEAD"],
+        r = subprocess.run(["git", "worktree", "add", "-b", f"feat/machine-{slice_id}", wt, base],
                            cwd=MAIN_REPO, capture_output=True, text=True)
         if r.returncode != 0 and "already exists" not in (r.stderr or ""):
             print(f"[run] worktree 失敗：{r.stderr}"); sys.exit(1)
@@ -44,10 +49,10 @@ def _print_node(node, upd):
 
 def _prep(a):
     """建 worktree + 寫工單，回 initial state。"""
-    wt = create_worktree(a.slice)
+    wt = create_worktree(a.slice, getattr(a, "base", None) or "HEAD")
     base = {"slice_id": a.slice, "autonomy": a.mode, "worktree": wt.replace("\\", "/")}
-    # ★下游軌（--from-impl）：無 spec 階段，不寫工單；plan/scope 已在 worktree（01 先 push）。
-    if getattr(a, "from_impl", False):
+    # ★下游軌（--from-impl / --from-measure）：無 spec 階段，不寫工單；plan/code 已在 worktree（先 push）。
+    if getattr(a, "from_impl", False) or getattr(a, "from_measure", False):
         return wt, base
     import bus
     brief = open(a.brief_file, encoding="utf-8").read() if a.brief_file else (a.brief or "")
@@ -260,14 +265,19 @@ def watch_server(a):
 
 
 def run_local(a):
-    from real_nodes import build_real, build_impl
+    from real_nodes import build_real, build_impl, build_measure
     from langgraph.checkpoint.sqlite import SqliteSaver
     from langgraph.types import Command
     os.makedirs(RUNS_DIR, exist_ok=True)
     db = os.path.join(RUNS_DIR, f"{a.slice}.sqlite")
     cfg = {"configurable": {"thread_id": a.slice}}
     with SqliteSaver.from_conn_string(db) as cp:
-        app = build_impl(cp) if getattr(a, "from_impl", False) else build_real(cp)
+        if getattr(a, "from_measure", False):
+            app = build_measure(cp)
+        elif getattr(a, "from_impl", False):
+            app = build_impl(cp)
+        else:
+            app = build_real(cp)
         if a.resume is not None:
             cmd_in = Command(resume=a.resume)
         else:
@@ -420,6 +430,8 @@ def fire_local(a):
     if a.brief_file: cmd += ["--brief-file", a.brief_file]
     if a.brief: cmd += ["--brief", a.brief]
     if getattr(a, "from_impl", False): cmd += ["--from-impl"]
+    if getattr(a, "from_measure", False): cmd += ["--from-measure"]
+    if getattr(a, "base", None): cmd += ["--base", a.base]
     if a.resume is not None: cmd += ["--resume", a.resume]
     flags = 0
     if os.name == "nt":
@@ -457,6 +469,9 @@ def main():
     ap.add_argument("--graph", default="pipeline_real")
     ap.add_argument("--from-impl", dest="from_impl", action="store_true",
                     help="01 下游軌：spec+plan 已在 session 寫好+push，只跑 implementer→measure→qa→②→merge")
+    ap.add_argument("--from-measure", dest="from_measure", action="store_true",
+                    help="measure 下游軌：opus 手動 impl 已 push code，只跑 measure→qa→②→merge（QA/measure=haiku 進機器）")
+    ap.add_argument("--base", help="worktree 起點 branch（--from-measure 傳手動 impl branch，如 origin/feat/A2b-impl）")
     ap.add_argument("--local", action="store_true", help="(已成預設) 本地 detached 跑")
     ap.add_argument("--server", action="store_true", help="改投 server（要 Studio live 圖時；需先開 run_studio.ps1）")
     ap.add_argument("--watch", action="store_true", help="背景盯一條已發動的 run（藍圖用）")
