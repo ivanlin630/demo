@@ -300,3 +300,28 @@ def make_real_graph():
 
 def build_real(checkpointer=None):
     return make_real_graph().compile(checkpointer=checkpointer or MemorySaver())
+
+
+def make_impl_graph():
+    """★01 下游軌（--from-impl）：01 在 persistent session 已寫好 spec+plan+scope 並 push，
+    機器只跑 implementer→measure→qa→②qa_review→merge（省 spec/review/plan 上游）。
+    worktree off origin/main → 取得 01 push 的 plan/scope（01 必先 push）。
+    ②qa_review 三路在此軌：approve→merge / redo→implementer(重跑下游) /
+    revise→END(QA 揭 spec 缺陷=此軌無 spec 站 → halt，01 回 session 改 spec/plan 再 re-fire) / reject→END。"""
+    g = StateGraph(SliceState)
+    for name, fn in [("implementer", rn_implementer), ("measure", rn_measure),
+                     ("qa", rn_qa), ("qa_review", rn_qa_review), ("merge", rn_merge)]:
+        g.add_node(name, fn)
+    g.add_edge(START, "implementer")
+    g.add_edge("implementer", "measure")
+    g.add_edge("measure", "qa")
+    g.add_edge("qa", "qa_review")
+    g.add_conditional_edges("qa_review", route_qa_review,
+                            {"merge": "merge", "implementer": "implementer",
+                             "systems_spec": END, "end": END})  # revise→END(回 01 改 spec)
+    g.add_edge("merge", END)
+    return g
+
+
+def build_impl(checkpointer=None):
+    return make_impl_graph().compile(checkpointer=checkpointer or MemorySaver())

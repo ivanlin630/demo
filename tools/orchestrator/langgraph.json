@@ -2,7 +2,8 @@
   "dependencies": ["."],
   "graphs": {
     "pipeline": "./graph.py:make_graph",
-    "pipeline_real": "./real_nodes.py:make_real_graph"
+    "pipeline_real": "./real_nodes.py:make_real_graph",
+    "pipeline_impl": "./real_nodes.py:make_impl_graph"
   },
   "env": ".env"
 }

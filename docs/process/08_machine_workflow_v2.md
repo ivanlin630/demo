@@ -55,6 +55,17 @@
 ```
 現況：藍圖(我)手動切 slice + 判並行。
 
+## 01 下游軌（`--from-impl`，2026-07-08）
+配合信箱兩軌（`07_mailbox_trigger.md`）：**01 在 persistent session 已寫好 spec+plan+scope 並 push 後**，只把機械的下游丟機器自動跑，省上游 spec/review/plan（那些 01 已在 session 帶 ctx 做完）。
+```
+01 session 寫 spec+plan+scope → git push → python run.py --slice X --from-impl
+  → [implementer → measure → qa → ②qa_review(你判) → merge]
+```
+- graph = `make_impl_graph`（START→implementer→measure→qa→qa_review→merge）；`pipeline_impl` 註冊在 langgraph.json。
+- worktree off origin/main → 取得 01 push 的 plan/scope（**01 必先 push，否則 worktree 拿舊 main 無 plan**）。
+- ②qa_review 三路：approve→merge / redo→implementer(重跑下游) / **revise→END**(QA 揭 spec 缺陷；此軌無 spec 站 → halt，01 回 session 改 spec/plan 再 re-fire) / reject→END。
+- 全走既有 pause-poll / freeze-resume / 成本分層（判斷節點 haiku、實作 opus）。
+
 ## 批次排程
 - **批次1**（done, 5896e7c 等）：--local detached / 控制指令 / A2a修 / README / 三裁定 / 角色doc+技能 / 量測員 / scope.json。
 - **批次1.5**：①檢查點(00審 handback重點) + spec/plan 拆(中插02②) + 判斷節點 haiku + scope 限讀。

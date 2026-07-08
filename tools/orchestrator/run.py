@@ -45,11 +45,15 @@ def _print_node(node, upd):
 def _prep(a):
     """建 worktree + 寫工單，回 initial state。"""
     wt = create_worktree(a.slice)
+    base = {"slice_id": a.slice, "autonomy": a.mode, "worktree": wt.replace("\\", "/")}
+    # ★下游軌（--from-impl）：無 spec 階段，不寫工單；plan/scope 已在 worktree（01 先 push）。
+    if getattr(a, "from_impl", False):
+        return wt, base
     import bus
     brief = open(a.brief_file, encoding="utf-8").read() if a.brief_file else (a.brief or "")
     bp = bus.write_handback("blueprint", "systems", f"{a.slice} 工單", brief, repo=wt)
-    return wt, {"slice_id": a.slice, "autonomy": a.mode, "worktree": wt.replace("\\", "/"),
-                "brief_path": os.path.relpath(bp, wt).replace("\\", "/")}
+    base["brief_path"] = os.path.relpath(bp, wt).replace("\\", "/")
+    return wt, base
 
 
 def _studio_url(url):
@@ -256,14 +260,14 @@ def watch_server(a):
 
 
 def run_local(a):
-    from real_nodes import build_real
+    from real_nodes import build_real, build_impl
     from langgraph.checkpoint.sqlite import SqliteSaver
     from langgraph.types import Command
     os.makedirs(RUNS_DIR, exist_ok=True)
     db = os.path.join(RUNS_DIR, f"{a.slice}.sqlite")
     cfg = {"configurable": {"thread_id": a.slice}}
     with SqliteSaver.from_conn_string(db) as cp:
-        app = build_real(cp)
+        app = build_impl(cp) if getattr(a, "from_impl", False) else build_real(cp)
         if a.resume is not None:
             cmd_in = Command(resume=a.resume)
         else:
@@ -415,6 +419,7 @@ def fire_local(a):
     cmd = [sys.executable, os.path.abspath(__file__), "--_worker", "--slice", a.slice, "--mode", a.mode]
     if a.brief_file: cmd += ["--brief-file", a.brief_file]
     if a.brief: cmd += ["--brief", a.brief]
+    if getattr(a, "from_impl", False): cmd += ["--from-impl"]
     if a.resume is not None: cmd += ["--resume", a.resume]
     flags = 0
     if os.name == "nt":
@@ -450,6 +455,8 @@ def main():
     ap.add_argument("--resume")
     ap.add_argument("--url", default="http://127.0.0.1:2025")
     ap.add_argument("--graph", default="pipeline_real")
+    ap.add_argument("--from-impl", dest="from_impl", action="store_true",
+                    help="01 下游軌：spec+plan 已在 session 寫好+push，只跑 implementer→measure→qa→②→merge")
     ap.add_argument("--local", action="store_true", help="(已成預設) 本地 detached 跑")
     ap.add_argument("--server", action="store_true", help="改投 server（要 Studio live 圖時；需先開 run_studio.ps1）")
     ap.add_argument("--watch", action="store_true", help="背景盯一條已發動的 run（藍圖用）")
