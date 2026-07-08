@@ -26,23 +26,19 @@ v1 用 `SUBTEAM_OPTION_SET={掠奪,攻擊}` 子集——**藍圖否決**：那�
 
 ## 設計決定（HOW，全框架 row/term/gate）
 
-### D1. 母團 directive 進 ctx（結構鏡射 faction_stakes）
+### D1. 子隊旗進 ctx（`is_subteam`，一旗兩用：歸建 directive + 戰略-gate）
 
 `decision_context.gd` 加欄（≈ line 64 faction_* 欄後）：
 ```
-var has_parent_directive: bool = false   # 有母團 → 服從母團命令（= 歸建 directive）
-var parent_team_pos: Vector2i = Vector2i(-1, -1)
+var is_subteam: bool = false   # parent_team_id != -1：①服從母團(歸建 directive) ②不自主發起戰略 option(戰略-gate)
 ```
-`gather()` 填（鏡射 faction_stakes block ≈ 195-213，`team.parent_team_id != -1` 時）：
+`gather()` 填：
 ```
-if team.parent_team_id != -1:
-	var _pt: TeamData = state.teams.get(team.parent_team_id)
-	if _pt != null:
-		c.has_parent_directive = true
-		c.parent_team_pos = _pt.tile_pos
+c.is_subteam = team.parent_team_id != -1
 ```
+- round-3 合併：v2 的 `has_parent_directive` + `parent_team_pos` → 單一 `is_subteam` 旗。`parent_team_pos` 無用（`_decide_subteam` 直讀 `parent.tile_pos`）→ 刪。
 - 子隊**同時 inherit faction_id → faction_stakes 照常填**（195-213）：warring faction 子隊自動拿 攻擊 directive（faction_duty）——攻擊紀律化免額外碼。
-- 非子隊 `has_parent_directive=false` → 下述 歸建 option / gate 對其無效（零成員/solo 行為變）。
+- 非子隊 `is_subteam=false` → 歸建 option / 戰略-gate 對其無效（零成員/solo 行為變）。
 
 ### D2. 「歸建」= 服從母團 option（faction_duty 驅，通用 row）
 
@@ -54,25 +50,34 @@ if team.parent_team_id != -1:
 - `applicable`（≈ 44 loop 內）加：
   ```
   "歸建":
-  	if ctx.has_parent_directive: out.append(opt)
+  	if ctx.is_subteam: out.append(opt)
   ```
 - `to_task`：`歸建` 由 `_decide_subteam` 特判（lifecycle move，見 D4），不進 `to_task` 標準派工；為安全加 fallback `"歸建": return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}`。
 
 `terms.gd` `faction_duty` eval（`terms.gd:100-106` match）加 case：
 ```
-"歸建": return FACTION_DUTY_DRIVE if ctx.has_parent_directive else 0.0
+"歸建": return FACTION_DUTY_DRIVE if ctx.is_subteam else 0.0
 ```
 - weight 已 `_duty_factor(_loyalty, 野心)`（`terms.gd:202`）→ 歸建 util = `_duty_factor × FACTION_DUTY_DRIVE(1.5)`。忠誠高→歸建 util 高（聽令回母團）；低忠高野→`_duty_factor→0`→歸建塌，掠奪（greed×loot weight）贏。**＝現況 `_check_deviation` greed·(1-loyalty) 語意，搬進框架用同一 duty 機制，零新 term。**
 
-### D3. 子隊不自立/佔據點（世界規則 gate，非 suppress 分支）
+### D3. 通用戰略-gate：一條規則管全部（round-3 真 un-patch，併原 D3 建設/佔村 + 涵蓋訓練）
 
-全 `rank_scored` 會讓子隊碰 `建設`（options.gd:55 無條件 applicable）/`佔村`（有 target 即候選）＝自建/奪據點=生命週期突變（工單護欄禁）。**正當性＝既有 leader-dispatch settle 機制**（藍圖 round-2 D3 裁定）：grep 證實子隊建造/安頓現行**皆由母團/leader 主動派遣既有 subteam 帶 pre-set task 發起**（`faction_ai_system.gd:525 _dispatch_subteam_settle → :540 try_set TASK_SETTLE`、`:2292 dispatch TASK_CONSTRUCT`），**從未由子隊自己 idle 決策發起**。子隊納 `rank_scored` 後，若不 gate，任一子隊會自主選「建設/佔村」＝憑空多出「附屬單位自建據點」新路徑，違工單護欄「子隊生命週期不動」。（**非借 invariants「立國=leader-level」**——那是 faction 建國 `create_faction`/`_declare_established`，文不對題。）`options.gd` applicable 兩 row 加**世界規則**謂詞（附屬單位不自主立據，對齊上述 leader-dispatch 現況，非「if subteam suppress」）：
-```
-"建設": if not ctx.has_parent_directive: out.append(opt)   # 現為無條件 append
-"佔村": ... and not ctx.has_parent_directive:               # 現有 pop/outpost 條件末 AND
-```
-- 成員/solo `has_parent_directive=false`→`not false=true`→**行為零變**。只子隊被擋自立據。
-- `生產/駐守`（`has_own_outpost` gated，子隊無自家 outpost）/`囤貨`（`intent==致富` gated，子隊 intent 空）**已自然排除**，無需加 gate。
+全 `rank_scored` 會讓子隊憑空拿到**自主戰略級行為**——`建設`（自建據點，options.gd:55 無條件 applicable）/`佔村`（奪據點，有 target 即候選）/**`訓練`**（練兵，options.gd:125-126 `archetype==FORCE and has_trainable`；子隊 leader_id!=-1 → loop2b `AmbitionLadder.update` 照算 archetype/rung，`708-722` 無 parent 排除 → 子隊 idle 可自選練兵）。三者皆「子隊原本不會做、框架化後憑空長出」＝生命週期突變（工單護欄禁）。
+
+**正當性＝既有 leader-dispatch settle 機制**（藍圖 round-2/3 裁定）：grep 證實子隊建造/安頓現行**皆由母團/leader 主動派遣既有 subteam 帶 pre-set task 發起**（`faction_ai_system.gd:525 _dispatch_subteam_settle → :540 try_set TASK_SETTLE`、`:2292 dispatch TASK_CONSTRUCT`），**從未子隊 idle 自選**。戰略足跡擴張（立據/奪據/練兵）屬 leader/faction 決定。（**非借 invariants「立國=leader-level」**——那是 faction 建國，文不對題。）
+
+**★round-3：立一條通用規則取代逐 option gate（別補丁苗頭）：**
+- `options.gd` 加 `const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練"]`（自主發起=擴張自身戰略足跡的活動）。
+- `applicable()` loop 頭**一個 guard**（44 loop 內，match 前）：
+  ```
+  # 子隊不自主發起戰略級 option（立據/奪據/練兵＝leader/faction 決定；母團命令走 pre-set lifecycle task）
+  if ctx.is_subteam and opt in STRATEGIC_SELFINIT_SET:
+  	continue
+  ```
+- **一條件管全部**：新增戰略 option 只需入 SET，自動涵蓋（無逐 option gate）。**併掉 round-2 的 建設/佔村 獨立 gate**（別留兩套）。
+- **「除非母團 directive」逃生口**：母團要子隊做戰略活動＝派 pre-set lifecycle task（TASK_SETTLE/CONSTRUCT，`_evaluate_subteam` lifecycle guard 早退，不進 engine applicable）→ 引擎決策點子隊**結構上無 strategic 母團 directive** → guard 對子隊無條件成立。若日後建模「母團經引擎下戰略令」，於此 guard 加 per-opt directive 檢查（hook 預留）。
+- 成員/solo `is_subteam=false`→ guard 不觸→**行為零變**。`生產/駐守`（`has_own_outpost`）/`囤貨`（`intent==致富`）子隊本已自然排除，非戰略-gate 對象。
+- **不 gate（子隊該能做）**：survival/投機（掠奪/覓食/返家補給/買糧/乞食/紮營/投靠）、被動防禦（迎戰/備戰/求和）、攻擊（已 faction directive/血仇 gated）。
 
 ### D4. 新 `_decide_subteam`（引擎 dispatch，cadence-gated，鏡射 `_decide_unified` 尾）
 
@@ -105,6 +110,13 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue
+		# ★投靠走共用 helper（見 D4b）：玩家 target→forced_event 請求(不自動併，防 P2a W2 坑)；NPC→try_set JOIN
+		if opt == "投靠":
+			if _try_join_target(state, sub, int(td.get("social_target", -1)), TaskArbiter.PRIO_DISPATCH, "subteam"):
+				sub.current_option = opt
+				HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
+				return
+			continue   # 投靠不可派 → 次佳
 		if not TaskArbiter.try_set(state, sub, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "subteam"):
 			continue
 		if td.has("combat_target"): state.set_combat_target(sub, int(td["combat_target"]))
@@ -120,6 +132,45 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 - **子隊非自主征服者**：`intent` 空 + `faction_id!=-1` → `_decide_unified` 的 conquest 分支（`_solo_type=="征服" and faction_id==-1`）結構性不觸 → `_decide_subteam` 無需鏡射 conquest scaffolding（簡化）。
 - **threat repertoire 保留**：full rank 含 `備戰/迎戰/求和`（threat-gated applicable）→ 紀律單位遇襲還手（藍圖要保）。
 - **掠奪 loyalty-gated 湧現**：歸建(duty)↔掠奪(greed) 同 rank 競秤；忠誠→歸建、不忠→掠奪，**非 patch 掠奪 term**（掠奪 term 零變，成員/solo 掠奪不受影響）。
+
+### D4b. 共用 join-helper（round-3 真 un-patch：抽一份，既有 2 處改呼，別複製第 3 份）
+
+**★問題**：子隊納全 rank 拿到 `投靠` option → `_find_strong_neighbor`（`faction_ai_system.gd:3232`，只排同 faction **不排玩家隊**）可回玩家隊 → `options.gd:152-156 to_task「投靠」` 對玩家一樣設 `social_target` → 同格觸發 `interaction_system.gd:1035 _resolve_join` **無條件 `SubteamSystem.merge_teams`**（自動併，非詢問）＝重引入 **P2a W2 已修的「NPC 投靠玩家誤自動併」坑**。
+
+**現況既有 guard = 2 處**（非 review 說的 3；`_decide_unified:1512-1516` + `_trigger_survival:3082-3086`；review 引的「prosperity :3085」即 `_trigger_survival` 內同一處，3085 ∈ 3055-3104）。各自 inline：
+```
+if opt == "投靠" and td.has("social_target"):
+	var pp = persons.get(player_id) ...
+	if pp != null and int(td["social_target"]) == pp.team_id:
+		if _maybe_request_join_player(state, team): return
+```
+
+**★抽共用 helper（`faction_ai_system.gd`，near `_maybe_request_join_player:3220`）**，**別複製第 3 份**：
+```
+# 投靠派工單一 seam：玩家 target → forced_event 請求(玩家決定收留，不自動併)；NPC → try_set TASK_JOIN + social_target。
+# 回 true = 已處理(caller return/停止試次佳)；false = 不可派(caller continue 試次佳)。
+func _try_join_target(state: WorldState, team: TeamData, target_id: int, prio: int, reason: String) -> bool:
+	if target_id == -1 or not state.teams.has(target_id):
+		return false
+	var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
+	if pp != null and target_id == pp.team_id:
+		return _maybe_request_join_player(state, team)   # 寫 forced_event，不 try_set（防自動併）
+	if not TaskArbiter.try_set(state, team, TeamData.TASK_JOIN, state.teams[target_id].tile_pos, prio, reason):
+		return false
+	state.set_social_target(team, target_id)
+	return true
+```
+
+**四條派工路徑全走它（既有 3 改呼 + A2a 子隊新路）**——★藍圖裁定「別靠 finder 排除玩家，集中 helper 一處攔」：
+| 路徑 | 現況 | 改 |
+|---|---|---|
+| `_decide_unified:1512-1516`(+1534 generic social_target) | inline guard + generic try_set | 投靠 branch 改呼 `_try_join_target(...,PRIO_DISPATCH,"unified")`（成功 return，否則 continue） |
+| `_trigger_survival:3082-3086`(+3087 try_set/3091 social_target) | inline guard + generic try_set | 同上，`(...,PRIO_SURVIVAL,"survival")` |
+| `_decide_subteam`（A2a 新，見 D4） | — | `(...,PRIO_DISPATCH,"subteam")` |
+
+- **helper 非塞進 `merge_teams` choke**（藍圖裁定）：choke 會變「到場才問」＝改 ask-before-travel 語意；helper 保現行語意（派工時決定走請求 or JOIN）。
+- **玩家排除集中 helper 一處**：`_find_strong_neighbor` 不動（不加 finder 排除）；即使它對子隊回玩家隊，helper 攔成 forced_event。
+- 減既有債：2 份 inline guard → 1 份 helper（round-3 un-patch 收益）。
 
 ### D5. cadence gate（效能，藍圖 review #2）
 
@@ -166,14 +217,14 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 
 | 檔 | 改點 |
 |---|---|
-| `scripts/simulation/decision/decision_context.gd` | +`has_parent_directive`/`parent_team_pos` 欄 + gather 填（D1） |
-| `scripts/simulation/decision/options.gd` | +`歸建` REGISTRY row + applicable + to_task fallback（D2）；建設/佔村 applicable +`not has_parent_directive` gate（D3） |
-| `scripts/simulation/decision/terms.gd` | `faction_duty` eval +`歸建` case（D2） |
+| `scripts/simulation/decision/decision_context.gd` | +`is_subteam` 欄（一旗兩用）+ gather 填 `= parent_team_id != -1`（D1；v2 的 has_parent_directive/parent_team_pos 合併掉） |
+| `scripts/simulation/decision/options.gd` | +`歸建` REGISTRY row + applicable(`is_subteam`) + to_task fallback（D2）；+`STRATEGIC_SELFINIT_SET` const + applicable loop 頭一個**通用戰略-gate** guard（D3，併建設/佔村+涵蓋訓練） |
+| `scripts/simulation/decision/terms.gd` | `faction_duty` eval +`歸建` case（`is_subteam`）（D2） |
 | `scripts/data/team_data.gd` | +`subteam_eval_next_tick` 欄（≈line 123，鏡射 `threat_eval_next_tick`）（D5） |
-| `scripts/simulation/faction_ai_system.gd` | +`_decide_subteam` + `SUBTEAM_CADENCE`；改 `_evaluate_subteam` tail；刪 `_check_deviation`/`_evaluate_idle_subteam`/`DEVIATION_RATE`（D4/D5/D6） |
+| `scripts/simulation/faction_ai_system.gd` | +`_decide_subteam` + `SUBTEAM_CADENCE`；+`_try_join_target` 共用 helper + **既有 2 處 join guard（`1512-1516`/`3082-3086`）改呼**（D4b）；改 `_evaluate_subteam` tail；刪 `_check_deviation`/`_evaluate_idle_subteam`/`DEVIATION_RATE`（D4/D5/D6） |
 | `scripts/debug/constitution_baseline.txt` | -2 site +`_decide_subteam`（D7） |
 
-**不碰**：`_tag_weight`（904/1893 仍用）、`hand_brain_probe.gd`（`SUBTEAM_BYPASS_REASONS` 變不可達，無害留）、子隊 lifecycle（detach/merge/settle/construct/escort/herald/discipline）、leader（A2b）、member/solo（A1a 已好，`has_parent_directive=false` 保零變）、A1a 拆的閥、掠奪 term（零 patch）。
+**不碰**：`_tag_weight`（904/1893 仍用）、`_find_strong_neighbor`（不加玩家排除，靠 helper 集中攔，D4b）、`_maybe_request_join_player`/`_resolve_join`/`merge_teams`（helper 復用，不動 choke 語意）、`hand_brain_probe.gd`（`SUBTEAM_BYPASS_REASONS` 變不可達，無害留）、子隊 lifecycle（detach/merge/settle/construct/escort/herald/discipline）、leader（A2b）、member/solo（A1a 已好，`is_subteam=false` 保零變）、A1a 拆的閥、掠奪 term（零 patch）。
 
 ## ★量測特判（工單硬守）
 
@@ -195,10 +246,13 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 6. **★效能回歸（藍圖 review #2，新增驗收項）**：before/after headless **per-tick 平均 tick-time 不顯著退化**（子隊 gather 已 cadence-gated 攤平）。手段：`SimRunner.phase_timing` 開，比 `loop1.factions`/gather.* bucket before(A2a 前)vs after；或 headless N-tick wall-time before/after（同 seed）差 <閾（量測員定，建議 ≤5%）。**驗「cadence gate 真攤平了 gather 成本」，非只功能對。**
 7. **非退化**：member/solo/leader category 背離不暴增；`arbiter_latch` 維持 A1a 後低檔；seeded final 漂移允許但 QA 判合理非退化。
 8. **效果發生**（subteam 背離真降 + bypass→0）非只「改了 code」。
+9. **★投靠玩家走 forced_event 非自動併**（round-3 D4b，P2a W2 回歸檢）：子隊（及既有 unified/survival 路）投靠 target=玩家隊 → 寫 forced_event 請求（`_maybe_request_join_player`），**不 `try_set` 不 `merge_teams` 自動併**。回歸測：構造子隊投靠玩家 → 斷言無自動 merge、有 forced_event。
+10. **★通用戰略-gate 生效**（round-3 D3）：子隊 idle 無母團 directive → `建設/佔村/訓練` 三者**皆不候選**（`applicable` 不含）；非子隊（member/solo）同場景 → 照候選（零影響）。
 
 ## 殘留疑點（呈報 reviewer，見 handback）
 
-- **D3 gate＝藍圖裁定保留**（round-2）：`建設/佔村 applicable +not has_parent_directive`＝對齊既有 leader-dispatch settle 現況（子隊建據皆 leader 派 pre-set task，非子隊 idle 自選）的世界規則謂詞，非 suppress 分支、成員零變。引用已從 invariants「立國」改指 leader-dispatch 機制（D3 段）。備案（若實作發現太像特例）=`_decide_subteam` dispatch loop skip 該兩 opt，同 lifecycle 護欄語意。
+- **通用戰略-gate（round-3 D3）取代逐 option gate**：一條 `is_subteam and opt in STRATEGIC_SELFINIT_SET` 管建設/佔村/訓練，新增戰略 option 入 SET 自動涵蓋（併掉 round-2 兩獨立 gate）。正當性=既有 leader-dispatch settle 現況（非借「立國」）。「除非母團 directive」逃生口＝母團戰略令走 pre-set lifecycle task，引擎點結構無 → hook 預留。
+- **join-helper（round-3 D4b）真 un-patch**：抽 `_try_join_target`，既有 2 處 inline guard（非 review 說 3 處）改呼，減既有債；玩家排除集中 helper（防 P2a W2 自動併坑）。
 - **mid-mission 投機叛逃移除＝藍圖明示接受**（round-2 D6，見 D6 段明示接受段）：非「系統自認超範圍」。完整「抗命」行為 deferred 另 slice（D6 future work 明記）。
 - 子隊離家 starve 走 survival option（full rank 自帶覓食/投靠/買糧）＝**比 v1 多拿到的 believable 行為**（紀律單位也會求生），符藍圖「納框架自動拿到」意圖。
 - `SUBTEAM_CADENCE=1 日` / `FACTION_DUTY_DRIVE` 對子隊量級＝TEST VALUE，平衡 pass 調。
