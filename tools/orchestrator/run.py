@@ -138,13 +138,17 @@ def cmd_status(a):
 
 
 def cmd_cancel(a):
-    """控制：停 run + 殺 worker/node 行程。--slice X 停該條；不帶 slice 清全部。"""
+    """控制：停 run + 殺 worker/node/godot 行程。--slice X 停該條；不帶 slice 清全部。"""
     import subprocess
-    # 殺 detached worker（--_worker 帶 slice）+ node（職責正典）
-    marker = f"--slice {a.slice}" if a.slice else "--_worker"
-    ps = (f"Get-CimInstance Win32_Process | Where-Object {{ $_.CommandLine -match '職責正典' "
-          f"-or ($_.CommandLine -match '--_worker' -and $_.CommandLine -match '{marker}') }} | "
-          f"ForEach-Object {{ Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }}")
+    # 可靠殺：python --_worker(+slice) + claude 節點(職責正典) + 殘留 Godot。按 Name+cmdline 精確配。
+    sfilter = f" -and $_.CommandLine -match '{a.slice}'" if a.slice else ""
+    ps = (
+        "$k=Get-CimInstance Win32_Process | Where-Object { "
+        f"($_.Name -match 'python' -and $_.CommandLine -match '_worker'{sfilter}) "
+        "-or ($_.Name -match 'claude' -and $_.CommandLine -match '職責正典') "
+        "-or ($_.Name -match 'Godot') }; "
+        "$k | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }; "
+        "$k.Count")
     try:
         subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True, timeout=30)
     except Exception:
