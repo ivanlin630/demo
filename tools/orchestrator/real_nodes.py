@@ -182,7 +182,7 @@ def rn_qa_review(state: SliceState):
         "checkpoint": "② QA 後強制中斷（裁2：人判 真bug vs godot噪音）",
         "slice": state["slice_id"], "qa_verdict": qa.get("verdict"), "qa_note": qa.get("note"),
         "measure": state["verdicts"].get("measure", {}).get("summary"),
-        "msg": "藍圖+你判：approve=merge進main / reject=停(修後重跑)。",
+        "msg": "藍圖+你判：approve=merge進main / redo=回實作重跑下游(spec好但實作/量測/qa掛,如限額) / reject=停。",
     })
     return {"resolution": str(decision)}
 
@@ -243,6 +243,13 @@ def route_bp_review(state: SliceState):
 def route_resolution(state: SliceState):
     return "merge" if str(state.get("resolution", "")).lower().startswith("approve") else "end"
 
+def route_qa_review(state: SliceState):
+    """②：approve→merge / redo→回 implementer(重跑 impl→measure→qa,救 spec好但下游掛(限額/godot)) / else→停。"""
+    d = str(state.get("resolution", "")).lower()
+    if d.startswith("approve"): return "merge"
+    if d.startswith("redo"): return "implementer"
+    return "end"
+
 def route_halt(state: SliceState):
     """halt resume 'revise'=丟回 systems_spec(原 01 session 帶 ctx 改)；其他=停。軟上限防打架。"""
     d = str(state.get("resolution", "")).lower()
@@ -269,7 +276,8 @@ def make_real_graph():
     g.add_edge("implementer", "measure")
     g.add_edge("measure", "qa")
     g.add_edge("qa", "qa_review")
-    g.add_conditional_edges("qa_review", route_resolution, {"merge": "merge", "end": END})
+    g.add_conditional_edges("qa_review", route_qa_review,
+                            {"merge": "merge", "implementer": "implementer", "end": END})  # redo→重跑下游
     g.add_conditional_edges("halt", route_halt, {"systems_spec": "systems_spec", "end": END})  # revise 迴圈
     g.add_edge("merge", END)
     return g

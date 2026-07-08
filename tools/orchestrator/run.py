@@ -265,28 +265,80 @@ def run_local(a):
     with SqliteSaver.from_conn_string(db) as cp:
         app = build_real(cp)
         if a.resume is not None:
-            stream = app.stream(Command(resume=a.resume), cfg, stream_mode="updates")
+            cmd_in = Command(resume=a.resume)
         else:
             wt, initial = _prep(a)
             print(f"[run] slice={a.slice} mode={a.mode}  (本地跑：console 印這，無 Studio)")
-            stream = app.stream(initial, cfg, stream_mode="updates")
-        for ch in stream:
-            if not isinstance(ch, dict):
+            cmd_in = initial
+        # ★暫停不退迴圈：interrupt → 寫 pause 檔 + poll decision 檔（藍圖寫檔即續，免 re-fire）。
+        while True:
+            for ch in app.stream(cmd_in, cfg, stream_mode="updates"):
+                if not isinstance(ch, dict):
+                    continue
+                for node, upd in ch.items():
+                    if node == "__interrupt__" or not isinstance(upd, dict):
+                        continue                # interrupt chunk 的值是 tuple,非節點更新→跳過
+                    _print_node(node, upd)
+            snap = app.get_state(cfg)
+            ints = [it.value for t in snap.tasks for it in getattr(t, "interrupts", [])]
+            if not snap.next:                   # 真跑完
+                _report(None, [], snap.values, a.slice)
+                _clear_pause(a.slice)
+                return
+            if ints:                            # interrupt → 暫停等 decision 檔（不退出）
+                decision = _pause_and_wait(a.slice, ints, snap.values)
+                if decision is None:            # poll 逾時 → 退出（sqlite 在，可 re-fire resume）
+                    return
+                cmd_in = Command(resume=decision)
                 continue
-            for node, upd in ch.items():
-                if node == "__interrupt__" or not isinstance(upd, dict):
-                    continue                    # interrupt chunk 的值是 tuple,非節點更新→跳過(修 local halt 崩)
-                _print_node(node, upd)
-        snap = app.get_state(cfg)
-        ints = [it.value for t in snap.tasks for it in getattr(t, "interrupts", [])]
-        _report(snap.next, ints, snap.values, a.slice)
+            cmd_in = None                       # next 但無 interrupt（罕見）→ 續跑
+
+
+def _decision_path(sid): return os.path.join(RUNS_DIR, f"{sid}.decision")
+def _pause_path(sid): return os.path.join(RUNS_DIR, f"{sid}.pause")
+
+def _clear_pause(sid):
+    for p in (_pause_path(sid), _decision_path(sid)):
+        try: os.remove(p)
+        except Exception: pass
+
+def _pause_and_wait(slice_id, interrupts, values, poll_s=6, timeout_s=7200):
+    """暫停不退：寫 pause 檔(等啥)+ poll decision 檔。藍圖寫 decision 檔即續，免 re-fire。逾時回 None。"""
+    import time, json as _json
+    try:
+        with open(_pause_path(slice_id), "w", encoding="utf-8") as f:
+            _json.dump({"slice": slice_id, "stage": values.get("stage"),
+                        "interrupts": [str(i)[:500] for i in interrupts]}, f, ensure_ascii=False)
+    except Exception:
+        pass
+    print("\n[run] ⏸ 停下等你（進程活著、poll decision 檔）：")
+    for v in interrupts: print("   ", str(v)[:400])
+    dp = _decision_path(slice_id)
+    print(f"[run] 續：寫 {dp}（內容 approve/reject/revise/redo）→ 進程自動續，免 re-fire")
+    print("[run] 帳單：docs/process/metrics.jsonl")
+    waited = 0
+    while waited < timeout_s:
+        if os.path.exists(dp):
+            d = ""
+            try: d = open(dp, encoding="utf-8").read().strip()
+            except Exception: pass
+            try: os.remove(dp)
+            except Exception: pass
+            if d:
+                try: os.remove(_pause_path(slice_id))
+                except Exception: pass
+                print(f"[run] ▶ 收到 decision={d}，續跑")
+                return d
+        time.sleep(poll_s)
+        waited += poll_s
+    print("[run] ⏸ poll 逾時，退出（sqlite 在，re-fire --resume 可續）")
+    return None
 
 
 def _report(nxt, interrupts, values, slice_id):
     if nxt:
         print("\n[run] ⏸ 停下等你：")
         for v in interrupts: print("   ", v)
-        print(f"[run] 繼續： python run.py --slice {slice_id} --resume approve   (或 reject)")
     else:
         print(f"\n[run] ✅ 完成：done={values.get('done')} stage={values.get('stage')}")
     print("[run] 帳單：docs/process/metrics.jsonl")
