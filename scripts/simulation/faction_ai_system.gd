@@ -20,7 +20,6 @@ const HONOR_INTERVAL_MULT: float  = 0.5   # honor=1.0 → 徵收週期 ×1.5（�
 const HONOR_EMERGENCY_DISC: float = 0.3   # honor=1.0 → emergency 門檻 ×0.7（義氣高 → 緊急門檻降低）
 const LOOT_SCORE_THRESHOLD: float = 0.35  # TEST VALUE — 掠奪 goal 分數門檻
 const LOOT_READINESS_MIN: float   = 0.6   # TEST VALUE — 掠奪需要的最低 readiness
-const DEVIATION_RATE: float       = 0.05  # TEST VALUE — 子團偏離基礎概率
 const SMALL_TEAM_RATIO: float     = 0.3   # TEST VALUE — pop < cap×0.3 視為小隊
 const SMALL_VS_LARGE: float       = 0.33  # TEST VALUE — pop < absorber.pop×0.33 才觸發合併
 const CONSOLIDATE_MAX_DIST: int   = 3     # TEST VALUE — 戰前集結距離上限（hex）
@@ -99,6 +98,8 @@ const ANON_TREASURY_BONUS_THRESHOLD: float = 200.0  # 公庫滿 → attack_score
 
 # ── Threat response（被動威脅反應）──
 const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威脅
+# A2a 子隊決策 cadence（效能：全框架 gather+rank 非逐 tick，攤平 O(N²) LOD 成本，鏡射 THREAT_CADENCE）。
+const SUBTEAM_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 子隊決策一次（TEST VALUE，平衡 pass 調）
 # preempt：忙碌隊只有「壓境能傷你」威脅才打斷進行中 task（門檻 = threat_threshold + 此加成）。
 # TEST VALUE=2.0（measured：逼近但弱敵 react≈1.5 須守住、壓境碾壓敵 react≈5.5 須觸發 → margin∈(1.1,5.2)，取 2.0 雙側留餘裕）。
 # 天然實現「能傷你」語意：power_ratio 貢獻 (ratio-1)·0.5，須 ratio≳5 才把 react 推過此門檻（見 threat_assessment.gd:19）。
@@ -1329,7 +1330,7 @@ func _recall_envoy(state: WorldState, envoy: TeamData) -> void:
 	envoy.task_reason = "envoy_recall"
 	var parent: TeamData = state.teams.get(envoy.parent_team_id)
 	if parent != null:
-		envoy.move_target = parent.tile_pos   # 下 tick _evaluate_idle_subteam 路由回家/併回
+		envoy.move_target = parent.tile_pos   # 下 tick _decide_subteam 路由回家/併回
 	else:
 		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（正常 AI 接手，非 zombie）
 		state.remove_tag(envoy, TeamData.TAG_SUBTEAM, "envoy_orphan")
@@ -1626,13 +1627,14 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 		return
 	if _check_discipline(state, sub):
 		return
-	if sub.current_task != TeamData.TASK_IDLE and sub.move_target != Vector2i(-1, -1):
-		if _check_deviation(state, sub):
-			return
+	# 抵達目標格 → 歸建（lifecycle，不進引擎/probe）
 	if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE:
 		merge_queue.append(sub.team_id)
-	elif sub.current_task == TeamData.TASK_IDLE:
-		_evaluate_idle_subteam(state, sub, merge_queue)
+		return
+	# idle → 引擎決策（cadence-gated；A2a 取代 _evaluate_idle_subteam 手 argmax + _check_deviation randf）
+	if sub.current_task == TeamData.TASK_IDLE:
+		_decide_subteam(state, sub, merge_queue)
+	# active-transit 已派 task → sticky（執行命令中 duty 壓制投機＝任務優先；到達自歸建 / discipline 自 detach）
 
 func _update_escort(state: WorldState, team: TeamData) -> void:
 	if team.order_target_id == -1:
@@ -1666,58 +1668,72 @@ func _check_discipline(state: WorldState, sub: TeamData) -> bool:
 		return true
 	return false
 
-func _check_deviation(state: WorldState, sub: TeamData) -> bool:
-	var leader = state.persons.get(sub.leader_id)
-	if leader == null:
-		return false
-	var greed: float   = float(leader.values.get("貪婪", 0.5))
-	var loyalty: float = leader.loyalty
-	var deviation_chance: float = greed * (1.0 - loyalty) * DEVIATION_RATE
-	if randf() < deviation_chance:
-		var loot_target: int = _nearest_independent(state, sub)
-		if loot_target != -1:
-			if TaskArbiter.try_set(state, sub, TeamData.TASK_LOOT,
-					state.teams[loot_target].tile_pos, TaskArbiter.PRIO_DISPATCH, "deviation"):
-				print("[SubAI] Team%d 偏離掠奪 Team%d" % [sub.team_id, loot_target])
-				HandBrainProbe.note_bypass(state, sub, "subteam")   # 手聽腦：子隊手寫 argmax 繞引擎（A2）
-				return true
-			return false
-		TaskArbiter.release(sub)
-	return false
-
-func _evaluate_idle_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+# A2a 子隊決策（引擎 dispatch，cadence-gated，鏡射 _decide_unified 尾）。
+# 取代 _check_deviation(randf 中途叛離) + _evaluate_idle_subteam(手 argmax)：子隊 idle 走全框架
+# rank_scored（含 faction_stakes/threat/掠奪/歸建），歸建(duty)↔掠奪(greed) loyalty-gated 競秤湧現。
+func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	# ★D5 cadence gate（效能）：子隊決策非逐 tick，比照 threat cadence，攤平 gather+rank 成本。
+	if state.world.current_tick < sub.subteam_eval_next_tick:
+		return
+	sub.subteam_eval_next_tick = state.world.current_tick + SUBTEAM_CADENCE
 	var parent: TeamData = state.teams.get(sub.parent_team_id)
 	if parent == null:
 		return
-	if parent.tile_pos == sub.tile_pos:
-		merge_queue.append(sub.team_id)
-		return
 	var leader_p = state.persons.get(sub.leader_id)
 	if leader_p == null:
-		sub.move_target = parent.tile_pos
+		sub.move_target = parent.tile_pos   # 無腦 → 回家（lifecycle，不 capture）
 		return
-	var greed:   float = float(leader_p.values.get("貪婪", 0.5))
-	var martial: float = float(leader_p.values.get("好戰", 0.5))
-	var scores: Dictionary = { "回歸": 0.3 }
-	scores[TeamData.TASK_LOOT] = (greed * 0.5 + martial * 0.2) * _tag_weight(sub, TeamData.TASK_LOOT)
-	scores[TeamData.TASK_ATTACK] = (martial * 0.4 + greed * 0.2) * _tag_weight(sub, TeamData.TASK_ATTACK)
-	var best_task := "回歸"
-	var best_score: float = 0.0
-	for t in scores:
-		if float(scores[t]) > best_score:
-			best_score = float(scores[t])
-			best_task  = t
-	if best_task == "回歸":
-		sub.move_target = parent.tile_pos
-	else:
-		var tid: int = _nearest_independent(state, sub)
-		if tid != -1:
-			if TaskArbiter.try_set(state, sub, best_task,
-					state.teams[tid].tile_pos, TaskArbiter.PRIO_DISPATCH, "subteam_idle"):
-				print("[SubAI] Team%d idle→%s (Team%d)" % [sub.team_id, best_task, tid])
-				HandBrainProbe.note_bypass(state, sub, "subteam")   # 手聽腦：子隊手寫 argmax 繞引擎（A2）
-		else:
+	var ranked: Array = DecisionEngine.rank_scored(state, sub)   # 全框架 rank
+	for e in ranked:
+		var opt: String = e["opt"]
+		# ★歸建 = 服從母團 = lifecycle move（回母團集結/歸建），不進 obey/violation 統計（量測特判）。
+		if opt == "歸建":
+			sub.current_option = opt
 			sub.move_target = parent.tile_pos
+			merge_queue.append(sub.team_id)   # 到家由 loop2b try_merge_back
+			return
+		var td: Dictionary = DecisionOptions.to_task(state, sub, opt)
+		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
+			continue
+		var tgt: Vector2i = td["target"]
+		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+			continue
+		# ★投靠走新 helper：玩家 target→forced_event 請求（★return 不 fallthrough，防 P2a W2 自動併）；NPC→try_set JOIN。
+		if opt == "投靠":
+			if _try_join_target(state, sub, int(td.get("social_target", -1))):
+				sub.current_option = opt
+				# ★量測特判（round-5）：只有 NPC 投靠真 try_set(JOIN) 才 capture；玩家 forced_event 分支
+				# 未 try_set → current_task 仍 IDLE(≠winner) → 若 capture 會誤記 violation，故比照歸建不 capture 直接 return。
+				if sub.current_task == TeamData.TASK_JOIN:
+					HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
+				return
+			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
+		if not TaskArbiter.try_set(state, sub, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "subteam"):
+			continue
+		if td.has("combat_target"): state.set_combat_target(sub, int(td["combat_target"]))
+		if td.has("social_target"): state.set_social_target(sub, int(td["social_target"]))
+		_wire_threat_task(sub, td)   # 迎戰/求和 aux target（threat repertoire 保留）
+		sub.current_option = opt      # 承諾慣性（COMMITMENT_BONUS 讀，防抖動）
+		HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
+		print("[SubAI] Team%d 引擎→%s (%s)" % [sub.team_id, td["task"], opt])
+		return
+	# 全不可派 → 回母團（lifecycle，不 capture）
+	sub.move_target = parent.tile_pos
+
+# A2a 子隊 join-player guard（scope B：只給 _decide_subteam 新路呼；既有 3 處 join 路不碰）。
+# 玩家 target → forced_event 請求（玩家決定收留），★不 try_set、caller 不 fallthrough；
+# NPC target → try_set TASK_JOIN + social_target。回 true=已處理(caller return)；false=不可派/已請求(caller continue)。
+func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool:
+	if target_id == -1 or not state.teams.has(target_id):
+		return false
+	var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
+	if pp != null and target_id == pp.team_id:
+		return _maybe_request_join_player(state, team)   # 寫 forced_event，★不 try_set、caller 不 fallthrough
+	if not TaskArbiter.try_set(state, team, TeamData.TASK_JOIN, state.teams[target_id].tile_pos, \
+			TaskArbiter.PRIO_DISPATCH, "subteam"):
+		return false
+	state.set_social_target(team, target_id)
+	return true
 
 # ──────── 獨立 Team 自主 AI ────────
 

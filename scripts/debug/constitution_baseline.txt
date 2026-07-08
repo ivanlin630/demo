@@ -14,11 +14,15 @@
 scripts/simulation/faction_ai_system.gd::_try_consolidate_merge
 # 序6b dispatch（leader _assign_tasks 立國/subteam-tribute 特殊語意，defer 序6b）
 scripts/simulation/faction_ai_system.gd::_assign_tasks
-scripts/simulation/faction_ai_system.gd::_check_deviation
 scripts/simulation/faction_ai_system.gd::_decide_unified
+# 序A2a subteam 溶入引擎（rank_scored 全框架；正當性同 _decide_unified/_evaluate_solo）；
+# removed: _check_deviation, _evaluate_idle_subteam（手 argmax/randf 溶解）。
+# _try_join_target = _decide_subteam 唯一 caller 的 投靠 option dispatch helper（引擎 rank 選中才 try_set，
+# 非手 argmax 繞引擎；玩家 target 走 forced_event 不 try_set）→ 引擎落點，同 _decide_subteam 正當。
+scripts/simulation/faction_ai_system.gd::_decide_subteam
+scripts/simulation/faction_ai_system.gd::_try_join_target
 # 序4 vendetta（try_set @775，enclosing func = _evaluate_all_body）
 scripts/simulation/faction_ai_system.gd::_evaluate_all_body
-scripts/simulation/faction_ai_system.gd::_evaluate_idle_subteam
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy
 scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure
 # 序5 prosperity（cascade _evaluate_prosperity_attack 已溶解刪除；保留 scout-verify scaffolding
