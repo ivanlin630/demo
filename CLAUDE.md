@@ -79,8 +79,9 @@ langgraph 機器（`tools/orchestrator/`）**少用**，只大/並行活才上�
 - **QA 驗收官**：★獨立 adversarial 判決 + release gate（交用戶前 QA 綠=硬閘）。守 `04_qa.md`/`05_acceptance.md`。
 - 邊界：藍圖不碰架構、系統不改願景；越界呈報。喬不攏你裁。禁廢話恭維。
 
-**實作 session**（`.worktrees/<feature>/` / `feat/<feature>`）：worktree 照 plan 做+TDD+handback，守 `03_implementer.md`。
-（worktree 別 dir、信箱 live 看不到 → 不 arm，走 plan/機器領活。）
+**worktree worker session**（`.worktrees/<feature>/` / `feat/<feature>`，別 dir、信箱 live 看不到 → 不 arm，走 plan/branch/機器領活）：
+- **實作**：照 plan 做+TDD+handback，守 `03_implementer.md`。
+- **量測員**：在 branch 跑 HOB/探針/beds 出**獨立**數字 → handback to:QA（藍圖不蹲 godot；maker/checker：產數字≠判數字，故 ≠QA、≠implementer）。
 
 **★信箱主動觸發（免人肉轉述）**：各持久角色開場 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`
 ——別的角色寫 `to:<我> && status:open` 信 ~20s 內主動喚醒。寄件=Write handback（frontmatter from/to/status/topic），動完改 `status:consumed`。
