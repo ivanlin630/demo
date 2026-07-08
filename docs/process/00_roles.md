@@ -77,6 +77,7 @@ topic: <一行>
 1. 發送方寫 `status: open`。
 2. **每 session 開頭掃 `handbacks/`，讀 `to: 本角色 / status: open` 的**（義務）。
    - **自動 📬（hook，gitignore 本地）**：`SessionStart → session-role.sh`（開頭掃一次）+ `UserPromptSubmit → handback-inbox.sh`（**每 turn 掃**，補 session 中途別角色寫的；空則靜默）。掃 frontmatter `to:$SESSION_ROLE status:open` = 讀真值源，免 QUEUE.md drift。消滅人肉轉述。
+   - **★`/clear` 後必重讀職責正典**：`/clear`（或 /compact）**不重觸 SessionStart hook** → 角色 context 被清掉。任何角色清 ctx 後接下一活前，先重讀自己的 `0X_<role>.md` + `00_roles.md` + 重 arm inbox-watch。（implementer per-task lifecycle 尤其，見 `03_implementer.md`。）
 3. 消費後改 `status: consumed`（不刪檔，留軌跡）。
 4. 待決事項的**歸宿仍是 owner doc**：handback 只是載體。例：藍圖裁定殲滅模型 → 寫進 `game-design.md` → handback consumed。系統定 seam → 寫進 `invariants.md`/spec → consumed。
 

@@ -100,6 +100,7 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
    - 寫 handback（X-to-Y frontmatter）到**唯一 main mailbox 絕對路徑**（見上 §2）。
    - **`cd` 回主目錄 `A:\GDS\demo`**，確認 `git branch --show-current` = **main**（worktree 的 feat 分支不動、只你 shell 回家）。**★絕不在主目錄 checkout feat 分支。**
    - **清 ctx**（`/clear` 或起新 session）→ 下 task 乾淨起、不累積。
+   - **★清 ctx 後必重讀職責**（`/clear` 不會重觸 SessionStart hook → 角色 context 被清掉）：重讀 `docs/process/03_implementer.md` + `00_roles.md`（本 lifecycle + X-to-Y handback + 禁主目錄 checkout 全在裡面），才接下一 task。
    - **待命**（重 arm inbox-watch，等下一封）。
 
 ∴ 主目錄恆 main、每 task ctx 隔離、worktree 隔離改 code、handback 走 main mailbox 自動觸發下一站。
