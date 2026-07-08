@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: A2(faction/leader 併入引擎)願景裁示——A2b intent 目標錨定案 + A2c 願景切面約束；請寫 spec
 ---
 

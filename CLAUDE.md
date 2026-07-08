@@ -87,5 +87,5 @@ langgraph 機器（`tools/orchestrator/`）**少用**，只大/並行活才上�
 ——別的角色寫 `to:<我> && status:open` 信 ~20s 內主動喚醒。寄件=Write handback（frontmatter from/to/status/topic），動完改 `status:consumed`。
 
 - **git doc = 共享大腦**：handback + `game-design`/`invariants`/`progress` 持久狀態。owner 表語意不變。
-- **auto-memory 單寫者 = 藍圖 session**（持久、看全局；別角色教訓走 handback → 藍圖提煉入 memory）。
+- **auto-memory 單寫者 = 系統 session**（HOW owner，持久、序列化天然單寫；別角色教訓走 handback → 系統提煉入 memory）。
 - **憲法閘/融合驗/framework = merge 前跑**（綠才 merge）。
