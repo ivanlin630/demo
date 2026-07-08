@@ -14,7 +14,7 @@ import bus
 ROLE_DOC = {
     "reviewer": "02_reviewer.md", "systems": "01_architect.md",
     "implementer": "03_implementer.md", "qa": "04_qa.md", "blueprint": "00_roles.md",
-    "measurer": "00_roles.md",  # 量測員：maker 側產獨立數字餵 QA（≠QA 判）；職責見 00_roles 量測員行
+    "measurer": "03b_measurer.md",  # 量測員職責正典（maker 側產獨立數字餵 QA，含 spec §驗收法守衛）
 }
 
 def _role_preamble(role: str) -> str:

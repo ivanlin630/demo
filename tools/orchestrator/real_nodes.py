@@ -157,7 +157,8 @@ def rn_measure(state: SliceState):
     r = nodes.write_node("measurer", state["slice_id"],
         task="量測本 slice 改動(★別改 scripts/ code，只跑探針+寫報告)。跑：①hand_obeys_brain_bed 單點(HOB_SEEDS=1337 HOB_MONTHS=1)抓 obey%/arbiter_latch/各機制/determinism ②constitution_gate ③sanity(headless_test/game_sim_test 無崩+關鍵print) ④TeamTrace 抖動檢。"
              "★★HOB bed 慢(跑 4×一個月 warring≈500s)：**先設 $env:GODOT_TIMEOUT='600' 再跑**，否則 wrapper 360s 預設會誤殺→假 perf 迴歸→假 reject(A2a 血教訓)。timeout 被殺≠迴歸，要區分。"
-             "★可行則 before/after 對照(main vs 本 worktree 同 seed)。寫 JSON 到 docs/process/verdicts/" + state["slice_id"] + ".measure.json"
+             "★★★也讀本 slice spec 的 §驗收法 → 把每條行為守衛翻成 seeded 量測(用 WarringHarness/seeded_warring_bed)→ **產 count/delta 數字**(如 leader_conquest_count、tribute_treasury_delta)。**這些數字你產、QA 只判門檻——別推給 QA seeded 遊走**(否則 QA 被迫自跑自判=破 maker/checker)。缺哪條產不出→列 incomplete 報藍圖，別留白。詳 docs/process/03b_measurer.md。"
+             "★可行則 before/after 對照(main vs 本 worktree 同 seed，比 per-tick 同規模非撞絕對門檻)。寫 JSON 到 docs/process/verdicts/" + state["slice_id"] + ".measure.json"
              "(obey_pct,arbiter_latch,mechanisms,determinism,constitution,thrash,before_after,summary)。commit。",
         reads="worktree 本 slice commits + scripts/debug/ 的 bed",
         worktree=state["worktree"], out_handback_to="qa", model=MODELS["measure"])

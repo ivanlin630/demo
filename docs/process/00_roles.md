@@ -12,7 +12,7 @@
 | **藍圖**（Blueprint） | **WHAT**：玩什麼、玩家循環、feature 願景、平衡意圖 | 架構決定、code | `game-design.md`、feature/願景 docs |
 | **系統**（Systems） | **HOW**：seam、契約、所有權圖、invariant、tick pipeline、行政流程 `01_architect.md`| 遊戲願景、平衡意圖 | spec / plan / `invariants.md`|
 | **實作**（Implementer） | worktree 寫 code、跑 sanity 測試 | 設計決定 | code + handback |
-| **量測員**（Measurer） | worktree/branch 跑 HOB/探針/beds 出**獨立**數字餵 QA（藍圖不蹲 godot） | 判決、改 code、裁設計 | `.measure.json` + handback to:QA |
+| **量測員**（Measurer） | branch 跑 HOB/探針/beds **＋ spec §驗收法客製守衛** 出**獨立**數字餵 QA（藍圖不蹲 godot）。職責正典 `03b_measurer.md` | 判決、改 code、裁設計 | `.measure.json` + handback to:QA |
 | **驗收官**（QA） | 充足性判決/戲感觀者/release gate/UI 落差（`04_qa.md` 四職）；**maker/checker 分離=非蓋房者的腦**，★讀量測員數字判、不自產 | 修 code、裁 WHAT、修 HOW、**自產數字** | 判決表/落差清單 + `escaped_defects.md` 管理 |
 
 **★硬閘：任何東西交用戶之前，QA 必綠**（三層驗收鏈見 `05_acceptance.md`）。充足性判決由 QA 出——系統不自判自己蓋的世界。
@@ -99,6 +99,7 @@ channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統�
 - `01_architect.md` — 系統(HOW) 職責 / spec / plan 本體
 - `02_reviewer.md` — 對抗式審查者（factcheck 驗前提 / 審 spec）
 - `03_implementer.md` — worktree 實作 + TDD + handback
+- `03b_measurer.md` — ★量測員（maker 產獨立數字，含 spec §驗收法守衛；≠QA 判）
 - `04_qa.md` — QA 四職判決（充足性/戲感/release gate/UI 落差）
 - `05_acceptance.md` — ★交付前驗收鏈（三層機器全綠=硬閘）
 - `06_pipeline_orchestration.md` — pipeline 編排（藍圖 spawn 下游 subagent）
