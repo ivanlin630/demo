@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2a spec 審——子隊決策路由進引擎(D7)；子集{掠奪,攻擊}秤+回歸=lifecycle fallback(不 capture)；兩取捨要你裁：①子集 vs 全 menu ②deviation randf 存廢
 ---
 
