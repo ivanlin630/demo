@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 照妖鏡首刀選定=潰退門檻→膽量,請願景 sign-off(改潰退率分布);spec 已備推下游
 ---
 
