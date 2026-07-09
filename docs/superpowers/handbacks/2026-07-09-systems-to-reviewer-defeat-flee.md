@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 審 敗北出路前置 spec（絕境逃決策膽量秤）——blueprint sign-off 已批,審 correctness
 ---
 
