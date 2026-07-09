@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②] S1 rev2 pursuit 累積器 de-patch 審——比照 _cas_carry;merge 前 CLEAN
 ---
 

@@ -35,7 +35,7 @@ var carry: float = _pursuit_carry.get(loser_id, 0.0) + real
 var pursuit_loss: int = int(carry)          # floor
 _pursuit_carry[loser_id] = carry - float(pursuit_loss)
 ```
-- `_pursuit_carry` = static dict（同 `_cas_carry` 模式，key=loser team_id）。10-pop 隊被反覆追→漸進掉血（比 truncate 永零 / round 每次必殺1 兩極都對）。**★釘死不變量（reviewer §D4 教訓）：track 清除點顯式 erase**——`_pursuit_carry.erase(loser_id)` 於隊滅絕/erase_team 時（避免 team_id 重用洩漏），或註解釘「靠 X 保」。determinism 保（無新 randf）。
+- `_pursuit_carry` = static dict（同 `_cas_carry` 模式，key=loser team_id）。10-pop 隊被反覆追→漸進掉血（比 truncate 永零 / round 每次必殺1 兩極都對）。**★顯式 erase = 預設硬要求（reviewer R② 釘：非與註解平權——`_cas_carry` 靠隱式重置=當初的坑）**：`_pursuit_carry.erase(loser_id)` 掛所有隊消滅路徑（`erase_team`/滅絕/團滅），堵 team_id 重用洩漏。**comment-only 僅在技術上真做不到 erase 時才准**（且須說明為何做不到），非退而求其次的免責選項。determinism 保（無新 randf）。
 
 **★機制事實（measurer 量對東西、blueprint 判準）**：`_apply_pursuit` 在 `_end_combat`(:410)/`_force_retreat`(:489) 內 = **combat 結束後放血**，**不重入殲滅檢查**。∴ S1 **不直接動 `combat.end_annihilation` count**（三端在 combat 內決）。「殘忍軍閥靠窮追殲滅」機制上=窮追把潰逃隊放血到後續**滅絕**（`extinct.*` 獨立路）或加重 attrition，非 end_annihilation 三端。
 **探針（S1 驗人格集中）**：`pursuit.n`、`pursuit.loss_sum`、`pursuit.cruelty_sum`、`pursuit.greed_sum`（追擊時勝方領袖值加權）；沿用既有 `end_annihilation`/`end_mortal_flee`/`capture.total` + `extinct.*`。
