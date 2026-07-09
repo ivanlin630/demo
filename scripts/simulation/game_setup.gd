@@ -145,7 +145,7 @@ static func _generate_factions(state, plan, config, rng) -> void:
 			if ti == 0:
 				team.tile_pos = main_pos
 			else:
-				team.tile_pos = _random_near(outposts, rng)
+				team.tile_pos = _random_near(state, outposts, rng)
 			this_faction_team_ids.append(team.team_id)
 
 		var first_team_id: int = this_faction_team_ids[0]
@@ -258,7 +258,7 @@ static func _setup_random_player(state, config, rng) -> void:
 					state.set_team_faction(team, fi)   # 入 faction（雙向同步）
 					var lt: TeamData = state.teams.get(state.factions[fi].leader_team_id)
 					if lt:
-						team.tile_pos = _random_near([lt.tile_pos], rng)
+						team.tile_pos = _random_near(state, [lt.tile_pos], rng)
 					else:
 						team.tile_pos = _random_empty_tile(state, rng)
 				else:
@@ -306,12 +306,20 @@ static func _is_tile_occupied(state: WorldState, pos: Vector2i) -> bool:
 		if state.teams[tid].tile_pos == pos: return true
 	return false
 
-static func _random_near(positions: Array, rng) -> Vector2i:
-	if positions.is_empty(): return Vector2i(0, 0)
+static func _random_near(state: WorldState, positions: Array, rng) -> Vector2i:
+	if positions.is_empty(): return _random_empty_tile(state, rng)
 	var origin: Vector2i = positions[rng.randi() % positions.size()]
 	var dirs: Array = [Vector2i(1,0), Vector2i(-1,0), Vector2i(0,1),
 	                   Vector2i(0,-1), Vector2i(1,-1), Vector2i(-1,1)]
-	return origin + dirs[rng.randi() % dirs.size()]
+	# 隨機起點掃 6 方向，取第一個「存在且未被佔」鄰格；全越界/被佔 → 退 _random_empty_tile。
+	# RNG 保近 case 不變：start 1 抽取代舊 dir 抽，for 掃描不呼 rng（純位移）→ 非邊緣 origin 同舊消耗。
+	var start: int = rng.randi() % dirs.size()
+	for i in range(dirs.size()):
+		var cand: Vector2i = origin + dirs[(start + i) % dirs.size()]
+		var key: int = cand.x * 1000 + cand.y
+		if state.world.tiles.has(key) and not _is_tile_occupied(state, cand):
+			return cand
+	return _random_empty_tile(state, rng)   # 邊緣全鄰格越界/被佔 → 安全兜底
 
 static func _random_empty_tile(state: WorldState, rng) -> Vector2i:
 	var keys: Array = state.world.tiles.keys()
