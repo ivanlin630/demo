@@ -1,7 +1,7 @@
 ---
 from: systems
 to: systems
-status: open
+status: consumed
 topic: HANDOFF——2026-07-09 大 session 交接:敗北逃rev2 in-flight + 3 backlog腿 + 4 流程新原則
 ---
 

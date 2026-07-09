@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 敗北逃決策 rev2 重做（pop-based 公式 + capture 修）——reviewer CLEAN,接 feat/defeat-flee
 ---
 

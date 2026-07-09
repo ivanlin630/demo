@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems, qa
-status: open
+status: consumed
 topic: A2b — faction leader 隊納統一引擎（3 task 完成）
 ---
 

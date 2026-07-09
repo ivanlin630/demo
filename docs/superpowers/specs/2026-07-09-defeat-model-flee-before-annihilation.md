@@ -71,6 +71,17 @@ func _mortal_flee_check(state, id_self, id_enemy) -> bool:   # 回 true=已潰�
 - 勇者小隊 → 血戰 → 殲滅（**稀**）。
 - 大隊（eff>3）→ 不進絕境逃、走既有 readiness-abandon(照妖鏡#1) + 殲滅——長 combat 三端照舊。
 
+### ★D4. 殲滅流血管道 de-patch（2026-07-10，measurer 定向床挖 code 根因後）
+**背景**：rev2 逃/俘兩端達意圖，但殲滅端 organic+定向床**全 0**（720 場、n_high=80 皆 0）。measurer 挖出 code 層根因（非猜）：`_resolve_combat_round` 傷亡 `loss=int(round(eff*str_share*ROUND_CASUALTY_RATE(0.1)))`——絕境隊 eff∈{1,2,3} → 積上限 `3×1.0×0.1=0.3<0.5` → **恆捨入 0** → mortal zone 每 round 零流血 → pop 掉不到 ≤1 → **殲滅結構性不可能**。= 補丁閘型病（`int(round())` 對小 pop 的量化截斷 pre-empt 引擎傷亡）。blueprint 裁：de-patch（非補償補丁），配比意圖不變（殲滅稀但>0=勇者血戰殘局）。
+
+**HOW（systems 定，有 HOW 決定權）= 分數傷亡累積器**（棄機率化捨入——後者新增 randf 擾 seeded warring RNG stream=破 determinism）：
+- 每 round 算 **real-valued** 傷亡 `real = eff*str_share*RATE`，**flanking 加碼套在 real 上**（不先 `int` 截斷）。
+- 跨 round 累積分數餘量於 `_combat_track[id]["cas_carry"]`（`start_combat` 建 track 時初始 0.0）：
+  `carry += real; loss = int(carry)  # floor; carry -= loss`。
+- 效果：mortal zone 0.3/round 累積 → ~3-4 round 掉 1 → 長 last-stand 能掉到殲滅線。**稀由 flee/rout 先 pre-empt 保**（bleed 慢、readiness drain 0.08/round 先觸 abandon/mortal_flee，只勇者撐夠久才殲滅）。零新增 randf → determinism 保。
+- **大隊 baseline**：real≥1/round，累積器 floor+carry 長跑總量=精確 Σreal（比 `round` 更準），per-round 漂移 ≤1（unbiased）→ ≈baseline（measurer 驗逃/俘不退化）。
+- **推翻 D-舊假設**：原 spec「不碰 combat 傷亡率常數」被 measurer 根因推翻——傷亡**捨入**才是殲滅端 blocker，非常數值。
+
 ## 觸及檔
 | 檔 | 改點 |
 |---|---|
