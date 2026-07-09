@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [收尾] 敗北逃 rev2 merged → main（3892761）+ owner docs/memory 落地確認
 ---
 
