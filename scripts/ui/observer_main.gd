@@ -139,6 +139,9 @@ func _build_ui() -> void:
 		_map.select_team(tid)
 		_ticker.set_filter_team(tid))
 	_inspect.follow_toggled.connect(func(on: bool): _map.set_follow(on))
+	# 點地圖格（空格/據點）→ inspect 切據點詳情（tile_selected 已由 world_map_view emit）
+	_map.tile_selected.connect(func(tpos: Vector2i):
+		_inspect.select_tile(tpos))
 
 func _on_speed(idx: int) -> void:
 	_speed_idx = idx

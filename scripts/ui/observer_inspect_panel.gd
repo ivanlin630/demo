@@ -10,7 +10,8 @@ var _bridge: ObserverBridge
 var _list: ItemList
 var _detail: RichTextLabel
 var _follow_btn: CheckBox
-var _selected: int = -1
+var _selected: int = -1                          # 選中隊 id，-1 sentinel
+var _selected_tile: Vector2i = Vector2i(-1, -1)  # 選中據點格，(-1,-1) sentinel
 var _row_tids: Array = []
 
 func setup(bridge: ObserverBridge) -> void:
@@ -39,16 +40,25 @@ func _on_row(idx: int) -> void:
 	if idx < 0 or idx >= _row_tids.size():
 		return
 	_selected = _row_tids[idx]
+	_selected_tile = Vector2i(-1, -1)   # 互斥：選隊清據點
 	_render_detail()
 	team_selected.emit(_selected)
 
-# 外部同步（地圖 pick）：選中 + 詳情，不回發 signal（防循環）
+# 外部同步（地圖 pick 隊）：選中 + 詳情，不回發 signal（防循環）
 func select_team(tid: int) -> void:
 	_selected = tid
+	_selected_tile = Vector2i(-1, -1)   # 互斥：選隊清據點
 	var idx: int = _row_tids.find(tid)
 	if idx >= 0:
 		_list.select(idx)
 		_list.ensure_current_is_visible()
+	_render_detail()
+
+# 外部同步（地圖 pick 空格/據點）：切據點詳情，互斥清隊選取
+func select_tile(tpos: Vector2i) -> void:
+	_selected_tile = tpos
+	_selected = -1
+	_list.deselect_all()
 	_render_detail()
 
 func refresh() -> void:
@@ -66,8 +76,12 @@ func refresh() -> void:
 	_render_detail()
 
 func _render_detail() -> void:
+	# 互斥判斷順序固定：據點格 sentinel 優先 → 隊 sentinel → 皆空提示。
+	if _selected_tile != Vector2i(-1, -1):
+		_render_outpost_detail()
+		return
 	if _selected == -1:
-		_detail.text = "（點地圖或清單選隊）"
+		_detail.text = "（點地圖或清單選隊；點地圖格看據點）"
 		return
 	var d: Dictionary = _bridge.query_team(_selected)
 	if d.is_empty():
@@ -89,4 +103,38 @@ func _render_detail() -> void:
 		"戰備：%.2f  疲勞：%.2f  傷兵：%d" % [float(d["readiness"]), float(d["fatigue"]), int(d["wounded"])],
 		"位置：(%d,%d)" % [d["tile_pos"].x, d["tile_pos"].y],
 	]
+	lines.append(_resources_line(d.get("resources_nonzero", {}), true))  # skip food/coin（隊已有專屬行）
+	_detail.text = "\n".join(lines)
+
+# 非零資源段（skip_food_coin=隊詳情已有專屬行時排除；其餘全露，中文標籤人看得懂）
+func _resources_line(res: Dictionary, skip_food_coin: bool) -> String:
+	var parts: Array = []
+	for k in res:
+		if skip_food_coin and (k == "food" or k == "coin"):
+			continue
+		parts.append("%s %s" % [ObserverQueryApi.res_label(k), _fmt_amount(res[k])])
+	if parts.is_empty():
+		return "資源持有：（無其他資源）"
+	return "資源持有：" + "，".join(parts)
+
+static func _fmt_amount(v) -> String:
+	if v is float:
+		return "%.0f" % v
+	return str(v)
+
+func _render_outpost_detail() -> void:
+	var o: Dictionary = _bridge.query_outpost(_selected_tile)
+	if o.is_empty():
+		_detail.text = "格 (%d,%d)：此格無據點" % [_selected_tile.x, _selected_tile.y]
+		return
+	var type_zh: String = "民生" if str(o["outpost_type"]) == "civilian" else "軍事"
+	var lines: Array = [
+		"[b]據點 (%d,%d)[/b]" % [_selected_tile.x, _selected_tile.y],
+		"類型：%s  等級：%d" % [type_zh, int(o["outpost_level"])],
+		"擁有：%s%s" % [str(o["owner_team"]),
+			"（%s）" % str(o["owner_faction"]) if str(o["owner_faction"]) != "" else ""],
+		"駐軍：%d 人" % int(o["garrison"]),
+		"武器坊等級：%d" % int(o["weaponsmith_level"]),
+	]
+	lines.append(_resources_line(o.get("resources_nonzero", {}), false))  # 據點含 food(糧倉) 全露
 	_detail.text = "\n".join(lines)
