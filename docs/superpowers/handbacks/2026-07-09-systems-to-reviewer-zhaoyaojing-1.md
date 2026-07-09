@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 審 照妖鏡#1 spec（潰退門檻→膽量）——blueprint sign-off 已批,審 correctness
 ---
 

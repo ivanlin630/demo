@@ -36,7 +36,7 @@ static func _abandon_threshold(state, team) -> float:
 | 檔 | 改點 |
 |---|---|
 | `scripts/simulation/npc_combat_system.gd` | flat `COMBAT_ABANDON_THRESHOLD` → `ABANDON_THRESHOLD_BASE`+`ABANDON_COURAGE_SPREAD`+`_abandon_threshold(state,team)`；:197/200 改各隊自算 |
-| `scripts/debug/warring_harness.gd` + npc_combat | 探針：`rout.by_courage`（潰退隊 courage 分布）/`rout.total`/平均回合數 |
+| `scripts/debug/warring_harness.gd` + npc_combat | 探針：`rout.total`/平均回合數 + **★`rout.readiness_at_retreat_by_courage_bucket`（reviewer 補，更直接）**：`_force_retreat` 命中瞬間（:197/200）記該隊 `readiness`，依 courage 分高/中/低三桶 → 勇者桶應集中低 readiness（撐到快死才退）、怯者桶較高（早退）=直接證驗收線1 因果（比純「誰退了」證據力強） |
 
 **不碰**：`_try_retreat`(:205 機率撤，另刀候選)、MORALE_CASCADE_THRESHOLD、傷亡率、`_force_retreat` 機制、其他常數。
 
@@ -44,8 +44,8 @@ static func _abandon_threshold(state, team) -> float:
 潰退**均值保 0.2**（aggregate 不變），但**個體潰退時機隨膽量攤開**（勇者晚逃/怯者早逃=玩家可見戲感變）。願景=正是要這湧現。**請 blueprint 確認願景對齊**（spread=0.16 量級是否合意，或要更誇張/更收斂）→ 放行往下。
 
 ## 驗收線（藍圖判，full_probe 3 seed 1337/42/7）
-1. **人格差異出現**（湧現證）：`rout.by_courage` 顯勇者隊平均潰退 readiness < 怯者隊（門檻真攤開）；同戰局不同膽量 leader 結局分化。
-2. **aggregate 保**：總潰退率/平均戰鬥回合數跨 seed 不系統性偏移（均值守恆，只攤方差）。
+1. **人格差異出現**（湧現證）：`rout.readiness_at_retreat_by_courage_bucket` 顯勇者桶潰退 readiness < 怯者桶（門檻真攤開，直接因果證）；同戰局不同膽量 leader 結局分化。
+2. **aggregate 保（★reviewer：待驗假設非形式保證）**：總潰退率/平均戰鬥回合數跨 seed 不系統性偏移。**★必查 aggregate 潰退率 vs baseline 對照**（好戰/慎重 archetype 分布不對稱 → 均值可能非純守恆而 shift；若真 shift 顯著 → 回 D2 median-center 或報 blueprint 接受小 shift）。不能只看 bucket 內分布漏看 aggregate。
 3. 憲法/framework/sanity 綠。
 4. 相關≠因果：若某戰局指標變，characterize 是膽量攤開真因 vs seed 噪音。
 
