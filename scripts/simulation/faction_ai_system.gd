@@ -1399,6 +1399,7 @@ func _assign_member_tasks(state: WorldState, f) -> void:
 		var _tm: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		if not (mt.current_task in SURVIVAL_TASKS and mt.current_task != TeamData.TASK_IDLE):
 			if _try_consolidate_merge(state, mt, f, leader_team):
+				Probe.bump("merge.consolidate_dispatch")   # full_probe：baseline pre-gate 實際 merge 計數
 				if SimRunner.phase_timing: _fai_pht("member.consolidate", _tm)
 				continue
 		if SimRunner.phase_timing: _tm = _fai_pht("member.consolidate", _tm)
