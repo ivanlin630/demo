@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 審 A2c-2 D1 折入定案（候選 A + 防禦式 gate）——D0 數據齊,審 fold correctness
 ---
 
