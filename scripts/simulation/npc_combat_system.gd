@@ -319,6 +319,9 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var loser: TeamData  = state.teams[loser_id]
 	state.clear_combat_target(winner)
 	state.clear_combat_target(loser)
+	# §D4 follow-up：顯式清累積器餘量（防 team_id 重用洩漏；不變量本靠 start_combat 重置，此為顯式安全）。
+	_cas_carry.erase(winner_id)
+	_cas_carry.erase(loser_id)
 	# 野獸結算：不走人類 loot/subjugate/capture/pursuit
 	if loser.beast_kind != "" or winner.beast_kind != "":
 		if loser.beast_kind != "" and winner.beast_kind == "":
@@ -474,6 +477,9 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	var pursuer: TeamData   = state.teams[pursuer_id]
 	state.clear_combat_target(retreater)
 	state.clear_combat_target(pursuer)
+	# §D4 follow-up：顯式清累積器餘量（防 team_id 重用洩漏；不變量本靠 start_combat 重置，此為顯式安全）。
+	_cas_carry.erase(retreater_id)
+	_cas_carry.erase(pursuer_id)
 	# 野獸退場：不走人類 capture/subjugate/pursuit，僅清除參戰獸隊
 	if retreater.beast_kind != "" or pursuer.beast_kind != "":
 		if retreater.beast_kind != "": BeastSystem.new()._cleanup(state, retreater_id)
