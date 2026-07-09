@@ -186,6 +186,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		_step1c_update_equipment(state, near_teams)
 		if phase_timing: _t = _pht("near.equip", _t)
 		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
+		_step2a_strategic_move(state, near_teams)   # A2c-2：戰略移動 move_target 設於 movement 前（arbiter-owned）
 		var move_near: Dictionary = _step2_move_teams(state, near_teams, time_speed_mult, NEAR_CADENCE)
 		state.rebuild_team_tile_index()   # post-move rebuild → 下游 co-location/hostile 查見 post-move 位置
 		var arrived_near: Array = move_near["arrived"]
@@ -236,6 +237,7 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 		var far_teams := _get_far_teams(state, player_pos)
 		_step1b_update_vision(state, far_teams, time_vision_mult)
 		_step1c_update_equipment(state, far_teams)
+		_step2a_strategic_move(state, far_teams)   # A2c-2：戰略移動 move_target 設於 movement 前（arbiter-owned）
 		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult, FAR_ZONE_INTERVAL)
 		state.rebuild_team_tile_index()   # post-move rebuild（far 隊移動後刷新，near 隊位置本 tick 不再變）
 		var arrived_far: Array = move_far["arrived"]
@@ -295,6 +297,33 @@ func _step1_advance_time(state: WorldState) -> void:
 func _step2_move_teams(state: WorldState, team_ids: Array,
 		time_speed_mult: float = 1.0, elapsed_ticks: int = WorldState.TICKS_PER_HOUR) -> Dictionary:
 	return _movement_system.process(state, team_ids, time_speed_mult, elapsed_ticks)
+
+# A2c-2 折入（候選 C）：戰略移動 move_target 設值——從舊 movement:66-77 直讀 bypass 搬來，
+# 於 movement 前跑（byte-identical：同 read-point、同 gate、同突圍優先 tie-break、同 sa_pos 值）。
+# arbiter-owned write（set_strategic_move 內建戰鬥鎖+FLEE guard）；居民鎖 guard 留 call-site（需 _is_resident_team）。
+# task 完全不動（保 IDLE→interaction:253 自發併隊）。STRAT_OVERLAY_OFF 續 stub（characterization 對照）。
+func _step2a_strategic_move(state: WorldState, team_ids: Array) -> void:
+	if OS.has_environment("STRAT_OVERLAY_OFF"):
+		return
+	var fai := FactionAISystem.new()
+	for tid in team_ids:
+		if not state.teams.has(tid):
+			continue
+		var team: TeamData = state.teams[tid]
+		# 居民鎖 guard（原 movement:58-63，call-site；防駐守居民被拉去戰略位）
+		if team.tags.has(TeamData.TAG_PRODUCE):
+			if fai._is_resident_team(state, team) \
+					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_REVOLT, TeamData.TASK_MIGRATE, TeamData.TASK_PREPARE]:
+				continue
+		if team.strategic_assignments.size() == 0:
+			continue
+		# 突圍優先 tie-break（-1 key=突圍位；否則正整數 key=包圍位），鏡射舊 movement:67-70
+		var sa_pos: Vector2i
+		if team.strategic_assignments.has(-1):
+			sa_pos = team.strategic_assignments[-1]
+		else:
+			sa_pos = team.strategic_assignments.values()[0]
+		TaskArbiter.set_strategic_move(team, sa_pos)   # 內建戰鬥鎖+FLEE guard
 
 func _get_time_fatigue_mult(state: WorldState) -> float:
 	return _day_night_system.get_fatigue_mult(state)
