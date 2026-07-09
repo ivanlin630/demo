@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 實作 A2c-2 D1 折入（候選 C：arbiter 純移動覆蓋 task 不變 + 3 guard）——spec 鎖(reviewer 3輪 CLEAN)
 ---
 
