@@ -27,6 +27,10 @@ var _msg:       SimMessageSystem
 var _skill_sys: SkillSystem
 var _equip:     EquipmentSystem
 
+# combat-defeat characterization（純探針，Probe.enabled 才動 → Probe off 時 byte-identical）。
+# 每場 combat 追 round 數 + 起始 effective pop，供結束時算 race（rounds vs 敗方 readiness 距門檻）。
+static var _combat_track: Dictionary = {}   # tid → {round:int, pop_start:int}
+
 func _init() -> void:
 	_msg       = SimMessageSystem.new()
 	_skill_sys = load("res://scripts/simulation/skill_system.gd").new()
@@ -93,7 +97,11 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 		"Team %d 對 Team %d 宣戰" % [atk_id, def_id], atk,
 		{ "origin": str(atk_id), "target": str(def_id) })
 	print("[Combat Start] Team%d vs Team%d" % [atk_id, def_id])
-	if Probe.enabled: Probe.bump("conq.combat_entered")
+	if Probe.enabled:
+		Probe.bump("conq.combat_entered")
+		# characterization：起始 effective pop（pop-wounded）+ round 計數初始化。
+		_combat_track[atk_id] = {"round": 0, "pop_start": maxi(atk.population - atk.wounded, 1)}
+		_combat_track[def_id] = {"round": 0, "pop_start": maxi(def.population - def.wounded, 1)}
 	_resolve_volley(state, atk_id, def_id)
 
 func team_strength(state: WorldState, team_id: int) -> float:
@@ -190,18 +198,26 @@ func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 		id_a, a.readiness, terrain_a, id_b, b.readiness, terrain_b, loss_a, loss_b,
 		maxi(a.population - a.wounded, 1), maxi(b.population - b.wounded, 1)])
 
+	# characterization：round 計數（每 _resolve_combat_round = 1 round，a/b 同步）
+	if Probe.enabled:
+		if _combat_track.has(id_a): _combat_track[id_a]["round"] += 1
+		if _combat_track.has(id_b): _combat_track[id_b]["round"] += 1
 	if maxi(a.population - a.wounded, 1) <= 1:
+		_probe_combat_end(state, id_b, id_a, "annihilation")
 		_end_combat(state, id_b, id_a)
 		return
 	if maxi(b.population - b.wounded, 1) <= 1:
+		_probe_combat_end(state, id_a, id_b, "annihilation")
 		_end_combat(state, id_a, id_b)
 		return
 	if a.readiness <= _abandon_threshold(state, a):
 		_probe_retreat(state, a)
+		_probe_combat_end(state, id_b, id_a, "rout")
 		_force_retreat(state, id_a, id_b)
 		return
 	if b.readiness <= _abandon_threshold(state, b):
 		_probe_retreat(state, b)
+		_probe_combat_end(state, id_a, id_b, "rout")
 		_force_retreat(state, id_b, id_a)
 		return
 	_skill_sys.on_combat_round(state, a)
@@ -342,6 +358,29 @@ static func _probe_retreat(state: WorldState, team: TeamData) -> void:
 	Probe.bump("rout.n_" + bucket)
 	Probe.add_amount("rout.ready_sum_" + bucket, team.readiness)
 
+# combat-defeat characterization：一場 combat 結束時釘死 race——結束原因 + round 數 + 敗方 readiness
+# 距門檻（annihilation 時 readiness 仍高=eff1 贏 race=①每round太致死）+ wnd_ratio + 起始 pop（③小隊）。
+static func _probe_combat_end(state: WorldState, winner_id: int, loser_id: int, reason: String) -> void:
+	if not Probe.enabled: return
+	Probe.bump("combat.end_" + reason)
+	Probe.bump("combat.ended_n")
+	var tr: Dictionary = _combat_track.get(loser_id, {})
+	Probe.add_amount("combat.rounds_sum", float(tr.get("round", 0)))
+	var pop_start: int = int(tr.get("pop_start", 0))
+	Probe.add_amount("combat.pop_start_sum", float(pop_start))
+	if pop_start > 0 and pop_start <= 3:
+		Probe.bump("combat.pop_start_le3")   # ③小隊撐不過 drain 證據
+	var loser: TeamData = state.teams.get(loser_id)
+	if loser != null:
+		# 敗方 readiness 距門檻：annihilation 時仍 > 門檻(~0.2) → readiness 沒 drain 到就先殲滅 = eff1 贏 race
+		Probe.add_amount("combat.loser_readiness_end_sum", loser.readiness)
+		if loser.readiness > ABANDON_THRESHOLD_BASE:
+			Probe.bump("combat.end_readiness_above_thr")   # 潰退門檻還沒到就結束（annihilation 搶先）
+		Probe.add_amount("combat.loser_wnd_end_sum",
+			float(loser.wounded) / float(maxi(loser.population, 1)))
+	_combat_track.erase(loser_id)
+	_combat_track.erase(winner_id)
+
 func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> void:
 	var retreater: TeamData = state.teams[retreater_id]
 	var pursuer: TeamData   = state.teams[pursuer_id]
@@ -444,6 +483,7 @@ func _try_retreat(state: WorldState, team_id: int, enemy_id: int) -> void:
 	var retreat_chance: float = survival * 0.5 + (1.0 - minf(str_ratio, 1.0)) * 0.3
 	if randf() < retreat_chance:
 		var enemy: TeamData = state.teams[enemy_id]
+		_probe_combat_end(state, enemy_id, team_id, "retreat")
 		state.clear_combat_target(team)
 		state.clear_combat_target(enemy)
 		print("[Retreat] Team%d 成功撤退 (rd=%.2f wnd=%d)" % [team_id, team.readiness, team.wounded])

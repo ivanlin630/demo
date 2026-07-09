@@ -43,6 +43,9 @@ const PROBE_KEYS: Array = [
 	"reaction.N2_riot", "reaction.N3_defect", "reaction.N4_shirk", "reaction.N5_extort", "reaction.breed",
 	# 照妖鏡#1：潰退門檻膽量化——總潰退 + courage 三桶潰退數（readiness 均值走 probe_amounts）
 	"rout.total", "rout.n_high", "rout.n_mid", "rout.n_low",
+	# combat-defeat characterization：結束原因分布 + race（敗方 readiness 距門檻）+ 小隊
+	"combat.end_annihilation", "combat.end_rout", "combat.end_retreat", "combat.ended_n",
+	"combat.end_readiness_above_thr", "combat.pop_start_le3",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。
@@ -137,7 +140,8 @@ static func _probe_subset() -> Dictionary:
 	return d
 
 # 浮點累計 subset（照妖鏡#1：courage 桶 readiness-at-retreat 總和 → 均值=sum/n_bucket）
-const AMOUNT_KEYS: Array = ["rout.ready_sum_high", "rout.ready_sum_mid", "rout.ready_sum_low"]
+const AMOUNT_KEYS: Array = ["rout.ready_sum_high", "rout.ready_sum_mid", "rout.ready_sum_low",
+	"combat.rounds_sum", "combat.pop_start_sum", "combat.loser_readiness_end_sum", "combat.loser_wnd_end_sum"]
 static func _probe_amounts_subset() -> Dictionary:
 	var d: Dictionary = {}
 	for k in AMOUNT_KEYS:
