@@ -1,0 +1,109 @@
+{
+  "_meta": {
+    "months": 3,
+    "seeds": [
+      "1337",
+      "42",
+      "7"
+    ],
+    "note": "overlay ON vs OFF(STRAT_OVERLAY_OFF stub movement:65-73). D0 characterization,非fold。"
+  },
+  "by_seed": {
+    "1337": {
+      "on": {
+        "strat.sa_move_dispatch": 496,
+        "strat.encircle_assigned": 667,
+        "strat.breakout_assigned": 2279,
+        "strat.expand_reached": 42,
+        "conq.declared": 740,
+        "conq.member_atk_eligible": 416,
+        "conq.member_atk_dispatch": 248,
+        "conq.combat_entered": 11,
+        "conq.combat_decisive": 2,
+        "capture.total": 2,
+        "conq.win_absorbed": 0,
+        "final_teams": 31,
+        "attrition_pct": 42.8
+      },
+      "off": {
+        "strat.sa_move_dispatch": 0,
+        "strat.encircle_assigned": 366,
+        "strat.breakout_assigned": 6183,
+        "strat.expand_reached": 0,
+        "conq.declared": 3647,
+        "conq.member_atk_eligible": 0,
+        "conq.member_atk_dispatch": 0,
+        "conq.combat_entered": 5,
+        "conq.combat_decisive": 0,
+        "capture.total": 0,
+        "conq.win_absorbed": 0,
+        "final_teams": 33,
+        "attrition_pct": 45.4
+      }
+    },
+    "42": {
+      "on": {
+        "strat.sa_move_dispatch": 698,
+        "strat.encircle_assigned": 0,
+        "strat.breakout_assigned": 1665,
+        "strat.expand_reached": 38,
+        "conq.declared": 454,
+        "conq.member_atk_eligible": 0,
+        "conq.member_atk_dispatch": 0,
+        "conq.combat_entered": 11,
+        "conq.combat_decisive": 0,
+        "capture.total": 3,
+        "conq.win_absorbed": 0,
+        "final_teams": 35,
+        "attrition_pct": 50.5
+      },
+      "off": {
+        "strat.sa_move_dispatch": 0,
+        "strat.encircle_assigned": 22,
+        "strat.breakout_assigned": 6288,
+        "strat.expand_reached": 0,
+        "conq.declared": 159,
+        "conq.member_atk_eligible": 0,
+        "conq.member_atk_dispatch": 0,
+        "conq.combat_entered": 5,
+        "conq.combat_decisive": 0,
+        "capture.total": 2,
+        "conq.win_absorbed": 0,
+        "final_teams": 27,
+        "attrition_pct": 51.7
+      }
+    },
+    "7": {
+      "on": {
+        "strat.sa_move_dispatch": 73,
+        "strat.encircle_assigned": 0,
+        "strat.breakout_assigned": 187,
+        "strat.expand_reached": 21,
+        "conq.declared": 23,
+        "conq.member_atk_eligible": 0,
+        "conq.member_atk_dispatch": 0,
+        "conq.combat_entered": 0,
+        "conq.combat_decisive": 0,
+        "capture.total": 0,
+        "conq.win_absorbed": 0,
+        "final_teams": 52,
+        "attrition_pct": 0.5
+      },
+      "off": {
+        "strat.sa_move_dispatch": 0,
+        "strat.encircle_assigned": 0,
+        "strat.breakout_assigned": 573,
+        "strat.expand_reached": 0,
+        "conq.declared": 66,
+        "conq.member_atk_eligible": 0,
+        "conq.member_atk_dispatch": 0,
+        "conq.combat_entered": 0,
+        "conq.combat_decisive": 0,
+        "capture.total": 0,
+        "conq.win_absorbed": 0,
+        "final_teams": 53,
+        "attrition_pct": 2.0
+      }
+    }
+  }
+}

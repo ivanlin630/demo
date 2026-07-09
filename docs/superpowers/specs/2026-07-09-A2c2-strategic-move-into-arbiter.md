@@ -30,7 +30,19 @@
 - **問**：overlay 關掉（stub `movement:64-72` 分支）vs 開，**擴張/包圍/征服接觸差多少**？若 overlay 幾乎不 fire（如 A2c-1 trade_net 6月零派）→ 折入零風險；若載著真包圍湧現 → 折入須保之。
 - **D0 產出定 D1/D2 校準門檻**。characterization 未跑完不鎖 D1/D2。
 
-## D1. seam 設計（movement-overlay→arbiter 權威，待 D0 定案微調）
+## ★D0 結論（characterization done，2026-07-09 `A2c2-d0-done`）
+overlay **非死路，載真湧現**：`sa_move_dispatch` 三 seed 有火(496/698/73→0)、`expand_reached` 到達唯一靠 overlay(42/38/21→0)、關則 `breakout_assigned` 暴增(困原地反覆指派)；seed1337 明證 **overlay 到位=征服接觸前置**(overlay off→member_atk_eligible 416→0/capture→0)。∴ **D1 折入必須保「戰略移動仍執行、隊仍到位」**，否則重演 OFF 崩塌。**驗收硬線**：折後 `expand_reached`/`member_atk_eligible`(seed1337) 不塌。
+
+## ★D1 定案（候選 A + 防禦式 gate，informed by D0 + reviewer）
+選 **候選 A（低 PRIO march task 經 TaskArbiter）**——正中 D11/V3「arbiter 成戰略移動唯一權威」。**但補 reviewer 抓的 2 保真 gate（不靠 priority 隱式，顯式重建）**：
+1. **顯式 move_target-gate**：try_set 前查 `team.move_target == Vector2i(-1,-1) or == team.tile_pos`（複製現行 `movement:71` 判準）——保「move_target 空/抵達才走戰略移動」的細顆粒觸發，**不錯位成「task==IDLE」**（reviewer 反例：TASK_TRADE 抵達等結算的隊，A 純 priority 會漏接 → sa_move_dispatch 掉 → 崩）。防禦式=不管 nonidle_empty 率多少都對。
+2. **突圍優先保留**：`strategic_assignments.has(-1)` 時取突圍 pos（鏡射 `movement:67-70` tie-break，突圍 > 包圍）——D0 顯 breakout_assigned 巨量(2279-6183)=雙鍵並存常見，必顯式保。
+- PRIO：新 `PRIO_STRATEGIC`（< PRIO_DISPATCH 50，> IDLE）——survival/真 task 仍壓過（保低優先 fallback 語意），但因顯式 move_target-gate 已管觸發，PRIO 主要作用=被真 task 中斷時退讓。
+
+### 原 D1 候選（保留參照，已選 A）
+（候選 A 低 PRIO march / 候選 B ctx input+移動 option——選 A，見上定案。）
+
+## D1-old. seam 設計（movement-overlay→arbiter 權威，待 D0 定案微調）
 **方向**：strategic_ai 續算 strategic_assignments（空間 affordance，合法=它是 spatial goal producer，非 task 權威）；**移動的執行**改經 arbiter/引擎，不由 movement 直吃。兩候選（D0 後選一）：
 
 - **候選 A（低優先 march 任務）**：新增/複用低 PRIO 的「戰略移動」task（如 `TASK_MARCH` 或既有定位 task），strategic_assignments 存在時經 `TaskArbiter.try_set(PRIO_STRATEGIC<PRIO_DISPATCH)` 設之 → arbiter 仲裁（任何真 task/survival 壓過 = 保「move_target 空才走」語意）。movement 不再直讀 strategic_assignments，改讀 task 的 move_target。

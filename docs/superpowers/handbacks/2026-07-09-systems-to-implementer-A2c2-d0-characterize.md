@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: A2c-2 D0 characterization——加 strat.* 探針 + overlay 開/關對照（折前摸清,別改 fold 邏輯）
 ---
 
