@@ -34,10 +34,11 @@ static func _random_near(state: WorldState, positions: Array, rng) -> Vector2i:
 - **語意保真意圖**：仍「近 origin」（優先鄰格），只是排除越界/被佔；邊緣退安全隨機格（原本越界=生圖外=bug，退 in-map 是修正非退化）。
 - 保留原 `dir` 六方向集（不擴散、不改地圖尺度）。
 
-## ★行為/determinism 影響（measurer 必知）
-- 修改**改 seeded 世界初始佈局**（原越界隊 → 現落 in-map）→ **seeded 床 baseline 位移=預期**（非退化）。
-- RNG 流：新增 `for` 掃描 + 可能呼 `_random_empty_tile`（內有 `rng.randi()` 迴圈）→ **RNG 消耗改變 → 全下游 seeded 軌跡岔開**。∴ 舊 seeded 硬斷值全需 re-baseline（headless reproducible 自比即可，非 hardcode）。
-- **不是「零行為變」slice**——是「修 bug 必然改軌跡」。measurer 報「baseline 位移=修 bug 預期」，別當退化 reject。
+## ★行為/determinism 影響（measurer 必知，reviewer 修正=條件性非必然）
+- **RNG 消耗保近 case 不變（reviewer 澄清）**：新碼 `start := rng.randi()`（1 抽）取代舊 `dir` 抽（1 抽）、`for` 掃描**不呼 rng**（純 `start+i` 位移）→ **非邊緣 origin 第一候選即合格 → 消耗仍 = origin 1 抽 + start 1 抽 = 舊碼同量**。
+- **只有** origin 靠邊緣、6 方向全越界/被佔 → 落 `_random_empty_tile` fallback（內有 `while` rng 迴圈）→ 這才是額外消耗**唯一觸發點**。
+- ∴ **位移是 data-dependent 非必然**：某 seed 若開局全隊 tile_pos 掃描 **0 越界**（原本沒踩 bug）→ RNG **byte-identical、軌跡零變**；只有**原本有越界隊**的 seed 才位移（一旦觸發，該 seed 下游全岔=單 RNG stream 特性）。
+- **measurer 判讀**：先跑「開局全隊 0 越界？」掃描分類——0 越界的 seed 應 byte-identical（非位移=正常）、有越界的 seed 位移=修 bug 預期（非退化）。別把「有些 seed 沒位移」當異常。
 
 ## 觸及檔
 | 檔 | 改點 |

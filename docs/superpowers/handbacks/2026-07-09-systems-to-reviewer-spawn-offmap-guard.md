@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 審 spawn-offmap-guard spec（_random_near 越界修）——fallback 語意 + RNG 影響
 ---
 
