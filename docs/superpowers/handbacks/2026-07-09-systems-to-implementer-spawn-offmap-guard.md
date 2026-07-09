@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 實作 spawn-offmap-guard（_random_near 越界修）
 ---
 
