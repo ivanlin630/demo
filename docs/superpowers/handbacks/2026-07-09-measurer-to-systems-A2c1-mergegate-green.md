@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: A2c1 純fold @423924c merge-gate 全綠——可 merge
 ---
 
