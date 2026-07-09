@@ -4,8 +4,9 @@
 surprise-interrupt 暫停+resume。increment 4 把 stub 換成 run_node 真節點。
 
 節點鏈（07_orchestrator_machine.md）：
-  blueprint → factcheck(對抗①) → systems → review(對抗②) → implementer → qa → gate → merge
+  blueprint → factcheck(對抗①) → systems → review(對抗②) → implementer → measure → qa → gate → merge
   surprise-interrupt：任一 verdict premise_contradiction → 暫停回用戶。
+  ★measure(標準 full_probe 床)→qa(autonomous 硬閘,判完整數據): LG 下游=autonomous lane,rn_qa 保留(2026-07-09)。
 """
 from __future__ import annotations
 from typing import TypedDict, Optional
@@ -68,8 +69,19 @@ def n3_review(state: SliceState):
 def n4_implementer(state: SliceState):
     return {"worktree": f".worktrees/{state['slice_id']}", "stage": "built"}
 
+def n4b_measure(state: SliceState):
+    # 量測員節點：跑標準 full_probe 床出完整數字餵 qa（real_nodes.rn_measure 對應）。
+    # stub 預設完整（inject 可標 incomplete 測 qa 完整性 gate）。
+    v = _inject(state, "measure") or {"summary": "measure 完整", "incomplete": []}
+    return {"verdicts": _put_verdict(state, "measure", v), "stage": "measured"}
+
 def n5_qa(state: SliceState):
+    # autonomous lane 硬閘（LG 下游）：完整性 gate 前置——measure incomplete[] 非空 → 強制 red
+    # （鏡射 real_nodes.rn_qa；判在完整 full_probe 數據上，不放行不完整驗證）。
+    mv = state.get("verdicts", {}).get("measure", {}) or {}
     v = _inject(state, "qa") or {"verdict": "green"}
+    if mv.get("incomplete"):
+        v = {"verdict": "red", "completeness_gate": True}
     upd = {"verdicts": _put_verdict(state, "qa", v), "stage": "qa"}
     if v.get("verdict") == "red":
         upd["retries"] = _bump(state, "qa")
@@ -122,7 +134,7 @@ def make_graph():
     g = StateGraph(SliceState)
     for name, fn in [("blueprint", n0_blueprint), ("factcheck", n1_factcheck),
                      ("systems", n2_systems), ("review", n3_review),
-                     ("implementer", n4_implementer), ("qa", n5_qa),
+                     ("implementer", n4_implementer), ("measure", n4b_measure), ("qa", n5_qa),
                      ("gate", n6_gate), ("merge", n7_merge), ("interrupt", n_interrupt)]:
         g.add_node(name, fn)
 
@@ -133,7 +145,8 @@ def make_graph():
     g.add_edge("systems", "review")
     g.add_conditional_edges("review", route_review,
                             {"implementer": "implementer", "systems": "systems", "interrupt": "interrupt"})
-    g.add_edge("implementer", "qa")
+    g.add_edge("implementer", "measure")
+    g.add_edge("measure", "qa")
     g.add_conditional_edges("qa", route_qa,
                             {"gate": "gate", "implementer": "implementer", "interrupt": "interrupt"})
     g.add_conditional_edges("gate", route_gate,

@@ -158,8 +158,9 @@ def rn_measure(state: SliceState):
         task="量測本 slice 改動(★別改 scripts/ code，只跑探針+寫報告)。跑：①hand_obeys_brain_bed 單點(HOB_SEEDS=1337 HOB_MONTHS=1)抓 obey%/arbiter_latch/各機制/determinism ②constitution_gate ③sanity(headless_test/game_sim_test 無崩+關鍵print) ④TeamTrace 抖動檢。"
              "★★HOB bed 慢(跑 4×一個月 warring≈500s)：**先設 $env:GODOT_TIMEOUT='600' 再跑**，否則 wrapper 360s 預設會誤殺→假 perf 迴歸→假 reject(A2a 血教訓)。timeout 被殺≠迴歸，要區分。"
              "★★★也讀本 slice spec 的 §驗收法 → 把每條行為守衛翻成 seeded 量測(用 WarringHarness/seeded_warring_bed)→ **產 count/delta 數字**(如 leader_conquest_count、tribute_treasury_delta)。**這些數字你產、QA 只判門檻——別推給 QA seeded 遊走**(否則 QA 被迫自跑自判=破 maker/checker)。缺哪條產不出→列 incomplete 報藍圖，別留白。詳 docs/process/03b_measurer.md。"
+             "★★★★acceptance/診斷 slice 跑**標準 full_probe 床(03b_measurer.md §④)：全維度一次抓齊**——衝突面(征服/攻擊/交戰/掠奪/血仇/背叛/外交)、生存面(餓死/餓滅/pop/food_flow/team-size 直方圖)、**決策面(option 選擇分布/merge-applicable 隊實際去向)**、結構面(teams/faction 消長/established)、食物經濟。結構化 JSON、**不靠 print 刮、無 quiet 死路、無缺維度**、baseline/slice 並排 → 寫 docs/process/verdicts/" + state["slice_id"] + ".fullprobe.json。**這是治 bounce 的關鍵：LG 下游=autonomous lane，rn_qa 保留硬閘、必須判在完整數據上**(缺維度=rn_qa 判不動=bounce)。"
              "★可行則 before/after 對照(main vs 本 worktree 同 seed，比 per-tick 同規模非撞絕對門檻)。寫 JSON 到 docs/process/verdicts/" + state["slice_id"] + ".measure.json"
-             "(obey_pct,arbiter_latch,mechanisms,determinism,constitution,thrash,before_after,summary)。commit。",
+             "(obey_pct,arbiter_latch,mechanisms,determinism,constitution,thrash,before_after,fullprobe_dims,incomplete,summary)。commit。",
         reads="worktree 本 slice commits + scripts/debug/ 的 bed",
         worktree=state["worktree"], out_handback_to="qa", model=MODELS["measure"])
     _freeze_if_api(r, "measure")
@@ -175,8 +176,9 @@ def rn_qa(state: SliceState):
     incomplete = mv.get("incomplete") or []
     measure_missing = (not mv) or ("未產出" in str(mv.get("summary", "")))
     v = nodes.judge_node("qa", state["slice_id"], "qa",
-        task="對抗驗已 commit 的改動。★讀量測員的 docs/process/verdicts/" + state["slice_id"] + ".measure.json 真數字當證據(別自己跑 godot)。"
-             "★★完整性 gate：measure.json 的 incomplete[] 非空 或 spec 守衛/標準床數字缺 = **不完整不能綠**，判 red 並註明缺哪項。"
+        task="對抗驗已 commit 的改動。★讀量測員的 docs/process/verdicts/" + state["slice_id"] + ".measure.json + " + state["slice_id"] + ".fullprobe.json 真數字當證據(別自己跑 godot)。"
+             "★★完整性 gate：measure.json 的 incomplete[] 非空 或 spec 守衛/標準床數字缺 或 acceptance slice 缺 fullprobe 全維度(衝突/生存/決策-option去向/結構/食物經濟) = **不完整不能綠**，判 red 並註明缺哪項。"
+             "★★★你是 autonomous lane 的硬閘(LG 下游=fire-N-走開，用戶不盯)——**判在完整 full_probe 數據上**，別放行不完整驗證。"
              "green=效果真發生(數字證)+無退化+無抖動+measure 完整；red=數字沒動/退化/抖動/measure 不完整。★分清真 bug vs godot 框架噪音寫進 note。",
         reads="量測員 .measure.json + git diff(worktree 本 slice commits)",
         scope_dir=state["worktree"], model=MODELS["qa"])

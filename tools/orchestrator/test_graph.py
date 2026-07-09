@@ -56,6 +56,19 @@ def main():
         "qared")
     check("qa red: 超上限最終 interrupt", "__interrupt__" in res)
 
+    # 5) measure 節點在鏈上（happy path 有 measured stage 產出）
+    _, _, res = run({"slice_id": "A1e", "autonomy": "C"}, "measure_ok")
+    check("measure: 節點在鏈上(有 measure verdict)", "measure" in res.get("verdicts", {}))
+    check("measure: happy 仍跑到 merged", res.get("done") is True)
+
+    # 6) ★autonomous 硬閘：measure incomplete → qa 完整性 gate 強制 red → 最終 interrupt（不放行不完整）
+    _, _, res = run(
+        {"slice_id": "A1f", "autonomy": "C",
+         "inject": {"measure": {"summary": "缺維度", "incomplete": ["fullprobe.決策面"]}}},
+        "measure_incomplete")
+    check("完整性 gate: measure 不完整 → 不 merge", not res.get("done"))
+    check("完整性 gate: 最終 interrupt(不放行不完整驗證)", "__interrupt__" in res)
+
     print(f"\n===== {'PASS' if not fails else 'FAIL: ' + ', '.join(fails)} =====")
     sys.exit(0 if not fails else 1)
 

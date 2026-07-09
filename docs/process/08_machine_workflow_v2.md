@@ -11,7 +11,7 @@
 >
 > ∴ **LG 下游 `rn_qa` 不搬藍圖 pass、保留自動硬閘**（呼應 workflow-qa-measurer-change caveat「autonomous→QA 回」；LG 下游=那個 autonomous lane 的具體化）。下方 `[04 QA] green/red` + `qa_review 三路` 在 **LG 軌照舊有效**（autonomous）；mailbox 軌才由藍圖 pass 承接。
 > - **rn_measure 升標準 full_probe 床**（`03b_measurer.md §④`）→ 治 bounce，讓 rn_qa 判在完整數據上。
-> - **★LG code 改動凍結**：Part A（下游 `--from-impl` 平行 + rn_measure full_probe + rn_qa 保留）= design-direction，**等用戶直接對系統授權「改 LG 下游」才動 graph.py**（經藍圖轉述不算授權）。scope：`n4→n5→n6→n7` + entry-point flag，動 test_graph.py；上游節點不碰。
+> - **★LG 下游改動已做（用戶 2026-07-09 直接授權「改 LG 下游」）**：發現下游平行骨架**早已存在**（`real_nodes.py build_real` = `--from-impl` lane：implementer→measure→qa→qa_review→merge，run.py 已支援）。實改=**`rn_measure` 升標準 full_probe 床**（全維度一次抓齊治 bounce）+ **`rn_qa` 讀 fullprobe.json + 完整性 gate 認 full_probe 維度**（autonomous 硬閘保留、判完整數據）+ graph.py stub 同步（補 measure node）+ test_graph.py（measure 在鏈 + 完整性 gate 強制 red，12/12 PASS）。上游節點不碰。**平行多條 = fire N 個 `run.py --from-impl`**（各自 thread/worktree），非 graph 改。
 > - cost $27/slice → 值得時機=手上一批獨立 specced slice 想一次平行；1-2 條走 mailbox。
 
 ## 流程（含兩個檢查點）
