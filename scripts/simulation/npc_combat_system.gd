@@ -3,6 +3,11 @@ class_name NpcCombatSystem
 const ROUND_CASUALTY_RATE: float      = 0.1
 const VOLLEY_CASUALTY_RATE: float     = 0.05
 const PURSUIT_RATE: float             = 0.05
+# S1 追擊放血人格化（de-patch）：固定 5%→勝方領袖殘忍/貪婪 秤。中性(0.5/0.5)→factor 1.0=保 5% mean baseline。
+const PURSUIT_CRUELTY_W: float        = 1.2    # TEST VALUE：殘忍主導（person_data:40 殘忍高→戰後屠殺）
+const PURSUIT_GREED_W: float          = 0.6    # TEST VALUE：貪婪次（窮追為劫）
+const PURSUIT_FACTOR_MIN: float       = 0.0    # 慈悲領袖幾乎不追（受降傾向，S3 深化）
+const PURSUIT_FACTOR_MAX: float       = 2.5    # 殘忍軍閥上限（safety cap，防無差別暴漲）
 const FLANKING_MULT: float            = 1.3
 const MORALE_CASCADE_THRESHOLD: float = 0.3
 # 照妖鏡#1：flat 潰退門檻 → 膽量人格化（spread 非 shift，均值保 0.2）。
@@ -547,12 +552,27 @@ func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var winner: TeamData = state.teams[winner_id]
 	var loser:  TeamData = state.teams[loser_id]
 	if winner.population < loser.population * 2:
-		return
-	var pursuit_loss: int = maxi(int(float(loser.population) * PURSUIT_RATE), 0)
+		return   # reachability gate（保留不動）：追不上就不放血
+	# S1 de-patch：放血率隨勝方領袖殘忍/貪婪 秤。中性→factor≈1.0 保 5% mean（人格重分配非全面膨脹）。
+	var w_leader: PersonData = state.persons.get(winner.leader_id)
+	var factor: float = 1.0
+	if w_leader != null:
+		var cruelty: float = float(w_leader.values.get("殘忍", 0.5))
+		var greed: float   = float(w_leader.values.get("貪婪", 0.5))
+		factor = clampf(1.0 + (cruelty - 0.5) * PURSUIT_CRUELTY_W + (greed - 0.5) * PURSUIT_GREED_W,
+			PURSUIT_FACTOR_MIN, PURSUIT_FACTOR_MAX)
+	var pursuit_loss: int = maxi(int(float(loser.population) * PURSUIT_RATE * factor), 0)
+	# 探針：追擊放血人格集中度（勝方領袖殘忍/貪婪加權）
+	if Probe.enabled:
+		Probe.bump("pursuit.n")
+		Probe.add_amount("pursuit.loss_sum", float(pursuit_loss))
+		if w_leader != null:
+			Probe.add_amount("pursuit.cruelty_sum", float(w_leader.values.get("殘忍", 0.5)))
+			Probe.add_amount("pursuit.greed_sum", float(w_leader.values.get("貪婪", 0.5)))
 	if pursuit_loss <= 0:
 		return
 	_apply_casualties(state, loser_id, pursuit_loss)
-	print("[Pursuit] Team%d 追擊 Team%d +%d傷亡" % [winner_id, loser_id, pursuit_loss])
+	print("[Pursuit] Team%d 追擊 Team%d +%d傷亡 (factor=%.2f)" % [winner_id, loser_id, pursuit_loss, factor])
 
 func _try_retreat(state: WorldState, team_id: int, enemy_id: int) -> void:
 	var team: TeamData = state.teams[team_id]
