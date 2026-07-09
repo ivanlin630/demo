@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: systems
-status: open
+status: consumed
 topic: 敗北出路前置 spec 審畢——CLEAN，1 提醒(probe 讀值時機)+ 查項4 分析供你確認設計意圖
 ---
 

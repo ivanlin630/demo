@@ -51,7 +51,12 @@ func _mortal_flee_check(state, id_self, id_enemy) -> bool:   # 回 true=已潰�
 | 檔 | 改點 |
 |---|---|
 | `scripts/simulation/npc_combat_system.gd` | +`_mortal_flee_check`（膽量秤絕境逃，殲滅線前）+`MORTAL_*` 常數；`_resolve_combat_round` casualty 後/殲滅前插雙方查；`_eff_strength` helper（若無，複用既有戰力算） |
-| `scripts/debug/warring_harness.gd` | 複用既有 `combat.*`/`rout.*` 探針驗三端配比（end_annihilation 降/end_rout 升/capture 升） |
+| `scripts/debug/warring_harness.gd` | 複用既有 `combat.*`/`rout.*` 探針驗三端配比（end_annihilation 降/end_rout 升/capture 升）+ **reviewer 3 補**：①`mortal_flee` 探針**分開標籤**（別混 readiness_abandon 池——`_mortal_flee_check` 記 readiness 在 drain 前、既有 rout 在 drain 後，時間點不一致會誤讀）②`combat.str_ratio_at_annihilation` 分布（證殲滅集中「勢均消耗」str_ratio≈1，非「絕望硬撐」） |
+
+**reviewer 精修（採納，非阻塞）**：
+- `_eff_strength(state,team)` = 2 行 `return team_strength(state,team.team_id)*team.readiness`（純複用，可棄既有 str_a/str_b 的 terrain 不對稱=更一致，非退化）。
+- `_mortal_flee_check` 探針**分流記錄**（drain 前值，標 mortal_flee 別混 readiness_abandon 的 drain 後值）。
+- 勇者血戰=條件性保留（str_ratio≈0 絕望勇者也逃=合理；str_ratio≈1 勢均消耗才血戰到殲滅=殲滅稀）——full_probe 記 str_ratio-at-annihilation 證之。
 
 **不碰**：`_force_retreat` 潰散機制（已完整，只是讓它更常觸）、照妖鏡#1 abandon_threshold（大隊 exhaustion 路保留）、殲滅線本身（保留=稀端）、combat 傷亡率常數。
 
