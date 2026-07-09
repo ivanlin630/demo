@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: combat 殲滅-heavy 釘死=①+③(小隊+絕對殲滅線)——敗北模型只對大隊work;請判願景+藥方向
 ---
 
