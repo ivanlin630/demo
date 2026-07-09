@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: A2c1 SHIP 純fold merge-gate（憲法/framework/HOB @423924c）——綠即回,我 merge
 ---
 
