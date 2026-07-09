@@ -75,3 +75,9 @@ func query_map_teams() -> Array:
 
 func query_map_tiles() -> Dictionary:
 	return ObserverQueryApi.query_map_tiles(_state)
+
+func query_outpost(tpos: Vector2i) -> Dictionary:
+	return ObserverQueryApi.query_outpost(_state, tpos)
+
+func query_all_outposts() -> Array:
+	return ObserverQueryApi.query_all_outposts(_state)
