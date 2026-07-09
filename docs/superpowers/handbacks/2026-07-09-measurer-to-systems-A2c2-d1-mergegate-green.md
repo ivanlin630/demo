@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: A2c-2 D1(015b7b1) merge-gate 全綠 + 3-month byte-identical覆核通過——可 merge
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 敗北出路前置 spec 備妥,請三端配比/門檻 sign-off——絕境逃決策膽量秤(啟動照妖鏡#1)
 ---
 
