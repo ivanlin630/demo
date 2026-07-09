@@ -1,0 +1,47 @@
+{
+  "purpose": "驗 fold(423924c) 是否跨seed真regress starvation，或僅 seed=1337 幽靈",
+  "commits": {"baseline": "a3db7c9 (main pre-fold)", "fold": "423924c (純fold，不含 survival-value)"},
+  "bed": "seeded_warring_bed.gd (WarringHarness)",
+  "seeds": [1337, 42, 7],
+  "months": 3,
+  "note_timeout": "首跑 GODOT_TIMEOUT=600 兩邊都在 seed=1337 後被殺(3 seed×3月 print量大於單seed跑，非迴歸)→ 拉 GODOT_TIMEOUT=1800 重跑全綠，無 timeout。",
+  "matrix": {
+    "extinct.starve": {
+      "baseline": {"1337": 16, "42": 24, "7": 0},
+      "fold":     {"1337": 19, "42": 0,  "7": 0},
+      "delta_fold_minus_baseline": {"1337": "+3", "42": "-24", "7": "0"},
+      "direction": "不一致——1337 fold更高、42 fold遠低於baseline、7持平。三seed非同向。"
+    },
+    "avg_team_size": {
+      "baseline": {"1337": 7.03, "42": 6.19, "7": 7.66},
+      "fold":     {"1337": 5.64, "42": 5.34, "7": 7.67},
+      "delta_fold_minus_baseline": {"1337": "-1.39", "42": "-0.85", "7": "+0.01"},
+      "direction": "1337/42 fold偏低，7幾乎持平"
+    },
+    "join.resolve": {
+      "baseline": {"1337": 24, "42": 17, "7": 0},
+      "fold":     {"1337": 14, "42": 0,  "7": 0},
+      "delta_fold_minus_baseline": {"1337": "-10", "42": "-17", "7": "0"},
+      "direction": "三seed一致：fold ≤ baseline（無一seed fold更高）"
+    }
+  },
+  "raw_final": {
+    "baseline": {
+      "1337": {"teams": 31, "factions": 8, "established": 1, "pop": 218, "attrition_pct": 42.8, "start_pop": 381},
+      "42":   {"teams": 37, "factions": 8, "established": 0, "pop": 229, "attrition_pct": 45.2, "start_pop": 418},
+      "7":    {"teams": 53, "factions": 8, "established": 0, "pop": 406, "attrition_pct": 0.2,  "start_pop": 407}
+    },
+    "fold": {
+      "1337": {"teams": 36, "factions": 8, "established": 1, "pop": 203, "attrition_pct": 46.7, "start_pop": 381},
+      "42":   {"teams": 35, "factions": 9, "established": 0, "pop": 187, "attrition_pct": 55.3, "start_pop": 418},
+      "7":    {"teams": 52, "factions": 8, "established": 0, "pop": 399, "attrition_pct": 2.0,  "start_pop": 407}
+    }
+  },
+  "merge_dimension_incidental": {
+    "note": "本工單主判非merge，順帶記錄——fold 的 merge.consolidate_dispatch/chose_other 跨seed也不穩定（seed7 chose_other=0/41=0%，seed42 chose_other=1222/2074=58.9%，seed1337 chose_other=166/320=51.9%），呼應「merge已證survival-inert」的前提。",
+    "fold_merge.consolidate_dispatch": {"1337": 154, "42": 41, "7": 852},
+    "fold_merge_appl.chose_other_pct": {"1337": "51.9%", "42": "0.0%", "7": "58.9%"}
+  },
+  "seed7_caveat": "baseline/fold 在 seed=7 幾乎零死亡(attrition 0.2%/2.0%)、established=0、beg/join/envoy全掛零——世界走向極端和平態，非典型亂世樣本。可能是該seed生成本身資源異常寬裕。列入矩陣但判讀時建議標註此seed代表性存疑。",
+  "summary": "★extinct.starve 方向跨3seed不一致(1337升/42大幅降/7持平)——不滿足『3 seed一致』的真regress判準，坐實幽靈假說：seed=1337偏高只是該seed個案，非fold系統性弱化生存。avg team-size 同向偏低但seed7例外。join.resolve唯一三seed一致方向(fold全≤baseline)，若判starvation要看這條，方向指向fold確實降低『投靠成功解決』——但需釐清這是否等同starvation regression或只是投靠管道使用率變化（非本工單判準範圍，藍圖裁）。數字產齊，判ship純fold/進food-aware交藍圖。"
+}
