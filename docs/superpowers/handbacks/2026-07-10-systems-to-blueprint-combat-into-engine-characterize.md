@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: combat-into-engine characterize——字面 per-round defer 阻抗錯配；HOW 提 rank_combat 子集 pattern，確認 intent-fit + 切 slice
 ---
 
