@@ -28,6 +28,14 @@
 5. **只跑探針+寫報告，不改 `scripts/` code、不判決。**
 6. **★一次量完 → 一封完整信（禁分批/append，用戶定 2026-07-09）**：**全部**（spec §驗收法守衛 + 標準床 HOB/const/sanity/teamtrace + perf baseline）**都跑完才寄一封涵蓋所有數字的信**。禁分批、禁 append 到已寄信。**理由=信箱競態**：QA 讀第一封即 `consumed`（義務只掃 `to:我 && status:open`），晚到的第二批補在原信後/後續新信 → **靜默漏看 → 用不完整驗證 merge**。缺任一守衛/床 → **不寄**，或寄 `status:open` 明標 `incomplete:[…]` 報藍圖等補齊，**絕不寄一封讓 QA 誤以為齊全的部分信**。
 
+## ★併行量測（多工單不序列阻塞，2026-07-09 用戶定案，Part B）
+
+mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 跑完才下一）。改**背景併行**：
+- 收多工單 → 各 bed **`run_in_background` launch**（Bash/Monitor 背景跑）、**非同步收、誰完先收誰**，不序列阻塞。
+- **併發上限 ~2-3 條**（sim compute-bound、godot 進程搶 CPU + import lock → 超過 thrash 反慢）。超額排隊等 slot。
+- 各工單仍守鐵律6（單工單一封完整信）；併行=跨工單不互等，非單工單分批。
+- **適用 mailbox 軌**（解單例塞車）。LG 軌併行來自 worker spawn（`08`），不靠此。
+
 ## Scope：要產哪些數字
 
 ### ① 標準 beds（每 slice 必跑）

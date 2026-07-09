@@ -2,7 +2,17 @@
 
 > 取代 06/07 的機制部分。這是**用戶親自討論鎖定**的 workflow（他真實工作模式：只跟 00 談、00 當 gate、重工 off-他-context、輕基建）。
 
-> **★★2026-07-09 流程改（用戶定案）——LG 機器軌的 QA 節點降級**：user-in-loop 下正式 QA release-gate 砍（`04_qa.md` banner）。機器軌若跑：**下游判用「量測員標準 full_probe 完整數字 → 00/藍圖判」取代 [04 QA] 節點的 release-gate**；QA 節點能力（充足性/戲感稽核）保留供調用，非強制 green/red 閘。∴ 下方流程圖 `[04 QA] 判 green/red` + `qa_review 三路` 在 user-in-loop 模式**改由藍圖 pass 權承接**。轉自動交付則 QA 節點硬閘回歸。（機器軌本就少用——小/序列走信箱，見 `00_roles.md §現行偏好`。）
+> **★★2026-07-09 流程改（用戶定案）——兩軌 QA 模型（更正前版過簡）**：QA 砍與否**綁模式（in-loop vs autonomous），非綁軌**。定位表：
+>
+> | 軌 | 模式 | QA |
+> |---|---|---|
+> | mailbox / 單 slice（用戶盯） | **in-loop** | 砍 QA release-gate，**藍圖 pass 權**（沒問題就過、有問題升用戶） |
+> | **LG 下游平行**（fire N 條走開） | **autonomous** | **`rn_qa` 保留硬閘**（獨立判決）——這正是 autonomous lane 該有 QA 的時候 |
+>
+> ∴ **LG 下游 `rn_qa` 不搬藍圖 pass、保留自動硬閘**（呼應 workflow-qa-measurer-change caveat「autonomous→QA 回」；LG 下游=那個 autonomous lane 的具體化）。下方 `[04 QA] green/red` + `qa_review 三路` 在 **LG 軌照舊有效**（autonomous）；mailbox 軌才由藍圖 pass 承接。
+> - **rn_measure 升標準 full_probe 床**（`03b_measurer.md §④`）→ 治 bounce，讓 rn_qa 判在完整數據上。
+> - **★LG code 改動凍結**：Part A（下游 `--from-impl` 平行 + rn_measure full_probe + rn_qa 保留）= design-direction，**等用戶直接對系統授權「改 LG 下游」才動 graph.py**（經藍圖轉述不算授權）。scope：`n4→n5→n6→n7` + entry-point flag，動 test_graph.py；上游節點不碰。
+> - cost $27/slice → 值得時機=手上一批獨立 specced slice 想一次平行；1-2 條走 mailbox。
 
 ## 流程（含兩個檢查點）
 ```
