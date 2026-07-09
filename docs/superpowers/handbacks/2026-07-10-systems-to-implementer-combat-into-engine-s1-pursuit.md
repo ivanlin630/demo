@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: combat-into-engine S1——追擊放血人格化（de-patch 固定 5%→殘忍/貪婪 秤）→ measurer 量三端不打亂
 ---
 
