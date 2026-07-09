@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [GO] combat S1 開工——reviewer② CLEAN+框裁清；+靶B三端merge-gate +綁§D4 cas_carry erase
 ---
 

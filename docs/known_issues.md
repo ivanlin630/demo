@@ -6,6 +6,19 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint 結構信號；第 3 次同型）
+`int(pop*rate)`/`round(pop*rate)` 在小 pop 尺度恆歸零 → 機制靜默啞（探針前砍光=cosmetic 假過關）。血證 3 次：①殲滅端傷亡 `int(round)`→0（§D4 `_cas_carry` de-patch ✅）②pursuit `int(pop*0.05)` pop<18→0（S1 rev2 `_pursuit_carry` de-patch 中）③capture `round(wounded*rate)` 小 wounded→0（部分，rev2 severity 半救）。
+**sweep 揭未護欄站**（`grep int(...pop...*)`）：
+| 站 | 型 | 建議修 |
+|---|---|---|
+| `npc_combat:551` pursuit | per-event 反覆 | 累積器（S1 rev2 做中）|
+| `anon_tier:277/282` capture wounded/healthy | one-shot | `maxi(1,)` floor 或機率化捨入（三端 capture 相關，優先）|
+| `encounter:251/252/1080` armed spawn | one-shot | 驗 ARMED_RATIO_FLOOR 是否已護；否則 floor |
+| `reaction:166` minor_cap | one-shot | 視語意 floor |
+| `subteam:130` anon_xfer | one-shot round | floor/累積 |
+**已安全（有 `maxi(1,)`）**：`population:18`、`reaction:194`、`interaction:126`。**比較用非病**：`faction_ai:3252`/`player_command:48`/`player_query:232`（`int(pop*1.5)` threshold）。
+→ **清償 slice（另開，fix 異質不塞 S1）**：per-event=累積器、one-shot=floor/機率化（決定性）。掛 memory [[feedback_structural_audit_complement]]。
+
 ## combat-into-engine arc backlog（2026-07-10，spec `specs/2026-07-10-combat-into-engine`）
 - **S4 斷糧求生路由（blueprint 裁 defer）**：`rank_combat` COMBAT_OPTION_SET{血戰/逃} 無「逃向補給/家」跨域路由=結構漏（現行 `_mortal_flee_check` 亦只戰場逃，S2 preserving 不使其更糟）。=淨新 feature，掛絕境經濟/consolidation arc。別丟。
 - **S2 地板1 硬 gate（靶A）**：rank_combat argmax 須逐 seed **重現** rev2 三端（逃83%/俘中頻/殲滅稀），對不上=design reject 非 tune weight 湊近似。
