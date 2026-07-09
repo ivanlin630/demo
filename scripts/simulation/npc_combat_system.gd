@@ -35,6 +35,9 @@ var _equip:     EquipmentSystem
 # combat-defeat characterization（純探針，Probe.enabled 才動 → Probe off 時 byte-identical）。
 # 每場 combat 追 round 數 + 起始 effective pop，供結束時算 race（rounds vs 敗方 readiness 距門檻）。
 static var _combat_track: Dictionary = {}   # tid → {round:int, pop_start:int}
+# 分數傷亡累積器（de-patch §D4，★生產路，非探針——與 _combat_track 分家，Probe off 時仍流血）。
+# tid → 累積未取整傷亡餘量。絕境小 pop 每 round 傷亡 <1.0 不再 int(round) 截 0 → mortal zone 真流血 → 殲滅稀>0。
+static var _cas_carry: Dictionary = {}
 
 func _init() -> void:
 	_msg       = SimMessageSystem.new()
@@ -102,6 +105,9 @@ func start_combat(state: WorldState, atk_id: int, def_id: int) -> void:
 		"Team %d 對 Team %d 宣戰" % [atk_id, def_id], atk,
 		{ "origin": str(atk_id), "target": str(def_id) })
 	print("[Combat Start] Team%d vs Team%d" % [atk_id, def_id])
+	# de-patch §D4：傷亡累積器餘量開場歸零（生產路，非探針——staleness 綁定單場、確定性）。
+	_cas_carry[atk_id] = 0.0
+	_cas_carry[def_id] = 0.0
 	if Probe.enabled:
 		Probe.bump("conq.combat_entered")
 		# characterization：起始 effective pop（pop-wounded）+ round 計數初始化。
@@ -212,6 +218,14 @@ func _resolve_volley(state: WorldState, id_a: int, id_b: int) -> void:
 	_skill_sys.on_volley(state, state.teams[id_a])
 	_skill_sys.on_volley(state, state.teams[id_b])
 
+# 分數傷亡累積器（de-patch §D4）：real 傷亡跨 round 累加，floor 取整、餘量留 _cas_carry。
+# 零 randf → seeded determinism 保。生產路（非探針），Probe off 時仍運作。
+func _accum_casualty(id: int, real_loss: float) -> int:
+	var carry: float = float(_cas_carry.get(id, 0.0)) + maxf(real_loss, 0.0)
+	var n: int = int(carry)   # floor（carry≥0）
+	_cas_carry[id] = carry - float(n)
+	return n
+
 func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 	var a: TeamData  = state.teams[id_a]
 	var b: TeamData  = state.teams[id_b]
@@ -225,23 +239,23 @@ func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 	var eff_a: int   = maxi(a.population - a.wounded, 1)
 	var eff_b: int   = maxi(b.population - b.wounded, 1)
 
-	var loss_a: int = max(int(round(eff_a * str_b / total * ROUND_CASUALTY_RATE)), 0)
-	var loss_b: int = max(int(round(eff_b * str_a / total * ROUND_CASUALTY_RATE)), 0)
-
+	# de-patch §D4：real-valued 傷亡，flanking 套 real 上（不先 int 截斷），經累積器 floor（跨 round carry 餘量）。
+	var real_a: float = float(eff_a) * str_b / total * ROUND_CASUALTY_RATE
+	var real_b: float = float(eff_b) * str_a / total * ROUND_CASUALTY_RATE
 	if eff_a >= eff_b * 3:
 		var tactics_b: float = 0.0
 		var leader_b: PersonData = state.persons.get(b.leader_id)
 		if leader_b != null:
 			tactics_b = float(leader_b.skills.get("戰術", 0.0))
-		var flank_mult: float = FLANKING_MULT - tactics_b * 0.3
-		loss_b = int(round(float(loss_b) * flank_mult))
+		real_b *= (FLANKING_MULT - tactics_b * 0.3)
 	if eff_b >= eff_a * 3:
 		var tactics_a: float = 0.0
 		var leader_a: PersonData = state.persons.get(a.leader_id)
 		if leader_a != null:
 			tactics_a = float(leader_a.skills.get("戰術", 0.0))
-		var flank_mult: float = FLANKING_MULT - tactics_a * 0.3
-		loss_a = int(round(float(loss_a) * flank_mult))
+		real_a *= (FLANKING_MULT - tactics_a * 0.3)
+	var loss_a: int = _accum_casualty(id_a, real_a)
+	var loss_b: int = _accum_casualty(id_b, real_b)
 
 	_apply_casualties(state, id_a, loss_a)
 	_apply_casualties(state, id_b, loss_b)
