@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: 職業搶匪量測結果——0/409征服意圖選掠奪，loot_lead峰值全0.00（機會型搶匪不存在）
 ---
 

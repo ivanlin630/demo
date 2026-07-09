@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c-1 純fold 已 merge 進 main（c047241）——你可 game-design 落筆
 ---
 

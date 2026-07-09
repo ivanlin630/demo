@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: observer 後續——#2 設施顯示全欄(非零) + #1 據點列表面板（feat/observer-inspect 續做）
 ---
 
