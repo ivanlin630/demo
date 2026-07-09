@@ -107,6 +107,18 @@ memory [[feedback-never-wrap]]。
 - 血證：敗北模型（絕對殲滅線 pre-empt 逃決策=殲滅-heavy）、A2c-1（pre-gate `continue` bypass）、arbiter latch（99% 病）。
 - systems characterize / measurer 量不到某湧現 → 都先查補丁閘。併 [[feedback_avoid_rabbithole]]（先量測揭「量不到」）→ 補丁閘優先查揭「為何量不到」。memory [[feedback-patch-gate-first]]。
 
+## ★★框外挑框：降 groupthink（用戶挖，2026-07-09）
+
+**根**：判斷層（blueprint/systems）清一色 Opus → 同 priors → 獨立實例也推同一（可能錯）結論。模型多樣（QA/量測 Sonnet、LG Haiku）在**下位機械角色**、defer 上位框架、不挑戰 → 碰不到判斷層。**自我質疑驗得了數據/執行、驗不了自己的框**（同 priors 自驗還是同結論；A2c-1「ironclad regression」數字對詮釋錯，破框靠用戶逼多 seed）。
+
+**藥：選擇性召異質 skeptic 挑框**（非全審=非浪費）。**★觸發三對齊才召**（其餘直接過）：
+1. 下**強結論且 redirect 大量工作**（建 X / 推翻 Y）；
+2. **相關跳因果**；
+3. **覺得 ironclad/很確定**（高信心=危險信號）+ **難逆**（build/ship/merge）。
+- **放早**（第一次下大框 call 時）prevent 白工（A2c-1 挑框太晚→已白建 survival-value）。
+- **分層省**：便宜先自 steelman 反面（filter）；貴的**異質模型 skeptic** 只給最大 call。
+- **落地=reviewer 承此**：判斷角色下大框 call（三對齊）時召 reviewer，且**★reviewer 用不同模型/代 + prompt 明確 refute（非 confirm）**才有框外效果（同 Opus reviewer=框內審）。詳 `02_reviewer.md`。memory [[feedback_frame_challenge]]（補框外，配 [[feedback_patch_gate_first]]/[[feedback_avoid_rabbithole]] 框內紀律）。
+
 ## 驗收鏈（QA 反轉,2026-07-04；★2026-07-09 user-in-loop 優化）
 
 **★2026-07-09（用戶定案）**：user-in-loop 模式下，release-pass 權 → 藍圖（完整 full_probe 數字判、有問題升用戶），正式 QA release-gate 砍。用戶=問題 backstop。**逃逸缺陷仍入 `docs/escaped_defects.md`**（QA 續管，砍 QA 後漏 bug 帳上可見可翻案）。**轉自動交付（用戶不看）→ 三層 QA 硬閘回歸**。
