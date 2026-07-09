@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 照妖鏡#1 交你判——機制 unit 直證但 warring bed 罕觸(rout≈0);揭 combat 殲滅-heavy;3 選項+我建議
 ---
 
