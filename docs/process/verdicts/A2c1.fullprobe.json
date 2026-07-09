@@ -1,0 +1,82 @@
+{
+  "slice": "A2c1-survival-value",
+  "commits": {
+    "baseline": "a3db7c9 (main, pre-fold)",
+    "fold": "423924c (純 fold)",
+    "upgrade": "4e57ea9 (survival-value + can_reach guard)"
+  },
+  "bed": "seeded_warring_bed.gd (WarringHarness)",
+  "seed": 1337,
+  "months": 3,
+  "ticks": 2400,
+  "final": {
+    "baseline": {"teams": 31, "factions": 8, "established": 1, "pop": 218, "attrition_pct": 42.8},
+    "fold":     {"teams": 36, "factions": 8, "established": 1, "pop": 203, "attrition_pct": 46.7},
+    "upgrade":  {"teams": 36, "factions": 8, "established": 1, "pop": 203, "attrition_pct": 46.7}
+  },
+  "avg_team_size": {
+    "baseline": 7.03,
+    "fold": 5.64,
+    "upgrade": 5.64,
+    "note": "final pop/final teams（無 per-team 直方圖 code，未改 scripts/ 故未補；final 完全同 fold）"
+  },
+  "decision_face": {
+    "merge.consolidate_dispatch": {"baseline": 978, "fold": 154, "upgrade": 320},
+    "merge_appl.total":           {"baseline": 0,   "fold": 320, "upgrade": 320},
+    "merge_appl.chose_整併":       {"baseline": 0,   "fold": 154, "upgrade": 320},
+    "merge_appl.chose_other":     {"baseline": 0,   "fold": 166, "upgrade": 0},
+    "chose_other_pct":            {"fold": "51.9%", "upgrade": "0.0%"}
+  },
+  "survival_face": {
+    "extinct.starve":  {"baseline": 16, "fold": 19, "upgrade": 19},
+    "extinct.combat":  {"baseline": 0,  "fold": 0,  "upgrade": 0},
+    "extinct.other":   {"baseline": 6,  "fold": 6,  "upgrade": 6},
+    "death.starve_anon": {"baseline": 122, "fold": 133, "upgrade": 133},
+    "join.resolve":    {"baseline": 24, "fold": 14, "upgrade": 13},
+    "join.dispatch":   {"baseline": 48, "fold": 39, "upgrade": 36}
+  },
+  "conflict_face_observed_no_target": {
+    "conq.declared": {"baseline": 740, "fold": 520, "upgrade": 520},
+    "conq.member_atk_eligible": {"baseline": 416, "fold": 309, "upgrade": 309},
+    "conq.combat_entered": {"baseline": 11, "fold": 8, "upgrade": 8},
+    "g3.betrayal": {"baseline": 11, "fold": 10, "upgrade": 9}
+  },
+  "structure_face": {
+    "final_teams": {"baseline": 31, "fold": 36, "upgrade": 36},
+    "final_factions_all": 8,
+    "established_all": 1
+  },
+  "spec_acceptance_lines": {
+    "1_starvation_revival": {
+      "target": "extinct.starve ≲16 (回落); avg-size 回升(>5.6); join.resolve 回升(>14)",
+      "actual": "extinct.starve=19(持平fold,未回落); avg-size=5.64(=fold,未回升); join.resolve=13(<fold 14,倒退)",
+      "verdict_input": "FAIL — 三項生存回健康指標，零項改善，一項(join.resolve)倒退"
+    },
+    "2_merge_between_ends": {
+      "target": "merge.consolidate_dispatch 落 (154,978) 中間,偏離兩端",
+      "actual": "320，數值上在區間內但貼近下端(154)，非中間",
+      "verdict_input": "技術上PASS(在區間內)，但偏移方向值得藍圖留意"
+    },
+    "3_chose_other_present": {
+      "target": "merge_appl.chose_other 仍可觀比例(>0%)，非再逼近100%整併",
+      "actual": "chose_other=0/320=0.0%（100% chose_整併，完全逼近 fold 的反面極端）",
+      "verdict_input": "FAIL — 明確違反此驗收線，survival-value 機制在此 seed 下讓所有 merge-applicable 隊全選整併，無一選 other"
+    },
+    "4_conflict_face_observed": {
+      "actual": "conq.declared/member_atk_eligible/combat_entered 與 fold 完全相同(520/309/8)，survival-value 對衝突面零可觀測影響",
+      "verdict_input": "觀察值記錄，不設 target"
+    }
+  },
+  "hard_gates": {
+    "gate6_merge_dispatch_lt_800": {"threshold": "<800", "actual": 320, "pass": true, "famine_window_check": "未觸發（320 遠低於閘值，無需判 famine-window）"},
+    "gate7_extinct_starve_le_19": {"threshold": "≤19（不比純fold差）", "actual": 19, "pass": true, "note": "boundary=踩線持平，非改善"}
+  },
+  "known_anomaly": {
+    "baseline_only_script_error": "baseline(main a3db7c9) log 出現大量 'SCRIPT ERROR: Out of bounds get index 50 (on base: Dictionary)'（約10+次，無 stack 對應具體檔）；fold/upgrade log 皆無此錯。判讀：main pre-existing quirk，與本 slice 無關（branch 上未重現，非本 slice 引入的迴歸）；未深追根因（非本工單範圍），已誠實揭露。"
+  },
+  "incomplete": [
+    "team-size 直方圖：warring_harness.gd 無 per-team histogram 欄位，加會動 scripts/（鐵律5禁）→ 只用 final pop/teams 算 avg 代替，非真直方圖",
+    "標準床(HOB/constitution/sanity/TeamTrace) 本工單未重跑——沿用 implementer 自報告(全綠)，未獨立覆核；ticket 範圍限定 3-way full_probe，如需獨立覆核請另開工單"
+  ],
+  "summary": "3-way full_probe(seed=1337,3月) 齊：baseline/fold/upgrade。硬閘6/7技術PASS。但spec驗收線①③明確FAIL——survival-value升級版在決策面上比純fold更差：merge dispatch 154→320反彈、chose_other從51.9%崩到0%(100%全選整併，與spec設計意圖'仍有隊選other'正面牴觸)。生存面零改善(avg-size持平/join.resolve倒退)。final teams/pop/attrition與fold逐位元相同，顯示這版survival boost在此seed下對最終結構無可觀測正面影響，只讓決策路徑更集中整併。數字產齊，判/升由藍圖定。"
+}
