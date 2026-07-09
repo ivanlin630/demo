@@ -23,8 +23,14 @@ func _make_tile(pos: Vector2i, otype: String, olevel: int, owner: int) -> HexTil
 	t.outpost_type = otype
 	t.outpost_level = olevel
 	t.outpost_owner = owner
-	t.weaponsmith_level = 2 if otype == "military" else 0
-	t.garrison = [101, 102] if otype == "military" else []
+	if otype == "military":
+		t.weaponsmith_level = 2
+		t.smelter_level = 1
+		t.garrison = [101, 102]
+	else:
+		t.farming_level = 3
+		t.mint_level = 1
+		t.garrison = []
 	t.resources = {"food": 40.0, "material": 15, "ore_iron": 3}
 	t.resource_cap = {"food": 100.0, "material": 50}
 	return t
@@ -82,12 +88,20 @@ func _initialize() -> void:
 	_check(str(civ.get("owner_team", "")) != "" and str(civ.get("owner_team", "")) != "（無主）", "civ owner_team labeled")
 	_check(str(civ.get("owner_faction", "")) != "", "civ owner_faction non-empty (fid=7)")
 	_check(civ.get("resources_nonzero", {}).has("ore_iron"), "civ resources_nonzero ore_iron")
+	# facilities_nonzero (civ: farming=3, mint=1)
+	var civ_fac: Dictionary = civ.get("facilities_nonzero", {})
+	_check(int(civ_fac.get("farming", -1)) == 3, "civ facilities farming=3")
+	_check(int(civ_fac.get("mint", -1)) == 1, "civ facilities mint=1")
+	_check(not civ_fac.has("weaponsmith"), "civ facilities no weaponsmith")
+	_check(not civ.has("weaponsmith_level"), "weaponsmith_level 單欄已移除 (併 facilities)")
 
-	# ── 3. query_outpost military（garrison + weaponsmith）──
+	# ── 3. query_outpost military（garrison + facilities）──
 	var mil: Dictionary = ObserverQueryApi.query_outpost(state, mil_pos)
 	_check(str(mil.get("outpost_type", "")) == "military", "mil type")
 	_check(int(mil.get("garrison", -1)) == 2, "mil garrison=2")
-	_check(int(mil.get("weaponsmith_level", -1)) == 2, "mil weaponsmith=2")
+	var mil_fac: Dictionary = mil.get("facilities_nonzero", {})
+	_check(int(mil_fac.get("weaponsmith", -1)) == 2, "mil facilities weaponsmith=2")
+	_check(int(mil_fac.get("smeltery", -1)) == 1, "mil facilities smeltery=1")
 	_check(int(mil.get("owner_team_id", -99)) == 9, "mil owner=9")
 
 	# ── 4. 無主據點 owner=-1：null guard 不炸 ──
@@ -102,6 +116,19 @@ func _initialize() -> void:
 	_check(e1.is_empty(), "non-outpost tile → {}")
 	var e2: Dictionary = ObserverQueryApi.query_outpost(state, Vector2i(99, 99))
 	_check(e2.is_empty(), "off-map tile (null tile) → {} (no crash)")
+
+	# ── 5b. query_all_outposts（3 據點：civ/mil/無主，非據點格不入）──
+	var all_op: Array = ObserverQueryApi.query_all_outposts(state)
+	_check(all_op.size() == 3, "query_all_outposts 3 據點 (empty tile 不入)")
+	var has_mil: bool = false
+	var has_civ_facilities: bool = false
+	for o in all_op:
+		if str(o["outpost_type"]) == "military":
+			has_mil = true
+		if (o["tile_pos"] as Vector2i) == civ_pos:
+			has_civ_facilities = int(o["facility_count"]) == 2   # farming+mint
+	_check(has_mil, "list 含 military")
+	_check(has_civ_facilities, "list civ facility_count=2")
 
 	# ── 6. res_label 中文 ──
 	_check(ObserverQueryApi.res_label("ore_iron") == "鐵礦", "res_label ore_iron=鐵礦")

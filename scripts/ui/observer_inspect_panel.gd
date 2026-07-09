@@ -8,11 +8,13 @@ signal follow_toggled(on: bool)
 
 var _bridge: ObserverBridge
 var _list: ItemList
+var _outpost_list: ItemList
 var _detail: RichTextLabel
 var _follow_btn: CheckBox
 var _selected: int = -1                          # 選中隊 id，-1 sentinel
 var _selected_tile: Vector2i = Vector2i(-1, -1)  # 選中據點格，(-1,-1) sentinel
 var _row_tids: Array = []
+var _outpost_rows: Array = []                    # 據點列表各行 tile_pos（Vector2i）
 
 func setup(bridge: ObserverBridge) -> void:
 	_bridge = bridge
@@ -29,6 +31,13 @@ func setup(bridge: ObserverBridge) -> void:
 	_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_list.item_selected.connect(_on_row)
 	add_child(_list)
+	var op_title := Label.new()
+	op_title.text = "據點"
+	add_child(op_title)
+	_outpost_list = ItemList.new()
+	_outpost_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_outpost_list.item_selected.connect(_on_outpost_row)
+	add_child(_outpost_list)
 	_detail = RichTextLabel.new()
 	_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_detail.fit_content = false
@@ -41,24 +50,38 @@ func _on_row(idx: int) -> void:
 		return
 	_selected = _row_tids[idx]
 	_selected_tile = Vector2i(-1, -1)   # 互斥：選隊清據點
+	_outpost_list.deselect_all()
 	_render_detail()
 	team_selected.emit(_selected)
+
+# 據點列表點選 → 走既有據點詳情路（select_tile）
+func _on_outpost_row(idx: int) -> void:
+	if idx < 0 or idx >= _outpost_rows.size():
+		return
+	select_tile(_outpost_rows[idx])
 
 # 外部同步（地圖 pick 隊）：選中 + 詳情，不回發 signal（防循環）
 func select_team(tid: int) -> void:
 	_selected = tid
 	_selected_tile = Vector2i(-1, -1)   # 互斥：選隊清據點
+	_outpost_list.deselect_all()
 	var idx: int = _row_tids.find(tid)
 	if idx >= 0:
 		_list.select(idx)
 		_list.ensure_current_is_visible()
 	_render_detail()
 
-# 外部同步（地圖 pick 空格/據點）：切據點詳情，互斥清隊選取
+# 外部同步（地圖 pick 空格/據點 or 據點列表）：切據點詳情，互斥清隊選取
 func select_tile(tpos: Vector2i) -> void:
 	_selected_tile = tpos
 	_selected = -1
 	_list.deselect_all()
+	var oidx: int = _outpost_rows.find(tpos)
+	if oidx >= 0:
+		_outpost_list.select(oidx)
+		_outpost_list.ensure_current_is_visible()
+	else:
+		_outpost_list.deselect_all()
 	_render_detail()
 
 func refresh() -> void:
@@ -73,6 +96,20 @@ func refresh() -> void:
 	var idx: int = _row_tids.find(_selected)
 	if idx >= 0:
 		_list.select(idx)
+	# 據點列表（並存，互斥 sentinel 不干擾）
+	var ops: Array = _bridge.query_all_outposts()
+	_outpost_list.clear()
+	_outpost_rows.clear()
+	for o in ops:
+		var tp: Vector2i = o["tile_pos"]
+		_outpost_rows.append(tp)
+		var type_zh: String = "民生" if str(o["outpost_type"]) == "civilian" else "軍事"
+		_outpost_list.add_item("(%d,%d) %sLv%d %s 設施%d" % [
+			tp.x, tp.y, type_zh, int(o["outpost_level"]),
+			str(o["owner_team"]), int(o["facility_count"])])
+	var oidx: int = _outpost_rows.find(_selected_tile)
+	if oidx >= 0:
+		_outpost_list.select(oidx)
 	_render_detail()
 
 func _render_detail() -> void:
@@ -135,10 +172,19 @@ func _outpost_lines(o: Dictionary) -> Array:
 		"擁有：%s%s" % [str(o["owner_team"]),
 			"（%s）" % str(o["owner_faction"]) if str(o["owner_faction"]) != "" else ""],
 		"駐軍：%d 人" % int(o["garrison"]),
-		"武器坊等級：%d" % int(o["weaponsmith_level"]),
+		_facilities_line(o.get("facilities_nonzero", {})),
 	]
 	lines.append(_resources_line(o.get("resources_nonzero", {}), false))  # 據點含 food(糧倉) 全露
 	return lines
+
+# 設施段（非零全出，中文標籤；空則「（無設施）」）
+func _facilities_line(fac: Dictionary) -> String:
+	var parts: Array = []
+	for k in fac:
+		parts.append("%sLv%d" % [ObserverQueryApi.facility_label(k), int(fac[k])])
+	if parts.is_empty():
+		return "設施：（無設施）"
+	return "設施：" + " ".join(parts)
 
 func _render_outpost_detail() -> void:
 	var o: Dictionary = _bridge.query_outpost(_selected_tile)

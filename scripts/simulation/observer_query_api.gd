@@ -16,6 +16,24 @@ const RES_LABEL: Dictionary = {
 static func res_label(key: String) -> String:
 	return RES_LABEL.get(key, key)   # 未知 key 原樣（人看得懂優先，缺映射不炸）
 
+# 設施 key→中文（權威=OutpostSystem.FACILITY_DEF；未來加設施補此映射即可）。
+const FACILITY_LABEL: Dictionary = {
+	"farming": "農場", "workshop": "工坊", "apothecary": "藥坊", "mint": "鑄幣坊",
+	"stable": "馬廄", "smeltery": "冶煉廠", "weaponsmith": "武器坊", "armorsmith": "護甲坊",
+}
+
+static func facility_label(key: String) -> String:
+	return FACILITY_LABEL.get(key, key)
+
+# tile 非零設施（DRY：以 FACILITY_DEF 為權威 iterate；facility_key→level，>0 才收）。
+static func _facilities_nonzero(tile: HexTileData) -> Dictionary:
+	var out: Dictionary = {}
+	for f in OutpostSystem.FACILITY_DEF:
+		var lv: int = int(tile.get(OutpostSystem.FACILITY_DEF[f]["current_level_key"]))
+		if lv > 0:
+			out[f] = lv
+	return out
+
 # 非零資源濾（god-view 全露；空 dict 亦合法）
 static func _nonzero_resources(res: Dictionary) -> Dictionary:
 	var out: Dictionary = {}
@@ -131,11 +149,30 @@ static func query_outpost(state: WorldState, tpos: Vector2i) -> Dictionary:
 		"owner_team_id": tile.outpost_owner,
 		"owner_team": team_label(state, tile.outpost_owner) if tile.outpost_owner != -1 else "（無主）",
 		"owner_faction": faction_label(state, _owner_faction_of(state, tile.outpost_owner)),
-		"weaponsmith_level": tile.weaponsmith_level,
+		"facilities_nonzero": _facilities_nonzero(tile),   # 全 8 設施非零（DRY via FACILITY_DEF）
 		"garrison": tile.garrison.size(),
 		"resources_nonzero": _nonzero_resources(tile.resources),
 		"resource_cap": tile.resource_cap.duplicate(),
 	}
+
+# 全據點列表 DTO（god-view；免逐隊翻找）。sort by tile_id 穩定。
+static func query_all_outposts(state: WorldState) -> Array:
+	var ids: Array = state.world.tiles.keys()
+	ids.sort()
+	var out: Array = []
+	for tid in ids:
+		var tile: HexTileData = state.world.tiles[tid]
+		if tile.outpost_type == "" or tile.outpost_level <= 0:
+			continue
+		out.append({
+			"tile_pos": tile.tile_pos,
+			"outpost_type": tile.outpost_type,
+			"outpost_level": tile.outpost_level,
+			"owner_team": team_label(state, tile.outpost_owner) if tile.outpost_owner != -1 else "（無主）",
+			"owner_faction": faction_label(state, _owner_faction_of(state, tile.outpost_owner)),
+			"facility_count": _facilities_nonzero(tile).size(),
+		})
+	return out
 
 # 雙 null guard：無主(-1) + 已滅 team 兩來源都接（state.teams.get(-1)=null → null.faction_id 必炸）。
 static func _owner_faction_of(state: WorldState, owner: int) -> int:
