@@ -190,6 +190,7 @@
 ### 敗方損耗對稱
 - encounter 與 npc_combat 敗方結算皆對敗方整隊 anon pop（**含未上場 reserve**）施 tier 加權陣亡（`AnonTierSystem.kill_random` + `SURVIVAL_KILL_WEIGHT`），無玩家專屬豁免（game-design §對稱性）。
 - pop 變動只經 cohort API。武裝下限 `ARMED_RATIO_FLOOR` 在消費端（encounter spawn / npc 戰力）套用，不覆寫 `armed_anon_ratio` 推導值。
+- **每 round 傷亡走分數累積器**（`_resolve_combat_round`+`_accum_casualty`，2026-07-10 §D4 de-patch）：real-valued 傷亡跨 round carry 於 `_combat_track[id].cas_carry`、floor 取整。**禁 `int(round())` 直接量化**——對小 pop（eff≤3，積 <0.5）恆捨入 0=絕境隊零流血=殲滅結構不可能（補丁閘型病）。累積器**零新增 randf**（傷亡量化不引入 RNG），seeded warring determinism 保。
 
 ## 玩法節奏
 
