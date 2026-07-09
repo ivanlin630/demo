@@ -5,7 +5,9 @@ const VOLLEY_CASUALTY_RATE: float     = 0.05
 const PURSUIT_RATE: float             = 0.05
 const FLANKING_MULT: float            = 1.3
 const MORALE_CASCADE_THRESHOLD: float = 0.3
-const COMBAT_ABANDON_THRESHOLD: float = 0.2
+# 照妖鏡#1：flat 潰退門檻 → 膽量人格化（spread 非 shift，均值保 0.2）。
+const ABANDON_THRESHOLD_BASE: float  = 0.2    # 均值（保 aggregate 潰退傾向）
+const ABANDON_COURAGE_SPREAD: float  = 0.16   # TEST VALUE：膽量調幅（勇 0.12→怯 0.28）
 const ROUND_READINESS_DRAIN: float    = 0.08
 const LOOT_RATE: float                = 0.3
 const LOSER_CASUALTY_RATE: float      = 0.2   # TEST VALUE：敗方 pop 損耗比例（複用 force_occupy 量級）
@@ -194,10 +196,12 @@ func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 	if maxi(b.population - b.wounded, 1) <= 1:
 		_end_combat(state, id_a, id_b)
 		return
-	if a.readiness <= COMBAT_ABANDON_THRESHOLD:
+	if a.readiness <= _abandon_threshold(state, a):
+		_probe_retreat(state, a)
 		_force_retreat(state, id_a, id_b)
 		return
-	if b.readiness <= COMBAT_ABANDON_THRESHOLD:
+	if b.readiness <= _abandon_threshold(state, b):
+		_probe_retreat(state, b)
 		_force_retreat(state, id_b, id_a)
 		return
 	_skill_sys.on_combat_round(state, a)
@@ -315,6 +319,28 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 		if _flip_on_loser_village and not _village_survives and Probe.enabled:
 			Probe.bump("yield.flip_ghost")
 		_try_subjugate(state, winner_id, loser_id, _village_survives)
+
+# 照妖鏡#1：膽量導出（連續 term，零新 classifier）。好戰高/慎重低→勇；反之→怯。
+static func _courage_of(state: WorldState, team: TeamData) -> float:
+	var ldr = state.persons.get(team.leader_id)
+	if ldr == null: return 0.5
+	var martial: float = float(ldr.values.get("好戰", 0.5))
+	var caution: float = float(ldr.values.get("慎重", 0.5))
+	return clampf(0.5 + (martial - caution) * 0.5, 0.0, 1.0)
+
+# per-team 潰退門檻：勇(courage→1)→門檻低(晚逃血戰)；怯(→0)→門檻高(早逃)。均值(0.5)=BASE。
+static func _abandon_threshold(state: WorldState, team: TeamData) -> float:
+	if state.persons.get(team.leader_id) == null: return ABANDON_THRESHOLD_BASE
+	return ABANDON_THRESHOLD_BASE + (0.5 - _courage_of(state, team)) * ABANDON_COURAGE_SPREAD
+
+# D0 探針：潰退命中瞬間記 readiness，依 courage 分高/中/低三桶（勇者應集中低 readiness=撐到快死才退）。
+static func _probe_retreat(state: WorldState, team: TeamData) -> void:
+	if not Probe.enabled: return
+	Probe.bump("rout.total")
+	var c: float = _courage_of(state, team)
+	var bucket: String = "high" if c > 0.66 else ("low" if c < 0.34 else "mid")
+	Probe.bump("rout.n_" + bucket)
+	Probe.add_amount("rout.ready_sum_" + bucket, team.readiness)
 
 func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> void:
 	var retreater: TeamData = state.teams[retreater_id]

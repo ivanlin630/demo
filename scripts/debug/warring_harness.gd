@@ -41,6 +41,8 @@ const PROBE_KEYS: Array = [
 	# 反應計數（Task2：9 反應 apply winner）
 	"reaction.P1_comply", "reaction.P2_produce", "reaction.P4_expand", "reaction.N1_flee",
 	"reaction.N2_riot", "reaction.N3_defect", "reaction.N4_shirk", "reaction.N5_extort", "reaction.breed",
+	# 照妖鏡#1：潰退門檻膽量化——總潰退 + courage 三桶潰退數（readiness 均值走 probe_amounts）
+	"rout.total", "rout.n_high", "rout.n_mid", "rout.n_low",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。
@@ -87,6 +89,7 @@ static func run(world_seed: int, total_ticks: int,
 			"established": _established_count(state), "pop": end_pop,
 		},
 		"probe": _probe_subset(),
+		"probe_amounts": _probe_amounts_subset(),
 	}
 	Probe.enabled = false
 	return result
@@ -131,4 +134,12 @@ static func _probe_subset() -> Dictionary:
 	var d: Dictionary = {}
 	for k in PROBE_KEYS:
 		d[k] = int(Probe.counts.get(k, 0))
+	return d
+
+# 浮點累計 subset（照妖鏡#1：courage 桶 readiness-at-retreat 總和 → 均值=sum/n_bucket）
+const AMOUNT_KEYS: Array = ["rout.ready_sum_high", "rout.ready_sum_mid", "rout.ready_sum_low"]
+static func _probe_amounts_subset() -> Dictionary:
+	var d: Dictionary = {}
+	for k in AMOUNT_KEYS:
+		d[k] = Probe.amount(k)
 	return d
