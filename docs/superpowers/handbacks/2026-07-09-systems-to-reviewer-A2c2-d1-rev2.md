@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 審 A2c-2 D1 rev2（候選 C：arbiter 純移動覆蓋 task 不變）——你破候選 A 後改
 ---
 

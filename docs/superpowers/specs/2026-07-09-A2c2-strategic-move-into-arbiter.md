@@ -44,11 +44,24 @@ overlay **非死路，載真湧現**：`sa_move_dispatch` 三 seed 有火(496/69
 # task_arbiter.gd 新增（純移動覆蓋，不碰 current_task/task_priority）：
 static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
     # arbiter 成戰略移動 move_target 唯一 owned write path（收 movement 直讀 bypass=D11/V3）。
+    # ★內建 2 道純 team-欄 guard（原掛 movement:62-65，folding 一併搬，防呼叫點遺漏破不變量）：
+    if team.combat_target != -1: return                        # 戰鬥鎖絕對（task_arbiter:28-29 全域不變量）
+    if team.current_task == TeamData.TASK_FLEE: return          # 逃跑不被戰略位覆蓋
     # 僅 move_target 空/抵達才覆蓋（保現行觸發顆粒），不動 task=IDLE 保留。
     if team.move_target == Vector2i(-1,-1) or team.move_target == team.tile_pos:
         team.move_target = pos
 ```
-- **呼叫端**：`movement:65-72` 拆除直讀 strategic_assignments 分支；改由**faction member loop / strategic tick 後**呼 `TaskArbiter.set_strategic_move(team, sa_pos)`，`sa_pos` 選取**保突圍優先**（`has(-1)`→突圍 pos，否則正整數 key，鏡射舊 `movement:67-70`）。
+- **呼叫端**（`faction_ai` member loop / strategic tick 後）：`movement:65-72` 拆除直讀 strategic_assignments 分支；改呼 `TaskArbiter.set_strategic_move(team, sa_pos)`。
+  - `sa_pos` 選取**保突圍優先**（`has(-1)`→突圍 pos，否則正整數 key，鏡射舊 `movement:67-70`）。
+  - **★呼叫前補居民鎖 guard**（reviewer 阻塞3 第3道，原 `movement:57-61`；因需 `FactionAISystem._is_resident_team` 故留 call-site 不入 arbiter，避 arbiter→faction_ai 耦合；call-site 本在 faction_ai 無新耦合）：
+    ```gdscript
+    if team.tags.has(TeamData.TAG_PRODUCE) and _is_resident_team(state, team) \
+            and team.current_task not in [TASK_FLEE,JOIN,REVOLT,MIGRATE,PREPARE]:
+        pass   # 居民鎖：駐守居民不被拉去戰略位
+    elif team.strategic_assignments.size() > 0:
+        TaskArbiter.set_strategic_move(team, sa_pos)
+    ```
+- **★3 道現行 guard 全保**（reviewer 阻塞3）：戰鬥鎖+FLEE 內建進 `set_strategic_move`（純 team 欄，防未來呼叫點遺漏）、居民鎖 call-site（需外部 helper）。缺任一 = 破既有不變量（交戰隊被拉走等），比阻塞1/2 隱蔽。
 - **task 不變**：隊 current_task 保持原值（IDLE 續 IDLE）→ `interaction:253` 自發併隊續 fire（阻塞2 解）。
 - **無 task_priority 閘**：純 move_target set 不經 try_set → nonidle_empty 隊(抵達等結算)也被覆蓋（阻塞1 解，同舊 overlay）。
 - **arbiter 權威**：strategic move_target 現經單一 arbiter-owned path（可集中 log/audit）=收 movement 直讀 bypass（D11/V3）。
@@ -68,9 +81,9 @@ static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
 ## D2. 觸及檔（候選 C）
 | 檔 | 改點 |
 |---|---|
-| `scripts/simulation/task_arbiter.gd` | +`set_strategic_move(team, pos)`（純移動覆蓋，move_target 空/抵達才寫，不動 task/priority） |
-| `scripts/simulation/movement_system.gd` | 拆 :65-72 直讀 strategic_assignments 分支（move_target 改由 arbiter owned path 設） |
-| faction member loop（`faction_ai` 或 strategic tick 後） | strategic_assignments 存在 → 選 sa_pos（突圍優先 tie-break）→ `TaskArbiter.set_strategic_move(team, sa_pos)` |
+| `scripts/simulation/task_arbiter.gd` | +`set_strategic_move(team, pos)`（純移動覆蓋，move_target 空/抵達才寫，不動 task/priority；**內建戰鬥鎖+FLEE 2 guard**） |
+| `scripts/simulation/movement_system.gd` | 拆 :57-72 直讀 strategic_assignments 分支（含 3 guard 一併搬走，move_target 改由 arbiter owned path 設） |
+| faction member loop（`faction_ai` 或 strategic tick 後） | **居民鎖 guard**（`TAG_PRODUCE`+`_is_resident_team`+task 清單）→ strategic_assignments 存在 → sa_pos（突圍優先 tie-break）→ `TaskArbiter.set_strategic_move(team, sa_pos)` |
 | `scripts/debug/warring_harness.gd` | strat.* PROBE_KEYS（D0 已立，複用） |
 
 **不碰**：current_task（保 IDLE=候選 C 精髓）、FA7 god-view、strategic goal 產生、target 選擇、interaction:253（靠 task 不變自然保）。
@@ -84,6 +97,7 @@ static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
 4. 憲法/framework/sanity 綠。
 5. 相關≠因果 + 3 seed：任何指標偏移先 characterize 真變 vs seed 噪音，別 ironclad。
 6. **byte-identical 則無需 sign-off**；若實測有 player-visible 偏移 → 回 blueprint。
+7. **★3 guard 保（reviewer 阻塞3）**：折後**交戰隊（combat_target!=-1）/ 逃跑隊（FLEE）/ 駐守居民**的 move_target **不被戰略位覆蓋**（同折前）——加斷言/探針驗這三類隊 strategic move_target 覆蓋=0。破任一=破既有不變量（戰鬥鎖絕對等）=FAIL。
 
 ## 流程
 D0 characterization（measurer 背景併行 3 seed）→ 讀數定 D1 候選 A/B → reviewer 審 seam → 下游（可 LG `--from-impl` 試水）。**D0 未出不鎖 D1/D2**。
