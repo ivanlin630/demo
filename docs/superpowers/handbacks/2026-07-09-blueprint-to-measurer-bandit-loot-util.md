@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 topic: 量測——職業搶匪湧現否?吃飽隊的掠奪 util 贏不贏正經工作(loot_util/loot_lead + fed/starve 分)
 ---
 

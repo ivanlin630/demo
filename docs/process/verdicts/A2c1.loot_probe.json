@@ -1,0 +1,24 @@
+{
+  "purpose": "職業搶匪湧現否——吃飽隊掠奪util贏不贏正經工作",
+  "commit": "dbcd0fc (main HEAD, 已含 shipped 純fold 423924c)",
+  "bed": "scripts/debug/a2c1_loot_probe_bed.gd（新增，沿用 WarringHarness，讀 Probe.peaks/counts dump，零sim邏輯變）",
+  "seeds": [1337, 42, 7],
+  "months": 3,
+  "matrix": {
+    "1337": {"loot_util_peak": 0.64, "loot_lead_peak": 0.00, "conq.winner_loot": 0, "conq.intent": 53, "winner_loot_rate": "0.0%"},
+    "42":   {"loot_util_peak": 0.66, "loot_lead_peak": 0.00, "conq.winner_loot": 0, "conq.intent": 339, "winner_loot_rate": "0.0%"},
+    "7":    {"loot_util_peak": 0.53, "loot_lead_peak": 0.00, "conq.winner_loot": 0, "conq.intent": 17, "winner_loot_rate": "0.0%"}
+  },
+  "aggregate": {
+    "total_conq_intent_decisions": 409,
+    "total_winner_loot": 0,
+    "loot_lead_peak_across_all_seeds": 0.00,
+    "note": "loot_lead_peak=0.00 三seed皆同——掠奪util從未領先次佳option過，遑論勝出"
+  },
+  "limitation": {
+    "distribution": "Probe.note() 只存單run內peak(max)，非分布/非per-event log——無法給histogram，只有峰值",
+    "fed_starve_stratification": "無法做——需在faction_ai_system.gd決策點當下讀food_flow/days_left並標記，會改scripts/simulation(鐵律5禁)。既有探針連分布都沒有，遑論分層。已誠實回報，未硬幹改sim code。",
+    "separate_channel_caveat": "★本探針只測『征服intent分支內的掠奪option』(_probe_conq_winner，match on 征服-intent決策)。另有獨立的『surv.loot_dispatch』(絕境生存選項掠奪派遣，PROBE_KEYS已收)不在本次量測範圍——那條路徑在先前full_probe曾量到非零值(如baseline seed1337=32)，屬不同機制(生存絕境選項非機會型option競秤)。別把兩者混為一談。"
+  },
+  "summary": "3 seed(1337/42/7)、409 個征服意圖決策點，掠奪option勝出次數=0/409，loot_lead峰值三seed皆0.00(從未領先次佳option)。★結論：機會型職業搶匪(吃飽隊搶贏正經工作)在此世界不存在——掠奪在_decide_unified util競秤中從未贏過，非僅edge case偏少，是完全零。若要山賊經濟湧現，現況util公式需調（掠奪util目前上限似乎低於其他option基準線）。惟本量測只涵蓋『征服分支機會型掠奪』，未涵蓋『絕境生存掠奪』(surv.loot_dispatch，機制不同、確有活動量)——若藍圖要問的是廣義『搶劫存在否』，那條線是活的；若問的是『划算就搶(非絕境驅動)』，答案是否定。"
+}
