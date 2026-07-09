@@ -20,6 +20,18 @@ const PRIO_AMBIENT:  int = 10
 const ENGINE_SOURCES: Array = ["unified", "solo"]
 
 
+# A2c-2（FA6 折入）：戰略移動 move_target 唯一 arbiter-owned write path（收 movement 直讀 bypass=D11/V3）。
+# 純移動覆蓋——不碰 current_task/task_priority（候選 C 精髓：保 IDLE→interaction:253 自發併隊續 fire）。
+# ★內建 2 道純 team-欄 guard（原掛 movement:64/68，folding 一併搬進 method，防未來呼叫點遺漏破不變量）：
+static func set_strategic_move(team: TeamData, pos: Vector2i) -> void:
+	if team.combat_target != -1: return                    # 戰鬥鎖絕對（同 try_set:28-29 全域不變量）
+	if team.current_task == TeamData.TASK_FLEE: return      # 逃跑不被戰略位覆蓋
+	# 僅 move_target 空/抵達才覆蓋（保現行觸發顆粒，byte-identical），不動 task=IDLE 保留。
+	if team.move_target == Vector2i(-1, -1) or team.move_target == team.tile_pos:
+		team.move_target = pos
+		Probe.bump("strat.sa_move_dispatch")   # overlay 實際生效頻率（D0 探針，count 折後不變）
+
+
 # 嘗試設 task。優先權嚴格大於現任才搶得動（同層先到先得）。
 # state 供抗命判定讀 leader；回 true = 已設；false = 被現任擋下。
 # 呼叫端必須處理 false：被擋時不得執行配套副作用（prosperity_target_id 等）。

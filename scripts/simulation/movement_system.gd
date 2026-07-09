@@ -61,15 +61,8 @@ func process(state: WorldState, team_ids: Array,
 				continue
 		if team.combat_target != -1:
 			continue
-		# strategic_assignments 優先（-1 key = 突圍；正整數 key = 包圍目標）
-		if team.strategic_assignments.size() > 0 and team.current_task != TeamData.TASK_FLEE:
-			var sa_target: Vector2i
-			if team.strategic_assignments.has(-1):
-				sa_target = team.strategic_assignments[-1]
-			else:
-				sa_target = team.strategic_assignments.values()[0]
-			if team.move_target == Vector2i(-1, -1) or team.move_target == team.tile_pos:
-				team.move_target = sa_target
+		# A2c-2 折入：戰略移動 move_target 改由 arbiter-owned set_strategic_move 於 movement 前設
+		#（sim_runner._step2a_strategic_move）→ 此處不再直讀 strategic_assignments（bypass 收攏）。
 		if team.move_target == Vector2i(-1, -1):
 			continue
 		team.move_tick_acc += elapsed_ticks
@@ -98,6 +91,10 @@ func process(state: WorldState, team_ids: Array,
 			# arrived = 走到原 move_target（_step_team 內到達會清 move_target）
 			if team.tile_pos == old_target:
 				arrived.append(tid)
+				# D0 探針：到達點 ∈ strategic_assignments 值 = 戰略移動到達（sa_pos）。
+				# 折後 move_target 由 set_strategic_move 設（仍 sa_pos），assignments 未變 → 計數保。
+				if Probe.enabled and old_target in team.strategic_assignments.values():
+					Probe.bump("strat.expand_reached")
 	return { "arrived": arrived, "moved": moved }
 
 func get_effective_mounts(team: TeamData) -> int:
