@@ -47,6 +47,8 @@ func process(state: WorldState, team_ids: Array,
 			team.order_target_id = -1
 		else:
 			team.move_target = target.tile_pos
+	# A2c-2 D0：STRAT_OVERLAY_OFF env → stub 戰略移動 overlay（characterization 開/關對照，非 fold）
+	var overlay_off: bool = OS.has_environment("STRAT_OVERLAY_OFF")
 	var arrived: Array = []
 	var moved: Array = []
 	for tid in team_ids:
@@ -62,7 +64,8 @@ func process(state: WorldState, team_ids: Array,
 		if team.combat_target != -1:
 			continue
 		# strategic_assignments 優先（-1 key = 突圍；正整數 key = 包圍目標）
-		if team.strategic_assignments.size() > 0 and team.current_task != TeamData.TASK_FLEE:
+		var sa_set: bool = false   # D0 探針：本 window move_target 是否由 SA overlay 設（供 expand_reached 判到達）
+		if not overlay_off and team.strategic_assignments.size() > 0 and team.current_task != TeamData.TASK_FLEE:
 			var sa_target: Vector2i
 			if team.strategic_assignments.has(-1):
 				sa_target = team.strategic_assignments[-1]
@@ -70,6 +73,8 @@ func process(state: WorldState, team_ids: Array,
 				sa_target = team.strategic_assignments.values()[0]
 			if team.move_target == Vector2i(-1, -1) or team.move_target == team.tile_pos:
 				team.move_target = sa_target
+				sa_set = true
+				Probe.bump("strat.sa_move_dispatch")   # overlay 實際生效頻率
 		if team.move_target == Vector2i(-1, -1):
 			continue
 		team.move_tick_acc += elapsed_ticks
@@ -98,6 +103,7 @@ func process(state: WorldState, team_ids: Array,
 			# arrived = 走到原 move_target（_step_team 內到達會清 move_target）
 			if team.tile_pos == old_target:
 				arrived.append(tid)
+				if sa_set: Probe.bump("strat.expand_reached")   # 戰略移動到達 sa_pos
 	return { "arrived": arrived, "moved": moved }
 
 func get_effective_mounts(team: TeamData) -> int:

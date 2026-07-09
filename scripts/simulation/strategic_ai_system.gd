@@ -150,6 +150,7 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
         var sa_pos: Vector2i = target_pos + dir * ENCIRCLE_DIST
         sa_pos = _nearest_valid_tile(state, sa_pos, target_pos)
         t.strategic_assignments[target_id] = sa_pos
+        Probe.bump("strat.encircle_assigned")   # D0 characterization
 
 func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     if self_team.current_task in FactionAISystem.SURVIVAL_TASKS:
@@ -177,6 +178,7 @@ func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     var sa_pos: Vector2i = self_team.tile_pos + best_dir * BREAKOUT_DIST
     sa_pos = _nearest_valid_tile(state, sa_pos, self_team.tile_pos)
     self_team.strategic_assignments[-1] = sa_pos
+    Probe.bump("strat.breakout_assigned")   # D0 characterization
 
 func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
     var dirs: Array = [
