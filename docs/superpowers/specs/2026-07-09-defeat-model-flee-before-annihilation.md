@@ -33,7 +33,7 @@ func _mortal_flee_check(state, id_self, id_enemy) -> bool:
 ```
 - `MORTAL_OUTNUMBER_W: float = 0.5`（TEST VALUE）。其餘常數同 v1（EFF_POP=3/FLEE_BASE=0.5/COURAGE_SPREAD=0.6）。
 - **eff=1（瀕死）→ criticality=1.0 > 中膽 flee_thr 0.8 → 中/怯逃、勇(1.1)血戰**=殲滅稀端保留（勇者+eff=1）。眾寡對稱時 criticality 主導，不再被虛高 team_strength 壓死。
-- **capture 端查（implementer #3）**：`_force_retreat` 俘殘部實測未升——先驗 flee 真 fire 後 capture 是否隨升（capture 靠 flee 觸發）；若 flee 升 capture 仍平 → 查 `capture_routed_as_captive` 條件（另修）。
+- **★capture 修（reviewer 挖根因，rev2 一併）**：`AnonTierSystem.capture_routed_as_captive` 俘虜率鎖 `(1-readiness)`（潰逃體力嚴重度）；但 pop-flee 在 drain 前觸發、readiness 還高(~0.8)→俘虜率結構偏低(~0.16)→capture 不隨 flee 升。**修=俘虜嚴重度納 pop-criticality**：`severity = maxf(1.0 - retreater.readiness, _pop_criticality(retreater))`（`_pop_criticality=(MORTAL_EFF_POP+1-eff)/MORTAL_EFF_POP` clamp，「潰逃慘」本含「差點被團滅」非只體力）。`max` 加性安全（readiness-abandon 路 readiness 已低→不變；pop-flee 路 criticality 高→俘升）。內建 `capture_routed_as_captive`（讀 retreater eff pop 自算，不改 caller 簽名）。
 - 新探針：`combat.pop_ratio_annih`（殲滅時敵/我 eff pop 比，證殲滅集中眾寡均等非「以多打少沒逃成」）。
 
 ### D1-v1. 絕境逃決策前置（膽量秤，殲滅線前 fire）【str_ratio 版，已被 rev2 取代】

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 審 敗北逃決策 rev2（str_ratio→pop-based 瀕滅度）——acceptance under-fire 修
 ---
 

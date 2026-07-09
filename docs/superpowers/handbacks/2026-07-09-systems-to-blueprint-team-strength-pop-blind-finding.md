@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 敗北逃決策 under-fire 揭更根本發現——team_strength pop-blind(1技能兵=強);記 backlog,本slice pop-based繞過
 ---
 
