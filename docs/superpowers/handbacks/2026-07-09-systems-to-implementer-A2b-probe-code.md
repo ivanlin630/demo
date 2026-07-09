@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: A2b +1 補 probe code（守衛 A/B 埋點，4 處）→ commit push feat/A2b-impl
 ---
 

@@ -1,0 +1,15 @@
+model=haiku ok=True effect_ok=True retried=False cost=0.23749619999999996 dur=183.4975459575653
+--- result ---
+DONE。
+
+工單所有 code 事實斷言驗證綠：
+- ✓ 子隊手寫 dispatch（faction_ai_system.gd:1669-1700 _check_deviation + _evaluate_idle_subteam）
+- ✓ 成員走 _decide_unified（:1428-1431）→ DecisionEngine.rank_scored（decision_engine.gd:11）
+- ✓ HandBrainProbe 工具就地（hand_brain_probe.gd + hand_obeys_brain_bed.gd）
+- ✓ TASK_RETURN_HOME="return_home"（team_data.gd:27）
+- ✓ 全庫無處 current_task="回歸"（grep zero）
+- ✓ 憲法閘 constitution_gate 存在
+
+判決寫入 `docs/process/verdicts/A2a.factcheck.json`。
+--- raw head ---
+{"type":"result","subtype":"success","is_error":false,"api_error_status":null,"duration_ms":175751,"duration_api_ms":170389,"ttft_ms":46393,"ttft_stream_ms":44103,"time_to_request_ms":432,"num_turns":39,"result":"DONE。\n\n工單所有 code 事實斷言驗證綠：\n- ✓ 子隊手寫 dispatch（faction_ai_system.gd:1669-1700 _check_deviation + _evaluate_idle_subteam）\n- ✓ 成員走 _decide_unified（:1428-1431）→ DecisionEngine.rank_scored（decision_engine.gd:11）\n- ✓ HandBrainProbe 工具就地（hand_brain_probe.gd + hand_obeys_brain_bed.gd）\n- ✓ TASK_RETURN_HOME=\"return_home\"（team_data.gd:27）\n- ✓ 全庫無處 current_task=\"回歸\"（grep zero）\n- ✓ 憲法閘 constitution_gate 存在\n\n判決寫入 `docs/process/verdicts/A2a.factcheck.json`。","stop_reason":"end_turn","session_id":"b8192a22-5679-4f08-905b-ec33a290ffc2","total_cost_usd":0.23749619999999996,"usage":{"input_tokens":572,"cache_creation_input_tokens":42857,"cache_read_input_tokens":1099652,"output_tokens":8249,"server_tool_use":{"web_search_requests":0,"web_fetch_requests":0},"service_tier":"standard","cache_creation":{"ephemeral_1h_input_tokens":42857,"ephemeral_5m_input_tokens":0},"inference_geo":"not_available","iterations":[{"input_tokens":8,"output_tokens":335,"cache_read_input_tokens":63315,"cache_creation_input_tokens":798,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":798},"type":"message"}],"speed":"standard"},"modelUsage":{"claude-haiku-4-5-20251001":{"inputTokens":572,"outputTokens":8249,"cacheReadInputTokens":1099652,"cacheCreationInputTokens":42857,"we

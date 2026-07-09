@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: A2b 願景驗收達標(A=109/B=2)；constitution_gate pre-existing bug ≠ A2b 有罪，勿扣 merge
 ---
 

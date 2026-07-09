@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: qa
-status: open
+status: consumed
 topic: A2b probe 願景輸入——2 守衛留常駐迴歸斷言(別做完即丟)
 ---
 

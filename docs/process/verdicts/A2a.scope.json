@@ -2,6 +2,8 @@
   "slice": "A2a",
   "title": "子隊決策路由進統一引擎（D7 手不聽腦）",
   "spec": "docs/superpowers/specs/2026-07-08-A2a-subteam-decision-routing.md",
+  "rev": 2,
+  "rev2_note": "審回饋修：commitment 防抖講清(rank_subteam 疊 COMMITMENT_BONUS 非鏡射無 commitment 的 rank_ambient)；攻擊 applicable 塌陷風險補量測 #4b + 呈報藍圖",
   "touch_files": [
     {
       "path": "scripts/simulation/faction_ai_system.gd",
@@ -10,27 +12,33 @@
     },
     {
       "path": "scripts/simulation/decision/options.gd",
-      "why": "加 SUBTEAM_OPTION_SET = [掠奪, 攻擊]（子集 narrowing，鏡射 SURVIVAL/AMBIENT_OPTION_SET）",
-      "risk": "low — 純加常數，不動既有 REGISTRY/applicable/to_task"
+      "why": "加 SUBTEAM_OPTION_SET = [掠奪, 攻擊]（子集 narrowing）。不改 shared applicable 攻擊閘",
+      "risk": "low — 純加常數"
     },
     {
       "path": "scripts/simulation/decision/decision_engine.gd",
-      "why": "加 rank_subteam(ctx)，逐字鏡射 rank_ambient（applicable ∩ 子集 → util 降序）",
-      "risk": "low — 純加 static func，不動 rank_scored/rank_ambient/rank_threat"
+      "why": "加 rank_subteam(ctx, current_option)：鏡射 rank_scored_ctx 的 COMMITMENT_BONUS(真防抖) + 子集過濾(收窄如 rank_ambient)。★非逐字鏡射 rank_ambient(該檔無 commitment)",
+      "risk": "low — 純加 static func，不動既有 ranker"
     },
     {
       "path": "scripts/debug/constitution_baseline.txt",
-      "why": "加 _decide_subteam 指紋(引擎 path，同 _decide_unified 正當)；否則新 try_set site = gate FAIL。舊 _check_deviation/_evaluate_idle_subteam site 標 removed",
-      "risk": "med — 憲法閘契約檔；漏改則 merge-gate FAIL"
+      "why": "加 _decide_subteam 指紋(引擎 path)；舊 _check_deviation/_evaluate_idle_subteam site 標 removed。漏改 = merge-gate FAIL",
+      "risk": "med — 憲法閘契約檔"
+    },
+    {
+      "path": "scripts/debug/hand_obeys_brain_bed.gd",
+      "why": "量測用(issue 2)：加印 subteam src winner_task 分布(掠奪/攻擊派工計數)，遷入前後對照 → 驗 repertoire 沒少(TASK_ATTACK 沒被閹到 0)。純觀測 print，不動 sim 邏輯",
+      "risk": "low — debug 工具 print"
     }
   ],
   "touch_systems": [
     "faction_ai (子隊自主 AI _evaluate_subteam 分支)",
-    "decision_engine (子集 ranker)"
+    "decision_engine (子集 ranker + commitment)"
   ],
   "no_touch": [
     "子隊 lifecycle: detach_subteam / merge_queue / settle / construct / escort / herald / discipline-fail",
     "_tag_weight (904/1893 仍用，非死碼)",
+    "shared applicable 攻擊閘 (不為子隊放寬；攻擊面塌陷走藍圖裁非偷改)",
     "hand_brain_probe.gd (subteam_bypass 常數變不可達但無害留)",
     "leader dispatch (=A2b)",
     "member/solo _decide_unified/_evaluate_solo (A1a 已清)",
@@ -39,13 +47,18 @@
   "depends_on": [
     {
       "slice": "A1a",
-      "why": "工單: A1a 修完引擎內閥後 subteam bypass 才浮上來為最大宗；A2a baseline/背離量測以 A1a 後低檔為對照基準"
+      "why": "工單: A1a 修完引擎內閥後 subteam bypass 才浮上來為最大宗；A2a 量測以 A1a 後低檔為對照基準"
     }
   ],
   "parallel_safe": false,
-  "parallel_notes": "與 A2b(leader) 撞同檔 faction_ai_system.gd + constitution_baseline.txt → 序列做非並行。與不觸 faction_ai/決策引擎/憲法閘的 slice 可並行。單寫者 orchestrator 序列化天然無並發，但 A2a/A2b 邏輯上須 A2a 先(縮範圍確認 subteam 路乾淨再上 leader)。",
+  "parallel_notes": "與 A2b(leader) 撞同檔 faction_ai_system.gd + constitution_baseline.txt → 序列非並行。與不觸 faction_ai/決策引擎/憲法閘/bed 的 slice 可並行。A2a 須先(縮範圍確認 subteam 路乾淨再上 leader)。",
   "constitution_gate": {
     "baseline_delta": "+faction_ai_system.gd::_decide_subteam (序A2a 引擎溶入); removed: _check_deviation, _evaluate_idle_subteam 的 try_set site",
     "contract": "current ⊆ baseline；新 try_set 未收編 baseline = FAIL"
-  }
+  },
+  "blueprint_decisions_pending": [
+    "子集 {掠奪,攻擊} vs 全 rank_scored (系統建議子集)",
+    "★子隊攻擊觸發面塌陷是否可接受 (系統建議接受+#4b 硬閘證主動出擊沒歸 0)",
+    "deviation randf 存廢 (系統建議保留)"
+  ]
 }

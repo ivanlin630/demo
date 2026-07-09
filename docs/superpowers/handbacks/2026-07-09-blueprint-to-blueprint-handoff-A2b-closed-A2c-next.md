@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 topic: 交接——A2b 收官(QA GREEN+用戶收)+measurer 流程規則已送 systems；下一步 A2c 設計
 ---
 

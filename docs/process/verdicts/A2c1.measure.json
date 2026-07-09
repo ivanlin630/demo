@@ -1,0 +1,122 @@
+﻿{
+    "A2c1_measurement":  {
+                             "beds":  {
+                                          "import_test":  {
+                                                              "status":  "PASS",
+                                                              "errors":  0,
+                                                              "warnings":  "cursor/blend (expected)",
+                                                              "note":  "GDScript 無錯誤"
+                                                          },
+                                          "constitution_gate":  {
+                                                                    "current_subset_baseline":  true,
+                                                                    "status":  "PASS",
+                                                                    "removed":  0,
+                                                                    "sites_checked":  29,
+                                                                    "note":  "無新增違憲 try_set（整併從 pre-gate→引擎 dispatch）"
+                                                                },
+                                          "game_sim_multi":  {
+                                                                 "status":  "PASS",
+                                                                 "min_ticks":  1000,
+                                                                 "note":  "sanity check ≥1000 tick 無崩潰通過",
+                                                                 "crash":  false,
+                                                                 "exit_code":  0
+                                                             },
+                                          "seeded_warring_bed_before_after":  {
+                                                                                  "total_diffs":  16,
+                                                                                  "seed":  1337,
+                                                                                  "spec_hard_line":  "total_diffs=0 required（零行為變證）",
+                                                                                  "root_cause":  "consolidate_drive TEST VALUE (2.0) 未校準至 threat option 壓制平衡；需調整 CONSOLIDATE_DRIVE 常數至收斂",
+                                                                                  "diffs":  [
+                                                                                                {
+                                                                                                    "before":  "2.36%",
+                                                                                                    "metric":  "attrition_pct",
+                                                                                                    "after":  "2.89%"
+                                                                                                },
+                                                                                                {
+                                                                                                    "before":  372,
+                                                                                                    "metric":  "end_pop",
+                                                                                                    "after":  370
+                                                                                                },
+                                                                                                {
+                                                                                                    "before":  2,
+                                                                                                    "metric":  "intent.CONQUER",
+                                                                                                    "after":  1
+                                                                                                },
+                                                                                                {
+                                                                                                    "before":  3,
+                                                                                                    "metric":  "intent.NONE",
+                                                                                                    "after":  2
+                                                                                                },
+                                                                                                {
+                                                                                                    "before":  8,
+                                                                                                    "metric":  "combat_entered",
+                                                                                                    "after":  7
+                                                                                                },
+                                                                                                {
+                                                                                                    "before":  322,
+                                                                                                    "metric":  "declared_conquests",
+                                                                                                    "after":  310
+                                                                                                },
+                                                                                                {
+                                                                                                    "before":  8,
+                                                                                                    "metric":  "betrayals",
+                                                                                                    "after":  7
+                                                                                                },
+                                                                                                {
+                                                                                                    "before":  8,
+                                                                                                    "metric":  "starve_anon",
+                                                                                                    "after":  9
+                                                                                                },
+                                                                                                {
+                                                                                                    "before":  7,
+                                                                                                    "metric":  "join_dispatch",
+                                                                                                    "after":  9
+                                                                                                }
+                                                                                            ],
+                                                                                  "months":  1,
+                                                                                  "status":  "FAIL - calibration not converged"
+                                                                              },
+                                          "hand_obeys_brain_bed":  {
+                                                                       "seed":  1337,
+                                                                       "determinism":  "PASS（同 seed 兩跑逐事件相同，見輸出末段）",
+                                                                       "status":  "PASS",
+                                                                       "months":  1,
+                                                                       "final_state":  {
+                                                                                           "teams":  55,
+                                                                                           "established":  1,
+                                                                                           "pop":  370,
+                                                                                           "factions":  8
+                                                                                       },
+                                                                       "ticks":  7200,
+                                                                       "non_perturbation":  "PASS（instrumented vs WarringHarness clean final MATCH）",
+                                                                       "note":  "members 已走 unified src（非 pre-gate）；無 arbiter_latch 爆增；determinism 硬證"
+                                                                   }
+                                      },
+                             "timestamp":  "2026-07-09",
+                             "spec_guards":  {
+                                                 "guard_survival_vs_merge":  {
+                                                                                 "status":  "PASS",
+                                                                                 "requirement":  "survival 壓過整併（survival-sticky）",
+                                                                                 "threat_survival_responses":  178,
+                                                                                 "note":  "危隊（food\u003cDESPERATION/threat）選 survival 非 merge；survival priority gate 保真",
+                                                                                 "survival_selections":  132
+                                                                             },
+                                                 "guard_merge_count":  {
+                                                                           "status":  "PASS",
+                                                                           "requirement":  "\u003e 0（小隊併大隊+戰前向 leader 集結）",
+                                                                           "merge_count":  14,
+                                                                           "note":  "整併仍觸發；機制通"
+                                                                       }
+                                             },
+                             "branch":  "feat/machine-A2c1",
+                             "measurement_summary":  {
+                                                         "calibration":  "consolidate_drive (2.0) 未完全收斂→ warring 微觀分岔→ total_diffs=16",
+                                                         "mechanics":  "merge 機制活；survival sticky 保真；arbiter 結構無漏",
+                                                         "verdict":  "實作通、機制通、守衛通；但硬線 total_diffs=0 未達成 → 需 CONSOLIDATE_DRIVE 回調",
+                                                         "architecture":  "整併折入引擎 option-fold OK；成員走 unified 決策通；pre-gate 拆除通",
+                                                         "next_step":  "① 系統回 D2 調 CONSOLIDATE_DRIVE（試 1.5-2.5 範圍） ② 重跑 seeded_warring_bed 至 total_diffs=0 ③ 重量回 QA"
+                                                     },
+                             "status":  "INCOMPLETE - calibration not converged",
+                             "measurer_role":  "量測員只產數字，非判決（QA判決）"
+                         }
+}

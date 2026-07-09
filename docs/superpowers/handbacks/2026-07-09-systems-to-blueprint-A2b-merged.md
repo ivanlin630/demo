@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2b merged @ d213893（憲法閘+framework 回歸綠）
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 現狀交接給01——process docs全改+memory單寫者=你,接手工作流本體+待決
 ---
 

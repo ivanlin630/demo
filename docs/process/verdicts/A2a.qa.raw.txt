@@ -1,0 +1,15 @@
+model=haiku ok=True effect_ok=True retried=False cost=0.26624270000000005 dur=181.04537963867188
+--- result ---
+DONE. 判決檔 `docs/process/verdicts/A2a.qa.json` 已寫。
+
+**判決**：🔴 **ISSUES**
+
+**核心**：
+- ✅ Code integrity PASS（憲法/健全/13斷言全綠）
+- ✅ Spec 改動完整（子隊決策遷引擎、量測防灌到位、baseline 更新、舊手 argmax 刪除）
+- 🔴 **Perf 迴歸**（hand_obeys_brain_bed + team_trace 都 360s 超時）
+- ❌ **不可交付**（無法測 obey_pct/determinism/anti-regression 等後續指標）
+
+**原因**：模擬器本身減速/卡住，可能 subteam gather O(N²) 未攤平或隱藏死迴路。需系統診斷效能。
+--- raw head ---
+{"type":"result","subtype":"success","is_error":false,"api_error_status":null,"duration_ms":178238,"duration_api_ms":174346,"ttft_ms":5081,"ttft_stream_ms":1847,"time_to_request_ms":325,"num_turns":28,"result":"DONE. 判決檔 `docs/process/verdicts/A2a.qa.json` 已寫。\n\n**判決**：🔴 **ISSUES**\n\n**核心**：\n- ✅ Code integrity PASS（憲法/健全/13斷言全綠）\n- ✅ Spec 改動完整（子隊決策遷引擎、量測防灌到位、baseline 更新、舊手 argmax 刪除）\n- 🔴 **Perf 迴歸**（hand_obeys_brain_bed + team_trace 都 360s 超時）\n- ❌ **不可交付**（無法測 obey_pct/determinism/anti-regression 等後續指標）\n\n**原因**：模擬器本身減速/卡住，可能 subteam gather O(N²) 未攤平或隱藏死迴路。需系統診斷效能。","stop_reason":"end_turn","session_id":"867b8aa2-93e7-4f6d-a174-61f02edb99ff","total_cost_usd":0.26624270000000005,"usage":{"input_tokens":170,"cache_creation_input_tokens":51514,"cache_read_input_tokens":1123397,"output_tokens":10141,"server_tool_use":{"web_search_requests":0,"web_fetch_requests":0},"service_tier":"standard","cache_creation":{"ephemeral_1h_input_tokens":51514,"ephemeral_5m_input_tokens":0},"inference_geo":"not_available","iterations":[{"input_tokens":8,"output_tokens":355,"cache_read_input_tokens":72073,"cache_creation_input_tokens":697,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":697},"type":"message"}],"speed":"standard"},"modelUsage":{"claude-haiku-4-5-20251001":{"inputTokens":170,"outputTokens":10141,"cacheReadInputTokens":1123397,"cacheCreationInputTokens":51514,"webSearchRequests":0,"costUSD":0.26624270000000005,"contextWindow":200000,"maxOutputTokens":32

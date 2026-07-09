@@ -165,6 +165,16 @@
 
 **接線脊椎（post-arc，待排）**：①感知改讀 belief（訊息真融進決策；信念層 team_intel 已建，缺決策消費它 + 補戰力估計欄位）②記憶腳接進引擎（經驗→claim→決策自然讀，零新學習系統，承「經驗=自己的 claim」）③情緒腳續接。三者=同一條「決策模型完成」，非各修各的。第一步＝掃清「哪些 finder/ctx 讀別隊真值」清單。
 
+**★感知腳＝征服可達性的唯一真閘（2026-07-06 measure 收斂）**：多 seed 揭征服 winner_prosperity=0 全 seed。曾疑兩閘（感知 + combat 結算），但 dogfood 診斷證 **combat 結算閘=量測假象**（`combat_decisive`/`win_absorbed` 只計全殲支，實戰走 retreat→`_try_subjugate` 捕獲、探針沒量那條；征服其實悄悄發生 capture.total 1-11）。
+
+**★再翻案（2026-07-06 戰力欄實作 measure）**：戰力欄 fog-fallback 修對了（埋死常數 `armed_est=pop_est`→人格化 helper，合三個家），**但不解鎖征服**——兩因：①`winner_prosperity` **也是量測假象**（征服隊選攻擊時引擎在 faction_ai:1485 return，沒跑到 :1506 計數器；與 combat_decisive 同款）②弱點公式 `1−對方武裝/我自己武裝` **相對攻擊者自身武裝**——早期隊自己武裝弱→看誰都不夠弱→不攻擊。**∴ 征服真閘＝攻擊者武裝化（militarization），且這是正確設計（武裝完成才想征服，征服本來就晚）。** fog-fallback＝latent-correct 衛生修（攻擊者武裝夠才生效）。**征服儀表壞了（winner_prosperity+combat_decisive 皆假象）＝一直在鬼影上診斷**；建 per-cohort 活動/武裝化時序觀測（`militarization_arc_bed.gd`，誠實漏斗 want→committed→executing→capture）。gen readiness／food＝駁倒。
+
+**★三閘定論（2026-07-06，3 seed×8 月 arc bed）**：儀表跑出征服卡在**三個上游閘**（漏斗每 seed 都塌在「want」；隊任何 seed 都不武裝，self_armed 平 ~0.20 無人選訓練）：
+1. **dispatch veto**（`_commit_conquest_attack` 後的 continue-override）：引擎排攻擊#1 但驗證攻擊 scaffolding 未 dispatch 時，舊碼 continue 掉去用低選項（建設）替代＝dispatch 層推翻秤#1。**已溶解 merged**（continue→return，保子隊閘+scout scaffolding；`_is_prosperity_candidate` 實為子隊閘非 readiness veto，讀 code 更正）。憲法 prerequisite，但**當前經濟下 dormant**（隊太餓→攻擊從不排#1→分支不 fire）。→ ①了結。
+2. **世界苦→意圖餓死**：die-off seed（pop 腰斬、forage+flee 主導）野心 2 月塌成求生。＝世界 harshness param（孿生條），defer。
+3. **★意圖不點火（主閘）**：**seed 7＝健康繁榮世界照樣零征服意圖**。樣本驗證：seed 7 **確有 2 真霸主**（T23 野心0.92好戰1.0、T40 野心0.87，archetype=武力）但被閘住 → ③是真閘非抽樣。**機制＝死鎖**：想征服←需看見弱獵物←需武裝←需選訓練←`ambient_train_drive`平頭0.5太弱沒人選；且 `_intent_scores` viability 層在「無可見獵物」時把霸主 intent 降級成致富→去貿易→永不武裝→死鎖。
+   **裁定（2026-07-06，破鎖）**：**霸主野心直接驅動 proactive 建軍**（不等可見目標；真軍閥先建軍再找目標）。`ambient_train_drive` 隨野心/好戰調製（照妖鏡：平頭常數→人格化），**狂者強到刪民生擴軍**（train util 壓過產/建）。湧現迴路：過度軍事化→餓自己民→饑民流串（串起③②）。「無可見目標」的反應該是「備戰+派斥候找目標」非「降級致富」。
+
 ## ★ 孿生條：引擎=通用機制，好戲活在 seed／參數（不把 scenario／平衡寫進引擎，定 2026-07-05）
 
 憲法禁「替 NPC 寫行為」；**孿生條禁「把 scenario／平衡寫進引擎」**。同一條線的另一半。
@@ -177,6 +187,21 @@
 3. **believability 尺留在 QA／param 側，不越線變硬限制**：世界感覺不對 → 解法是**改 seed／param 或補缺的世界機制**，**永不是**硬塞行為規則（例：反龜縮的正解＝給忙碌者「感知威脅」的能力，非「逼 NPC 打」）。藍圖的尺判參數選得好不好，不改引擎。
 
 **判準**：你在寫「**任何世界都成立的機制**」還是「**這個 scenario 該長怎樣**」？前者進引擎，後者進 seed／param。動盪不安靠 seed＋環境＋未開維度（正統／繼承／叛亂／天災）製造，不靠在引擎壓某個率。
+
+### ★ 三個家：常數的終局歸宿（定 2026-07-06）
+
+> 願景：**沒有一個埋死的全域常數偷偷替 NPC 做決定。** 但這**不等於「零數字」**——目標是每個數字都有正確的家，共三個：
+
+| 家 | 是什麼 | 例 | 終局形態 |
+|---|---|---|---|
+| **NPC 判斷輸入** | 人格／記憶／現況 | 好戰、慎重、這隊是仇人、我剩幾天糧 | **決策側零全域常數**——全溶進個體判斷 |
+| **個體物理屬性** | per-NPC 身體／能力 | 代謝、體力、tier、技能 | per-entity 屬性（非全域、非判斷） |
+| **世界／seed 參數** | 作者寫的舞台規則（暴露非埋死） | 糧耗率、戰鬥致死率、hex 距離 | 暴露成 seed／env param（孿生條） |
+
+**關鍵分辨**：「他餓了要不要逃／搶／投降」＝**判斷**（進第一家，溶進人格/現況/記憶）；「他一天需要多少糧」＝**物理**（進第二/三家，NPC 不 judge 它）。**硬把物理塞進判斷 = 破憲法另一半（作者寫世界）＝沒有舞台，NPC 在虛空裡判斷。**
+
+- 這是**雙憲法合起來的極限**：沙盒憲法推到底＝決策側零常數（全 NPC 判斷）；孿生條接手剩下（世界物理→參數/屬性，非判斷）。
+- **照妖鏡 backlog（決策側該溶的行為常數）**：`PREEMPT_MARGIN=2.0`、combat 潰退門檻 `0.2`（該士氣/人格化＝勇者血戰怯者先逃）、readiness 門檻、feud/scarcity 門檻…＝全歸「決策模型接線」線逐一人格化。**戰鬥物理（回合/傷亡/retreat→capture）＝世界側，留參數不動。**
 
 ## AI 深度：逐步逼近完整，節流閥非上限
 
