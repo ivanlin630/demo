@@ -9,6 +9,10 @@ const MORALE_CASCADE_THRESHOLD: float = 0.3
 const ABANDON_THRESHOLD_BASE: float  = 0.2    # 均值（保 aggregate 潰退傾向）
 const ABANDON_COURAGE_SPREAD: float  = 0.16   # TEST VALUE：膽量調幅（勇 0.12→怯 0.28）
 const ROUND_READINESS_DRAIN: float    = 0.08
+# 敗北出路前置（blueprint 願景：潰散/逃=劣勢小隊常態,殲滅稀）。絕境逃決策膽量秤,殲滅線前 fire。
+const MORTAL_EFF_POP: int             = 3     # TEST VALUE：eff pop ≤此才進絕境逃判（大隊不受影響=保長 combat 三端）
+const MORTAL_FLEE_BASE: float         = 0.5   # TEST VALUE：絕境逃門檻基（怯者 flee_thr≈0.5 早逃）
+const MORTAL_COURAGE_SPREAD: float    = 0.6   # TEST VALUE：勇者 flee_thr→1.1 血戰（壓力更大才逃）
 const LOOT_RATE: float                = 0.3
 const LOSER_CASUALTY_RATE: float      = 0.2   # TEST VALUE：敗方 pop 損耗比例（複用 force_occupy 量級）
 const ARMED_RATIO_FLOOR: float        = 0.1   # TEST VALUE：最低參戰比，堵 0 武裝免疫（同 encounter）
@@ -120,6 +124,46 @@ func team_strength(state: WorldState, team_id: int) -> float:
 			base += _strength_raw(state, tid)
 	return base
 
+# 敗北出路：有效戰力（複用 team_strength × readiness，棄 terrain 不對稱=兩方一致）。
+func _eff_strength(state: WorldState, team: TeamData) -> float:
+	return team_strength(state, team.team_id) * team.readiness
+
+# 絕境逃決策（膽量秤，殲滅線前）。回 true=已潰散前置（caller return）。
+# eff pop ≤MORTAL_EFF_POP 才進判；mortal_pressure=劣勢+瀕滅程度；flee_thr 隨膽量（勇高=血戰、怯低=早逃）。
+func _mortal_flee_check(state: WorldState, id_self: int, id_enemy: int) -> bool:
+	var s: TeamData = state.teams[id_self]
+	var e: TeamData = state.teams[id_enemy]
+	var eff: int = maxi(s.population - s.wounded, 0)
+	if eff > MORTAL_EFF_POP:
+		return false   # 還沒到絕境（大隊/健康）→ 續戰，走既有 readiness-abandon/殲滅三端
+	var str_ratio: float = _eff_strength(state, s) / maxf(_eff_strength(state, e), 0.01)
+	var mortal_pressure: float = clampf((1.0 - str_ratio) + float(MORTAL_EFF_POP - eff) * 0.3, 0.0, 1.5)
+	var flee_thr: float = MORTAL_FLEE_BASE + _courage_of(state, s) * MORTAL_COURAGE_SPREAD
+	if mortal_pressure >= flee_thr:
+		if Probe.enabled:
+			# 分開標籤（drain 前 readiness，別混 readiness_abandon 池）
+			Probe.add_amount("mortal_flee.readiness_sum", s.readiness)
+			Probe.bump("mortal_flee.n")
+			# 照妖鏡#1 啟動證：絕境逃 courage 桶（怯者早逃桶多、勇者血戰桶少）
+			var c: float = _courage_of(state, s)
+			Probe.bump("mortal_flee.n_" + ("high" if c > 0.66 else ("low" if c < 0.34 else "mid")))
+			_probe_combat_end(state, id_enemy, id_self, "mortal_flee")
+		_force_retreat(state, id_self, id_enemy)   # 走既有潰散端（逃脫+loot+俘殘部）
+		return true
+	return false
+
+# 殲滅時 str_ratio 分布（證殲滅集中「勢均消耗」≈1，非「絕望硬撐」）。
+func _probe_str_ratio_annih(state: WorldState, id_loser: int, id_winner: int) -> void:
+	if not Probe.enabled: return
+	var lo: TeamData = state.teams.get(id_loser)
+	var wi: TeamData = state.teams.get(id_winner)
+	if lo == null or wi == null: return
+	Probe.add_amount("combat.str_ratio_annih_sum", _eff_strength(state, lo) / maxf(_eff_strength(state, wi), 0.01))
+	Probe.bump("combat.str_ratio_annih_n")
+	# 殲滅端 loser courage 桶（勇者血戰→殲滅該多、怯者少=膽量真秤，與 mortal_flee 桶互補）
+	var c: float = _courage_of(state, lo)
+	Probe.bump("annih.n_" + ("high" if c > 0.66 else ("low" if c < 0.34 else "mid")))
+
 func calc_armed(state: WorldState, team: TeamData) -> int:
 	var named_armed: int = 0
 	for pid in ([team.leader_id] as Array) + team.named_members:
@@ -187,6 +231,18 @@ func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 	_apply_casualties(state, id_a, loss_a)
 	_apply_casualties(state, id_b, loss_b)
 
+	# characterization：round 計數上移（casualty 後即計，供 mortal_flee/殲滅/rout 各端 round 一致）
+	if Probe.enabled:
+		if _combat_track.has(id_a): _combat_track[id_a]["round"] += 1
+		if _combat_track.has(id_b): _combat_track[id_b]["round"] += 1
+
+	# 絕境逃決策（憲法版：逃 vs 血戰=引擎膽量秤，優先於機械殲滅線）。casualty 後、drain 前、殲滅檢查前，
+	# 雙方各查（a→return 再 b，鏡射殲滅序）。勇者 last-stand、怯者絕境早逃 → 殲滅稀。
+	if _mortal_flee_check(state, id_a, id_b):
+		return
+	if _mortal_flee_check(state, id_b, id_a):
+		return
+
 	var wnd_ratio_a: float = float(a.wounded) / float(maxi(a.population, 1))
 	var wnd_ratio_b: float = float(b.wounded) / float(maxi(b.population, 1))
 	var drain_a: float = ROUND_READINESS_DRAIN * (2.0 if wnd_ratio_a > MORALE_CASCADE_THRESHOLD else 1.0)
@@ -198,15 +254,13 @@ func _resolve_combat_round(state: WorldState, id_a: int, id_b: int) -> void:
 		id_a, a.readiness, terrain_a, id_b, b.readiness, terrain_b, loss_a, loss_b,
 		maxi(a.population - a.wounded, 1), maxi(b.population - b.wounded, 1)])
 
-	# characterization：round 計數（每 _resolve_combat_round = 1 round，a/b 同步）
-	if Probe.enabled:
-		if _combat_track.has(id_a): _combat_track[id_a]["round"] += 1
-		if _combat_track.has(id_b): _combat_track[id_b]["round"] += 1
 	if maxi(a.population - a.wounded, 1) <= 1:
+		_probe_str_ratio_annih(state, id_a, id_b)
 		_probe_combat_end(state, id_b, id_a, "annihilation")
 		_end_combat(state, id_b, id_a)
 		return
 	if maxi(b.population - b.wounded, 1) <= 1:
+		_probe_str_ratio_annih(state, id_b, id_a)
 		_probe_combat_end(state, id_a, id_b, "annihilation")
 		_end_combat(state, id_a, id_b)
 		return

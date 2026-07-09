@@ -1,0 +1,112 @@
+{
+  "_meta": {
+    "months": 3,
+    "seeds": [
+      "1337",
+      "42",
+      "7"
+    ],
+    "note": "敗北出路前置 acceptance,fix vs pre-fix combat-defeat baseline"
+  },
+  "by_seed": {
+    "1337": {
+      "end_annihilation": {
+        "base": 9,
+        "fix": 7
+      },
+      "end_mortal_flee": {
+        "base": 0,
+        "fix": 3
+      },
+      "end_rout": {
+        "base": 0,
+        "fix": 0
+      },
+      "capture_total": {
+        "base": 0,
+        "fix": 0
+      },
+      "ended_n": {
+        "base": 9,
+        "fix": 10
+      },
+      "mortal_flee_bucket": [
+        2,
+        1,
+        0
+      ],
+      "annih_bucket": [
+        0,
+        6,
+        1
+      ],
+      "str_ratio_annih_mean": 6.52
+    },
+    "42": {
+      "end_annihilation": {
+        "base": 7,
+        "fix": 7
+      },
+      "end_mortal_flee": {
+        "base": 0,
+        "fix": 0
+      },
+      "end_rout": {
+        "base": 1,
+        "fix": 1
+      },
+      "capture_total": {
+        "base": 1,
+        "fix": 1
+      },
+      "ended_n": {
+        "base": 8,
+        "fix": 8
+      },
+      "mortal_flee_bucket": [
+        0,
+        0,
+        0
+      ],
+      "annih_bucket": [
+        0,
+        7,
+        0
+      ],
+      "str_ratio_annih_mean": 9.28
+    },
+    "7": {
+      "end_annihilation": {
+        "base": 1,
+        "fix": 1
+      },
+      "end_mortal_flee": {
+        "base": 0,
+        "fix": 0
+      },
+      "end_rout": {
+        "base": 0,
+        "fix": 0
+      },
+      "capture_total": {
+        "base": 0,
+        "fix": 0
+      },
+      "ended_n": {
+        "base": 1,
+        "fix": 1
+      },
+      "mortal_flee_bucket": [
+        0,
+        0,
+        0
+      ],
+      "annih_bucket": [
+        0,
+        1,
+        0
+      ],
+      "str_ratio_annih_mean": 6.73
+    }
+  }
+}

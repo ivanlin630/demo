@@ -48,6 +48,10 @@ const PROBE_KEYS: Array = [
 	# combat-defeat characterization：結束原因分布 + race（敗方 readiness 距門檻）+ 小隊
 	"combat.end_annihilation", "combat.end_rout", "combat.end_retreat", "combat.ended_n",
 	"combat.end_readiness_above_thr", "combat.pop_start_le3",
+	# 敗北出路前置：絕境逃（膽量秤，殲滅線前）分開標籤 + str_ratio 樣本數 + courage 桶（照妖鏡#1 啟動證）
+	"combat.end_mortal_flee", "mortal_flee.n", "combat.str_ratio_annih_n",
+	"mortal_flee.n_high", "mortal_flee.n_mid", "mortal_flee.n_low",
+	"annih.n_high", "annih.n_mid", "annih.n_low",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。
@@ -143,7 +147,8 @@ static func _probe_subset() -> Dictionary:
 
 # 浮點累計 subset（照妖鏡#1：courage 桶 readiness-at-retreat 總和 → 均值=sum/n_bucket）
 const AMOUNT_KEYS: Array = ["rout.ready_sum_high", "rout.ready_sum_mid", "rout.ready_sum_low",
-	"combat.rounds_sum", "combat.pop_start_sum", "combat.loser_readiness_end_sum", "combat.loser_wnd_end_sum"]
+	"combat.rounds_sum", "combat.pop_start_sum", "combat.loser_readiness_end_sum", "combat.loser_wnd_end_sum",
+	"mortal_flee.readiness_sum", "combat.str_ratio_annih_sum"]
 static func _probe_amounts_subset() -> Dictionary:
 	var d: Dictionary = {}
 	for k in AMOUNT_KEYS:
