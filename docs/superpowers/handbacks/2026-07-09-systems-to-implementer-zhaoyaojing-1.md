@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 實作 照妖鏡#1（潰退門檻→膽量）——spec 鎖(blueprint sign-off+reviewer CLEAN)
 ---
 
