@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: A2c-2 D1 merge-gate + byte-identical 覆核（候選 C FA6 折入）——綠即 merge
 ---
 
