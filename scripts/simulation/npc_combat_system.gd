@@ -13,6 +13,7 @@ const ROUND_READINESS_DRAIN: float    = 0.08
 const MORTAL_EFF_POP: int             = 3     # TEST VALUE：eff pop ≤此才進絕境逃判（大隊不受影響=保長 combat 三端）
 const MORTAL_FLEE_BASE: float         = 0.5   # TEST VALUE：絕境逃門檻基（怯者 flee_thr≈0.5 早逃）
 const MORTAL_COURAGE_SPREAD: float    = 0.6   # TEST VALUE：勇者 flee_thr→1.1 血戰（壓力更大才逃）
+const MORTAL_OUTNUMBER_W: float       = 0.5   # TEST VALUE：數量劣勢加碼權重（rev2 pop-based）
 const LOOT_RATE: float                = 0.3
 const LOSER_CASUALTY_RATE: float      = 0.2   # TEST VALUE：敗方 pop 損耗比例（複用 force_occupy 量級）
 const ARMED_RATIO_FLOOR: float        = 0.1   # TEST VALUE：最低參戰比，堵 0 武裝免疫（同 encounter）
@@ -128,6 +129,11 @@ func team_strength(state: WorldState, team_id: int) -> float:
 func _eff_strength(state: WorldState, team: TeamData) -> float:
 	return team_strength(state, team.team_id) * team.readiness
 
+# pop 瀕滅度（rev2）：eff pop 越近殲滅線越高（eff=1→1.0/2→0.67/3→0.33/>3→0）。
+static func _pop_criticality(team: TeamData) -> float:
+	var eff: int = maxi(team.population - team.wounded, 0)
+	return clampf(float(MORTAL_EFF_POP + 1 - eff) / float(MORTAL_EFF_POP), 0.0, 1.0)
+
 # 絕境逃決策（膽量秤，殲滅線前）。回 true=已潰散前置（caller return）。
 # eff pop ≤MORTAL_EFF_POP 才進判；mortal_pressure=劣勢+瀕滅程度；flee_thr 隨膽量（勇高=血戰、怯低=早逃）。
 func _mortal_flee_check(state: WorldState, id_self: int, id_enemy: int) -> bool:
@@ -136,8 +142,13 @@ func _mortal_flee_check(state: WorldState, id_self: int, id_enemy: int) -> bool:
 	var eff: int = maxi(s.population - s.wounded, 0)
 	if eff > MORTAL_EFF_POP:
 		return false   # 還沒到絕境（大隊/健康）→ 續戰，走既有 readiness-abandon/殲滅三端
-	var str_ratio: float = _eff_strength(state, s) / maxf(_eff_strength(state, e), 0.01)
-	var mortal_pressure: float = clampf((1.0 - str_ratio) + float(MORTAL_EFF_POP - eff) * 0.3, 0.0, 1.5)
+	# rev2 pop-based（棄 str_ratio 反噬=pop-blind）：瀕滅度為主 + 數量劣勢加碼。
+	# criticality：eff 越近殲滅線壓力越大（eff=1→1.0/2→0.67/3→0.33）。
+	var criticality: float = _pop_criticality(s)
+	# outnumber：被以多打少更該逃（敵/我 eff 比 -1，clamp）。
+	var eff_enemy: int = maxi(e.population - e.wounded, 1)
+	var outnumber: float = clampf(float(eff_enemy) / float(maxi(eff, 1)) - 1.0, 0.0, 1.0)
+	var mortal_pressure: float = clampf(criticality + outnumber * MORTAL_OUTNUMBER_W, 0.0, 1.5)
 	var flee_thr: float = MORTAL_FLEE_BASE + _courage_of(state, s) * MORTAL_COURAGE_SPREAD
 	if mortal_pressure >= flee_thr:
 		if Probe.enabled:
@@ -160,6 +171,10 @@ func _probe_str_ratio_annih(state: WorldState, id_loser: int, id_winner: int) ->
 	if lo == null or wi == null: return
 	Probe.add_amount("combat.str_ratio_annih_sum", _eff_strength(state, lo) / maxf(_eff_strength(state, wi), 0.01))
 	Probe.bump("combat.str_ratio_annih_n")
+	# rev2：殲滅時 pop 比（敵/我 eff，證殲滅集中眾寡均等 ≈1 非「以多打少沒逃成」）
+	var lo_eff: int = maxi(lo.population - lo.wounded, 1)
+	var wi_eff: int = maxi(wi.population - wi.wounded, 1)
+	Probe.add_amount("combat.pop_ratio_annih_sum", float(wi_eff) / float(lo_eff))
 	# 殲滅端 loser courage 桶（勇者血戰→殲滅該多、怯者少=膽量真秤，與 mortal_flee 桶互補）
 	var c: float = _courage_of(state, lo)
 	Probe.bump("annih.n_" + ("high" if c > 0.66 else ("low" if c < 0.34 else "mid")))

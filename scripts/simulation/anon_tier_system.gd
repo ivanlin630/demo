@@ -254,8 +254,13 @@ static func capture_routed_as_captive(state: WorldState, winner: TeamData, retre
 	var healthy_total: int = AnonCohort.by_health(retreater.anon_cohorts, "healthy")
 	if wounded_total <= 0 and healthy_total <= 0:
 		return 0
-	# 潰逃嚴重度 → 俘虜比例（確定性）
-	var rate: float = clampf((1.0 - retreater.readiness) * CAPTURE_GUARD_FACTOR, 0.0, CAPTURE_RATE_MAX)
+	# 潰逃嚴重度 → 俘虜比例（確定性）。rev2：severity 納 pop-criticality——pop-flee 在 drain 前觸發、
+	# readiness 還高(~0.8)→僅 (1-readiness) 俘率偏低；「潰逃慘」本含「差點被團滅」→ 取 max（加性安全：
+	# readiness-abandon 路 readiness 已低不變、pop-flee 路 criticality 高則俘升）。
+	var _eff: int = maxi(retreater.population - retreater.wounded, 0)
+	var _pop_crit: float = clampf(float(NpcCombatSystem.MORTAL_EFF_POP + 1 - _eff) / float(NpcCombatSystem.MORTAL_EFF_POP), 0.0, 1.0)
+	var severity: float = maxf(1.0 - retreater.readiness, _pop_crit)
+	var rate: float = clampf(severity * CAPTURE_GUARD_FACTOR, 0.0, CAPTURE_RATE_MAX)
 	if rate <= 0.0:
 		return 0
 	# guard 餘力 cap（守衛容量；滿則俘不下）

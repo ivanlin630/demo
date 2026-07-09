@@ -52,6 +52,8 @@ const PROBE_KEYS: Array = [
 	"combat.end_mortal_flee", "mortal_flee.n", "combat.str_ratio_annih_n",
 	"mortal_flee.n_high", "mortal_flee.n_mid", "mortal_flee.n_low",
 	"annih.n_high", "annih.n_mid", "annih.n_low",
+	# 潰逃俘虜（真俘虜端信號，capture.total 不含此路）：控地俘殘部 vs 沒俘
+	"conq.combat_retreat", "conq.retreat_captured", "conq.retreat_no_capture",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。
@@ -148,7 +150,7 @@ static func _probe_subset() -> Dictionary:
 # 浮點累計 subset（照妖鏡#1：courage 桶 readiness-at-retreat 總和 → 均值=sum/n_bucket）
 const AMOUNT_KEYS: Array = ["rout.ready_sum_high", "rout.ready_sum_mid", "rout.ready_sum_low",
 	"combat.rounds_sum", "combat.pop_start_sum", "combat.loser_readiness_end_sum", "combat.loser_wnd_end_sum",
-	"mortal_flee.readiness_sum", "combat.str_ratio_annih_sum"]
+	"mortal_flee.readiness_sum", "combat.str_ratio_annih_sum", "combat.pop_ratio_annih_sum"]
 static func _probe_amounts_subset() -> Dictionary:
 	var d: Dictionary = {}
 	for k in AMOUNT_KEYS:
