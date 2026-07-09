@@ -1484,7 +1484,6 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
-		team.current_option = opt   # 承諾追蹤實際派出
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
 		elif opt == "佔村": Probe.bump("occupy.dispatch")
@@ -1494,6 +1493,12 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		# A2c-1 (b-lite)：承諾追蹤「實際派出」（符本行原意）——只有 try_set 成功才記 current_option。
+		# 修 pre-existing bug：rank winner try_set 失敗（arbiter 擋，隊仍做原 task）仍寫 commitment=phantom。
+		# FA5 高 util 整併 option 首個踩到（busy-attacking merge-applicable 隊 merge 贏 rank 但擋不進→
+		# 舊寫 current_option="整併" 干擾攻擊承諾）。gate on _set_ok → 承諾=實際在做的事。
+		if _set_ok:
+			team.current_option = opt
 		# 漏斗站4探針（純觀測）：unified 路徑 TRADE 實派計數（分 opt）。
 		# timeout 起算已改讀 try_set 蓋章的 task_start_tick（單源），此路不需另外蓋章。
 		if _set_ok and td["task"] == TeamData.TASK_TRADE:

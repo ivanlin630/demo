@@ -25,7 +25,7 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 # 「除 survival-sticky 外恆 fire」保真。survival-sticky 由 TaskArbiter priority-gate 保（非 rank_scored 內
 # 競秤）：獨立 _trigger_survival 設 PRIO_SURVIVAL(80) task → 整併走 _decide_unified PRIO_DISPATCH(50)
 # 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
-const CONSOLIDATE_DRIVE: float = 2.0    # TEST VALUE — warring-bed total_diffs=0 校準
+const CONSOLIDATE_DRIVE: float = 2.0    # TEST VALUE — 整併競秤量級（>mundane，survival 仍 PRIO 保）。folded=引擎一致 baseline，征服密度為引擎內可調旋鈕（平衡 pass/A2d）。
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
