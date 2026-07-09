@@ -27,6 +27,8 @@ const PROBE_KEYS: Array = [
 	"conq.intent", "conq.prosperity_reached",
 	"p1.assimilate", "p1.revolt", "p1.flee",
 	"beg.dispatch", "beg.resolve", "join.dispatch", "join.resolve",
+	# A2c-1 full_probe：求生整併(consolidation)維度——merge 實派 + merge-applicable 隊 option 去向(該併卻選別的)
+	"merge.consolidate_dispatch", "merge_appl.total", "merge_appl.chose_整併", "merge_appl.chose_other",
 	# R1 驗收（三帶+logistics）：絕境仍搏 / ③管住獨立隊攻屬村 / 貿易量（guard ④）
 	"surv.loot_dispatch", "conq.indep_atk_believed_owned", "g1.arb_hit",
 	# 征服 winner funnel（引擎實選：loot vs 攻擊=直接看階梯；bump 點多已存在 code，此擴收）

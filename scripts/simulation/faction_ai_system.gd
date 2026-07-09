@@ -1491,6 +1491,13 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# 序6 probe 遷移：成員征服攻擊實派 + 徵收實派（舊 hand-cascade 探針已刪 → 引擎路重掛，供驗魂）。
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
+		# full_probe（診斷）：fold 路 merge 實派 + merge-applicable 隊 option 去向（B 鐵證：該併卻選別的）。
+		if opt == "整併": Probe.bump("merge.consolidate_dispatch")
+		if Probe.enabled and team.faction_id != -1 and team.parent_team_id == -1:
+			var _fc2 = state.factions.get(team.faction_id)
+			if _fc2 != null and team.team_id != _fc2.leader_team_id and consolidate_target_of(state, team, _fc2) != -1:
+				Probe.bump("merge_appl.total")
+				Probe.bump("merge_appl.chose_整併" if opt == "整併" else "merge_appl.chose_other")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
