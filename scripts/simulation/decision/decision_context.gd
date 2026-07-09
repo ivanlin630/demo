@@ -93,6 +93,9 @@ var prosperity_prey_id: int = -1
 # A2a 子隊旗（一旗兩用）：parent_team_id != -1 → ①服從母團(歸建 duty option) ②不自主發起戰略 option(戰略-gate)。
 # 非子隊 is_subteam=false → 歸建 option/戰略-gate 對其無效（零成員/solo 行為變）。
 var is_subteam: bool = false
+# A2c-1（FA5 折入）：整併 target（容量吸收優先，否則戰前向 leader 集結）。非-leader faction 成員
+# + 非子隊才算（鏡射 _try_consolidate_merge 兩支，保真）。-1 = 無整併 target。
+var consolidate_target_id: int = -1
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -255,6 +258,12 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			c.intent_target = c.prosperity_prey_id
 			c.intent_target_pos = state.teams[c.prosperity_prey_id].tile_pos
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.readiness_prey", _tg)
+	# A2c-1（FA5）：整併 target（非-leader faction 成員 + 非子隊才算）。
+	c.consolidate_target_id = -1
+	if team.faction_id != -1 and team.parent_team_id == -1:
+		var _f = state.factions.get(team.faction_id)
+		if _f != null and team.team_id != _f.leader_team_id:
+			c.consolidate_target_id = FactionAISystem.consolidate_target_of(state, team, _f)
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。

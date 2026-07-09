@@ -8,10 +8,9 @@
 # ctx.team_panic→threat_pressure→引擎 survival option FLEE）；個體反應 apply=state-effect consequence
 # scaffolding（無 try_set 不在閘內，全保留）。reaction_system 現零 TaskArbiter 呼叫面。
 # 序6 dispatch：_assign_member_tasks goal→task if/elif cascade 溶解（指紋 removed=arc 進度，
-# 成員走引擎 _decide_unified）；_try_consolidate_merge = 保留的 faction 整併 scaffolding
-# （小隊併大隊=faction-level 機制非個體 utility 決策，故不入引擎 option，鏡射 _commit_conquest_attack
-#  /_evaluate_threat 保留法）。
-scripts/simulation/faction_ai_system.gd::_try_consolidate_merge
+# 成員走引擎 _decide_unified）。
+# ★A2c-1：_try_consolidate_merge 兩 try_set 指紋移除（consolidate pre-gate 拆除，
+# 整併現全經 _decide_unified→to_task「整併」option 引擎 dispatch，落點見 _decide_unified 既有指紋）。
 # A2b: leader 戰術→_decide_unified（引擎競秤）；_assign_tasks 本體只留 player_cmd(PRIO_PLAYER)+立國 lifecycle-gate（tactical cascade 已拆，note_bypass 移除）
 scripts/simulation/faction_ai_system.gd::_assign_tasks
 scripts/simulation/faction_ai_system.gd::_decide_unified
