@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: 實作 敗北出路前置（絕境逃決策膽量秤）——spec 鎖(blueprint sign-off+reviewer CLEAN)
 ---
 

@@ -12,7 +12,31 @@
 `_resolve_combat_round` 每 round 序：①`maxi(pop-wounded,1)≤1`→殲滅(FIRST) ②`readiness≤_abandon_threshold`→`_force_retreat`(潰散) ③`_try_retreat`(FLEE 機率)。**病=① pre-empt ②**：小隊 eff pop 1~2、readiness 從沒 drain 到門檻(~10 round 需求 vs 1~2 round 殲滅)→ 潰散端 `_force_retreat`（已完整：逃脫+loot+俘殘部）**永不觸**。
 
 ## 設計（seam 系統定）
-### D1. 絕境逃決策前置（膽量秤，殲滅線前 fire）
+### ★D1 rev2（str_ratio 反噬修，2026-07-09 acceptance under-fire 後）
+**v1 under-fire 釘死**：`mortal_pressure` 的 `(1-str_ratio)` 項用 `_eff_strength=team_strength×readiness` **pop-blind**——被殲滅小隊 str_ratio 實測 mean 6.5~9.3(»1)（team_strength 反映 leader 技能/裝備、不隨 pop 縮 → 1 個技能兵「看起來強」卻死於人數）→ `(1-str_ratio)` 對小隊變負→壓抑 pressure→不逃（annih 17→15 微降、mortal_flee 僅 3、capture 平）。**str_ratio 是錯信號（pop-blind）**。
+
+**rev2 = pop-based 瀕滅度為主**（棄 str_ratio）：
+```gdscript
+func _mortal_flee_check(state, id_self, id_enemy) -> bool:
+    var s = state.teams[id_self]; var e = state.teams[id_enemy]
+    var eff = maxi(s.population - s.wounded, 0)
+    if eff > MORTAL_EFF_POP: return false
+    # 瀕滅度(pop-based,主)：eff 越近殲滅線壓力越大。eff=1→1.0/2→0.67/3→0.33。
+    var criticality = clampf(float(MORTAL_EFF_POP + 1 - eff) / float(MORTAL_EFF_POP), 0.0, 1.0)
+    # 數量劣勢(pop-based,加碼)：被以多打少更該逃。
+    var eff_enemy = maxi(e.population - e.wounded, 1)
+    var outnumber = clampf(float(eff_enemy) / float(maxi(eff, 1)) - 1.0, 0.0, 1.0)
+    var mortal_pressure = clampf(criticality + outnumber * MORTAL_OUTNUMBER_W, 0.0, 1.5)
+    var flee_thr = MORTAL_FLEE_BASE + _courage_of(state, s) * MORTAL_COURAGE_SPREAD
+    if mortal_pressure >= flee_thr: _force_retreat(state, id_self, id_enemy); return true
+    return false
+```
+- `MORTAL_OUTNUMBER_W: float = 0.5`（TEST VALUE）。其餘常數同 v1（EFF_POP=3/FLEE_BASE=0.5/COURAGE_SPREAD=0.6）。
+- **eff=1（瀕死）→ criticality=1.0 > 中膽 flee_thr 0.8 → 中/怯逃、勇(1.1)血戰**=殲滅稀端保留（勇者+eff=1）。眾寡對稱時 criticality 主導，不再被虛高 team_strength 壓死。
+- **capture 端查（implementer #3）**：`_force_retreat` 俘殘部實測未升——先驗 flee 真 fire 後 capture 是否隨升（capture 靠 flee 觸發）；若 flee 升 capture 仍平 → 查 `capture_routed_as_captive` 條件（另修）。
+- 新探針：`combat.pop_ratio_annih`（殲滅時敵/我 eff pop 比，證殲滅集中眾寡均等非「以多打少沒逃成」）。
+
+### D1-v1. 絕境逃決策前置（膽量秤，殲滅線前 fire）【str_ratio 版，已被 rev2 取代】
 `_resolve_combat_round` **在殲滅檢查(`:193`)前**加膽量秤絕境逃決策：
 ```gdscript
 # 絕境逃決策（憲法版：逃 vs 血戰=引擎人格秤，優先於機械殲滅線）。
