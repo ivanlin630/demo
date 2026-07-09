@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: 系統側收尾回報——observer/spawn merged + LG下游改完 + worktree 清理
 ---
 
