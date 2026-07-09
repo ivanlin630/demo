@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: A2c1 consolidate 折入引擎（FA5）— 量測完成；校準未收斂
 ---
 

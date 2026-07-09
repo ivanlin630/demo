@@ -495,6 +495,7 @@
 - **[中] UI↔Sim 常數靠註解耦合**(見 VISION_RADIUS)：靠「人記得改兩邊」。修：UI 引用 sim const。
 - **[中] `_decide_unified` phantom current_option**(faction_ai_system.gd:1487)：`team.current_option = opt` 寫在 `_set_ok = try_set`(1496) 前 → rank winner **dispatch 失敗也記承諾**（違本行註解「追蹤實際派出」原意）。busy 隊被高 util option 贏 rank 但 arbiter 擋不進時，current_option 記成沒做的事 → 下 tick COMMITMENT_BONUS 誤導。A2c-1 高 util 整併 option 首個踩到（量證對征服 immaterial，520→520，故 A2c-1 revert 未修）。修：gate on `_set_ok`（獨立 micro-slice，自己 spec+驗證）。
 - **[中] observer dump 月級不可用**(perf)：`--obs-ticker-dump` 實測 warring_states 41 隊 **<12 tick/s**，3 月(21600t) 撞 GODOT_TIMEOUT 1800s 跑不完（純 `seeded_warring_bed` 快得多）。observer per-tick overhead(render/ticker/inspect refresh) 壓垮月級敘事落檔 → **③戲感審計工具在 warring 尺度實質不可用**。修：headless 快路徑（跳 render/UI refresh，純 sim+event 落檔）。併觀測 arc 或另立。
+- **[設計限制·未來 slice] merge/join food-blind = survival-inert（2026-07-09 A2c-1 揭）**：`SubteamSystem.merge_teams` 併=pop+資產(含食物)按比例搬進 absorber，**不生食物**；`_find_absorber` 選 absorber 只看 capacity/proximity **不看糧**。∴ 餓隊併入非餘糧 absorber = 多嘴+少糧一起挪，全隊仍餓 → **併對生存零因果**。A2c-1 survival-value 實驗鐵證：逼併回 320(vs fold 154) starve 紋風不動(19)、final 世界逐位元同(36/203/46.7%)。**歸未來「絕境經濟」設計**（藍圖+用戶談中：投靠/整併找**能養的**food-aware 強者 + 饑民→掠奪→職業搶匪湧現）。非 bug=機制誠實，但機制弱。join.resolve 降(fold≤baseline)是此症狀，harmless for shipping。
 
 **前 3 優先**：① FOOD const 收斂 ② 補 TASK_* 全引用 ③ 刪 TRAINING_CAP dead + tier 字串具名化。
 

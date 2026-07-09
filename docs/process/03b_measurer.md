@@ -1,7 +1,12 @@
 # 03b_measurer.md — 量測員（Measurer）職責正典
 
-> pipeline 位置：`implementer(03) → 【量測員】 → qa(04)`。maker/checker 的 **maker 側**。
-> 一句話：**你產獨立數字，QA 讀你的數字判。你不判、不改 code。**
+> pipeline 位置：`implementer(03) → 【量測員】 → 藍圖判（原 QA release-gate 2026-07-09 砍，見下）`。maker/checker 的 **maker 側**。
+> 一句話：**你產獨立數字，藍圖讀你的數字判/升。你不判、不改 code。**
+
+> **★★2026-07-09 流程改（用戶定案）——你的下游 checker 從 QA 改藍圖；acceptance/診斷跑標準 full_probe 床**：
+> - **正式 per-slice QA release-gate 砍**（`04_qa.md` banner）→ 你的完整數字**直接餵藍圖判**（release-pass 權在藍圖，有問題才升用戶）。handback `to:` 改 **`blueprint`**（acceptance/診斷場合），非 `qa`。
+> - **acceptance/診斷 = 跑標準 full_probe 床，全維度一次抓齊**（下 §Scope ④）——結構化 JSON、**不靠 print 刮、無 quiet 死路、無缺維度**。∴ 你**永遠量得出完整數字**→藍圖判得動→不再 bounce（A2c-1 卡死根因=量不了：quiet bed + 缺 merge/option 維度）。
+> - **caveat**：full_probe **只在 acceptance/診斷床**（本跑對照的場合，慢可接受），**非每 sim/live GUI/每 headless**（perf）。標準 beds（HOB/const/sanity）照舊每 slice。
 
 ## 身分
 
@@ -40,14 +45,23 @@
   - 例（A2b）守衛 A：seeded 長跑 → **產 `leader_conquest_count`**（QA 判 >0）。
   - 例（A2b）守衛 B：seeded → **產 `distant_tribute_treasury_delta`**（QA 判 >0）。
   - 例 target 保真：seeded before/after → **產 target 斷言結果**。
-- 沒現成 bed → 用 seeded harness（`WarringHarness`/`seeded_warring_bed`）自組短量測，產出 count/delta 數字。**你產數字，QA 判門檻。**
-- 缺哪條產不出 → 明列在報告「未量到」+ 報藍圖，**別留白讓 QA 自己跑**。
+- 沒現成 bed → 用 seeded harness（`WarringHarness`/`seeded_warring_bed`）自組短量測，產出 count/delta 數字。**你產數字，藍圖判門檻。**
+- 缺哪條產不出 → 明列在報告「未量到」+ 報藍圖，**別留白讓下游自己跑**。
+
+### ④ ★標準 full_probe 床（acceptance/診斷場合；2026-07-09 用戶定案）
+acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓齊**，結構化 JSON 並排、無 quiet 死路、無缺維度：
+- **衝突面**：征服/攻擊/交戰/掠奪/血仇/背叛/外交（declared/eligible/resolve count）。
+- **生存面**：餓死/餓滅/pop/food_flow 分布/**team-size 直方圖**。
+- **決策面（★上次缺這個卡死 A2c-1）**：option 選擇分布 / **merge-applicable 隊實際去向**（`merge_appl.total`/`chose_*`）。
+- **結構面**：teams/faction 消長/established。
+- 探針起頭已立：`warring_harness.gd` PROBE_KEYS + `faction_ai` bump（merge 維度）→ **續補齊上述全維度成標準模式，未來 slice 複用**。
+- 產 `<slice>.fullprobe.json`（baseline/slice 並排）。**這是新量測模型的核心**：完整量→藍圖判得動→release-pass 閉環。
 
 ## 產物
 
 1. **`docs/process/verdicts/<slice>.measure.json`**：
    `{obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。
-2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-qa-<slice>.md`（`from:measurer to:qa status:open`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**
+2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（`from:measurer to:blueprint status:open`；**2026-07-09 起下游改藍圖判**，原 `to:qa`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + full_probe 全維度（acceptance 場合）+ 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**（信箱 hook role-agnostic，只認 `to:` 欄→改欄即改路由，無需動 hook。）
 
 ## 交接
 

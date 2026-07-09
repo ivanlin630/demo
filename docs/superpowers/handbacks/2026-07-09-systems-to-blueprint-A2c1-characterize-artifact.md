@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 characterize 完成——740→520 = (a) artifact 移除（pre-gate bypass 撐征服）;附 (b-lite) phantom current_option 可選 refine
 ---
 

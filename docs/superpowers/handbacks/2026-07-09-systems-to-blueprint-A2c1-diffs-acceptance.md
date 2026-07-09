@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 red — total_diffs=16(全 ~3% macro 漣漪)；請裁「保湧現」驗收 bar：byte-exact 0 vs within-noise 等價
 ---
 

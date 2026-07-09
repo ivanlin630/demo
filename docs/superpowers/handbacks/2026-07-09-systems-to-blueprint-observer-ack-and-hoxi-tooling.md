@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: observer inspect 擴充收到(將並行 spec) + 記 perf + ★點破好戲驗工具卡點(observer dump 月級跑不完=卡 A2c-1)
 ---
 

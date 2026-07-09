@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 survival-value 標準 full_probe 3-way 量測結果——硬閘技術PASS但spec驗收線①③FAIL
 ---
 

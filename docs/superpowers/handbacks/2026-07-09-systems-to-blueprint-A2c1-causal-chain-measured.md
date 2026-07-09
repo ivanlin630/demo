@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 因果診斷——多信號 measured 支持用戶假設(merge=生存被弱化);缺直接 merge-count(bed quiet);提標準全探針床
 ---
 

@@ -2,6 +2,8 @@
 
 > 取代 06/07 的機制部分。這是**用戶親自討論鎖定**的 workflow（他真實工作模式：只跟 00 談、00 當 gate、重工 off-他-context、輕基建）。
 
+> **★★2026-07-09 流程改（用戶定案）——LG 機器軌的 QA 節點降級**：user-in-loop 下正式 QA release-gate 砍（`04_qa.md` banner）。機器軌若跑：**下游判用「量測員標準 full_probe 完整數字 → 00/藍圖判」取代 [04 QA] 節點的 release-gate**；QA 節點能力（充足性/戲感稽核）保留供調用，非強制 green/red 閘。∴ 下方流程圖 `[04 QA] 判 green/red` + `qa_review 三路` 在 user-in-loop 模式**改由藍圖 pass 權承接**。轉自動交付則 QA 節點硬閘回歸。（機器軌本就少用——小/序列走信箱，見 `00_roles.md §現行偏好`。）
+
 ## 流程（含兩個檢查點）
 ```
 你+00 定 feature A

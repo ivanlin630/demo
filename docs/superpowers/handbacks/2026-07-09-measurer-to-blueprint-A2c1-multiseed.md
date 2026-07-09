@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 多seed baseline vs 純fold——extinct.starve 方向不一致(坐實幽靈)，join.resolve 三seed一致降
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: systems
-status: open
+status: consumed
 topic: HANDOFF——A2c-1 定案 fold+survival-value 待 spec(護欄+鐵證+seam 選項);observer slice 待做;full_probe 已立
 ---
 

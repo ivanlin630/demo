@@ -34,8 +34,14 @@ brainstorm → spec → plan 設計，不實作。
 - **凡 in-flight latch 必配 timeout/release（藍圖 2026-07-03,found_ally 凍結教訓）**：spec 含任何「dispatch 後不重評」guard 時,必同時給 timeout（按距離/移速估,非死常數）。scout/FLEE/TRADE 有、found_ally 漏=家族病。
 - **身分=權重非路徑切換（藍圖 2026-07-03）**：spec 禁「按身分(fid/tag/階級)切換決策路徑」——個人戰略層永遠跑,身分只能是 util term/context 權重。
 
-**Plan 完成後，主 session 自動輸出精簡子 session 指令：**
-```
-在 A:\GDS\demo 的 feat/<feature> worktree 實作 docs/superpowers/plans/<plan-file>.md 的全部 Task，完成後回報結果。
-```
-不加額外注意事項（注意事項寫在 plan 內）。
+## ★spec/plan 鎖後直接 dispatch，別問用戶（2026-07-09 定死）
+
+spec 鎖定（reviewer CLEAN）後，**dispatch = 直接寫 `to:implementer status:open` handback 到 main mailbox**——armed implementer session 主動撿，這**就是** dispatch 本體，不需 live 終端、不需人肉轉述。
+
+**禁止**：問用戶「要 spawn agent 還是開終端還是跑 LG」。dispatch 方式是技術微決策（memory `feedback_no_tech_microdecisions`），系統自決：
+- **預設 = 寄 implementer 信箱**（多終端 relay 主軌；worktree implementer session 收信做）。
+- LG 機器只大/並行活才上（$27/slice 燒錢，少用）；小/序列 slice 一律信箱。
+- Agent subagent spawn 只在短+平行+commit-early 才用（`feedback_no_reflexive_spawn`）。
+- 系統**不** inline 改 code（L1/L2 禁；僅 L3 surgical 1-3 行例外）。
+
+handback 內含觸及檔/驗收法摘要（指向 spec，注意事項寫 spec/plan 內）。task 完成判定 = systems + reviewer/QA，非 implementer 自判。

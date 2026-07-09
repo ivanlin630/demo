@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 fixed 重量完成——全閘綠;但 (b-lite) 沒回收征服(520 不動),純 (a) artifact 坐實;請定 keep/revert (b-lite)
 ---
 

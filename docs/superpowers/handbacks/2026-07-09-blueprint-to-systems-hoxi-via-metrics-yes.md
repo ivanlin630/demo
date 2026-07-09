@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: 好戲驗改走 (1) metrics——要你整 520/740 對照表;範疇釐清(metrics=活力gate足夠;句子審計正交另slice)
 ---
 

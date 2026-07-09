@@ -1,3 +1,5 @@
+> **★★2026-07-09 SHIP 定案（藍圖 `blueprint-to-systems-A2c1-ship-pure-fold`）**：**A2c-1 = 純 FA5 fold @423924c**（整併折入引擎 option、移除 weigh 前 pre-gate bypass）**已放行 merge**。續議的 survival-value 升級（`2026-07-09-A2c1-survival-value.md`）**撤銷**——多 seed 證「fold=regression」為 seed-1337 幽靈（starve 方向不一致）、且 merge 已證 food-blind/survival-inert。**已知限制**：merge food-blind = survival-inert（`known_issues`），歸未來絕境經濟設計。phantom current_option（`known_issues`，faction_ai:1487）獨立待修不變。
+
 # A2c-1 Spec — faction consolidate 整併 pre-gate 折入統一引擎（FA5）
 
 - from: systems

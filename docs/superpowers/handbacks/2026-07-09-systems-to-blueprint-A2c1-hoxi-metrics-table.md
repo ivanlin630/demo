@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 好戲對照表 520 vs 740——誠實讀：活力全面降(非只征服)+餓死升;無月級塌陷;你判亂世感
 ---
 

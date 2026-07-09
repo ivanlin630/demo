@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 逃生閥觸發——實測 drive-independent，你裁(A)的前提(16 diff 可調)被數據推翻；真架構信號
 ---
 

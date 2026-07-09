@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 (b-lite) reverted——純 FA5 fold @ 80c3d77;閘綠;等你好戲驗鎖 spec
 ---
 

@@ -12,10 +12,12 @@
 | **藍圖**（Blueprint） | **WHAT**：玩什麼、玩家循環、feature 願景、平衡意圖 | 架構決定、code | `game-design.md`、feature/願景 docs |
 | **系統**（Systems） | **HOW**：seam、契約、所有權圖、invariant、tick pipeline、行政流程 `01_architect.md`| 遊戲願景、平衡意圖 | spec / plan / `invariants.md`|
 | **實作**（Implementer） | worktree 寫 code、跑 sanity 測試 | 設計決定 | code + handback |
-| **量測員**（Measurer） | **留 main dir**（`godot --path .worktrees/<slice>` 對 branch code）跑 HOB/探針/beds **＋ spec §驗收法客製守衛** 出**獨立**數字餵 QA（藍圖不蹲 godot；★禁原地 checkout）。職責正典 `03b_measurer.md` | 判決、改 code、裁設計 | `.measure.json` + handback to:QA |
-| **驗收官**（QA） | 充足性判決/戲感觀者/release gate/UI 落差（`04_qa.md` 四職）；**maker/checker 分離=非蓋房者的腦**，★讀量測員數字判、不自產 | 修 code、裁 WHAT、修 HOW、**自產數字** | 判決表/落差清單 + `escaped_defects.md` 管理 |
+| **量測員**（Measurer） | **留 main dir**（`godot --path .worktrees/<slice>` 對 branch code）跑 HOB/探針/beds **＋ spec §驗收法客製守衛 ＋標準 full_probe 床（acceptance 全維度一次抓齊）** 出**獨立**數字**餵藍圖判**（2026-07-09 起，原餵 QA；藍圖不蹲 godot；★禁原地 checkout）。職責正典 `03b_measurer.md` | 判決、改 code、裁設計 | `.measure.json`/`.fullprobe.json` + handback to:blueprint |
+| **驗收官**（QA） | **★2026-07-09 release-gate 硬閘暫停**（pass 權→藍圖）；能力保留供按需調用：充足性判決/戲感觀者/UI 落差（`04_qa.md`）+ **`escaped_defects.md` ledger 續管**；maker/checker 分離=非蓋房者的腦 | 修 code、裁 WHAT、修 HOW、**自產數字** | 落差清單/稽核 + `escaped_defects.md` 管理 |
 
-**★硬閘：任何東西交用戶之前，QA 必綠**（三層驗收鏈見 `05_acceptance.md`）。充足性判決由 QA 出——系統不自判自己蓋的世界。
+**★★2026-07-09 流程改（用戶定案，`blueprint-to-systems-workflow-qa-measurer-change`）**：正式 per-slice **QA release-gate 硬閘砍除**，**release-pass 權 → 藍圖**（沒問題就過、有問題才升用戶；用戶=問題 backstop 非每次交付閘）。每 slice 仍保 **reviewer（對抗審）+ 量測員（標準 full_probe 床全維度數字）**——這兩個才真正 localize regression。QA 能力（充足性稽核/戲感/UI 落差/`escaped_defects` ledger）保留供藍圖按需調用，唯「交用戶前 QA 必綠」硬閘由藍圖 pass 權取代。**綁 user-in-loop：轉自動交付則 QA 硬閘回歸**（見 `04_qa.md` banner + `03b_measurer.md §④` + `05_acceptance.md`）。
+
+（下段=2026-07-09 前舊模型，保留參照）~~**★硬閘：任何東西交用戶之前，QA 必綠**（三層驗收鏈見 `05_acceptance.md`）。充足性判決由 QA 出——系統不自判自己蓋的世界。~~
 
 兩個設計 session 都在 `A:\GDS\demo` / `main`。實作在 `.worktrees/<feature>/` / `feat/<feature>`。
 
@@ -85,9 +87,11 @@ topic: <一行>
 
 channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統做；本節即首個 dogfood（`2026-06-19-blueprint-to-systems-handback-channel.md`）。
 
-## 驗收鏈（QA 反轉,2026-07-04 事故級規則）
+## 驗收鏈（QA 反轉,2026-07-04；★2026-07-09 user-in-loop 優化）
 
-**用戶眼球=願景輸入,永遠不是驗收工具。**交付用戶前三層機器全綠（①充足性閾值②常駐漏斗③戲感審計）,**判決由驗收官（QA）出**;用戶發現的問題=逃逸缺陷入 `docs/escaped_defects.md`（QA 管理）。規則本體+enforcement 見 `05_acceptance.md`（**每 session 交付前讀**）。
+**★2026-07-09（用戶定案）**：user-in-loop 模式下，release-pass 權 → 藍圖（完整 full_probe 數字判、有問題升用戶），正式 QA release-gate 砍。用戶=問題 backstop。**逃逸缺陷仍入 `docs/escaped_defects.md`**（QA 續管，砍 QA 後漏 bug 帳上可見可翻案）。**轉自動交付（用戶不看）→ 三層 QA 硬閘回歸**。
+
+（下=2026-07-04 舊模型，user-out-of-loop 時適用）**用戶眼球=願景輸入,永遠不是驗收工具。**交付用戶前三層機器全綠（①充足性閾值②常駐漏斗③戲感審計）,判決由驗收官（QA）出。規則本體 見 `05_acceptance.md`。
 
 ## auto-memory 規則（承 §2）
 

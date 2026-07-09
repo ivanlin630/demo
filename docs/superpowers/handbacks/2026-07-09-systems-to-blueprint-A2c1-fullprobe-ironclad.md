@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: A2c1 全探針鐵證——merge 實派 978→154(-84%);52% 該併隊選別的;用戶假設直接坐實=fold 弱化 merge-as-survival
 ---
 
