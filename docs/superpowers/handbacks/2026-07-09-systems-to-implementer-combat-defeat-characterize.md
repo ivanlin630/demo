@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: combat 殲滅-heavy characterization（絕境根,最高 priority）——純探針釘死 ①②③,無 fix
 ---
 

@@ -1,0 +1,55 @@
+{
+  "_meta": {
+    "months": 3,
+    "seeds": [
+      "1337",
+      "42",
+      "7"
+    ],
+    "note": "combat 殲滅-heavy characterization,純探針無fix。race=annihilation vs rout/retreat。"
+  },
+  "by_seed": {
+    "1337": {
+      "ended_n": 9,
+      "end_annihilation": 9,
+      "end_rout": 0,
+      "end_retreat": 0,
+      "end_readiness_above_thr": 9,
+      "pop_start_le3": 9,
+      "mean_rounds": 1.0,
+      "mean_pop_start": 1.0,
+      "mean_loser_readiness_at_end": 0.92,
+      "mean_loser_wnd_ratio_at_end": 0.0,
+      "rout_total": 0,
+      "capture_total": 0
+    },
+    "42": {
+      "ended_n": 8,
+      "end_annihilation": 7,
+      "end_rout": 1,
+      "end_retreat": 0,
+      "end_readiness_above_thr": 8,
+      "pop_start_le3": 7,
+      "mean_rounds": 2.12,
+      "mean_pop_start": 1.88,
+      "mean_loser_readiness_at_end": 0.83,
+      "mean_loser_wnd_ratio_at_end": 0.0,
+      "rout_total": 1,
+      "capture_total": 1
+    },
+    "7": {
+      "ended_n": 1,
+      "end_annihilation": 1,
+      "end_rout": 0,
+      "end_retreat": 0,
+      "end_readiness_above_thr": 1,
+      "pop_start_le3": 1,
+      "mean_rounds": 1.0,
+      "mean_pop_start": 1.0,
+      "mean_loser_readiness_at_end": 0.92,
+      "mean_loser_wnd_ratio_at_end": 0.0,
+      "rout_total": 0,
+      "capture_total": 0
+    }
+  }
+}
