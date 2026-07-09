@@ -63,12 +63,51 @@
 
 ## 執行方式
 
-### 方式 A：Godot 編輯器
+### 方式 A：觀測 GUI（★目前主要看世界用；玩家模式暫擱）
+
+god-view 觀測視窗——看勢力自行演化（擴張 / 整併 / 背叛 / 掠奪）即時跑，不需玩家。
+
+用 wrapper 開（強制 UTF-8，避免中文亂碼），**不加 `--headless`** 才有視窗：
+
+```powershell
+.\tools\godot.ps1 scenes/ObserverMain.tscn -- --obs-seed=1337
+```
+
+> `--` 分隔符必帶；`--obs-*` 參數在它之後。主場景是玩家用的 `TextUI.tscn`（dormant），所以觀測要直接指 `scenes/ObserverMain.tscn`。
+
+**視窗內容**：
+- god-view 六角地圖（archetype 顏色 + faction 環 + outpost 標）
+- 事件 ticker（人話事件流 + 隊過濾）
+- 隊伍 inspect（點選看細節，地圖三方同步）
+- 速度四檔：暫停 / 1×（240 tps）/ 4×（960 tps）/ max（預算內盡量）+ 月/日/tick 顯示
+
+**參數**：
+
+| 參數 | 作用 |
+|---|---|
+| `--obs-seed=N` | 換世界（驗過 1337 / 2674，狼弧鏈可讀） |
+| `--obs-config=warring_states` | 世界配置（預設 warring_states；`default` 跑真產品世界） |
+| `--obs-run-months=M` | 跑滿 M 月後停（headless 落檔用） |
+| `--obs-shots=t1,t2,...` | 指定 tick 截圖 |
+| `--obs-out=dir` | 截圖 / dump 輸出目錄 |
+| `--obs-ticker-dump=file` | 跑完把全量事件流落檔（`tick⇥type⇥teams⇥text`）＝世界大事記，機器可讀 |
+
+**無視窗變體**（截圖 / 世界句子落檔，加 `--headless`）：
+
+```powershell
+# 6 月世界大事記落檔（讀故事用）
+.\tools\godot.ps1 --headless scenes/ObserverMain.tscn -- --obs-seed=1337 --obs-ticker-dump=story.txt --obs-run-months=6
+
+# 特定 tick 快照
+.\tools\godot.ps1 --headless scenes/ObserverMain.tscn -- --obs-seed=1337 --obs-shots=3000,9000,15000 --obs-out=shots/
+```
+
+### 方式 B：Godot 編輯器
 1. 安裝 Godot 4.2+
 2. Import 專案中的 project.godot
 3. 按 F5 執行
 
-### 方式 B：命令列（可用於快速驗證）
+### 方式 C：命令列（可用於快速驗證）
 在專案根目錄執行：
 
 Godot_v4.2.2-stable_win64_console.exe --path . --quit --verbose
