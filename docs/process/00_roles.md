@@ -87,6 +87,18 @@ topic: <一行>
 
 channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統做；本節即首個 dogfood（`2026-06-19-blueprint-to-systems-handback-channel.md`）。
 
+## ★★無斷點自動鏈（用戶定案 2026-07-09，總則）
+
+用戶要「無斷點自動工作，直到有問題要我裁決」。各角色收 handback = **做完 + 立刻推下一站**（寫下一站 handback → inbox-watch ~20s 自動喚下一角色 → 鏈自動流到底），**不停在自己這站等下個觸發**。
+
+1. **收 handback → 做完 + 推下一站**（動完立刻寫下一站信，不等）。
+2. **禁自造斷點**：不「park／排隊／下個 session 接／等下再做／非急擱著」。有輸入就往前推。
+3. **只為用戶裁決停**：唯一停鏈時機 = 真需用戶決策——願景 fork（改玩家體感/平衡意圖）／授權（如 LG code）／喬不攏的優先序。**其餘角色間自動鏈，不回問用戶。**
+4. **要用戶輸入時給具體待裁問題**（「FA6 折入改包圍格局，A/B 哪個」），非「要不要繼續／收工」。
+5. 與 QA-pass 同族：mailbox in-loop 下鏈自動跑，只在 blueprint 判出真問題時升用戶。
+
+memory [[feedback-never-wrap]]。
+
 ## 驗收鏈（QA 反轉,2026-07-04；★2026-07-09 user-in-loop 優化）
 
 **★2026-07-09（用戶定案）**：user-in-loop 模式下，release-pass 權 → 藍圖（完整 full_probe 數字判、有問題升用戶），正式 QA release-gate 砍。用戶=問題 backstop。**逃逸缺陷仍入 `docs/escaped_defects.md`**（QA 續管，砍 QA 後漏 bug 帳上可見可翻案）。**轉自動交付（用戶不看）→ 三層 QA 硬閘回歸**。

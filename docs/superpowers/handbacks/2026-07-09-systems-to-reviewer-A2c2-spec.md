@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 審 A2c-2 spec（FA6 戰略移動 bypass 折入 arbiter）——FA6/FA7 seam + D0 characterization plan + 候選 A/B
 ---
 
