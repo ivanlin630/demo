@@ -104,6 +104,11 @@ func _render_detail() -> void:
 		"位置：(%d,%d)" % [d["tile_pos"].x, d["tile_pos"].y],
 	]
 	lines.append(_resources_line(d.get("resources_nonzero", {}), true))  # skip food/coin（隊已有專屬行）
+	# 該隊駐守格若有據點 → 附據點段（多數據點被 owner 駐隊佔 → 方塊點擊落隊,據點靠此露）。
+	var op: Dictionary = _bridge.query_outpost(d["tile_pos"])
+	if not op.is_empty():
+		lines.append("─ 駐守據點 ─")
+		lines.append_array(_outpost_lines(op))
 	_detail.text = "\n".join(lines)
 
 # 非零資源段（skip_food_coin=隊詳情已有專屬行時排除；其餘全露，中文標籤人看得懂）
@@ -122,14 +127,10 @@ static func _fmt_amount(v) -> String:
 		return "%.0f" % v
 	return str(v)
 
-func _render_outpost_detail() -> void:
-	var o: Dictionary = _bridge.query_outpost(_selected_tile)
-	if o.is_empty():
-		_detail.text = "格 (%d,%d)：此格無據點" % [_selected_tile.x, _selected_tile.y]
-		return
+# 據點詳情行（無 header，供 select_tile 直選 + team 詳情附段共用）
+func _outpost_lines(o: Dictionary) -> Array:
 	var type_zh: String = "民生" if str(o["outpost_type"]) == "civilian" else "軍事"
 	var lines: Array = [
-		"[b]據點 (%d,%d)[/b]" % [_selected_tile.x, _selected_tile.y],
 		"類型：%s  等級：%d" % [type_zh, int(o["outpost_level"])],
 		"擁有：%s%s" % [str(o["owner_team"]),
 			"（%s）" % str(o["owner_faction"]) if str(o["owner_faction"]) != "" else ""],
@@ -137,4 +138,13 @@ func _render_outpost_detail() -> void:
 		"武器坊等級：%d" % int(o["weaponsmith_level"]),
 	]
 	lines.append(_resources_line(o.get("resources_nonzero", {}), false))  # 據點含 food(糧倉) 全露
+	return lines
+
+func _render_outpost_detail() -> void:
+	var o: Dictionary = _bridge.query_outpost(_selected_tile)
+	if o.is_empty():
+		_detail.text = "格 (%d,%d)：此格無據點" % [_selected_tile.x, _selected_tile.y]
+		return
+	var lines: Array = ["[b]據點 (%d,%d)[/b]" % [_selected_tile.x, _selected_tile.y]]
+	lines.append_array(_outpost_lines(o))
 	_detail.text = "\n".join(lines)
