@@ -1,4 +1,12 @@
-# 06_pipeline_orchestration.md — 全 pipeline 工作流（草案，待藍圖+用戶過目）
+# 06_pipeline_orchestration.md — 全 pipeline 工作流
+
+> **★★作廢（2026-07-10，用戶定案）**：本 doc 描述的「**全 pipeline**」模型（藍圖 orchestrator 持久、spawn ephemeral 系統/實作/QA subagent、持久角色 session 退場、auto-memory 單寫者→藍圖）**已被 2026-07-08 切回多終端 revert**——現行 = 各角色**持久 session** + 信箱 relay（`00_roles` + `07_mailbox_trigger`），auto-memory 單寫者 = **系統**。
+> **下游 LG（`--from-impl` 機器軌）仍是可選項**，但已收進 `08_machine_workflow_v2.md`（少用，只大/並行活）。
+> 本 doc 留作**歷史軌跡**（勿依此操作）。現行工作流一律以 `00_roles` 為權威。
+
+---
+
+## （以下為 2026-07-06 作廢草案，歷史參照）
 
 > 藍圖 `pipeline-workflow-adopt`（用戶定案）落地。系統擬 HOW；WHAT（藍圖 orchestrator/用戶只談藍圖）藍圖已定。**切點=決策模型接線脊椎開軌時**（憲法 arc+序7/8/probe/gen 落完後，不中途，防雙寫手 race）。**切換前不動現狀**（`00_roles`/`01_architect`/`03_implementer` 現行有效）。
 
