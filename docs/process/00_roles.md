@@ -27,7 +27,7 @@
 你 →願景→ 藍圖(WHAT) →意圖→ 【R①factcheck 工單前提】→ 系統(HOW) spec →【R②審 spec=CLEAN】→ 實作 →handback→ 系統(收+驗+推下一站)
 ```
 
-- **★reviewer 兩道閘是鏈上的站，不可省**（`02_reviewer.md`，reviewer 讀；系統側=見 `01` dispatch 閘序）：R①=00→01 間 factcheck 工單每個 code 斷言；R②=01→03 間審 spec，**CLEAN 才准 dispatch/merge**。**無斷點自動鏈 ≠ 跳站**——推下一站含推 reviewer。
+- **★reviewer 是鏈上的站**（`02_reviewer.md` reviewer 讀；系統側閘序見 `01 §兩道對抗閘`）：**R②（審 spec）每 slice 必過，CLEAN 才 dispatch/merge**；**R①（factcheck 前提）只新概念大框且前提含未驗 code 斷言才啟用**（小 slice/已 file:line 坐實則免）。**無斷點自動鏈 ≠ 跳站**——推下一站含推 reviewer②。
 - 同一 feature 不會同時找兩個談：先藍圖定要什麼，再系統定怎麼架。
 - 你「找兩個」只在做**不同 feature 的不同階段** = pipeline，不是腦力衝突。
 
@@ -135,17 +135,18 @@ user-in-loop 下 release-pass 權→藍圖（full_probe 數字判、有問題升
 
 | 你是 | 開場只讀 | 該格權威 topic |
 |---|---|---|
-| 系統(HOW) | 00 + **01** | spec/plan/3 層/dispatch 閘序 |
+| 系統(HOW) | 00 + **01** + **流程 owner 全 doc（02-08）** | spec/plan/3 層/dispatch 閘序 + **流程 doc owner** |
 | 藍圖(WHAT) | 00 + `game-design.md` | 願景/feature/平衡（無專屬流程 doc） |
 | 實作 | 00 + **03** | worktree/TDD/handback |
 | 量測員 | 00 + **03b** | 獨立數字/守衛床（≠QA 判） |
 | QA | 00 + **04** + **05** | 判決 / 驗收鏈規則 |
 | reviewer | 00 + **02** | 兩道對抗閘 factcheck/review |
 
-**共用機制（按需查，非開場全讀）**：
-- 信箱 relay（**現行預設軌**：各角色持久 session + Monitor 觸發）→ `07_mailbox_trigger.md`
-- langgraph 機器軌（**少用**，只大/並行活；動機=機器誤判 A2a + $27/slice）→ `08_machine_workflow_v2.md`（`07_orchestrator_machine.md`=設計背景）
-- ~~`06_pipeline_orchestration.md`~~ **作廢**（全 pipeline 藍圖 orchestrator 模型；2026-07-08 切回多終端已 revert）；**下游 LG `--from-impl` 仍可選**，存 08。
+**操作工作流（信箱 relay = 全角色每天操作的本體，非選讀）**：
+- **操作精髓已 hook inline**（`session-role.sh`：開場 arm Monitor 信箱 + 無斷點自動鏈）→ 全角色開場自動得，**不必主動讀 07**。
+- **全文 = 系統讀**（流程 doc owner）：`07_mailbox_trigger.md`（信箱機制細節）。**現行預設軌**=各角色持久 session + Monitor 觸發。
+- langgraph 機器軌（**少用**，只大/並行活；動機=機器誤判 A2a + $27/slice；含下游 LG `--from-impl` 可選）→ `08_machine_workflow_v2.md`（系統讀；`07_orchestrator_machine.md`=設計背景）。
+- ~~`06_pipeline_orchestration.md`~~ **作廢**（全 pipeline 藍圖 orchestrator 模型；2026-07-08 切回多終端已 revert；留史）。
 
 ## 你的負擔
 

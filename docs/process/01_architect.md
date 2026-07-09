@@ -29,16 +29,15 @@ brainstorm → spec → plan 設計，不實作。
 
 ## ★兩道對抗閘（reviewer，spec 前後各一——不可省，2026-07-10 釘死）
 
-**無斷點自動鏈 ≠ 跳站**：reviewer 是鏈上的站，spec 前後各一道。收 blueprint intent 或 characterize 出 code 斷言 → **別直推 implementer**。
+**無斷點自動鏈 ≠ 跳站**：reviewer 是鏈上的站。**R② 每 slice 必過；R① 只新概念大框才啟用**。
 
-| 閘 | 位置 | 我(系統)做什麼 |
-|---|---|---|
-| **R① factcheck** | 收 intent/工單 → **寫 spec 前** | 工單/前提含 code 斷言（「X 不存在/根因是 Y」）→ 寫 `to:reviewer` 請 factcheck file:line。`premise_contradiction` → halt 重估，別在錯前提上寫 spec |
-| **R② review** | spec 鎖 → **dispatch/merge 前** | spec 寫完 → `to:reviewer` 審設計（真根治 vs 搬問題/退化/違 invariant）。**CLEAN 才 dispatch**（下段 §dispatch） |
+| 閘 | 何時啟用 | 位置 | 我(系統)做什麼 |
+|---|---|---|---|
+| **R① factcheck** | **僅新概念大框**（新子系統/推翻既有/大 redirect）**且前提含未驗 code 斷言** | 收 intent → **寫 spec 前** | 工單/前提的 code 斷言（「X 不存在/根因是 Y」）→ `to:reviewer` factcheck file:line。`premise_contradiction` → halt 重估，別在錯前提上寫 spec。小 slice/前提已 file:line 坐實（如 measurer 已 localize）→ **不需 R①** |
+| **R② review** | **每 slice 必過** | spec 鎖 → **dispatch/merge 前** | spec 寫完 → `to:reviewer` 審設計（真根治 vs 搬問題/退化/違 invariant）。**CLEAN 才 dispatch**（下段 §dispatch） |
 
 - 大框 call（三對齊：強結論+redirect 大工／相關跳因果／ironclad+難逆）→ R② 升**異質框外審**（別 Opus 代 + refute prompt，見 `00_roles §框外挑框`）。
-- 小 de-patch（1 factor 疊既有、無 redirect）→ R① factcheck 即可，不必異質。
-- **血證（2026-07-10）**：§D4 累積器跳兩閘直 merge、combat S1 跳閘直推 implementer=無斷點誤讀成跳站。
+- **血證（2026-07-10）**：§D4 累積器 + combat S1 跳過 R②直 merge/推 implementer = 無斷點誤讀成跳站（R② 才是每 slice 硬閘）。
 
 ## 設計 checklist（spec 前必過）
 

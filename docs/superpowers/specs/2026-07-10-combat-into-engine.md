@@ -36,7 +36,12 @@ const PURSUIT_FACTOR_MAX: float = 2.5  # 殘忍軍閥上限（safety cap，防�
 - ③determinism（無新 randf，pursuit_loss 確定性）/融合閘/憲法綠。
 
 ### S2 逃/戰入 rank_combat（behavior-PRESERVING 重構，地板1/2 硬；S1 後）
-`_mortal_flee_check`+`_abandon_threshold` → `rank_combat` COMBAT_OPTION_SET{血戰/逃} + `flee_drive` term（courage-weighed criticality+outnumber，**逐 seed 重現 rev2 三端=signoff 硬閘**）+ DecisionContext 擴 round-level 欄（self/敵 eff、criticality、readiness、round）。**大架構 call → spec-lock 前召 reviewer 異質 refute 框外審**（三對齊觸發）。
+`_mortal_flee_check`+`_abandon_threshold` → `rank_combat` COMBAT_OPTION_SET{血戰/逃} + `flee_drive` term（courage-weighed criticality+outnumber）+ DecisionContext 擴 round-level 欄（self/敵 eff、criticality、readiness、round）。**大架構 call → spec-lock 前召 reviewer 異質 refute 框外審**（三對齊觸發）。
+- **★靶A（reviewer 框①/blueprint 裁）地板1 升真硬 gate**：argmax 競秤 ≠ 顯式閾值、數學不天然等價、有翻譯漂移。∴ **逐 seed 重現 rev2 三端對不上 = 整案打回設計層重審，禁微調 weight 湊近似通過**（近似≠重現）。S2 spec 須寫明「重現失敗處置=design reject 非 tune」。
+- **★靶C（blueprint 裁）接受範圍缺口**：COMBAT_OPTION_SET{血戰/逃} 無「逃向補給/家」跨域路由=結構漏，但**現行 `_mortal_flee_check` 本就只戰場逃**→ S2 behavior-preserving=維持現狀非退化，缺口不綁進 S2。→ 記 **S4**。
+
+### S4 斷糧求生路由（未來 slice，blueprint 裁 defer；掛絕境經濟/consolidation arc）
+combat 中逃向 food/home 的跨域決策（擴 COMBAT_OPTION_SET 含補給路由）。=淨新 feature 非 S2 退化。別丟。
 
 ### S3 戰後受降 vs 屠殺（真新湧現；序末，別當 nice-to-have 砍）
 殘忍 term 決屠殺 vs 受降，接 capture/subjugate。慈悲領袖受降（俘虜升）、殘忍領袖屠殺（放血/滅絕升）。

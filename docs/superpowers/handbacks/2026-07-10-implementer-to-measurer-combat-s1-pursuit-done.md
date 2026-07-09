@@ -1,9 +1,13 @@
 ---
 from: implementer
 to: measurer
-status: open
-topic: S1 追擊放血人格化 done+驗 → 跑 organic 大窗量 ①人格分配 ②三端不打亂 ③extinct/attrition
+status: hold
+topic: [HOLD] S1 追擊放血人格化 done+驗 → 但 systems 下 HOLD（跳 reviewer①②），暫勿量測
 ---
+
+> ★★HOLD（2026-07-10）：systems 補正工作流失誤——S1 工單跳過 reviewer 對抗①(框)+②(spec)。
+> **暫勿跑量測**（spec 可能改）。等 reviewer verdict clean + systems 重發 GO，屆時我重驗/調參後再開新 to:measurer 信。
+> code 已 committed @94bb60d（未 merge）。詳 `systems-to-implementer-combat-s1-HOLD.md`。
 
 # S1 追擊放血人格化 done（commit 94bb60d @feat/combat-s1-pursuit，base main 26758fe）
 

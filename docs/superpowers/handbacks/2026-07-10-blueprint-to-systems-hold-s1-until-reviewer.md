@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: [GATE] combat-into-engine S1 spec-lock 暫緩——補召 reviewer 對抗①/框外先過
 ---
 

@@ -6,6 +6,11 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## combat-into-engine arc backlog（2026-07-10，spec `specs/2026-07-10-combat-into-engine`）
+- **S4 斷糧求生路由（blueprint 裁 defer）**：`rank_combat` COMBAT_OPTION_SET{血戰/逃} 無「逃向補給/家」跨域路由=結構漏（現行 `_mortal_flee_check` 亦只戰場逃，S2 preserving 不使其更糟）。=淨新 feature，掛絕境經濟/consolidation arc。別丟。
+- **S2 地板1 硬 gate（靶A）**：rank_combat argmax 須逐 seed **重現** rev2 三端（逃83%/俘中頻/殲滅稀），對不上=design reject 非 tune weight 湊近似。
+- **S3 戰後受降 vs 屠殺**：殘忍 term 決屠殺/受降接 capture/subjugate（真新湧現，序末別砍）。
+
 ## 統一矩陣窮盡稽核揭項（2026-07-01，全貌 `specs/2026-07-01-unification-matrix-audit`）
 
 - **憲法防閘掛點（序0 2026-07-05 立閘；藍圖 wave1-order-gate 裁定提前硬掛）**：**arc 期間硬閘已上**=本地 `.git/hooks/pre-commit`——staged 含 `scripts/simulation/*.gd` 時跑 `constitution_gate.gd`（純檔掃描，不需 import），輸出含 FAIL 拒 commit（繞過 `git commit --no-verify` 須系統認可）。worktree 共用 common hooks dir → 實作子 session commit 也觸發（正中「邊拆邊長新」怕點）。**限制**：hook 在 `.git`（本地非版控，單機 arc-temporary）；閘 coverage 只鎖 TaskArbiter mutation 面，不覆蓋 return-task-字串式違憲（如 `ambition_ladder.rung_task`），見 `invariants.md` 憲法段誠實聲明。**arc 尾**：轉常駐全掃鏈（framework_validation 內呼 or 獨立 gate step），撤此 pre-commit。手跑：`.\tools\godot.ps1 --headless --script scripts/debug/constitution_gate.gd`（CLAUDE.md 常用指令）。

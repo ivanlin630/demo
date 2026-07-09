@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: 對抗審 2 項——①§D4 累積器 de-patch post-merge 稽核（漏審補審）②combat-into-engine S1 spec pre-merge factcheck
 ---
 

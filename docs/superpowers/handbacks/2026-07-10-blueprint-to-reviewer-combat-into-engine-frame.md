@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: [對抗①/框外] combat-into-engine 大框 call refute——rank_combat 子集框 + 地板守則前提，S1 spec-lock 前
 ---
 
