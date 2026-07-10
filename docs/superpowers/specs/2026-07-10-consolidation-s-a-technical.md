@@ -22,15 +22,8 @@
 - 威脅加碼（可選）：`+ THREAT_JOIN_W * threat_norm(ctx)`。
 
 ### `consolidate_drive`（整併=全池化合併，弱方主動選）＝S-A 主修（真 flat 病）
-- **eval `:161` 退 flat `CONSOLIDATE_DRIVE`** → **★(b) 預防性併 band（blueprint 裁 2026-07-11，= §HOW-5 真根 C 的解）**：
-```gdscript
-	"consolidate_drive":
-		if opt != "整併" or ctx.consolidate_target_id == -1: return 0.0
-		if ctx.food_days < DESPERATION_DAYS: return 0.0    # 絕境交 survival,consolidate 不撞(消 29 set_fail churn + 24 被覆寫)
-		return DESPERATION_SCALE * maxf(0.0, CONSOLIDATE_DAYS - ctx.food_days)   # 中度食壓帶[DESPERATION_DAYS, CONSOLIDATE_DAYS)=看苗頭抱團
-```
-  - `CONSOLIDATE_DAYS = 6.0`（TEST VALUE，< `SURVIVAL_RECOVER_DAYS=7`）。**帶 = food_days ∈ [3,6)**：中度餓 fire、survival 未觸（`_trigger_survival` 在更低食壓）→ TASK_MERGE @PRIO_DISPATCH **不被 survival@80 覆寫** → persist 到 movement。**<3 歸 0**：絕境交 survival，consolidate 不 dispatch（消 churn，非搶 priority=blueprint 釘的分層非抬 priority）。
-  - ∴ 真根 C（食壓驅併 vs survival-sticky 互斥）解 = **把 consolidate 觸發窗移出 survival 域**（band 非 monotonic-到-0），非抬 priority。
+- **eval `:161` 退 flat → 絕境 food-scaled**（比照 join `:91`：`DESPERATION_SCALE * maxf(0, DESPERATION_DAYS - food_days)`）。~~C1 band~~ 作廢（中度窗實測空 98.6% eligible 絕境）。
+  - **★C2 = 整併升 survival-class（blueprint 重裁，真根解）**：整併加入 `SURVIVAL_OPTION_SET` + applicable +food<DESPERATION_DAYS（比照 join）→ 經 `rank_survival`/`_trigger_survival` 派 @**PRIO_SURVIVAL**（絕境域競秤 forage/beg/join，**不被 survival-sticky 覆寫**=C 互斥解，靠「與 join sibling 統一」非抬 priority 補丁）。**+`_trigger_survival` 補 order_target 接線**（此路真缺 `_wire_threat_task`）。join/整併=同求生本能不同尺度（個人脫離/整隊池化，依凝聚力湧現）。詳工單 `c2-survival-class-merge`。
 - **weight `:229` 退 flat 1.0** → `consolidate` weight = f(求生欲, 1-野心)（餓+不稱霸傾向併大）。
 
 ### 吸附側 pull（強方收弱隊）＝接受方 rank（見 HOW-3）

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [WHAT 重裁] C1(b)預防性併實測死——eligible隊98.6%絕境,中度窗空;要C2絕境併 or 整併語意收斂?
 ---
 
