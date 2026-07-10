@@ -1,6 +1,42 @@
 # Spec — Consolidation S-A 併決策統一（技術 / systems HOW）
 
-> 願景 = `2026-07-10-consolidation-unified-decision-design.md`（blueprint，已收 reviewer 框①三靶）。本檔 = S-A 技術 HOW（term/context/seam）。屬決策統一 program [[project_unified_decision_framework]]。**S-B 降服/附庸另 slice**。
+> 願景 = `2026-07-10-consolidation-unified-decision-design.md`（blueprint，已收 reviewer 框①三靶 + §★★統一「併入」收斂 2026-07-11 用戶定案）。本檔 = S-A 技術 HOW。屬決策統一 program [[project_unified_decision_framework]]。**S-B 降服/附庸另 slice**。
+
+## ★★§HOW-6 統一「併入」決策（2026-07-11 用戶定案，取代 join/整併 兩 option 框）
+**背景**：6 層漏斗實測 join/整併 **冗餘**（都走 `merge_teams` 全併、搶同絕境 niche → join 常勝、整併 marginal 2.5%）。**收成一個「併入」決策**（消兩求解器＝真統一，非框架補丁）。**下述 §HOW-1~5 的 S-A 修（consolidate_drive 食壓化/churn cadence/`:214` 到達/C2 survival-class/order_target/movement A/`merge_teams`）全 carry forward——修的是真 bug，統一併入照樣需要。**
+
+### 決策（一個 option，取代 投靠+整併）
+```
+「併入」applicable = 食壓<DESPERATION_DAYS AND 有可併 host（有 surplus 的強鄰/absorber，gate#1）
+drive = 食壓 scaled（survival-class，同 join）;weight = 求生欲 + 好感 + (1-野心)
+resolve（接觸時 host 願收 = 統領容量 + rank 秤意願）→ 結果分流：
+  人少 + 好感高 + 低凝聚  → dissolve 散進（現 join，merge_teams 全併滅團）
+  人多 or 好感低 or 高凝聚 → 整隊變子隊（附庸保身份，set_subteam_parent）
+```
+
+### 參數（用戶挑，file:line 坐實）
+- **好感**(joiner→host) = `team.known_reputations[host]`(`team_data:187`) ± `relation_edges`(`person_data:63`，feud/killed/gratitude/protect)。
+- **凝聚** = `loyalty`(`person_data:14`，對原隊；低→易散 dissolve、高→整團傾子隊)。
+- **host 容量/意願** = `統領` skill（`pop_cap_from_leadership`）+ host rank 秤願不願收（accept-util 薄層，§HOW-3，單 util 比較）。
+- 分流門檻（人數/好感/凝聚）= TEST VALUE，measurer 校準。
+
+### 兩 primitive（已存在，驗過）
+- **dissolve** → `merge_teams(host, joiner)`（`subteam_system:105`，容量-gated 全併，joiner pop→0 時 detach）。**已有**。
+- **子隊-attach** → `set_subteam_parent(joiner, host_id)`（`world_state:143`，雙向同步 parent/subteam_ids）。**已有**。**+ 補**：`set_team_faction(joiner, host.faction_id)`（子隊繼承 host faction，`set_subteam_parent` 不動 faction_id）。
+
+### ★併入 set 新人起始忠誠（補 merge_teams loyalty 漏洞）
+- 漏洞：`merge_teams`/attach 換 team_id 但**不動 loyalty** → 新人保留「對舊領袖」忠誠當成對新 host。
+- 修：set 併入者對 host 起始 `loyalty` = f(好感, 情境 voluntary/coerced, 義氣)。**脅迫/低好感→低 loyalty→心不甘子隊→S-B 叛離燃料**（公式 TEST VALUE，measurer 量叛離頻率再調）。
+
+### ★輕量 characterize（blueprint 點，非 blocker）
+`set_subteam_parent` 對**外來隊**（非 host 自己分出的）：subteam 骨架多處硬假設 `parent_team_id==absorber_id` 用途＝「同源子隊歸建」（`subteam_system:185/192/198` duty 驅歸建）→ 外來附庸子隊可能誤觸歸建/faction 繼承 edge。**S-A 只需 set 通（parent+faction+loyalty），跑得順即可**；歸建-duty 對外來隊的完整處置歸 S-B risk 清單（`known_issues` S-B 前置）。
+
+### 驗（measurer）
+- **`merge_accept>0` 且分流兩端都現**（dissolve + 子隊各有樣本）。gate#1 非搬餓（併進真 surplus host）+ 隊數不崩塌（防 mega-blob）+ **忠誠初始化生效**（併入者 loyalty≠原隊值、脅迫端低）+ 三 gate + churn + determinism。
+- 大窗用 detach+resume（03b SOP）。
+
+---
+（下 §HOW-1~5 = 統一併入前的 S-A 逐層修，全 carry forward；保留作實作參照 + root 演進誠實記錄。）
 
 ## 目標（S-A，★blueprint 重定 2026-07-10）
 **＝食壓驅併＝有機政體湧現 + S-B 政治層地基。非殲滅修復**（因果鏈反向已證、pop-% 已 S1 絕對解、殲滅已裁接受不可見）。價值判準 = **gate#1 餵養真解生存非搬餓**（S-A 成敗核心）。

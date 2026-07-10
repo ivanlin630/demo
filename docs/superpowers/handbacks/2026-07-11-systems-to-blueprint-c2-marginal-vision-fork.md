@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [決策樹 marginal 支] C2 機制對但 join 蓋 niche→marginal;願景 fork 含 S-B 依賴+世界態深層,你升 user
 ---
 
