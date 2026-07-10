@@ -35,8 +35,39 @@ resolve（接觸時 host 願收 = 統領容量 + rank 秤意願）→ 結果分�
 - **`merge_accept>0` 且分流兩端都現**（dissolve + 子隊各有樣本）。**★對稱空窗守衛（reviewer R② 建議）：分流任一端=0（只 dissolve 或只子隊）→ 標 `INCONCLUSIVE` 非 PASS + 回報分流門檻可能失衡（同 gate#1 空真守衛型）**，systems 調門檻重跑。gate#1 非搬餓（併進真 surplus host）+ 隊數不崩塌（防 mega-blob）+ **忠誠初始化生效**（併入者 loyalty≠原隊值、脅迫端低）+ 三 gate + churn + determinism。
 - 大窗用 detach+resume（03b SOP）。
 
+## ★★§HOW-7 強方擴張 pull（2026-07-11 blueprint 批，補完雙向願景另一向）
+**背景**：§HOW-6 統一併入=**只做弱方求生 push**（弱隊發起併入 absorber）——而弱方正是被 survival 鎖那半（絕境小隊）。design §合併=雙向早訂 **強方擴張 pull（野心/統領→強隊主動吸弱鄰）**，**從沒建**。強方發起者=**有餘裕強隊、不餓→無 survival lock→@正常 priority 競秤**，結構上避開絕境死結。**這是補雙向、非新 scope**。
+
+### 決策（新 option「吸納」，強隊發起，擴張-class 非 survival）
+```
+「吸納」applicable = 統領餘裕(pop_cap - pop > 閾) AND 有可吸弱鄰(finder) AND 非-survival 域（正常 PRIO_DISPATCH）
+  ★無 food gate（擴張非求生）；不入 SURVIVAL_OPTION_SET
+drive「absorb_drive」= 野心 × 統領餘裕(normalized) × weak-neighbor-available;weight = 野心/統領
+to_task = 向弱鄰行軍（order_target=弱鄰;movement A re-track 追）
+resolve（弱鄰接觸,弱方接受=自願/默許，S-A 無脅迫）→ 複用 §HOW-6 分流：
+  absorber=強隊發起者、absorbed=弱鄰;人數(弱鄰)+好感(弱→強)+凝聚(弱 loyalty)分 dissolve/子隊
+  + set 弱鄰新人對強起始忠誠（強吸弱常低好感→弱鄰變子隊帶怨→S-B 叛離燃料，天然接上）
+```
+
+### HOW（file:line）
+- **統領餘裕** = `pop_cap_from_leadership(統領 skill)`(`team_data:47`) − population。
+- **弱鄰 finder** = adapt `_find_weakest_prey`(`faction_ai:3155` 弱-隊 scan)→ capacity-bounded「可吸弱鄰」（弱、近、強隊裝得下）；餵 `ctx.absorb_target_id`（新 context 欄）。
+- **absorb_drive** term（`terms.gd` 新）：野心 value × 餘裕比 × (target!=-1)。weight = 野心/統領（近 `ambition_drive`:71 pattern）。
+- 派 @PRIO_DISPATCH（`_decide_unified` 正常路，競 攻擊/佔村/貿易）。resolve 複用 §HOW-6 primitive（merge_teams/set_subteam_parent/set_team_faction/loyalty init）。
+
+### 守則（blueprint 不可退）
+1. **擴張-class 非 survival**（別 collapse 進 survival——這正是避絕境死結關鍵）。
+2. **公平競秤不硬保**：absorb_drive 跟 攻擊/佔村/貿易 同層競，軍閥寧可征服也合理。**禁 rank 硬優勢湊 volume**（重蹈 flat 病）。measure 哪個湧現。
+3. **防 mega-blob**：野心軍閥滾雪球別吞全世界；隊數/多樣性守。
+4. **S-A/S-B 切分**：S-A=**強發起 + 弱自願/默許接受**；**顯性脅迫（最後通牒/拒則攻）=S-B**，coercive teeth 不做。
+
+### 驗（measure-first，blueprint 決策樹）
+- **absorb_drive dispatch + completion**：強隊真去 rank 吸納嗎（vs 攻擊/佔村）？吸成了嗎（merge_accept>0）？
+- gate#1 非搬餓（強隊有 surplus 才吸=天然，強隊不餓）+ 隊數不崩塌 + 忠誠 init（弱鄰帶怨）+ 三 gate + churn + determinism。大窗 detach+resume。
+- **有量 → consolidation 活、有機政體交付 → blueprint signoff**。**也 marginal → 雙向都試過 = 真結構結論 → 升 user a/b/c**。
+
 ---
-（下 §HOW-1~5 = 統一併入前的 S-A 逐層修，全 carry forward；保留作實作參照 + root 演進誠實記錄。）
+（下 §HOW-1~6 = 弱方 push 逐層修 + 統一併入，全 carry forward；root 演進誠實記錄。）
 
 ## 目標（S-A，★blueprint 重定 2026-07-10）
 **＝食壓驅併＝有機政體湧現 + S-B 政治層地基。非殲滅修復**（因果鏈反向已證、pop-% 已 S1 絕對解、殲滅已裁接受不可見）。價值判準 = **gate#1 餵養真解生存非搬餓**（S-A 成敗核心）。
