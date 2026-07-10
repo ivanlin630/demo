@@ -3110,12 +3110,18 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
-		if TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival"):
+		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival")
+		if Probe.enabled and opt == "整併":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
+			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
+		if _surv_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)   # specimen tap
 			if td.has("combat_target"):
 				state.set_combat_target(team, int(td["combat_target"]))
 			if td.has("social_target"):
 				state.set_social_target(team, int(td["social_target"]))
+			if td.has("order_target"):
+				# S-A C2：整併 survival-class 需 order_target（此 survival 路無 _wire_threat_task→真缺口）
+				team.order_target_id = int(td["order_target"])
 			match opt:   # 保留分流診斷 marker（world_sim 量測 homeless 分流）
 				"掠奪":
 					Probe.bump("surv.loot_dispatch")   # R1 驗收哨：絕境仍搏（拔閘後 survival loot 不降）

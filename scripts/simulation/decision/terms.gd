@@ -26,7 +26,6 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 # 競秤）：獨立 _trigger_survival 設 PRIO_SURVIVAL(80) task → 整併走 _decide_unified PRIO_DISPATCH(50)
 # 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
-const CONSOLIDATE_DAYS: float = 6.0          # TEST VALUE — C1 整併食壓窗上界（<SURVIVAL_RECOVER_DAYS=7；中度餓[3,6)預防性併）
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
@@ -158,12 +157,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return float(ctx.leader_values.get("貪婪", 0.5)) * 0.5 + float(ctx.leader_values.get("信義", 0.5)) * 0.3 \
 				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
 		"consolidate_drive":
-			# S-A C1（blueprint (b) 預防性併）：食壓窗前移 band [DESPERATION_DAYS,CONSOLIDATE_DAYS)。
-			# <3=絕境交 survival（consolidate 不 dispatch→消 set_fail+同tick 覆寫 churn）；中度餓[3,6)=看苗頭抱團
-			# →TASK_MERGE persist（survival 未觸）→movement→到達→merge。不抬 priority（真快餓死該 survival）。
+			# S-A C2（blueprint 絕境併）：整併=survival-class 絕境求生（與 join sibling，mirror :91）。
+			# eligible 隊 98.6% 絕境<3（C1 中度窗撲空證），故復絕境 food-scaled；升 PRIO_SURVIVAL 不被覆寫。
 			if opt != "整併" or ctx.consolidate_target_id == -1: return 0.0
-			if ctx.food_days < DESPERATION_DAYS: return 0.0
-			return DESPERATION_SCALE * maxf(0.0, CONSOLIDATE_DAYS - ctx.food_days)
+			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0

@@ -44,7 +44,7 @@ const REGISTRY: Dictionary = {
 const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練"]
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
-const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "投靠", "紮營", "乞食", "買糧"]
+const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "投靠", "紮營", "乞食", "買糧", "整併"]   # S-A C2：整併升 survival-class（絕境抱團，與投靠 sibling）
 
 # 序4 vendetta 溶入：血仇開打門檻（防輕微不快即戰）。TEST VALUE。
 const FEUD_ATTACK_MIN := 0.5
@@ -144,7 +144,8 @@ static func applicable(ctx: DecisionContext) -> Array:
 			# A2c-1（FA5 折入）：faction 非-leader 成員 + 有整併 target（容量吸收 or 戰前向 leader 集結）→ 候選。
 			# 觸發條件保真（consolidate_target_id 於 gather 依現行 _find_absorber/rally 兩支算）。
 			"整併":
-				if ctx.consolidate_target_id != -1: out.append(opt)
+				# S-A C2：整併=絕境 survival option（比照 投靠 :99 food gate）。target 存在 + 絕境才候選。
+				if ctx.consolidate_target_id != -1 and ctx.food_days < DecisionTerms.DESPERATION_DAYS: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:

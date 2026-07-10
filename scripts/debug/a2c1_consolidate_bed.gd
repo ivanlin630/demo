@@ -96,22 +96,17 @@ func _run() -> void:
 	var target_c: int = FactionAISystem.consolidate_target_of(state_c, member_c, f_c)
 	_assert(target_c == leader_c.team_id, "case C: 戰前集結 target == leader_team_id")
 
-	# ── Task2: consolidate_drive term（C1 食壓窗 band [DESPERATION_DAYS,CONSOLIDATE_DAYS)）──
+	# ── Task2: consolidate_drive term（C2 絕境 survival-class，mirror join：food<DESPERATION 才 fire）──
 	var ctx_a := DecisionContext.new()
 	ctx_a.consolidate_target_id = absorber_a.team_id
-	ctx_a.food_days = 4.0   # 中度食壓（band 內）→ fire
-	# C1：band 內 food_days=4 → DESPERATION_SCALE*(CONSOLIDATE_DAYS-4)。
+	ctx_a.food_days = 0.0   # 絕境 → 食壓最大
+	# C2：絕境 food-scaled，food=0 → DESPERATION_SCALE*DESPERATION_DAYS。
 	var drive_hit: float = DecisionTerms.eval("consolidate_drive", ctx_a, "整併")
-	_assert(is_equal_approx(drive_hit, DecisionTerms.DESPERATION_SCALE * (DecisionTerms.CONSOLIDATE_DAYS - 4.0)),
-		"term: consolidate_drive band 內食壓 scaled")
-	# 絕境（<DESPERATION_DAYS）→ 0（交 survival，不撞）
-	var ctx_desp := DecisionContext.new()
-	ctx_desp.consolidate_target_id = absorber_a.team_id
-	ctx_desp.food_days = 1.0
-	_assert(DecisionTerms.eval("consolidate_drive", ctx_desp, "整併") == 0.0, "term: 絕境<3 → consolidate 0（交 survival）")
+	_assert(is_equal_approx(drive_hit, DecisionTerms.DESPERATION_SCALE * DecisionTerms.DESPERATION_DAYS),
+		"term: consolidate_drive 絕境 food-scaled（餓→DESPERATION_SCALE*DAYS）")
 	var ctx_fed := DecisionContext.new()
 	ctx_fed.consolidate_target_id = absorber_a.team_id
-	ctx_fed.food_days = 99.0   # 飽（>CONSOLIDATE_DAYS）→ 食壓 0
+	ctx_fed.food_days = 99.0   # 飽（≥DESPERATION）→ 食壓 0
 	_assert(DecisionTerms.eval("consolidate_drive", ctx_fed, "整併") == 0.0, "term: 飽足 → consolidate_drive 0")
 	var drive_wrong_opt: float = DecisionTerms.eval("consolidate_drive", ctx_a, "貿易")
 	_assert(drive_wrong_opt == 0.0, "term: opt != 整併 → 0")
@@ -132,9 +127,9 @@ func _run() -> void:
 	_assert(int(td["order_target"]) == absorber_a.team_id, "to_task: order_target == absorber_id")
 
 	# ── Task4: 整合行為（跑一次 _assign_member_tasks，整併經引擎達成）──
-	# C1：食壓驅併——small_a 需中度食壓（band [DESPERATION_DAYS,CONSOLIDATE_DAYS)=[3,6)）consolidate 才 fire，
-	# 且未觸 survival-sticky（<3 才交 survival）。設 ~4 天餘命；absorber 仍充足糧過餵養 gate。
-	small_a.resources["food"] = float(small_a.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 4.0
+	# C2：整併=絕境 survival-class——small_a 需絕境食壓（food<DESPERATION_DAYS）consolidate 才 fire。
+	# 設 ~1.5 天餘命；absorber 仍充足糧過餵養 gate。
+	small_a.resources["food"] = float(small_a.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.5
 	fai._assign_member_tasks(state_a, f_a)
 	_assert(small_a.current_task == TeamData.TASK_MERGE, "整合: small member current_task == TASK_MERGE（經引擎）")
 	_assert(small_a.order_target_id == absorber_a.team_id, "整合: order_target_id == absorber_id")
