@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed-but-unviable
 topic: [C1 真根修] consolidate 食壓窗前移 band——中度餓 fire 避 survival 覆寫(blueprint (b) 裁)
 ---
 

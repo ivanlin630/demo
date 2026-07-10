@@ -66,8 +66,9 @@
 - **:214 combat_target 早退**（真但**不足**）：豁免 social/merge 到達已修（@f7f7d6d，BEG/JOIN 同清），但 merge_accept 仍 0。
 - ~~到達硬牆/A re-track~~（真但**下游**）：A 到達重追蹤已實作（`merge-arrival-retrack`），但 `mv_reached=0`——TASK_MERGE **從不進 movement loop**（task 在 movement 前已被覆寫）→ A 治不到。
 - **★★真根 = C priority 張力（implementer mv_reached=0 鐵證）**：`set_ok=24 但 mv_reached=0`＝食壓驅併的餓隊同 tick 被 `_trigger_survival`@`PRIO_SURVIVAL(80)` 覆寫 TASK_MERGE@`PRIO_DISPATCH(50)` → 永不 persist 到 movement。29 set_fail（當場擋）+ 24 set_ok-覆寫 = 同張力兩面。**食壓驅併與 survival-sticky 結構互斥**。
-**修 = C1 食壓窗前移 band**（見 §HOW-1 consolidate_drive：中度食壓帶 [DESPERATION_DAYS, CONSOLIDATE_DAYS) fire、<DESPERATION_DAYS 歸 0 交 survival）= blueprint (b) 預防性併裁。**A/combat豁免/居民鎖三 movement 修保留**（C 解後 task persist → 這些下游修才生效＝必要非充分）。
-- **systems 誠實記：mis-ranked C 為次要、A 為主修**（實 C=根、A=下游）——未先探 mv_reached 就排序。implementer 深挖漏斗（mv_reached）校正。
+- ~~C1 食壓窗前移 band~~（**實測死，blueprint (b) 願景與世界動力不符**）：食壓分布探針證 **consolidate-eligible 隊 98.6% 絕境<3**（868/880），中度窗 [3,6) 僅 12(1.4%) 且仍輸 rank → **dispatch=0**。小隊有整併 target 時=已絕境，「看苗頭預防性抱團」不發生。C1 邏輯避開 priority 撞、實際避進**空窗**。
+- **★真根（五層扒到底）= eligible 隊恆絕境 + 絕境域 priority 互斥**。要 merge 發生須在**絕境域**讓 consolidate 贏且 persist。**回 blueprint 重裁**（`c1-unviable`）：C2（整併升 survival-class=抱團求生，比照 join）／整併語意收斂為「絕境融合=大池化 join」／join-整併關係。**待 blueprint WHAT 重裁**，spec-lock hold。
+- **systems 誠實記：mis-ranked C 為次要、A 為主修**（實 C=根、A=下游，未先探 mv_reached）；且 blueprint (b) 與我 spec 的 C1 band 皆建在「有中度餓隊」的**未驗假設**上——implementer 食壓分布探針才揭空窗。**深層=小-絕境隊世界**（隊太小→想併→太絕境沒法併，與殲滅不可見同根）。
 
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。
