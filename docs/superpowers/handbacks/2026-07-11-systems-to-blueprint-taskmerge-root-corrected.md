@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [更正] TASK_MERGE 根因翻案——非 order_target(我錯)是 combat_target 早退;implementer 框外挑框抓
 ---
 
