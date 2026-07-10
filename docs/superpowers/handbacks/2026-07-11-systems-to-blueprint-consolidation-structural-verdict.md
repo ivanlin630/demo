@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [升 user] consolidation 結構抗拒確認(7層+統一併入~0)——S-A真win已交付,湧現defer絕境經濟;user裁a/b/c
 ---
 
