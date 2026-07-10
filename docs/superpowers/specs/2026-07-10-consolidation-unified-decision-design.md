@@ -3,12 +3,16 @@
 > 2026-07-10 brainstorm 定案。blueprint 願景層（WHAT/意圖/湧現/地板）。HOW（term 公式/context 欄/seam）交 systems 出技術 spec。屬決策統一 program（同傘 rank_combat），[[project_unified_decision_framework]]。
 
 ## 一句話
-隊的**合併**與**降服（附庸）不是獨立子系統，是同一顆統一決策腦（`DecisionEngine.rank_scored`）裡的新 option-set + 真實生存/人格 term**。food 驅動合併、脅迫驅動附庸——全是統一效用秤的**湧現輸出**，無 bespoke AI、無 hardcoded 特例驅力。
+隊的**合併**與**降服（附庸）不是獨立子系統，是同一顆統一決策腦（`DecisionEngine.rank_scored`）裡的新 option-set + 真實生存/人格 term**。food 驅動合併、脅迫驅動附庸——**核心驅力統一於 rank_scored 效用秤的湧現輸出**，退役 flat/特例驅力。
+
+> **但書（reviewer 框外① 靶C）**：「核心驅力統一」不等於「零框外機制」。**跨隊同意的時序協調**（發起方 util 選 + 接受方 util 選的雙邊握手原子性）**待驗證是否需框外薄層**——單隊 per-cadence argmax 能否純腦內解決雙邊異步咬合是 open。承諾範圍＝**驅力**統一，非「連跨隊時序協調都無 bespoke」。避免 A2c-1「先講死強框、事後被 code 打臉」。
 
 ## 動機
 - **小隊根**：organic combat 全小隊（殲滅不可見、pursuit pop-% 失效同根）。隊太小 → 任何 pop-比例效果悶。
-- **未統一殘留**：`consolidate_drive` 現 return flat 1.0（「faction 機制非人格染色」）、`join_drive` 現只 `has_strong_neighbor` gate——**併決策沒進統一效用秤**，與飢餓/死活無關 → 食壓驅不動合併 → 隊留小。
+- **未統一殘留**：`consolidate_drive` 現 return flat 1.0（「faction 機制非人格染色」）、`join_drive` 現只 `has_strong_neighbor` gate——**併決策沒進統一效用秤**，與飢餓/死活無關。
 - 這是 combat 決策 hardcoded 的同型病（決策不統一），修法同型：收進 rank_scored 真 term 秤。
+
+> **假設非事實（reviewer 框外① 靶A）**：「食壓驅不動合併→隊留小、故統一後隊會變大」是**待驗因果鏈假設，非既定事實**。三跳各有風險：(1) 餓隊 argmax 可能「覓食/掠奪/返家補給」等既有 survival option 先贏（併只是 8-option 之一）；(2) **餵養盲＝致命**：`_find_absorber` 零 food 檢查，餓世界吸附者可能自己也餓 →「併＝把餓稀釋進更大隊＝搬餓非解餓」，不解生存；(3) 隊變大→殲滅窄縫（雙勇均等）常觸，**無現成驗證路徑**。∴ 本設計是**假設驅動的實驗**，成敗以下 §驗收硬 gate 判，非先建先信。
 
 ## 願景骨架
 
@@ -40,6 +44,12 @@
 3. **既有三端/戰鬥行為不退化**：合併改變戰鬥規模是**下游湧現**（隊變大→戰更長→殲滅可見），非直接改 combat 公式。determinism/融合閘/憲法綠。
 4. **不重造概念**：附庸復用 subteam 骨架（01 judge 盤點）。
 
+## ★S-A 硬驗收 gate（reviewer 框外① 靶A，非事後量）
+S-A spec **必須**把下列寫成 measurer 硬 gate（先驗、不過就打回，非先建先看）：
+1. **餵養真解生存非搬餓**：併後吸附者+被吸的合隊，`food 餘裕/餘命`須**實質改善**（吸附者併前有真 surplus 才吸），非把兩個餓隊併成一個更大餓隊。measurer 量併事件前後合隊生存指標。
+2. **隊變大真觸殲滅可見**：organic full_probe 量隊規模分布上移 + `end_annihilation` 是否隨之 >0（承敗北逃 arc 定案的殲滅窄縫）。若隊變大但殲滅仍 0 → 因果鏈第(3)跳斷，回報 blueprint 重估。
+3. **併是湧現非腳本**：無硬寫 `pop<N 就併`；食壓 term 驅 argmax。三端/戰鬥不退化、determinism/融合閘/憲法綠。
+
 ## 交 systems 的 HOW（本 slice S-A）
 - 生存訊號怎麼進 term：飢餓（food 存量 vs 消耗率/餘命）、威脅（打不過的鄰）怎麼量化餵 `consolidate_drive`/`join_drive`。
 - `consolidate_drive` 退 flat：改人格×生存 weigh（野心低+餓→投靠 util 高；野心高→傾向當吸附方）。
@@ -49,4 +59,5 @@
 
 ## 開放/後續
 - S-B 降服全套（脅迫三態/怨氣/叛離）——獨立 slice。
+- **★S-B 動工前置（reviewer 框外① 靶B）**：subteam 骨架多處硬假設 `parent_team_id==absorber_id` 且用途＝「同源子隊歸建」（`subteam_system.gd:185/192/198`、`_decide_subteam` duty-driven 歸建）。S-B build 前**必須先產具體 risk 清單**：外來降服隊塞此骨架會打破哪些既有假設（跨 faction parent_team_id 合法性？duty-driven 歸建對外來附庸誤觸？subteam_ids 雙向同步對外來隊？），確認「推廣非重造」撐得住，非到 S-B 動手才發現骨架撐不住。
 - 跨勢力 vs 同勢力合併邊界——systems 評（現 `_find_absorber` 限同 faction）。
