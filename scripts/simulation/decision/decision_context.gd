@@ -276,6 +276,8 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
 		c.consolidate_target_id = team.consolidate_target_cache
 		c.absorb_target_id = team.absorb_target_cache
+		if Probe.enabled and team.absorb_target_cache != -1:
+			Probe.bump("absorb.target_found")   # DIAG：有 capacity-bound 弱鄰可吸（finder 非空）
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
