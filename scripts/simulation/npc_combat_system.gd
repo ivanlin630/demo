@@ -2,12 +2,11 @@ class_name NpcCombatSystem
 
 const ROUND_CASUALTY_RATE: float      = 0.1
 const VOLLEY_CASUALTY_RATE: float     = 0.05
-const PURSUIT_RATE: float             = 0.05
-# S1 追擊放血人格化（de-patch）：固定 5%→勝方領袖殘忍/貪婪 秤。中性(0.5/0.5)→factor 1.0=保 5% mean baseline。
-const PURSUIT_CRUELTY_W: float        = 1.2    # TEST VALUE：殘忍主導（person_data:40 殘忍高→戰後屠殺）
-const PURSUIT_GREED_W: float          = 0.6    # TEST VALUE：貪婪次（窮追為劫）
-const PURSUIT_FACTOR_MIN: float       = 0.0    # 慈悲領袖幾乎不追（受降傾向，S3 深化）
-const PURSUIT_FACTOR_MAX: float       = 2.5    # 殘忍軍閥上限（safety cap，防無差別暴漲）
+# S1 rev3 追擊絕對 straggler-kill（棄 pop-%：5%×小pop 恆~0）：殘忍/貪婪 scaled 小整數。
+# 慈悲→0、中性→round(0.5*2+0.5*0.8)=1、軍閥→CAP。scale 無關（小隊也見血）、bounded、人格 gated。
+const PURSUIT_CRUELTY_K: float        = 2.0    # TEST VALUE：殘忍主導（person_data:40 殘忍高→戰後屠殺）
+const PURSUIT_GREED_K: float          = 0.8    # TEST VALUE：貪婪次（窮追為劫）
+const PURSUIT_KILL_CAP: int           = 3      # TEST VALUE：軍閥見血上限（bounded，防暴漲打亂逃為主）
 const FLANKING_MULT: float            = 1.3
 const MORALE_CASCADE_THRESHOLD: float = 0.3
 # 照妖鏡#1：flat 潰退門檻 → 膽量人格化（spread 非 shift，均值保 0.2）。
@@ -43,10 +42,6 @@ static var _combat_track: Dictionary = {}   # tid → {round:int, pop_start:int}
 # 分數傷亡累積器（de-patch §D4，★生產路，非探針——與 _combat_track 分家，Probe off 時仍流血）。
 # tid → 累積未取整傷亡餘量。絕境小 pop 每 round 傷亡 <1.0 不再 int(round) 截 0 → mortal zone 真流血 → 殲滅稀>0。
 static var _cas_carry: Dictionary = {}
-# S1 rev2 追擊放血累積器（de-patch 截斷病）：key=loser team_id，跨 pursuit 事件累加分數傷亡
-# （固定 int(pop*0.05*factor) 需 pop≥18 才 ≥1→小隊全 truncate 0=cosmetic 假過關）。
-# 顯式 erase 於 world_state.erase_teams（隊死 chokepoint，防 team_id 重用洩漏；reviewer §D4 教訓）。
-static var _pursuit_carry: Dictionary = {}
 
 func _init() -> void:
 	_msg       = SimMessageSystem.new()
@@ -563,30 +558,25 @@ func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var loser:  TeamData = state.teams[loser_id]
 	if winner.population < loser.population * 2:
 		return   # reachability gate（保留不動）：追不上就不放血
-	# S1 de-patch：放血率隨勝方領袖殘忍/貪婪 秤。中性→factor≈1.0 保 5% mean（人格重分配非全面膨脹）。
+	# S1 rev3 絕對 straggler-kill（棄 pop-%/累積器：5%×小pop 本質恆~0=organic 全小隊零效）。
+	# 殘忍/貪婪 scaled 小整數：慈悲→0、中性→1、軍閥→CAP。scale 無關（小隊也見血）、bounded、人格 gated。
 	var w_leader: PersonData = state.persons.get(winner.leader_id)
-	var factor: float = 1.0
+	var straggler_kill: int = 0
 	if w_leader != null:
 		var cruelty: float = float(w_leader.values.get("殘忍", 0.5))
 		var greed: float   = float(w_leader.values.get("貪婪", 0.5))
-		factor = clampf(1.0 + (cruelty - 0.5) * PURSUIT_CRUELTY_W + (greed - 0.5) * PURSUIT_GREED_W,
-			PURSUIT_FACTOR_MIN, PURSUIT_FACTOR_MAX)
-	# S1 rev2 de-patch：跨 pursuit 事件分數累積器（比照 _cas_carry；棄 int() 單事件截斷=小隊恆 0）。
-	var real: float = maxf(float(loser.population) * PURSUIT_RATE * factor, 0.0)
-	var carry: float = float(_pursuit_carry.get(loser_id, 0.0)) + real
-	var pursuit_loss: int = int(carry)          # floor（carry≥0）
-	_pursuit_carry[loser_id] = carry - float(pursuit_loss)
+		straggler_kill = clampi(int(round(cruelty * PURSUIT_CRUELTY_K + greed * PURSUIT_GREED_K)), 0, PURSUIT_KILL_CAP)
+	var pursuit_loss: int = mini(straggler_kill, loser.population)
 	# 探針：追擊放血人格集中度（勝方領袖殘忍/貪婪加權）
-	if Probe.enabled:
+	if pursuit_loss > 0 and Probe.enabled:
 		Probe.bump("pursuit.n")
 		Probe.add_amount("pursuit.loss_sum", float(pursuit_loss))
-		if w_leader != null:
-			Probe.add_amount("pursuit.cruelty_sum", float(w_leader.values.get("殘忍", 0.5)))
-			Probe.add_amount("pursuit.greed_sum", float(w_leader.values.get("貪婪", 0.5)))
+		Probe.add_amount("pursuit.cruelty_sum", float(w_leader.values.get("殘忍", 0.5)) if w_leader else 0.5)
+		Probe.add_amount("pursuit.greed_sum", float(w_leader.values.get("貪婪", 0.5)) if w_leader else 0.5)
 	if pursuit_loss <= 0:
 		return
 	_apply_casualties(state, loser_id, pursuit_loss)
-	print("[Pursuit] Team%d 追擊 Team%d +%d傷亡 (factor=%.2f)" % [winner_id, loser_id, pursuit_loss, factor])
+	print("[Pursuit] Team%d 追擊 Team%d +%d傷亡 (straggler_kill=%d)" % [winner_id, loser_id, pursuit_loss, straggler_kill])
 
 func _try_retreat(state: WorldState, team_id: int, enemy_id: int) -> void:
 	var team: TeamData = state.teams[team_id]
