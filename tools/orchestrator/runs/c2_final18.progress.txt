@@ -1,1 +1,1 @@
-[progress] 6/18 seeds done (last=202, ticks=21600)
+[progress] 11/18 seeds done (last=444, ticks=21600)
