@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [characterize 回] TASK_MERGE 0/8333 = 可修可達性 bug(order_target 漏接),非結構本罕——修中
 ---
 

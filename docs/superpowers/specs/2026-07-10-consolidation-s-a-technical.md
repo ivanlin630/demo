@@ -53,7 +53,7 @@
 
 ## HOW-5：整隊合併可達性 de-patch（★S-A merge-blocker，18-seed 揭 TASK_MERGE 0/8333）
 **根因確認（code 邏輯確定非假設）**：`options.gd:247` 整併 to_task 回 `{"task": TASK_MERGE, "order_target": ctid}`，但 **`_decide_unified` 成員 dispatch 尾巴（`faction_ai:1508-1512`）只處理 `combat_target`+`social_target`，漏 `order_target`** → `team.order_target_id` 從沒被寫（留 -1）→ resolver `interaction_system:261`（`order_target_id==id_b`）+ `_try_merge:464`（`order_target_id!=target_id: return`）**恆 false** → `_try_merge` 永不執行 → **0/8333**。leader 路（`faction_ai:403`）有接 order_target，成員路漏 = BEG/JOIN social_target 同型 seam bug（target 欄沒接進 dispatch）。**可修可達性 bug 非結構本罕**（solo-join 走 social_target 通、整併走 order_target 斷）。
-**修 = de-patch 補接 order_target**（鏡射 `:403`/social_target 處理）：`_decide_unified` dispatch 尾加 `if td.has("order_target"): team.order_target_id = int(td["order_target"])`。單點解鎖 resolver 到達 + `_try_merge` 內部檢查 → `merge_teams` 真整隊吸收。
+**修 = de-patch 補接 order_target**（鏡射 `:403`）→ **★parity audit 擴大**：`order_target`/`order_task` 只 leader 路（`:403-404`）接，**成員/子隊/solo 三路全漏** → 補三路（`:1509`/`:1703`/`:1776` 旁各加 order_target+order_task，鏡射 leader）。解鎖整併（整隊吸收）+ **求和（`:234` order_target+order_task）第二潛在 never-fire** 一併修。詳工單 `dispatch-parity-fix`。
 - 次要（非本修，觀察）：`interaction:214` combat_target 早退可能仍擋部分（absorber 戰鬥中）→ 降頻非歸零；先修 order_target 看實際 accept 率，再判是否需第二修。
 
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）

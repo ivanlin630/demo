@@ -17,6 +17,7 @@
 | `reaction:166` minor_cap | one-shot | 視語意 floor |
 | `subteam:130` anon_xfer | one-shot round | floor/累積 |
 **已安全（有 `maxi(1,)`）**：`population:18`、`reaction:194`、`interaction:126`。**比較用非病**：`faction_ai:3252`/`player_command:48`/`player_query:232`（`int(pop*1.5)` threshold）。
+- **★同大類第三型：dispatch field-wiring parity（2026-07-11，S-A merge-blocker 揭）**：`to_task` 回傳的 target field 沒被 dispatch 尾接 → field 掉地上 → option never-accept（能 dispatch 不能成，metric 0）。**parity audit**：`order_target`/`order_task` 只 leader 路（`faction_ai:403-404`）接，**成員/子隊/solo 三路全漏**（`:1509`/`:1703`/`:1776`）→ 整併 0/8333（成員）+ 求和 latent（`options.gd:234`）。修=三路補接（鏡射 leader，S-A 折入）。**共性 = 「機制能跑不能成、症狀 metric 0」**（int-truncate / pop-% / field-parity 三型同根，都靠「never-fire→查可達性/量化/wiring 洞非 tune」抓）。
 → **清償 slice（另開，fix 異質不塞 S1）**：per-event=累積器、one-shot=floor/機率化（決定性）。掛 memory [[feedback_structural_audit_complement]]。
 **★更廣結構債（blueprint 2026-07-10 擴，pursuit 3 次失敗揭）**：不只捨入——**`pop-% × 小效果` 在小隊世界普遍失效**（organic 全小隊 → 任何 `pop*小rate` 恆~0，累積器也救不了因每 entity 只觸一次）。sweep 同看**模型選擇**：該量是「敗方 pop 百分比」還是「絕對小數（軍閥砍尾型）」？pursuit=絕對正解（rev3）。與**殲滅不可見同根**（隊太小）=consolidation 腿另一症狀。各站標「pop-% vs 絕對」宜哪個。
 
