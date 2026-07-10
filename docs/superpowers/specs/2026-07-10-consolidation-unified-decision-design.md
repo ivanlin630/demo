@@ -44,11 +44,17 @@
 3. **既有三端/戰鬥行為不退化**：合併改變戰鬥規模是**下游湧現**（隊變大→戰更長→殲滅可見），非直接改 combat 公式。determinism/融合閘/憲法綠。
 4. **不重造概念**：附庸復用 subteam 骨架（01 judge 盤點）。
 
-## ★S-A 硬驗收 gate（reviewer 框外① 靶A，非事後量）
-S-A spec **必須**把下列寫成 measurer 硬 gate（先驗、不過就打回，非先建先看）：
-1. **餵養真解生存非搬餓**：併後吸附者+被吸的合隊，`food 餘裕/餘命`須**實質改善**（吸附者併前有真 surplus 才吸），非把兩個餓隊併成一個更大餓隊。measurer 量併事件前後合隊生存指標。
-2. **隊變大真觸殲滅可見**：organic full_probe 量隊規模分布上移 + `end_annihilation` 是否隨之 >0（承敗北逃 arc 定案的殲滅窄縫）。若隊變大但殲滅仍 0 → 因果鏈第(3)跳斷，回報 blueprint 重估。
-3. **併是湧現非腳本**：無硬寫 `pop<N 就併`；食壓 term 驅 argmax。三端/戰鬥不退化、determinism/融合閘/憲法綠。
+## ★目標重定（2026-07-10，systems 異質審抓因果鏈反向後）
+**consolidation 目標＝食壓驅併＝有機政體湧現 + S-B 政治層地基。非殲滅修復。**
+- systems 異質框外審讀 code 證：因果鏈第(3)跳「隊變大→殲滅可見」**反向**——大隊(eff>MORTAL_EFF_POP=3)跳過絕境逃判、rout 檢查在 annihilation 前跑 → 隊變大=更多機會先 rout 逃走，殲滅**更難**觸；且殲滅=雙勇均等 1v1 窄縫，隊變大更難湊。
+- 且殲滅可見**非 live 目標**（敗北逃 arc 已裁「接受殲滅不可見」）、pop-%（pursuit）已由 S1 rev3 絕對 straggler 解。∴ consolidation 的結構修復正當性蒸發，**真價值＝有機政體/政治層深度**。
+- 但**併決策統一本身仍該做**（`consolidate_drive` flat 1.0 是未統一特例殘留，遲早收）——只是誠實不賣殲滅修復。
+
+## ★S-A 硬驗收 gate（reviewer 框外① 靶A + 目標重定）
+S-A spec **必須**把下列寫成 measurer gate（先驗、非先建先看）：
+1. **餵養真解生存非搬餓（硬 gate）**：併後吸附者+被吸的合隊，`food 餘裕/餘命`須**實質改善**（吸附者併前有真 surplus 才吸），非把兩個餓隊併成一個更大餓隊。measurer 量併事件前後合隊生存指標。**這是 S-A 成敗核心判準**——併若不解生存只搬餓＝白做。
+2. ~~隊變大→殲滅可見~~ **降為「觀察不強求」**（非硬 gate）：因果鏈反向已證，不列驗收條件。measurer 可順手記隊規模分布 + annih 率當 side-observation，但**不作 pass/fail**，也不為它調任何東西。
+3. **併是湧現非腳本（硬 gate）**：無硬寫 `pop<N 就併`；食壓 term 驅 argmax。三端/戰鬥不退化、determinism/融合閘/憲法綠。
 
 ## 交 systems 的 HOW（本 slice S-A）
 - 生存訊號怎麼進 term：飢餓（food 存量 vs 消耗率/餘命）、威脅（打不過的鄰）怎麼量化餵 `consolidate_drive`/`join_drive`。
