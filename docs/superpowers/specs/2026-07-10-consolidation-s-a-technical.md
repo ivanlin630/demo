@@ -22,7 +22,15 @@
 - 威脅加碼（可選）：`+ THREAT_JOIN_W * threat_norm(ctx)`。
 
 ### `consolidate_drive`（整併=全池化合併，弱方主動選）＝S-A 主修（真 flat 病）
-- **eval `:161` 退 flat `CONSOLIDATE_DRIVE`** → 食壓 scaled，**★(b) 預防性併（blueprint 裁 2026-07-11）：threshold 用 `CONSOLIDATE_DAYS`（> `DESPERATION_DAYS`）** → `DESPERATION_SCALE * maxf(0, CONSOLIDATE_DAYS - food_days)`，gate 保 `consolidate_target_id!=-1`。**中度食壓就 fire（看苗頭抱團），非死到臨頭**。**★不抬 priority 壓 survival**——重度食壓時 survival-sticky（`PRIO_SURVIVAL>PRIO_DISPATCH`）天然 pre-empt consolidate＝中度→併/重度→survival 接管，分層非搶優先。（此為 §HOW-5 C 的落地，序：A 到達修交付 accept>0 後做。）
+- **eval `:161` 退 flat `CONSOLIDATE_DRIVE`** → **★(b) 預防性併 band（blueprint 裁 2026-07-11，= §HOW-5 真根 C 的解）**：
+```gdscript
+	"consolidate_drive":
+		if opt != "整併" or ctx.consolidate_target_id == -1: return 0.0
+		if ctx.food_days < DESPERATION_DAYS: return 0.0    # 絕境交 survival,consolidate 不撞(消 29 set_fail churn + 24 被覆寫)
+		return DESPERATION_SCALE * maxf(0.0, CONSOLIDATE_DAYS - ctx.food_days)   # 中度食壓帶[DESPERATION_DAYS, CONSOLIDATE_DAYS)=看苗頭抱團
+```
+  - `CONSOLIDATE_DAYS = 6.0`（TEST VALUE，< `SURVIVAL_RECOVER_DAYS=7`）。**帶 = food_days ∈ [3,6)**：中度餓 fire、survival 未觸（`_trigger_survival` 在更低食壓）→ TASK_MERGE @PRIO_DISPATCH **不被 survival@80 覆寫** → persist 到 movement。**<3 歸 0**：絕境交 survival，consolidate 不 dispatch（消 churn，非搶 priority=blueprint 釘的分層非抬 priority）。
+  - ∴ 真根 C（食壓驅併 vs survival-sticky 互斥）解 = **把 consolidate 觸發窗移出 survival 域**（band 非 monotonic-到-0），非抬 priority。
 - **weight `:229` 退 flat 1.0** → `consolidate` weight = f(求生欲, 1-野心)（餓+不稱霸傾向併大）。
 
 ### 吸附側 pull（強方收弱隊）＝接受方 rank（見 HOW-3）
@@ -56,9 +64,10 @@
 **根因逐層（implementer 漏斗 pinpoint，非 code-read 猜——連三次 misroot 教訓後改實證定位）**：
 - ~~order_target 漏接~~（作廢，早已 wired）。
 - **:214 combat_target 早退**（真但**不足**）：豁免 social/merge 到達已修（@f7f7d6d，BEG/JOIN 同清），但 merge_accept 仍 0。
-- **★到達硬牆（漏斗實證真根）**：`merge.pair_seen=0`＝TASK_MERGE 隊**從不與 absorber co-locate**。根 = `movement_system:37-49` re-track loop **只 TASK_ESCORT** 每 tick refresh move_target，**MERGE/JOIN 用 dispatch 時靜態快照 tile** → absorber（活躍大隊）移走 → merger 走空 tile → 從不到達。（JOIN 偶 resolve 因 host 較靜；MERGE=0 因 absorber 大隊移動多。）
-**修 = A 到達重追蹤**（movement re-track loop 擴 MERGE(order_target)+JOIN(social_target)，鏡射 ESCORT）。詳工單 `merge-arrival-retrack`。
-**★C priority 張力（另 flag blueprint）**：漏斗 29/53 set_fail = 食壓驅併（只餓才驅）vs survival-sticky（餓也 latch，`PRIO_SURVIVAL>PRIO_DISPATCH` 擋 MERGE dispatch）**結構互斥**。= consolidate 語意「絕境併 vs 預防性併」WHAT 問題（`consolidate-priority-tension`），blueprint 裁後定要不要鬆 priority/食壓窗。A 先治 24 set_ok 到達，C 放大 dispatch 量為第二層。
+- ~~到達硬牆/A re-track~~（真但**下游**）：A 到達重追蹤已實作（`merge-arrival-retrack`），但 `mv_reached=0`——TASK_MERGE **從不進 movement loop**（task 在 movement 前已被覆寫）→ A 治不到。
+- **★★真根 = C priority 張力（implementer mv_reached=0 鐵證）**：`set_ok=24 但 mv_reached=0`＝食壓驅併的餓隊同 tick 被 `_trigger_survival`@`PRIO_SURVIVAL(80)` 覆寫 TASK_MERGE@`PRIO_DISPATCH(50)` → 永不 persist 到 movement。29 set_fail（當場擋）+ 24 set_ok-覆寫 = 同張力兩面。**食壓驅併與 survival-sticky 結構互斥**。
+**修 = C1 食壓窗前移 band**（見 §HOW-1 consolidate_drive：中度食壓帶 [DESPERATION_DAYS, CONSOLIDATE_DAYS) fire、<DESPERATION_DAYS 歸 0 交 survival）= blueprint (b) 預防性併裁。**A/combat豁免/居民鎖三 movement 修保留**（C 解後 task persist → 這些下游修才生效＝必要非充分）。
+- **systems 誠實記：mis-ranked C 為次要、A 為主修**（實 C=根、A=下游）——未先探 mv_reached 就排序。implementer 深挖漏斗（mv_reached）校正。
 
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。
