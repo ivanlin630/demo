@@ -1500,6 +1500,12 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 			if _fc2 != null and team.team_id != _fc2.leader_team_id and consolidate_target_of(state, team, _fc2) != -1:
 				Probe.bump("merge_appl.total")
 				Probe.bump("merge_appl.chose_整併" if opt == "整併" else "merge_appl.chose_other")
+				# DIAG C1：有 target 隊的食壓分布（證 consolidate-eligible 是否恆絕境<3，band[3,6)撲空）
+				var _fd: float = ResourceSystem.effective_food(state, team) \
+					/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+				if _fd < DecisionTerms.DESPERATION_DAYS: Probe.bump("merge_appl.food_lt3")
+				elif _fd < 6.0: Probe.bump("merge_appl.food_3to6")
+				else: Probe.bump("merge_appl.food_ge6")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
