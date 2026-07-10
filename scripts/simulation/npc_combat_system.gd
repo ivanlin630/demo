@@ -43,6 +43,10 @@ static var _combat_track: Dictionary = {}   # tid → {round:int, pop_start:int}
 # 分數傷亡累積器（de-patch §D4，★生產路，非探針——與 _combat_track 分家，Probe off 時仍流血）。
 # tid → 累積未取整傷亡餘量。絕境小 pop 每 round 傷亡 <1.0 不再 int(round) 截 0 → mortal zone 真流血 → 殲滅稀>0。
 static var _cas_carry: Dictionary = {}
+# S1 rev2 追擊放血累積器（de-patch 截斷病）：key=loser team_id，跨 pursuit 事件累加分數傷亡
+# （固定 int(pop*0.05*factor) 需 pop≥18 才 ≥1→小隊全 truncate 0=cosmetic 假過關）。
+# 顯式 erase 於 world_state.erase_teams（隊死 chokepoint，防 team_id 重用洩漏；reviewer §D4 教訓）。
+static var _pursuit_carry: Dictionary = {}
 
 func _init() -> void:
 	_msg       = SimMessageSystem.new()
@@ -567,7 +571,11 @@ func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 		var greed: float   = float(w_leader.values.get("貪婪", 0.5))
 		factor = clampf(1.0 + (cruelty - 0.5) * PURSUIT_CRUELTY_W + (greed - 0.5) * PURSUIT_GREED_W,
 			PURSUIT_FACTOR_MIN, PURSUIT_FACTOR_MAX)
-	var pursuit_loss: int = maxi(int(float(loser.population) * PURSUIT_RATE * factor), 0)
+	# S1 rev2 de-patch：跨 pursuit 事件分數累積器（比照 _cas_carry；棄 int() 單事件截斷=小隊恆 0）。
+	var real: float = maxf(float(loser.population) * PURSUIT_RATE * factor, 0.0)
+	var carry: float = float(_pursuit_carry.get(loser_id, 0.0)) + real
+	var pursuit_loss: int = int(carry)          # floor（carry≥0）
+	_pursuit_carry[loser_id] = carry - float(pursuit_loss)
 	# 探針：追擊放血人格集中度（勝方領袖殘忍/貪婪加權）
 	if Probe.enabled:
 		Probe.bump("pursuit.n")

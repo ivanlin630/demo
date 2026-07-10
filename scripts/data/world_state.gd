@@ -292,6 +292,10 @@ func erase_teams(tids: Array) -> void:
 			f.known_member_states.erase(tid)
 			if f.leader_team_id == tid:
 				disband_faction(team.faction_id)
+		# 3b. combat 累積器餘量清除（隊死 chokepoint=所有消滅路徑；防 team_id 重用洩漏。
+		# reviewer R②/§D4 A：硬要求顯式 erase，非靠 start_combat 隱式重置）
+		NpcCombatSystem._pursuit_carry.erase(tid)
+		NpcCombatSystem._cas_carry.erase(tid)
 	# 3. 其他隊指向任一 dead tid 的 ref 單趟全清（死隊間互指不清：隨 teams.erase 一併消失）
 	for otid in teams:
 		if dead.has(otid):
