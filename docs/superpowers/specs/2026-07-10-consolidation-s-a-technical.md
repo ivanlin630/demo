@@ -52,9 +52,9 @@
 - **S-A merge 前置**：大窗現 churn 跑不動（60min timeout），cadence 修好 measurer 才拿得到 gate 樣本。
 
 ## HOW-5：整隊合併可達性 de-patch（★S-A merge-blocker，18-seed 揭 TASK_MERGE 0/8333）
-**根因確認（code 邏輯確定非假設）**：`options.gd:247` 整併 to_task 回 `{"task": TASK_MERGE, "order_target": ctid}`，但 **`_decide_unified` 成員 dispatch 尾巴（`faction_ai:1508-1512`）只處理 `combat_target`+`social_target`，漏 `order_target`** → `team.order_target_id` 從沒被寫（留 -1）→ resolver `interaction_system:261`（`order_target_id==id_b`）+ `_try_merge:464`（`order_target_id!=target_id: return`）**恆 false** → `_try_merge` 永不執行 → **0/8333**。leader 路（`faction_ai:403`）有接 order_target，成員路漏 = BEG/JOIN social_target 同型 seam bug（target 欄沒接進 dispatch）。**可修可達性 bug 非結構本罕**（solo-join 走 social_target 通、整併走 order_target 斷）。
-**修 = de-patch 補接 order_target**（鏡射 `:403`）→ **★parity audit 擴大**：`order_target`/`order_task` 只 leader 路（`:403-404`）接，**成員/子隊/solo 三路全漏** → 補三路（`:1509`/`:1703`/`:1776` 旁各加 order_target+order_task，鏡射 leader）。解鎖整併（整隊吸收）+ **求和（`:234` order_target+order_task）第二潛在 never-fire** 一併修。詳工單 `dispatch-parity-fix`。
-- 次要（非本修，觀察）：`interaction:214` combat_target 早退可能仍擋部分（absorber 戰鬥中）→ 降頻非歸零；先修 order_target 看實際 accept 率，再判是否需第二修。
+**根因（★2026-07-11 修正——systems 首判 order_target 漏接=錯，implementer 框外挑框+實證翻案）**：`order_target`/`order_task` **早已三路 wired**（共享 helper `_wire_threat_task:401-406`，成員 :1529 / 子隊 :1705 / solo :1779 / leader :394 全呼）——首判「成員路漏 order_target」= 不完整讀（漏 :1529 helper 呼叫）。實證：加 dup 無效，`merge_accept=0 且 merge_reject=0`＝`_try_merge` **從沒被 call**（非呼了被拒）。
+**真根 = `interaction_system:214` `if combat_target != -1: return` 早退，先於 social/merge resolver（BEG:228/JOIN:237/MERGE:261）**：absorber 強隊常在戰鬥 → merger 到格 → :214 早退 → `_try_merge` 永不觸 → 0/8333。code :216 註解早點名此 BEG/JOIN 死路類（known_issues:18 同案）。
+**修 = de-patch :214 早退豁免 social/merge 到達**（arriving-to-merge/join/beg 且 target=對方 → resolve，不被對方戰鬥狀態擋；戰鬥路不變）。BEG/JOIN 一併清（同閘）。詳工單 `merge-seam-real-fix`。前兩單（order_target 單點/parity 擴大）作廢。
 
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。

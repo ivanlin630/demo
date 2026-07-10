@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [parity audit 完] order_target/order_task 三路漏接=field-wiring parity 缺口——折入 S-A 修,求和第二case
 ---
 

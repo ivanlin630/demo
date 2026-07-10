@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S-A merge-blocker 修] 整隊合併可達性 de-patch——補接 order_target(0/8333 根因)
 ---
 

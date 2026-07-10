@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S-A 修擴大] dispatch field-parity——order_target+order_task 補三路(非只成員),折入 order_target 修
 ---
 
