@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S1 rev2] pursuit de-patch 累積器——int() 截斷病(cosmetic 假過關)改跨事件累積器
 ---
 

@@ -16,31 +16,26 @@
 
 ### ★S1 追擊放血人格化（de-patch，behavior-CHANGING=地板3；本 slice 開工）
 **現況**：`npc_combat_system.gd:544 _apply_pursuit`——`pursuit_loss=int(loser.pop * PURSUIT_RATE(0.05))` 固定 5%，無人格。gate=`winner.pop >= loser.pop*2`（reachability，保留不動）。
-**de-patch**：追擊放血率隨勝方領袖 **殘忍/貪婪** 秤。中性(0.5/0.5)→factor≈1.0 **保 5% mean baseline**（純按人格重分配非全面膨脹）。殘忍主、貪婪次（呼應 terms.gd:209 attack=好戰+殘忍、:218 loot=殘忍/好戰/貪婪 詞彙）。
+**★S1 rev3（2026-07-10，blueprint 停機制修補→改絕對模型）**：rev1(`int(pop*5%)`截斷)→0、rev2(累積器)→0 兩次零效（rev2 累積粒度錯配=每場只追一次、218 場無隊被追二次→carry never crosses 1.0）。**真根=`5%×小pop` 本質恆~0**（organic 全小隊）。**pop-% 從一開始就錯模型**。
+**改：絕對 straggler-kill**——追擊質感=軍閥砍逃兵尾巴=**絕對小數**（追上最慢幾個），非敗方 pop 百分比。
 ```gdscript
-# 新常數（TEST VALUE）
-const PURSUIT_CRUELTY_W: float = 1.2   # 殘忍主導（person_data:40 殘忍高→戰後屠殺）
-const PURSUIT_GREED_W:   float = 0.6   # 貪婪次（窮追為劫）
-const PURSUIT_FACTOR_MIN: float = 0.0  # 慈悲領袖幾乎不追（受降傾向，S3 深化）
-const PURSUIT_FACTOR_MAX: float = 2.5  # 殘忍軍閥上限（safety cap，防無差別暴漲=blueprint 要的 weight 上限）
+# 新常數（TEST VALUE，measurer 校準）
+const PURSUIT_CRUELTY_K: float = 2.0   # 殘忍主導（軍閥砍尾）
+const PURSUIT_GREED_K:   float = 0.8   # 貪婪次（窮追為劫）
+const PURSUIT_KILL_CAP:  int   = 3     # 絕對上限（bounded，防無差別暴漲）
 ```
-- `pursuit_factor = clampf(1.0 + (殘忍-0.5)*PURSUIT_CRUELTY_W + (貪婪-0.5)*PURSUIT_GREED_W, MIN, MAX)`
-- winner leader null → factor=1.0（保 baseline）。
-
-**★S1 rev2（2026-07-10，measurer 揭截斷病第 3 次 + blueprint 裁 de-patch）**：`pursuit_loss = int(loser.pop * PURSUIT_RATE * factor)` 需 loser.pop≥18 才 ≥1 → organic 敗方多小隊 → **14/14 全 truncate 0，`loss_sum=0`=cosmetic 假過關**（cruelty weight 算了永不咬）。**de-patch = 跨 pursuit 事件分數累積器**（比照 `_cas_carry`）：
-```
-# 每 pursuit 事件：real = loser.pop * PURSUIT_RATE * factor；跨事件 carry
-var real: float = float(loser.population) * PURSUIT_RATE * factor
-var carry: float = _pursuit_carry.get(loser_id, 0.0) + real
-var pursuit_loss: int = int(carry)          # floor
-_pursuit_carry[loser_id] = carry - float(pursuit_loss)
-```
-- `_pursuit_carry` = static dict（同 `_cas_carry` 模式，key=loser team_id）。10-pop 隊被反覆追→漸進掉血（比 truncate 永零 / round 每次必殺1 兩極都對）。**★顯式 erase = 預設硬要求（reviewer R② 釘：非與註解平權——`_cas_carry` 靠隱式重置=當初的坑）**：`_pursuit_carry.erase(loser_id)` 掛所有隊消滅路徑（`erase_team`/滅絕/團滅），堵 team_id 重用洩漏。**comment-only 僅在技術上真做不到 erase 時才准**（且須說明為何做不到），非退而求其次的免責選項。determinism 保（無新 randf）。
+- `w_leader` null → 0（保守，無領袖不主動屠殺）。否則：
+  `straggler_kill = clampi(int(round(cruelty*PURSUIT_CRUELTY_K + greed*PURSUIT_GREED_K)), 0, PURSUIT_KILL_CAP)`
+  - 量級：慈悲(0/0)→0、中性(0.5/0.5)→round(1.4)=1、殘忍軍閥(1/1)→round(2.8)=3。**scale 無關**（小隊也見血）、天生 bounded、人格 gated=S1 紅利。
+- `pursuit_loss = mini(straggler_kill, loser.population)`（不超敗方 pop）。
+- reachability gate `winner.pop >= loser.pop*2`（追得到）**保留不動**。
+- **累積器/`_pursuit_carry` 撤**（絕對整數每場即結，無跨事件狀態=無 erase 顧慮）。**`_cas_carry`（§D4）erase 債另計**（見 erase-amend 工單，仍要補）。
+- 與 measurer B（`PURSUIT_RATE`↑ 放大百分比→大隊暴漲）差別：絕對 clamp 小整數，大小隊都 bounded 不暴漲=「人格化非無差別」正解。determinism 保（無 randf）。
 
 **★機制事實（measurer 量對東西、blueprint 判準）**：`_apply_pursuit` 在 `_end_combat`(:410)/`_force_retreat`(:489) 內 = **combat 結束後放血**，**不重入殲滅檢查**。∴ S1 **不直接動 `combat.end_annihilation` count**（三端在 combat 內決）。「殘忍軍閥靠窮追殲滅」機制上=窮追把潰逃隊放血到後續**滅絕**（`extinct.*` 獨立路）或加重 attrition，非 end_annihilation 三端。
 **探針（S1 驗人格集中）**：`pursuit.n`、`pursuit.loss_sum`、`pursuit.cruelty_sum`、`pursuit.greed_sum`（追擊時勝方領袖值加權）；沿用既有 `end_annihilation`/`end_mortal_flee`/`capture.total` + `extinct.*`。
 **驗（→measurer→blueprint）**：
-- ①放血按人格分配：高殘忍/貪婪 pursuer 放血 factor>1、慈悲<1（`cruelty_sum/n` 對照）。
+- ①放血按人格分配：`straggler_kill` 隨殘忍/貪婪 升（慈悲=0、軍閥=CAP），`pursuit.loss_sum>0`（`cruelty_sum/n` 對照證集中高殘忍 pursuer）。
 - ②**三端 organic 不打亂**（地板1）：`end_annihilation`/`mortal_flee`/`capture` ≈ S1 前（預期 end_annihilation 幾乎不動=機制事實）；若 `extinct.*`/attrition 因殘忍窮追升→標明分布（blueprint 判軍閥暴虐湧現 vs 打亂）。
 - ③determinism（無新 randf，pursuit_loss 確定性）/融合閘/憲法綠。
 

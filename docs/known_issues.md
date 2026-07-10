@@ -18,6 +18,7 @@
 | `subteam:130` anon_xfer | one-shot round | floor/累積 |
 **已安全（有 `maxi(1,)`）**：`population:18`、`reaction:194`、`interaction:126`。**比較用非病**：`faction_ai:3252`/`player_command:48`/`player_query:232`（`int(pop*1.5)` threshold）。
 → **清償 slice（另開，fix 異質不塞 S1）**：per-event=累積器、one-shot=floor/機率化（決定性）。掛 memory [[feedback_structural_audit_complement]]。
+**★更廣結構債（blueprint 2026-07-10 擴，pursuit 3 次失敗揭）**：不只捨入——**`pop-% × 小效果` 在小隊世界普遍失效**（organic 全小隊 → 任何 `pop*小rate` 恆~0，累積器也救不了因每 entity 只觸一次）。sweep 同看**模型選擇**：該量是「敗方 pop 百分比」還是「絕對小數（軍閥砍尾型）」？pursuit=絕對正解（rev3）。與**殲滅不可見同根**（隊太小）=consolidation 腿另一症狀。各站標「pop-% vs 絕對」宜哪個。
 
 ## combat-into-engine arc backlog（2026-07-10，spec `specs/2026-07-10-combat-into-engine`）
 - **S4 斷糧求生路由（blueprint 裁 defer）**：`rank_combat` COMBAT_OPTION_SET{血戰/逃} 無「逃向補給/家」跨域路由=結構漏（現行 `_mortal_flee_check` 亦只戰場逃，S2 preserving 不使其更糟）。=淨新 feature，掛絕境經濟/consolidation arc。別丟。

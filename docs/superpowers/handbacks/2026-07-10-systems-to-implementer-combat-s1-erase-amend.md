@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S1 rev2 修正] _pursuit_carry erase = 硬要求非可選——reviewer R② 釘
 ---
 
