@@ -34,16 +34,23 @@ const WAGON_TERRAIN_MULT: Dictionary = {
 #   確定性仍守（同 seed 同結果）。禁在迴圈內先濾後算/memoize 重排 randf 消耗序。
 func process(state: WorldState, team_ids: Array,
 		time_mult: float = 1.0, elapsed_ticks: int = WorldState.TICKS_PER_HOUR) -> Dictionary:
-	# 護衛：每 tick 追蹤目標位置
+	# 到達重追蹤：ESCORT/MERGE(order_target)/JOIN(social_target) 每 tick 追目標現位。
+	# S-A seam 修 A：MERGE/JOIN 原用 dispatch 靜態快照→活躍大隊(absorber/host)移走→merger 走空 tile→
+	# pair_seen=0(從不 co-locate)。比照 ESCORT 追移動目標。（BEG 短程暫不納。）
 	for tid in team_ids:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
-		if team.current_task != TeamData.TASK_ESCORT or team.order_target_id == -1:
+		var tgt_id: int = -1
+		if team.current_task == TeamData.TASK_ESCORT or team.current_task == TeamData.TASK_MERGE:
+			tgt_id = team.order_target_id
+		elif team.current_task == TeamData.TASK_JOIN:
+			tgt_id = team.social_target
+		if tgt_id == -1:
 			continue
-		var target: TeamData = state.teams.get(team.order_target_id)
+		var target: TeamData = state.teams.get(tgt_id)
 		if target == null:
-			TaskArbiter.release(team)   # 護衛對象消失 → 任務結束
+			TaskArbiter.release(team)   # 目標消失 → 任務結束
 			team.order_target_id = -1
 		else:
 			team.move_target = target.tile_pos
@@ -56,15 +63,22 @@ func process(state: WorldState, team_ids: Array,
 		# 居民鎖：PRODUCE + 在自家 outpost + task 不在脫離清單
 		if team.tags.has(TeamData.TAG_PRODUCE):
 			var fai := FactionAISystem.new()
+			# S-A：TASK_MERGE 納脫離清單（原缺→PRODUCE 居民 merger 被鎖在 outpost→永不到 absorber→pair_seen=0；
+			# JOIN 本在清單=能離開,MERGE 漏=asymmetry 根。整併=脫離現據點併大隊,語意同 JOIN 該放行）。
 			if fai._is_resident_team(state, team) \
-					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_REVOLT, TeamData.TASK_MIGRATE, TeamData.TASK_PREPARE]:
+					and team.current_task not in [TeamData.TASK_FLEE, TeamData.TASK_JOIN, TeamData.TASK_MERGE, TeamData.TASK_REVOLT, TeamData.TASK_MIGRATE, TeamData.TASK_PREPARE]:
 				continue
+		var _dbg_merge: bool = Probe.enabled and team.current_task == TeamData.TASK_MERGE
+		if _dbg_merge: Probe.bump("merge.mv_reached")   # DIAG：TASK_MERGE 隊過居民鎖，進 movement
 		if team.combat_target != -1:
+			if _dbg_merge: Probe.bump("merge.mv_block_combat")   # DIAG：combat_target 擋移動
 			continue
 		# A2c-2 折入：戰略移動 move_target 改由 arbiter-owned set_strategic_move 於 movement 前設
 		#（sim_runner._step2a_strategic_move）→ 此處不再直讀 strategic_assignments（bypass 收攏）。
 		if team.move_target == Vector2i(-1, -1):
+			if _dbg_merge: Probe.bump("merge.mv_no_target")   # DIAG：move_target 未設
 			continue
+		if _dbg_merge: Probe.bump("merge.mv_moving")   # DIAG：TASK_MERGE 隊實際行軍
 		team.move_tick_acc += elapsed_ticks
 		var old_target: Vector2i = team.move_target
 		# 多格迴圈：acc>=cost 逐格步進、每步 acc-=cost 保餘數（疏非慢非笨）。

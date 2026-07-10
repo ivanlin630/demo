@@ -33,6 +33,7 @@ const PROBE_KEYS: Array = [
 	"accept.join_accept", "accept.join_reject", "accept.merge_accept", "accept.merge_reject", "consol.accept_n",
 	"merge.pair_seen", "merge.branch_reached", "merge.try_entered", "merge.guard_fail_ordertgt",
 	"merge.set_ok", "merge.set_fail",
+	"merge.mv_reached", "merge.mv_block_combat", "merge.mv_no_target", "merge.mv_moving",
 	# A2c-2 D0：戰略移動 overlay(FA6)characterization——overlay 生效頻率 + 包圍/突圍指派 + 到達
 	"strat.sa_move_dispatch", "strat.encircle_assigned", "strat.breakout_assigned", "strat.expand_reached",
 	# R1 驗收（三帶+logistics）：絕境仍搏 / ③管住獨立隊攻屬村 / 貿易量（guard ④）
