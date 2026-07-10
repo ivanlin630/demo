@@ -1056,7 +1056,8 @@ func _precond_met(state: WorldState, f, leader_team: TeamData, pre: String, targ
 			var own_armed: int = _calc_own_armed(state, leader_team)
 			return float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO
 		"can_reach":
-			return target_id != -1 and _hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999
+			return target_id != -1 and state.teams.has(target_id) \
+				and _hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999
 		"has_richer_member":
 			return _richest_member(state, f) != -1
 	return true
