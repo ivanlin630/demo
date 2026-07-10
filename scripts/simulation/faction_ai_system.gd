@@ -1503,6 +1503,8 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		if Probe.enabled and opt == "整併":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
+			Probe.bump("merge.set_ok" if _set_ok else "merge.set_fail")
 		# 漏斗站4探針（純觀測）：unified 路徑 TRADE 實派計數（分 opt）。
 		# timeout 起算已改讀 try_set 蓋章的 task_start_tick（單源），此路不需另外蓋章。
 		if _set_ok and td["task"] == TeamData.TASK_TRADE:

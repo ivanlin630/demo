@@ -212,8 +212,19 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 				Probe.bump("atk.blocked_ct_197")   # 同格但 combat_target 早退擋開打
 			else:
 				Probe.bump("atk.reached")           # 同格可開打（→ 276 branch）
-	if a.combat_target != -1 or b.combat_target != -1:
-		# 197 早退先於 247 BEG resolver。BEG/JOIN 恆設 combat_target → 恆走此路 → resolver 死路。
+	# S-A de-patch：社交/merge 到達豁免 combat_target 早退（BEG:229/JOIN:237/MERGE:261 resolver 在此之後→
+	# absorber 強隊在戰鬥→merger 到格被早退擋→_try_merge 永不觸=0/8333，known_issues:18 BEG/JOIN 同類死路）。
+	# 豁免條件鏡射下方 resolver 觸發條件（target=對方）→ 只放社交路，戰鬥路（攻擊/掠奪到達）不變。
+	if Probe.enabled and (a.current_task == TeamData.TASK_MERGE or b.current_task == TeamData.TASK_MERGE):
+		Probe.bump("merge.pair_seen")   # DIAG：TASK_MERGE 隊出現在任一接觸對（co-location 發生）
+	var _social_arrive: bool = (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
+		or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a) \
+		or (a.current_task == TeamData.TASK_JOIN and a.social_target == id_b) \
+		or (b.current_task == TeamData.TASK_JOIN and b.social_target == id_a) \
+		or (a.current_task == TeamData.TASK_BEG and a.social_target == id_b) \
+		or (b.current_task == TeamData.TASK_BEG and b.social_target == id_a)
+	if (a.combat_target != -1 or b.combat_target != -1) and not _social_arrive:
+		# 197 早退先於 247 BEG resolver（非社交路才擋；社交/merge 到達已豁免）。
 		if a.current_task == TeamData.TASK_BEG or b.current_task == TeamData.TASK_BEG:
 			Probe.bump("beg.early_return_197")
 		if a.current_task == TeamData.TASK_JOIN or b.current_task == TeamData.TASK_JOIN:
@@ -261,6 +272,7 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 			SubteamSystem.new().merge_teams(state, absorber, absorbed, all_npcs)
 		elif (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
 				or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a):
+			if Probe.enabled: Probe.bump("merge.branch_reached")   # DIAG
 			_try_merge(state, id_a, id_b)
 		elif a.current_task == TeamData.TASK_SETTLE:
 			var tile: HexTileData = state.world.tiles.get(a.tile_pos.x * 1000 + a.tile_pos.y)
@@ -462,7 +474,9 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 	var merger_id: int = id_a if a.current_task == TeamData.TASK_MERGE else id_b
 	var target_id: int = id_b if merger_id == id_a else id_a
 	var merger: TeamData = state.teams[merger_id]
+	if Probe.enabled: Probe.bump("merge.try_entered")   # DIAG
 	if merger.order_target_id != target_id:
+		if Probe.enabled: Probe.bump("merge.guard_fail_ordertgt")   # DIAG
 		return
 	# S-A 靶C 雙邊握手：absorber(target) 秤 accept-util。拒→merger 回退（釋放，下 cadence 重 argmax）。
 	if not _absorber_accepts(state, target_id, merger_id):
