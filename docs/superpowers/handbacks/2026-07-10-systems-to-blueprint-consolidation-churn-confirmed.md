@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [churn 確認] 假設 profile 屬實——cadence gate 修（merge 前置）+ metric 已交 measurer
 ---
 
