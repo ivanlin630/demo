@@ -263,7 +263,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if team.faction_id != -1 and team.parent_team_id == -1:
 		var _f = state.factions.get(team.faction_id)
 		if _f != null and team.team_id != _f.leader_team_id:
-			c.consolidate_target_id = FactionAISystem.consolidate_target_of(state, team, _f)
+			# S-A：cadence gate（1 日）——快取 target，防每成員每 tick O(N) _find_absorber churn。
+			if state.world.current_tick >= team.consolidate_eval_next_tick:
+				team.consolidate_target_cache = FactionAISystem.consolidate_target_of(state, team, _f)
+				team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
+			c.consolidate_target_id = team.consolidate_target_cache
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
