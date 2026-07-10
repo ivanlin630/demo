@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [big-window 確認] 統一併入 @32bc09b funnel ~0——排除樣本量,結構確認→to:blueprint(supersede c2-bigwindow)
 ---
 

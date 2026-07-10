@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [§HOW-7 開工] 強方擴張 pull「吸納」——擴張-class 強隊主動吸弱鄰,複用併入分流;R② CLEAN
 ---
 
