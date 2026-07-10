@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: 大窗量測 SOP 裁定——單批預設/seed=1估耗時/進度sidecar（bed已加）；現象2非環境是機制重
 ---
 

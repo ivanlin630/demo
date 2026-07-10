@@ -42,6 +42,15 @@
 3. accept → `merge_teams`（整併）/ subteam attach（投靠）；reject → 發起方回退（下 cadence 重 argmax，可能轉別 absorber 或別 option）。
 - **邊界誠實聲明**：此 resolver = bespoke 薄層（contact 觸發），**不假裝零框外**。**accept-util 邊界公式仿 `_resolve_aid_request`(BEG) 節制原則＝單一 util 比較非全 rank**（reviewer 顯式點名前例：judge 盤點確認 accept-util 與 BEG resolver 結構近但非同 judge/不同 option 域，不違 01 鐵律）。**★量級但書（異質審抓）**：同構的 `_resolve_aid_request`(BEG) 實測 ~75 行完整次要評分系統——「薄層」史上守不住，**別承諾「~1 函數」**；accept-util 若滾成 absorber 側完整 rank 就是第二決策引擎（違統一）。設計約束：accept-util **限單一 util 比較（收/不收）非全 option rank**，超出即回報 blueprint 重估「薄層是否撐得住」。復用 interaction-resolver seam（judge 盤點：非重造，同 BEG/JOIN/aid 模式）。
 
+## HOW-4：consolidate cadence gate（★perf，S-A merge 前置；blueprint churn 假設 systems profile 確認）
+**根因確認（file:line）**：`decision_context.gd:262-266` 每 faction 成員（非子隊非 leader）**每 tick** call `consolidate_target_of`→`_find_absorber`（`faction_ai:1562`）O(N) 掃全 faction 成員，**無 cadence gate**（`subteam_eval_next_tick`/`threat_eval_next_tick:357` 有、成員整併塊漏）。S-A `consolidate_drive` 食壓 scaled → 餓隊 argmax 選整併 → dispatch → 餵養 gate#1 拒 → re-dispatch **churn**（dispatch:accept≈281:1），疊每-tick O(N) = 2x 慢 + 抖動走位。
+**修 = cadence gate（鏡射 `SUBTEAM_CADENCE`，1 日級）**：
+- `TeamData` +`consolidate_target_cache: int`(-1) + `consolidate_eval_next_tick: int`。
+- `decision_context.gd:266` 前 gate：`if current_tick >= team.consolidate_eval_next_tick: cache = consolidate_target_of(...); next_tick = current_tick + CONSOLIDATE_CADENCE`；否則 `c.consolidate_target_id = cache`（用快取，不重掃）。
+- `CONSOLIDATE_CADENCE = TimeScale.TICK_PER_DAY * 1`（TEST VALUE）。
+- = 砍 O(N) 掃頻率（每 tick→每日）+ churn（餓隊不每 tick 重派）→ perf 解 + 行為更穩。determinism 保（cache 純節流，同 seed 同軌）。
+- **S-A merge 前置**：大窗現 churn 跑不動（60min timeout），cadence 修好 measurer 才拿得到 gate 樣本。
+
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。
    - **★空真守衛（reviewer R② 抓，pursuit 截斷病同型）**：本 gate 須先驗**併事件次數 >0**（organic full_probe 內）才有效判定；**=0 則標 `INCONCLUSIVE` 非 PASS**（「沒一次搬餓」空真≠通過），並回報**門檻 `ABSORBER_MIN_SURVIVE_DAYS` 可能過嚴致機制啞**（同 gate 太嚴=機制不 fire 的截斷病），systems 調門檻重跑。
