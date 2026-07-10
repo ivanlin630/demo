@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S-A 開工] consolidation 併決策統一——term 退flat/餵養gate/accept-util薄層
 ---
 

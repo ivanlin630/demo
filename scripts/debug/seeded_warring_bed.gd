@@ -24,13 +24,24 @@ func _run() -> void:
 	var ticks: int = maxi(months, 1) * WorldState.TICKS_PER_MONTH
 	print("=== seeded_warring_bed：seeds=%s months=%d (ticks=%d) ===" % [str(seeds), months, ticks])
 
+	# 進度 sidecar（繞 godot.ps1 末端 transcode 的盲點：長跑中途 measurer 可 Read 此檔查進度）。
+	var prog_path: String = OS.get_environment("WARRING_PROGRESS")
+	var _seed_n: int = seeds.size()
+
 	var results: Dictionary = {}
+	var _done: int = 0
 	for s in seeds:
 		var r: Dictionary = WarringHarness.run(int(s), ticks)
 		if r.is_empty():
 			print("[FAIL] seed=%d harness 空（config 載入失敗？）" % int(s)); continue
 		results[str(int(s))] = r
 		_print_metrics(int(s), r)
+		_done += 1
+		if prog_path != "":
+			var pf := FileAccess.open(prog_path, FileAccess.WRITE)   # 覆寫（最新一行即進度）
+			if pf != null:
+				pf.store_string("[progress] %d/%d seeds done (last=%d, ticks=%d)\n" % [_done, _seed_n, int(s), ticks])
+				pf.close()   # close = flush，確保 measurer 中途 Read 得到
 
 	# dump baseline
 	var out_path: String = OS.get_environment("WARRING_OUT")
