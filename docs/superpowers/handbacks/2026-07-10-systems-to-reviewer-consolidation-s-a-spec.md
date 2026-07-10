@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 異質框外審] consolidation S-A 技術 spec——大架構三對齊，refute 導向，spec-lock 前 CLEAN
 ---
 
