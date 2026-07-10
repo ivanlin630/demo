@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 框內] S-A 統一「併入」spec 更新——join+整併合一+分流+忠誠init;審設計健全
 ---
 

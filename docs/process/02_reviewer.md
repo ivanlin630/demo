@@ -18,6 +18,19 @@
 | **對抗①（factcheck）** | 00→01（工單→spec 前） | **fact-check 工單每個 code 斷言**：grep 驗 file:line | 前提被 code 打臉（「X不存在」但 grep 到）＝`premise_contradiction` |
 | **對抗②（review）** | 01→03（spec→build 前） | **對抗審具體 spec**：設計健不健全 | 真根治 vs 搬問題（閉迴路 vs 移閥）、漏洞、退化風險、違反 invariants |
 
+## ★R② refute checklist：補丁 / 框架內補丁 / 冗餘求解器（用戶定 2026-07-11）
+對抗②審 spec/設計，除「真根治 vs 搬問題」，**明確逐問**（尤 systems/blueprint 下「加 X」型變更）：
+1. **框架外補丁**？settled architecture 上疊繞過/硬 gate → refute（[[feedback_patch_gate_first]] / `feedback_no_patch_on_settled_architecture`）。
+2. **★框架內冗餘求解器**（更隱蔽）：新增 option/term/solver **跟既有某個做重疊的事**嗎？兩路 applicable 域重疊 + 結果殊途同歸（血證：join vs 整併 都走 `merge_teams` 全併、搶同絕境 niche → 整併 marginal 2.5%；用戶抓非 reviewer）→ refute，要求**收斂為一**（一決策 + 參數分流），非並存。
+3. **flat/特例驅力**？掛框架上但沒真過人格/生存秤（血證：consolidate_drive flat 1.0）→ refute，要求收進真 term。
+4. **正解方向**：收進真 term 秤 / 收斂冗餘求解器為一 / de-patch 拆閘——**非**在框架內多加一個平行物。
+
+**smell test（具體）**：
+- 「這新 option/term/solver，**能不能用既有的某個 + 參數分流達成**？」能 → 冗餘，refute。
+- 「兩 option **applicable 域重疊 + 結果殊途同歸**嗎？」是 → 收斂為一。
+- 「這是**延伸統一**還是**在框架裡開分支繞過**？」
+- 缺此 lens 的代價：本 session reviewer 兩次對抗①（combat-into-engine/consolidation）都放行 join/整併 冗餘，用戶才在設計對話看穿。
+
 ## 鐵律
 1. **任何 code 事實斷言必須有 file:line**（用 Read/Grep/Glob 查證，不臆測、不憑記憶）。
 2. **預設反駁（refute-by-default）**：不確定 → 標為疑點，不放行。

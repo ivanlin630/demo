@@ -32,7 +32,7 @@ resolve（接觸時 host 願收 = 統領容量 + rank 秤意願）→ 結果分�
 `set_subteam_parent` 對**外來隊**（非 host 自己分出的）：subteam 骨架多處硬假設 `parent_team_id==absorber_id` 用途＝「同源子隊歸建」（`subteam_system:185/192/198` duty 驅歸建）→ 外來附庸子隊可能誤觸歸建/faction 繼承 edge。**S-A 只需 set 通（parent+faction+loyalty），跑得順即可**；歸建-duty 對外來隊的完整處置歸 S-B risk 清單（`known_issues` S-B 前置）。
 
 ### 驗（measurer）
-- **`merge_accept>0` 且分流兩端都現**（dissolve + 子隊各有樣本）。gate#1 非搬餓（併進真 surplus host）+ 隊數不崩塌（防 mega-blob）+ **忠誠初始化生效**（併入者 loyalty≠原隊值、脅迫端低）+ 三 gate + churn + determinism。
+- **`merge_accept>0` 且分流兩端都現**（dissolve + 子隊各有樣本）。**★對稱空窗守衛（reviewer R② 建議）：分流任一端=0（只 dissolve 或只子隊）→ 標 `INCONCLUSIVE` 非 PASS + 回報分流門檻可能失衡（同 gate#1 空真守衛型）**，systems 調門檻重跑。gate#1 非搬餓（併進真 surplus host）+ 隊數不崩塌（防 mega-blob）+ **忠誠初始化生效**（併入者 loyalty≠原隊值、脅迫端低）+ 三 gate + churn + determinism。
 - 大窗用 detach+resume（03b SOP）。
 
 ---
