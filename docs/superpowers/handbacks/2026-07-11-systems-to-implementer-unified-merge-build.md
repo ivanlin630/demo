@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [統一併入 開工] join+整併合一+分流+忠誠init——reviewer R② CLEAN,疊 @34034bb
 ---
 

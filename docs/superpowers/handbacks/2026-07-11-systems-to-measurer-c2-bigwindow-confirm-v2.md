@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: C2 big-window 確認 marginal 結構非樣本——survival-rank%/accept/gate#1 逐站→to:blueprint
 ---
 
