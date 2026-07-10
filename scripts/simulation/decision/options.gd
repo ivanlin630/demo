@@ -17,6 +17,8 @@ const REGISTRY: Dictionary = {
 	# S-A §HOW-6：統一「併入」（join+整併合一，取代兩 row）。絕境求生 food-scaled；weight=求生欲/(1-野心)
 	# （§HOW-6 定，非 join weight——join weight×low_ambition 使 併入 rank 過低不勝 survival first=0 regression）。
 	"併入":   [["join_drive", "mergein"]],
+	# S-A §HOW-7：強方擴張 pull「吸納」（強隊主動吸弱鄰，擴張-class @PRIO_DISPATCH，非 survival）。
+	"吸納":   [["absorb_drive", "absorb"]],
 	"紮營":   [["camp_drive", "camp"]],
 	"乞食":   [["beg_drive",  "beg"]],
 	# 序4 vendetta 溶入：feud_pull term 掛入 → 血仇成攻擊的一個 weight 驅力（衝動 leader 血仇高→攻擊贏 rank）。
@@ -41,7 +43,7 @@ const REGISTRY: Dictionary = {
 
 # A2a 通用戰略-gate：子隊不自主發起「擴張自身戰略足跡」的 option（立據/奪據/練兵＝leader/faction 決定；
 # 母團命令走 pre-set lifecycle task，引擎點結構上無 strategic directive）。新增戰略 option 入 SET 自動涵蓋。
-const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練"]
+const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練", "吸納"]   # §HOW-7 吸納=擴張戰略,子隊不自主發起
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
 const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "併入", "紮營", "乞食", "買糧"]   # S-A §HOW-6：統一「併入」(join+整併合一)絕境求生
@@ -98,6 +100,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 			"併入":
 				# §HOW-6：絕境 + 有 surplus host（consolidate_target_id 含 gate#1 餵養檢查=非搬餓）。
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.consolidate_target_id != -1: out.append(opt)
+			"吸納":
+				# §HOW-7：有 capacity-bound 可吸弱鄰（finder 已保統領餘裕裝得下）→ 擴張候選（無 food gate）。
+				if ctx.absorb_target_id != -1: out.append(opt)
 			"紮營":
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_farmable_tile \
 						and not ctx.has_own_outpost: out.append(opt)
@@ -175,6 +180,12 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			if host == -1 or not state.teams.has(host): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			return {"task": TeamData.TASK_JOIN, "target": state.teams[host].tile_pos,
 				"social_target": host, "order_target": host}
+		"吸納":
+			# §HOW-7：強方向弱鄰行軍吸納。TASK_MERGE(merger=本強隊,order_target=弱鄰)→_try_merge 分流。
+			var _ac: DecisionContext = DecisionContext.gather(state, team)
+			var prey: int = _ac.absorb_target_id
+			if prey == -1 or not state.teams.has(prey): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_MERGE, "target": state.teams[prey].tile_pos, "order_target": prey}
 		"紮營":
 			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
 			if ft == Vector2i(-1,-1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

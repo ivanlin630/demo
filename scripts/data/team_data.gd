@@ -122,6 +122,7 @@ var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標
 var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
 var subteam_eval_next_tick: int = 0      # 下次子隊決策 tick（cadence，鏡射 threat_eval_next_tick，A2a）
 var consolidate_target_cache: int = -1   # S-A：整併 target 快取（cadence 節流，防每 tick O(N) _find_absorber）
+var absorb_target_cache: int = -1        # §HOW-7：吸納弱鄰 target 快取（同 cadence 節流）
 var consolidate_eval_next_tick: int = 0  # S-A：下次整併 target 評估 tick（cadence，鏡射 subteam_eval_next_tick）
 var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻

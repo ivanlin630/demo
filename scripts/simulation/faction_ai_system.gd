@@ -1496,6 +1496,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
 		# full_probe（診斷）：fold 路 merge 實派 + merge-applicable 隊 option 去向（B 鐵證：該併卻選別的）。
 		if opt == "併入": Probe.bump("merge.consolidate_dispatch")
+		if Probe.enabled and opt == "吸納": Probe.bump("absorb.dispatch")   # §HOW-7 強方吸納實派
 		if Probe.enabled and team.faction_id != -1 and team.parent_team_id == -1:
 			var _fc2 = state.factions.get(team.faction_id)
 			if _fc2 != null and team.team_id != _fc2.leader_team_id and consolidate_target_of(state, team, _fc2) != -1:
@@ -3199,6 +3200,30 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 				or (absf(pop_est - best_pop) <= PREY_POP_TIE_EPS and food_est > best_food):
 			best_pop = pop_est
 			best_food = food_est
+			best_id = tid
+	return best_id
+
+# §HOW-7 吸納 target：adapt _find_weakest_prey + ★capacity-bound（統領餘裕裝得下才吸，非直接複用攻擊 target）。
+# 弱(pop_est<本隊*0.7)+近(reachable)+裝得下(pop_est <= pop_cap_from_leadership(統領)-本隊 pop)。回弱鄰 id / -1。
+func _find_absorb_target(state: WorldState, team: TeamData) -> int:
+	var ldr: PersonData = state.persons.get(team.leader_id)
+	var cmd: float = float(ldr.skills.get("統領", 0.0)) if ldr else 0.0
+	var slack: int = TeamData.pop_cap_from_leadership(cmd) - team.population
+	if slack <= 0:
+		return -1   # 無統領餘裕 → 吸不下
+	var best_id: int = -1
+	var best_pop: float = 999999.0
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
+		if not PathSystem.estimate_catch_up(state, team, tid, true).reachable: continue
+		var pop_est: float = float(BeliefSystem.best_estimate(state, team.team_id, tid).get("population_est", 0.0))
+		if pop_est >= float(team.population) * 0.7: continue   # 不夠弱
+		if pop_est > float(slack): continue                    # ★capacity-bound：裝不下不吸
+		if pop_est < best_pop:
+			best_pop = pop_est
 			best_id = tid
 	return best_id
 

@@ -96,6 +96,7 @@ var is_subteam: bool = false
 # A2c-1（FA5 折入）：整併 target（容量吸收優先，否則戰前向 leader 集結）。非-leader faction 成員
 # + 非子隊才算（鏡射 _try_consolidate_merge 兩支，保真）。-1 = 無整併 target。
 var consolidate_target_id: int = -1
+var absorb_target_id: int = -1   # §HOW-7 吸納：capacity-bound 可吸弱鄰（強方擴張 pull）
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -258,16 +259,23 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			c.intent_target = c.prosperity_prey_id
 			c.intent_target_pos = state.teams[c.prosperity_prey_id].tile_pos
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.readiness_prey", _tg)
-	# A2c-1（FA5）：整併 target（非-leader faction 成員 + 非子隊才算）。
+	# 併入/吸納 target（cadence gate 1 日共用，防每 tick O(N) finder churn）。非子隊才算。
 	c.consolidate_target_id = -1
-	if team.faction_id != -1 and team.parent_team_id == -1:
-		var _f = state.factions.get(team.faction_id)
-		if _f != null and team.team_id != _f.leader_team_id:
-			# S-A：cadence gate（1 日）——快取 target，防每成員每 tick O(N) _find_absorber churn。
-			if state.world.current_tick >= team.consolidate_eval_next_tick:
-				team.consolidate_target_cache = FactionAISystem.consolidate_target_of(state, team, _f)
-				team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
-			c.consolidate_target_id = team.consolidate_target_cache
+	c.absorb_target_id = -1
+	if team.parent_team_id == -1:
+		if state.world.current_tick >= team.consolidate_eval_next_tick:
+			# §HOW-6 併入 target（faction 成員 push）
+			var ct: int = -1
+			if team.faction_id != -1:
+				var _f = state.factions.get(team.faction_id)
+				if _f != null and team.team_id != _f.leader_team_id:
+					ct = FactionAISystem.consolidate_target_of(state, team, _f)
+			team.consolidate_target_cache = ct
+			# §HOW-7 吸納 target（強方 pull，capacity-bound 弱鄰）
+			team.absorb_target_cache = FactionAISystem.new()._find_absorb_target(state, team)
+			team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
+		c.consolidate_target_id = team.consolidate_target_cache
+		c.absorb_target_id = team.absorb_target_cache
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。

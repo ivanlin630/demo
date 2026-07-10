@@ -256,6 +256,13 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	if b.current_task == TeamData.TASK_JOIN and b.social_target == id_a:
 		_resolve_join(state, id_b, id_a)
 		return
+	# §HOW-7 吸納 resolver（強方 pull，TASK_MERGE）：置 same_faction 前=可跨勢力吸弱鄰（擴張，mirror JOIN 位置）。
+	if a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b:
+		_try_merge(state, id_a, id_b)
+		return
+	if b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a:
+		_try_merge(state, id_b, id_a)
+		return
 	var same_faction: bool = a.faction_id != -1 and a.faction_id == b.faction_id
 	if same_faction:
 		if a.current_task == TeamData.TASK_TRIBUTE:
@@ -274,10 +281,6 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 			if abs_team.leader_id != -1: all_npcs.append(abs_team.leader_id)
 			all_npcs.append_array(abs_team.named_members)
 			SubteamSystem.new().merge_teams(state, absorber, absorbed, all_npcs)
-		elif (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
-				or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a):
-			if Probe.enabled: Probe.bump("merge.branch_reached")   # DIAG
-			_try_merge(state, id_a, id_b)
 		elif a.current_task == TeamData.TASK_SETTLE:
 			var tile: HexTileData = state.world.tiles.get(a.tile_pos.x * 1000 + a.tile_pos.y)
 			if tile and tile.outpost_owner != -1:
@@ -482,22 +485,19 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 	if merger.order_target_id != target_id:
 		if Probe.enabled: Probe.bump("merge.guard_fail_ordertgt")   # DIAG
 		return
-	# S-A 靶C 雙邊握手：absorber(target) 秤 accept-util。拒→merger 回退（釋放，下 cadence 重 argmax）。
-	if not _absorber_accepts(state, target_id, merger_id):
+	# §HOW-7 吸納：merger=強方發起（TASK_MERGE 向弱鄰），target=弱鄰。強吸弱=absorber:merger、absorbed:target。
+	# gate#1（強有 surplus 餵得起弱）= _absorber_accepts(強,弱) 的 feed_ok；弱方默許(S-A 非脅迫,怨走低 loyalty)。
+	if not _absorber_accepts(state, merger_id, target_id):
 		if Probe.enabled: Probe.bump("accept.merge_reject")
 		TaskArbiter.release(merger)
 		merger.order_target_id = -1
 		return
 	if Probe.enabled: Probe.bump("accept.merge_accept")
-	# absorbed_team is the MERGER (small team dissolving into target)
-	var absorbed_team: TeamData = state.teams[merger_id]
-	var all_npcs: Array = []
-	if absorbed_team.leader_id != -1: all_npcs.append(absorbed_team.leader_id)
-	all_npcs.append_array(absorbed_team.named_members)
-	SubteamSystem.new().merge_teams(state, target_id, merger_id, all_npcs)
-	# reset merger task (safe even if merger_id erased — GDScript ref stays valid)
-	TaskArbiter.release(merger)
-	merger.order_target_id = -1
+	_resolve_mergein(state, merger_id, target_id)   # 強(merger)吸弱(target)，分流 dissolve/子隊
+	# reset merger task (safe even if erased — GDScript ref stays valid)
+	if state.teams.has(merger_id):
+		TaskArbiter.release(merger)
+		merger.order_target_id = -1
 
 func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> void:
 	var collector: TeamData = state.teams[collector_id]
@@ -1104,30 +1104,38 @@ func _resolve_join(state: WorldState, joiner_id: int, host_id: int) -> void:
 		return
 	if Probe.enabled: Probe.bump("accept.join_accept")
 	Probe.bump("join.resolve")   # 死路探針：JOIN handler 實呼（前 62/66 靜默 fall-through）
-	# §HOW-6 分流：好感=joiner 對 host 觀感，凝聚=joiner leader loyalty（對原隊，高→整團傾子隊）。
-	var affinity: float = float(joiner.known_reputations.get(host_id, 0.5))
-	var jo_leader: PersonData = state.persons.get(joiner.leader_id)
-	var cohesion: float = float(jo_leader.loyalty) if jo_leader else 1.0
-	var dissolve: bool = joiner.population <= MERGEIN_DISSOLVE_MAX_POP \
+	# §HOW-6 弱方 push：host 吸 joiner。分流走共用 _resolve_mergein。
+	_resolve_mergein(state, host_id, joiner_id)
+
+# §HOW-6/7 共用併入分流：absorber 吸 absorbed。好感=absorbed→absorber、凝聚=absorbed leader loyalty。
+# 人少+好感高+低凝聚→dissolve（全併滅團）；否則整隊變子隊（附庸保身份+繼承 faction+起始 loyalty）。
+# 弱方 push（_resolve_join）與強方 pull（_try_merge/吸納）皆呼此=真統一分流。
+func _resolve_mergein(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
+	var absorber: TeamData = state.teams.get(absorber_id)
+	var absorbed: TeamData = state.teams.get(absorbed_id)
+	if absorber == null or absorbed == null:
+		return
+	var affinity: float = float(absorbed.known_reputations.get(absorber_id, 0.5))
+	var ab_leader: PersonData = state.persons.get(absorbed.leader_id)
+	var cohesion: float = float(ab_leader.loyalty) if ab_leader else 1.0
+	var dissolve: bool = absorbed.population <= MERGEIN_DISSOLVE_MAX_POP \
 		and affinity >= MERGEIN_AFFINITY_HIGH and cohesion < MERGEIN_COHESION_LOW
 	if dissolve:
-		# 人少+好感高+低凝聚 → 散進（全併滅團，pop 守恆，複用 merge_teams）
 		if Probe.enabled: Probe.bump("mergein.dissolve")
 		var all_npcs: Array = []
-		if joiner.leader_id != -1: all_npcs.append(joiner.leader_id)
-		all_npcs.append_array(joiner.named_members)
-		SubteamSystem.new().merge_teams(state, host_id, joiner_id, all_npcs)
+		if absorbed.leader_id != -1: all_npcs.append(absorbed.leader_id)
+		all_npcs.append_array(absorbed.named_members)
+		SubteamSystem.new().merge_teams(state, absorber_id, absorbed_id, all_npcs)
 	else:
-		# 人多 or 好感低 or 高凝聚 → 整隊變子隊（附庸保身份）。繼承 host faction + set 起始忠誠。
 		if Probe.enabled: Probe.bump("mergein.subteam")
-		state.set_subteam_parent(joiner, host_id)
-		state.set_team_faction(joiner, host.faction_id)   # set_subteam_parent 不動 faction_id → 補
-		# 併入起始忠誠（voluntary，食壓自願）= f(好感, 義氣)。脅迫端(S-B)另低，S-A 自願偏高。
-		if jo_leader != null:
-			var yiqi: float = float(jo_leader.values.get("義氣", 0.5))
-			jo_leader.loyalty = clampf(0.3 + affinity * 0.4 + yiqi * 0.3, 0.0, 1.0)
-		state.clear_social_target(joiner)
-		TaskArbiter.release(joiner)
+		state.set_subteam_parent(absorbed, absorber_id)
+		state.set_team_faction(absorbed, absorber.faction_id)   # set_subteam_parent 不動 faction_id → 補
+		# 起始忠誠 = f(好感, 義氣)。強吸弱常低好感→帶怨子隊(S-B 叛離燃料)。
+		if ab_leader != null:
+			var yiqi: float = float(ab_leader.values.get("義氣", 0.5))
+			ab_leader.loyalty = clampf(0.3 + affinity * 0.4 + yiqi * 0.3, 0.0, 1.0)
+		state.clear_social_target(absorbed)
+		TaskArbiter.release(absorbed)
 
 func _clear_aid_task(state: WorldState, beggar: TeamData) -> void:
 	state.clear_social_target(beggar)

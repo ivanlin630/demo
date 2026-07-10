@@ -26,6 +26,7 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 # 競秤）：獨立 _trigger_survival 設 PRIO_SURVIVAL(80) task → 整併走 _decide_unified PRIO_DISPATCH(50)
 # 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
+const ABSORB_DRIVE_BASE: float = 1.2         # TEST VALUE — §HOW-7 吸納量級（近 OCCUPY，擴張-class 公平競秤攻擊/佔村）
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
@@ -156,6 +157,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "求和": return 0.0
 			return float(ctx.leader_values.get("貪婪", 0.5)) * 0.5 + float(ctx.leader_values.get("信義", 0.5)) * 0.3 \
 				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
+		"absorb_drive":
+			# §HOW-7 強方擴張 pull：野心驅動吸弱鄰（capacity-bound 已在 applicable/finder，餘裕比折入 gate）。
+			# 擴張-class：與攻擊/佔村/貿易同層 argmax（公平競秤，禁硬優勢；軍閥寧征服也合理）。
+			if opt != "吸納" or ctx.absorb_target_id == -1: return 0.0
+			return ABSORB_DRIVE_BASE * float(ctx.leader_values.get("野心", 0.5))
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0
@@ -227,6 +233,8 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
 		# §HOW-6 併入 weight：求生欲主 + 低野心（餓+不稱霸傾向抱團；好感在 resolver 分流秤，非此）。
 		"mergein":           return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4
+		# §HOW-7 吸納 weight：野心/統領（強擴張者傾吸；近 ambition pattern，非字面重用）。
+		"absorb":            return float(v.get("野心", 0.5)) * 0.6 + clampf(float(v.get("統領", 0.0)), 0.0, 1.0) * 0.4
 		# ── 融合 threat：人格已 baked 進 eval（additive，鏡射舊 scores）→ weight=1.0（同 intent_fit）──
 		"prepare", "defend", "pacify": return 1.0
 		# 野心階梯溶入（序3）：練兵傾向=好戰/野心染色（ambient 低 magnitude 由 eval 壓，讓位緊急）。

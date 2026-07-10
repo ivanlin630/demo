@@ -37,6 +37,7 @@ const PROBE_KEYS: Array = [
 	"merge_appl.food_lt3", "merge_appl.food_3to6", "merge_appl.food_ge6",
 	"merge.surv_ok", "merge.surv_fail",
 	"mergein.dissolve", "mergein.subteam",   # §HOW-6 分流兩端（對稱空窗守衛：任一=0→INCONCLUSIVE）
+	"absorb.dispatch",   # §HOW-7 強方吸納實派（vs 攻擊/佔村）
 	# A2c-2 D0：戰略移動 overlay(FA6)characterization——overlay 生效頻率 + 包圍/突圍指派 + 到達
 	"strat.sa_move_dispatch", "strat.encircle_assigned", "strat.breakout_assigned", "strat.expand_reached",
 	# R1 驗收（三帶+logistics）：絕境仍搏 / ③管住獨立隊攻屬村 / 貿易量（guard ④）
