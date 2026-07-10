@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [語意 flag] 食壓驅併 vs survival-sticky 互斥（29/53 set_fail）——consolidate=絕境併 or 預防性併?
 ---
 

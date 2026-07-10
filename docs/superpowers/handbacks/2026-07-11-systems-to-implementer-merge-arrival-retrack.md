@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [seam 修 A] MERGE/JOIN 到達重追蹤——比照 ESCORT 每 tick refresh move_target(治靜態快照追不上移動 absorber)
 ---
 

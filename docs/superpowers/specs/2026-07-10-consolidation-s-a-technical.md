@@ -22,7 +22,7 @@
 - 威脅加碼（可選）：`+ THREAT_JOIN_W * threat_norm(ctx)`。
 
 ### `consolidate_drive`（整併=全池化合併，弱方主動選）＝S-A 主修（真 flat 病）
-- **eval `:161` 退 flat `CONSOLIDATE_DRIVE`** → 食壓 scaled（mirror join `:91`：`DESPERATION_SCALE * maxf(0, DESPERATION_DAYS - food_days)`），gate 保 `consolidate_target_id!=-1`。
+- **eval `:161` 退 flat `CONSOLIDATE_DRIVE`** → 食壓 scaled，**★(b) 預防性併（blueprint 裁 2026-07-11）：threshold 用 `CONSOLIDATE_DAYS`（> `DESPERATION_DAYS`）** → `DESPERATION_SCALE * maxf(0, CONSOLIDATE_DAYS - food_days)`，gate 保 `consolidate_target_id!=-1`。**中度食壓就 fire（看苗頭抱團），非死到臨頭**。**★不抬 priority 壓 survival**——重度食壓時 survival-sticky（`PRIO_SURVIVAL>PRIO_DISPATCH`）天然 pre-empt consolidate＝中度→併/重度→survival 接管，分層非搶優先。（此為 §HOW-5 C 的落地，序：A 到達修交付 accept>0 後做。）
 - **weight `:229` 退 flat 1.0** → `consolidate` weight = f(求生欲, 1-野心)（餓+不稱霸傾向併大）。
 
 ### 吸附側 pull（強方收弱隊）＝接受方 rank（見 HOW-3）
@@ -66,6 +66,7 @@
    - **★★調門檻的 WHAT 邊界（blueprint 守則 2026-07-10，不可破）**：`ABSORBER_MIN_SURVIVE_DAYS` 可調（HOW），但**方向 = 讓真有餘裕 absorber 更易匹配，非讓餓 absorber 也能吸**。**禁為湊 `accept_n>0` 放寬到餓 absorber 可吸 = 重新引入搬餓 = 破 gate#1 存在理由**。非搬餓=不可退地板：調後 measurer 仍須驗每個 accept 事件 `combined_days ≫ joiner 原餘命` 且 absorber 併後不跌破生存線。**若 cadence 修後 accept 仍≈0 且非門檻問題（餓世界結構性無 surplus absorber）= WHAT 發現（consolidation 純飢荒世界救不了誰），回報 blueprint 重估意義，非硬調參湊數**。稀 accept+每次真救 > 多 accept+搬餓。
 2. ~~**隊變大真觸殲滅可見**~~ **★砍為 side-observe（blueprint 裁 2026-07-10）**：異質審證因果鏈反向（大隊跳絕境判、rout 每 round 先於 annihilation → 隊變大更易先 rout 逃非撐到殲滅；殲滅=雙勇均等 1v1 窄縫，隊變大更難湊）。**殲滅可見非 S-A 目標**（敗北逃已裁接受不可見、pop-% 已 S1 絕對解）。measurer **只 side-observe 隊規模分布/annih**（記數不判 pass/fail、不為它調任何東西）。
 3. **併=湧現非腳本**：grep 確認**無** `pop<N 就併` 硬寫；食壓 term 驅 argmax。三端/戰鬥不退化、determinism/融合閘/憲法綠。
+4. **★防過度併/mega-blob（blueprint (b) 新守則 2026-07-11）**：(b) 預防性併風險=所有隊一有壓力就抱成寡頭 mega-blob 失多樣性。**measurer 驗：併後隊總數降幅合理、非塌成寡頭**（隊數/最大隊 pop 佔比觀察）。中度食壓是**帶(band)**——`CONSOLIDATE_DAYS` 別設太高致全世界一直併。列 S-A 驗收觀察項（A+C 交付後量）。
 
 ## 觸及檔（S-A）
 | 檔 | 改點 |
