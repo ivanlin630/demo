@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②] S1 rev3 絕對 straggler-kill 審——棄 pop-%/累積器改絕對小整數;merge 前對 diff CLEAN
 ---
 
