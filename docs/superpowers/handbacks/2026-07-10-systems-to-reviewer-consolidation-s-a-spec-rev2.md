@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 框內] consolidation S-A spec rev2——characterize修正+目標重定+gate#2砍，再走一輪
 ---
 

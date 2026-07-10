@@ -40,10 +40,11 @@
 1. **發起方**（弱隊）argmax 選 `投靠`/`整併` → `to_task` dispatch 走向 absorber（move_target=absorber，既有）。
 2. **接受方**（absorber）在**接觸時** resolver 查其 **accept-util**：absorber 側 rank 一個輕量 accept 判斷（野心/統領力 weight × 有餘裕收 → 願收；食壓自身太重 → 拒）。**這是薄層**：非 absorber 每 cadence 主動秤全 option，而是被動 on-contact 秤「收不收這隊」。
 3. accept → `merge_teams`（整併）/ subteam attach（投靠）；reject → 發起方回退（下 cadence 重 argmax，可能轉別 absorber 或別 option）。
-- **邊界誠實聲明**：此 resolver = bespoke 薄層（contact 觸發），**不假裝零框外**。**★量級但書（異質審抓）**：同構的 `_resolve_aid_request`(BEG) 實測 ~75 行完整次要評分系統——「薄層」史上守不住，**別承諾「~1 函數」**；accept-util 若滾成 absorber 側完整 rank 就是第二決策引擎（違統一）。設計約束：accept-util **限單一 util 比較（收/不收）非全 option rank**，超出即回報 blueprint 重估「薄層是否撐得住」。復用 interaction-resolver seam（judge 盤點：非重造，同 BEG/JOIN/aid 模式）。
+- **邊界誠實聲明**：此 resolver = bespoke 薄層（contact 觸發），**不假裝零框外**。**accept-util 邊界公式仿 `_resolve_aid_request`(BEG) 節制原則＝單一 util 比較非全 rank**（reviewer 顯式點名前例：judge 盤點確認 accept-util 與 BEG resolver 結構近但非同 judge/不同 option 域，不違 01 鐵律）。**★量級但書（異質審抓）**：同構的 `_resolve_aid_request`(BEG) 實測 ~75 行完整次要評分系統——「薄層」史上守不住，**別承諾「~1 函數」**；accept-util 若滾成 absorber 側完整 rank 就是第二決策引擎（違統一）。設計約束：accept-util **限單一 util 比較（收/不收）非全 option rank**，超出即回報 blueprint 重估「薄層是否撐得住」。復用 interaction-resolver seam（judge 盤點：非重造，同 BEG/JOIN/aid 模式）。
 
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。
+   - **★空真守衛（reviewer R② 抓，pursuit 截斷病同型）**：本 gate 須先驗**併事件次數 >0**（organic full_probe 內）才有效判定；**=0 則標 `INCONCLUSIVE` 非 PASS**（「沒一次搬餓」空真≠通過），並回報**門檻 `ABSORBER_MIN_SURVIVE_DAYS` 可能過嚴致機制啞**（同 gate 太嚴=機制不 fire 的截斷病），systems 調門檻重跑。
 2. ~~**隊變大真觸殲滅可見**~~ **★砍為 side-observe（blueprint 裁 2026-07-10）**：異質審證因果鏈反向（大隊跳絕境判、rout 每 round 先於 annihilation → 隊變大更易先 rout 逃非撐到殲滅；殲滅=雙勇均等 1v1 窄縫，隊變大更難湊）。**殲滅可見非 S-A 目標**（敗北逃已裁接受不可見、pop-% 已 S1 絕對解）。measurer **只 side-observe 隊規模分布/annih**（記數不判 pass/fail、不為它調任何東西）。
 3. **併=湧現非腳本**：grep 確認**無** `pop<N 就併` 硬寫；食壓 term 驅 argmax。三端/戰鬥不退化、determinism/融合閘/憲法綠。
 
