@@ -53,8 +53,12 @@
 
 ## HOW-5：整隊合併可達性 de-patch（★S-A merge-blocker，18-seed 揭 TASK_MERGE 0/8333）
 **根因（★2026-07-11 修正——systems 首判 order_target 漏接=錯，implementer 框外挑框+實證翻案）**：`order_target`/`order_task` **早已三路 wired**（共享 helper `_wire_threat_task:401-406`，成員 :1529 / 子隊 :1705 / solo :1779 / leader :394 全呼）——首判「成員路漏 order_target」= 不完整讀（漏 :1529 helper 呼叫）。實證：加 dup 無效，`merge_accept=0 且 merge_reject=0`＝`_try_merge` **從沒被 call**（非呼了被拒）。
-**真根 = `interaction_system:214` `if combat_target != -1: return` 早退，先於 social/merge resolver（BEG:228/JOIN:237/MERGE:261）**：absorber 強隊常在戰鬥 → merger 到格 → :214 早退 → `_try_merge` 永不觸 → 0/8333。code :216 註解早點名此 BEG/JOIN 死路類（known_issues:18 同案）。
-**修 = de-patch :214 早退豁免 social/merge 到達**（arriving-to-merge/join/beg 且 target=對方 → resolve，不被對方戰鬥狀態擋；戰鬥路不變）。BEG/JOIN 一併清（同閘）。詳工單 `merge-seam-real-fix`。前兩單（order_target 單點/parity 擴大）作廢。
+**根因逐層（implementer 漏斗 pinpoint，非 code-read 猜——連三次 misroot 教訓後改實證定位）**：
+- ~~order_target 漏接~~（作廢，早已 wired）。
+- **:214 combat_target 早退**（真但**不足**）：豁免 social/merge 到達已修（@f7f7d6d，BEG/JOIN 同清），但 merge_accept 仍 0。
+- **★到達硬牆（漏斗實證真根）**：`merge.pair_seen=0`＝TASK_MERGE 隊**從不與 absorber co-locate**。根 = `movement_system:37-49` re-track loop **只 TASK_ESCORT** 每 tick refresh move_target，**MERGE/JOIN 用 dispatch 時靜態快照 tile** → absorber（活躍大隊）移走 → merger 走空 tile → 從不到達。（JOIN 偶 resolve 因 host 較靜；MERGE=0 因 absorber 大隊移動多。）
+**修 = A 到達重追蹤**（movement re-track loop 擴 MERGE(order_target)+JOIN(social_target)，鏡射 ESCORT）。詳工單 `merge-arrival-retrack`。
+**★C priority 張力（另 flag blueprint）**：漏斗 29/53 set_fail = 食壓驅併（只餓才驅）vs survival-sticky（餓也 latch，`PRIO_SURVIVAL>PRIO_DISPATCH` 擋 MERGE dispatch）**結構互斥**。= consolidate 語意「絕境併 vs 預防性併」WHAT 問題（`consolidate-priority-tension`），blueprint 裁後定要不要鬆 priority/食壓窗。A 先治 24 set_ok 到達，C 放大 dispatch 量為第二層。
 
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。

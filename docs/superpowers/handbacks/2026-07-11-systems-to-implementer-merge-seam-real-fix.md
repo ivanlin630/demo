@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [真 seam 修] TASK_MERGE 0/8333 真根=combat_target 早退 pre-empt——你挑框對,前兩單作廢
 ---
 
