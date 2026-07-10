@@ -54,6 +54,8 @@ const PROBE_KEYS: Array = [
 	"annih.n_high", "annih.n_mid", "annih.n_low",
 	# 潰逃俘虜（真俘虜端信號，capture.total 不含此路）：控地俘殘部 vs 沒俘
 	"conq.combat_retreat", "conq.retreat_captured", "conq.retreat_no_capture",
+	# S1 追擊放血人格化：追擊次數（放血量/人格加權走 AMOUNT_KEYS）
+	"pursuit.n",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。
@@ -150,7 +152,8 @@ static func _probe_subset() -> Dictionary:
 # 浮點累計 subset（照妖鏡#1：courage 桶 readiness-at-retreat 總和 → 均值=sum/n_bucket）
 const AMOUNT_KEYS: Array = ["rout.ready_sum_high", "rout.ready_sum_mid", "rout.ready_sum_low",
 	"combat.rounds_sum", "combat.pop_start_sum", "combat.loser_readiness_end_sum", "combat.loser_wnd_end_sum",
-	"mortal_flee.readiness_sum", "combat.str_ratio_annih_sum", "combat.pop_ratio_annih_sum"]
+	"mortal_flee.readiness_sum", "combat.str_ratio_annih_sum", "combat.pop_ratio_annih_sum",
+	"pursuit.loss_sum", "pursuit.cruelty_sum", "pursuit.greed_sum"]
 static func _probe_amounts_subset() -> Dictionary:
 	var d: Dictionary = {}
 	for k in AMOUNT_KEYS:

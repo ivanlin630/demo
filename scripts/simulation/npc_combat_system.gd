@@ -2,7 +2,11 @@ class_name NpcCombatSystem
 
 const ROUND_CASUALTY_RATE: float      = 0.1
 const VOLLEY_CASUALTY_RATE: float     = 0.05
-const PURSUIT_RATE: float             = 0.05
+# S1 rev3 追擊絕對 straggler-kill（棄 pop-%：5%×小pop 恆~0）：殘忍/貪婪 scaled 小整數。
+# 慈悲→0、中性→round(0.5*2+0.5*0.8)=1、軍閥→CAP。scale 無關（小隊也見血）、bounded、人格 gated。
+const PURSUIT_CRUELTY_K: float        = 2.0    # TEST VALUE：殘忍主導（person_data:40 殘忍高→戰後屠殺）
+const PURSUIT_GREED_K: float          = 0.8    # TEST VALUE：貪婪次（窮追為劫）
+const PURSUIT_KILL_CAP: int           = 3      # TEST VALUE：軍閥見血上限（bounded，防暴漲打亂逃為主）
 const FLANKING_MULT: float            = 1.3
 const MORALE_CASCADE_THRESHOLD: float = 0.3
 # 照妖鏡#1：flat 潰退門檻 → 膽量人格化（spread 非 shift，均值保 0.2）。
@@ -314,6 +318,9 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var loser: TeamData  = state.teams[loser_id]
 	state.clear_combat_target(winner)
 	state.clear_combat_target(loser)
+	# §D4 follow-up：顯式清累積器餘量（防 team_id 重用洩漏；不變量本靠 start_combat 重置，此為顯式安全）。
+	_cas_carry.erase(winner_id)
+	_cas_carry.erase(loser_id)
 	# 野獸結算：不走人類 loot/subjugate/capture/pursuit
 	if loser.beast_kind != "" or winner.beast_kind != "":
 		if loser.beast_kind != "" and winner.beast_kind == "":
@@ -469,6 +476,9 @@ func _force_retreat(state: WorldState, retreater_id: int, pursuer_id: int) -> vo
 	var pursuer: TeamData   = state.teams[pursuer_id]
 	state.clear_combat_target(retreater)
 	state.clear_combat_target(pursuer)
+	# §D4 follow-up：顯式清累積器餘量（防 team_id 重用洩漏；不變量本靠 start_combat 重置，此為顯式安全）。
+	_cas_carry.erase(retreater_id)
+	_cas_carry.erase(pursuer_id)
 	# 野獸退場：不走人類 capture/subjugate/pursuit，僅清除參戰獸隊
 	if retreater.beast_kind != "" or pursuer.beast_kind != "":
 		if retreater.beast_kind != "": BeastSystem.new()._cleanup(state, retreater_id)
@@ -547,12 +557,26 @@ func _apply_pursuit(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var winner: TeamData = state.teams[winner_id]
 	var loser:  TeamData = state.teams[loser_id]
 	if winner.population < loser.population * 2:
-		return
-	var pursuit_loss: int = maxi(int(float(loser.population) * PURSUIT_RATE), 0)
+		return   # reachability gate（保留不動）：追不上就不放血
+	# S1 rev3 絕對 straggler-kill（棄 pop-%/累積器：5%×小pop 本質恆~0=organic 全小隊零效）。
+	# 殘忍/貪婪 scaled 小整數：慈悲→0、中性→1、軍閥→CAP。scale 無關（小隊也見血）、bounded、人格 gated。
+	var w_leader: PersonData = state.persons.get(winner.leader_id)
+	var straggler_kill: int = 0
+	if w_leader != null:
+		var cruelty: float = float(w_leader.values.get("殘忍", 0.5))
+		var greed: float   = float(w_leader.values.get("貪婪", 0.5))
+		straggler_kill = clampi(int(round(cruelty * PURSUIT_CRUELTY_K + greed * PURSUIT_GREED_K)), 0, PURSUIT_KILL_CAP)
+	var pursuit_loss: int = mini(straggler_kill, loser.population)
+	# 探針：追擊放血人格集中度（勝方領袖殘忍/貪婪加權）
+	if pursuit_loss > 0 and Probe.enabled:
+		Probe.bump("pursuit.n")
+		Probe.add_amount("pursuit.loss_sum", float(pursuit_loss))
+		Probe.add_amount("pursuit.cruelty_sum", float(w_leader.values.get("殘忍", 0.5)) if w_leader else 0.5)
+		Probe.add_amount("pursuit.greed_sum", float(w_leader.values.get("貪婪", 0.5)) if w_leader else 0.5)
 	if pursuit_loss <= 0:
 		return
 	_apply_casualties(state, loser_id, pursuit_loss)
-	print("[Pursuit] Team%d 追擊 Team%d +%d傷亡" % [winner_id, loser_id, pursuit_loss])
+	print("[Pursuit] Team%d 追擊 Team%d +%d傷亡 (straggler_kill=%d)" % [winner_id, loser_id, pursuit_loss, straggler_kill])
 
 func _try_retreat(state: WorldState, team_id: int, enemy_id: int) -> void:
 	var team: TeamData = state.teams[team_id]
