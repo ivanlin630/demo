@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S1 rev3] pursuit 改絕對 straggler-kill——棄 pop-%/累積器，殘忍scaled小整數
 ---
 

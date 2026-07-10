@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S1 rev3 修] 補 3 常數宣告(parse 錯 halt)+ 清死碼——reviewer premise_contradiction
 ---
 
