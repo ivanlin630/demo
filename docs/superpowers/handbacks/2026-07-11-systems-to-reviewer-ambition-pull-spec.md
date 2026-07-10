@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 框內+反補丁lens] 強方擴張 pull spec——補雙向另一向;驗「非冗餘求解器」(不同發起者)
 ---
 
