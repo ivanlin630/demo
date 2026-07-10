@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [C2 真根修] 整併升 survival-class——與 join sibling,絕境域競秤不被覆寫(blueprint 裁)
 ---
 
