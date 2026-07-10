@@ -87,8 +87,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
 			return OCCUPY_DRIVE_BASE * (1.0 if not ctx.has_own_outpost else 0.3)
 		"join_drive":
-			# S-A：has_strong_neighbor 硬 gate 移出 eval → options.gd applicable 前提（食壓驅 join 不限強鄰）。
-			if opt != "投靠": return 0.0
+			# §HOW-6 統一「併入」：絕境 food-scaled 求生（join+整併合一，分流 dissolve/子隊在 resolver）。
+			if opt != "併入": return 0.0
 			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
@@ -156,11 +156,6 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "求和": return 0.0
 			return float(ctx.leader_values.get("貪婪", 0.5)) * 0.5 + float(ctx.leader_values.get("信義", 0.5)) * 0.3 \
 				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
-		"consolidate_drive":
-			# S-A C2（blueprint 絕境併）：整併=survival-class 絕境求生（與 join sibling，mirror :91）。
-			# eligible 隊 98.6% 絕境<3（C1 中度窗撲空證），故復絕境 food-scaled；升 PRIO_SURVIVAL 不被覆寫。
-			if opt != "整併" or ctx.consolidate_target_id == -1: return 0.0
-			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0
@@ -230,8 +225,6 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
-		# S-A：整併 weight 退 flat → 人格秤（餓+不稱霸傾向併大）。求生欲主、低野心次。
-		"consolidate_drive": return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4
 		# ── 融合 threat：人格已 baked 進 eval（additive，鏡射舊 scores）→ weight=1.0（同 intent_fit）──
 		"prepare", "defend", "pacify": return 1.0
 		# 野心階梯溶入（序3）：練兵傾向=好戰/野心染色（ambient 低 magnitude 由 eval 壓，讓位緊急）。

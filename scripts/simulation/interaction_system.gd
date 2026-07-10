@@ -14,6 +14,10 @@ const READINESS_FOOD_COST: float     = 0.05
 
 const AID_RESERVE_DAYS: float = 14.0
 const ACCEPT_UTIL_THRESHOLD: float = 0.3   # TEST VALUE — S-A 靶C accept-util 收/不收門檻
+# §HOW-6 併入分流門檻（TEST VALUE，measurer 校準）：人少+好感高+低凝聚→dissolve；否則整隊變子隊。
+const MERGEIN_DISSOLVE_MAX_POP: int = 3     # 人少上限（>此傾整隊子隊）
+const MERGEIN_AFFINITY_HIGH: float = 0.5    # 好感高門檻（known_reputations[host]）
+const MERGEIN_COHESION_LOW: float = 0.5     # 低凝聚門檻（joiner leader loyalty，低→易散）
 # 特別稅（徵收 task）= 一般稅率 × 此倍率，重於常態一般稅（戰時/缺糧額外加徵）。TEST VALUE
 const SPECIAL_TAX_MULT: float = 1.5
 
@@ -1100,10 +1104,30 @@ func _resolve_join(state: WorldState, joiner_id: int, host_id: int) -> void:
 		return
 	if Probe.enabled: Probe.bump("accept.join_accept")
 	Probe.bump("join.resolve")   # 死路探針：JOIN handler 實呼（前 62/66 靜默 fall-through）
-	var all_npcs: Array = []
-	if joiner.leader_id != -1: all_npcs.append(joiner.leader_id)
-	all_npcs.append_array(joiner.named_members)
-	SubteamSystem.new().merge_teams(state, host_id, joiner_id, all_npcs)
+	# §HOW-6 分流：好感=joiner 對 host 觀感，凝聚=joiner leader loyalty（對原隊，高→整團傾子隊）。
+	var affinity: float = float(joiner.known_reputations.get(host_id, 0.5))
+	var jo_leader: PersonData = state.persons.get(joiner.leader_id)
+	var cohesion: float = float(jo_leader.loyalty) if jo_leader else 1.0
+	var dissolve: bool = joiner.population <= MERGEIN_DISSOLVE_MAX_POP \
+		and affinity >= MERGEIN_AFFINITY_HIGH and cohesion < MERGEIN_COHESION_LOW
+	if dissolve:
+		# 人少+好感高+低凝聚 → 散進（全併滅團，pop 守恆，複用 merge_teams）
+		if Probe.enabled: Probe.bump("mergein.dissolve")
+		var all_npcs: Array = []
+		if joiner.leader_id != -1: all_npcs.append(joiner.leader_id)
+		all_npcs.append_array(joiner.named_members)
+		SubteamSystem.new().merge_teams(state, host_id, joiner_id, all_npcs)
+	else:
+		# 人多 or 好感低 or 高凝聚 → 整隊變子隊（附庸保身份）。繼承 host faction + set 起始忠誠。
+		if Probe.enabled: Probe.bump("mergein.subteam")
+		state.set_subteam_parent(joiner, host_id)
+		state.set_team_faction(joiner, host.faction_id)   # set_subteam_parent 不動 faction_id → 補
+		# 併入起始忠誠（voluntary，食壓自願）= f(好感, 義氣)。脅迫端(S-B)另低，S-A 自願偏高。
+		if jo_leader != null:
+			var yiqi: float = float(jo_leader.values.get("義氣", 0.5))
+			jo_leader.loyalty = clampf(0.3 + affinity * 0.4 + yiqi * 0.3, 0.0, 1.0)
+		state.clear_social_target(joiner)
+		TaskArbiter.release(joiner)
 
 func _clear_aid_task(state: WorldState, beggar: TeamData) -> void:
 	state.clear_social_target(beggar)

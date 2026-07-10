@@ -1481,7 +1481,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # 不可派 → 試次佳(修凍死)
 		# 投靠玩家：走 forced_event（玩家決定收留），不自動 merge（對稱 + UX）
-		if opt == "投靠" and td.has("social_target"):
+		if opt == "併入" and td.has("social_target"):
 			var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
@@ -1494,12 +1494,12 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
 		# full_probe（診斷）：fold 路 merge 實派 + merge-applicable 隊 option 去向（B 鐵證：該併卻選別的）。
-		if opt == "整併": Probe.bump("merge.consolidate_dispatch")
+		if opt == "併入": Probe.bump("merge.consolidate_dispatch")
 		if Probe.enabled and team.faction_id != -1 and team.parent_team_id == -1:
 			var _fc2 = state.factions.get(team.faction_id)
 			if _fc2 != null and team.team_id != _fc2.leader_team_id and consolidate_target_of(state, team, _fc2) != -1:
 				Probe.bump("merge_appl.total")
-				Probe.bump("merge_appl.chose_整併" if opt == "整併" else "merge_appl.chose_other")
+				Probe.bump("merge_appl.chose_併入" if opt == "併入" else "merge_appl.chose_other")
 				# DIAG C1：有 target 隊的食壓分布（證 consolidate-eligible 是否恆絕境<3，band[3,6)撲空）
 				var _fd: float = ResourceSystem.effective_food(state, team) \
 					/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
@@ -1509,7 +1509,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
-		if Probe.enabled and opt == "整併":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
+		if Probe.enabled and opt == "併入":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
 			Probe.bump("merge.set_ok" if _set_ok else "merge.set_fail")
 		# 漏斗站4探針（純觀測）：unified 路徑 TRADE 實派計數（分 opt）。
 		# timeout 起算已改讀 try_set 蓋章的 task_start_tick（單源），此路不需另外蓋章。
@@ -1709,7 +1709,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue
 		# ★投靠走新 helper：玩家 target→forced_event 請求（★return 不 fallthrough，防 P2a W2 自動併）；NPC→try_set JOIN。
-		if opt == "投靠":
+		if opt == "併入":
 			if _try_join_target(state, sub, int(td.get("social_target", -1))):
 				sub.current_option = opt
 				# ★量測特判（round-5）：只有 NPC 投靠真 try_set(JOIN) 才 capture；玩家 forced_event 分支
@@ -3105,13 +3105,13 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # finder 撲空（無可派目標）→ 試次佳 option
 		# 投靠對象是玩家隊 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge（同 P2a W2）
-		if opt == "投靠" and td.has("social_target"):
+		if opt == "併入" and td.has("social_target"):
 			var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
 		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival")
-		if Probe.enabled and opt == "整併":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
+		if Probe.enabled and opt == "併入":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
 			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
 		if _surv_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)   # specimen tap
@@ -3130,7 +3130,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 					team.current_option = "佔村"   # capture 歸因用（survival 路不設 current_option → 補）
 					Probe.bump("occupy.dispatch"); Probe.bump("occupy.dispatch_survival")
 					print("[SurvivalOccupy] team=Team%d → 佔 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
-				"投靠": print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, int(td.get("social_target", -1))])
+				"併入": print("[SurvivalMergeIn] team=Team%d → 併入 Team%d" % [team.team_id, int(td.get("social_target", -1))])
 				"紮營": print("[SurvivalCamp] team=Team%d → 紮營 @(%d,%d)" % [team.team_id, tgt.x, tgt.y])
 				"覓食": print("[SurvivalForage] team=Team%d pop=%d → 覓食 @(%d,%d)" % [team.team_id, team.population, tgt.x, tgt.y])
 			return
