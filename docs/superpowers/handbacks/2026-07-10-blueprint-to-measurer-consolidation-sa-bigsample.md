@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 topic: [S-A merge-gate] 方向 signoff ✅——補 18-seed 排搬餓tail/規模病理，環境穩即跑(不逼即刻)
 ---
 

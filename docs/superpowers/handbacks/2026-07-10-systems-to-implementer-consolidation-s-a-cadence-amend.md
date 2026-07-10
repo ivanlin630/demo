@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S-A 追加] consolidate cadence gate（perf/churn 修，merge 前置）——加進 feat/consolidation-s-a
 ---
 

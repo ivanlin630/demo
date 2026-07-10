@@ -51,6 +51,11 @@
 - = 砍 O(N) 掃頻率（每 tick→每日）+ churn（餓隊不每 tick 重派）→ perf 解 + 行為更穩。determinism 保（cache 純節流，同 seed 同軌）。
 - **S-A merge 前置**：大窗現 churn 跑不動（60min timeout），cadence 修好 measurer 才拿得到 gate 樣本。
 
+## HOW-5：整隊合併可達性 de-patch（★S-A merge-blocker，18-seed 揭 TASK_MERGE 0/8333）
+**根因確認（code 邏輯確定非假設）**：`options.gd:247` 整併 to_task 回 `{"task": TASK_MERGE, "order_target": ctid}`，但 **`_decide_unified` 成員 dispatch 尾巴（`faction_ai:1508-1512`）只處理 `combat_target`+`social_target`，漏 `order_target`** → `team.order_target_id` 從沒被寫（留 -1）→ resolver `interaction_system:261`（`order_target_id==id_b`）+ `_try_merge:464`（`order_target_id!=target_id: return`）**恆 false** → `_try_merge` 永不執行 → **0/8333**。leader 路（`faction_ai:403`）有接 order_target，成員路漏 = BEG/JOIN social_target 同型 seam bug（target 欄沒接進 dispatch）。**可修可達性 bug 非結構本罕**（solo-join 走 social_target 通、整併走 order_target 斷）。
+**修 = de-patch 補接 order_target**（鏡射 `:403`/social_target 處理）：`_decide_unified` dispatch 尾加 `if td.has("order_target"): team.order_target_id = int(td["order_target"])`。單點解鎖 resolver 到達 + `_try_merge` 內部檢查 → `merge_teams` 真整隊吸收。
+- 次要（非本修，觀察）：`interaction:214` combat_target 早退可能仍擋部分（absorber 戰鬥中）→ 降頻非歸零；先修 order_target 看實際 accept 率，再判是否需第二修。
+
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。
    - **★空真守衛（reviewer R② 抓，pursuit 截斷病同型）**：本 gate 須先驗**併事件次數 >0**（organic full_probe 內）才有效判定；**=0 則標 `INCONCLUSIVE` 非 PASS**（「沒一次搬餓」空真≠通過），並回報**門檻 `ABSORBER_MIN_SURVIVE_DAYS` 可能過嚴致機制啞**（同 gate 太嚴=機制不 fire 的截斷病），systems 調門檻重跑。
