@@ -56,6 +56,38 @@ S-A spec **必須**把下列寫成 measurer gate（先驗、非先建先看）�
 2. ~~隊變大→殲滅可見~~ **降為「觀察不強求」**（非硬 gate）：因果鏈反向已證，不列驗收條件。measurer 可順手記隊規模分布 + annih 率當 side-observation，但**不作 pass/fail**，也不為它調任何東西。
 3. **併是湧現非腳本（硬 gate）**：無硬寫 `pop<N 就併`；食壓 term 驅 argmax。三端/戰鬥不退化、determinism/融合閘/憲法綠。
 
+## ★★統一「併入」收斂（2026-07-11，用戶定案——取代 join/整併 兩 option）
+
+實測揭 join/整併 **冗餘**（都走 `merge_teams` 全併、搶同絕境 niche → join 常勝 → 整併 marginal 2.5%）。用戶定案：**join 與整併是同一決策的不同表現，收成一個 option**（消兩求解器＝真統一，非框架內補丁）。
+
+### 一個「併入」決策，結果由參數分流
+```
+併入(host) 發生 = joiner 想併(survival rank) AND host 願收(host rank：統領容量 + 意願)
+結果分流（resolve 時算，非兩個 option）：
+  joiner 人少 + 好感高 + 低凝聚  → dissolve 散進去（＝舊 join，滅團）
+  joiner 人多 or 好感低 or 高凝聚 → 整隊變子隊（＝附庸，保留身份、掛 parent）
+```
+- **一個 survival option、一個 solver**。rank 只秤「要不要併入此 host」。dissolve/子隊 = resolve 時依 (人數, 好感, 凝聚) 的**分支**，非兩選項競爭 → marginal 自動消。
+- **容量分流已存在**：`merge_teams`（`subteam_system:105`）已做「容量吸得下→dissolve、吸不完→剩團變子隊」（:159/:165）。本設計**補「好感/凝聚」軸**疊上既有容量軸。
+
+### 參數（用戶挑，file:line 坐實）
+- **好感（joiner→host）** = `team.known_reputations[host]`（team_data:187，團對團觀感 0-1）± `relation_edges`（person_data:63，feud/killed 拉低、gratitude/protect 拉高＝「記憶」恩怨）。
+- **凝聚/散夥傾向** = `loyalty`（person_data:14，對原隊）——低忠誠→易散成個人 dissolve；高忠誠→整團行動→傾子隊。
+- **host 容量/意願** = `統領`（skills，pop_cap 已用）+ host rank 秤願不願收（雙方同意的接受半）。
+
+### 併入時「設」新人對 host 的起始忠誠（補語意漏洞）
+- **現況漏洞**：`merge_teams` 換 `team_id` 但**不動 `loyalty`** → 新人原封保留「對**舊**領袖」的忠誠當成對新 host 的——語意錯。
+- **修**：併入時 **set** 新人對 host 起始忠誠 = f(好感 known_reputations、情境 voluntary/coerced、義氣 disposition)。**脅迫/低好感→起始忠誠低→心不甘子隊→S-B 叛離燃料**；自願/高好感→合理→安分。
+- **最終忠誠非團平均**：per-person 混合（忠誠核心 + 編碼「怎麼被併進來」的新人）＝S-B 戲劇底。
+
+### 留用 vs 新加（給 systems 疊既有 S-A code，非重起）
+| 留用（已建，照吃） | 新加/改 |
+|---|---|
+| consolidate_drive 食壓化、churn cadence、`:214` 到達修、C2 survival-class、order_target/movement 到達修、`merge_teams` 容量→dissolve/子隊 | ①join+整併 合成一個「併入」option ②結果補「好感/凝聚」分流軸（疊容量軸）③併入時 set 新人起始忠誠 |
+
+### 「外來隊變子隊」非矛盾（用戶點）
+一旦併入即成 host 子隊（掛 parent、繼承 host faction）＝結構上就是子隊，非外人。忠不忠（歸建 vs 叛離）由 loyalty+記憶驅動＝S-B 戲。（systems 輕量 characterize：merge→建子隊路對「非自己分出的隊」faction 繼承/parent 設定跑得順否，非 blocker。）
+
 ## 交 systems 的 HOW（本 slice S-A）
 - 生存訊號怎麼進 term：飢餓（food 存量 vs 消耗率/餘命）、威脅（打不過的鄰）怎麼量化餵 `consolidate_drive`/`join_drive`。
 - `consolidate_drive` 退 flat：改人格×生存 weigh（野心低+餓→投靠 util 高；野心高→傾向當吸附方）。
