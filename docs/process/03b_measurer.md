@@ -40,6 +40,19 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 - 各工單仍守鐵律6（單工單一封完整信）；併行=跨工單不互等，非單工單分批。
 - **適用 mailbox 軌**（解單例塞車）。LG 軌併行來自 worker spawn（`08`），不靠此。
 
+### ★大窗量測 SOP（2026-07-10，measurer 報 runtime 不穩後 systems 定）
+大窗 organic full_probe（≥~9seed×3mo／≥200 場戰鬥）是最耗時最不穩環節，避免盲跑撞牆：
+1. **單批起跑，禁自拆平行雙批**：**一個大窗 run 不切成 2 個 godot 同時跑**（heavy godot 平行撞記憶體/container 資源上限→外部 kill，非 timeout；血證 consolidation-s-a 連 3 次被 kill、降單批才穩）。§35 的「2-3 併發」是**跨不同工單**，非單一大窗自拆。多 seed 就一個進程內序列跑（`WARRING_SEEDS=1337,42,7,...` 單批）。
+2. **先 seed=1 短跑估耗時**：大窗前先 `WARRING_SEEDS=<one> WARRING_MONTHS=<target>` 跑一顆計時 → ×seed 數估總時 → 設對 `GODOT_TIMEOUT`（別默認 360 誤殺）+ 知道要等多久。機制重（如 consolidation `merge.consolidate_dispatch` 高頻）吞吐比 baseline 慢屬正常，非環境問題。
+3. **進度 sidecar 查中途**（繞 `godot.ps1` 末端 transcode 盲點＝跑完才有 stdout）：`WARRING_PROGRESS=<path>` → `seeded_warring_bed` 每 seed 完覆寫一行進度 → measurer 中途 `Read <path>` 查「i/N seeds done」，不必盲等。
+
+### ★長跑（大窗需長時）真解：脫離啟動 + resume（2026-07-11 root cause 定+工具建）
+**root cause（實測定，非 OOM）**：0-byte 瞬殺 = CLI harness 把 bg-task 包在 kill-on-close Job → 殺 bg-task 連帶殺 pwsh wrapper + godot child（→ 末端 transcode 沒跑=0 bytes/無 marker）。證：近 24h 零 Resource-Exhaustion 事件（非 OOM）+ 零 WER（非 crash）+ 前景跑成功 + VSCode log 不涵蓋（headless CLI 層殺）。∴ 非記憶體/非 code，是**背景任務生命週期**。
+**長跑 SOP（短跑仍用前景 `godot.ps1`）**：
+1. **脫離啟動 `tools/godot-detach.ps1`**（WMI `Win32_Process.Create` breakaway job）：`WARRING_*` env 設好 → 呼叫即返回 `[GODOT DETACHED pid=...]`，godot **不隨 bg-task 被殺**。measurer **輪詢 `WARRING_PROGRESS`/`WARRING_OUT`（UTF-8）** 到 DONE，不 hold 長 bg-task。
+2. **checkpoint+resume（終極保險，死了不虧）**：`seeded_warring_bed` 每 seed 完**增量 dump `WARRING_OUT`**（rewrite 累積）；`WARRING_RESUME=1` → 讀回已完成 seed **跳過**、只補沒跑的。**跨多次 launch 最終湊齊**（killable-and-resumable=殺幾次都收斂）。
+   - ★**worktree 注意**：resume/detach/progress 在 **main 的 bed**；measurer 跑 `--path .worktrees/<slice>` 用**該 branch 的 bed 副本** → branch 須先 rebase/merge main 才有這些（否則載到舊 bed，resume 靜默不生效=踩過的坑）。
+
 ## Scope：要產哪些數字
 
 ### ① 標準 beds（每 slice 必跑）

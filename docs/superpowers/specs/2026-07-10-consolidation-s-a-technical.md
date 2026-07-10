@@ -22,7 +22,8 @@
 - 威脅加碼（可選）：`+ THREAT_JOIN_W * threat_norm(ctx)`。
 
 ### `consolidate_drive`（整併=全池化合併，弱方主動選）＝S-A 主修（真 flat 病）
-- **eval `:161` 退 flat `CONSOLIDATE_DRIVE`** → 食壓 scaled（mirror join `:91`：`DESPERATION_SCALE * maxf(0, DESPERATION_DAYS - food_days)`），gate 保 `consolidate_target_id!=-1`。
+- **eval `:161` 退 flat → 絕境 food-scaled**（比照 join `:91`：`DESPERATION_SCALE * maxf(0, DESPERATION_DAYS - food_days)`）。~~C1 band~~ 作廢（中度窗實測空 98.6% eligible 絕境）。
+  - **★C2 = 整併升 survival-class（blueprint 重裁，真根解）**：整併加入 `SURVIVAL_OPTION_SET` + applicable +food<DESPERATION_DAYS（比照 join）→ 經 `rank_survival`/`_trigger_survival` 派 @**PRIO_SURVIVAL**（絕境域競秤 forage/beg/join，**不被 survival-sticky 覆寫**=C 互斥解，靠「與 join sibling 統一」非抬 priority 補丁）。**+`_trigger_survival` 補 order_target 接線**（此路真缺 `_wire_threat_task`）。join/整併=同求生本能不同尺度（個人脫離/整隊池化，依凝聚力湧現）。詳工單 `c2-survival-class-merge`。
 - **weight `:229` 退 flat 1.0** → `consolidate` weight = f(求生欲, 1-野心)（餓+不稱霸傾向併大）。
 
 ### 吸附側 pull（強方收弱隊）＝接受方 rank（見 HOW-3）
@@ -42,11 +43,33 @@
 3. accept → `merge_teams`（整併）/ subteam attach（投靠）；reject → 發起方回退（下 cadence 重 argmax，可能轉別 absorber 或別 option）。
 - **邊界誠實聲明**：此 resolver = bespoke 薄層（contact 觸發），**不假裝零框外**。**accept-util 邊界公式仿 `_resolve_aid_request`(BEG) 節制原則＝單一 util 比較非全 rank**（reviewer 顯式點名前例：judge 盤點確認 accept-util 與 BEG resolver 結構近但非同 judge/不同 option 域，不違 01 鐵律）。**★量級但書（異質審抓）**：同構的 `_resolve_aid_request`(BEG) 實測 ~75 行完整次要評分系統——「薄層」史上守不住，**別承諾「~1 函數」**；accept-util 若滾成 absorber 側完整 rank 就是第二決策引擎（違統一）。設計約束：accept-util **限單一 util 比較（收/不收）非全 option rank**，超出即回報 blueprint 重估「薄層是否撐得住」。復用 interaction-resolver seam（judge 盤點：非重造，同 BEG/JOIN/aid 模式）。
 
+## HOW-4：consolidate cadence gate（★perf，S-A merge 前置；blueprint churn 假設 systems profile 確認）
+**根因確認（file:line）**：`decision_context.gd:262-266` 每 faction 成員（非子隊非 leader）**每 tick** call `consolidate_target_of`→`_find_absorber`（`faction_ai:1562`）O(N) 掃全 faction 成員，**無 cadence gate**（`subteam_eval_next_tick`/`threat_eval_next_tick:357` 有、成員整併塊漏）。S-A `consolidate_drive` 食壓 scaled → 餓隊 argmax 選整併 → dispatch → 餵養 gate#1 拒 → re-dispatch **churn**（dispatch:accept≈281:1），疊每-tick O(N) = 2x 慢 + 抖動走位。
+**修 = cadence gate（鏡射 `SUBTEAM_CADENCE`，1 日級）**：
+- `TeamData` +`consolidate_target_cache: int`(-1) + `consolidate_eval_next_tick: int`。
+- `decision_context.gd:266` 前 gate：`if current_tick >= team.consolidate_eval_next_tick: cache = consolidate_target_of(...); next_tick = current_tick + CONSOLIDATE_CADENCE`；否則 `c.consolidate_target_id = cache`（用快取，不重掃）。
+- `CONSOLIDATE_CADENCE = TimeScale.TICK_PER_DAY * 1`（TEST VALUE）。
+- = 砍 O(N) 掃頻率（每 tick→每日）+ churn（餓隊不每 tick 重派）→ perf 解 + 行為更穩。determinism 保（cache 純節流，同 seed 同軌）。
+- **S-A merge 前置**：大窗現 churn 跑不動（60min timeout），cadence 修好 measurer 才拿得到 gate 樣本。
+
+## HOW-5：整隊合併可達性 de-patch（★S-A merge-blocker，18-seed 揭 TASK_MERGE 0/8333）
+**根因（★2026-07-11 修正——systems 首判 order_target 漏接=錯，implementer 框外挑框+實證翻案）**：`order_target`/`order_task` **早已三路 wired**（共享 helper `_wire_threat_task:401-406`，成員 :1529 / 子隊 :1705 / solo :1779 / leader :394 全呼）——首判「成員路漏 order_target」= 不完整讀（漏 :1529 helper 呼叫）。實證：加 dup 無效，`merge_accept=0 且 merge_reject=0`＝`_try_merge` **從沒被 call**（非呼了被拒）。
+**根因逐層（implementer 漏斗 pinpoint，非 code-read 猜——連三次 misroot 教訓後改實證定位）**：
+- ~~order_target 漏接~~（作廢，早已 wired）。
+- **:214 combat_target 早退**（真但**不足**）：豁免 social/merge 到達已修（@f7f7d6d，BEG/JOIN 同清），但 merge_accept 仍 0。
+- ~~到達硬牆/A re-track~~（真但**下游**）：A 到達重追蹤已實作（`merge-arrival-retrack`），但 `mv_reached=0`——TASK_MERGE **從不進 movement loop**（task 在 movement 前已被覆寫）→ A 治不到。
+- **★★真根 = C priority 張力（implementer mv_reached=0 鐵證）**：`set_ok=24 但 mv_reached=0`＝食壓驅併的餓隊同 tick 被 `_trigger_survival`@`PRIO_SURVIVAL(80)` 覆寫 TASK_MERGE@`PRIO_DISPATCH(50)` → 永不 persist 到 movement。29 set_fail（當場擋）+ 24 set_ok-覆寫 = 同張力兩面。**食壓驅併與 survival-sticky 結構互斥**。
+- ~~C1 食壓窗前移 band~~（**實測死，blueprint (b) 願景與世界動力不符**）：食壓分布探針證 **consolidate-eligible 隊 98.6% 絕境<3**（868/880），中度窗 [3,6) 僅 12(1.4%) 且仍輸 rank → **dispatch=0**。小隊有整併 target 時=已絕境，「看苗頭預防性抱團」不發生。C1 邏輯避開 priority 撞、實際避進**空窗**。
+- **★真根（五層扒到底）= eligible 隊恆絕境 + 絕境域 priority 互斥**。要 merge 發生須在**絕境域**讓 consolidate 贏且 persist。**回 blueprint 重裁**（`c1-unviable`）：C2（整併升 survival-class=抱團求生，比照 join）／整併語意收斂為「絕境融合=大池化 join」／join-整併關係。**待 blueprint WHAT 重裁**，spec-lock hold。
+- **systems 誠實記：mis-ranked C 為次要、A 為主修**（實 C=根、A=下游，未先探 mv_reached）；且 blueprint (b) 與我 spec 的 C1 band 皆建在「有中度餓隊」的**未驗假設**上——implementer 食壓分布探針才揭空窗。**深層=小-絕境隊世界**（隊太小→想併→太絕境沒法併，與殲滅不可見同根）。
+
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。
    - **★空真守衛（reviewer R② 抓，pursuit 截斷病同型）**：本 gate 須先驗**併事件次數 >0**（organic full_probe 內）才有效判定；**=0 則標 `INCONCLUSIVE` 非 PASS**（「沒一次搬餓」空真≠通過），並回報**門檻 `ABSORBER_MIN_SURVIVE_DAYS` 可能過嚴致機制啞**（同 gate 太嚴=機制不 fire 的截斷病），systems 調門檻重跑。
+   - **★★調門檻的 WHAT 邊界（blueprint 守則 2026-07-10，不可破）**：`ABSORBER_MIN_SURVIVE_DAYS` 可調（HOW），但**方向 = 讓真有餘裕 absorber 更易匹配，非讓餓 absorber 也能吸**。**禁為湊 `accept_n>0` 放寬到餓 absorber 可吸 = 重新引入搬餓 = 破 gate#1 存在理由**。非搬餓=不可退地板：調後 measurer 仍須驗每個 accept 事件 `combined_days ≫ joiner 原餘命` 且 absorber 併後不跌破生存線。**若 cadence 修後 accept 仍≈0 且非門檻問題（餓世界結構性無 surplus absorber）= WHAT 發現（consolidation 純飢荒世界救不了誰），回報 blueprint 重估意義，非硬調參湊數**。稀 accept+每次真救 > 多 accept+搬餓。
 2. ~~**隊變大真觸殲滅可見**~~ **★砍為 side-observe（blueprint 裁 2026-07-10）**：異質審證因果鏈反向（大隊跳絕境判、rout 每 round 先於 annihilation → 隊變大更易先 rout 逃非撐到殲滅；殲滅=雙勇均等 1v1 窄縫，隊變大更難湊）。**殲滅可見非 S-A 目標**（敗北逃已裁接受不可見、pop-% 已 S1 絕對解）。measurer **只 side-observe 隊規模分布/annih**（記數不判 pass/fail、不為它調任何東西）。
 3. **併=湧現非腳本**：grep 確認**無** `pop<N 就併` 硬寫；食壓 term 驅 argmax。三端/戰鬥不退化、determinism/融合閘/憲法綠。
+4. **★防過度併/mega-blob（blueprint (b) 新守則 2026-07-11）**：(b) 預防性併風險=所有隊一有壓力就抱成寡頭 mega-blob 失多樣性。**measurer 驗：併後隊總數降幅合理、非塌成寡頭**（隊數/最大隊 pop 佔比觀察）。中度食壓是**帶(band)**——`CONSOLIDATE_DAYS` 別設太高致全世界一直併。列 S-A 驗收觀察項（A+C 交付後量）。
 
 ## 觸及檔（S-A）
 | 檔 | 改點 |

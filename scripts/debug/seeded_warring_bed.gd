@@ -24,24 +24,46 @@ func _run() -> void:
 	var ticks: int = maxi(months, 1) * WorldState.TICKS_PER_MONTH
 	print("=== seeded_warring_bed：seeds=%s months=%d (ticks=%d) ===" % [str(seeds), months, ticks])
 
+	# 進度 sidecar（繞 godot.ps1 末端 transcode 的盲點：長跑中途 measurer 可 Read 此檔查進度）。
+	var prog_path: String = OS.get_environment("WARRING_PROGRESS")
+	var out_path: String = OS.get_environment("WARRING_OUT")
+	var _seed_n: int = seeds.size()
+
+	# ★resume（WARRING_RESUME=1 + WARRING_OUT 存在）：讀回已完成 seed 結果，本跑跳過（長跑被殺後接續，不虧已完成）。
 	var results: Dictionary = {}
+	if OS.get_environment("WARRING_RESUME") != "" and out_path != "" and FileAccess.file_exists(out_path):
+		var rf := FileAccess.open(out_path, FileAccess.READ)
+		if rf != null:
+			var parsed = JSON.parse_string(rf.get_as_text())
+			rf.close()
+			if parsed is Dictionary:
+				results = parsed
+				print("[bed] RESUME：已有 %d seed 結果，跳過 → %s" % [results.size(), str(results.keys())])
+
+	var _done: int = results.size()
 	for s in seeds:
+		if results.has(str(int(s))):
+			continue   # resume：已完成，跳
 		var r: Dictionary = WarringHarness.run(int(s), ticks)
 		if r.is_empty():
 			print("[FAIL] seed=%d harness 空（config 載入失敗？）" % int(s)); continue
 		results[str(int(s))] = r
 		_print_metrics(int(s), r)
+		_done += 1
+		# ★每 seed 增量 dump WARRING_OUT（rewrite 累積：死了不虧、可 resume；小 dict 成本可忽略）
+		if out_path != "":
+			var wf := FileAccess.open(out_path, FileAccess.WRITE)
+			if wf != null:
+				wf.store_string(JSON.stringify(results, "  "))
+				wf.close()
+		if prog_path != "":
+			var pf := FileAccess.open(prog_path, FileAccess.WRITE)   # 覆寫（最新一行即進度）
+			if pf != null:
+				pf.store_string("[progress] %d/%d seeds done (last=%d, ticks=%d)\n" % [_done, _seed_n, int(s), ticks])
+				pf.close()   # close = flush，確保 measurer 中途 Read 得到
 
-	# dump baseline
-	var out_path: String = OS.get_environment("WARRING_OUT")
 	if out_path != "":
-		var f := FileAccess.open(out_path, FileAccess.WRITE)
-		if f == null:
-			print("[FAIL] 無法寫 WARRING_OUT=%s" % out_path)
-		else:
-			f.store_string(JSON.stringify(results, "  "))
-			f.close()
-			print("[bed] baseline metric 已寫 → %s" % out_path)
+		print("[bed] baseline metric 已寫（增量）→ %s" % out_path)
 
 	# before/after 逐點 diff
 	var base_path: String = OS.get_environment("WARRING_BASELINE")
