@@ -27,6 +27,8 @@ func _mk_team(state: WorldState, pop: int, cmd: float, pos: Vector2i, faction_id
 	t.leader_id = _mk_person(state, cmd)
 	if pop > 0:
 		AnonTierSystem.add_anon(t, AnonCohort.TIER_PLEB, pop - 1)   # leader 算 1
+	# S-A：預設充足糧（10 天餘命）→ 過 _find_absorber 餵養 gate#1，隔離 target 選擇特徵測試。
+	t.resources["food"] = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 10.0
 	t.tile_pos = pos
 	t.faction_id = faction_id
 	t.parent_team_id = -1
@@ -61,6 +63,15 @@ func _run() -> void:
 	_assert(target_a != -1, "case A: consolidate_target_of 命中容量吸收 target != -1")
 	_assert(target_a == absorber_a.team_id, "case A: target == absorber_id")
 
+	# ── S-A case A2: 餵養 gate#1——所有候選 absorber 無糧 → 不選（防搬餓）──
+	# （leader_a 也在 dist≤3 內=候選；須一併餓才隔離 gate）
+	absorber_a.resources["food"] = 0.0
+	leader_a.resources["food"] = 0.0
+	var target_a2: int = FactionAISystem.consolidate_target_of(state_a, small_a, f_a)
+	_assert(target_a2 == -1, "case A2: 餵養 gate——候選 absorber 皆無糧 → target == -1")
+	absorber_a.resources["food"] = float(absorber_a.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 10.0  # 復原
+	leader_a.resources["food"] = float(leader_a.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 10.0
+
 	# ── Task1 case B: small member 不夠小（不命中）──
 	var state_b := WorldState.new()
 	var leader_b := _mk_team(state_b, 5, 5.0, Vector2i(0, 0), -1)
@@ -88,8 +99,15 @@ func _run() -> void:
 	# ── Task2: consolidate_drive term ──
 	var ctx_a := DecisionContext.new()
 	ctx_a.consolidate_target_id = absorber_a.team_id
+	ctx_a.food_days = 0.0   # 餓（food_days=0）→ 食壓最大
+	# S-A：consolidate_drive 退 flat → 食壓 scaled（mirror join）。food_days=0 → DESPERATION_SCALE*DESPERATION_DAYS。
 	var drive_hit: float = DecisionTerms.eval("consolidate_drive", ctx_a, "整併")
-	_assert(drive_hit == DecisionTerms.CONSOLIDATE_DRIVE, "term: consolidate_drive 命中回 CONSOLIDATE_DRIVE")
+	_assert(is_equal_approx(drive_hit, DecisionTerms.DESPERATION_SCALE * DecisionTerms.DESPERATION_DAYS),
+		"term: consolidate_drive 食壓 scaled（餓→DESPERATION_SCALE*DAYS）")
+	var ctx_fed := DecisionContext.new()
+	ctx_fed.consolidate_target_id = absorber_a.team_id
+	ctx_fed.food_days = 99.0   # 飽 → 食壓 0
+	_assert(DecisionTerms.eval("consolidate_drive", ctx_fed, "整併") == 0.0, "term: 飽足 → consolidate_drive 0")
 	var drive_wrong_opt: float = DecisionTerms.eval("consolidate_drive", ctx_a, "貿易")
 	_assert(drive_wrong_opt == 0.0, "term: opt != 整併 → 0")
 	var ctx_none := DecisionContext.new()
@@ -109,6 +127,9 @@ func _run() -> void:
 	_assert(int(td["order_target"]) == absorber_a.team_id, "to_task: order_target == absorber_id")
 
 	# ── Task4: 整合行為（跑一次 _assign_member_tasks，整併經引擎達成）──
+	# S-A：食壓驅併——small_a 需食壓（food_days < DESPERATION）consolidate_drive 才 fire。
+	# 設 ~1.5 天餘命（壓力足但未觸 survival-sticky）；absorber 仍充足糧過餵養 gate。
+	small_a.resources["food"] = float(small_a.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.5
 	fai._assign_member_tasks(state_a, f_a)
 	_assert(small_a.current_task == TeamData.TASK_MERGE, "整合: small member current_task == TASK_MERGE（經引擎）")
 	_assert(small_a.order_target_id == absorber_a.team_id, "整合: order_target_id == absorber_id")

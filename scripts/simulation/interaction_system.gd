@@ -13,6 +13,7 @@ const READINESS_RECOVERY_BASE: float = 0.04
 const READINESS_FOOD_COST: float     = 0.05
 
 const AID_RESERVE_DAYS: float = 14.0
+const ACCEPT_UTIL_THRESHOLD: float = 0.3   # TEST VALUE — S-A 靶C accept-util 收/不收門檻
 # 特別稅（徵收 task）= 一般稅率 × 此倍率，重於常態一般稅（戰時/缺糧額外加徵）。TEST VALUE
 const SPECIAL_TAX_MULT: float = 1.5
 
@@ -463,6 +464,13 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 	var merger: TeamData = state.teams[merger_id]
 	if merger.order_target_id != target_id:
 		return
+	# S-A 靶C 雙邊握手：absorber(target) 秤 accept-util。拒→merger 回退（釋放，下 cadence 重 argmax）。
+	if not _absorber_accepts(state, target_id, merger_id):
+		if Probe.enabled: Probe.bump("accept.merge_reject")
+		TaskArbiter.release(merger)
+		merger.order_target_id = -1
+		return
+	if Probe.enabled: Probe.bump("accept.merge_accept")
 	# absorbed_team is the MERGER (small team dissolving into target)
 	var absorbed_team: TeamData = state.teams[merger_id]
 	var all_npcs: Array = []
@@ -1034,6 +1042,35 @@ func _count_recent_special_tax(leader: PersonData, collector_id: int) -> int:
 			count += 1
 	return count
 
+# S-A 靶C accept-util 薄層（★單一 util 收/不收，非 absorber 全 option rank——超出即回報 blueprint）。
+# 仿 _resolve_aid_request(BEG) 節制原則。收 util = 願擴傾向(野心/統領) × 餵得起(併後合隊餘命)；自身餓→util 崩。
+# 邊界誠實：contact-time bespoke 薄層（非零框外），限單一 util 比較=不滾成第二決策引擎。
+func _absorber_accepts(state: WorldState, absorber_id: int, joiner_id: int) -> bool:
+	var ab: TeamData = state.teams.get(absorber_id)
+	var jo: TeamData = state.teams.get(joiner_id)
+	if ab == null or jo == null:
+		return false
+	var ldr: PersonData = state.persons.get(ab.leader_id)
+	var ambition: float = float(ldr.values.get("野心", 0.5)) if ldr else 0.5
+	var command: float = clampf(float(ldr.skills.get("統領", 0.0)), 0.0, 1.0) if ldr else 0.0
+	# 餵養能力（mirror _find_absorber gate）：併後合隊餘命 / 門檻，clamp 0..1。
+	var fpd: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY
+	var ef_ab: float = ResourceSystem.effective_food(state, ab)
+	var ef_jo: float = ResourceSystem.effective_food(state, jo)
+	var combined_days: float = (ef_ab + ef_jo) / maxf(float(ab.population + jo.population) * fpd, 0.001)
+	var feed_ok: float = clampf(combined_days / FactionAISystem.ABSORBER_MIN_SURVIVE_DAYS, 0.0, 1.0)
+	var accept_util: float = (ambition * 0.6 + command * 0.4) * feed_ok
+	if accept_util < ACCEPT_UTIL_THRESHOLD:
+		return false
+	# gate#1 驗（餵養真解非搬餓）：記併前 absorber/joiner 餘命 + 併後合隊餘命 → measurer 比 combined>min。
+	if Probe.enabled:
+		Probe.bump("consol.accept_n")
+		Probe.add_amount("consol.combined_days_sum", combined_days)
+		Probe.add_amount("consol.absorber_days_sum", ef_ab / maxf(float(ab.population) * fpd, 0.001))
+		Probe.add_amount("consol.joiner_days_sum", ef_jo / maxf(float(jo.population) * fpd, 0.001))
+		Probe.add_amount("consol.absorber_pop_sum", float(ab.population))   # 隊規模分布 side-observe
+	return true
+
 # 投靠 resolver：joiner 全併入 host（複用既有 merge_teams full absorb，pop 守恆轉移）。
 # host = joiner 的 social_target（強鄰）。joiner 完全併入後滅團（merge_teams 內走 erase_team）。
 func _resolve_join(state: WorldState, joiner_id: int, host_id: int) -> void:
@@ -1041,6 +1078,13 @@ func _resolve_join(state: WorldState, joiner_id: int, host_id: int) -> void:
 	var host: TeamData = state.teams.get(host_id)
 	if joiner == null or host == null:
 		return
+	# S-A 靶C 雙邊握手：host 秤 accept-util（收/不收）。拒→joiner 回退（釋放 task，下 cadence 重 argmax）。
+	if not _absorber_accepts(state, host_id, joiner_id):
+		if Probe.enabled: Probe.bump("accept.join_reject")
+		state.clear_social_target(joiner)
+		TaskArbiter.release(joiner)
+		return
+	if Probe.enabled: Probe.bump("accept.join_accept")
 	Probe.bump("join.resolve")   # 死路探針：JOIN handler 實呼（前 62/66 靜默 fall-through）
 	var all_npcs: Array = []
 	if joiner.leader_id != -1: all_npcs.append(joiner.leader_id)

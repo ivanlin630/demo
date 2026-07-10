@@ -25,6 +25,7 @@ const LOOT_READINESS_MIN: float   = 0.6   # TEST VALUE — 掠奪需要的最低
 const SMALL_TEAM_RATIO: float     = 0.3   # TEST VALUE — pop < cap×0.3 視為小隊
 const SMALL_VS_LARGE: float       = 0.33  # TEST VALUE — pop < absorber.pop×0.33 才觸發合併
 const CONSOLIDATE_MAX_DIST: int   = 3     # TEST VALUE — 戰前集結距離上限（hex）
+const ABSORBER_MIN_SURVIVE_DAYS: float = 7.0  # TEST VALUE — S-A 餵養 gate#1：併後合隊最低餘命（防搬餓）
 const ATTACK_SCORE_THRESHOLD:  float = 0.25  # TEST VALUE — ②b 稍寬（0.30→0.25，餬口狼偶爾動手；archetype gate 仍擋知足者）
 # ②b 飢餓下修搶糧 readiness（僅獨立 prosperity raid 路；faction campaign/can_expand/directives 不吃）。TEST VALUE。
 const HUNGER_SLIDE_DAYS: float = 7.0   # food_days ≥ 此 → hunger_relief=1.0（正常門檻）；越餓越低
@@ -1573,6 +1574,16 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 		var t_cap: int = TeamData.pop_cap_from_leadership(t_cmd) - t.population
 		if t_cap <= 0:
 			continue
+		# S-A 靶A 餵養 gate#1（防搬餓）：吸附者須有糧 + 併後合隊真能撐 ABSORBER_MIN_SURVIVE_DAYS。
+		# 不過=不選（非把餓稀釋進更大隊）。consolidate_target_of 同呼此路→context target 一致。
+		var ef_t: float = ResourceSystem.effective_food(state, t)
+		if ef_t <= 0.0:
+			continue   # 吸附者自身無糧→無餵養能力
+		var ef_mt: float = ResourceSystem.effective_food(state, mt)
+		var combined_days: float = (ef_t + ef_mt) \
+			/ maxf(float(t.population + mt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		if combined_days < ABSORBER_MIN_SURVIVE_DAYS:
+			continue   # 併後撐不住→不選
 		var d: int = _hex_dist(mt.tile_pos, t.tile_pos)
 		if d <= 1 or d > CONSOLIDATE_MAX_DIST:
 			continue

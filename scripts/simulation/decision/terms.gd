@@ -25,7 +25,7 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 # 「除 survival-sticky 外恆 fire」保真。survival-sticky 由 TaskArbiter priority-gate 保（非 rank_scored 內
 # 競秤）：獨立 _trigger_survival 設 PRIO_SURVIVAL(80) task → 整併走 _decide_unified PRIO_DISPATCH(50)
 # 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
-const CONSOLIDATE_DRIVE: float = 2.0    # TEST VALUE — 整併競秤量級（>mundane，survival 仍 PRIO 保）。folded=引擎一致 baseline，征服密度為引擎內可調旋鈕（平衡 pass/A2d）。
+const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
@@ -87,7 +87,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
 			return OCCUPY_DRIVE_BASE * (1.0 if not ctx.has_own_outpost else 0.3)
 		"join_drive":
-			if opt != "投靠" or not ctx.has_strong_neighbor: return 0.0
+			# S-A：has_strong_neighbor 硬 gate 移出 eval → options.gd applicable 前提（食壓驅 join 不限強鄰）。
+			if opt != "投靠": return 0.0
 			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
@@ -157,8 +158,9 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
 		"consolidate_drive":
 			# A2c-1（FA5 折入）：整併 target 存在才 fire；flat 高量級（faction-level 機制非個人染色）。
+			# S-A 併決策統一：整併驅力退 flat → 食壓 scaled（mirror join_drive :91），target 存在才 fire。
 			if opt != "整併" or ctx.consolidate_target_id == -1: return 0.0
-			return CONSOLIDATE_DRIVE
+			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0
@@ -219,14 +221,17 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("貪婪", 0.5)) * 0.2
 		"occupy":            return float(v.get("野心", 0.5)) * 0.5 \
 			+ float(v.get("好戰", 0.5)) * 0.3 + float(v.get("統領", 0.0)) * 0.2
-		"join":              return float(v.get("義氣", 0.5)) * 0.4 \
-			+ float(v.get("信義", 0.5)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
+		# S-A：+野心負向（野心高者不甘投靠→weight 疊 low-ambition factor；野心低+餓→投靠 util 高）。
+		"join":              return (float(v.get("義氣", 0.5)) * 0.4 \
+			+ float(v.get("信義", 0.5)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3) \
+			* clampf(1.0 - float(v.get("野心", 0.5)), JOIN_LOW_AMBITION_FLOOR, 1.0)
 		"camp":              return float(v.get("野心", 0.5)) * 0.4 \
 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
-		"consolidate_drive": return 1.0   # A2c-1：faction 機制非人格染色（mirror intent_fit/faction_duty flat）
+		# S-A：整併 weight 退 flat → 人格秤（餓+不稱霸傾向併大）。求生欲主、低野心次。
+		"consolidate_drive": return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4
 		# ── 融合 threat：人格已 baked 進 eval（additive，鏡射舊 scores）→ weight=1.0（同 intent_fit）──
 		"prepare", "defend", "pacify": return 1.0
 		# 野心階梯溶入（序3）：練兵傾向=好戰/野心染色（ambient 低 magnitude 由 eval 壓，讓位緊急）。
