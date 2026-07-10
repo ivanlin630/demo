@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [收尾] combat S1 merged（db04407）+ 下一序評（S2 / consolidation / sweep 清償）待你排→升user
 ---
 
