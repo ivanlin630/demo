@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [S-A halt/重估] 異質審抓因果鏈3 可能反向 + consolidation leverage 縮水——WHAT 重估待你
 ---
 

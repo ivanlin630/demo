@@ -2,8 +2,9 @@
 
 > 願景 = `2026-07-10-consolidation-unified-decision-design.md`（blueprint，已收 reviewer 框①三靶）。本檔 = S-A 技術 HOW（term/context/seam）。屬決策統一 program [[project_unified_decision_framework]]。**S-B 降服/附庸另 slice**。
 
-## 目標（S-A）
-退役 `consolidate_drive` flat 1.0 + `join_drive` 窄 `has_strong_neighbor` gate → **收進 rank_scored 真生存/人格 term 秤**；`_find_absorber` 納**餵養能力**（靶A 硬 gate 防搬餓）；接受方也 rank 秤（雙邊握手，靶C 薄層邊界誠實寫）。
+## 目標（S-A，★blueprint 重定 2026-07-10）
+**＝食壓驅併＝有機政體湧現 + S-B 政治層地基。非殲滅修復**（因果鏈反向已證、pop-% 已 S1 絕對解、殲滅已裁接受不可見）。價值判準 = **gate#1 餵養真解生存非搬餓**（S-A 成敗核心）。
+技術：退役 `consolidate_drive` **雙 flat**（eval flat + weight flat 1.0）+ `join_drive` weight/gate 補齊 → **收進 rank_scored 真生存/人格 term 秤**；`_find_absorber` 納**餵養能力**（gate#1 防搬餓）；接受方也 rank 秤（雙邊握手，靶C 薄層邊界誠實寫）。
 
 ## 現況錨點（characterize，★異質框外審修正 2026-07-10）
 - `terms.gd:89-91 join_drive`：gate `投靠 + has_strong_neighbor`，**eval 已食壓 scaled**＝`DESPERATION_SCALE * maxf(0, DESPERATION_DAYS - food_days)`（與 camp/beg/buyfood 共 pattern）。weight `join`=義氣/信義/求生欲(`:222`)。**∴ join 真 delta 僅 weight 側（+野心負向）+ gate 降 applicable，eval 別重造（原 spec 誤稱「無食壓」=異質審抓的 premise_contradiction）**。
@@ -43,7 +44,7 @@
 
 ## ★S-A 硬驗收 gate（reviewer 靶A，spec 寫成 measurer 先驗項，非事後量）
 1. **餵養真解非搬餓**：measurer 量併事件**前後合隊** `food_days/餘命`——須**實質改善**（`combined_food_days > 兩隊併前 min`，且吸附者併前 surplus>0）。搬餓（合隊更餓）=FAIL 打回。
-2. **隊變大真觸殲滅可見**：organic full_probe 量**隊規模分布上移** + `end_annihilation` 隨之 **>0**。**★★異質審 halt（2026-07-10，pending blueprint）**：code 讀出此鏈**可能反向**——大隊(eff>3)**跳過**絕境逃判、rout 檢查每 round 在 annihilation 前跑 → 隊變大=更多 round=**更多機會先 rout 逃走**，非更易撐到殲滅；**無任何 code 機制接「隊變大→殲滅更易」**。∴ gate#2 前提待 blueprint 重估（見 `systems-to-blueprint-consolidation-causal-reversal`），**未決前 S-A 不 spec-lock**。
+2. ~~**隊變大真觸殲滅可見**~~ **★砍為 side-observe（blueprint 裁 2026-07-10）**：異質審證因果鏈反向（大隊跳絕境判、rout 每 round 先於 annihilation → 隊變大更易先 rout 逃非撐到殲滅；殲滅=雙勇均等 1v1 窄縫，隊變大更難湊）。**殲滅可見非 S-A 目標**（敗北逃已裁接受不可見、pop-% 已 S1 絕對解）。measurer **只 side-observe 隊規模分布/annih**（記數不判 pass/fail、不為它調任何東西）。
 3. **併=湧現非腳本**：grep 確認**無** `pop<N 就併` 硬寫；食壓 term 驅 argmax。三端/戰鬥不退化、determinism/融合閘/憲法綠。
 
 ## 觸及檔（S-A）
