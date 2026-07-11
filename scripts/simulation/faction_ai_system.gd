@@ -1573,7 +1573,7 @@ func _probe_conq_winner(winner_opt: String, ranked: Array) -> void:
 
 func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 	var best_id: int = -1
-	var best_d: int  = 999
+	var best_score: float = -9999.0   # 名聲磁鐵 §3：偏好高 protector_rep host（主觀 mt 視角）；dist 次序 tiebreak
 	for tid in f.member_team_ids:
 		if tid == mt.team_id:
 			continue
@@ -1598,8 +1598,10 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 		var d: int = _hex_dist(mt.tile_pos, t.tile_pos)
 		if d <= 1 or d > CONSOLIDATE_MAX_DIST:
 			continue
-		if d < best_d:
-			best_d = d
+		# 名聲磁鐵 §3：score = protector_rep 主導（避投奔強暴君）− dist 懲罰（近者次選）。
+		var score: float = mt.get_protector_rep(tid) * 10.0 - float(d)
+		if score > best_score:
+			best_score = score
 			best_id = tid
 	return best_id
 

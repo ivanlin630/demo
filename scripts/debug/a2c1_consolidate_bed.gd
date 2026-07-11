@@ -100,9 +100,11 @@ func _run() -> void:
 	var ctx_a := DecisionContext.new()
 	ctx_a.consolidate_target_id = absorber_a.team_id
 	ctx_a.food_days = 0.0   # 絕境 → 食壓最大
+	ctx_a.host_protector_rep = 0.5   # 名聲磁鐵中性 → magnet=1+0.5*REP_MAGNET_W
 	var drive_hit: float = DecisionTerms.eval("join_drive", ctx_a, "併入")
-	_assert(is_equal_approx(drive_hit, DecisionTerms.DESPERATION_SCALE * DecisionTerms.DESPERATION_DAYS),
-		"term: 併入 join_drive 絕境 food-scaled（餓→DESPERATION_SCALE*DAYS）")
+	var _magnet: float = 1.0 + 0.5 * DecisionTerms.REP_MAGNET_W
+	_assert(is_equal_approx(drive_hit, DecisionTerms.DESPERATION_SCALE * DecisionTerms.DESPERATION_DAYS * _magnet),
+		"term: 併入 join_drive 絕境 food-scaled × 名聲磁鐵")
 	var ctx_fed := DecisionContext.new()
 	ctx_fed.consolidate_target_id = absorber_a.team_id
 	ctx_fed.food_days = 99.0   # 飽 → 食壓 0

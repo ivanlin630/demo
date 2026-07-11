@@ -27,6 +27,7 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 # 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
 const ABSORB_DRIVE_BASE: float = 1.2         # TEST VALUE — §HOW-7 吸納量級（近 OCCUPY，擴張-class 公平競秤攻擊/佔村）
+const REP_MAGNET_W: float = 1.0              # TEST VALUE — 名聲磁鐵 §3 投靠加成權重（高名聲 host 翻贏逃）
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
@@ -88,11 +89,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
 			return OCCUPY_DRIVE_BASE * (1.0 if not ctx.has_own_outpost else 0.3)
 		"join_drive":
-			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。survival OR 威脅兩路。
+			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。
+			# 名聲磁鐵 §3：× (1 + host protector_rep × REP_MAGNET_W)——高名聲 host 投靠翻贏逃，中性(0.5)加成小。
 			if opt != "併入": return 0.0
 			var hunger: float = maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 			var threat_push: float = ctx.threat if ctx.threat > ctx.threat_threshold else 0.0
-			return DESPERATION_SCALE * maxf(hunger, threat_push)
+			var magnet: float = 1.0 + ctx.host_protector_rep * REP_MAGNET_W
+			return DESPERATION_SCALE * maxf(hunger, threat_push) * magnet
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
 			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)

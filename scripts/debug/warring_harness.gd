@@ -38,6 +38,7 @@ const PROBE_KEYS: Array = [
 	"merge.surv_ok", "merge.surv_fail",
 	"mergein.dissolve", "mergein.subteam",   # §HOW-6 分流兩端（對稱空窗守衛：任一=0→INCONCLUSIVE）
 	"absorb.dispatch", "absorb.target_found", "absorb.util_n", "absorb.slack_pos", "absorb.yield_pos",   # §HOW-7/8 診斷
+	"rep.host_nonneutral",   # 名聲磁鐵：protector_rep 脫 0.5 差別數
 	# A2c-2 D0：戰略移動 overlay(FA6)characterization——overlay 生效頻率 + 包圍/突圍指派 + 到達
 	"strat.sa_move_dispatch", "strat.encircle_assigned", "strat.breakout_assigned", "strat.expand_reached",
 	# R1 驗收（三帶+logistics）：絕境仍搏 / ③管住獨立隊攻屬村 / 貿易量（guard ④）

@@ -102,6 +102,7 @@ var consolidate_target_id: int = -1
 var absorb_target_id: int = -1   # §HOW-7 吸納：capacity-bound 可吸弱鄰（強方擴張 pull）
 var resource_slack: float = 0.0  # §HOW-8：養得起更多 pop 的餘裕（統領 pop_cap 空額×資源 buffer，★≠food_days 餘命）
 var absorb_yield: float = 0.0    # §HOW-8：吸 absorb_target 淨收益（產能/據點 − pop 負擔，★≠richness 貪婪值）
+var host_protector_rep: float = 0.5   # 名聲磁鐵 §3：本隊對 併入 host 的 protector_rep（道德聲望，主觀 per-observer）
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -281,6 +282,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
 		c.consolidate_target_id = team.consolidate_target_cache
 		c.absorb_target_id = team.absorb_target_cache
+		# 名聲磁鐵 §3：本隊對 host 的 protector_rep（主觀 per-observer，禁全域真值）
+		if c.consolidate_target_id != -1:
+			c.host_protector_rep = team.get_protector_rep(c.consolidate_target_id)
+			if Probe.enabled and absf(c.host_protector_rep - 0.5) > 0.01:
+				Probe.bump("rep.host_nonneutral")   # DIAG：磁鐵有差別（protector_rep 脫 0.5）
 		if Probe.enabled and team.absorb_target_cache != -1:
 			Probe.bump("absorb.target_found")   # DIAG：有 capacity-bound 弱鄰可吸（finder 非空）
 	# §HOW-8 resource_slack（systems 公式）：空 pop 容量 × 舒適度（≠food_days 餘命；spare 主軸、comfort gate）。
