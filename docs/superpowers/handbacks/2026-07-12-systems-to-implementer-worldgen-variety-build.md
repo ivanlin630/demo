@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [world-gen variety 開工] 據點seeded scatter+範圍+全域地板+重baseline;R² CLEAN
 ---
 

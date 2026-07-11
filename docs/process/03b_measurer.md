@@ -46,6 +46,14 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 2. **先 seed=1 短跑估耗時**：大窗前先 `WARRING_SEEDS=<one> WARRING_MONTHS=<target>` 跑一顆計時 → ×seed 數估總時 → 設對 `GODOT_TIMEOUT`（別默認 360 誤殺）+ 知道要等多久。機制重（如 consolidation `merge.consolidate_dispatch` 高頻）吞吐比 baseline 慢屬正常，非環境問題。
 3. **進度 sidecar 查中途**（繞 `godot.ps1` 末端 transcode 盲點＝跑完才有 stdout）：`WARRING_PROGRESS=<path>` → `seeded_warring_bed` 每 seed 完覆寫一行進度 → measurer 中途 `Read <path>` 查「i/N seeds done」，不必盲等。
 
+### ★右尺寸：量測對準「驗什麼」（2026-07-12，別盲跑大窗）
+量測前先分「要驗的性質是哪類」，別一律 18-seed×3mo：
+- **生成輸出性質**（world-gen 佈局/地板/覆蓋/variety、初始 state 結構…）＝**生成完即定，不用跑 sim** → 純 `generate` 秒級，可跑**極多 seed**（便宜）就地讀輸出。血證：world-gen variety 地板/variety 拿 18×3mo(127min)驗＝燒錯地方，純生成幾分鐘全 seed 跑完。
+- **sim 行為性質**（dispatch 率、湧現、三端、build-outpost fire…）＝要跑 sim，但**少 seed 短窗**多半夠（fire 得早的機制 1 月足）。
+- **per-seed 性質**（determinism byte-identical）＝1 seed×2 夠。
+- **稀事件率/跨 seed robustness** 才需大窗多 seed（且稀事件優先定向床，見上）。
+- ∴ 一個 slice 常拆：生成輸出純生成掃（全 seed instant）+ 行為少 seed 短 sim + determinism 1 seed + 大窗只當 belt-suspenders regression（detach 跑、別等）。配 §右尺寸原則（signal-type × event-frequency）。
+
 ### ★長跑（大窗需長時）真解：脫離啟動 + resume（2026-07-11 root cause 定+工具建）
 **root cause（實測定，非 OOM）**：0-byte 瞬殺 = CLI harness 把 bg-task 包在 kill-on-close Job → 殺 bg-task 連帶殺 pwsh wrapper + godot child（→ 末端 transcode 沒跑=0 bytes/無 marker）。證：近 24h 零 Resource-Exhaustion 事件（非 OOM）+ 零 WER（非 crash）+ 前景跑成功 + VSCode log 不涵蓋（headless CLI 層殺）。∴ 非記憶體/非 code，是**背景任務生命週期**。
 **長跑 SOP（短跑仍用前景 `godot.ps1`）**：
