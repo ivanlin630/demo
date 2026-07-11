@@ -27,9 +27,10 @@
 **真 inert 根因**：`_find_strong_neighbor` 已跨 faction，但 **:3247 讀 `known_reputations`（情報信任）+ :3253 選 `best_pop`（最強）**——**不讀 protector_rep、不選護過我的**。∴ 選的強鄰 protector_rep 恆 0.5→磁鐵 inert。
 **真修（小，非引新 finder）**：`_find_strong_neighbor` **選擇準則改 protector_rep**（投奔護過我的最佳保護者=§3.2 原意）：
 - 保既有 filter（跨 faction :3246 / 可達 :3245 / belief :3250 / 強度 :3252）。
-- **選擇改**：`:3253 best_pop` → argmax `protector_rep[tid]`（tie-break pop）——選我最高 protector_rep 的（護過我的）保護傘。喂(aided→護我者 rep 漲)-讀(選 rep 高者)**同 pair**→非 0.5。
-- known_reputations>0.3 filter（:3248）：情報信任基本 sanity，可保或放寬（implementer 評；別跟 protector_rep 撞語意）。
-- **★implementer 確認 `_find_strong_neighbor` 唯投靠用**（另 caller `faction_ai:3422`）——若他用，rep-選 scope 到投靠路（別擾別用途）。跑不順標回 systems。
+- **★選擇軸參數化（reviewer rev2 抓：`_find_strong_neighbor` 共用，:3422 defection-surrender 也呼——投降要「最強軍事保護」、JOIN 要「最高 rep 仁君」，衝突，systems spec 解不 punt）**：`_find_strong_neighbor(state, team, axis: String = "pop")`——
+  - JOIN（投靠 finder 呼叫）傳 **`"rep"`**：`:3253 select` → argmax `protector_rep[tid]`（tie-break pop）＝投奔護過我的保護傘。喂-讀同 pair→非 0.5。
+  - `_trigger_defection_evaluation`（`:3422`）**維持 `"pop"`**（best_pop 不變，投降找扛得住的強者）＝行為零變。
+  - 共用 filter/scan/reachability（跨 faction :3246 / 可達 / belief / 強度 / known_reputations>0.3 sanity），只分流最終 select 準則＝既有函式參數化，非重造/非冗餘。
 - **resolver 已跨 faction**（`_resolve_join` `interaction:237` 早於 same_faction `:243`，reviewer 複核確認）→ 不用改。
 - **邊界最小版**：只投奔高 rep 保護傘+併入；S-B 政治（叛離後果/怨氣/忠誠/通牒）defer。
 - context：`best_protector_rep`（選中 host 的 protector_rep）供 join_drive §3.1 讀。

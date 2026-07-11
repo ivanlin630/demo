@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 重審] §3b 根因已修正(你抓對我mis-root)——真根=_find_strong_neighbor選best_pop非protector_rep
 ---
 
