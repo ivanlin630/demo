@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [§4重baseline] world-gen merged 9156f6f—seeded_warring_bed baseline重生(標位移非迴歸)+深度長跑參照(2seed×12月/1年全探針,用戶定,非18seed廣度)
 ---
 
