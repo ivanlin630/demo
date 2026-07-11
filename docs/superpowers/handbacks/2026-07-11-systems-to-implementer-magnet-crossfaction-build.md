@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [磁鐵修 開工] 跨faction rep-選(治inert)——finder參數化axis,兩JOIN點傳rep;R②三輪CLEAN
 ---
 

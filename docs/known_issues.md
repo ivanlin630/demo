@@ -21,6 +21,12 @@
 → **清償 slice（另開，fix 異質不塞 S1）**：per-event=累積器、one-shot=floor/機率化（決定性）。掛 memory [[feedback_structural_audit_complement]]。
 **★更廣結構債（blueprint 2026-07-10 擴，pursuit 3 次失敗揭）**：不只捨入——**`pop-% × 小效果` 在小隊世界普遍失效**（organic 全小隊 → 任何 `pop*小rate` 恆~0，累積器也救不了因每 entity 只觸一次）。sweep 同看**模型選擇**：該量是「敗方 pop 百分比」還是「絕對小數（軍閥砍尾型）」？pursuit=絕對正解（rev3）。與**殲滅不可見同根**（隊太小）=consolidation 腿另一症狀。各站標「pop-% vs 絕對」宜哪個。
 
+## world-gen variety backlog（2026-07-11，blueprint 記，下個項目一起做非現在）
+用戶 GUI 親驗發現，**per-seed determinism 必守**（否則回歸 diff 廢）：
+1. **據點太規則**：`world_generator:180 pick_start_positions` 按 tile key 順序貪婪挑 → 掃描式規則布局、**每 seed 一樣**。傷世界質感（人工格狀）+ 量測效度（地理骨架固定，多 seed 沒測不同地緣）。→ 改 **seeded 散布**（min_spacing 內隨機撒）。
+2. **seed 間變異太窄**：現固定=據點位置/數量/地圖 grid/領土形狀；只變類型/隊數/次要位置/資源/人格。→ 加變維度：據點數量（8-14）、勢力數（2-4）+領土 share、地形分布（山/林/平原格局隨 seed；先驗地形現 seeded 沒）。
+- 序：名聲磁鐵 slice 跑完後開，走正常 characterize/spec/R②。
+
 ## combat-into-engine arc backlog（2026-07-10，spec `specs/2026-07-10-combat-into-engine`）
 - **S4 斷糧求生路由（blueprint 裁 defer）**：`rank_combat` COMBAT_OPTION_SET{血戰/逃} 無「逃向補給/家」跨域路由=結構漏（現行 `_mortal_flee_check` 亦只戰場逃，S2 preserving 不使其更糟）。=淨新 feature，掛絕境經濟/consolidation arc。別丟。
 - **S2 地板1 硬 gate（靶A）**：rank_combat argmax 須逐 seed **重現** rev2 三端（逃83%/俘中頻/殲滅稀），對不上=design reject 非 tune weight 湊近似。
