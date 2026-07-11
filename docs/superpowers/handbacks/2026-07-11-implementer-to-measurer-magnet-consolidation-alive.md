@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 topic: [★突破] consolidation completion 活了！跨faction 保護傘投靠→聯邦成形(join.resolve=11,分流兩端);rep-差別仍待
 ---
 

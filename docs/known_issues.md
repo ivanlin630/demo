@@ -21,6 +21,9 @@
 → **清償 slice（另開，fix 異質不塞 S1）**：per-event=累積器、one-shot=floor/機率化（決定性）。掛 memory [[feedback_structural_audit_complement]]。
 **★更廣結構債（blueprint 2026-07-10 擴，pursuit 3 次失敗揭）**：不只捨入——**`pop-% × 小效果` 在小隊世界普遍失效**（organic 全小隊 → 任何 `pop*小rate` 恆~0，累積器也救不了因每 entity 只觸一次）。sweep 同看**模型選擇**：該量是「敗方 pop 百分比」還是「絕對小數（軍閥砍尾型）」？pursuit=絕對正解（rev3）。與**殲滅不可見同根**（隊太小）=consolidation 腿另一症狀。各站標「pop-% vs 絕對」宜哪個。
 
+## gossip 名聲傳播 backlog（2026-07-11，資訊維度 Phase D；磁鐵接口已留）
+consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長（aided/looted），organic `rep.host_nonneutral=0`（曝光缺口）→ 現階段「中性 rep 無差別投靠」（可接受、mega-blob 受控）。**gossip loop-1（名聲傳播）**讓它→「擇良木而棲（仁君聚望/暴君遭棄）」=名聲靈魂。**接口已留**（`update_protector_rep(…, source)` source-agnostic + `message_system:182 _exchange_intel` 標 TODO seam）→ 屆時「擴 message 帶第三方 protector_rep 意見，複用信任 gate/distortion/decay」=中工非大 arc。歸資訊維度 Phase D。
+
 ## world-gen variety backlog（2026-07-11，blueprint 記，下個項目一起做非現在）
 用戶 GUI 親驗發現，**per-seed determinism 必守**（否則回歸 diff 廢）：
 1. **據點太規則**：`world_generator:180 pick_start_positions` 按 tile key 順序貪婪挑 → 掃描式規則布局、**每 seed 一樣**。傷世界質感（人工格狀）+ 量測效度（地理骨架固定，多 seed 沒測不同地緣）。→ 改 **seeded 散布**（min_spacing 內隨機撒）。

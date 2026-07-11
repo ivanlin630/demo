@@ -54,6 +54,14 @@
 - 附觀察：高名聲仁君 vs 低名聲暴君 是否分化「自願聯邦 vs 征服帝國」兩路。
 - protector_rep 真波動（脫離 0.5，護/背事件驅）+ gate#1 非搬餓 + determinism + 三端不退化。
 
+## ★§4 收尾（2026-07-11 blueprint 裁 ship）：gossip 接口 + defer 傳播本體
+磁鐵大窗確認活（18-seed **196 次完成** vs 前版 4-19=10 倍跳、跨 faction 自願歸附穩定、mega-blob 受控均 34.67 隊、三端/gate#1 綠）→ **ship**。a/b/c 收掉（consolidation 非世界抗拒，是磁鐵讓它活）。現況「中性 rep(0.5) 無差別投靠」接受為現階段（無名聲資訊時投誰都合理、mega-blob 受控）。
+**★留 gossip 接口（核心，別漏；現不建本體）**：
+1. **`update_protector_rep` 做成單一可擴充入口**：簽名加 `source: String = "direct"`（直接事件走 "direct"、**未來 gossip 走 "gossip"**）——不假設 source 只能直接事件，未來接 gossip 不用重構 rep 模型。per-observer 主觀（已是）。
+2. **message_system 標擴充縫（TODO/seam，不實作）**：`_exchange_intel`（`message_system:182`）/`exchange_intel_on_arrival`（`:145`）附近註明「未來 gossip：相遇交換情報時，也交換對**第三方**的 protector_rep 意見 → 收方經 `update_protector_rep(…, source="gossip")` 更新（複用既有信任 gate + distortion/decay）」。
+3. **確保現設計不擋 gossip**：rep per-observer + 入口 source-agnostic = 屆時「擴 message 帶名聲內容」中工非大 arc。
+**defer gossip 本體**：完整名聲傳播（loop-1）歸資訊維度後續（Phase D）；接上留好的入口即可。它讓磁鐵從「無差別投靠」→「擇良木而棲（仁君聚望/暴君遭棄）」=名聲靈魂。
+
 ## 觸及檔
 | 檔 | 改點 |
 |---|---|
