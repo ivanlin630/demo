@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 框內] world-gen variety 技術spec——評分/scatter熵護欄/全域地板/重baseline;審健全+冗餘lens
 ---
 
