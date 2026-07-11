@@ -200,3 +200,11 @@ var task_extra_data: Dictionary = {}   # 子隊任務附加數據（build_type/l
 # 對 other_id 隊的口碑增減（clamp 0~1，預設 0.5 中立）；外交/施捨/勒索共用
 func update_reputation(other_id: int, delta: float) -> void:
 	known_reputations[other_id] = clampf(float(known_reputations.get(other_id, 0.5)) + delta, 0.0, 1.0)
+
+# 名聲磁鐵：對 protector_id 隊的「值不值託付/道德聲望」（★語意獨立 known_reputations 情報信任軸，別混）。
+# key=protector team_id，default 0.5 中立，clamp 0~1。道德事件(護/恩→升、仇/殺→跌)喂。
+var protector_rep: Dictionary = {}
+func get_protector_rep(protector_id: int) -> float:
+	return float(protector_rep.get(protector_id, 0.5))
+func update_protector_rep(protector_id: int, delta: float) -> void:
+	protector_rep[protector_id] = clampf(float(protector_rep.get(protector_id, 0.5)) + delta, 0.0, 1.0)
