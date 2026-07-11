@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [§2 裁定] 選項3=呼叫端就地喂(映射歧義在呼叫端消失,team直接在手);確切2喂點
 ---
 
