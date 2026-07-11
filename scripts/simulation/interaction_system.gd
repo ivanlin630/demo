@@ -13,6 +13,11 @@ const READINESS_RECOVERY_BASE: float = 0.04
 const READINESS_FOOD_COST: float     = 0.05
 
 const AID_RESERVE_DAYS: float = 14.0
+const ACCEPT_UTIL_THRESHOLD: float = 0.3   # TEST VALUE — S-A 靶C accept-util 收/不收門檻
+# §HOW-6 併入分流門檻（TEST VALUE，measurer 校準）：人少+好感高+低凝聚→dissolve；否則整隊變子隊。
+const MERGEIN_DISSOLVE_MAX_POP: int = 3     # 人少上限（>此傾整隊子隊）
+const MERGEIN_AFFINITY_HIGH: float = 0.5    # 好感高門檻（known_reputations[host]）
+const MERGEIN_COHESION_LOW: float = 0.5     # 低凝聚門檻（joiner leader loyalty，低→易散）
 # 特別稅（徵收 task）= 一般稅率 × 此倍率，重於常態一般稅（戰時/缺糧額外加徵）。TEST VALUE
 const SPECIAL_TAX_MULT: float = 1.5
 
@@ -211,8 +216,19 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 				Probe.bump("atk.blocked_ct_197")   # 同格但 combat_target 早退擋開打
 			else:
 				Probe.bump("atk.reached")           # 同格可開打（→ 276 branch）
-	if a.combat_target != -1 or b.combat_target != -1:
-		# 197 早退先於 247 BEG resolver。BEG/JOIN 恆設 combat_target → 恆走此路 → resolver 死路。
+	# S-A de-patch：社交/merge 到達豁免 combat_target 早退（BEG:229/JOIN:237/MERGE:261 resolver 在此之後→
+	# absorber 強隊在戰鬥→merger 到格被早退擋→_try_merge 永不觸=0/8333，known_issues:18 BEG/JOIN 同類死路）。
+	# 豁免條件鏡射下方 resolver 觸發條件（target=對方）→ 只放社交路，戰鬥路（攻擊/掠奪到達）不變。
+	if Probe.enabled and (a.current_task == TeamData.TASK_MERGE or b.current_task == TeamData.TASK_MERGE):
+		Probe.bump("merge.pair_seen")   # DIAG：TASK_MERGE 隊出現在任一接觸對（co-location 發生）
+	var _social_arrive: bool = (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
+		or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a) \
+		or (a.current_task == TeamData.TASK_JOIN and a.social_target == id_b) \
+		or (b.current_task == TeamData.TASK_JOIN and b.social_target == id_a) \
+		or (a.current_task == TeamData.TASK_BEG and a.social_target == id_b) \
+		or (b.current_task == TeamData.TASK_BEG and b.social_target == id_a)
+	if (a.combat_target != -1 or b.combat_target != -1) and not _social_arrive:
+		# 197 早退先於 247 BEG resolver（非社交路才擋；社交/merge 到達已豁免）。
 		if a.current_task == TeamData.TASK_BEG or b.current_task == TeamData.TASK_BEG:
 			Probe.bump("beg.early_return_197")
 		if a.current_task == TeamData.TASK_JOIN or b.current_task == TeamData.TASK_JOIN:
@@ -240,6 +256,13 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 	if b.current_task == TeamData.TASK_JOIN and b.social_target == id_a:
 		_resolve_join(state, id_b, id_a)
 		return
+	# §HOW-7 吸納 resolver（強方 pull，TASK_MERGE）：置 same_faction 前=可跨勢力吸弱鄰（擴張，mirror JOIN 位置）。
+	if a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b:
+		_try_merge(state, id_a, id_b)
+		return
+	if b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a:
+		_try_merge(state, id_b, id_a)
+		return
 	var same_faction: bool = a.faction_id != -1 and a.faction_id == b.faction_id
 	if same_faction:
 		if a.current_task == TeamData.TASK_TRIBUTE:
@@ -258,9 +281,6 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 			if abs_team.leader_id != -1: all_npcs.append(abs_team.leader_id)
 			all_npcs.append_array(abs_team.named_members)
 			SubteamSystem.new().merge_teams(state, absorber, absorbed, all_npcs)
-		elif (a.current_task == TeamData.TASK_MERGE and a.order_target_id == id_b) \
-				or (b.current_task == TeamData.TASK_MERGE and b.order_target_id == id_a):
-			_try_merge(state, id_a, id_b)
 		elif a.current_task == TeamData.TASK_SETTLE:
 			var tile: HexTileData = state.world.tiles.get(a.tile_pos.x * 1000 + a.tile_pos.y)
 			if tile and tile.outpost_owner != -1:
@@ -461,17 +481,23 @@ func _try_merge(state: WorldState, id_a: int, id_b: int) -> void:
 	var merger_id: int = id_a if a.current_task == TeamData.TASK_MERGE else id_b
 	var target_id: int = id_b if merger_id == id_a else id_a
 	var merger: TeamData = state.teams[merger_id]
+	if Probe.enabled: Probe.bump("merge.try_entered")   # DIAG
 	if merger.order_target_id != target_id:
+		if Probe.enabled: Probe.bump("merge.guard_fail_ordertgt")   # DIAG
 		return
-	# absorbed_team is the MERGER (small team dissolving into target)
-	var absorbed_team: TeamData = state.teams[merger_id]
-	var all_npcs: Array = []
-	if absorbed_team.leader_id != -1: all_npcs.append(absorbed_team.leader_id)
-	all_npcs.append_array(absorbed_team.named_members)
-	SubteamSystem.new().merge_teams(state, target_id, merger_id, all_npcs)
-	# reset merger task (safe even if merger_id erased — GDScript ref stays valid)
-	TaskArbiter.release(merger)
-	merger.order_target_id = -1
+	# §HOW-7 吸納：merger=強方發起（TASK_MERGE 向弱鄰），target=弱鄰。強吸弱=absorber:merger、absorbed:target。
+	# gate#1（強有 surplus 餵得起弱）= _absorber_accepts(強,弱) 的 feed_ok；弱方默許(S-A 非脅迫,怨走低 loyalty)。
+	if not _absorber_accepts(state, merger_id, target_id):
+		if Probe.enabled: Probe.bump("accept.merge_reject")
+		TaskArbiter.release(merger)
+		merger.order_target_id = -1
+		return
+	if Probe.enabled: Probe.bump("accept.merge_accept")
+	_resolve_mergein(state, merger_id, target_id)   # 強(merger)吸弱(target)，分流 dissolve/子隊
+	# reset merger task (safe even if erased — GDScript ref stays valid)
+	if state.teams.has(merger_id):
+		TaskArbiter.release(merger)
+		merger.order_target_id = -1
 
 func _resolve_tribute(state: WorldState, collector_id: int, payer_id: int) -> void:
 	var collector: TeamData = state.teams[collector_id]
@@ -1034,6 +1060,35 @@ func _count_recent_special_tax(leader: PersonData, collector_id: int) -> int:
 			count += 1
 	return count
 
+# S-A 靶C accept-util 薄層（★單一 util 收/不收，非 absorber 全 option rank——超出即回報 blueprint）。
+# 仿 _resolve_aid_request(BEG) 節制原則。收 util = 願擴傾向(野心/統領) × 餵得起(併後合隊餘命)；自身餓→util 崩。
+# 邊界誠實：contact-time bespoke 薄層（非零框外），限單一 util 比較=不滾成第二決策引擎。
+func _absorber_accepts(state: WorldState, absorber_id: int, joiner_id: int) -> bool:
+	var ab: TeamData = state.teams.get(absorber_id)
+	var jo: TeamData = state.teams.get(joiner_id)
+	if ab == null or jo == null:
+		return false
+	var ldr: PersonData = state.persons.get(ab.leader_id)
+	var ambition: float = float(ldr.values.get("野心", 0.5)) if ldr else 0.5
+	var command: float = clampf(float(ldr.skills.get("統領", 0.0)), 0.0, 1.0) if ldr else 0.0
+	# 餵養能力（mirror _find_absorber gate）：併後合隊餘命 / 門檻，clamp 0..1。
+	var fpd: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY
+	var ef_ab: float = ResourceSystem.effective_food(state, ab)
+	var ef_jo: float = ResourceSystem.effective_food(state, jo)
+	var combined_days: float = (ef_ab + ef_jo) / maxf(float(ab.population + jo.population) * fpd, 0.001)
+	var feed_ok: float = clampf(combined_days / FactionAISystem.ABSORBER_MIN_SURVIVE_DAYS, 0.0, 1.0)
+	var accept_util: float = (ambition * 0.6 + command * 0.4) * feed_ok
+	if accept_util < ACCEPT_UTIL_THRESHOLD:
+		return false
+	# gate#1 驗（餵養真解非搬餓）：記併前 absorber/joiner 餘命 + 併後合隊餘命 → measurer 比 combined>min。
+	if Probe.enabled:
+		Probe.bump("consol.accept_n")
+		Probe.add_amount("consol.combined_days_sum", combined_days)
+		Probe.add_amount("consol.absorber_days_sum", ef_ab / maxf(float(ab.population) * fpd, 0.001))
+		Probe.add_amount("consol.joiner_days_sum", ef_jo / maxf(float(jo.population) * fpd, 0.001))
+		Probe.add_amount("consol.absorber_pop_sum", float(ab.population))   # 隊規模分布 side-observe
+	return true
+
 # 投靠 resolver：joiner 全併入 host（複用既有 merge_teams full absorb，pop 守恆轉移）。
 # host = joiner 的 social_target（強鄰）。joiner 完全併入後滅團（merge_teams 內走 erase_team）。
 func _resolve_join(state: WorldState, joiner_id: int, host_id: int) -> void:
@@ -1041,11 +1096,46 @@ func _resolve_join(state: WorldState, joiner_id: int, host_id: int) -> void:
 	var host: TeamData = state.teams.get(host_id)
 	if joiner == null or host == null:
 		return
+	# S-A 靶C 雙邊握手：host 秤 accept-util（收/不收）。拒→joiner 回退（釋放 task，下 cadence 重 argmax）。
+	if not _absorber_accepts(state, host_id, joiner_id):
+		if Probe.enabled: Probe.bump("accept.join_reject")
+		state.clear_social_target(joiner)
+		TaskArbiter.release(joiner)
+		return
+	if Probe.enabled: Probe.bump("accept.join_accept")
 	Probe.bump("join.resolve")   # 死路探針：JOIN handler 實呼（前 62/66 靜默 fall-through）
-	var all_npcs: Array = []
-	if joiner.leader_id != -1: all_npcs.append(joiner.leader_id)
-	all_npcs.append_array(joiner.named_members)
-	SubteamSystem.new().merge_teams(state, host_id, joiner_id, all_npcs)
+	# §HOW-6 弱方 push：host 吸 joiner。分流走共用 _resolve_mergein。
+	_resolve_mergein(state, host_id, joiner_id)
+
+# §HOW-6/7 共用併入分流：absorber 吸 absorbed。好感=absorbed→absorber、凝聚=absorbed leader loyalty。
+# 人少+好感高+低凝聚→dissolve（全併滅團）；否則整隊變子隊（附庸保身份+繼承 faction+起始 loyalty）。
+# 弱方 push（_resolve_join）與強方 pull（_try_merge/吸納）皆呼此=真統一分流。
+func _resolve_mergein(state: WorldState, absorber_id: int, absorbed_id: int) -> void:
+	var absorber: TeamData = state.teams.get(absorber_id)
+	var absorbed: TeamData = state.teams.get(absorbed_id)
+	if absorber == null or absorbed == null:
+		return
+	var affinity: float = float(absorbed.known_reputations.get(absorber_id, 0.5))
+	var ab_leader: PersonData = state.persons.get(absorbed.leader_id)
+	var cohesion: float = float(ab_leader.loyalty) if ab_leader else 1.0
+	var dissolve: bool = absorbed.population <= MERGEIN_DISSOLVE_MAX_POP \
+		and affinity >= MERGEIN_AFFINITY_HIGH and cohesion < MERGEIN_COHESION_LOW
+	if dissolve:
+		if Probe.enabled: Probe.bump("mergein.dissolve")
+		var all_npcs: Array = []
+		if absorbed.leader_id != -1: all_npcs.append(absorbed.leader_id)
+		all_npcs.append_array(absorbed.named_members)
+		SubteamSystem.new().merge_teams(state, absorber_id, absorbed_id, all_npcs)
+	else:
+		if Probe.enabled: Probe.bump("mergein.subteam")
+		state.set_subteam_parent(absorbed, absorber_id)
+		state.set_team_faction(absorbed, absorber.faction_id)   # set_subteam_parent 不動 faction_id → 補
+		# 起始忠誠 = f(好感, 義氣)。強吸弱常低好感→帶怨子隊(S-B 叛離燃料)。
+		if ab_leader != null:
+			var yiqi: float = float(ab_leader.values.get("義氣", 0.5))
+			ab_leader.loyalty = clampf(0.3 + affinity * 0.4 + yiqi * 0.3, 0.0, 1.0)
+		state.clear_social_target(absorbed)
+		TaskArbiter.release(absorbed)
 
 func _clear_aid_task(state: WorldState, beggar: TeamData) -> void:
 	state.clear_social_target(beggar)

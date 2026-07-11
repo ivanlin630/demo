@@ -14,7 +14,11 @@ const REGISTRY: Dictionary = {
 	# 佔村：奪據點+搬進去（雙引擎咬合）。與掠奪同 menu 秤 util argmax（零新判斷器）。
 	# intent_fit=匱乏→奪產村 boost（與掠奪 parallel）；occupy_drive=野心 base_need edge（決定佔 vs 搶）。
 	"佔村":   [["occupy_drive", "occupy"], ["intent_fit", "intent_fit"]],
-	"投靠":   [["join_drive", "join"]],
+	# S-A §HOW-6：統一「併入」（join+整併合一，取代兩 row）。絕境求生 food-scaled；weight=求生欲/(1-野心)
+	# （§HOW-6 定，非 join weight——join weight×low_ambition 使 併入 rank 過低不勝 survival first=0 regression）。
+	"併入":   [["join_drive", "mergein"]],
+	# S-A §HOW-7：強方擴張 pull「吸納」（強隊主動吸弱鄰，擴張-class @PRIO_DISPATCH，非 survival）。
+	"吸納":   [["absorb_drive", "absorb"]],
 	"紮營":   [["camp_drive", "camp"]],
 	"乞食":   [["beg_drive",  "beg"]],
 	# 序4 vendetta 溶入：feud_pull term 掛入 → 血仇成攻擊的一個 weight 驅力（衝動 leader 血仇高→攻擊贏 rank）。
@@ -35,16 +39,14 @@ const REGISTRY: Dictionary = {
 	# A2a 子隊溶入：歸建＝服從母團權威/回母團集結（duty 驅，通用 row，非子隊專屬 term）。
 	# faction_duty weight 已 _duty_factor(loyalty,野心)→忠誠子隊聽令回母團；不忠→掠奪(greed)贏 rank。
 	"歸建":   [["faction_duty", "faction_duty"]],
-	# A2c-1（FA5 折入）：faction 整併（小隊併大隊/戰前向 leader 集結）降 rank_scored 競秤 option。
-	"整併":   [["consolidate_drive", "consolidate_drive"]],
 }
 
 # A2a 通用戰略-gate：子隊不自主發起「擴張自身戰略足跡」的 option（立據/奪據/練兵＝leader/faction 決定；
 # 母團命令走 pre-set lifecycle task，引擎點結構上無 strategic directive）。新增戰略 option 入 SET 自動涵蓋。
-const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練"]
+const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練", "吸納"]   # §HOW-7 吸納=擴張戰略,子隊不自主發起
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
-const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "投靠", "紮營", "乞食", "買糧"]
+const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "併入", "紮營", "乞食", "買糧"]   # S-A §HOW-6：統一「併入」(join+整併合一)絕境求生
 
 # 序4 vendetta 溶入：血仇開打門檻（防輕微不快即戰）。TEST VALUE。
 const FEUD_ATTACK_MIN := 0.5
@@ -95,8 +97,14 @@ static func applicable(ctx: DecisionContext) -> Array:
 					else:
 						Probe.bump("occupy.applicable")
 						out.append(opt)
-			"投靠":
-				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_strong_neighbor: out.append(opt)
+			"併入":
+				# §HOW-8 ungate + §3b：絕境 OR 威脅認慫。host = rep 保護傘(strong_neighbor,跨faction) 或 consolidate_target(同faction)。
+				if (ctx.has_strong_neighbor or ctx.consolidate_target_id != -1) \
+						and (ctx.food_days < DecisionTerms.DESPERATION_DAYS \
+							or (ctx.has_strong_neighbor and ctx.threat > ctx.threat_threshold)): out.append(opt)
+			"吸納":
+				# §HOW-7：有 capacity-bound 可吸弱鄰（finder 已保統領餘裕裝得下）→ 擴張候選（無 food gate）。
+				if ctx.absorb_target_id != -1: out.append(opt)
 			"紮營":
 				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_farmable_tile \
 						and not ctx.has_own_outpost: out.append(opt)
@@ -141,10 +149,6 @@ static func applicable(ctx: DecisionContext) -> Array:
 			# A2a 子隊：歸建＝服從母團，僅子隊候選（duty↔掠奪 rank 競秤，忠誠→歸建贏）。
 			"歸建":
 				if ctx.is_subteam: out.append(opt)
-			# A2c-1（FA5 折入）：faction 非-leader 成員 + 有整併 target（容量吸收 or 戰前向 leader 集結）→ 候選。
-			# 觸發條件保真（consolidate_target_id 於 gather 依現行 _find_absorber/rally 兩支算）。
-			"整併":
-				if ctx.consolidate_target_id != -1: out.append(opt)
 	return out
 
 static func terms_of(opt: String) -> Array:
@@ -170,11 +174,19 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			var vid: int = FactionAISystem.new()._find_occupy_target(state, team)
 			if vid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_ATTACK, "target": state.teams[vid].tile_pos, "combat_target": vid}
-		"投靠":
-			var sn: int = FactionAISystem.new()._find_strong_neighbor(state, team)
-			if sn == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			# 社交意圖：設 social_target 非 combat_target（否則 _try_interact:197 早退擋死 JOIN resolver）
-			return {"task": TeamData.TASK_JOIN, "target": state.teams[sn].tile_pos, "social_target": sn}
+		"併入":
+			# §3b：host = rep 保護傘(strong_neighbor,跨faction,喂-讀對齊磁鐵) 優先；無則 consolidate_target(同faction)。
+			var _hc: DecisionContext = DecisionContext.gather(state, team)
+			var host: int = _hc.strong_neighbor_id if _hc.strong_neighbor_id != -1 else _hc.consolidate_target_id
+			if host == -1 or not state.teams.has(host): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_JOIN, "target": state.teams[host].tile_pos,
+				"social_target": host, "order_target": host}
+		"吸納":
+			# §HOW-7：強方向弱鄰行軍吸納。TASK_MERGE(merger=本強隊,order_target=弱鄰)→_try_merge 分流。
+			var _ac: DecisionContext = DecisionContext.gather(state, team)
+			var prey: int = _ac.absorb_target_id
+			if prey == -1 or not state.teams.has(prey): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_MERGE, "target": state.teams[prey].tile_pos, "order_target": prey}
 		"紮營":
 			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
 			if ft == Vector2i(-1,-1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
@@ -237,12 +249,4 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		# A2a 歸建：由 _decide_subteam 特判為 lifecycle move（set move_target + merge_queue），
 		# 不進 to_task 標準派工；此 fallback 為安全（若誤入標準路 → IDLE）。
 		"歸建":   return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-		"整併":
-			# A2c-1（FA5）：向 target(absorber/leader)行軍 merge；TASK_MERGE 由 interaction_system:261 消費
-			# （抵達→併解）。局部 gather 取 target（避改 to_task 簽名 17-caller，鏡射「攻擊」法）。
-			var _cc: DecisionContext = DecisionContext.gather(state, team)
-			var ctid: int = _cc.consolidate_target_id
-			if ctid == -1 or not state.teams.has(ctid):
-				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			return {"task": TeamData.TASK_MERGE, "target": state.teams[ctid].tile_pos, "order_target": ctid}
 		_:        return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}

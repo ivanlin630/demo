@@ -121,6 +121,9 @@ var order_eval_next_tick: int = 0   # 下次訂單 cadence 評估 tick
 var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標 team（move_target 每 tick 依 intel 刷新）
 var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
 var subteam_eval_next_tick: int = 0      # 下次子隊決策 tick（cadence，鏡射 threat_eval_next_tick，A2a）
+var consolidate_target_cache: int = -1   # S-A：整併 target 快取（cadence 節流，防每 tick O(N) _find_absorber）
+var absorb_target_cache: int = -1        # §HOW-7：吸納弱鄰 target 快取（同 cadence 節流）
+var consolidate_eval_next_tick: int = 0  # S-A：下次整併 target 評估 tick（cadence，鏡射 subteam_eval_next_tick）
 var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻
@@ -197,3 +200,12 @@ var task_extra_data: Dictionary = {}   # 子隊任務附加數據（build_type/l
 # 對 other_id 隊的口碑增減（clamp 0~1，預設 0.5 中立）；外交/施捨/勒索共用
 func update_reputation(other_id: int, delta: float) -> void:
 	known_reputations[other_id] = clampf(float(known_reputations.get(other_id, 0.5)) + delta, 0.0, 1.0)
+
+# 名聲磁鐵：對 protector_id 隊的「值不值託付/道德聲望」（★語意獨立 known_reputations 情報信任軸，別混）。
+# key=protector team_id，default 0.5 中立，clamp 0~1。道德事件(護/恩→升、仇/殺→跌)喂。
+var protector_rep: Dictionary = {}
+func get_protector_rep(protector_id: int) -> float:
+	return float(protector_rep.get(protector_id, 0.5))
+# source = 更新來源（"direct"=道德事件親歷／未來 "gossip"=傳聞 decay）。單一可擴充入口，source-agnostic 內部只記/clamp。
+func update_protector_rep(protector_id: int, delta: float, _source: String = "direct") -> void:
+	protector_rep[protector_id] = clampf(float(protector_rep.get(protector_id, 0.5)) + delta, 0.0, 1.0)

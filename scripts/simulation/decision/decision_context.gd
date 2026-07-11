@@ -19,6 +19,9 @@ var threat: float = 0.0
 var team_panic: float = 0.0
 const PANIC_STRESS: float = 0.6   # TEST VALUE — 成員 stress 過此才算恐慌源
 const PANIC_LOY: float = 0.4      # TEST VALUE — 成員 loyalty 低於此才算恐慌源（高忠不潰）
+const SLACK_COMFORT_DAYS: float = 7.0   # §HOW-8 TEST VALUE — resource_slack 舒適門檻（=SURVIVAL_RECOVER_DAYS）
+const YIELD_NORM: float = 20.0          # §HOW-8 TEST VALUE — absorb_yield 淨產能正規化
+const YIELD_LAND_BONUS: float = 0.3     # §HOW-8 TEST VALUE — target 帶 granary/outpost 加分
 var ambition_gap: int = 0
 var strongest_feud: float = 0.0
 # 序4 vendetta 溶入：血仇仇敵 team id（NpcAiSystem.vendetta_target 回值，鏡射舊 hand dispatch 掃描）。
@@ -96,6 +99,11 @@ var is_subteam: bool = false
 # A2c-1（FA5 折入）：整併 target（容量吸收優先，否則戰前向 leader 集結）。非-leader faction 成員
 # + 非子隊才算（鏡射 _try_consolidate_merge 兩支，保真）。-1 = 無整併 target。
 var consolidate_target_id: int = -1
+var absorb_target_id: int = -1   # §HOW-7 吸納：capacity-bound 可吸弱鄰（強方擴張 pull）
+var resource_slack: float = 0.0  # §HOW-8：養得起更多 pop 的餘裕（統領 pop_cap 空額×資源 buffer，★≠food_days 餘命）
+var absorb_yield: float = 0.0    # §HOW-8：吸 absorb_target 淨收益（產能/據點 − pop 負擔，★≠richness 貪婪值）
+var host_protector_rep: float = 0.5   # 名聲磁鐵 §3：本隊對 併入 host 的 protector_rep（道德聲望，主觀 per-observer）
+var best_protector_rep: float = 0.5   # 名聲磁鐵 §3b：rep-選中 strong_neighbor host 的 protector_rep
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -166,11 +174,14 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.occupy_target_id = _occ
 	c.occupy_target_pos = state.teams[_occ].tile_pos if _occ != -1 else Vector2i(-1, -1)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.weak_prey", _tg)
-	# P2a 絕境目標欄（複用 finder，仿 _find_weakest_prey 風格）
-	var _sn: int = _fa._find_strong_neighbor(state, team)
+	# 名聲磁鐵 §3b：strong_neighbor 用 rep 軸選（投奔高 protector_rep 保護傘，喂-讀對齊）。
+	var _sn: int = _fa._find_strong_neighbor(state, team, "rep")
 	c.has_strong_neighbor = _sn != -1
 	c.strong_neighbor_id = _sn
 	c.strong_neighbor_pos = state.teams[_sn].tile_pos if _sn != -1 else Vector2i(-1, -1)
+	c.best_protector_rep = team.get_protector_rep(_sn) if _sn != -1 else 0.5   # 選中 host rep 供 join_drive 磁鐵
+	if Probe.enabled and _sn != -1 and absf(c.best_protector_rep - 0.5) > 0.01:
+		Probe.bump("rep.host_nonneutral")   # DIAG：磁鐵有差別（strong_neighbor protector_rep 脫 0.5）
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)
 	c.farmable_pos = _ft
@@ -258,12 +269,49 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			c.intent_target = c.prosperity_prey_id
 			c.intent_target_pos = state.teams[c.prosperity_prey_id].tile_pos
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.readiness_prey", _tg)
-	# A2c-1（FA5）：整併 target（非-leader faction 成員 + 非子隊才算）。
+	# 併入/吸納 target（cadence gate 1 日共用，防每 tick O(N) finder churn）。非子隊才算。
 	c.consolidate_target_id = -1
-	if team.faction_id != -1 and team.parent_team_id == -1:
-		var _f = state.factions.get(team.faction_id)
-		if _f != null and team.team_id != _f.leader_team_id:
-			c.consolidate_target_id = FactionAISystem.consolidate_target_of(state, team, _f)
+	c.absorb_target_id = -1
+	if team.parent_team_id == -1:
+		if state.world.current_tick >= team.consolidate_eval_next_tick:
+			# §HOW-6 併入 target（faction 成員 push）
+			var ct: int = -1
+			if team.faction_id != -1:
+				var _f = state.factions.get(team.faction_id)
+				if _f != null and team.team_id != _f.leader_team_id:
+					ct = FactionAISystem.consolidate_target_of(state, team, _f)
+			team.consolidate_target_cache = ct
+			# §HOW-7 吸納 target（強方 pull，capacity-bound 弱鄰）
+			team.absorb_target_cache = FactionAISystem.new()._find_absorb_target(state, team)
+			team.consolidate_eval_next_tick = state.world.current_tick + FactionAISystem.CONSOLIDATE_CADENCE
+		c.consolidate_target_id = team.consolidate_target_cache
+		c.absorb_target_id = team.absorb_target_cache
+		# 名聲磁鐵 §3：本隊對 host 的 protector_rep（主觀 per-observer，禁全域真值）
+		if c.consolidate_target_id != -1:
+			c.host_protector_rep = team.get_protector_rep(c.consolidate_target_id)
+		if Probe.enabled and team.absorb_target_cache != -1:
+			Probe.bump("absorb.target_found")   # DIAG：有 capacity-bound 弱鄰可吸（finder 非空）
+	# §HOW-8 resource_slack（systems 公式）：空 pop 容量 × 舒適度（≠food_days 餘命；spare 主軸、comfort gate）。
+	var _cmd: float = float(ldr.skills.get("統領", 0.0)) if ldr != null else 0.0
+	var _cap: int = TeamData.pop_cap_from_leadership(_cmd)
+	var _spare: float = clampf(float(_cap - team.population) / maxf(float(_cap), 1.0), 0.0, 1.0)
+	var _comfort: float = clampf(c.food_days / SLACK_COMFORT_DAYS, 0.0, 1.0)
+	c.resource_slack = _spare * _comfort
+	# §HOW-8 absorb_yield（systems 公式）：target 自養能力=產能−pop 負擔+帶地（≠richness 貪婪值）。
+	if c.absorb_target_id != -1:
+		var _tgt: TeamData = state.teams.get(c.absorb_target_id)
+		if _tgt != null:
+			var _net: float = ResourceSystem.effective_food(state, _tgt) \
+				- float(_tgt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+			var _land: float = YIELD_LAND_BONUS if ResourceSystem.own_granary_tile(state, _tgt) != null else 0.0
+			c.absorb_yield = clampf(_net / YIELD_NORM + _land, -1.0, 1.0)
+		# DIAG §HOW-8：吸納 utility 組件分布（證 decision-到位 vs formula-always-0）
+		if Probe.enabled:
+			Probe.bump("absorb.util_n")
+			Probe.add_amount("absorb.slack_sum", c.resource_slack)
+			Probe.add_amount("absorb.yield_sum", c.absorb_yield)
+			if c.resource_slack > 0.05: Probe.bump("absorb.slack_pos")
+			if c.absorb_yield > 0.0: Probe.bump("absorb.yield_pos")
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。

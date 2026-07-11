@@ -27,6 +27,8 @@ func _mk_team(state: WorldState, pop: int, cmd: float, pos: Vector2i, faction_id
 	t.leader_id = _mk_person(state, cmd)
 	if pop > 0:
 		AnonTierSystem.add_anon(t, AnonCohort.TIER_PLEB, pop - 1)   # leader 算 1
+	# S-A：預設充足糧（10 天餘命）→ 過 _find_absorber 餵養 gate#1，隔離 target 選擇特徵測試。
+	t.resources["food"] = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 10.0
 	t.tile_pos = pos
 	t.faction_id = faction_id
 	t.parent_team_id = -1
@@ -61,6 +63,15 @@ func _run() -> void:
 	_assert(target_a != -1, "case A: consolidate_target_of 命中容量吸收 target != -1")
 	_assert(target_a == absorber_a.team_id, "case A: target == absorber_id")
 
+	# ── S-A case A2: 餵養 gate#1——所有候選 absorber 無糧 → 不選（防搬餓）──
+	# （leader_a 也在 dist≤3 內=候選；須一併餓才隔離 gate）
+	absorber_a.resources["food"] = 0.0
+	leader_a.resources["food"] = 0.0
+	var target_a2: int = FactionAISystem.consolidate_target_of(state_a, small_a, f_a)
+	_assert(target_a2 == -1, "case A2: 餵養 gate——候選 absorber 皆無糧 → target == -1")
+	absorber_a.resources["food"] = float(absorber_a.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 10.0  # 復原
+	leader_a.resources["food"] = float(leader_a.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 10.0
+
 	# ── Task1 case B: small member 不夠小（不命中）──
 	var state_b := WorldState.new()
 	var leader_b := _mk_team(state_b, 5, 5.0, Vector2i(0, 0), -1)
@@ -85,33 +96,40 @@ func _run() -> void:
 	var target_c: int = FactionAISystem.consolidate_target_of(state_c, member_c, f_c)
 	_assert(target_c == leader_c.team_id, "case C: 戰前集結 target == leader_team_id")
 
-	# ── Task2: consolidate_drive term ──
+	# ── Task2: 併入 drive（§HOW-6 統一，join_drive 絕境 food-scaled，opt="併入"）──
 	var ctx_a := DecisionContext.new()
 	ctx_a.consolidate_target_id = absorber_a.team_id
-	var drive_hit: float = DecisionTerms.eval("consolidate_drive", ctx_a, "整併")
-	_assert(drive_hit == DecisionTerms.CONSOLIDATE_DRIVE, "term: consolidate_drive 命中回 CONSOLIDATE_DRIVE")
-	var drive_wrong_opt: float = DecisionTerms.eval("consolidate_drive", ctx_a, "貿易")
-	_assert(drive_wrong_opt == 0.0, "term: opt != 整併 → 0")
+	ctx_a.food_days = 0.0   # 絕境 → 食壓最大
+	ctx_a.host_protector_rep = 0.5   # 名聲磁鐵中性 → magnet=1+0.5*REP_MAGNET_W
+	var drive_hit: float = DecisionTerms.eval("join_drive", ctx_a, "併入")
+	var _magnet: float = 1.0 + 0.5 * DecisionTerms.REP_MAGNET_W
+	_assert(is_equal_approx(drive_hit, DecisionTerms.DESPERATION_SCALE * DecisionTerms.DESPERATION_DAYS * _magnet),
+		"term: 併入 join_drive 絕境 food-scaled × 名聲磁鐵")
+	var ctx_fed := DecisionContext.new()
+	ctx_fed.consolidate_target_id = absorber_a.team_id
+	ctx_fed.food_days = 99.0   # 飽 → 食壓 0
+	_assert(DecisionTerms.eval("join_drive", ctx_fed, "併入") == 0.0, "term: 飽足 → 併入 drive 0")
+	_assert(DecisionTerms.eval("join_drive", ctx_a, "貿易") == 0.0, "term: opt != 併入 → 0")
 	var ctx_none := DecisionContext.new()
 	ctx_none.consolidate_target_id = -1
-	var drive_no_target: float = DecisionTerms.eval("consolidate_drive", ctx_none, "整併")
-	_assert(drive_no_target == 0.0, "term: target == -1 → 0")
 
-	# ── Task3: 整併 option applicable + to_task ──
+	# ── Task3: 併入 option applicable（絕境 + 有 host）+ to_task（TASK_JOIN → host）──
 	var applicable_hit: Array = DecisionOptions.applicable(ctx_a)
-	_assert("整併" in applicable_hit, "option: consolidate_target_id!=-1 → 整併 applicable")
+	_assert("併入" in applicable_hit, "option: 絕境+consolidate_target → 併入 applicable")
 	var applicable_none: Array = DecisionOptions.applicable(ctx_none)
-	_assert(not ("整併" in applicable_none), "option: consolidate_target_id==-1 → 整併 不 applicable")
+	_assert(not ("併入" in applicable_none), "option: 無 host → 併入 不 applicable")
 
-	var td: Dictionary = DecisionOptions.to_task(state_a, small_a, "整併")
-	_assert(td["task"] == TeamData.TASK_MERGE, "to_task: task == TASK_MERGE")
-	_assert(td["target"] == state_a.teams[absorber_a.team_id].tile_pos, "to_task: target == absorber tile_pos")
-	_assert(int(td["order_target"]) == absorber_a.team_id, "to_task: order_target == absorber_id")
+	var td: Dictionary = DecisionOptions.to_task(state_a, small_a, "併入")
+	_assert(td["task"] == TeamData.TASK_JOIN, "to_task: task == TASK_JOIN")
+	_assert(int(td["social_target"]) == absorber_a.team_id, "to_task: social_target == host")
+	_assert(int(td["order_target"]) == absorber_a.team_id, "to_task: order_target == host")
 
-	# ── Task4: 整合行為（跑一次 _assign_member_tasks，整併經引擎達成）──
+	# ── Task4: 整合行為（跑一次 _assign_member_tasks，併入經引擎達成 TASK_JOIN）──
+	# small_a 需絕境食壓（food<DESPERATION_DAYS）併入才 fire。設 ~1.5 天；absorber 充足糧過餵養 gate。
+	small_a.resources["food"] = float(small_a.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 1.5
 	fai._assign_member_tasks(state_a, f_a)
-	_assert(small_a.current_task == TeamData.TASK_MERGE, "整合: small member current_task == TASK_MERGE（經引擎）")
-	_assert(small_a.order_target_id == absorber_a.team_id, "整合: order_target_id == absorber_id")
+	_assert(small_a.current_task == TeamData.TASK_JOIN, "整合: small member current_task == TASK_JOIN（併入經引擎）")
+	_assert(small_a.social_target == absorber_a.team_id, "整合: social_target == host")
 
 	# survival case：餓/危 member 已在 survival task → 仍 survival，非整併
 	var state_s := WorldState.new()

@@ -25,6 +25,7 @@ const LOOT_READINESS_MIN: float   = 0.6   # TEST VALUE — 掠奪需要的最低
 const SMALL_TEAM_RATIO: float     = 0.3   # TEST VALUE — pop < cap×0.3 視為小隊
 const SMALL_VS_LARGE: float       = 0.33  # TEST VALUE — pop < absorber.pop×0.33 才觸發合併
 const CONSOLIDATE_MAX_DIST: int   = 3     # TEST VALUE — 戰前集結距離上限（hex）
+const ABSORBER_MIN_SURVIVE_DAYS: float = 7.0  # TEST VALUE — S-A 餵養 gate#1：併後合隊最低餘命（防搬餓）
 const ATTACK_SCORE_THRESHOLD:  float = 0.25  # TEST VALUE — ②b 稍寬（0.30→0.25，餬口狼偶爾動手；archetype gate 仍擋知足者）
 # ②b 飢餓下修搶糧 readiness（僅獨立 prosperity raid 路；faction campaign/can_expand/directives 不吃）。TEST VALUE。
 const HUNGER_SLIDE_DAYS: float = 7.0   # food_days ≥ 此 → hunger_relief=1.0（正常門檻）；越餓越低
@@ -104,6 +105,7 @@ const THREAT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 評估一次威
 const INTENT_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日
 # A2a 子隊決策 cadence（效能：全框架 gather+rank 非逐 tick，攤平 O(N²) LOD 成本，鏡射 THREAT_CADENCE）。
 const SUBTEAM_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # 1 日 子隊決策一次（TEST VALUE，平衡 pass 調）
+const CONSOLIDATE_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # S-A：整併 target 評估 cadence（鏡射 SUBTEAM_CADENCE，掐 churn）
 # preempt：忙碌隊只有「壓境能傷你」威脅才打斷進行中 task（門檻 = threat_threshold + 此加成）。
 # TEST VALUE=2.0（measured：逼近但弱敵 react≈1.5 須守住、壓境碾壓敵 react≈5.5 須觸發 → margin∈(1.1,5.2)，取 2.0 雙側留餘裕）。
 # 天然實現「能傷你」語意：power_ratio 貢獻 (ratio-1)·0.5，須 ratio≳5 才把 react 推過此門檻（見 threat_assessment.gd:19）。
@@ -1054,7 +1056,8 @@ func _precond_met(state: WorldState, f, leader_team: TeamData, pre: String, targ
 			var own_armed: int = _calc_own_armed(state, leader_team)
 			return float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO
 		"can_reach":
-			return target_id != -1 and _hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999
+			return target_id != -1 and state.teams.has(target_id) \
+				and _hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999
 		"has_richer_member":
 			return _richest_member(state, f) != -1
 	return true
@@ -1479,7 +1482,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # 不可派 → 試次佳(修凍死)
 		# 投靠玩家：走 forced_event（玩家決定收留），不自動 merge（對稱 + UX）
-		if opt == "投靠" and td.has("social_target"):
+		if opt == "併入" and td.has("social_target"):
 			var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
@@ -1492,15 +1495,24 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
 		# full_probe（診斷）：fold 路 merge 實派 + merge-applicable 隊 option 去向（B 鐵證：該併卻選別的）。
-		if opt == "整併": Probe.bump("merge.consolidate_dispatch")
+		if opt == "併入": Probe.bump("merge.consolidate_dispatch")
+		if Probe.enabled and opt == "吸納": Probe.bump("absorb.dispatch")   # §HOW-7 強方吸納實派
 		if Probe.enabled and team.faction_id != -1 and team.parent_team_id == -1:
 			var _fc2 = state.factions.get(team.faction_id)
 			if _fc2 != null and team.team_id != _fc2.leader_team_id and consolidate_target_of(state, team, _fc2) != -1:
 				Probe.bump("merge_appl.total")
-				Probe.bump("merge_appl.chose_整併" if opt == "整併" else "merge_appl.chose_other")
+				Probe.bump("merge_appl.chose_併入" if opt == "併入" else "merge_appl.chose_other")
+				# DIAG C1：有 target 隊的食壓分布（證 consolidate-eligible 是否恆絕境<3，band[3,6)撲空）
+				var _fd: float = ResourceSystem.effective_food(state, team) \
+					/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+				if _fd < DecisionTerms.DESPERATION_DAYS: Probe.bump("merge_appl.food_lt3")
+				elif _fd < 6.0: Probe.bump("merge_appl.food_3to6")
+				else: Probe.bump("merge_appl.food_ge6")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		if Probe.enabled and opt == "併入":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
+			Probe.bump("merge.set_ok" if _set_ok else "merge.set_fail")
 		# 漏斗站4探針（純觀測）：unified 路徑 TRADE 實派計數（分 opt）。
 		# timeout 起算已改讀 try_set 蓋章的 task_start_tick（單源），此路不需另外蓋章。
 		if _set_ok and td["task"] == TeamData.TASK_TRADE:
@@ -1561,7 +1573,7 @@ func _probe_conq_winner(winner_opt: String, ranked: Array) -> void:
 
 func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 	var best_id: int = -1
-	var best_d: int  = 999
+	var best_score: float = -9999.0   # 名聲磁鐵 §3：偏好高 protector_rep host（主觀 mt 視角）；dist 次序 tiebreak
 	for tid in f.member_team_ids:
 		if tid == mt.team_id:
 			continue
@@ -1573,11 +1585,23 @@ func _find_absorber(state: WorldState, mt: TeamData, f) -> int:
 		var t_cap: int = TeamData.pop_cap_from_leadership(t_cmd) - t.population
 		if t_cap <= 0:
 			continue
+		# S-A 靶A 餵養 gate#1（防搬餓）：吸附者須有糧 + 併後合隊真能撐 ABSORBER_MIN_SURVIVE_DAYS。
+		# 不過=不選（非把餓稀釋進更大隊）。consolidate_target_of 同呼此路→context target 一致。
+		var ef_t: float = ResourceSystem.effective_food(state, t)
+		if ef_t <= 0.0:
+			continue   # 吸附者自身無糧→無餵養能力
+		var ef_mt: float = ResourceSystem.effective_food(state, mt)
+		var combined_days: float = (ef_t + ef_mt) \
+			/ maxf(float(t.population + mt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		if combined_days < ABSORBER_MIN_SURVIVE_DAYS:
+			continue   # 併後撐不住→不選
 		var d: int = _hex_dist(mt.tile_pos, t.tile_pos)
 		if d <= 1 or d > CONSOLIDATE_MAX_DIST:
 			continue
-		if d < best_d:
-			best_d = d
+		# 名聲磁鐵 §3：score = protector_rep 主導（避投奔強暴君）− dist 懲罰（近者次選）。
+		var score: float = mt.get_protector_rep(tid) * 10.0 - float(d)
+		if score > best_score:
+			best_score = score
 			best_id = tid
 	return best_id
 
@@ -1689,7 +1713,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue
 		# ★投靠走新 helper：玩家 target→forced_event 請求（★return 不 fallthrough，防 P2a W2 自動併）；NPC→try_set JOIN。
-		if opt == "投靠":
+		if opt == "併入":
 			if _try_join_target(state, sub, int(td.get("social_target", -1))):
 				sub.current_option = opt
 				# ★量測特判（round-5）：只有 NPC 投靠真 try_set(JOIN) 才 capture；玩家 forced_event 分支
@@ -3085,17 +3109,23 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # finder 撲空（無可派目標）→ 試次佳 option
 		# 投靠對象是玩家隊 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge（同 P2a W2）
-		if opt == "投靠" and td.has("social_target"):
+		if opt == "併入" and td.has("social_target"):
 			var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
-		if TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival"):
+		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival")
+		if Probe.enabled and opt == "併入":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
+			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
+		if _surv_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)   # specimen tap
 			if td.has("combat_target"):
 				state.set_combat_target(team, int(td["combat_target"]))
 			if td.has("social_target"):
 				state.set_social_target(team, int(td["social_target"]))
+			if td.has("order_target"):
+				# S-A C2：整併 survival-class 需 order_target（此 survival 路無 _wire_threat_task→真缺口）
+				team.order_target_id = int(td["order_target"])
 			match opt:   # 保留分流診斷 marker（world_sim 量測 homeless 分流）
 				"掠奪":
 					Probe.bump("surv.loot_dispatch")   # R1 驗收哨：絕境仍搏（拔閘後 survival loot 不降）
@@ -3104,7 +3134,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 					team.current_option = "佔村"   # capture 歸因用（survival 路不設 current_option → 補）
 					Probe.bump("occupy.dispatch"); Probe.bump("occupy.dispatch_survival")
 					print("[SurvivalOccupy] team=Team%d → 佔 Team%d" % [team.team_id, int(td.get("combat_target", -1))])
-				"投靠": print("[SurvivalJoin] team=Team%d → 投靠 Team%d" % [team.team_id, int(td.get("social_target", -1))])
+				"併入": print("[SurvivalMergeIn] team=Team%d → 併入 Team%d" % [team.team_id, int(td.get("social_target", -1))])
 				"紮營": print("[SurvivalCamp] team=Team%d → 紮營 @(%d,%d)" % [team.team_id, tgt.x, tgt.y])
 				"覓食": print("[SurvivalForage] team=Team%d pop=%d → 覓食 @(%d,%d)" % [team.team_id, team.population, tgt.x, tgt.y])
 			return
@@ -3175,6 +3205,30 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 			best_id = tid
 	return best_id
 
+# §HOW-7 吸納 target：adapt _find_weakest_prey + ★capacity-bound（統領餘裕裝得下才吸，非直接複用攻擊 target）。
+# 弱(pop_est<本隊*0.7)+近(reachable)+裝得下(pop_est <= pop_cap_from_leadership(統領)-本隊 pop)。回弱鄰 id / -1。
+func _find_absorb_target(state: WorldState, team: TeamData) -> int:
+	var ldr: PersonData = state.persons.get(team.leader_id)
+	var cmd: float = float(ldr.skills.get("統領", 0.0)) if ldr else 0.0
+	var slack: int = TeamData.pop_cap_from_leadership(cmd) - team.population
+	if slack <= 0:
+		return -1   # 無統領餘裕 → 吸不下
+	var best_id: int = -1
+	var best_pop: float = 999999.0
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var t: TeamData = state.teams.get(tid)
+		if t == null: continue
+		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
+		if not PathSystem.estimate_catch_up(state, team, tid, true).reachable: continue
+		var pop_est: float = float(BeliefSystem.best_estimate(state, team.team_id, tid).get("population_est", 0.0))
+		if pop_est >= float(team.population) * 0.7: continue   # 不夠弱
+		if pop_est > float(slack): continue                    # ★capacity-bound：裝不下不吸
+		if pop_est < best_pop:
+			best_pop = pop_est
+			best_id = tid
+	return best_id
+
 # 佔村 target 選擇（means-end：要據點的狼打「有據點的弱村」而非追流浪隊 → 戰落村格=capture 可翻+可據）。
 # 可據信號=目標站在自家 outpost（村格；可見性物理，capture 落點=此格）；weakness 讀 belief（非 god-view）。
 # 回最弱（belief pop_est 最低）可據村 team_id，無則 -1。
@@ -3235,9 +3289,12 @@ func _maybe_request_join_player(state: WorldState, team: TeamData) -> bool:
 	print("[JoinRequest] 流民 Team%d 求投靠玩家 Team%d" % [team.team_id, ptid])
 	return true
 
-func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
+# axis="pop"（投降找最強，defection 原行為）/ "rep"（名聲磁鐵：找最高 protector_rep 保護傘，避投奔強暴君）。
+# 共用 filter/scan/reachability/跨 faction/belief/known_reputations>0.3 sanity 全不變；只換 select 準則。
+func _find_strong_neighbor(state: WorldState, team: TeamData, axis: String = "pop") -> int:
 	var best_id: int = -1
 	var best_pop: int = 0
+	var best_rep: float = -1.0
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
@@ -3250,7 +3307,14 @@ func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
 		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
 		var pop_est: int = int(BeliefSystem.best_estimate(state, team.team_id, tid).get("population_est", 0))
 		if pop_est <= int(float(team.population) * 1.5): continue
-		if pop_est > best_pop:
+		if axis == "rep":
+			# 名聲磁鐵：argmax protector_rep（主觀 per-observer 道德聲望），tie-break pop。
+			var prot: float = team.get_protector_rep(tid)
+			if prot > best_rep or (is_equal_approx(prot, best_rep) and pop_est > best_pop):
+				best_rep = prot
+				best_pop = pop_est
+				best_id = tid
+		elif pop_est > best_pop:
 			best_pop = pop_est
 			best_id = tid
 	return best_id

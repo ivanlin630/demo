@@ -1,0 +1,1 @@
+[progress] 12/18 seeds done (last=505, ticks=21600)

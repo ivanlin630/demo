@@ -8,6 +8,9 @@ const PURSUIT_CRUELTY_K: float        = 2.0    # TEST VALUE：殘忍主導（per
 const PURSUIT_GREED_K: float          = 0.8    # TEST VALUE：貪婪次（窮追為劫）
 const PURSUIT_KILL_CAP: int           = 3      # TEST VALUE：軍閥見血上限（bounded，防暴漲打亂逃為主）
 const FLANKING_MULT: float            = 1.3
+# 名聲磁鐵 §2：道德聲望喂（戰場保護信號）。跌快於漲（護信任難建易毀）。TEST VALUE。
+const REP_GAIN: float                 = 0.1    # aided=護我→勝方對 escort protector_rep 漲
+const REP_LOSS: float                 = 0.15   # looted=劫我→敗方對勝方 protector_rep 跌
 const MORALE_CASCADE_THRESHOLD: float = 0.3
 # 照妖鏡#1：flat 潰退門檻 → 膽量人格化（spread 非 shift，均值保 0.2）。
 const ABANDON_THRESHOLD_BASE: float  = 0.2    # 均值（保 aggregate 潰退傾向）
@@ -345,6 +348,8 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 	var sev_key: String = "massacre" if maxi(loser.population - loser.wounded, 0) <= 1 else "looted"
 	NpcAiSystem.spread_feud(state, loser, winner.leader_id,
 		NpcAiSystem.FEUD_SEVERITY[sev_key], state.world.current_tick)
+	# 名聲磁鐵 §2：敗方對勝方 protector_rep 跌（掠奪者=壞保護傘；massacre 級跌更兇）。team-level 一次。
+	loser.update_protector_rep(winner.team_id, -REP_LOSS * (1.5 if sev_key == "massacre" else 1.0))
 	# 勝方 aided_in_battle 記憶：支援護衛 team 全員
 	var _npc_ai_aid := NpcAiSystem.new()
 	for escort_id in state.teams:
@@ -356,6 +361,8 @@ func _end_combat(state: WorldState, winner_id: int, loser_id: int) -> void:
 				if sp:
 					_npc_ai_aid.write_memory(sp, "aided_in_battle", escort.leader_id,
 						state.world.current_tick, 0.5)
+			# 名聲磁鐵 §2：勝方對 escort protector_rep 漲（護我=好保護傘，★核心磁鐵信號）。每 escort 一次。
+			winner.update_protector_rep(escort.team_id, REP_GAIN * 0.5)
 	if cruelty > 0.6:
 		var worsen_chance: float = (cruelty - 0.6) * 0.5
 		for pid in state.persons:
