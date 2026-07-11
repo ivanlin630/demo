@@ -142,6 +142,9 @@ func _decide_propagation_mode(carrier: PersonData) -> String:
 	if roll < w_malicious: return "malicious"
 	return "silent"
 
+# TODO gossip（資訊維度 Phase D，接口已留）：相遇交換情報時，也交換對第三方的 protector_rep 意見
+#   → 收方經 update_protector_rep(third_id, decayed_delta, source="gossip") 更新（複用信任 gate + distortion/decay）。
+#   現不實作，只留縫；rep 入口 source-agnostic 已備。
 func exchange_intel_on_arrival(state: WorldState, arrived_ids: Array, all_team_ids: Array) -> void:
 	for arrived_id in arrived_ids:
 		var arrived: TeamData = state.teams.get(arrived_id)
@@ -179,6 +182,7 @@ func _claim_source_type(giver: TeamData, receiver: TeamData) -> String:
 		return "商旅"
 	return "流民"
 
+# TODO gossip（Phase D 接口）：此處交換第三方 protector_rep 意見 → receiver update_protector_rep(third, decayed, "gossip")。現留縫。
 func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void:
 	var giver: TeamData    = state.teams.get(giver_id)
 	var receiver: TeamData = state.teams.get(receiver_id)

@@ -206,5 +206,6 @@ func update_reputation(other_id: int, delta: float) -> void:
 var protector_rep: Dictionary = {}
 func get_protector_rep(protector_id: int) -> float:
 	return float(protector_rep.get(protector_id, 0.5))
-func update_protector_rep(protector_id: int, delta: float) -> void:
+# source = 更新來源（"direct"=道德事件親歷／未來 "gossip"=傳聞 decay）。單一可擴充入口，source-agnostic 內部只記/clamp。
+func update_protector_rep(protector_id: int, delta: float, _source: String = "direct") -> void:
 	protector_rep[protector_id] = clampf(float(protector_rep.get(protector_id, 0.5)) + delta, 0.0, 1.0)

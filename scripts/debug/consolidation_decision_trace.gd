@@ -137,4 +137,32 @@ func _run() -> void:
 	teamE.known_reputations[200] = 0.4
 	_dump(sE, teamE, "弱隊E：faction member food夠(非絕境)+外部強鄰打不過（測謹慎投靠 ungate 是否 fire）")
 
+	# ── 場景 F：名聲磁鐵控制掃描（blueprint 方法學：固定一切，只變 protector_rep，找因果翻盤點）──
+	# 複用 E 的世界結構（同人格/位置/資源/威脅），唯一變因 = teamF.protector_rep[200]。
+	print("\n########## 場景F：名聲磁鐵控制掃描（固定世界，只變 protector_rep）##########")
+	for rep in [0.1, 0.3, 0.5, 0.7, 0.9]:
+		var sF := _new_state(); _fill(sF, 3)
+		_mk_leader(sF, 10, {"野心": 0.5, "求生欲": 0.7}, {"統領": 0.9})
+		_mk_team(sF, 100, 10, 20, Vector2i(0, 0), 15.0, 1)
+		_mk_leader(sF, 11, {"求生欲": 0.8, "慎重": 0.7}, {"統領": 0.2})
+		var teamF := _mk_team(sF, 101, 11, 2, Vector2i(2, 0), 10.0, 1)
+		var facF := FactionData.new(); facF.faction_id = 1; facF.leader_team_id = 100
+		facF.member_team_ids = [100, 101]
+		sF.factions[1] = facF
+		_mk_leader(sF, 20, {"殘忍": 0.6}, {"統領": 0.9})
+		_mk_team(sF, 200, 20, 40, Vector2i(3, 0), 20.0, -1)
+		_link_belief(sF, 101, 200, 40.0, 20.0, 15.0)
+		teamF.known_reputations[200] = 0.4   # 觸發 has_strong_neighbor+ctx.threat 兩道 gate（見場景E註）
+		teamF.protector_rep[200] = rep        # ★唯一變因：對 200 的道德聲望（磁鐵軸）
+		var ctxF := DecisionContext.gather(sF, teamF)
+		var scoredF: Array = DecisionEngine.rank_scored(sF, teamF)
+		var u_join: float = 0.0; var u_survival: float = 0.0; var top_opt: String = "(空)"; var top_u: float = 0.0
+		for e in scoredF:
+			if e["opt"] == "併入": u_join = e["u"]
+			if e["opt"] == "survival": u_survival = e["u"]
+		if scoredF.size() > 0: top_opt = String(scoredF[0]["opt"]); top_u = float(scoredF[0]["u"])
+		print("  protector_rep=%.1f  best_protector_rep(ctx讀到)=%.2f  併入util=%.4f  survival util=%.4f  首選=%s(%.4f)  %s" % [
+			rep, ctxF.best_protector_rep, u_join, u_survival, top_opt, top_u,
+			"★併入翻贏！" if top_opt == "併入" else ""])
+
 	print("\n=== consolidation 決策 trace DONE ===")
