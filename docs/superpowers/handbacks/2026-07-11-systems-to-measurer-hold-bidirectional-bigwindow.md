@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [降級/hold] 雙向 big-window 暫緩——結論按住(utility 半成品),薄版數字不驅決策
 ---
 

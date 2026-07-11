@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [完整性盤點+scope] consolidation utility 半成品確認——盤點表+完整utility設計+scope中等;世界抗拒按住
 ---
 

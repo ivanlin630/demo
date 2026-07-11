@@ -66,8 +66,38 @@ resolve（弱鄰接觸,弱方接受=自願/默許，S-A 無脅迫）→ 複用 �
 - gate#1 非搬餓（強隊有 surplus 才吸=天然，強隊不餓）+ 隊數不崩塌 + 忠誠 init（弱鄰帶怨）+ 三 gate + churn + determinism。大窗 detach+resume。
 - **有量 → consolidation 活、有機政體交付 → blueprint signoff**。**也 marginal → 雙向都試過 = 真結構結論 → 升 user a/b/c**。
 
+## ★★§HOW-8 完整 consolidation utility（2026-07-11 用戶批投資，取代薄版 drive/gate）
+**背景**：完整性盤點揭 consolidation 決策 utility 半成品——**個性窄（多野心/求生）+ 戰略盲（資源餘裕/期待收益/擴展需求非驅力，只容量當 gate）+ gate 限（投靠 food<3 排除中度隊=製造「98.6% eligible 絕境」假分布=殺 (b) 真兇）**。∴「世界抗拒」建在半成品上不成立。**把 consolidation 從「薄選項」做成「真決策」**：`utility = 個性適配 × 資源可負擔 × 期待收益 × 擴展需求`（真戰略盤算，rank_scored 真 term，禁 flat 湊 volume）。
+
+### 1. 投靠 ungate（`options.gd:99`，真治謹慎/預防性投靠）
+`food<DESPERATION_DAYS` **OR** `威脅驅（has_strong_neighbor 且 threat 過門檻→打不過的鄰求保護，有餘裕也可觸）`。→ 中度隊不再被 gate 擋出 consolidation 評估。
+
+### 2. 新 context 欄（`decision_context.gd`，過冗餘 lens）
+- **`resource_slack`**：自身「可負擔更多 pop 的餘裕」= f(統領 pop_cap − pop 的空額, team.resources 超 survival 的 buffer, 產能盈餘)。**★語意≠`food_days`**（food_days=survival 餘命「會不會餓死」；resource_slack=「養不養得起更多嘴」）——冗餘 lens 守。
+- **`absorb_yield`**：吸 target 的**淨期待收益** = f(target 產能/據點/地) − f(target pop 負擔)。>0=划算吸、<0=純負擔。helper 讀 target 資產（outposts/resources）算。
+
+### 3. term 補全（`terms.gd`，取代薄版）
+- **`join_drive`**（弱方求收留）= `個性適配(求生欲 + 威脅下 1-好戰=認慫求保護) × 生存壓(food OR 威脅) × (host 期待安全)`。survival OR 威脅驅兩路。
+- **`absorb_drive`**（強方吸納）= `個性適配 × 資源可負擔 × 期待收益 × 擴展需求`：
+  - 個性適配 = 野心（擴張型）**+ 仁慈(1-殘忍)/信義（保護傘型）**——低殘忍/高信義 leader 收容弱者，非只野心軍閥。
+  - 資源可負擔 = `resource_slack`（養得起才吸）。
+  - 期待收益 = `absorb_yield`（划算才吸；純負擔則不）。
+  - 擴展需求 = `ambition_gap`（`context:22` 已存在，**吸納 drive 接上**）。
+- weight/eval 分配照既有 rank_scored pattern；仁慈 = `1-殘忍`/`信義`（**非新 person value**，wiring 既有）。
+
+### 守則（硬，blueprint 釘）
+- **禁 flat/硬優勢湊 volume**：補全=讓決策更真實，**非把吸納調贏征服**。**征服若因真划算而贏=合理 emergent，保留不動**。目標「決策到位」非「consolidation 一定要多」。
+- 全走 rank_scored 真 term（統一框架內非 bespoke）；新 term 過**框架內冗餘 lens**（resource_slack vs food_days 語意別撞——已切分）。不重造（複用 ambition_gap/併入分流/loyalty init）。
+
+### 驗（measurer，補完後雙向重量；★測完才判世界抗拒）
+- 雙向 completion：謹慎投靠 dispatch/complete、仁慈吸納 dispatch/complete + **跟征服的比**（`conq.intent` 對照）。
+- **翻案判準**：完整 utility 下——
+  - consolidation 起量（謹慎投靠/仁慈吸納真發生、隊聚合）→ **翻案：世界不抗拒，是之前決策沒到位** → blueprint signoff。
+  - 仍 ~0（決策到位仍強寧征服/弱寧覓食）→ **那才是真「世界抗拒」** → 升 user a/b/c。
+- gate#1 非搬餓 / 隊數不崩(防 mega-blob) / determinism / 三端不退化 守。
+
 ---
-（下 §HOW-1~6 = 弱方 push 逐層修 + 統一併入，全 carry forward；root 演進誠實記錄。）
+（下 §HOW-1~7 = 薄版逐層修 + 統一併入 + 吸納，全 carry forward；root 演進誠實記錄。§HOW-8 完整 utility 取代其中的薄 drive/gate。）
 
 ## 目標（S-A，★blueprint 重定 2026-07-10）
 **＝食壓驅併＝有機政體湧現 + S-B 政治層地基。非殲滅修復**（因果鏈反向已證、pop-% 已 S1 絕對解、殲滅已裁接受不可見）。價值判準 = **gate#1 餵養真解生存非搬餓**（S-A 成敗核心）。
