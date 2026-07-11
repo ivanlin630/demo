@@ -59,6 +59,11 @@ git push -u origin feat/<feature>
    - **★為何**：信箱靠實體資料夾共享，你 worktree 的 `docs/handbacks/` 是**另一個資料夾**、下一站 main dir session 看不到。寫 main mailbox 才 live 觸發下一站。**code 留 worktree、handback 寫 main mailbox。**
    - 開場也 arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`（hook 已指 main mailbox）→ systems 寫 to:implementer 的信你也自動讀。
 
+**★★問題/卡點 → `to:systems` handback，禁在自己終端直接問 user（用戶定 2026-07-11）**：
+- 遇「設計不明／spec 有歧義／不確定怎麼做／發現前提不對／需裁決」→ **寫 `to:systems` 的 handback 問**（systems 是你的上游、答疑窗口）。**禁在你 worktree 終端直接問 user**——user 是整條鏈的**問題 backstop**，非 implementer 的答疑/QA 窗口；直接問 user = 破壞角色鏈（systems 該接的丟給 user 人肉轉述）。
+- 例外＝§3「回報分支給 user」（merge 前告知 branch，非提問）。真需 user 裁的願景/授權，也走 `to:systems` → systems 判斷該不該升 user（不是你直接升）。
+- 卡住時：寫 `to:systems status:open` 問 + standby，systems ~20s 內 Monitor 喚醒回你。不空等、不改猜、不問 user。
+
 3. 回報分支給user
 
 ```markdown
