@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [re-R² world-gen §3補齊] implementer補3檢查+fallback(ef089fe),measurer全4維60/60綠+fallback20/20觸發;審§3 diff CLEAN即merge
 ---
 
