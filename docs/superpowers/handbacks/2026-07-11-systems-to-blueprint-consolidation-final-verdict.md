@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [升 user·決策到位確認] 完整utility仍~0=真世界抗拒(9383evals/slack68%/yield82%/dispatch0);a/b/c+統一win可ship
 ---
 
