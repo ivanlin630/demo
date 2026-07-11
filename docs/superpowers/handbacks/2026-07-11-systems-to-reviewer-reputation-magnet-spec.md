@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 框內+冗餘lens] 名聲磁鐵 slice spec——新protector_rep軸(β)+事件喂+決策讀;驗二軸語意分
 ---
 
