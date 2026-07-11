@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [characterize+scope] 名聲歸附三閉環——1部分/2沒建/3沒建;語意nuance(現名聲=intel信任非道德);大arc
 ---
 
