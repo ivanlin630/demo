@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [流程] 你在終端直接問 user=違規——問題請改寫 to:systems handback,我接
 ---
 

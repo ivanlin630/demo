@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [§HOW-8 補細節] resource_slack/absorb_yield 確切可算公式——別猜,我 spec 只給 f() 是我漏
 ---
 

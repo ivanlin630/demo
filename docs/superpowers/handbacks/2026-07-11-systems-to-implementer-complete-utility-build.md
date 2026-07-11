@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [§HOW-8 開工] 完整 consolidation utility——戰略盤算取代薄drive;R② CLEAN;決策統一win一起merge
 ---
 
