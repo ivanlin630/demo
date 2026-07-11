@@ -73,8 +73,8 @@ resolve（弱鄰接觸,弱方接受=自願/默許，S-A 無脅迫）→ 複用 �
 `food<DESPERATION_DAYS` **OR** `威脅驅（has_strong_neighbor 且 threat 過門檻→打不過的鄰求保護，有餘裕也可觸）`。→ 中度隊不再被 gate 擋出 consolidation 評估。
 
 ### 2. 新 context 欄（`decision_context.gd`，過冗餘 lens）
-- **`resource_slack`**：自身「可負擔更多 pop 的餘裕」= f(統領 pop_cap − pop 的空額, team.resources 超 survival 的 buffer, 產能盈餘)。**★語意≠`food_days`**（food_days=survival 餘命「會不會餓死」；resource_slack=「養不養得起更多嘴」）——冗餘 lens 守。
-- **`absorb_yield`**：吸 target 的**淨期待收益** = f(target 產能/據點/地) − f(target pop 負擔)。>0=划算吸、<0=純負擔。helper 讀 target 資產（outposts/resources）算。
+- **`resource_slack`**：空 pop 容量 × 舒適度 = `clampf((pop_cap−pop)/pop_cap,0,1) * clampf(food_days/SLACK_COMFORT_DAYS(7),0,1)`。**★≠`food_days`**（food_days=餘命單軸；slack=空容量×舒適「收得起人嗎」，spare 主軸 comfort gate）。確切公式見工單 `slack-yield-formulas`。
+- **`absorb_yield`**：target 自養淨值 = `clampf((effective_food(tgt) − tgt.pop×FOOD_PER_PERSON)/YIELD_NORM + 帶地bonus, -1,1)`。>0=划算吸、<0=純負擔（gate#1 非搬餓天然由此壓）。**★別抄 `_belief_richness`**（richness=值不值搶/貪婪視角；yield=養不養得起/淨產能視角）。確切公式見工單。
 
 ### 3. term 補全（`terms.gd`，取代薄版）
 - **`join_drive`**（弱方求收留）= `個性適配(求生欲 + 威脅下 1-好戰=認慫求保護) × 生存壓(food OR 威脅) × (host 期待安全)`。survival OR 威脅驅兩路。
