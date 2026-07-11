@@ -53,6 +53,7 @@ mailbox 軌量測員=單例 → 多工單預設**序列排隊塞車**（一 bed 
 - **per-seed 性質**（determinism byte-identical）＝1 seed×2 夠。
 - **稀事件率/跨 seed robustness** 才需大窗多 seed（且稀事件優先定向床，見上）。
 - ∴ 一個 slice 常拆：生成輸出純生成掃（全 seed instant）+ 行為少 seed 短 sim + determinism 1 seed + 大窗只當 belt-suspenders regression（detach 跑、別等）。配 §右尺寸原則（signal-type × event-frequency）。
+- **★但保留 ≥1 全探針(full_probe)長跑當參照基線（用戶定 2026-07-12）**：右尺寸是為「快答/gating」，**不砍全貌**。每個改世界態/大 slice 留 ≥1 個 full_probe 長跑（detach 跑、存檔）= 完整行為簽名 + 重 baseline 實體，供未來回歸對照 + 看全維度湧現異常。快答不 gate 於它、它不 gate 快答，兩得。
 
 ### ★長跑（大窗需長時）真解：脫離啟動 + resume（2026-07-11 root cause 定+工具建）
 **root cause（實測定，非 OOM）**：0-byte 瞬殺 = CLI harness 把 bg-task 包在 kill-on-close Job → 殺 bg-task 連帶殺 pwsh wrapper + godot child（→ 末端 transcode 沒跑=0 bytes/無 marker）。證：近 24h 零 Resource-Exhaustion 事件（非 OOM）+ 零 WER（非 crash）+ 前景跑成功 + VSCode log 不涵蓋（headless CLI 層殺）。∴ 非記憶體/非 code，是**背景任務生命週期**。
