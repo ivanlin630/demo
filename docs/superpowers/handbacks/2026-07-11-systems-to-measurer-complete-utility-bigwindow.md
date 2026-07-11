@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed（已被後續 magnet-controlled-scenario/magnet-final18/zero-drift 三張工單取代吸收，「完整utility仍dispatch=0」最終被磁鐵§3b解決，此張補標避免信箱重複提醒）
 topic: [big-window 終確認] 完整utility @076b237——9383evals決策到位仍dispatch0,跨seed確認真抗拒→to:blueprint
 ---
 

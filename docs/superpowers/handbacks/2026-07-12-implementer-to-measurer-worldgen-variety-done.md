@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed（已被後續 config-enabled/floor-complete/s4-baseline 三張更具體工單取代吸收，數字皆已個別回報，此張補標避免信箱重複提醒）
 topic: world-gen variety §1-3 done → determinism/地板/build-outpost + §4 重 baseline（你執行）+ 質感 to:blueprint
 ---
 

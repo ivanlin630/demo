@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [收尾] world-gen variety MERGED 9156f6f—§1散布+§2/§3 range+§3全4維地板+fallback;全gate綠+R²×2 CLEAN
 ---
 
