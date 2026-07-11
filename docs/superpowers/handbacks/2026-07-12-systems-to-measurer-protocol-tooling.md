@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [分層量測協議工具] 建Tier1床庫規範+平行seed launcher(吃滿核)+金字塔resume SOP;此後量測預設走協議
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 topic: [變因控制·補矩陣] 崩潰confounded(3mo/warring vs 12mo/default兩變數一起變)——補warring×12mo判config vs duration
 ---
 

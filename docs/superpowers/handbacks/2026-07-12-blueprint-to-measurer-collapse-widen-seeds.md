@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed（併入 2x2-matrix 一次回報）
 topic: [多seed破幽靈] default崩潰結論建在2seed太薄——加seed深度跑看分布,別在2seed翻優先序;pre+post各多seed
 ---
 

@@ -46,6 +46,18 @@
 **三大槓桿排序**：①迭代期不碰大窗（行為改，零成本，省最多）②平行 seed 吃滿核（技術）③控制場景床查因果 > organic 聚合。
 （更深根=sim 慢的 O(N²) faction AI＝timescale wave backlog，大 arc 先不做；現在快贏=協議+平行非重寫 sim。）
 
+**Tier 1 床庫盤點（迭代期查哪類問題用哪個床）**：
+| 問題類型 | 床 | 用法 |
+|---|---|---|
+| 決策/utility 因果（哪個 option 贏、贏多少、翻盤點在哪） | `scripts/debug/consolidation_decision_trace.gd` | 手構最小 WorldState+團，呼叫 `DecisionContext.gather`+`DecisionEngine.rank_scored`，print 每 option util。改場景=改構造參數，秒級。範例：名聲磁鐵 protector_rep 掃描找翻盤點（rep≈0.23）。 |
+| world-gen 結構/分布/地板/variety | `scripts/debug/worldgen_floor_scan.gd` | 只呼叫 `GameSetup.setup`（不跑 sim），多 seed（20-30+皆秒級）讀 `worldgen.floor_pass/fail`+outpost/faction 分布+跨seed座標重疊率。支援 `WORLDGEN_CONFIG` env 切換config。 |
+| 標準 organic 多 seed（三端/湧現/perf/§4 baseline） | `scripts/debug/seeded_warring_bed.gd` | Tier 2 用（非迭代）。支援 `WARRING_CONFIG` env（2026-07-12 補，向下相容預設 warring_states.json）切換 config；`WARRING_RESUME`+`WARRING_PROGRESS` 支援長跑續接。 |
+| 決策快照（單團/單 tick dump，非 rank 全表） | `scripts/debug/team_trace.gd`／`spine_trace.gd`／`specimen_tracer.gd` | 既有工具，未在本輪重新盤點細節——需要時個別讀。 |
+
+**缺的常用維度**：目前無專屬「單機制 A/B 對照秒級床」通用模板（每次新建手構場景），可考慮抽一個共用 helper（`_mk_leader`/`_mk_team`/`_link_belief`，`consolidation_decision_trace.gd` 內已有）給下個 slice 複用，非本輪動作。
+
+**平行 seed launcher + 金字塔 resume**：概念已在上方 Tier2 §42-43 定案（跨不同 seed 各一 `godot-detach.ps1` 進程、`WARRING_RESUME` 接續深度）。工具化（自動分配核數/收 progress sidecar 湊齊的 wrapper script）留待下次大窗實跑時視需要建——目前手動起多個 detach 進程已可行（本 session 2026-07-12 崩潰矩陣診斷已用「同時起 warring×12mo + default×12mo 兩個 detach 進程」驗證平行可行，未撞資源上限）。
+
 ## ★診斷通則：量不到某湧現 → 先查補丁閘（用戶定 2026-07-09）
 
 full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（rout=0、征服=0…）→ **報數字時附「先查補丁閘」提示**：是不是硬 gate/override/`continue`/絕對門檻 pre-empt 掉引擎/人格決策（如殲滅線 pre-empt 逃決策）→ 交 systems characterize 時標「疑補丁閘」，別讓 systems 猜 tuning。你量「量不到」，補丁閘查揭「為何量不到」。詳 `00_roles §診斷通則`。
