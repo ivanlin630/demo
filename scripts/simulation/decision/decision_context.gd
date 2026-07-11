@@ -103,6 +103,7 @@ var absorb_target_id: int = -1   # §HOW-7 吸納：capacity-bound 可吸弱鄰�
 var resource_slack: float = 0.0  # §HOW-8：養得起更多 pop 的餘裕（統領 pop_cap 空額×資源 buffer，★≠food_days 餘命）
 var absorb_yield: float = 0.0    # §HOW-8：吸 absorb_target 淨收益（產能/據點 − pop 負擔，★≠richness 貪婪值）
 var host_protector_rep: float = 0.5   # 名聲磁鐵 §3：本隊對 併入 host 的 protector_rep（道德聲望，主觀 per-observer）
+var best_protector_rep: float = 0.5   # 名聲磁鐵 §3b：rep-選中 strong_neighbor host 的 protector_rep
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -173,11 +174,14 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.occupy_target_id = _occ
 	c.occupy_target_pos = state.teams[_occ].tile_pos if _occ != -1 else Vector2i(-1, -1)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.weak_prey", _tg)
-	# P2a 絕境目標欄（複用 finder，仿 _find_weakest_prey 風格）
-	var _sn: int = _fa._find_strong_neighbor(state, team)
+	# 名聲磁鐵 §3b：strong_neighbor 用 rep 軸選（投奔高 protector_rep 保護傘，喂-讀對齊）。
+	var _sn: int = _fa._find_strong_neighbor(state, team, "rep")
 	c.has_strong_neighbor = _sn != -1
 	c.strong_neighbor_id = _sn
 	c.strong_neighbor_pos = state.teams[_sn].tile_pos if _sn != -1 else Vector2i(-1, -1)
+	c.best_protector_rep = team.get_protector_rep(_sn) if _sn != -1 else 0.5   # 選中 host rep 供 join_drive 磁鐵
+	if Probe.enabled and _sn != -1 and absf(c.best_protector_rep - 0.5) > 0.01:
+		Probe.bump("rep.host_nonneutral")   # DIAG：磁鐵有差別（strong_neighbor protector_rep 脫 0.5）
 	var _ft: Vector2i = _fa._find_unowned_farmable_tile(state, team)
 	c.has_farmable_tile = _ft != Vector2i(-1, -1)
 	c.farmable_pos = _ft
@@ -285,8 +289,6 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		# 名聲磁鐵 §3：本隊對 host 的 protector_rep（主觀 per-observer，禁全域真值）
 		if c.consolidate_target_id != -1:
 			c.host_protector_rep = team.get_protector_rep(c.consolidate_target_id)
-			if Probe.enabled and absf(c.host_protector_rep - 0.5) > 0.01:
-				Probe.bump("rep.host_nonneutral")   # DIAG：磁鐵有差別（protector_rep 脫 0.5）
 		if Probe.enabled and team.absorb_target_cache != -1:
 			Probe.bump("absorb.target_found")   # DIAG：有 capacity-bound 弱鄰可吸（finder 非空）
 	# §HOW-8 resource_slack（systems 公式）：空 pop 容量 × 舒適度（≠food_days 餘命；spare 主軸、comfort gate）。

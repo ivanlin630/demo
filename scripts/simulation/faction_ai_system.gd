@@ -3289,9 +3289,12 @@ func _maybe_request_join_player(state: WorldState, team: TeamData) -> bool:
 	print("[JoinRequest] 流民 Team%d 求投靠玩家 Team%d" % [team.team_id, ptid])
 	return true
 
-func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
+# axis="pop"（投降找最強，defection 原行為）/ "rep"（名聲磁鐵：找最高 protector_rep 保護傘，避投奔強暴君）。
+# 共用 filter/scan/reachability/跨 faction/belief/known_reputations>0.3 sanity 全不變；只換 select 準則。
+func _find_strong_neighbor(state: WorldState, team: TeamData, axis: String = "pop") -> int:
 	var best_id: int = -1
 	var best_pop: int = 0
+	var best_rep: float = -1.0
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
@@ -3304,7 +3307,14 @@ func _find_strong_neighbor(state: WorldState, team: TeamData) -> int:
 		if not BeliefSystem.has_belief(state, team.team_id, tid): continue
 		var pop_est: int = int(BeliefSystem.best_estimate(state, team.team_id, tid).get("population_est", 0))
 		if pop_est <= int(float(team.population) * 1.5): continue
-		if pop_est > best_pop:
+		if axis == "rep":
+			# 名聲磁鐵：argmax protector_rep（主觀 per-observer 道德聲望），tie-break pop。
+			var prot: float = team.get_protector_rep(tid)
+			if prot > best_rep or (is_equal_approx(prot, best_rep) and pop_est > best_pop):
+				best_rep = prot
+				best_pop = pop_est
+				best_id = tid
+		elif pop_est > best_pop:
 			best_pop = pop_est
 			best_id = tid
 	return best_id

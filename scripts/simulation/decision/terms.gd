@@ -94,7 +94,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "併入": return 0.0
 			var hunger: float = maxf(0.0, DESPERATION_DAYS - ctx.food_days)
 			var threat_push: float = ctx.threat if ctx.threat > ctx.threat_threshold else 0.0
-			var magnet: float = 1.0 + ctx.host_protector_rep * REP_MAGNET_W
+			var magnet: float = 1.0 + ctx.best_protector_rep * REP_MAGNET_W
 			return DESPERATION_SCALE * maxf(hunger, threat_push) * magnet
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0

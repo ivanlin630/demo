@@ -98,8 +98,8 @@ static func applicable(ctx: DecisionContext) -> Array:
 						Probe.bump("occupy.applicable")
 						out.append(opt)
 			"併入":
-				# §HOW-8 ungate：絕境 OR (有強鄰 AND 威脅過門檻=打不過的鄰求保護，有餘裕也可觸)。需 surplus host。
-				if ctx.consolidate_target_id != -1 \
+				# §HOW-8 ungate + §3b：絕境 OR 威脅認慫。host = rep 保護傘(strong_neighbor,跨faction) 或 consolidate_target(同faction)。
+				if (ctx.has_strong_neighbor or ctx.consolidate_target_id != -1) \
 						and (ctx.food_days < DecisionTerms.DESPERATION_DAYS \
 							or (ctx.has_strong_neighbor and ctx.threat > ctx.threat_threshold)): out.append(opt)
 			"吸納":
@@ -175,10 +175,9 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 			if vid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_ATTACK, "target": state.teams[vid].tile_pos, "combat_target": vid}
 		"併入":
-			# §HOW-6：host = consolidate_target（surplus absorber，gate#1）。TASK_JOIN 走 movement A re-track；
-			# social_target+order_target 皆設 host → resolver 分流(dissolve/子隊)讀。
+			# §3b：host = rep 保護傘(strong_neighbor,跨faction,喂-讀對齊磁鐵) 優先；無則 consolidate_target(同faction)。
 			var _hc: DecisionContext = DecisionContext.gather(state, team)
-			var host: int = _hc.consolidate_target_id
+			var host: int = _hc.strong_neighbor_id if _hc.strong_neighbor_id != -1 else _hc.consolidate_target_id
 			if host == -1 or not state.teams.has(host): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			return {"task": TeamData.TASK_JOIN, "target": state.teams[host].tile_pos,
 				"social_target": host, "order_target": host}
