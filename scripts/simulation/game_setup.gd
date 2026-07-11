@@ -192,17 +192,21 @@ static func _floor_validate(state, plan: Dictionary) -> bool:
 			return false
 		if not _tile_reachable(state, outs[0]):
 			return false
-	# ② 領土非孤島（軟）：每 faction 每 outpost 到最近同 faction outpost ≤ 上界（單 outpost faction 免）
+	# ② 領土非孤島（★軟：spec「不強求連通但不孤島全散」）：faction 只要有 ≥1 對同 faction outpost 相鄰
+	# （≤FLOOR_CONNECT_MAX），即非「全散孤島」→ 過。全部互相孤立才 fail。單 outpost faction 免。
 	for fi in faction_outposts:
 		var outs2: Array = faction_outposts[fi]
 		if outs2.size() >= 2:
+			var has_cluster: bool = false
 			for a in outs2:
-				var nearest: int = 1 << 30
 				for b in outs2:
-					if a != b:
-						nearest = mini(nearest, _hex_dist_static(a, b))
-				if nearest > FLOOR_CONNECT_MAX:
-					return false
+					if a != b and _hex_dist_static(a, b) <= FLOOR_CONNECT_MAX:
+						has_cluster = true
+						break
+				if has_cluster:
+					break
+			if not has_cluster:
+				return false
 	# ④ 獨立隊不全死角：每 indep outpost 鄰格至少 1 可通行（tile 存在=可移動空間）
 	for p in indep:
 		if not _has_passable_neighbor(state, p):
