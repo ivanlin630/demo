@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 topic: [方法學] 名聲磁鐵驗收=控制場景床先(隔離protector_rep),多seed robustness殿後
 ---
 
