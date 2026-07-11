@@ -23,6 +23,16 @@ const TEAM_RESOURCE_PRESET: Dictionary = {
 }
 
 const FLOAT_RES_KEYS: Array = ["food", "material"]
+# world-gen variety §2/§3（TEST VALUE，measurer 校準）：據點/勢力 seeded range + 結構地板。
+const OUTPOST_MIN: int = 8
+const OUTPOST_MAX: int = 14
+const OUTPOST_DENSITY_CAP: float = 0.25   # 據點數硬上限 = 地圖 tile 數 × 此（留空地）
+const FAC_MIN: int = 2
+const FAC_MAX: int = 4
+const FAC_SHARE_MIN: int = 1
+const FAC_SHARE_MAX: int = 4               # share 擾動幅（獨霸=懸殊/群雄=均等）
+const COVERAGE_MIN: float = 0.5            # §3 覆蓋度下限（象限覆蓋比）
+const FLOOR_RETRY_MAX: int = 8             # §3 地板 retry 上限（同 rng 續抽，bounded）
 
 static func setup(state: WorldState, config: Dictionary) -> void:
 	var mode: String = config.get("mode", "random")
@@ -68,16 +78,52 @@ static func _generate_map(state, config, rng) -> void:
 		"resource_multiplier": richness_mult
 	})
 
+# world-gen variety §3：散布覆蓋度地板——據點跨 ≥COVERAGE_MIN 比例的象限（防全擠一角）。
+static func _coverage_ok(state, positions: Array) -> bool:
+	if positions.is_empty():
+		return false
+	# 地圖包圍盒中心（由 tiles 算，地形固定=每 seed 同 bounds）
+	var min_x: int = 1 << 30; var max_x: int = -(1 << 30)
+	var min_y: int = 1 << 30; var max_y: int = -(1 << 30)
+	for tid in state.world.tiles:
+		var x: int = tid / 1000; var y: int = tid % 1000
+		min_x = mini(min_x, x); max_x = maxi(max_x, x)
+		min_y = mini(min_y, y); max_y = maxi(max_y, y)
+	var cx: float = (min_x + max_x) * 0.5; var cy: float = (min_y + max_y) * 0.5
+	var quad: Dictionary = {}
+	for p in positions:
+		var qx: int = 0 if float(p.x) < cx else 1
+		var qy: int = 0 if float(p.y) < cy else 1
+		quad[qx * 2 + qy] = true
+	return float(quad.size()) / 4.0 >= COVERAGE_MIN
+
 static func _plan_outposts(state, config, rng) -> Dictionary:
 	var ocfg: Dictionary = config.get("outposts", {})
-	var total: int = int(ocfg.get("total_count", 10))
 	var min_sp: int = int(ocfg.get("min_spacing", 2))
 	var indep_ratio: float = float(ocfg.get("independent_ratio", 0.3))
 	var type_ratio: Dictionary = ocfg.get("type_ratio",
 		{ "civilian": 0.6, "military": 0.4 })
 
+	# world-gen variety §2：據點數 seeded range（config 明設則尊重，否則每 seed 變）。硬上限=地圖容量比留空地。
+	var total: int
+	if ocfg.has("total_count"):
+		total = int(ocfg["total_count"])
+	else:
+		total = rng.randi_range(OUTPOST_MIN, OUTPOST_MAX)
+	var map_cap: int = int(float(state.world.tiles.size()) * OUTPOST_DENSITY_CAP)
+	total = mini(total, maxi(map_cap, 1))
+
 	var gen = load("res://scripts/simulation/world_generator.gd").new()
-	var positions: Array = gen.pick_start_positions(state, total, min_sp)
+	# world-gen variety §3：結構地板 validate+retry（同 seeded rng 續抽=deterministic）。覆蓋過線才收。
+	var positions: Array = []
+	var _floor_ok: bool = false
+	for _attempt in range(FLOOR_RETRY_MAX):
+		positions = gen.pick_start_positions(state, total, min_sp, rng)
+		if _coverage_ok(state, positions):
+			_floor_ok = true
+			break
+	if Probe.enabled:
+		Probe.bump("worldgen.floor_pass" if _floor_ok else "worldgen.floor_fail")
 	if positions.size() < total:
 		push_warning("Only %d outposts placed (wanted %d)" % [positions.size(), total])
 
@@ -91,12 +137,19 @@ static func _plan_outposts(state, config, rng) -> Dictionary:
 	var faction_pool: Array = positions.slice(indep_count)
 
 	var fcfg: Dictionary = config.get("factions", {})
-	var fcount: int = int(fcfg.get("count", 2))
+	# world-gen variety §2：勢力數 seeded range（config 明設則尊重）。
+	var fcount: int
+	if fcfg.has("count"):
+		fcount = int(fcfg["count"])
+	else:
+		fcount = rng.randi_range(FAC_MIN, FAC_MAX)
+	fcount = mini(fcount, maxi(faction_pool.size(), 1))   # 不超過可分據點
 	var weights: Array = fcfg.get("weights", [])
 	if weights.size() < fcount:
+		# world-gen variety §2：領土 share seeded 擾動（獨霸/群雄/稀疏）。config 無 weights 才隨機。
 		weights = []
 		for i in range(fcount):
-			weights.append(1)
+			weights.append(rng.randi_range(FAC_SHARE_MIN, FAC_SHARE_MAX))
 
 	var total_w: int = 0
 	for w in weights: total_w += int(w)
