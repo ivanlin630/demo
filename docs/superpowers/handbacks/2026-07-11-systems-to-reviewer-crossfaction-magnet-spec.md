@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 框內] 跨faction磁鐵修(§3b)——finder改rep-選對齊喂-讀;審S-A/S-B邊界守+resolver已跨faction
 ---
 

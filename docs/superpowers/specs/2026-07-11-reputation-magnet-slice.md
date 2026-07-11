@@ -22,12 +22,17 @@
   - `aided_in_battle`（`npc_combat:~357` escort 迴圈）→ `winner.update_protector_rep(escort.team_id, +REP_GAIN×0.5)`（★核心磁鐵信號）。
   - 不碰 `_write_relation_edge`（subject-ambiguous 無 state）；不喂 team-subject 邊際事件（begged/taxed）。2 點足夠讓 protector_rep 脫 0.5 測磁鐵；太平則加 master/kindness 次階段。
 
-## ★§3b 跨 faction rep-選 target（2026-07-11，磁鐵 inert 修：喂-讀 pair 對齊）
-**inert 根因**：原 §3 讀的 host=`_find_absorber`(容量選 **same-faction** absorber，`faction_ai:1562` loop member_team_ids)，但 §2 喂的是「戰場護/劫我的隊」——決策隊對 faction-mate absorber 從沒護衛史→rep 恆 0.5→磁鐵 inert。**治=finder 改由 protector_rep 選（投奔護過我的），喂-讀同 pair**（blueprint 授權跨 faction 最小版）。
-- **新 `_find_best_protector(state, team)`**：argmax over `team.protector_rep`（rep>0.5 的護我者），filter 可達/存活/有容量餘裕，回最高 rep target。**允許跨 faction**（不 loop f.member_team_ids，掃 protector_rep dict）。取代**投靠**的 target 來源。
-- **★resolver 已跨 faction**：`_resolve_join`（`interaction:237`）位於 `same_faction` 塊（`:243`）**之前**（註 `:225-227`「社交跨/同 faction 均可 resolve」）→ **JOIN 本就跨 faction，resolver 不用改**。join=joiner 併入 protector（faction 繼承 protector）。
-- **邊界（最小版，S-B defer）**：只做「投奔高 rep 保護傘 + 併入」。**不做**叛離原勢力的政治後果/怨氣/忠誠演變/通牒（S-B）。
-- context：`best_protector_id`/`best_protector_rep` = `_find_best_protector` 結果（取代原 host 來源）。
+## ★§3b rep-選 target（2026-07-11 rev2，磁鐵 inert 修——reviewer 校正我 mis-root）
+**★systems 首判錯（reviewer premise_contradiction 抓）**：我原稱「投靠讀 `_find_absorber` same-faction absorber」=**假**。真相（file:line 複核）：**投靠(JOIN) target = `_find_strong_neighbor`（`faction_ai:3238`）**，`_find_absorber` 只餵整併/吸納（`consolidate_target_id`），投靠沒用它。且 `_find_strong_neighbor:3246` **已排除 same-faction=本就跨 faction**（我「same-faction 限致 inert」也假）。
+**真 inert 根因**：`_find_strong_neighbor` 已跨 faction，但 **:3247 讀 `known_reputations`（情報信任）+ :3253 選 `best_pop`（最強）**——**不讀 protector_rep、不選護過我的**。∴ 選的強鄰 protector_rep 恆 0.5→磁鐵 inert。
+**真修（小，非引新 finder）**：`_find_strong_neighbor` **選擇準則改 protector_rep**（投奔護過我的最佳保護者=§3.2 原意）：
+- 保既有 filter（跨 faction :3246 / 可達 :3245 / belief :3250 / 強度 :3252）。
+- **選擇改**：`:3253 best_pop` → argmax `protector_rep[tid]`（tie-break pop）——選我最高 protector_rep 的（護過我的）保護傘。喂(aided→護我者 rep 漲)-讀(選 rep 高者)**同 pair**→非 0.5。
+- known_reputations>0.3 filter（:3248）：情報信任基本 sanity，可保或放寬（implementer 評；別跟 protector_rep 撞語意）。
+- **★implementer 確認 `_find_strong_neighbor` 唯投靠用**（另 caller `faction_ai:3422`）——若他用，rep-選 scope 到投靠路（別擾別用途）。跑不順標回 systems。
+- **resolver 已跨 faction**（`_resolve_join` `interaction:237` 早於 same_faction `:243`，reviewer 複核確認）→ 不用改。
+- **邊界最小版**：只投奔高 rep 保護傘+併入；S-B 政治（叛離後果/怨氣/忠誠/通牒）defer。
+- context：`best_protector_rep`（選中 host 的 protector_rep）供 join_drive §3.1 讀。
 
 ## §3 閉環 3 — 決策讀名聲（磁鐵發動）
 1. **`join_drive`（`terms.gd:89`）× 名聲加成**：`join_drive_final = join_drive × (1 + protector_rep[host] × REP_MAGNET_W)`——高名聲 host → 投靠 util 升（trace 場景 E：逃 1.0 vs 投靠 0.82，掛名聲後高名聲 host 翻盤）。低名聲/中性(0.5) → 加成小/無。`REP_MAGNET_W`(~1.0 TEST VALUE)。
