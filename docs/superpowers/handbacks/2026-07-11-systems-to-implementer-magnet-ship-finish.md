@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [磁鐵收尾 ship] gossip入口(source參)+message seam註記;決策統一win一起merge
 ---
 
