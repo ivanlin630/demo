@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [§2/§3 config啟用] worktree default.json 移除total_count/count顯設→觸發range;驗weights
 ---
 

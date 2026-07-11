@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [config版圖回] default.json=玩家遊戲世界;warring_states等=控制場景;§2/§3已route implementer啟用→measurer驗
 ---
 
