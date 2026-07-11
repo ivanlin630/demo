@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R² world-gen variety merge前審] 5檔diff §1散布+§2/§3 count/faction range+config分工;四gate綠+融合閘PASS+headless零新增,差R²CLEAN即merge
 ---
 
