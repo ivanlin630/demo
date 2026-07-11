@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [big-window 終確認] 雙向 consolidation @41e882c——弱push+強pull 都~0,確認結構非樣本→to:blueprint升user
 ---
 

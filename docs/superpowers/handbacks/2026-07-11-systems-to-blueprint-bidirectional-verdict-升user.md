@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [升 user·雙向確認] 和平consolidation非此世界emergent(弱不能併+強不願吸,兩端sound)——a/b/c;S-A統一win可ship
 ---
 
