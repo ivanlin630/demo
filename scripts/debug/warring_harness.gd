@@ -64,6 +64,8 @@ const PROBE_KEYS: Array = [
 	"annih.n_high", "annih.n_mid", "annih.n_low",
 	# 潰逃俘虜（真俘虜端信號，capture.total 不含此路）：控地俘殘部 vs 沒俘
 	"conq.combat_retreat", "conq.retreat_captured", "conq.retreat_no_capture",
+	# world-gen variety：結構地板 pass/fail + build-outpost dispatch(靶B)
+	"worldgen.floor_pass", "worldgen.floor_fail", "worldgen.build_outpost",
 	# S1 追擊放血人格化：追擊次數（放血量/人格加權走 AMOUNT_KEYS）
 	"pursuit.n",
 ]

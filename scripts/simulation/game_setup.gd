@@ -23,6 +23,17 @@ const TEAM_RESOURCE_PRESET: Dictionary = {
 }
 
 const FLOAT_RES_KEYS: Array = ["food", "material"]
+# world-gen variety §2/§3（TEST VALUE，measurer 校準）：據點/勢力 seeded range + 結構地板。
+const OUTPOST_MIN: int = 8
+const OUTPOST_MAX: int = 14
+const OUTPOST_DENSITY_CAP: float = 0.25   # 據點數硬上限 = 地圖 tile 數 × 此（留空地）
+const FAC_MIN: int = 2
+const FAC_MAX: int = 4
+const FAC_SHARE_MIN: int = 1
+const FAC_SHARE_MAX: int = 4               # share 擾動幅（獨霸=懸殊/群雄=均等）
+const COVERAGE_MIN: float = 0.5            # §3 覆蓋度下限（象限覆蓋比）
+const FLOOR_RETRY_MAX: int = 8             # §3 地板 retry 上限（同 rng 續抽，bounded）
+const FLOOR_CONNECT_MAX: int = 12          # §3② 領土非孤島軟上界（同 faction outpost 最近距離 hex）
 
 static func setup(state: WorldState, config: Dictionary) -> void:
 	var mode: String = config.get("mode", "random")
@@ -68,40 +79,85 @@ static func _generate_map(state, config, rng) -> void:
 		"resource_multiplier": richness_mult
 	})
 
+# world-gen variety §3：散布覆蓋度地板——據點跨 ≥COVERAGE_MIN 比例的象限（防全擠一角）。
+static func _coverage_ok(state, positions: Array) -> bool:
+	if positions.is_empty():
+		return false
+	# 地圖包圍盒中心（由 tiles 算，地形固定=每 seed 同 bounds）
+	var min_x: int = 1 << 30; var max_x: int = -(1 << 30)
+	var min_y: int = 1 << 30; var max_y: int = -(1 << 30)
+	for tid in state.world.tiles:
+		var x: int = tid / 1000; var y: int = tid % 1000
+		min_x = mini(min_x, x); max_x = maxi(max_x, x)
+		min_y = mini(min_y, y); max_y = maxi(max_y, y)
+	var cx: float = (min_x + max_x) * 0.5; var cy: float = (min_y + max_y) * 0.5
+	var quad: Dictionary = {}
+	for p in positions:
+		var qx: int = 0 if float(p.x) < cx else 1
+		var qy: int = 0 if float(p.y) < cy else 1
+		quad[qx * 2 + qy] = true
+	return float(quad.size()) / 4.0 >= COVERAGE_MIN
+
 static func _plan_outposts(state, config, rng) -> Dictionary:
 	var ocfg: Dictionary = config.get("outposts", {})
-	var total: int = int(ocfg.get("total_count", 10))
 	var min_sp: int = int(ocfg.get("min_spacing", 2))
 	var indep_ratio: float = float(ocfg.get("independent_ratio", 0.3))
 	var type_ratio: Dictionary = ocfg.get("type_ratio",
 		{ "civilian": 0.6, "military": 0.4 })
 
-	var gen = load("res://scripts/simulation/world_generator.gd").new()
-	var positions: Array = gen.pick_start_positions(state, total, min_sp)
-	if positions.size() < total:
-		push_warning("Only %d outposts placed (wanted %d)" % [positions.size(), total])
+	# world-gen variety §2：據點數 seeded range（config 明設則尊重，否則每 seed 變）。硬上限=地圖容量比留空地。
+	var total: int
+	if ocfg.has("total_count"):
+		total = int(ocfg["total_count"])
+	else:
+		total = rng.randi_range(OUTPOST_MIN, OUTPOST_MAX)
+	var map_cap: int = int(float(state.world.tiles.size()) * OUTPOST_DENSITY_CAP)
+	total = mini(total, maxi(map_cap, 1))
 
+	var gen = load("res://scripts/simulation/world_generator.gd").new()
+	var fcfg: Dictionary = config.get("factions", {})
+	# world-gen variety §3：全域結構地板 validate+retry（scatter+分配 全在迴圈內，同 seeded rng 續抽=deterministic）。
+	# 4 檢查（可達/非孤島/覆蓋/獨立不死角）全過才收；耗盡→deterministic fallback 補位（非靜默送不合格）。
+	var plan: Dictionary = {}
+	var _floor_ok: bool = false
+	for _attempt in range(FLOOR_RETRY_MAX):
+		var positions: Array = gen.pick_start_positions(state, total, min_sp, rng)
+		plan = _assemble_plan(state, positions, indep_ratio, type_ratio, fcfg, rng)
+		if _floor_validate(state, plan):
+			_floor_ok = true
+			break
+	if not _floor_ok:
+		# deterministic fallback：補位欠覆蓋象限的次高分候選 → 重驗；仍不過保底可跑（非靜默不合格）。
+		plan = _floor_fallback(state, gen, plan, total, min_sp, indep_ratio, type_ratio, fcfg, rng)
+		_floor_ok = _floor_validate(state, plan)
+	if Probe.enabled:
+		Probe.bump("worldgen.floor_pass" if _floor_ok else "worldgen.floor_fail")
+	return plan
+
+# 組裝 plan（scatter 後：types + indep/faction 分配 + share 擾動）。rng 全 seeded。
+static func _assemble_plan(state, positions: Array, indep_ratio: float, type_ratio: Dictionary,
+		fcfg: Dictionary, rng) -> Dictionary:
 	var types: Dictionary = {}
 	var civ_ratio: float = float(type_ratio.get("civilian", 0.6))
 	for pos in positions:
 		types[pos] = "civilian" if rng.randf() < civ_ratio else "military"
-
 	var indep_count: int = int(round(positions.size() * indep_ratio))
 	var indep_outposts: Array = positions.slice(0, indep_count)
 	var faction_pool: Array = positions.slice(indep_count)
-
-	var fcfg: Dictionary = config.get("factions", {})
-	var fcount: int = int(fcfg.get("count", 2))
+	var fcount: int
+	if fcfg.has("count"):
+		fcount = int(fcfg["count"])
+	else:
+		fcount = rng.randi_range(FAC_MIN, FAC_MAX)
+	fcount = mini(fcount, maxi(faction_pool.size(), 1))
 	var weights: Array = fcfg.get("weights", [])
 	if weights.size() < fcount:
 		weights = []
 		for i in range(fcount):
-			weights.append(1)
-
+			weights.append(rng.randi_range(FAC_SHARE_MIN, FAC_SHARE_MAX))
 	var total_w: int = 0
 	for w in weights: total_w += int(w)
 	if total_w == 0: total_w = 1
-
 	var faction_outposts: Dictionary = {}
 	var assigned: int = 0
 	for fi in range(fcount):
@@ -112,12 +168,84 @@ static func _plan_outposts(state, config, rng) -> Dictionary:
 			share = int(faction_pool.size() * float(weights[fi]) / float(total_w))
 		faction_outposts[fi] = faction_pool.slice(assigned, assigned + share)
 		assigned += share
-
 	return {
 		"faction_outposts": faction_outposts,
 		"independent_outposts": indep_outposts,
-		"outpost_types": types
+		"outpost_types": types,
 	}
+
+# §3 全域結構地板 4 檢查（AND）：①每勢力≥1可達 ②領土非孤島 ③覆蓋度 ④獨立隊不死角。
+static func _floor_validate(state, plan: Dictionary) -> bool:
+	var faction_outposts: Dictionary = plan.get("faction_outposts", {})
+	var indep: Array = plan.get("independent_outposts", [])
+	var all_pos: Array = []
+	for fi in faction_outposts:
+		all_pos.append_array(faction_outposts[fi])
+	all_pos.append_array(indep)
+	# ③ 覆蓋度
+	if not _coverage_ok(state, all_pos):
+		return false
+	# ① 每勢力 ≥1 outpost + 該 outpost tile 可達（在生成地圖上、非孤立）
+	for fi in faction_outposts:
+		var outs: Array = faction_outposts[fi]
+		if outs.is_empty():
+			return false
+		if not _tile_reachable(state, outs[0]):
+			return false
+	# ② 領土非孤島（★軟：spec「不強求連通但不孤島全散」）：faction 只要有 ≥1 對同 faction outpost 相鄰
+	# （≤FLOOR_CONNECT_MAX），即非「全散孤島」→ 過。全部互相孤立才 fail。單 outpost faction 免。
+	for fi in faction_outposts:
+		var outs2: Array = faction_outposts[fi]
+		if outs2.size() >= 2:
+			var has_cluster: bool = false
+			for a in outs2:
+				for b in outs2:
+					if a != b and _hex_dist_static(a, b) <= FLOOR_CONNECT_MAX:
+						has_cluster = true
+						break
+				if has_cluster:
+					break
+			if not has_cluster:
+				return false
+	# ④ 獨立隊不全死角：每 indep outpost 鄰格至少 1 可通行（tile 存在=可移動空間）
+	for p in indep:
+		if not _has_passable_neighbor(state, p):
+			return false
+	return true
+
+static func _tile_reachable(state, pos: Vector2i) -> bool:
+	# 在生成地圖上（tile 存在）+ 至少 1 鄰格可通行 → 非孤立不可達。
+	return state.world.tiles.has(pos.x * 1000 + pos.y) and _has_passable_neighbor(state, pos)
+
+static func _has_passable_neighbor(state, pos: Vector2i) -> bool:
+	for d in ResourceSystem.HEX_DIRS:
+		if state.world.tiles.has((pos.x + d.x) * 1000 + (pos.y + d.y)):
+			return true
+	return false
+
+static func _hex_dist_static(a: Vector2i, b: Vector2i) -> int:
+	var dx: int = b.x - a.x; var dy: int = b.y - a.y
+	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+# deterministic fallback：欠覆蓋象限補次高分候選（同 rng 已耗，用純評分無 rng=deterministic）→ 直到 4 項過線 or 保底。
+static func _floor_fallback(state, gen, plan: Dictionary, total: int, min_sp: int,
+		indep_ratio: float, type_ratio: Dictionary, fcfg: Dictionary, rng) -> Dictionary:
+	# 純評分（無噪聲）取全 tile top 候選，補進現有 positions 欠覆蓋象限，重組 plan。deterministic。
+	var cur: Array = []
+	for fi in plan.get("faction_outposts", {}):
+		cur.append_array(plan["faction_outposts"][fi])
+	cur.append_array(plan.get("independent_outposts", []))
+	var scored: Array = gen.scored_positions_pure(state)   # 無 rng 純評分降序
+	for e in scored:
+		if cur.size() >= total:
+			break
+		var ok: bool = true
+		for c in cur:
+			if _hex_dist_static(e, c) < min_sp:
+				ok = false; break
+		if ok and not (e in cur):
+			cur.append(e)
+	return _assemble_plan(state, cur, indep_ratio, type_ratio, fcfg, rng)
 
 static func _generate_factions(state, plan, config, rng) -> void:
 	var fcfg: Dictionary = config.get("factions", {})

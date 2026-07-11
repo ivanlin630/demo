@@ -1,4 +1,9 @@
 const TERRAIN_WEIGHTS: Dictionary = { "plains": 50, "forest": 30, "mountain": 20 }
+# world-gen variety §1：據點評分 scatter（棄 key-order 貪婪）。TEST VALUE，measurer 校準。
+const W_RES: float = 1.0          # 資源價值權重（聚落貼資源）
+const W_STRAT: float = 0.4        # 戰略因子權重（鄰格資源多樣=補給腹地）
+const WILD_GAME_W: float = 0.05   # wild_game 併入資源價值係數
+const SCATTER_NOISE: float = 0.35 # ★位置熵護欄：score×(1±noise) 每 seed 有機散布,非純 argmax
 
 const RESOURCE_PROFILE: Dictionary = {
 	"plains":   { "food": [100, 300], "material": [5,  20]  },   # 農業為主
@@ -177,21 +182,57 @@ func _random_terrain(rng: RandomNumberGenerator) -> String:
 			return t
 	return "plains"
 
-func pick_start_positions(state: WorldState, n: int, min_sep: int) -> Array:
-	var chosen: Array = []
+# world-gen variety §1：評分 + seeded 熵散布（棄 key-order 貪婪；rng 全 seeded=per-seed determinism）。
+# 高分區(貼資源+腹地)優先，score×rng 噪聲=每 seed 有機不同、非格狀 re-regularize。min_sep 硬保。
+func pick_start_positions(state: WorldState, n: int, min_sep: int, rng: RandomNumberGenerator) -> Array:
+	var scored: Array = []
 	for tid in state.world.tiles:
 		var tile = state.world.tiles[tid]
 		var pos := Vector2i(tid / 1000, tid % 1000)
+		var s: float = _tile_start_score(state, tile, pos) * (1.0 + rng.randf_range(-SCATTER_NOISE, SCATTER_NOISE))
+		scored.append({ "pos": pos, "score": s })
+	scored.sort_custom(func(a, b): return a["score"] > b["score"])   # 高分優先（噪聲已擾）
+	var chosen: Array = []
+	for e in scored:
 		var ok := true
 		for c in chosen:
-			if _hex_dist(pos, c) < min_sep:
+			if _hex_dist(e["pos"], c) < min_sep:
 				ok = false
 				break
 		if ok:
-			chosen.append(pos)
+			chosen.append(e["pos"])
 		if chosen.size() >= n:
 			break
 	return chosen
+
+# 據點起點評分：資源價值(terrain 產能+wild_game) × W_RES + 戰略(鄰格資源和=補給腹地) × W_STRAT。
+# §3 fallback 用：純評分（無 rng 噪聲）全 tile 位置降序。deterministic（同 seed 同序）。
+func scored_positions_pure(state: WorldState) -> Array:
+	var scored: Array = []
+	for tid in state.world.tiles:
+		var tile = state.world.tiles[tid]
+		var pos := Vector2i(tid / 1000, tid % 1000)
+		scored.append({ "pos": pos, "score": _tile_start_score(state, tile, pos) })
+	scored.sort_custom(func(a, b): return a["score"] > b["score"])
+	var out: Array = []
+	for e in scored:
+		out.append(e["pos"])
+	return out
+
+func _tile_start_score(state: WorldState, tile, pos: Vector2i) -> float:
+	var res_val: float = _tile_res_value(tile)
+	var strat: float = 0.0
+	for d in ResourceSystem.HEX_DIRS:
+		var ntid: int = (pos.x + d.x) * 1000 + (pos.y + d.y)
+		var nt = state.world.tiles.get(ntid)
+		if nt != null:
+			strat += _tile_res_value(nt)
+	return res_val * W_RES + strat * W_STRAT
+
+func _tile_res_value(tile) -> float:
+	var rates: Dictionary = ResourceSystem.REGEN_RATE.get(tile.terrain, { "food": 2.0, "material": 1.0 })
+	return float(rates.get("food", 0.0)) + float(rates.get("material", 0.0)) \
+		+ float(tile.resources.get("wild_game", 0)) * WILD_GAME_W
 
 func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x

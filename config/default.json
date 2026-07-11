@@ -10,15 +10,12 @@
   "opening_granary_food": 800,
 
   "outposts": {
-    "total_count": 14,
     "type_ratio": { "civilian": 0.8, "military": 0.2 },
     "independent_ratio": 0.3,
     "min_spacing": 2
   },
 
   "factions": {
-    "count": 3,
-    "weights": [3, 2, 1],
     "teams_per_faction_range": [2, 4]
   },
 
