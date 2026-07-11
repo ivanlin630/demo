@@ -17,7 +17,10 @@
 - `protect` / `gratitude`（受助/被護）→ observer.protector_rep[subject_team] **+= REP_GAIN×intensity**（護人→名聲漲）。
 - `feud` / `killed`（被害/背叛）→ **-= REP_LOSS×intensity**（背叛→跌）。
 - 常數 TEST VALUE：`REP_GAIN`(~0.1)/`REP_LOSS`(~0.15，跌快於漲=名聲難得易失)。
-- **★subject→team 映射**：relation_edges 在 person(leader)、subject_id 型別（person or team）**implementer build 時確認**——若 subject=person，resolve 其 team 當 protector key；observer=該 person 的 team。**跑不順標明回 systems**（別猜）。
+- **★subject→team 映射解（build 卡點後 systems 裁）= 呼叫端就地喂**（映射歧義只在 `_write_relation_edge` 內部收 int subject；呼叫端手上有 TeamData object）。**本 slice 2 核心喂點**（team 直接在手，不需 person→team resolve）：
+  - `looted`（`npc_combat:~342`）→ `loser.update_protector_rep(winner.team_id, -REP_LOSS×sev)`（massacre 級跌更兇）。
+  - `aided_in_battle`（`npc_combat:~357` escort 迴圈）→ `winner.update_protector_rep(escort.team_id, +REP_GAIN×0.5)`（★核心磁鐵信號）。
+  - 不碰 `_write_relation_edge`（subject-ambiguous 無 state）；不喂 team-subject 邊際事件（begged/taxed）。2 點足夠讓 protector_rep 脫 0.5 測磁鐵；太平則加 master/kindness 次階段。
 
 ## §3 閉環 3 — 決策讀名聲（磁鐵發動）
 1. **`join_drive`（`terms.gd:89`）× 名聲加成**：`join_drive_final = join_drive × (1 + protector_rep[host] × REP_MAGNET_W)`——高名聲 host → 投靠 util 升（trace 場景 E：逃 1.0 vs 投靠 0.82，掛名聲後高名聲 host 翻盤）。低名聲/中性(0.5) → 加成小/無。`REP_MAGNET_W`(~1.0 TEST VALUE)。

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [名聲磁鐵 開工] protector_rep軸+道德事件喂+決策讀;R② CLEAN;疊S-A worktree
 ---
 
