@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [收尾] consolidation S-A merged（14c08f9）——名聲磁鐵讓consolidation活 + 決策統一win入main
 ---
 
