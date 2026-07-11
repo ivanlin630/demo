@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [determinism 查清] 實測兩run byte-identical=不重現;0.82→1.22=跨版本磁鐵wiring非洩漏;分類床-clean可進多seed
 ---
 
