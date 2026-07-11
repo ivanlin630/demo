@@ -37,7 +37,7 @@ const PROBE_KEYS: Array = [
 	"merge_appl.food_lt3", "merge_appl.food_3to6", "merge_appl.food_ge6",
 	"merge.surv_ok", "merge.surv_fail",
 	"mergein.dissolve", "mergein.subteam",   # §HOW-6 分流兩端（對稱空窗守衛：任一=0→INCONCLUSIVE）
-	"absorb.dispatch", "absorb.target_found",   # §HOW-7 強方吸納實派 + finder 非空診斷
+	"absorb.dispatch", "absorb.target_found", "absorb.util_n", "absorb.slack_pos", "absorb.yield_pos",   # §HOW-7/8 診斷
 	# A2c-2 D0：戰略移動 overlay(FA6)characterization——overlay 生效頻率 + 包圍/突圍指派 + 到達
 	"strat.sa_move_dispatch", "strat.encircle_assigned", "strat.breakout_assigned", "strat.expand_reached",
 	# R1 驗收（三帶+logistics）：絕境仍搏 / ③管住獨立隊攻屬村 / 貿易量（guard ④）
@@ -164,7 +164,8 @@ const AMOUNT_KEYS: Array = ["rout.ready_sum_high", "rout.ready_sum_mid", "rout.r
 	"mortal_flee.readiness_sum", "combat.str_ratio_annih_sum", "combat.pop_ratio_annih_sum",
 	"pursuit.loss_sum", "pursuit.cruelty_sum", "pursuit.greed_sum",
 	# S-A gate#1（餵養真解非搬餓）：併前 absorber/joiner 餘命 + 併後合隊餘命 + 隊規模分布
-	"consol.combined_days_sum", "consol.absorber_days_sum", "consol.joiner_days_sum", "consol.absorber_pop_sum"]
+	"consol.combined_days_sum", "consol.absorber_days_sum", "consol.joiner_days_sum", "consol.absorber_pop_sum",
+	"absorb.slack_sum", "absorb.yield_sum"]
 static func _probe_amounts_subset() -> Dictionary:
 	var d: Dictionary = {}
 	for k in AMOUNT_KEYS:

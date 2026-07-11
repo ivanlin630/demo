@@ -297,6 +297,13 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 				- float(_tgt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
 			var _land: float = YIELD_LAND_BONUS if ResourceSystem.own_granary_tile(state, _tgt) != null else 0.0
 			c.absorb_yield = clampf(_net / YIELD_NORM + _land, -1.0, 1.0)
+		# DIAG §HOW-8：吸納 utility 組件分布（證 decision-到位 vs formula-always-0）
+		if Probe.enabled:
+			Probe.bump("absorb.util_n")
+			Probe.add_amount("absorb.slack_sum", c.resource_slack)
+			Probe.add_amount("absorb.yield_sum", c.absorb_yield)
+			if c.resource_slack > 0.05: Probe.bump("absorb.slack_pos")
+			if c.absorb_yield > 0.0: Probe.bump("absorb.yield_pos")
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
