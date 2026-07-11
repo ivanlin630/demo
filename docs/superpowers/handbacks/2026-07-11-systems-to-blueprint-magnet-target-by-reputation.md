@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [設計裁] 磁鐵inert根因=join由容量選非名聲選;真意「投奔護過我的保護傘」須finder改讀rep(跨faction)——你裁scope
 ---
 
