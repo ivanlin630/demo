@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [系統觀點+量測法] default.json崩潰惡化=pre-existing餓死債被config鬆綁放大(gate只驗空間非經濟);+分層resume採樣法(廣度深度都要又省時)—用戶要在此討論
 ---
 

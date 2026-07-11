@@ -28,6 +28,24 @@
 5. **只跑探針+寫報告，不改 `scripts/` code、不判決。**
 6. **★一次量完 → 一封完整信（禁分批/append，用戶定 2026-07-09）**：**全部**（spec §驗收法守衛 + 標準床 HOB/const/sanity/teamtrace + perf baseline）**都跑完才寄一封涵蓋所有數字的信**。禁分批、禁 append 到已寄信。**理由=信箱競態**：QA 讀第一封即 `consumed`（義務只掃 `to:我 && status:open`），晚到的第二批補在原信後/後續新信 → **靜默漏看 → 用不完整驗證 merge**。缺任一守衛/床 → **不寄**，或寄 `status:open` 明標 `incomplete:[…]` 報藍圖等補齊，**絕不寄一封讓 QA 誤以為齊全的部分信**。
 
+## ★★分層量測協議：迭代快 / 確認慢（用戶定 2026-07-12，砍重跑浪費）
+
+> 根因（一 session 燒最多 wall-time）：大窗(35-85分)在 **code 還迭代時**反覆跑（pursuit rev1/2/3 各跑大窗、consolidation 多輪）+ seed 序列跑沒吃滿核 + 窗太短重跑 + 變因混淆重跑。分兩層治：
+
+**Tier 1｜迭代用（秒級，code 還在改時只用這個）**：
+- **控制場景床**（手構最小 WorldState，如 `consolidation_decision_trace.gd`）→ 機制/邏輯/因果。**查因果 > organic 聚合**（decision-trace 秒級且更有料，本 session 驗兩次）。
+- **純生成掃**（如 `worldgen_floor_scan`，只 GameSetup 不跑 sim）→ 結構/分布/地板/variety。
+- **★鐵律：code 還在改 → 只用 Tier 1，禁大窗 organic。** 本 session 最大浪費就是違反此條。organic 大窗**不是迭代工具**。
+
+**Tier 2｜確認用（code 定稿才跑一次，當閘）**：
+- organic 多 seed 只在 **code 定稿後跑一次**，非迭代工具。
+- **★平行 seed 吃滿核**（最大 wall-time 槓桿 ~N×）——但守 §大窗 SOP①：**單一大窗 run 不自拆 2 godot**（撞記憶體被 kill）；平行=**跨不同 seed 用平行 launcher 吃核**（非單一 heavy run 自拆），併發上限看資源。
+- **★金字塔 resume**：廣度 8×3mo（非 18，CV spread 8 個就見）→ 挑**兩極 seed** resume 續深度到 12mo，複用前綴省 ~46%（`WARRING_RESUME` 現成）。深度樣本 = 廣度樣本同世界（連續零浪費）。詳 §右尺寸 + §長跑 resume。
+- **右尺寸**：窗長/seed 數配問題，3mo 能答別 12mo（見下 §右尺寸）。
+
+**三大槓桿排序**：①迭代期不碰大窗（行為改，零成本，省最多）②平行 seed 吃滿核（技術）③控制場景床查因果 > organic 聚合。
+（更深根=sim 慢的 O(N²) faction AI＝timescale wave backlog，大 arc 先不做；現在快贏=協議+平行非重寫 sim。）
+
 ## ★診斷通則：量不到某湧現 → 先查補丁閘（用戶定 2026-07-09）
 
 full_probe/探針顯「某行為缺失/塌陷/從不 fire/湧現量不到」（rout=0、征服=0…）→ **報數字時附「先查補丁閘」提示**：是不是硬 gate/override/`continue`/絕對門檻 pre-empt 掉引擎/人格決策（如殲滅線 pre-empt 逃決策）→ 交 systems characterize 時標「疑補丁閘」，別讓 systems 猜 tuning。你量「量不到」，補丁閘查揭「為何量不到」。詳 `00_roles §診斷通則`。
