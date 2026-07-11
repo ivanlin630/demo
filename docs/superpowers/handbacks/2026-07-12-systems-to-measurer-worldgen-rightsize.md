@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [右尺寸量測] world-gen variety——地板/variety純生成(instant全seed)+build-outpost/regression少seed短窗;18×3mo非必要
 ---
 

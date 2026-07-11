@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [右尺寸 addendum·用戶要] 保留≥1全探針長跑當參照基線——右尺寸快答不砍全貌
 ---
 
