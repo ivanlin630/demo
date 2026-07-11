@@ -19,6 +19,9 @@ var threat: float = 0.0
 var team_panic: float = 0.0
 const PANIC_STRESS: float = 0.6   # TEST VALUE — 成員 stress 過此才算恐慌源
 const PANIC_LOY: float = 0.4      # TEST VALUE — 成員 loyalty 低於此才算恐慌源（高忠不潰）
+const SLACK_COMFORT_DAYS: float = 7.0   # §HOW-8 TEST VALUE — resource_slack 舒適門檻（=SURVIVAL_RECOVER_DAYS）
+const YIELD_NORM: float = 20.0          # §HOW-8 TEST VALUE — absorb_yield 淨產能正規化
+const YIELD_LAND_BONUS: float = 0.3     # §HOW-8 TEST VALUE — target 帶 granary/outpost 加分
 var ambition_gap: int = 0
 var strongest_feud: float = 0.0
 # 序4 vendetta 溶入：血仇仇敵 team id（NpcAiSystem.vendetta_target 回值，鏡射舊 hand dispatch 掃描）。
@@ -97,6 +100,8 @@ var is_subteam: bool = false
 # + 非子隊才算（鏡射 _try_consolidate_merge 兩支，保真）。-1 = 無整併 target。
 var consolidate_target_id: int = -1
 var absorb_target_id: int = -1   # §HOW-7 吸納：capacity-bound 可吸弱鄰（強方擴張 pull）
+var resource_slack: float = 0.0  # §HOW-8：養得起更多 pop 的餘裕（統領 pop_cap 空額×資源 buffer，★≠food_days 餘命）
+var absorb_yield: float = 0.0    # §HOW-8：吸 absorb_target 淨收益（產能/據點 − pop 負擔，★≠richness 貪婪值）
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -278,6 +283,20 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		c.absorb_target_id = team.absorb_target_cache
 		if Probe.enabled and team.absorb_target_cache != -1:
 			Probe.bump("absorb.target_found")   # DIAG：有 capacity-bound 弱鄰可吸（finder 非空）
+	# §HOW-8 resource_slack（systems 公式）：空 pop 容量 × 舒適度（≠food_days 餘命；spare 主軸、comfort gate）。
+	var _cmd: float = float(ldr.skills.get("統領", 0.0)) if ldr != null else 0.0
+	var _cap: int = TeamData.pop_cap_from_leadership(_cmd)
+	var _spare: float = clampf(float(_cap - team.population) / maxf(float(_cap), 1.0), 0.0, 1.0)
+	var _comfort: float = clampf(c.food_days / SLACK_COMFORT_DAYS, 0.0, 1.0)
+	c.resource_slack = _spare * _comfort
+	# §HOW-8 absorb_yield（systems 公式）：target 自養能力=產能−pop 負擔+帶地（≠richness 貪婪值）。
+	if c.absorb_target_id != -1:
+		var _tgt: TeamData = state.teams.get(c.absorb_target_id)
+		if _tgt != null:
+			var _net: float = ResourceSystem.effective_food(state, _tgt) \
+				- float(_tgt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+			var _land: float = YIELD_LAND_BONUS if ResourceSystem.own_granary_tile(state, _tgt) != null else 0.0
+			c.absorb_yield = clampf(_net / YIELD_NORM + _land, -1.0, 1.0)
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。

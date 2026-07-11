@@ -98,8 +98,10 @@ static func applicable(ctx: DecisionContext) -> Array:
 						Probe.bump("occupy.applicable")
 						out.append(opt)
 			"併入":
-				# §HOW-6：絕境 + 有 surplus host（consolidate_target_id 含 gate#1 餵養檢查=非搬餓）。
-				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.consolidate_target_id != -1: out.append(opt)
+				# §HOW-8 ungate：絕境 OR (有強鄰 AND 威脅過門檻=打不過的鄰求保護，有餘裕也可觸)。需 surplus host。
+				if ctx.consolidate_target_id != -1 \
+						and (ctx.food_days < DecisionTerms.DESPERATION_DAYS \
+							or (ctx.has_strong_neighbor and ctx.threat > ctx.threat_threshold)): out.append(opt)
 			"吸納":
 				# §HOW-7：有 capacity-bound 可吸弱鄰（finder 已保統領餘裕裝得下）→ 擴張候選（無 food gate）。
 				if ctx.absorb_target_id != -1: out.append(opt)

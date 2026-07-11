@@ -88,9 +88,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
 			return OCCUPY_DRIVE_BASE * (1.0 if not ctx.has_own_outpost else 0.3)
 		"join_drive":
-			# §HOW-6 統一「併入」：絕境 food-scaled 求生（join+整併合一，分流 dissolve/子隊在 resolver）。
+			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。survival OR 威脅兩路。
 			if opt != "併入": return 0.0
-			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+			var hunger: float = maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+			var threat_push: float = ctx.threat if ctx.threat > ctx.threat_threshold else 0.0
+			return DESPERATION_SCALE * maxf(hunger, threat_push)
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
 			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
@@ -158,10 +160,12 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			return float(ctx.leader_values.get("貪婪", 0.5)) * 0.5 + float(ctx.leader_values.get("信義", 0.5)) * 0.3 \
 				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
 		"absorb_drive":
-			# §HOW-7 強方擴張 pull：野心驅動吸弱鄰（capacity-bound 已在 applicable/finder，餘裕比折入 gate）。
-			# 擴張-class：與攻擊/佔村/貿易同層 argmax（公平競秤，禁硬優勢；軍閥寧征服也合理）。
+			# §HOW-8 完整 utility：資源可負擔(resource_slack) × 期待收益(absorb_yield) × 擴展需求(ambition_gap)。
+			# 個性(野心+仁慈)在 weight。擴張-class 公平競秤（禁硬優勢；征服真划算而贏=保留不動）。
 			if opt != "吸納" or ctx.absorb_target_id == -1: return 0.0
-			return ABSORB_DRIVE_BASE * float(ctx.leader_values.get("野心", 0.5))
+			var amb_gap: float = clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
+			var yield_pos: float = clampf(ctx.absorb_yield, 0.0, 1.0)   # 負 yield=純負擔→0=不吸(gate#1)
+			return ABSORB_DRIVE_BASE * ctx.resource_slack * (0.3 + 0.7 * yield_pos) * (0.5 + 0.5 * amb_gap)
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0
@@ -233,8 +237,9 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
 		# §HOW-6 併入 weight：求生欲主 + 低野心（餓+不稱霸傾向抱團；好感在 resolver 分流秤，非此）。
 		"mergein":           return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4
-		# §HOW-7 吸納 weight：野心/統領（強擴張者傾吸；近 ambition pattern，非字面重用）。
-		"absorb":            return float(v.get("野心", 0.5)) * 0.6 + clampf(float(v.get("統領", 0.0)), 0.0, 1.0) * 0.4
+		# §HOW-8 吸納 weight：野心 + 仁慈(1-殘忍)/信義（殘忍者寧屠不吸；仁慈者傾納弱）。
+		"absorb":            return float(v.get("野心", 0.5)) * 0.5 \
+			+ (1.0 - float(v.get("殘忍", 0.5))) * 0.3 + float(v.get("信義", 0.5)) * 0.2
 		# ── 融合 threat：人格已 baked 進 eval（additive，鏡射舊 scores）→ weight=1.0（同 intent_fit）──
 		"prepare", "defend", "pacify": return 1.0
 		# 野心階梯溶入（序3）：練兵傾向=好戰/野心染色（ambient 低 magnitude 由 eval 壓，讓位緊急）。
