@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [R² halt·§3全域地板縮水] 4項只交1項+FLOOR_RETRY無fallback→補3檢查+deterministic補位;疊worktree
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [FYI merge暫held] R²抓§3全域地板縮水(4項只交1項)→implementer補齊中;非regression,收尾延一輪
 ---
 
