@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 重審3] §3b 補選擇軸參數化(你的正解)——JOIN傳rep/defection維持pop,不污染投降路徑
 ---
 

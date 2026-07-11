@@ -28,8 +28,8 @@
 **真修（小，非引新 finder）**：`_find_strong_neighbor` **選擇準則改 protector_rep**（投奔護過我的最佳保護者=§3.2 原意）：
 - 保既有 filter（跨 faction :3246 / 可達 :3245 / belief :3250 / 強度 :3252）。
 - **★選擇軸參數化（reviewer rev2 抓：`_find_strong_neighbor` 共用，:3422 defection-surrender 也呼——投降要「最強軍事保護」、JOIN 要「最高 rep 仁君」，衝突，systems spec 解不 punt）**：`_find_strong_neighbor(state, team, axis: String = "pop")`——
-  - JOIN（投靠 finder 呼叫）傳 **`"rep"`**：`:3253 select` → argmax `protector_rep[tid]`（tie-break pop）＝投奔護過我的保護傘。喂-讀同 pair→非 0.5。
-  - `_trigger_defection_evaluation`（`:3422`）**維持 `"pop"`**（best_pop 不變，投降找扛得住的強者）＝行為零變。
+  - **★JOIN 兩呼叫點都傳 `"rep"`（reviewer 終審盤點，缺一則 gate/target 脫鉤）**：`decision_context:170`（餵 has_strong_neighbor/strong_neighbor_id = `terms.gd:90` join_drive gate + `options.gd:99` 投靠 applicable gate）**和** `options:174`（JOIN target 取值）**都**傳 `"rep"`——否則 gate 判「有強鄰」(pop-strong) vs 實際 target(rep-strong) 選不同隊脫鉤。select → argmax `protector_rep`（tie-break pop）＝投奔護過我的。喂-讀同 pair→非 0.5。
+  - `_trigger_defection_evaluation`（`:3422`）**維持 `"pop"`**（best_pop 不變，投降找扛得住的強者）＝行為零變。（reviewer 盤點：共 3 呼叫點，無第 4。）
   - 共用 filter/scan/reachability（跨 faction :3246 / 可達 / belief / 強度 / known_reputations>0.3 sanity），只分流最終 select 準則＝既有函式參數化，非重造/非冗餘。
 - **resolver 已跨 faction**（`_resolve_join` `interaction:237` 早於 same_faction `:243`，reviewer 複核確認）→ 不用改。
 - **邊界最小版**：只投奔高 rep 保護傘+併入；S-B 政治（叛離後果/怨氣/忠誠/通牒）defer。
