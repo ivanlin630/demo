@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 框內+冗餘lens] 完整 consolidation utility spec §HOW-8——戰略盤算取代薄drive;審健全+新term不撞既有
 ---
 
