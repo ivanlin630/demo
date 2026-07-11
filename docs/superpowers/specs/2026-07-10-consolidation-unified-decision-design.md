@@ -88,6 +88,38 @@ S-A spec **必須**把下列寫成 measurer gate（先驗、非先建先看）�
 ### 「外來隊變子隊」非矛盾（用戶點）
 一旦併入即成 host 子隊（掛 parent、繼承 host faction）＝結構上就是子隊，非外人。忠不忠（歸建 vs 叛離）由 loyalty+記憶驅動＝S-B 戲。（systems 輕量 characterize：merge→建子隊路對「非自己分出的隊」faction 繼承/parent 設定跑得順否，非 blocker。）
 
+## ★★★名聲驅動自願歸附（2026-07-11 用戶定案——consolidation arc 的解答）
+
+**背景**：完整 utility(§HOW-8)測完，和平 consolidation 仍 ~0——但單團 decision trace 揭穿：不是世界根本拒絕，是**「征服/覓食/逃跑」被調得主宰 + 強方吸納(push)恆輸征服**。用戶找到繞過此死結的路。
+
+### 核心翻轉：consolidation 不跟征服搶，走另一條路
+不再靠**強方主動吸納(push，util 恆輸征服=死路)**。改靠**弱方自願投奔可信的強者(pull)**：
+```
+受威脅的弱隊決策「逃 vs 投靠保護傘」= 看它【記憶中】對那保護傘的名聲：
+  記憶中名聲好(可信) → 投靠(牠會護我不奴役我)
+  記憶中名聲爛(暴虐) → 逃跑(不投暴君)
+```
+
+### 兩條通往壯大的路（個性/名聲驅動，並立）
+- **高名聲仁君 → 自願聯邦**：先護幾個弱鄰 → 恩義傳開 → 更多來投 → 滾成聯邦。慢熱、靠資訊擴散、靠持續守信。**pull。**
+- **低名聲暴君 → 征服帝國**：鐵蹄征服。即時、不需名聲。**push（現狀，不動）。**
+- ∴ **不動征服平衡**（避開 risky rebalance）——征服照舊，仁君靠名聲吸引投靠。非破壞性、真個性湧現。**這解掉「仁慈保護型霸主不存在」——不是強者選擇吸(輸征服)，是弱者選擇投奔可信強者(pull)。**
+
+### 名聲＝主觀 + 傳播（用戶定案，非全知直讀）
+- **主觀**：掛 `known_reputations[protector]`（team_data:187，**已是 per-observer 主觀**）——弱隊只投它**自己知道/聽過**名聲好的。沒接觸/沒聽過的仁君，它不會去投。
+- **傳播(用戶選 b)**：`known_reputations` 更新吃**親身經歷 + 二手傳聞**（接 `message_system`/`belief_system` 知識/謠言傳播）→ 名聲能遠播。仁君可近處人望所歸、遠方待傳。
+- **事件記憶**：接 `relation_edges`（protect/gratitude→名聲漲、betray/killed→跌）。
+- **資訊遊戲湧現**：弱隊拿片面/過時資訊決策（投錯/錯過）；名聲=要經營+要傳播的品牌，非天生標籤。
+
+### 待 systems characterize 的三閉環（決定可行性 + scope）
+1. **`known_reputations` 現被什麼更新**？只親身接觸，還是也吃傳聞(message/belief)？（用戶要 b=也吃傳聞。）
+2. **恩義/背叛事件 → 名聲**：`relation_edges`(protect/gratitude/betray) 有沒有接進 reputation 更新？
+3. **名聲賺得起/掉得下嗎**（閉環活不活）？否則全卡中性 0.5、磁鐵發不動。
++ **決策改**：`投靠`/逃跑 weight 讀主觀 `known_reputations[protector]`（逃 vs 投靠掛名聲）。
+
+### scope / 投資（systems 估 → user 裁）
+這是**新大方向**（名聲傳播 + 主觀名聲驅動歸附 + 逃vs投靠改），比「補完 utility」大。systems 估三閉環現況(多少已在/要建多少) + scope → blueprint 給 user 裁投資額。**a/b/c 續按住**——這條若成，consolidation 靠名聲歸附活，不需 (b) 征服 rebalance。
+
 ## 交 systems 的 HOW（本 slice S-A）
 - 生存訊號怎麼進 term：飢餓（food 存量 vs 消耗率/餘命）、威脅（打不過的鄰）怎麼量化餵 `consolidate_drive`/`join_drive`。
 - `consolidate_drive` 退 flat：改人格×生存 weigh（野心低+餓→投靠 util 高；野心高→傾向當吸附方）。
