@@ -206,6 +206,19 @@ func pick_start_positions(state: WorldState, n: int, min_sep: int, rng: RandomNu
 	return chosen
 
 # 據點起點評分：資源價值(terrain 產能+wild_game) × W_RES + 戰略(鄰格資源和=補給腹地) × W_STRAT。
+# §3 fallback 用：純評分（無 rng 噪聲）全 tile 位置降序。deterministic（同 seed 同序）。
+func scored_positions_pure(state: WorldState) -> Array:
+	var scored: Array = []
+	for tid in state.world.tiles:
+		var tile = state.world.tiles[tid]
+		var pos := Vector2i(tid / 1000, tid % 1000)
+		scored.append({ "pos": pos, "score": _tile_start_score(state, tile, pos) })
+	scored.sort_custom(func(a, b): return a["score"] > b["score"])
+	var out: Array = []
+	for e in scored:
+		out.append(e["pos"])
+	return out
+
 func _tile_start_score(state: WorldState, tile, pos: Vector2i) -> float:
 	var res_val: float = _tile_res_value(tile)
 	var strat: float = 0.0
