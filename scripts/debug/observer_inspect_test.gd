@@ -70,9 +70,21 @@ func _initialize() -> void:
 	empty.tile_id = _tid_key(empty_pos)
 	state.world.tiles[_tid_key(empty_pos)] = empty   # 非據點格
 
+	# 計畫層 S4：plan_phase 露 query（純顯示）
+	team.plan_phase = "求糧"
+	team.ambition_rung = 1
+
 	# ── 1. query_team.resources_nonzero ──
 	var d: Dictionary = ObserverQueryApi.query_team(state, 5)
 	var rn: Dictionary = d.get("resources_nonzero", {})
+	# S4：query 含 plan_phase + rung
+	_check(d.has("plan_phase") and str(d["plan_phase"]) == "求糧", "query_team 含 plan_phase=求糧")
+	_check(d.has("rung") and int(d["rung"]) == 1, "query_team 含 rung")
+	var all_t: Array = ObserverQueryApi.query_all_teams(state)
+	var found_phase: bool = false
+	for e in all_t:
+		if int(e["id"]) == 5 and str(e.get("plan_phase", "")) == "求糧": found_phase = true
+	_check(found_phase, "query_all_teams 含 plan_phase")
 	_check(rn.has("material") and int(rn["material"]) == 8, "team nonzero material=8")
 	_check(rn.has("weapon_melee_low"), "team nonzero weapon_melee_low present")
 	_check(not rn.has("gem"), "team zero gem excluded")

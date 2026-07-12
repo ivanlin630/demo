@@ -133,6 +133,7 @@ func _render_detail() -> void:
 		"糧食：%.0f（日流 %+.1f）  錢：%d" % [float(d["food"]), float(d["food_flow"]), int(d["coin"])],
 		"野心：階%d／上限%d（%s）" % [int(d["rung"]), int(d["rung_cap"]),
 			str(d["archetype"]) if str(d["archetype"]) != "" else "未定"],
+		"計畫：%s" % (str(d.get("plan_phase", "")) if str(d.get("plan_phase", "")) != "" else "（無）"),
 		"勢力：%s" % (str(d["faction"]) if str(d["faction"]) != "" else "（獨立）"),
 		"任務：%s（%s）" % [str(d["task"]),
 			str(d["task_reason"]) if str(d["task_reason"]) != "" else "—"],
