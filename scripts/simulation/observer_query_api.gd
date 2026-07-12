@@ -70,7 +70,7 @@ static func query_all_teams(state: WorldState) -> Array:
 		out.append({
 			"id": tid, "label": team_label(state, tid),
 			"pop": t.population, "rung": t.ambition_rung,
-			"archetype": t.ambition_archetype, "task": t.current_task,
+			"archetype": t.ambition_archetype, "plan_phase": t.plan_phase, "task": t.current_task,
 			"faction_id": t.faction_id, "tile_pos": t.tile_pos,
 			"is_beast": t.beast_kind != "",
 		})
@@ -96,6 +96,7 @@ static func query_team(state: WorldState, tid: int) -> Dictionary:
 		"resources_nonzero": _nonzero_resources(t.resources),
 		"rung": t.ambition_rung, "rung_cap": t.ambition_cap,
 		"archetype": t.ambition_archetype,
+		"plan_phase": t.plan_phase,   # 計畫層 S4：中長期攀爬 phase（純顯示）
 		"faction_id": t.faction_id,
 		"faction": faction_label(state, t.faction_id),
 		"task": t.current_task,
