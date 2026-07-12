@@ -448,6 +448,7 @@ func _initialize() -> void:
 	_test_team_ambition_default()
 	_test_ambition_rung_climb()
 	_test_ambition_cap_limits()
+	_test_plan_rung_event_driven()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -13762,9 +13763,11 @@ func _test_ambition_rung_climb() -> void:
 	assert(t.ambition_archetype != "" and t.ambition_cap == 4, "derive 生效")
 	assert(t.ambition_rung >= AmbitionLadder.RUNG_EXPAND, "躁進+足糧足人應達擴張+，實際=%d" % t.ambition_rung)
 	# 安全崩（食物流轉負，淨赤字）→ 退階
+	# S1 事件驅動：demote 改連續 K 次失守 milestone 才降（遲滯，非舊瞬時一次退）——行為改動非 regression
 	t.food_flow_avg = -1.0
-	AmbitionLadder.update(s, t)
-	assert(t.ambition_rung < AmbitionLadder.RUNG_EXPAND, "食物赤字應退階，實際=%d" % t.ambition_rung)
+	for _i in range(AmbitionLadder.RUNG_STALL_K):
+		AmbitionLadder.update(s, t)
+	assert(t.ambition_rung < AmbitionLadder.RUNG_EXPAND, "食物赤字連續K次應退階，實際=%d" % t.ambition_rung)
 	print("ambition rung climb OK")
 
 func _test_ambition_cap_limits() -> void:
@@ -15689,6 +15692,44 @@ func _test_seeded_warring_reproducible() -> void:
 # ════════════════════════════════════════════════════════════
 # R2：intent/archetype 共源（disposition_scores 單一公式）
 # ════════════════════════════════════════════════════════════
+
+# 計畫層 S1 test helper（headless_test 無現成 _mk_min_state/_mk_team → inline 構造）
+func _mk_min_state() -> WorldState:
+	var s := WorldState.new(); s.world = WorldData.new()
+	return s
+
+func _mk_team(state: WorldState, pop: int, values: Dictionary) -> TeamData:
+	var tid: int = state.teams.size()
+	var leader := PersonData.new(); leader.id = 900 + tid
+	for k in values:
+		leader.values[k] = values[k]
+	state.persons[leader.id] = leader
+	var team := TeamData.new(); team.team_id = tid; team.leader_id = leader.id
+	_seed_pop(team, pop)
+	state.teams[tid] = team
+	return team
+
+func _test_plan_rung_event_driven() -> void:
+	print("--- 計畫層 T1: rung 事件驅動（milestone 升 / 失守 K 降）---")
+	var state := _mk_min_state()
+	var team := _mk_team(state, 5, {"野心": 0.5, "慎重": 0.5})  # 非 reckless；pop=5 (<8 不誤升 EXPAND)
+	team.ambition_cap = AmbitionLadder.RUNG_HEGEMON
+	team.ambition_rung = AmbitionLadder.RUNG_SURVIVE
+	# milestone: food_flow≥0.5 → 升 ACCUMULATE（升一步;pop<8 擋 EXPAND）
+	team.food_flow_avg = 1.0
+	AmbitionLadder.update(state, team)
+	assert(team.ambition_rung == AmbitionLadder.RUNG_ACCUMULATE, "milestone 達成→升 ACCUMULATE (got %d)" % team.ambition_rung)
+	# 失守 ACCUMULATE（food_flow 跌破 0.5 門）連續 K 次 → 降回 SURVIVE
+	team.food_flow_avg = 0.2   # < ACCUMULATE_FLOW_MIN(0.5) = 失守（含 plateau-below-threshold）
+	for _i in range(AmbitionLadder.RUNG_STALL_K):
+		AmbitionLadder.update(state, team)
+	assert(team.ambition_rung == AmbitionLadder.RUNG_SURVIVE, "失守 milestone K 次→降回 SURVIVE (got %d)" % team.ambition_rung)
+	# 撐住:milestone 仍滿足 → 不降（且可再升）
+	team.food_flow_avg = 1.0
+	for _j in range(AmbitionLadder.RUNG_STALL_K + 2):
+		AmbitionLadder.update(state, team)
+	assert(team.ambition_rung >= AmbitionLadder.RUNG_ACCUMULATE, "milestone 滿足→不降(且可再升) (got %d)" % team.ambition_rung)
+	print("[OK] _test_plan_rung_event_driven")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()

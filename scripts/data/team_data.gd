@@ -73,6 +73,7 @@ var forage_today: float = 0.0   # 當日覓食累積（episode 日彙整用，�
 # 由 ResourceSystem.resolve_consumption 每 cadence 更新（見 _update_food_flow）。
 var food_flow_avg: float = 0.0    # 日均淨食物流 EMA（食物/天）
 var food_flow_last: float = -1.0   # 上次取樣 effective_food（sentinel -1 = 未初始化，首取樣不計流）
+var rung_stall_count: int = 0   # 計畫層：連續失守當前 rung milestone 次數（達 K 降 rung）
 # 統一戰略意圖 struct {type,why,mode}（F-D4：廢一槽兩義）。戰略層(獨立建國/致富/征服/守成)寫；
 # 空 {} = 無戰略意圖。SoloAI 日常 task 承諾改用 solo_task_last（下方），不再共用此槽。
 var solo_intent: Dictionary = {}
