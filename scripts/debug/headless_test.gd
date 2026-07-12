@@ -451,6 +451,7 @@ func _initialize() -> void:
 	_test_plan_rung_event_driven()
 	_test_plan_phase_derive()
 	_test_plan_phase_bias()
+	_test_plan_rung_bypass()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -15765,6 +15766,22 @@ func _test_plan_phase_bias() -> void:
 	assert(DecisionTerms.eval("plan_phase_drive", ctx, "覓食") > 0.0, "plan_phase_drive term 對覓食生效")
 	assert(DecisionTerms.eval("plan_phase_drive", ctx, "攻擊") == 0.0, "plan_phase_drive term 對攻擊=0")
 	print("[OK] _test_plan_phase_bias")
+
+func _test_plan_rung_bypass() -> void:
+	print("--- 計畫層 T3: survival-bypass（劇變立即降 rung，不經 stall K）---")
+	var state := _mk_min_state()
+	var team := _mk_team(state, 20, {"野心": 0.9, "慎重": 0.5})
+	team.ambition_cap = AmbitionLadder.RUNG_HEGEMON
+	team.food_flow_avg = 2.0
+	team.rung_pop_last = 20
+	team.ambition_rung = AmbitionLadder.RUNG_EXPAND
+	# pop 驟降 50% (20→10) + food 深負 → 劇變 bypass 立即降（不等 stall K）
+	_seed_pop(team, 10)   # population getter → 10（移除 anon）
+	team.food_flow_avg = -3.0
+	AmbitionLadder.update(state, team)
+	assert(team.ambition_rung <= AmbitionLadder.RUNG_SURVIVE + 1, "劇變 bypass 立即降 rung 到承載力 (got %d)" % team.ambition_rung)
+	assert(team.rung_stall_count == 0, "bypass 不經 stall_count")
+	print("[OK] _test_plan_rung_bypass")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()
