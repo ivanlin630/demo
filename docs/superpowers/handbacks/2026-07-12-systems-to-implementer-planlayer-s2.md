@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [工單 S2] 計畫層 phase導出+偏置term—讀S1穩定rung不碰rung;plan Task2(PHASE_GATHER已修併入);疊新worktree feat/plan-layer-s2
 ---
 

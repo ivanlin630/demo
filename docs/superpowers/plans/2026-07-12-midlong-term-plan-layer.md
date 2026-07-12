@@ -281,11 +281,13 @@ c.plan_phase_drive_map = _phase_option_bias(c.plan_phase)   # {option: mag}
 const PLAN_PHASE_DRIVE_MAG: float = 0.4   # TEST VALUE
 static func _phase_option_bias(phase: String) -> Dictionary:
     match phase:
-        PHASE_SEEK_FOOD: return {"覓食": PLAN_PHASE_DRIVE_MAG, "買糧": PLAN_PHASE_DRIVE_MAG, "貿易": PLAN_PHASE_DRIVE_MAG}
+        PHASE_SEEK_FOOD: return {"覓食": PLAN_PHASE_DRIVE_MAG, "買糧": PLAN_PHASE_DRIVE_MAG}
         PHASE_GROW:      return {"返家補給": PLAN_PHASE_DRIVE_MAG, "紮營": PLAN_PHASE_DRIVE_MAG}
         PHASE_GATHER:    return {"外交": PLAN_PHASE_DRIVE_MAG, "併入": PLAN_PHASE_DRIVE_MAG}
     return {}
 ```
+
+> **★設計原則（S2 blocker 裁定 2026-07-12，防個性 collapse）**：phase map **只含該 phase 目標的內在選項,排除其他 intent/個性的「主要表達」option**。**「貿易」= 致富 intent 的主要表達（由 intent_fit 致富→貿易 驅動）→ 不放進任何 phase map**（原 SEEK_FOOD 誤置已移除）。理由:①化解 reviewer 貿易雙偏置 watch（貿易只 intent_fit 驅、phase 零觸,無疊加）②SEEK_FOOD 缺糧求生該直接取食（覓食/買糧）非 profit-trade③非商人餓隊不被 phase 推去貿易 collapse 個性分歧（TC7 保:商人仍走 intent_fit 貿易、隱士留駐守、霸主建設=3 distinct）。**GROW 的「紮營」watch**:紮營近定居個性表達,measurer 驗 GROW 隊有無 collapse 定居 vs 非定居分歧;若破同原則移除。
 （★option 實名對齊 `DecisionOptions.SURVIVAL_OPTION_SET`（options.gd:49）——**「投靠」「整併」已被 S-A consolidation 統一成單一「併入」(join+整併合一)**,勿用舊名（rank_scored 靜默對不上）。求糧/成長 option 名亦 grep 確認實名。）
 
 > **★watch-item（reviewer R² 標，measurer 觀察）**：`intent_fit`「致富」貿易偏置（food_days 充裕觸發）vs `plan_phase_drive`「求糧」貿易偏置（food_flow_avg 赤字觸發）——兩條件通常反相關但非嚴格互斥,窄邊緣 case 可能對「貿易」option 雙重疊加。MAG 0.4 已刻意壓低,風險可控。measurer S2 驗收順帶觀察「貿易」option util 量級有無異常疊加。
