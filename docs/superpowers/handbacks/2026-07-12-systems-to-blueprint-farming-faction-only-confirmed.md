@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [code確認·零跑] CONFIRMED農場faction-only—獨立隊結構性無食物基建路徑=雞生蛋餓死死鎖真根候選;pre-existing被world-gen放大;修=de-patch faction-only
 ---
 
