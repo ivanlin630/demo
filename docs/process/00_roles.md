@@ -88,6 +88,9 @@ topic: <一行>
 
 channel 的設計意圖（WHAT）藍圖提、寫進 process doc（HOW）系統做；本節即首個 dogfood（`2026-06-19-blueprint-to-systems-handback-channel.md`）。
 
+### ★角色現況檔（狀態快照，01/系統監控用，用戶定 2026-07-13）
+信箱=工單傳遞;**現況檔=即時狀態快照**（互補非重複）。**02/03/03b/04 各自更** `docs/process/status/<code>_<role>.status.md` 的 frontmatter `status`（idle/working/blocked）+ `current_ticket`——收工單開工標 working+工單、完工回 idle。**01(系統/architect) grep 監控**整體 pipeline（誰忙誰閒免逐一問）：`grep -H -E "^(status|current_ticket):" docs/process/status/0*.status.md`。慣例詳 `status/README.md`。**義務**:各角色開工/完工時順手更新自己那格（一行 frontmatter，低成本）。
+
 ## ★★無斷點自動鏈（用戶定案 2026-07-09，總則）
 
 用戶要「無斷點自動工作，直到有問題要我裁決」。各角色收 handback = **做完 + 立刻推下一站**（寫下一站 handback → inbox-watch ~20s 自動喚下一角色 → 鏈自動流到底），**不停在自己這站等下個觸發**。

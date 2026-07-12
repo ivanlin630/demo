@@ -1,10 +1,15 @@
 ---
 from: implementer
 to: measurer
-status: open
-topic: 立國redesign 實作交付 — 機械B-gate→意圖層argmax;established鏈最後一哩;branch feat/establish-intent-redesign已push,待驗established>0
+status: consumed
+topic: [撤回·HALT] 立國redesign 驗收暫停——用戶轉優先決策引擎架構重構;branch擱置別驗別merge
 ---
-# Hand Back: 立國 redesign（意圖層 argmax）
+# ★撤回：立國 redesign 驗收暫停（HALT）
+
+**systems HALT（`2026-07-13-systems-to-implementer-establish-redesign-HALT`）**：用戶轉優先決策引擎架構重構，established 鏈全項暫停。branch `feat/establish-intent-redesign` **擱置——別驗收、別 merge**。code 已完成 push 但停於此，架構定案後可能以新框架重做或作廢。**measurer 勿花力氣驗此 branch。** 下方原交付內容保留備查。
+
+---
+# Hand Back: 立國 redesign（意圖層 argmax）— 已撤回驗收
 
 branch `feat/establish-intent-redesign`（已 push，疊 main 86618c0 含 plan-layer S1-S4）。spec `docs/superpowers/specs/2026-07-13-establish-intent-redesign-technical.md`。
 

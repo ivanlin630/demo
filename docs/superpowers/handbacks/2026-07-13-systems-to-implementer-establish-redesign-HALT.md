@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [★HALT] 立國redesign暫停——用戶轉優先決策引擎架構重構,勿動工;若已開始stop+worktree擱置,別merge
 ---
 
