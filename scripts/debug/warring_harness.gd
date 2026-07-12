@@ -62,6 +62,8 @@ const PROBE_KEYS: Array = [
 	# 死因分解（Task1：餓/戰/叛離縮編/滅團分類）
 	"death.starve_minor", "death.starve_anon", "death.combat_pop", "death.combat_named", "death.defect_leave",
 	"extinct.starve", "extinct.combat", "extinct.other",
+	# 計畫層 S1：rung 事件驅動 churn（升/降次數；vs baseline 瞬時版比 rung 變更次數=抖動度）
+	"g2.ambition_promote", "g2.ambition_demote",
 	# 反應計數（Task2：9 反應 apply winner）
 	"reaction.P1_comply", "reaction.P2_produce", "reaction.P4_expand", "reaction.N1_flee",
 	"reaction.N2_riot", "reaction.N3_defect", "reaction.N4_shirk", "reaction.N5_extort", "reaction.breed",
@@ -123,6 +125,7 @@ static func run(world_seed: int, total_ticks: int,
 		"attrition_pct": 0.0 if start_pop == 0 else 100.0 * (start_pop - end_pop) / float(start_pop),
 		"curve": curve,
 		"intent": _intent_histogram(state),
+		"rung_dist": _rung_histogram(state),
 		"final": {
 			"teams": state.teams.size(), "factions": state.factions.size(),
 			"established": _established_count(state), "pop": end_pop,
@@ -215,6 +218,16 @@ static func _established_count(state: WorldState) -> int:
 	for fid in state.factions:
 		if state.factions[fid].is_established: n += 1
 	return n
+
+# 計畫層 S1：per-rung 分布快照（rung 0-4 各幾隊）——驗階分布不再全卡瞬時抖動。
+static func _rung_histogram(state: WorldState) -> Dictionary:
+	var h: Dictionary = {"r0": 0, "r1": 0, "r2": 0, "r3": 0, "r4": 0}
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id != -1: continue   # 子隊無獨立 rung 計畫
+		var r: int = clampi(t.ambition_rung, 0, 4)
+		h["r%d" % r] += 1
+	return h
 
 # 統一 intent 分布 = faction commander(f.intent) + 獨立隊(solo_intent)。跨實體型一套菜單。
 static func _intent_histogram(state: WorldState) -> Dictionary:

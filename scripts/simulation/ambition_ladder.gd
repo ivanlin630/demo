@@ -19,6 +19,7 @@ const ACCUMULATE_FLOW_MIN: float = 0.5   # TEST VALUE — 升積累 rung 所需�
 const EXPAND_MIN_POP: int = 8
 const STATE_MIN_FACTION_TEAMS: int = 2
 const HEGEMON_MIN_FACTION_TEAMS: int = 4
+const RUNG_STALL_K: int = 3   # TEST VALUE — 連續失守 milestone 幾 cadence 才降 rung（遲滯）
 
 # R2 單一人格傾向公式（intent/archetype 共源）：_intent_scores 人格層原式搬家（數字不動）。
 # viability 疊加（established/weak_enemy/can_levy）留在 FactionAISystem._intent_scores。TEST VALUE 權重。
@@ -81,21 +82,51 @@ static func target_rung(state: WorldState, team: TeamData, leader: PersonData) -
 					rung = RUNG_HEGEMON
 	return mini(rung, team.ambition_cap)
 
+# milestone_met(N) = 「夠格在 rung N」的階梯條件（累進；複用 target_rung gate 語意）
+static func milestone_met(state: WorldState, team: TeamData, rung_val: int) -> bool:
+	var pop: int = team.population
+	match rung_val:
+		RUNG_SURVIVE:    return true   # 地板恆夠格
+		RUNG_ACCUMULATE: return team.food_flow_avg >= ACCUMULATE_FLOW_MIN
+		RUNG_EXPAND:     return team.food_flow_avg >= ACCUMULATE_FLOW_MIN and pop >= EXPAND_MIN_POP
+		RUNG_STATE, RUNG_HEGEMON:
+			if team.food_flow_avg < ACCUMULATE_FLOW_MIN or pop < EXPAND_MIN_POP: return false
+			if team.faction_id == -1 or not state.factions.has(team.faction_id): return false
+			var ft: int = state.factions[team.faction_id].member_team_ids.size()
+			return ft >= (STATE_MIN_FACTION_TEAMS if rung_val == RUNG_STATE else HEGEMON_MIN_FACTION_TEAMS)
+	return false
+
+# 事件驅動 rung：升=milestone_met(next)、降=連續 K 次失守 milestone_met(current)（遲滯）。無 trend。
 static func update(state: WorldState, team: TeamData) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)
 	team.ambition_archetype = derive_archetype(leader)
 	team.ambition_cap = derive_cap(leader)
-	var target: int = target_rung(state, team, leader)
 	var old: int = team.ambition_rung
-	if target < old:
-		team.ambition_rung = old - 1        # 安全崩：一步退（可連續退到生存）
-		Probe.bump("g2.ambition_demote")
-	elif target > old:
+	var next_rung: int = old + 1
+	# 升：milestone_met(next) 達成（capped by ambition_cap）
+	if next_rung <= team.ambition_cap and milestone_met(state, team, next_rung):
 		var amb: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
 		var prud: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
 		var reckless: bool = amb > 0.65 and prud < 0.4
-		team.ambition_rung = target if reckless else old + 1   # 躁進直跳 / 否則一步
+		if reckless:   # reckless 直跳到最高連續達成的 rung
+			var t: int = next_rung
+			while t + 1 <= team.ambition_cap and milestone_met(state, team, t + 1):
+				t += 1
+			team.ambition_rung = t
+		else:
+			team.ambition_rung = next_rung
+		team.rung_stall_count = 0
 		Probe.bump("g2.ambition_promote")
+	# 降：連續 K 次失守當前 rung milestone（遲滯，瞬時跌不降；含 plateau-below-threshold）
+	elif old > RUNG_SURVIVE:
+		if not milestone_met(state, team, old):
+			team.rung_stall_count += 1
+			if team.rung_stall_count >= RUNG_STALL_K:
+				team.ambition_rung = old - 1
+				team.rung_stall_count = 0
+				Probe.bump("g2.ambition_demote")
+		else:
+			team.rung_stall_count = 0   # 仍夠格 → 撐住
 	team.ambition_eval_next_tick = state.world.current_tick + LADDER_EVAL_CADENCE
 	if team.ambition_rung != old:
 		print("[Ambition] Team%d rung %d→%d (%s cap=%d)" % [
