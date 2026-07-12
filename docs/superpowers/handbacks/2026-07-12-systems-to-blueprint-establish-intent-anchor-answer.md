@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [兩題答案·零跑] Q1:B門established=純機械gate(4條件AND→emit立國goal→:1378機械消費→is_established,無argmax);Q2:無Anchor系統,立國沒掛;∴redesign=加意圖層(立國傾向argmax競爭,mirror A門建國),非只調門檻
 ---
 
