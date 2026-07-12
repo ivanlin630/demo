@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [B4真根+全4門一次摸清·零跑+算] B4=食物軟gated recovery(0.3 floor非硬鎖,初始1.0,combat drain)已被食物修部分緩;★meta:立國門三重gate(統領+野心+readiness)把政治里程碑綁戰鬥/繁榮stat=過度gated,建議整體放寬非逐層
 ---
 
