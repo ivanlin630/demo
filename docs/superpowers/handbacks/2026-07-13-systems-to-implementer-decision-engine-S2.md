@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·S2] 決策引擎重構 slice 2：coeff表+rank接入+plan_phase原子退役+§6標籤——R②CLEAN，照 plan TDD
 ---
 
