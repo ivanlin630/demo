@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [反冗餘·零跑] 苟活地板已存在別重建—survival-priority forage(PRIO_SURVIVAL不被搶)+1.5天latch;修=tune現有floor(太低/hand-to-mouth零韌性)非新機制;measurer先確認死隊有無在forage
 ---
 
