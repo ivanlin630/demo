@@ -3,7 +3,7 @@ class_name HuntSystem
 # 小獵物抽象狩獵：求生技能 roll → 成功得食物 + 枯竭 1 隻。無場景（危險野獸戰鬥屬 Plan 2b）。
 const FOOD_PER_GAME: float = 12.0          # TEST VALUE — 每隻小獵物食物
 const ACTIVE_BASE_CHANCE: float = 0.4      # TEST VALUE — 主動狩獵基礎命中
-const PASSIVE_BASE_CHANCE: float = 0.08    # TEST VALUE — 覓食被動小獵命中（低）
+const PASSIVE_BASE_CHANCE: float = 0.30    # TEST VALUE — 覓食被動小獵命中（0.08→0.30 降空手率；仍<ACTIVE 0.4）
 
 # active=true 玩家/NPC 主動狩獵；active=false 覓食 tick 被動。回傳 {success, food, msg}
 func hunt_small_game(state: WorldState, team: TeamData, tile: HexTileData, active: bool) -> Dictionary:

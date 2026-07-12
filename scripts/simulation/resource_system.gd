@@ -4,7 +4,8 @@ const FOOD_PER_PERSON_PER_DAY: float = 0.8   # TEST VALUE — R1 張力校準：
 # （原 2.4 配 24× 供給 bug；R1 修 cadence 後穩態食物 income≈regen[plains 8/forest 3 per day]，
 #  0.8 使 plains op1 養小鎮微盈餘[繁榮]、forest op1 微赤[苟活須交易]、赤字溫和不成餓死潮）
 # 讀B：覓食 = 苟活地板。覓食來源食物淨貢獻上限 = 幾日餬口（超額不 bank、不耗 wild_game）。
-const FORAGE_FLOOR_DAYS: float = 1.5         # TEST VALUE — 覓食淨貢獻上限=幾日餬口
+const FORAGE_FLOOR_DAYS: float = 5.0         # TEST VALUE — 覓食淨貢獻上限=幾日餬口（1.5→5 苟活韌性；<建國7天門）
+const WILD_GAME_REGEN_PER_DAY: float = 0.15  # TEST VALUE — 獵物慢繁殖回補（月級，上限夾 resource_cap）
 const FOOD_PER_MOUNT_PER_DAY: float = 0.5    # TEST VALUE — 草料 0.5食物/馬/天
 const PROVISION_DAYS: float = 10.0           # TEST VALUE — 旅途乾糧天數（自家 outpost 補 carried buffer）
 # R2 flow-not-stock：日均淨食物流 EMA 平滑窗（天）。cadence 無關（α=day_fraction/window）。
@@ -94,6 +95,14 @@ func regenerate_tiles(state: WorldState, cadence_ticks: int = WorldState.TICKS_P
 			float(tile.resources.get("material", 0)) + mat_regen,
 			float(tile.resource_cap.get("material", 0))
 		), "regen_material")
+		# wild_game 慢繁殖回補（獵物採乾後再生，上限夾 resource_cap 不破稀有度）
+		var wg_cap: float = float(tile.resource_cap.get("wild_game", 0))
+		if wg_cap > 0.0:
+			var wg_cur: float = float(tile.resources.get("wild_game", 0))
+			if wg_cur < wg_cap:
+				var wg_regen: float = WILD_GAME_REGEN_PER_DAY * day_fraction
+				TileBank.pool_set(tile, "wild_game",
+					minf(wg_cur + wg_regen, wg_cap), "regen_wildgame")
 		# ore / gem 不再生
 
 func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int) -> void:
