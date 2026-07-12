@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [code審·零跑] 完整建國→established兩階段條件表—食物只是階段A一門;真根候選=path_ok可達獨立盟/7日盈餘/readiness≥0.7;probe indep.gate_fail_*已instrument直接指門
 ---
 
