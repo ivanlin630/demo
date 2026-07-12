@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [新慣例] 角色現況檔—你自更docs/process/status/03_implementer.status.md(idle/working/blocked+工單);01監控
 ---
 

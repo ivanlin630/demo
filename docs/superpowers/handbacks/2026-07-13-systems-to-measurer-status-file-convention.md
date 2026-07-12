@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [新慣例] 角色現況檔—你自更docs/process/status/03b_measurer.status.md(idle/working+工單,長跑標detach);01監控
 ---
 
