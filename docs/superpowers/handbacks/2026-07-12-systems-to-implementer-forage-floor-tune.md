@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [工單] 苟活地板tune—FORAGE_FLOOR_DAYS 1.5→5/PASSIVE 0.08→0.30/wild_game regen;spec+R²CLEAN;疊新worktree feat/forage-floor-tune
 ---
 
