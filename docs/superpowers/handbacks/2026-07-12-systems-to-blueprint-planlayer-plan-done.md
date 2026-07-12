@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [plan done] 中長期計畫層4-slice實作計畫排好→route R²→CLEAN即序列dispatch S1;establishment-redesign已棄不做
 ---
 

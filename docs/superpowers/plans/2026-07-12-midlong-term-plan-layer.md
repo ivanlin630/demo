@@ -295,10 +295,12 @@ static func _phase_option_bias(phase: String) -> Dictionary:
     match phase:
         PHASE_SEEK_FOOD: return {"覓食": PLAN_PHASE_DRIVE_MAG, "買糧": PLAN_PHASE_DRIVE_MAG, "貿易": PLAN_PHASE_DRIVE_MAG}
         PHASE_GROW:      return {"返家補給": PLAN_PHASE_DRIVE_MAG, "紮營": PLAN_PHASE_DRIVE_MAG}
-        PHASE_GATHER:    return {"外交": PLAN_PHASE_DRIVE_MAG, "整併": PLAN_PHASE_DRIVE_MAG, "投靠": PLAN_PHASE_DRIVE_MAG}
+        PHASE_GATHER:    return {"外交": PLAN_PHASE_DRIVE_MAG, "併入": PLAN_PHASE_DRIVE_MAG}
     return {}
 ```
-（option 名稱對齊 `DecisionOptions.SURVIVAL_OPTION_SET` + faction 意圖 option 詞彙;grep 確認實名。）
+（★option 實名對齊 `DecisionOptions.SURVIVAL_OPTION_SET`（options.gd:49）——**「投靠」「整併」已被 S-A consolidation 統一成單一「併入」(join+整併合一)**,勿用舊名（rank_scored 靜默對不上）。求糧/成長 option 名亦 grep 確認實名。）
+
+> **★watch-item（reviewer R² 標，measurer 觀察）**：`intent_fit`「致富」貿易偏置（food_days 充裕觸發）vs `plan_phase_drive`「求糧」貿易偏置（food_flow_avg 赤字觸發）——兩條件通常反相關但非嚴格互斥,窄邊緣 case 可能對「貿易」option 雙重疊加。MAG 0.4 已刻意壓低,風險可控。measurer S2 驗收順帶觀察「貿易」option util 量級有無異常疊加。
 
 - [ ] **Step 4: 加 `plan_phase_drive` term 到 rank_scored**
 

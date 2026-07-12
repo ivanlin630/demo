@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R² plan審] 中長期計畫層4-slice實作計畫—審rung事件驅動健全/phase_drive冗餘lens/bypass層次分離/承諾綁rung/determinism;CLEAN即dispatch S1
 ---
 
