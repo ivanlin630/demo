@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [常數來源·零跑] PASSIVE_BASE_CHANCE=0.08 + FORAGE_FLOOR_DAYS=1.5 皆feature引入commit的TEST VALUE,從未balance調校—抬它們非違背刻意平衡,green light
 ---
 
