@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [完整phase偏置表·零跑] 4 phase→option:求糧{覓食,買糧}/成長{返家,紮營}/聚勢{外交,併入}/立國{}空;★立國phase零偏置=靠機械B-gate(接paused立國redesign);多pop成長路phase未涵蓋(征服吸收/俘虜無phase偏置)
 ---
 

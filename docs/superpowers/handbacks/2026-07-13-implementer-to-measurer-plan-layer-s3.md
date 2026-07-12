@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 topic: 計畫層 S3 實作交付 — survival-bypass劇變立即重算rung;branch feat/plan-layer-s3已push,待驗收
 ---
 # Hand Back: 計畫層 S3（survival-bypass）
