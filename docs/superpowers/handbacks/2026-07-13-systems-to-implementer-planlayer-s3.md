@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [工單 S3] 計畫層 survival-bypass—劇變立即重算rung(目標階層≠行動層survival override);plan Task3;疊新worktree feat/plan-layer-s3
 ---
 
