@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [B2真根·零跑] 統領技能成長路徑存在但被繁榮閘鎖死—P4_expand(唯一成長觸發)base 0.55僅food>100+stress<0.3+統領tag,否則0.05;絕境隊永觸不到=第三層雞生蛋;修=de-patch繁榮閘
 ---
 
