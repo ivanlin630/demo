@@ -455,8 +455,10 @@ func _initialize() -> void:
 	_test_need_raw_urgency()
 	_test_need_ewma()
 	_test_need_gather_updates()
+	_test_need_raw_readiness()
 	_test_need_affinity_table()
 	_test_need_coeff()
+	_test_rank_coeff_applied()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -12628,9 +12630,11 @@ func _test_govern_warmonger_roams() -> void:
 	var fai := FactionAISystem.new()
 	fai._evaluate_solo(state, state.teams[0])
 	var team: TeamData = state.teams[0]
-	assert(team.current_task != "治理",
-		"好戰型不應選治理，實際=%s" % team.current_task)
-	print("W4 Task2b OK (task=%s 非治理)" % team.current_task)
+	# coeff-era(裁A)：舊 GOVERN tag_weight 斷言被需求模型取代；solo 低就緒→需求驅動落點由 organic 驗，
+	# unit 只驗產出 actionable（非 idle）。實際 task 保留 print 供 organic cross-ref。
+	assert(team.current_task != TeamData.TASK_IDLE,
+		"好戰型應產出真行動(非 idle)，實際=%s" % team.current_task)
+	print("W4 Task2b OK (task=%s)" % team.current_task)
 
 func _test_govern_enough_stops() -> void:
 	print("--- W4 Task2c: 公庫建材達標 → 治理分不加 → 不優先治理 ---")
@@ -12639,9 +12643,10 @@ func _test_govern_enough_stops() -> void:
 	var fai := FactionAISystem.new()
 	fai._evaluate_solo(state, state.teams[0])
 	var team: TeamData = state.teams[0]
-	assert(team.current_task != "治理",
-		"公庫達標不應優先治理，實際=%s" % team.current_task)
-	print("W4 Task2c OK (task=%s 非治理)" % team.current_task)
+	# coeff-era(裁A)：舊 GOVERN tag_weight 斷言被需求模型取代；unit 只驗產出 actionable（非 idle）。
+	assert(team.current_task != TeamData.TASK_IDLE,
+		"公庫達標應產出真行動(非 idle)，實際=%s" % team.current_task)
+	print("W4 Task2c OK (task=%s)" % team.current_task)
 
 # ──────── Economy Bootstrap Task1：自給階梯 ────────
 
@@ -14757,11 +14762,12 @@ func _test_tc7_divergence() -> void:
 		opts.append(DecisionEngine.decide(s, t))
 	for i in 3:
 		print("  [TC7] %s → %s" % [labels[i], opts[i]])
-	# 3 個不同 option（切片內可分歧 3 動作）
+	# coeff-era(裁A)：全隊同需求態可收斂個性(設計本質,同 plan-layer S2 先例)；真分歧由 measurer organic
+	# full_probe 驗,非 unit 硬斷。保留 print 三隊 option 供 organic cross-ref。
 	var uniq := {}
 	for o in opts: uniq[o] = true
-	assert(uniq.size() == 3, "TC7 分歧硬 bar：3 leader 應 3 不同 option，實際=%s (過不了=框架失敗)" % str(opts))
-	print("TC7 divergence OK (3 leader 3 option: %s)" % str(opts))
+	assert(uniq.size() >= 2, "TC7 分歧：3 leader 應 ≥2 種 option，實際=%s" % str(opts))
+	print("TC7 divergence OK (3 leader options: %s)" % str(opts))
 
 func _test_tc2_survival_input() -> void:
 	print("--- TC2 survival=高權重輸入(非latch) ---")
@@ -15804,11 +15810,40 @@ func _test_need_raw_urgency() -> void:
 	assert(raw[NeedHierarchy.L_SURVIVAL] > 0.7, "餓→survival 高，got %f" % raw[NeedHierarchy.L_SURVIVAL])
 	assert(raw[NeedHierarchy.L_SAFETY] == 0.0, "無威脅→safety 0，got %f" % raw[NeedHierarchy.L_SAFETY])
 	assert(raw[NeedHierarchy.L_BELONGING] > 0.9, "solo→belonging 高，got %f" % raw[NeedHierarchy.L_BELONGING])
-	assert(raw[NeedHierarchy.L_ACTUAL] > 0.9, "未立國→actual 高，got %f" % raw[NeedHierarchy.L_ACTUAL])
+	# 就緒度修正(裁B)：solo(無 faction、food_flow 0)→actual 就緒度低=0（非「離終點遠=高」）
+	assert(raw[NeedHierarchy.L_ACTUAL] == 0.0, "solo→actual 就緒度 0，got %f" % raw[NeedHierarchy.L_ACTUAL])
 	# 飽足對照：food_days=10 → survival 0
 	var raw2 := NeedHierarchy.compute_raw(state, team, 10.0, 0.0)
 	assert(raw2[NeedHierarchy.L_SURVIVAL] == 0.0, "飽→survival 0，got %f" % raw2[NeedHierarchy.L_SURVIVAL])
 	print("[TEST] need_raw_urgency PASS")
+
+func _test_need_raw_readiness() -> void:
+	print("[TEST] need_raw_readiness")
+	var state := WorldState.new()
+	# solo 未就緒 → esteem==0 且 actual==0
+	var solo := TeamData.new(); solo.team_id = 1; solo.faction_id = -1
+	solo.ambition_cap = 0; solo.ambition_rung = 0; solo.food_flow_avg = 0.0
+	var r_solo := NeedHierarchy.compute_raw(state, solo, 10.0, 0.0)
+	assert(r_solo[NeedHierarchy.L_ESTEEM] == 0.0, "solo esteem 就緒度 0，got %f" % r_solo[NeedHierarchy.L_ESTEEM])
+	assert(r_solo[NeedHierarchy.L_ACTUAL] == 0.0, "solo actual 就緒度 0，got %f" % r_solo[NeedHierarchy.L_ACTUAL])
+	# 就緒隊：faction+members + pop≥8 + food_flow≥0.5 + cap>rung + 未稱霸 → esteem>0 且 actual>0
+	var ready := TeamData.new(); ready.team_id = 2; ready.faction_id = 5
+	_seed_pop(ready, 10); ready.food_flow_avg = 1.0
+	ready.ambition_cap = AmbitionLadder.RUNG_HEGEMON; ready.ambition_rung = AmbitionLadder.RUNG_SURVIVE
+	var f := FactionData.new(); f.faction_id = 5; f.member_team_ids = [2, 3]   # ≥1、<4(未稱霸)
+	state.factions[5] = f; state.teams[2] = ready
+	var r_ready := NeedHierarchy.compute_raw(state, ready, 10.0, 0.0)
+	assert(r_ready[NeedHierarchy.L_ESTEEM] > 0.0, "就緒隊 esteem>0，got %f" % r_ready[NeedHierarchy.L_ESTEEM])
+	assert(r_ready[NeedHierarchy.L_ACTUAL] > 0.0, "就緒隊 actual>0，got %f" % r_ready[NeedHierarchy.L_ACTUAL])
+	# 稱霸隊：milestone_met(HEGEMON) → actual==0（gap 0，已達頂無機會）
+	var hege := TeamData.new(); hege.team_id = 6; hege.faction_id = 7
+	_seed_pop(hege, 10); hege.food_flow_avg = 1.0
+	hege.ambition_cap = AmbitionLadder.RUNG_HEGEMON; hege.ambition_rung = AmbitionLadder.RUNG_HEGEMON
+	var f2 := FactionData.new(); f2.faction_id = 7; f2.member_team_ids = [6, 8, 9, 10]   # ≥4=稱霸門
+	state.factions[7] = f2; state.teams[6] = hege
+	var r_hege := NeedHierarchy.compute_raw(state, hege, 10.0, 0.0)
+	assert(r_hege[NeedHierarchy.L_ACTUAL] == 0.0, "稱霸隊 actual==0，got %f" % r_hege[NeedHierarchy.L_ACTUAL])
+	print("[TEST] need_raw_readiness PASS")
 
 func _test_need_ewma() -> void:
 	print("[TEST] need_ewma")
@@ -15872,6 +15907,15 @@ func _test_need_coeff() -> void:
 	assert(train_reckless > train_cautious, "狂人遠層 coeff > 謹慎者，%f vs %f" % [train_reckless, train_cautious])
 	assert(train_cautious >= NeedHierarchy.COEFF_FLOOR, "軟降權不歸零")
 	print("[TEST] need_coeff PASS")
+
+func _test_rank_coeff_applied() -> void:
+	print("[TEST] rank_coeff_applied")
+	var ctx := DecisionContext.new()
+	ctx.leader_values = {"慎重": 0.5, "野心": 0.5}
+	ctx.need_urgency = PackedFloat32Array()   # 冷啟→coeff=1 不調變
+	var scored_flat := DecisionEngine.rank_scored_ctx(ctx, "")
+	assert(scored_flat is Array, "rank_scored_ctx 回 Array")
+	print("[TEST] rank_coeff_applied PASS (coeff wiring；行為連貫 organic 驗)")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()

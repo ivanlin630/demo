@@ -31,16 +31,22 @@ static func compute_raw(state: WorldState, team: TeamData, food_days: float, thr
 	else:
 		raw[L_BELONGING] = clampf(float(AmbitionLadder.STATE_MIN_FACTION_TEAMS - members) \
 			/ float(AmbitionLadder.STATE_MIN_FACTION_TEAMS), 0.0, 1.0)
-	# 尊重：野心 cap 與當前 rung 的差距（想爬多高 vs 已在哪）
-	var cap: int = maxi(team.ambition_cap, 1)
-	raw[L_ESTEEM] = clampf(float(team.ambition_cap - team.ambition_rung) / float(cap), 0.0, 1.0)
-	# 自我實現：距立國/稱霸。未達 STATE→1；達 STATE 未達 HEGEMON→0.5；稱霸→0
-	if not AmbitionLadder.milestone_met(state, team, AmbitionLadder.RUNG_STATE):
-		raw[L_ACTUAL] = 1.0
-	elif not AmbitionLadder.milestone_met(state, team, AmbitionLadder.RUNG_HEGEMON):
-		raw[L_ACTUAL] = 0.5
-	else:
-		raw[L_ACTUAL] = 0.0
+	# 尊重（地位/擴張）就緒度 = 基礎穩(食/安有餘裕在意地位) × 機會(野心階梯還有空間爬)。
+	# 讀世界訊號(food_days/threat/cap/rung)，禁讀他層 urgency（守 §2 獨立）。
+	var food_ready: float = clampf(food_days / SURVIVAL_SATED_DAYS, 0.0, 1.0)
+	var safe_ready: float = 1.0 - clampf(threat, 0.0, 1.0)
+	var cap_e: int = maxi(team.ambition_cap, 1)
+	var ambition_gap: float = clampf(float(team.ambition_cap - team.ambition_rung) / float(cap_e), 0.0, 1.0)
+	raw[L_ESTEEM] = food_ready * safe_ready * ambition_gap
+	# 自我實現（立國/稱霸）就緒度 = 接近立國條件(食流盈餘×夠人×有社會結構) × 機會(未達稱霸頂)。solo→0。
+	var ff_ready: float = clampf(team.food_flow_avg / AmbitionLadder.ACCUMULATE_FLOW_MIN, 0.0, 1.0)
+	var pop_ready: float = clampf(float(team.population) / float(AmbitionLadder.EXPAND_MIN_POP), 0.0, 1.0)
+	var faction_ready: float = 0.0
+	if team.faction_id != -1 and state.factions.has(team.faction_id) \
+			and state.factions[team.faction_id].member_team_ids.size() >= 1:
+		faction_ready = 1.0
+	var gap_a: float = 0.0 if AmbitionLadder.milestone_met(state, team, AmbitionLadder.RUNG_HEGEMON) else 1.0
+	raw[L_ACTUAL] = ff_ready * pop_ready * faction_ready * gap_a
 	return raw
 
 # §3 一致性係數 affinity 表：option → 服務哪些需求層(權重，行和≈1)。純靜態 lookup，零動態分支。

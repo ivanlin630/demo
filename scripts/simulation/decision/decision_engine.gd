@@ -23,6 +23,9 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "") -
 		var u: float = 0.0
 		for tw in DecisionOptions.terms_of(opt):
 			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
+		# 需求金字塔重構：五層急迫度一致性係數(§3)統一調變全 23 option。純乘一係數，不改 term 內部。
+		# ★乘在 COMMITMENT_BONUS 之前（承諾慣性是決策層加成，不受需求調變）。
+		u *= NeedHierarchy.consistency_coeff(opt, ctx.need_urgency, ctx.leader_values)
 		if opt == current_option:
 			u += COMMITMENT_BONUS
 		scored.append({"u": u, "i": idx, "opt": opt})
