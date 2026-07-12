@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: measurer
-status: open
+status: consumed
 topic: [新主線·經濟長程診斷] 為何3mo OK/12mo餓死?—儀表化食物供需隨時間,定位供給何時何處崩(measure-first,別猜)
 ---
 

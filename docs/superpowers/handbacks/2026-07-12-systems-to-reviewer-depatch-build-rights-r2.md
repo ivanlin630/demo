@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R² spec審] de-patch建造權遍歷結構—faction迴圈→outpost-owner-team;審determinism穩定序/perf不放大/§2移除跨隊評估無漏/範圍鎖只自outpost
 ---
 
