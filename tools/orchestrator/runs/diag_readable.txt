@@ -1,0 +1,30 @@
+=== seed 1337 ===
+貿易: appl_n=1587 avg_coeff=0.612 coeff_pressed=644 avg_mainurg=0.586 avg_ownutil=0.027 avg_winutil=1.496
+備戰: appl_n=9233 avg_coeff=0.492 coeff_pressed=6247 avg_mainurg=0.105 avg_ownutil=0.240 avg_winutil=2.836
+求和: appl_n=9233 avg_coeff=0.459 coeff_pressed=6255 avg_mainurg=0.105 avg_ownutil=0.119 avg_winutil=2.836
+駐守: appl_n=7722 avg_coeff=0.586 coeff_pressed=2493 avg_mainurg=0.465 avg_ownutil=0.162 avg_winutil=2.437
+乞食: appl_n=1 avg_coeff=1.000 coeff_pressed=0 avg_mainurg=1.000 avg_ownutil=1.068 avg_winutil=11.367
+併入: appl_n=743 avg_coeff=0.526 coeff_pressed=185 avg_mainurg=0.003 avg_ownutil=1.522 avg_winutil=8.955
+吸納: appl_n=2293 avg_coeff=0.600 coeff_pressed=416 avg_mainurg=0.002 avg_ownutil=0.066 avg_winutil=0.495
+訓練: appl_n=5 avg_coeff=0.799 coeff_pressed=0 avg_mainurg=0.727 avg_ownutil=0.000 avg_winutil=1.023
+買糧: appl_n=2643 avg_coeff=0.898 coeff_pressed=0 avg_mainurg=0.922 avg_ownutil=1.059 avg_winutil=9.950
+=== seed 42 ===
+貿易: appl_n=3233 avg_coeff=0.617 coeff_pressed=7 avg_mainurg=0.223 avg_ownutil=0.031 avg_winutil=5.072
+備戰: appl_n=10625 avg_coeff=0.581 coeff_pressed=3002 avg_mainurg=0.241 avg_ownutil=0.286 avg_winutil=3.664
+求和: appl_n=10625 avg_coeff=0.540 coeff_pressed=5139 avg_mainurg=0.241 avg_ownutil=0.116 avg_winutil=3.664
+駐守: appl_n=3143 avg_coeff=0.550 coeff_pressed=1 avg_mainurg=0.032 avg_ownutil=0.163 avg_winutil=0.697
+乞食: appl_n=34 avg_coeff=0.865 coeff_pressed=0 avg_mainurg=0.895 avg_ownutil=0.633 avg_winutil=9.965
+併入: appl_n=483 avg_coeff=0.661 coeff_pressed=1 avg_mainurg=0.001 avg_ownutil=1.264 avg_winutil=7.867
+吸納: appl_n=2665 avg_coeff=0.576 coeff_pressed=602 avg_mainurg=0.001 avg_ownutil=0.079 avg_winutil=3.197
+訓練: appl_n=596 avg_coeff=0.825 coeff_pressed=1 avg_mainurg=0.994 avg_ownutil=0.000 avg_winutil=0.526
+買糧: appl_n=4757 avg_coeff=0.901 coeff_pressed=2 avg_mainurg=0.919 avg_ownutil=1.008 avg_winutil=9.928
+=== seed 7 ===
+貿易: appl_n=5774 avg_coeff=0.605 coeff_pressed=1782 avg_mainurg=0.340 avg_ownutil=0.030 avg_winutil=3.905
+備戰: appl_n=14184 avg_coeff=0.623 coeff_pressed=5723 avg_mainurg=0.305 avg_ownutil=0.313 avg_winutil=3.851
+求和: appl_n=14184 avg_coeff=0.594 coeff_pressed=5830 avg_mainurg=0.305 avg_ownutil=0.128 avg_winutil=3.851
+駐守: appl_n=7499 avg_coeff=0.606 coeff_pressed=1474 avg_mainurg=0.369 avg_ownutil=0.197 avg_winutil=2.060
+乞食: appl_n=245 avg_coeff=0.855 coeff_pressed=0 avg_mainurg=0.877 avg_ownutil=0.637 avg_winutil=8.976
+併入: appl_n=13 avg_coeff=0.594 coeff_pressed=2 avg_mainurg=0.146 avg_ownutil=1.485 avg_winutil=8.938
+吸納: appl_n=2783 avg_coeff=0.609 coeff_pressed=530 avg_mainurg=0.010 avg_ownutil=0.132 avg_winutil=1.571
+訓練: appl_n=3655 avg_coeff=0.737 coeff_pressed=0 avg_mainurg=0.512 avg_ownutil=0.078 avg_winutil=3.344
+買糧: appl_n=5118 avg_coeff=0.903 coeff_pressed=1 avg_mainurg=0.927 avg_ownutil=0.915 avg_winutil=9.922

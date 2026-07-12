@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [診斷probe·裁A] per-option applicable-but-not-chosen 三類分流探針(coeff/主層urg/util gap)→交measurer分類
 ---
 
