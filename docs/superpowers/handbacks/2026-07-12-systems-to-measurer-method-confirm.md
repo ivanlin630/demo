@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [量測方式確認] 用戶提及改先跑3mo提報告—回報現行量測細節:窗長/config/A/B檔設定/probe funnel讀法,好對齊spec驗收
 ---
 
