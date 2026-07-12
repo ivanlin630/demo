@@ -76,6 +76,9 @@ var food_flow_last: float = -1.0   # 上次取樣 effective_food（sentinel -1 =
 var rung_stall_count: int = 0   # 計畫層：連續失守當前 rung milestone 次數（達 K 降 rung）
 var plan_phase: String = ""   # 計畫層 S2：中長期 phase（求糧/成長/聚勢/立國），gather 導出持久（GUI/hysteresis）
 var rung_pop_last: int = 0   # 計畫層 S3：上期 pop（算單期驟降，survival-bypass 劇變偵測）
+# 需求金字塔（決策引擎重構）：五層急迫度 EWMA 持久狀態（生存/安全/歸屬/尊重/自我實現）。
+# 感測器非決策者，gather 每 cadence 更新；rank_scored 讀此算一致性係數。size 5 或 0(冷啟)。
+var need_urgency: PackedFloat32Array = PackedFloat32Array()
 # 統一戰略意圖 struct {type,why,mode}（F-D4：廢一槽兩義）。戰略層(獨立建國/致富/征服/守成)寫；
 # 空 {} = 無戰略意圖。SoloAI 日常 task 承諾改用 solo_task_last（下方），不再共用此槽。
 var solo_intent: Dictionary = {}

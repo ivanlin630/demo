@@ -95,6 +95,8 @@ const PHASE_ESTABLISH := "立國"   # 立國傾向
 const PLAN_PHASE_DRIVE_MAG: float = 0.4   # TEST VALUE — phase 偏置 magnitude（低，讓位 survival/緊急）
 var plan_phase: String = ""
 var plan_phase_drive_map: Dictionary = {}   # {option: mag} 當前 phase 對齊 option 加成
+# 需求金字塔重構：五層急迫度快照（gather 更新後的 team.need_urgency 拷貝，供 rank_scored 算 coeff）。
+var need_urgency: PackedFloat32Array = PackedFloat32Array()
 # 征服溶入（序5 prosperity）：軍力就緒度（pop/skill/food/weapon mean）+ 有效門檻（含慎重 + hunger_relief 滑降）
 # + 富 prey target（find_prosperity_prey：richness×貪婪 + weakness×殘忍 + border×野心 / eta×logistics）。
 # intent_fit 征服路 × readiness_factor（沒本錢趨0=readiness 閘，合憲法權重非硬閘）；攻擊 target 用 prosperity_prey_id。
@@ -350,6 +352,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			Probe.add_amount("absorb.yield_sum", c.absorb_yield)
 			if c.resource_slack > 0.05: Probe.bump("absorb.slack_pos")
 			if c.absorb_yield > 0.0: Probe.bump("absorb.yield_pos")
+	# 需求金字塔（決策引擎重構 S1）：五層急迫度 EWMA 更新（inert——本 slice 不接 rank_scored）。
+	# compute_raw 讀 food_days/threat(已算) + team/state；ewma_update 累積進持久 team.need_urgency。
+	var _raw_need: PackedFloat32Array = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)
+	team.need_urgency = NeedHierarchy.ewma_update(team.need_urgency, _raw_need)
+	c.need_urgency = team.need_urgency
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。
