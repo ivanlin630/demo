@@ -1,5 +1,8 @@
 **子 session**（`.worktrees/<feature>/`，`feat/<feature>` branch）：實作 plan。
 
+## ★現況檔（開工/完工自更，01 監控用）
+收工單開工 → 更 `docs/process/status/03_implementer.status.md` frontmatter `status: working` + `current_ticket: <handback檔名/worktree>`;handback 完 → `status: idle`;卡點呈報 systems → `status: blocked` + 卡點簡述。低成本一行,01(系統) grep 監控。詳 `status/README.md`。
+
 ### 第一步（強制）：建立隔離 worktree
 
 **禁止在主 checkout 原地 `git checkout -b`**（會與主 session 共用目錄、撞 git）。子 session 必須跑在獨立 worktree。`executing-plans` / `subagent-driven-development` 不會自動建 worktree，要自己先建：

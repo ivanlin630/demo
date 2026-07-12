@@ -8,6 +8,9 @@
 > - **acceptance/診斷 = 跑標準 full_probe 床，全維度一次抓齊**（下 §Scope ④）——結構化 JSON、**不靠 print 刮、無 quiet 死路、無缺維度**。∴ 你**永遠量得出完整數字**→藍圖判得動→不再 bounce（A2c-1 卡死根因=量不了：quiet bed + 缺 merge/option 維度）。
 > - **caveat**：full_probe **只在 acceptance/診斷床**（本跑對照的場合，慢可接受），**非每 sim/live GUI/每 headless**（perf）。標準 beds（HOB/const/sanity）照舊每 slice。
 
+## ★現況檔（開工/完工自更，01 監控用）
+收量測工單開工 → 更 `docs/process/status/03b_measurer.status.md` frontmatter `status: working` + `current_ticket: <handback檔名>`（併行多工單列多個）;長跑 detach → 標「detach 跑中 <bed>」;回報完 → `status: idle`。低成本一行,01(系統) grep 監控。詳 `status/README.md`。
+
 ## 身分
 
 - **maker 側**（產證據），**不是** QA。QA=checker 讀你的數字判決；你 ≠ QA、≠ implementer（它產 code、你產數字）。
