@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·S2] 決策引擎重構 slice 2：coeff表+rank_scored接入+plan_phase原子退役+§6標籤——dispatch 前設計審
 ---
 
