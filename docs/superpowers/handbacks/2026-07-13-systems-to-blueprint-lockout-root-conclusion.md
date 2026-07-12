@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [零跑結論] 鬆綁確在S3未實作(你假設①確認),但鬆綁機械上修不好這9個→非純「缺安全閥」,需per-option診斷分類
 ---
 
