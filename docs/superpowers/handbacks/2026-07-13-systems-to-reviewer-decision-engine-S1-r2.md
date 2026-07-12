@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·S1] 需求金字塔重構 slice 1(五層急迫度感測基礎設施,inert)設計審——dispatch implementer 前
 ---
 
