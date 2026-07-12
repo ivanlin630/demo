@@ -126,6 +126,7 @@ static func run(world_seed: int, total_ticks: int,
 		"curve": curve,
 		"intent": _intent_histogram(state),
 		"rung_dist": _rung_histogram(state),
+		"decision_opt_dist": _decision_opt_snapshot(),
 		"final": {
 			"teams": state.teams.size(), "factions": state.factions.size(),
 			"established": _established_count(state), "pop": end_pop,
@@ -220,6 +221,17 @@ static func _established_count(state: WorldState) -> int:
 	return n
 
 # 計畫層 S1：per-rung 分布快照（rung 0-4 各幾隊）——驗階分布不再全卡瞬時抖動。
+# per-option 決策 probe 分布（chosen/applicable/coeff_pressed × 23 option）——dynamic key 前綴掃
+# Probe.counts（固定 PROBE_KEYS 掃不到 suffix key）。sort key 保 determinism。①全覆蓋/④不死鎖用。
+static func _decision_opt_snapshot() -> Dictionary:
+	var out: Dictionary = {}
+	var keys: Array = Probe.counts.keys()
+	keys.sort()
+	for k in keys:
+		if String(k).begins_with("decision.opt_"):
+			out[k] = int(Probe.counts[k])
+	return out
+
 static func _rung_histogram(state: WorldState) -> Dictionary:
 	var h: Dictionary = {"r0": 0, "r1": 0, "r2": 0, "r3": 0, "r4": 0}
 	for tid in state.teams:

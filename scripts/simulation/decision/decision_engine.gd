@@ -30,6 +30,9 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "") -
 		if Probe.enabled and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
 			Probe.bump("decision.coeff_applied_n")   # 全 23 option 受 coeff 覆蓋計數
 			if _coeff < 0.5: Probe.bump("decision.coeff_lowhalf")   # 遠層被顯著壓比例
+			# per-option probe（①全覆蓋/④不死鎖，比照 rung_dist；純觀測零行為變）
+			Probe.bump("decision.opt_applicable." + opt)          # 候選分母
+			if _coeff < 1.0: Probe.bump("decision.opt_coeff_pressed." + opt)   # coeff 確隨急迫度變(非恆1)
 		if opt == current_option:
 			u += COMMITMENT_BONUS
 		scored.append({"u": u, "i": idx, "opt": opt})
@@ -37,6 +40,9 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "") -
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])   # tiebreak：applicable 順序
+	# per-option 選中分布（argmax=rank[0]；判「applicable 過但選中恆 0」=結構性死鎖 ④）
+	if Probe.enabled and not scored.is_empty() and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
+		Probe.bump("decision.opt_chosen." + String(scored[0]["opt"]))
 	return scored
 
 static func rank(state: WorldState, team: TeamData) -> Array:
