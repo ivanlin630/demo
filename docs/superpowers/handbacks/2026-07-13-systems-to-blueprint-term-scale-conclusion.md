@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [零跑結論] term量級系統性落差確認(pre-existing);舊subset-routing隔離比較,統一rank首次揭;根=優先序baked進base-scale非coeff;推薦專屬normalize slice先於S3/S4
 ---
 
