@@ -376,6 +376,7 @@ func _initialize() -> void:
 	_test_passive_hunt_on_forage()
 	# ── 讀B：覓食 = 苟活地板（產出 capped）──
 	_test_forage_subsistence_cap()
+	_test_forage_floor_tune()
 	_test_forage_no_growth()
 	_test_settled_still_grows()
 	_test_find_game_tile()
@@ -1911,6 +1912,39 @@ func _test_forage_subsistence_cap() -> void:
 	assert(int(tile.resources["wild_game"]) == game_at_cap,
 		"超 buffer 覓食不應消耗 wild_game，before=%d after=%d" % [game_at_cap, int(tile.resources["wild_game"])])
 	print("forage subsistence cap OK")
+
+# forage-floor tune：FORAGE_FLOOR_DAYS 5 + passive 0.30 + wild_game regen（急性餓死崩上游修）。
+func _test_forage_floor_tune() -> void:
+	print("--- forage-floor tune: 5天地板 + passive 0.30 + wild_game regen ---")
+	# §1 latch cap = pop × FOOD_PER_PERSON_PER_DAY(0.8) × FORAGE_FLOOR_DAYS(5) = pop×4.0
+	var team := TeamData.new(); _seed_pop(team, 10)
+	var buf: float = ResourceSystem._forage_subsist_buffer(team)
+	assert(is_equal_approx(buf, 10 * 4.0), "FORAGE_FLOOR_DAYS=5 → buffer=pop×4.0，實際=%.2f" % buf)
+	assert(is_equal_approx(ResourceSystem.FORAGE_FLOOR_DAYS, 5.0), "FORAGE_FLOOR_DAYS=5")
+	# §2 passive hunt 0.30，仍 < ACTIVE 0.4
+	assert(is_equal_approx(HuntSystem.PASSIVE_BASE_CHANCE, 0.30), "passive=0.30")
+	assert(HuntSystem.PASSIVE_BASE_CHANCE < HuntSystem.ACTIVE_BASE_CHANCE, "passive<active 保狩獵優勢")
+	# §3 wild_game regen：低於 cap 回升 +0.15/天
+	var state := WorldState.new(); state.world = WorldData.new()
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.resource_cap = { "wild_game": 10.0 }; tile.resources = { "wild_game": 2.0 }
+	state.world.tiles[0] = tile
+	var rs := ResourceSystem.new()
+	rs.regenerate_tiles(state, WorldState.TICKS_PER_DAY)
+	assert(is_equal_approx(float(tile.resources["wild_game"]), 2.0 + ResourceSystem.WILD_GAME_REGEN_PER_DAY),
+		"wild_game 1 天 +0.15，實際=%.3f" % float(tile.resources["wild_game"]))
+	# 夾 cap：接近 cap 不超
+	tile.resources["wild_game"] = 9.95
+	rs.regenerate_tiles(state, WorldState.TICKS_PER_DAY)
+	assert(float(tile.resources["wild_game"]) <= 10.0,
+		"wild_game 不超 cap，實際=%.3f" % float(tile.resources["wild_game"]))
+	# cap 缺（無獵物地）→ 不憑空生
+	var barren := HexTileData.new(); barren.tile_pos = Vector2i(1, 0); barren.terrain = "plains"
+	barren.resource_cap = {}; barren.resources = {}
+	state.world.tiles[1] = barren
+	rs.regenerate_tiles(state, WorldState.TICKS_PER_DAY)
+	assert(float(barren.resources.get("wild_game", 0)) == 0.0, "無 wild_game_cap 不憑空生獵物")
+	print("forage-floor tune OK: buffer=%.1f, passive=0.30, wild_game regen 守 cap" % buf)
 
 # 讀B 驗收面：純覓食隊食物 latch，遠低於 breed(7日) 門檻 → surplus 不由覓食驅動。
 func _test_forage_no_growth() -> void:
