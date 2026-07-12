@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [裁決請求·S2] 需求模型 §1/§2 張力——solo 高層 raw 恆=1.0 使駐守/建設系統性壓贏,撞 Maslow;3案推薦B
 ---
 

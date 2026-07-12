@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S2 standby] blocker 非機械 bug=需求模型 WHAT 張力,已呈藍圖裁決;保 S2.1/S2.2,S2.3 待裁
 ---
 
