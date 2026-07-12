@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R² spec審] 苟活地板tune—FORAGE_FLOOR_DAYS 1.5→5/PASSIVE 0.08→0.30/wild_game regen複用;審常數乾淨/regen正確/balance守5<7門/determinism
 ---
 
