@@ -15,11 +15,12 @@ util(option) = weight(term, 人格) × eval(term, ctx, opt) × coeff(需求對�
 - **coeff = 需求優先序**（S2 已建，urgency 載「現在多需要」）。
 - 三因子皆可比值域 → 統一 rank 公平；優先序**只**由 coeff 表達（survival 該壓過別的=靠 coeff 高、非 base ×4）。
 
-## 優先序保全（剝 base urgency 後，coeff 撐得住嗎）— worked example
-餓隊(food=0)：survival urgency≈1→覓食(survival-aligned)coeff≈1；訓練(esteem-aligned,survival urgent 時 esteem 未對齊)coeff≈FLOOR~0.15-0.3。
-- 覓食 util = weight(1.0)×base(1.0)×coeff(1.0) = **1.0**
-- 訓練 util = weight(0.5)×base(0.5)×coeff(0.2) = **0.05** → 覓食 20× 壓過。**survival 仍支配**（靠 coeff 非 base ×4）。✓
-飽隊(food=10)：survival urgency≈0→覓食 coeff≈FLOOR；esteem urgency 高→訓練 coeff≈1 → 訓練贏。**graduated priority=重構本意**。✓
+## 優先序保全（剝 base urgency 後，coeff 撐得住嗎）— worked example（R② 代入真公式訂正）
+餓隊(food=0)：survival urgency≈1→覓食(survival-aligned,alignment=0.9)coeff≈0.9475；訓練(survival affinity=0→alignment=0)coeff≈0.475。
+- 覓食 util = weight(1.0)×base(1.0)×coeff(0.9475) ≈ **0.95**
+- 訓練 util = weight(0.5)×base(0.5)×coeff(0.475) ≈ **0.14** → 覓食 **≈6.65×** 壓過。**survival 仍支配**（靠 coeff 非 base ×4）。✓
+邊界半餓隊(food=3,urgency=0.4)：覓食≈0.664 vs 貿易(merchant 最佳)≈0.414 → 仍贏 1.6×；food=4(urgency=0.2)：覓食≈0.57 vs 貿易≈0.40 → 1.4×。**margin 隨 food 改善平滑遞減、非斷崖反轉**（graduated priority=重構本意，無「半餓隊跑去貿易」regression）。✓
+飽隊(food=10)：survival urgency≈0→覓食 coeff≈FLOOR；esteem urgency 高→訓練 coeff≈1 → 訓練贏。✓
 
 ## Per-term 正規化（eval 改；剝 urgency 保 quality；值域 [0,1]）
 

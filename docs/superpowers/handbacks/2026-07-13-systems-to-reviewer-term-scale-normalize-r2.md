@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·S2.7] term-scale normalize 設計審(大範圍~13term,壓測優先序保全+回歸面)——dispatch 前
 ---
 
