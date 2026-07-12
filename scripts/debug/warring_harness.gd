@@ -126,6 +126,7 @@ static func run(world_seed: int, total_ticks: int,
 		"curve": curve,
 		"intent": _intent_histogram(state),
 		"rung_dist": _rung_histogram(state),
+		"plan_phase_dist": _plan_phase_snapshot(state),
 		"final": {
 			"teams": state.teams.size(), "factions": state.factions.size(),
 			"established": _established_count(state), "pop": end_pop,
@@ -145,6 +146,7 @@ static func _snapshot(month: int, state: WorldState) -> Dictionary:
 		"pop": _total_pop(state),
 		"intent": _intent_histogram(state),
 		"food_econ": _food_econ_snapshot(state),
+		"plan_phase_dist": _plan_phase_snapshot(state),
 	}
 
 # 經濟長程診斷（blueprint 2026-07-12 新主線）：食物供需隨時間聚合。複用既有 TeamData.food_flow_avg
@@ -228,6 +230,24 @@ static func _rung_histogram(state: WorldState) -> Dictionary:
 		var r: int = clampi(t.ambition_rung, 0, 4)
 		h["r%d" % r] += 1
 	return h
+
+# 計畫層 S2：organic plan_phase 分布 + 偏置實效（S3 前驗「≥2 種模式」同質化風險）。
+# 純讀 state 統計，零 randf、零 sim 邏輯改。子隊排除（phase=NONE 無獨立計畫）。
+static func _plan_phase_snapshot(state: WorldState) -> Dictionary:
+	var dist: Dictionary = {"求糧": 0, "成長": 0, "聚勢": 0, "立國": 0, "": 0}
+	var bias_hit: int = 0     # current_option 落在其 phase 偏置 map（偏置真被選）
+	var bias_total: int = 0   # 有非空偏置 map 的隊（分母）
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id != -1: continue   # 子隊服母團，無獨立 phase
+		var ph: String = t.plan_phase
+		if not dist.has(ph): ph = ""
+		dist[ph] += 1
+		var bmap: Dictionary = DecisionContext._phase_option_bias(t.plan_phase)
+		if not bmap.is_empty():
+			bias_total += 1
+			if bmap.has(t.current_option): bias_hit += 1
+	return {"dist": dist, "bias_hit": bias_hit, "bias_total": bias_total}
 
 # 統一 intent 分布 = faction commander(f.intent) + 獨立隊(solo_intent)。跨實體型一套菜單。
 static func _intent_histogram(state: WorldState) -> Dictionary:
