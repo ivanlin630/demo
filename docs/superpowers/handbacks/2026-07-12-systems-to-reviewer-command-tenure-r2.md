@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R² spec審] 統領日常領導成長—loop2掛cadence _grow_leadership_tenure;審落點/速率/determinism/不碰P4_expand/範圍鎖B2
 ---
 
