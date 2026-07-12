@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 topic: [★交接·重開讀我] session 狀態——主線=經濟死鎖修(農場faction-only雞生蛋),真根已確認,待建造條件表+用戶點頭
 ---
 

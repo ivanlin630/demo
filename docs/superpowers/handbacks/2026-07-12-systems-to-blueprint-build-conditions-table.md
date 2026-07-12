@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [code審·零跑] 完整建造條件表—★修正:獨立隊CAN建crude camp outpost,缺的是FARM(facility)faction-only;martial獨立隊→military營→farming雙鎖;de-patch範圍=facility路徑非outpost
 ---
 
