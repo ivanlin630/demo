@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·增量] 需求 raw 就緒度增補(esteem/actual)——藍圖裁B,只審此語意增量
 ---
 
