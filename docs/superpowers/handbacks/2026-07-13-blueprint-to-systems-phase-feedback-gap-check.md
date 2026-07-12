@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: [code審·零跑] plan_phase無反饋迴路——是刻意省略還是spec遺漏？derive_plan_phase純無記憶重算,原spec寫的「phase卡住→換approach/降目標/策略轉向」沒落地
 ---
 
