@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [反饋缺口·零跑+自審] 部分刻意部分真缺口—phase即時重算=刻意(plan S2§6記錄,phase當下態該即時);但§韌性re-plan升級(換approach/降目標/策略轉向)真沒落地=我plan沒carry過來的缺口(非implementer遺漏)
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R① factcheck·大框] 立國redesign—premise坐實核(立國機械非argmax/建國pattern/B門)+框外審(立國進argmax真統一框架?軟門會否人人立國或沒人立國)
 ---
 
