@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S2 hold] coeff baseline 位移=驗證契約政策,升藍圖;S2.0保留,S2.3 wiring暫擱等裁
 ---
 

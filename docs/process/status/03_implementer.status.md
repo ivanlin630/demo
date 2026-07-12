@@ -2,7 +2,7 @@
 role: implementer
 code: "03"
 status: blocked
-current_ticket: "decision-engine-S2 (S2.0 就緒度綠但 coeff 仍破 govern×2+TC7新，回報 systems)"
+current_ticket: "decision-engine-S2 (等藍圖裁驗證契約政策；S2.0/S2.1/S2.2 保留，S2.3 wiring 暫擱)"
 updated: 2026-07-13
 ---
 
