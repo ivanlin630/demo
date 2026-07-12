@@ -2,6 +2,8 @@ class_name FactionAISystem
 
 const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
+const LEADERSHIP_TENURE_INTERVAL: int = WorldState.TICKS_PER_DAY     # 每日一次（TEST VALUE）
+const LEADERSHIP_TENURE_GROWTH: float = 0.0006                      # TEST VALUE — 明顯低於 P4_expand
 const DISPATCH_DIST_THRESHOLD: int   = 2
 
 static var _a2b_remote_tribute_payers: Dictionary = {}   # A2b 守衛 B：遠距徵收 dispatch 的 payer id（settle 對帳）
@@ -664,6 +666,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 	var merge_queue: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
+		# 統領日常領導成長：帶隊即練，三分支外層統一觸發（覆蓋子隊/獨立/faction 成員 leader）
+		if state.world.current_tick % LEADERSHIP_TENURE_INTERVAL == 0:
+			_grow_leadership_tenure(state, team)
 		if team.parent_team_id != -1:
 			_evaluate_subteam(state, team, merge_queue)
 		elif team.faction_id == -1:
@@ -2684,6 +2689,18 @@ func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array
 # ──────── 基建主決策 ────────
 
 const INFRA_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時評估一次
+
+# 統領日常領導成長：帶隊即被動累積統領（底層保底，不取代 P4_expand）。
+# 復用 SkillSystem._grow 同款 attr×endurance×mult 公式（一致，非另發明）。
+func _grow_leadership_tenure(state: WorldState, team: TeamData) -> void:
+	if team.leader_id == -1: return
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	var charisma: float = float(leader.attributes.get("魅力", 0.5)) * leader.get_attribute_mult("魅力")
+	var endurance: float = float(leader.attributes.get("毅力", 0.5)) * leader.get_attribute_mult("毅力")
+	var growth: float = LEADERSHIP_TENURE_GROWTH * charisma * (0.5 + endurance * 0.5) \
+		* leader.get_skill_mult("統領")
+	SkillSystem.cap_add(leader, "統領", growth)
 
 # leader values 決定新據點傾向（軍用 vs 民用）
 func _pick_outpost_type(state: WorldState, leader_team: TeamData, leader: PersonData) -> String:

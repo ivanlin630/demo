@@ -121,6 +121,7 @@ func _initialize() -> void:
 	_test_dispatch_builder()
 	_test_evaluate_outpost_location()
 	_test_evaluate_infrastructure()
+	_test_command_tenure_growth()
 	_test_subteam_arrival_triggers_build()
 	_test_dispatch_upgrader_and_facility()
 	_test_auto_settle_after_build()
@@ -7618,6 +7619,33 @@ func _test_evaluate_infrastructure() -> void:
 			sub_count += 1
 	assert(sub_count >= 1, "應派出基建子隊")
 	print("Infra Task5 OK (派出 %d 子隊)" % sub_count)
+
+# command-tenure：帶隊 leader 隨 cadence 被動長統領（B2 established 硬牆第三層根修）。
+func _test_command_tenure_growth() -> void:
+	print("--- command-tenure: 統領日常領導成長 ---")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var team := TeamData.new(); team.team_id = 0
+	var leader := PersonData.new(); leader.id = 100
+	leader.attributes = { "魅力": 0.6, "毅力": 0.7 }
+	leader.skills = { "統領": 0.25 }
+	state.persons[100] = leader; team.leader_id = 100
+	state.teams[0] = team
+	var fai := FactionAISystem.new()
+	var before: float = float(leader.skills["統領"])
+	for _i in range(50):
+		fai._grow_leadership_tenure(state, team)
+	var after: float = float(leader.skills["統領"])
+	assert(after > before, "統領應隨帶隊成長，%f→%f" % [before, after])
+	# cap ≤ 1.0
+	leader.skills["統領"] = 0.999
+	for _j in range(1000):
+		fai._grow_leadership_tenure(state, team)
+	assert(float(leader.skills["統領"]) <= 1.0, "統領 cap 不超 1.0，實際=%f" % float(leader.skills["統領"]))
+	# leader_id == -1 不崩
+	var empty := TeamData.new(); empty.team_id = 1; empty.leader_id = -1
+	state.teams[1] = empty
+	fai._grow_leadership_tenure(state, empty)
+	print("command-tenure OK: 統領 %f→%f, cap 守, 無 leader 不崩" % [before, after])
 
 func _test_subteam_arrival_triggers_build() -> void:
 	print("--- Infra Task6: 子隊抵達觸發建造 ---")
