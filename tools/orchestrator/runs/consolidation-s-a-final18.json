@@ -1,0 +1,29 @@
+{
+  "worktree": "feat/consolidation-s-a @477aa7c (S-A + cadence gate perf fix)",
+  "seeds": 18, "months_each": 3,
+  "note_runtime": "18 seeds accumulated via 6 sequential small chunks (1-3 seeds each) due to repeated external process kills on larger batches even after the cadence-gate perf fix (9-seed batches still hit internal 1800s timeout twice); 3-seed chunks completed reliably. Total wall-clock across chunks: several hours spread over session, see timing-summary handback for detail.",
+  "aggregate": {
+    "merge.consolidate_dispatch": 8333,
+    "accept.merge_accept": 0,
+    "accept.join_accept": 19,
+    "join.resolve": 19,
+    "consol.accept_n": 19,
+    "consol.combined_days_sum": 1359.1139537133406,
+    "consol.absorber_days_sum": 1667.2833720402464,
+    "consol.joiner_days_sum": 29.439968698932596,
+    "consol.absorber_pop_sum": 147,
+    "combat.end_annihilation": 0,
+    "combat.ended_n": 188
+  },
+  "derived": {
+    "dispatch_to_accept_rate": "19/8333 = 0.228% -- almost all dispatches never result in an accept",
+    "avg_combined_days_per_accept": 71.53,
+    "avg_absorber_days_pre_per_accept": 87.75,
+    "avg_joiner_days_pre_per_accept": 1.55,
+    "avg_absorber_pop_at_accept": 7.74,
+    "merge_accept_share": "0/19 -- TASK_MERGE path (absorbing a whole team via _try_merge) never fired across 18 seeds/8333 dispatches; 100% of accepts are via the solo-join path (accept.join_accept/join.resolve)"
+  },
+  "gate1_verdict": "PASS on the feed-improvement dimension -- avg joiner was ~1.55 days from starvation, avg combined result survives ~71.5 days; every measured accept event is a genuine rescue, not starvation-spreading. Absorber's own margin stays well above ABSORBER_MIN_SURVIVE_DAYS(7) on average.",
+  "gate1_secondary_finding": "dispatch-to-accept ratio is extremely low (0.23%) and TASK_MERGE (whole-team absorption) never fires at all (0/8333). This matches implementer's earlier single-seed observation (merge_accept=0, join_accept=1) now confirmed at 18-seed scale -- not sample noise. The 'churn' (8333 dispatches) is real computational cost for very little realized consolidation (19 solo-joins, 0 team-merges).",
+  "gate3_verdict": "PASS (grep + code read, done in earlier small-sample pass, unchanged in this run -- consolidate_drive remains food-pressure argmax driven, no hardcoded pop<N threshold)"
+}

@@ -1,0 +1,19 @@
+{
+  "worktree": "feat/consolidation-s-a @7dfc620 (名聲磁鐵 §1~3b + consolidation §HOW-1~8 全)",
+  "seeds": 18, "months_each": 3,
+  "aggregate": {
+    "merge.consolidate_dispatch": 39628, "merge.surv_ok": 473, "merge.surv_fail": 4390,
+    "accept.join_accept": 196, "accept.join_reject": 166, "accept.merge_accept": 0, "accept.merge_reject": 0,
+    "join.resolve": 196, "mergein.dissolve": 71, "mergein.subteam": 125, "consol.accept_n": 196,
+    "rep.host_nonneutral": 0, "combat.end_annihilation": 0, "combat.ended_n": 188,
+    "avg_final_teams": 34.67, "max_final_teams": 52
+  },
+  "derived": {
+    "surv_rank_win_rate": "473/(473+4390)=9.7% (vs pre-magnet ~0.42% at S-A/consolidation-only stage -- ~23x)",
+    "join_accept_rate": "196/(196+166)=54.1% of attempted joins accepted",
+    "completion_total": "196 across 18 seeds (~10.9/seed) vs prior best 19 total (S-A full-utility) and 4 total (bidirectional) -- >10x jump",
+    "dissolve_vs_subteam_split": "71 dissolve (36%) / 125 subteam (64%) -- both paths alive, subteam more common",
+    "rep_differentiation": "still 0/39628+ dispatches show host_nonneutral -- confirmed inert at organic world-scale, consistent with implementer's diagnosis (aided/looted pair history between desperate-team and its chosen protector rarely exists before the join decision)"
+  },
+  "controlled_scenario_crosscheck": "consolidation_decision_trace.gd scenario F (protector_rep sweep, same fixed world) proved the magnet mechanism itself IS causally correct: join util scales linearly with protector_rep, flip point vs survival at rep≈0.23, low-rep hosts correctly lose to fleeing, high-rep hosts correctly win. The big-window rep.host_nonneutral=0 is therefore an ORGANIC EXPOSURE gap (rep rarely deviates from 0.5 neutral default before the decision point occurs), not a broken magnet formula."
+}

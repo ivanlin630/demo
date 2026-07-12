@@ -1,0 +1,13 @@
+{
+  "worktree": "feat/combat-s1-pursuit @f0fc7ed (rev2: _pursuit_carry cross-event accumulator + hard erase on team death)",
+  "seeds": 18, "months_each": 3,
+  "aggregate": {
+    "combat.ended_n": 218, "combat.end_annihilation": 0, "combat.end_mortal_flee": 180,
+    "combat.end_rout": 29, "combat.end_retreat": 9, "capture.total": 30,
+    "pursuit.n": 14, "pursuit.loss_sum": 0, "pursuit.cruelty_sum": 8.49745783209801, "pursuit.greed_sum": 6.270339399576188,
+    "extinct.starve": 452, "extinct.combat": 0, "extinct.other": 89, "death.combat_pop": 0
+  },
+  "identical_to_pre_rev2_run": true,
+  "finding": "rev2 accumulator (_pursuit_carry, keyed by loser_id, persists across pursuit events) is structurally correct and modeled on the working _cas_carry pattern (which DID fix the earlier annihilation zero-bleed bug). BUT: _cas_carry accumulates across many ROUNDS *within a single combat* (guaranteed repeat contributions to the same team_id before the encounter ends), whereas _pursuit_carry only gets ONE contribution per combat (pursuit fires once, at combat end) and only accumulates further if the SAME team_id is pursued again in a SEPARATE future combat. Across 218 combats / 18 seeds, all 14 pursuit events hit 14 distinct loser teams (or at minimum, no team_id was pursued a second time before the carry could cross 1.0) -- so the accumulator never had a second contribution to sum with the first, and output is byte-identical to the pre-rev2 (broken int()-truncation) run. This is not a failed de-patch -- the carry logic is sound -- it's a structural mismatch: the _cas_carry pattern relies on within-encounter round repetition to accumulate; pursuit has no equivalent repetition structure at organic scale.",
+  "implication_not_judged_by_measurer": "For pursuit's cruelty/greed personalization to ever manifest in organic play, either (a) accept it as effectively a rare/dormant mechanism that only fires when the same team is unlucky enough to be pursued in back-to-back separate encounters (may never happen at typical world scale), or (b) change the accumulation unit -- e.g. carry across a team's entire lifetime is already what's implemented, so the real lever is increasing PURSUIT_RATE or lowering the reachability gate so single-event fractional loss crosses 1.0 more often, which reopens the 'personalization vs indiscriminate inflation' tradeoff the original spec was trying to avoid. Systems/blueprint call, not measured here."
+}

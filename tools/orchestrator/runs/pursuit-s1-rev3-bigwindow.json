@@ -1,0 +1,20 @@
+{
+  "worktree": "feat/combat-s1-pursuit @f2af65e (rev3: absolute straggler_kill = clampi(round(cruelty*2.0+greed*0.8),0,3), replaces pop-% + accumulator)",
+  "seeds": 18, "months_each": 3,
+  "aggregate": {
+    "combat.ended_n": 199, "combat.end_annihilation": 0, "combat.end_mortal_flee": 165,
+    "combat.end_rout": 30, "combat.end_retreat": 4, "capture.total": 29,
+    "pursuit.n": 5, "pursuit.loss_sum": 6, "pursuit.cruelty_sum": 3.347173660993575, "pursuit.greed_sum": 2.397578418254852,
+    "extinct.starve": 442, "extinct.combat": 0, "extinct.other": 87, "death.combat_pop": 0,
+    "avg_cruelty_per_pursuit": 0.6694347321987151, "avg_loss_per_pursuit": 1.2
+  },
+  "baseline_219combats": {"ended_n":219,"annih":0,"flee":182,"rout":29,"retreat":8,"capture":30},
+  "rate_comparison": {
+    "flee_rate": "83.1% (baseline) -> 82.9% (rev3) -- stable",
+    "rout_rate": "13.2% -> 15.1% -- +1.9pp",
+    "retreat_rate": "3.7% -> 2.0% -- -1.7pp",
+    "annih_rate": "0.0% -> 0.0% -- unchanged",
+    "ended_n_absolute": "219 -> 199 (delta -20, ~9%), attributable to cascading effect of real casualties now removing pop, reducing subsequent-encounter opportunity, not to any single end-category being disproportionately inflated"
+  },
+  "finding": "rev3 (absolute straggler-kill, scale-independent) is the first pursuit revision to produce loss_sum>0 -- 6 total kills across 5 pursuit events (avg 1.2/event), matching the formula's expected output at avg measured cruelty 0.669 (above-neutral). Proportional three-end mix stays close to baseline (flee still dominant ~83%, annih still 0%); the ~9% drop in total combat count is a real downstream effect of the mechanism now doing something (fewer surviving teams -> fewer future encounters in the 3-month window), not evidence of any one end being inflated out of proportion. extinct.combat stays 0 -- straggler_kill capped at 3 is not enough alone to wipe a team outright in observed sample."
+}

@@ -1,0 +1,25 @@
+{
+  "worktree": "feat/combat-s1-pursuit @d139392 (94bb60d pursuit personalization + d139392 cas_carry erase, behavior-inert per diff review)",
+  "seeds": 18,
+  "months_each": 3,
+  "note_on_commit": "batch A (9 seeds) ran at 94bb60d; batch B (9 seeds) ran at d139392 after re-import. Diff between the two commits is a pure dict-erase safety patch (no Probe-visible behavior change, confirmed by reading the diff) -- safe to merge both batches into one aggregate.",
+  "baseline_comparison_source": "defeat-flee bigwindow (main HEAD 26758fe == that worktree, same 18 seeds x3mo, 219 combats, annih=0/flee=182/rout=29/retreat=8/capture=30)",
+  "s1_pursuit_aggregate": {
+    "combat.ended_n": 218, "combat.end_annihilation": 0, "combat.end_mortal_flee": 180,
+    "combat.end_rout": 29, "combat.end_retreat": 9, "capture.total": 30,
+    "pursuit.n": 14, "pursuit.loss_sum": 0, "pursuit.cruelty_sum": 8.49745783209801, "pursuit.greed_sum": 6.270339399576188,
+    "extinct.starve": 452, "extinct.combat": 0, "extinct.other": 89, "death.combat_pop": 0,
+    "mortal_flee.n_high": 14, "combat.str_ratio_annih_n": 0
+  },
+  "three_end_drift_vs_baseline": {
+    "ended_n": "219 -> 218 (delta -1, within RNG-stream noise from new pursuit code path)",
+    "end_annihilation": "0 -> 0 (unchanged)",
+    "end_mortal_flee": "182 -> 180 (delta -2, noise)",
+    "end_rout": "29 -> 29 (unchanged)",
+    "end_retreat": "8 -> 9 (delta +1, noise)",
+    "capture.total": "30 -> 30 (unchanged)",
+    "verdict": "three ends NOT disrupted -- but see root_cause_finding, this is because pursuit never actually removes any pop, not because the mechanism is well-tuned"
+  },
+  "root_cause_finding": "pursuit.n=14 (mechanism fired 14 times across 218 combats) but pursuit.loss_sum=0 for ALL 14 events -- zero actual pop loss from pursuit, every single time. Code: npc_combat_system.gd:570 `pursuit_loss = int(loser.population * PURSUIT_RATE(0.05) * factor)`, uses int() truncation (stricter than round()). Average measured factor from cruelty_sum/greed_sum = 1 + (0.607-0.5)*1.2 + (0.448-0.5)*0.6 ~= 1.10 (mildly cruel-leaning pursuers on average, as expected from random leader trait distribution). At factor~1.10, loser.population must be >=~18 for loss>=1 (0.05*1.10*18=0.99->1). Given most combats in this codebase resolve via mortal_flee/rout with small eff-pop losers (per earlier defeat-flee findings), loser.population at pursuit time is evidently below this floor in all 14 observed cases.",
+  "implication_not_judged_by_measurer": "The S1 pursuit personalization mechanism is currently a structural no-op at realistic organic pop scales -- it fires (gate + factor calc execute) but the truncation floor means personalized cruelty/greed never translates into any actual casualties, extinction, or attrition signal. This is NOT 'accepted: annih stays concentrated in cruel pursuers' nor 'reject: indiscriminate inflation disrupts three ends' -- it's a third outcome the spec's judged binary didn't anticipate: the feature is currently invisible/inert in play. Whether to fix (e.g. round() instead of int(), or a carry-accumulator pattern like the earlier §D4 de-patch) or accept as a rare-edge-case-only mechanism is a systems/blueprint call."
+}

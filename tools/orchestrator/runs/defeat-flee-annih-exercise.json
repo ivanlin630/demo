@@ -1,0 +1,35 @@
+{
+  "bed": "scripts/debug/defeat_flee_annih_exercise_bed.gd",
+  "worktree": "feat/defeat-flee @a6b90e2 (post de-patch §D4: real-valued casualty + _cas_carry floor accumulator)",
+  "note": "supersedes earlier pre-de-patch run in this file (that run was @84b9d66, all-zero bleed artifact of int-rounding, now fixed)",
+  "asymmetric_matrix": {
+    "desc": "self courage varies {high,mid,low} x self_eff{1,2,3} x enemy_eff{1,2,3,4} x 20 repeat; enemy courage FIXED mid",
+    "total_encounters": 720,
+    "outcome_by_self_courage": {
+      "high": {"n": 240, "annihilation": 0, "mortal_flee": 185, "other_rout": 55, "timeout": 0},
+      "mid":  {"n": 240, "annihilation": 0, "mortal_flee": 212, "other_rout": 28, "timeout": 0},
+      "low":  {"n": 240, "annihilation": 0, "mortal_flee": 231, "other_rout": 9,  "timeout": 0}
+    },
+    "probe": {
+      "mortal_flee.n": 628, "mortal_flee.n_high": 87, "mortal_flee.n_mid": 354, "mortal_flee.n_low": 187,
+      "annih.n_high": 0, "annih.n_mid": 0, "annih.n_low": 0,
+      "combat.end_annihilation": 0, "combat.end_rout": 92, "combat.ended_n": 720,
+      "conq.combat_entered": 720, "conq.retreat_captured": 148, "conq.no_capture": 0
+    },
+    "n_high_mortal_flee": 87, "n_high_annih": 0
+  },
+  "symmetric_matrix": {
+    "desc": "self courage == enemy courage (both brave / both mid / both low), self_eff == enemy_eff {1,2,3} x 20 repeat -- tests whether annih requires BOTH sides to hold (not pre-empted by either side fleeing)",
+    "total_encounters": 180,
+    "outcome_by_courage": {
+      "high": {"n": 60, "annihilation": 27, "mortal_flee": 10, "other_rout": 23, "timeout": 0},
+      "mid":  {"n": 60, "annihilation": 0,  "mortal_flee": 49, "other_rout": 11, "timeout": 0},
+      "low":  {"n": 60, "annihilation": 0,  "mortal_flee": 56, "other_rout": 4,  "timeout": 0}
+    },
+    "str_ratio_annih_mean": 1.000,
+    "pop_ratio_annih_mean": 1.000,
+    "annih_n": 27
+  },
+  "finding": "de-patch (a6b90e2) fixed the earlier structural zero-bleed bug (int-rounding floor). Post-fix: annihilation is reachable but ONLY when both sides are symmetric high-courage (brave-vs-brave, same eff) -- 27/60 = 45% of that specific cell. Any courage mismatch (asymmetric matrix, enemy fixed mid) drives annihilation to exactly 0 across 720 encounters -- confirms implementer's hypothesis: mortal_flee pre-empts annihilation whenever either side's pressure crosses its own flee_thr first; with enemy fixed at mid courage (flee_thr=0.8), enemy always flees before pop reaches <=1. mid-vs-mid and low-vs-low symmetric also = 0 (their flee_thr is low enough that even matched pressure triggers flee first). str_ratio_annih_mean=1.000 and pop_ratio_annih_mean=1.000 confirm annihilation (when it occurs) is genuinely between evenly-matched sides, not 'many-vs-few failed to flee'.",
+  "implication_not_judged_by_measurer": "Population-wide annihilation rate depends on how often organic warring produces brave-vs-brave same-eff mortal-zone encounters -- likely rare (courage is leader-trait-derived, not uniformly distributed, and matched-eff mortal-zone encounters are themselves a minority). Whether that rarity = intended 'annih 稀但>0' or = under-fire needs the ratio against organic encounter population, which is blueprint/systems call, not measured here."
+}

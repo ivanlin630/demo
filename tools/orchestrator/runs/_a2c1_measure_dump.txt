@@ -1,0 +1,58 @@
+### A2c1_measurement
+{
+ "beds": {
+  "import_test": {
+   "status": "PASS",
+   "errors": 0,
+   "warnings": "cursor/blend (expected)",
+   "note": "GDScript 無錯誤"
+  },
+  "constitution_gate": {
+   "current_subset_baseline": true,
+   "status": "PASS",
+   "removed": 0,
+   "sites_checked": 29,
+   "note": "無新增違憲 try_set（整併從 pre-gate→引擎 dispatch）"
+  },
+  "game_sim_multi": {
+   "status": "PASS",
+   "min_ticks": 1000,
+   "note": "sanity check ≥1000 tick 無崩潰通過",
+   "crash": false,
+   "exit_code": 0
+  },
+  "seeded_warring_bed_before_after": {
+   "total_diffs": 16,
+   "seed": 1337,
+   "spec_hard_line": "total_diffs=0 required（零行為變證）",
+   "root_cause": "consolidate_drive TEST VALUE (2.0) 未校準至 threat option 壓制平衡；需調整 CONSOLIDATE_DRIVE 常數至收斂",
+   "diffs": [
+    {
+     "before": "2.36%",
+     "metric": "attrition_pct",
+     "after": "2.89%"
+    },
+    {
+     "before": 372,
+     "metric": "end_pop",
+     "after": 370
+    },
+    {
+     "before": 2,
+     "metric": "intent.CONQUER",
+     "after": 1
+    },
+    {
+     "before": 3,
+     "metric": "intent.NONE",
+     "after": 2
+    },
+    {
+     "before": 8,
+     "metric": "combat_entered",
+     "after": 7
+    },
+    {
+     "before": 322,
+     "metric": "declared_conquests",
+     

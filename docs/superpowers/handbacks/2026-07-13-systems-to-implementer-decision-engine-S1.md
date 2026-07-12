@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·S1] 決策引擎重構 slice 1：五層急迫度感測基礎設施(inert)——R②CLEAN，照 plan TDD
 ---
 

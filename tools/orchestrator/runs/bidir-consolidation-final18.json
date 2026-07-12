@@ -1,0 +1,24 @@
+{
+  "worktree": "feat/consolidation-s-a @41e882c (S-A HOW-1~7 full, bidirectional weak-push + strong-pull consolidation)",
+  "seeds": 18, "months_each": 3,
+  "aggregate_funnel": {
+    "weak_push": {
+      "merge_appl.food_lt3": 10057, "merge_appl.food_3to6": 268, "merge_appl.food_ge6": 5705,
+      "merge.surv_ok": 5, "merge.surv_fail": 1198,
+      "merge.mv_reached": 4, "merge.mv_moving": 4, "merge.mv_block_combat": 0, "merge.mv_no_target": 0
+    },
+    "strong_pull": {
+      "absorb.target_found": 221620, "absorb.dispatch": 46
+    },
+    "completion": {"mergein.dissolve": 1, "mergein.subteam": 3, "total": 4},
+    "contrast": {"join.resolve": 4, "conq.intent": 6876, "conq.declared": 21963}
+  },
+  "derived_rates": {
+    "surv_ok_rate": "5/1203 (surv_ok+surv_fail) = 0.42% -- weak push is survival-locked, almost never wins the rank check",
+    "target_found_to_dispatch": "46/221620 = 0.021% -- strong pull finds candidates constantly but almost never dispatches",
+    "dispatch_to_completion": "4/46 = 8.7% of dispatches complete (small absolute base)",
+    "completion_vs_conquest": "4 total merge completions vs 21963 conquest declarations across the same 18-seed/3mo run -- conquest outnumbers peaceful consolidation by ~5490:1"
+  },
+  "three_end_check": {"combat.end_annihilation": 0, "combat.ended_n": 172, "avg_final_teams": 38.0, "note": "combat/annihilation baseline stable, no destabilization from the consolidation mechanism itself"},
+  "verdict_input_for_blueprint": "Structural confirmation, not sample artifact: both weak-push (survival-rank check, surv_ok=5/1203=0.42%) and strong-pull (dispatch=46/target_found=221620=0.02%) funnels bottleneck hard at scale across 18 independent seeds/3 months each. Total realized consolidations (dissolve+subteam)=4, versus conquest declarations=21963 in the same run. This matches the decision-tree's 'confirmed structural, not 1-seed fluke' branch."
+}

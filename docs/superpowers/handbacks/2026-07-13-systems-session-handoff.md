@@ -1,7 +1,7 @@
 ---
 from: systems
 to: systems
-status: open
+status: consumed
 topic: [交接·大案前] systems session 狀態固化—決策引擎架構重構待啟(established鏈全暫停);merged/擱置/backlog清單+monitor+慣例
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: [R①對抗·premise查證] 決策引擎架構重構(需求金字塔驅動決策)——用戶已approve，查spec內斷言是否成立，特別是「現況是N個獨立term瞎子投票」這個核心premise
 ---
 

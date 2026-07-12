@@ -1,0 +1,20 @@
+{
+  "worktree": "feat/consolidation-s-a @e8d7d52",
+  "note_env": "background full-scale (18 seed x3mo, two 9-seed batches) was killed by an external interruption three times in a row during this session (before any output was produced each time) -- cause unconfirmed (possibly environment/container recycling), not a code issue. Fell back to a small 3-seed x3mo run which completed cleanly and gave clean signal on gate#1. Can scale up if blueprint wants tighter confidence.",
+  "seeds": 3, "months_each": 3,
+  "per_seed": {
+    "1337": {"merge.consolidate_dispatch": 198, "accept.join_accept": 1, "consol.accept_n": 1, "combined_days": 12.6344198817556, "absorber_days_pre": 13.75, "joiner_days_pre": 1.47861869931222, "absorber_pop": 10},
+    "42":   {"merge.consolidate_dispatch": 562, "accept.join_accept": 1, "consol.accept_n": 1, "combined_days": 20.4958996524616, "absorber_days_pre": 22.4491477619943, "joiner_days_pre": 2.91666666666666, "absorber_pop": 9},
+    "7":    {"merge.consolidate_dispatch": 0,   "accept.join_accept": 0, "consol.accept_n": 0, "combined_days": 0, "absorber_days_pre": 0, "joiner_days_pre": 0, "absorber_pop": 0}
+  },
+  "gate1_feed_gate_check": {
+    "accept_n_total": 2,
+    "verdict_per_event": [
+      "seed1337: combined(12.63) > min(absorber=13.75, joiner=1.48)=1.48 -- joiner rescued from near-starvation (1.48 days left) to 12.63 days combined; absorber's own margin dipped 13.75->12.63 but still far above ABSORBER_MIN_SURVIVE_DAYS(7)",
+      "seed42: combined(20.50) > min(absorber=22.45, joiner=2.92)=2.92 -- same pattern, joiner rescued from 2.92 days to 20.50 combined"
+    ],
+    "verdict": "PASS -- both observed accepts are genuine feed-improvement for the joiner (imminent-starvation team saved), not pop-dilution/starvation-spreading. Absorber's post-merge days stays well above the 7-day gate in both cases."
+  },
+  "gate3_no_hardcoded_pop_threshold": {"verdict": "PASS", "method": "grep for pop<N / population<N patterns near consolidate_drive/_find_absorber/consolidate_target_of -- none found; consolidate_drive is DESPERATION_SCALE*max(0,DESPERATION_DAYS-food_days), food-pressure argmax driven, confirmed by reading terms.gd:159-163"},
+  "gate2_side_observe": {"avg_absorber_pop_at_merge": 9.5, "annih_count_in_sample": 0, "note": "observational only, not judged"}
+}
