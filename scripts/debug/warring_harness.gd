@@ -127,6 +127,7 @@ static func run(world_seed: int, total_ticks: int,
 		"intent": _intent_histogram(state),
 		"rung_dist": _rung_histogram(state),
 		"decision_opt_dist": _decision_opt_snapshot(),
+		"decision_diag": _decision_diag_snapshot(),
 		"final": {
 			"teams": state.teams.size(), "factions": state.factions.size(),
 			"established": _established_count(state), "pop": end_pop,
@@ -230,6 +231,20 @@ static func _decision_opt_snapshot() -> Dictionary:
 	for k in keys:
 		if String(k).begins_with("decision.opt_"):
 			out[k] = int(Probe.counts[k])
+	return out
+
+# 診斷(裁A) zero-option 三類分流：掃 Probe.counts(appl_n/coeff_pressed)+amounts(*_sum)的 diag.* key。
+# sort 保 determinism。measurer 按 coeff_sum/appl_n + mainurg_sum/appl_n + win/own util 分三類。
+static func _decision_diag_snapshot() -> Dictionary:
+	var out: Dictionary = {}
+	var ck: Array = Probe.counts.keys(); ck.sort()
+	for k in ck:
+		if String(k).begins_with("diag."):
+			out[k] = int(Probe.counts[k])
+	var ak: Array = Probe.amounts.keys(); ak.sort()
+	for k in ak:
+		if String(k).begins_with("diag."):
+			out[k] = Probe.amounts[k]
 	return out
 
 static func _rung_histogram(state: WorldState) -> Dictionary:

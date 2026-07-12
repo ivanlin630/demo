@@ -43,6 +43,19 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "") -
 	# per-option 選中分布（argmax=rank[0]；判「applicable 過但選中恆 0」=結構性死鎖 ④）
 	if Probe.enabled and not scored.is_empty() and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
 		Probe.bump("decision.opt_chosen." + String(scored[0]["opt"]))
+		# 診斷(裁A)：zero-option 三類分流（coeff-lockout / base-util 競爭 / applicable 稀有）。純觀測。
+		var winner: Dictionary = scored[0]
+		for e in scored:
+			if e["opt"] == winner["opt"]: continue
+			var opt: String = e["opt"]
+			var cf: float = NeedHierarchy.consistency_coeff(opt, ctx.need_urgency, ctx.leader_values)
+			var ml: int = NeedHierarchy.main_layer_of(opt)
+			Probe.bump("diag.%s.appl_n" % opt)                                  # 分母:applicable-but-lost
+			Probe.add_amount("diag.%s.coeff_sum" % opt, cf)                     # 平均 coeff
+			if cf < 0.5: Probe.bump("diag.%s.coeff_pressed" % opt)             # coeff-lockout 候選
+			Probe.add_amount("diag.%s.mainurg_sum" % opt, ctx.need_urgency[ml] if ml >= 0 else 0.0)  # 主層 urgency
+			Probe.add_amount("diag.%s.ownutil_sum" % opt, float(e["u"]))       # 自己 util(post-coeff)
+			Probe.add_amount("diag.%s.winutil_sum" % opt, float(winner["u"]))  # winner util
 	return scored
 
 static func rank(state: WorldState, team: TeamData) -> Array:
