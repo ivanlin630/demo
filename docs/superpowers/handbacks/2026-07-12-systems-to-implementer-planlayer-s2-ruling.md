@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [裁決 S2] B案—SEEK_FOOD map移除「貿易」(語意修正:貿易=致富主表達由intent_fit驅);TC7自動PASS不動框架bar;plan已更新續build
 ---
 
