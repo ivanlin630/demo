@@ -44,7 +44,8 @@ func _run() -> void:
 	for s in seeds:
 		if results.has(str(int(s))):
 			continue   # resume：已完成，跳
-		var r: Dictionary = WarringHarness.run(int(s), ticks)
+		var cfg_path: String = OS.get_environment("WARRING_CONFIG") if OS.get_environment("WARRING_CONFIG") != "" else "res://config/warring_states.json"
+		var r: Dictionary = WarringHarness.run(int(s), ticks, cfg_path)
 		if r.is_empty():
 			print("[FAIL] seed=%d harness 空（config 載入失敗？）" % int(s)); continue
 		results[str(int(s))] = r

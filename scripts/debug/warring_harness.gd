@@ -20,6 +20,18 @@ const PROBE_KEYS: Array = [
 	"g2.faction_found", "g2.feud_formed", "g2.vendetta_trigger",
 	"g3.scout_dispatch", "g3.betrayal", "g3.trust_up", "g3.trust_down",
 	"indep.found_ally", "indep.found_subjugate", "indep.found_timeout",
+	# established=0 真根定位（blueprint 2026-07-12）：階段A gate funnel
+	"indep.gate_ambitious", "indep.gate_fail_pop", "indep.gate_fail_food",
+	"indep.gate_fail_busy", "indep.gate_fail_nopath", "indep.gate_path_ok",
+	# 階段B（faction→established）gate funnel
+	"establish.gate_b1_ok", "establish.gate_fail_b1_members",
+	"establish.gate_fail_b2_command", "establish.gate_fail_b3_ambition",
+	"establish.gate_fail_b4_readiness", "establish.gate_all_pass",
+	# 死隊 forage 斷點定位（blueprint 2026-07-12）：餓死時 task 分類 × owner 狀態
+	"extinct.starve_while_foraging_owner", "extinct.starve_while_foraging_nonowner",
+	"extinct.starve_while_fleeing_owner", "extinct.starve_while_fleeing_nonowner",
+	"extinct.starve_no_forage_owner", "extinct.starve_no_forage_nonowner",
+	"g1.engine_survival",
 	# ②a 信使外交結局分佈（藍圖要的「怎麼沒結盟」fail 分佈）
 	"envoy.dispatched", "envoy.delivered", "envoy.accept", "envoy.reject",
 	"envoy.timeout", "envoy.target_dead",
@@ -101,9 +113,11 @@ static func run(world_seed: int, total_ticks: int,
 			break
 
 	var end_pop: int = _total_pop(state)
+	var farming: Dictionary = _farming_snapshot(state)
 	var result: Dictionary = {
 		"seed": world_seed,
 		"total_ticks": total_ticks,
+		"farming_final": farming,
 		"start_pop": start_pop,
 		"end_pop": end_pop,
 		"attrition_pct": 0.0 if start_pop == 0 else 100.0 * (start_pop - end_pop) / float(start_pop),
@@ -127,6 +141,67 @@ static func _snapshot(month: int, state: WorldState) -> Dictionary:
 		"established": _established_count(state),
 		"pop": _total_pop(state),
 		"intent": _intent_histogram(state),
+		"food_econ": _food_econ_snapshot(state),
+	}
+
+# 經濟長程診斷（blueprint 2026-07-12 新主線）：食物供需隨時間聚合。複用既有 TeamData.food_flow_avg
+# （R2 日均淨食物流 EMA，income−consumption，非新機制）+ 現有 resources.food 存量，純讀不寫、零行為變。
+static func _food_econ_snapshot(state: WorldState) -> Dictionary:
+	var total_stock: float = 0.0
+	var flow_sum: float = 0.0
+	var n_flow: int = 0
+	var n_negative: int = 0
+	var min_flow: float = INF
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		total_stock += float(t.resources.get("food", 0.0))
+		if t.food_flow_last >= 0.0:   # -1.0 sentinel＝未初始化取樣，排除
+			flow_sum += t.food_flow_avg
+			n_flow += 1
+			if t.food_flow_avg < 0.0: n_negative += 1
+			if t.food_flow_avg < min_flow: min_flow = t.food_flow_avg
+	return {
+		"total_food_stock": total_stock,
+		"avg_food_flow": (flow_sum / float(n_flow)) if n_flow > 0 else 0.0,
+		"n_teams_flow_sampled": n_flow,
+		"n_teams_negative_flow": n_negative,
+		"min_food_flow": min_flow if min_flow != INF else 0.0,
+	}
+
+# de-patch 死鎖 pre-build 實證（systems 2026-07-12）：獨立隊 vs faction隊 farming_level 分布 +
+# crude camp civ/mil 比例 + farming×存活粗略對照。純讀 tile/team 既有欄位，零行為變。
+static func _farming_snapshot(state: WorldState) -> Dictionary:
+	var indep_farm_pos: int = 0; var indep_farm_zero: int = 0
+	var indep_civ: int = 0; var indep_mil: int = 0
+	var fac_farm_pos: int = 0; var fac_farm_zero: int = 0
+	var farm_pos_pop: int = 0; var farm_pos_teams: int = 0
+	var farm_zero_pop: int = 0; var farm_zero_teams: int = 0
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_owner == -1: continue
+		var owner: TeamData = state.teams.get(tile.outpost_owner)
+		if owner == null: continue
+		var is_indep: bool = owner.faction_id == -1
+		var has_farm: bool = int(tile.farming_level) > 0
+		if is_indep:
+			if tile.outpost_type == "civilian": indep_civ += 1
+			elif tile.outpost_type == "military": indep_mil += 1
+			if has_farm: indep_farm_pos += 1
+			else: indep_farm_zero += 1
+		else:
+			if has_farm: fac_farm_pos += 1
+			else: fac_farm_zero += 1
+		if has_farm:
+			farm_pos_pop += owner.population; farm_pos_teams += 1
+		else:
+			farm_zero_pop += owner.population; farm_zero_teams += 1
+	return {
+		"indep_farm_pos": indep_farm_pos, "indep_farm_zero": indep_farm_zero,
+		"indep_civ": indep_civ, "indep_mil": indep_mil,
+		"faction_farm_pos": fac_farm_pos, "faction_farm_zero": fac_farm_zero,
+		"farm_pos_avg_pop": (float(farm_pos_pop) / float(farm_pos_teams)) if farm_pos_teams > 0 else 0.0,
+		"farm_zero_avg_pop": (float(farm_zero_pop) / float(farm_zero_teams)) if farm_zero_teams > 0 else 0.0,
+		"farm_pos_teams": farm_pos_teams, "farm_zero_teams": farm_zero_teams,
 	}
 
 static func _total_pop(state: WorldState) -> int:

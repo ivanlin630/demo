@@ -2143,6 +2143,15 @@ func _on_team_extinct(state: WorldState, team: TeamData) -> void:
 		if team.famine_days > 0.0: Probe.bump("extinct.starve")
 		elif team.combat_target != -1: Probe.bump("extinct.combat")
 		else: Probe.bump("extinct.other")
+		# 死隊 forage 斷點定位（blueprint 2026-07-12）：死亡當下 task 是否為覓食/求生 + owner 狀態
+		var _has_home: bool = ResourceSystem.own_granary_tile(state, team) != null
+		if team.famine_days > 0.0:   # 只在餓死組分類，非本次判準的戰鬥/其他死不混入
+			if team.current_task == TeamData.TASK_FORAGE:
+				Probe.bump("extinct.starve_while_foraging_owner" if _has_home else "extinct.starve_while_foraging_nonowner")
+			elif team.current_task == TeamData.TASK_FLEE:
+				Probe.bump("extinct.starve_while_fleeing_owner" if _has_home else "extinct.starve_while_fleeing_nonowner")
+			else:
+				Probe.bump("extinct.starve_no_forage_owner" if _has_home else "extinct.starve_no_forage_nonowner")
 	if team.faction_id != -1 and state.factions.has(team.faction_id):
 		var f = state.factions[team.faction_id]
 		f.member_team_ids.erase(team.team_id)

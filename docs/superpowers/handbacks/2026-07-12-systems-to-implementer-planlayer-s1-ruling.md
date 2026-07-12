@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [裁決 S1] demote改綁milestone非trend—棄EWMA;demote=連續K次not milestone_met(current);plan Task1已更新,續build
 ---
 
