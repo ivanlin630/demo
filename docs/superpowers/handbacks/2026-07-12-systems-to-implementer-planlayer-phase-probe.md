@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [小工單] 補plan_phase分布probe(比照rung_dist)—warring_harness記organic各隊phase+偏置option分布;S3前先驗同質化風險;疊main(已含S1+S2)
 ---
 
