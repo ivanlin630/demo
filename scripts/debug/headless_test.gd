@@ -455,6 +455,8 @@ func _initialize() -> void:
 	_test_need_raw_urgency()
 	_test_need_ewma()
 	_test_need_gather_updates()
+	_test_need_affinity_table()
+	_test_need_coeff()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -15840,6 +15842,36 @@ func _test_need_gather_updates() -> void:
 	var second := team.need_urgency[NeedHierarchy.L_BELONGING]
 	assert(second >= first, "EWMA 累積不倒退，%f→%f" % [first, second])
 	print("[TEST] need_gather_updates PASS")
+
+func _test_need_affinity_table() -> void:
+	print("[TEST] need_affinity_table")
+	for opt in DecisionOptions.REGISTRY.keys():
+		var a := NeedHierarchy.affinity_of(opt)
+		assert(a.size() == NeedHierarchy.N_LAYERS, "%s affinity size 5" % opt)
+		var s := 0.0
+		for v in a: s += v
+		assert(absf(s - 1.0) < 0.01, "%s 行和≈1，got %f" % [opt, s])
+	assert(NeedHierarchy.affinity_of("覓食")[NeedHierarchy.L_SURVIVAL] >= 0.6, "覓食 survival 主導")
+	assert(NeedHierarchy.affinity_of("survival")[NeedHierarchy.L_SAFETY] >= 0.6, "FLEE safety 主導")
+	assert(NeedHierarchy.affinity_of("併入")[NeedHierarchy.L_BELONGING] >= 0.5, "併入 belonging 主導")
+	assert(NeedHierarchy.affinity_of("訓練")[NeedHierarchy.L_ESTEEM] >= 0.5, "訓練 esteem 主導")
+	print("[TEST] need_affinity_table PASS")
+
+func _test_need_coeff() -> void:
+	print("[TEST] need_coeff")
+	var urg := PackedFloat32Array([1.0, 0.0, 0.0, 0.0, 0.0])
+	var neutral := {"慎重": 0.5, "野心": 0.5}
+	var c_forage := NeedHierarchy.consistency_coeff("覓食", urg, neutral)
+	var c_train := NeedHierarchy.consistency_coeff("訓練", urg, neutral)
+	assert(c_forage > c_train, "生存急迫下 覓食 coeff > 訓練，%f vs %f" % [c_forage, c_train])
+	assert(c_forage <= 1.0 and c_train >= NeedHierarchy.COEFF_FLOOR, "coeff 界 [FLOOR,1]")
+	var cautious := {"慎重": 0.9, "野心": 0.1}
+	var reckless := {"慎重": 0.1, "野心": 0.9}
+	var train_cautious := NeedHierarchy.consistency_coeff("訓練", urg, cautious)
+	var train_reckless := NeedHierarchy.consistency_coeff("訓練", urg, reckless)
+	assert(train_reckless > train_cautious, "狂人遠層 coeff > 謹慎者，%f vs %f" % [train_reckless, train_cautious])
+	assert(train_cautious >= NeedHierarchy.COEFF_FLOOR, "軟降權不歸零")
+	print("[TEST] need_coeff PASS")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()
