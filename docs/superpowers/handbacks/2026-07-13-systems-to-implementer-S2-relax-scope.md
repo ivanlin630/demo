@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S2 續·裁A] coeff-era unit測放寬具體範圍→續S2.3~S2.6→measurer organic
 ---
 
