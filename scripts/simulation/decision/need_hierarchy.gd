@@ -11,6 +11,7 @@ const N_LAYERS: int = 5
 
 # raw 急迫度門檻（TEST VALUE）
 const SURVIVAL_SATED_DAYS: float = 5.0   # TEST VALUE — 食物餘命達此→生存急迫度 0（對齊 forage floor 域）
+const URGENCY_EWMA_ALPHA: float = 0.25   # TEST VALUE — 急迫度平滑係數（同 S1 zero-randf pattern）
 
 # 每層 raw 急迫度 = 該層底層指標距門檻的差距(0..1，越沒滿足越高)。純算術零 randf。
 # food_days/threat 由呼叫端(gather)供（已算，避重複）；其餘讀 team/state + AmbitionLadder 門檻。
@@ -41,3 +42,13 @@ static func compute_raw(state: WorldState, team: TeamData, food_days: float, thr
 	else:
 		raw[L_ACTUAL] = 0.0
 	return raw
+
+# EWMA：new = α·raw + (1-α)·prev。prev 空(冷啟)視同全 0。純算術零 randf。
+static func ewma_update(prev: PackedFloat32Array, raw: PackedFloat32Array) -> PackedFloat32Array:
+	var out := PackedFloat32Array()
+	out.resize(N_LAYERS)
+	var has_prev: bool = prev.size() == N_LAYERS
+	for i in range(N_LAYERS):
+		var p: float = prev[i] if has_prev else 0.0
+		out[i] = URGENCY_EWMA_ALPHA * raw[i] + (1.0 - URGENCY_EWMA_ALPHA) * p
+	return out

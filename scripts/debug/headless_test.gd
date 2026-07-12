@@ -453,6 +453,7 @@ func _initialize() -> void:
 	_test_plan_phase_bias()
 	_test_plan_rung_bypass()
 	_test_need_raw_urgency()
+	_test_need_ewma()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -15805,6 +15806,24 @@ func _test_need_raw_urgency() -> void:
 	var raw2 := NeedHierarchy.compute_raw(state, team, 10.0, 0.0)
 	assert(raw2[NeedHierarchy.L_SURVIVAL] == 0.0, "飽→survival 0，got %f" % raw2[NeedHierarchy.L_SURVIVAL])
 	print("[TEST] need_raw_urgency PASS")
+
+func _test_need_ewma() -> void:
+	print("[TEST] need_ewma")
+	var prev := PackedFloat32Array([0.0, 0.0, 0.0, 0.0, 0.0])
+	var raw := PackedFloat32Array([1.0, 1.0, 1.0, 1.0, 1.0])
+	var e1 := NeedHierarchy.ewma_update(prev, raw)
+	# α=0.25：0.25*1 + 0.75*0 = 0.25
+	assert(absf(e1[0] - 0.25) < 1e-5, "EWMA step1=0.25，got %f" % e1[0])
+	var e2 := NeedHierarchy.ewma_update(e1, raw)
+	# 0.25*1 + 0.75*0.25 = 0.4375
+	assert(absf(e2[0] - 0.4375) < 1e-5, "EWMA step2=0.4375，got %f" % e2[0])
+	# 冷啟(prev 空 size 0)→視同全 0
+	var e0 := NeedHierarchy.ewma_update(PackedFloat32Array(), raw)
+	assert(absf(e0[0] - 0.25) < 1e-5, "冷啟 EWMA=0.25，got %f" % e0[0])
+	# 持久欄存在且初值 0
+	var team := TeamData.new()
+	assert(team.need_urgency.size() == 0 or team.need_urgency.size() == NeedHierarchy.N_LAYERS, "need_urgency 欄存在")
+	print("[TEST] need_ewma PASS")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()
