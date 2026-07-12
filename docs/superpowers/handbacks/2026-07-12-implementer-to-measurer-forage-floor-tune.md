@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 topic: 苟活地板tune 實作交付 — FORAGE_FLOOR_DAYS 5/passive 0.30/wild_game regen;branch feat/forage-floor-tune已push,待A/B驗收
 ---
 # Hand Back: 苟活地板 tune

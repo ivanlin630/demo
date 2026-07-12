@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [右尺寸砍·省時] forage A/B別跑滿3seed×12mo×2檔(~4hr)—A/B從3mo選檔+12mo只winner檔1-2seed;established是下游慢變量本slice不主判
 ---
 
