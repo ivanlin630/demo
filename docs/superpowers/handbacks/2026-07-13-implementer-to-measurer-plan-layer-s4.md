@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 topic: 計畫層 S4·末 實作交付 — Observer露plan_phase(純顯示);plan-layer S1-S4全收齊;branch feat/plan-layer-s4已push,待驗收+GUI手驗
 ---
 # Hand Back: 計畫層 S4（GUI 可讀性，末 slice）

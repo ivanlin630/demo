@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [完整清單·零跑] 決策鏈四表:intent選單6項/rung0-4/milestone累進表/archetype 3型—視覺化用,file:line齊
 ---
 
