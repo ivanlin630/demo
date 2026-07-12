@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R② 設計審] 立國redesign—R①CLEAN(框外量級窗坐實);審實作設計:硬gate移除乾淨/intent emit接線/統領是skill/立國goal consume不動/determinism/範圍鎖
 ---
 
