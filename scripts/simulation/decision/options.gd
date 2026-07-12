@@ -6,26 +6,26 @@ const REGISTRY: Dictionary = {
 	"貿易":   [["economic_opp", "economic"], ["intent_fit", "intent_fit"]],
 	"生產":   [["produce_need", "settle"], ["ambition_drive", "ambition"]],
 	"建設":   [["settle_fit", "settle"], ["ambition_drive", "ambition"]],
-	"覓食":   [["survival_pressure", "survival_pressure"]],
+	"覓食":   [["survival_pressure", "survival_pressure"], ["plan_phase_drive", "plan_phase_drive"]],
 	"survival":[["threat_pressure", "survival_pressure"]],
 	"駐守":   [["settle_fit", "settle"]],
-	"返家補給":[["restock_need", "survival_pressure"]],
+	"返家補給":[["restock_need", "survival_pressure"], ["plan_phase_drive", "plan_phase_drive"]],
 	"掠奪":   [["loot_drive", "loot"], ["intent_fit", "intent_fit"]],
 	# 佔村：奪據點+搬進去（雙引擎咬合）。與掠奪同 menu 秤 util argmax（零新判斷器）。
 	# intent_fit=匱乏→奪產村 boost（與掠奪 parallel）；occupy_drive=野心 base_need edge（決定佔 vs 搶）。
 	"佔村":   [["occupy_drive", "occupy"], ["intent_fit", "intent_fit"]],
 	# S-A §HOW-6：統一「併入」（join+整併合一，取代兩 row）。絕境求生 food-scaled；weight=求生欲/(1-野心)
 	# （§HOW-6 定，非 join weight——join weight×low_ambition 使 併入 rank 過低不勝 survival first=0 regression）。
-	"併入":   [["join_drive", "mergein"]],
+	"併入":   [["join_drive", "mergein"], ["plan_phase_drive", "plan_phase_drive"]],
 	# S-A §HOW-7：強方擴張 pull「吸納」（強隊主動吸弱鄰，擴張-class @PRIO_DISPATCH，非 survival）。
 	"吸納":   [["absorb_drive", "absorb"]],
-	"紮營":   [["camp_drive", "camp"]],
+	"紮營":   [["camp_drive", "camp"], ["plan_phase_drive", "plan_phase_drive"]],
 	"乞食":   [["beg_drive",  "beg"]],
 	# 序4 vendetta 溶入：feud_pull term 掛入 → 血仇成攻擊的一個 weight 驅力（衝動 leader 血仇高→攻擊贏 rank）。
 	"攻擊":   [["faction_duty", "faction_duty"], ["attack_drive", "attack"], ["intent_fit", "intent_fit"], ["feud_pull", "feud"]],
 	"徵收":   [["faction_duty", "faction_duty"], ["levy_drive", "levy"]],
-	"外交":   [["faction_duty", "faction_duty"], ["diplo_drive", "diplo"]],
-	"買糧":   [["buyfood_drive", "buyfood"]],
+	"外交":   [["faction_duty", "faction_duty"], ["diplo_drive", "diplo"], ["plan_phase_drive", "plan_phase_drive"]],
+	"買糧":   [["buyfood_drive", "buyfood"], ["plan_phase_drive", "plan_phase_drive"]],
 	# means-end：致富+餘糧 → 蓋倉囤貨低買高賣（複用 TASK_TRADE 到市集 hub，非新機制）。
 	"囤貨":   [["intent_fit", "intent_fit"]],
 	# 融合 threat（序1 溶入）：4 反應 repertoire 中的 3（FLEE=既有 survival option）。
