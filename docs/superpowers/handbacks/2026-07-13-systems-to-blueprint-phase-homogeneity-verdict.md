@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [同質化真根·零跑] derive_plan_phase邏輯正確非bug—GROW獨大=食物修成功副作用(不缺糧)+attrition縮pop<8;揭真瓶頸=pop成長(繁殖)被鎖非野心分布;續S3,pop成長是下個phase多樣化槓桿
 ---
 
