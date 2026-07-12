@@ -453,6 +453,9 @@ func _initialize() -> void:
 	_test_plan_phase_bias()
 	_test_plan_rung_bypass()
 	_test_strategic_reads_ladder()
+	_test_establish_intent_wins()
+	_test_establish_intent_loses()
+	_test_establish_intent_needs_members()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
 	_test_vendetta_target()
@@ -15789,6 +15792,53 @@ func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	for k in vals:
 		p.values[k] = vals[k]
 	return p
+
+# 立國 redesign：建 faction+leader 隊，控野心(value)/統領(skill)/readiness/phase/成員數。
+func _mk_establish_state(amb: float, cmd: float, rdy: float, phase: String, members: int) -> Array:
+	var s := WorldState.new(); s.world = WorldData.new(); s.player_id = -1
+	var lt := TeamData.new(); lt.team_id = 1; lt.readiness = rdy; lt.plan_phase = phase
+	var l := PersonData.new(); l.id = 100
+	l.values = {"野心": amb}; l.skills = {"統領": cmd}
+	s.persons[100] = l; lt.leader_id = 100
+	s.teams[1] = lt
+	if members >= 2:   # 建額外成員隊（member_team_ids 有 size，隊實體最小）
+		var m := TeamData.new(); m.team_id = 2; m.faction_id = 0
+		s.teams[2] = m
+	var f := FactionData.new(); f.faction_id = 0; f.leader_team_id = 1
+	f.member_team_ids = ([1, 2] if members >= 2 else [1])
+	f.is_established = false; f.intent = {}
+	s.factions[0] = f
+	return [s, f, lt]
+
+func _test_establish_intent_wins() -> void:
+	print("--- 立國 redesign T1: 高野心+高統領+ESTABLISH phase → 立國贏 argmax ---")
+	var r := _mk_establish_state(0.9, 0.9, 0.9, DecisionContext.PHASE_ESTABLISH, 2)
+	var fai := FactionAISystem.new()
+	var s: WorldState = r[0]; var f = r[1]
+	var intent: Dictionary = fai._select_intent(s, f)
+	assert(intent["type"] == "立國", "高野心+統領+phase → 立國贏 argmax，實際=%s" % intent["type"])
+	# emit path：_update_goals 選中 → f.goals 含「立國」（食足避 survival override）
+	var lt: TeamData = r[2]; lt.resources = {"food": 9999.0}; _seed_pop(lt, 3)
+	s.world.current_tick = 0; f.intent_eval_next_tick = 0
+	fai._update_goals(s, f)
+	assert("立國" in f.goals, "立國 intent → emit 立國 goal，實際 goals=%s" % str(f.goals))
+	print("[OK] _test_establish_intent_wins")
+
+func _test_establish_intent_loses() -> void:
+	print("--- 立國 redesign T2: 低統領+低戰備 → 立國輸(非人人立國) ---")
+	var r := _mk_establish_state(0.3, 0.0, 0.2, "", 2)
+	var fai := FactionAISystem.new()
+	var intent: Dictionary = fai._select_intent(r[0], r[1])
+	assert(intent["type"] != "立國", "低統領+低戰備不該立國，實際=%s" % intent["type"])
+	print("[OK] _test_establish_intent_loses")
+
+func _test_establish_intent_needs_members() -> void:
+	print("--- 立國 redesign T3: <2 成員 → 立國不入 scores ---")
+	var r := _mk_establish_state(0.9, 0.9, 0.9, DecisionContext.PHASE_ESTABLISH, 1)  # 僅 1 成員
+	var fai := FactionAISystem.new()
+	var intent: Dictionary = fai._select_intent(r[0], r[1])
+	assert(intent["type"] != "立國", "<2 成員不成國，實際=%s" % intent["type"])
+	print("[OK] _test_establish_intent_needs_members")
 
 # desync=0：disposition_scores argmax → derive_archetype 映射一致（同公式共源）
 func _test_r2_disposition_delegation() -> void:

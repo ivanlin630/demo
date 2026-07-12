@@ -8,9 +8,14 @@ static var _a2b_remote_tribute_payers: Dictionary = {}   # A2b 守衛 B：遠距
 const FOOD_EMERGENCY: float          = 3.0
 # 戰爭基金：野心/好戰高 leader material 低於此 → 非缺糧也觸發特別稅徵收。TEST VALUE
 const WAR_CHEST_MIN: float           = 200.0
-const ESTABLISH_COMMAND: float       = 0.4
-const ESTABLISH_AMBITION: float      = 0.7
-const ESTABLISH_READINESS: float     = 0.7
+const ESTABLISH_READINESS: float     = 0.7   # 立國 readiness 軟折扣分母（rdy_mod）
+# 立國 redesign（機械 B-gate → 意圖層 argmax，B2/B3/B4 降軟 modifier；全 TEST VALUE）
+const ESTABLISH_MIN_MEMBERS: int = 2         # B1 結構最小（≥2 成員才成「國」，沿用 STATE_MIN 語意）
+const ESTABLISH_AMBITION_W: float = 0.4      # 野心對立國傾向權重（B3 軟化）
+const ESTABLISH_COMMAND_W: float = 0.4       # 統領對立國傾向權重（B2 軟化）
+const ESTABLISH_RDY_FLOOR: float = 0.5       # readiness 軟折扣下限（B4 軟化，非 0 硬擋）
+const ESTABLISH_PHASE_BONUS: float = 0.2     # ESTABLISH phase 加成
+const ESTABLISH_COMMITMENT_BONUS: float = 0.15  # 承諾 hysteresis
 const DIPLOMACY_READINESS_MIN: float = 0.6
 const DISCIPLINE_FAIL_BASE: float    = 0.15
 const MANUFACTURE_MATERIAL_MIN: float = 30.0
@@ -879,6 +884,9 @@ func select_strategic_intent(state: WorldState, _team: TeamData, ctx: Dictionary
 	# 征服(可打贏弱敵)通常勝擴張；無 viable 弱敵時擴張補位(領土 pressure)→ strategic_ai 包圍。
 	if bool(ctx.get("can_expand", false)):
 		scores["擴張"] = 0.3 + float(values.get("野心", 0.5)) * 0.3
+	# 立國（faction 級 gate）：僅 can_establish（未立國+≥2 成員）可選；score 由 caller 人格×戰備軟秤折入。
+	if bool(ctx.get("can_establish", false)):
+		scores["立國"] = float(ctx.get("establish_score", 0.0))
 	var picked: Dictionary = _argmax_intent(scores, String(ctx.get("committed", "")))
 	var target_id: int = int(ctx.get("target_id", -1))
 	var needs_target: bool = picked["type"] == "征服" or picked["type"] == "擴張"
@@ -895,6 +903,7 @@ func _intent_why(itype: String, target_id: int) -> String:
 		"致富": return "貪婪驅動，treasury 增"
 		"防衛": return "慎重/威脅驅動，備戰守土"
 		"建國": return "野心驅動，累積夠+路徑可達→立勢力"
+		"立國": return "野心/統領驅動，faction 稱王(intent argmax 勝)"
 		"守成": return "無強驅動，維持現狀"
 	return ""
 
@@ -913,6 +922,10 @@ func _select_intent(state: WorldState, f) -> Dictionary:
 	# 擴張 gate（F-D3）：武力 archetype + rung≥擴張 + 有 target → 可選擴張（折入 strategic_ai expand）。
 	var can_expand: bool = leader_team.ambition_archetype == AmbitionLadder.ARCHETYPE_FORCE \
 		and leader_team.ambition_rung >= AmbitionLadder.RUNG_EXPAND and target_id != -1
+	# 立國 redesign：faction 級第 7 意圖（僅未立國 + B1 ≥2 成員可選；人格×戰備軟驅取代舊硬 AND 閘）。
+	# 立國 faction-only → 在此 faction 版 _select_intent 注入 ctx（獨立版走建國，can_establish 不設）。
+	var can_establish: bool = not f.is_established \
+		and f.member_team_ids.size() >= ESTABLISH_MIN_MEMBERS and leader_p != null
 	# faction leader 走統一 scorer（established faction 已立國 → can_found=false，不重複建國）。
 	var ctx: Dictionary = {
 		"leader_values": values,
@@ -922,9 +935,30 @@ func _select_intent(state: WorldState, f) -> Dictionary:
 		"committed": f.intent.get("type", ""),
 		"can_found": false,
 		"can_expand": can_expand,
+		"can_establish": can_establish,
+		"establish_score": _establish_intent_score(state, f, leader_team, leader_p) if can_establish else 0.0,
 		"target_id": target_id,
 	}
 	return select_strategic_intent(state, leader_team, ctx)
+
+# 立國傾向 score（人格驅動，B2 統領/B3 野心/B4 readiness 折入軟秤，取代舊硬 AND 閘）。
+# ★統領 = leader_p.skills.get("統領")（skill）；野心 = leader_p.values.get("野心")（value）——別混。
+func _establish_intent_score(state: WorldState, f, leader_team: TeamData, leader_p) -> float:
+	if leader_p == null: return 0.0
+	var cmd: float = float(leader_p.skills.get("統領", 0.0))       # B2 統領（軟）
+	var amb: float = float(leader_p.values.get("野心", 0.5))        # B3 野心（軟）
+	var rdy: float = leader_team.readiness                          # B4 readiness（軟）
+	# 立國傾向 = 野心×統領人格 base × readiness 軟調（低戰備折扣非硬擋）
+	var base: float = amb * ESTABLISH_AMBITION_W + cmd * ESTABLISH_COMMAND_W
+	var rdy_mod: float = clampf(rdy / ESTABLISH_READINESS, ESTABLISH_RDY_FLOOR, 1.0)
+	var score: float = base * rdy_mod
+	# ESTABLISH phase 加成（§3 取 A：phase→intent，非 phase→option）
+	if leader_team.plan_phase == DecisionContext.PHASE_ESTABLISH:
+		score += ESTABLISH_PHASE_BONUS
+	# 承諾 hysteresis（mirror 既有 intent，別每 cadence 翻）
+	if f.intent is Dictionary and String(f.intent.get("type", "")) == "立國":
+		score += ESTABLISH_COMMITMENT_BONUS
+	return score
 
 # 征服 viability：我力(含可補力餘裕粗估) >= belief 敵力 × strength ratio。複用既有 attack gate。
 func _conquest_viable(state: WorldState, f, leader_team: TeamData, target_id: int) -> bool:
@@ -960,7 +994,7 @@ func _update_goals(state: WorldState, f) -> void:
 	var survival: float = float(leader_p.values.get("求生欲", 0.5)) if leader_p else 0.5
 	var honor:    float = float(leader_p.values.get("義氣",   0.5)) if leader_p else 0.5
 
-	# ── 步驟 1：survival override（意圖前）＋立國 gate（既有分離）──
+	# ── 步驟 1：survival override（意圖前）──
 	# WS-2c：有效糧(私產+自家糧倉)，否則定居 leader 隊 food 在糧倉→永誤判缺糧→恆觸急徵稅。
 	var food_per_cap: float = ResourceSystem.effective_food(state, leader_team) / maxf(leader_team.population, 1)
 	var effective_emergency: float = FOOD_EMERGENCY * (0.7 + survival * 0.6) \
@@ -970,14 +1004,8 @@ func _update_goals(state: WorldState, f) -> void:
 		_emit_goal(state, f, "徵收", "守成", "缺糧 survival override", "survival")  # driver mode=survival
 		return
 
-	# 立國 gate（既有分離，非意圖集；不在 means-end argmax）
-	if not f.is_established and f.member_team_ids.size() >= 2 and leader_p != null:
-		var cmd: float = float(leader_p.skills.get("統領", 0.0))
-		var ambition_discount: float = (ambition - 0.5) * 0.2
-		if cmd >= ESTABLISH_COMMAND - ambition_discount \
-				and ambition >= ESTABLISH_AMBITION - 0.1 \
-				and leader_team.readiness >= ESTABLISH_READINESS:
-			_emit_goal(state, f, "立國", "守成", "稱號擴張(既有 gate)", "establish")
+	# 立國 redesign：舊機械四重 AND 閘移除 → 立國成 faction argmax 第 7 意圖（見 _select_intent
+	# ctx.can_establish/establish_score + 執行段 emit）。B2/B3/B4 降軟 modifier，argmax 贏了才立國。
 
 	# ── 步驟 2：意圖選擇（cadence-gate，藍圖 #3：1 日重選，cadence 內沿用 f.intent）──
 	if state.world.current_tick >= f.intent_eval_next_tick:
@@ -1001,6 +1029,9 @@ func _update_goals(state: WorldState, f) -> void:
 
 	# ── 步驟 3+4：分解子需求(深度1) + 匹配 filler + emit（每令 driver）──
 	match itype:
+		"立國":
+			# 立國 redesign：intent argmax 贏 → emit 立國 goal（:1378 consume → _declare_established 不動）。
+			_emit_goal(state, f, "立國", "立國", "野心稱王(intent argmax)", "establish")
 		"征服":
 			# 主行動=攻擊 target；補力肢從未滿足前提(force_ge_target)現算
 			_emit_goal(state, f, "攻擊", "征服", "主手段取 target%d" % intent["target_id"], "combat")
