@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [裁定 T1] 13破按類處理:A機械更新值/B優先注入urgency保invariant(非直接放寬)/真regression停報;逐測列
 ---
 

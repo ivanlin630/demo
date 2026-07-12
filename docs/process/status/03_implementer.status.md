@@ -2,7 +2,7 @@
 role: implementer
 code: "03"
 status: blocked
-current_ticket: "term-scale-normalize T1 (13 新破 decision 測=多屬 obsolete 舊eval值斷言，待 systems 裁更新範圍)"
+current_ticket: "term-scale-normalize T1 (8/13修畢;5餘揭T1-design真regression候選:FLEE0.6floor/loot/belonging,呈systems)"
 updated: 2026-07-13
 ---
 
