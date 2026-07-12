@@ -13,6 +13,23 @@ const N_LAYERS: int = 5
 const SURVIVAL_SATED_DAYS: float = 5.0   # TEST VALUE — 食物餘命達此→生存急迫度 0（對齊 forage floor 域）
 const URGENCY_EWMA_ALPHA: float = 0.25   # TEST VALUE — 急迫度平滑係數（同 S1 zero-randf pattern）
 
+# §6 主敘事標籤（純顯示衍生值）：取急迫度最高層 → 給人看的簡化摘要。非決策(決策走 coeff 完整混合)。
+const LABEL_SURVIVAL: String = "求生"
+const LABEL_SAFETY: String = "警戒"
+const LABEL_BELONGING: String = "歸附"
+const LABEL_ESTEEM: String = "立業"
+const LABEL_ACTUAL: String = "立國"
+
+static func narrative_label(urgency: PackedFloat32Array) -> String:
+	if urgency.size() != N_LAYERS:
+		return ""
+	var labels: Array = [LABEL_SURVIVAL, LABEL_SAFETY, LABEL_BELONGING, LABEL_ESTEEM, LABEL_ACTUAL]
+	var best_i: int = 0
+	for i in range(1, N_LAYERS):
+		if urgency[i] > urgency[best_i]:
+			best_i = i
+	return labels[best_i]
+
 # 每層 raw 急迫度 = 該層底層指標距門檻的差距(0..1，越沒滿足越高)。純算術零 randf。
 # food_days/threat 由呼叫端(gather)供（已算，避重複）；其餘讀 team/state + AmbitionLadder 門檻。
 static func compute_raw(state: WorldState, team: TeamData, food_days: float, threat: float) -> PackedFloat32Array:

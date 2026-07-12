@@ -357,6 +357,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _raw_need: PackedFloat32Array = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)
 	team.need_urgency = NeedHierarchy.ewma_update(team.need_urgency, _raw_need)
 	c.need_urgency = team.need_urgency
+	# §6 主敘事標籤：team.plan_phase 來源改接五層急迫度衍生(argmax)，非 derive_plan_phase 自算。
+	# GUI(observer_query_api/observer_inspect_panel)讀 team.plan_phase 不變，來源改接。
+	team.plan_phase = NeedHierarchy.narrative_label(team.need_urgency)
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。

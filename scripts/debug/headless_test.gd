@@ -459,6 +459,7 @@ func _initialize() -> void:
 	_test_need_affinity_table()
 	_test_need_coeff()
 	_test_rank_coeff_applied()
+	_test_need_narrative_label()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -15916,6 +15917,14 @@ func _test_rank_coeff_applied() -> void:
 	var scored_flat := DecisionEngine.rank_scored_ctx(ctx, "")
 	assert(scored_flat is Array, "rank_scored_ctx 回 Array")
 	print("[TEST] rank_coeff_applied PASS (coeff wiring；行為連貫 organic 驗)")
+
+func _test_need_narrative_label() -> void:
+	print("[TEST] need_narrative_label")
+	assert(NeedHierarchy.narrative_label(PackedFloat32Array([1,0,0,0,0])) == NeedHierarchy.LABEL_SURVIVAL, "生存急迫→求生標籤")
+	assert(NeedHierarchy.narrative_label(PackedFloat32Array([0,1,0,0,0])) == NeedHierarchy.LABEL_SAFETY, "安全急迫→警戒標籤")
+	assert(NeedHierarchy.narrative_label(PackedFloat32Array([0,0,0,0,1])) == NeedHierarchy.LABEL_ACTUAL, "自我實現→立國標籤")
+	assert(NeedHierarchy.narrative_label(PackedFloat32Array()) == "", "冷啟空標籤")
+	print("[TEST] need_narrative_label PASS")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()
