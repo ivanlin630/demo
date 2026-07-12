@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [平行corroborate·pre-build] 死鎖實證—獨立隊farming_level恆0 vs faction隊>0×存活+crude camp civ/mil比例;佐證de-patch方向
 ---
 

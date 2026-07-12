@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [工單] de-patch建造權—faction迴圈→outpost-owner-team遍歷;spec+R²CLEAN;疊新worktree feat/depatch-build-rights
 ---
 
