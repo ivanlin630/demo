@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [真根·零跑+算] command-tenure code正確build未merge(驗收失敗);B2仍卡真根=成長速率×leader週轉交叉—0.0003/日爬門檻缺口需170-430日>>leader在任;succession不繼承統領;第四層=絕境早崩吃掉一切累積
 ---
 
