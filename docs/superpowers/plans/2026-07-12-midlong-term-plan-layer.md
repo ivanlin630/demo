@@ -46,50 +46,52 @@
 **Interfaces:**
 - Consumes: 既有 `team.food_flow_avg`（decision_context 已維護日均淨食物流 EMA）、`team.population`、`team.faction_id`、`team.ambition_cap`、`team.ambition_rung`。
 - Produces（slice 3 依賴）：
-  - `team.rung_trend_ewma: float`、`team.rung_trend_ewma_last: float`、`team.rung_stall_count: int`（trend 狀態）。
-  - `AmbitionLadder.milestone_met(state, team, target_rung_val) -> bool`（判目標階達成，slice 3 bypass 複用）。
-  - `AmbitionLadder.update(state, team)` 語意：事件驅動 rung（升=milestone、降=stall），簽名不變。
+  - `team.rung_stall_count: int`（連續失守 milestone 計數）。**（棄 EWMA/trend 欄——demote 改綁 milestone，見下）**
+  - `AmbitionLadder.milestone_met(state, team, rung_val) -> bool`（判「夠格在 rung_val」的階梯條件，slice 3 bypass 複用）。
+  - `AmbitionLadder.update(state, team)` 語意：事件驅動 rung（升=milestone_met(next)、降=連續失守 milestone_met(current)），簽名不變。
 
 ### 設計（HOW，systems 定）
-- **milestone 判達成**：複用既有 `target_rung()` 的階梯條件——「當前 rung+1 的達成條件是否滿足」= milestone_met。條件即 target_rung 內既有 gate（ACCUMULATE:food_flow≥0.5 / EXPAND:pop≥8 / STATE:faction≥2 / HEGEMON:faction≥4）。
-- **rung 升**：`milestone_met(rung+1)` 為真 → rung+1（reckless=野心>0.65+慎重<0.4 直跳 target,保留既有）。承諾式:達成才升。
-- **rung 降**：**trend 停滯 K 次才降**（非瞬時）。trend = milestone 指標的 EWMA 斜率。
-  - milestone 進度指標 = 當前目標階對應的主指標:RUNG_ACCUMULATE→`food_flow_avg`;RUNG_EXPAND→`float(population)`;RUNG_STATE/HEGEMON→`float(faction teams)`。
-  - `trend = ewma_now − ewma_last`（每 cadence 更新）。`trend ≤ 0` 連續 `RUNG_STALL_K` 次 → rung−1（一步退）+ 重置 stall_count。`trend > 0` → stall_count=0（有進度撐住）。
+- **milestone_met(N) = 「夠格在 rung N」的階梯條件**（複用 target_rung gate；累進條件）：ACCUMULATE→food_flow≥0.5 / EXPAND→food_flow≥0.5 且 pop≥8 / STATE→＋faction≥2 / HEGEMON→＋faction≥4 / SURVIVE→恆 true（地板）。
+- **rung 升**：`milestone_met(rung+1)` 為真 → rung+1（reckless=野心>0.65+慎重<0.4 直跳到最高連續達成 rung，保留既有）。stall_count 歸零。承諾式:達成才升。
+- **rung 降（milestone-based，非 trend）**：**連續 `RUNG_STALL_K` 次 `not milestone_met(current_rung)` 才降**（遲滯，瞬時跌不降）。
+  - 每 cadence:若 `not milestone_met(team.ambition_rung)`（失守當前階條件）→ stall_count++;達 K → rung−1（一步退）+ stall_count 歸零。若 `milestone_met(current)`（仍夠格）→ stall_count=0（撐住）。
+  - **對稱**:升=達成 next、降=失守 current。**無 EWMA/trend**——milestone 條件本身即「能否維持此 rung」。plateau-below-threshold（如 food_flow 平在 0.2<0.5）= 失守 ACCUMULATE → 正確 demote（trend 版會漏這個死角）。
 - **常數**（ambition_ladder.gd 頂）：
   ```gdscript
-  const RUNG_TREND_ALPHA: float = 0.3    # TEST VALUE — EWMA 平滑係數
-  const RUNG_STALL_K: int = 3            # TEST VALUE — trend≤0 連續幾 cadence 判停滯降 rung
+  const RUNG_STALL_K: int = 3   # TEST VALUE — 連續失守 milestone 幾 cadence 才降 rung（遲滯）
   ```
 
 - [ ] **Step 1: 寫失敗測試**（team_data 欄先加否則 parse fail——先加欄再測）
 
-先在 `team_data.gd` food_flow 欄後加：
+先在 `team_data.gd` food_flow 欄後加（**只一欄**）：
 ```gdscript
-var rung_trend_ewma: float = 0.0       # 計畫層：milestone 進度指標 EWMA
-var rung_trend_ewma_last: float = 0.0   # 上次 EWMA（算 trend 斜率）
-var rung_stall_count: int = 0           # trend≤0 連續次數（達 K 降 rung）
+var rung_stall_count: int = 0   # 計畫層：連續失守當前 rung milestone 次數（達 K 降 rung）
 ```
 `headless_test.gd` 加測（手構最小 state + team，驗事件驅動語意）：
 ```gdscript
 func _test_plan_rung_event_driven() -> void:
-    print("--- 計畫層 T1: rung 事件驅動（milestone 升 / trend 停滯降）---")
+    print("--- 計畫層 T1: rung 事件驅動（milestone 升 / 失守 K 降）---")
     var state := _mk_min_state()
-    var team := _mk_team(state, 10, {"野心": 0.5, "慎重": 0.5})  # 非 reckless
+    var team := _mk_team(state, 5, {"野心": 0.5, "慎重": 0.5})  # 非 reckless；pop=5 (<8 不誤升 EXPAND)
     team.ambition_cap = AmbitionLadder.RUNG_HEGEMON
     team.ambition_rung = AmbitionLadder.RUNG_SURVIVE
-    # milestone: food_flow≥0.5 → 升 ACCUMULATE
+    # milestone: food_flow≥0.5 → 升 ACCUMULATE（升一步;pop<8 擋 EXPAND）
     team.food_flow_avg = 1.0
     AmbitionLadder.update(state, team)
-    assert(team.ambition_rung == AmbitionLadder.RUNG_ACCUMULATE, "milestone 達成→升 ACCUMULATE")
-    # trend 停滯 K 次 → 降。food_flow 保持不漲（trend=0）
-    team.food_flow_avg = 1.0
-    for _i in range(AmbitionLadder.RUNG_STALL_K + 1):
+    assert(team.ambition_rung == AmbitionLadder.RUNG_ACCUMULATE, "milestone 達成→升 ACCUMULATE (got %d)" % team.ambition_rung)
+    # 失守 ACCUMULATE（food_flow 跌破 0.5 門）連續 K 次 → 降回 SURVIVE
+    team.food_flow_avg = 0.2   # < ACCUMULATE_FLOW_MIN(0.5) = 失守（含 plateau-below-threshold）
+    for _i in range(AmbitionLadder.RUNG_STALL_K):
         AmbitionLadder.update(state, team)
-    assert(team.ambition_rung == AmbitionLadder.RUNG_SURVIVE, "trend 停滯 K 次→降回 SURVIVE (got %d)" % team.ambition_rung)
+    assert(team.ambition_rung == AmbitionLadder.RUNG_SURVIVE, "失守 milestone K 次→降回 SURVIVE (got %d)" % team.ambition_rung)
+    # 撐住:milestone 仍滿足 → 不降
+    team.food_flow_avg = 1.0
+    for _i in range(AmbitionLadder.RUNG_STALL_K + 2):
+        AmbitionLadder.update(state, team)
+    assert(team.ambition_rung >= AmbitionLadder.RUNG_ACCUMULATE, "milestone 滿足→不降(且可再升)")
     print("[OK] _test_plan_rung_event_driven")
 ```
-（`_mk_min_state`/`_mk_team` 用既有 test helper;無則比照 `consolidation_decision_trace.gd` 的 `_mk_leader` 構造。）
+（`_mk_min_state`/`_mk_team` headless_test 無現成 → inline 手構 state/team,比照既有 headless 手構 pattern（`_mk_leader_with_values:15693` 可複用構 leader）。）
 
 - [ ] **Step 2: 跑測試驗證失敗**
 
@@ -98,48 +100,34 @@ Expected: FAIL（`_test_plan_rung_event_driven` 斷言不過——舊 update 是
 
 - [ ] **Step 3: 重寫 `AmbitionLadder.update()` 為事件驅動**
 
-`ambition_ladder.gd` 頂加常數（上方 §設計）。加 helper + 重寫 update：
+`ambition_ladder.gd` 頂加常數 `RUNG_STALL_K=3`。加 helper + 重寫 update：
 ```gdscript
-# milestone：當前 rung+1 的達成條件是否滿足（複用 target_rung 階梯 gate）
-static func milestone_met(state: WorldState, team: TeamData, next_rung: int) -> bool:
+# milestone_met(N) = 「夠格在 rung N」的階梯條件（累進；複用 target_rung gate 語意）
+static func milestone_met(state: WorldState, team: TeamData, rung_val: int) -> bool:
     var pop: int = team.population
-    match next_rung:
+    match rung_val:
+        RUNG_SURVIVE:    return true   # 地板恆夠格
         RUNG_ACCUMULATE: return team.food_flow_avg >= ACCUMULATE_FLOW_MIN
         RUNG_EXPAND:     return team.food_flow_avg >= ACCUMULATE_FLOW_MIN and pop >= EXPAND_MIN_POP
         RUNG_STATE, RUNG_HEGEMON:
+            if team.food_flow_avg < ACCUMULATE_FLOW_MIN or pop < EXPAND_MIN_POP: return false
             if team.faction_id == -1 or not state.factions.has(team.faction_id): return false
             var ft: int = state.factions[team.faction_id].member_team_ids.size()
-            return ft >= (STATE_MIN_FACTION_TEAMS if next_rung == RUNG_STATE else HEGEMON_MIN_FACTION_TEAMS)
+            return ft >= (STATE_MIN_FACTION_TEAMS if rung_val == RUNG_STATE else HEGEMON_MIN_FACTION_TEAMS)
     return false
-
-# 當前目標階的進度指標（算 trend）
-static func _progress_metric(state: WorldState, team: TeamData) -> float:
-    match team.ambition_rung:
-        RUNG_SURVIVE, RUNG_ACCUMULATE: return team.food_flow_avg
-        RUNG_EXPAND: return float(team.population)
-        _:
-            if team.faction_id != -1 and state.factions.has(team.faction_id):
-                return float(state.factions[team.faction_id].member_team_ids.size())
-            return float(team.population)
 
 static func update(state: WorldState, team: TeamData) -> void:
     var leader: PersonData = state.persons.get(team.leader_id)
     team.ambition_archetype = derive_archetype(leader)
     team.ambition_cap = derive_cap(leader)
     var old: int = team.ambition_rung
-    # trend EWMA 更新（進度指標斜率）
-    var metric: float = _progress_metric(state, team)
-    team.rung_trend_ewma_last = team.rung_trend_ewma
-    team.rung_trend_ewma = (1.0 - RUNG_TREND_ALPHA) * team.rung_trend_ewma + RUNG_TREND_ALPHA * metric
-    var trend: float = team.rung_trend_ewma - team.rung_trend_ewma_last
-    # 升：milestone 達成（capped by ambition_cap）
     var next_rung: int = old + 1
+    # 升：milestone_met(next) 達成（capped by ambition_cap）
     if next_rung <= team.ambition_cap and milestone_met(state, team, next_rung):
         var amb: float = float(leader.values.get("野心", 0.5)) if leader else 0.5
         var prud: float = float(leader.values.get("慎重", 0.5)) if leader else 0.5
         var reckless: bool = amb > 0.65 and prud < 0.4
-        # reckless 直跳到最高連續達成的 rung
-        if reckless:
+        if reckless:   # reckless 直跳到最高連續達成的 rung
             var t: int = next_rung
             while t + 1 <= team.ambition_cap and milestone_met(state, team, t + 1):
                 t += 1
@@ -148,22 +136,22 @@ static func update(state: WorldState, team: TeamData) -> void:
             team.ambition_rung = next_rung
         team.rung_stall_count = 0
         Probe.bump("g2.ambition_promote")
-    # 降：trend 停滯 K 次（遲滯，非瞬時）
+    # 降：連續 K 次失守當前 rung milestone（遲滯，瞬時跌不降；含 plateau-below-threshold）
     elif old > RUNG_SURVIVE:
-        if trend <= 0.0:
+        if not milestone_met(state, team, old):
             team.rung_stall_count += 1
             if team.rung_stall_count >= RUNG_STALL_K:
                 team.ambition_rung = old - 1
                 team.rung_stall_count = 0
                 Probe.bump("g2.ambition_demote")
         else:
-            team.rung_stall_count = 0
+            team.rung_stall_count = 0   # 仍夠格 → 撐住
     team.ambition_eval_next_tick = state.world.current_tick + LADDER_EVAL_CADENCE
     if team.ambition_rung != old:
         print("[Ambition] Team%d rung %d→%d (%s cap=%d)" % [
             team.team_id, old, team.ambition_rung, team.ambition_archetype, team.ambition_cap])
 ```
-（保留 `target_rung()` 函式不刪——其他既有 caller 可能讀,且 milestone_met 複用其語意;但 update 不再呼它。grep 確認 target_rung 其他 caller 若有則保持相容。）
+（保留 `target_rung()` 不刪——外部 caller = `specimen_tracer.gd:104`（implementer 確認），留著相容;update 不再呼它。**milestone_met 累進條件**：高階含低階條件，∴ 失守低階=失守高階,demote 一步步退正確。）
 
 - [ ] **Step 4: 跑測試驗證通過 + 迴歸**
 
@@ -504,6 +492,6 @@ git commit -m "feat(plan-layer S4): Observer GUI露plan_phase+rung欄—攀爬�
 
 ## Self-Review 註記
 - **spec 覆蓋**：四層模型（rung/milestone/phase/承諾偏置）→ S1(rung事件+milestone)/S2(phase+偏置+承諾綁rung)/S3(survival-bypass)/S4(GUI)。韌性(逃生閥/劇變重規劃)→S3+S2 導出式重導。誠實化(同質風險)→驗收「≥2種模式」。
-- **TEST VALUE 留白全填**：RUNG_TREND_ALPHA=0.3/RUNG_STALL_K=3/PLAN_PHASE_DRIVE_MAG=0.4/RUNG_CRASH_POP_DROP_PCT=0.30/RUNG_CRASH_FOOD_DEEP=-2.0。
+- **TEST VALUE 留白全填**：RUNG_STALL_K=3/PLAN_PHASE_DRIVE_MAG=0.4/RUNG_CRASH_POP_DROP_PCT=0.30/RUNG_CRASH_FOOD_DEEP=-2.0。（EWMA/trend 棄——demote 綁 milestone_met，S1 blocker 裁定 2026-07-12。）
 - **型別一致**：plan_phase:String(PHASE_* const)、rung:int、trend:float 跨 slice 一致。`milestone_met`/`derive_plan_phase` 簽名 slice 間對齊。
 - **待實作者補**：`_mk_min_state`/`_mk_team` test helper（若 headless_test 無現成，比照 consolidation_decision_trace 構造）;option 實名（覓食/買糧/貿易/外交/整併/投靠）grep `DecisionOptions` 對齊;GUI panel 檔實名對齊既有 observer slice。

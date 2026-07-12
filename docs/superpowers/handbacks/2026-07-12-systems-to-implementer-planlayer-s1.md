@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [工單 S1] 計畫層 rung事件驅動化—AmbitionLadder.update棄瞬時重算→milestone升/trend停滯降;plan Task1;疊新worktree feat/plan-layer-s1
 ---
 
