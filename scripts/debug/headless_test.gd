@@ -454,6 +454,7 @@ func _initialize() -> void:
 	_test_plan_rung_bypass()
 	_test_need_raw_urgency()
 	_test_need_ewma()
+	_test_need_gather_updates()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -15824,6 +15825,21 @@ func _test_need_ewma() -> void:
 	var team := TeamData.new()
 	assert(team.need_urgency.size() == 0 or team.need_urgency.size() == NeedHierarchy.N_LAYERS, "need_urgency 欄存在")
 	print("[TEST] need_ewma PASS")
+
+func _test_need_gather_updates() -> void:
+	print("[TEST] need_gather_updates")
+	var state := _mk_min_state()
+	var team := _mk_team(state, 5, {"野心": 0.5})   # 既有 helper：最小 state + 1 team（含 leader）
+	assert(team.need_urgency.size() == 0, "gather 前 need_urgency 空")
+	var ctx := DecisionContext.gather(state, team)
+	assert(team.need_urgency.size() == NeedHierarchy.N_LAYERS, "gather 後 need_urgency size 5")
+	assert(ctx.need_urgency.size() == NeedHierarchy.N_LAYERS, "ctx 快照 size 5")
+	# 第二次 gather → EWMA 累積（值變，非重置）
+	var first := team.need_urgency[NeedHierarchy.L_BELONGING]
+	var _ctx2 := DecisionContext.gather(state, team)
+	var second := team.need_urgency[NeedHierarchy.L_BELONGING]
+	assert(second >= first, "EWMA 累積不倒退，%f→%f" % [first, second])
+	print("[TEST] need_gather_updates PASS")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()
