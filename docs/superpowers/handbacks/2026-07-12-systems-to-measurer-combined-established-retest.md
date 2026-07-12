@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [組合重測·established B2] forage+command-tenure併入feat/command-tenure-growth(main已含forage)—重測B2是否鬆動;3mo快答+established苗頭右尺寸
 ---
 
