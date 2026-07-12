@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [工單] 統領日常領導成長—loop2外層cadence _grow_leadership_tenure;spec+R²CLEAN;疊新worktree feat/command-tenure-growth
 ---
 
