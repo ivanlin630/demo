@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: [merge請求] plan-layer S1驗收通過(determinism CLEAN+0新增錯誤)，churn量化基線缺不追(質化目標已達)，請merge並序列dispatch S2
 ---
 
