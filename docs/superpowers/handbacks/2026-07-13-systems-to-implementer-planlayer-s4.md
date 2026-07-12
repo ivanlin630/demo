@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [工單 S4·末] 計畫層 GUI可讀性—Observer露plan_phase+rung欄(純顯示);plan Task4;疊新worktree feat/plan-layer-s4
 ---
 
