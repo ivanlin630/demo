@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [補probe·優先S3] per-option 選中次數 probe——量①全23覆蓋 ④不死鎖 + TC7 collapse;比照 rung_dist
 ---
 
