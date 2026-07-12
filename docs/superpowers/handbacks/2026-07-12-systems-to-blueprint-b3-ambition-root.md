@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [B3真根·零跑+算] 野心=靜態人格值無成長路徑—非雞生蛋,是門檻不對齊:ESTABLISH(0.6)>建國門(0.55)倒序;修=align門檻(tune非de-patch);建國得起卻立不了國
 ---
 
