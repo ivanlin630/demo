@@ -2,7 +2,7 @@
 role: implementer
 code: "03"
 status: blocked
-current_ticket: "decision-engine-S2 / feat/decision-needs-hierarchy (S2.3 待藍圖裁 need-model 張力)"
+current_ticket: "decision-engine-S2 (S2.0 就緒度綠但 coeff 仍破 govern×2+TC7新，回報 systems)"
 updated: 2026-07-13
 ---
 

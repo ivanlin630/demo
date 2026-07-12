@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [S2 續] 裁B R②CLEAN——先做 S2.0(raw就緒度修正)再續 S2.3~S2.6
 ---
 
