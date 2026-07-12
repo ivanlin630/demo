@@ -121,6 +121,8 @@ func _initialize() -> void:
 	_test_dispatch_builder()
 	_test_evaluate_outpost_location()
 	_test_evaluate_infrastructure()
+	_test_depatch_independent_team_builds_farm()
+	_test_depatch_scope_lock_no_foreign_build()
 	_test_subteam_arrival_triggers_build()
 	_test_dispatch_upgrader_and_facility()
 	_test_auto_settle_after_build()
@@ -7611,13 +7613,55 @@ func _test_evaluate_infrastructure() -> void:
 			tile.productivity = 1.0; tile.outpost_level = 0
 			state.world.tiles[x * 1000 + y] = tile
 	var fai := FactionAISystem.new()
-	fai._evaluate_infrastructure(state, f)
+	fai._evaluate_infrastructure(state, state.teams[0], fai._build_owner_outpost_index(state).get(0, []))
 	var sub_count = 0
 	for tid in state.teams:
 		if state.teams[tid].parent_team_id == 0:
 			sub_count += 1
 	assert(sub_count >= 1, "應派出基建子隊")
 	print("Infra Task5 OK (派出 %d 子隊)" % sub_count)
+
+# de-patch 建造權：獨立隊（不在任何 faction）擁自有 civilian outpost + 飢餓
+# → owner 遍歷評到 → 啟動農田（de-patch 前 faction-leader-team-only 漏評 = 死鎖根）。
+func _test_depatch_independent_team_builds_farm() -> void:
+	print("--- de-patch: 獨立隊擁 outpost + 飢餓 → 自建農田 ---")
+	var r := _make_infra_state("civilian")
+	var state: WorldState = r[0]; var team: TeamData = r[1]
+	var tile: HexTileData = r[2]
+	assert(team.faction_id == -1, "獨立隊 faction_id=-1")
+	assert(not state.factions.has(team.faction_id), "不在任何 faction（無 leader 代評）")
+	tile.outpost_level = 3   # 已滿級 → 跳過升級路徑(1)，隔離 facility 農田決策
+	team.resources = { "food": 0.0, "material": 500.0, "coin": 100.0 }   # 飢餓 + 有料
+	team.current_task = TeamData.TASK_IDLE; team.combat_target = -1
+	state.world.current_tick = 0   # 0 % INFRA_INTERVAL == 0 → 觸發 INFRA cadence
+	var fai := FactionAISystem.new()
+	fai.evaluate_all(state, [team.team_id])   # 走新 owner 遍歷（非 faction 迴圈）
+	assert(tile.construction_team_id == team.team_id,
+		"獨立隊應在自有 outpost 啟動施工，construction_team_id=%d" % tile.construction_team_id)
+	assert(tile.construction_target.get("facility", "") == "farming",
+		"飢餓 → 農田，實際 target=%s" % str(tile.construction_target))
+	print("de-patch OK: 獨立隊自建農田啟動")
+
+# de-patch 範圍鎖：team 只對「自有」outpost 動工，不碰他隊 outpost。
+func _test_depatch_scope_lock_no_foreign_build() -> void:
+	print("--- de-patch: 範圍鎖—不對非自有 outpost 動工 ---")
+	var r := _make_infra_state("civilian")
+	var state: WorldState = r[0]; var team: TeamData = r[1]
+	var tile: HexTileData = r[2]
+	tile.outpost_owner = 9   # (0,0) 改由 team 9 擁有
+	var foreign := TeamData.new(); foreign.team_id = 9; _seed_pop(foreign, 5)
+	foreign.tile_pos = Vector2i(5, 5)
+	state.teams[9] = foreign
+	team.resources = { "food": 0.0, "material": 500.0 }   # 飢餓 + 有料
+	team.tile_pos = Vector2i(0, 0)   # 即使站在他人 outpost 上
+	var fai := FactionAISystem.new()
+	var idx := fai._build_owner_outpost_index(state)
+	assert(not idx.has(0), "team0 無自有 outpost → 不在索引")
+	assert(idx.get(9, []).size() == 1, "team9 擁 (0,0)")
+	fai._evaluate_infrastructure(state, team, idx.get(0, []))   # owned_tiles 空
+	assert(tile.construction_team_id != team.team_id,
+		"team0 不應對 team9 的 outpost 動工，實際 construction_team_id=%d" % tile.construction_team_id)
+	print("de-patch scope-lock OK")
 
 func _test_subteam_arrival_triggers_build() -> void:
 	print("--- Infra Task6: 子隊抵達觸發建造 ---")
@@ -12678,7 +12722,7 @@ func _test_govern_faction_leader() -> void:
 	var state := _bootstrap_govern_state(Vector2i(5, 5), 0.0)
 	var fid: int = state.teams[0].faction_id
 	var fai := FactionAISystem.new()
-	fai._evaluate_infrastructure(state, state.factions[fid])
+	fai._evaluate_infrastructure(state, state.teams[0], fai._build_owner_outpost_index(state).get(0, []))
 	var team: TeamData = state.teams[0]
 	assert(team.current_task == "治理",
 		"faction leader 公庫不足應回家治理，實際=%s" % team.current_task)
@@ -12691,7 +12735,7 @@ func _test_govern_skip_when_vault_full() -> void:
 	var state := _bootstrap_govern_state(Vector2i(5, 5), 100.0)
 	var fid: int = state.teams[0].faction_id
 	var fai := FactionAISystem.new()
-	fai._evaluate_infrastructure(state, state.factions[fid])
+	fai._evaluate_infrastructure(state, state.teams[0], fai._build_owner_outpost_index(state).get(0, []))
 	var team: TeamData = state.teams[0]
 	assert(team.current_task != "治理",
 		"公庫達標不應治理，實際=%s" % team.current_task)

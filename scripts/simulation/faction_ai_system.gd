@@ -637,10 +637,6 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if SimRunner.phase_timing: _tf = _fai_pht("loop1.update_goals", _tf)
 		_assign_tasks(state, f)
 		if SimRunner.phase_timing: _tf = _fai_pht("loop1.assign_tasks", _tf)
-		# C: 每 INFRA_INTERVAL 評估一次基建（蓋/升級/擴建）
-		if state.world.current_tick % INFRA_INTERVAL == 0:
-			_evaluate_infrastructure(state, f)
-		if SimRunner.phase_timing: _tf = _fai_pht("loop1.infra", _tf)
 		# 每 20 小時評估一次主動外交
 		if state.world.current_tick % FACTION_UPDATE_INTERVAL == 0:
 			var _leader_team: TeamData = state.teams.get(f.leader_team_id)
@@ -661,6 +657,20 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if SimRunner.phase_timing: _fai_pht("loop1.betray", _tf)
 
 	if SimRunner.phase_timing: _t = _fai_pht("loop1.factions", _t)
+
+	# de-patch 建造權：INFRA cadence 遍歷所有擁 outpost 的 team（獨立隊 + faction 成員含非 leader）
+	# 取代原 faction 迴圈內 per-leader-team 評估——真根 faction-leader-team-only 死鎖。
+	if state.world.current_tick % INFRA_INTERVAL == 0:
+		var _ti0: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+		var owner_tiles: Dictionary = _build_owner_outpost_index(state)
+		var owner_ids: Array = owner_tiles.keys()
+		owner_ids.sort()   # determinism: team_id 升序遍歷（不依賴 dict hash 序）
+		for owner_tid in owner_ids:
+			var builder: TeamData = state.teams.get(owner_tid)
+			if builder == null: continue
+			_evaluate_infrastructure(state, builder, owner_tiles[owner_tid])
+		if SimRunner.phase_timing: _fai_pht("loop1.infra", _ti0)
+
 	var merge_queue: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
@@ -2707,44 +2717,47 @@ func _faction_has_workshop(state: WorldState, leader_team: TeamData) -> bool:
 				return true
 	return false
 
-func _evaluate_infrastructure(state: WorldState, faction) -> void:
-	var leader_team: TeamData = state.teams.get(faction.leader_team_id)
-	if leader_team == null: return
-	if leader_team.combat_target != -1: return
-	var leader: PersonData = state.persons.get(leader_team.leader_id)
-	if leader == null: return
-	# 玩家 leader → 不自動決策（後續用 AdvisorSystem.push_outpost_advice）
-	if leader_team.leader_id == state.player_id and state.player_id != -1:
-		return
-	var _ti: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
-	# (1) 升級既有 outpost
+# de-patch 建造權：掃 tiles 一趟建 {owner_team_id: [HexTileData]} 索引。
+# 無狀態、每 INFRA tick 重建（避免增量維護失效）。OutpostOwnerBank 不動。
+func _build_owner_outpost_index(state: WorldState) -> Dictionary:
+	var idx: Dictionary = {}
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.outpost_owner != leader_team.team_id: continue
+		if tile.outpost_level > 0 and tile.outpost_owner != -1:
+			if not idx.has(tile.outpost_owner):
+				idx[tile.outpost_owner] = []
+			idx[tile.outpost_owner].append(tile)
+	return idx
+
+# de-patch：評估對象改「擁 outpost 的 team」自身（builder_team），只走自有 outpost（owned_tiles）。
+func _evaluate_infrastructure(state: WorldState, builder_team: TeamData, owned_tiles: Array) -> void:
+	if builder_team == null: return
+	if builder_team.combat_target != -1: return
+	var leader: PersonData = state.persons.get(builder_team.leader_id)
+	if leader == null: return
+	# 玩家 leader → 不自動決策（後續用 AdvisorSystem.push_outpost_advice）
+	if builder_team.leader_id == state.player_id and state.player_id != -1:
+		return
+	var _ti: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
+	# (1) 升級既有 outpost（owned_tiles 已保證 owner==builder）
+	for tile in owned_tiles:
 		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue
-		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
+		if _dispatch_upgrader(state, builder_team, tile.tile_pos, tile.outpost_level + 1):
 			if SimRunner.phase_timing: _fai_pht("infra.upgrade", _ti)
 			return
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.upgrade", _ti)
-	# (2) 擴建設施（faction 內所有 outpost；owner 以自身 local 資料評估，
-	#     就地施工優先：owner 在場 > 居民團 > 派擴建子隊）
-	for tile_id in state.world.tiles:
-		var tile: HexTileData = state.world.tiles[tile_id]
+	# (2) 擴建設施（只走自有 outpost；owner=builder 就地施工優先：
+	#     owner 在場 > 居民團 > 派擴建子隊）
+	for tile in owned_tiles:
 		if tile.outpost_level == 0: continue
 		if tile.construction_team_id != -1:
 			if OutpostSystem.new().check_construction_timeout(state, tile):
 				continue
-			_try_resume_construction(state, tile, leader_team)
+			_try_resume_construction(state, tile, builder_team)
 			continue
-		var owner_team: TeamData = state.teams.get(tile.outpost_owner)
-		if owner_team == null: continue
-		if owner_team.team_id != leader_team.team_id \
-				and (owner_team.faction_id != leader_team.faction_id or owner_team.faction_id == -1):
-			continue
-		# 玩家 team 不自動決策
-		if owner_team.leader_id == state.player_id and state.player_id != -1: continue
-		var owner_leader: PersonData = state.persons.get(owner_team.leader_id)
-		if owner_leader == null: continue
+		# owned_tiles 已保證 owner==builder（範圍鎖：只自 outpost），不再跨隊代評
+		var owner_team: TeamData = builder_team
+		var owner_leader: PersonData = leader
 		var pick: Dictionary = _pick_facility(state, owner_team, tile, owner_leader)
 		if pick.is_empty(): continue
 		if pick.has("demolish_first"):
@@ -2769,19 +2782,19 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 			return
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.facility", _ti)
 	# (3) 蓋新 outpost 前：公庫不足 + leader 不在家 + idle → 回家治理攢公庫
-	var own_pos: Vector2i = _find_own_outpost(state, leader_team)
-	if own_pos != Vector2i(-1, -1) and leader_team.tile_pos != own_pos:
+	var own_pos: Vector2i = _find_own_outpost(state, builder_team)
+	if own_pos != Vector2i(-1, -1) and builder_team.tile_pos != own_pos:
 		var home_tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
 		var vault_mat: float = float(home_tile.public_storage.get("material", 0)) if home_tile else 0.0
-		if vault_mat < GOVERN_MATERIAL_TARGET and leader_team.current_task == TeamData.TASK_IDLE:
-			if TaskArbiter.try_set(state, leader_team, TeamData.TASK_GOVERN, own_pos,
+		if vault_mat < GOVERN_MATERIAL_TARGET and builder_team.current_task == TeamData.TASK_IDLE:
+			if TaskArbiter.try_set(state, builder_team, TeamData.TASK_GOVERN, own_pos,
 					TaskArbiter.PRIO_DISPATCH, "govern_accumulate"):
 				return
 	# (3) 蓋新 outpost
-	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
+	var loc: Dictionary = _evaluate_new_outpost_location(state, builder_team)
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.new_loc", _ti)
 	if loc.is_empty(): return
-	var outpost_type: String = _pick_outpost_type(state, leader_team, leader)
+	var outpost_type: String = _pick_outpost_type(state, builder_team, leader)
 	# S2 礦村：含礦山地 → 強制 civilian（mint 只允 civilian；軍鎮不採礦=無意義）
 	var loc_tile: HexTileData = loc.get("tile", null)
 	if loc_tile != null and loc_tile.terrain == "mountain":
@@ -2790,7 +2803,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 			+ float(loc_tile.resource_cap.get("ore_silver", 0))
 		if ore_self > 0.0:
 			outpost_type = "civilian"
-	_dispatch_builder(state, leader_team, loc.pos, outpost_type, 1)
+	_dispatch_builder(state, builder_team, loc.pos, outpost_type, 1)
 
 # ──────── 設施需求迴路（score = 地利 × (1+缺口) × 個性）────────
 
