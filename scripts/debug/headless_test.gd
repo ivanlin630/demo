@@ -449,6 +449,8 @@ func _initialize() -> void:
 	_test_ambition_rung_climb()
 	_test_ambition_cap_limits()
 	_test_plan_rung_event_driven()
+	_test_plan_phase_derive()
+	_test_plan_phase_bias()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -15730,6 +15732,39 @@ func _test_plan_rung_event_driven() -> void:
 		AmbitionLadder.update(state, team)
 	assert(team.ambition_rung >= AmbitionLadder.RUNG_ACCUMULATE, "milestone 滿足→不降(且可再升) (got %d)" % team.ambition_rung)
 	print("[OK] _test_plan_rung_event_driven")
+
+func _test_plan_phase_derive() -> void:
+	print("--- 計畫層 T2: phase 導出（缺口×個性×隊形）---")
+	var state := _mk_min_state()
+	# 缺糧隊 → 求糧
+	var t1 := _mk_team(state, 10, {"野心": 0.5, "慎重": 0.6})
+	t1.food_flow_avg = -1.0  # 缺糧
+	assert(DecisionContext.derive_plan_phase(state, t1) == DecisionContext.PHASE_SEEK_FOOD, "缺糧→求糧")
+	# 糧足人少 → 成長
+	var t2 := _mk_team(state, 4, {"野心": 0.7})
+	t2.food_flow_avg = 2.0
+	t2.ambition_rung = AmbitionLadder.RUNG_ACCUMULATE
+	assert(DecisionContext.derive_plan_phase(state, t2) == DecisionContext.PHASE_GROW, "糧足人少→成長")
+	# 子隊 → NONE
+	var t3 := _mk_team(state, 10, {})
+	t3.parent_team_id = t1.team_id
+	assert(DecisionContext.derive_plan_phase(state, t3) == DecisionContext.PHASE_NONE, "子隊→無計畫")
+	print("[OK] _test_plan_phase_derive")
+
+func _test_plan_phase_bias() -> void:
+	print("--- 計畫層 T2: phase 偏置 term ---")
+	var state := _mk_min_state()
+	var team := _mk_team(state, 10, {})
+	team.food_flow_avg = -1.0   # 缺糧 → derive=求糧
+	var ctx := DecisionContext.gather(state, team)
+	# 求糧 phase → 覓食 option 有 plan_phase_drive 加成
+	assert(ctx.plan_phase == DecisionContext.PHASE_SEEK_FOOD, "缺糧隊 phase=求糧 (got %s)" % ctx.plan_phase)
+	assert(ctx.plan_phase_drive_map.get("覓食", 0.0) > 0.0, "求糧 phase 偏置覓食")
+	assert(ctx.plan_phase_drive_map.get("攻擊", 0.0) == 0.0, "求糧 phase 不偏置攻擊")
+	# term 生效：eval 回 map 值
+	assert(DecisionTerms.eval("plan_phase_drive", ctx, "覓食") > 0.0, "plan_phase_drive term 對覓食生效")
+	assert(DecisionTerms.eval("plan_phase_drive", ctx, "攻擊") == 0.0, "plan_phase_drive term 對攻擊=0")
+	print("[OK] _test_plan_phase_bias")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()

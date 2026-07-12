@@ -86,6 +86,15 @@ var archetype: String = ""
 var rung: int = 0
 var has_trainable: bool = false
 var ambient_train_drive: float = 0.0
+# 計畫層 S2：中長期 phase（缺口×個性×隊形導出）→ option 承諾偏置。讀 S1 rung 不碰 rung。
+const PHASE_NONE := ""
+const PHASE_SEEK_FOOD := "求糧"   # 缺糧
+const PHASE_GROW := "成長"        # 缺人
+const PHASE_GATHER := "聚勢"      # 缺勢（結盟/整併/立國前置）
+const PHASE_ESTABLISH := "立國"   # 立國傾向
+const PLAN_PHASE_DRIVE_MAG: float = 0.4   # TEST VALUE — phase 偏置 magnitude（低，讓位 survival/緊急）
+var plan_phase: String = ""
+var plan_phase_drive_map: Dictionary = {}   # {option: mag} 當前 phase 對齊 option 加成
 # 征服溶入（序5 prosperity）：軍力就緒度（pop/skill/food/weapon mean）+ 有效門檻（含慎重 + hunger_relief 滑降）
 # + 富 prey target（find_prosperity_prey：richness×貪婪 + weakness×殘忍 + border×野心 / eta×logistics）。
 # intent_fit 征服路 × readiness_factor（沒本錢趨0=readiness 閘，合憲法權重非硬閘）；攻擊 target 用 prosperity_prey_id。
@@ -104,6 +113,31 @@ var resource_slack: float = 0.0  # §HOW-8：養得起更多 pop 的餘裕（統
 var absorb_yield: float = 0.0    # §HOW-8：吸 absorb_target 淨收益（產能/據點 − pop 負擔，★≠richness 貪婪值）
 var host_protector_rep: float = 0.5   # 名聲磁鐵 §3：本隊對 併入 host 的 protector_rep（道德聲望，主觀 per-observer）
 var best_protector_rep: float = 0.5   # 名聲磁鐵 §3b：rep-選中 strong_neighbor host 的 protector_rep
+
+# 計畫層 S2：phase 導出 = 缺口偵測（低階缺口優先：糧>人>勢>立國）× 隊形（子隊無獨立計畫）。
+# 讀 S1 rung/state，純機械+人格（複用 AmbitionLadder milestone 門檻），零新 scorer、零 randf。
+static func derive_plan_phase(state: WorldState, team: TeamData) -> String:
+	if team.parent_team_id != -1: return PHASE_NONE   # 子隊服母團
+	if team.food_flow_avg < AmbitionLadder.ACCUMULATE_FLOW_MIN:
+		return PHASE_SEEK_FOOD
+	if team.population < AmbitionLadder.EXPAND_MIN_POP:
+		return PHASE_GROW
+	var ft: int = 0
+	if team.faction_id != -1 and state.factions.has(team.faction_id):
+		ft = state.factions[team.faction_id].member_team_ids.size()
+	if ft < AmbitionLadder.STATE_MIN_FACTION_TEAMS:
+		return PHASE_GATHER   # 缺勢→聚勢（結盟/整併/立國前置）
+	return PHASE_ESTABLISH
+
+# phase → 對齊 option 加成 map（option 實名對齊 REGISTRY；「併入」= S-A 統一 join+整併）。
+static func _phase_option_bias(phase: String) -> Dictionary:
+	match phase:
+		# 貿易 移除（裁決 B）：貿易=致富 intent 主表達（intent_fit 致富→貿易 已驅）；
+		# phase map 只含 phase 內在選項，排除他 intent 主表達 → 防個性分歧 collapse（TC7）+ 化解貿易雙偏置。
+		PHASE_SEEK_FOOD: return {"覓食": PLAN_PHASE_DRIVE_MAG, "買糧": PLAN_PHASE_DRIVE_MAG}
+		PHASE_GROW:      return {"返家補給": PLAN_PHASE_DRIVE_MAG, "紮營": PLAN_PHASE_DRIVE_MAG}
+		PHASE_GATHER:    return {"外交": PLAN_PHASE_DRIVE_MAG, "併入": PLAN_PHASE_DRIVE_MAG}
+	return {}
 
 static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var c := DecisionContext.new()
@@ -252,6 +286,10 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if c.archetype == AmbitionLadder.ARCHETYPE_FORCE \
 			and team.ambition_rung in [AmbitionLadder.RUNG_ACCUMULATE, AmbitionLadder.RUNG_EXPAND]:
 		c.ambient_train_drive = 0.5   # TEST VALUE — 低 magnitude 讓位緊急決策
+	# 計畫層 S2：導出 phase + 偏置 map（讀 rung/state，純算術零 randf）；持久 team.plan_phase 供 GUI/hysteresis
+	c.plan_phase = derive_plan_phase(state, team)
+	team.plan_phase = c.plan_phase
+	c.plan_phase_drive_map = _phase_option_bias(c.plan_phase)
 	# 征服溶入（序5）：readiness/thr_eff/富 prey（鏡射舊 cascade G3/G4，helper 已 static）。
 	# readiness_thr_eff = threshold × hunger_relief（越餓門檻越低=豁出去搶糧；連續信號零新閘）。
 	if ldr != null:
