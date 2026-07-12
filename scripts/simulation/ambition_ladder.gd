@@ -20,6 +20,8 @@ const EXPAND_MIN_POP: int = 8
 const STATE_MIN_FACTION_TEAMS: int = 2
 const HEGEMON_MIN_FACTION_TEAMS: int = 4
 const RUNG_STALL_K: int = 3   # TEST VALUE — 連續失守 milestone 幾 cadence 才降 rung（遲滯）
+const RUNG_CRASH_POP_DROP_PCT: float = 0.30   # TEST VALUE — S3 survival-bypass：pop 單期驟降門檻
+const RUNG_CRASH_FOOD_DEEP: float = -2.0      # TEST VALUE — S3：food_flow 深負門檻（/day）
 
 # R2 單一人格傾向公式（intent/archetype 共源）：_intent_scores 人格層原式搬家（數字不動）。
 # viability 疊加（established/weak_enemy/can_levy）留在 FactionAISystem._intent_scores。TEST VALUE 權重。
@@ -101,6 +103,27 @@ static func update(state: WorldState, team: TeamData) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)
 	team.ambition_archetype = derive_archetype(leader)
 	team.ambition_cap = derive_cap(leader)
+	# S3 survival-bypass：劇變幅度（pop 驟降/food 深負/leader 失）→ 無視 K 遲滯，
+	# 立即重算 rung 為當前承載力（連續 milestone_met 爬到的最高 rung）。
+	# ★層次分離：只改 ambition_rung（目標階層），不碰 _evaluate_survival（行動層插隊覓食）。
+	var pop_now: int = team.population
+	var pop_drop: bool = team.rung_pop_last > 0 \
+		and float(team.rung_pop_last - pop_now) / float(team.rung_pop_last) > RUNG_CRASH_POP_DROP_PCT
+	var food_crash: bool = team.food_flow_avg < RUNG_CRASH_FOOD_DEEP
+	var leader_lost: bool = leader == null
+	if pop_drop or food_crash or leader_lost:
+		var carry: int = RUNG_SURVIVE
+		var n: int = RUNG_ACCUMULATE
+		while n <= team.ambition_cap and milestone_met(state, team, n):
+			carry = n; n += 1
+		if carry < team.ambition_rung:
+			team.ambition_rung = carry
+			team.rung_stall_count = 0
+			Probe.bump("g2.ambition_crash_bypass")
+		team.rung_pop_last = pop_now
+		team.ambition_eval_next_tick = state.world.current_tick + LADDER_EVAL_CADENCE
+		return   # 劇變當 cadence 只做 bypass，不再走正常升降
+	team.rung_pop_last = pop_now
 	var old: int = team.ambition_rung
 	var next_rung: int = old + 1
 	# 升：milestone_met(next) 達成（capped by ambition_cap）
