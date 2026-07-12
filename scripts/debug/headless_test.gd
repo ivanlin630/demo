@@ -452,6 +452,7 @@ func _initialize() -> void:
 	_test_plan_phase_derive()
 	_test_plan_phase_bias()
 	_test_plan_rung_bypass()
+	_test_need_raw_urgency()
 	_test_strategic_reads_ladder()
 	_test_threat_unstub()
 	# ── G2d 私人脫軌（血仇）──
@@ -15782,6 +15783,28 @@ func _test_plan_rung_bypass() -> void:
 	assert(team.ambition_rung <= AmbitionLadder.RUNG_SURVIVE + 1, "劇變 bypass 立即降 rung 到承載力 (got %d)" % team.ambition_rung)
 	assert(team.rung_stall_count == 0, "bypass 不經 stall_count")
 	print("[OK] _test_plan_rung_bypass")
+
+func _test_need_raw_urgency() -> void:
+	print("[TEST] need_raw_urgency")
+	var state := WorldState.new()
+	var team := TeamData.new()
+	team.team_id = 1
+	team.population = 4
+	team.food_flow_avg = 0.0
+	team.faction_id = -1
+	team.ambition_cap = AmbitionLadder.RUNG_HEGEMON
+	team.ambition_rung = AmbitionLadder.RUNG_SURVIVE
+	# 餓(food_days=1<5 飽線)→survival 高；無威脅→safety=0；solo→belonging=1；rung 差滿→esteem 高；未立國→actual=1
+	var raw := NeedHierarchy.compute_raw(state, team, 1.0, 0.0)
+	assert(raw.size() == NeedHierarchy.N_LAYERS, "raw size 5")
+	assert(raw[NeedHierarchy.L_SURVIVAL] > 0.7, "餓→survival 高，got %f" % raw[NeedHierarchy.L_SURVIVAL])
+	assert(raw[NeedHierarchy.L_SAFETY] == 0.0, "無威脅→safety 0，got %f" % raw[NeedHierarchy.L_SAFETY])
+	assert(raw[NeedHierarchy.L_BELONGING] > 0.9, "solo→belonging 高，got %f" % raw[NeedHierarchy.L_BELONGING])
+	assert(raw[NeedHierarchy.L_ACTUAL] > 0.9, "未立國→actual 高，got %f" % raw[NeedHierarchy.L_ACTUAL])
+	# 飽足對照：food_days=10 → survival 0
+	var raw2 := NeedHierarchy.compute_raw(state, team, 10.0, 0.0)
+	assert(raw2[NeedHierarchy.L_SURVIVAL] == 0.0, "飽→survival 0，got %f" % raw2[NeedHierarchy.L_SURVIVAL])
+	print("[TEST] need_raw_urgency PASS")
 
 func _mk_leader_with_values(vals: Dictionary) -> PersonData:
 	var p := PersonData.new()
