@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·S2.7 T1] term-scale normalize survival-class——R②CLEAN,逐bucket first bucket
 ---
 

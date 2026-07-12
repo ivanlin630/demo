@@ -1,8 +1,8 @@
 ---
 role: implementer
 code: "03"
-status: idle
-current_ticket: "-"
+status: blocked
+current_ticket: "term-scale-normalize T1 (13 新破 decision 測=多屬 obsolete 舊eval值斷言，待 systems 裁更新範圍)"
 updated: 2026-07-13
 ---
 
