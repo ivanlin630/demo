@@ -173,9 +173,6 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0
 			return ctx.ambient_train_drive
-		"plan_phase_drive":
-			# 計畫層 S2（中長期 phase→承諾偏置；語意≠intent_fit 短期意圖、≠ambient_train 練兵 base）。
-			return float(ctx.plan_phase_drive_map.get(opt, 0.0))
 		_:
 			return 0.0
 
@@ -241,7 +238,6 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
-		"plan_phase_drive":  return 1.0   # 計畫層 phase 偏置（magnitude 已 baked in map，比照 intent_fit weight=1.0）
 		# §HOW-6 併入 weight：求生欲主 + 低野心（餓+不稱霸傾向抱團；好感在 resolver 分流秤，非此）。
 		"mergein":           return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4
 		# §HOW-8 吸納 weight：野心 + 仁慈(1-殘忍)/信義（殘忍者寧屠不吸；仁慈者傾納弱）。
