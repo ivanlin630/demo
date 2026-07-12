@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [工單] 立國redesign—機械B-gate→意圖層argmax;spec+R①R②CLEAN;疊新worktree feat/establish-intent-redesign;established鏈最後一哩
 ---
 
