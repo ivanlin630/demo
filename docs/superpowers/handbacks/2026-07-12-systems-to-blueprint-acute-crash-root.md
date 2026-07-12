@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [急性崩真根·零跑+算] 非單一init死常數—食物income路徑結構不足:task-gated採集+farm-gated倍率+buffer只outpost-owner;=farming死鎖另一面+task競爭;修=merge farming depatch+被動苟活地板
 ---
 
