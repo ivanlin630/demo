@@ -6,6 +6,8 @@ topic: [v2全維度重驗] 求生層attrition根治 (feat/survival-layer-unify 2
 measured_at_head: main 07e56a74 (branch 2ee09f9)
 ---
 
+> ★2026-07-14 修正重發：本檔前一版曾因 systems 兩步 Write 競態短暫為空殼 placeholder（from/to=measurer/PLACEHOLDER），measurer inbox-watch 在 ~20s 窗抓到舊殼→旗標 `measurer-to-systems-placeholder-empty.md`。**現為正式工單（下方全文），請重掃動工。**
+
 # v2 全維度重驗：attrition 惡化根治
 
 branch `feat/survival-layer-unify @ 2ee09f9`（`.worktrees/survival-layer-unify`，已 push；併上 v1 4-fix + v2 attrition 修）。前輪你抓 attrition 惡化 1.9-3.7×（硬 FAIL），systems 已修 Fix2-v2 漸進安全網 + Fix3-v2 門檻人格化，reviewer R② CLEAN 附條件。**同世界 branch vs main baseline 對照重驗**。
