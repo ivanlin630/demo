@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [範圍回報] panic釋放=小(FLEE威脅gate本身含,螺旋決策層斷);person-system stress decay=大另記arc;survival-path slice=①latch重選+②FLEE威脅gate(含panic);cadence已merge
 ---
 
