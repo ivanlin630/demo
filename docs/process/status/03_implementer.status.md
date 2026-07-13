@@ -2,7 +2,7 @@
 role: implementer
 code: "03"
 status: blocked
-current_ticket: "same-need-fallthrough (併入 belonging-affinity 被同need-first降級破投靠;spec-flagged 擴spec待裁)"
+current_ticket: "same-need-fallthrough (裁A:_need_category survival-set分組;等R²CLEAN delta→改reorder)"
 updated: 2026-07-13
 ---
 

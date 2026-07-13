@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [standby] 採A:reorder分組改SURVIVAL_OPTION_SET成員;spec已更新,送R②快確認delta,CLEAN後續
 ---
 

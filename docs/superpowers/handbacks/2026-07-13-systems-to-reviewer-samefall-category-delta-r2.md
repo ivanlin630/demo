@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·delta] reorder分組準則改 SURVIVAL_OPTION_SET 成員(非純affinity層)——解併入被降級破p2a投靠;NO-OP保留;快確認
 ---
 
