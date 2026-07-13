@@ -1,0 +1,43 @@
+{
+  "slice": "winner-dist-contradiction-resolved",
+  "method": "重跑single_team_trace_bed.gd(TRACE_SEED=1337,TRACE_MONTHS=3,main HEAD)確認舊數字可否重現+補4隊task日記",
+  "contradiction_resolution": {
+    "verdict": "71/22/7%數字正確可重現,非我誤植;main_story_trace_v7.txt看起來矛盾是因為它是另一支腳本/另一輪跑出的log(無[Specimen]tag,非single_team_trace_bed.gd輸出),非同一份資料源比錯",
+    "rerun_result": {"買糧": 271, "覓食": 83, "生產": 26, "紮營": 1, "total": 381, "matches_original_claim": true},
+    "why_v7_txt_differs": "main_story_trace_v7.txt無任何[Specimen]/[SpecimenTracer]tag→非此bed產出;它的[SoloAI]Team7行100%'覓食(覓食)'代表另一次跑(另一世界/另一seed組態下的Team7),跟這次重跑的Team7非同一隊同一組決策序列——比較對象錯,非數字錯"
+  },
+  "new_anomaly_found": {
+    "summary": "★util argmax疑似不符——尾端多筆winner=買糧但同筆candidates列印顯示覓食util(0.86-0.87)高於買糧(0.58),理論上argmax該選覓食",
+    "evidence_line": "[Specimen T7] tick=21240 winner=買糧 task=貿易 tgt=(12,3) | candidates: 覓食=0.87 買糧=0.58 生產=0.29 駐守=0.27 備戰=0.23 建設=0.19 求和=0.16 survival=0.00",
+    "note": "未定位根因(不確定candidates print的util是否=最終排序依據,或有dispatch-fallthrough/覓食不可派等後段邏輯覆蓋argmax)——標記給systems characterize,非我этой輪結論",
+    "pattern": "tick5580起連續67天(271筆)鎖在買糧,期間覓食util持續印得比買糧高但從未被選中——非單次噪音,是穩定現象"
+  },
+  "team_diaries": {
+    "Team7(specimen,pop=4,致富致intent全程)": {
+      "tick10-5310(day0-22)": "覓食×83",
+      "tick5320": "紮營×1",
+      "tick5340-5570(day22-23)": "生產×26",
+      "tick5580-21480(day23-90)": "買糧×271,task=貿易,tgt恆(12,3),連續67天無再轉換"
+    },
+    "Team5(貿易/建設週期隊)": {
+      "pattern": "貿易(囤貨)大塊(170-605筆/次)⟷建設(建設)中塊(99-110筆/次)規律交替,偶插1筆return_home",
+      "total_soloai": 4916,
+      "verdict": "週期性雙模行為,非病態單task鎖"
+    },
+    "Team9(同Team5週期,較單純)": {
+      "pattern": "覓食×2→貿易(囤貨)×498→建設×221,三段循環重複3輪",
+      "total_soloai": 2173
+    },
+    "Team10(死亡隊,day89 Extinct)": {
+      "pattern": "覓食/建設/逃跑(survival)/貿易(買糧)/紮營/攻擊(佔村)交錯,含famine餓死+滅團",
+      "total_soloai": 551,
+      "verdict": "混亂但多樣,危機期反應多路徑(非卡死單task);最終餓死滅團"
+    },
+    "Team12(建設隊)": {
+      "pattern": "建設(建設)超大塊(591-593筆)為主,偶插逃跑(survival)38筆連續段(危機期)+少量貿易",
+      "total_soloai": 1824
+    }
+  },
+  "incomplete": [],
+  "summary": "矛盾已解:71/22/7%可重現非誤,對比檔錯(main_story_trace_v7.txt是別支跑法產物)。附帶查到新疑點:util argmax跟winner選擇疑不一致(買糧連續67天勝出但candidates列印util持續低於覓食)——這比原矛盾更該查,建議升systems定位再讓①②裁定復活。四隊日記顯示多數隊為週期性雙/三模行為,非單task病態鎖(Team10除外因死亡混亂但仍多樣)。"
+}
