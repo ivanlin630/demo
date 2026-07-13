@@ -1825,6 +1825,8 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			Probe.bump("trade.dispatch.solo")   # 漏斗站4（timeout 起算由 try_set 蓋章 task_start_tick）
 		# 手聽腦單點探針（此路 try_set 已成功→set_ok 恆真；rank[0] 被跳→次佳=subset_fallthrough）
 		HandBrainProbe.capture(state, team, "solo", String(ranked[0]["opt"]), opt, td["task"], true)
+		# 序① solo capture_decision 可見性（鏡射 _decide_unified）：純觀測 specimen tap，非 specimen 零成本。
+		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		print("[SoloAI] Team%d → %s (%s)" % [team.team_id, td["task"], opt])
 		return
 	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner
