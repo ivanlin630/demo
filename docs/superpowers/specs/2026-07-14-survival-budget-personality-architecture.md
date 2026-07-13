@@ -32,7 +32,9 @@ frame: ★大框三對齊（動架構 + 剛拍板願景「求生=個性加權競
   ```
   - `SURVIVAL_BOOST_FLOOR` **低**（TEST VALUE ~2 天，遠低於人格安全存量目標）→ 安全氣囊非日常剎車。
   - `SURVIVAL_BOOST_MAX` 夠大（TEST VALUE ~2.5）→ food→0 時 survival util →~1+2.5 碾壓任何 dev（建設 1.14）→ 奪回 argmax。隨 food→0 線性放大（復原舊 12 域碾壓語意）。
-  - **加法**（非乘法/非 coeff）→ 突破 [0,1] 封頂。boost 加在 commitment 之前或之後不敏感（survival 觸發時本就要贏）。
+  - **加法**（非乘法/非 coeff）→ 突破 [0,1] 封頂。
+  - **★★插入點寫死（reviewer 二次異質框外審唯一條件 2026-07-14）**：boost **必須加在 `u *= _coeff`（`decision_engine.gd:29` 對應行）之後**，**絕不可在 coeff 乘法之前**——否則 boost 2.5 被 `COEFF_FLOOR=0.15` 打折剩 0.375，起不到碾壓 1.14 的保底。`+= COMMITMENT_BONUS`(:37) 之前或之後皆可（加法不敏感）。邊界 food_days=FLOOR 時 `(FLOOR-food_days)/FLOOR=0` 線性平滑銜接，無 flip-flop。
+  - **範圍＝全 SURVIVAL_OPTION_SET，勿縮到只覓食/買糧**（reviewer #1：等量加不改 survival-class 內部相對序，只集體破頂；縮範圍會讓「只能投靠/掠奪才活」的隊卡在頂下選不出正確求生）。
   - **restores 統一隊求生**（經 util，非重加硬 floor）→ Team10/TAG_PRODUCE 統一隊極低糧時 survival 奪回 argmax，不再發展死。
 - **真根3 立場翻正**：改 `need_hierarchy:70-71` 註解（刪「野心餓死=特色」定義）→ 明載「性格調日常風格，層0 boost 保證極端不結構性餓死」。
 - **determinism**：純算術（food_days/const），零 randf。

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·★異質框外審必須·再過] slice A加層0求生util量級復原(真根,顛覆esteem-focus)+願景A兩層防線+真根3立場翻正
 ---
 
