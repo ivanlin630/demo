@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R①·premise] 決策生命週期統一(②成員決策+路收斂/⑦釋放統一)——factcheck 4 premise,尤架構紀律可達成(無殘留特判)
 ---
 

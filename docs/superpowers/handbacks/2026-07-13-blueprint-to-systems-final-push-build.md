@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: [★直接動工,不再量測到完成] 決策生命週期統一最後兩塊——②分流收斂(尤其faction成員無個人決策路)+⑦釋放統一(4套獨立重評判斷收成一套)。做完再一次量測，中途不要再送量測報告
 ---
 

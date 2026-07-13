@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [量測·用戶優先] main HEAD 代表隊完整3mo trace(Team7手法)——用戶要看行為像不像構想,非數字
 ---
 
