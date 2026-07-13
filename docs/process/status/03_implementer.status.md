@@ -2,7 +2,7 @@
 role: implementer
 code: "03"
 status: blocked
-current_ticket: "feat/survival-layer-unify eef534a — [REDO]完(10測遷移全綠),hold warm 待 systems/reviewer 複審"
+current_ticket: "feat/survival-layer-unify 2ee09f9 — v2 完(attrition 根治),hold warm 待 systems/reviewer/measurer 複審"
 updated: 2026-07-13
 ---
 
