@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [★heads-up] v2(層1-2)驗收已被真根發現超越;別當最終acceptance,等全slice A整包工單(含層0求生量級復原)
 ---
 
