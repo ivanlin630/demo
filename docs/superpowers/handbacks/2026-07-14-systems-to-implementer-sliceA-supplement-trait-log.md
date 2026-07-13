@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [★slice A 補·順手] SpecimenTracer dump 加 leader values(性格顯性化驗收要);+品質及格線知會
 ---
 
