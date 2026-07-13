@@ -404,6 +404,9 @@ func _initialize() -> void:
 	_test_solo_seek_home()
 	_test_decision_crisis_bypass()
 	_test_decision_cadence()
+	_test_should_reeval()
+	_test_directive_fresh_no_loop()
+	_test_unified_throttle()
 	_test_survival_relatch_repick()
 	_test_flee_threat_gate()
 	_test_reorder_same_need()
@@ -13158,6 +13161,61 @@ func _test_decision_crisis_bypass() -> void:
 	var t3 := TeamData.new(); t3.team_id = 2; _seed_pop(t3, 10); t3.rung_pop_last = 10; t3.food_flow_avg = 0.0
 	assert(not fai._decision_crisis(state, t3), "穩態非 crisis")
 	print("[TEST] decision_crisis_bypass PASS")
+
+func _test_should_reeval() -> void:
+	print("[TEST] should_reeval")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fai := FactionAISystem.new()
+	var t := TeamData.new(); t.team_id = 0; t.faction_id = -1
+	t.current_task = TeamData.TASK_IDLE
+	assert(fai._should_reeval(state, t), "IDLE→重評")
+	# busy 無事 + cadence 未到 → false
+	t.current_task = TeamData.TASK_FORAGE; state.world.current_tick = 0; t.decision_eval_next_tick = 100
+	t.rung_pop_last = 0; t.food_flow_avg = 0.0
+	assert(not fai._should_reeval(state, t), "busy無事+cadence未到→不重評")
+	# cadence 到 → true
+	t.decision_eval_next_tick = 0
+	assert(fai._should_reeval(state, t), "cadence到→重評")
+	# crisis(food 深負) → true
+	t.decision_eval_next_tick = 100; t.food_flow_avg = -3.0
+	assert(fai._should_reeval(state, t), "crisis→重評")
+	t.food_flow_avg = 0.0
+	# directive_fresh → true
+	var f := FactionData.new(); f.faction_id = 5; f.directive_change_tick = 50
+	state.factions[5] = f; t.faction_id = 5; t.last_decision_tick = 10
+	assert(fai._should_reeval(state, t), "faction 新命令→重評")
+	print("[TEST] should_reeval PASS")
+
+func _test_directive_fresh_no_loop() -> void:
+	print("[TEST] directive_fresh_no_loop")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fai := FactionAISystem.new()
+	var t := TeamData.new(); t.team_id = 0; t.faction_id = 5
+	var f := FactionData.new(); f.faction_id = 5; f.directive_change_tick = 50; state.factions[5] = f
+	# 命令(50)新於上次決策(40) → fresh
+	t.last_decision_tick = 40
+	assert(fai._directive_fresh(state, t), "命令新於決策→fresh")
+	# 決策後 last(60)>命令(50) → 截斷(不 fresh，防死循環)
+	t.last_decision_tick = 60
+	assert(not fai._directive_fresh(state, t), "決策後 last>directive→截斷 fresh")
+	# 獨立隊(faction_id -1)→永不 fresh
+	t.faction_id = -1
+	assert(not fai._directive_fresh(state, t), "獨立隊無 faction 命令→不 fresh")
+	print("[TEST] directive_fresh_no_loop PASS")
+
+func _test_unified_throttle() -> void:
+	print("[TEST] unified_throttle")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]; t.leader_id = 100
+	_seed_pop(t, 5); t.current_task = TeamData.TASK_TRADE; t.faction_id = -1
+	t.decision_eval_next_tick = 100; t.food_flow_avg = 0.0; t.rung_pop_last = 0
+	var l := PersonData.new(); l.id = 100; state.persons[100] = l; state.teams[0] = t
+	var fai := FactionAISystem.new()
+	state.world.current_tick = 0
+	fai._decide_unified(state, t)
+	# busy 無命令 + cadence 未到 → throttle(不重評)，decision_eval_next_tick 不變
+	assert(t.decision_eval_next_tick == 100, "unified busy無命令+cadence未到→throttle(非每tick)，實際=%d" % t.decision_eval_next_tick)
+	print("[TEST] unified_throttle PASS")
 
 func _test_decision_cadence() -> void:
 	print("[TEST] decision_cadence")

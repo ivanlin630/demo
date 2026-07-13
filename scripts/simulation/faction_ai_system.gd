@@ -1088,6 +1088,8 @@ func _emit_goal(state: WorldState, f, goal: String, intent_type: String, why: St
 	if goal not in f.goals:
 		f.goals.append(goal)
 	f.goal_drivers[goal] = {"intent": intent_type, "why": why, "mode": mode}
+	# ⑦ 統一重評 stamp（單一 choke point，涵蓋全 11 呼叫點）：faction 命令變化 → 成員 directive_fresh 即重評。
+	f.directive_change_tick = state.world.current_tick
 	if Probe.enabled: Probe.bump("intent.goal_emit")
 	# specimen tap：commander goal → capture intent（leader team 是 specimen 時）
 	SpecimenTracer.capture_intent(state, f.leader_team_id, intent_type, why, mode)
@@ -1441,6 +1443,12 @@ func uses_unified(team: TeamData) -> bool:
 
 # 切片隊走引擎決策 → 設 task（取代舊 member/solo 派工）。
 func _decide_unified(state: WorldState, team: TeamData) -> void:
+	# ⑦ 統一重評 gate（修每小時過頻）：IDLE/stuck/crisis/命令新仍即時，否則 cadence 節流。
+	if not _should_reeval(state, team):
+		return
+	team.decision_eval_next_tick = state.world.current_tick \
+		+ (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
+	team.last_decision_tick = state.world.current_tick   # 命令 freshness 比對基準（截斷 directive_fresh 死循環）
 	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
 	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
@@ -1763,6 +1771,20 @@ func _decision_crisis(_state: WorldState, team: TeamData) -> bool:
 		return true
 	return false
 
+# ⑦ faction 命令即時響應（R①#1）：成員 faction 命令在其上次決策後才變 → 即重評（不等 cadence，守協同紅線）。
+func _directive_fresh(state: WorldState, team: TeamData) -> bool:
+	if team.faction_id == -1 or not state.factions.has(team.faction_id):
+		return false
+	return state.factions[team.faction_id].directive_change_tick > team.last_decision_tick
+
+# ⑦ 統一「何時重評」predicate（唯一判斷點，架構紀律）：IDLE/stuck/crisis/命令新→即時；否則 cadence 節流。
+func _should_reeval(state: WorldState, team: TeamData) -> bool:
+	if team.current_task == TeamData.TASK_IDLE: return true      # 空閒/剛釋放→即重評
+	if _is_stuck(team): return true                              # 卡住→重評
+	if _decision_crisis(state, team): return true               # 劇變(食崩/pop驟降)→反射提前
+	if _directive_fresh(state, team): return true               # faction 新命令→即時響應
+	return state.world.current_tick >= team.decision_eval_next_tick   # 否則 cadence 節流
+
 func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id: return   # 玩家隊不受 SoloAI 控制
 	if team.combat_target != -1: return
@@ -1772,14 +1794,13 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if uses_unified(team):                          # ← hoist 到 IDLE gate 前(unified 退 latch)
 		_decide_unified(state, team)
 		return
-	# 重評 cadence 重構：週期 + IDLE 立即 + crisis 提前（取代 completion-gated 永久 IDLE-lock）。
-	# 舊 lock（current_task!=IDLE && !stuck→return）使選長任務隊永不重評=9-zero 上游根。
-	var _due: bool = state.world.current_tick >= team.decision_eval_next_tick
-	var _crisis: bool = _decision_crisis(state, team)
-	if not (team.current_task == TeamData.TASK_IDLE or _is_stuck(team) or _due or _crisis):
+	# ⑦ 統一重評 gate（收斂到單一 _should_reeval predicate；IDLE/stuck/crisis/命令新即時，否則 cadence 節流）。
+	if not _should_reeval(state, team):
 		return
 	# 排下次重評：crisis 短 cadence（反射），常態全 cadence
-	team.decision_eval_next_tick = state.world.current_tick + (DECISION_CADENCE / 4 if _crisis else DECISION_CADENCE)
+	team.decision_eval_next_tick = state.world.current_tick \
+		+ (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
+	team.last_decision_tick = state.world.current_tick   # 命令 freshness 比對基準
 
 	# 序5 dissolve：舊「FORCE 隊 cadence tick 讓給 loop3 prosperity_attack」yield 閘已刪——
 	# 征服攻擊決策溶進主 rank（攻擊 option: intent_fit 征服 × readiness/富prey），FORCE 隊直接主 rank
