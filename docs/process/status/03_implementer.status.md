@@ -1,8 +1,8 @@
 ---
 role: implementer
 code: "03"
-status: idle
-current_ticket: "-"
+status: blocked
+current_ticket: "survival-path (①②③實作完,churn接點 rank_survival改 previous_task 待systems確認)"
 updated: 2026-07-13
 ---
 

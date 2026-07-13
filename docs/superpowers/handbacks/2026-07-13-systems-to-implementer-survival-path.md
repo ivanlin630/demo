@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·survival-path] latch重選(release-then-retrigger)+FLEE威脅gate——R②CLEAN;解餓隊鎖死+食足隊spurious FLEE餓死
 ---
 
