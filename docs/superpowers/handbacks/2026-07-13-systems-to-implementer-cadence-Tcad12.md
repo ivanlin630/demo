@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·cadence] T-cad1週期重評+T-cad2 crisis提前——R②CLEAN(T-cad3拆後續);解Team7鎖死主根
 ---
 
