@@ -142,8 +142,42 @@ static func esteem_food_ref(leader_values: Dictionary) -> float:
 ## v2 觸及檔（增量）
 `faction_ai_system.gd`(Fix2-v2 `_decision_crisis` 漸進 + `GRADUAL_DECLINE_FLOW` const)、`need_hierarchy.gd`(Fix3-v2 `esteem_food_ref` + 4 const，`compute_raw` 取 leader values；改簽名或內部 fetch leader)。
 
+## Fix3b（併入 v2，blueprint 2026-07-14 第三條）：食物戰略備糧對稱化 + 安全存量水位＝Fix3 門檻同一參數
+
+**根（比 Fix3 更深，坐實）**：食物採購**不對稱**——
+- 買糧 applicable（`options.gd:133-135`）：`food_days < DESPERATION(3) and has_food_market and has_specie` = **純絕境救急**。
+- 囤貨/貿易：`food_days >= SURPLUS(7)` 得戰略機會權重（`terms.gd:203` 只給貿易/囤貨）= **戰略主動**。
+- ∴ **食物只有「絕境買糧」，無對稱「充足時戰略備糧」**。team 一到 food_days≥3 → 買糧 option **直接失 applicable**（模型眼中選項消失）→ 檯面只剩囤貨/買武器 → 跑去發展 → 糧跌回<3 買糧才冒出、常來不及。**不是模型選擇不備糧，是系統沒給「戰略備糧」選項**（像人只准快餓死才能買菜）。物資有戰略採購、食物沒有＝設計缺口，比 Fix3 門檻常數更根本。
+
+**設計（與 Fix3 人格化門檻合併＝同一「安全感門檻」兩面）**：
+1. **統一門檻函式**：`Fix3-v2` 的 `esteem_food_ref` 更名/擴為 `food_security_threshold(leader_values)`（同公式 f(慎重/野心)），**同時駕馭兩面**：
+   - esteem food_ready（該不該鬆懈去發展）：`food_ready = clampf(food_days / food_security_threshold, 0, 1)`（不變）。
+   - 買糧 safety-stock（該備糧到幾天）：見下 applicable。
+   - 語意：一個「安全感」數字——謹慎領袖高(備糧多才敢發展)、賭徒低(薄糧就搏)。
+2. **買糧 applicable 對稱化**（`options.gd:133-135`）：
+   ```
+   "買糧":
+       if ctx.food_days < maxf(DecisionTerms.DESPERATION_DAYS, ctx.food_security_threshold) \
+               and ctx.has_food_market and ctx.has_specie:
+           out.append(opt)
+   ```
+   - `maxf(DESPERATION, threshold)`：**絕境永遠是地板**（賭徒 threshold=2 → max(3,2)=3 絕境救急、無戰略備糧＝符合賭徒；謹慎 threshold=7 → max(3,7)=7 戰略備糧到 7 天）。
+   - `ctx.food_security_threshold` 於 gather 算填（取 leader values），mirror 既有 flag。
+3. **buyfood_drive 加 security-gap 驅力**（`terms.gd:106-111`）：現只留旅費折扣 base 0.5-1.0；戰略帶(food_days∈[DESPERATION, threshold]) survival coeff 低 → 買糧 rank 恐永輸發展（blueprint 警「applicable 放行但 rank 永輸＝白做」）。加一項「低於安全線」驅力（非 hunger urgency，是「補到安全存量」的戰略驅）：
+   ```
+   var _gap: float = clampf((ctx.food_security_threshold - ctx.food_days) / maxf(ctx.food_security_threshold, 1.0), 0, 1)
+   return clampf(0.5 + 0.5*_dd + SECURITY_STOCK_DRIVE * _gap, 0, 1)   # SECURITY_STOCK_DRIVE TEST VALUE
+   ```
+   越低於安全線→備糧驅越強→謹慎隊維持 buffer。糧價便宜/arb 可再加成（選配，避免無限買）。
+
+**效果**：謹慎領袖 food_days 6→仍 <threshold 7 → 買糧 applicable + 有驅力 → 主動補到 7 → 有 buffer 抗波動 → 不週期性挨餓。賭徒 threshold 低 → 只絕境買 → 薄糧搏發展 → 可能餓死（角色缺陷）。**Team14 型「脫離絕境就棄糧買武器」消除**（謹慎者根本不會棄糧；賭徒棄糧=角色選擇）。
+
+**觸及檔（Fix3b 增量）**：`decision_context.gd`（`food_security_threshold` 欄+gather 填）、`need_hierarchy.gd`（`esteem_food_ref`→統一 `food_security_threshold`，或 need_hierarchy 呼 DecisionTerms 的統一函式——避雙 owner，實作定單一 home）、`options.gd`（買糧 applicable maxf）、`terms.gd`（buyfood_drive security-gap + `SECURITY_STOCK_DRIVE` const）。
+
+**★三條收斂同一 spec**（blueprint 問）：是——Fix2 漸進(安全網) + Fix3 門檻人格化 + Fix3b 備糧對稱化，三者共用**同一 `food_security_threshold(leader)` 人格門檻**，同屬求生決策層，一份 spec 一次實作一次驗。
+
 ## v2 未納（blueprint 留議，非本輪）
-「求生該是可競爭 util 選項還是硬中斷」——更根本問題，blueprint 與用戶討論浮出未拍板，本輪先 Fix2 漸進+Fix3 人格化，留議。
+「求生該是可競爭 util 選項還是硬中斷」——更根本問題，blueprint 與用戶討論浮出未拍板，本輪先 Fix2 漸進+Fix3 人格化+Fix3b 備糧對稱化，留議。
 
 ## 驗收法（measurer 標準床，一次跑，seed1337 + 補 seed42/7）
 1. **Fix1/2 治 thrash**：seed1337 3mo，Team10（及同型非-unified 隊）**無 `建設↔貿易↔idle` 每 tick livelock**；`[Survival]` thrash print 消失；Team10 **不再 day89 餓滅**（或至少 thrash-death 機制消除，餓死若發生須是真無解非 livelock）。
@@ -155,6 +189,7 @@ static func esteem_food_ref(leader_values: Dictionary) -> float:
    - **★reviewer 條件 #2（防 over-trigger 換皮）**：measurer 報告**必須同時附 attrition + reeval 頻率兩數字**（reeval.crisis/TOTAL 仍遠低基線 13997）——不能只報 attrition 過關；怕 Fix2-v2 漸進 spam 到某程度也壓低 attrition 但代價是效能/thrash 復發。
    - **★reviewer 條件 #3（防人格化 trap 換皮）**：抽驗**謹慎領袖隊（caution 高，ref≈7）長期(3mo)仍能在合理時間升階**（非永久 esteem 卡 0）——若謹慎隊全程升不了階＝trap 換皮沒解，回頭調 CAUTION 係數非 declare 完工。
    - **★reviewer 條件 #1（隱含 bisect）**：attrition 若沒回落到 baseline ±餘裕 → premise 訊號不足，屆時才要求真 bisect（隔離 Fix1/4 貢獻），非現在預防性做。
+7. **★Fix3b 備糧對稱化**：謹慎領袖隊**主動買糧維持 buffer**（food_days 常態站在其 `food_security_threshold` 附近，非貼著 DESPERATION 3 天挨餓）；Team14 型「脫離絕境即棄糧買武器」死亡消除；賭徒仍可能薄糧餓死（角色缺陷）。**副作用守**：買糧活動增加不致經濟扭曲（糧價/coin 流無異常暴走）；winner 分布仍多樣（非全 buy food lockstep）。
 5. **順帶觀察（非閘）**：Team7 pop 暴崩 60%（tick5580→9000）現象——三修後消失/改善＝連帶驗證；仍在＝另開查。
 
 ## dispatch 註（reviewer CLEAN 後）
