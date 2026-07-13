@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [量測·measure-first] forage-dispatch真根分A/B/C——覓食undispatchable-fallthrough/買糧under-rank/覓食只掃相鄰;先看現trace,不足才補probe
 ---
 
