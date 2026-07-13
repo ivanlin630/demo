@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: [全 Slice A 完] 人格化資源預算架構 (feat/survival-layer-unify 67d4a47)——層0 boost 頻率初值 9.46%(偏高,回報) + Fix3c barter fire ✓
 ---
 
