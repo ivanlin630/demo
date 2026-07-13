@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: [★併入同spec·再補兩層]買糧鋸齒(觸發線=收手線,累積不到安全存量)+錢要戰略分配(備糧/軍備/發展權衡,別單項吃光預算)
 ---
 

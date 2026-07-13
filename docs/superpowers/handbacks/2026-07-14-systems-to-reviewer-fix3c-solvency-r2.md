@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·輕量] Fix3c取代Fix3b:償付能力has_specie認武器(修機械誤判零新行為);Fix3b作廢
 ---
 
