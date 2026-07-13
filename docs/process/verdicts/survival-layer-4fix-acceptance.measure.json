@@ -1,0 +1,53 @@
+{
+  "slice": "survival-layer-4fix-acceptance",
+  "measured_at_head": {"branch": "eef534a7", "main_baseline": "0e34e00e"},
+  "method": "seed1337主驗+補seed42/7;standard beds(constitution/HOB/reeval_attribution/single_team_trace)於branch worktree跑;full_probe(seeded_warring_bed,warring_states.json)branch vs main baseline雙跑對照,3seed×3mo;長跑用godot-detach.ps1(存活session job回收)",
+  "raw_logs": {
+    "constitution": "PASS(sites=29,removed=0)",
+    "hob": "docs/measurements/2026-07-14-survival4fix-hob-branch-eef534a.log",
+    "reeval_attribution": "docs/measurements/2026-07-14-survival4fix-reeval-attribution-branch-eef534a.log",
+    "team7_trace": "docs/measurements/2026-07-14-survival4fix-team7trace-branch-eef534a.log",
+    "fullprobe_branch": "docs/measurements/2026-07-14-survival4fix-fullprobe-branch-eef534a.json",
+    "fullprobe_main_baseline": "docs/measurements/2026-07-14-survival4fix-fullprobe-mainbaseline-0e34e00.json"
+  },
+  "guards": {
+    "1_thrash治好(headline)": {
+      "verdict": "★部分——Team10型已治,但同型thrash非branch特有、非全消",
+      "evidence": "reeval_attribution_bed(乾淨單run,seed1337,無global reseed污染)0筆[Survival]tag,Team10存活day90做建設無famine——此樣本乾淨;但single_team_trace_bed跑出的另一seed1337世界(reeval_attribution_bed.gd:seed機制跟single_team_trace_bed.gd不同,兩者非同一world,見下)裡Team14/Team16仍現同型thrash(建設/貿易/覓食↔idle每tick循環)+famine死+滅團(2026-07-14-survival4fix-team7trace-branch-eef534a.log grep '[Survival] Team16')。★更關鍵:main baseline detach run同樣廣泛出現此pattern(Team11/16/18/21/27/70等多隊,同log tail),證實這是main HEAD既有問題,非4-fix引入,但也非4-fix消滅——只治好Team10這條特定路徑",
+      "caveat": "reeval_attribution_bed.gd不呼叫全域seed(),single_team_trace_bed.gd呼叫——兩者「seed=1337」實際是不同world,比對時勿誤認同一世界"
+    },
+    "2_頻率": {
+      "verdict": "PASS",
+      "evidence": "reeval_attribution_bed:TOTAL true=3092(對比implementer報3239同量級,遠低於baseline13997);single_team_trace_bed:Team7型decision_count=381→113,大降"
+    },
+    "3_升階": {
+      "verdict": "PASS(至少此樣本)",
+      "evidence": "single_team_trace_bed該run winner分布={覓食73,求和4,迎戰1,建設35}(113決策)——建設佔31%,非100%覓食/買糧單一底層"
+    },
+    "4_覓食可達性": {
+      "verdict": "PASS(此樣本)",
+      "evidence": "single_team_trace_bed該run 113筆candidates全數0個✗標記,fallthrough未見常態觸發"
+    },
+    "5_不回歸": {
+      "verdict": "★FAIL——population attrition全面惡化,非established",
+      "evidence": {
+        "established": "branch=[0,0,2] vs main=[0,0,2]——三seed逐一相同,無回歸",
+        "determinism": "HOB clean vs inst MATCH(teams/factions/pop byte一致)",
+        "attrition_pct_branch_vs_main": {
+          "seed1337": {"branch": 50.5, "main": 13.5, "起始pop": "436(兩邊一致,worldgen對齊排除偏差)"},
+          "seed42": {"branch": 34.7, "main": 11.8, "起始pop": "423 vs 424(對齊)"},
+          "seed7": {"branch": 31.3, "main": 16.7, "起始pop": "362 vs 363(對齊)"}
+        },
+        "note": "★三seed一致方向:branch attrition是main的2-3倍;起始世界(worldgen)幾乎相同(排除seed偶然性偏差),差異可歸因於4-fix本身改動的決策/派工邏輯",
+        "hob_obey": "94.7% obey,4.2%違規全屬arbiter_latch(單一T53型latch,tick4120起連續每10tick重複,非本輪fix範圍內新增——需systems確認是否pre-existing"
+      }
+    }
+  },
+  "observation_points": {
+    "A_絕糧無option建設": "未特別分離驗證(時間考量)",
+    "B_well-fed卡覓食": "跟guard1發現的廣泛[Survival]thrash pattern疑似相關(建設/貿易/覓食↔idle循環),但未逐隊細拆esteem/faction signal強弱做因果切分",
+    "C_Fix3復餓": "未特別驗證(時間考量)"
+  },
+  "incomplete": ["3觀察點A/C未細驗(時間考量,標記給systems/blueprint決定要不要追)", "attrition惡化根因未定位(是哪個fix1-4造成,需systems逐fix切分或revert-bisect)"],
+  "summary": "★不建議直接release-pass。5守衛2過(頻率/升階)+1部分過但不完美(thrash,治好Team10型但同型廣泛存在於main+branch,非新病但也非真解)+1樣本內過(覓食可達性)+★1明確FAIL(population attrition branch比main高2-3倍,三seed一致,起始世界對齊排除偶然)。attrition惡化是嚴重信號,建議blueprint裁定:merge前需systems定位是哪個fix造成、或先only-merge治Team10部分、或retest。"
+}

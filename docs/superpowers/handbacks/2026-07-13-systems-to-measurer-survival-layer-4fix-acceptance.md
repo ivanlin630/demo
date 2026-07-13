@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [全維度驗收] 求生層4-fix (feat/survival-layer-unify eef534a)——一次跑seed1337+補42/7,驗5守衛+3觀察點餵藍圖
 measured_at_head: main 9f0893ac (branch eef534a off 0b1efc9)
 ---
