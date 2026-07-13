@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·delta2] fallthrough組=PASSIVE_SURVIVAL_SET(排攻擊型掠奪/佔村)——解fed溫和隊loot繞人格gate(p1);保p2a投靠;快確認
 ---
 
