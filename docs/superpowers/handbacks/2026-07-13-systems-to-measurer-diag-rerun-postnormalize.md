@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [量測·裁A] diag probe post-normalize 重跑——量6項層內own_util/winner gap,對比前輪分「該贏卻輸 vs 稀有」
 ---
 

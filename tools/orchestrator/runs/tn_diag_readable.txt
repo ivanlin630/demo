@@ -1,0 +1,21 @@
+=== seed 1337 ===
+備戰: appl_n=7451 avg_coeff=0.477 avg_mainurg=0.060 avg_ownutil=0.2132 avg_winutil=0.652 gap=3.1x
+駐守: appl_n=7031 avg_coeff=0.533 avg_mainurg=0.214 avg_ownutil=0.1589 avg_winutil=0.625 gap=3.9x
+乞食: appl_n=8 avg_coeff=0.831 avg_mainurg=0.631 avg_ownutil=0.2266 avg_winutil=0.950 gap=4.2x
+吸納: appl_n=2794 avg_coeff=0.617 avg_mainurg=0.537 avg_ownutil=0.0873 avg_winutil=0.643 gap=7.4x
+訓練: appl_n=4 avg_coeff=0.820 avg_mainurg=0.745 avg_ownutil=0.0000 avg_winutil=0.994 gap=infx
+買糧: appl_n=1741 avg_coeff=0.901 avg_mainurg=0.897 avg_ownutil=0.2702 avg_winutil=0.969 gap=3.6x
+=== seed 42 ===
+備戰: appl_n=10476 avg_coeff=0.519 avg_mainurg=0.093 avg_ownutil=0.2536 avg_winutil=0.826 gap=3.3x
+駐守: appl_n=6127 avg_coeff=0.557 avg_mainurg=0.009 avg_ownutil=0.1704 avg_winutil=0.826 gap=4.8x
+乞食: appl_n=180 avg_coeff=0.725 avg_mainurg=0.598 avg_ownutil=0.2046 avg_winutil=1.039 gap=5.1x
+吸納: appl_n=2079 avg_coeff=0.596 avg_mainurg=0.001 avg_ownutil=0.0784 avg_winutil=0.881 gap=11.2x
+訓練: appl_n=713 avg_coeff=0.826 avg_mainurg=0.998 avg_ownutil=0.0000 avg_winutil=0.723 gap=infx
+買糧: appl_n=3919 avg_coeff=0.880 avg_mainurg=0.880 avg_ownutil=0.3487 avg_winutil=0.992 gap=2.8x
+=== seed 7 ===
+備戰: appl_n=12064 avg_coeff=0.622 avg_mainurg=0.325 avg_ownutil=0.2806 avg_winutil=0.849 gap=3.0x
+駐守: appl_n=6026 avg_coeff=0.560 avg_mainurg=0.274 avg_ownutil=0.1821 avg_winutil=0.659 gap=3.6x
+乞食: appl_n=42 avg_coeff=0.768 avg_mainurg=0.560 avg_ownutil=0.1799 avg_winutil=1.081 gap=6.0x
+吸納: appl_n=2152 avg_coeff=0.581 avg_mainurg=0.125 avg_ownutil=0.0944 avg_winutil=0.861 gap=9.1x
+訓練: appl_n=2115 avg_coeff=0.760 avg_mainurg=0.605 avg_ownutil=0.0033 avg_winutil=1.061 gap=316.8x
+買糧: appl_n=3922 avg_coeff=0.917 avg_mainurg=0.888 avg_ownutil=0.2786 avg_winutil=1.032 gap=3.7x
