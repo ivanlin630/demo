@@ -11,6 +11,7 @@ const N_LAYERS: int = 5
 
 # raw 急迫度門檻（TEST VALUE）
 const SURVIVAL_SATED_DAYS: float = 5.0   # TEST VALUE — 食物餘命達此→生存急迫度 0（對齊 forage floor 域）
+const ESTEEM_FOOD_REF_DAYS: float = 3.0  # Fix3 TEST VALUE — esteem food_ready 參考線(=DESPERATION_DAYS)：脫困(≥3天)即近滿→在意地位/能升階
 const URGENCY_EWMA_ALPHA: float = 0.25   # TEST VALUE — 急迫度平滑係數（同 S1 zero-randf pattern）
 
 # §6 主敘事標籤（純顯示衍生值）：取急迫度最高層 → 給人看的簡化摘要。非決策(決策走 coeff 完整混合)。
@@ -50,7 +51,10 @@ static func compute_raw(state: WorldState, team: TeamData, food_days: float, thr
 			/ float(AmbitionLadder.STATE_MIN_FACTION_TEAMS), 0.0, 1.0)
 	# 尊重（地位/擴張）就緒度 = 基礎穩(食/安有餘裕在意地位) × 機會(野心階梯還有空間爬)。
 	# 讀世界訊號(food_days/threat/cap/rung)，禁讀他層 urgency（守 §2 獨立）。
-	var food_ready: float = clampf(food_days / SURVIVAL_SATED_DAYS, 0.0, 1.0)
+	# Fix3 雞生蛋鬆綁：舊參考線=SATED(5)→救回量(買糧僅到 3-5 天邊緣)碰不到近1的舒適線→esteem 卡低→生產永輸買糧→survival-lock。
+	# 參考線降到 DESPERATION(3)：脫困(food_days≥3)即 food_ready 近滿→esteem urgency 起得來→生產有機會贏、低pop隊能升階。
+	# ★偏離 spec §Fix3 桿A 字面 pseudocode(見 handback 待確認：字面式在[3,5]帶反使 food_ready 更低,與根因相反)——TEST VALUE, measurer 校。
+	var food_ready: float = clampf(food_days / ESTEEM_FOOD_REF_DAYS, 0.0, 1.0)
 	var safe_ready: float = 1.0 - clampf(threat, 0.0, 1.0)
 	var cap_e: int = maxi(team.ambition_cap, 1)
 	var ambition_gap: float = clampf(float(team.ambition_cap - team.ambition_rung) / float(cap_e), 0.0, 1.0)

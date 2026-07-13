@@ -52,6 +52,9 @@ var aid_target_pos: Vector2i = Vector2i(-1, -1)
 var has_food_market: bool = false
 var food_market_pos: Vector2i = Vector2i(-1, -1)
 var food_market_dist: int = -1
+# Fix4 覓食可達性：本格/鄰格有可覓食 tile（無→覓食不 applicable，防 forage-to-nowhere churn）。
+var has_forage_tile: bool = false
+var forage_pos: Vector2i = Vector2i(-1, -1)
 var has_specie: bool = false
 # 經濟底：自家糧倉 food（含遠端家，team 不在家也讀得到）→ 返家補給 home-empty gate 用。
 var home_food: float = 0.0
@@ -207,6 +210,10 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.food_market_pos = _mkt
 	c.food_market_dist = _fa._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.market", _tg)
+	# Fix4 覓食可達性：本格/鄰格有 wild_game tile 才可覓食（鏡射 market 一次性 gather，避每 option 重跑）。
+	var _fg: Vector2i = _fa._find_forage_tile(state, team)
+	c.has_forage_tile = _fg != Vector2i(-1, -1)
+	c.forage_pos = _fg
 	# has_specie 廣義納可交易特產：coin / goods / material / ore（forest=木材 mountain=礦 換糧籌碼）。
 	c.has_specie = float(team.resources.get("coin", 0)) > 0.0 \
 		or float(team.resources.get("goods", 0)) >= 10.0 \

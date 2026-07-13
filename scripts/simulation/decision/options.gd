@@ -80,7 +80,8 @@ static func applicable(ctx: DecisionContext) -> Array:
 					out.append(opt)
 			"覓食":
 				# P2b-1：viable-pop 守衛移入 applicable（舊 _trigger_survival forage 限 pop≤此值）。
-				if ctx.population <= FactionAISystem.FORAGE_VIABLE_POP:
+				# Fix4：+ 覓食可達性預檢——本格/鄰格無 wild_game tile 則不 applicable（防 forage-to-nowhere churn）。
+				if ctx.population <= FactionAISystem.FORAGE_VIABLE_POP and ctx.has_forage_tile:
 					out.append(opt)
 			"survival":
 				out.append(opt)   # 恆候選（FLEE 靠 threat 權重，非守衛）
