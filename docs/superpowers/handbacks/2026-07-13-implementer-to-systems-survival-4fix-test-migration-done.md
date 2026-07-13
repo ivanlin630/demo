@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: [REDO 完] 求生層 4-fix 測試遷移完 (feat/survival-layer-unify eef534a)——10 微測全綠,1 個曝引擎 forage-release 特性供 measurer 觀察
 ---
 

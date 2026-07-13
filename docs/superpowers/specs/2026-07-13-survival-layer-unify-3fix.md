@@ -68,7 +68,9 @@ frame_challenge: ★三對齊（強結論=退役 legacy 子系統+重設計核�
 **根（坐實）**：`need_hierarchy.gd:57 raw[L_ESTEEM] = food_ready × safe_ready × ambition_gap`，`food_ready = clampf(food_days/SURVIVAL_SATED_DAYS(5),0,1)`（:53）。買糧 applicable 於 `food_days<DESPERATION_DAYS(3)`（`options.gd:136`/`terms.gd:6`）→ 救回量大概率只到 3-5 天邊緣，`food_ready` 碰不到接近 1 的舒適線 → esteem urgency 卡低 → 生產(affinity esteem 0.5,`need_hierarchy.gd:95`) 的 `consistency_coeff`(:128) alignment 低→壓 FLOOR 0.15 → 生產 util 永輸買糧(survival 0.9→coeff~1) → 自我強化 survival-lock。已確認生產全程在 candidates（非 applicable 濾掉），是每輪算分穩定輸。
 
 **設計**（兩桿，implementer 量測選定，reviewer 審）：
-- **桿 A（主，漸進非乘法門檻）**：esteem `food_ready` 的參考線從 SATED(5) 降到「脫離絕境即開始給分」——如 `food_ready = clampf((food_days - DESPERATION_DAYS)/(SURVIVAL_SATED_DAYS - DESPERATION_DAYS), 0, 1)` 之類，讓「剛脫困(food_days≥3)」的隊 esteem 就開始 ramp，而非要摸到 5 才啟動。（DESPERATION=3/SATED=5 的 2 天盲區正是陷阱帶。）★數字 TEST VALUE，量測校。
+- **桿 A（主，漸進非乘法門檻）**：esteem `food_ready` 的參考線從 SATED(5) 降到「脫離絕境即開始給分」，讓「剛脫困(food_days≥3)」的隊 esteem 就 ramp，而非摸到 5 才啟動。
+  - **★實作採用（implementer 修正 2026-07-13）**：`food_ready = clampf(food_days / ESTEEM_FOOD_REF_DAYS(3), 0, 1)`（參考線 5→3，脫困即近滿）。
+  - ⚠️ 原草稿曾寫 `(food_days-DESPERATION)/(SATED-DESPERATION)` = **方向寫反**（food_days=3→0，比舊 f/5=0.6 更低，與 intent 相反）→ 作廢。implementer 抓到並改對，systems ACCEPT。★TEST VALUE，measurer 驗收③量校（f/3 若太急致復餓再 tune 曲線）。
 - **桿 B（可疊，脫困緩衝期）**：隊 food_days 上穿 DESPERATION 後給一段 grace（如 N 天）內 esteem urgency 加成/floor 抬高，讓升階念頭有機會冒出、生產有機會贏一次啟動正循環。需 TeamData 記「脫困 tick」或用既有 previous 欄。
 - **保留**：乘法 safe_ready × ambition_gap 的語意（不安全/無爬升空間→不該追地位）合理，**只鬆綁 food_ready 這一桿**，不動另兩桿（避免過度改寫，最小手術）。
 

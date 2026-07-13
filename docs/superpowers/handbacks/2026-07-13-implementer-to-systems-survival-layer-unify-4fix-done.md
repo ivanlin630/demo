@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: [交付+待裁] 求生層統一 4-fix 實作完 (feat/survival-layer-unify f5e66ae)——附 headless 10 微測失敗分類 + Fix3 偏離 + Fix4 邊緣裁決
 ---
 
