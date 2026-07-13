@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R①·cadence] 重評cadence重構premise factcheck——非-unified隊IDLE-gate永久鎖(Team7血證);寫spec前坐實
 ---
 
