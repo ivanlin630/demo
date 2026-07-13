@@ -3044,6 +3044,19 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 			and team.task_priority == TaskArbiter.PRIO_DISPATCH
 		if days_left >= SURVIVAL_RECOVER_DAYS and not proactive_camp:
 			TaskArbiter.release(team)
+			return
+		# survival-latch 重選：仍餓 + 重評 cadence 到(或 crisis) → 重跑 survival 選擇(forage 失效換
+		# 買糧/掠奪/併入)，非死鎖首選。proactive_camp 豁免(在途不打斷)。
+		# ★R② 坐實 try_set 同-prio no-op → 必 release-then-retrigger(先 release→IDLE→_trigger_survival 成立)。
+		if not proactive_camp and days_left < WARNING_DAYS \
+				and (state.world.current_tick >= team.decision_eval_next_tick or _decision_crisis(state, team)):
+			team.decision_eval_next_tick = state.world.current_tick \
+				+ (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
+			# ★churn 防抖：release 前存 previous_task 供 rank_survival COMMITMENT 比對（release→IDLE 破基準）
+			team.previous_task = team.current_task
+			TaskArbiter.release(team)
+			var severity: String = "urgent" if days_left < URGENCY_DAYS else "warning"
+			_trigger_survival(state, team, severity)
 		return
 	if days_left < URGENCY_DAYS or days_left < WARNING_DAYS:
 		var severity: String = "urgent" if days_left < URGENCY_DAYS else "warning"
@@ -3115,7 +3128,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return
 
-	team.previous_task = team.current_task
+	# churn 防抖：relatch 路已 release→current_task=IDLE，勿以 IDLE 覆蓋 previous_task
+	# （其保留 release 前的 survival task 供 rank_survival COMMITMENT 比對）。
+	if team.current_task != TeamData.TASK_IDLE:
+		team.previous_task = team.current_task
 
 	# 正在腳下工地蓋「農田」→ 建設即自救，不中斷（農田完工才是糧食出路，工期僅 3 天）
 	# 其他設施（鑄幣廠 30 天等）照常被飢餓中斷 — 不會蓋到餓死

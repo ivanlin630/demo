@@ -76,7 +76,10 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 		var u: float = 0.0
 		for tw in DecisionOptions.terms_of(opt):
 			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)
-		if DecisionOptions.to_task(state, team, opt).get("task") == team.current_task:
+		# churn 防抖：比對 previous_task（非 current_task）——survival-latch relatch 路 release→current_task=IDLE，
+		# previous_task 保留 release 前 survival task，防餓隊每 cadence 亂跳（覓食/買糧/掠奪/併入）。
+		# 常態路 previous_task==current_task（_trigger_survival 設）→等價。
+		if DecisionOptions.to_task(state, team, opt).get("task") == team.previous_task:
 			u += COMMITMENT_BONUS
 		scored.append({"u": u, "i": idx, "opt": opt})
 		idx += 1

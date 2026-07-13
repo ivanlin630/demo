@@ -57,8 +57,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# T1：剝 hunger urgency(移 coeff)，保機會品質——家糧倉越滿返家越值(空家不返)。
 			return clampf(ctx.home_food / RESTOCK_MIN, 0.0, 1.0)
 		"threat_pressure":
-			# T1：survival(FLEE)剝 threat urgency(移 L_SAFETY coeff)，保可行+恐慌加成品質。
-			return clampf(0.6 + ctx.team_panic * 0.4, 0.0, 1.0)
+			# survival-path ②：撤 T1 0.6 floor→FLEE 威脅 gate。無威脅(threat=0)→eval 0(食足隊不 spurious FLEE
+			# 餓死)；panic 僅威脅時計(斷 death spiral)。真威脅→威脅+恐慌加成。
+			if ctx.threat <= 0.0:
+				return 0.0
+			return clampf(ctx.threat + ctx.team_panic * 0.4, 0.0, 1.0)
 		"economic_opp":
 			if opt != "貿易": return 0.0
 			var role: float = 1.0 if ctx.is_merchant else NON_MERCHANT_TRADE_FACTOR
