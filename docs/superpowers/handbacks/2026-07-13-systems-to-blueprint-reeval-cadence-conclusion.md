@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [零跑結論] 確認=非-unified隊只IDLE/stuck重評,長任務永不回IDLE→永不重評(Team7血證);比term量級更上游;是9-zero主根候選;需裁pivot
 ---
 
