@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·同需求fallthrough] rank[0]不可dispatch→同need層優先——審不影響conquest/threat既有dispatch+NO-OP保證;dispatch前
 ---
 
