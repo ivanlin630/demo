@@ -404,6 +404,8 @@ func _initialize() -> void:
 	_test_solo_seek_home()
 	_test_decision_crisis_bypass()
 	_test_decision_cadence()
+	_test_survival_relatch_repick()
+	_test_flee_threat_gate()
 	# ── 文字 UI Phase 1: API 暴露 ──
 	_test_location_game_predator()
 	_test_precarity_dto()
@@ -1986,10 +1988,10 @@ func _test_term_normalize_t1() -> void:
 	assert(rn >= 0.0 and rn <= 1.0, "restock ∈[0,1]，got %f" % rn)
 	ctx.home_food = 999.0
 	assert(DecisionTerms.eval("restock_need", ctx, "返家補給") == 1.0, "滿家 restock=1")
-	# threat_pressure(FLEE) = 0.6+panic*0.4 ∈[0,1]
-	ctx.team_panic = 0.0
-	assert(absf(DecisionTerms.eval("threat_pressure", ctx, "survival") - 0.6) < 1e-5, "panic0→0.6")
-	ctx.team_panic = 1.0
+	# threat_pressure(FLEE) survival-path ②：無威脅→0(撤 T1 0.6 floor)；真威脅→威脅+panic
+	ctx.threat = 0.0; ctx.team_panic = 0.9
+	assert(DecisionTerms.eval("threat_pressure", ctx, "survival") == 0.0, "②無威脅→FLEE eval 0")
+	ctx.threat = 0.8; ctx.team_panic = 1.0
 	var tp := DecisionTerms.eval("threat_pressure", ctx, "survival")
 	assert(tp >= 0.0 and tp <= 1.0, "threat_pressure ∈[0,1]，got %f" % tp)
 	# buyfood_drive(買糧) = dist_disc ∈(0,1]
@@ -13086,6 +13088,37 @@ func _test_survival_start_config() -> void:
 	assert(tile != null and tile.outpost_level == 0, "開局玩家不應有 outpost")
 	print("survival_start config OK")
 
+func _test_survival_relatch_repick() -> void:
+	print("[TEST] survival_relatch_repick")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var t := TeamData.new(); t.team_id = 0; t.leader_id = 100; t.tile_pos = Vector2i(0, 0)
+	_seed_pop(t, 5); t.current_task = TeamData.TASK_FORAGE; t.task_priority = TaskArbiter.PRIO_SURVIVAL
+	t.resources = {"food": 1.0}   # days_left=1/(5×0.8)=0.25 < WARNING(3) = 仍餓
+	t.decision_eval_next_tick = 0; t.rung_pop_last = 0; t.food_flow_avg = 0.0   # due、非 crisis
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	state.world.tiles[0] = tile
+	var l := PersonData.new(); l.id = 100; state.persons[100] = l; state.teams[0] = t
+	var fai := FactionAISystem.new()
+	state.world.current_tick = 0
+	fai._evaluate_survival(state, t)
+	# relatch 觸發：仍餓+cadence 到→release+_trigger_survival 重跑(非死鎖 FORAGE)→decision_eval_next_tick 前進
+	assert(t.decision_eval_next_tick > 0, "餓+cadence到→relatch重評(next_tick前進)，實際=%d" % t.decision_eval_next_tick)
+	print("[TEST] survival_relatch_repick PASS")
+
+func _test_flee_threat_gate() -> void:
+	print("[TEST] flee_threat_gate")
+	var ctx := DecisionContext.new()
+	# 無威脅 → FLEE eval 0（不管 panic，食足隊不 spurious FLEE）
+	ctx.threat = 0.0; ctx.team_panic = 0.9
+	assert(DecisionTerms.eval("threat_pressure", ctx, "survival") == 0.0, "無威脅→FLEE eval 0(不管 panic)")
+	# 真威脅 → 威脅 + panic 加成
+	ctx.threat = 0.8; ctx.team_panic = 0.0
+	assert(absf(DecisionTerms.eval("threat_pressure", ctx, "survival") - 0.8) < 1e-5, "威脅0.8→0.8")
+	ctx.team_panic = 0.5
+	var v := DecisionTerms.eval("threat_pressure", ctx, "survival")
+	assert(v > 0.8 and v <= 1.0, "威脅+panic→>0.8 clamp[0,1]，got %f" % v)
+	print("[TEST] flee_threat_gate PASS")
+
 func _test_decision_crisis_bypass() -> void:
 	print("[TEST] decision_crisis_bypass")
 	var state := WorldState.new(); state.world = WorldData.new()
@@ -15060,8 +15093,8 @@ func _test_survival_magnitude() -> void:
 	assert(DecisionTerms.eval("survival_pressure", c, "覓食") == 1.0, "T1:覓食 base 恆 1.0(飢餓移 L_SURVIVAL coeff)")
 	c.home_food = 5.0
 	assert(abs(DecisionTerms.eval("restock_need", c, "返家補給") - 0.5) < 0.01, "T1:restock=home_food/RESTOCK_MIN(5/10)")
-	c.team_panic = 0.0
-	assert(abs(DecisionTerms.eval("threat_pressure", c, "survival") - 0.6) < 0.01, "T1:threat_pressure=0.6+panic×0.4")
+	c.threat = 0.0; c.team_panic = 0.0
+	assert(DecisionTerms.eval("threat_pressure", c, "survival") == 0.0, "②無威脅→threat_pressure 0(撤 T1 0.6 floor)")
 
 	# decide：糧危無家商隊 → 覓食(survival_pressure 4.0 碾壓 trade)
 	var s1 := WorldState.new(); s1.world = WorldData.new()

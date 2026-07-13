@@ -544,3 +544,6 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 
 ## 決策引擎（term-normalize T5）
 - **乞食 chosen≈0**：非缺陷。BEG_FLOOR_FACTOR 故意低（乞食=最後手段低品質）+ applicable 稀有（需 has_aid_target，appl_n 8-180）。合理現象，不改 code（measure 觀察佐證）。
+
+## 情緒系統（stress decay，death spiral 根層）
+- **成員 stress 累積不釋放**：驅 `team_panic` → death spiral 根層，跨 reaction/morale。survival-path #2 已於決策層斷 FLEE 螺旋（threat=0→FLEE eval 0），但 stress 本身累積待 person 情緒系統獨立 arc（decay/釋放機制）。本 slice 不修。
