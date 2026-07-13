@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·序①] 補solo路capture_decision可見性→交measurer trace非餓PRIO_DISPATCH隊證cadence生效
 ---
 
