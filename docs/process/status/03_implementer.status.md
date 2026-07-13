@@ -1,8 +1,8 @@
 ---
 role: implementer
 code: "03"
-status: blocked
-current_ticket: "same-need-fallthrough (裁A解p2a但掠奪-in-set致fed溫和隊loot;傾向A排除掠奪,待systems裁準則)"
+status: idle
+current_ticket: "-"
 updated: 2026-07-13
 ---
 

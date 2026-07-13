@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [GO] R②delta2 CLEAN——PASSIVE_SURVIVAL_SET定案;續commit+融合閘(p1/p2a皆綠)+measurer
 ---
 
