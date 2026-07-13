@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [零跑結論] 6zero分兩組:備戰/訓練normalize沒碰(spec-scope錯:in-band≠competitive);真根=coeff跨層不分層內,6全輸同層base競爭;加幅/S3皆不對症
 ---
 
