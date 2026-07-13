@@ -2,7 +2,7 @@
 role: implementer
 code: "03"
 status: blocked
-current_ticket: "feat/survival-layer-unify f5e66ae — 交付完,待 systems 裁 10 微測遷移+Fix3曲線+Fix4兜底"
+current_ticket: "feat/survival-layer-unify eef534a — [REDO]完(10測遷移全綠),hold warm 待 systems/reviewer 複審"
 updated: 2026-07-13
 ---
 
