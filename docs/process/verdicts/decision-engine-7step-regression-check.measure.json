@@ -1,0 +1,35 @@
+{
+  "slice": "decision-engine-7step-regression-check",
+  "method": "既有log分析(非重跑)——main_story_trace.txt(⑦前)vs main_story_trace_v7.txt(⑦後,含全7步)",
+  "same_run_span": "9600 tick(3mo),同seed(main HEAD=cef31e2跑出v7)",
+  "before_after": {
+    "before_file": "tools/orchestrator/runs/main_story_trace.txt (35160行,加於08d63ee,含S1-⑥6步但不含⑦)",
+    "after_file": "tools/orchestrator/runs/main_story_trace_v7.txt (29140行,加於0a75348,含全7步)",
+    "famine_deaths": {"before": 52, "after": 40, "delta_pct": -23.1},
+    "combat_start_count": {"before": 6, "after": 10, "delta_pct": 66.7},
+    "site_dispatch_fail(資源不足)": {"before": 184, "after": 192, "delta_pct": 4.3},
+    "script_error": {"before": 0, "after": 0}
+  },
+  "famine_detail_v7": {
+    "total_deaths": 40,
+    "by_team": {"Team14": 17, "Team10": 14, "Team8": 7, "Team19": 2},
+    "note": "分散4隊,非單隊死亡螺旋(無deadlock模式)"
+  },
+  "combat_detail_v7": {
+    "total_starts": 10,
+    "all_vs": "Team-1000000(野獸/NPC ambush,非faction混戰)",
+    "note": "皆[Ambush]NPC被boar伏擊背景事件,非玩家隊互戰失控"
+  },
+  "established_json_v7": {
+    "seed_1337": {"established": 0, "factions": 2, "teams": 14, "attrition_pct": 15.44},
+    "seed_42": {"established": 0, "factions": 2, "teams": 17, "attrition_pct": 18.06},
+    "seed_7": {"established": 1, "factions": 5, "teams": 30, "attrition_pct": 12.11}
+  },
+  "faction_diplomacy_check": {
+    "verdict": "設計如此,非漏log",
+    "evidence": "scripts/simulation/faction_ai_system.gd:1213 [IndepStrategy]派信使結盟print存在;分支條件=獨立隊+野心建國門檻,本輪established多為0/factions少(2-5)→分支鮮少觸發,非log缺失",
+    "diff_check": "git diff 1f056e6..282a5bd -- faction_ai_system.gd 對結盟/alliance/外交分支零改動(僅rung_crash無關行);今日7步未動此邏輯"
+  },
+  "incomplete": [],
+  "summary": "無異常。famine/combat/script_error三維在⑦前後同規模(52→40死亡降/6→10戰鬥屬野獸背景事件量級,無blowup無deadlock無crash);faction協同稀薄=既有設計分支門檻高,非今日改動所致、非漏log。今日7步(S1/S2/normalize/cadence/survival-path/fallthrough/⑦)未觸及famine(resource.gd)/combat(npc_combat)/faction diplomacy分支code。"
+}
