@@ -61,17 +61,22 @@ func _run() -> void:
 	# ★同世界 specimen 死因裁定
 	if spec_id != -1:
 		print("--- specimen Team%d 死因裁定（同世界）---" % spec_id)
-		print("  decision_count = %d" % SpecimenTracer.decision_count)
+		# ★decision_count = SpecimenTracer capture_decision tap ONLY——不含 [Order] 經濟決策路徑
+		# → decision_count=0 ≠「AI 沒碰到」(tap-gap);死因看家當(weapons/food_days)+ grep [Order] 活動,非靠此數。
+		print("  decision_count(SpecimenTracer tap,tap-gap警告) = %d" % SpecimenTracer.decision_count)
 		print("  存活至尾 = %s；死 tick = %s" % [state.teams.has(spec_id), str(spec_death_tick)])
 		if not spec_last.is_empty():
 			print("  死前家當: pop=%d food=%.1f food_days=%.2f weapons=%d coin=%.0f" % [
 				spec_last["pop"], spec_last["food"], spec_last["food_days"], spec_last["weap"], spec_last["coin"]])
-		if SpecimenTracer.decision_count <= 2:
-			print("  ★裁定: 速死/decision_count≈0 → 「第三種死法」成立(AI 沒碰到,查繞過路徑)")
+		# 裁定看家當(非 decision_count):武器堆+糧盡=軍備餓死(tuning);無武器無錢=真赤貧;有錢無武器=別的
+		if state.teams.has(spec_id):
+			print("  ★裁定: 存活至尾(非死隊)")
 		elif not spec_last.is_empty() and spec_last["weap"] > 5 and spec_last["food_days"] < 2.0:
-			print("  ★裁定: 有決策(%d)+死前武器堆(%d)+糧盡 → 軍備堆積餓死型(層0/3 tuning,非架構絕症)" % [SpecimenTracer.decision_count, spec_last["weap"]])
+			print("  ★裁定: 死前武器堆(%d)+糧盡 → 軍備堆積餓死型(層0/5 tuning,非架構絕症;★核 [Order] 確認有活躍買賣決策)" % spec_last["weap"])
+		elif not spec_last.is_empty() and spec_last["coin"] < 1.0 and spec_last["weap"] <= 1:
+			print("  ★裁定: 死前無錢無武器 → 真赤貧(可能本該死,非 bug)")
 		else:
-			print("  ★裁定: 有決策(%d),死因非典型軍備餓死,見上家當+trace" % SpecimenTracer.decision_count)
+			print("  ★裁定: 死因非典型,見家當+grep [Order]/[Famine] 活動判(勿靠 decision_count)")
 		SpecimenTracer.summary()
 		SpecimenTracer.enabled = false
 	Probe.enabled = false
