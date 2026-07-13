@@ -142,7 +142,32 @@ static func esteem_food_ref(leader_values: Dictionary) -> float:
 ## v2 觸及檔（增量）
 `faction_ai_system.gd`(Fix2-v2 `_decision_crisis` 漸進 + `GRADUAL_DECLINE_FLOW` const)、`need_hierarchy.gd`(Fix3-v2 `esteem_food_ref` + 4 const，`compute_raw` 取 leader values；改簽名或內部 fetch leader)。
 
-## Fix3b（併入 v2，blueprint 2026-07-14 第三條）：食物戰略備糧對稱化 + 安全存量水位＝Fix3 門檻同一參數
+## ⚠️ Fix3b 作廢（2026-07-14 blueprint 修正診斷 + 用戶定原則「不加新行為」）
+下方原 Fix3b（加戰略備糧 applicable trigger + buyfood security-gap 驅力）**違反用戶原則「不加新 option/新行為」**，且診斷不夠準（買糧不卡 3 天=買到 ~12 食物日或錢盡；囤貨會順便低買囤糧；戰略備糧管道其實存在）→ **作廢，改 Fix3c**。Fix3b R② 曾 CLEAN 但設計已換，那份 CLEAN 一併作廢。
+
+## Fix3c（取代 Fix3b）：償付能力認全部家當（修機械誤判，零新行為）
+**真兇（blueprint 深挖坐實）**：`has_specie`（`decision_context.gd:211-214`）只認 coin/goods/material/ore，**不認 weapon**。武備隊(Team14 型：武器一堆、cash/ore 耗盡)糧跌破 3 想買糧 → **武器不算「付得起」→ 買糧 option 根本不 applicable** → 掉乞食/掠奪失敗 → **滿手可交易財富(武器)卻因「錢包空」機械判定餓死**。
+- Team14 死亡故事：薄 esteem 門檻→脫困即換武器→現金/礦盡滿手武器→糧跌回<3→武器不算資產→買糧不出現→乞食/掠奪失敗→餓死。
+
+**★關鍵坐實：barter 執行層本就支援武器變現**——`_attempt_barter`(`interaction_system.gd:812-840`) 遍歷 `TradeValuation.BASE_PRICE.keys()`，而 **weapon_* 全在 BASE_PRICE**（`trade_valuation.gd:17-20`，武器有定價+留底 TARGET_PER_POP）。∴ coinless 武備隊到市集**已能以武器超出留底的量 barter 換糧**——只差**決策層 `has_specie` 誤判「買不起」擋在門外**。∴ 這是純「死判定 pre-empt 真實資源狀態」的補丁（診斷通則命中），**修 decision gate 即可、零新行為**（交易能力早存在）。
+
+**設計（最小手術）**：`decision_context.gd:211-214` has_specie 加武器超留底項：
+```
+# Fix3c 償付能力認全部家當：武器超出留底=可變現換糧（barter 已支援，見 _attempt_barter+BASE_PRICE 含 weapon_*）
+var _weapon_liquid: bool = false
+for w in ["weapon_melee_low","weapon_melee_high","weapon_ranged_low","weapon_ranged_high"]:
+    if float(team.resources.get(w,0)) - TradeValuation.reserve(team, w) > 0.0:
+        _weapon_liquid = true; break
+c.has_specie = <既有 coin/goods/material/ore 四項> or _weapon_liquid
+```
+- 用 `TradeValuation.reserve`（留底=TARGET_PER_POP×pop）→ 只認**超出戰備留底**的武器（不會逼隊賣光防身武器；barter 同用此 reserve 守留底一致）。
+- 零新 option、零新行為：買糧 applicable/驅力/買量全不動，只讓「付得起」的認定誠實納武器。
+
+**personalization 軸（blueprint 第二軸）已由 Fix3-v2 承載**：買不買發展 vs 囤糧的個性秤＝Fix3-v2 esteem `food_security_threshold`(慎重/野心)；買糧一觸發買到 ~12 食物日(錢/財盡為止，非天數 cap)＝買量本就足，不需人格化買量。∴ 第三條 = 純 Fix3c solvency，不重複做水位。
+
+**觸及檔（Fix3c）**：`decision_context.gd`（has_specie 加武器超留底）。單檔單點。
+
+## Fix3b（作廢·留史）：食物戰略備糧對稱化 + 安全存量水位＝Fix3 門檻同一參數
 
 **根（比 Fix3 更深，坐實）**：食物採購**不對稱**——
 - 買糧 applicable（`options.gd:133-135`）：`food_days < DESPERATION(3) and has_food_market and has_specie` = **純絕境救急**。
@@ -189,7 +214,7 @@ static func esteem_food_ref(leader_values: Dictionary) -> float:
    - **★reviewer 條件 #2（防 over-trigger 換皮）**：measurer 報告**必須同時附 attrition + reeval 頻率兩數字**（reeval.crisis/TOTAL 仍遠低基線 13997）——不能只報 attrition 過關；怕 Fix2-v2 漸進 spam 到某程度也壓低 attrition 但代價是效能/thrash 復發。
    - **★reviewer 條件 #3（防人格化 trap 換皮）**：抽驗**謹慎領袖隊（caution 高，ref≈7）長期(3mo)仍能在合理時間升階**（非永久 esteem 卡 0）——若謹慎隊全程升不了階＝trap 換皮沒解，回頭調 CAUTION 係數非 declare 完工。
    - **★reviewer 條件 #1（隱含 bisect）**：attrition 若沒回落到 baseline ±餘裕 → premise 訊號不足，屆時才要求真 bisect（隔離 Fix1/4 貢獻），非現在預防性做。
-7. **★Fix3b 備糧對稱化**：謹慎領袖隊**主動買糧維持 buffer**（food_days 常態站在其 `food_security_threshold` 附近，非貼著 DESPERATION 3 天挨餓）；Team14 型「脫離絕境即棄糧買武器」死亡消除；賭徒仍可能薄糧餓死（角色缺陷）。**副作用守**：買糧活動增加不致經濟扭曲（糧價/coin 流無異常暴走）；winner 分布仍多樣（非全 buy food lockstep）。
+7. **★Fix3c 償付能力（headline for 第三條）**：**Team14 型「滿手武器卻買不起糧餓死」消除**——武備隊(cash-poor weapon-rich)糧跌破時買糧 applicable、以武器 barter 換糧存活；若仍餓死須是真無可交易財富(武器也用盡)或賭徒性格搏輸，非機械誤判。抽驗：weapon-rich 隊 has_specie 正確為 true、市集 barter 武器換糧成交(`trade.barter_deal` probe)。零新 option/行為（買糧 applicable/驅力/買量未動）。
 5. **順帶觀察（非閘）**：Team7 pop 暴崩 60%（tick5580→9000）現象——三修後消失/改善＝連帶驗證；仍在＝另開查。
 
 ## dispatch 註（reviewer CLEAN 後）
