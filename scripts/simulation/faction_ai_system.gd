@@ -1445,6 +1445,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
 	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
+	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
 	if SimRunner.phase_timing: _tr = _fai_pht("unified.rank", _tr)
 	# 征服名實探針（純觀測）：solo_intent=征服 的隊在此實際 winner 分類（想征服 vs 做掠奪）。
 	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
@@ -1794,6 +1795,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	var _conq: bool = Probe.enabled and _solo_type(team) == "征服"
 	if _conq: Probe.bump("conq.intent")
 	var ranked: Array = DecisionEngine.rank_scored(state, team)
+	ranked = DecisionEngine.reorder_same_need_first(ranked)   # 同需求 fallthrough：rank[0]不可派→同層次佳(非跨層落生產)
 	for e in ranked:
 		var opt: String = e["opt"]
 		# 序5 dissolve：征服 intent 攻擊 → dispatch-time scout-verify scaffolding（不確定→斥候、confident→打；
