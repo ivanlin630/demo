@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [★premise矛盾岔路·halt] R①抓錯:成員早已走_decide_unified(rank_scored),縫#3序6已結清;②-1「最大洞」不存在=我gatekeeper審漏loop1;需重定②scope
 ---
 

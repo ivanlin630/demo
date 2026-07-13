@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: main HEAD代表隊完整3mo fidelity trace(Team6)——★整體判讀:像構想,連貫/遇險合理反應/危機內同需求換策略皆有實例；仍有怪點：紮營時覓食util(1.00)明顯高於紮營(0.68)卻選紮營(疑似防衛hold模式下覓食target暫不可達,非bug是威脅期合理避戰行為，但值得你/用戶親眼判斷是否符合直覺)
 ---
 
