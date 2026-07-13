@@ -1,7 +1,7 @@
 ---
 from: systems
 to: systems
-status: consumed
+status: open
 topic: [交接·EOD 2026-07-13] 決策引擎世界崩潰調查鏈全 merged+established首破;⑦收尾;信箱status文件修;下步待用戶親判
 ---
 
