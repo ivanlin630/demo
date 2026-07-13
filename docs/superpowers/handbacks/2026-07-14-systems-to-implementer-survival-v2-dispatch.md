@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [v2 dispatch] 求生層attrition根治:Fix2漸進安全網+Fix3門檻人格化(reviewer R② CLEAN);改同一branch feat/survival-layer-unify
 ---
 
