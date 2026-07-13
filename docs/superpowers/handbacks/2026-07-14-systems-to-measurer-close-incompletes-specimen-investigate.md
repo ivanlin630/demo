@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [補完3 incomplete·供用戶裁] 指定-team specimen工具已加→查Team1/7/9/14全滅死因+層4鋸齒三態+Team10/P25活教材+determinism/憲法閘複核
 measured_at_head: main <即將commit> (branch 67d4a47)
 ---

@@ -1,0 +1,40 @@
+{
+  "slice": "survival-layer-sliceA-incompletes-closed",
+  "measured_at_head": {"branch": "67d4a470", "main_baseline_recheck": "057a0b3b"},
+  "method": "新SPECIMEN_TEAM_ID工具(從main checkout進worktree,純觀測非決策碼)鎖定Team14/Team10/Team7做specimen trace;HOB+憲法閘複核",
+  "raw_logs": {
+    "team14": "docs/measurements/2026-07-14-sliceA-incomplete-team14-deathcause-67d4a47.log",
+    "team10_p25": "docs/measurements/2026-07-14-sliceA-incomplete-team10-p25-67d4a47.log",
+    "team7": "docs/measurements/2026-07-14-sliceA-incomplete-team7-67d4a47.log",
+    "hob_recheck": "docs/measurements/2026-07-14-sliceA-incomplete-hob-recheck-67d4a47.log"
+  },
+  "item1_deathcause": {
+    "verdict": "★關鍵發現——Team14死於AI決策層之前,層0修復根本沒機會作用",
+    "team14": {
+      "decision_count": 0,
+      "population_track": "[10,2,0,0]——month2內滅團",
+      "survival_tag_count": 0,
+      "分類": "既非「boost觸發但量級不夠」,也非「真赤貧無解」——是★根本沒進rank_scored捕獲點,decision_count=0代表SpecimenTracer.capture_decision從未被呼叫。連舊[Survival]override tag都是0筆(本run),死亡極快極沉默,疑似連legacy override都沒機會fire,可能是純環境famine機制(resource.gd)直接團滅,AI(新舊皆)都沒觸及"
+    },
+    "team7_caveat": "★方法論限制:single_team_trace_bed.gd呼叫全域seed()+config['seed'],跟reeval_attribution_bed.gd(只設config['seed']無全域seed())是不同world——本次SPECIMEN_TEAM_ID='7'鎖定的Team7在此world裡pop=[10,10,10,10]穩定存活(decision_count=282,覓食89/求和3/建設13/紮營2/生產75/囤貨100,多樣健康),並未重現reeval_attribution世界裡Team7死亡的情況。∴無法在同一world直接對應原始死因隊——這是工具限制(reeval_attribution_bed.gd無SpecimenTracer tap),非造假",
+    "residual_risk_note": "Team14型(decision_count=0,環境急死)可能是attrition殘根未回main水準的部分解釋,但無法排除reeval_attribution世界的Team1/9另有不同死因(需reeval_attribution_bed也加SpecimenTracer tap才能同world對照,超出本輪工具範圍)"
+  },
+  "item2_layer4_sawtooth": {
+    "verdict": "★(b)變淺仍在——非消失、非如舊致命",
+    "evidence": "P25(Team10)food_days序列:早期18.2天高buffer,中段降到min=1.3天(desperation線以下)後回升(1.3→1.4→1.6→...→2.9),尾端again從4.0緩降到3.1——鋸齒模式仍在,但★這次伴隨存活+pop成長(8→11),非過往的死亡收場",
+    "sample_count": "1隊(Team10/P25),時間考量未擴第二隻窮隊驗證是否所有隊都同款(b)"
+  },
+  "item3_team10_p25_flagship": {
+    "verdict": "★確認轉型成功——活教材達標",
+    "leader_traits": {"野心": 0.89, "慎重": 0.63, "求生欲": 0.59, "好戰": 0.87, "貪婪": 0.41, "food_sec_target": 3.0},
+    "before_after": "v2輪(前次量測)Team10 decision_count=965/建設94%鎖死(覓食/建設抽搐普通人);sliceA本輪decision_count=220,intent分布={建國50,致富133,征服37}(非只致富一種!),winner分布覓食57/建設14/紮營1/生產148(生產67%為主),pop 8→11成長(擴張非純求生)",
+    "verdict_detail": "野心0.89霸主leader確實從純求生層轉為積極開國(建國intent 50次)+征服意圖(37次)+人口擴張,符合工單期待的「雄心開國之君」轉型"
+  },
+  "item4_determinism_constitution": {
+    "constitution": "PASS(sites=29,removed=0)",
+    "hob_determinism": "MATCH(clean vs inst: teams=64,factions=8,pop=436,byte一致)",
+    "note": "本次main baseline HEAD已推進至057a0b3b(跟上輪sliceA驗收的68c8febb不同,main持續有其他commit進來,但HOB determinism檢查對象是branch worktree本身clean/inst自我比對,不受main漂移影響)"
+  },
+  "incomplete": ["Team1/Team9死因未直接查(reeval_attribution世界跟single_team_trace_bed世界不同,無共用specimen tap工具跨兩世界對照;需reeval_attribution_bed也加SpecimenTracer支援才能同world驗證)", "層4鋸齒只驗1隊(Team10),未擴其他窮隊確認普遍性"],
+  "summary": "4項補完,3項有明確答案+1項有方法論限制誠實揭露。①Team14死因=根本沒進AI決策層(decision_count=0),非boost量級問題,但Team7在此world穩定存活(跟reeval_attribution世界的死亡不對應,方法論限制標記);②層4=(b)變淺仍在但可存活(伴隨pop成長非死亡);③P25活教材確認轉型成功(建國+征服intent出現,pop擴張);④determinism MATCH+憲法閘PASS。整體:sliceA修復對P25型霸主隊效果顯著,但對Team14型(決策層之前即死)的隊沒有觸及——這解釋了attrition為何未完全回落main水準:層0/1/2/3修復都作用在「進入決策引擎」之後,對「連決策引擎都沒碰到就死」的隊無效。"
+}
