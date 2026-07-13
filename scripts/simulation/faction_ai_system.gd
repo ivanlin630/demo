@@ -93,6 +93,7 @@ const OWNER_CHANGE_BUFFER_DAYS: int = 7
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
 const SURVIVAL_RECOVER_DAYS: float = 7.0   # 糧恢復到此 → 脫離 survival（hysteresis 防抖）
+const GRADUAL_DECLINE_FLOW: float = -0.5   # Fix2-v2 TEST VALUE — 慢性糧滑坡 crisis 門檻（DEEP -2.0 與 0 間，漸進安全網）
 const FLEE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 5   # 逃跑逾時 5 天（修硬編 240，跟根）→ 釋放重評，小地圖防永逃
 
 # ── Prosperity attack（野心驅動主動征服）──
@@ -1768,6 +1769,10 @@ func _decision_crisis(_state: WorldState, team: TeamData) -> bool:
 			and float(team.rung_pop_last - team.population) / float(team.rung_pop_last) > AmbitionLadder.RUNG_CRASH_POP_DROP_PCT:
 		return true
 	if team.food_flow_avg < AmbitionLadder.RUNG_CRASH_FOOD_DEEP:
+		return true
+	# Fix2-v2：慢性糧滑坡(輕負 flow，非暴跌<DEEP)=漸進安全網→糧一開始流失就週期性拉回確認補糧。
+	# 不 revert edge：crisis_latched 節流仍在→漸進 crisis edge fire 一次+持續落 /4 cadence(非每 tick)。
+	if team.food_flow_avg < GRADUAL_DECLINE_FLOW:
 		return true
 	return false
 

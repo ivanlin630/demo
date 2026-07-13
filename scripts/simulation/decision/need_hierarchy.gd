@@ -2,6 +2,9 @@ class_name NeedHierarchy
 
 # 需求金字塔五層急迫度（Maslow 式）。感測器非決策者：只讀「這層還缺多少」(0..1)。
 # 生存(食物)→安全(威脅)→歸屬(faction/社交)→尊重(地位/擴張)→自我實現(立國/稱霸)。
+# §2 層獨立（invariants）：raw 可讀「世界訊號」(food_days/threat/cap/rung…) + 「靜態人格 trait」(如慎重/野心，
+#   同 consistency_coeff 早讀 leader_values 先例)，但**不可讀其他 raw[layer] 的 urgency 值**（防循環耦合）。
+#   ∴ Fix3-v2 讀領袖人格算 esteem 參考線 = 合規（trait 非他層 urgency）。
 const L_SURVIVAL: int = 0
 const L_SAFETY: int = 1
 const L_BELONGING: int = 2
@@ -11,7 +14,13 @@ const N_LAYERS: int = 5
 
 # raw 急迫度門檻（TEST VALUE）
 const SURVIVAL_SATED_DAYS: float = 5.0   # TEST VALUE — 食物餘命達此→生存急迫度 0（對齊 forage floor 域）
-const ESTEEM_FOOD_REF_DAYS: float = 3.0  # Fix3 TEST VALUE — esteem food_ready 參考線(=DESPERATION_DAYS)：脫困(≥3天)即近滿→在意地位/能升階
+# Fix3-v2 esteem food_ready 參考線人格化（退役死常數 ESTEEM_FOOD_REF_DAYS=3——全域死常數 pre-empt 人格=變相補丁）。
+# 謹慎↑→ref↑(存久才敢鬆懈發展)；野心↑→ref↓(薄庫存搏發展)。TEST VALUE。
+const ESTEEM_REF_BASE: float = 4.0       # 中性領袖(慎重=野心=0.5)參考線
+const ESTEEM_REF_CAUTION: float = 4.0    # 慎重對 ref 的斜率
+const ESTEEM_REF_AMBITION: float = 4.0   # 野心對 ref 的斜率(反向)
+const ESTEEM_REF_MIN: float = 2.0        # 賭徒下限(薄庫存搏)
+const ESTEEM_REF_MAX: float = 8.0        # 謹慎狂上限(存久)
 const URGENCY_EWMA_ALPHA: float = 0.25   # TEST VALUE — 急迫度平滑係數（同 S1 zero-randf pattern）
 
 # §6 主敘事標籤（純顯示衍生值）：取急迫度最高層 → 給人看的簡化摘要。非決策(決策走 coeff 完整混合)。
@@ -30,6 +39,13 @@ static func narrative_label(urgency: PackedFloat32Array) -> String:
 		if urgency[i] > urgency[best_i]:
 			best_i = i
 	return labels[best_i]
+
+# Fix3-v2 esteem food_ready 參考線人格化：領袖慎重↑→ref↑(存久才發展)；野心↑→ref↓(薄糧搏)。純算術零 randf。
+static func esteem_food_ref(leader_values: Dictionary) -> float:
+	var caution: float = float(leader_values.get("慎重", 0.5))
+	var ambition: float = float(leader_values.get("野心", 0.5))
+	return clampf(ESTEEM_REF_BASE + (caution - 0.5) * ESTEEM_REF_CAUTION - (ambition - 0.5) * ESTEEM_REF_AMBITION,
+		ESTEEM_REF_MIN, ESTEEM_REF_MAX)
 
 # 每層 raw 急迫度 = 該層底層指標距門檻的差距(0..1，越沒滿足越高)。純算術零 randf。
 # food_days/threat 由呼叫端(gather)供（已算，避重複）；其餘讀 team/state + AmbitionLadder 門檻。
@@ -50,11 +66,12 @@ static func compute_raw(state: WorldState, team: TeamData, food_days: float, thr
 		raw[L_BELONGING] = clampf(float(AmbitionLadder.STATE_MIN_FACTION_TEAMS - members) \
 			/ float(AmbitionLadder.STATE_MIN_FACTION_TEAMS), 0.0, 1.0)
 	# 尊重（地位/擴張）就緒度 = 基礎穩(食/安有餘裕在意地位) × 機會(野心階梯還有空間爬)。
-	# 讀世界訊號(food_days/threat/cap/rung)，禁讀他層 urgency（守 §2 獨立）。
-	# Fix3 雞生蛋鬆綁：舊參考線=SATED(5)→救回量(買糧僅到 3-5 天邊緣)碰不到近1的舒適線→esteem 卡低→生產永輸買糧→survival-lock。
-	# 參考線降到 DESPERATION(3)：脫困(food_days≥3)即 food_ready 近滿→esteem urgency 起得來→生產有機會贏、低pop隊能升階。
-	# ★偏離 spec §Fix3 桿A 字面 pseudocode(見 handback 待確認：字面式在[3,5]帶反使 food_ready 更低,與根因相反)——TEST VALUE, measurer 校。
-	var food_ready: float = clampf(food_days / ESTEEM_FOOD_REF_DAYS, 0.0, 1.0)
+	# 讀世界訊號(food_days/threat/cap/rung) + 靜態人格 trait，禁讀他層 urgency（守 §2 獨立）。
+	# Fix3-v2 人格化：參考線改 f(領袖慎重/野心)——退役死常數 ESTEEM_FOOD_REF_DAYS=3(過低→餓著發展→attrition 惡化)。
+	# 謹慎領袖 ref↑(存久才鬆懈發展)存活；野心賭徒 ref↓(薄糧搏發展)可能餓死=角色缺陷致死非系統 bug。
+	var _ldr: PersonData = state.persons.get(team.leader_id) if team.leader_id != -1 else null
+	var _lvals: Dictionary = _ldr.values if _ldr != null else {}
+	var food_ready: float = clampf(food_days / esteem_food_ref(_lvals), 0.0, 1.0)
 	var safe_ready: float = 1.0 - clampf(threat, 0.0, 1.0)
 	var cap_e: int = maxi(team.ambition_cap, 1)
 	var ambition_gap: float = clampf(float(team.ambition_cap - team.ambition_rung) / float(cap_e), 0.0, 1.0)
