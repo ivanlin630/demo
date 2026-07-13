@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [零跑結論] cadence gate有接非bug;但追的餓隊被另一把鎖(survival-latch:_evaluate_survival早退+PRIO_SURVIVAL擋主rank)——cadence修DISPATCH-tier沒碰survival-tier;真根+推薦
 ---
 
