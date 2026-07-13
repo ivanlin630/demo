@@ -541,3 +541,6 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 | D2 player 死亡 | Game Over 畫面 | 自動轉移到新角色 |
 | S4 人口分裂 | 提高門檻 | demo 期間停用 |
 
+
+## 決策引擎（term-normalize T5）
+- **乞食 chosen≈0**：非缺陷。BEG_FLOOR_FACTOR 故意低（乞食=最後手段低品質）+ applicable 稀有（需 has_aid_target，appl_n 8-180）。合理現象，不改 code（measure 觀察佐證）。

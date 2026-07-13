@@ -379,6 +379,7 @@ func _initialize() -> void:
 	_test_forage_floor_tune()
 	_test_term_normalize_t1()
 	_test_term_normalize_t3()
+	_test_t5_intra_layer()
 	_test_forage_no_growth()
 	_test_settled_still_grows()
 	_test_find_game_tile()
@@ -1925,6 +1926,38 @@ func _test_forage_subsistence_cap() -> void:
 	assert(int(tile.resources["wild_game"]) == game_at_cap,
 		"超 buffer 覓食不應消耗 wild_game，before=%d after=%d" % [game_at_cap, int(tile.resources["wild_game"])])
 	print("forage subsistence cap OK")
+
+# term-normalize T5：層內 base 校 + 訓練 eval-gate 對齊。
+func _test_t5_intra_layer() -> void:
+	print("[TEST] t5_intra_layer")
+	# 備戰：謹慎隊高、好戰隊低（保人格梯度）
+	var cc := DecisionContext.new(); cc.leader_values = {"慎重": 0.9, "好戰": 0.2}
+	assert(DecisionTerms.eval("prepare_drive", cc, "備戰") > 0.7, "謹慎隊備戰>0.7")
+	var cf := DecisionContext.new(); cf.leader_values = {"慎重": 0.1, "好戰": 0.9}
+	assert(DecisionTerms.eval("prepare_drive", cf, "備戰") < 0.4, "好戰隊備戰<0.4(梯度保)")
+	# 駐守 settle_fit
+	var c0 := DecisionContext.new()
+	assert(DecisionTerms.eval("settle_fit", c0, "駐守") == 0.9, "駐守 settle_fit=0.9")
+	assert(DecisionTerms.eval("settle_fit", c0, "生產") == 0.4, "生產 settle_fit=0.4(不動)")
+	assert(DecisionTerms.eval("settle_fit", c0, "建設") == 0.4, "建設 settle_fit=0.4(不動)")
+	# 買糧 0.5~1.0 隨旅費折扣
+	var cb := DecisionContext.new(); cb.has_food_market = true; cb.has_specie = true
+	cb.food_market_dist = 6   # dist_disc=1 → 1.0
+	assert(absf(DecisionTerms.eval("buyfood_drive", cb, "買糧") - 1.0) < 1e-5, "買糧 dist近→1.0")
+	cb.food_market_dist = 1000000   # dist_disc→0 → 0.5
+	assert(absf(DecisionTerms.eval("buyfood_drive", cb, "買糧") - 0.5) < 0.01, "買糧 dist遠→0.5")
+	# 訓練 gate：FORCE(任 rung)→0.5、非 FORCE→0
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.leader_id = 100
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 5)   # has_trainable
+	t.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE; t.ambition_rung = AmbitionLadder.RUNG_STATE
+	var l := PersonData.new(); l.id = 100; state.persons[100] = l; state.teams[0] = t
+	var ctx_f := DecisionContext.gather(state, t)
+	assert(absf(ctx_f.ambient_train_drive - 0.5) < 1e-5, "FORCE(任rung)→ambient_train_drive 0.5")
+	t.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	var ctx_t := DecisionContext.gather(state, t)
+	assert(ctx_t.ambient_train_drive == 0.0, "非 FORCE→ambient_train_drive 0")
+	print("[TEST] t5_intra_layer PASS")
 
 # term-scale normalize T3：ambient/opportunity eval rescale [0,1]。
 func _test_term_normalize_t3() -> void:

@@ -103,7 +103,9 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"buyfood_drive":
 			# T1：剝 hunger urgency(移 coeff)，只留旅費折扣品質（近市集勝遠市集）。
 			if opt != "買糧" or not ctx.has_food_market or not ctx.has_specie: return 0.0
-			return BUYFOOD_DIST_FULL / maxf(float(ctx.food_market_dist), BUYFOOD_DIST_FULL)
+			# T5 層內 base 校：買糧非墊底(有市集+錢=可行行動)→抬 base band(0.5~1.0 隨旅費折扣)。
+			var _dd: float = BUYFOOD_DIST_FULL / maxf(float(ctx.food_market_dist), BUYFOOD_DIST_FULL)
+			return clampf(0.5 + 0.5 * _dd, 0.0, 1.0)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"faction_duty":
@@ -134,8 +136,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 駐守 = 純知足（settle 主導，無 ambition pull）→ 給高 base，使低野心 leader 選它
 			# 而非 建設/生產（後者另含 ambition_drive，野心 leader 才被推上去）。
 			match opt:
-				"駐守":        return 0.6
-				"生產", "建設": return 0.4
+				"駐守":        return 0.9   # T5 層內 base 校：純知足駐守抬 0.6→0.9(低野心 leader 選它非建設)
+				"生產", "建設": return 0.4   # 不動(另含 ambition_drive)
 				_:             return 0.0
 		"intent_fit":
 			# means-end 戰術層：team 自己戰略 intent → 子需求 → boost 對應 option（貢獻打分,非 flat）。
@@ -148,7 +150,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"prepare_drive":
 			# 備戰 = 純人格（鏡射舊 caution*0.6 + martial*0.3）。
 			if opt != "備戰": return 0.0
-			return float(ctx.leader_values.get("慎重", 0.5)) * 0.6 + float(ctx.leader_values.get("好戰", 0.5)) * 0.3
+			# T5 層內 base 校：抬謹慎梯度(慎·0.9+好·0.2)——謹慎隊備戰高、好戰隊仍低(保人格梯度)。
+			return clampf(float(ctx.leader_values.get("慎重", 0.5)) * 0.9 + float(ctx.leader_values.get("好戰", 0.5)) * 0.2, 0.0, 1.0)
 		"defend_drive":
 			# 迎戰 = 好戰驅動，威脅越大越不敢正面（鏡射舊 martial*0.7 + (1−threat)*0.2）。
 			if opt != "迎戰": return 0.0
@@ -164,7 +167,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "吸納" or ctx.absorb_target_id == -1: return 0.0
 			var amb_gap: float = clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
 			var yield_pos: float = clampf(ctx.absorb_yield, 0.0, 1.0)   # 負 yield=純負擔→0=不吸(gate#1)
-			return ABSORB_DRIVE_BASE * ctx.resource_slack * (0.3 + 0.7 * yield_pos) * (0.5 + 0.5 * amb_gap)
+			return ABSORB_DRIVE_BASE * ctx.resource_slack * (0.5 + 0.5 * yield_pos) * (0.5 + 0.5 * amb_gap)
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0
