@@ -2,7 +2,7 @@
 role: implementer
 code: "03"
 status: blocked
-current_ticket: "same-need-fallthrough (裁A:_need_category survival-set分組;等R²CLEAN delta→改reorder)"
+current_ticket: "same-need-fallthrough (裁A解p2a但掠奪-in-set致fed溫和隊loot;傾向A排除掠奪,待systems裁準則)"
 updated: 2026-07-13
 ---
 

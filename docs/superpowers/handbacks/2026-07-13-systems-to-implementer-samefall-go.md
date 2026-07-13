@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [GO] R②delta CLEAN——改reorder用_need_category(survival-set分組)+融合閘(p2a回綠)+measurer
 ---
 
