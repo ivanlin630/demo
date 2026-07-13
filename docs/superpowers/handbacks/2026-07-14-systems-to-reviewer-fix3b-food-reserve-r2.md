@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·異質框外審] Fix3b食物戰略備糧對稱化(併v2);三attrition修共用同一food_security_threshold人格門檻
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [★HOLD·別動branch] Fix3b食物備糧對稱化將追加,但measurer正對branch跑v2驗收→等我GO再改,免污染讀碼
 ---
 
