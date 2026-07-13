@@ -20,9 +20,17 @@
 func _should_reeval(state: WorldState, team: TeamData) -> bool:
     if team.current_task == TeamData.TASK_IDLE: return true      # 空閒/剛釋放→即重評
     if _is_stuck(team): return true                              # 卡住→重評
-    if _decision_crisis(state, team): return true               # 劇變(食崩/pop驟降/威脅暴增)→反射提前
+    if _decision_crisis(state, team): return true               # 劇變(食崩/pop驟降)→反射提前
+    if _directive_fresh(state, team): return true               # ★R①#1:faction 新命令→即時響應(不等 cadence)
     return state.world.current_tick >= team.decision_eval_next_tick   # 否則 cadence 節流
 ```
+
+### 1b. ★faction 命令即時響應（補 R①#1 缺口，守協同紅線）
+R① 坐實：`_decide_unified` 加 cadence throttle 後,忙碌成員收新 faction 命令(f.goals 改:攻擊/徵收/外交令)最多隔 1 日才響應=破協同。**修:faction 命令變化=重評觸發**(納單一 predicate,非另路)：
+- **stamp**：faction 設/改 member-relevant directive 處(f.goals/directive target 變)→`f.directive_change_tick = state.world.current_tick`。implementer 定位 faction goal 設點(strategic_ai/_assign_tasks 意圖設定路)stamp。
+- **predicate**：`_directive_fresh(state, team) = team.faction_id != -1 and f.directive_change_tick > team.last_decision_tick`（成員 faction 命令在其上次決策後才變→即重評響應)。
+- **`last_decision_tick`**：team 每次通過 `_should_reeval`+跑 rank 時設 = current_tick。
+- → 忙碌成員收新命令**下一 tick 即重評**(非等 cadence);無新命令則 cadence throttle(修過頻)。命令響應即時 + 過頻修,兩全。架構紀律保(命令 freshness = 單一 predicate 的一個輸入條件,非獨立重評路)。
 - `_evaluate_solo:1778` gate 改用 `_should_reeval`(語意等價,收斂)。
 - **`_decide_unified` 開頭加 `_should_reeval` gate**(現無→加):
 ```gdscript
@@ -31,8 +39,10 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
         return   # ⑦:unified/成員也 throttle(修每小時過頻);IDLE/stuck/crisis 仍即時
     team.decision_eval_next_tick = state.world.current_tick \
         + (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
+    team.last_decision_tick = state.world.current_tick   # ★命令 freshness 比對基準
     ... (survival-sticky pass + rank_scored 原樣)
 ```
+（`_evaluate_solo` gate 亦設 `last_decision_tick`。team_data 加 `var last_decision_tick: int = 0`。）
 
 ### 2. releases 收斂為「設 IDLE」非「各自 force 重評」
 四套 release 保**狀態轉換語意**(釋放 sticky task),但不各自獨立驅動重評——release→IDLE→`_should_reeval` IDLE 分支即時接手。crisis 級變化→`_decision_crisis` 統一涵蓋。

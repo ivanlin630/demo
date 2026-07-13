@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R①·premise] ⑦釋放統一——factcheck:_decide_unified加cadence不破faction命令響應?4套release可收斂設IDLE?架構紀律真收斂?
 ---
 
