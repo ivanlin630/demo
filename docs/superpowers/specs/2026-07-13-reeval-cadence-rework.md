@@ -36,10 +36,11 @@
 
 ### T-cad2：事件提前觸發（複用 crash-bypass）
 - `_decision_crisis(state, team) -> bool`：複用 `AmbitionLadder.RUNG_CRASH_POP_DROP_PCT`/`RUNG_CRASH_FOOD_DEEP` + 威脅（threat_react 跨 threshold）。任一劇變→true。
-- T-cad1 gate 加 `or _decision_crisis(state, team)`；crisis 時**不推 next_tick 到未來**（允許連續反射直到劇變解除）——或推短 cadence。
+- T-cad1 gate 加 `or _decision_crisis(state, team)`；crisis 時推**短 cadence**（R② 精修：`decision_eval_next_tick = current_tick + DECISION_CADENCE/4`,TEST VALUE）——遠比平常頻繁的反射,但避免每 tick 無界重評 churn/perf 爆。
 - TDD `_test_decision_crisis_bypass`：pop 驟降 30% 隊 → crisis=true → 不等 cadence 立即重評。
 
-### T-cad3：框架債縫#3——faction 成員重評路（藍圖「順便解」，較高風險，獨立驗）
+### T-cad3：框架債縫#3——faction 成員重評路（★R② 裁拆獨立後續 slice，不在本輪 dispatch）
+> R②(`cadence-rework-r2-verdict`)：成員進主 rank=新增寫入路徑與 `_assign_tasks` 雙寫 current_task，與 T-cad1/2「調頻率」不同風險類別,混同輪難歸因 regression。**拆獨立 slice,T-cad1/2 先行獨立 organic 驗後再開。** 以下設計保留待後續 slice：
 - 成員(faction_id!=-1,非子隊)現只 `_evaluate_independent_strategy`(684-696)，無個人日常重評。
 - **風險**：成員日常 task 由 `_assign_tasks`(faction 派工)管，加 _evaluate_solo 路徑恐與派工互搏（688 註警「避大面積互搏」）。
 - **設計**：成員也走同 DECISION_CADENCE 重評**個人 option**，但**faction_duty term 已在 rank**（服從母團命令 option 高 util）→ 忠誠成員 rank 自然選 duty option、不忠選個人。**非另開路徑，是讓成員也進主 rank**（收斂 unified/solo/member 三路一 rank）。

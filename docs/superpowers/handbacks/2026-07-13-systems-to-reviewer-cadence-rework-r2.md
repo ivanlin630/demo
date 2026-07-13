@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·cadence] 重評cadence重構設計審——churn/survival-latch/成員互搏/perf 壓測;dispatch前
 ---
 
