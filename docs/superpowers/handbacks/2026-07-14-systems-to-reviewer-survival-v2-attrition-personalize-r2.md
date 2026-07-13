@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·建議異質框外審] 求生層v2:Fix2漸進安全網+Fix3門檻人格化(死常數→f領袖謹慎/野心);attrition惡化根治,decision-core+人格化
 ---
 

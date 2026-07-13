@@ -151,7 +151,10 @@ static func esteem_food_ref(leader_values: Dictionary) -> float:
 3. **Fix3 升階**：低 pop 隊（如 Team7）脫離「67 天卡生存底層」——量 winner 分布**出現生產/建設升階**（非 100% 覓食/買糧）；且**脫困後不復崩**（pop 穩、food_days 站上 DESPERATION 以上）。
 4. **Fix4 可達性預檢**：搆不到獵物的隊，candidates **不再出現覓食**（specimen trace：無 `覓食=..✗` 常態出現）；正常情況 dispatch fallthrough 不常態觸發；覓食 winner 分布只在真有獵物時出現。
 5. **不回歸**：established 跨 seed 無退化（維持 seed7=1 等）；determinism byte-identical（新欄確定性）；憲法閘綠；無新 famine/death 惡化。
-6. **★v2 attrition 回落（headline）**：branch vs main baseline 同世界（`seeded_warring_bed` 3seed×3mo），**attrition 從惡化 1.9-3.7× 回落到 ≈ main baseline 水準**（±可接受餘裕）；Team14 型「餓著發展」死亡消失（謹慎領袖存活，僅野心賭徒仍可能餓死＝角色缺陷非系統 bug）。同時 Team10 thrash 仍治好、Fix2 reeval 頻率仍遠低 13997、established 不退。
+6. **★v2 attrition 回落（headline）**：branch vs main baseline 同世界（`seeded_warring_bed` 3seed×3mo），**attrition 從惡化 1.9-3.7× 回落到 ≈ main baseline 水準**（±可接受餘裕）；Team14 型「餓著發展」死亡消失（謹慎領袖存活，僅野心賭徒仍可能餓死＝角色缺陷非系統 bug）。同時 Team10 thrash 仍治好、established 不退。
+   - **★reviewer 條件 #2（防 over-trigger 換皮）**：measurer 報告**必須同時附 attrition + reeval 頻率兩數字**（reeval.crisis/TOTAL 仍遠低基線 13997）——不能只報 attrition 過關；怕 Fix2-v2 漸進 spam 到某程度也壓低 attrition 但代價是效能/thrash 復發。
+   - **★reviewer 條件 #3（防人格化 trap 換皮）**：抽驗**謹慎領袖隊（caution 高，ref≈7）長期(3mo)仍能在合理時間升階**（非永久 esteem 卡 0）——若謹慎隊全程升不了階＝trap 換皮沒解，回頭調 CAUTION 係數非 declare 完工。
+   - **★reviewer 條件 #1（隱含 bisect）**：attrition 若沒回落到 baseline ±餘裕 → premise 訊號不足，屆時才要求真 bisect（隔離 Fix1/4 貢獻），非現在預防性做。
 5. **順帶觀察（非閘）**：Team7 pop 暴崩 60%（tick5580→9000）現象——三修後消失/改善＝連帶驗證；仍在＝另開查。
 
 ## dispatch 註（reviewer CLEAN 後）
