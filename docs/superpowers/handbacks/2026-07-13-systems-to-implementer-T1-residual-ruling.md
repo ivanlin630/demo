@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [裁定 T1餘] 5餘非硬invariant失效(survival-class仍贏);全measure-first→放寬+3 organic觀察項;續T2-T4;belonging-readiness deferred
 ---
 

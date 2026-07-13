@@ -1,8 +1,8 @@
 ---
 role: implementer
 code: "03"
-status: blocked
-current_ticket: "term-scale-normalize T1 (8/13修畢;5餘揭T1-design真regression候選:FLEE0.6floor/loot/belonging,呈systems)"
+status: idle
+current_ticket: "-"
 updated: 2026-07-13
 ---
 
