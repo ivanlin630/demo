@@ -1,0 +1,29 @@
+{
+  "slice": "team7-wealth-trace",
+  "measured_at_head": "d81cfdb",
+  "method": "既有log重抽(seed1337,single_team_trace_bed.gd既跑段,非重跑)——SpecimenTracer._snapshot()本就每決策記coin/material(非新欄位),只是我上一版measure.json沒把它抽進team_diaries",
+  "source_log": "docs/measurements/2026-07-13-team7-wealth-trace-1337.log(全381筆[Specimen T7]entry含狀態行)",
+  "core_question_answer": {
+    "問": "Team7連續67天買糧,錢/物資從哪來,是不是每次真成交",
+    "答": "★不是用coin,是用material barter——coin全程=0(381筆全部),但material從未低於20且長期升到51plateau",
+    "code_evidence": "decision_context.gd:211-214 has_specie判準= coin>0 OR material≥20(MATERIAL_TRADE_MIN,terms.gd:15) OR goods≥10 OR ore≥20——Team7走material這條分支,非coin",
+    "material_trend": {
+      "tick5580(買糧鎖起點)": {"mat": 20, "pop": 10, "food_priv": 17.2},
+      "tick7000": {"mat": 51, "pop": 5, "food_priv": 0.0},
+      "tick9000": {"mat": 51, "pop": 4, "food_priv": 0.2},
+      "tick15000": {"mat": 51, "pop": 4, "food_priv": 2.9},
+      "tick21480(結束)": {"mat": 51, "pop": 4, "food_priv": 2.9}
+    },
+    "material_verdict": "從未枯竭/從未跌破門檻(20)——tick5580起就在20起漸升到51不再變,非「越買越窮見底」"
+  },
+  "unexpected_finding": {
+    "summary": "★population 在買糧鎖前段暴崩:tick5580 pop=10 → tick7000 pop=5 → tick9000 pop=4(60%人口流失),之後pop=4穩定55天(tick9000-21480)未再降",
+    "note": "食物food_priv同期也貼地(0.0→0.2→2.9緩升),買糧鎖跟人口崩解時間點重疊——相關性明顯,因果我沒查(是「先崩→pop少了買糧夠養」還是「買糧沒即時解糧→崩」,需更細tick級因果才能斷,超出本輪範圍)"
+  },
+  "not_delivered_reason": {
+    "goods欄位": "SpecimenTracer._snapshot()(specimen_tracer.gd:100-115)目前無goods,只有coin/material/ore隱含未印——加這欄需編輯scripts/,超出量測員界(不改code),留給implementer/systems按需加",
+    "買糧成交成功/失敗旗標": "需tap interaction_system.gd:766 buyer_coin<=0 return判斷點,同樣需改scripts/——超出我界,標記為可選跟進項"
+  },
+  "incomplete": ["goods軌跡未補(code變更超出量測員界)", "買糧真成交/no-deal拆分未補(同上)", "pop崩解因果未細查(時間+範圍考量)"],
+  "summary": "核心問題已答:Team7買糧財源=material barter非coin,material供應健康未枯竭。意外查到pop在鎖死初期暴崩60%後穩定——時間點跟買糧鎖重疊,建議blueprint/systems決定要不要細查因果。goods欄位+成交旗標需code變更,超出我界,標記給implementer/systems。"
+}
