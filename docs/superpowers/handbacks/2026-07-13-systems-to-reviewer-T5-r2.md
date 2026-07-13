@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·T5] 層內base校+訓練eval-gate對齊——審抬base不破優先序保全+對齊正確;dispatch前
 ---
 
