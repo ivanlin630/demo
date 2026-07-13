@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: 單一代表隊3mo時間軸——★首次嘗試(Team14)全程survival-override未觸tracer(decision_count=0)；改良逐候選試跑選中Team7但僅捕1次決策(90天內)——稀疏本身是證據(鎖定覓食task未搖擺)非bug；標T1-T5態(當前HEAD含T5)；若要更豐富故事需擴大候選池或調cadence觀察窗
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: reviewer
 to: blueprint
-status: open
+status: consumed
 topic: [R①重查verdict] 計畫層四靶全數未解——spec自打回後零commit，逐字相同
 ---
 
