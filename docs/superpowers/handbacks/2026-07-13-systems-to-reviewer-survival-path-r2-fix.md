@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②修正回覆·survival-path] ①改明確release-then-retrigger(你確切prescription)+churn note;請確認CLEAN
 ---
 
