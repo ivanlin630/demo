@@ -78,14 +78,35 @@ frame_challenge: ★三對齊（強結論=退役 legacy 子系統+重設計核�
 
 ---
 
+## Fix 4：覓食 util 可達性預檢查（追加，blueprint 2026-07-13；look-before-leap 輕量版）
+
+**根**：覓食 applicable（`options.gd:81-84`）只檢查 `pop <= FORAGE_VIABLE_POP`，**不檢查 `_find_forage_tile` 搆不搆得到獵物** → util 恆高(單 survival_pressure term)，選了才在 dispatch 撞 target=(-1,-1) 靠 fallthrough 補救。model 看起來「笨」（選才知搆不到）。blueprint 要：**選之前就知道搆不到**。
+
+**設計（鏡射既有 gather-flag pattern，最小手術）**：
+1. `decision_context.gd` 加 `var has_forage_tile: bool = false`（+ 選配 `var forage_pos: Vector2i = Vector2i(-1,-1)`）。
+2. `gather()`（鏡射 `has_food_market` 那段 :205-208）：`var _forage: Vector2i = _fa._find_forage_tile(state, team); c.has_forage_tile = _forage != Vector2i(-1,-1); c.forage_pos = _forage`。★finder 只跑一次(radius-1，7 格，cheap)。
+3. `options.gd:81-84` 覓食 applicable 加 `and ctx.has_forage_tile`：
+   ```
+   "覓食":
+       if ctx.population <= FactionAISystem.FORAGE_VIABLE_POP and ctx.has_forage_tile:
+           out.append(opt)
+   ```
+   → 搆不到獵物時覓食**根本不入 candidates**（非入了 util 高再撞牆）→ rank 直接在可達 option 裡選 → 正常情況 fallthrough 不常態觸發（fallthrough 仍留當保險）。
+4. 選配：`to_task` 覓食 target 可讀 `c.forage_pos` 免二次 scan（implementer 判；to_task 不取 ctx，留原 `_find_forage_tile` 亦可，cheap）。
+
+**scope 裁定（blueprint 問）**：**只做覓食**。稽核其餘 target-resolving option——買糧(`has_food_market`+`has_specie`✓)/返家補給(`has_home_outpost`✓)/掠奪·攻擊(`has_weak_prey`/`feud_target`✓)/佔村(`has_occupy_target`✓)/併入(`consolidate_target`✓)/吸納(`absorb_target`✓)**都已有 applicable 可達性 gate**，覓食是唯一漏的。∴ 範圍不擴大，不需 blueprint 再裁。
+
+**invariant 守**：不改 fallthrough 機制（保險留）；純把可達性從「dispatch 事後」提前到「applicant 事前」。determinism：finder 純確定性讀 tile。
+
 ## 驗收法（measurer 標準床，一次跑，seed1337 + 補 seed42/7）
 1. **Fix1/2 治 thrash**：seed1337 3mo，Team10（及同型非-unified 隊）**無 `建設↔貿易↔idle` 每 tick livelock**；`[Survival]` thrash print 消失；Team10 **不再 day89 餓滅**（或至少 thrash-death 機制消除，餓死若發生須是真無解非 livelock）。
 2. **Fix2 頻率**：`_should_reeval` 分支計數 reeval.crisis 從 13087 **大降**（預估 <2000）；Team7 decision_count 381→**低百**。（用現有 `reeval_attribution_bed.gd` + probe。）
 3. **Fix3 升階**：低 pop 隊（如 Team7）脫離「67 天卡生存底層」——量 winner 分布**出現生產/建設升階**（非 100% 覓食/買糧）；且**脫困後不復崩**（pop 穩、food_days 站上 DESPERATION 以上）。
-4. **不回歸**：established 跨 seed 無退化（維持 seed7=1 等）；determinism byte-identical（新欄確定性）；憲法閘綠；無新 famine/death 惡化。
+4. **Fix4 可達性預檢**：搆不到獵物的隊，candidates **不再出現覓食**（specimen trace：無 `覓食=..✗` 常態出現）；正常情況 dispatch fallthrough 不常態觸發；覓食 winner 分布只在真有獵物時出現。
+5. **不回歸**：established 跨 seed 無退化（維持 seed7=1 等）；determinism byte-identical（新欄確定性）；憲法閘綠；無新 famine/death 惡化。
 5. **順帶觀察（非閘）**：Team7 pop 暴崩 60%（tick5580→9000）現象——三修後消失/改善＝連帶驗證；仍在＝另開查。
 
 ## dispatch 註（reviewer CLEAN 後）
-- 觸及檔：`faction_ai_system.gd`（Fix1 override 退役 + Fix2 `_should_reeval`）、`team_data.gd`（Fix2 `crisis_latched` 欄 + 可能 Fix3 脫困 tick 欄）、`need_hierarchy.gd`（Fix3 food_ready 映射）。注意事項寫本 spec。
+- 觸及檔：`faction_ai_system.gd`（Fix1 override 退役 + Fix2 `_should_reeval`）、`team_data.gd`（Fix2 `crisis_latched` 欄 + 可能 Fix3 脫困 tick 欄）、`need_hierarchy.gd`（Fix3 food_ready 映射）、`decision_context.gd`（Fix4 `has_forage_tile` 欄+gather 填）、`options.gd`（Fix4 覓食 applicable gate）。注意事項寫本 spec。
 - 三項一次實作、一次 measurer 驗收（用戶定：不分批）。
 - task 完成判定 = systems + reviewer，非 implementer 自判。

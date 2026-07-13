@@ -551,5 +551,8 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **加劇缺陷**：`SURVIVAL_TASKS`(:80)=[RETURN_HOME,BEG,JOIN,FORAGE,CAMP] **不含 TASK_TRADE(貿易)**；買糧→貿易 但 survival-latch(:3076-3094 hold+cadence throttle)認不得 貿易＝survival → override **每 tick 無節流重觸發**。（不可 naive 加 貿易 進 SURVIVAL_TASKS＝會誤classify 商隊常態交易。）
 - **修向**：de-patch＝非-unified 求生亦走引擎(退役 `_evaluate_survival` override，鏡射 unified :3046-3047)。**decision-core 結構 fix(L1/L2)，需 spec→reviewer→implementer**。定序待用戶(2026-07-13 交接中，見 handback `systems-to-blueprint-roach-team10-thrash`)。關 [[project_unified_decision_framework]]/[[project_reverse_engineering_arc]]。
 
+## 決策引擎（貿易/訓練/囤貨 applicable-vs-target gap，2026-07-13 reviewer 稽核附帶）
+- **同型 gap（非阻塞 backlog）**：`貿易`(applicable 用 `has_goods`/`has_arb`) 但 `_merchant_trade_target` 找不找得到市場無關 → applicable 過但 to_task 可能撲空 IDLE 重評。訓練/囤貨同理未深驗。**非求生層、非本次 3-fix 引入/惡化**，撲空後果=任務落空重評（非求生斷觸發等級），故 Fix4 未納。日後若某經濟 option 常態撲空 churn，比照覓食 Fix4 加 applicable 可達性 gate（gather-flag pattern）。關 `2026-07-13-survival-layer-unify-3fix.md §Fix4`。
+
 ## 情緒系統（stress decay，death spiral 根層）
 - **成員 stress 累積不釋放**：驅 `team_panic` → death spiral 根層，跨 reaction/morale。survival-path #2 已於決策層斷 FLEE 螺旋（threat=0→FLEE eval 0），但 stress 本身累積待 person 情緒系統獨立 arc（decay/釋放機制）。本 slice 不修。
