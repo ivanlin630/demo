@@ -100,12 +100,58 @@ frame_challenge: ★三對齊（強結論=退役 legacy 子系統+重設計核�
 
 **invariant 守**：不改 fallthrough 機制（保險留）；純把可達性從「dispatch 事後」提前到「applicant 事前」。determinism：finder 純確定性讀 tile。
 
+---
+
+# ★修訂 v2（2026-07-14）：attrition 惡化根治——Fix2 漸進安全網 + Fix3 門檻人格化
+
+**背景**：4-fix 全維度驗收（`2026-07-14-measurer-to-blueprint-survival4fix-acceptance.md`）發現 **population attrition 惡化 1.9-3.7×（3 seed 一致，硬 FAIL）**，established 無回歸、determinism MATCH。blueprint 讀死亡故事線(Team14 seed1337)+ systems 讀 diff 坐實根因，用戶裁定修向（`2026-07-14-blueprint-to-systems-attrition-rootcause-personalize-threshold.md`）。
+
+**根因（坐實）**：
+- **Fix3 主兇**：`food_ready = food_days / ESTEEM_FOOD_REF_DAYS(3)` → food_days=2.5(已跌破絕境) 時 food_ready 仍 =0.83 → esteem urgency 高 → 生產/採購 coeff 壓過買糧（生產 alignment 0.57 > 買糧 0.45 @food_days=2.5）→ **team 餓著發展不買糧** → famine 死。/3 過低=矯枉過正（舊 /5 太難=trap，/3 太易=餓死）。
+- **Fix2 補刀**：crisis edge-trigger 只抓「暴跌」；**慢性漸進糧損(food_flow_avg 輕負，非 <DEEP -2.0)不 trip crisis** → 不 latch 不提前重評 → team 停採購過 cadence → 餓死。舊 level-trigger 93% 重評雖吵，但每 tick 重看食物＝誤打誤撞安全網，被 de-patch 犧牲。
+
+**診斷通則命中**：安全門檻是**全域死常數 pre-empt 人格**＝變相補丁（照妖鏡「死常數人格化」同款病，`潰退門檻#1` 已治過，此安全門檻同型漏）。
+
+## Fix2-v2：crisis 加漸進滑坡觸發（安全網不能省，主藥）
+`_decision_crisis`（:1766，純讀 team 欄零 gather）加漸進項：
+```
+# 既有：pop 驟降 / food_flow_avg < RUNG_CRASH_FOOD_DEEP(-2.0)=暴跌
+# 新增 v2：慢性糧滑坡(輕負 flow)=漸進安全網→糧一開始流失就週期性拉回確認補糧
+if team.food_flow_avg < GRADUAL_DECLINE_FLOW:   # TEST VALUE ~-0.5（DEEP -2.0 與 0 之間）
+    return true
+```
+- **不 revert edge-trigger 機制**：`crisis_latched` 節流仍在→漸進 crisis edge fire 一次 + 持續落 /4 cadence(60 ticks=6h 重看糧)，非每 tick。∴ 保安全網又不回 13997 spam（預估 reeval.crisis 34→數百，遠低基線）。
+- 純讀 `food_flow_avg`（已存欄），零 gather、零 randf，守原設計。
+- ★measurer 驗 reeval 頻率不失控（仍遠低 13997）+ 餓隊被漸進拉回補糧。
+
+## Fix3-v2：ESTEEM_FOOD_REF_DAYS 人格化（死常數→f(領袖人格)）
+`need_hierarchy.gd` esteem food_ready 參考線改人格化：
+```
+static func esteem_food_ref(leader_values: Dictionary) -> float:
+    var caution: float = float(leader_values.get("慎重", 0.5))
+    var ambition: float = float(leader_values.get("野心", 0.5))
+    # 謹慎↑→ref↑(存久才敢鬆懈發展)；野心↑→ref↓(薄庫存搏發展)
+    return clampf(ESTEEM_REF_BASE + (caution-0.5)*ESTEEM_REF_CAUTION - (ambition-0.5)*ESTEEM_REF_AMBITION,
+                  ESTEEM_REF_MIN, ESTEEM_REF_MAX)
+# food_ready = clampf(food_days / esteem_food_ref(leader_values), 0, 1)
+```
+- TEST VALUE 建議：`BASE=4, CAUTION=4, AMBITION=4, MIN=2, MAX=8`（謹慎狂 caution=1/ambition=0→ref≈7 存久；賭徒 caution=0/ambition=1→ref≈1→clamp 2 薄庫存搏）。
+- **效果**：Team14 餓死 → 從「全體共用死常數的系統 bug」變「領袖是好高騖遠賭徒，剩薄糧就敢買武器賭發展，賭輸餓死」＝**角色缺陷致死、有故事性**。謹慎領袖存糧多→存活但發展慢；trap 從「全體卡死」溶成「謹慎者保守/野心者搏」的人格光譜。
+- **實作**：`compute_raw`（gather :323 呼，有 team→leader）取 `leader.values` 算 ref。need_hierarchy 讀人格 trait 非他層 urgency，守 §2。determinism：純算術零 randf。
+
+## v2 觸及檔（增量）
+`faction_ai_system.gd`(Fix2-v2 `_decision_crisis` 漸進 + `GRADUAL_DECLINE_FLOW` const)、`need_hierarchy.gd`(Fix3-v2 `esteem_food_ref` + 4 const，`compute_raw` 取 leader values；改簽名或內部 fetch leader)。
+
+## v2 未納（blueprint 留議，非本輪）
+「求生該是可競爭 util 選項還是硬中斷」——更根本問題，blueprint 與用戶討論浮出未拍板，本輪先 Fix2 漸進+Fix3 人格化，留議。
+
 ## 驗收法（measurer 標準床，一次跑，seed1337 + 補 seed42/7）
 1. **Fix1/2 治 thrash**：seed1337 3mo，Team10（及同型非-unified 隊）**無 `建設↔貿易↔idle` 每 tick livelock**；`[Survival]` thrash print 消失；Team10 **不再 day89 餓滅**（或至少 thrash-death 機制消除，餓死若發生須是真無解非 livelock）。
 2. **Fix2 頻率**：`_should_reeval` 分支計數 reeval.crisis 從 13087 **大降**（預估 <2000）；Team7 decision_count 381→**低百**。（用現有 `reeval_attribution_bed.gd` + probe。）
 3. **Fix3 升階**：低 pop 隊（如 Team7）脫離「67 天卡生存底層」——量 winner 分布**出現生產/建設升階**（非 100% 覓食/買糧）；且**脫困後不復崩**（pop 穩、food_days 站上 DESPERATION 以上）。
 4. **Fix4 可達性預檢**：搆不到獵物的隊，candidates **不再出現覓食**（specimen trace：無 `覓食=..✗` 常態出現）；正常情況 dispatch fallthrough 不常態觸發；覓食 winner 分布只在真有獵物時出現。
 5. **不回歸**：established 跨 seed 無退化（維持 seed7=1 等）；determinism byte-identical（新欄確定性）；憲法閘綠；無新 famine/death 惡化。
+6. **★v2 attrition 回落（headline）**：branch vs main baseline 同世界（`seeded_warring_bed` 3seed×3mo），**attrition 從惡化 1.9-3.7× 回落到 ≈ main baseline 水準**（±可接受餘裕）；Team14 型「餓著發展」死亡消失（謹慎領袖存活，僅野心賭徒仍可能餓死＝角色缺陷非系統 bug）。同時 Team10 thrash 仍治好、Fix2 reeval 頻率仍遠低 13997、established 不退。
 5. **順帶觀察（非閘）**：Team7 pop 暴崩 60%（tick5580→9000）現象——三修後消失/改善＝連帶驗證；仍在＝另開查。
 
 ## dispatch 註（reviewer CLEAN 後）
