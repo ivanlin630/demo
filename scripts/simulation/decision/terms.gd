@@ -50,19 +50,15 @@ static func _duty_factor(loy: float, amb: float) -> float:
 static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 	match term:
 		"survival_pressure":
-			# 重標度：吃飽(≥WARNING 3)→0 不蓋過 trade；糧危陡升量級支配(food2→4/food0→12)。
-			if ctx.food_days >= 3.0: return 0.0
-			return 4.0 * (3.0 - ctx.food_days)
+			# T1 正規化：剝 urgency 乘子(移 L_SURVIVAL coeff)。覓食=survival 預設可行行動(applicable 已 gate)→品質 1.0。
+			return 1.0
 		"restock_need":
 			if opt != "返家補給": return 0.0
-			# proactive 回家：~food4 起、量級隨糧降攀升(無上限,壓過覓食使有家偏好回家)。
-			return maxf(0.0, 1.5 * (RESTOCK_DAYS - ctx.food_days))
+			# T1：剝 hunger urgency(移 coeff)，保機會品質——家糧倉越滿返家越值(空家不返)。
+			return clampf(ctx.home_food / RESTOCK_MIN, 0.0, 1.0)
 		"threat_pressure":
-			# survival(FLEE)=威脅驅動(與 hunger 分離)。序7 reaction 溶入：疊 team_panic（集體潰散=感知威脅放大，
-			# 潰散抬 survival util 壓過 leader 勇氣）。★三源序保：panic 疊加 ≤ 真絕境（PANIC_WEIGHT 校，
-			# max 0.5 << survival_pressure 量級 12），panic-only FLEE 走主 rank PRIO_DISPATCH(50)/threat 路 70,
-			# 皆 < 真 survival-class PRIO_SURVIVAL(80) → 不喧賓奪主。
-			return ctx.threat + ctx.team_panic * PANIC_WEIGHT
+			# T1：survival(FLEE)剝 threat urgency(移 L_SAFETY coeff)，保可行+恐慌加成品質。
+			return clampf(0.6 + ctx.team_panic * 0.4, 0.0, 1.0)
 		"economic_opp":
 			if opt != "貿易": return 0.0
 			var role: float = 1.0 if ctx.is_merchant else NON_MERCHANT_TRADE_FACTOR
@@ -87,27 +83,26 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 要根據地驅力（純野心 base_need；匱乏→奪產村的 hunger boost 走 intent_fit term，與掠奪 parallel）。
 			# 人格染色走 weight("occupy")。無 outpost 流浪狼 base_need=1（最需要），有 outpost 弱驅 0.3。
 			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
-			return OCCUPY_DRIVE_BASE * (1.0 if not ctx.has_own_outpost else 0.3)
+			# T1：base 1.2→1.0；要根據地品質(無 outpost 流浪狼最需要 1.0，有 outpost 弱驅 0.3)。
+			return 1.0 if not ctx.has_own_outpost else 0.3
 		"join_drive":
 			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。
 			# 名聲磁鐵 §3：× (1 + host protector_rep × REP_MAGNET_W)——高名聲 host 投靠翻贏逃，中性(0.5)加成小。
 			if opt != "併入": return 0.0
-			var hunger: float = maxf(0.0, DESPERATION_DAYS - ctx.food_days)
-			var threat_push: float = ctx.threat if ctx.threat > ctx.threat_threshold else 0.0
-			var magnet: float = 1.0 + ctx.best_protector_rep * REP_MAGNET_W
-			return DESPERATION_SCALE * maxf(hunger, threat_push) * magnet
+			# T1：剝 hunger/threat urgency(移 coeff)，保名聲磁鐵品質(高名聲 host 投靠更值)。
+			return clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
-			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+			# T1：剝 hunger urgency(移 coeff)。可耕地已 gate→品質 1.0。
+			return 1.0
 		"beg_drive":
 			if opt != "乞食" or not ctx.has_aid_target: return 0.0
-			return DESPERATION_SCALE * BEG_FLOOR_FACTOR * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+			# T1：剝 hunger urgency(移 coeff)。低品質最後手段=低 band 定值。
+			return BEG_FLOOR_FACTOR
 		"buyfood_drive":
-			# 餓 + 有市集 + 有錢 → 買糧 drive；旅費折扣（近市集勝遠市集）。無錢=0（乞食真語意）。
+			# T1：剝 hunger urgency(移 coeff)，只留旅費折扣品質（近市集勝遠市集）。
 			if opt != "買糧" or not ctx.has_food_market or not ctx.has_specie: return 0.0
-			var hunger: float = DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
-			var dist_disc: float = BUYFOOD_DIST_FULL / maxf(float(ctx.food_market_dist), BUYFOOD_DIST_FULL)
-			return hunger * dist_disc
+			return BUYFOOD_DIST_FULL / maxf(float(ctx.food_market_dist), BUYFOOD_DIST_FULL)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"faction_duty":
