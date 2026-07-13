@@ -16,6 +16,22 @@ const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量�
 # ── means-end 戰術層（2026-07-01）：intent → 子需求 → option 貢獻打分（mirror FACTION_DUTY_DRIVE）──
 const INTENT_FIT_DRIVE: float = 1.0     # TEST VALUE — T3 正規化：意圖反應量級→[0,1]（1.5→1.0）
 const SURPLUS_FOOD_DAYS: float = 7.0    # TEST VALUE — 「有餘糧」門檻（致富→囤貨/貿易 子需求觸發）
+# 候選2 統一人格門檻（單一 home=DecisionTerms；收編 Fix3-v2 esteem_food_ref，need_hierarchy/trade_valuation 都呼此）。
+# 「安全感」數字：謹慎領袖高(備糧多才敢發展/賣糧)、賭徒低(薄糧就搏)。同時駕馭 esteem food_ready + 賣糧留底。
+const FOOD_SEC_BASE: float = 4.0        # TEST VALUE — 中性領袖(慎重=野心=0.5)安全存量目標(天)
+const FOOD_SEC_CAUTION: float = 4.0     # TEST VALUE — 慎重對目標斜率
+const FOOD_SEC_AMBITION: float = 4.0    # TEST VALUE — 野心對目標斜率(反向)
+const FOOD_SEC_MIN: float = 2.0         # TEST VALUE — 賭徒下限(薄庫存搏)
+const FOOD_SEC_MAX: float = 8.0         # TEST VALUE — 謹慎狂上限(存久)
+# 層5 gap-to-target drive 量級（低於安全線→補糧驅力；連續信號非新 band）。
+const SECURITY_STOCK_DRIVE: float = 0.5   # TEST VALUE — 食物安全 gap 對 buyfood_drive 的加成量級
+
+# 人格化食物安全存量目標(天)：慎重↑→目標↑存久；野心↑→目標↓薄糧搏。純算術零 randf。
+static func food_security_target(leader_values: Dictionary) -> float:
+	var caution: float = float(leader_values.get("慎重", 0.5))
+	var ambition: float = float(leader_values.get("野心", 0.5))
+	return clampf(FOOD_SEC_BASE + (caution - 0.5) * FOOD_SEC_CAUTION - (ambition - 0.5) * FOOD_SEC_AMBITION,
+		FOOD_SEC_MIN, FOOD_SEC_MAX)
 const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/好戰門檻（防 over-war：溫和窮隊不搶）
 # ── 佔村（雙引擎咬合：奪據點→據點產糧養兵，複用 capture+residency）──
 const OCCUPY_DRIVE_BASE: float = 1.2    # TEST VALUE — 佔村驅力基值（× occupy weight ≈ 0.4-0.7 → util 略勝 loot，要根據地的狼優先打村）
@@ -108,7 +124,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "買糧" or not ctx.has_food_market or not ctx.has_specie: return 0.0
 			# T5 層內 base 校：買糧非墊底(有市集+錢=可行行動)→抬 base band(0.5~1.0 隨旅費折扣)。
 			var _dd: float = BUYFOOD_DIST_FULL / maxf(float(ctx.food_market_dist), BUYFOOD_DIST_FULL)
-			return clampf(0.5 + 0.5 * _dd, 0.0, 1.0)
+			var _tgt: float = food_security_target(ctx.leader_values)
+			var _gap: float = clampf((_tgt - ctx.food_days) / maxf(_tgt, 1.0), 0.0, 1.0)
+			# 層5：食物安全 gap-to-target 驅力——越低於人格安全存量→補糧驅越強→謹慎隊維持 buffer(連續信號,非新 band)。
+			return clampf(0.5 + 0.5 * _dd + SECURITY_STOCK_DRIVE * _gap, 0.0, 1.0)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"faction_duty":

@@ -13,6 +13,9 @@ func _initialize() -> void:
 	_test_fix2_gradual_decline()
 	_test_fix3_esteem_ref_personalize()
 	_test_fix3_food_ready_via_leader()
+	_test_layer0_survival_boost()
+	_test_layer5_buyfood_gap()
+	_test_candidate1_food_reserve()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -76,17 +79,17 @@ func _test_fix2_gradual_decline() -> void:
 	_ok(ai._decision_crisis(state, t2) == false, "極輕糧損(flow=-0.3)→ 非 crisis(不誤觸發)")
 
 func _test_fix3_esteem_ref_personalize() -> void:
-	print("--- Fix3-v2 esteem_food_ref 人格化 ---")
+	print("--- 候選2 food_security_target 人格化(單一 home=DecisionTerms) ---")
 	# 中性領袖(慎重=野心=0.5)→ BASE=4
-	_ok(absf(NeedHierarchy.esteem_food_ref({}) - 4.0) < 0.01, "中性領袖 → ref=BASE 4")
-	_ok(absf(NeedHierarchy.esteem_food_ref({"慎重": 0.5, "野心": 0.5}) - 4.0) < 0.01, "顯式中性 → ref=4")
+	_ok(absf(DecisionTerms.food_security_target({}) - 4.0) < 0.01, "中性領袖 → target=BASE 4")
+	_ok(absf(DecisionTerms.food_security_target({"慎重": 0.5, "野心": 0.5}) - 4.0) < 0.01, "顯式中性 → target=4")
 	# 謹慎狂(慎重=1,野心=0)→ 4+2+2=8 → clamp MAX 8（存久才發展）
-	var ref_caution: float = NeedHierarchy.esteem_food_ref({"慎重": 1.0, "野心": 0.0})
-	_ok(ref_caution >= 7.9, "謹慎狂(慎重1/野心0)→ ref 高(%.1f，存久)" % ref_caution)
+	var ref_caution: float = DecisionTerms.food_security_target({"慎重": 1.0, "野心": 0.0})
+	_ok(ref_caution >= 7.9, "謹慎狂(慎重1/野心0)→ target 高(%.1f，存久)" % ref_caution)
 	# 賭徒(慎重=0,野心=1)→ 4-2-2=0 → clamp MIN 2（薄糧搏發展）
-	var ref_gambler: float = NeedHierarchy.esteem_food_ref({"慎重": 0.0, "野心": 1.0})
-	_ok(ref_gambler <= 2.1, "賭徒(慎重0/野心1)→ ref 低(%.1f，薄糧搏)" % ref_gambler)
-	_ok(ref_caution > ref_gambler, "謹慎領袖 ref > 賭徒 ref(人格分化)")
+	var ref_gambler: float = DecisionTerms.food_security_target({"慎重": 0.0, "野心": 1.0})
+	_ok(ref_gambler <= 2.1, "賭徒(慎重0/野心1)→ target 低(%.1f，薄糧搏)" % ref_gambler)
+	_ok(ref_caution > ref_gambler, "謹慎領袖 target > 賭徒 target(人格分化)")
 
 func _test_fix3_food_ready_via_leader() -> void:
 	print("--- Fix3-v2 food_ready 讀領袖人格 ---")
@@ -111,3 +114,62 @@ func _test_fix3_food_ready_via_leader() -> void:
 	t2.ambition_cap = 2; t2.ambition_rung = 0; t2.leader_id = -1
 	var raw_n := NeedHierarchy.compute_raw(state, t2, 4.0, 0.0)
 	_ok(absf(raw_n[NeedHierarchy.L_ESTEEM] - 1.0) < 0.01, "null leader food_days=4 → ref=4→food_ready=1.0(不崩)")
+
+func _mk_ctx(food_days: float) -> DecisionContext:
+	var ctx := DecisionContext.new()
+	ctx.food_days = food_days
+	ctx.population = 5                       # ≤ FORAGE_VIABLE_POP(15)
+	ctx.has_forage_tile = true               # 覓食 applicable
+	ctx.leader_values = {}
+	var u := PackedFloat32Array(); u.resize(NeedHierarchy.N_LAYERS)   # 全 0 urgency（隔離層0 boost）
+	ctx.need_urgency = u
+	return ctx
+
+func _util_of(scored: Array, opt: String) -> float:
+	for e in scored:
+		if e["opt"] == opt: return e["u"]
+	return -999.0
+
+func _test_layer0_survival_boost() -> void:
+	print("--- 層0 survival util 量級 boost ---")
+	# food_days=1 (<FLOOR 2) → survival-class 加法超量級奪 argmax
+	var scored1: Array = DecisionEngine.rank_scored_ctx(_mk_ctx(1.0))
+	_ok(scored1[0]["opt"] in DecisionOptions.SURVIVAL_OPTION_SET,
+		"food_days=1 → rank[0] 為 survival-class(boost 破頂)，實際=%s" % scored1[0]["opt"])
+	# food_days=5 (>FLOOR) → boost 不觸發：覓食 util 低於 food_days=1 態
+	var scored5: Array = DecisionEngine.rank_scored_ctx(_mk_ctx(5.0))
+	var forage1: float = _util_of(scored1, "覓食")
+	var forage5: float = _util_of(scored5, "覓食")
+	_ok(forage1 > forage5 + 0.5, "覓食 util food_days=1(%.2f) 顯著 > food_days=5(%.2f)(boost 隨 food→0 放大)" % [forage1, forage5])
+	# 邊界 food_days=FLOOR(2) → boost=0 平滑銜接
+	var scoredF: Array = DecisionEngine.rank_scored_ctx(_mk_ctx(2.0))
+	_ok(absf(_util_of(scoredF, "覓食") - forage5) < 0.01, "food_days=FLOOR(2)→boost=0，與>FLOOR 平滑銜接")
+
+func _test_layer5_buyfood_gap() -> void:
+	print("--- 層5 買糧 gap-to-target 驅力 ---")
+	# 同市集，低糧 gap 大 → buyfood_drive 高於 高糧 gap=0
+	var lowf := DecisionContext.new()
+	lowf.food_days = 1.0; lowf.has_food_market = true; lowf.has_specie = true; lowf.food_market_dist = 100000; lowf.leader_values = {}
+	var highf := DecisionContext.new()
+	highf.food_days = 10.0; highf.has_food_market = true; highf.has_specie = true; highf.food_market_dist = 100000; highf.leader_values = {}
+	_ok(DecisionTerms.eval("buyfood_drive", lowf, "買糧") > DecisionTerms.eval("buyfood_drive", highf, "買糧"),
+		"低糧(gap大) buyfood_drive > 高糧(gap=0)")
+	# 同糧態，謹慎領袖(target 高→gap 大)買糧驅 > 賭徒(target 低→gap 小)——早補糧維 buffer
+	var caut := DecisionContext.new()
+	caut.food_days = 5.0; caut.has_food_market = true; caut.has_specie = true; caut.food_market_dist = 100000
+	caut.leader_values = {"慎重": 1.0, "野心": 0.0}   # target≈8 → gap=(8-5)/8=0.375
+	var gamb := DecisionContext.new()
+	gamb.food_days = 5.0; gamb.has_food_market = true; gamb.has_specie = true; gamb.food_market_dist = 100000
+	gamb.leader_values = {"慎重": 0.0, "野心": 1.0}   # target≈2 → food>target → gap=0
+	_ok(DecisionTerms.eval("buyfood_drive", caut, "買糧") > DecisionTerms.eval("buyfood_drive", gamb, "買糧"),
+		"謹慎領袖(食物安全 gap 大)買糧驅 > 賭徒(已達薄目標)")
+
+func _test_candidate1_food_reserve() -> void:
+	print("--- 候選1 賣糧 food reserve 人格化 ---")
+	var t := TeamData.new(); AnonCohort.add(t.anon_cohorts, "平民", "healthy", 10)   # population 是 cohort 衍生 getter
+	var r_caut: float = TradeValuation.reserve(t, "food", {"慎重": 1.0, "野心": 0.0})   # target≈8
+	var r_gamb: float = TradeValuation.reserve(t, "food", {"慎重": 0.0, "野心": 1.0})   # target≈2
+	var r_neut: float = TradeValuation.reserve(t, "food", {})                            # target=4
+	_ok(r_caut > r_neut and r_neut > r_gamb, "food reserve：謹慎(%.0f) > 中性(%.0f) > 賭徒(%.0f)" % [r_caut, r_neut, r_gamb])
+	# 中性 = target(4) × pop(10) × FOOD_PER_PERSON_PER_DAY(0.8) = 32
+	_ok(absf(r_neut - 4.0 * 10.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY) < 0.01, "中性 reserve = target×pop×日耗")

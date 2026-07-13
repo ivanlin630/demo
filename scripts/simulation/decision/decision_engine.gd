@@ -4,6 +4,10 @@ class_name DecisionEngine
 # 蒐集 DecisionContext → 列候選 Option → 每 option util = Σ(人格權重 × 驅力 term)
 # + 現行 option 承諾 bonus → argmax。平手 → 保持現行（承諾慣性防震盪）。
 const COMMITMENT_BONUS: float = 0.3   # TEST VALUE：承諾慣性（防震盪）
+# 層0 安全氣囊：極低糧→survival-class option 加法超量級，突破 coeff [0,1] 天花板奪回 argmax。
+# floor 低→正常隊靠層1/2/5 安全網不觸發；boost 觸發頻率=健康指標(常觸發=安全網失職)。
+const SURVIVAL_BOOST_FLOOR: float = 2.0   # TEST VALUE — 極低糧門檻(遠低人格安全存量,安全氣囊非日常剎車)
+const SURVIVAL_BOOST_MAX: float = 2.5     # TEST VALUE — food→0 時 survival util +此(碾壓任何 dev,復原舊 12 域碾壓力)
 
 # options 依 util 降序（index tiebreak：util 相等→applicable 順序在前者勝，同 argmax strict >）。
 # 排序後帶 util 的 scored 陣列 [{u,i,opt}, ...]（降序）。rank() 只取 opt；
@@ -27,6 +31,12 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "") -
 		# ★乘在 COMMITMENT_BONUS 之前（承諾慣性是決策層加成，不受需求調變）。
 		var _coeff: float = NeedHierarchy.consistency_coeff(opt, ctx.need_urgency, ctx.leader_values)
 		u *= _coeff
+		# 層0 安全氣囊（★插在 coeff 乘法之後——寫死此序：coeff 前會被 0.15 floor 打折失效）：
+		# 極低糧時 survival-class 加法超量級破頂，隨 food→0 線性放大，奪回 argmax。全 SURVIVAL_OPTION_SET 等量加
+		# (不改 survival-class 內部相對序，只集體破頂)。food_days=FLOOR 時加成=0 平滑銜接無 flip-flop。
+		if ctx.food_days < SURVIVAL_BOOST_FLOOR and opt in DecisionOptions.SURVIVAL_OPTION_SET:
+			u += SURVIVAL_BOOST_MAX * (SURVIVAL_BOOST_FLOOR - ctx.food_days) / SURVIVAL_BOOST_FLOOR
+			if Probe.enabled: Probe.bump("survival.boost_fire")   # 觸發頻率=健康指標(measurer 要)
 		if Probe.enabled and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
 			Probe.bump("decision.coeff_applied_n")   # 全 23 option 受 coeff 覆蓋計數
 			if _coeff < 0.5: Probe.bump("decision.coeff_lowhalf")   # 遠層被顯著壓比例

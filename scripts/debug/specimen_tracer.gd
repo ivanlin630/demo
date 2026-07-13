@@ -111,6 +111,16 @@ static func _snapshot(state: WorldState, team: TeamData) -> Dictionary:
 	var granary_food: float = float(g.public_storage.get("food", 0)) if g != null else 0.0
 	var leader: PersonData = state.persons.get(team.leader_id)
 	var rung: int = AmbitionLadder.target_rung(state, team, leader) if leader != null else -1
+	# slice A 補：leader trait dump（性格顯性化驗收要——一眼看出此 leader 性格對應什麼資源分配/option）。
+	var lv: Dictionary = leader.values if leader != null else {}
+	var traits: Dictionary = {
+		"野心": snappedf(float(lv.get("野心", 0.5)), 0.01),
+		"慎重": snappedf(float(lv.get("慎重", 0.5)), 0.01),
+		"求生欲": snappedf(float(lv.get("求生欲", 0.5)), 0.01),
+		"好戰": snappedf(float(lv.get("好戰", 0.5)), 0.01),
+		"貪婪": snappedf(float(lv.get("貪婪", 0.5)), 0.01),
+		"food_sec_target": snappedf(DecisionTerms.food_security_target(lv), 0.1),   # 該性格的食物安全存量目標(天)
+	}
 	return {
 		"pop": team.population,
 		"food_private": float(team.resources.get("food", 0)),
@@ -121,6 +131,7 @@ static func _snapshot(state: WorldState, team: TeamData) -> Dictionary:
 		"faction_id": team.faction_id,
 		"coin": float(team.resources.get("coin", 0)),
 		"material": float(team.resources.get("material", 0)),
+		"leader_traits": traits,
 	}
 
 # action target Vector2i → 站該格的 team_id（belief re-query 用）；無/自己 → -1。
@@ -148,3 +159,8 @@ static func _print_entry(e: Dictionary) -> void:
 	print("    狀態: pop=%d food(priv=%.1f/gran=%.1f/eff=%.1f) consume/d=%.1f rung=%d fid=%d coin=%.0f mat=%.0f" % [
 		s["pop"], s["food_private"], s["food_granary"], s["effective_food"],
 		s["consume_per_day"], s["rung"], s["faction_id"], s["coin"], s["material"]])
+	var _tr: Dictionary = s.get("leader_traits", {})
+	if not _tr.is_empty():
+		print("    leader: 野心=%.2f 慎重=%.2f 求生欲=%.2f 好戰=%.2f 貪婪=%.2f → food_sec_target=%.1f天" % [
+			_tr.get("野心", 0.5), _tr.get("慎重", 0.5), _tr.get("求生欲", 0.5),
+			_tr.get("好戰", 0.5), _tr.get("貪婪", 0.5), _tr.get("food_sec_target", 4.0)])

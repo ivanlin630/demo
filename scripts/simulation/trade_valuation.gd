@@ -55,9 +55,20 @@ const FOOD_RESERVE_TICKS: float = 20.0   # TEST VALUE — food 最低自留（po
 
 # 留底（不賣掉自己需要的）：food 按存糧 tick、coin 半留、其他按 target 需求。單一源。
 # NPC market 與 玩家路徑同用；武器留底統一走 target-based（TARGET_PER_POP[weapon]）。
-static func reserve(team: TeamData, res: String) -> float:
+# 候選1 helper：從 state 取隊領袖人格值(供 food reserve 人格化)。null/無領袖→{}→BASE 目標。
+static func leader_vals(state: WorldState, team: TeamData) -> Dictionary:
+	if state == null or team.leader_id == -1:
+		return {}
+	var l: PersonData = state.persons.get(team.leader_id)
+	return l.values if l != null else {}
+
+static func reserve(team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
 	if res == "food":
-		return float(team.population) * 0.1 * FOOD_RESERVE_TICKS
+		# 候選1 人格化：食物留底=人格安全存量目標(天)×pop×真實日耗——不賣到自己餓。
+		# 退役死常數 pop×0.1×20(用錯 0.1 vs 真實 FOOD_PER_PERSON_PER_DAY=0.8)。同一 food_security_target(領袖)。
+		# 對齊 aid-reserve 已人格化先例(interaction_system:1000-1002 lerpf)。空 leader_values→BASE 4 天。
+		return DecisionTerms.food_security_target(leader_values) * float(team.population) \
+			* ResourceSystem.FOOD_PER_PERSON_PER_DAY
 	if res == "coin":
 		return float(team.resources.get("coin", 0)) * 0.5
 	return float(team.population) * float(TARGET_PER_POP.get(res, 0.0))

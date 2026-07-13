@@ -1948,8 +1948,9 @@ func _test_t5_intra_layer() -> void:
 	assert(DecisionTerms.eval("settle_fit", c0, "駐守") == 0.9, "駐守 settle_fit=0.9")
 	assert(DecisionTerms.eval("settle_fit", c0, "生產") == 0.4, "生產 settle_fit=0.4(不動)")
 	assert(DecisionTerms.eval("settle_fit", c0, "建設") == 0.4, "建設 settle_fit=0.4(不動)")
-	# 買糧 0.5~1.0 隨旅費折扣
+	# 買糧 0.5~1.0 隨旅費折扣（層5：food_days 高→安全 gap=0，隔離旅費折扣分量；gap 分量另測 survival bed）
 	var cb := DecisionContext.new(); cb.has_food_market = true; cb.has_specie = true
+	cb.food_days = 10.0   # > food_security_target MAX(8) → gap=0，純旅費折扣
 	cb.food_market_dist = 6   # dist_disc=1 → 1.0
 	assert(absf(DecisionTerms.eval("buyfood_drive", cb, "買糧") - 1.0) < 1e-5, "買糧 dist近→1.0")
 	cb.food_market_dist = 1000000   # dist_disc→0 → 0.5
@@ -4815,12 +4816,13 @@ func _run_sim_test() -> void:
 func _test_buyfood_term_and_option() -> void:
 	print("--- 買糧 term/option (Phase1) ---")
 	# (a) buyfood_drive：餓+有市集+有 specie → >0；無 specie → 0；近市集 util > 遠市集
+	# 層5：food_days 高→安全 gap=0，隔離旅費折扣（近>遠）；gap 分量另測 survival bed。
 	var near := DecisionContext.new()
-	near.food_days = 0.5; near.has_food_market = true; near.has_specie = true; near.food_market_dist = 1
+	near.food_days = 10.0; near.has_food_market = true; near.has_specie = true; near.food_market_dist = 1
 	var far := DecisionContext.new()
-	far.food_days = 0.5; far.has_food_market = true; far.has_specie = true; far.food_market_dist = 20
+	far.food_days = 10.0; far.has_food_market = true; far.has_specie = true; far.food_market_dist = 20
 	var poor := DecisionContext.new()
-	poor.food_days = 0.5; poor.has_food_market = true; poor.has_specie = false; poor.food_market_dist = 1
+	poor.food_days = 10.0; poor.has_food_market = true; poor.has_specie = false; poor.food_market_dist = 1
 	assert(DecisionTerms.eval("buyfood_drive", near, "買糧") > DecisionTerms.eval("buyfood_drive", far, "買糧"), \
 		"[buyfood] 近市集 util 未高於遠（旅費折扣失效）")
 	assert(DecisionTerms.eval("buyfood_drive", poor, "買糧") == 0.0, "[buyfood] 無錢竟買糧 drive>0")

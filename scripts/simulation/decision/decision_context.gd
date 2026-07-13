@@ -215,10 +215,18 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_forage_tile = _fg != Vector2i(-1, -1)
 	c.forage_pos = _fg
 	# has_specie 廣義納可交易特產：coin / goods / material / ore（forest=木材 mountain=礦 換糧籌碼）。
+	# Fix3c 償付能力認全部家當：武器超出戰備留底=可變現換糧（barter 已支援武器,見 _attempt_barter+BASE_PRICE 含 weapon_*）。
+	# 修「滿手武器卻機械判定買不起糧餓死」——用 reserve 只認超留底(不逼賣光防身武器)。
+	var _weapon_liquid: bool = false
+	for _w in ["weapon_melee_low", "weapon_melee_high", "weapon_ranged_low", "weapon_ranged_high"]:
+		if float(team.resources.get(_w, 0)) - TradeValuation.reserve(team, _w) > 0.0:
+			_weapon_liquid = true
+			break
 	c.has_specie = float(team.resources.get("coin", 0)) > 0.0 \
 		or float(team.resources.get("goods", 0)) >= 10.0 \
 		or float(team.resources.get("material", 0)) >= DecisionTerms.MATERIAL_TRADE_MIN \
-		or float(team.resources.get("ore_iron", 0)) + float(team.resources.get("ore_gold", 0)) >= DecisionTerms.MATERIAL_TRADE_MIN
+		or float(team.resources.get("ore_iron", 0)) + float(team.resources.get("ore_gold", 0)) >= DecisionTerms.MATERIAL_TRADE_MIN \
+		or _weapon_liquid
 	# home_food：自家糧倉 food（掃自有 outpost tile，team 不在家也讀得到 → 空家判定）。
 	c.home_food = DecisionContext._home_granary_food(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)
