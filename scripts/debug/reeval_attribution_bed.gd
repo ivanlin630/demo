@@ -9,20 +9,42 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var seed_val: int = 1337
-	print("=== reeval attribution: default.json seed=%d 3mo ===" % seed_val)
+	# ★同世界 specimen（blueprint 查證「第三種死法」跨世界假象 2026-07-14）：SPECIMEN_TEAM_ID 設則
+	# 在**這支床產出全滅清單的同一世界**鎖該隊，讀真實 decision_count + 死因（軍備堆積餓死 vs 速死 decision_count=0）。
+	var spec_id: int = int(OS.get_environment("SPECIMEN_TEAM_ID")) if OS.get_environment("SPECIMEN_TEAM_ID") != "" else -1
+	print("=== reeval attribution: default.json seed=%d 3mo (specimen=%d) ===" % [seed_val, spec_id])
 	Probe.enabled = true; Probe.reset()
+	if spec_id != -1:
+		SpecimenTracer.reset(); SpecimenTracer.enabled = true
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config := GameSetup.load_config("res://config/default.json")
 	if config.is_empty(): print("[FAIL] config"); return
 	config["seed"] = seed_val
 	GameSetup.setup(state, config)
+	if spec_id != -1:
+		state.specimen_team_ids = [spec_id]
 	var no_player := Vector2i(-1, -1)
 	var ticks: int = TimeScale.TICK_PER_DAY * 90
+	# specimen 死因快照：每 tick 存最後已知狀態，消失即記死 tick + 死前家當
+	var spec_last: Dictionary = {}
+	var spec_death_tick: int = -1
 	for tick in range(ticks):
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
+		if spec_id != -1:
+			if state.teams.has(spec_id):
+				var t: TeamData = state.teams[spec_id]
+				spec_last = {
+					"tick": tick, "pop": t.population,
+					"food": float(t.resources.get("food", 0)),
+					"food_days": float(t.resources.get("food", 0)) / maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001),
+					"weap": int(t.resources.get("weapon_melee_low",0)) + int(t.resources.get("weapon_melee_high",0)) + int(t.resources.get("weapon_ranged_low",0)) + int(t.resources.get("weapon_ranged_high",0)),
+					"coin": float(t.resources.get("coin", 0)),
+				}
+			elif spec_death_tick == -1 and not spec_last.is_empty():
+				spec_death_tick = tick
 	# established 數
 	var est: int = 0
 	for fid in state.factions:
@@ -36,5 +58,21 @@ func _run() -> void:
 		total += c
 		print("  %-18s = %d" % [k, c])
 	print("  %-18s = %d" % ["TOTAL true", total])
+	# ★同世界 specimen 死因裁定
+	if spec_id != -1:
+		print("--- specimen Team%d 死因裁定（同世界）---" % spec_id)
+		print("  decision_count = %d" % SpecimenTracer.decision_count)
+		print("  存活至尾 = %s；死 tick = %s" % [state.teams.has(spec_id), str(spec_death_tick)])
+		if not spec_last.is_empty():
+			print("  死前家當: pop=%d food=%.1f food_days=%.2f weapons=%d coin=%.0f" % [
+				spec_last["pop"], spec_last["food"], spec_last["food_days"], spec_last["weap"], spec_last["coin"]])
+		if SpecimenTracer.decision_count <= 2:
+			print("  ★裁定: 速死/decision_count≈0 → 「第三種死法」成立(AI 沒碰到,查繞過路徑)")
+		elif not spec_last.is_empty() and spec_last["weap"] > 5 and spec_last["food_days"] < 2.0:
+			print("  ★裁定: 有決策(%d)+死前武器堆(%d)+糧盡 → 軍備堆積餓死型(層0/3 tuning,非架構絕症)" % [SpecimenTracer.decision_count, spec_last["weap"]])
+		else:
+			print("  ★裁定: 有決策(%d),死因非典型軍備餓死,見上家當+trace" % SpecimenTracer.decision_count)
+		SpecimenTracer.summary()
+		SpecimenTracer.enabled = false
 	Probe.enabled = false
 	print("=== DONE ===")
