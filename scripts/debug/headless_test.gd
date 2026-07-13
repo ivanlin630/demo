@@ -406,6 +406,7 @@ func _initialize() -> void:
 	_test_decision_cadence()
 	_test_survival_relatch_repick()
 	_test_flee_threat_gate()
+	_test_reorder_same_need()
 	# ── 文字 UI Phase 1: API 暴露 ──
 	_test_location_game_predator()
 	_test_precarity_dto()
@@ -13087,6 +13088,30 @@ func _test_survival_start_config() -> void:
 	var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
 	assert(tile != null and tile.outpost_level == 0, "開局玩家不應有 outpost")
 	print("survival_start config OK")
+
+func _test_reorder_same_need() -> void:
+	print("[TEST] reorder_same_need")
+	# [覓食(surv),生產(esteem),買糧(surv)] → 同層(survival)在前 → [覓食,買糧,生產]
+	var ranked: Array = [{"opt": "覓食", "u": 0.9, "i": 0}, {"opt": "生產", "u": 0.5, "i": 1}, {"opt": "買糧", "u": 0.3, "i": 2}]
+	var r := DecisionEngine.reorder_same_need_first(ranked)
+	assert(String(r[0]["opt"]) == "覓食" and String(r[1]["opt"]) == "買糧" and String(r[2]["opt"]) == "生產",
+		"同need層優先，實際=%s" % str([r[0]["opt"], r[1]["opt"], r[2]["opt"]]))
+	# PASSIVE_SURVIVAL_SET 分組：[覓食,生產,併入]→[覓食,併入,生產]（併入 passive-survival 同組）
+	var sset: Array = [{"opt": "覓食", "u": 0.9, "i": 0}, {"opt": "生產", "u": 0.5, "i": 1}, {"opt": "併入", "u": 0.3, "i": 2}]
+	var rs := DecisionEngine.reorder_same_need_first(sset)
+	assert(String(rs[0]["opt"]) == "覓食" and String(rs[1]["opt"]) == "併入" and String(rs[2]["opt"]) == "生產",
+		"passive-survival 分組(併入同組)，實際=%s" % str([rs[0]["opt"], rs[1]["opt"], rs[2]["opt"]]))
+	# ★掠奪(攻擊型)不納 passive-survival→esteem 組：[覓食,掠奪]→掠奪不同組→留 rest(順序不變此例但類別異)
+	assert(DecisionEngine._need_category("掠奪") != "survival", "掠奪不納 passive-survival(攻擊型)")
+	assert(DecisionEngine._need_category("覓食") == "survival" and DecisionEngine._need_category("併入") == "survival", "覓食/併入=survival 組")
+	# rank[0] 與後續全同層 → NO-OP（順序不變）
+	var same_all: Array = [{"opt": "覓食", "u": 0.9, "i": 0}, {"opt": "買糧", "u": 0.5, "i": 1}]
+	var r2 := DecisionEngine.reorder_same_need_first(same_all)
+	assert(String(r2[0]["opt"]) == "覓食" and String(r2[1]["opt"]) == "買糧", "全同層 NO-OP 順序不變")
+	# 單/空 → 原樣
+	assert(DecisionEngine.reorder_same_need_first([]).is_empty(), "空→原樣")
+	assert(DecisionEngine.reorder_same_need_first([{"opt": "覓食"}]).size() == 1, "單→原樣")
+	print("[TEST] reorder_same_need PASS")
 
 func _test_survival_relatch_repick() -> void:
 	print("[TEST] survival_relatch_repick")

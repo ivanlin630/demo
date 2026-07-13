@@ -58,6 +58,31 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "") -
 			Probe.add_amount("diag.%s.winutil_sum" % opt, float(winner["u"]))  # winner util
 	return scored
 
+# 被動求生 repertoire（定案）：覓食/買糧/乞食/返家補給/紮營/併入=被動求生(食物+投靠認慫)→"survival" 一組
+# 保 fallthrough；★排攻擊型 掠奪/佔村（主動侵略，靠人格 weight 主導非 fallthrough 保底，否則溫和 fed 隊誤 loot）。
+const PASSIVE_SURVIVAL_SET: Array = ["覓食", "買糧", "乞食", "返家補給", "紮營", "併入"]
+
+# 需求分組：PASSIVE_SURVIVAL_SET 成員→"survival"（不看 affinity）；非→按 affinity 主層。
+static func _need_category(opt: String) -> String:
+	if opt in PASSIVE_SURVIVAL_SET:
+		return "survival"
+	return "L%d" % NeedHierarchy.main_layer_of(opt)
+
+# 同需求 fallthrough：rank[0] 不可 dispatch 時，落同需求組的次佳（非跨組落生產）。
+# same-cat 在前、其餘在後，各組保 util 降序（穩定 partition）。rank[0] dispatchable→仍首試=NO-OP。純函式零 randf。
+static func reorder_same_need_first(ranked: Array) -> Array:
+	if ranked.size() <= 1:
+		return ranked
+	var top_cat: String = _need_category(String(ranked[0].get("opt", "")))
+	var same: Array = []
+	var rest: Array = []
+	for e in ranked:
+		if _need_category(String(e.get("opt", ""))) == top_cat:
+			same.append(e)
+		else:
+			rest.append(e)
+	return same + rest
+
 static func rank(state: WorldState, team: TeamData) -> Array:
 	var out: Array = []
 	for e in rank_scored(state, team): out.append(e["opt"])
