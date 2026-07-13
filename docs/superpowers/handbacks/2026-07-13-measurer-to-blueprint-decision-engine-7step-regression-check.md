@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: [補回歸驗證·結案建議] 決策引擎7步改動未波及famine/combat/faction協同——無異常,分析既有log非重跑
 ---
 

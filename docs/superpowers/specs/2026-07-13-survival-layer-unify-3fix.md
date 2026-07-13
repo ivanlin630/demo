@@ -1,0 +1,91 @@
+# Spec：求生層統一 3-fix（Team10 override thrash + crisis edge-trigger + esteem 乘法陷阱）
+
+status: draft（待 reviewer R② CLEAN → dispatch implementer）
+owner: systems
+premise_verified: 三根皆 file:line 坐實（見下），R① 自 factcheck 通過（無 premise_contradiction）
+frame_challenge: ★三對齊（強結論=退役 legacy 子系統+重設計核心公式／redirect 大工／decision-core 難逆）→ **R② 建議升異質框外審**（別 Opus 代 + refute prompt，見 00_roles §框外挑框）
+
+## 為何三項一份 spec
+三根同屬「**求生/需求決策層未統一**」家族，且**互相咬合**——分開修會漏掉交互：
+- Fix1 退役非-unified 求生 override → 求生改走引擎（rank_scored）。但引擎 re-pick 受 `_should_reeval` cadence 閘。
+- Fix2 crisis edge-trigger → 餓隊在 override 退役後，crisis 重評**正是**它的求生安全網（edge 觸發+/4 節流＝commit 夠久執行，非每 tick thrash）。
+- Fix3 esteem 漸進 → 餓隊靠 Fix1+2 穩定買糧脫困後，能真的爬升到生產（否則脫困也卡回買糧）。
+∴ 三者是**同一條 survival→esteem 決策路徑**的一次性統一，非三個獨立補丁。
+
+---
+
+## Fix 1：退役非-unified `_evaluate_survival` override（Team10 真殺隊 thrash）
+
+**根（坐實）**：tick loop `faction_ai_system.gd:680 _evaluate_solo` + `:737 _evaluate_survival` 同 tick 對非-unified 隊跑**兩個決策生產者**：solo rank(idle→建設 ambient) vs legacy override(缺糧→買糧/貿易)，互蓋 livelock → Team10 day89 餓滅。unified 隊 `:3046 uses_unified→return` 跳過故無病 → override 是 unification arc 未退役 legacy。
+
+**設計（reviewer R② 修正後 = option A：退役範圍排除子隊）**：
+非-unified **且非子隊**的隊求生走引擎；**子隊維持 legacy override**（reviewer 抓：子隊建造中無非-IDLE 引擎路徑，全退會餓死 zombie，見下）。
+1. `_evaluate_survival` 的 legacy 求生 body（:3065 起）gate 改為：
+   ```
+   if uses_unified(team) or team.parent_team_id == -1:
+       return   # 有引擎求生路徑（unified 任隊 / 非子隊 solo·成員走 _evaluate_solo/_decide_unified）→ 求生走引擎
+   # 剩：非-unified 「子隊」(parent_team_id != -1) → 保留下方 legacy override body（子隊無非-IDLE 引擎路徑）
+   ```
+   求生選擇對非子隊統一由 `_evaluate_solo→rank_scored`（survival option 覓食/買糧/掠奪/乞食/返家/紮營/併入 已在引擎 repertoire + coeff 求生層 urgency 高→自然勝出）承載。
+   - **★Team10 確認 fix 得到**：probe（`docs/measurements/2026-07-13-team10-type-probe-<hash>-dirty.log`）→ Team10 `parent_team_id=-1 faction_id=-1 tags=["獨立軍隊"]`＝**非子隊獨立隊，走 SoloAI**（`[SoloAI] Team10→…`）→ option A 退其 override→ rank_scored 承接求生，收斂。thrash 根（SoloAI 建設 vs override 掠奪/覓食 每 tick 互蓋）消除。
+2. **為何排除子隊（reviewer 抓的 regression）**：`_evaluate_subteam`（:1620-1660）對 TASK_BUILD(:1625)/CONSTRUCT/UPGRADE/EXPAND(:1629) **提前 return 不進引擎**，只 IDLE→`_decide_subteam`。子隊全退 override → 建造中子隊**完全無求生評估**（連 :3095 一般餓死觸發都沒了）→ 可預期 zombie 餓死 regression。∴ 子隊**維持現狀 legacy body**（含一般觸發+礦山豁免），blast radius 最小。子隊求生本走不同路徑，切開不影響 Fix2/Fix3。
+3. **必須保留（非決策、跨全隊）**：`:3035-3045` TASK_CAMP 到達立營在 gate **之前**，對全隊成立，不動。
+4. **invariant 守**：
+   - 進得去出得來：非子隊靠引擎 latch（:1825 stuck-release + :1798 reeval gate）；子隊靠原 legacy latch。皆無永凍。
+   - 餓隊必反應：非子隊靠 Fix2 crisis 確保餓時 `_should_reeval` 觸發——**Fix1 依賴 Fix2**，故同 spec；子隊靠原 override 每 tick。
+
+**風險**：非子隊求生反應從「每 tick override」變「reeval cadence（crisis /4）」。可接受＝commit 夠久執行滿週期正是治 thrash；驗收法①守餓隊不因 cadence 太疏反應不及。
+
+---
+
+## Fix 2：crisis level-trigger → edge-trigger（重評 381/13087 根）
+
+**根（坐實）**：`_should_reeval`（:1781）`if _decision_crisis: return true` 是 level-trigger——慢性糧負隊每 tick trip crisis（reeval.crisis=13087=93%，seed1337 log:6455）→ 繞過 cadence，`:1802` 本想給 crisis 的 `/4` 短 throttle 變死碼。
+
+**設計**：crisis 改邊緣觸發 + 持續期走 /4 cadence。
+1. TeamData 加 `crisis_latched: bool = false`（data 欄）。
+2. `_should_reeval` crisis 分支改：
+   ```
+   var in_crisis: bool = _decision_crisis(state, team)
+   if in_crisis:
+       if not team.crisis_latched:
+           team.crisis_latched = true
+           return true          # edge：進入 crisis 當下 fire 一次
+       # 持續 crisis → 不每 tick，落下方 cadence 閘（:1802 排程已 /4）
+   else:
+       team.crisis_latched = false   # 離開 crisis → 解 latch，供下次 edge
+   ...
+   return state.world.current_tick >= team.decision_eval_next_tick
+   ```
+3. 效果：crisis 13087 → edge 次數（每次進 crisis 1）+ /4 cadence 命中（60 ticks 一次）。預估 Team7 381→低百，全世界大降。
+4. **determinism**：新欄初值 false，純確定性狀態機，無 randf。
+5. **invariant 守**：新 crisis 仍即時響應（edge fire）；持續 crisis 靠 /4 cadence 不失反應（6 小時一次，餓隊足夠）。★與 Fix1 咬合：Fix1 退 override 後，此 crisis 重評＝非-unified 餓隊唯一求生觸發點，故 edge+/4 節流須確保「進 crisis 立即 + 持續期定期」雙保。
+
+---
+
+## Fix 3：esteem 乘法門檻雞生蛋陷阱（低 pop 隊卡生存底層無法升階）
+
+**根（坐實）**：`need_hierarchy.gd:57 raw[L_ESTEEM] = food_ready × safe_ready × ambition_gap`，`food_ready = clampf(food_days/SURVIVAL_SATED_DAYS(5),0,1)`（:53）。買糧 applicable 於 `food_days<DESPERATION_DAYS(3)`（`options.gd:136`/`terms.gd:6`）→ 救回量大概率只到 3-5 天邊緣，`food_ready` 碰不到接近 1 的舒適線 → esteem urgency 卡低 → 生產(affinity esteem 0.5,`need_hierarchy.gd:95`) 的 `consistency_coeff`(:128) alignment 低→壓 FLOOR 0.15 → 生產 util 永輸買糧(survival 0.9→coeff~1) → 自我強化 survival-lock。已確認生產全程在 candidates（非 applicable 濾掉），是每輪算分穩定輸。
+
+**設計**（兩桿，implementer 量測選定，reviewer 審）：
+- **桿 A（主，漸進非乘法門檻）**：esteem `food_ready` 的參考線從 SATED(5) 降到「脫離絕境即開始給分」——如 `food_ready = clampf((food_days - DESPERATION_DAYS)/(SURVIVAL_SATED_DAYS - DESPERATION_DAYS), 0, 1)` 之類，讓「剛脫困(food_days≥3)」的隊 esteem 就開始 ramp，而非要摸到 5 才啟動。（DESPERATION=3/SATED=5 的 2 天盲區正是陷阱帶。）★數字 TEST VALUE，量測校。
+- **桿 B（可疊，脫困緩衝期）**：隊 food_days 上穿 DESPERATION 後給一段 grace（如 N 天）內 esteem urgency 加成/floor 抬高，讓升階念頭有機會冒出、生產有機會贏一次啟動正循環。需 TeamData 記「脫困 tick」或用既有 previous 欄。
+- **保留**：乘法 safe_ready × ambition_gap 的語意（不安全/無爬升空間→不該追地位）合理，**只鬆綁 food_ready 這一桿**，不動另兩桿（避免過度改寫，最小手術）。
+
+**風險**：放寬 esteem 可能讓「剛脫困但仍脆弱」的隊過早追生產而復餓。→ 驗收法③守「脫困隊不因升階復崩」。傾向桿 A（漸進）優先，桿 B 視量測補。
+
+**invariant 守**：需求層獨立（§2，esteem 不讀他層 urgency，只讀世界訊號）——桿 A/B 只改 food_ready 對 food_days 的映射，仍只讀世界訊號，守。
+
+---
+
+## 驗收法（measurer 標準床，一次跑，seed1337 + 補 seed42/7）
+1. **Fix1/2 治 thrash**：seed1337 3mo，Team10（及同型非-unified 隊）**無 `建設↔貿易↔idle` 每 tick livelock**；`[Survival]` thrash print 消失；Team10 **不再 day89 餓滅**（或至少 thrash-death 機制消除，餓死若發生須是真無解非 livelock）。
+2. **Fix2 頻率**：`_should_reeval` 分支計數 reeval.crisis 從 13087 **大降**（預估 <2000）；Team7 decision_count 381→**低百**。（用現有 `reeval_attribution_bed.gd` + probe。）
+3. **Fix3 升階**：低 pop 隊（如 Team7）脫離「67 天卡生存底層」——量 winner 分布**出現生產/建設升階**（非 100% 覓食/買糧）；且**脫困後不復崩**（pop 穩、food_days 站上 DESPERATION 以上）。
+4. **不回歸**：established 跨 seed 無退化（維持 seed7=1 等）；determinism byte-identical（新欄確定性）；憲法閘綠；無新 famine/death 惡化。
+5. **順帶觀察（非閘）**：Team7 pop 暴崩 60%（tick5580→9000）現象——三修後消失/改善＝連帶驗證；仍在＝另開查。
+
+## dispatch 註（reviewer CLEAN 後）
+- 觸及檔：`faction_ai_system.gd`（Fix1 override 退役 + Fix2 `_should_reeval`）、`team_data.gd`（Fix2 `crisis_latched` 欄 + 可能 Fix3 脫困 tick 欄）、`need_hierarchy.gd`（Fix3 food_ready 映射）。注意事項寫本 spec。
+- 三項一次實作、一次 measurer 驗收（用戶定：不分批）。
+- task 完成判定 = systems + reviewer，非 implementer 自判。

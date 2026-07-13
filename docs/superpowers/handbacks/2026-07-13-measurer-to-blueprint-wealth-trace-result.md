@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: [財富軌跡查完·核心問題有答] Team7買糧67天財源=material barter非coin,coin全程0；意外查到pop鎖初期崩60%
 measured_at_head: d81cfdb
 ---

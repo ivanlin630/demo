@@ -29,6 +29,7 @@
 3. **`[GODOT TIMEOUT]` = bed 被殺 ≠ 迴歸。** 區分「量到迴歸」vs「沒量到（工具超時/flake）」。沒量到 → 報「量測不完整」給藍圖 halt，**別當迴歸、別讓 QA 拿空報告判**。
 4. **perf 比 per-tick 同規模、不撞絕對門檻**：warring 天生慢是 pre-existing（main 也有）。比「本 branch 同 tick/同隊數 ≤ main」；wall 差可能只是世界岔開（存活隊多），非單位變慢（A2a 教訓）。
 5. **只跑探針+寫報告，不改 `scripts/` code、不判決。**
+7. **★量測可溯源：原始輸出必落地檔 + 附 commit hash（用戶定 2026-07-13，see §可溯源協議）**——handback 裡的數字**不准裸轉述**，必附來源檔路徑（+行）與量測當下 HEAD hash。血教訓：71/22/7% winner 轉述進 handback、原始 print 沒存檔、沒標 hash → 事後對不上 main(100%覓食) 分不清「舊 code 過期數字」vs「determinism 壞了」，只能重跑辨。
 6. **★一次量完 → 一封完整信（禁分批/append，用戶定 2026-07-09）**：**全部**（spec §驗收法守衛 + 標準床 HOB/const/sanity/teamtrace + perf baseline）**都跑完才寄一封涵蓋所有數字的信**。禁分批、禁 append 到已寄信。**理由=信箱競態**：QA 讀第一封即 `consumed`（義務只掃 `to:我 && status:open`），晚到的第二批補在原信後/後續新信 → **靜默漏看 → 用不完整驗證 merge**。缺任一守衛/床 → **不寄**，或寄 `status:open` 明標 `incomplete:[…]` 報藍圖等補齊，**絕不寄一封讓 QA 誤以為齊全的部分信**。
 
 ## ★★分層量測協議：迭代快 / 確認慢（用戶定 2026-07-12，砍重跑浪費）
@@ -124,10 +125,38 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 - 探針起頭已立：`warring_harness.gd` PROBE_KEYS + `faction_ai` bump（merge 維度）→ **續補齊上述全維度成標準模式，未來 slice 複用**。
 - 產 `<slice>.fullprobe.json`（baseline/slice 並排）。**這是新量測模型的核心**：完整量→藍圖判得動→release-pass 閉環。
 
+## ★量測可溯源協議（用戶定 2026-07-13，全量測角色遵守）
+
+**原則**：任何寫進 handback 的數字，必須**當下能回查、事後能辨真偽**。裸轉述（「我跑過看到 71%」）禁止——原始輸出沒落地、沒標 code 版本＝日後對不上時分不清「舊 code 過期數字」vs「determinism 壞了」，只能重跑（浪費）。
+
+### 三條硬規
+
+1. **原始輸出必落地成檔（非憑記憶轉述）**
+   - 每次量測跑，raw stdout **導出存檔**（非只看終端）。用 tee：
+     ```powershell
+     $H = (git rev-parse --short HEAD); $D = (git diff --quiet; if ($?) {""} else {"-dirty"})
+     .\tools\godot.ps1 --headless --script scripts/debug/<bed>.gd | Tee-Object "docs/measurements/$(Get-Date -Format yyyy-MM-dd)-<topic>-<seed|config>-$H$D.log"
+     ```
+   - **落點**：`docs/measurements/`（`.log` 已被 `.gitignore *.log` 收→本地持久、不進 repo；同機跨 session 可回查）。
+   - **命名**：`YYYY-MM-DD-<topic>-<seed|config>-<shortHASH>[-dirty].log`。hash 進檔名＝一眼知哪版 code 跑的。
+   - 背景長跑的 task `.output` 是 session-temp（scratchpad，會清）＝**非**落地檔；跑完須 `cp` 進 `docs/measurements/` 或直接 tee 到那。
+
+2. **handback 引數字必附來源**（file:line 或檔路徑）
+   - 每個數字後標它從哪來：`reeval.crisis=13087（docs/measurements/2026-07-13-reeval-attr-seed1337-<hash>.log:M行）`。
+   - 禁裸數字。下游（藍圖/QA）能點回原始輸出核對。
+
+3. **標 commit hash / HEAD**（+ dirty flag）
+   - handback frontmatter 或首段寫：`measured_at_head: <shortHASH>[-dirty]`。
+   - 用途：日後數字對不上 → 同 hash 重跑＝determinism 檢驗；不同 hash＝過期數字，非 bug。**這是辨真偽的錨。**
+   - **`-dirty`（工作區有未 commit 改）務必標**——dirty 跑的數字最易變成孤兒（無法精確重現）。理想量測跑在乾淨 HEAD。
+
+### 小結構化摘要仍走 `.measure.json`（committed，見下 §產物 1）
+raw `.log`＝本地全量佐證；`.measure.json`＝committed 精華 + 應含 `measured_at_head` 欄跨機引用。兩者互補：對不上時先比 hash，再點 raw log 行。
+
 ## 產物
 
 1. **`docs/process/verdicts/<slice>.measure.json`**：
-   `{obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。
+   `{measured_at_head:<shortHASH[-dirty]>, raw_logs:[<docs/measurements/*.log 路徑>], obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。（`measured_at_head`+`raw_logs`＝可溯源錨，見 §量測可溯源協議。）
 2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（`from:measurer to:blueprint status:open`——**★寄件一律 open,絕不自寫 consumed**（consumed 是收件端讀後回執,你自寫=對方 Monitor 只掃 open→永不送達→靜默漏看;2026-07-13 用戶戳 measurer 犯此。詳 `07_mailbox_trigger §status 所有權`)；**2026-07-09 起下游改藍圖判**，原 `to:qa`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + full_probe 全維度（acceptance 場合）+ 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**（信箱 hook role-agnostic，只認 `to:` 欄→改欄即改路由，無需動 hook。）
 
 ## 交接

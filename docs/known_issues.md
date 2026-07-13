@@ -545,5 +545,11 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 ## 決策引擎（term-normalize T5）
 - **乞食 chosen≈0**：非缺陷。BEG_FLOOR_FACTOR 故意低（乞食=最後手段低品質）+ applicable 稀有（需 has_aid_target，appl_n 8-180）。合理現象，不改 code（measure 觀察佐證）。
 
+## 決策引擎（non-unified 求生 override thrash → 致死，2026-07-13 蟑螂普查確診 Team10 seed1337）
+- **現象**：非-unified 隊絕境(days_left=0)時 task 每 tick 在 `建設↔貿易↔idle` 三者 livelock，從未穩定執行滿週期 → famine 累加 → 滅團（Team10 day89）。血證 `docs/measurements/2026-07-13-roach-scan-team10-thrash-1337.log`。
+- **根（補丁閘/dual-owner 類）**：非-unified 隊同 tick 跑**兩個決策生產者**——`_evaluate_solo`(rank_scored，idle 時挑 ambient 建設) + `_evaluate_survival`(:3029 legacy override，缺糧翻成 買糧→貿易)，二者不收斂。unified 隊在 :3046 `uses_unified→return` 跳過 override 故無此病 → **override 是 unification arc 未退役的 legacy 補丁**。
+- **加劇缺陷**：`SURVIVAL_TASKS`(:80)=[RETURN_HOME,BEG,JOIN,FORAGE,CAMP] **不含 TASK_TRADE(貿易)**；買糧→貿易 但 survival-latch(:3076-3094 hold+cadence throttle)認不得 貿易＝survival → override **每 tick 無節流重觸發**。（不可 naive 加 貿易 進 SURVIVAL_TASKS＝會誤classify 商隊常態交易。）
+- **修向**：de-patch＝非-unified 求生亦走引擎(退役 `_evaluate_survival` override，鏡射 unified :3046-3047)。**decision-core 結構 fix(L1/L2)，需 spec→reviewer→implementer**。定序待用戶(2026-07-13 交接中，見 handback `systems-to-blueprint-roach-team10-thrash`)。關 [[project_unified_decision_framework]]/[[project_reverse_engineering_arc]]。
+
 ## 情緒系統（stress decay，death spiral 根層）
 - **成員 stress 累積不釋放**：驅 `team_panic` → death spiral 根層，跨 reaction/morale。survival-path #2 已於決策層斷 FLEE 螺旋（threat=0→FLEE eval 0），但 stress 本身累積待 person 情緒系統獨立 arc（decay/釋放機制）。本 slice 不修。

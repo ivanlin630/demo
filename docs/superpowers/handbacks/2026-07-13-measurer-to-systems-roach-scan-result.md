@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: [★普查有結果·非查無] Team10確診病態,但型態≠Team7——[Survival]legacy override跟unified引擎thrash致死,非簡單fallthrough
 measured_at_head: 98a9841
 ---

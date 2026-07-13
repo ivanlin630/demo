@@ -30,7 +30,16 @@ static func capture_options(state: WorldState, team: TeamData, scored: Array) ->
 	if not is_specimen(state, team.team_id): return
 	var cands: Array = []
 	for e in scored:
-		cands.append({"opt": e.get("opt", "?"), "util": float(e.get("u", 0.0))})
+		var opt: String = String(e.get("opt", "?"))
+		# 可派性標記（arg­max 疑點結案 follow-up①）：util 最高 ≠ 可派。鏡射 dispatch 迴圈跳過條件
+		# （faction_ai :1844 task==IDLE / :1846 target==(-1,-1) 非 FLEE）→ 標 ✗，免再誤判 argmax。
+		# 只讀 to_task（lookup 無 state 變更），specimen-gated → 零非-specimen 成本。
+		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		var _task = td.get("task", TeamData.TASK_IDLE)
+		var _tgt: Vector2i = td.get("target", Vector2i(-1, -1))
+		var nd: bool = (_task == TeamData.TASK_IDLE) \
+			or (_tgt == Vector2i(-1, -1) and _task != TeamData.TASK_FLEE)
+		cands.append({"opt": opt, "util": float(e.get("u", 0.0)), "nd": nd})
 	_scratch(team.team_id)["candidates"] = cands
 
 # ── capture_intent：commander _emit_goal / solo _evaluate_independent_strategy tap ──
@@ -73,7 +82,7 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 # ── flush：印可讀 timeline（mirror warring per-month summary），tag [Specimen T<id>] ──
 static func flush() -> void:
 	if not enabled or entries.is_empty(): return
-	print("\n========== [SpecimenTracer] flush %d entries ==========" % entries.size())
+	print("\n========== [SpecimenTracer] flush %d entries（候選 ✗=當下不可派/無target，util雖高仍fallthrough）==========" % entries.size())
 	for e in entries:
 		_print_entry(e)
 	print("=======================================================")
@@ -129,7 +138,7 @@ static func _print_entry(e: Dictionary) -> void:
 	var s: Dictionary = e["狀態"]
 	var cand_str: String = ""
 	for c in w["candidates"]:
-		cand_str += "%s=%.2f " % [c["opt"], c["util"]]
+		cand_str += "%s=%.2f%s " % [c["opt"], c["util"], "✗" if c.get("nd", false) else ""]
 	print("[Specimen T%d] tick=%d intent=%s | winner=%s task=%s tgt=%s" % [
 		e["team_id"], e["tick"], str(w["intent"]),
 		d["winner_opt"], d["task"], str(d["target"])])

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: blueprint
-status: open
+status: consumed
 topic: [★交接·重開讀我] session狀態——決策引擎架構重構今日收尾,established首次organic>0(1/3 seed)+行為/頻率大幅改善,四個延續選項待裁,main HEAD=cef31e2
 ---
 

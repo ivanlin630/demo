@@ -1779,11 +1779,22 @@ func _directive_fresh(state: WorldState, team: TeamData) -> bool:
 
 # ⑦ 統一「何時重評」predicate（唯一判斷點，架構紀律）：IDLE/stuck/crisis/命令新→即時；否則 cadence 節流。
 func _should_reeval(state: WorldState, team: TeamData) -> bool:
-	if team.current_task == TeamData.TASK_IDLE: return true      # 空閒/剛釋放→即重評
-	if _is_stuck(team): return true                              # 卡住→重評
-	if _decision_crisis(state, team): return true               # 劇變(食崩/pop驟降)→反射提前
-	if _directive_fresh(state, team): return true               # faction 新命令→即時響應
-	return state.world.current_tick >= team.decision_eval_next_tick   # 否則 cadence 節流
+	if team.current_task == TeamData.TASK_IDLE:
+		if Probe.enabled: Probe.bump("reeval.idle")
+		return true      # 空閒/剛釋放→即重評
+	if _is_stuck(team):
+		if Probe.enabled: Probe.bump("reeval.stuck")
+		return true                              # 卡住→重評
+	if _decision_crisis(state, team):
+		if Probe.enabled: Probe.bump("reeval.crisis")
+		return true               # 劇變(食崩/pop驟降)→反射提前
+	if _directive_fresh(state, team):
+		if Probe.enabled: Probe.bump("reeval.directive")
+		return true               # faction 新命令→即時響應
+	if state.world.current_tick >= team.decision_eval_next_tick:
+		if Probe.enabled: Probe.bump("reeval.cadence")
+		return true
+	return false   # 否則 cadence 節流
 
 func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id: return   # 玩家隊不受 SoloAI 控制
