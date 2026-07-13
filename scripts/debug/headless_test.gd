@@ -378,6 +378,7 @@ func _initialize() -> void:
 	_test_forage_subsistence_cap()
 	_test_forage_floor_tune()
 	_test_term_normalize_t1()
+	_test_term_normalize_t3()
 	_test_forage_no_growth()
 	_test_settled_still_grows()
 	_test_find_game_tile()
@@ -1924,6 +1925,19 @@ func _test_forage_subsistence_cap() -> void:
 	assert(int(tile.resources["wild_game"]) == game_at_cap,
 		"超 buffer 覓食不應消耗 wild_game，before=%d after=%d" % [game_at_cap, int(tile.resources["wild_game"])])
 	print("forage subsistence cap OK")
+
+# term-scale normalize T3：ambient/opportunity eval rescale [0,1]。
+func _test_term_normalize_t3() -> void:
+	print("[TEST] term_normalize_t3")
+	var ctx := DecisionContext.new()
+	ctx.is_merchant = true; ctx.has_goods = true; ctx.has_arb = true
+	var eo := DecisionTerms.eval("economic_opp", ctx, "貿易")
+	assert(eo >= 0.0 and eo <= 1.0, "economic_opp ∈[0,1]，got %f" % eo)
+	assert(absf(eo - 1.0) < 1e-5, "商隊+貨+arb→economic_opp=1.0")
+	ctx.absorb_target_id = 1; ctx.resource_slack = 1.0; ctx.absorb_yield = 1.0; ctx.ambition_gap = 10
+	var ab := DecisionTerms.eval("absorb_drive", ctx, "吸納")
+	assert(ab >= 0.0 and ab <= 1.0, "absorb_drive ∈[0,1]，got %f" % ab)
+	print("[TEST] term_normalize_t3 PASS")
 
 # term-scale normalize T1：survival-class 8 term eval 正規化 [0,1]（剝 urgency 移 coeff）。
 func _test_term_normalize_t1() -> void:
