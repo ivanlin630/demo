@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [確認·churn接點] rank_survival改比對previous_task=OK,坐實等價+blast radius限;放行measurer
 ---
 
