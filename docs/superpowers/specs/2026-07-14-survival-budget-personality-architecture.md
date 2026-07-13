@@ -6,7 +6,39 @@ supersedes/extends: `2026-07-13-survival-layer-unify-3fix.md`（層1-3 本體在
 frame: ★大框三對齊（動架構 + 剛拍板願景「求生=個性加權競爭項非硬中斷」）→ **R② 升異質框外審**（別 Opus 代 + refute prompt，用戶指定，01_architect 規則）
 
 ## 願景前提（用戶拍板 2026-07-14，留議 close）
-**求生 = 個性加權的競爭項，非硬中斷。** 不要「餓破線→無條件停一切求生」；要「求生跟軍備/發展在人格化預算裡競爭權重」。本架構建立在此。
+**求生 = 個性加權的競爭項，非硬中斷。** 不要「餓破線→無條件停一切求生」；要「求生跟軍備/發展在人格化預算裡競爭權重」。
+
+**★願景 A 精修（2026-07-14 真根定位後，兩層防線分工）**：
+1. **日常主力＝安全網**（層1 漸進 + 層2 人格化安全存量 + 層5 預算分配）：隊伍提早備糧、維持緩衝，**根本不走到「糧剩 1 天」危機區**。天天運作的主剎車。
+2. **最後保險＝超量級 boost（層0）**：極低糧時 survival option 產生**加法式超過 1.0 的量級**（隨 food→0 放大，復原舊 ~12 域碾壓力），突破 util 天花板奪回 argmax。**安全氣囊非日常剎車**——正常隊幾乎不觸發。仍 util 競爭（量級碾壓非繞過引擎），非硬中斷。
+3. **★驗收鐵律：boost 觸發頻率要低。常觸發 = 安全網失職**（老掉危機才靠 boost 硬救＝上游備糧沒做好）。boost 觸發頻率＝健康指標。
+4. **★不許結構性餓死**：性格調「多冒進/多囤糧」風格（層2/5），但**任何性格都不許在結構上必然餓死**（翻正 v2 `need_hierarchy:70-71` 舊立場「野心餓死=特色」）。boost 保證極端時人人有活路。
+
+## ★真根（2026-07-14 blueprint 讀 v2 branch code 坐實，顛覆前 esteem-focus 診斷）
+前 v1/v2 一路調門檻（3→5→人格化 2-8）都在治**次要症狀**。真根 = **求生 util 量級被 term-normalize 閹割封頂**：
+- `terms.gd:52-54` survival_pressure eval **硬 `return 1.0`**（T1 正規化剝 urgency 移 coeff）。urgency 進 coeff（`need_hierarchy:39` raw[L_SURVIVAL]=clampf((5-food)/5)）**但 coeff 是有界軟乘子 [0.15,1]，只壓別選項、推不動求生自己過 1.0**。
+- v2 實測（food_days=1、野心統一 Team10）：覓食 util=**0.91**(封頂) vs 建設=**1.14**(base 1.135+承諾 0.3) → **建設贏到餓死**。就算 esteem urgency 歸零建設仍 util≈1.05+0.3 > 覓食 → **esteem 門檻(Fix3)只是次要加劇，主根是求生量級封頂**（systems 已 `terms.gd:52-54` 覆核坐實）。
+- 真根2：統一隊兩安全網空轉——Fix2 漸進只管「多久重算」不管「重算誰贏」（重算仍選建設，decision_count 暴增 965）；PRIO_SURVIVAL 硬 floor（`faction_ai:3063-3064`）v2 已對統一隊/solo 非子隊退役 → 統一隊求生全靠 util argmax，而 util 求生封頂贏不了 = 安全網有名無實。
+
+## ★層0（最底層地基，優先做）：求生 util 量級復原
+**沒有層0，門檻/預算調再好，極端飢餓求生仍贏不了**——層0 是所有上層人格化/預算成立的地基。
+**設計（vision A：util 競爭框內、量級碾壓非硬中斷）**：
+- `DecisionEngine.rank_scored`（`decision_engine.gd`）算完各 option `u` 後，對 **survival-class option**（`DecisionOptions.SURVIVAL_OPTION_SET`）在**極低糧**時加**加法式 boost**：
+  ```
+  # 層0 安全氣囊:極低糧→survival option 加法超量級,突破 coeff 天花板奪回 argmax。
+  # floor 低→正常隊靠層1/2/5 安全網不觸發;boost 頻率=健康指標(常觸發=安全網失職)。
+  if ctx.food_days < SURVIVAL_BOOST_FLOOR and opt in DecisionOptions.SURVIVAL_OPTION_SET:
+      u += SURVIVAL_BOOST_MAX * (SURVIVAL_BOOST_FLOOR - ctx.food_days) / SURVIVAL_BOOST_FLOOR
+  ```
+  - `SURVIVAL_BOOST_FLOOR` **低**（TEST VALUE ~2 天，遠低於人格安全存量目標）→ 安全氣囊非日常剎車。
+  - `SURVIVAL_BOOST_MAX` 夠大（TEST VALUE ~2.5）→ food→0 時 survival util →~1+2.5 碾壓任何 dev（建設 1.14）→ 奪回 argmax。隨 food→0 線性放大（復原舊 12 域碾壓語意）。
+  - **加法**（非乘法/非 coeff）→ 突破 [0,1] 封頂。boost 加在 commitment 之前或之後不敏感（survival 觸發時本就要贏）。
+  - **restores 統一隊求生**（經 util，非重加硬 floor）→ Team10/TAG_PRODUCE 統一隊極低糧時 survival 奪回 argmax，不再發展死。
+- **真根3 立場翻正**：改 `need_hierarchy:70-71` 註解（刪「野心餓死=特色」定義）→ 明載「性格調日常風格，層0 boost 保證極端不結構性餓死」。
+- **determinism**：純算術（food_days/const），零 randf。
+
+## 層0 與上層關係
+層0（保險）+ 層1 漸進偵測（多久重算）+ 層2 人格安全存量（日常目標）+ 層5 預算分配（日常剎車）+ 層3 認武器（買得起）+ 候選1 賣糧對稱（不自餓）= **兩層防線**：日常安全網讓隊不掉危機區（boost 少觸發），層0 兜極端。**boost 觸發頻率低 = 整套健康**。
 
 ## 核心設計：人格化資源類別目標 + gap-to-target 驅力
 統一機制取代散落死常數門檻（候選2 框架）：
@@ -44,7 +76,9 @@ frame: ★大框三對齊（動架構 + 剛拍板願景「求生=個性加權競
 - 非食物 applicable gate 人格化 follow-up（候選2 框架擴用）。
 - 層4 鋸齒獨立機制（僅當本 slice 量測後殘餘鋸齒、且非真赤貧才補）。
 
-## 驗收法（measurer 標準床，一次跑 seed1337/42/7，全 slice A）
+## 驗收法（measurer 標準床，一次跑 seed1337/42/7，全 slice A；★用戶鐵律：全好才量、不半套 bisect）
+0. **★層0 求生量級（headline·主根）**：極低糧統一隊（Team10/14 型）**survival 奪回 argmax、不再發展死**；`建設` winner **不再 ~94% 鎖死**（餓隊選求生非建設）。
+0b. **★boost 觸發頻率低（健康鐵律）**：survival boost 觸發次數/隊·時間**低**（正常隊靠層1/2/5 安全網不掉危機區）；**常觸發＝安全網失職**（回報，非 boost 壞）。boost 頻率本身當健康指標報。
 1. **attrition 回落 ≈ main baseline**（headline；branch vs main 同世界，從惡化 1.9-3.7× 回落）。
 2. **Team10 thrash 仍治好**、**established 不退**、determinism、憲法閘綠。
 3. **Team14 型「滿手武器買不起糧餓死」消除**（層3；weapon-rich has_specie true + barter 換糧成交 `trade.barter_deal`）。
@@ -54,7 +88,7 @@ frame: ★大框三對齊（動架構 + 剛拍板願景「求生=個性加權競
 7. **reviewer 沿用條件**：attrition+reeval 頻率雙報；經濟無扭曲（糧價/coin 流無暴走）。
 
 ## 觸及檔（架構增量，Slice A）
-`decision_context.gd`（類別 gap/target 入 ctx）、`terms.gd`/`need_hierarchy.gd`（drive 吃 gap-to-target + 統一 `category_target` helper）、`trade_valuation.gd`（候選1 賣糧 reserve）、`team_data.gd`（若需類別 target 快取欄）。單一 owner 收斂人格門檻函式。
+`decision_engine.gd`（★層0 survival boost + `SURVIVAL_BOOST_FLOOR/MAX` const）、`decision_context.gd`（類別 gap/target 入 ctx；food_days 已有）、`terms.gd`/`need_hierarchy.gd`（drive 吃 gap-to-target + 統一 `category_target` helper + 真根3 註解翻正）、`trade_valuation.gd`（候選1 賣糧 reserve）、`team_data.gd`（若需類別 target 快取欄）。單一 owner 收斂人格門檻函式。
 
 ## 內部 build 序（implementer 參考，仍一次量測）
 ① `category_target` helper（單一源，收編層2 esteem threshold）→ ② 買糧/賣糧 drive+reserve 吃 food_security_target（層2 對齊+候選1+層4 吸收）→ ③ 軍備/發展類別 gap drive（層5 分配）→ ④ 處境 override 接既有 survival coeff。層3 Fix3c 獨立可先做。
