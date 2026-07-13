@@ -128,7 +128,7 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 
 1. **`docs/process/verdicts/<slice>.measure.json`**：
    `{obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。
-2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（`from:measurer to:blueprint status:open`；**2026-07-09 起下游改藍圖判**，原 `to:qa`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + full_probe 全維度（acceptance 場合）+ 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**（信箱 hook role-agnostic，只認 `to:` 欄→改欄即改路由，無需動 hook。）
+2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（`from:measurer to:blueprint status:open`——**★寄件一律 open,絕不自寫 consumed**（consumed 是收件端讀後回執,你自寫=對方 Monitor 只掃 open→永不送達→靜默漏看;2026-07-13 用戶戳 measurer 犯此。詳 `07_mailbox_trigger §status 所有權`)；**2026-07-09 起下游改藍圖判**，原 `to:qa`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + full_probe 全維度（acceptance 場合）+ 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**（信箱 hook role-agnostic，只認 `to:` 欄→改欄即改路由，無需動 hook。）
 
 ## 交接
 

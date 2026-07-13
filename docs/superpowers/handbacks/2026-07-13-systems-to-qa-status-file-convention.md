@@ -1,7 +1,7 @@
 ---
 from: systems
 to: qa
-status: open
+status: consumed
 topic: [新慣例] 角色現況檔—你自更docs/process/status/04_qa.status.md(idle/working+工單);01監控
 ---
 

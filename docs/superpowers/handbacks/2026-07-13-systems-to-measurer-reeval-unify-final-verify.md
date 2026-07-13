@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [終驗·⑦] main HEAD 含⑦——Team6式trace看1712→?降+established+不回歸;供final交藍圖
 ---
 
