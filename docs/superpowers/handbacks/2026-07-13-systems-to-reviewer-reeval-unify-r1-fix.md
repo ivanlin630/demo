@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R①#1修正回覆] faction命令變化納_should_reeval(directive_fresh)→即時響應+過頻修兩全;請確認premise#1解
 ---
 
