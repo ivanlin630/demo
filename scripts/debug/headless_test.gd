@@ -402,6 +402,8 @@ func _initialize() -> void:
 	# ── SoloAI 主動尋家 + 承諾慣性 ──
 	_test_solo_commitment()
 	_test_solo_seek_home()
+	_test_decision_crisis_bypass()
+	_test_decision_cadence()
 	# ── 文字 UI Phase 1: API 暴露 ──
 	_test_location_game_predator()
 	_test_precarity_dto()
@@ -13083,6 +13085,42 @@ func _test_survival_start_config() -> void:
 	var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
 	assert(tile != null and tile.outpost_level == 0, "開局玩家不應有 outpost")
 	print("survival_start config OK")
+
+func _test_decision_crisis_bypass() -> void:
+	print("[TEST] decision_crisis_bypass")
+	var state := WorldState.new(); state.world = WorldData.new()
+	var fai := FactionAISystem.new()
+	# pop 驟降 >30%（20→10）→ crisis
+	var t := TeamData.new(); t.team_id = 0; _seed_pop(t, 10); t.rung_pop_last = 20; t.food_flow_avg = 0.0
+	assert(fai._decision_crisis(state, t), "pop 驟降>30%→crisis")
+	# food_flow 深負 → crisis
+	var t2 := TeamData.new(); t2.team_id = 1; _seed_pop(t2, 10); t2.rung_pop_last = 10; t2.food_flow_avg = -3.0
+	assert(fai._decision_crisis(state, t2), "food_flow<-2→crisis")
+	# 穩態 → 非 crisis
+	var t3 := TeamData.new(); t3.team_id = 2; _seed_pop(t3, 10); t3.rung_pop_last = 10; t3.food_flow_avg = 0.0
+	assert(not fai._decision_crisis(state, t3), "穩態非 crisis")
+	print("[TEST] decision_crisis_bypass PASS")
+
+func _test_decision_cadence() -> void:
+	print("[TEST] decision_cadence")
+	var state := WorldState.new(); state.world = WorldData.new(); state.player_id = -1
+	var t := TeamData.new(); t.team_id = 0; t.leader_id = 100; t.tile_pos = Vector2i(0, 0)
+	_seed_pop(t, 5); t.current_task = TeamData.TASK_FORAGE
+	t.resources = {"food": 100.0}; t.rung_pop_last = 0; t.food_flow_avg = 0.0   # 非 crisis
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	state.world.tiles[0] = tile
+	var l := PersonData.new(); l.id = 100; state.persons[100] = l; state.teams[0] = t
+	var fai := FactionAISystem.new()
+	# (a) 未過期 + 非 crisis + FORAGE(非 IDLE/stuck) → 擋(early return)，next_tick 不變
+	state.world.current_tick = 0; t.decision_eval_next_tick = 100
+	fai._evaluate_solo(state, t)
+	assert(t.decision_eval_next_tick == 100, "未過期非crisis應擋(不重評)，實際=%d" % t.decision_eval_next_tick)
+	# (b) 過期 → 放行重評 + 排下次 cadence
+	t.decision_eval_next_tick = 0   # due（current_tick 0 >= 0）
+	fai._evaluate_solo(state, t)
+	assert(t.decision_eval_next_tick == FactionAISystem.DECISION_CADENCE,
+		"過期應重評+排下次 cadence，實際=%d" % t.decision_eval_next_tick)
+	print("[TEST] decision_cadence PASS")
 
 func _test_solo_commitment() -> void:
 	print("--- SoloAI 承諾慣性 ---")

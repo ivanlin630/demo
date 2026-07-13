@@ -2,6 +2,7 @@ class_name FactionAISystem
 
 const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 小時
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
+const DECISION_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # TEST VALUE — 非-unified 週期重評（解 IDLE-lock）
 const DISPATCH_DIST_THRESHOLD: int   = 2
 
 static var _a2b_remote_tribute_payers: Dictionary = {}   # A2b 守衛 B：遠距徵收 dispatch 的 payer id（settle 對帳）
@@ -1751,6 +1752,16 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 
 # ──────── 獨立 Team 自主 AI ────────
 
+# 重評 cadence 重構：劇變事件→提前重評（複用 S3 crash-bypass 門檻）。純讀 team 已存欄，零 randf、零 gather
+# （避每 tick 全 gather perf）。pop 驟降/food 深負；威脅由既有 threat_eval cadence 路徑覆蓋，不在此重算。
+func _decision_crisis(_state: WorldState, team: TeamData) -> bool:
+	if team.rung_pop_last > 0 \
+			and float(team.rung_pop_last - team.population) / float(team.rung_pop_last) > AmbitionLadder.RUNG_CRASH_POP_DROP_PCT:
+		return true
+	if team.food_flow_avg < AmbitionLadder.RUNG_CRASH_FOOD_DEEP:
+		return true
+	return false
+
 func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if team.leader_id == state.player_id: return   # 玩家隊不受 SoloAI 控制
 	if team.combat_target != -1: return
@@ -1760,8 +1771,14 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	if uses_unified(team):                          # ← hoist 到 IDLE gate 前(unified 退 latch)
 		_decide_unified(state, team)
 		return
-	# stuck 視為 idle，允許重評（task 保留意圖直到重新派發）
-	if team.current_task != TeamData.TASK_IDLE and not _is_stuck(team): return
+	# 重評 cadence 重構：週期 + IDLE 立即 + crisis 提前（取代 completion-gated 永久 IDLE-lock）。
+	# 舊 lock（current_task!=IDLE && !stuck→return）使選長任務隊永不重評=9-zero 上游根。
+	var _due: bool = state.world.current_tick >= team.decision_eval_next_tick
+	var _crisis: bool = _decision_crisis(state, team)
+	if not (team.current_task == TeamData.TASK_IDLE or _is_stuck(team) or _due or _crisis):
+		return
+	# 排下次重評：crisis 短 cadence（反射），常態全 cadence
+	team.decision_eval_next_tick = state.world.current_tick + (DECISION_CADENCE / 4 if _crisis else DECISION_CADENCE)
 
 	# 序5 dissolve：舊「FORCE 隊 cadence tick 讓給 loop3 prosperity_attack」yield 閘已刪——
 	# 征服攻擊決策溶進主 rank（攻擊 option: intent_fit 征服 × readiness/富prey），FORCE 隊直接主 rank
@@ -1808,6 +1825,8 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			Probe.bump("trade.dispatch.solo")   # 漏斗站4（timeout 起算由 try_set 蓋章 task_start_tick）
 		# 手聽腦單點探針（此路 try_set 已成功→set_ok 恆真；rank[0] 被跳→次佳=subset_fallthrough）
 		HandBrainProbe.capture(state, team, "solo", String(ranked[0]["opt"]), opt, td["task"], true)
+		# 序① solo capture_decision 可見性（鏡射 _decide_unified）：純觀測 specimen tap，非 specimen 零成本。
+		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		print("[SoloAI] Team%d → %s (%s)" % [team.team_id, td["task"], opt])
 		return
 	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner
