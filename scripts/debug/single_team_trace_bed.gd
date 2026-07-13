@@ -9,6 +9,9 @@ func _initialize() -> void:
 	var world_seed: int = int(OS.get_environment("TRACE_SEED")) if OS.get_environment("TRACE_SEED") != "" else 1337
 	var months: int = int(OS.get_environment("TRACE_MONTHS")) if OS.get_environment("TRACE_MONTHS") != "" else 3
 	var cfg_path: String = OS.get_environment("TRACE_CONFIG") if OS.get_environment("TRACE_CONFIG") != "" else "res://config/default.json"
+	# ★指定-team specimen（measurer 兩輪缺工具）：SPECIMEN_TEAM_ID 設則強制鎖該隊，
+	# 略過 pop-swing 自動挑，且不受「活到尾/非owner」濾——供直接驗活教材(Team10=P25 霸主)或查死因(Team1/7/9/14 全滅)。
+	var forced_id: int = int(OS.get_environment("SPECIMEN_TEAM_ID")) if OS.get_environment("SPECIMEN_TEAM_ID") != "" else -1
 	var ticks: int = months * WorldState.TICKS_PER_MONTH
 
 	# ── pass1：找候選代表隊（非owner、活到尾、population 有起伏）──
@@ -50,6 +53,10 @@ func _initialize() -> void:
 		var story_score: float = swing + final_pop * 0.5
 		scored_candidates.append({"tid": tid, "swing": swing, "score": story_score})
 	scored_candidates.sort_custom(func(a, b): return a["score"] > b["score"])
+	if forced_id != -1:
+		# 強制鎖指定隊（略過自動挑+存活濾；死隊也 trace 查死因）
+		scored_candidates = [{"tid": forced_id, "swing": 0.0, "score": 0.0}]
+		print("[bed] ★SPECIMEN_TEAM_ID=%d 強制鎖定（略過 pop-swing 自動挑）" % forced_id)
 	if scored_candidates.is_empty():
 		print("[FAIL] 無候選代表隊（全滅或全穩定無波折）"); quit(); return
 
@@ -70,7 +77,7 @@ func _initialize() -> void:
 			runner2.advance_tick(state2, no_player)
 			if state2.encounter_active and state2.encounter_tick > 800:
 				runner2._encounter_system.resolve_encounter_end(state2, "draw")
-		if SpecimenTracer.decision_count > 0:
+		if SpecimenTracer.decision_count > 0 or forced_id != -1:
 			print("[bed] 選定代表隊 = Team%d，population 軌跡=%s（波折幅度=%.0f，decision_count=%d）" % [
 				candidate_id, str(pop_history[candidate_id]), cand["swing"], SpecimenTracer.decision_count])
 			SpecimenTracer.flush()

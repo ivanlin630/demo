@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: blueprint
-status: open
+status: consumed
 topic: [全slice A驗收·大幅進步待裁門檻] attrition 1.9-3.7x→1.3-1.7x;性格顯性化3樣本分化;Fix3c PASS;P25個案工具缺口
 measured_at_head: branch=67d4a470 main_baseline=68c8febb
 ---
