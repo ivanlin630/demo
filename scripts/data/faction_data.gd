@@ -9,6 +9,7 @@ var tribute_rate: float = 0.10
 
 # 策略層（faction_ai_system 讀寫）
 var goals: Array = []        # ["徵收", "立國", "擴張", "防禦"]
+var directive_change_tick: int = 0   # ⑦ 統一重評：faction 命令(goals)最後變化 tick（_emit_goal stamp；成員 directive_fresh 讀）
 var strategy: String = "idle"
 
 # commander-v2 means-end：意圖驅動 + 每令 driver（北極星：named 意圖必有可解釋驅動）
