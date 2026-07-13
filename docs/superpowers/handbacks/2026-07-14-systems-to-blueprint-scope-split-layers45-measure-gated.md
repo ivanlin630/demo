@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [★scope裁決·待用戶定序] 建議本輪只出1-3(全CLEAN)+量測;層4鋸齒/層5預算分配=measure-gated延後(架構+耦合+可能被Fix3c溶掉)
 ---
 
