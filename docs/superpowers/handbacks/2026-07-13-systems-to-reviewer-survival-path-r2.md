@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·survival-path] latch重選+FLEE威脅gate——審三修互擾/try_set同prio接點/threat=0判斷/真威脅不回歸;dispatch前
 ---
 

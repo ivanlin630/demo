@@ -24,15 +24,18 @@ if team.current_task in SURVIVAL_TASKS:
         return
     # survival-latch 重選：仍餓 + 重評 cadence 到 → 重跑 survival 選擇(forage 失效換買糧/掠奪/併入),非死鎖首選。
     # proactive_camp 豁免(主動紮營在途,不打斷)。crisis 亦觸發(複用 _decision_crisis)。
+    # ★R② 坐實 try_set 同-prio(PRIO_SURVIVAL vs PRIO_SURVIVAL)確定 no-op(task_arbiter:42嚴格>,:57例外只服務PRIO_DISPATCH)
+    #   → 必 release-then-retrigger(非條件式):先 release→current_task=IDLE→_trigger_survival try_set 成立。
     if not proactive_camp and days_left < WARNING_DAYS \
             and (state.world.current_tick >= team.decision_eval_next_tick or _decision_crisis(state, team)):
         team.decision_eval_next_tick = state.world.current_tick \
             + (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
+        TaskArbiter.release(team)   # ★先釋放:current_task→IDLE、task_priority 歸低(否則同-prio try_set no-op)
         var severity: String = "urgent" if days_left < URGENCY_DAYS else "warning"
-        _trigger_survival(state, team, severity)   # rank_survival 重選(同 prio,可換 survival option)
+        _trigger_survival(state, team, severity)   # 現 IDLE→try_set PRIO_SURVIVAL 成立,可換 survival option
     return
 ```
-- **注意**：`_trigger_survival:3127` try_set PRIO_SURVIVAL——重選同 prio(PRIO_SURVIVAL)換 survival task。查 try_set 同-prio survival self-replace 是否成立（PRIO_SURVIVAL 非 ENGINE_SOURCES 白名單→同 prio 換不動?）。**若同 prio 換不動→需先 release 再 _trigger_survival**（release→IDLE→_trigger_survival try_set PRIO_SURVIVAL 成立）。implementer build 時驗此接點,不成立則 release-then-retrigger。
+- **churn 注意（R② 提，implementer 驗）**：`rank_survival` 是否比對 `current_task` 給 `COMMITMENT_BONUS` 防抖?——release 後 current_task=IDLE,COMMITMENT 比對基準可能失效→餓隊每 cadence 在覓食/買糧/掠奪/併入間亂跳。implementer build 時查 `rank_survival` COMMITMENT 基準;若 release 破防抖→重選前記 `previous_task` 供 COMMITMENT 比對,或 rank_survival 用 solo_task_last 比對。measurer 終驗觀察 churn。
 - 復用既有 `decision_eval_next_tick`(cadence 欄)+ `_decision_crisis`（cadence slice 已加）。
 - TDD `_test_survival_relatch_repick`：餓隊 current_task=FORAGE + forage 失效(food 持續低) + cadence 到 → _trigger_survival 重跑(mock 驗 rank_survival 被呼/task 可換)。
 
