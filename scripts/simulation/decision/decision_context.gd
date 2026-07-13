@@ -254,8 +254,8 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.archetype = team.ambition_archetype
 	c.rung = team.ambition_rung
 	c.has_trainable = not team.anon_cohorts.is_empty()   # 有 anon 可練
-	if c.archetype == AmbitionLadder.ARCHETYPE_FORCE \
-			and team.ambition_rung in [AmbitionLadder.RUNG_ACCUMULATE, AmbitionLadder.RUNG_EXPAND]:
+	# T5.2 訓練 eval-gate 對齊：drop rung 條件（rung 優先序移 coeff/esteem urgency 承接）→ 僅 FORCE archetype。
+	if c.archetype == AmbitionLadder.ARCHETYPE_FORCE:
 		c.ambient_train_drive = 0.5   # TEST VALUE — 低 magnitude 讓位緊急決策
 	# plan_phase 退役（S2.5）：team.plan_phase 由 §6 narrative_label 於 gather 尾寫（S2.4），此處不再 derive。
 	# 征服溶入（序5）：readiness/thr_eff/富 prey（鏡射舊 cascade G3/G4，helper 已 static）。

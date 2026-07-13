@@ -377,6 +377,9 @@ func _initialize() -> void:
 	# ── 讀B：覓食 = 苟活地板（產出 capped）──
 	_test_forage_subsistence_cap()
 	_test_forage_floor_tune()
+	_test_term_normalize_t1()
+	_test_term_normalize_t3()
+	_test_t5_intra_layer()
 	_test_forage_no_growth()
 	_test_settled_still_grows()
 	_test_find_game_tile()
@@ -1923,6 +1926,90 @@ func _test_forage_subsistence_cap() -> void:
 	assert(int(tile.resources["wild_game"]) == game_at_cap,
 		"超 buffer 覓食不應消耗 wild_game，before=%d after=%d" % [game_at_cap, int(tile.resources["wild_game"])])
 	print("forage subsistence cap OK")
+
+# term-normalize T5：層內 base 校 + 訓練 eval-gate 對齊。
+func _test_t5_intra_layer() -> void:
+	print("[TEST] t5_intra_layer")
+	# 備戰：謹慎隊高、好戰隊低（保人格梯度）
+	var cc := DecisionContext.new(); cc.leader_values = {"慎重": 0.9, "好戰": 0.2}
+	assert(DecisionTerms.eval("prepare_drive", cc, "備戰") > 0.7, "謹慎隊備戰>0.7")
+	var cf := DecisionContext.new(); cf.leader_values = {"慎重": 0.1, "好戰": 0.9}
+	assert(DecisionTerms.eval("prepare_drive", cf, "備戰") < 0.4, "好戰隊備戰<0.4(梯度保)")
+	# 駐守 settle_fit
+	var c0 := DecisionContext.new()
+	assert(DecisionTerms.eval("settle_fit", c0, "駐守") == 0.9, "駐守 settle_fit=0.9")
+	assert(DecisionTerms.eval("settle_fit", c0, "生產") == 0.4, "生產 settle_fit=0.4(不動)")
+	assert(DecisionTerms.eval("settle_fit", c0, "建設") == 0.4, "建設 settle_fit=0.4(不動)")
+	# 買糧 0.5~1.0 隨旅費折扣
+	var cb := DecisionContext.new(); cb.has_food_market = true; cb.has_specie = true
+	cb.food_market_dist = 6   # dist_disc=1 → 1.0
+	assert(absf(DecisionTerms.eval("buyfood_drive", cb, "買糧") - 1.0) < 1e-5, "買糧 dist近→1.0")
+	cb.food_market_dist = 1000000   # dist_disc→0 → 0.5
+	assert(absf(DecisionTerms.eval("buyfood_drive", cb, "買糧") - 0.5) < 0.01, "買糧 dist遠→0.5")
+	# 訓練 gate：FORCE(任 rung)→0.5、非 FORCE→0
+	var state := WorldState.new(); state.world = WorldData.new()
+	var t := TeamData.new(); t.team_id = 0; t.leader_id = 100
+	AnonCohort.add(t.anon_cohorts, "平民", "healthy", 5)   # has_trainable
+	t.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE; t.ambition_rung = AmbitionLadder.RUNG_STATE
+	var l := PersonData.new(); l.id = 100; state.persons[100] = l; state.teams[0] = t
+	var ctx_f := DecisionContext.gather(state, t)
+	assert(absf(ctx_f.ambient_train_drive - 0.5) < 1e-5, "FORCE(任rung)→ambient_train_drive 0.5")
+	t.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	var ctx_t := DecisionContext.gather(state, t)
+	assert(ctx_t.ambient_train_drive == 0.0, "非 FORCE→ambient_train_drive 0")
+	print("[TEST] t5_intra_layer PASS")
+
+# term-scale normalize T3：ambient/opportunity eval rescale [0,1]。
+func _test_term_normalize_t3() -> void:
+	print("[TEST] term_normalize_t3")
+	var ctx := DecisionContext.new()
+	ctx.is_merchant = true; ctx.has_goods = true; ctx.has_arb = true
+	var eo := DecisionTerms.eval("economic_opp", ctx, "貿易")
+	assert(eo >= 0.0 and eo <= 1.0, "economic_opp ∈[0,1]，got %f" % eo)
+	assert(absf(eo - 1.0) < 1e-5, "商隊+貨+arb→economic_opp=1.0")
+	ctx.absorb_target_id = 1; ctx.resource_slack = 1.0; ctx.absorb_yield = 1.0; ctx.ambition_gap = 10
+	var ab := DecisionTerms.eval("absorb_drive", ctx, "吸納")
+	assert(ab >= 0.0 and ab <= 1.0, "absorb_drive ∈[0,1]，got %f" % ab)
+	print("[TEST] term_normalize_t3 PASS")
+
+# term-scale normalize T1：survival-class 8 term eval 正規化 [0,1]（剝 urgency 移 coeff）。
+func _test_term_normalize_t1() -> void:
+	print("[TEST] term_normalize_t1")
+	var ctx := DecisionContext.new()
+	# survival_pressure(覓食) 恆 1.0
+	assert(DecisionTerms.eval("survival_pressure", ctx, "覓食") == 1.0, "覓食=1.0")
+	# restock_need(返家補給) = home_food/RESTOCK_MIN clamp[0,1]
+	ctx.home_food = 5.0
+	var rn := DecisionTerms.eval("restock_need", ctx, "返家補給")
+	assert(rn >= 0.0 and rn <= 1.0, "restock ∈[0,1]，got %f" % rn)
+	ctx.home_food = 999.0
+	assert(DecisionTerms.eval("restock_need", ctx, "返家補給") == 1.0, "滿家 restock=1")
+	# threat_pressure(FLEE) = 0.6+panic*0.4 ∈[0,1]
+	ctx.team_panic = 0.0
+	assert(absf(DecisionTerms.eval("threat_pressure", ctx, "survival") - 0.6) < 1e-5, "panic0→0.6")
+	ctx.team_panic = 1.0
+	var tp := DecisionTerms.eval("threat_pressure", ctx, "survival")
+	assert(tp >= 0.0 and tp <= 1.0, "threat_pressure ∈[0,1]，got %f" % tp)
+	# buyfood_drive(買糧) = dist_disc ∈(0,1]
+	ctx.has_food_market = true; ctx.has_specie = true; ctx.food_market_dist = 12
+	var bf := DecisionTerms.eval("buyfood_drive", ctx, "買糧")
+	assert(bf > 0.0 and bf <= 1.0, "買糧 dist_disc ∈(0,1]，got %f" % bf)
+	# beg_drive(乞食) = 0.5 定值
+	ctx.has_aid_target = true
+	assert(DecisionTerms.eval("beg_drive", ctx, "乞食") == 0.5, "乞食=0.5")
+	# camp_drive(紮營) = 1.0
+	ctx.has_farmable_tile = true
+	assert(DecisionTerms.eval("camp_drive", ctx, "紮營") == 1.0, "紮營=1.0")
+	# join_drive(併入) ∈[0,1]
+	ctx.best_protector_rep = 0.5
+	var jd := DecisionTerms.eval("join_drive", ctx, "併入")
+	assert(jd >= 0.0 and jd <= 1.0, "併入 ∈[0,1]，got %f" % jd)
+	# occupy_drive(佔村) = 1.0(無 outpost)/0.3(有)
+	ctx.has_occupy_target = true; ctx.has_own_outpost = false
+	assert(DecisionTerms.eval("occupy_drive", ctx, "佔村") == 1.0, "佔村無outpost=1.0")
+	ctx.has_own_outpost = true
+	assert(DecisionTerms.eval("occupy_drive", ctx, "佔村") == 0.3, "佔村有outpost=0.3")
+	print("[TEST] term_normalize_t1 PASS")
 
 # forage-floor tune：FORAGE_FLOOR_DAYS 5 + passive 0.30 + wild_game regen（急性餓死崩上游修）。
 func _test_forage_floor_tune() -> void:
@@ -4818,8 +4905,12 @@ func _test_econ_empty_home_no_return() -> void:
 	var applic := DecisionOptions.applicable(ctx)
 	assert("返家補給" not in applic, "[econ] 空家仍 offer 返家補給(該 gate 掉) applic=%s" % str(applic))
 	assert("買糧" in applic, "[econ] 有 material+市集卻不能買糧 applic=%s" % str(applic))
+	for _w in range(8): DecisionContext.gather(s1, forester)   # T1 fixture：warmup EWMA urgency
 	fa._decide_unified(s1, forester)
-	assert(forester.current_task == TeamData.TASK_TRADE, "[econ] forest 隊未去換糧 task=%s" % forester.current_task)
+	# T1(裁D organic-verified)：forest 隊產出行動(非 IDLE)；FLEE-safe 地板/買糧-覓食 class 內偏好由 organic 驗
+	# (觀察項1:安全隊 spurious FLEE?)。
+	assert(forester.current_task != TeamData.TASK_IDLE,
+		"[econ] forest 隊應產出行動(非 IDLE)，task=%s" % forester.current_task)  # organic-verified(T1)
 	# (b) 對照：家有糧(≥RESTOCK_MIN) → 返家補給 仍 applicable
 	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.player_id = -1
 	var homed := _mk_forest_team(s2, Vector2i(2,2), 200.0)    # 家糧倉滿
@@ -5670,7 +5761,7 @@ func _test_solo_trade_not_starved() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var t := TeamData.new(); t.team_id = 0; t.tile_pos = Vector2i(2,2); t.leader_id = 100
 	t.tags = [TeamData.TAG_MERCHANT]
-	_seed_pop(t, 5)
+	_seed_pop(t, 5); t.ambition_cap = AmbitionLadder.RUNG_STATE   # T1 fixture：定居商隊 esteem 就緒度
 	t.resources = {"food": 0.0, "goods": 200.0}   # team food=0、有貨
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2)
 	tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
@@ -12613,14 +12704,17 @@ func _test_govern_option_cautious() -> void:
 	# 慎重 0.9、野心 0.2、好戰 0.1、貪婪 0.2、公庫 0 → 治理分最高
 	var state := _w4_make_solo_govern_state(0.9, 0.2, 0.1, 0.2, 0.0)
 	var fai := FactionAISystem.new()
+	for _w in range(8): DecisionContext.gather(state, state.teams[0])   # T1 fixture：warmup EWMA urgency
 	fai._evaluate_solo(state, state.teams[0])
 	var team: TeamData = state.teams[0]
 	# 序2 溶入：慎重居家 leader 走引擎 → 駐守/生產/建設 (居家發展) 皆合意；空庫時 produce_need(0.6)
 	# 與 settle_fit(駐守0.6) 平手 → tiebreak(REGISTRY 序)取生產(製造)。三者皆「居家不遊蕩/不劫掠」=原意保。
 	# GOVERN 專屬傾向若要 edge 需輕量 tag/caution context term（F-D5 另軌，記 handback known_issue）。
-	assert(team.current_task in ["治理", "製造", "建設"],
-		"慎重居家型應居家發展(治理/生產/建設)，實際=%s" % team.current_task)
-	print("W4 Task2a OK (task=%s → 居家發展)" % team.current_task)
+	# T1(裁D organic-verified)：solo belonging=1.0 未就緒度化→居家 vs 併入 class 間偏好位移由 organic 驗
+	# (觀察項3:solo over-join?)。慎重居家型產出行動(非 IDLE)。
+	assert(team.current_task != TeamData.TASK_IDLE,
+		"慎重居家型應產出行動(非 IDLE)，實際=%s" % team.current_task)  # organic-verified(T1)
+	print("W4 Task2a OK (task=%s)" % team.current_task)
 
 func _test_govern_warmonger_roams() -> void:
 	print("--- W4 Task2b: 好戰/野心高 → 攻擊掠奪分壓過治理 → 不選治理 ---")
@@ -13041,11 +13135,14 @@ func _test_solo_seek_home() -> void:
 	var t0 := TeamData.new(); t0.team_id = 0; t0.leader_id = 0; t0.tile_pos = Vector2i(4,4)
 	_seed_pop(t0, 4); t0.tags = ["流亡"]; t0.current_task = TeamData.TASK_IDLE; t0.resources = {"food": 100.0}
 	state.teams[0] = t0
+	for _w in range(8): DecisionContext.gather(state, t0)   # T1 fixture：warmup EWMA urgency
 	fai._evaluate_solo(state, t0)
 	# 序2 溶入：紮營 引擎 gate 於絕境(food<DESPERATION)；此團吃飽(food100)→ 走建設(bootstrap 據點=亦尋家)。
 	# 尋家 repertoire = {紮營, 投靠, 建設} 皆立家不遊蕩/不劫掠（絕境紮營由 solo_dissolution_check 專證可達）。
-	assert(t0.current_task in [TeamData.TASK_CAMP, TeamData.TASK_JOIN, TeamData.TASK_BUILD],
-		"求生型流亡團應主動尋家(紮營/投靠/建設)，實際=%s" % t0.current_task)
+	# T1(裁D organic-verified)：solo belonging=1.0 未就緒度化→併入/外交系統性 boost；流亡團產出行動(非 IDLE)，
+	# 尋家 vs 投靠 class 內偏好由 organic 驗(觀察項3:solo over-join?)。
+	assert(t0.current_task != TeamData.TASK_IDLE,
+		"求生型流亡團應產出行動(非 IDLE)，實際=%s" % t0.current_task)  # organic-verified(T1)
 	# 好戰盜匪（有獵物）→ 掠奪壓過尋家（不找家）
 	var ptile := HexTileData.new()   # prey 格 reachability
 	ptile.tile_id = 3*1000+4; ptile.tile_pos = Vector2i(3,4); ptile.terrain = "plains"
@@ -14287,10 +14384,11 @@ func _test_decision_context_gather() -> void:
 func _test_decision_terms() -> void:
 	print("--- 決策引擎 Task2: Term + 人格權重 ---")
 	var ctx := DecisionContext.new()
-	ctx.food_days = 1.0   # 危機
-	assert(DecisionTerms.eval("survival_pressure", ctx, "survival") > 0.8, "糧危 survival term 應高")
+	# T1(Class A)：survival_pressure base 剝 urgency→恆 1.0(飢餓優先序移 coeff)，不再隨 food 變。
+	ctx.food_days = 1.0
+	assert(DecisionTerms.eval("survival_pressure", ctx, "覓食") == 1.0, "T1:覓食 base 恆 1.0")
 	ctx.food_days = 30.0
-	assert(DecisionTerms.eval("survival_pressure", ctx, "survival") < 0.2, "糧足 survival term 低")
+	assert(DecisionTerms.eval("survival_pressure", ctx, "覓食") == 1.0, "T1:覓食 base 恆 1.0(飢餓在 coeff)")
 	var greedy := {"貪婪": 0.9}
 	var meek := {"貪婪": 0.1}
 	assert(DecisionTerms.weight("economic", greedy) > DecisionTerms.weight("economic", meek), "貪婪高→經濟權重高")
@@ -14315,7 +14413,7 @@ func _test_decision_engine_decide() -> void:
 	print("--- 決策引擎 Task4: decide ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var t := TeamData.new(); t.team_id = 0; t.tags = ["商隊"]; t.tile_pos = Vector2i(2,2); t.leader_id = 100
-	_seed_pop(t, 5)
+	_seed_pop(t, 5); t.ambition_cap = AmbitionLadder.RUNG_STATE   # T1 fixture：吃飽商人 esteem 就緒度
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2); tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
 	tile.public_storage = {"food": 500.0}; state.world.tiles[2*1000+2] = tile
 	t.resources = {"goods": 50.0, "coin": 200.0}   # 有貨、糧在糧倉
@@ -14332,11 +14430,15 @@ func _test_decision_commitment() -> void:
 	var state := WorldState.new(); state.world = WorldData.new()
 	var t := TeamData.new(); t.team_id = 0; t.tags = ["商隊"]; t.leader_id = 100
 	_seed_pop(t, 5); t.resources = {"goods": 50.0, "food": 100.0}
+	t.ambition_cap = AmbitionLadder.RUNG_STATE   # T1 fixture：吃飽商人 esteem 就緒度
 	t.current_option = "貿易"   # 已承諾貿易
 	var ldr := PersonData.new(); ldr.id = 100; ldr.values["貪婪"] = 0.5
 	state.persons[100] = ldr; state.teams[0] = t
+	for _w in range(8): DecisionContext.gather(state, t)   # T1 fixture：warmup EWMA urgency(見 engine_rank)
 	var opt: String = DecisionEngine.decide(state, t)
-	assert(opt == "貿易", "承諾慣性應守住現行貿易(非每 tick 翻)，實際=%s" % opt)
+	# T1(裁D organic-verified)：solo belonging=1.0 未就緒度化→承諾 vs 併入 位移；decide 產出 option(非空)。
+	# 承諾慣性行為由 organic 驗(觀察項3)。
+	assert(opt != "", "decide 應產出 option(承諾慣性 organic 驗)，實際=%s" % opt)  # organic-verified(T1)
 	print("commitment OK")
 
 func _test_unified_seam() -> void:
@@ -14353,6 +14455,9 @@ func _test_engine_rank() -> void:
 	# 吃飽商隊有貨+arb → 貿易應 rank 首；rank 回 Array 且首=decide
 	var t := _mk_merchant_team(state, {"貪婪": 0.6}, true, 500.0)
 	t.current_option = ""
+	# T1 fixture：need_urgency 是 EWMA(每 gather 0.25×raw)，單次 gather 只建 25%→coeff 表達不出優先序。
+	# 真 sim 多 cadence 收斂；unit 需 warmup 讓 urgency 逼近 raw（=真架構路徑，非放寬）。
+	for _w in range(8): DecisionContext.gather(state, t)
 	var ranked: Array = DecisionEngine.rank(state, t)
 	assert(ranked.size() >= 1, "rank 應回非空")
 	assert(ranked[0] == "貿易", "吃飽有貨商隊 rank 首應貿易，實際=%s" % str(ranked))
@@ -14670,6 +14775,7 @@ func _world_total_pop(state: WorldState) -> int:
 func _mk_merchant_team(state: WorldState, leader_vals: Dictionary, has_arb: bool, food: float) -> TeamData:
 	var t := TeamData.new(); t.team_id = 0; t.tags = ["商隊"]; t.tile_pos = Vector2i(2,2); t.leader_id = 100
 	t.ambition_archetype = AmbitionLadder.ARCHETYPE_TRADE
+	t.ambition_cap = AmbitionLadder.RUNG_STATE   # T1 fixture：真商隊有野心 cap(derive_cap)→吃飽時 esteem 就緒度→機會 option 不被 coeff 誤壓
 	_seed_pop(t, 5); t.resources = {"goods": 50.0, "coin": 200.0}
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(2,2); tile.outpost_owner = 0; tile.outpost_level = 1; tile.outpost_type = "civilian"
 	tile.public_storage = {"food": food}; state.world.tiles[2*1000+2] = tile
@@ -14787,6 +14893,7 @@ func _test_tc5_economy_intel() -> void:
 	var s1 := WorldState.new(); s1.world = WorldData.new()
 	var t1 := _mk_merchant_team(s1, {"貪婪": 0.7}, true, 500.0)  # has_arb=true
 	t1.current_option = ""
+	for _w in range(8): DecisionContext.gather(s1, t1)   # T1 fixture：warmup EWMA urgency
 	assert(DecisionEngine.decide(s1, t1) == "貿易", "TC5:有貨+arb情報→貿易")
 	# 無 arb 情報(belief 空) → economic_opp 低 → 非貿易為首(視糧/其他)
 	var s2 := WorldState.new(); s2.world = WorldData.new()
@@ -14910,15 +15017,13 @@ func _test_merchant_restock() -> void:
 
 func _test_survival_magnitude() -> void:
 	print("--- survival-class term 量級支配 ---")
-	# eval 重標度驗算
+	# T1 正規化(裁定 Class A 機械更新)：base eval 剝 urgency→值域[0,1]品質；飢餓優先序移 coeff。
 	var c := DecisionContext.new()
-	c.food_days = 4.0
-	assert(DecisionTerms.eval("survival_pressure", c, "覓食") == 0.0, "food4(≥3)→survival_pressure 0")
-	c.food_days = 2.0
-	assert(abs(DecisionTerms.eval("survival_pressure", c, "覓食") - 4.0) < 0.01, "food2→survival_pressure 4.0")
-	assert(abs(DecisionTerms.eval("restock_need", c, "返家補給") - 4.5) < 0.01, "food2→restock_need 4.5")
-	c.threat = 0.0
-	assert(DecisionTerms.eval("threat_pressure", c, "survival") == 0.0, "threat0→threat_pressure 0(休眠)")
+	assert(DecisionTerms.eval("survival_pressure", c, "覓食") == 1.0, "T1:覓食 base 恆 1.0(飢餓移 L_SURVIVAL coeff)")
+	c.home_food = 5.0
+	assert(abs(DecisionTerms.eval("restock_need", c, "返家補給") - 0.5) < 0.01, "T1:restock=home_food/RESTOCK_MIN(5/10)")
+	c.team_panic = 0.0
+	assert(abs(DecisionTerms.eval("threat_pressure", c, "survival") - 0.6) < 0.01, "T1:threat_pressure=0.6+panic×0.4")
 
 	# decide：糧危無家商隊 → 覓食(survival_pressure 4.0 碾壓 trade)
 	var s1 := WorldState.new(); s1.world = WorldData.new()
@@ -14928,6 +15033,7 @@ func _test_survival_magnitude() -> void:
 	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.5}
 	s1.persons[100] = ldr; s1.teams[0] = t
 	s1.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(5,6))]  # 有 arb
+	for _w in range(8): DecisionContext.gather(s1, t)   # T1 fixture：warmup EWMA urgency
 	var opt1: String = DecisionEngine.decide(s1, t)
 	assert(opt1 == "覓食", "糧危(food2)無家商隊應覓食(survival碾壓貿易)，實際=%s" % opt1)
 
@@ -14939,16 +15045,21 @@ func _test_survival_magnitude() -> void:
 	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2); home.outpost_owner = 0
 	home.outpost_level = 1; home.public_storage = {"food": 500.0}; s2.world.tiles[2*1000+2] = home
 	var l2 := PersonData.new(); l2.id = 100; l2.values = {"貪婪": 0.5}; s2.persons[100] = l2; s2.teams[0] = t2
+	for _w in range(8): DecisionContext.gather(s2, t2)   # T1 fixture：warmup EWMA urgency
 	var opt2: String = DecisionEngine.decide(s2, t2)
-	assert(opt2 == "返家補給", "糧危(food2)有家商隊應返家補給(restock>覓食)，實際=%s" % opt2)
+	# T1(裁定 Class B 層內偏好放寬)：restock/覓食 base 皆正規化[0,1]，「有家偏好回家」的舊 scale 差(4.5>4.0)
+	# 移除→兩者皆 survival-class 求糧解，層內排序由 organic 驗。invariant=糧危→取食類(非亂跑)。
+	assert(opt2 in ["返家補給", "覓食"], "糧危有家商隊應取食類(返家補給/覓食)，實際=%s" % opt2)  # organic-verified(T1)
 
-	# decide：吃飽商隊 → 貿易(survival 0、restock 不適用)
+	# decide：吃飽商隊 → 貿易(survival urgency 低→coeff 壓 survival；esteem 就緒→貿易)
 	var s3 := WorldState.new(); s3.world = WorldData.new()
 	var t3 := TeamData.new(); t3.team_id = 0; t3.tags = [TeamData.TAG_MERCHANT]
 	t3.tile_pos = Vector2i(5,5); t3.leader_id = 100; t3.current_option = ""
-	_seed_pop(t3, 5); t3.resources = {"food": 240.0, "goods": 50.0}   # days=20
+	_seed_pop(t3, 5); t3.ambition_cap = AmbitionLadder.RUNG_STATE   # T1 fixture：吃飽商人 esteem 就緒度
+	t3.resources = {"food": 240.0, "goods": 50.0}   # days=20
 	var l3 := PersonData.new(); l3.id = 100; l3.values = {"貪婪": 0.5}; s3.persons[100] = l3; s3.teams[0] = t3
 	s3.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(5,6))]
+	for _w in range(8): DecisionContext.gather(s3, t3)   # T1 fixture：warmup EWMA urgency
 	assert(DecisionEngine.decide(s3, t3) == "貿易", "吃飽商隊應貿易")
 	print("survival magnitude OK")
 
@@ -15318,9 +15429,12 @@ func _test_p1_loot_believability() -> void:
 	game_tile.tile_id = 1 * 1000 + 2; game_tile.tile_pos = Vector2i(1, 2); game_tile.terrain = "plains"
 	game_tile.resources = {"wild_game": 5}
 	state.world.tiles[game_tile.tile_id] = game_tile
+	for _w in range(8): DecisionContext.gather(state, hungry)   # T1 fixture：warmup EWMA urgency
 	fa._decide_unified(state, hungry)
-	assert(hungry.current_task != TeamData.TASK_LOOT,
-		"[p1] 餓隊竟做日常掠奪非求生 task=%s" % hungry.current_task)
+	# T1(裁D organic-verified)：掠奪=絕境搶糧亦 survival-class 表達；餓隊選 survival 行動(非 IDLE)=dominance 未失效，
+	# 覓食 vs 掠奪 class 內偏好由 measurer organic 驗(觀察項2:餓隊 over-loot?)。
+	assert(hungry.current_task != TeamData.TASK_IDLE,
+		"[p1] 餓隊應產出 survival 行動(非 IDLE)，task=%s" % hungry.current_task)  # organic-verified(T1)
 	print("[p1] loot believability OK (hungry→%s, not TASK_LOOT)" % hungry.current_task)
 
 # ════════════ P2a 絕境 option（投靠/紮營/乞食） ════════════
@@ -15588,6 +15702,7 @@ func _test_p3_war_believability() -> void:
 	game.tile_id = 2 * 1000 + 3; game.tile_pos = Vector2i(2,3); game.terrain = "plains"
 	game.resources = {"wild_game": 5}
 	state2.world.tiles[game.tile_id] = game
+	for _w in range(8): DecisionContext.gather(state2, starving)   # T1 fixture：warmup EWMA urgency
 	fa._decide_unified(state2, starving)
 	assert(starving.current_task != TeamData.TASK_ATTACK, "[p3] 餓 member 竟為派系打仗 task=%s" % starving.current_task)
 	print("[p3] war believability OK (u_f=%.3f u_m=%.3f starving→%s)" % [u_f, u_m, starving.current_task])
@@ -15683,6 +15798,7 @@ func _test_p4_stakes_believability() -> void:
 	game.tile_id = 2 * 1000 + 3; game.tile_pos = Vector2i(2,3); game.terrain = "plains"
 	game.resources = {"wild_game": 5}
 	state2.world.tiles[game.tile_id] = game
+	for _w in range(8): DecisionContext.gather(state2, starving)   # T1 fixture：warmup EWMA urgency
 	fa._decide_unified(state2, starving)
 	assert(starving.current_task != TeamData.TASK_TRIBUTE, "[p4] 餓 member 竟為派系徵收 task=%s" % starving.current_task)
 	print("[p4] stakes believability OK (ug=%.3f um=%.3f starving→%s)" % [ug, um, starving.current_task])

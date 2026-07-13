@@ -14,7 +14,7 @@ const BUYFOOD_DIST_FULL: float = 6.0    # TEST VALUE — 買糧旅費折扣基�
 const RESTOCK_MIN: float = 10.0         # TEST VALUE — 家糧倉至少這麼多 food 才值得返家補給（空家不返）
 const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量即視為可換糧籌碼（forest/mountain 特產）
 # ── means-end 戰術層（2026-07-01）：intent → 子需求 → option 貢獻打分（mirror FACTION_DUTY_DRIVE）──
-const INTENT_FIT_DRIVE: float = 1.5     # TEST VALUE — 意圖反應量級（mirror faction_duty；戰術層 reshape 強度）
+const INTENT_FIT_DRIVE: float = 1.0     # TEST VALUE — T3 正規化：意圖反應量級→[0,1]（1.5→1.0）
 const SURPLUS_FOOD_DAYS: float = 7.0    # TEST VALUE — 「有餘糧」門檻（致富→囤貨/貿易 子需求觸發）
 const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/好戰門檻（防 over-war：溫和窮隊不搶）
 # ── 佔村（雙引擎咬合：奪據點→據點產糧養兵，複用 capture+residency）──
@@ -26,7 +26,7 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 # 競秤）：獨立 _trigger_survival 設 PRIO_SURVIVAL(80) task → 整併走 _decide_unified PRIO_DISPATCH(50)
 # 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
-const ABSORB_DRIVE_BASE: float = 1.2         # TEST VALUE — §HOW-7 吸納量級（近 OCCUPY，擴張-class 公平競秤攻擊/佔村）
+const ABSORB_DRIVE_BASE: float = 1.0         # TEST VALUE — T3 正規化：吸納量級→[0,1]（1.2→1.0）
 const REP_MAGNET_W: float = 1.0              # TEST VALUE — 名聲磁鐵 §3 投靠加成權重（高名聲 host 翻贏逃）
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
@@ -50,23 +50,20 @@ static func _duty_factor(loy: float, amb: float) -> float:
 static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 	match term:
 		"survival_pressure":
-			# 重標度：吃飽(≥WARNING 3)→0 不蓋過 trade；糧危陡升量級支配(food2→4/food0→12)。
-			if ctx.food_days >= 3.0: return 0.0
-			return 4.0 * (3.0 - ctx.food_days)
+			# T1 正規化：剝 urgency 乘子(移 L_SURVIVAL coeff)。覓食=survival 預設可行行動(applicable 已 gate)→品質 1.0。
+			return 1.0
 		"restock_need":
 			if opt != "返家補給": return 0.0
-			# proactive 回家：~food4 起、量級隨糧降攀升(無上限,壓過覓食使有家偏好回家)。
-			return maxf(0.0, 1.5 * (RESTOCK_DAYS - ctx.food_days))
+			# T1：剝 hunger urgency(移 coeff)，保機會品質——家糧倉越滿返家越值(空家不返)。
+			return clampf(ctx.home_food / RESTOCK_MIN, 0.0, 1.0)
 		"threat_pressure":
-			# survival(FLEE)=威脅驅動(與 hunger 分離)。序7 reaction 溶入：疊 team_panic（集體潰散=感知威脅放大，
-			# 潰散抬 survival util 壓過 leader 勇氣）。★三源序保：panic 疊加 ≤ 真絕境（PANIC_WEIGHT 校，
-			# max 0.5 << survival_pressure 量級 12），panic-only FLEE 走主 rank PRIO_DISPATCH(50)/threat 路 70,
-			# 皆 < 真 survival-class PRIO_SURVIVAL(80) → 不喧賓奪主。
-			return ctx.threat + ctx.team_panic * PANIC_WEIGHT
+			# T1：survival(FLEE)剝 threat urgency(移 L_SAFETY coeff)，保可行+恐慌加成品質。
+			return clampf(0.6 + ctx.team_panic * 0.4, 0.0, 1.0)
 		"economic_opp":
 			if opt != "貿易": return 0.0
 			var role: float = 1.0 if ctx.is_merchant else NON_MERCHANT_TRADE_FACTOR
-			return (0.8 if ctx.has_goods else 0.2) * (1.0 if ctx.has_arb else 0.3) * role
+			# T3 正規化：rescale 到 [0,1]（舊 max 0.8 → /0.8）。品質=有貨×有單×商隊角色。
+			return clampf((0.8 if ctx.has_goods else 0.2) * (1.0 if ctx.has_arb else 0.3) * role / 0.8, 0.0, 1.0)
 		"produce_need":
 			if opt != "生產": return 0.0
 			return 0.3 if ctx.has_goods else 0.6   # 已有貨→低
@@ -87,27 +84,28 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 要根據地驅力（純野心 base_need；匱乏→奪產村的 hunger boost 走 intent_fit term，與掠奪 parallel）。
 			# 人格染色走 weight("occupy")。無 outpost 流浪狼 base_need=1（最需要），有 outpost 弱驅 0.3。
 			if opt != "佔村" or not ctx.has_occupy_target: return 0.0
-			return OCCUPY_DRIVE_BASE * (1.0 if not ctx.has_own_outpost else 0.3)
+			# T1：base 1.2→1.0；要根據地品質(無 outpost 流浪狼最需要 1.0，有 outpost 弱驅 0.3)。
+			return 1.0 if not ctx.has_own_outpost else 0.3
 		"join_drive":
 			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。
 			# 名聲磁鐵 §3：× (1 + host protector_rep × REP_MAGNET_W)——高名聲 host 投靠翻贏逃，中性(0.5)加成小。
 			if opt != "併入": return 0.0
-			var hunger: float = maxf(0.0, DESPERATION_DAYS - ctx.food_days)
-			var threat_push: float = ctx.threat if ctx.threat > ctx.threat_threshold else 0.0
-			var magnet: float = 1.0 + ctx.best_protector_rep * REP_MAGNET_W
-			return DESPERATION_SCALE * maxf(hunger, threat_push) * magnet
+			# T1：剝 hunger/threat urgency(移 coeff)，保名聲磁鐵品質(高名聲 host 投靠更值)。
+			return clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
-			return DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+			# T1：剝 hunger urgency(移 coeff)。可耕地已 gate→品質 1.0。
+			return 1.0
 		"beg_drive":
 			if opt != "乞食" or not ctx.has_aid_target: return 0.0
-			return DESPERATION_SCALE * BEG_FLOOR_FACTOR * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
+			# T1：剝 hunger urgency(移 coeff)。低品質最後手段=低 band 定值。
+			return BEG_FLOOR_FACTOR
 		"buyfood_drive":
-			# 餓 + 有市集 + 有錢 → 買糧 drive；旅費折扣（近市集勝遠市集）。無錢=0（乞食真語意）。
+			# T1：剝 hunger urgency(移 coeff)，只留旅費折扣品質（近市集勝遠市集）。
 			if opt != "買糧" or not ctx.has_food_market or not ctx.has_specie: return 0.0
-			var hunger: float = DESPERATION_SCALE * maxf(0.0, DESPERATION_DAYS - ctx.food_days)
-			var dist_disc: float = BUYFOOD_DIST_FULL / maxf(float(ctx.food_market_dist), BUYFOOD_DIST_FULL)
-			return hunger * dist_disc
+			# T5 層內 base 校：買糧非墊底(有市集+錢=可行行動)→抬 base band(0.5~1.0 隨旅費折扣)。
+			var _dd: float = BUYFOOD_DIST_FULL / maxf(float(ctx.food_market_dist), BUYFOOD_DIST_FULL)
+			return clampf(0.5 + 0.5 * _dd, 0.0, 1.0)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"faction_duty":
@@ -138,8 +136,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 駐守 = 純知足（settle 主導，無 ambition pull）→ 給高 base，使低野心 leader 選它
 			# 而非 建設/生產（後者另含 ambition_drive，野心 leader 才被推上去）。
 			match opt:
-				"駐守":        return 0.6
-				"生產", "建設": return 0.4
+				"駐守":        return 0.9   # T5 層內 base 校：純知足駐守抬 0.6→0.9(低野心 leader 選它非建設)
+				"生產", "建設": return 0.4   # 不動(另含 ambition_drive)
 				_:             return 0.0
 		"intent_fit":
 			# means-end 戰術層：team 自己戰略 intent → 子需求 → boost 對應 option（貢獻打分,非 flat）。
@@ -152,7 +150,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"prepare_drive":
 			# 備戰 = 純人格（鏡射舊 caution*0.6 + martial*0.3）。
 			if opt != "備戰": return 0.0
-			return float(ctx.leader_values.get("慎重", 0.5)) * 0.6 + float(ctx.leader_values.get("好戰", 0.5)) * 0.3
+			# T5 層內 base 校：抬謹慎梯度(慎·0.9+好·0.2)——謹慎隊備戰高、好戰隊仍低(保人格梯度)。
+			return clampf(float(ctx.leader_values.get("慎重", 0.5)) * 0.9 + float(ctx.leader_values.get("好戰", 0.5)) * 0.2, 0.0, 1.0)
 		"defend_drive":
 			# 迎戰 = 好戰驅動，威脅越大越不敢正面（鏡射舊 martial*0.7 + (1−threat)*0.2）。
 			if opt != "迎戰": return 0.0
@@ -168,7 +167,7 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "吸納" or ctx.absorb_target_id == -1: return 0.0
 			var amb_gap: float = clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
 			var yield_pos: float = clampf(ctx.absorb_yield, 0.0, 1.0)   # 負 yield=純負擔→0=不吸(gate#1)
-			return ABSORB_DRIVE_BASE * ctx.resource_slack * (0.3 + 0.7 * yield_pos) * (0.5 + 0.5 * amb_gap)
+			return ABSORB_DRIVE_BASE * ctx.resource_slack * (0.5 + 0.5 * yield_pos) * (0.5 + 0.5 * amb_gap)
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0
@@ -206,7 +205,7 @@ static func _intent_fit(ctx: DecisionContext, opt: String) -> float:
 			# （對齊舊 cascade attack_score 野心+好戰−信義；高信義者不屑掠人）。readiness_thr_eff 含慎重+hunger_relief。
 			if opt == "攻擊" and (ctx.intent_target != -1 or ctx.has_weak_prey):
 				var honor: float = float(ctx.leader_values.get("信義", 0.5))
-				var conq_person: float = clampf(0.5 + maxf(amb, martial) * 0.5 - honor * 0.4, 0.0, 1.5)
+				var conq_person: float = clampf(0.5 + maxf(amb, martial) * 0.5 - honor * 0.4, 0.0, 1.0)
 				var readiness_factor: float = clampf(ctx.readiness / maxf(ctx.readiness_thr_eff, 0.01), 0.0, 1.0)
 				return INTENT_FIT_DRIVE * conq_person * cap * readiness_factor
 	return 0.0

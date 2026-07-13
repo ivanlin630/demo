@@ -108,6 +108,15 @@ static func affinity_of(opt: String) -> Array:
 		return AFFINITY[opt]
 	return _AFFINITY_UNIFORM
 
+# option 主 affinity 層(argmax)。空/未知→-1。純 lookup（診斷 probe/S3 用）。
+static func main_layer_of(opt: String) -> int:
+	if opt == "": return -1
+	var aff: Array = affinity_of(opt)
+	var best: int = 0
+	for i in range(1, N_LAYERS):
+		if float(aff[i]) > float(aff[best]): best = i
+	return best
+
 # §3 軟降權：coeff = clampf(1 - steepness·(1-alignment), FLOOR, 1)。純算術零分支。
 # alignment = Σ affinity[opt]·urgency ∈[0,1]（affinity 行和≈1、urgency≤1 → alignment≤1）。
 # §4 steepness 由人格：謹慎↑陡(遠層壓極重)、野心↓陡(狂人遠層仍有機會)。軟降權不歸零(FLOOR)。
