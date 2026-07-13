@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: [v2 完] 求生層 attrition 根治 (feat/survival-layer-unify 2ee09f9)——Fix2 漸進安全網+Fix3 人格化,reeval.crisis=49
 ---
 
