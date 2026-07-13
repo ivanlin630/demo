@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [量測·用戶請求] 單一代表隊3mo逐次task/option時間軸——用既有SpecimenTracer,無需implementer
 ---
 
