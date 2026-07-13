@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·⑦] 釋放統一(單一_should_reeval,修過頻1712+命令即時)——R①R②全CLEAN,自主slice
 ---
 
