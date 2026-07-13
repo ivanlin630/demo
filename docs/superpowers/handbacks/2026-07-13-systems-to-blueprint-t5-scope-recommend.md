@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [T5 scope 推薦] diag分類:備戰/駐守/買糧①base校/訓練③eval-gate錯配(坐實)/吸納邊界/乞食②稀有記錄——請裁T5範圍
 ---
 
