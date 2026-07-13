@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: measurer
-status: open
+status: consumed
 topic: 同需求 fallthrough 交付 — rank[0]不可派→同被動求生組次佳;branch feat/same-need-fallthrough已push,待餓隊換食物策略終驗
 ---
 # Hand Back: dispatch 同需求 fallthrough（PASSIVE_SURVIVAL_SET）
