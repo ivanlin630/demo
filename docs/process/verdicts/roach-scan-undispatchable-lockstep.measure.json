@@ -1,0 +1,33 @@
+{
+  "slice": "roach-scan-undispatchable-lockstep",
+  "measured_at_head": "98a9841",
+  "method": "既有main_story_trace_v7-rerun同源seg3(seed1337,3mo,main HEAD跑single_team_trace_bed.gd次段——已剝除pass1/失敗candidate的重複段,詳見下)分析,非新跑;僅取log line grep,不改scripts/code",
+  "source_note": "背景task .output為scratchpad會清,已將關鍵段落落地docs/measurements/2026-07-13-roach-scan-team10-thrash-1337.log(line 7960-8030原始摘錄)",
+  "scan_result": {
+    "candidates_checked": ["Team5","Team6","Team7","Team8","Team9","Team10","Team11","Team12","Team13"],
+    "longest_same_task_runs_days": {
+      "Team12": {"task": "建設", "days": 88, "span": "day1-89", "verdict": "健康"},
+      "Team9": {"task": "建設", "days": 67, "span": "day22-89", "verdict": "健康"},
+      "Team10": {"task": "建設", "days": 27, "span": "day16-43(粗估run-length算法值)", "verdict": "★病態(roach確診)"},
+      "Team5": {"task": "貿易", "days": 23, "span": "day14-37", "verdict": "健康(週期隊,非鎖死)"},
+      "Team6": {"task": "覓食", "days": 21, "verdict": "健康"},
+      "Team11": {"task": "覓食", "days": 18, "verdict": "健康"},
+      "Team8": {"task": "逃跑", "days": 16, "verdict": "危機期反應,非鎖死"},
+      "Team13": {"task": "覓食", "days": 14, "verdict": "健康"},
+      "Team7": {"task": "覓食", "days": 9, "verdict": "健康(前段,後段67天買糧已由systems判健康)"}
+    }
+  },
+  "team10_roach_detail": {
+    "verdict": "★確診病態,但型態≠Team7的乾淨fallthrough——是[Survival]legacy override層跟unified引擎thrash(livelock)",
+    "evidence_log": "docs/measurements/2026-07-13-roach-scan-team10-thrash-1337.log:1-71",
+    "pattern": "day62起(famine=7天已在跑)每tick重複[Survival]Team10 urgent days_left=0.0 建設→貿易/貿易→idle/建設→貿易…連續數十次thrash,未見成功抵達市集/覓食完成的痕跡;famine計數7→13天累加,最終day89三名anon餓死+Team10滅團(Extinct)",
+    "root_cause_hypothesis": "非簡單util-top恆✗fallthrough(Team7型),疑是舊[Survival]override系統(非unified decision_engine路徑)每tick覆蓋/搶奪unified剛選定的task,兩層打架導致task從未穩定執行滿一個completion cycle(如貿易需到市集,但每tick被打斷回idle)——屬補丁閘嫌疑(舊override pre-empt統一引擎),非環境合理無解",
+    "boundary": "根因定位屬systems權限,我只確認現象存在+可溯源;未逐行讀survival override code"
+  },
+  "team9_team12_detail": {
+    "verdict": "健康——雖建設task長期不變(67-88天),但買賣order持續正常運作(weapon/ore/material/food交易),無famine/death/extinct事件,武力rung野心穩步推進——判定為dedicated economy specialization,非鎖死無解",
+    "evidence": "grep [Order]/[Ambition]顯示Team9/Team12在建設鎖期內持續有效交易+野心提升,無危機信號"
+  },
+  "incomplete": ["未逐一驗證Team5/6/8/11/13(標健康based on短span+無死亡/famine tag共現,非逐行讀log);未擴其他seed(42/7)——時間考量,先報單seed確認有真蟑螂再議是否擴"],
+  "summary": "普查結果=非查無,找到1個確診病態(Team10,famine死+滅團,[Survival]override thrash型,跟Team7乾淨fallthrough不同型態)。Team9/Team12雖也長期單task但屬健康specialization。建議:①crisis de-patch不能只看dispatch-fallthrough(Team7型),Team10顯示[Survival]legacy override跟unified引擎thrash也是致死路徑,需systems擴查②scope。"
+}

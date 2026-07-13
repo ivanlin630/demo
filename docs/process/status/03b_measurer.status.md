@@ -12,7 +12,7 @@ updated: 2026-07-13
 
 **工單**：無
 
-**最近**：winner分布71/22/7%矛盾查清(數字對,比對檔錯)+查到util argmax疑點(買糧勝出但util印得比覓食低,連續67天)+4隊日記,handback to:blueprint(open,建議升systems查疑點)。
+**最近**：蟑螂普查有結果(非查無)——Team10確診病態(famine死+滅團,[Survival]override thrash型≠Team7的乾淨fallthrough型);Team9/12長期單task但健康(dedicated economy)。handback to:systems(open)。
 
 ---
 > 慣例（此檔 owner=measurer 自更）：收量測工單開工 → `status: working` + `current_ticket: <handback檔名>`（多工單併行可列多個）；跑長跑 detach → `status: working` 標「detach 跑中 <bed>」；回報完 → `status: idle`。01 grep 監控。
