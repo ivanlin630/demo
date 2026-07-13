@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·⑦] 釋放統一設計審——_should_reeval收斂正確/unified throttle不回歸/架構紀律真收斂;dispatch前
 ---
 
