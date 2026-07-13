@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [零跑結論·redirect] commitment被數字否證(非真因);真根=覓食undispatchable(local game枯竭+只掃相鄰)→fallthrough生產+買糧排生產下;別建commitment閥,查forage-dispatch/food-ranking
 ---
 
