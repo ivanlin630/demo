@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [v2全維度重驗] 求生層attrition根治 (feat/survival-layer-unify 2ee09f9)——headline=attrition回落;附reviewer 3條件;數字餵藍圖
 measured_at_head: main 07e56a74 (branch 2ee09f9)
 ---

@@ -1,0 +1,46 @@
+{
+  "slice": "survival-layer-v2-acceptance",
+  "measured_at_head": {"branch": "2ee09f9b", "main_baseline": "916b0b7d"},
+  "method": "同v1輪法:full_probe(seeded_warring_bed,warring_states.json,3seed×3mo,branch vs main baseline同世界對照,detach launch);reeval_attribution_bed+single_team_trace_bed(v2 worktree)複核",
+  "raw_logs": {
+    "fullprobe_branch": "docs/measurements/2026-07-14-survival-v2-fullprobe-branch-2ee09f9.json",
+    "fullprobe_main_baseline": "docs/measurements/2026-07-14-survival-v2-fullprobe-mainbaseline-916b0b7.json",
+    "reeval_attribution": "docs/measurements/2026-07-14-survival-v2-reeval-attribution-branch-2ee09f9.log",
+    "team10_trace": "docs/measurements/2026-07-14-survival-v2-team10trace-branch-2ee09f9.log"
+  },
+  "headline_verdict": {
+    "verdict": "★★FAIL——headline宣稱不成立",
+    "claim": "工單宣稱attrition從惡化1.9-3.7×回落到≈main baseline水準(±餘裕)",
+    "actual": {
+      "seed1337": {"v2_branch": 45.3, "main": 13.5, "v1_branch(前輪)": 50.5, "倍數(v2/main)": 3.4},
+      "seed42": {"v2_branch": 42.8, "main": 11.8, "v1_branch(前輪)": 34.7, "倍數(v2/main)": 3.6, "note": "★v2比v1更差(34.7→42.8)"},
+      "seed7": {"v2_branch": 31.5, "main": 16.7, "v1_branch(前輪)": 31.3, "倍數(v2/main)": 1.9, "note": "跟v1幾無變化(31.3→31.5)"}
+    },
+    "established": "branch=[0,0,2] main=[0,0,2]——三seed一致,無回歸(此項唯一過)"
+  },
+  "reviewer_3conditions": {
+    "1_over_trigger換皮": {
+      "verdict": "PASS(此指標本身)",
+      "evidence": "reeval_attribution_bed(v2,乾淨單run,seed1337):reeval.crisis=41(implementer報49同量級);TOTAL=3157(v1同法為3092,量級相近,非爆千位)——reeval頻率本身未over-trigger",
+      "caveat": "★但同一份乾淨跑famine/extinct暴增(見下)——reeval頻率沒換皮,但attrition仍未解,故#1標準本身過但無助於headline"
+    },
+    "2_人格化trap換皮_謹慎升階": {
+      "verdict": "incomplete——未驗證",
+      "reason": "無現成工具篩「慎重trait高的leader隊」做定向抽驗(caution trait不在任何log tag印出),需新probe/log tap才能做,超出我界(不改scripts/)。建議implementer/systems加一個可讀caution值的print，供下輪抽驗"
+    },
+    "3_隱含bisect觸發": {
+      "verdict": "★觸發——attrition沒回落到baseline±餘裕,依工單條款3,回報「premise訊號不足」,要求真bisect",
+      "note": "工單條款3明訂:attrition沒回落→回報premise不足,此時才要求bisect(非我現在做)——本輪即觸發此條款"
+    }
+  },
+  "unexpected_finding": {
+    "summary": "★v2的乾淨reeval_attribution_bed跑(同v1輪同款方法,唯一差異=code版本)裡,Team10（flagship修復對象）again 出現famine死+Extinct滅團——直接矛盾工單陳述「Team10 thrash仍治好(不day89餓滅)」",
+    "evidence_v1_vs_v2": {
+      "v1_reeval_attribution(前輪)": "0筆[Survival]tag,0筆Famine/Extinct,Team10存活day90做建設",
+      "v2_reeval_attribution(本輪)": "57筆[Survival]tag(Team14為主),★Team10/Team14/Team12/Team4/Team11/Team3/Team1/Team6/Team8多隊出現famine,Team14/Team12/Team10/Team4/Team1皆Extinct"
+    },
+    "single_team_trace_bed_corroboration": "v2該run選中Team10為代表隊,decision_count=965(遠高於v1 Team7型的113)，winner分布覓食57/建設908(建設佔94%——高頻+高鎖疊加,非v1呈現的健康多樣化31%建設)；famine/extinct行數181(含多pass疊加,定性佐證死亡大增非個案)"
+  },
+  "incomplete": ["謹慎升階抽驗(需新caution-trait log tap,超出量測員界)", "觀察點A(絕糧建設)/C(復餓)仍未細驗(時間+上游headline已FAIL,優先度降)"],
+  "summary": "★★不建議release-pass。headline(attrition回落)FAIL——v2跟v1相比未見有意義改善(1337/42反而更差,7幾無變化),仍是main baseline的1.9-3.6倍。更嚴重:乾淨單run複核發現Team10(flagship修復對象)本輪又famine死+滅團,跟工單「仍治好」的陳述直接矛盾。依reviewer條款3,觸發「premise訊號不足」——要求真bisect(隔離Fix1-4 vs Fix2-v2/Fix3-v2各自貢獻)才能往下走,非我現在做。"
+}
