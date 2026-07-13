@@ -1,0 +1,59 @@
+{
+  "slice": "survival-layer-sliceA-acceptance",
+  "measured_at_head": {"branch": "67d4a470", "main_baseline": "68c8febb"},
+  "method": "full_probe(seeded_warring_bed,3seed×3mo,branch vs main baseline同世界對照,detach launch)+reeval_attribution_bed(乾淨單run)+slice_a_observe(boost頻率+Fix3c)+single_team_trace_bed(seed1337/42/7,leader-trait性格抽驗)",
+  "raw_logs": {
+    "fullprobe_branch": "docs/measurements/2026-07-14-sliceA-fullprobe-branch-67d4a47.json",
+    "fullprobe_main_baseline": "docs/measurements/2026-07-14-sliceA-fullprobe-mainbaseline-68c8feb.json",
+    "reeval_attribution": "docs/measurements/2026-07-14-sliceA-reeval-attribution-branch-67d4a47.log",
+    "slice_a_observe": "docs/measurements/2026-07-14-sliceA-observe-boost-fix3c-67d4a47.log",
+    "trace_1337": "docs/measurements/2026-07-14-sliceA-trace-1337-67d4a47.log",
+    "trace_42": "docs/measurements/2026-07-14-sliceA-trace-42-67d4a47.log",
+    "trace_7": "docs/measurements/2026-07-14-sliceA-trace-7-67d4a47.log"
+  },
+  "headline_verdicts": {
+    "0_層0求生量級": {
+      "verdict": "★大幅改善,非全清",
+      "evidence": "reeval_attribution_bed(乾淨單run,seed1337):Team10從v2的Extinct(滅團)改善為僅1筆famine事件即存活(docs/measurements/2026-07-14-sliceA-reeval-attribution-branch-67d4a47.log famine=7天,無Extinct)。但同run Team1/7/9/14仍全滅(Extinct),Team14持續thrash(122筆[Survival]tag,同log)"
+    },
+    "0b_boost觸發頻率": {
+      "verdict": "10.52%,跟implementer初值9.46%同量級,偏高(工單已定性=tuning訊號非boost壞)",
+      "evidence": "slice_a_observe.gd輸出:survival.boost_fire=2023/decision.coeff_applied_n=19224=10.5233%(docs/measurements/2026-07-14-sliceA-observe-boost-fix3c-67d4a47.log)"
+    },
+    "1_attrition回落": {
+      "verdict": "★大幅改善,未完全達main baseline水準但差距大縮",
+      "table": {
+        "seed1337": {"sliceA": 23.0, "main": 13.5, "倍數": 1.70, "v1": 50.5, "v2": 45.3},
+        "seed42": {"sliceA": 17.1, "main": 11.8, "倍數": 1.45, "v1": 34.7, "v2": 42.8},
+        "seed7": {"sliceA": 21.8, "main": 16.7, "倍數": 1.31, "v1": 31.3, "v2": 31.5}
+      },
+      "note": "倍數從v1/v2的1.9-3.7x降到1.3-1.7x——方向對、幅度大,但非「≈main baseline」(仍高30-70%)。是否算「可接受餘裕」需blueprint裁定門檻",
+      "established_bonus": "seed1337★branch=1 vs main=0(branch多達成一個established,非回歸,反向利多)"
+    },
+    "2_性格顯性化": {
+      "verdict": "PASS(可辨識分化),但活教材P25個案未直接鎖定",
+      "samples": {
+        "中庸型(seed1337,Team13)": {"野心": 0.52, "慎重": 0.47, "求生欲": 0.37, "好戰": 0.48, "貪婪": 0.38, "food_sec_target": 3.8, "decision_count": 200, "winner分布": "覓食70/建設13/紮營1/生產8/買糧108(5 option多樣,買糧54%非monotonic)"},
+        "好戰武力型(seed42,Team9)": {"野心": 0.47, "慎重": 0.65, "求生欲": 0.65, "好戰": 0.97, "貪婪": 0.60, "food_sec_target": 4.7, "decision_count": 186, "winner分布": "迎戰34/囤貨71/覓食12/紮營2/生產32/乞食1/買糧21/返家補給9/求和4(9 option極多樣,含高頻迎戰)"},
+        "謹慎守成型(seed7,Team15)": {"野心": 0.40, "慎重": 0.65, "求生欲": 0.45, "好戰": 0.62, "貪婪": 0.39, "food_sec_target": 5.0, "decision_count": 117, "winner分布": "建設93/紮營3/覓食8/迎戰13(79%建設守成,方向對但非因子唯一——好戰0.62也偏高)"}
+      },
+      "trend": "food_sec_target隨慎重遞增:3.8(慎重0.47)→4.7(慎重0.65)→5.0(慎重0.65,但求生欲較低)——方向大致對,三樣本option分布明顯不同,非全隊同一套行為",
+      "P25個案": "★工單點名Team10 leader P25(野心0.89霸主)未能直接鎖定——single_team_trace_bed候選由pop-swing自動評分挑選,非team_id指定,3次seed跑都沒選中Team10(候選演算法挑了Team13/Team9/Team15);無現成工具可強制指定team_id=10做specimen,需implementer/systems加一個『指定team_id specimen』參數(同caution-trait log tap,累積第二個工具缺口)。標記incomplete"
+    },
+    "3_Fix3c武備隊存活": {
+      "verdict": "PASS",
+      "evidence": "slice_a_observe.gd:has_specie=true(修前應false);barter:food 5→142,weapon 30→11(跟implementer報數字完全一致)"
+    },
+    "4_層4鋸齒三態": {
+      "verdict": "未細驗(時間考量,標incomplete)"
+    }
+  },
+  "other_guards": {
+    "established跨seed": "sliceA=[1,0,2] vs main=[0,0,2]——無退化,seed1337反向多一個established(利多非回歸)",
+    "determinism": "本輪未重跑HOB複核(前兩輪已驗MATCH,code此輪僅動decision層非決定性結構,風險低,但嚴謹起見標記未在本輪覆核)",
+    "reeval頻率": "TOTAL=3186(v1=3092,v2=3157,同量級,遠低於基線13997,無over-trigger)",
+    "constitution": "未在本輪重跑(前兩輪皆綠,decision層改動不動site,風險低但同上標記)"
+  },
+  "incomplete": ["P25霸主野心型個案未直接鎖定(需team_id指定specimen工具,超出量測員界)", "層4鋸齒三態未細驗", "HOB determinism/憲法閘本輪未重跑複核(前兩輪皆綠)"],
+  "summary": "★大幅進步,建議blueprint參考門檻裁定是否過關。attrition倍數從v1/v2的1.9-3.7x大降到1.3-1.7x(方向對、非≈main但差距大縮),established無回歸(seed1337反向多一個)。boost頻率10.52%偏高(tuning訊號)。性格顯性化3樣本呈現可辨識分化(食物安全存量隨慎重遞增,option分布明顯不同),但活教材P25個案因工具缺口未直接驗證。Fix3c PASS。reeval_attribution乾淨跑顯示Team10具體改善(全滅→僅1筆famine存活)但Team1/7/9/14仍全滅+Team14持續thrash——非全清,残留死亡率仍需關注。"
+}

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: [全維度驗收·整包] slice A人格化資源預算架構(feat/survival-layer-unify 67d4a47)——attrition回落+boost頻率健康度+★性格顯性化;數字餵藍圖release
 measured_at_head: main 0e7bfdba (branch 67d4a47)
 ---

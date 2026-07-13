@@ -12,7 +12,7 @@ updated: 2026-07-14
 
 **工單**：無
 
-**最近**：求生層v2重驗結案——headline(attrition回落)FAIL,仍1.9-3.6倍main,seed42比v1更差;★意外發現Team10(flagship修復對象)乾淨跑又餓死滅團,矛盾工單「仍治好」陳述。已觸發reviewer條款3(要真bisect)。handback to:blueprint(open)。
+**最近**：全slice A整包驗收結案——大幅進步:attrition倍數1.9-3.7x→1.3-1.7x(未達≈main,門檻裁定交blueprint);性格顯性化3樣本分化明顯;Fix3c PASS;P25霸主個案因工具缺口(無team_id指定specimen)未鎖定,標incomplete。handback to:blueprint(open)。
 
 ---
 > 慣例（此檔 owner=measurer 自更）：收量測工單開工 → `status: working` + `current_ticket: <handback檔名>`（多工單併行可列多個）；跑長跑 detach → `status: working` 標「detach 跑中 <bed>」；回報完 → `status: idle`。01 grep 監控。
