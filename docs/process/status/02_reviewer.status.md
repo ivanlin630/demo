@@ -1,8 +1,8 @@
 ---
 role: reviewer
 code: "02"
-status: idle
-current_ticket: "-"
+status: working
+current_ticket: "2026-07-13-systems-to-reviewer-samefall-category-delta-r2.md"
 updated: 2026-07-13
 ---
 

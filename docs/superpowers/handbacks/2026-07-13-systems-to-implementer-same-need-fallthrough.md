@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·同需求fallthrough] rank[0]不可dispatch→同need層優先(裁A)——R②CLEAN;解餓隊覓食失敗落生產
 ---
 

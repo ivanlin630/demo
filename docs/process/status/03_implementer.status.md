@@ -1,8 +1,8 @@
 ---
 role: implementer
 code: "03"
-status: idle
-current_ticket: "-"
+status: blocked
+current_ticket: "same-need-fallthrough (併入 belonging-affinity 被同need-first降級破投靠;spec-flagged 擴spec待裁)"
 updated: 2026-07-13
 ---
 
