@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [dispatch·T5] 層內base校+訓練eval-gate對齊——R②CLEAN,normalize收尾slice
 ---
 
