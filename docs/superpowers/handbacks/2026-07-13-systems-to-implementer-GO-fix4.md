@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [GO Fix4] reviewer R② CLEAN——Fix4覓食可達性預檢查放行,四項一起做完再handback
 ---
 
