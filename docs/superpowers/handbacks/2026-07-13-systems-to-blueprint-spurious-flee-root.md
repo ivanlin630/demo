@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: [零跑結論] ②真根=FLEE base 0.6 flat floor(我T1 spec錯)+panic回饋+FLEE re-latch死亡螺旋;累積不釋放坐實;推薦併survival-path slice(latch重選+FLEE威脅gate+panic釋放)
 ---
 
