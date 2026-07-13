@@ -18,9 +18,9 @@ frame: ★大框三對齊（動架構 + 剛拍板願景「求生=個性加權競
 - **每個花費 option 的 drive = 該類別 gap-to-target**（current stock vs 人格目標）：
   - `買糧` drive ∝ max(0, food_security_target − food_days)：food 低於目標→高，補到目標→趨零→**自動收手在人格化安全存量**（非收手在 DESPERATION 3）。
   - `軍備採購/囤貨/生產發展` drive ∝ 各自類別 gap。
-- **∴ 三個湧現效果**（無新 option、無新玩家行為，純 drive 曲線吃人格目標）：
-  1. **層4 鋸齒被吸收**：買糧收手線 = 人格化目標(非=觸發線)，gap→0 自然停 → 「觸發≠收手」湧現，不需獨立層4機制。★需量測確認（見驗收）。
-  2. **層5 預算分配湧現**：某類別補到目標→其 drive 落→argmax 轉到下個最缺類別→**任一項不吃光預算**，分配浮現個性（謹慎先填糧、賭徒先填軍備）。
+- **∴ 三個效果**（無新 option、無新玩家行為，純 drive 曲線吃人格目標）：
+  1. **層4 鋸齒改善（★假說待驗，非架構保證——reviewer 異質框外審降級 2026-07-14）**：買糧 drive∝gap→補到人格目標趨零→**傾向**收手在人格化安全存量而非 DESPERATION(3天)。**但 `rank_scored` 是 flat argmax、無 lexicographic「先填滿食物再看下個類別」保證**：食物補到一半時若軍備/發展 gap 反超，argmax 會跳走，食物**可能停在人格目標以下**＝鋸齒**地板抬高/齒變淺，非保證消除**。∴ 這是「**預期改善的假說**」，量測驗證，**非已證湧現**。殘餘鋸齒（真赤貧除外）→ 補獨立層4（驗收④）。
+  2. **層5 預算分配（傾向，非硬保證）**：某類別補到目標→其 drive 落→argmax 傾向轉到下個最缺類別→**傾向**任一項不吃光；但同 flat-argmax 性質，target 高的類別 gap 可能長期最大→該類別偏重（=人格光譜設計意圖，非 bug；風險=target 太高致收斂超遊戲時長，驗收⑤ 抽驗謹慎隊仍升階把關）。
   3. **候選1 賣糧對稱**：賣糧 reserve = 同一 `food_security_target`（非死常數 pop×2.5天）→ 不賣到自己餓、不賣破 buy-panic 線。
 
 ## Slice A 落地清單（一次做完一次驗）
@@ -35,7 +35,7 @@ frame: ★大框三對齊（動架構 + 剛拍板願景「求生=個性加權競
 ### 候選1 賣糧 reserve 人格化
 - `trade_valuation.gd:58-63` food reserve `pop×0.1×FOOD_RESERVE_TICKS`（死常數，過期 0.1/tick vs 真實 `FOOD_PER_PERSON_PER_DAY=0.8`）→ 改 `food_security_target(leader) × pop × FOOD_PER_PERSON_PER_DAY`。★對齊 aid-reserve 已人格化先例（`interaction_system.gd:1000-1002 lerpf(2,60,hoard)`）——賣糧端補齊同型一致。
 ### 候選2 人格化門檻框架（統一 home）
-- 提供單一 helper（home 建議 `DecisionTerms` 或新 `PersonalityBudget` util）算 `category_target(leader, category)`；層2/層5/候選1 全呼此**單一源**（judge 盤點精神：不並存散落常數）。
+- 提供單一 helper（**home = `DecisionTerms`**，reviewer 定案 2026-07-14：三讀取者 need_hierarchy/terms/trade_valuation 都 import DecisionTerms 較乾淨，need_hierarchy 已有向 decision 層 import 先例如 DESPERATION_DAYS）算 `category_target(leader, category)`；層2/層5/候選1 全呼此**單一源**（judge 盤點精神：不並存散落常數）。
 - **★scope 界（systems HOW 裁，控 blast radius）**：本 slice **只實例化「食物安全 + 軍備 + 發展」三類別 + 相關 option**。非食物 gate（佔村 OCCUPY_MIN_POP/血仇 FEUD_ATTACK_MIN/匱乏搶 SCARCITY_RAID_MIN/capability VIABLE_ARMED_RATIO）**同框架、延後 follow-up 逐 gate 遷入**（非本輪，非 attrition 相關，一次全遷=過大 blast radius）。框架設計成可擴，本輪只接食物簇。列 known_issues 追蹤 follow-up。
 
 ## 排之後（known_issues，用戶定）
@@ -48,7 +48,7 @@ frame: ★大框三對齊（動架構 + 剛拍板願景「求生=個性加權競
 1. **attrition 回落 ≈ main baseline**（headline；branch vs main 同世界，從惡化 1.9-3.7× 回落）。
 2. **Team10 thrash 仍治好**、**established 不退**、determinism、憲法閘綠。
 3. **Team14 型「滿手武器買不起糧餓死」消除**（層3；weapon-rich has_specie true + barter 換糧成交 `trade.barter_deal`）。
-4. **★層4 吸收確認**：窮隊**不再貼 3 天鋸齒餓死**（買到人格化安全存量才收手）——**若殘餘鋸齒餓死（真赤貧無錢/無武器/無貨 除外）→ 回報，補層4**。
+4. **★層4 鋸齒（假說待驗，reviewer 條件：別二元 pass/fail）**：measurer **明確區分三態**——(a)鋸齒消失(買到人格安全存量才收手)＝假說成立；(b)**鋸齒變淺/地板抬高但仍在**＝部分改善(符合預期，非失敗，別當 fail 掩蓋)；(c)鋸齒如舊＝假說不成立。(b)/(c) 且非真赤貧(無錢/武器/貨)餓死 → 回報，補獨立層4。**別用二元 pass/fail 掩掉「部分改善」訊號。**
 5. **★資源分配浮現個性非二元擺盪**：抽驗謹慎隊(食物比例高、有 buffer)vs 野心隊(軍備/擴張比例高、薄糧)——**非「全砸買糧 or 全砸軍備」二元**；謹慎隊仍能升階（非變純糧倉廢發展）；野心隊不因薄糧即崩。
 6. **候選1 賣糧不自餓**：囤貨/賣糧隊不再賣到 <buy-panic 線後自己掉恐慌。
 7. **reviewer 沿用條件**：attrition+reeval 頻率雙報；經濟無扭曲（糧價/coin 流無暴走）。

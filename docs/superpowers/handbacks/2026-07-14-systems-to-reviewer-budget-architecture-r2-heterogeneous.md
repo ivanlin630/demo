@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: [R②·★異質框外審必須] 人格化資源預算架構(層5+候選2框架+層1-3+候選1);動架構+剛拍板願景=大框三對齊,refute-first
 ---
 
