@@ -89,6 +89,12 @@ frame: ★大框三對齊（動架構 + 剛拍板願景「求生=個性加權競
 6. **候選1 賣糧不自餓**：囤貨/賣糧隊不再賣到 <buy-panic 線後自己掉恐慌。
 7. **reviewer 沿用條件**：attrition+reeval 頻率雙報；經濟無扭曲（糧價/coin 流無暴走）。
 
+## ★驗收品質標準（用戶親裁 2026-07-14）：及格線＝性格透過戰略選擇顯性化，非只「沒餓死」
+半套（只補層0 求生）＝「活著但平庸的霸主」＝**假訊號**（會誤判修好）。整包 A 才量到「活得像那個性格」。這是「全好才量」的深層理由。
+- **8. ★性格顯性化（真成功指標）**：抽驗 2-3 隻不同人格 leader（霸主野心型/謹慎守成型/中庸型），看**資源分配 + option 選擇是否呈現可辨識性格差異**：霸主該衝（留小部分保命、大部投軍備/建國/擴張、敢在別人不敢時出手）、謹慎該囤（高安全存量、保守）、中庸該平衡——**非全隊同一套行為**。behavior 分化＝A 架構成功真指標。
+  - 活教材 Team10 leader P25（野心0.89 霸主、覓食236>建設216 想活卻被系統封頂殺）：A 齊後該從「覓食/建設抽搐的焦慮普通人」變「留夠口糧+野心建國擴張+缺糧果斷變賣戰利品+危急本能求生」的**雄心開國之君**。
+  - ★measurer 需 leader trait log → **implementer 順手加 leader values 進 SpecimenTracer dump**（reviewer 早標「caution-trait log 缺」；免又 incomplete）。
+
 ## 觸及檔（架構增量，Slice A）
 `decision_engine.gd`（★層0 survival boost + `SURVIVAL_BOOST_FLOOR/MAX` const）、`decision_context.gd`（類別 gap/target 入 ctx；food_days 已有）、`terms.gd`/`need_hierarchy.gd`（drive 吃 gap-to-target + 統一 `category_target` helper + 真根3 註解翻正）、`trade_valuation.gd`（候選1 賣糧 reserve）、`team_data.gd`（若需類別 target 快取欄）。單一 owner 收斂人格門檻函式。
 

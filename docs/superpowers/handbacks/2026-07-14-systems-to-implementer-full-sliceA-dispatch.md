@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: [GO·全slice A整包] 求生預算人格化架構(層0+1+2+3+5+候選1+候選2)一次做完再一次量測;reviewer二次異質框外審CLEAN
 ---
 

@@ -1,8 +1,8 @@
 ---
 role: implementer
 code: "03"
-status: blocked
-current_ticket: "feat/survival-layer-unify 2ee09f9 — v2 完(attrition 根治),hold warm 待 systems/reviewer/measurer 複審"
+status: working
+current_ticket: "feat/survival-layer-unify — 全 slice A 整包(層0 boost+真根3+Fix3c+候選2 統一門檻+層5 預算+候選1)"
 updated: 2026-07-13
 ---
 
