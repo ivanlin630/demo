@@ -48,6 +48,7 @@
 - **★perf 可行性（systems 量測 `lod_perf_bed@89b22ad3`，部分否決）**：~15 隊 full-HD=474tps（1× 撐、4× 勉強不到、hitch 103ms）；**116 隊 full-HD=~8tps 崩**。真根=**faction_ai O(N²)**（每 faction rank 所有隊，assign_tasks/unified.rank/assign.members 116隊時 213-270ms）。∴ **full-HD 正典現行規模(~15-25隊)可落，50+ 隊否決待 O(N²) arc**。
 - **落地順序**：①full-HD 轉正典現行規模先落（thrash-fix 在 full-HD judge，進行中）②gen 重校 slice（含 breed/reactions 開機動態）③**O(N²) faction_ai perf arc=50+ enabler**（timescale-wave 真根，攤平每 faction rank 所有隊）④LOD-as-fidelity-preserving-opt。
 - **★backlog（待 greenlight，未 dispatch）**：gen 重校 slice / O(N²) faction_ai perf arc（大 arc）。
+- **★O(N²) 歸因 refine（LOD@116 補跑 2026-07-14）**：116 隊 **LOD=25tps / full-HD=18tps 都崩**（都 <<240），LOD far-cadence 攤銷**只買 1.42x**→ **O(N²) 是「50+ 隊」硬前提、不分 LOD/full-HD，LOD 當不了 stopgap**。可玩天花板(1×)外推：full-HD~25隊/LOD~45隊，都搆不到 50+。∴ O(N²) arc 與 full-HD 決定**解耦**（想要大世界就得修，不管 regime）；full-HD 額外只 1.42x=加固 full-HD 轉正典決定（scale 問題本就是 O(N²) 非 regime）。
 
 **★衍生 backlog（本 workflow 導出，未 dispatch）**：
 - **觀測盲點閘（待建·可行性系統評）**：憲法閘同精神的 site-freeze tap-coverage baseline——新增 decision/resource/state 未接 tap→FAIL。現況=不變量已立、機械閘未建。可行性初判：`constitution_gate.gd` 有現成 site-freeze 樣板可仿（掃 tap 註冊面 vs baseline），但「暫態」語意覆蓋比 TaskArbiter mutation 面廣，需先定 tap 註冊點契約。
