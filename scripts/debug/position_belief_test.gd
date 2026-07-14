@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_test_belief_pos_fallback_not_self()
 	_test_movement_fallback_not_self()
 	_test_to_task_stale_puffs()
+	_test_fixF_pursuit_vision_gate()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -82,3 +83,48 @@ func _test_to_task_stale_puffs() -> void:
 	# 直測 belief_pos 過期→(-1,-1)（to_task 攻擊據此回 IDLE，不追真值 9,9 或自身）
 	_ok(BeliefSystem.belief_pos(state, 1, 2) == Vector2i(-1, -1),
 		"攻擊 target belief 過期 → belief_pos (-1,-1) → to_task 撲空 IDLE（不追真值/自身）")
+
+# ── Fix F：_refresh_attack_pursuit 三態 vision-gate ──
+func _mk_pursuit(belief_tick: int, with_tile_pos: bool) -> Array:   # → [state, team, prey]
+	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 100000
+	for x in range(-1, 12):
+		for y in range(-1, 12):
+			var tl := HexTileData.new(); tl.tile_pos = Vector2i(x, y); tl.terrain = "plains"
+			state.world.tiles[x * 1000 + y] = tl
+	var team := TeamData.new(); team.team_id = 1; team.faction_id = -1; team.tile_pos = Vector2i(0, 0)
+	team.current_task = TeamData.TASK_ATTACK; team.combat_target = -1; team.prosperity_target_id = 2
+	var ldr := PersonData.new(); ldr.id = 10; state.persons[10] = ldr; team.leader_id = 10
+	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 5); state.teams[1] = team
+	var prey := TeamData.new(); prey.team_id = 2; prey.faction_id = -1; prey.tile_pos = Vector2i(9, 9)
+	AnonCohort.add(prey.anon_cohorts, "平民", "healthy", 3); state.teams[2] = prey
+	state.team_discovered[1] = [2]
+	var val: Dictionary = {"population_est": 3, "last_tick": belief_tick}
+	if with_tile_pos: val["tile_pos"] = Vector2i(7, 7)
+	state.team_intel[1] = {2: val}
+	return [state, team, prey]
+
+func _test_fixF_pursuit_vision_gate() -> void:
+	print("--- Fix F：_refresh_attack_pursuit 三態 vision-gate ---")
+	var fa := FactionAISystem.new()
+	# ① 本 tick 可見（last_tick==current）→ live 攔截；不 release
+	var w1: Array = _mk_pursuit(100000, true)
+	fa._refresh_attack_pursuit(w1[0], w1[1])
+	_ok(w1[1].prosperity_target_id == 2, "①可見→不放棄追擊(prosperity 保留)")
+	_ok(w1[1].move_target != Vector2i(-1, -1), "①可見→move_target 設(live 攔截)")
+	# ② 斷視線+belief 新（5 tick 前<stale）→ move_target = belief last-seen(7,7)，非 prey 活值(9,9)
+	var w2: Array = _mk_pursuit(100000 - 5, true)
+	fa._refresh_attack_pursuit(w2[0], w2[1])
+	_ok(w2[1].move_target == Vector2i(7, 7), "②斷視線→去 last-seen(7,7)撲空，實際=%s" % str(w2[1].move_target))
+	_ok(w2[1].move_target != Vector2i(9, 9), "②斷視線→非 prey 活值現址(9,9)")
+	_ok(w2[1].prosperity_target_id == 2, "②belief 新→續追擊(不放棄)")
+	# ③ 斷視線+過期（超 BELIEF_STALE_TICKS）→ 放棄追擊 re-eval
+	var w3: Array = _mk_pursuit(100000 - BeliefSystem.BELIEF_STALE_TICKS - 10, true)
+	fa._refresh_attack_pursuit(w3[0], w3[1])
+	_ok(w3[1].prosperity_target_id == -1, "③過期→放棄追擊(prosperity_target_id=-1)")
+	_ok(w3[1].current_task == TeamData.TASK_IDLE, "③過期→task released(re-eval)")
+	# ④ 斷視線(非本 tick)+無 belief 位置（snap 無 tile_pos）→ 同③ release，★不移向 prey 活值(9,9)/自身
+	# （註：last_tick==current 時無 tile_pos 仍走態①可見 live 攔截，合法；此案測「不可見+無位」）
+	var w4: Array = _mk_pursuit(100000 - 5, false)
+	fa._refresh_attack_pursuit(w4[0], w4[1])
+	_ok(w4[1].prosperity_target_id == -1, "④無 belief 位置→放棄追擊")
+	_ok(w4[1].move_target != Vector2i(9, 9), "④無 belief→★不退 prey 活值(9,9)")
