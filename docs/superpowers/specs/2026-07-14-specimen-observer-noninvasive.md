@@ -1,10 +1,12 @@
 # Spec：specimen 觀測非侵入化 + .specimen.jsonl 輸出（觀測不變量修復）
 
-status: draft（待 reviewer R② CLEAN → dispatch implementer）
+status: ★HALT（R② issues：Fix 1/2/3 機制 CLEAN，但 Fix 2 的 judged-world 選擇=WHAT，待 blueprint 裁後才 dispatch）
 owner: systems
 premise_verified: 根因 file:line 坐實（sim_runner LOD-exemption）；R① 免（前提 code 坐實，非新概念大框）
 blueprint_intent: `2026-07-14-blueprint-to-systems-execlock-verdict.md`（Q2+⚠️：specimen.jsonl 產不出 + tracer 側效應=系統優先修）
 governing_invariant: `invariants.md §全量暫態可觀測性`（觀測者不得改變被觀測物）
+
+> **★R② issue 校正（2026-07-14）**：本 spec 原稱「blueprint 已接受全-HD judged 世界」＝**我（systems）主張了未授權的 WHAT**（reviewer 查證：verdict 只授權「系統評①早期 team_id/②Tier1 兩候選」，未見 force_full_hd 第三案，未觸及「judged 全-HD 世界 vs 出貨 LOD 世界」取捨）。此為 WHAT 越界（judged-world=藍圖地盤）。**已發 `to:blueprint` 問（`2026-07-14-systems-to-blueprint-judged-world-choice.md`），待裁後才定 Fix 2 + dispatch。** 下文 §Fix2 標「pending blueprint」段落即此缺口。
 
 ## 一句話
 **SpecimenTracer 的 specimen 標記把被標記隊強制升 near-LOD（`sim_runner:458/470`）→ 該隊決策 cadence 從 far(FAR_ZONE_INTERVAL) 變 near(每-tick)→ 軌跡分化 + 消耗不同 RNG 連帶改其他隊（Team20 整場消失）＝觀測者改變被觀測物,直接違反剛立的觀測不變量**,讓故事性 QA 工具鏈不可信。修＝觀測與 LOD 解耦。
