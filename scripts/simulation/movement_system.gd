@@ -77,6 +77,11 @@ func process(state: WorldState, team_ids: Array,
 		if team.combat_target != -1:
 			if _dbg_merge: Probe.bump("merge.mv_block_combat")   # DIAG：combat_target 擋移動
 			continue
+		# flee 位移根治：FLEE 隊(move_target 未設/已到達)+有威脅逃離位→算反向 away-tile（純幾何+可達，零 randf）。
+		# flee_from_pos==(-1,-1)（無威脅情報）→ 不設 target → 下方 continue，靠 release 收（不亂逃）。
+		if team.current_task == TeamData.TASK_FLEE and team.flee_from_pos != Vector2i(-1, -1) \
+				and (team.move_target == Vector2i(-1, -1) or team.tile_pos == team.move_target):
+			team.move_target = _flee_away_tile(state, team, team.flee_from_pos)
 		# A2c-2 折入：戰略移動 move_target 改由 arbiter-owned set_strategic_move 於 movement 前設
 		#（sim_runner._step2a_strategic_move）→ 此處不再直讀 strategic_assignments（bypass 收攏）。
 		if team.move_target == Vector2i(-1, -1):
@@ -290,3 +295,36 @@ func _hex_dist(a: Vector2i, b: Vector2i) -> int:
 	var dx := b.x - a.x
 	var dy := b.y - a.y
 	return (abs(dx) + abs(dx + dy) + abs(dy)) / 2
+
+# ────────── flee 位移根治（純幾何+可達，零 randf）──────────
+const FLEE_STEP: int = 3   # TEST VALUE — flee 一次逃離 hex 數（away 方向步進上限）
+const _HEX_DIRS: Array = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1)]
+
+# flee 反向 away-tile：從 team.tile_pos 朝遠離 from_pos 的 hex 方向逐步找最遠存在 tile（遇無 tile=邊界停）。
+# 自家 outpost 在遠離威脅側→優先逃向 home（逃回家保命）。零 randf→同 seed 兩跑 bit-identical。
+func _flee_away_tile(state: WorldState, team: TeamData, from_pos: Vector2i) -> Vector2i:
+	var away: Vector2i = team.tile_pos - from_pos
+	if away == Vector2i.ZERO: away = Vector2i(1, 0)   # 同格→任意方向
+	var dir: Vector2i = _unit_hex(away)
+	var best: Vector2i = team.tile_pos
+	for step in range(1, FLEE_STEP + 1):
+		var p: Vector2i = team.tile_pos + dir * step
+		if state.world.tiles.get(p.x * 1000 + p.y) == null: break   # 邊界/無 tile → 停在最遠可達
+		best = p
+	# 自家 outpost 在遠離威脅側(away 同向)→ 優先逃向 home
+	var home: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	if home != Vector2i(-1, -1):
+		var hd: Vector2i = home - team.tile_pos
+		if hd.x * away.x + hd.y * away.y > 0:   # home 在遠離威脅方向
+			best = home
+	return best
+
+# away 向量最接近的 hex 單位方向（6 方向 argmax dot；固定序 first-max on tie→deterministic）。
+func _unit_hex(away: Vector2i) -> Vector2i:
+	var best_dir: Vector2i = _HEX_DIRS[0]
+	var best_dot: int = -999999
+	for d in _HEX_DIRS:
+		var dot: int = int(d.x) * away.x + int(d.y) * away.y
+		if dot > best_dot:
+			best_dot = dot; best_dir = d
+	return best_dir
