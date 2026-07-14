@@ -66,6 +66,19 @@ static func capture_intent(state: WorldState, team_id: int, intent: String, why:
 	if not is_specimen(state, team_id): return
 	_scratch(team_id)["intent"] = {"intent": intent, "why": why, "mode": mode}
 
+# ── Fix 1 person-reaction tap（內政盲點補）：記 specimen 隊成員反應 winner（誰/reaction/why driver 快照）──
+# phase:"reaction" entry；純讀 person（loyalty/stress）；is_specimen gate；零 mutation/RNG。QA 判 defect/riot 真因。
+static func capture_reaction(state: WorldState, person: PersonData, team: TeamData, reaction: String, why: Dictionary) -> void:
+	if not is_specimen(state, team.team_id): return
+	var entry: Dictionary = {
+		"tick": state.world.current_tick, "team_id": team.team_id, "phase": "reaction",
+		"person_id": person.id, "reaction": reaction, "why": why,
+		"狀態": _snapshot(state, team),
+	}
+	entries.append(entry)
+	_archive.append(entry)
+	_last_entry_tick[team.team_id] = state.world.current_tick
+
 # ── capture_decision：winner commit tap → 組完整 entry（想什麼/做什麼/狀態 + action target belief）──
 static func capture_decision(state: WorldState, team: TeamData, winner_opt: String,
 		task: String, target: Vector2i, result: String = "committed") -> void:
@@ -232,6 +245,11 @@ static func _print_entry(e: Dictionary) -> void:
 		print("[Specimen T%d] tick=%d ♥heartbeat（no-decision）pop=%d food(eff=%.1f)" % [
 			int(e.get("team_id", -1)), int(e.get("tick", -1)),
 			int(hs.get("pop", 0)), float(hs.get("effective_food", 0.0))])
+		return
+	if e.get("phase") == "reaction":
+		print("[Specimen T%d] tick=%d ⚡reaction person=%d %s why=%s" % [
+			int(e.get("team_id", -1)), int(e.get("tick", -1)),
+			int(e.get("person_id", -1)), str(e.get("reaction", "")), str(e.get("why", {}))])
 		return
 	var w: Dictionary = e["想什麼"]
 	var d: Dictionary = e["做什麼"]
