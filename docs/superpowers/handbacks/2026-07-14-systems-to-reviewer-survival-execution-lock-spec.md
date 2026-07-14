@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② 審設計] 求生執行鎖 thrash-fix spec——recognizer de-sync 根治(priority-based)+子隊 tap-gap;CLEAN 才 dispatch"
 ---
 

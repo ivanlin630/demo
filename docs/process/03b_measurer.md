@@ -1,7 +1,7 @@
 # 03b_measurer.md — 量測員（Measurer）職責正典
 
-> pipeline 位置：`implementer(03) → 【量測員】 → 藍圖判（原 QA release-gate 2026-07-09 砍，見下）`。maker/checker 的 **maker 側**。
-> 一句話：**你產獨立數字，藍圖讀你的數字判/升。你不判、不改 code。**
+> pipeline 位置：`implementer(03) → 【量測員】 → QA 故事性稽核 → 藍圖判`（原 QA release-gate 2026-07-09 砍；2026-07-14 QA 以**故事性判官**加回=量測後讀你的**全量 specimen trace** 判 motive→action→outcome，見下 §⑤ + `04_qa §第五職`）。maker/checker 的 **maker 側**。
+> 一句話：**你產獨立數字 + 全量 specimen trace，QA 讀 trace 判故事、藍圖讀數字判/升。你不判、不改 code。**
 
 > **★★2026-07-09 流程改（用戶定案）——你的下游 checker 從 QA 改藍圖；acceptance/診斷跑標準 full_probe 床**：
 > - **正式 per-slice QA release-gate 砍**（`04_qa.md` banner）→ 你的完整數字**直接餵藍圖判**（release-pass 權在藍圖，有問題才升用戶）。handback `to:` 改 **`blueprint`**（acceptance/診斷場合），非 `qa`。
@@ -168,13 +168,17 @@ raw `.log`＝本地全量佐證；`.measure.json`＝committed 精華 + 應含 `m
 ## 產物
 
 1. **`docs/process/verdicts/<slice>.measure.json`**：
-   `{measured_at_head:<shortHASH[-dirty]>, raw_logs:[<docs/measurements/*.log 路徑>], obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。（`measured_at_head`+`raw_logs`＝可溯源錨，見 §量測可溯源協議。）
+   `{measured_at_head:<shortHASH[-dirty]>, raw_logs:[<docs/measurements/*.log 路徑>], specimen_trace:<.specimen.jsonl 路徑>, obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。（`measured_at_head`+`raw_logs`＝可溯源錨，見 §量測可溯源協議。）
+1b. **★`<slice>.specimen.jsonl`（故事性場合＝有 QA 故事稽核的 slice）**：逐 specimen 逐事件全量 trace（想法/狀態/資源時序，含死隊）＝**QA 故事性判官讀的料**（見 §⑤）。聚合 `.measure.json` 給藍圖判率、`.specimen.jsonl` 給 QA 判 motive→action→outcome。落地全量暫態可觀測性不變量。
 2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（`from:measurer to:blueprint status:open`——**★寄件一律 open,絕不自寫 consumed**（consumed 是收件端讀後回執,你自寫=對方 Monitor 只掃 open→永不送達→靜默漏看;2026-07-13 用戶戳 measurer 犯此。詳 `07_mailbox_trigger §status 所有權`)；**2026-07-09 起下游改藍圖判**，原 `to:qa`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + full_probe 全維度（acceptance 場合）+ 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**（信箱 hook role-agnostic，只認 `to:` 欄→改欄即改路由，無需動 hook。）
 
 ## 交接
 
 - **上游**：implementer handback（code 已 commit）。
-- **下游**：QA 讀你的 `.measure.json` + handback → **判門檻**（不自跑 godot）。你若把守衛數字產齊，QA 全程零 godot。
+- **下游（2026-07-14 雙下游）**：
+  - **藍圖**讀你的 `.measure.json` + handback 數字 → 判率/release-pass（不自跑 godot）。acceptance/診斷 handback `to:blueprint`。
+  - **QA 故事性判官**讀你的 `.specimen.jsonl` 全量 trace → 判 motive→action→outcome 故事性（`04_qa §第五職`）。**∴ 故事性場合你必產 specimen trace**（沒 trace＝QA 判官瞎，違全量暫態可觀測性不變量）。
+  - 你若把守衛數字 + specimen trace 產齊，藍圖/QA 全程零 godot。
 
 ## 關聯
-`00_roles.md`（角色表/maker-checker）、`04_qa.md`（下游 checker 判什麼）、`05_acceptance.md`（release gate）、`reference_hob_perf_protocol`（perf 協議）。
+`00_roles.md`（角色表/maker-checker/接力流向含 QA 故事站）、`04_qa.md §第五職`（QA 故事性判官讀 specimen trace 判什麼）、`invariants.md §全量暫態可觀測性`（specimen dump 零盲點鐵律）、`05_acceptance.md`（release gate）、`reference_hob_perf_protocol`（perf 協議）。
