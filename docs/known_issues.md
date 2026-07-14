@@ -640,3 +640,6 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **★治根 vs 治症**：blueprint 初判「缺執行鎖」＝表象；加 lock 只讓 churn 節流（隊仍卡原地永逃）＝治症（[[feedback_symptom_vs_root_retry]]）。**治根＝恢復 flee 位移**（FLEE 派出設 move_target=遠離 threat belief 位的可達 tile→逃遠→threat 距離衰減→out of vision→自然 release=「有終點」）。
 - **附帶**：①`_decide_unified:1537`/`_evaluate_solo:1876` `capture_decision` 在 try_set **前**用預設 `"committed"`（self-replace/被擋也記 committed）→3080 部分虛高；tracer-completeness 只補 survival(3217)未補 unified/solo＝**tracer-completeness follow-up**。②`_evaluate_threat` FLEE_TIMEOUT reflee-loop 逃成功後 moot。
 - **狀態**：reframe 報 blueprint 確認中（`2026-07-15-systems-to-blueprint-flee-root-reframe`）→ 認同則 spec「恢復 flee 位移」。感知鐵律：flee 反向讀 threat belief 非活值。
+
+## state-transition specimen tap（下批候選，R² advisory 2026-07-15）
+- **death/split/betray/found/capture** 等 state-transition 事件目前僅 `Probe.bump` aggregate、**無 specimen tap**（同 person-reaction 補前現狀）。observability-path-completion 本刀先收 person-reaction，這批**下批**（模式相同：capture 進 specimen 帶 who/why）。**記此防之後當新發現重走一輪 R²**（tap-gap 家族第 5+ 個，該一併走盲點閘掃出）。

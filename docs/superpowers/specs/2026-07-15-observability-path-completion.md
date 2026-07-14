@@ -24,6 +24,7 @@ tracer 時間維（heartbeat）補了，但**路徑維零散建、多決策/反�
 | 決策 commit（**ambient** idle-filler） | loop3:817 | **無** | ❌（低優先，可選） |
 | **person-reaction**（P1/N2_riot/N3_defect/N4/N5/breed） | `reaction_system:121` winner | 僅 `Probe.bump`（aggregate） | ❌ **內政盲點**（specimen 看不到誰為何 defect/riot） |
 | 時間維 heartbeat | `evaluate_all` 末尾 | `heartbeat_sweep` | ✅ |
+| **state-transition**（death/split/betray/found/capture） | 各 bump 點 | 僅 `Probe.bump` aggregate | ⚠ **同 person-reaction 現狀=已知同類尚缺**（R² advisory）→ 本刀不含，記 known_issues 當下批候選（防之後當新發現重走 R²） |
 
 ## Fix（路徑維補齊，4 項）
 
@@ -33,8 +34,11 @@ tracer 時間維（heartbeat）補了，但**路徑維零散建、多決策/反�
 - **entry 型**：新 `phase:"reaction"` entry（`_print_entry` 加輕印分支，比照 heartbeat）→ specimen timeline 顯內政敘事。
 - QA 才判得出 defect/riot 有真因（好戲 or loyalty 太弱 bug）。
 
-### Fix 2：unified/solo capture 真 result（修虛高）
-`_decide_unified:1537` / `_evaluate_solo:1876` `capture_decision` 現在 try_set **前**、預設 committed → **挪到 try_set 後帶真 result**（鏡射 survival loop：`_set_ok` true→"committed" / false→"try_set_noop"；finder 撲空 continue 前→"finder_miss"）。→ 3080 式虛高消，路徑維準。
+### Fix 2：unified 修虛高（挪位）+ solo 補早退 tap（attempt-tap）★R² 訂正：兩者非同病
+R² 逐行查證：**unified 與 solo 現狀不同病**，分別處理：
+- **Fix 2a（unified：predetermined committed 病）**：`_decide_unified:1537` `capture_decision` 在 try_set(`:1538`)**前**、無 result 參數＝不管成敗都記 committed（虛高）→ **挪到 try_set 後帶真 result**（`_set_ok` true→"committed" / false→"try_set_noop"）。
+- **Fix 2b（solo：早退分支零 tap 病，非 predetermined）**：`_evaluate_solo` 的 `capture_decision`(`:1890`)**已在 try_set(`:1875`)後**＝天然 gated（同 survival loop 結構，committed 已準，**無位可挪**）。solo 真缺口＝**三個早退 continue 零 tap**：`:1871`(task==IDLE)/`:1873-1874`(finder 撲空 tgt==(-1,-1))/`:1875-1876`(try_set fail)→ 各補 attempt-tap（`"idle_skip"`/`"finder_miss"`/`"try_set_noop"`，鏡射 survival loop Fix1-attempt 模式，capture_decision 本身不動）。
+- **★別誤照原文去 solo「挪位」**（solo capture 早在 try_set 後）——那會白工且漏補三早退 tap，讓 solo 路徑維洞續存。
 
 ### Fix 3：threat dispatch tap
 `_evaluate_threat:408` try_set 成功後 → `capture_decision(state, team, opt, tk, tgt, "committed")`（威脅反應 FLEE/DEFEND/PREPARE/求和 進 specimen；flee 故事需要）。ambient(817) 同 pattern（可選，低優先——標記 spec，implementer 判要不要納或留 follow-up）。
