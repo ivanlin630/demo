@@ -62,7 +62,10 @@ governing_invariant: `invariants.md §全量暫態可觀測性`（觀測者不�
 - **憲法 site-freeze**：無新 try_set/mutation → sites 不變。
 
 ## 驗收法（measurer）
-1. **★觀測非侵入（headline，不變量操作定義）**：同 seed（1337）force_full_hd，specimen_team_ids=[A] vs =[B] 兩跑 → **除 SpecimenTracer entries 外，世界狀態/其他隊軌跡 byte-identical**（換 specimen 不換世界）。這是 tracer 侵入性根治的證明。
+1. **★觀測非侵入證明（implementer 校正確認 2026-07-14，systems ACCEPT）**：
+   - **主證＝by-construction + LOD 分區 unit test**（非世界級 byte-diff）：Fix1 後 `specimen_team_ids` 在 production 行為路徑**零讀點**（reviewer R② 已證只 sim_runner:458/470 兩讀點，皆移；SpecimenTracer.is_specimen 純 capture-gate 唯讀）→ specimen 選擇對世界演化**零影響 by construction**。implementer LOD 分區 unit test（直測 `_get_near_teams`/`_get_far_teams`+specimen，red-pre 3 FAIL/green-post 0）坐實。**此比世界級 byte-diff 更強且確定**。
+   - ⚠ **原 spec「force_full_hd byte-identical」測不出 fix**（implementer #1 抓）：force_full_hd 時 near/far 分區短路 return（`:452/464`），specimen clause 不觸達 → 該模式 pre-fix 也 byte-identical，無法 red-first。侵入只在 normal LOD 顯現。∴ red-first 測試須在 normal LOD 直測改動點（已改）。
+   - **measurer belt（選配，非核心）**：normal-LOD 真 config 長跑 specimen=[A] vs [B] 世界簽章對照（近端無-player 200 tick 不擴散＝量不到，需真 config 長跑）——by-construction 已足，此為經驗補強，量不到不阻。
 2. **完整 trace 產出**：force_full_hd + specimen=seed1337 死隊 → `.specimen.jsonl` 產出、非空、含死隊死前決策時序（想法+狀態+資源）；`decision_count > 0`（Fix B tap-gap 已收，此處驗子隊 trace 進 jsonl）。
 3. **故事性可判**：QA 故事判官能讀 `.specimen.jsonl` 判 seed1337 多死 motive→action→outcome（此 slice 的下游閉環）。
 4. **★headline 全-HD 重跑（blueprint 裁 A 一致性）**：execlock branch(`b962fc74`) vs base 在 **force_full_hd** 同世界重跑 → churn/attrition/established/thrash-flip 一組**全-HD 正典數字**（取代作廢的 LOD -84.7%/established 1→2）。故事 trace + headline 同一 force_full_hd 世界（同源可交叉核）。餵 blueprint 重判 execlock release。
