@@ -21,7 +21,9 @@ FLEE = **no-op task**：設 `current_task=FLEE` + `move_target=(-1,-1)` → move
 ### Fix 1：恢復 flee-direction 位移（核心）
 FLEE 隊要有真 `move_target` = **遠離威脅 belief 位的可達 tile**。
 - **新欄** `TeamData.flee_from_pos: Vector2i = (-1,-1)`（逃離的威脅 belief 位）。
-- **dispatch 時設**：FLEE 派出（`_evaluate_threat` 及 unified/solo/survival 路徑選 FLEE）→ 若 `ctx.threat_id != -1` → `team.flee_from_pos = BeliefSystem.belief_pos(state, team.team_id, ctx.threat_id)`（★感知鐵律：讀 belief 非活值，god-view 已提供 belief_pos）。belief_pos 回 (-1,-1)（無情報/過期）→ flee_from_pos 保 (-1,-1)（無威脅可逃離 = 下方 release）。
+- **dispatch 時設（★R² 訂正：真實 3 站非 4）**：FLEE 派出 → `team.flee_from_pos = BeliefSystem.belief_pos(state, team.team_id, ctx.threat_id)`（`ctx.threat_id != -1` 時；★感知鐵律：讀 belief 非活值，god-view 已提供 belief_pos）。belief_pos 回 (-1,-1)（無情報/過期）→ flee_from_pos 保 (-1,-1)（無威脅可逃離 = 下方 release）。
+  - **真實 FLEE 派發站＝3 個**：`_evaluate_threat:408`（rank_threat，THREAT_OPTION_SET 含 survival=FLEE）+ `_decide_unified:1538`（rank_scored，一般 applicable 恆候選 FLEE）+ `_evaluate_solo:1875`（rank_scored 同）。
+  - **★`_trigger_survival`（survival:3213）不是 FLEE 站**（R² 查證）：走 `rank_survival` 過濾到 `SURVIVAL_OPTION_SET`（不含 "survival"/FLEE）→ 永不派 FLEE。**implementer 勿在 survival 迴圈加 flee_from_pos 分支＝打不到的死分支**。TDD 只針對 3 真實站各構「選 FLEE→flee_from_pos 設對」斷言。
 - **mover 算 away-target**（restore「mover 算」使假註解成真，單一計算點）：`movement_system` 對 `task==FLEE` 且（`move_target==(-1,-1)` 或已到達）→ 若 `flee_from_pos != (-1,-1)`：算**反向 away-tile**——從 `team.tile_pos` 朝遠離 `flee_from_pos` 方向、`FLEE_STEP` hex 的**可達** tile（clamp 地圖邊界；若自家 outpost 在遠離側則優先逃向 home=「逃回家」）。設 `move_target`。
   - `flee_from_pos==(-1,-1)`（無威脅情報）→ 不設 target（無處可逃離）→ 靠 release 收（threat 已不明=不該續逃）。
 - **`_helper _flee_away_tile(state, team, from_pos) -> Vector2i`**（純幾何+可達，零 RNG）。
