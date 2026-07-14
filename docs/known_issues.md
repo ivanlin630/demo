@@ -633,3 +633,10 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 ## tracer-completeness finder_miss 未 live-demo（2026-07-15 merge 2a805d35，留觀）
 - `capture_decision(...,"finder_miss")` tap（`faction_ai:3219-3223`，survival loop finder 撲空 `continue` 前）＝**code-verified + 同構於 live-verified try_set_noop**（緊鄰同 for 迴圈、同 pattern），但**時限內未構造 live 觸發**——罕見防禦分支：ctx 可行（option applicable）但 to_task 回 `tgt==(-1,-1)` 的 race，organic 也從未撞到。
 - **留觀**：若未來 specimen trace 出現「該有 finder_miss 卻沒被捕」的洞→回頭查此 tap 是否真 fire（現為高信心 code-verify 非 live 證）。非 blocker（try_set_noop 同迴圈 live 活證已證 tap 機制真接 code path）。
+
+## ★FLEE 從不移動（dead flee-movement，序1 dissolution 遺留，2026-07-15 full-HD 觀察揪出）
+- **現象**：隊觸發 TASK_FLEE 後**永不移動**（Team1 128 天原地「逃」，threat_react 凍結 15 位相同，re-commit 3080 次=75% 人生 churn）。aggregate `N1_flee` 虛高大半來自此。
+- **根（code-verified）**：`options.gd:188` FLEE `to_task`→target `(-1,-1)`；`movement:82-84` `move_target==(-1,-1)→continue`（跳過）；**全域無 flee 方向/away-vector 計算**（`_flee_target` 序1 wave-dissolution 刪除，`faction_ai:445-447` 註解**謊稱**「FLEE target 由 mover 算」，mover 不算）；`_wire_threat_task` 不設 flee target。∴ FLEE=no-op，隊不動→威脅位置凍→threat 每次 re-eval 都贏→無限 churn。
+- **★治根 vs 治症**：blueprint 初判「缺執行鎖」＝表象；加 lock 只讓 churn 節流（隊仍卡原地永逃）＝治症（[[feedback_symptom_vs_root_retry]]）。**治根＝恢復 flee 位移**（FLEE 派出設 move_target=遠離 threat belief 位的可達 tile→逃遠→threat 距離衰減→out of vision→自然 release=「有終點」）。
+- **附帶**：①`_decide_unified:1537`/`_evaluate_solo:1876` `capture_decision` 在 try_set **前**用預設 `"committed"`（self-replace/被擋也記 committed）→3080 部分虛高；tracer-completeness 只補 survival(3217)未補 unified/solo＝**tracer-completeness follow-up**。②`_evaluate_threat` FLEE_TIMEOUT reflee-loop 逃成功後 moot。
+- **狀態**：reframe 報 blueprint 確認中（`2026-07-15-systems-to-blueprint-flee-root-reframe`）→ 認同則 spec「恢復 flee 位移」。感知鐵律：flee 反向讀 threat belief 非活值。
