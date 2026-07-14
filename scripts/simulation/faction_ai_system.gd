@@ -3494,7 +3494,9 @@ func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
 func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	if not _is_resident_team(state, team): return
 	if team.current_task in [TeamData.TASK_REVOLT, TeamData.TASK_HOLD]: return
-	if _in_survival(team): return   # 求生中（含買糧/掠奪 @PRIO_SURVIVAL）不評起義，一致
+	# ★窄白名單（非 _in_survival）：只「全隊一致對外求生」(覓食/乞食/併入/紮營/返家) skip 起義。
+	# 買糧/掠奪 @PRIO_SURVIVAL 隊仍駐紮在地、內部 loyalty 崩壞仍可能起義——不可 skip（掩蓋叛亂訊號）。
+	if team.current_task in SURVIVAL_TASKS: return
 	var avg_loy: float = _avg_named_loyalty(state, team)
 	if avg_loy >= 0.2: return
 	if team.unrest_turns < 60: return
