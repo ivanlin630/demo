@@ -15,7 +15,7 @@ const SURVIVAL_BOOST_MAX: float = 2.5     # TEST VALUE — food→0 時 survival
 static func rank_scored(state: WorldState, team: TeamData) -> Array:
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
 	var scored: Array = rank_scored_ctx(ctx, team.current_option)
-	SpecimenTracer.capture_options(state, team, scored)   # specimen tap（no-op-unless-specimen）
+	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	return scored
 
 # ctx-taking 純打分 accessor（鏡射 rank_threat(ctx)）：不 gather、不寫 current_option、不 specimen tap。
@@ -121,7 +121,7 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	scored.sort_custom(func(a, b):
 		if a["u"] != b["u"]: return a["u"] > b["u"]
 		return a["i"] < b["i"])
-	SpecimenTracer.capture_options(state, team, scored)   # specimen tap（no-op-unless-specimen）
+	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
 	var out: Array = []
 	for e in scored: out.append(e["opt"])
 	return out
