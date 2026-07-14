@@ -21,7 +21,21 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
-## 📍 當前狀態（2026-07-15）——god-view 位置根治 + 絕境找糧真根修 + 觀測 confound 修 merged
+## 📍 當前狀態（2026-07-15）——tracer 完整性 + god-view 位置根治 + 絕境找糧真根修 merged
+
+### tracer-completeness（specimen 全生命+全路徑，第三觀測洞根治）→ main（merge `2a805d35`，2026-07-15）
+
+**arc 敘事**：用戶+QA 抽樣戳「從沒量過全程紀錄的樣本」——觀測不變量**第三次同族破**（LOD-exemption 換世界→RNG-confound 換世界→現在 lifecycle 窗口）。specimen jsonl＝**成功-commit 窗口**非全生命（Team26 錄 day76-85 漏 day24-75）。**根因 code 定音**：capture 全 commit-gated（`capture_decision` 只在 try_set 成功點 tap）→ no-commit 期（IDLE/survival relatch commit 反覆失敗/子隊）零 entry、commit-fail churn 全隱形。**tap-placement 非 perf 非觀測改世界**。修好＝story-QA 地基（往後 organic trace 可信）。
+
+**已修（三 Fix）**：
+- **時間維 heartbeat sweep**：`evaluate_all` 末尾對 specimen 無決策期補輕 entry（`HEARTBEAT_CADENCE`=6h）→ timeline 無 >6h 洞（Team26 gap 1680→60 tick）。
+- **路徑維 attempt-tap**：`capture_decision` 加 `result`（committed/finder_miss/try_set_noop），survival loop 補 commit-fail 分支 tap → churn 現形不靠掃描撞。
+- **★零擾動（觀測禁改世界硬紅線）**：tracer on/off 兩跑 **byte-identical**——觀測不變量破三次的核心終於確認**觀測不改世界**（新 tap 零 state mutation/零 RNG）。
+- **盲點閘**：runtime churn 床（斷言 gap≤cadence + commit-fail 現形）+ static tripwire baseline 6/2/2。第二個 Tier1 控制場景床 `churn_tap_bed.gd` 進 repo。
+
+**★誠實（別吹）**：`try_set_noop`＝真 code path **live 活證**（手構絕境隊撞同-prio→`_trigger_survival`→try_set false→capture @3235 真觸發）；**`finder_miss`＝code-verified + 同構於 live-verified try_set_noop（緊鄰同 for 迴圈），但時限內未 live-demo**（罕見 race：ctx 可行 but to_task 失敗，organic 也從未撞）→ known_issue 留觀。
+
+**invariants 升條**：觀測不變量段收斂三洞（specimen 完整性 + 禁燒 RNG + 全量可觀測）+ 盲點閘③（specimen 完整性閘已落地）——`invariants.md §觀測不變量`。三次同族破全修完。
 
 ### god-view 位置 belief 化 → main（merge `6aa3ee18`，2026-07-15）
 

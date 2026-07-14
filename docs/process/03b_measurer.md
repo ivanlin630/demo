@@ -59,6 +59,7 @@
 | 標準 organic 多 seed（三端/湧現/perf/§4 baseline） | `scripts/debug/seeded_warring_bed.gd` | Tier 2 用（非迭代）。支援 `WARRING_CONFIG` env（2026-07-12 補，向下相容預設 warring_states.json）切換 config；`WARRING_RESUME`+`WARRING_PROGRESS` 支援長跑續接。 |
 | 決策快照（單團/單 tick dump，非 rank 全表） | `scripts/debug/team_trace.gd`／`spine_trace.gd`／`specimen_tracer.gd` | 既有工具，未在本輪重新盤點細節——需要時個別讀。 |
 | ★控制場景 story 驗證（稀有/story-central 行為 before/after，繞 organic seed roulette） | `scripts/debug/pursuit_hiding_bed.gd` | 2026-07-15 建（god-view 首用戶）。手構最小 WorldState（prey belief last-seen A 位 vs live B 位斷視線）驗逃脫撲空率。**場景 spec 與斷言分離設計＝可復用**：後續稀有/story-central option（乞食/求和/未來）掛此床，別再賭 organic。inert-by-absence（organic seed 撞不到稀有行為）→ 用此床，非大構 organic 窗。 |
+| ★罕見 code path live 觸發驗證（防禦分支/commit-fail/race，手呼 API 不算數） | `scripts/debug/churn_tap_bed.gd` | 2026-07-15 建（tracer-completeness）。手構絕境隊撞真實觸發條件（同-prio try_set no-op→`_trigger_survival`→try_set false→capture tap 真觸發），**非手呼 capture API**＝證 tap 真接在 live code path。用於「這分支真的會 fire 嗎」的活證（vs code-verify 同構推論）。罕見 race 分支（finder_miss）時限內構不出 live→誠實標 code-verified 未 live-demo，別吹已驗證。 |
 
 **缺的常用維度**：目前無專屬「單機制 A/B 對照秒級床」通用模板（每次新建手構場景），可考慮抽一個共用 helper（`_mk_leader`/`_mk_team`/`_link_belief`，`consolidation_decision_trace.gd` 內已有）給下個 slice 複用，非本輪動作。
 

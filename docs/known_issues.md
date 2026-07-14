@@ -629,3 +629,7 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **擴為完整人格化道德選項集**（`game-design.md §俘虜處置` owner=blueprint）：**殺俘/處決**（殘忍高→屠/低→受降，★帶③凝聚成本:殺俘違背低殘忍成員→不滿→defect/激進化）、**贖金**（貪婪高→勒贖，俘虜原勢力付得起才成=belief-gated 鏡射 look-before-leap）、**釋放**（義氣/慈悲→放走→名聲升）。各選項人格驅動→同批俘虜不同領袖處置全異=道德戲。
 - **邊界**：decide_treatment 本身已是合法域專 scorer（讀殘忍，穿人格，非 unification blocker——見 invariants 域專判斷器邊界原則）；本 slice=**擴選項集**（加殺俘/贖金/釋放 option + 各自人格驅動 + 殺俘的③成本），非重構成 rank。
 - **排序**：backlog，非急、**不擋** god-view/tracer-completeness。**標記「③內部政治 slice 的一部分」**——殺俘的牙（領袖決策違背成員→凝聚成本）=③同根，開③內部政治 slice 時一起做。
+
+## tracer-completeness finder_miss 未 live-demo（2026-07-15 merge 2a805d35，留觀）
+- `capture_decision(...,"finder_miss")` tap（`faction_ai:3219-3223`，survival loop finder 撲空 `continue` 前）＝**code-verified + 同構於 live-verified try_set_noop**（緊鄰同 for 迴圈、同 pattern），但**時限內未構造 live 觸發**——罕見防禦分支：ctx 可行（option applicable）但 to_task 回 `tgt==(-1,-1)` 的 race，organic 也從未撞到。
+- **留觀**：若未來 specimen trace 出現「該有 finder_miss 卻沒被捕」的洞→回頭查此 tap 是否真 fire（現為高信心 code-verify 非 live 證）。非 blocker（try_set_noop 同迴圈 live 活證已證 tap 機制真接 code path）。
