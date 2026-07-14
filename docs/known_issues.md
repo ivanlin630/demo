@@ -6,6 +6,22 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★Team18 lone-survivor death-limbo + intent 誤標致富（2026-07-14，full-HD live 觀察首個獵物）
+
+**來源**：execlock 全-HD story acceptance 找團滅 specimen 時意外揪出（`docs/measurements/2026-07-14-execlock-seed1337-Team18-annihilated.jsonl`，34 entries）。**非 thrash-fix 範圍**。這是「先有結果/full-HD live 觀察」方向提早見效——**真 coherence bug 從 specimen trace 浮出，靜態設計看不到**。
+
+**現象**：孤隊 Team18(pop=1)——tick7110/7120 兩次「併入→投靠」(真掙扎找收留)→ tick7690 起轉「買糧」(貿易 task)→ **連 31+ 天(27+筆/日)coin=0 food=0 卡同一迴圈**，到 trace 尾(tick15130/day63)仍 pop=1。
+
+**兩疑似 bug**：
+1. **death-limbo（該死不死）**：孤隊零糧一個月+理論該餓死卻卡 limbo 不死不活。possible root=(a) 買糧-貿易 path **繞過 survival controller**（lone-survivor 子隊死亡/求生判定沒接回引擎）/(b) famine 死亡判定對 pop=1 子隊有洞。
+2. **intent-reality 不符（coherence）**：零錢零糧孤隊 AI「想什麼」標**致富/貪婪驅動**非求生恐慌。= 決策模型該防的「慾望不配現實」（垂死該求生欲主導，不該追財）。連 `game-design.md §決策模型 v2`（現實 gate 慾望）。
+
+**歸屬**：**full-HD live 觀察 slice 的獵物**（decision-model coherence，live 才現形）。observe slice 開時優先查此類。連 [[project_desperation_economy]] / 敗北出路家族。
+
+## ★reeval_attribution_bed 死亡偵測 false-positive（2026-07-14，量測可靠性）
+
+`reeval_attribution_bed.gd` 死亡偵測（`elif spec_death_tick==-1 and not spec_last.is_empty(): spec_death_tick=tick`，單次 `state.teams` dict 查無即判死）→ Team18 tick7239 **瞬間 remove-readd**（併入嘗試的 lifecycle）被**誤判永久死亡**。**影響**：measurer 找「團滅 specimen」時把沒死透的隊誤當死透。**修法（L3）**：改連續 N tick 查無才判死、或讀 `population==0` 事件而非 dict-membership 瞬態。**已 dispatch implementer 修**（execlock worktree，量測可靠性在關鍵路徑上）。
+
 ## ★小 pop int()/round() 截斷病=結構類（2026-07-10 sweep，blueprint 結構信號；第 3 次同型）
 `int(pop*rate)`/`round(pop*rate)` 在小 pop 尺度恆歸零 → 機制靜默啞（探針前砍光=cosmetic 假過關）。血證 3 次：①殲滅端傷亡 `int(round)`→0（§D4 `_cas_carry` de-patch ✅）②pursuit `int(pop*0.05)` pop<18→0（S1 rev2 `_pursuit_carry` de-patch 中）③capture `round(wounded*rate)` 小 wounded→0（部分，rev2 severity 半救）。
 **sweep 揭未護欄站**（`grep int(...pop...*)`）：
