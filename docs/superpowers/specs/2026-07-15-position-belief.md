@@ -1,6 +1,6 @@
 # Spec：位置感知 belief 化（god-view 位置根治）— v2 重定靶（異質框外審後）
 
-status: draft（待 reviewer R② re-confirm → dispatch implementer）
+status: 核心 A-E merged-to-branch bd6f97d2（systems 驗 PASS）；+Fix F pursuit vision-gate（blueprint 裁定 ①，待 R② → dispatch implementer）
 owner: systems
 premise_verified: ★v1 瞄錯靶（decision_context `*_pos` 多數 dead），v2 靶＝真 wire（options.gd to_task 活值 + movement_system 逐 tick），異質框外審 file:line 坐實
 blueprint_intent: `2026-07-15-blueprint-to-systems-godview-position-arc.md`（逃得掉/躲得住/伏得成）
@@ -48,14 +48,41 @@ ESCORT/MERGE/JOIN 的 `team.move_target = target.tile_pos`（活值逐 tick）�
 - `observe_velocity` visible「當下距離≤vision」vs `tick_discovery` 機率偵測不對稱（潛行半徑內仍被幾何看穿）→ **建議綁「本 tick 有親見 claim 刷新」**更貼伏擊願景；spec 若接受幾何不對稱亦可先行（implementer 判/blueprint 裁）。
 - `path_system.gd:29/:170-171` SSSP cache/trusted 優化契約會被本刀作廢 → 同步改寫註解，別留誤導契約。
 
+### Fix F：`_refresh_attack_pursuit` vision-gate（blueprint 裁定 ①，2026-07-15）
+**根**：`faction_ai_system.gd:285-293`（engage combat_target 後每 tick 追擊微調）**未過 belief gate**——`:291` best_estimate fallback=`prey.tile_pos`(live)、`:292` `predict_intercept(state, team, prey)` 吃**活 prey 物件**做攔截預測。∴ engage 後即使斷視線仍神視精準追活位置＝**逃脫破口**（躲森林/斷後撤退全無效）。blueprint WHAT：engage 後只在**視線內**讀活值；斷視線→跟丟→fallback belief last-seen（撲空）。
+
+**HOW（systems 定）——vision-gate 訊號**：本 tick vision pass 已見 = belief snap `last_tick == current_tick`。權威且無 off-by-one：pipeline 序 `sim_runner` near vision`:184`→faction_ai`:216`、far vision`:238`→faction_ai`:257`——vision 皆在 faction_ai **前**同 tick 跑（current_tick 已 +1），故可見目標本 tick 必有 `last_tick==current_tick`；不可見則落後。
+
+**改（`_refresh_attack_pursuit`，prey==null 早退保留）**：
+```gdscript
+var snap: Dictionary = BeliefSystem.best_estimate(state, team.team_id, team.prosperity_target_id)
+var last_tick: int = int(snap.get("last_tick", -1))
+if last_tick == state.world.current_tick:
+    # 本 tick 可見 → live 攔截預測合法(在視線內)
+    var predicted: Vector2i = PathSystem.predict_intercept(state, team, prey)
+    team.move_target = predicted if predicted != prey.tile_pos else prey.tile_pos
+    return
+# 斷視線 → 去 belief last-seen 搜(prey 已移=撲空空地); belief 過期/無位 → 放棄追擊(re-eval)
+var stale: bool = last_tick < 0 or (state.world.current_tick - last_tick) > BeliefSystem.BELIEF_STALE_TICKS
+if stale or not snap.has("tile_pos"):
+    team.prosperity_target_id = -1
+    TaskArbiter.release(team)
+    return
+team.move_target = snap["tile_pos"]   # last-seen 搜(撲空機制)
+```
+**三態**：①可見→live 攔截(公平,在視線)；②斷視線+belief 新→追 last-seen(prey 已移=撲空 headline)；③斷視線+belief 過期/無→放棄+re-eval（**staleness 解 loop、防 ghost-chase 無限走向空地**——此 release 非 scope creep，是 vision-gate 引入「追 last-seen」後必要的收尾，否則追兵永遠走向舊位）。
+**憲法**：改移動目標來源+既有 release 路徑，零新 try_set；determinism（讀 belief 確定，seen_now 分支才呼 predict_intercept／observe_velocity——與 Fix C 同 randf 時機語意）。
+
 ## invariant 守
 - **感知鐵律位置版**：敵情/社交目標位置只吃 belief last-seen（含 staleness）；自身位置 + 靜態設施（outpost tile）+ 同-faction（known_member_states）留真值/專用通道。
+- **★engage≠永久鎖定 god-view**（Fix F）：追擊 live 讀值需**本 tick 可見**（`last_tick==current_tick`）；斷視線降級 belief last-seen→可撲空→過期放棄。
 - **★fallback 禁自身**（Fix A）；**★staleness 必配**（Fix A）。
 - **determinism**：belief 讀確定。★**驗收改「同 seed 兩跑 bit-identical」**（R②#8），**非** baseline byte-identical（observe_velocity visible 改→randf 時機/次數變→世界軌跡本就該變＝行為改動本意）。
 - **憲法**：改位置資料來源，不加判斷器、無新 try_set。
 
 ## 驗收法（★中性世界 + 故事 QA）
-1. **★逃脫故事（headline）**：斷視線+移動的隊，追兵撲空率 > 0（現＝0）。specimen trace：追擊 move 到 last-seen、視野內刷新、斷視線→撲空。**驗真 wire（to_task/movement）改到，非死欄位。**
+0. **★Tier1 pursuit-hiding 控制場景（blueprint ② 裁定，旗艦 story 非 organic code-verify 就收）**：measurer 建控制場景床——手構「1 隻 prey 斷視線躲藏（走森林/繞路降 exposure 出視野）+ 1 隻追兵 engage 後」→ 演示**乾淨逃脫**：prey 出視野 → 追兵 belief `last_tick` 停更 → 撲空/去 last-seen 搜、**非精準攔截**。一齣 before/after（Fix F 前=每 tick god-view 精準攔截 vs 後=可撲空）。此床＝「控制場景 story 驗證床」，god-view 首用戶，後續 story-central/稀有 option 復用。
+1. **★逃脫故事（headline）**：斷視線+移動的隊，追兵撲空率 > 0（現＝0）。specimen trace：追擊 move 到 last-seen、視野內刷新、斷視線→撲空。**驗真 wire（to_task/movement/`_refresh_attack_pursuit`）改到，非死欄位。**
 2. **staleness 解 loop**：駐村隊對「曾現後永離」的敵→threat_react 隨 belief 過期歸零（非永久 loop）。
 3. **不誤殺**：自身位置/佔村 outpost tile/徵收 known_member_states 照正確通道；佔村仍打村格（非空地）、徵收仍找到同僚。
 4. **fallback 安全**：無 belief 目標→option 不評估/撲空 release，**無隊移向自身座標**。
