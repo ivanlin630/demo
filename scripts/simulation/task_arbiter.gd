@@ -91,6 +91,7 @@ static func release(team: TeamData) -> void:
 	team.current_task = TeamData.TASK_IDLE
 	team.move_target = Vector2i(-1, -1)
 	team.task_priority = 0
+	team.flee_from_pos = Vector2i(-1, -1)   # flee 位移根治：清逃離位（避 stale 殘留）
 
 
 # 不改釋放流程、就地轉換 task 的欄位同步（如 安頓→生產）。
