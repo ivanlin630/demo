@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] Fix A-2 v2 rejection-learning——同分支;R②v2 CLEAN;拒後記憶不重纏;TDD"
 ---
 

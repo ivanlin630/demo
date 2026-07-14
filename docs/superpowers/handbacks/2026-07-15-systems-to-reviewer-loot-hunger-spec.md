@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② 審] 絕境掠奪對準糧源(hunger-weighted prey)——真根=target選擇非yield;守身分=權重;CLEAN才dispatch"
 ---
 

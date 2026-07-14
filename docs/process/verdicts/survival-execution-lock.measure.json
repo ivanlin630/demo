@@ -1,0 +1,81 @@
+{
+  "slice": "survival-execution-lock (thrash-fix)",
+  "measured_at_head": "1f5a8764 (full-HD story acceptance, PRIMARY) — supersedes earlier b962fc74/dbfc7cc8 LOD-mode pass (kept for audit trail in lod_mode_pass_SUPERSEDED)",
+  "base_head": "full-HD before/after used file-level swap of faction_ai_system.gd from main inside branch worktree (systems-authorized method), not a separate base checkout",
+  "raw_logs": [
+    "docs/measurements/2026-07-14-execlock-reeval-team14-seed1337-base-dbfc7cc8.log",
+    "docs/measurements/2026-07-14-execlock-reeval-team14-seed1337-branch-b962fc74.log",
+    "docs/measurements/2026-07-14-execlock-constitution-branch-b962fc74.log",
+    "docs/measurements/2026-07-14-execlock-hob-base-dbfc7cc8.log",
+    "docs/measurements/2026-07-14-execlock-hob-branch-b962fc74.log",
+    "docs/measurements/2026-07-14-execlock-headlesstest-base-dbfc7cc8.log",
+    "docs/measurements/2026-07-14-execlock-headlesstest-branch-b962fc74.log",
+    "docs/measurements/2026-07-14-execlock-warring-base-dbfc7cc8.log",
+    "docs/measurements/2026-07-14-execlock-warring-branch-b962fc74.log",
+    "docs/measurements/2026-07-14-execlock-warring-base.json",
+    "docs/measurements/2026-07-14-execlock-specimen-team20-seed1337-base-dbfc7cc8.log",
+    "docs/measurements/2026-07-14-execlock-specimen-team20-seed1337-branch-b962fc74.log",
+    "docs/measurements/2026-07-14-execlock-constitution-branch-0234153e.log",
+    "docs/measurements/2026-07-14-execlock-headlesstest-branch-0234153e.log",
+    "docs/measurements/2026-07-14-execlock-fullhd-scan-branch-1f5a8764.log",
+    "docs/measurements/2026-07-14-execlock-fullhd-scan-PREFIX-swap.log",
+    "docs/measurements/2026-07-14-execlock-fullhd-specimen20-branch-1f5a8764.log",
+    "docs/measurements/2026-07-14-execlock-fullhd-specimen20-run2-branch-1f5a8764.log",
+    "docs/measurements/2026-07-14-execlock-seed1337-specimen.jsonl"
+  ],
+  "specimen_trace": "docs/measurements/2026-07-14-execlock-seed1337-specimen.jsonl (Team20, 331 entries, decision_count=331, survives to day90 — struggle-and-recover story, no death observed for this specimen in this world)",
+  "fullhd_story_acceptance": {
+    "note": "PRIMARY/authoritative pass — force_full_hd=true (blueprint judged-world=A), tooling fixed (specimen non-invasive + explicit seed() call) so no more LOD-exemption world-divergence confound from the earlier pass.",
+    "headline_thrash": {
+      "method": "seed1337 default.json 90d FORCE_FULL_HD=1, same worktree — post-fix run at 1f5a8764 vs pre-fix run via systems-authorized file-level swap (git checkout main -- faction_ai_system.gd inside worktree, restored immediately after, worktree verified clean)",
+      "pre_fix": {"total_flip_prints": 57, "same_snapshot_repeats": 22},
+      "post_fix": {"total_flip_prints": 12, "same_snapshot_repeats": 0},
+      "verdict": "★literal thrash-zero ACHIEVED at the churn level (22→0 same-snapshot repeats). Post-fix Team20 shows clean monotonic 8-step crisis escalation (3.0→2.7→2.3→1.8→1.4→1.0→0.6→0.0 days_left, zero repeats, zero X→idle bounce-back). Pre-fix same team: 55+ flip lines with classic 貿易↔idle alternation at identical days_left values repeatedly. This is qualitative/same-world-approx (recognizer swap changes downstream RNG consumption after divergence point, per spec's own caveat — not strict per-tick byte match across the swap), but the pattern difference is unambiguous and matches the original Team14 blood-evidence signature exactly."
+    },
+    "fix_b_tap_gap": {"decision_count": 331, "jsonl_entries": 331, "match": true, "team_survives_to_end": true, "verdict": "RESOLVED — organic decision_count>0 now cleanly produced (LOD-exemption confound fixed by non-invasive specimen slice)"},
+    "determinism": {"method": "2 independent process launches, SPECIMEN_JSONL_OUT to separate files, SHA256 compare", "run1_sha256": "D241633B53928184EE8CB00013D005EEFD00AFF7A6E2474FAD5A733A2178354D", "run2_sha256": "D241633B53928184EE8CB00013D005EEFD00AFF7A6E2474FAD5A733A2178354D", "match": true, "verdict": "PASS byte-identical"},
+    "constitution": "PASS sites=29 removed=0 at 0234153e (post-tooling-merge head; re-verified independently of implementer's own claim)",
+    "sanity_headless_test_0234153e": "IDENTICAL FAIL/SCRIPT-ERROR set to all prior passes (2 FAIL + 3 SCRIPT ERROR, pre-existing) — zero new regressions from the observability tooling merge",
+    "no_death_specimen_caveat": "Team20 (the only clear thrash-then-recover subteam found in this full-HD seed1337 world) survives to day 90 — no extinction observed for it. QA's requested framing ('合法悲劇(死) or 不連貫新死法') doesn't strictly apply since there's no death; the jsonl instead shows a full struggle-recover-struggle-recover cycle (8 crisis episodes) which is still a valid motive→action→outcome story. If QA specifically needs a DEATH specimen, a separate run with a different team_id is needed — not attempted this round (scope: primary ask was decision_count>0 + non-empty jsonl, both met)."
+  },
+  "lod_mode_pass_SUPERSEDED": {
+    "note": "Earlier pass, kept for audit trail only — superseded by fullhd_story_acceptance above per blueprint's judged-world=A ruling. The LOD-exemption confound documented here is what triggered the tooling fix.",
+    "measured_at_head": "b962fc74 (branch) / dbfc7cc8 (base)",
+    "thrash_headline": {
+      "total_flip_prints": {"base": 190, "branch": 56, "delta_pct": -70.5},
+      "same_snapshot_repeat_proxy": {"base": 163, "branch": 25, "delta_pct": -84.7},
+      "verdict_note": "NOT literal zero under LOD mode — superseded, see fullhd_story_acceptance for the authoritative literal-zero result."
+    },
+    "buy_food_fulfillment": {
+      "team19_branch": "8 reissues, 0 [Market] fulfillment observed in 90d window — pre-existing (base same pattern) — separate/unrelated issue",
+      "team20_branch": "reissues + multiple [Market] Team20<->TeamX 成交 confirmed"
+    },
+    "fix_b_tap_gap_INCONCLUSIVE_under_LOD": {
+      "code_diff_verified": true,
+      "organic_decision_count_probe": "INCONCLUSIVE under LOD mode — SPECIMEN_TEAM_ID itself triggered LOD-exemption world-divergence (changing specimen id = changing world trajectory). This finding is what triggered the tooling fix; resolved in fullhd_story_acceptance above."
+    },
+    "determinism": {"base": "PASS (HOB: seed=1337 run1 dec=7775 viol=2 ev=2 == run2)", "branch": "PASS (HOB: seed=1337 run1 dec=7811 viol=1 ev=1 == run2)"},
+    "constitution": {"branch": "PASS sites=29 removed=0"},
+    "sanity_headless_test": {"verdict": "IDENTICAL set base vs branch — zero new regressions"},
+    "hob": {"base": {"obey_pct": 96.2}, "branch": {"obey_pct": 96.2, "excused_pct": 3.8, "leader_bypass": 0, "subteam_bypass": 0}},
+    "warring_before_after": {
+      "seeds": [1337, 42, 7], "months": 3,
+      "seed1337": {"base": {"teams": 67, "factions": 10, "established": 1, "pop": 342, "attrition_pct": 22.97}, "branch": {"teams": 64, "factions": 10, "established": 2, "pop": 322, "attrition_pct": 27.48}, "attrition_delta_pp": 4.5},
+      "seed42":   {"base": {"teams": 58, "factions": 8, "established": 0, "pop": 358, "attrition_pct": 17.13}, "branch": {"teams": 59, "factions": 8, "established": 0, "pop": 363, "attrition_pct": 15.97}, "attrition_delta_pp": -1.16},
+      "seed7":    {"base": {"teams": 58, "factions": 8, "established": 2, "pop": 290, "attrition_pct": 21.83}, "branch": {"teams": 55, "factions": 9, "established": 2, "pop": 294, "attrition_pct": 20.75}, "attrition_delta_pp": -1.08},
+      "total_diffs": 899,
+      "flag": "★ NOT superseded — this warring 3-seed pass ran in LOD mode (normal gameplay regime, not force_full_hd), still relevant as-is. seed1337(血證世界) attrition 惡化 +4.5pp(22.97%→27.48%)——spec允許'不強求回baseline'但明言'不能惡化'；seed42/7兩者皆改善(-1.1~1.2pp)。仍待 blueprint 判是否容許雜訊帶內或需追查（established同時1→2改善，未深究因果）。this dispatch's scope was story-acceptance only ('平衡數字gen未重校前只當定性')，未要求在 full-HD 下重跑 warring——維持原判待裁。"
+    }
+  },
+  "incomplete": [],
+  "resolved_this_round": [
+    "fix_b_tap_gap organic decision_count>0：RESOLVED (331, jsonl 331 entries match)",
+    "specimen.jsonl：PRODUCED (Team20, 331 entries, byte-identical determinism confirmed 2 runs)",
+    "headline thrash 歸零：ACHIEVED under full-HD (22→0 same-snapshot repeats), LOD-mode -85%收斂數字SUPERSEDED"
+  ],
+  "still_open_for_blueprint": [
+    "seed1337 warring(LOD mode) attrition 惡化 +4.5pp — 待判雜訊帶內 or 追查（未在本輪 full-HD 重跑，spec範圍外）",
+    "Team20 specimen 未死（struggle-and-recover非death故事）——QA若堅持要死隊specimen需另跑指定team_id"
+  ],
+  "summary": "全-HD story acceptance（judged-world=A，blueprint裁）為權威結果：headline thrash 在同快照重複層級達成字面歸零(22→0)，Fix B tap-gap以decision_count=331+jsonl 331行確認解決，determinism獨立雙跑SHA256 byte-identical，憲法/sanity零新增。此輪解決先前LOD-mode量測法因SpecimenTracer LOD-exemption側效應造成的世界岔開confound(已由implementer non-invasive化工具修復)。唯一未解：seed1337 warring(LOD mode,非本輪重跑範圍)attrition +4.5pp仍待blueprint判；specimen(Team20)未觀察到死亡,是掙扎-恢復故事非死亡故事,QA若需死隊需另指定。"
+}

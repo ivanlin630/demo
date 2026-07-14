@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·最終 acceptance] desperation A+B+A-2 全@dfeecb80——全-HD重跑Team20+Team18+新死隊給QA複判連貫窮死;併入不再幻覺loop"
 ---
 

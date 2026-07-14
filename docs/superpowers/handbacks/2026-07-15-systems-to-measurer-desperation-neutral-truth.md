@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·中性世界真相·release真門檻] desperation@5fcb68e3(含confound修)——thrash真消沒消?A/B/A-2真有效?觀測現非侵入,這次綠才算數"
 ---
 

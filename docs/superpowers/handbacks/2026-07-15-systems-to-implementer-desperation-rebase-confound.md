@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[小工單] desperation分支merge最新main(拿confound修)→push→measurer中性重驗;confound修已merge 6e19e13b"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DONE] 絕境找糧A/B/A-2+confound修 merged→main 24c0c442;中性世界QA雙綠;收尾(consume+cd回主目錄+重arm)"
 ---
 

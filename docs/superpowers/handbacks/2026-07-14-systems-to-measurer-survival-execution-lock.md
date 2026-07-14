@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測] 求生執行鎖 thrash-fix——headline thrash歸零 + 買糧成交 + tap-gap收 + .specimen.jsonl給QA;首個試驗新workflow"
 ---
 

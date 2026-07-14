@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·中性世界] 求和/外交 grounded@d277259b——★驗真生效非inert(seeded byte-identical疑床沒exercise diplomacy);求和不變求盟+被拒不loop"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·全-HD 重跑] 絕境找糧真根修@2b9428c8——Team20+Team18+新死隊 specimen 給 QA 複判連貫窮死;A/B 生效驗"
 ---
 

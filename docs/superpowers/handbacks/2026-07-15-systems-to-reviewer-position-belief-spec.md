@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R②·★升異質框外審] 位置感知belief化(god-view位置根治)——大結構框12點,refute-first驗不誤殺自身/靜態;CLEAN才dispatch"
 ---
 

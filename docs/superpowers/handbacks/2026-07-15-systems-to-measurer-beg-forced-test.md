@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·乞食強制樣本] 逼乞食情境驗完成(mercy floor轉糧?)+診斷為何從不被選;code初判=非幻覺(有mercy完成路)"
 ---
 

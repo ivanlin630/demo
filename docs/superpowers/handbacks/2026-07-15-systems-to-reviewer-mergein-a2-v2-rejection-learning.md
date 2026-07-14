@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② A-2 v2·機制改] belief無food估→look-before-leap不可行→改learn-from-rejection(拒後記憶不重纏);真根=拒絕無cooldown;重審"
 ---
 

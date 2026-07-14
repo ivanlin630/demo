@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② 審] 求和/外交 grounded——look-before-leap(讀reject_cooldown)+求和order_task seam;mirage家族收尾;CLEAN才dispatch"
 ---
 

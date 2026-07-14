@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[LOD@116 歸因] O(N²)是50+硬前提——LOD@116=25tps/full-HD@116=18tps都崩,LOD只買1.42x;LOD當不了50+ stopgap;refine roadmap"
 ---
 

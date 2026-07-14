@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[HEAD 更新] execlock branch 4fbaa7e8→b962fc74(uprising 窄化,行為中性);量 b962fc74;若已跑 4fbaa7e8 數字仍有效(中性 delta)"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] 求生執行鎖 thrash-fix——spec鎖+R②CLEAN;新worktree feat/survival-execution-lock;TDD"
 ---
 

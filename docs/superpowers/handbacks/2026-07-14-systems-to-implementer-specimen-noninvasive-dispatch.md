@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] specimen 觀測非侵入化——移LOD-exemption+force_full_hd acceptance+jsonl writer;R②CLEAN;新worktree;TDD"
 ---
 

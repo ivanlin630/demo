@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·中性世界] 掠奪對準糧@f8821ada——day24-26殘留thrash消?looter得食?★釐清implementer旗:food-weighting是否inert(有沒有真改target)"
 ---
 

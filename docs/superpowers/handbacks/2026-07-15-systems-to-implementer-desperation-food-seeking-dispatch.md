@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] 絕境找糧真根修 A+B+C——新分支feat/desperation-food-seeking;R②v2 CLEAN;TDD;守感知鐵律+憲法閘"
 ---
 

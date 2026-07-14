@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② 審設計] specimen 觀測非侵入化——移 LOD-exemption + force_full_hd + jsonl;修觀測不變量違反;CLEAN 才 dispatch"
 ---
 

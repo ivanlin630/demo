@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[乞食定音+A-2機制改FYI] 乞食非幻覺(mercy完成路,code雙證);死rung根=belief門檻太嚴(設計取捨待你);A-2改learn-from-rejection(belief無food估)"
 ---
 

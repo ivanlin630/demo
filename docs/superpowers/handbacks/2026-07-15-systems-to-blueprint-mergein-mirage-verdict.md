@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[code 定音] 併入=幻覺(a)確診——餓世界host feed_ok恆拒+full-or-nothing無漸進;pop降是餓死非吸收;已spec Fix A-2 look-before-leap(你預授權)→R²"
 ---
 

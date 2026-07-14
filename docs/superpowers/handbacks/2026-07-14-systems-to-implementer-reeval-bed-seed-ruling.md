@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[裁定 Option 1] reeval_bed 加 seed(seed_val)——determinism 是量測床正確性;第三種死法已結案無依賴;L3 補+快驗→measurer 跑"
 ---
 

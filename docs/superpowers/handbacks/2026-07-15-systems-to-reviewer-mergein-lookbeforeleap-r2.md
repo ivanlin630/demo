@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② 審 Fix A-2] 併入 look-before-leap——完成A覆蓋;belief估host收得起(非god-view);小增補CLEAN'd spec;CLEAN才dispatch"
 ---
 

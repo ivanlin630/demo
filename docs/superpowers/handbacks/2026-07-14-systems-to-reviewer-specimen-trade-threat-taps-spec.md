@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② 審設計] specimen 交易+威脅 tap——履行觀測不變量(QA缺口①②);純讀tap;CLEAN 才 dispatch"
 ---
 

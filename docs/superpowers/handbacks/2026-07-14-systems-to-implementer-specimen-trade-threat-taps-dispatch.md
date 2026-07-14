@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] specimen 交易+威脅 tap——建在 execlock 分支(隨其 merge);R②CLEAN;TDD"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[重診斷·挖到底] 買糧真根=coin=0+無食物賣方+資產不流通+空間受困;買糧applicability不驗真買得到;執行鎖治錯層該廢;含WHAT待你裁+經濟大題"
 ---
 

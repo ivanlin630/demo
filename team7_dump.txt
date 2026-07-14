@@ -1,0 +1,1 @@
+/team_diaries/Team7(specimen,pop=4,致富致intent全程) : {'tick10-5310(day0-22)': '覓食×83', 'tick5320': '紮營×1', 'tick5340-5570(day22-23)': '生產×26', 'tick5580-21480(day23-90)': '買糧×271,task=貿易,tgt恆(12,3),連續67天無再轉換'}

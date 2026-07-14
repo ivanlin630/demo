@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[重跑·可解釋 specimen] execlock@200d7e49(含交易+威脅 tap)——重跑 Team20 可解釋 + 團滅 specimen 給 QA 複判"
 ---
 

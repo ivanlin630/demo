@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] 絕境掠奪對準糧源(hunger-weighted prey)——新分支feat/loot-hunger-targeting;R²CLEAN;單一連續公式;TDD"
 ---
 

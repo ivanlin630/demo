@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·全-HD story acceptance] execlock@0234153e(含觀測工具)——force_full_hd headline重跑+seed1337 .specimen.jsonl給QA;正式故事維度第一跑"
 ---
 

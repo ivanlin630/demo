@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[小工單] execlock 分支 merge 最新 main(拿觀測工具)→push→回報;下一步 measurer 全-HD story acceptance"
 ---
 

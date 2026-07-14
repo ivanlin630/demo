@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[HALT 根因確認+修 spec] confound=SpecimenTracer to_task→observe_velocity耗randf無suppress旗標(HOB同款已解過);修=包suppress;修後中性世界重驗release真門檻"
 ---
 

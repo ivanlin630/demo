@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[可行性判斷] full-HD 轉正典:方向可行但perf卡SCALE;現行~15隊full-HD撐1×;50+隊須先修O(N²)faction_ai真根;不全否決=部分否決50+"
 ---
 

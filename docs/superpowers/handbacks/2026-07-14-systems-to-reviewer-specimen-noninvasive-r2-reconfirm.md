@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② re-confirm] specimen 觀測非侵入化——judged-world WHAT 已由 blueprint 裁定=A(全-HD);機制你已 CLEAN,只確認 acceptance 世界界定補完"
 ---
 

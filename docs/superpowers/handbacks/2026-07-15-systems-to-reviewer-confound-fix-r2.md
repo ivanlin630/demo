@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② 審] SpecimenTracer RNG confound 修——observe_velocity耗randf無suppress;修=包旗標;scope精準不動真實rank;CLEAN才dispatch"
 ---
 

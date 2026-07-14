@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② v2 標準複核] 絕境找糧 spec 6條全收斂——感知鐵律違反修/pop守衛補/死循環過濾/憲法閘release/A-gate語意定;複核收斂細節"
 ---
 

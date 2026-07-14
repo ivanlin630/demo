@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH·最高優先] SpecimenTracer RNG confound修——新分支feat/specimen-rng-confound-fix;R²CLEAN;包suppress_observe_noise;三跑byte-identical驗"
 ---
 

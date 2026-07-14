@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[工具備齊·GO] execlock全-HD story acceptance可跑了——branch 1f5a8764(非侵入+jsonl+seeded reeval_bed);seed1337 reproducible"
 ---
 

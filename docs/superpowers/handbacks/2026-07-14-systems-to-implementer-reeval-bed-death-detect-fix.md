@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[L3] reeval_bed 死亡偵測 false-positive 修——瞬間 remove-readd 誤判死;改連續 N tick 查無;execlock worktree"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R②·升異質框外審] 絕境找糧真根修 A+B+C——買糧look-before-leap+遷移找糧+連貫窮死;大框改求生路,refute-first;CLEAN才dispatch"
 ---
 

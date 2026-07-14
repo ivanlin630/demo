@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[結構稽核報告] 4維度完;主線=決策統一但對不上現實有一族缺口(社交ungrounded/位置god-view/死常數族/矩陣殘);建議優先序含你裁"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[L3 小工單] execlock worktree 內 reeval_attribution_bed 加 3 env 開關(FORCE_FULL_HD/SPECIMEN_JSONL_OUT)——解 measurer 全-HD acceptance 工具缺口"
 ---
 

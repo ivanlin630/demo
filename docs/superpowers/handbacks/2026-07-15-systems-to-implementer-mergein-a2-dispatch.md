@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] Fix A-2 併入 look-before-leap——同分支feat/desperation-food-seeking;R②CLEAN;host對應鎖定;TDD"
 ---
 

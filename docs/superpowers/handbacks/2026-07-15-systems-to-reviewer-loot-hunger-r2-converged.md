@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② 一行收斂] loot spec 鎖單一連續加權公式(刪雙鍵切主序)——sated hunger=0精確收斂pop_est-only;守身分=權重;CLEAN?"
 ---
 
