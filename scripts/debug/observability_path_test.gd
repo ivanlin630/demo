@@ -60,12 +60,14 @@ func _world_sig(state: WorldState) -> String:
 			snappedf(float(t.resources.get("food", 0)), 0.01)])
 	return JSON.stringify(arr)
 
+# 回 world sig + ★Probe aggregate（含 counter：驗 tracer re-query 不污染 Probe）。
 func _run_warring(seed_val: int, ticks: int, specimen: Array, tracer_on: bool) -> String:
 	seed(seed_val)
 	var state := WorldState.new(); var runner := SimRunner.new()
 	var cfg: Dictionary = GameSetup.load_config(CFG); cfg["seed"] = seed_val
 	GameSetup.setup(state, cfg)
 	SimRunner.force_full_hd = true
+	Probe.enabled = true; Probe.reset()   # ★啟 Probe：驗 tracer re-query 不 bump 污染
 	SpecimenTracer.reset()
 	if tracer_on:
 		state.specimen_team_ids.assign(specimen); SpecimenTracer.enabled = true
@@ -74,15 +76,21 @@ func _run_warring(seed_val: int, ticks: int, specimen: Array, tracer_on: bool) -
 		runner.advance_tick(state, np)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
-	SpecimenTracer.enabled = false; SimRunner.force_full_hd = false
-	var sig := _world_sig(state); SpecimenTracer.reset()
+	# Probe aggregate 簽名（sorted key→count；tracer 若污染則 on/off 不同）
+	var pk: Array = Probe.counts.keys(); pk.sort()
+	var parr: Array = []
+	for k in pk: parr.append([k, int(Probe.counts[k])])
+	var sig := _world_sig(state) + "|PROBE|" + JSON.stringify(parr)
+	SpecimenTracer.enabled = false; SimRunner.force_full_hd = false; Probe.enabled = false
+	SpecimenTracer.reset()
 	return sig
 
 func _test_tracer_onoff_byte_identical() -> void:
-	print("--- ★核心：tracer on/off 世界 byte-identical（觀測禁改世界）---")
+	print("--- ★核心：tracer on/off 世界+Probe byte-identical（觀測禁改世界+禁污染 counter）---")
 	var on := _run_warring(1337, 300, [7], true)
 	var off := _run_warring(1337, 300, [], false)
-	_ok(on == off, "tracer on vs off → 世界 byte-identical（新 tap 全純讀/is_specimen gate）")
+	_ok(on == off, "tracer on vs off → 世界+Probe aggregate byte-identical（re-query 包 suppress 不污染）")
 	if on != off:
-		print("    on =%s" % on.substr(0, 160))
-		print("    off=%s" % off.substr(0, 160))
+		var oi: int = 0
+		while oi < mini(on.length(), off.length()) and on[oi] == off[oi]: oi += 1
+		print("    首異 @%d：on=…%s / off=…%s" % [oi, on.substr(maxi(0, oi - 20), 60), off.substr(maxi(0, oi - 20), 60)])

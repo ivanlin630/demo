@@ -20,6 +20,19 @@ const HEARTBEAT_CADENCE: int = WorldState.TICKS_PER_DAY / 4   # TEST VALUE — 6
 static func is_specimen(state: WorldState, team_id: int) -> bool:
 	return enabled and team_id in state.specimen_team_ids
 
+# ★觀測非侵入單點（observer_no_global_rng 家族）：tracer 的 re-query（純觀測，非真決策）包此——
+# 關 Probe.enabled（防 tracer re-query bump 污染 Probe counter）+ suppress_observe_noise（防 randf）。
+# 鏡射 RNG-confound 修的 suppress 模式，擴含 Probe。return-based 可重入。scope 只包 re-query，微秒級。
+static func _begin_observe() -> Array:
+	var saved: Array = [Probe.enabled, PathSystem.suppress_observe_noise]
+	Probe.enabled = false
+	PathSystem.suppress_observe_noise = true
+	return saved
+
+static func _end_observe(saved: Array) -> void:
+	Probe.enabled = saved[0]
+	PathSystem.suppress_observe_noise = saved[1]
+
 static func reset() -> void:
 	enabled = false
 	entries.clear()
@@ -39,8 +52,7 @@ static func capture_options(state: WorldState, team: TeamData, scored: Array, ct
 	# finder→estimate_catch_up→observe_velocity→randf＝tracer **額外**消耗 global RNG → 觀測誰岔開世界。
 	# 包 suppress_observe_noise（save/restore）使此段 RNG-neutral。真實 rank 的 estimate_catch_up 在 capture
 	# 之前（rank 內）不受影響、保留 noise → 真實世界軌跡不變。
-	var _prev_suppress: bool = PathSystem.suppress_observe_noise
-	PathSystem.suppress_observe_noise = true
+	var _obs: Array = _begin_observe()   # suppress RNG(observe_velocity)+Probe(to_task→finder bump)污染
 	for e in scored:
 		var opt: String = String(e.get("opt", "?"))
 		# 可派性標記（arg­max 疑點結案 follow-up①）：util 最高 ≠ 可派。鏡射 dispatch 迴圈跳過條件
@@ -52,7 +64,7 @@ static func capture_options(state: WorldState, team: TeamData, scored: Array, ct
 		var nd: bool = (_task == TeamData.TASK_IDLE) \
 			or (_tgt == Vector2i(-1, -1) and _task != TeamData.TASK_FLEE)
 		cands.append({"opt": opt, "util": float(e.get("u", 0.0)), "nd": nd})
-	PathSystem.suppress_observe_noise = _prev_suppress
+	_end_observe(_obs)
 	_scratch(team.team_id)["candidates"] = cands
 	# 威脅來源（純讀 ctx）：QA 判 survival/flee 空鎖有無真威脅驅動（threat_id=-1+react≈0=無威脅空鎖=慢版 thrash 嫌疑）。
 	if ctx != null:
@@ -70,10 +82,13 @@ static func capture_intent(state: WorldState, team_id: int, intent: String, why:
 # phase:"reaction" entry；純讀 person（loyalty/stress）；is_specimen gate；零 mutation/RNG。QA 判 defect/riot 真因。
 static func capture_reaction(state: WorldState, person: PersonData, team: TeamData, reaction: String, why: Dictionary) -> void:
 	if not is_specimen(state, team.team_id): return
+	var _obs: Array = _begin_observe()   # _snapshot callees 可能 bump Probe → suppress（觀測非侵入）
+	var _snap: Dictionary = _snapshot(state, team)
+	_end_observe(_obs)
 	var entry: Dictionary = {
 		"tick": state.world.current_tick, "team_id": team.team_id, "phase": "reaction",
 		"person_id": person.id, "reaction": reaction, "why": why,
-		"狀態": _snapshot(state, team),
+		"狀態": _snap,
 	}
 	entries.append(entry)
 	_archive.append(entry)
@@ -86,13 +101,17 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 	var scr: Dictionary = _scratch(team.team_id)
 	var _solo_t: String = String(team.solo_intent.get("type", "")) if team.solo_intent is Dictionary else ""
 	var intent = scr.get("intent", _solo_t if _solo_t != "" else "日常")
-	# 該 action target 的 best_estimate（beliefs 不存 → 這裡 re-query action target 一條）
+	# 該 action target 的 best_estimate（beliefs 不存 → 這裡 re-query action target 一條）。
+	# ★包 _begin/_end_observe：re-query bump Probe 會污染 counter（sim 不讀但違觀測不變量）→ suppress。
+	var _obs: Array = _begin_observe()
 	var beliefs: Array = []
 	var tgt_team_id: int = _target_team_id(state, target)
 	if tgt_team_id != -1 and tgt_team_id != team.team_id:
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tgt_team_id)
 		if not bel.is_empty():
 			beliefs.append({"tgt": tgt_team_id, "est": bel})
+	var _snap: Dictionary = _snapshot(state, team)   # _snapshot callees 可能 bump Probe → 同包 suppress
+	_end_observe(_obs)
 	var entry: Dictionary = {
 		"tick": state.world.current_tick,
 		"team_id": team.team_id,
@@ -103,7 +122,7 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 			"threat": scr.get("threat", {}),
 		},
 		"做什麼": {"winner_opt": winner_opt, "task": task, "target": target, "result": result},
-		"狀態": _snapshot(state, team),
+		"狀態": _snap,
 	}
 	entries.append(entry)
 	_archive.append(entry)   # ★全量 archive（flush 清 entries 不動此）→ write_jsonl 死隊最後決策不遺漏
@@ -125,9 +144,12 @@ static func heartbeat_sweep(state: WorldState) -> void:
 		if not state.teams.has(tid): continue
 		if now - int(_last_entry_tick.get(tid, -999999999)) < HEARTBEAT_CADENCE: continue
 		var team: TeamData = state.teams[tid]
+		var _obs: Array = _begin_observe()   # _snapshot callees 可能 bump Probe → suppress
+		var _snap: Dictionary = _snapshot(state, team)
+		_end_observe(_obs)
 		var entry: Dictionary = {
 			"tick": now, "team_id": tid, "phase": "heartbeat", "reason": "no-decision",
-			"狀態": _snapshot(state, team),
+			"狀態": _snap,
 		}
 		entries.append(entry)
 		_archive.append(entry)
