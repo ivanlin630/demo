@@ -50,16 +50,21 @@ governing: `game-design.md §決策模型 v2`（現實 gate 慾望）+ `invarian
 
 **併入幻覺 code 坐實（systems 讀 code 定音）**：`_resolve_join`(`interaction_system:1094`)→`_absorber_accepts`(`:1066`)：`feed_ok = clampf(combined_days/ABSORBER_MIN_SURVIVE_DAYS,0,1)`，`accept_util=(野心0.6+統領0.4)×feed_ok`，`< ACCEPT_UTIL_THRESHOLD` → 拒 → `release joiner`。**餓世界 absorber+joiner 合隊糧低→feed_ok≈0→恆拒**→joiner 重選併入→又拒→loop，`faction_id` 永不變。`_resolve_mergein` 是 **full-or-nothing absorb（無 partial）**→Team26 pop 3→2→1=餓死非漸進吸收（blueprint(b)排除）。∴ 併入同買糧幻覺。
 
-**設計（Fix A gate 家族，慾望配現實）**：`decision_context` 加 `has_acceptable_join_host: bool`，gate `options.gd:103` 併入 applicable：
-- **★host 對應鎖定（R②#issue）**：`has_acceptable_join_host` 評的 host 須**鏡射 `to_task:181` 同一優先序**——`host = strong_neighbor_id if strong_neighbor_id != -1 else consolidate_target_id`，belief 估**這一個** host（非兩者獨立判斷 OR）。否則 gate 過 consolidate 但 dispatch 去 strong_neighbor（未必 acceptable）→ gate/resolver 錯配 → 仍恆拒 loop（正是本刀要修的 bug 變形）。
-- **honest 定義（守感知鐵律）**：對上述選定 host，joiner **依自身認知預估**其收得起——鏡射 `_absorber_accepts` 的 feed_ok，但**用 joiner 對該 host 的 belief 估其糧/pop**（`BeliefSystem.best_estimate`），**非 god-view 讀 host 精確 effective_food**。可達（PathSystem）+ 粗估 `combined_days_est ≥ ABSORBER_MIN_SURVIVE_DAYS × 保守係數` 才算 acceptable。
-  - 無 belief（沒情報）→ 保守**當不可估**（不入候選；認慫投靠陌生強鄰本就該先有接觸/情報，合感知鐵律）。
-- `options.gd:103`：併入 applicable 加 `and ctx.has_acceptable_join_host`。
-- 效果：餓世界無收得起的 host 時**併入不入候選**（不追必被拒的幻覺）→ 隊 fall through 覓食/遷移/掠奪 或連貫窮死。**這是慾望配現實在投靠層**。
-- ⚠ **不誤殺真投靠**：belief 估 host 收得起（含 stale/失真副本，同 A 不濾原則）→ 入候選；到場真被拒（host 現況變）→ 既有 release 回退（撲空 emergent 保留，非 bug）。gate 只擋「明知（依情報）沒 host 收得起」的純幻覺，非所有可能撲空。
+**★v2 機制修正（2026-07-15，implementer 撞前提 gap 後 systems 重裁）**：
+- **前提 gap（file:line 坐實）**：spec v1 要「belief 估 host 糧」鏡射 feed_ok，但 **belief 根本無 food 估欄**（`vision_system.gd:112-128` 只存 `population_est`/`resource_scale`[0-3 粗總資源桶,僅 dist≤1 近觀]/`armed_est`，**無 food**）。∴ 「猜 host 收不收得起」**honest 信號不存在**（resource_scale 是總資源粗桶+遠處缺→誤殺；pop-capacity 不鏡射 feed_ok→big-but-starving host 過 gate 卻 resolver 拒＝R② 警告的 gate/resolver 錯配 loop）。**food-belief look-before-leap 不可行**（除非另闢 belief food_est slice）。
+- **★真根重裁＝learn-from-rejection（非猜 host 糧）**：loop 的根＝`_resolve_join` 拒絕只 `clear_social_target`+`release`（`:1100-1103`，**無 cooldown/記憶**）→ joiner 立刻重選併入→重纏**同一** host→又拒→永動。∴ 修＝**被拒後記住、不再纏該 host**（honest：用**真發生的拒絕經驗**，非 god-view 糧估）。更連貫（試→被拒→改試別路＝奮力，非「明明沒試過就不投靠」）。
+
+**設計（v2 rejection-learning）**：
+1. **拒絕寫記憶**：`_resolve_join` 拒絕分支（`:1100-1103`）補 `_npc_ai.write_memory(joiner_leader, "join_rejected", host_id, tick, ...)`（或等價輕量標記；既有 memory 機制）。
+2. **finder 跳最近拒過的 host**：`decision_context` 加 `has_acceptable_join_host: bool`＝有**可達**（PathSystem）host（**鏡射 `to_task:181` 優先序**：`strong_neighbor if !=-1 else consolidate_target`）**且該 host 未在近期 `join_rejected` 記憶內**（cooldown N ticks，TEST VALUE）。
+   - **host 對應鎖定不變（R② 關鍵）**：評的 host＝dispatch 會去的那一個（鏡射 to_task:181），非 OR。
+   - 選定 host 最近被拒→`has_acceptable_join_host=false`→併入不入候選。
+3. `options.gd:103` 併入 applicable 加 `and ctx.has_acceptable_join_host`。
+- **效果**：第一次可試投靠（含撲空 emergent，合理）；被拒→cooldown 內不再纏該 host→fall through 覓食/遷移/掠奪 或連貫窮死；host 全被拒過→併入不 applicable。**loop 斷、不誤殺（給一次真試機會）、honest（用真拒絕非猜糧）**。
+- **不用 belief food/resource_scale/pop-capacity**（前兩者信號弱、後者 gate/resolver 錯配）。cooldown 過期後若 host 現況變好可再試（不永久黑名單，撲空 emergent 精神）。
 
 ## 觸及檔
-- `decision_context.gd`：`has_buyable_food`（received food 賣單，≤MERCHANT_MAX_RANGE，不濾 stale）+ **`has_acceptable_join_host`（belief 估可達 host 收得起，Fix A-2）** + `food_seek_target`（VisionSystem 視野內 wild_game[繼承 pop 守衛] / 已知食物賣單，皆過 PathSystem 可達）（+ gather 填）。
+- `decision_context.gd`：`has_buyable_food`（received food 賣單，≤MERCHANT_MAX_RANGE，不濾 stale）+ **`has_acceptable_join_host`（Fix A-2 v2：有可達且未近期被拒的 host，鏡射 to_task:181 優先序）** + `food_seek_target`（VisionSystem 視野內 wild_game[繼承 pop 守衛] / 已知食物賣單，皆過 PathSystem 可達）（+ gather 填）。
 - `options.gd`：買糧 applicable 加 `has_buyable_food` gate；新 `遷移找糧` option（applicable + to_task + SURVIVAL_OPTION_SET）。
 - `terms.gd`：遷移找糧 weight term（survival_pressure 驅）。
 - finder（`faction_ai` helper 或 context 內）：VisionSystem-導出半徑 wild_game 掃 + received 食物賣單 pos + PathSystem 可達過濾。
