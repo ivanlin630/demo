@@ -23,10 +23,14 @@ governing: `game-design.md §決策模型 v2`（慾望配現實）+ `invariants.
 `interaction_system.gd _try_diplomacy`：**依 order_task 路由 action**，非硬寫 propose_alliance：
 - 求和（order_task=TRIBUTE_OFFER，跨 faction 向威脅源息兵）→ 送對應的**息兵/納貢求和** action 給 `handle_diplomacy_message`（非 propose_alliance）。
 - 外交/結盟 directive → propose_alliance（現行）。
-- **★implementer 先驗**：`handle_diplomacy_message` 的 `match action` 有沒有「求和/息兵/offer_tribute」case（現見 propose_alliance/demand_tribute…）。
-  - **有** → `_try_diplomacy` 路由 order_task→該 action，求和真息兵。
-  - **無**（求和無 resolver，等於一直是 mislabeled 求盟）→ **停下報 systems**：這是「求和是不是獨立行為 vs 該併外交」的 WHAT，flag blueprint（別自建新息兵機制或自刪求和，那超 grounded scope）。
-- **不誤傷外交/結盟**（走 propose_alliance 那條不動）。
+- **★handler 缺口＝已實測確認必發生（R②）**：`diplomatic_ai_system.gd:196-229 handle_diplomacy_message` 的 `match action` 只有 `propose_alliance/propose_trade/demand_tribute/offer_surrender/invite_settle`——**無「求和/息兵/tribute_offer」case**。∴ 求和無 resolver（一直是 mislabeled 求盟）。
+- **★執行期規範（R② 要求，定死非留 implementer 猜）**：`_try_diplomacy` 偵測 `order_task == TASK_TRIBUTE_OFFER` 且無對應 handler 時：
+  - `TaskArbiter.release(initiator)`（釋放，不卡 task）
+  - `initiator.diplomacy_reject_cooldown[target_id] = current_tick + REJECT_COOLDOWN`（視同「此路暫不可行」，讓 Fix1 look-before-leap 抓得到→不再纏→**不製造新 thrash 源**）
+  - **不呼叫 `handle_diplomacy_message`**（不誤觸發 propose_alliance＝不靜默恢復成求盟）
+  - ∴ 求和現態＝**grounded no-op**（fire 一次→release+cooldown→隊改做別的），honest（不假裝息兵），不 loop。
+- **不誤傷外交/結盟**（外交 to_task 不帶 order_task→走 propose_alliance 那條不動）。
+- **★求和真息兵行為＝backlog（WHAT，非本 grounded scope）**：「求和是否獨立行為（納貢息兵讓威脅退）vs 該併外交」＝blueprint 裁；要做則另建 `sue_for_peace`/`offer_tribute` handler（威脅 de-escalate 機制）。本刀只讓求和 grounded（不 loop、不偽裝求盟），記 known_issues。
 
 ## invariant 守
 - **感知鐵律**：look-before-leap 讀自隊 reject_cooldown 記憶（真拒絕），非 god-view 猜對方。

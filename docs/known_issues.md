@@ -18,6 +18,18 @@ Team18 後半 `threat_id:10 / threat_pos:[13,5] / threat_react:8.7` **29 天一�
 
 Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**combat 死接不到 SpecimenTracer**（tracer 只接決策路徑 capture_decision，combat 結算死亡不經決策 tap）。**違 `invariants.md §全量暫態可觀測性`**（combat 死也是決策依賴的暫態/結局，該可 trace）。**修向**：combat 死亡結算補 SpecimenTracer tap（死因+死前狀態），比照決策 tap。**歸屬**：全量暫態可觀測性補洞（同交易/威脅 tap 家族），非 desperation 刀 blocker。
 
+## survival-latch: _evaluate_survival 每-tick 重觸 churn（2026-07-15，掠奪根 scrap 後 measurer 定位，non-fatal backlog）
+
+真 thrash 殘留源＝`_evaluate_survival` 每-tick 重觸（legacy，非掠奪選擇）→ Team26 day24-26 churn 88/56 次。**但非致命**：Team26 挺過 churn、期間仍行動（有 loot）、死在 60 天後（day85），churn 非死因＝噪音非 bug。**修向**：survival-latch（`_evaluate_survival` 別同快照重觸，＝原執行鎖意圖但對的層——非 recognizer、是「同狀態別每 tick 重跑」）。**backlog 非 urgent**：future 若觀察到 churn 普遍 + perf 貴再做。連 [[feedback_avoid_rabbithole]]（blueprint 判 Team26 剩的是邊際噪音，停追）。
+
+## 絕境掠奪搶糧優先 + 權重量級（2026-07-15，掠奪 fix inert scrap 後 observe-later）
+
+掠奪 hunger-weighted prey fix **inert 已 scrap**（`FOOD_PULL=1.0` 太弱、遠小於 pop_est 量級 + Team26 危機期只一候選＝方法錯，byte-identical，不 merge）。絕境隊掠奪「搶到料沒糧」QA 已判**連貫死**（搶了個也沒糧的鄰居＝真實悲劇，非幻覺）。**observe-later**：絕境掠奪要不要優先搶糧 + 強化權重量級＝desperation-economy arc，若觀察到 raiders **系統性**搶不到糧才做。分支 `feat/loot-hunger-targeting` 棄（inert）。
+
+## 求和 sue-for-peace 無 handler（2026-07-15，diplomacy grounded 揭，backlog）
+
+`handle_diplomacy_message` 無「求和/息兵/tribute_offer」case（只 propose_alliance/propose_trade/demand_tribute/offer_surrender/invite_settle）→ 求和一直被 `_try_diplomacy` 硬寫成 propose_alliance（求盟）。**diplomacy-grounded 刀只讓求和 grounded**（fire→release+cooldown no-op，不 loop 不偽裝求盟）。**真息兵行為＝backlog（WHAT 待 blueprint）**：求和是否獨立行為（納貢息兵讓威脅 de-escalate 退兵）vs 該併外交；要做則建 `sue_for_peace` handler（威脅退兵機制）。
+
 ## has_food_market god-view 既有債（2026-07-15，desperation-food-seeking R② advisory）
 
 `decision_context.gd` 的 `has_food_market`（`faction_ai_system.gd:2024-2037 _nearest_market_outpost`）**掃全圖**找最近市集 outpost＝god-view 既有債（違感知鐵律，隊不該全知所有市集位置）。非 desperation-food-seeking 刀範圍（該刀新增的 has_buyable_food/food_seek 已守鐵律），但既有 has_food_market 未修。**修向**：改讀隊已知市集（探索過/傳播聞得）而非全圖掃。**優先序**：低（既有行為，非本刀 blocker），感知鐵律稽核 slice 一併掃。
