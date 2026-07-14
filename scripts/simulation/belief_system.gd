@@ -6,6 +6,7 @@ class_name BeliefSystem
 
 const MAX_CLAIMS_PER_TARGET := 4      # TEST VALUE
 const MAX_CLAIMS_PER_OBSERVER := 200  # TEST VALUE
+const BELIEF_STALE_TICKS: int = WorldState.TICKS_PER_DAY * 3   # TEST VALUE — 位置 belief 超此視同未知(過期)→防永久 threat/pursuit loop
 
 # 類型基準表（TEST VALUE，序遵 game-design：親見>隊友>商旅>流民）。
 # 官方/酒館/書籍待 producer 再加（免休眠；現無寫端產這些類別）。
@@ -110,6 +111,34 @@ static func has_belief(state: WorldState, obs_id: int, tgt_id: int) -> bool:
 
 static func known_targets(state: WorldState, obs_id: int) -> Array:
 	return state.team_intel.get(obs_id, {}).keys()
+
+# ★位置感知 belief 化（god-view 位置根治）：observer 對 target 的「最後可見/可知」位置。
+# 通道分流（感知鐵律位置版）：
+#   - 同-faction 自家人 → faction.known_member_states（自帶 last_tick，非 BeliefSystem，遠方同僚沒 claim 也知位）。
+#   - 跨-faction 敵情/社交 → BeliefSystem.best_estimate last-seen tile_pos。
+# 皆過 staleness gate（last_tick 超 BELIEF_STALE_TICKS 視同未知）。
+# ★fallback 鐵則：無有效 belief/過期 → 回 (-1,-1)（caller 據此棄該 option/target）；★絕不退自身位置
+#   （退自身＝catch-up 恆追上 / threat 幽靈貼臉，比 god-view 更糟）。靜態設施(outpost)/自身位置由 caller 走真值通道。
+static func belief_pos(state: WorldState, observer_id: int, target_id: int) -> Vector2i:
+	var obs: TeamData = state.teams.get(observer_id)
+	var tgt: TeamData = state.teams.get(target_id)
+	if obs == null or tgt == null:
+		return Vector2i(-1, -1)
+	var now: int = state.world.current_tick
+	# 同-faction → known_member_states 通道（自家人）
+	if tgt.faction_id != -1 and tgt.faction_id == obs.faction_id:
+		var f = state.factions.get(obs.faction_id)
+		if f == null:
+			return Vector2i(-1, -1)
+		var kms: Dictionary = f.known_member_states.get(target_id, {})
+		if kms.is_empty() or now - int(kms.get("last_tick", 0)) > BELIEF_STALE_TICKS:
+			return Vector2i(-1, -1)
+		return kms.get("tile_pos", Vector2i(-1, -1))
+	# 跨-faction → BeliefSystem last-seen
+	var bel: Dictionary = best_estimate(state, observer_id, target_id)
+	if bel.is_empty() or now - int(bel.get("last_tick", 0)) > BELIEF_STALE_TICKS:
+		return Vector2i(-1, -1)
+	return bel.get("tile_pos", Vector2i(-1, -1))
 
 static func best_estimate(state: WorldState, obs_id: int, tgt_id: int) -> Dictionary:
 	var cs: Array = claims(state, obs_id, tgt_id)

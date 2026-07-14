@@ -2101,7 +2101,10 @@ func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
 		var t: TeamData = state.teams[tid]
 		if t.faction_id != -1 or t.team_id == from_team.team_id:
 			continue
-		var d: int = _hex_dist(from_team.tile_pos, t.tile_pos)
+		# god-view 位置根治（Fix D）：補 has_belief gate——只選有情報目標，用 belief last-seen 位置估距（非活值）。
+		var bpos: Vector2i = BeliefSystem.belief_pos(state, from_team.team_id, tid)
+		if bpos == Vector2i(-1, -1): continue   # 無 belief/過期→不選
+		var d: int = _hex_dist(from_team.tile_pos, bpos)
 		if d < best_d:
 			best_d  = d
 			best_id = tid

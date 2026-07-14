@@ -53,7 +53,11 @@ func process(state: WorldState, team_ids: Array,
 			TaskArbiter.release(team)   # 目標消失 → 任務結束
 			team.order_target_id = -1
 		else:
-			team.move_target = target.tile_pos
+			# god-view 位置根治：逐 tick 追 belief last-seen（視野內刷新跟上 / 斷視線→last-seen→撲空逃脫）。
+			# belief_pos 內部分流（同-faction MERGE→known_member_states）；(-1,-1)→保持原 move_target（★不退自身）。
+			var bpos: Vector2i = BeliefSystem.belief_pos(state, tid, tgt_id)
+			if bpos != Vector2i(-1, -1):
+				team.move_target = bpos
 	var arrived: Array = []
 	var moved: Array = []
 	for tid in team_ids:
