@@ -26,6 +26,7 @@ capture_decision 只 4 call-site（`faction_ai:1480/1523/1876/3217`）**全 comm
   - 現 `:3217` 成功路 → 傳 `"committed"`（顯式）。
   - ∴ rank_survival 逐 option fallthrough（opt1 撲空→opt2 no-op→opt3 committed）全成 entry timeline，churn 可讀。
 - **其他 commit 點（unified :1523 / solo :1876 / attack :1480）**：本刀主修 survival（thrash 巢），其餘同 pattern 補 result 欄（committed/miss），blast radius 控在「加欄+加 fail 分支 tap」不改決策邏輯。
+- **第四態 advisory（R②，本刀不處理僅記）**：`_trigger_survival:3208-3212`「投靠玩家隊」分支 `_maybe_request_join_player` 回 true → 提前 `return` 繞過 3 tap 點＝第四種 attempt 結果「請求送出待玩家答」（`join_player_pending`）。範圍窄（僅 `opt=="併入"`+target 恰玩家隊+`player_id!=-1`），headless churn 床無 active player 大概率不命中。**日後玩家互動 story-QA 才浮現時再補此 result**；本刀 result 三態足夠。
 
 ### Fix 2：時間維——specimen per-cadence heartbeat（gapless sweep）
 **不插遍決策路徑**。單點 sweep：`evaluate_all`（`:609`）**末尾**對 `state.specimen_team_ids` 做 heartbeat：
@@ -39,7 +40,7 @@ capture_decision 只 4 call-site（`faction_ai:1480/1523/1876/3217`）**全 comm
 1. **時間維**：specimen timeline 相鄰 entry 最大 gap ≤ HEARTBEAT_CADENCE（無時間洞）。
 2. **路徑維**：強制 churn（finder 撲空/no-op）下，`result != "committed"` 的 entry 出現 ≥1（commit-fail 現形）。
 - 床 FAIL＝有洞/漏路徑 → merge-gate 擋（比照 constitution_gate 機制）。
-**static tripwire（副）**：凍結 `SpecimenTracer.capture*` call-site 計數 baseline（現 4 capture_decision + 2 capture_intent + 1 capture_options）；新增決策 commit 點（try_set in decision context）未伴隨 capture → 計數比失衡提示（弱訊號，非硬斷；主閘是 runtime 床）。
+**static tripwire（副）**：凍結**生產側**（`scripts/simulation/`，排除 `scripts/debug` 測試 tap）`SpecimenTracer.capture*` call-site 計數 baseline ＝ **4 capture_decision + 2 capture_intent（faction_ai:1096/1107）+ 2 capture_options（decision_engine:18/124）**（R² 訂正：capture_options 現 **2** 非 1；grep 坐實）；新增決策 commit 點（try_set in decision context）未伴隨 capture → 計數比失衡提示（弱訊號，非硬斷；主閘是 runtime 床）。**★baseline 必準否則 tripwire 起跑即失真**（R² issue）。
 
 ### Fix 4：invariants 升條（觀測不變量段收斂）
 `invariants.md` 收斂三洞成單一「觀測不變量」段（我 owner 草）：
