@@ -635,6 +635,9 @@ func evaluate_all(state: WorldState, _team_ids: Array) -> void:
 			for i in range(mini(8, parts.size())):
 				top += "%s=%dus " % [parts[i]["n"], parts[i]["us"]]
 			print("[FaiPhase] tick=%d total=%d us | %s" % [state.world.current_tick, total, top])
+	# Fix 2 時間維 heartbeat sweep（末尾）：specimen 無決策 entry 且超 HEARTBEAT_CADENCE → 補心跳，timeline 無洞。
+	# specimen-gated（enabled + 只迭代 specimen_team_ids）→ tracer off 零成本、byte-identical。
+	SpecimenTracer.heartbeat_sweep(state)
 
 func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 	var _t: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
@@ -3217,6 +3220,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # 路徑維 tap：finder 撲空 attempt（churn 現形）
 			continue   # finder 撲空（無可派目標）→ 試次佳 option
 		# 投靠對象是玩家隊 → 改走 forced_event（玩家決定收留/婉拒），不自動 merge（同 P2a W2）
 		if opt == "併入" and td.has("social_target"):
@@ -3227,8 +3231,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival")
 		if Probe.enabled and opt == "併入":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
 			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
+		if not _surv_ok:
+			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # 路徑維 tap：try_set no-op fail attempt
 		if _surv_ok:
-			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)   # specimen tap
+			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed")   # specimen tap（顯式 committed）
 			if td.has("combat_target"):
 				state.set_combat_target(team, int(td["combat_target"]))
 			if td.has("social_target"):
