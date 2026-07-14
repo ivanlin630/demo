@@ -51,7 +51,8 @@ governing: `game-design.md §決策模型 v2`（現實 gate 慾望）+ `invarian
 **併入幻覺 code 坐實（systems 讀 code 定音）**：`_resolve_join`(`interaction_system:1094`)→`_absorber_accepts`(`:1066`)：`feed_ok = clampf(combined_days/ABSORBER_MIN_SURVIVE_DAYS,0,1)`，`accept_util=(野心0.6+統領0.4)×feed_ok`，`< ACCEPT_UTIL_THRESHOLD` → 拒 → `release joiner`。**餓世界 absorber+joiner 合隊糧低→feed_ok≈0→恆拒**→joiner 重選併入→又拒→loop，`faction_id` 永不變。`_resolve_mergein` 是 **full-or-nothing absorb（無 partial）**→Team26 pop 3→2→1=餓死非漸進吸收（blueprint(b)排除）。∴ 併入同買糧幻覺。
 
 **設計（Fix A gate 家族，慾望配現實）**：`decision_context` 加 `has_acceptable_join_host: bool`，gate `options.gd:103` 併入 applicable：
-- **honest 定義（守感知鐵律）**：有**可達**（PathSystem）host（strong_neighbor/consolidate_target）且 joiner **依自身認知預估** host 收得起——鏡射 `_absorber_accepts` 的 feed_ok，但**用 joiner 對 host 的 belief 估 host 糧/pop**（`BeliefSystem.best_estimate`），**非 god-view 讀 host 精確 effective_food**。粗估 `combined_days_est ≥ ABSORBER_MIN_SURVIVE_DAYS × 保守係數` 才算 acceptable。
+- **★host 對應鎖定（R②#issue）**：`has_acceptable_join_host` 評的 host 須**鏡射 `to_task:181` 同一優先序**——`host = strong_neighbor_id if strong_neighbor_id != -1 else consolidate_target_id`，belief 估**這一個** host（非兩者獨立判斷 OR）。否則 gate 過 consolidate 但 dispatch 去 strong_neighbor（未必 acceptable）→ gate/resolver 錯配 → 仍恆拒 loop（正是本刀要修的 bug 變形）。
+- **honest 定義（守感知鐵律）**：對上述選定 host，joiner **依自身認知預估**其收得起——鏡射 `_absorber_accepts` 的 feed_ok，但**用 joiner 對該 host 的 belief 估其糧/pop**（`BeliefSystem.best_estimate`），**非 god-view 讀 host 精確 effective_food**。可達（PathSystem）+ 粗估 `combined_days_est ≥ ABSORBER_MIN_SURVIVE_DAYS × 保守係數` 才算 acceptable。
   - 無 belief（沒情報）→ 保守**當不可估**（不入候選；認慫投靠陌生強鄰本就該先有接觸/情報，合感知鐵律）。
 - `options.gd:103`：併入 applicable 加 `and ctx.has_acceptable_join_host`。
 - 效果：餓世界無收得起的 host 時**併入不入候選**（不追必被拒的幻覺）→ 隊 fall through 覓食/遷移/掠奪 或連貫窮死。**這是慾望配現實在投靠層**。
