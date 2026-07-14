@@ -21,7 +21,21 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
-## 📍 當前狀態（2026-07-15）——tracer 完整性 + god-view 位置根治 + 絕境找糧真根修 merged
+## 📍 當前狀態（2026-07-15）——full-HD 觀察開跑 + flee 真修 + tracer 完整性 + god-view merged
+
+### full-HD live 觀察 slice 開跑（觀察先於設計，blueprint）
+三大 arc（desperation/god-view/tracer-completeness）落地→**現在有可信 tracer**→開沉睡世界（反應/生育/情緒 near-gated，`SimRunner.force_full_hd=true` 全隊 near 自然開，零 gate 改）。**交付=觀察報告非修**。measurer 跑四維（人口/內政/情緒/經濟）+ 全生命 specimen。**立刻兌現真問題**（見下 flee）。
+
+### flee 恢復位移（FLEE no-op 根治，live 觀察後第一個真修）→ main（merge `12d3d7b1`，2026-07-15）
+**arc 敘事**：full-HD 觀察 + 故事 QA 揪出 Team1 128 天原地逃 3080 churn（75% 人生）。blueprint 初判「缺執行鎖」→ **patch-gate-first 挖到底翻轉**：真根非缺鎖，是 **FLEE 從不移動**（序1 wave-dissolution 誤刪 `_flee_target` + 留假註解「mover 接手」，mover 不算＝dead-code 病）。加 lock=治症（隊仍卡原地）；治根=恢復位移。
+
+**已修（de-patch）**：FLEE dispatch（3 站 threat/unified/solo）算**遠離 threat belief 位**的可達 move_target（讀 belief 非活值，守感知鐵律；god-view 已提供 belief_pos）→ 隊真逃遠→`ThreatAssessment.score` 距離衰減→out-of-vision→`_has_active_threat` false→**自然 release=有終點**（非硬 lock）。修假註解。
+
+**★cascade（一根解兩假警報）**：`N1_flee -52%/-18%`、**`defect_leave -79%/-93%`**（probe key 被 flee-離隊+defect-離隊共用，flee-churn 反覆觸發灌虛高）、`riot -47%/-13%`。**「逃跑巨量」「內政 defect 千級」兩 aggregate 異常大半是此 flee-churn 虛高，非情緒太高/loyalty 太弱**——先修觀測工具+觀察才揪得出這是虛高非真病。
+
+**★god-view 連動**：flee 讀 threat belief 反向位移 + god-view 位置 belief 化 = **完整逃脫迴路**（逃者真移動→god-view 讓追兵 belief 過期→撲空→真逃脫 organic 湧現）。flee-restore **解鎖 god-view 逃脫在真實遊玩發生**（先前逃者不動→god-view 逃脫 organic 發生不了）。
+
+**QA 獨立複判**：churn 3080筆/128天→**162筆/6.75天**（有限會解除）+ Team1 全生命連貫 + flee 真逃 396 次移動。憲法 sites=29、TDD 7 綠。**教訓**：patch-gate-first 第 2 次抓治症（execlock、flee-lock），挖到 dead-code 真根（[[feedback_symptom_vs_root_retry]]）；reviewer 抓 spec 派發站幽靈（survival:3213 非 FLEE 站）。
 
 ### tracer-completeness（specimen 全生命+全路徑，第三觀測洞根治）→ main（merge `2a805d35`，2026-07-15）
 
