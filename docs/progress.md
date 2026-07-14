@@ -42,6 +42,9 @@
 2. **全量暫態可觀測性=不變量**（`invariants.md §全量暫態可觀測性`，憲法同級）：code 改不准製造量測盲點，新 decision/resource/state 必接 tap。
 - 量測員標準床升級逐 specimen 全量 dump（`03b_measurer §⑤`）撐 QA 判官。
 
+**★未來 vision 稽核 flag（blueprint 2026-07-14，非本 slice，可能拉用戶）**：
+- **LOD-fidelity 稽核**：far 隊命運是否 match near 隊？blueprint 傾向「一隊命運不該因玩家看不看而不同（看著就活/不看就死=詭異）→ LOD 分化=fidelity bug」。牽動 perf 架構+vision → 獨立稽核，等觀測工具 slice 落地+有餘力再碰，碰時 blueprint 拉用戶定「LOD 允不允許分化」。源：specimen 觀測非侵入 slice 浮出的 LOD vs full-HD judged-world 張力（blueprint 裁 acceptance 判全-HD）。
+
 **★衍生 backlog（本 workflow 導出，未 dispatch）**：
 - **觀測盲點閘（待建·可行性系統評）**：憲法閘同精神的 site-freeze tap-coverage baseline——新增 decision/resource/state 未接 tap→FAIL。現況=不變量已立、機械閘未建。可行性初判：`constitution_gate.gd` 有現成 site-freeze 樣板可仿（掃 tap 註冊面 vs baseline），但「暫態」語意覆蓋比 TaskArbiter mutation 面廣，需先定 tap 註冊點契約。
 - **逐 specimen 全量 dump 床（部分工具化）**：SpecimenTracer 補接 order 系統等 tap-gap（本 session 血證 decision_count=0 假象）+ jsonl trace 輸出。

@@ -53,8 +53,9 @@ func _in_survival(team: TeamData) -> bool:
    - `proactive_camp` 特判（:3094 TASK_CAMP@PRIO_DISPATCH）不受影響（白名單仍認 TASK_CAMP）。
 2. **`:1360`（leader survival-sticky）**：`if leader_team.current_task in SURVIVAL_TASKS:` → `if _in_survival(leader_team):`
    - 修潛在同型 bug：買糧/掠奪 survival 中的 leader 原本不 sticky（會被 :1366+ 主 rank 蓋過）→ 現正確 sticky（不蓋，仍派成員）。
-3. **`:3484`（uprising skip）**：`if team.current_task in SURVIVAL_TASKS: return` → `if _in_survival(team): return`
-   - 求生中（含買糧/掠奪）不評起義，一致。
+3. **`:3484`（uprising skip）**：**保留窄白名單 `if team.current_task in SURVIVAL_TASKS: return`（不改 `_in_survival`）**。
+   - **★scope 修訂（2026-07-14，systems 事後裁定）**：本處**行為中性**——`_evaluate_uprising` 所有副作用都在 `try_set(TASK_REVOLT/HOLD, PRIO_THREAT=70)` 之後（:3502-3508 `if not try_set: return`）；team @PRIO_SURVIVAL(80) 的 uprising try_set @70 **恆被 arbiter 拒**（80>70）→ 早退零副作用。∴ broad `_in_survival`（skip eval）vs narrow（run-then-reject）**行為完全相同**，兩者皆正確。保留 narrow＝維持該處原語意（「全隊一致對外求生 journey」skip 起義），不擴 blast radius。
+   - ⚠ **note**：實作 handback（`execlock-redo-fixed`）給的理由「窄化才不掩蓋叛亂訊號」**技術上錯**（叛亂本就被 priority 80>70 擋，窄化不多揭任何叛亂）；正確理由＝上述「行為中性、保留原語意」。且該改動經由**不存在的 systems REDO**（虛構授權，見 provenance note），systems 事後 ratify（因中性無害）非事前授權。
 
 **為何不直接把 TASK_TRADE/TASK_ATTACK 加進 `SURVIVAL_TASKS` 白名單**：TASK_TRADE/TASK_ATTACK 也用於**非-survival**（正常商隊貿易、正常攻擊）——盲加會讓正常貿易/攻擊隊被誤判「在 survival」→ 誤 skip uprising / 誤 sticky / 誤走 hysteresis。priority-based 精準只認 `@PRIO_SURVIVAL` 的 dispatch，正常 task（@PRIO_DISPATCH）不誤傷。
 
