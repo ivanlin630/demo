@@ -15,6 +15,8 @@ func _initialize() -> void:
 	_test_fixB_finder_vision_reachable()
 	_test_fixB_pop_guard()
 	_test_fixB_reachability_filter()
+	_test_a2_join_gate()
+	_test_a2_rejection_cooldown()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -124,3 +126,46 @@ func _test_fixB_reachability_filter() -> void:
 		state.world.tiles.erase(nb.x * 1000 + nb.y)
 	var fst: Vector2i = FactionAISystem.new()._find_food_seek_target(state, team)
 	_ok(fst == Vector2i(-1, -1), "不可達 wild_game(0,2) 被排除→(-1,-1)（可達過濾防死循環），實際=%s" % str(fst))
+
+# ── Fix A-2 v2：併入 look-before-leap（rejection-learning）──
+func _test_a2_join_gate() -> void:
+	print("--- Fix A-2 v2：併入 gate (has_acceptable_join_host) ---")
+	# 有 host 候選 + 餓，但 host 不 acceptable（剛拒/不可達）→ 併入不入候選（不追必被拒幻覺）
+	var c1 := _mk_desperate_ctx()
+	c1.has_strong_neighbor = true; c1.strong_neighbor_id = 2
+	c1.threat = 0.0; c1.threat_threshold = 1.0
+	c1.has_acceptable_join_host = false
+	_ok(not ("併入" in DecisionOptions.applicable(c1)),
+		"host 不 acceptable(剛拒/不可達) → 併入不入候選")
+	# host acceptable（可達+未拒）→ 併入入（不誤殺真投靠）
+	var c2 := _mk_desperate_ctx()
+	c2.has_strong_neighbor = true; c2.strong_neighbor_id = 2
+	c2.has_acceptable_join_host = true
+	_ok("併入" in DecisionOptions.applicable(c2),
+		"host acceptable(可達+未拒) → 併入入候選(不誤殺)")
+
+func _test_a2_rejection_cooldown() -> void:
+	print("--- Fix A-2 v2：rejection memory cooldown（gather 計算）---")
+	# 世界：joiner(1)@(0,0) + host(2)@(2,0)，consolidate_target=2、無 strong_neighbor → host mirror 取 consolidate。
+	var state := _mk_tile_world(4)
+	state.world.current_tick = 10000
+	var joiner := _mk_team_at(state, Vector2i(0, 0), 5)   # id=1
+	var jl := PersonData.new(); jl.id = 10; state.persons[10] = jl; joiner.leader_id = 10
+	joiner.consolidate_target_cache = 2
+	joiner.consolidate_eval_next_tick = 999999   # 用 cache 不重算 finder
+	var host := TeamData.new(); host.team_id = 2; host.tile_pos = Vector2i(2, 0); host.faction_id = -1
+	AnonCohort.add(host.anon_cohorts, "平民", "healthy", 10)
+	state.teams[2] = host
+	# (a) 沒拒過 + 可達 → acceptable（給一次真試）
+	var ca := DecisionContext.gather(state, joiner)
+	_ok(ca.has_acceptable_join_host, "host 沒拒過+可達 → acceptable(給一次真試不誤殺)")
+	# (b) 剛拒過（join_rejected memory 在 cooldown 內）→ 不 acceptable（破恆拒 loop）
+	jl.memory.append({"type": "join_rejected", "subject_id": 2, "tick": 10000 - 100, "intensity": 0.5})
+	var cb := DecisionContext.gather(state, joiner)
+	_ok(not cb.has_acceptable_join_host, "host 剛拒(cooldown 內) → 不 acceptable(不重纏)")
+	# (c) cooldown 過期 → 可再試（非永久黑名單）
+	jl.memory.clear()
+	jl.memory.append({"type": "join_rejected", "subject_id": 2,
+		"tick": 10000 - DecisionContext.JOIN_REJECT_COOLDOWN_TICKS - 10, "intensity": 0.5})
+	var cc := DecisionContext.gather(state, joiner)
+	_ok(cc.has_acceptable_join_host, "cooldown 過期 → 再 acceptable(非永久黑名單，撲空 emergent)")
