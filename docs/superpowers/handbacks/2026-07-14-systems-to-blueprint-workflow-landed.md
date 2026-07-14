@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[落地完成] 故事性QA+全量暫態可觀測性 workflow 已入 owner docs+memory;衍生 backlog(觀測盲點閘待建/thrash-fix首試待greenlight)"
 ---
 
