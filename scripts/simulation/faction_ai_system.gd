@@ -3259,6 +3259,36 @@ func _find_forage_tile(state: WorldState, team: TeamData) -> Vector2i:
 			best_pos = p
 	return best_pos
 
+# Fix B 遷移找糧 finder：視野內可達 wild_game（pop 守衛）/ 已知食物賣單 pos（可達）取最近。
+# 守感知鐵律：wild_game 只掃 VisionSystem 視野內（bounding box，非全圖 god-view）；賣單只讀 received（team_known）。
+# 皆過 PathSystem 可達過濾（防選回不可達 target → dispatch→timeout→dispatch 永動死循環）。純確定性讀，零 randf。
+func _find_food_seek_target(state: WorldState, team: TeamData) -> Vector2i:
+	var best: Vector2i = Vector2i(-1, -1)
+	var best_dist: int = 999999
+	# (1) 視野內 wild_game（僅 pop <= FORAGE_VIABLE_POP 才算——否則 pop>15 追不到野味死＝新型不連貫死，正犯 C）
+	if team.population <= FORAGE_VIABLE_POP:
+		var vrange: int = VisionSystem.vision_range(state, team)
+		for dx in range(-vrange, vrange + 1):
+			for dy in range(-vrange, vrange + 1):
+				var p: Vector2i = team.tile_pos + Vector2i(dx, dy)
+				var d: int = _hex_dist(team.tile_pos, p)
+				if d > vrange or d >= best_dist: continue
+				var tile: HexTileData = state.world.tiles.get(p.x * 1000 + p.y)
+				if tile == null or tile.outpost_level > 0: continue
+				if int(tile.resources.get("wild_game", 0)) <= 0: continue
+				if PathSystem.find_path(state, team.tile_pos, p).path.is_empty(): continue   # 不可達排除
+				best = p; best_dist = d
+	# (2) 已知食物賣單 pos（received=team_known，同 Fix A honest 來源；可達過濾）
+	for _so in OrderSystem.new().received_sell_orders(state, team):
+		if String(_so.get("res", "")) != "food": continue
+		var sp: Vector2i = _so.get("pos", Vector2i.ZERO)
+		if sp == Vector2i(-1, -1) or sp == Vector2i.ZERO: continue
+		var d2: int = _hex_dist(team.tile_pos, sp)
+		if d2 >= best_dist: continue
+		if PathSystem.find_path(state, team.tile_pos, sp).path.is_empty(): continue
+		best = sp; best_dist = d2
+	return best
+
 func _should_abandon_current_task(team: TeamData, survival_target: Vector2i) -> bool:
 	if team.move_target == Vector2i(-1, -1):
 		return true

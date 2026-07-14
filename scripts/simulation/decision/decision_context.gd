@@ -56,6 +56,11 @@ var food_market_dist: int = -1
 var has_forage_tile: bool = false
 var forage_pos: Vector2i = Vector2i(-1, -1)
 var has_specie: bool = false
+# Fix A 買糧 look-before-leap（守感知鐵律，不濾 stale）：隊「聽過」≤MERCHANT_MAX_RANGE 的 food 賣單（received，team_known）
+# 才把買糧當慾望目標——從沒聽過任何食物賣單=不追純幻覺。撲空(stale)由 Fix B 遷移/Fix C 連貫死承接。
+var has_buyable_food: bool = false
+# Fix B 遷移找糧 target（視野內可達 wild_game[繼承 pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）；(-1,-1)=真無可達已知糧源。
+var food_seek_target: Vector2i = Vector2i(-1, -1)
 # 經濟底：自家糧倉 food（含遠端家，team 不在家也讀得到）→ 返家補給 home-empty gate 用。
 var home_food: float = 0.0
 # P3/P4 混合協調：派系 stakes directive 集合（攻擊/徵收/外交）。
@@ -229,6 +234,16 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		or _weapon_liquid
 	# home_food：自家糧倉 food（掃自有 outpost tile，team 不在家也讀得到 → 空家判定）。
 	c.home_food = DecisionContext._home_granary_food(state, team)
+	# Fix A 買糧 look-before-leap：隊「聽過」≤MERCHANT_MAX_RANGE 的 food 賣單才追買糧
+	# （received=team_known 物理在場/傳播，守感知鐵律；★不濾 stale=血訓 G1d/r3，撲空由 B/C 承接）。
+	c.has_buyable_food = false
+	for _so in OrderSystem.new().received_sell_orders(state, team):
+		if String(_so.get("res", "")) == "food" \
+				and _fa._hex_dist(team.tile_pos, _so.get("pos", Vector2i.ZERO)) <= OrderSystem.MERCHANT_MAX_RANGE:
+			c.has_buyable_food = true
+			break
+	# Fix B 遷移找糧 target（視野內可達 wild_game[pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）。
+	c.food_seek_target = _fa._find_food_seek_target(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)
 	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:
