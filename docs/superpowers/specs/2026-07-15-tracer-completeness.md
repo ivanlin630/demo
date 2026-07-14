@@ -40,7 +40,7 @@ capture_decision 只 4 call-site（`faction_ai:1480/1523/1876/3217`）**全 comm
 1. **時間維**：specimen timeline 相鄰 entry 最大 gap ≤ HEARTBEAT_CADENCE（無時間洞）。
 2. **路徑維**：強制 churn（finder 撲空/no-op）下，`result != "committed"` 的 entry 出現 ≥1（commit-fail 現形）。
 - 床 FAIL＝有洞/漏路徑 → merge-gate 擋（比照 constitution_gate 機制）。
-**static tripwire（副）**：凍結**生產側**（`scripts/simulation/`，排除 `scripts/debug` 測試 tap）`SpecimenTracer.capture*` call-site 計數 baseline ＝ **4 capture_decision + 2 capture_intent（faction_ai:1096/1107）+ 2 capture_options（decision_engine:18/124）**（R² 訂正：capture_options 現 **2** 非 1；grep 坐實）；新增決策 commit 點（try_set in decision context）未伴隨 capture → 計數比失衡提示（弱訊號，非硬斷；主閘是 runtime 床）。**★baseline 必準否則 tripwire 起跑即失真**（R² issue）。
+**static tripwire（副）**：凍結**生產側**（`scripts/simulation/`，排除 `scripts/debug` 測試 tap）`SpecimenTracer.capture*` call-site 計數 baseline ＝ **★shipped baseline（merge b21794b7）= 6 capture_decision + 2 capture_intent（faction_ai:1107/1118）+ 2 capture_options（decision_engine:18/124）**——capture_decision 從 4→**6**（Fix 1 合法新增 survival loop finder_miss/try_set_noop 兩 tap）；capture_options **2**（R² 訂正原 spec 誤寫 1）；新增決策 commit 點（try_set in decision context）未伴隨 capture → 計數比失衡提示（弱訊號，非硬斷；主閘是 runtime 床）。**★baseline 必準否則 tripwire 起跑即失真**（R² issue，已訂）。
 
 ### Fix 4：invariants 升條（觀測不變量段收斂）
 `invariants.md` 收斂三洞成單一「觀測不變量」段（我 owner 草）：
