@@ -6,6 +6,14 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★凍結威脅實體無 resolve/despawn（2026-07-15，QA desperation 複判抓，「無事發生的假戲」族）
+
+Team18 後半 `threat_id:10 / threat_pos:[13,5] / threat_react:8.7` **29 天一個小數點沒變**，food 卻爬 279→369＝**威脅實體掛著不動、無 resolve/despawn**，撐 survival 決策常勝（原地戒備恆合理）。QA 判「無事發生的假戲」家族（決策合理但底層世界靜止不動＝同 thrash/mirage 族——決策層對、世界層沒對應動作）。**修向**：威脅實體須有生命週期（接觸→交戰/嚇退/despawn），非永久靜掛。**可觀測性**：威脅 tap 已能抓（threat_id/react 凍結可見），故此 bug 現形＝觀測投資回報。優先序中（撐假 survival 常勝＝掩蓋真求生壓力）。
+
+## ★SpecimenTracer combat-death 盲點（2026-07-15，違全量暫態觀測不變量）
+
+Team14 真死於 combat（tick9599）但 `decision_count=0`、trace 空＝**combat 死接不到 SpecimenTracer**（tracer 只接決策路徑 capture_decision，combat 結算死亡不經決策 tap）。**違 `invariants.md §全量暫態可觀測性`**（combat 死也是決策依賴的暫態/結局，該可 trace）。**修向**：combat 死亡結算補 SpecimenTracer tap（死因+死前狀態），比照決策 tap。**歸屬**：全量暫態可觀測性補洞（同交易/威脅 tap 家族），非 desperation 刀 blocker。
+
 ## has_food_market god-view 既有債（2026-07-15，desperation-food-seeking R② advisory）
 
 `decision_context.gd` 的 `has_food_market`（`faction_ai_system.gd:2024-2037 _nearest_market_outpost`）**掃全圖**找最近市集 outpost＝god-view 既有債（違感知鐵律，隊不該全知所有市集位置）。非 desperation-food-seeking 刀範圍（該刀新增的 has_buyable_food/food_seek 已守鐵律），但既有 has_food_market 未修。**修向**：改讀隊已知市集（探索過/傳播聞得）而非全圖掃。**優先序**：低（既有行為，非本刀 blocker），感知鐵律稽核 slice 一併掃。
