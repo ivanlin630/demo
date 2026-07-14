@@ -45,6 +45,32 @@
 - **★B 重框（取代「常數參數化」）= 落地債**：**行為門檻的歸宿只有兩處——世界代價（seed/世界接地）或人格/記憶/現況（逐 agent）；無塑造行為的門檻該以全域常數活下來。** `PREEMPT_MARGIN=2.0` 病=該由這隊謹慎度算出（膽小早逃/悍將晚動），非全域一刀切=第一示範。同類：THREAT_CADENCE/FEUD_ATTACK_MIN/VIABLE_ARMED_RATIO/各 reaction 閾。**方向硬機制軟**：怎麼算/何時溶/溶多深=系統 HOW+measure 按 arc 節奏逐步收（arc 內順手 or 另軌「常數人格化」）。
 - **★溶入驗收多一條隱性標準**（所有後續溶）：**該行為是否真穿過人格/記憶/現況的秤，非某全域規則/常數直達。冒出具名 margin/gate/threshold 常數=照妖鏡響。**
 
+## ★★ 全量暫態可觀測性（governing invariant，憲法同級，用戶定 2026-07-14）
+
+> WHAT owner=`game-design.md`「好戲關」；本節=架構 enforcement。**與憲法閘同級**（新增盲點=違規，該被閘擋）。
+
+**code 不管怎麼改，所有暫態都要量得出。任何改動不准製造量測盲點。**
+
+「暫態」= **故事判斷可能依賴的一切瞬時狀態**，三類：
+- **想法**：decision trace（候選 option / winner / 理由）、控制流轉換（如 `idle↔貿易` thrash、`[Survival]` fire 轉換）。
+- **狀態**：pop / food_days / 威脅 / 意圖 / 子隊關係 / 狀態機轉移。
+- **資源**：coin / food / weapons / 庫存時序。
+
+**規則**：新增任何決策層／資源／狀態機 → **必須同步接進量測 tap**。**新增盲點 = 違規**（憲法閘同精神，可行性系統評下方閘）。
+
+**為何是不變量非 nice-to-have（血證，2026-07-14）**：盲點會**捏造假故事 + 誤導判決**——
+- **tap-gap 假象**：SpecimenTracer tap 沒接 order 系統 → `decision_count=0` 假象 → **差點誤判「架構絕症」**（第一次量測結論，第二次同世界 reeval 才推翻）。
+- **thrash 只因 `[Survival]` 轉換有 log 才抓得到**（Team14 subteam `貿易↔idle` 抖 122 次餓死）；沒 log = 永久盲點，故事崩在哪永遠看不出。
+
+**現實校準（藍圖給，免落地做歪）**：「所有暫態每 tick 全 dump」爆 perf（fullprobe 已重）。可實作版＝
+- **tap 必須存在、零盲點**（可觀測性=不變量，不打折）。
+- **dump 可 scope**：specimen 鎖隊全量 / probe 抽樣，不必全世界每 tick 全記。
+- **原則不稀釋**（不准有量不到的暫態），**perf 平衡=系統 HOW**。
+
+**enforcement（觀測盲點閘，憲法閘同精神，待建·可行性系統評）**：新增 decision/resource/state 未接 tap → FAIL。與 `constitution_gate.gd` 同級的 site-freeze 式閘（tap coverage baseline）。**現況=不變量已立、機械閘待實作**（列 backlog，見 `progress.md`）。
+
+連 [[project_playable_priority]]（好戲=四關之首，聚合 metric 過≠好戲過）。
+
 ## World
 
 - 世界獨立運作

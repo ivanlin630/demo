@@ -35,6 +35,18 @@
 - **溯源**：fullprobe `docs/measurements/2026-07-14-sliceA-fullprobe-branch-67d4a47.json` vs `-mainbaseline-68c8feb.json`；死因 `2026-07-14-samewrld-team14-deathcause-67d4a47-dirty.log`。
 - **⚠ 既有測試債（非本 slice）**：headless_test 3 個 assertion 失敗 main 早存在（p2a join weight 0.41 / beg_join combat 197 擋 / strategic ladder 擴張未選）——merge 前後同、零新增，屬獨立既有 bug（見 known_issues 待查）。
 
+### workflow 改（用戶定案 2026-07-14）——故事性 QA + 全量暫態可觀測性
+
+藍圖轉用戶親定兩件，系統已落地 owner docs + memory（本 workflow 對**後續 slice** 生效，不回改 Slice A a630f2ab；thrash-fix slice 當首個試驗）：
+1. **QA 加回=故事性判官**（`04_qa §第五職`/`00_roles 五角色+接力流向`）：量測後讀全量 specimen trace 判 motive→action→outcome=好戲關可稽核閘，餵藍圖（非 release-gate）。
+2. **全量暫態可觀測性=不變量**（`invariants.md §全量暫態可觀測性`，憲法同級）：code 改不准製造量測盲點，新 decision/resource/state 必接 tap。
+- 量測員標準床升級逐 specimen 全量 dump（`03b_measurer §⑤`）撐 QA 判官。
+
+**★衍生 backlog（本 workflow 導出，未 dispatch）**：
+- **觀測盲點閘（待建·可行性系統評）**：憲法閘同精神的 site-freeze tap-coverage baseline——新增 decision/resource/state 未接 tap→FAIL。現況=不變量已立、機械閘未建。可行性初判：`constitution_gate.gd` 有現成 site-freeze 樣板可仿（掃 tap 註冊面 vs baseline），但「暫態」語意覆蓋比 TaskArbiter mutation 面廣，需先定 tap 註冊點契約。
+- **逐 specimen 全量 dump 床（部分工具化）**：SpecimenTracer 補接 order 系統等 tap-gap（本 session 血證 decision_count=0 假象）+ jsonl trace 輸出。
+- **thrash-fix slice（首個試驗，待用戶 greenlight）**：真活=求生 fire 後鎖執行到買糧單下成，別每 tick 被底層任務打回 idle（Team14 subteam 貿易↔idle 抖 122 次餓死）。走 patch-gate-first 查誰跟求生控制器搶。**★藍圖推翻早前「層5 餓時食物壓過軍備」方向**——真根是 thrash（手不聽腦）非權重，非 tuning。
+
 ## 📍 前狀態（2026-07-01）
 
 - **🧭 中長期計畫層 = 主動攀爬取代反應式苟活（✅ S1-S4 全 merged，2026-07-13，established 鏈根治方向）**：established 五層調查鏈用戶裁定的根治——決策只有短期反應無中長期規劃 → 加「承諾式攀爬計畫層」（延伸野心階梯非新求解器,plan_phase=feedback controller 餵 rank_scored 偏置 term）。**S1 rung 事件驅動**（`efa2c69`,milestone_met 升/連續 K 失守降,棄每 10h 瞬時 target_rung 重算抖動;S1 blocker 裁定棄 EWMA 綁 milestone——implementer trace 抓 EWMA 對常數 metric 恆正 demote 永不 fire）。**S2 phase 導出+偏置**（`0af34ec`,缺口×個性×隊形→plan_phase{求糧/成長/聚勢/立國}→plan_phase_drive term;S2 blocker 裁定 B——貿易移出 SEEK_FOOD:貿易=致富主表達由 intent_fit 驅,設計原則「phase map 排他 intent 主表達」化解 reviewer 雙偏置 watch + TC7 個性分歧 collapse）。**S3 survival-bypass**（`6ffcb2b`,劇變 pop驟降30%/food深負-2/leader失→立即重算 rung 為承載力無視遲滯;目標階層≠行動層 survival override）。**S4 GUI**（Observer 露 plan_phase+rung+archetype 攀爬軌跡可讀）。全 slice R²×gate 綠+determinism。**★process 亮點**:plan trace 先於 build 連抓兩設計 bug（S1 EWMA/S2 貿易 collapse）零 merge 污染。**現況**:機制面完成,established 仍恆0——揭 phase 同質化（GROW 獨大=食物修成功不缺糧+attrition 縮 pop<8,pop 成長多路受限:繁殖 safety>0.7鎖+征服吸收 flee-heavy 節流,訂正「繁殖鎖=唯一」over-simplify）+ **ESTABLISH phase 零偏置=立國未接計畫層**（純機械 B-gate）。**下階段=立國 redesign**（加立國意圖進 argmax mirror 建國+B2/B3/B4 硬閘降 modifier+填 ESTABLISH 偏置）=established 最後一哩。plan `2026-07-12-midlong-term-plan-layer`;memory [[project_established_chain]]。

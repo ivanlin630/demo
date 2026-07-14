@@ -125,6 +125,18 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 - 探針起頭已立：`warring_harness.gd` PROBE_KEYS + `faction_ai` bump（merge 維度）→ **續補齊上述全維度成標準模式，未來 slice 複用**。
 - 產 `<slice>.fullprobe.json`（baseline/slice 並排）。**這是新量測模型的核心**：完整量→藍圖判得動→release-pass 閉環。
 
+### ⑤ ★逐 specimen 全量 dump（餵 QA 故事性判官；用戶定 2026-07-14）
+§④ fullprobe = **聚合**維度（率/分布/count）；**QA 故事性判官需 specimen 級全量 trace** 才判 motive→action→outcome（`04_qa §第五職`）。聚合 metric 過≠好戲過 → 標準床**加逐 specimen 全量 dump**：
+- **對象**：鎖定 specimen 隊（`SPECIMEN_TEAM_ID`，含**死隊**——死因才是故事關鍵）+ 抽樣代表隊。
+- **三類暫態全量時序**（對齊 `invariants.md §全量暫態可觀測性`）：
+  - **想法**：decision trace（每次 reeval 的候選 option/winner/理由）、控制流轉換（`idle↔X` thrash、`[Survival]` fire）。
+  - **狀態**：pop/food_days/威脅/意圖/子隊關係逐 tick（或事件驅動）。
+  - **資源**：coin/food/weapons/庫存時序。
+- **零盲點鐵律**：dump 前確認新增 decision/resource/state **都接了 tap**——tap-gap（如 SpecimenTracer 沒接 order → decision_count=0 假象）會**捏造假故事誤導判決**（血證 2026-07-14）。量到 `decision_count=0`/某維度空 → **先查是不是 tap-gap（工具盲點）非真空**，別當真實信號報。
+- **perf scope**（藍圖校準）：**specimen 鎖隊全量、非全世界每 tick 全記**（爆 perf）。probe 抽樣可較粗。
+- 產 `<slice>.specimen.jsonl`（逐 specimen 逐事件 trace，QA 讀）；配 §④ 聚合 fullprobe 一起餵（聚合給藍圖看率、specimen 給 QA 判故事）。
+- **交付路由**：故事性場合 handback 同寄 `to:blueprint`（藍圖判 release）+ trace 供 QA 讀（QA 稽核 handback 亦 `to:blueprint`）。
+
 ## ★量測可溯源協議（用戶定 2026-07-13，全量測角色遵守）
 
 **原則**：任何寫進 handback 的數字，必須**當下能回查、事後能辨真偽**。裸轉述（「我跑過看到 71%」）禁止——原始輸出沒落地、沒標 code 版本＝日後對不上時分不清「舊 code 過期數字」vs「determinism 壞了」，只能重跑（浪費）。
