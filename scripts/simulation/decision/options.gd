@@ -134,8 +134,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 				# 派系 directive=徵收 且有更富 member target → 候選。
 				if "徵收" in ctx.faction_stakes and ctx.faction_tribute_target != -1: out.append(opt)
 			"外交":
-				# 派系 directive=外交 且有獨立鄰 target → 候選。
-				if "外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1: out.append(opt)
+				# 派系 directive=外交 且有獨立鄰 target + ★target 未在 reject_cooldown 內（被拒不再纏）→ 候選。
+				if "外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1 \
+						and not ctx.diplo_target_on_cooldown: out.append(opt)
 			"買糧":
 				# 餓 + 有市集 + 有錢 + ★聽過食物賣單(has_buyable_food) → 買糧候選（Fix A look-before-leap：
 				# 從沒聽過任何食物賣單=不追純幻覺；無錢=乞食真語意，不入）。駐村隊不濾。
@@ -158,7 +159,8 @@ static func applicable(ctx: DecisionContext) -> Array:
 				# 居民團不可迎戰（鏡射舊 _dispatch_threat_response is_resident 排除）。
 				if ctx.threat_react >= ctx.threat_threshold and not ctx.is_resident: out.append(opt)
 			"求和":
-				if ctx.threat_react >= ctx.threat_threshold: out.append(opt)
+				# ★求和 target(threat_id) 未在 reject_cooldown 內才候選（被拒不再纏 loop，diplomacy grounded）。
+				if ctx.threat_react >= ctx.threat_threshold and not ctx.pacify_target_on_cooldown: out.append(opt)
 			# 野心階梯溶入（序3）：FORCE-archetype + 有 anon 可練 → 練兵候選。
 			"訓練":
 				if ctx.archetype == AmbitionLadder.ARCHETYPE_FORCE and ctx.has_trainable: out.append(opt)

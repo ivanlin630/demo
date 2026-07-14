@@ -77,6 +77,10 @@ var faction_tribute_target: int = -1
 var faction_tribute_target_pos: Vector2i = Vector2i(-1, -1)
 var faction_diplo_target: int = -1
 var faction_diplo_target_pos: Vector2i = Vector2i(-1, -1)
+# diplomacy grounded look-before-leap：求和 target(threat_id)/外交 target(faction_diplo_target) 在
+# team.diplomacy_reject_cooldown 內 → 不當慾望目標（被拒不再纏 loop，鏡射 A-2 rejection-learning）。
+var pacify_target_on_cooldown: bool = false
+var diplo_target_on_cooldown: bool = false
 var leader_loyalty: float = 0.5
 # means-end 戰術層（2026-07-01）：team 自己戰略 intent 進 ctx（mirror faction_stakes）。
 # 獨立=solo_intent.type / faction leader=f.intent.type（member 已有 faction_stakes → 不重覆）。
@@ -268,6 +272,13 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 				var _dt: int = _fa._nearest_independent(state, team)
 				c.faction_diplo_target = _dt
 				c.faction_diplo_target_pos = state.teams[_dt].tile_pos if _dt != -1 else Vector2i(-1, -1)
+	# diplomacy grounded look-before-leap：求和(threat_id)/外交(faction_diplo_target) target 在
+	# reject_cooldown 內 → flag（被拒不再纏；純讀自隊記憶，非 god-view）。
+	var _now: int = state.world.current_tick
+	c.pacify_target_on_cooldown = c.threat_id != -1 \
+		and int(team.diplomacy_reject_cooldown.get(c.threat_id, 0)) > _now
+	c.diplo_target_on_cooldown = c.faction_diplo_target != -1 \
+		and int(team.diplomacy_reject_cooldown.get(c.faction_diplo_target, 0)) > _now
 	# team 自己戰略 intent（means-end 戰術層）：獨立=solo_intent / faction leader=f.intent。
 	# member 已由 faction_stakes 供 tactical 訊號 → 不重覆注入（避雙寫同義）。
 	if team.faction_id == -1:

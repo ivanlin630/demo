@@ -406,6 +406,16 @@ func _try_diplomacy(state: WorldState, initiator_id: int, target_id: int) -> voi
 		return
 	if state.persons.get(target.leader_id) == null:
 		return
+	# Fix2 求和 grounded（TRIBUTE_OFFER 無息兵 handler）：release + cooldown，★不呼 handle_diplomacy_message
+	# （不誤觸發 propose_alliance＝不靜默恢復成求盟）。真息兵行為＝backlog（WHAT，需另建 sue_for_peace/
+	# offer_tribute handler）；此刀只讓求和 grounded（fire 一次→release+cooldown→不 loop、不偽裝求盟）。
+	# 外交/結盟 order_task=""→不入此支→走下方 propose_alliance 不動（不誤傷）。
+	if initiator.order_task == TeamData.TASK_TRIBUTE_OFFER:
+		TaskArbiter.release(initiator)
+		initiator.diplomacy_reject_cooldown[target_id] = \
+			state.world.current_tick + DiplomaticAiSystem.REJECT_COOLDOWN
+		initiator.order_task = ""   # 清 order_task（防殘留→下次外交/結盟誤路由為求和）
+		return
 	var resp: String = DiplomaticAiSystem.new().handle_diplomacy_message(
 		state, target, initiator, "propose_alliance")
 	if resp != "accept":
