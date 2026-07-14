@@ -78,6 +78,15 @@ const ACTIONS: Dictionary = {
 		"affordances": [{"goal": "補力", "mode": "ally"}]},
 }
 const SURVIVAL_TASKS: Array = [TeamData.TASK_RETURN_HOME, TeamData.TASK_BEG, TeamData.TASK_JOIN, TeamData.TASK_FORAGE, TeamData.TASK_CAMP]
+
+# survival-in-progress recognizer（priority-based，抗 recognizer drift）。
+# 白名單認 proactive-camp 等 @PRIO_DISPATCH 的 survival task；PRIO_SURVIVAL 認買糧(TASK_TRADE)/
+# 掠奪(TASK_ATTACK) 等 survival 派但 enum 也用於非-survival 的 task。
+# ★根因修：白名單漂移（缺 TASK_TRADE/TASK_ATTACK）→ 買糧 survival 每 tick 被 legacy 重觸打回 idle
+#   → 貿易↔idle thrash 餓死。改 priority-based 讓既有 execution-lock（hysteresis+cadence-relatch）生效。
+# 精準只認 @PRIO_SURVIVAL 的 dispatch（唯一產生於 _trigger_survival :3213）→ 正常貿易/攻擊(@PRIO_DISPATCH)不誤傷。
+func _in_survival(team: TeamData) -> bool:
+	return team.current_task in SURVIVAL_TASKS or team.task_priority == TaskArbiter.PRIO_SURVIVAL
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
 # P2b-1：LOOT_GATE/JOIN_GATE/CAMP_GATE + _loot_pref/_join_pref/_camp_pref 已刪
 # （survival 選擇統一委派 DecisionEngine.rank_survival → DecisionTerms weight，消雙 owner）
@@ -1357,7 +1366,8 @@ func _assign_tasks(state: WorldState, f) -> void:
 	if leader_team == null or leader_team.combat_target != -1:
 		return
 	# 生存 sticky：leader 在 survival task 中不蓋過（仍跑 member 指派）
-	if leader_team.current_task in SURVIVAL_TASKS:
+	# 買糧/掠奪 survival 中的 leader 亦 sticky（priority-based recognizer 修同型 bug）
+	if _in_survival(leader_team):
 		var _tas: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 		_assign_member_tasks(state, f)
 		if SimRunner.phase_timing: _fai_pht("assign.members", _tas)
@@ -1740,6 +1750,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 		_wire_threat_task(sub, td)   # 迎戰/求和 aux target（threat repertoire 保留）
 		sub.current_option = opt      # 承諾慣性（COMMITMENT_BONUS 讀，防抖動）
 		HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
+		SpecimenTracer.capture_decision(state, sub, opt, td["task"], tgt)   # specimen tap（鏡射 solo/unified，補子隊漏接）
 		print("[SubAI] Team%d 引擎→%s (%s)" % [sub.team_id, td["task"], opt])
 		return
 	# 全不可派 → 回母團（lifecycle，不 capture）
@@ -3090,7 +3101,9 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 	# （核心修：原本 early-return 永不釋放 → return_home/乞食 永久 p80 凍結）
 	# 例外：SoloAI 主動紮營（PRIO_DISPATCH）本就在不缺糧時觸發，不可被「糧足」釋放 →
 	#   否則往鄰格 farmable 移動途中即被釋放、到不了 → 永遠重派 churn（移動 1 格即可結算）。
-	if team.current_task in SURVIVAL_TASKS:
+	# ★執行鎖入口：priority-based recognizer 讓買糧/掠奪 survival(@PRIO_SURVIVAL) 命中 →
+	#   走 hysteresis(:下) + cadence-relatch → HOLD 到成交/cadence，不再每 tick 重觸 thrash。
+	if _in_survival(team):
 		var proactive_camp: bool = team.current_task == TeamData.TASK_CAMP \
 			and team.task_priority == TaskArbiter.PRIO_DISPATCH
 		if days_left >= SURVIVAL_RECOVER_DAYS and not proactive_camp:
@@ -3481,7 +3494,7 @@ func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
 func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 	if not _is_resident_team(state, team): return
 	if team.current_task in [TeamData.TASK_REVOLT, TeamData.TASK_HOLD]: return
-	if team.current_task in SURVIVAL_TASKS: return
+	if _in_survival(team): return   # 求生中（含買糧/掠奪 @PRIO_SURVIVAL）不評起義，一致
 	var avg_loy: float = _avg_named_loyalty(state, team)
 	if avg_loy >= 0.2: return
 	if team.unrest_turns < 60: return
