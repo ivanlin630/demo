@@ -34,6 +34,11 @@ func _run() -> void:
 	# specimen 死因快照：每 tick 存最後已知狀態，消失即記死 tick + 死前家當
 	var spec_last: Dictionary = {}
 	var spec_death_tick: int = -1
+	# ★死亡偵測 false-positive 修：單次 dict-miss 會誤判 remove-readd 瞬態（併入 lifecycle，如 Team18 tick7239）為死。
+	# 改連續 N tick(=1日)查無才確認死、死 tick 記消失起點；中途重現歸零。純判定改、不動 bed 其他行為。
+	var spec_gone_streak: int = 0
+	var spec_gone_start: int = -1
+	var _death_confirm_ticks: int = TimeScale.TICK_PER_DAY
 	for tick in range(ticks):
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
@@ -48,8 +53,14 @@ func _run() -> void:
 					"weap": int(t.resources.get("weapon_melee_low",0)) + int(t.resources.get("weapon_melee_high",0)) + int(t.resources.get("weapon_ranged_low",0)) + int(t.resources.get("weapon_ranged_high",0)),
 					"coin": float(t.resources.get("coin", 0)),
 				}
-			elif spec_death_tick == -1 and not spec_last.is_empty():
-				spec_death_tick = tick
+				spec_gone_streak = 0   # 重現 → 歸零（濾 remove-readd 瞬態）
+				spec_gone_start = -1
+			elif not spec_last.is_empty():
+				if spec_gone_streak == 0:
+					spec_gone_start = tick   # 記消失起點
+				spec_gone_streak += 1
+				if spec_death_tick == -1 and spec_gone_streak >= _death_confirm_ticks:
+					spec_death_tick = spec_gone_start   # 連續 N tick 查無 → 確認死於起點
 	# established 數
 	var est: int = 0
 	for fid in state.factions:
