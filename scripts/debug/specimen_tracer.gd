@@ -31,6 +31,12 @@ static func reset() -> void:
 static func capture_options(state: WorldState, team: TeamData, scored: Array, ctx: DecisionContext = null) -> void:
 	if not is_specimen(state, team.team_id): return
 	var cands: Array = []
+	# ★confound 修（觀測禁耗 global RNG，invariants durable rule）：下方 to_task 迴圈每候選重呼
+	# finder→estimate_catch_up→observe_velocity→randf＝tracer **額外**消耗 global RNG → 觀測誰岔開世界。
+	# 包 suppress_observe_noise（save/restore）使此段 RNG-neutral。真實 rank 的 estimate_catch_up 在 capture
+	# 之前（rank 內）不受影響、保留 noise → 真實世界軌跡不變。
+	var _prev_suppress: bool = PathSystem.suppress_observe_noise
+	PathSystem.suppress_observe_noise = true
 	for e in scored:
 		var opt: String = String(e.get("opt", "?"))
 		# 可派性標記（arg­max 疑點結案 follow-up①）：util 最高 ≠ 可派。鏡射 dispatch 迴圈跳過條件
@@ -42,6 +48,7 @@ static func capture_options(state: WorldState, team: TeamData, scored: Array, ct
 		var nd: bool = (_task == TeamData.TASK_IDLE) \
 			or (_tgt == Vector2i(-1, -1) and _task != TeamData.TASK_FLEE)
 		cands.append({"opt": opt, "util": float(e.get("u", 0.0)), "nd": nd})
+	PathSystem.suppress_observe_noise = _prev_suppress
 	_scratch(team.team_id)["candidates"] = cands
 	# 威脅來源（純讀 ctx）：QA 判 survival/flee 空鎖有無真威脅驅動（threat_id=-1+react≈0=無威脅空鎖=慢版 thrash 嫌疑）。
 	if ctx != null:

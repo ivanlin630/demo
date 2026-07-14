@@ -48,6 +48,7 @@
 - **★perf 可行性（systems 量測 `lod_perf_bed@89b22ad3`，部分否決）**：~15 隊 full-HD=474tps（1× 撐、4× 勉強不到、hitch 103ms）；**116 隊 full-HD=~8tps 崩**。真根=**faction_ai O(N²)**（每 faction rank 所有隊，assign_tasks/unified.rank/assign.members 116隊時 213-270ms）。∴ **full-HD 正典現行規模(~15-25隊)可落，50+ 隊否決待 O(N²) arc**。
 - **落地順序**：①full-HD 轉正典現行規模先落（thrash-fix 在 full-HD judge，進行中）②gen 重校 slice（含 breed/reactions 開機動態）③**O(N²) faction_ai perf arc=50+ enabler**（timescale-wave 真根，攤平每 faction rank 所有隊）④LOD-as-fidelity-preserving-opt。
 - **★backlog（待 greenlight，未 dispatch）**：gen 重校 slice / O(N²) faction_ai perf arc（大 arc）。
+- **★絕境階梯完整性 arc（blueprint 2026-07-15，desperation 刀衍生，待 greenlight）**：desperation-food-seeking 刀補完「絕境隊不選兌現不了的路」（買糧/併入 look-before-leap+rejection-learning、遷移找糧）後，剩絕境階梯的完整性題：①**盲乞食**（乞食 belief 門檻 `food_est` 太嚴→絕境隊從不乞；改對可見鄰居盲試，人格 gate 肯不肯乞——WHAT 已裁，見 known_issues）②**抱團模型**（併入/consolidation 弱隊主動抱團求生的完整 lifecycle）③**食物流通**（餓世界無食物賣方=買糧供給側，D 經濟供給題，併 full-HD live 觀察）。三者同族（絕境求生的供給/社交面），observe/經濟 arc 一起做。
 - **★O(N²) 歸因 refine（LOD@116 補跑 2026-07-14）**：116 隊 **LOD=25tps / full-HD=18tps 都崩**（都 <<240），LOD far-cadence 攤銷**只買 1.42x**→ **O(N²) 是「50+ 隊」硬前提、不分 LOD/full-HD，LOD 當不了 stopgap**。可玩天花板(1×)外推：full-HD~25隊/LOD~45隊，都搆不到 50+。∴ O(N²) arc 與 full-HD 決定**解耦**（想要大世界就得修，不管 regime）；full-HD 額外只 1.42x=加固 full-HD 轉正典決定（scale 問題本就是 O(N²) 非 regime）。
 
 **★衍生 backlog（本 workflow 導出，未 dispatch）**：

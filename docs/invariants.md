@@ -67,7 +67,9 @@
 - **dump 可 scope**：specimen 鎖隊全量 / probe 抽樣，不必全世界每 tick 全記。
 - **原則不稀釋**（不准有量不到的暫態），**perf 平衡=系統 HOW**。
 
-**enforcement（觀測盲點閘，憲法閘同精神，待建·可行性系統評）**：新增 decision/resource/state 未接 tap → FAIL。與 `constitution_gate.gd` 同級的 site-freeze 式閘（tap coverage baseline）。**現況=不變量已立、機械閘待實作**（列 backlog，見 `progress.md`）。
+**★觀測者禁耗 global RNG（顯規則，用戶+blueprint 2026-07-15，第 3 次同族咬人後升）**：任何觀測儀器（SpecimenTracer/HOB/probe/tracer）**禁消耗 global RNG**（`randf`/`randi`）。觀測若多跑決策/估算路徑（gather→estimate_catch_up→observe_velocity、rank→to_task→finder…）而耗 RNG → 偏移全域 RNG 流 → **觀測改變被觀測物**（換 specimen/開 probe=換世界）。**必包 `PathSystem.suppress_observe_noise=true`（save/restore，scope 只包觀測額外呼叫）或等價 observe/dry-run 旗標。** 血證：①LOD-exemption（specimen 升 near→換世界）②RNG（SpecimenTracer observe_velocity 耗 randf→同世界 Team26 flip 0/71/88，desperation 全驗證在擾動世界=不可信）。**驗收操作定義**：同 seed，specimen=A/=B/無 三跑→除 tracer entries 外世界 byte-identical。**release 綠只認中性（無-specimen）世界**，擾動世界綠作廢；determinism/憲法綠不救此。memory [[feedback_observer_no_global_rng]]。
+
+**enforcement（觀測盲點閘，憲法閘同精神，待建·可行性系統評）**：①新增 decision/resource/state 未接 tap → FAIL；②**新 tracer/probe 未 suppress global RNG（specimen=A/B/無 三跑非 byte-identical）→ FAIL**（RNG-中性檢查）。與 `constitution_gate.gd` 同級的 site-freeze 式閘。**現況=不變量已立、機械閘待實作**（列 backlog，見 `progress.md`）。
 
 連 [[project_playable_priority]]（好戲=四關之首，聚合 metric 過≠好戲過）。
 
