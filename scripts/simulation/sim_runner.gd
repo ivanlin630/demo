@@ -454,9 +454,9 @@ func _get_near_teams(state: WorldState, player_pos: Vector2i) -> Array:
 	var result: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
-		# specimen LOD-exempt：一律納 near（每 near-cadence 全 pipeline，完整 trace），mirror player 豁免
-		if tid in state.specimen_team_ids \
-				or _hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS:
+		# 觀測非侵入：移除 specimen LOD-exempt（原強制 specimen 升 near → 岔 RNG → 改世界=Heisenberg 侵入）。
+		# specimen trace 改走 force_full_hd 全-HD acceptance（judged-world）；normal LOD 下 specimen 不再特殊待遇。
+		if _hex_distance(team.tile_pos, player_pos) <= LOD_NEAR_RADIUS:
 			result.append(tid)
 	return result
 
@@ -466,9 +466,7 @@ func _get_far_teams(state: WorldState, player_pos: Vector2i) -> Array:
 	var result: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
-		# specimen 已納 near → 不入 far（避免雙跑）
-		if tid in state.specimen_team_ids:
-			continue
+		# 觀測非侵入：移除 specimen far 豁免（原 specimen 跳 far 降級 → 岔 RNG）。specimen 正常參與 LOD 分區。
 		if _hex_distance(team.tile_pos, player_pos) > LOD_NEAR_RADIUS:
 			result.append(tid)
 	return result

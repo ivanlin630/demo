@@ -5,7 +5,8 @@ class_name SpecimenTracer
 # enabled 預設 false → 一般跑 no-op（capture 皆 early-return，零非-specimen 成本）；seed/debug 開。
 # 禁改遊戲 state：只讀 + append entry + 印。
 static var enabled: bool = false
-static var entries: Array = []          # timeline：每 specimen 每決策一條 entry（見 spec 資料模型）
+static var entries: Array = []          # timeline：每 specimen 每決策一條 entry（見 spec 資料模型）；flush() 清空
+static var _archive: Array = []         # 全量 archive：capture 時與 entries 同步 append，flush 不清 → write_jsonl 涵蓋全程(含死隊最後決策，非侵入 jsonl 輸出)
 static var _pending: Dictionary = {}    # team_id → { candidates:[{opt,util}], intent:{...} } 本 tick 決策 scratch
 # 跨-flush 聚合（診斷 錨→行為用；flush 清 entries 但保留這些）
 static var winner_hist: Dictionary = {}   # winner_opt → count（做了什麼）
@@ -19,6 +20,7 @@ static func is_specimen(state: WorldState, team_id: int) -> bool:
 static func reset() -> void:
 	enabled = false
 	entries.clear()
+	_archive.clear()
 	_pending.clear()
 	winner_hist.clear()
 	intent_hist.clear()
@@ -61,7 +63,7 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tgt_team_id)
 		if not bel.is_empty():
 			beliefs.append({"tgt": tgt_team_id, "est": bel})
-	entries.append({
+	var entry: Dictionary = {
 		"tick": state.world.current_tick,
 		"team_id": team.team_id,
 		"想什麼": {
@@ -71,7 +73,9 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 		},
 		"做什麼": {"winner_opt": winner_opt, "task": task, "target": target},
 		"狀態": _snapshot(state, team),
-	})
+	}
+	entries.append(entry)
+	_archive.append(entry)   # ★全量 archive（flush 清 entries 不動此）→ write_jsonl 死隊最後決策不遺漏
 	# 聚合（跨 flush 存活，供 summary 診斷 錨→行為）
 	winner_hist[winner_opt] = int(winner_hist.get(winner_opt, 0)) + 1
 	var intent_key: String = str(intent["intent"]) if intent is Dictionary else str(intent)
@@ -91,6 +95,35 @@ static func flush() -> void:
 # dump = flush 別名（spec 語彙；end full dump 用）。
 static func dump() -> void:
 	flush()
+
+# ── write_jsonl：全量 trace → jsonl（每 entry 一行 JSON）。純讀 _archive + 寫檔，零 state mutation/零 RNG。──
+# _archive 於 capture_decision 時同步累積、flush 不清 → 涵蓋全程（含已 flush 出去的 + 死隊死前最後決策）。
+# Vector2i/Vector2 經 _json_safe 轉 [x,y]（JSON 不原生支援 Vector）。
+static func write_jsonl(path: String) -> void:
+	var f: FileAccess = FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		push_error("[SpecimenTracer] write_jsonl 開檔失敗(%d): %s" % [FileAccess.get_open_error(), path])
+		return
+	for e in _archive:
+		f.store_line(JSON.stringify(_json_safe(e)))
+	f.close()
+	print("[SpecimenTracer] write_jsonl → %s (%d entries)" % [path, _archive.size()])
+
+# 遞迴轉 JSON-safe：Vector2i/Vector2 → [x,y]；Dictionary/Array 遞迴；其餘原樣。
+static func _json_safe(v):
+	if v is Vector2i or v is Vector2:
+		return [v.x, v.y]
+	if v is Dictionary:
+		var d: Dictionary = {}
+		for k in v:
+			d[str(k)] = _json_safe(v[k])
+		return d
+	if v is Array:
+		var a: Array = []
+		for x in v:
+			a.append(_json_safe(x))
+		return a
+	return v
 
 # summary：跨-flush 聚合印（錨→行為診斷：想什麼 intent 分布 vs 做什麼 winner 分布）。
 static func summary() -> void:
