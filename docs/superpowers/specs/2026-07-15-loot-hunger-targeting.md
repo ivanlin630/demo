@@ -14,14 +14,19 @@ governing: `game-design.md §決策模型 v2`（慾望配現實：垂死隊掠�
 - **target 選擇（真根）**：`_find_weakest_prey`（`faction_ai_system.gd`）：`pop_est` 最低為主序（beatability），`food_est` 僅 `PREY_POP_TIE_EPS` 帶內 tie-break。**絕境 looter 不優先糧多目標** → 鎖最弱（可能無糧）→ 搶到料不解飢。
 - **殘留 thrash 機制**：掠奪(搶料還餓)→再決策→貿易(無賣方/coin 買不到)→idle→掠奪…（day24-26 56 次）。兩條求生路都不解飢＝震盪。掠奪對準糧→搶到糧解飢→不震盪。
 
-## Fix：hunger-weighted prey（身分=權重，非路徑切換）
-`_find_weakest_prey` 的排序改：**保 beatability 硬門檻（`pop_est < team.population×0.7` 不變，別打太強）**，但**在可打候選內，food_est 的權重隨 looter 飢餓（`food_days`）放大**：
-- 概念：`prey_score = beatability_term − food_gap_penalty`，或雙鍵排序改**飢餓時 food_est 升為主序**：
-  - looter **飢餓**（`food_days < DESPERATION`）→ 可打候選中**選 belief food_est 最高**者（對準糧；同 food 才 pop tie-break）。
-  - looter **不飢餓**（食足，掠奪為財/人力）→ **現行 pop_est 最弱為主**（不變，strategic raid 要好打）。
-  - **身分=權重（invariant）**：非「survival flag 切 finder」，是**food_est 權重 = f(飢餓度)**——飢餓連續放大 food 權重，sated→0（連續，非二分路徑）。implementer 挑乾淨實作（雙鍵飢餓切主序 / 連續加權分數）。
-- **感知鐵律**：用 `bel.food_est`（belief `best_estimate`，可失真/stale），**非 god-view 讀 target 真 food**（`_find_weakest_prey` 已用 belief，延續）。
-- **不加 food 硬濾**（血訓：`②c 刪 food<20 硬濾`，窮村仍可俘人力）——飢餓只**加權**food，不排除無糧目標（無糧目標當它是最後選項，非移除）。
+## Fix：hunger-weighted prey（★單一連續加權公式，R② 鎖定）
+`_find_weakest_prey` 的排序改：**保 beatability 硬門檻（`pop_est < team.population×0.7` 不變，別打太強）**，但**在可打候選內，用單一連續 `prey_score` 排序，food_est 權重＝looter 飢餓度（`food_days`）的連續函式**：
+- **★單一公式（無門檻切主鍵，守身分=權重）**：
+  ```
+  # 概念（implementer 定係數/正規化，TEST VALUE）：
+  hunger = clampf((DESPERATION_DAYS - food_days) / DESPERATION_DAYS, 0, 1)   # food_days≥DESP→0、越餓越→1，連續
+  prey_score = pop_weakness_term − FOOD_PULL × hunger × food_est_norm
+  # 選 prey_score 最優（最弱 + 飢餓時 food 拉高糧多目標）
+  ```
+  - **連續**：`hunger` 是 `food_days` 的連續函式，**無 `if food_days<X` 離散切排序主鍵**。sated（`food_days≥DESPERATION`）→ `hunger=0` → food 項歸零 → **精確收斂到現行 pop_est-only 行為**（strategic raid 不退化）。越餓 → food 權重連續升 → 糧多可打目標排前。
+  - **★刪除原「雙鍵切主序」選項（R②）**：飢餓門檻處離散切排序主鍵＝路徑切換，違 `invariants.md:197 身分=權重非路徑切換`。**不留給 implementer 挑**，只採此連續公式。
+- **感知鐵律**：用 `bel.food_est`（belief `best_estimate`，可失真/stale），**非 god-view 讀 target 真 food**（`_find_weakest_prey` 已用 belief，延續）。food_est_norm＝food_est 正規化（如 /(pop×食量參考)，implementer 定，deterministic）。
+- **不加 food 硬濾**（血訓：`②c 刪 food<20 硬濾`，窮村仍可俘人力）——飢餓只**連續加權**food，不排除無糧目標（無糧目標 prey_score 靠後，非移除）。
 
 ## invariant 守
 - **身分=權重非路徑切換**（藍圖 2026-07-03）：food 權重隨飢餓連續調，非按 survival 身分切 finder 路徑。
