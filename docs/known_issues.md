@@ -608,3 +608,13 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 
 ## 情緒系統（stress decay，death spiral 根層）
 - **成員 stress 累積不釋放**：驅 `team_panic` → death spiral 根層，跨 reaction/morale。survival-path #2 已於決策層斷 FLEE 螺旋（threat=0→FLEE eval 0），但 stress 本身累積待 person 情緒系統獨立 arc（decay/釋放機制）。本 slice 不修。
+
+## 觀測（SpecimenTracer 窗口非全生命 — 第三觀測洞,討論中 2026-07-15）
+- **現象**：specimen jsonl ＝**成功-commit 窗口**非全生命（Team26 錄 day76-85、漏 day24-75 ~50 天）。從沒一份 specimen 涵蓋一隊完整一生。
+- **根（code 定音,非 perf）**：capture_decision 4 個 call-site（`faction_ai:1480/1523/1876/3217`）**全 commit-gated**——`:3217` 在 `if _surv_ok:` 內（try_set 成功才 tap）。no-commit 期間（IDLE 空檔／survival relatch commit 反覆失敗＝non-unified thrash 那隻／子隊無獨立決策）＝**零 entry**＝時間洞。commit-fail 的 attempt（rank 跑了選了 option 但撲空/no-op-fail）+ `[Survival]` flip(`:3117`) **完全不 tap**＝路徑洞。**tap-placement 問題,非觀測改世界（前兩洞的族但不同機制）**。
+- **修向（1 隻 specimen 便宜,無 perf 否決）**：①tap 挪決策-attempt 邊界（帶 commit-result 成功/撲空/no-op-fail）補路徑維；②specimen per-cadence heartbeat 輕 entry 補時間維（timeline 無洞）。全族群全生命＝貴但不需要。
+- **升閘（規劃）**：觀測不變量第三次同族破 → invariants 顯規則「specimen=全生命+全路徑,新決策/commit-fail 路徑必接 tap」+ 觀測盲點閘（未接 tap→FAIL），與「全量暫態可觀測性」「觀測禁燒 RNG」併。
+- **不擋 god-view**：Tier1 控制場景=短窗受控→無窗口洞→god-view 繞開,tracer-completeness 排獨立 arc（序待用戶）。詳 handback `2026-07-15-systems-to-blueprint-tracer-completeness-analysis`。關 [[feedback_full_transient_observability]]/[[feedback_observer_no_global_rng]]。
+
+## 選敵 finder（_find_weakest_prey 同-faction 不濾 — R② Fix F advisory②,pre-existing）
+- `_find_weakest_prey`(`faction_ai:3311-3332`)迭代 `team_discovered` **無 faction_id 過濾** → `prosperity_target_id` 理論可能曾是同-faction 隊。Fix F 用純 `BeliefSystem.best_estimate`（非 belief_pos 通道分流），同僚可能無 belief claim → 提早進態③放棄。**效果=提早放棄攻擊（保守退化）非危險行為**，pre-existing 非 Fix F 引入,不阻本刀。日後選敵 finder 補同-faction 濾一併處理。
