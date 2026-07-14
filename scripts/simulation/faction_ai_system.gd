@@ -407,6 +407,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		var tgt: Vector2i = td.get("target", Vector2i(-1, -1))
 		if not TaskArbiter.try_set(state, team, tk, tgt, TaskArbiter.PRIO_THREAT, "threat"): continue
 		_wire_threat_task(team, td)
+		if tk == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		Probe.bump("threat.dispatch." + opt)   # 融合驗率表（該出現還出現）
 		print("[ThreatResponse] Team%d → %s (threat=Team%d, u-rank)" % [team.team_id, opt, ctx.threat_id])
 		break
@@ -417,6 +418,22 @@ func _wire_threat_task(team: TeamData, td: Dictionary) -> void:
 	if td.has("prosperity_target"): team.prosperity_target_id = int(td["prosperity_target"])
 	if td.has("order_target"): team.order_target_id = int(td["order_target"])
 	if td.has("order_task"): team.order_task = td["order_task"]
+
+# flee 位移根治：FLEE 威脅來源 belief 位（★感知鐵律：belief 非活值；斷視線朝最後已知威脅位反向逃）。
+# 掃 discovered 取最大 ThreatAssessment.score → belief_pos。3 FLEE 派發站派 FLEE 後呼，設 team.flee_from_pos。
+# 無威脅/belief 過期 → (-1,-1)（mover 不設 target，靠 release 收）。純讀零 randf。
+func _flee_threat_pos(state: WorldState, team: TeamData) -> Vector2i:
+	var best_id: int = -1
+	var best_t: float = 0.0
+	for tid in state.team_discovered.get(team.team_id, []):
+		if tid == team.team_id: continue
+		var other: TeamData = state.teams.get(tid)
+		if other == null: continue
+		var t: float = ThreatAssessment.score(state, team, other)
+		if t > best_t:
+			best_t = t; best_id = tid
+	if best_id == -1: return Vector2i(-1, -1)
+	return BeliefSystem.belief_pos(state, team.team_id, best_id)
 
 # 序4 vendetta 溶入：引擎純血仇攻擊 dispatch → bump g2.vendetta_trigger（framework S2b 驗魂 + 融合驗率表）。
 # 純血仇 = feud 過門檻 且 非 faction directive 攻擊 且 非征服 intent（後二者有各自 driver，非私仇脫軌）。
@@ -444,7 +461,8 @@ func _has_active_threat(state: WorldState, team: TeamData) -> bool:
 
 # _dispatch_threat_response / _flee_target 已溶入引擎（序1）：
 #   4 反應（逃跑/備戰/迎戰/求和）→ REGISTRY option（survival/備戰/迎戰/求和），DecisionEngine.rank_threat 秤。
-#   FLEE target 由 mover 算（survival to_task target=-1，同 unified survival 路徑），故 _flee_target 一併刪。
+#   FLEE target 由 mover 算：3 派發站設 team.flee_from_pos=威脅 belief 位 → movement_system._flee_away_tile
+#   朝遠離該位算 away-tile（flee 位移根治 2026-07-15，恢復序1 遺留的 dead flee-movement）。
 
 func _is_prosperity_candidate(_state: WorldState, team: TeamData) -> bool:
 	# 打草穀（斷①A）：faction 成員也過候選（部將個體 raid=五代常態）。子隊(parent≠-1)仍擋——
@@ -1536,6 +1554,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		if Probe.enabled and opt == "併入":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
 			Probe.bump("merge.set_ok" if _set_ok else "merge.set_fail")
 		# 漏斗站4探針（純觀測）：unified 路徑 TRADE 實派計數（分 opt）。
@@ -1879,6 +1898,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if td.has("social_target"): state.set_social_target(team, int(td["social_target"]))
 		if opt == "攻擊": _probe_vendetta_dispatch(state, team)   # 序4：純血仇攻擊驗魂
 		_wire_threat_task(team, td)   # 迎戰/求和 aux target（prosperity/order）
+		if td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		team.solo_task_last = td["task"]   # F-D4：task 承諾記此槽（solo_intent 保留戰略 intent）
 		team.current_option = opt          # 承諾慣性：引擎 COMMITMENT_BONUS 讀
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根

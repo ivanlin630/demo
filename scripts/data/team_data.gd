@@ -107,6 +107,8 @@ var work_morale: float = 1.0   # 工作態度係數 [0.5,1.5]，reaction 統計�
 var faction_id: int = -1
 var tile_pos: Vector2i = Vector2i.ZERO
 var move_target: Vector2i = Vector2i(-1, -1)  # -1,-1 = 無目標，不移動
+# flee 位移根治：FLEE 派出時設=威脅 belief 位（感知鐵律）；mover 朝遠離此位算 away-tile。release 清。(-1,-1)=無威脅可逃離。
+var flee_from_pos: Vector2i = Vector2i(-1, -1)
 var last_tile_pos: Vector2i = Vector2i(-999, -999)   # 上一移動步位置（observe_velocity 用）
 var move_tick_acc: int = 0
 var combat_target: int = -1
