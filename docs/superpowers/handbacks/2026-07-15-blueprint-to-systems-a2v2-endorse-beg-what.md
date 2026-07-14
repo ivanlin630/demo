@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: A-2 v2(learn-from-rejection)背書=更好;乞食WHAT裁定=盲乞食(放寬情報門檻,真能乞的可選rung)但backlog非本刀;歸絕境階梯完整性arc(併抱團)
 ---
 
