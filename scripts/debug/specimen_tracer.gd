@@ -12,6 +12,9 @@ static var _pending: Dictionary = {}    # team_id → { candidates:[{opt,util}],
 static var winner_hist: Dictionary = {}   # winner_opt → count（做了什麼）
 static var intent_hist: Dictionary = {}   # intent str → count（想什麼）
 static var decision_count: int = 0
+# Fix 2 時間維 heartbeat：team_id→最後 entry tick（capture_decision/heartbeat 更新）→ 補洞判據。
+static var _last_entry_tick: Dictionary = {}
+const HEARTBEAT_CADENCE: int = WorldState.TICKS_PER_DAY / 4   # TEST VALUE — 6h；specimen 無決策超此→補心跳(timeline 無洞、有界)
 
 # specimen 判定：enabled 且 team_id ∈ state.specimen_team_ids（gate 一律過此，零漏）。
 static func is_specimen(state: WorldState, team_id: int) -> bool:
@@ -25,6 +28,7 @@ static func reset() -> void:
 	winner_hist.clear()
 	intent_hist.clear()
 	decision_count = 0
+	_last_entry_tick.clear()
 
 # ── capture_options：DecisionEngine rank/rank_survival 的 scored[] tap（現丟棄，唯一拿全 util 點）──
 # scored 元素 = {u, i, opt}（decision_engine 內部格式）→ 存本決策全候選 {opt, util}。
@@ -64,7 +68,7 @@ static func capture_intent(state: WorldState, team_id: int, intent: String, why:
 
 # ── capture_decision：winner commit tap → 組完整 entry（想什麼/做什麼/狀態 + action target belief）──
 static func capture_decision(state: WorldState, team: TeamData, winner_opt: String,
-		task: String, target: Vector2i) -> void:
+		task: String, target: Vector2i, result: String = "committed") -> void:
 	if not is_specimen(state, team.team_id): return
 	var scr: Dictionary = _scratch(team.team_id)
 	var _solo_t: String = String(team.solo_intent.get("type", "")) if team.solo_intent is Dictionary else ""
@@ -85,17 +89,36 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 			"beliefs": beliefs,
 			"threat": scr.get("threat", {}),
 		},
-		"做什麼": {"winner_opt": winner_opt, "task": task, "target": target},
+		"做什麼": {"winner_opt": winner_opt, "task": task, "target": target, "result": result},
 		"狀態": _snapshot(state, team),
 	}
 	entries.append(entry)
 	_archive.append(entry)   # ★全量 archive（flush 清 entries 不動此）→ write_jsonl 死隊最後決策不遺漏
+	_last_entry_tick[team.team_id] = state.world.current_tick   # Fix 2：更新最後 entry tick（heartbeat 補洞判據）
 	# 聚合（跨 flush 存活，供 summary 診斷 錨→行為）
 	winner_hist[winner_opt] = int(winner_hist.get(winner_opt, 0)) + 1
 	var intent_key: String = str(intent["intent"]) if intent is Dictionary else str(intent)
 	intent_hist[intent_key] = int(intent_hist.get(intent_key, 0)) + 1
 	decision_count += 1
 	_pending.erase(team.team_id)   # 本決策已成 entry，清 scratch
+
+# Fix 2 時間維 heartbeat sweep（evaluate_all 末尾呼）：specimen 隊本 tick 無決策 entry 且距上次 entry 超
+# HEARTBEAT_CADENCE → append 輕 heartbeat entry（_snapshot 純讀，無候選/belief 重算）→ timeline 無 >6h 洞、不膨脹。
+# ★零 state mutation / 零 RNG；specimen-gated（只迭代 specimen_team_ids + enabled gate）→ tracer off 零成本、byte-identical。
+static func heartbeat_sweep(state: WorldState) -> void:
+	if not enabled: return
+	var now: int = state.world.current_tick
+	for tid in state.specimen_team_ids:
+		if not state.teams.has(tid): continue
+		if now - int(_last_entry_tick.get(tid, -999999999)) < HEARTBEAT_CADENCE: continue
+		var team: TeamData = state.teams[tid]
+		var entry: Dictionary = {
+			"tick": now, "team_id": tid, "phase": "heartbeat", "reason": "no-decision",
+			"狀態": _snapshot(state, team),
+		}
+		entries.append(entry)
+		_archive.append(entry)
+		_last_entry_tick[tid] = now
 
 # ── flush：印可讀 timeline（mirror warring per-month summary），tag [Specimen T<id>] ──
 static func flush() -> void:
@@ -203,6 +226,13 @@ static func _target_team_id(state: WorldState, target: Vector2i) -> int:
 	return -1
 
 static func _print_entry(e: Dictionary) -> void:
+	# Fix 2 heartbeat entry（無 想什麼/做什麼，只 狀態）→ 輕印，不存取決策欄（防 Invalid get index）。
+	if e.get("phase") == "heartbeat":
+		var hs: Dictionary = e.get("狀態", {})
+		print("[Specimen T%d] tick=%d ♥heartbeat（no-decision）pop=%d food(eff=%.1f)" % [
+			int(e.get("team_id", -1)), int(e.get("tick", -1)),
+			int(hs.get("pop", 0)), float(hs.get("effective_food", 0.0))])
+		return
 	var w: Dictionary = e["想什麼"]
 	var d: Dictionary = e["做什麼"]
 	var s: Dictionary = e["狀態"]
