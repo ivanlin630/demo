@@ -623,3 +623,9 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **★撲空後 aftermath 未觀測**：Fix F 追兵斷視線→去 belief last-seen 撲空已驗（單 tick 靜態，QA 撲空核心連貫）。但**追兵到達空的 last-seen 之後做什麼**（搜索周邊/放棄 re-eval/凍結/thrash）**完全沒驗證過**——pursuit_hiding_bed 是單 tick 靜態驗證非 multi-tick trace。**修向**：延長 pursuit 床多跑幾 tick 判 aftermath 連貫（或 tracer-completeness arc 順帶，因它正是看 multi-tick 行為）。態③(stale→release)理論上接手放棄，但未 organic 驗。
 - **門檻④ HOB/sanity=implementer 自報未獨立複驗**：Fix F+床 infra 小 code 面，systems 判 HOB 回歸風險可忽略（belief_pos 非 LOD-gated、行為只斷視線 rare case 岔開、determinism 兩跑 byte-identical）→ 接受自報 merge。若日後 HOB obey% 異常回溯此決定。
 - **_find_weakest_prey 同-faction 不濾**（R² Fix F advisory②，pre-existing）：見上「選敵 finder」條。
+
+## 俘虜處置擴選項 = ③內部政治 slice（用戶定 B，2026-07-15，backlog 非急）
+- **現況**：`decide_treatment` 只 厚待(→同化)/苛待(→暴動逃)。**缺主動殺俘**——③內部政治我們假設過殺俘存在但 code 沒有。
+- **擴為完整人格化道德選項集**（`game-design.md §俘虜處置` owner=blueprint）：**殺俘/處決**（殘忍高→屠/低→受降，★帶③凝聚成本:殺俘違背低殘忍成員→不滿→defect/激進化）、**贖金**（貪婪高→勒贖，俘虜原勢力付得起才成=belief-gated 鏡射 look-before-leap）、**釋放**（義氣/慈悲→放走→名聲升）。各選項人格驅動→同批俘虜不同領袖處置全異=道德戲。
+- **邊界**：decide_treatment 本身已是合法域專 scorer（讀殘忍，穿人格，非 unification blocker——見 invariants 域專判斷器邊界原則）；本 slice=**擴選項集**（加殺俘/贖金/釋放 option + 各自人格驅動 + 殺俘的③成本），非重構成 rank。
+- **排序**：backlog，非急、**不擋** god-view/tracer-completeness。**標記「③內部政治 slice 的一部分」**——殺俘的牙（領袖決策違背成員→凝聚成本）=③同根，開③內部政治 slice 時一起做。
