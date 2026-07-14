@@ -45,8 +45,20 @@ governing: `game-design.md §決策模型 v2`（現實 gate 慾望）+ `invarian
 ## Fix C：連貫窮死（驗收準，非機制）
 真四方無糧（無 local 覓/買、無已知糧源可遷移、無 prey/aid/join）→ 餓死＝合法悲劇（判準表 窮死 ✅）。**QA 驗 winner 連貫**：死前 trace 是「覓食/遷移找糧/乞食/掠奪/併入 輪番嘗試、四處落空」，**非死守買糧海市蜃樓**。這是故事 QA 驗收，非 code gate。
 
+## Fix A-2：併入 look-before-leap（完成 A 覆蓋，2026-07-15）
+**背景**：blueprint 原 A=全求生選項 look-before-leap，v1 只做買糧。QA 複判：買糧✅、掠奪✅（移動延遲非幻覺）、乞食=死 rung（never-selected，另案）、**併入=幻覺**（code 定音，見下）。
+
+**併入幻覺 code 坐實（systems 讀 code 定音）**：`_resolve_join`(`interaction_system:1094`)→`_absorber_accepts`(`:1066`)：`feed_ok = clampf(combined_days/ABSORBER_MIN_SURVIVE_DAYS,0,1)`，`accept_util=(野心0.6+統領0.4)×feed_ok`，`< ACCEPT_UTIL_THRESHOLD` → 拒 → `release joiner`。**餓世界 absorber+joiner 合隊糧低→feed_ok≈0→恆拒**→joiner 重選併入→又拒→loop，`faction_id` 永不變。`_resolve_mergein` 是 **full-or-nothing absorb（無 partial）**→Team26 pop 3→2→1=餓死非漸進吸收（blueprint(b)排除）。∴ 併入同買糧幻覺。
+
+**設計（Fix A gate 家族，慾望配現實）**：`decision_context` 加 `has_acceptable_join_host: bool`，gate `options.gd:103` 併入 applicable：
+- **honest 定義（守感知鐵律）**：有**可達**（PathSystem）host（strong_neighbor/consolidate_target）且 joiner **依自身認知預估** host 收得起——鏡射 `_absorber_accepts` 的 feed_ok，但**用 joiner 對 host 的 belief 估 host 糧/pop**（`BeliefSystem.best_estimate`），**非 god-view 讀 host 精確 effective_food**。粗估 `combined_days_est ≥ ABSORBER_MIN_SURVIVE_DAYS × 保守係數` 才算 acceptable。
+  - 無 belief（沒情報）→ 保守**當不可估**（不入候選；認慫投靠陌生強鄰本就該先有接觸/情報，合感知鐵律）。
+- `options.gd:103`：併入 applicable 加 `and ctx.has_acceptable_join_host`。
+- 效果：餓世界無收得起的 host 時**併入不入候選**（不追必被拒的幻覺）→ 隊 fall through 覓食/遷移/掠奪 或連貫窮死。**這是慾望配現實在投靠層**。
+- ⚠ **不誤殺真投靠**：belief 估 host 收得起（含 stale/失真副本，同 A 不濾原則）→ 入候選；到場真被拒（host 現況變）→ 既有 release 回退（撲空 emergent 保留，非 bug）。gate 只擋「明知（依情報）沒 host 收得起」的純幻覺，非所有可能撲空。
+
 ## 觸及檔
-- `decision_context.gd`：`has_buyable_food`（received food 賣單，≤MERCHANT_MAX_RANGE，不濾 stale）+ `food_seek_target`（VisionSystem 視野內 wild_game[繼承 pop 守衛] / 已知食物賣單，皆過 PathSystem 可達）（+ gather 填）。
+- `decision_context.gd`：`has_buyable_food`（received food 賣單，≤MERCHANT_MAX_RANGE，不濾 stale）+ **`has_acceptable_join_host`（belief 估可達 host 收得起，Fix A-2）** + `food_seek_target`（VisionSystem 視野內 wild_game[繼承 pop 守衛] / 已知食物賣單，皆過 PathSystem 可達）（+ gather 填）。
 - `options.gd`：買糧 applicable 加 `has_buyable_food` gate；新 `遷移找糧` option（applicable + to_task + SURVIVAL_OPTION_SET）。
 - `terms.gd`：遷移找糧 weight term（survival_pressure 驅）。
 - finder（`faction_ai` helper 或 context 內）：VisionSystem-導出半徑 wild_game 掃 + received 食物賣單 pos + PathSystem 可達過濾。
