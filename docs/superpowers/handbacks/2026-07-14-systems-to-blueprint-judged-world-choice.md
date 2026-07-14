@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[WHAT 待裁] 故事性 QA 判哪個世界?全-HD(機制ground truth) vs LOD(出貨世界) vs Tier1(合成)——觀測不變量與 LOD 有張力;擋 execlock release"
 ---
 

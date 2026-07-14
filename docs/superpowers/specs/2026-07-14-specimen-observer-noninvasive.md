@@ -1,12 +1,13 @@
 # Spec：specimen 觀測非侵入化 + .specimen.jsonl 輸出（觀測不變量修復）
 
-status: ★HALT（R② issues：Fix 1/2/3 機制 CLEAN，但 Fix 2 的 judged-world 選擇=WHAT，待 blueprint 裁後才 dispatch）
+status: draft（judged-world WHAT 已由 blueprint 裁定=A，見下；待 R② re-confirm acceptance 世界界定 → dispatch）
 owner: systems
 premise_verified: 根因 file:line 坐實（sim_runner LOD-exemption）；R① 免（前提 code 坐實，非新概念大框）
-blueprint_intent: `2026-07-14-blueprint-to-systems-execlock-verdict.md`（Q2+⚠️：specimen.jsonl 產不出 + tracer 側效應=系統優先修）
+blueprint_intent: `2026-07-14-blueprint-to-systems-execlock-verdict.md`（Q2+⚠️：系統優先修）
+blueprint_ruling: `2026-07-14-blueprint-to-systems-judged-world-verdict.md`（★裁定 judged-world=A 全-HD force_full_hd；接受 headline 全-HD 重跑；先前 LOD 數作廢）
 governing_invariant: `invariants.md §全量暫態可觀測性`（觀測者不得改變被觀測物）
 
-> **★R② issue 校正（2026-07-14）**：本 spec 原稱「blueprint 已接受全-HD judged 世界」＝**我（systems）主張了未授權的 WHAT**（reviewer 查證：verdict 只授權「系統評①早期 team_id/②Tier1 兩候選」，未見 force_full_hd 第三案，未觸及「judged 全-HD 世界 vs 出貨 LOD 世界」取捨）。此為 WHAT 越界（judged-world=藍圖地盤）。**已發 `to:blueprint` 問（`2026-07-14-systems-to-blueprint-judged-world-choice.md`），待裁後才定 Fix 2 + dispatch。** 下文 §Fix2 標「pending blueprint」段落即此缺口。
+> **★judged-world 已裁（2026-07-14，blueprint）**：本 spec 曾（R② 抓）自稱「blueprint 已接受全-HD」＝未授權 WHAT 主張，已問 blueprint。**blueprint 裁定＝A（全-HD force_full_hd 為故事性 acceptance 正典世界）**：故事發生在 near-LOD（玩家在看的隊）、全-HD=最乾淨 ground truth、thrash 是 near 現象判全-HD=判最嚴、唯一「忠實 organic + 滿足觀測不變量」。**接受 headline+attrition+established+specimen story 全在 force_full_hd 跑一次（同源）；先前 LOD 的 -84.7%/established 1→2 作廢，以全-HD 重跑為正典。** LOD-vs-full-HD 分化=fidelity 隱憂 → **未來獨立 vision 稽核 flag（非本 slice）**，見 `progress.md` backlog。
 
 ## 一句話
 **SpecimenTracer 的 specimen 標記把被標記隊強制升 near-LOD（`sim_runner:458/470`）→ 該隊決策 cadence 從 far(FAR_ZONE_INTERVAL) 變 near(每-tick)→ 軌跡分化 + 消耗不同 RNG 連帶改其他隊（Team20 整場消失）＝觀測者改變被觀測物,直接違反剛立的觀測不變量**,讓故事性 QA 工具鏈不可信。修＝觀測與 LOD 解耦。
@@ -31,13 +32,14 @@ governing_invariant: `invariants.md §全量暫態可觀測性`（觀測者不�
 - 效果：**specimen 標記對 LOD tier 零影響**→ 任何模式下換 specimen id 不改任何隊軌跡（觀測純被動）。滿足觀測不變量。
 - **player 豁免不動**：player team 仍 near（原意保留，player 是真玩家焦點非觀測探針；註解 :457 「mirror player 豁免」的類比錯——player 是遊戲主體,specimen 是外部觀測者,兩者語意相反,移除 specimen 部分）。
 
-## Fix 2（acceptance 協議）：故事 trace 跑 force_full_hd
-移除 exemption 後，headless-no-player 下**所有隊皆 far**（player_pos=(-1,-1)，`:483`）→ 無隊跑 near-pipeline → 決策 trace 稀疏、thrash（near 現象）看不到。∴ **acceptance/故事-trace 床設 `SimRunner.force_full_hd = true`**：
+## Fix 2（acceptance 協議·★blueprint 裁定 A）：全 acceptance 跑 force_full_hd
+移除 exemption 後，headless-no-player 下**所有隊皆 far**（player_pos=(-1,-1)，`:483`）→ 無隊跑 near-pipeline → 決策 trace 稀疏、thrash（near 現象）看不到。∴ **acceptance/故事-trace 床設 `SimRunner.force_full_hd = true`**（blueprint 裁定 A）：
 - 全隊 near、統一全-HD → specimen 不特殊（大家都 near）→ **零 per-team 分化 + 零連帶 RNG 岔開**（`:452` 早返回，specimen clause 本就 dead）→ 觀測不變量滿足。
 - 完整決策 trace（specimen 每 tick 決策全捕）+ 自洽世界 + determinism（同 seed）。
 - perf：全-HD 慢，但 acceptance/診斷床本就容許慢（`03b §④ caveat`）。
-- **judged 的是全-HD 世界**（無 LOD 近似）＝故事性判官要的「機制產不產出連貫故事」的 ground truth（LOD 是 perf 近似；若 LOD 本身改故事＝另一 LOD-fidelity 觀測不變量議題，非本 slice）。
-- **headline churn 也在 force_full_hd 跑**（branch vs base 同模式）→ thrash 數字與 story trace 同世界、可交叉核。
+- **judged 的是全-HD 世界＝故事性 acceptance 正典世界（blueprint 裁定）**：故事發生在 near-LOD（玩家在看的隊）、全-HD=機制無 LOD 近似的 ground truth、thrash 是 near 現象判全-HD=判最嚴。
+- **★headline 一致性重跑（blueprint 接受）**：**headline churn + attrition + established + specimen story 全在 force_full_hd 跑一次（同源世界）**。先前 execlock LOD 數（-84.7%/established 1→2）**作廢**，以全-HD 重跑為正典，blueprint 重看一組全-HD 數字判。branch vs base 同 force_full_hd 模式對照。
+- **LOD-vs-full-HD 分化**＝獨立 fidelity 隱憂，blueprint 傾向「LOD 該 match full-HD（命運不該因玩家看不看而不同）＝fidelity bug」→ **未來獨立 vision 稽核（拉用戶定 LOD 允不允許分化），非本 slice**（`progress.md` backlog）。
 
 ## Fix 3（Q2a）：SpecimenTracer .specimen.jsonl 輸出
 `specimen_tracer.gd` 加結構化 writer（純觀測，守「禁改 state」）：
@@ -63,7 +65,8 @@ governing_invariant: `invariants.md §全量暫態可觀測性`（觀測者不�
 1. **★觀測非侵入（headline，不變量操作定義）**：同 seed（1337）force_full_hd，specimen_team_ids=[A] vs =[B] 兩跑 → **除 SpecimenTracer entries 外，世界狀態/其他隊軌跡 byte-identical**（換 specimen 不換世界）。這是 tracer 侵入性根治的證明。
 2. **完整 trace 產出**：force_full_hd + specimen=seed1337 死隊 → `.specimen.jsonl` 產出、非空、含死隊死前決策時序（想法+狀態+資源）；`decision_count > 0`（Fix B tap-gap 已收，此處驗子隊 trace 進 jsonl）。
 3. **故事性可判**：QA 故事判官能讀 `.specimen.jsonl` 判 seed1337 多死 motive→action→outcome（此 slice 的下游閉環）。
-4. **不回歸**：determinism（force_full_hd 同 seed 逐點重現）；憲法 sites 不變；既有 specimen 用途（headless_test specimen=[0]）不壞（在 force_full_hd 或 team0-near 情境仍捕）；execlock thrash 修復數字不變（同世界重量）。
+4. **★headline 全-HD 重跑（blueprint 裁 A 一致性）**：execlock branch(`b962fc74`) vs base 在 **force_full_hd** 同世界重跑 → churn/attrition/established/thrash-flip 一組**全-HD 正典數字**（取代作廢的 LOD -84.7%/established 1→2）。故事 trace + headline 同一 force_full_hd 世界（同源可交叉核）。餵 blueprint 重判 execlock release。
+5. **不回歸**：determinism（force_full_hd 同 seed 逐點重現）；憲法 sites 不變；既有 specimen 用途（headless_test specimen=[0]）不壞（在 force_full_hd 或 team0-near 情境仍捕）。
 
 ## dispatch 註（reviewer R② CLEAN 後）
 - R②：觀測非侵入設計是否真根治（移 exemption + full_hd 是否確保換 specimen 零連帶）？jsonl writer 是否純讀不改 state？force_full_hd acceptance 是否 judged 對世界（全-HD vs LOD 的 story-fidelity 取捨 blueprint 已接受）？
