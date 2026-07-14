@@ -56,6 +56,15 @@ var food_market_dist: int = -1
 var has_forage_tile: bool = false
 var forage_pos: Vector2i = Vector2i(-1, -1)
 var has_specie: bool = false
+# Fix A 買糧 look-before-leap（守感知鐵律，不濾 stale）：隊「聽過」≤MERCHANT_MAX_RANGE 的 food 賣單（received，team_known）
+# 才把買糧當慾望目標——從沒聽過任何食物賣單=不追純幻覺。撲空(stale)由 Fix B 遷移/Fix C 連貫死承接。
+var has_buyable_food: bool = false
+# Fix B 遷移找糧 target（視野內可達 wild_game[繼承 pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）；(-1,-1)=真無可達已知糧源。
+var food_seek_target: Vector2i = Vector2i(-1, -1)
+# Fix A-2 v2（rejection-learning）：有可達且未近期被拒的 host 才把併入當出路——破「餓世界恆拒→重選併入→又拒」loop。
+# host 鏡射 to_task:200 優先序（strong_neighbor else consolidate，非 OR）；cooldown 過期可再試（非永久黑名單）。
+var has_acceptable_join_host: bool = false
+const JOIN_REJECT_COOLDOWN_TICKS: int = 480   # TEST VALUE — 被拒後 N tick 內不重選此 host（跨多 cadence 破 loop，過期再試）
 # 經濟底：自家糧倉 food（含遠端家，team 不在家也讀得到）→ 返家補給 home-empty gate 用。
 var home_food: float = 0.0
 # P3/P4 混合協調：派系 stakes directive 集合（攻擊/徵收/外交）。
@@ -229,6 +238,16 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		or _weapon_liquid
 	# home_food：自家糧倉 food（掃自有 outpost tile，team 不在家也讀得到 → 空家判定）。
 	c.home_food = DecisionContext._home_granary_food(state, team)
+	# Fix A 買糧 look-before-leap：隊「聽過」≤MERCHANT_MAX_RANGE 的 food 賣單才追買糧
+	# （received=team_known 物理在場/傳播，守感知鐵律；★不濾 stale=血訓 G1d/r3，撲空由 B/C 承接）。
+	c.has_buyable_food = false
+	for _so in OrderSystem.new().received_sell_orders(state, team):
+		if String(_so.get("res", "")) == "food" \
+				and _fa._hex_dist(team.tile_pos, _so.get("pos", Vector2i.ZERO)) <= OrderSystem.MERCHANT_MAX_RANGE:
+			c.has_buyable_food = true
+			break
+	# Fix B 遷移找糧 target（視野內可達 wild_game[pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）。
+	c.food_seek_target = _fa._find_food_seek_target(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)
 	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:
@@ -333,6 +352,21 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			Probe.add_amount("absorb.yield_sum", c.absorb_yield)
 			if c.resource_slack > 0.05: Probe.bump("absorb.slack_pos")
 			if c.absorb_yield > 0.0: Probe.bump("absorb.yield_pos")
+	# Fix A-2 v2（rejection-learning）：有可達且未近期被拒的 host 才把併入當出路（破恆拒 loop）。
+	# host 鏡射 to_task:200 優先序（strong_neighbor else consolidate，非 OR）；純讀 memory/PathSystem。
+	c.has_acceptable_join_host = false
+	var _jhost: int = c.strong_neighbor_id if c.strong_neighbor_id != -1 else c.consolidate_target_id
+	if _jhost != -1 and state.teams.has(_jhost):
+		var _reachable: bool = not PathSystem.find_path(state, team.tile_pos, state.teams[_jhost].tile_pos).path.is_empty()
+		var _recently_rejected: bool = false
+		if ldr != null:
+			for _m in ldr.memory:
+				if String(_m.get("type", "")) == "join_rejected" \
+						and int(_m.get("subject_id", -1)) == _jhost \
+						and state.world.current_tick - int(_m.get("tick", 0)) < JOIN_REJECT_COOLDOWN_TICKS:
+					_recently_rejected = true
+					break
+		c.has_acceptable_join_host = _reachable and not _recently_rejected
 	# 需求金字塔（決策引擎重構 S1）：五層急迫度 EWMA 更新（inert——本 slice 不接 rank_scored）。
 	# compute_raw 讀 food_days/threat(已算) + team/state；ewma_update 累積進持久 team.need_urgency。
 	var _raw_need: PackedFloat32Array = NeedHierarchy.compute_raw(state, team, c.food_days, c.threat)

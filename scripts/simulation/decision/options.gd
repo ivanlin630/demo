@@ -26,6 +26,9 @@ const REGISTRY: Dictionary = {
 	"徵收":   [["faction_duty", "faction_duty"], ["levy_drive", "levy"]],
 	"外交":   [["faction_duty", "faction_duty"], ["diplo_drive", "diplo"]],
 	"買糧":   [["buyfood_drive", "buyfood"]],
+	# Fix B 遷移找糧：絕境階梯新階（當地求生全不可 fulfill → 移向視野內可達糧源）。獨立 option 保承諾慣性/trace
+	# 可讀；weight 複用 survival_pressure（食物越低越想動，同覓食驅力）。排序 emergent（weight×人格 argmax）非硬階梯。
+	"遷移找糧":[["survival_pressure", "survival_pressure"]],
 	# means-end：致富+餘糧 → 蓋倉囤貨低買高賣（複用 TASK_TRADE 到市集 hub，非新機制）。
 	"囤貨":   [["intent_fit", "intent_fit"]],
 	# 融合 threat（序1 溶入）：4 反應 repertoire 中的 3（FLEE=既有 survival option）。
@@ -46,7 +49,7 @@ const REGISTRY: Dictionary = {
 const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練", "吸納"]   # §HOW-7 吸納=擴張戰略,子隊不自主發起
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
-const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "併入", "紮營", "乞食", "買糧"]   # S-A §HOW-6：統一「併入」(join+整併合一)絕境求生
+const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "併入", "紮營", "乞食", "買糧", "遷移找糧"]   # S-A §HOW-6：統一「併入」(join+整併合一)絕境求生；Fix B 遷移找糧
 
 # 序4 vendetta 溶入：血仇開打門檻（防輕微不快即戰）。TEST VALUE。
 const FEUD_ATTACK_MIN := 0.5
@@ -100,7 +103,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 						out.append(opt)
 			"併入":
 				# §HOW-8 ungate + §3b：絕境 OR 威脅認慫。host = rep 保護傘(strong_neighbor,跨faction) 或 consolidate_target(同faction)。
+				# Fix A-2 v2：+ has_acceptable_join_host（可達且未近期被拒的 host）→ 不追必被拒的併入幻覺 loop。
 				if (ctx.has_strong_neighbor or ctx.consolidate_target_id != -1) \
+						and ctx.has_acceptable_join_host \
 						and (ctx.food_days < DecisionTerms.DESPERATION_DAYS \
 							or (ctx.has_strong_neighbor and ctx.threat > ctx.threat_threshold)): out.append(opt)
 			"吸納":
@@ -132,9 +137,19 @@ static func applicable(ctx: DecisionContext) -> Array:
 				# 派系 directive=外交 且有獨立鄰 target → 候選。
 				if "外交" in ctx.faction_stakes and ctx.faction_diplo_target != -1: out.append(opt)
 			"買糧":
-				# 餓 + 有市集 + 有錢 → 買糧候選（無錢=乞食真語意，不入）。
-				# 駐村隊不濾（同「貿易」註：餓村掛 TRADE 姿態=向來客買糧）。
-				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market and ctx.has_specie:
+				# 餓 + 有市集 + 有錢 + ★聽過食物賣單(has_buyable_food) → 買糧候選（Fix A look-before-leap：
+				# 從沒聽過任何食物賣單=不追純幻覺；無錢=乞食真語意，不入）。駐村隊不濾。
+				if ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market \
+						and ctx.has_specie and ctx.has_buyable_food:
+					out.append(opt)
+			"遷移找糧":
+				# Fix B 絕境階梯新階：餓 + 有可達已知糧源(food_seek_target) + 當地覓食·買糧皆不 applicable
+				# → 移向糧源（有 local 出路優先 local，不遷移）。撲空/target 消失由 cadence 重秤 + C 連貫死收。
+				var _forage_ok: bool = ctx.population <= FactionAISystem.FORAGE_VIABLE_POP and ctx.has_forage_tile
+				var _buyfood_ok: bool = ctx.has_food_market and ctx.has_specie and ctx.has_buyable_food
+				if ctx.food_days < DecisionTerms.DESPERATION_DAYS \
+						and ctx.food_seek_target != Vector2i(-1, -1) \
+						and not _forage_ok and not _buyfood_ok:
 					out.append(opt)
 			# ── 融合 threat：threat-gated（威脅過門檻才候選）──
 			"備戰":
@@ -162,6 +177,12 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		"生產":   return {"task": TeamData.TASK_MANUFACTURE, "target": team.tile_pos}
 		"建設":   return {"task": TeamData.TASK_BUILD, "target": team.tile_pos}
 		"覓食":   return {"task": TeamData.TASK_FORAGE, "target": FactionAISystem.new()._find_forage_tile(state, team)}
+		"遷移找糧":
+			# Fix B：移向視野內可達糧源（wild_game 遠格/糧市 pos）。複用 TASK_FORAGE（移動+抵達覓食）。
+			# 抵達後本地覓食/買糧於 next cadence 引擎重秤自然承接（零新 try_set 落點；憲法閘 baseline 不變）。
+			var fst: Vector2i = FactionAISystem.new()._find_food_seek_target(state, team)
+			if fst == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_FORAGE, "target": fst}
 		"survival": return {"task": TeamData.TASK_FLEE, "target": Vector2i(-1,-1)}
 		"駐守":   return {"task": TeamData.TASK_GOVERN, "target": team.tile_pos}
 		"返家補給": return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.new()._find_own_outpost(state, team)}

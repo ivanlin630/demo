@@ -4863,6 +4863,16 @@ func _mk_market_outpost(state: WorldState, pos: Vector2i) -> void:
 	_seed_pop(seller, 10); seller.resources = {"food": 5000.0, "coin": 100.0}
 	state.teams[99] = seller
 
+# Fix A（desperation-food-seeking）：買糧 look-before-leap 後，applicable 需 has_buyable_food＝隊
+# 「聽過」≤MERCHANT_MAX_RANGE 的 food 賣單（received=team_known）。舊測只擺 market storage（無 posted
+# sell order＝海市蜃樓，Fix A 正修此）→ 注入一筆 received food 賣單使「知道有糧可買」，保原測意圖。
+func _inject_food_sell_order(state: WorldState, buyer_id: int, market_pos: Vector2i) -> void:
+	var msg := MessageData.new()
+	msg.type = "order_sell"
+	msg.params = {"res": "food", "origin_pos": market_pos, "origin_team": 99, "qty": 100, "order_id": 987654}
+	if not state.team_known.has(buyer_id): state.team_known[buyer_id] = []
+	state.team_known[buyer_id].append(msg)
+
 func _test_buyfood_integration() -> void:
 	print("--- 買糧 integration (Phase1) ---")
 	# (a) 餓商隊 + coin + 鄰市集 → 買糧（TASK_TRADE）
@@ -4870,6 +4880,7 @@ func _test_buyfood_integration() -> void:
 	var fa := FactionAISystem.new()
 	var rich := _mk_starving_merchant(s1, Vector2i(0,0), 500.0)
 	_mk_market_outpost(s1, Vector2i(1,0))
+	_inject_food_sell_order(s1, rich.team_id, Vector2i(1,0))   # Fix A：隊知道鄰市集售糧（received）
 	fa._decide_unified(s1, rich)
 	assert(rich.current_task == TeamData.TASK_TRADE, "[buyfood] 餓商隊有錢未買糧 task=%s" % rich.current_task)
 	# (b) 無錢餓商隊 + 鄰市集 → 非買糧（落乞食/紮營）
@@ -4877,6 +4888,7 @@ func _test_buyfood_integration() -> void:
 	var broke := _mk_starving_merchant(s2, Vector2i(0,0), 0.0)
 	broke.resources = {"food": 5.0, "coin": 0.0, "goods": 5.0}   # has_specie=false
 	_mk_market_outpost(s2, Vector2i(1,0))
+	_inject_food_sell_order(s2, broke.team_id, Vector2i(1,0))   # 有 buyable_food，隔離「無錢」為唯一不買因
 	fa._decide_unified(s2, broke)
 	assert(broke.current_task != TeamData.TASK_TRADE, "[buyfood] 無錢隊竟買糧 task=%s" % broke.current_task)
 	print("[buyfood] integration OK (rich=%s broke=%s)" % [rich.current_task, broke.current_task])
@@ -4909,6 +4921,7 @@ func _test_econ_empty_home_no_return() -> void:
 	var fa := FactionAISystem.new()
 	var forester := _mk_forest_team(s1, Vector2i(2,2), 0.0)   # 家糧倉空
 	_mk_market_outpost(s1, Vector2i(3,2))                     # 鄰市集（owner 99）
+	_inject_food_sell_order(s1, forester.team_id, Vector2i(3,2))   # Fix A：隊知道鄰市集售糧（received）
 	var ctx := DecisionContext.gather(s1, forester)
 	assert(ctx.home_food < 1.0, "[econ] 前置:家糧倉非空 home_food=%.1f" % ctx.home_food)
 	assert(ctx.has_specie, "[econ] material 充卻 has_specie=false(未納特產)")

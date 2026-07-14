@@ -6,6 +6,21 @@ const SCOUT_BONUS: float  = 2.0  # TEST VALUE — 偵查=1.0 最多 +2 hex
 const TERRAIN_VISION_MULT: Dictionary   = { "plains": 1.0, "forest": 0.6, "mountain": 0.8 }
 const TERRAIN_EXPOSURE_MULT: Dictionary = { "plains": 1.0, "forest": 0.5, "mountain": 0.7 }
 
+# 單一權威：team 當前視野半徑（= tick_discovery vrange 同式，鏡射不 drift）。
+# 供 decision finder 導出「隊看得到多遠」——守感知鐵律：只找視野內糧源，非 god-view/自由常數。
+# time_vision_mult 預設 1.0（decision finder 用 base 視野；day/night 由 sim 傳入才計）。
+static func vision_range(state: WorldState, team: TeamData, time_vision_mult: float = 1.0) -> int:
+	var total: float = 0.0
+	var count: int = 0
+	for pid in ([team.leader_id] as Array) + team.named_members:
+		var p: PersonData = state.persons.get(pid)
+		if p: total += float(p.skills.get("偵查", 0.0)); count += 1
+	var scout: float = total / maxf(float(count), 1.0)
+	var obs_tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	var obs_terrain: String = obs_tile.terrain if obs_tile != null else "plains"
+	var vmult: float = float(TERRAIN_VISION_MULT.get(obs_terrain, 1.0))
+	return roundi((VISION_RADIUS + scout * SCOUT_BONUS) * vmult * time_vision_mult)
+
 func tick_discovery(state: WorldState, team_ids: Array,
 		time_vision_mult: float = 1.0) -> void:
 	for tid in team_ids:
