@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[討論回·架構定音] tracer 窗口根因=commit-gated tap(非 perf/非觀測改世界);全生命對1隻specimen便宜(無perf否決);升閘=YES;★god-view控制場景短窗不需等此修→不擋"
 ---
 
