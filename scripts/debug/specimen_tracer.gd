@@ -28,7 +28,7 @@ static func reset() -> void:
 
 # ── capture_options：DecisionEngine rank/rank_survival 的 scored[] tap（現丟棄，唯一拿全 util 點）──
 # scored 元素 = {u, i, opt}（decision_engine 內部格式）→ 存本決策全候選 {opt, util}。
-static func capture_options(state: WorldState, team: TeamData, scored: Array) -> void:
+static func capture_options(state: WorldState, team: TeamData, scored: Array, ctx: DecisionContext = null) -> void:
 	if not is_specimen(state, team.team_id): return
 	var cands: Array = []
 	for e in scored:
@@ -43,6 +43,12 @@ static func capture_options(state: WorldState, team: TeamData, scored: Array) ->
 			or (_tgt == Vector2i(-1, -1) and _task != TeamData.TASK_FLEE)
 		cands.append({"opt": opt, "util": float(e.get("u", 0.0)), "nd": nd})
 	_scratch(team.team_id)["candidates"] = cands
+	# 威脅來源（純讀 ctx）：QA 判 survival/flee 空鎖有無真威脅驅動（threat_id=-1+react≈0=無威脅空鎖=慢版 thrash 嫌疑）。
+	if ctx != null:
+		_scratch(team.team_id)["threat"] = {
+			"threat_id": ctx.threat_id, "threat_pos": ctx.threat_pos,
+			"threat_react": snappedf(ctx.threat_react, 0.01),
+		}
 
 # ── capture_intent：commander _emit_goal / solo _evaluate_independent_strategy tap ──
 static func capture_intent(state: WorldState, team_id: int, intent: String, why: String, mode: String) -> void:
@@ -70,6 +76,7 @@ static func capture_decision(state: WorldState, team: TeamData, winner_opt: Stri
 			"intent": intent,
 			"candidates": scr.get("candidates", []),
 			"beliefs": beliefs,
+			"threat": scr.get("threat", {}),
 		},
 		"做什麼": {"winner_opt": winner_opt, "task": task, "target": target},
 		"狀態": _snapshot(state, team),
@@ -154,6 +161,15 @@ static func _snapshot(state: WorldState, team: TeamData) -> Dictionary:
 		"貪婪": snappedf(float(lv.get("貪婪", 0.5)), 0.01),
 		"food_sec_target": snappedf(DecisionTerms.food_security_target(lv), 0.1),   # 該性格的食物安全存量目標(天)
 	}
+	# 買糧執行鏈可觀測（純讀 active_orders/tile）：分「換皮(單卡 never 到市集/never 成交)」vs「成交沒 tap」。
+	var _buy_food_qty: int = 0
+	var _orders_summary: Array = []
+	for o in team.active_orders:
+		_orders_summary.append({"kind": o["kind"], "res": o["res"], "qty_rem": int(o["qty_remaining"])})
+		if o["kind"] == "buy" and o["res"] == "food":
+			_buy_food_qty = int(o["qty_remaining"])
+	var _mtile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	var _at_market: bool = _mtile != null and _mtile.outpost_level > 0   # 在市集 outpost（讀板成交前提）
 	return {
 		"pop": team.population,
 		"food_private": float(team.resources.get("food", 0)),
@@ -165,6 +181,9 @@ static func _snapshot(state: WorldState, team: TeamData) -> Dictionary:
 		"coin": float(team.resources.get("coin", 0)),
 		"material": float(team.resources.get("material", 0)),
 		"leader_traits": traits,
+		"active_buy_food_qty": _buy_food_qty,
+		"at_market": _at_market,
+		"orders": _orders_summary,
 	}
 
 # action target Vector2i → 站該格的 team_id（belief re-query 用）；無/自己 → -1。

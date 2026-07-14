@@ -22,6 +22,7 @@ const CFG := "res://config/warring_states.json"
 func _initialize() -> void:
 	_test_lod_partition_noninvasive()
 	_test_jsonl_production()
+	_test_trade_threat_taps()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -120,4 +121,56 @@ func _test_jsonl_production() -> void:
 	#   若只讀 entries（flush 會清），行數會 << decision_count。
 	_ok(n_lines == total_decisions,
 		"jsonl 行數(%d)==decision_count(%d)：archive 跨 flush 全捕不遺漏" % [n_lines, total_decisions])
+	SpecimenTracer.reset()
+
+# ── 交易執行 + 威脅來源 tap（slice: specimen-trade-threat-taps；QA 缺口①②）──
+# spec: docs/superpowers/specs/2026-07-14-specimen-trade-threat-taps.md
+# Fix1 _snapshot 加 active_buy_food_qty/at_market/orders（買糧執行鏈可判換皮 vs tap-miss）。
+# Fix2 capture_options 收 ctx → 想什麼.threat（threat_id/threat_pos/threat_react；判空鎖有無真威脅）。
+func _test_trade_threat_taps() -> void:
+	print("--- 交易執行 + 威脅來源 tap：jsonl 含新欄 ---")
+	var world_seed := 1337
+	var ticks := 200
+	var sr: Array = _setup_world(world_seed)
+	var state: WorldState = sr[0]
+	var runner: SimRunner = sr[1]
+	SimRunner.force_full_hd = true
+	var ids: Array = state.teams.keys()
+	ids.sort()
+	state.specimen_team_ids.assign(ids.slice(0, mini(5, ids.size())))
+	SpecimenTracer.reset()
+	SpecimenTracer.enabled = true
+	var no_player := Vector2i(-1, -1)
+	for _tick in range(ticks):
+		runner.advance_tick(state, no_player)
+		if state.encounter_active and state.encounter_tick > 800:
+			runner._encounter_system.resolve_encounter_end(state, "draw")
+	var path := "user://specimen_trade_threat_trace.jsonl"
+	SpecimenTracer.write_jsonl(path)
+	SpecimenTracer.enabled = false
+	SimRunner.force_full_hd = false
+
+	var f := FileAccess.open(path, FileAccess.READ)
+	_ok(f != null, "jsonl 檔開得成")
+	var n := 0
+	var trade_ok := false   # 狀態含 active_buy_food_qty/at_market/orders
+	var threat_ok := false  # 想什麼.threat 含 threat_id/threat_react
+	if f != null:
+		while not f.eof_reached():
+			var line := f.get_line()
+			if line.strip_edges().is_empty(): continue
+			n += 1
+			var e = JSON.parse_string(line)
+			if not (e is Dictionary): continue
+			var snap = e.get("狀態", {})
+			if snap is Dictionary and snap.has("active_buy_food_qty") and snap.has("at_market") and snap.has("orders"):
+				trade_ok = true
+			var want = e.get("想什麼", {})
+			if want is Dictionary and want.get("threat", null) is Dictionary \
+					and want["threat"].has("threat_id") and want["threat"].has("threat_react"):
+				threat_ok = true
+		f.close()
+	_ok(n > 0, "jsonl 非空(%d 行)" % n)
+	_ok(trade_ok, "Fix1：狀態含 active_buy_food_qty/at_market/orders（交易執行可判）")
+	_ok(threat_ok, "Fix2：想什麼.threat 含 threat_id/threat_react（威脅來源可判）")
 	SpecimenTracer.reset()
