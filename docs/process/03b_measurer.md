@@ -29,6 +29,7 @@
 3. **`[GODOT TIMEOUT]` = bed 被殺 ≠ 迴歸。** 區分「量到迴歸」vs「沒量到（工具超時/flake）」。沒量到 → 報「量測不完整」給藍圖 halt，**別當迴歸、別讓 QA 拿空報告判**。
 4. **perf 比 per-tick 同規模、不撞絕對門檻**：warring 天生慢是 pre-existing（main 也有）。比「本 branch 同 tick/同隊數 ≤ main」；wall 差可能只是世界岔開（存活隊多），非單位變慢（A2a 教訓）。
 5. **只跑探針+寫報告，不改 `scripts/` code、不判決。**
+5b. **★godot exe 直印 log = UTF-16LE（QA 抓，2026-07-15）**：不經 wrapper（`godot.ps1` 強制 UTF-8）的 godot exe 直印 log ＝ **UTF-16LE**，直接 `Read`/grep 會亂碼。**存 log 前先轉 UTF-8**（`iconv -f UTF-16LE -t UTF-8`）或一律用 wrapper，別讓下游讀的人重踩。**存 jsonl/measurements 檔亦然**（下游 QA/blueprint 讀）。
 7. **★量測可溯源：原始輸出必落地檔 + 附 commit hash（用戶定 2026-07-13，see §可溯源協議）**——handback 裡的數字**不准裸轉述**，必附來源檔路徑（+行）與量測當下 HEAD hash。血教訓：71/22/7% winner 轉述進 handback、原始 print 沒存檔、沒標 hash → 事後對不上 main(100%覓食) 分不清「舊 code 過期數字」vs「determinism 壞了」，只能重跑辨。
 6. **★一次量完 → 一封完整信（禁分批/append，用戶定 2026-07-09）**：**全部**（spec §驗收法守衛 + 標準床 HOB/const/sanity/teamtrace + perf baseline）**都跑完才寄一封涵蓋所有數字的信**。禁分批、禁 append 到已寄信。**理由=信箱競態**：QA 讀第一封即 `consumed`（義務只掃 `to:我 && status:open`），晚到的第二批補在原信後/後續新信 → **靜默漏看 → 用不完整驗證 merge**。缺任一守衛/床 → **不寄**，或寄 `status:open` 明標 `incomplete:[…]` 報藍圖等補齊，**絕不寄一封讓 QA 誤以為齊全的部分信**。
 
@@ -57,6 +58,7 @@
 | world-gen 結構/分布/地板/variety | `scripts/debug/worldgen_floor_scan.gd` | 只呼叫 `GameSetup.setup`（不跑 sim），多 seed（20-30+皆秒級）讀 `worldgen.floor_pass/fail`+outpost/faction 分布+跨seed座標重疊率。支援 `WORLDGEN_CONFIG` env 切換config。 |
 | 標準 organic 多 seed（三端/湧現/perf/§4 baseline） | `scripts/debug/seeded_warring_bed.gd` | Tier 2 用（非迭代）。支援 `WARRING_CONFIG` env（2026-07-12 補，向下相容預設 warring_states.json）切換 config；`WARRING_RESUME`+`WARRING_PROGRESS` 支援長跑續接。 |
 | 決策快照（單團/單 tick dump，非 rank 全表） | `scripts/debug/team_trace.gd`／`spine_trace.gd`／`specimen_tracer.gd` | 既有工具，未在本輪重新盤點細節——需要時個別讀。 |
+| ★控制場景 story 驗證（稀有/story-central 行為 before/after，繞 organic seed roulette） | `scripts/debug/pursuit_hiding_bed.gd` | 2026-07-15 建（god-view 首用戶）。手構最小 WorldState（prey belief last-seen A 位 vs live B 位斷視線）驗逃脫撲空率。**場景 spec 與斷言分離設計＝可復用**：後續稀有/story-central option（乞食/求和/未來）掛此床，別再賭 organic。inert-by-absence（organic seed 撞不到稀有行為）→ 用此床，非大構 organic 窗。 |
 
 **缺的常用維度**：目前無專屬「單機制 A/B 對照秒級床」通用模板（每次新建手構場景），可考慮抽一個共用 helper（`_mk_leader`/`_mk_team`/`_link_belief`，`consolidation_decision_trace.gd` 內已有）給下個 slice 複用，非本輪動作。
 

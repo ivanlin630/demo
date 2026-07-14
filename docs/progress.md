@@ -21,7 +21,22 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
-## 📍 當前狀態（2026-07-15）——絕境找糧真根修 + 觀測 confound 修 merged
+## 📍 當前狀態（2026-07-15）——god-view 位置根治 + 絕境找糧真根修 + 觀測 confound 修 merged
+
+### god-view 位置 belief 化 → main（merge `6aa3ee18`，2026-07-15）
+
+**arc 敘事**：結構稽核揭 god-view 位置＝感知鐵律最大債（選敵+位置感知全知）。敵情/社交目標位置從 god-view 活值 → belief last-seen。**世界從全知變有迷霧**——位置認知腳補上，「決策對得上現實」最大一塊。
+
+**已修（三介面一致 + finder gate）**：
+- **dispatch-time target**（`options.gd to_task` 9 處）→ `belief_pos`（staleness gate `BELIEF_STALE_TICKS`=3天 + 跨-faction→BeliefSystem last-seen / 同-faction→known_member_states 通道分流 + ★fallback (-1,-1) 禁退自身）；佔村→outpost tile 靜態真值（打村格）。
+- **movement_system**（combat/merge/join 逐 tick 追蹤）→ belief_pos（(-1,-1)→不退自身）。
+- **`_refresh_attack_pursuit`（Fix F）engage 後追擊 vision-gate**：engage≠永久鎖 god-view。三態＝①本 tick 可見(`last_tick==current_tick`)→live 攔截合法 / ②斷視線→去 belief last-seen 搜(prey 已移=撲空) / ③過期或無位→release re-eval。
+- **`_nearest_independent`** 補 has_belief gate（只選有情報目標，belief 距離）。
+- **★逃脫成立**：prey 斷視線移走→追兵鎖 last-seen 撲空（非 god-view 直取 live）。QA 撲空核心故事判連貫（motive 斷視線→action 真移動→outcome 撲空舊座標）。解鎖逃脫/迷霧/伏擊/斥候的位置基礎。**首個「控制場景 story 驗證床」`pursuit_hiding_bed.gd` 收進 repo**（可復用 infra，稀有/story-central option 掛它繞 organic roulette）。
+
+**★known_issue（非已驗，別吹）**：**撲空後 aftermath 未觀測**——追兵到空 last-seen 後搜索/放棄/凍結完全沒驗（pursuit 床單 tick 靜態驗證非 multi-tick trace）。需延長 bed 幾 tick 判（backlog / tracer-completeness 順帶）。門檻④ sanity/HOB=implementer 自報（headless 3+3/TDD16 綠，未獨立複驗——小 code 面 Fix F+床 infra，HOB 回歸風險可忽略：belief_pos 非 LOD-gated、行為只斷視線 rare case 岔開）。
+
+**過程**：測試遷移裁定(a)逐函數補（禁 record_claim 補預設＝god-view 漏回）；v1 瞄錯靶（dead decision_context 欄位）→異質框外審(Fable)抓真 wire（options.gd to_task + movement）→v2 重定靶；Fix F R² CLEAN（pipeline 序 vision 在 faction_ai 前無 off-by-one）。門檻①-④ 齊（wiring code-verified / vision-gate / Tier1 撲空演示 / determinism 兩跑 byte-identical + 憲法 sites=29）。
 
 ### 絕境找糧 A/B/A-2 + SpecimenTracer RNG confound → main（merge `24c0c442`，2026-07-15）
 

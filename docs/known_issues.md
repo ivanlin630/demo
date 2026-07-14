@@ -618,3 +618,8 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 
 ## 選敵 finder（_find_weakest_prey 同-faction 不濾 — R② Fix F advisory②,pre-existing）
 - `_find_weakest_prey`(`faction_ai:3311-3332`)迭代 `team_discovered` **無 faction_id 過濾** → `prosperity_target_id` 理論可能曾是同-faction 隊。Fix F 用純 `BeliefSystem.best_estimate`（非 belief_pos 通道分流），同僚可能無 belief claim → 提早進態③放棄。**效果=提早放棄攻擊（保守退化）非危險行為**，pre-existing 非 Fix F 引入,不阻本刀。日後選敵 finder 補同-faction 濾一併處理。
+
+## god-view 位置 belief 化 follow-up（2026-07-15 merge 6aa3ee18）
+- **★撲空後 aftermath 未觀測**：Fix F 追兵斷視線→去 belief last-seen 撲空已驗（單 tick 靜態，QA 撲空核心連貫）。但**追兵到達空的 last-seen 之後做什麼**（搜索周邊/放棄 re-eval/凍結/thrash）**完全沒驗證過**——pursuit_hiding_bed 是單 tick 靜態驗證非 multi-tick trace。**修向**：延長 pursuit 床多跑幾 tick 判 aftermath 連貫（或 tracer-completeness arc 順帶，因它正是看 multi-tick 行為）。態③(stale→release)理論上接手放棄，但未 organic 驗。
+- **門檻④ HOB/sanity=implementer 自報未獨立複驗**：Fix F+床 infra 小 code 面，systems 判 HOB 回歸風險可忽略（belief_pos 非 LOD-gated、行為只斷視線 rare case 岔開、determinism 兩跑 byte-identical）→ 接受自報 merge。若日後 HOB obey% 異常回溯此決定。
+- **_find_weakest_prey 同-faction 不濾**（R² Fix F advisory②，pre-existing）：見上「選敵 finder」條。
