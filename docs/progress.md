@@ -21,7 +21,21 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
-## 📍 當前狀態（2026-07-01）
+## 📍 當前狀態（2026-07-14）——Slice A 求生層統一 merged
+
+### 求生層統一（survival-layer-unify）→ main（merge `a630f2ab`，2026-07-14）
+
+用戶裁定(a)直接 merge。merge 前閘序全綠：R② reviewer CLEAN（升異質框外審 refute-first）｜憲法 site-freeze PASS(sites=29,removed=0)｜regression：branch 與 main 同 3 既有失敗、零新增。
+
+- **內容**：人格化資源預算架構——層0 boost + 候選2 統一門檻 + 層5 + 候選1 + Fix3c（武備隊 barter food 5→142，滿手武器不再餓死）。求生決策搬進引擎/人格秤（`need_hierarchy.gd`/`decision_engine.gd`/`terms.gd`/`faction_ai_system.gd`）。
+- **驗收全貌**：性格顯性化 PASS（食安目標隨慎重遞增／option 分化）｜武備隊 Fix3c PASS｜P25 活教材 PASS（抽搐普通人→雄心開國君 pop 8→11）｜established seed1337 0→1（改善）｜determinism/憲法 PASS。
+- **trade（非純改善）**：attrition 3.7× 惡化 → 修到 1.3-1.7× main（fullprobe 64隊3seed branch 22.97/17.1/21.8% vs baseline 13.5/11.8/16.7%）。本質=死亡率換決策真實性。
+- **殘根=tuning follow-up（非架構絕症）**：軍備堆積餓死型（Team14 死時 coin=47/weapons=3/food=0=有錢優先軍備餓死）。「第三種死法」查證=假象（decision_count=0 是 SpecimenTracer tap-gap 非 AI 沒碰到）。
+- **★follow-up backlog（merge 後 tuning，未 dispatch）**：①層5 餓時食物權重壓過軍備 / weapon-buy drive 調弱 → fullprobe attrition 壓回 baseline 附近（走 patch-gate-first 查為何餓時不 pre-empt 買糧）②boost 觸發頻率 10.52% 偏高觀察（常觸發=上游備糧沒做好靠安全網兜）。
+- **溯源**：fullprobe `docs/measurements/2026-07-14-sliceA-fullprobe-branch-67d4a47.json` vs `-mainbaseline-68c8feb.json`；死因 `2026-07-14-samewrld-team14-deathcause-67d4a47-dirty.log`。
+- **⚠ 既有測試債（非本 slice）**：headless_test 3 個 assertion 失敗 main 早存在（p2a join weight 0.41 / beg_join combat 197 擋 / strategic ladder 擴張未選）——merge 前後同、零新增，屬獨立既有 bug（見 known_issues 待查）。
+
+## 📍 前狀態（2026-07-01）
 
 - **🧭 中長期計畫層 = 主動攀爬取代反應式苟活（✅ S1-S4 全 merged，2026-07-13，established 鏈根治方向）**：established 五層調查鏈用戶裁定的根治——決策只有短期反應無中長期規劃 → 加「承諾式攀爬計畫層」（延伸野心階梯非新求解器,plan_phase=feedback controller 餵 rank_scored 偏置 term）。**S1 rung 事件驅動**（`efa2c69`,milestone_met 升/連續 K 失守降,棄每 10h 瞬時 target_rung 重算抖動;S1 blocker 裁定棄 EWMA 綁 milestone——implementer trace 抓 EWMA 對常數 metric 恆正 demote 永不 fire）。**S2 phase 導出+偏置**（`0af34ec`,缺口×個性×隊形→plan_phase{求糧/成長/聚勢/立國}→plan_phase_drive term;S2 blocker 裁定 B——貿易移出 SEEK_FOOD:貿易=致富主表達由 intent_fit 驅,設計原則「phase map 排他 intent 主表達」化解 reviewer 雙偏置 watch + TC7 個性分歧 collapse）。**S3 survival-bypass**（`6ffcb2b`,劇變 pop驟降30%/food深負-2/leader失→立即重算 rung 為承載力無視遲滯;目標階層≠行動層 survival override）。**S4 GUI**（Observer 露 plan_phase+rung+archetype 攀爬軌跡可讀）。全 slice R²×gate 綠+determinism。**★process 亮點**:plan trace 先於 build 連抓兩設計 bug（S1 EWMA/S2 貿易 collapse）零 merge 污染。**現況**:機制面完成,established 仍恆0——揭 phase 同質化（GROW 獨大=食物修成功不缺糧+attrition 縮 pop<8,pop 成長多路受限:繁殖 safety>0.7鎖+征服吸收 flee-heavy 節流,訂正「繁殖鎖=唯一」over-simplify）+ **ESTABLISH phase 零偏置=立國未接計畫層**（純機械 B-gate）。**下階段=立國 redesign**（加立國意圖進 argmax mirror 建國+B2/B3/B4 硬閘降 modifier+填 ESTABLISH 偏置）=established 最後一哩。plan `2026-07-12-midlong-term-plan-layer`;memory [[project_established_chain]]。
 - **🍖 苟活地板 tune = 解急性餓死崩（✅ merge `0661d19`，2026-07-12，established 五層調查鏈第五輪）**：default.json 深度量測揭 established 恆0，逐層 patch-gate-first 挖出**五層雞生蛋**：①farming 死鎖（獨立隊無食物基建，de-patch `feat/depatch-build-rights` 已 merged）②建國 A 門 pop≥8（82.7% 卡，早崩吃人口）③B2 統領繁榮閘（統領唯一成長=P4_expand 被 `_score_expand` food>100 閘鎖，絕境隊統領凍 ~0.25<門檻~0.35）④leader 週轉吃成長（command-tenure 單獨測 B2 仍卡=leader 死太快，統領累積 170-430 日 >> 在任）⑤**共享上游根=月1-3 急性餓死崩**（86-96% 隊開局負食物流,attrition 45%）。真根=食物 income 路徑結構不足（`_collect_from_tile` task-gated 採集 + farm-gated 倍率 + buffer 800 只 outpost-owner）。**反冗餘 lens 擋掉新建苟活地板**（已存在:`_evaluate_survival`→rank_survival PRIO_SURVIVAL forage + `_forage_subsist_buffer` latch）→ 改 **tune 現有 placeholder 常數**（`FORAGE_FLOOR_DAYS` 1.5→5 給韌性 margin、`PASSIVE_BASE_CHANCE` 0.08→0.30 降空手、wild_game regen 複用 regenerate_tiles）。**★balance 守**:floor 5 天=pop×4.0 < 建國 7 天門 pop×5.6 → 苟活保命但不成長（farming/貿易對繁榮仍必要）。measurer 3mo A/B:attrition 47%→17-31%,5 天優於 7 天（7 無額外改善+貼建國門風險）,苟活≠繁榮守住,determinism CLEAN。融合閘 constitution PASS+headless 零新增。**command-tenure（統領日常成長,loop2 外層 cadence `_grow_leadership_tenure`）已併 worktree 重測 B2**（急性崩腰斬→leader 活久→tenure 累積前提變）——鬆動則一修多解實證,仍卡則加碼（succession 繼承/授XP）。specs `2026-07-12-{depatch-build-rights,command-tenure-growth,forage-floor-tune}-technical`。**教訓**:五層 patch-gate-first 逐層挖（每層修露下一層）最終收斂到共享上游急性崩;反冗餘 lens 擋重複建設改成小改常數;右尺寸砍 A/B（3mo 答急性崩不必 12mo×3seed×2檔 ~4hr→~1hr）。
