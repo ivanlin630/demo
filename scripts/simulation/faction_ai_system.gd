@@ -287,10 +287,21 @@ func _refresh_attack_pursuit(state: WorldState, team: TeamData) -> void:
 		team.prosperity_target_id = -1
 		TaskArbiter.release(team)
 		return
-	# C: 攻擊追擊用攔截預測（朝 prey 移動方向提前 N 步），視野外/不動 fallback intel 最後已知
-	var last_pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, team.prosperity_target_id).get("tile_pos", prey.tile_pos)
-	var predicted: Vector2i = PathSystem.predict_intercept(state, team, prey)
-	team.move_target = predicted if predicted != prey.tile_pos else last_pos
+	# Fix F 追擊 vision-gate（god-view 位置根治）：三態——①本 tick 可見 live 攔截 / ②斷視線去 belief
+	# last-seen(prey 已移=撲空) / ③belief 過期或無位→放棄追擊 re-eval。★不退 prey 活值/自身。
+	var snap: Dictionary = BeliefSystem.best_estimate(state, team.team_id, team.prosperity_target_id)
+	var last_tick: int = int(snap.get("last_tick", -1))
+	if last_tick == state.world.current_tick:
+		# ①本 tick 可見 → live 攔截合法（在視線內；predict_intercept→observe_velocity randf 時機同 Fix C）
+		team.move_target = PathSystem.predict_intercept(state, team, prey)
+		return
+	# 斷視線 → belief last-seen 搜（prey 已移=撲空）；belief 過期/無位 → 放棄追擊
+	var stale: bool = last_tick < 0 or (state.world.current_tick - last_tick) > BeliefSystem.BELIEF_STALE_TICKS
+	if stale or not snap.has("tile_pos"):
+		team.prosperity_target_id = -1
+		TaskArbiter.release(team)
+		return
+	team.move_target = snap["tile_pos"]   # ②last-seen 搜（撲空機制，非 prey 活值現址）
 
 # ──────── 征服攻擊 dispatch-time scout-verify scaffolding（序5 溶入）────────
 # cascade 決策已溶進引擎 攻擊 option（intent_fit 征服 × readiness/富 prey，見 terms/ctx）；
@@ -2101,7 +2112,10 @@ func _nearest_independent(state: WorldState, from_team: TeamData) -> int:
 		var t: TeamData = state.teams[tid]
 		if t.faction_id != -1 or t.team_id == from_team.team_id:
 			continue
-		var d: int = _hex_dist(from_team.tile_pos, t.tile_pos)
+		# god-view 位置根治（Fix D）：補 has_belief gate——只選有情報目標，用 belief last-seen 位置估距（非活值）。
+		var bpos: Vector2i = BeliefSystem.belief_pos(state, from_team.team_id, tid)
+		if bpos == Vector2i(-1, -1): continue   # 無 belief/過期→不選
+		var d: int = _hex_dist(from_team.tile_pos, bpos)
 		if d < best_d:
 			best_d  = d
 			best_id = tid

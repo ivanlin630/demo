@@ -191,26 +191,37 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		"掠奪":
 			var pid: int = FactionAISystem.new()._find_weakest_prey(state, team)
 			if pid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
-			return {"task": TeamData.TASK_LOOT, "target": state.teams[pid].tile_pos, "combat_target": pid}
+			# god-view 位置根治：敵情走 belief last-seen（含 staleness）；無 belief/過期→撲空棄（不移向真值/自身）。
+			var pid_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, pid)
+			if pid_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_LOOT, "target": pid_pos, "combat_target": pid}
 		"佔村":
 			# 攻取據村：TASK_ATTACK 到村格 → 戰勝 capture 自動翻旗（既有）→ 次 cadence has_own_outpost
 			# → 生產/駐守 + _evaluate_outpost_residency 派駐（既有）接手 → 食引擎點火。不新造據點系統。
 			var vid: int = FactionAISystem.new()._find_occupy_target(state, team)
 			if vid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
-			return {"task": TeamData.TASK_ATTACK, "target": state.teams[vid].tile_pos, "combat_target": vid}
+			# ★#7 佔村→打村格（outpost tile 靜態真值：物理設施非隊瞬時位置；belief last-seen 可能覓食位=打空地）。
+			var vpos: Vector2i = FactionAISystem.new()._find_own_outpost(state, state.teams[vid])
+			if vpos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_ATTACK, "target": vpos, "combat_target": vid}
 		"併入":
 			# §3b：host = rep 保護傘(strong_neighbor,跨faction,喂-讀對齊磁鐵) 優先；無則 consolidate_target(同faction)。
 			var _hc: DecisionContext = DecisionContext.gather(state, team)
 			var host: int = _hc.strong_neighbor_id if _hc.strong_neighbor_id != -1 else _hc.consolidate_target_id
 			if host == -1 or not state.teams.has(host): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			return {"task": TeamData.TASK_JOIN, "target": state.teams[host].tile_pos,
+			# belief_pos 內部分流：strong_neighbor(跨-faction)→belief / consolidate(同-faction)→known_member_states。
+			var host_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, host)
+			if host_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_JOIN, "target": host_pos,
 				"social_target": host, "order_target": host}
 		"吸納":
 			# §HOW-7：強方向弱鄰行軍吸納。TASK_MERGE(merger=本強隊,order_target=弱鄰)→_try_merge 分流。
 			var _ac: DecisionContext = DecisionContext.gather(state, team)
 			var prey: int = _ac.absorb_target_id
 			if prey == -1 or not state.teams.has(prey): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			return {"task": TeamData.TASK_MERGE, "target": state.teams[prey].tile_pos, "order_target": prey}
+			var prey_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, prey)   # 弱鄰位置走 belief（同-faction 走 known_member_states）
+			if prey_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_MERGE, "target": prey_pos, "order_target": prey}
 		"紮營":
 			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
 			if ft == Vector2i(-1,-1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
@@ -218,8 +229,10 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 		"乞食":
 			var aid: int = FactionAISystem.new()._find_aid_target(state, team)
 			if aid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			# 社交意圖：設 social_target 非 combat_target（resolver 讀 social_target）
-			return {"task": TeamData.TASK_BEG, "target": state.teams[aid].tile_pos, "social_target": aid}
+			# 社交意圖：設 social_target 非 combat_target（resolver 讀 social_target）。位置走 belief（無/過期→撲空）。
+			var aid_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, aid)
+			if aid_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_BEG, "target": aid_pos, "social_target": aid}
 		"攻擊":
 			# 多源攻擊 target（優先序 faction directive > 征服 intent > 血仇 fallback）。序4 vendetta 溶入：
 			# 純血仇驅動時 target=仇敵（feud_target_id），非粗取 _nearest_independent。ctx gather 取三源
@@ -229,19 +242,26 @@ static func to_task(state: WorldState, team: TeamData, opt: String) -> Dictionar
 				else (_ac.intent_target if _ac.intent_target != -1 else _ac.feud_target_id)
 			if atid == -1 or not state.teams.has(atid):
 				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			return {"task": TeamData.TASK_ATTACK, "target": state.teams[atid].tile_pos, "combat_target": atid}
+			var atid_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, atid)   # 攻擊 target 走 belief last-seen
+			if atid_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_ATTACK, "target": atid_pos, "combat_target": atid}
 		"徵收":
 			# 派系指定最富 member 徵貢（非戰，不設 combat_target）。排除自身（_richest_member 未排）。
 			var f4 = state.factions.get(team.faction_id)
 			if f4 == null: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
 			var rt: int = FactionAISystem.new()._richest_member(state, f4)
 			if rt == -1 or rt == team.team_id: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			return {"task": TeamData.TASK_TRIBUTE, "target": state.teams[rt].tile_pos}
+			# #12 同-faction 徵收 → belief_pos 內走 known_member_states 通道（自家人非敵情 belief）。
+			var rt_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, rt)
+			if rt_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_TRIBUTE, "target": rt_pos}
 		"外交":
 			# 派系指定最近獨立隊外交（非戰，不設 combat_target）。
 			var dt: int = FactionAISystem.new()._nearest_independent(state, team)
 			if dt == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
-			return {"task": TeamData.TASK_DIPLOMACY, "target": state.teams[dt].tile_pos}
+			var dt_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, dt)   # 外交 target(跨-faction)走 belief last-seen
+			if dt_pos == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1,-1)}
+			return {"task": TeamData.TASK_DIPLOMACY, "target": dt_pos}
 		"買糧":
 			# 到最近市集 outpost 走既有 TASK_TRADE；到場 _resolve_market 餓隊 food local_value 高→買 food。
 			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost(state, team)
