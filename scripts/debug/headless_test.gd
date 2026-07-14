@@ -6602,7 +6602,7 @@ func _test_survival_decision_tree() -> void:
 	var prey := TeamData.new(); prey.team_id = 1; prey.tile_pos = Vector2i(1,0); _seed_pop(prey, 3)
 	prey.resources["food"] = 40   # ≤ pop×14=42 → 非 aid 目標(排乞食)；belief food_est≥20 → 可掠
 	s2.teams[0] = t2; s2.teams[1] = prey; s2.team_discovered[0] = [1]
-	BeliefSystem.record_claim(s2, 0, 1, 0, "親見", {"population_est": 3, "food_est": 40}, 1.0, false)  # G3-targeting：選擇讀 belief
+	BeliefSystem.record_claim(s2, 0, 1, 0, "親見", {"population_est": 3, "food_est": 40, "tile_pos": Vector2i(1, 0), "last_tick": s2.world.current_tick}, 1.0, false)  # G3-targeting：選擇讀 belief（position-belief：claim 帶 tile_pos/last_tick）
 	fai._trigger_survival(s2, t2, "urgent")
 	assert(t2.current_task == TeamData.TASK_LOOT, "Path 2 應 掠奪，實際=%s" % t2.current_task)
 	# (3) 義氣 + 信義 → 投靠
@@ -6619,7 +6619,7 @@ func _test_survival_decision_tree() -> void:
 	s3.persons[200] = ally_leader; ally.leader_id = 200
 	s3.teams[0] = t3; s3.teams[1] = ally; s3.team_discovered[0] = [1]
 	t3.known_reputations[1] = 0.6
-	BeliefSystem.record_claim(s3, 0, 1, 0, "親見", {"population_est": 20}, 1.0, false)  # Phase-E：強鄰投靠讀 belief
+	BeliefSystem.record_claim(s3, 0, 1, 0, "親見", {"population_est": 20, "tile_pos": Vector2i(2, 0), "last_tick": s3.world.current_tick}, 1.0, false)  # Phase-E：強鄰投靠讀 belief（position-belief）
 	fai._trigger_survival(s3, t3, "urgent")
 	assert(t3.current_task == TeamData.TASK_JOIN, "Path 3 應 投靠，實際=%s" % t3.current_task)
 	# (4) 默認 → 乞食（pop > FORAGE_VIABLE_POP 跳覓食；周圍格皆有主 → 無法紮營 → 落到乞食）
@@ -6636,7 +6636,7 @@ func _test_survival_decision_tree() -> void:
 	var aid := TeamData.new(); aid.team_id = 1; aid.tile_pos = Vector2i(2,0); _seed_pop(aid, 18)
 	aid.resources["food"] = 500
 	s4.teams[0] = t4; s4.teams[1] = aid; s4.team_discovered[0] = [1]
-	BeliefSystem.record_claim(s4, 0, 1, 0, "親見", {"population_est": 18, "food_est": 500}, 1.0, false)  # Phase-E：乞食(_find_aid_target)讀 belief
+	BeliefSystem.record_claim(s4, 0, 1, 0, "親見", {"population_est": 18, "food_est": 500, "tile_pos": Vector2i(2, 0), "last_tick": s4.world.current_tick}, 1.0, false)  # Phase-E：乞食(_find_aid_target)讀 belief（position-belief）
 	fai._trigger_survival(s4, t4, "urgent")
 	assert(t4.current_task == TeamData.TASK_BEG, "Path 4 應 乞食，實際=%s" % t4.current_task)
 	print("Survival Task4 OK")
@@ -6725,7 +6725,7 @@ func _test_p2b1_nonunified_survival_delegation() -> void:
 	sb.teams[990] = prey
 	sb.team_discovered[raider.team_id] = [990]
 	BeliefSystem.record_claim(sb, raider.team_id, 990, 0, "親見", \
-		{"population_est": 3, "food_est": 30}, 1.0, false)
+		{"population_est": 3, "food_est": 30, "tile_pos": Vector2i(2, 1), "last_tick": sb.world.current_tick}, 1.0, false)
 	fa._trigger_survival(sb, raider, "urgent")
 	assert(raider.current_task == TeamData.TASK_LOOT, \
 		"[p2b1] 殘忍 homeless 隊未掠奪 task=%s" % raider.current_task)
@@ -9946,7 +9946,7 @@ func _test_stuck_allows_reeval() -> void:
 	_seed_pop(prey, 2)   # 弱 prey（vs team pop10）→ has_weak_prey → 征服 intent_target
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
-	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 2, "armed_est": 1}, 1.0, false)   # G3：無情報打不了
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 2, "armed_est": 1, "tile_pos": Vector2i(2, 0), "last_tick": state.world.current_tick}, 1.0, false)   # G3：無情報打不了（position-belief：claim 帶位置）
 	var fai := FactionAISystem.new()
 	fai._evaluate_solo(state, team)
 	assert(team.move_target == Vector2i(2, 0),
@@ -13288,7 +13288,7 @@ func _test_solo_commitment() -> void:
 	state.teams[0] = team
 	state.team_discovered[0] = [1, 2]
 	for tid in [1, 2]:
-		BeliefSystem.record_claim(state, 0, tid, 0, "親見", {"population_est": 3, "armed_est": 1}, 1.0, false)
+		BeliefSystem.record_claim(state, 0, tid, 0, "親見", {"population_est": 3, "armed_est": 1, "tile_pos": state.teams[tid].tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
 	fai._evaluate_solo(state, team)
 	assert(team.current_task == TeamData.TASK_LOOT, "掠奪 applicable + 承諾(current_option=掠奪) → 應續掠奪，實際=%s" % team.current_task)
 	assert(team.current_option == "掠奪", "選後 current_option 記錄承諾")
@@ -13334,7 +13334,7 @@ func _test_solo_seek_home() -> void:
 	t1.armed_anon_ratio = 1.0   # capability grounding（裁2）：掠奪需有戰力
 	state.teams[1] = t1
 	state.team_discovered[1] = [9]
-	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 2, "armed_est": 1}, 1.0, false)   # G3：有情報才打
+	BeliefSystem.record_claim(state, 1, 9, 1, "親見", {"population_est": 2, "armed_est": 1, "tile_pos": Vector2i(3, 4), "last_tick": state.world.current_tick}, 1.0, false)   # G3：有情報才打（position-belief：claim 帶位置）
 	fai._evaluate_solo(state, t1)
 	assert(t1.current_task == TeamData.TASK_LOOT or t1.current_task == TeamData.TASK_ATTACK,
 		"好戰盜匪應 roving 非尋家，實際=%s" % t1.current_task)
@@ -15695,7 +15695,7 @@ func _mk_strong_neighbor_team(state: WorldState, pos: Vector2i, target: TeamData
 	state.team_discovered[target.team_id].append(tid)
 	# Phase-E：_find_strong_neighbor 讀 belief → 供投靠決策看見「強鄰」
 	BeliefSystem.record_claim(state, target.team_id, tid, target.team_id, "親見",
-		{"population_est": 30}, 1.0, false)
+		{"population_est": 30, "tile_pos": t.tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
 	return t
 
 # 玩家強隊：state.player_id + leader=player + strong
@@ -15770,7 +15770,7 @@ func _test_p2a_join_player_forced() -> void:
 	# npc 發現玩家隊（同格 → 可達 → strong neighbor）
 	state.team_discovered[npc.team_id].append(pteam.team_id)
 	BeliefSystem.record_claim(state, npc.team_id, pteam.team_id, npc.team_id, "親見",
-		{"population_est": 30}, 1.0, false)  # Phase-E：強鄰投靠讀 belief
+		{"population_est": 30, "tile_pos": pteam.tile_pos, "last_tick": state.world.current_tick}, 1.0, false)  # Phase-E：強鄰投靠讀 belief
 	fa._decide_unified(state, npc)
 	assert(not state.player_forced_event.is_empty(), "[p2a] 投靠玩家未寫 forced_event（W2）")
 	assert(state.player_forced_event.get("action") == "join_request", "[p2a] forced_event 非 join_request")
@@ -15854,6 +15854,9 @@ func _mk_independent_target(state: WorldState, pos: Vector2i) -> TeamData:
 			state.team_discovered[other_tid] = []
 		if not state.team_discovered[other_tid].has(tid):
 			state.team_discovered[other_tid].append(tid)
+		# position-belief：注入 belief（含 tile_pos/last_tick）使 has_belief gate 過（真 sim 由 vision 注入）
+		BeliefSystem.record_claim(state, other_tid, tid, other_tid, "親見",
+			{"population_est": 5, "tile_pos": t.tile_pos, "last_tick": state.world.current_tick}, 1.0, false)
 	return t
 
 func _test_p3_attack_option() -> void:
@@ -15925,8 +15928,8 @@ func _mk_richer_member(state: WorldState, pos: Vector2i, ref_team: TeamData) -> 
 	var f = state.factions[fid]
 	if not f.member_team_ids.has(tid): f.member_team_ids.append(tid)
 	if not f.member_team_ids.has(ref_team.team_id): f.member_team_ids.append(ref_team.team_id)
-	f.known_member_states[tid] = {"food_est": 999.0}
-	f.known_member_states[ref_team.team_id] = {"food_est": 10.0}
+	f.known_member_states[tid] = {"food_est": 999.0, "tile_pos": t.tile_pos, "last_tick": state.world.current_tick}
+	f.known_member_states[ref_team.team_id] = {"food_est": 10.0, "tile_pos": ref_team.tile_pos, "last_tick": state.world.current_tick}
 	return t
 
 func _test_p4_stakes_terms() -> void:
