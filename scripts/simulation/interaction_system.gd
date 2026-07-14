@@ -1099,6 +1099,11 @@ func _resolve_join(state: WorldState, joiner_id: int, host_id: int) -> void:
 	# S-A 靶C 雙邊握手：host 秤 accept-util（收/不收）。拒→joiner 回退（釋放 task，下 cadence 重 argmax）。
 	if not _absorber_accepts(state, host_id, joiner_id):
 		if Probe.enabled: Probe.bump("accept.join_reject")
+		# Fix A-2 v2 rejection-learning：記 join_rejected → joiner 下次 gather 不再選此 host（cooldown 內）
+		# → 破「餓世界恆拒→重選併入→又拒」loop。cooldown 過期可再試（非永久黑名單，撲空 emergent 精神）。
+		var joiner_leader: PersonData = state.persons.get(joiner.leader_id)
+		if joiner_leader != null:
+			_npc_ai.write_memory(joiner_leader, "join_rejected", host_id, state.world.current_tick, 0.5)
 		state.clear_social_target(joiner)
 		TaskArbiter.release(joiner)
 		return

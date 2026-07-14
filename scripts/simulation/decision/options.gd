@@ -103,7 +103,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 						out.append(opt)
 			"併入":
 				# §HOW-8 ungate + §3b：絕境 OR 威脅認慫。host = rep 保護傘(strong_neighbor,跨faction) 或 consolidate_target(同faction)。
+				# Fix A-2 v2：+ has_acceptable_join_host（可達且未近期被拒的 host）→ 不追必被拒的併入幻覺 loop。
 				if (ctx.has_strong_neighbor or ctx.consolidate_target_id != -1) \
+						and ctx.has_acceptable_join_host \
 						and (ctx.food_days < DecisionTerms.DESPERATION_DAYS \
 							or (ctx.has_strong_neighbor and ctx.threat > ctx.threat_threshold)): out.append(opt)
 			"吸納":
