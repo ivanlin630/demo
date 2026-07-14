@@ -21,7 +21,26 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
-## 📍 當前狀態（2026-07-14）——Slice A 求生層統一 merged
+## 📍 當前狀態（2026-07-15）——絕境找糧真根修 + 觀測 confound 修 merged
+
+### 絕境找糧 A/B/A-2 + SpecimenTracer RNG confound → main（merge `24c0c442`，2026-07-15）
+
+**arc 敘事**：起於「thrash-fix（execlock）」——被 QA 故事 regime 揭穿=換皮不換骨（買糧從不出貨），退回重診斷，一路挖到真根＝**絕境隊選了兌現不了的路**。中性世界 QA 雙綠驗證（觀測 confound 修後可信）。
+
+**已修**：
+- **買糧幻覺→look-before-leap**：`has_buyable_food`（received food 賣單，不濾 stale）gate；餓世界無賣方不追幻覺，真出貨驗綠。
+- **遷移找糧（新絕境路）**：`food_seek_target`（VisionSystem 視野內 wild_game[繼承 pop 守衛] / received 食物賣單，PathSystem 可達）→ 離死市集移向糧源；抵達 release→引擎重秤（零新 try_set）。
+- **併入 A-2（learn-from-rejection）**：`_resolve_join` 拒絕寫 `join_rejected` 記憶 + `has_acceptable_join_host` 查可達且非近期被拒 host（cooldown，鏡射 to_task 優先序）→ 被拒不再纏 loop。接決策模型記憶腳。
+- **連貫窮死（C 驗收準）**：QA 故事判官驗（Team26 遷移→覓食→掠奪→賣貨求併入四路全試才力竭死＝合法悲劇）。
+- **★SpecimenTracer RNG confound 修**：`capture_options→to_task→observe_velocity` 耗 randf 無 suppress→偏移全域 RNG→換世界（同世界 0/71/88）。修＝tracer 額外 path-work 包 `suppress_observe_noise`（鏡射 HOB）。**觀測不變量最深違反根治**；升顯規則（invariants + memory `feedback_observer_no_global_rng`）。
+
+**★未修/下個真根（誠實記，不吹）**：**thrash 未完全根治**——Team26 早段 56 次同快照 thrash（貿易↔掠奪↔idle）仍在。根＝**掠奪資源錯配**（搶到 material 不解 food→餓著再決策→震盪）。**下個 slice（一修解殘留 thrash + 絕境隊餓死，patch-gate-first）**，待 greenlight。
+
+**★留觀**：併入 faction_id 真成功尚未驗證（3 trace 累計 0 成功）——餓世界 feed_ok≈0 恆拒＝預期，抱團模型（pooling follow-up）才讓 merge 真成。
+
+**arc 過程血教訓（全入 memory）**：症狀 vs 根（治抖動=治症 `feedback_symptom_vs_root_retry`）、觀測禁耗 RNG（`feedback_observer_no_global_rng`）、不虛構授權（`feedback_no_fabricated_authority`）、Windows merge lock（`feedback_windows_git_merge_lock`）。**兩道閘 + 異質框外審 + 故事 QA + 全量可觀測性一路揪換皮/假前提/感知鐵律違反/觀測假象。**
+
+## 📍 前狀態（2026-07-14）——Slice A 求生層統一 merged
 
 ### 求生層統一（survival-layer-unify）→ main（merge `a630f2ab`，2026-07-14）
 
