@@ -9,8 +9,9 @@ func _initialize() -> void:
 
 func _run() -> void:
 	var seed_val: int = 1337
-	# ★同世界 specimen（blueprint 查證「第三種死法」跨世界假象 2026-07-14）：SPECIMEN_TEAM_ID 設則
-	# 在**這支床產出全滅清單的同一世界**鎖該隊，讀真實 decision_count + 死因（軍備堆積餓死 vs 速死 decision_count=0）。
+	# ★同世界 specimen：原 blueprint 查證「第三種死法」，**已結案=假象（3154d52e）**——decision_count=0 是
+	# SpecimenTracer tap-gap 非真死，本 arc 觀測 slice Fix B 已修。bed 現 seed 全域 RNG＝跨-run 確定性，
+	# 無非-seeded 世界依賴（下個讀者勿誤以為仍靠特定非-seeded 全滅清單）。SPECIMEN_TEAM_ID 設則鎖該隊讀 decision_count + 死因。
 	var spec_id: int = int(OS.get_environment("SPECIMEN_TEAM_ID")) if OS.get_environment("SPECIMEN_TEAM_ID") != "" else -1
 	print("=== reeval attribution: default.json seed=%d 3mo (specimen=%d) ===" % [seed_val, spec_id])
 	Probe.enabled = true; Probe.reset()
@@ -21,6 +22,7 @@ func _run() -> void:
 	var config := GameSetup.load_config("res://config/default.json")
 	if config.is_empty(): print("[FAIL] config"); return
 	config["seed"] = seed_val
+	seed(seed_val)   # ★播全域 runtime RNG（72 處 bare randf/randi）→ 跨-run 確定（鏡射 WarringHarness.run:91）；acceptance 需 seed1337 reproducible trace
 	GameSetup.setup(state, config)
 	if spec_id != -1:
 		state.specimen_team_ids = [spec_id]
