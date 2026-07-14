@@ -33,6 +33,11 @@ const HUNGER_SLIDE_DAYS: float = 7.0   # food_days ≥ 此 → hunger_relief=1.0
 const RELIEF_FLOOR: float      = 0.4   # hunger_relief 下限（餓兵搶糧最多把門檻降到 0.4×）
 # ②c prey 濾改分：同弱者（pop_est 近似）food_est 高者優先的 tie 帶寬。TEST VALUE。
 const PREY_POP_TIE_EPS: float  = 0.5
+# 絕境掠奪對準糧源（hunger-weighted prey）：飢餓 looter 的 prey 選擇連續加權 food_est。
+# 單一連續 prey_score = pop_est − FOOD_PULL × hunger × food_norm（hunger=looter 飢餓連續函式，sated→0）。
+# ★無離散門檻切主鍵（禁 if food_days<X）；sated(hunger=0)→純 pop_est=weakest（strategic raid 零退化）。
+const FOOD_PULL: float = 1.0          # TEST VALUE — 飢餓 looter 對糧多 prey 的拉力（越大越優先糧多）
+const FOOD_EST_NORM: float = 100.0    # TEST VALUE — food_est 正規化（≈pop_est 量級，供加權可比）
 const ATTACK_READINESS_MIN:    float = 0.75  # readiness required for attack goal
 const ATTACK_STRENGTH_RATIO:   float = 0.8   # own_armed must be >= enemy_armed * this
 const DIPLOMACY_AMBITION_DISC: float = 0.2   # how much ambition shifts diplomacy readiness req
@@ -3310,8 +3315,11 @@ func _estimate_eta_to(state: WorldState, team: TeamData, target: Vector2i) -> in
 
 func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 	var best_id: int = -1
-	var best_pop: float = 999999.0
-	var best_food: float = -1.0
+	var best_score: float = INF
+	# looter 飢餓度（連續，sated→0）：越餓越把 prey 選擇拉向糧多目標（hunger-weighted，非門檻切主鍵）。
+	var _ef: float = ResourceSystem.effective_food(state, team)
+	var _food_days: float = _ef / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var hunger: float = clampf((DecisionTerms.DESPERATION_DAYS - _food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
 	for tid in state.team_discovered.get(team.team_id, []):
 		if tid == team.team_id: continue
 		var t: TeamData = state.teams.get(tid)
@@ -3320,14 +3328,15 @@ func _find_weakest_prey(state: WorldState, team: TeamData) -> int:
 		if not PathSystem.estimate_catch_up(state, team, tid, true).reachable: continue
 		var bel: Dictionary = BeliefSystem.best_estimate(state, team.team_id, tid)
 		var pop_est: float = float(bel.get("population_est", 0.0))
-		if pop_est >= float(team.population) * 0.7: continue   # belief 看似不夠弱→跳
-		# ②c：刪 food<20 硬濾（餓世界目標仍可俘——raid 收益=糧+人力+coin+裝備，窮村仍有人可俘）。
-		# 弱點主排序不變（pop_est 最低）；同弱者（pop 近似，PREY_POP_TIE_EPS 帶寬內）food_est 高者優先（輕 tie-break，不蓋 pop 主序）。
+		if pop_est >= float(team.population) * 0.7: continue   # beatability 硬門檻：belief 看似不夠弱→跳（不動）
+		# ②c：不加 food 硬濾（餓世界無糧目標仍在候選只是排後）。真根修：target 選擇 food-weighted。
+		# 單一連續 prey_score = pop_est − FOOD_PULL×hunger×food_norm（food_est belief 可失真/stale，非 god-view）。
+		# sated→hunger=0→food 項歸零→純 pop_est=weakest（strategic raid 零退化）。飢餓→拉向糧多可打隊。
 		var food_est: float = float(bel.get("food_est", 0.0))
-		if pop_est < best_pop - PREY_POP_TIE_EPS \
-				or (absf(pop_est - best_pop) <= PREY_POP_TIE_EPS and food_est > best_food):
-			best_pop = pop_est
-			best_food = food_est
+		var food_norm: float = food_est / FOOD_EST_NORM
+		var prey_score: float = pop_est - FOOD_PULL * hunger * food_norm
+		if prey_score < best_score:
+			best_score = prey_score
 			best_id = tid
 	return best_id
 
