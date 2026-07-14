@@ -647,9 +647,9 @@ func local_value(team: TeamData, res: String) -> float:
 
 # ──────── 雙向 market 結算（取代舊 _resolve_trade）────────
 
-func _calc_reserve(team: TeamData, res: String) -> float:
-	# 留底邏輯收進 TradeValuation.reserve（單一源），NPC + 玩家路徑同用。
-	return TradeValuation.reserve(team, res)
+func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
+	# 留底邏輯收進 TradeValuation.reserve（單一源），NPC + 玩家路徑同用。候選1：food 留底吃領袖人格。
+	return TradeValuation.reserve(team, res, leader_values)
 
 func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int, price: float) -> void:
 	ResourceBank.add(seller, res, -qty, "trade_goods_out")
@@ -789,7 +789,7 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 	# (2) 賣 surplus（保留最低儲備）
 	for res in TradeValuation.BASE_PRICE.keys():
 		var stock: float = float(seller.resources.get(res, 0))
-		var reserve: float = _calc_reserve(seller, res)
+		var reserve: float = _calc_reserve(seller, res, TradeValuation.leader_vals(state, seller))
 		var surplus: float = maxf(stock - reserve, 0.0)
 		if surplus <= 0.0: continue
 		var ask: float = TradeValuation.local_value(seller, res) * (1.0 - commerce * 0.1)
@@ -813,14 +813,14 @@ func _attempt_barter(state: WorldState, a: TeamData, b: TeamData) -> void:
 	# a 可給的（a surplus 且 b 缺=b 想要）
 	for give_res in TradeValuation.BASE_PRICE.keys():
 		if give_res == "coin": continue
-		var a_surplus: float = maxf(float(a.resources.get(give_res, 0)) - TradeValuation.reserve(a, give_res), 0.0)
+		var a_surplus: float = maxf(float(a.resources.get(give_res, 0)) - TradeValuation.reserve(a, give_res, TradeValuation.leader_vals(state, a)), 0.0)
 		if a_surplus <= 0.0: continue
 		# b 是否想要（b 對該 res 估值 > a 對該 res 估值,即 b 較缺）
 		if TradeValuation.local_value(b, give_res) <= TradeValuation.local_value(a, give_res): continue
 		# 找 b 能回付的（b surplus 且 a 想要）
 		for pay_res in TradeValuation.BASE_PRICE.keys():
 			if pay_res == "coin" or pay_res == give_res: continue
-			var b_surplus: float = maxf(float(b.resources.get(pay_res, 0)) - TradeValuation.reserve(b, pay_res), 0.0)
+			var b_surplus: float = maxf(float(b.resources.get(pay_res, 0)) - TradeValuation.reserve(b, pay_res, TradeValuation.leader_vals(state, b)), 0.0)
 			if b_surplus <= 0.0: continue
 			if TradeValuation.local_value(a, pay_res) <= TradeValuation.local_value(b, pay_res): continue
 			# 等值互換：以雙方各自估值算可換量,取較小值的一筆

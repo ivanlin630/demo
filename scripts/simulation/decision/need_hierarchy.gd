@@ -2,6 +2,9 @@ class_name NeedHierarchy
 
 # 需求金字塔五層急迫度（Maslow 式）。感測器非決策者：只讀「這層還缺多少」(0..1)。
 # 生存(食物)→安全(威脅)→歸屬(faction/社交)→尊重(地位/擴張)→自我實現(立國/稱霸)。
+# §2 層獨立（invariants）：raw 可讀「世界訊號」(food_days/threat/cap/rung…) + 「靜態人格 trait」(如慎重/野心，
+#   同 consistency_coeff 早讀 leader_values 先例)，但**不可讀其他 raw[layer] 的 urgency 值**（防循環耦合）。
+#   ∴ Fix3-v2 讀領袖人格算 esteem 參考線 = 合規（trait 非他層 urgency）。
 const L_SURVIVAL: int = 0
 const L_SAFETY: int = 1
 const L_BELONGING: int = 2
@@ -11,6 +14,8 @@ const N_LAYERS: int = 5
 
 # raw 急迫度門檻（TEST VALUE）
 const SURVIVAL_SATED_DAYS: float = 5.0   # TEST VALUE — 食物餘命達此→生存急迫度 0（對齊 forage floor 域）
+# Fix3-v2 esteem food_ready 參考線人格化（退役死常數 ESTEEM_FOOD_REF_DAYS=3）。
+# 候選2 收編：門檻函式單一 home = DecisionTerms.food_security_target(領袖慎重/野心)，此處直接呼(別雙常數)。
 const URGENCY_EWMA_ALPHA: float = 0.25   # TEST VALUE — 急迫度平滑係數（同 S1 zero-randf pattern）
 
 # §6 主敘事標籤（純顯示衍生值）：取急迫度最高層 → 給人看的簡化摘要。非決策(決策走 coeff 完整混合)。
@@ -49,8 +54,13 @@ static func compute_raw(state: WorldState, team: TeamData, food_days: float, thr
 		raw[L_BELONGING] = clampf(float(AmbitionLadder.STATE_MIN_FACTION_TEAMS - members) \
 			/ float(AmbitionLadder.STATE_MIN_FACTION_TEAMS), 0.0, 1.0)
 	# 尊重（地位/擴張）就緒度 = 基礎穩(食/安有餘裕在意地位) × 機會(野心階梯還有空間爬)。
-	# 讀世界訊號(food_days/threat/cap/rung)，禁讀他層 urgency（守 §2 獨立）。
-	var food_ready: float = clampf(food_days / SURVIVAL_SATED_DAYS, 0.0, 1.0)
+	# 讀世界訊號(food_days/threat/cap/rung) + 靜態人格 trait，禁讀他層 urgency（守 §2 獨立）。
+	# Fix3-v2 人格化：參考線改 f(領袖慎重/野心)——退役死常數 ESTEEM_FOOD_REF_DAYS=3(過低→餓著發展→attrition 惡化)。
+	# 性格只調日常風格(謹慎存久發展慢 / 野心薄糧搏發展快，層2/5)；★極端低糧由層0 boost 保底奪回求生 argmax，
+	# 任何性格都不許結構性餓死（翻正舊立場「野心餓死=特色」——結構性必然餓死是 bug 非設計）。
+	var _ldr: PersonData = state.persons.get(team.leader_id) if team.leader_id != -1 else null
+	var _lvals: Dictionary = _ldr.values if _ldr != null else {}
+	var food_ready: float = clampf(food_days / DecisionTerms.food_security_target(_lvals), 0.0, 1.0)
 	var safe_ready: float = 1.0 - clampf(threat, 0.0, 1.0)
 	var cap_e: int = maxi(team.ambition_cap, 1)
 	var ambition_gap: float = clampf(float(team.ambition_cap - team.ambition_rung) / float(cap_e), 0.0, 1.0)

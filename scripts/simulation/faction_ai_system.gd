@@ -93,6 +93,7 @@ const OWNER_CHANGE_BUFFER_DAYS: int = 7
 const URGENCY_DAYS: float = 1.0
 const WARNING_DAYS: float = 3.0
 const SURVIVAL_RECOVER_DAYS: float = 7.0   # 糧恢復到此 → 脫離 survival（hysteresis 防抖）
+const GRADUAL_DECLINE_FLOW: float = -0.5   # Fix2-v2 TEST VALUE — 慢性糧滑坡 crisis 門檻（DEEP -2.0 與 0 間，漸進安全網）
 const FLEE_TIMEOUT: int = TimeScale.TICK_PER_DAY * 5   # 逃跑逾時 5 天（修硬編 240，跟根）→ 釋放重評，小地圖防永逃
 
 # ── Prosperity attack（野心驅動主動征服）──
@@ -1769,6 +1770,10 @@ func _decision_crisis(_state: WorldState, team: TeamData) -> bool:
 		return true
 	if team.food_flow_avg < AmbitionLadder.RUNG_CRASH_FOOD_DEEP:
 		return true
+	# Fix2-v2：慢性糧滑坡(輕負 flow，非暴跌<DEEP)=漸進安全網→糧一開始流失就週期性拉回確認補糧。
+	# 不 revert edge：crisis_latched 節流仍在→漸進 crisis edge fire 一次+持續落 /4 cadence(非每 tick)。
+	if team.food_flow_avg < GRADUAL_DECLINE_FLOW:
+		return true
 	return false
 
 # ⑦ faction 命令即時響應（R①#1）：成員 faction 命令在其上次決策後才變 → 即重評（不等 cadence，守協同紅線）。
@@ -1785,9 +1790,17 @@ func _should_reeval(state: WorldState, team: TeamData) -> bool:
 	if _is_stuck(team):
 		if Probe.enabled: Probe.bump("reeval.stuck")
 		return true                              # 卡住→重評
-	if _decision_crisis(state, team):
-		if Probe.enabled: Probe.bump("reeval.crisis")
-		return true               # 劇變(食崩/pop驟降)→反射提前
+	# Fix2 crisis edge-trigger：level-trigger(每 tick trip crisis 繞過 cadence, reeval.crisis=13087=93%)→ 邊緣化。
+	# 進 crisis 當下 fire 一次(latch)；持續 crisis 落下方 cadence 閘(crisis 排程已 /4)；離開解 latch 供下次 edge。
+	var in_crisis: bool = _decision_crisis(state, team)
+	if in_crisis:
+		if not team.crisis_latched:
+			team.crisis_latched = true
+			if Probe.enabled: Probe.bump("reeval.crisis")
+			return true           # edge：進入 crisis 當下反射提前一次
+		# 持續 crisis → 不每 tick，落下方 cadence 閘
+	else:
+		team.crisis_latched = false   # 離開 crisis → 解 latch
 	if _directive_fresh(state, team):
 		if Probe.enabled: Probe.bump("reeval.directive")
 		return true               # faction 新命令→即時響應
@@ -3043,8 +3056,12 @@ func _evaluate_survival(state: WorldState, team: TeamData) -> void:
 			TaskArbiter.release(team)
 			team.previous_task = ""
 			return
-	if uses_unified(team):
-		return   # unified 隊求生改由 DecisionEngine 決(切片);舊系統不雙觸發
+	# Fix1 退役非-unified 非子隊 legacy override（Team10 thrash 根：solo rank vs legacy override 雙決策生產者互蓋 livelock）。
+	# 非子隊(parent_team_id==-1)有引擎求生路徑(_evaluate_solo→rank_scored, survival option 在 repertoire)→求生走引擎。
+	# ★只退非子隊；子隊(parent_team_id!=-1)保留下方 legacy body——子隊 TASK_BUILD/CONSTRUCT 提前 return 不進引擎，
+	#   全退會無求生評估→餓死 zombie(reviewer 抓的 regression)。
+	if uses_unified(team) or team.parent_team_id == -1:
+		return   # unified 任隊 / 非子隊 → 求生走引擎(DecisionEngine);舊系統不雙觸發
 	# S2 礦村：建造子隊在途或施工中（TASK_CONSTRUCT/TASK_BUILD + parent 存在）→ 豁免求生打斷。
 	# 背景：礦山偏遠、FAR 區 LOD 移動慢，bootstrap food 在途中耗盡；famine grace 7天。
 	# builder 到達後立即起建（BUILD），山地 ore harvest 可快速補糧，不會死亡殭屍。

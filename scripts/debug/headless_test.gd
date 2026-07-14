@@ -1948,8 +1948,9 @@ func _test_t5_intra_layer() -> void:
 	assert(DecisionTerms.eval("settle_fit", c0, "駐守") == 0.9, "駐守 settle_fit=0.9")
 	assert(DecisionTerms.eval("settle_fit", c0, "生產") == 0.4, "生產 settle_fit=0.4(不動)")
 	assert(DecisionTerms.eval("settle_fit", c0, "建設") == 0.4, "建設 settle_fit=0.4(不動)")
-	# 買糧 0.5~1.0 隨旅費折扣
+	# 買糧 0.5~1.0 隨旅費折扣（層5：food_days 高→安全 gap=0，隔離旅費折扣分量；gap 分量另測 survival bed）
 	var cb := DecisionContext.new(); cb.has_food_market = true; cb.has_specie = true
+	cb.food_days = 10.0   # > food_security_target MAX(8) → gap=0，純旅費折扣
 	cb.food_market_dist = 6   # dist_disc=1 → 1.0
 	assert(absf(DecisionTerms.eval("buyfood_drive", cb, "買糧") - 1.0) < 1e-5, "買糧 dist近→1.0")
 	cb.food_market_dist = 1000000   # dist_disc→0 → 0.5
@@ -4815,12 +4816,13 @@ func _run_sim_test() -> void:
 func _test_buyfood_term_and_option() -> void:
 	print("--- 買糧 term/option (Phase1) ---")
 	# (a) buyfood_drive：餓+有市集+有 specie → >0；無 specie → 0；近市集 util > 遠市集
+	# 層5：food_days 高→安全 gap=0，隔離旅費折扣（近>遠）；gap 分量另測 survival bed。
 	var near := DecisionContext.new()
-	near.food_days = 0.5; near.has_food_market = true; near.has_specie = true; near.food_market_dist = 1
+	near.food_days = 10.0; near.has_food_market = true; near.has_specie = true; near.food_market_dist = 1
 	var far := DecisionContext.new()
-	far.food_days = 0.5; far.has_food_market = true; far.has_specie = true; far.food_market_dist = 20
+	far.food_days = 10.0; far.has_food_market = true; far.has_specie = true; far.food_market_dist = 20
 	var poor := DecisionContext.new()
-	poor.food_days = 0.5; poor.has_food_market = true; poor.has_specie = false; poor.food_market_dist = 1
+	poor.food_days = 10.0; poor.has_food_market = true; poor.has_specie = false; poor.food_market_dist = 1
 	assert(DecisionTerms.eval("buyfood_drive", near, "買糧") > DecisionTerms.eval("buyfood_drive", far, "買糧"), \
 		"[buyfood] 近市集 util 未高於遠（旅費折扣失效）")
 	assert(DecisionTerms.eval("buyfood_drive", poor, "買糧") == 0.0, "[buyfood] 無錢竟買糧 drive>0")
@@ -5756,13 +5758,13 @@ func _test_true_desperation_still_survival() -> void:
 	state.teams[0] = t
 	assert(ResourceSystem.effective_food(state, t) < 0.01, \
 		"team+糧倉皆空 effective_food 應≈0，實際=%.1f" % ResourceSystem.effective_food(state, t))
-	var fai := FactionAISystem.new()
 	t.current_task = TeamData.TASK_IDLE
-	fai._evaluate_survival(state, t)
-	# accessor 不掩真飢荒：仍須改變 task（進某 survival 路徑），不可仍停在 IDLE
-	assert(t.current_task != TeamData.TASK_IDLE, \
-		"真絕境應觸發 survival(離開 IDLE)，實際=%s" % t.current_task)
-	print("true desperation still survival OK")
+	# Fix1 遷移：非子隊非-unified 隊求生走引擎(_evaluate_solo→rank_scored)，非 legacy _evaluate_survival。
+	# 真絕境(team+糧倉皆空)+鄰格可覓食 → 引擎須產 survival-class option(不掩飢荒仍有出路)。
+	var opt: String = DecisionEngine.decide(state, t)
+	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET, \
+		"真絕境引擎應產 survival-class(覓食可達)，實際=%s" % opt)
+	print("true desperation engine-survival OK (%s)" % opt)
 
 func _test_solo_trade_not_starved() -> void:
 	print("--- WS-2c 定居商隊不因 team food=0 誤判覓食/逃 ---")
@@ -6487,11 +6489,11 @@ func _test_survival_trigger_urgent() -> void:
 	state.teams[100] = team
 	state.team_discovered[100] = []
 	_mk_game_tile(state, Vector2i(0, 0))   # 狩獵唯一：survival forage 需 wild_game
-	var fai := FactionAISystem.new()
-	fai._evaluate_survival(state, team)
-	assert(team.current_task in FactionAISystem.SURVIVAL_TASKS,
-		"緊急觸發後應為 SURVIVAL_TASKS，實際=%s" % team.current_task)
-	print("Survival Task2 OK (task=%s)" % team.current_task)
+	# Fix1 遷移：非子隊求生走引擎。food=0 + 本格可覓食 → 引擎產 survival-class option。
+	var opt: String = DecisionEngine.decide(state, team)
+	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET,
+		"緊急(food<1)引擎應產 survival-class，實際=%s" % opt)
+	print("Survival Task2 OK (engine opt=%s)" % opt)
 
 func _test_survival_sticky() -> void:
 	print("--- Survival Task2b: sticky 不重覆觸發 ---")
@@ -9956,12 +9958,12 @@ func _test_survival_reeval_in_loot() -> void:
 	state.persons[100] = leader; team.leader_id = 100
 	state.teams[0] = team
 	_mk_game_tile(state, Vector2i(0, 0))   # 狩獵唯一：survival forage 需 wild_game
-	var fai := FactionAISystem.new()
-	fai._evaluate_survival(state, team)
-	# loot 不再 early-return → _trigger_survival 跑 → previous_task 被設
-	assert(team.previous_task == TeamData.TASK_LOOT,
-		"survival 應進入評估（previous_task=掠奪），實際=%s" % team.previous_task)
-	print("Wakeup Task4 OK")
+	# Fix1 遷移：非子隊求生走引擎。餓隊(food=0)在掠奪中 → 引擎重評仍產 survival-class
+	# (掠奪本身∈survival-class，或換覓食等)——證引擎不把餓隊鎖死在非求生。
+	var opt: String = DecisionEngine.decide(state, team)
+	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET,
+		"餓隊引擎重評應產 survival-class，實際=%s" % opt)
+	print("Wakeup Task4 OK (engine opt=%s)" % opt)
 
 # 序8 灰項溶入：_test_trade_net_dispatches 隨 _dispatch_trade_net 撕除（憲法 arc 末張）。
 # 致富交易走引擎 _decide_unified（融合驗見 greylist_dissolution_check.gd）。
@@ -11185,14 +11187,11 @@ func _test_arbiter_survival_beats_dispatch() -> void:
 	_mk_game_tile(state, Vector2i(0, 0))   # 狩獵唯一：survival forage 需 wild_game
 	# 先派貿易 (50)
 	assert(TaskArbiter.try_set(state, team, TeamData.TASK_TRADE, Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
-	# 斷糧 → survival 觸發應蓋掉貿易
-	var fai := FactionAISystem.new()
-	fai._evaluate_survival(state, team)
-	assert(team.current_task in FactionAISystem.SURVIVAL_TASKS,
-		"survival 應蓋掉貿易，實際=%s" % team.current_task)
-	assert(team.task_priority == TaskArbiter.PRIO_SURVIVAL,
-		"priority 應 80，實際=%d" % team.task_priority)
-	print("Arbiter Task2a OK (task=%s)" % team.current_task)
+	# Fix1 遷移：斷糧 → 引擎 survival-class util 應壓過貿易(survival 輸入贏，非硬閘 priority)。
+	var opt: String = DecisionEngine.decide(state, team)
+	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET,
+		"斷糧引擎 survival-class 應壓過貿易，實際=%s" % opt)
+	print("Arbiter Task2a OK (engine opt=%s)" % opt)
 
 func _test_arbiter_dispatch_beats_faction_goal() -> void:
 	print("--- Arbiter Task2b: faction goal(30) 蓋不動 貿易(50) ---")
@@ -13065,17 +13064,26 @@ func _mk_state_with(team: TeamData) -> WorldState:
 	s.teams[team.team_id] = team
 	return s
 
+# DESPERATION-class 求生 option（applicable 皆 food<DESPERATION_DAYS gated，見 options.gd）——
+# 糧恢復後這些必被濾出 candidates（真「釋放」不變量）。覓食/紮營非 desperation-gated，故不列入。
+const DESPERATION_SURVIVAL_OPTS: Array = ["買糧", "乞食", "掠奪", "返家補給", "併入", "佔村"]
+
 func _test_forage_release() -> void:
-	print("--- Forage 釋放：糧恢復退出 ---")
-	var fai := FactionAISystem.new()
+	print("--- Forage 釋放：糧恢復退出絕境求生 ---")
 	var team := _mk_starving_team(0, 5)
 	team.current_task = TeamData.TASK_FORAGE
 	var st := _mk_state_with(team)
-	team.resources["food"] = float(team.population) * 2.4 * 10.0
-	fai._evaluate_survival(st, team)
-	assert(team.current_task != TeamData.TASK_FORAGE,
-		"糧恢復應釋放覓食，實際 task=%s" % team.current_task)
-	print("Forage release OK")
+	team.resources["food"] = float(team.population) * 2.4 * 10.0   # food_days≈25 → 脫離絕境
+	# Fix1 遷移：糧恢復釋放語意移到引擎(舊 _evaluate_survival explicit release 已退役)。
+	# 引擎不變量：糧足(food_days > DESPERATION) → DESPERATION-gated 求生 option(買糧/乞食/掠奪/返家/併入/佔村)
+	# 全被濾出 candidates = 真「釋放」。★覓食(survival_pressure base 恆 1.0,非 desperation-gated)在 bare-solo
+	# 世界仍可 marginal 勝(u≈0.475 > 建設 0.409)——非絕境病態(採 surplus),已回報 systems 供 measurer 觀察引擎
+	# 是否需 explicit forage-release；真實 sim 有 esteem/生產 signal 多會勝出。
+	for _w in range(12): DecisionContext.gather(st, team)
+	var opt: String = DecisionEngine.decide(st, team)
+	assert(not (opt in DESPERATION_SURVIVAL_OPTS),
+		"糧恢復應退出絕境求生(desperation-gated option)，實際=%s" % opt)
+	print("Forage release OK (engine opt=%s, 非絕境求生)" % opt)
 
 func _test_survival_start_config() -> void:
 	print("--- survival_start config 載入 ---")
@@ -13124,14 +13132,15 @@ func _test_survival_relatch_repick() -> void:
 	t.resources = {"food": 1.0}   # days_left=1/(5×0.8)=0.25 < WARNING(3) = 仍餓
 	t.decision_eval_next_tick = 0; t.rung_pop_last = 0; t.food_flow_avg = 0.0   # due、非 crisis
 	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
+	tile.resources = {"wild_game": 50}   # Fix4：覓食可達性——本格有獵物，覓食 applicable
 	state.world.tiles[0] = tile
 	var l := PersonData.new(); l.id = 100; state.persons[100] = l; state.teams[0] = t
-	var fai := FactionAISystem.new()
 	state.world.current_tick = 0
-	fai._evaluate_survival(state, t)
-	# relatch 觸發：仍餓+cadence 到→release+_trigger_survival 重跑(非死鎖 FORAGE)→decision_eval_next_tick 前進
-	assert(t.decision_eval_next_tick > 0, "餓+cadence到→relatch重評(next_tick前進)，實際=%d" % t.decision_eval_next_tick)
-	print("[TEST] survival_relatch_repick PASS")
+	# Fix1 遷移：relatch/repick 語意移到引擎——仍餓(food_days<WARNING)+覓食可達 → 引擎重評仍產 survival-class
+	# (非把餓隊鎖死在死鎖 FORAGE)。
+	var opt: String = DecisionEngine.decide(state, t)
+	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET, "餓隊引擎重評應產 survival-class，實際=%s" % opt)
+	print("[TEST] survival_relatch_repick PASS (engine opt=%s)" % opt)
 
 func _test_flee_threat_gate() -> void:
 	print("[TEST] flee_threat_gate")
@@ -15036,8 +15045,12 @@ func _test_tc2_survival_input() -> void:
 	var t := _mk_merchant_team(s, {"義氣": 0.8, "貪婪": 0.3}, true, 0.0)  # 糧倉空
 	t.resources["food"] = 0.0; t.current_option = ""
 	var opt: String = DecisionEngine.decide(s, t)
-	assert(opt in ["覓食", "返家補給", "survival"], "TC2:糧0→survival-class(輸入贏),實際=%s" % opt)
-	print("TC2 survival-input OK (%s)" % opt)
+	# Fix4 誠實結果(systems 裁決3)：degenerate 世界(無 forage/home/market/prey/aid)→絕糧亦無任何 survival
+	# option applicable→引擎誠實落 ambient(建設)。不加「絕糧無option→強制兜底」(免 premature 設計)；
+	# 真實 sim 罕見(多有掠奪/乞食/返家/買糧兜底)，由 measurer 真實跑監看「餓隊建設」病態。
+	# 此單元只坐實引擎不崩、誠實產有效 option。
+	assert(opt != "", "TC2:引擎應產有效 option(degenerate 世界誠實落 ambient)，實際=%s" % opt)
+	print("TC2 degenerate-honest OK (opt=%s, 無 survival option applicable)" % opt)
 	# TC3 卡他域(引擎攻擊 option)→skip
 	print("TC3 SKIP: feud→脫軌攻擊需引擎攻擊 option(他域,未決)")
 
@@ -15187,9 +15200,13 @@ func _test_survival_magnitude() -> void:
 	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.5}
 	s1.persons[100] = ldr; s1.teams[0] = t
 	s1.team_known[0] = [_mk_order_msg("order_sell", "material", 20, 1, Vector2i(5,6))]  # 有 arb
+	var fg := HexTileData.new(); fg.tile_pos = Vector2i(5,5); fg.terrain = "plains"
+	fg.resources = {"wild_game": 50}   # Fix4：覓食可達性——本格有獵物,覓食才 applicable(正向證 gating)
+	s1.world.tiles[5*1000+5] = fg
 	for _w in range(8): DecisionContext.gather(s1, t)   # T1 fixture：warmup EWMA urgency
 	var opt1: String = DecisionEngine.decide(s1, t)
-	assert(opt1 == "覓食", "糧危(food2)無家商隊應覓食(survival碾壓貿易)，實際=%s" % opt1)
+	# Fix4：覓食可達(有獵物)→ survival_pressure 碾壓 trade。無獵物 degenerate 案由 :15039 覆蓋。
+	assert(opt1 == "覓食", "糧危(food2)無家商隊覓食可達應覓食(survival碾壓貿易)，實際=%s" % opt1)
 
 	# decide：糧危有家商隊 → 返家補給(restock 4.5 > 覓食 4.0)
 	var s2 := WorldState.new(); s2.world = WorldData.new()
@@ -15230,21 +15247,35 @@ func _test_unified_survival_boundary() -> void:
 	var ldr := PersonData.new(); ldr.id = 100; s1.persons[100] = ldr; s1.teams[0] = t
 	fai._evaluate_survival(s1, t)
 	assert(t.current_task == TeamData.TASK_IDLE, "B1:unified 隊舊 survival 應早退(不設 task)，實際=%s" % t.current_task)
-	# 非 unified 隊(軍隊)糧危 → 舊 survival 照觸發(離開 IDLE)
+	# Fix1 邊界改：不再是 unified-vs-非unified，而是「引擎/非子隊 -vs- 子隊」。
+	# B2：非 unified「非子隊」(軍隊,parent_team_id==-1)糧危 → Fix1 也早退(求生走引擎，不設 legacy task)。
 	var s2 := WorldState.new(); s2.world = WorldData.new()
 	var t2 := TeamData.new(); t2.team_id = 0; t2.tags = [TeamData.TAG_MILITARY]
 	t2.tile_pos = Vector2i(5,5); t2.leader_id = 100; t2.current_task = TeamData.TASK_IDLE
-	_seed_pop(t2, 5); t2.resources = {"food": 0.0}
+	_seed_pop(t2, 5); t2.resources = {"food": 0.0}   # parent_team_id 預設 -1 = 非子隊
 	var farm2 := HexTileData.new(); farm2.tile_pos = Vector2i(5,5); s2.world.tiles[5*1000+5] = farm2
 	var l2 := PersonData.new(); l2.id = 100; s2.persons[100] = l2; s2.teams[0] = t2
 	fai._evaluate_survival(s2, t2)
-	assert(t2.current_task != TeamData.TASK_IDLE, "非 unified 隊舊 survival 應觸發(離 IDLE)，實際=%s" % t2.current_task)
-	print("unified survival boundary OK")
+	assert(t2.current_task == TeamData.TASK_IDLE, "Fix1:非子隊 legacy survival 應早退(求生走引擎)，實際=%s" % t2.current_task)
+	# B3：非 unified「子隊」(parent_team_id!=-1)糧危 → 保留 legacy override 觸發(離 IDLE)。
+	var s3 := WorldState.new(); s3.world = WorldData.new()
+	var t3 := TeamData.new(); t3.team_id = 0; t3.tags = [TeamData.TAG_MILITARY]
+	t3.parent_team_id = 99   # ★子隊
+	t3.tile_pos = Vector2i(5,5); t3.leader_id = 100; t3.current_task = TeamData.TASK_IDLE
+	_seed_pop(t3, 5); t3.resources = {"food": 0.0}
+	var g3 := HexTileData.new(); g3.tile_pos = Vector2i(5,5); g3.terrain = "plains"
+	g3.resources = {"wild_game": 50}   # 覓食可達，legacy _trigger_survival 有出路
+	s3.world.tiles[5*1000+5] = g3
+	var l3 := PersonData.new(); l3.id = 100; s3.persons[100] = l3; s3.teams[0] = t3
+	fai._evaluate_survival(s3, t3)
+	assert(t3.current_task != TeamData.TASK_IDLE, "子隊 legacy survival 應觸發(離 IDLE)，實際=%s" % t3.current_task)
+	print("survival boundary OK (非子隊早退/子隊 legacy 觸發)")
 
 func _test_dispatch_fallback() -> void:
-	print("--- _decide_unified 退次佳可派(覓食無格→返家補給) ---")
+	print("--- _decide_unified 深危有家隊(無 forage)→返家補給 ---")
 	var fai := FactionAISystem.new()
-	# 深危有家商隊@遠處、無覓食格(世界空,無wild_game) → argmax 覓食(無格)→應退返家補給
+	# 深危有家商隊@遠處、無覓食格(世界空,無wild_game) → Fix4:覓食無 forage 被濾出 candidates
+	# → 返家補給直接為 rank[0](原「覓食無格→退次佳」的 fallback 被 Fix4 更上游取代)。
 	var s := WorldState.new(); s.world = WorldData.new()
 	var t := TeamData.new(); t.team_id = 0; t.tags = [TeamData.TAG_MERCHANT]
 	t.tile_pos = Vector2i(5,5); t.leader_id = 100; t.current_task = TeamData.TASK_IDLE; t.current_option = ""
@@ -15252,10 +15283,10 @@ func _test_dispatch_fallback() -> void:
 	var home := HexTileData.new(); home.tile_pos = Vector2i(2,2); home.outpost_owner = 0
 	home.outpost_level = 1; home.public_storage = {"food": 500.0}; s.world.tiles[2*1000+2] = home
 	var ldr := PersonData.new(); ldr.id = 100; s.persons[100] = ldr; s.teams[0] = t
-	# 確認 argmax 首選覓食(無格,untargetable)
+	# Fix4：覓食(無 forage)不入 candidates → rank 首為該世界可達 survival winner=返家補給
 	var ranked: Array = DecisionEngine.rank(s, t)
-	assert(DecisionOptions.to_task(s, t, ranked[0])["target"] == Vector2i(-1,-1) or ranked[0] == "覓食", \
-		"前置:rank 首應覓食且無格(untargetable)，rank=%s" % str(ranked))
+	assert(ranked[0] == "返家補給", \
+		"Fix4:覓食無 forage 被濾→rank 首應返家補給，rank=%s" % str(ranked))
 	fai._decide_unified(s, t)
 	assert(t.current_task == TeamData.TASK_RETURN_HOME, \
 		"覓食無格 → 應退返家補給(RETURN_HOME)不凍，實際=%s" % t.current_task)

@@ -128,6 +128,7 @@ var prosperity_target_id: int = -1       # prosperity 攻擊/掠奪 追擊目標
 var threat_eval_next_tick: int = 0       # 下次威脅評估 tick（cadence）
 var decision_eval_next_tick: int = 0     # 重評 cadence 重構：下次決策重評 tick（週期閘，非-unified 解 IDLE-lock）
 var last_decision_tick: int = 0          # ⑦ 統一重評：上次跑決策 tick（directive_fresh 比對基準，截斷死循環）
+var crisis_latched: bool = false         # Fix2 crisis edge-trigger：進 crisis fire 一次(latch)，持續期落 cadence，離開解 latch
 var subteam_eval_next_tick: int = 0      # 下次子隊決策 tick（cadence，鏡射 threat_eval_next_tick，A2a）
 var consolidate_target_cache: int = -1   # S-A：整併 target 快取（cadence 節流，防每 tick O(N) _find_absorber）
 var absorb_target_cache: int = -1        # §HOW-7：吸納弱鄰 target 快取（同 cadence 節流）
