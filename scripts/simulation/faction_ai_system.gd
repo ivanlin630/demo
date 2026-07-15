@@ -715,6 +715,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			else:
 				_evaluate_independent_strategy(state, team)
 				_evaluate_solo(state, team)
+			# S3 means-end 統一：獨立定居隊自家 outpost 建設施（同 _pick_facility argmax，閉合想 goods→需設施→去蓋）。
+			if state.world.current_tick % INFRA_INTERVAL == 0:
+				_evaluate_independent_infrastructure(state, team)
 		else:
 			# faction 成員（非子隊，斷①C「入勢力不換腦」）：個人戰略層對每個 leader 永遠跑——
 			# faction 身分=context/term（faction_duty），非決策路徑開關。只跑戰略 intent 層
@@ -2828,8 +2831,11 @@ func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array
 
 const INFRA_INTERVAL: int = 50 * WorldState.TICKS_PER_HOUR  # 每 50 小時評估一次
 
-# leader values 決定新據點傾向（軍用 vs 民用）
-func _pick_outpost_type(state: WorldState, leader_team: TeamData, leader: PersonData) -> String:
+const ORE_CIVILIAN_PULL: float = 1.0   # S4.4 TEST VALUE：礦脈→貪婪領袖偏採礦村(mint)的人格加分
+
+# leader values 決定新據點傾向（軍用 vs 民用）。S4.4：ore 機會融入人格秤（非硬 override）。
+func _pick_outpost_type(state: WorldState, leader_team: TeamData, leader: PersonData,
+		loc_tile: HexTileData = null) -> String:
 	# 文明階梯：軍鎮需 tools；無 tools 來源 → 只能蓋民村（個性想軍鎮也買不起）
 	var has_tools: bool = float(leader_team.resources.get("tools", 0)) >= 3.0 \
 		or _faction_has_workshop(state, leader_team)
@@ -2837,6 +2843,13 @@ func _pick_outpost_type(state: WorldState, leader_team: TeamData, leader: Person
 		return "civilian"
 	var military: float = float(leader.values.get("好戰", 0.5)) + float(leader.values.get("野心", 0.5))
 	var civilian: float = float(leader.values.get("慎重", 0.5)) + float(leader.values.get("貪婪", 0.5))
+	# S4.4 de-patch（§R² 補裁 1）：礦脈→採礦村(mint)機會融入人格秤——貪婪/mint-inclined 領袖偏 civilian
+	# 採礦鑄幣；好戰領袖仍可選軍鎮防守。移除「含礦→硬改 civilian」override，決策交人格。
+	if loc_tile != null and loc_tile.terrain == "mountain":
+		var ore: float = float(loc_tile.resource_cap.get("ore_gold", 0)) \
+			+ float(loc_tile.resource_cap.get("ore_silver", 0))
+		if ore > 0.0:
+			civilian += float(leader.values.get("貪婪", 0.5)) * ORE_CIVILIAN_PULL
 	return "military" if military > civilian else "civilian"
 
 func _faction_has_workshop(state: WorldState, leader_team: TeamData) -> bool:
@@ -2849,6 +2862,29 @@ func _faction_has_workshop(state: WorldState, leader_team: TeamData) -> bool:
 			if o != null and o.faction_id == leader_team.faction_id and leader_team.faction_id != -1:
 				return true
 	return false
+
+# S3 means-end 統一發起（涵蓋 faction_id=-1）：獨立定居隊對自家 outpost 走**同** `_pick_facility` argmax
+# 自評估 + 建造 dispatch（非另開平行路）。閉合「想 goods→需設施→去蓋」回路（獨立隊 has_facility 成長路）。
+# ★行為層待 measurer 坐實：統一路徑真讓獨立隊 has_facility 成長（full-HD 驗，非篤定）。
+func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> void:
+	if team.combat_target != -1: return
+	if team.leader_id == state.player_id and state.player_id != -1: return
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	var own_pos: Vector2i = _find_own_outpost(state, team)
+	if own_pos == Vector2i(-1, -1): return
+	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
+	if tile == null or tile.outpost_level == 0 or tile.construction_team_id != -1: return
+	var pick: Dictionary = _pick_facility(state, team, tile, leader)   # 同 faction 隊 argmax 決策
+	if pick.is_empty(): return
+	if pick.has("demolish_first"):
+		OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
+	# owner 在場就地開工，否則派 builder（同 _evaluate_infrastructure 施工路徑）
+	if team.tile_pos == tile.tile_pos and team.current_task != TeamData.TASK_BUILD:
+		if OutpostSystem.new()._subteam_upgrade_facility(state, team, tile, pick["facility"]):
+			return
+	else:
+		_dispatch_facility_builder(state, team, tile.tile_pos, pick["facility"])
 
 func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	var leader_team: TeamData = state.teams.get(faction.leader_team_id)
@@ -2911,28 +2947,14 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 			if SimRunner.phase_timing: _fai_pht("infra.facility", _ti)
 			return
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.facility", _ti)
-	# (3) 蓋新 outpost 前：公庫不足 + leader 不在家 + idle → 回家治理攢公庫
-	var own_pos: Vector2i = _find_own_outpost(state, leader_team)
-	if own_pos != Vector2i(-1, -1) and leader_team.tile_pos != own_pos:
-		var home_tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
-		var vault_mat: float = float(home_tile.public_storage.get("material", 0)) if home_tile else 0.0
-		if vault_mat < GOVERN_MATERIAL_TARGET and leader_team.current_task == TeamData.TASK_IDLE:
-			if TaskArbiter.try_set(state, leader_team, TeamData.TASK_GOVERN, own_pos,
-					TaskArbiter.PRIO_DISPATCH, "govern_accumulate"):
-				return
+	# S4.3 de-patch（§R² 補裁 4）：移除 infra 層強制 GOVERN 攢公庫——govern 單一 owner = 引擎既有「駐守」
+	# option（人格秤發起）；infra 層不派/不秤 govern，避 Team10 雙決策生產者互蓋 livelock 前科。
 	# (3) 蓋新 outpost
 	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.new_loc", _ti)
 	if loc.is_empty(): return
-	var outpost_type: String = _pick_outpost_type(state, leader_team, leader)
-	# S2 礦村：含礦山地 → 強制 civilian（mint 只允 civilian；軍鎮不採礦=無意義）
-	var loc_tile: HexTileData = loc.get("tile", null)
-	if loc_tile != null and loc_tile.terrain == "mountain":
-		# resource_cap 記初始礦量（永不清零），避免執行期礦量已被採集導致誤判
-		var ore_self: float = float(loc_tile.resource_cap.get("ore_gold", 0)) \
-			+ float(loc_tile.resource_cap.get("ore_silver", 0))
-		if ore_self > 0.0:
-			outpost_type = "civilian"
+	# S4.4：ore 機會已融入 _pick_outpost_type 人格秤（傳 loc_tile），移除硬 civilian override。
+	var outpost_type: String = _pick_outpost_type(state, leader_team, leader, loc.get("tile", null))
 	_dispatch_builder(state, leader_team, loc.pos, outpost_type, 1)
 
 # ──────── 設施需求迴路（score = 地利 × (1+缺口) × 個性）────────
@@ -2941,37 +2963,45 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		leader: PersonData) -> Dictionary:
 	var slot_full: bool = OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile)
-	# S2 granary seam + 常數分層：據點局部 food_days < 人格安全天(food_security_target,×7 死常數退役)。
-	# ★override 留為安全網(S4 才移，S2 gate 過後)——此時 survival-crush 已保底，override 冗餘但雙保險。
-	var hungry: bool = _facility_food_days(state, team, tile) < DecisionTerms.food_security_target(leader.values)
-	# 飢餓 override：缺糧 → 農田最優先（slot 滿可拆遷搶 slot）
-	if hungry and tile.outpost_type == "civilian" \
-			and int(tile.farming_level) == 0:
-		if not slot_full:
-			return { "facility": "farming" }
-		var lowest: String = _lowest_score_facility(state, team, tile, leader)
-		if lowest != "":
-			return { "facility": "farming", "demolish_first": lowest }
-		return {}
+	# S4：移除飢餓 override——S2 survival-crush 已讓餓隊 farming score 主導(S2 gate 驗過)，override 冗餘。
+	# 統一 argmax：未建設施中 _facility_score 最高者（farming 餓時經 survival-crush 自然勝出）。
 	var best: String = ""
 	var best_score: float = 0.05   # 門檻：score 太低不蓋（TEST VALUE）
 	for f in OutpostSystem.FACILITY_DEF:
 		var def: Dictionary = OutpostSystem.FACILITY_DEF[f]
 		if not (tile.outpost_type in def["allowed_outpost"]): continue
 		if def.has("required_terrain") and tile.terrain != def["required_terrain"]: continue
-		var current: int = int(tile.get(def["current_level_key"]))
-		if current > 0: continue          # 已有 → 升級走另一路徑
-		if slot_full: continue
+		if int(tile.get(def["current_level_key"])) > 0: continue   # 已有 → 升級走另一路徑
 		var s: float = _facility_score(state, team, tile, leader, f)
 		if s > best_score:
 			best_score = s
 			best = f
 	if best == "": return {}
-	return { "facility": best }
+	if not slot_full:
+		return { "facility": best }
+	# S4 demolish 泛化（全設施通用，非 farming 專屬）：slot 滿→best 遠勝最低 score 設施則拆建。
+	# ★farming 受規則保護不列拆遷候選（_lowest_score_facility 排除）＝命脈食物設施不拆（§R² 補裁 2）。
+	var lowest: String = _lowest_score_facility(state, team, tile, leader)
+	if lowest == "":
+		return {}
+	if best_score > _facility_score(state, team, tile, leader, lowest) * DEMOLISH_MARGIN:
+		return { "facility": best, "demolish_first": lowest }
+	return {}
 
 # S2 survival-crush（TEST VALUE）：餓→農田 score 壓過發展設施。urgency² 軟連續(非 cliff/binary tier)。
 # crossover 交叉點合理範圍待 measurer tune；量級須讓中性餓隊 farming>workshop(直答 R① 駁表)。
 const SURVIVAL_CRUSH: float = 5.0
+const DEMOLISH_MARGIN: float = 1.5   # S4 TEST VALUE：slot 滿時 best 須 > 最低 score×此才拆建（避 thrash）
+# S4.5 rule（§R² 補裁 3）：產糧設施集合（規則層，未來新增產糧設施加此）+ 短工期門檻。
+const FOOD_FACILITIES: Array = ["farming"]   # 當前唯一產糧設施
+const SURVIVAL_BUILD_MAX_TICKS: int = 120    # 短工期(farming 72 符合;workshop 168/mint 更高不符→照常中斷)
+
+# S4.5：腳下正蓋產糧設施且短工期 → 建設即自救不中斷（means-end 規則，取代硬編 =="farming"）。
+func _is_food_facility_short(facility: String) -> bool:
+	if not (facility in FOOD_FACILITIES):
+		return false
+	var cost: Dictionary = OutpostSystem.FACILITY_DEF.get(facility, {}).get("cost", {})
+	return int(cost.get("ticks", 9999)) <= SURVIVAL_BUILD_MAX_TICKS
 
 func _facility_score(state: WorldState, team: TeamData, tile: HexTileData,
 		leader: PersonData, facility: String) -> float:
@@ -2998,13 +3028,15 @@ func _facility_food_urgency(state: WorldState, team: TeamData, tile: HexTileData
 	var fdays: float = _facility_food_days(state, team, tile)
 	return clampf((tgt - fdays) / maxf(tgt, 0.001), 0.0, 1.0)
 
-# 拆遷候選：已建設施中 score 最低者（農田不拆）
+# 拆遷候選：已建設施中 score 最低者。
+# ★rule（§R² 補裁 2，非殘留 override）：farming＝受保護命脈食物設施，不為蓋他物拆除（世界規則）。
+# 拆糧倉→下 tick 又餓→重蓋 thrash 風險，故農田恆不列拆遷候選。
 func _lowest_score_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		leader: PersonData) -> String:
 	var lowest: String = ""
 	var lowest_score: float = INF
 	for f in OutpostSystem.FACILITY_DEF:
-		if f == "farming": continue
+		if f == "farming": continue   # rule：命脈食物設施不拆
 		var def: Dictionary = OutpostSystem.FACILITY_DEF[f]
 		if int(tile.get(def["current_level_key"])) == 0: continue
 		var s: float = _facility_score(state, team, tile, leader, f)
@@ -3276,13 +3308,13 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	if team.current_task != TeamData.TASK_IDLE:
 		team.previous_task = team.current_task
 
-	# 正在腳下工地蓋「農田」→ 建設即自救，不中斷（農田完工才是糧食出路，工期僅 3 天）
-	# 其他設施（鑄幣廠 30 天等）照常被飢餓中斷 — 不會蓋到餓死
+	# S4.5 rule 泛化（§R² 補裁 3，非硬編 =="farming"）：腳下正蓋**產糧設施 + 短工期**→建設即自救不中斷
+	# （完工才是糧食出路，means-end 規則）。其他設施（鑄幣廠 30 天等）照常被飢餓中斷—不會蓋到餓死。
 	if team.current_task == TeamData.TASK_BUILD:
 		var cur_tile: HexTileData = state.world.tiles.get(
 			team.tile_pos.x * 1000 + team.tile_pos.y)
 		if cur_tile != null and cur_tile.construction_team_id == team.team_id \
-				and str(cur_tile.construction_target.get("facility", "")) == "farming":
+				and _is_food_facility_short(str(cur_tile.construction_target.get("facility", ""))):
 			team.previous_task = ""
 			return
 
