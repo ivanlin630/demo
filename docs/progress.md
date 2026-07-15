@@ -603,3 +603,13 @@ hand vendetta dispatch（`faction_ai:733-741` 直塞 TASK_ATTACK@PRIO_VENDETTA�
 | **宗教/文化系統** | 新 values 或 faction 屬性 |
 | **PersonGenerator 其他 call site** | 玩家招募、天賦事件 |
 | **存檔/讀檔** | WorldState 序列化 |
+
+## 統一生產框架 merged（生產 arc 甲，2026-07-16，merge dac824cb）
+供給牆破。de-patch 設施決策入思考層（框架管規則·思考歸引擎人格）。
+- **S1** 製造 precondition 規則 + no-op tap（A2 補缺 + E 可觀測）。
+- **S2** food-security survival-crush 項編進秤（farming×(1+CRUSH×urgency²)，軟連續，food_security_target 人格調變）+ granary 位置 seam 修 + 常數分層（×0.8 flat/×7 人格化）。S2 gate：餓隊 farming 13.80>workshop 4.40（精確 match R① 手算）。
+- **S3** means-end 統一發起涵蓋 faction_id=-1 獨立隊。
+- **S4** 移 A1 override + A4 govern de-patch（單 owner 引擎駐守）+ 礦山 civilian de-patch（ore 融人格秤）+ farming 不拆/survival 農田特例=規則明文。
+- **measurer full-HD**：has_facility 恆1→10%~31.3%（含獨立隊 27.3%）、成品池 26→480(18x)、[Manufacture] 6→4348、no-op=0、urgency 真 fire、starve 2→2 無回歸、守恆 PASS、觀測閘 byte-identical。
+- **閘鏈**：R①（異質手算擋天真 de-patch）→re-verify CLEAN→R² issues(5 閘)→R² CLEAN→impl(S2 gate)→measurer→觀測閘全綠→blueprint 批。
+- **誠實標記**：供給破=強證；人格分化 mechanism-present 待 multi-seed fast-follow；deal 側成交牆(死法②)=下個 arc。
