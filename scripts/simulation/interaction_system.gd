@@ -738,10 +738,15 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 	var s_leader = state.persons.get(owner.leader_id) if owner != null else null
 	var commerce: float = float(s_leader.skills.get("商業", 0.0)) if s_leader else 0.0
 	var owner_lv: Dictionary = TradeValuation.leader_vals(state, owner) if owner != null else {}
+	# 觀測：到市場地方＝會合（鏡射舊 pairwise trade.meet 語意，全量暫態可觀測性）。
+	if Probe.enabled and visitor.current_task == TeamData.TASK_TRADE:
+		Probe.bump("trade.meet")
 	var dealt: bool = false
+	var saw_live_order: bool = false
 	for entry in tile.market_orders.duplicate():   # 複製：沖銷改動原陣列
 		var rem: int = int(entry["qty_remaining"])
 		if rem <= 0: continue
+		saw_live_order = true
 		var oid: int = int(entry["order_id"])
 		var res: String = String(entry["res"])
 		var kind: String = String(entry["kind"])
@@ -751,6 +756,8 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 		elif kind == "buy":
 			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv):
 				dealt = true
+	if not saw_live_order:
+		Probe.bump("trade.market_bail.no_board_order")   # 板上無活單（29 bail 因可觀測）
 	if dealt:
 		print("[Market@%s] Team%d ↔ outpost owner Team%d 成交" % [str(tile.tile_pos), visitor.team_id, owner_id])
 		Probe.bump("trade.deal")
@@ -767,20 +774,26 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
 		oid: int, res: String, order_rem: int, commerce: float, owner_lv: Dictionary) -> bool:
 	var vcoin: float = float(visitor.resources.get("coin", 0))
-	if vcoin <= 0.0: return false
+	if vcoin <= 0.0: Probe.bump("trade.market_bail.buy_no_coin"); return false
 	var ask: float = TradeValuation.ask_price(owner, res, commerce, owner_lv, state) if owner != null \
 		else float(TradeValuation.BASE_PRICE.get(res, 0.0))   # 無主 outpost → face value
-	if ask <= 0.0: return false
+	if ask <= 0.0: Probe.bump("trade.market_bail.buy_no_price"); return false
 	var stock: float = TileBank.get_stored(tile, res)   # ★min(單餘,現貨)：可購量鎖現貨
 	# 訪客缺口（storage-aware，補到自己 reserve）；SURVIVAL 買方求生亦補
 	var want: float = maxf(TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state)
 		- ResourceSystem.effective_holding(state, visitor, res), 0.0)
 	var qty: int = int(minf(minf(float(order_rem), stock), minf(vcoin / ask, want)))
 	qty = mini(qty, MovementSystem.new().carry_space_for_res(visitor, res))
-	if qty <= 0: return false
+	if qty <= 0:
+		# 分因 bail 可觀測（29 bail 因 headline，measurer 拆得出）
+		if stock <= 0.0: Probe.bump("trade.market_bail.buy_no_stock")
+		elif want <= 0.0: Probe.bump("trade.market_bail.buy_no_want")
+		elif vcoin / ask < 1.0: Probe.bump("trade.market_bail.buy_cant_afford")
+		else: Probe.bump("trade.market_bail.buy_carry_full")
+		return false
 	var got: float = TileBank.withdraw(tile, res, float(qty), "market_sell_out")   # 實量
 	var q: int = int(got)
-	if q <= 0: return false
+	if q <= 0: Probe.bump("trade.market_bail.buy_withdraw_empty"); return false
 	ResourceBank.add(visitor, res, q, "market_buy_in")
 	ResourceBank.add(visitor, "coin", -(q * ask), "market_buy_coin_out")
 	_credit_owner_coin(state, owner, tile, q * ask)
@@ -791,19 +804,22 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 # owner 無 coin → 買不成（連 coin 循環風險）。SURVIVAL 訪客不甩活命糧（surplus 已扣 reserve floor）。
 func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
 		oid: int, res: String, order_rem: int, owner_lv: Dictionary) -> bool:
-	if owner == null: return false   # 無主 outpost 無 coin 收購
+	if owner == null: Probe.bump("trade.market_bail.sell_ownerless"); return false   # 無主 outpost 無 coin 收購
 	var ocoin: float = float(owner.resources.get("coin", 0))
-	if ocoin <= 0.0: return false
+	if ocoin <= 0.0: Probe.bump("trade.market_bail.sell_owner_no_coin"); return false
 	var surplus: float = maxf(ResourceSystem.effective_holding(state, visitor, res)
 		- TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state), 0.0)
-	if surplus <= 0.0: return false
+	if surplus <= 0.0: Probe.bump("trade.market_bail.sell_no_surplus"); return false
 	var bid: float = TradeValuation.local_value(owner, res, state)
-	if bid <= 0.0: return false
+	if bid <= 0.0: Probe.bump("trade.market_bail.sell_no_price"); return false
 	var qty: int = int(minf(minf(float(order_rem), surplus), ocoin / bid))
-	if qty <= 0: return false
+	if qty <= 0:
+		if ocoin / bid < 1.0: Probe.bump("trade.market_bail.sell_owner_cant_afford")
+		else: Probe.bump("trade.market_bail.sell_zero_qty")
+		return false
 	var deposited: float = TileBank.deposit(tile, res, float(qty), "market_buy_in")   # cap 限
 	var q: int = int(deposited)
-	if q <= 0: return false
+	if q <= 0: Probe.bump("trade.market_bail.sell_storage_full"); return false
 	ResourceSystem.spend_holding(state, visitor, res, float(q))
 	ResourceBank.add(visitor, "coin", q * bid, "market_sell_coin_in")
 	ResourceBank.add(owner, "coin", -(q * bid), "market_sell_coin_out")

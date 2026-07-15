@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_test_survival_no_order_no_sell()
 	_test_conservation()
 	_test_integration_step3c_fires()
+	_test_probe_full_funnel()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -170,4 +171,36 @@ func _test_integration_step3c_fires() -> void:
 	sr._step3c_read_market_board(s, [2])   # arrived = [visitor]
 	_ok(float(visitor.resources.get("food", 0)) > food0, "★整合：step3c→resolver 真 fire，visitor 買到 food（%.0f）" % float(visitor.resources.get("food", 0)))
 	_ok(int(Probe.counts.get("trade.deal_market", 0)) > 0, "★deal_market probe 動（=%d，非死碼）" % int(Probe.counts.get("trade.deal_market", 0)))
+	Probe.enabled = false
+
+# ── ★probe 全 funnel 可觀測（observability-fix）：成交 bump deal/deal_market/order_fulfilled；bail 分因可觀測 ──
+func _test_probe_full_funnel() -> void:
+	print("--- ★probe 全 funnel：成交計數口徑 + bail 分因 ---")
+	# (a) 成交 → order_fulfilled + deal + deal_market bump（鏡射舊路口徑）
+	Probe.enabled = true; Probe.reset()
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
+	owner.active_orders = [{"order_id": 90, "kind": "sell", "res": "food", "qty_remaining": 5}]
+	var tile := _mk_outpost(s, 1, Vector2i(1, 1), {"food": 500.0},
+		[{"order_id": 90, "kind": "sell", "res": "food", "qty_remaining": 5, "origin_team": 1, "expire_tick": 99999}])
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0, "food": 0.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	InteractionSystem.new()._resolve_market_at_outpost(s, visitor, tile)
+	_ok(int(Probe.counts.get("trade.deal", 0)) > 0, "trade.deal bump（=%d）" % int(Probe.counts.get("trade.deal", 0)))
+	_ok(int(Probe.counts.get("trade.deal_market", 0)) > 0, "trade.deal_market bump（=%d）" % int(Probe.counts.get("trade.deal_market", 0)))
+	_ok(int(Probe.counts.get("g1.order_fulfilled", 0)) > 0, "★order_fulfilled bump（單填滿=%d，鏡射舊路）" % int(Probe.counts.get("g1.order_fulfilled", 0)))
+	_ok(int(Probe.counts.get("trade.meet", 0)) > 0, "trade.meet bump（到市場會合=%d）" % int(Probe.counts.get("trade.meet", 0)))
+	# (b) bail 分因可觀測：無 coin → buy_no_coin
+	Probe.reset()
+	var s2 := _mk_state()
+	_mk_person(s2, 100); _mk_person(s2, 200)
+	var o2 := _mk_team(s2, 1, 100, 10, {"coin": 0.0})
+	o2.active_orders = [{"order_id": 91, "kind": "sell", "res": "food", "qty_remaining": 5}]
+	var tile2 := _mk_outpost(s2, 1, Vector2i(1, 1), {"food": 500.0},
+		[{"order_id": 91, "kind": "sell", "res": "food", "qty_remaining": 5, "origin_team": 1, "expire_tick": 99999}])
+	var v2 := _mk_team(s2, 2, 200, 10, {"coin": 0.0, "food": 0.0})   # 無 coin
+	v2.current_task = TeamData.TASK_TRADE; v2.tile_pos = Vector2i(1, 1)
+	InteractionSystem.new()._resolve_market_at_outpost(s2, v2, tile2)
+	_ok(int(Probe.counts.get("trade.market_bail.buy_no_coin", 0)) > 0, "★bail 分因可觀測: buy_no_coin bump（=%d）" % int(Probe.counts.get("trade.market_bail.buy_no_coin", 0)))
 	Probe.enabled = false
