@@ -693,3 +693,10 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **★方法論修正**:TAG_MERCHANT本世界全程0隊!真閘=ambition_archetype==ARCHETYPE_TRADE(faction_ai:2045)。fix對象ARCHETYPE_TRADE非TAG_MERCHANT。
 - **fix WHAT-fork(待blueprint)**:A追賣方belief_pos(鏡射pursuit,漫遊難追fragile,team-to-team)vs B outpost-market(貨在public_storage買方到outpost買stock免賣方在場,WS-2b infra現成,穩+像真市場,systems建議B)。市場模型WHAT:追人vs place-based。
 - **序**:②merchant完成trade(通co-location)→①成交條件液化(held)→coin combo重驗。液化+coin B held不merge(下游)。溯源handback `2026-07-15-systems-to-blueprint-arb-root-fix-fork`。關 [[project_economy_arc]]。
+
+## 經濟深multi-wall stack:coin大勝但供給側牆(2026-07-15,~10層measured剝殼)
+- **coin combo大勝**:buy_no_coin 30421→27(-99.9%),coin雙向流動,私囊鎖root治對。但deal仍~1-2(未revive)。
+- **層序(每層measured,修一露一)**:①供給可見性(seam)②撮合③移動④co-location(65%漫遊→market-as-place解)⑤成交條件(液化)⑥coin(私囊鎖,大勝)⑦**sell_no_surplus 51.7%(訪客到市場沒貨賣)=供給存在性最深牆**。
+- **供給最深根候選**:producer產不出surplus(自用即耗/產能低)or TRADE隊無inventory累積(買低賣高需先買=chicken-egg)。=回到blueprint最初「誰生產可賣surplus」。
+- **策略點(blueprint+用戶定)**:①續剝供給②重估市場模型/目標(稀缺世界本就少貿易?=設計特徵)③止血merge coin+foundation(unified-commerce巨大正確refactor+coin流+守恆,非inert,誠實標供給待續)。systems傾向3+1。
+- **branch feat/unified-commerce(160301d9)**:market-as-place+液化+coin,守恆PASS,機制真fire(deal_market非零),但deals低=供給頂上。溯源handback `2026-07-15-systems-to-blueprint-coin-won-supply-wall-strategy`。關 [[project_economy_arc]]/[[project_established_chain]](深stack同精神)。
