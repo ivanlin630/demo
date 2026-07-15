@@ -718,3 +718,9 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **頭號補丁閘=恆-hungry**(_pick_facility:糧倉有糧仍effective_food判餓→farming硬override→製造設施never)。其餘閘blueprint靜態稽核列中(餵systems)。
 - **架構方向(systems HOW,待靜態稽核全閘)**:facility/發展決策走DecisionEngine(人格加權needs:工匠→製造/農夫→農/好戰→軍事)取代硬gate(hungry→farming override/facility_score門檻/builder gate);同unified-commerce精神(整子系統進框架)。切幾slice待閘清單。
 - **等靜態稽核餵全補丁閘列表**再spec(同商業異質稽核抓全縫)。溯源handback `2026-07-16-blueprint-to-systems-production-arc-greenlight-unify-all-gates`。關 [[project_unification_matrix]]/[[project_economy_arc]]。
+
+## 生產框架 arc follow-up（2026-07-16,供給側成功後殘項）
+- **deal 側成交牆（死法②同款,下一 arc）**:生產框架破供給牆(has_facility 10%→31.3%、成品池 26→480 18x),但 deal headline 仍低(deal=2、sell_no_surplus 最大 bail)。根=供給「量」有了但**流通到 visitor 隨身可交易貨**未打通(產出集中在有 facility 隊自家 outpost 公庫,非分散到 roam visitor 手上)。=死法②同款成交牆,另開 arc 治(非生產框架範圍)。
+- **A3 utility 化(生產 S4.2 未做)**:`_evaluate_infrastructure` 固定 if 階梯(升級>擴建>蓋新 first-match)→ utility argmax。measurer 坐實**非 release block**(has_facility 正常漲,ladder 沒餓死建造)→低優先 de-patch follow-up slice。
+- **`GOVERN_MATERIAL_TARGET` const 孤兒**(A4 govern de-patch 後 `faction_ai:18` const 可能無 caller)——advisory 清,非閘。
+- **人格分化 confirm**(弱證據 n=8):mechanism 在(leader_pref+_facility_personality)但乾淨相關性樣本不足→待 blueprint 裁是否 multi-seed 聚合 confirm。關 [[project_economy_arc]]。
