@@ -50,7 +50,7 @@ hole-by-hole 每融一縫→下個補丁擋（打地鼠：seam→churn→threat�
 
 ## invariant 守
 - **資源守恆**：全走 ResourceBank/TileBank chokepoint，coin/goods 只搬。CoinAudit=0、InvariantAudit=0。
-- **感知鐵律**：目標選市場走 belief（去過/傳聞），非 god-view 掃全 tile。
+- **感知鐵律**：★R²訂正——目標選市場走 **`_nearest_market_outpost` 的「市集=公開地標」豁免**（誠實入 invariants 豁免清單，同 known_reputations/同-faction；非假裝 belief——BeliefSystem 無 tile 級知識庫，belief-market store=backlog）。敵情/社交目標位置仍走 belief（god-view 位置根治不回退）。
 - **全量暫態可觀測性**：新 resolver/target/掛單路徑接 specimen tap（盲點閘掃）+ 補 A 縫 tap（躲 public_storage 貨可觀測）。
 - **determinism**：純人格+狀態，零 randf → 同 seed 兩跑 bit-identical（行為本就該變＝market-as-place，驗收同 seed 兩跑非 baseline）。
 - **憲法**：決策交引擎（target/掛單走 rank/人格），無新 try_set 繞過。
