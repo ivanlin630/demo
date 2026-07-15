@@ -649,3 +649,9 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **根(code-verified,framework seam)**:manufacture 產出(`manufacturing_system._add_output:117-118`)outpost 隊→`tile.public_storage`(非 team.resources);但非糧賣單(`order_system:110`)`qty=team.resources.get(res); if qty<20: continue`只讀 team.resources→定居隊製造的 goods/weapon/ore_steel 在糧倉、賣單查私產=0→**永不掛非糧賣單**→市場無貨。**同 WS-2c food accessor 家族**(資源搬位置讀者沒跟)。food 賣單已修(`_tick_food_granary_sell:138` 讀 granary,227筆/年);非糧漏同款修。
 - **修向**:非糧賣單讀 effective 持有(team.resources+自家 public_storage,鏡射 effective_food 單源 accessor)+ 成交從正確 storage 扣。**下一層**(seam 修後若供給仍薄):material 產能 vs 消耗(measure-first 別預修)。
 - **=經濟/發展 arc 經濟維核心**(生產→surplus→貿易→財富鏈接通)。blueprint 出願景→systems spec。溯源 handback `2026-07-15-systems-to-blueprint-economy-supply-root-found`。關 [[project_framework_seams]]/[[project_economy_arc]]。
+
+## 掛單噪音 churn(blueprint+用戶抓 2026-07-15,經濟arc納入)
+- **現象**:order_placed 539-850單/月、arb_call 數千/月、arb_kill_nostock 8372-20331/月。Team0 常駐6張單跨tick不變每cycle重掛→撮合狂空轉。churn家族(掛成不了的單還重掛,同flee每tick重commit/買糧幻覺精神)。
+- **兩層**:①供給seam修後可能自消一部分(有貨可撮→成交清掉→spam減,像flee修N1_flee回落)②剩獨立churn(隊照掛不管有沒有貨/買不買得起)→掛單紀律治。
+- **掛單紀律(order-discipline,scope待seam修後噪音量測定)**:grounded-order(掛單版look-before-leap:買不到/賣不掉/付不起別掛)+dedup(常駐單去重)+expiry(過期清)。訂單也是決策/行動該grounded(結構稽核grounded-ness家族)。
+- **序**:供給seam第一刀驗收#7量噪音修前後→看供給下游自消vs獨立churn組成→blueprint定同刀or下刀。**別預修**。溯源handback `2026-07-15-blueprint-to-systems-order-noise-scope`。關 [[project_economy_arc]]。
