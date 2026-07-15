@@ -706,3 +706,8 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **根候選(systems measure中)**:①manufacture產能低(material稀/facility rare/生產鮮少選)②reserve太高(surplus never>reserve)③TRADE隊無inventory累積(買低賣高chicken-egg)。=回blueprint最初「誰產可賣surplus」。
 - **決定甲/乙(measure後)**:甲=建surplus經濟(生產鏈產tradeable餘)/乙=接受薄貿易(稀缺世界本少貿易=設計特徵)。
 - **孤兒函式advisory**(reviewer merge-gate標,de-patch殘留,非阻擋):生產arc順手清。溯源handback `2026-07-16-systems-to-implementer-unified-commerce-merged-done`。關 [[project_economy_arc]]。
+
+## ★供給根precise=製造設施幾乎不建(生產arc甲,2026-07-16 measurer坐實)
+- **根(measurer)**:has_facility隊恆=1(僅1隊有製造設施6月不變),8隊goods holding恒=0(從未產一單位),[Manufacture]全程6次。非material稀(surplus 417→破千)非reserve高非task-selection(TASK_MANUFACTURE dispatch 1→11隊想製造但has_facility=1每tick空轉no-op)。
+- **precise=facility建造鏈存在但幾乎不產製造設施**(_evaluate_infrastructure→_pick_facility→_dispatch_facility_builder)。候選gate:①恆-hungry永建農(_pick_facility hungry→farming優先,WS-2c註定居隊food在糧倉恆hungry)②_facility_score製造太低(<門檻0.05)③builder gate(cost×1.5/advisor/pop≥6/subteam)。
+- **生產arc(甲,待blueprint+用戶greenlight)**:讓製造設施蓋起→goods產出→surplus→市場供給→貿易活。接發展模型(生產/軍事/建設維度)。乙=接受薄貿易(稀缺特徵)。→greenlight則systems patch-gate-first定哪gate(可能measure一輪)→spec。溯源handback `2026-07-16-systems-to-blueprint-supply-root-facility-chain-production-arc`。關 [[project_economy_arc]]/[[project_established_chain]]。
