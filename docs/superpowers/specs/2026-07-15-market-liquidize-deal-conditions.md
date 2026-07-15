@@ -14,11 +14,13 @@ governing: `invariants.md`（資源守恆 — 成交只搬不生）+ 決策模�
 
 ## Fix（流動為底 + 摩擦人格化，blueprint 願景）
 
-### Fix 1：reserve 液化 + 人格化（非糧，鏡射食物已人格化先例）
-非糧 reserve 從 flat `pop×TARGET_PER_POP` → **人格化 + 降底**：
-- `reserve = pop × TARGET_PER_POP[res] × reserve_factor(leader_values, urgency)`。
-- **`reserve_factor`**：貪婪/慎重 → 高（守貨守價）；**急迫/絕境**（低 food_days / 缺 coin 壓力）→ 低（鬆手賣換 coin/糧）。baseline `RESERVE_BASE < 1.0`（降底 → 願賣方變多 = 流動為底）。
-- ∴ willing 賣方（有 surplus）大增，貪婪囤/絕境甩＝人格戲（blueprint「摩擦人格化」）。
+### Fix 1：reserve 液化 + 人格化（★只非活命品，SURVIVAL_GOODS 保 floor）
+**★R² 訂正：液化只作用非活命品，`SURVIVAL_GOODS=["food","medicine"]` 排除**（food + medicine 同是活命糧，絕境降 reserve 會賣掉救命藥/糧→死）：
+- **SURVIVAL_GOODS（food/medicine）保既有 survival-floor reserve**（food 已 `food_security_target` 人格化；medicine 同保 survival floor 不因絕境甩光）——**不液化、不賣活命糧**。
+- **非活命品（material/weapon/ore/goods/tools/…）** reserve 從 flat `pop×TARGET_PER_POP` → **人格化 + 降底**：
+  - `reserve = pop × TARGET_PER_POP[res] × reserve_factor(leader_values, urgency)`。
+  - **`reserve_factor`**：貪婪/慎重 → 高（守貨守價）；**急迫/絕境**（低 food_days / 缺 coin 壓力）→ 低（鬆手賣**非活命品**換 coin/糧）。baseline `RESERVE_BASE < 1.0`（降底 → 願賣方變多 = 流動為底）。
+- ∴ willing 賣方（有非活命品 surplus）大增，貪婪囤/絕境甩非活命品＝人格戲（blueprint「摩擦人格化」）；**活命糧永不甩**。
 
 ### Fix 2：ask/bid 液化（willing 對大多成交，摩擦=少數有理由）
 - **commerce 折扣加寬 or 加 willing-deal 偏置**：當賣方有 surplus + 買方真想要（`bid > seller BASE 或 buyer shortage>0`）→ **偏向成交**（deal zone 放寬，ask≤bid×(1+SPREAD_TOL) 或折扣隨賣方急迫加深）。
