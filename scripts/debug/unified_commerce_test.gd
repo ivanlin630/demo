@@ -15,6 +15,8 @@ func _initialize() -> void:
 	_test_conservation()
 	_test_integration_step3c_fires()
 	_test_probe_full_funnel()
+	_test_member_tax_conservation()
+	_test_combo_taxed_buyer_deals()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -204,3 +206,59 @@ func _test_probe_full_funnel() -> void:
 	InteractionSystem.new()._resolve_market_at_outpost(s2, v2, tile2)
 	_ok(int(Probe.counts.get("trade.market_bail.buy_no_coin", 0)) > 0, "★bail 分因可觀測: buy_no_coin bump（=%d）" % int(Probe.counts.get("trade.market_bail.buy_no_coin", 0)))
 	Probe.enabled = false
+
+# ── coin combo：成員稅守恆（person.coin→team.coin 池間搬，留 floor）──
+func _test_member_tax_conservation() -> void:
+	print("--- coin combo：成員稅守恆（person→team，留 floor）---")
+	var s := _mk_state()
+	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.9, "慎重": 0.1}
+	s.persons[100] = ldr
+	var team := TeamData.new(); team.team_id = 1; team.leader_id = 100
+	team.resources = {"coin": 0.0}
+	for i in range(3):
+		var p := PersonData.new(); p.id = 200 + i; p.coin = 100.0
+		s.persons[200 + i] = p; team.named_members.append(200 + i)
+	s.teams[1] = team
+	var mc0: float = 0.0
+	for pid in team.named_members: mc0 += s.persons[pid].coin
+	FactionAISystem.new()._collect_member_tax(s, team)
+	var mc1: float = 0.0
+	for pid in team.named_members: mc1 += s.persons[pid].coin
+	var tc1: float = float(team.resources.get("coin", 0))
+	_ok(mc1 < mc0 and tc1 > 0.0, "person.coin 降（%.0f→%.0f）、team.coin 升（%.0f）" % [mc0, mc1, tc1])
+	_ok(absf((mc0 - mc1) - tc1) < 0.001, "★守恆 Δperson(%.1f)=Δteam(%.1f)" % [mc0 - mc1, tc1])
+	var min_p: float = 1e9
+	for pid in team.named_members: min_p = minf(min_p, s.persons[pid].coin)
+	_ok(min_p >= FactionAISystem.PERSONAL_COIN_FLOOR, "留 floor：最低 person.coin(%.1f) >= FLOOR(%.1f)" % [min_p, FactionAISystem.PERSONAL_COIN_FLOOR])
+
+# ── ★combo：市場有 sell stock + 買方經稅有 coin → deal fire（no_coin binding 破）──
+func _test_combo_taxed_buyer_deals() -> void:
+	print("--- ★combo：稅回補 team.coin → 買方到市場成交 ---")
+	var s := _mk_state()
+	# owner 市場：food sell 單 + storage
+	_mk_person(s, 100)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
+	owner.active_orders = [{"order_id": 95, "kind": "sell", "res": "food", "qty_remaining": 50}]
+	var tile := _mk_outpost(s, 1, Vector2i(2, 2), {"food": 500.0},
+		[{"order_id": 95, "kind": "sell", "res": "food", "qty_remaining": 50, "origin_team": 1, "expire_tick": 99999}])
+	# 買方 team.coin=0（no_coin binding）但 named 成員有錢
+	var vldr := PersonData.new(); vldr.id = 200; vldr.values = {"貪婪": 0.9, "慎重": 0.1}
+	s.persons[200] = vldr
+	var visitor := TeamData.new(); visitor.team_id = 2; visitor.leader_id = 200
+	visitor.resources = {"coin": 0.0, "food": 0.0}
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(2, 2)
+	for i in range(9):
+		var p := PersonData.new(); p.id = 300 + i; p.coin = 100.0
+		s.persons[300 + i] = p; visitor.named_members.append(300 + i)
+	s.teams[2] = visitor
+	# 稅前：team.coin=0 → 到市場買不成
+	var iact := InteractionSystem.new()
+	iact._resolve_market_at_outpost(s, visitor, tile)
+	var food_pretax: float = float(visitor.resources.get("food", 0))
+	_ok(food_pretax == 0.0, "稅前 team.coin=0 → 買不成（food=%.0f）" % food_pretax)
+	# 收稅 → team.coin 回補
+	FactionAISystem.new()._collect_member_tax(s, visitor)
+	_ok(float(visitor.resources.get("coin", 0)) > 3.4, "★稅後 team.coin(%.1f) > market ask ~3.4（買方有錢）" % float(visitor.resources.get("coin", 0)))
+	# 稅後：到市場買成
+	iact._resolve_market_at_outpost(s, visitor, tile)
+	_ok(float(visitor.resources.get("food", 0)) > 0.0, "★combo：稅後買方到市場成交（food=%.0f，no_coin binding 破）" % float(visitor.resources.get("food", 0)))
