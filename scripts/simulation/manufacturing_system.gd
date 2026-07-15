@@ -76,21 +76,26 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 		var tile_id: int      = team.tile_pos.x * 1000 + team.tile_pos.y
 		var tile: HexTileData = state.world.tiles.get(tile_id)
 		if tile == null or tile.outpost_level == 0:
+			Probe.bump("manufacture.noop_no_outpost")   # S1 tap：據點消失後殘任務空轉
 			continue
 		if not _team_works_tile(state, team, tile):
+			Probe.bump("manufacture.noop_no_worker")   # S1 tap：無生產權
 			continue
 		# 生產人力 gate：tile 上有居民團（PRODUCE tag）才生產
 		if not OutpostSystem.new()._has_resident_on_tile(state, tile):
+			Probe.bump("manufacture.noop_no_worker")   # S1 tap：無居民人力
 			continue
 
 		var pop_mult: float   = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
 		var avg_skill: float  = _avg_skill(state, team, "製造")
 
 		var ran_any: bool = false
+		var any_facility: bool = false
 		for level_key in RECIPE_GROUPS:
 			var level: int = int(tile.get(level_key))
 			if level <= 0:
-				continue
+				continue   # 無此設施（下方統一 no_facility tap，避免每 group bump 灌數）
+			any_facility = true
 			var worker_rate: float = float(level) * pop_mult * (0.5 + avg_skill * 0.5)
 			var ran_recipe: String = _run_recipe_group(state, team, tile, level_key, worker_rate)
 			if ran_recipe != "":
@@ -98,6 +103,10 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 				print("[Manufacture] Team%d %s worker_rate=%.2f" % [tid, ran_recipe, worker_rate])
 		if ran_any:
 			_grow_skills(state, team)
+		elif not any_facility:
+			Probe.bump("manufacture.noop_no_facility")   # S1 tap：A2 主病——無製造設施空轉
+		else:
+			Probe.bump("manufacture.noop_no_material")   # S1 tap：有設施+人力但原料不足每 tick 空轉
 
 # 生產權：owner 本人或同 faction（軍屯/派駐居民團代工）
 func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> bool:

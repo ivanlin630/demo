@@ -2100,12 +2100,12 @@ func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 			best_id = tid
 	return best_id
 
-func _can_manufacture(state: WorldState, team: TeamData) -> bool:
-	var tile_id: int      = team.tile_pos.x * 1000 + team.tile_pos.y
-	var tile: HexTileData = state.world.tiles.get(tile_id)
+# S1：製造 precondition 規則（本格任一製造設施 level>0 + 生產權）。無 material 查（材料不足=另條 no-op tap）。
+# 死碼 _can_manufacture 設施查邏輯抽此 static，供 DecisionContext.gather「生產」applicable 規則重用（A2 補缺）。
+static func has_manufacturing_facility(state: WorldState, team: TeamData) -> bool:
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	if tile == null or tile.outpost_level == 0:
 		return false
-	# 任一製造類設施（工坊/冶煉/武器/護甲）才可開工
 	var has_facility: bool = false
 	for level_key in ManufacturingSystem.RECIPE_GROUPS:
 		if int(tile.get(level_key)) > 0:
@@ -2118,6 +2118,11 @@ func _can_manufacture(state: WorldState, team: TeamData) -> bool:
 		var owner: TeamData = state.teams.get(tile.outpost_owner)
 		if owner == null or owner.faction_id != team.faction_id or team.faction_id == -1:
 			return false
+	return true
+
+func _can_manufacture(state: WorldState, team: TeamData) -> bool:
+	if not has_manufacturing_facility(state, team):
+		return false
 	return float(team.resources.get("material", 0)) >= MANUFACTURE_MATERIAL_MIN
 
 func _is_known(state: WorldState, from_id: int, target_id: int) -> bool:

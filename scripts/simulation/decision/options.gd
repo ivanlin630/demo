@@ -68,7 +68,13 @@ static func applicable(ctx: DecisionContext) -> Array:
 				# 駐村隊（movement 居民鎖）不濾：掛 TRADE 站自家村=擺攤營業（來客觸發 _resolve_market
 				# + absorb 糧倉賣餘糧=需求側環實體）。漏斗 r3 實證：濾掉→村攤關門→成交崩，勿再加鎖。
 				if ctx.has_goods or ctx.has_arb: out.append(opt)
-			"生產", "駐守":
+			"生產":
+				# S1：製造需設施 precondition（A2 補缺）——無製造設施→濾掉（否則無設施選製造=no-op 空轉）。
+				if ctx.has_own_outpost and ctx.has_manufacturing_facility:
+					out.append(opt)
+				elif ctx.has_own_outpost and Probe.enabled:
+					Probe.bump("produce.appl_kill_nofacility")   # 生產被 precondition 濾（A2 主病可觀測）
+			"駐守":
 				if ctx.has_own_outpost: out.append(opt)
 			"建設":
 				out.append(opt)   # bootstrap(無據點建新) + 升級(有據點) 皆候選 → 無據點生產隊不被困
