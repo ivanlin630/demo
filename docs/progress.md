@@ -86,6 +86,9 @@ full-HD 觀察 unblock 內政的觀測 infra。tap-gap 撞出 4 個（order/surv
 
 **arc 過程血教訓（全入 memory）**：症狀 vs 根（治抖動=治症 `feedback_symptom_vs_root_retry`）、觀測禁耗 RNG（`feedback_observer_no_global_rng`）、不虛構授權（`feedback_no_fabricated_authority`）、Windows merge lock（`feedback_windows_git_merge_lock`）。**兩道閘 + 異質框外審 + 故事 QA + 全量可觀測性一路揪換皮/假前提/感知鐵律違反/觀測假象。**
 
+### 統一商業框架 market-as-place + coin 循環 → main（merge `eb047b6f`，2026-07-15）
+經濟維第一個交付。**10 層 measured 剝殼**（供給可見性→撮合→移動→co-location→成交條件→coin→sell_no_surplus）後，用戶裁 hole-by-hole 打地鼠+互 confound → **整個商業框架一次做**（market-as-place 骨幹）。**已修**：market-as-place（貨在 outpost、買方到市場買/賣 stock、免賣方在場，解 65% 賣方漫遊撲空；`_resolve_market_at_outpost` owner-mediated 雙側 coin 雙向、履約 order_id 權威直沖）+ effective_holding 統一 6 讀點去 absorb/spill + 掛單人格化 + reserve 液化（SURVIVAL food+medicine 保 floor）+ de-patch kill-list（雙 resolver 收斂/死常數叢/三 fallback）+ coin 循環（`_collect_member_tax` 破私囊鎖 salary 單向枯竭）+ invariants 市集=公開地標豁免。**量測**：機制證明 deal_market 0→2、**coin 大勝 buy_no_coin 30421→27(-99.9%) coin 雙向流動**、守恆 CoinAudit=0、byte-identical、盲點閘綠。**★誠實標**：機制+coin 通但市場未大 revive（deal 仍~1-2）——新主牆 `sell_no_surplus 51.7%`（訪客沒貨賣=供給存在性）**待生產 arc**（甲建 surplus 經濟/乙接受薄貿易，patch-gate-first 中）。**★方法教訓**：hole-by-hole 6+ 刀全 inert（打地鼠+互 confound）→ 整框架一次做；異質框外審抓 3 結構缺口；wiring gap（新 resolver 死碼 TDD 單測漏 measurer full-HD 抓）；stale commit 審核陷阱。3 閘 merge（R² CLEAN+probe 核+誠實 log）。**held 不 merge inert 全程守，0 白 merge。**
+
 ## 📋 結構 backlog（用戶定「都要處理」，序，2026-07-15）
 結構稽核揪出，用戶定調**沒框架 + 多求解器 + 矩陣殘＝都要處理**（非一次性 flag 忽略）。**全用統一框架式做**（族走共用人格函式、雙 resolver 併一、思考腳走引擎讀取＝同發展模型統一框架精神）。**非現在急**（經濟 freeze arc + 發展模型統一框架化在飛），經濟 arc 收一段落挑下一個，blueprint 出願景→systems spec。序（blueprint 願景排，systems HOW 調）：
 

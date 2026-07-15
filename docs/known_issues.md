@@ -700,3 +700,9 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **供給最深根候選**:producer產不出surplus(自用即耗/產能低)or TRADE隊無inventory累積(買低賣高需先買=chicken-egg)。=回到blueprint最初「誰生產可賣surplus」。
 - **策略點(blueprint+用戶定)**:①續剝供給②重估市場模型/目標(稀缺世界本就少貿易?=設計特徵)③止血merge coin+foundation(unified-commerce巨大正確refactor+coin流+守恆,非inert,誠實標供給待續)。systems傾向3+1。
 - **branch feat/unified-commerce(160301d9)**:market-as-place+液化+coin,守恆PASS,機制真fire(deal_market非零),但deals低=供給頂上。溯源handback `2026-07-15-systems-to-blueprint-coin-won-supply-wall-strategy`。關 [[project_economy_arc]]/[[project_established_chain]](深stack同精神)。
+
+## 供給牆=生產arc(統一商業merged後,2026-07-15→16 patch-gate-first中)
+- **市場未大revive因sell_no_surplus 51.7%**(訪客到市場沒貨賣)——掛單碼確認`surplus=effective_holding−reserve>ORDER_POST_MIN才掛`(seam已修含public_storage)→∴根=producer累積不出goods surplus。
+- **根候選(systems measure中)**:①manufacture產能低(material稀/facility rare/生產鮮少選)②reserve太高(surplus never>reserve)③TRADE隊無inventory累積(買低賣高chicken-egg)。=回blueprint最初「誰產可賣surplus」。
+- **決定甲/乙(measure後)**:甲=建surplus經濟(生產鏈產tradeable餘)/乙=接受薄貿易(稀缺世界本少貿易=設計特徵)。
+- **孤兒函式advisory**(reviewer merge-gate標,de-patch殘留,非阻擋):生產arc順手清。溯源handback `2026-07-16-systems-to-implementer-unified-commerce-merged-done`。關 [[project_economy_arc]]。
