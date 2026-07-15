@@ -682,3 +682,8 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **真修向=coin循環(WHAT待blueprint)**:named成員person.coin該花回經濟(消費/週期回收/salary別單向枯竭)。**成員守財奴=私囊鎖病**。
 - **accessor統一降級**:主刀→小follow-up(line 252/86/138/absorb真債,material +114%真小改善,非binding)。併框架債or coin修後順手。
 - **Team6 execlock thrash**(死法一24筆survival↔trade)=churn家族→併backlog#5。**threat韌性B降優先**(非threat殺貿易是沒錢買)。溯源handback `2026-07-15-systems-to-blueprint-economy-real-root-siku`。關 [[project_economy_arc]]/[[feedback_symptom_vs_root_retry]]。
+
+## ★★經濟真binding=merchant不co-locate+deal條件牆(coin紅鯡魚,2026-07-15 measure第5次擋)
+- **coin紅鯡魚證實**:reconcile coin新解禁370筆全落coin_ok_other_bail、WOULD_TRADE恆零(有錢照樣不成交)→coin非binding。census:person.coin(named)61-63%最大池(B對準對池但floor/rate太弱補不動team_pool才3.6%)。**coin B治標,棄(非held),coin循環願景A+B降框架債backlog**(日後市場活了才有意義)。
+- **2真結構binding**:①**merchant從不co-locate**(100% co-loc買方resident,0 merchant!arb_hit=0直因=merchant travel到order pos但從不與賣方成pair;churn trace證到達但落空)=blueprint預授WHAT「merchant完成trade」。候選根:move_target(order pos=_market_pos賣方outpost)vs賣方實位不符/normal-rotation preempt。②**price/surplus/qty牆**:deals=3 vs WOULD_TRADE 560(WOULD_TRADE該→deal卻沒),成交條件本身此世界幾乎不滿足。
+- **measure-first第5次**擋非-binding(seam/churn/threat/accessor/coin全非市場死主根)。市場死=多結構疊(絕境五層鏈同精神)。**待blueprint定序(merchant co-locate vs deal牆)→systems patch-gate-first→spec**。溯源handback `2026-07-15-systems-to-blueprint-coin-red-herring-real-bindings`。關 [[project_economy_arc]]/[[project_established_chain]]。
