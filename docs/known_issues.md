@@ -687,3 +687,9 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **coin紅鯡魚證實**:reconcile coin新解禁370筆全落coin_ok_other_bail、WOULD_TRADE恆零(有錢照樣不成交)→coin非binding。census:person.coin(named)61-63%最大池(B對準對池但floor/rate太弱補不動team_pool才3.6%)。**coin B治標,棄(非held),coin循環願景A+B降框架債backlog**(日後市場活了才有意義)。
 - **2真結構binding**:①**merchant從不co-locate**(100% co-loc買方resident,0 merchant!arb_hit=0直因=merchant travel到order pos但從不與賣方成pair;churn trace證到達但落空)=blueprint預授WHAT「merchant完成trade」。候選根:move_target(order pos=_market_pos賣方outpost)vs賣方實位不符/normal-rotation preempt。②**price/surplus/qty牆**:deals=3 vs WOULD_TRADE 560(WOULD_TRADE該→deal卻沒),成交條件本身此世界幾乎不滿足。
 - **measure-first第5次**擋非-binding(seam/churn/threat/accessor/coin全非市場死主根)。市場死=多結構疊(絕境五層鏈同精神)。**待blueprint定序(merchant co-locate vs deal牆)→systems patch-gate-first→spec**。溯源handback `2026-07-15-systems-to-blueprint-coin-red-herring-real-bindings`。關 [[project_economy_arc]]/[[project_established_chain]]。
+
+## ★經濟arb_hit=0根確認+fix fork(2026-07-15,重排序②merchant先)
+- **根(75到達,measurer)**:65.3%賣方漫遊離outpost(_market_pos固定outpost≠賣方實位,owner_settled_here=false)=dominant;24% owner在家仍零deal(②成交條件牆);preempt僅21.6%非主因。
+- **★方法論修正**:TAG_MERCHANT本世界全程0隊!真閘=ambition_archetype==ARCHETYPE_TRADE(faction_ai:2045)。fix對象ARCHETYPE_TRADE非TAG_MERCHANT。
+- **fix WHAT-fork(待blueprint)**:A追賣方belief_pos(鏡射pursuit,漫遊難追fragile,team-to-team)vs B outpost-market(貨在public_storage買方到outpost買stock免賣方在場,WS-2b infra現成,穩+像真市場,systems建議B)。市場模型WHAT:追人vs place-based。
+- **序**:②merchant完成trade(通co-location)→①成交條件液化(held)→coin combo重驗。液化+coin B held不merge(下游)。溯源handback `2026-07-15-systems-to-blueprint-arb-root-fix-fork`。關 [[project_economy_arc]]。
