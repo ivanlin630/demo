@@ -2039,22 +2039,20 @@ func _can_trade(state: WorldState, team: TeamData) -> bool:
 # G1d：商業 archetype 隊優先讀「收到的訂單」(殘缺/可失真情報) 定貿易目標，
 # 非 team_discovered 上帝視角（接「目標決策讀殘缺情報」總則）。回目標格；無回 (-1,-1)。
 # _find_trade_target(team_discovered) 降為無訂單時的 fallback。
+# unified-commerce M1：目標收斂單一「選市場地方」（market-as-place）。三路 fallback 收斂為
+# arb 單原點市場 → 最近市集 outpost（公開地標豁免）。廢 _find_trade_target team-chase（漫遊追人，
+# 由 market-as-place 到場 resolver 取代）。市集＝固定地標，到達穩定（解 65% 漫遊撲空）。
 func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
 	if team.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
 		var ord: Dictionary = OrderSystem.new().best_arbitrage_order(state, team)
 		if not ord.is_empty():
 			Probe.bump("g1.arb_attempt")
-			return ord["pos"]   # 履約走既有 interaction 同格 trade（到場供需若已變→撲空 emergent）
-	# WS-2b 破死鎖：無 arb（沒讀過任何別隊單）→ 巡最近市集 outpost（公開地標）→ 抵達親讀看板取得 arb。
-	# 有理由出門 → 碰得到看板 → 下輪有 arb → 正常套利。市集是公開地標（非偷看他隊內部）。
+			return ord["pos"]   # 單原點=下單隊自家市集 outpost（固定市場地方）
+	# 無 arb（沒讀過任何別隊單）→ 巡最近市集 outpost（公開地標）→ 抵達親讀看板取得 arb。
 	var mkt: Vector2i = _nearest_market_outpost(state, team)
 	if mkt != Vector2i(-1, -1):
 		Probe.bump("g1.seek_market")
-		return mkt
-	var pid: int = _find_trade_target(state, team)
-	if pid == -1:
-		return Vector2i(-1, -1)
-	return state.teams[pid].tile_pos
+	return mkt   # (-1,-1) = 無市場可去
 
 # WS-2b：找最近「有看板的市集 outpost」（outpost_level>0、非自家）。
 # scan tile = 公開地標（市集告示是公開），確定性（無 RNG）。無 → (-1,-1)。

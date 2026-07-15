@@ -342,9 +342,15 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 		if not state.teams.has(tid):
 			continue
 		# 漏斗站5探針（純觀測）：TRADE 隊走到 move_target（arrived = 本 tick 到點）
-		if Probe.enabled and state.teams[tid].current_task == TeamData.TASK_TRADE:
+		var _t: TeamData = state.teams[tid]
+		if Probe.enabled and _t.current_task == TeamData.TASK_TRADE:
 			Probe.bump("trade.arrive")
-		os.read_market_board(state, state.teams[tid])
+		os.read_market_board(state, _t)
+		# unified-commerce M2：TRADE 隊到市集 outpost → market-as-place 到場 resolver（owner-mediated，免賣方在場）。
+		if _t.current_task == TeamData.TASK_TRADE:
+			var _mt: HexTileData = state.world.tiles.get(_t.tile_pos.x * 1000 + _t.tile_pos.y)
+			if _mt != null and _mt.outpost_level > 0 and _mt.outpost_owner != _t.team_id:
+				_interaction_system._resolve_market_at_outpost(state, _t, _mt)
 
 func _step4_resolve_interactions(state: WorldState, moved_ids: Array, all_ids: Array) -> void:
 	_interaction_system.process_on_move(state, moved_ids, all_ids)

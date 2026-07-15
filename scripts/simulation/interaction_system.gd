@@ -236,6 +236,11 @@ func _try_interact(state: WorldState, id_a: int, id_b: int) -> void:
 		return
 	# 貿易：跨勢力均可，優先於外交/攻擊判斷
 	if a.current_task == TeamData.TASK_TRADE or b.current_task == TeamData.TASK_TRADE:
+		# M2 交界：市集 outpost tile 的成交走 step3c 到場 resolver（market-as-place 專屬，不雙 fire）；
+		# 此 pairwise 限非市集格＝巧遇次路（途中相遇機會交易）。
+		var _tt: HexTileData = state.world.tiles.get(a.tile_pos.x * 1000 + a.tile_pos.y)
+		if _tt != null and _tt.outpost_level > 0:
+			return
 		_resolve_market(state, a, b)
 		return
 	# 社交 resolver（BEG/JOIN）置於 same_faction 塊之前：aid/強鄰 finder 多偏好同 faction 對象
@@ -721,34 +726,31 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 				Probe.bump("trade.meet")
 				if _pt.move_target != Vector2i(-1, -1) and _pt.tile_pos != _pt.move_target:
 					Probe.bump("trade.meet_midroute")
-	var a_original: Dictionary = _absorb_public_storage(state, a)
-	var b_original: Dictionary = _absorb_public_storage(state, b)
+	# M5：去 absorb/spill dance——巧遇次路在非市集格（無自家糧倉），effective_holding 已 storage-aware。
 	var a_coin_before: float = float(a.resources.get("coin", 0))
-	# 履約：交易窗前快照各隊 active_order 涉及的 res 持有（窗內 = 私有+吸入公庫 = 完整持有）
+	# 履約：交易窗前快照各隊 active_order 涉及的 res 持有（巧遇路走 settle_orders delta 降級法）
 	var a_before: Dictionary = _snapshot_order_res(a)
 	var b_before: Dictionary = _snapshot_order_res(b)
 	_attempt_trade_direction(state, a, b)
 	_attempt_trade_direction(state, b, a)
 	_attempt_barter(state, a, b)   # 缺幣互補：以物易物（coin 換完後）
-	# 履約結算（spillback 前，team.resources 仍 = 完整持有）
+	# 履約結算（巧遇路 delta 法；市集路走 order_id 直沖，不經此）
 	var _os := OrderSystem.new()
 	var a_prog: bool = _os.settle_orders(a, a_before, state.world.current_tick)
 	var b_prog: bool = _os.settle_orders(b, b_before, state.world.current_tick)
-	if (a_prog and b.tags.has(TeamData.TAG_MERCHANT)) or (b_prog and a.tags.has(TeamData.TAG_MERCHANT)):
+	if (a_prog and b.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE) or (b_prog and a.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE):
 		Probe.bump("g1.arb_hit")
 	var _dealt: bool = absf(float(a.resources.get("coin", 0)) - a_coin_before) > 0.001
 	if _dealt:
-		print("[Market] Team%d <-> Team%d 成交（公庫接入）" % [a.team_id, b.team_id])
-		# 漏斗站6探針：成交主體分流（商隊跑單 vs resident 互售）
+		print("[Market] Team%d <-> Team%d 巧遇成交" % [a.team_id, b.team_id])
+		# 漏斗站6探針：成交主體分流（R²#7：ARCHETYPE_TRADE 分流，TAG_MERCHANT 全0）
 		Probe.bump("trade.deal")
-		if a.tags.has(TeamData.TAG_MERCHANT) or b.tags.has(TeamData.TAG_MERCHANT):
+		if a.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE or b.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
 			Probe.bump("trade.deal_merchant")
 		else:
 			Probe.bump("trade.deal_resident")
 	elif Probe.enabled and (a.current_task == TeamData.TASK_TRADE or b.current_task == TeamData.TASK_TRADE):
 		Probe.bump("trade.meet_nodeal")   # 漏斗站6：會合但零成交（撲空/沒貨/價差不成）
-	_spill_back_public_storage(state, a, a_original)
-	_spill_back_public_storage(state, b, b_original)
 	# 途中相遇=機會交易，交易完續程（不棄單）；到點（move_target 已清/同格）才 release 重評。
 	# 舊行為任意同格相遇即 release → 商隊途中碰任何隊=棄單（漏斗 release_midroute 定罪）。
 	# 續程仍有界：TRADE_TIMEOUT 6 日 + 高優先 task 可搶（latch 必 timeout 守住）。
@@ -764,6 +766,119 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 			TaskArbiter.release(b)
 		else:
 			Probe.bump("trade.continue_midroute")
+
+# ──────── unified-commerce M2：market-as-place 到場 resolver（owner-mediated）────────
+# 訪客到市集 outpost tile 觸發（sim_runner step3c）。outpost owner team = 做市商，
+# 訪客對 owner 的 board 兩側交易：買 owner sell 單(coin→owner)、賣入 owner buy 單(owner.coin→visitor)。
+# 履約按 order_id 直沖 owner.active_orders + board（權威，非 delta）。守恆走 ResourceBank/TileBank chokepoint。
+func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexTileData) -> void:
+	if tile == null or tile.outpost_level <= 0:
+		return
+	var owner_id: int = tile.outpost_owner
+	if owner_id == visitor.team_id:
+		return   # 自家市集不自交易
+	var owner: TeamData = state.teams.get(owner_id)   # 可能 null（無主 outpost）
+	var s_leader = state.persons.get(owner.leader_id) if owner != null else null
+	var commerce: float = float(s_leader.skills.get("商業", 0.0)) if s_leader else 0.0
+	var owner_lv: Dictionary = TradeValuation.leader_vals(state, owner) if owner != null else {}
+	var dealt: bool = false
+	for entry in tile.market_orders.duplicate():   # 複製：沖銷改動原陣列
+		var rem: int = int(entry["qty_remaining"])
+		if rem <= 0: continue
+		var oid: int = int(entry["order_id"])
+		var res: String = String(entry["res"])
+		var kind: String = String(entry["kind"])
+		if kind == "sell":
+			if _market_visitor_buy(state, visitor, owner, tile, oid, res, rem, commerce, owner_lv):
+				dealt = true
+		elif kind == "buy":
+			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv):
+				dealt = true
+	if dealt:
+		print("[Market@%s] Team%d ↔ outpost owner Team%d 成交" % [str(tile.tile_pos), visitor.team_id, owner_id])
+		Probe.bump("trade.deal")
+		Probe.bump("trade.deal_market")
+		if visitor.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE:
+			Probe.bump("trade.deal_merchant")
+		else:
+			Probe.bump("trade.deal_resident")
+	elif Probe.enabled and visitor.current_task == TeamData.TASK_TRADE:
+		Probe.bump("trade.meet_nodeal")
+
+# 訪客買：向 owner sell 單 + public_storage stock 買 → 扣 storage、visitor.coin → owner.coin。
+# 可購量 = min(單餘量, 現貨, 買得起, 缺口, carry)；withdraw 實量計價（禁信 board 鏡像）。
+func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
+		oid: int, res: String, order_rem: int, commerce: float, owner_lv: Dictionary) -> bool:
+	var vcoin: float = float(visitor.resources.get("coin", 0))
+	if vcoin <= 0.0: return false
+	var ask: float = TradeValuation.ask_price(owner, res, commerce, owner_lv, state) if owner != null \
+		else float(TradeValuation.BASE_PRICE.get(res, 0.0))   # 無主 outpost → face value
+	if ask <= 0.0: return false
+	var stock: float = TileBank.get_stored(tile, res)   # ★min(單餘,現貨)：可購量鎖現貨
+	# 訪客缺口（storage-aware，補到自己 reserve）；SURVIVAL 買方求生亦補
+	var want: float = maxf(TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state)
+		- ResourceSystem.effective_holding(state, visitor, res), 0.0)
+	var qty: int = int(minf(minf(float(order_rem), stock), minf(vcoin / ask, want)))
+	qty = mini(qty, MovementSystem.new().carry_space_for_res(visitor, res))
+	if qty <= 0: return false
+	var got: float = TileBank.withdraw(tile, res, float(qty), "market_sell_out")   # 實量
+	var q: int = int(got)
+	if q <= 0: return false
+	ResourceBank.add(visitor, res, q, "market_buy_in")
+	ResourceBank.add(visitor, "coin", -(q * ask), "market_buy_coin_out")
+	_credit_owner_coin(state, owner, tile, q * ask)
+	_settle_owner_order(owner, tile, oid, q)
+	return true
+
+# 訪客賣：向 owner buy 單賣 → 貨入 public_storage、owner.coin → visitor.coin（套利閉合,coin 雙向）。
+# owner 無 coin → 買不成（連 coin 循環風險）。SURVIVAL 訪客不甩活命糧（surplus 已扣 reserve floor）。
+func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
+		oid: int, res: String, order_rem: int, owner_lv: Dictionary) -> bool:
+	if owner == null: return false   # 無主 outpost 無 coin 收購
+	var ocoin: float = float(owner.resources.get("coin", 0))
+	if ocoin <= 0.0: return false
+	var surplus: float = maxf(ResourceSystem.effective_holding(state, visitor, res)
+		- TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state), 0.0)
+	if surplus <= 0.0: return false
+	var bid: float = TradeValuation.local_value(owner, res, state)
+	if bid <= 0.0: return false
+	var qty: int = int(minf(minf(float(order_rem), surplus), ocoin / bid))
+	if qty <= 0: return false
+	var deposited: float = TileBank.deposit(tile, res, float(qty), "market_buy_in")   # cap 限
+	var q: int = int(deposited)
+	if q <= 0: return false
+	ResourceSystem.spend_holding(state, visitor, res, float(q))
+	ResourceBank.add(visitor, "coin", q * bid, "market_sell_coin_in")
+	ResourceBank.add(owner, "coin", -(q * bid), "market_sell_coin_out")
+	_settle_owner_order(owner, tile, oid, q)
+	return true
+
+# 成交 coin 入 owner team；owner 已滅 → 入 tile.public_storage.coin（CoinAudit 池內不蒸發）。
+func _credit_owner_coin(state: WorldState, owner: TeamData, tile: HexTileData, amt: float) -> void:
+	if amt <= 0.0: return
+	if owner != null:
+		ResourceBank.add(owner, "coin", amt, "market_owner_coin_in")
+	else:
+		TileBank.set_amt(tile, "coin", TileBank.get_stored(tile, "coin") + amt, "market_abandoned_coin")
+
+# 履約 order_id 權威直沖：owner.active_orders + board entry 同步減量，沖滿移除。
+func _settle_owner_order(owner: TeamData, tile: HexTileData, oid: int, filled: int) -> void:
+	if filled <= 0: return
+	for e in tile.market_orders:
+		if int(e["order_id"]) == oid:
+			e["qty_remaining"] = maxi(int(e["qty_remaining"]) - filled, 0)
+			break
+	if owner != null:
+		var kept: Array = []
+		for o in owner.active_orders:
+			if int(o["order_id"]) == oid:
+				o["qty_remaining"] = maxi(int(o["qty_remaining"]) - filled, 0)
+			if int(o["order_id"]) == oid and int(o["qty_remaining"]) <= 0:
+				Probe.bump("g1.order_fulfilled")
+				continue   # 沖滿移除（不留幽靈）
+			kept.append(o)
+		owner.active_orders = kept
+	Probe.bump("g1.order_settled_direct")
 
 func _snapshot_order_res(team: TeamData) -> Dictionary:
 	var snap: Dictionary = {}
@@ -796,15 +911,16 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 			buyer_coin -= inv_qty * inv_bid
 		seller.merchant_inventory = seller.merchant_inventory.filter(
 			func(it): return int(it.get("qty", 0)) > 0)
-	# (2) 賣 surplus（保留最低儲備）
+	# (2) 賣 surplus（保留人格 reserve）——巧遇次路（非市集格），storage-aware + 液化人格化 ask。
 	for res in TradeValuation.BASE_PRICE.keys():
-		var stock: float = float(seller.resources.get(res, 0))
-		var reserve: float = _calc_reserve(seller, res, TradeValuation.leader_vals(state, seller))
+		var stock: float = ResourceSystem.effective_holding(state, seller, res)
+		var reserve: float = TradeValuation.reserve(seller, res, TradeValuation.leader_vals(state, seller), state)
 		var surplus: float = maxf(stock - reserve, 0.0)
 		if surplus <= 0.0: continue
-		var ask: float = TradeValuation.local_value(seller, res) * (1.0 - commerce * 0.1)
-		var bid: float = TradeValuation.local_value(buyer, res)
-		if ask <= 0.0 or ask >= bid: continue
+		# 液化：ask 折扣人格化(急鬆手/貪守價)；willing 對閉合邊際價差(SPREAD_TOL)。
+		var ask: float = TradeValuation.ask_price(seller, res, commerce, TradeValuation.leader_vals(state, seller), state)
+		var bid: float = TradeValuation.local_value(buyer, res, state)
+		if ask <= 0.0 or ask > bid * (1.0 + TradeValuation.SPREAD_TOL): continue
 		var qty: int = mini(int(surplus), int(buyer_coin / ask))
 		qty = mini(qty, ms.carry_space_for_res(buyer, res))   # WS-3 carry 限（買方滿載即止買）
 		if qty <= 0: continue
