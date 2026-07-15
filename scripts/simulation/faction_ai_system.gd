@@ -807,6 +807,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		# 公庫徵用：每月一次依 leader 貪婪評估
 		if state.world.current_tick % WorldState.TICKS_PER_MONTH == 0:
 			_consider_extraction(state, team)
+			_collect_member_tax(state, team)   # coin 循環 B：成員稅回收（破 salary 單向枯竭，補 team.coin 池）
 		# D B2: 無人 outpost 駐留接管
 		_evaluate_outpost_takeover(state, team)
 		# 居民派駐：自家無居民 outpost → 派子隊/邀流亡（cadence 內控）
@@ -2243,6 +2244,30 @@ func _consider_extraction(state: WorldState, team: TeamData) -> void:
 	if extract_score > 0.4:
 		var ratio: float = greed * 0.3
 		_extract_treasury(state, team, ratio, "貪婪驅動")
+
+# coin 循環 B：成員稅回收（私囊鎖根治，經濟 binding 真修）。salary team.coin→person.coin 單向 +
+# person.coin 唯死亡回流 → team.coin 枯竭 → no_coin 91%(買方口袋空)→市場死。稅回收直補 team 池。
+# 鏡射 _consider_extraction：月 cadence（呼點）、玩家隊不自動、稅率掛領袖人格（貪婪−慎重）。★守恆：池間搬。
+const MEMBER_TAX_K: float       = 0.3    # TEST VALUE — 貪婪→稅率係數
+const MEMBER_TAX_K2: float      = 0.2    # TEST VALUE — 慎重→減稅係數
+const MEMBER_TAX_MIN: float     = 0.0    # TEST VALUE
+const MEMBER_TAX_MAX: float     = 0.5    # TEST VALUE
+const PERSONAL_COIN_FLOOR: float = 5.0   # TEST VALUE — 留個人燃料不收乾
+func _collect_member_tax(state: WorldState, team: TeamData) -> void:
+	if team.leader_id == state.player_id: return   # 玩家手動（同 extraction）
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null: return
+	var greed: float = float(leader.values.get("貪婪", 0.5))
+	var prudence: float = float(leader.values.get("慎重", 0.5))
+	var tax_rate: float = clampf(greed * MEMBER_TAX_K - prudence * MEMBER_TAX_K2, MEMBER_TAX_MIN, MEMBER_TAX_MAX)
+	if tax_rate <= 0.0: return
+	for pid in team.named_members:
+		var p: PersonData = state.persons.get(int(pid))
+		if p == null: continue
+		var levy: float = minf(p.coin * tax_rate, p.coin - PERSONAL_COIN_FLOOR)   # 留 floor 不收乾
+		if levy <= 0.0: continue
+		ResourceBank.adjust_person_coin(p, -levy, "member_tax")   # 守恆 chokepoint：person.coin−
+		ResourceBank.add(team, "coin", levy, "member_tax")        # team.coin+（池間搬，CoinAudit=0）
 
 # 滅團標記：清 faction 引用 + 排入延遲清除（資產路由延到 erase 當下，捕捉時序間加回的 coin）
 func _on_team_extinct(state: WorldState, team: TeamData) -> void:
