@@ -34,6 +34,10 @@ brainstorm → spec → plan 設計，不實作。
 | 閘 | 何時啟用 | 位置 | 我(系統)做什麼 |
 |---|---|---|---|
 | **R① factcheck** | **僅新概念大框**（新子系統/推翻既有/大 redirect）**且前提含未驗 code 斷言** | 收 intent → **寫 spec 前** | 工單/前提的 code 斷言（「X 不存在/根因是 Y」）→ `to:reviewer` factcheck file:line。`premise_contradiction` → halt 重估，別在錯前提上寫 spec。小 slice/前提已 file:line 坐實（如 measurer 已 localize）→ **不需 R①** |
+
+> **★★R① 判準精修（藍圖/用戶戳，2026-07-16）：`file:line 坐實原始事實 ≠ 坐實詮釋斷言`。**
+> 前提有兩層：**原始事實**（code 在 X 行、值是 Y）file:line 即坐實 → 免 R①；**詮釋斷言**（「這 code 是**主導**病 / 拆了會**產出**預期 / 這 seam **真的有** fire / 移除後**會**分化」）**file:line 不坐實** → 仍屬未驗 code 斷言 → **R① 不免**（reviewer refute 向 factcheck，可能需 measurer 一輪定「到底有沒有發生/哪個主導」）。
+> 血證：本生產 arc 詮釋錯 6 次 + 商業 accessor（systems claim「最傷」→ 量出 <3%）。**別把「行號在那」當「詮釋成立」而跳 R①。** measure-first 正是治詮釋斷言。
 | **R② review** | **每 slice 必過** | spec 鎖 → **dispatch/merge 前** | spec 寫完 → `to:reviewer` 審設計（真根治 vs 搬問題/退化/違 invariant）。**CLEAN 才 dispatch**（下段 §dispatch） |
 
 - 大框 call（三對齊：強結論+redirect 大工／相關跳因果／ironclad+難逆）→ R② 升**異質框外審**（別 Opus 代 + refute prompt，見 `00_roles §框外挑框`）。

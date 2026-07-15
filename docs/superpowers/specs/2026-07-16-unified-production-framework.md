@@ -1,5 +1,8 @@
 # Spec：統一生產/發展框架（de-patch 設施決策入思考層）
 
+> **★★狀態：HELD 待 R① CLEAN（藍圖/用戶戳，2026-07-16）。**
+> §根的 raw fact（file:line）已坐實，**但詮釋斷言未驗**（A2 是否主導病、移 A1 是否 emergent 分化、granary seam 是否真 fire、de-patch 是否產 surplus）——`file:line 坐實原始事實 ≠ 坐實詮釋斷言`。本 arc 詮釋錯 6 次 + 商業 accessor 前科。**R① CLEAN（可能含 measurer 一輪定主導閘）→ systems 確認/修前提 → 才進 R② 設計審 → dispatch。** 見 handback `systems-to-reviewer-production-framework-r2`。
+
 > 生產 arc（甲）。用戶定：拆光生產/設施子系統所有補丁閘融進框架（引擎+人格），無殘補釘再量。
 > **原則（沙盒憲法精準版）**：框架只管**規則/機制**（不決定），思考=**DecisionEngine+人格**（NPC 自己想）。
 > de-patch = 把決策**抽出**機制交思考層，**非**把硬邏輯搬進 facility/order code（換地方藏補丁）。
