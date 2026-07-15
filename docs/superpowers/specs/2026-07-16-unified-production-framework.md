@@ -1,6 +1,7 @@
 # Spec：統一生產/發展框架 v2（de-patch 設施決策入思考層）
 
-> **狀態：R① CLEAN（premise_contradiction 解，2026-07-16）→ 本 v2 待 R② 設計審 → impl。**
+> **狀態：R① CLEAN + R² 補裁 5 項額外閘後待 re-R²（2026-07-16）→ CLEAN 才 impl。**
+> R② round1：R① 兩致命解法全 CLEAN，但漏裁 v1 異質審同批 5 項額外補丁閘/風險（礦山 override/farming 不拆/survival 特例/govern 雙寫/tap 2 缺口）——已於 §R² 補裁 + S1.3 + S4 逐項裁定（拆/留為規則/de-patch/併入既有 term），對齊藍圖「拆光全部」。
 > v1（天真 de-patch：拆 override 讓人格 argmax 選 farming）被 R① 異質手算推翻——普通地力餓隊會蓋工坊餓死（override 是**承重的**）+ means-end 斷鏈（獨立隊永無建設路）。v2 訂正經 R① re-verify CLEAN（reviewer 獨立重算公式全 match、4 訂正結構站得住）。
 > **★誠實標記**：本 spec 兩項屬**行為層待 measurer 坐實**（非篤定 emergent）：①urgency 真 sim fire 頻率 ②統一發起真讓 has_facility 成長。impl 後 full-HD 驗。
 
@@ -29,7 +30,21 @@
 ### S1 — 製造 precondition 規則 + no-op tap（A2 + E）
 1. **`DecisionContext` 加 `has_manufacturing_facility`**（重用死碼 `_can_manufacture` 設施查邏輯：本格任一 `RECIPE_GROUPS` level>0 + 生產權 owner/同 faction）。
 2. **`options.gd:71` `"生產"` applicable 改** `if ctx.has_own_outpost and ctx.has_manufacturing_facility`（補缺規則）。「駐守」維持 `has_own_outpost`。
-3. **tap**：`manufacturing_system` 各 no-op continue 加 `Probe.bump("manufacture.noop_<reason>")`；`options.gd` 生產被 precondition 濾加 `Probe.bump("produce.appl_kill_nofacility")`。**觀測禁耗 RNG/禁污染**（byte-identical、盲點閘③④⑤綠）。
+3. **tap（★R² 補裁：明列全 no-op 路徑，防下一個 tap-gap）**：`manufacturing_system` **每條** no-op continue 各掛 `Probe.bump`：
+   - `tile==null or outpost_level==0`（`:78`，據點消失後殘任務空轉）→ `manufacture.noop_no_outpost`。
+   - `not _team_works_tile` / `not _has_resident_on_tile`（`:80-84`）→ `manufacture.noop_no_worker`。
+   - `level<=0 continue`（`:90-93`，無設施）→ `manufacture.noop_no_facility`（A2 主病）。
+   - **★`_run_recipe_group` 原料不足靜默 no-op**（`_can_consume_scaled` 不過→`return ""`，有設施+resident 但 material 不夠每 tick 空轉，跟 A2 同型「病躲很久」）→ `manufacture.noop_no_material`。
+   - `options.gd` 生產被 precondition 濾 → `produce.appl_kill_nofacility`。
+   **觀測禁耗 RNG/禁污染**（byte-identical、盲點閘③④⑤綠）。
+
+## §R² 補裁：額外補丁閘（★藍圖「拆光全部」，避免打地鼠）
+v1 異質框外審同批找到、與 A1-A4 同型的 5 項，逐項裁定寫入（reviewer R² issue）：
+1. **礦山強制 civilian override**（`faction_ai:2923-2930`）→ **de-patch（S4）**：`_pick_outpost_type` 人格秤（`:2827-2835`，設計良好）被「含礦→硬改 civilian」蓋掉＝同 A1 病。融「ore 機會」進人格秤（ore→civilian 加分，貪婪/mint-inclined 領袖偏採礦村；好戰可仍選軍鎮防守）→ 移硬 override。決策交人格。
+2. **`_lowest_score_facility` 農田不拆排除**（`:2979 if f=="farming": continue`）→ **留為規則（明文宣告）**：糧食生產設施＝**受保護命脈基礎建設**，不為蓋他物拆除（世界規則，非決策補丁）。de-patch 會有「拆糧倉→下 tick 又餓→重蓋」thrash 風險，故留；spec 明文標「rule: 不拆命脈食物設施」非殘留 override。
+3. **`_trigger_survival` 蓋農田不被飢餓中斷特例**（`:3250-3258`）→ **留為規則 + 泛化**：「腳下正蓋產糧設施（短工期）→ 建設即自救不中斷（完工才是糧食出路）」＝良 means-end 規則非補丁。條件由硬編 `=="farming"` 泛化為「產糧設施 + 短工期」（principle-consistent；當前僅 farming 符合，功能等價）。
+4. **govern 雙寫風險**（`options.gd` 駐守 engine option 已派 govern + infra 層 `faction_ai:2914-2917` A4 又派）→ **de-patch（S4.2 訂正）**：**移除 A4 強制 GOVERN；govern 單一 owner = 引擎既有「駐守」option；infra 層不派/不秤 govern**。避重演 Team10「雙決策生產者互蓋 livelock」（`faction_ai:3122` 前科）。**非新設計 = 避免雙寫。**
+5. **tap 缺口 2 處** → 已併入 S1.3（`_run_recipe_group` 原料不足 + `tile==null` 殘任務）。
 
 ### S2 — food-security survival-crush 項 + granary seam 修 + 常數分層（★override 留著當安全網）
 1. **survival-crush 項**（farming/食物設施 score）：
@@ -48,9 +63,12 @@
 1. **facility 建造發起統一路徑涵蓋所有據點主**：獨立隊（`faction_id=-1`）對自家 outpost 自評估建設施（同 `_pick_facility` argmax 決策 + 建造 dispatch，**非另開平行路**）。閉合「想 goods→需設施→去蓋」回路。
 2. **★待 measurer 坐實**（誠實標）：統一路徑真讓獨立隊 has_facility 成長——impl 後看實際呼叫圖 + full-HD 驗，**非本 spec 篤定**。
 
-### S4 — 移除 A1 override + A3/A4 utility 化（★S2 驗過才做）
-1. **移除 `_pick_facility:2942-2950` hungry early-return**——此時 S2 survival-crush 項已保底餓隊選 farming，override 冗餘。demolish-for-farming 泛化成「best utility > lowest + 門檻則拆建」全設施通用。
-2. **A3/A4**：`_evaluate_infrastructure` 固定 if 階梯 → utility 排序（升級/擴建/govern/蓋新各 score → argmax）；A4 強制 GOVERN → govern 成競秤 option（公庫缺口×慎重 term）。
+### S4 — 移除 A1 override + A3 utility 化 + A4/礦山 de-patch（★S2 驗過才做）
+1. **移除 `_pick_facility:2942-2950` hungry early-return**——此時 S2 survival-crush 項已保底餓隊選 farming，override 冗餘。demolish 泛化成「best utility > lowest + 門檻則拆建」全設施通用，**但 farming 受規則保護、不列拆遷候選**（§R² 補裁 2：命脈食物設施不拆）。
+2. **A3 utility 化**：`_evaluate_infrastructure` 固定 if 階梯（升級/擴建/蓋新）→ utility 排序（各 score → argmax），退役 first-match ladder。
+3. **A4 govern de-patch（★S4.2 訂正，§R² 補裁 4）**：**移除 `2914-2917` 強制 GOVERN；govern 單一 owner = 引擎既有「駐守」option；infra 層不派/不秤 govern**（避 Team10 雙寫 livelock，`faction_ai:3122` 前科）。
+4. **礦山強制 civilian de-patch（§R² 補裁 1）**：移除 `2923-2930` 硬 override，融「ore 機會」進 `_pick_outpost_type` 人格秤（`:2827-2835`）——ore→civilian 加分（貪婪/mint-inclined 偏採礦村、好戰可選軍鎮），決策交人格。
+5. **規則明文宣告**（§R² 補裁 2/3，非殘留 override）：`_lowest_score_facility` 農田不拆＝rule（命脈設施保護）；`_trigger_survival:3250-3258` 蓋產糧設施不中斷＝rule（means-end 自救），條件泛化「產糧設施+短工期」。
 
 ## 非回歸
 - **FACILITY_DEF/build 機制純規則不動**。
