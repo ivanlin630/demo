@@ -9,6 +9,8 @@ var _fail: int = 0
 func _initialize() -> void:
 	_test_s1_has_facility_gate()
 	_test_s1_produce_applicable()
+	_test_s2_gate_hungry_farming_wins()
+	_test_s2_granary_seam()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -75,3 +77,46 @@ func _test_s1_produce_applicable() -> void:
 	var opts2: Array = DecisionOptions.applicable(ctx2)
 	_ok("生產" in opts2, "有設施→「生產」applicable")
 	Probe.enabled = false
+
+# ── ★S2 GATE（硬性）：餓隊 farming score 主導可耕地（直答 R① 駁表，S4 拆 override 前提）──
+func _test_s2_gate_hungry_farming_wins() -> void:
+	print("--- ★S2 GATE：餓隊 farming score > workshop（拆 override 前提）---")
+	var s := _mk_state()
+	# civilian tile harvest 1.0（farming terrain fit 1.0）；鄰森林（workshop terrain fit 2.0）
+	var tile := _mk_tile(s, Vector2i(0, 0), 1, 0)
+	tile.terrain = "plains"; tile.harvest_factor = 1.0
+	for d in PathSystem.HEX_DIRS:   # 6 鄰放森林 → workshop terrain fit=2.0
+		var np: Vector2i = Vector2i(0, 0) + d
+		var ft := HexTileData.new(); ft.tile_pos = np; ft.terrain = "forest"
+		s.world.tiles[np.x * 1000 + np.y] = ft
+	# 中性人格領袖（R① 駁表基準）+ 餓（據點局部糧=0）
+	var team := _mk_team(s, 1, Vector2i(0, 0))
+	team.resources = {"food": 0.0}
+	var leader: PersonData = s.persons[team.leader_id]
+	leader.values = {"慎重": 0.5, "貪婪": 0.5, "野心": 0.5, "好戰": 0.5}
+	var fai := FactionAISystem.new()
+	var farm_s: float = fai._facility_score(s, team, tile, leader, "farming")
+	var work_s: float = fai._facility_score(s, team, tile, leader, "workshop")
+	_ok(farm_s > work_s, "★★餓隊 farming(%.2f) > workshop(%.2f)（survival-crush 保底，override 可拆）" % [farm_s, work_s])
+	# 飽足時 workshop 該回歸領先（軟連續非鎖死 farming）
+	team.resources = {"food": 1000.0}   # 據點局部糧充足→urgency≈0
+	var farm_fed: float = fai._facility_score(s, team, tile, leader, "farming")
+	var work_fed: float = fai._facility_score(s, team, tile, leader, "workshop")
+	_ok(work_fed > farm_fed, "飽足時 workshop(%.2f) > farming(%.2f)（軟連續，非永鎖農）" % [work_fed, farm_fed])
+
+# ── S2 granary seam：facility food_days 讀據點局部（糧倉），非 positional effective_food ──
+func _test_s2_granary_seam() -> void:
+	print("--- S2 granary seam：facility 食安讀據點局部糧倉 ---")
+	var s := _mk_state()
+	var tile := _mk_tile(s, Vector2i(0, 0), 1, 0)
+	tile.public_storage = {"food": 400.0}   # 糧倉滿（但 team.resources food=0）
+	var team := _mk_team(s, 1, Vector2i(0, 0))
+	team.resources = {"food": 0.0}   # 私產空（定居隊糧在糧倉）
+	var fai := FactionAISystem.new()
+	var fdays: float = fai._facility_food_days(s, team, tile)
+	# pop=2(leader+1 named)，burn=2×0.8=1.6，(400+0)/1.6=250 天 → 不餓（讀糧倉非私產）
+	_ok(fdays > 50.0, "★據點糧倉 food 算進 food_days(%.0f 天)——不誤判定居隊餓（granary seam）" % fdays)
+	var leader: PersonData = s.persons[team.leader_id]
+	leader.values = {"慎重": 0.5}
+	var urg: float = fai._facility_food_urgency(s, team, tile, leader)
+	_ok(urg < 0.01, "糧倉滿→urgency≈0(%.2f)，不觸 survival-crush（不誤判餓）" % urg)

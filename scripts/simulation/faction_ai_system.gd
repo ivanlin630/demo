@@ -2941,9 +2941,9 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		leader: PersonData) -> Dictionary:
 	var slot_full: bool = OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile)
-	# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→恆 hungry→永優先建農。
-	var hungry: bool = ResourceSystem.effective_food(state, team) \
-		< float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 7.0
+	# S2 granary seam + 常數分層：據點局部 food_days < 人格安全天(food_security_target,×7 死常數退役)。
+	# ★override 留為安全網(S4 才移，S2 gate 過後)——此時 survival-crush 已保底，override 冗餘但雙保險。
+	var hungry: bool = _facility_food_days(state, team, tile) < DecisionTerms.food_security_target(leader.values)
 	# 飢餓 override：缺糧 → 農田最優先（slot 滿可拆遷搶 slot）
 	if hungry and tile.outpost_type == "civilian" \
 			and int(tile.farming_level) == 0:
@@ -2969,11 +2969,34 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 	if best == "": return {}
 	return { "facility": best }
 
+# S2 survival-crush（TEST VALUE）：餓→農田 score 壓過發展設施。urgency² 軟連續(非 cliff/binary tier)。
+# crossover 交叉點合理範圍待 measurer tune；量級須讓中性餓隊 farming>workshop(直答 R① 駁表)。
+const SURVIVAL_CRUSH: float = 5.0
+
 func _facility_score(state: WorldState, team: TeamData, tile: HexTileData,
 		leader: PersonData, facility: String) -> float:
-	return _facility_terrain_fit(state, facility, tile) \
+	var base: float = _facility_terrain_fit(state, facility, tile) \
 		* (1.0 + _facility_deficit(state, team, facility, tile)) \
 		* _facility_personality(leader, OutpostSystem.FACILITY_DEF[facility])
+	# S2：食物設施(farming)survival-crush——餓時人格化壓過發展。urgency 讀據點局部糧(granary seam)。
+	if facility == "farming":
+		var urgency: float = _facility_food_urgency(state, team, tile, leader)
+		base *= (1.0 + SURVIVAL_CRUSH * urgency * urgency)
+	return base
+
+# S2 granary seam：facility-eval 食物天數讀**據點局部**（本 tile 糧倉 + 私產），非 wandering leader positional
+# effective_food（隊不站自家 outpost→positional 退私產≈0→誤 hungry）。只改 facility-eval reader。
+func _facility_food_days(state: WorldState, team: TeamData, tile: HexTileData) -> float:
+	var granary: float = float(tile.public_storage.get("food", 0))
+	var priv: float = float(team.resources.get("food", 0))
+	var burn: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)   # ×0.8 flat 代謝(禁人格化)
+	return (granary + priv) / burn
+
+# S2 食安 urgency [0,1]：人格安全天視野(food_security_target,×7 死常數退役)−據點局部 food_days，軟連續。
+func _facility_food_urgency(state: WorldState, team: TeamData, tile: HexTileData, leader: PersonData) -> float:
+	var tgt: float = DecisionTerms.food_security_target(leader.values)   # 人格化安全天(慎重 buffer 大→餓更晚仍發展)
+	var fdays: float = _facility_food_days(state, team, tile)
+	return clampf((tgt - fdays) / maxf(tgt, 0.001), 0.0, 1.0)
 
 # 拆遷候選：已建設施中 score 最低者（農田不拆）
 func _lowest_score_facility(state: WorldState, team: TeamData, tile: HexTileData,
@@ -3015,8 +3038,9 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 	match facility:
 		"farming":
 			var target: float = pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 14.0
-			# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→缺口恆滿→永想擴農。
-			return clampf((target - ResourceSystem.effective_food(state, team)) / target, 0.0, 1.0)
+			# S2 granary seam：據點局部糧(本 tile 糧倉+私產)，非 positional effective_food(隊不在家→誤缺口恆滿)。
+			var local_food: float = float(tile.public_storage.get("food", 0)) + float(team.resources.get("food", 0))
+			return clampf((target - local_food) / target, 0.0, 1.0)
 		"workshop":
 			var worst: float = 1.0
 			for res in ["goods", "tools", "arrows"]:
