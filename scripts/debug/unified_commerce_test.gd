@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_test_order_id_direct_settle()
 	_test_survival_no_order_no_sell()
 	_test_conservation()
+	_test_integration_step3c_fires()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -148,3 +149,25 @@ func _test_conservation() -> void:
 
 func _tot_coin(owner: TeamData, visitor: TeamData, tile: HexTileData) -> float:
 	return float(owner.resources.get("coin", 0)) + float(visitor.resources.get("coin", 0)) + float(tile.public_storage.get("coin", 0))
+
+# ── ★整合測（wiring-fix）：SimRunner._step3c_read_market_board → 新 resolver 真 fire（非死碼）──
+func _test_integration_step3c_fires() -> void:
+	print("--- ★整合：SimRunner._step3c → market-as-place resolver 真 fire ---")
+	Probe.enabled = true; Probe.reset()
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	# owner b：market outpost，food sell 單於 board + storage
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
+	owner.tile_pos = Vector2i(3, 3)
+	owner.active_orders = [{"order_id": 80, "kind": "sell", "res": "food", "qty_remaining": 100}]
+	var tile := _mk_outpost(s, 1, Vector2i(3, 3), {"food": 500.0},
+		[{"order_id": 80, "kind": "sell", "res": "food", "qty_remaining": 100, "origin_team": 1, "expire_tick": 99999}])
+	# hungry visitor a：TASK_TRADE 站在 market tile（＝arrived），有 coin、低 food
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0, "food": 0.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(3, 3)
+	var food0: float = float(visitor.resources.get("food", 0))
+	var sr := SimRunner.new()
+	sr._step3c_read_market_board(s, [2])   # arrived = [visitor]
+	_ok(float(visitor.resources.get("food", 0)) > food0, "★整合：step3c→resolver 真 fire，visitor 買到 food（%.0f）" % float(visitor.resources.get("food", 0)))
+	_ok(int(Probe.counts.get("trade.deal_market", 0)) > 0, "★deal_market probe 動（=%d，非死碼）" % int(Probe.counts.get("trade.deal_market", 0)))
+	Probe.enabled = false

@@ -351,6 +351,11 @@ func _step3c_read_market_board(state: WorldState, arrived_ids: Array) -> void:
 			var _mt: HexTileData = state.world.tiles.get(_t.tile_pos.x * 1000 + _t.tile_pos.y)
 			if _mt != null and _mt.outpost_level > 0 and _mt.outpost_owner != _t.team_id:
 				_interaction_system._resolve_market_at_outpost(state, _t, _mt)
+				# 到市場（arrived＝到 dest）→ 交易畢 release 重評（避免 TASK_TRADE latch 卡死市集不再 fire）。
+				# 續有需求→下輪 re-dispatch 再赴市場＝連續交易循環（非一次凍結）。
+				if _t.move_target == Vector2i(-1, -1) or _t.tile_pos == _t.move_target:
+					Probe.bump("trade.release_at_dest")
+					TaskArbiter.release(_t)
 
 func _step4_resolve_interactions(state: WorldState, moved_ids: Array, all_ids: Array) -> void:
 	_interaction_system.process_on_move(state, moved_ids, all_ids)
