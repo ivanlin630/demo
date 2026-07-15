@@ -19,12 +19,8 @@ coin 4 池（`coin_audit:7`）：team.resources.coin（貿易花的流通池）+
   - `ResourceBank.adjust_person_coin(p, −levy)` + `ResourceBank.add(team, "coin", +levy)`（守恆，chokepoint ledger）。
 - **這是 no_coin 直解**：team.resources.coin 週期回補 → 買方有錢買。
 
-### Fix A：成員消費（市場需求 + 個人經濟戲）
-named 成員 person.coin 花在個人需求 → coin 流賣方團池。
-- **`_member_consume(state, team)`**（cadence 或掛 reaction）：named 成員有 person.coin + 個人需求（飢餓/慾望）→ 花 person.coin 買個人消費（個人口糧/貨）。
-  - **賣方＝團自身**（成員向自團買個人口糧：person.coin → team.resources.coin）＝最簡 plumbing + 直補團池；或到市集向賣方團買（cross-team coin 擴散，市場活）。**先做向自團買**（簡、守恆、直補 no_coin），cross-team 消費留 follow-up。
-  - **人格化戲**：`貪婪` 高 → 囤（少花，守財奴）；`匱乏`（窮/餓成員）→ 多花（活命）。spend_rate = f(person.values.貪婪, person 飢餓/coin 量)。
-  - 守恆：person.coin → team.resources.coin（買自團）。
+### Fix A：成員消費（★R² 訂正：本刀 defer，跨團版才上）
+**R² 判：A「向自團買」版＝冗餘求解器**——person.coin→自團 team.coin，與 B 稅同結構、同終點池、同方向。兩機制做同一 coin 移動＝多求解器反模式。**A 的真價值（成員經濟 agent、市場需求擴散）只在跨團版兌現**（成員買**外團**賣方 → coin cross-team 擴散、市場活）。∴ **本刀只出 B**（直補 no_coin，load-bearing）；**A 跨團版 = follow-up**（併經濟後續，成員成 market buyer 新 actor，較大 add）。blueprint A+B 願景保留，A 非刪＝推遲到非冗餘的跨團形式。
 
 ### 平衡（blueprint 意圖：稅別收乾）
 B 稅 floor（PERSONAL_COIN_FLOOR）留成員錢 → A 消費有燃料 → 雙向流動（salary 出、稅+消費入）。全 TEST VALUE 待 measurer 校。
