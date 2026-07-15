@@ -107,7 +107,7 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 			continue
 		if is_constructing:
 			continue   # 施工隊保留建材，不賣
-		var qty: float = float(team.resources.get(res, 0))
+		var qty: float = ResourceSystem.effective_holding(state, team, res)   # 供給 seam：含自家糧倉貨（別漏 storage）
 		if qty < 20.0:
 			continue
 		if _has_active(team, "sell", res):
@@ -115,7 +115,7 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		post_order(state, team, "sell", res, int(qty * 0.5))
 	# 3. 短缺發買單（缺料/缺武器 → 徵）
 	for res in _ORDER_ELIGIBLE_RES:
-		if float(team.resources.get(res, 0)) >= SHORTAGE_QTY:
+		if ResourceSystem.effective_holding(state, team, res) >= SHORTAGE_QTY:   # 供給 seam：含糧倉貨→不誤判短缺亂買已有貨
 			continue
 		if _has_active(team, "buy", res):
 			continue
@@ -142,7 +142,7 @@ func _tick_food_granary_sell(state: WorldState, team: TeamData) -> void:
 	var tile: HexTileData = state.world.tiles.get(tid)
 	if tile == null or tile.outpost_level == 0 or tile.outpost_owner != team.team_id:
 		return   # 非定居隊（無自家糧倉）→ 不發 food 賣盤
-	var granary: float = float(tile.public_storage.get("food", 0))
+	var granary: float = ResourceSystem.effective_holding(state, team, "food")   # 供給 seam：統一讀 holding（定居隊 food 在糧倉）
 	var cap: float = OutpostSystem.new()._get_storage_cap(tile, "food")
 	var reserve: float = cap * FOOD_SELL_RESERVE_RATIO
 	if granary <= reserve:

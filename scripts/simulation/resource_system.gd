@@ -397,10 +397,35 @@ static func own_granary_tile(state: WorldState, team: TeamData) -> HexTileData:
 static func _forage_subsist_buffer(team: TeamData) -> float:
 	return float(team.population) * FOOD_PER_PERSON_PER_DAY * FORAGE_FLOOR_DAYS
 
-static func effective_food(state: WorldState, team: TeamData) -> float:
+# 供給 seam 統一 accessor：team.resources[res] + 自家 outpost public_storage[res]（泛化 effective_food）。
+# 決策/賣單/買短缺讀者單源——別再漏 storage（定居隊料/武/goods 在糧倉，team.resources 為 0 誤判無貨）。
+static func effective_holding(state: WorldState, team: TeamData, res: String) -> float:
 	var g: HexTileData = own_granary_tile(state, team)
-	var gf: float = float(g.public_storage.get("food", 0)) if g != null else 0.0
-	return float(team.resources.get("food", 0)) + gf
+	var gf: float = float(g.public_storage.get(res, 0)) if g != null else 0.0
+	return float(team.resources.get(res, 0)) + gf
+
+# alias 保既有 caller 不破。
+static func effective_food(state: WorldState, team: TeamData) -> float:
+	return effective_holding(state, team, "food")
+
+# ★守恆核心：先扣自家 outpost public_storage（TileBank ledger）餘扣 team.resources（ResourceBank ledger），
+# 不透支（扣到 0 為止），回實際扣量。settle 賣方出貨走此，不賣幽靈貨。零 randf。
+static func spend_holding(state: WorldState, team: TeamData, res: String, qty: float) -> float:
+	var remaining: float = qty
+	var g: HexTileData = own_granary_tile(state, team)
+	if g != null and remaining > 0.0:
+		var gs: float = float(g.public_storage.get(res, 0))
+		var take_g: float = minf(gs, remaining)
+		if take_g > 0.0:
+			TileBank.set_amt(g, res, gs - take_g, "spend_holding_storage")
+			remaining -= take_g
+	if remaining > 0.0:
+		var tr: float = float(team.resources.get(res, 0))
+		var take_t: float = minf(tr, remaining)
+		if take_t > 0.0:
+			ResourceBank.set_amt(team, res, tr - take_t, "spend_holding_team")
+			remaining -= take_t
+	return qty - remaining   # 實際扣量（可能 < qty 若庫存不足→不透支）
 
 static func _pos_to_tile_id(pos: Vector2i) -> int:
 	return pos.x * 1000 + pos.y

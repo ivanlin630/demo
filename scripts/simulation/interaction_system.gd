@@ -661,11 +661,13 @@ func _calc_reserve(team: TeamData, res: String, leader_values: Dictionary = {}) 
 	# 留底邏輯收進 TradeValuation.reserve（單一源），NPC + 玩家路徑同用。候選1：food 留底吃領袖人格。
 	return TradeValuation.reserve(team, res, leader_values)
 
-func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int, price: float) -> void:
-	ResourceBank.add(seller, res, -qty, "trade_goods_out")
-	ResourceBank.add(buyer, res, qty, "trade_goods_in")
-	ResourceBank.add(buyer, "coin", -(qty * price), "trade_coin_out")
-	ResourceBank.add(seller, "coin", qty * price, "trade_coin_in")
+func _execute_transfer(state: WorldState, seller: TeamData, buyer: TeamData, res: String, qty: int, price: float) -> void:
+	# 供給 seam 守恆：seller 出貨走 spend_holding（先扣糧倉餘扣私產，不賣幽靈貨）；qty 用實際可扣量。
+	var sold: float = ResourceSystem.spend_holding(state, seller, res, float(qty))
+	var real_qty: int = int(sold)
+	ResourceBank.add(buyer, res, real_qty, "trade_goods_in")
+	ResourceBank.add(buyer, "coin", -(real_qty * price), "trade_coin_out")
+	ResourceBank.add(seller, "coin", real_qty * price, "trade_coin_in")
 
 # 「村長代管公庫」：居民團（PRODUCE+在自家 faction outpost）或 outpost owner team
 # 在 outpost tile 上時，absorb public_storage 進 team.resources（臨時）
@@ -808,7 +810,7 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		var qty: int = mini(int(surplus), int(buyer_coin / ask))
 		qty = mini(qty, ms.carry_space_for_res(buyer, res))   # WS-3 carry 限（買方滿載即止買）
 		if qty <= 0: continue
-		_execute_transfer(seller, buyer, res, qty, ask)
+		_execute_transfer(state, seller, buyer, res, qty, ask)
 		buyer_coin -= qty * ask
 		# 買方若是商隊 → 物品移到 inventory（之後高價賣出）
 		if buyer.tags.has(TeamData.TAG_MERCHANT):
