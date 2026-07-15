@@ -711,3 +711,10 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **根(measurer)**:has_facility隊恆=1(僅1隊有製造設施6月不變),8隊goods holding恒=0(從未產一單位),[Manufacture]全程6次。非material稀(surplus 417→破千)非reserve高非task-selection(TASK_MANUFACTURE dispatch 1→11隊想製造但has_facility=1每tick空轉no-op)。
 - **precise=facility建造鏈存在但幾乎不產製造設施**(_evaluate_infrastructure→_pick_facility→_dispatch_facility_builder)。候選gate:①恆-hungry永建農(_pick_facility hungry→farming優先,WS-2c註定居隊food在糧倉恆hungry)②_facility_score製造太低(<門檻0.05)③builder gate(cost×1.5/advisor/pop≥6/subteam)。
 - **生產arc(甲,待blueprint+用戶greenlight)**:讓製造設施蓋起→goods產出→surplus→市場供給→貿易活。接發展模型(生產/軍事/建設維度)。乙=接受薄貿易(稀缺特徵)。→greenlight則systems patch-gate-first定哪gate(可能measure一輪)→spec。溯源handback `2026-07-16-systems-to-blueprint-supply-root-facility-chain-production-arc`。關 [[project_economy_arc]]/[[project_established_chain]]。
+
+## ★生產/發展arc greenlight(甲·統一框架,2026-07-16用戶定)
+- **用戶裁甲+同商業那套**:不de-patch單一恆-hungry閘,拆光生產/設施子系統所有補丁閘融進框架(引擎+人格秤)無殘補釘再量。乙不成立(bug閘非設計稀缺,補丁閘通則=de-patch)。
+- **願景(綜合發展模型)**:食安地基→多維發展人格化(工匠建製造/農夫續農/好戰建軍事)。設施建造=發展核心動作。
+- **頭號補丁閘=恆-hungry**(_pick_facility:糧倉有糧仍effective_food判餓→farming硬override→製造設施never)。其餘閘blueprint靜態稽核列中(餵systems)。
+- **架構方向(systems HOW,待靜態稽核全閘)**:facility/發展決策走DecisionEngine(人格加權needs:工匠→製造/農夫→農/好戰→軍事)取代硬gate(hungry→farming override/facility_score門檻/builder gate);同unified-commerce精神(整子系統進框架)。切幾slice待閘清單。
+- **等靜態稽核餵全補丁閘列表**再spec(同商業異質稽核抓全縫)。溯源handback `2026-07-16-blueprint-to-systems-production-arc-greenlight-unify-all-gates`。關 [[project_unification_matrix]]/[[project_economy_arc]]。
