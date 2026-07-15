@@ -655,3 +655,9 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **兩層**:①供給seam修後可能自消一部分(有貨可撮→成交清掉→spam減,像flee修N1_flee回落)②剩獨立churn(隊照掛不管有沒有貨/買不買得起)→掛單紀律治。
 - **掛單紀律(order-discipline,scope待seam修後噪音量測定)**:grounded-order(掛單版look-before-leap:買不到/賣不掉/付不起別掛)+dedup(常駐單去重)+expiry(過期清)。訂單也是決策/行動該grounded(結構稽核grounded-ness家族)。
 - **序**:供給seam第一刀驗收#7量噪音修前後→看供給下游自消vs獨立churn組成→blueprint定同刀or下刀。**別預修**。溯源handback `2026-07-15-blueprint-to-systems-order-noise-scope`。關 [[project_economy_arc]]。
+
+## 經濟供給seam修正確但非binding(2026-07-15,多層調查中)
+- **seam修(effective_holding)驗證**:kill_nostock月1-3降(-22/-47/-59%=賣單看見糧倉貨,供給可見性真改善)但deals仍~0(order_fulfilled 1→2),coin三池凍,守恆PASS。**seam是真bug但非市場死的binding約束**(同絕境五層鏈,修一層露下一層)。
+- **binding層候選(待漏斗證,別猜)**:①賣單貼了merchant看不到(board_read≈0 known_issue)②太遠arb_kill_range③追了到不了點(travel/co-location)④會合不成交(transfer)。deal路徑要買方/merchant到producer outpost co-locate,非只「賣單看見貨」。
+- **best_arbitrage_order:252讀merchant.resources**(carried stock,同seam家族但不同path=merchant carried非producer granary)——待漏斗定是否binding。
+- **處置**:seam分支`feat/supply-seam-effective-holding`(4c2f85cb)hold不單獨merge(inert避換皮),等binding層挖出bundle。measurer跑完整trade漏斗breakdown(post_sell/arb_sell_seen/arb_pick/meet_nodeal/deal)定binding站。溯源handback `2026-07-15-systems-to-blueprint-seam-not-binding`。關 [[project_economy_arc]]/[[project_established_chain]](多層調查同精神)。
