@@ -675,3 +675,10 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **第二刀(死法一,附帶,待量)**:387半路跑threat-preempt動態坐實掉因→定B threat韌性該修多少(商隊threat門檻人格化,PRIO_THREAT vs TASK_TRADE別flat)。
 - **紀律**:先量再spec不變(死法二local_value hypothesis動態抽驗+死法一掉因坐實才spec)。line252併主刀收全。supply-seam分支(held)併入或廢重做。
 - **兩刀分明**:死法二結構根(主刀)、死法一threat願景B(第二刀)。溯源handback `2026-07-15-blueprint-to-systems-economy-structural-unification`。關 [[project_economy_arc]]/[[project_unification_matrix]]/[[project_framework_seams]]。
+
+## ★★經濟真根定音:私囊鎖coin循環斷(no_coin 91%,非accessor/threat,2026-07-15 measure第4次救)
+- **死法二主根=no_coin 91%(24600/27020)**:買方team.resources.coin空。**code root=私囊鎖**:salary(salary_system:65-66)team.resources.coin→person.coin單向抽,person.coin唯一outflow=死亡(npc_combat:745),living named成員永不花回流;anon_treasury有extraction回收但named person.coin沒有→team.resources.coin單調枯竭→買不了→市場死。
+- **★四假設全被measure/trace推翻(非binding)**:supply seam(可見性,deals~0)/merchant-target churn(target穩定trace推翻)/threat-preempt(真~6起,80.6% normal rotation,FLEE缺糧非threat)/accessor local_value(absorb+114%但<3%)。**真binding第5層=私囊鎖**。measure-first第4次擋非-binding大重構(accessor當主刀<3%=白做)。
+- **真修向=coin循環(WHAT待blueprint)**:named成員person.coin該花回經濟(消費/週期回收/salary別單向枯竭)。**成員守財奴=私囊鎖病**。
+- **accessor統一降級**:主刀→小follow-up(line 252/86/138/absorb真債,material +114%真小改善,非binding)。併框架債or coin修後順手。
+- **Team6 execlock thrash**(死法一24筆survival↔trade)=churn家族→併backlog#5。**threat韌性B降優先**(非threat殺貿易是沒錢買)。溯源handback `2026-07-15-systems-to-blueprint-economy-real-root-siku`。關 [[project_economy_arc]]/[[feedback_symptom_vs_root_retry]]。
