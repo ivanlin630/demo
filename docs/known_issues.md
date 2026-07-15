@@ -643,3 +643,9 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 
 ## state-transition specimen tap（下批候選，R² advisory 2026-07-15）
 - **death/split/betray/found/capture** 等 state-transition 事件目前僅 `Probe.bump` aggregate、**無 specimen tap**（同 person-reaction 補前現狀）。observability-path-completion 本刀先收 person-reaction，這批**下批**（模式相同：capture 進 specimen 帶 who/why）。**記此防之後當新發現重走一輪 R²**（tap-gap 家族第 5+ 個，該一併走盲點閘掃出）。
+
+## ★經濟供給鏈斷點:非糧賣單查錯 storage(framework seam,2026-07-15 full-HD 觀察揪出)
+- **現象**:order_placed 539-850/月(需求穩)但 order_fulfilled≈0(6月共1筆),arb_kill_nostock 數千/月(無貨撮)。市場撮合引擎在跑非壞,供給端拿不出貨。
+- **根(code-verified,framework seam)**:manufacture 產出(`manufacturing_system._add_output:117-118`)outpost 隊→`tile.public_storage`(非 team.resources);但非糧賣單(`order_system:110`)`qty=team.resources.get(res); if qty<20: continue`只讀 team.resources→定居隊製造的 goods/weapon/ore_steel 在糧倉、賣單查私產=0→**永不掛非糧賣單**→市場無貨。**同 WS-2c food accessor 家族**(資源搬位置讀者沒跟)。food 賣單已修(`_tick_food_granary_sell:138` 讀 granary,227筆/年);非糧漏同款修。
+- **修向**:非糧賣單讀 effective 持有(team.resources+自家 public_storage,鏡射 effective_food 單源 accessor)+ 成交從正確 storage 扣。**下一層**(seam 修後若供給仍薄):material 產能 vs 消耗(measure-first 別預修)。
+- **=經濟/發展 arc 經濟維核心**(生產→surplus→貿易→財富鏈接通)。blueprint 出願景→systems spec。溯源 handback `2026-07-15-systems-to-blueprint-economy-supply-root-found`。關 [[project_framework_seams]]/[[project_economy_arc]]。
