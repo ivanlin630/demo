@@ -672,51 +672,8 @@ func _execute_transfer(seller: TeamData, buyer: TeamData, res: String, qty: int,
 	ResourceBank.add(buyer, "coin", -(qty * price), "trade_coin_out")
 	ResourceBank.add(seller, "coin", qty * price, "trade_coin_in")
 
-# 「村長代管公庫」：居民團（PRODUCE+在自家 faction outpost）或 outpost owner team
-# 在 outpost tile 上時，absorb public_storage 進 team.resources（臨時）
-# 回傳 { res: original_team_amount } 供 spill_back 還原
-static func _absorb_public_storage(state: WorldState, team: TeamData) -> Dictionary:
-	var original: Dictionary = {}
-	var tile: HexTileData = state.world.tiles.get(
-		team.tile_pos.x * 1000 + team.tile_pos.y)
-	if tile == null or tile.outpost_owner == -1: return original
-	# 條件：outpost owner 本身 或 居民團（PRODUCE+同 faction）
-	var can_absorb: bool = (tile.outpost_owner == team.team_id) \
-		or FactionAISystem.new()._is_resident_team(state, team)
-	if not can_absorb: return original
-	for res in tile.public_storage:
-		var public_amount: float = float(tile.public_storage[res])
-		if public_amount <= 0: continue
-		var team_amount: float = float(team.resources.get(res, 0))
-		original[res] = team_amount
-		ResourceBank.set_amt(team, res, team_amount + public_amount, "borrow_public")
-		TileBank.set_amt(tile, res, 0.0, "borrow_public_out")   # MOVE 出公庫（避免雙重存在，spill_back 再分流回去）
-	return original
-
-# trade 結束後，多出來的存回 public_storage（cap 限制；超量留 team）
-static func _spill_back_public_storage(state: WorldState, team: TeamData,
-		original: Dictionary) -> void:
-	var tile: HexTileData = state.world.tiles.get(
-		team.tile_pos.x * 1000 + team.tile_pos.y)
-	if tile == null or tile.outpost_owner == -1: return
-	var can_spill: bool = (tile.outpost_owner == team.team_id) \
-		or FactionAISystem.new()._is_resident_team(state, team)
-	if not can_spill: return
-	for res in original:
-		var current: float = float(team.resources.get(res, 0))
-		var orig: float = float(original[res])
-		var diff: float = current - orig
-		var cap: float = OutpostSystem.new()._get_storage_cap(tile, res)
-		var stored: float = float(tile.public_storage.get(res, 0))
-		if diff >= 0:
-			var space: float = maxf(cap - stored, 0.0)
-			var deposit: float = minf(diff, space)
-			TileBank.set_amt(tile, res, stored + deposit, "spill_back")
-			ResourceBank.set_amt(team, res, orig + (diff - deposit), "spill_back")
-		else:
-			# team 賣掉超過借出的公庫量（連自家底貨也動了）→ 公庫歸零，team 保留實際剩餘（不憑空生）
-			TileBank.set_amt(tile, res, maxf(stored + diff, 0.0), "spill_back_overdraw")
-			ResourceBank.set_amt(team, res, current, "spill_back_overdraw")
+# M5：absorb/spill dance 已廢——市集貨走 market-as-place 到場 resolver（TileBank storage-aware），
+# 決策讀 effective_holding、花費 spend_holding，語意對稱，不再借入/還原公庫。
 
 func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 	# 漏斗站5/6探針（純觀測）：TRADE 隊同格會合分類（到點 vs 途中被截胡）
@@ -911,9 +868,10 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 			buyer_coin -= inv_qty * inv_bid
 		seller.merchant_inventory = seller.merchant_inventory.filter(
 			func(it): return int(it.get("qty", 0)) > 0)
-	# (2) 賣 surplus（保留人格 reserve）——巧遇次路（非市集格），storage-aware + 液化人格化 ask。
+	# (2) 賣 surplus（保留人格 reserve）——巧遇次路（非市集格=無自家糧倉），賣隨身 team.resources。
+	# ★守恆：surplus 讀 team.resources（_execute_transfer 搬 team.resources）；糧倉貨走市集 resolver（TileBank）。
 	for res in TradeValuation.BASE_PRICE.keys():
-		var stock: float = ResourceSystem.effective_holding(state, seller, res)
+		var stock: float = float(seller.resources.get(res, 0))
 		var reserve: float = TradeValuation.reserve(seller, res, TradeValuation.leader_vals(state, seller), state)
 		var surplus: float = maxf(stock - reserve, 0.0)
 		if surplus <= 0.0: continue
