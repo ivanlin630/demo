@@ -12,6 +12,9 @@ extends SceneTree
 #   SUFF_MONTHS  跑幾月，default 6
 #   SUFF_DUMP    事件流落檔路徑（global_messages+observer_messages）
 #   SUFF_JSON    率表 machine-readable JSON 落檔路徑（可選；default 只印 stdout）
+#   FORCE_FULL_HD=1        開沉睡系統（反應/生育/情緒，LOD near-only 才 live；純 regime flag，零邏輯改）
+#   SUFF_SPECIMEN_IDS      逗號集 team_id（2-4隻），開 SpecimenTracer 全生命 jsonl（用可信 tracer：全生命+全路徑+零擾動）
+#   SUFF_SPECIMEN_OUT_DIR  specimen jsonl 輸出目錄（每 seed×team 一檔：<dir>/seed<seed>-team<id>.jsonl）
 
 const CONFIG_PATH: String = "res://config/default.json"
 
@@ -118,6 +121,18 @@ func _run_one(world_seed: int, total_ticks: int) -> Dictionary:
 	config["seed"] = world_seed         # 播 setup RNG（map/team/person gen local rng）
 	GameSetup.setup(state, config)
 	state.player_id = -1                 # 自然世界：無玩家 → 全 NPC AI 自解，無 forced_event 卡死
+	if OS.get_environment("FORCE_FULL_HD") == "1":
+		SimRunner.force_full_hd = true   # 開沉睡系統（反應/生育/情緒 near-gated → 全隊 near）
+	var _spec_ids: Array[int] = []
+	var _spec_out_dir: String = OS.get_environment("SUFF_SPECIMEN_OUT_DIR")
+	var _spec_raw: String = OS.get_environment("SUFF_SPECIMEN_IDS")
+	if _spec_raw != "":
+		for tok in _spec_raw.split(",", false):
+			var t: String = tok.strip_edges()
+			if t.is_valid_int(): _spec_ids.append(int(t))
+	if not _spec_ids.is_empty():
+		state.specimen_team_ids = _spec_ids
+		SpecimenTracer.reset(); SpecimenTracer.enabled = true
 	var no_player := Vector2i(-1, -1)
 	var monthly: Array = []
 	var prev_snapshot: Dictionary = {}
@@ -132,6 +147,7 @@ func _run_one(world_seed: int, total_ticks: int) -> Dictionary:
 				"delta": _counts_delta(prev_snapshot, cur),
 				"teams": state.teams.size(),
 				"pop": _total_pop(state),
+				"coin_census": _coin_census(state),
 			})
 			prev_snapshot = cur
 		if state.teams.is_empty():
@@ -144,6 +160,12 @@ func _run_one(world_seed: int, total_ticks: int) -> Dictionary:
 		"monthly": monthly,
 		"msg_dump": _collect_msg_dump(state),
 	}
+	if not _spec_ids.is_empty():
+		if _spec_out_dir != "":
+			for sid in _spec_ids:
+				SpecimenTracer.write_jsonl("%s/seed%d-team%d.jsonl" % [_spec_out_dir, world_seed, sid])
+		SpecimenTracer.enabled = false
+	SimRunner.force_full_hd = false   # 復位防洩（static 跨 seed 汙染）
 	Probe.enabled = false
 	return result
 
@@ -159,6 +181,36 @@ func _total_pop(state: WorldState) -> int:
 	var n: int = 0
 	for tid in state.teams: n += state.teams[tid].population
 	return n
+
+# coin census（blueprint授權，四池拆分，鏡射 game_sim_multi.gd:133 _coin_equivalent_total 純讀不改）：
+# 1=team可交易(resources.coin) 2=公庫(anon_treasury) 3=person私囊(coin) 4=tile(public_storage.coin+abandoned_coin)
+# 金銀礦換算不計入四池明細（避免與coin混淆），只在 total 附註 ore 換算後總量供守恆對照。
+func _coin_census(state: WorldState) -> Dictionary:
+	var team_pool: float = 0.0
+	var treasury: float = 0.0
+	var person_pool: float = 0.0
+	var tile_pool: float = 0.0
+	var ore_eq: float = 0.0
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		team_pool += float(t.resources.get("coin", 0))
+		treasury += t.anon_treasury
+		ore_eq += float(t.resources.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
+		ore_eq += float(t.resources.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
+	for pid in state.persons:
+		person_pool += state.persons[pid].coin
+	for tile_id in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tile_id]
+		tile_pool += float(tile.public_storage.get("coin", 0)) + tile.abandoned_coin
+		ore_eq += float(tile.public_storage.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
+		ore_eq += float(tile.public_storage.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
+		ore_eq += float(tile.resources.get("ore_gold", 0)) * OutpostSystem.GOLD_TO_COIN_RATIO
+		ore_eq += float(tile.resources.get("ore_silver", 0)) * OutpostSystem.SILVER_TO_COIN_RATIO
+	return {
+		"team_pool": team_pool, "treasury": treasury, "person_pool": person_pool, "tile_pool": tile_pool,
+		"coin_only_total": team_pool + treasury + person_pool + tile_pool,
+		"coin_eq_total": team_pool + treasury + person_pool + tile_pool + ore_eq,
+	}
 
 func _collect_msg_dump(state: WorldState) -> Dictionary:
 	return {
