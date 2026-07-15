@@ -16,7 +16,6 @@ const DIPLOMACY_READINESS_MIN: float = 0.6
 const DISCIPLINE_FAIL_BASE: float    = 0.15
 const MANUFACTURE_MATERIAL_MIN: float = 30.0
 const GOVERN_MATERIAL_TARGET: float = 75.0   # TEST VALUE — 公庫建材達標就放手擴張
-const TRADE_MIN_STOCK: float          = 10.0   # 商隊最低持貨（有貨才出門）
 const TRADE_MIN_COIN: float           = 5.0    # 買方最低 coin 門檻
 const MERCHANT_TRADE_BONUS: float     = 0.5    # WS-2 TEST VALUE：商隊-tag solo trade 分數加成(勝 CAMP，但 FLEE 仍優先)
 const HONOR_INTERVAL_MULT: float  = 0.5   # honor=1.0 → 徵收週期 ×1.5（義氣高 → 少收稅）
@@ -2024,19 +2023,18 @@ func _update_guard_ratio(team: TeamData, state: WorldState) -> void:
 
 # ──────── 輔助函數 ────────
 
+# unified-commerce M4：貿易總閘走 effective_holding + 人格 reserve（廢殭屍公式 pop×0.1×FOOD_RESERVE_TICKS
+# 與 TRADE_MIN_STOCK 死常數）。有任一 res 餘量（effective_holding − reserve > 0）＝有貨可賣 → 可貿易。
 func _can_trade(state: WorldState, team: TeamData) -> bool:
 	if _tag_weight(team, TeamData.TASK_TRADE) == 0.0:
 		return false
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	for res in TRADEABLE_RES:
-		var stock: float = float(team.resources.get(res, 0))
-		if res == "food":
-			stock = maxf(stock - float(team.population) * 0.1 \
-				* InteractionSystem.FOOD_RESERVE_TICKS, 0.0)
-		if stock >= TRADE_MIN_STOCK:
+		var surplus: float = ResourceSystem.effective_holding(state, team, res) \
+			- TradeValuation.reserve(team, res, lv, state)
+		if surplus > 0.0:
 			return true
 	return false
-
-const MERCHANT_MAX_RANGE: int = 20
 
 # G1d：商業 archetype 隊優先讀「收到的訂單」(殘缺/可失真情報) 定貿易目標，
 # 非 team_discovered 上帝視角（接「目標決策讀殘缺情報」總則）。回目標格；無回 (-1,-1)。
