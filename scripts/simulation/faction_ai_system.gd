@@ -407,6 +407,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		var tgt: Vector2i = td.get("target", Vector2i(-1, -1))
 		if not TaskArbiter.try_set(state, team, tk, tgt, TaskArbiter.PRIO_THREAT, "threat"): continue
 		_wire_threat_task(team, td)
+		SpecimenTracer.capture_decision(state, team, opt, tk, tgt, "committed")   # Fix3 threat tap（威脅反應 FLEE/DEFEND/求和 進 specimen）
 		if tk == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		Probe.bump("threat.dispatch." + opt)   # 融合驗率表（該出現還出現）
 		print("[ThreatResponse] Team%d → %s (threat=Team%d, u-rank)" % [team.team_id, opt, ctx.threat_id])
@@ -1552,8 +1553,8 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				elif _fd < 6.0: Probe.bump("merge_appl.food_3to6")
 				else: Probe.bump("merge_appl.food_ge6")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
-		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		if Probe.enabled and opt == "併入":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
 			Probe.bump("merge.set_ok" if _set_ok else "merge.set_fail")
@@ -1887,11 +1888,15 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			# 不落次佳 option 替換 NPC 選擇（舊 `continue`＝dispatch 層否決統一秤 #1）。
 			return
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
-		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE: continue
+		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
+			SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_IDLE, Vector2i(-1, -1), "idle_skip")   # Fix2b 早退 tap
+			continue
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
+			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
 		if not TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "solo"):
+			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # Fix2b 早退 tap
 			continue
 		# 掠奪/佔村/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（鏡射 _decide_unified）
 		if td.has("combat_target"): state.set_combat_target(team, int(td["combat_target"]))
@@ -1907,7 +1912,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		# 手聽腦單點探針（此路 try_set 已成功→set_ok 恆真；rank[0] 被跳→次佳=subset_fallthrough）
 		HandBrainProbe.capture(state, team, "solo", String(ranked[0]["opt"]), opt, td["task"], true)
 		# 序① solo capture_decision 可見性（鏡射 _decide_unified）：純觀測 specimen tap，非 specimen 零成本。
-		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt)
+		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed")   # Fix2b：顯式 committed（早退已 gated，此路真成功）
 		print("[SoloAI] Team%d → %s (%s)" % [team.team_id, td["task"], opt])
 		return
 	if _conq: Probe.bump("conq.winner_none")   # 征服 intent 但無可派 winner

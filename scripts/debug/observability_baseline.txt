@@ -1,0 +1,8 @@
+# 觀測盲點閘 baseline（Fix 4，2026-07-15）——凍結生產側 specimen capture 覆蓋 vs 決策 commit 點數。
+# 新增決策 commit(try_set)點無伴隨 capture → 計數失衡=疑漏 tap；capture 點移除=coverage 退→FAIL。
+# 更新規則：合法新增 tap 後同步更新此 baseline（同 constitution_baseline 慣例）。
+capture_decision=10
+capture_reaction=1
+capture_intent=2
+capture_options=2
+decision_tryset=6

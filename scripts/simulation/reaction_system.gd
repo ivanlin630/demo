@@ -119,6 +119,10 @@ func _evaluate_person(state: WorldState, person: PersonData, team: TeamData) -> 
 			best_score = s
 			best = key
 	if Probe.enabled: Probe.bump("reaction." + best)   # winner 反應計數（序7 觀測空白補）
+	# Fix 1 person-reaction tap（內政盲點補）：specimen 隊成員反應進 timeline（誰/reaction/why driver）。
+	SpecimenTracer.capture_reaction(state, person, team, best, {
+		"loyalty": snappedf(person.loyalty, 0.01), "stress": snappedf(person.stress, 0.01),
+	})
 	return best
 
 func _goal_bonus(person: PersonData, reaction: String) -> float:
