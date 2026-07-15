@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·經濟revive①刀真章] 成交條件液化@b0cdf624——★deals大幅回升?(resident路willing大多成交)+摩擦人格質感+活命糧不甩+守恆;數字tune到blueprint「willing大多成交」"
 ---
 

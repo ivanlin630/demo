@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[裁定·ratify] 違規回報收到——規則已收 memory(全角色遵);你自我糾正正確;繼續建床不受影響"
 ---
 

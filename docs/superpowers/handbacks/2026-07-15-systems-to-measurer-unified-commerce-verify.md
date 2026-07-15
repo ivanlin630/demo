@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·整條經濟climax] 統一商業框架@ac18721d——★市場終於revive?deal大幅升(市場即地方,免賣方在場解65%漫遊)+統一無殘+守恆CoinAudit=0+coin單向泵長窗觀測(deals不得單調衰減0)+觀測on/off byte-identical"
 ---
 

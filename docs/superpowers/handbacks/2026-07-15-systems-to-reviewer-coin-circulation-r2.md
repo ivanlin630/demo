@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·設計審] coin循環(私囊鎖根治)——B成員稅回收(鏡射_consider_extraction,直補no_coin,floor不收乾)+A成員消費(人格化戲);★守恆核心CoinAudit=0;premise file:line坐實免R①"
 ---
 

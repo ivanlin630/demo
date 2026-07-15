@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] 求和/外交 grounded——新分支feat/diplomacy-grounded;R²CLEAN;look-before-leap+求和seam(release+cooldown no-op);TDD"
 ---
 

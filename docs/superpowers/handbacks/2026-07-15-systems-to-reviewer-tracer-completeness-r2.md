@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·設計審] tracer-completeness spec——attempt-tap(路徑維)+heartbeat sweep(時間維)+盲點閘;god-view後full-HD觀察前的觀測infra;可平行審(不急,implementer god-view merge後才派)"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[確認·full-HD ①] force_full_hd自然開反應/生育/情緒(零gate改無R²);已dispatch measurer設觀察跑(四維+全生命specimen)"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·arb_hit=0精確根] merchant到stale _market_pos(賣方固定outpost)但賣方到達時不在該格?確認1 datum定精確fix:①29到達點有無對手隊(賣方在不在)②sell-order origin是settled(守outpost)還漫遊(離outpost forage/build)③merchant是commit trade到底還中途preempt漂走"
 ---
 

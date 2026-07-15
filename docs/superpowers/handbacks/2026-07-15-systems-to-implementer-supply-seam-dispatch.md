@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] 供給seam修統一effective_holding accessor——R²過(Fix3訂正:賣+買短缺兩讀點一併);新分支feat/supply-seam-effective-holding;TDD守恆"
 ---
 

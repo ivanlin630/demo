@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[經濟·誠實回報] coin B正確+守恆但inert:market未revive(funnel byte-identical,no_coin 86→82僅-4pt,team_pool才3.6%);兩疑:①96.4%coin鎖哪池(疑anon_treasury,B只碰named)②funnel byte-identical=coin或非真binding(deals卡arb_hit=0);請measurer池census定;B held別merge inert"
 ---
 

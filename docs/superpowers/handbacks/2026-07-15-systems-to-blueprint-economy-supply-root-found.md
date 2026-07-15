@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[patch-gate-first 結果·供給鏈真根] 產了但賣行為查錯storage:manufacture產出→public_storage,非糧賣單讀team.resources=0→永不掛賣單→市場無貨(同WS-2c food accessor家族seam);food已修非糧漏修;回你定願景"
 ---
 

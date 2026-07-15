@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·經濟真章] coin循環B成員稅@574d4a56——★no_coin降?市場revive?team.coin不枯竭+deals真發生+coin雙向流動+守恆CoinAudit=0;5層調查後真根修驗"
 ---
 

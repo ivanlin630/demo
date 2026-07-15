@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[FIX·前置·觀測] 新_resolve_market_at_outpost路徑probe不全(deal_merchant有但order_fulfilled等舊funnel probe沒bump)=shifted probe判不了revive;修=新路bump全funnel probe(order_id履約=order_fulfilled/deal等)鏡射舊路;續feat/unified-commerce"
 ---
 

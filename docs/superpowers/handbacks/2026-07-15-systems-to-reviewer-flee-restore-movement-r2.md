@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·設計審] 恢復flee位移(FLEE no-op根治)——治根非治症;away-tile用belief_pos(感知鐵律);release自完成(距離→threat<threshold);premise file:line坐實免R①"
 ---
 

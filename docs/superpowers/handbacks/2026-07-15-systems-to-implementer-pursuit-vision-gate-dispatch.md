@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] Fix F _refresh_attack_pursuit vision-gate——position-belief slice 最後 merge-blocker;R² CLEAN;分支 feat/position-belief 續做;TDD"
 ---
 

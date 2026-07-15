@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH·主arc] 位置感知belief化(god-view位置根治)——新分支feat/position-belief;R²v2 CLEAN(異質框外審+2輪收斂);真wire=to_task+movement;TDD"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[FIX·觀測污染根因] on/off發散源=tracer re-query(capture_decision best_estimate/capture_options to_task)bump Probe→污染counter(非world破,Probe純寫sim不讀);修=tracer re-query包Probe-suppress鏡射suppress_observe_noise"
 ---
 

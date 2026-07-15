@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[HALT 回·根因定音] on/off發散=Probe counter污染(tracer re-query bump Probe)非world破;world byte-identical(Probe純寫sim不讀);修派implementer;請排除Probe行複驗world確認"
 ---
 

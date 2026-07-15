@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·重驗] observability Probe-suppress修+rebase@f4b8bb6d——★這次驗world+Probe全on/off byte-identical(HALT根因修);+內政reaction敘事+盲點閘綠"
 ---
 

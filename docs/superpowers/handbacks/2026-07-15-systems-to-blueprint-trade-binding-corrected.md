@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★診斷修正·churn被trace推翻] merchant非churn(target穩定+有到達);真binding=①96%trade被threat/flee preempt到不了(survival vs commerce=你WHAT)②到場meet_nodeal12/14;line252 accessor仍valid正交修;修向從latch變threat-vs-trade,要你重定"
 ---
 

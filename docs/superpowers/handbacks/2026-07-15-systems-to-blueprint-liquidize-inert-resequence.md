@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[經濟·誠實回報+重排序建議] 液化也inert(deals 0,meet_nodeal 7/7);2洞察:①no_coin最先bail液化在其後(coin+液化combo從沒測,reconcile用舊條件)②只7-10 co-loc/6月=即使全成交也無市場→真dominant binding=co-location罕見(merchant arb_hit=0主機制死);建議重排序:merchant完成trade(②)先於成交牆(①)"
 ---
 

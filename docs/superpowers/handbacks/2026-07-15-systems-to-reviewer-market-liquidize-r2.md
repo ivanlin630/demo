@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·設計審] 市場成交條件液化(經濟revive①刀)——reserve人格化+降底(willing賣方變多)+ask/bid液化(willing大多成交,摩擦人格質感);★守恆+不賣活命糧;premise file:line坐實免R①"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] 觀測路徑維補齊+盲點閘——R²過(Fix2訂正:unified挪位/solo補早退tap);Fix1 person-reaction先行unblock內政;新分支feat/observability-path-completion"
 ---
 

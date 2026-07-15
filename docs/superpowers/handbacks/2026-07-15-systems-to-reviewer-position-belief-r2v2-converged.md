@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R② v2 一行補] JOIN host兩源分流(strong_neighbor跨→belief_pos / consolidate_target同→known_member_states);7項已過,CLEAN?"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·定位] coin B inert:①4池census(team/person/anon_treasury/tile佔比,96.4%在哪)②reconcile coin vs arb_hit哪個真binding(co-loc買方merchant還resident,B後有pair coin變夠仍沒deal嗎)"
 ---
 

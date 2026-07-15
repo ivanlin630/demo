@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[經濟·誠實回報] seam修正確但非binding:市場仍死(deals~0);kill_nostock月1-3降=供給可見性真改善但deal斷在下游(match→co-locate→成交);漏斗定位中別重犯修非binding層"
 ---
 

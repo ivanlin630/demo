@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[FIX·wiring gap] 統一商業M2新resolver從沒wire進sim(_resolve_market_at_outpost零呼叫點,interaction:239還呼舊_resolve_market)=deals 0根;修=到達market outpost觸發新resolver+舊路由巧遇(非市場格);續feat/unified-commerce"
 ---
 

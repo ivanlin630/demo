@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·重驗·wire已修] 統一商業@77479608(非ac18721d)——★resolver真wire了(sim_runner:353,你上輪審stale無wire=deals 0正確);這次真market-as-place fire,驗deal真升?+coin雙向不泵乾+守恆+統一無殘"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] 恢復flee位移(FLEE no-op根治)——R²過(訂正3真實派發站);新分支feat/flee-restore-movement;TDD"
 ---
 

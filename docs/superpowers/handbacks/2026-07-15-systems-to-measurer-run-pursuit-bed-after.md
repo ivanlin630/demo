@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[執行·ping] Fix F 落分支(08e376d5)——對 feat/position-belief 跑 Tier1 pursuit-hiding 床 after,演示乾淨逃脫撲空率>0"
 ---
 

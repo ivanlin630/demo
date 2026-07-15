@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] 市場成交條件液化(經濟revive①刀)——R²過(訂正:SURVIVAL_GOODS food+medicine排除保floor);reserve人格化降底+ask/bid液化;新分支feat/market-liquidize;TDD守恆"
 ---
 

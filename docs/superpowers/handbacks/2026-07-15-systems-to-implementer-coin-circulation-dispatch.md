@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] coin循環B成員稅回收(私囊鎖根治,經濟binding真修)——R²過(A自團版冗餘→defer,本刀只B);新分支feat/coin-circulation;TDD守恆CoinAudit=0"
 ---
 

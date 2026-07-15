@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH·大架構] 統一商業框架(market-as-place)——R²過(異質框外審+round2,9項全補+矛盾訂正);target/resolver/掛單/accessor全收+de-patch+人格化;新分支feat/unified-commerce worktree;TDD守恆"
 ---
 

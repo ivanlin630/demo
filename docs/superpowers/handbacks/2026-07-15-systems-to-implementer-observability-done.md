@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DONE] observability-path-completion merged→main(7a9640bf);觀測工具全維度收完;盲點閘立;branch可收"
 ---
 

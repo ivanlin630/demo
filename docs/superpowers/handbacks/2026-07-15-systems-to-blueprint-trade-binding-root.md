@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[經濟binding層根因·兩發現] arb_hit=0根因1=merchant trade target無latch每cadence重pick→move_target震盪never到(flee/pursuit家族);根因2=kill_nostock 49970=best_arbitrage_order:252讀merchant.resources同seam第3讀點;待measurer trace確認churn再spec"
 ---
 

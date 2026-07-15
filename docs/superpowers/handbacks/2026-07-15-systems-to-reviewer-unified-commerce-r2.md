@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·大框結構審·可能升異質] 統一商業框架(market-as-place)——用戶裁整個商業一次進框架(棄hole-by-hole打地鼠);target/resolver/掛單/accessor全收+人格化+de-patch;三對齊大框,你判要不要升異質框外審"
 ---
 

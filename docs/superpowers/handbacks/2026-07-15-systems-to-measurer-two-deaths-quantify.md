@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·兩死法量級+真根] blueprint要先證再spec:死法①387半路掉逐merchant追真因(specimen trace看什麼取代TASK_TRADE)②meet_nodeal12/14控制co-loc床看哪條件bail;systems給code候選map,你量化坐實哪個"
 ---
 

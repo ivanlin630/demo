@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·spec 審·大框結構重構·★R① 先] 統一生產框架 spec(de-patch 設施決策入思考層)。★修正:R① 不免(藍圖/用戶戳:file:line 坐實原始事實≠坐實詮釋斷言)——R① CLEAN 後才這 R²。審設計 cohere+match 原則+de-patch 真拆非搬家+非回歸。★建議升異質框外審。spec HELD 待 R①"
 ---
 

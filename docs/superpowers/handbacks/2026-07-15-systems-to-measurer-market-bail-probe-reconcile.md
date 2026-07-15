@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·2疑] @77479608:①拆29 market到場bail(no_coin vs 條件[ask<bid/surplus/carry]各佔比→定下層帶coin還tune)②probe語意核:order_fulfilled 7→0是真regression還新路order_id直沖不計舊probe(新路真成交數vs舊路)"
 ---
 

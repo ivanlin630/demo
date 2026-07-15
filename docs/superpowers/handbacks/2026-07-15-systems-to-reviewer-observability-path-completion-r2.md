@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·設計審] 觀測路徑維補齊+盲點閘(tap-gap家族系統性收)——person-reaction tap unblock內政+unified/solo真result+threat tap+盲點閘;含覆蓋審計"
 ---
 

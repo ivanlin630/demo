@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R②·設計審] Fix F _refresh_attack_pursuit vision-gate——engage後斷視線該跟丟(gate=last_tick==current_tick);position-belief slice最後merge-blocker"
 ---
 

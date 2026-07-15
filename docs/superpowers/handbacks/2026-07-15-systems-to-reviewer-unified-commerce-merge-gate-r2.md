@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·merge-gate·全實作] 統一商業+coin@160301d9——用戶拍merge(閘①你R²必過);spec已R²CLEAN(異質+round2),但實作跨多commit(spec impl+wiring fix+probe fix+coin combo)→複核全branch實作cohere+match spec+無回歸;閘②probe measurer已核遷移非regression"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·生產arc供給牆patch-gate-first] sell_no_surplus 51.7%根:①producer public_storage有無goods/weapon/ore surplus(存在?)②manufacture跑不跑(產能:material有?facility有?生產鮮少選?)③reserve太高擋掉surplus?→定甲(建surplus)/乙(接受薄貿易)料"
 ---
 

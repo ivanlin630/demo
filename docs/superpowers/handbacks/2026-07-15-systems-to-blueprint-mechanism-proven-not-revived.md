@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[經濟·機制證明但未revive] market-as-place機制對(deal_merchant 0→2首次非零+守恆+stale異常消)但2筆/12月=杯水非revive;下瓶頸=29到場bail(疑no_coin,coin-B held不在branch)+probe語意位移需核;你裁:merge foundation now加coin上vs branch建到revive"
 ---
 

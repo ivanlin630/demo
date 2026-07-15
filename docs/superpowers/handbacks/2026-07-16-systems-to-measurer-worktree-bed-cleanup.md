@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[housekeeping·低優先] 統一商業worktree清理被你未追蹤bed擋(implementer不force刪他人檔=對);請撿有價值bed(trade_bail_probe/funnel復用infra)commit進repo+清worktree未追蹤→implementer收worktree。非阻塞供給牆measure"
 ---
 

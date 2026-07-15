@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·觀測infra] 路徑維補齊@279ad8c8——★unblock內政:重抓高-defect specimen顯reaction敘事+驗on/off byte-identical+盲點閘綠;這是工具驗非行為驗"
 ---
 

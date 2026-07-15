@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[patch-gate-first 結果·翻轉診斷] flee churn 真根=FLEE從不移動(dead flee-movement,序1刪位移碼註解謊稱mover接手),非缺鎖;治根=恢復flee位移(→你的有終點),非加lock(治症);請確認reframe再spec"
 ---
 

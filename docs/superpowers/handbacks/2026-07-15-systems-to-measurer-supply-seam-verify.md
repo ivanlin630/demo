@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·中性full-HD·經濟arc第一刀] 供給seam@4c2f85cb——★市場revive?order_fulfilled回升+arb_kill_nostock降+coin流+守恆+掛單噪音修前後對比(#7)"
 ---
 

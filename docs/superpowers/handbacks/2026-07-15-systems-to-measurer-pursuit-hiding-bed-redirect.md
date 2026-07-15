@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[改道·省 roulette] 逃脫 verify 改法:organic=inert-by-absence(blueprint 裁),別燒長 roulette;改建 Tier1 pursuit-hiding 控制場景床(infra 先建),Fix F 落分支後跑乾淨逃脫"
 ---
 

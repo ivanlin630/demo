@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH] tracer-completeness——specimen全生命+全路徑(第三觀測洞根治);R²過(baseline已訂正);新分支feat/tracer-completeness base main(god-view已merged);TDD"
 ---
 

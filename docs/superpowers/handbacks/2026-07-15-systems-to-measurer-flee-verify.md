@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·中性full-HD] 恢復flee位移@77d7687c——驗flee真逃(tile_pos變)+N1_flee aggregate回落(衡量bug佔比)+故事連貫(逃→威脅解→轉別的)"
 ---
 

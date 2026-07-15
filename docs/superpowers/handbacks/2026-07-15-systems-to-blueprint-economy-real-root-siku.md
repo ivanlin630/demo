@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★經濟真根定音·私囊鎖非accessor] measure破accessor:no_coin 91%主根=私囊鎖(salary team→person單向,person→team僅死亡,living成員囤coin→team.resources.coin單調枯竭→買不了);accessor<3%/threat 5起全非binding;measure-first第4次救大重構;真修=coin循環非accessor"
 ---
 

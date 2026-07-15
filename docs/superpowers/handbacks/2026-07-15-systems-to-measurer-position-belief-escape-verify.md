@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·中性世界·逃脫故事] 位置belief化@bd6f97d2——★差異在斷視線case(in-sight=base是正確非inert);撲空率>0/staleness解loop/不誤殺"
 ---
 

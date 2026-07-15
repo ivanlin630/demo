@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·tracer-completeness] 驗specimen全生命+churn現形+on/off byte-identical@b21794b7;這是觀測infra刀,驗工具本身不漏不擾"
 ---
 

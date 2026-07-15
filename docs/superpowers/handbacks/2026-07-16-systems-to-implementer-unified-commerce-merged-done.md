@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DONE·大架構] 統一商業+coin merged→main(eb047b6f);經濟首個交付;3閘全過;branch可收;下=生產arc供給牆(systems先measure)"
 ---
 

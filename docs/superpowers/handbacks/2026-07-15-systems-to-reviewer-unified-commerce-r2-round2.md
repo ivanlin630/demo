@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·重送round2] 統一商業框架補齊——3結構缺口(賣方變現半環/belief基底=公開地標豁免誠實入invariants/履約權威側直記)+6補完項全補;大框寧可多轉,你複核補齊是否CLEAN"
 ---
 

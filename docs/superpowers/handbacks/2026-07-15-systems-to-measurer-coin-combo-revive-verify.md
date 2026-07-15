@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·★combo revive真章] 統一商業+液化+coin三件套齊@160301d9——市場終於revive?deal大幅升+no_coin大降(owner 30→5已證)+coin雙向不泵乾+守恆;bail拆(coin破後buy_no_want成下牆?)+新全funnel/bail probe headline可用"
 ---
 

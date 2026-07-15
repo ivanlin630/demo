@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DONE] tracer-completeness merged→main(2a805d35);第三觀測洞根治;churn_tap_bed進repo;下個大slice=full-HD觀察(待blueprint WHAT設計)"
 ---
 

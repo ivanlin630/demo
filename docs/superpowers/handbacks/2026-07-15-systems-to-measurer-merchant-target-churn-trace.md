@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·確認binding根因] merchant specimen trace:move_target是否逐tick震盪(重pick churn)?——確認arb_hit=0是target churn(flee家族)非別的,別讓systems重犯seam overclaim"
 ---
 

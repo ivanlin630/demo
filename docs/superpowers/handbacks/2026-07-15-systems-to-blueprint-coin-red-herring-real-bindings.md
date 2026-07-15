@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★決定性·coin紅鯡魚證實] reconcile:coin新解禁370筆全落other_bail WOULD_TRADE恆零→coin非binding(你假設對);2真結構binding:①merchant從不co-locate(0 merchant pair,arb_hit=0)②price/surplus/qty牆(deals=3 vs WOULD_TRADE 560);B棄(治標);你定序:merchant完成trade(你預授WHAT)+deal條件牆"
 ---
 

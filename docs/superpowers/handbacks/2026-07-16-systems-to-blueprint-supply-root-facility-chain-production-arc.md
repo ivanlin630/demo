@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[供給根precise=甲·生產arc]供給牆真根=製造設施幾乎不建(has_facility恆1,非material非reserve);facility建造鏈存在但被gate;候選:恆-hungry永建農/facility_score製造太低/builder gate(cost×1.5·pop6·subteam);甲確認,生產arc greenlight?→systems patch-gate-first定哪gate→spec"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[經濟·coin大勝但市場仍死·策略點] no_coin牆破-99.9%(coin流雙向)但deal仍~1-2;新主牆=sell_no_surplus 51.7%(訪客到市場沒貨賣)+供給側=最深/原始牆(producer無surplus→無sell單→買方有錢也沒貨買);~10層深stack;你+用戶定策略:續剝供給 vs 重估市場模型 vs merge coin+foundation止血"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[arb_hit=0根確認+fix WHAT-fork] 65%賣方漫遊離outpost(_market_pos錯位)=dominant根;方法論修正TAG_MERCHANT全0隊真閘=ARCHETYPE_TRADE;fix兩選:A追賣方belief_pos(你WHAT,漫遊難追fragile)vs B outpost-market(貨在outpost買方買stock免賣方在場,WS-2b infra已有,穩+像真市場)——建議B,你WHAT定"
 ---
 

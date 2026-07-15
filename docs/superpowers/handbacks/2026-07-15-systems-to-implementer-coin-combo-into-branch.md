@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[REDIRECT+DISPATCH] probe-fix funnel部分moot(measurer證order_fulfilled雙路共用counter已計新路,7→0真低樣本非gap);真下層=coin combo:fold coin-B成員稅進feat/unified-commerce(no_coin 72.75%坐實binding)+tune強(單獨3.6%太弱);測combo revive"
 ---
 
