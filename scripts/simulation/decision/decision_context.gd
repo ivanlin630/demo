@@ -28,6 +28,7 @@ var strongest_feud: float = 0.0
 # 攻擊 applicable 血仇路 + to_task 血仇 target fallback 讀此。內含衝動 gate + 可見/存在守衛。
 var feud_target_id: int = -1
 var has_own_outpost: bool = false
+var has_manufacturing_facility: bool = false   # S1：本格有製造設施+生產權（「生產」applicable precondition，A2 補缺）
 var is_merchant: bool = false
 var has_home_outpost: bool = false
 var has_weak_prey: bool = false
@@ -149,6 +150,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _vfoe: int = NpcAiSystem.new().vendetta_target(state, ldr) if ldr != null else -1
 	c.feud_target_id = _vfoe if (_vfoe != -1 and state.teams.has(_vfoe)) else -1
 	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
+	c.has_manufacturing_facility = FactionAISystem.has_manufacturing_facility(state, team)   # S1 製造 precondition
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
 	# threat（F-D6 un-stub）：視野內最高敵威脅（belief-based ThreatAssessment，含逼近/敵意/距離衰減）。

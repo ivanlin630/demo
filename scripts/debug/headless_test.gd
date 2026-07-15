@@ -351,8 +351,7 @@ func _initialize() -> void:
 	_test_pick_civilian_no_tools()
 	_test_pick_military_with_workshop()
 	_test_pick_military_tools_stock()
-	_test_govern_faction_leader()
-	_test_govern_skip_when_vault_full()
+	# S4.3 de-patch：infra 層強制 GOVERN 已移除（govern 單一 owner=引擎「駐守」option）→ 相關測試退役。
 	_test_person_sex()
 	_test_breed_needs_both_sexes()
 	_test_breed_decoupled()
@@ -12736,50 +12735,9 @@ func _test_pick_military_tools_stock() -> void:
 
 # ──────── Economy Bootstrap Task2：治理接 faction leader ────────
 
-func _bootstrap_govern_state(leader_pos: Vector2i, vault_mat: float) -> WorldState:
-	var state := WorldState.new()
-	state.world = WorldData.new()
-	# leader_team 自家 civilian outpost (0,0) level 1
-	var home := HexTileData.new()
-	home.tile_pos = Vector2i(0, 0); home.terrain = "plains"
-	home.outpost_level = 1; home.outpost_type = "civilian"; home.outpost_owner = 0
-	home.public_storage = { "material": vault_mat }
-	state.world.tiles[0] = home
-	var team := TeamData.new(); team.team_id = 0
-	_seed_pop(team, 10); team.tile_pos = leader_pos
-	team.current_task = TeamData.TASK_IDLE; team.combat_target = -1
-	team.resources = {}   # 無私產 → 升級/擴建派工皆失敗 → 落到治理判定
-	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
-	leader.values = { "慎重": 0.5 }
-	state.persons[100] = leader; team.leader_id = 100
-	state.teams[0] = team
-	state.create_faction(0)
-	return state
-
-func _test_govern_faction_leader() -> void:
-	print("--- Bootstrap Task2: 治理接 faction leader ---")
-	# faction leader 不在自家 outpost + 公庫 < 75 + idle → 設「治理」、target=自家 outpost
-	var state := _bootstrap_govern_state(Vector2i(5, 5), 0.0)
-	var fid: int = state.teams[0].faction_id
-	var fai := FactionAISystem.new()
-	fai._evaluate_infrastructure(state, state.factions[fid])
-	var team: TeamData = state.teams[0]
-	assert(team.current_task == "治理",
-		"faction leader 公庫不足應回家治理，實際=%s" % team.current_task)
-	assert(team.move_target == Vector2i(0, 0),
-		"治理 target 應為自家 outpost，實際=(%d,%d)" % [team.move_target.x, team.move_target.y])
-	print("Bootstrap Task2a OK")
-
-func _test_govern_skip_when_vault_full() -> void:
-	# 公庫 material >= 75 → 不治理（正常派工路徑）
-	var state := _bootstrap_govern_state(Vector2i(5, 5), 100.0)
-	var fid: int = state.teams[0].faction_id
-	var fai := FactionAISystem.new()
-	fai._evaluate_infrastructure(state, state.factions[fid])
-	var team: TeamData = state.teams[0]
-	assert(team.current_task != "治理",
-		"公庫達標不應治理，實際=%s" % team.current_task)
-	print("Bootstrap Task2b OK")
+# S4.3 de-patch（§R² 補裁 4）：infra 層強制 GOVERN 攢公庫已移除——govern 單一 owner = 引擎既有「駐守」
+# option（人格秤發起），infra 層不派/不秤 govern（避 Team10 雙寫 livelock）。原 _test_govern_faction_leader/
+# _test_govern_skip_when_vault_full + _bootstrap_govern_state 測的是被移除機制→退役。
 
 # ──────── Economy Bootstrap Task3：生育反應分層 ────────
 
@@ -15017,11 +14975,12 @@ func _test_role_applicable() -> void:
 	var s2 := WorldState.new(); s2.world = WorldData.new()
 	var p := _mk_produce_team(s2, {"義氣": 0.6}, 500.0, true)
 	p.resources["goods"] = 50.0
+	s2.world.tiles[2*1000+2].manufacturing_level = 1   # S1 遷移：生產需製造設施 precondition→給 workshop
 	var ctx_p: DecisionContext = DecisionContext.gather(s2, p)
 	assert(not ctx_p.is_merchant, "生產隊 is_merchant 應 false")
 	var ap: Array = DecisionOptions.applicable(ctx_p)
 	assert("貿易" in ap, "gate→權重後生產隊貿易應入候選(軟壓非禁)，實際=%s" % str(ap))
-	assert("駐守" in ap and "生產" in ap and "建設" in ap, "生產隊有 生產/駐守/建設 候選，實際=%s" % str(ap))
+	assert("駐守" in ap and "生產" in ap and "建設" in ap, "生產隊(有設施)有 生產/駐守/建設 候選，實際=%s" % str(ap))
 	# 生產隊無據點 → 建設(bootstrap) 候選；生產/駐守 不候選
 	var s3 := WorldState.new(); s3.world = WorldData.new()
 	var p2 := _mk_produce_team(s3, {"義氣": 0.6}, 500.0, false)
