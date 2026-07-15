@@ -11638,8 +11638,9 @@ func _test_trade_reserve_no_drain() -> void:
 	print("--- Trade 問題1: reserve 單一源,玩家不可刷光 ---")
 	var pts := PlayerTradeSystem.new()
 	var t := TeamData.new(); t.team_id = 1; _seed_pop(t, 10)
-	# material 剛好 reserve 量（pop × TARGET_PER_POP）→ sellable ≈ 0（全留底）
-	var reserve_amt: float = 10.0 * float(TradeValuation.TARGET_PER_POP["material"])
+	# market-liquidize：非活命品 reserve 液化人格化(pop×TARGET×factor,<flat)→用單一源實際 reserve 量。
+	# 舊 flat pop×TARGET 已被液化取代（intent：降底→willing 賣方變多）；此測驗「不可刷光 + 單一源 delegate」不變。
+	var reserve_amt: float = TradeValuation.reserve(t, "material")
 	t.resources["material"] = reserve_amt
 	assert(pts._sellable_qty(t, "material") < 1.0,
 		"material 在 reserve 量 → 不可賣（修刷光），實際 sellable=%.1f" % pts._sellable_qty(t, "material"))

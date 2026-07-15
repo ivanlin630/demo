@@ -802,9 +802,10 @@ func _attempt_trade_direction(state: WorldState, seller: TeamData, buyer: TeamDa
 		var reserve: float = _calc_reserve(seller, res, TradeValuation.leader_vals(state, seller))
 		var surplus: float = maxf(stock - reserve, 0.0)
 		if surplus <= 0.0: continue
-		var ask: float = TradeValuation.local_value(seller, res) * (1.0 - commerce * 0.1)
+		# 液化：ask 折扣人格化(急鬆手/貪守價,單一源 TradeValuation)；willing 對閉合邊際價差(SPREAD_TOL)。
+		var ask: float = TradeValuation.ask_price(seller, res, commerce, TradeValuation.leader_vals(state, seller))
 		var bid: float = TradeValuation.local_value(buyer, res)
-		if ask <= 0.0 or ask >= bid: continue
+		if ask <= 0.0 or ask > bid * (1.0 + TradeValuation.SPREAD_TOL): continue
 		var qty: int = mini(int(surplus), int(buyer_coin / ask))
 		qty = mini(qty, ms.carry_space_for_res(buyer, res))   # WS-3 carry 限（買方滿載即止買）
 		if qty <= 0: continue
