@@ -668,3 +668,10 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **line 252 accessor**(best_arbitrage_order讀merchant.resources,kill_nostock 49970)=同seam第3讀點,code確定valid,正交收全(併held seam分支)。
 - **★systems churn overclaim第2次被trace/HALT救**(seam非binding→churn非binding):**先證再修紀律價值再證**。churn假設trace推翻,沒白spec。merchant移出churn家族(progress backlog#5訂正)。
 - **待blueprint定主根WHAT**(threat-vs-trade韌性方向)→systems spec。溯源handback `2026-07-15-systems-to-blueprint-trade-binding-corrected`。關 [[project_economy_arc]]。
+
+## ★★經濟修向定案:結構統一重構(非調threat,blueprint靜態稽核+用戶核准 2026-07-15)
+- **靜態稽核破死法二**:主根=結構沒統一,三層裸。accessor seam **5讀點**(非3):order_system:110/118/252 + ★trade_valuation:86 local_value(讀team.resources→糧倉貨誤估短缺→ask高/拒賣=meet_nodeal根) + decision_context:138 has_goods。我supply-seam只收3漏:86/:138/:252。**結構視圖抓measure-first撞不到的縫**([[feedback_structural_audit_complement]])。
+- **主刀(結構統一,用戶核准)**:①effective_holding(state,team,res)收斂5讀點+廢absorb/spill dance ②order_system掛單層讀它+讀人格(食物留底統一走food_security_target,廢FOOD_SELL_RESERVE_RATIO/FOOD_BUY_DAYS死常數,清孤兒SURPLUS_RESERVE_MULT) ③雙resolver收斂(訂單看板vs到場ask/bid對齊,_find_trade_target+best_arbitrage_order收單一路徑) ④補accessor縫tap(躲public_storage的貨可觀測,守全量暫態可觀測性)。**大框→R²**。
+- **第二刀(死法一,附帶,待量)**:387半路跑threat-preempt動態坐實掉因→定B threat韌性該修多少(商隊threat門檻人格化,PRIO_THREAT vs TASK_TRADE別flat)。
+- **紀律**:先量再spec不變(死法二local_value hypothesis動態抽驗+死法一掉因坐實才spec)。line252併主刀收全。supply-seam分支(held)併入或廢重做。
+- **兩刀分明**:死法二結構根(主刀)、死法一threat願景B(第二刀)。溯源handback `2026-07-15-blueprint-to-systems-economy-structural-unification`。關 [[project_economy_arc]]/[[project_unification_matrix]]/[[project_framework_seams]]。
