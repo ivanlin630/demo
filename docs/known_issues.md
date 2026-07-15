@@ -661,3 +661,10 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **binding層候選(待漏斗證,別猜)**:①賣單貼了merchant看不到(board_read≈0 known_issue)②太遠arb_kill_range③追了到不了點(travel/co-location)④會合不成交(transfer)。deal路徑要買方/merchant到producer outpost co-locate,非只「賣單看見貨」。
 - **best_arbitrage_order:252讀merchant.resources**(carried stock,同seam家族但不同path=merchant carried非producer granary)——待漏斗定是否binding。
 - **處置**:seam分支`feat/supply-seam-effective-holding`(4c2f85cb)hold不單獨merge(inert避換皮),等binding層挖出bundle。measurer跑完整trade漏斗breakdown(post_sell/arb_sell_seen/arb_pick/meet_nodeal/deal)定binding站。溯源handback `2026-07-15-systems-to-blueprint-seam-not-binding`。關 [[project_economy_arc]]/[[project_established_chain]](多層調查同精神)。
+
+## ★經濟binding修正:非churn,是threat-preempt+meet_nodeal(2026-07-15 trace推翻churn假設)
+- **trace判定**(measurer T5商隊specimen逐tick):非A churn(target 28000tick僅切6次穩定)、非B(抵達print命中29次有到)、落C變體(到點co-location落空);native bed:**dispatch404→arrive僅17(4.2%),96%被逃跑/threat preempt腰斬**;到場17裡meet_nodeal12/14。
+- **真binding兩層**:①**主根=96% trade被threat/flee preempt到不了**(TASK_TRADE PRIO_DISPATCH50被threat PRIO_THREAT70 override;full-HD warring威脅常在+flee剛修好加劇)=survival vs commerce張力(WHAT:貿易該對threat有韌性or危險世界殺貿易對?)②次根=到場meet_nodeal(order pos=_market_pos固定outpost,疑對方移走/供需窗變/price)。
+- **line 252 accessor**(best_arbitrage_order讀merchant.resources,kill_nostock 49970)=同seam第3讀點,code確定valid,正交收全(併held seam分支)。
+- **★systems churn overclaim第2次被trace/HALT救**(seam非binding→churn非binding):**先證再修紀律價值再證**。churn假設trace推翻,沒白spec。merchant移出churn家族(progress backlog#5訂正)。
+- **待blueprint定主根WHAT**(threat-vs-trade韌性方向)→systems spec。溯源handback `2026-07-15-systems-to-blueprint-trade-binding-corrected`。關 [[project_economy_arc]]。
