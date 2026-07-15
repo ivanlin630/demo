@@ -17,8 +17,11 @@ manufacture 產出（goods/weapon/ore_steel/armor…）→ outpost 隊進 `tile.
 ### Fix 2：統一 spend accessor `spend_holding`（★守恆核心）
 `ResourceSystem` 加 `spend_holding(state, team, res, qty)` = **先扣 public_storage（貨在那），餘額扣 team.resources**（`TileBank.deposit(tile,res,-x)` + `ResourceBank.add(team,res,-y)`，守恆、不透支）。回實際扣量。
 
-### Fix 3：非糧賣單讀 effective（`order_system:110`）
-`var qty = ResourceSystem.effective_holding(state, team, res)`（取代 `team.resources.get`）→ 定居隊製造 surplus（≥20）觸發賣單。**food 路（`_tick_food_granary_sell`）同 refactor 走 effective_holding**（統一，不留兩套；food 保 cap×reserve 語意＝賣超 reserve 的半）。
+### Fix 3：賣單讀 + 買單短缺讀 effective（★R² 訂正：同函式對稱兩面一併收）
+同一 seam 的**兩個對稱讀點**（`order_system` 同函式內，別只收一半留第五個 tap-gap）：
+- **賣單讀（`:110`）**：`var qty = ResourceSystem.effective_holding(state, team, res)`（取代 `team.resources.get`）→ 定居隊製造 surplus（≥20）觸發賣單。
+- **★買單短缺讀（`:118`，R² 抓）**：`if ResourceSystem.effective_holding(state, team, res) >= SHORTAGE_QTY: continue`（取代 `team.resources.get`）→ 定居隊倉裡有 material/goods/weapon 就**不誤判短缺亂買已有的貨**（浪費 coin + 製造虛假需求＝掛單噪音一部分，順手降）。food 買單（`:127-133`）已用 `effective_food`＝正確，非糧買單漏了同款修。
+- **food 賣路（`_tick_food_granary_sell`）同 refactor 走 effective_holding**（統一，不留兩套；food 保 cap×reserve 語意＝賣超 reserve 的半）。
 
 ### Fix 4：settle 從正確 storage 扣（`_execute_transfer:665`）
 seller `res` 扣 `ResourceSystem.spend_holding(state, seller, res, qty)`（取代 `ResourceBank.add(seller,res,-qty)`）→ 貨從 public_storage 出（製造成品所在）→ **守恆不賣幽靈貨**。coin/buyer 側不動（buyer 收進 resources 照舊）。
