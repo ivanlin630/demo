@@ -23,6 +23,9 @@
 
 ## 📍 當前狀態（2026-07-15）——full-HD 觀察開跑 + flee 真修 + tracer 完整性 + god-view merged
 
+### observability-path-completion（tap-gap 家族系統性收 + 盲點閘）→ main（merge `7a9640bf`，2026-07-15）
+full-HD 觀察 unblock 內政的觀測 infra。tap-gap 撞出 4 個（order/survival-churn/unified-solo/person-reaction）→ blueprint 令系統性掃別打地鼠。**已修**：Fix1 person-reaction tap（reaction winner 進 specimen，誰/reaction/why loyalty·stress→內政 defect/riot 可判真因，riot 樣本 person33 loyalty0.88/stress0.9/food0=stress 驅動好戲非 loyalty bug）+ Fix2a unified capture 挪 try_set 後帶真 result（修 predetermined committed 虛高）+ Fix2b solo 三早退 tap（idle_skip/finder_miss/try_set_noop）+ Fix3 threat dispatch tap + **Fix4 盲點閘 `observability_gate.gd`**（新決策/commit-fail/reaction 路徑未 tap→FAIL 系統性守衛，打地鼠結束）。**★HALT 修（觀測禁改世界第 4 次同族）**：tracer re-query（best_estimate/to_task）bump Probe 污染 counter→`_begin/_end_observe`（Probe.enabled=false+suppress_observe_noise）包裹→on/off 含 Probe 全 byte-identical（15917 行 0 diff）；invariants 升（禁 RNG→禁 RNG+Probe）。**觀測工具全維度收完**：全生命(heartbeat)+全路徑(attempt-tap+person-reaction+unified/solo/threat)+零擾動(RNG+Probe)+盲點閘守衛=「全量暫態可觀測性」不變量真落地。**教訓**：先窄後寬撞 confound 第 2 次（TDD 小場景 Probe 差不顯，full-HD 才爆），spec 該要求 Probe-neutral（已補 invariant 驗收）。
+
 ### full-HD live 觀察 slice 開跑（觀察先於設計，blueprint）
 三大 arc（desperation/god-view/tracer-completeness）落地→**現在有可信 tracer**→開沉睡世界（反應/生育/情緒 near-gated，`SimRunner.force_full_hd=true` 全隊 near 自然開，零 gate 改）。**交付=觀察報告非修**。measurer 跑四維（人口/內政/情緒/經濟）+ 全生命 specimen。**立刻兌現真問題**（見下 flee）。
 
