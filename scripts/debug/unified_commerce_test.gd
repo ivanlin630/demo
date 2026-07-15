@@ -1,0 +1,264 @@
+extends SceneTree
+
+# 統一商業框架 TDD（unified-commerce，market-as-place）
+# spec: docs/superpowers/specs/2026-07-15-unified-commerce-framework.md
+# M2 到場 resolver _resolve_market_at_outpost：owner-mediated，訪客買 owner sell 單(coin→owner)/
+# 賣入 owner buy 單(owner.coin→visitor)；order_id 直沖；min(單餘,現貨);無單不賣;SURVIVAL 有單才賣;守恆。
+
+var _fail: int = 0
+
+func _initialize() -> void:
+	_test_visitor_buy_from_stock()
+	_test_visitor_sell_to_buyorder()
+	_test_order_id_direct_settle()
+	_test_survival_no_order_no_sell()
+	_test_conservation()
+	_test_integration_step3c_fires()
+	_test_probe_full_funnel()
+	_test_member_tax_conservation()
+	_test_combo_taxed_buyer_deals()
+	if _fail == 0:
+		print("=== DONE === ALL PASS")
+	else:
+		print("=== DONE === %d FAIL" % _fail)
+	quit()
+
+func _ok(cond: bool, msg: String) -> void:
+	if cond: print("  [PASS] %s" % msg)
+	else: _fail += 1; print("  [FAIL] %s" % msg)
+
+func _mk_person(state: WorldState, id: int, vals: Dictionary = {}) -> void:
+	var p := PersonData.new(); p.id = id; p.values = vals; p.skills = {}
+	state.persons[id] = p
+
+func _mk_team(state: WorldState, tid: int, leader_id: int, pop: int, res: Dictionary) -> TeamData:
+	var t := TeamData.new(); t.team_id = tid; t.leader_id = leader_id
+	t.resources = res.duplicate()
+	for i in range(pop - 1):
+		t.named_members.append(tid * 100 + i)
+	state.teams[tid] = t
+	return t
+
+# owner outpost tile：public_storage stock + board sell/buy 單（＝owner active_orders 鏡像）。
+func _mk_outpost(state: WorldState, owner_id: int, pos: Vector2i, storage: Dictionary, orders: Array) -> HexTileData:
+	var tile := HexTileData.new()
+	tile.tile_pos = pos; tile.outpost_level = 1; tile.outpost_owner = owner_id
+	tile.public_storage = storage.duplicate()
+	tile.market_orders = orders.duplicate(true)
+	state.world.tiles[pos.x * 1000 + pos.y] = tile
+	return tile
+
+func _mk_state() -> WorldState:
+	var s := WorldState.new(); s.world = WorldData.new(); s.world.current_tick = 0
+	return s
+
+# ── TDD1：訪客到市場 outpost → 向 stock 買（deal fire，扣 storage，coin→owner，守恆）──
+func _test_visitor_buy_from_stock() -> void:
+	print("--- TDD1：訪客買 owner sell 單/stock（coin→owner）---")
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0, "material": 100.0})
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	# owner 掛 sell material ×80（board + active_orders 權威）
+	var sell_order := {"order_id": 42, "kind": "sell", "res": "material", "qty_remaining": 80}
+	owner.active_orders.append(sell_order.duplicate())
+	var tile := _mk_outpost(s, 1, Vector2i(1, 1), {"material": 100.0}, [sell_order])
+	var owner_coin0: float = float(owner.resources.get("coin", 0))
+	var vis_mat0: float = float(visitor.resources.get("material", 0))
+	InteractionSystem.new()._resolve_market_at_outpost(s, visitor, tile)
+	_ok(float(visitor.resources.get("material", 0)) > vis_mat0, "訪客得 material（%.0f→%.0f）" % [vis_mat0, float(visitor.resources.get("material", 0))])
+	_ok(float(owner.resources.get("coin", 0)) > owner_coin0, "owner 得 coin（%.0f→%.0f，coin→owner）" % [owner_coin0, float(owner.resources.get("coin", 0))])
+	_ok(float(tile.public_storage.get("material", 0)) < 100.0, "public_storage material 扣減（%.0f）" % float(tile.public_storage.get("material", 0)))
+
+# ── TDD2：★訪客賣 → 向 owner buy 單賣（貨入 storage，owner.coin→visitor，套利閉合）──
+func _test_visitor_sell_to_buyorder() -> void:
+	print("--- TDD2：★訪客賣入 owner buy 單（owner.coin→visitor）---")
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 500.0})
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 0.0, "goods": 60.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	var buy_order := {"order_id": 43, "kind": "buy", "res": "goods", "qty_remaining": 40}
+	owner.active_orders.append(buy_order.duplicate())
+	var tile := _mk_outpost(s, 1, Vector2i(1, 1), {}, [buy_order])
+	var vis_coin0: float = float(visitor.resources.get("coin", 0))
+	var owner_coin0: float = float(owner.resources.get("coin", 0))
+	InteractionSystem.new()._resolve_market_at_outpost(s, visitor, tile)
+	_ok(float(visitor.resources.get("coin", 0)) > vis_coin0, "★訪客賣得 coin（%.0f→%.0f，套利閉合）" % [vis_coin0, float(visitor.resources.get("coin", 0))])
+	_ok(float(owner.resources.get("coin", 0)) < owner_coin0, "owner.coin 付出（%.0f→%.0f）" % [owner_coin0, float(owner.resources.get("coin", 0))])
+	_ok(float(tile.public_storage.get("goods", 0)) > 0.0, "貨入 public_storage（%.0f）" % float(tile.public_storage.get("goods", 0)))
+
+# ── TDD3：履約 order_id 直沖（成交即沖 active_orders + board，不掛幽靈）──
+func _test_order_id_direct_settle() -> void:
+	print("--- TDD3：order_id 直沖 active_orders + board ---")
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	var sell_order := {"order_id": 42, "kind": "sell", "res": "material", "qty_remaining": 30}
+	owner.active_orders.append(sell_order.duplicate())
+	var tile := _mk_outpost(s, 1, Vector2i(1, 1), {"material": 100.0}, [sell_order])
+	InteractionSystem.new()._resolve_market_at_outpost(s, visitor, tile)
+	# 權威 active_orders qty_remaining 直沖（減少）
+	var oid_rem: int = -1
+	for o in owner.active_orders:
+		if int(o["order_id"]) == 42: oid_rem = int(o["qty_remaining"])
+	var board_rem: int = 999
+	for e in tile.market_orders:
+		if int(e["order_id"]) == 42: board_rem = int(e["qty_remaining"])
+	_ok(oid_rem < 30 or oid_rem == -1, "active_orders order_id=42 直沖（qty_remaining=%d，<30 或已移除）" % oid_rem)
+	_ok(board_rem < 30, "board entry order_id=42 同步直沖（qty_remaining=%d）" % board_rem)
+
+# ── TDD4：SURVIVAL_GOODS 無單不賣（活命糧不買穿：storage 有 food 但無 sell 單 → 不成交）──
+func _test_survival_no_order_no_sell() -> void:
+	print("--- TDD4：SURVIVAL 無單不賣（食物不買穿）---")
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	# storage 有 food 但 board 無 food sell 單（只有 material sell 單）
+	var mat_order := {"order_id": 50, "kind": "sell", "res": "material", "qty_remaining": 10}
+	owner.active_orders.append(mat_order.duplicate())
+	var tile := _mk_outpost(s, 1, Vector2i(1, 1), {"food": 200.0, "material": 20.0}, [mat_order])
+	var food0: float = float(tile.public_storage.get("food", 0))
+	InteractionSystem.new()._resolve_market_at_outpost(s, visitor, tile)
+	_ok(absf(float(tile.public_storage.get("food", 0)) - food0) < 0.001, "★food 無 sell 單 → 不賣（storage food %.0f 不動）" % float(tile.public_storage.get("food", 0)))
+
+# ── TDD5：守恆——成交總 coin + 總 goods 不生不滅 ──
+func _test_conservation() -> void:
+	print("--- TDD5：市場成交守恆（coin↔goods 只搬）---")
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 200.0, "material": 100.0})
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0, "goods": 50.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	var sell_o := {"order_id": 60, "kind": "sell", "res": "material", "qty_remaining": 50}
+	var buy_o := {"order_id": 61, "kind": "buy", "res": "goods", "qty_remaining": 30}
+	owner.active_orders.append(sell_o.duplicate()); owner.active_orders.append(buy_o.duplicate())
+	var tile := _mk_outpost(s, 1, Vector2i(1, 1), {"material": 100.0}, [sell_o, buy_o])
+	var coin0: float = _tot_coin(owner, visitor, tile)
+	var mat0: float = float(owner.resources.get("material", 0)) + float(visitor.resources.get("material", 0)) + float(tile.public_storage.get("material", 0))
+	var goods0: float = float(owner.resources.get("goods", 0)) + float(visitor.resources.get("goods", 0)) + float(tile.public_storage.get("goods", 0))
+	InteractionSystem.new()._resolve_market_at_outpost(s, visitor, tile)
+	var coin1: float = _tot_coin(owner, visitor, tile)
+	var mat1: float = float(owner.resources.get("material", 0)) + float(visitor.resources.get("material", 0)) + float(tile.public_storage.get("material", 0))
+	var goods1: float = float(owner.resources.get("goods", 0)) + float(visitor.resources.get("goods", 0)) + float(tile.public_storage.get("goods", 0))
+	_ok(absf(coin1 - coin0) < 0.001, "★總 coin 守恆（%.2f→%.2f）" % [coin0, coin1])
+	_ok(absf(mat1 - mat0) < 0.001, "★總 material 守恆（%.2f→%.2f）" % [mat0, mat1])
+	_ok(absf(goods1 - goods0) < 0.001, "★總 goods 守恆（%.2f→%.2f）" % [goods0, goods1])
+
+func _tot_coin(owner: TeamData, visitor: TeamData, tile: HexTileData) -> float:
+	return float(owner.resources.get("coin", 0)) + float(visitor.resources.get("coin", 0)) + float(tile.public_storage.get("coin", 0))
+
+# ── ★整合測（wiring-fix）：SimRunner._step3c_read_market_board → 新 resolver 真 fire（非死碼）──
+func _test_integration_step3c_fires() -> void:
+	print("--- ★整合：SimRunner._step3c → market-as-place resolver 真 fire ---")
+	Probe.enabled = true; Probe.reset()
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	# owner b：market outpost，food sell 單於 board + storage
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
+	owner.tile_pos = Vector2i(3, 3)
+	owner.active_orders = [{"order_id": 80, "kind": "sell", "res": "food", "qty_remaining": 100}]
+	var tile := _mk_outpost(s, 1, Vector2i(3, 3), {"food": 500.0},
+		[{"order_id": 80, "kind": "sell", "res": "food", "qty_remaining": 100, "origin_team": 1, "expire_tick": 99999}])
+	# hungry visitor a：TASK_TRADE 站在 market tile（＝arrived），有 coin、低 food
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0, "food": 0.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(3, 3)
+	var food0: float = float(visitor.resources.get("food", 0))
+	var sr := SimRunner.new()
+	sr._step3c_read_market_board(s, [2])   # arrived = [visitor]
+	_ok(float(visitor.resources.get("food", 0)) > food0, "★整合：step3c→resolver 真 fire，visitor 買到 food（%.0f）" % float(visitor.resources.get("food", 0)))
+	_ok(int(Probe.counts.get("trade.deal_market", 0)) > 0, "★deal_market probe 動（=%d，非死碼）" % int(Probe.counts.get("trade.deal_market", 0)))
+	Probe.enabled = false
+
+# ── ★probe 全 funnel 可觀測（observability-fix）：成交 bump deal/deal_market/order_fulfilled；bail 分因可觀測 ──
+func _test_probe_full_funnel() -> void:
+	print("--- ★probe 全 funnel：成交計數口徑 + bail 分因 ---")
+	# (a) 成交 → order_fulfilled + deal + deal_market bump（鏡射舊路口徑）
+	Probe.enabled = true; Probe.reset()
+	var s := _mk_state()
+	_mk_person(s, 100); _mk_person(s, 200)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
+	owner.active_orders = [{"order_id": 90, "kind": "sell", "res": "food", "qty_remaining": 5}]
+	var tile := _mk_outpost(s, 1, Vector2i(1, 1), {"food": 500.0},
+		[{"order_id": 90, "kind": "sell", "res": "food", "qty_remaining": 5, "origin_team": 1, "expire_tick": 99999}])
+	var visitor := _mk_team(s, 2, 200, 10, {"coin": 500.0, "food": 0.0})
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(1, 1)
+	InteractionSystem.new()._resolve_market_at_outpost(s, visitor, tile)
+	_ok(int(Probe.counts.get("trade.deal", 0)) > 0, "trade.deal bump（=%d）" % int(Probe.counts.get("trade.deal", 0)))
+	_ok(int(Probe.counts.get("trade.deal_market", 0)) > 0, "trade.deal_market bump（=%d）" % int(Probe.counts.get("trade.deal_market", 0)))
+	_ok(int(Probe.counts.get("g1.order_fulfilled", 0)) > 0, "★order_fulfilled bump（單填滿=%d，鏡射舊路）" % int(Probe.counts.get("g1.order_fulfilled", 0)))
+	_ok(int(Probe.counts.get("trade.meet", 0)) > 0, "trade.meet bump（到市場會合=%d）" % int(Probe.counts.get("trade.meet", 0)))
+	# (b) bail 分因可觀測：無 coin → buy_no_coin
+	Probe.reset()
+	var s2 := _mk_state()
+	_mk_person(s2, 100); _mk_person(s2, 200)
+	var o2 := _mk_team(s2, 1, 100, 10, {"coin": 0.0})
+	o2.active_orders = [{"order_id": 91, "kind": "sell", "res": "food", "qty_remaining": 5}]
+	var tile2 := _mk_outpost(s2, 1, Vector2i(1, 1), {"food": 500.0},
+		[{"order_id": 91, "kind": "sell", "res": "food", "qty_remaining": 5, "origin_team": 1, "expire_tick": 99999}])
+	var v2 := _mk_team(s2, 2, 200, 10, {"coin": 0.0, "food": 0.0})   # 無 coin
+	v2.current_task = TeamData.TASK_TRADE; v2.tile_pos = Vector2i(1, 1)
+	InteractionSystem.new()._resolve_market_at_outpost(s2, v2, tile2)
+	_ok(int(Probe.counts.get("trade.market_bail.buy_no_coin", 0)) > 0, "★bail 分因可觀測: buy_no_coin bump（=%d）" % int(Probe.counts.get("trade.market_bail.buy_no_coin", 0)))
+	Probe.enabled = false
+
+# ── coin combo：成員稅守恆（person.coin→team.coin 池間搬，留 floor）──
+func _test_member_tax_conservation() -> void:
+	print("--- coin combo：成員稅守恆（person→team，留 floor）---")
+	var s := _mk_state()
+	var ldr := PersonData.new(); ldr.id = 100; ldr.values = {"貪婪": 0.9, "慎重": 0.1}
+	s.persons[100] = ldr
+	var team := TeamData.new(); team.team_id = 1; team.leader_id = 100
+	team.resources = {"coin": 0.0}
+	for i in range(3):
+		var p := PersonData.new(); p.id = 200 + i; p.coin = 100.0
+		s.persons[200 + i] = p; team.named_members.append(200 + i)
+	s.teams[1] = team
+	var mc0: float = 0.0
+	for pid in team.named_members: mc0 += s.persons[pid].coin
+	FactionAISystem.new()._collect_member_tax(s, team)
+	var mc1: float = 0.0
+	for pid in team.named_members: mc1 += s.persons[pid].coin
+	var tc1: float = float(team.resources.get("coin", 0))
+	_ok(mc1 < mc0 and tc1 > 0.0, "person.coin 降（%.0f→%.0f）、team.coin 升（%.0f）" % [mc0, mc1, tc1])
+	_ok(absf((mc0 - mc1) - tc1) < 0.001, "★守恆 Δperson(%.1f)=Δteam(%.1f)" % [mc0 - mc1, tc1])
+	var min_p: float = 1e9
+	for pid in team.named_members: min_p = minf(min_p, s.persons[pid].coin)
+	_ok(min_p >= FactionAISystem.PERSONAL_COIN_FLOOR, "留 floor：最低 person.coin(%.1f) >= FLOOR(%.1f)" % [min_p, FactionAISystem.PERSONAL_COIN_FLOOR])
+
+# ── ★combo：市場有 sell stock + 買方經稅有 coin → deal fire（no_coin binding 破）──
+func _test_combo_taxed_buyer_deals() -> void:
+	print("--- ★combo：稅回補 team.coin → 買方到市場成交 ---")
+	var s := _mk_state()
+	# owner 市場：food sell 單 + storage
+	_mk_person(s, 100)
+	var owner := _mk_team(s, 1, 100, 10, {"coin": 0.0})
+	owner.active_orders = [{"order_id": 95, "kind": "sell", "res": "food", "qty_remaining": 50}]
+	var tile := _mk_outpost(s, 1, Vector2i(2, 2), {"food": 500.0},
+		[{"order_id": 95, "kind": "sell", "res": "food", "qty_remaining": 50, "origin_team": 1, "expire_tick": 99999}])
+	# 買方 team.coin=0（no_coin binding）但 named 成員有錢
+	var vldr := PersonData.new(); vldr.id = 200; vldr.values = {"貪婪": 0.9, "慎重": 0.1}
+	s.persons[200] = vldr
+	var visitor := TeamData.new(); visitor.team_id = 2; visitor.leader_id = 200
+	visitor.resources = {"coin": 0.0, "food": 0.0}
+	visitor.current_task = TeamData.TASK_TRADE; visitor.tile_pos = Vector2i(2, 2)
+	for i in range(9):
+		var p := PersonData.new(); p.id = 300 + i; p.coin = 100.0
+		s.persons[300 + i] = p; visitor.named_members.append(300 + i)
+	s.teams[2] = visitor
+	# 稅前：team.coin=0 → 到市場買不成
+	var iact := InteractionSystem.new()
+	iact._resolve_market_at_outpost(s, visitor, tile)
+	var food_pretax: float = float(visitor.resources.get("food", 0))
+	_ok(food_pretax == 0.0, "稅前 team.coin=0 → 買不成（food=%.0f）" % food_pretax)
+	# 收稅 → team.coin 回補
+	FactionAISystem.new()._collect_member_tax(s, visitor)
+	_ok(float(visitor.resources.get("coin", 0)) > 3.4, "★稅後 team.coin(%.1f) > market ask ~3.4（買方有錢）" % float(visitor.resources.get("coin", 0)))
+	# 稅後：到市場買成
+	iact._resolve_market_at_outpost(s, visitor, tile)
+	_ok(float(visitor.resources.get("food", 0)) > 0.0, "★combo：稅後買方到市場成交（food=%.0f，no_coin binding 破）" % float(visitor.resources.get("food", 0)))

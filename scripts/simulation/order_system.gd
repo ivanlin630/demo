@@ -2,19 +2,15 @@ class_name OrderSystem
 
 const ORDER_LIFETIME: int = 5 * WorldState.TICKS_PER_DAY    # 訂單壽命
 const ORDER_POST_CADENCE: int = 12 * WorldState.TICKS_PER_HOUR
-const SURPLUS_RESERVE_MULT: float = 2.0   # 超過 reserve×此 = 餘 → 發賣盤
 
 const _ORDER_ELIGIBLE_RES: Array = ["goods", "weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel", "food", "mounts"]
 
-const SHORTAGE_QTY: float = 3.0   # TEST VALUE：低於此視為短缺,發買單
+# unified-commerce M5：MERCHANT_MAX_RANGE 單一源（原 faction_ai:2039 重複宣告收此）。
 const MERCHANT_MAX_RANGE: int = 20
-
-# WS-1：糧倉「滿」信號門檻 = food cap × 此比例。糧倉 > 門檻 → 發 food sell 單
-# （滿了→賣決策 fire；鐵則：cap 須改變 NPC 決策）。TEST VALUE。
-const FOOD_SELL_RESERVE_RATIO: float = 0.5   # 賣到剩 cap×此（保留半倉自用）
-
-const FOOD_BUY_DAYS: float = 4.0          # TEST VALUE：effective_food 低於此天數 → 發 food 買單
-const FOOD_BUY_TARGET_DAYS: float = 8.0   # TEST VALUE：買到此 buffer
+# unified-commerce M3：掛單門檻走 effective_holding + 人格化 reserve（TradeValuation.reserve）。
+# 廢死常數 SURPLUS_RESERVE_MULT/SHORTAGE_QTY/FOOD_SELL_RESERVE_RATIO/FOOD_BUY_DAYS/FOOD_BUY_TARGET_DAYS/×0.5/20.0：
+# 賣＝effective_holding−reserve>0 的餘量；買＝reserve−effective_holding>0 的缺口；food 走 food_security_target 統一。
+const ORDER_POST_MIN: float = 1.0   # 掛單最小量（<此不值得掛）
 
 var _msg := SimMessageSystem.new()
 
@@ -97,44 +93,51 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 	team.active_orders = kept
 	# WS-2b：同步市集看板（鏡像權威）——過期/已滿足/已消失單從看板清，避免商隊讀幽靈單撲空。
 	_sync_board(state, team)
-	# 2. 餘量發賣盤（囤量遠超自用 → 餘 → 賣；TEST VALUE 門檻）
+	# M3：掛單門檻走 effective_holding + 人格化 reserve（貪婪守/絕境鬆手，活命糧 floor）。
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	# 建造/施工隊不賣資源（背負建材上路，賣光→抵達建不了）
 	var is_constructing: bool = team.current_task in [TeamData.TASK_CONSTRUCT, TeamData.TASK_BUILD, TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]
+	# 2. 餘量發賣盤（effective_holding − 人格 reserve > 0 → 餘 → 賣）
 	for res in _ORDER_ELIGIBLE_RES:
 		if res == "food":
-			# WS-1：food 對定居隊在糧倉（非 team.resources）→ 糧倉「滿」信號發 sell。
-			_tick_food_granary_sell(state, team)
+			_tick_food_granary_sell(state, team)   # food 走 food_security_target 統一
 			continue
 		if is_constructing:
 			continue   # 施工隊保留建材，不賣
-		var qty: float = float(team.resources.get(res, 0))
-		if qty < 20.0:
-			continue
 		if _has_active(team, "sell", res):
 			continue
-		post_order(state, team, "sell", res, int(qty * 0.5))
-	# 3. 短缺發買單（缺料/缺武器 → 徵）
-	for res in _ORDER_ELIGIBLE_RES:
-		if float(team.resources.get(res, 0)) >= SHORTAGE_QTY:
+		var surplus: float = ResourceSystem.effective_holding(state, team, res) \
+			- TradeValuation.reserve(team, res, lv, state)
+		if surplus < ORDER_POST_MIN:
 			continue
+		post_order(state, team, "sell", res, int(surplus))
+	# 3. 短缺發買單（人格 reserve − effective_holding > 0 → 缺 → 徵）
+	for res in _ORDER_ELIGIBLE_RES:
+		if res == "food":
+			continue   # food 買單下方統一
 		if _has_active(team, "buy", res):
 			continue
-		# 僅對 team「該有」的資源發買單（proxy：武力隊徵武器/料；避免亂徵）TEST VALUE
+		# 僅對 team「該有」的資源發買單（proxy：武力隊徵武器/料；避免亂徵）
 		if res in ["weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel"]:
-			post_order(state, team, "buy", res, int(SHORTAGE_QTY * 2))
+			var shortfall: float = TradeValuation.reserve(team, res, lv, state) \
+				- ResourceSystem.effective_holding(state, team, res)
+			if shortfall < ORDER_POST_MIN:
+				continue
+			post_order(state, team, "buy", res, int(shortfall))
 			Probe.bump("g1.shortage_buy")
-	# food 買單：缺糧隊表達糧需求(effective_food=私產+自家糧倉,WS-2c 單源)→商隊運糧
+	# food 買單：effective_food 低於人格安全存量目標(天) → 補到 target（統一 food_security_target，廢 FOOD_BUY_DAYS）
 	if not _has_active(team, "buy", "food"):
 		var burn: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 		var fdays: float = ResourceSystem.effective_food(state, team) / burn
-		if fdays < FOOD_BUY_DAYS:
-			var need: int = int((FOOD_BUY_TARGET_DAYS - fdays) * burn)
+		var tgt_days: float = DecisionTerms.food_security_target(lv)
+		if fdays < tgt_days:
+			var need: int = int((tgt_days - fdays) * burn)
 			if need > 0:
 				post_order(state, team, "buy", "food", need)
 				Probe.bump("g1.food_buy")
 
-# WS-1：定居隊糧倉「滿」信號 → 發 food sell 單（cap 改變 NPC 決策；鐵則）。
-# 讀自家 outpost public_storage food；> cap×reserve → 賣超量的一半（保留半倉自用）。
+# M3：定居隊 food 賣盤——effective_food 超人格安全存量目標(food_security_target) → 賣餘量。
+# 廢 FOOD_SELL_RESERVE_RATIO/cap×0.5：統一走人格 food reserve（不賣到自己餓，慎重領袖留更多）。
 func _tick_food_granary_sell(state: WorldState, team: TeamData) -> void:
 	if _has_active(team, "sell", "food"):
 		return
@@ -142,15 +145,12 @@ func _tick_food_granary_sell(state: WorldState, team: TeamData) -> void:
 	var tile: HexTileData = state.world.tiles.get(tid)
 	if tile == null or tile.outpost_level == 0 or tile.outpost_owner != team.team_id:
 		return   # 非定居隊（無自家糧倉）→ 不發 food 賣盤
-	var granary: float = float(tile.public_storage.get("food", 0))
-	var cap: float = OutpostSystem.new()._get_storage_cap(tile, "food")
-	var reserve: float = cap * FOOD_SELL_RESERVE_RATIO
-	if granary <= reserve:
-		return   # 未滿門檻 → 自用，不賣
-	var sell_qty: int = int((granary - reserve) * 0.5)
-	if sell_qty <= 0:
-		return
-	post_order(state, team, "sell", "food", sell_qty)
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var surplus: float = ResourceSystem.effective_food(state, team) \
+		- TradeValuation.reserve(team, "food", lv, state)
+	if surplus < ORDER_POST_MIN:
+		return   # 未超人格安全存量 → 自用，不賣
+	post_order(state, team, "sell", "food", int(surplus))
 
 func _has_active(team: TeamData, kind: String, res: String) -> bool:
 	for o in team.active_orders:
@@ -240,7 +240,8 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 		if _hex_dist(merchant.tile_pos, o["pos"]) > MERCHANT_MAX_RANGE:
 			Probe.bump("trade.arb_kill_range")
 			continue
-		var gain: float = TradeValuation.local_value(merchant, o["res"]) * float(o["qty"]) * 0.1   # proxy：自評值高→值得搬回
+		# M5：廢 arb ×0.1 硬碼（相對排序不變，argmax 無關）。M4：估值讀 effective_holding。
+		var gain: float = TradeValuation.local_value(merchant, o["res"], state) * float(o["qty"])   # proxy：自評值高→值得搬回
 		if gain > best_score:
 			best_score = gain; best = {"kind": "sell", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	for o in received_buy_orders(state, merchant):
@@ -249,11 +250,11 @@ func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:
 		if _hex_dist(merchant.tile_pos, o["pos"]) > MERCHANT_MAX_RANGE:
 			Probe.bump("trade.arb_kill_range")
 			continue
-		var stock: float = float(merchant.resources.get(o["res"], 0))
+		var stock: float = ResourceSystem.effective_holding(state, merchant, o["res"])
 		if stock <= 0.0:
 			Probe.bump("trade.arb_kill_nostock")   # 有買單無貨可賣
 			continue
-		var gain2: float = TradeValuation.local_value(merchant, o["res"]) * minf(stock, float(o["qty"])) * 0.1
+		var gain2: float = TradeValuation.local_value(merchant, o["res"], state) * minf(stock, float(o["qty"]))
 		if gain2 > best_score:
 			best_score = gain2; best = {"kind": "buy", "res": o["res"], "qty": o["qty"], "pos": o["pos"], "origin_team": o["origin_team"], "order_id": o["order_id"]}
 	if not best.is_empty():

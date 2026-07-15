@@ -231,11 +231,7 @@ func _initialize() -> void:
 	_test_resident_lock_prepare_allowed()
 	_test_find_trade_partner_outpost_only()
 	_test_trade_timeout()
-	_test_absorb_then_spill_no_trade()
-	_test_absorb_only_at_own_outpost()
-	_test_spill_back_with_cap_overflow()
-	_test_resolve_market_absorbs_storage()
-	_test_resident_team_absorbs_public_storage()
+	_test_resolve_market_absorbs_storage()   # unified-commerce M2：market-as-place 到場買公庫（absorb/spill dance 已廢）
 	# ── Outpost 居民派駐 AI ──
 	_test_residency_team_fields()
 	_test_has_resident_team_check()
@@ -10592,70 +10588,18 @@ func _test_trade_timeout() -> void:
 
 # ──────── Trade 接公庫 ────────
 
-func _test_absorb_then_spill_no_trade() -> void:
-	print("--- TradePublic Task1a: absorb→spill round-trip ---")
-	var state := WorldState.new(); state.world = WorldData.new()
-	var tile := HexTileData.new()
-	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 0
-	tile.outpost_type = "civilian"; tile.outpost_level = 1
-	tile.public_storage = { "food": 50.0 }
-	state.world.tiles[0] = tile
-	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
-	team.resources = { "food": 10.0 }
-	state.teams[0] = team
-	var orig: Dictionary = InteractionSystem._absorb_public_storage(state, team)
-	assert(float(team.resources["food"]) == 60.0, "absorb 後 team.food 應 60，實際 %.1f" % float(team.resources["food"]))
-	assert(float(orig["food"]) == 10.0, "original 應記 team 原 food=10")
-	assert(float(tile.public_storage["food"]) == 0.0, "absorb 應 move 出公庫（=0）")
-	InteractionSystem._spill_back_public_storage(state, team, orig)
-	assert(float(team.resources["food"]) == 10.0, "spill_back 後 team.food 應還原 10，實際 %.1f" % float(team.resources["food"]))
-	assert(float(tile.public_storage["food"]) == 50.0, "公庫 food 應還原 50，實際 %.1f" % float(tile.public_storage["food"]))
-	print("TradePublic Task1a OK")
-
-func _test_absorb_only_at_own_outpost() -> void:
-	print("--- TradePublic Task1b: 別人 outpost 不 absorb ---")
-	var state := WorldState.new(); state.world = WorldData.new()
-	var tile := HexTileData.new()
-	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 99   # 別團 outpost
-	tile.public_storage = { "food": 50.0 }
-	state.world.tiles[0] = tile
-	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
-	team.resources = { "food": 10.0 }
-	state.teams[0] = team
-	var orig: Dictionary = InteractionSystem._absorb_public_storage(state, team)
-	assert(orig.is_empty(), "別人 outpost 不應 absorb")
-	assert(float(team.resources["food"]) == 10.0, "team.food 不變")
-	assert(float(tile.public_storage["food"]) == 50.0, "公庫不變")
-	print("TradePublic Task1b OK")
-
-func _test_spill_back_with_cap_overflow() -> void:
-	print("--- TradePublic Task1c: spill_back 超 cap 留 team ---")
-	var state := WorldState.new(); state.world = WorldData.new()
-	var tile := HexTileData.new()
-	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 0
-	tile.outpost_type = "civilian"; tile.outpost_level = 1   # WS-1 food cap = 2000
-	tile.public_storage = { "food": 1980.0 }
-	state.world.tiles[0] = tile
-	var team := TeamData.new(); team.team_id = 0; team.tile_pos = Vector2i(0, 0)
-	team.resources = { "food": 0.0 }
-	state.teams[0] = team
-	var orig: Dictionary = InteractionSystem._absorb_public_storage(state, team)
-	# 模擬 trade 後 team food 多 100（1980 借出 + 100 賺 = 2080）
-	team.resources["food"] = 2080.0
-	InteractionSystem._spill_back_public_storage(state, team, orig)
-	assert(float(tile.public_storage["food"]) == 2000.0, "公庫應補到 cap=2000，實際 %.1f" % float(tile.public_storage["food"]))
-	assert(float(team.resources["food"]) == 80.0, "超 cap 的 80 應留 team，實際 %.1f" % float(team.resources["food"]))
-	print("TradePublic Task1c OK")
-
 func _test_resolve_market_absorbs_storage() -> void:
-	print("--- TradePublic Task2: _resolve_market absorb 公庫 ---")
+	# unified-commerce M2 遷移：舊 absorb/spill dance → market-as-place 到場 resolver。
+	# owner b 掛 food sell 單於 board（storage 有貨）；trader a 到市集 outpost → _resolve_market_at_outpost 買。
+	print("--- TradePublic Task2: market-as-place 到場買公庫 food ---")
 	var state := WorldState.new(); state.world = WorldData.new()
 	var it := InteractionSystem.new()
-	# b：outpost owner，公庫有 food，自己 coin 少；a：trader 帶 coin
+	# b：outpost owner，公庫有 food，掛 food sell 單，自己 coin 少；a：trader 帶 coin
 	var tile := HexTileData.new()
 	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
 	tile.outpost_type = "civilian"; tile.outpost_level = 1
 	tile.public_storage = { "food": 200.0 }
+	tile.market_orders = [{ "order_id": 70, "kind": "sell", "res": "food", "qty_remaining": 100 }]
 	state.world.tiles[0] = tile
 	var a := TeamData.new(); a.team_id = 0; a.faction_id = -1; a.tile_pos = Vector2i(0, 0)
 	_seed_pop(a, 5); a.current_task = TeamData.TASK_TRADE
@@ -10666,42 +10610,19 @@ func _test_resolve_market_absorbs_storage() -> void:
 	var b := TeamData.new(); b.team_id = 1; b.faction_id = -1; b.tile_pos = Vector2i(0, 0)
 	_seed_pop(b, 5); b.current_task = TeamData.TASK_IDLE
 	b.resources = { "coin": 0.0, "food": 0.0 }
+	b.active_orders = [{ "order_id": 70, "kind": "sell", "res": "food", "qty_remaining": 100 }]
 	var b_leader := PersonData.new(); b_leader.id = 11; b_leader.team_id = 1
 	state.persons[11] = b_leader; b.leader_id = 11
 	state.teams[1] = b
 	var public_before: float = float(tile.public_storage["food"])
 	var a_coin_before: float = float(a.resources["coin"])
-	it._resolve_market(state, a, b)
-	# a 應買到 food（coin 減），b 公庫 food 減（賣出），b coin 增
+	it._resolve_market_at_outpost(state, a, tile)
+	# a 應買到 food（coin 減），公庫 food 減（賣出），owner b coin 增
 	assert(float(a.resources.get("food", 0)) > 0.0, "trader 應買到 food，實際 %.1f" % float(a.resources.get("food", 0)))
 	assert(float(a.resources["coin"]) < a_coin_before, "trader coin 應減少")
 	assert(float(tile.public_storage["food"]) < public_before, "公庫 food 應減少（賣出），實際 %.1f" % float(tile.public_storage["food"]))
 	assert(float(b.resources.get("coin", 0)) > 0.0, "owner 應收到 coin")
 	print("TradePublic Task2 OK")
-
-func _test_resident_team_absorbs_public_storage() -> void:
-	# 改設計：trader 跟 居民團（PRODUCE+在自家 faction outpost）交易，居民團代管公庫
-	print("--- TradePublic Task3: 居民團 absorb 公庫 ---")
-	var state := WorldState.new(); state.world = WorldData.new()
-	var tile := HexTileData.new()
-	tile.tile_pos = Vector2i(0, 0); tile.outpost_owner = 1
-	tile.outpost_type = "civilian"; tile.outpost_level = 1
-	tile.public_storage = { "food": 100.0 }
-	state.world.tiles[0] = tile
-	# 居民團 (PRODUCE tag, 同 faction owner) 在 outpost tile
-	var resident := TeamData.new(); resident.team_id = 2; resident.faction_id = 0
-	resident.tile_pos = Vector2i(0, 0); _seed_pop(resident, 5)
-	resident.tags = ["生產"]
-	resident.resources = { "food": 10.0 }
-	state.teams[2] = resident
-	# owner team 同 faction
-	var owner := TeamData.new(); owner.team_id = 1; owner.faction_id = 0
-	state.teams[1] = owner
-	var original = InteractionSystem._absorb_public_storage(state, resident)
-	assert(original.has("food"), "居民團 absorb 應觸發")
-	assert(int(resident.resources["food"]) == 110, "資源應 absorb，實際=%d" % int(resident.resources["food"]))
-	assert(float(tile.public_storage["food"]) == 0.0, "公庫應清空")
-	print("TradePublic Task3 OK")
 
 # ──────── Outpost 居民派駐 AI ────────
 
@@ -11638,8 +11559,9 @@ func _test_trade_reserve_no_drain() -> void:
 	print("--- Trade 問題1: reserve 單一源,玩家不可刷光 ---")
 	var pts := PlayerTradeSystem.new()
 	var t := TeamData.new(); t.team_id = 1; _seed_pop(t, 10)
-	# material 剛好 reserve 量（pop × TARGET_PER_POP）→ sellable ≈ 0（全留底）
-	var reserve_amt: float = 10.0 * float(TradeValuation.TARGET_PER_POP["material"])
+	# unified-commerce M3/M5：非活命品 reserve 液化人格化(pop×TARGET×factor,<flat)→用單一源實際 reserve 量。
+	# 舊 flat pop×TARGET 被液化取代(intent:降底→willing 賣方變多)；此測驗「不可刷光+單一源 delegate」不變。
+	var reserve_amt: float = TradeValuation.reserve(t, "material")
 	t.resources["material"] = reserve_amt
 	assert(pts._sellable_qty(t, "material") < 1.0,
 		"material 在 reserve 量 → 不可賣（修刷光），實際 sellable=%.1f" % pts._sellable_qty(t, "material"))

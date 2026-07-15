@@ -168,6 +168,7 @@
   - `faction_ai_system.gd` `_find_aid_target` 施援目標 pop+food（1c）
 - **背叛 belief 驅動化（Task3）**：`betrayal_assessment` 純函數＝人格 + belief power advantage（盟弱我利→動機↑）+ confidence gate（1−uncertainty，不憑不確定情報背叛）。`consider_betrayal` driver 為主驅、僅門檻邊界保留小 stochastic tie-break（去純 `randf()<0.1`）。driver 可解釋。
 - **刻意豁免（同 faction 內部協調，讀真值合法）**：merge/consolidate、faction/global tally（`faction_ai_system.gd` :1060/:1072/:1145/:1630/:1650/:1991 一帶）＝同勢力共享情報 believable；背叛的 faction `known_member_states` snapshot 亦屬此類。位置/reachability = 可見性物理(PathSystem 讀真位)，不在此限。
+- **★市集＝公開地標豁免（unified-commerce，誠實非 belief 冒充）**：貿易目標選市場走 `_nearest_market_outpost` 全圖掃 outpost（`faction_ai_system.gd:_nearest_market_outpost`）＝**市集 outpost 為公開可見地標**（告示公開，同 `known_reputations`/同-faction 先例精神）。BeliefSystem 目前 team-keyed、**無 tile/market 級知識庫**——此豁免是 WS-2b 死鎖破除器（冷啟動靠它出門，拆＝經濟停擺）。**不假裝 belief-based**；belief-market-knowledge store＝未來增益 backlog。**其餘敵情/社交目標位置仍走 belief last-seen（god-view 位置根治不回退）。**
 - **審計手段 = 回歸測**（非 runtime probe，成本裁）：`headless_test.gd` `_test_leak_*`（真值≠belief 兩向斷言決策跟 belief）+ `_test_betrayal_belief_driven`。新增決策讀他隊 stat 須走 belief 並補對應「真值≠belief」測。
 
 ### 屈服/失真/戰意單一 owner（F-I2/I4/I7，2026-07-04 互動統一）
