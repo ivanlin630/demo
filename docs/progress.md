@@ -86,6 +86,19 @@ full-HD 觀察 unblock 內政的觀測 infra。tap-gap 撞出 4 個（order/surv
 
 **arc 過程血教訓（全入 memory）**：症狀 vs 根（治抖動=治症 `feedback_symptom_vs_root_retry`）、觀測禁耗 RNG（`feedback_observer_no_global_rng`）、不虛構授權（`feedback_no_fabricated_authority`）、Windows merge lock（`feedback_windows_git_merge_lock`）。**兩道閘 + 異質框外審 + 故事 QA + 全量可觀測性一路揪換皮/假前提/感知鐵律違反/觀測假象。**
 
+## 📋 結構 backlog（用戶定「都要處理」，序，2026-07-15）
+結構稽核揪出，用戶定調**沒框架 + 多求解器 + 矩陣殘＝都要處理**（非一次性 flag 忽略）。**全用統一框架式做**（族走共用人格函式、雙 resolver 併一、思考腳走引擎讀取＝同發展模型統一框架精神）。**非現在急**（經濟 freeze arc + 發展模型統一框架化在飛），經濟 arc 收一段落挑下一個，blueprint 出願景→systems spec。序（blueprint 願景排，systems HOW 調）：
+
+1. **★死常數照妖鏡「族」**（最大「沒框架」，高值，直接續「決策穿人格非平頭」）——**建共用人格函式讓整族走**非逐條溶：
+   - `calc_engagement_margin(leader_values)`（攻擊/佔村門檻族：ATTACK_STRENGTH_RATIO/OCCUPY_WIN_MARGIN/POP_RATIO/READINESS_MIN）
+   - 收編 `food_security_target` band（DESPERATION_DAYS/SURVIVAL_SATED_DAYS/SURPLUS_FOOD_DAYS）
+   - 「隊伍膽識」聚合（PANIC_WEIGHT+PANIC_STRESS/LOY+readiness，接潰退已用的 courage 源）
+   - `commitment_bonus(leader_values)`（散 4 檔 0.15/0.3 收斂）
+2. **F-I1 雙 diplomacy resolver**：god-view `_try_diplomacy` vs belief `handle_diplomacy_message`（同動詞相反 epistemics）→ **統一走 belief**（連求和 seam bug 同根，一起）。
+3. **矩陣殘**：prisoner_population 死路（`encounter:1295` 寫零消費）清、F-B1 known_member_states 雙 epistemics（god-view 7 caller live + belief）拆。
+4. **思考腳（記憶/情緒）泛化**（深接線，最後）：記憶只讀仇（恩/信/懼寫黑洞）、情緒只 panic→FLEE → 決策讀取端拓寬（承 v2 §6 情緒調節器 + 記憶染價值）。
+關 [[project_unification_matrix]]/[[project_framework_seams]]/[[feedback-patch-gate-first]]。溯源 handback `2026-07-15-blueprint-to-systems-structural-backlog-confirmed` + 結構稽核 `docs/superpowers/structural-audit-2026-07-15.md`。
+
 ## 📍 前狀態（2026-07-14）——Slice A 求生層統一 merged
 
 ### 求生層統一（survival-layer-unify）→ main（merge `a630f2ab`，2026-07-14）
