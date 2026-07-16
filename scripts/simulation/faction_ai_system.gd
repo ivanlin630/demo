@@ -182,14 +182,8 @@ static func calc_readiness(state: WorldState, team: TeamData) -> float:
 	var weapon_factor: float = clampf(weapon / maxf(float(team.population), 1.0), 0.0, 1.0)
 	return (pop_factor + skill + food_factor + weapon_factor) / 4.0
 
-static func calc_attack_score(team: TeamData, leader: PersonData) -> float:
-	var ambition: float = float(leader.values.get("野心", 0.5))
-	var martial: float = float(leader.values.get("好戰", 0.5))
-	var honor: float = float(leader.values.get("信義", 0.5))
-	var base: float = ambition * 0.4 + martial * 0.4 - honor * 0.4
-	if team.anon_treasury > ANON_TREASURY_BONUS_THRESHOLD:
-		base += 0.1
-	return base
+# de-patch 閘7：calc_attack_score 刪除——production/征服 arc 零 caller 孤兒（攻擊決策已溶進引擎
+# intent_fit/attack_drive，見 terms/ctx）。孤兒 score 公式退役。
 
 static func find_prosperity_prey(state: WorldState, team: TeamData, leader: PersonData) -> int:
 	var greed: float = float(leader.values.get("貪婪", 0.5))
@@ -3090,16 +3084,16 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 			if med_tgt <= 0.001: return 0.0
 			return clampf((med_tgt - float(team.resources.get("medicine", 0))) / med_tgt, 0.0, 1.0) * 0.5
 		"weaponsmith":
-			if not _threat_recent(state, team): return 0.0
-			return clampf(0.6 - team.armed_anon_ratio, 0.0, 1.0)   # armed_ratio 非 quantity-target，保留
+			# de-patch 閘1：拆反應式「近期被打才備」硬 gate → 軍備傾向由人格 militancy 秤
+			# （主動軍閥備戰、和平農夫不備）。armed_ratio 缺口 × militancy。
+			return clampf(0.6 - team.armed_anon_ratio, 0.0, 1.0) * _militancy(team, lv)
 		"armorsmith":
-			if not _threat_recent(state, team): return 0.0
 			var armor: float = float(team.resources.get("armor_low", 0)) \
 				+ float(team.resources.get("armor_high", 0))
-			# S6：armor 終端自用 need（兩級和）
+			# S6：armor 終端自用 need（兩級和）。閘1：×militancy（拆反應 threat gate）。
 			var a_tgt: float = NeedOracle.need_keep(state, team, "armor_low", lv) + NeedOracle.need_keep(state, team, "armor_high", lv)
 			if a_tgt <= 0.001: return 0.0
-			return clampf((a_tgt - armor) / a_tgt, 0.0, 1.0)
+			return clampf((a_tgt - armor) / a_tgt, 0.0, 1.0) * _militancy(team, lv)
 		"smeltery":
 			# 武器/護甲坊存在（facility gating 保留）且 steel 缺
 			if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0: return 0.0
@@ -3130,13 +3124,13 @@ func _facility_personality(leader: PersonData, def: Dictionary) -> float:
 	return mult
 
 # 近期威脅：戰鬥中 / 有攻擊意圖 / 已知低評價 team
-func _threat_recent(state: WorldState, team: TeamData) -> bool:
-	if team.combat_target != -1 or team.prosperity_target_id != -1:
-		return true
-	for tid in team.known_reputations:
-		if float(team.known_reputations[tid]) < 0.3 and state.teams.has(tid):
-			return true
-	return false
+# de-patch 閘1：軍備傾向 militancy [0,1]——主動軍閥(好戰/征服 archetype)+交戰中 → 備戰；和平農夫低。
+# 取代反應式 _threat_recent 硬 gate（拆「近期被打才備」）。純人格+狀態，零 randf。
+func _militancy(team: TeamData, leader_values: Dictionary) -> float:
+	var martial: float = float(leader_values.get("好戰", 0.5))
+	var force_arch: float = 1.0 if team.ambition_archetype == AmbitionLadder.ARCHETYPE_FORCE else 0.0
+	var in_combat: float = 1.0 if team.combat_target != -1 else 0.0
+	return clampf(martial * 0.7 + force_arch * 0.4 + in_combat * 0.5, 0.0, 1.0)
 
 func _nearby_resource(state: WorldState, tile: HexTileData, keys: Array) -> float:
 	var total: float = 0.0

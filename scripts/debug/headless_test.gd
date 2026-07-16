@@ -179,7 +179,7 @@ func _initialize() -> void:
 	_test_find_prosperity_prey()
 	_test_evaluate_prosperity_trigger()
 	_test_prosperity_same_faction_skip()   # 序5：low_ambition/low_readiness 硬閘測已刪（溶成 engine 權重）
-	_test_prosperity_treasury_bonus()
+	# _test_prosperity_treasury_bonus 退役（閘7 calc_attack_score 孤兒刪除）
 	_test_prosperity_prey_personality_weight()   # 序5：_test_prosperity_cadence 已刪（cadence 機制溶解）
 	_test_survival_b_branch_far_outpost_loot()
 	_test_survival_b_branch_near_outpost_return()
@@ -1039,7 +1039,7 @@ func _diplomacy_hostile_scene() -> Array:
 	state.teams[0] = demander
 	var dleader := PersonData.new()
 	dleader.id = 100
-	dleader.values = { "貪婪": 0.7, "慎重": 2.0, "義氣": 0.1, "信義": 0.1, "野心": 0.5 }
+	dleader.values = { "貪婪": 0.7, "慎重": 0.8, "義氣": 0.1, "信義": 0.1, "野心": 0.5 }
 	state.persons[100] = dleader
 	demander.leader_id = 100
 	var target := TeamData.new()
@@ -1062,14 +1062,14 @@ func _test_diplomacy_hostile_gate() -> void:
 	var st_a: WorldState = sa[0]; var dm_a: TeamData = sa[1]
 	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
 	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
-	dip.try_proactive_diplomacy(st_a, dm_a)
+	for _i in range(40): dip.try_proactive_diplomacy(st_a, dm_a)
 	assert(not dm_a.diplomacy_reject_cooldown.has(1),
 		"慎重者矛盾情報→敵對按兵(無求貢)，實際 cooldown=%s" % str(dm_a.diplomacy_reject_cooldown))
 	# B) 慎重 demander + 親見確定 belief → 照常求貢(被拒設冷卻) → gate 不凍結友/敵
 	var sb: Array = _diplomacy_hostile_scene()
 	var st_b: WorldState = sb[0]; var dm_b: TeamData = sb[1]
 	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 20}, 1.0, false)
-	dip.try_proactive_diplomacy(st_b, dm_b)
+	for _i in range(40): dip.try_proactive_diplomacy(st_b, dm_b)
 	assert(dm_b.diplomacy_reject_cooldown.has(1),
 		"慎重者親見確定→照常求貢(不凍結)，實際 cooldown=%s" % str(dm_b.diplomacy_reject_cooldown))
 	print("diplomacy gate OK")
@@ -1083,7 +1083,7 @@ func _tribute_leak_scene(target_real_pop: int, belief_pop: int) -> Array:
 	dm.faction_id = -1; dm.resources = { "food": 5000 }
 	st.teams[0] = dm
 	var dl := PersonData.new(); dl.id = 100
-	dl.values = { "貪婪": 0.7, "慎重": 2.0, "義氣": 0.1, "信義": 0.1, "野心": 0.5 }
+	dl.values = { "貪婪": 0.7, "慎重": 0.8, "義氣": 0.1, "信義": 0.1, "野心": 0.5 }
 	st.persons[100] = dl; dm.leader_id = 100
 	var tg := TeamData.new(); tg.team_id = 1; tg.tile_pos = Vector2i(0,0); _seed_pop(tg, target_real_pop)
 	tg.faction_id = 1; st.teams[1] = tg
@@ -1098,12 +1098,12 @@ func _test_leak_tribute_powergap_belief() -> void:
 	var dip := DiplomaticAiSystem.new()
 	# A) 真強(pop20) 但 belief 弱(3)：god-view 會求貢(gap4>0.5)，belief 說不值 → 不求貢
 	var sa: Array = _tribute_leak_scene(20, 3)
-	dip.try_proactive_diplomacy(sa[0], sa[1])
+	for _i in range(40): dip.try_proactive_diplomacy(sa[0], sa[1])
 	assert(not (sa[1] as TeamData).diplomacy_reject_cooldown.has(1),
 		"真強belief弱→依 belief 不求貢，實際 cooldown=%s" % str((sa[1] as TeamData).diplomacy_reject_cooldown))
 	# B) 真弱(pop4) 但 belief 強(50)：god-view 不求貢，belief 說可欺 → 求貢
 	var sb: Array = _tribute_leak_scene(4, 50)
-	dip.try_proactive_diplomacy(sb[0], sb[1])
+	for _i in range(40): dip.try_proactive_diplomacy(sb[0], sb[1])
 	assert((sb[1] as TeamData).diplomacy_reject_cooldown.has(1),
 		"真弱belief強→依 belief 求貢，實際 cooldown=%s" % str((sb[1] as TeamData).diplomacy_reject_cooldown))
 	print("leak 1a tribute power_gap belief OK")
@@ -9169,17 +9169,7 @@ func _test_prosperity_same_faction_skip() -> void:
 	assert(prey_pick == -1, "唯一 prey 同 faction 應被 find_prosperity_prey 排除，實際 pick=%d" % prey_pick)
 	print("Prosperity Task3d OK")
 
-func _test_prosperity_treasury_bonus() -> void:
-	print("--- Prosperity Task3e: anon_treasury 加成 +0.1 ---")
-	var team := TeamData.new()
-	var leader := PersonData.new()
-	leader.values = { "野心": 0.5, "好戰": 0.5, "信義": 0.5 }
-	team.anon_treasury = 0.0
-	var s0 = FactionAISystem.calc_attack_score(team, leader)
-	team.anon_treasury = 250.0
-	var s1 = FactionAISystem.calc_attack_score(team, leader)
-	assert(abs((s1 - s0) - 0.1) < 0.001, "公庫加成應 +0.1，實際=%.3f" % (s1 - s0))
-	print("Prosperity Task3e OK")
+# de-patch 閘7：calc_attack_score 孤兒刪除→ _test_prosperity_treasury_bonus 退役（測已刪函式）。
 
 func _test_prosperity_prey_personality_weight() -> void:
 	print("--- Prosperity Task14: prey 評分個性權重 ---")
@@ -11231,7 +11221,7 @@ func _test_diplomacy_reject_cooldown() -> void:
 	var a := TeamData.new(); a.team_id = 0; a.faction_id = -1; _seed_pop(a, 5)
 	a.resources["food"] = 0.0
 	var al := PersonData.new(); al.id = 1; al.team_id = 0
-	al.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.0, "慎重": 1.0 }
+	al.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.0, "慎重": 0.3 }
 	state.persons[1] = al; a.leader_id = 1
 	state.teams[0] = a
 	# B：糧足 + 低義氣信義 → 對 A score 0.1 → reject
@@ -11275,7 +11265,7 @@ func _test_u20_proactive_same_tile_gate() -> void:
 	state.teams[0] = pt
 	# 發起隊（高義氣信義 → score 高；遠端 (7,10)）
 	var sl := PersonData.new(); sl.id = 5; sl.team_id = 5
-	sl.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.7, "慎重": 1.0 }
+	sl.values = { "義氣": 1.0, "信義": 1.0, "貪婪": 0.7, "慎重": 0.3 }
 	state.persons[5] = sl
 	var st := TeamData.new(); st.team_id = 5; st.faction_id = -1; _seed_pop(st, 5)
 	st.tile_pos = Vector2i(7, 10); st.leader_id = 5

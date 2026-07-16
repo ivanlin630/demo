@@ -245,9 +245,7 @@ func _diag_gate(state: WorldState, t: TeamData, w: Dictionary, month: int) -> vo
 		parts.append("★非候選(fid=%d parent=%d)" % [t.faction_id, t.parent_team_id])
 	if t.ambition_archetype != AmbitionLadder.ARCHETYPE_FORCE:
 		parts.append("★archetype=%s" % t.ambition_archetype)
-	var score: float = FactionAISystem.calc_attack_score(t, leader)
-	if score < FactionAISystem.ATTACK_SCORE_THRESHOLD:
-		parts.append("★score=%.2f<%.2f" % [score, FactionAISystem.ATTACK_SCORE_THRESHOLD])
+	# 閘7：calc_attack_score 孤兒刪除→此 diag 行退役（攻擊決策溶進引擎 intent_fit/attack_drive）。
 	var rthr: float = FactionAISystem.calc_readiness_threshold(t, leader)
 	# ②b：prosperity 路吃 hunger_relief（越餓門檻越低）→ diag 複刻 threshold_eff，勿用 raw rthr 誤判卡點。
 	var _fd: float = ResourceSystem.effective_food(state, t) \
