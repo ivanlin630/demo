@@ -26,15 +26,8 @@ const RATES: Dictionary = {
 	"WAGON_RATE": WAGON_RATE, "MEDICINE_RATE": MEDICINE_RATE,
 }
 
-# 缺口排序用 target（stock / (target × pop) 最低者先做）；缺項 fallback 1.0
-const TARGET_PER_POP: Dictionary = {
-	"goods": 3.0, "tools": 0.5, "arrows": 2.0,
-	"ore_steel": 1.5,
-	"weapon_melee_low": 1.0, "weapon_ranged_low": 0.8,
-	"weapon_melee_high": 0.5, "weapon_ranged_high": 0.4,
-	"armor_low": 0.3, "armor_high": 0.15,
-	"wagons": 0.2, "medicine": 1.0, "horses": 0.5,
-}
+# S5：manufacturing TARGET_PER_POP 正式退役（#2 雙宣告 collision 解）——生產目標改讀 NeedOracle 兩量
+# （need_keep+demand，_run_recipe_group）。trade_valuation.TARGET_PER_POP 保留為定價 physics 單一身分。
 
 # 4 配方組：各設施只跑自己組；組內依缺口排序，原料不足跳下一個。
 # in = 每單位成品原料（per-unit）；實際扣帳 = in × 本 tick 產量 q。
@@ -124,7 +117,12 @@ func _team_works_tile(state: WorldState, team: TeamData, tile: HexTileData) -> b
 # 成品流向公庫（tile 為自家 outpost）；無 outpost fallback 進 team
 func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> void:
 	if tile != null and tile.outpost_level > 0:
-		TileBank.deposit(tile, res, amt, "manufacture_output")   # capped add，溢出 drop = sink
+		# S5：溢出落地守恆——cap 超量落自然池(不蒸發)+tap+audit。scope 限製造成品(本 func 唯一 caller=製造)。
+		var deposited: float = TileBank.deposit(tile, res, amt, "manufacture_output")
+		var overflow: float = amt - deposited
+		if overflow > 0.001:
+			TileBank.pool_add(tile, res, overflow, "manufacture_overflow_ground")   # 落地自然池，守恆不蒸發
+			Probe.bump("manufacture.overflow_ground")   # S5 tap：溢出落地可觀測
 	else:
 		ResourceBank.add(team, res, amt, "manufacture_output")
 
