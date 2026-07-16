@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·v2 spec 設計審] 統一生產框架 v2——R① CLEAN 後寫。S1 製造precondition+tap/S2 survival-crush項+granary seam+常數分層(override留安全網)/S3 means-end統一發起(涵蓋faction_id=-1)/S4 移override+A3/A4 utility。兩行為層(urgency真fire/獨立隊has_facility成長)誠實標待measurer。異質v1已做不需重升(除非新大框)。CLEAN才dispatch implementer"
 ---
 

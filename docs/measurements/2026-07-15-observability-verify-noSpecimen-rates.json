@@ -1,0 +1,6270 @@
+{
+  "1337": {
+    "final_counts": {
+      "absorb.slack_pos": 1252,
+      "absorb.target_found": 1267,
+      "absorb.util_n": 1267,
+      "absorb.yield_pos": 718,
+      "accept.join_accept": 1,
+      "bel.best_call": 522076,
+      "bel.best_hit": 456682,
+      "bel.claim_fresh": 263500,
+      "bel.claim_mid": 105016,
+      "bel.claim_stale": 88166,
+      "bel.has_belief_call": 694059,
+      "bel.has_belief_true": 693715,
+      "bel.reconcile_compared": 7461,
+      "bel.reconcile_opportunity": 29072,
+      "combat.end_mortal_flee": 8,
+      "combat.end_readiness_above_thr": 8,
+      "combat.ended_n": 8,
+      "combat.pop_start_le3": 8,
+      "conq.combat_entered": 8,
+      "conq.declared": 124,
+      "conq.declared_nonunified": 124,
+      "conq.intent": 18,
+      "conq.winner_other": 18,
+      "consol.accept_n": 1,
+      "death.defect_leave": 615,
+      "death.starve_minor": 2,
+      "decision.coeff_applied_n": 89109,
+      "decision.coeff_lowhalf": 25132,
+      "decision.opt_applicable.survival": 13174,
+      "decision.opt_applicable.乞食": 157,
+      "decision.opt_applicable.併入": 422,
+      "decision.opt_applicable.備戰": 9980,
+      "decision.opt_applicable.吸納": 1138,
+      "decision.opt_applicable.囤貨": 1830,
+      "decision.opt_applicable.建設": 13170,
+      "decision.opt_applicable.徵收": 3511,
+      "decision.opt_applicable.掠奪": 1318,
+      "decision.opt_applicable.攻擊": 17,
+      "decision.opt_applicable.歸建": 4,
+      "decision.opt_applicable.求和": 9919,
+      "decision.opt_applicable.生產": 9206,
+      "decision.opt_applicable.紮營": 1012,
+      "decision.opt_applicable.覓食": 2648,
+      "decision.opt_applicable.訓練": 243,
+      "decision.opt_applicable.貿易": 2655,
+      "decision.opt_applicable.迎戰": 8789,
+      "decision.opt_applicable.返家補給": 68,
+      "decision.opt_applicable.遷移找糧": 642,
+      "decision.opt_applicable.駐守": 9206,
+      "decision.opt_chosen.survival": 3711,
+      "decision.opt_chosen.併入": 19,
+      "decision.opt_chosen.備戰": 131,
+      "decision.opt_chosen.囤貨": 769,
+      "decision.opt_chosen.建設": 427,
+      "decision.opt_chosen.徵收": 3510,
+      "decision.opt_chosen.掠奪": 17,
+      "decision.opt_chosen.歸建": 2,
+      "decision.opt_chosen.求和": 28,
+      "decision.opt_chosen.生產": 1075,
+      "decision.opt_chosen.紮營": 53,
+      "decision.opt_chosen.覓食": 1874,
+      "decision.opt_chosen.貿易": 46,
+      "decision.opt_chosen.迎戰": 78,
+      "decision.opt_chosen.返家補給": 45,
+      "decision.opt_chosen.遷移找糧": 491,
+      "decision.opt_chosen.駐守": 898,
+      "decision.opt_coeff_pressed.survival": 13174,
+      "decision.opt_coeff_pressed.乞食": 157,
+      "decision.opt_coeff_pressed.併入": 422,
+      "decision.opt_coeff_pressed.備戰": 9980,
+      "decision.opt_coeff_pressed.吸納": 1138,
+      "decision.opt_coeff_pressed.囤貨": 1830,
+      "decision.opt_coeff_pressed.建設": 13170,
+      "decision.opt_coeff_pressed.徵收": 3511,
+      "decision.opt_coeff_pressed.掠奪": 1318,
+      "decision.opt_coeff_pressed.攻擊": 17,
+      "decision.opt_coeff_pressed.歸建": 4,
+      "decision.opt_coeff_pressed.求和": 9919,
+      "decision.opt_coeff_pressed.生產": 9206,
+      "decision.opt_coeff_pressed.紮營": 1012,
+      "decision.opt_coeff_pressed.覓食": 2648,
+      "decision.opt_coeff_pressed.訓練": 243,
+      "decision.opt_coeff_pressed.貿易": 2655,
+      "decision.opt_coeff_pressed.迎戰": 8789,
+      "decision.opt_coeff_pressed.返家補給": 68,
+      "decision.opt_coeff_pressed.遷移找糧": 642,
+      "decision.opt_coeff_pressed.駐守": 9206,
+      "diag.survival.appl_n": 9463,
+      "diag.survival.coeff_pressed": 6384,
+      "diag.乞食.appl_n": 157,
+      "diag.乞食.coeff_pressed": 2,
+      "diag.併入.appl_n": 403,
+      "diag.併入.coeff_pressed": 26,
+      "diag.備戰.appl_n": 9849,
+      "diag.備戰.coeff_pressed": 3533,
+      "diag.吸納.appl_n": 1138,
+      "diag.吸納.coeff_pressed": 336,
+      "diag.囤貨.appl_n": 1061,
+      "diag.囤貨.coeff_pressed": 170,
+      "diag.建設.appl_n": 12743,
+      "diag.建設.coeff_pressed": 1235,
+      "diag.徵收.appl_n": 1,
+      "diag.徵收.coeff_pressed": 1,
+      "diag.掠奪.appl_n": 1301,
+      "diag.掠奪.coeff_pressed": 438,
+      "diag.攻擊.appl_n": 17,
+      "diag.歸建.appl_n": 2,
+      "diag.歸建.coeff_pressed": 1,
+      "diag.求和.appl_n": 9891,
+      "diag.求和.coeff_pressed": 3801,
+      "diag.生產.appl_n": 8131,
+      "diag.生產.coeff_pressed": 3197,
+      "diag.紮營.appl_n": 959,
+      "diag.紮營.coeff_pressed": 10,
+      "diag.覓食.appl_n": 774,
+      "diag.覓食.coeff_pressed": 537,
+      "diag.訓練.appl_n": 243,
+      "diag.貿易.appl_n": 2609,
+      "diag.貿易.coeff_pressed": 910,
+      "diag.迎戰.appl_n": 8711,
+      "diag.迎戰.coeff_pressed": 525,
+      "diag.返家補給.appl_n": 23,
+      "diag.遷移找糧.appl_n": 151,
+      "diag.遷移找糧.coeff_pressed": 47,
+      "diag.駐守.appl_n": 8308,
+      "diag.駐守.coeff_pressed": 2241,
+      "dip.proposal_accept": 1,
+      "dip.proposal_handled": 4,
+      "dip.proposal_sent": 1,
+      "envoy.delivered": 2,
+      "envoy.dispatched": 4,
+      "envoy.gift_delivered": 2,
+      "envoy.gift_sent": 3,
+      "envoy.reject": 2,
+      "envoy.timeout": 1,
+      "evt.event_faction_defect.check": 86466,
+      "evt.event_tag_shift.check": 86466,
+      "evt.event_tag_shift.fire": 5,
+      "evt.event_unrest_replace.check": 86466,
+      "evt.event_unrest_replace.fire": 7,
+      "evt.event_unrest_split.check": 86466,
+      "extinct.other": 8,
+      "g1.arb_attempt": 91,
+      "g1.board_read": 11,
+      "g1.board_register": 2791,
+      "g1.engine_survival": 4362,
+      "g1.food_buy": 287,
+      "g1.market_arrive": 26,
+      "g1.order_placed": 3712,
+      "g1.outpost_change": 29,
+      "g1.restock_chosen": 1,
+      "g1.seek_market": 432,
+      "g1.shortage_buy": 3026,
+      "g1.treasury_reset": 5,
+      "g2.ambition_crash_bypass": 9,
+      "g2.ambition_demote": 73,
+      "g2.ambition_promote": 94,
+      "g3.detect_信假": 240,
+      "g3.detect_生疑": 21,
+      "g3.lie_claim": 261,
+      "g3.trust_down": 4223,
+      "g3.trust_up": 2655,
+      "indep.found_ally": 3,
+      "indep.found_timeout": 1,
+      "indep.gate_ambitious": 16383,
+      "indep.gate_fail_busy": 878,
+      "indep.gate_fail_food": 4821,
+      "indep.gate_fail_nopath": 13,
+      "indep.gate_fail_pop": 10668,
+      "indep.gate_path_ok": 3,
+      "intent.goal_emit": 3903,
+      "intent.sel_建國": 3,
+      "intent.sel_征服": 124,
+      "intent.sel_致富": 63388,
+      "intent.sel_防衛": 35804,
+      "join.dispatch": 1,
+      "join.resolve": 1,
+      "merge.consolidate_dispatch": 7,
+      "merge.set_fail": 4,
+      "merge.set_ok": 3,
+      "mergein.subteam": 1,
+      "mortal_flee.n": 8,
+      "mortal_flee.n_high": 1,
+      "mortal_flee.n_mid": 7,
+      "msg.delivered": 758,
+      "msg.distorted": 189,
+      "msg.prop_candidate": 1082,
+      "msg.prop_done": 758,
+      "msg.sent": 3720,
+      "occupy.appl_kill_hasbase": 9,
+      "occupy.ctx_hastarget": 9,
+      "occupy.scan_kill_margin": 11,
+      "occupy.scan_kill_notweak": 6989,
+      "occupy.scan_kill_unreach": 39236,
+      "occupy.scan_outpost_target": 46245,
+      "occupy.scan_passed": 9,
+      "reaction.N1_flee": 5772,
+      "reaction.N2_riot": 363,
+      "reaction.P1_comply": 104731,
+      "reaction.P2_produce": 14710,
+      "reaction.P4_expand": 29647,
+      "reaction.breed": 43,
+      "reaction.none": 16,
+      "reeval.cadence": 5999,
+      "reeval.crisis": 77,
+      "reeval.directive": 7049,
+      "reeval.idle": 45,
+      "station.timeout": 227,
+      "survival.boost_fire": 1984,
+      "threat.dispatch.survival": 123,
+      "trade.arb_buy_seen": 43233,
+      "trade.arb_call": 17722,
+      "trade.arb_kill_nostock": 33633,
+      "trade.arb_pick": 3470,
+      "trade.arb_sell_seen": 3153,
+      "trade.arrive": 11,
+      "trade.barter_deal": 1,
+      "trade.continue_midroute": 14,
+      "trade.deal": 6,
+      "trade.deal_resident": 6,
+      "trade.dispatch.ambient": 118,
+      "trade.dispatch.solo": 232,
+      "trade.dispatch.unified_囤貨": 420,
+      "trade.dispatch.unified_貿易": 401,
+      "trade.meet": 21,
+      "trade.meet_midroute": 14,
+      "trade.meet_nodeal": 13,
+      "trade.post_buy": 3313,
+      "trade.post_sell": 399,
+      "trade.preempt.建設|solo": 2,
+      "trade.preempt.製造|unified": 23,
+      "trade.preempt.覓食|solo": 5,
+      "trade.preempt.覓食|unified": 2,
+      "trade.preempt.迎戰|unified": 1,
+      "trade.preempt.逃跑|threat": 23,
+      "trade.preempt.逃跑|unified": 25,
+      "trade.release_at_dest": 7,
+      "trade.timeout": 47,
+      "worldgen.build_outpost": 21,
+      "worldgen.floor_pass": 1
+    },
+    "final_peaks": {
+      "conq.loot_lead": 0,
+      "conq.loot_util": 3.01875235258786,
+      "g3.claim_peak": 5
+    },
+    "monthly": [
+      {
+        "delta": {
+          "absorb.slack_pos": 97,
+          "absorb.target_found": 98,
+          "absorb.util_n": 98,
+          "absorb.yield_pos": 93,
+          "bel.best_call": 53638,
+          "bel.best_hit": 48874,
+          "bel.claim_fresh": 48874,
+          "bel.has_belief_call": 56417,
+          "bel.has_belief_true": 56361,
+          "bel.reconcile_compared": 1164,
+          "bel.reconcile_opportunity": 7694,
+          "combat.end_mortal_flee": 7,
+          "combat.end_readiness_above_thr": 7,
+          "combat.ended_n": 7,
+          "combat.pop_start_le3": 7,
+          "conq.combat_entered": 7,
+          "conq.declared": 124,
+          "conq.declared_nonunified": 124,
+          "conq.intent": 18,
+          "conq.winner_other": 18,
+          "death.defect_leave": 15,
+          "decision.coeff_applied_n": 9341,
+          "decision.coeff_lowhalf": 2118,
+          "decision.opt_applicable.survival": 1677,
+          "decision.opt_applicable.乞食": 3,
+          "decision.opt_applicable.併入": 103,
+          "decision.opt_applicable.備戰": 917,
+          "decision.opt_applicable.吸納": 77,
+          "decision.opt_applicable.囤貨": 470,
+          "decision.opt_applicable.建設": 1675,
+          "decision.opt_applicable.掠奪": 115,
+          "decision.opt_applicable.攻擊": 17,
+          "decision.opt_applicable.歸建": 2,
+          "decision.opt_applicable.求和": 863,
+          "decision.opt_applicable.生產": 184,
+          "decision.opt_applicable.紮營": 223,
+          "decision.opt_applicable.覓食": 991,
+          "decision.opt_applicable.訓練": 201,
+          "decision.opt_applicable.貿易": 628,
+          "decision.opt_applicable.迎戰": 889,
+          "decision.opt_applicable.遷移找糧": 122,
+          "decision.opt_applicable.駐守": 184,
+          "decision.opt_chosen.survival": 108,
+          "decision.opt_chosen.併入": 4,
+          "decision.opt_chosen.備戰": 44,
+          "decision.opt_chosen.囤貨": 113,
+          "decision.opt_chosen.建設": 293,
+          "decision.opt_chosen.歸建": 2,
+          "decision.opt_chosen.求和": 8,
+          "decision.opt_chosen.生產": 45,
+          "decision.opt_chosen.紮營": 6,
+          "decision.opt_chosen.覓食": 816,
+          "decision.opt_chosen.貿易": 26,
+          "decision.opt_chosen.迎戰": 9,
+          "decision.opt_chosen.遷移找糧": 85,
+          "decision.opt_chosen.駐守": 118,
+          "decision.opt_coeff_pressed.survival": 1677,
+          "decision.opt_coeff_pressed.乞食": 3,
+          "decision.opt_coeff_pressed.併入": 103,
+          "decision.opt_coeff_pressed.備戰": 917,
+          "decision.opt_coeff_pressed.吸納": 77,
+          "decision.opt_coeff_pressed.囤貨": 470,
+          "decision.opt_coeff_pressed.建設": 1675,
+          "decision.opt_coeff_pressed.掠奪": 115,
+          "decision.opt_coeff_pressed.攻擊": 17,
+          "decision.opt_coeff_pressed.歸建": 2,
+          "decision.opt_coeff_pressed.求和": 863,
+          "decision.opt_coeff_pressed.生產": 184,
+          "decision.opt_coeff_pressed.紮營": 223,
+          "decision.opt_coeff_pressed.覓食": 991,
+          "decision.opt_coeff_pressed.訓練": 201,
+          "decision.opt_coeff_pressed.貿易": 628,
+          "decision.opt_coeff_pressed.迎戰": 889,
+          "decision.opt_coeff_pressed.遷移找糧": 122,
+          "decision.opt_coeff_pressed.駐守": 184,
+          "diag.survival.appl_n": 1569,
+          "diag.survival.coeff_pressed": 809,
+          "diag.乞食.appl_n": 3,
+          "diag.併入.appl_n": 99,
+          "diag.併入.coeff_pressed": 24,
+          "diag.備戰.appl_n": 873,
+          "diag.備戰.coeff_pressed": 127,
+          "diag.吸納.appl_n": 77,
+          "diag.囤貨.appl_n": 357,
+          "diag.囤貨.coeff_pressed": 14,
+          "diag.建設.appl_n": 1382,
+          "diag.建設.coeff_pressed": 193,
+          "diag.掠奪.appl_n": 115,
+          "diag.掠奪.coeff_pressed": 9,
+          "diag.攻擊.appl_n": 17,
+          "diag.求和.appl_n": 855,
+          "diag.求和.coeff_pressed": 30,
+          "diag.生產.appl_n": 139,
+          "diag.生產.coeff_pressed": 12,
+          "diag.紮營.appl_n": 217,
+          "diag.紮營.coeff_pressed": 1,
+          "diag.覓食.appl_n": 175,
+          "diag.覓食.coeff_pressed": 135,
+          "diag.訓練.appl_n": 201,
+          "diag.貿易.appl_n": 602,
+          "diag.貿易.coeff_pressed": 88,
+          "diag.迎戰.appl_n": 880,
+          "diag.迎戰.coeff_pressed": 27,
+          "diag.遷移找糧.appl_n": 37,
+          "diag.駐守.appl_n": 66,
+          "diag.駐守.coeff_pressed": 1,
+          "dip.proposal_handled": 2,
+          "envoy.delivered": 2,
+          "envoy.dispatched": 4,
+          "envoy.gift_delivered": 2,
+          "envoy.gift_sent": 3,
+          "envoy.reject": 2,
+          "envoy.timeout": 1,
+          "evt.event_faction_defect.check": 12228,
+          "evt.event_tag_shift.check": 12228,
+          "evt.event_tag_shift.fire": 4,
+          "evt.event_unrest_replace.check": 12228,
+          "evt.event_unrest_split.check": 12228,
+          "g1.arb_attempt": 36,
+          "g1.board_read": 4,
+          "g1.board_register": 109,
+          "g1.engine_survival": 258,
+          "g1.food_buy": 42,
+          "g1.market_arrive": 4,
+          "g1.order_placed": 590,
+          "g1.outpost_change": 13,
+          "g1.seek_market": 8,
+          "g1.shortage_buy": 510,
+          "g2.ambition_crash_bypass": 2,
+          "g2.ambition_demote": 8,
+          "g2.ambition_promote": 12,
+          "g3.detect_信假": 68,
+          "g3.detect_生疑": 10,
+          "g3.lie_claim": 78,
+          "g3.trust_down": 694,
+          "g3.trust_up": 470,
+          "indep.found_ally": 3,
+          "indep.found_timeout": 1,
+          "indep.gate_ambitious": 1928,
+          "indep.gate_fail_busy": 878,
+          "indep.gate_fail_food": 581,
+          "indep.gate_fail_nopath": 13,
+          "indep.gate_fail_pop": 453,
+          "indep.gate_path_ok": 3,
+          "intent.sel_建國": 3,
+          "intent.sel_征服": 124,
+          "intent.sel_致富": 8009,
+          "intent.sel_防衛": 5368,
+          "mortal_flee.n": 7,
+          "mortal_flee.n_mid": 7,
+          "msg.delivered": 318,
+          "msg.distorted": 77,
+          "msg.prop_candidate": 408,
+          "msg.prop_done": 318,
+          "msg.sent": 597,
+          "occupy.scan_kill_margin": 1,
+          "occupy.scan_kill_notweak": 48,
+          "occupy.scan_kill_unreach": 248,
+          "occupy.scan_outpost_target": 297,
+          "reaction.N1_flee": 608,
+          "reaction.N2_riot": 103,
+          "reaction.P1_comply": 22304,
+          "reaction.P4_expand": 5063,
+          "reaction.breed": 2,
+          "reeval.cadence": 1630,
+          "reeval.crisis": 20,
+          "reeval.idle": 25,
+          "station.timeout": 7,
+          "survival.boost_fire": 314,
+          "threat.dispatch.survival": 13,
+          "trade.arb_buy_seen": 11899,
+          "trade.arb_call": 2327,
+          "trade.arb_kill_nostock": 10132,
+          "trade.arb_pick": 858,
+          "trade.arb_sell_seen": 548,
+          "trade.arrive": 5,
+          "trade.continue_midroute": 9,
+          "trade.deal": 6,
+          "trade.deal_resident": 6,
+          "trade.dispatch.ambient": 8,
+          "trade.dispatch.solo": 127,
+          "trade.dispatch.unified_貿易": 12,
+          "trade.meet": 10,
+          "trade.meet_midroute": 9,
+          "trade.meet_nodeal": 2,
+          "trade.post_buy": 552,
+          "trade.post_sell": 38,
+          "trade.preempt.建設|solo": 1,
+          "trade.preempt.覓食|solo": 2,
+          "trade.preempt.逃跑|threat": 1,
+          "trade.release_at_dest": 1,
+          "trade.timeout": 6,
+          "worldgen.build_outpost": 5,
+          "worldgen.floor_pass": 1
+        },
+        "month": 1,
+        "pop": 127,
+        "teams": 19
+      },
+      {
+        "delta": {
+          "absorb.slack_pos": 298,
+          "absorb.target_found": 310,
+          "absorb.util_n": 310,
+          "absorb.yield_pos": 18,
+          "bel.best_call": 106838,
+          "bel.best_hit": 97055,
+          "bel.claim_fresh": 87377,
+          "bel.claim_mid": 9678,
+          "bel.has_belief_call": 150245,
+          "bel.has_belief_true": 150189,
+          "bel.reconcile_compared": 1780,
+          "bel.reconcile_opportunity": 4032,
+          "death.defect_leave": 210,
+          "death.starve_minor": 2,
+          "decision.coeff_applied_n": 16187,
+          "decision.coeff_lowhalf": 4329,
+          "decision.opt_applicable.survival": 2473,
+          "decision.opt_applicable.乞食": 139,
+          "decision.opt_applicable.併入": 121,
+          "decision.opt_applicable.備戰": 1827,
+          "decision.opt_applicable.吸納": 302,
+          "decision.opt_applicable.囤貨": 217,
+          "decision.opt_applicable.建設": 2473,
+          "decision.opt_applicable.徵收": 668,
+          "decision.opt_applicable.掠奪": 330,
+          "decision.opt_applicable.求和": 1820,
+          "decision.opt_applicable.生產": 786,
+          "decision.opt_applicable.紮營": 583,
+          "decision.opt_applicable.覓食": 504,
+          "decision.opt_applicable.訓練": 42,
+          "decision.opt_applicable.貿易": 1186,
+          "decision.opt_applicable.迎戰": 1595,
+          "decision.opt_applicable.返家補給": 14,
+          "decision.opt_applicable.遷移找糧": 321,
+          "decision.opt_applicable.駐守": 786,
+          "decision.opt_chosen.survival": 466,
+          "decision.opt_chosen.併入": 8,
+          "decision.opt_chosen.備戰": 79,
+          "decision.opt_chosen.囤貨": 99,
+          "decision.opt_chosen.建設": 79,
+          "decision.opt_chosen.徵收": 668,
+          "decision.opt_chosen.掠奪": 13,
+          "decision.opt_chosen.求和": 19,
+          "decision.opt_chosen.生產": 251,
+          "decision.opt_chosen.紮營": 45,
+          "decision.opt_chosen.覓食": 310,
+          "decision.opt_chosen.貿易": 12,
+          "decision.opt_chosen.迎戰": 59,
+          "decision.opt_chosen.返家補給": 7,
+          "decision.opt_chosen.遷移找糧": 224,
+          "decision.opt_chosen.駐守": 134,
+          "decision.opt_coeff_pressed.survival": 2473,
+          "decision.opt_coeff_pressed.乞食": 139,
+          "decision.opt_coeff_pressed.併入": 121,
+          "decision.opt_coeff_pressed.備戰": 1827,
+          "decision.opt_coeff_pressed.吸納": 302,
+          "decision.opt_coeff_pressed.囤貨": 217,
+          "decision.opt_coeff_pressed.建設": 2473,
+          "decision.opt_coeff_pressed.徵收": 668,
+          "decision.opt_coeff_pressed.掠奪": 330,
+          "decision.opt_coeff_pressed.求和": 1820,
+          "decision.opt_coeff_pressed.生產": 786,
+          "decision.opt_coeff_pressed.紮營": 583,
+          "decision.opt_coeff_pressed.覓食": 504,
+          "decision.opt_coeff_pressed.訓練": 42,
+          "decision.opt_coeff_pressed.貿易": 1186,
+          "decision.opt_coeff_pressed.迎戰": 1595,
+          "decision.opt_coeff_pressed.返家補給": 14,
+          "decision.opt_coeff_pressed.遷移找糧": 321,
+          "decision.opt_coeff_pressed.駐守": 786,
+          "diag.survival.appl_n": 2007,
+          "diag.survival.coeff_pressed": 1070,
+          "diag.乞食.appl_n": 139,
+          "diag.乞食.coeff_pressed": 2,
+          "diag.併入.appl_n": 113,
+          "diag.併入.coeff_pressed": 2,
+          "diag.備戰.appl_n": 1748,
+          "diag.備戰.coeff_pressed": 255,
+          "diag.吸納.appl_n": 302,
+          "diag.吸納.coeff_pressed": 192,
+          "diag.囤貨.appl_n": 118,
+          "diag.囤貨.coeff_pressed": 37,
+          "diag.建設.appl_n": 2394,
+          "diag.建設.coeff_pressed": 713,
+          "diag.掠奪.appl_n": 317,
+          "diag.掠奪.coeff_pressed": 172,
+          "diag.求和.appl_n": 1801,
+          "diag.求和.coeff_pressed": 762,
+          "diag.生產.appl_n": 535,
+          "diag.生產.coeff_pressed": 153,
+          "diag.紮營.appl_n": 538,
+          "diag.紮營.coeff_pressed": 9,
+          "diag.覓食.appl_n": 194,
+          "diag.覓食.coeff_pressed": 120,
+          "diag.訓練.appl_n": 42,
+          "diag.貿易.appl_n": 1174,
+          "diag.貿易.coeff_pressed": 369,
+          "diag.迎戰.appl_n": 1536,
+          "diag.迎戰.coeff_pressed": 84,
+          "diag.返家補給.appl_n": 7,
+          "diag.遷移找糧.appl_n": 97,
+          "diag.遷移找糧.coeff_pressed": 47,
+          "diag.駐守.appl_n": 652,
+          "diag.駐守.coeff_pressed": 27,
+          "evt.event_faction_defect.check": 15113,
+          "evt.event_tag_shift.check": 15113,
+          "evt.event_tag_shift.fire": 1,
+          "evt.event_unrest_replace.check": 15113,
+          "evt.event_unrest_split.check": 15113,
+          "extinct.other": 1,
+          "g1.arb_attempt": 28,
+          "g1.board_register": 451,
+          "g1.engine_survival": 651,
+          "g1.food_buy": 82,
+          "g1.market_arrive": 7,
+          "g1.order_placed": 680,
+          "g1.outpost_change": 14,
+          "g1.seek_market": 419,
+          "g1.shortage_buy": 532,
+          "g1.treasury_reset": 1,
+          "g2.ambition_crash_bypass": 2,
+          "g2.ambition_demote": 19,
+          "g2.ambition_promote": 28,
+          "g3.detect_信假": 144,
+          "g3.detect_生疑": 11,
+          "g3.lie_claim": 155,
+          "g3.trust_down": 626,
+          "g3.trust_up": 1012,
+          "indep.gate_ambitious": 3648,
+          "indep.gate_fail_food": 1072,
+          "indep.gate_fail_pop": 2576,
+          "intent.goal_emit": 735,
+          "intent.sel_致富": 11703,
+          "intent.sel_防衛": 5969,
+          "merge.consolidate_dispatch": 3,
+          "merge.set_fail": 1,
+          "merge.set_ok": 2,
+          "msg.delivered": 264,
+          "msg.distorted": 80,
+          "msg.prop_candidate": 432,
+          "msg.prop_done": 264,
+          "msg.sent": 680,
+          "occupy.scan_kill_margin": 8,
+          "occupy.scan_kill_notweak": 517,
+          "occupy.scan_kill_unreach": 7588,
+          "occupy.scan_outpost_target": 8113,
+          "reaction.N1_flee": 2872,
+          "reaction.N2_riot": 121,
+          "reaction.P1_comply": 18830,
+          "reaction.P2_produce": 708,
+          "reaction.P4_expand": 5486,
+          "reaction.breed": 15,
+          "reaction.none": 16,
+          "reeval.cadence": 1114,
+          "reeval.crisis": 17,
+          "reeval.directive": 1329,
+          "reeval.idle": 13,
+          "station.timeout": 27,
+          "survival.boost_fire": 1032,
+          "threat.dispatch.survival": 27,
+          "trade.arb_buy_seen": 24178,
+          "trade.arb_call": 3618,
+          "trade.arb_kill_nostock": 17854,
+          "trade.arb_pick": 1507,
+          "trade.arb_sell_seen": 1575,
+          "trade.arrive": 1,
+          "trade.barter_deal": 1,
+          "trade.continue_midroute": 2,
+          "trade.dispatch.ambient": 12,
+          "trade.dispatch.solo": 30,
+          "trade.dispatch.unified_囤貨": 61,
+          "trade.dispatch.unified_貿易": 381,
+          "trade.meet": 4,
+          "trade.meet_midroute": 2,
+          "trade.meet_nodeal": 4,
+          "trade.post_buy": 614,
+          "trade.post_sell": 66,
+          "trade.preempt.建設|solo": 1,
+          "trade.preempt.覓食|unified": 1,
+          "trade.preempt.迎戰|unified": 1,
+          "trade.preempt.逃跑|threat": 2,
+          "trade.preempt.逃跑|unified": 5,
+          "trade.release_at_dest": 2,
+          "trade.timeout": 6,
+          "worldgen.build_outpost": 14
+        },
+        "month": 2,
+        "pop": 122,
+        "teams": 23
+      },
+      {
+        "delta": {
+          "bel.best_call": 100347,
+          "bel.best_hit": 87593,
+          "bel.claim_fresh": 43463,
+          "bel.claim_mid": 44130,
+          "bel.has_belief_call": 135998,
+          "bel.has_belief_true": 135938,
+          "bel.reconcile_compared": 475,
+          "bel.reconcile_opportunity": 4774,
+          "death.defect_leave": 84,
+          "decision.coeff_applied_n": 16069,
+          "decision.coeff_lowhalf": 4903,
+          "decision.opt_applicable.survival": 2313,
+          "decision.opt_applicable.乞食": 7,
+          "decision.opt_applicable.併入": 74,
+          "decision.opt_applicable.備戰": 1854,
+          "decision.opt_applicable.囤貨": 369,
+          "decision.opt_applicable.建設": 2312,
+          "decision.opt_applicable.徵收": 683,
+          "decision.opt_applicable.掠奪": 39,
+          "decision.opt_applicable.歸建": 1,
+          "decision.opt_applicable.求和": 1854,
+          "decision.opt_applicable.生產": 1924,
+          "decision.opt_applicable.紮營": 68,
+          "decision.opt_applicable.覓食": 359,
+          "decision.opt_applicable.貿易": 647,
+          "decision.opt_applicable.迎戰": 1568,
+          "decision.opt_applicable.返家補給": 16,
+          "decision.opt_applicable.遷移找糧": 57,
+          "decision.opt_applicable.駐守": 1924,
+          "decision.opt_chosen.survival": 783,
+          "decision.opt_chosen.併入": 3,
+          "decision.opt_chosen.備戰": 2,
+          "decision.opt_chosen.囤貨": 245,
+          "decision.opt_chosen.建設": 14,
+          "decision.opt_chosen.徵收": 682,
+          "decision.opt_chosen.求和": 1,
+          "decision.opt_chosen.生產": 212,
+          "decision.opt_chosen.紮營": 1,
+          "decision.opt_chosen.覓食": 101,
+          "decision.opt_chosen.貿易": 8,
+          "decision.opt_chosen.迎戰": 4,
+          "decision.opt_chosen.返家補給": 8,
+          "decision.opt_chosen.遷移找糧": 54,
+          "decision.opt_chosen.駐守": 195,
+          "decision.opt_coeff_pressed.survival": 2313,
+          "decision.opt_coeff_pressed.乞食": 7,
+          "decision.opt_coeff_pressed.併入": 74,
+          "decision.opt_coeff_pressed.備戰": 1854,
+          "decision.opt_coeff_pressed.囤貨": 369,
+          "decision.opt_coeff_pressed.建設": 2312,
+          "decision.opt_coeff_pressed.徵收": 683,
+          "decision.opt_coeff_pressed.掠奪": 39,
+          "decision.opt_coeff_pressed.歸建": 1,
+          "decision.opt_coeff_pressed.求和": 1854,
+          "decision.opt_coeff_pressed.生產": 1924,
+          "decision.opt_coeff_pressed.紮營": 68,
+          "decision.opt_coeff_pressed.覓食": 359,
+          "decision.opt_coeff_pressed.貿易": 647,
+          "decision.opt_coeff_pressed.迎戰": 1568,
+          "decision.opt_coeff_pressed.返家補給": 16,
+          "decision.opt_coeff_pressed.遷移找糧": 57,
+          "decision.opt_coeff_pressed.駐守": 1924,
+          "diag.survival.appl_n": 1530,
+          "diag.survival.coeff_pressed": 1145,
+          "diag.乞食.appl_n": 7,
+          "diag.併入.appl_n": 71,
+          "diag.備戰.appl_n": 1852,
+          "diag.備戰.coeff_pressed": 733,
+          "diag.囤貨.appl_n": 124,
+          "diag.囤貨.coeff_pressed": 30,
+          "diag.建設.appl_n": 2298,
+          "diag.建設.coeff_pressed": 119,
+          "diag.徵收.appl_n": 1,
+          "diag.徵收.coeff_pressed": 1,
+          "diag.掠奪.appl_n": 39,
+          "diag.掠奪.coeff_pressed": 20,
+          "diag.歸建.appl_n": 1,
+          "diag.歸建.coeff_pressed": 1,
+          "diag.求和.appl_n": 1853,
+          "diag.求和.coeff_pressed": 758,
+          "diag.生產.appl_n": 1712,
+          "diag.生產.coeff_pressed": 773,
+          "diag.紮營.appl_n": 67,
+          "diag.覓食.appl_n": 258,
+          "diag.覓食.coeff_pressed": 191,
+          "diag.貿易.appl_n": 639,
+          "diag.貿易.coeff_pressed": 453,
+          "diag.迎戰.appl_n": 1564,
+          "diag.迎戰.coeff_pressed": 413,
+          "diag.返家補給.appl_n": 8,
+          "diag.遷移找糧.appl_n": 3,
+          "diag.駐守.appl_n": 1729,
+          "diag.駐守.coeff_pressed": 53,
+          "dip.proposal_accept": 1,
+          "dip.proposal_handled": 1,
+          "dip.proposal_sent": 1,
+          "evt.event_faction_defect.check": 15144,
+          "evt.event_tag_shift.check": 15144,
+          "evt.event_unrest_replace.check": 15144,
+          "evt.event_unrest_split.check": 15144,
+          "extinct.other": 5,
+          "g1.arb_attempt": 12,
+          "g1.board_read": 7,
+          "g1.board_register": 568,
+          "g1.engine_survival": 792,
+          "g1.food_buy": 50,
+          "g1.market_arrive": 6,
+          "g1.order_placed": 624,
+          "g1.outpost_change": 1,
+          "g1.restock_chosen": 1,
+          "g1.seek_market": 5,
+          "g1.shortage_buy": 504,
+          "g1.treasury_reset": 3,
+          "g2.ambition_crash_bypass": 2,
+          "g2.ambition_demote": 13,
+          "g2.ambition_promote": 14,
+          "g3.detect_信假": 7,
+          "g3.lie_claim": 7,
+          "g3.trust_down": 462,
+          "g3.trust_up": 11,
+          "indep.gate_ambitious": 2821,
+          "indep.gate_fail_food": 792,
+          "indep.gate_fail_pop": 2029,
+          "intent.goal_emit": 792,
+          "intent.sel_致富": 11678,
+          "intent.sel_防衛": 6267,
+          "msg.delivered": 90,
+          "msg.distorted": 15,
+          "msg.prop_candidate": 124,
+          "msg.prop_done": 90,
+          "msg.sent": 624,
+          "occupy.scan_kill_margin": 2,
+          "occupy.scan_kill_notweak": 1457,
+          "occupy.scan_kill_unreach": 8425,
+          "occupy.scan_outpost_target": 9884,
+          "reaction.N1_flee": 1032,
+          "reaction.N2_riot": 40,
+          "reaction.P1_comply": 17828,
+          "reaction.P2_produce": 2616,
+          "reaction.P4_expand": 4411,
+          "reaction.breed": 5,
+          "reeval.cadence": 895,
+          "reeval.crisis": 13,
+          "reeval.directive": 1400,
+          "reeval.idle": 4,
+          "station.timeout": 46,
+          "survival.boost_fire": 181,
+          "threat.dispatch.survival": 21,
+          "trade.arb_buy_seen": 5085,
+          "trade.arb_call": 3201,
+          "trade.arb_kill_nostock": 3835,
+          "trade.arb_pick": 784,
+          "trade.arb_sell_seen": 637,
+          "trade.arrive": 3,
+          "trade.continue_midroute": 2,
+          "trade.dispatch.ambient": 27,
+          "trade.dispatch.solo": 54,
+          "trade.dispatch.unified_囤貨": 166,
+          "trade.dispatch.unified_貿易": 8,
+          "trade.meet": 4,
+          "trade.meet_midroute": 2,
+          "trade.meet_nodeal": 4,
+          "trade.post_buy": 554,
+          "trade.post_sell": 70,
+          "trade.preempt.製造|unified": 5,
+          "trade.preempt.覓食|solo": 2,
+          "trade.preempt.覓食|unified": 1,
+          "trade.preempt.逃跑|threat": 6,
+          "trade.preempt.逃跑|unified": 5,
+          "trade.release_at_dest": 2,
+          "trade.timeout": 11,
+          "worldgen.build_outpost": 1
+        },
+        "month": 3,
+        "pop": 121,
+        "teams": 20
+      },
+      {
+        "delta": {
+          "absorb.slack_pos": 152,
+          "absorb.target_found": 152,
+          "absorb.util_n": 152,
+          "absorb.yield_pos": 129,
+          "bel.best_call": 91320,
+          "bel.best_hit": 78644,
+          "bel.claim_fresh": 31216,
+          "bel.claim_mid": 39579,
+          "bel.claim_stale": 7849,
+          "bel.has_belief_call": 121225,
+          "bel.has_belief_true": 121169,
+          "bel.reconcile_compared": 1134,
+          "bel.reconcile_opportunity": 4285,
+          "combat.end_mortal_flee": 1,
+          "combat.end_readiness_above_thr": 1,
+          "combat.ended_n": 1,
+          "combat.pop_start_le3": 1,
+          "conq.combat_entered": 1,
+          "death.defect_leave": 223,
+          "decision.coeff_applied_n": 15458,
+          "decision.coeff_lowhalf": 4452,
+          "decision.opt_applicable.survival": 2202,
+          "decision.opt_applicable.乞食": 4,
+          "decision.opt_applicable.併入": 48,
+          "decision.opt_applicable.備戰": 1822,
+          "decision.opt_applicable.吸納": 131,
+          "decision.opt_applicable.囤貨": 294,
+          "decision.opt_applicable.建設": 2202,
+          "decision.opt_applicable.徵收": 720,
+          "decision.opt_applicable.掠奪": 117,
+          "decision.opt_applicable.求和": 1822,
+          "decision.opt_applicable.生產": 2053,
+          "decision.opt_applicable.紮營": 62,
+          "decision.opt_applicable.覓食": 227,
+          "decision.opt_applicable.貿易": 22,
+          "decision.opt_applicable.迎戰": 1610,
+          "decision.opt_applicable.返家補給": 21,
+          "decision.opt_applicable.遷移找糧": 48,
+          "decision.opt_applicable.駐守": 2053,
+          "decision.opt_chosen.survival": 782,
+          "decision.opt_chosen.備戰": 1,
+          "decision.opt_chosen.囤貨": 98,
+          "decision.opt_chosen.建設": 16,
+          "decision.opt_chosen.徵收": 720,
+          "decision.opt_chosen.生產": 197,
+          "decision.opt_chosen.覓食": 179,
+          "decision.opt_chosen.返家補給": 17,
+          "decision.opt_chosen.遷移找糧": 41,
+          "decision.opt_chosen.駐守": 151,
+          "decision.opt_coeff_pressed.survival": 2202,
+          "decision.opt_coeff_pressed.乞食": 4,
+          "decision.opt_coeff_pressed.併入": 48,
+          "decision.opt_coeff_pressed.備戰": 1822,
+          "decision.opt_coeff_pressed.吸納": 131,
+          "decision.opt_coeff_pressed.囤貨": 294,
+          "decision.opt_coeff_pressed.建設": 2202,
+          "decision.opt_coeff_pressed.徵收": 720,
+          "decision.opt_coeff_pressed.掠奪": 117,
+          "decision.opt_coeff_pressed.求和": 1822,
+          "decision.opt_coeff_pressed.生產": 2053,
+          "decision.opt_coeff_pressed.紮營": 62,
+          "decision.opt_coeff_pressed.覓食": 227,
+          "decision.opt_coeff_pressed.貿易": 22,
+          "decision.opt_coeff_pressed.迎戰": 1610,
+          "decision.opt_coeff_pressed.返家補給": 21,
+          "decision.opt_coeff_pressed.遷移找糧": 48,
+          "decision.opt_coeff_pressed.駐守": 2053,
+          "diag.survival.appl_n": 1420,
+          "diag.survival.coeff_pressed": 1076,
+          "diag.乞食.appl_n": 4,
+          "diag.併入.appl_n": 48,
+          "diag.備戰.appl_n": 1821,
+          "diag.備戰.coeff_pressed": 819,
+          "diag.吸納.appl_n": 131,
+          "diag.囤貨.appl_n": 196,
+          "diag.囤貨.coeff_pressed": 39,
+          "diag.建設.appl_n": 2186,
+          "diag.建設.coeff_pressed": 91,
+          "diag.掠奪.appl_n": 117,
+          "diag.掠奪.coeff_pressed": 1,
+          "diag.求和.appl_n": 1822,
+          "diag.求和.coeff_pressed": 751,
+          "diag.生產.appl_n": 1856,
+          "diag.生產.coeff_pressed": 759,
+          "diag.紮營.appl_n": 62,
+          "diag.覓食.appl_n": 48,
+          "diag.覓食.coeff_pressed": 31,
+          "diag.貿易.appl_n": 22,
+          "diag.迎戰.appl_n": 1610,
+          "diag.返家補給.appl_n": 4,
+          "diag.遷移找糧.appl_n": 7,
+          "diag.駐守.appl_n": 1902,
+          "diag.駐守.coeff_pressed": 720,
+          "dip.proposal_handled": 1,
+          "evt.event_faction_defect.check": 14941,
+          "evt.event_tag_shift.check": 14941,
+          "evt.event_unrest_replace.check": 14941,
+          "evt.event_unrest_replace.fire": 7,
+          "evt.event_unrest_split.check": 14941,
+          "g1.arb_attempt": 5,
+          "g1.board_register": 550,
+          "g1.engine_survival": 830,
+          "g1.food_buy": 43,
+          "g1.market_arrive": 2,
+          "g1.order_placed": 621,
+          "g1.shortage_buy": 510,
+          "g2.ambition_demote": 11,
+          "g2.ambition_promote": 16,
+          "g3.detect_信假": 4,
+          "g3.lie_claim": 4,
+          "g3.trust_down": 593,
+          "g3.trust_up": 242,
+          "indep.gate_ambitious": 2972,
+          "indep.gate_fail_food": 792,
+          "indep.gate_fail_pop": 2180,
+          "intent.goal_emit": 792,
+          "intent.sel_致富": 11426,
+          "intent.sel_防衛": 6227,
+          "mortal_flee.n": 1,
+          "mortal_flee.n_high": 1,
+          "msg.delivered": 16,
+          "msg.distorted": 3,
+          "msg.prop_candidate": 23,
+          "msg.prop_done": 16,
+          "msg.sent": 622,
+          "occupy.appl_kill_hasbase": 2,
+          "occupy.ctx_hastarget": 2,
+          "occupy.scan_kill_notweak": 1705,
+          "occupy.scan_kill_unreach": 7554,
+          "occupy.scan_outpost_target": 9261,
+          "occupy.scan_passed": 2,
+          "reaction.N1_flee": 627,
+          "reaction.N2_riot": 87,
+          "reaction.P1_comply": 15751,
+          "reaction.P2_produce": 3747,
+          "reaction.P4_expand": 4989,
+          "reaction.breed": 10,
+          "reeval.cadence": 757,
+          "reeval.crisis": 4,
+          "reeval.directive": 1440,
+          "reeval.idle": 1,
+          "station.timeout": 51,
+          "survival.boost_fire": 195,
+          "threat.dispatch.survival": 17,
+          "trade.arb_buy_seen": 408,
+          "trade.arb_call": 2845,
+          "trade.arb_kill_nostock": 336,
+          "trade.arb_pick": 48,
+          "trade.arb_sell_seen": 9,
+          "trade.continue_midroute": 1,
+          "trade.dispatch.ambient": 23,
+          "trade.dispatch.solo": 3,
+          "trade.dispatch.unified_囤貨": 64,
+          "trade.meet": 1,
+          "trade.meet_midroute": 1,
+          "trade.meet_nodeal": 1,
+          "trade.post_buy": 553,
+          "trade.post_sell": 68,
+          "trade.preempt.製造|unified": 6,
+          "trade.preempt.逃跑|threat": 5,
+          "trade.preempt.逃跑|unified": 5,
+          "trade.timeout": 8
+        },
+        "month": 4,
+        "pop": 127,
+        "teams": 21
+      },
+      {
+        "delta": {
+          "absorb.slack_pos": 405,
+          "absorb.target_found": 405,
+          "absorb.util_n": 405,
+          "absorb.yield_pos": 252,
+          "bel.best_call": 88501,
+          "bel.best_hit": 75829,
+          "bel.claim_fresh": 26334,
+          "bel.claim_mid": 8374,
+          "bel.claim_stale": 41121,
+          "bel.has_belief_call": 118824,
+          "bel.has_belief_true": 118764,
+          "bel.reconcile_compared": 1136,
+          "bel.reconcile_opportunity": 3913,
+          "death.defect_leave": 80,
+          "decision.coeff_applied_n": 16150,
+          "decision.coeff_lowhalf": 4736,
+          "decision.opt_applicable.survival": 2268,
+          "decision.opt_applicable.乞食": 4,
+          "decision.opt_applicable.併入": 39,
+          "decision.opt_applicable.備戰": 1794,
+          "decision.opt_applicable.吸納": 341,
+          "decision.opt_applicable.囤貨": 256,
+          "decision.opt_applicable.建設": 2268,
+          "decision.opt_applicable.徵收": 720,
+          "decision.opt_applicable.掠奪": 368,
+          "decision.opt_applicable.求和": 1794,
+          "decision.opt_applicable.生產": 2138,
+          "decision.opt_applicable.紮營": 37,
+          "decision.opt_applicable.覓食": 315,
+          "decision.opt_applicable.貿易": 55,
+          "decision.opt_applicable.迎戰": 1564,
+          "decision.opt_applicable.返家補給": 8,
+          "decision.opt_applicable.遷移找糧": 43,
+          "decision.opt_applicable.駐守": 2138,
+          "decision.opt_chosen.survival": 789,
+          "decision.opt_chosen.備戰": 3,
+          "decision.opt_chosen.囤貨": 114,
+          "decision.opt_chosen.建設": 8,
+          "decision.opt_chosen.徵收": 720,
+          "decision.opt_chosen.生產": 180,
+          "decision.opt_chosen.覓食": 258,
+          "decision.opt_chosen.返家補給": 4,
+          "decision.opt_chosen.遷移找糧": 42,
+          "decision.opt_chosen.駐守": 150,
+          "decision.opt_coeff_pressed.survival": 2268,
+          "decision.opt_coeff_pressed.乞食": 4,
+          "decision.opt_coeff_pressed.併入": 39,
+          "decision.opt_coeff_pressed.備戰": 1794,
+          "decision.opt_coeff_pressed.吸納": 341,
+          "decision.opt_coeff_pressed.囤貨": 256,
+          "decision.opt_coeff_pressed.建設": 2268,
+          "decision.opt_coeff_pressed.徵收": 720,
+          "decision.opt_coeff_pressed.掠奪": 368,
+          "decision.opt_coeff_pressed.求和": 1794,
+          "decision.opt_coeff_pressed.生產": 2138,
+          "decision.opt_coeff_pressed.紮營": 37,
+          "decision.opt_coeff_pressed.覓食": 315,
+          "decision.opt_coeff_pressed.貿易": 55,
+          "decision.opt_coeff_pressed.迎戰": 1564,
+          "decision.opt_coeff_pressed.返家補給": 8,
+          "decision.opt_coeff_pressed.遷移找糧": 43,
+          "decision.opt_coeff_pressed.駐守": 2138,
+          "diag.survival.appl_n": 1479,
+          "diag.survival.coeff_pressed": 1161,
+          "diag.乞食.appl_n": 4,
+          "diag.併入.appl_n": 39,
+          "diag.備戰.appl_n": 1791,
+          "diag.備戰.coeff_pressed": 811,
+          "diag.吸納.appl_n": 341,
+          "diag.吸納.coeff_pressed": 68,
+          "diag.囤貨.appl_n": 142,
+          "diag.囤貨.coeff_pressed": 30,
+          "diag.建設.appl_n": 2260,
+          "diag.建設.coeff_pressed": 71,
+          "diag.掠奪.appl_n": 368,
+          "diag.掠奪.coeff_pressed": 105,
+          "diag.求和.appl_n": 1794,
+          "diag.求和.coeff_pressed": 750,
+          "diag.生產.appl_n": 1958,
+          "diag.生產.coeff_pressed": 750,
+          "diag.紮營.appl_n": 37,
+          "diag.覓食.appl_n": 57,
+          "diag.覓食.coeff_pressed": 30,
+          "diag.貿易.appl_n": 55,
+          "diag.迎戰.appl_n": 1564,
+          "diag.返家補給.appl_n": 4,
+          "diag.遷移找糧.appl_n": 1,
+          "diag.駐守.appl_n": 1988,
+          "diag.駐守.coeff_pressed": 720,
+          "evt.event_faction_defect.check": 14640,
+          "evt.event_tag_shift.check": 14640,
+          "evt.event_unrest_replace.check": 14640,
+          "evt.event_unrest_split.check": 14640,
+          "extinct.other": 2,
+          "g1.arb_attempt": 8,
+          "g1.board_register": 552,
+          "g1.engine_survival": 936,
+          "g1.food_buy": 34,
+          "g1.market_arrive": 4,
+          "g1.order_placed": 600,
+          "g1.shortage_buy": 490,
+          "g1.treasury_reset": 1,
+          "g2.ambition_crash_bypass": 1,
+          "g2.ambition_demote": 10,
+          "g2.ambition_promote": 12,
+          "g3.detect_信假": 6,
+          "g3.lie_claim": 6,
+          "g3.trust_down": 782,
+          "g3.trust_up": 214,
+          "indep.gate_ambitious": 2638,
+          "indep.gate_fail_food": 792,
+          "indep.gate_fail_pop": 1846,
+          "intent.goal_emit": 792,
+          "intent.sel_致富": 10901,
+          "intent.sel_防衛": 5978,
+          "msg.delivered": 45,
+          "msg.distorted": 10,
+          "msg.prop_candidate": 60,
+          "msg.prop_done": 45,
+          "msg.sent": 600,
+          "occupy.appl_kill_hasbase": 3,
+          "occupy.ctx_hastarget": 3,
+          "occupy.scan_kill_notweak": 1649,
+          "occupy.scan_kill_unreach": 7749,
+          "occupy.scan_outpost_target": 9401,
+          "occupy.scan_passed": 3,
+          "reaction.N1_flee": 402,
+          "reaction.P1_comply": 15394,
+          "reaction.P2_produce": 3486,
+          "reaction.P4_expand": 4958,
+          "reaction.breed": 6,
+          "reeval.cadence": 815,
+          "reeval.crisis": 11,
+          "reeval.directive": 1440,
+          "reeval.idle": 2,
+          "station.timeout": 50,
+          "survival.boost_fire": 123,
+          "threat.dispatch.survival": 14,
+          "trade.arb_buy_seen": 938,
+          "trade.arb_call": 2907,
+          "trade.arb_kill_nostock": 838,
+          "trade.arb_pick": 103,
+          "trade.arb_sell_seen": 110,
+          "trade.arrive": 2,
+          "trade.dispatch.ambient": 24,
+          "trade.dispatch.solo": 8,
+          "trade.dispatch.unified_囤貨": 64,
+          "trade.meet": 2,
+          "trade.meet_nodeal": 2,
+          "trade.post_buy": 524,
+          "trade.post_sell": 76,
+          "trade.preempt.製造|unified": 6,
+          "trade.preempt.逃跑|threat": 4,
+          "trade.preempt.逃跑|unified": 5,
+          "trade.release_at_dest": 2,
+          "trade.timeout": 8
+        },
+        "month": 5,
+        "pop": 131,
+        "teams": 20
+      },
+      {
+        "delta": {
+          "absorb.slack_pos": 300,
+          "absorb.target_found": 302,
+          "absorb.util_n": 302,
+          "absorb.yield_pos": 226,
+          "accept.join_accept": 1,
+          "bel.best_call": 81432,
+          "bel.best_hit": 68687,
+          "bel.claim_fresh": 26236,
+          "bel.claim_mid": 3255,
+          "bel.claim_stale": 39196,
+          "bel.has_belief_call": 111350,
+          "bel.has_belief_true": 111294,
+          "bel.reconcile_compared": 1772,
+          "bel.reconcile_opportunity": 4374,
+          "consol.accept_n": 1,
+          "death.defect_leave": 3,
+          "decision.coeff_applied_n": 15904,
+          "decision.coeff_lowhalf": 4594,
+          "decision.opt_applicable.survival": 2241,
+          "decision.opt_applicable.併入": 37,
+          "decision.opt_applicable.備戰": 1766,
+          "decision.opt_applicable.吸納": 287,
+          "decision.opt_applicable.囤貨": 224,
+          "decision.opt_applicable.建設": 2240,
+          "decision.opt_applicable.徵收": 720,
+          "decision.opt_applicable.掠奪": 349,
+          "decision.opt_applicable.歸建": 1,
+          "decision.opt_applicable.求和": 1766,
+          "decision.opt_applicable.生產": 2121,
+          "decision.opt_applicable.紮營": 39,
+          "decision.opt_applicable.覓食": 252,
+          "decision.opt_applicable.貿易": 117,
+          "decision.opt_applicable.迎戰": 1563,
+          "decision.opt_applicable.返家補給": 9,
+          "decision.opt_applicable.遷移找糧": 51,
+          "decision.opt_applicable.駐守": 2121,
+          "decision.opt_chosen.survival": 783,
+          "decision.opt_chosen.併入": 4,
+          "decision.opt_chosen.備戰": 2,
+          "decision.opt_chosen.囤貨": 100,
+          "decision.opt_chosen.建設": 17,
+          "decision.opt_chosen.徵收": 720,
+          "decision.opt_chosen.掠奪": 4,
+          "decision.opt_chosen.生產": 190,
+          "decision.opt_chosen.紮營": 1,
+          "decision.opt_chosen.覓食": 210,
+          "decision.opt_chosen.迎戰": 6,
+          "decision.opt_chosen.返家補給": 9,
+          "decision.opt_chosen.遷移找糧": 45,
+          "decision.opt_chosen.駐守": 150,
+          "decision.opt_coeff_pressed.survival": 2241,
+          "decision.opt_coeff_pressed.併入": 37,
+          "decision.opt_coeff_pressed.備戰": 1766,
+          "decision.opt_coeff_pressed.吸納": 287,
+          "decision.opt_coeff_pressed.囤貨": 224,
+          "decision.opt_coeff_pressed.建設": 2240,
+          "decision.opt_coeff_pressed.徵收": 720,
+          "decision.opt_coeff_pressed.掠奪": 349,
+          "decision.opt_coeff_pressed.歸建": 1,
+          "decision.opt_coeff_pressed.求和": 1766,
+          "decision.opt_coeff_pressed.生產": 2121,
+          "decision.opt_coeff_pressed.紮營": 39,
+          "decision.opt_coeff_pressed.覓食": 252,
+          "decision.opt_coeff_pressed.貿易": 117,
+          "decision.opt_coeff_pressed.迎戰": 1563,
+          "decision.opt_coeff_pressed.返家補給": 9,
+          "decision.opt_coeff_pressed.遷移找糧": 51,
+          "decision.opt_coeff_pressed.駐守": 2121,
+          "diag.survival.appl_n": 1458,
+          "diag.survival.coeff_pressed": 1123,
+          "diag.併入.appl_n": 33,
+          "diag.備戰.appl_n": 1764,
+          "diag.備戰.coeff_pressed": 788,
+          "diag.吸納.appl_n": 287,
+          "diag.吸納.coeff_pressed": 76,
+          "diag.囤貨.appl_n": 124,
+          "diag.囤貨.coeff_pressed": 20,
+          "diag.建設.appl_n": 2223,
+          "diag.建設.coeff_pressed": 48,
+          "diag.掠奪.appl_n": 345,
+          "diag.掠奪.coeff_pressed": 131,
+          "diag.歸建.appl_n": 1,
+          "diag.求和.appl_n": 1766,
+          "diag.求和.coeff_pressed": 750,
+          "diag.生產.appl_n": 1931,
+          "diag.生產.coeff_pressed": 750,
+          "diag.紮營.appl_n": 38,
+          "diag.覓食.appl_n": 42,
+          "diag.覓食.coeff_pressed": 30,
+          "diag.貿易.appl_n": 117,
+          "diag.迎戰.appl_n": 1557,
+          "diag.迎戰.coeff_pressed": 1,
+          "diag.遷移找糧.appl_n": 6,
+          "diag.駐守.appl_n": 1971,
+          "diag.駐守.coeff_pressed": 720,
+          "evt.event_faction_defect.check": 14400,
+          "evt.event_tag_shift.check": 14400,
+          "evt.event_unrest_replace.check": 14400,
+          "evt.event_unrest_split.check": 14400,
+          "g1.arb_attempt": 2,
+          "g1.board_register": 561,
+          "g1.engine_survival": 895,
+          "g1.food_buy": 36,
+          "g1.market_arrive": 3,
+          "g1.order_placed": 597,
+          "g1.outpost_change": 1,
+          "g1.shortage_buy": 480,
+          "g2.ambition_crash_bypass": 2,
+          "g2.ambition_demote": 12,
+          "g2.ambition_promote": 12,
+          "g3.detect_信假": 11,
+          "g3.lie_claim": 11,
+          "g3.trust_down": 1066,
+          "g3.trust_up": 706,
+          "indep.gate_ambitious": 2376,
+          "indep.gate_fail_food": 792,
+          "indep.gate_fail_pop": 1584,
+          "intent.goal_emit": 792,
+          "intent.sel_致富": 9671,
+          "intent.sel_防衛": 5995,
+          "join.dispatch": 1,
+          "join.resolve": 1,
+          "merge.consolidate_dispatch": 4,
+          "merge.set_fail": 3,
+          "merge.set_ok": 1,
+          "mergein.subteam": 1,
+          "msg.delivered": 25,
+          "msg.distorted": 4,
+          "msg.prop_candidate": 35,
+          "msg.prop_done": 25,
+          "msg.sent": 597,
+          "occupy.appl_kill_hasbase": 4,
+          "occupy.ctx_hastarget": 4,
+          "occupy.scan_kill_notweak": 1613,
+          "occupy.scan_kill_unreach": 7672,
+          "occupy.scan_outpost_target": 9289,
+          "occupy.scan_passed": 4,
+          "reaction.N1_flee": 231,
+          "reaction.N2_riot": 12,
+          "reaction.P1_comply": 14624,
+          "reaction.P2_produce": 4153,
+          "reaction.P4_expand": 4740,
+          "reaction.breed": 5,
+          "reeval.cadence": 788,
+          "reeval.crisis": 12,
+          "reeval.directive": 1440,
+          "station.timeout": 46,
+          "survival.boost_fire": 139,
+          "threat.dispatch.survival": 31,
+          "trade.arb_buy_seen": 725,
+          "trade.arb_call": 2824,
+          "trade.arb_kill_nostock": 638,
+          "trade.arb_pick": 170,
+          "trade.arb_sell_seen": 274,
+          "trade.dispatch.ambient": 24,
+          "trade.dispatch.solo": 10,
+          "trade.dispatch.unified_囤貨": 65,
+          "trade.post_buy": 516,
+          "trade.post_sell": 81,
+          "trade.preempt.製造|unified": 6,
+          "trade.preempt.覓食|solo": 1,
+          "trade.preempt.逃跑|threat": 5,
+          "trade.preempt.逃跑|unified": 5,
+          "trade.timeout": 8,
+          "worldgen.build_outpost": 1
+        },
+        "month": 6,
+        "pop": 134,
+        "teams": 20
+      }
+    ],
+    "msg_dump": {
+      "global": [
+        {
+          "desc": "Team4 徵 food ×57",
+          "distorted": false,
+          "id": 283,
+          "origin_team": 4,
+          "origin_tick": 39850,
+          "params": {
+            "expire_tick": 41050,
+            "order_id": 283,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 57,
+            "res": "food"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 售 material ×49",
+          "distorted": false,
+          "id": 284,
+          "origin_team": 13,
+          "origin_tick": 39850,
+          "params": {
+            "expire_tick": 41050,
+            "order_id": 284,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 49,
+            "res": "material"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team4 售 material ×42",
+          "distorted": false,
+          "id": 285,
+          "origin_team": 4,
+          "origin_tick": 39970,
+          "params": {
+            "expire_tick": 41170,
+            "order_id": 285,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 42,
+            "res": "material"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team11 售 material ×24",
+          "distorted": false,
+          "id": 286,
+          "origin_team": 11,
+          "origin_tick": 39970,
+          "params": {
+            "expire_tick": 41170,
+            "order_id": 286,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 24,
+            "res": "material"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team23 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 287,
+          "origin_team": 23,
+          "origin_tick": 40000,
+          "params": {
+            "expire_tick": 41200,
+            "order_id": 287,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 288,
+          "origin_team": 23,
+          "origin_tick": 40000,
+          "params": {
+            "expire_tick": 41200,
+            "order_id": 288,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 289,
+          "origin_team": 23,
+          "origin_tick": 40000,
+          "params": {
+            "expire_tick": 41200,
+            "order_id": 289,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 23,
+          "origin_tick": 40000,
+          "params": {
+            "expire_tick": 41200,
+            "order_id": 290,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 售 food ×1",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 20,
+          "origin_tick": 40050,
+          "params": {
+            "expire_tick": 41250,
+            "order_id": 291,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 1,
+            "res": "food"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team20 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 20,
+          "origin_tick": 40050,
+          "params": {
+            "expire_tick": 41250,
+            "order_id": 292,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 20,
+          "origin_tick": 40050,
+          "params": {
+            "expire_tick": 41250,
+            "order_id": 293,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 20,
+          "origin_tick": 40050,
+          "params": {
+            "expire_tick": 41250,
+            "order_id": 294,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 20,
+          "origin_tick": 40050,
+          "params": {
+            "expire_tick": 41250,
+            "order_id": 295,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 0,
+          "origin_tick": 40090,
+          "params": {
+            "expire_tick": 41290,
+            "order_id": 293,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 food ×4",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 6,
+          "origin_tick": 40090,
+          "params": {
+            "expire_tick": 41290,
+            "order_id": 294,
+            "origin_pos": "(11, 9)",
+            "origin_team": 6,
+            "qty": 4,
+            "res": "food"
+          },
+          "pos": [
+            11,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 food ×89",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 11,
+          "origin_tick": 40090,
+          "params": {
+            "expire_tick": 41290,
+            "order_id": 295,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 89,
+            "res": "food"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 售 material ×41",
+          "distorted": false,
+          "id": 289,
+          "origin_team": 7,
+          "origin_tick": 40330,
+          "params": {
+            "expire_tick": 41530,
+            "order_id": 289,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 41,
+            "res": "material"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team14 售 material ×70",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 14,
+          "origin_tick": 40330,
+          "params": {
+            "expire_tick": 41530,
+            "order_id": 290,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 70,
+            "res": "material"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team14 徵 food ×48",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 14,
+          "origin_tick": 40330,
+          "params": {
+            "expire_tick": 41530,
+            "order_id": 291,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 48,
+            "res": "food"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 21,
+          "origin_tick": 40430,
+          "params": {
+            "expire_tick": 41630,
+            "order_id": 292,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 21,
+          "origin_tick": 40430,
+          "params": {
+            "expire_tick": 41630,
+            "order_id": 293,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 21,
+          "origin_tick": 40430,
+          "params": {
+            "expire_tick": 41630,
+            "order_id": 294,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 21,
+          "origin_tick": 40430,
+          "params": {
+            "expire_tick": 41630,
+            "order_id": 295,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 food ×30",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 5,
+          "origin_tick": 40450,
+          "params": {
+            "expire_tick": 41650,
+            "order_id": 296,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 30,
+            "res": "food"
+          },
+          "pos": [
+            5,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 售 material ×38",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 9,
+          "origin_tick": 40450,
+          "params": {
+            "expire_tick": 41650,
+            "order_id": 297,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 38,
+            "res": "material"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team16 售 food ×200",
+          "distorted": false,
+          "id": 289,
+          "origin_team": 16,
+          "origin_tick": 40560,
+          "params": {
+            "expire_tick": 41760,
+            "order_id": 289,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 200,
+            "res": "food"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team16 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 16,
+          "origin_tick": 40560,
+          "params": {
+            "expire_tick": 41760,
+            "order_id": 290,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 16,
+          "origin_tick": 40560,
+          "params": {
+            "expire_tick": 41760,
+            "order_id": 291,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 16,
+          "origin_tick": 40560,
+          "params": {
+            "expire_tick": 41760,
+            "order_id": 292,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 16,
+          "origin_tick": 40560,
+          "params": {
+            "expire_tick": 41760,
+            "order_id": 293,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 17,
+          "origin_tick": 40600,
+          "params": {
+            "expire_tick": 41800,
+            "order_id": 294,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 17,
+          "origin_tick": 40600,
+          "params": {
+            "expire_tick": 41800,
+            "order_id": 295,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 17,
+          "origin_tick": 40600,
+          "params": {
+            "expire_tick": 41800,
+            "order_id": 296,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 17,
+          "origin_tick": 40600,
+          "params": {
+            "expire_tick": 41800,
+            "order_id": 297,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 售 material ×33",
+          "distorted": false,
+          "id": 231,
+          "origin_team": 0,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 231,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 33,
+            "res": "material"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team0 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 232,
+          "origin_team": 0,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 232,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 233,
+          "origin_team": 0,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 233,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 234,
+          "origin_team": 0,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 234,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team1 售 material ×42",
+          "distorted": false,
+          "id": 235,
+          "origin_team": 1,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 235,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 42,
+            "res": "material"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team1 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 236,
+          "origin_team": 1,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 236,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team1 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 237,
+          "origin_team": 1,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 237,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team1 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 238,
+          "origin_team": 1,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 238,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team2 售 material ×22",
+          "distorted": false,
+          "id": 239,
+          "origin_team": 2,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 239,
+            "origin_pos": "(7, 12)",
+            "origin_team": 2,
+            "qty": 22,
+            "res": "material"
+          },
+          "pos": [
+            7,
+            12
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team2 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 240,
+          "origin_team": 2,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 240,
+            "origin_pos": "(7, 12)",
+            "origin_team": 2,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            7,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team2 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 241,
+          "origin_team": 2,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 241,
+            "origin_pos": "(7, 12)",
+            "origin_team": 2,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            7,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team2 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 242,
+          "origin_team": 2,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 242,
+            "origin_pos": "(7, 12)",
+            "origin_team": 2,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            7,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team3 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 243,
+          "origin_team": 3,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 243,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team3 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 244,
+          "origin_team": 3,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 244,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team3 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 245,
+          "origin_team": 3,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 245,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 246,
+          "origin_team": 4,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 246,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 247,
+          "origin_team": 4,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 247,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 248,
+          "origin_team": 4,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 248,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 249,
+          "origin_team": 5,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 249,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            5,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 250,
+          "origin_team": 5,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 250,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            5,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 251,
+          "origin_team": 5,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 251,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            5,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 252,
+          "origin_team": 5,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 252,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            5,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 253,
+          "origin_team": 6,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 253,
+            "origin_pos": "(11, 9)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 254,
+          "origin_team": 6,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 254,
+            "origin_pos": "(11, 9)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 material ×6",
+          "distorted": false,
+          "id": 255,
+          "origin_team": 6,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 255,
+            "origin_pos": "(11, 9)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "material"
+          },
+          "pos": [
+            11,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 256,
+          "origin_team": 6,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 256,
+            "origin_pos": "(11, 9)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 257,
+          "origin_team": 6,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 257,
+            "origin_pos": "(11, 9)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 258,
+          "origin_team": 7,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 258,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 259,
+          "origin_team": 7,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 259,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 260,
+          "origin_team": 7,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 260,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 261,
+          "origin_team": 7,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 261,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 262,
+          "origin_team": 8,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 262,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 263,
+          "origin_team": 8,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 263,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 264,
+          "origin_team": 8,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 264,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 265,
+          "origin_team": 8,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 265,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 food ×38",
+          "distorted": false,
+          "id": 266,
+          "origin_team": 8,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 266,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 38,
+            "res": "food"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 267,
+          "origin_team": 9,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 267,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 268,
+          "origin_team": 9,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 268,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 269,
+          "origin_team": 9,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 269,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 270,
+          "origin_team": 9,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 270,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 food ×51",
+          "distorted": false,
+          "id": 271,
+          "origin_team": 9,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 271,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 51,
+            "res": "food"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 272,
+          "origin_team": 11,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 272,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 273,
+          "origin_team": 11,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 273,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 274,
+          "origin_team": 11,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 274,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 275,
+          "origin_team": 11,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 275,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team12 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 276,
+          "origin_team": 12,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 276,
+            "origin_pos": "(15, 5)",
+            "origin_team": 12,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            15,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team12 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 277,
+          "origin_team": 12,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 277,
+            "origin_pos": "(15, 5)",
+            "origin_team": 12,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            15,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team12 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 278,
+          "origin_team": 12,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 278,
+            "origin_pos": "(15, 5)",
+            "origin_team": 12,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            15,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team12 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 279,
+          "origin_team": 12,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 279,
+            "origin_pos": "(15, 5)",
+            "origin_team": 12,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            15,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 280,
+          "origin_team": 13,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 280,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 281,
+          "origin_team": 13,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 281,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 282,
+          "origin_team": 13,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 282,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 283,
+          "origin_team": 13,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 283,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team14 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 284,
+          "origin_team": 14,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 284,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team14 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 285,
+          "origin_team": 14,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 285,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team14 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 286,
+          "origin_team": 14,
+          "origin_tick": 40810,
+          "params": {
+            "expire_tick": 42010,
+            "order_id": 286,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team1 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 287,
+          "origin_team": 1,
+          "origin_tick": 40930,
+          "params": {
+            "expire_tick": 42130,
+            "order_id": 287,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team3 售 material ×24",
+          "distorted": false,
+          "id": 288,
+          "origin_team": 3,
+          "origin_tick": 40930,
+          "params": {
+            "expire_tick": 42130,
+            "order_id": 288,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 24,
+            "res": "material"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team3 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 289,
+          "origin_team": 3,
+          "origin_tick": 40930,
+          "params": {
+            "expire_tick": 42130,
+            "order_id": 289,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 4,
+          "origin_tick": 40930,
+          "params": {
+            "expire_tick": 42130,
+            "order_id": 290,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 售 material ×45",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 5,
+          "origin_tick": 40930,
+          "params": {
+            "expire_tick": 42130,
+            "order_id": 291,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 45,
+            "res": "material"
+          },
+          "pos": [
+            5,
+            13
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team8 售 material ×44",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 8,
+          "origin_tick": 40930,
+          "params": {
+            "expire_tick": 42130,
+            "order_id": 292,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 44,
+            "res": "material"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team14 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 14,
+          "origin_tick": 40930,
+          "params": {
+            "expire_tick": 42130,
+            "order_id": 293,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team22 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 22,
+          "origin_tick": 41000,
+          "params": {
+            "expire_tick": 42200,
+            "order_id": 294,
+            "origin_pos": "(11, 5)",
+            "origin_team": 22,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team22 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 22,
+          "origin_tick": 41000,
+          "params": {
+            "expire_tick": 42200,
+            "order_id": 295,
+            "origin_pos": "(11, 5)",
+            "origin_team": 22,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team22 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 22,
+          "origin_tick": 41000,
+          "params": {
+            "expire_tick": 42200,
+            "order_id": 296,
+            "origin_pos": "(11, 5)",
+            "origin_team": 22,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team22 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 22,
+          "origin_tick": 41000,
+          "params": {
+            "expire_tick": 42200,
+            "order_id": 297,
+            "origin_pos": "(11, 5)",
+            "origin_team": 22,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 food ×57",
+          "distorted": false,
+          "id": 286,
+          "origin_team": 4,
+          "origin_tick": 41050,
+          "params": {
+            "expire_tick": 42250,
+            "order_id": 286,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 57,
+            "res": "food"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 售 material ×49",
+          "distorted": false,
+          "id": 287,
+          "origin_team": 13,
+          "origin_tick": 41050,
+          "params": {
+            "expire_tick": 42250,
+            "order_id": 287,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 49,
+            "res": "material"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team4 售 material ×42",
+          "distorted": false,
+          "id": 288,
+          "origin_team": 4,
+          "origin_tick": 41170,
+          "params": {
+            "expire_tick": 42370,
+            "order_id": 288,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 42,
+            "res": "material"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team11 售 material ×25",
+          "distorted": false,
+          "id": 289,
+          "origin_team": 11,
+          "origin_tick": 41170,
+          "params": {
+            "expire_tick": 42370,
+            "order_id": 289,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 25,
+            "res": "material"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team23 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 23,
+          "origin_tick": 41200,
+          "params": {
+            "expire_tick": 42400,
+            "order_id": 290,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 23,
+          "origin_tick": 41200,
+          "params": {
+            "expire_tick": 42400,
+            "order_id": 291,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 23,
+          "origin_tick": 41200,
+          "params": {
+            "expire_tick": 42400,
+            "order_id": 292,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 23,
+          "origin_tick": 41200,
+          "params": {
+            "expire_tick": 42400,
+            "order_id": 293,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 售 food ×19",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 20,
+          "origin_tick": 41250,
+          "params": {
+            "expire_tick": 42450,
+            "order_id": 294,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 19,
+            "res": "food"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team20 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 20,
+          "origin_tick": 41250,
+          "params": {
+            "expire_tick": 42450,
+            "order_id": 295,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 20,
+          "origin_tick": 41250,
+          "params": {
+            "expire_tick": 42450,
+            "order_id": 296,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 20,
+          "origin_tick": 41250,
+          "params": {
+            "expire_tick": 42450,
+            "order_id": 297,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 298,
+          "origin_team": 20,
+          "origin_tick": 41250,
+          "params": {
+            "expire_tick": 42450,
+            "order_id": 298,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 0,
+          "origin_tick": 41290,
+          "params": {
+            "expire_tick": 42490,
+            "order_id": 296,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 food ×89",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 11,
+          "origin_tick": 41290,
+          "params": {
+            "expire_tick": 42490,
+            "order_id": 297,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 89,
+            "res": "food"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 food ×3",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 6,
+          "origin_tick": 41530,
+          "params": {
+            "expire_tick": 42730,
+            "order_id": 290,
+            "origin_pos": "(11, 8)",
+            "origin_team": 6,
+            "qty": 3,
+            "res": "food"
+          },
+          "pos": [
+            11,
+            8
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 售 material ×43",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 7,
+          "origin_tick": 41530,
+          "params": {
+            "expire_tick": 42730,
+            "order_id": 291,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 43,
+            "res": "material"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team14 售 material ×70",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 14,
+          "origin_tick": 41530,
+          "params": {
+            "expire_tick": 42730,
+            "order_id": 292,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 70,
+            "res": "material"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team14 徵 food ×51",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 14,
+          "origin_tick": 41530,
+          "params": {
+            "expire_tick": 42730,
+            "order_id": 293,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 51,
+            "res": "food"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 21,
+          "origin_tick": 41630,
+          "params": {
+            "expire_tick": 42830,
+            "order_id": 294,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 21,
+          "origin_tick": 41630,
+          "params": {
+            "expire_tick": 42830,
+            "order_id": 295,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 21,
+          "origin_tick": 41630,
+          "params": {
+            "expire_tick": 42830,
+            "order_id": 296,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 21,
+          "origin_tick": 41630,
+          "params": {
+            "expire_tick": 42830,
+            "order_id": 297,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 售 material ×38",
+          "distorted": false,
+          "id": 298,
+          "origin_team": 9,
+          "origin_tick": 41650,
+          "params": {
+            "expire_tick": 42850,
+            "order_id": 298,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 38,
+            "res": "material"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team16 售 food ×229",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 16,
+          "origin_tick": 41760,
+          "params": {
+            "expire_tick": 42960,
+            "order_id": 290,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 229,
+            "res": "food"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team16 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 16,
+          "origin_tick": 41760,
+          "params": {
+            "expire_tick": 42960,
+            "order_id": 291,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 16,
+          "origin_tick": 41760,
+          "params": {
+            "expire_tick": 42960,
+            "order_id": 292,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 16,
+          "origin_tick": 41760,
+          "params": {
+            "expire_tick": 42960,
+            "order_id": 293,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 16,
+          "origin_tick": 41760,
+          "params": {
+            "expire_tick": 42960,
+            "order_id": 294,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 17,
+          "origin_tick": 41800,
+          "params": {
+            "expire_tick": 43000,
+            "order_id": 295,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 17,
+          "origin_tick": 41800,
+          "params": {
+            "expire_tick": 43000,
+            "order_id": 296,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 17,
+          "origin_tick": 41800,
+          "params": {
+            "expire_tick": 43000,
+            "order_id": 297,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 298,
+          "origin_team": 17,
+          "origin_tick": 41800,
+          "params": {
+            "expire_tick": 43000,
+            "order_id": 298,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 售 material ×33",
+          "distorted": false,
+          "id": 232,
+          "origin_team": 0,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 232,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 33,
+            "res": "material"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team0 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 233,
+          "origin_team": 0,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 233,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 234,
+          "origin_team": 0,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 234,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 235,
+          "origin_team": 0,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 235,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team1 售 material ×42",
+          "distorted": false,
+          "id": 236,
+          "origin_team": 1,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 236,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 42,
+            "res": "material"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team1 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 237,
+          "origin_team": 1,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 237,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team1 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 238,
+          "origin_team": 1,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 238,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team1 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 239,
+          "origin_team": 1,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 239,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team2 售 material ×22",
+          "distorted": false,
+          "id": 240,
+          "origin_team": 2,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 240,
+            "origin_pos": "(7, 12)",
+            "origin_team": 2,
+            "qty": 22,
+            "res": "material"
+          },
+          "pos": [
+            7,
+            12
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team2 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 241,
+          "origin_team": 2,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 241,
+            "origin_pos": "(7, 12)",
+            "origin_team": 2,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            7,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team2 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 242,
+          "origin_team": 2,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 242,
+            "origin_pos": "(7, 12)",
+            "origin_team": 2,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            7,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team2 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 243,
+          "origin_team": 2,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 243,
+            "origin_pos": "(7, 12)",
+            "origin_team": 2,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            7,
+            12
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team3 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 244,
+          "origin_team": 3,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 244,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team3 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 245,
+          "origin_team": 3,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 245,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team3 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 246,
+          "origin_team": 3,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 246,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 247,
+          "origin_team": 4,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 247,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 248,
+          "origin_team": 4,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 248,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 249,
+          "origin_team": 4,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 249,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 250,
+          "origin_team": 5,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 250,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            5,
+            16
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 251,
+          "origin_team": 5,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 251,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            5,
+            16
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 252,
+          "origin_team": 5,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 252,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            5,
+            16
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 253,
+          "origin_team": 5,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 253,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            5,
+            16
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 徵 food ×31",
+          "distorted": false,
+          "id": 254,
+          "origin_team": 5,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 254,
+            "origin_pos": "(4, 9)",
+            "origin_team": 5,
+            "qty": 31,
+            "res": "food"
+          },
+          "pos": [
+            5,
+            16
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 255,
+          "origin_team": 6,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 255,
+            "origin_pos": "(11, 8)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            8
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 256,
+          "origin_team": 6,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 256,
+            "origin_pos": "(11, 8)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            8
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 material ×6",
+          "distorted": false,
+          "id": 257,
+          "origin_team": 6,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 257,
+            "origin_pos": "(11, 8)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "material"
+          },
+          "pos": [
+            11,
+            8
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 258,
+          "origin_team": 6,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 258,
+            "origin_pos": "(11, 8)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            8
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 259,
+          "origin_team": 6,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 259,
+            "origin_pos": "(11, 8)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            8
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 260,
+          "origin_team": 7,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 260,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 261,
+          "origin_team": 7,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 261,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 262,
+          "origin_team": 7,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 262,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 263,
+          "origin_team": 7,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 263,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 264,
+          "origin_team": 8,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 264,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 265,
+          "origin_team": 8,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 265,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 266,
+          "origin_team": 8,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 266,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 267,
+          "origin_team": 8,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 267,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 徵 food ×38",
+          "distorted": false,
+          "id": 268,
+          "origin_team": 8,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 268,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 38,
+            "res": "food"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 269,
+          "origin_team": 9,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 269,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 270,
+          "origin_team": 9,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 270,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 271,
+          "origin_team": 9,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 271,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 272,
+          "origin_team": 9,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 272,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 徵 food ×51",
+          "distorted": false,
+          "id": 273,
+          "origin_team": 9,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 273,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 51,
+            "res": "food"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 274,
+          "origin_team": 11,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 274,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 275,
+          "origin_team": 11,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 275,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 276,
+          "origin_team": 11,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 276,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team11 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 277,
+          "origin_team": 11,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 277,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team12 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 278,
+          "origin_team": 12,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 278,
+            "origin_pos": "(15, 5)",
+            "origin_team": 12,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            15,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team12 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 279,
+          "origin_team": 12,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 279,
+            "origin_pos": "(15, 5)",
+            "origin_team": 12,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            15,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team12 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 280,
+          "origin_team": 12,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 280,
+            "origin_pos": "(15, 5)",
+            "origin_team": 12,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            15,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team12 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 281,
+          "origin_team": 12,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 281,
+            "origin_pos": "(15, 5)",
+            "origin_team": 12,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            15,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 282,
+          "origin_team": 13,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 282,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 283,
+          "origin_team": 13,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 283,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 284,
+          "origin_team": 13,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 284,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 285,
+          "origin_team": 13,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 285,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team14 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 286,
+          "origin_team": 14,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 286,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team14 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 287,
+          "origin_team": 14,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 287,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team14 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 288,
+          "origin_team": 14,
+          "origin_tick": 42010,
+          "params": {
+            "expire_tick": 43210,
+            "order_id": 288,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team1 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 289,
+          "origin_team": 1,
+          "origin_tick": 42130,
+          "params": {
+            "expire_tick": 43330,
+            "order_id": 289,
+            "origin_pos": "(10, 13)",
+            "origin_team": 1,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            10,
+            13
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team3 售 material ×24",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 3,
+          "origin_tick": 42130,
+          "params": {
+            "expire_tick": 43330,
+            "order_id": 290,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 24,
+            "res": "material"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team3 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 3,
+          "origin_tick": 42130,
+          "params": {
+            "expire_tick": 43330,
+            "order_id": 291,
+            "origin_pos": "(13, 0)",
+            "origin_team": 3,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            13,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 4,
+          "origin_tick": 42130,
+          "params": {
+            "expire_tick": 43330,
+            "order_id": 292,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team8 售 material ×44",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 8,
+          "origin_tick": 42130,
+          "params": {
+            "expire_tick": 43330,
+            "order_id": 293,
+            "origin_pos": "(14, 7)",
+            "origin_team": 8,
+            "qty": 44,
+            "res": "material"
+          },
+          "pos": [
+            14,
+            7
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team14 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 14,
+          "origin_tick": 42130,
+          "params": {
+            "expire_tick": 43330,
+            "order_id": 294,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team22 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 22,
+          "origin_tick": 42200,
+          "params": {
+            "expire_tick": 43400,
+            "order_id": 295,
+            "origin_pos": "(11, 5)",
+            "origin_team": 22,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team22 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 22,
+          "origin_tick": 42200,
+          "params": {
+            "expire_tick": 43400,
+            "order_id": 296,
+            "origin_pos": "(11, 5)",
+            "origin_team": 22,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team22 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 22,
+          "origin_tick": 42200,
+          "params": {
+            "expire_tick": 43400,
+            "order_id": 297,
+            "origin_pos": "(11, 5)",
+            "origin_team": 22,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team22 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 298,
+          "origin_team": 22,
+          "origin_tick": 42200,
+          "params": {
+            "expire_tick": 43400,
+            "order_id": 298,
+            "origin_pos": "(11, 5)",
+            "origin_team": 22,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team4 徵 food ×57",
+          "distorted": false,
+          "id": 287,
+          "origin_team": 4,
+          "origin_tick": 42250,
+          "params": {
+            "expire_tick": 43450,
+            "order_id": 287,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 57,
+            "res": "food"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team13 售 material ×49",
+          "distorted": false,
+          "id": 288,
+          "origin_team": 13,
+          "origin_tick": 42250,
+          "params": {
+            "expire_tick": 43450,
+            "order_id": 288,
+            "origin_pos": "(9, 6)",
+            "origin_team": 13,
+            "qty": 49,
+            "res": "material"
+          },
+          "pos": [
+            9,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team4 售 material ×42",
+          "distorted": false,
+          "id": 289,
+          "origin_team": 4,
+          "origin_tick": 42370,
+          "params": {
+            "expire_tick": 43570,
+            "order_id": 289,
+            "origin_pos": "(5, 5)",
+            "origin_team": 4,
+            "qty": 42,
+            "res": "material"
+          },
+          "pos": [
+            5,
+            5
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team11 售 material ×26",
+          "distorted": false,
+          "id": 290,
+          "origin_team": 11,
+          "origin_tick": 42370,
+          "params": {
+            "expire_tick": 43570,
+            "order_id": 290,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 26,
+            "res": "material"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team23 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 291,
+          "origin_team": 23,
+          "origin_tick": 42400,
+          "params": {
+            "expire_tick": 43600,
+            "order_id": 291,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 292,
+          "origin_team": 23,
+          "origin_tick": 42400,
+          "params": {
+            "expire_tick": 43600,
+            "order_id": 292,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 23,
+          "origin_tick": 42400,
+          "params": {
+            "expire_tick": 43600,
+            "order_id": 293,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team23 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 23,
+          "origin_tick": 42400,
+          "params": {
+            "expire_tick": 43600,
+            "order_id": 294,
+            "origin_pos": "(11, 4)",
+            "origin_team": 23,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            4
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 售 food ×37",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 20,
+          "origin_tick": 42450,
+          "params": {
+            "expire_tick": 43650,
+            "order_id": 295,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 37,
+            "res": "food"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team20 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 20,
+          "origin_tick": 42450,
+          "params": {
+            "expire_tick": 43650,
+            "order_id": 296,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 20,
+          "origin_tick": 42450,
+          "params": {
+            "expire_tick": 43650,
+            "order_id": 297,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 298,
+          "origin_team": 20,
+          "origin_tick": 42450,
+          "params": {
+            "expire_tick": 43650,
+            "order_id": 298,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team20 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 299,
+          "origin_team": 20,
+          "origin_tick": 42450,
+          "params": {
+            "expire_tick": 43650,
+            "order_id": 299,
+            "origin_pos": "(14, 6)",
+            "origin_team": 20,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            14,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team0 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 0,
+          "origin_tick": 42490,
+          "params": {
+            "expire_tick": 43690,
+            "order_id": 297,
+            "origin_pos": "(6, 9)",
+            "origin_team": 0,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            6,
+            9
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team5 售 material ×45",
+          "distorted": false,
+          "id": 298,
+          "origin_team": 5,
+          "origin_tick": 42490,
+          "params": {
+            "expire_tick": 43690,
+            "order_id": 298,
+            "origin_pos": "(5, 16)",
+            "origin_team": 5,
+            "qty": 45,
+            "res": "material"
+          },
+          "pos": [
+            5,
+            16
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team11 徵 food ×89",
+          "distorted": false,
+          "id": 299,
+          "origin_team": 11,
+          "origin_tick": 42490,
+          "params": {
+            "expire_tick": 43690,
+            "order_id": 299,
+            "origin_pos": "(5, 10)",
+            "origin_team": 11,
+            "qty": 89,
+            "res": "food"
+          },
+          "pos": [
+            5,
+            10
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team6 徵 food ×6",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 6,
+          "origin_tick": 42730,
+          "params": {
+            "expire_tick": 43930,
+            "order_id": 293,
+            "origin_pos": "(11, 8)",
+            "origin_team": 6,
+            "qty": 6,
+            "res": "food"
+          },
+          "pos": [
+            11,
+            8
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team7 售 material ×44",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 7,
+          "origin_tick": 42730,
+          "params": {
+            "expire_tick": 43930,
+            "order_id": 294,
+            "origin_pos": "(15, 7)",
+            "origin_team": 7,
+            "qty": 44,
+            "res": "material"
+          },
+          "pos": [
+            15,
+            7
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team14 售 material ×70",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 14,
+          "origin_tick": 42730,
+          "params": {
+            "expire_tick": 43930,
+            "order_id": 295,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 70,
+            "res": "material"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team14 徵 food ×54",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 14,
+          "origin_tick": 42730,
+          "params": {
+            "expire_tick": 43930,
+            "order_id": 296,
+            "origin_pos": "(12, 0)",
+            "origin_team": 14,
+            "qty": 54,
+            "res": "food"
+          },
+          "pos": [
+            12,
+            0
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 21,
+          "origin_tick": 42830,
+          "params": {
+            "expire_tick": 44030,
+            "order_id": 297,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 298,
+          "origin_team": 21,
+          "origin_tick": 42830,
+          "params": {
+            "expire_tick": 44030,
+            "order_id": 298,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 299,
+          "origin_team": 21,
+          "origin_tick": 42830,
+          "params": {
+            "expire_tick": 44030,
+            "order_id": 299,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team21 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 300,
+          "origin_team": 21,
+          "origin_tick": 42830,
+          "params": {
+            "expire_tick": 44030,
+            "order_id": 300,
+            "origin_pos": "(11, 11)",
+            "origin_team": 21,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            11,
+            11
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team9 售 material ×38",
+          "distorted": false,
+          "id": 301,
+          "origin_team": 9,
+          "origin_tick": 42850,
+          "params": {
+            "expire_tick": 44050,
+            "order_id": 301,
+            "origin_pos": "(10, 14)",
+            "origin_team": 9,
+            "qty": 38,
+            "res": "material"
+          },
+          "pos": [
+            10,
+            14
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team16 售 food ×256",
+          "distorted": false,
+          "id": 293,
+          "origin_team": 16,
+          "origin_tick": 42960,
+          "params": {
+            "expire_tick": 44160,
+            "order_id": 293,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 256,
+            "res": "food"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_sell"
+        },
+        {
+          "desc": "Team16 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 294,
+          "origin_team": 16,
+          "origin_tick": 42960,
+          "params": {
+            "expire_tick": 44160,
+            "order_id": 294,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 295,
+          "origin_team": 16,
+          "origin_tick": 42960,
+          "params": {
+            "expire_tick": 44160,
+            "order_id": 295,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 296,
+          "origin_team": 16,
+          "origin_tick": 42960,
+          "params": {
+            "expire_tick": 44160,
+            "order_id": 296,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team16 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 297,
+          "origin_team": 16,
+          "origin_tick": 42960,
+          "params": {
+            "expire_tick": 44160,
+            "order_id": 297,
+            "origin_pos": "(10, 6)",
+            "origin_team": 16,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            10,
+            6
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 weapon_melee_low ×6",
+          "distorted": false,
+          "id": 298,
+          "origin_team": 17,
+          "origin_tick": 43000,
+          "params": {
+            "expire_tick": 44200,
+            "order_id": 298,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "weapon_melee_low"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 weapon_ranged_low ×6",
+          "distorted": false,
+          "id": 299,
+          "origin_team": 17,
+          "origin_tick": 43000,
+          "params": {
+            "expire_tick": 44200,
+            "order_id": 299,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "weapon_ranged_low"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 ore_iron ×6",
+          "distorted": false,
+          "id": 300,
+          "origin_team": 17,
+          "origin_tick": 43000,
+          "params": {
+            "expire_tick": 44200,
+            "order_id": 300,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "ore_iron"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        },
+        {
+          "desc": "Team17 徵 ore_steel ×6",
+          "distorted": false,
+          "id": 301,
+          "origin_team": 17,
+          "origin_tick": 43000,
+          "params": {
+            "expire_tick": 44200,
+            "order_id": 301,
+            "origin_pos": "(16, 7)",
+            "origin_team": 17,
+            "qty": 6,
+            "res": "ore_steel"
+          },
+          "pos": [
+            16,
+            7
+          ],
+          "strength": 1,
+          "type": "order_buy"
+        }
+      ],
+      "observer": []
+    },
+    "seed": 1337
+  }
+}

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R① re-verify·訂正前提] v1 premise_contradiction 收下。訂正前提(藍圖+系統收斂):①food-security survival-crush項編進秤(farming×(1+CRUSH×urgency²),urgency由food_security_target人格調變)手算餓→farming量級輾壓可耕地/食安→人格發展贏——直答你v1駁表;②means-end統一建設發起涵蓋faction_id=-1;③常數0.8 flat/7人格化,TARGET_PER_POP雙身分分離;④序:score修好才拆override。驗手算+wiring可達,新詮釋(urgency真fire)可能需measure"
 ---
 

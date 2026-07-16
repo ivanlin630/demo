@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R①·前提 factcheck·大框先驗] Arc1 統一 need oracle——blueprint 明令『判斷層已被獨立查證推翻7次,大框前提務必先驗』。refute 向 factcheck 6 前提:①食物need真散≥7處各算各(不同閾10 vs 14天)?②TARGET_PER_POP=flat常數當need-proxy?③NeedHierarchy現僅引擎內部乘子非全域?④供應鏈傳導(RECIPE_GROUPS支援劍→回推鐵鋼)?⑤_add_output溢出丟回傳值蒸發違守恆?⑥goods只貿易need無自用?premise_contradiction→回systems修再spec"
 ---
 

@@ -1,0 +1,10 @@
+=== Team0 (seed1337) 可讀生命日誌:task轉折+每10天快照 ===
+day  0 t   10 | (reaction)   | pop=8 food=499.7 gran=801 coin=50 mat=80 | -
+day 10 t 2410 | (reaction)   | pop=8 food=435.7 gran=0 coin=43 mat=80 | 賣materi×40,買weapon×6,買ore_ir×6,買ore_st×6
+day 20 t 4810 | (reaction)   | pop=8 food=371.7 gran=0 coin=34 mat=80 | 賣materi×40,買weapon×6,買ore_ir×6,買ore_st×6
+day 30 t 7210 | (reaction)   | pop=8 food=307.7 gran=0 coin=16 mat=80 | 賣materi×40,買weapon×6,買ore_ir×6,買ore_st×6
+day 40 t 9610 | (reaction)   | pop=8 food=243.7 gran=0 coin=7 mat=80 | 賣materi×40,買weapon×6,買ore_ir×6,買ore_st×6
+day 50 t12010 | (reaction)   | pop=8 food=179.7 gran=0 coin=0 mat=80 | 賣materi×40,買weapon×6,買ore_ir×6,買ore_st×6
+day 60 t14410 | (reaction)   | pop=8 food=115.7 gran=0 coin=0 mat=80 | 賣materi×40,買weapon×6,買ore_ir×6,買ore_st×6
+day 70 t16810 | (reaction)   | pop=8 food=51.7 gran=0 coin=0 mat=80 | 賣materi×40,買weapon×6,買ore_ir×6,買ore_st×6
+day 80 t19210 | (reaction)   | pop=5 food=3.9 gran=0 coin=0 mat=60 | 買weapon×6,買food×26,賣materi×30,買weapon×6,買ore_ir×6,買ore_st×6

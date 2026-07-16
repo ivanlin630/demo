@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[emergence multi-seed 混合·tune 前提變了呈報] 好戰→軍事強烈坐實(Δ+0.36);貪婪→工坊反向/慎重→農零——但★這是框架need-first設計可預期後果非tuning漏:farming被survival-crush刻意主導、workshop被deficit主導→人格term被輾壓=正確(食安地基)。盲tune人格權重有風險(打架need-correctness傷供給+trait映射『工坊=貪婪』本身可疑,貪婪可能→貿易掠奪非建廠)。觸WHAT:願景archetype模型(工匠=哪trait?多強personality vs need-driven?)你裁"
 ---
 

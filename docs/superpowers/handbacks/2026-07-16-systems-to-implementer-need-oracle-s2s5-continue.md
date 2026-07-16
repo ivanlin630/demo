@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[CONTINUE·S2-S5·fresh session] need oracle S1 接受(c25abfb7,Tier1 5綠,零產線影響=fallback設計生效)。裁:S2-S5 fresh session續(核心架構arc大slice,degraded-ctx高風險;git保S1)。接手:branch feat/need-oracle@c25abfb7,spec v2唯一真相,next=S2供應鏈gap+gating+多配方→S3貿易demand非幽靈→S4共讀兩量+per-recipe停產+TARGET_PER_POP退役+SURVIVAL_CRUSH reconcile→S5溢出落地雙sink+migrate。每slice Tier1。禁AskUserQuestion"
 ---
 

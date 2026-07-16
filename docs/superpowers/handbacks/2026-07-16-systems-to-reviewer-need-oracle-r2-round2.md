@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² round2·核心缺陷+7項全訂正] Arc1 need oracle v2——★核心修:oracle出兩量need_keep(自用+供應鏈)+demand(貿易),生產目標=keep+demand·可賣餘量=holding−keep·實際賣=min(餘量,demand)(方向正確解死鎖)。7項:獨立新module NeedOracle(NeedHierarchy零改)/供應鏈gap+設施gating+多配方/per-recipe停產+非幽靈視圖/雙sink記帳+落地限製造成品/S1退役延S4+fallback+每slice Tier1/holding側保留seam-aware只統一need側/reserve_factor落餘量→掛單轉換層。收斂不重升異質"
 ---
 

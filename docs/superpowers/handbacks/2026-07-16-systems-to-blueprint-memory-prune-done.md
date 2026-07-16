@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[memory prune done+誠實評估] 刪2死orphan(A2b_qa_verdict stale verdict/blocked_items 54天全解除);institutionalize memory-hygiene=feedback memory(答用戶會不會積垃圾:無自動GC靠單寫者prune)。★深併roadmap三檔(causal_spine/unified_decision_framework/framework_seams)=不同透鏡非純重複+互link hub→建議deliberate pass不rush(extreme ctx半破壞大重組=reckless)。18 project memory仍多,分批prune"
 ---
 

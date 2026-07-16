@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² round2·補裁 5 項] 收下 R² issue——v1 異質審同批 5 額外閘全逐項裁定寫進 spec:①礦山override→de-patch融_pick_outpost_type人格秤 ②farming不拆→留為規則(命脈保護,de-patch有thrash險) ③survival農田特例→留為規則+泛化產糧設施 ④govern雙寫→移A4·單owner引擎駐守·infra不秤(避Team10 livelock) ⑤tap 2缺口→明列入S1.3(原料不足+tile null)。對齊藍圖拆光全部。收斂不重升異質"
 ---
 

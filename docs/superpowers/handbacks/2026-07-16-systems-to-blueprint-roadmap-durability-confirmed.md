@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[durability 達成確認] unification_matrix memory content 已更新7序+Arc1在飛(commit a5bb0431,已grep驗:description line+完整7序段+Arc1兩量need_keep/demand架構+R①R²CLEAN+S1 done)。content更新從沒綁deferred大合併——deferred只跨檔lens-merge。三處耐久(game-design WHAT+memory每session喚醒+progress走到哪)全完。用戶路線圖免重問=達成"
 ---
 

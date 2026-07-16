@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH·統一路線首塊大框 TDD] Arc1 need oracle v2——R①CLEAN+R²CLEAN(異質)全過。worktree feat/need-oracle@origin/main。★核心兩量:need_keep(自用+供應鏈)+demand(貿易),reader組合方向正確。TDD S1骨架+自用(退役延S4+fallback)→S2供應鏈gap→S3貿易demand→S4共讀兩量+per-recipe停產+TARGET_PER_POP退役→S5溢出落地雙sink+migrate。每slice Tier1。整arc完成handback to:systems(→measurer full-HD)。禁AskUserQuestion"
 ---
 

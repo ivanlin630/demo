@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·設計審·統一路線首塊大框] Arc1 need oracle spec——R① CLEAN 後架。NeedOracle 全域源(自用消耗率×人格buffer推導/供應鏈RECIPE傳導/貿易綁deal),生產商業共讀餘量(holding−need)防打架,含停產+溢出落地(sink改TileBank.pool_add+tap)+消耗品可貿易。退役TARGET_PER_POP雙宣告。5 slice。★建議升異質框外審(統一arc首塊·大框·立模式)。CLEAN才dispatch"
 ---
 

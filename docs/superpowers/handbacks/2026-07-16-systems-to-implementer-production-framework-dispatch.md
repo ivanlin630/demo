@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH·大框 TDD] 統一生產框架 v2——R①CLEAN+R²CLEAN 全過。worktree feat/production-framework@origin/main。TDD S1製造precondition+tap→S2 survival-crush+granary seam+常數分層(override留)→★S2 gate驗餓隊farming主導→S3 means-end統一發起(涵蓋faction_id=-1)→S4移override+A3 utility+A4/礦山de-patch。整框架完成handback to:systems(→measurer full-HD)。禁AskUserQuestion"
 ---
 
