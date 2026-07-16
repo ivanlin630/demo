@@ -729,3 +729,8 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **S1 done**（branch feat/need-oracle @ c25abfb7，Tier1 5 綠，零產線影響=fallback 防中間態設計生效）。**S2-S5 remaining**（fresh session 續，ctx 衛生）。
 - **核心架構**：NeedOracle 獨立新 module（NeedHierarchy 零改），出兩量 `need_keep`(自用+供應鏈,保留向)+`demand`(貿易,流出向);reader 組合 生產=keep+demand·可賣餘量=holding−keep·賣=min(餘量,demand)（R² 異質框外審抓單標量混反向缺陷後修）。
 - **next=S2** 供應鏈 gap+gating+多配方→S3 貿易 demand 非幽靈→S4 共讀兩量+per-recipe 停產+TARGET_PER_POP 退役+SURVIVAL_CRUSH reconcile→S5 溢出落地雙 sink+migrate。spec v2=唯一真相。關 [[project_economy_arc]]。
+
+## Arc1 need oracle done + urgency-閾順延 arc5（2026-07-16）
+- **Arc1 need-quantity oracle S1-S5 core done**（branch feat/need-oracle @ 71280560,measurer full-HD 驗中）：NeedOracle 兩量(need_keep 自用+供應鏈/demand 貿易)、manufacturing 需求驅動、per-recipe 停產、reserve→need_keep、溢出雙 sink 落地守恆、TARGET_PER_POP 退役。早訊號:矛盾率 0.716→0.667、goods 死鎖解、trade 活、CoinAudit=0×多輪、生產框架 crossover reconcile。
+- **★scope 釐清(implementer 抓)**:「散 need」混兩軸——**need-quantity**(該留多少:farming×14/reserve/TARGET)本 arc 收斂✓;**urgency-天閾**(DESPERATION/WARNING/RECOVER/SLACK/URGENCY days-常數,離餓幾天驅 survival 排序)=獨立 urgency 軸,量≠急,留 NeedHierarchy 零改動→**順延 arc5 死常數人格化**(它們是決策門檻常數該人格化)。migrate 進 NeedOracle=category error。
+- deal 側成交牆(死法②)可能仍需專 arc(貿易 need 綁 deal 是供給側誠實,成交起否待 measurer)。關 [[project_economy_arc]]/[[project_unification_matrix]] arc5。
