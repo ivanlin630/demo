@@ -633,3 +633,8 @@ need-quantity 收斂成單一思考驅動 oracle。
 - **批前兩坑修**：mis-cite(矛盾率=死法②)+incomplete single-source(S6)。**known-deferred**：終端消耗品 self-use 值待戰耗機制。**死法②=下 arc**。
 - **★立模式（Arc2-3 照做）**：單一 oracle+既有零改動邊界+byte-identical refactor 驗+乾淨全量對指標+前提先驗 R①+判準(源統一硬/值推導軟債)。
 - **路線圖狀態更新**：1🟢merged / 2🔵next(三重 dispatch 收斂) / 3-7⚪待。
+
+## 統一路線圖重排（2026-07-16，R① reframe 後）
+- **Arc2 dispatch 收斂 → 降級低優先**：R① 揭 4 個 rank_*（survival/threat/scored/ambient）全是同 DecisionOptions.applicable() 池 + 同 terms filtered subset，**非繞過引擎、無 bypass 可拆**=cosmetic cleanup 非 de-patch → 降級（含 survival/threat 語意併=北極星，日後）。
+- **Arc2 = 統一 threat oracle（原 Arc3 上移，🔵R① 驗中）**：roadmap 稱 8 處各算/3 門檻不一致=真高值打架種子。**★前提先驗 R①**（稽核前提連兩次被打臉[need 7處→2軸、dispatch 三重→4 filtered]→不假設，驗 8 處真各算還是同源 filtered）。
+- **★鐵律**：稽核前提不可靠、連被 R① 修正 → 每 arc spec 前 R① factcheck，永不在稽核假設上寫 spec。路線序動態（非固定）。
