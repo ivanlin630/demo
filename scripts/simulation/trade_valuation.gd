@@ -83,17 +83,15 @@ static func _stock(state: WorldState, team: TeamData, res: String) -> float:
 	return float(team.resources.get(res, 0))
 
 static func reserve(team: TeamData, res: String, leader_values: Dictionary = {}, state: WorldState = null) -> float:
-	if res == "food":
-		# 人格化：食物留底=人格安全存量目標(天)×pop×真實日耗——不賣到自己餓。空 leader_values→BASE 4 天。
-		return DecisionTerms.food_security_target(leader_values) * float(team.population) \
-			* ResourceSystem.FOOD_PER_PERSON_PER_DAY
+	# need-oracle S4b：reserve = 保留向 need_keep（R² 核心兩量落點）。coin 特例保留。
 	if res == "coin":
 		return float(team.resources.get("coin", 0)) * 0.5
-	if res in SURVIVAL_GOODS:
-		# ★medicine（另一活命品）：保 flat survival floor，不液化（絕境不甩救命藥）。
-		return float(team.population) * float(TARGET_PER_POP.get(res, 0.0))
-	# 非活命品：液化 + 人格化（流動為底、貪婪守/絕境鬆手＝摩擦人格質感）。
-	return float(team.population) * float(TARGET_PER_POP.get(res, 0.0)) * _reserve_factor(team, leader_values, state)
+	# food/medicine（SURVIVAL）：need_keep 已含 food 自用/medicine 終端自用＝survival floor，不液化（絕境不甩活命糧）。
+	if res == "food" or res in SURVIVAL_GOODS:
+		return NeedOracle.need_keep(state, team, res, leader_values)
+	# 非活命品：need_keep（自用+供應鏈）× 液化（貪婪守/絕境鬆手＝可賣餘量轉換層安全網）。
+	# goods need_keep=0 → reserve=0 → 可賣餘量=holding（有 demand 才賣，死鎖解）。
+	return NeedOracle.need_keep(state, team, res, leader_values) * _reserve_factor(team, leader_values, state)
 
 # 非活命品 reserve 人格化液化係數：貪婪/慎重↑守貨(高)、急迫/絕境↓鬆手賣(低)。純算術零 randf。
 static func _reserve_factor(team: TeamData, leader_values: Dictionary, state: WorldState = null) -> float:

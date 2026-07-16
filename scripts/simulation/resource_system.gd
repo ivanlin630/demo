@@ -278,7 +278,10 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 			# 故 food 不入 gained → 不再走一般稅 split（避免重複入庫）。
 			var dst_tile: HexTileData = state.world.tiles.get(_pos_to_tile_id(team.tile_pos))
 			if dst_tile != null and dst_tile.outpost_level > 0:
-				TileBank.deposit(dst_tile, res, gain, "harvest_intake_vault")   # capped，over-cap drop = sink
+				# S5：第二 sink 記帳——自然資源 over-cap 是 legit 倉容上限(落自然池會撞 regen cap-clamp 故不落地)，補 tap 使可觀測。
+					var _dep: float = TileBank.deposit(dst_tile, res, gain, "harvest_intake_vault")   # capped，over-cap = legit 倉滿
+					if gain - _dep > 0.001:
+						Probe.bump("harvest.vault_overflow_drop")   # S5 tap：糧倉滿溢出可觀測(S5 閘對此資源不假)
 			else:
 				# 無 outpost fallback 進 team（小隊；food 仍記 gained 供一般稅）
 				ResourceBank.add(team, res, gain, "harvest_intake")
