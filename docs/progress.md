@@ -613,3 +613,14 @@ hand vendetta dispatch（`faction_ai:733-741` 直塞 TASK_ATTACK@PRIO_VENDETTA�
 - **measurer full-HD**：has_facility 恆1→10%~31.3%（含獨立隊 27.3%）、成品池 26→480(18x)、[Manufacture] 6→4348、no-op=0、urgency 真 fire、starve 2→2 無回歸、守恆 PASS、觀測閘 byte-identical。
 - **閘鏈**：R①（異質手算擋天真 de-patch）→re-verify CLEAN→R² issues(5 閘)→R² CLEAN→impl(S2 gate)→measurer→觀測閘全綠→blueprint 批。
 - **誠實標記**：供給破=強證；人格分化 mechanism-present 待 multi-seed fast-follow；deal 側成交牆(死法②)=下個 arc。
+
+## ★統一路線圖 v2（用戶定「照路線架」2026-07-16）
+全庫稽核:DecisionEngine 半成品(引擎存在但引擎外多 dispatch 路 + 各算各的 need 7處/threat 8處/估值 5處,faction_ai 3781 行大雜燴)。路線=收散亂成單一思考驅動 oracle。**7 序 + 執行狀態**:
+1. **統一 need oracle（Arc1，🔵在飛）**：NeedOracle 獨立 module,兩量 need_keep(自用+供應鏈)+demand(貿易);生產/商業共讀餘量防打架;停產+溢出落地雙 sink+消耗品可貿易+退役 TARGET_PER_POP。R①CLEAN+R²CLEAN(異質抓核心單標量混反向缺陷)+S1 done(c25abfb7),S2-S5 fresh session 續。
+2. 收斂三重 dispatch（威脅/求生全走引擎 rank）— ⚪待。
+3. 統一威脅 oracle（ThreatAssessment 單源，8 處收斂）— ⚪待。
+4. 拆 `_threat_recent` 軍備閘 — ⚪待。
+5. 決策門檻死常數人格化（照妖鏡族）— ⚪待。
+6. 情緒系統 — ⚪待。
+7. 內部政治 / 設施 / 俘虜 — ⚪待。
+紀律:每 arc 前提先驗(R①)+R²(大框升異質)+measurer full-HD。三處耐久:game-design(WHAT)+memory+progress(此)。
