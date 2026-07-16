@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_test_s2_gap_not_raw()
 	_test_s3_trade_demand_nonghost()
 	_test_s4_per_recipe_stop()
+	_test_s6_facility_deficit_oracle()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -139,3 +140,26 @@ func _test_s4_per_recipe_stop() -> void:
 	# goods 滿 → 不再產 goods（可能產 tools/arrows 因 terminal self_use，但 goods 這條 recipe stop）
 	var ran2: String = mfg._run_recipe_group(w[0], w[1], w[0].world.tiles[0], "manufacturing_level", 1.0)
 	_ok(ran2 != "goods", "★goods 滿→per-recipe 停產 goods（不燒 material 囤爆，實際=%s）" % ran2)
+
+# ── S6：_facility_deficit non-food 遷 oracle（workshop-for-goods 由 demand 驅、apothecary 由 medicine need）──
+func _test_s6_facility_deficit_oracle() -> void:
+	print("--- S6：facility_deficit 遷 oracle ---")
+	var fai := FactionAISystem.new()
+	# workshop：goods 無 demand + tools/arrows 有 self_use → deficit>0（tools/arrows 缺口驅）
+	var w := _mk_state_team_facility(10, "manufacturing_level", 1)
+	w[0].world.current_tick = 100
+	w[1].resources = {"tools": 0.0, "arrows": 0.0, "goods": 0.0}
+	var tile: HexTileData = w[0].world.tiles[0]
+	var d_notrade: float = fai._facility_deficit(w[0], w[1], "workshop", tile)
+	_ok(d_notrade > 0.0, "workshop deficit>0（tools/arrows self_use need 缺口驅，實際=%.2f）" % d_notrade)
+	# ★goods demand 驅：加 goods 買單 → workshop deficit 反映 goods 想產（demand 非 keep）
+	w[1].resources = {"tools": 9999.0, "arrows": 9999.0, "goods": 0.0}   # tools/arrows 滿→只剩 goods 可驅
+	var d_nodemand: float = fai._facility_deficit(w[0], w[1], "workshop", tile)
+	w[0].team_known[1] = [_mk_buy_msg("goods", 40, 5, 200)]   # goods demand
+	var d_demand: float = fai._facility_deficit(w[0], w[1], "workshop", tile)
+	_ok(d_demand > d_nodemand, "★goods demand→workshop deficit 升（%.2f>%.2f，goods 由 demand 驅非 keep）" % [d_demand, d_nodemand])
+	# apothecary：medicine need_keep 驅
+	var a := _mk_state_team_facility(10, "apothecary_level", 1)
+	a[1].resources = {"medicine": 0.0}
+	var d_med: float = fai._facility_deficit(a[0], a[1], "apothecary", a[0].world.tiles[0])
+	_ok(d_med > 0.0, "apothecary deficit>0（medicine need_keep 驅，實際=%.2f）" % d_med)

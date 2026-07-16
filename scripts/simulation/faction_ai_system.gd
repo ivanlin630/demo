@@ -3067,6 +3067,9 @@ func _facility_terrain_fit(state: WorldState, facility: String, tile: HexTileDat
 func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 		tile: HexTileData) -> float:
 	var pop: float = maxf(float(team.population), 1.0)
+	# S6：non-food QUANTITY-target 遷 NeedOracle need（消引擎外各算 TARGET_PER_POP 殘留，與生產/商業共讀同源）。
+	# farming 已遷 granary（勿動）；weaponsmith(armed_ratio)/mint(ore-tile) 是 ratio/physics 非 quantity-target，保留。
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	match facility:
 		"farming":
 			var target: float = pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 14.0
@@ -3074,30 +3077,35 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 			var local_food: float = float(tile.public_storage.get("food", 0)) + float(team.resources.get("food", 0))
 			return clampf((target - local_food) / target, 0.0, 1.0)
 		"workshop":
+			# S6：goods=demand 驅(need_keep=0 純貿易)、tools/arrows=need_keep(自用)。target=兩量和(該 res 性質自動)。
 			var worst: float = 1.0
 			for res in ["goods", "tools", "arrows"]:
-				var tgt: float = float(TradeValuation.TARGET_PER_POP.get(res, 1.0)) * pop
-				worst = minf(worst, float(team.resources.get(res, 0)) / maxf(tgt, 0.001))
+				var tgt: float = NeedOracle.need_keep(state, team, res, lv) + NeedOracle.demand(state, team, res, lv)
+				if tgt <= 0.001:
+					continue   # 該 res 無 need+demand → 不驅工坊 deficit（goods 無買家不逼建工坊）
+				worst = minf(worst, float(team.resources.get(res, 0)) / tgt)
 			return clampf(1.0 - worst, 0.0, 1.0)
 		"apothecary":
-			var med_tgt: float = pop * 0.2
-			return clampf((med_tgt - float(team.resources.get("medicine", 0))) \
-				/ maxf(med_tgt, 0.001), 0.0, 1.0) * 0.5
+			var med_tgt: float = NeedOracle.need_keep(state, team, "medicine", lv)   # S6：medicine 終端自用 need
+			if med_tgt <= 0.001: return 0.0
+			return clampf((med_tgt - float(team.resources.get("medicine", 0))) / med_tgt, 0.0, 1.0) * 0.5
 		"weaponsmith":
 			if not _threat_recent(state, team): return 0.0
-			return clampf(0.6 - team.armed_anon_ratio, 0.0, 1.0)
+			return clampf(0.6 - team.armed_anon_ratio, 0.0, 1.0)   # armed_ratio 非 quantity-target，保留
 		"armorsmith":
 			if not _threat_recent(state, team): return 0.0
 			var armor: float = float(team.resources.get("armor_low", 0)) \
 				+ float(team.resources.get("armor_high", 0))
-			var a_tgt: float = pop * 0.3
-			return clampf((a_tgt - armor) / maxf(a_tgt, 0.001), 0.0, 1.0)
+			# S6：armor 終端自用 need（兩級和）
+			var a_tgt: float = NeedOracle.need_keep(state, team, "armor_low", lv) + NeedOracle.need_keep(state, team, "armor_high", lv)
+			if a_tgt <= 0.001: return 0.0
+			return clampf((a_tgt - armor) / a_tgt, 0.0, 1.0)
 		"smeltery":
-			# 武器/護甲坊存在且 steel 缺
+			# 武器/護甲坊存在（facility gating 保留）且 steel 缺
 			if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0: return 0.0
-			var s_tgt: float = pop * 0.75
-			return clampf((s_tgt - float(team.resources.get("ore_steel", 0))) \
-				/ maxf(s_tgt, 0.001), 0.0, 1.0)
+			var s_tgt: float = NeedOracle.need_keep(state, team, "ore_steel", lv)   # S6：ore_steel 供應鏈 need
+			if s_tgt <= 0.001: return 0.0
+			return clampf((s_tgt - float(team.resources.get("ore_steel", 0))) / s_tgt, 0.0, 1.0)
 		"mint":
 			# TILE-bound ore only：public_storage（採後入庫）+ resource_cap（礦脈存在標記）。
 			# 不含 team.resources：持有 looted/traded ore 的非礦村 outpost 不應觸發 mint 建造。
@@ -3108,9 +3116,9 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 			var ore: float = maxf(ore_pub, ore_cap * 0.5)
 			return 1.0 if ore > 10.0 else 0.0
 		"stable":
-			var m_tgt: float = pop * MOUNT_TARGET_RATIO
-			return clampf((m_tgt - float(team.resources.get("mounts", 0))) \
-				/ maxf(m_tgt, 0.001), 0.0, 1.0)
+			var m_tgt: float = NeedOracle.need_keep(state, team, "mounts", lv)   # S6：mounts 終端自用 need
+			if m_tgt <= 0.001: return 0.0
+			return clampf((m_tgt - float(team.resources.get("mounts", 0))) / m_tgt, 0.0, 1.0)
 	return 0.0
 
 # 個性：1.0 + Σ values × pref
