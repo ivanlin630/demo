@@ -734,3 +734,7 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **Arc1 need-quantity oracle S1-S5 core done**（branch feat/need-oracle @ 71280560,measurer full-HD 驗中）：NeedOracle 兩量(need_keep 自用+供應鏈/demand 貿易)、manufacturing 需求驅動、per-recipe 停產、reserve→need_keep、溢出雙 sink 落地守恆、TARGET_PER_POP 退役。早訊號:矛盾率 0.716→0.667、goods 死鎖解、trade 活、CoinAudit=0×多輪、生產框架 crossover reconcile。
 - **★scope 釐清(implementer 抓)**:「散 need」混兩軸——**need-quantity**(該留多少:farming×14/reserve/TARGET)本 arc 收斂✓;**urgency-天閾**(DESPERATION/WARNING/RECOVER/SLACK/URGENCY days-常數,離餓幾天驅 survival 排序)=獨立 urgency 軸,量≠急,留 NeedHierarchy 零改動→**順延 arc5 死常數人格化**(它們是決策門檻常數該人格化)。migrate 進 NeedOracle=category error。
 - deal 側成交牆(死法②)可能仍需專 arc(貿易 need 綁 deal 是供給側誠實,成交起否待 measurer)。關 [[project_economy_arc]]/[[project_unification_matrix]] arc5。
+
+## Arc1 need oracle S6 + 終端消耗品 known-deferred（2026-07-16）
+- **S6 遷 `_facility_deficit` → oracle**（dispatched）:blueprint 裁甲——workshop/apothecary/weaponsmith 等 non-food 設施 deficit 引擎外走 TARGET_PER_POP 各算=單一源違規+打架種子→遷 NeedOracle need（goods 由 demand 驅因 need_keep=0;保 facility gating）。遷完 ① clean→measurer 乾淨全量→批。
+- **終端消耗品(武器/tools/armor) self-use=known-deferred(非 blocker)**:NeedOracle 內 self-use 暫用 flat TARGET_PER_POP base（`need_oracle:35`），**單一源已達成**(reader 都經 oracle),只是值待「戰耗/造耗/傷耗率」世界物理機制建了才真推導。判準見 invariants「單一源 oracle 判準」(源統一=硬/值推導=軟債)。順手 arc5 死常數人格化或戰鬥機制 arc 補推導。關 [[project_economy_arc]]。

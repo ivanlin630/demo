@@ -45,6 +45,7 @@
 - **★B 重框（取代「常數參數化」）= 落地債**：**行為門檻的歸宿只有兩處——世界代價（seed/世界接地）或人格/記憶/現況（逐 agent）；無塑造行為的門檻該以全域常數活下來。** `PREEMPT_MARGIN=2.0` 病=該由這隊謹慎度算出（膽小早逃/悍將晚動），非全域一刀切=第一示範。同類：THREAT_CADENCE/FEUD_ATTACK_MIN/VIABLE_ARMED_RATIO/各 reaction 閾。**方向硬機制軟**：怎麼算/何時溶/溶多深=系統 HOW+measure 按 arc 節奏逐步收（arc 內順手 or 另軌「常數人格化」）。
 - **★溶入驗收多一條隱性標準**（所有後續溶）：**該行為是否真穿過人格/記憶/現況的秤，非某全域規則/常數直達。冒出具名 margin/gate/threshold 常數=照妖鏡響。**
 - **★★域專判斷器邊界原則（用戶定 2026-07-15）**：獨立 domain scorer（`decide_treatment` 讀殘忍→苛待、`ReactionSystem` named 9-scorer 等）**不必強塞 DecisionEngine `rank`** 才算「統一」。合法域專 scorer 判準兩條：①**真穿人格/記憶/現況**（非硬寫繞過引擎的死路）；②**讀跟主引擎同一組人格值**（角色一致，不分裂人格）。**統一 arc 的敵人＝硬寫/繞過 dispatch 的死常數 gate（C 類 judge 退役針對這種），非人格化 scorer。** ∴ 滿足兩條的域專 scorer＝**矩陣可標「收斂」非「待併 rank」**（decide_treatment/reaction-9 皆是，非 unification blocker/殘項）。未來同類 scorer 照此判，別再逐個當「未統一殘項」列 backlog。**反例仍違規**：讀跟主引擎不同的人格值（人格分裂）、或硬寫常數 gate 繞過（照妖鏡響）。
+- **★★單一源 oracle 判準（用戶/blueprint 定 2026-07-16，統一路線圖通則）**：收概念成單一 oracle（need/threat/估值…）時，兩種「不完整」判準不同：**①違規=oracle 外各算**（同概念在引擎外另有一套計算，如 `_facility_deficit` 引擎外走 TARGET_PER_POP 算 need）→**必遷 oracle**（是打架種子，各算會不一致）。**②可接受 deferred=oracle 內值暫 flat**（單一源已達成、所有 reader 都經 oracle，只是某分量的值還是常數未推導，如 NeedOracle 終端消耗品 self-use 暫用 TARGET_PER_POP 待戰耗率機制）→**記 known-deferred 非 blocker**（值的精化可後補，源已統一）。**分界=「源」統一（reader 都經 oracle）是硬標準；「值」推導完整度是可分期的軟債。** 驗收乾淨證據時 grep「oracle 外同概念各算」=硬 gate，「oracle 內 flat 值」=documented。
 
 ## ★★ 全量暫態可觀測性（governing invariant，憲法同級，用戶定 2026-07-14）
 
