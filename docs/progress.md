@@ -624,3 +624,12 @@ hand vendetta dispatch（`faction_ai:733-741` 直塞 TASK_ATTACK@PRIO_VENDETTA�
 6. 情緒系統 — ⚪待。
 7. 內部政治 / 設施 / 俘虜 — ⚪待。
 紀律:每 arc 前提先驗(R①)+R²(大框升異質)+measurer full-HD。三處耐久:game-design(WHAT)+memory+progress(此)。
+
+## ★Arc1 統一 need oracle MERGED（統一路線圖第一塊，2026-07-16，merge e483f85c）
+need-quantity 收斂成單一思考驅動 oracle。
+- **NeedOracle 獨立 module**（NeedHierarchy 零改動），兩量 need_keep(自用+供應鏈)/demand(貿易);生產/商業/facility 共讀（餘量=holding−need_keep 防打架）。
+- S1 骨架+food 推導 / S2 供應鏈 gap / S3 貿易 demand 非幽靈 / S4 共讀兩量+per-recipe 停產+TARGET_PER_POP 退役 / S5 溢出雙 sink 落地守恆 / S6 遷 _facility_deficit 消殘各算。
+- **measurer 對指標全綠**：①單一源(byte-identical refactor) ②goods 死鎖解量化 ③停產+溢出守恆 ④crossover 100%/守恆/starve 持平。
+- **批前兩坑修**：mis-cite(矛盾率=死法②)+incomplete single-source(S6)。**known-deferred**：終端消耗品 self-use 值待戰耗機制。**死法②=下 arc**。
+- **★立模式（Arc2-3 照做）**：單一 oracle+既有零改動邊界+byte-identical refactor 驗+乾淨全量對指標+前提先驗 R①+判準(源統一硬/值推導軟債)。
+- **路線圖狀態更新**：1🟢merged / 2🔵next(三重 dispatch 收斂) / 3-7⚪待。
