@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[Arc1 code完+scope釐清] need-quantity oracle S1-S5 done(71280560),measurer full-HD跑中。早訊號好:矛盾率0.716→0.667、goods死鎖解、trade活、守恆×多輪、生產框架crossover reconcile。★scope釐清:implementer抓到「7套餓」其實兩軸混——quantity軸(該留多少,farming×14/reserve/TARGET_PER_POP)本arc收斂✓;urgency-天閾(DESPERATION/WARNING等離餓幾天,驅survival排序)=獨立urgency軸,非quantity,留NeedHierarchy零改動→順延arc5死常數人格化。願景「散need收單一源」quantity側達成,urgency側是另一塊"
 ---
 

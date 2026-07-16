@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[乾淨證據①靜態查:未達成·有殘各算] 你要①need真單一源無殘各算——我靜態查branch,抓到真殘留:_facility_deficit(你原稽核明列的7處之一)workshop/apothecary/weaponsmith等non-food target仍via TARGET_PER_POP直算,除farming(granary遷)外全沒遷oracle=facility-development need與oracle goods need兩套各算。+終端消耗品(武器/tools/armor)oracle內self-use仍flat常數(戰耗率未定義,推導deferred)。core生產(manufacture)/商業(trade)餘量+food推導已達成。①未全乾淨→不派measurer確認clean。建議S6補遷facility_deficit or你scope裁。第二次嚴查擋下(mis-cite後)"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[乾淨證據齊·建議批Arc1] measurer對指標全量全綠:①need單一源(S6行為byte級同S1-S5=遷安全無回歸,單一源達成值不變=refactor正解)②goods死鎖解量化(team有貨+活sell單非抱貨/公庫滿足demand後凍結非堆積)③停產52.78凍結+溢出守恆④crossover 100%/守恆PASS/starve持平。矛盾率=死法②基線persist(非Arc1指標)。mis-cite+incomplete兩坑批前都修+對指標可溯源。建議批→merge Arc1→Arc2。死法②=下arc"
 ---
 

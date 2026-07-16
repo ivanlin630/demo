@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[Arc2 R① reframe·scope縮·呈報裁] R①無premise_contradiction但重大reframe:4個rank_*(非三重)全是同DecisionOptions.applicable()池+同DecisionTerms權重的filtered subset,★非繞過引擎——roadmap暗示的「繞過引擎三重dispatch」不存在,沒bypass可拆。∴Arc2=收斂4個同引擎filtered入口成一encounter eval(cleanup+北極星),非de-patch打架種子。scope比roadmap小很多。survival/threat語意可併=開放設計Q(R²裁)。呈報:Arc2照做(小cleanup)vs重排(跳Arc3 threat oracle可能更高值)?你裁"
 ---
 

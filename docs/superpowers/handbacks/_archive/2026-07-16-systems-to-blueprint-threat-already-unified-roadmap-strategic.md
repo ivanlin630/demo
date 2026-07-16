@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[threat已統一+★戰略:稽核系統性over-count各算] R① threat=第三結局(混合like need):threat感知已統一(ThreatAssessment.score單函式/4呼叫讀同源/1 base常數+人格+margin,非8各算3門檻)=本就oracle;_should_attack=真獨立攻擊軸(不同方向不該naive合併)。∴Arc2 threat-oracle幾無de-patch工。★大meta:稽核「各算」連三次被R①打臉(need→2軸+1真de-patch/dispatch→已統一cosmetic/threat→已統一)=憲法溶解arc早統一大半,真de-patch只facility_deficit一項。建議R①-verify剩4-7才假設有工,真gap恐是經濟/行為非統一。你裁roadmap"
 ---
 

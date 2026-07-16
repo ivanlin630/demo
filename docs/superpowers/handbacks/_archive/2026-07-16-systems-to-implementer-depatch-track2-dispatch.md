@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH·de-patch軌2值閘·R²CLEAN] 續gate v2同worktree。de-patch:閘1 _threat_recent→intent/好戰軍備·閘5 tribute FLEE override(diplomatic:40)→膽識-絕望秤·閘6 _calc_diplomacy硬門檻→軟化·try_proactive_diplomacy(124)陡化(0.2~0.7→性格推兩端)。gate-ok標baseline:閘2a consider_betrayal/閘3 _check_discipline/閘4 _maybe_request_join+A類~60(canonical rank_*/taskarbiter lifecycle/world-rule threshold/early_return guards)。刪閘7 calc_attack_score孤兒。de-patch後對應閘從baseline removed。行為變非byte-identical→per-gate commit+Tier1。完成handback→measurer乾淨全量。禁AskUserQuestion"
 ---
 

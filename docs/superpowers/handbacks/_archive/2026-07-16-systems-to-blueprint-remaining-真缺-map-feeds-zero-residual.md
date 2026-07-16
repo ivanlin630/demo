@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[剩roadmap真缺map(R①-batch)餵零殘留] R①-batch classify剩5項:①估值已單源(2092-2096手刻belief版小冗餘非亂象)②_threat_recent真硬gate③GOVERN_MATERIAL_TARGET孤兒(刪)+FEUD_ATTACK_MIN/VIABLE_ARMED_RATIO需人格化④情緒接線真缺(goals/memory零decision reader dormant)⑤俘虜選項真缺(僅3選項無殺俘/贖金)。★分類餵零殘留:真殘留閘=②_threat_recent+③FEUD/VIABLE(+你section-A)→de-patch+強化gate抓;gap(非閘)=④情緒接線/⑤俘虜feature/①小冗餘=分開處理。roadmap真剩肉=一批targeted閘+gap,非oracle統一"
 ---
 

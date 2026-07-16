@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[裁·S4-S5 續] need oracle S1-S3 讚(cbd402e2,13綠,零prod影響=fallback持住)。S4 reader-switch高風險行為變flag收到=對,故arc有強制full-HD閘(Tier1只sanity,full-HD才真驗)。裁:續S4+S5完成arc→端到端full-HD=真閘。★S4 Tier1若現主動退化(非只驗不全)→停flag別衝S5;否則S5後handback→measurer full-HD。git per-slice每slice commit。禁AskUserQuestion"
 ---
 

@@ -20,7 +20,7 @@ branch `feat/need-oracle` @ `a8466b9e`（已 push，7 commit）。Arc1 S1-S6 cod
 - **★facility 仍建（確定性檢，非 unseeded）**：構食足缺 tools 隊 → `workshop_deficit=1.00`、`_pick_facility→workshop`。**facility-build 非退化根確認**（生產框架 facility-choice 讀遷後 deficit 仍正常）。
 - **Tier1 19 綠**（workshop tools/arrows 驅 + goods demand 驅非 keep + apothecary medicine 驅）。
 - **CoinAudit delta=0×4** + **determinism byte-identical MD5 F85E975A** + **headless 3+3 baseline 0 net new**。
-- ⚠ 註：`game_sim_multi` 單跑 Manufacture=0＝**unseeded drift**（該 bed 無 seed，見 [[reference_multi_sanity_unseeded]]）；facility-build 機制經確定性檢證正常，真 production revive = measurer full-HD 真閘。
+- ⚠ **★誠實訂正（勿被我上句誤導）**：`game_sim_multi` **兩跑 Manufacture 皆=0**（非 drift，系統性 in that bed）。但**機制確定性檢證正常**：facility-build→workshop(deficit 1.00)、per-recipe 條件足時真產（S4 Tier1 goods+demand→產）。∴ 0 = 該 bed **短窗場景未同時達 production 條件**（workshop built + material + resident + 未滿 need），非機制退化。**真 production revive 需 measurer full-HD 長窗真閘坐實**——這是本 arc 待驗核心行為斷言，我無法在 sanity bed 證，不宜篤定「已 revive」。**measurer 請特別驗：長窗 Manufacture 是否 fire（生產是否真被 need+demand 驅動起來）。**
 
 ## ★Arc1 全貌（S1-S6，7 commit）
 | slice | 內容 |
@@ -35,6 +35,9 @@ branch `feat/need-oracle` @ `a8466b9e`（已 push，7 commit）。Arc1 S1-S6 cod
 
 ## measurer 乾淨全量待驗（①②③④，arc 真閘）
 ①need 真單一源無殘 / ②餘量一致 goods 死鎖解量化 / ③停產+溢出守恆數字 / ④無回歸（食安/生產框架 facility-choice/holding-seam）。誠實標：真 revive + 行為正確性 = full-HD 坐實。
+
+## ⚠ 註（surface，didn't create it）
+HEAD `fd1625f7`（S6 後一 commit）：清診斷 script 時 `git add -A` 誤將 **measurer 的 `scripts/debug/need_oracle_verify_bed.gd`**（arc full-HD 驗證床，非我建）一併 commit 進 branch。**compile 淨、arc-relevant、benign**——留著（arc 驗證床隨 arc 走）；若 measurer 要自管請告知，我 revert。
 
 ## 溯源
 spec v2 / R① CLEAN / R② round2 CLEAN / boundary-clarified / S6 dispatch（blueprint 裁甲）。git 保 S1-S6。

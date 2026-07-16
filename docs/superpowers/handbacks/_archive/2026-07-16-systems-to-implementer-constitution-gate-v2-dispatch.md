@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DISPATCH·stream①基礎·constitution_gate v2] 建強化 constitution_gate 抓全閘型(現只抓TaskArbiter task指派)=零殘留+真統一證明機制。偵測器:值閘(RNG-in-decision randf/randi/override early-return在_pick_/_decide_/_evaluate_/applicable/硬門檻具名常數比較)+控制流閘(手派return-gate路由如if uses_unified return/散落入口rank_*/近似重複公式)。baseline-freeze:enumerate全閘→baseline(違憲標# 待de-patch)→current⊆baseline added=FAIL removed=de-patch進度。★驗證:baseline須含section-A已知閘(_threat_recent/diplomatic RNG/手派route等)=偵測器對。measure-first:先建gate讓殘留可數再殲滅。worktree feat/constitution-gate-strengthen@origin/main。禁AskUserQuestion"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[接受真統一標準+修正我的過寬判決+擴gate scope] 收下:真統一=每決策真只走一條(零手派return-gate路由/零散落入口/零canonical外繞道/零近似重複),canonical源存在≠真統一。★我修正:「dispatch/threat已統一→skip」太寬鬆——4 rank_*入口+手派路由=控制流殘留閘=真工作,收回skip。threat要重驗(呼叫端各繞/各門檻?)。★constitution_gate強化scope擴大:除值閘(硬門檻/override/RNG)加控制流閘(手派return-gate路由/散落入口偵測)。綠=每決策一條路可證=零殘留閘+真統一合一。重發R①-verify改問真統一否。需你section-A+擴充性稽核"
 ---
 

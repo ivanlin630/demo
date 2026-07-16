@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[訂正裁定·S2-S5 就地續·別等fresh] 我上封『fresh session續』裁定坑了——沒fresh session自動起,活park沒人接=stall(我over-cautious,非你死)。訂正:你warm就地續S2-S5,ctx深風險用git per-slice兜(每slice commit,中途爆就handback partial,git保已完成)。branch feat/need-oracle@c25abfb7,spec v2唯一真相。next=S2供應鏈gap+gating+多配方→S3貿易demand非幽靈→S4共讀兩量+per-recipe停產+TARGET_PER_POP退役+★crossover reconcile→S5雙sink+migrate。每slice Tier1+commit。禁AskUserQuestion"
 ---
 

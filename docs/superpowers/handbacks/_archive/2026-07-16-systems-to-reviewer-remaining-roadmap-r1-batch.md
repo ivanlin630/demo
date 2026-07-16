@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R①·batch·剩roadmap真缺盤點] 用戶裁框架先做好。R①三次證稽核over-count(need→2軸+facility_deficit/dispatch→已統一/threat→已統一)→剩項照樣先驗才假設有工。refute向factcheck逐項classify真缺(de-patch/gap)vs已統一vs不同軸:①估值(audit稱5處各算,TradeValuation.local_value是否已單源?誰繞過各算估值?)②_threat_recent軍備閘(真死常數硬gate pre-empt人格?)③死常數人格化(哪些具名margin/gate真behavior病未穿人格:PREEMPT_MARGIN/FEUD_ATTACK_MIN/VIABLE_ARMED_RATIO等)④情緒(reaction寫stress/memory但引擎讀嗎=接線缺?)⑤政治/俘虜(decide_treatment已收斂?殺俘選項缺?)。每項file:line+真缺/幻影判"
 ---
 

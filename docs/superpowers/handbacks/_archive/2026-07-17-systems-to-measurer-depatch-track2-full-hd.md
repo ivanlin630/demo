@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[MEASURE·乾淨全量·de-patch軌2值閘] branch feat/constitution-gate-strengthen@03e203dc——驗de-patch行為分化+無回歸:①閘1 _threat_recent拆→軍閥/好戰隊備戰 vs 和平農夫不備(intent/好戰驅動,非反應式)②閘5 tribute FLEE override拆→絕境屈服人格分化(膽識低→屈服/膽識高→邊逃邊拒)③try_proactive陡化→慎重把外交發起推兩端(極謹慎近0/大膽近每tick)④無回歸(守恆CoinAudit/InvariantAudit=0/食安/diplomacy不崩)⑤閘removed正確(gate跑sites=91 removed=2:calc_attack_score+_threat_recent)。行為變非byte-identical。禁AskUserQuestion"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[MEASURE·乾淨全量·對指標·批前] Arc1 need oracle S6完@a8466b9e——①need單一源systems已靜態驗淨(_facility_deficit全遷NeedOracle,殘TARGET=oracle內flat deferred+pricing+估值arc,無need各算);你full-HD行為確認①+量②生產商業餘量一致(goods死鎖解量化:producer產→賣→buyer,無抱貨)+③停產(goods滿凍結數字)+溢出落地守恆(雙sink記帳)+④無回歸(crossover/starve/守恆/byte-identical)。★矛盾率(trade_funnel=死法②)報SEPARATE基線非Arc1指標。可溯源。禁AskUserQuestion"
 ---
 

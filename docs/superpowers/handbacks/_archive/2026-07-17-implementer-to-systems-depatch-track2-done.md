@@ -22,7 +22,7 @@ branch `feat/constitution-gate-strengthen` @ `03e203dc`（續 gate v2 worktree�
 
 ## 驗（Tier1 + sanity）
 - **Tier1 8/8 PASS**：閘1 軍閥 militancy 1.00>農夫 0.07 / 閘5 逃跑義氣拒+膽識低屈服 / 閘2b 陡化 慎重推兩端(0.2→skip 0.008、0.9→skip 0.729)。
-- **gate v2 PASS sites=91 removed=2**（_threat_recent + calc_attack_score）。**headless 3+3 baseline 0 net new**（4 測 migrate）。**CoinAudit delta=0×4**。determinism 驗跑中（陡化 randf 決定性=同 seed 兩跑 bit-identical，行為變非 baseline-identical）。
+- **gate v2 PASS sites=91 removed=2**（_threat_recent + calc_attack_score）。**headless 3+3 baseline 0 net new**（4 測 migrate）。**CoinAudit delta=0×4**。**determinism byte-identical MD5 F85E975A**（陡化 randf seed-決定性=同 seed 兩跑 bit-identical，行為變非 baseline-identical）。
 
 ## baseline gate-ok（legit 標）
 37+ gate-ok：taskarbiter lifecycle 28 / rank_* canonical 5 / rng-legit 3（consider_betrayal 案③/_check_discipline 案②/_maybe_request_join event-ID）/ gift guard。

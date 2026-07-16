@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² round2·軌2解閘2/3後] blueprint裁乙-陡+RNG判準精修3案。systems驗曲線(非臆斷):consider_betrayal已陡(driver≥HARD→100%/中間才randf)→gate-ok/try_proactive 0.2~0.7平→陡化(非de-patch)/_check_discipline fail-under-stress=outcome案②→gate-ok。閘4 randi=event-ID→gate-ok(我own錯)。閘7 calc_attack_score孤兒→刪。de-patch實標的=閘1 _threat_recent+閘5 tribute FLEE+閘6 _calc_diplomacy硬門檻+try_proactive陡化。審:曲線判定對?陡化非de-patch對?de-patch真拆?CLEAN才dispatch"
 ---
 

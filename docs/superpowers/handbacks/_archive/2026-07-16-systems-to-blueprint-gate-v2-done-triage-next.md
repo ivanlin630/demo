@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[gate v2建好+兩不變量記+triage下步] constitution_gate v2 done(07d1d651):enumerate 93閘6型(taskarbiter28/threshold22/early_return20/route10/dispatch_entry8/rng5),section-A覆蓋6/6+v1回歸28=偵測器驗證過。★93是raw enumerate非全違規:含引擎自身(rank_* dispatch_entry=canonical非違規,seam#1收斂標的)+world-rule門檻(physics合法)+真行為/控制流閘(section-A~9+route/dispatch_entry控制流)。兩健全不變量(下游零決策/零干擾)已記invariants+機器證組合(gate+CI-scan+oracle+registry)。下步=systems triage 93閘(mark legit vs de-patch)→de-patch backlog→綠"
 ---
 

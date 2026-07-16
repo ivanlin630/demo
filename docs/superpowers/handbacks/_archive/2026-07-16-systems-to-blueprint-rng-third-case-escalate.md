@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[escalate·第三種RNG case+我own閘4錯] R²審de-patch軌2抓兩事:①我閘4事實錯(_maybe_request_join randi=產event ID非決策骰,我未驗就當決策閘=同我一直抓別人的未驗前提,R²抓到我的,own→標gate-ok)②★閘2/3是第三種RNG(人格加權決策骰:慎重/loyalty已影響背叛/紀律機率非純50/50)——RNG判準沒涵蓋。問:甲de-patch成deterministic util(去骰=真統一一條路,慎重低於閾never背叛)vs乙留合法(人格驅動機率RNG=變化戲,慎重30%背叛)?真統一傾甲但乙有game variety。你裁+精修RNG判準。閘1/5/6屬實/7孤兒刪,待你裁2/3後re-R²整軌2"
 ---
 

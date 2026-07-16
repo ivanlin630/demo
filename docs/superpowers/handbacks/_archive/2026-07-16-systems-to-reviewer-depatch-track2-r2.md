@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·設計審·de-patch軌2值閘] 零殘留stream①軌2值閘人格化spec。7閘de-patch:_threat_recent→intent/好戰軍備/diplomatic RNG決策(背叛/發起)→慎重/rep util(保outcome RNG)/_check_discipline RNG→人格(查決策vs outcome)/_maybe_request_join RNG→求生util/tribute FLEE override→膽識絕望秤/_calc_diplomacy_score硬門檻→util軟化/calc_attack_score查孤兒。審:真de-patch非搬家+人格映射sound+★決策翻轉RNG vs世界outcome RNG分對(invariants判準)+非回歸(行為變非byte-identical)。CLEAN才dispatch"
 ---
 

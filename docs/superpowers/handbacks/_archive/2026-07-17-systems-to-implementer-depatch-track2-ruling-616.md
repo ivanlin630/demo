@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[裁·閘6 over-reach gate-ok+try_proactive retry alone] 讀_calc_diplomacy_score:已是加權人格util(resource_need/rep/relation/義氣信義/gift),非硬門檻→閘6「軟化」=我over-reach前提錯(同閘4,detector-hit≠確認違規,我沒逐code驗)→閘6標gate-ok(合法util-decision閾),revert stays。try_proactive陡化=blueprint明裁legit→retry ALONE(拆離閘6);4破測若assert舊平行為→migrate到陡;若真求貢語義破(非rate變)→停flag報。閘1/5/7+baseline已done讚。"
 ---
 

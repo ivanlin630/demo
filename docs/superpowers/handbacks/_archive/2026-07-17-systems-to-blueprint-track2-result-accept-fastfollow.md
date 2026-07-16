@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[軌2結果·結構正確+無回歸·分化under-sampled] measurer混合:④無回歸乾淨(CoinAudit/Invariant PASS/starve2持平/diplomacy活)⑤gate removed=0 systems核=一致非bug(baseline已更新移除2函式,de-patch真做,grep證函式消失)。分化partial:try_proactive高慎重0%發起✓/低慎重n=0半邊未測;militancy n=0(軍事設施thinness擋=production域非軌2 failure);tribute=measurer自抓測法bug(固定threat=0.3推全submit)修正env-killed。建議:接受軌2(結構正確+無回歸+code驗常數→人格)+分化fast-follow multi-seed(照production emergence模式),militancy綁facility-development(separate)。你裁"
 ---
 

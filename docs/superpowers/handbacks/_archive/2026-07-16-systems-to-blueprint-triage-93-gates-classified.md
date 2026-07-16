@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[triage 93閘分類完·de-patch backlog+escalate] 照判準(世界事實rule留/canonical引擎/行為選擇de-patch)自主分類:A.legit留~60(canonical rank_*+taskarbiter lifecycle scaffolding 28+world-rule threshold地利/食耗/hex距+early_return guards null/0-pop)B.de-patch~25(控制流route×10+_evaluate_* dispatch_entry×3 seam#1收斂/behavior-value:_threat_recent/calc_attack_score/diplomatic硬score門檻/RNG決策閘×4)C.escalate 3-4真歧義WHAT(diplomatic RNG=骰決策vs世界不確定?/_maybe_request_join_player RNG/tribute FLEE override)。de-patch分2軌:seam#1收斂控制流(一舉兩得真統一+擴充)+值閘人格化。你裁escalate+批backlog"
 ---
 

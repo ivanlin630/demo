@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[狀態快照·給用戶] ①baseline 91(93→91,de-patch 2:calc_attack_score刪+_threat_recent),37 gate-ok legit標,54待②de-patch軌2值閘DONE+MERGED(08d3a39d:閘1/5/7+try_proactive陡化,閘4/6 gate-ok),軌1 seam#1未啟③seam#1未啟(下個大slice)④分化multi-seed未跑(try_proactive高慎重0%✓,低慎重/militancy/tribute待;militancy綁軍事設施thin)⑤下一步seam#1 spec+fast-follow dispatch,無卡點(軌2已merged,都systems自主可推)"
 ---
 

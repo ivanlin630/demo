@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R①·前提factcheck·Arc2三重dispatch收斂] blueprint啟Arc2(照路線)。前提:威脅/求生有多dispatch路(roadmap稱三重)繞過/平行於統一引擎rank,該收斂全走rank(encounter-north-star:rank_survival/rank_threat/rank_scored/ambient分slice=過渡,終態一個encounter eval)。refute向factcheck:①真有幾條平行rank/dispatch路(rank_survival/rank_threat/rank_scored/rank_ambient?非unified vs unified雙軌?)file:line?②真「繞過」還是同引擎filtered subset?③收斂成一eval前提(語意可併?survival soft vs threat hard語意衝突?)。前提先驗(判斷層被推翻多次)→premise_contradiction回systems"
 ---
 
