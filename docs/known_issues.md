@@ -724,3 +724,8 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **A3 utility 化(生產 S4.2 未做)**:`_evaluate_infrastructure` 固定 if 階梯(升級>擴建>蓋新 first-match)→ utility argmax。measurer 坐實**非 release block**(has_facility 正常漲,ladder 沒餓死建造)→低優先 de-patch follow-up slice。
 - **`GOVERN_MATERIAL_TARGET` const 孤兒**(A4 govern de-patch 後 `faction_ai:18` const 可能無 caller)——advisory 清,非閘。
 - **人格分化 confirm**(弱證據 n=8):mechanism 在(leader_pref+_facility_personality)但乾淨相關性樣本不足→待 blueprint 裁是否 multi-seed 聚合 confirm。關 [[project_economy_arc]]。
+
+## Arc1 need oracle 進行中（統一路線首塊，2026-07-16）
+- **S1 done**（branch feat/need-oracle @ c25abfb7，Tier1 5 綠，零產線影響=fallback 防中間態設計生效）。**S2-S5 remaining**（fresh session 續，ctx 衛生）。
+- **核心架構**：NeedOracle 獨立新 module（NeedHierarchy 零改），出兩量 `need_keep`(自用+供應鏈,保留向)+`demand`(貿易,流出向);reader 組合 生產=keep+demand·可賣餘量=holding−keep·賣=min(餘量,demand)（R² 異質框外審抓單標量混反向缺陷後修）。
+- **next=S2** 供應鏈 gap+gating+多配方→S3 貿易 demand 非幽靈→S4 共讀兩量+per-recipe 停產+TARGET_PER_POP 退役+SURVIVAL_CRUSH reconcile→S5 溢出落地雙 sink+migrate。spec v2=唯一真相。關 [[project_economy_arc]]。
