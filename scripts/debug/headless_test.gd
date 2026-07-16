@@ -5545,13 +5545,16 @@ func _test_demand_driven_production() -> void:
 	var mfg := ManufacturingSystem.new()
 	var s := WorldState.new(); s.world = WorldData.new()
 	var t := TeamData.new(); t.team_id = 1; t.tile_pos = Vector2i(0,0)
+	_seed_pop(t, 10)   # need-oracle 遷移：weapon self_use need_keep 需 pop>0（舊 maxi(pop,1) 退役）
 	t.resources = {"ore_iron": 100.0, "material": 100.0,
 		"weapon_melee_low": 0.0, "weapon_ranged_low": 0.0}
 	s.teams[1] = t
-	var tile := HexTileData.new(); tile.outpost_level = 1; tile.weaponsmith_level = 1
-	# 控制組：無買單 → 預設順序選 melee_low
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(0,0); tile.outpost_level = 1
+	tile.outpost_owner = 1; tile.weaponsmith_level = 1
+	s.world.tiles[0] = tile   # need-oracle 遷移：設施 gating 掃自家 outpost，tile 須在 world
+	# 控制組：無買單 → weapon self_use need（melee gap 10 > ranged gap 8）→ 選 melee_low
 	var none_pick: String = mfg._run_recipe_group(s, t, tile, "weaponsmith_level", 10.0)
-	assert(none_pick == "weapon_melee_low", "無需求時依預設順序選 melee_low，實得 %s" % none_pick)
+	assert(none_pick == "weapon_melee_low", "無需求時 weapon self_use need→melee_low（gap 大先），實得 %s" % none_pick)
 	# 實驗組：塞 ranged_low 買單 → 偏好翻轉
 	var buyer := TeamData.new(); buyer.team_id = 2; buyer.tile_pos = Vector2i(0,0); s.teams[2] = buyer
 	OrderSystem.new().post_order(s, buyer, "buy", "weapon_ranged_low", 5)
@@ -8418,6 +8421,10 @@ func _test_manufacturing_to_storage() -> void:
 	team.tags.append(TeamData.TAG_PRODUCE)   # 生產人力 gate
 	team.resources["material"] = 100.0
 	state.teams[0] = team
+	# need-oracle 遷移：goods=純貿易品 need_keep=0，需 demand(買單) 才產（per-recipe 停產：無需求不燒 material）。
+	var _bm := MessageData.new(); _bm.type = "order_buy"
+	_bm.params = {"res": "goods", "qty": 50, "origin_team": 9, "expire_tick": 99999}
+	state.team_known[0] = [_bm]
 	var ms := ManufacturingSystem.new()
 	ms.tick_all(state, [0])
 	assert(float(tile.public_storage.get("goods", 0)) > 0, "goods 應進公庫")
@@ -11624,6 +11631,10 @@ func _test_smeltery_separate() -> void:
 	var r2 := _make_mfg_state({ "_outpost": "military", "smelter_level": 1 })
 	var state2: WorldState = r2[0]; var team2: TeamData = r2[1]; var tile2: HexTileData = r2[2]
 	team2.resources = { "material": 100.0, "ore_iron": 50.0 }
+	# need-oracle 遷移：steel=純中間品 need_keep 走供應鏈；無下游武器設施→加 steel demand(買單)驅動生產。
+	var _sm := MessageData.new(); _sm.type = "order_buy"
+	_sm.params = {"res": "ore_steel", "qty": 20, "origin_team": 9, "expire_tick": 99999}
+	state2.team_known[team2.team_id] = [_sm]
 	ms.tick_all(state2, [0])
 	var steel_out: float = float(tile2.public_storage.get("ore_steel", 0)) \
 		+ float(team2.resources.get("ore_steel", 0))

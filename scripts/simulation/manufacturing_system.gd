@@ -133,22 +133,20 @@ func _add_output(team: TeamData, tile: HexTileData, res: String, amt: float) -> 
 func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, level_key: String,
 		worker_rate: float) -> String:
 	var recipes: Array = RECIPE_GROUPS[level_key]
-	# 自隊收到的買單需求集（訂單真 reader → 非 dormant；殘缺/失真副本）
-	var demand: Dictionary = {}
-	for bo in OrderSystem.new().received_buy_orders(state, team):
-		demand[bo["res"]] = true
+	# S4：生產目標讀 NeedOracle 兩量（need_keep+demand），退役 manufacturing TARGET_PER_POP decision 身分。
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var order: Array = []
 	for i in range(recipes.size()):
 		var out: String = recipes[i]["out"]
 		var stock: float = float(team.resources.get(out, 0)) \
 			+ float(tile.public_storage.get(out, 0))
-		var target: float = float(TARGET_PER_POP.get(out, 1.0)) * float(maxi(team.population, 1))
-		order.append({ "idx": i, "ratio": stock / maxf(target, 0.001), "demand": demand.has(out) })
-	# 需求命中優先（demand=true 排前），其次缺口比最低先
-	order.sort_custom(func(a, b):
-		if a.demand != b.demand:
-			return a.demand
-		return a.ratio < b.ratio)
+		# 生產目標 = need_keep(自用+供應鏈) + demand(貿易)；per-recipe 停產：out 滿→跳(不燒 material)。
+		var target: float = NeedOracle.need_keep(state, team, out, lv) + NeedOracle.demand(state, team, out, lv)
+		if target <= 0.0 or stock >= target:
+			continue   # ★per-recipe 停產：此 out 無 need+demand 或已滿 → 不產(逐配方 skip，非整設施停)
+		order.append({ "idx": i, "gap": target - stock })
+	# 缺口最大先（most needed first）——demand 加進 target→gap→demand 驅動選 recipe。
+	order.sort_custom(func(a, b): return a.gap > b.gap)
 	for entry in order:
 		var recipe: Dictionary = recipes[entry.idx]
 		var rate: float = float(RATES[recipe["rate_const"]])

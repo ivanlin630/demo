@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_test_s2_supply_chain_gating()
 	_test_s2_gap_not_raw()
 	_test_s3_trade_demand_nonghost()
+	_test_s4_per_recipe_stop()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -117,3 +118,24 @@ func _test_s3_trade_demand_nonghost() -> void:
 	# 全過期 → demand=0
 	s.team_known[1] = [_mk_buy_msg("goods", 30, 5, 50)]
 	_ok(NeedOracle.demand(s, team, "goods", lv_amb) == 0.0, "全過期買單→demand=0（幽靈不供產）")
+
+# ── S4：per-recipe 停產（goods 有 demand→產；goods 滿→停該 recipe，不燒 material）──
+func _test_s4_per_recipe_stop() -> void:
+	print("--- S4：per-recipe 停產（reader 切 oracle）---")
+	var w := _mk_state_team_facility(10, "manufacturing_level", 1)   # workshop
+	w[0].world.current_tick = 100
+	w[1].resources = {"material": 100.0, "goods": 0.0, "gem": 0.0}
+	w[0].team_known[1] = [_mk_buy_msg("goods", 40, 5, 200)]   # goods demand 40（有效）
+	var mfg := ManufacturingSystem.new()
+	var mat0: float = float(w[1].resources.get("material", 0))
+	# goods 有 demand + holding 0 → 產 goods（消耗 material）
+	var ran: String = mfg._run_recipe_group(w[0], w[1], w[0].world.tiles[0], "manufacturing_level", 1.0)
+	_ok(ran == "goods", "★goods 有 demand→產 goods（reader 切 oracle need+demand，實際=%s）" % ran)
+	_ok(float(w[1].resources.get("material", 0)) < mat0, "產 goods 消耗 material（%.1f→%.1f）" % [mat0, float(w[1].resources.get("material", 0))])
+	# goods 灌滿（≥demand）+ 無其他 need（tools/arrows self_use 也要考量）→ 至少 goods 該停
+	# 用純 goods 場景：holding 遠超 demand → goods recipe 被 per-recipe stop 跳過
+	w[1].resources = {"material": 100.0, "goods": 9999.0}
+	w[0].team_known[1] = [_mk_buy_msg("goods", 40, 5, 200)]
+	# goods 滿 → 不再產 goods（可能產 tools/arrows 因 terminal self_use，但 goods 這條 recipe stop）
+	var ran2: String = mfg._run_recipe_group(w[0], w[1], w[0].world.tiles[0], "manufacturing_level", 1.0)
+	_ok(ran2 != "goods", "★goods 滿→per-recipe 停產 goods（不燒 material 囤爆，實際=%s）" % ran2)
