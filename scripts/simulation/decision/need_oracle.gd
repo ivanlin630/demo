@@ -69,6 +69,26 @@ static func _team_has_facility(state: WorldState, team: TeamData, level_key: Str
 			return true
 	return false
 
-# ── 貿易 demand（市場有效買單+野心+可載）——★S3 實作；S1 fallback 0（reader 尚未切，賣邏輯仍走舊路）──
-static func _trade_demand(_state: WorldState, _team: TeamData, _res: String, _leader_values: Dictionary) -> float:
-	return 0.0
+# ── 貿易 demand（★S3）：市場「有效」買單（非幽靈：過期單不供產，僅履約排序用）+ 致富野心。綁 deal 側。──
+# 讀 team_known 親聞 order_buy（感知鐵律：聽過才算，非 god-view）。過期單濾除＝非幽靈視圖（R²#1-issue）。
+static func _trade_demand(state: WorldState, team: TeamData, res: String, leader_values: Dictionary) -> float:
+	if state == null:
+		return 0.0
+	var tick: int = state.world.current_tick
+	var total: float = 0.0
+	for m in state.team_known.get(team.team_id, []):
+		if m.type != "order_buy":
+			continue
+		if String(m.params.get("res", "")) != res:
+			continue
+		if int(m.params.get("origin_team", -1)) == team.team_id:
+			continue   # 自己的買單不算 demand
+		# ★非幽靈：過期買單不供產（production demand 濾過期；過期單僅供履約排序，不在此）
+		if int(m.params.get("expire_tick", 0)) <= tick:
+			continue
+		total += float(m.params.get("qty", 0))
+	if total <= 0.0:
+		return 0.0
+	# 致富野心秤：野心高→更積極追貿易（綁 deal 側，TEST VALUE）。
+	var ambition: float = float(leader_values.get("野心", 0.5))
+	return total * (0.5 + ambition)

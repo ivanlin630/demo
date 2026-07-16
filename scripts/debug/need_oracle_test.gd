@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_test_s1_fallback_and_demand()
 	_test_s2_supply_chain_gating()
 	_test_s2_gap_not_raw()
+	_test_s3_trade_demand_nonghost()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -91,3 +92,28 @@ func _test_s2_gap_not_raw() -> void:
 		w[1].resources[wp] = 9999.0
 	var mat_need: float = NeedOracle.need_keep(w[0], w[1], "material", lv)
 	_ok(mat_need == 0.0, "★成品(weapon)已滿→material need_keep=0（gap 非 raw，不囤爆原料）")
+
+func _mk_buy_msg(res: String, qty: int, origin: int, expire: int) -> MessageData:
+	var m := MessageData.new(); m.type = "order_buy"
+	m.params = {"res": res, "qty": qty, "origin_team": origin, "expire_tick": expire}
+	return m
+
+# ── S3：貿易 demand 非幽靈視圖（過期買單不供產）+ 野心秤 ──
+func _test_s3_trade_demand_nonghost() -> void:
+	print("--- S3：貿易 demand 非幽靈（過期濾）+ 野心 ---")
+	var s := WorldState.new(); s.world = WorldData.new(); s.world.current_tick = 100
+	var team := _mk_team(10)
+	s.team_known[1] = [
+		_mk_buy_msg("goods", 40, 5, 200),   # 有效（expire 200 > tick 100）
+		_mk_buy_msg("goods", 30, 5, 50),    # ★過期（expire 50 <= 100）→ 非幽靈濾除
+	]
+	var lv_amb := {"野心": 0.5}
+	var d: float = NeedOracle.demand(s, team, "goods", lv_amb)
+	# 只算有效單 40，野心 0.5 秤(0.5+0.5=1.0) → 40
+	_ok(absf(d - 40.0) < 0.001, "★demand(goods)=40（有效單40，過期單30 非幽靈濾除）實際=%.1f" % d)
+	# 野心高 → demand 大（致富綁 deal）
+	var d_hi: float = NeedOracle.demand(s, team, "goods", {"野心": 1.0})
+	_ok(d_hi > d, "★野心高 demand(%.1f) > 中性(%.1f)（致富野心秤）" % [d_hi, d])
+	# 全過期 → demand=0
+	s.team_known[1] = [_mk_buy_msg("goods", 30, 5, 50)]
+	_ok(NeedOracle.demand(s, team, "goods", lv_amb) == 0.0, "全過期買單→demand=0（幽靈不供產）")
