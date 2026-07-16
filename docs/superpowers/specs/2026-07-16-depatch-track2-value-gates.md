@@ -8,8 +8,10 @@
 逐閘：硬門檻/RNG-決策 → 人格/情境秤（constant/dice 退役）。**per-gate git commit**。
 
 1. **`_threat_recent::threshold`**（`faction_ai:3125`，caller weaponsmith `:3087`/armorsmith `:3090`）＝反應式軍備閘（pre-empt 征服者主動備戰）→ **de-patch**：軍備需求由 **intent（征服/野心）+ 好戰 + 感知威脅** 秤（主動軍閥備戰、和平農夫不備），非「近期被打過才備」硬 gate。weaponsmith/armorsmith deficit 已走 NeedOracle（Arc1），此閘是額外 threat-gate → 拆，交人格軍備傾向。
-2. **diplomatic 決策 RNG**（`_send_diplomacy_message`/`consider_betrayal`/`try_proactive_diplomacy` rng）＝**★R² 訂正：已部分人格加權**（慎重/loyalty 影響機率，非純 random）＝**第三種 RNG case（人格加權決策骰）→ escalate blueprint 裁**（de-patch 成 deterministic util[真統一一條路] vs 留[人格驅動機率=變化戲]，見下 §escalate）。**待裁，暫不動。**
-3. **`_check_discipline::rng`** ＝ **★R² 訂正：同閘2**（已人格加權[loyalty]，非純骰）→ escalate 同批（決策 vs outcome + 人格加權骰去留）。**待裁。**
+2. **diplomatic 決策 RNG**（`consider_betrayal`/`try_proactive_diplomacy` rng）＝**★blueprint 裁乙-陡 + systems 驗曲線**（RNG 判準案③）：
+   - **`consider_betrayal`（`:313`）= 已陡 → gate-ok**：driver≥`BETRAY_DRIVE_HARD`→100% 背叛、<MIN→0%、**只中間 margin 用 randf**（清楚案例兩端 deterministic）＝正合「性格推兩端、骰斷難分中間」。標 legit。
+   - **`try_proactive_diplomacy`（`:124` `randf() > 慎重×0.5+0.2`）= 平（0.2~0.7）→ 陡化**（非 de-patch）：慎重把清楚案例推兩端（極謹慎 never proactive、大膽近乎每 tick），骰只斷中間。改機率曲線陡化（非拆 RNG）。
+3. **`_check_discipline::rng`（`:14-15` `fail_chance=(1-loyalty)×stress×BASE`）= ★outcome（案②）→ gate-ok**：紀律在壓力下失效＝世界怎麼回應（非蓄意決策；deviation 決策已 refactor 走 rank_scored）。標 legit-outcome。
 4. **`_maybe_request_join_player::rng`** ＝ **★R² 訂正：事實錯（我未驗前提，own）**——`randi()` 只產 **event ID**、**無任何決策骰** → **非 de-patch 標的，標 gate-ok**（ID 生成非決策 RNG）。此閘 rng detector false-positive。
 5. **tribute FLEE override**（`diplomatic:40` tribute_accept 逃跑必屈服）＝ **de-patch → 膽識/絕望秤**：邊逃邊拒（做得到=行為選擇非物理不可能，絕境戲）——屈服由 **膽識（低→屈服）+ 絕望度 + 戰力差** 秤，非「逃跑=必屈服」硬 override。**（R² 屬實）**
 6. **`_calc_diplomacy_score::threshold`**（硬 score 門檻）＝ 外交決策硬閾 → **人格 util 軟化**（連續秤非硬切）。**（R² 屬實）**

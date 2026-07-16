@@ -49,7 +49,11 @@
   - **① 下游零決策**：思考層（DecisionEngine+人格 oracle）做決策，下游系統**純執行**。下游偷做決策（section-A 焊決策的行為閘：`_threat_recent`/硬門檻 override/RNG 開閘）=違規 → de-patch → `constitution_gate` v2 值閘+控制流閘 detector **綠 = 下游零決策證**。**caveat：下游供狀態給思考層讀 = OK（輸入非決策）**——分界=「算給思考參考」合法 vs 「替思考決定 task/行為」違規。
   - **② 下游零干擾**：下游系統互不干擾，三面：**(寫)** Pattern B 單寫者（一狀態一 owner，CI-scan 強制閘證，需驗覆蓋完整）；**(算)** 零各算——同概念多處各算=干擾，**單一源 oracle 殺之**（need/threat oracle + `constitution_gate` 近似重複 detector 抓手刻版）；**(tick 順序)** `sim_runner` 系統 registry（`SYSTEMS=[{sys,lod_policy}]` 統一 tick loop，消 near+far 雙分支手接=順序確定不亂,seam#3）。
   - **★機器證組合**：`constitution_gate` v2（零決策+近似重複）+ CI-scan（單寫者）+ oracle 單一源（零各算）+ sim_runner registry（tick 序）**全綠 = 用戶兩問「下游不影響決策 + 互不干擾」有機器證**。別讓下游偷決策 or 跨系統亂寫/各算。
-  - **★RNG 判準（用戶定 2026-07-16）**：**決策翻轉 RNG = 行為閘 → de-patch**（用純骰替 NPC 選行為，如背叛/外交發起/紀律靠 randf 開閘 → 該人格/情境秤）；**世界不確定 outcome RNG = 合法留**（訊息有沒有送到、外交成敗、戰鬥擲骰=世界的不確定性，非替 NPC 做決策）。分界=RNG 決定「這隻選什麼」（違憲）vs RNG 決定「世界怎麼回應」（合憲）。`constitution_gate` rng detector 抓的須逐個照此判。
+  - **★RNG 判準 3 案（用戶精修 2026-07-17）**：`constitution_gate` rng detector 抓的逐個照此判：
+    - **① 純骰無人格替決策 = 行為閘 → de-patch**（personality-blind randf 選行為）。
+    - **② 世界不確定 outcome = 合法留**（訊息有沒有送到/事件/event-ID 生成/遭遇/外交成敗/戰鬥擲骰=世界怎麼回應，非替 NPC 決策）。
+    - **③ 人格加權機率決策 = 合法-IF 陡 + framework-routed + seeded**：性格把**清楚案例推兩端**（忠 2%/奸 95%），骰**只斷真難分的中間**→結果掙來（不太運氣）+ 有機戲（天人交戰不可測）。**曲線平（如 0.2~0.7 範圍）= 太運氣 → 陡化（非 de-patch）**；曲線陡（清楚案例 deterministic、margin-only stochastic，如 `consider_betrayal` driver≥HARD→100%）= gate-ok。
+    - **systems 驗**：③ 類逐個驗曲線陡度——陡則 gate-ok、平則陡化（把人格影響放大到兩端），非拆掉 RNG。血證：`consider_betrayal` 陡(ok)、`try_proactive_diplomacy` 0.2~0.7 平(陡化)、`_check_discipline` fail-under-stress=②outcome(ok)。
 - **★★單一源 oracle 判準（用戶/blueprint 定 2026-07-16，統一路線圖通則）**：收概念成單一 oracle（need/threat/估值…）時，兩種「不完整」判準不同：**①違規=oracle 外各算**（同概念在引擎外另有一套計算，如 `_facility_deficit` 引擎外走 TARGET_PER_POP 算 need）→**必遷 oracle**（是打架種子，各算會不一致）。**②可接受 deferred=oracle 內值暫 flat**（單一源已達成、所有 reader 都經 oracle，只是某分量的值還是常數未推導，如 NeedOracle 終端消耗品 self-use 暫用 TARGET_PER_POP 待戰耗率機制）→**記 known-deferred 非 blocker**（值的精化可後補，源已統一）。**分界=「源」統一（reader 都經 oracle）是硬標準；「值」推導完整度是可分期的軟債。** 驗收乾淨證據時 grep「oracle 外同概念各算」=硬 gate，「oracle 內 flat 值」=documented。
 
 ## ★★ 全量暫態可觀測性（governing invariant，憲法同級，用戶定 2026-07-14）
