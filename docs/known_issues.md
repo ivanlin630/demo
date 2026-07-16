@@ -738,3 +738,11 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 ## Arc1 need oracle S6 + 終端消耗品 known-deferred（2026-07-16）
 - **S6 遷 `_facility_deficit` → oracle**（dispatched）:blueprint 裁甲——workshop/apothecary/weaponsmith 等 non-food 設施 deficit 引擎外走 TARGET_PER_POP 各算=單一源違規+打架種子→遷 NeedOracle need（goods 由 demand 驅因 need_keep=0;保 facility gating）。遷完 ① clean→measurer 乾淨全量→批。
 - **終端消耗品(武器/tools/armor) self-use=known-deferred(非 blocker)**:NeedOracle 內 self-use 暫用 flat TARGET_PER_POP base（`need_oracle:35`），**單一源已達成**(reader 都經 oracle),只是值待「戰耗/造耗/傷耗率」世界物理機制建了才真推導。判準見 invariants「單一源 oracle 判準」(源統一=硬/值推導=軟債)。順手 arc5 死常數人格化或戰鬥機制 arc 補推導。關 [[project_economy_arc]]。
+
+## ★★框架「做好」= 3 流（用戶零殘留+真統一+可擴充,blueprint 裁 2026-07-16,defer behavior)
+統一驗收=**真統一+零殘留閘+可擴充三位一體**,3 流全綠才 behavior:
+- **① 零殘留閘流**:強化 constitution_gate 抓全閘型(值閘 RNG/override/硬門檻 + 控制流閘 手派路由/散落入口/近似重複)→ enumerate baseline → de-patch section-A 真閘 → baseline→零/全 legit-marked = 證零殘留。歧義 world-rule vs behavior-gate 由 de-patch 進度判(非 regex auto)。
+- **② 真統一/擴充 3 seam(一舉兩得)**:seam#1 `applicable()`+`to_task()` 折 REGISTRY(消 4 switch→registry 1 entry+term,收益最大,也修 dispatch 手派路由真統一破口);seam#2 `_facility_deficit` 資料驅動(FACILITY_DEF→NeedOracle gap 泛型衍生,加設施自動有需求訊號);seam#3 `sim_runner` 系統 registry(SYSTEMS=[{sys,lod_policy}]+統一 tick loop,消 near+far 雙分支)。
+- **③ 思考補完**:情緒接線(person.goals/memory dormant→決策輸入維度,像 need/threat oracle 供 term;結構接線=框架,情緒行為內容=behavior 後做)。
+- **section-A de-patch 清單**(各判):_threat_recent(faction_ai:3125,caller 3087/3090)=behavior-gate/FEUD_ATTACK_MIN+VIABLE_ARMED_RATIO=人格化/GOVERN_MATERIAL_TARGET 孤兒=刪/_evaluate_threat 忙碌+門檻雙gate(388-401)=util/tribute FLEE override(diplomatic:40)=world-rule?待判/establish is_military(3285)+try_hunt(3254)=連續util/applicable DESPERATION天閾(options.gd:93/103/115/121/124/149)=可達性留-天閾de-patch/diplomatic RNG閘(124/137/140)=人格util/dispatch手派return-gate(_evaluate_survival:3187/_evaluate_threat:396 if uses_unified return)=真統一破口收斂。**+baseline偵測器窮盡補漏(別假設清單完整)**。
+- **defer behavior**:俘虜feature(殺俘/贖金)/估值小冗餘/emotion內容/deal側死法②。每流照Arc1模式(byte-identical/乾淨全量/R②)。關 [[project_unification_matrix]]。
