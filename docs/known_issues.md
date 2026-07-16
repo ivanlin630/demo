@@ -746,3 +746,9 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **③ 思考補完**:情緒接線(person.goals/memory dormant→決策輸入維度,像 need/threat oracle 供 term;結構接線=框架,情緒行為內容=behavior 後做)。
 - **section-A de-patch 清單**(各判):_threat_recent(faction_ai:3125,caller 3087/3090)=behavior-gate/FEUD_ATTACK_MIN+VIABLE_ARMED_RATIO=人格化/GOVERN_MATERIAL_TARGET 孤兒=刪/_evaluate_threat 忙碌+門檻雙gate(388-401)=util/tribute FLEE override(diplomatic:40)=world-rule?待判/establish is_military(3285)+try_hunt(3254)=連續util/applicable DESPERATION天閾(options.gd:93/103/115/121/124/149)=可達性留-天閾de-patch/diplomatic RNG閘(124/137/140)=人格util/dispatch手派return-gate(_evaluate_survival:3187/_evaluate_threat:396 if uses_unified return)=真統一破口收斂。**+baseline偵測器窮盡補漏(別假設清單完整)**。
 - **defer behavior**:俘虜feature(殺俘/贖金)/估值小冗餘/emotion內容/deal側死法②。每流照Arc1模式(byte-identical/乾淨全量/R②)。關 [[project_unification_matrix]]。
+
+## 框架做好 stream① 進度（2026-07-17，constitution_gate v2 + 軌2 merged 08d3a39d）
+- **constitution_gate v2 merged**:抓全閘型(值閘 RNG/override/硬門檻 + 控制流閘 手派route/散落入口/近似重複),baseline-freeze enumerate 93閘,綠=baseline全gate-ok=零殘留可證。baseline 現 91(37 gate-ok + 54 待軌1/triage)。
+- **de-patch 軌2 值閘 merged**:閘1 _threat_recent→intent軍備/閘5 tribute FLEE→膽識絕望秤/閘7 calc_attack_score孤兒刪/try_proactive陡化。結構正確+無回歸,gate grep證消失。
+- **★fast-follow(非blocker)**:①軌2分化 multi-seed confirm(militancy/低慎重 try_proactive/tribute修測法)——militancy綁**軍事設施thinness**(軍事設施幾乎不建,同生產框架facility-thin,production域separate)②守measure前不宣victory,分化待confirm。
+- **剩零殘留工**:**軌1 seam#1 控制流收斂**(route×10+dispatch_entry收斂成一encounter eval+registry=真統一+擴充,大slice)+ 其餘54閘triage/de-patch → gate baseline續縮向零。stream② seam#2/#3(facility_deficit資料驅動/sim_runner registry)+ stream③情緒接線。關 [[project_unification_matrix]]。
