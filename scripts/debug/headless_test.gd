@@ -179,7 +179,7 @@ func _initialize() -> void:
 	_test_find_prosperity_prey()
 	_test_evaluate_prosperity_trigger()
 	_test_prosperity_same_faction_skip()   # 序5：low_ambition/low_readiness 硬閘測已刪（溶成 engine 權重）
-	_test_prosperity_treasury_bonus()
+	# _test_prosperity_treasury_bonus 退役（閘7 calc_attack_score 孤兒刪除）
 	_test_prosperity_prey_personality_weight()   # 序5：_test_prosperity_cadence 已刪（cadence 機制溶解）
 	_test_survival_b_branch_far_outpost_loot()
 	_test_survival_b_branch_near_outpost_return()
@@ -9169,17 +9169,7 @@ func _test_prosperity_same_faction_skip() -> void:
 	assert(prey_pick == -1, "唯一 prey 同 faction 應被 find_prosperity_prey 排除，實際 pick=%d" % prey_pick)
 	print("Prosperity Task3d OK")
 
-func _test_prosperity_treasury_bonus() -> void:
-	print("--- Prosperity Task3e: anon_treasury 加成 +0.1 ---")
-	var team := TeamData.new()
-	var leader := PersonData.new()
-	leader.values = { "野心": 0.5, "好戰": 0.5, "信義": 0.5 }
-	team.anon_treasury = 0.0
-	var s0 = FactionAISystem.calc_attack_score(team, leader)
-	team.anon_treasury = 250.0
-	var s1 = FactionAISystem.calc_attack_score(team, leader)
-	assert(abs((s1 - s0) - 0.1) < 0.001, "公庫加成應 +0.1，實際=%.3f" % (s1 - s0))
-	print("Prosperity Task3e OK")
+# de-patch 閘7：calc_attack_score 孤兒刪除→ _test_prosperity_treasury_bonus 退役（測已刪函式）。
 
 func _test_prosperity_prey_personality_weight() -> void:
 	print("--- Prosperity Task14: prey 評分個性權重 ---")

@@ -35,13 +35,15 @@ func _get_pop_est(state: WorldState, obs_id: int, tgt_id: int, fallback: int) ->
 # interaction.resolve_extortion_direct 內嵌分全退役）。
 # F-I7：aggressor 實力讀 believed pop（無估 fallback=self pop=視為等強，保守不偷看真值）。
 # F-I5：consult feud/gratitude typed 邊當權重項。
+const TRIBUTE_W_FLEE: float = 0.25   # de-patch 閘5 TEST VALUE：逃跑絕境屈服傾向(<義氣權重 0.3→膽識/義氣可拒=絕境戲)
+
 static func tribute_accept(state: WorldState, defender: TeamData, aggressor: TeamData,
 		threat: float) -> bool:
-	if defender.current_task == TeamData.TASK_FLEE:
-		return true
 	var leader: PersonData = state.persons.get(defender.leader_id) if defender.leader_id != -1 else null
 	if leader == null:
 		return false
+	# de-patch 閘5：拆「逃跑=必屈服」硬 override → 逃跑=絕境屈服傾向(加分)，但義氣/膽識高仍可邊逃邊拒(絕境戲)。
+	var flee_desperation: float = TRIBUTE_W_FLEE if defender.current_task == TeamData.TASK_FLEE else 0.0
 	var caution: float  = float(leader.values.get("慎重", 0.5))
 	var honor: float    = float(leader.values.get("義氣", 0.5))
 	var survival: float = float(leader.values.get("求生欲", 0.5))
@@ -52,7 +54,8 @@ static func tribute_accept(state: WorldState, defender: TeamData, aggressor: Tea
 	var score: float = (power_r - 1.0) * TRIBUTE_W_POWER \
 		+ caution * TRIBUTE_W_CAUTION - honor * TRIBUTE_W_HONOR \
 		+ survival * TRIBUTE_W_SURVIVAL + leader.fear * TRIBUTE_W_FEAR \
-		+ clampf(threat, 0.0, 1.0) * TRIBUTE_W_THREAT
+		+ clampf(threat, 0.0, 1.0) * TRIBUTE_W_THREAT \
+		+ flee_desperation   # 閘5：逃跑絕境屈服傾向（義氣/膽識高可抵銷 → 邊逃邊拒）
 	var score_no_edge: float = score
 	var had_edge: bool = false
 	if aggressor.leader_id != -1:
