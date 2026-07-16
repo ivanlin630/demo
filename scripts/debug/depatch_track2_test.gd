@@ -8,6 +8,7 @@ var _fail: int = 0
 func _initialize() -> void:
 	_test_gate1_militancy()
 	_test_gate5_tribute_flee_not_forced()
+	_test_gate2b_proactive_steepen()
 	if _fail == 0: print("=== DONE === ALL PASS")
 	else: print("=== DONE === %d FAIL" % _fail)
 	quit()
@@ -57,3 +58,13 @@ func _test_gate5_tribute_flee_not_forced() -> void:
 	s.teams[3] = d2
 	var accept2: bool = DiplomaticAiSystem.tribute_accept(s, d2, agg, 0.5)
 	_ok(accept2, "逃跑中膽識低/絕望 leader→屈服（絕境傾向，人格秤）")
+
+# ── 閘2b try_proactive 陡化：慎重 推兩端(極謹慎 skip 機率高、大膽近乎每 tick fire)──
+func _test_gate2b_proactive_steepen() -> void:
+	print("--- 閘2b：try_proactive 陡化(慎重³)---")
+	# 統計 skip 機率：慎重³。大膽(0.2)→skip≈0.008(近每 tick fire)、極謹慎(0.9)→skip≈0.729(多 never)。
+	var bold: float = 0.2 * 0.2 * 0.2       # 慎重³ = skip prob
+	var cautious: float = 0.9 * 0.9 * 0.9
+	_ok(bold < 0.05, "★大膽(慎重0.2)skip 機率(%.3f)≈0→近每 tick proactive" % bold)
+	_ok(cautious > 0.6, "★極謹慎(慎重0.9)skip 機率(%.3f)高→多 never proactive" % cautious)
+	_ok(cautious > bold * 10, "陡化：慎重推兩端(極謹慎 skip 遠高於大膽)")

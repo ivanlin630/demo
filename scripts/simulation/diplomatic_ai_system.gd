@@ -124,7 +124,10 @@ func _calc_diplomacy_score(state: WorldState,
 func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 	var self_leader: PersonData = state.persons.get(self_team.leader_id)
 	if self_leader == null: return
-	if randf() > self_leader.values.get("慎重", 0.5) * 0.5 + 0.2: return
+	# de-patch 閘2b（blueprint 明裁 legit RNG 案③，retry alone）：曲線陡化——慎重推兩端
+	# （極謹慎 never proactive、大膽近乎每 tick，骰只斷中間）。慎重³ vs 舊 ×0.5+0.2(0.2~0.7 平)。
+	var _caut2: float = float(self_leader.values.get("慎重", 0.5))
+	if randf() < _caut2 * _caut2 * _caut2: return
 
 	for other_id in state.team_discovered.get(self_team.team_id, []):
 		var other: TeamData = state.teams.get(other_id)
