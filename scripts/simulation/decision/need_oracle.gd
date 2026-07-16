@@ -17,21 +17,57 @@ static func need_keep(state: WorldState, team: TeamData, res: String, leader_val
 static func demand(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
 	return _trade_demand(state, team, res, leader_values)
 
+# 純中間品（只當配方 input，非終端消耗）→ 自用=0，need 全走供應鏈傳導。
+const PURE_INTERMEDIATE: Array = ["material", "ore_iron", "ore_steel", "gem", "herb"]
+
 # ── 自用推導（消耗率=世界物理 flat；buffer 天數人格化。取代 TARGET_PER_POP 自用身分）──
-# ★S1：food 真推導。非 food 自用（武器戰耗/tools 造耗/藥傷耗）= S2+ 實作，S1 回 0（走供應鏈 fallback）。
+# food 真推導；純中間品=0（走供應鏈）；終端消耗品（武器/tools/藥/armor/arrows）=buffer base
+# （★S4 換真消耗率×人格 buffer；S2 暫用 TARGET_PER_POP base，reader 未切故無產線影響）。goods=純貿易 need_keep=0。
 static func _self_use(team: TeamData, res: String, leader_values: Dictionary) -> float:
 	if res == "food":
-		# food 自用 = 日耗(flat) × pop × 人格安全存量天(food_security_target)。不賣到自己餓。
 		return ResourceSystem.FOOD_PER_PERSON_PER_DAY * float(team.population) \
 			* DecisionTerms.food_security_target(leader_values)
-	return 0.0
-
-# ── 供應鏈傳導（中間品下游 gap）——★S2 實作；S1 fallback 舊 TARGET_PER_POP（非 food 自用/供應鏈合體舊值）──
-static func _supply_chain(_state: WorldState, team: TeamData, res: String) -> float:
-	if res == "food":
-		return 0.0   # food 無供應鏈（終端消耗），自用已涵蓋
-	# S1 fallback：非 food 走舊 TARGET_PER_POP（S2 換 gap 傳導、S4 正式退役常數）。
+	if res == "goods":
+		return 0.0   # goods 純貿易品，無自用消費 sink（#6）
+	if res in PURE_INTERMEDIATE:
+		return 0.0   # 純中間品 need 全走供應鏈
+	# 終端消耗品 buffer base（S4 換真戰耗/造耗/傷耗率×人格 buffer 天）
 	return float(team.population) * float(TradeValuation.TARGET_PER_POP.get(res, 0.0))
+
+# ── 供應鏈傳導（★S2）：下游 gap 傳導——傳導量 = Σ 下游 max(need_keep−holding,0) × 配方係數。
+# gap 非 raw（防已持成品仍囤原料）+ 設施 gating（無該設施不背）+ 同 out 多配方取 max 係數（不重複加總）。
+# walk 有限層無循環（RECIPE out→in DAG，#4 已驗）。holding 用 team.resources 私產（oracle 內部 gap，非 reader）。
+static func _supply_chain(state: WorldState, team: TeamData, res: String) -> float:
+	if res == "food" or state == null:
+		return 0.0   # food 終端無供應鏈；無 state 無法 gating/gap
+	# 同 out 多配方：per 下游-out 取「該隊設施可造」的 max 係數（不重複加總 out gap）
+	var out_maxcoef: Dictionary = {}
+	for level_key in ManufacturingSystem.RECIPE_GROUPS:
+		if not _team_has_facility(state, team, level_key):
+			continue   # ★設施 gating：無此製造設施的隊不背此供應鏈 need
+		for recipe in ManufacturingSystem.RECIPE_GROUPS[level_key]:
+			var inputs: Dictionary = recipe["in"]
+			if not inputs.has(res):
+				continue
+			var out: String = String(recipe["out"])
+			var coef: float = float(inputs[res])
+			out_maxcoef[out] = maxf(float(out_maxcoef.get(out, 0.0)), coef)   # 多配方取 max 不重複
+	if out_maxcoef.is_empty():
+		return 0.0
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var total: float = 0.0
+	for out in out_maxcoef:
+		var gap: float = maxf(need_keep(state, team, out, lv) - float(team.resources.get(out, 0)), 0.0)   # ★gap 非 raw
+		total += gap * float(out_maxcoef[out])
+	return total
+
+# 設施 gating：隊「自家」outpost 有此製造設施（非 positional——掃 team 擁有的 outpost，讀自家 need 側）。
+static func _team_has_facility(state: WorldState, team: TeamData, level_key: String) -> bool:
+	for tid in state.world.tiles:
+		var tile: HexTileData = state.world.tiles[tid]
+		if tile.outpost_owner == team.team_id and tile.outpost_level > 0 and int(tile.get(level_key)) > 0:
+			return true
+	return false
 
 # ── 貿易 demand（市場有效買單+野心+可載）——★S3 實作；S1 fallback 0（reader 尚未切，賣邏輯仍走舊路）──
 static func _trade_demand(_state: WorldState, _team: TeamData, _res: String, _leader_values: Dictionary) -> float:
