@@ -24,7 +24,7 @@ func _initialize() -> void:
 func _mk_ctx(vals: Dictionary) -> DecisionContext:
 	var c := DecisionContext.new()
 	c.leader_values = vals
-	c.threat_react = 0.8
+	c.threat_react = 1.1   # ★S2 calibrate：高威脅(≥THREAT_BOOST_FLOOR 1.0，boost fires)→repertoire 各響應清晰
 	c.threat_threshold = ThreatAssessment.THREAT_BASE_THRESHOLD + float(vals.get("慎重", 0.5)) * 0.3
 	c.threat_id = 1
 	c.threat_pos = Vector2i(2, 0)
@@ -45,8 +45,9 @@ func _check_repertoire() -> void:
 	print("--- 5a repertoire (4 原型) ---")
 	# 求生欲高 → survival(FLEE=逃跑)
 	_expect_first("FLEE", {"求生欲": 0.9, "好戰": 0.1, "慎重": 0.5, "貪婪": 0.5, "信義": 0.5}, "survival")
-	# 好戰高+非居民 → 迎戰(DEFEND)
-	_expect_first("DEFEND", {"求生欲": 0.3, "好戰": 0.9, "慎重": 0.2, "貪婪": 0.5, "信義": 0.5}, "迎戰")
+	# 好戰高+低慎重(reckless 死戰 override winnable)+非居民 → 迎戰(DEFEND)。★S2 calibrate：迎戰 dampen 後
+	# 好戰-high 需 reckless(低慎重 override)或可勝才 charge；moderate 慎重+不可勝→備戰(respect,cautious-hawk)。
+	_expect_first("DEFEND", {"求生欲": 0.3, "好戰": 0.9, "慎重": 0.1, "貪婪": 0.5, "信義": 0.5}, "迎戰")
 	# 慎重高 → 備戰(PREPARE)
 	_expect_first("PREPARE", {"求生欲": 0.4, "好戰": 0.4, "慎重": 0.9, "貪婪": 0.5, "信義": 0.5}, "備戰")
 	# 貪婪+信義高+好戰低+★低求生欲(真 weak-pragmatic，非怯逃) → 求和(pacify outlet)

@@ -9,8 +9,8 @@ const COMMITMENT_BONUS: float = 0.3   # TEST VALUE：承諾慣性（防震盪）
 const SURVIVAL_BOOST_FLOOR: float = 2.0   # TEST VALUE — 極低糧門檻(遠低人格安全存量,安全氣囊非日常剎車)
 const SURVIVAL_BOOST_MAX: float = 2.5     # TEST VALUE — food→0 時 survival util +此(碾壓任何 dev,復原舊 12 域碾壓力)
 # ★threat-oracle S2 break-top boost（TEST VALUE，measure 校；★硬約束 THREAT_BOOST_MAX < SURVIVAL_BOOST_MAX）
-const THREAT_BOOST_FLOOR: float = 0.6     # TEST VALUE — severity(threat_react)≥此才 boost threat option(gate on floor)
-const THREAT_BOOST_MAX: float = 1.2       # TEST VALUE — severity=SEVERITY_MAX 時 threat option +此(<survival 2.5=不必然勝)
+const THREAT_BOOST_FLOOR: float = 1.0     # TEST VALUE(S2 calibrate ↑0.6)— boost 只在真高威脅(organic:threat 碾平經濟修)
+const THREAT_BOOST_MAX: float = 0.5       # TEST VALUE(S2 calibrate ↓1.2)— <survival 2.5；organic 迎戰 over-shoot 修
 
 # options 依 util 降序（index tiebreak：util 相等→applicable 順序在前者勝，同 argmax strict >）。
 # 排序後帶 util 的 scored 陣列 [{u,i,opt}, ...]（降序）。rank() 只取 opt；
