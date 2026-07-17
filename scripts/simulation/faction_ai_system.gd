@@ -3083,15 +3083,13 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 		tile: HexTileData) -> float:
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var entry: Dictionary = FACILITY_DEFICIT_DEF.get(facility, {})
-	if entry.is_empty():
-		return 0.0
+	if entry.is_empty(): return 0.0
 	# C 類：專屬 evaluator（非 NeedOracle res-gap，語意真異質不硬併）。
 	if entry.has("special"):
 		return float(call(entry["special"], state, team, tile, lv))
 	# B facility-gating（smeltery 需 weapon/armorsmith 存在）。
 	if entry.get("gating", "") == "smeltery":
-		if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0:
-			return 0.0
+		if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0: return 0.0
 	# A 類泛型 evaluator（NeedOracle-gap）。
 	var outputs: Array = entry["outputs"]
 	var use_demand: bool = entry["use_demand"]
@@ -3117,8 +3115,7 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 			if use_demand:
 				tgt += NeedOracle.demand(state, team, res, lv)
 			total_tgt += tgt
-		if total_tgt <= 0.001:
-			return 0.0
+		if total_tgt <= 0.001: return 0.0
 		deficit = clampf((total_tgt - total_hold) / total_tgt, 0.0, 1.0)
 	deficit *= float(entry["output_scale"])
 	if entry["militancy_scaled"]:
