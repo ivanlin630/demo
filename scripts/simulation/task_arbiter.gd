@@ -54,7 +54,9 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 	# 引擎自己派的 task（腦選、手無條件執行）。兩側都要 engine-owned：新 source 在白名單、
 	# 現任 task_reason 也在（defy_ 前綴=抗命贏來的引擎 task，視同）→ herald/merchant/scout
 	# 等同層現任不被 stomp。防抖動由引擎 COMMITMENT_BONUS 承擔（rank 前已偏置現任 option）。
-	if priority == PRIO_DISPATCH and team.task_priority == PRIO_DISPATCH \
+	# ★threat-oracle S3：擴認 PRIO_THREAT self-replace（收斂後 threat option 走 _decide_unified@PRIO_THREAT 70；
+	# 同層 threat option 可換 迎戰→求和 不卡=finding3 黏性）。source 白名單(unified/solo)擋 uprising 誤觸。
+	if priority in [PRIO_DISPATCH, PRIO_THREAT] and team.task_priority == priority \
 			and _source in ENGINE_SOURCES \
 			and team.task_reason.trim_prefix("defy_") in ENGINE_SOURCES:
 		if new_task == team.current_task:
