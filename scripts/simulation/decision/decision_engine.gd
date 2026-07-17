@@ -8,6 +8,9 @@ const COMMITMENT_BONUS: float = 0.3   # TEST VALUE：承諾慣性（防震盪）
 # floor 低→正常隊靠層1/2/5 安全網不觸發；boost 觸發頻率=健康指標(常觸發=安全網失職)。
 const SURVIVAL_BOOST_FLOOR: float = 2.0   # TEST VALUE — 極低糧門檻(遠低人格安全存量,安全氣囊非日常剎車)
 const SURVIVAL_BOOST_MAX: float = 2.5     # TEST VALUE — food→0 時 survival util +此(碾壓任何 dev,復原舊 12 域碾壓力)
+# ★threat-oracle S2 break-top boost（TEST VALUE，measure 校；★硬約束 THREAT_BOOST_MAX < SURVIVAL_BOOST_MAX）
+const THREAT_BOOST_FLOOR: float = 1.0     # TEST VALUE(S2 calibrate ↑0.6)— boost 只在真高威脅(organic:threat 碾平經濟修)
+const THREAT_BOOST_MAX: float = 0.5       # TEST VALUE(S2 calibrate ↓1.2)— <survival 2.5；organic 迎戰 over-shoot 修
 
 # options 依 util 降序（index tiebreak：util 相等→applicable 順序在前者勝，同 argmax strict >）。
 # 排序後帶 util 的 scored 陣列 [{u,i,opt}, ...]（降序）。rank() 只取 opt；
@@ -37,6 +40,12 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "") -
 		if ctx.food_days < SURVIVAL_BOOST_FLOOR and opt in DecisionOptions.SURVIVAL_OPTION_SET:
 			u += SURVIVAL_BOOST_MAX * (SURVIVAL_BOOST_FLOOR - ctx.food_days) / SURVIVAL_BOOST_FLOOR
 			if Probe.enabled: Probe.bump("survival.boost_fire")   # 觸發頻率=健康指標(measurer 要)
+		# ★threat-oracle S2 break-top boost（解 skeptic finding3 單 term-多 term 不匹配）：severity≥FLOOR 時
+		# threat option 加法破頂 ∝ severity（鏡射 survival，全 THREAT_OPTION_SET 等量加，保內部序）
+		# ★capped 且 < survival boost(2.5)：threat=belief→survival(存亡)保序不破；blueprint② 非偽裝硬閘。
+		if ctx.threat_react >= THREAT_BOOST_FLOOR and opt in THREAT_OPTION_SET:
+			u += THREAT_BOOST_MAX * clampf((ctx.threat_react - THREAT_BOOST_FLOOR) / (DecisionTerms.SEVERITY_MAX - THREAT_BOOST_FLOOR), 0.0, 1.0)
+			if Probe.enabled: Probe.bump("threat.boost_fire")
 		if Probe.enabled and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
 			Probe.bump("decision.coeff_applied_n")   # 全 23 option 受 coeff 覆蓋計數
 			if _coeff < 0.5: Probe.bump("decision.coeff_lowhalf")   # 遠層被顯著壓比例

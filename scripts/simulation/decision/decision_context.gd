@@ -99,6 +99,10 @@ var threat_threshold: float = 0.0
 # threat-oracle S1.5：純戰力比（belief-based，god-view-free）供 S2 winnable。★≠threat_react
 # （threat_react=approach+hostility+power blend；此=純 other_power/self_power）。無 threat→0。
 var perceived_power_ratio: float = 0.0
+# threat-oracle S2：可勝性 [0,1] = self 真戰力(自知) / 感知敵戰力(belief ppr)。隨 ppr↓(敵強→難勝→低)。
+# 感知鐵律:self_armed_ratio(自知真值) × 1/perceived_power_ratio(belief 敵)→虛張生效(不偷看敵真戰力)。
+const WINNABLE_PPR_FLOOR: float = 0.5   # TEST VALUE — ppr 下限(避除小爆;ppr<此=我遠強→winnable 飽和)
+var winnable: float = 0.0
 var is_resident: bool = false
 # 野心階梯（序3 rung_task 溶入）：archetype/rung 當 weight 驅動 option（非查表塞 task）。
 # ambient_train_drive = FORCE-archetype 累積/擴張階練兵 base（低 magnitude 讓位緊急決策）。
@@ -197,6 +201,8 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
 	# 無牙商隊 armed≈0 → ratio≈0 → loot_drive/intent_fit capability_factor 壓平（送死沒人幹，非被禁）。
 	c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(float(team.population), 1.0)
+	# threat-oracle S2：可勝性（self_armed 自知 × 1/perceived_power belief 敵；ppr 需先算=threat 段已設）。
+	c.winnable = clampf(c.self_armed_ratio / maxf(c.perceived_power_ratio, WINNABLE_PPR_FLOOR), 0.0, 1.0)
 	# 佔村 target（可據 stationary 弱村；belief-driven weakness，可見性物理判可據）
 	var _occ: int = _fa._find_occupy_target(state, team)
 	c.has_occupy_target = _occ != -1

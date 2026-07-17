@@ -16,6 +16,18 @@ const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量�
 # ── means-end 戰術層（2026-07-01）：intent → 子需求 → option 貢獻打分（mirror FACTION_DUTY_DRIVE）──
 const INTENT_FIT_DRIVE: float = 1.0     # TEST VALUE — T3 正規化：意圖反應量級→[0,1]（1.5→1.0）
 const SURPLUS_FOOD_DAYS: float = 7.0    # TEST VALUE — 「有餘糧」門檻（致富→囤貨/貿易 子需求觸發）
+# ── threat-oracle S2：severity-scaled threat util（TEST VALUE，measure 校；方向/cap/零fall-through 鎖死）──
+const SEVERITY_MAX: float = 1.2   # TEST VALUE(S2 calibrate ↓1.5)— threat_react 上界(capped 保競秤;organic 碾平修)
+const CONFRONT_K: float = 0.6     # TEST VALUE(S2 calibrate)— 迎戰 dampen(好戰×sev×modulate×此;organic 迎戰 44-105x 修)
+const PREP_A: float = 0.6         # 備戰 base 慎重係數
+const PREP_B: float = 0.2         # 備戰 base 好戰係數
+const PREP_K: float = 0.5         # 備戰 severity 放大率(普遍隨威脅升，慎重-weighted 幅度)
+const PACIFY_C: float = 0.5       # 求和 貪婪係數
+const PACIFY_D: float = 0.3       # 求和 信義係數
+const PACIFY_E: float = 0.3       # 求和 好戰抑制(好戰者不屑低頭)
+const FLEE_SURV: float = 0.7      # FLEE 膽量秤 求生欲係數
+const FLEE_MARTIAL: float = 0.3   # FLEE 膽量秤 (1−好戰) 係數
+const FLEE_PANIC: float = 0.4     # FLEE 恐慌加成(保 panic-FLEE 機制，鏡射舊 threat_pressure panic 項)
 # 候選2 統一人格門檻（單一 home=DecisionTerms；收編 Fix3-v2 esteem_food_ref，need_hierarchy/trade_valuation 都呼此）。
 # 「安全感」數字：謹慎領袖高(備糧多才敢發展/賣糧)、賭徒低(薄糧就搏)。同時駕馭 esteem food_ready + 賣糧留底。
 const FOOD_SEC_BASE: float = 4.0        # TEST VALUE — 中性領袖(慎重=野心=0.5)安全存量目標(天)
@@ -73,11 +85,15 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# T1：剝 hunger urgency(移 coeff)，保機會品質——家糧倉越滿返家越值(空家不返)。
 			return clampf(ctx.home_food / RESTOCK_MIN, 0.0, 1.0)
 		"threat_pressure":
-			# survival-path ②：撤 T1 0.6 floor→FLEE 威脅 gate。無威脅(threat=0)→eval 0(食足隊不 spurious FLEE
-			# 餓死)；panic 僅威脅時計(斷 death spiral)。真威脅→威脅+恐慌加成。
+			# ★threat-oracle S2（finding5 rewrite）：FLEE = 膽量秤(求生欲/1−好戰) × severity × (1−winnable)
+			#   + 恐慌加成（outlet:怯/絕境）。無威脅(threat=0)→0（食足隊不 spurious FLEE 餓死；panic 僅威脅時計）。
+			#   ★survival_pressure 絕境層(:72-74 restock 等)分離不動；此=threat-repertoire FLEE。
 			if ctx.threat <= 0.0:
 				return 0.0
-			return clampf(ctx.threat + ctx.team_panic * 0.4, 0.0, 1.0)
+			var _sev: float = clampf(ctx.threat_react, 0.0, SEVERITY_MAX)
+			var _courage: float = clampf(float(ctx.leader_values.get("求生欲", 0.5)) * FLEE_SURV \
+				+ (1.0 - float(ctx.leader_values.get("好戰", 0.5))) * FLEE_MARTIAL, 0.0, 1.0)
+			return _courage * _sev * (1.0 - ctx.winnable) + ctx.team_panic * FLEE_PANIC
 		"economic_opp":
 			if opt != "貿易": return 0.0
 			var role: float = 1.0 if ctx.is_merchant else NON_MERCHANT_TRADE_FACTOR
@@ -170,19 +186,30 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		# 鏡射舊 _dispatch_threat_response scores（threat_react 只作小係數 modifier，非碾壓量級）——
 		# 否則 threat_react unbounded(power_ratio 可大)會壓過 survival 絕境 drive。threat 有無由 applicable gate 管。
 		"prepare_drive":
-			# 備戰 = 純人格（鏡射舊 caution*0.6 + martial*0.3）。
+			# ★threat-oracle S2：備戰 = (慎重·a + 好戰·b) × (1 + severity·k_prep)。普遍隨威脅升
+			#   (連謹慎/怯懦者被威脅也備戰=低後悔對沖)；人格調幅度非方向。零 fall-through:cautious 象限主導。
 			if opt != "備戰": return 0.0
-			# T5 層內 base 校：抬謹慎梯度(慎·0.9+好·0.2)——謹慎隊備戰高、好戰隊仍低(保人格梯度)。
-			return clampf(float(ctx.leader_values.get("慎重", 0.5)) * 0.9 + float(ctx.leader_values.get("好戰", 0.5)) * 0.2, 0.0, 1.0)
+			var _sevp: float = clampf(ctx.threat_react, 0.0, SEVERITY_MAX)
+			var _base_p: float = float(ctx.leader_values.get("慎重", 0.5)) * PREP_A \
+				+ float(ctx.leader_values.get("好戰", 0.5)) * PREP_B
+			return _base_p * (1.0 + _sevp * PREP_K)
 		"defend_drive":
-			# 迎戰 = 好戰驅動，威脅越大越不敢正面（鏡射舊 martial*0.7 + (1−threat)*0.2）。
+			# ★threat-oracle S2：迎戰 = 好戰 × severity × modulate_win；modulate_win=lerp(winnable,1,1−慎重)
+			#   慎重高→respect winnable(不可勝→迎戰低)；慎重低→override(魯莽死戰 last-stand=proud-doomed 主導)。
 			if opt != "迎戰": return 0.0
-			return float(ctx.leader_values.get("好戰", 0.5)) * 0.7 + (1.0 - ctx.threat_react) * 0.2
+			var _sevd: float = clampf(ctx.threat_react, 0.0, SEVERITY_MAX)
+			var _caution_d: float = float(ctx.leader_values.get("慎重", 0.5))
+			var _modulate_win: float = lerpf(ctx.winnable, 1.0, 1.0 - _caution_d)
+			return float(ctx.leader_values.get("好戰", 0.5)) * _sevd * _modulate_win * CONFRONT_K
 		"pacify_drive":
-			# 求和 = 貪婪/信義驅動，好戰者不屑低頭（鏡射舊 greed*0.5 + honor*0.3 − martial*0.3）。
+			# ★threat-oracle S2：求和 = (貪婪·c + 信義·d − 好戰·e) × severity × (1−winnable)。outlet:
+			#   不可勝 + 低好戰 → 求和(好戰者不屑低頭)。零 fall-through:weak-pragmatic 象限主導。
 			if opt != "求和": return 0.0
-			return float(ctx.leader_values.get("貪婪", 0.5)) * 0.5 + float(ctx.leader_values.get("信義", 0.5)) * 0.3 \
-				- float(ctx.leader_values.get("好戰", 0.5)) * 0.3
+			var _sevc: float = clampf(ctx.threat_react, 0.0, SEVERITY_MAX)
+			var _base_c: float = float(ctx.leader_values.get("貪婪", 0.5)) * PACIFY_C \
+				+ float(ctx.leader_values.get("信義", 0.5)) * PACIFY_D \
+				- float(ctx.leader_values.get("好戰", 0.5)) * PACIFY_E
+			return _base_c * _sevc * (1.0 - ctx.winnable)
 		"absorb_drive":
 			# §HOW-8 完整 utility：資源可負擔(resource_slack) × 期待收益(absorb_yield) × 擴展需求(ambition_gap)。
 			# 個性(野心+仁慈)在 weight。擴張-class 公平競秤（禁硬優勢；征服真划算而贏=保留不動）。
