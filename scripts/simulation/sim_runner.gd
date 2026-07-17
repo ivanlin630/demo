@@ -120,6 +120,90 @@ func _pht(name: String, t0: int) -> int:
 	_ph[name] = int(_ph.get(name, 0)) + (now - t0)
 	return now
 
+# ★seam#3 S1：per-team 系統 registry（near+far 統一 loop，byte-identical 純重構 dispatch 結構）。
+# 加 per-team 系統 = 加 SYSTEMS 1 entry（非改 near+far 兩分支）。lod=BOTH(near+far 都跑)/NEAR(僅 near)。
+# ★near/far 共同步序本就相同（逐 code 核）→ 單 registry 順序可同時 byte-identical 兩分支。
+# ★非平坦（R②②）：move entry 後顯式 checkpoint(rebuild_index=BOTH R②修正 + moved/arrived 抽取
+#   + near player-clear)；phase_timing label 掛群組最後 entry(near 才 fire)；near-only glue(player_old
+#   capture / encounter-return / RecruitTutorial)以 is_near+entry-name hook。tick 級單次步保 explicit。
+# args_shape(R② 補第4型 time_mult)：vision(state,teams,vmult)/teams/teams_cadence/moved(state,moved,teams)
+#   /arrived(state,arrived)/state/regen(state,cadence)/move(state,teams,smult,cadence→Dict special)。
+const LOD_NEAR: int = 0
+const LOD_BOTH: int = 1
+static var SYSTEMS: Array = [
+	{"name": "vision",           "fn": "_step1b_update_vision",     "lod": LOD_BOTH, "shape": "vision",        "tl": "near.vision"},
+	{"name": "equip",            "fn": "_step1c_update_equipment",  "lod": LOD_BOTH, "shape": "teams",         "tl": "near.equip"},
+	{"name": "strategic_move",   "fn": "_step2a_strategic_move",    "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
+	{"name": "move",             "fn": "_step2_move_teams",         "lod": LOD_BOTH, "shape": "move",          "tl": "near.move"},
+	{"name": "propagate",        "fn": "_step3_propagate_messages", "lod": LOD_BOTH, "shape": "moved",         "tl": ""},
+	{"name": "intel",            "fn": "_step3b_exchange_intel",    "lod": LOD_BOTH, "shape": "moved",         "tl": ""},
+	{"name": "market",           "fn": "_step3c_read_market_board", "lod": LOD_BOTH, "shape": "arrived",       "tl": "near.messages"},
+	{"name": "interactions",     "fn": "_step4_resolve_interactions","lod": LOD_BOTH,"shape": "moved",         "tl": "near.interact"},
+	{"name": "outpost_tick",     "fn": "_step4b_outpost_tick",      "lod": LOD_NEAR, "shape": "state",         "tl": ""},
+	{"name": "faction_snapshot", "fn": "_step4e_faction_snapshot",  "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
+	{"name": "ambush",           "fn": "_step_ambush_check",        "lod": LOD_BOTH, "shape": "teams",         "tl": "near.outpost_ambush"},
+	{"name": "collect",          "fn": "_step5_collect_resources",  "lod": LOD_BOTH, "shape": "teams_cadence", "tl": ""},
+	{"name": "regen",            "fn": "_step5a_regenerate_tiles",  "lod": LOD_NEAR, "shape": "regen",         "tl": ""},
+	{"name": "manufacture",      "fn": "_step5b_manufacture",       "lod": LOD_BOTH, "shape": "teams",         "tl": "near.economy"},
+	{"name": "consumption",      "fn": "_step6_resolve_consumption","lod": LOD_BOTH, "shape": "teams_cadence", "tl": ""},
+	{"name": "salary",           "fn": "_step6c_salary",            "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
+	{"name": "fatigue",          "fn": "_step6d_fatigue",           "lod": LOD_BOTH, "shape": "teams_cadence", "tl": "near.consume"},
+	{"name": "faction_ai",       "fn": "_step6b_faction_ai",        "lod": LOD_BOTH, "shape": "teams",         "tl": "near.faction_ai"},
+	{"name": "training",         "fn": "_step6f_training",          "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
+	{"name": "strategic_ai",     "fn": "_step6e_strategic_ai",      "lod": LOD_BOTH, "shape": "state",         "tl": "near.strategic_ai"},
+	{"name": "reactions",        "fn": "_step7_person_reactions",   "lod": LOD_NEAR, "shape": "teams",         "tl": ""},
+	{"name": "cleanup",          "fn": "_step7b_npc_goal_cleanup",  "lod": LOD_NEAR, "shape": "teams",         "tl": "near.reactions"},
+	{"name": "events",           "fn": "_step8_generate_events",    "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
+	{"name": "emit",             "fn": "_step9_emit_messages",      "lod": LOD_BOTH, "shape": "state",         "tl": "near.events_emit"},
+]
+
+# 統一 near/far 系統 loop。is_near=true 跑 NEAR+BOTH（+near-only glue+分組 _pht）；false 僅 BOTH（無 _pht）。
+# 回 {"result": String, "t": int}——result="player_turn"=near 伏擊起 encounter 早退；t=更新後 timing 鏈點。
+func _run_systems(state: WorldState, teams: Array, cadence: int, vmult: float, smult: float,
+		is_near: bool, t_in: int) -> Dictionary:
+	var _t: int = t_in
+	var moved: Array = []
+	var arrived: Array = []
+	var player_old: Vector2i = Vector2i.ZERO
+	for sys in SYSTEMS:
+		if int(sys["lod"]) == LOD_NEAR and not is_near:
+			continue
+		var sname: String = sys["name"]
+		var fn: String = sys["fn"]
+		# near-only pre-hook：move 前擷取 player 舊位（供 move 後偵測玩家移動清 pending target）。
+		if is_near and sname == "strategic_move":
+			player_old = _get_player_tile_pos(state)
+		match String(sys["shape"]):
+			"vision":        call(fn, state, teams, vmult)
+			"teams":         call(fn, state, teams)
+			"teams_cadence": call(fn, state, teams, cadence)
+			"moved":         call(fn, state, moved, teams)
+			"arrived":       call(fn, state, arrived)
+			"state":         call(fn, state)
+			"regen":         call(fn, state, cadence)
+			"move":
+				var mv: Dictionary = call(fn, state, teams, smult, cadence)
+				state.rebuild_team_tile_index()   # ★BOTH post-move rebuild（near+far 各一次；下游 co-location/hostile 查 post-move 位）
+				arrived = mv["arrived"]
+				moved = mv["moved"]
+				if is_near and _get_player_tile_pos(state) != player_old:
+					_player_cmd.clear_pending_targets(state)
+		# near-only post-hook：emit 後、near.events_emit _pht 前送 tutorial 投奔者。
+		if is_near and sname == "emit":
+			RecruitTutorial.new().check(state)
+		# phase_timing 群組邊界（near 才 fire；label 掛該組最後 entry）。
+		var tl: String = sys["tl"]
+		if is_near and phase_timing and tl != "":
+			_t = _pht(tl, _t)
+		# near-only：伏擊起 encounter（near.outpost_ambush 後）→ 交還 bridge。
+		if is_near and sname == "ambush" and state.encounter_active:
+			return {"result": "player_turn", "t": _t}
+	return {"result": "", "t": _t}
+
+# seam#3 擴充 proof 用 test-support no-op（僅測試 append dummy entry 時觸發；一般 sim 無此 entry）。
+func _seam3_dummy_step(_state: WorldState) -> void:
+	Probe.bump("seam3.dummy")
+
 func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	if phase_timing: _ph.clear()   # 相位計時：每 tick 重置
 	if state.encounter_active:
@@ -181,51 +265,11 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 			state.player_forced_event = {}
 			state.player_forced_event_id = ""
 		if phase_timing: _t = _pht("near.forced_event", _t)
-		_step1b_update_vision(state, near_teams, time_vision_mult)
-		if phase_timing: _t = _pht("near.vision", _t)
-		_step1c_update_equipment(state, near_teams)
-		if phase_timing: _t = _pht("near.equip", _t)
-		var _player_old_pos: Vector2i = _get_player_tile_pos(state)
-		_step2a_strategic_move(state, near_teams)   # A2c-2：戰略移動 move_target 設於 movement 前（arbiter-owned）
-		var move_near: Dictionary = _step2_move_teams(state, near_teams, time_speed_mult, NEAR_CADENCE)
-		state.rebuild_team_tile_index()   # post-move rebuild → 下游 co-location/hostile 查見 post-move 位置
-		var arrived_near: Array = move_near["arrived"]
-		var moved_near: Array = move_near["moved"]
-		if _get_player_tile_pos(state) != _player_old_pos:
-			_player_cmd.clear_pending_targets(state)
-		if phase_timing: _t = _pht("near.move", _t)
-		_step3_propagate_messages(state, moved_near, near_teams)
-		_step3b_exchange_intel(state, moved_near, near_teams)
-		_step3c_read_market_board(state, arrived_near)
-		if phase_timing: _t = _pht("near.messages", _t)
-		_step4_resolve_interactions(state, moved_near, near_teams)
-		if phase_timing: _t = _pht("near.interact", _t)
-		_step4b_outpost_tick(state)
-		_step4e_faction_snapshot(state, near_teams)
-		_step_ambush_check(state, near_teams)
-		if phase_timing: _t = _pht("near.outpost_ambush", _t)
-		if state.encounter_active: return "player_turn"   # 伏擊起 encounter → 交還 bridge
-		_step5_collect_resources(state, near_teams, NEAR_CADENCE)
-		_step5a_regenerate_tiles(state, NEAR_CADENCE)   # 全 tile 全域再生（每小時）→ 覆蓋 far 區 tile
-		_step5b_manufacture(state, near_teams)
-		if phase_timing: _t = _pht("near.economy", _t)
-		_step6_resolve_consumption(state, near_teams, NEAR_CADENCE)
-		_step6c_salary(state, near_teams)
-		_step6d_fatigue(state, near_teams, NEAR_CADENCE)
-		if phase_timing: _t = _pht("near.consume", _t)
-		_step6b_faction_ai(state, near_teams)
-		if phase_timing: _t = _pht("near.faction_ai", _t)
-		_step6f_training(state, near_teams)
-		_step6e_strategic_ai(state)
-		if phase_timing: _t = _pht("near.strategic_ai", _t)
-		_step7_person_reactions(state, near_teams)
-		_step7b_npc_goal_cleanup(state, near_teams)
-		if phase_timing: _t = _pht("near.reactions", _t)
-		_step8_generate_events(state, near_teams)
-		_step9_emit_messages(state)
-		# 階段2 tutorial onboarding：玩家食物盈餘 → 一次性送投奔者小隊（check 內守 forced_event 非空跳過）
-		RecruitTutorial.new().check(state)
-		if phase_timing: _t = _pht("near.events_emit", _t)
+		# ★seam#3 S1：near 塊改 SYSTEMS registry 統一 loop（NEAR+BOTH，含分組 _pht + near-only glue）。
+		var near_r: Dictionary = _run_systems(state, near_teams, NEAR_CADENCE,
+			time_vision_mult, time_speed_mult, true, _t)
+		_t = near_r["t"]
+		if near_r["result"] == "player_turn": return "player_turn"   # 伏擊起 encounter → 交還 bridge
 
 	# Harvest：每 6 小時（TICKS_PER_DAY / 4）
 	if state.world.current_tick % (WorldState.TICKS_PER_DAY / 4) == 0:
@@ -235,30 +279,10 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 	# 遠區：每 FAR_ZONE_INTERVAL Tick 跑一次，跳過人物反應
 	if state.world.current_tick % FAR_ZONE_INTERVAL == 0:
 		var far_teams := _get_far_teams(state, player_pos)
-		_step1b_update_vision(state, far_teams, time_vision_mult)
-		_step1c_update_equipment(state, far_teams)
-		_step2a_strategic_move(state, far_teams)   # A2c-2：戰略移動 move_target 設於 movement 前（arbiter-owned）
-		var move_far: Dictionary = _step2_move_teams(state, far_teams, time_speed_mult, FAR_ZONE_INTERVAL)
-		state.rebuild_team_tile_index()   # post-move rebuild（far 隊移動後刷新，near 隊位置本 tick 不再變）
-		var arrived_far: Array = move_far["arrived"]
-		var moved_far: Array = move_far["moved"]
-		_step3_propagate_messages(state, moved_far, far_teams)
-		_step3b_exchange_intel(state, moved_far, far_teams)
-		_step3c_read_market_board(state, arrived_far)
-		_step4_resolve_interactions(state, moved_far, far_teams)
-		_step4e_faction_snapshot(state, far_teams)
-		_step_ambush_check(state, far_teams)
-		_step5_collect_resources(state, far_teams, FAR_ZONE_INTERVAL)
-		# R1：tile 再生已由 near 分支每小時全域跑（覆蓋 far tile）→ 此處不重複再生（原為 24× 雙記元凶之一）
-		_step5b_manufacture(state, far_teams)
-		_step6_resolve_consumption(state, far_teams, FAR_ZONE_INTERVAL)
-		_step6c_salary(state, far_teams)
-		_step6d_fatigue(state, far_teams, FAR_ZONE_INTERVAL)
-		_step6b_faction_ai(state, far_teams)
-		_step6f_training(state, far_teams)
-		_step6e_strategic_ai(state)
-		_step8_generate_events(state, far_teams)
-		_step9_emit_messages(state)
+		# ★seam#3 S1：far 塊改 SYSTEMS registry 統一 loop（僅 BOTH，無分組 _pht；跳 near-only:reactions/
+		# cleanup/tile-regen/outpost_tick/tutorial）。tile 再生已由 near 每小時全域跑覆蓋 far tile（不重複=原 24× 雙記元凶）。
+		_run_systems(state, far_teams, FAR_ZONE_INTERVAL,
+			time_vision_mult, time_speed_mult, false, _t)
 	if phase_timing: _t = _pht("far.total", _t)
 	_step_captives(state)
 	_step_cleanup_extinct_teams(state)
