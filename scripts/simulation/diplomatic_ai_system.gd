@@ -127,7 +127,7 @@ func try_proactive_diplomacy(state: WorldState, self_team: TeamData) -> void:
 	# de-patch 閘2b（blueprint 明裁 legit RNG 案③，retry alone）：曲線陡化——慎重推兩端
 	# （極謹慎 never proactive、大膽近乎每 tick，骰只斷中間）。慎重³ vs 舊 ×0.5+0.2(0.2~0.7 平)。
 	var _caut2: float = float(self_leader.values.get("慎重", 0.5))
-	if randf() < _caut2 * _caut2 * _caut2: return
+	if randf() < _caut2 * _caut2 * _caut2: return   # gate-ok: rng: 慎重³ 人格加權骰(案③ blueprint 裁 legit,非決策硬 gate)
 
 	for other_id in state.team_discovered.get(self_team.team_id, []):
 		var other: TeamData = state.teams.get(other_id)
@@ -171,7 +171,7 @@ func _send_diplomacy_message(state: WorldState, sender: TeamData,
 					"from_id": sender.team_id,
 					"proposal": action,
 				}
-				state.player_forced_event_id = str(randi())
+				state.player_forced_event_id = str(randi())   # gate-ok: rng: event-ID str(randi())(非決策骰)
 				# 設冷卻：玩家拒/超時後不立刻重發（原玩家路徑漏設 → 隔空 spam）
 				sender.diplomacy_reject_cooldown[target.team_id] = \
 					state.world.current_tick + REJECT_COOLDOWN
