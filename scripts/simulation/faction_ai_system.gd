@@ -393,18 +393,13 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		# busy-preemptible：高門檻，只壓境「能傷你」威脅才打斷工作（unified 忙碌隊亦走此——
 		# _decide_unified 忙碌時不重跑 rank，preempt 是唯一即時感知路）。
 		if ctx.threat_react < ctx.threat_threshold + PREEMPT_MARGIN: return
-	for opt in DecisionEngine.rank_threat(ctx):
-		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
-		var tk = td.get("task", TeamData.TASK_IDLE)
-		if tk == TeamData.TASK_IDLE: continue
-		var tgt: Vector2i = td.get("target", Vector2i(-1, -1))
-		if not TaskArbiter.try_set(state, team, tk, tgt, TaskArbiter.PRIO_THREAT, "threat"): continue
-		_wire_threat_task(team, td)
-		SpecimenTracer.capture_decision(state, team, opt, tk, tgt, "committed")   # Fix3 threat tap（威脅反應 FLEE/DEFEND/求和 進 specimen）
-		if tk == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
-		Probe.bump("threat.dispatch." + opt)   # 融合驗率表（該出現還出現）
-		print("[ThreatResponse] Team%d → %s (threat=Team%d, u-rank)" % [team.team_id, opt, ctx.threat_id])
-		break
+	# ★threat-oracle S3 收斂（真統一 finale）：撕除 rank_threat 手派 argmax → threat 決策走 _decide_unified
+	# 全 pool rank_scored（severity-scaled threat option 全 pool 競秤=北極星「一 encounter eval」）。
+	# preempt 語意保（上方 busy gate + 門檻=trigger）；決策 route unified（非 rank_threat）。
+	# force reeval：threat 觸發即反應（繞 _decide_unified cadence 節流——threat 非 _should_reeval 內建 trigger）。
+	# side-effect（_wire_threat_task/flee_from_pos/threat.dispatch tap/specimen）由 _decide_unified commit loop 承（DRY）。
+	team.decision_eval_next_tick = state.world.current_tick
+	_decide_unified(state, team)
 
 # 融合 threat：threat option 的 aux target 接線（DEFEND=prosperity_target / 求和=order_target+order_task）。
 # _evaluate_threat（non-unified）與 _decide_unified（unified）共用 → 兩路 threat 反應接線一致（DRY）。
@@ -1553,7 +1548,10 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				elif _fd < 6.0: Probe.bump("merge_appl.food_3to6")   # gate-ok: probe bookkeeping (merge_appl food bucket，非決策)
 				else: Probe.bump("merge_appl.food_ge6")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
-		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
+		# ★threat-oracle S3：threat 反應(備戰/迎戰/求和)commit @PRIO_THREAT 70(finding3 黏性——收斂後不被
+		# 高值經濟 @50 換掉；task_arbiter self-replace 已擴認 70 同層 threat option 可換 迎戰→求和)。其餘 @50。
+		var _prio: int = TaskArbiter.PRIO_THREAT if opt in ["備戰", "迎戰", "求和"] else TaskArbiter.PRIO_DISPATCH
+		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, _prio, "unified")
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		if Probe.enabled and opt == "併入":   # DIAG：整併 try_set 成敗（priority-gate 擋？）

@@ -133,7 +133,9 @@ func _check_rate_table() -> void:
 func _check_live_dispatch() -> void:
 	print("--- 5b live-seam：確定性 non-unified 威脅 → _evaluate_threat 實派 ---")
 	var state := WorldState.new(); state.world = WorldData.new()
-	# non-unified（無 merchant/produce tag）idle 隊：求生欲高 + 慎重低（門檻低）→ FLEE。
+	# ★S3 收斂 migrate：non-unified idle 隊 → _evaluate_threat route _decide_unified 實派 threat 反應。
+	# 狂徒(好戰高慎重低·碾壓不可勝)→迎戰(defiance last-stand)——選 threat.dispatch 有 tap 的反應(S1 scope=
+	# 備戰/迎戰/求和,survival/FLEE 不 tap)驗 probe。收斂前=rank_threat 手派;收斂後=_decide_unified full pool。
 	var tid := 810
 	var t := TeamData.new(); t.team_id = tid; t.tags = ["軍隊"]
 	t.tile_pos = Vector2i(5, 5); t.leader_id = tid * 10
@@ -144,7 +146,7 @@ func _check_live_dispatch() -> void:
 	state.team_discovered[tid] = []
 	state.team_intel[tid] = {}
 	var ldr := PersonData.new(); ldr.id = tid * 10; ldr.team_id = tid
-	ldr.values = {"求生欲": 0.9, "好戰": 0.1, "慎重": 0.2, "貪婪": 0.5, "信義": 0.5}
+	ldr.values = {"求生欲": 0.2, "好戰": 0.9, "慎重": 0.1, "貪婪": 0.3, "信義": 0.3}
 	state.persons[ldr.id] = ldr
 	_place_plains(state, Vector2i(5, 5))
 	# 逼近敵：碾壓實力 + 敵意 rep → threat_react 過門檻。
