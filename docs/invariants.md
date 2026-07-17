@@ -170,12 +170,13 @@
 ### 決策讀 belief 非真值（G3 Phase E — provenance enforce）
 - **信息域不變量**：凡決策評估**他隊**的 pop/food/armed/實力，一律經 `BeliefSystem.best_estimate`（追得回 provenance），**禁直讀 `other.population`/`.resources`/`.armed`（god-view 真值）**。比照決策域「無因令=0」硬約束：決策直讀真值 = 違規（=「自信地錯」的地基，欺敵才有後果）。
 - **無估 fallback = 保守/不行動，非偷讀真值**：無 belief → 攻擊性決策(掠食/求貢/背叛)最保守（skip 或視對方等強/強 → 不主動敵對）；選擇層(prey/aid/strong)無 belief→`continue` 不列 candidate。
-- **已補 leak（5 處）**：
+- **已補 leak（6 處）**：
   - `diplomatic_ai_system.gd` `try_proactive_diplomacy` demand_tribute power_gap（1a）
   - `diplomatic_ai_system.gd` `handle_diplomacy_message` demand_tribute 回應讀 sender 實力（1d）
   - `diplomatic_ai_system.gd` `consider_betrayal`/`betrayal_assessment` 盟友實力（1e，優先 faction snapshot 次 belief）
   - `faction_ai_system.gd` `_find_strong_neighbor` 強鄰 pop（1b）
   - `faction_ai_system.gd` `_find_aid_target` 施援目標 pop+food（1c）
+  - `threat_assessment.gd` `_power_ratio` 無 belief fallback→self_pop 視等強（1f，2026-07-17 threat-oracle S1.5;原 fallback `other.population`=首接觸讀真 pop 破虛張）
 - **背叛 belief 驅動化（Task3）**：`betrayal_assessment` 純函數＝人格 + belief power advantage（盟弱我利→動機↑）+ confidence gate（1−uncertainty，不憑不確定情報背叛）。`consider_betrayal` driver 為主驅、僅門檻邊界保留小 stochastic tie-break（去純 `randf()<0.1`）。driver 可解釋。
 - **刻意豁免（同 faction 內部協調，讀真值合法）**：merge/consolidate、faction/global tally（`faction_ai_system.gd` :1060/:1072/:1145/:1630/:1650/:1991 一帶）＝同勢力共享情報 believable；背叛的 faction `known_member_states` snapshot 亦屬此類。位置/reachability = 可見性物理(PathSystem 讀真位)，不在此限。
 - **★市集＝公開地標豁免（unified-commerce，誠實非 belief 冒充）**：貿易目標選市場走 `_nearest_market_outpost` 全圖掃 outpost（`faction_ai_system.gd:_nearest_market_outpost`）＝**市集 outpost 為公開可見地標**（告示公開，同 `known_reputations`/同-faction 先例精神）。BeliefSystem 目前 team-keyed、**無 tile/market 級知識庫**——此豁免是 WS-2b 死鎖破除器（冷啟動靠它出門，拆＝經濟停擺）。**不假裝 belief-based**；belief-market-knowledge store＝未來增益 backlog。**其餘敵情/社交目標位置仍走 belief last-seen（god-view 位置根治不回退）。**
