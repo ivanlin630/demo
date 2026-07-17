@@ -36,7 +36,6 @@ scripts/simulation/faction_ai_system.gd::_evaluate_survival::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_threat::dispatch_entry
 scripts/simulation/faction_ai_system.gd::_evaluate_threat::early_return
 scripts/simulation/faction_ai_system.gd::_evaluate_threat::route
-scripts/simulation/faction_ai_system.gd::_evaluate_threat::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_evaluate_threat::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_uprising::early_return
 scripts/simulation/faction_ai_system.gd::_evaluate_uprising::route
