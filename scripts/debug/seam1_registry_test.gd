@@ -20,7 +20,7 @@ func _initialize() -> void:
 	_test_probe_produce_nofacility()
 	_test_probe_occupy_branches()
 	_test_to_task_pure_branches()
-	#_test_extensibility_single_entry()   # RED on baseline: const REGISTRY 無法加 entry（parse error）→ refactor 後啟用
+	_test_extensibility_single_entry()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -146,21 +146,19 @@ func _test_to_task_pure_branches() -> void:
 
 func _test_extensibility_single_entry() -> void:
 	print("--- 5. 擴充 proof：加 registry 1 entry = 自動納入（不改 applicable/to_task 本體）---")
-	# NOTE: refactor 前此段對 const REGISTRY 造成 parse error（= RED，擴充能力不存在）。
-	# refactor（const→static var）後解除下方註解啟用。
-	pass
-	#DecisionOptions.REGISTRY["__seam1_dummy__"] = {
-	#	"terms": [["intent_fit", "intent_fit"]],
-	#	"applicable": func(ctx: DecisionContext) -> bool: return ctx.food_days > 999.0,
-	#	"to_task": func(_state: WorldState, _team: TeamData) -> Dictionary:
-	#		return {"task": TeamData.TASK_IDLE, "target": Vector2i(7, 7)},
-	#}
-	#Probe.enabled = false
-	#var c := _mk_ctx_order(); c.food_days = 1000.0
-	#_ok("__seam1_dummy__" in DecisionOptions.applicable(c),
-	#	"dummy entry 自動入 applicable（pred 真）")
-	#_ok(DecisionOptions.terms_of("__seam1_dummy__") == [["intent_fit", "intent_fit"]],
-	#	"dummy terms_of 讀 registry entry")
-	#var td: Dictionary = DecisionOptions.to_task(WorldState.new(), TeamData.new(), "__seam1_dummy__")
-	#_ok(td.get("target") == Vector2i(7, 7), "dummy to_task 讀 registry entry")
-	#DecisionOptions.REGISTRY.erase("__seam1_dummy__")
+	# refactor（const→static var）後：加 1 entry 即自動參與 applicable/terms_of/to_task，本體零改。
+	DecisionOptions.REGISTRY["__seam1_dummy__"] = {
+		"terms": [["intent_fit", "intent_fit"]],
+		"applicable": func(ctx: DecisionContext) -> bool: return ctx.food_days > 999.0,
+		"to_task": func(_state: WorldState, _team: TeamData) -> Dictionary:
+			return {"task": TeamData.TASK_IDLE, "target": Vector2i(7, 7)},
+	}
+	Probe.enabled = false
+	var c := _mk_ctx_order(); c.food_days = 1000.0
+	_ok("__seam1_dummy__" in DecisionOptions.applicable(c),
+		"dummy entry 自動入 applicable（pred 真）")
+	_ok(DecisionOptions.terms_of("__seam1_dummy__") == [["intent_fit", "intent_fit"]],
+		"dummy terms_of 讀 registry entry")
+	var td: Dictionary = DecisionOptions.to_task(WorldState.new(), TeamData.new(), "__seam1_dummy__")
+	_ok(td.get("target") == Vector2i(7, 7), "dummy to_task 讀 registry entry")
+	DecisionOptions.REGISTRY.erase("__seam1_dummy__")
