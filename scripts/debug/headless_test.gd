@@ -1933,11 +1933,14 @@ func _test_forage_subsistence_cap() -> void:
 # term-normalize T5：層內 base 校 + 訓練 eval-gate 對齊。
 func _test_t5_intra_layer() -> void:
 	print("[TEST] t5_intra_layer")
-	# 備戰：謹慎隊高、好戰隊低（保人格梯度）
+	# 備戰：謹慎隊高、好戰隊低（保人格梯度）。★S2 migrate：base=(慎·0.6+好·0.2)×(1+sev·k)，
+	# sev=0(無 threat_react)時=純 base；謹慎隊 base≈0.58 > 好戰隊 base≈0.24（梯度保，量級隨 S2 base 調）。
 	var cc := DecisionContext.new(); cc.leader_values = {"慎重": 0.9, "好戰": 0.2}
-	assert(DecisionTerms.eval("prepare_drive", cc, "備戰") > 0.7, "謹慎隊備戰>0.7")
+	var _prep_c: float = DecisionTerms.eval("prepare_drive", cc, "備戰")
 	var cf := DecisionContext.new(); cf.leader_values = {"慎重": 0.1, "好戰": 0.9}
-	assert(DecisionTerms.eval("prepare_drive", cf, "備戰") < 0.4, "好戰隊備戰<0.4(梯度保)")
+	var _prep_f: float = DecisionTerms.eval("prepare_drive", cf, "備戰")
+	assert(_prep_c > 0.5, "謹慎隊備戰 base 高(>0.5,S2 base;got %f)" % _prep_c)
+	assert(_prep_c > _prep_f, "謹慎隊備戰 > 好戰隊備戰(人格梯度保;%f>%f)" % [_prep_c, _prep_f])
 	# 駐守 settle_fit
 	var c0 := DecisionContext.new()
 	assert(DecisionTerms.eval("settle_fit", c0, "駐守") == 0.9, "駐守 settle_fit=0.9")
@@ -13039,15 +13042,23 @@ func _test_survival_relatch_repick() -> void:
 func _test_flee_threat_gate() -> void:
 	print("[TEST] flee_threat_gate")
 	var ctx := DecisionContext.new()
-	# 無威脅 → FLEE eval 0（不管 panic，食足隊不 spurious FLEE）
+	# ★S2 migrate（finding5 rewrite）：threat_pressure = 膽量秤(求生欲,1−好戰)×severity×(1−winnable) + panic×0.4。
+	# 無威脅(threat=0) → FLEE eval 0（gate 保，食足隊不 spurious FLEE，不管 panic）。
 	ctx.threat = 0.0; ctx.team_panic = 0.9
 	assert(DecisionTerms.eval("threat_pressure", ctx, "survival") == 0.0, "無威脅→FLEE eval 0(不管 panic)")
-	# 真威脅 → 威脅 + panic 加成
-	ctx.threat = 0.8; ctx.team_panic = 0.0
-	assert(absf(DecisionTerms.eval("threat_pressure", ctx, "survival") - 0.8) < 1e-5, "威脅0.8→0.8")
-	ctx.team_panic = 0.5
-	var v := DecisionTerms.eval("threat_pressure", ctx, "survival")
-	assert(v > 0.8 and v <= 1.0, "威脅+panic→>0.8 clamp[0,1]，got %f" % v)
+	# 有威脅 + 膽量秤高(求生欲高好戰低) + severity + 不可勝(winnable低) → FLEE 高
+	ctx.threat = 0.8; ctx.threat_react = 1.0; ctx.team_panic = 0.0
+	ctx.leader_values = {"求生欲": 0.9, "好戰": 0.1}; ctx.winnable = 0.1
+	var v_flee := DecisionTerms.eval("threat_pressure", ctx, "survival")
+	assert(v_flee > 0.5, "膽量秤高+不可勝→FLEE 高(>0.5;got %f)" % v_flee)
+	# ★讀 winnable(finding5)：可勝(winnable高) → FLEE 降
+	ctx.winnable = 0.9
+	var v_win := DecisionTerms.eval("threat_pressure", ctx, "survival")
+	assert(v_win < v_flee, "可勝→FLEE 降(讀 winnable;%f<%f)" % [v_win, v_flee])
+	# panic 加成
+	ctx.winnable = 0.1; ctx.team_panic = 0.5
+	var v_panic := DecisionTerms.eval("threat_pressure", ctx, "survival")
+	assert(v_panic > v_flee, "panic 加成→FLEE 升(%f>%f)" % [v_panic, v_flee])
 	print("[TEST] flee_threat_gate PASS")
 
 func _test_decision_crisis_bypass() -> void:

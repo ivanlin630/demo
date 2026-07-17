@@ -29,6 +29,7 @@ func _mk_ctx(vals: Dictionary) -> DecisionContext:
 	c.threat_id = 1
 	c.threat_pos = Vector2i(2, 0)
 	c.is_resident = false
+	c.winnable = 0.1   # ★S2：不可勝場景（迎戰 override/求和/逃 outlet 前提；threat util 讀 winnable）
 	return c
 
 func _expect_first(label: String, vals: Dictionary, expected: String) -> void:
@@ -48,8 +49,10 @@ func _check_repertoire() -> void:
 	_expect_first("DEFEND", {"求生欲": 0.3, "好戰": 0.9, "慎重": 0.2, "貪婪": 0.5, "信義": 0.5}, "迎戰")
 	# 慎重高 → 備戰(PREPARE)
 	_expect_first("PREPARE", {"求生欲": 0.4, "好戰": 0.4, "慎重": 0.9, "貪婪": 0.5, "信義": 0.5}, "備戰")
-	# 貪婪+信義高+好戰低 → 求和(pacify)
-	_expect_first("PACIFY", {"求生欲": 0.5, "好戰": 0.1, "慎重": 0.5, "貪婪": 0.8, "信義": 0.7}, "求和")
+	# 貪婪+信義高+好戰低+★低求生欲(真 weak-pragmatic，非怯逃) → 求和(pacify outlet)
+	# ★S2 migrate：舊 pacify threat-invariant→求生欲0.5 仍求和；新 FLEE=膽量秤(求生欲)×sev×(1−winnable)
+	# → 求生欲0.5 膽量秤中→逃競爭；真 weak-pragmatic=低求生欲(不想逃只想低頭)才穩求和(對齊 spec 象限)。
+	_expect_first("PACIFY", {"求生欲": 0.2, "好戰": 0.1, "慎重": 0.2, "貪婪": 0.8, "信義": 0.7}, "求和")
 
 # ── 居民守衛：好戰居民隊 → 迎戰 不在 applicable（鏡射舊 is_resident 排除）──
 func _check_resident_guard() -> void:
