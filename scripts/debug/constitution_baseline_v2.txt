@@ -7,8 +7,6 @@ scripts/simulation/decision/decision_engine.gd::rank_survival::dispatch_entry  #
 scripts/simulation/decision/decision_engine.gd::rank_survival::early_return
 scripts/simulation/decision/decision_engine.gd::rank_threat::dispatch_entry  # gate-ok: canonical 引擎 rank 入口(統一決策層,非散落)
 scripts/simulation/decision/options.gd::applicable::route
-scripts/simulation/decision/options.gd::applicable::threshold
-scripts/simulation/decision/options.gd::to_task::early_return
 scripts/simulation/diplomatic_ai_system.gd::_calc_diplomacy_score::early_return
 scripts/simulation/diplomatic_ai_system.gd::_calc_diplomacy_score::threshold  # gate-ok: if gift_food>0.0 禮物存在 guard(非決策硬閾)
 scripts/simulation/diplomatic_ai_system.gd::_send_diplomacy_message::rng
