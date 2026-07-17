@@ -96,6 +96,9 @@ var threat_react: float = 0.0
 var threat_id: int = -1
 var threat_pos: Vector2i = Vector2i(-1, -1)
 var threat_threshold: float = 0.0
+# threat-oracle S1.5：純戰力比（belief-based，god-view-free）供 S2 winnable。★≠threat_react
+# （threat_react=approach+hostility+power blend；此=純 other_power/self_power）。無 threat→0。
+var perceived_power_ratio: float = 0.0
 var is_resident: bool = false
 # 野心階梯（序3 rung_task 溶入）：archetype/rung 當 weight 驅動 option（非查表塞 task）。
 # ambient_train_drive = FORCE-archetype 累積/擴張階練兵 base（低 magnitude 讓位緊急決策）。
@@ -181,7 +184,10 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.threat_id = _best_id
 	if _best_id != -1:
 		var _ot: TeamData = state.teams.get(_best_id)
-		if _ot != null: c.threat_pos = _ot.tile_pos
+		if _ot != null:
+			c.threat_pos = _ot.tile_pos
+			# S1.5：純戰力比（belief-based，god-view-free）供 S2 winnable（禁拿 threat_react 當 proxy）。
+			c.perceived_power_ratio = ThreatAssessment._power_ratio(state, team, _ot)
 	c.is_resident = FactionAISystem.is_resident_static(state, team)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.threat", _tg)
 	var _fa := FactionAISystem.new()

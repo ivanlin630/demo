@@ -9,7 +9,7 @@ var _fail: int = 0
 
 func _initialize() -> void:
 	_test_power_ratio_no_belief_uses_self_pop()
-	#_test_ctx_perceived_power_ratio_exposed()   # RED on baseline: perceived_power_ratio 欄不存在 → 加欄後啟用
+	_test_ctx_perceived_power_ratio_exposed()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -64,12 +64,10 @@ func _test_ctx_perceived_power_ratio_exposed() -> void:
 	state.team_intel[1] = {}
 	self_t.known_reputations[2] = 0.1
 	BeliefSystem.record_claim(state, 1, 2, 2, "親見", {"population_est": 12}, 1.0, false)
-	# NOTE: 加 perceived_power_ratio 欄後解除下方註解（baseline 無此欄=compile error=RED）。
-	return
-	#var ctx := DecisionContext.gather(state, self_t)
-	#var direct: float = ThreatAssessment._power_ratio(state, self_t, enemy)
-	#print("  [info] perceived_power_ratio=%.4f _power_ratio(direct)=%.4f threat_react=%.4f" % [
-	#	ctx.perceived_power_ratio, direct, ctx.threat_react])
-	#_feq(ctx.perceived_power_ratio, direct, "perceived_power_ratio == _power_ratio(threat target)")
-	#_ok(absf(ctx.perceived_power_ratio - ctx.threat_react) > 1e-6 or ctx.threat_react == 0.0,
-	#	"perceived_power_ratio ≠ threat_react（純戰力比≠approach+hostility blend）")
+	var ctx := DecisionContext.gather(state, self_t)
+	var direct: float = ThreatAssessment._power_ratio(state, self_t, enemy)
+	print("  [info] perceived_power_ratio=%.4f _power_ratio(direct)=%.4f threat_react=%.4f" % [
+		ctx.perceived_power_ratio, direct, ctx.threat_react])
+	_feq(ctx.perceived_power_ratio, direct, "perceived_power_ratio == _power_ratio(threat target)")
+	_ok(absf(ctx.perceived_power_ratio - ctx.threat_react) > 1e-6 or ctx.threat_react == 0.0,
+		"perceived_power_ratio ≠ threat_react（純戰力比≠approach+hostility blend）")

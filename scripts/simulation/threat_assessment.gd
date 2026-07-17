@@ -39,7 +39,9 @@ static func _power_ratio(state: WorldState, self_team: TeamData,
 	var self_power: float = _team_power(self_team)
 	# 對方用 team_intel snapshot（NPC 不全知）
 	var intel: Dictionary = BeliefSystem.best_estimate(state, self_team.team_id, other.team_id)
-	var pop_est: int = int(intel.get("population_est", other.population))
+	# ★god-view fix（invariants.md:171-173）：無 belief fallback 用 self_pop（視對方等強），禁讀 other.population
+	# （真值=god-view，破虛張/偽裝）。鏡射 diplomatic _get_pop_est fallback=self_pop 模式。
+	var pop_est: int = int(intel.get("population_est", self_team.population))
 	# 無 combat skill in intel → 用 0.3 baseline 估算
 	var other_power: float = float(pop_est) * 0.3
 	return other_power / maxf(self_power, 0.1)
