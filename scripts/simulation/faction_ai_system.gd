@@ -2965,12 +2965,12 @@ func _pick_facility(state: WorldState, team: TeamData, tile: HexTileData,
 		var def: Dictionary = OutpostSystem.FACILITY_DEF[f]
 		if not (tile.outpost_type in def["allowed_outpost"]): continue
 		if def.has("required_terrain") and tile.terrain != def["required_terrain"]: continue
-		if int(tile.get(def["current_level_key"])) > 0: continue   # 已有 → 升級走另一路徑
+		if int(tile.get(def["current_level_key"])) > 0: continue   # 已有 → 升級走另一路徑   # gate-ok: guard: 已有設施→升級 skip(selection)
 		var s: float = _facility_score(state, team, tile, leader, f)
 		if s > best_score:
 			best_score = s
 			best = f
-	if best == "": return {}
+	if best == "": return {}   # gate-ok: guard: best empty
 	if not slot_full:
 		return { "facility": best }
 	# S4 demolish 泛化（全設施通用，非 farming 專屬）：slot 滿→best 遠勝最低 score 設施則拆建。
@@ -3047,14 +3047,14 @@ func _facility_terrain_fit(state: WorldState, facility: String, tile: HexTileDat
 		"workshop":
 			return 2.0 if _nearby_has_terrain(state, tile, "forest") else 1.0
 		"apothecary":
-			return 3.0 if _nearby_resource(state, tile, ["herb"]) > 0.0 else 0.0
+			return 3.0 if _nearby_resource(state, tile, ["herb"]) > 0.0 else 0.0   # gate-ok: world-mechanic: resource-presence geography(terrain fit)
 		"smeltery", "weaponsmith", "armorsmith":
-			return 3.0 if _nearby_resource(state, tile, ["ore_iron"]) > 0.0 else 0.5
+			return 3.0 if _nearby_resource(state, tile, ["ore_iron"]) > 0.0 else 0.5   # gate-ok: world-mechanic: resource-presence geography(terrain fit)
 		"mint":
-			return 3.0 if _nearby_resource(state, tile, ["ore_gold", "ore_silver"]) > 0.0 else 0.3
+			return 3.0 if _nearby_resource(state, tile, ["ore_gold", "ore_silver"]) > 0.0 else 0.3   # gate-ok: world-mechanic: resource-presence geography(terrain fit)
 		"stable":
 			# required_terrain=plains 已 gate；鄰格野馬 → ×3
-			return 3.0 if _nearby_resource(state, tile, ["wild_horses"]) > 0.0 else 1.0
+			return 3.0 if _nearby_resource(state, tile, ["wild_horses"]) > 0.0 else 1.0   # gate-ok: world-mechanic: resource-presence geography(terrain fit)
 	return 1.0
 
 # ★seam#2 S1 registry 化（byte-identical 純重構）：facility deficit 資料驅動。
@@ -3083,13 +3083,13 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 		tile: HexTileData) -> float:
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var entry: Dictionary = FACILITY_DEFICIT_DEF.get(facility, {})
-	if entry.is_empty(): return 0.0
+	if entry.is_empty(): return 0.0   # gate-ok: guard: entry empty
 	# C 類：專屬 evaluator（非 NeedOracle res-gap，語意真異質不硬併）。
 	if entry.has("special"):
 		return float(call(entry["special"], state, team, tile, lv))
 	# B facility-gating（smeltery 需 weapon/armorsmith 存在）。
 	if entry.get("gating", "") == "smeltery":
-		if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0: return 0.0
+		if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0: return 0.0   # gate-ok: world-mechanic: smeltery gating(weapon/armorsmith 存在)
 	# A 類泛型 evaluator（NeedOracle-gap）。
 	var outputs: Array = entry["outputs"]
 	var use_demand: bool = entry["use_demand"]
@@ -3101,7 +3101,7 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 			var tgt: float = NeedOracle.need_keep(state, team, res, lv)
 			if use_demand:
 				tgt += NeedOracle.demand(state, team, res, lv)
-			if tgt <= 0.001:
+			if tgt <= 0.001:   # gate-ok: guard: tgt<=0.001(該 res 無 need→不驅 deficit)
 				continue   # 該 res 無 need(+demand) → 不驅 deficit
 			worst = minf(worst, float(team.resources.get(res, 0)) / tgt)
 		deficit = clampf(1.0 - worst, 0.0, 1.0)
@@ -3115,7 +3115,7 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 			if use_demand:
 				tgt += NeedOracle.demand(state, team, res, lv)
 			total_tgt += tgt
-		if total_tgt <= 0.001: return 0.0
+		if total_tgt <= 0.001: return 0.0   # gate-ok: guard: total_tgt<=0.001(pooled 目標 0→不驅)
 		deficit = clampf((total_tgt - total_hold) / total_tgt, 0.0, 1.0)
 	deficit *= float(entry["output_scale"])
 	if entry["militancy_scaled"]:
