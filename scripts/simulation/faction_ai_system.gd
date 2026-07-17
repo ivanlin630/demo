@@ -1532,6 +1532,9 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if opt == "返家補給": Probe.bump("g1.restock_chosen")
 		elif opt in ["覓食", "survival"]: Probe.bump("g1.engine_survival")
 		elif opt == "佔村": Probe.bump("occupy.dispatch")
+		# threat-oracle S1（seam#1 finding5）：統一路 threat option commit tap（收斂前補盲點；
+		# 現況唯一 threat.dispatch tap 在 preempt loop :405，統一隊 rank_scored 選中 threat option=無 tap）。
+		if Probe.enabled and opt in ["備戰", "迎戰", "求和"]: Probe.bump("threat.dispatch." + opt)
 		# 序6 probe 遷移：成員征服攻擊實派 + 徵收實派（舊 hand-cascade 探針已刪 → 引擎路重掛，供驗魂）。
 		if _mconq and opt == "攻擊": Probe.bump("conq.member_atk_dispatch")
 		if team.faction_id != -1 and Probe.enabled and opt == "徵收": Probe.bump("tribute.dispatch.member")
