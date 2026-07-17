@@ -83,7 +83,7 @@ static func _edge_intensity_to(edges: Array, type: String, target: int) -> float
 func _calc_diplomacy_score(state: WorldState,
 		self_team: TeamData, other_team: TeamData, gift: Dictionary = {}) -> float:
 	var self_leader: PersonData = state.persons.get(self_team.leader_id)
-	if self_leader == null: return 0.0
+	if self_leader == null: return 0.0   # gate-ok: guard early-return (self_leader null)
 
 	var food_ratio: float = float(self_team.resources.get("food", 0)) / \
 		maxf(self_team.population * 5.0, 1.0)
