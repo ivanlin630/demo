@@ -81,10 +81,12 @@ func _test_winnable_modulate() -> void:
 	var c_lowin := _util(_mk_ctx(cautious, 1.0, 0.1), "迎戰")
 	var c_hiwin := _util(_mk_ctx(cautious, 1.0, 0.9), "迎戰")
 	_ok(c_hiwin > c_lowin, "cautious 迎戰隨 winnable 升(respect;hi=%.3f>lo=%.3f)" % [c_hiwin, c_lowin])
+	# ★defiance：狂徒(reckless) 迎戰 不可勝時 SPIKE(defiant last-stand)——與 cautious 反向(cautious 可勝才戰)
 	var reckless := {"好戰": 0.9, "慎重": 0.1, "求生欲": 0.3, "貪婪": 0.3, "信義": 0.3}
 	var r_lowin := _util(_mk_ctx(reckless, 1.0, 0.1), "迎戰")
 	var r_hiwin := _util(_mk_ctx(reckless, 1.0, 0.9), "迎戰")
-	_ok(absf(r_hiwin - r_lowin) < c_hiwin - c_lowin, "reckless 迎戰對 winnable 較不敏感(override;Δ=%.3f)" % absf(r_hiwin - r_lowin))
+	_ok(r_lowin > r_hiwin, "狂徒 迎戰 不可勝>可勝(defiance last-stand;%.3f>%.3f)" % [r_lowin, r_hiwin])
+	_ok(r_lowin > c_lowin, "狂徒 不可勝迎戰 > cautious 不可勝迎戰(defiance spike 只狂徒;%.3f>%.3f)" % [r_lowin, c_lowin])
 
 # ── FLEE(threat_pressure) 讀 winnable（finding5）──
 func _test_flee_references_winnable() -> void:

@@ -18,7 +18,8 @@ const INTENT_FIT_DRIVE: float = 1.0     # TEST VALUE — T3 正規化：意圖�
 const SURPLUS_FOOD_DAYS: float = 7.0    # TEST VALUE — 「有餘糧」門檻（致富→囤貨/貿易 子需求觸發）
 # ── threat-oracle S2：severity-scaled threat util（TEST VALUE，measure 校；方向/cap/零fall-through 鎖死）──
 const SEVERITY_MAX: float = 1.2   # TEST VALUE(S2 calibrate ↓1.5)— threat_react 上界(capped 保競秤;organic 碾平修)
-const CONFRONT_K: float = 0.6     # TEST VALUE(S2 calibrate)— 迎戰 dampen(好戰×sev×modulate×此;organic 迎戰 44-105x 修)
+const CONFRONT_K: float = 0.6     # TEST VALUE(S2 calibrate)— 迎戰 base dampen(好戰×sev×modulate×此)
+const K_DEFIANCE: float = 1.5     # TEST VALUE(S2 defiance)— 狂徒 last-stand spike(好戰×(1−慎重)×(1−winnable)×sev×此)
 const PREP_A: float = 0.6         # 備戰 base 慎重係數
 const PREP_B: float = 0.2         # 備戰 base 好戰係數
 const PREP_K: float = 0.5         # 備戰 severity 放大率(普遍隨威脅升，慎重-weighted 幅度)
@@ -199,8 +200,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "迎戰": return 0.0
 			var _sevd: float = clampf(ctx.threat_react, 0.0, SEVERITY_MAX)
 			var _caution_d: float = float(ctx.leader_values.get("慎重", 0.5))
+			var _martial_d: float = float(ctx.leader_values.get("好戰", 0.5))
 			var _modulate_win: float = lerpf(ctx.winnable, 1.0, 1.0 - _caution_d)
-			return float(ctx.leader_values.get("好戰", 0.5)) * _sevd * _modulate_win * CONFRONT_K
+			var _base_d: float = _martial_d * _sevd * _modulate_win * CONFRONT_K
+			# ★defiance（blueprint 拆假張力，取代全域 break-top boost）：狂徒(好戰高×慎重低×不可勝×高 severity
+			# 四齊)才 spike last-stand；非狂徒(任一低)≈0→不碾平經濟。人格值 first-class(非全域死常數 gate)。
+			var _defiance: float = _martial_d * (1.0 - _caution_d) * (1.0 - ctx.winnable) * _sevd * K_DEFIANCE
+			return _base_d + _defiance
 		"pacify_drive":
 			# ★threat-oracle S2：求和 = (貪婪·c + 信義·d − 好戰·e) × severity × (1−winnable)。outlet:
 			#   不可勝 + 低好戰 → 求和(好戰者不屑低頭)。零 fall-through:weak-pragmatic 象限主導。
