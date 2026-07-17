@@ -523,10 +523,10 @@ func _has_inflight_settler(state: WorldState, owner: TeamData, tile: HexTileData
 
 # cadence 評估：掃自家無居民 outpost，依個性派子隊或邀流亡
 func _evaluate_outpost_residency(state: WorldState, team: TeamData) -> void:
-	if state.world.current_tick < team.residency_eval_next_tick: return
+	if state.world.current_tick < team.residency_eval_next_tick: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	team.residency_eval_next_tick = state.world.current_tick + RESIDENCY_CADENCE
 	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
+	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_owner != team.team_id: continue
@@ -1141,14 +1141,14 @@ func _set_solo(state: WorldState, team: TeamData, itype: String, why: String, mo
 # 觸發 gate：fid=-1 + 野心≥AMBITION_FOUND_MIN + 累積夠（pop≥EXPAND_MIN_POP + 食盈餘）+ founding 路徑可達。
 # 稀有 by construction：野心高 + 累積 + 路徑三閘 → 多數獨立隊守成（非建國潮）。
 func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
-	if team.leader_id == state.player_id and state.player_id != -1: return
+	if team.leader_id == state.player_id and state.player_id != -1: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	# 斷①C「入勢力不換腦」：個人戰略層對每個 leader 永遠跑（含 faction 成員）——身分=權重非路徑切換。
 	# 成員的建國由 can_found=false 擋（fid≠-1 不重複建國）；征服 intent 只宣告。
 	# 序5 dissolve：成員打草穀 raid 舊走 loop3 cascade（已刪）；征服 intent 現無獨立 dispatch 路 → 待 序6 loop3 全溶。
-	if team.parent_team_id != -1: return        # 子隊不自建國
-	if team.combat_target != -1: return         # 戰鬥中不重評
+	if team.parent_team_id != -1: return        # 子隊不自建國   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if team.combat_target != -1: return         # 戰鬥中不重評   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
+	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var lv: Dictionary = leader.values
 
 	# 建國 in-flight guard（②a 保險網：凡 in-flight latch 必有 timeout/release）。
@@ -1547,7 +1547,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				var _fd: float = ResourceSystem.effective_food(state, team) \
 					/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 				if _fd < DecisionTerms.DESPERATION_DAYS: Probe.bump("merge_appl.food_lt3")
-				elif _fd < 6.0: Probe.bump("merge_appl.food_3to6")
+				elif _fd < 6.0: Probe.bump("merge_appl.food_3to6")   # gate-ok: probe bookkeeping (merge_appl food bucket，非決策)
 				else: Probe.bump("merge_appl.food_ge6")
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "unified")
@@ -1576,7 +1576,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				and state.factions[team.faction_id].leader_team_id == team.team_id:
 			var _rt: int = _richest_member(state, state.factions[team.faction_id])
 			if _rt != -1 and _rt != team.team_id \
-					and _hex_dist(team.tile_pos, state.teams[_rt].tile_pos) > DISPATCH_DIST_THRESHOLD:
+					and _hex_dist(team.tile_pos, state.teams[_rt].tile_pos) > DISPATCH_DIST_THRESHOLD:   # gate-ok: probe bookkeeping: DISPATCH_DIST_THRESHOLD 記帳非決策
 				Probe.bump("a2b.remote_tribute_dispatch")
 				_a2b_remote_tribute_payers[_rt] = true
 		# 融合 threat：unified 隊選 迎戰/求和 時亦接 aux target（prosperity/order），與 non-unified 路徑一致。
@@ -2232,10 +2232,10 @@ func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: 
 	print("[Extract] Team%d 徵用 %.0f coin (%s)" % [team.team_id, amt, reason])
 
 func _consider_extraction(state: WorldState, team: TeamData) -> void:
-	if team.anon_treasury <= 0.0: return
-	if team.leader_id == state.player_id: return   # 玩家手動
+	if team.anon_treasury <= 0.0: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if team.leader_id == state.player_id: return   # 玩家手動   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
+	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var greed: float = float(leader.values.get("貪婪", 0.5))
 	var prudence: float = float(leader.values.get("慎重", 0.5))
 	var extract_score: float = greed - prudence * 0.5
@@ -2379,8 +2379,8 @@ func _calc_team_need(team: TeamData, res: String) -> float:
 			return 0.0
 
 func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileData) -> void:
-	if tile.outpost_owner != team.team_id: return
-	if tile.public_storage.is_empty(): return
+	if tile.outpost_owner != team.team_id: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if tile.public_storage.is_empty(): return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var os := OutpostSystem.new()
 	for res in tile.public_storage.keys():
 		var stored: float = float(tile.public_storage[res])
@@ -2388,14 +2388,14 @@ func _evaluate_storage_visit(state: WorldState, team: TeamData, tile: HexTileDat
 		var needed: float = _calc_team_need(team, res)
 		if team_have < needed:
 			var take: float = minf(stored, needed - team_have)
-			if take > 0.0:
+			if take > 0.0:   # gate-ok: housekeeping: take>0 正量守衛
 				TileBank.set_amt(tile, res, stored - take, "npc_withdraw_vault_out")
 				ResourceBank.set_amt(team, res, team_have + take, "npc_withdraw_vault")
 		elif team_have > needed * 2.0:
 			var cap: float = os._get_storage_cap(tile, res)
 			var deposit_max: float = cap - stored
 			var deposit: float = minf(team_have - needed, deposit_max)
-			if deposit > 0.0:
+			if deposit > 0.0:   # gate-ok: housekeeping: deposit>0 正量守衛
 				TileBank.set_amt(tile, res, stored + deposit, "npc_deposit_vault_in")
 				ResourceBank.set_amt(team, res, team_have - deposit, "npc_deposit_vault")
 
@@ -2756,7 +2756,7 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 		if min_enemy_dist < 5: score -= float(5 - min_enemy_dist) * 10.0
 		if score >= MIN_BUILD_SCORE:
 			candidates.append({ "pos": tile.tile_pos, "score": score, "tile": tile })
-	if candidates.is_empty(): return {}
+	if candidates.is_empty(): return {}   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	candidates.sort_custom(func(a, b): return a.score > b.score)
 	var best: Dictionary = candidates[0]
 	var sig: String = "%d_%d" % [best.pos.x, best.pos.y]
@@ -2842,7 +2842,7 @@ func _pick_outpost_type(state: WorldState, leader_team: TeamData, leader: Person
 	if loc_tile != null and loc_tile.terrain == "mountain":
 		var ore: float = float(loc_tile.resource_cap.get("ore_gold", 0)) \
 			+ float(loc_tile.resource_cap.get("ore_silver", 0))
-		if ore > 0.0:
+		if ore > 0.0:   # gate-ok: world-mechanic: 礦脈存在→貪婪加 civilian 分(資源存在檢,非硬閾決策)
 			civilian += float(leader.values.get("貪婪", 0.5)) * ORE_CIVILIAN_PULL
 	return "military" if military > civilian else "civilian"
 
@@ -2861,16 +2861,16 @@ func _faction_has_workshop(state: WorldState, leader_team: TeamData) -> bool:
 # 自評估 + 建造 dispatch（非另開平行路）。閉合「想 goods→需設施→去蓋」回路（獨立隊 has_facility 成長路）。
 # ★行為層待 measurer 坐實：統一路徑真讓獨立隊 has_facility 成長（full-HD 驗，非篤定）。
 func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> void:
-	if team.combat_target != -1: return
-	if team.leader_id == state.player_id and state.player_id != -1: return
+	if team.combat_target != -1: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if team.leader_id == state.player_id and state.player_id != -1: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
+	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var own_pos: Vector2i = _find_own_outpost(state, team)
-	if own_pos == Vector2i(-1, -1): return
+	if own_pos == Vector2i(-1, -1): return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
-	if tile == null or tile.outpost_level == 0 or tile.construction_team_id != -1: return
+	if tile == null or tile.outpost_level == 0 or tile.construction_team_id != -1: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var pick: Dictionary = _pick_facility(state, team, tile, leader)   # 同 faction 隊 argmax 決策
-	if pick.is_empty(): return
+	if pick.is_empty(): return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	if pick.has("demolish_first"):
 		OutpostSystem.new().demolish_facility(state, tile, pick["demolish_first"])
 	# owner 在場就地開工，否則派 builder（同 _evaluate_infrastructure 施工路徑）
@@ -2882,10 +2882,10 @@ func _evaluate_independent_infrastructure(state: WorldState, team: TeamData) -> 
 
 func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	var leader_team: TeamData = state.teams.get(faction.leader_team_id)
-	if leader_team == null: return
-	if leader_team.combat_target != -1: return
+	if leader_team == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
+	if leader_team.combat_target != -1: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var leader: PersonData = state.persons.get(leader_team.leader_id)
-	if leader == null: return
+	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	# 玩家 leader → 不自動決策（後續用 AdvisorSystem.push_outpost_advice）
 	if leader_team.leader_id == state.player_id and state.player_id != -1:
 		return
@@ -2894,7 +2894,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	for tile_id in state.world.tiles:
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_owner != leader_team.team_id: continue
-		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue
+		if tile.outpost_level >= 3 or tile.construction_team_id != -1: continue   # gate-ok: world-mechanic: outpost level cap (>=3)
 		if _dispatch_upgrader(state, leader_team, tile.tile_pos, tile.outpost_level + 1):
 			if SimRunner.phase_timing: _fai_pht("infra.upgrade", _ti)
 			return
@@ -2946,7 +2946,7 @@ func _evaluate_infrastructure(state: WorldState, faction) -> void:
 	# (3) 蓋新 outpost
 	var loc: Dictionary = _evaluate_new_outpost_location(state, leader_team)
 	if SimRunner.phase_timing: _ti = _fai_pht("infra.new_loc", _ti)
-	if loc.is_empty(): return
+	if loc.is_empty(): return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	# S4.4：ore 機會已融入 _pick_outpost_type 人格秤（傳 loc_tile），移除硬 civilian override。
 	var outpost_type: String = _pick_outpost_type(state, leader_team, leader, loc.get("tile", null))
 	_dispatch_builder(state, leader_team, loc.pos, outpost_type, 1)
@@ -3303,7 +3303,7 @@ func establish_crude_camp(state: WorldState, team: TeamData) -> bool:
 
 func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> void:
 	var leader: PersonData = state.persons.get(team.leader_id)
-	if leader == null: return
+	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 
 	# churn 防抖：relatch 路已 release→current_task=IDLE，勿以 IDLE 覆蓋 previous_task
 	# （其保留 release 前的 survival task 供 rank_survival COMMITMENT 比對）。
@@ -3631,7 +3631,7 @@ func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
 	if team.occupying_outpost_since == -1:
 		team.occupying_outpost_since = state.world.current_tick
 		return
-	if state.world.current_tick - team.occupying_outpost_since >= OUTPOST_TAKEOVER_DAYS * WorldState.TICKS_PER_DAY:
+	if state.world.current_tick - team.occupying_outpost_since >= OUTPOST_TAKEOVER_DAYS * WorldState.TICKS_PER_DAY:   # gate-ok: world-mechanic: OUTPOST_TAKEOVER_DAYS 占領 timer
 		OutpostOwnerBank.set_owner(tile, team.team_id, "takeover")
 		team.occupying_outpost_since = -1
 		print("[Takeover] Team%d 接管無人 outpost (%d,%d)" % [
@@ -3724,7 +3724,7 @@ func _count_stress_sources(state: WorldState, team: TeamData) -> int:
 
 func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: String) -> void:
 	var leader = state.persons.get(team.leader_id)
-	if leader == null: return
+	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var honor: float = float(leader.values.get("義氣", 0.5))
 	var prudence: float = float(leader.values.get("慎重", 0.5))
 	var ambition: float = float(leader.values.get("野心", 0.5))
@@ -3754,7 +3754,7 @@ func _has_memory_type(person: PersonData, type: String) -> bool:
 	return false
 
 func _evaluate_owner_contact(state: WorldState, team: TeamData) -> void:
-	if not _is_resident_team(state, team): return
+	if not _is_resident_team(state, team): return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 	var owner_id: int = tile.outpost_owner if tile else -1
 	if owner_id == -1 or not state.teams.has(owner_id):
@@ -3765,7 +3765,7 @@ func _evaluate_owner_contact(state: WorldState, team: TeamData) -> void:
 	if last_tick == -1:
 		return   # 從未接觸（剛建立可能）
 	var days_since: int = (state.world.current_tick - last_tick) / WorldState.TICKS_PER_DAY
-	if days_since > CONTACT_TIMEOUT_DAYS:
+	if days_since > CONTACT_TIMEOUT_DAYS:   # gate-ok: world-mechanic: CONTACT_TIMEOUT_DAYS cadence
 		_trigger_defection_evaluation(state, team, "no_contact")
 		return
 	# owner leader 異動 → 7 天緩衝
