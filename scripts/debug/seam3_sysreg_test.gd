@@ -13,7 +13,7 @@ var _fail: int = 0
 
 func _initialize() -> void:
 	_test_phase_timing_label_sequence()
-	#_test_extensibility_dummy_both()   # RED on baseline: 無 SYSTEMS registry → refactor 後啟用
+	_test_extensibility_dummy_both()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -58,28 +58,25 @@ func _test_phase_timing_label_sequence() -> void:
 # ── 擴充 proof：加 1 個 BOTH 系統 entry = near+far 皆自動執行（不改 loop 本體）──
 func _test_extensibility_dummy_both() -> void:
 	print("--- 擴充 proof：加 BOTH 系統 registry 1 entry ---")
-	# NOTE: refactor 前 SimRunner.SYSTEMS/LOD_BOTH/_seam3_dummy_step 不存在（parse error）=RED。
-	# refactor 後解除下方註解。dummy step = Probe.bump("seam3.dummy")（test-support no-op）。
-	pass
-	#SimRunner.SYSTEMS.append({
-	#	"name": "__dummy_both__", "fn": "_seam3_dummy_step", "lod": SimRunner.LOD_BOTH,
-	#	"shape": "state", "tl": "",
-	#})
-	#Probe.reset(); Probe.enabled = true
-	#seed(7)
-	#var state := WorldState.new()
-	#var runner := SimRunner.new()
-	#var config: Dictionary = GameSetup.load_config("res://config/default.json")
-	#config["seed"] = 7
-	#GameSetup.setup(state, config)
-	#var no_player := Vector2i(-1, -1)
-	#var ran_far := false
-	#while state.world.current_tick < 2000:
-	#	runner.advance_tick(state, no_player)
-	#	if state.world.current_tick % SimRunner.FAR_ZONE_INTERVAL == 0:
-	#		ran_far = true
-	#		break
-	#Probe.enabled = false
-	#_ok(ran_far, "跑到 near+far tick")
-	#_ok(int(Probe.counts.get("seam3.dummy", 0)) >= 2, "dummy BOTH 系統 near+far 皆執行（calls=%d≥2）" % int(Probe.counts.get("seam3.dummy", 0)))
-	#SimRunner.SYSTEMS.pop_back()
+	SimRunner.SYSTEMS.append({
+		"name": "__dummy_both__", "fn": "_seam3_dummy_step", "lod": SimRunner.LOD_BOTH,
+		"shape": "state", "tl": "",
+	})
+	Probe.reset(); Probe.enabled = true
+	seed(7)
+	var state := WorldState.new()
+	var runner := SimRunner.new()
+	var config: Dictionary = GameSetup.load_config("res://config/default.json")
+	config["seed"] = 7
+	GameSetup.setup(state, config)
+	var no_player := Vector2i(-1, -1)
+	var ran_far := false
+	while state.world.current_tick < 2000:
+		runner.advance_tick(state, no_player)
+		if state.world.current_tick % SimRunner.FAR_ZONE_INTERVAL == 0:
+			ran_far = true
+			break
+	Probe.enabled = false
+	_ok(ran_far, "跑到 near+far tick")
+	_ok(int(Probe.counts.get("seam3.dummy", 0)) >= 2, "dummy BOTH 系統 near+far 皆執行（calls=%d≥2）" % int(Probe.counts.get("seam3.dummy", 0)))
+	SimRunner.SYSTEMS.pop_back()
