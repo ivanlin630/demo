@@ -3057,63 +3057,95 @@ func _facility_terrain_fit(state: WorldState, facility: String, tile: HexTileDat
 			return 3.0 if _nearby_resource(state, tile, ["wild_horses"]) > 0.0 else 1.0
 	return 1.0
 
-# 缺口（自身庫存 threshold，0–1）。TEST VALUES
+# ★seam#2 S1 registry 化（byte-identical 純重構）：facility deficit 資料驅動。
+# 加 A 類設施 = 加 FACILITY_DEFICIT_DEF 1 entry（泛型 evaluator 自動處理）。
+# A 類（NeedOracle-gap）：{outputs, use_demand, agg_mode, output_scale, militancy_scaled, gating?}。
+#   agg_mode="min_per_res"(workshop worst bottleneck) | "pooled_sum"(多資源加總，單資源等價)。
+# C 類（非 res-gap，語意真異質不硬併=seam#1 threat 教訓）：{special:"<method>"} dispatch 專屬 evaluator。
+# ★命名 FACILITY_DEFICIT_DEF（非 spec 字面 FACILITY_DEF）：避與同檔 OutpostSystem.FACILITY_DEF(build 元資料)混淆。
+# ★const→static var：擴充 proof 需 runtime 加 entry（entry 純資料，非 Callable）。
+static var FACILITY_DEFICIT_DEF: Dictionary = {
+	# C 類特殊 evaluator（granary 局部糧 / armed_ratio / tile ore）——不泛型化
+	"farming":     {"special": "_deficit_farming"},
+	"weaponsmith": {"special": "_deficit_weaponsmith"},
+	"mint":        {"special": "_deficit_mint"},
+	# A 類泛型（NeedOracle-gap）
+	"workshop":    {"outputs": ["goods", "tools", "arrows"], "use_demand": true,  "agg_mode": "min_per_res", "output_scale": 1.0, "militancy_scaled": false},
+	"apothecary":  {"outputs": ["medicine"],                 "use_demand": false, "agg_mode": "pooled_sum",  "output_scale": 0.5, "militancy_scaled": false},
+	"armorsmith":  {"outputs": ["armor_low", "armor_high"],  "use_demand": false, "agg_mode": "pooled_sum",  "output_scale": 1.0, "militancy_scaled": true},
+	"smeltery":    {"outputs": ["ore_steel"],                "use_demand": false, "agg_mode": "pooled_sum",  "output_scale": 1.0, "militancy_scaled": false, "gating": "smeltery"},
+	"stable":      {"outputs": ["mounts"],                   "use_demand": false, "agg_mode": "pooled_sum",  "output_scale": 1.0, "militancy_scaled": false},
+}
+
+# 缺口（自身庫存 threshold，0–1）。TEST VALUES。★registry dispatch：A 類泛型 evaluator + C 類 special。
+# S6：non-food QUANTITY-target 讀 NeedOracle need（與生產/商業共讀同源）；farming granary/weaponsmith(armed_ratio)/mint(ore-tile)=C 特殊。
 func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 		tile: HexTileData) -> float:
-	var pop: float = maxf(float(team.population), 1.0)
-	# S6：non-food QUANTITY-target 遷 NeedOracle need（消引擎外各算 TARGET_PER_POP 殘留，與生產/商業共讀同源）。
-	# farming 已遷 granary（勿動）；weaponsmith(armed_ratio)/mint(ore-tile) 是 ratio/physics 非 quantity-target，保留。
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
-	match facility:
-		"farming":
-			var target: float = pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 14.0
-			# S2 granary seam：據點局部糧(本 tile 糧倉+私產)，非 positional effective_food(隊不在家→誤缺口恆滿)。
-			var local_food: float = float(tile.public_storage.get("food", 0)) + float(team.resources.get("food", 0))
-			return clampf((target - local_food) / target, 0.0, 1.0)
-		"workshop":
-			# S6：goods=demand 驅(need_keep=0 純貿易)、tools/arrows=need_keep(自用)。target=兩量和(該 res 性質自動)。
-			var worst: float = 1.0
-			for res in ["goods", "tools", "arrows"]:
-				var tgt: float = NeedOracle.need_keep(state, team, res, lv) + NeedOracle.demand(state, team, res, lv)
-				if tgt <= 0.001:
-					continue   # 該 res 無 need+demand → 不驅工坊 deficit（goods 無買家不逼建工坊）
-				worst = minf(worst, float(team.resources.get(res, 0)) / tgt)
-			return clampf(1.0 - worst, 0.0, 1.0)
-		"apothecary":
-			var med_tgt: float = NeedOracle.need_keep(state, team, "medicine", lv)   # S6：medicine 終端自用 need
-			if med_tgt <= 0.001: return 0.0
-			return clampf((med_tgt - float(team.resources.get("medicine", 0))) / med_tgt, 0.0, 1.0) * 0.5
-		"weaponsmith":
-			# de-patch 閘1：拆反應式「近期被打才備」硬 gate → 軍備傾向由人格 militancy 秤
-			# （主動軍閥備戰、和平農夫不備）。armed_ratio 缺口 × militancy。
-			return clampf(0.6 - team.armed_anon_ratio, 0.0, 1.0) * _militancy(team, lv)
-		"armorsmith":
-			var armor: float = float(team.resources.get("armor_low", 0)) \
-				+ float(team.resources.get("armor_high", 0))
-			# S6：armor 終端自用 need（兩級和）。閘1：×militancy（拆反應 threat gate）。
-			var a_tgt: float = NeedOracle.need_keep(state, team, "armor_low", lv) + NeedOracle.need_keep(state, team, "armor_high", lv)
-			if a_tgt <= 0.001: return 0.0
-			return clampf((a_tgt - armor) / a_tgt, 0.0, 1.0) * _militancy(team, lv)
-		"smeltery":
-			# 武器/護甲坊存在（facility gating 保留）且 steel 缺
-			if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0: return 0.0
-			var s_tgt: float = NeedOracle.need_keep(state, team, "ore_steel", lv)   # S6：ore_steel 供應鏈 need
-			if s_tgt <= 0.001: return 0.0
-			return clampf((s_tgt - float(team.resources.get("ore_steel", 0))) / s_tgt, 0.0, 1.0)
-		"mint":
-			# TILE-bound ore only：public_storage（採後入庫）+ resource_cap（礦脈存在標記）。
-			# 不含 team.resources：持有 looted/traded ore 的非礦村 outpost 不應觸發 mint 建造。
-			var ore_pub: float = float(tile.public_storage.get("ore_gold", 0)) \
-				+ float(tile.public_storage.get("ore_silver", 0))
-			var ore_cap: float = float(tile.resource_cap.get("ore_gold", 0)) \
-				+ float(tile.resource_cap.get("ore_silver", 0))
-			var ore: float = maxf(ore_pub, ore_cap * 0.5)
-			return 1.0 if ore > 10.0 else 0.0
-		"stable":
-			var m_tgt: float = NeedOracle.need_keep(state, team, "mounts", lv)   # S6：mounts 終端自用 need
-			if m_tgt <= 0.001: return 0.0
-			return clampf((m_tgt - float(team.resources.get("mounts", 0))) / m_tgt, 0.0, 1.0)
-	return 0.0
+	var entry: Dictionary = FACILITY_DEFICIT_DEF.get(facility, {})
+	if entry.is_empty():
+		return 0.0
+	# C 類：專屬 evaluator（非 NeedOracle res-gap，語意真異質不硬併）。
+	if entry.has("special"):
+		return float(call(entry["special"], state, team, tile, lv))
+	# B facility-gating（smeltery 需 weapon/armorsmith 存在）。
+	if entry.get("gating", "") == "smeltery":
+		if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0:
+			return 0.0
+	# A 類泛型 evaluator（NeedOracle-gap）。
+	var outputs: Array = entry["outputs"]
+	var use_demand: bool = entry["use_demand"]
+	var deficit: float
+	if entry["agg_mode"] == "min_per_res":
+		# worst bottleneck：逐資源算比取最差（某資源夠≠整體夠）。goods=demand 驅、tools/arrows=need_keep。
+		var worst: float = 1.0
+		for res in outputs:
+			var tgt: float = NeedOracle.need_keep(state, team, res, lv)
+			if use_demand:
+				tgt += NeedOracle.demand(state, team, res, lv)
+			if tgt <= 0.001:
+				continue   # 該 res 無 need(+demand) → 不驅 deficit
+			worst = minf(worst, float(team.resources.get(res, 0)) / tgt)
+		deficit = clampf(1.0 - worst, 0.0, 1.0)
+	else:
+		# pooled_sum：多資源先加總持有 vs 加總目標再算比（可互抵；單資源等價 min_per_res）。
+		var total_hold: float = 0.0
+		var total_tgt: float = 0.0
+		for res in outputs:
+			total_hold += float(team.resources.get(res, 0))
+			var tgt: float = NeedOracle.need_keep(state, team, res, lv)
+			if use_demand:
+				tgt += NeedOracle.demand(state, team, res, lv)
+			total_tgt += tgt
+		if total_tgt <= 0.001:
+			return 0.0
+		deficit = clampf((total_tgt - total_hold) / total_tgt, 0.0, 1.0)
+	deficit *= float(entry["output_scale"])
+	if entry["militancy_scaled"]:
+		deficit *= _militancy(team, lv)   # 閘1 de-patch：軍備由人格 militancy 秤（armorsmith）
+	return deficit
+
+# ── C 類 special evaluator（非 NeedOracle res-gap，語意真異質，registry special dispatch）──
+# farming：granary 局部糧缺口（S2 granary seam，非 positional effective_food：隊不在家→誤缺口恆滿）。
+func _deficit_farming(_state: WorldState, team: TeamData, tile: HexTileData, _lv: Dictionary) -> float:
+	var pop: float = maxf(float(team.population), 1.0)
+	var target: float = pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY * 14.0
+	var local_food: float = float(tile.public_storage.get("food", 0)) + float(team.resources.get("food", 0))
+	return clampf((target - local_food) / target, 0.0, 1.0)
+
+# weaponsmith：de-patch 閘1，armed_ratio 缺口 × militancy（軍備由人格秤，非反應式 threat gate）。
+func _deficit_weaponsmith(_state: WorldState, team: TeamData, _tile: HexTileData, lv: Dictionary) -> float:
+	return clampf(0.6 - team.armed_anon_ratio, 0.0, 1.0) * _militancy(team, lv)
+
+# mint：TILE-bound ore 二元（public_storage 採後入庫 + resource_cap 礦脈標記；不含 team.resources：
+# 持有 looted/traded ore 的非礦村 outpost 不應觸發 mint 建造）。
+func _deficit_mint(_state: WorldState, _team: TeamData, tile: HexTileData, _lv: Dictionary) -> float:
+	var ore_pub: float = float(tile.public_storage.get("ore_gold", 0)) \
+		+ float(tile.public_storage.get("ore_silver", 0))
+	var ore_cap: float = float(tile.resource_cap.get("ore_gold", 0)) \
+		+ float(tile.resource_cap.get("ore_silver", 0))
+	var ore: float = maxf(ore_pub, ore_cap * 0.5)
+	return 1.0 if ore > 10.0 else 0.0
 
 # 個性：1.0 + Σ values × pref
 func _facility_personality(leader: PersonData, def: Dictionary) -> float:

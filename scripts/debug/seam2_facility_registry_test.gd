@@ -22,7 +22,7 @@ func _initialize() -> void:
 	_test_mint_special()
 	_test_farming_special()
 	_test_unknown_facility()
-	#_test_extensibility_dummy_a()   # RED on baseline: 無 FACILITY_DEFICIT_DEF（parse error）→ refactor 後啟用
+	_test_extensibility_dummy_a()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -174,19 +174,18 @@ func _test_unknown_facility() -> void:
 # ── 擴充 proof：加 1 個 A 類 dummy entry = 泛型 evaluator 自動處理（不改 _facility_deficit 本體）──
 func _test_extensibility_dummy_a() -> void:
 	print("--- 擴充 proof：加 A 類 registry 1 entry ---")
-	# NOTE: refactor 前 FACILITY_DEFICIT_DEF 不存在（parse error）=RED。refactor 後解除下方註解。
-	pass
-	#FactionAISystem.FACILITY_DEFICIT_DEF["__dummy_a__"] = {
-	#	"outputs": ["medicine"], "use_demand": false, "agg_mode": "pooled_sum",
-	#	"output_scale": 1.0, "militancy_scaled": false,
-	#}
-	#var f := _mk(10, "apothecary_level", 1)
-	#f[1].resources = {"medicine": 0.0}
-	#var lv := _lv(f[0], f[1])
-	#var med_tgt: float = NeedOracle.need_keep(f[0], f[1], "medicine", lv)
-	#var got: float = fai._facility_deficit(f[0], f[1], "__dummy_a__", f[2])
-	#if med_tgt <= 0.001:
-	#	_feq(got, 0.0, "dummy med_tgt≈0 → 0")
-	#else:
-	#	_feq(got, clampf((med_tgt - 0.0) / med_tgt, 0.0, 1.0), "dummy A 類 entry 自動走泛型 evaluator（scale=1.0）")
-	#FactionAISystem.FACILITY_DEFICIT_DEF.erase("__dummy_a__")
+	# refactor 後：加 1 A 類 entry 即自動走泛型 evaluator（不改 _facility_deficit 本體）。
+	FactionAISystem.FACILITY_DEFICIT_DEF["__dummy_a__"] = {
+		"outputs": ["medicine"], "use_demand": false, "agg_mode": "pooled_sum",
+		"output_scale": 1.0, "militancy_scaled": false,
+	}
+	var f := _mk(10, "apothecary_level", 1)
+	f[1].resources = {"medicine": 0.0}
+	var lv := _lv(f[0], f[1])
+	var med_tgt: float = NeedOracle.need_keep(f[0], f[1], "medicine", lv)
+	var got: float = fai._facility_deficit(f[0], f[1], "__dummy_a__", f[2])
+	if med_tgt <= 0.001:
+		_feq(got, 0.0, "dummy med_tgt≈0 → 0")
+	else:
+		_feq(got, clampf((med_tgt - 0.0) / med_tgt, 0.0, 1.0), "dummy A 類 entry 自動走泛型 evaluator（scale=1.0）")
+	FactionAISystem.FACILITY_DEFICIT_DEF.erase("__dummy_a__")
