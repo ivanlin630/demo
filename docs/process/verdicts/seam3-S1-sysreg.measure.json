@@ -1,0 +1,56 @@
+{
+  "measured_at_head": "1d370635 (branch feat/seam3-sysreg, off baseline f5fda115)",
+  "baseline_head": "f5fda115",
+  "branch_head": "1d370635",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-seam3-baseline-f5fda115.json",
+    "docs/measurements/2026-07-17-seam3-baseline-run-f5fda115.log",
+    "docs/measurements/2026-07-17-seam3-branch-seed1337-1d370635.log",
+    "docs/measurements/2026-07-17-seam3-branch-constitution-1d370635.log",
+    "docs/measurements/2026-07-17-seam3-branch-charbed-1d370635.log",
+    "docs/measurements/2026-07-17-seam3-branch-headless-1d370635.log"
+  ],
+  "method": "同seam#1/#2手法：自建獨立baseline worktree(.worktrees/seam3-baseline detached@f5fda115)+branch worktree(.worktrees/seam3-sysreg@1d370635)各自--import重建快取，完全獨立重跑。★perf comparison：sim_runner.gd內建[TickPerf]逐日avg/max us於seeded_warring_bed跑的同一份log中提取(非額外跑)，baseline vs branch同seed同ticks配對比較。",
+  "gates": {
+    "seeded_warring_bed_pointwise_diff": {
+      "seed": 1337,
+      "months": 3,
+      "result": "total_diffs=0（same）",
+      "verdict": "CONFIRMED byte-identical"
+    },
+    "constitution_gate": {
+      "result": "PASS sites=72 removed=0",
+      "matches_claim": true,
+      "verdict": "CONFIRMED"
+    },
+    "char_bed_seam3_sysreg_test": {
+      "result": "phase_timing 17-label序byte-identical；dummy BOTH系統near+far皆執行(calls=112)",
+      "verdict": "CONFIRMED"
+    },
+    "headless_test_full": {
+      "result": "=== DONE ===，殘3 assertion同名同行號：_test_p2a_survival_terms:15529 / _test_beg_join_social_resolve:7075 / _test_strategic_reads_ladder:13979",
+      "verdict": "CONFIRMED pre-existing，無新增無減少"
+    },
+    "game_sim_multi_line_diff": {
+      "result": "未獨立重跑（時間預算——seeded_warring_bed pointwise diff已覆蓋probe/behavior核心宣稱，且本輪已額外做perf對照，優先度取捨）",
+      "verdict": "NOT_INDEPENDENTLY_VERIFIED，採信implementer自報（12092行/0 semantic diff excl [TickPerf]）"
+    },
+    "perf_tickperf_comparison": {
+      "method": "seed1337×3mo(90天) baseline vs branch，逐日[TickPerf] avg_us/max_us配對比較（同一份seeded_warring_bed log，非額外跑）",
+      "n_days": 90,
+      "teams_factions_per_day_identical": true,
+      "mean_daily_avg_us_baseline": 25226.6,
+      "mean_daily_avg_us_branch": 25142.9,
+      "mean_avg_delta_pct": -0.33,
+      "mean_daily_max_us_baseline": 1342930.1,
+      "mean_daily_max_us_branch": 1349660.4,
+      "mean_max_delta_pct": 0.50,
+      "days_branch_higher_avg": 41,
+      "days_branch_lower_avg": 49,
+      "total_days": 90,
+      "verdict": "NO SIGNIFICANT REGRESSION——mean delta -0.33%(avg)/+0.50%(max)遠小於日間自然波動(單日avg_us範圍15135~37725,約±40%量級)，41/90天branch較高49/90天較低=雙向噪音非系統性。call()動態派發熱路徑的overhead在此規模(67-69隊)下量不到，可接受不需systems裁調整。"
+    }
+  },
+  "incomplete": ["game_sim_multi 逐行diff未獨立重跑（信賴implementer自報）"],
+  "summary": "4/5 byte-identical閘獨立重跑確認(含最關鍵warring pointwise diff=0)+★perf flag已用同一份log的內建[TickPerf]做90天配對比較,結論：無顯著regression(mean delta<0.5%,雙向噪音)。可判merge，perf flag已解除疑慮不需額外裁決。"
+}

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[MEASURE·fast-follow·軌2分化 multi-seed] de-patch軌2已merged main(08d3a39d)。fast-follow確認人格分化(本輪n=0/測法bug缺口):①try_proactive陡曲線兩端(高慎重0%已✓/★低慎重0-0.3=大膽近每tick待補)②tribute屈服 vs 膽識(★修測法bug:別固定threat=0.3,用真世界分佈或threat=0多案例避flee_desperation結構性推submit)③militancy=軍閥備戰vs農夫(★軍事設施thin擋n=0,若仍0隊建weaponsmith則標『綁facility-development』非軌2否證)。多seed(≥8)大N聚合。禁AskUserQuestion"
 ---
 

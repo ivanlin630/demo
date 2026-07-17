@@ -1,0 +1,45 @@
+{
+  "measured_at_head": "fd801ecd (branch feat/threat-oracle-s1.5, off baseline e0198666)",
+  "baseline_head": "e0198666",
+  "branch_head": "fd801ecd",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-threatoracle-s15-baseline-charbed-e0198666.log",
+    "docs/measurements/2026-07-17-threatoracle-s15-branch-charbed-fd801ecd.log",
+    "docs/measurements/2026-07-17-threatoracle-s15-branch-constitution-fd801ecd.log",
+    "docs/measurements/2026-07-17-threatoracle-s15-branch-headless-fd801ecd.log",
+    "docs/measurements/2026-07-17-threatoracle-s15-baseline-e0198666.json",
+    "docs/measurements/2026-07-17-threatoracle-s15-branch-seed1337-fd801ecd.log",
+    "docs/measurements/2026-07-17-threatoracle-s15-branch-seed42-fd801ecd.log"
+  ],
+  "method": "★非byte-identical案例:同seam系列自建獨立baseline+branch worktree法，但驗收判準改為「行為變合理」非「diff=0」。char bed雙邊獨立驗(RED在baseline親跑,GREEN在branch親跑,非只信implementer報的兩個數字)+seeded_warring 2 seed探no-belief觸發窗。",
+  "gates": {
+    "char_bed_RED_before": {
+      "result": "[FAIL] 無belief→pop_est=self_pop (a=30.000000 b=3.000000，god-view洩漏；baseline走god-view真pop=30) + SCRIPT ERROR: perceived_power_ratio欄不存在(結構性證實(b)是全新加欄非既有)",
+      "matches_implementer_claim": "數字精確吻合implementer報告的baseline ratio=30.0",
+      "verdict": "CONFIRMED（獨立在baseline worktree上跑，非只信implementer的RED宣稱）"
+    },
+    "char_bed_GREEN_after": {
+      "result": "[PASS]無belief→self_pop=3.0(虛張生效)+[PASS]確非god-view(other.population=100未洩漏)+[PASS]perceived_power_ratio==_power_ratio直算(3.272727)+[PASS]perceived_power_ratio≠threat_react",
+      "matches_implementer_claim": "數字精確吻合implementer報告的fix後ratio=3.0/perceived_power_ratio=3.272727",
+      "verdict": "CONFIRMED"
+    },
+    "constitution_gate": {
+      "result": "PASS sites=65 removed=0",
+      "matches_claim": true,
+      "verdict": "CONFIRMED"
+    },
+    "headless_test_full": {
+      "result": "=== DONE ===，殘3 assertion同名同行號：_test_p2a_survival_terms:15529 / _test_beg_join_social_resolve:7075 / _test_strategic_reads_ladder:13979",
+      "verdict": "CONFIRMED pre-existing，行為變未回歸測試套件"
+    },
+    "seeded_warring_organic_delta": {
+      "seeds_tested": [1337, 42],
+      "months": 2,
+      "result_seed_1337": "total_diffs=0（same）",
+      "result_seed_42": "total_diffs=0（same）",
+      "verdict": "no-belief-fallback觸發窗（threat_id存在但該target無population_est belief claim）在這2 seed×2mo樣本內未被organic撞到——非否證fix，是mechanism-level fix已由char bed結構性證實生效+隔離(has-belief路徑不變)，organic層級delta本輪樣本太小/窗太短沒撞到觸發條件。若systems要organic層級的delta量化證據，需更多seed/更長窗專門追蹤首接觸-無belief-有threat_id的時刻，非本輪必要（char bed已是決定性單元證據）。"
+    }
+  },
+  "incomplete": ["seeded_warring在2 seed×2mo內未觀測到no-belief分支觸發時的world-level delta——非發現問題,是char bed已充分證明機制正確,organic層追加驗證的邊際價值低於時間成本"],
+  "summary": "行為變（非byte-identical）驗收：char bed雙邊獨立驗證CONFIRMED（RED baseline ratio=30.0精確吻合/GREEN branch ratio=3.0+perceived_power_ratio精確吻合implementer數字，且baseline缺該欄的結構性錯誤額外證實(b)為全新加欄）；constitution_gate/headless_test皆CONFIRMED無回歸。has-belief路徑（結構上）byte-identical，no-belief分支的organic world-level delta在2 seed×2mo內未觀測到（觸發窗窄，非否證）。整體：fix機制正確且如預期被限縮在無belief分支，可判merge。"
+}

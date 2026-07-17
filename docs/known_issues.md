@@ -752,3 +752,11 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 - **de-patch 軌2 值閘 merged**:閘1 _threat_recent→intent軍備/閘5 tribute FLEE→膽識絕望秤/閘7 calc_attack_score孤兒刪/try_proactive陡化。結構正確+無回歸,gate grep證消失。
 - **★fast-follow(非blocker)**:①軌2分化 multi-seed confirm(militancy/低慎重 try_proactive/tribute修測法)——militancy綁**軍事設施thinness**(軍事設施幾乎不建,同生產框架facility-thin,production域separate)②守measure前不宣victory,分化待confirm。
 - **剩零殘留工**:**軌1 seam#1 控制流收斂**(route×10+dispatch_entry收斂成一encounter eval+registry=真統一+擴充,大slice)+ 其餘54閘triage/de-patch → gate baseline續縮向零。stream② seam#2/#3(facility_deficit資料驅動/sim_runner registry)+ stream③情緒接線。關 [[project_unification_matrix]]。
+
+## 框架做好 stream① 進度2（2026-07-17，seam#1 R②翻案 + 軌2 fast-follow結案）
+- **★seam#1 R②異質框外審翻案(v1 FLAWED→REVISED)**:異質Sonnet skeptic+systems逐code全驗——**threat收斂UNSOUND**(5 findings全file:line):threat util量級**故意壓小**(terms.gd:170-171靠applicable-gate選)全pool被貿易1.3/野心1.5壓過+無break-top boost(survival有)+PRIO 70→50塌層+preempt唯一call site=rank_threat+自有FLEE公式(decision_engine.gd:143 vs主rank)。**裁定:threat收斂剝離→歸threat-oracle arc(4前置:severity-scaling util↑/break-top boost/preempt明確+PRIO保/probe先接)**,本就路線圖序3-4在後。seam#1只留**S1 registry(byte-identical)** + survival/ambient逐路驗收斂。threat控制流閘=**legit-until-threat-oracle**(標非移除)。可複用:filtered subset可編碼真選擇語意≠scaffolding,收斂前逐路驗。關 [[feedback_frame_challenge]]。spec `2026-07-17-seam1-control-flow-convergence.md`(REVISED)。
+- **軌2 fast-follow multi-seed結案(measurer 8-10seed)**:3項de-patch機制**全legit(源硬統一done,框架零殘留達)**,殘餘=值軟債/vision→defer(framework-first):
+  - **① militancy n=0穩**=facility-thin(軍事設施幾乎不建),production域→facility backlog,不追量。
+  - **② tribute 100% submit under FLEE**=機制已de-patch(diplomatic_ai:46純人格formula),但generator floor(慎重/求生欲≥0.35)+flat TRIBUTE_W_FLEE=0.25→**高義氣拒絕分支數學不可達**(honor=1.0仍submit 0.125>0.1閾)。=**值軟債**:平衡波降W_FLEE/rebalance讓拒絕可達。連 [[project_desperation_economy]] 敗北三端塌1端(submit壟斷)。
+  - **③ try_proactive 慎重³**=公式legit(unit-proven陡,RNG案③),但**行為級分化撤回**:高端「0%」是127-樣本noise(569樣本0.70%不重現),低慎重<0.35 generator架構不可達(person_generator:17 NORMAL_LO=0.35無lo_v慎重archetype)→分化被opportunity稀缺+floor遮蔽。gate-ok立於公式非行為。殘:generator-diversity(低慎重原型)+藍圖陳述更正=vision backlog。
+- **54-triage tracker**:`docs/superpowers/54-triage.md`(A1安全收斂/A2 threat legit-until-oracle/B逐code/C=2皆legit)。

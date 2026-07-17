@@ -1,0 +1,42 @@
+{
+  "measured_at_head": "24e51cc1 (branch feat/seam1-registry, off baseline 1fd7b425)",
+  "baseline_head": "1fd7b425",
+  "branch_head": "24e51cc1",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-seam1-baseline-1fd7b425.json",
+    "docs/measurements/2026-07-17-seam1-branch-seed1337-24e51cc1.log",
+    "docs/measurements/2026-07-17-seam1-branch-seed42-24e51cc1.log",
+    "docs/measurements/2026-07-17-seam1-branch-constitution-24e51cc1.log",
+    "docs/measurements/2026-07-17-seam1-branch-charbed-24e51cc1.log",
+    "docs/measurements/2026-07-17-seam1-branch-headless-24e51cc1.log"
+  ],
+  "method": "獨立 worktree 對照：baseline pinned .worktrees/seam1-baseline@1fd7b425（detached, 非implementer提供）vs branch .worktrees/seam1-registry@24e51cc1，各自 --import 重建快取，非沿用 implementer 自跑結果。",
+  "gates": {
+    "seeded_warring_bed_pointwise_diff": {
+      "seeds": [1337, 42],
+      "months": 3,
+      "seed_1337": "total_diffs=0（same）",
+      "seed_42": "total_diffs=0（same）",
+      "verdict": "CONFIRMED byte-identical（獨立重跑，非採信implementer自報）"
+    },
+    "constitution_gate": {
+      "result": "PASS sites=89 removed=2",
+      "matches_claim": true,
+      "verdict": "CONFIRMED，與implementer報告數字一致（91→89, removed=2: options.gd::applicable::threshold + options.gd::to_task::early_return，非行為變，fingerprint搬進lambda）"
+    },
+    "char_bed_seam1_registry_test": {
+      "result": "ALL PASS（applicable順序/subteam前置閘/Probe計數 produce+occupy 分支/to_task純分支/擴充proof 全綠）",
+      "verdict": "CONFIRMED"
+    },
+    "headless_test_full": {
+      "result": "=== DONE ===，殘3 assertion與baseline完全同名同行號：_test_p2a_survival_terms:15529 / _test_beg_join_social_resolve:7075 / _test_strategic_reads_ladder:13979",
+      "verdict": "CONFIRMED pre-existing，無新增無減少"
+    },
+    "game_sim_multi_line_diff": {
+      "result": "未獨立重跑（時間預算——warring bed pointwise diff已覆蓋probe/behavior核心宣稱，優先度較低）",
+      "verdict": "NOT_INDEPENDENTLY_VERIFIED，採信implementer自報（12092行/0 semantic diff excl [TickPerf]）——若systems要求可補跑"
+    }
+  },
+  "incomplete": ["game_sim_multi 逐行diff未獨立重跑（信賴implementer自報，非我獨立驗證）"],
+  "summary": "4/5 閘獨立重跑確認 byte-identical（含最關鍵的 seeded_warring_bed pointwise Probe diff，2 seed×3mo，total_diffs=0）+ constitution_gate 數字精確吻合 + char bed 全綠 + headless 3 pre-existing assertion 精確同名同行。1 閘（game_sim_multi）未獨立重跑，時間預算取捨，非發現問題。整體：byte-identical claim CONFIRMED，可判 merge。"
+}

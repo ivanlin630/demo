@@ -1,0 +1,38 @@
+{
+  "measured_at_head": "8ea5e90e (branch feat/threat-oracle-s1-probe, off baseline 37350f06)",
+  "baseline_head": "37350f06",
+  "branch_head": "8ea5e90e",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-threatoracle-baseline-charbed-37350f06.log",
+    "docs/measurements/2026-07-17-threatoracle-branch-charbed-8ea5e90e.log",
+    "docs/measurements/2026-07-17-threatoracle-branch-constitution-8ea5e90e.log",
+    "docs/measurements/2026-07-17-threatoracle-baseline-37350f06.json",
+    "docs/measurements/2026-07-17-threatoracle-branch-seed1337-8ea5e90e.log"
+  ],
+  "method": "同seam系列手法：自建獨立baseline worktree(.worktrees/threat-oracle-baseline detached@37350f06)+branch worktree(.worktrees/threat-oracle-s1-probe@8ea5e90e)。★char bed RED/GREEN雙邊獨立驗——把新char bed複製進baseline worktree跑,獨立確認tap缺前FAIL(非只信implementer的RED宣稱)。warring pointwise因contention(其他session同時跑godot)第一次3mo跑被wrapper timeout(GODOT_TIMEOUT=560s無output)→縮2mo重試成功。",
+  "gates": {
+    "char_bed_RED_before": {
+      "result": "[FAIL] threat.dispatch.迎戰 bump（統一路 tap）— tap缺，符合預期RED",
+      "verdict": "CONFIRMED（獨立在baseline worktree上跑同一份char bed，非只信implementer的RED宣稱）"
+    },
+    "char_bed_GREEN_after": {
+      "result": "[PASS] 統一隊選threat option（chosen=迎戰）+ [PASS] threat.dispatch.迎戰 bump（統一路tap）",
+      "verdict": "CONFIRMED"
+    },
+    "constitution_gate": {
+      "result": "PASS sites=72 removed=0",
+      "matches_claim": true,
+      "verdict": "CONFIRMED"
+    },
+    "seeded_warring_bed_pointwise_diff": {
+      "seed": 1337,
+      "months": 2,
+      "note": "縮自3mo(重試2次:第1次3mo因系統contention被wrapper 560s timeout殺無output;第2次縮2mo在330s內完成)",
+      "result": "total_diffs=0（same）",
+      "threat_dispatch_in_warring_probe_subset": false,
+      "verdict": "CONFIRMED byte-identical世界軌跡；threat.dispatch.*未現於本次warring probe印出子集(implementer已預告caveat,與純加項/guard設計一致,非異常)"
+    }
+  },
+  "incomplete": [],
+  "summary": "純Probe.bump加項(guard by Probe.enabled)獨立複核CONFIRMED：①char bed雙邊(baseline FAIL/branch PASS)獨立證實tap真的是新加而非既有②constitution_gate精確吻合③seeded_warring pointwise diff=0(世界行為零變)。可判merge。"
+}

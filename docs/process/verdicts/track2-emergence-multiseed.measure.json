@@ -1,0 +1,49 @@
+{
+  "measured_at_head": "1fd7b425",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-depatch-track2-calib-seed1337-2mo-1fd7b425.log",
+    "docs/measurements/2026-07-17-depatch-track2-fastfollow-batch1-1fd7b425.log",
+    "docs/measurements/2026-07-17-depatch-track2-fastfollow-batch2-1fd7b425.log",
+    "docs/measurements/2026-07-17-depatch-track2-fastfollow-militancy-ext-1fd7b425.log"
+  ],
+  "bed": "scripts/debug/depatch_track2_verify_bed.gd (main dir, untracked debug tool, per-seed sample-cap fix applied 2026-07-17 — old version had global caps that saturated within first 1-2 seeds, defeating multi-seed purpose)",
+  "seeds_covered": [1337, 2674, 4201, 5590, 7183, 8842, 9911, 3355],
+  "n_seeds": 10,
+  "note": "8 distinct seeds for main aggregate (2mo) + seeds 1337/2674 re-run extended to 6mo for militancy supplementary window",
+  "militancy": {
+    "total_samples_owned_outpost_teams": 2024,
+    "has_weapon_fac_true_n": 0,
+    "windows": "2mo x8seeds(1224) + 6mo x2seeds(400, supplementary) + calib 2mo x1seed(200,folded into batch)",
+    "verdict": "n=0 held across ALL windows incl. 6mo extension — root cause = facility-development thinness (weaponsmith/armorsmith construction near-absent), a known separate production-domain issue, NOT a de-patch defect. More seeds/months unlikely to change this without facility-development arc work."
+  },
+  "tribute": {
+    "total_samples_FLEE_teams": 1650,
+    "submit_true_n": 1650,
+    "submit_false_n": 0,
+    "methodology_fix_applied": "threat=0.0 (was 0.3, fixed per prior handback's self-identified bug)",
+    "structural_root_cause": "TRIBUTE_W_FLEE=0.25 (diplomatic_ai_system.gd:38) > TRIBUTE_ACCEPT_THRESHOLD=0.1 (line 27) — flee_desperation alone exceeds accept threshold. Defiance requires honor(義氣) near max AND caution/survival/fear near-min simultaneously (score = (power_r-1)*0.4 + caution*0.3 - honor*0.3 + survival*0.2 + fear*0.2 + threat*0.2 + 0.25 > 0.1). Worst case honor=1.0,others=0: score=-0.05<0.1 (defiant) — theoretically reachable but a rare joint trait configuration not observed in 1650 organic draws across 10 seeds.",
+    "verdict": "0% defiance rate held after methodology fix AND across 10 seeds/up to 6mo — this is NOT the measurer's prior test-bug (already fixed), it is a weight/threshold characteristic: mechanism code path for defiance exists (verified separately by implementer TDD synthetic case per prior handback) but is organically near-unreachable under current weights. Systems/blueprint judgment call: accept as 'mechanism-present-rarely-observed' or retune weights for a fatter defiance tail."
+  },
+  "try_proactive_steepening": {
+    "low_conscientiousness_bucket_0_to_0.3": {
+      "total_samples_across_all_seeds": 0,
+      "root_cause": "PersonGenerator normal band NORMAL_LO=0.35 (scripts/simulation/person_generator.gd:17) is the floor for ALL non-outlier leaders; among outlier archetypes (person_generator.gd:25-29 霸主/屠夫/謀士/懦夫) only 謀士 touches 慎重 and only as hi_v (pushes to [0.85,1.0]) — NO archetype has 慎重 in lo_v. ∴ 慎重<0.35 is architecturally unreachable for any generated leader, not a sampling-budget gap.",
+      "verdict": "This bucket cannot be organically populated regardless of seed count or window length under the current generator. To test the '大膽近每tick' half of the steepening hypothesis requires either (a) a new low-慎重 archetype in PersonGenerator (a real code change, systems/implementer call) or (b) a direct/synthetic-leader unit test bypassing organic generation (same pattern as the existing TDD case that already validated the formula: bold=0.008 vs cautious=0.729, per prior handback)."
+    },
+    "high_conscientiousness_bucket_0.7_to_1.0": {
+      "batch1": "1/245 = 0.41%",
+      "batch2": "3/238 = 1.26%",
+      "militancy_ext_6mo": "0/86 = 0.00%",
+      "combined": "4/569 = 0.70%"
+    },
+    "mid_conscientiousness_bucket_0.3_to_0.7": {
+      "batch1": "0/2955 = 0.00%",
+      "batch2": "29/2962 = 0.98%",
+      "militancy_ext_6mo": "0/1514 = 0.00%",
+      "combined": "29/7431 = 0.39%"
+    },
+    "verdict": "Prior report's high-慎重=0/127=0% (single small sample) does NOT replicate at larger N (569 samples, 0.70%) — high bucket rate is now in the same order of magnitude as mid bucket (0.39%), not distinguishably near-zero. The previously claimed 'high-慎重 end confirmed' should be walked back to 'inconclusive, both ends effectively untested/unconfirmed at this N' — low end structurally untestable (see above), high end's near-0% claim was likely small-N noise."
+  },
+  "incomplete": [],
+  "summary": "Fast-follow multi-seed (8-10 seeds, 2-6mo) run at main HEAD 1fd7b425. All 3 items resolved to root-cause diagnoses, not just 'still under-sampled': (1) militancy n=0 robust across windows — facility-thinness, separate arc, non-blocker for de-patch. (2) tribute 0% defiance robust after methodology fix — structural weight/threshold characteristic (TRIBUTE_W_FLEE > ACCEPT_THRESHOLD), mechanism exists but organically near-unreachable; a tuning/acceptance call for systems. (3) try_proactive low-慎重 bucket is architecturally unreachable (generator floor, not sampling gap); high-慎重 near-0% claim from prior small sample does not replicate at larger N — steepening hypothesis is inconclusive on current evidence, not confirmed on either end."
+}
