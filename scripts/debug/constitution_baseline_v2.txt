@@ -7,7 +7,6 @@ scripts/simulation/decision/decision_engine.gd::rank_survival::dispatch_entry  #
 scripts/simulation/decision/decision_engine.gd::rank_survival::early_return
 scripts/simulation/decision/decision_engine.gd::rank_threat::dispatch_entry  # gate-ok: canonical 引擎 rank 入口(統一決策層,非散落)
 scripts/simulation/decision/options.gd::applicable::route
-scripts/simulation/diplomatic_ai_system.gd::_calc_diplomacy_score::early_return
 scripts/simulation/diplomatic_ai_system.gd::_calc_diplomacy_score::threshold  # gate-ok: if gift_food>0.0 禮物存在 guard(非決策硬閾)
 scripts/simulation/diplomatic_ai_system.gd::_send_diplomacy_message::rng
 scripts/simulation/diplomatic_ai_system.gd::consider_betrayal::rng  # gate-ok: 案③已陡(driver≥HARD→100%,中間 margin 才骰)
@@ -15,34 +14,21 @@ scripts/simulation/diplomatic_ai_system.gd::try_proactive_diplomacy::rng
 scripts/simulation/faction_ai_system.gd::_assign_tasks::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_check_discipline::rng  # gate-ok: 案②outcome(壓力下紀律失效=世界回應,非決策)
 scripts/simulation/faction_ai_system.gd::_commit_conquest_attack::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
-scripts/simulation/faction_ai_system.gd::_consider_extraction::early_return
 scripts/simulation/faction_ai_system.gd::_consider_extraction::threshold
 scripts/simulation/faction_ai_system.gd::_decide_subteam::route
 scripts/simulation/faction_ai_system.gd::_decide_subteam::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_decide_unified::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
-scripts/simulation/faction_ai_system.gd::_decide_unified::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_all_body::route
 scripts/simulation/faction_ai_system.gd::_evaluate_all_body::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_evaluate_all_body::threshold
-scripts/simulation/faction_ai_system.gd::_evaluate_independent_infrastructure::early_return
-scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::early_return
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::route
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_evaluate_independent_strategy::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::dispatch_entry
-scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::early_return
-scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::threshold
-scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::early_return
 scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::threshold
-scripts/simulation/faction_ai_system.gd::_evaluate_outpost_residency::early_return
-scripts/simulation/faction_ai_system.gd::_evaluate_outpost_takeover::threshold
-scripts/simulation/faction_ai_system.gd::_evaluate_owner_contact::early_return
-scripts/simulation/faction_ai_system.gd::_evaluate_owner_contact::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_solo::early_return
 scripts/simulation/faction_ai_system.gd::_evaluate_solo::route
 scripts/simulation/faction_ai_system.gd::_evaluate_solo::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
-scripts/simulation/faction_ai_system.gd::_evaluate_storage_visit::early_return
-scripts/simulation/faction_ai_system.gd::_evaluate_storage_visit::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_subteam::route
 scripts/simulation/faction_ai_system.gd::_evaluate_subteam::threshold
 scripts/simulation/faction_ai_system.gd::_evaluate_survival::dispatch_entry
@@ -64,10 +50,7 @@ scripts/simulation/faction_ai_system.gd::_facility_terrain_fit::threshold
 scripts/simulation/faction_ai_system.gd::_maybe_request_join_player::rng  # gate-ok: randi=event-ID 非決策骰(false-positive)
 scripts/simulation/faction_ai_system.gd::_pick_facility::early_return
 scripts/simulation/faction_ai_system.gd::_pick_facility::threshold
-scripts/simulation/faction_ai_system.gd::_pick_outpost_type::threshold
-scripts/simulation/faction_ai_system.gd::_trigger_defection_evaluation::early_return
 scripts/simulation/faction_ai_system.gd::_trigger_defection_evaluation::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
-scripts/simulation/faction_ai_system.gd::_trigger_survival::early_return
 scripts/simulation/faction_ai_system.gd::_trigger_survival::route
 scripts/simulation/faction_ai_system.gd::_trigger_survival::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_try_invite_nearby_exile::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
