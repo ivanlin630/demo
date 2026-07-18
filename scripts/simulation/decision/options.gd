@@ -338,6 +338,17 @@ const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村"
 # 序4 vendetta 溶入：血仇開打門檻（防輕微不快即戰）。TEST VALUE。
 const FEUD_ATTACK_MIN := 0.5
 
+# ★絕境經濟 ① survival 保序單一源（team19/subteam whack-a-mole 收單一源；散落常數=統一矩陣程序正靶）：
+# option → commit priority。**全 dispatch 路一律讀此**（_decide_unified/_evaluate_solo/_trigger_survival/
+# _decide_subteam/_try_join_target）→ 不變量:survival 保序=命運不看走哪 dispatch 路，solo/unified/subteam
+# commit priority 一致（survival-class 皆 PRIO_SURVIVAL）。加 survival-class option 自動涵蓋（SURVIVAL_OPTION_SET）。
+static func priority_for(opt: String) -> int:
+	if opt in SURVIVAL_OPTION_SET or opt == "survival":
+		return TaskArbiter.PRIO_SURVIVAL   # 求生 preempt 同層(絕境隊命運不看 dispatch 路)
+	if opt in ["備戰", "迎戰", "求和"]:
+		return TaskArbiter.PRIO_THREAT      # threat 反應 @70(finding3 黏性)
+	return TaskArbiter.PRIO_DISPATCH
+
 static func applicable(ctx: DecisionContext) -> Array:
 	var out: Array = []
 	for opt in REGISTRY:

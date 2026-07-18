@@ -1550,14 +1550,8 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		# ★threat-oracle S3：threat 反應(備戰/迎戰/求和)commit @PRIO_THREAT 70(finding3 黏性——收斂後不被
 		# 高值經濟 @50 換掉；task_arbiter self-replace 已擴認 70 同層 threat option 可換 迎戰→求和)。其餘 @50。
-		# ★survival PRIO fix（S3 regression）：restore 80>70>50 階層。survival-class(絕境求生+FLEE)@PRIO_SURVIVAL
-		# 80→瀕死隊 survival preempt threat @70(no_forage 死→FLEE 死=自限 starvation);threat 反應 @70;其餘 @50。
-		var _prio: int = TaskArbiter.PRIO_DISPATCH
-		if opt in DecisionOptions.SURVIVAL_OPTION_SET or opt == "survival":
-			_prio = TaskArbiter.PRIO_SURVIVAL
-		elif opt in ["備戰", "迎戰", "求和"]:
-			_prio = TaskArbiter.PRIO_THREAT
-		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, _prio, "unified")
+		# ★絕境經濟 ① 單一源：option→priority 收 DecisionOptions.priority_for（survival 保序不看 dispatch 路）。
+		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "unified")
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		if Probe.enabled and opt == "併入":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
@@ -1771,7 +1765,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 					HandBrainProbe.capture(state, sub, "subteam", String(ranked[0]["opt"]), opt, td["task"], true)
 				return
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
-		if not TaskArbiter.try_set(state, sub, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "subteam"):
+		if not TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for(opt), "subteam"):   # ★① 單一源(subteam survival @80 preempt,team19 換子隊 bug 收)
 			continue
 		if td.has("combat_target"): state.set_combat_target(sub, int(td["combat_target"]))
 		if td.has("social_target"): state.set_social_target(sub, int(td["social_target"]))
@@ -1793,7 +1787,7 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 	if pp != null and target_id == pp.team_id:
 		return _maybe_request_join_player(state, team)   # 寫 forced_event，★不 try_set、caller 不 fallthrough
 	if not TaskArbiter.try_set(state, team, TeamData.TASK_JOIN, state.teams[target_id].tile_pos, \
-			TaskArbiter.PRIO_DISPATCH, "subteam"):
+			DecisionOptions.priority_for("併入"), "subteam"):   # ★① 單一源第5路(grep 抓:JOIN=併入 survival-class @80,非 @50)
 		return false
 	state.set_social_target(team, target_id)
 	return true
@@ -1899,7 +1893,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "finder_miss")   # Fix2b 早退 tap
 			continue   # 不可派 → 試次佳（修凍死，鏡射 _decide_unified）
-		if not TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_DISPATCH, "solo"):
+		if not TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "solo"):   # ★① 單一源(solo survival @80 preempt 安頓)
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # Fix2b 早退 tap
 			continue
 		# 掠奪/佔村/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（鏡射 _decide_unified）
@@ -3373,7 +3367,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			if pp != null and int(td["social_target"]) == pp.team_id:
 				if _maybe_request_join_player(state, team):
 					return
-		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, TaskArbiter.PRIO_SURVIVAL, "survival")
+		var _surv_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "survival")   # ★① 單一源(收 @80)
 		if Probe.enabled and opt == "併入":   # DIAG C2：survival 路整併 dispatch（PRIO_SURVIVAL，正確路）
 			Probe.bump("merge.surv_ok" if _surv_ok else "merge.surv_fail")
 		if not _surv_ok:
