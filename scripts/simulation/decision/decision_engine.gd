@@ -17,11 +17,21 @@ const THREAT_BOOST_MAX: float = 0.5       # TEST VALUE(S2 calibrate ↓1.2)— <
 # 修:committed option stall 偵測(relief before/after magnitude,禁瞬時)→硬排除 bounded window(reject_cooldown idiom,鏡射
 #   diplomatic_ai_system.gd:5 REJECT_COOLDOWN)→argmax 換次格產階梯。單一 option 豁免(無次格 ride 窮死非 idle-churn)。
 enum { STALL_WAITING, STALL_RESOLVING, STALL_STALLED }
-const STALL_BASE_DAYS: float = 8.0        # TEST VALUE — 耐性基準天(× patience_factor;latch 33+天前介入升級)
-const STALL_RELIEF_MIN: float = 1.0       # TEST VALUE — food_days 較 baseline 回升 ≥此 才算 resolving(非「沒更低就算解」)
-const STALL_EXCLUDE_WINDOW: int = WorldState.TICKS_PER_DAY * 20   # TEST VALUE — 硬排除窗(> STALL_DAYS max 防 A 太快回來 ping-pong)
+# ★TEST VALUE + calibration-sweep env override（blueprint 裁 B）：measurer 禁改 scripts → env 注入掃值。
+#   無 env → fallback 現預設 = byte-identical 現行為（gate/determinism 無 env 時不變，純掃機非改邏輯）。
+static var STALL_BASE_DAYS: float = _env_float("LADDER_STALL_BASE", 8.0)          # 耐性基準天(× patience_factor;latch 33+天前介入升級)
+static var STALL_RELIEF_MIN: float = _env_float("LADDER_RELIEF_MIN", 1.0)         # food_days 較 baseline 回升 ≥此 才算 resolving
+static var STALL_EXCLUDE_WINDOW: int = _env_int("LADDER_STALL_WINDOW", WorldState.TICKS_PER_DAY * 20)   # 硬排除窗(> STALL_DAYS max 防 ping-pong)
 const STALL_PATIENCE_MIN: float = 0.5     # patience clamp 下限(急換者)
 const STALL_PATIENCE_MAX: float = 1.5     # patience clamp 上限(撐久者)
+
+# calibration-sweep env 讀取（無 env → 預設；零 RNG）。
+static func _env_float(key: String, dflt: float) -> float:
+	var v: String = OS.get_environment(key)
+	return v.to_float() if v != "" else dflt
+static func _env_int(key: String, dflt: int) -> int:
+	var v: String = OS.get_environment(key)
+	return int(v.to_float()) if v != "" else dflt
 
 # stall 判定：before/after relief-magnitude（禁瞬時比昨日；比 committed baseline）。純函式（可測）。
 static func stall_verdict(committed_tick: int, committed_food: float, cur_tick: int, cur_food: float,
