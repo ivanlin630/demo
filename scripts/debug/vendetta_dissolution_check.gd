@@ -78,7 +78,6 @@ func _check_feud_over_enrich() -> void:
 	c.strongest_feud = 1.0
 	c.feud_target_id = 1
 	c.has_weak_prey = true
-	c.weak_prey_pos = Vector2i(3, 0)
 	var opts: Array = _opts(c)
 	var ai: int = opts.find("攻擊")
 	var li: int = opts.find("掠奪")

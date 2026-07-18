@@ -136,7 +136,11 @@ func _assign_encirclement(state: WorldState, faction: FactionData,
     ]
     # T-02：用 leader 的 team_intel 取目標最後已知位置
     var leader_id: int = faction.leader_team_id
-    var target_pos: Vector2i = BeliefSystem.best_estimate(state, leader_id, target_id).get("tile_pos", target.tile_pos)
+    var target_pos: Vector2i = BeliefSystem.best_estimate(state, leader_id, target_id).get("tile_pos", Vector2i(-1, -1))
+    # F1 感知鐵律：缺 belief → sentinel (-1,-1)（禁默認 live）。無 belief 位 → 不包圍（座標算術不能用 -1）；
+    # assignments 已 clear(:131)，直接 return 不設 sa_pos。
+    if target_pos == Vector2i(-1, -1):
+        return
     # S9 建造/升級/擴建子隊豁免：正前往施工目標，不得被包圍戰略覆蓋 move_target
     var _BUILDER_TASKS_SA: Array = [TeamData.TASK_CONSTRUCT, TeamData.TASK_BUILD,
         TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]

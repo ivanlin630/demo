@@ -310,7 +310,10 @@ func _commit_conquest_attack(state: WorldState, team: TeamData, prey_id: int) ->
 	# G3d-1/2 風險 gate：不確定 + 慎重 → 派斥候移向 prey best_estimate 位 → 親見壓謊 → 下次收斂。
 	if not BeliefSystem.confident_enough(state, team.team_id, prey_id, _caution):
 		var prey_t: TeamData = state.teams.get(prey_id)
-		var scout_pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, prey_id).get("tile_pos", prey_t.tile_pos) if prey_t else team.tile_pos
+		# F1 感知鐵律：缺 belief tile_pos → sentinel (-1,-1)（禁默認 live 真位=god-view 回潮）。
+		var scout_pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, prey_id).get("tile_pos", Vector2i(-1, -1)) if prey_t else Vector2i(-1, -1)
+		if scout_pos == Vector2i(-1, -1):
+			return false   # 無 belief 位 → 不 scout（不瞎追 live）
 		if team.current_task == TeamData.TASK_SCOUT and team.prosperity_target_id == prey_id:
 			team.move_target = scout_pos   # 追蹤刷新：prey 移動 → 朝最新 best_estimate（不重派/不 spam log）
 			return true
@@ -1281,7 +1284,10 @@ func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype:
 	if target == null:
 		return false
 	# 目標位讀 belief best_estimate（非上帝視角真位；對齊決策讀情報總則）
-	var target_pos: Vector2i = BeliefSystem.best_estimate(state, mother.team_id, target_id).get("tile_pos", target.tile_pos)
+	# F1 感知鐵律：缺 belief → sentinel (-1,-1)（禁默認 live）；無位不派 envoy。
+	var target_pos: Vector2i = BeliefSystem.best_estimate(state, mother.team_id, target_id).get("tile_pos", Vector2i(-1, -1))
+	if target_pos == Vector2i(-1, -1):
+		return false   # 無 belief 位 → 不派 envoy（不瞎追 live）
 	var dist: int = _hex_dist(mother.tile_pos, target_pos)
 	var budget: int = _founding_timeout(dist)
 	var proposal_id: String = "%d_%d_%d" % [mother.team_id, target_id, state.world.current_tick]
@@ -1365,9 +1371,15 @@ func _tick_envoy(state: WorldState, envoy: TeamData, merge_queue: Array) -> void
 		return
 	# 追蹤刷新：攔截預測（朝 target 移動方向提前，破 pursuit-lag 永 1 格差）+ best_estimate fallback。
 	# 對齊 _refresh_attack_pursuit（攻擊追擊 land combat 同機制）：可見且動→lead，靜/不可見→最後已知位。
-	var est_pos: Vector2i = BeliefSystem.best_estimate(state, envoy.team_id, target_id).get("tile_pos", target.tile_pos)
+	# F1 感知鐵律：缺 belief → sentinel (-1,-1)（禁默認 live）。無 belief 位 → 不用 (-1,-1) 當 move（保持現 move_target=pursuit-only，
+	# 下 tick timeout/recall 承接），非瞎追 live 真位。
+	var est_pos: Vector2i = BeliefSystem.best_estimate(state, envoy.team_id, target_id).get("tile_pos", Vector2i(-1, -1))
 	var predicted: Vector2i = PathSystem.predict_intercept(state, envoy, target)
-	envoy.move_target = predicted if predicted != target.tile_pos else est_pos
+	if predicted != target.tile_pos:
+		envoy.move_target = predicted   # 有攔截預測 → lead
+	elif est_pos != Vector2i(-1, -1):
+		envoy.move_target = est_pos      # 無預測但有 belief → 最後已知位
+	# else: 無預測 + 無 belief → 保持現 move_target（不設 (-1,-1)/live）
 
 # 信使歸隊：釋放 task + 朝母隊移動 → 到母格 try_merge_back（復用 merge）。母隊 pending 靠自身 timeout 清。
 func _recall_envoy(state: WorldState, envoy: TeamData) -> void:

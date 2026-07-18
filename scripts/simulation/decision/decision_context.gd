@@ -32,7 +32,6 @@ var has_manufacturing_facility: bool = false   # S1：本格有製造設施+生�
 var is_merchant: bool = false
 var has_home_outpost: bool = false
 var has_weak_prey: bool = false
-var weak_prey_pos: Vector2i = Vector2i(-1, -1)
 # capability grounding（藍圖 tag-soft-ruling 裁2）：self 有效武裝比（armed / pop）。
 # attack/loot eval 讀此→「打得動嗎」的世界事實（無牙商隊 attack eval 趨 0=送死沒人幹，非被禁）。
 # Task2 於 gather 填值（_calc_own_armed / pop）；terms.gd loot_drive/_intent_fit 疊 capability_factor。
@@ -40,15 +39,12 @@ var self_armed_ratio: float = 0.0
 # 佔村（means-end：要根據地的狼打「有據點的弱村」而非追流浪隊）：可據 stationary 弱村。
 var has_occupy_target: bool = false
 var occupy_target_id: int = -1
-var occupy_target_pos: Vector2i = Vector2i(-1, -1)
 var has_strong_neighbor: bool = false
 var strong_neighbor_id: int = -1
-var strong_neighbor_pos: Vector2i = Vector2i(-1, -1)
 var has_farmable_tile: bool = false
 var farmable_pos: Vector2i = Vector2i(-1, -1)
 var has_aid_target: bool = false
 var aid_target_id: int = -1
-var aid_target_pos: Vector2i = Vector2i(-1, -1)
 # 買糧（Phase 1）：最近市集 outpost + 是否有錢（specie）。
 var has_food_market: bool = false
 var food_market_pos: Vector2i = Vector2i(-1, -1)
@@ -73,11 +69,8 @@ var home_food: float = 0.0
 const STAKES_SET: Array = ["攻擊", "徵收", "外交"]
 var faction_stakes: Array = []
 var faction_attack_target: int = -1
-var faction_attack_target_pos: Vector2i = Vector2i(-1, -1)
 var faction_tribute_target: int = -1
-var faction_tribute_target_pos: Vector2i = Vector2i(-1, -1)
 var faction_diplo_target: int = -1
-var faction_diplo_target_pos: Vector2i = Vector2i(-1, -1)
 # diplomacy grounded look-before-leap：求和 target(threat_id)/外交 target(faction_diplo_target) 在
 # team.diplomacy_reject_cooldown 內 → 不當慾望目標（被拒不再纏 loop，鏡射 A-2 rejection-learning）。
 var pacify_target_on_cooldown: bool = false
@@ -88,7 +81,6 @@ var leader_loyalty: float = 0.5
 # intent_fit term 讀此把「意圖→子需求」reshape 戰術 option util（斷點：獨立隊 solo reshape 零）。
 var intent: String = ""
 var intent_target: int = -1
-var intent_target_pos: Vector2i = Vector2i(-1, -1)
 # 融合 threat（序1 溶入）：鏡射舊 _evaluate_threat 掃描（raw score over ALL discovered，
 # 含 approach/power 非純 hostility；≠ ctx.threat 的 reputation-filtered _max_threat）。
 # threat option（備戰/迎戰/求和）的 applicable gate + eval 讀此。
@@ -201,7 +193,6 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _fa := FactionAISystem.new()
 	var _prey: int = _fa._find_weakest_prey(state, team)
 	c.has_weak_prey = _prey != -1
-	c.weak_prey_pos = state.teams[_prey].tile_pos if c.has_weak_prey else Vector2i(-1, -1)
 	# capability grounding（裁2）：self 有效武裝比 → attack/loot「打得動嗎」世界事實。
 	# 無牙商隊 armed≈0 → ratio≈0 → loot_drive/intent_fit capability_factor 壓平（送死沒人幹，非被禁）。
 	c.self_armed_ratio = float(_fa._calc_own_armed(state, team)) / maxf(float(team.population), 1.0)
@@ -211,13 +202,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _occ: int = _fa._find_occupy_target(state, team)
 	c.has_occupy_target = _occ != -1
 	c.occupy_target_id = _occ
-	c.occupy_target_pos = state.teams[_occ].tile_pos if _occ != -1 else Vector2i(-1, -1)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.weak_prey", _tg)
 	# 名聲磁鐵 §3b：strong_neighbor 用 rep 軸選（投奔高 protector_rep 保護傘，喂-讀對齊）。
 	var _sn: int = _fa._find_strong_neighbor(state, team, "rep")
 	c.has_strong_neighbor = _sn != -1
 	c.strong_neighbor_id = _sn
-	c.strong_neighbor_pos = state.teams[_sn].tile_pos if _sn != -1 else Vector2i(-1, -1)
 	c.best_protector_rep = team.get_protector_rep(_sn) if _sn != -1 else 0.5   # 選中 host rep 供 join_drive 磁鐵
 	if Probe.enabled and _sn != -1 and absf(c.best_protector_rep - 0.5) > 0.01:
 		Probe.bump("rep.host_nonneutral")   # DIAG：磁鐵有差別（strong_neighbor protector_rep 脫 0.5）
@@ -228,7 +217,6 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _aid: int = _fa._find_aid_target(state, team)
 	c.has_aid_target = _aid != -1
 	c.aid_target_id = _aid
-	c.aid_target_pos = state.teams[_aid].tile_pos if _aid != -1 else Vector2i(-1, -1)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.aid", _tg)
 	# P3 混合協調：loyalty 注入 leader_values（weight("faction_duty") 讀，避擴 weight 簽名；
 	# `_` 前綴非人格值，既有 term match 不誤讀，leader_values 已 duplicate 不污染 PersonData）。
@@ -280,16 +268,13 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			if "攻擊" in c.faction_stakes:
 				var _at: int = _fa._nearest_independent(state, team)
 				c.faction_attack_target = _at
-				c.faction_attack_target_pos = state.teams[_at].tile_pos if _at != -1 else Vector2i(-1, -1)
 			if "徵收" in c.faction_stakes:
 				var _rt: int = _fa._richest_member(state, f)
 				if _rt == team.team_id: _rt = -1   # 不對自己徵收（_richest_member 未排自身）
 				c.faction_tribute_target = _rt
-				c.faction_tribute_target_pos = state.teams[_rt].tile_pos if _rt != -1 else Vector2i(-1, -1)
 			if "外交" in c.faction_stakes:
 				var _dt: int = _fa._nearest_independent(state, team)
 				c.faction_diplo_target = _dt
-				c.faction_diplo_target_pos = state.teams[_dt].tile_pos if _dt != -1 else Vector2i(-1, -1)
 	# diplomacy grounded look-before-leap：求和(threat_id)/外交(faction_diplo_target) target 在
 	# reject_cooldown 內 → flag（被拒不再纏；純讀自隊記憶，非 god-view）。
 	var _now: int = state.world.current_tick
@@ -306,13 +291,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		if fi != null and fi.leader_team_id == team.team_id and fi.intent is Dictionary:
 			c.intent = String(fi.intent.get("type", ""))
 			c.intent_target = int(fi.intent.get("target_id", -1))
-	# 征服意圖 target 位（faction leader 帶 target_id；獨立 fallback weak_prey）→ intent_fit 攻擊路徑用。
-	if c.intent == "征服":
-		if c.intent_target != -1 and state.teams.has(c.intent_target):
-			c.intent_target_pos = state.teams[c.intent_target].tile_pos
-		elif c.has_weak_prey:
-			c.intent_target = _prey
-			c.intent_target_pos = c.weak_prey_pos
+	# 征服意圖 target fallback（F2：死欄 intent_target_pos 已刪；保留 intent_target 賦值=真消費 by intent_fit）。
+	# 無 faction target（或 target 不存在）+ 有 weak_prey → intent_target 用 prey（intent_fit 攻擊路徑用）。
+	if c.intent == "征服" and c.has_weak_prey \
+			and (c.intent_target == -1 or not state.teams.has(c.intent_target)):
+		c.intent_target = _prey
 	# 野心階梯（序3 rung_task 溶入）：archetype/rung 成 weight context；FORCE 累積/擴張階 → 練兵 base。
 	c.archetype = team.ambition_archetype
 	c.rung = team.ambition_rung
@@ -336,7 +319,6 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		if c.intent == "征服" and c.prosperity_prey_id != -1 \
 				and (c.intent_target == -1 or c.intent_target == _prey):
 			c.intent_target = c.prosperity_prey_id
-			c.intent_target_pos = state.teams[c.prosperity_prey_id].tile_pos
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.readiness_prey", _tg)
 	# 併入/吸納 target（cadence gate 1 日共用，防每 tick O(N) finder churn）。非子隊才算。
 	c.consolidate_target_id = -1
