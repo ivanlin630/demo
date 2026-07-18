@@ -1475,6 +1475,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 	team.decision_eval_next_tick = state.world.current_tick \
 		+ (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
 	team.last_decision_tick = state.world.current_tick   # 命令 freshness 比對基準（截斷 directive_fresh 死循環）
+	_detect_survival_stall(state, team)   # ② 絕境階梯 DETECT（單一源全 5 路決策 entry 之一：latch 隊 reason=unified 在此）
 	if team.current_task in SURVIVAL_TASKS and team.current_task != TeamData.TASK_IDLE:
 		pass   # 生存 sticky 仍尊重；引擎的 survival option 會自然續（承諾）
 	var _tr: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
@@ -1552,6 +1553,7 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# 高值經濟 @50 換掉；task_arbiter self-replace 已擴認 70 同層 threat option 可換 迎戰→求和)。其餘 @50。
 		# ★絕境經濟 ① 單一源：option→priority 收 DecisionOptions.priority_for（survival 保序不看 dispatch 路）。
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "unified")
+		if _set_ok: _stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
 		if Probe.enabled and opt == "併入":   # DIAG：整併 try_set 成敗（priority-gate 擋？）
@@ -1733,6 +1735,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 	if state.world.current_tick < sub.subteam_eval_next_tick:
 		return
 	sub.subteam_eval_next_tick = state.world.current_tick + SUBTEAM_CADENCE
+	_detect_survival_stall(state, sub)   # ② 絕境階梯 DETECT（單一源全 5 路決策 entry 之一：subteam）
 	var parent: TeamData = state.teams.get(sub.parent_team_id)
 	if parent == null:
 		return
@@ -1767,6 +1770,7 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 			continue   # 投靠不可派/已寫 forced_event → 次佳（不 fallthrough 到 try_set）
 		if not TaskArbiter.try_set(state, sub, td["task"], tgt, DecisionOptions.priority_for(opt), "subteam"):   # ★① 單一源(subteam survival @80 preempt,team19 換子隊 bug 收)
 			continue
+		_stamp_survival_commit(state, sub, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		if td.has("combat_target"): state.set_combat_target(sub, int(td["combat_target"]))
 		if td.has("social_target"): state.set_social_target(sub, int(td["social_target"]))
 		_wire_threat_task(sub, td)   # 迎戰/求和 aux target（threat repertoire 保留）
@@ -1789,6 +1793,7 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 	if not TaskArbiter.try_set(state, team, TeamData.TASK_JOIN, state.teams[target_id].tile_pos, \
 			DecisionOptions.priority_for("併入"), "subteam"):   # ★① 單一源第5路(grep 抓:JOIN=併入 survival-class @80,非 @50)
 		return false
+	_stamp_survival_commit(state, team, "併入")   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 	state.set_social_target(team, target_id)
 	return true
 
@@ -1857,6 +1862,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 	team.decision_eval_next_tick = state.world.current_tick \
 		+ (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
 	team.last_decision_tick = state.world.current_tick   # 命令 freshness 比對基準
+	_detect_survival_stall(state, team)   # ② 絕境階梯 DETECT（單一源全 5 路決策 entry 之一：non-unified solo）
 
 	# 序5 dissolve：舊「FORCE 隊 cadence tick 讓給 loop3 prosperity_attack」yield 閘已刪——
 	# 征服攻擊決策溶進主 rank（攻擊 option: intent_fit 征服 × readiness/富prey），FORCE 隊直接主 rank
@@ -1896,6 +1902,7 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 		if not TaskArbiter.try_set(state, team, td["task"], tgt, DecisionOptions.priority_for(opt), "solo"):   # ★① 單一源(solo survival @80 preempt 安頓)
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # Fix2b 早退 tap
 			continue
+		_stamp_survival_commit(state, team, opt)   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）
 		# 掠奪/佔村/攻擊 設 combat_target 才交戰；投靠/乞食 設 social_target（鏡射 _decide_unified）
 		if td.has("combat_target"): state.set_combat_target(team, int(td["combat_target"]))
 		if td.has("social_target"): state.set_social_target(team, int(td["social_target"]))
@@ -3355,10 +3362,9 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	# + fallback forage/beg）。選擇全經 rank_survival → DecisionTerms weight × drive。
 	# severity 不再對選擇加 gate（食物量級由 drive 自然表達）；entry gate(_evaluate_survival)
 	# 仍用 WARNING/URGENCY 判何時進。承諾比對 current_task（non-unified 無 current_option 語意）。
-	# ② 絕境階梯失敗回饋：偵測現承諾 option 是否 stall（committed N 天無 relief）→ 硬排除換次格（rank_survival 帶單一 option 豁免）。
-	#   讀自身 food_days = 自身狀態（合憲，非 god-view）。baseline 蓋章在下方 try_set 成功站。
-	var _sctx: DecisionContext = DecisionContext.gather(state, team)
-	_update_survival_stall(state, team, _sctx)
+	# ② 絕境階梯失敗回饋：偵測現承諾 option 是否 stall → 硬排除換次格（rank_survival 帶單一 option 豁免）。
+	#   ★食 inline 算（effective_food，零 gather 零 RNG——避第二 gather 岔世界 seed42 regression）。
+	_detect_survival_stall(state, team)
 	for opt in DecisionEngine.rank_survival(state, team):
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
@@ -3378,11 +3384,7 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # 路徑維 tap：try_set no-op fail attempt
 		if _surv_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed")   # specimen tap（顯式 committed）
-			# ② 絕境階梯：蓋章真 option 字串 + baseline（換到新 option 才重蓋，同 option 續承諾則 baseline 保留累積時間）。
-			if team.survival_committed_option != opt:
-				team.survival_committed_option = opt
-				team.survival_committed_tick = state.world.current_tick
-				team.survival_committed_food = _sctx.food_days
+			_stamp_survival_commit(state, team, opt)   # ② 蓋章 committed option baseline（單一源全 5 路之一）
 			if td.has("combat_target"):
 				state.set_combat_target(team, int(td["combat_target"]))
 			if td.has("social_target"):
@@ -3410,22 +3412,42 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	TaskArbiter.release(team)
 	team.previous_task = ""
 
-# ② 絕境階梯失敗回饋：committed survival option stall 偵測。committed N 天（耐性人格 scaled）後看 relief-magnitude：
-#   足→resolving（清 stall，X 起作用留它）；不足/plateau→stall（硬排除該 option bounded window→rank_survival 換次格）。
-#   單一 option 豁免在 rank_survival（無次格→ride 窮死非 idle-churn）。只讀自身 food_days（合憲）。
-func _update_survival_stall(state: WorldState, team: TeamData, ctx: DecisionContext) -> void:
+# ② 絕境階梯：food_days inline 算（effective_food/pop×FPPD）——零 gather 零 RNG（STAMP/DETECT 共用，避第二 gather 岔世界）。
+func _survival_food_days(state: WorldState, team: TeamData) -> float:
+	var pop: int = team.population
+	if pop <= 0: return 0.0
+	return ResourceSystem.effective_food(state, team) \
+		/ maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+
+# ② 絕境階梯 STAMP（單一源全 5 路 try_set 成功站呼）：蓋章真 option 字串 + tick + food baseline。
+#   換到新 survival option 才重蓋（同 option 續承諾則 baseline 保留累積時間=stall 計時不 reset）。非 survival option 不蓋。
+func _stamp_survival_commit(state: WorldState, team: TeamData, opt: String) -> void:
+	if opt not in DecisionOptions.SURVIVAL_OPTION_SET: return
+	if team.survival_committed_option == opt: return   # 同 option 續承諾：保留 baseline 累積 stall 時間
+	team.survival_committed_option = opt
+	team.survival_committed_tick = state.world.current_tick
+	team.survival_committed_food = _survival_food_days(state, team)
+
+# ② 絕境階梯 DETECT（全 5 路決策 entry per cadence 呼）：committed survival option stall 偵測。
+#   committed N 天（耐性人格 scaled）後看 relief-magnitude：足→resolving（清 stall，X 起作用留它）；
+#   不足/plateau→stall（硬排除該 option bounded window→ applicable() 排除→argmax 換次格；rank_survival 帶單一 option 豁免）。
+#   ★食 inline（零 gather 零 RNG）。只讀自身 food_days（合憲，非 god-view）。
+func _detect_survival_stall(state: WorldState, team: TeamData) -> void:
 	if team.survival_committed_option == "":
-		return   # 未承諾 → 無可偵（待下方 try_set 蓋章）
-	var patience: float = DecisionEngine.stall_patience_factor(ctx.leader_values)
+		return   # 未承諾 → 無可偵（待 try_set 蓋章）
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var vals: Dictionary = leader.values if leader != null else {}
+	var patience: float = DecisionEngine.stall_patience_factor(vals)
 	var stall_ticks: int = int(DecisionEngine.STALL_BASE_DAYS * patience * float(WorldState.TICKS_PER_DAY))
+	var cur_food: float = _survival_food_days(state, team)
 	# recover-restarve 邊界：committed 過久（曾食足離 survival 又回）→ baseline 陳舊 → 重置視為新 episode，不誤判 STALL。
 	# （連續 latch 在 stall_ticks 就 fire 並清 committed；committed!="" 且 elapsed 遠超 stall_ticks+window = 必為 stale 再進。）
 	if state.world.current_tick - team.survival_committed_tick > stall_ticks + DecisionEngine.STALL_EXCLUDE_WINDOW:
 		team.survival_committed_tick = state.world.current_tick
-		team.survival_committed_food = ctx.food_days
+		team.survival_committed_food = cur_food
 		return
 	var verdict: int = DecisionEngine.stall_verdict(team.survival_committed_tick, team.survival_committed_food,
-		state.world.current_tick, ctx.food_days, stall_ticks, DecisionEngine.STALL_RELIEF_MIN)
+		state.world.current_tick, cur_food, stall_ticks, DecisionEngine.STALL_RELIEF_MIN)
 	match verdict:
 		DecisionEngine.STALL_RESOLVING:
 			team.survival_stall_cooldown.erase(team.survival_committed_option)   # relief expiry：清該 option cooldown
@@ -3433,7 +3455,7 @@ func _update_survival_stall(state: WorldState, team: TeamData, ctx: DecisionCont
 		DecisionEngine.STALL_STALLED:
 			team.survival_stall_cooldown[team.survival_committed_option] = \
 				state.world.current_tick + DecisionEngine.STALL_EXCLUDE_WINDOW   # 硬排除 bounded window
-			team.survival_committed_option = ""   # 清蓋章 → rank_survival 排除後選次格 → 新格重蓋
+			team.survival_committed_option = ""   # 清蓋章 → applicable() 排除後選次格 → 新格重蓋
 			if Probe.enabled: Probe.bump("survival.stall_exclude")
 		# STALL_WAITING：耐性未耗盡，保持承諾續等
 

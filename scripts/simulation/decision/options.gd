@@ -349,13 +349,18 @@ static func priority_for(opt: String) -> int:
 		return TaskArbiter.PRIO_THREAT      # threat 反應 @70(finding3 黏性)
 	return TaskArbiter.PRIO_DISPATCH
 
-static func applicable(ctx: DecisionContext) -> Array:
+static func applicable(ctx: DecisionContext, ignore_stall: bool = false) -> Array:
 	var out: Array = []
 	for opt in REGISTRY:
 		# ★caveat②：A2a 通用戰略-gate（每 entry predicate 之前統一套一次，非塞進各 entry pred）：
 		# 子隊不自主發起戰略級 option（立據/奪據/練兵＝leader/faction 決定；母團戰略令走 pre-set lifecycle task）。
 		# 非子隊 is_subteam=false → 不觸 → 行為零變。新增戰略 option 入 STRATEGIC_SELFINIT_SET 自動涵蓋。
 		if ctx.is_subteam and opt in STRATEGIC_SELFINIT_SET:
+			continue
+		# ② 絕境階梯失敗回饋單一源：stall cooldown 內的 survival option 退出候選（全 rank 路共用=unified/solo/subteam/survival）。
+		# argmax 自然選次高 base-weight applicable survival 格 → 產階梯 progression。ignore_stall=true 供 rank_survival
+		# 單一 option 豁免（排除後無次格→raw 重取 ride 窮死，非 idle-churn）。
+		if not ignore_stall and opt in SURVIVAL_OPTION_SET and opt in ctx.survival_stall_active:
 			continue
 		if REGISTRY[opt]["applicable"].call(ctx):
 			out.append(opt)

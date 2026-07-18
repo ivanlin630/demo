@@ -130,6 +130,8 @@ var resource_slack: float = 0.0  # §HOW-8：養得起更多 pop 的餘裕（統
 var absorb_yield: float = 0.0    # §HOW-8：吸 absorb_target 淨收益（產能/據點 − pop 負擔，★≠richness 貪婪值）
 var host_protector_rep: float = 0.5   # 名聲磁鐵 §3：本隊對 併入 host 的 protector_rep（道德聲望，主觀 per-observer）
 var best_protector_rep: float = 0.5   # 名聲磁鐵 §3b：rep-選中 strong_neighbor host 的 protector_rep
+# ② 絕境階梯：現在 active 的 survival stall cooldown option（applicable() 單一源排除讀此）。gather 純讀 team dict 零 RNG。
+var survival_stall_active: Array = []
 
 # 計畫層 S2 plan_phase 已退役（決策引擎重構 S2.5）→ 五層急迫度 coeff 取代；team.plan_phase
 # 純顯示欄由 §6 narrative_label 寫（S2.4），不再 derive。
@@ -400,6 +402,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	# §6 主敘事標籤：team.plan_phase 來源改接五層急迫度衍生(argmax)，非 derive_plan_phase 自算。
 	# GUI(observer_query_api/observer_inspect_panel)讀 team.plan_phase 不變，來源改接。
 	team.plan_phase = NeedHierarchy.narrative_label(team.need_urgency)
+	# ② 絕境階梯：蒐 active stall cooldown option（applicable() 排除單一源；純讀 dict 零 RNG）。
+	var _stall_now: int = state.world.current_tick
+	for _sopt in team.survival_stall_cooldown:
+		if _stall_now < int(team.survival_stall_cooldown[_sopt]):
+			c.survival_stall_active.append(_sopt)
 	return c
 
 # 視野內最高敵威脅（F-D6）：掃 discovered，取 ThreatAssessment.score 最大值。

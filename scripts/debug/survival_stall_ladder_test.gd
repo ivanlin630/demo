@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_test_stall_verdict()
 	_test_patience_factor()
 	_test_stall_exclusion()
+	_test_applicable_single_source()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -77,3 +78,21 @@ func _test_stall_exclusion() -> void:
 	# 無 cooldown → 原封
 	var r5 := DecisionEngine.apply_stall_exclusion(["掠奪", "乞食", "併入"], {}, tick)
 	_ok(r5 == ["掠奪", "乞食", "併入"], "無 cooldown → 原封：%s" % str(r5))
+
+# ── EXCLUDE 單一源在 applicable()（全 rank 路共用：unified/solo/subteam 走 rank_scored 自動排除）──
+func _test_applicable_single_source() -> void:
+	print("--- applicable() 單一源排除 stall survival option（ignore_stall 豁免旗）---")
+	# 構 ctx 讓 覓食 applicable（population≤FORAGE_VIABLE_POP + has_forage_tile）
+	var c := DecisionContext.new()
+	c.population = 5
+	c.has_forage_tile = true
+	c.leader_values = {}
+	var base := DecisionOptions.applicable(c)
+	_ok("覓食" in base, "無 stall → 覓食 applicable（前提正確）")
+	# survival_stall_active=["覓食"] → 預設排除（unified/solo rank_scored 走此，換次格）
+	c.survival_stall_active = ["覓食"]
+	var excluded := DecisionOptions.applicable(c)
+	_ok(not ("覓食" in excluded), "覓食 in stall_active → applicable() 排除（EXCLUDE 單一源）")
+	# ignore_stall=true → 豁免回全（rank_survival 單一 option ride 用）
+	var raw := DecisionOptions.applicable(c, true)
+	_ok("覓食" in raw, "ignore_stall=true → 覓食 回候選（rank_survival ride 豁免用）")

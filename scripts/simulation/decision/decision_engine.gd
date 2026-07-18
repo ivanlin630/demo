@@ -149,9 +149,11 @@ static func rank(state: WorldState, team: TeamData) -> Array:
 # 承諾慣性比對 team.current_task（non-unified 無 current_option 語意）。
 static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
-	# ② 絕境階梯：先集 applicable ∩ SURVIVAL_SET，硬排除 stall-cooldown 內 option（單一 option 豁免）→ 剩下的才打分。
+	# ② 絕境階梯：取 raw applicable ∩ SURVIVAL_SET（ignore_stall=true 繞 applicable() 排除），再 apply_stall_exclusion
+	# 帶單一 option 豁免（排除 cooldown 內；若排除後無次格→raw 全留 ride 窮死，非 idle-churn）。EXCLUDE 單一源在
+	# applicable()（unified/solo/subteam 走 rank_scored 自動排除）；此路 survival-only menu 需豁免故用 raw+helper。
 	var all_surv: Array = []
-	for opt in DecisionOptions.applicable(ctx):
+	for opt in DecisionOptions.applicable(ctx, true):
 		if opt in DecisionOptions.SURVIVAL_OPTION_SET: all_surv.append(opt)
 	var candidates: Array = apply_stall_exclusion(all_surv, team.survival_stall_cooldown, state.world.current_tick)
 	var scored: Array = []
