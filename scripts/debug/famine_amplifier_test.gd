@@ -10,6 +10,7 @@ var _fail: int = 0
 func _initialize() -> void:
 	_test_beg_famine()
 	_test_join_famine()
+	_test_camp_famine()
 	_test_no_amplify_when_fed()
 	_test_cap_no_unbounded()
 	if _fail == 0:
@@ -63,6 +64,30 @@ func _test_join_famine() -> void:
 	var highamb := DecisionTerms.eval("join_famine", _mk_ctx(0.0, {"野心": 0.9, "求生欲": 0.1}), "併入")
 	_ok(lowamb > highamb, "低野心高求生更升級併入（%.2f > %.2f）" % [lowamb, highamb])
 	_ok(DecisionTerms.eval("join_famine", _mk_ctx(0.0, vals), "乞食") == 0.0, "join_famine 只染併入（他 opt=0）")
+
+func _mk_camp_ctx(food_days: float, vals: Dictionary) -> DecisionContext:
+	var c := DecisionContext.new()
+	c.food_days = food_days
+	c.leader_values = vals
+	c.has_farmable_tile = true
+	return c
+
+func _test_camp_famine() -> void:
+	print("--- 紮營 famine-amplifier：高野心/求生欲→餓深自立紮營(不投靠)（systems 裁 A 加第三支）---")
+	var vals := {"野心": 0.9, "求生欲": 0.9}
+	var starving := DecisionTerms.eval("camp_famine", _mk_camp_ctx(0.0, vals), "紮營")
+	var hungry := DecisionTerms.eval("camp_famine", _mk_camp_ctx(2.0, vals), "紮營")
+	var fed := DecisionTerms.eval("camp_famine", _mk_camp_ctx(3.0, vals), "紮營")
+	_ok(starving > hungry and hungry > fed, "餓深→紮營升級（食0 %.2f > 食2 %.2f > 食3 %.2f）" % [starving, hungry, fed])
+	_ok(fed == 0.0, "食足 → 紮營 famine 不 amplify（=0）")
+	# 人格方向：高野心+高求生(自立) > 低野心+低求生
+	var selfreliant := DecisionTerms.eval("camp_famine", _mk_camp_ctx(0.0, {"野心": 0.9, "求生欲": 0.9}), "紮營")
+	var submissive := DecisionTerms.eval("camp_famine", _mk_camp_ctx(0.0, {"野心": 0.1, "求生欲": 0.1}), "紮營")
+	_ok(selfreliant > submissive, "高野心自立者更升級紮營（%.2f > %.2f，vs 低野心走併入）" % [selfreliant, submissive])
+	_ok(DecisionTerms.eval("camp_famine", _mk_camp_ctx(0.0, vals), "乞食") == 0.0, "camp_famine 只染紮營（他 opt=0）")
+	# 無可耕地 → 0（紮營無處紮）
+	var c_notile := _mk_camp_ctx(0.0, vals); c_notile.has_farmable_tile = false
+	_ok(DecisionTerms.eval("camp_famine", c_notile, "紮營") == 0.0, "無可耕地 → 紮營 famine=0（無處紮）")
 
 func _test_no_amplify_when_fed() -> void:
 	print("--- 覓食 baseline 不 amplify（絕境 option amplify 過它=升級）---")

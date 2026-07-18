@@ -151,7 +151,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_MERGE, "target": prey_pos, "order_target": prey},
 	},
 	"紮營": {
-		"terms": [["camp_drive", "camp"]],
+		"terms": [["camp_drive", "camp"], ["camp_famine", "famine_amp"]],   # S2 絕境階梯:高野心/求生欲餓深自立墾荒(systems 裁 A 第三支)
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_farmable_tile \
 					and not ctx.has_own_outpost,

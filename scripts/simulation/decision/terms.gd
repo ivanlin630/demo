@@ -45,11 +45,11 @@ static func food_security_target(leader_values: Dictionary) -> float:
 	return clampf(FOOD_SEC_BASE + (caution - 0.5) * FOOD_SEC_CAUTION - (ambition - 0.5) * FOOD_SEC_AMBITION,
 		FOOD_SEC_MIN, FOOD_SEC_MAX)
 const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/好戰門檻（防 over-war：溫和窮隊不搶）
-# ── S2 絕境階梯 famine-amplifier（乞食/併入；覓食=baseline 不 amplify=絕境 option 蓋過它=升級）──
+# ── S2 絕境階梯 famine-amplifier（紮營/乞食/併入 = 非暴力 clean-gap 出路；覓食=baseline 不 amplify）──
 # famine_severity = clampf((FAMINE_FLOOR − food_days)/FAMINE_FLOOR, 0, 1)（cap 禁無界，深餓 severity 飽和 @1）。
 # 買糧/覓食失敗→續餓→famine 深→對應人格絕境 option 蓋過（自然升級無 counter）。K_* = 人格 term 係數（非全域死常數）。
-# ★掠奪支未實作：與現有 _intent_fit 匱乏→搶（:237-244，hunger-scaled raid boost，SCARCITY_RAID_MIN + has_weak_prey + capability gate）
-#   重疊(amb/martial-high 隊 double-count over-war 風險) + spec 公式缺 has_weak_prey/capability guard(raid 無 prey=空轉)→ escalate systems 待裁。
+# ★連貫階梯（systems 裁 A 2026-07-18）：暴力(掠奪)由 prey 機會 gate=既有 _intent_fit 匱乏→搶（hunger-scaled + has_weak_prey/capability guard，
+#   單一源不重疊，此處不加第二路 raid famine=避 double-count over-war）；非暴力(紮營/乞食/併入)由 famine 深度驅動。兩軸不同源。
 const FAMINE_FLOOR: float = 3.0    # TEST VALUE — 絕境階梯門檻（對齊 DESPERATION_DAYS）；food_days 低於此→famine_severity>0
 const K_BEG: float = 1.0           # TEST VALUE — 乞討 famine-amplifier 量級（人格 term 係數）
 const K_JOIN: float = 1.0          # TEST VALUE — 投靠 famine-amplifier 量級
@@ -57,6 +57,9 @@ const BEG_CAUTION: float = 0.5     # 乞討 famine 慎重係數（謹慎者餓�
 const BEG_HONOR: float = 0.5       # 乞討 famine 榮譽(信義)係數（重義者不屑掠人→乞）
 const JOIN_LOWAMB: float = 0.5     # 投靠 famine (1−野心) 係數（不稱霸者餓極抱團）
 const JOIN_SURV: float = 0.5       # 投靠 famine 求生欲係數（保命本能）
+const K_CAMP: float = 1.0          # TEST VALUE — 紮營 famine-amplifier 量級（systems 裁 A 第三支）
+const CAMP_AMB: float = 0.5        # 紮營 famine 野心係數（高野心自立紮營，vs 低野心走併入 = 階梯區分軸）
+const CAMP_SURV: float = 0.5       # 紮營 famine 求生欲係數（保命本能）
 # ── 佔村（雙引擎咬合：奪據點→據點產糧養兵，複用 capture+residency）──
 const OCCUPY_DRIVE_BASE: float = 1.2    # TEST VALUE — 佔村驅力基值（× occupy weight ≈ 0.4-0.7 → util 略勝 loot，要根據地的狼優先打村）
 const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守得住+夠日後分駐 settler，對齊 _dispatch_subteam_settle pop 需求）
@@ -147,6 +150,13 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
 			# T1：剝 hunger urgency(移 coeff)。可耕地已 gate→品質 1.0。
 			return 1.0
+		"camp_famine":
+			# ★S2 絕境階梯（systems 裁 A 第三支）：紮營 famine-amplifier（高野心/求生欲→餓深自立紮營）。base camp_drive=1.0 flat；
+			#   此=WHO 餓極升級到它（高野心不投靠、自立墾荒；vs 低野心走併入 = 階梯區分軸）。personality baked in eval（weight famine_amp=1.0）。
+			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
+			return _famine_severity(ctx.food_days) \
+				* (float(ctx.leader_values.get("野心", 0.5)) * CAMP_AMB \
+					+ float(ctx.leader_values.get("求生欲", 0.5)) * CAMP_SURV) * K_CAMP
 		"beg_drive":
 			if opt != "乞食" or not ctx.has_aid_target: return 0.0
 			# T1：剝 hunger urgency(移 coeff)。低品質最後手段=低 band 定值。
