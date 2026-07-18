@@ -138,6 +138,11 @@ var consolidate_eval_next_tick: int = 0  # S-A：下次整併 target 評估 tick
 var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻
+# ② 絕境階梯失敗回饋（stall→硬排除換格）。committed=_trigger_survival 蓋章真 option 字串(分辨掠奪/佔村皆TASK_ATTACK)。
+var survival_committed_option: String = ""   # 現承諾的 survival option 字串（"" = 未承諾/待重蓋）
+var survival_committed_tick: int = 0         # 蓋章 tick（stall 計時 baseline）
+var survival_committed_food: float = 0.0     # 蓋章時 food_days baseline（relief before/after 比基準）
+var survival_stall_cooldown: Dictionary = {}  # { option字串: tick_until } stall 硬排除窗（reject_cooldown idiom）
 # 信使外交提案（權威存發起隊，對齊 active_orders pattern）。空 {} = 無在途提案。
 # {type:"alliance", target_id, target_pos, issued_tick, proposal_id, timeout, gift} — 信使帶 proposal_id ref。
 # gift = 誘因 payload 通用 {res: amount}（發起時已扣，送達轉移目標；本 slice 僅 food，聯姻/財槽未來直插）。

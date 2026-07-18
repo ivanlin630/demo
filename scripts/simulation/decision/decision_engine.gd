@@ -12,6 +12,42 @@ const SURVIVAL_BOOST_MAX: float = 2.5     # TEST VALUE — food→0 時 survival
 const THREAT_BOOST_FLOOR: float = 1.0     # TEST VALUE(S2 calibrate ↑0.6)— boost 只在真高威脅(organic:threat 碾平經濟修)
 const THREAT_BOOST_MAX: float = 0.5       # TEST VALUE(S2 calibrate ↓1.2)— <survival 2.5；organic 迎戰 over-shoot 修
 
+# ── ② 絕境階梯失敗回饋（spec 2026-07-18-desperation-ladder-failure-feedback v2）──
+# 根:SURVIVAL_BOOST 集體等量 order-preserving→最高 base-weight 格恆贏,卡格 latch(QA 7隊33+天不換序,action 從未 resolve)。
+# 修:committed option stall 偵測(relief before/after magnitude,禁瞬時)→硬排除 bounded window(reject_cooldown idiom,鏡射
+#   diplomatic_ai_system.gd:5 REJECT_COOLDOWN)→argmax 換次格產階梯。單一 option 豁免(無次格 ride 窮死非 idle-churn)。
+enum { STALL_WAITING, STALL_RESOLVING, STALL_STALLED }
+const STALL_BASE_DAYS: float = 8.0        # TEST VALUE — 耐性基準天(× patience_factor;latch 33+天前介入升級)
+const STALL_RELIEF_MIN: float = 1.0       # TEST VALUE — food_days 較 baseline 回升 ≥此 才算 resolving(非「沒更低就算解」)
+const STALL_EXCLUDE_WINDOW: int = WorldState.TICKS_PER_DAY * 20   # TEST VALUE — 硬排除窗(> STALL_DAYS max 防 A 太快回來 ping-pong)
+const STALL_PATIENCE_MIN: float = 0.5     # patience clamp 下限(急換者)
+const STALL_PATIENCE_MAX: float = 1.5     # patience clamp 上限(撐久者)
+
+# stall 判定：before/after relief-magnitude（禁瞬時比昨日；比 committed baseline）。純函式（可測）。
+static func stall_verdict(committed_tick: int, committed_food: float, cur_tick: int, cur_food: float,
+		stall_ticks: int, relief_min: float) -> int:
+	if cur_tick - committed_tick < stall_ticks:
+		return STALL_WAITING   # 未到判定窗(耐性)——不早判
+	if cur_food - committed_food >= relief_min:
+		return STALL_RESOLVING   # relief 足→X 起作用,留它(重置 stall)
+	return STALL_STALLED   # relief 不足(含 plateau 慢產/惡化)→升級換格
+
+# 耐性人格 factor：慎重↑撐久、求生欲↑急換。禁虛構 trait（person_data 無「堅忍」，只用既有 慎重/求生欲）。
+static func stall_patience_factor(leader_values: Dictionary) -> float:
+	var caution: float = float(leader_values.get("慎重", 0.5))
+	var survival: float = float(leader_values.get("求生欲", 0.5))
+	return clampf(caution + (1.0 - survival), STALL_PATIENCE_MIN, STALL_PATIENCE_MAX)
+
+# 硬排除 active-cooldown option + 單一 option 豁免：非-stalled 非空→回它(換格)；全 stall→回原(ride 窮死非清空 idle)。
+# 純函式（可測）；保序（iterate all_surv）。
+static func apply_stall_exclusion(all_surv: Array, cooldown: Dictionary, tick: int) -> Array:
+	var non_stalled: Array = []
+	for opt in all_surv:
+		if tick < int(cooldown.get(opt, 0)):
+			continue   # cooldown 內→排除
+		non_stalled.append(opt)
+	return non_stalled if non_stalled.size() > 0 else all_surv   # design-5 豁免:無次格不排除
+
 # options 依 util 降序（index tiebreak：util 相等→applicable 順序在前者勝，同 argmax strict >）。
 # 排序後帶 util 的 scored 陣列 [{u,i,opt}, ...]（降序）。rank() 只取 opt；
 # 量測探針（征服名實）要讀 util 排序根 → 走此無損 accessor（不重算 term loop）。
@@ -113,10 +149,14 @@ static func rank(state: WorldState, team: TeamData) -> Array:
 # 承諾慣性比對 team.current_task（non-unified 無 current_option 語意）。
 static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
+	# ② 絕境階梯：先集 applicable ∩ SURVIVAL_SET，硬排除 stall-cooldown 內 option（單一 option 豁免）→ 剩下的才打分。
+	var all_surv: Array = []
+	for opt in DecisionOptions.applicable(ctx):
+		if opt in DecisionOptions.SURVIVAL_OPTION_SET: all_surv.append(opt)
+	var candidates: Array = apply_stall_exclusion(all_surv, team.survival_stall_cooldown, state.world.current_tick)
 	var scored: Array = []
 	var idx: int = 0
-	for opt in DecisionOptions.applicable(ctx):
-		if opt not in DecisionOptions.SURVIVAL_OPTION_SET: continue
+	for opt in candidates:
 		var u: float = 0.0
 		for tw in DecisionOptions.terms_of(opt):
 			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)

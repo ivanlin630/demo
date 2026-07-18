@@ -3355,6 +3355,10 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	# + fallback forage/beg）。選擇全經 rank_survival → DecisionTerms weight × drive。
 	# severity 不再對選擇加 gate（食物量級由 drive 自然表達）；entry gate(_evaluate_survival)
 	# 仍用 WARNING/URGENCY 判何時進。承諾比對 current_task（non-unified 無 current_option 語意）。
+	# ② 絕境階梯失敗回饋：偵測現承諾 option 是否 stall（committed N 天無 relief）→ 硬排除換次格（rank_survival 帶單一 option 豁免）。
+	#   讀自身 food_days = 自身狀態（合憲，非 god-view）。baseline 蓋章在下方 try_set 成功站。
+	var _sctx: DecisionContext = DecisionContext.gather(state, team)
+	_update_survival_stall(state, team, _sctx)
 	for opt in DecisionEngine.rank_survival(state, team):
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tgt: Vector2i = td["target"]
@@ -3374,6 +3378,11 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "try_set_noop")   # 路徑維 tap：try_set no-op fail attempt
 		if _surv_ok:
 			SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed")   # specimen tap（顯式 committed）
+			# ② 絕境階梯：蓋章真 option 字串 + baseline（換到新 option 才重蓋，同 option 續承諾則 baseline 保留累積時間）。
+			if team.survival_committed_option != opt:
+				team.survival_committed_option = opt
+				team.survival_committed_tick = state.world.current_tick
+				team.survival_committed_food = _sctx.food_days
 			if td.has("combat_target"):
 				state.set_combat_target(team, int(td["combat_target"]))
 			if td.has("social_target"):
@@ -3400,6 +3409,33 @@ func _trigger_survival(state: WorldState, team: TeamData, severity: String) -> v
 	# 全失敗 → 釋放回 idle（避空轉 latch；solo AI 接手或 famine 收場）
 	TaskArbiter.release(team)
 	team.previous_task = ""
+
+# ② 絕境階梯失敗回饋：committed survival option stall 偵測。committed N 天（耐性人格 scaled）後看 relief-magnitude：
+#   足→resolving（清 stall，X 起作用留它）；不足/plateau→stall（硬排除該 option bounded window→rank_survival 換次格）。
+#   單一 option 豁免在 rank_survival（無次格→ride 窮死非 idle-churn）。只讀自身 food_days（合憲）。
+func _update_survival_stall(state: WorldState, team: TeamData, ctx: DecisionContext) -> void:
+	if team.survival_committed_option == "":
+		return   # 未承諾 → 無可偵（待下方 try_set 蓋章）
+	var patience: float = DecisionEngine.stall_patience_factor(ctx.leader_values)
+	var stall_ticks: int = int(DecisionEngine.STALL_BASE_DAYS * patience * float(WorldState.TICKS_PER_DAY))
+	# recover-restarve 邊界：committed 過久（曾食足離 survival 又回）→ baseline 陳舊 → 重置視為新 episode，不誤判 STALL。
+	# （連續 latch 在 stall_ticks 就 fire 並清 committed；committed!="" 且 elapsed 遠超 stall_ticks+window = 必為 stale 再進。）
+	if state.world.current_tick - team.survival_committed_tick > stall_ticks + DecisionEngine.STALL_EXCLUDE_WINDOW:
+		team.survival_committed_tick = state.world.current_tick
+		team.survival_committed_food = ctx.food_days
+		return
+	var verdict: int = DecisionEngine.stall_verdict(team.survival_committed_tick, team.survival_committed_food,
+		state.world.current_tick, ctx.food_days, stall_ticks, DecisionEngine.STALL_RELIEF_MIN)
+	match verdict:
+		DecisionEngine.STALL_RESOLVING:
+			team.survival_stall_cooldown.erase(team.survival_committed_option)   # relief expiry：清該 option cooldown
+			team.survival_committed_option = ""   # 解承諾 → 下 cadence 正常重蓋
+		DecisionEngine.STALL_STALLED:
+			team.survival_stall_cooldown[team.survival_committed_option] = \
+				state.world.current_tick + DecisionEngine.STALL_EXCLUDE_WINDOW   # 硬排除 bounded window
+			team.survival_committed_option = ""   # 清蓋章 → rank_survival 排除後選次格 → 新格重蓋
+			if Probe.enabled: Probe.bump("survival.stall_exclude")
+		# STALL_WAITING：耐性未耗盡，保持承諾續等
 
 # 找最佳狩獵格：本格+鄰格 wild_game 最多的無 outpost tile；皆無 game → (-1,-1)（掉去乞食/loot）。
 func _find_forage_tile(state: WorldState, team: TeamData) -> Vector2i:
