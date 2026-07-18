@@ -10700,6 +10700,8 @@ func _test_invite_high_commerce() -> void:
 	state.persons[101] = el; ex.leader_id = 101
 	state.teams[1] = ex
 	state.team_discovered[0] = [1]
+	# A3 感知：invite 距離 gate 讀 belief_pos（production vision 同 tick 寫 discovered+belief）。手搭 state 補 belief。
+	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick}}
 	var fai := FactionAISystem.new()
 	fai._try_dispatch_or_invite(state, owner, tile, leader)
 	assert(ex.current_task == TeamData.TASK_SETTLE, "高商業低野心應邀流亡安頓，實際=%s" % ex.current_task)
@@ -10751,6 +10753,8 @@ func _test_invite_exile_accept() -> void:
 	state.persons[101] = el; ex.leader_id = 101
 	state.teams[1] = ex
 	state.team_discovered[0] = [1]
+	# A3 感知：invite 距離 gate 讀 belief_pos（production vision 同 tick 寫 discovered+belief）。手搭 state 補 belief。
+	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick}}
 	var fai := FactionAISystem.new()
 	fai._try_invite_nearby_exile(state, owner, tile)
 	assert(ex.current_task == TeamData.TASK_SETTLE, "接受應 task=安頓")
@@ -10775,6 +10779,8 @@ func _test_invite_exile_reject_cooldown() -> void:
 	state.persons[101] = el; ex.leader_id = 101
 	state.teams[1] = ex
 	state.team_discovered[0] = [1]
+	# A3 感知：invite 距離 gate 讀 belief_pos（production vision 同 tick 寫 discovered+belief）。手搭 state 補 belief。
+	state.team_intel[0] = {1: {"population_est": 8.0, "tile_pos": ex.tile_pos, "last_tick": state.world.current_tick}}
 	var fai := FactionAISystem.new()
 	fai._try_invite_nearby_exile(state, owner, tile)
 	assert(ex.current_task != TeamData.TASK_SETTLE, "拒絕不應安頓")

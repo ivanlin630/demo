@@ -570,7 +570,7 @@ func _dispatch_subteam_settle(state: WorldState, owner: TeamData, tile: HexTileD
 		owner.team_id, subteam_id, tile.tile_pos.x, tile.tile_pos.y, settler_count])
 
 # 邀視野內流亡團安頓；個性接受 → task=安頓 + 長 cooldown，拒絕 → 7 天 cooldown
-const INVITE_RANGE: int = 5   # TEST VALUE — 邀請近距門檻（對齊 VisionSystem.VISION_RADIUS 近距；measurer 校 seed1337）
+const INVITE_RANGE: int = 8   # TEST VALUE — 邀請近距門檻（≥ max vision range=VISION_RADIUS 3+scout+terrain，涵蓋 in-vision 流亡；擋 cross-map；measurer 校 seed1337 team19）
 func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileData) -> void:
 	for tid in state.team_discovered.get(team.team_id, []):
 		var t: TeamData = state.teams.get(tid)
