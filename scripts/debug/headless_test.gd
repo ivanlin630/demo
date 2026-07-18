@@ -820,10 +820,10 @@ func _test_confidence_gate() -> void:
 	var s := WorldState.new(); s.world = WorldData.new()
 	s.team_intel = {}
 	# 親見高 cred 單源 → uncertainty≈0 → 慎重者也過
-	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 50, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # F1：belief 帶 tile_pos（鏡射 production vision/interaction/relay 皆寫位；scout guard 需位）
 	assert(BeliefSystem.confident_enough(s, 1, 2, 1.0), "親見確定→慎重者 commit")
 	# 矛盾多源 → uncertainty 高 → 慎重者按兵、莽者照衝
-	BeliefSystem.record_claim(s, 1, 2, 9, "流民", {"population_est": 200}, 0.4, true)
+	BeliefSystem.record_claim(s, 1, 2, 9, "流民", {"population_est": 200, "tile_pos": Vector2i(2, 0)}, 0.4, true)   # F1：belief 帶 tile_pos（鏡射 production relay 帶位）
 	assert(BeliefSystem.uncertainty(s, 1, 2) > 0.5, "矛盾→高 uncertainty")
 	assert(not BeliefSystem.confident_enough(s, 1, 2, 1.0), "慎重者矛盾→按兵")
 	assert(BeliefSystem.confident_enough(s, 1, 2, 0.0), "莽者→照衝")
@@ -1006,16 +1006,16 @@ func _test_faction_attack_gate() -> void:
 	# A) 慎重 leader + 矛盾多源 belief(高 uncertainty) → 主動派斥候查證(G3d-2，取代被動按兵)
 	var sa: Array = _attack_gate_scene(1.0)
 	var st_a: WorldState = sa[0]; var tm_a: TeamData = sa[1]
-	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
-	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # F1：belief 帶 tile_pos（鏡射 production vision/interaction/relay 皆寫位；scout guard 需位）
+	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200, "tile_pos": Vector2i(2, 0)}, 0.4, true)   # F1：belief 帶 tile_pos（鏡射 production relay 帶位）
 	FactionAISystem.new()._commit_conquest_attack(st_a, tm_a, 1)   # 序5：scout-verify scaffolding（prey=1）
 	assert(tm_a.prosperity_target_id == 1 and tm_a.current_task == TeamData.TASK_SCOUT,
 		"慎重者矛盾情報→派斥候查證，實際 target=%d task=%s" % [tm_a.prosperity_target_id, tm_a.current_task])
 	# B) 莽者(慎重低) 同矛盾 belief → 照衝（target 設）
 	var sb: Array = _attack_gate_scene(0.0)
 	var st_b: WorldState = sb[0]; var tm_b: TeamData = sb[1]
-	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
-	BeliefSystem.record_claim(st_b, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
+	BeliefSystem.record_claim(st_b, 0, 1, 0, "親見", {"population_est": 50, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # F1：belief 帶 tile_pos（鏡射 production vision/interaction/relay 皆寫位；scout guard 需位）
+	BeliefSystem.record_claim(st_b, 0, 1, 9, "流民", {"population_est": 200, "tile_pos": Vector2i(2, 0)}, 0.4, true)   # F1：belief 帶 tile_pos（鏡射 production relay 帶位）
 	FactionAISystem.new()._commit_conquest_attack(st_b, tm_b, 1)   # 序5：莽者→照衝（prey=1）
 	assert(tm_b.prosperity_target_id == 1 and tm_b.current_task == TeamData.TASK_ATTACK,
 		"莽者矛盾情報→照衝(誘殺)，實際 target=%d task=%s" % [tm_b.prosperity_target_id, tm_b.current_task])
@@ -1060,8 +1060,8 @@ func _test_diplomacy_hostile_gate() -> void:
 	# A) 慎重 demander + 矛盾多源 belief → 求貢按兵（拒貢冷卻不被設）
 	var sa: Array = _diplomacy_hostile_scene()
 	var st_a: WorldState = sa[0]; var dm_a: TeamData = sa[1]
-	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50}, 1.0, false)
-	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200}, 0.4, true)
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 50, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # F1：belief 帶 tile_pos（鏡射 production vision/interaction/relay 皆寫位；scout guard 需位）
+	BeliefSystem.record_claim(st_a, 0, 1, 9, "流民", {"population_est": 200, "tile_pos": Vector2i(2, 0)}, 0.4, true)   # F1：belief 帶 tile_pos（鏡射 production relay 帶位）
 	for _i in range(40): dip.try_proactive_diplomacy(st_a, dm_a)
 	assert(not dm_a.diplomacy_reject_cooldown.has(1),
 		"慎重者矛盾情報→敵對按兵(無求貢)，實際 cooldown=%s" % str(dm_a.diplomacy_reject_cooldown))
@@ -1185,7 +1185,7 @@ func _test_leak_strong_neighbor_belief() -> void:
 	team.known_reputations = { 1: 0.5, 2: 0.5, 3: 0.5 }
 	st.team_discovered[0] = [1, 2, 3]
 	BeliefSystem.record_claim(st, 0, 1, 0, "親見", {"population_est": 5}, 1.0, false)
-	BeliefSystem.record_claim(st, 0, 2, 0, "親見", {"population_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(st, 0, 2, 0, "親見", {"population_est": 50, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # F1：belief 帶 tile_pos（鏡射 production vision/interaction/relay 皆寫位；scout guard 需位）
 	var pick: int = fai._find_strong_neighbor(st, team)
 	assert(pick == 2, "belief 強者(n2)被選，真強belief弱(n1)/無情報(n3)不選，實際=%d" % pick)
 	print("leak 1b strong neighbor belief OK")
@@ -1257,7 +1257,7 @@ func _test_uncertainty_credweighted() -> void:
 	print("--- G3d-2：cred-weighted uncertainty ---")
 	# 親見單源(cred 1) → top=1, spread=0 → ~0（確定）
 	var s := WorldState.new(); s.world = WorldData.new(); s.team_intel = {}
-	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 50}, 1.0, false)
+	BeliefSystem.record_claim(s, 1, 2, 1, "親見", {"population_est": 50, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # F1：belief 帶 tile_pos（鏡射 production vision/interaction/relay 皆寫位；scout guard 需位）
 	assert(BeliefSystem.uncertainty(s, 1, 2) < 0.05, "親見確定→~0")
 	# 純 relay 單源低 cred → 高（未驗→不確定，慎重者 scout）
 	var s2 := WorldState.new(); s2.world = WorldData.new(); s2.team_intel = {}
@@ -1267,7 +1267,7 @@ func _test_uncertainty_credweighted() -> void:
 	var s4 := WorldState.new(); s4.world = WorldData.new(); s4.team_intel = {}
 	BeliefSystem.record_claim(s4, 1, 2, 9, "流民", {"population_est": 300}, 0.3, true)  # tick 0
 	s4.world.current_tick = BeliefSystem.CRED_AGE_FULL_DECAY   # 假源時效全衰 → 權重塌至 floor
-	BeliefSystem.record_claim(s4, 1, 2, 1, "親見", {"population_est": 50}, 1.0, false)  # fresh
+	BeliefSystem.record_claim(s4, 1, 2, 1, "親見", {"population_est": 50, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # F1：belief 帶 tile_pos（鏡射 production vision/interaction/relay 皆寫位；scout guard 需位）  # fresh
 	assert(BeliefSystem.uncertainty(s4, 1, 2) < 0.3, "親見壓舊假→低(收斂)")
 	# 兩新鮮高 cred 矛盾 → 高（真打架→查證）
 	var s3 := WorldState.new(); s3.world = WorldData.new(); s3.team_intel = {}
