@@ -191,7 +191,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if _best_id != -1:
 		var _ot: TeamData = state.teams.get(_best_id)
 		if _ot != null:
-			c.threat_pos = _ot.tile_pos
+			# A1 感知鐵律：threat DEFEND/求和 move target = belief last-seen（敵脫視→追 last-seen 非瞬鎖 live 真位）。
+			# 鏡射攻擊 options.gd:194 belief_pos；threat_pos 無其他消費者（只 :294/:305 move target）故全域改此源。
+			c.threat_pos = BeliefSystem.belief_pos(state, team.team_id, _best_id)
 			# S1.5：純戰力比（belief-based，god-view-free）供 S2 winnable（禁拿 threat_react 當 proxy）。
 			c.perceived_power_ratio = ThreatAssessment._power_ratio(state, team, _ot)
 	c.is_resident = FactionAISystem.is_resident_static(state, team)
@@ -367,11 +369,13 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	# §HOW-8 absorb_yield（systems 公式）：target 自養能力=產能−pop 負擔+帶地（≠richness 貪婪值）。
 	if c.absorb_target_id != -1:
 		var _tgt: TeamData = state.teams.get(c.absorb_target_id)
-		if _tgt != null:
-			var _net: float = ResourceSystem.effective_food(state, _tgt) \
-				- float(_tgt.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+		# A2 感知鐵律：yield 禁 god-view 直讀 target effective_food/population。belief schema 無 food_est → 降級：
+		# gate on has_belief（無 belief→yield 0，不 god-view）；有 belief→population_est proxy（保守，無食估→用規模；
+		# measurer 驗併入 known-target 仍 fire）。帶地 bonus 走 belief-gate 內（已見過→約略知其據點）。
+		if _tgt != null and BeliefSystem.has_belief(state, team.team_id, c.absorb_target_id):
+			var _pop_est: float = float(BeliefSystem.best_estimate(state, team.team_id, c.absorb_target_id).get("population_est", 0.0))
 			var _land: float = YIELD_LAND_BONUS if ResourceSystem.own_granary_tile(state, _tgt) != null else 0.0
-			c.absorb_yield = clampf(_net / YIELD_NORM + _land, -1.0, 1.0)
+			c.absorb_yield = clampf(_pop_est / YIELD_NORM + _land, -1.0, 1.0)
 		# DIAG §HOW-8：吸納 utility 組件分布（證 decision-到位 vs formula-always-0）
 		if Probe.enabled:
 			Probe.bump("absorb.util_n")

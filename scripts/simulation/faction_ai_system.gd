@@ -570,6 +570,7 @@ func _dispatch_subteam_settle(state: WorldState, owner: TeamData, tile: HexTileD
 		owner.team_id, subteam_id, tile.tile_pos.x, tile.tile_pos.y, settler_count])
 
 # 邀視野內流亡團安頓；個性接受 → task=安頓 + 長 cooldown，拒絕 → 7 天 cooldown
+const INVITE_RANGE: int = 5   # TEST VALUE — 邀請近距門檻（對齊 VisionSystem.VISION_RADIUS 近距；measurer 校 seed1337）
 func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileData) -> void:
 	for tid in state.team_discovered.get(team.team_id, []):
 		var t: TeamData = state.teams.get(tid)
@@ -577,6 +578,10 @@ func _try_invite_nearby_exile(state: WorldState, team: TeamData, tile: HexTileDa
 		if not ("流亡" in t.tags): continue
 		if t.current_task == TeamData.TASK_SETTLE: continue   # 已在路上，不重邀
 		if state.world.current_tick < int(team.invite_cooldown.get(tid, 0)): continue
+		# A3 感知鐵律：邀請距離 gate 用 belief last-seen 非 live（跨圖不邀；無 belief/過期→belief_pos(-1,-1)→擋）。
+		# 禁 live t.tile_pos（用 live=修 god-view 卻讀 god-view=cosmetic，belief 該拒卻照發跨圖 settle）。
+		var _bp: Vector2i = BeliefSystem.belief_pos(state, team.team_id, tid)
+		if _bp == Vector2i(-1, -1) or _hex_dist(team.tile_pos, _bp) > INVITE_RANGE: continue
 		var dipl := DiplomaticAiSystem.new()
 		var resp: String = dipl.handle_diplomacy_message(
 			state, t, team, "invite_settle")
