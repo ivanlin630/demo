@@ -21,6 +21,9 @@ const MORTAL_EFF_POP: int             = 3     # TEST VALUE：eff pop ≤此才�
 const MORTAL_FLEE_BASE: float         = 0.5   # TEST VALUE：絕境逃門檻基（怯者 flee_thr≈0.5 早逃）
 const MORTAL_COURAGE_SPREAD: float    = 0.6   # TEST VALUE：勇者 flee_thr→1.1 血戰（壓力更大才逃）
 const MORTAL_OUTNUMBER_W: float       = 0.5   # TEST VALUE：數量劣勢加碼權重（rev2 pop-based）
+# ★cause2 de-patch：飢餓認進絕境逃判（絕境階梯延進戰鬥；食足→0 不影響戰）。
+const FAMINE_FLEE_FLOOR: float        = 3.0   # TEST VALUE：food_days<此=飢餓(對齊 DESPERATION_DAYS/decision_context 絕境判)
+const FAMINE_W: float                 = 1.2   # TEST VALUE：famine 權重★food→0 時 1×此=1.2 頂過最勇 flee_thr 1.1→餓極必逃(絕境階梯保證)
 const LOOT_RATE: float                = 0.3
 const LOSER_CASUALTY_RATE: float      = 0.2   # TEST VALUE：敗方 pop 損耗比例（複用 force_occupy 量級）
 const ARMED_RATIO_FLOOR: float        = 0.1   # TEST VALUE：最低參戰比，堵 0 武裝免疫（同 encounter）
@@ -153,21 +156,29 @@ func _mortal_flee_check(state: WorldState, id_self: int, id_enemy: int) -> bool:
 	var s: TeamData = state.teams[id_self]
 	var e: TeamData = state.teams[id_enemy]
 	var eff: int = maxi(s.population - s.wounded, 0)
-	if eff > MORTAL_EFF_POP:
-		return false   # 還沒到絕境（大隊/健康）→ 續戰，走既有 readiness-abandon/殲滅三端
-	# rev2 pop-based（棄 str_ratio 反噬=pop-blind）：瀕滅度為主 + 數量劣勢加碼。
-	# criticality：eff 越近殲滅線壓力越大（eff=1→1.0/2→0.67/3→0.33）。
+	# ★cause2 de-patch：eff>3 絕對門檻只對「不餓」pre-empt（健康大隊續戰）；飢餓隊即使 eff>3 進絕境逃判
+	# （eff≤3 絕對閘 pre-empt 膽量秤 for 飢餓=補丁閘，撕除→絕境階梯延進戰鬥）。food_days 公式對齊絕境判。
+	var food_days: float = ResourceSystem.effective_food(state, s) \
+		/ maxf(float(s.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var starving: bool = food_days < FAMINE_FLEE_FLOOR
+	if eff > MORTAL_EFF_POP and not starving:
+		return false   # 健康且不餓 → 續戰，走既有 readiness-abandon/殲滅三端
+	# rev2 pop-based（棄 str_ratio 反噬=pop-blind）：瀕滅度為主 + 數量劣勢加碼 + 飢餓壓力。
+	# criticality：eff 越近殲滅線壓力越大（eff=1→1.0/2→0.67/3→0.33；eff>3→0）。
 	var criticality: float = _pop_criticality(s)
 	# outnumber：被以多打少更該逃（敵/我 eff 比 -1，clamp）。
 	var eff_enemy: int = maxi(e.population - e.wounded, 1)
 	var outnumber: float = clampf(float(eff_enemy) / float(maxi(eff, 1)) - 1.0, 0.0, 1.0)
-	var mortal_pressure: float = clampf(criticality + outnumber * MORTAL_OUTNUMBER_W, 0.0, 1.5)
+	# ★famine_pressure：餓越極壓力越大（膽量秤:餓+怯早逃/餓+勇撐；food→0 時 ×FAMINE_W 頂過最勇 flee_thr）。
+	var famine_pressure: float = clampf((FAMINE_FLEE_FLOOR - food_days) / FAMINE_FLEE_FLOOR, 0.0, 1.0) if starving else 0.0
+	var mortal_pressure: float = clampf(criticality + outnumber * MORTAL_OUTNUMBER_W + famine_pressure * FAMINE_W, 0.0, 1.5)
 	var flee_thr: float = MORTAL_FLEE_BASE + _courage_of(state, s) * MORTAL_COURAGE_SPREAD
 	if mortal_pressure >= flee_thr:
 		if Probe.enabled:
 			# 分開標籤（drain 前 readiness，別混 readiness_abandon 池）
 			Probe.add_amount("mortal_flee.readiness_sum", s.readiness)
 			Probe.bump("mortal_flee.n")
+			if starving: Probe.bump("mortal_flee.famine")   # cause2：飢餓觸發的絕境逃(measurer 分 famine vs combat flee)
 			# 照妖鏡#1 啟動證：絕境逃 courage 桶（怯者早逃桶多、勇者血戰桶少）
 			var c: float = _courage_of(state, s)
 			Probe.bump("mortal_flee.n_" + ("high" if c > 0.66 else ("low" if c < 0.34 else "mid")))
