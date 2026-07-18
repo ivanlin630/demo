@@ -169,8 +169,9 @@ static func _team_speed_mult(team: TeamData) -> float:
 
 # trusted=true：caller 已保證 target 在 observer 的 team_discovered（finder 迴圈迭代同一 array）
 # → 跳 O(n) Array.has（O(n²) fan-out 根之一）。回傳值恆等（檢查恆真）、randf 流不動。
-# ★god-view landmine（勿復活作決策/nearby-scan：讀 live target.tile_pos，非 belief last-seen。復活前須 belief-gate，
-#   見 invariants.md 感知鐵律 nearby-scan landmine）。零 production caller（test-only + founding_path_measure.gd:31）。
+# ★live god-view leak（11 production caller：finder 族 + envoy tracking + threat_assessment；Slice D 待修）：
+# 讀 live target.tile_pos = god-view（斷視線仍瞬鎖真位）。非死碼（前註「零 caller」是 systems grep glob-bug 誤，已訂正）。
+# belief-gate（Slice D：caller 傳 belief 位 or last_tick 新鮮 gate，鏡射 _refresh_attack_pursuit:269-291）前勿加新 caller。
 static func observe_velocity(state: WorldState, observer: TeamData, target: TeamData,
 		trusted: bool = false) -> Dictionary:
 	if not trusted and not state.team_discovered.get(observer.team_id, []).has(target.team_id):
@@ -195,8 +196,9 @@ static func observe_velocity(state: WorldState, observer: TeamData, target: Team
 
 # ────────── catch-up ──────────
 
-# ★god-view landmine（勿復活作決策/nearby-scan：讀 live target.tile_pos，非 belief last-seen。復活前須 belief-gate，
-#   見 invariants.md 感知鐵律 nearby-scan landmine）。零 production caller（test-only）。
+# ★live god-view leak（11 production caller：finder 族 + envoy tracking + threat_assessment；Slice D 待修）：
+# 讀 live target.tile_pos = god-view（斷視線仍瞬鎖真位）。非死碼（前註「零 caller」是 systems grep glob-bug 誤，已訂正）。
+# belief-gate（Slice D：caller 傳 belief 位 or last_tick 新鮮 gate，鏡射 _refresh_attack_pursuit:269-291）前勿加新 caller。
 static func estimate_catch_up(state: WorldState, self_team: TeamData, target_id: int,
 		trusted: bool = false) -> Dictionary:
 	if not trusted and not state.team_discovered.get(self_team.team_id, []).has(target_id):
@@ -233,8 +235,9 @@ static func _is_moving_away_observed(self_team: TeamData, target_team: TeamData,
 
 # 依觀察到的速度自適應 N 步預測 target 未來位置。N = 到 target 的路徑成本（越遠預測越多步）。
 # 視野外 / 不動 / 預測落在地圖外 → fallback 回 target 當前位置。
-# ★god-view landmine（勿復活作決策/nearby-scan：讀 live target.tile_pos，非 belief last-seen。復活前須 belief-gate，
-#   見 invariants.md 感知鐵律 nearby-scan landmine）。零 production caller（test-only）。
+# ★live god-view leak（11 production caller：finder 族 + envoy tracking + threat_assessment；Slice D 待修）：
+# 讀 live target.tile_pos = god-view（斷視線仍瞬鎖真位）。非死碼（前註「零 caller」是 systems grep glob-bug 誤，已訂正）。
+# belief-gate（Slice D：caller 傳 belief 位 or last_tick 新鮮 gate，鏡射 _refresh_attack_pursuit:269-291）前勿加新 caller。
 static func predict_intercept(state: WorldState, attacker: TeamData,
 		target: TeamData) -> Vector2i:
 	var obs: Dictionary = observe_velocity(state, attacker, target)
