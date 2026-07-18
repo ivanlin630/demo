@@ -349,21 +349,30 @@ static func priority_for(opt: String) -> int:
 		return TaskArbiter.PRIO_THREAT      # threat 反應 @70(finding3 黏性)
 	return TaskArbiter.PRIO_DISPATCH
 
-static func applicable(ctx: DecisionContext, ignore_stall: bool = false) -> Array:
+static func applicable(ctx: DecisionContext) -> Array:
 	var out: Array = []
+	var stalled_excluded: Array = []   # ② 因 stall 排除的 raw-applicable survival option（design-5 單一 option 豁免候選）
+	var has_survival: bool = false     # ② 排除後仍有 applicable survival option？（無→觸發豁免）
 	for opt in REGISTRY:
 		# ★caveat②：A2a 通用戰略-gate（每 entry predicate 之前統一套一次，非塞進各 entry pred）：
 		# 子隊不自主發起戰略級 option（立據/奪據/練兵＝leader/faction 決定；母團戰略令走 pre-set lifecycle task）。
 		# 非子隊 is_subteam=false → 不觸 → 行為零變。新增戰略 option 入 STRATEGIC_SELFINIT_SET 自動涵蓋。
 		if ctx.is_subteam and opt in STRATEGIC_SELFINIT_SET:
 			continue
-		# ② 絕境階梯失敗回饋單一源：stall cooldown 內的 survival option 退出候選（全 rank 路共用=unified/solo/subteam/survival）。
-		# argmax 自然選次高 base-weight applicable survival 格 → 產階梯 progression。ignore_stall=true 供 rank_survival
-		# 單一 option 豁免（排除後無次格→raw 重取 ride 窮死，非 idle-churn）。
-		if not ignore_stall and opt in SURVIVAL_OPTION_SET and opt in ctx.survival_stall_active:
+		var _is_surv: bool = opt in SURVIVAL_OPTION_SET
+		# ② 絕境階梯失敗回饋單一源：stall cooldown 內的 survival option 暫退候選（全 rank 路共用=unified/solo/subteam/survival）。
+		# argmax 自然選次高 base-weight applicable survival 格 → 產階梯 progression。被排除者記入 stalled_excluded 供豁免。
+		if _is_surv and opt in ctx.survival_stall_active:
+			if REGISTRY[opt]["applicable"].call(ctx):
+				stalled_excluded.append(opt)
 			continue
 		if REGISTRY[opt]["applicable"].call(ctx):
 			out.append(opt)
+			if _is_surv: has_survival = true
+	# ② design-5 單一 option 豁免（★單一源，全 rank 路共用：solo/unified/subteam/survival 皆走此 applicable）：
+	# stall 排除後若無任何 applicable survival option → ride 被排除者（唯一 survival 生路，非 idle-starve/窮死出路）。
+	if not has_survival and stalled_excluded.size() > 0:   # gate-ok: ② design-5 單一 option 豁免（引擎絕境生路 ride 窮死，非 patch override/機械 pre-empt）
+		out.append_array(stalled_excluded)
 	return out
 
 static func terms_of(opt: String) -> Array:

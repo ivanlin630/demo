@@ -38,15 +38,8 @@ static func stall_patience_factor(leader_values: Dictionary) -> float:
 	var survival: float = float(leader_values.get("求生欲", 0.5))
 	return clampf(caution + (1.0 - survival), STALL_PATIENCE_MIN, STALL_PATIENCE_MAX)
 
-# 硬排除 active-cooldown option + 單一 option 豁免：非-stalled 非空→回它(換格)；全 stall→回原(ride 窮死非清空 idle)。
-# 純函式（可測）；保序（iterate all_surv）。
-static func apply_stall_exclusion(all_surv: Array, cooldown: Dictionary, tick: int) -> Array:
-	var non_stalled: Array = []
-	for opt in all_surv:
-		if tick < int(cooldown.get(opt, 0)):
-			continue   # cooldown 內→排除
-		non_stalled.append(opt)
-	return non_stalled if non_stalled.size() > 0 else all_surv   # design-5 豁免:無次格不排除
+# ② EXCLUDE + design-5 單一 option 豁免收進 DecisionOptions.applicable()（單一源，全 rank 路共用）——
+# 舊 apply_stall_exclusion（rank_survival-only 半路豁免）已退役，避「機制部分路非全路」。
 
 # options 依 util 降序（index tiebreak：util 相等→applicable 順序在前者勝，同 argmax strict >）。
 # 排序後帶 util 的 scored 陣列 [{u,i,opt}, ...]（降序）。rank() 只取 opt；
@@ -149,13 +142,10 @@ static func rank(state: WorldState, team: TeamData) -> Array:
 # 承諾慣性比對 team.current_task（non-unified 無 current_option 語意）。
 static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
-	# ② 絕境階梯：取 raw applicable ∩ SURVIVAL_SET（ignore_stall=true 繞 applicable() 排除），再 apply_stall_exclusion
-	# 帶單一 option 豁免（排除 cooldown 內；若排除後無次格→raw 全留 ride 窮死，非 idle-churn）。EXCLUDE 單一源在
-	# applicable()（unified/solo/subteam 走 rank_scored 自動排除）；此路 survival-only menu 需豁免故用 raw+helper。
-	var all_surv: Array = []
-	for opt in DecisionOptions.applicable(ctx, true):
-		if opt in DecisionOptions.SURVIVAL_OPTION_SET: all_surv.append(opt)
-	var candidates: Array = apply_stall_exclusion(all_surv, team.survival_stall_cooldown, state.world.current_tick)
+	# ② 絕境階梯：applicable() 已收單一源 stall 排除 + 單一 option 豁免（全 rank 路共用）→ 此處直取 survival 子集。
+	var candidates: Array = []
+	for opt in DecisionOptions.applicable(ctx):
+		if opt in DecisionOptions.SURVIVAL_OPTION_SET: candidates.append(opt)
 	var scored: Array = []
 	var idx: int = 0
 	for opt in candidates:
