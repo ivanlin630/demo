@@ -116,7 +116,7 @@ static var REGISTRY: Dictionary = {
 	# S-A §HOW-6：統一「併入」（join+整併合一，取代兩 row）。絕境求生 food-scaled；weight=求生欲/(1-野心)
 	# （§HOW-6 定，非 join weight——join weight×low_ambition 使 併入 rank 過低不勝 survival first=0 regression）。
 	"併入": {
-		"terms": [["join_drive", "mergein"]],
+		"terms": [["join_drive", "mergein"], ["join_famine", "famine_amp"]],   # S2 絕境階梯:低野心/高求生欲餓深升級
 		# §HOW-8 ungate + §3b：絕境 OR 威脅認慫。host = rep 保護傘(strong_neighbor,跨faction) 或 consolidate_target(同faction)。
 		# Fix A-2 v2：+ has_acceptable_join_host（可達且未近期被拒的 host）→ 不追必被拒的併入幻覺 loop。
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -161,7 +161,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_CAMP, "target": ft},
 	},
 	"乞食": {
-		"terms": [["beg_drive", "beg"]],
+		"terms": [["beg_drive", "beg"], ["beg_famine", "famine_amp"]],   # S2 絕境階梯:慎重/榮譽餓深升級
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_aid_target,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:

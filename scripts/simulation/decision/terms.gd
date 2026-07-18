@@ -45,6 +45,18 @@ static func food_security_target(leader_values: Dictionary) -> float:
 	return clampf(FOOD_SEC_BASE + (caution - 0.5) * FOOD_SEC_CAUTION - (ambition - 0.5) * FOOD_SEC_AMBITION,
 		FOOD_SEC_MIN, FOOD_SEC_MAX)
 const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/好戰門檻（防 over-war：溫和窮隊不搶）
+# ── S2 絕境階梯 famine-amplifier（乞食/併入；覓食=baseline 不 amplify=絕境 option 蓋過它=升級）──
+# famine_severity = clampf((FAMINE_FLOOR − food_days)/FAMINE_FLOOR, 0, 1)（cap 禁無界，深餓 severity 飽和 @1）。
+# 買糧/覓食失敗→續餓→famine 深→對應人格絕境 option 蓋過（自然升級無 counter）。K_* = 人格 term 係數（非全域死常數）。
+# ★掠奪支未實作：與現有 _intent_fit 匱乏→搶（:237-244，hunger-scaled raid boost，SCARCITY_RAID_MIN + has_weak_prey + capability gate）
+#   重疊(amb/martial-high 隊 double-count over-war 風險) + spec 公式缺 has_weak_prey/capability guard(raid 無 prey=空轉)→ escalate systems 待裁。
+const FAMINE_FLOOR: float = 3.0    # TEST VALUE — 絕境階梯門檻（對齊 DESPERATION_DAYS）；food_days 低於此→famine_severity>0
+const K_BEG: float = 1.0           # TEST VALUE — 乞討 famine-amplifier 量級（人格 term 係數）
+const K_JOIN: float = 1.0          # TEST VALUE — 投靠 famine-amplifier 量級
+const BEG_CAUTION: float = 0.5     # 乞討 famine 慎重係數（謹慎者餓極乞食非搶）
+const BEG_HONOR: float = 0.5       # 乞討 famine 榮譽(信義)係數（重義者不屑掠人→乞）
+const JOIN_LOWAMB: float = 0.5     # 投靠 famine (1−野心) 係數（不稱霸者餓極抱團）
+const JOIN_SURV: float = 0.5       # 投靠 famine 求生欲係數（保命本能）
 # ── 佔村（雙引擎咬合：奪據點→據點產糧養兵，複用 capture+residency）──
 const OCCUPY_DRIVE_BASE: float = 1.2    # TEST VALUE — 佔村驅力基值（× occupy weight ≈ 0.4-0.7 → util 略勝 loot，要根據地的狼優先打村）
 const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守得住+夠日後分駐 settler，對齊 _dispatch_subteam_settle pop 需求）
@@ -69,6 +81,10 @@ const PANIC_WEIGHT: float = 0.5   # TEST VALUE / B 債
 # faction_duty weight 與 attack_drive drive 共用 = 叛離者既無 duty 亦無個人參戰驅力（「這不是我的仗」）。
 static func _duty_factor(loy: float, amb: float) -> float:
 	return clampf(loy - maxf(0.0, amb - 0.5) * DEFECT_AMBITION_K, 0.0, 1.0)
+
+# S2 絕境階梯：飢荒嚴重度 [0,1]（food_days ≥ FAMINE_FLOOR → 0 不 amplify；深餓 capped @1 禁無界）。
+static func _famine_severity(food_days: float) -> float:
+	return clampf((FAMINE_FLOOR - food_days) / FAMINE_FLOOR, 0.0, 1.0)
 
 # 統一決策引擎：term 函式庫 + w_term 人格映射。
 # eval：驅力強度（0..~1.5），term × opt 對應；不適用 opt 回 0。
@@ -135,6 +151,20 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			if opt != "乞食" or not ctx.has_aid_target: return 0.0
 			# T1：剝 hunger urgency(移 coeff)。低品質最後手段=低 band 定值。
 			return BEG_FLOOR_FACTOR
+		"beg_famine":
+			# ★S2 絕境階梯：乞討 famine-amplifier（慎重/榮譽人格→餓深升級乞食）。base beg_drive=求生欲 floor(誰都可乞)；
+			#   此=WHO 餓極升級到它（謹慎/重義者不屑搶→乞）。personality baked in eval（weight famine_amp=1.0）。
+			if opt != "乞食" or not ctx.has_aid_target: return 0.0
+			return _famine_severity(ctx.food_days) \
+				* (float(ctx.leader_values.get("慎重", 0.5)) * BEG_CAUTION \
+					+ float(ctx.leader_values.get("信義", 0.5)) * BEG_HONOR) * K_BEG
+		"join_famine":
+			# ★S2 絕境階梯：投靠 famine-amplifier（低野心/高求生欲→餓深升級投靠）。base join_drive=名聲磁鐵品質；
+			#   此=WHO 餓極升級到它（不稱霸+保命者抱團）。personality baked in eval（weight famine_amp=1.0）。
+			if opt != "併入": return 0.0
+			return _famine_severity(ctx.food_days) \
+				* ((1.0 - float(ctx.leader_values.get("野心", 0.5))) * JOIN_LOWAMB \
+					+ float(ctx.leader_values.get("求生欲", 0.5)) * JOIN_SURV) * K_JOIN
 		"buyfood_drive":
 			# T1：剝 hunger urgency(移 coeff)，只留旅費折扣品質（近市集勝遠市集）。
 			if opt != "買糧" or not ctx.has_food_market or not ctx.has_specie: return 0.0
@@ -286,6 +316,7 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
+		"famine_amp":        return 1.0   # S2 絕境階梯:人格已 baked in eval(慎重/榮譽/低野心/求生欲),故 weight=1.0(同 intent_fit/threat)
 		# §HOW-6 併入 weight：求生欲主 + 低野心（餓+不稱霸傾向抱團；好感在 resolver 分流秤，非此）。
 		"mergein":           return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4
 		# §HOW-8 吸納 weight：野心 + 仁慈(1-殘忍)/信義（殘忍者寧屠不吸；仁慈者傾納弱）。
