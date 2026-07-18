@@ -1550,7 +1550,13 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		if _conq: _probe_conq_winner(opt, ranked)   # winner 分類 + util 排序根
 		# ★threat-oracle S3：threat 反應(備戰/迎戰/求和)commit @PRIO_THREAT 70(finding3 黏性——收斂後不被
 		# 高值經濟 @50 換掉；task_arbiter self-replace 已擴認 70 同層 threat option 可換 迎戰→求和)。其餘 @50。
-		var _prio: int = TaskArbiter.PRIO_THREAT if opt in ["備戰", "迎戰", "求和"] else TaskArbiter.PRIO_DISPATCH
+		# ★survival PRIO fix（S3 regression）：restore 80>70>50 階層。survival-class(絕境求生+FLEE)@PRIO_SURVIVAL
+		# 80→瀕死隊 survival preempt threat @70(no_forage 死→FLEE 死=自限 starvation);threat 反應 @70;其餘 @50。
+		var _prio: int = TaskArbiter.PRIO_DISPATCH
+		if opt in DecisionOptions.SURVIVAL_OPTION_SET or opt == "survival":
+			_prio = TaskArbiter.PRIO_SURVIVAL
+		elif opt in ["備戰", "迎戰", "求和"]:
+			_prio = TaskArbiter.PRIO_THREAT
 		var _set_ok: bool = TaskArbiter.try_set(state, team, td["task"], tgt, _prio, "unified")
 		SpecimenTracer.capture_decision(state, team, opt, td["task"], tgt, "committed" if _set_ok else "try_set_noop")   # Fix2a：挪 try_set 後帶真 result（修虛高 committed）
 		if _set_ok and td["task"] == TeamData.TASK_FLEE: team.flee_from_pos = _flee_threat_pos(state, team)   # flee 位移根治：設逃離位
