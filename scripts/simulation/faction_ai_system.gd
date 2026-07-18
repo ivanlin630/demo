@@ -77,6 +77,9 @@ const ACTIONS: Dictionary = {
 		"affordances": [{"goal": "補力", "mode": "ally"}]},
 }
 const SURVIVAL_TASKS: Array = [TeamData.TASK_RETURN_HOME, TeamData.TASK_BEG, TeamData.TASK_JOIN, TeamData.TASK_FORAGE, TeamData.TASK_CAMP]
+# crisis-override（跨線危機安全網，泛化 ②）：committed 任何 task 深餓未緩 → force re-rank。
+const CRISIS_FLOOR: float = 1.5   # TEST VALUE — 深餓門檻（★decouple SURVIVAL_BOOST_FLOOR 2.0，略深；避 boost tuning 誤動 crisis）
+const CRISIS_DAYS: float = 6.0    # TEST VALUE — committed 未緩 N 天才 crisis（給 task 工作時間，非急打斷）
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
 # P2b-1：LOOT_GATE/JOIN_GATE/CAMP_GATE + _loot_pref/_join_pref/_camp_pref 已刪
 # （survival 選擇統一委派 DecisionEngine.rank_survival → DecisionTerms weight，消雙 owner）
@@ -372,6 +375,14 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 		# 起義（流亡路徑）是瞬時事件，結算已完成 → 釋放回常規 AI
 		#（若有追兵，下次 cadence threat 評估會派逃跑）
 		TaskArbiter.release(team)
+		return
+	# ★crisis-override（OUTCOME-based 安全網，泛化 ②）：committed 任何 task 深餓未緩 → release → 下 cadence
+	#   re-rank → survival @80 preempt 卡住 task。放 FLEE/preempt gate 前=涵蓋 5 種 stuck-task（FLEE/建設/外交/
+	#   等待新領主/併入-pending）。不特判 flee（survival 主宰 by engine THREAT<SURVIVAL 不變量；valid-flee 罕見角 deferred Arc5）。
+	if _famine_crisis(state, team):
+		TaskArbiter.release(team)
+		team.previous_task = ""
+		if Probe.enabled: Probe.bump("crisis.override_release")
 		return
 	if team.current_task in [TeamData.TASK_DEFEND, TeamData.TASK_PREPARE, TeamData.TASK_FLEE, TeamData.TASK_HOLD]:
 		# 威脅消失 → 釋放；或逃跑逾時（小地圖逃不到 5 格脫離 → 靠 timeout 重評，否則永逃）
@@ -3435,6 +3446,25 @@ func _survival_food_days(state: WorldState, team: TeamData) -> float:
 	if pop <= 0: return 0.0
 	return ResourceSystem.effective_food(state, team) \
 		/ maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+
+# crisis-override（OUTCOME-based 安全網，泛化 ② 到任何 committed task）：深餓（food<CRISIS_FLOOR）+ committed N 天未緩
+# （food 沒回升 ≥RELIEF_MIN）→ true → caller release → 下 cadence re-rank → survival @80 preempt 卡住 task。
+# baseline lazy 蓋（crisis_committed_tick != task_start_tick=新 task episode → 重蓋）；task 變自動重置=進度隊（② 換格/
+# 正常完工）task_start_tick 變 → 計時歸零 → 不誤 fire。只讀自身 food_days（合憲，非 god-view）；零 RNG。
+func _famine_crisis(state: WorldState, team: TeamData) -> bool:
+	if team.current_task == TeamData.TASK_IDLE:
+		return false   # 無 committed task → 自然 re-rank，無可 release
+	var cur_food: float = _survival_food_days(state, team)
+	# lazy baseline：新 task episode（task_start_tick 變）→ 重蓋，本 tick 不判（還沒累積 committed 時間）。
+	if team.crisis_committed_tick != team.task_start_tick:
+		team.crisis_committed_tick = team.task_start_tick
+		team.crisis_committed_food = cur_food
+		return false
+	if cur_food >= CRISIS_FLOOR:
+		return false   # 非深餓（淺餓由 SURVIVAL_BOOST/② 承接）
+	if state.world.current_tick - team.task_start_tick < int(CRISIS_DAYS * float(WorldState.TICKS_PER_DAY)):
+		return false   # committed 未到 N 天（給 task 工作時間，非急打斷 build 快完成）
+	return cur_food - team.crisis_committed_food < DecisionEngine.STALL_RELIEF_MIN   # 未緩（reuse ② relief）→ crisis
 
 # ② 絕境階梯 STAMP（單一源全 5 路 try_set 成功站呼）：蓋章真 option 字串 + tick + food baseline。
 #   換到新 survival option 才重蓋（同 option 續承諾則 baseline 保留累積時間=stall 計時不 reset）。非 survival option 不蓋。
