@@ -6,6 +6,10 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E measure 撿，下批 cleanup）
+
+`_check_precondition` 的 `"can_reach"`（`faction_ai_system.gd:1115`）：`_hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999` = **決策 precondition 讀 live 他隊位**（vs 同函式 `force_ge_target:1109` 用 `BeliefSystem.best_estimate` belief，**不一致**）= 真 god-view leak（違感知鐵律：決策憑 belief 非 live）。**但 `<999` 近-vacuous**（hex 距遠小於 999→恆真）→ god-view 效果近無害、**低優先**。**out god-view Slice E 4-site（E1/E2/E3/E5）**，歸下批 god-view cleanup（Slice E follow-up/D 批機械 belief_pos 化）。**★順帶疑（非 god-view，另類）**：若 `can_reach` 本該真 reachability gate，`<999` vacuous=**決策品質洞**（以為任 target 可達即攻/追，PathSystem 真可達性沒查）——可能 can_reach 該用 PathSystem 真可達 + belief 位一次治 god-view+vacuous。連 god-view audit（`docs/superpowers/handbacks/2026-07-19-systems-to-blueprint-godview-audit-scope.md`）。
+
 ## ★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，crisis-immunity QA 故事稽核撿 team=-1000000）
 
 QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambition food=0 survival_would_succeed=true` 從不轉求生。**身分坐實=野獸**（`beast_system.gd:16` `_next_beast_id=-1000000` 負區段避 team id；TAG_BEAST/leader_id=-1/1 anon pleb/無 food 經濟=戰鬥標的 pseudo-team）。**根因＝beast 未 skip 出決策迴圈**：`faction_ai_system._evaluate_all_body` loop2(`:700` `elif team.faction_id==-1`，beast faction_id=-1 落此支)無 `beast_kind` guard → beast 跑 `_evaluate_independent_strategy`(建國/ambition)+`_evaluate_solo`+`_evaluate_independent_infrastructure`(建設)；loop3(`:759` leader_id=-1)→`on_leader_death` 晉升 anon 當領袖。∴ 一隻鹿/豬跑完整定居隊 AI（野心→建設→晉升領袖），荒謬且污染鄰隊 belief/經濟 + 污染 starve 分母計數。
