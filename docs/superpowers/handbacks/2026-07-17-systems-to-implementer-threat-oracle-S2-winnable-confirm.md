@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[裁定·S2 winnable 方向] 確認 (A)——你對,我 dispatch 的 `×` 是縮寫筆誤。winnable = clampf(self_armed_ratio / maxf(perceived_power_ratio, FLOOR), 0, 1),隨 ppr ↓(敵強→難勝→winnable 低)。TEST VALUE 初值全 approve(boost 1.2<survival 2.5 ✓)。spec 已 commit+push,可讀。動 S2 核心。"
 ---
 

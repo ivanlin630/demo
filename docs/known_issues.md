@@ -6,6 +6,14 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ② stall 對併入-rejection loop 不 fire（retry 不 re-stamp，2026-07-19，crisis-override R² 抓，crisis 已覆）
+
+② `_detect_survival_stall` 判 `survival_committed_option` + relief（`_stamp_survival_commit` **只在 try_set 成功時 re-stamp baseline**）。**併入被 host 拒→retry loop** 不成功 try_set → 不 re-stamp → ② stall 不 fire（team 卡 pending-join 食不回升餓死）。**crisis-override（2026-07-19）已涵蓋**（OUTCOME=famine 未緩，不管 dispatch 成敗）→ 非急。**② 那 gap（retry 該不該 re-stamp baseline）**留 backlog：realistic 應維持首次 baseline（仍卡=stall 累積）而非每 retry 重置窗。crisis 覆後低優先。連 [[project_desperation_economy]]。
+
+## task-priority-preempt 缺口（team48 型，2026-07-18，QA ② ladder 稽核順帶抓，與 ② 無關）
+
+QA 讀 seed4201 specimen 時抓：**team48 死於另一個既有 task-priority-preempt 缺口**（survival 該 preempt 的 task 沒 preempt 到），**與 desperation-ladder ② branch 無關**（非 ② 引入，pre-existing）。① priority 單一源收了 5 dispatch 路的 survival 保序，但 team48 這型疑另一 preempt 路徑漏（待 code-locate）。**獨立票**：不擋 ②。修前先 grep locate team48 走哪條 dispatch + 為何 survival 沒 preempt（別假設=本 session 反覆 state-錯教訓）。連 [[project_desperation_economy]] ① single-source。
+
 ## ★乞食死 rung——引擎幾乎不選乞食（2026-07-15，desperation QA 複判抓，絕境階梯斷階）
 
 desperation 複判 6 specimen **全程從沒選過乞食**、log 無 beg print → 不是「幻覺」（never-selected 不守幻覺），是**引擎幾乎不選它**。該乞食的謙卑窮隊從不乞食＝絕境階梯一個死 rung。**非 desperation A 刀 blocker**（A=不選幻覺；乞食沒被選無 A 問題）。**★根因坐實（2026-07-15 code-read，非 util 是 applicability 門檻太嚴）**：`_find_aid_target`（`faction_ai_system.gd:3448`）要求 belief 有 **`food_est` 具體糧估** + 信它有餘糧（`food_est > pop×14`）——這種私有針對性情報通常只在**先前交易過/派人打探過**該隊才形成。剛絕境的隊大機率對鄰居無此具體 belief → `has_aid_target` 常年 false → 乞食**連候選都進不去**（與 util 無關）。對比買糧只需「聽過市集廣播賣單」（公開）寬鬆得多。**乞食非幻覺**（`_resolve_aid_request` mercy floor 有完成路，code 雙證）。**★blueprint WHAT 裁定（2026-07-15）＝盲乞食**：乞討本質＝對**可見鄰居的絕望懇求**（非對已知富 patron 的針對性精算）→ 放寬門檻：絕境隊對可見鄰居**盲試乞食**（不需 `food_est`，`has_belief`/視野內有隊即可）→ 撲空 emergent（謙卑施主給、禽獸拒；mercy 路真能救命＝可選 rung）。**人格 gate**：高求生欲/謙卑/低野心→肯乞；驕傲→寧死不乞（接決策模型）。**backlog 非本刀 blocker**（乞食 dead≠coherence bug，隊有覓食/遷移/掠奪其他路不 limbo）→ 歸「絕境階梯完整性」arc（見 progress.md，與抱團+食物流通同做）。連 [[project_desperation_economy]]。

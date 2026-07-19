@@ -2,13 +2,79 @@
 role: implementer
 code: "03"
 status: idle
-current_ticket: "-"
-updated: 2026-07-14
+current_ticket: "hold-warm: crisis-override + immunity fix(branch@b71647ab,HIGH)→to:measurer re-measure seed1337。measurer 揭 crisis 真fire 但 release-then-instant-recommit(team1/19 defection/team13 FLEE 打回原 task)→加免疫窗(try_set 擋同 task 重委派,survival 選別task 接住)。TDD 8/8,gate 64,headless 0 new,determinism byte-identical(90353154)。並行:god-view F/②sweep/slice2 pipeline。剩:hook-prepush(deferred)。"
+updated: 2026-07-19
 ---
 
 # 03 implementer 現況
 
-**狀態**：working——need-oracle S2-S5 就地續（systems 訂正裁定：別等 fresh，git per-slice commit 兜 ctx 風險，中途爆 handback partial）。S1 done c25abfb7。next=S2 供應鏈 gap+gating+多配方。
+**crisis-override（HEAD `e77aa99b`,branch feat/crisis-override off main d0ab7f91,已 push,待 measurer，HIGH）**：
+- **OUTCOME-based 跨線危機安全網（泛化 ②）**：committed 任何 task 深餓（food<CRISIS_FLOOR=1.5，decouple boost）+ committed N天（CRISIS_DAYS=6，task_start_tick）未緩（food 沒回升≥STALL_RELIEF_MIN）→ `_famine_crisis` true → hook `_evaluate_threat` release → 下 cadence re-rank → survival @80 preempt。涵蓋 5 種 stuck-task（FLEE/建設/外交/等待新領主/併入-pending）。
+- **不特判 flee**（survival 主宰 by engine THREAT<SURVIVAL 不變量；valid-flee deferred Arc5）。baseline lazy 蓋（task 變自動重置=進度隊不誤 fire）。互補 ②（非取代，無雙 release；併入-rejection ② gap 由 crisis 覆）。
+- **驗**：TDD `crisis_override_test` 7/7；gate 64 removed=0；headless comprehensive mine 6==base 6（0 new，雙格式嚴驗，base 獨立重跑）；determinism 2跑 byte-identical（`2418712a`）。
+- **下一站（HIGH，先於 god-view D-後 doom-delta 讀）**：measurer（5 stuck-task 消 + 量化 54% 逃跑真vs broken）→ QA → blueprint release → merge。
+
+---
+
+**god-view Slice F（HEAD `d0ab7f91`,branch feat/godview-slice-F off local main a5495461,已 push,待 measurer）**：
+- **+ 增量**：Part C 註訂正（`bbefcb3a`，零caller→11 caller live god-view leak/Slice D，systems 確認自身 glob-bug）；headless test-fixture fix（`d0ab7f91`，measurer 抓 1 new=矛盾情報 scout 測試漏 belief tile_pos→補=0 new comprehensive；同 slice2 款；F1 code 未動 byte-identical 不變）。
+- **F1** fallback-to-live→sentinel(-1,-1)+per-site guard 4 site（scout `_commit_conquest_attack:313`/envoy dispatch `_dispatch_envoy:1284`/envoy track `:1368`/encircle `strategic_ai:139`；inquiry:64 不改=legit intel）。缺 belief 不瞎追 live。
+- **F2** 刪 8 死 *_pos 欄（exhaustive grep 零消費者；保留 farmable/forage/market/threat_pos；intent 段 rewrite 保 intent_target）。
+- **驗**：char bed `godview_f_test` 5/5 PASS；gate 64 removed=0；**★F2 byte-identical 4-way 硬證**（base==F2-only==full==mine-2x=`b2452128`，死欄刪零行為變）；determinism 2跑 byte-identical。F1 在 game_sim_multi 沒 fire（隊互見有 belief）→行為變只在 belief-loss→measurer organic 量 doom-delta。
+- **★flag systems**：`predict_intercept` 有 production caller（faction_ai:1369 envoy tracking）→ slice2 Part C 我加的「零 caller」註不實 + envoy 追蹤仍走 live god-view（下個 slice 候選）。
+- **下一站**：measurer doom-delta measure（seed1337/42/4201）→ QA → blueprint release → systems merge。
+
+---
+
+**slice2 感知鐵律一致（HEAD `8da63525`,branch feat/slice2-perception off local main bb1e75ff,已 push,待 measurer）**：
+- 3 fix 皆 god-view→belief last-seen：**A1** threat DEFEND/求和 move→`belief_pos`（threat_pos 全域改源，鏡射攻擊:194）/ **A2** absorb yield→belief-gate 降級（無 food_est→`has_belief` gate + `population_est` proxy，保守）/ **A3** invite 距離 gate 用 `belief_pos`（INVITE_RANGE=5，無 belief→擋）。
+- **Part C**：path_system 3 god-view fn 頂加 landmine 註（零 caller，純註解）。
+- **驗**：TDD `slice2_perception_test` ALL PASS（A1 belief 非 live/A2 無 belief→0 有→proxy/A3 遠擋近處理）；gate 64 removed=0；headless base(bb1e75ff)-vs-mine `diff` IDENTICAL（0 new）。
+- **★A2 降級 caveat**：pop_est proxy 失 burden 信號→measurer 驗併入 known-target 仍 fire。
+- **下一站**：measurer sim measure（seed1337 team19 不再跨圖 settle + absorb 收斂 + threat 不瞬追）→ .qa.json → blueprint release → systems merge。
+
+---
+**並行在飛：② 絕境階梯失敗回饋**（branch feat/desperation-ladder-feedback@17fd4fc4，REDO+豁免+env override 全 done，measurer full re-measure + blueprint 裁 B sweep STALL_DAYS 中）。
+
+**② 絕境階梯失敗回饋 REDO 修完（HEAD `bf8452b7`,branch feat/desperation-ladder-feedback off local main 1132bf0c,已 push,待 measurer re-measure）**：
+- **機制**：main 真 latch 根 = `SURVIVAL_BOOST` 集體等量 order-preserving（最高 base-weight survival 格恆贏不換序，7隊卡33+天）。② = 失敗回饋:committed option stall→硬排除換次格產階梯。
+- **★REDO（measurer organic 揭 stall_exclude=0 沒 fire）**：舊掛 `_trigger_survival`（:3219 uses_unified/subteam-only return→latch隊 reason=unified 碰不到）。修=STAMP+DETECT+EXCLUDE **掛單一源全5路**（同①：unified1554/subteam1768/join1790/solo1896/survival3374，抽 `_stamp_survival_commit`/`_detect_survival_stall` 共用）+ EXCLUDE 收 `applicable(ctx,ignore_stall)` 中央（全rank路共用）。
+- **★去額外gather（seed42 0→8 RNG regression 根）**：移 _trigger_survival 第二次 gather；DETECT/STAMP food inline（`effective_food/pop`零RNG）。[[feedback_observer_no_global_rng]]。
+- **S1/S2 邏輯**：stall_verdict（relief before/after magnitude 非瞬時，plateau=STALLED）/patience=慎重+(1-求生欲)既有trait/硬排除 cooldown（reject_cooldown idiom）/單一option豁免（rank_survival ignore_stall raw+apply_stall_exclusion）。
+- **驗**：TDD ALL PASS(+applicable單一源測)；gate 64 removed=0；headless 0 new；**determinism game_sim_multi 兩跑 byte-identical**；**★organic seed1337 2月 stall_exclude=69 真fire(REDO是0)+teams 68→72 sustain**。
+- **下一站**：measurer re-measure（seed1337 latch 7隊主靶 + **seed42 回0** regression 驗 + determinism 三跑 → .qa.json）→ blueprint release-pass → systems merge。
+
+---
+**前（作廢）：famine-amplifier ②**（feat/starvation-desperation-fix@ebf4489b；systems 重裁 main 無 amplifier→作廢）；**① single-source** 已 merged local main=1132bf0c（origin 未 push=用戶授權線，downstream diff 對 local）。
+
+**絕境經濟 fix impl A 完（HEAD `ebf4489b`,branch feat/starvation-desperation-fix,已 push,待 systems R²）**：
+- **① survival 保序單一源**（`1132bf0c`）：`DecisionOptions.priority_for(opt)` 一處定 priority，全 **5 dispatch 路**讀（含 grep 捕第 5 路 `_try_join_target`）。修「task 切不掉」型 no_forage。（=systems 信提「剩 ① solo/subteam@80」已完。）
+- **② famine-amplifier 紮營/乞食/併入**（`764577e9`+`ebf4489b`）：`_famine_severity=clampf((FAMINE_FLOOR-food_days)/FAMINE_FLOOR,0,1)`×人格×K，cap 禁無界，覓食 baseline 不 amplify，weight famine_amp=1.0。
+  - 乞食=慎重/信義、併入=(1-野心)/求生欲、**紮營=野心/求生欲**（連貫階梯:低野心→併入 vs 高野心→紮營自立）。修「非暴力象限傻站死」型 no_forage（base beg/join/camp drive 平）。
+- **掠奪不 famine-amplify（systems 裁 A）**：留既有 `_intent_fit` 匱乏→搶（已 hunger-scaled+has_weak_prey/capability guard）。連貫階梯:暴力 prey-gate / 非暴力 famine-drive，兩軸不同源，避 double-count over-war。spec §掠奪作廢。
+- **驗**：TDD `famine_amplifier_test`(三支)+`survival_single_source_test` ALL PASS；gate 64 removed=0；headless **base-vs-mine 逐條 `diff` IDENTICAL**（同 3 pre-existing，0 new）。
+- **★flag pre-merge R²**：紮營人格軸(野心/求生欲)= 我 derive（systems 只命名 option 未給公式；mirror camp weight 野心-dominant + 完成階梯象限）。
+- **下一站（照裁定 flow）**：systems pre-merge R² 綠 → measurer measure（is_sim=true+seed1337/42/4201→.qa.json）→ blueprint release-pass → merge。**不跳 QA**。
+
+---
+
+**前：de-patch 軌2 [DONE]**（`03e203dc`），hold warm 等 measurer 乾淨全量
+
+**de-patch 軌2 完（HEAD `03e203dc`）**：閘1 _threat_recent→militancy(刪)/閘5 tribute FLEE→膽識絕望秤/閘6 gate-ok(systems 裁 over-reach,_calc_diplomacy 已 util)/閘7 calc_attack_score 刪/try_proactive 陡化(慎重³,retry alone). ★4 diplomacy 測 migrate(診斷=測用 out-of-range 慎重 2.0「繞 RNG」hack,真 sim=rate 變非語義破→遷 valid 慎重+loop). Tier1 8綠;gate PASS sites=91 removed=2;headless 3+3;CoinAudit=0×4. detector gap 誠實標(try_proactive caller score>0.6 未抓,下 slice widen). 前 constitution_gate v2 `07d1d651`.
+
+**de-patch 軌2（HEAD `412251b0`）**：閘1 _threat_recent→militancy(軍閥備戰/農夫不備,刪 _threat_recent)/閘5 tribute FLEE override→膽識絕望秤(邊逃邊拒)/閘7 calc_attack_score 刪(孤兒). baseline gate-ok 37 標. Tier1 5綠;gate PASS sites=91 removed=2;headless 3+3. **★閘6+try_proactive 陡化 REVERTED**——方向翻轉(極謹慎 never proactive)破 4 diplomacy 測(求貢同 gate 語義衝突),請 systems 裁 migrate 測 or 求貢 gate 分離重設計. 前：constitution_gate v2 `07d1d651`.
+
+**constitution_gate v2（stream① 基礎，HEAD `07d1d651`）**：v1 只抓 TaskArbiter→v2 加全閘型偵測器(值閘 rng/threshold/early_return + 控制流 dispatch_entry/route). enumerate 93 閘(baseline_v2 凍結),PASS sites=93. ★section-A 6/6 覆蓋(偵測器對)+v1 taskarbiter 28 回歸. measure-first 殘留可數→逐閘 de-patch. 誠實:route/近似重複公式=best-effort.
+
+**前：Arc1 need oracle merged `e483f85c`。**
+
+**Arc1 merged（`e483f85c`）**：S1-S6 need-quantity 單一源。blueprint 批 + measurer 乾淨全量對指標全綠. 2 邊界 catch(urgency≠quantity 洞 / 批前嚴查 facility_deficit 殘各算). worktree 清理待 measurer(其 need_oracle_verify_bed.gd 修改中,不 force 刪他人檔). branch feat/need-oracle Keep as-is.
+
+**need-oracle S6 完①（HEAD `fd1625f7`,7 commit）**：_facility_deficit non-food 遷 oracle need(真單一源,grep 淨). facility 仍建(確定性檢 _pick_facility→workshop deficit 1.00,非退化)+determinism byte-identical F85E975A+CoinAudit=0×4+headless 3+3+Tier1 19綠. game_sim Manufacture 兩跑皆 0(非 drift,系統性)——機制確定性檢證正常(facility-build+per-recipe 條件足時產),但短窗場景未達 production 條件;★真 production revive=measurer full-HD 長窗真閘(誠實:sanity 證不了,不篤定已 revive). ⚠註:git add -A 誤 commit measurer 的 need_oracle_verify_bed.gd(arc 驗證床,compile 淨,benign,已 surface). → measurer 乾淨全量真閘.
+
+**need-oracle arc DONE（HEAD `71280560`,6 commit）**：S1-S3 oracle 三分量 / S4a manufacturing 需求驅動+per-recipe 停產 / S4b reserve→need_keep(goods 死鎖解) / S5 溢出雙 sink 守恆+TARGET 退役. Tier1 16綠;全程非退化(trade 活/矛盾率 0.716→0.667 改善/CoinAudit=0 多輪/headless 3+3). ★邊界 systems 釐清確認：farming×14=need-quantity(已 migrate✓)、URGENCY/WARNING/DESPERATION/RECOVER/SLACK=urgency-天閾(離餓幾天→survival 排序)=urgency 域留 NeedHierarchy 零改動(禁 migrate=category error)；urgency-閾一致性=arc5 死常數人格化非本 arc。**Arc1 code 完整,無 more slice** → systems 派 measurer full-HD 真閘.
+
+**need-oracle（HEAD `ef377f44`,已 push,4 commit）**：S1 骨架+food 自用 / S2 供應鏈傳導(gap+gating+多配方) / S3 貿易 demand(非幽靈+野心) / ★S4a **manufacturing reader 切 oracle+per-recipe 停產**(生產目標=need_keep+demand,out 滿→逐配方 skip 不燒 material,sort gap 降序 demand 驅動). Tier1 16綠;**game_sim Manufacture 活躍(14)+CoinAudit=0+無崩=生產真運作非退化**;headless 3+3(3 測遷移). **★S4b(reserve→need_keep)=sanity 驗不出的行為正確性風險**(facility-less 隊 material need_keep=0→傾售全 material,CoinAudit 仍 0 但行為錯,只 full-HD 抓)——停 S4a 乾淨可驗界,請裁 (a)fresh 續 S4b/S5/(b)measurer 先驗 S4a/(c)評 material 傾售風險.
 
 **need-oracle arc（HEAD `c25abfb7`,已 push）**：S1 NeedOracle 新 module(兩量 need_keep/demand 修 R²#1 方向)+food 自用真推導. Tier1 5綠;憲法 PASS;零 reader wire=零產線影響. **★S2-S5 remaining**(供應鏈 gap/貿易 demand/reader 全切+per-recipe 停產+TARGET_PER_POP 退役+★S4 crossover reconcile/雙 sink). 誠實:本 session 連做 8 大塊 ctx 深→S1 乾淨斷點,請 systems 裁下輪 fresh 續 or re-dispatch(base c25abfb7).
 

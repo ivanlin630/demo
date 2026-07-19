@@ -18,7 +18,7 @@
   ```powershell
   .\tools\godot.ps1 --path .worktrees/<slice> --headless --script scripts/debug/hand_obeys_brain_bed.gd
   ```
-  driver 跑 worktree 的 branch code，你人在 main dir。**★絕禁在 `A:\GDS\demo` 原地 `git checkout <branch>`**——會換掉所有共用此 dir 的 session 的 branch（2026-07-09 事故：QA/量測原地 checkout feat/A2b → blueprint commit 落錯分支）。before/after 對照 = `--path` 各指 worktree vs 一個 main baseline worktree。
+  driver 跑 worktree 的 branch code，你人在 main dir。**禁原地 checkout**（全角色 canonical 見 `00_roles §2`）。before/after 對照 = `--path` 各指 worktree vs 一個 main baseline worktree。
 - **藍圖不蹲 godot**：量測的髒活你扛，藍圖/QA 只讀數字。
 
 ## 鐵律
@@ -31,7 +31,7 @@
 5. **只跑探針+寫報告，不改 `scripts/` code、不判決。**
 5c. **★worktree 看不到 main dir 未 commit 工具（2026-07-15 flee 撞）**：worktree=獨立 checkout，main dir 未 commit 的 debug 工具擴充（bed/tracer 改）**worktree 看不到**。`godot --path .worktrees/<slice>` 跑前**先確認工具已 commit 進該 branch or 同步**，否則跑舊工具 = 假結果。
 5b. **★godot exe 直印 log = UTF-16LE（QA 抓，2026-07-15）**：不經 wrapper（`godot.ps1` 強制 UTF-8）的 godot exe 直印 log ＝ **UTF-16LE**，直接 `Read`/grep 會亂碼。**存 log 前先轉 UTF-8**（`iconv -f UTF-16LE -t UTF-8`）或一律用 wrapper，別讓下游讀的人重踩。**存 jsonl/measurements 檔亦然**（下游 QA/blueprint 讀）。
-7. **★量測可溯源：原始輸出必落地檔 + 附 commit hash（用戶定 2026-07-13，see §可溯源協議）**——handback 裡的數字**不准裸轉述**，必附來源檔路徑（+行）與量測當下 HEAD hash。血教訓：71/22/7% winner 轉述進 handback、原始 print 沒存檔、沒標 hash → 事後對不上 main(100%覓食) 分不清「舊 code 過期數字」vs「determinism 壞了」，只能重跑辨。
+7. **★量測可溯源：原始輸出必落地檔 + 附 commit hash（用戶定 2026-07-13，本體見 §可溯源協議）**——handback 數字**不准裸轉述**，必附來源檔:行 + 量測當下 HEAD hash。（血證 71/22/7 詳 §可溯源協議。）
 6. **★一次量完 → 一封完整信（禁分批/append，用戶定 2026-07-09）**：**全部**（spec §驗收法守衛 + 標準床 HOB/const/sanity/teamtrace + perf baseline）**都跑完才寄一封涵蓋所有數字的信**。禁分批、禁 append 到已寄信。**理由=信箱競態**：QA 讀第一封即 `consumed`（義務只掃 `to:我 && status:open`），晚到的第二批補在原信後/後續新信 → **靜默漏看 → 用不完整驗證 merge**。缺任一守衛/床 → **不寄**，或寄 `status:open` 明標 `incomplete:[…]` 報藍圖等補齊，**絕不寄一封讓 QA 誤以為齊全的部分信**。
 
 ## ★★分層量測協議：迭代快 / 確認慢（用戶定 2026-07-12，砍重跑浪費）
@@ -61,10 +61,6 @@
 | 決策快照（單團/單 tick dump，非 rank 全表） | `scripts/debug/team_trace.gd`／`spine_trace.gd`／`specimen_tracer.gd` | 既有工具，未在本輪重新盤點細節——需要時個別讀。 |
 | ★控制場景 story 驗證（稀有/story-central 行為 before/after，繞 organic seed roulette） | `scripts/debug/pursuit_hiding_bed.gd` | 2026-07-15 建（god-view 首用戶）。手構最小 WorldState（prey belief last-seen A 位 vs live B 位斷視線）驗逃脫撲空率。**場景 spec 與斷言分離設計＝可復用**：後續稀有/story-central option（乞食/求和/未來）掛此床，別再賭 organic。inert-by-absence（organic seed 撞不到稀有行為）→ 用此床，非大構 organic 窗。 |
 | ★罕見 code path live 觸發驗證（防禦分支/commit-fail/race，手呼 API 不算數） | `scripts/debug/churn_tap_bed.gd` | 2026-07-15 建（tracer-completeness）。手構絕境隊撞真實觸發條件（同-prio try_set no-op→`_trigger_survival`→try_set false→capture tap 真觸發），**非手呼 capture API**＝證 tap 真接在 live code path。用於「這分支真的會 fire 嗎」的活證（vs code-verify 同構推論）。罕見 race 分支（finder_miss）時限內構不出 live→誠實標 code-verified 未 live-demo，別吹已驗證。 |
-
-**缺的常用維度**：目前無專屬「單機制 A/B 對照秒級床」通用模板（每次新建手構場景），可考慮抽一個共用 helper（`_mk_leader`/`_mk_team`/`_link_belief`，`consolidation_decision_trace.gd` 內已有）給下個 slice 複用，非本輪動作。
-
-**平行 seed launcher + 金字塔 resume**：概念已在上方 Tier2 §42-43 定案（跨不同 seed 各一 `godot-detach.ps1` 進程、`WARRING_RESUME` 接續深度）。工具化（自動分配核數/收 progress sidecar 湊齊的 wrapper script）留待下次大窗實跑時視需要建——目前手動起多個 detach 進程已可行（本 session 2026-07-12 崩潰矩陣診斷已用「同時起 warring×12mo + default×12mo 兩個 detach 進程」驗證平行可行，未撞資源上限）。
 
 ## ★診斷通則：量不到某湧現 → 先查補丁閘（用戶定 2026-07-09）
 
@@ -139,6 +135,7 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 - **零盲點鐵律**：dump 前確認新增 decision/resource/state **都接了 tap**——tap-gap（如 SpecimenTracer 沒接 order → decision_count=0 假象）會**捏造假故事誤導判決**（血證 2026-07-14）。量到 `decision_count=0`/某維度空 → **先查是不是 tap-gap（工具盲點）非真空**，別當真實信號報。
 - **perf scope**（藍圖校準）：**specimen 鎖隊全量、非全世界每 tick 全記**（爆 perf）。probe 抽樣可較粗。
 - 產 `<slice>.specimen.jsonl`（逐 specimen 逐事件 trace，QA 讀）；配 §④ 聚合 fullprobe 一起餵（聚合給藍圖看率、specimen 給 QA 判故事）。
+- **★通用長跑 dump 工具（`SpecimenDumpHelper`，2026-07-19 用戶偏好「任何長跑→QA，無 seed 亦可」）**：`scripts/debug/specimen_dump_helper.gd`（class_name）——`setup_from_env(state)` 讀 `SPECIMEN_TEAM_ID`（明確清單）或 `SPECIMEN_SAMPLE_N`（均勻抽 N 隊）→ 設 `state.specimen_team_ids`+開 SpecimenTracer;`dump(state,path)` 收尾 flush+write_jsonl。**兩開關未設=no-op 零成本**（既有床/determinism 安全）。**任何長跑（含 ad-hoc/unseeded 探索跑）掛得上**→出 QA 可讀 jsonl，非只 slice acceptance measure。範例 `scripts/debug/adhoc_specimen_demo.gd`（無 seed 2400tick）。QA 故事審不需 determinism→無 seed OK（但當 regression 閘仍需 seed=兩用途別混）。observer GUI ticker-dump 長跑卡死→用此 headless 法。
 - **交付路由**：故事性場合 handback 同寄 `to:blueprint`（藍圖判 release）+ trace 供 QA 讀（QA 稽核 handback 亦 `to:blueprint`）。
 
 ## ★量測可溯源協議（用戶定 2026-07-13，全量測角色遵守）
@@ -174,7 +171,7 @@ raw `.log`＝本地全量佐證；`.measure.json`＝committed 精華 + 應含 `m
 1. **`docs/process/verdicts/<slice>.measure.json`**：
    `{measured_at_head:<shortHASH[-dirty]>, raw_logs:[<docs/measurements/*.log 路徑>], specimen_trace:<.specimen.jsonl 路徑>, obey_pct, arbiter_latch, leader_bypass, subteam_bypass, mechanisms, determinism, constitution, thrash, before_after, spec_guards:{<守衛名>:<數字>}, incomplete:[<未量到項>], summary}`。commit。（`measured_at_head`+`raw_logs`＝可溯源錨，見 §量測可溯源協議。）
 1b. **★`<slice>.specimen.jsonl`（故事性場合＝有 QA 故事稽核的 slice）**：逐 specimen 逐事件全量 trace（想法/狀態/資源時序，含死隊）＝**QA 故事性判官讀的料**（見 §⑤）。聚合 `.measure.json` 給藍圖判率、`.specimen.jsonl` 給 QA 判 motive→action→outcome。落地全量暫態可觀測性不變量。
-2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（`from:measurer to:blueprint status:open`——**★寄件一律 open,絕不自寫 consumed**（consumed 是收件端讀後回執,你自寫=對方 Monitor 只掃 open→永不送達→靜默漏看;2026-07-13 用戶戳 measurer 犯此。詳 `07_mailbox_trigger §status 所有權`)；**2026-07-09 起下游改藍圖判**，原 `to:qa`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + full_probe 全維度（acceptance 場合）+ 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**（信箱 hook role-agnostic，只認 `to:` 欄→改欄即改路由，無需動 hook。）
+2. **handback** `docs/superpowers/handbacks/YYYY-MM-DD-measurer-to-blueprint-<slice>.md`（`from:measurer to:blueprint status:open`——**★寄件一律 open,絕不自寫 consumed**，全角色規則本體見 `00_roles §跨角色 handback 生命週期`；**2026-07-09 起下游改藍圖判**，原 `to:qa`）：貼數字 + before/after + **spec 守衛的 count/delta 數字** + full_probe 全維度（acceptance 場合）+ 誠實揭 timeout≠迴歸 / 未量到項。**★全量完成才寄（鐵律6）——一封完整信，不分批/不 append。**（信箱 hook role-agnostic，只認 `to:` 欄→改欄即改路由，無需動 hook。）
 
 ## 交接
 

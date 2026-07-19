@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: "[S2 卡點·需裁] winnable 公式方向:dispatch 寫 self_armed × perceived_power_ratio,但 spec 零fall-through 語意要 winnable LOW-when-不可勝(perceived_power高=敵強)。× 給反向(敵強→winnable高→迎戰高)=倒轉核心行為。確認方向再動核心公式(不猜)。附我規劃的 TEST VALUE 常數供同輪確認。"
 ---
 # S2 卡點：winnable 公式方向確認（dispatch vs spec 語意矛盾）

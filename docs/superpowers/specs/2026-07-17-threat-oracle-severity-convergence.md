@@ -40,7 +40,15 @@ severity = clampf(ctx.threat_react, 0.0, SEVERITY_MAX)   # ★CAPPED(blueprint�
 求和 pacify  = (貪婪·c + 信義·d − 好戰·e) × severity × (1−winnable)  # outlet:不可勝 + 低好戰 → 求和
 FLEE        = 膽量秤(求生欲, 1−好戰) × severity × (1−winnable)      # outlet:怯/絕境。★rewrite terms.gd:75-80 threat_pressure(finding5)非只 :176/180/184
 ```
-- **★threat break-top boost（REQUIRED，解 skeptic finding3 單term-多term）**：severity≥THREAT_BOOST_FLOOR 時最佳 threat option 得 additive boost ∝ severity（**capped，鏡射 survival `decision_engine.gd:37`**）→ 讓最佳 threat option 在全 pool 競過多term stack（掠奪~2.0/攻擊>3.0）。**bounded 非 unbounded amplifier**（blueprint② cap 滿足:極佳機會仍可 edge 過=非偽裝硬閘）。單term base 量級不足由 boost 補（非靠 base 匹配多term）。**★定性約束（R² 要求）：threat boost 相對強度 < survival boost（`SURVIVAL_BOOST_MAX=2.5`）**——survival=存亡必須(絕境必勝設計本意)、threat=blueprint 明講「不必然」→ threat boost 該顯著弱於 survival，保「極佳機會可 edge 過」。
+- **★defiance term 替全域 boost（blueprint 拆假張力 2026-07-17，last-stand 走窄人格閘）**：~~原全域 break-top boost（severity-gate 常數）~~ **廢——它本身是全域 severity-boost 死常數=框架清潔 arc 中的自我違憲照妖鏡**（blueprint 硬約束:禁全域 severity-boost 死常數）。改**人格化 defiance term 加進迎戰**：
+  ```
+  defiance = 好戰 × (1−慎重) × (1−winnable) × severity × K_DEFIANCE   # 綁人格值(first-class),非全域常數
+  迎戰 += defiance
+  ```
+  - **狂徒-last-stand 窄閘**：只在 好戰高 AND 慎重低 AND 不可勝(winnable低) AND 高severity **四者齊** 才 spike（product ~0 除非全高）→ 狂徒玉碎 defiance；**對非狂徒（慎重高→(1−慎重)低 / winnable高→(1−winnable)低 / 低威脅→severity低）≈0**。
+  - **★張力消失**：defiance 對非狂徒≈0 → **不可能碾平 trade**（只狂徒迎戰 spike，狂徒罕）；一般 threat 競秤由 base severity-scaled util 管（迎戰/備戰/求和 base，moderate）。
+  - **照妖鏡 clean**：defiance 綁 好戰/慎重/winnable（人格+state），K_DEFIANCE 是 term 係數（同 k_prep/k_conf/weight("attack")）非全域 severity-gate 常數 → 合框架清潔（blueprint 硬約束滿足）。**若驗發現只能靠 tuned 全域常數才成立 → flag+defer（不加死常數）**。
+  - 單term-多term（skeptit finding3）:一般 threat 競秤靠 base util moderate（threat 本該小眾非碾平多term）;狂徒 last-stand 靠 defiance 個案 spike。**非全域拉高所有 threat**。
 - **★零 fall-through 不變量（blueprint①，spec 須證每象限有主導 response）**：
   - proud-doomed（好戰高慎重低·不可勝）→ **迎戰**（reckless-override winnable，死戰）✓
   - cautious-hawk（好戰高慎重高·不可勝）→ 迎戰低(respfor winnable)+**備戰**高(慎重-weighted) ✓
@@ -56,7 +64,12 @@ FLEE        = 膽量秤(求生欲, 1−好戰) × severity × (1−winnable)    
 - **S1 probe 先接（byte-identical，觀測不變量前置）**：`_decide_unified` commit site 接 `threat.dispatch.*`（現唯一 tap 在 `_evaluate_threat:405` preempt loop 內，收斂後正常路無 tap=seam#1 finding5 盲點）。**先於任何 threat 行為變**。byte-identical（純加 probe）。
 - **S1.5 god-view fix + power_ratio 曝（R² finding1/2，S2 前置）**：(a) `_power_ratio`（`threat_assessment.gd:42`）無 belief fallback `other.population` → 改**保守 self_team.population（視等強）**，比照 `invariants.md:173` 已補 5 處法（禁讀 god-view，虛張生效）。(b) `ctx` 曝 `perceived_power_ratio`（clean，供 winnable 用；禁 implementer 拿 threat_react 當 winnable proxy=finding2 風險）。**行為變（首接觸不再讀真 pop）→ measure:虛張/偽裝在無 belief 窗口生效 + 首接觸 threat 評估變保守**。連 `invariants.md:173` 補入已修名單。
 - **S2 threat util severity-scaled 重設計（行為變，含 blueprint 補裁）**：`terms.gd` 備戰/迎戰/求和/FLEE(**含 :75-80 threat_pressure，finding5**) 改 §目標式（severity-CAPPED + winnable **modulate 非硬gate** + 慎重-override 魯莽死戰 + threat **break-top boost** capped）。`ctx` 補 winnable（self_armed_ratio × ctx.perceived_power_ratio，S1.5 曝）。measure=行為驗證:**零 fall-through 四象限各有主導**（proud-doomed→迎戰/cautious→備戰/coward→逃/pragmatic→求和）、severity capped（threat 不無限碾 trade）、survival 保序（**具體引 `reaction_dissolution_check.gd:80-99` 真絕境>panic-FLEE**）、感知鐵律。**★R² 補 2 具體 measure 場景（S2 完工驗收）**：(1) **boost≠偽裝硬閘**:「中等 severity + 決定性非-threat 機會（高值貿易/建國臨門）→ 非-threat 選項**偶爾仍勝**（非 threat 恆勝）」;(2) **真零 fall-through**:「極端全低人格向量（慎重≈好戰≈貪婪≈信義≈求生欲≈0）壓力測試」**或**引 `person_generator.gd` 人格 floor 佐證此退化象限架構性不可達（非只驗 4 代表角）。
-- **S3 收斂 + preempt 明確化**：threat 選項進 rank_scored 全 pool（severity-scaled 量級競秤），退役 rank_threat filtered 入口 + 手派路由；preempt 明確 repoint（world-mechanic 保留 or 走統一 rank threat 權重）+ PRIO_THREAT 70 黏性保。gate baseline threat 控制流閘 removed（零殘留進度）。measure=收斂後 threat 行為保 + gate 減。
+- **S3 收斂（★R² HALT 後 surgical 切割 KEEP/RETIRE/FIX，2026-07-17）**：溶決策非刪 scaffolding（憲法孖 arc 老區分）。逐項：
+  - **KEEP scaffolding**：`_evaluate_threat` **`:364-379` release 監控**（cadence gate + REVOLT release + DEFEND/PREPARE/FLEE/HOLD 威脅消失 or FLEE-timeout→`TaskArbiter.release`）=task lifecycle world-mechanic，**serves 全隊含 unified**（`:389` 註「release 檢查對 unified 亦成立」）。整函式退役會靜默丟它→unified 隊 threat task 無人 release=永久卡死（R² finding）。→ **抽成 release-only scaffolding 保留**。
+  - **RETIRE decision**：`:385-407` 非統一 `rank_threat` argmax dispatch（手派選哪 threat option）→ 全隊 threat 決策走 `_decide_unified` rank_scored（unified idle 隊 `:390` 已如此，擴全隊）。退役 rank_threat filtered subset。
+  - **KEEP preempt trigger, route decision to unified**：`:380-395` busy-preempt(壓境威脅打斷忙碌隊)=**唯一即時感知路**，保 trigger，但**決策 route 到 `_decide_unified`（非 rank_threat）**→ preempt 語意保、決策統一。
+  - **★FIX task_arbiter self-replace（`task_arbiter.gd:57` finding）**：現 self-replace 只認 `PRIO_DISPATCH`→threat @`PRIO_THREAT 70` 隊換 threat option（迎戰→求和）做不到=卡死。→ **擴 self-replace 認 PRIO_THREAT**（engine-sourced 同層換 threat option），保 70 黏性(finding3)+可換。
+  - **gate**：`_evaluate_threat` decision dispatch + `rank_threat` 控制流 fingerprint removed（零殘留;release scaffolding 留=gate-ok task-lifecycle）。measure=threat 率保(迎戰/備戰/求和/FLEE vs S2 similar)+preempt 保(忙碌隊仍應強威脅)+release 保(threat task 不卡死)+PRIO 黏性+gate 減。
 
 ## 非回歸
 - **survival 保序**（絕境 FLEE/覓食 rank_scored boost 奪 argmax，不被 threat util 蓋）。

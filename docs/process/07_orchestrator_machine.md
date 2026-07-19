@@ -34,6 +34,10 @@
                         [N7 merge+回報用戶]（按自主邊界）
 ```
 
+---
+> **★以下為深 impl 細節（節點契約表/落地步驟/狀態物件）＝按需讀**，非每 compaction 重讀集。機器**少用**（只大/並行活，動機=A2a 誤判+$27/slice）；上方「為何是這台」+「節點圖」＝ gist，日常夠。真要跑機器軌才往下讀。
+---
+
 ## 每節點契約（input=git讀 / output=git寫 / effect-check）
 
 | N | 角色 | headless role | 讀 | 寫 | effect-check（過節點的硬證） |

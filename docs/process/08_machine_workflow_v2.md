@@ -79,11 +79,7 @@
 - 全走既有 pause-poll / freeze-resume / 成本分層（判斷節點 haiku、實作 opus）。
 
 ## 批次排程
-- **批次1**（done, 5896e7c 等）：--local detached / 控制指令 / A2a修 / README / 三裁定 / 角色doc+技能 / 量測員 / scope.json。
-- **批次1.5**：①檢查點(00審 handback重點) + spec/plan 拆(中插02②) + 判斷節點 haiku + scope 限讀。
-- **批次1.6**：session-resume 優化（做完量 vs 重讀）。
-- **批次2**：分解階段（01 分解 A→A1~A5 + 並行圖 + ⓪審）。
-- **並行**：A2a 重跑（工單已補回歸-capture 特判）+ 續 A2b(leader) 等。
+機器 build 批次 status（批次1 done / 1.5/1.6/2 分解階段待）＝**歷史 build 狀態**，機器少用 → 詳 git log，非本 workflow 規則。
 
 ## 角色↔doc
 00 藍圖 / 01 systems(01_architect) / 02 reviewer(02_reviewer) / 03 implementer(03_implementer) / 量測員(03b_measurer.md；★maker 側產數字≠QA 判，非 QA 角色，含 spec §驗收法守衛) / 04 QA(04_qa)。節點 prompt 載職責正典 + superpowers 技能(已驗上線)。

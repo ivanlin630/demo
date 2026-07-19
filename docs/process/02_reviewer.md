@@ -35,7 +35,7 @@
 - 「這新 option/term/solver，**能不能用既有的某個 + 參數分流達成**？」能 → 冗餘，refute。
 - 「兩 option **applicable 域重疊 + 結果殊途同歸**嗎？」是 → 收斂為一。
 - 「這是**延伸統一**還是**在框架裡開分支繞過**？」
-- 缺此 lens 的代價：本 session reviewer 兩次對抗①（combat-into-engine/consolidation）都放行 join/整併 冗餘，用戶才在設計對話看穿。
+- 缺此 lens = 放行冗餘（血證：join/整併 過審，用戶才在設計對話看穿）。
 
 ## 鐵律
 1. **任何 code 事實斷言必須有 file:line**（用 Read/Grep/Glob 查證，不臆測、不憑記憶）。

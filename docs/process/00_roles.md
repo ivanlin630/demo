@@ -17,8 +17,6 @@
 
 **★★2026-07-09 流程改（用戶定案，`blueprint-to-systems-workflow-qa-measurer-change`）**：正式 per-slice **QA release-gate 硬閘砍除**，**release-pass 權 → 藍圖**（沒問題就過、有問題才升用戶；用戶=問題 backstop 非每次交付閘）。每 slice 仍保 **reviewer（對抗審）+ 量測員（標準 full_probe 床全維度數字）**——這兩個才真正 localize regression。QA 能力（充足性稽核/戲感/UI 落差/`escaped_defects` ledger）保留供藍圖按需調用，唯「交用戶前 QA 必綠」硬閘由藍圖 pass 權取代。**綁 user-in-loop：轉自動交付則 QA 硬閘回歸**（見 `04_qa.md` banner + `03b_measurer.md §④` + `05_acceptance.md`）。
 
-（下段=2026-07-09 前舊模型，保留參照）~~**★硬閘：任何東西交用戶之前，QA 必綠**（三層驗收鏈見 `05_acceptance.md`）。充足性判決由 QA 出——系統不自判自己蓋的世界。~~
-
 兩個設計 session 都在 `A:\GDS\demo` / `main`。實作在 `.worktrees/<feature>/` / `feat/<feature>`。
 
 ## 接力流向（同一 feature 不同階段，非同時）
@@ -28,6 +26,7 @@
 ```
 
 - **★量測→QA 故事稽核→藍圖（2026-07-14 加）**：量測員產全量 specimen trace → **QA 讀 trace 判故事性**（motive→action→outcome，`04_qa §第五職`）→ 餵藍圖。聚合 metric 過≠好戲過，需人讀全量 trace。QA 故事性判官≠release-gate（藍圖仍持 release-pass）。互鎖前提=全量暫態可觀測性不變量（`invariants.md`）。
+- **★★QA 故事稽核不可跳（2026-07-18 用戶戳·systems 違反血證）**：release-gate 砍（2026-07-09）**≠故事稽核砍**——別 conflate 把整 QA 站丟。**canonical 鏈量測→QA 故事稽核→藍圖不可跳；QA session 沒開=flow owner flag blocker（arm QA / 呈報），非 silent skip 藉口**。**QA 故事稽核 ≠ multi-seed（兩軸）**：multi-seed 驗「普不普適(跨世界)」、QA 驗「故事對不對(隊在演啥)」；**單 seed trace 就足以故事稽核（餓死vs戰死），不必等 multi-seed**。血證：threat-oracle/starvation 全走量測員數字→藍圖跳 QA→systems 把「attrition 升」誤讀成 combat 好戲餵藍圖（實=starvation，沒人讀單 seed 死因故事）。連 memory [[feedback_qa_inversion]]。
 
 - **★reviewer 是鏈上的站**（`02_reviewer.md` reviewer 讀；系統側閘序見 `01 §兩道對抗閘`）：**R②（審 spec）每 slice 必過，CLEAN 才 dispatch/merge**；**R①（factcheck 前提）只新概念大框且前提含未驗 code 斷言才啟用**（小 slice/已 file:line 坐實則免）。**無斷點自動鏈 ≠ 跳站**——推下一站含推 reviewer②。
 - 同一 feature 不會同時找兩個談：先藍圖定要什麼，再系統定怎麼架。
@@ -50,6 +49,7 @@
 
 - 不碰對方 owner 的檔。要改 → 呈報 owner。
 - 藍圖的設計事實寫進 `game-design.md`（git），**不寫 auto-memory**。
+- **★禁原地 checkout（全角色 canonical，2026-07-09 事故規則）**：`A:\GDS\demo`（main）是全 session 共用工作樹 → **絕不原地 `git checkout <branch>`**（會換掉所有共用此 dir 的 session 的 branch，別人 commit 落錯分支）。看 branch 內容用 `git show <branch>:<file>` / `git diff main..<branch>`；跑 branch code 用 `godot --path .worktrees/<slice>`；實作在獨立 worktree。各角色 doc 只指此條。
 
 ### 3. 衝突仲裁
 - 藍圖想要 X、架構撐不住 → **系統有可行性否決權**（不假裝架構支援不了的東西）。
