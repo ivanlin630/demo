@@ -143,6 +143,14 @@ var survival_committed_option: String = ""   # 現承諾的 survival option 字�
 var survival_committed_tick: int = 0         # 蓋章 tick（stall 計時 baseline）
 var survival_committed_food: float = 0.0     # 蓋章時 food_days baseline（relief before/after 比基準）
 var survival_stall_cooldown: Dictionary = {}  # { option字串: tick_until } stall 硬排除窗（reject_cooldown idiom）
+# crisis-override（跨線危機安全網，泛化 ②）：committed 任何 task 深餓未緩 → force re-rank。
+# baseline lazy 蓋（crisis_committed_tick != task_start_tick → 新 episode 重置）；auto-reset on task change。
+var crisis_committed_food: float = 0.0   # 現 task 蓋章時 food_days baseline
+var crisis_committed_tick: int = -1      # 蓋章對應的 task_start_tick（≠ 則新 task episode，重蓋）
+# crisis release 後免疫窗：剛 released 的 task 短時間禁重委派（防同 cadence release-then-instant-recommit）
+# → 迫 re-rank 選別的(survival)task 接住餓死隊。measurer 揭 team1/19 等待新領主/team13 FLEE 立刻打回原 task。
+var crisis_released_task: String = ""    # 剛被 crisis-override release 的 task（""=無）
+var crisis_released_until: int = 0        # 免疫窗到期 tick（try_set 內禁此 task 重委派至此）
 # 信使外交提案（權威存發起隊，對齊 active_orders pattern）。空 {} = 無在途提案。
 # {type:"alliance", target_id, target_pos, issued_tick, proposal_id, timeout, gift} — 信使帶 proposal_id ref。
 # gift = 誘因 payload 通用 {res: amount}（發起時已扣，送達轉移目標；本 slice 僅 food，聯姻/財槽未來直插）。
