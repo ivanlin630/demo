@@ -106,6 +106,17 @@ static func release(team: TeamData) -> void:
 # A1a：蓋 task_start_tick（與 try_set 同源）——否則 transition 進場的 task（如 PRODUCE）
 # 拿 stale 起算，timeout 檢查派出即秒殺（W2 TRADE 漏斗定罪過同型 bug）。
 static func transition(state: WorldState, team: TeamData, new_task: String, priority: int, _source: String = "transition") -> void:
+	# ★arbiter 後門根治（手不聽腦，team16 凍死）：transition 舊為無條件 raw 覆寫繞 arbiter → 外部低 prio
+	# 呼叫（defection「等待新領主」@AMBIENT）clobber 引擎剛派的 survival@80 + 繞免疫 → crisis 永不 fire。
+	# 補齊三 guard（對齊 try_set 的 current_task 寫入不變量）：擋「外部 in-place stomp active emergency」。
+	# ★emergency task 自身的正當退場走 release（→re-rank/re-set），非靠 transition 降級：resolution caller
+	#   已改 release-first（現任=IDLE@0 → guard 不 fire → 正常轉換），故此 guard 只擋 (a) 外部 stomp、不誤傷 (b) 退場。
+	if team.combat_target != -1: return                       # combat lock 絕對（同 try_set:40）
+	if new_task == team.crisis_released_task and team.crisis_released_task != "" \
+			and state.world.current_tick < team.crisis_released_until:
+		return                                                # crisis-免疫（補 transition 洩漏，對齊 try_set:45）
+	if team.task_priority >= PRIO_THREAT and priority < team.task_priority:
+		return                                                # emergency-respect：擋外部低 prio in-place stomp
 	team.current_task = new_task
 	team.task_priority = priority
 	team.task_reason = _source

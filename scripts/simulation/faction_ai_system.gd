@@ -2643,6 +2643,8 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 			candidates.append(t)
 	if candidates.is_empty(): return
 	var worker: TeamData = candidates[0]
+	# release-first：zombie 現任常 RETURN_HOME survival@80，先 release→IDLE@0 過 transition guard，再 set BUILD（正當復工退場）。
+	TaskArbiter.release(worker)
 	TaskArbiter.transition(state, worker, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	worker.move_target = tile.tile_pos
 	print("[Infra] Team%d 復工 at (%d,%d)%s" % [worker.team_id,
