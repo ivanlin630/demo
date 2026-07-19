@@ -1,0 +1,59 @@
+#!/bin/sh
+# ★ push-to-shared 防閘（fail-closed，pre-push）。折兩閘：constitution_gate + verification_gate。
+# 根：gate 在 push origin（推共享）非每 WIP commit=不擋本地開發，只擋推共享（blueprint 裁 2026-07-18）。
+#   - constitution_gate：★恆跑（每次 push 都是 push-to-shared；補「手動=可跳=零殘留綠會衰減」的洞）。
+#   - verification_gate：branch-scoped fast-exit（本 branch slice 有 sim .measure.json 才啟 godot；否則秒退零開銷）。
+#   任一 FAIL → 擋 push（exit 1）。
+#
+# 安裝（★systems 協調啟用時序：starvation fix 落地 + schema 採用穩後才裝，見 hook-prepush spec）：
+#   cp scripts/hooks/pre-push .git/hooks/pre-push && chmod +x .git/hooks/pre-push
+# 繞過 `git push --no-verify` 須系統認可（同 constitution_gate/verification_gate 規矩）。
+#
+# pre-push 參數：$1=remote name、$2=remote URL；stdin 每行 `<local ref> <local sha> <remote ref> <remote sha>`。
+
+# --- 先判有無實體要推（純刪 ref → 無內容可 gate → 放行）---
+ZERO="0000000000000000000000000000000000000000"
+has_update=0
+while read -r local_ref local_sha remote_ref remote_sha; do
+	[ -z "$local_ref" ] && continue
+	# local_sha 全 0 = 刪遠端 ref（無 push 內容）→ 跳過此行
+	[ "$local_sha" = "$ZERO" ] && continue
+	has_update=1
+done
+# stdin 無任何非刪 ref → 無內容要 gate → 放行（不啟 godot）
+[ "$has_update" -eq 0 ] && exit 0
+
+# --- 找 godot exe（wrapper 同法：repo tools 優先）---
+GODOT="tools/godot/Godot_v4.2.2-stable_win64_console.exe"
+[ -x "$GODOT" ] || GODOT="A:/GDS/demo/tools/godot/Godot_v4.2.2-stable_win64_console.exe"
+if [ ! -x "$GODOT" ]; then
+	echo "[pre-push] ★兩閘 skip（godot exe 未找到 $GODOT）——push-to-shared 未 gate，systems 注意。"
+	exit 0
+fi
+
+fail=0
+
+# === 閘 1：constitution_gate（★恆跑，push-to-shared 零殘留證明）===
+"$GODOT" --headless --script scripts/debug/constitution_gate.gd 2>/dev/null | grep -q "\[CONSTITUTION-GATE\] PASS"
+if [ $? -ne 0 ]; then
+	echo "[pre-push] ★CONSTITUTION-GATE FAIL：新增引擎外閘（違憲）。溶入引擎/統一，或呈報系統更新 baseline。"
+	echo "[pre-push]   詳跑：./tools/godot.ps1 --headless --script scripts/debug/constitution_gate.gd"
+	fail=1
+fi
+
+# === 閘 2：verification_gate（branch-scoped，sim 量測 → QA PASS coupling）===
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+slice=$(printf '%s' "$branch" | sed 's|^feat/||')
+measure="docs/process/verdicts/${slice}.measure.json"
+if [ -f "$measure" ]; then
+	# 本 branch slice 有 sim measure → 跑 verification_gate（branch-scoped 免 stale 誤擋）
+	"$GODOT" --headless --script scripts/debug/verification_gate.gd -- --slice="$slice" 2>/dev/null | grep -q "\[VERIFICATION-GATE\] PASS"
+	if [ $? -ne 0 ]; then
+		echo "[pre-push] ★VERIFICATION-GATE FAIL：slice '$slice' 有 sim 量測(is_sim:true)但缺 QA PASS verdict。"
+		echo "[pre-push]   修 docs/process/verdicts/${slice}.qa.json（verdict:PASS）後再 push，或 --no-verify（系統認可）。"
+		echo "[pre-push]   詳跑：./tools/godot.ps1 --headless --script scripts/debug/verification_gate.gd -- --slice=$slice"
+		fail=1
+	fi
+fi
+
+exit $fail
