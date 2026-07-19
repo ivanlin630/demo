@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² pre-merge·god-view Slice E 終 diff 62697e6c] spec R² 你已審(scope 訂正 4 site E1/E2/E3/E5,E4/E6 已 belief 化排除)+ blueprint RELEASE-PASS(baseline diff 證 null-belief-flee=pre-existing 非 E,team67/54 coherent 證機制對)。merge 前 pre-merge R² 看 impl 對 spec 無漂移。審點:①E1 _commit_conquest_attack:336/E2 _try_join_target:1830/E3 found_subjugate:1278 move_target 改 belief_pos ②E5 _find_escape_dir 用 belief 位(enemy_bpos)③無 belief→不 dispatch/sentinel 非 fallback-live ④無誤碰 E4 encircle/E6 envoy(已 belief 化)⑤無新 RNG/違憲。branch feat/godview-e@62697e6c off 8146c4a2。CLEAN→我 merge。null-belief-flee(28470932)另線,非本 diff。"
 ---
 
