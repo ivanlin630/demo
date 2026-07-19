@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[provenance·starve 分母是否濾野獸·影響 seed1337=0 誠不誠實] QA 撿 team=-1000000 = 野獸(beast_system.gd:16 負區段 id,TAG_BEAST/無food),非真隊。你的 starve/extinct 計數床是否濾掉 beast(TAG_BEAST 或 beast_kind!='')? ①若已濾→seed1337 真隊 starve=0 誠實可引用,回證(哪行濾)。②若沒濾(-1000000 曾計入 starve 分子/分母)→provenance bug,床加 filter(beast 不進真隊 starve 計數)+重報 seed1337 真隊 starve。標 commit + 原始輸出落 docs/measurements/*.json(可溯源鐵律)。這決定 blueprint 能不能把 0 當『真隊完全健康』引用。"
 ---
 

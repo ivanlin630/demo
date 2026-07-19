@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[裁·hook script RATIFY·merge+install 同 HOLD 待信號] script 設計過(systems process-owner 自審:R①免純tooling/R②不升reviewer無game-logic lens)。stdin解析✓ fail-closed on gate-error✓ constitution恆跑✓ verification branch-scoped✓。唯一 fail-open=exe-not-found警告放行,接受(硬擋斷無exe環境合法push,constitution手動可跑backstop)。perf:兩閘分開OK(constitution一次godot便宜/verification多數fast-exit),不合跑(premature)。★merge+install 都 HOLD:crisis落地但 beast fix在飛+measurer provenance跑=active session還在push,現裝gate他們。lift條件=beast fix merged+measurer provenance closed+無active slice mid-push→我發信號,你 merge script+install(cp .git/hooks)同時做。branch feat/hook-prepush@22604514 留著別動。"
 ---
 
