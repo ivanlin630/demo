@@ -36,6 +36,33 @@ if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDL
 - `_forager_sated`：`_survival_food_days(sub) >= FORAGE_SATED_DAYS`（TEST VALUE，攜糧夠多值得回交）。`_parent_needs_food`：`parent != null and _survival_food_days(parent) < PARENT_LOW_DAYS`（TEST VALUE，母團缺糧→即使沒滿也回交）。
 - **非 thrash-抑制補丁**：這是把「即時 merge」改「條件 merge（交糧時機）」——forager 覓食工作、食足回交，供給環閉合。sated 後歸建移向 parent（食足→forage util 低→不 re-forage→不 thrash）。
 
+## ★v3 重設計（blueprint 結構 scope 後）：連續母團監看 + orphan-forager
+> **v2（sated-gated 條件 merge）仍不足**：measurer 查 seed1337 v2 惡化（6→10）= **真結構洞非 cascade**。`_parent_needs_food` 召回檢查在 `move_target==-1` 分支內（只 forager 駐 forage tile 才查）→ **旅途中 forager 完全不監看母團** → 母團垂危時出門的 forager 召不回；死案例 forager 已吃飽（food 10-11）卻救不了（交糧太慢）。∴ 需**連續監看**（不等駐點）。
+
+**v3 兩結構修（併同 spec，blueprint 裁）**：
+1. **連續母團監看召回（主）**：foraging subteam **每 tick（旅途中也查，不等駐點/不等 sated）**監看母團——母團 `<PARENT_LOW` **立即掉頭歸建交糧**。位置＝`_check_discipline` 後、position-branch 前：
+```gdscript
+if _check_discipline(state, sub): return
+# ★v3 連續母團監看（foraging subteam，不等駐點——補 v2 只駐點查的結構洞）
+if sub.current_task in SURVIVAL_TASKS:
+    var parent: TeamData = state.teams.get(sub.parent_team_id)
+    if parent == null:
+        _orphan_forager(state, sub)   # ★orphan：母團死/缺席 → 轉獨立（見下）
+        return
+    if _parent_needs_food(state, parent):
+        merge_queue.append(sub.team_id)   # ★母團垂危 → 立即掉頭歸建交糧（loop2b 移向 parent→抵達 merge）
+        return
+# （以下 position-branch：v2 sated-gated merge 處理「駐 forage tile 食足→交糧」正常路）
+```
+2. **orphan-forager**（parent 缺席/死亡）：轉獨立（沿用 discipline_fail 現成路 `state.detach_subteam(sub) + remove_tag(TAG_SUBTEAM) + TaskArbiter.release(sub)` → 下 tick 跑獨立戰略/faction，不再無限囤糧）：
+```gdscript
+func _orphan_forager(state, sub) -> void:
+    state.detach_subteam(sub); state.remove_tag(sub, TeamData.TAG_SUBTEAM, "orphan_forager"); TaskArbiter.release(sub)
+    print("[SubAI] Team%d 母團缺席 → orphan 轉獨立" % sub.team_id)
+```
+- **v2 sated-merge 保留**：position-branch 的「駐 forage tile + 食足 → 歸建交糧」正常路不變（連續監看是 in-transit 補洞，非取代 sated 路）。
+- **gate-tune 排 v3 結構修之後**（blueprint 裁）：SATED=10/PARENT_LOW 可能仍偏，但**結構洞補完才是純參數敏感度**——v2 已證純調參數不堵召回洞治標不治本。結構+orphan 落地後若殘留才 gate-tune。
+
 ## ★terminal-sticky = 真 blocker（訂正 v1 reviewer/implementer 的 non-blocker 判斷）
 reviewer R²v1 標 terminal-sticky「非 blocker，measurer 順帶量」、implementer 照 dispatch——**訂正**：blueprint+measurer 坐實 terminal-sticky = **真 blocker**（破供給環 famine regression 有清楚因果，非模糊聚合）。教訓歸「症狀vs根/以為修好其實換位置」（memory [[feedback_symptom_vs_root_retry]]）。**v2 必含供給環才 accept**。
 
@@ -49,6 +76,9 @@ blueprint **接受 subteam 獨立覓食，但要求交糧回母團**（供給環
 - **measure**：seed1337 6 隊（62/71/73/79/84/90）不再 idle-latch、覓食食物流進（committed=覓食 subteam ARRIVE_MERGEQ↔RELEASE 振盪消失）；42/4201 無 regression；subteam 正常 lifecycle（mission 完工歸建）不破。
 - **★供給環閉合 must-pass（v2 核心，真 blocker）**：修後 forager 食足→歸建**交糧給母團**（`try_merge_back` food 進 parent）→ 母團失覓食貢獻的餓死鏈消。**seed42 famine 0→10 regression 必回 0**（v1 引入的，v2 必治）。terminal-sticky（forager 永久囤糧不交）**必消**：forager food_days 不無限累積（食足即歸建交糧），囤糧 200-2000 food-days 現象消失。
 - **★無 re-thrash**：sated 後歸建移向 parent、food 足→不 re-pick forage→不回到 thrash（measurer 驗 ARRIVE↔RELEASE 振盪 + 新的 sated-歸建 路都不振盪）。
+- **★v3 連續監看 must-pass**：**seed1337 v2 惡化（6→10）回落**（旅途中 forager 監看母團垂危→掉頭交糧→母團不再召不回餓死）；死母團案例（forager food 10-11 卻救不了）消。
+- **★v3 orphan must-pass**：parent 死/缺席的 forager **轉獨立不無限囤糧**（囤 200-2000 food-days 現象在 orphan 路也消）。
+- **★整體 must-pass（blueprint re-measure）**：seed42 famine→0（v2 目標）+ seed1337 不惡化（v3 目標）+ orphan 消 + 手不聽腦維持 0 + 6 隊解 + 無 re-thrash。gate 值（SATED/PARENT_LOW）待結構修落地後才 tune（現調無意義）。
 
 ## 排序
 HIGH。off main 980e0b1c 後 HEAD。R² 必過（重點審 SURVIVAL_TASKS 排除不破 mission-merge lifecycle + sibling 行為）→ dispatch。
