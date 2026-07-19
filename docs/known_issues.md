@@ -26,9 +26,13 @@ QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambit
 
 crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只覆蓋「release 後走 **try_set** 重委派」的重鎖（team1/19 被接住）。**走 `transition` 的重鎖（team16「等待新領主」）未覆蓋**。∴ 原 release-pass（靶三隊 team1/19/13 剛好全走 try_set 路）= **樣本不完整**，免疫修對它瞄準的有效但覆蓋不全。**非推翻已 merge**（免疫對 try_set 路真有效），但誠實記「覆蓋範圍=try_set 重委派，transition 重鎖需上條 transition 修一併治」。blueprint owner 補 game-design 對應處。連上條 [[TaskArbiter.transition 後門]]。
 
-## team64/68 手不聽腦-STUCK（food-ok idle 坐死，2026-07-19，measurer 死因校準坐實）
+## team68 手不聽腦-STUCK + team64 CONTESTED（food-ok idle 坐死，2026-07-19，measurer 死因校準）
 
-measurer 校準 seed1337 14 消失真隊（`beastfix-lockpoint-deaths-7fb16350-1337.txt`）：9 TRUE-FAMINE（coherent 窮死）+ **team64/68 手不聽腦-STUCK**（food 4.17/4.58 **>CRISIS_FLOOR 1.5=不缺糧** + `dispatch_would_succeed=true` 卻 task idle 坐死＝控制層不執行）+ 3 food-ok vanish。**crisis-override 本不該 fire（非深餓，正確）**——這是**手不聽腦**（腦說可派、手 idle），非餓。`famine_days=0 → 不在 extinct.starve metric`（∴ 不污染 cascade verdict，9 famine 仍 coherent）。**pre-existing 控制層 latch**（beast-fix skip 只碰 `beast_kind!=""`，真隊照跑→非 beast-fix；被 seed1337 較苦 basin 暴露）。**併入 [[TaskArbiter.transition 後門]] HIGH 票 scope**：查 team64/68（food-ok 路）與 team16（famine 路 transition-clobber）是否同根（transition 無條件覆寫 survival / release-無-redispatch）。**bed 死因標籤已批 3 分類修**（famine/stuck-task/手不聽腦，measurer 出 determinism-safe patch）——消「純窮死=無 stall_exclude」單軸掩蓋 stuck 的觀測盲點（全量暫態可觀測性不變量）。連 [[project_reverse_engineering_arc]]（手不聽腦）。
+measurer 校準 seed1337 14 消失真隊（`beastfix-lockpoint-deaths-7fb16350-1337.txt`）：9 TRUE-FAMINE（coherent 窮死）+ 手不聽腦-STUCK + 3 food-ok vanish。
+- **team68 = 手不聽腦-STUCK（solid）**：food 4.58 **>CRISIS_FLOOR 1.5=不缺糧** + `dispatch_would_succeed=true` 卻 task idle 坐死＝控制層不執行（非餓）。
+- **★team64 = CONTESTED（別當乾淨案例，blueprint 戳 2026-07-19）**：measurer 判手不聽腦（food 4.17 idle 坐死）；**QA 故事稽核先前獨判 COHERENT**（逃真威脅戰死，`flee_from` 真座標被追殺，food_days **8.75**）。兩讀 food_days（4.17 vs 8.75）+ 死因（idle-stuck vs combat-flee）不同 → **可能同隊死亡序列不同時間點**（先逃真威脅=coherent，後段卡 idle=手不聽腦）**非必矛盾**，也可能一讀誤。**寫 transition/手不聽腦票時 team64 別直接寫死為手不聽腦，先核對兩份 trace 時間窗**（measure-first / [[feedback_fileline_vs_interpretation]]）。
+
+`famine_days=0 → 不在 extinct.starve metric`（∴ 不污染 cascade verdict，9 famine 仍 coherent）。**pre-existing 控制層 latch**（beast-fix skip 只碰 `beast_kind!=""`，真隊照跑→非 beast-fix；被 seed1337 較苦 basin 暴露）。**併入 [[TaskArbiter.transition 後門]] HIGH 票 scope**：查 team68（food-ok 路，solid）+ 核對 team64（contested 時間窗）+ team16（famine 路 transition-clobber）是否同根（transition 無條件覆寫 survival / release-無-redispatch）。**bed 死因標籤已批 3 分類修**（famine/stuck-task/手不聽腦，measurer 出 determinism-safe patch）——消「純窮死=無 stall_exclude」單軸掩蓋 stuck 的觀測盲點（全量暫態可觀測性不變量）。連 [[project_reverse_engineering_arc]]（手不聽腦）。
 
 ## ② stall 對併入-rejection loop 不 fire（retry 不 re-stamp，2026-07-19，crisis-override R² 抓，crisis 已覆）
 
