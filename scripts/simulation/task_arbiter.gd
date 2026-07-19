@@ -39,6 +39,12 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 		move_target: Vector2i, priority: int, _source: String = "") -> bool:
 	if team.combat_target != -1:
 		return false   # 戰鬥鎖絕對（combat 結束流程清 combat_target）
+	# crisis-override 免疫窗：剛 crisis-released 的 task 短時間禁重委派（防同 cadence release-then-instant-recommit：
+	# defection「等待新領主」/solo FLEE 子系統立刻打回原 task → survival 永無機會）。只擋「同一 task」→ survival
+	# 選別的 task（覓食/買糧…）不受阻，順利接住餓死隊。到期自動解。
+	if new_task == team.crisis_released_task and team.crisis_released_task != "" \
+			and state.world.current_tick < team.crisis_released_until:
+		return false
 	if team.current_task == TeamData.TASK_IDLE or priority > team.task_priority:
 		# 漏斗站4探針（純觀測）：TRADE 在途被搶 → 記誰搶走（new_task|source）
 		if Probe.enabled and team.current_task == TeamData.TASK_TRADE \

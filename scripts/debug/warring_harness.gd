@@ -82,6 +82,10 @@ const PROBE_KEYS: Array = [
 	"worldgen.floor_pass", "worldgen.floor_fail", "worldgen.build_outpost",
 	# S1 追擊放血人格化：追擊次數（放血量/人格加權走 AMOUNT_KEYS）
 	"pursuit.n",
+	# ② 絕境階梯 stall-detection 健康指標（measurer 要，main 線之前漏收=tap-gap，此份重補）：換格觸發 + boost 觸發頻率
+	"survival.stall_exclude", "survival.boost_fire",
+	# crisis-override 健康指標（measurer 要）：OUTCOME-based 跨線危機安全網觸發頻率
+	"crisis.override_release",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。

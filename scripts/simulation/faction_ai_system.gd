@@ -80,6 +80,7 @@ const SURVIVAL_TASKS: Array = [TeamData.TASK_RETURN_HOME, TeamData.TASK_BEG, Tea
 # crisis-override（跨線危機安全網，泛化 ②）：committed 任何 task 深餓未緩 → force re-rank。
 const CRISIS_FLOOR: float = 1.5   # TEST VALUE — 深餓門檻（★decouple SURVIVAL_BOOST_FLOOR 2.0，略深；避 boost tuning 誤動 crisis）
 const CRISIS_DAYS: float = 6.0    # TEST VALUE — committed 未緩 N 天才 crisis（給 task 工作時間，非急打斷）
+const CRISIS_IMMUNITY: int = WorldState.TICKS_PER_DAY * 2   # TEST VALUE — release 後禁重委派同 task 窗（橋接到 survival @80 commit，防 instant-recommit）
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
 # P2b-1：LOOT_GATE/JOIN_GATE/CAMP_GATE + _loot_pref/_join_pref/_camp_pref 已刪
 # （survival 選擇統一委派 DecisionEngine.rank_survival → DecisionTerms weight，消雙 owner）
@@ -380,6 +381,8 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	#   re-rank → survival @80 preempt 卡住 task。放 FLEE/preempt gate 前=涵蓋 5 種 stuck-task（FLEE/建設/外交/
 	#   等待新領主/併入-pending）。不特判 flee（survival 主宰 by engine THREAT<SURVIVAL 不變量；valid-flee 罕見角 deferred Arc5）。
 	if _famine_crisis(state, team):
+		team.crisis_released_task = team.current_task   # 免疫此 task（防同 cadence 立刻打回）→ 迫 re-rank 選別的 survival task
+		team.crisis_released_until = state.world.current_tick + CRISIS_IMMUNITY
 		TaskArbiter.release(team)
 		team.previous_task = ""
 		if Probe.enabled: Probe.bump("crisis.override_release")

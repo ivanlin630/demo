@@ -16,6 +16,7 @@ func _initialize() -> void:
 	_test_no_fire_idle()
 	_test_lazy_baseline_reset()
 	_test_five_stuck_tasks()
+	_test_release_immunity()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -89,3 +90,24 @@ func _test_five_stuck_tasks() -> void:
 	for task in [TeamData.TASK_FLEE, TeamData.TASK_BUILD, TeamData.TASK_DIPLOMACY, TeamData.TASK_JOIN, TeamData.TASK_GOVERN]:
 		var w: Array = _mk(task, 2.0, 5, 0, 8 * TPD, 0.5)
 		_ok(FactionAISystem.new()._famine_crisis(w[0], w[1]), "stuck task=%s 深餓未緩 → crisis TRUE（OUTCOME-based）" % task)
+
+# release 免疫窗：擋同 task 重委派（防 instant-recommit）、放別 task（survival 接住）。
+func _test_release_immunity() -> void:
+	print("--- release 免疫窗：擋同 task 重委派、放別 task ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 1000
+	var t := TeamData.new(); t.team_id = 1; AnonCohort.add(t.anon_cohorts, "平民", "healthy", 5)
+	state.teams[1] = t
+	t.crisis_released_task = TeamData.TASK_FLEE   # 剛 crisis-release 了 FLEE
+	t.crisis_released_until = 1000 + 480
+	# 同 task（FLEE）重委派 → 擋（防 defection/solo 立刻打回）
+	_ok(not TaskArbiter.try_set(state, t, TeamData.TASK_FLEE, Vector2i(1, 1), TaskArbiter.PRIO_SURVIVAL, "solo"),
+		"免疫窗內同 task(FLEE)重委派 → 擋")
+	# 別 task（覓食 survival）→ 放（survival 接住餓死隊）
+	_ok(TaskArbiter.try_set(state, t, TeamData.TASK_FORAGE, Vector2i(2, 2), TaskArbiter.PRIO_SURVIVAL, "solo"),
+		"免疫窗內別 task(覓食 survival)→ 放（接住）")
+	# 窗過期 → 同 task 可再委派
+	state.world.current_tick = 1000 + 500
+	var t2 := TeamData.new(); t2.team_id = 2; AnonCohort.add(t2.anon_cohorts, "平民", "healthy", 5); state.teams[2] = t2
+	t2.crisis_released_task = TeamData.TASK_FLEE; t2.crisis_released_until = 1000 + 480
+	_ok(TaskArbiter.try_set(state, t2, TeamData.TASK_FLEE, Vector2i(1, 1), TaskArbiter.PRIO_SURVIVAL, "solo"),
+		"免疫窗過期(1500>1480) → 同 task 可再委派")
