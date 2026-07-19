@@ -6,6 +6,10 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★null-belief-flee 凍結（個體 FLEE 對空氣逃，2026-07-20，Slice E QA 抽查撿，★Slice D 前必修）
+
+team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍結 1 格 + food=0 餓死（team4/13 還逃跑↔建設 thrash）。**第 4 種 broken 家族（手不聽腦 finder-check classifier 看不到——不是「有 target 沒 dispatch」，是「dispatch 了但目標 null」）**。機制：個體 survival FLEE（`faction_ai:1595/1948` `flee_from_pos = _flee_threat_pos` = 威脅 **belief 位**）——belief 威脅**有存在感但無座標**（stale/positionless→`belief_pos` 回 `(-1,-1)`）→ `flee_from_pos=(-1,-1)` → 算不出逃離向量。`movement:81` 說「(-1,-1) 不設 target 靠 release 收」**但 release 沒真發生** → 卡 task=逃跑 凍結不覓食餓死。**★PRE-EXISTING（code 強證：E diff 沒碰個體 FLEE 路，只 E1/E2/E3+E5 strategic_assignments；slice2 belief-化威脅位+缺 flee-release 引入，待 measurer baseline diff 確認）**——**每 belief-化 slice（E 已、D 更大）都暴露更多**。**★Slice D 前必修**（否則 D doom-delta 被同款污染）。**修方向**（blueprint 認可，look-before-leap）：`flee_from_pos==(-1,-1)`（威脅無座標）→ **release FLEE → re-rank 轉覓食**，非凍結（FLEE 無座標=not applicable 不該卡死）。連 god-view arc（belief-化暴露）/[[feedback_fileline_vs_interpretation]]。
+
 ## god-view 殘留 can_reach（faction_ai:1115，2026-07-20，Slice E measure 撿，下批 cleanup）
 
 `_check_precondition` 的 `"can_reach"`（`faction_ai_system.gd:1115`）：`_hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999` = **決策 precondition 讀 live 他隊位**（vs 同函式 `force_ge_target:1109` 用 `BeliefSystem.best_estimate` belief，**不一致**）= 真 god-view leak（違感知鐵律：決策憑 belief 非 live）。**但 `<999` 近-vacuous**（hex 距遠小於 999→恆真）→ god-view 效果近無害、**低優先**。**out god-view Slice E 4-site（E1/E2/E3/E5）**，歸下批 god-view cleanup（Slice E follow-up/D 批機械 belief_pos 化）。**★順帶疑（非 god-view，另類）**：若 `can_reach` 本該真 reachability gate，`<999` vacuous=**決策品質洞**（以為任 target 可達即攻/追，PathSystem 真可達性沒查）——可能 can_reach 該用 PathSystem 真可達 + belief 位一次治 god-view+vacuous。連 god-view audit（`docs/superpowers/handbacks/2026-07-19-systems-to-blueprint-godview-audit-scope.md`）。
