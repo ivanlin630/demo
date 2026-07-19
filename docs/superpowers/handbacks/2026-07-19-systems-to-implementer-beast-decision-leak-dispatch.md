@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·野獸洩進決策迴圈+id碰撞·R² CLEAN·★off LOCAL main f42a6e1c 非 origin] spec=2026-07-19-beast-decision-leak-and-id-collision.md。R² CLEAN(5審點 file:line 坐實)。兩root:①id碰撞—_next_beast_id instance var(beast_system.gd:16)→所有 BeastSystem.new() spawn 拿-1000000→create_team覆寫。修=counter移 WorldState.next_beast_id(★禁static var:跨run非決定);build_beast_team讀state.next_beast_id-=1。②決策洩漏—evaluate_all loop2(:700 faction_id==-1支)/loop3(:749)無beast_kind guard→beast跑team AI。修=兩loop body頂 if team.beast_kind!='' : continue。★★branch off LOCAL main f42a6e1c(含slice2/godviewF/crisis merge),★禁 origin/main(bb1e75ff 落後11 commit,naive-merge會revert整批)。TDD:①3beast 3相異id ②spawn beast跑N tick evaluate_all→無task/ambition/leader晉升 ③既有beast測(headless_test 2202/2231/2262/2401)續綠。gate PASS/headless 0new(baseline 3:p2a/beg-join/strategic-ladder)/determinism 2跑byte-identical/measure seed1337·42·4201真隊無regression。task完成判定=systems+reviewer非自判。"
 ---
 
