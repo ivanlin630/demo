@@ -36,6 +36,7 @@ if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDL
 - **★sibling 驗**：CAMP/BEG/JOIN/RETURN_HOME subteam 抵達目的地——確認排除後行為對（CAMP 留紮營✓/BEG 乞食✓；JOIN 抵達 join target 由 _decide 執行✓；RETURN_HOME 抵家 resupply 非被召 parent✓）。若某 sibling 排除後卡別的態→measure flag。
 - **gate** constitution PASS / **headless** 0 new(baseline 3) / **determinism** 2 跑 byte-identical。
 - **measure**：seed1337 6 隊（62/71/73/79/84/90）不再 idle-latch、覓食食物流進（committed=覓食 subteam ARRIVE_MERGEQ↔RELEASE 振盪消失）；42/4201 無 regression；subteam 正常 lifecycle（mission 完工歸建）不破。
+- **★terminal-sticky must-verify（reviewer R² 升級，非 merge blocker）**：修後 survival subteam 抵達 forage tile 執行覓食（不 merge），但 FORAGE/CAMP/RETURN_HOME **無 release 路** → 疑 fed 後**永不歸建/re-rank**（永久 detached forager，卡 FORAGE 非-IDLE → _decide_subteam 不重跑）。**非餓死 latch（已 fed=嚴格優於原 thrash-死），屬 WHAT-flag 同族**。measurer 量：修後 6 隊 fed 之後**會不會 re-rank/歸建**，還是 terminal-sticky 卡 forage 永不回母團。**若 terminal-sticky 真**→follow-up（foraging subteam 食足後 re-rank 路 / 歸建 util 升，blueprint WHAT 判要不要 pool 母團）非本 fix blocker。
 
 ## 排序
 HIGH。off main 980e0b1c 後 HEAD。R² 必過（重點審 SURVIVAL_TASKS 排除不破 mission-merge lifecycle + sibling 行為）→ dispatch。
