@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[當機打斷·重跑 crisis-immunity re-measure seed1337] 剛當機殺掉你的 godot,你 status 卡 remeasure-aggregate-pending 沒跑完。branch feat/crisis-override@b71647ab(immunity fix 已commit,worktree clean)off main d0ab7f91。重跑 seed1337(±42/4201 對照):驗 crisis release 免疫窗生效——team1/19(等待新領主 defection)/team13(FLEE)是否接住(release 後不被同 cadence 打回原 task,survival 選別 task 覓食/買糧),→ starve 應降(前輪 measurer 揭 6→8 反升=release-then-instant-recommit,immunity 修的就是這)。★量測可溯源:原始輸出落 docs/measurements/*.json + 引數附來源檔:行 + 標 commit b71647ab。出數 → 餵 blueprint release-pass(2026-07-09 pass 權→藍圖)。你原 status ticket 就是這,當機前沒完成,重啟接著跑。"
 ---
 
