@@ -139,6 +139,22 @@ func _run() -> void:
 				print("      tick=%d 排除=%s (排除前承諾option=%s) food_days_at_fire=%.2f famine_days=%.1f" % [
 					ev["tick"], String(ev["excluded_option"]), String(ev["committed_option_before"]),
 					ev["food_days_at_fire"], ev["famine_days"]])
+		# ★死因 3 分類（systems 批 2026-07-19，取代單軸「純窮死=無 stall_exclude fire」誤標）：
+		# 舊標籤只表「無 stall_exclude」≠ 真缺糧，會把手不聽腦 stuck（food 足卻坐死）誤標餓死＝量測盲點捏假故事
+		# （全量暫態可觀測性不變量正解）。純觀測：只讀已收集 snapshot 末筆，不碰 sim state/RNG（determinism-safe）。
+		var _ls: Dictionary = history[tid][history[tid].size() - 1]
+		var _food: float = _ls["food_days"]
+		var _task: String = String(_ls["task"])
+		var _committed: String = String(_ls["survival_committed_option"])
+		var _would_dispatch: bool = bool(_ls["would_survival_dispatch_succeed"])
+		var _cause: String = ""
+		if _food < FactionAISystem.CRISIS_FLOOR:
+			_cause = "famine（末筆 food_days=%.2f < CRISIS_FLOOR=%.1f ＝真深餓）" % [_food, FactionAISystem.CRISIS_FLOOR]
+		elif _would_dispatch and _task == "idle":
+			_cause = "手不聽腦（food_days=%.2f 足 + dispatch_would_succeed=true 卻 idle 坐死＝控制層不執行，非餓）" % _food
+		elif _committed != "":
+			_cause = "stuck-task（food_days=%.2f 足 + committed=%s 卻消失＝任務卡住非餓）" % [_food, _committed]
 		else:
-			print("    （此隊死前無 stall_exclude fire 事件——純窮死，非 exclusion 誤排除路徑）")
+			_cause = "food-ok-vanish（food_days=%.2f 足、無 stuck 徵兆＝疑 merge/combat/absorb 非餓死）" % _food
+		print("    ★死因分類=%s%s" % [_cause, "" if fire_events.has(tid) else "（死前無 stall_exclude fire）"])
 	print("=== DONE ===")
