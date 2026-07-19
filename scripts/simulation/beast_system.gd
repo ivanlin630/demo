@@ -13,14 +13,14 @@ const BEAST_PROFILE: Dictionary = {
 			   "behavior": "predator", "meat": 50.0, "hide": 10.0, "strength": 16.0 },
 }
 
-var _next_beast_id: int = -1000000   # 負區段 id，避開正常 team id
-
 # 造臨時野獸 pseudo-team，入 state.teams，回傳 team_id。
 func build_beast_team(state: WorldState, kind: String, pos: Vector2i) -> int:
 	var prof: Dictionary = BEAST_PROFILE.get(kind, BEAST_PROFILE["boar"])
 	var t := TeamData.new()
-	t.team_id = _next_beast_id
-	_next_beast_id -= 1
+	# id counter 移 WorldState.next_beast_id（★禁 instance/static var）：每 BeastSystem.new() 都拿到
+	# per-world 唯一遞減 id（舊 instance var 令每 new() 重置 -1000000 → 全 beast 撞 id → create_team 覆寫）。
+	t.team_id = state.next_beast_id
+	state.next_beast_id -= 1
 	state.set_team_tags(t, [TeamData.TAG_BEAST], "beast_spawn")
 	t.beast_kind = kind
 	t.beast_strength = float(prof["strength"])

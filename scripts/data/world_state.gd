@@ -36,6 +36,10 @@ var offmap_extinct_coin: float = 0.0  # off-map 滅團（radius 全無有效格�
 # 純加速結構、非真值源：消費端仍 live 復驗 tile_pos/hex_dist（容 key 碰撞 + 建後瞬時態）。
 var teams_by_tile: Dictionary = {}   # tile_id(int = x*1000+y) → Array[int] team_ids
 var _next_faction_id: int = 0
+# beast pseudo-team id counter（負區段，避開正常 team id）。★per-world（非 BeastSystem instance var，
+# 亦禁 static var）：每 world fresh init → per-seed 決定性 + 每 beast 唯一遞減 id。舊 instance var 令每
+# BeastSystem.new() 重置 -1000000 → 全 beast 撞同 id → create_team 靜默覆寫（beast id 碰撞 bug）。
+var next_beast_id: int = -1000000
 var player_id: int = -1
 var specimen_team_ids: Array[int] = []   # 指標團：LOD-exempt + SpecimenTracer 詳捕決策（觀測 only，debug/seed 設）
 var player_state: Dictionary = {}

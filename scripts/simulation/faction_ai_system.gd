@@ -709,6 +709,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 	var merge_queue: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
+		# 野獸(beast_kind!="")不進決策迴圈：非-agent 無「腦」不該經引擎的秤（憲法決策模型）。
+		# 生命週期(spawn/combat/reward/cleanup)全在 encounter/npc_combat/beast_system，不評 strategy/solo/infra。
+		if team.beast_kind != "": continue
 		if team.parent_team_id != -1:
 			_evaluate_subteam(state, team, merge_queue)
 		elif team.faction_id == -1:
@@ -764,6 +767,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
+		# 野獸不進決策迴圈：不 succession 晉升領袖(leader_id=-1 非「死領袖」)、不 ambition/survival/threat。
+		# beast husk 清理由 combat cleanup(reward_and_cleanup/_cleanup) 擁有，非 loop3 generic _on_team_extinct。
+		if team.beast_kind != "": continue
 		# 滅團：population<=0 → 遺財轉公庫/abandoned + 移除空殼團（餓死路徑原只清資產不 erase → husk）
 		if team.population <= 0:
 			_on_team_extinct(state, team)
