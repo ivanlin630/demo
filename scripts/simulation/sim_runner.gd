@@ -256,8 +256,11 @@ func _advance_tick_body(state: WorldState, player_pos: Vector2i) -> String:
 							pt_t.team_id, state.world.current_tick, 0.5)
 					state.clear_social_target(beggar_t)   # BEG 現走 social_target（非 combat_target）
 					if beggar_t.previous_task != "" and beggar_t.previous_task != TeamData.TASK_IDLE:
-						TaskArbiter.transition(state, beggar_t, beggar_t.previous_task,
-							TaskArbiter.PRIO_DISPATCH)
+						# release-first + move_target 存/還（同 _clear_aid_task；release 清 -1，resume 需原目的地）。
+						var saved_mt: Vector2i = beggar_t.move_target
+						TaskArbiter.release(beggar_t)
+						TaskArbiter.try_set(state, beggar_t, beggar_t.previous_task, saved_mt,
+							TaskArbiter.PRIO_DISPATCH, "beggar_restore")
 					else:
 						TaskArbiter.release(beggar_t)
 					beggar_t.previous_task = ""

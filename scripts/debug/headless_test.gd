@@ -6902,7 +6902,7 @@ func _test_aid_resolve_npc_accept() -> void:
 	state.world = WorldData.new()
 	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 10); b.resources["food"] = 0
 	b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_TRADE
-	b.combat_target = 1; b.tile_pos = Vector2i(2,2)
+	b.social_target = 1; b.tile_pos = Vector2i(2,2)   # BEG 走 social_target（非 combat_target）；戰鬥中不 restore=正確
 	var b_leader := PersonData.new(); b_leader.id = 100; b_leader.team_id = 0
 	state.persons[100] = b_leader; b.leader_id = 100
 	state.teams[0] = b
@@ -6925,7 +6925,7 @@ func _test_aid_resolve_npc_refuse() -> void:
 	var state := WorldState.new()
 	state.world = WorldData.new()
 	var b := TeamData.new(); b.team_id = 0; _seed_pop(b, 10); b.resources["food"] = 0
-	b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_TRADE; b.combat_target = 1
+	b.current_task = TeamData.TASK_BEG; b.previous_task = TeamData.TASK_TRADE; b.social_target = 1   # BEG 走 social_target
 	var b_leader := PersonData.new(); b_leader.id = 100
 	state.persons[100] = b_leader; b.leader_id = 100
 	state.teams[0] = b

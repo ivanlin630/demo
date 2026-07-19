@@ -1245,8 +1245,11 @@ func _resolve_mergein(state: WorldState, absorber_id: int, absorbed_id: int) -> 
 func _clear_aid_task(state: WorldState, beggar: TeamData) -> void:
 	state.clear_social_target(beggar)
 	if beggar.previous_task != "" and beggar.previous_task != TeamData.TASK_IDLE:
-		# 恢復 survival 前的原 task（就地轉換，move_target 保留）
-		TaskArbiter.transition(state, beggar, beggar.previous_task, TaskArbiter.PRIO_DISPATCH)
+		# 恢復 survival 前的原 task（release-first：先 release 過 transition guard，再還原 previous_task）。
+		# ★move_target 存/還：release 清 move_target=-1，但 resume 原工需原目的地，否則 team 不知去哪。
+		var saved: Vector2i = beggar.move_target
+		TaskArbiter.release(beggar)
+		TaskArbiter.try_set(state, beggar, beggar.previous_task, saved, TaskArbiter.PRIO_DISPATCH, "beggar_restore")
 	else:
 		TaskArbiter.release(beggar)
 	beggar.previous_task = ""
@@ -1261,6 +1264,8 @@ func _execute_settlement(state: WorldState, team_id: int, outpost_pos: Vector2i,
 		state.add_tag(t, TeamData.TAG_PRODUCE, "settle")
 	state.remove_tag(t, "流亡", "settle")
 	state.set_team_faction(t, faction_id)   # 安頓入 faction（雙向同步）
+	# release-first：流亡隊常在 survival@80，先 release→IDLE@0 過 transition guard，再 set 生產（正當安頓退場）。
+	TaskArbiter.release(t)
 	TaskArbiter.transition(state, t, "生產", TaskArbiter.PRIO_AMBIENT)
 	t.move_target = Vector2i(-1, -1)
 	# 若該 outpost 已有同 faction PRODUCE team → 嘗試合併
@@ -1286,6 +1291,8 @@ func _convert_to_resident(state: WorldState, subteam: TeamData) -> void:
 		state.add_tag(subteam, TeamData.TAG_PRODUCE, "convert_resident")
 	state.remove_tag(subteam, TeamData.TAG_SUBTEAM, "convert_resident")
 	state.remove_tag(subteam, "流亡", "convert_resident")
+	# release-first：清 emergency→IDLE@0 過 transition guard，再 set 生產（正當變居民退場）。
+	TaskArbiter.release(subteam)
 	TaskArbiter.transition(state, subteam, "生產", TaskArbiter.PRIO_AMBIENT)
 	state.detach_subteam(subteam)   # 變居民脫離母團（雙向同步）
 	print("[Settle] Team%d 安頓於 (%d,%d) 變居民" % [
