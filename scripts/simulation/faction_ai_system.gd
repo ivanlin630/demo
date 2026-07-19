@@ -332,8 +332,12 @@ func _commit_conquest_attack(state: WorldState, team: TeamData, prey_id: int) ->
 	var _was_scout: bool = (team.current_task == TeamData.TASK_SCOUT and team.task_reason == "scout")
 	if _is_stuck(team) or _was_scout:
 		TaskArbiter.release(team)
+	# E1 感知鐵律：攻擊移動目標讀 belief last-seen（非 live god-view；prey 脫視野→照最後見位追=伏擊/佯動 intended）。
+	var atk_pos_e1: Vector2i = BeliefSystem.belief_pos(state, team.team_id, prey_id)
+	if atk_pos_e1 == Vector2i(-1, -1):
+		return false   # 無 belief 位 → 不 dispatch（禁 fallback live）
 	if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
-			state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "prosperity"):
+			atk_pos_e1, TaskArbiter.PRIO_DISPATCH, "prosperity"):
 		team.prosperity_target_id = prey_id
 		if _was_scout: Probe.bump("g3.scout_converge")
 		Probe.bump("conq.prosperity_reached")   # 征服鏈起點（prosperity-attack→失能-capture→吸收）走到
@@ -1274,8 +1278,10 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 				# 吞併 fallback（此分支現不觸；weak prey 已由 prosperity defer 收）。保留 symmetry。
 				if not team.tags.has("統領"):
 					state.add_tag(team, "統領", "found_subjugate")
-				if TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
-						state.teams[prey_id].tile_pos, TaskArbiter.PRIO_DISPATCH, "found_subjugate"):
+				# E3 感知鐵律：建國吞併攻擊移動目標讀 belief last-seen（非 live god-view）。無 belief→不 dispatch。
+				var fs_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, prey_id)
+				if fs_pos != Vector2i(-1, -1) and TaskArbiter.try_set(state, team, TeamData.TASK_ATTACK,
+						fs_pos, TaskArbiter.PRIO_DISPATCH, "found_subjugate"):
 					team.prosperity_target_id = prey_id
 					print("[IndepStrategy] Team%d 野心建國→吞併 Team%d (野心=%.2f)" % [
 						team.team_id, prey_id, ambition])
@@ -1827,7 +1833,11 @@ func _try_join_target(state: WorldState, team: TeamData, target_id: int) -> bool
 	var pp: PersonData = state.persons.get(state.player_id) if state.player_id != -1 else null
 	if pp != null and target_id == pp.team_id:
 		return _maybe_request_join_player(state, team)   # 寫 forced_event，★不 try_set、caller 不 fallthrough
-	if not TaskArbiter.try_set(state, team, TeamData.TASK_JOIN, state.teams[target_id].tile_pos, \
+	# E2 感知鐵律：JOIN 移動目標讀 belief last-seen（非 live god-view）。無 belief→不 dispatch。
+	var join_pos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, target_id)
+	if join_pos == Vector2i(-1, -1):
+		return false   # 無 belief 位 → 不 JOIN dispatch（禁 fallback live）
+	if not TaskArbiter.try_set(state, team, TeamData.TASK_JOIN, join_pos, \
 			DecisionOptions.priority_for("併入"), "subteam"):   # ★① 單一源第5路(grep 抓:JOIN=併入 survival-class @80,非 @50)
 		return false
 	_stamp_survival_commit(state, team, "併入")   # ② 蓋章 committed survival option baseline（單一源全 5 路之一）

@@ -1022,7 +1022,7 @@ func _test_faction_attack_gate() -> void:
 	# C) 慎重 leader + 親見確定 belief(uncertainty≈0) → 照常攻擊（gate 不凍結）
 	var sc: Array = _attack_gate_scene(1.0)
 	var st_c: WorldState = sc[0]; var tm_c: TeamData = sc[1]
-	BeliefSystem.record_claim(st_c, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
+	BeliefSystem.record_claim(st_c, 0, 1, 0, "親見", {"population_est": 4, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # E1：belief 帶 tile_pos（攻擊路 move_target 讀 belief_pos，非 live）
 	FactionAISystem.new()._commit_conquest_attack(st_c, tm_c, 1)   # 序5：確定→照常攻擊（prey=1）
 	assert(tm_c.prosperity_target_id == 1 and tm_c.current_task == TeamData.TASK_ATTACK,
 		"慎重者親見確定→照常攻擊(不凍結)，實際 target=%d task=%s" % [tm_c.prosperity_target_id, tm_c.current_task])
@@ -1288,7 +1288,7 @@ func _test_scout_verification() -> void:
 		"慎重者未驗情報→派斥候，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
 	assert(tm_a.move_target == Vector2i(2, 0), "斥候移向 prey best_estimate 位，實際 %s" % str(tm_a.move_target))
 	# 斥候抵達親見（注入確定 claim）→ uncertainty 塌 → 下次評估轉攻擊（迴路收斂）
-	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)
+	BeliefSystem.record_claim(st_a, 0, 1, 0, "親見", {"population_est": 4, "tile_pos": Vector2i(2, 0)}, 1.0, false)   # E1：belief 帶 tile_pos（攻擊路讀 belief_pos）
 	FactionAISystem.new()._commit_conquest_attack(st_a, tm_a, 1)   # 序5：親見壓 uncertainty→收斂轉攻（prey=1）
 	assert(tm_a.current_task == TeamData.TASK_ATTACK and tm_a.prosperity_target_id == 1,
 		"親見壓低 uncertainty→收斂轉攻，實際 task=%s target=%d" % [tm_a.current_task, tm_a.prosperity_target_id])
@@ -9136,7 +9136,7 @@ func _test_evaluate_prosperity_trigger() -> void:
 	state.team_discovered[0] = [1]
 	team.ambition_archetype = AmbitionLadder.ARCHETYPE_FORCE   # G2c gate：武力擴張才主動征服
 	team.ambition_rung = AmbitionLadder.RUNG_EXPAND
-	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 4}, 1.0, false)  # G3d-1：親見確定 → gate 過
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 4, "tile_pos": Vector2i(2, 0)}, 1.0, false)  # G3d-1：親見確定→gate 過；E1：belief 帶 tile_pos（攻擊路 move_target 讀 belief_pos，非 live）
 	var fas = FactionAISystem.new()
 	fas._commit_conquest_attack(state, team, 1)   # 序5：cascade 溶解後 scout-verify scaffolding（prey=1，親見→confident→attack）
 	assert(team.current_task == TeamData.TASK_ATTACK, "應 TASK_ATTACK，實際=%s" % team.current_task)
@@ -9895,12 +9895,16 @@ func _test_breakout_distance_guard() -> void:
 	var e2 := TeamData.new(); e2.team_id = 2; e2.tile_pos = Vector2i(0, 5); e2.faction_id = 2
 	state.teams[1] = e1; state.teams[2] = e2
 	state.team_discovered[0] = [1, 2]
+	# E5：breakout 讀 belief last-seen 敵位（非 live）→ 測需 belief tile_pos（鏡射 production vision 寫位）。
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "tile_pos": Vector2i(5, 0)}, 1.0, false)
+	BeliefSystem.record_claim(state, 0, 2, 0, "親見", {"population_est": 5, "tile_pos": Vector2i(0, 5)}, 1.0, false)
 	var sai := StrategicAiSystem.new()
 	sai._assign_breakout(state, self_team)
 	assert(not self_team.strategic_assignments.has(-1),
 		"鄰敵 > 3 hex 不應觸發 breakout，實際 sa=%s" % str(self_team.strategic_assignments))
-	# 移近一個 enemy 至 2 hex → 觸發
+	# 移近一個 enemy 至 2 hex → 觸發（belief 同步更新到 (2,0)）
 	e1.tile_pos = Vector2i(2, 0)
+	BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"population_est": 5, "tile_pos": Vector2i(2, 0)}, 1.0, false)
 	sai._assign_breakout(state, self_team)
 	assert(self_team.strategic_assignments.has(-1),
 		"鄰敵 <= 3 hex 應觸發 breakout")

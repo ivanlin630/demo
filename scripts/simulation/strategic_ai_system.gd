@@ -160,31 +160,34 @@ func _assign_breakout(state: WorldState, self_team: TeamData) -> void:
     if self_team.current_task in FactionAISystem.SURVIVAL_TASKS:
         self_team.strategic_assignments.erase(-1)
         return
-    var enemy_teams: Array = []
+    # E5 感知鐵律：突圍讀 belief last-seen 敵位（非 live god-view；敵脫視野→照最後見位算逃向=合理，同 threat evasion）。
+    var enemy_bpos: Array = []   # [Vector2i] believed 敵位（無 belief 者略過，不納突圍計算）
     for tid in state.team_discovered.get(self_team.team_id, []):
         var t: TeamData = state.teams.get(tid)
         if t == null: continue
         if t.faction_id == -1 or t.faction_id == self_team.faction_id:
             continue
-        enemy_teams.append(t)
-    if enemy_teams.size() < 2:
+        var bp: Vector2i = BeliefSystem.belief_pos(state, self_team.team_id, tid)
+        if bp == Vector2i(-1, -1): continue   # 無 belief 位 → 不納入突圍
+        enemy_bpos.append(bp)
+    if enemy_bpos.size() < 2:
         self_team.strategic_assignments.erase(-1)
         return
     # 鄰敵 > BREAKOUT_NEAREST_THRESHOLD hex 不觸發 breakout（看遠敵不必恐慌）
     var nearest_dist: int = 9999
-    for e in enemy_teams:
-        var d: int = _hex_dist(self_team.tile_pos, e.tile_pos)
+    for bp in enemy_bpos:
+        var d: int = _hex_dist(self_team.tile_pos, bp)
         if d < nearest_dist: nearest_dist = d
     if nearest_dist > BREAKOUT_NEAREST_THRESHOLD:
         self_team.strategic_assignments.erase(-1)
         return
-    var best_dir: Vector2i = _find_escape_dir(self_team.tile_pos, enemy_teams)
+    var best_dir: Vector2i = _find_escape_dir(self_team.tile_pos, enemy_bpos)
     var sa_pos: Vector2i = self_team.tile_pos + best_dir * BREAKOUT_DIST
     sa_pos = _nearest_valid_tile(state, sa_pos, self_team.tile_pos)
     self_team.strategic_assignments[-1] = sa_pos
     Probe.bump("strat.breakout_assigned")   # D0 characterization
 
-func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
+func _find_escape_dir(origin: Vector2i, enemy_positions: Array) -> Vector2i:
     var dirs: Array = [
         Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
         Vector2i(0, -1), Vector2i(1, -1), Vector2i(-1, 1),
@@ -192,8 +195,8 @@ func _find_escape_dir(origin: Vector2i, enemies: Array) -> Vector2i:
     var best_dir: Vector2i = dirs[0]; var best_score: float = -99.0
     for d in dirs:
         var score: float = 0.0
-        for e in enemies:
-            var ev: Vector2i = e.tile_pos - origin
+        for ev_pos in enemy_positions:   # E5：belief last-seen 敵位（非 live tile_pos）
+            var ev: Vector2i = ev_pos - origin
             score -= float(d.x * ev.x + d.y * ev.y)
         if score > best_score: best_score = score; best_dir = d
     return best_dir
