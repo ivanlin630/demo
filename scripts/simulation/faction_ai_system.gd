@@ -1724,7 +1724,12 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	if _check_discipline(state, sub):
 		return
 	# 抵達目標格 → 歸建（lifecycle，不進引擎/probe）
-	if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE:
+	# ★手不聽腦第 3 種 de-patch（subteam-idle-latch）：排除 SURVIVAL_TASKS——覓食/紮營/乞食/歸家/join
+	# 是「到目的地執行工作」語意（抵達留 tile 覓食/紮營…，非回母團），blanket merge 把覓食 subteam 抵達
+	# forage 目的地誤當歸建抵家 → thrash(ARRIVE↔RELEASE 1:1) 覓食不執行坐死。只 mission/lifecycle task
+	# (TRADE/GOVERN 等完工返家型) 抵達才 merge-back（歸建顯式路 _decide_subteam 另處理）。
+	if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE \
+			and sub.current_task not in SURVIVAL_TASKS:
 		merge_queue.append(sub.team_id)
 		return
 	# idle → 引擎決策（cadence-gated；A2a 取代 _evaluate_idle_subteam 手 argmax + _check_deviation randf）
