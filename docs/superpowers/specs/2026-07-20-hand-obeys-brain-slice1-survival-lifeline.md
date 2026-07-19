@@ -9,6 +9,15 @@
 ## 骨架（sweep 坐實）
 survival 派發：獨立隊 loop2 `_evaluate_solo`／子隊 loop3 `_evaluate_survival`／**faction 成員只有 loop1 `_assign_tasks→_decide_unified` 一條命脈**（`_evaluate_survival:3267` `uses_unified or parent==-1 → return` 排除成員/獨立走引擎）。team21=faction 成員命脈三重掐。
 
+## ★★前置 gating（異質 R² BLOCKER 1，2026-07-20）：因果須先坐實
+**診斷血證基礎不穩**：判 team21/65 手不聽腦的 bed `would_succeed`（`starvation_lockpoint_trace_bed:72-75`）**只驗優先權零 finder** → 真 famine（無可達食物）坐 IDLE 也記 would_succeed=true → 誤標手不聽腦。∴「team21/65 freeze 非 famine」**未坐實**。**slice1 dispatch HOLD until measurer 補 finder-check 重分類**（`systems-to-measurer-would-succeed-finder-check-reclassify`）：
+- **(a) 真手不聽腦**（finder 找得到可派 survival target 卻沒派）→ slice1 修 A/B/C 有效 → dispatch。
+- **(b) famine 誤標**（finder 全 miss，真無可達食物）→ **slice1 救不了**（改 routing 不生食物），診斷 scope 重估（食物可得性/經濟另 arc）。
+- **驗收指標訂正**：不用「手不聽腦 bucket→0」（不可靠，可能只 famine 重貼標）——用 finder-check 重分類的真 freeze 隊數降。
+
+## ★★原子性約束（異質 R² BLOCKER 2）：A+B+C 不可分批 merge
+fix A 單獨（ambient-skip）在 D1 期間（領主戰鬥/null）→ food-crisis 成員從「卡貿易（至少有 task）」變「卡 IDLE 零 dispatch」= **退化**（loop1 D1 擋、loop2 只設旗標、loop3 threat 無威脅 return，三路全落空）。∴ **A+B+C 必須原子同 merge**；**fix B 必須真觸達「無威脅 IDLE food-crisis 成員」**（在 D1 期間開一條 survival dispatch）——impl/measure 坐實 fix B 的 survival-only pass 對這類成員真 fire，否則 A+B 合上仍留洞。
+
 ## 三修（slice1）
 
 ### 修 A（D6，影響最廣）：ambient fallback 不搶 food-crisis IDLE
