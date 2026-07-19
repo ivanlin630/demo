@@ -1,17 +1,22 @@
 extends SceneTree
 
-# subteam-idle-latch TDD（spec 2026-07-19-subteam-idle-latch，手不聽腦第 3 種）。
-# root：_evaluate_subteam(faction_ai:1727) blanket「抵達(move_target=-1)非-IDLE→歸建 merge_queue」
-#       把覓食 subteam 抵達 forage 目的地誤當歸建抵家 → thrash(ARRIVE↔RELEASE 1:1)、覓食不執行坐死。
-# 修：1727 加 `and sub.current_task not in SURVIVAL_TASKS`（=RETURN_HOME/BEG/JOIN/FORAGE/CAMP，
-#     execute-at-destination 非歸建）→ survival subteam 抵達留 tile 執行覓食，非被召回。
+# subteam-idle-latch TDD v2（spec 2026-07-19-subteam-idle-latch，手不聽腦第 3 種 + 供給環閉合）。
+# root：_evaluate_subteam(faction_ai:1727) blanket「抵達(move_target=-1)非-IDLE→歸建 merge」把覓食
+#       subteam 抵達 forage 目的地誤當歸建 → thrash 覓食不執行坐死。
+# v1（全排除 survival merge）治 thrash-死但引入 terminal-sticky：forager 永久囤糧不交母團→破供給環→
+#       seed42 famine 0→10。
+# v2（供給環）：survival-work 抵達 → 未食足 且 母團不缺 → 留 tile 覓食；食足 or 母團缺糧 → 歸建交糧。
+#   _forager_sated = food_days(sub) >= FORAGE_SATED_DAYS(10)；_parent_needs_food = food_days(parent) < PARENT_LOW_DAYS(3)。
+# food_days = effective_food / (pop × FPPD 0.8)。
 
 var _fail: int = 0
 
 func _initialize() -> void:
-	_test_forage_arrive_no_merge()      # ① 覓食 subteam 抵達不歸建
-	_test_survival_siblings_no_merge()  # ★sibling：CAMP/BEG/JOIN/RETURN_HOME 抵達不歸建
-	_test_mission_task_still_merges()   # ② mission(TRADE)抵達仍歸建（lifecycle 不破）
+	_test_unsated_no_parent_stays()      # ①未食足+母團不缺→留 tile 覓食（不 merge，不 thrash）
+	_test_survival_siblings_stay()       # ★sibling：CAMP/BEG/JOIN/RETURN_HOME 未食足亦留
+	_test_sated_forager_merges()         # ②食足→歸建交糧（merge，供給環閉合）
+	_test_parent_low_merges()            # ③母團缺糧→即使未食足也歸建交糧
+	_test_mission_task_still_merges()    # mission(TRADE 非-survival)抵達仍 merge（lifecycle 不破）
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -25,16 +30,25 @@ func _ok(cond: bool, msg: String) -> void:
 		_fail += 1
 		print("  [FAIL] %s" % msg)
 
-# subteam 抵達目的地（move_target=-1）、無 leader（_check_discipline 短路回 false → 達 1727 判斷）
-func _mk_sub(task: String) -> Array:
+# 造 subteam（抵達=move_target -1、無 leader→_check_discipline 短路 false→達 1727）+ pop + food。
+# parent_food<0 = 不建 parent（parent=null→_parent_needs_food false）；>=0 = 建 parent team 1 帶該 food。
+func _mk(task: String, food: float, pop: int, parent_food: float) -> Array:
 	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 1000
 	var sub := TeamData.new()
-	sub.team_id = 73; sub.parent_team_id = 1        # 子隊
+	sub.team_id = 73; sub.parent_team_id = 1
 	sub.current_task = task
-	sub.move_target = Vector2i(-1, -1)              # 已抵達目的地
-	sub.leader_id = -1                              # 無 leader → _check_discipline 回 false
+	sub.move_target = Vector2i(-1, -1)
+	sub.leader_id = -1
 	sub.tile_pos = Vector2i(26, 9)
+	AnonCohort.add(sub.anon_cohorts, AnonCohort.TIER_PLEB, "healthy", pop)
+	sub.resources["food"] = food
 	state.teams[73] = sub
+	if parent_food >= 0.0:
+		var parent := TeamData.new()
+		parent.team_id = 1; parent.tile_pos = Vector2i(25, 6)
+		AnonCohort.add(parent.anon_cohorts, AnonCohort.TIER_PLEB, "healthy", 5)
+		parent.resources["food"] = parent_food
+		state.teams[1] = parent
 	return [state, sub]
 
 func _eval(w: Array) -> Array:
@@ -42,25 +56,42 @@ func _eval(w: Array) -> Array:
 	FactionAISystem.new()._evaluate_subteam(w[0], w[1], mq)
 	return mq
 
-# ① 覓食 subteam 抵達 forage tile → 不進 merge_queue（留 tile 覓食，非歸建召回）
-func _test_forage_arrive_no_merge() -> void:
-	print("--- ①覓食 subteam 抵達不歸建 ---")
-	var w: Array = _mk_sub(TeamData.TASK_FORAGE)
+# ① 未食足（food_days<10）+ 母團不缺（food_days>=3）→ 留 tile 覓食（不 merge）
+func _test_unsated_no_parent_stays() -> void:
+	print("--- ①未食足+母團不缺→留 tile 覓食 ---")
+	# pop5 food8 → 8/(5*0.8)=2 天 <10 未食足；parent pop5 food20 → 20/4=5 天 >=3 不缺
+	var w: Array = _mk(TeamData.TASK_FORAGE, 8.0, 5, 20.0)
 	var mq: Array = _eval(w)
-	_ok(mq.is_empty(), "FORAGE subteam 抵達 → 不進 merge_queue（留 tile 覓食，got mq=%s）" % str(mq))
-	_ok((w[1] as TeamData).current_task == TeamData.TASK_FORAGE, "current_task 仍 FORAGE（未被召回改態）")
+	_ok(mq.is_empty(), "FORAGE 未食足+母團不缺 → 不 merge，留 tile（got mq=%s）" % str(mq))
+	_ok((w[1] as TeamData).current_task == TeamData.TASK_FORAGE, "current_task 仍 FORAGE")
 
-# ★sibling：其餘 SURVIVAL_TASKS 抵達皆不歸建
-func _test_survival_siblings_no_merge() -> void:
-	print("--- ★sibling survival-task 抵達不歸建 ---")
+# ★sibling：CAMP/BEG/JOIN/RETURN_HOME 未食足亦留 tile
+func _test_survival_siblings_stay() -> void:
+	print("--- ★sibling survival-task 未食足留 tile ---")
 	for task in [TeamData.TASK_CAMP, TeamData.TASK_BEG, TeamData.TASK_JOIN, TeamData.TASK_RETURN_HOME]:
-		var w: Array = _mk_sub(task)
+		var w: Array = _mk(task, 8.0, 5, 20.0)   # 未食足 + 母團不缺
 		var mq: Array = _eval(w)
-		_ok(mq.is_empty(), "%s subteam 抵達 → 不進 merge_queue（execute-at-destination，got mq=%s）" % [task, str(mq)])
+		_ok(mq.is_empty(), "%s 未食足+母團不缺 → 留 tile 不 merge（got mq=%s）" % [task, str(mq)])
 
-# ② mission task（TRADE，非 SURVIVAL_TASKS）抵達 → 仍歸建（lifecycle 完工返家不破）
-func _test_mission_task_still_merges() -> void:
-	print("--- ②mission(TRADE)抵達仍歸建 ---")
-	var w: Array = _mk_sub(TeamData.TASK_TRADE)
+# ② 食足（food_days>=10）→ 歸建交糧（merge，供給環閉合）
+func _test_sated_forager_merges() -> void:
+	print("--- ②食足→歸建交糧 ---")
+	# pop5 food50 → 50/4=12.5 天 >=10 食足；母團不缺（food20→5天）→ 仍應 merge（食足優先歸建交糧）
+	var w: Array = _mk(TeamData.TASK_FORAGE, 50.0, 5, 20.0)
 	var mq: Array = _eval(w)
-	_ok(mq.has(73), "TRADE subteam 抵達 → 進 merge_queue（mission lifecycle 不破，got mq=%s）" % str(mq))
+	_ok(mq.has(73), "FORAGE 食足 → 進 merge_queue（歸建交糧，供給環閉合，got mq=%s）" % str(mq))
+
+# ③ 母團缺糧（food_days<3）→ 即使 forager 未食足也歸建交糧
+func _test_parent_low_merges() -> void:
+	print("--- ③母團缺糧→未食足也歸建交糧 ---")
+	# forager pop5 food8→2天 未食足；parent pop5 food8→2天 <3 缺糧 → 應 merge（回交救母團）
+	var w: Array = _mk(TeamData.TASK_FORAGE, 8.0, 5, 8.0)
+	var mq: Array = _eval(w)
+	_ok(mq.has(73), "FORAGE 未食足但母團缺糧 → 進 merge_queue（回交救母團，got mq=%s）" % str(mq))
+
+# mission task（TRADE，非 SURVIVAL_TASKS）抵達 → 仍 merge（lifecycle 不破，無關 sated）
+func _test_mission_task_still_merges() -> void:
+	print("--- mission(TRADE)抵達仍歸建 ---")
+	var w: Array = _mk(TeamData.TASK_TRADE, 8.0, 5, 20.0)   # 即使「未食足+母團不缺」，非-survival 照 merge
+	var mq: Array = _eval(w)
+	_ok(mq.has(73), "TRADE 抵達 → 進 merge_queue（mission lifecycle 不破，got mq=%s）" % str(mq))

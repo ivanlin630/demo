@@ -82,6 +82,8 @@ const CRISIS_FLOOR: float = 1.5   # TEST VALUE — 深餓門檻（★decouple SU
 const CRISIS_DAYS: float = 6.0    # TEST VALUE — committed 未緩 N 天才 crisis（給 task 工作時間，非急打斷）
 const CRISIS_IMMUNITY: int = WorldState.TICKS_PER_DAY * 2   # TEST VALUE — release 後禁重委派同 task 窗（橋接到 survival @80 commit，防 instant-recommit）
 const FORAGE_VIABLE_POP: int = 15   # TEST VALUE — pop ≤ 此值覓食划算（income/burn 比的粗略 proxy，待量測 tune）
+const FORAGE_SATED_DAYS: float = 10.0   # TEST VALUE — forager 攜糧達此天數 → 值得歸建交糧（供給環閉合，measurer tune）
+const PARENT_LOW_DAYS: float = 3.0      # TEST VALUE — 母團糧 < 此 → forager 即使未食足也歸建交糧（供給環，measurer tune）
 # P2b-1：LOOT_GATE/JOIN_GATE/CAMP_GATE + _loot_pref/_join_pref/_camp_pref 已刪
 # （survival 選擇統一委派 DecisionEngine.rank_survival → DecisionTerms weight，消雙 owner）
 const SOLO_COMMITMENT_BONUS: float = 0.15   # TEST VALUE — SoloAI 慣性加成（止 flip-flop，非鎖死）
@@ -1724,13 +1726,18 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	if _check_discipline(state, sub):
 		return
 	# 抵達目標格 → 歸建（lifecycle，不進引擎/probe）
-	# ★手不聽腦第 3 種 de-patch（subteam-idle-latch）：排除 SURVIVAL_TASKS——覓食/紮營/乞食/歸家/join
-	# 是「到目的地執行工作」語意（抵達留 tile 覓食/紮營…，非回母團），blanket merge 把覓食 subteam 抵達
-	# forage 目的地誤當歸建抵家 → thrash(ARRIVE↔RELEASE 1:1) 覓食不執行坐死。只 mission/lifecycle task
-	# (TRADE/GOVERN 等完工返家型) 抵達才 merge-back（歸建顯式路 _decide_subteam 另處理）。
-	if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE \
-			and sub.current_task not in SURVIVAL_TASKS:
-		merge_queue.append(sub.team_id)
+	# ★手不聽腦第 3 種 v2（供給環閉合，subteam-idle-latch）：blanket 即時 merge 把覓食 subteam 抵達
+	# forage 目的地誤當歸建抵家 → thrash(ARRIVE↔RELEASE 1:1) 覓食不執行坐死。survival-work（覓食/紮營/
+	# 乞食/歸家/join）是「到目的地執行工作」語意，該留 tile 執行；但 blanket 全排除 merge（v1）→ forager
+	# 永久囤糧不交母團 → 破供給環（母團失覓食貢獻餓死，seed42 0→10）。∴ 改「條件 merge」＝閉合供給環：
+	#   未食足 且 母團不缺 → 留 tile 覓食（collect_resources 累積 food，不 thrash）；
+	#   食足 or 母團缺糧 or 非-survival → 歸建 merge（try_merge_back 交糧給母團 / mission lifecycle）。
+	if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE:
+		var parent: TeamData = state.teams.get(sub.parent_team_id)
+		if sub.current_task in SURVIVAL_TASKS \
+				and not (_forager_sated(state, sub) or _parent_needs_food(state, parent)):
+			return   # 未食足 且 母團不缺 → 留 tile 繼續覓食（不即時 merge）
+		merge_queue.append(sub.team_id)   # 食足/母團缺糧/非-survival → 歸建（交糧 deliver）
 		return
 	# idle → 引擎決策（cadence-gated；A2a 取代 _evaluate_idle_subteam 手 argmax + _check_deviation randf）
 	if sub.current_task == TeamData.TASK_IDLE:
@@ -3464,6 +3471,12 @@ func _survival_food_days(state: WorldState, team: TeamData) -> float:
 	if pop <= 0: return 0.0
 	return ResourceSystem.effective_food(state, team) \
 		/ maxf(float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+
+# 供給環閉合 helper（subteam-idle-latch v2）：survival subteam 抵達目的地何時該歸建交糧（否則留 tile 覓食）。
+func _forager_sated(state: WorldState, sub: TeamData) -> bool:
+	return _survival_food_days(state, sub) >= FORAGE_SATED_DAYS   # 攜糧達門檻 → 值得歸建交糧母團
+func _parent_needs_food(state: WorldState, parent: TeamData) -> bool:
+	return parent != null and _survival_food_days(state, parent) < PARENT_LOW_DAYS   # 母團缺糧 → 未滿也回交
 
 # crisis-override（OUTCOME-based 安全網，泛化 ② 到任何 committed task）：深餓（food<CRISIS_FLOOR）+ committed N 天未緩
 # （food 沒回升 ≥RELIEF_MIN）→ true → caller release → 下 cadence re-rank → survival @80 preempt 卡住 task。
