@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² pre-merge·crisis-override 終 diff(e77aa99b+b71647ab)] merge 前必過 R²(釘死),immunity fix 沒獨立 R² → 審 crisis-override 全終 diff。核心:committed 任何 task 深餓(food<CRISIS_FLOOR)未緩→release→survival re-rank(泛化②OUTCOME-based);immunity fix=release 記 crisis_released_task+until(2天),TaskArbiter.try_set 頂 guard 擋同 task 重委派(防 release-then-instant-recommit,只擋同一 task→survival 選別 task 接住)。審點:①真根治 vs 搬問題(release→recommit loop 有無新 latch)②守 THREAT<SURVIVAL 不變量(不特判 flee)③immunity guard 有無誤擋合法重委派(非 crisis 情境)④baseline 泛化無 RNG。branch feat/crisis-override@b71647ab off main d0ab7f91。CLEAN → 我 merge。"
 ---
 

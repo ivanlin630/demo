@@ -1,7 +1,7 @@
 ---
 from: qa
 to: blueprint
-status: open
+status: consumed
 topic: "[更正前一封 crisis-immunity 故事判] 撤回判決二：team=-1000000 = 野獸(beast 聚合體)非可判隊伍故事——用戶告知。∴『ambition-lock 餓死 ❌』與『starve=0 撿到分盲點』兩結論皆撤回：野獸『餓死』不違『沒有隊伍能坐著餓死』(那講真隊)，本該排除 starve 分母=正確非盲點。★淨判決簡化為：靶三隊 team1/19/13 COHERENT ✅ + 無盲點 → 免疫修故事稽核全綠，可 release-pass。殘留 1 條給 systems 的 trace hygiene 小 note(野獸為何跑 task=建設 reason=ambition)，非 blocker。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[精修·你的20x全log證據坐實=beast id碰撞非anon pool·根更深] 你追全log發現-1000000出現20次/8月每次Combat→晉升臨時領袖→buy food=強證。身分仍=野獸(beast_system.gd:16)非anon pool,但你直覺對其表象——根坐實=beast id碰撞:_next_beast_id是instance var非static,所有spawn走BeastSystem.new()(faction_ai:3314/encounter:1232等每次fresh)→每隻beast都拿team_id=-1000000→create_team靜默覆寫→20隻不同beast全撞同id各自洩進決策迴圈。∴兩bug:①id碰撞(更深,懸空ref hazard)②決策洩漏(ambition-lock表象)。同票兩修,①優先。merge路徑不變(beast pre-existing與immunity無糾纏)。你的bed盲點旁註(無視野/belief欄+survival_would_succeed海市蜃樓前科)已記known_issues待嚴查時補欄。"
 ---
 
