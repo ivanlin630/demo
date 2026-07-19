@@ -17,26 +17,38 @@ if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDL
 
 = 補丁閘（機械 lifecycle gate pre-empt 引擎覓食決策）。覓食是「到目的地工作」語意（該留 tile 覓食），非「回母團」。1727 一律送 merge_queue。
 
-## 修（de-patch：1727 排除 survival-work task）
+## ★v2 重設計（blueprint SEND-BACK 後）：閉合供給環，非只拆 merge
+> **v1（1 行 `not in SURVIVAL_TASKS` 全排除 merge）= 換位置錯誤**：治好 thrash-死**但引入 terminal-sticky**——forager 永久卡 forage 囤 200-2000 food-days **不交母團** → 破食物供給環 → seed42 0→10 famine regression（measurer 追到 forager-detach→母團失覓食貢獻→餓死鏈）。**不是 net 進步，是換一種餓死**（thrash-死→hoard 卡+母團餓死）。∴ 拆 merge 不夠，需**閉合供給環**。
+
+**供給環機制（坐實）**：forager 覓食 `collect_resources`（`resource_system:46`）per-day 累積 `forage_today`→食物；歸建 `try_merge_back`（`subteam_system`）`ResourceBank.add(absorber,...)` = **交糧給母團**。∴ 1727 blanket 即時 merge 其實是**（粗糙的）交糧機制**，v1 拆掉它=拆供給環。
+
+**v2 修：1727 對 survival-work 的 merge 改「食足 or 母團缺糧才 merge（交糧），否則留 tile 覓食」**：
 ```gdscript
-if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE \
-        and sub.current_task not in SURVIVAL_TASKS:
-    merge_queue.append(sub.team_id)
+if sub.move_target == Vector2i(-1, -1) and sub.current_task != TeamData.TASK_IDLE:
+    if sub.current_task in SURVIVAL_TASKS \
+            and not (_forager_sated(sub) or _parent_needs_food(state, parent)):
+        return   # 未食足 且 母團不缺 → 留 tile 繼續覓食（不 merge，不 thrash，food 累積）
+    merge_queue.append(sub.team_id)   # 食足/母團缺糧/非-survival → 歸建（交糧 deliver）
     return
 ```
-- `SURVIVAL_TASKS`（`faction_ai:79`）= `[RETURN_HOME, BEG, JOIN, FORAGE, CAMP]`——**survival-work task 抵達目的地 = 執行（留 tile 覓食/紮營/…），非歸建召回**。像正常隊（非 subteam）抵達 forage tile 就地覓食、食物累積。
-- 只 mission/lifecycle task（TRADE/GOVERN 等完工返家型）+ 明確歸建（`_decide_subteam:1787` 已處理）才 merge-back。
-- **de-patch 非補償**：不加「thrash 抑制」補丁，直接讓引擎覓食決策執行（1727 別 pre-empt）。
+- **未食足+母團不缺 → 留 tile 覓食**（不即時 merge=不 thrash，`collect_resources` 累積 food）。
+- **食足 or 母團缺糧 → 歸建 merge**（`try_merge_back` 交糧給母團=閉合供給環）。
+- `_forager_sated`：`_survival_food_days(sub) >= FORAGE_SATED_DAYS`（TEST VALUE，攜糧夠多值得回交）。`_parent_needs_food`：`parent != null and _survival_food_days(parent) < PARENT_LOW_DAYS`（TEST VALUE，母團缺糧→即使沒滿也回交）。
+- **非 thrash-抑制補丁**：這是把「即時 merge」改「條件 merge（交糧時機）」——forager 覓食工作、食足回交，供給環閉合。sated 後歸建移向 parent（食足→forage util 低→不 re-forage→不 thrash）。
 
-## ★WHAT flag 給 blueprint（非 blocker，informational）
-修後 **subteam 會獨立覓食（離 parent 執行 survival）**——這是**引擎 rank_scored 已決策**的（覓食 > 歸建 於這些低糧 subteam），手不聽腦 fix = 執行它。**若 blueprint 判定 detached subteam 不該獨立覓食（該優先歸建 pool 母團糧）**：那是 **rank 決策層調整**（歸建 option util 對低糧 subteam 升權），**另軌 follow-up**，非本 1727 lifecycle override。本 fix（執行引擎決策）HOW-correct 無論如何。flag 供 blueprint 判要不要後續調 rank。
+## ★terminal-sticky = 真 blocker（訂正 v1 reviewer/implementer 的 non-blocker 判斷）
+reviewer R²v1 標 terminal-sticky「非 blocker，measurer 順帶量」、implementer 照 dispatch——**訂正**：blueprint+measurer 坐實 terminal-sticky = **真 blocker**（破供給環 famine regression 有清楚因果，非模糊聚合）。教訓歸「症狀vs根/以為修好其實換位置」（memory [[feedback_symptom_vs_root_retry]]）。**v2 必含供給環才 accept**。
+
+## WHAT（blueprint SEND-BACK 已定）
+blueprint **接受 subteam 獨立覓食，但要求交糧回母團**（供給環閉合）——非禁覓食。v2 供給環正是此意。
 
 ## 驗收
 - **TDD**：①覓食 subteam 抵達 forage tile（move_target=-1）→ **不進 merge_queue**（`current_task in SURVIVAL_TASKS` 排除）→ 留 tile → 覓食執行、食物累積、無 thrash。②mission task（如 TRADE，非 SURVIVAL_TASKS）抵達 → 仍 merge_queue（不破 lifecycle）。③歸建（_decide_subteam:1787）路不變。
 - **★sibling 驗**：CAMP/BEG/JOIN/RETURN_HOME subteam 抵達目的地——確認排除後行為對（CAMP 留紮營✓/BEG 乞食✓；JOIN 抵達 join target 由 _decide 執行✓；RETURN_HOME 抵家 resupply 非被召 parent✓）。若某 sibling 排除後卡別的態→measure flag。
 - **gate** constitution PASS / **headless** 0 new(baseline 3) / **determinism** 2 跑 byte-identical。
 - **measure**：seed1337 6 隊（62/71/73/79/84/90）不再 idle-latch、覓食食物流進（committed=覓食 subteam ARRIVE_MERGEQ↔RELEASE 振盪消失）；42/4201 無 regression；subteam 正常 lifecycle（mission 完工歸建）不破。
-- **★terminal-sticky must-verify（reviewer R² 升級，非 merge blocker）**：修後 survival subteam 抵達 forage tile 執行覓食（不 merge），但 FORAGE/CAMP/RETURN_HOME **無 release 路** → 疑 fed 後**永不歸建/re-rank**（永久 detached forager，卡 FORAGE 非-IDLE → _decide_subteam 不重跑）。**非餓死 latch（已 fed=嚴格優於原 thrash-死），屬 WHAT-flag 同族**。measurer 量：修後 6 隊 fed 之後**會不會 re-rank/歸建**，還是 terminal-sticky 卡 forage 永不回母團。**若 terminal-sticky 真**→follow-up（foraging subteam 食足後 re-rank 路 / 歸建 util 升，blueprint WHAT 判要不要 pool 母團）非本 fix blocker。
+- **★供給環閉合 must-pass（v2 核心，真 blocker）**：修後 forager 食足→歸建**交糧給母團**（`try_merge_back` food 進 parent）→ 母團失覓食貢獻的餓死鏈消。**seed42 famine 0→10 regression 必回 0**（v1 引入的，v2 必治）。terminal-sticky（forager 永久囤糧不交）**必消**：forager food_days 不無限累積（食足即歸建交糧），囤糧 200-2000 food-days 現象消失。
+- **★無 re-thrash**：sated 後歸建移向 parent、food 足→不 re-pick forage→不回到 thrash（measurer 驗 ARRIVE↔RELEASE 振盪 + 新的 sated-歸建 路都不振盪）。
 
 ## 排序
 HIGH。off main 980e0b1c 後 HEAD。R² 必過（重點審 SURVIVAL_TASKS 排除不破 mission-merge lifecycle + sibling 行為）→ dispatch。
