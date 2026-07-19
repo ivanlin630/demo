@@ -7,15 +7,17 @@
 決策移動目標讀他隊**當前位置**一律 `BeliefSystem.belief_pos`（last-seen belief），**禁讀 live `target.tile_pos`（god-view，跟蹤已脫視野的隊）**。範式=攻擊 to_task `options.gd:194`「攻擊 target 走 belief last-seen」。terrain/自身位=物理真值合法；**他隊位≠**。
 
 ## 病象（audit file:line 坐實）：平行 dispatch 路繞 belief
-統一 arc（序1-8）沒掃到的 legacy dispatch 路，move_target 直讀 live 他隊位：
+> **★scope 訂正（R² 2026-07-20）**：真 leak = **E1/E2/E3/E5** 四處。**E4 encirclement（`strategic_ai:137 best_estimate`+F1 sentinel）+ E6 envoy（`faction_ai:1396 best_estimate`+攔截+timeout）前一 slice 已 belief 化**——我 spec 前提過期，**勿再改（重改 regression 風險）**。E5 breakout 確認真敵位 leak（非同-faction tally，不豁免）。
+
+統一 arc（序1-8）沒掃到的 legacy dispatch 路，move_target 直讀 live 他隊位（**訂正後 4 處**）：
 | # | site | 現況（讀 live） |
 |---|---|---|
 | E1 | `_commit_conquest_attack`（`faction_ai:309`，:336） | `try_set(..., state.teams[prey_id].tile_pos, ...)` = 征服攻擊移動目標讀 live prey 位 |
 | E2 | `_try_join_target`（`faction_ai:1824`，:1830） | `try_set(..., TASK_JOIN, state.teams[target_id].tile_pos, ...)` = subteam JOIN 移動讀 live target 位 |
 | E3 | found_subjugate（`faction_ai:1278`） | `try_set(..., state.teams[prey_id].tile_pos, ...)` = 建國征服移動讀 live 位 |
-| E4 | strategic_ai encirclement（`strategic_ai_system:122 _assign_encirclement`） | 包圍分派讀 target live 位（locate 確認） |
-| E5 | strategic_ai breakout（`strategic_ai_system:159 _assign_breakout`） | 突圍讀敵 live 位（locate 確認） |
-| E6 | envoy tracking | 信使追蹤 target live 位（audit 提，locate 確認；注意 envoy 已有 proximity/timeout 機制，別破） |
+| E5 | strategic_ai breakout（`strategic_ai_system:159 _assign_breakout` → `_find_escape_dir:207 e.tile_pos`） | 突圍逃跑方向讀 live 敵位（真 leak，R² 確認不豁免） |
+| ~~E4~~ | ~~encirclement~~ | **已 belief 化（前 slice），不改** |
+| ~~E6~~ | ~~envoy~~ | **已 belief 化+攔截+timeout，不改** |
 
 ## 修（統一 belief_pos，範式 slice2）
 每處 move_target = `state.teams[X].tile_pos`（live 他隊位）→ 改 `BeliefSystem.belief_pos(state, self, X)`（last-seen）。
