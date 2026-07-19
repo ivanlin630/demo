@@ -15,6 +15,19 @@ extends SceneTree
 func _initialize() -> void:
 	_run(); quit()
 
+# ★finder-check（systems 2026-07-20 升級）：would_succeed 只驗優先權/combat/reason（dispatch 允許），
+# 零 finder → 真 famine(所有 survival option finder-miss 無可達食物)坐 IDLE 也記 would_succeed=true → 誤標手不聽腦。
+# 補真 finder：跑 SURVIVAL_OPTION_SET 每 opt 的 to_task，任一有可達 target(≠(-1,-1))=dispatchable。
+# ★determinism-safe：DecisionOptions.to_task + 全 survival finder(_find_forage_tile 等)已驗零 randf（觀測不擾動）。
+func _survival_finder_hits(state: WorldState, team: TeamData) -> bool:
+	for opt in DecisionOptions.SURVIVAL_OPTION_SET:
+		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		var tsk = td.get("task", TeamData.TASK_IDLE)
+		var tgt: Vector2i = td.get("target", Vector2i(-1, -1))
+		if tsk != TeamData.TASK_IDLE and tgt != Vector2i(-1, -1):
+			return true   # 至少一 survival option finder 找到可達 target → 真能派得出（非 finder-miss famine）
+	return false
+
 func _run() -> void:
 	var seed_val: int = int(OS.get_environment("SPECIMEN_SEED")) if OS.has_environment("SPECIMEN_SEED") else 1337
 	var months: int = int(OS.get_environment("SPECIMEN_MONTHS")) if OS.has_environment("SPECIMEN_MONTHS") else 8
@@ -73,12 +86,14 @@ func _run() -> void:
 					t.current_task == TeamData.TASK_IDLE or TaskArbiter.PRIO_SURVIVAL > t.task_priority or (
 						t.task_priority == TaskArbiter.PRIO_SURVIVAL and "survival" in TaskArbiter.ENGINE_SOURCES
 						and reason_stripped in TaskArbiter.ENGINE_SOURCES))
+				var finder_hits: bool = _survival_finder_hits(state, t)   # ★真 finder（有可達食物 target）
 				var snap: Dictionary = {
 					"tick": tick, "team_id": tid, "task": t.current_task,
 					"combat_target": t.combat_target, "current_option": t.current_option,
 					"food_days": food_days, "pop": t.population, "famine_days": t.famine_days,
 					"task_priority": t.task_priority, "task_reason": t.task_reason,
 					"would_survival_dispatch_succeed": self_replace_would_work,
+					"survival_finder_hits": finder_hits,
 					"survival_committed_option": t.survival_committed_option,
 					"survival_stall_cooldown_keys": str(cur_cooldown_keys),
 					"tile_pos": t.tile_pos, "move_target": t.move_target,
@@ -147,15 +162,17 @@ func _run() -> void:
 		var _task: String = String(_ls["task"])
 		var _committed: String = String(_ls["survival_committed_option"])
 		var _would_dispatch: bool = bool(_ls["would_survival_dispatch_succeed"])
+		var _finder_hits: bool = bool(_ls.get("survival_finder_hits", false))
 		var _cause: String = ""
-		# ★凍結-lens 優先於 food-lens（systems 2026-07-20 修真 bug）：would_succeed=true 卻不執行的凍結死
-		# food 也會掉到 0（committed survival 不執行→食物不進→餓），舊版 food-first 把它誤標 famine 藏進乾淨桶
-		# （team21 血證）。∴ food=0 ≠ famine——先分 would_succeed：would_succeed=true+idle/等待新領主=手不聽腦，
-		# 不管 food；famine 只在 would_succeed=false（真無 survival 可救）才算。純 print/determinism-safe。
-		if _would_dispatch and (_task == "idle" or _task == "等待新領主"):
-			_cause = "手不聽腦（would_succeed=true 卻 task=%s 不執行 food_days=%.2f＝控制層凍結,不管 food 不落 famine）" % [_task, _food]
-		elif _food < FactionAISystem.CRISIS_FLOOR:
-			_cause = "famine（would_succeed=false + food_days=%.2f < CRISIS_FLOOR=%.1f ＝真無救深餓）" % [_food, FactionAISystem.CRISIS_FLOOR]
+		# ★凍結-lens 優先於 food-lens + finder-check（systems 2026-07-20 兩封）：
+		# would_succeed 只驗優先權/combat/reason（dispatch 允許），零 finder → 真 famine(所有 survival option
+		# finder-miss 無可達食物)坐 IDLE 也 would_succeed=true → 誤標手不聽腦。∴ 手不聽腦 = dispatch 允許
+		# (would_succeed) AND 真有可達食物(finder_hits) 卻坐 idle/等待新領主 = 真凍結（能派得出卻沒派）；
+		# famine = finder 全 miss（真無可達食物）+ 深餓，不管 would_succeed（team21/65 若 finder-miss=真餓非凍結）。
+		if _would_dispatch and _finder_hits and (_task == "idle" or _task == "等待新領主"):
+			_cause = "手不聽腦（would_succeed=true+finder有可達食物 卻 task=%s 不執行 food_days=%.2f＝真凍結,slice1可治）" % [_task, _food]
+		elif not _finder_hits and _food < FactionAISystem.CRISIS_FLOOR:
+			_cause = "famine（finder全miss無可達食物 + food_days=%.2f<CRISIS_FLOOR=%.1f＝真餓,slice1救不了=經濟/可得性問題）" % [_food, FactionAISystem.CRISIS_FLOOR]
 		elif _committed != "":
 			_cause = "stuck-task（food_days=%.2f 足 + committed=%s 卻消失＝任務卡住非餓）" % [_food, _committed]
 		else:
