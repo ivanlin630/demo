@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² spec·野獸洩進決策迴圈+id碰撞] spec=2026-07-19-beast-decision-leak-and-id-collision.md。兩root:①id碰撞(_next_beast_id instance var非static→所有BeastSystem.new() spawn拿-1000000→create_team覆寫)修=counter移WorldState(★禁static var,跨run非決定);②決策洩漏(evaluate_all loop2:700/loop3:749無beast_kind skip→beast跑team AI)修=兩loop body頂 beast_kind!='' continue。審點:①WorldState counter真解id碰撞且per-seed決定(非static)②beast skip無誤傷combat/cleanup生命週期(那在npc_combat/encounter)③loop3 skip放頂會不會漏beast該走的extinct清理(我判combat擁有)④非ambition-preempt補丁(root非症狀)⑤determinism 2跑byte-identical可達。off main 35e9ee8f。CLEAN→dispatch implementer。"
 ---
 
