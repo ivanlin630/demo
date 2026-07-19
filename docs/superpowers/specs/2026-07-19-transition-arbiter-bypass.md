@@ -33,7 +33,7 @@ static func transition(state, team, new_task, priority, _source="transition"):
 
 ### Part 2：resolution caller 改 release-first（emergency 自身退場，語意 (b)）
 把「解自己 emergency 後降級回常工」的 caller 改：**先 `TaskArbiter.release(team)`（清 emergency→IDLE@0，無 guard）→ 再 set 新 task**（release 後現任=IDLE，transition/try_set 均通過 guard）。逐 caller：
-- **beggar-restore ×3**（`interaction_system.gd:1249`、`player_command_system.gd:1017`、`sim_runner.gd:259`）：BEG@80 resolution handler。改 `release(beggar)` → `try_set(previous_task, DISPATCH)`（或 release 後 transition，post-release 現任 IDLE 過 guard）。★保留「restore previous_task」語意，別讓 previous_task 永失。
+- **beggar-restore ×3**（`interaction_system.gd:1249`、`player_command_system.gd:1017`、`sim_runner.gd:259`）：BEG@80 resolution handler。改 `release(beggar)` → set previous_task。★**move_target 必存/還（reviewer R²v2 抓）**：`release` 清 `move_target=-1`（`task_arbiter:98-102`），但 beggar-restore 原靠 transition **保留 move_target**（乞討不動 move_target，resume 原工需原目的地）。∴ **release 前存 `saved := beggar.move_target`，set 後還原**——用 `try_set(state, beggar, previous_task, saved, DISPATCH)`（try_set 帶 move_target 參）或 release 後 `beggar.move_target = saved`。否則 restore 的 previous_task 失目的地（team 不知去哪）。★保留「restore previous_task + 其目的地」完整語意。
 - **settle**（`interaction_system.gd:1264` `_execute_settlement` + `:1289` convert_resident）：流亡隊常在 survival@80 接受安頓。改 `release(t)` → transition「生產」@AMBIENT。避「tag PRODUCE+入 faction 卻卡舊 survival task」不一致態。
 - **zombie-revive**（`faction_ai_system.gd:2646` at_site_stuck 復工 → BUILD@DISPATCH）：zombie 現任若 RETURN_HOME survival@80。改 `release` → set BUILD。（`:2638` 非-zombie 現任 <70 者不需改，measure 確認。）
 
@@ -50,7 +50,7 @@ idle-latch（food-ok would_succeed=true）本 spec 不預設同根，落地後 m
 
 ## 驗收
 - **TDD**：
-  - ①**beggar-restore（v1 漏測型）**：beggar BEG@80 → resolution → release-first → previous_task **恢復成功**（guard 不誤擋）+ previous_task 未被永失。
+  - ①**beggar-restore（v1 漏測型 + move_target）**：beggar BEG@80 + move_target=某地 → resolution → release-first → previous_task **恢復成功**（guard 不誤擋）+ previous_task 未被永失 + **move_target 還原到原目的地**（非 -1，reviewer R²v2 抓）。
   - ②**defection stomp（team16）**：survival@80 活 → defection transition(AMBIENT) **被擋** → survival 留 → 不凍死。
   - ③**settle from survival**：流亡隊 survival@80 → release-first → 「生產」set 成 + 態一致（PRODUCE tag ↔ task）。
   - ④**zombie-revive**：zombie RETURN_HOME@80 → release-first → BUILD set 成。
