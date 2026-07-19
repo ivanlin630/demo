@@ -39,6 +39,8 @@ measurer 校準 seed1337 14 消失真隊（`beastfix-lockpoint-deaths-7fb16350-1
 - **team68 = 手不聽腦-STUCK（solid）**：food 4.58 **>CRISIS_FLOOR 1.5=不缺糧** + `dispatch_would_succeed=true` 卻 task idle 坐死＝控制層不執行（非餓）。
 - **team64 = broken idle-latch（QA v2 讓步 2026-07-19）**：QA 前判 coherent-flee 是**抽樣偏誤**，v2 讓步 = 實為 idle-latch 坐死（food 4.17）。與 team68 同 idle-latch 型。
 
+**★★pivot 到結構 sweep（blueprint 裁 2026-07-20）**：subteam-idle v1→v2→v3 三輪 gate-tuning 證治標不治根（team65 乾淨手不聽腦仍 fire、team21 等待新領主重現）→ **手不聽腦 mini-arc 結構 sweep 提前**（[[手不聽腦 mini-arc]] ①結構列舉全部「committed survival + would_succeed=true 卻不 dispatch」drop 點），**停 subteam-idle 調參**。subteam-idle branch（c53c8cbb v3）HOLD 不 finalize（sweep 定調再論併入/重寫）。**team21 = transition-arbiter 覆蓋不全**（lineage 查證 branch 含 transition fix 93966d15，非誤報；team21 faction 成員的 survival dispatch 可能有更上游洞——loop2 faction 成員只跑 `_evaluate_independent_strategy` 不跑 `_evaluate_solo`，survival 從沒 dispatch 則 transition stomp guard 無從擋起）。**bed classifier 真 bug**：would_succeed=true 凍結死誤標 famine（food=0）→ 藏 team21，已轉 measurer 修（凍結-lens 優先 food-lens）。sweep map 進行中→結構修 spec 一次治同根。
+
 **★收斂（blueprint broken-count 2026-07-19）＝broken 3 隊可能兩種 DISTINCT 機制，開票別預設同根**：
 - **team16 = leaderless-limbo**（已 root-cause 到 [[TaskArbiter.transition 後門]]：defection path A transition「等待新領主」→ crisis 永不 fire + 免疫繞過）。
 - **team64/68 = idle-latch**（`would_succeed=true` ×300 能救沒救，task idle）——**機制未定，別預設同 transition-bypass 根**。可能 release-無-redispatch / arbiter latch / 另條 transition。**分開查根因**（QA 提醒）。
