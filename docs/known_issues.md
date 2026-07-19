@@ -26,7 +26,14 @@ QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambit
 
 crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只覆蓋「release 後走 **try_set** 重委派」的重鎖（team1/19 被接住）。**走 `transition` 的重鎖（team16「等待新領主」）未覆蓋**。∴ 原 release-pass（靶三隊 team1/19/13 剛好全走 try_set 路）= **樣本不完整**，免疫修對它瞄準的有效但覆蓋不全。**非推翻已 merge**（免疫對 try_set 路真有效），但誠實記「覆蓋範圍=try_set 重委派，transition 重鎖需上條 transition 修一併治」。blueprint owner 補 game-design 對應處。連上條 [[TaskArbiter.transition 後門]]。
 
-## team68 手不聽腦-STUCK + team64 CONTESTED（food-ok idle 坐死，2026-07-19，measurer 死因校準）
+## ★subteam-idle-latch = 第三種手不聽腦（6 隊，2026-07-19，QA 抓 measurer undercount，HIGH）
+
+bed 3 分類 classifier 測出 **6 隊同款 broken**（team62/71/73/79/84/90），同 signature：`food_days 足(2.5-4.58) + committed=覓食/遷移找糧 卻 task=idle 不執行 + reason=subteam + survival_dispatch_would_succeed=true`。measurer 只回報 1 隊（team84）= undercount，QA 逐隊讀 classifier 抓齊 6。**starve metric 天然看不到**（food OK 不進 famine 分母）→ 別靠聚合判此 arc，需 QA 逐隊讀。
+
+**獨立於 transition-bypass 的第三種手不聽腦機制**：transition 路（defection-stomp）已修（[[TaskArbiter.transition 後門]]），這 6 隊走 **subteam dispatch 路**（`reason=subteam`，疑 subteam 指揮/併隊後 dispatch 沒正確執行 committed 求生 task）。**patch-gate-first**（非 tuning）：查 subteam dispatch 為何在 `committed=覓食` 且 `would_succeed=true` 時仍卡 `task=idle` 不執行。優先序 HIGH（同 quality bar「沒有隊伍能坐著/掙扎落空地餓死」）。歸 [[手不聽腦 mini-arc]]。
+
+## team68 手不聽腦-STUCK + team64 RESOLVED（food-ok idle 坐死，2026-07-19，measurer 死因校準）
+> 更新（transition-arbiter QA 稽核 2026-07-19）：team64 branch 93966d15 **SURVIVES**（transition fix 生效）；team68 resolved 成 food-ok-vanish。**team64/68 = transition-bypass 家族已解**（非 subteam-idle-latch 那 6 隊的獨立機制）。
 
 measurer 校準 seed1337 14 消失真隊（`beastfix-lockpoint-deaths-7fb16350-1337.txt`）：9 TRUE-FAMINE（coherent 窮死）+ 手不聽腦-STUCK + 3 food-ok vanish。
 - **team68 = 手不聽腦-STUCK（solid）**：food 4.58 **>CRISIS_FLOOR 1.5=不缺糧** + `dispatch_would_succeed=true` 卻 task idle 坐死＝控制層不執行（非餓）。
