@@ -15,12 +15,13 @@ team75/4/13：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍結 1 格 + food
 ## 修（look-before-leap：FLEE 無座標=not applicable→release 轉覓食）
 blueprint 認可方向：`flee_from_pos==(-1,-1)`（威脅無座標）→ **release FLEE → re-rank 轉覓食**，非凍結。FLEE「選項」無座標時其實 not applicable，不該被選中卡死。
 
-### 修 A（primary，dispatch look-before-leap）
-FLEE dispatch（`faction_ai:1595/1948`）：算 `flee_from_pos = _flee_threat_pos(...)`；**若 == (-1,-1)**（威脅無座標）→ **`TaskArbiter.release(team)`**（撤剛設的 FLEE → IDLE）→ 下 reeval survival re-rank 選覓食/別的。**不留無座標 FLEE 卡死。**
-- （或等價：FLEE option applicability gate 加「`_flee_threat_pos != (-1,-1)` 才 applicable」——impl 選乾淨點；效果同=無座標不選 FLEE。）
+### 修 A（primary，★applicability-gate=reviewer 建議真根治，收斂 A+B）
+**FLEE option applicability gate**：FLEE（逃跑）option **applicable 僅當 `_flee_threat_pos(state, team) != (-1,-1)`**（威脅有 belief 座標可算逃向）。positionless → **FLEE not applicable → 根本不選中** → survival/threat rank 落到次佳（覓食/defend）→ 不進 FLEE 卡死。
+- reviewer 判：applicability-gate 比「select-then-release」更乾淨真根治（不選不可執行的 option，vs 選了再撤）。**收斂原 A（dispatch release）+B（movement）成一點**。
+- impl：找 FLEE/逃跑 的 applicable() 判準（options.gd 或 decision rank 的 threat FLEE 選點），加 `_flee_threat_pos != (-1,-1)` 條件。若 FLEE 選在 threat 系統無 applicable()，則等價於「dispatch 前 gate：`_flee_threat_pos==(-1,-1)` 不派 FLEE 落次佳」。
 
-### 修 B（backstop，movement release）
-`movement:82` 把空話「靠 release 收」落實：`if FLEE and flee_from_pos==(-1,-1): TaskArbiter.release(team)`（撤 FLEE → IDLE）而非 `continue` 凍結。防修 A 漏的邊角（timing：FLEE 設後威脅 belief 過期成 positionless）。
+### 修 B（optional，harmless defense，reviewer 判冗餘不同層）
+`movement:82` 落實 release（`if FLEE and flee_from_pos==(-1,-1): TaskArbiter.release`）= **冗餘 defense**（A applicability-gate 後 FLEE 不會無座標被選）。reviewer 判 harmless 不同層——impl 可加當 timing 邊角 backstop（FLEE 設後 belief 過期成 positionless），或省（A 夠）。**非必要，A 為主。**
 
 ## 感知鐵律一致
 不回退 live-track（威脅無 belief 座標時**不**偷讀 live 位逃）——無座標=真的不知威脅在哪=合理「轉覓食（顧眼前生存）」，非「瞬鎖 live 逃」。守 belief-化。
