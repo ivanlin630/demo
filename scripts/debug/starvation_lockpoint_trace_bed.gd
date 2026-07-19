@@ -148,10 +148,14 @@ func _run() -> void:
 		var _committed: String = String(_ls["survival_committed_option"])
 		var _would_dispatch: bool = bool(_ls["would_survival_dispatch_succeed"])
 		var _cause: String = ""
-		if _food < FactionAISystem.CRISIS_FLOOR:
-			_cause = "famine（末筆 food_days=%.2f < CRISIS_FLOOR=%.1f ＝真深餓）" % [_food, FactionAISystem.CRISIS_FLOOR]
-		elif _would_dispatch and _task == "idle":
-			_cause = "手不聽腦（food_days=%.2f 足 + dispatch_would_succeed=true 卻 idle 坐死＝控制層不執行，非餓）" % _food
+		# ★凍結-lens 優先於 food-lens（systems 2026-07-20 修真 bug）：would_succeed=true 卻不執行的凍結死
+		# food 也會掉到 0（committed survival 不執行→食物不進→餓），舊版 food-first 把它誤標 famine 藏進乾淨桶
+		# （team21 血證）。∴ food=0 ≠ famine——先分 would_succeed：would_succeed=true+idle/等待新領主=手不聽腦，
+		# 不管 food；famine 只在 would_succeed=false（真無 survival 可救）才算。純 print/determinism-safe。
+		if _would_dispatch and (_task == "idle" or _task == "等待新領主"):
+			_cause = "手不聽腦（would_succeed=true 卻 task=%s 不執行 food_days=%.2f＝控制層凍結,不管 food 不落 famine）" % [_task, _food]
+		elif _food < FactionAISystem.CRISIS_FLOOR:
+			_cause = "famine（would_succeed=false + food_days=%.2f < CRISIS_FLOOR=%.1f ＝真無救深餓）" % [_food, FactionAISystem.CRISIS_FLOOR]
 		elif _committed != "":
 			_cause = "stuck-task（food_days=%.2f 足 + committed=%s 卻消失＝任務卡住非餓）" % [_food, _committed]
 		else:
