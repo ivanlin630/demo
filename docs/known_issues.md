@@ -30,9 +30,13 @@ crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只�
 
 measurer 校準 seed1337 14 消失真隊（`beastfix-lockpoint-deaths-7fb16350-1337.txt`）：9 TRUE-FAMINE（coherent 窮死）+ 手不聽腦-STUCK + 3 food-ok vanish。
 - **team68 = 手不聽腦-STUCK（solid）**：food 4.58 **>CRISIS_FLOOR 1.5=不缺糧** + `dispatch_would_succeed=true` 卻 task idle 坐死＝控制層不執行（非餓）。
-- **★team64 = CONTESTED（別當乾淨案例，blueprint 戳 2026-07-19）**：measurer 判手不聽腦（food 4.17 idle 坐死）；**QA 故事稽核先前獨判 COHERENT**（逃真威脅戰死，`flee_from` 真座標被追殺，food_days **8.75**）。兩讀 food_days（4.17 vs 8.75）+ 死因（idle-stuck vs combat-flee）不同 → **可能同隊死亡序列不同時間點**（先逃真威脅=coherent，後段卡 idle=手不聽腦）**非必矛盾**，也可能一讀誤。**寫 transition/手不聽腦票時 team64 別直接寫死為手不聽腦，先核對兩份 trace 時間窗**（measure-first / [[feedback_fileline_vs_interpretation]]）。
+- **team64 = broken idle-latch（QA v2 讓步 2026-07-19）**：QA 前判 coherent-flee 是**抽樣偏誤**，v2 讓步 = 實為 idle-latch 坐死（food 4.17）。與 team68 同 idle-latch 型。
 
-`famine_days=0 → 不在 extinct.starve metric`（∴ 不污染 cascade verdict，9 famine 仍 coherent）。**pre-existing 控制層 latch**（beast-fix skip 只碰 `beast_kind!=""`，真隊照跑→非 beast-fix；被 seed1337 較苦 basin 暴露）。**併入 [[TaskArbiter.transition 後門]] HIGH 票 scope**：查 team68（food-ok 路，solid）+ 核對 team64（contested 時間窗）+ team16（famine 路 transition-clobber）是否同根（transition 無條件覆寫 survival / release-無-redispatch）。**bed 死因標籤已批 3 分類修**（famine/stuck-task/手不聽腦，measurer 出 determinism-safe patch）——消「純窮死=無 stall_exclude」單軸掩蓋 stuck 的觀測盲點（全量暫態可觀測性不變量）。連 [[project_reverse_engineering_arc]]（手不聽腦）。
+**★收斂（blueprint broken-count 2026-07-19）＝broken 3 隊可能兩種 DISTINCT 機制，開票別預設同根**：
+- **team16 = leaderless-limbo**（已 root-cause 到 [[TaskArbiter.transition 後門]]：defection path A transition「等待新領主」→ crisis 永不 fire + 免疫繞過）。
+- **team64/68 = idle-latch**（`would_succeed=true` ×300 能救沒救，task idle）——**機制未定，別預設同 transition-bypass 根**。可能 release-無-redispatch / arbiter latch / 另條 transition。**分開查根因**（QA 提醒）。
+
+`famine_days=0 → 不在 extinct.starve metric`（∴ 不污染 cascade verdict：淨 8 coherent 窮死 + 3 broken stuck + 3 merge/combat + 2 combat）。**pre-existing 控制層 latch**（beast-fix skip 只碰 `beast_kind!=""`，真隊照跑→非 beast-fix；被 seed1337 較苦 basin 暴露）。**開票拆兩查**：team16→[[TaskArbiter.transition 後門]] HIGH 票（root 已定）；team64/68 idle-latch→獨立查根因（別綁 transition 假設）。**bed 死因標籤已批 3 分類修**（famine/stuck-task/手不聽腦，measurer 出 determinism-safe patch）——消觀測盲點（全量暫態可觀測性不變量）。連 [[project_reverse_engineering_arc]]（手不聽腦 arc 未竟殘留）。
 
 ## ② stall 對併入-rejection loop 不 fire（retry 不 re-stamp，2026-07-19，crisis-override R² 抓，crisis 已覆）
 
