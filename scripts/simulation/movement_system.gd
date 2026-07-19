@@ -82,6 +82,12 @@ func process(state: WorldState, team_ids: Array,
 		if team.current_task == TeamData.TASK_FLEE and team.flee_from_pos != Vector2i(-1, -1) \
 				and (team.move_target == Vector2i(-1, -1) or team.tile_pos == team.move_target):
 			team.move_target = _flee_away_tile(state, team, team.flee_from_pos)
+		# null-belief-flee backstop（冗餘 defense，修 B）：FLEE 但威脅無座標(flee_from_pos=-1)→無法算逃向
+		# → release 回 IDLE re-rank（非下方 continue-freeze 卡 task=逃跑 餓死）。修 A applicability-gate 後正常
+		# 不會無座標選 FLEE；此為 timing 邊角 backstop（FLEE 設後 belief 過期成 positionless）。
+		if team.current_task == TeamData.TASK_FLEE and team.flee_from_pos == Vector2i(-1, -1):
+			TaskArbiter.release(team)
+			continue
 		# A2c-2 折入：戰略移動 move_target 改由 arbiter-owned set_strategic_move 於 movement 前設
 		#（sim_runner._step2a_strategic_move）→ 此處不再直讀 strategic_assignments（bypass 收攏）。
 		if team.move_target == Vector2i(-1, -1):

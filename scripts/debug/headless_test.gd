@@ -14473,9 +14473,10 @@ func _test_decision_terms() -> void:
 func _test_decision_options() -> void:
 	print("--- 決策引擎 Task3: Option 表 ---")
 	var ctx := DecisionContext.new(); ctx.has_goods = true; ctx.has_arb = true; ctx.food_days = 20.0; ctx.is_merchant = true
+	ctx.threat_pos = Vector2i(3, 3)   # null-belief-flee 修：FLEE(survival) applicable 僅威脅有 belief 座標時（非恆候選）
 	var opts: Array = DecisionOptions.applicable(ctx)
 	assert("貿易" in opts, "商隊有貨+arb → 貿易候選")
-	assert("survival" in opts, "survival 恆候選")
+	assert("survival" in opts, "survival 候選（威脅有座標時；null-belief-flee 修後非恆候選）")
 	var terms: Array = DecisionOptions.terms_of("貿易")
 	var has_eco := false
 	for tw in terms:
