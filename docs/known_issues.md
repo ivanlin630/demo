@@ -14,6 +14,22 @@ QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambit
 
 **兩修（同票）**：①**id 碰撞**——`_next_beast_id` 改 `static var`（class 級持久跨 new()）或移到 WorldState 持久 counter，讓每 beast 拿唯一遞減 id。②**決策洩漏**——`_evaluate_all_body` loop2/loop3 skip `team.beast_kind != ""`（beast 只留 combat/cleanup 生命週期，在 npc_combat/encounter 非 evaluate_all）。①優先(懸空 ref hazard=更基礎,可能污染 belief/combat_target/其他量測)。behavior 變(beast 停建設/晉升+唯一 id)→非 byte-identical，measure 驗真隊無 regression。**排序**：獨立票，off crisis-override merge 後 main（避 faction_ai 衝突）→ spec-light+R²+dispatch。**與 crisis-immunity 無因果糾纏**（pre-existing）。**★狀態（2026-07-19）：fix 實作@7fb16350 gates/determinism 全綠但 seed1337 真隊 8mo REGRESSION（starve 0→5,attrition 3.15→20.27 ~6.4x,可重現）→ blueprint 裁 investigate,merge HOLD。systems code-read 看不出顯機制（決策-skip 後 beast 被動→「累積圍毆」講不通;beast 勝敗 _end_combat 都 _cleanup→accumulation 不明顯）→ measurer 跑 month3→8 specimen trace（4 信號:beast count/hunt-meat/死因/divergence-point 分機制vs混沌）。混沌→accept;真機制→systems 查根因（accumulation 真則補 beast 生命週期界非 revert id 修）。****provenance（measurer 回證 2026-07-19，closed）**：`extinct.starve` bump（`faction_ai:2299 _on_team_extinct`）**無** TAG_BEAST 守衛，**但** seed1337 baseline 6 starve 全真隊（tid 48/58/52/19/96/35，beast_kind 空，pop=0，famine~33d），**零野獸** → seed1337 真隊 starve 乾淨可引用。2299 加 TAG_BEAST 守衛 = defense-in-depth（beast fix loop3-skip 已關 beast 走 extinct 路，冗餘），已給 implementer 順手可選。**bed 盲點旁註**（blueprint 提）：現 specimen bed 無視野/belief/鄰近資源欄→答不了「窮死前視野多大」；`survival_would_succeed=true` 有海市蜃樓前科(2026-07-14 買糧 applicable)不照單全收→嚴查此類需補欄。連 [[project_desperation_economy]]/[[feedback_patch_gate_first]]/[[feedback_symptom_vs_root_retry]]。
 
+## ★TaskArbiter.transition = 無條件 raw 覆寫後門（手不聽腦，2026-07-19，team16 QA 撿 → systems patch-gate 查坐實）
+
+`TaskArbiter.transition`（`task_arbiter.gd:108-112`）直接賦值 `current_task/task_priority/task_start_tick`，**不檢查 priority、不檢查 crisis-免疫 guard（只在 try_set:45-47）、不檢查 combat lock**。13 caller（`faction_ai:2638/3876`、`interaction:1249/1264/1289`、`outpost:384/406/447/461/566/602`、`player_command:1017`、`sim_runner:259`：defection「等待新領主」/建設/生產/BUILD/beggar-restore）**全繞過**三檢查。∴ transition 可 **clobber 引擎剛派的 survival@80**（手不聽腦：機械 override pre-empt 引擎決策=補丁閘家族）+ **重設 task_start_tick 使 `_famine_crisis`(faction_ai:3462 baseline)恆重置→crisis 永不 fire**。
+
+**血證=team16**：defection path A（`faction_ai:3876`）transition「等待新領主」@AMBIENT → team16 famine `would_succeed=true` 凍死 300 tick（crisis 永不 fire + 免疫抓不到 transition 重鎖）。**PRE-EXISTING @35e9ee8f**（beast-fix 不碰此路）。
+
+**修方向（HOW，待 spec）**：transition 至少守 combat lock + 不 clobber 更高 priority（survival/combat）+ 尊重 crisis-免疫。★13 caller 有正當用途（安頓→生產就地轉換）→ spec 需 measure 逐 caller 不破。排序=beast-fix 定性後（絕境經濟/手不聽腦 arc 真根之一）。連 [[project_desperation_economy]]/[[feedback_patch_gate_first]]/[[project_reverse_engineering_arc]]（控制層手不聽腦）。
+
+## crisis-immunity 覆蓋不全（2026-07-19，team16 揭）
+
+crisis-immunity（35e9ee8f/b71647ab）免疫 guard **只在 `try_set`** → 只覆蓋「release 後走 **try_set** 重委派」的重鎖（team1/19 被接住）。**走 `transition` 的重鎖（team16「等待新領主」）未覆蓋**。∴ 原 release-pass（靶三隊 team1/19/13 剛好全走 try_set 路）= **樣本不完整**，免疫修對它瞄準的有效但覆蓋不全。**非推翻已 merge**（免疫對 try_set 路真有效），但誠實記「覆蓋範圍=try_set 重委派，transition 重鎖需上條 transition 修一併治」。blueprint owner 補 game-design 對應處。連上條 [[TaskArbiter.transition 後門]]。
+
+## team68 覓食→idle 翻（2026-07-19，team16 稽核順帶，另 signature 待查）
+
+QA 撿 team68：`committed=覓食 但 task 翻 idle, food 4.17-4.58`。food 4.5 **>CRISIS_FLOOR 1.5=非深餓** → crisis-override 本就不 fire（正確）。非 team16 的 transition-crisis 路 = **另一 signature**（覓食→idle 翻:release 沒 re-dispatch or 另條 transition clobber）。**單獨查**，低優先（非急餓死）。附：bed「純窮死」標籤語意洞（只測 stall_exclude fire 有無，不測真缺糧）→ measurer 修標籤語意。
+
 ## ② stall 對併入-rejection loop 不 fire（retry 不 re-stamp，2026-07-19，crisis-override R² 抓，crisis 已覆）
 
 ② `_detect_survival_stall` 判 `survival_committed_option` + relief（`_stamp_survival_commit` **只在 try_set 成功時 re-stamp baseline**）。**併入被 host 拒→retry loop** 不成功 try_set → 不 re-stamp → ② stall 不 fire（team 卡 pending-join 食不回升餓死）。**crisis-override（2026-07-19）已涵蓋**（OUTCOME=famine 未緩，不管 dispatch 成敗）→ 非急。**② 那 gap（retry 該不該 re-stamp baseline）**留 backlog：realistic 應維持首次 baseline（仍卡=stall 累積）而非每 retry 重置窗。crisis 覆後低優先。連 [[project_desperation_economy]]。
