@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[beast fix 順手·可選 defense-in-depth] measurer 查 starve 計數器(faction_ai:2299 _on_team_extinct bump)無 TAG_BEAST 守衛。你的 beast fix loop3-skip 已關掉 beast 走 generic extinct 路 → 那守衛冗餘。但順手在 2299 starve bump 前加 `if team.beast_kind != '': `(不計野獸)= defense-in-depth,防未來別條路 extinct 野獸誤計。★可選非阻塞:beast fix 主體(id碰撞+決策洩漏)照 spec 為準,這個加不加你判(加=1行 robustness,不加=loop3-skip 已足)。別為此擴 measure 範圍。"
 ---
 
