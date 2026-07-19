@@ -1725,6 +1725,17 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 		return
 	if _check_discipline(state, sub):
 		return
+	# ★v3 連續母團監看（survival-work subteam 每 tick 查，旅途中也監看——補 v2 只在駐點(move_target==-1)查
+	# 的結構洞：v2 下旅途中 forager 不監看母團 → 母團垂危召不回 → seed1337 惡化 6→10）。
+	#   母團缺席/死 → orphan 轉獨立（不無限囤糧）；母團缺糧 → 立即掉頭歸建交糧（不等駐點/不等 sated）。
+	if sub.current_task in SURVIVAL_TASKS:
+		var mon_parent: TeamData = state.teams.get(sub.parent_team_id)
+		if mon_parent == null:
+			_orphan_forager(state, sub)          # 母團缺席/死 → 轉獨立
+			return
+		if _parent_needs_food(state, mon_parent):
+			merge_queue.append(sub.team_id)      # 母團垂危 → 立即掉頭歸建交糧（loop2b 移向 parent→抵達 merge）
+			return
 	# 抵達目標格 → 歸建（lifecycle，不進引擎/probe）
 	# ★手不聽腦第 3 種 v2（供給環閉合，subteam-idle-latch）：blanket 即時 merge 把覓食 subteam 抵達
 	# forage 目的地誤當歸建抵家 → thrash(ARRIVE↔RELEASE 1:1) 覓食不執行坐死。survival-work（覓食/紮營/
@@ -3477,6 +3488,15 @@ func _forager_sated(state: WorldState, sub: TeamData) -> bool:
 	return _survival_food_days(state, sub) >= FORAGE_SATED_DAYS   # 攜糧達門檻 → 值得歸建交糧母團
 func _parent_needs_food(state: WorldState, parent: TeamData) -> bool:
 	return parent != null and _survival_food_days(state, parent) < PARENT_LOW_DAYS   # 母團缺糧 → 未滿也回交
+
+# orphan-forager（v3）：母團缺席/死 → subteam 轉獨立（沿用 discipline_fail 現成 detach 路），
+# 不再無限囤糧（下 tick 跑獨立戰略/faction 決策）。
+func _orphan_forager(state: WorldState, sub: TeamData) -> void:
+	state.detach_subteam(sub)
+	state.remove_tag(sub, TeamData.TAG_SUBTEAM, "orphan_forager")
+	TaskArbiter.release(sub)
+	print("[SubAI] Team%d 母團缺席 → orphan 轉獨立" % sub.team_id)
+
 
 # crisis-override（OUTCOME-based 安全網，泛化 ② 到任何 committed task）：深餓（food<CRISIS_FLOOR）+ committed N 天未緩
 # （food 沒回升 ≥RELIEF_MIN）→ true → caller release → 下 cadence re-rank → survival @80 preempt 卡住 task。

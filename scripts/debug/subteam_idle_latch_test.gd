@@ -17,6 +17,9 @@ func _initialize() -> void:
 	_test_sated_forager_merges()         # ②食足→歸建交糧（merge，供給環閉合）
 	_test_parent_low_merges()            # ③母團缺糧→即使未食足也歸建交糧
 	_test_mission_task_still_merges()    # mission(TRADE 非-survival)抵達仍 merge（lifecycle 不破）
+	_test_intransit_parent_low_recalls() # v3①旅途中(move_target set)母團垂危→掉頭交糧（v2 漏的結構洞）
+	_test_orphan_parent_dead()           # v3②母團死/缺席→orphan 轉獨立（不囤糧）
+	_test_monitor_no_harm_build()        # v3③監看不誤傷 BUILD（早退不被召回，施工不中斷）
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -95,3 +98,32 @@ func _test_mission_task_still_merges() -> void:
 	var w: Array = _mk(TeamData.TASK_TRADE, 8.0, 5, 20.0)   # 即使「未食足+母團不缺」，非-survival 照 merge
 	var mq: Array = _eval(w)
 	_ok(mq.has(73), "TRADE 抵達 → 進 merge_queue（mission lifecycle 不破，got mq=%s）" % str(mq))
+
+# v3① 旅途中（move_target≠-1，非駐點）母團垂危 → 連續監看掉頭交糧（v2 只駐點查漏此結構洞）
+func _test_intransit_parent_low_recalls() -> void:
+	print("--- v3①旅途中母團垂危→掉頭交糧 ---")
+	# forager 未食足(food8→2天)、仍在旅途(move_target set 非 -1)；母團缺糧(food8→2天<3)
+	var w: Array = _mk(TeamData.TASK_FORAGE, 8.0, 5, 8.0)
+	(w[1] as TeamData).move_target = Vector2i(10, 10)   # ★旅途中（v2 position-branch 不會 fire）
+	var mq: Array = _eval(w)
+	_ok(mq.has(73), "旅途中(move_target set)母團垂危 → 連續監看召回交糧（v2 漏此，got mq=%s）" % str(mq))
+
+# v3② 母團死/缺席 → orphan 轉獨立（detach + 去 TAG_SUBTEAM + release，不無限囤糧）
+func _test_orphan_parent_dead() -> void:
+	print("--- v3②母團死→orphan 轉獨立 ---")
+	var w: Array = _mk(TeamData.TASK_FORAGE, 8.0, 5, -1.0)   # parent_food<0 → 不建 parent → parent==null
+	var sub: TeamData = w[1]
+	w[0].add_tag(sub, TeamData.TAG_SUBTEAM, "test_setup")
+	var mq: Array = _eval(w)
+	_ok(not mq.has(73), "orphan 不進 merge_queue（無母團可歸，got mq=%s）" % str(mq))
+	_ok(not sub.tags.has(TeamData.TAG_SUBTEAM), "orphan 去 TAG_SUBTEAM（轉獨立）")
+	_ok(sub.parent_team_id == -1, "orphan detach（parent_team_id=-1，got %d）" % sub.parent_team_id)
+	_ok(sub.current_task == TeamData.TASK_IDLE, "orphan release→IDLE（下 tick 跑獨立決策，got '%s')" % sub.current_task)
+
+# v3③ 監看不誤傷 BUILD（BUILD 早退於監看前，施工不被母團監看中斷/召回）
+func _test_monitor_no_harm_build() -> void:
+	print("--- v3③監看不誤傷 BUILD ---")
+	var w: Array = _mk(TeamData.TASK_BUILD, 8.0, 5, 8.0)   # 母團缺糧 but BUILD 施工中不該被召回
+	var mq: Array = _eval(w)
+	_ok(mq.is_empty(), "BUILD 不被母團監看召回（施工不中斷，got mq=%s）" % str(mq))
+	_ok((w[1] as TeamData).current_task == TeamData.TASK_BUILD, "current_task 仍 BUILD")
