@@ -709,6 +709,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 	var merge_queue: Array = []
 	for tid in state.teams:
 		var team: TeamData = state.teams[tid]
+		# 野獸(beast_kind!="")不進決策迴圈：非-agent 無「腦」不該經引擎的秤（憲法決策模型）。
+		# 生命週期(spawn/combat/reward/cleanup)全在 encounter/npc_combat/beast_system，不評 strategy/solo/infra。
+		if team.beast_kind != "": continue
 		if team.parent_team_id != -1:
 			_evaluate_subteam(state, team, merge_queue)
 		elif team.faction_id == -1:
@@ -764,6 +767,9 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
+		# 野獸不進決策迴圈：不 succession 晉升領袖(leader_id=-1 非「死領袖」)、不 ambition/survival/threat。
+		# beast husk 清理由 combat cleanup(reward_and_cleanup/_cleanup) 擁有，非 loop3 generic _on_team_extinct。
+		if team.beast_kind != "": continue
 		# 滅團：population<=0 → 遺財轉公庫/abandoned + 移除空殼團（餓死路徑原只清資產不 erase → husk）
 		if team.population <= 0:
 			_on_team_extinct(state, team)
@@ -2308,7 +2314,9 @@ func _collect_member_tax(state: WorldState, team: TeamData) -> void:
 
 # 滅團標記：清 faction 引用 + 排入延遲清除（資產路由延到 erase 當下，捕捉時序間加回的 coin）
 func _on_team_extinct(state: WorldState, team: TeamData) -> void:
-	if Probe.enabled:
+	# defense-in-depth（systems addendum 2026-07-19）：野獸死=狩獵結果非隊死因統計，不計入 extinct.* 死因計數器。
+	# loop3 beast-skip 已令 beast 正常走不到此（combat cleanup 擁有 beast 清理）→ 此守衛冗餘但防未來別條 extinct 路誤計。
+	if Probe.enabled and team.beast_kind == "":
 		# 滅團死因分類（盡力，無完美標記→extinct.other 兜底）：餓死計時>0=餓主因，否則戰鬥標記，否則其他
 		if team.famine_days > 0.0: Probe.bump("extinct.starve")
 		elif team.combat_target != -1: Probe.bump("extinct.combat")
