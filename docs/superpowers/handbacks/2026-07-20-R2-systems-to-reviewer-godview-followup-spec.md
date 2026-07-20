@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·god-view follow-up spec·enemy_outpost+jhost belief-gate·你已判兩者真 leak] spec=2026-07-20-godview-followup-enemy-outpost-jhost.md。①jhost(decision_context:373) trivial=同 1119 belief_pos 範式(無 belief→不可達)。②★enemy_outpost(faction_ai:2912) 設計點:用途=選址軟 penalty(建近敵-分非硬排除);fix=belief-about-owner proxy(觀察者對 owner team 有 best_estimate belief 才納避讓,★store-free 復用既有 belief,不建 team_outpost_known 大 store)。審點:①jhost belief_pos 範式一致②★★enemy_outpost proxy 可接受嗎(imperfect:belief_pos 給 owner last-seen 位非據點位,見過owner≠知據點;但 store-free+軟penalty 容忍+「避已知敵」語意合理)vs 需建真 sighting store(過重?)③baseline drop 2 CANDIDATE-LEAK 註對(fingerprint 修後 removed=PASS)④無新 RNG。CLEAN→dispatch(off post-1119 main 避 faction_ai 衝突)。這批 merged→真 zero-untracked-god-view→arc 收官。"
 ---
 

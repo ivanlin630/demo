@@ -41,11 +41,14 @@ for tile_id in state.world.tiles:
 
 ## 驗收
 - **TDD**：①jhost 可見→belief 位算可達/斷視線 recent→last-seen/positionless→(-1,-1)→不可達。②enemy_outpost：owner 有 belief→納入避讓/owner 無 belief→不納（未見敵不避）。
-- **gate** PASS（★constitution_gate v3：這 2 site 修後 gv_teamstate/gv_mapscan fingerprint drop→removed=PASS，baseline 該 2 CANDIDATE-LEAK 註行移除）/ **headless** 0 new / **determinism** 2 跑 byte-identical（無新 RNG）。
+- **gate** PASS（★★constitution_gate v3 baseline 處置——reviewer R² ③訂正：
+  - **jhost**：`state.teams[_jhost].tile_pos`→belief_pos → gv_teamstate fingerprint **真 drop=removed**（`decision_context.gd::gather::gv_teamstate` 從 baseline **移除**）。
+  - **enemy_outpost**：belief filter 加在 loop **內**，`for tile_id in state.world.tiles` **loop 結構保留** → gv_mapscan fingerprint **仍命中**！**不是移除，是 RE-CLASSIFY**：baseline 該行註 `# CANDIDATE-LEAK`→改 `# gate-ok(legit): belief-filtered(owner-belief) 全圖 loop 保留但只避已知敵`（**保留 tracked，不加源碼 # gate-ok**——detector 尊重源碼 gate-ok，加了會離 current 變 removed；要它續 tracked+visible 故只改 baseline 註）。
+  - systems merge 時改 baseline（jhost 移除 + enemy_outpost re-label）。）/ **headless** 0 new / **determinism** 2 跑 byte-identical（無新 RNG）。
 - **★measure（→measurer，behavior-sensitive）**：enemy_outpost belief-gate 影響選址→outpost 分佈/衝突率/doom-delta（seed1337/42）；jhost 影響 join 決策（輕）。doom-delta 惡化不明顯即 OK（arguably 更多衝突=更好戲，藍圖看數字）。
 
 ## arc 收尾
-2 site merged + baseline drop 2 CANDIDATE-LEAK 註 → **god-view detector gv_teamstate/gv_mapscan 剩全 legit/gray** → 真 zero-untracked-god-view-residual → 報 blueprint arc 收官 → economy arc（re-baseline）。
+2 site merged + baseline 訂正（jhost gv_teamstate 移除 + enemy_outpost gv_mapscan re-classify gate-ok belief-filtered）→ **god-view detector 剩全 legit/gray + belief-filtered** → 真 zero-untracked-god-view-residual → 報 blueprint arc 收官 → economy arc（re-baseline）。
 
 ## 排序
 L3，off LOCAL main。R²（★enemy_outpost proxy vs 真 store 設計點 + jhost 範式一致）→ dispatch。可與 1119 同批或緊接（jhost 完全同 1119 範式）。
