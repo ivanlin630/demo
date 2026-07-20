@@ -34,6 +34,21 @@ for ta_cfg in teams_cfg:
 - **淵源**：explicit config 若有 `parent_team_id`/founding 關係則納；無則只 ②+③本地。
 - **★窄例外（純機制 unit test）**：加 config flag `omniscient_discovery`（**default false**）→ true 時保留 all-pairs 全知。**測試須顯式標**（純機制測某互動不想被 discovery gate 干擾）→ 標明非預設（sandbox/emergence config 一律不設=②+③）。
 
+## ★★B 擴：relay-discovery（blueprint 裁 (b) 2026-07-20，履行 2026-07-18 make-or-break 前置承諾）
+> reviewer R① 載重驗出「初識靠 belief 傳播」premise 機制不成立（relay 零寫 team_discovered）= 2026-07-18 冷啟動悖論裁定的「channel② 派系互相 relay」+「need-bootstrap 待驗」**前置承諾被兌現**，非新需求。裁 (b)：**relay-discovery 需建，併入 B 擴**（非另開大 arc）。
+
+**範圍收窄（最小行為，非完整情報網模型）**：relay/message 傳到時，**提及隊未 discovered → 連帶 discover + 初始 belief entry**。**率/延遲/失真的完整情報網 = defer（資訊操控維度，另軌）**。
+- **插入點**：`message_system.gd:239`（giver→receiver 告知 tgt 呼 `record_claim`）前：
+```gdscript
+# relay-discovery（Slice B(b)）：聽說未識隊 → 連帶 discover（記 discovery,belief entry 由 record_claim 建）
+if not state.team_discovered.get(receiver_id, []).has(tgt_id):
+    if not state.team_discovered.has(receiver_id): state.team_discovered[receiver_id] = []
+    state.team_discovered[receiver_id].append(tgt_id)
+BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)   # 已建 belief entry
+```
+- **含 distorted**：lie claim 也 discover（team 真存在，只 details 失真——「聽說有隊 X」為真，位/stats 可假）。minimal=任 relay→discover。
+- ∴ **discovery 兩-channel成立**：①直接視野（vision）②relay（聽說）→ awareness 遠識靠情報網撐（invariants 兩-channel 兌現）。
+
 ## ★measure（8 config 影響，emergence 敏感）
 創世知識縮（全知→②+③）→ 隊開局知較少 → 初識/外交/威脅靠 belief 傳播漸長。**驗 emergence 仍運作**（非崩）：
 - before/after doom-delta（seed1337/42/4201）：真隊存亡不崩（開局不全知該是更真實冷啟動非災難）。
@@ -41,7 +56,7 @@ for ta_cfg in teams_cfg:
 - 逐 config sanity（8 個 explicit config headless 跑不崩）。
 
 ## 驗收
-- **TDD**：①②同 faction 創世 discovered ②③本地鄰居（proximity≤半徑）discovered、遠隊不 ③`omniscient_discovery=true` 保 all-pairs（純機制測用）④default（無 flag）= ②+③ 非全知。
+- **TDD**：①②同 faction 創世 discovered ②③本地鄰居（proximity≤半徑）discovered、遠隊不 ③`omniscient_discovery=true` 保 all-pairs（純機制測用）④default（無 flag）= ②+③ 非全知 ⑤**relay-discovery**：giver relay tgt 給未識 receiver → receiver discover tgt + belief entry 建（`message_system:239`）⑥relay distorted claim 也 discover。
 - **gate** PASS / **headless** 0 new（★注意：8 explicit config 測 fixture 可能靠開局全知——依賴全知的測改設 `omniscient_discovery:true` 或補 belief setup；區分「測 fixture 該顯式全知」vs「測真實遊戲情境」逐個判，同 slice2 fixture 教訓）/ **determinism** 2 跑 byte-identical。
 - **measure**：上述 emergence 對照 + doom-delta。
 
