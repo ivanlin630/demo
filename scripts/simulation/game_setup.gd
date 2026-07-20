@@ -31,6 +31,7 @@ const FAC_MIN: int = 2
 const FAC_MAX: int = 4
 const FAC_SHARE_MIN: int = 1
 const FAC_SHARE_MAX: int = 4               # share 擾動幅（獨霸=懸殊/群雄=均等）
+const CREATION_KNOW_RADIUS: int = 3        # TEST VALUE — 創世認識半徑（出生認識附近隊；≥VISION_RADIUS=3，measure tune）
 const COVERAGE_MIN: float = 0.5            # §3 覆蓋度下限（象限覆蓋比）
 const FLOOR_RETRY_MAX: int = 8             # §3 地板 retry 上限（同 rng 續抽，bounded）
 const FLOOR_CONNECT_MAX: int = 12          # §3② 領土非孤島軟上界（同 faction outpost 最近距離 hex）
@@ -566,15 +567,35 @@ static func _setup_explicit_teams(state: WorldState, config: Dictionary) -> void
 		var tid: int = int(t_cfg["id"])
 		if state.factions.has(fid2) and state.teams.has(tid):
 			state.set_team_faction(state.teams[tid], fid2)   # 入 faction（雙向同步）
+	# ★god-view Slice B：創世知識 seed（②+③，非全知）取代舊 all-pairs 全知（開局全知污染 emergence
+	# 冷啟動：初識/外交/威脅該靠 belief 傳播長出）。② 同 faction 互 discovered / ③ 本地鄰居(proximity≤
+	# CREATION_KNOW_RADIUS) / ③ 淵源(parent 若 config 有)。窄例外：omniscient_discovery=true(default false)
+	# → 保 all-pairs（純機制 test 顯式全知；sandbox/emergence config 一律不設）。
+	var omniscient: bool = bool(config.get("omniscient_discovery", false))
 	for ta_cfg in teams_cfg:
 		var ta_id: int = int(ta_cfg["id"])
 		if not state.team_discovered.has(ta_id):
 			state.team_discovered[ta_id] = []
 		if not state.team_known.has(ta_id):
 			state.team_known[ta_id] = []
+		var fa: int = int(ta_cfg.get("faction_id", -1))
+		var ta_pa: Array = ta_cfg.get("tile_pos", [0, 0])
+		var ta_pos: Vector2i = Vector2i(int(ta_pa[0]), int(ta_pa[1]))
+		var ta_parent: int = int(ta_cfg.get("parent_team_id", -1))
 		for tb_cfg in teams_cfg:
 			var tb_id: int = int(tb_cfg["id"])
-			if ta_id != tb_id and not state.team_discovered[ta_id].has(tb_id):
+			if ta_id == tb_id or state.team_discovered[ta_id].has(tb_id):
+				continue
+			var known: bool = omniscient
+			if not known and fa != -1 and int(tb_cfg.get("faction_id", -1)) == fa:
+				known = true   # ② 同 faction（共享情報，合 invariants 刻意豁免）
+			if not known:
+				var tb_pa: Array = tb_cfg.get("tile_pos", [0, 0])
+				if _hex_dist(ta_pos, Vector2i(int(tb_pa[0]), int(tb_pa[1]))) <= CREATION_KNOW_RADIUS:
+					known = true   # ③ 本地鄰居（創世 proximity）
+			if not known and (ta_parent == tb_id or int(tb_cfg.get("parent_team_id", -1)) == ta_id):
+				known = true   # ③ 淵源（parent 雙向）
+			if known:
 				state.team_discovered[ta_id].append(tb_id)
 
 static func _build_explicit_team(state: WorldState, t_cfg: Dictionary) -> void:
