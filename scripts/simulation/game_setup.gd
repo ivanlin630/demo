@@ -50,8 +50,25 @@ static func setup(state: WorldState, config: Dictionary) -> void:
 		_generate_independent_teams(state, outpost_plan, config, rng)
 		_setup_random_player(state, config, rng)
 
+	# ★god-view Slice C：創世 market-known seed（三源之一）——每隊知附近市集（proximity≤CREATION_KNOW_RADIUS）。
+	# 開局憑「聽過附近有市集」出得了門（冷啟動不因不知市集全卡死）；放 mode 分支後=全 outpost 就位。一次性（非 per-tick）。
+	_seed_creation_market_known(state)
+
 	print("[GameSetup] 完成：%d teams, %d factions, %d persons" %
 		[state.teams.size(), state.factions.size(), state.persons.size()])
+
+static func _seed_creation_market_known(state: WorldState) -> void:
+	for tid in state.teams:
+		var team: TeamData = state.teams[tid]
+		var known: Dictionary = state.team_market_known.get(tid, {})
+		for otid in state.world.tiles:
+			var tile: HexTileData = state.world.tiles[otid]
+			if tile.outpost_level <= 0 or tile.outpost_owner == tid:
+				continue   # 非市集 or 自家 outpost（同 _nearest_market_outpost 排除）
+			if _hex_dist(team.tile_pos, tile.tile_pos) <= CREATION_KNOW_RADIUS:
+				known[otid] = true
+		if not known.is_empty():
+			state.team_market_known[tid] = known
 
 static func load_config(path: String) -> Dictionary:
 	var file := FileAccess.open(path, FileAccess.READ)

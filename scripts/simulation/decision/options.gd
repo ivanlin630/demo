@@ -18,7 +18,12 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.has_goods or ctx.has_arb,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
-			return {"task": TeamData.TASK_TRADE, "target": FactionAISystem.new()._merchant_trade_target(state, team)},
+			var tgt: Vector2i = FactionAISystem.new()._merchant_trade_target(state, team)
+			# ★god-view Slice C：belief-gate 後無已知市集→(-1,-1)。只 roaming merchant→IDLE（無市集去=無事可做）；
+			# ★resident 擺攤 (-1,-1)=合法原地交易（PRODUCE 居民站自家村待客）→保 TASK_TRADE，防村攤關門(r3 regression)。
+			if tgt == Vector2i(-1, -1) and not FactionAISystem.is_resident_static(state, team):
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_TRADE, "target": tgt},
 	},
 	"生產": {
 		"terms": [["produce_need", "settle"], ["ambition_drive", "ambition"]],
