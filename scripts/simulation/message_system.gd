@@ -236,6 +236,13 @@ func _exchange_intel(state: WorldState, giver_id: int, receiver_id: int) -> void
 			if det["discount"] == BeliefSystem.DETECT_ADJUDICATE_MULT: Probe.bump("g3.detect_裁決")
 			elif det["discount"] == BeliefSystem.DETECT_SUSPECT_MULT: Probe.bump("g3.detect_生疑")
 			else: Probe.bump("g3.detect_信假")
+		# ★relay-discovery（god-view Slice B(b)）：聽說未識隊 → 連帶 discover（記 discovery；belief entry 由下方
+		# record_claim 建）。含 distorted（lie claim 也 discover：team 真存在只 details 失真——「聽說有隊 X」為真，
+		# 位/stats 可假）。∴ discovery 兩-channel 成立：①直接視野(vision) ②relay(聽說)→遠識靠情報網撐。
+		if tgt_id != receiver_id and not state.team_discovered.get(receiver_id, []).has(tgt_id):
+			if not state.team_discovered.has(receiver_id):
+				state.team_discovered[receiver_id] = []
+			state.team_discovered[receiver_id].append(tgt_id)
 		BeliefSystem.record_claim(state, receiver_id, tgt_id, giver_id, stype, entry, cred, distorted)
 
 func process_pending(_state: WorldState) -> void:
