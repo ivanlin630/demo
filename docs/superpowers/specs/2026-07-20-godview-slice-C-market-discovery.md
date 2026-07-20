@@ -9,16 +9,24 @@
 ## blueprint WHAT：市場零豁免、憑 belief（聽過）
 市集位置**永遠靠傳播/親見習得**（非全圖掃）。位置固定→習得後穩定，但**取得永遠靠傳播**（名聲高傳播率自然廣傳）。
 
-## 修（兩部，鏡射 team-discovery 三源）
-### ① 新 market-discovery belief store（基建）
-`WorldState` 加 `team_market_known: Dictionary`（`team_id → Array[tile_id]` 已知市集 outpost tile）。**三發現源**（鏡射 team_discovered vision+relay+創世）：
-- **創世**：隊創世時知**附近**市集（proximity≤`CREATION_KNOW_RADIUS`，同 Slice B 本地知識）——冷啟動出門憑「聽過附近有市集」。
-- **直接親見**：隊在/近 outpost tile（vision 半徑內）→ 加入 known（同 vision team-discovery）。
-- **relay 聽說**：市集資訊經 message/relay 傳到→加入 known（**復用/擴 order_buy/sell message 或 market-info relay**；名聲高市集傳播廣）。
-- ★**store 隨市集消失清**（outpost 拆/易主→known 條目清，避懸空；同 team_discovered death-erase 精神）。
+## ★★v2 訂正（異質 R² BLOCKING 後）：premise HOLDS + 3 前置
+> **異質審親驗 market-relay premise HOLDS（異於 Slice B，refute 訂正 reviewer 自己初判）**：`message_system:194-207 _exchange_intel` 複製全 known msg（不濾 type）+ order 訊息帶 `origin_pos`（`post_order:30-33`，`_market_pos`=下單隊 outpost tile）+ `outpost_built`（`outpost_system:285`，TTL30d）帶 source_pos，皆騎 :194-207 relay copy。`received_buy/sell_orders`（order_system:164-187）**今天就消費這 relay 位置**（`best_arbitrage_order` 是 `_merchant_trade_target:2098` 主路，`_nearest_market_outpost` 是 fallback）。∴ **relay 聽說 = aggregation plumbing（從已到訊息 harvest origin_pos），非 Slice B 那種需從零建**。
 
-### ② `_nearest_market_outpost` belief-gate
-`:2112` 改：**只掃 `state.team_market_known[team_id]`**（已知市集），非全 tiles。無已知市集→回 (-1,-1)（該隊沒聽過任何市集→不能盲貿易，靠發現）。
+## 修（v2：harvest + belief-gate + 3 前置）
+### ① market-discovery belief store（harvest 既有 plumbing，非建 relay）
+`WorldState` 加 `team_market_known: Dictionary`（`team_id → Set[tile_id]` 已知市集 outpost tile）。**三源**：
+- **創世**：知附近市集（proximity≤`CREATION_KNOW_RADIUS`，同 Slice B）。
+- **直接親見**：在/近 outpost tile（vision 半徑內）→ 加入。
+- **★relay harvest（非建）**：從 `team_known` 的 order/outpost_built 訊息 **harvest `origin_pos`/`source_pos` 進 known**（既有傳播路，reviewer 坐實流通）。**★caveat：濾 `tile.outpost_level>0`**（`_market_pos` 對無 outpost 隊 fallback live team pos=noise，須濾真市集）+ **無新 RNG**（harvest 既有 entry，不加「注意到市集」新 dice）。
+
+### ② `_nearest_market_outpost` belief-gate（`faction_ai:2112`）
+改：**只掃 `state.team_market_known[team_id]`**（已知市集），非全 tiles。無已知→回 (-1,-1)。
+
+### ③ ★貿易 option 補 (-1,-1) guard（BLOCKER 1，對齊 7 兄弟）
+`options.gd:22-23` 貿易 `to_task` **唯一無 (-1,-1) guard**（7 兄弟掠奪/佔村/紮營/乞食/攻擊/併入/吸納皆有）→ belief-gate 後 (-1,-1) 常態 → **卡 idle-標 trading**（同 null-belief-flee 凍結型）。**修**：貿易 `to_task` 補 `if target==(-1,-1): return {TASK_IDLE}`（對齊兄弟）或 applicable 加 market-known 檢查→無已知市集不選貿易。
+
+### ④ ★team_market_known 顯式 cleanup（BLOCKER 2，無既有 erase 可鏡射）
+**tile.market_orders 本身 capture/demolish 零清理**（`outpost:606` capture 只改 owner；`:327` demolish 清 type/level/owner 不清 market_orders）→ **team_market_known 不能 naive 假設有 death-erase**。**修**：Slice C **顯式建** team_market_known 的 capture/demolish 清理（outpost 拆/易主→清該 tile known）+ harvest 濾 `outpost_level>0`（避 stale market_orders ghost 餵易主市集）。★market_orders 本身 pre-existing 洩漏（capture/demolish 不清）=順帶記 known_issues（非 C 必修但相關）。
 
 ## ★measure（economy 行為敏感）
 市場全知→belief-gate = 貿易目標從「全圖最近」變「已知中最近」→ 動貿易/economy 行為。**非盲改**：
@@ -27,7 +35,7 @@
 - **★market-info relay 真傳得到**（承 Slice B R① 教訓「別假設 relay」）：坐實市集資訊 relay 機制真存在/傳得到（order message 或新 market-info relay），否則市場發現只 proximity=可能經濟卡（同 B 的 relay premise 驗）。
 
 ## 驗收
-- **TDD**：①創世-nearby 市集 known ②直接親見 outpost→known ③relay 市集→known ④`_nearest_market_outpost` 只回 known 中最近、未知市集不回 ⑤市集消失→known 清 ⑥無已知市集→(-1,-1)不盲貿易。
+- **TDD**：①創世-nearby 市集 known ②直接親見 outpost→known ③relay harvest order/outpost_built 訊息 origin_pos→known（濾 outpost_level>0，無 outpost 隊的 live pos 不 harvest）④`_nearest_market_outpost` 只回 known 中最近、未知市集不回 ⑤★outpost capture/demolish→team_market_known 顯式清該 tile（非假設繼承 erase）⑥★**貿易 option target==(-1,-1)→TASK_IDLE**（對齊 7 兄弟，不卡 idle-標 trading）⑦harvest 無新 RNG（determinism）。
 - **gate** PASS / **headless** 0 new / **determinism** 2 跑 byte-identical。
 - **measure**：上述 economy 對照 + doom-delta + 冷啟動不死鎖 + market-info relay 坐實。
 
