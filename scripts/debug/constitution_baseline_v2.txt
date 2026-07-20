@@ -71,7 +71,6 @@ scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::gv_maps
 scripts/simulation/faction_ai_system.gd::_evaluate_outpost_residency::gv_mapscan  # legit-geo: 地形掃 residency
 scripts/simulation/faction_ai_system.gd::_faction_has_workshop::gv_mapscan  # legit-self: 掃 own faction workshop
 scripts/simulation/faction_ai_system.gd::_find_own_outpost::gv_mapscan  # legit-self: 掃 own outpost
-scripts/simulation/faction_ai_system.gd::_precond_met::gv_teamstate  # LEAK-1119: can_reach 讀 live 他隊位(implementer 修中→merge 後 removed=PASS)
 scripts/simulation/faction_ai_system.gd::consolidate_target_of::gv_teamstate  # gray: 同-faction own-member pop(faction 知自家人,可 known_member_states 精修待評)
 scripts/simulation/faction_ai_system.gd::_enemy_outpost_positions::gv_mapscan  # CANDIDATE-LEAK: 掃全圖敵據點=瞬知全敵基建(應 belief,待 R²+follow-up)
 scripts/simulation/decision/decision_context.gd::gather::gv_teamstate  # CANDIDATE-LEAK: jhost live pos 入 PathSystem 算可達(同 1119 類,cross-faction god-view,待 R²+follow-up)
