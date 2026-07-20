@@ -33,13 +33,14 @@ if target == Vector2i(-1, -1) and not _is_resident_team(state, team):
 ```
 （`_is_resident_team` 存在 `faction_ai:495`。★**別加 applicable market-known 檢查**——同理濾掉擺攤，r3 警告勿加鎖。）
 
-### ④ ★team_market_known cleanup hook chokepoint（BLOCKER 2 精修，v3）
-> **v2「hook outpost:606+demolish:327」漏 encounter 主 capture 路**：owner 變更 funnel 經 **`OutpostOwnerBank.set_owner` choke point**，caller 多站：`encounter_system:1350/1417/1442/1459`（combat capture ×4 **主路**）+`diplomatic_ai:267`（結盟）+`faction_ai:3793/3835`（takeover）+`:3379`（camp）。outpost:606 只是其一（非主路）。逐 site 列舉必漏（已漏 encounter 主路）。
+### ④ ★team_market_known cleanup 只觸發 demolish（v4 訂正，reviewer 自我修正 v2/v3）
+> **v2/v3「hook set_owner 全 owner-change」= OVER-CLEAN（reviewer refute 自己 v2 prescription）**：`team_market_known` 存 **tile_id（位置）only**。**capture（owner 變）保 `outpost_level>0`=市集還在該 tile=entry 不懸空**（市集位置沒變，只換老闆）。清掉=**忘掉有效市集** → 違 blueprint「位置固定→習得後穩定」+ warzone trade 反覆斷（warzone 市集頻繁易主，每 capture 清=隊一直忘市集）。
+> ∴ 市集**只在 demolish（`outpost_level→0`）才真消失**（entry 才懸空）。
 
-**修（hook 單一 chokepoint 非逐 site）**：
-- **`OutpostOwnerBank.set_owner`**（owner 變即清所有隊對此 tile 的 `team_market_known` 條目 or 標重驗）——涵蓋 encounter capture×4/結盟/takeover/camp 全路。
-- **+ demolish**（`outpost_level→0`，`outpost:327`）→ 清該 tile known。
-- ★market_orders 本身 pre-existing 洩漏（capture/demolish 不清 market_orders）=記 known_issues（非 C 必修；team_market_known 走 chokepoint cleanup=正解示範，別繼承此病）。
+**修（cleanup 只觸發 `outpost_level→0`=demolish）**：
+- **hook demolish（`outpost:332`，唯一 `outpost_level→0` 路）** → 清**所有隊** `team_market_known` 對此 tile 的條目（tile 級=所有知此市集的隊都該忘，因市集拆了）。
+- **★不 hook set_owner/capture**（市集還在=known 位置仍有效，換老闆的 stale-賣單問題由 order 系統 staleness + harvest 濾 `outpost_level>0` 處理，非清 known）。
+- ★market_orders 本身 pre-existing 洩漏（capture/demolish 不清 market_orders）=記 known_issues（team_market_known demolish-only cleanup=正解，別繼承此病）。
 
 ## ★measure（economy 行為敏感）
 市場全知→belief-gate = 貿易目標從「全圖最近」變「已知中最近」→ 動貿易/economy 行為。**非盲改**：
@@ -48,7 +49,7 @@ if target == Vector2i(-1, -1) and not _is_resident_team(state, team):
 - **★market-info relay 真傳得到**（承 Slice B R① 教訓「別假設 relay」）：坐實市集資訊 relay 機制真存在/傳得到（order message 或新 market-info relay），否則市場發現只 proximity=可能經濟卡（同 B 的 relay premise 驗）。
 
 ## 驗收
-- **TDD**：①創世-nearby 市集 known ②直接親見 outpost→known ③relay harvest order/outpost_built 訊息 origin_pos→known（濾 outpost_level>0，無 outpost 隊的 live pos 不 harvest）④`_nearest_market_outpost` 只回 known 中最近、未知市集不回 ⑤★owner 變更（`OutpostOwnerBank.set_owner` chokepoint，含 encounter capture×4/結盟/takeover/camp）+demolish→team_market_known 清該 tile（chokepoint 非逐 site）⑥★**貿易 target==(-1,-1) 且 非-resident→TASK_IDLE**（只 roaming merchant；★resident 擺攤 (-1,-1) 保 TASK_TRADE 原地交易不關門=r3 不 regression）⑦harvest 無新 RNG（determinism）。
+- **TDD**：①創世-nearby 市集 known ②直接親見 outpost→known ③relay harvest order/outpost_built 訊息 origin_pos→known（濾 outpost_level>0，無 outpost 隊的 live pos 不 harvest）④`_nearest_market_outpost` 只回 known 中最近、未知市集不回 ⑤★**demolish（`outpost_level→0`，outpost:332）ONLY→清所有隊 team_market_known 對此 tile；★capture（owner 變）不清**（市集還在=known 位置仍有效，習得後穩定）⑥★**貿易 target==(-1,-1) 且 非-resident→TASK_IDLE**（只 roaming merchant；★resident 擺攤 (-1,-1) 保 TASK_TRADE 原地交易不關門=r3 不 regression）⑦harvest 無新 RNG（determinism）。
 - **gate** PASS / **headless** 0 new / **determinism** 2 跑 byte-identical。
 - **measure**：上述 economy 對照 + doom-delta + 冷啟動不死鎖 + market-info relay 坐實。
 
