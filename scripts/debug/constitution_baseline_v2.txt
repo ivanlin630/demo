@@ -62,3 +62,17 @@ scripts/simulation/player_command_system.gd::_action_camp::taskarbiter  # gate-o
 scripts/simulation/player_command_system.gd::_action_order_subteam::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/player_command_system.gd::_action_respond_aid_request::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/sim_runner.gd::_advance_tick_body::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
+# ─── v3 god-view 偵測（感知鐵律機器證，2026-07-20；enumerate 全部，分類註於 # 後）───
+scripts/simulation/decision/decision_context.gd::_home_granary_food::gv_mapscan  # legit-self: 掃 own 糧倉 tile(自家公共知識)
+scripts/simulation/decision/need_oracle.gd::_team_has_facility::gv_mapscan  # legit-self: 掃 own 隊設施
+scripts/simulation/faction_ai_system.gd::_check_ore_surplus::gv_mapscan  # legit-self: 掃 own faction member outpost ore
+scripts/simulation/faction_ai_system.gd::_evaluate_infrastructure::gv_mapscan  # legit-geo: 地形掃選建址(看得到地=公共地理)
+scripts/simulation/faction_ai_system.gd::_evaluate_new_outpost_location::gv_mapscan  # legit-geo: 地形掃選建址
+scripts/simulation/faction_ai_system.gd::_evaluate_outpost_residency::gv_mapscan  # legit-geo: 地形掃 residency
+scripts/simulation/faction_ai_system.gd::_faction_has_workshop::gv_mapscan  # legit-self: 掃 own faction workshop
+scripts/simulation/faction_ai_system.gd::_find_own_outpost::gv_mapscan  # legit-self: 掃 own outpost
+scripts/simulation/faction_ai_system.gd::_precond_met::gv_teamstate  # LEAK-1119: can_reach 讀 live 他隊位(implementer 修中→merge 後 removed=PASS)
+scripts/simulation/faction_ai_system.gd::consolidate_target_of::gv_teamstate  # gray: 同-faction own-member pop(faction 知自家人,可 known_member_states 精修待評)
+scripts/simulation/faction_ai_system.gd::_enemy_outpost_positions::gv_mapscan  # CANDIDATE-LEAK: 掃全圖敵據點=瞬知全敵基建(應 belief,待 R²+follow-up)
+scripts/simulation/decision/decision_context.gd::gather::gv_teamstate  # CANDIDATE-LEAK: jhost live pos 入 PathSystem 算可達(同 1119 類,cross-faction god-view,待 R²+follow-up)
+scripts/simulation/strategic_ai_system.gd::_find_trade_partner::gv_mapscan  # CANDIDATE-LEAK: partner discovered 但 outpost pos 讀 live(半漏,待 R²+follow-up)

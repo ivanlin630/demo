@@ -6,12 +6,20 @@ extends SceneTree
 # 指紋 = <relpath>::<func>::<type>。契約：current ⊆ baseline。added=FAIL（新閘）。removed=PASS（de-patch 進度）。
 # ★不 auto-classify legit vs violation（做不到）——enumerate 全部；legit/violation 標記由後續 de-patch 人工判。
 # 源碼行含 `# gate-ok` = 明允世界機制豁免（如 combat 擲骰），不入 current。
+#
+# ★★v3 加 god-view 偵測（感知鐵律機器證，2026-07-20）：決策讀 belief 非 live 他隊真值/whole-map 瞬知。
+#   gv_teamstate = indexed `state.teams[id].<動態欄>`（1119 can_reach 型：刻意讀單一他隊 live 態）——高信號。
+#   gv_mapscan   = `for x in <...>.tiles`（whole-map 瞬掃，Slice C 市集發現型）——中信號，地理/own-infra legit → # gate-ok。
+#   ★限制：靜態 regex 分不出 loop var 是自/他 → 不抓「for t in teams: t.tile_pos」型（結構性全隊迭代=引擎 orchestration，噪音高故 DROP gv_teamscan）。
+#   本 gate 是「明顯重引入」回歸閘非證明；細粒度 self/other 靠 review。enumerate→凍 baseline→NEW FAIL。legit(self/地理)標 # gate-ok。
 
 const SCAN_DIR := "res://scripts/simulation"
 const BASELINE := "res://scripts/debug/constitution_baseline_v2.txt"
 
 # 決策路徑檔（值閘/控制流閘只在此掃；世界機制檔如 combat/resource RNG 不算決策閘）
 const DECISION_FILE_RE := "(faction_ai_system|diplomatic_ai_system|npc_ai_system|strategic_ai_system|decision/)"
+# god-view 檔（感知鐵律偵測；比決策檔廣一格：含 threat_assessment=威脅感知規範案）。獨立不擾值閘 baseline。
+const GV_FILE_RE := "(faction_ai_system|diplomatic_ai_system|npc_ai_system|strategic_ai_system|threat_assessment|decision/)"
 # 決策函式（override/threshold/route 只在此算）
 const DECISION_FUNC_RE := "(^_pick_|^_decide_|^_evaluate_|^_facility_|^rank_|^to_task$|^applicable$|_score$|^_threat_recent$|^_consider_|^_trigger_|^_calc_|_deficit$|^_is_)"
 # 散落入口（同決策多 dispatch 點：真統一破口）
@@ -26,6 +34,12 @@ const THRESHOLD_RE := "\\b(if|elif|while|and|or)\\b.*[<>]=?\\s*([A-Z][A-Z0-9_]{2
 const EARLY_RETURN_RE := "^\\s*if\\b.*:\\s*return\\b"
 # 手派 route：按 uses_unified / 隊型 / tag / task 手動選路徑
 const ROUTE_RE := "\\bif\\b.*(uses_unified|ambition_archetype\\s*==|current_task\\s*==|\\.tags\\.has\\(|is_merchant|is_subteam)"
+
+# ─── god-view 偵測器（感知鐵律：決策讀 belief 非 live 他隊真值/whole-map 瞬知）───
+# gv_teamstate：state.teams[id].<動態欄> = indexed live 他隊態讀（1119 can_reach 型；自讀/同-faction legit → # gate-ok）
+const GV_TEAMSTATE_RE := "state\\.teams\\[[^\\]]+\\]\\.(tile_pos|armed|food|coin|population|morale|troops|current_task)"
+# gv_mapscan：for x in <...>.tiles = whole-map tile 迭代（市集/資源瞬掃全圖；地理=公共知識 legit → # gate-ok）
+const GV_MAPSCAN_RE := "for\\s+\\w+\\s+in\\s+[^#]*\\.tiles\\b"
 
 func _initialize() -> void:
 	var current: Dictionary = _scan()
@@ -71,7 +85,10 @@ func _scan() -> Dictionary:
 	var thr := RegEx.new(); thr.compile(THRESHOLD_RE)
 	var early := RegEx.new(); early.compile(EARLY_RETURN_RE)
 	var route := RegEx.new(); route.compile(ROUTE_RE)
-	var res: Array = [dfile, dfunc, disp, func_re, rng, ta, thr, early, route]
+	var gvfile := RegEx.new(); gvfile.compile(GV_FILE_RE)
+	var gv_ts := RegEx.new(); gv_ts.compile(GV_TEAMSTATE_RE)
+	var gv_map := RegEx.new(); gv_map.compile(GV_MAPSCAN_RE)
+	var res: Array = [dfile, dfunc, disp, func_re, rng, ta, thr, early, route, gvfile, gv_ts, gv_map]
 	_walk(SCAN_DIR, res, out)
 	return out
 
@@ -94,10 +111,12 @@ func _scan_file(path: String, res: Array, out: Dictionary) -> void:
 	var dfile: RegEx = res[0]; var dfunc: RegEx = res[1]; var disp: RegEx = res[2]
 	var func_re: RegEx = res[3]; var rng: RegEx = res[4]; var ta: RegEx = res[5]
 	var thr: RegEx = res[6]; var early: RegEx = res[7]; var route: RegEx = res[8]
+	var gvfile: RegEx = res[9]; var gv_ts: RegEx = res[10]; var gv_map: RegEx = res[11]
 	var f := FileAccess.open(path, FileAccess.READ)
 	if f == null: return
 	var rel: String = path.replace("res://", "")
 	var is_decision: bool = dfile.search(rel) != null
+	var is_gv_file: bool = gvfile.search(rel) != null
 	var cur_func: String = "<global>"
 	while not f.eof_reached():
 		var line: String = f.get_line()
@@ -110,6 +129,12 @@ func _scan_file(path: String, res: Array, out: Dictionary) -> void:
 		# TaskArbiter（回歸：v1 task 指派全檔仍抓）
 		if ta.search(line) != null:
 			out["%s::%s::taskarbiter" % [rel, cur_func]] = true
+		# god-view 閘（感知鐵律）——gv_file 全 func（含 threat_assessment、helper 如 _precond_met/consolidate_target_of），非只 dfunc。# gate-ok 豁免自讀/同-faction/公共地理。
+		if is_gv_file and line.find("# gate-ok") == -1:
+			if gv_ts.search(line) != null:
+				out["%s::%s::gv_teamstate" % [rel, cur_func]] = true
+			if gv_map.search(line) != null:
+				out["%s::%s::gv_mapscan" % [rel, cur_func]] = true
 		if not is_decision:
 			continue
 		if line.find("# gate-ok") != -1:

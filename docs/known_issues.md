@@ -18,6 +18,15 @@ team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍�
 
 `_check_precondition` 的 `"can_reach"`（`faction_ai_system.gd:1115`）：`_hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999` = **決策 precondition 讀 live 他隊位**（vs 同函式 `force_ge_target:1109` 用 `BeliefSystem.best_estimate` belief，**不一致**）= 真 god-view leak（違感知鐵律：決策憑 belief 非 live）。**但 `<999` 近-vacuous**（hex 距遠小於 999→恆真）→ god-view 效果近無害、**低優先**。**out god-view Slice E 4-site（E1/E2/E3/E5）**，歸下批 god-view cleanup（Slice E follow-up/D 批機械 belief_pos 化）。**★順帶疑（非 god-view，另類）**：若 `can_reach` 本該真 reachability gate，`<999` vacuous=**決策品質洞**（以為任 target 可達即攻/追，PathSystem 真可達性沒查）——可能 can_reach 該用 PathSystem 真可達 + belief 位一次治 god-view+vacuous。連 god-view audit（`docs/superpowers/handbacks/2026-07-19-systems-to-blueprint-godview-audit-scope.md`）。
 
+## ★constitution_gate v3 god-view detector 揪 2 新候選殘留 leak（2026-07-20，god-view arc 收尾機器證撿）
+
+`constitution_gate.gd` v3 加 god-view 偵測（gv_teamstate=indexed `state.teams[id].動態欄`；gv_mapscan=`for x in ...tiles` whole-map 掃）。enumerate 13 site，凍 baseline v2.txt（含分類註）。triage：7 legit（self/地理）+ 1119(_precond_met,修中)+ 1 gray(consolidate 同-faction own-member pop) + **3 候選 leak**：
+- **★`_enemy_outpost_positions`（`faction_ai:2912-2921`）掃全圖敵據點回位置陣列 = 瞬知全敵基建**（違感知鐵律，隊應只知看過/聞得的敵據點）。未記過，detector 新撿。**行為敏感**（改 belief 影響防禦/攻擊規劃）→ 待 R²+measure follow-up slice。
+- **★`decision_context.gd::gather`（`:373`）jhost live pos 入 `PathSystem.find_path` 算 join 可達**（jhost=strong_neighbor cross-faction 時=god-view，同 1119 can_reach 類）。未記過，detector 新撿。待 R²+follow-up（可與 1119 同範式 belief_pos-gate）。
+- `_find_trade_partner`（strategic_ai）partner discovered(belief) 但 outpost pos 讀 live = 半漏——**已知**（本檔「finder 濾鏈 C 類候選」+ invariants「team_discovered fallback 最終應刪」）。
+- **detector 限制**：靜態 regex 分不出 loop var 自/他 → 不抓 `for t in teams: t.tile_pos`（DROP gv_teamscan 噪音），是回歸閘非證明；細粒度靠 review。
+- **狀態**：detector 已 merge（gate PASS sites=77）；3 候選 R² 送 reviewer 判真 leak vs acceptable；確認則 follow-up belief-gate slice（enemy_outpost + jhost 可同批，同 belief_pos 範式）。
+
 ## ★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，crisis-immunity QA 故事稽核撿 team=-1000000）
 
 QA 讀 seed1337 trace 撿 `team=-1000000` 連 300 tick `task=建設 reason=ambition food=0 survival_would_succeed=true` 從不轉求生。**身分坐實=野獸**（`beast_system.gd:16` `_next_beast_id=-1000000` 負區段避 team id；TAG_BEAST/leader_id=-1/1 anon pleb/無 food 經濟=戰鬥標的 pseudo-team）。**根因＝beast 未 skip 出決策迴圈**：`faction_ai_system._evaluate_all_body` loop2(`:700` `elif team.faction_id==-1`，beast faction_id=-1 落此支)無 `beast_kind` guard → beast 跑 `_evaluate_independent_strategy`(建國/ambition)+`_evaluate_solo`+`_evaluate_independent_infrastructure`(建設)；loop3(`:759` leader_id=-1)→`on_leader_death` 晉升 anon 當領袖。∴ 一隻鹿/豬跑完整定居隊 AI（野心→建設→晉升領袖），荒謬且污染鄰隊 belief/經濟 + 污染 starve 分母計數。
