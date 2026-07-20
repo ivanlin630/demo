@@ -27,6 +27,16 @@ freshness = `belief last_tick == current_tick`（本 tick 可見）：
 
 **caller 不可見 fallback（reviewer SURVIVES）**：Dict-回傳 func（estimate_catch_up/observe_velocity）各 caller 有 `.reachable`/`.visible` 檢查（205/2135/3607/3636/3667/3715/3748/threat:28）→ 夠。**唯 predict_intercept 的 envoy caller 是缺口**（上述 lockstep 補）。
 
+## ★★v3 fold：threat_assessment:20 dist_factor（異質 R² v2 BLOCKER，乘算主導 god-view）
+> **異質審抓**：`ThreatAssessment.score`（`threat_assessment:11-23`）= `raw * dist_factor`。`dist_factor`（:20-22）`_hex_dist(self, other.tile_pos)` 讀 **live other 位**、**乘算主導**整威脅分。Slice D 修 approach（一加項）卻留 dist_factor（乘算主導項）全 god-view → 脫視野近敵 approach→0 但 dist_factor 用 live 真距離照算威脅 → **「威脅評估 belief 化」宣稱假過**（[[feedback_structural_audit_complement]] 近端修遮同 func 主導項）。∴ **fold 進 Slice D**（一行、同修式）：
+- `threat_assessment:20` dist 也走 belief（position，非 velocity）：**本 tick 可見→live 距離；斷視線→belief last-seen 位算距離；positionless/過期→`dist_factor=0`**（威脅位置未知=無法算 proximity 威脅→不 proximate-threat）。
+- **★優雅統一**：positionless 威脅→dist_factor 0→威脅分 0→**不 flee/defend 無位威脅**（合 null-belief-flee「威脅無座標 FLEE not applicable→覓食」+ 既有「dist≥5 逃出生天→0」語意）。看不到就不瞬鎖真位反應=belief-化。
+- freshness=`belief last_tick==current_tick`（同 estimate_catch_up 的 position 態）。
+- **∴「威脅評估 belief 化」真達成**（approach velocity + dist position + rep + power 全 belief）→ god-view audit 可誠實斷言。
+
+## ★combat_target freeze（reviewer UNCERTAIN，systems verify=pre-existing，measure 盯）
+`options.gd:92/118/200`（掠奪/佔村/攻擊）dispatch 即設 combat_target → `movement:77 if combat_target!=-1: continue`（凍結移動）+ `_refresh_attack_pursuit:277 combat_target!=-1: return`（撲空放棄網早退）→ modern DecisionOptions 路「撲空後放棄」安全網可能不 fire、隊卡 combat_target 於 stale tile。**★verify=pre-existing 架構**（D 不碰 combat_target/movement:77，只改「選哪個 target/位置」→ 餵更多 stale 進此既有路，非 D 引入）。**measure 硬盯 combat_target 凍結隊數 before/after**（D 若顯著增→撲空放棄網缺口暴露=另票，非 D blocker 但要看見）。
+
 ## ★measure 敏感（spec 硬含 before/after 協議）
 改威脅/追擊距離 = **動全盤行為**（threat 評估→誰是威脅→flee/defend/attack；finder catch-up/intercept→追擊/攔截）。∴ **不盲改**：
 - **before/after doom-delta**（seed1337/42/4201）：真隊存亡/attrition 對照。
@@ -42,7 +52,9 @@ freshness = `belief last_tick == current_tick`（本 tick 可見）：
   - leak 測（威脅 _approach_score/追擊跟 belief 非 live）。
 - **gate** constitution PASS / **headless** 0 new(baseline 3) / **determinism** 2 跑 byte-identical。
 - **measure**：before/after doom-delta + threat/combat 行為對照（上述協議），逐隊 coherent/broken 切。
-- **★god-view audit**：D 改後 path_system 三 func 無 `trusted=true` 跳 discovery 讀 live（belief-gate 證）；zero god-view gate 逼近（A/F/E/D 全落 → 剩 B/C）。
+- **★dist_factor TDD**：⑦threat_assessment:20 dist 走 belief（本 tick 可見→live 距離、斷視線→last-seen、positionless→dist_factor=0）→ 脫視野近敵不再依真距算威脅。
+- **★combat_target measure**：before/after combat_target 凍結隊數（D 餵 stale target，凍結顯著增=撲空放棄網缺口另票）。
+- **★god-view audit（宣稱訂正）**：D 改後 path_system 4 func（含 _is_moving_away_observed）+ **threat_assessment:20 dist_factor** 全 belief-gate → **「威脅評估 belief 化」可誠實斷言**（approach+dist+rep+power 全 belief）；path_system 無 `trusted=true` 讀 live。zero god-view gate 逼近（A/F/E/D 全落 → 剩 B/C）。**★若只修 path_system 不 fold dist_factor→audit 假過（禁）。**
 
 ## out-of-scope
 B（創世②③知識）/C（市場 belief-gate+store）= D 後另 slice（方向已定）。1119 can_reach 下批。
