@@ -50,8 +50,12 @@ static var REGISTRY: Dictionary = {
 	},
 	"survival": {
 		"terms": [["threat_pressure", "survival_pressure"]],
-		"applicable": func(_ctx: DecisionContext) -> bool:
-			return true,   # 恆候選（FLEE 靠 threat 權重，非守衛）
+		"applicable": func(ctx: DecisionContext) -> bool:
+			# null-belief-flee 根治（applicability-gate）：FLEE 僅當威脅有 belief 座標(threat_pos!=-1)才 applicable。
+			# threat_pos 鏡射 _flee_threat_pos（同 team_discovered×ThreatAssessment.score max→belief_pos）——
+			# positionless（威脅存在但無座標/stale）→ FLEE not applicable → 不選中 → 落次佳(覓食/defend)，
+			# 非卡 task=逃跑 凍結餓死（movement 無座標無 target+continue，沒人 release）。不回退 live-track（無座標=真不知威脅在哪=顧眼前生存）。
+			return ctx.threat_pos != Vector2i(-1, -1),
 		"to_task": func(_state: WorldState, _team: TeamData) -> Dictionary:
 			return {"task": TeamData.TASK_FLEE, "target": Vector2i(-1, -1)},
 	},
