@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² pre-merge·beast-fix 終 diff(1524d5ed+7fb16350)] blueprint ACCEPT(team16/68 剝離=pre-existing transition-bypass,cascade 論 measurer 4信號坐實)。merge 前補 pre-merge R²(釘死看終 diff;7fb16350 defense-in-depth 守衛=spec-R² 後新增,systems 建議的順手,未 R²)。審點:①1524d5ed impl 對 R²'d spec(id 碰撞→WorldState.next_beast_id 非 static/決策洩漏→evaluate_all loop2/3 beast_kind skip)無漂移 ②7fb16350 extinct death-cause counter 排除 beast=只濾計數非改 sim 邏輯(byte-identical to sim) ③loop3 skip 沒誤斷 beast combat/cleanup 生命週期 ④無新違憲/RNG。branch feat/beast-fix@7fb16350 off f469127f。★背景:seed1337 6.4x regression=cascade/seed-fragile(measurer 判 tick-0 結構擾動非機制病),非 diff bug——但你獨立眼看 diff 有無引入非必要的額外擾動。CLEAN→我 merge。"
 ---
 

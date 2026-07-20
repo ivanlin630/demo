@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·god-view Slice D·最大塊·異質 R² v3 CLEAN(3輪)·★off LOCAL main 3dee8b5a·measure 敏感] spec=2026-07-20-godview-slice-D-pathsystem-freshness-gate.md。★感知鐵律最大違憲點+measure 敏感(動全盤 threat/combat)→非盲改。修=差異化 belief-gate(velocity≠position):①observe_velocity(:175)本tick可見(belief last_tick==current_tick)→live velocity/斷視線→{visible:false}(非last-seen);移 trusted ②predict_intercept(:241)斷視線→belief last-seen 位(非 live)/sentinel(-1,-1)+★envoy caller faction_ai:1403-1408 lockstep(別靠!=target.tile_pos)③estimate_catch_up(:202)catch_cost:210 position→belief last-seen ④_is_moving_away_observed(:226)被 observe_velocity fix 級聯保護(verify)⑤★fold threat_assessment:20 dist_factor→belief(可見live距/斷視線last-seen/positionless→dist_factor=0=不 flee 無位威脅合 null-belief-flee)。★caller 10(faction_ai:205/293/1403/2134/3607/3636/3666/3715/3747+threat:27,非3596)——★落地前再 grep 確認(別信 stale 行號=fileline 紀律)。★★off LOCAL main 3dee8b5a 禁 origin,pre-push hook 已裝。TDD 差異化7型+leak測。gate/headless 0new/★measure=before/after doom-delta+threat/combat 行為+★combat_target 凍結隊數(D 餵 stale,顯著增=撲空放棄網缺口另票)+逐隊 coherent/broken 切(承 Slice E)。task=systems+reviewer。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·subteam-idle-latch·HIGH·R² CLEAN·手不聽腦第3種·★off LOCAL main c2b5847b] spec=2026-07-19-subteam-idle-latch.md。root(measurer 坐實):faction_ai:1727 blanket『抵達非-IDLE→歸建 merge』把覓食 subteam 抵達 forage 目的地誤當歸建抵家→thrash(ARRIVE 337≈RELEASE 346),覓食不執行食物不進坐死。修 1 行:1727 加 `and sub.current_task not in SURVIVAL_TASKS`(faction_ai:79=RETURN_HOME/BEG/JOIN/FORAGE/CAMP,execute-at-destination 非歸建)→survival subteam 抵達執行覓食非召回。R² CLEAN(執行路 collect_resources subteam-agnostic 真執行,歸建 _decide_subteam 顯式路不受影響)。★★branch off LOCAL main c2b5847b,禁 origin(落後~40)。★pre-push hook 已裝 push 起兩閘。TDD:①覓食 subteam 抵達不 merge 留 tile 覓食食物累積無 thrash ②mission task(TRADE)抵達仍 merge ③歸建路不變 + sibling(CAMP/BEG/JOIN/RETURN_HOME)。gate/headless 0new/determinism/measure 6隊不 idle-latch+食物流。★terminal-sticky must-verify(measurer 量,非 blocker)。task 完成=systems+reviewer。"
 ---
 

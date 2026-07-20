@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[REDIRECT·subteam-idle v3 結構修·R² CLEAN·extend 036fc42c] hold 解除。v3 R² CLEAN(監看=edge-trigger 收斂/orphan 沿用 discipline_fail proven 路/位置並存不誤傷)。同 branch 036fc42c extend:①_check_discipline 後、position-branch 前加連續母團監看——`if sub.current_task in SURVIVAL_TASKS: parent=get(parent_team_id); if parent==null: _orphan_forager(release+detach+remove TAG_SUBTEAM,沿用 discipline_fail:52-55 路); return; if _parent_needs_food(state,parent): merge_queue.append; return`②v2 sated-merge position-branch 保留。TDD 補:①旅途中母團垂危→forager 掉頭交糧(非駐點也召回)②parent 死→orphan 轉獨立不囤糧③監看不誤傷 ESCORT/BUILD。→to:measurer,★硬驗(別當 non-blocker):(a)recall 收斂—旅途 recall 後 _decide re-pick forage 有無慢震盪(reviewer flag)(b)seed42 famine→0 (c)seed1337 v2 惡化(6→10)回落 (d)orphan 消 (e)手不聽腦維持 0 (f)perf 每tick parent lookup 無 spike。gate 值 tune 排結構後。★off LOCAL,pre-push hook 兩閘。"
 ---
 

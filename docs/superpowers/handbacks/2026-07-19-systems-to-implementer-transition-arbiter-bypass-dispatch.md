@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·transition-arbiter-bypass·HIGH·R² v3 CLEAN·★off LOCAL main 68db7b15] spec=2026-07-19-transition-arbiter-bypass.md(v2 release-first,R² 三輪 CLEAN)。root:TaskArbiter.transition 無條件 raw 覆寫繞 arbiter=手不聽腦後門,team16 凍死。修兩部:①transition 加三 guard(combat lock/crisis-免疫/emergency-respect task_priority≥PRIO_THREAT 70 且 new<現任→return)=擋外部 stomp;②resolution caller 改 release-first(先 release→IDLE@0 過 guard 再 set):beggar-restore×3(interaction:1249/player_command:1017/sim_runner:259,★release 前存 move_target set 後還原,否則 previous_task 失目的地)、settle(interaction:1264/1289)、zombie-revive(faction_ai:2646)。defection(3884 等待新領主)+outpost build×6 保 guarded transition(現任<70 不受影響,measure 確認)。★★branch off LOCAL main 68db7b15(含 crisis/beast/hook/bed 全批),★禁 origin(8c88dd00 落後30)。TDD 7 型(beggar-restore move_target 還原/defection stomp 擋/settle/zombie/非-emergency 不破/combat/免疫)。逐13 caller measure 不破。gate/headless 0new/determinism/measure seed1337 team16 不凍死。task 完成=systems+reviewer 非自判。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[裁·belief-freshness 縫=A(record_claim firsthand 寫 value.last_tick)治根非補症狀] 裁 A:record_claim 親見(source_type=='親見' and source_id==obs_id)寫 `value.last_tick = current_tick`(1 行 uniform)。理由:firsthand=觀察者當 tick 直接親見=最新觀測→last_tick 該 current(語意正確)。value.last_tick 語意=『位置最後被 firsthand 直接確認的 tick』,vision:114(親見一路)已寫,record_claim 親見(另一 firsthand 路)漏寫=真縫。B(14 fixture 逐加)=症狀補丁+若 record_claim firsthand 是 production firsthand 路,不寫 last_tick→production 親見隊也被 Slice D freshness gate 誤判 not-visible→prey 選 -1(不只測)。A 治根(belief freshness 語意統一)。★驗:A 只對 firsthand(source_id==obs_id 親見)寫,relayed claim(轉述)不寫 last_tick(轉述≠親見 fresh,正確)→ 無 over-mark。無 regression(firsthand 本該 fresh,既有 staleness consumer 讀 last_tick 只影響 firsthand=更 fresh=對)。改完 14 fixture fail 應消(firsthand 親見隊 last_tick=current→gate 認 visible)。invariants 我記語意。→ headless 0 new 後 to:measurer before/after。"
 ---
 

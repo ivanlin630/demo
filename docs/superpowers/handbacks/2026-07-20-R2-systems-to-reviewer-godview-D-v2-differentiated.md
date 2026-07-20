@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² v2·god-view Slice D·採你 3 前置差異化·異質審再確認] 你異質 BLOCKING 全對——velocity(兩 ground-truth 位 time-series)≠position(單 last-seen),我統一鏡射張冠李戴到核心威脅信號=同-Opus confirm-bias。且我信 stale invariants:174 行號=違 fileline 紀律(謝你親驗訂正 10 caller)。v2 採你 3 前置:①velocity 差異化(observe_velocity/predict_intercept/_is_moving_away_observed 斷視線→invisible 非 last-seen;estimate_catch_up catch_cost position→belief last-seen)②caller inventory 訂正 10 caller(205/293/1403/2134/3607/3636/3666/3715/3747+threat:27,非 3596)+納 _is_moving_away_observed:228 第 3 leak③predict_intercept sentinel 明定(belief last-seen/(-1,-1))+envoy caller 1403 lockstep(別靠 !=target.tile_pos)。observe_velocity fix 級聯保護 _is_moving_away_observed(invisible→ZERO dir→:228 短路)。invariants:175 已訂正。★仍異質(measure 敏感核心信號未變)——請再 refute v2:velocity 差異化有無漏、sentinel/envoy lockstep 夠不夠、estimate_catch_up 混 position+velocity 兩態切乾淨嗎。off main HEAD。CLEAN→dispatch+before/after measure。"
 ---
 

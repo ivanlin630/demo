@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² spec·subteam-idle-latch·手不聽腦第3種·root measurer 坐實] spec=2026-07-19-subteam-idle-latch.md。root(measurer trace CONFIRMED @9a915fe7):faction_ai:1727 blanket『抵達非-IDLE→歸建 merge』把覓食 subteam 抵達 forage 目的地誤當歸建抵家→merge_queue→loop2b:761 release→IDLE→thrash(ARRIVE 337≈RELEASE 346 振盪),覓食不執行食物不進。修=1727 加 `and sub.current_task not in SURVIVAL_TASKS`(RETURN_HOME/BEG/JOIN/FORAGE/CAMP=execute-at-destination 非歸建)。審點:①SURVIVAL_TASKS 排除不破 mission-merge lifecycle(TRADE/GOVERN 完工返家仍 merge)②sibling(CAMP/BEG/JOIN/RETURN_HOME)排除後行為對③RETURN_HOME 在集內—抵家 resupply vs 歸建 parent 語意有無混。★WHAT flag:修後 subteam 獨立覓食=引擎已決策(執行非新增),若不該獨立覓食=rank follow-up 非本 fix。off 980e0b1c 後 HEAD。CLEAN→dispatch。"
 ---
 

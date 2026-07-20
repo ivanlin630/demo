@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² pre-merge·transition impl 終 diff 93966d15] spec R² 三輪 CLEAN(你審的)+ blueprint ACCEPT(QA team16 baseline 凍死→branch SURVIVES,team64 SURVIVES,68 resolved;42/4201 無迴歸;gates 綠;determinism byte-identical)。merge 前 pre-merge R² 看 impl 對 thrice-reviewed spec 無漂移。審點:①三 guard(combat/crisis-免疫/emergency-respect ≥PRIO_THREAT)實作對 ②beggar-restore×3 release-first 有存/還 move_target(你 v2 抓的,非-1)③settle/zombie release-first ④defection/outpost 保 guarded transition ⑤不變量+配套句進 invariants ⑥無新 RNG/違憲。branch feat/transition-arbiter@93966d15 off 649f7070。CLEAN→我 merge。"
 ---
 

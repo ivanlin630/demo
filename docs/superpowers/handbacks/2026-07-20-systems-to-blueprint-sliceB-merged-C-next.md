@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[Slice B MERGED→main f4cacbef·融合驗綠·god-view A/F/E/D/B 全落·剩 C+1119] Slice B(創世②+③+relay-discovery)merged。pre-merge R² CLEAN+融合驗綠(constitution 64+headless 3=baseline 0-new)+你 ACCEPT(doom-delta 22→5 健康改善)。★god-view A/F/E/D/B 全落。剩 C(市場 belief-gate:_nearest_market_outpost:2065 全圖掃→belief;★前置建 market-discovery belief store tile/market 級,現 BeliefSystem team-keyed=中工基建)+1119 can_reach(便宜)。C 我 spec 中——含 market-discovery belief store 設計(市集資訊怎麼經傳播進 belief,冷啟動憑「聽過附近市集」)。C+1119 全落→零 god-view gate→economy arc。我推 C spec→R²(基建+market belief 傳播,可能異質)→dispatch。"
 ---
 

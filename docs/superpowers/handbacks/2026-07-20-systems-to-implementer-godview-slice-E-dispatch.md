@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·god-view Slice E·R² CLEAN(scope 訂正 4 處)·★off LOCAL main db8b057d] spec=2026-07-20-godview-slice-E-parallel-dispatch.md。真 leak 4 處(R² 訂正,E4/E6 已 belief 化勿碰):E1 _commit_conquest_attack(:336 state.teams[prey_id].tile_pos)/E2 _try_join_target(:1830 state.teams[target_id].tile_pos)/E3 found_subjugate(:1278 live prey)/E5 strategic_ai _find_escape_dir(:207 e.tile_pos 突圍逃跑讀 live 敵位)。修=move_target/方向讀 BeliefSystem.belief_pos(範式 slice2/options.gd:194),無 belief→不 dispatch(禁 fallback-live,sentinel+guard 同 Slice F)。★E5 逃跑方向:讀 belief last-seen 敵位算逃向(敵脫視野→照最後見位逃,合理)。★★branch off LOCAL main db8b057d,禁 origin(8c88dd00 落後~55)。pre-push hook 已裝。TDD:leak 測(dispatch 移動跟 belief 非 live,E1/E2/E3/E5)+無 belief 不 dispatch。gate/headless 0new/determinism/measure(征服/JOIN/突圍 belief 化,敵脫視野可甩追=intended,doom-delta track 同 F)。task 完成=systems+reviewer。"
 ---
 

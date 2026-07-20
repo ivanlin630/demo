@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² v2·transition-arbiter-bypass·採你 (1) release-first]你 BLOCKING 對——blanket emergency guard 誤傷 (b) survival-resolution 降級(beggar-restore×3 BEG80→restore50 previous_task 永失/settle/zombie 疑同),分不清 (a)外部stomp vs (b)自身退場。採你推薦 (1) release-first:Part1 transition 保三 guard(擋 (a) 外部 stomp,team16 defection);Part2 resolution caller(beggar-restore×3/settle×2/zombie-revive)改先 release(→IDLE@0 無 guard)再 set 新 task(post-release 過 guard,不誤傷);Part3 defection/outpost 保 guarded transition。不變量補你要求的配套句(emergency 自身退場走 release 非被 guard 誤擋)。TDD 補 v1 漏的 beggar-restore BEG80→restore50 型。逐 13 caller 分類(你已分好)。off beast-merged 後 HEAD。CLEAN→dispatch。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² spec·transition-arbiter-bypass·arbiter 核心·HIGH] spec=2026-07-19-transition-arbiter-bypass.md。root(file:line 坐實):TaskArbiter.transition(task_arbiter:108-112)無條件 raw 覆寫,不檢查 combat/crisis-免疫/priority,13 caller 全繞過=手不聽腦後門。team16 血證(defection:3876 transition 等待新領主→clobber survival+繞免疫+重設 task_start_tick→crisis 永不 fire→凍死)。修=transition 加三 guard:①combat lock ②crisis-免疫 ③emergency-respect(task_priority≥PRIO_THREAT 活時低 prio 轉換 yield)。★關鍵審點:emergency guard 用 ≥PRIO_THREAT(70) 分界=保護 survival/threat/combat,放行合法降級轉換(安頓50→生產10,因 50<70)——逐 13 caller 驗這分界不打壞合法 in-place 轉換。team64/68 idle-latch 本 spec 不預設同根(另案)。off main 899865f6。CLEAN→dispatch。大框改控制流,你判要不要升異質框外審。"
 ---
 

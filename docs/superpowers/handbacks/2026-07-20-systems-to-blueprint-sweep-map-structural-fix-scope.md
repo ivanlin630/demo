@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[結構 sweep 完·15 drop 點·核心根 D6+D1/D2 比 3 個已知修深·結構修 scope 求對齊] 手不聽腦結構 sweep 完(地圖存 docs/process/hand_obeys_brain_sweep_map.md)。骨架:survival 對 3 類 team 派發路不同——獨立隊 loop2 solo/子隊 loop3 survival/faction 成員**只有 loop1 _decide_unified 一條命脈**。team21 型根=faction 成員命脈被三重掐:D1(:1418 領主戰鬥/null→整包跳過)+D2(:1628 落空無 release 兜底卡 stale 等待新領主)+D6(:850 crisis-release→IDLE 後同 tick ambient fallback 塞『貿易』非-survival,免疫窗只鎖同字串繞過)。★D6 影響最廣(所有 crisis-released 隊)。結構修原則(求你確認 WHAT-adjacent):『food-crisis survival dispatch 必通用跨 team 類別+優先於 ambient/lifecycle fallback+不可掉(終端兜底)』。建議 scope:先治 D6(最廣)+D1/D2(team21 命脈)為 slice1,D3/D4/D5(等待新領主 preemptible)+subteam D10/D11(v3 fold)為 slice2。求你:①確認 survival>ambient 原則②scope 切法/優先序③這 arc vs 其他 backlog 優先。"
 ---
 

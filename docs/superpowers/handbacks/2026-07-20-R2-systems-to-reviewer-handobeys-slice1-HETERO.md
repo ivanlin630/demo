@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[★異質 R²·手不聽腦 slice1 結構修·框外挑框三對齊] blueprint 同意升異質框外審(大結構改 core survival routing+高信心診斷+難逆 merge)。★請用不同模型/代 + refute prompt(非 confirm)——目標 REFUTE 診斷,非背書。spec=2026-07-20-hand-obeys-brain-slice1-survival-lifeline.md。診斷(sweep map):faction 成員 survival 只有 loop1 _decide_unified 一條命脈,三重掐:D1(:1418 領主戰鬥整包跳過)+D2(:1628 落空無兜底)+D6(:851 crisis-release→IDLE 同 tick ambient 塞貿易)。三修:A ambient fallback 加 food-crisis gate/B 成員 survival 不被領主-combat gate/C _decide_unified 終端兜底 release。★refute 標的:①診斷真根嗎(D1/D2/D6 真掐死 team21,還是我 sweep 誤讀路由骨架/漏了成員別條 survival 路?)②修 A ambient-skip 會不會餓隊卡 IDLE 更久(survival 次 reeval 真接得到嗎)?③修 B 分離領主協調/成員 survival 會不會破 faction 協調語意?④would_succeed=true vs finder-miss 矛盾(修 C)——是純 finder-miss 還是漏試可成 option(影響修法)?⑤改 core survival routing 有無下游 regression(改 :851 影響所有 IDLE 隊)。off main HEAD。CLEAN→dispatch。"
 ---
 

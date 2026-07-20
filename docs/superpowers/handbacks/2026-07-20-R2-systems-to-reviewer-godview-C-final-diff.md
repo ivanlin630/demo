@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² pre-merge·god-view Slice C 終 diff a6cf4466·arc 收官] spec R² 你 4 輪異質審 CLEAN(premise HOLDS/3 前置/2 精修/自我修正 demolish-only)+ blueprint ACCEPT(market-relay 107 events NOT vision 直證;全 seed attr↓pop↑淨健康;gates 綠)。merge 前 pre-merge R² 看 impl 對 4-round spec 無漂移。審點:①team_market_known store 三源(創世+vision+relay harvest 濾 outpost_level>0 無新 RNG)②_nearest_market_outpost belief-gate③★貿易 (-1,-1) guard 豁免 _is_resident_team(resident 擺攤保 TASK_TRADE)④★cleanup 只 demolish(outpost:332)非 capture⑤無新 RNG⑥market_orders 未繼承洩漏。branch feat/godview-c@a6cf4466。CLEAN→我 merge=god-view belief-化 arc A/F/E/D/B/C 全落收官。"
 ---
 

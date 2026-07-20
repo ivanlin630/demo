@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★升裁·Slice B premise 機制缺·discovery 純 proximity 無 relay·你「初識靠 belief 傳播」premise 不成立·WHAT 決策] reviewer 異質載重坐實:team_discovered 寫入只 game_setup(創世)+vision:30/92/94(直接視野),relay/message 零寫→discovery 只經創世+直接視野,無 relay-discovery。∴ 你 B ruling 的『emergence 初識靠 belief 傳播長出』premise 機制不成立——後-B discovery=純 proximity-driven(隊只認識看過的+創世 ②③,永不經情報網「聽說遠方有隊」而 discover)。★這正是 invariants「掃近隊兩-channel」自己警告的(『scan-nearby 前 R① 必坐实既有 message/relay 真傳得到遠威脅,別假設』)——relay→discovery 這 channel 不存在(relay 只傳已 discovered 隊的 belief 位/stats,不新增 discovery;且決策 gate 在 team_discovered=vision→relay-belief 對 undiscovered 隊是死的)。★WHAT 決策(你):(a)proximity-driven discovery 是意圖(只認識看過的)→B 照走+我訂正 invariants「兩-channel」(intel 只傳已識隊 belief 非新增 discovery)+measure 詮釋為 proximity emergence (b)relay-discovery 需建(情報網該讓你 discover 遠隊『聽說有個強鄰』)=另 channel(relay 寫 team_discovered),較大 scope,B 前 or B 擴。HOLD B dispatch 待你裁。這是 pre-existing 架構缺(vision-only discovery)被 B(創世→proximity)暴露,同 god-view arc 邊做邊揭 pre-existing 型。"
 ---
 

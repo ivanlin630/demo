@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[PARK subteam-idle·手不聽腦 mini-arc 收工·回 god-view Slice E] blueprint 判:手不聽腦 mini-arc 收工——真案例(crisis 5-stuck/transition team16/64)已 merged+QA 確認真救,slice1 DROP(當前世界 idle-freeze≈0 finder-check 揭大半假象),subteam-idle target(team62/73)reclassify economy arc。★你的 feat/subteam-idle@c53c8cbb(v3 連續監看+orphan)PARK 不 merge(target 岔走/reclassify,非你實作問題,3 版都被 measure/QA 攔=品管在運作)。branch 留著(economy arc 若要 forager-delivery 機制可重用)。你 status→idle,收尾。下一票=god-view Slice E(平行 dispatch 路,systems 準備中)另 dispatch。"
 ---
 

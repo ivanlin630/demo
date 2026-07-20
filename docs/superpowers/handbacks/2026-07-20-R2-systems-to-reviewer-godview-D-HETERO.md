@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[★異質 R²·god-view Slice D·核心威脅信號+measure 敏感·框外挑框] god-view arc 最大塊,升異質框外審(大結構改 path_system 3 func+11 caller、動核心威脅信號 threat_assessment:27、measure 敏感=動全盤 threat/combat/flee 行為、難逆)。★請用不同模型/代 + refute prompt。spec=2026-07-20-godview-slice-D-pathsystem-freshness-gate.md。診斷:path_system observe_velocity:175/estimate_catch_up:202/predict_intercept:241 讀 target live 位,11 caller(finder 族+threat_assessment:27)trusted=true 跳 discovery=live god-view leak。修=centralized freshness-gate(鏡射 _refresh_attack_pursuit:269 三態:本tick可見→live/斷視線→belief last-seen/過期→不可見),移 trusted=true。★refute 標的:①centralized(path_system 內建 gate)vs per-caller 哪個對(11 caller 有無特例需 live,如同-faction 協調 tally)②三態鏡射 _refresh_attack_pursuit 是否漏態(它是 attack pursuit,threat_assessment 語意同嗎)③measure 敏感=改 threat 距離會不會 coherent-vs-broken 難切(承 Slice E null-belief 混入教訓)④不可見 fallback(caller 既有 0/skip 路)夠不夠 or 有 caller 沒處理不可見會崩⑤determinism(freshness-gate 讀 belief last_tick 無 RNG)。off main HEAD。CLEAN→dispatch+before/after measure。"
 ---
 

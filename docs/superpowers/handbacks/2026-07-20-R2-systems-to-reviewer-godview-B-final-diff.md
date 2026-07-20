@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² pre-merge·god-view Slice B 終 diff 23989506] spec R² v2 你已審 CLEAN(創世②+③+relay-discovery,premise 由 relay-discovery 兌現)+ blueprint ACCEPT(relay-discovery 具體事例 tick=100 team25 經 relay discover team6 NOT vision·570 事件;4 config 0-crash;doom-delta 22→5 健康改善;faction 8→10 照常形成)。merge 前 pre-merge R² 看 impl 對 spec 無漂移。審點:①創世 ②派系+③本地鄰居(CREATION_KNOW_RADIUS)+omniscient_discovery flag(default false)②★relay-discovery(message:239 前 receiver 未識 tgt→set team_discovered,含 distorted)③8 config fixture 依賴全知處理對(omniscient_discovery:true vs 補 belief 逐個判,無盲設全知掩蓋)④跨-faction 預盟軟化 per-config⑤無新 RNG。branch feat/godview-b@23989506。CLEAN→我 merge(god-view A/F/E/D/B 全落,剩 C+1119)。"
 ---
 

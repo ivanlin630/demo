@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² spec·god-view Slice E 平行 dispatch 路·感知鐵律一致] blueprint 恢復 god-view 排程(slice1 all-in 理由已不適用),Slice E 接手。spec=2026-07-20-godview-slice-E-parallel-dispatch.md。統一 arc 沒掃到的 legacy dispatch 路 move_target 讀 live 他隊位=god-view:E1 _commit_conquest_attack(:336)/E2 _try_join_target(:1830)/E3 found_subjugate(:1278)/E4-5 strategic_ai encircle/breakout/E6 envoy。修=belief_pos(範式 slice2/options.gd:194),無 belief→不 dispatch(禁 fallback-live)。審點:①E1/E2/E3 明確他隊位當 move 目標→belief 對②E4/E5 包圍/突圍幾何可否 belief 化 or 屬同-faction 協調豁免(逐 site 判)③E6 envoy 別破既有 proximity/timeout tracking④無 belief 守衛=保守不 dispatch 非 fallback-live⑤攻擊脫視野甩追=intended 深度非 regression。A/F 已 merged,D(path_system)/B/C 留後。off main HEAD。CLEAN→dispatch。"
 ---
 

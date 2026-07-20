@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[★升級·would_succeed 補 finder-check 重分類 team21/65·gating slice1] 異質 R² 抓:bed would_succeed(starvation_lockpoint_trace_bed:72-75)只驗優先權/combat/reason,零 finder → 真 famine(所有 survival option finder-miss 無可達食物)坐 IDLE/等待新領主也記 would_succeed=true → 分類器誤標手不聽腦。∴『team21/65 freeze 非 famine』未坐實,整 slice1 結構修前提懸空。★修 bed(承你 bed-classifier-frozen-not-famine 那封,升級):would_succeed 補真 finder——呼 DecisionEngine.rank_survival/DecisionOptions.applicable,檢首個非-finder-miss survival option 存在。重分類 seed1337 team21/65(+同族 62/71/73/79/84/90):(a)finder 找得到可派 survival target 卻沒派=真手不聽腦(freeze)→slice1 修有效 (b)finder 全 miss(真無可達食物)=famine→誤標,slice1 救不了(是經濟/食物可得性另問題)。標 commit,→to:systems 定 slice1 走不走。determinism-safe(觀測層,不碰 sim)。"
 ---
 

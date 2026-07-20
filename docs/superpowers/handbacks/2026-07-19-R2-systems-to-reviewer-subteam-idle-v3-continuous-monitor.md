@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² v3·subteam-idle-latch 連續母團監看+orphan·結構修] measurer 查 seed1337 v2 惡化(6→10)=真結構洞:_parent_needs_food 召回在 move_target==-1 分支內(只駐 forage tile 查)→旅途中 forager 不監看母團→母團垂危召不回,forager 已飽卻救不了(交糧太慢)。v3 兩結構修:①連續監看——foraging subteam 每 tick(旅途中也查,_check_discipline 後 position-branch 前)查 parent,母團<PARENT_LOW→merge_queue 掉頭交糧;parent==null→orphan ②orphan-forager——parent 死/缺席→detach 轉獨立(沿用 discipline_fail 現成路)。v2 sated-merge 保留(駐點正常路)。審點:①連續監看每 tick merge_queue 掉頭 vs loop2b release-move 交互不 thrash②orphan detach 沿用 discipline_fail 路安全(轉獨立後跑獨立戰略)③監看位置(discipline 後 position 前)不誤傷 ESCORT/BUILD④parent 垂危 recall vs sated deliver 兩路並存不衝突。gate-tune 排結構後。off 980e0b1c 後 HEAD,extend 036fc42c。CLEAN→redirect implementer。"
 ---
 

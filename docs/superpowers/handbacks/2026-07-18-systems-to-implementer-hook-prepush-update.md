@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·hook pre-push 改+折 constitution_gate·低優先·build 現/install starvation 後] blueprint 裁:hook 改 pre-push 非 pre-commit(不擋 WIP 只 gate 分享),範圍折 constitution_gate + verification_gate 兩閘(constitution_gate 現手動=正是機器證的洞),install 非 optional 但時機=starvation fix 落地後。build 現可做(改 scripts/hooks/pre-push),★install(cp→.git/hooks/pre-push)等我信號(starvation 落地+schema 採用穩)。低優先於 starvation fix impl。"
 ---
 

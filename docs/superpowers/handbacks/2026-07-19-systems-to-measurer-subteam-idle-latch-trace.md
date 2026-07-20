@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[定點 trace·subteam-idle-latch root·手不聽腦第3種] 你(bed classifier)抓的 6 隊(62/71/73/79/84/90 food-ok+committed 覓食+would_succeed=true 卻 idle,reason=subteam)——systems code-locate 到 subteam 決策路(_evaluate_subteam:1692/_decide_subteam:1770)有跑 survival rank+try_set@80(路存在,非缺路),但需 trace 定哪個 drop 點 fire。請 dump 一隻(team84 or 任一)stuck 點逐 tick:①current_task/move_target/combat_target ②subteam_eval_next_tick vs current_tick(cadence gate?)③parent_team_id + parent 在不在同格(1727 merge_queue→loop2b:744 release→IDLE?)④_check_discipline 有無 fire(1724 early return?)⑤_decide_subteam 有無被呼到(print [SubAI] 有無)或早退。★主嫌假說:覓食 arrive(move_target==-1)→1727 merge_queue→loop2b parent 不同格→release→IDLE→覓食↔歸建 thrash(食物流不進)。驗真假。標 commit 980e0b1c(transition merged 後)。原始落 docs/measurements。"
 ---
 

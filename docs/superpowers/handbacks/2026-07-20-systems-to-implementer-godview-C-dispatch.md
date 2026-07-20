@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·god-view Slice C 市場 belief-gate·R² v4 CLEAN(4輪異質審)·★off LOCAL main f7390b1e·economy measure 敏感] spec=2026-07-20-godview-slice-C-market-discovery.md。root:_nearest_market_outpost(faction_ai:2112 行號驗過非 audit stale 2065)全掃 tiles=god-view。修 4 部:①新 WorldState.team_market_known(team_id→Set[tile_id])三源:創世-nearby(proximity≤CREATION_KNOW_RADIUS)+直接親見 outpost+★relay HARVEST(從 team_known 的 order/outpost_built 訊息收 origin_pos/source_pos 進 known,★濾 tile.outpost_level>0 避無 outpost 隊 live pos noise,★無新 RNG harvest 既有 entry)②_nearest_market_outpost:2112 belief-gate(只掃 team_market_known 非全 tiles)③★貿易 to_task(options:22)補 `if target==(-1,-1) and not _is_resident_team(state,team): return {TASK_IDLE}`(只 roaming→IDLE;★resident 擺攤 (-1,-1) 保 TASK_TRADE 原地交易,防 r3 村攤關門;別加 applicable market-known 同理濾擺攤)④★cleanup 只 hook demolish(outpost:332 outpost_level→0 唯一路)→清所有隊此 tile known;★capture/set_owner 不清(市集還在習得後穩定)。market_orders pre-existing 洩漏已記 known_issues 別繼承。★★off LOCAL main f7390b1e 禁 origin,pre-push hook 已裝。TDD 7型(spec §驗收)。gate/headless 0new/determinism 無新 RNG/★measure=economy 對照(trade volume/coin_eq/市集發現曲線)+冷啟動 throughput+doom-delta seed1337/42/4201+8 config sanity。task=systems+reviewer。"
 ---
 

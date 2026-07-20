@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² spec·god-view Slice B 創世全知→②+③] blueprint WHAT 已裁(創世全知=bug,②+③知識,窄例外純機制 test)。spec=2026-07-20-godview-slice-B-creation-knowledge.md。root:game_setup:575-578 all-pairs discovered=創世全知,8/11 config(demo/econ_bed/game_sim_test/merchant/survival_start/tyrant/warzone/world_sim)用 explicit→多數 sandbox 開局全知。修=②派系(同 faction 互相 discovered)+③本地鄰居(proximity≤CREATION_KNOW_RADIUS TEST VALUE)+③淵源(config parent 若有);config flag omniscient_discovery(default false,純機制 test set true 保 all-pairs)。審點:①②+③判準完整(有無漏該知的,如同盟不同 faction?)②CREATION_KNOW_RADIUS 值方向(創世認識 vs live VISION_RADIUS=3)③8 config fixture 依賴全知的處理(標 omniscient_discovery vs 補 belief,同 slice2 fixture 教訓逐個判)④emergence 敏感(開局不全知→初識靠 belief 傳播,情報網撐得起遠識?連 invariants 掃近隊兩-channel)⑤determinism。measure 敏感(8 config)→spec 含 emergence 對照。off main HEAD。CLEAN→dispatch+measure。"
 ---
 

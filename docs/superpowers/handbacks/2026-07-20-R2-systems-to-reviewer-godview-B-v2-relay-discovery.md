@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² v2·god-view Slice B 擴 relay-discovery·blueprint 裁 (b)] 你 R① 載重驗出 premise 不成立(relay 零寫 team_discovered)→blueprint 裁 (b):relay-discovery 需建(履行 2026-07-18 冷啟動 make-or-break 前置承諾,非新 scope),併入 B 擴,範圍收窄。v2:①原 ②+③ 創世知識(game_setup:575-578)②★relay-discovery(message_system:239 前:receiver 未 discovered tgt→set team_discovered,record_claim 已建 belief entry;含 distorted;不建率/延遲/失真完整模型=defer)。invariants 兩-channel 訂正=兌現(discovery ①vision②relay)。審點:①message_system:239 插入點對(所有 relay claim 路都經此?還有別的 record_claim relayed caller?)②distorted claim discover 對(team 真存在 details 假)③relay-discovery 後 emergence=情報網撐遠識(measure 詮釋改:discovery 兩-channel 長)④跨-faction 預盟 per-config 我 spec 補了嗎(⑤TDD relay-discovery+distorted)⑥determinism(relay-discovery 純確定,無新 RNG)。off main HEAD。CLEAN→dispatch+measure。"
 ---
 

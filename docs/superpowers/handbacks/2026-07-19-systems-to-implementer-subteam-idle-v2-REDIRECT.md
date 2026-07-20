@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[REDIRECT·subteam-idle-latch v2 供給環·R² CLEAN·extend 036fc42c] hold 解除。v2 R² CLEAN(供給環坐實 try_merge_back→_transfer 真交糧,sated-gated 不 re-thrash)。在你 branch feat/subteam-idle@036fc42c 上 extend(別新 branch,你 1 行修保留當基):1727 對 survival-work 的 merge 由『全排除』改『條件』——`if current_task in SURVIVAL_TASKS and not (_forager_sated(sub) or _parent_needs_food(state,parent)): return`(未食足+母團不缺→留 tile 覓食);else merge_queue(食足/母團缺糧/非-survival→歸建交糧)。加兩 helper+兩 TEST VALUE 常數:_forager_sated=survival_food_days(sub)>=FORAGE_SATED_DAYS、_parent_needs_food=parent!=null and survival_food_days(parent)<PARENT_LOW_DAYS。TDD 補:①未食足留 tile ②食足→歸建交糧(food 進 parent)③母團缺糧→即使沒滿也交 ④sated 後無 re-thrash。→to:measurer(seed42 famine 回 0+囤糧消+6 隊解+無 re-thrash;gate 值 tune)。★off LOCAL(禁 origin),pre-push hook 兩閘。"
 ---
 

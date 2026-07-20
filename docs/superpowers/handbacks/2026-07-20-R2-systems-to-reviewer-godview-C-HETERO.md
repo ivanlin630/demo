@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[★異質 R²·god-view Slice C 市場 belief-gate+market-discovery store·economy 敏感+market-relay premise 驗(承 Slice B 教訓)] god-view 倒數第二,新 belief store 基建+economy 行為敏感→升異質框外審。★請異質模型+refute prompt。spec=2026-07-20-godview-slice-C-market-discovery.md。root:_nearest_market_outpost:2112(行號驗過非 audit stale 2065)全掃 tiles 找 outpost=god-view。修=新 team_market_known store(創世-nearby+直接親見+relay 三源)+belief-gate(只掃 known)。★★最關鍵 refute(承 Slice B premise 血教訓):『市集資訊經 relay 傳播進 belief』premise 真成立嗎?——order_buy/sell message 傳的是『已知市集的賣單』(對已 discovered 市集),還是能讓隊 discover 一個『從沒聽過的新市集』?若後者不存在=同 Slice B relay-discovery 缺口重演(市場發現只 proximity→economy 可能卡遠市集永不知)。★別假設 relay 傳得到,file:line 驗市集發現的 relay 路真存在 or 需建(像 Slice B relay-discovery 那樣連帶建)。其他 refute:①創世-nearby 冷啟動夠不夠出門②store 消失清乾淨③belief-gate 後無已知市集→(-1,-1)不盲貿易,冷啟動隊會不會全卡④economy measure 詮釋。off main HEAD。CLEAN→dispatch+measure。"
 ---
 

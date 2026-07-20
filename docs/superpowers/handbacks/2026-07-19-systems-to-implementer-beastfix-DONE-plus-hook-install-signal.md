@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DONE beast-fix MERGED 06a1a30e + ★hook install 信號 lift 達成] beast-fix(feat/beast-fix@7fb16350)MERGED→main 06a1a30e。pre-merge R² CLEAN + 融合驗綠(constitution_gate 64 PASS + headless 3=baseline 0-new + beast 測全過 build/encounter/hunt/reward)。收尾 crisis 那套(consume+cd 回主目錄+重 arm)。★★同時 hook install 信號:lift 條件達成(beast merged✓ + measurer provenance closed✓)→ 可 merge feat/hook-prepush script 進 main + install(cp scripts/hooks/pre-push .git/hooks/pre-push && chmod +x)。裝完 push 起兩閘(constitution 恆跑 + verification branch-scoped)。裝前確認你手邊無 mid-push WIP。下一票(transition-arbiter-bypass HIGH)systems 正在 spec,另 dispatch。"
 ---
 

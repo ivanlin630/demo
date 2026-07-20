@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² pre-merge·null-belief-flee 終 diff 28470932] spec R² 你已審 CLEAN(建議 applicability-gate)+ blueprint ACCEPT(570→20 97%降,applicability-gate 精確對應 QA 診斷,coherent flee 保留,gates 綠)。merge 前 pre-merge R² 看 impl 對 spec 無漂移。審點:①FLEE applicable gate `_flee_threat_pos!=(-1,-1)`(威脅無座標不選 FLEE→落次佳覓食)②有座標正常 flee 不誤傷 ③不回退 live-track(無座標=轉覓食非偷讀 live)④release side-effect 乾淨 ⑤無新 RNG/違憲。branch feat/nullbelief-flee@28470932 off 95c0cfe7。CLEAN→我 merge(★Slice D 前置)。殘留 20(97%已降)+seed42 波動=非阻塞追蹤,非本 diff blocker。"
 ---
 

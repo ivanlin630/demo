@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² spec·null-belief-flee 凍結根治·Slice D 前必修] blueprint 認可修方向。spec=2026-07-20-nullbelief-flee-release.md。root:個體 FLEE(faction_ai:1595/1948)flee_from_pos=_flee_threat_pos=威脅 belief 位;positionless→(-1,-1);movement:82 無座標時無 target+continue(『靠 release 收』空話沒人 release)→卡 task=逃跑 凍結餓死(team75/4/13)。修 look-before-leap:A dispatch flee_from_pos==(-1,-1)→release FLEE(轉 IDLE→re-rank 覓食);B movement backstop 落實 release 非 continue-freeze。審點:①A release 後 survival re-rank 真接得到覓食(非又卡別的)②不誤傷 coherent flee(team67/54 有座標正常逃)③不回退 live-track(無座標=轉覓食非偷讀 live 逃,守 belief-化)④A+B 是否重複(A 夠則 B 冗餘 defense or 真需 backstop 邊角)⑤release 撤 FLEE 的 side-effect(flee_from_pos 清?combat?)。off main HEAD。CLEAN→dispatch。Slice E measure(baseline diff)另線確認 pre-existing 中,此 fix 獨立(治 pre-existing bug,非 Slice E)。"
 ---
 

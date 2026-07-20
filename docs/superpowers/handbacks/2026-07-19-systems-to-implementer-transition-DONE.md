@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DONE transition-arbiter MERGED 980e0b1c] feat/transition-arbiter@93966d15 MERGED→main 980e0b1c。pre-merge R² CLEAN(impl 對 thrice-reviewed spec 無漂移)+ 融合驗綠(constitution 64 PASS + headless 3=baseline 0-new + arbiter 測全過 Task1e/1f/2a/2b)+ QA(team16/64 SURVIVES)+ blueprint ACCEPT。收尾(consume+cd 回主目錄+重 arm+status idle)。下一票 subteam-idle-latch(手不聽腦第3種,6隊 reason=subteam)= systems 先 patch-gate-first 查 root 再 spec+dispatch,你先收尾別動。"
 ---
 

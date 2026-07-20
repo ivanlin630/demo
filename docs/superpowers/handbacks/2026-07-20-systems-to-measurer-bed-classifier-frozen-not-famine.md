@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[bed classifier 真 bug·would_succeed=true 凍結死誤標 famine·修:獨立標記非 famine bucket] blueprint QA 揭:bed 3 分類把 `would_succeed=true` 的凍結死(等待新領主/idle,food=0)因 food=0 誤標成 famine → 藏進乾淨桶 → 聚合乾淨騙人第 N 次重演(team21 就這樣藏起來)。★修 classifier:凍結死判準優先於 food-lens——`survival_dispatch_would_succeed=true 且 task=idle/等待新領主(committed 有效 survival option 卻不執行)` → 標『手不聽腦』bucket,**不管 food=0 都不落 famine**。food=0 只在 would_succeed=false(真無救) 才算 famine。純 print/determinism-safe。這是觀測不變量(死因分類=故事判斷 transient,誤標=捏假故事)。修完標 commit,→to:systems(sweep 要靠準確分類)。"
 ---
 

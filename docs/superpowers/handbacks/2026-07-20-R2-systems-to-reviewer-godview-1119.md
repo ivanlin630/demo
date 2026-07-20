@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² spec·god-view 1119 can_reach·便宜收尾] god-view arc 最後 leak(A/F/E/D/B/C merged)。spec=2026-07-20-godview-1119-can-reach.md。leak:can_reach(faction_ai:1115)決策 precondition 讀 live 他隊位算距(周圍 1109 用 belief 不一致)。修=belief-gate 距離(可見 live/斷視線 belief last-seen/positionless→false),同 Slice D position 範式。★vacuous(<999 恆真)另記 known_issues 不擴本刀(本刀只治 god-view 讀)。審點:①belief-gate 範式一致(同 D position)②positionless→false 對(無位無法算可達,合 null-belief-flee/dist_factor 精神)③vacuous 不擴刀對(god-view 純度 vs reachability 語意分開)④無新 RNG。便宜 slice。off main HEAD。CLEAN→dispatch。這條 merged→god-view arc 全 leak 治完→constitution_gate 擴版證零。"
 ---
 

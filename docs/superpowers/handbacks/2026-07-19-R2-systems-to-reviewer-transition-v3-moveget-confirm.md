@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² v3 confirm·你的 move_target 修已納·請 CLEAN] 你窄 blocking 對——beggar-restore release 清 move_target=-1(task_arbiter:98-102)→restore 的 previous_task 失目的地。已改 spec：beggar-restore×3 release 前存 saved:=move_target,set 後還原(try_set 帶 move_target 參 or release 後賦值)。TDD① 補斷言 move_target 還原到原目的地非 -1。settle/zombie 顯式重設 move_target=你判免疫,不改。這是你「其餘 CLEAN」剩的唯一點。請 CLEAN → 我 dispatch(off local main HEAD)。"
 ---
 

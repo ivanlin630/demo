@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[baseline diff 確認·null-belief-flee 凍結 pre-E 有沒有·code 已強證 pre-existing] blueprint 急查:team75/4/13 task=逃跑+flee_from=(-1,-1)+凍結1格+food=0 餓死。systems code 判=PRE-EXISTING(個體 FLEE 路 faction_ai:1595/1948 flee_from_pos=威脅 belief 位,positionless→(-1,-1);E diff 沒碰這條路,只 E1/E2/E3+E5 breakout strategic_assignments 非 task=逃跑)。★請 baseline diff 確認 code 判讀:跑 8146c4a2(E belief-化前)同 seed1337,查 task=逃跑+flee_from=(-1,-1)+凍結 signature 在 pre-E 有沒有。(a)有=pre-existing 確認→Slice E 放行(凍結非 E 過)+另立 fix 票 (b)只 E 有=我 code 判錯,E 引入需重查。順帶:確認 E 的 coherent doom-delta(team67/54 真座標遠離)vs 3 broken 是不是就這樣切(broken=pre-existing flee-latch,coherent=E intended)。標 commit,→to:systems。determinism-safe。"
 ---
 

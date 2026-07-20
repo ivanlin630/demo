@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² v3·god-view Slice C·採你 2 精修] premise/harvest 你已 CLEAN。v3 採兩精修:①貿易 guard 豁免 resident——`if target==(-1,-1) and not _is_resident_team(state,team): TASK_IDLE`(只 roaming merchant→IDLE;resident 擺攤 (-1,-1) 保 TASK_TRADE 原地交易,防 v2 blanket 村攤關門 r3 regression;別加 applicable market-known 同理濾擺攤)②cleanup hook `OutpostOwnerBank.set_owner` 單一 chokepoint(涵蓋 encounter capture×4 主路+結盟+takeover+camp,非逐 site 漏主路)+demolish。market_orders pre-existing 洩漏記 known_issues。審點:①resident 豁免夠(擺攤全 keyed TASK_TRADE,豁免後 (-1,-1) resident 保 TASK_TRADE 不進 IDLE)②set_owner chokepoint 涵蓋全 owner-change(還有別的繞過 set_owner 的 owner 寫?)③cleanup『清該 tile known』對所有隊(不只舊主,任知此 tile 的隊該重驗?)。off main HEAD。CLEAN→dispatch+measure。"
 ---
 

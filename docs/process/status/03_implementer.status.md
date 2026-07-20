@@ -2,11 +2,21 @@
 role: implementer
 code: "03"
 status: idle
-current_ticket: "hold-warm: crisis-override + immunity fix(branch@b71647ab,HIGH)→to:measurer re-measure seed1337。measurer 揭 crisis 真fire 但 release-then-instant-recommit(team1/19 defection/team13 FLEE 打回原 task)→加免疫窗(try_set 擋同 task 重委派,survival 選別task 接住)。TDD 8/8,gate 64,headless 0 new,determinism byte-identical(90353154)。並行:god-view F/②sweep/slice2 pipeline。剩:hook-prepush(deferred)。"
-updated: 2026-07-19
+current_ticket: "-（god-view Slice C DONE MERGED 927f40e9[R² CLEAN 4輪+blueprint ACCEPT]=★god-view belief-化 arc A/F/E/D/B/C+null-belief-flee 全落收官。本 session merged:crisis/beast/hook+install/transition/god-view A·E·F·D·B·C/null-belief-flee。剩 1119(便宜 god-view leak)systems spec 中另 dispatch。）"
+updated: 2026-07-20
 ---
 
 # 03 implementer 現況
+
+**beast-fix（HEAD `1524d5ed`,branch feat/beast-fix off local main f469127f,已 push,待 measurer）**：
+- **兩 root**：①id 碰撞—`_next_beast_id` BeastSystem instance var→每 `.new()` 重置 -1000000→全 beast 撞 id→create_team 覆寫。修=counter 移 `WorldState.next_beast_id`（per-world fresh，★禁 static）。②決策洩漏—beast(faction_id=-1)落 evaluate_all loop2/loop3→succession 晉升領袖+ambition+survival。修=兩 loop body 頂 `if team.beast_kind != "": continue`。
+- **驗**：TDD `beast_decision_leak_test` 11/11（RED→GREEN；id 唯一/per-world fresh 禁 static/beast 不晉升-派 task-ambition/對照真隊仍晉升）；headless `=== DONE ===` 3 fail=baseline 0 new；gate 64 removed=0（continue+string compare 非新閘）；determinism seed1337 3mo 2 跑 byte-identical md5 `ff7878af`。
+- **下一站**：measurer（seed1337/42/4201 真隊無 regression starve/pop/teams + 真隊 belief 無 -1000000 幻影）→ .qa.json/餵 blueprint 或 pre-merge to:systems。
+
+**hook-prepush（HEAD `22604514`,branch feat/hook-prepush off main 35e9ee8f,已 push,systems RATIFY+HOLD）**：
+- pre-commit→pre-push 遷移，折 constitution_gate（恆跑）+verification_gate（branch-scoped fast-exit）；刪舊 pre-commit。build done、systems 判設計過。**merge+install 都 HOLD 待信號**（starvation 落地+beast 在飛+measurer prove）。
+
+---
 
 **crisis-override（HEAD `e77aa99b`,branch feat/crisis-override off main d0ab7f91,已 push,待 measurer，HIGH）**：
 - **OUTCOME-based 跨線危機安全網（泛化 ②）**：committed 任何 task 深餓（food<CRISIS_FLOOR=1.5，decouple boost）+ committed N天（CRISIS_DAYS=6，task_start_tick）未緩（food 沒回升≥STALL_RELIEF_MIN）→ `_famine_crisis` true → hook `_evaluate_threat` release → 下 cadence re-rank → survival @80 preempt。涵蓋 5 種 stuck-task（FLEE/建設/外交/等待新領主/併入-pending）。

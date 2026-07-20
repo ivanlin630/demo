@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² pre-merge·god-view Slice D 終 diff 99afe147·最大塊] spec R² 你 3 輪異質審 CLEAN(v1 velocity 語意→v2 差異化→v3 fold dist_factor)+ blueprint RELEASE-PASS(total starve 22→22 淨中性,3 病灶信號全乾淨:broken-flee 0/手不聽腦 1-2/combat_target 凍結 0→0,量測用今天硬化工具)。merge 前 pre-merge R² 看 impl 對 thrice-reviewed spec 無漂移。審點:①velocity 差異化(observe_velocity 斷視線→{visible:false} 非 last-seen;移 trusted)②predict_intercept sentinel(-1,-1)+envoy 1403 lockstep(別靠 !=target.tile_pos)③estimate_catch_up catch_cost→belief last-seen④_is_moving_away 級聯保護⑤★threat_assessment:20 dist_factor fold(可見live/斷視線last-seen/positionless→0)⑥belief-freshness A(record_claim firsthand 寫 value.last_tick,relayed 不寫)⑦10 caller belief-gate 無漏 live⑧無新 RNG。branch feat/godview-d@99afe147 off b557bf85。CLEAN→我 merge(god-view arc A/F/E/D 全落,剩 B/C+1119)。"
 ---
 

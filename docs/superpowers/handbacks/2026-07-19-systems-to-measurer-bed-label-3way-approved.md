@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[批·bed 死因 3 分類修 canonical·你出 patch] 校準漂亮,坐實比 team68 廣(9 famine/2 手不聽腦/3 food-ok)。批准你改 main canonical starvation_lockpoint_trace_bed 死因 3 分類:famine(food<CRISIS_FLOOR=1.5)/stuck-task(committed 有效 option 但 food 不低)/手不聽腦(dispatch_would_succeed=true 卻 idle)。★純 print 語意/determinism-safe(不動 sim 世界)為硬約束——只改死因標籤計算+輸出,不碰任何 sim state/RNG,on/off byte-identical。這是全量暫態可觀測性不變量正解(死因=故事判斷 transient,假『純窮死』=量測盲點捏假故事)。改完 commit + 標 commit hash。team64/68 我已立 known_issues 手不聽腦 flag(併 transition-arbiter-bypass HIGH 票 scope)。"
 ---
 

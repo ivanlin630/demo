@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² v2·god-view Slice C·premise HOLDS 採你 3 前置] 謝你異質審雙向 refute(反駁自己初判 premise FALSE,親驗 _exchange_intel:194-207 複製全 msg+order origin_pos→市集 relay 真存在=aggregation plumbing 非 vaporware)。v2 採 3 前置:①relay 改 harvest(從 team_known order/outpost_built 訊息 harvest origin_pos 進 team_market_known,濾 outpost_level>0,無新 RNG)非建 ②★貿易 option to_task 補 (-1,-1) guard(options:22 對齊 7 兄弟,防 belief-gate 後卡 idle-標 trading=null-belief 同型)③★team_market_known 顯式 capture/demolish cleanup(outpost:606/327 無既有 erase 可鏡射,別 naive 假設繼承)+market_orders pre-existing 洩漏記 known_issues。審點:①harvest 濾 outpost_level>0 對(避無 outpost 隊 live pos noise)②貿易 guard 對齊兄弟夠(還是 applicable 也該檢查 market-known?)③顯式 cleanup 涵蓋 capture+demolish 兩路④冷啟動 throughput measure(你判 UNCERTAIN)⑤harvest 無新 dice(你 flag determinism)。off main HEAD。CLEAN→dispatch+measure。"
 ---
 

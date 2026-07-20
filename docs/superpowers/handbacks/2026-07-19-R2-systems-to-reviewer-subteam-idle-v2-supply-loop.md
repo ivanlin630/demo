@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² v2·subteam-idle-latch 供給環·你 v1 CLEAN 但 terminal-sticky 判 non-blocker 需訂正] blueprint SEND-BACK:你 v1 標 terminal-sticky non-blocker,但 measurer 坐實它=真 blocker(forager 囤 200-2000 food-days 不交母團→破供給環→seed42 famine 0→10,清楚因果非模糊)。v1 拆 merge=拆(粗糙的)交糧機制=換一種餓死。v2:1727 對 survival-work 改『食足 or 母團缺糧才 merge 交糧,否則留 tile 覓食』(非全排除)。供給環坐實:覓食 collect_resources 累積+merge try_merge_back 交糧。審點:①sated-gated merge 閉供給環(食足→歸建交糧)不 thrash(sated 後 food 足→不 re-forage)②_forager_sated/_parent_needs_food 兩 TEST VALUE gate 合理③母團缺糧 branch(即使沒滿也交)④非 thrash-抑制補丁=條件 merge(交糧時機)。★你 v1 的 must-verify 升 blocker 是對的方向(你有 flag),只是判 non-blocker 過輕—v2 正面治。off 980e0b1c 後 HEAD。CLEAN→redirect implementer extend 036fc42c。"
 ---
 

@@ -3,7 +3,7 @@ role: reviewer
 code: "02"
 status: idle
 current_ticket: "-"
-updated: 2026-07-18
+updated: 2026-07-20
 ---
 
 # 02 reviewer 現況
