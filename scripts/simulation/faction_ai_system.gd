@@ -2924,6 +2924,11 @@ func _enemy_outpost_positions(state: WorldState, leader_team: TeamData) -> Array
 		var owner: TeamData = state.teams.get(tile.outpost_owner)
 		if owner == null: continue
 		if owner.faction_id == leader_team.faction_id and owner.faction_id != -1: continue
+		# ★god-view follow-up（belief-gate，store-free proxy）：只納「觀察者對 owner 有 belief（見過/聞得）」的敵據點
+		# →只避已知敵、未見敵不避（更多衝突湧現，合鐵律）。belief-about-owner=imperfect proxy（belief_pos 給 owner 隊
+		# last-seen 非據點位；owner 可 roam），但軟 penalty 容忍高、免建 team_outpost_known 大 store（R² 判 proxy 可接受）。
+		# 全圖 loop 結構保留（hoist perf：候選對此集取 min-dist），belief filter 加 loop 內。
+		if BeliefSystem.belief_pos(state, leader_team.team_id, owner.team_id) == Vector2i(-1, -1): continue
 		out.append(tile.tile_pos)
 	return out
 
