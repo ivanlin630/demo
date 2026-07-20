@@ -25,7 +25,7 @@ team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍�
 - **★`decision_context.gd::gather`（`:373`）jhost live pos 入 `PathSystem.find_path` 算 join 可達**（jhost=strong_neighbor cross-faction 時=god-view，同 1119 can_reach 類）。未記過，detector 新撿。待 R²+follow-up（可與 1119 同範式 belief_pos-gate）。
 - `_find_trade_partner`（strategic_ai）partner discovered(belief) 但 outpost pos 讀 live = 半漏——**已知**（本檔「finder 濾鏈 C 類候選」+ invariants「team_discovered fallback 最終應刪」）。
 - **detector 限制**：靜態 regex 分不出 loop var 自/他 → 不抓 `for t in teams: t.tile_pos`（DROP gv_teamscan 噪音），是回歸閘非證明；細粒度靠 review。
-- **狀態**：detector 已 merge（gate PASS sites=77）；3 候選 R² 送 reviewer 判真 leak vs acceptable；確認則 follow-up belief-gate slice（enemy_outpost + jhost 可同批，同 belief_pos 範式）。
+- **狀態 ✅ RESOLVED（2026-07-21）**：reviewer R² 判 2 新候選**皆真 leak**（半公共/需知位 REFUTED）→ **followup slice merged 63d93aab**（jhost=belief_pos 同 1119 / enemy_outpost=belief-about-owner store-free proxy，全圖 loop 保留只避已知敵）。baseline 訂正：jhost gv_teamstate 移除、enemy_outpost gv_mapscan re-classify gate-ok(belief-filtered)。gate PASS sites=75 **零 CANDIDATE-LEAK 剩=真 zero-untracked-god-view**。`_find_trade_partner`(strategic C 類候選)續掛 team_discovered fallback「最終應刪」（非 god-view 本 arc，另軌）。god-view belief-化 arc 全收官。
 
 ## ★野獸洩進 team 決策迴圈（beast-decision-loop leak，2026-07-19，crisis-immunity QA 故事稽核撿 team=-1000000）
 
