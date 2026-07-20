@@ -370,7 +370,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_acceptable_join_host = false
 	var _jhost: int = c.strong_neighbor_id if c.strong_neighbor_id != -1 else c.consolidate_target_id
 	if _jhost != -1 and state.teams.has(_jhost):
-		var _reachable: bool = not PathSystem.find_path(state, team.tile_pos, state.teams[_jhost].tile_pos).path.is_empty()
+		# ★god-view follow-up：jhost 位讀 belief（同 1119/Slice D position 範式）。無 belief（positionless/斷視線太舊）
+		# →(-1,-1)→_reachable false（不知對方在哪=無法算 join 可達，不讀 live god-view）。team.tile_pos=自身合法。
+		var _jpos: Vector2i = BeliefSystem.belief_pos(state, team.team_id, _jhost)
+		var _reachable: bool = _jpos != Vector2i(-1, -1) \
+			and not PathSystem.find_path(state, team.tile_pos, _jpos).path.is_empty()
 		var _recently_rejected: bool = false
 		if ldr != null:
 			for _m in ldr.memory:
