@@ -1115,8 +1115,15 @@ func _precond_met(state: WorldState, f, leader_team: TeamData, pre: String, targ
 			var own_armed: int = _calc_own_armed(state, leader_team)
 			return float(own_armed) >= float(tgt_armed) * ATTACK_STRENGTH_RATIO
 		"can_reach":
-			return target_id != -1 and state.teams.has(target_id) \
-				and _hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999
+			# ★god-view 1119（arc 最後 leak）：target 位讀 belief（可見→live/斷視線→belief last-seen/
+			# positionless→can_reach false），同 Slice D position 範式（不瞬鎖真位算可達）。observer=f.leader_team_id
+			# 與旁 force_ge_target 的 best_estimate 一致。★<999 near-vacuous(真可達語意)=另評,記 known_issues,不擴本刀。
+			if target_id == -1 or not state.teams.has(target_id):
+				return false
+			var tgt_pos: Vector2i = BeliefSystem.belief_pos(state, f.leader_team_id, target_id)
+			if tgt_pos == Vector2i(-1, -1):
+				return false   # 無 belief 位=無法算可達（不讀 live god-view）
+			return _hex_dist(leader_team.tile_pos, tgt_pos) < 999
 		"has_richer_member":
 			return _richest_member(state, f) != -1
 	return true
