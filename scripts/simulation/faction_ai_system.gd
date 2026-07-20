@@ -1399,13 +1399,13 @@ func _tick_envoy(state: WorldState, envoy: TeamData, merge_queue: Array) -> void
 	# 對齊 _refresh_attack_pursuit（攻擊追擊 land combat 同機制）：可見且動→lead，靜/不可見→最後已知位。
 	# F1 感知鐵律：缺 belief → sentinel (-1,-1)（禁默認 live）。無 belief 位 → 不用 (-1,-1) 當 move（保持現 move_target=pursuit-only，
 	# 下 tick timeout/recall 承接），非瞎追 live 真位。
-	var est_pos: Vector2i = BeliefSystem.best_estimate(state, envoy.team_id, target_id).get("tile_pos", Vector2i(-1, -1))
+	# ★Slice D envoy lockstep：predict_intercept 已 belief-gate（可見→攔截/live、斷視線→belief last-seen、
+	# 無 belief→sentinel (-1,-1)）。★別靠 `!= target.tile_pos` 判 fallback（新 sentinel 會誤過→誤寫 (-1,-1) 進
+	# move_target 繞 belief-fallback）→ 改明確 sentinel 判：非 (-1,-1) 才設（攔截 or belief last-seen 位）。
 	var predicted: Vector2i = PathSystem.predict_intercept(state, envoy, target)
-	if predicted != target.tile_pos:
-		envoy.move_target = predicted   # 有攔截預測 → lead
-	elif est_pos != Vector2i(-1, -1):
-		envoy.move_target = est_pos      # 無預測但有 belief → 最後已知位
-	# else: 無預測 + 無 belief → 保持現 move_target（不設 (-1,-1)/live）
+	if predicted != Vector2i(-1, -1):
+		envoy.move_target = predicted   # 攔截預測 or belief last-seen 位（predict_intercept 已 belief-gate）
+	# else: 無 belief 位 → 保持現 move_target（不設 (-1,-1)/live），下 tick timeout/recall 承接
 
 # 信使歸隊：釋放 task + 朝母隊移動 → 到母格 try_merge_back（復用 merge）。母隊 pending 靠自身 timeout 清。
 func _recall_envoy(state: WorldState, envoy: TeamData) -> void:

@@ -192,10 +192,15 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 	if not state.team_intel.has(obs_id):
 		state.team_intel[obs_id] = {}
 	var cs: Array = _coerce(state.team_intel[obs_id].get(tgt_id, null))
+	# ★裁A（belief-freshness 縫，Slice D）：firsthand 親見（source_id==obs_id）= 觀察者本 tick 直接確認位置
+	# → value.last_tick=current_tick（對齊 vision:114 另一 firsthand 路）。轉述(source≠obs)不寫（轉述≠親見 fresh，
+	# 位置該當 last-seen 非「本 tick 可見」）。value.last_tick 語意=「位置最後被 firsthand 直接確認的 tick」。
+	var firsthand: bool = source_type == "親見" and source_id == obs_id
 	var found := false
 	for c in cs:
 		if int(c["source_id"]) == source_id:
 			(c["value"] as Dictionary).merge(fields, true)  # 同源累積/覆寫欄
+			if firsthand: (c["value"] as Dictionary)["last_tick"] = int(state.world.current_tick)
 			c["tick"] = int(state.world.current_tick)
 			c["credibility"] = credibility
 			c["distorted"] = distorted
@@ -204,6 +209,7 @@ static func record_claim(state: WorldState, obs_id: int, tgt_id: int,
 	if not found:
 		var v: Dictionary = {}
 		v.merge(fields, true)
+		if firsthand: v["last_tick"] = int(state.world.current_tick)
 		cs.append({ "value": v, "source_id": source_id, "source_type": source_type,
 			"tick": int(state.world.current_tick), "credibility": credibility, "distorted": distorted })
 	Probe.note("g3.claim_peak", float(cs.size()))

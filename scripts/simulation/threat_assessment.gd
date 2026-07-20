@@ -17,7 +17,15 @@ static func score(state: WorldState, self_team: TeamData,
 	var hostility: float = clampf(1.0 - rep, 0.0, 1.0)
 	var power_ratio: float = _power_ratio(state, self_team, other)
 	var raw: float = approach * 1.0 + hostility * 1.0 + (power_ratio - 1.0) * 0.5
-	var dist: int = _hex_dist(self_team.tile_pos, other.tile_pos)
+	# ★Slice D fold（dist_factor 乘算主導 god-view）：dist 走 belief（position）——本 tick 可見→live 距、
+	# 斷視線→belief last-seen 位算距、positionless/過期→dist_factor=0（威脅位置未知=無法算 proximity 威脅→不
+	# proximate-threat；合 null-belief-flee「威脅無座標→不 flee」+ 既有「dist≥5 逃出生天→0」）。∴ 威脅評估全 belief。
+	var other_pos: Vector2i = other.tile_pos
+	if int(BeliefSystem.best_estimate(state, self_team.team_id, other.team_id).get("last_tick", -1)) != state.world.current_tick:
+		other_pos = BeliefSystem.belief_pos(state, self_team.team_id, other.team_id)
+		if other_pos == Vector2i(-1, -1):
+			return 0.0   # positionless 威脅 → dist_factor 0 → 威脅分 0
+	var dist: int = _hex_dist(self_team.tile_pos, other_pos)
 	# 距離脫離：dist≥5 → factor 0（逃出生天）。原 floor 0.1 → 遠敵永遠算威脅 → 逃跑永不釋放
 	var dist_factor: float = clampf(1.0 - float(dist) / 5.0, 0.0, 1.0)
 	return maxf(raw * dist_factor, 0.0)
