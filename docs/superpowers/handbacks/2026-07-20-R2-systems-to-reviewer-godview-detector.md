@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·constitution_gate v3 god-view detector·感知鐵律機器證·+2 新候選殘留 leak] merged f7ff2ea0(gate PASS sites=77,pre-push 解封,非改 sim 行為純 tooling)。detector 2 型:gv_teamstate(indexed state.teams[id].動態欄=1119型)+gv_mapscan(for x in tiles whole-map)。DROP gv_teamscan(全隊迭代=orchestration噪音,靜態regex分不出自/他)。enumerate 13 凍 baseline。審點:①detector 設計(2型+DROP teamscan+GV_FILE_RE含threat_assessment+enumerate-not-classify+回歸閘非證明)對嗎②★triage:7 legit(self/地理)/1119修中/1 gray(consolidate 同-faction own-member pop)判對嗎③★★2 新候選真 leak 嗎:_enemy_outpost_positions(掃全圖敵據點=瞬知全敵基建,違感知鐵律)+decision_context:373 jhost live pos入PathSystem算可達(cross-faction=同1119類)——真 leak→follow-up belief-gate,還是 acceptable(據點半公共/join 需知位)?④_find_trade_partner 已知(C類候選)不重複記對嗎。CLEAN→我報 blueprint arc 非literally-zero+提 follow-up slice。"
 ---
 
