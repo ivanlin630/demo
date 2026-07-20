@@ -6,6 +6,14 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★economy 補丁閘優先查 verdict（2026-07-21，re-baseline 後，blueprint 認可）
+
+god-view arc 收官後 re-baseline（main 9c084d3a，乾淨 doom **21.2/22.5/0.6%**，舊 28% 作廢）。blueprint 序③補丁閘優先查（tune 前查假稀缺 vs 真 balance）：
+- **① team73「缺糧仍貿易」= 非 patch-gate（非 urgent，設計問題）**：覓食=`PRIO_SURVIVAL` 本會 preempt 貿易=`PRIO_DISPATCH`（`options.gd:354`），無 task-priority override。真機制=**DESPERATION_DAYS(~3) applicability cliff**：survival opt gate 在 `food_days < DESPERATION`，team73 food=4.17 > 3 → 無 survival opt applicable → default 貿易。**= 門檻 cliff 非 bug，連 2026-07-16「連續急迫非硬 cliff」原則**（blueprint 標 known-issue 非 urgent）。修向（未來）：DESPERATION cliff → 連續急迫（食物越低越傾 survival，非硬 3 天開關）。
+- **② 死法② illiquidity ≠ 假稀缺 goods-reserve-gate（HIGH 信心）**：`TradeValuation.reserve` 非活命品 goods = `need_keep(0)×factor ≈ 0`（死鎖早解，可賣=holding）。runtime seed1337：`sell_no_surplus=302=100% meet` + `order_placed 9450/fulfilled 6`(撮合 0.06%) + `restock 2236` = **one-sided FOOD 市場**（人人買糧、無人有糧餘可賣；food survival-lock `reserve=need_keep`「絕境不甩活命糧」永不液化 → food 市場結構上無法 peer 成交）。
+- **③ reframe（MEDIUM 信心，未驗）**：economy 瓶頸信號指向 **FOOD 供給結構** 非 GOODS 流動性。未驗：食物是否真被生產（TASK_PRODUCE 產出率）、sell_no_surplus res-split、team73 貿易 intent → **measurer 決定性 measure 中**。
+- **★★market-liquidize branch（`feat/b0cdf624` 降 goods reserve）= 正式 HOLD（blueprint 明確裁 2026-07-21）**：修錯層（goods reserve 已 ~0），**不再投入**，等 food-production 決定性測回來才定 economy 入口（**food 供給 arc / goods 流動性 / DESPERATION 門檻 tune 三選**）。避免 implementer 白工。連 [[project_economy_arc]]/[[feedback-patch-gate-first]]。
+
 ## ★null-belief-flee 凍結（個體 FLEE 對空氣逃，2026-07-20，Slice E QA 抽查撿，★Slice D 前必修）
 
 team75/4/13（seed1337）：`task=逃跑 + flee_from_pos=(-1,-1)` 全程 + 凍結 1 格 + food=0 餓死（team4/13 還逃跑↔建設 thrash）。**第 4 種 broken 家族（手不聽腦 finder-check classifier 看不到——不是「有 target 沒 dispatch」，是「dispatch 了但目標 null」）**。機制：個體 survival FLEE（`faction_ai:1595/1948` `flee_from_pos = _flee_threat_pos` = 威脅 **belief 位**）——belief 威脅**有存在感但無座標**（stale/positionless→`belief_pos` 回 `(-1,-1)`）→ `flee_from_pos=(-1,-1)` → 算不出逃離向量。`movement:81` 說「(-1,-1) 不設 target 靠 release 收」**但 release 沒真發生** → 卡 task=逃跑 凍結不覓食餓死。**★PRE-EXISTING 確認（measurer baseline diff 2026-07-20：pre-E 8146c4a2 seed1337 此 signature 570 snapshots 跨 11 隊 16/38/56/57/58/63/64/66/68/92/93=凍結 pre-E 就大量在，非 E 引入）**——slice2 belief-化威脅位+缺 flee-release 引入，**每 belief-化 slice（E 已、D 更大）都暴露更多**。**★廣（11+ 隊）值得修。fix 已 build @28470932（applicability-gate：FLEE 威脅無座標 not applicable→轉覓食），measurer 量測中。****★Slice D 前必修**（否則 D doom-delta 被同款污染）。**修方向**（blueprint 認可，look-before-leap）：`flee_from_pos==(-1,-1)`（威脅無座標）→ **release FLEE → re-rank 轉覓食**，非凍結（FLEE 無座標=not applicable 不該卡死）。連 god-view arc（belief-化暴露）/[[feedback_fileline_vs_interpretation]]。
