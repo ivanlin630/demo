@@ -86,6 +86,12 @@ const PROBE_KEYS: Array = [
 	"survival.stall_exclude", "survival.boost_fire",
 	# crisis-override 健康指標（measurer 要）：OUTCOME-based 跨線危機安全網觸發頻率
 	"crisis.override_release",
+	# [temp measurer economy re-baseline 2026-07-21] economy 指標（絕對基線用）
+	"g1.order_placed", "g1.order_fulfilled", "g1.order_settled_direct", "g1.restock_chosen",
+	"g1.shortage_buy", "g1.food_buy", "g1.seek_market", "g1.market_arrive", "g1.mint",
+	"trade.deal", "trade.deal_market", "trade.deal_merchant", "trade.deal_resident", "trade.barter_deal",
+	"trade.market_bail.sell_no_surplus", "trade.market_bail.buy_no_stock", "trade.market_bail.buy_no_coin",
+	"trade.arrive", "trade.meet", "trade.timeout",
 ]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。
