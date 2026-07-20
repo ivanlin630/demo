@@ -172,9 +172,16 @@ static func _team_speed_mult(team: TeamData) -> float:
 # ★live god-view leak（11 production caller：finder 族 + envoy tracking + threat_assessment；Slice D 待修）：
 # 讀 live target.tile_pos = god-view（斷視線仍瞬鎖真位）。非死碼（前註「零 caller」是 systems grep glob-bug 誤，已訂正）。
 # belief-gate（Slice D：caller 傳 belief 位 or last_tick 新鮮 gate，鏡射 _refresh_attack_pursuit:269-291）前勿加新 caller。
+# ★Slice D freshness gate：belief last_tick == current_tick = target 本 tick 可見（velocity/live 讀合法）。
+static func _visible_this_tick(state: WorldState, observer: TeamData, target_id: int) -> bool:
+	return int(BeliefSystem.best_estimate(state, observer.team_id, target_id).get("last_tick", -1)) == state.world.current_tick
+
 static func observe_velocity(state: WorldState, observer: TeamData, target: TeamData,
-		trusted: bool = false) -> Dictionary:
-	if not trusted and not state.team_discovered.get(observer.team_id, []).has(target.team_id):
+		_trusted: bool = false) -> Dictionary:
+	# ★Slice D 差異化 belief-gate（velocity）：velocity=兩 ground-truth 位 time-series，需本 tick 可見才有意義。
+	# 斷視線/過期 → {visible:false}（看不到=無 velocity，★非 last-seen：stale velocity=garbage 向量）。移 trusted-discovery
+	# bypass（改 freshness gate）→ 級聯保護 predict_intercept + _is_moving_away_observed（吃 direction，invisible→ZERO→既有短路）。
+	if not _visible_this_tick(state, observer, target.team_id):
 		return { "visible": false }
 	var dist: int = _hex_dist(observer.tile_pos, target.tile_pos)
 	var noise_factor: float = clampf(float(dist) / float(VisionSystem.VISION_RADIUS), 0.0, 1.0)
@@ -206,8 +213,16 @@ static func estimate_catch_up(state: WorldState, self_team: TeamData, target_id:
 	var target_team: TeamData = state.teams.get(target_id)
 	if target_team == null:
 		return { "reachable": false, "reason": "team_missing" }
+	# ★Slice D 差異化 belief-gate（position eta）：catch_cost 的 target 位——本 tick 可見用 live、
+	# 斷視線用 belief last-seen（去最後見位的 eta 有意義=合法 last-seen）、無 belief 位→不可達。
+	# velocity 部分（observe_velocity :213）自動 degrade（invisible→target_speed 0→視同不動 last-seen）。
+	var tgt_pos: Vector2i = target_team.tile_pos
+	if not _visible_this_tick(state, self_team, target_id):
+		tgt_pos = BeliefSystem.belief_pos(state, self_team.team_id, target_id)
+		if tgt_pos == Vector2i(-1, -1):
+			return { "reachable": false, "reason": "no_belief_pos" }
 	# SSSP cost（bit-exact 同 A* 最優 cost；.path 無 consumer → 不再回傳）
-	var cost: float = catch_cost(state, self_team.tile_pos, target_team.tile_pos)
+	var cost: float = catch_cost(state, self_team.tile_pos, tgt_pos)
 	if cost == INF:
 		return { "reachable": false, "reason": "no_path" }
 	var obs: Dictionary = observe_velocity(state, self_team, target_team, trusted)
@@ -242,7 +257,9 @@ static func predict_intercept(state: WorldState, attacker: TeamData,
 		target: TeamData) -> Vector2i:
 	var obs: Dictionary = observe_velocity(state, attacker, target)
 	if not obs.get("visible", false):
-		return target.tile_pos
+		# ★Slice D：斷視線 → 不回 live target.tile_pos（god-view）。sentinel 契約：有 belief→last-seen 位、無→(-1,-1)。
+		return BeliefSystem.belief_pos(state, attacker.team_id, target.team_id)
+	# 以下本 tick 可見（observe_velocity visible）→ live 位/velocity 合法。
 	var direction: Vector2i = obs.get("direction", Vector2i.ZERO)
 	var target_speed: float = float(obs.get("speed", 0.0))
 	if direction == Vector2i.ZERO or target_speed < 0.1:

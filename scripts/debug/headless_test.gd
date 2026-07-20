@@ -7538,13 +7538,13 @@ func _test_find_trade_target_max_gap() -> void:
 	t1.team_id = 1; t1.tile_pos = Vector2i(1, 0); _seed_pop(t1, 5)
 	t1.resources["food"] = 100.0
 	state.teams[1] = t1
-	state.team_intel[0] = { 1: { "food": 100.0, "population": 5 } }
+	state.team_intel[0] = { 1: { "food": 100.0, "population": 5, "tile_pos": Vector2i(1, 0), "last_tick": 802 } }   # Slice D：本 tick 可見(last_tick==current 802)→finder reachability 用 live 位
 	# Team 2: 遠，價差大
 	var t2 := TeamData.new()
 	t2.team_id = 2; t2.tile_pos = Vector2i(3, 0); _seed_pop(t2, 50)
 	t2.resources["food"] = 0.0
 	state.teams[2] = t2
-	state.team_intel[0][2] = { "food": 0.0, "population": 50 }
+	state.team_intel[0][2] = { "food": 0.0, "population": 50, "tile_pos": Vector2i(3, 0), "last_tick": 802 }   # Slice D：本 tick 可見
 	var fai := FactionAISystem.new()
 	var target = fai._find_trade_target(state, merchant)
 	# Team 2 食物缺 + 人多 → local_value 高，價差大；雖遠但 score 應較高
@@ -8851,6 +8851,7 @@ func _test_observe_velocity_visible() -> void:
 	target.last_tile_pos = Vector2i(1, 0)
 	state.teams[1] = target
 	state.team_discovered[0] = [1]
+	state.team_intel[0] = {1: {"tier": 2, "population_est": 5, "tile_pos": Vector2i(2, 0), "last_tick": 0}}   # Slice D：velocity 需本 tick 可見(belief last_tick==current 0)
 	var r = PathSystem.observe_velocity(state, observer, target)
 	assert(r.get("visible", false), "應可見")
 	assert(r.get("speed", 0) > 0, "speed 應 > 0 (1 hex movement)")
@@ -8889,6 +8890,7 @@ func _test_estimate_catch_up_reachable() -> void:
 	target.last_tile_pos = Vector2i(2, 0)
 	state.teams[1] = target
 	state.team_discovered[0] = [1]
+	state.team_intel[0] = {1: {"tier": 2, "population_est": 5, "tile_pos": Vector2i(2, 0), "last_tick": 0}}   # Slice D：本 tick 可見→live 位算 eta
 	var r = PathSystem.estimate_catch_up(state, observer, 1)
 	assert(r.get("reachable", false), "應 reachable")
 	print("Path Task5 OK (eta=%d)" % r.get("eta", 0))
@@ -8910,6 +8912,7 @@ func _test_estimate_catch_up_too_far() -> void:
 	target.last_tile_pos = Vector2i(27, 0)
 	state.teams[1] = target
 	state.team_discovered[0] = [1]
+	state.team_intel[0] = {1: {"tier": 2, "population_est": 5, "tile_pos": Vector2i(27, 0), "last_tick": 0}}   # Slice D：本 tick 可見→live 位算 eta（too_far）
 	var r = PathSystem.estimate_catch_up(state, observer, 1)
 	assert(not r.get("reachable", true), "應 unreachable")
 	assert(r.get("reason", "") == "too_far", "reason 應 too_far，實際=%s" % r.get("reason", ""))
@@ -10392,6 +10395,7 @@ func _test_predict_intercept_static() -> void:
 	prey.last_tile_pos = Vector2i(5, 0)   # velocity 0
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
+	state.team_intel[0] = {1: {"tier": 2, "population_est": 5, "tile_pos": Vector2i(5, 0), "last_tick": 0}}   # Slice D：本 tick 可見→靜止 prey 回 live 當前
 	var p = PathSystem.predict_intercept(state, attacker, prey)
 	assert(p == prey.tile_pos, "靜止 prey → 回當前，實際=%s" % str(p))
 	print("Engagement Task1a OK")
@@ -10406,6 +10410,7 @@ func _test_predict_intercept_moving() -> void:
 	prey.last_tile_pos = Vector2i(2, 0)   # 朝 +x
 	state.teams[1] = prey
 	state.team_discovered[0] = [1]
+	state.team_intel[0] = {1: {"tier": 2, "population_est": 5, "tile_pos": Vector2i(3, 0), "last_tick": 0}}   # Slice D：本 tick 可見→live velocity 預測前方
 	var p = PathSystem.predict_intercept(state, attacker, prey)
 	assert(p != prey.tile_pos, "移動 prey 應預測未來格，實際=%s" % str(p))
 	assert(p.x > prey.tile_pos.x, "預測應在 prey 前方，實際=%s" % str(p))
@@ -10422,7 +10427,8 @@ func _test_predict_intercept_out_of_sight() -> void:
 	state.teams[1] = prey
 	state.team_discovered[0] = []   # 不在視野
 	var p = PathSystem.predict_intercept(state, attacker, prey)
-	assert(p == prey.tile_pos, "視野外應 fallback 當前，實際=%s" % str(p))
+	# ★Slice D：視野外 → belief-gate sentinel (-1,-1)（無 belief 位；★不再 fallback live god-view 當前位）
+	assert(p == Vector2i(-1, -1), "視野外+無 belief → sentinel(-1,-1)（非 fallback live），實際=%s" % str(p))
 	print("Engagement Task1c OK")
 
 func _test_threat_score_out_of_sight() -> void:
@@ -10448,7 +10454,7 @@ func _test_threat_score_high_hostile() -> void:
 	_seed_pop(other, 20)
 	state.teams[1] = other
 	state.team_discovered[0] = [1]
-	state.team_intel[0] = { 1: { "population_est": 20 } }
+	state.team_intel[0] = { 1: { "population_est": 20, "tile_pos": Vector2i(2, 0), "last_tick": 0 } }   # Slice D：approach(velocity)+dist 需本 tick 可見(last_tick==current 0)
 	var s = ThreatAssessment.score(state, self_team, other)
 	assert(s > 0.5, "敵意接近應 score>0.5，實際=%.2f" % s)
 	print("Engagement Task2b OK (score=%.2f)" % s)
@@ -10462,7 +10468,7 @@ func _test_threat_score_distance_decay() -> void:
 	var other := TeamData.new(); other.team_id = 1
 	state.teams[1] = other
 	state.team_discovered[0] = [1]
-	state.team_intel[0] = { 1: { "population_est": 15 } }
+	state.team_intel[0] = { 1: { "population_est": 15, "tile_pos": Vector2i(1, 0), "last_tick": 0 } }   # Slice D：本 tick 可見(last_tick==current 0)→用 live 位算距（測隨 other.tile_pos 移動）
 	# 近：dist 1，朝我來
 	other.tile_pos = Vector2i(1, 0); other.last_tile_pos = Vector2i(2, 0)
 	var near_s = ThreatAssessment.score(state, self_team, other)
@@ -10502,7 +10508,7 @@ func _test_evaluate_threat_finds_hostile() -> void:
 	enemy.last_tile_pos = Vector2i(3, 0); _seed_pop(enemy, 20)
 	state.teams[1] = enemy
 	state.team_discovered[0] = [1]
-	state.team_intel[0] = { 1: { "population_est": 20 } }
+	state.team_intel[0] = { 1: { "population_est": 20, "tile_pos": Vector2i(2, 0), "last_tick": 0 } }   # Slice D：本 tick 可見(last_tick==current 0)→threat dist/approach 用 live 位
 	var fai := FactionAISystem.new()
 	fai._evaluate_threat(state, team)
 	assert(team.current_task != TeamData.TASK_IDLE, "應觸發反應，task=%s" % team.current_task)
