@@ -18,6 +18,10 @@ var global_messages: Array = []
 var observer_messages: Array = []
 var team_known: Dictionary = {}
 var team_discovered: Dictionary = {}   # int team_id → Array[int] 已知 team_id 清單
+# god-view Slice C：market-discovery belief store（team_id → Dictionary{tile_id:int→true} 已知市集 outpost tile）。
+# 三源習得：創世-nearby(game_setup) / 直接親見(vision 半徑內 outpost) / relay harvest(team_known order/outpost_built 訊息)。
+# 貿易目標選擇（_nearest_market_outpost）只掃此=belief-gate（非全圖 god-view）。demolish(outpost_level→0)清此 tile 全隊條目。
+var team_market_known: Dictionary = {}
 var team_intel: Dictionary = {}
 # { obs_id: int → { tgt_id: int → {
 #   "tier":           int,       # 最高接觸層級：0/1/2

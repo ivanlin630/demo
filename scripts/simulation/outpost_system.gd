@@ -331,6 +331,12 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 			tile.outpost_type  = ""
 			tile.outpost_level = 0
 			OutpostOwnerBank.set_owner(tile, -1, "demolish")
+			# ★god-view Slice C：市集拆了(outpost_level→0，唯一真消失路)→清所有隊 team_market_known 對此 tile 的
+			# 條目（tile 級：知此市集的隊都該忘）。★只 demolish 清；capture/set_owner 不清（市集還在=known 位置仍有效，
+			# 習得後穩定；換老闆的 stale 賣單由 order staleness + harvest 濾 outpost_level>0 處理，非清 known）。
+			var demo_tid: int = tile.tile_pos.x * 1000 + tile.tile_pos.y
+			for tmk in state.team_market_known.values():
+				(tmk as Dictionary).erase(demo_tid)
 			for fac_name in FACILITY_DEF:
 				tile.set(FACILITY_DEF[fac_name]["current_level_key"], 0)
 			tile.stable_progress = 0.0

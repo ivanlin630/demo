@@ -5419,6 +5419,7 @@ func _test_merchant_seek_market() -> void:
 	m.resources = {"goods": 50.0, "food": 100.0, "coin": 200.0}
 	var ml := PersonData.new(); ml.id = 10; ml.values["貪婪"] = 0.7; state.persons[10] = ml; m.leader_id = 10
 	state.teams[0] = m; state.team_known[0] = []
+	state.team_market_known[0] = {8 * 1000 + 8: true}   # Slice C：商隊已知市集(8,8)（belief-gate；鏡射創世/relay 發現）
 	var tgt: Vector2i = fai._merchant_trade_target(state, m)
 	assert(tgt == Vector2i(8,8), "無 arb 應巡最近市集(8,8)，實際=%s" % str(tgt))
 	print("merchant seek market OK")
@@ -5444,6 +5445,7 @@ func _test_market_trade_chain() -> void:
 	_seed_pop(buyer, 5)
 	buyer.resources = {"goods": 0.0, "coin": 500.0}
 	state.teams[1] = buyer; state.team_known[1] = []
+	state.team_market_known[1] = {3 * 1000 + 3: true}   # Slice C：商隊已知市集(3,3)（belief-gate；鏡射創世/relay 發現）
 	var os := OrderSystem.new()
 	os.post_order(state, seller, "sell", "goods", 30)
 	assert(s_tile.market_orders.size() == 1, "sell 單登錄市集看板")

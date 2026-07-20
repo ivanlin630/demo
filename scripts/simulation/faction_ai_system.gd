@@ -2107,15 +2107,18 @@ func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
 		Probe.bump("g1.seek_market")
 	return mkt   # (-1,-1) = 無市場可去
 
-# WS-2b：找最近「有看板的市集 outpost」（outpost_level>0、非自家）。
-# scan tile = 公開地標（市集告示是公開），確定性（無 RNG）。無 → (-1,-1)。
+# ★god-view Slice C：找最近「已知市集 outpost」（belief-gate，非全圖 god-view）。
+# 只掃 team_market_known（三源習得：創世/親見/relay），非全 state.world.tiles。無已知市集→(-1,-1)。
+# 確定性（無 RNG）：harvest 讀既有 entry/tile，不加 dice。
 func _nearest_market_outpost(state: WorldState, team: TeamData) -> Vector2i:
+	_harvest_market_known(state, team)   # 更新 known（直接親見 vision 半徑內 + relay harvest team_known 訊息）
+	var known: Dictionary = state.team_market_known.get(team.team_id, {})
 	var best_pos: Vector2i = Vector2i(-1, -1)
 	var best_d: int = 1 << 30
-	for tile_id in state.world.tiles:
-		var tile: HexTileData = state.world.tiles[tile_id]
-		if tile.outpost_level <= 0:
-			continue
+	for tile_id in known:
+		var tile: HexTileData = state.world.tiles.get(tile_id)
+		if tile == null or tile.outpost_level <= 0:
+			continue   # demolish/失效市集 → 略（demolish hook 亦清 known，此 re-validate 保險）
 		if tile.outpost_owner == team.team_id:
 			continue   # 自家據點看板只有自己的單，去也無跨隊 arb
 		var d: int = _hex_dist(team.tile_pos, tile.tile_pos)
@@ -2123,6 +2126,43 @@ func _nearest_market_outpost(state: WorldState, team: TeamData) -> Vector2i:
 			best_d = d
 			best_pos = tile.tile_pos
 	return best_pos
+
+# market-discovery 兩源 harvest（★無新 RNG）：①直接親見（vision 半徑內 outpost，bounded local scan 非全圖）
+# ②relay harvest（team_known 的 order/outpost_built 訊息 market pos，★濾 outpost_level>0 避無 outpost 隊 live pos noise）。
+# 創世-nearby 源在 game_setup（開局 seed）。
+func _harvest_market_known(state: WorldState, team: TeamData) -> void:
+	var known: Dictionary = state.team_market_known.get(team.team_id, {})
+	# ① 直接親見：vision 半徑內 outpost tile（bounded=vision，非全圖 god-view）
+	var vr: int = VisionSystem.VISION_RADIUS
+	for dx in range(-vr, vr + 1):
+		for dy in range(-vr, vr + 1):
+			var p: Vector2i = team.tile_pos + Vector2i(dx, dy)
+			if _hex_dist(team.tile_pos, p) > vr:
+				continue
+			var tid: int = p.x * 1000 + p.y
+			var t: HexTileData = state.world.tiles.get(tid)
+			if t != null and t.outpost_level > 0:
+				known[tid] = true
+	# ② relay harvest：team_known 訊息（order/outpost_built）market pos → known（濾真市集 outpost_level>0）
+	for msg in state.team_known.get(team.team_id, []):
+		var mpos: Vector2i = _msg_market_pos(msg)
+		if mpos == Vector2i(-999, -999):
+			continue
+		var mtid: int = mpos.x * 1000 + mpos.y
+		var mt: HexTileData = state.world.tiles.get(mtid)
+		if mt != null and mt.outpost_level > 0:   # ★濾無 outpost 隊 fallback live pos noise
+			known[mtid] = true
+	state.team_market_known[team.team_id] = known
+
+# 從 relay 訊息取市集 pos：order_buy/sell → params.origin_pos（下單隊市集）；outpost_built → source_pos（outpost tile）。
+func _msg_market_pos(msg) -> Vector2i:
+	if msg.type == "order_buy" or msg.type == "order_sell":
+		var op = msg.params.get("origin_pos", null)
+		if op is Vector2i:
+			return op
+	elif msg.type == "outpost_built":
+		return msg.source_pos
+	return Vector2i(-999, -999)
 
 func _find_trade_target(state: WorldState, merchant: TeamData) -> int:
 	var best_id: int = -1
