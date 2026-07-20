@@ -10,9 +10,9 @@
 
 god-view arc 收官後 re-baseline（main 9c084d3a，乾淨 doom **21.2/22.5/0.6%**，舊 28% 作廢）。blueprint 序③補丁閘優先查（tune 前查假稀缺 vs 真 balance）：
 - **① team73「缺糧仍貿易」= 非 patch-gate（非 urgent，設計問題）**：覓食=`PRIO_SURVIVAL` 本會 preempt 貿易=`PRIO_DISPATCH`（`options.gd:354`），無 task-priority override。真機制=**DESPERATION_DAYS(~3) applicability cliff**：survival opt gate 在 `food_days < DESPERATION`，team73 food=4.17 > 3 → 無 survival opt applicable → default 貿易。**= 門檻 cliff 非 bug，連 2026-07-16「連續急迫非硬 cliff」原則**（blueprint 標 known-issue 非 urgent）。修向（未來）：DESPERATION cliff → 連續急迫（食物越低越傾 survival，非硬 3 天開關）。
-- **② 死法② illiquidity ≠ 假稀缺 goods-reserve-gate（HIGH 信心）**：`TradeValuation.reserve` 非活命品 goods = `need_keep(0)×factor ≈ 0`（死鎖早解，可賣=holding）。runtime seed1337：`sell_no_surplus=302=100% meet` + `order_placed 9450/fulfilled 6`(撮合 0.06%) + `restock 2236` = **one-sided FOOD 市場**（人人買糧、無人有糧餘可賣；food survival-lock `reserve=need_keep`「絕境不甩活命糧」永不液化 → food 市場結構上無法 peer 成交）。
-- **③ reframe（MEDIUM 信心，未驗）**：economy 瓶頸信號指向 **FOOD 供給結構** 非 GOODS 流動性。未驗：食物是否真被生產（TASK_PRODUCE 產出率）、sell_no_surplus res-split、team73 貿易 intent → **measurer 決定性 measure 中**。
-- **★★market-liquidize branch（`feat/b0cdf624` 降 goods reserve）= 正式 HOLD（blueprint 明確裁 2026-07-21）**：修錯層（goods reserve 已 ~0），**不再投入**，等 food-production 決定性測回來才定 economy 入口（**food 供給 arc / goods 流動性 / DESPERATION 門檻 tune 三選**）。避免 implementer 白工。連 [[project_economy_arc]]/[[feedback-patch-gate-first]]。
+- **② 死法② = GOODS 供需失衡（res-split 坐實，2026-07-21 訂正）**：`goods reserve = need_keep(0)×factor ≈ 0`（code-read 對，死鎖早解）。**★但我原「one-sided FOOD 市場」verdict 被 measurer res-split 推翻**：`sell_no_surplus` **food 26 vs goods 276**（我稱的 302 實 91% goods）、buy **food 1093 vs goods 3573**（goods 3.3×）、**food_harvested 76k 豐產**。→ **真根 = GOODS 供需失衡**（goods 需求 3573 高、賣家 holding~0 → sell_no_surplus goods 276）。**教訓**：聚合 count（sell_no_surplus=302）沒拆 res 就下結論 = 誤讀（同 team16/75 坑）[[feedback_fileline_vs_interpretation]]。
+- **③ economy 入口 = GOODS 流動性/供給（blueprint 裁 2026-07-21）**：food-結構 arc 取消（food 豐產，starve=分配非產量，另議）。**★market-liquidize branch（`feat/b0cdf624` 降 goods reserve）HOLD 解除、重啟**（一直對著正確的靶=goods 流動性）。
+- **★決定性未決：goods「沒產夠 vs 產了瞬耗」**（measurer 拆分中）——定 fix 生產側（產出不足）vs 撮合/流動性側（產了賣不掉，market-liquidize 對）。**market-liquidize 全推進等此拆分**（blueprint「方向不明別走岔路」）。連 [[project_economy_arc]]/[[feedback-patch-gate-first]]。
 
 ## ★null-belief-flee 凍結（個體 FLEE 對空氣逃，2026-07-20，Slice E QA 抽查撿，★Slice D 前必修）
 
