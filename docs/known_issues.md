@@ -6,6 +6,10 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## workshop demand-deficit 封頂太粗→連續（follow-up，2026-07-21，reviewer R² 拆出）
+
+`_facility_deficit` A 類 min_per_res：`tgt = need_keep + demand`（unbounded）→ 中度未滿足即 `worst→0` → deficit 恆封頂 1.0（cliff-ish）。workshop（goods demand 3573 巨）恆 1.0=score 恆高。**fix**：demand 貢獻 pop-relative 正規化（`demand cap pop×DEMAND_PER_POP_CAP`）→ deficit **連續反映 demand 量級**（同 team73 DESPERATION「連續非 cliff」紀律）。**blueprint 認可「兩個都做、①優先」**（weaponsmith demand fix=①先，此=②錦上添花公式品質）。reviewer R² 拆獨立 slice（綁 ① 會 conflate goods 行為 measure）。**排序**：weaponsmith fix merged 後獨立做。連 [[project_economy_arc]]。
+
 ## ★economy 補丁閘優先查 verdict（2026-07-21，re-baseline 後，blueprint 認可）
 
 god-view arc 收官後 re-baseline（main 9c084d3a，乾淨 doom **21.2/22.5/0.6%**，舊 28% 作廢）。blueprint 序③補丁閘優先查（tune 前查假稀缺 vs 真 balance）：

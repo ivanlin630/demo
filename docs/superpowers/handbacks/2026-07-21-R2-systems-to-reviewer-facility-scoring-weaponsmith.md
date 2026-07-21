@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·facility-scoring 平衡·weaponsmith 納武器市場 demand·blueprint 選①授權] spec=2026-07-21-facility-scoring-weaponsmith-demand.md。根 code-confirmed(deficit 不對稱:workshop demand-responsive 封頂1.0 vs weaponsmith armed_ratio-only 無視武器 demand→systematically 輸 60樣本僅中1)。blueprint 裁選①(納武器市場 demand,連綜合發展模型商隊追財/軍火商,armed_ratio 自衛留)。①_deficit_weaponsmith 改兩路徑 max(self_defense=armed_ratio×militancy 留 / market=武器 demand × 商業人格)。②workshop demand 封頂→連續(次要,順手)。審點:①max 語意對嗎(自衛OR軍火商任一驅建)②★商業人格權重穿秤非 flat(貪婪/商業技能,blueprint 域專判斷器邊界)③★複用:_weapon_market_deficit 該複用 A 類 generic(weaponsmith 轉 A 類+special 融合)還 special 內算=DRY 判④②workshop 連續動 goods 行為風險→同 slice or 拆 follow-up⑤無 RNG(純算術+人格)⑥measure-sensitive 非盲改。不需 QA(blueprint:formula 事實)。CLEAN→dispatch。"
 ---
 

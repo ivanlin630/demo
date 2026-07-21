@@ -19,24 +19,22 @@ func _deficit_weaponsmith(state, team, _tile, lv) -> float:
     var market: float = _weapon_market_deficit(state, team, lv) * _commercial_inclination(team, lv)
     return clampf(maxf(self_defense, market), 0.0, 1.0)
 ```
-- **`_weapon_market_deficit`**：對稱 workshop A 類 min_per_res——weaponsmith outputs=`[weapon_melee_low, weapon_ranged_low]`，每 res `tgt = need_keep + NeedOracle.demand`（demand=belief-gated 武器買單），`worst = min(holding/tgt)`，`deficit = 1 − worst`。（★複用既有 A 類算法邏輯，別重寫——見驗收 note。）
+- **`_weapon_market_deficit`**：weaponsmith outputs=`[weapon_melee_low, weapon_ranged_low]` 的 demand-driven deficit。**★★DRY（reviewer R² ③要求）：抽 shared helper `_generic_res_deficit(state, team, outputs, use_demand, agg_mode, lv) -> float`，從 `_facility_deficit` 的 A 類分支（min_per_res/pooled_sum + need_keep + demand + output_scale）抽出。A 類 dispatch **和** weaponsmith market 都呼此 helper，禁平行重寫**（收斂為一，避 seam#1「各算」）。weaponsmith market = `_generic_res_deficit(state, team, [weapon_melee_low, weapon_ranged_low], true, "min_per_res", lv)`。
 - **`_commercial_inclination`**：`clampf(貪婪×W1 + 商業技能×W2, 0, 1)`（TEST VALUE 權重；貪婪/商業高→軍火商動機強）。**人格化非 flat**（blueprint「穿人格秤非硬寫繞過」，同域專判斷器邊界）。
-- **max 語意**：自衛急（armed 低）OR 市場好賣（demand 高 × 商業人格）任一 → weaponsmith 值得建。兩動機都合理。
+- **max 語意**：自衛急（armed 低）OR 市場好賣（demand 高 × 商業人格）任一 → weaponsmith 值得建。兩動機都合理，reviewer R² 判無 double-count。
 
-## ② 修 workshop demand 封頂太粗 → 連續（順手，次要）
-workshop A 類 min_per_res：`worst = min(holding/tgt)`，`tgt = need_keep + demand`。demand unbounded → 中度未滿足即 `worst→0` → deficit 恆 1.0（cliff-ish）。
-- **改**：demand 貢獻 pop-relative 正規化——`tgt` 內 demand 項 cap 在 `pop × DEMAND_PER_POP_CAP`（TEST VALUE），使 deficit **連續反映 demand 量級**非中度即封頂（同 team73 DESPERATION「連續非 cliff」紀律）。
-- **★次要**：①已解 weaponsmith 輸的主病（兩者都 demand-responsive→weaponsmith 憑 terrain_fit near ore_iron 贏）；②是公式品質改善。R² 若判 ② 動 goods 行為風險大→拆獨立 follow-up slice，①先行。
+## ② workshop demand 封頂→連續 = **拆獨立 follow-up slice（reviewer R² ④）**
+**本 slice 不含 ②**。reviewer R² 判：② workshop cliff→連續 = **獨立 goods 建造行為改**，綁一起 conflate ① 的 measure（① 是核心解武器產業起不來，② 是 goods 公式品質）。→ **②拆獨立 follow-up slice**（`workshop demand pop-relative 連續正規化`，記 known_issues backlog）。①單獨解主病、單獨 measure（乾淨對照）。blueprint 認可「兩個都做、①優先」——②不砍只延後獨立做。
 
 ## ★★無 RNG / 人格穿秤
 - 純算術（demand/holding 比 + 人格權重），**零 randf**。
 - 人格化 = 決策穿人格秤（貪婪/商業/militancy），非硬寫繞過引擎。
 
 ## 驗收
-- **TDD**：①weaponsmith：高武器 demand + 商業人格 → deficit 高（market 路徑）/ 武裝足 + 低商業 → deficit 由 self_defense（不歸零若仍 militaristic）/ demand=0 且武裝足 → deficit 0。②workshop：中度 demand → deficit 連續（非直接 1.0）。
-- **★複用檢查**：`_weapon_market_deficit` 若能複用 A 類 generic evaluator（`FACILITY_DEFICIT_DEF` weaponsmith 改 A 類 + special 融合）更佳；R² 判「複用 vs special 內算」哪個乾淨（別重寫 A 類邏輯=DRY）。
-- **gate** PASS / **headless** 0 new / **determinism** 2 跑 byte-identical（無 RNG）。
+- **TDD**：weaponsmith：①高武器 demand + 商業人格 → deficit 高（market 路徑）②武裝不足 + militaristic → deficit 由 self_defense ③demand=0 且武裝足 + 低商業 → deficit 0 ④max 語意（兩路徑取高、無 double-count）。
+- **★DRY 檢查（reviewer ③）**：`_generic_res_deficit` helper 抽出後，`_facility_deficit` A 類分支 **和** weaponsmith market 都呼此 helper（非平行實作）；A 類既有 facility（workshop/apothecary/armorsmith/smeltery/stable）行為 **byte-identical**（純重構，helper 抽出不改語意）。
+- **gate** PASS / **headless** 0 new / **determinism** 2 跑 byte-identical（無 RNG + helper 抽出純重構）。
 - **★measure（→measurer，behavior-sensitive，帶 §④b 樣本/可用 Probe.bump_sample）**：facility-build-by-type（weaponsmith 建數 0→?）+ weapon 產出（weapon_melee_low 池 0→?）+ weaponsmith vs workshop score 分布（不再 systematically 輸）+ doom-delta（seed1337/42）+ 8 config sanity。**不需 QA**（blueprint：formula 事實非故事）。
 
 ## 排序
-①優先（核心，解武器產業起不來）+ ②順手（R² 判是否同 slice or 拆）。R²（人格權重/max 語意/複用 A 類/②風險/無 RNG）→ dispatch。
+本 slice = **①單獨**（weaponsmith 納武器 demand + DRY helper 抽出）。R² CLEAN（reviewer 2 要求已納：DRY helper + 拆 ②）→ dispatch。②workshop 連續 = 獨立 follow-up（known_issues backlog）。
