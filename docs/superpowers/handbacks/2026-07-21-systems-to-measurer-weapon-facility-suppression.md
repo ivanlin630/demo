@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[工單·weapon-facility 抑制 measure·定天然限制 vs farming-crush過度抑制·帶樣本§④b] 補丁閘查:武器製造無硬override-gate,但 weaponsmith 兩結構抑制(terrain_fit 要 ore_iron + farming survival-crush)。keystone=ore_iron 供給。★需你 measure 定『天然限制 vs 過度抑制』(main 9c084d3a economy keys bed):①facility-build-by-type 計數(weaponsmith/smeltery/armorsmith 到底建幾個 vs farming/workshop)②weaponsmith _facility_score 分布 vs farming(誰贏差多少;若 farming 恆碾=crush 主導)③facility-eval 時局部 food-urgency 分布(_facility_food_urgency:urgency 普遍高?=farming-crush 常態壓制 vs 偶發)④ore_iron 已開採 tile 數/有無 iron 礦村(供給是地質稀缺 vs 礦村沒建 vs harvest-gate)。★★帶 bounded 樣本(新協議 §④b):每項聚合同捕 3-10 instance(tick/隊/facility score/urgency/ore_iron 值),過渡期無 Probe.bump_sample 工具→手動 print(開銷零)。回 blueprint(定序)+副本 systems。用途:天然→ore_iron 供給側 spec(iron 礦村 like mint)/過度抑制→farming-crush 局部性修。"
 ---
 
