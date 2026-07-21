@@ -1895,6 +1895,13 @@ func _should_reeval(state: WorldState, team: TeamData) -> bool:
 	if _directive_fresh(state, team):
 		if Probe.enabled: Probe.bump("reeval.directive")
 		return true               # faction 新命令→即時響應
+	# ★market-seek 在途 sticky（Gate A，手不聽腦家族·尋路 task）：TASK_TRADE 未抵達（move_target set）+ 非 crisis
+	# → 不 cadence-divert（機會性重評搶走=64% 到不了市場）。crisis 落下方 cadence（survival escape）；IDLE/stuck/
+	# crisis-edge/directive 上方已 return true（求生/威脅/命令 escape 全保）；trade-timeout（:817 TRADE_TIMEOUT）
+	# 抓 zombie；resident 擺攤（move_target==(-1,-1)）非在途不受影響。
+	if team.current_task == TeamData.TASK_TRADE and team.move_target != Vector2i(-1, -1) and not in_crisis:
+		if Probe.enabled: Probe.bump("reeval.marketseek_sticky")
+		return false
 	if state.world.current_tick >= team.decision_eval_next_tick:
 		if Probe.enabled: Probe.bump("reeval.cadence")
 		return true
