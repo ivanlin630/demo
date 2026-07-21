@@ -125,6 +125,21 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 - 探針起頭已立：`warring_harness.gd` PROBE_KEYS + `faction_ai` bump（merge 維度）→ **續補齊上述全維度成標準模式，未來 slice 複用**。
 - 產 `<slice>.fullprobe.json`（baseline/slice 並排）。**這是新量測模型的核心**：完整量→藍圖判得動→release-pass 閉環。
 
+### ④b ★★decision-bearing 聚合 → 寫時同捕 bounded 樣本（blueprint/用戶定 2026-07-21，非事後補）
+
+**原則（WHAT 級預防，blueprint 提）**：任何**會被拿去支撐 WHAT 級決策**的聚合探針（方向判斷／release-pass／HOLD 解除／arc 入口／verdict）——**寫探針的當下就同時捕 3-10 個 bounded 具體 instance**（有上限、非全 dump），**不是計數器單獨存在**。這樣任何「決定性數字」出來時，故事材料已在旁邊，不用事後回頭補一輪 trace。
+
+**血證（2026-07-21 economy disambig）**：`sell_no_surplus=302` 聚合探針**只存計數、沒存 instance** → systems 用聚合直接下 verdict（誤讀成 food）、blueprint 用它解除 HOLD → 用戶戳「沒人讀過故事」→ 回頭請 measurer 補 res-split trace 才發現 91% 是 goods（非 food）。**若探針當初每 bail 順手存 `{tick, team, res, holding, reserve}` 樣本，res 維度當場可見、不會誤讀**。連 [[feedback_fileline_vs_interpretation]]（聚合 count 是 fact，composition 詮釋未拆維度=未坐實）。
+
+**開銷非理由（用戶定調）**：sim 主成本 = 跑模擬本身；探針**偵測到事件時順手多印幾行**（tick/隊/資源/相關狀態）幾乎免費；bounded 小樣本讀起來也不貴。
+
+**How（機制）**：
+- **判定門檻**：這聚合會不會餵 WHAT 級決策（verdict/方向/pass/HOLD）？會 → 必附樣本。純內部診斷計數（不上報決策）可免。
+- **樣本內容**：捕能**消歧**的維度——res type / 隊 id / task / 死因 / 相關狀態值（哪個維度可能讓聚合被誤讀，就存哪個）。`sell_no_surplus` 該存 `res`（食物 vs goods 之爭正是漏這維）。
+- **bounded**：前 N 個 distinct instance（N=3-10，硬上限），非全量（全量=§⑤ specimen dump 的事，對象是鎖定隊）。
+- **工具 enabler**（HOW backlog）：`Probe.bump` 現只計數 → 加 `Probe.bump_sample(key, instance_dict)`（存計數 + ring-buffer ≤N 樣本，env-gated 零成本 off）→ 落 `<slice>.fullprobe.json` 的 `samples.<key>`。決定性探針改用之。
+- **與 §⑤ 區別**：§⑤=**鎖定 specimen 隊全量** trace（QA 故事）；④b=**每個 decision-bearing 聚合自帶小樣本**（消歧在源頭，不限特定隊）。兩者互補。
+
 ### ⑤ ★逐 specimen 全量 dump（餵 QA 故事性判官；用戶定 2026-07-14）
 §④ fullprobe = **聚合**維度（率/分布/count）；**QA 故事性判官需 specimen 級全量 trace** 才判 motive→action→outcome（`04_qa §第五職`）。聚合 metric 過≠好戲過 → 標準床**加逐 specimen 全量 dump**：
 - **對象**：鎖定 specimen 隊（`SPECIMEN_TEAM_ID`，含**死隊**——死因才是故事關鍵）+ 抽樣代表隊。

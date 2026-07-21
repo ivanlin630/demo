@@ -21,3 +21,6 @@ blueprint 裁 economy 入口 = **GOODS 流動性/供給**（你 res-split 推翻
 - **沒產夠** → fix 生產側（goods 產出不足，manufacture 機制）。
 - **產了瞬耗** → fix 找 sink / 撮合側（market-liquidize 對靶）。
 回 blueprint（定 fix 側）+ 副本 systems。**★market-liquidize 全推進等這答案**（blueprint「方向不明別走岔路」）。
+
+## ★帶 bounded 樣本（新協議 §④b，2026-07-21，別再只存聚合）
+這是**決定性 measure（餵 WHAT 決策）**→ 遵 `03b_measurer §④b`：每個聚合（產出/sink/holding）**同捕 3-10 個 bounded instance**（`tick/隊/res/holding/reserve/facility`）。決定性數字直接帶故事，不用事後補 trace。過渡期無 `Probe.bump_sample` 工具→**手動 print 幾行**即可（開銷幾乎零）。上次 sell_no_surplus 只存聚合害我誤讀 food/goods=本規則的直接動機。
