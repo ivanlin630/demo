@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·Probe.bump_sample·R² CLEAN·tiny·★off LOCAL main 85bb9b0c] spec=2026-07-21-probe-bump-sample.md。§④b enabler(用戶核可建工具不建 gate)。Probe(scripts/debug/probe_stats.gd)加:①static var samples: Dictionary={} ②bump_sample(event,instance,cap=8):if not enabled return→arr=samples.get(event,[])→size<cap 才 append→samples[event]=arr ③reset() 加 samples={}。★★硬約束:no-RNG(first-N cap 非 reservoir,禁 randf,守 observer-no-rng 鐵律)+env-gated off byte-identical+禁改 sim state(只寫 Probe.samples)+instance 由 caller 傳 Probe 不 re-query。TDD 4型(off no-op/append 到 cap/cap 後不 append/reset 清)。determinism on/off byte-identical 2跑 identical。gate PASS/headless 0new。無 caller 遷移(只加工具,決定性探針改用=後續)。task=systems+reviewer。做完→to:systems merge。"
 ---
 

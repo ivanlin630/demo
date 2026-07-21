@@ -137,7 +137,7 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 - **判定門檻**：這聚合會不會餵 WHAT 級決策（verdict/方向/pass/HOLD）？會 → 必附樣本。純內部診斷計數（不上報決策）可免。
 - **樣本內容**：捕能**消歧**的維度——res type / 隊 id / task / 死因 / 相關狀態值（哪個維度可能讓聚合被誤讀，就存哪個）。`sell_no_surplus` 該存 `res`（食物 vs goods 之爭正是漏這維）。
 - **bounded**：前 N 個 distinct instance（N=3-10，硬上限），非全量（全量=§⑤ specimen dump 的事，對象是鎖定隊）。
-- **工具 enabler**（HOW backlog）：`Probe.bump` 現只計數 → 加 `Probe.bump_sample(key, instance_dict)`（存計數 + ring-buffer ≤N 樣本，env-gated 零成本 off）→ 落 `<slice>.fullprobe.json` 的 `samples.<key>`。決定性探針改用之。
+- **工具 enabler（已 merged 798f4e22）**：`Probe.bump_sample(key, instance_dict, cap=8)`（計數 + ring-buffer ≤N 樣本，first-N cap 無 RNG，env-gated 零成本 off）→ 落 `<slice>.fullprobe.json` 的 `samples.<key>`。決定性探針用之。**★用它、別在決策檔手動 `if _printed < N: print`**——手動 threshold-print 在 `scripts/simulation` 決策檔觸 `constitution_gate` threshold detector（`bump_sample` 在 `scripts/debug` gate 不掃）；非用不可時 temp 行標 `# gate-ok: temp §④b measure`，measure 完移除（腳手架非產品 code，別 commit 進 main）。
 - **與 §⑤ 區別**：§⑤=**鎖定 specimen 隊全量** trace（QA 故事）；④b=**每個 decision-bearing 聚合自帶小樣本**（消歧在源頭，不限特定隊）。兩者互補。
 
 ### ⑤ ★逐 specimen 全量 dump（餵 QA 故事性判官；用戶定 2026-07-14）
