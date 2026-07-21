@@ -6,6 +6,7 @@ static var enabled: bool = false
 static var counts: Dictionary = {}
 static var peaks: Dictionary = {}
 static var amounts: Dictionary = {}   # 浮點累計器（如鑄幣 coin 總量 ledger）
+static var samples: Dictionary = {}   # event → Array[Dictionary]（≤cap 個具體 instance，聚合帶故事）
 
 const AMBUSH_UNDEREST := 0.5   # TEST VALUE：belief 武力低估 < 真值 50% → 視為被誤導
 
@@ -22,11 +23,21 @@ static func add_amount(event: String, value: float) -> void:
 	if not enabled: return
 	amounts[event] = float(amounts.get(event, 0.0)) + value
 
+# 決定性聚合帶 bounded 具體案例（§④b）：計數 key 旁存 ≤cap 個 instance，落 fullprobe 供決策帶故事。
+# ★first-N cap（size<cap 才 append），★禁 reservoir（reservoir 需 randf=違 observer-no-rng 鐵律）。純確定性。
+# instance dict 由 caller 傳（{tick,team,res,...}），Probe 不算不 re-query（免耗 RNG/污染）。只寫 Probe.samples（禁改 sim state）。
+static func bump_sample(event: String, instance: Dictionary, cap: int = 8) -> void:
+	if not enabled: return
+	var arr: Array = samples.get(event, [])
+	if arr.size() < cap:
+		arr.append(instance)
+		samples[event] = arr
+
 static func amount(event: String) -> float:
 	return float(amounts.get(event, 0.0))
 
 static func reset() -> void:
-	counts = {}; peaks = {}; amounts = {}
+	counts = {}; peaks = {}; amounts = {}; samples = {}
 
 static func ambush_check(state: WorldState, attacker_id: int, defender_id: int) -> void:
 	if not enabled: return
