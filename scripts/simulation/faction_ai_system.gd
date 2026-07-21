@@ -3201,12 +3201,18 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 	# B facility-gating（smeltery 需 weapon/armorsmith 存在）。
 	if entry.get("gating", "") == "smeltery":
 		if tile.weaponsmith_level == 0 and tile.armorsmith_level == 0: return 0.0   # gate-ok: world-mechanic: smeltery gating(weapon/armorsmith 存在)
-	# A 類泛型 evaluator（NeedOracle-gap）。
-	var outputs: Array = entry["outputs"]
-	var use_demand: bool = entry["use_demand"]
-	var deficit: float
-	if entry["agg_mode"] == "min_per_res":
-		# worst bottleneck：逐資源算比取最差（某資源夠≠整體夠）。goods=demand 驅、tools/arrows=need_keep。
+	# A 類泛型 evaluator（NeedOracle-gap）。★DRY：res-gap 算抽 _generic_res_deficit 共用（weaponsmith market 亦呼，避各算）。
+	var deficit: float = _generic_res_deficit(state, team, entry["outputs"], entry["use_demand"], entry["agg_mode"], lv)
+	deficit *= float(entry["output_scale"])
+	if entry["militancy_scaled"]:
+		deficit *= _militancy(team, lv)   # 閘1 de-patch：軍備由人格 militancy 秤（armorsmith）
+	return deficit
+
+# ★DRY shared helper（reviewer R² ③）：NeedOracle res-gap deficit（need_keep + demand + agg）。
+# A 類 dispatch（_facility_deficit）和 weaponsmith market 路徑都呼此=單一源，禁平行重寫（收斂 seam#1「各算」）。
+func _generic_res_deficit(state: WorldState, team: TeamData, outputs: Array, use_demand: bool, agg_mode: String, lv: Dictionary) -> float:
+	if agg_mode == "min_per_res":
+		# worst bottleneck：逐資源算比取最差（某資源夠≠整體夠）。demand 驅或 need_keep。
 		var worst: float = 1.0
 		for res in outputs:
 			var tgt: float = NeedOracle.need_keep(state, team, res, lv)
@@ -3215,23 +3221,19 @@ func _facility_deficit(state: WorldState, team: TeamData, facility: String,
 			if tgt <= 0.001:   # gate-ok: guard: tgt<=0.001(該 res 無 need→不驅 deficit)
 				continue   # 該 res 無 need(+demand) → 不驅 deficit
 			worst = minf(worst, float(team.resources.get(res, 0)) / tgt)
-		deficit = clampf(1.0 - worst, 0.0, 1.0)
-	else:
-		# pooled_sum：多資源先加總持有 vs 加總目標再算比（可互抵；單資源等價 min_per_res）。
-		var total_hold: float = 0.0
-		var total_tgt: float = 0.0
-		for res in outputs:
-			total_hold += float(team.resources.get(res, 0))
-			var tgt: float = NeedOracle.need_keep(state, team, res, lv)
-			if use_demand:
-				tgt += NeedOracle.demand(state, team, res, lv)
-			total_tgt += tgt
-		if total_tgt <= 0.001: return 0.0   # gate-ok: guard: total_tgt<=0.001(pooled 目標 0→不驅)
-		deficit = clampf((total_tgt - total_hold) / total_tgt, 0.0, 1.0)
-	deficit *= float(entry["output_scale"])
-	if entry["militancy_scaled"]:
-		deficit *= _militancy(team, lv)   # 閘1 de-patch：軍備由人格 militancy 秤（armorsmith）
-	return deficit
+		return clampf(1.0 - worst, 0.0, 1.0)
+	# pooled_sum：多資源先加總持有 vs 加總目標再算比（可互抵；單資源等價 min_per_res）。
+	var total_hold: float = 0.0
+	var total_tgt: float = 0.0
+	for res in outputs:
+		total_hold += float(team.resources.get(res, 0))
+		var tgt: float = NeedOracle.need_keep(state, team, res, lv)
+		if use_demand:
+			tgt += NeedOracle.demand(state, team, res, lv)
+		total_tgt += tgt
+	if total_tgt <= 0.001:   # gate-ok: guard: total_tgt<=0.001(pooled 目標 0→不驅)
+		return 0.0
+	return clampf((total_tgt - total_hold) / total_tgt, 0.0, 1.0)
 
 # ── C 類 special evaluator（非 NeedOracle res-gap，語意真異質，registry special dispatch）──
 # farming：granary 局部糧缺口（S2 granary seam，非 positional effective_food：隊不在家→誤缺口恆滿）。
@@ -3241,9 +3243,24 @@ func _deficit_farming(_state: WorldState, team: TeamData, tile: HexTileData, _lv
 	var local_food: float = float(tile.public_storage.get("food", 0)) + float(team.resources.get("food", 0))
 	return clampf((target - local_food) / target, 0.0, 1.0)
 
-# weaponsmith：de-patch 閘1，armed_ratio 缺口 × militancy（軍備由人格秤，非反應式 threat gate）。
-func _deficit_weaponsmith(_state: WorldState, team: TeamData, _tile: HexTileData, lv: Dictionary) -> float:
-	return clampf(0.6 - team.armed_anon_ratio, 0.0, 1.0) * _militancy(team, lv)
+# weaponsmith：兩路徑取 max（自衛 OR 軍火商，皆可驅建；R² 判無 double-count）。
+# 路徑1 自衛：armed_ratio 缺口 × militancy（現況留，軍備由人格秤非反應式 threat gate）。
+# 路徑2 ★軍火商：武器市場 demand（_generic_res_deficit 共用 A 類算，非各算）× 商業人格（穿人格秤非 flat）。
+# 修根：舊只看 armed_ratio 無視武器市場 demand → 武器 demand 再高不驅建 → militaristic/商業隊走不了軍火路。
+const COMMERCIAL_GREED_W: float = 0.6   # TEST VALUE — 貪婪→軍火商動機
+const COMMERCIAL_SKILL_W: float = 0.7   # TEST VALUE — 商業技能→軍火商動機
+func _deficit_weaponsmith(state: WorldState, team: TeamData, _tile: HexTileData, lv: Dictionary) -> float:
+	var self_defense: float = clampf(0.6 - team.armed_anon_ratio, 0.0, 1.0) * _militancy(team, lv)
+	var market: float = _generic_res_deficit(state, team, ["weapon_melee_low", "weapon_ranged_low"], true, "min_per_res", lv) \
+			* _commercial_inclination(state, team, lv)
+	return clampf(maxf(self_defense, market), 0.0, 1.0)
+
+# 軍火商傾向（人格穿秤，非 flat）：貪婪(value)+商業技能(skill)高→更響應武器市場 demand。零 RNG。
+func _commercial_inclination(state: WorldState, team: TeamData, lv: Dictionary) -> float:
+	var greed: float = float(lv.get("貪婪", 0.5))
+	var leader: PersonData = state.persons.get(team.leader_id)
+	var commerce: float = float(leader.skills.get("商業", 0.0)) if leader != null else 0.0
+	return clampf(greed * COMMERCIAL_GREED_W + commerce * COMMERCIAL_SKILL_W, 0.0, 1.0)
 
 # mint：TILE-bound ore 二元（public_storage 採後入庫 + resource_cap 礦脈標記；不含 team.resources：
 # 持有 looted/traded ore 的非礦村 outpost 不應觸發 mint 建造）。
