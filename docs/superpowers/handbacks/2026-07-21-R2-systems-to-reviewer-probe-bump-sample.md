@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·Probe.bump_sample 工具·§④b enabler·tiny] spec=2026-07-21-probe-bump-sample.md。用戶核可(建工具不建 gate)。Probe(probe_stats.gd)加 samples dict + bump_sample(event,instance,cap=8):計數 key 旁存 ≤N 具體 instance,落 fullprobe 供決策帶故事。審點:①★no-RNG=first-N cap(size<cap 才 append)非 reservoir sampling(reservoir 需 randf 違 observer-no-rng 鐵律第5次)②★env-gated off(if not enabled return)=byte-identical(sim 不讀 Probe)③禁改 sim state(只寫 Probe.samples)④instance 由 caller 傳,Probe 不 re-query(不耗 RNG/污染)⑤reset 清 samples。TDD 4型+determinism on/off byte-identical。無 caller 遷移(只加工具)。CLEAN→dispatch implementer。tiny slice。"
 ---
 
