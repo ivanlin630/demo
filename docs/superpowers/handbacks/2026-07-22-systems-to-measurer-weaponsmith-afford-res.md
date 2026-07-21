@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[工單·weaponsmith START-fail afford res 分因·定 tools vs material·帶 §④b 樣本] code-trace 定位:_pick_facility 不查 afford→選中 weaponsmith(slot 有空)→_begin_facility_construction(_can_afford)/_dispatch_facility_builder(avail<cost×1.5)afford fail→0 START。weaponsmith cost=material 80+tools 3(military outpost only)。★強候選=tools(tools 由 civ workshop 產,military 隊缺→跨供應鏈斷)。★需你 measure(main,economy keys bed,帶 §④b 樣本 Probe.bump_sample):①weaponsmith START-fail 的 afford res 分因——material 不足 vs tools 不足 誰卡(_can_afford/_dispatch afford loop 哪個 res return false)②選中 weaponsmith 的 military 隊 tools/material holding(真缺哪個)③tools 全域:workshop 產 tools 量 + tools 流通(有無到 military 隊手)+ military outpost 有無 workshop。判讀:tools 卡→(b)tools 供應鏈打通 spec;material 卡→afford 預檢;兩者→兩修。回 blueprint+副本 systems→定 fix res。"
 ---
 
