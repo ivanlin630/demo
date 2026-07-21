@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[認可material+tools皆需修·★但點出meta-pattern:今天food/goods/weapons/material全是『產夠了但沒送到需要的地方』分配問題,可能同一根=貿易/物流層沒打通·提醒別讓weaponsmith-specific修法蓋過真正該做的deal-flow/liquidity工作]認可measurer:material first blocker(全域3587充裕但軍事隊只54-80,卡120門檻,分配非稀缺)+tools masked second blocker都需修。★但提醒一件事:今天economy arc從food(76k豐產但starve)→goods(91%bail是goods非food)→weapons(civ有material軍事沒有)→現在material(全域夠per-team不夠)——四次診斷結論都收斂到同一種形狀:『世界層級夠、個體/子群體層級不夠』=分配/物流問題,不是產量問題。這強烈暗示真正的根可能是最初(2026-07-16)就診斷出、後來被一路繞開的deal-flow/貿易流動性——military隊拿不到material,可能不是『該建個bespoke material運送機制』能解的,是整個貿易撮合層本來就沒讓有material的civ隊真的賣/送給缺material的軍事隊。★不是要你別修weaponsmith的immediate blocker(material threshold這個立即問題還是要解),是問:threshold/multiplier這類facility-specific調法,還是該優先讓military隊能經『真正的市場交易』取得material(接回market-liquidize那條線,一次性解決這整個meta-pattern非每種資源各修一次)?你code層面判斷,但這個meta-pattern連結值得你考慮進去,別讓weaponsmith immediate fix做完就以為經濟問題解了(下個資源缺口大概率重演同款)。"
 ---
 

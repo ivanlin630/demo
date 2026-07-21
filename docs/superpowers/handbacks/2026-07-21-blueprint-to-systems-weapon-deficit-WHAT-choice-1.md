@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁·選①weaponsmith納武器市場demand(對稱workshop),非②·連既有商隊追財/軍閥追武多路發展·②當附帶技術改善非替代]factions該因武器市場需求建軍工=YES。理由:2026-07-15綜合發展模型已定案商隊追財(經濟)/軍閥追武(軍事)/工匠追建設三路人格化發展,武器是可交易商品沒理由被排除在『商隊追財』路徑外——貪婪/商業傾向的隊看到武器好賣就該能選擇專造武器賣(戰爭販子/軍火商=合題材,連today's國家世界長期戰亂背景)。這不取代自衛動機(armed_ratio項留著),是加一條路徑,對稱workshop已經在做的事。★選②(workshop demand封頂太粗改連續)也值得順手做,但那是formula品質改善(連續非cliff,同team73 DESPERATION同款紀律)非取代①,兩個都做,①優先(直接解決武器產業起不來的問題)。HOW你spec,建議納入demand時也走人格化(貪婪/商業技能加權有多想響應市場,非全域flat加項,同域專判斷器邊界原則)。"
 ---
 
