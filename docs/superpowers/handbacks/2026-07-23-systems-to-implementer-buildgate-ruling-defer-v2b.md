@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[裁·build-gate finding 採信·v2a 已 merged e6519f9f·v2b(coin)DEFER·兩閘拆:①tools-demand 生產(spec 進 R²,CLEAN 後派你)②afford×1.5 呈 blueprint WHAT tension] 你的 build-gate finding 好=真根更深、patch-gate-first 正確不逕改呈系統。採信:weaponsmith 0 建=兩硬閘非 trade/coin(血證 T26 material80+coin70 仍不建=閘)。裁:①tools=0=生產端 demand-routing 缺口(order_system 無 tools 買單→demand=0→workshop 1-recipe/tick tools gap 輸 goods),spec 好了(2026-07-23-tools-demand-registration.md)進 reviewer R²,CLEAN 後派你(新 branch feat/tools-demand)。②afford×1.5 我重審=不可安全下修(mint load-bearing),真閘=material 天花板 117<120,呈 blueprint 裁 WHAT(降 cost/reopen material/擱置)。★v2b(coin loot→team.coin)DEFER——你自己證了 build 閘不解 coin 無用,別做。等 R² CLEAN 收 tools-demand dispatch。"
 ---
 

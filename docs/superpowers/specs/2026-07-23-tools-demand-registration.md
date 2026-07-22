@@ -2,7 +2,7 @@
 
 > 層級：L3（2 檔 tune，決策模型 measure-sensitive）。off LOCAL main。
 > 來源：material-buy v2a merged（e6519f9f）後，QA 故事判 reframe → blueprint 確認（`2026-07-23-blueprint-to-systems-tools-demand-reframe-confirmed.md`）：tools=0 全域 = **生產端 demand-routing 缺口**（同 material「需求沒轉買單」家族，深一層），非 trade。
-> ★本刀 = **兩 build 閘之①**（tools 生產）。閘②afford×1.5 = 另議（WHAT tension，見 handback to:blueprint）。**單獨此刀不會讓 weaponsmith 建成**（afford②仍擋）——成功判準=tools 進經濟（生產解閘），非 weaponsmith 建成。
+> ★本刀 = **兩 build 閘一起解**（blueprint 裁 2026-07-23：一輪組合驗 cost70+tools-demand 是否真解 weaponsmith 0→0）：①tools 生產（demand-routing）②weaponsmith material cost 80→70（blueprint 裁②，非全域 ×1.5 下修[不可安全,mint load-bearing]，改降設施自身 cost=game-design 平衡桿，需求 105<天花板 117 穩達）。**成功判準=weaponsmith 真建成**（兩閘皆開）。
 
 ## 根（file:line 坐實）
 - workshop 產 tools（`manufacturing RECIPE_GROUPS`：`{"out":"tools","in":{"material":4}}`）但 `faction_ai:3205` `use_demand=true`。
@@ -25,20 +25,26 @@
 - `:6` `_ORDER_ELIGIBLE_RES` 加 `"tools"`（→ 施工隊不賣 tools[99 is_constructing 已擋]、餘 tools 發賣盤[civ workshop 產超自用→賣]、短缺發買單）。
 - `:121` proxy list `["weapon_melee_low","weapon_ranged_low","material","ore_iron","ore_steel"]` 加 `"tools"`（→ mil 隊 reserve(tools)>holding 發 tools 買單；reserve(tools) 現含 weaponsmith build-need via ①）。
 
+### ③ weaponsmith material cost 80→70（blueprint 裁②·afford 閘）
+- `outpost_system.gd:87` `FACILITY_DEF.weaponsmith.cost.material` **80 → 70**（`upgrade_cost = base×target_level`：建 0→1 = 70×1 = **70**；需求 70×1.5 buffer = **105 < 天花板 117** 穩達）。
+- **僅 weaponsmith**（armorsmith:93 material 80 不動；OUTPOST_COST 陣列[10-21]=據點本體非設施，不動）。
+- 理由（blueprint）：設施自身 cost = game-design 平衡桿（低風險），非動已證 load-bearing 的全域 ×1.5；70 合理基礎武器坊成本。tools cost 3 不變（由 tools-demand①供給）。
+
 ## 鏈（修後，感知鐵律一致）
 mil weaponsmith build-need → `need_keep(tools)`↑（①）→ `reserve(tools)>holding` → **tools 買單**（②）→ 傳播（訊息系統，civ **親聞**才算 demand，非 god-view）→ civ workshop `demand(tools)>0` → build-tick tools gap spike > goods → workshop 產 tools → 餘量發賣盤 → mil 經既有 trade 買 tools。
 
 ## 驗收
-- **TDD**：①mil team weaponsmith-desire≥MIN → `need_keep(tools)` 含 weaponsmith tools-cost（3），capped ②civ team（無 tools-cost facility）→ `need_keep(tools)`=self_use only（pop×0.5）不變 ③**output-guard**：`_construction_facility_need(tools)` 不呼 `_facility_deficit(workshop)`（即使人為給 workshop tools-cost 也不遞迴——assert 有界）④material 路徑 byte-identical（無 facility output material，guard no-op）⑤order_system：reserve(tools)>holding → 發 tools 買單。
+- **TDD**：①mil team weaponsmith-desire≥MIN → `need_keep(tools)` 含 weaponsmith tools-cost（3），capped ②civ team（無 tools-cost facility）→ `need_keep(tools)`=self_use only（pop×0.5）不變 ③**output-guard**：`_construction_facility_need(tools)` 不呼 `_facility_deficit(workshop)`（即使人為給 workshop tools-cost 也不遞迴——assert 有界）④material 路徑 byte-identical（無 facility output material，guard no-op）⑤order_system：reserve(tools)>holding → 發 tools 買單 ⑥**weaponsmith cost**：`upgrade_cost("weaponsmith",1).material == 70`（armorsmith 仍 80）。
 - **gate** PASS（憲法 site-freeze）/ **headless** 0 new fail / **determinism** 2 跑 byte-identical（無 RNG）。
 - **★★measure（→measurer，帶 §④b samples + specimen dump → QA；長跑新規則）**：
   - **tools 全域產量 > 0**（§④b：哪些 workshop/team 產、tool 數 3-10 樣本）
   - mil 隊 tools 買單發出數 / demand(tools) at workshop > 0
   - tools 賣盤 / tools 進市場 / tools 成交
   - build-tick workshop 選 tools-recipe 次數（vs goods 競爭勝率）
-  - weaponsmith build 嘗試（**預期仍被 afford② 擋**——故事=生產解閘、afford 另議，非 weaponsmith 建成）
+  - **★weaponsmith 建成數 > 0**（兩閘皆開的最終驗；§④b：哪些 mil 隊建成、build tick、耗 material/tools 樣本）
+  - afford 通過率（cost70 後 mil 隊 avail≥105 達成率）
   - 回歸：goods 產量 / doom-delta / 無餓死。
-- **送 QA 判故事**：mil 想建 weaponsmith → 發 tools 需求 → workshop 產 tools → tools 進經濟 coherent；weaponsmith 未建=確認 afford② 是剩餘閘（非本刀失敗）。
+- **送 QA 判故事**：mil 想建 weaponsmith → 發 tools 需求 → workshop 產 tools → tools 進經濟 → mil 買 tools + 湊足 material(≥105) → **weaponsmith 真建成** coherent。若 weaponsmith 仍 0 = 診斷未盡（QA 判剩餘閘）。
 
 ## 排序
 ①② 一刀（同 means-end demand-registration，同批 measure）。R²（output-guard 有界性 / material byte-identical / tools cap 交互 / 無 RNG / 感知鐵律 tools 買單傳播）→ dispatch。afford② = 另 handback 呈 blueprint（WHAT tension）。

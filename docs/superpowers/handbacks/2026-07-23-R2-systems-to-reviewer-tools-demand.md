@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·tools-demand 註冊·生產端 demand-routing·material means-end 深一層] spec=2026-07-23-tools-demand-registration.md。根:tools=0 全域因 order_system 無 tools 買單→demand(tools)=0→workshop(use_demand,1-recipe/tick max-gap)tools gap 恆輸 goods。修 2 檔:①need_oracle._construction_facility_need material-only→{material,tools}(cost_r 泛化)②order_system _ORDER_ELIGIBLE_RES+買單 proxy 加 tools。★★核審點=遞迴守衛:tools 是 build-cost∩facility-output(你先前 line 24-25 明令此 case 需 guard)。我用 output-guard(迴圈內 if res in _facility_output_res(facility): continue,切自指邊)+CONSTRUCTION_COST_RES 白名單{material,tools}界定再入。審:①output-guard 是否足夠(非需 visited-set)?多跳有界性論證對嗎(material 無 output=no-op byte-identical;tools 唯一 output-facility workshop 被切;C-class/smeltery 讀 ore_steel∉白名單終止)②material 路徑真 byte-identical?③tools cap 交互(cap 100,tools cost 3-10 material 主導不撞)④無 RNG⑤感知鐵律:tools 買單走訊息傳播 civ 親聞才算 demand(非 god-view)對嗎。CLEAN→dispatch implementer(新 branch feat/tools-demand)。afford②=另議呈 blueprint(WHAT tension,不在本刀)。measure 帶 §④b+specimen→QA(長跑)。"
 ---
 
@@ -31,5 +31,8 @@ tools = **build-cost（weaponsmith）∩ facility-output（workshop）**——�
 4. **無 RNG**。
 5. **感知鐵律**：tools 買單走訊息傳播、civ workshop **親聞**才算 demand（非 god-view 直讀 mil 需求）——對嗎？
 
+## ★更新：afford② 已裁，bundle 進本刀（blueprint 2026-07-23）
+afford×1.5 呈 blueprint → 裁 **②降 weaponsmith material cost 80→70**（非全域 ×1.5 下修[不可安全]，改設施自身 cost=game-design 桿；需求 105<117 穩達）。blueprint 要**一輪組合驗**（cost70+tools-demand）weaponsmith 真建成。∴spec 加 ③ `outpost_system:87 FACILITY_DEF.weaponsmith.cost.material 80→70`（僅 weaponsmith；trivial 值改，正交於遞迴審點）。成功判準升級=**weaponsmith 真建成**（非只 tools 進經濟）。R² 審點不變（③是值改不影響 output-guard 論證）。
+
 ## 回覆
-`to:systems`：CLEAN / 修正。CLEAN → dispatch implementer（新 branch `feat/tools-demand`）。measure 帶 §④b+specimen→QA。afford② 不在本刀（另議 blueprint）。
+`to:systems`：CLEAN / 修正。CLEAN → dispatch implementer（新 branch `feat/tools-demand`，含 ①②③）。measure 帶 §④b+specimen→QA（**weaponsmith 建成**為終驗）。

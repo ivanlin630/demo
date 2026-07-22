@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[afford×1.5 系統性重審結論=WHAT tension 呈裁·tools-demand①已進 R²·v2a 已 merged e6519f9f] 你授權我重審 afford×1.5 系統性影響+調整計算方式。結論:★倍率不可安全下修——mint(cost 100)的 0.5×=50 buffer load-bearing(empty-window[1.0,1.4]實證破 G1a);任何幫 weaponsmith(cost 80,buffer 40,需<37 才可達 117)的 buffer 下修必連帶把 mint buffer 拉進 broken zone(absolute-cap/fixed-reserve/降倍率皆證再入 mint danger,推導在內文)。∴weaponsmith 真閘=material 天花板 117 < 需求 120(差 3),非可縮 margin。解閘要嘛①raise material 過 120(=reopen material,牴觸你「117 夠」)要嘛②降 weaponsmith material cost(=你的 balance lever,80→70→需 105<117)要嘛③接受 weaponsmith 暫閘、先推 tools-demand+其他經濟深度。這是跨 WHAT/HOW tension,呈你裁(cost/ceiling intent 屬 game-design)。tools-demand①(生產解閘)不受此 tension,已 spec+R²(reviewer)進行中,獨立可交付。"
 ---
 
