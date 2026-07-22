@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·tools-demand+weaponsmith cost70·R² CLEAN(2 建議已納)·新 branch feat/tools-demand·decisive] spec=2026-07-23-tools-demand-registration.md。兩 build 閘一起解(blueprint 要一輪組合驗 weaponsmith 真建成)。3 修:①need_oracle._construction_facility_need material→{material,tools}(CONSTRUCTION_COST_RES 白名單,cost_r=upgrade_cost().get(res,0) 泛化)+★★兩層遞迴守衛[(a)output-guard: if res in _facility_output_res(facility): continue (b)re-entrancy: static _construction_visiting Dict,入口 if visiting[res] return 0,設/清]②order_system _ORDER_ELIGIBLE_RES+買單 proxy(:121)加 tools ③outpost_system:87 FACILITY_DEF.weaponsmith.cost.material 80→70(僅 weaponsmith,armorsmith 不動)。TDD 6 型(★③人為造 material↔tools 環 fixture→有界回 0 硬驗 re-entrancy;⑥upgrade_cost(weaponsmith,1).material==70)。gate PASS/headless 0new/determinism 2 跑 byte-identical(無 RNG)。★★measure(→measurer,§④b samples+specimen→QA,長跑新規則):tools 全域產量>0/mil tools 買單/workshop tools-recipe 勝率/★weaponsmith 建成數>0(終驗)/material-need before-after(reviewer②耦合)/回歸 goods+doom+無餓死。★感知鐵律:demand(tools) 沿用 _trade_demand 讀 team_known(親聞,非 global),確認 tools 未繞道。做完→to:measurer(→QA 判故事:mil 想建→發 tools 需求→workshop 產→買齊→weaponsmith 建成 coherent)。task=systems+reviewer(merge-gate R² 複confirm 遞迴守衛 impl)。"
 branch: feat/tools-demand
 ---

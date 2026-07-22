@@ -6,6 +6,17 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★★arc 收斂：weaponsmith 0→0 唯一終閘 = workshop 供給側生產（2026-07-23，cost70+tools-demand 後）
+
+cost70+tools-demand **兩修 confirmed 有效**（measurer：afford 達 105≤天花板113、tools-demand 接 795 筆買單）但 weaponsmith 仍 0→0 → 唯一剩因 = **tools 供給全域 0**（workshop 幾乎沒蓋 + 蓋出來也產 0）= 製造業產能本身（非需求/貿易/門檻）。blueprint 授權查兩子閘，fix 範圍**等 QA §④b build-sample 判故事後**定。結構圖（systems patch-gate-first 查，file:line）：
+- **子閘 A：workshop 0→1 稀少（build 側）**：workshop=civilian-only A-class；build-completion 家族（同日 civ 設施 **20-44% 完工率**調查）——construction 起手不完工（subteam abandon/timeout/資源）+ facility-argmax 選擇。連 [[project_hand_obeys_brain_arc]]。此 seed 尤糟（只 1 workshop + 晚建）。
+- **子閘 B：蓋出來產 0（生產側，manufacturing_system:62-102）**。候選（QA build-sample 待判哪個主導）：
+  1. **★silent MANUFACTURE-assign gate**（`:67` `if current_task != TASK_MANUFACTURE: continue` **無 tap**）：workshop tile 的 owner 沒被指派 MANUFACTURE → 產 0 **零可觀測**（決策沒選生產任務；tap-gap，違全量暫態可觀測性）。
+  2. **no-material**（`:102` `noop_no_material`）：material=**tile-harvest**（forest 12/day 富、mountain 2、**plains 0.5 貧**；resource_system:35-37），**無 facility 產 material**（只 harvest+beast-hide+loot+anon）→ workshop 在 material-貧 tile（plains）或沒 harvest → 產 0。
+  3. **no-demand**：recipe target≤0（need+demand 皆 0）。
+- **★★兩 tap-gap（觀測盲點，會讓 QA build-sample 捏假故事）**：(1) `:67` silent MANUFACTURE gate 無 tap (2) `:102` `noop_no_material` **混淆** no-material/no-demand/already-satisfied 三因（`_run_recipe_group` 回 "" 三種都落此 tap）。→ 若 QA specimen 無法 tile-level 拆這三，需補 tap 再 measure（觀測=判決前置，憲法）。
+- fix **未定**（等 build-sample）。連下方兩 build 閘（afford/tools 已解，供給側是新終閘）。
+
 ## ★weaponsmith 真牆 = 兩 build 閘（非 trade，2026-07-23，material-buy arc 後 patch-gate-first）
 
 material-buy arc（v1+v2a merged e6519f9f）修好 trade 側（mil 買 material，peak 117 vs baseline 98，QA coherent 0 餓死），**但 weaponsmith 仍 0 建=兩硬 build 閘**（血證：T26 material80+coin70 夠 base cost 仍不建=閘非供給/錢）：

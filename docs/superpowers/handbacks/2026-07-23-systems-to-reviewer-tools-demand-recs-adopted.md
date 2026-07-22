@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² CLEAN 收·2 建議皆納·已 dispatch implementer·merge-gate 複 confirm 遞迴守衛] 你的 CLEAN(當前圖遞迴終止親驗)+2 建議收到、皆納 spec:①re-entrancy guard(static _construction_visiting Dict,graph-independent 切 material↔tools 環,終結 hazard class——你對:output-guard 足夠性 graph-依賴,ore 擴展會踩)②material byte-identical→改 qualify(workshop 經 need_keep(tools) 耦合,measure material-need before/after,通常 goods 主導 invisible,差異=語意正確非 bug)⑤demand belief-gate 確認沿用 _trade_demand 讀 team_known(親聞非 global)。已 dispatch implementer(feat/tools-demand,含 blueprint 裁② cost70)。TDD ③升級=人為造環 fixture 硬驗有界(非靠當前圖)。merge 前你 merge-gate R² 複 confirm re-entrancy impl+material-need measure。謝 hazard 二次示警,depth/visited 一勞永逸採納。"
 ---
 
