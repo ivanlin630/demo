@@ -15,10 +15,12 @@
 ### ① `need_oracle._construction_facility_need`：material-only → build-cost-res {material, tools}
 - `CONSTRUCTION_COST_RES = ["material","tools"]`（build-cost 純消耗 res；破 chicken-egg 前瞻）。line 29 `if res != "material"` → `if not (res in CONSTRUCTION_COST_RES)`。
 - `cost_mat` 泛化為 `cost_r = upgrade_cost(facility,cur+1).get(res,0)`（讀當前 res 的 build-cost，非寫死 material）。cost-guard/desire-gate/cap 不動。
-- **★★結構遞迴守衛（reviewer R² 明令：tools = build-cost ∩ facility-output，line 24-25 flagged 需 guard）**：迴圈內加 **output-guard**——`if res in _facility_output_res(facility): continue`（該 facility 產此 res → 建它滿足此 res-need = 自指遞迴 → skip）。
-  - `_facility_output_res(facility)` = 讀 `RECIPE_GROUPS`/A-table outputs（workshop→[goods,tools,arrows]）。
-  - **為何足夠（非需 visited-set）**：遞迴唯一邊 = 「F costs res 且 F outputs res」（F 之 deficit 讀 need_keep(res)）。output-guard 切此邊。多跳有界：`CONSTRUCTION_COST_RES` 白名單只 {material,tools} → 再入 `_construction_facility_need` 僅此二 res；material 無任何 facility output（guard no-op，material 路徑 byte-identical）；tools 唯一 output-facility=workshop 被 guard 切。C-class（weaponsmith/armorsmith militancy）+ smeltery（use_demand=false 讀 need_keep(ore_steel)∉白名單→0）皆終止。**結構有界無循環**。
-  - 現況 workshop `tools_cost=0`（outpost_system:56）→ cost-guard 已擋；output-guard = defense-in-depth + 防未來有人給 workshop tools-cost。
+- **★★結構遞迴守衛（reviewer R² 明令 + verdict 補強：tools = build-cost ∩ facility-output）**：**兩層守衛**——
+  - **(a) output-guard**：迴圈內 `if res in _facility_output_res(facility): continue`（該 facility 產此 res → 建它滿足此 res-need = 自指遞迴 → skip 該自指邊）。`_facility_output_res(facility)` = 讀 `FACILITY_DEFICIT_DEF`/`RECIPE_GROUPS` outputs（workshop→[goods,tools,arrows]）。
+  - **(b) ★re-entrancy guard（reviewer verdict 建議 1，第 2 次此 hazard→終結 class）**：module 靜態 `static var _construction_visiting: Dictionary = {}`；入口 `if _construction_visiting.get(res, false): return 0.0`（切**任何** material↔tools 型跨環，**graph-independent** 非靠 per-graph 論證）；`_construction_visiting[res]=true` → 算 → 出口清 `false`。同步單線程、同隊 need-tree 內、transient（call-tree 內設清不跨 tick）、無 RNG、非 decision/resource/state（內部控制流，免 tap）。
+  - **為何要 (b)**：output-guard 足夠性 = **graph-依賴**（reviewer 驗：當前圖 material 0-producer + tools 唯一 workshop 被切 → CLEAN；但未來加 material-producer facility 且 costs tools → M↔workshop 成環，output-guard 切不斷[M 出 material 非 tools、workshop 出 tools 非 material，互不被對方 output-guard 切]）。**擴展計畫 ore_iron/ore_steel（更多 producer）→ 每擴需 per-graph 環分析=脆**。re-entrancy guard 一勞永逸。
+  - **白名單界定**：`CONSTRUCTION_COST_RES={material,tools}` 仍在（非白名單 res→0，限 scope）。
+  - 現況 workshop `tools_cost=0`（outpost_system:56）→ cost-guard 已擋；(a)(b) = defense-in-depth + 未來安全。
 - `cap`（`CONSTRUCTION_MATERIAL_NEED_CAP=100`）沿用（rename→`CONSTRUCTION_COST_NEED_CAP` 語意，值不變；tools cost 小 3-10，material 主導 cap，tools 不會撞）。
 
 ### ② `order_system`：tools 納可交易 + 買單 proxy
@@ -34,7 +36,7 @@
 mil weaponsmith build-need → `need_keep(tools)`↑（①）→ `reserve(tools)>holding` → **tools 買單**（②）→ 傳播（訊息系統，civ **親聞**才算 demand，非 god-view）→ civ workshop `demand(tools)>0` → build-tick tools gap spike > goods → workshop 產 tools → 餘量發賣盤 → mil 經既有 trade 買 tools。
 
 ## 驗收
-- **TDD**：①mil team weaponsmith-desire≥MIN → `need_keep(tools)` 含 weaponsmith tools-cost（3），capped ②civ team（無 tools-cost facility）→ `need_keep(tools)`=self_use only（pop×0.5）不變 ③**output-guard**：`_construction_facility_need(tools)` 不呼 `_facility_deficit(workshop)`（即使人為給 workshop tools-cost 也不遞迴——assert 有界）④material 路徑 byte-identical（無 facility output material，guard no-op）⑤order_system：reserve(tools)>holding → 發 tools 買單 ⑥**weaponsmith cost**：`upgrade_cost("weaponsmith",1).material == 70`（armorsmith 仍 80）。
+- **TDD**：①mil team weaponsmith-desire≥MIN → `need_keep(tools)` 含 weaponsmith tools-cost（3），capped ②civ team（無 tools-cost facility）→ `need_keep(tools)`=self_use only（pop×0.5）不變 ③**遞迴守衛**：`_construction_facility_need(tools)` 不呼 `_facility_deficit(workshop)`（output-guard）；**★人為造 material↔tools 環（fixture：給某 facility output material + costs tools）→ 不無限遞迴、有界回 0**（re-entrancy guard 硬驗，非靠當前圖）④material 路徑：**qualify 非 byte-identical**（見下 measure）⑤order_system：reserve(tools)>holding → 發 tools 買單 ⑥**weaponsmith cost**：`upgrade_cost("weaponsmith",1).material == 70`（armorsmith 仍 80）。
 - **gate** PASS（憲法 site-freeze）/ **headless** 0 new fail / **determinism** 2 跑 byte-identical（無 RNG）。
 - **★★measure（→measurer，帶 §④b samples + specimen dump → QA；長跑新規則）**：
   - **tools 全域產量 > 0**（§④b：哪些 workshop/team 產、tool 數 3-10 樣本）
@@ -43,7 +45,9 @@ mil weaponsmith build-need → `need_keep(tools)`↑（①）→ `reserve(tools)
   - build-tick workshop 選 tools-recipe 次數（vs goods 競爭勝率）
   - **★weaponsmith 建成數 > 0**（兩閘皆開的最終驗；§④b：哪些 mil 隊建成、build tick、耗 material/tools 樣本）
   - afford 通過率（cost70 後 mil 隊 avail≥105 達成率）
+  - **★material-need 分布 before/after（reviewer ② qualify）**：workshop 經 `need_keep(tools)` 耦合（其 desire=min_per_res over goods/tools/arrows）→ 擴展後 workshop tools-target 升 → **material-need 可能變**（通常 goods demand 巨主導 min→invisible；goods 滿足時 tools 成 bottleneck→耦合顯現）。measure material-need before/after 確認：差異=語意正確耦合（tools-need 升→workshop 想建 material→合理）非 bug。
   - 回歸：goods 產量 / doom-delta / 無餓死。
+  - **★感知鐵律驗（reviewer ⑤）**：`demand(tools)` 走既有 `_trade_demand`（need_oracle:142 讀 `state.team_known` = **親聞買單** belief-gated，非 global order book）——tools 沿用同路徑，civ workshop 只對**聽過**的 tools 買單生產（無新 god-view）。impl 確認 tools 未繞道全域。
 - **送 QA 判故事**：mil 想建 weaponsmith → 發 tools 需求 → workshop 產 tools → tools 進經濟 → mil 買 tools + 湊足 material(≥105) → **weaponsmith 真建成** coherent。若 weaponsmith 仍 0 = 診斷未盡（QA 判剩餘閘）。
 
 ## 排序
