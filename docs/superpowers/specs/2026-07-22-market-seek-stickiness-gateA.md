@@ -1,4 +1,6 @@
-# spec：market-seek stickiness（deal-flow Gate A，手不聽腦家族）
+> ★★★RETRACTED 2026-07-22（QA 40-event 故事翻案）：本 spec 建在 measurer『64% divert』metric 上，該 metric **有 bug**（arrive% 算錯，23/40 已到算沒到）。真相=market-seeker re-seek 同一**空**市場 loop（非 divert/opportunistic），空=Gate B under-production。∴ stickiness 治症狀，真根 Gate B（production）。**別實作**。教訓：behavior fix 的 metric 前提需 QA 故事驗證才 spec [[feedback_fileline_vs_interpretation]]。留檔為記錄。
+
+# spec：market-seek stickiness（deal-flow Gate A，手不聽腦家族）〔RETRACTED〕
 
 > 層級：L3（_should_reeval +1 guard，behavior-sensitive）。off LOCAL main。
 > 來源：deal-flow measure 坐實 Gate A——seek_market 2207→arrive 798（**64% 半路 divert 到不了市場**，discovery 排除 avg 42.46 市場/隊）。blueprint：market-seek task committed 卻不執行到底=今天第 N 次手不聽腦家族（這次尋路非求生/建設），re-eval 沒給 market-seek sticky 保護（類子隊 builder transit-exempt 但 unified TASK_TRADE 無此層）。Gate B(under-production)靠 production 軌隱性改善，非本刀。
