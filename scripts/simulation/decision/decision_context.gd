@@ -49,6 +49,10 @@ var aid_target_id: int = -1
 var has_food_market: bool = false
 var food_market_pos: Vector2i = Vector2i(-1, -1)
 var food_market_dist: int = -1
+# ★買料（material means-end，Gate B）：有 material stock 的已知市集 + material 缺口。
+var has_material_market: bool = false
+var material_shortfall: float = 0.0
+var material_build_urgency: float = 0.0   # ★v2a：max material-facility 建設迫切（買料 util 繫此=建設前置）
 # Fix4 覓食可達性：本格/鄰格有可覓食 tile（無→覓食不 applicable，防 forage-to-nowhere churn）。
 var has_forage_tile: bool = false
 var forage_pos: Vector2i = Vector2i(-1, -1)
@@ -228,6 +232,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.has_food_market = _mkt != Vector2i(-1, -1)
 	c.food_market_pos = _mkt
 	c.food_market_dist = _fa._hex_dist(team.tile_pos, _mkt) if c.has_food_market else -1
+	# ★買料信號（material means-end，Gate B）：有 material stock 的已知市集 + material 缺口（need_keep 含 construction need）。
+	c.has_material_market = _fa._nearest_market_outpost_with(state, team, "material") != Vector2i(-1, -1)
+	c.material_shortfall = maxf(NeedOracle.need_keep(state, team, "material", c.leader_values) \
+		- ResourceSystem.effective_holding(state, team, "material"), 0.0)
+	c.material_build_urgency = NeedOracle.max_material_facility_desire(state, team)   # ★v2a：買料 util 繫建設迫切
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.market", _tg)
 	# Fix4 覓食可達性：本格/鄰格有 wild_game tile 才可覓食（鏡射 market 一次性 gather，避每 option 重跑）。
 	var _fg: Vector2i = _fa._find_forage_tile(state, team)

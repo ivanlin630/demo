@@ -11,7 +11,70 @@ class_name NeedOracle
 
 # 保留向 need：自用(消耗品) + 供應鏈(中間品下游 gap 傳導)。
 static func need_keep(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
-	return _self_use(team, res, leader_values) + _supply_chain(state, team, res)
+	return _self_use(team, res, leader_values) + _supply_chain(state, team, res) \
+		+ _construction_facility_need(state, team, res, leader_values)
+
+# ★means-end material need（Gate B trade-primary 核心）：team 想建的 facility → 其 build-cost material need
+# （前瞻買料建設，破 chicken-egg:material need gated on 已有 facility→builder 不帶 need→買不到→建不了）。
+# 讀既有 _facility_deficit 慾望信號（blueprint 認可耦合;憲法=utility 餵 utility 非 scripted）。
+# ★★循環守衛（結構性，reviewer R²）：`if cost_mat<=0: continue` 必在 `_facility_deficit` 呼叫之前
+#   （只對 build-cost 含 material 的 facility 讀 deficit）。★結構不變量：build-cost res(material/tools) ∩
+#   facility-output res(goods/weapon/ore_steel/armor/medicine/mounts)=∅（grep 驗無 facility output material）→
+#   讀 deficit 的 facility 其 deficit 計算(_generic_res_deficit(outputs)/need_keep(outputs≠material))永不回呼
+#   need_keep(material)→結構無遞迴（非靠 depth-1）。★禁擴到「同時是 build-cost 且 facility-output」的 res
+#   （需 visited-set guard）；本刀只 material（純 build-cost 非任何 output）=結構安全。
+const CONSTRUCTION_DESIRE_MIN: float = 0.3    # TEST VALUE — facility desire≥此才前瞻買料（夠想才囤料）
+const CONSTRUCTION_MATERIAL_NEED_CAP: float = 100.0   # TEST VALUE — 防多 material-facility 疊爆 over-buy（≈單一最貴 material-facility cost）
+static func _construction_facility_need(state: WorldState, team: TeamData, res: String, lv: Dictionary) -> float:
+	if res != "material" or state == null:
+		return 0.0   # scope:material only（tools/ore 另軌供給 gap；★禁擴 build-cost∩output≠∅ 的 res）
+	var own_pos: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	if own_pos == Vector2i(-1, -1):
+		return 0.0
+	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
+	if tile == null or tile.outpost_level == 0:
+		return 0.0
+	var total: float = 0.0
+	for facility in OutpostSystem.FACILITY_DEF:
+		var def: Dictionary = OutpostSystem.FACILITY_DEF[facility]
+		if not (tile.outpost_type in def.get("allowed_outpost", [])):
+			continue   # 該格能建
+		var cur: int = int(tile.get(def["current_level_key"]))
+		if cur >= 3:
+			continue
+		var cost_mat: float = float(OutpostSystem.upgrade_cost(facility, cur + 1).get("material", 0))
+		if cost_mat <= 0.0:
+			continue   # ★★循環守衛:cost-guard 在 _facility_deficit 呼叫之前（只讀 build-cost 含 material 的 facility）
+		var desire: float = FactionAISystem.new()._facility_deficit(state, team, facility, tile)   # 0-1 既有信號
+		if desire < CONSTRUCTION_DESIRE_MIN:
+			continue   # 夠想才前瞻買料（desire 當 gate）
+		total += cost_mat   # ★v2a：過閘=夠想建→全 build-cost（非 ×desire 稀釋；稀釋 24<80=白買 QA 半破根）
+	return minf(total, CONSTRUCTION_MATERIAL_NEED_CAP)   # ★cap 防疊爆 over-buy
+
+# ★v2a：team 對 material-facility 的 max 建設迫切（0-1，reuse _facility_deficit 信號）。
+# 買料 util 繫此=買料是建設前置（想建強→買料 util 高，競得過建設），非 shortfall band 墊底（1.7% 敗）。
+# mirror _construction_facility_need 列舉（cost-guard 前置同結構安全），聚合改 max desire 非 sum cost。
+static func max_material_facility_desire(state: WorldState, team: TeamData) -> float:
+	if state == null:
+		return 0.0
+	var own_pos: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	if own_pos == Vector2i(-1, -1):
+		return 0.0
+	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
+	if tile == null or tile.outpost_level == 0:
+		return 0.0
+	var best: float = 0.0
+	for facility in OutpostSystem.FACILITY_DEF:
+		var def: Dictionary = OutpostSystem.FACILITY_DEF[facility]
+		if not (tile.outpost_type in def.get("allowed_outpost", [])):
+			continue
+		var cur: int = int(tile.get(def["current_level_key"]))
+		if cur >= 3:
+			continue
+		if float(OutpostSystem.upgrade_cost(facility, cur + 1).get("material", 0)) <= 0.0:
+			continue   # 只認 build-cost 含 material 的 facility（買料才有意義）
+		best = maxf(best, FactionAISystem.new()._facility_deficit(state, team, facility, tile))
+	return best
 
 # 流出向 need：貿易 demand（市場有效買單 + 野心 + 可載，綁 deal 側）。goods 只有此量（need_keep=0）。
 static func demand(state: WorldState, team: TeamData, res: String, leader_values: Dictionary = {}) -> float:
