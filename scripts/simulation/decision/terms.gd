@@ -146,10 +146,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# 層5：食物安全 gap-to-target 驅力——越低於人格安全存量→補糧驅越強→謹慎隊維持 buffer(連續信號,非新 band)。
 			return clampf(0.5 + 0.5 * _dd + SECURITY_STOCK_DRIVE * _gap, 0.0, 1.0)
 		"buymaterial_drive":
-			# 買料品質：material 缺口越大越想買（標度化 0.5-1.0 base band，穿人格秤在 weight「buymaterial」貪婪）。
+			# ★v2a：買料 util 繫「建設迫切」（買料=建設前置，想建強+缺料多→競得過建設，非 0.5-1.0 band 墊底 1.7%）。
+			# = 標度化缺口(shortfall/CAP) × max material-facility 建設迫切。food-ok gate 已在 options applicable 結構擋餓隊。
 			if opt != "買料" or not ctx.has_material_market or not ctx.has_specie: return 0.0
 			var _msf: float = clampf(ctx.material_shortfall / MATERIAL_SHORTFALL_FULL, 0.0, 1.0)
-			return clampf(0.5 + 0.5 * _msf, 0.0, 1.0)
+			return clampf(_msf * ctx.material_build_urgency, 0.0, 1.0)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"faction_duty":

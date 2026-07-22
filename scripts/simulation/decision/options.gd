@@ -253,7 +253,10 @@ static var REGISTRY: Dictionary = {
 	"買料": {
 		"terms": [["buymaterial_drive", "buymaterial"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.material_shortfall > 0.0 and ctx.has_material_market and ctx.has_specie,
+			# ★v2a food-ok gate（reviewer R²）：買料非 survival-class→util 高搶 survival rank；餓隊買料→餓死。
+			# food_days>=DESPERATION（鏡射買糧 food<DESPERATION=互斥）→餓時只買糧、食足才投資建設料=結構防餓死。
+			return ctx.food_days >= DecisionTerms.DESPERATION_DAYS \
+					and ctx.material_shortfall > 0.0 and ctx.has_material_market and ctx.has_specie,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, "material")
 			if mp == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
