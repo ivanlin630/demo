@@ -6,6 +6,10 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## dispatch afford buffer ×1.5 承重（G1a mint 依賴，不能為 weaponsmith 降，2026-07-22 ABANDON）
+
+`_dispatch_facility_builder:2780` / `_dispatch_upgrader:2637`（3 站含 2551）dispatch-afford `avail < cost×1.5`——嘗試降解 weaponsmith 卡建（mil 隊 material 54-80、cost 80×1.5=120），**但 buffer 承重**：降到 1.1 → owner 撥完料 depletion → **G1a 礦村→鑄幣鏈斷（headless 1 new）**。★**空解窗**：幫 80-料隊需 buffer≤1.0，但 1.1 已破 G1a（1.4 才安全）→ 無值能幫 weaponsmith 又不破 G1a。∴ **buffer 不是 weaponsmith lever**，ABANDON（revert 1.5）。weaponsmith 真解=material 貿易（mil 買料達標，Gate B trade-primary 主線）。**若日後要**：depletion-guard（降 buffer 但守 owner critical needs 如 mint 資源）拆 weaponsmith afford=另案 slice（非 cheap，需 guard 設計）。reviewer 預警「查承重」+ implementer TDD 具現（1.4 過/1.1 破）雙證。
+
 ## crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 fire，2026-07-22，QA d26ae644 驗證撿，低優先）
 
 `_decision_crisis`（`faction_ai_system.gd:1858`）= **food_flow_avg 流-based**（`< RUNG_CRASH_FOOD_DEEP` / `< GRADUAL_DECLINE_FLOW`）+ pop-crash，**無絕對-food 條件**。`food_flow_avg`（`resource_system:208`）= daily_rate 的 EMA。∴ **food=0 stuck → daily_rate=0 → flow EMA→0 → 不 < 負門檻 → 不 fire crisis**。QA 坐實：seed1337 team54 food_days=0.0 連 500 tick（tick4800-5300）全程 `in_crisis=false`（11/11 food=0 DIVERT 事件皆非 crisis）→ crisis-escape 不 fire → 鎖空市場貿易 lingered（[SurvivalMergeIn] 併入 Team34 安全網接住沒釀死）。**根=crisis 只偵「流失中」不偵「已見底 stuck」**。**修向**：`_decision_crisis` 加絕對-food 條件（`team.famine_days > 0`=已進飢荒 / 或 `food_days < CRISIS_ABSOLUTE_DAYS` 硬底）→ 字面餓著必 crisis → crisis-escape fire → re-eval 求生。**低優先**（blueprint 裁 2026-07-22：merge 安全網接住、非釀死，記待查）。連 [[feedback_symptom_vs_root_retry]] + 下方 market-seeker 空市場 + DESPERATION cliff 同族（abandon-guard/絕境門檻連續化一批處理）。
