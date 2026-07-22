@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[green-light·tools-demand+cost70 全條件綠·MERGE NOW] reviewer merge-gate R² CLEAN(bdbcfd22:re-entrancy guard 親驗正確 balanced set/clear+poison-TDD 結構驗、material-need measure 無異常、融合驗綠、零 RNG、demand belief-gated)+我 ratify 授權=全綠。★merge feat/tools-demand→main。merge 後→等製造 bootstrap arc 範圍(我在 spec produce_need demand-responsive=子根②,另 branch)。v2b DEFER。"
 branch: feat/tools-demand
 commit: bdbcfd22
