@@ -3,7 +3,7 @@ class_name OrderSystem
 const ORDER_LIFETIME: int = 5 * WorldState.TICKS_PER_DAY    # 訂單壽命
 const ORDER_POST_CADENCE: int = 12 * WorldState.TICKS_PER_HOUR
 
-const _ORDER_ELIGIBLE_RES: Array = ["goods", "weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel", "food", "mounts"]
+const _ORDER_ELIGIBLE_RES: Array = ["goods", "weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel", "food", "mounts", "tools"]
 
 # unified-commerce M5：MERCHANT_MAX_RANGE 單一源（原 faction_ai:2039 重複宣告收此）。
 const MERCHANT_MAX_RANGE: int = 20
@@ -118,7 +118,7 @@ func tick_team_orders(state: WorldState, team: TeamData) -> void:
 		if _has_active(team, "buy", res):
 			continue
 		# 僅對 team「該有」的資源發買單（proxy：武力隊徵武器/料；避免亂徵）
-		if res in ["weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel"]:
+		if res in ["weapon_melee_low", "weapon_ranged_low", "material", "ore_iron", "ore_steel", "tools"]:
 			var shortfall: float = TradeValuation.reserve(team, res, lv, state) \
 				- ResourceSystem.effective_holding(state, team, res)
 			if shortfall < ORDER_POST_MIN:

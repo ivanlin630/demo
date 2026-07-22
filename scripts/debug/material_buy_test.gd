@@ -59,8 +59,8 @@ func _test_full_build_need() -> void:
 	# 隔離 weaponsmith：其餘 material-facility(smeltery/armorsmith/stable) maxed L3 → cur>=3 skip。
 	tile.set("armorsmith_level", 3); tile.set("smelter_level", 3); tile.set("stable_level", 3)
 	var cn: float = NeedOracle._construction_facility_need(w[0], w[1], "material", _lv(w[1], w[0]))
-	# 過 desire gate → 全 weaponsmith cost 80（v1 舊碼 ×desire 會 <80=白買=半破根）。
-	_ok(is_equal_approx(cn, 80.0), "單一想建 weaponsmith → construction need=full 80（非 ×desire 稀釋，got %.1f）" % cn)
+	# 過 desire gate → 全 weaponsmith cost（tools-demand 後 material 70；非 ×desire 稀釋）。
+	_ok(is_equal_approx(cn, 70.0), "單一想建 weaponsmith → construction need=full 70（tools-demand cost80→70；非 ×desire 稀釋，got %.1f）" % cn)
 
 # ② cap：多 material-facility → total clamp 到 CONSTRUCTION_MATERIAL_NEED_CAP
 func _test_cap_clamps() -> void:
