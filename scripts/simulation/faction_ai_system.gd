@@ -2134,6 +2134,27 @@ func _nearest_market_outpost(state: WorldState, team: TeamData) -> Vector2i:
 			best_pos = tile.tile_pos
 	return best_pos
 
+# 找最近「已知市集 outpost 且有指定 res stock」（買料 action 用；belief-gate 同 _nearest_market_outpost）。
+# res 濾 public_storage>0（有貨可買）。無 → (-1,-1)。確定性（無 RNG）。
+func _nearest_market_outpost_with(state: WorldState, team: TeamData, res: String) -> Vector2i:
+	_harvest_market_known(state, team)
+	var known: Dictionary = state.team_market_known.get(team.team_id, {})
+	var best_pos: Vector2i = Vector2i(-1, -1)
+	var best_d: int = 1 << 30
+	for tile_id in known:
+		var tile: HexTileData = state.world.tiles.get(tile_id)
+		if tile == null or tile.outpost_level <= 0:
+			continue
+		if tile.outpost_owner == team.team_id:
+			continue
+		if float(tile.public_storage.get(res, 0)) <= 0.0:
+			continue   # ★需有該 res stock（有貨可買）
+		var d: int = _hex_dist(team.tile_pos, tile.tile_pos)
+		if d < best_d:
+			best_d = d
+			best_pos = tile.tile_pos
+	return best_pos
+
 # market-discovery 兩源 harvest（★無新 RNG）：①直接親見（vision 半徑內 outpost，bounded local scan 非全圖）
 # ②relay harvest（team_known 的 order/outpost_built 訊息 market pos，★濾 outpost_level>0 避無 outpost 隊 live pos noise）。
 # 創世-nearby 源在 game_setup（開局 seed）。

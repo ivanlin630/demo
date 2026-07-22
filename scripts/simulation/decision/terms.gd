@@ -11,6 +11,7 @@ const DEFECT_AMBITION_K: float = 1.0    # TEST VALUE — 野心折損 faction_du
 const ATTACK_DRIVE_BASE: float = 0.3    # TEST VALUE — 個人參戰基值；× attack weight(好戰/殘忍)=染色 HOW
 const STAKES_DRIVE_BASE: float = 0.3    # TEST VALUE — 徵收/外交 個人 drive 基值（沿用 ATTACK_DRIVE_BASE 值，獨立便調）
 const BUYFOOD_DIST_FULL: float = 6.0    # TEST VALUE — 買糧旅費折扣基準距離（≤此距離不折扣，遠則衰減）
+const MATERIAL_SHORTFALL_FULL: float = 80.0   # TEST VALUE — 買料 material 缺口標度化基準（≈一 weaponsmith cost；缺此量→drive 滿）
 const RESTOCK_MIN: float = 10.0         # TEST VALUE — 家糧倉至少這麼多 food 才值得返家補給（空家不返）
 const MATERIAL_TRADE_MIN: float = 20.0  # TEST VALUE — material/ore 達此量即視為可換糧籌碼（forest/mountain 特產）
 # ── means-end 戰術層（2026-07-01）：intent → 子需求 → option 貢獻打分（mirror FACTION_DUTY_DRIVE）──
@@ -144,6 +145,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var _gap: float = clampf((_tgt - ctx.food_days) / maxf(_tgt, 1.0), 0.0, 1.0)
 			# 層5：食物安全 gap-to-target 驅力——越低於人格安全存量→補糧驅越強→謹慎隊維持 buffer(連續信號,非新 band)。
 			return clampf(0.5 + 0.5 * _dd + SECURITY_STOCK_DRIVE * _gap, 0.0, 1.0)
+		"buymaterial_drive":
+			# 買料品質：material 缺口越大越想買（標度化 0.5-1.0 base band，穿人格秤在 weight「buymaterial」貪婪）。
+			if opt != "買料" or not ctx.has_material_market or not ctx.has_specie: return 0.0
+			var _msf: float = clampf(ctx.material_shortfall / MATERIAL_SHORTFALL_FULL, 0.0, 1.0)
+			return clampf(0.5 + 0.5 * _msf, 0.0, 1.0)
 		"feud_pull":
 			return ctx.strongest_feud if opt == "攻擊" else 0.0
 		"faction_duty":
@@ -285,6 +291,7 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 			+ float(v.get("統領", 0.0)) * 0.3 + float(v.get("求生欲", 0.5)) * 0.3
 		"beg":               return float(v.get("求生欲", 0.5))   # 人人可乞，墊底由 drive×BEG_FLOOR 壓低
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
+		"buymaterial":       return clampf(float(v.get("貪婪", 0.5)), 0.3, 1.0)   # 貪婪→建設/軍火投資傾向（穿人格秤，非 flat）
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
 		# §HOW-6 併入 weight：求生欲主 + 低野心（餓+不稱霸傾向抱團；好感在 resolver 分流秤，非此）。
 		"mergein":           return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4

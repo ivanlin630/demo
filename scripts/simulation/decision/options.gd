@@ -247,6 +247,18 @@ static var REGISTRY: Dictionary = {
 			if mp == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
 			return {"task": TeamData.TASK_TRADE, "target": mp},
 	},
+	# ★買料（material means-end，Gate B trade-primary 核心）：想建 facility→material need（NeedOracle _construction_facility_need）
+	# → 缺料 + 有 material 市場 + 有籌碼 → 到有 material 的最近已知市集買（閉環:reserve>0→_market_visitor_buy want-driven 買 material→建得起）。
+	# 仿買糧結構;非 survival（economic），PRIO_DISPATCH。
+	"買料": {
+		"terms": [["buymaterial_drive", "buymaterial"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.material_shortfall > 0.0 and ctx.has_material_market and ctx.has_specie,
+		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
+			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, "material")
+			if mp == Vector2i(-1, -1): return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_TRADE, "target": mp},
+	},
 	# Fix B 遷移找糧：絕境階梯新階（當地求生全不可 fulfill → 移向視野內可達糧源）。獨立 option 保承諾慣性/trace
 	# 可讀；weight 複用 survival_pressure（食物越低越想動，同覓食驅力）。排序 emergent（weight×人格 argmax）非硬階梯。
 	"遷移找糧": {
