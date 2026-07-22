@@ -84,7 +84,7 @@ const FACILITY_DEF: Dictionary = {
 		"leader_pref": { "好戰": 0.2 },
 	},
 	"weaponsmith": {
-		"cost": { "material": 80, "tools": 3, "ticks": 336 },
+		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # ★tools-demand:material 80→70(blueprint 裁②,需 70×1.5=105<天花板 117 穩達;僅 weaponsmith)
 		"allowed_outpost": ["military"],
 		"current_level_key": "weaponsmith_level",
 		"leader_pref": { "好戰": 0.4 },

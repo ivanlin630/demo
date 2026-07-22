@@ -14,26 +14,34 @@ static func need_keep(state: WorldState, team: TeamData, res: String, leader_val
 	return _self_use(team, res, leader_values) + _supply_chain(state, team, res) \
 		+ _construction_facility_need(state, team, res, leader_values)
 
-# ★means-end material need（Gate B trade-primary 核心）：team 想建的 facility → 其 build-cost material need
-# （前瞻買料建設，破 chicken-egg:material need gated on 已有 facility→builder 不帶 need→買不到→建不了）。
+# ★means-end build-cost need（Gate B trade-primary 核心）：team 想建的 facility → 其 build-cost need
+# （前瞻買料建設，破 chicken-egg:need gated on 已有 facility→builder 不帶 need→買不到→建不了）。
 # 讀既有 _facility_deficit 慾望信號（blueprint 認可耦合;憲法=utility 餵 utility 非 scripted）。
-# ★★循環守衛（結構性，reviewer R²）：`if cost_mat<=0: continue` 必在 `_facility_deficit` 呼叫之前
-#   （只對 build-cost 含 material 的 facility 讀 deficit）。★結構不變量：build-cost res(material/tools) ∩
-#   facility-output res(goods/weapon/ore_steel/armor/medicine/mounts)=∅（grep 驗無 facility output material）→
-#   讀 deficit 的 facility 其 deficit 計算(_generic_res_deficit(outputs)/need_keep(outputs≠material))永不回呼
-#   need_keep(material)→結構無遞迴（非靠 depth-1）。★禁擴到「同時是 build-cost 且 facility-output」的 res
-#   （需 visited-set guard）；本刀只 material（純 build-cost 非任何 output）=結構安全。
+# ★tools-demand：material-only → build-cost res {material,tools}（weaponsmith 需 tools 3=第二 build 閘，
+#   tools 生產鏈缺 demand-routing）。tools = build-cost ∩ facility-output（workshop 產 tools）→ 遞迴 hazard。
+# ★★兩層遞迴守衛（reviewer R² 明令+verdict 補強）：
+#   (a) output-guard：迴圈內 `if res in _facility_output_res(facility): continue`——該 facility 產此 res→
+#       建它滿足此 res-need=自指遞迴→skip 自指邊（workshop 產 tools→算 tools-need 時跳 workshop）。
+#   (b) ★re-entrancy guard（graph-independent 一勞永逸）：static _construction_visiting；入口 res 正算中→回 0。
+#       切任何 material↔tools 型跨環（A-class evaluator 讀 need_keep(outputs)＝真回呼路徑:
+#       need_keep(material)→_facility_deficit(workshop)→need_keep(tools)→...若回讀 need_keep(material) 則守衛切）。
+#       內部控制流免 tap、無 RNG、同步單線程、call-tree 內設清不跨 tick。
 const CONSTRUCTION_DESIRE_MIN: float = 0.3    # TEST VALUE — facility desire≥此才前瞻買料（夠想才囤料）
-const CONSTRUCTION_MATERIAL_NEED_CAP: float = 100.0   # TEST VALUE — 防多 material-facility 疊爆 over-buy（≈單一最貴 material-facility cost）
+const CONSTRUCTION_MATERIAL_NEED_CAP: float = 100.0   # TEST VALUE — 防多 build-cost-facility 疊爆 over-buy（material 主導；tools cost 小 3-5 不撞）
+const CONSTRUCTION_COST_RES: Array = ["material", "tools"]   # build-cost 純消耗 res 白名單（前瞻 means-end；★禁擴其他 res）
+static var _construction_visiting: Dictionary = {}   # ★(b) re-entrancy guard state（transient，call-tree 內設清不跨 tick）
 static func _construction_facility_need(state: WorldState, team: TeamData, res: String, lv: Dictionary) -> float:
-	if res != "material" or state == null:
-		return 0.0   # scope:material only（tools/ore 另軌供給 gap；★禁擴 build-cost∩output≠∅ 的 res）
+	if not (res in CONSTRUCTION_COST_RES) or state == null:
+		return 0.0   # scope:build-cost res only（material/tools；★禁擴 build-cost∩output≠∅ 的其他 res 無守衛）
+	if _construction_visiting.get(res, false):
+		return 0.0   # ★(b) re-entrancy:此 res 正算中→切環（graph-independent，防 material↔tools 跨環無限遞迴）
 	var own_pos: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 	if own_pos == Vector2i(-1, -1):
 		return 0.0
 	var tile: HexTileData = state.world.tiles.get(own_pos.x * 1000 + own_pos.y)
 	if tile == null or tile.outpost_level == 0:
 		return 0.0
+	_construction_visiting[res] = true   # ★入口設 visiting（null-guard 後、迴圈前；出口清）
 	var total: float = 0.0
 	for facility in OutpostSystem.FACILITY_DEF:
 		var def: Dictionary = OutpostSystem.FACILITY_DEF[facility]
@@ -42,14 +50,22 @@ static func _construction_facility_need(state: WorldState, team: TeamData, res: 
 		var cur: int = int(tile.get(def["current_level_key"]))
 		if cur >= 3:
 			continue
-		var cost_mat: float = float(OutpostSystem.upgrade_cost(facility, cur + 1).get("material", 0))
-		if cost_mat <= 0.0:
-			continue   # ★★循環守衛:cost-guard 在 _facility_deficit 呼叫之前（只讀 build-cost 含 material 的 facility）
+		if res in _facility_output_res(facility):
+			continue   # ★(a) output-guard:該 facility 產此 res→建它滿足此 res-need=自指遞迴→skip
+		var cost_r: float = float(OutpostSystem.upgrade_cost(facility, cur + 1).get(res, 0))
+		if cost_r <= 0.0:
+			continue   # ★cost-guard 在 _facility_deficit 呼叫之前（只讀 build-cost 含此 res 的 facility）
 		var desire: float = FactionAISystem.new()._facility_deficit(state, team, facility, tile)   # 0-1 既有信號
 		if desire < CONSTRUCTION_DESIRE_MIN:
 			continue   # 夠想才前瞻買料（desire 當 gate）
-		total += cost_mat   # ★v2a：過閘=夠想建→全 build-cost（非 ×desire 稀釋；稀釋 24<80=白買 QA 半破根）
+		total += cost_r   # ★過閘=夠想建→全 build-cost（非 ×desire 稀釋；稀釋<全 cost=白買 v1 半破根）
+	_construction_visiting[res] = false   # ★出口清 visiting（唯一 set 後 return 路徑，balanced）
 	return minf(total, CONSTRUCTION_MATERIAL_NEED_CAP)   # ★cap 防疊爆 over-buy
+
+# ★facility 產出 res 集（output-guard 用）：讀 FACILITY_DEFICIT_DEF outputs（workshop→[goods,tools,arrows]；
+# special evaluator[weaponsmith/mint/farming]無 outputs 鍵→[]，其不產 material/tools 故 output-guard 不誤跳）。
+static func _facility_output_res(facility: String) -> Array:
+	return FactionAISystem.FACILITY_DEFICIT_DEF.get(facility, {}).get("outputs", [])
 
 # ★v2a：team 對 material-facility 的 max 建設迫切（0-1，reuse _facility_deficit 信號）。
 # 買料 util 繫此=買料是建設前置（想建強→買料 util 高，競得過建設），非 shortfall band 墊底（1.7% 敗）。
