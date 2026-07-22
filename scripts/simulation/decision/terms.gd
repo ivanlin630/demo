@@ -101,8 +101,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# T3 正規化：rescale 到 [0,1]（舊 max 0.8 → /0.8）。品質=有貨×有單×商隊角色。
 			return clampf((0.8 if ctx.has_goods else 0.2) * (1.0 if ctx.has_arb else 0.3) * role / 0.8, 0.0, 1.0)
 		"produce_need":
+			# ★製造 bootstrap 子根②：死常數 0.3/0.6 → belief demand-responsive produce_pull
+			# （自家可造 outputs 的 worst-shortfall；聽到好賣 tools/goods 買單→pull 升→選生產產貨→進市場）。
 			if opt != "生產": return 0.0
-			return 0.3 if ctx.has_goods else 0.6   # 已有貨→低
+			return ctx.produce_pull
 		"ambition_drive":
 			# 階梯缺口 → 爬階靠「做東西」(生產/建設)，非貿易（貿易是賺錢非爬階）。
 			# 貿易移出 → 野心 magnitude 不再同步抬貿易，霸主(野心高)與商人(貪婪高)才分得開。
