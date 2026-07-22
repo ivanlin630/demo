@@ -142,6 +142,7 @@ acceptance/診斷（跑 baseline vs slice 對照的場合）**全維度一次抓
 
 ### ⑤ ★逐 specimen 全量 dump（餵 QA 故事性判官；用戶定 2026-07-14）
 §④ fullprobe = **聚合**維度（率/分布/count）；**QA 故事性判官需 specimen 級全量 trace** 才判 motive→action→outcome（`04_qa §第五職`）。聚合 metric 過≠好戲過 → 標準床**加逐 specimen 全量 dump**：
+- **★★每長跑 sim → 必附 specimen dump 送 QA（用戶定 2026-07-22,綁 hook）**：任何長跑 sim（warring/game_sim/world_sim/economy/despladder/detach/大窗——長跑=成本所在，付了就該取 QA 價值）**必掛 `SpecimenDumpHelper` 產全量 trace，回報時同送 QA（to:qa）讀故事**，不只餵藍圖聚合數字。**下游（systems/blueprint）禁在未經 QA 故事讀的 metric 上鎖 spec/下 behavior 因果**（血證 2026-07-22 一日 3 次翻案）。**沒長跑=不需**（快跑 gate/import/_test 免）。機械提醒=`.claude/hooks/longrun-qa-gate.sh`（PostToolUse 偵測長跑注入）。**★工具 bug 也會騙**（如 arrive%/divert% `position==move_target` 邏輯洞 23/40 誤判）→ QA 讀真實事件故事是 metric 正確性的獨立校驗。
 - **對象**：鎖定 specimen 隊（`SPECIMEN_TEAM_ID`，含**死隊**——死因才是故事關鍵）+ 抽樣代表隊。
 - **三類暫態全量時序**（對齊 `invariants.md §全量暫態可觀測性`）：
   - **想法**：decision trace（每次 reeval 的候選 option/winner/理由）、控制流轉換（`idle↔X` thrash、`[Survival]` fire）。
