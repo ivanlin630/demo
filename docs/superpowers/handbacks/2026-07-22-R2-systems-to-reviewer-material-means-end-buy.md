@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·material means-end need + 買料 action·Gate B trade-primary 核心·blueprint 點頭+QA 補action] spec=2026-07-22-material-means-end-buy.md。root=chicken-egg(material need gated on 已有facility→builder不帶need→want<0→買不到→建不了;供給OK civ賣1155/全域4100)。blueprint點頭means-end(facility慾望→material need,連軍閥追武/2026-07-19長程計劃,憲法=utility耦合非scripted已判合憲)。QA補:need接了還需新增買material action(現有買糧305×/買material 0=結構缺口)。修3部閉環:①need_oracle _construction_facility_need(讀_facility_deficit慾望×material cost,想建的facility驅前瞻料need)②DecisionContext has_material_market+material_shortfall(仿has_food_market)③options.gd「買料」option(仿買糧,缺料+市場+coin→TASK_TRADE買material)。★審點:①★循環守衛——need_keep(material)→_construction_facility_need→_facility_deficit;weaponsmith/armorsmith C類_militancy不呼need_keep、workshop A類呼need_keep(goods/tools≠material),depth-1不遞迴→有界無限迴圈?驗死②cap total(多facility疊爆?)③憲法:讀_facility_deficit信號餵need=utility耦合非scripted if-then(blueprint判合憲,你複核)④買料term人格化(商業/貪婪穿秤非flat)⑤與既有「囤貨」「貿易」option不重疊/不搶(買料=缺料驅,囤貨=致富餘糧驅,語意分)⑥tools/coin分開非本刀對⑦無RNG。measure帶§④b+specimen→QA(長跑新規則)。CLEAN→dispatch。★這是Gate B trade核心閉環,值得細審(決策模型改,今日多次翻案警惕前提)。"
 ---
 

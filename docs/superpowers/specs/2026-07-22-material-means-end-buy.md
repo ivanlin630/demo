@@ -31,8 +31,9 @@ static func _construction_facility_need(state, team, res, lv) -> float:
         total += cost_mat * desire   # 想得越強、料需越高
     return total
 ```
-- **★循環守衛**：`_facility_deficit(weaponsmith/armorsmith)`=C 類 `_militancy`（不呼 need_keep）；A 類（workshop）呼 `need_keep(goods/tools/arrows)` ≠ material → 不遞迴回 material need。**depth-1 不遞迴**（只算團隊直接想的 facility 的料，不算那 facility 的供應鏈）→ 有界、無無限遞迴。R² 驗此。
-- **cap**：`total` 建議 clamp（如 ≤ 最貴 facility material，避多 facility 疊爆）——R² 判。
+- **★★循環守衛（結構性，reviewer R² 訂正——非 scope-依賴 depth-1）**：關鍵 = **`if cost[res]<=0: continue` 必在 `_facility_deficit` 呼叫之前**（只對「build-cost 含 `res`」的 facility 讀 deficit）。**結構不變量**：**build-cost res（material/tools）∩ facility-output res（goods/weapons/ore_steel/armor/medicine/mounts）= ∅**——build-cost 只有 material/tools，facility 產出全是別的 res → 讀 deficit 的 facility 其 deficit 計算（A 類 need_keep(outputs)/C 類 _militancy）**永不回呼 need_keep(material/tools)** → 結構無遞迴（非靠 depth-1）。
+  - **★擴展守則（明標，防未來 footgun）**：**禁把 `_construction_facility_need` 的 res 擴到「同時是 build-cost 且是 facility-output」的 res**。ore_steel=smeltery output（reviewer 例）：ore_steel 非 build-cost（無 facility cost ore_steel）→ `_construction_facility_need(ore_steel)` 恆 0（cost-guard 擋），故擴 ore_steel **無害但無效**；真正危險=若某 res 既是某 facility 的 build-cost 又是另一 facility 的 output → 需 visited-set guard。**本刀只 material（純 build-cost 非任何 output）= 結構安全**。code 標 assert/註記此不變量。
+- **★② cap（reviewer 要求，防多 facility 疊爆 over-buy）**：`total = minf(total, CONSTRUCTION_MATERIAL_NEED_CAP)`，`CONSTRUCTION_MATERIAL_NEED_CAP` TEST VALUE（建議 = 單一最貴 material-facility cost，如 weaponsmith 80 或 workshop-upgrade 100；避團隊同時想 5 個 facility → material need 爆 → over-buy 囤積）。R² 認可 cap 存在，值由 measurer tune。
 
 ### ② DecisionContext 信號（仿 has_food_market）
 `DecisionContext.gather` 加：
@@ -59,7 +60,7 @@ static func _construction_facility_need(state, team, res, lv) -> float:
 - **mil coin≈0**=次要（has_specie gate 已擋無coin；coin 流通另軌）。
 
 ## 驗收
-- **TDD**：①想建 weaponsmith 的 mil 隊 → need_keep(material)>0（means-end fire）②無 outpost/低 desire → 0（不亂囤）③買料 applicable=缺料+市場+coin ④循環守衛（need_keep(material) 不無限遞迴，depth-1）。
+- **TDD**：①想建 weaponsmith 的 mil 隊 → need_keep(material)>0（means-end fire）②無 outpost/低 desire → 0（不亂囤）③買料 applicable=缺料+市場+coin ④**循環守衛結構驗**（need_keep(material) 一次呼叫完成、不無限遞迴；斷言 cost-guard 在 deficit-call 前）⑤**cap**（多 material-facility 想 → total clamp 到 CAP，不爆）。
 - **gate** PASS（★新 option/term 過 constitution_gate；`_facility_deficit` 呼叫非新閘）/ **headless** 0 new / **determinism** 2 跑 byte-identical（無 RNG，純 utility）。
 - **★★measure（→measurer，behavior-sensitive，帶 §④b 樣本 + specimen；長跑→QA 新規則）**：material buy DEAL（0→?）+ post_buy.material（0→?）+ no_want 率↓ + weaponsmith START/建成（afford 解→建得成?）+ weapon 產出 + doom-delta + owner-depletion/回歸。**送 QA 讀 specimen 判故事 coherent**（mil 隊想建→買料→建成→產武器 motive→action→outcome 鏈）。
 
