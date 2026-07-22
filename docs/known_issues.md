@@ -6,6 +6,10 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## crisis 門檻 flow-based 漏偵絕對餓（food=0×500tick 不 fire，2026-07-22，QA d26ae644 驗證撿，低優先）
+
+`_decision_crisis`（`faction_ai_system.gd:1858`）= **food_flow_avg 流-based**（`< RUNG_CRASH_FOOD_DEEP` / `< GRADUAL_DECLINE_FLOW`）+ pop-crash，**無絕對-food 條件**。`food_flow_avg`（`resource_system:208`）= daily_rate 的 EMA。∴ **food=0 stuck → daily_rate=0 → flow EMA→0 → 不 < 負門檻 → 不 fire crisis**。QA 坐實：seed1337 team54 food_days=0.0 連 500 tick（tick4800-5300）全程 `in_crisis=false`（11/11 food=0 DIVERT 事件皆非 crisis）→ crisis-escape 不 fire → 鎖空市場貿易 lingered（[SurvivalMergeIn] 併入 Team34 安全網接住沒釀死）。**根=crisis 只偵「流失中」不偵「已見底 stuck」**。**修向**：`_decision_crisis` 加絕對-food 條件（`team.famine_days > 0`=已進飢荒 / 或 `food_days < CRISIS_ABSOLUTE_DAYS` 硬底）→ 字面餓著必 crisis → crisis-escape fire → re-eval 求生。**低優先**（blueprint 裁 2026-07-22：merge 安全網接住、非釀死，記待查）。連 [[feedback_symptom_vs_root_retry]] + 下方 market-seeker 空市場 + DESPERATION cliff 同族（abandon-guard/絕境門檻連續化一批處理）。
+
 ## market-seeker 卡空市場不放棄→餓死（2026-07-22，QA 40-event 撿，DESPERATION 同族小範圍）
 
 market-seeker（TASK_TRADE 去市場）食物低 + 市場空（Gate B under-production，無貨）→ **該放棄交易轉覓食卻繼續 re-seek 同市場** → 食物耗乾部分餓死。= 「該放棄不可行選項轉可行選項」手不聽腦類型，連 [[feedback_symptom_vs_root_retry]]（治重試 X 前問 X 能否成功）+ DESPERATION 連續化 / look-before-leap 同家族。**範圍小**（只 market-seek 卡空市場特定情境）。**排低優先 / 順手併 DESPERATION cliff known-issue 一起處理**（market-seek 應 look-before-leap：市場空/無我要的貨 → 不 applicable → 轉覓食）。★真根仍是 Gate B（市場有貨了此情境自消）。**注意**：原 market-seek stickiness fix（Gate A）已撤回（治症狀，建在 buggy divert metric 上）。
