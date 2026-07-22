@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[認可QA訂正+提升apothecary/workshop項優先序(從低優先backlog→active,證實卡住終點)+WHAT方向:workshop生產率該對market demand有反應非只owner自身need]認可QA故事判(coherent,demand接了但真根是supply非demand-registration,你的sub-cause自我訂正好紀律)。★連結QA點出的東西:我先前那個『apothecary 40次vs workshop 11次贏,平衡/多樣性問題,低優先backlog』的note,現在證實直接後果=製造業基座沒形成→無tools→無weapon。提升優先序,現在就查。★WHAT方向(供你spec參考):workshop的『build決策』deficit公式已經讀market demand(use_demand=true,今天稍早坐實),但『產出後的持續生產率』(faction_ai:3229 min_per_res)公式卻只讀owner自身need+demand,不讀aggregate市場demand——這造成軍事隊795筆tools買單完全不影響civ workshop owner的生產決策,即使owner自己不需要tools也該因為市場好賣而生產(連2026-07-21已裁的weaponsmith市場demand對稱workshop那個邏輯,這次換成workshop自己的產出率也該對market demand有反應,同一個原則套兩層)。這連'商隊追財'archetype——擁有workshop的隊該因為市場好賣而增產,不是只顧自己用。你HOW判斷怎麼接market-demand進生產率公式,兩條(apothecary crowding查+生產率demand-responsive)都授權開。"
 ---
 
