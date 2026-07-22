@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·material-buy v2a·full build-need+買料util校正+food-ok gate·R² CLEAN(結構guard已納)·★接 v1 branch feat/material-buy 續·decisive] spec=2026-07-23-material-buy-v2a-full-need-utility.md。v1(ca199844)QA判半破(want接但buy-to-80未達)。★★接 feat/material-buy branch 續(非新branch,①③疊v1上,完整才merge)。reviewer R² ①CLEAN+②結構要求已納:修①need_oracle _construction_facility_need line `total+=cost_mat*desire`→`total+=cost_mat`(desire已當gate,過閘全cost 80非稀釋24;cap 100仍在)②terms.gd buymaterial_drive現shortfall band太低→繫construction迫切(shortfall/CAP × max _facility_deficit,買料util≈建設前置;穿人格保留)③★★options.gd「買料」applicable加`ctx.food_days >= DecisionTerms.DESPERATION_DAYS`(food-ok gate,鏡射買糧food<DESPERATION互斥=結構防餓隊買料餓死;買料非survival-class,util高無food-gate會搶survival rank害餓死→加此gate結構擋)。TDD 4型(need full 80/cap/drive升/★food-ok gate:food<DESP不applicable、food>=DESP applicable)。gate/headless 0new/determinism 2跑byte-identical無RNG。★★measure帶§④b+specimen→QA(長跑新規則):material buy DEAL/no_want率(72→?)/買料勝率(1.7→?)/有-coin mil隊buy-to-80達成/weaponsmith建成/★無餓死回歸(food-ok gate驗)/doom-delta。②coin=下slice(mil coin貧困,①③measure確認唯一剩blocker)。task=systems+reviewer。做完→to:measurer(→QA)。"
 ---
 

@@ -6,6 +6,13 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★weaponsmith 真牆 = 兩 build 閘（非 trade，2026-07-23，material-buy arc 後 patch-gate-first）
+
+material-buy arc（v1+v2a merged e6519f9f）修好 trade 側（mil 買 material，peak 117 vs baseline 98，QA coherent 0 餓死），**但 weaponsmith 仍 0 建=兩硬 build 閘**（血證：T26 material80+coin70 夠 base cost 仍不建=閘非供給/錢）：
+- **閘① afford×1.5（`faction_ai:2801` `_dispatch_facility_builder`：`avail < cost×1.5`）**：weaponsmith material 80→需 **120** > 隊 carry-cap ~117（差 3 不可達）。**★系統性 margin 非 weaponsmith-specific**（連 civ site material 62→需 75 同卡；blueprint 撤回 facility-specific 框架，改系統性重審倍率影響範圍/計算方式）。★注意 [[feedback...]] 全域降 ×1.5 已 ABANDON（破 mint/G1a 空解窗）→ 系統性修須 mint-safe（如絕對-bounded buffer `min(cost×0.5, CAP)`，高 cost 設施可達、低 cost mint 不變）。
+- **閘② tools=0 全域 = 生產端 demand-routing 缺口（QA reframe）**：workshop 已完工（Team6/30/3/19/45）產 tools（recipe `out:tools, in:material 4`）**但 `use_demand=true`**（需求驅動）；weaponsmith build-need（tools 3）**從沒發 tools-demand 信號** → demand-gated workshop 不產。★根：`order_system:121` buy-order res list **不含 tools**（只 weapon/material/ore）→ mil 隊無 tools 買單 → `demand(tools)=0` → workshop 不產 → tools 恆 0。= material「需求沒轉買單」的**生產端版本**（同 means-end 家族深一層）。★workshop civilian-only / weaponsmith military-only = cross-outpost-type，須經 trade（mil 買 tools ← civ workshop 產）。
+- **修（blueprint 定 2 件）**：①**tools-demand 註冊**（means-end 擴 tools：weaponsmith build-need→tools need→tools 買單→demand→workshop 產→mil 買→afford）②**afford×1.5 系統性重審**（mint-safe 計算調整）。v2b coin **defer**（build 閘不解，coin 無用）。material 停止迭代（117 夠）。連 [[project_economy_arc]]。
+
 ## dispatch afford buffer ×1.5 承重（G1a mint 依賴，不能為 weaponsmith 降，2026-07-22 ABANDON）
 
 `_dispatch_facility_builder:2780` / `_dispatch_upgrader:2637`（3 站含 2551）dispatch-afford `avail < cost×1.5`——嘗試降解 weaponsmith 卡建（mil 隊 material 54-80、cost 80×1.5=120），**但 buffer 承重**：降到 1.1 → owner 撥完料 depletion → **G1a 礦村→鑄幣鏈斷（headless 1 new）**。★**空解窗**：幫 80-料隊需 buffer≤1.0，但 1.1 已破 G1a（1.4 才安全）→ 無值能幫 weaponsmith 又不破 G1a。∴ **buffer 不是 weaponsmith lever**，ABANDON（revert 1.5）。weaponsmith 真解=material 貿易（mil 買料達標，Gate B trade-primary 主線）。**若日後要**：depletion-guard（降 buffer 但守 owner critical needs 如 mint 資源）拆 weaponsmith afford=另案 slice（非 cheap，需 guard 設計）。reviewer 預警「查承重」+ implementer TDD 具現（1.4 過/1.1 破）雙證。
