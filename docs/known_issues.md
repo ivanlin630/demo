@@ -6,6 +6,10 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★★食安 arc release-pass 成功判準守護（blueprint 命 2026-07-23，防誤判）
+
+**GATE-A/二刀/食安修 measure→QA 的成功判準 = food_urg 降 / 絕境隊降 / 隊守家（脫 oscillation）——★NOT『設施建造數上升』**。因 **coin 鎖還在**（貧困陷阱兩鎖，見上 poverty-trap 洞）：食安只解 food 那把，設施 unlock 要 food AND coin 兩鎖都解。∴食安修後**建設不會跳是預期**（coin 鎖壓著 reserve_factor），別誤判成「食安修失敗」（= threat-oracle「修 X 但 Y 沒動→誤判 X 失敗」血證同型）。QA 稽核食安 release-pass 時用 food-side 判準，設施建造留給 facility-build keystone（兩鎖+means-end 一起收）。
+
 ## ★★★食糧地方安全 arc = session keystone：兩分配閘（2026-07-23，measure+QA+systems code 三方坐實）
 
 24-37% 隊 end-state 絕境，**但 world food 34904 充裕**（surplus 79-82% posted）= **純分配 gap 非產量**。QA gate-vs-real-cost 判 + systems patch-gate-first code 確認 = **兩閘 + forest 真缺少數**：
