@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[patch-gate-first 確認·食糧兩閘 code 坐實·session keystone·attack GATE-A 先(離家棄產)·GATE-B=死法②分配機制] QA 兩閘我 code 確認:①★GATE-A=positional harvest 家常識缺口:harvest 只採隊『站的』tile(resource_system:53,71-76),food regen→tile pool 非 granary,只有站在上面的隊採。→食低隊離 food-rich home 去買糧→home regen(12.8>burn4.8)沒人採、granary 恆 0→餓死在別人市場、自家平原溢出。殘忍陷阱:低糧→離家買→買不到(GATE-B)→不採 home→餓死。②★GATE-B=local-only 撮合:_market_visitor_buy 只從『抵達 tile 的 granary』買(interaction:781),遠方 surplus 搆不到→空間錯配(sell_no_surplus 主導)。★attack 序:GATE-A 先(最大槓桿:plains 假缺是絕境主體,修好→food-productive-home 隊留家被動採飽→假飢餓消失→順帶洩掉 buy-fill 漏斗壓力;且 survival-correct=認自家 tile 是食物源,非削弱求生)→再 GATE-B(真空間分配機制=死法②,伺候 forest 真缺少數)。★GATE-A 修向=食低+home tile 產糧≥burn→別離家買糧/roam,留家被動採(現 harvest driver 站 tile 就採,留家自動飽);鏡射 material food-ok gate 結構。這需決策設計+measure。求你 sanity-check 這 framing(認自家食物源、留家survival-correct)+ GATE-A 先序,認可我 spec。measurer bail 分解跑中(confirm GATE-B stock/spatial 非 coin)。"
 ---
 

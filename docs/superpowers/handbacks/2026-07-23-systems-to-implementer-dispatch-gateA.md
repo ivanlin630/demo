@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·GATE-A 認自家食物源·食糧 arc keystone·R² CLEAN(商隊 trap 修已納)·新 branch feat/gateA-productive-home] spec=2026-07-23-gateA-recognize-productive-home.md。根:harvest positional(採站的 tile),離 food-rich home 買糧→home regen 沒人採→餓死在 surplus 平原;返家補給 applicable+restock_need drive 都綁 home_food granary stock→離家後空 granary→回不去 trap。修 4 touch(同 home_food_productive 信號):①decision_context c.home_food_productive=家 outpost tile ResourceSystem.REGEN_RATE[terrain].food×harvest_factor≥burn(pop×FOOD_PER_PERSON_PER_DAY);僅 has_home_outpost,否則 false②options 返家補給 applicable 加 OR home_food_productive③terms restock_need=maxf(home_food/RESTOCK_MIN, home_food_productive?1:0)④★options 買糧 applicable 加 and not ctx.home_food_productive(reviewer R² 必加:閉商隊 toss-up trap,結構偏好家糧鏡射 material-buy food-ok gate)。★感知鐵律:自家 outpost 知識非 god-view。TDD 6(★⑥買糧 gate:plains→買糧 not applicable、forest→applicable)。gate/headless 0new/determinism 2跑 byte-identical(純算術無 RNG)。★★measure(→measurer §④b+specimen→QA 長跑):end food_days<3 比例(24-37%→?)/返家補給 chosen(productive-home)/T28 型脫餓/buy-fill 漏斗壓力洩/facility 建成(食穩→specialize?)/★forest 隊仍離家貿易無誤鎖/無新餓死。做完→to:measurer(→QA 判故事:productive-home 食低→返家採飽脫餓;forest 仍正確離家;假飢餓消失真缺留 GATE-B)。task=systems+reviewer(merge-gate R²)。GATE-B 下刀待 bail 分解。"
 branch: feat/gateA-productive-home
 ---

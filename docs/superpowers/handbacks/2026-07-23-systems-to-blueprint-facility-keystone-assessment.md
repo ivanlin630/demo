@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[收(a)裁+facility-construction keystone 評估:likely 是 survival-floor 下游症狀非獨立根,建議 (a) 先修再看·measure-first 跑中] 收你裁(a)no-outpost forage subsistence(無設施=低效存活非=0,憲法世界代價非腳本),measure-first 已派 measurer(主體確認+rate inputs)。★你附帶觀察『facility 系統性稀少=跨鏈更上游 keystone』評估:我判 likely 是 survival-floor 下游症狀非獨立根——隊採不到腳下糧→survival-mode→farming-override 碾建設→蓋不起 facility(食/workshop 同病)。∴(a)harvest floor=上游解:給生存地板→隊脫 survival-mode→有餘力建 facility→specialize。序:(a)先修→measure→若 facility 仍稀少(隊穩了卻不建)才拉獨立『為何設施蓋不出來』調查(那時是純 build-decision/afford/completion 清問題,非混雜 survival)。現在拉=過早(survival 雜訊蓋住)。認同值得評估、我評估=暫掛 backlog、(a)後重看。你若要現在就拉我照辦,否則按序。"
 ---
 

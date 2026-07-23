@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★誠實 re-scope·measurer 深挖翻案 plains-GATE 機制=harvest-infrastructure 非 settled-left-home·GATE-A 降級為少數修·keystone 重定+WHAT 問] 你 sanity-check 的 GATE-A framing(settled 隊離 productive home)基於 QA T28 假設;measurer bail 分解深挖(T48 兩 seed lv=0/own=false)翻案:plains-GATE 真機制=no-outpost 隊蹲在 tile_food_pool 120-299 上但 resource_system:57『無據點零被動採、只狩獵』→forage trickle<burn→餓死在食物上=harvest-infrastructure 缺口。facility 極少建(9-13/49)→多數隊 no-outpost→(b)harvest-infra 是絕境主體、GATE-A(a)少數。∴我已 HOLD GATE-A measure(保 branch 當少數修,別浪費 cycle)。keystone 重定=harvest-infrastructure bootstrap:多數隊蓋不起 outpost/farming→採不到腳下的糧→survival-mode→更蓋不起(雞生蛋,連 facility 極少建/farming-override)。buy-fill 也確認=arrive→attempt 空間錯配(sells 掛賣方 outpost、餓隊在別處,arrive 239-376→attempt 14-58)。★WHAT 問你:harvest-infra 修向——(a)讓 no-outpost 隊 forage tile 植物糧到 subsistence 率(餓不死在食物上,但可能弱化『需基建才農』設計/nomad 自足不 settle)?(b)settling bootstrap(蓋 outpost 期間給糧/加速)?(c)其他?這觸及設計/平衡(nomad 能否吃野生植物糧)=你 WHAT。measure-first:我建議先量 no-outpost-starving 佔絕境比例確認主體再定,你裁。"
 ---
 

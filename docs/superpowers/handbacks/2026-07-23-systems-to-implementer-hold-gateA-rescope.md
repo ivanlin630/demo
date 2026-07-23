@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[★HOLD GATE-A measure·re-scope·measurer 深挖翻案 plains-GATE 機制] 別 measure→QA GATE-A,先 HOLD。measurer bail 分解深挖(T48 兩 seed)翻案:plains-GATE 真機制=harvest-infrastructure(no-outpost 隊 lv=0 蹲在 tile_food_pool 120-299 上但 resource_system:57 無據點零被動採、只狩獵→forage trickle<burn→餓死在食物上),非我 GATE-A 假設的『settled 隊離 productive home』。facility 極少建(9-13/49)→多數隊 no-outpost→(b)harvest-infra 是絕境主體、GATE-A(a settled-left-home)是少數。∴GATE-A 對但低影響、非 keystone。★別丟 code(feat/gateA-productive-home 是對的少數修,保 branch)但別 measure(省 cycle);等我跟 blueprint 重定 keystone scope(harvest-infra gate)再定 GATE-A 是 bank-as-minor 還是 fold 進大修。你若還沒動可先擱;動了就 commit 保存別 measure。v2b/其他 DEFER。"
 branch: feat/gateA-productive-home
 ---
