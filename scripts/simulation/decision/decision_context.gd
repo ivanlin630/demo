@@ -69,6 +69,9 @@ var has_acceptable_join_host: bool = false
 const JOIN_REJECT_COOLDOWN_TICKS: int = 480   # TEST VALUE — 被拒後 N tick 內不重選此 host（跨多 cadence 破 loop，過期再試）
 # 經濟底：自家糧倉 food（含遠端家，team 不在家也讀得到）→ 返家補給 home-empty gate 用。
 var home_food: float = 0.0
+# ★GATE-A 食糧 keystone：家 outpost tile 食物再生≥燃燒率 = 產糧家（返家可採飽脫餓，非空 granary trap）。
+# harvest positional→離 food-rich home 買糧=home regen 沒人採→餓死 surplus 平原。此信號讓返家補給認「產糧潛力」非只 granary stock。
+var home_food_productive: bool = false
 # P3/P4 混合協調：派系 stakes directive 集合（攻擊/徵收/外交）。
 # 立國=leader-level（_declare_established，非 member option）；掠奪=日常個體（非 stakes）。
 const STAKES_SET: Array = ["攻擊", "徵收", "外交"]
@@ -277,6 +280,16 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 		or _weapon_liquid
 	# home_food：自家糧倉 food（掃自有 outpost tile，team 不在家也讀得到 → 空家判定）。
 	c.home_food = DecisionContext._home_granary_food(state, team)
+	# ★GATE-A：home_food_productive=家 outpost tile 食物再生≥燃燒率（產糧潛力，非只 granary stock）。
+	# ★感知鐵律 clean：自家 outpost terrain=自家知識，非 god-view 世界。
+	c.home_food_productive = false
+	if c.has_home_outpost:
+		var _hp: Vector2i = _fa._find_own_outpost(state, team)
+		var _htile: HexTileData = state.world.tiles.get(_hp.x * 1000 + _hp.y)
+		if _htile != null:
+			var _regen: float = float(ResourceSystem.REGEN_RATE.get(_htile.terrain, {}).get("food", 0.0)) * _htile.harvest_factor
+			var _burn: float = float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+			c.home_food_productive = _regen >= _burn
 	# Fix A 買糧 look-before-leap：隊「聽過」≤MERCHANT_MAX_RANGE 的 food 賣單才追買糧
 	# （received=team_known 物理在場/傳播，守感知鐵律；★不濾 stale=血訓 G1d/r3，撲空由 B/C 承接）。
 	c.has_buyable_food = false

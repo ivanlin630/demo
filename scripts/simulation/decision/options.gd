@@ -77,8 +77,10 @@ static var REGISTRY: Dictionary = {
 		# P2b-1 generalize：任何有家隊絕境(food<DESPERATION)→回家(保 non-unified 1037 熱路徑)。
 		# 經濟底 home-empty gate：家糧倉 < RESTOCK_MIN（空家）→ 不 offer（返空家乾耗無意義）
 		#   → 讓 買糧/交易/覓食 接手（forest 隊賣特產換糧而非返空家）。
+		# ★GATE-A：home-empty gate 加 OR home_food_productive——產糧家即使 granary 空也值得返（回去採飽，
+		# 非空 granary trap）。harvest positional→離 food-rich home 買糧=home 沒人採→餓死 surplus 平原之修。
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.has_home_outpost and ctx.home_food >= DecisionTerms.RESTOCK_MIN and ( \
+			return ctx.has_home_outpost and (ctx.home_food >= DecisionTerms.RESTOCK_MIN or ctx.home_food_productive) and ( \
 					(ctx.is_merchant and ctx.food_days < DecisionTerms.RESTOCK_DAYS) \
 					or ctx.food_days < DecisionTerms.DESPERATION_DAYS),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
@@ -238,9 +240,12 @@ static var REGISTRY: Dictionary = {
 		"terms": [["buyfood_drive", "buyfood"]],
 		# 餓 + 有市集 + 有錢 + ★聽過食物賣單(has_buyable_food) → 買糧候選（Fix A look-before-leap：
 		# 從沒聽過任何食物賣單=不追純幻覺；無錢=乞食真語意，不入）。駐村隊不濾。
+		# ★GATE-A（reviewer R² 必加）：加 not home_food_productive——產糧家結構偏好返家採飽（非離家買糧
+		# 海市蜃樓餓死）。閉商隊 toss-up trap（返家 1.0≈買糧 merchant 1.0，靠 drive 競不贏→結構 gate）。
+		# 鏡射 material-buy food-ok gate 互斥。targeted:forest(home_food_productive=false)→買糧不變(仍離家買=多樣性)。
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market \
-					and ctx.has_specie and ctx.has_buyable_food,
+					and ctx.has_specie and ctx.has_buyable_food and not ctx.home_food_productive,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 到最近市集 outpost 走既有 TASK_TRADE；到場 _resolve_market 餓隊 food local_value 高→買 food。
 			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost(state, team)
