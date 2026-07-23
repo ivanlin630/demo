@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·produce_need demand-responsive·製造 bootstrap 子根②·死常數人格化] spec=2026-07-23-produce-need-demand-responsive.md。根:terms.gd:103-105 produce_need=死常數 `0.3 if has_goods else 0.6`,只看自家 goods 存量、不讀 market demand→workshop owner 聽到 795 tools 買單也不選生產(measurer 0 manufacture probe)。修:①decision_context 加 c.produce_pull=隊自家可造 outputs 的 worst shortfall ratio((need_keep(out)+demand(out)-holding)/target,0-1,mirror material_shortfall 範式)②produce_need term→ctx.produce_pull。★感知鐵律核審:demand()=_trade_demand 讀 team_known 親聞買單非 god-view 全域(TDD⑤god-view fixture 驗他隊有單但沒聽到→不含)。審點:①produce_pull normalization(worst ratio 對嗎/多 output 取 max 是否過激)②感知鐵律 belief-gate 真守③cold-start:無 demand+無 need→produce_pull=0→製造業會不會餓死(own-need baseline need_keep(tools)=pop×0.5 撐 tools/arrows;goods need_keep=0→goods 只市場驅,無人買 goods→不產 goods=對還是 bootstrap 死?這連子根①goods 不在 buy-proxy,另 thread)④舊 0.6 baseline 移除迴歸(本靠 baseline 產的隊變不產)⑤無 RNG(ambition=leader_values)。CLEAN→dispatch(feat/produce-demand-responsive,off tools-demand merge 後 main)。measure→QA。子根①/apothecary=後 thread。"
 ---
 

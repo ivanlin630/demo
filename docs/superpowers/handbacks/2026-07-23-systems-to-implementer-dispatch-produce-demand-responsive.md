@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·produce_need demand-responsive·R² CLEAN·新 branch feat/produce-demand-responsive·製造 bootstrap 子根②] spec=2026-07-23-produce-need-demand-responsive.md。R² CLEAN(死常數人格化乾淨、感知鐵律 belief-gate 親驗守、cold-start 不餓死、無 RNG)。off main(已 merge tools-demand 9c551c06 後)。2 修:①decision_context.gd gather 加 c.produce_pull=隊自家可造 outputs(tile facility level>0 的 RECIPE_GROUPS)的 worst shortfall ratio: clampf((NeedOracle.need_keep(out)+NeedOracle.demand(out)-holding)/target,0,1) 取 max;僅 has_manufacturing_facility 算否則 0;holding 對齊 manufacturing target(team.resources+public_storage)②terms.gd:103-105 produce_need→return ctx.produce_pull(opt≠生產→0)。★感知鐵律:demand()走既有 _trade_demand 讀 team_known 親聞單(勿繞 global)。加 tap produce.wanted_not_chosen(produce_pull>THRESH 但落選)。TDD 5(★⑤god-view fixture:他隊有單但本隊沒聽到→produce_pull 不含;①聽到 tools 單→高;②無需無市場→0;③無 facility→0;④term=ctx.produce_pull)。gate/headless 0new/determinism 2跑 byte-identical(無 RNG)。★★measure(→measurer §④b+specimen→QA 長跑):manufacture.* probe 0→?/選 TASK_MANUFACTURE 隊數/tools+goods 產量 0→?/produce_pull 分布+wanted_not_chosen/weaponsmith 建成(②解後通 or 揭子根①傳播)/回歸 doom+無餓死+goods 不亂產。做完→to:measurer(→QA 判故事:聽到好賣→produce_pull 升→選生產→產 tools→進市場;civ 沒聽到=揭①傳播)。task=systems+reviewer(merge-gate R²)。"
 branch: feat/produce-demand-responsive
 ---

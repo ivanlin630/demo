@@ -6,7 +6,15 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
-## ★★arc 收斂：weaponsmith 0→0 唯一終閘 = workshop 供給側生產（2026-07-23，cost70+tools-demand 後）
+## ★★★武器經濟 arc 正式收斂完畢 → 併入食物安全 arc（2026-07-23 blueprint 收官裁定）
+
+food→goods→weapons→material→tools→workshop-build 整條鏈**正式收斂**。誠實記：**每一層都是真 bug 且已修**——material-buy v1/v2a（chicken-egg trade 側）、tools-demand（生產端 demand-routing）、weaponsmith cost70（afford margin）、produce_need demand-responsive（死常數→市場反應，子根②）全部 merged/授權 merge、無迴歸。**但終閘不在本輪範圍**：
+- **workshop-build 終閘根 = farming 求生優先 override 碾壓（QA 終驗，正確機制非 bug）**：`_facility_score`（faction_ai:3132）farming `×(1+SURVIVAL_CRUSH×urgency²)`，食壓下 farming 壓過一切發展設施 → 隊永遠卡 subsistence farming、升不到 specialization（workshop/apothecary）→ 無 workshop → 無 tools → 無 weapon。= **食物經濟下游症狀**，連回 session 最早 starvation/desperation-economy 根。
+- **★★禁 force-workshop 補丁（blueprint 明裁，違憲）**：不准繞合法求生優先權強蓋 workshop / 動 `SURVIVAL_CRUSH`/argmax。求生優先是正確憲法行為，武器 gap 的解在**上游食物安全**非強塞下游。
+- implementer refine（採信）：workshop deficit ≠ goods-starve（goods target=0→min_per_res SKIP 非 binding，workshop deficit 由 tools/arrows self_use 驅≈1 高）→ 「apothecary 40× 勝」非 goods-demand 缺、亦非 argmax 因子問題，是 farming survival-crush 碾壓整個 specialization 層。
+- **真下一步 = 食物地方分配/穩定性**（新 arc，meta-pattern「world-level 夠、local/team-level 不夠」第 N 次；material/goods/tools/food 同款）。詳 [[project_economy_arc]] + systems 盤點。
+
+## arc 收斂中間態（保留脈絡）：weaponsmith 0→0 供給側（2026-07-23，已併入上方收官）
 
 cost70+tools-demand **兩修 confirmed 有效**（measurer：afford 達 105≤天花板113、tools-demand 接 795 筆買單）但 weaponsmith 仍 0→0 → 唯一剩因 = **tools 供給全域 0**（workshop 幾乎沒蓋 + 蓋出來也產 0）= 製造業產能本身（非需求/貿易/門檻）。blueprint 授權查兩子閘，fix 範圍**等 QA §④b build-sample 判故事後**定。結構圖（systems patch-gate-first 查，file:line）：
 - **子閘 A：workshop 0→1 稀少（build 側）**：workshop=civilian-only A-class；build-completion 家族（同日 civ 設施 **20-44% 完工率**調查）——construction 起手不完工（subteam abandon/timeout/資源）+ facility-argmax 選擇。連 [[project_hand_obeys_brain_arc]]。此 seed 尤糟（只 1 workshop + 晚建）。
