@@ -29,6 +29,7 @@ var strongest_feud: float = 0.0
 var feud_target_id: int = -1
 var has_own_outpost: bool = false
 var has_manufacturing_facility: bool = false   # S1：本格有製造設施+生產權（「生產」applicable precondition，A2 補缺）
+var produce_pull: float = 0.0   # ★製造 bootstrap 子根②：自家可造 outputs 的 belief demand-responsive worst-shortfall（0-1；替死常數 produce_need）
 var is_merchant: bool = false
 var has_home_outpost: bool = false
 var has_weak_prey: bool = false
@@ -156,6 +157,25 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.feud_target_id = _vfoe if (_vfoe != -1 and state.teams.has(_vfoe)) else -1
 	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
 	c.has_manufacturing_facility = FactionAISystem.has_manufacturing_facility(state, team)   # S1 製造 precondition
+	# ★製造 bootstrap 子根②：produce_pull=自家可造 outputs 的 worst-shortfall ratio（belief demand-responsive，
+	# 替 produce_need 死常數 0.3/0.6）。★感知鐵律:demand()=_trade_demand 讀 team_known 親聞單（非 global order book）。
+	c.produce_pull = 0.0
+	if c.has_manufacturing_facility:
+		var _ptile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+		if _ptile != null:
+			var _best: float = 0.0
+			for level_key in ManufacturingSystem.RECIPE_GROUPS:
+				if int(_ptile.get(level_key)) <= 0:
+					continue   # 無此設施
+				for recipe in ManufacturingSystem.RECIPE_GROUPS[level_key]:
+					var out: String = recipe["out"]
+					var target: float = NeedOracle.need_keep(state, team, out, c.leader_values) \
+						+ NeedOracle.demand(state, team, out, c.leader_values)   # 自用+★belief 親聞買單
+					if target <= 0.001:
+						continue   # 該 out 無 need+demand → 不驅生產
+					var hold: float = float(team.resources.get(out, 0)) + float(_ptile.public_storage.get(out, 0))   # 對齊 manufacturing:139 target
+					_best = maxf(_best, clampf((target - hold) / target, 0.0, 1.0))
+			c.produce_pull = _best
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
 	# threat（F-D6 un-stub）：視野內最高敵威脅（belief-based ThreatAssessment，含逼近/敵意/距離衰減）。

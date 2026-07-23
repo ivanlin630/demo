@@ -4,6 +4,7 @@ class_name DecisionEngine
 # 蒐集 DecisionContext → 列候選 Option → 每 option util = Σ(人格權重 × 驅力 term)
 # + 現行 option 承諾 bonus → argmax。平手 → 保持現行（承諾慣性防震盪）。
 const COMMITMENT_BONUS: float = 0.3   # TEST VALUE：承諾慣性（防震盪）
+const PRODUCE_WANT_THRESH: float = 0.3   # TEST VALUE — produce_pull>此=有意義想產（wanted_not_chosen tap 過濾噪音）
 # 層0 安全氣囊：極低糧→survival-class option 加法超量級，突破 coeff [0,1] 天花板奪回 argmax。
 # floor 低→正常隊靠層1/2/5 安全網不觸發；boost 觸發頻率=健康指標(常觸發=安全網失職)。
 const SURVIVAL_BOOST_FLOOR: float = 2.0   # TEST VALUE — 極低糧門檻(遠低人格安全存量,安全氣囊非日常剎車)
@@ -91,6 +92,10 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "") -
 	# per-option 選中分布（argmax=rank[0]；判「applicable 過但選中恆 0」=結構性死鎖 ④）
 	if Probe.enabled and not scored.is_empty() and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
 		Probe.bump("decision.opt_chosen." + String(scored[0]["opt"]))
+		# ★製造 bootstrap 子根②觀測：想產(produce_pull>THRESH，含 facility)但落選(rank[0]≠生產)→task-competition 輸
+		# （供 QA 判②demand-responsive 後是否仍卡於 rank；純觀測零行為變、Probe-gated 無 RNG）。
+		if ctx.produce_pull > PRODUCE_WANT_THRESH and String(scored[0]["opt"]) != "生產":
+			Probe.bump("produce.wanted_not_chosen")
 		# 診斷(裁A)：zero-option 三類分流（coeff-lockout / base-util 競爭 / applicable 稀有）。純觀測。
 		var winner: Dictionary = scored[0]
 		for e in scored:
