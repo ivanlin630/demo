@@ -9,8 +9,13 @@
 ## ★★★食糧地方安全 arc = session keystone：兩分配閘（2026-07-23，measure+QA+systems code 三方坐實）
 
 24-37% 隊 end-state 絕境，**但 world food 34904 充裕**（surplus 79-82% posted）= **純分配 gap 非產量**。QA gate-vs-real-cost 判 + systems patch-gate-first code 確認 = **兩閘 + forest 真缺少數**：
-- **★GATE-A′ = harvest-infrastructure 缺口（絕境主體，2026-07-23 measurer 深挖翻案）**：`resource_system:57`「無據點隊零被動食物、只狩獵」→ **no-outpost 隊蹲在 tile_food_pool 120-299 上但採不到**（forage trickle<burn）→ **餓死在腳下的食物上**（T48 血證：lv=0/own=false/pop10/burn8/regen9.7/tile_pool 120-299/eff_food~0）。facility 極少建（9-13/49）→ 多數隊 no-outpost → **這是絕境主體**。雞生蛋：蓋不起 outpost/farming→採不到糧→survival-mode→更蓋不起（連 farming survival-override + facility 極少建）。**修向未定（呈 blueprint WHAT）**：(a)no-outpost forage 植物糧到 subsistence 率 (b)settling bootstrap 給糧/加速 (c)降 outpost 門檻。觸設計/平衡（nomad 能否吃野生植物糧）。
-- **GATE-A（settled-left-home）= 少數修（降級，非 keystone）**：positional harvest（採站的 tile），settled 隊離 productive home 買糧→home regen 沒人採→餓（QA T28 假設）。修=返家補給認 home_food_productive（spec `...-gateA-recognize-productive-home`，**HOLD measure**——低影響，保 branch 當少數修待 blueprint 裁 bank/fold）。
+**★end-state 分類（2026-07-23 measurer proper 跨-seed，double-reframe 定稿）——主體=GATE-A 非 no-outpost**：
+- **★GATE-A settled-left-home = 56-61% = 主體**：擁 productive home outpost 卻離家（positional effective_food 低、疑離家超 PROVISION_DAYS=10 乾糧 buffer 耗盡）；positional harvest（`resource_system:53,71-76` 採站的 tile）→ 離家不採 home、home granary 空 → 困死。**修=返家補給認 home_food_productive**（spec `...-gateA-recognize-productive-home`，4 touch，R² CLEAN，**resume measure 中**）。
+- **settled-on-productive 薄利 = 23-36%**：蹲自家 outpost 仍餓——`with-outpost collect 5.58-6.55/day < pop10 burn 8`（大隊自產打不平、需 trade 但 GATE-B 崩）。修=harvest rate / trade（GATE-A 後）。
+- **no-outpost（harvest-infra）= 8-13% 少數**：`resource_system:57` 無據點只狩獵（hunt 1.08-1.21/day≪burn）→ 蹲 tile_food_pool 上採不到（T48 transient）。blueprint 裁 **(a) forage subsistence 率**（∈(1.2,5.6)，無設施=低效存活非=0，憲法世界代價非腳本）——**降為第③序**（仍做、少數）。
+- forest real-cost 0-3% 極少。
+- **★教訓**：我一度據 measurer T48 **transient 單點** re-scope 成「no-outpost 主體」→ proper end-state 分類糾回 GATE-A 主體。**該先要分類分布再 halt，別憑單 specimen**（[[feedback_fileline_vs_interpretation]] transient≠end-state 主體）。
+- **★re-prioritize（呈 blueprint）**：①GATE-A（56-61%）②薄利 harvest rate（23-36%）③no-outpost forage 裁(a)（8-13%）。②③繫 harvest rate/trade，可能 GATE-A+harvest rate 解大半。GATE-B（買糧空間錯配 arrive→attempt 崩）伺候剩餘 trade。
 - **★GATE-B = local-only 撮合（真空間分配，死法②）**：`_market_visitor_buy`（interaction:781）只從**抵達 tile 的 granary**買 → 遠方 surplus 搆不到 → 空間錯配（buy-fill 0.5%：seek 1363→arrive 333→fill 4；sell_no_surplus 主導）。同 material Gate B。修=分配機制（surplus 流向 demand），大於 GATE-A。
 - **forest 真缺**（T7/T43/T47 regen<burn）=少數 + 被 GATE-B 堵死逃不掉，修 GATE-B 後自動有出路（買糧/遷移）。
 - **★attack 序**：GATE-A 先（最大槓桿+survival-correct+洩 buy-fill 壓力）→ GATE-B（死法②分配機制，兼 goods）。**★session keystone**：兩閘=開頭 starvation 死隊 + 結尾 workshop-build 終閘同根。呈 blueprint sanity-check framing（`...-food-gates-confirmed-attack`）。連 [[project_economy_arc]] 死法②/[[project_desperation_economy]]。
