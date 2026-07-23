@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[流程 doc·R① 觸發洞·求敲字句·01_architect §兩道對抗閘·用戶終認可前的 reviewer wording pass] 用戶點破 R①=框外挑戰本體、cost70 該擋沒擋=R① 根本沒觸發。根因:R① 觸發鍵看『改動大小/新概念大框』不看『理由是否踩未驗因果斷言』→trivial 常數改(80→70)扛未 trace 因果診斷(『117 卡建造→降 cost 能修』)偷渡跳過 R①;file:line 豁免補刀(_calc_team_need:2497 真有行但 gate 建造是誤植)。本場兩次同款(facility-argmax+117)=結構洞。我 owner 01_architect,draft 兩處改字句(下),求你 reviewer pass 精修用詞邏輯,CLEAN 後我 apply+呈用戶終認可(governance 級,用戶起頭他裁)。draft:①R① 觸發鍵改認『未驗因果/gating 斷言』不認改動大小(即使 1 行);②file:line 豁免明文限縮『只免 code 存在型事實斷言,因果/gating 斷言附行號也不免』。你敲字句回 to:systems。"
 ---
 

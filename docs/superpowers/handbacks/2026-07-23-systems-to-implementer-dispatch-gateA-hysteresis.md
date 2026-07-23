@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·GATE-A 二刀 返家閉環 hysteresis·R² CLEAN(touch 0 已補)·新 branch feat/gateA-return-hysteresis·off GATE-A merge 後 main] spec=2026-07-23-gateA-2nd-cut-return-hysteresis.md。根:返家補給 applicable food_days<DESPERATION(3)→隊返家途中 food 過 3→option 消失→漂回 idle/trade→震盪(QA Team66/85/59 + code 雙坐實)。修 2 touch:①★touch 0(reviewer 必補):decision_context.gd gather 加 c.current_task = team.current_task(team 自身欄非 god-view)②options.gd 返家補給 applicable 加 `or (ctx.current_task==TeamData.TASK_RETURN_HOME and ctx.food_days < RETURN_HYSTERESIS_DAYS)`,新 const RETURN_HYSTERESIS_DAYS=RESTOCK_DAYS(5)(terms.gd,重用既有值非新魔數)=hysteresis band[3,5]。TDD 5(①returning+food 3-5→applicable true②非returning+3-5→false③food≥5→false 釋放④food<3→true⑤productive returning restock_need 1.0)。gate/headless 0new/determinism byte-identical(純算術無 RNG)。★★measure(→measurer §④b+specimen→QA):返家 chosen(2638→?應降)/GATE-A bucket %(58-73%→?)/days_left 卡點爬升/returning 隊到家+harvest+food 過5+出門閉環坐實(逐 tick,非只邏輯)/forest 不誤鎖+不過鎖(food≥5 釋放正常出門率)/end-絕境(15/26→?)/無新餓死。做完→to:measurer(→QA)。task=systems+reviewer(merge-gate)。★base=GATE-A merge 後 main(先確認 feat/gateA-productive-home 已 merge)。"
 branch: feat/gateA-return-hysteresis
 ---

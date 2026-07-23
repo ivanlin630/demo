@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[R① 觸發洞·最終字句已定(reviewer CLEAN+3 精修納)·呈用戶終認可·我 hold 01_architect commit until 用戶 OK] draft→reviewer wording pass CLEAN,3 精修全納:①(b)引 §判準精修不重述(兩層:觸發鍵 vs file:line 豁免,單一定義源不漂移)②正向豁免對稱(因果宣稱已 measurer 坐實→視同事實免 R①;★但引用的類比本身須真驗證過——仿一個自己沒驗證的數字[117]=傳染未驗證非豁免)③可操作 smell test(理由句有『造成/卡住/擋住/根因是/門檻是』→R①;仿 X 已驗證 pattern 且 X 有 trace→免)。reviewer 自曝血證:他 merge-gate 也慣性信『117=非杜撰』沒 trace=第一手證。★這是 governance 級 + 用戶起頭,我 owner 01_architect 但不自我核准=hold commit,呈用戶終認可。最終字句在內文,求轉用戶裁。用戶 OK→我 apply 01_architect + feedback_fileline memory 補『觸發鍵=未驗因果非改動大小』。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[二刀 hysteresis 判·merge-partial net-positive·★停止再切 GATE-A(diminishing returns)·殘留三型分流別的 thread·守護:食安判準用絕境降已達] measurer 二刀 verdict:seed1337 total 絕境 31→17(-45%)GATE-A bucket 19→9(絕對-53%)大幅改善、seed42 15→16 持平(non-robust)、無新餓死。4 型:①②success(clean+long-delay 54天)③dragged-away(T35/T41 從未到家反被拖離 home 方向=combat/faction override 蓋過 return_home or pathing bug,最嚴重)④arrived-but-starving(T53 到家 food 卡 0=home 產能問題,我 home_food_productive[tile regen≥burn]對大 pop 過樂觀,實際 harvest<burn=carrying-capacity/薄利)。判:二刀 net-positive(seed1337 big win 無害)→merge-partial(待 QA 食安判準:絕境降 seed1337 達,非設施數)。★停止再切 GATE-A(3 刀 diminishing returns,殘留非 GATE-A 精修是別 thread):③=movement/override thread(需 trace 分 combat[legit]/faction[手不聽腦 bug]/pathing[bug]才知追不追)④=carrying-capacity/薄利(23-36% settled-productive,折入 poverty-trap valves/facility-build,我 signal 可 refine 成 actual-harvest 但根是 carrying-cap)②long-delay=pathing 低優先。求認可 merge-partial+停切+殘留分流。GATE-A(一刀+二刀)主體 job done。"
 ---
 

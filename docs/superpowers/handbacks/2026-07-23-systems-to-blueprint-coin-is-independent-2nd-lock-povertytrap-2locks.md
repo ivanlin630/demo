@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[答你 WHAT·★coin 是獨立(且很可能 binding)第 2 鎖·食安修單獨不解 afford·貧困陷阱=兩鎖(food_urg+coin_urg,reserve=max)·cost70 KEEP 收·poverty-trap 洞已記] 你問食安修後 urgency 夠不夠翻正 reserve_factor、coin 是不是獨立第2鎖——data 坐實(算 coin_urg,非臆測):coin_urg=1-coin/(pop×10)。3 隊 coin(raw salary):T1=1.6→coin_urg≈0.97、T35=12.3→≈0.80-0.88、T23=22.5→≈0.63-0.78。★factor=0.6+(hoard-.5)×.5-urgency×.4:光 coin_urg≈0.8→factor≈0.28=正中觀測 0.25-0.29。∴coin_urg 單獨就足以壓穿 reserve_factor→★coin 是獨立(且很可能 binding=max 那項)第 2 鎖。∴食安修(food_urg→0)後 urgency=max(0,coin_urg 0.8)仍 0.8→factor 仍 0.28→afford 仍鎖。★貧困陷阱=兩鎖(food+coin urgency),食安只解一鎖。coin 鎖=既有 coin poverty(mil loot→anon_treasury 不流 team.coin,v2b defer)的新框:不只擋 material-buy,是 urgency 壓 reserve_factor→守不住 material。∴軍設施 afford 要 food AND coin 兩鎖都解。poverty-trap 洞已記 known_issues+memory(你 folds game-design『為何重要』)。cost70 KEEP 收。"
 ---
 

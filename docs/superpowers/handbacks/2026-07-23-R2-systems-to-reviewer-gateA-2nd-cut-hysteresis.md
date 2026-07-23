@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·GATE-A 二刀 返家閉環 hysteresis·破 oscillation·committed-not-executed 家族] spec=2026-07-23-gateA-2nd-cut-return-hysteresis.md。GATE-A merge-partial(-40%/-16%)後殘留=返家 oscillation:QA §④b 坐實(Team66/85/59 warning→return_home→漂回 idle/trade→re-warn,days_left 卡 1.6-3.0 never 爬)+我 code-坐實:返家補給 applicable food-gate=food_days<DESPERATION(3)(options:83)→隊返家途中 food 一過 3→option 消失→漂回 idle/trade→未到家→food 再降→又返家=震盪。修 1 clause:返家補給 applicable 加 `or (current_task==RETURN_HOME and food_days<RETURN_HYSTERESIS_DAYS)`(新 const 起始 RESTOCK_DAYS=5)=hysteresis band[3,5],已在返家路上撐到舒適才停→完成返家+到家 harvest 補到 5+才出門。審點:①hysteresis band[3,5]值合理?(trigger 3 開始返家、撐到 5 停;會不會過鎖[food≥5 釋放應解]或不夠[measure 調])②current_task 讀=自身狀態非 god-view?③forest 不受影響(只 current_task==RETURN_HOME 才 hysteresis,forest 不會在返家 task)④不過鎖(food≥5 釋放出門,正常出門率驗)⑤與 SOLO_COMMITMENT_BONUS(0.15)交互(option 在了 bonus 撐 rank)⑥無 RNG⑦『到不了家』sub-case:QA 顯來源 task=idle/trade(漂離非走不到)→hysteresis 正解,若殘留真 travel=三刀 movement 非本刀。CLEAN→dispatch(feat/gateA-return-hysteresis,off GATE-A merge 後 main)。measure→QA。"
 ---
 

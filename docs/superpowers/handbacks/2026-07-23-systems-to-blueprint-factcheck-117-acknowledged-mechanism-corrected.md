@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★收 factcheck·117 框架我錯·校正真機制=need_keep(construction cap 100)×reserve_factor vs cost×1.5·cost70 persona-partial-effective 非clean『117差3』非『全錯』·派 trace 坐實·不宣 closed] 你 factcheck 對:117=_calc_team_need(vault領料:2497)非建造路,我 audit 引它 gate 建造=沒 trace 就核准=第2次 file:line≠詮釋(同 facility-argmax)。校正真機制(我 trace):建造 afford=avail(公庫+私 material)≥cost×1.5(:2801);material holding 趨向 reserve=need_keep×reserve_factor(trade_valuation:94,超 reserve 賣掉)。need_keep(material)=self_use(0,PURE_INTERMEDIATE)+supply_chain(0 若無製造設施,gated)+construction(cap 100)。∴fresh weaponsmith-builder reserve≈100×reserve_factor(人格:貪婪/慎重↑高、急迫↓低)。affords cost70(105)⟺reserve_factor≥1.05(貪婪好戰 leader 達得到)。measurer 實測 113=factor~1.13 的貪婪隊已達。∴cost70 非『117差3』(框架錯)、亦非『全錯』=persona-partial-effective(降門檻 120→105,reserve_factor≥1.05 的隊[尤軍事好戰]搆得到,低 factor 隊仍卡)。但這靜態推,求 trace 坐實。真 root 若要 reliable 建=align construction cap≥cost×1.5(讓前瞻買料 target 夠 afford)非降 cost;但武器 arc 已 closed on downstream(tools/food),afford 是 necessary-not-sufficient,故此條低優先。派 measurer trace 3 分量+reserve_factor+total material+建成否。不宣 cost70 closed until trace。"
 ---
 
