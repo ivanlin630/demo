@@ -2363,11 +2363,14 @@ const EXTRACT_BUFFER_MAX: float = 30.0    # TEST VALUE — 慎重 leader 留厚 
 func coin_need(state: WorldState, team: TeamData) -> float:
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var need: float = 0.0
-	# material-buy（construction means-end）：缺料 → 需 coin 買料（mirror 買料 material_shortfall）
-	var mat_short: float = maxf(NeedOracle.need_keep(state, team, "material", lv) \
-		- ResourceSystem.effective_holding(state, team, "material"), 0.0)
-	if mat_short > 0.0:
-		need += mat_short * TradeValuation.local_value(team, "material", state)   # coin ≈ 缺料量 × 料價
+	# ★material-hold ④：material-buy 對齊 afford×1.5 缺口（非只 need_keep shortfall）→ extraction 拉夠 coin 買足量
+	# 到能 afford（cost×1.5）。cost=想蓋 facility 的 material build-need（_construction_facility_need）。
+	var mat_cost: float = NeedOracle._construction_facility_need(state, team, "material", lv)
+	if mat_cost > 0.0:
+		var mat_afford_short: float = maxf(mat_cost * 1.5 \
+			- ResourceSystem.effective_holding(state, team, "material"), 0.0)
+		if mat_afford_short > 0.0:
+			need += mat_afford_short * TradeValuation.local_value(team, "material", state)   # coin ≈ afford 缺料量 × 料價
 	# food-buy（食壓）：food_days<DESPERATION → 需 coin 買糧
 	var pop: float = maxf(float(team.population), 1.0)
 	var eff_food: float = ResourceSystem.effective_food(state, team)

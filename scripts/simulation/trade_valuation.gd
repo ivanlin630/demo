@@ -89,6 +89,11 @@ static func reserve(team: TeamData, res: String, leader_values: Dictionary = {},
 	# food/medicine（SURVIVAL）：need_keep 已含 food 自用/medicine 終端自用＝survival floor，不液化（絕境不甩活命糧）。
 	if res == "food" or res in SURVIVAL_GOODS:
 		return NeedOracle.need_keep(state, team, res, leader_values)
+	# ★material-hold-protection（脫貧第三腿）：material 有 active construction-need（想蓋 facility 缺料）
+	# → 用 food-only factor（對 coin_urg 免疫）→ 守住要蓋的料不被 coin 焦慮逼賣（本 case 病治）；acute food 仍釋放(守護)。
+	if res == "material" and state != null \
+			and NeedOracle._construction_facility_need(state, team, "material", leader_values) > 0.0:
+		return NeedOracle.need_keep(state, team, res, leader_values) * _reserve_factor_food_only(team, leader_values, state)
 	# 非活命品：need_keep（自用+供應鏈）× 液化（貪婪守/絕境鬆手＝可賣餘量轉換層安全網）。
 	# goods need_keep=0 → reserve=0 → 可賣餘量=holding（有 demand 才賣，死鎖解）。
 	return NeedOracle.need_keep(state, team, res, leader_values) * _reserve_factor(team, leader_values, state)
@@ -99,13 +104,24 @@ static func _reserve_factor(team: TeamData, leader_values: Dictionary, state: Wo
 	var factor: float = RESERVE_BASE + (hoard - 0.5) * RESERVE_HOARD_K - _urgency(team, state) * RESERVE_URGENCY_K
 	return clampf(factor, RESERVE_FACTOR_MIN, RESERVE_FACTOR_MAX)
 
+# ★material-hold-protection：construction-material reserve 用「只食急迫」液化係數（對 coin_urg 免疫）。
+# =_reserve_factor 但 urgency 只用 food_urg 非 max(food,coin)→coin 焦慮不逼賣要蓋的料；acute food 仍降 factor 可賣(守護)。
+static func _reserve_factor_food_only(team: TeamData, leader_values: Dictionary, state: WorldState = null) -> float:
+	var hoard: float = (float(leader_values.get("貪婪", 0.5)) + float(leader_values.get("慎重", 0.5))) * 0.5
+	var factor: float = RESERVE_BASE + (hoard - 0.5) * RESERVE_HOARD_K - _food_urgency(team, state) * RESERVE_URGENCY_K
+	return clampf(factor, RESERVE_FACTOR_MIN, RESERVE_FACTOR_MAX)
+
+# 只食急迫 [0,1]：食物天數低→鬆手賣（decouple coin_urg，供 material-hold food-only factor + acute 守護）。純狀態零 randf。
+static func _food_urgency(team: TeamData, state: WorldState = null) -> float:
+	var pop: float = maxf(float(team.population), 1.0)
+	var food_days: float = _stock(state, team, "food") / (pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY)
+	return clampf((DecisionTerms.DESPERATION_DAYS - food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
+
 # 隊急迫度 [0,1]：食物天數低 + 人均 coin 缺 → 鬆手賣非活命品換 coin/糧。純狀態，零 randf。
 static func _urgency(team: TeamData, state: WorldState = null) -> float:
 	var pop: float = maxf(float(team.population), 1.0)
-	var food_days: float = _stock(state, team, "food") / (pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY)
-	var food_urg: float = clampf((DecisionTerms.DESPERATION_DAYS - food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
 	var coin_urg: float = clampf(1.0 - float(team.resources.get("coin", 0)) / (pop * URGENCY_COIN_COMFORT), 0.0, 1.0)
-	return maxf(food_urg, coin_urg)
+	return maxf(_food_urgency(team, state), coin_urg)
 
 # ask 售價：折扣人格化——商業技能 + 急迫鬆手(折扣深)，貪婪守價(折扣收窄→部分談崩)。零 randf。
 static func ask_price(seller: TeamData, res: String, commerce: float, leader_values: Dictionary, state: WorldState = null) -> float:
