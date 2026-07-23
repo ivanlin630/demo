@@ -56,7 +56,8 @@ material-buy arc（v1+v2a merged e6519f9f）修好 trade 側（mil 買 material�
 - **★兩把鎖（data 坐實，非臆測）**：`urgency=max(food_urg, coin_urg)`——
   - **food 鎖**：`food_urg=(DESPERATION-food_days)/DESPERATION`。**食安 keystone（GATE-A 等）解此把**。
   - **★coin 鎖**：`coin_urg=1-coin/(pop×URGENCY_COIN_COMFORT=10)`。3 trace 隊 coin_urg：T1(coin1.6)≈0.97、T35(12.3)≈0.80-0.88、T23(22.5)≈0.63-0.78——**光 coin_urg≈0.8→factor≈0.28=正中觀測**→**coin_urg 對 mil 隊很可能是 binding(max 那項)**。∴**食安修單獨不解 afford**（food_urg→0 但 urgency=max(0,coin_urg 0.8)仍 0.8）。coin 鎖 = 既有 coin poverty（mil loot→anon_treasury 不流 team.coin，v2b defer）**升格**：不只擋 material-buy，是 urgency 壓 reserve_factor 的第 2 把。
-- **逃生閥 = 解兩鎖**：軍設施 afford 要 **food AND coin urgency 都降**。食安解一把；coin 鎖需另解（v2b coin 重框成「貧困陷阱第 2 把」，對 mil afford binding→優先序 blueprint 裁）。
+- **逃生閥 = 解兩鎖**：軍設施 afford 要 **food AND coin urgency 都降**。食安解一把；coin 鎖需另解（v2b coin 重框成「貧困陷阱第 2 把」）。
+- **★coin-scope full-pop 坐實（2026-07-23，keystone-level 但 not-binding）**：chronic coin_urg>0.5=**91%**（兩 seed 一致）、**mil+civ 皆廣布**（mil 100/94%、civ 89/90%，非窄 mil-loot 因）、結構性（transient 僅 1/64）、coin_urg×reserve_factor 反向確認（high-urg→0.25）→ **coin poverty=keystone-level 系統性經濟條件**（非窄 defer，折入 facility-build keystone）。★**但 facility_count 高/低 coin_urg 兩組皆近零**（0.03-0.07 vs 0.00）→**coin necessary-not-sufficient**，建造近零 regardless of coin=binding 在**別處（build-decision/survival-override 非 accumulation）**。∴**facility-build keystone=全 poverty-trap 逃生**（means-end+food+coin 三根互鎖+survival-override 碾發展），非單根修；連 workshop-build 終閘（farming survival-override 碾 specialization）同一 trap。開場 measure-first build-decision fire 率+誰 preempt 定 binding 根。呈 blueprint vision（`...-coin-keystone-level-but-not-binding-facilitybuild-full-trap`）。
 - 連 [[project_desperation_economy]]（絕境經濟根）+ [[project_economy_arc]] 食安 keystone + cost70-trace（下條，afford largely-ineffective 的真 root 就是此兩鎖）。
 
 ## ★cost70 診斷訂正 + construction cap 100 脫鉤 afford 門檻 = means-end 缺口鐵證（2026-07-23 blueprint factcheck）
