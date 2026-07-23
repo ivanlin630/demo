@@ -33,13 +33,13 @@ func _consider_extraction(state, team):
 - **砍掉 `extract_score = greed-prud×0.5 > 0.4` flat 門檻**（死常數人格化：改 need 驅 + 人格 texture）。
 
 ### ③ persona buffer texture（守護：別 swing 到 always-extract-all）
-`_extract_buffer(leader)` = 人格化保留 buffer（extract 後留在 anon_treasury 的緩衝）：慎重↑→buffer 厚（留更多防未來）、貪婪↑→buffer 薄（積極抽）。=**人格決定「補到多夠用」非「抽不抽」**（抽由 need 決；texture 是 margin）。★extract=補 shortfall+buffer margin，**非清空 treasury**（blueprint texture 守護）。
+`_extract_buffer(leader)` = 人格化保留 buffer（extract 後留在 anon_treasury 的緩衝）：慎重↑→buffer 厚、貪婪↑→buffer 薄。**★下限（reviewer R² 必補）**：`buffer = lerp(BUFFER_MIN, BUFFER_MAX, prudence)`，**`BUFFER_MIN > 0`（TEST VALUE，如 5-10 coin）**——**貪婪只降到正下限非降到 0**（否則極貪婪 leader extract 後 anon_treasury 真清零=違「非清空」texture 守護；spec 原質性描述允許 buffer→0=文字自矛盾，補下限修正）。=**人格決定「補到多夠用」非「抽不抽」**（抽由 need 決；texture 是 margin）。★extract=補 shortfall+buffer margin，**非清空 treasury**。
 
 ## 為何 de-patch 非 tune
 - 不是調低 0.4（tune 壞閘=中位人格還是可能卡）——是**移除 flat 人格門檻，改 need 驅動**（隊有真 coin-用途才抽）。= 本場整條 arc 型（flat 常數 gate→utility/need 湧現）+ 憲法「utility 餵 utility 非 scripted」+ 死常數人格化。emergency 路徑（飢餓緊急）保留。
 
 ## 驗收
-- **TDD**：①中位領袖（greed.5/prud.5）+ coin_need>spendable → **extract**（原永不）②無 coin_need（無 buy-intent+食足）→ **不 extract**（不亂徵）③persona buffer：慎重領袖 extract 後留 buffer > 貪婪領袖 ④shortfall≤0（spendable 已夠）→ 不 extract ⑤守恆（anon_treasury→team.coin 搬，CoinAudit=0）⑥emergency 路徑不變。
+- **TDD**：①中位領袖（greed.5/prud.5）+ coin_need>spendable → **extract**（原永不）②無 coin_need（無 buy-intent+食足）→ **不 extract**（不亂徵）③persona buffer：慎重領袖 extract 後留 buffer > 貪婪領袖 **+ ★即使最貪婪 leader（greed=1.0）buffer > 0**（斷言 `buffer_greedy > 0`，非只相對值，測「真清空」反例）④shortfall≤0（spendable 已夠）→ 不 extract ⑤守恆（anon_treasury→team.coin 搬，CoinAudit=0）⑥emergency 路徑不變。
 - **gate** PASS / **headless** 0 new / **determinism** 2 跑 byte-identical（純算術/人格值，無 randf）。
 - **★★measure（→measurer §④b+specimen→QA 長跑）**：extraction fire 率（中位人格 0→?）/ spendable team.coin 分布升 / **coin_urg 降（91%→?）**→ reserve_factor 升 → **has_specie up → 買糧/買料 up → material 累積 up → afford up → facility 建成 up**（脫貧鏈端到端）/ ★守恆 CoinAudit=0 + texture（慎重隊仍留 buffer，無 swing always-extract-all，通膨/coin 池不爆）/ 無新餓死。
 - **送 QA 判故事**：中位隊有真需（想建/餓）→ 取回自己 anon_treasury coin → 買得起 → 脫貧鏈動 coherent；貪婪 vs 慎重 buffer texture 差異可見。
