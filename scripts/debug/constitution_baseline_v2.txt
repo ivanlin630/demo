@@ -12,7 +12,6 @@ scripts/simulation/diplomatic_ai_system.gd::consider_betrayal::rng  # gate-ok: �
 scripts/simulation/faction_ai_system.gd::_assign_tasks::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_check_discipline::rng  # gate-ok: 案②outcome(壓力下紀律失效=世界回應,非決策)
 scripts/simulation/faction_ai_system.gd::_commit_conquest_attack::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
-scripts/simulation/faction_ai_system.gd::_consider_extraction::threshold
 scripts/simulation/faction_ai_system.gd::_decide_subteam::route
 scripts/simulation/faction_ai_system.gd::_decide_subteam::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_decide_unified::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
