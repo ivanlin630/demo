@@ -2354,17 +2354,47 @@ func _extract_treasury(state: WorldState, team: TeamData, ratio: float, reason: 
 		UnrestBank.add(team, 1, "faction")
 	print("[Extract] Team%d 徵用 %.0f coin (%s)" % [team.team_id, amt, reason])
 
+# ★extraction de-patch：coin_need 信號（means-end 延伸，reuse 既有 buy-intent 架構）。
+# 隊真 coin-用途估算=要 spendable coin 才做得成的 buy-intent（material-buy 建設 + food-buy 食壓）。
+# ★無遞迴：讀 material/food need（resource need，非 facility-output）→ 不回呼 coin/extraction（reviewer R² 驗）。
+const COIN_NEED_CAP: float = 500.0        # TEST VALUE — coin_need clamp 上限防爆
+const EXTRACT_BUFFER_MIN: float = 5.0     # TEST VALUE — 貪婪 leader extract 後留 treasury 下限（>0=非清空）
+const EXTRACT_BUFFER_MAX: float = 30.0    # TEST VALUE — 慎重 leader 留厚 buffer 上限
+func coin_need(state: WorldState, team: TeamData) -> float:
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var need: float = 0.0
+	# material-buy（construction means-end）：缺料 → 需 coin 買料（mirror 買料 material_shortfall）
+	var mat_short: float = maxf(NeedOracle.need_keep(state, team, "material", lv) \
+		- ResourceSystem.effective_holding(state, team, "material"), 0.0)
+	if mat_short > 0.0:
+		need += mat_short * TradeValuation.local_value(team, "material", state)   # coin ≈ 缺料量 × 料價
+	# food-buy（食壓）：food_days<DESPERATION → 需 coin 買糧
+	var pop: float = maxf(float(team.population), 1.0)
+	var eff_food: float = ResourceSystem.effective_food(state, team)
+	var food_days: float = eff_food / (pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY)
+	if food_days < DecisionTerms.DESPERATION_DAYS:
+		var food_short: float = maxf(DecisionTerms.DESPERATION_DAYS * pop * ResourceSystem.FOOD_PER_PERSON_PER_DAY - eff_food, 0.0)
+		need += food_short * TradeValuation.local_value(team, "food", state)   # coin ≈ 缺糧量 × 糧價
+	return minf(need, COIN_NEED_CAP)
+
+# ★persona buffer texture（extract 後留 treasury margin）：慎重↑留厚、貪婪↑留薄。
+# ★下限 EXTRACT_BUFFER_MIN>0（reviewer R² 必補）：貪婪只降到正下限非 0=非清空 treasury（人格=補多夠用非抽不抽）。
+func _extract_buffer(leader: PersonData) -> float:
+	var prudence: float = float(leader.values.get("慎重", 0.5))
+	return lerpf(EXTRACT_BUFFER_MIN, EXTRACT_BUFFER_MAX, prudence)
+
 func _consider_extraction(state: WorldState, team: TeamData) -> void:
 	if team.anon_treasury <= 0.0: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	if team.leader_id == state.player_id: return   # 玩家手動   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var leader: PersonData = state.persons.get(team.leader_id)
 	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
-	var greed: float = float(leader.values.get("貪婪", 0.5))
-	var prudence: float = float(leader.values.get("慎重", 0.5))
-	var extract_score: float = greed - prudence * 0.5
-	if extract_score > 0.4:
-		var ratio: float = greed * 0.3
-		_extract_treasury(state, team, ratio, "貪婪驅動")
+	# ★de-patch:砍 flat `greed-prud×0.5>0.4` 死常數門檻 → need-driven（有真 coin-用途才取回自己 treasury coin）。
+	var spendable: float = float(team.resources.get("coin", 0))
+	var shortfall: float = coin_need(state, team) - spendable
+	if shortfall <= 0.0: return   # gate-ok: guard: spendable 已夠→不亂徵(need-guard 非人格閘)
+	# ★need 決定「抽不抽」(有真缺才抽);人格 buffer=texture「補到多夠用」(非清空 treasury)。
+	var amt: float = minf(shortfall + _extract_buffer(leader), team.anon_treasury)
+	_extract_treasury(state, team, amt / team.anon_treasury, "need_driven")
 
 # unified-commerce coin combo（fold coin-B 成員稅回收，破 salary 單向枯竭補 team.coin 池）。
 # 鏡射 _consider_extraction：月 cadence、玩家隊不自動、稅率掛領袖人格。★守恆：person.coin→team.coin 池間搬。
