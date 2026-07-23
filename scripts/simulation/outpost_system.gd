@@ -78,19 +78,19 @@ const FACILITY_DEF: Dictionary = {
 		"leader_pref": { "野心": 0.2, "好戰": 0.3 },
 	},
 	"smeltery": {
-		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,同族 afford 閘):降 cost×1.5 120→105 persona-partial-effective。★原註「天花板117」誤植訂正(117=vault 領料非建造,見 known_issues cost70-trace)
+		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,同族,balance):afford margin。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency 非 cost,經食安化解;keep=無害。詳 known_issues cost70-trace
 		"allowed_outpost": ["military"],
 		"current_level_key": "smelter_level",
 		"leader_pref": { "好戰": 0.2 },
 	},
 	"weaponsmith": {
-		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # material 80→70(blueprint 裁②):降 afford 門檻 cost×1.5 120→105。persona-partial-effective(material holding≈construction-need cap 100×reserve_factor,factor≥1.05 的貪婪/好戰隊搆到 105)。★原註「天花板117」誤植訂正:117=_calc_team_need vault 領料(faction_ai:2497)非建造路,見 known_issues cost70-trace
+		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # material 80→70(blueprint balance 裁②):afford margin(cost×1.5 120→105)。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency-suppression(隊食/coin 壓賣掉 material)非 cost/cap/「117」,經食安化解;keep=無害 balance 值。詳 known_issues cost70-trace
 		"allowed_outpost": ["military"],
 		"current_level_key": "weaponsmith_level",
 		"leader_pref": { "好戰": 0.4 },
 	},
 	"armorsmith": {
-		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,同族 afford 閘):降 cost×1.5 120→105 persona-partial-effective。★原註「天花板117」誤植訂正(117=vault 領料非建造,見 known_issues cost70-trace)
+		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,同族,balance):afford margin。★trace 坐實 largely ineffective——真 afford root=reserve_factor urgency 非 cost,經食安化解;keep=無害。詳 known_issues cost70-trace
 		"allowed_outpost": ["military"],
 		"current_level_key": "armorsmith_level",
 		"leader_pref": { "慎重": 0.3, "好戰": 0.2 },
