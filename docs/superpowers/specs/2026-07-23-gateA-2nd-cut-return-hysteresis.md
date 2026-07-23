@@ -8,7 +8,10 @@
 - ∴ 隊決定返家（TASK_RETURN_HOME）**途中** food_days 一過 3（碰 DESPERATION 線）→ **返家補給 option 消失（not applicable）→ 無 option 可承諾**（SOLO_COMMITMENT_BONUS 0.15 救不了消失的 option）→ 隊 re-rank 到 idle/trade → **漂離**（未到家）→ 不採 → food 再降 <3 → 返家補給 re-applicable → 又返家 → …。
 - = **oscillation**：days_left 永卡 1.6-3.0（在 DESPERATION=3 線上下抖）= **never 真到家 harvest 補飽**。返家「決策」接上（chosen 2638）但「閉環（到家+harvest+補飽）」未成。
 
-## 修（1 clause hysteresis）
+## 修（touch 0 ctx 暴露 + 1 clause hysteresis）
+### ★touch 0（reviewer R² 必補）：`decision_context.gd` gather 加 `c.current_task = team.current_task`
+- `ctx.current_task` 目前**不存在**（grep 0 match）→ 正式列為第 0 touch，別讓 implementer 從審點反推。`team.current_task`（`team_data.gd:98` team 自身欄）=自身狀態非 god-view。
+
 ### `options.gd 返家補給` applicable：加返家途中 hysteresis band
 ```gdscript
 "返家補給": applicable = ctx.has_home_outpost \
