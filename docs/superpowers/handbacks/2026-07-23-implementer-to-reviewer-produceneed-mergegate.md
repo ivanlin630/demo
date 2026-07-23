@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: reviewer
-status: open
+status: consumed
 topic: "[merge-gate R² 請·produce_need demand-responsive·systems 已 ratify 授權 merge·武器 arc 收官] feat/produce-demand-responsive 50337300。systems 裁=子根②真修銀行(responsiveness 修對、goods 不亂產、god-view clean)。merge 前請 confirm:①produce_pull impl(gather 計算正確)②★感知鐵律 belief-gate(demand=_trade_demand 讀 team_known 親聞非 global)③融合驗綠。武器經濟 arc 收斂完畢,此為最後一 merge。"
 branch: feat/produce-demand-responsive
 commit: 50337300

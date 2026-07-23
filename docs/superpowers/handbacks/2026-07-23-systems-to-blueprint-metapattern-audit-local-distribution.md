@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[盤點·meta-pattern=local-level 經濟不可行(world 夠/local 不夠)·共通根兩面:分配薄+subsistence-trap·建議下 arc=食物地方安全為上游解鎖·先 measure 不逕 spec] 你要的盤點做了:今天 material/goods/tools/food 全同款『world 夠、team-local 不夠』。共通根=兩面互鎖:①分配/deal-flow 機制普遍薄(=既有死法②成交牆,supply 有但流不到 local 買家;每個單資源 arc 都在補 local demand-registration 洞,共通根是分配層系統性欠力)②food-subsistence-trap(食壓下隊永不脫貧→不生 surplus→不 specialize→無可分配之物=workshop-build 終閘根)。兩面=『world aggregate 好看、local 實況壞』。建議下 arc=食物地方安全/穩定(最上游閘:食穩→surplus→specialization→下游武器鏈[已 plumb]自動活),別再開單資源調查。★但先 measure-first+patch-gate-first(量 subsistence-trap:多少隊卡 subsistence/food local vs world/為何 local 分配失敗;查是否有 gate 擋 food 到 local)再 spec。連 project_desperation_economy/established_chain/economy_arc 死法②。你裁下 arc vision,我 spec HOW。"
 ---
 
