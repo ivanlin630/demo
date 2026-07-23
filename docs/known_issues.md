@@ -46,6 +46,15 @@ material-buy arc（v1+v2a merged e6519f9f）修好 trade 側（mil 買 material�
 - **閘② tools=0 全域 = 生產端 demand-routing 缺口（QA reframe）**：workshop 已完工（Team6/30/3/19/45）產 tools（recipe `out:tools, in:material 4`）**但 `use_demand=true`**（需求驅動）；weaponsmith build-need（tools 3）**從沒發 tools-demand 信號** → demand-gated workshop 不產。★根：`order_system:121` buy-order res list **不含 tools**（只 weapon/material/ore）→ mil 隊無 tools 買單 → `demand(tools)=0` → workshop 不產 → tools 恆 0。= material「需求沒轉買單」的**生產端版本**（同 means-end 家族深一層）。★workshop civilian-only / weaponsmith military-only = cross-outpost-type，須經 trade（mil 買 tools ← civ workshop 產）。
 - **修（blueprint 定 2 件）**：①**tools-demand 註冊**（means-end 擴 tools：weaponsmith build-need→tools need→tools 買單→demand→workshop 產→mil 買→afford）②**afford×1.5 系統性重審**（mint-safe 計算調整）。v2b coin **defer**（build 閘不解，coin 無用）。material 停止迭代（117 夠）。連 [[project_economy_arc]]。
 
+## ★★★貧困陷阱 = reserve_factor urgency-suppression 兩鎖（2026-07-23 大設計洞，blueprint 命記·folds game-design）
+
+**機制（架構自洽非 bug，但強故事）**：`reserve_factor = clampf(0.6 + (hoard-0.5)×0.5 - urgency×0.4, 0.1, 1.2)`（trade_valuation:97）；`urgency = max(food_urg, coin_urg)`（:108）。**常駐高 urgency → factor 壓穿（0.25-0.29）→ 隊把非活命品(material)賣到 reserve(cap×25-30%≈25-29)→ structurally 囤不到投資本(afford 門檻 105)→ 蓋不出原本能解壓的設施(farming 升級/weaponsmith 等)→ 永困高壓**。= **貧困陷阱**：越窮越守不住資產→越蓋不起翻身設施→越窮。
+- **★兩把鎖（data 坐實，非臆測）**：`urgency=max(food_urg, coin_urg)`——
+  - **food 鎖**：`food_urg=(DESPERATION-food_days)/DESPERATION`。**食安 keystone（GATE-A 等）解此把**。
+  - **★coin 鎖**：`coin_urg=1-coin/(pop×URGENCY_COIN_COMFORT=10)`。3 trace 隊 coin_urg：T1(coin1.6)≈0.97、T35(12.3)≈0.80-0.88、T23(22.5)≈0.63-0.78——**光 coin_urg≈0.8→factor≈0.28=正中觀測**→**coin_urg 對 mil 隊很可能是 binding(max 那項)**。∴**食安修單獨不解 afford**（food_urg→0 但 urgency=max(0,coin_urg 0.8)仍 0.8）。coin 鎖 = 既有 coin poverty（mil loot→anon_treasury 不流 team.coin，v2b defer）**升格**：不只擋 material-buy，是 urgency 壓 reserve_factor 的第 2 把。
+- **逃生閥 = 解兩鎖**：軍設施 afford 要 **food AND coin urgency 都降**。食安解一把；coin 鎖需另解（v2b coin 重框成「貧困陷阱第 2 把」，對 mil afford binding→優先序 blueprint 裁）。
+- 連 [[project_desperation_economy]]（絕境經濟根）+ [[project_economy_arc]] 食安 keystone + cost70-trace（下條，afford largely-ineffective 的真 root 就是此兩鎖）。
+
 ## ★cost70 診斷訂正 + construction cap 100 脫鉤 afford 門檻 = means-end 缺口鐵證（2026-07-23 blueprint factcheck）
 
 **「material 天花板 117」= 診斷框架錯**（blueprint factcheck，systems 認錯=本場第 2 次 file:line≠詮釋）：117=`_calc_team_need`（faction_ai:2497，NPC 公庫領料進背包 target）**與建造無關**。**建造真機制**：afford=`avail(公庫+私 material) ≥ cost×1.5`（faction_ai:2801）；material holding 趨向 `reserve=need_keep(material)×reserve_factor`（trade_valuation:94，超 reserve 賣掉）；`need_keep(material)=self_use(0,PURE_INTERMEDIATE)+supply_chain(0 若無製造設施)+construction(cap 100,need_oracle:52)`。
