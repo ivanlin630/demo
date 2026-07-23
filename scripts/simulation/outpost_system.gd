@@ -78,7 +78,7 @@ const FACILITY_DEF: Dictionary = {
 		"leader_pref": { "野心": 0.2, "好戰": 0.3 },
 	},
 	"smeltery": {
-		"cost": { "material": 80, "tools": 3, "ticks": 336 },
+		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,閉同族 afford-ceiling 洞;70×1.5=105<天花板 117)
 		"allowed_outpost": ["military"],
 		"current_level_key": "smelter_level",
 		"leader_pref": { "好戰": 0.2 },
@@ -90,7 +90,7 @@ const FACILITY_DEF: Dictionary = {
 		"leader_pref": { "好戰": 0.4 },
 	},
 	"armorsmith": {
-		"cost": { "material": 80, "tools": 3, "ticks": 336 },
+		"cost": { "material": 70, "tools": 3, "ticks": 336 },   # ★mil-facility-cost70:material 80→70(仿 weaponsmith,閉同族 afford-ceiling 洞;70×1.5=105<天花板 117)
 		"allowed_outpost": ["military"],
 		"current_level_key": "armorsmith_level",
 		"leader_pref": { "慎重": 0.3, "好戰": 0.2 },
