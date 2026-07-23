@@ -79,10 +79,14 @@ static var REGISTRY: Dictionary = {
 		#   → 讓 買糧/交易/覓食 接手（forest 隊賣特產換糧而非返空家）。
 		# ★GATE-A：home-empty gate 加 OR home_food_productive——產糧家即使 granary 空也值得返（回去採飽，
 		# 非空 granary trap）。harvest positional→離 food-rich home 買糧=home 沒人採→餓死 surplus 平原之修。
+		# ★GATE-A 二刀 hysteresis：+returning 隊撐到 food≥RETURN_HYSTERESIS_DAYS(5) 才釋放——破 oscillation
+		# (返家途中 food 過 DESPERATION 3→option 消失→漂回 idle/trade→re-warn，days_left 卡 1.6-3.0 never 爬升)。
+		# band[3,5]:trigger 3 開始返家、途中撐到 food≥5 停 → 完成返家+到家 harvest 補到 5+ 才出門。
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.has_home_outpost and (ctx.home_food >= DecisionTerms.RESTOCK_MIN or ctx.home_food_productive) and ( \
 					(ctx.is_merchant and ctx.food_days < DecisionTerms.RESTOCK_DAYS) \
-					or ctx.food_days < DecisionTerms.DESPERATION_DAYS),
+					or ctx.food_days < DecisionTerms.DESPERATION_DAYS \
+					or (ctx.current_task == TeamData.TASK_RETURN_HOME and ctx.food_days < DecisionTerms.RETURN_HYSTERESIS_DAYS)),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.new()._find_own_outpost(state, team)},
 	},

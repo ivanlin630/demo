@@ -1,6 +1,7 @@
 class_name DecisionTerms
 
 const RESTOCK_DAYS: float = 5.0   # TEST VALUE：商隊糧低於此 → proactive 返家補給(> WARNING 3)
+const RETURN_HYSTERESIS_DAYS: float = 5.0   # ★GATE-A 二刀:返家途中撐到 food≥此才停(=RESTOCK_DAYS 重用非新魔數)。band[DESPERATION 3, 此 5]破 oscillation(途中過 3 就漂回)
 const NON_MERCHANT_TRADE_FACTOR: float = 0.3   # TEST VALUE：非商隊 roam-trade 軟壓(能但很少)
 const LOOT_DRIVE_BASE: float = 1.0   # TEST VALUE — loot 驅力基值；× weight(loot 0..1) → loot util ≈ 0..1，危時不碾壓 survival(≥2)
 const DESPERATION_DAYS: float = 3.0    # TEST VALUE — 食物低於此才入絕境 option（對齊 WARNING_DAYS）

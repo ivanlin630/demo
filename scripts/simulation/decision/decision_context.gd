@@ -32,6 +32,7 @@ var has_manufacturing_facility: bool = false   # S1：本格有製造設施+生�
 var produce_pull: float = 0.0   # ★製造 bootstrap 子根②：自家可造 outputs 的 belief demand-responsive worst-shortfall（0-1；替死常數 produce_need）
 var is_merchant: bool = false
 var has_home_outpost: bool = false
+var current_task: String = ""   # ★GATE-A 二刀 touch0：team 自身 current_task（返家 hysteresis 用；自身欄非 god-view）
 var has_weak_prey: bool = false
 # capability grounding（藍圖 tag-soft-ruling 裁2）：self 有效武裝比（armed / pop）。
 # attack/loot eval 讀此→「打得動嗎」的世界事實（無牙商隊 attack eval 趨 0=送死沒人幹，非被禁）。
@@ -181,6 +182,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			c.produce_pull = _best
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
+	c.current_task = team.current_task   # ★GATE-A 二刀 touch0：自身 current_task（返家 hysteresis；自身欄非 god-view）
 	# threat（F-D6 un-stub）：視野內最高敵威脅（belief-based ThreatAssessment，含逼近/敵意/距離衰減）。
 	# 餵 threat_pressure term → unified 隊(商隊/生產)遇逼近敵會 FLEE（威脅真驅動非死 stub）。
 	c.threat = DecisionContext._max_threat(state, team)
