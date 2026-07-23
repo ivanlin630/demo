@@ -84,7 +84,8 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 		"restock_need":
 			if opt != "返家補給": return 0.0
 			# T1：剝 hunger urgency(移 coeff)，保機會品質——家糧倉越滿返家越值(空家不返)。
-			return clampf(ctx.home_food / RESTOCK_MIN, 0.0, 1.0)
+			# ★GATE-A：產糧家即使 granary 空也 drive=1.0（回去採飽脫餓，非空 granary 低 drive 返不了）。
+			return maxf(clampf(ctx.home_food / RESTOCK_MIN, 0.0, 1.0), 1.0 if ctx.home_food_productive else 0.0)
 		"threat_pressure":
 			# ★threat-oracle S2（finding5 rewrite）：FLEE = 膽量秤(求生欲/1−好戰) × severity × (1−winnable)
 			#   + 恐慌加成（outlet:怯/絕境）。無威脅(threat=0)→0（食足隊不 spurious FLEE 餓死；panic 僅威脅時計）。
