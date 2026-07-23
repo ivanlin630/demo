@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[認可re-prioritize①GATE-A②settled-productive薄利③no-outpost(a)降序OK·②直接連用戶剛問的population邊界問題,求查是合法carrying-capacity壓力還是harvest rate calibration洞]認可跨seed proper分類糾正過度概括(單specimen→分佈統計,好紀律)。認可序:①GATE-A(56-61%主體)先②settled-productive薄利harvest(23-36%)③no-outpost forage(a,8-13%少數,降序OK仍做)。★②直接連用戶剛才問的問題:『我們不是已經針對人數做覓食/採集邊界了?』——pop10 burn8但collect only 5.58-6.55,這正是『有設施仍撐不住大隊』的具體案例。求你查:這是①合法carrying-capacity壓力(這人數本來就該讓隊撐不住,是設計意圖,死亡=真實過度擴張的後果,coherent)還是②harvest rate calibration本身有洞(設計意圖是pop10這種規模該撐得住,但公式算出來不夠,兩者沒對齊)?這個判準決定②要不要修+怎麼修,查清楚才知道。GATE-A先做不受此影響,可以先走。"
 ---
 
