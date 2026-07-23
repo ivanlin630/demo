@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[measure-first 診斷·食物地方安全新 arc·subsistence-trap 盛行率+local food 失敗根(gate vs real-cost)·別 spec 前先量] blueprint 裁下 arc=食物地方安全,認可 measure-first。目標=分類 local 食不穩是①補丁閘假稀缺(食物存在/可達但機制擋)還是②真世界代價(pop>local regen+無 trade access 真缺)+量 subsistence-trap 規模。跑 main(produce_need merge 後)長跑 seed 42/1337。三組:A subsistence-trap 盛行率(%隊 never-specialize/food_days 分布/farming survival-crush fire 率/facility-build histogram farming vs specialize)B local food 失敗分解(慢性缺糧隊 §④b specimen:terrain regen/pop vs local regen/food 買單 posted vs FILLED/has_food_market+dist/has_specie 付得起/★world food surplus 是否有人囤沒賣=分配 gap 非產量)C 補丁閘候選查(food_security_target 囤積:avg food held vs sold+surplus-sell 率[FOOD_SEC_BASE persona-modulated,若普遍囤到 target 才賣→surplus 少到不了 market]/food-seek 空市場 re-seek loop/granary cap/spoilage)。★★§④b+specimen 送 QA 判故事(哪些隊卡 subsistence、為何、是閘還是真缺)。★別下 fix 結論(measure 完 to:systems,我 patch-gate-first 判 gate vs real-cost 再 spec)。"
 ---
 

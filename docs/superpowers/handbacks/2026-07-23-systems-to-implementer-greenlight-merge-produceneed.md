@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[green-light·produce_need 50337300 全條件綠·MERGE NOW=武器 arc 最後一刀] reviewer merge-gate R² CLEAN(produce_pull impl 精確吻合 spec、belief-gate 硬驗 _test_perception_gate、tap 純觀測零行為變、零 RNG、融合綠)+我 ratify 授權=全綠。★merge feat/produce-demand-responsive→main。這是武器經濟 arc 最後一刀。merge 後 arc 收官,轉食物地方安全新 arc(measure-first 中,等 measurer 數字才 spec)。v2b DEFER 收攤。"
 branch: feat/produce-demand-responsive
 commit: 50337300

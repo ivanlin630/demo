@@ -6,6 +6,14 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★★★食糧地方安全 arc = session keystone：兩分配閘（2026-07-23，measure+QA+systems code 三方坐實）
+
+24-37% 隊 end-state 絕境，**但 world food 34904 充裕**（surplus 79-82% posted）= **純分配 gap 非產量**。QA gate-vs-real-cost 判 + systems patch-gate-first code 確認 = **兩閘 + forest 真缺少數**：
+- **★GATE-A = positional-harvest「離家棄產」（假稀缺，絕境主體）**：harvest 是 positional（`resource_system:53,71-76` 每 cadence 採隊**站的** tile；food regen→**tile pool** 非 granary，只有站在上面的隊採；farming_level 只是採集乘子:268 仍需在場）。→ 食低隊離 food-rich home（plains regen 12.8≫burn 4.8）去買糧 → home regen 沒人採、granary 恆 0 → 餓死在別人市場、自家平原溢出（T28 血證：at_market/granary 0/plains 餵得起）。殘忍陷阱：低糧→離家買→買不到(GATE-B)→不採 home→餓死。**修向=認自家 tile 是食物源（食低+home 產糧≥burn→留家被動採、別離家買，鏡射 material food-ok gate）＝survival-correct 非削弱求生**。
+- **★GATE-B = local-only 撮合（真空間分配，死法②）**：`_market_visitor_buy`（interaction:781）只從**抵達 tile 的 granary**買 → 遠方 surplus 搆不到 → 空間錯配（buy-fill 0.5%：seek 1363→arrive 333→fill 4；sell_no_surplus 主導）。同 material Gate B。修=分配機制（surplus 流向 demand），大於 GATE-A。
+- **forest 真缺**（T7/T43/T47 regen<burn）=少數 + 被 GATE-B 堵死逃不掉，修 GATE-B 後自動有出路（買糧/遷移）。
+- **★attack 序**：GATE-A 先（最大槓桿+survival-correct+洩 buy-fill 壓力）→ GATE-B（死法②分配機制，兼 goods）。**★session keystone**：兩閘=開頭 starvation 死隊 + 結尾 workshop-build 終閘同根。呈 blueprint sanity-check framing（`...-food-gates-confirmed-attack`）。連 [[project_economy_arc]] 死法②/[[project_desperation_economy]]。
+
 ## ★★★武器經濟 arc 正式收斂完畢 → 併入食物安全 arc（2026-07-23 blueprint 收官裁定）
 
 food→goods→weapons→material→tools→workshop-build 整條鏈**正式收斂**。誠實記：**每一層都是真 bug 且已修**——material-buy v1/v2a（chicken-egg trade 側）、tools-demand（生產端 demand-routing）、weaponsmith cost70（afford margin）、produce_need demand-responsive（死常數→市場反應，子根②）全部 merged/授權 merge、無迴歸。**但終閘不在本輪範圍**：
