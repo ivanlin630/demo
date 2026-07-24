@@ -45,6 +45,7 @@
     status: String }             # active / satisfied / abandoned
   ```
 - **持久跨 tick**：不因當下不能做而清（vs `FactionData.goals` 每 cadence `clear()`＝反模式）。
+- **★target 語意定案（次要3：防偷渡 plan-state）**：`goal_state` 只存**慾望本身**——`goal_type` +（若多實例）**最終目標** target（如 `build_weaponsmith` 的 facility_type、`acquire_material` 的 res）。**中繼 frontier 的具體 tile/子目標 target 由 resolver 每 tick 重算，絕不鎖進 goal_state**（定位型的「去哪塊 forest」每 tick 重選最近可達）。∴ 存的是「要什麼」非「怎麼走的第 N 步」＝**無 plan-state**（守 §9，vs 退役 S2 鎖 plan-state 被打斷就壞）。
 - **不重用既有 3 欄**（R① 坐实全不能用）：`PersonData.goals`（reaction 消費、與 decision 脫節）/`FactionData.goals`（每 cadence 重建）/`FactionData.strategic_goals`（`invariants:372` 禁當獨立權威）。**team-level 全新欄**。
 - **goal 生成/維護**（誰掛 goal 上去）：cadence 評估（人格×現況 → 掛「想要 X」慾望，util-driven 非硬派）。**基礎 goal-set**（WHAT §8）：資源維持（food/material/tools/weapons/coin 各「維持夠用」）+ 設施發展（每座設施「想要 F」）。**掛/退 goal 本身也走 util 門檻**（夠想才掛、達成/長期折零則退），非 scripted。
 - **決定性**：goal 掛/退 讀狀態+人格閾，禁 randf。
@@ -94,7 +95,11 @@
   | `manpower` | pop ≥ N | 「長 pop」candidate（既有繁殖/招募路）|
   | `facility` | 自有 outpost 有該設施 | 遞迴 `build_<facility>` goal |
   | `subgoal` | 另一 goal satisfied | 遞迴該 goal |
-- **★通用 tile-resolver**（定位型核心新增，取代一次性 finder）：`find_nearest_tile(state, team, condition_fn, reachable=true) -> tile`。condition_fn 宣告式（terrain==forest / 有 material regen / unowned…）。**這是現有各 `_find_*` finder 缺的通用版**（R① 坐实）。決定性（無 randf；tie-break 用 tile_id）。
+- **★通用 tile-resolver（must-fix②：查詢來源必拆兩類，禁 generic 含混過 constitution_gate）**：
+  - **(i) 純地形/物理地理查詢**（`terrain==forest` / `material regen>0` / 靜態地形屬性）＝**公共地理**，比照 `constitution_gate.gd:41` 「地理=公共知識 legit → # gate-ok」先例：`find_nearest_terrain_tile(state, team, terrain_cond_fn, reachable)` 可全圖掃，標 `# gate-ok`。
+  - **(ii) 所有權/動態狀態查詢**（`control`/`unowned`/誰擁有此地＝WHAT §3 location 前置的 `control:true`）＝**會變動的所有權，非固定地理**，踩 `invariants.md:192` 市集判例（★★零豁免、必經 belief）→ **禁全知全圖掃**，必走 belief store：`find_nearest_known_tile(...)` 讀新建的通用 **`team_tile_known` belief store**（鏡射既有 `team_market_known`，見 §12 in-scope 交付）。
+  - **可達（reachable）**＝belief-reachable（感知鐵律，非全知 PathSystem live）。決定性（無 randf；tie-break tile_id）。
+  - **★模組路徑**：`GoalResolver` + tile-resolver 放 `scripts/simulation/decision/` 底下（`constitution_gate.gd` `GV_FILE_RE` 涵蓋 `decision/`）→ god-view/mapscan detector 看得到，別溜過憲法閘。
 - **有界**：只 resolve 到 frontier（當下能做的一層），**不算整圖、無 plan-state**（vs 退役 S2）。每 tick 重算 frontier（cheap，local）。
 - **決定性**：純讀狀態+registry，禁 randf（[[feedback_observer_no_global_rng]]）。
 
@@ -117,7 +122,11 @@
 - **現況**（R① 坐实）：`_supply_chain`+`_construction_facility_need` 真有資源型 chaining，但硬 scope `CONSTRUCTION_COST_RES=["material","tools"]`。
 - **改**：資源型前置的 need 傳播**泛化**——goal 的 `resource` 前置 → 生 res-need → 若該 res 需製造/採集則遞迴其鏈（既有 `_supply_chain` DAG walk 精神，但由 GoalRegistry 驅動非硬 scope）。
 - **邊界**：NeedOracle 續管「資源數量 need」；**定位/人力/設施/子目標前置不塞 NeedOracle**（它 per-(team,res)→float 表達不了）——走 GoalResolver 的 per-kind handler。**分工清楚**：資源量→NeedOracle；非資源前置→Resolver。
-- re-entrancy guard 精神沿用（防 material↔tools 型跨環）。
+- **★兩 guard 聯集無環定案（次要5：兩張圖交叉安全論證）**：系統有兩張依賴圖 + 各自 re-entrancy guard——
+  - **goal 依賴圖**（`goal_type` keyed visiting set，組件 C）：管 goal→子 goal→…（設施/子目標型前置的 goal 遞迴）。
+  - **recipe DAG**（`res` keyed `_construction_visiting`/`_supply_chain`，NeedOracle）：管 res→原料 res。
+  - **交叉點 = 資源型前置**：goal resolver 遇 `resource` 前置 → **委給 NeedOracle**（進 recipe 圖）。
+  - **無跨圖環論證**：方向單向 **goal 圖 → res 圖（葉方向）**——res-need 計算**永不回呼 goal resolver**（NeedOracle 只算資源數量，不生 goal、不 walk goal_state）。∴ 兩圖串接是 DAG（goal 圖在上、res 圖在下、單向下沉），聯集無環。各 guard 管各自圖內環（goal→goal 環 / material↔tools 環），交叉邊單向不成環。**invariants 明記此單向約束**（NeedOracle 禁讀/寫 goal_state，守葉方向）。
 
 ---
 
@@ -128,6 +137,9 @@
   - **預期回報**（淺啟發，守有界）：該 frontier 解掉的**上層 goal payoff**（GoalRegistry `payoff` 欄）。非完整經濟報酬模型。
   - **折現(延遲, 人格)**：延遲越長折越重；**人格=折現率**（耐心/慎重折輕=遠視；衝動/絕境折重=短視）。**權重非 gate**（憲法：人格 WEIGH 不 GATE）。
   - 效果（WHAT §6）：快餓死隊折到趨零→輸給眼前糧危（不起步走遠路）；穩定隊遠視投資。**情境感知（餓=短視）由 food_days 進折現率**，同既有 survival boost 精神但反向（boost 拉近端、折現壓遠端）。
+- **★遞迴子目標 discount 歸屬 + label 穩定定案（次要4）**：resolver 唯讀、每 tick 合成 transient frontier（**不寫回 goal_state**）。
+  - **discount 歸屬**：中繼子目標的**延遲/折現算「root goal」的**——`created_tick` 用 root `GoalInstance.created_tick`（掛慾望的時間），折現延遲 = 從 root goal 掛起算的預估總延遲。中繼子目標不各自持久、不各記 created_tick。
+  - **label 穩定 = 有界不爆炸**：frontier `label` = `root_goal_type + ":" + frontier_kind`（如 `acquire_material:location`）。**每 tick 只到 frontier 一層** → label 空間 = `goal_types × prereq_kinds`（有界小集，非組合爆炸的路徑空間）→ 既有 `COMMITMENT_BONUS`（為小固定集設計）對 frontier label 沿用**安全**（同一慾望的同一 frontier-kind label 穩定，防抖有效）。
 - **HOW 待 plan 細化**：`payoff` 估法、折現函數形（exp/linear）、人格折現率映射——plan 定具體公式（TEST VALUE，measure 後校）。
 
 ---
@@ -144,8 +156,14 @@
   ```
 - winner 若是 goal candidate → 用 `cand.to_task`；若是 static option → 既有 `to_task_of`。
 - **承諾**：goal-level 承諾（掛著的 goal 持久）+ 既有 option commitment bonus 對 frontier label 沿用（現行 frontier +bonus 防抖）。
-- **boost 交互**：survival/threat boost 仍只作用 static SURVIVAL/THREAT option（goal candidate 是發展型，絕境時折現自然壓低=不需 boost 排除；survival boost 破頂仍優先＝存亡保序）。
 - **決定性**：candidate 順序決定性（resolver 輸出 stable-sorted by goal created_tick + tile_id），tie-break 同既有 `i` 順序。
+
+### ★★must-fix① util-scale 架構護欄（HOW 層級硬保證，非留 plan「相信折現」）
+goal candidate **不在 `DecisionOptions.applicable(ctx)` 集內** → 不經 `consistency_coeff`、不吃 survival/threat boost。若 candidate.util 無上界，隨便挑的 payoff/折現數字可能蓋過 `static_u + SURVIVAL_BOOST_MAX(2.5)`，**破全引擎仰賴的「survival 恆贏」不變量**（`THREAT_BOOST_MAX < SURVIVAL_BOOST_MAX` 的精神）。∴ **HOW 層級硬護欄（二者皆納，非擇一）**：
+1. **goal candidate 一律走發展層壓制**：`cand.util` 先乘 `dev_urgency_coeff(ctx)`——鏡射 `NeedHierarchy.consistency_coeff` 對「發展/遠層需求」的壓制（絕境 `food_days→0` 時係數 →0）。goal candidate 全歸「發展層」（它們本就是遠慾望，非存亡/威脅即時反應）。= 讓 candidate 吃跟 static 發展 option **同款急迫度壓制**（語意一致：絕境時遠層被壓）。
+2. **明文上界宣告（不變量）**：`cand.util` clamp 上界 `< SURVIVAL_BOOST_FLOOR 對應的 survival-class 最低保證 util`，即 **goal candidate util 恆 < 絕境 survival-boosted static option util**。硬保證：**任何 goal candidate 永遠贏不過 survival boost**（發展慾望絕不蓋過活命）。goal candidate 之間才靠 payoff×折現 排序。
+- **boost 交互**：survival/threat boost 續只作用 static SURVIVAL/THREAT option；goal candidate 靠上述 (1)(2) 架構壓制（**非假設折現會救**）。
+- ★**合成 range 斷言（S2/S6，unit-level 非 gameplay measurement，不違 whole-system-first）**：S2（candidate 首次非零 util）+ S6（折現接上）各加合成 ctx 檢查——斷言「絕境合成 ctx（food_days→0）下，任意 payoff 的 goal candidate util < survival-boosted static option util」。護欄迴歸硬驗。
 
 ---
 
@@ -170,11 +188,11 @@
 > ★用戶原則②：**建完前不邊建邊 measure 個別症狀**。slice 是**內部開發/R②粒度**，非「每 slice measure 一次症狀」。整套接通跑得動（無崩潰、determinism 綠）才回頭 measure 基礎經濟活起來。
 
 - **S1 骨架**：GoalState schema（組件 A）+ GoalRegistry 空表結構（組件 B）+ rank 池整合 hook（組件 G，先吃空 candidate 列表＝byte-identical no-op proof）。**驗**：determinism 2 跑 identical、既有行為零變（candidate 空）。
-- **S2 resolver + 資源型**：GoalResolver（組件 C）+ 資源型 handler + NeedOracle 泛化（組件 E）+ 資源維持 goal-set（food/material/tools/weapons/coin）。定位型先 stub（回無 candidate）。**驗**：資源 goal 能 resolve、determinism。
-- **S3 定位型 + 通用 tile-resolver**（組件 C 定位 handler）：解本場 material 核心缺口（缺料→找 forest tile→移動/settle candidate）。
+- **S2 resolver + 資源型**：GoalResolver（組件 C）+ 資源型 handler + NeedOracle 泛化（組件 E）+ 資源維持 goal-set（food/material/tools/weapons/coin）。定位型先 stub（回無 candidate）。**驗**：資源 goal 能 resolve、determinism、**★must-fix① 合成 range 斷言**（絕境 ctx 下 candidate util < survival-boosted static，護欄迴歸）。
+- **S3 定位型 + 通用 tile-resolver**（組件 C 定位 handler）：解本場 material 核心缺口（缺料→找 forest tile→移動/settle candidate）。**★含 must-fix②**：地理查詢用 `find_nearest_terrain_tile`（gate-ok）；所有權/control 查詢建 **`team_tile_known` belief store**（鏡射 `team_market_known`）+ `find_nearest_known_tile`。**驗**：constitution_gate 綠（無新 god-view leak）、感知鐵律 belief-reachable。
 - **S4 設施發展 goal-set + 設施/人力型前置**（8 座設施鏈）。
 - **S5 委派 peer option**（組件 D）+ gate② 正解 + 餘力 gate 多線。
-- **S6 折現**（組件 F）+ 人格折現率。
+- **S6 折現**（組件 F）+ 人格折現率。**驗**：**★must-fix① 合成 range 斷言複跑**（折現接上後護欄仍守：任意 payoff 的 candidate util < survival boost）。
 - **S7 goal 生成/維護 cadence**（掛/退 goal 的 util 門檻）+ 收尾接通。
 - **whole 接通後** → measure（WHAT §12：基礎經濟活起來、EXPAND/harvest/facility/deal 脫近零、人格差異化投資、material/coin/掛單噪音自然消退）。
 - 每 slice：**R② 必過** + determinism 綠 + 憲法 gate（constitution_gate：新機制禁引擎外 task 指派/god-view/RNG）。
