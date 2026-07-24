@@ -21,12 +21,35 @@ const MAINTAIN_GOAL_RES: Dictionary = {
 	"maintain_coin":     "coin",
 }
 
-# ★registry 資料表（goal_type → {prereqs, payoff}）。S2 填 5 資源維持 goal。
-# payoff=解掉此 goal 的上層 util 估（TEST VALUE，S6 折現+校準）。qty 走 need_keep 通用（resolver 動態算非硬寫）。
+# ★S4 設施發展 goal → 對應 facility（8 座）。prereqs 由 GoalResolver 從 OutpostSystem.FACILITY_DEF 動態導
+# （resource=build-cost material/tools、facility=allowed_outpost type、manpower=build pop 門檻）。goal 生成走 _facility_deficit desire。
+const BUILD_FACILITY_GOALS: Dictionary = {
+	"build_farming":     "farming",
+	"build_workshop":    "workshop",
+	"build_apothecary":  "apothecary",
+	"build_mint":        "mint",
+	"build_stable":      "stable",
+	"build_smeltery":    "smeltery",
+	"build_weaponsmith": "weaponsmith",
+	"build_armorsmith":  "armorsmith",
+}
+
+# ★registry 資料表（goal_type → {prereqs, payoff, facility?}）。S2 5 資源維持 + S4 8 設施發展。
+# payoff=解掉此 goal 的上層 util 估（TEST VALUE，S6 折現+校準）。build_F prereqs 動態導自 FACILITY_DEF。
 static var REGISTRY: Dictionary = {
 	"maintain_food":     {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "food"}],             "payoff": 1.0},
 	"maintain_material": {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "material"}],         "payoff": 1.0},
 	"maintain_tools":    {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "tools"}],            "payoff": 1.0},
 	"maintain_weapons":  {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "weapon_melee_low"}], "payoff": 1.0},
 	"maintain_coin":     {"prereqs": [{"kind": PREREQ_RESOURCE, "res": "coin"}],             "payoff": 1.0},
+	# S4 設施發展 8 座（facility 標記，prereqs 動態導 FACILITY_DEF）。payoff 略高於 maintain（發展意圖）。
+	"build_farming":     {"facility": "farming",     "payoff": 1.5},
+	"build_workshop":    {"facility": "workshop",    "payoff": 1.5},
+	"build_apothecary":  {"facility": "apothecary",  "payoff": 1.5},
+	"build_mint":        {"facility": "mint",        "payoff": 1.5},
+	"build_stable":      {"facility": "stable",      "payoff": 1.5},
+	"build_smeltery":    {"facility": "smeltery",    "payoff": 1.5},
+	"build_weaponsmith": {"facility": "weaponsmith", "payoff": 1.5},
+	"build_armorsmith":  {"facility": "armorsmith",  "payoff": 1.5},
 }
+const FACILITY_BUILD_POP_MIN: int = 6   # build pop 門檻（既有 _dispatch_facility_builder pop 檢查）
