@@ -84,6 +84,10 @@ var need_urgency: PackedFloat32Array = PackedFloat32Array()
 var solo_intent: Dictionary = {}
 var solo_task_last: String = ""   # SoloAI 上次選的 task（承諾慣性；與戰略 intent 分離，F-D4）
 var current_option: String = ""   # 統一決策引擎承諾用（現行 option 名）
+# ★means-end 長程規劃（組件 A，HOW spec 2026-07-24 §2）：team-level 遠慾望列表，跨 tick 持久（非 string tag）。
+# 每元素 GoalInstance = {goal_type:String, target=null, created_tick:int, status:String[active/satisfied/abandoned]}。
+# 只存慾望本身(要什麼)非 plan-state(怎麼走)；中繼 frontier 由 GoalResolver 每 tick 重算不鎖此。S1 空初始。
+var goal_state: Array = []
 var beast_kind: String = ""       # 非空 = 此 team 為野獸 pseudo-team（鹿/野豬/熊/狼群）
 var beast_strength: float = 0.0   # npc_combat 用：beast team 的整體戰鬥力
 var resources: Dictionary = {
