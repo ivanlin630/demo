@@ -81,16 +81,22 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, res)
 		if mp != Vector2i(-1, -1):
 			return _mk_candidate(g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
-	# ── 取得手段 2：採@地形（S3，買不到→定位取得）★material 缺口鏈：需該地形 outpost 採；無→移動到最近可達地形 tile。
+	# ── 取得手段 2：採@地形（S3，買不到→定位取得）★material 缺口鏈：需該地形 outpost 採。
+	# ★湧現閉環：缺料→(a)移動到 forest→(b)到了建 outpost→own.terrain==forest→採 satisfied。
 	if RES_HARVEST_TERRAIN.has(res):
 		var terrain: String = String(RES_HARVEST_TERRAIN[res])
 		var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 		var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 		if own_tile != null and own_tile.terrain == terrain:
-			return {}   # 已有該地形 outpost → 採 satisfied（既有 harvest 供給），無 move candidate
+			return {}   # ★閉環完成:已有該地形 outpost → 採 satisfied（既有 harvest 供給）
+		var cur: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+		if cur != null and cur.terrain == terrain and cur.outpost_level == 0:
+			# ★build-closure frontier（REDO）：隊已在目標地形 tile 且未建 → 「建 outpost 那裡」candidate（in-place build）。
+			# unowned 過濾:目標格已被別隊擁有→outpost_level>0 不進此支;真被占 start_build 自然擋。委派 build=S5 別提前。
+			return _mk_candidate(g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx, {"task": TeamData.TASK_BUILD, "target": team.tile_pos})
 		var pos: Vector2i = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)   # 純地形=公共地理
-		if pos != Vector2i(-1, -1):
-			# frontier「移動到最近可達地形 tile」（到了下一 frontier=建 outpost 那裡，前置滿才 applicable→湧現順序）。
+		if pos != Vector2i(-1, -1) and pos != team.tile_pos:
+			# frontier1「移動到最近可達地形 tile」（防 d=0 對自己 tile 生移動卡住）。
 			return _mk_candidate(g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
 	return {}   # S3 無取得手段（產=S4 設施）
 

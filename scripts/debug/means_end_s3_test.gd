@@ -8,6 +8,7 @@ var _fail: int = 0
 
 func _initialize() -> void:
 	_test_material_gap_chain()      # ①material 缺口鏈:缺料+無 forest outpost+買不到→移動 forest candidate
+	_test_build_closure()           # ★REDO:隊在 forest tile 未建→build-closure candidate;建成→採 satisfied(閉環)
 	_test_tile_resolver_two_class() # ②tile-resolver 兩類分流(地形查詢 vs control 走不同源)
 	_test_belief_only_discovered()  # ③team_tile_known 只存已發現 tile(非全圖)
 	_test_belief_reachable_bounded()# ⑤belief-reachable(bounded,遠 tile 不選)
@@ -61,6 +62,42 @@ func _test_material_gap_chain() -> void:
 	if not found.is_empty():
 		_ok(found["to_task"]["task"] == TeamData.TASK_MIGRATE and found["to_task"]["target"] == Vector2i(8, 5),
 			"to_task=移動到最近 forest tile(8,5)（means-end 湧現:移動→建→採 順序）")
+
+# ★REDO build-closure 閉環：隊已在 forest tile 未建→「建 outpost 那裡」candidate；建成 forest outpost→採 satisfied
+func _test_build_closure() -> void:
+	print("--- ★REDO build-closure 閉環 ---")
+	var w: Array = _mk(); var state: WorldState = w[0]; var team: TeamData = w[1]
+	# 想建 weaponsmith → material need；material 0；隊已站在 forest tile（未建 outpost）
+	var mtile: HexTileData = state.world.tiles[5 * 1000 + 5]
+	mtile.outpost_owner = 1; mtile.outpost_type = "military"; mtile.outpost_level = 1; mtile.set("weaponsmith_level", 0)
+	team.resources["material"] = 0.0
+	# 讓隊「移到」forest tile(7,7) 站著、且該 tile 未建 outpost
+	_set_forest(state, Vector2i(7, 7)); team.tile_pos = Vector2i(7, 7)
+	# ★但 own outpost 仍在 (5,5)=military plains（own.terrain != forest）→未 satisfied
+	GoalResolver.ensure_maintain_goals(state, team)
+	var ctx: DecisionContext = DecisionContext.gather(state, team)
+	var cands: Array = GoalResolver.frontier_candidates(state, team, ctx)
+	var build_c: Dictionary = {}
+	for c in cands:
+		if String(c.get("label", "")) == "maintain_material:facility":
+			build_c = c
+	_ok(not build_c.is_empty(), "隊在 forest tile 未建 → build-closure candidate（maintain_material:facility，閉環到採）")
+	if not build_c.is_empty():
+		_ok(build_c["to_task"]["task"] == TeamData.TASK_BUILD and build_c["to_task"]["target"] == Vector2i(7, 7),
+			"to_task=TASK_BUILD in-place(7,7)（建 forest outpost 那裡）")
+	# ★閉環完成：隊 own outpost 在 forest → 採 satisfied（無 move/build candidate）
+	var w2: Array = _mk(); var s2: WorldState = w2[0]; var t2: TeamData = w2[1]
+	_set_forest(s2, Vector2i(6, 6))
+	var ftile: HexTileData = s2.world.tiles[6 * 1000 + 6]
+	ftile.outpost_owner = 1; ftile.outpost_type = "civilian"; ftile.outpost_level = 1; ftile.set("weaponsmith_level", 0)
+	t2.tile_pos = Vector2i(6, 6); t2.resources["material"] = 0.0
+	GoalResolver.ensure_maintain_goals(s2, t2)
+	var ctx2: DecisionContext = DecisionContext.gather(s2, t2)
+	var has_mat_loc_or_fac: bool = false
+	for c in GoalResolver.frontier_candidates(s2, t2, ctx2):
+		var lbl: String = String(c.get("label", ""))
+		if lbl == "maintain_material:location" or lbl == "maintain_material:facility": has_mat_loc_or_fac = true
+	_ok(not has_mat_loc_or_fac, "★own forest outpost → 採 satisfied（無 material move/build candidate＝閉環完成）")
 
 # ② tile-resolver 兩類分流：find_nearest_terrain_tile(公共地理全圖) vs find_nearest_known_tile(belief 只已知)
 func _test_tile_resolver_two_class() -> void:
