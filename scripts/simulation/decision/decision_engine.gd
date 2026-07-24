@@ -46,6 +46,7 @@ static func stall_patience_factor(leader_values: Dictionary) -> float:
 # 排序後帶 util 的 scored 陣列 [{u,i,opt}, ...]（降序）。rank() 只取 opt；
 # 量測探針（征服名實）要讀 util 排序根 → 走此無損 accessor（不重算 term loop）。
 static func rank_scored(state: WorldState, team: TeamData) -> Array:
+	GoalResolver.ensure_maintain_goals(state, team)   # ★means-end S2（組件 A）:冪等確保 5 資源維持 goal + 更新 active/satisfied
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
 	var scored: Array = rank_scored_ctx(ctx, team.current_option, state, team)   # ★means-end:傳 state/team 供 goal frontier hook
 	SpecimenTracer.capture_options(state, team, scored, ctx)   # specimen tap（no-op-unless-specimen）；ctx 帶 threat 來源
