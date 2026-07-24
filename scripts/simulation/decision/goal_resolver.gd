@@ -150,13 +150,13 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 		# ★unowned track（reviewer R²）：隊在自己 tile 未建→建 outpost（start_build 自然擋已占）；有 outpost 但 type 不符=改建複雜 S4 不做。
 		var cur: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
 		if cur != null and cur.outpost_level == 0:
-			return _mk_candidate(g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx, {"task": TeamData.TASK_BUILD, "target": team.tile_pos})
+			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx, {"task": TeamData.TASK_BUILD, "target": team.tile_pos})
 		return {}   # 無合適位置 → 靜默（whole-system-first，不造假）
 	# 前置 3：manpower pop（既有 build pop 門檻）——不足→靜默（S4 最小，passive 繁殖增，無主動 recruit task）。
 	if team.population < GoalRegistry.FACILITY_BUILD_POP_MIN:
 		return {}
 	# ★全滿 → build_F action candidate（在 own outpost 建 F；to_task 帶 facility 供 dispatch 接既有 build 機械）。
-	return _mk_candidate(g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
+	return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
 		{"task": TeamData.TASK_BUILD, "target": own_tile.tile_pos, "facility": f})
 
 # ★S2/S3 資源型前置 resolution：未滿→取得 candidate（S2 買 / S3 採@地形定位）。
@@ -175,7 +175,7 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 	if ctx.has_specie:
 		var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, res)
 		if mp != Vector2i(-1, -1):
-			return _mk_candidate(g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
+			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_RESOURCE, payoff, ctx, {"task": TeamData.TASK_TRADE, "target": mp})
 	# ── 取得手段 2：採@地形（S3，買不到→定位取得）★material 缺口鏈：需該地形 outpost 採。
 	# ★湧現閉環：缺料→(a)移動到 forest→(b)到了建 outpost→own.terrain==forest→採 satisfied。
 	if RES_HARVEST_TERRAIN.has(res):
@@ -188,11 +188,11 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		if cur != null and cur.terrain == terrain and cur.outpost_level == 0:
 			# ★build-closure frontier（REDO）：隊已在目標地形 tile 且未建 → 「建 outpost 那裡」candidate（in-place build）。
 			# unowned 過濾:目標格已被別隊擁有→outpost_level>0 不進此支;真被占 start_build 自然擋。委派 build=S5 別提前。
-			return _mk_candidate(g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx, {"task": TeamData.TASK_BUILD, "target": team.tile_pos})
+			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx, {"task": TeamData.TASK_BUILD, "target": team.tile_pos})
 		var pos: Vector2i = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)   # 純地形=公共地理
 		if pos != Vector2i(-1, -1) and pos != team.tile_pos:
 			# frontier1「移動到最近可達地形 tile」（防 d=0 對自己 tile 生移動卡住）。
-			return _mk_candidate(g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
+			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
 	return {}   # S3 無取得手段（產=S4 設施）
 
 # ★S3 定位型前置 handler（組件 C）：{kind:location, terrain, control?}。查隊在/有滿足 tile，未滿→tile frontier candidate。
@@ -215,12 +215,12 @@ static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: Dec
 		pos = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)
 	if pos == Vector2i(-1, -1):
 		return {}
-	return _mk_candidate(g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
+	return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
 
-static func _mk_candidate(g: Dictionary, gt: String, frontier_kind: String, payoff: float,
+static func _mk_candidate(team: TeamData, g: Dictionary, gt: String, frontier_kind: String, payoff: float,
 		ctx: DecisionContext, to_task: Dictionary) -> Dictionary:
 	return {
-		"util": _candidate_util(payoff, ctx),
+		"util": _candidate_util(payoff, ctx, _estimate_delay_days(team, to_task)),   # ★S6:util 含 delay 折現
 		"to_task": to_task,
 		"source_goal": g,
 		"label": gt + ":" + frontier_kind,   # root_goal + frontier_kind（有界 label，HOW §7）
@@ -284,11 +284,35 @@ static func _harvest_tile_known(state: WorldState, team: TeamData) -> void:
 		known[mpos.x * 1000 + mpos.y] = true
 	state.team_tile_known[team.team_id] = known
 
-# ★must-fix① util 護欄（HOW §8，reviewer S2 指定回歸點）：
-# dev_urgency_coeff(絕境壓遠慾望) × payoff，clamp 上界 < survival boost → goal candidate 永不蓋活命。
-static func _candidate_util(payoff: float, ctx: DecisionContext) -> float:
-	# dev_urgency_coeff：鏡射 NeedHierarchy consistency_coeff 對「發展/遠層」的壓制精神——
-	# food_days→0（絕境）→ 0（遠慾望歸零，讓眼前 survival 奪 argmax）；food 足→1。
+# ★S6 折現（組件 F，HOW §7）：delay-based discount（連續，符憲法 utility 連續）。
+const MOVE_TILES_PER_DAY: float = 2.0   # TEST VALUE — 移速估（淺啟發，delay 有界）
+const BUILD_DAYS_EST: float = 3.0       # TEST VALUE — build/settle 工期估（淺啟發，非讀細 BUILD_TICKS）
+const DISCOUNT_BASE: float = 0.5        # TEST VALUE — 折現率基值（人格/絕境調）
+
+# delay 估（淺啟發有界）：移動天數（target hex dist÷移速）+ build/settle 工期。純狀態零 randf。
+static func _estimate_delay_days(team: TeamData, to_task: Dictionary) -> float:
+	var days: float = 0.0
+	var target = to_task.get("target", Vector2i(-1, -1))
+	if team != null and target is Vector2i and target != Vector2i(-1, -1) and target != team.tile_pos:
+		days += float(FactionAISystem.new()._hex_dist(team.tile_pos, target)) / MOVE_TILES_PER_DAY
+	var task: String = String(to_task.get("task", ""))
+	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE:
+		days += BUILD_DAYS_EST
+	return days
+
+# ★人格折現率 rate（WHAT §6「人格=折現率」，權重非 gate）：絕境→高(短視,遠 candidate 折趨零不走遠路)/
+# 慎重耐心高→低(遠視肯投遠利)。純狀態零 randf。
+static func _discount_rate(ctx: DecisionContext) -> float:
+	var desperation: float = clampf(1.0 - ctx.food_days / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)   # food→0→1(絕境)
+	var caution: float = float(ctx.leader_values.get("慎重", 0.5))   # 遠視(rate 降;極慎重=純遠視 rate→0)
+	return maxf(DISCOUNT_BASE * (desperation + 1.0 - caution), 0.0)   # 中性有 baseline 折現;絕境高;極慎重趨 0
+
+# ★must-fix① util 護欄（HOW §8，reviewer S2/S6 回歸點）+ S6 折現：
+# util = payoff × dev_coeff(絕境→0) × discount(delay,人格 rate)，clamp<survival。★折現乘法(≤1)只變小非變大→護欄不破。
+static func _candidate_util(payoff: float, ctx: DecisionContext, delay_days: float = 0.0) -> float:
+	# dev_urgency_coeff：鏡射 consistency_coeff 對「發展/遠層」壓制——food_days→0（絕境）→ 0（遠慾望歸零讓 survival 奪 argmax）。
 	var dev_coeff: float = clampf(ctx.food_days / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
-	# clamp 上界 GOAL_UTIL_CAP < SURVIVAL_BOOST_MAX：即使 payoff 巨、dev_coeff 未全 0，硬保證 < 絕境 survival-boosted static util。
-	return clampf(payoff * dev_coeff, 0.0, GOAL_UTIL_CAP)
+	# ★S6 折現:discount=1/(1+rate×delay)（delay=0→1 近/即時不折;delay 大+絕境 rate 高→趨零不走遠路）。遞減有界。
+	var discount: float = 1.0 / (1.0 + _discount_rate(ctx) * maxf(delay_days, 0.0))
+	# clamp 上界 GOAL_UTIL_CAP < SURVIVAL_BOOST_MAX：硬保證 < 絕境 survival-boosted static util（折現只讓 util 更小=護欄更穩）。
+	return clampf(payoff * dev_coeff * discount, 0.0, GOAL_UTIL_CAP)
