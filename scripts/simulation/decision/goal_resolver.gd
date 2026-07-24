@@ -38,6 +38,24 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 		var target: float = NeedOracle.need_keep(state, team, res, lv)
 		var holding: float = ResourceSystem.effective_holding(state, team, res)
 		g["status"] = "active" if holding < target else "satisfied"
+	# ★S4 設施發展 goal 生成（組件 A 最小）：隊對 F 有 desire（_facility_deficit≥threshold 且未建）→ 掛 build_F goal。
+	# S7 才做 util-門檻掛退 cadence 泛化；S4 只掛（desire 掉→下 handler 自然 satisfied[F 建成]或無 candidate）。
+	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var otile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
+	if otile != null:
+		var fai := FactionAISystem.new()
+		for gt2 in GoalRegistry.BUILD_FACILITY_GOALS:   # 決定性順序
+			if have.has(gt2):
+				continue
+			var f: String = String(GoalRegistry.BUILD_FACILITY_GOALS[gt2])
+			var fdef: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
+			if not (otile.outpost_type in fdef.get("allowed_outpost", [])):
+				continue   # 該 outpost type 不能建此 F → 不掛
+			if int(otile.get(fdef.get("current_level_key", ""))) > 0:
+				continue   # 已建 → 不掛
+			if fai._facility_deficit(state, team, f, otile) >= NeedOracle.CONSTRUCTION_DESIRE_MIN:
+				team.goal_state.append({"goal_type": gt2, "target": null,
+					"created_tick": state.world.current_tick, "status": "active"})
 
 static func frontier_candidates(state: WorldState, team: TeamData, ctx: DecisionContext) -> Array:
 	if state == null or team == null or ctx == null:
@@ -52,6 +70,12 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 		if def.is_empty():
 			continue
 		var payoff: float = float(def.get("payoff", 1.0))
+		# ★S4 設施發展 goal（build_F）：walk build-cost/facility-type/manpower 前置→frontier or build_F action。
+		if def.has("facility"):
+			var bc: Dictionary = _resolve_build_facility(state, team, ctx, g, gt, def)
+			if not bc.is_empty():
+				out.append(bc)
+			continue
 		for prereq in def.get("prereqs", []):
 			var kind: String = String(prereq.get("kind", ""))
 			var cand: Dictionary = {}
@@ -63,6 +87,42 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 			if not cand.is_empty():
 				out.append(cand)
 	return out
+
+# ★S4 設施發展 resolution（組件 C 設施型）：walk build_F 前置鏈——resource(build-cost)→facility(outpost-type)
+# →manpower(pop)→全滿 build_F action。first-unsatisfied 前置生 frontier（means-end 湧現順序）。
+static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: DecisionContext,
+		g: Dictionary, gt: String, def: Dictionary) -> Dictionary:
+	var f: String = String(def.get("facility", ""))
+	var fdef: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
+	if fdef.is_empty():
+		return {}
+	var payoff: float = float(def.get("payoff", 1.5))
+	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
+	var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
+	# F 已建 → satisfied（無 candidate）。
+	if own_tile != null and int(own_tile.get(fdef.get("current_level_key", ""))) > 0:
+		return {}
+	# 前置 1：resource build-cost（material/tools）——缺→接 S2/S3 資源鏈（need_keep 已含 construction need）。
+	var cost: Dictionary = OutpostSystem.upgrade_cost(f, 1)
+	for res in ["material", "tools"]:
+		if float(cost.get(res, 0)) > 0.0:
+			var c: Dictionary = _resolve_resource_prereq(state, team, ctx, g, gt, payoff, {"kind": GoalRegistry.PREREQ_RESOURCE, "res": res})
+			if not c.is_empty():
+				return c   # first-unsatisfied resource → 取得 frontier（買/採）
+	# 前置 2：facility outpost-type（需 allowed_outpost type outpost）——無合適 type→建 outpost frontier。
+	var allowed: Array = fdef.get("allowed_outpost", [])
+	if own_tile == null or not (own_tile.outpost_type in allowed):
+		# ★unowned track（reviewer R²）：隊在自己 tile 未建→建 outpost（start_build 自然擋已占）；有 outpost 但 type 不符=改建複雜 S4 不做。
+		var cur: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+		if cur != null and cur.outpost_level == 0:
+			return _mk_candidate(g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx, {"task": TeamData.TASK_BUILD, "target": team.tile_pos})
+		return {}   # 無合適位置 → 靜默（whole-system-first，不造假）
+	# 前置 3：manpower pop（既有 build pop 門檻）——不足→靜默（S4 最小，passive 繁殖增，無主動 recruit task）。
+	if team.population < GoalRegistry.FACILITY_BUILD_POP_MIN:
+		return {}
+	# ★全滿 → build_F action candidate（在 own outpost 建 F；to_task 帶 facility 供 dispatch 接既有 build 機械）。
+	return _mk_candidate(g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
+		{"task": TeamData.TASK_BUILD, "target": own_tile.tile_pos, "facility": f})
 
 # ★S2/S3 資源型前置 resolution：未滿→取得 candidate（S2 買 / S3 採@地形定位）。
 const SEEK_TILE_RANGE: int = 30   # TEST VALUE — belief-reachable 上界（bounded seek，非全知 PathSystem live）
