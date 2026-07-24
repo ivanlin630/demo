@@ -13,6 +13,9 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 ### order-noise（arb_kill_nostock 42k-84k）= hollow-economy 症狀（measurer 確診 2026-07-24，同根不獨立修）
 kill_nostock 99.96-99.97% 集中在 tools/weapon_melee_low/weapon_ranged_low，這 3 種 **production=0**（cross-ref harvest_carry+manufacture_output 雙源）——沒隊在產（沒 weaponsmith/manufacturing 設施＝EXPAND 100% 失敗互證）→ 掛單找不到貨 → kill_nostock。material 本身有 production（362-556）且**零 kill＝非噪音源**。∴order-noise = **means-end/facility-scarcity 同一根的下游症狀**，非獨立 order-layer bug；root（means-end 全系統）修好自然消退，**不需另開 ungrounded-order-layer 修復工**。（(b) ungrounded 掛單分支 measure 排除。）
 
+### S4 perf + facility-type-mismatch（means-end 設施型 followup，2026-07-24）
+**(A) perf**：goal 生成（`GoalResolver.ensure_maintain_goals`）每 `rank_scored`（每隊每 decide cadence）呼，掃 5 maintain + 8 build_F × `_facility_deficit` → 較慢（headless exit 0 非 hang，非 blocker）。修 = **S7 goal 生成 cadence-gate**（非每 decide 呼）optimize。**(B) facility-type-mismatch**：隊有 civilian outpost 想建 mil-facility（allowed_outpost type 不符）→ 靜默無 candidate（改建/建新 military outpost 鏈 S4 不做）。whole-system-first 中間態；whole 建完 measure 若真需再補「建對 type outpost」子鏈。
+
 ### S3 unowned forest 優選（means-end 定位型 whole-measure 待撿，reviewer R² track 2026-07-24）
 S3 material 缺口鏈 `find_nearest_terrain_tile` 純地形找最近 forest，**不排除已被別隊佔的 forest tile**。若最近 forest 被佔（`outpost_level>0`）：隊 migrate 過去 → 到達發現 occupied（build-closure `outpost_level==0` 不 fire）→ d=0 guard 壓移動 → **該 goal thread 靜默無 candidate，落回 static option（非 churn/crash，非退化，同 arc 前行為）**。∴ 非 blocker，但**次優**（該優選 unowned forest 而非最近）。真需 unowned 優選 = S4（設施 build owned/unowned 前置自然處理）或 whole 建完 measure 真值時撿。**別漏**。
 
