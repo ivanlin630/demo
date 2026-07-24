@@ -10,6 +10,9 @@
 
 material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。**用戶兩原則**（memory `feedback_whole_system_first`）：①健全系統才有價值模擬結果 ②整個系統做完當 whole 才 measure，非邊建邊 patch。**∴ material 全 PARK**（settle-motive/伐木場/regen/初始庫存/gate②/BUY 弱閥）until **means-end/長程計畫全系統**（2026-07-19-long-range-planning-brainstorm.md，scope=B 全四塊：慾望 registry × means-end 依賴圖 × applicability 湧現順序 × 折現/承諾）設計+建完當一個 whole。L1 大功能，brainstorm（用戶主導）→spec→plan→implement。★架構 orientation：機制大半已在（`option.applicable`=前置 gate、`rank_scored`=湧現順序、`NeedOracle`=need 傳播），缺口=(a)need 沿依賴鏈上傳 chaining (b)goal-as-chainable-option → 實作=擴非新引擎。
 
+### order-noise（arb_kill_nostock 42k-84k）= hollow-economy 症狀（measurer 確診 2026-07-24，同根不獨立修）
+kill_nostock 99.96-99.97% 集中在 tools/weapon_melee_low/weapon_ranged_low，這 3 種 **production=0**（cross-ref harvest_carry+manufacture_output 雙源）——沒隊在產（沒 weaponsmith/manufacturing 設施＝EXPAND 100% 失敗互證）→ 掛單找不到貨 → kill_nostock。material 本身有 production（362-556）且**零 kill＝非噪音源**。∴order-noise = **means-end/facility-scarcity 同一根的下游症狀**，非獨立 order-layer bug；root（means-end 全系統）修好自然消退，**不需另開 ungrounded-order-layer 修復工**。（(b) ungrounded 掛單分支 measure 排除。）
+
 ### gate② settle attempt-gate 矛盾（flagged 不一致，DEFER 進 means-end 重寫）
 `_try_dispatch_or_invite:567` attempt-gate `population>=8` 比 dispatch guard 鬆——`_dispatch_subteam_settle:574-575` 需 `pop − settler_count(clampi(pop/4,2,5)) ≥ MIN_PARENT_POP_AFTER_DISPATCH(=10,:142)` → **effective pop≥13**，pop 8-12 帶 **100% 浪費 attempt**（measurer 坐實 93-795 全 fail）。**非純 hygiene**（對齊 attempt-gate 會讓 pop8-12 落 `:569 else→_try_invite_nearby_exile`=多 invite=behavioral 改）+ settle/expand dispatch 整條 means-end 要重寫 → **現修=churn**。DEFER 進 means-end 全系統設計，不做零改版（無價值）。
 
