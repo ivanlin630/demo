@@ -1563,7 +1563,8 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 				return
 			continue   # 非候選（子隊=非自主 leader）→ 試次佳
 		var _t2: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
-		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		# ★means-end S2：goal frontier candidate 用其 cand.to_task（label 非 static REGISTRY key）；static option 走既有。
+		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
 		if SimRunner.phase_timing: _fai_pht("unified.to_task", _t2)
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
@@ -1802,7 +1803,8 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 			sub.move_target = parent.tile_pos
 			merge_queue.append(sub.team_id)   # 到家由 loop2b try_merge_back
 			return
-		var td: Dictionary = DecisionOptions.to_task(state, sub, opt)
+		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
+		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, sub, opt)
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			continue
 		var tgt: Vector2i = td["target"]
@@ -1945,7 +1947,8 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			# 憲法（融合非刪）：引擎選 攻擊 → 驗證攻擊路徑獨佔此決策，未派＝暫緩本 cadence 下輪重評，
 			# 不落次佳 option 替換 NPC 選擇（舊 `continue`＝dispatch 層否決統一秤 #1）。
 			return
-		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
+		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
+		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_IDLE, Vector2i(-1, -1), "idle_skip")   # Fix2b 早退 tap
 			continue
