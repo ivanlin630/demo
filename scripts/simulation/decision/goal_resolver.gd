@@ -15,11 +15,16 @@ class_name GoalResolver
 # = payoff × dev_urgency_coeff（絕境 food_days→0→0=壓遠慾望）+ clamp 上界 < SURVIVAL_BOOST_MAX（硬保證）。
 const GOAL_UTIL_CAP: float = 1.5   # TEST VALUE — < DecisionEngine.SURVIVAL_BOOST_MAX(2.5) 硬護欄:goal candidate 永不蓋絕境 survival boost
 
-# ★組件 A（S2 版）：冪等確保 team.goal_state 含 5 資源維持 goal + 更新 active/satisfied（holding<need_keep→active）。
-# S7 才做 util-門檻掛退 cadence 泛化；S2 固定 goal-set。純讀狀態+need_keep，零 randf。
+# ★組件 A（S7 完整 lifecycle）：cadence-gate 每 GOAL_EVAL_CADENCE tick 呼一次（非每 decide=perf,known_issues A）。
+# 掛=desire>threshold;★退=build_F 建成 or desire 掉→移除(免 goal_state 無限累積);maintain 冪等持久留。純讀狀態+need_keep,零 randf。
+const GOAL_EVAL_CADENCE: int = TimeScale.TICK_PER_DAY * 3   # 3 天評估（鏡射 RESIDENCY_CADENCE）
 static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 	if state == null or team == null or state.world == null:
 		return
+	# ★S7 cadence-gate：goal 生成/掛退每 GOAL_EVAL_CADENCE tick 一次（goal_state 持久跨 tick，frontier 每 decide 重驗 holding）。
+	if state.world.current_tick < team.goal_eval_next_tick:
+		return   # gate-ok: guard cadence early-return（perf 節流，非決策閘）
+	team.goal_eval_next_tick = state.world.current_tick + GOAL_EVAL_CADENCE
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var have: Dictionary = {}
 	for g in team.goal_state:
@@ -29,31 +34,44 @@ static func ensure_maintain_goals(state: WorldState, team: TeamData) -> void:
 		if not have.has(gt):
 			team.goal_state.append({"goal_type": gt, "target": null,
 				"created_tick": state.world.current_tick, "status": "active"})
-	# 更新 status：holding < need_keep(res) → active（想維持）；否則 satisfied。
+	# 更新 maintain status：holding < need_keep(res) → active（想維持）；否則 satisfied。
 	for g in team.goal_state:
 		var gt: String = String(g.get("goal_type", ""))
 		if not GoalRegistry.MAINTAIN_GOAL_RES.has(gt):
-			continue   # 非 maintain goal（S3+ 別型）不在此管
+			continue
 		var res: String = String(GoalRegistry.MAINTAIN_GOAL_RES[gt])
-		var target: float = NeedOracle.need_keep(state, team, res, lv)
-		var holding: float = ResourceSystem.effective_holding(state, team, res)
-		g["status"] = "active" if holding < target else "satisfied"
-	# ★S4 設施發展 goal 生成（組件 A 最小）：隊對 F 有 desire（_facility_deficit≥threshold 且未建）→ 掛 build_F goal。
-	# S7 才做 util-門檻掛退 cadence 泛化；S4 只掛（desire 掉→下 handler 自然 satisfied[F 建成]或無 candidate）。
+		g["status"] = "active" if ResourceSystem.effective_holding(state, team, res) < NeedOracle.need_keep(state, team, res, lv) else "satisfied"
+	# ★S4/S7 設施發展 goal 掛退 lifecycle：desire≥threshold 且未建→掛；建成 or desire 掉→退（移除，免累積）。
 	var own: Vector2i = FactionAISystem.new()._find_own_outpost(state, team)
 	var otile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
+	var fai := FactionAISystem.new()
+	var kept: Array = []
+	for g in team.goal_state:
+		var gt: String = String(g.get("goal_type", ""))
+		if not GoalRegistry.BUILD_FACILITY_GOALS.has(gt):
+			kept.append(g)   # maintain / 別型 goal 冪等持久留
+			continue
+		var f: String = String(GoalRegistry.BUILD_FACILITY_GOALS[gt])
+		var fdef: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
+		# 退判定：無合適 outpost / 已建成 / desire 掉 below threshold → 移除。
+		if otile == null or not (otile.outpost_type in fdef.get("allowed_outpost", [])) \
+				or int(otile.get(fdef.get("current_level_key", ""))) > 0 \
+				or fai._facility_deficit(state, team, f, otile) < NeedOracle.CONSTRUCTION_DESIRE_MIN:
+			continue   # ★退（不 append=移除）
+		kept.append(g)   # desire 仍高+未建→留
+	team.goal_state = kept
+	# 掛：desire≥threshold+未建+未在 goal_state → 新掛 build_F goal（決定性 REGISTRY key 序）。
 	if otile != null:
-		var fai := FactionAISystem.new()
-		for gt2 in GoalRegistry.BUILD_FACILITY_GOALS:   # 決定性順序
+		for gt2 in GoalRegistry.BUILD_FACILITY_GOALS:
 			if have.has(gt2):
 				continue
-			var f: String = String(GoalRegistry.BUILD_FACILITY_GOALS[gt2])
-			var fdef: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
-			if not (otile.outpost_type in fdef.get("allowed_outpost", [])):
-				continue   # 該 outpost type 不能建此 F → 不掛
-			if int(otile.get(fdef.get("current_level_key", ""))) > 0:
-				continue   # 已建 → 不掛
-			if fai._facility_deficit(state, team, f, otile) >= NeedOracle.CONSTRUCTION_DESIRE_MIN:
+			var f2: String = String(GoalRegistry.BUILD_FACILITY_GOALS[gt2])
+			var fdef2: Dictionary = OutpostSystem.FACILITY_DEF.get(f2, {})
+			if not (otile.outpost_type in fdef2.get("allowed_outpost", [])):
+				continue
+			if int(otile.get(fdef2.get("current_level_key", ""))) > 0:
+				continue
+			if fai._facility_deficit(state, team, f2, otile) >= NeedOracle.CONSTRUCTION_DESIRE_MIN:
 				team.goal_state.append({"goal_type": gt2, "target": null,
 					"created_tick": state.world.current_tick, "status": "active"})
 
