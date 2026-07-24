@@ -1566,6 +1566,12 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task（label 非 static REGISTRY key）；static option 走既有。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
 		if SimRunner.phase_timing: _fai_pht("unified.to_task", _t2)
+		# ★means-end S5 委派：delegate candidate 贏 → 派子隊執行 action，母隊留守（本 cadence 畢）；派失敗→試次佳。
+		if td.get("delegate", false):
+			if _dispatch_goal_delegate(state, team, td):
+				team.current_option = String(e["opt"])   # 承諾追蹤(label:delegate)
+				return
+			continue
 		var tgt: Vector2i = td["target"]
 		if tgt == Vector2i(-1, -1) and td["task"] != TeamData.TASK_FLEE:
 			continue   # 不可派 → 試次佳(修凍死)
@@ -1805,6 +1811,8 @@ func _decide_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> vo
 			return
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, sub, opt)
+		if td.get("delegate", false):
+			continue   # ★S5:子隊不再委派(避 sub-sub nesting)→試次佳(自己做)
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			continue
 		var tgt: Vector2i = td["target"]
@@ -1949,6 +1957,12 @@ func _evaluate_solo(state: WorldState, team: TeamData) -> void:
 			return
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
+		# ★means-end S5 委派（solo）：delegate candidate 贏 → 派子隊，母隊留守。
+		if td.get("delegate", false):
+			if _dispatch_goal_delegate(state, team, td):
+				team.current_option = String(e["opt"])
+				return
+			continue
 		if td.get("task", TeamData.TASK_IDLE) == TeamData.TASK_IDLE:
 			SpecimenTracer.capture_decision(state, team, opt, TeamData.TASK_IDLE, Vector2i(-1, -1), "idle_skip")   # Fix2b 早退 tap
 			continue
@@ -2786,6 +2800,18 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 		return -1
 	state.add_member(team, new_advisor.id)   # 拔擢 anon→named 工頭
 	return new_advisor.id
+
+# ★means-end S5 委派：goal delegate candidate 贏 → 派子隊執行其 action（build/settle），母隊留守本業。
+# 接既有 SubteamSystem.dispatch（advisor+settler pop+action task/target）。回 true=派出成功。
+func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) -> bool:
+	var advisor_id: int = _pick_or_promote_advisor(state, team)
+	if advisor_id == -1:
+		return false
+	var settler: int = int(td.get("settler", clampi(team.population / 4, 2, 5)))
+	var action_task: String = String(td.get("task", TeamData.TASK_BUILD))
+	var target: Vector2i = td.get("target", Vector2i(-1, -1))
+	var sub_id: int = SubteamSystem.new().dispatch(state, team.team_id, advisor_id, settler, action_task, target)
+	return sub_id != -1
 
 # 撥付建造款：公庫優先。目標 tile 公庫足 → 子隊不需補（抵達後 _deduct_cost 自扣公庫）；
 # 僅當「公庫 + 子隊私產」不足時，owner 私產補差額（守恆：純轉移）。

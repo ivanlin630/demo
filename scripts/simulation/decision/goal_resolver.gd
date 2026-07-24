@@ -86,7 +86,42 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 			# manpower/facility/subgoal = S4-S6（無 candidate，stub 邊界）
 			if not cand.is_empty():
 				out.append(cand)
+	# ★S5 委派 peer option（組件 D）：build/settle 型 candidate 產「派子隊做」變體並列 rank 池（跟自己做競 util）。
+	var delegated: Array = []
+	for c in out:
+		var dv: Dictionary = _delegate_variant(state, team, ctx, c)
+		if not dv.is_empty():
+			delegated.append(dv)
+	out.append_array(delegated)
 	return out
+
+# ★S5 委派變體（組件 D）：build/settle 型 action 產「派子隊做」變體。★gate② 正解:applicable=真 viability
+# （pop − settler_count ≥ MIN_PARENT_POP_AFTER_DISPATCH，attempt=dispatch 同源→無 pop 8-12 浪費帶）。
+# 委派 util=自己做 util+多線紅利(母隊留守+子隊並行)−餘力成本;must-fix① clamp<survival 沿用。純狀態零 randf。
+const DELEGATE_MULTILINE_BONUS: float = 0.3   # TEST VALUE — 多線紅利（母隊留守本業+子隊並行，不離 food base）
+const DELEGATE_COST: float = 0.1              # TEST VALUE — 餘力成本（分兵管理開銷）
+static func _delegate_variant(state: WorldState, team: TeamData, ctx: DecisionContext, self_cand: Dictionary) -> Dictionary:
+	var to_task: Dictionary = self_cand.get("to_task", {})
+	var task: String = String(to_task.get("task", ""))
+	if task != TeamData.TASK_BUILD and task != TeamData.TASK_SETTLE:
+		return {}   # 只 build/settle 型委派（S5）
+	# ★gate② viability（attempt=dispatch 同源，根治 8-12 浪費帶）
+	var pop: int = team.population
+	var settler: int = clampi(pop / 4, 2, 5)
+	if pop - settler < FactionAISystem.MIN_PARENT_POP_AFTER_DISPATCH:
+		return {}   # 餘力不足 → 無委派變體（只自己做，pop-guard 擋=多線無委派恆贏）
+	var base_u: float = float(self_cand.get("util", 0.0))
+	var deleg_u: float = clampf(base_u + DELEGATE_MULTILINE_BONUS - DELEGATE_COST, 0.0, GOAL_UTIL_CAP)   # must-fix① clamp 沿用
+	var dtask: Dictionary = to_task.duplicate()
+	dtask["delegate"] = true
+	dtask["settler"] = settler   # 派子隊 pop（餘力 gate 配額）
+	return {
+		"util": deleg_u,
+		"to_task": dtask,
+		"source_goal": self_cand.get("source_goal", {}),
+		"label": String(self_cand.get("label", "")) + ":delegate",
+		"delegate": true,
+	}
 
 # ★S4 設施發展 resolution（組件 C 設施型）：walk build_F 前置鏈——resource(build-cost)→facility(outpost-type)
 # →manpower(pop)→全滿 build_F action。first-unsatisfied 前置生 frontier（means-end 湧現順序）。
