@@ -13,6 +13,9 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 ### order-noise（arb_kill_nostock 42k-84k）= hollow-economy 症狀（measurer 確診 2026-07-24，同根不獨立修）
 kill_nostock 99.96-99.97% 集中在 tools/weapon_melee_low/weapon_ranged_low，這 3 種 **production=0**（cross-ref harvest_carry+manufacture_output 雙源）——沒隊在產（沒 weaponsmith/manufacturing 設施＝EXPAND 100% 失敗互證）→ 掛單找不到貨 → kill_nostock。material 本身有 production（362-556）且**零 kill＝非噪音源**。∴order-noise = **means-end/facility-scarcity 同一根的下游症狀**，非獨立 order-layer bug；root（means-end 全系統）修好自然消退，**不需另開 ungrounded-order-layer 修復工**。（(b) ungrounded 掛單分支 measure 排除。）
 
+### S7 cadence stale-satisfied 反向 staleness（means-end whole-measure watch，reviewer R² track 2026-07-25）
+`ensure_maintain_goals` cadence-gate（每 GOAL_EVAL_CADENCE=3天）：maintain goal 標 `satisfied` 後，資源在 3天窗內轉短 → `frontier_candidates` 首關 `if status!=active: continue` 跳過 → **不走 `_resolve_resource_prereq` 重驗** → 該資源 means-end 取得候選靜默停擺，最長 3天才醒（下次 cadence tick）。**非 blocker**：既有靜態 REGISTRY option（買糧/覓食/貿易/返家補給，GATE-A/extraction/material-hold 三腿已密驗）**每 decide 即時不受影響**，真斷糧不會因此餓死；受影響的只是 means-end「順便去買/採一點」背景補給念頭反應慢。**whole-measure watch**：量 means-end maintain-goal「資源轉短→候選恢復延遲」實際窗口，3天在真實隊節奏下是否可觀察落後。若無影響（多半既有 option 早接手）純紀錄；若真問題 → S8 調 cadence 或「resource 型 goal status 判斷繞過 cadence，只 lifecycle 掛/退節流」的更精準設計。（★我 R² 論證漏 stale-satisfied 方向，reviewer 異質框外抓，good catch。）
+
 ### S5 _try_dispatch_or_invite residency 手評未退（means-end 委派 followup，2026-07-24）
 S5 委派 peer option 把 build/settle 派子隊變體收進 rank 池（引擎化）+ gate② 根治，**但 `_try_dispatch_or_invite`（residency repopulate owned empty outpost 的手評 heuristic `ambition*0.5+military*0.3`，在 rank 池外）未退役**——語意不同（residency 填自己空 outpost ≠ 新 build/settle），退役需驗融合 residency 不退化。= 憲法債殘（means-end 委派已進引擎，residency 仍手派）。followup：residency 收進委派/rank 池 option = 後續 arc；whole 建完 measure 後或 means-end 收尾撿。
 
