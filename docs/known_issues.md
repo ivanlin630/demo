@@ -6,6 +6,13 @@
 > **圖形 Main.tscn 項 moot**：`run/main_scene = TextUI.tscn` → S5/U5/U6/U7/U8/U9 等 graphical 項凍結,復活圖形 UI 才解。**部分復活（2026-07-04 observer GUI）**：`world_map_view.gd` 現雙用途（observer 分支 + dormant player 分支）,動 player 繪製須顧 observer;Main.tscn 本體仍 dormant。
 
 
+## ★★★means-end/長程計畫全系統 = binding root（用戶定 2026-07-24，material arc 全 PARK 待它）
+
+material 供給查出決策模型 **means-end 缺口完整三段**（①動機盲 `settle_fit` terms.gd:184-190 flat by option-type ②零 terrain/forest-seeking 移動決策 ③build 只腳下 `建設 to_task=team.tile_pos` options:45 / `start_build` 用當前格 outpost:368）→ 逐段補 = 3 條 bespoke 補丁 = 違憲 scripted + 無限打地鼠（同 軍閥天命/立王朝/發展維度/造謠/天災 全同缺口，2026-07-19 note line 52）。**用戶兩原則**（memory `feedback_whole_system_first`）：①健全系統才有價值模擬結果 ②整個系統做完當 whole 才 measure，非邊建邊 patch。**∴ material 全 PARK**（settle-motive/伐木場/regen/初始庫存/gate②/BUY 弱閥）until **means-end/長程計畫全系統**（2026-07-19-long-range-planning-brainstorm.md，scope=B 全四塊：慾望 registry × means-end 依賴圖 × applicability 湧現順序 × 折現/承諾）設計+建完當一個 whole。L1 大功能，brainstorm（用戶主導）→spec→plan→implement。★架構 orientation：機制大半已在（`option.applicable`=前置 gate、`rank_scored`=湧現順序、`NeedOracle`=need 傳播），缺口=(a)need 沿依賴鏈上傳 chaining (b)goal-as-chainable-option → 實作=擴非新引擎。
+
+### gate② settle attempt-gate 矛盾（flagged 不一致，DEFER 進 means-end 重寫）
+`_try_dispatch_or_invite:567` attempt-gate `population>=8` 比 dispatch guard 鬆——`_dispatch_subteam_settle:574-575` 需 `pop − settler_count(clampi(pop/4,2,5)) ≥ MIN_PARENT_POP_AFTER_DISPATCH(=10,:142)` → **effective pop≥13**，pop 8-12 帶 **100% 浪費 attempt**（measurer 坐實 93-795 全 fail）。**非純 hygiene**（對齊 attempt-gate 會讓 pop8-12 落 `:569 else→_try_invite_nearby_exile`=多 invite=behavioral 改）+ settle/expand dispatch 整條 means-end 要重寫 → **現修=churn**。DEFER 進 means-end 全系統設計，不做零改版（無價值）。
+
 ## ★★食安 arc release-pass 成功判準守護（blueprint 命 2026-07-23，防誤判）
 
 **GATE-A/二刀/食安修 measure→QA 的成功判準 = food_urg 降 / 絕境隊降 / 隊守家（脫 oscillation）——★NOT『設施建造數上升』**。因 **coin 鎖還在**（貧困陷阱兩鎖，見上 poverty-trap 洞）：食安只解 food 那把，設施 unlock 要 food AND coin 兩鎖都解。∴食安修後**建設不會跳是預期**（coin 鎖壓著 reserve_factor），別誤判成「食安修失敗」（= threat-oracle「修 X 但 Y 沒動→誤判 X 失敗」血證同型）。QA 稽核食安 release-pass 時用 food-side 判準，設施建造留給 facility-build keystone（兩鎖+means-end 一起收）。
