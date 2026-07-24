@@ -22,6 +22,10 @@ var team_discovered: Dictionary = {}   # int team_id → Array[int] 已知 team_
 # 三源習得：創世-nearby(game_setup) / 直接親見(vision 半徑內 outpost) / relay harvest(team_known order/outpost_built 訊息)。
 # 貿易目標選擇（_nearest_market_outpost）只掃此=belief-gate（非全圖 god-view）。demolish(outpost_level→0)清此 tile 全隊條目。
 var team_market_known: Dictionary = {}
+# ★means-end S3 定位型 belief store（鏡射 team_market_known）：{ team_id: { tile_id: true } } 已發現 tile。
+# tile-discovery 兩源（親見 vision 半徑 bounded scan + relay team_known tile 訊息）。所有權/control 型 tile 查詢讀此
+# =belief-gate（禁全圖 god-view；純地形查詢另走 find_nearest_terrain_tile # gate-ok 公共地理）。
+var team_tile_known: Dictionary = {}
 var team_intel: Dictionary = {}
 # { obs_id: int → { tgt_id: int → {
 #   "tier":           int,       # 最高接觸層級：0/1/2
