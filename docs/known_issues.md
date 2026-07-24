@@ -13,6 +13,9 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 ### order-noise（arb_kill_nostock 42k-84k）= hollow-economy 症狀（measurer 確診 2026-07-24，同根不獨立修）
 kill_nostock 99.96-99.97% 集中在 tools/weapon_melee_low/weapon_ranged_low，這 3 種 **production=0**（cross-ref harvest_carry+manufacture_output 雙源）——沒隊在產（沒 weaponsmith/manufacturing 設施＝EXPAND 100% 失敗互證）→ 掛單找不到貨 → kill_nostock。material 本身有 production（362-556）且**零 kill＝非噪音源**。∴order-noise = **means-end/facility-scarcity 同一根的下游症狀**，非獨立 order-layer bug；root（means-end 全系統）修好自然消退，**不需另開 ungrounded-order-layer 修復工**。（(b) ungrounded 掛單分支 measure 排除。）
 
+### S5 _try_dispatch_or_invite residency 手評未退（means-end 委派 followup，2026-07-24）
+S5 委派 peer option 把 build/settle 派子隊變體收進 rank 池（引擎化）+ gate② 根治，**但 `_try_dispatch_or_invite`（residency repopulate owned empty outpost 的手評 heuristic `ambition*0.5+military*0.3`，在 rank 池外）未退役**——語意不同（residency 填自己空 outpost ≠ 新 build/settle），退役需驗融合 residency 不退化。= 憲法債殘（means-end 委派已進引擎，residency 仍手派）。followup：residency 收進委派/rank 池 option = 後續 arc；whole 建完 measure 後或 means-end 收尾撿。
+
 ### S4 perf + facility-type-mismatch（means-end 設施型 followup，2026-07-24）
 **(A) perf**：goal 生成（`GoalResolver.ensure_maintain_goals`）每 `rank_scored`（每隊每 decide cadence）呼，掃 5 maintain + 8 build_F × `_facility_deficit` → 較慢（headless exit 0 非 hang，非 blocker）。修 = **S7 goal 生成 cadence-gate**（非每 decide 呼）optimize。**(B) facility-type-mismatch**：隊有 civilian outpost 想建 mil-facility（allowed_outpost type 不符）→ 靜默無 candidate（改建/建新 military outpost 鏈 S4 不做）。whole-system-first 中間態；whole 建完 measure 若真需再補「建對 type outpost」子鏈。
 
