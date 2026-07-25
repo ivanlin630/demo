@@ -119,6 +119,9 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 const DELEGATE_MULTILINE_BONUS: float = 0.3   # TEST VALUE — 多線紅利（母隊留守本業+子隊並行，不離 food base）
 const DELEGATE_COST: float = 0.1              # TEST VALUE — 餘力成本（分兵管理開銷）
 static func _delegate_variant(state: WorldState, team: TeamData, ctx: DecisionContext, self_cand: Dictionary) -> Dictionary:
+	# ★A1:founding/facility candidate 本身已 delegate（派子隊建）→ 別再包委派的委派（早退）。
+	if self_cand.get("delegate", false):
+		return {}
 	var to_task: Dictionary = self_cand.get("to_task", {})
 	var task: String = String(to_task.get("task", ""))
 	if task != TeamData.TASK_BUILD and task != TeamData.TASK_SETTLE:
@@ -165,17 +168,21 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 	# 前置 2：facility outpost-type（需 allowed_outpost type outpost）——無合適 type→建 outpost frontier。
 	var allowed: Array = fdef.get("allowed_outpost", [])
 	if own_tile == null or not (own_tile.outpost_type in allowed):
-		# ★unowned track（reviewer R²）：隊在自己 tile 未建→建 outpost（start_build 自然擋已占）；有 outpost 但 type 不符=改建複雜 S4 不做。
-		var cur: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
-		if cur != null and cur.outpost_level == 0:
-			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx, {"task": TeamData.TASK_BUILD, "target": team.tile_pos})
-		return {}   # 無合適位置 → 靜默（whole-system-first，不造假）
+		# ★A1 裁②：same-tile founding（隊站空 tile 建 new outpost）無母隊就地 outpost-build 路 → 移除 candidate，靜默。
+		# 屬 facility-type-mismatch known_issues followup（non-A1-core），前置未滿=靜默（whole-system-first，不造假）。
+		return {}
 	# 前置 3：manpower pop（既有 build pop 門檻）——不足→靜默（S4 最小，passive 繁殖增，無主動 recruit task）。
 	if team.population < GoalRegistry.FACILITY_BUILD_POP_MIN:
 		return {}
-	# ★全滿 → build_F action candidate（在 own outpost 建 F；to_task 帶 facility 供 dispatch 接既有 build 機械）。
-	return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
-		{"task": TeamData.TASK_BUILD, "target": own_tile.tile_pos, "facility": f})
+	# ★A1 全滿 → facility 建：
+	# owner 在場（team 站 own outpost）→ **defer 給 infra path**（不生 candidate）。infra desire-based _pick_facility
+	# 選最想建 facility 就地建（較 goal REGISTRY-order 聰明；單一 build slot 不撞），忠於二裁意圖「接 infra path 非另立子隊路」。
+	# （goal REGISTRY-order 就地建會壟斷 build slot→礦村建 workshop 非 mint→15360 regression；量測坐實。）
+	if team.tile_pos == own_tile.tile_pos:
+		return {}
+	# owner 不在場（own outpost 在別格）→ facility candidate（派子隊 remote 真移動→抵達→建，_dispatch_facility_builder）。
+	return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
+		{"facility": f, "target": own_tile.tile_pos})
 
 # ★S2/S3 資源型前置 resolution：未滿→取得 candidate（S2 買 / S3 採@地形定位）。
 const SEEK_TILE_RANGE: int = 30   # TEST VALUE — belief-reachable 上界（bounded seek，非全知 PathSystem live）
@@ -202,16 +209,15 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		var own_tile: HexTileData = state.world.tiles.get(own.x * 1000 + own.y) if own != Vector2i(-1, -1) else null
 		if own_tile != null and own_tile.terrain == terrain:
 			return {}   # ★閉環完成:已有該地形 outpost → 採 satisfied（既有 harvest 供給）
-		var cur: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
-		if cur != null and cur.terrain == terrain and cur.outpost_level == 0:
-			# ★build-closure frontier（REDO）：隊已在目標地形 tile 且未建 → 「建 outpost 那裡」candidate（in-place build）。
-			# unowned 過濾:目標格已被別隊擁有→outpost_level>0 不進此支;真被占 start_build 自然擋。委派 build=S5 別提前。
-			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx, {"task": TeamData.TASK_BUILD, "target": team.tile_pos})
+		# ★A1 founding：缺料+無該地形 outpost → 派子隊到最近該地形 tile 建 civilian outpost（複用 _dispatch_builder consumer）。
+		# 移除舊 in-place TASK_BUILD + TASK_MIGRATE frontier（TASK_BUILD 無 consumer=死路;founding 本質派子隊,合 WHAT §4）。
 		var pos: Vector2i = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)   # 純地形=公共地理
+		# ★A1 裁③：remote forest founding（異格）→ 派子隊（子隊真移動→抵達→建，正常）。
+		# ★裁② guard：pos == team.tile_pos（隊已站該地形）= same-tile founding，無母隊就地 outpost-build 路 → 靜默（followup）。
 		if pos != Vector2i(-1, -1) and pos != team.tile_pos:
-			# frontier1「移動到最近可達地形 tile」（防 d=0 對自己 tile 生移動卡住）。
-			return _mk_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx, {"task": TeamData.TASK_MIGRATE, "target": pos})
-	return {}   # S3 無取得手段（產=S4 設施）
+			return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx,
+				{"build_type": "civilian", "target": pos})
+	return {}   # S3 無取得手段（產=S4 設施 / same-tile founding=followup）
 
 # ★S3 定位型前置 handler（組件 C）：{kind:location, terrain, control?}。查隊在/有滿足 tile，未滿→tile frontier candidate。
 static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: DecisionContext,
@@ -243,6 +249,22 @@ static func _mk_candidate(team: TeamData, g: Dictionary, gt: String, frontier_ki
 		"source_goal": g,
 		"label": gt + ":" + frontier_kind,   # root_goal + frontier_kind（有界 label，HOW §7）
 		"delegate": false,   # 委派變體 = S5（組件 D）別提前
+	}
+
+# ★A1 founding/facility delegate candidate：新建 outpost（build_type）或自家 outpost 建設施（facility）
+# 本質=派子隊施工（複用既有 _dispatch_builder / _dispatch_facility_builder working consumer，非發無 consumer 的 TASK_BUILD）。
+# to_task 帶 delegate=true→faction_ai 路由 _dispatch_goal_delegate 型別分支。util 走 must-fix① 護欄（clamp<survival）。
+static func _mk_delegate_candidate(team: TeamData, g: Dictionary, gt: String, frontier_kind: String,
+		payoff: float, ctx: DecisionContext, core: Dictionary) -> Dictionary:
+	var to_task: Dictionary = core.duplicate()
+	to_task["delegate"] = true
+	to_task["settler"] = clampi(team.population / 4, 2, 5)   # 派子隊配額（founding 分支 _dispatch_builder 內部自估，此為 generic 保底）
+	return {
+		"util": _candidate_util(payoff, ctx, _estimate_delay_days(team, to_task)),
+		"to_task": to_task,
+		"source_goal": g,
+		"label": gt + ":" + frontier_kind + ":delegate",
+		"delegate": true,
 	}
 
 # ★must-fix②(i) 純地形/物理地理查詢（公共知識 legit）→ 全圖掃標 # gate-ok（比照 constitution_gate:41）。
@@ -314,7 +336,9 @@ static func _estimate_delay_days(team: TeamData, to_task: Dictionary) -> float:
 	if team != null and target is Vector2i and target != Vector2i(-1, -1) and target != team.tile_pos:
 		days += float(FactionAISystem.new()._hex_dist(team.tile_pos, target)) / MOVE_TILES_PER_DAY
 	var task: String = String(to_task.get("task", ""))
-	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE:
+	# ★A1:founding(build_type)/facility 委派亦含 build 工期（雖不發 TASK_BUILD，仍派子隊施工）。
+	if task == TeamData.TASK_BUILD or task == TeamData.TASK_SETTLE \
+			or to_task.has("build_type") or to_task.has("facility"):
 		days += BUILD_DAYS_EST
 	return days
 
