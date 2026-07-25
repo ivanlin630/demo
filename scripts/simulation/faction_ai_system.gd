@@ -2749,28 +2749,52 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 	var candidates: Array = []
 	for tid in state.teams:
 		var t: TeamData = state.teams[tid]
-		if t.combat_target != -1: continue
+		if t.combat_target != -1:
+			if Probe.enabled: Probe.bump("resume.reject_combat")   # ★純觀測
+			continue
 		if t.leader_id == state.player_id and state.player_id != -1: continue
 		# 糧 < 3 天不復工（餓肚子不搬磚 — 否則和 survival 搶人 ping-pong）
 		# WS-2c：有效糧(私產+自家糧倉)，否則定居隊 food 在糧倉→誤判餓→永不復工建造。
 		var days_left: float = ResourceSystem.effective_food(state, t) \
 			/ maxf(float(t.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
-		if days_left < 3.0: continue
+		if days_left < 3.0:
+			if Probe.enabled: Probe.bump("resume.reject_starving")   # ★純觀測
+			continue
 		var is_owner: bool = t.team_id == tile.outpost_owner
 		var resident_here: bool = t.tile_pos == tile.tile_pos \
 			and t.faction_id == leader_team.faction_id and t.faction_id != -1 \
 			and TeamData.TAG_PRODUCE in t.tags
-		if not (is_owner or resident_here): continue
+		if not (is_owner or resident_here):
+			# ★純觀測:非 owner 亦非 resident（founding 荒地 owner==-1 恆假=#4 二階候選）
+			if Probe.enabled:
+				Probe.bump("resume.reject_owner" if not is_owner else "resume.reject_resident")
+			continue
 		# 已在工地的 return_home 殭屍態（到家但飢餓 sticky）也可復工
 		var at_site_stuck: bool = t.tile_pos == tile.tile_pos \
 			and t.current_task == TeamData.TASK_RETURN_HOME
-		if not (t.current_task in interruptible or at_site_stuck): continue
+		if not (t.current_task in interruptible or at_site_stuck):
+			if Probe.enabled: Probe.bump("resume.reject_busy")   # ★純觀測
+			continue
 		if t.tile_pos == tile.tile_pos:
 			candidates.push_front(t)   # 在場優先
 		else:
 			candidates.append(t)
+	# ★resume attempt tap（純觀測）：候選數揭召回為何失效（0=無人可召=#4 坐實）。
+	if Probe.enabled:
+		Probe.bump("resume.attempt")
+		Probe.bump_sample("resume.attempt", {
+			"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
+			"ct_id": tile.construction_team_id, "candidates": candidates.size(),
+			"outpost_owner": tile.outpost_owner,
+		})
 	if candidates.is_empty(): return
 	var worker: TeamData = candidates[0]
+	if Probe.enabled:
+		Probe.bump("resume.success")   # ★純觀測
+		Probe.bump_sample("resume.success", {
+			"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
+			"worker": worker.team_id,
+		})
 	# release-first：zombie 現任常 RETURN_HOME survival@80，先 release→IDLE@0 過 transition guard，再 set BUILD（正當復工退場）。
 	TaskArbiter.release(worker)
 	TaskArbiter.transition(state, worker, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)

@@ -255,6 +255,20 @@ func _tick_mint(_state: WorldState, tile: HexTileData, _team: TeamData) -> void:
 			Probe.bump("g1.mint")
 			Probe.add_amount("mint_coin", coin_added)   # 鑄幣 ledger
 
+# ★construction 可觀測性 tap（純觀測，禁耗 RNG；spec 2026-07-25-construction-pipeline-observability）：
+# build/facility start transition 後捕捉實際 current_task/priority——坐實 transition 是否真讓 task→TASK_BUILD
+# （一階#2 最強候選：若被 task_arbiter guard 攔→task 留 TASK_CONSTRUCT→_tick_construction 找不到→永不倒數）。
+func _tap_build_start(state: WorldState, team: TeamData, tile: HexTileData, action: String) -> void:
+	if not Probe.enabled: return
+	Probe.bump("construct.start")
+	if team.current_task != TeamData.TASK_BUILD:
+		Probe.bump("construct.start_task_not_build")   # ★transition 被攔=stall 一階#2 坐實
+	Probe.bump_sample("construct.start", {
+		"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
+		"ct_id": tile.construction_team_id, "team": team.team_id, "action": action,
+		"task_after": team.current_task, "prio_after": team.task_priority,
+	})
+
 func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 	# 找同格上所有 current_task == "建設" 的 team（接手機制）
 	var active_team: TeamData = null
@@ -264,7 +278,27 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 			active_team = t
 			break
 	if active_team == null:
+		# ★stall tap（關鍵一階根）：施工隊去向——construction_team_id 那隊現 task/pos/reason，揭它跑哪被啥改。
+		if Probe.enabled:
+			Probe.bump("construct.stall")
+			var ct: TeamData = state.teams.get(tile.construction_team_id)
+			Probe.bump_sample("construct.stall", {
+				"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
+				"ct_id": tile.construction_team_id,
+				"ct_task": ct.current_task if ct != null else "gone",
+				"ct_pos": ([ct.tile_pos.x, ct.tile_pos.y] if ct != null else [-1, -1]),
+				"ct_reason": ct.task_reason if ct != null else "",
+				"ticks_left": tile.construction_ticks_left,
+			})
 		return  # 無施工隊在格，暫停（faction_ai._try_resume_construction 負責召回復工）
+	# ★progress tap（進度真動否）
+	if Probe.enabled:
+		Probe.bump("construct.progress")
+		Probe.bump_sample("construct.progress", {
+			"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
+			"ticks_left": tile.construction_ticks_left, "active": active_team.team_id,
+			"pop": active_team.population,
+		})
 	# 更新施工 team（接手：任何在格上建設的 team 都可繼續）
 	tile.construction_team_id = active_team.team_id
 	if tile.construction_started_tick == -1:
@@ -276,6 +310,13 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 
 func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData) -> void:
 	var action: String = tile.construction_target.get("action", "")
+	# ★complete tap（純觀測）：completion 事件（A1 measure=0 的正向對照）。
+	if Probe.enabled:
+		Probe.bump("construct.complete")
+		Probe.bump_sample("construct.complete", {
+			"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
+			"action": action, "team": team.team_id,
+		})
 	match action:
 		"build":
 			tile.outpost_type  = tile.construction_target["type"]
@@ -388,6 +429,7 @@ func start_build(state: WorldState, team: TeamData, type: String, level: int) ->
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
 	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
+	_tap_build_start(state, team, tile, "build")
 	print("[Outpost] Team%d 開始建 %s Lv%d at (%d,%d)（需 %d person-ticks）" % [
 		team.team_id, type, level, tile.tile_pos.x, tile.tile_pos.y,
 		tile.construction_ticks_left])
@@ -410,6 +452,7 @@ func start_upgrade_level(state: WorldState, team: TeamData) -> bool:
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
 	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
+	_tap_build_start(state, team, tile, "upgrade_level")
 	print("[Outpost] Team%d 升級 → Lv%d at (%d,%d)" % [
 		team.team_id, new_level, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -451,6 +494,7 @@ func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTi
 	tile.construction_ticks_left = int(cost["ticks"])
 	tile.construction_target    = { "action": "upgrade_facility", "facility": facility }
 	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	_tap_build_start(state, team, tile, "upgrade_facility")
 	print("[Outpost] Team%d 設施施工 %s → Lv%d at (%d,%d)" % [
 		team.team_id, facility, cur + 1, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -465,6 +509,7 @@ func start_demolish(state: WorldState, team: TeamData) -> bool:
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][tile.outpost_level - 1] / 2
 	tile.construction_target    = { "action": "demolish" }
 	TaskArbiter.transition(state, team, "建設", TaskArbiter.PRIO_DISPATCH)
+	_tap_build_start(state, team, tile, "demolish")
 	print("[Outpost] Team%d 拆除 at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
@@ -496,6 +541,14 @@ func check_construction_timeout(state: WorldState, tile: HexTileData) -> bool:
 		return false
 	if state.world.current_tick - tile.construction_last_progress_tick <= CONSTRUCTION_TIMEOUT:
 		return false
+	# ★timeout cancel tap（純觀測）：工地逾時取消（stall 未被召回→逾時=一階/二階失效證）。
+	if Probe.enabled:
+		Probe.bump("construct.timeout_cancel")
+		Probe.bump_sample("construct.timeout_cancel", {
+			"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
+			"ct_id": tile.construction_team_id,
+			"stall_ticks": state.world.current_tick - tile.construction_last_progress_tick,
+		})
 	var ct: TeamData = state.teams.get(tile.construction_team_id)
 	var cost: Dictionary = construction_cost_of(tile)
 	if ct != null:
@@ -570,6 +623,7 @@ func _subteam_upgrade_level(state: WorldState, team: TeamData, tile: HexTileData
 	tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
 	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	_tap_build_start(state, team, tile, "upgrade_level")
 	print("[Outpost] 子隊 Team%d 開始升級 → Lv%d at (%d,%d)" % [
 		team.team_id, target_level, tile.tile_pos.x, tile.tile_pos.y])
 	return true
@@ -606,6 +660,7 @@ func demolish_with_control(state: WorldState, team: TeamData) -> bool:
 	tile.construction_ticks_left = BUILD_TICKS[tile.outpost_type][tile.outpost_level - 1] / 2
 	tile.construction_target    = { "action": "demolish" }
 	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+	_tap_build_start(state, team, tile, "demolish")
 	print("[Outpost] Team%d 拆除（control）at (%d,%d)" % [team.team_id, tile.tile_pos.x, tile.tile_pos.y])
 	return true
 
