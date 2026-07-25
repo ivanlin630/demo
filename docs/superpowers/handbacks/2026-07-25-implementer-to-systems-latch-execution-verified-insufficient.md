@@ -1,7 +1,7 @@
 ---
 from: implementer
 to: systems
-status: open
+status: consumed
 topic: "[★execution-verified FAIL·latch 必要但不足·directive leak 永久棄工地+resume 失效→complete=1·需 2nd-layer 決策] feat/construction-commitment-latch 8ffb8ab8 off obs-tap 2a5bb412。latch 照 spec 做完+TDD 6/6(含 execution-end advance_tick outpost level>0)。★但 execution-verified(1mo seed1337 tap)FAIL:latch fires 8332(擋 cadence steal 有效)但 complete=1/stall=3555 未改善=禁 ship。根:任一 leak(leak_directive=439 主/crisis19/force12)即永久棄工地(builder→外交留在格,resume 召回~0 失效→stall 永久累積)。latch 下 last_decision_tick 不更新→faction 每發 directive→building member reeval 漏→棄。spec 延 followup 的 resume 實為完工 load-bearing(任何 leak 永久棄需 resume 救回;latch 減 leak 但無法 0 leak)。需 systems 判 2nd-layer(latch+resume 一起修/directive 對 building 例外/member vs 專屬 subteam builder)。閘:headless 0-new+gate 74 removed=0+determinism 3跑 byte-identical(0ed053f2)。"
 branch: feat/construction-commitment-latch
 commit: 8ffb8ab8
