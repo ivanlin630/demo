@@ -168,17 +168,19 @@ static func _resolve_build_facility(state: WorldState, team: TeamData, ctx: Deci
 	# 前置 2：facility outpost-type（需 allowed_outpost type outpost）——無合適 type→建 outpost frontier。
 	var allowed: Array = fdef.get("allowed_outpost", [])
 	if own_tile == null or not (own_tile.outpost_type in allowed):
-		# ★A1 founding：無合適 type outpost → 派子隊建 allowed type outpost（複用 _dispatch_builder）。有 outpost 但 type 不符=改建複雜 S4 不做。
-		var cur: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
-		if cur != null and cur.outpost_level == 0:
-			var btype: String = String(allowed[0]) if not allowed.is_empty() else "civilian"
-			return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
-				{"build_type": btype, "target": team.tile_pos})
-		return {}   # 無合適位置 → 靜默（whole-system-first，不造假）
+		# ★A1 裁②：same-tile founding（隊站空 tile 建 new outpost）無母隊就地 outpost-build 路 → 移除 candidate，靜默。
+		# 屬 facility-type-mismatch known_issues followup（non-A1-core），前置未滿=靜默（whole-system-first，不造假）。
+		return {}
 	# 前置 3：manpower pop（既有 build pop 門檻）——不足→靜默（S4 最小，passive 繁殖增，無主動 recruit task）。
 	if team.population < GoalRegistry.FACILITY_BUILD_POP_MIN:
 		return {}
-	# ★A1 全滿 → facility candidate（派子隊在 own outpost 建 F；複用 _dispatch_facility_builder consumer，非發無 consumer 的 TASK_BUILD）。
+	# ★A1 全滿 → facility 建：
+	# owner 在場（team 站 own outpost）→ **defer 給 infra path**（不生 candidate）。infra desire-based _pick_facility
+	# 選最想建 facility 就地建（較 goal REGISTRY-order 聰明；單一 build slot 不撞），忠於二裁意圖「接 infra path 非另立子隊路」。
+	# （goal REGISTRY-order 就地建會壟斷 build slot→礦村建 workshop 非 mint→15360 regression；量測坐實。）
+	if team.tile_pos == own_tile.tile_pos:
+		return {}
+	# owner 不在場（own outpost 在別格）→ facility candidate（派子隊 remote 真移動→抵達→建，_dispatch_facility_builder）。
 	return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_FACILITY, payoff, ctx,
 		{"facility": f, "target": own_tile.tile_pos})
 
@@ -210,10 +212,12 @@ static func _resolve_resource_prereq(state: WorldState, team: TeamData, ctx: Dec
 		# ★A1 founding：缺料+無該地形 outpost → 派子隊到最近該地形 tile 建 civilian outpost（複用 _dispatch_builder consumer）。
 		# 移除舊 in-place TASK_BUILD + TASK_MIGRATE frontier（TASK_BUILD 無 consumer=死路;founding 本質派子隊,合 WHAT §4）。
 		var pos: Vector2i = find_nearest_terrain_tile(state, team, terrain, SEEK_TILE_RANGE)   # 純地形=公共地理
-		if pos != Vector2i(-1, -1):
+		# ★A1 裁③：remote forest founding（異格）→ 派子隊（子隊真移動→抵達→建，正常）。
+		# ★裁② guard：pos == team.tile_pos（隊已站該地形）= same-tile founding，無母隊就地 outpost-build 路 → 靜默（followup）。
+		if pos != Vector2i(-1, -1) and pos != team.tile_pos:
 			return _mk_delegate_candidate(team, g, gt, GoalRegistry.PREREQ_LOCATION, payoff, ctx,
 				{"build_type": "civilian", "target": pos})
-	return {}   # S3 無取得手段（產=S4 設施）
+	return {}   # S3 無取得手段（產=S4 設施 / same-tile founding=followup）
 
 # ★S3 定位型前置 handler（組件 C）：{kind:location, terrain, control?}。查隊在/有滿足 tile，未滿→tile frontier candidate。
 static func _resolve_location_prereq(state: WorldState, team: TeamData, ctx: DecisionContext,

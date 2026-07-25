@@ -64,11 +64,11 @@ func _test_material_gap_chain() -> void:
 				and found["to_task"]["target"] == Vector2i(8, 5) and found["to_task"].get("delegate", false),
 			"to_task=派子隊到最近 forest tile(8,5) 建 civilian outpost（★A1:複用 _dispatch_builder,非發無 consumer TASK_MIGRATE/BUILD）")
 
-# ★A1 founding 閉環：缺料+無 forest outpost→派子隊建 forest outpost（不論隊站哪）；建成 forest outpost→採 satisfied
+# ★A1 二裁:隊站 forest tile（same-tile founding）→無母隊就地 outpost-build 路→靜默（followup 非 A1）；own forest outpost→採 satisfied
 func _test_build_closure() -> void:
-	print("--- ★A1 founding 閉環 ---")
+	print("--- ★A1 same-tile founding 靜默 + 閉環 satisfied ---")
 	var w: Array = _mk(); var state: WorldState = w[0]; var team: TeamData = w[1]
-	# 想建 weaponsmith → material need；material 0；隊站 forest tile（7,7）未建 outpost
+	# 想建 weaponsmith → material need；material 0；隊站 forest tile（7,7）未建 outpost=same-tile
 	var mtile: HexTileData = state.world.tiles[5 * 1000 + 5]
 	mtile.outpost_owner = 1; mtile.outpost_type = "military"; mtile.outpost_level = 1; mtile.set("weaponsmith_level", 0)
 	team.resources["material"] = 0.0
@@ -81,10 +81,7 @@ func _test_build_closure() -> void:
 	for c in cands:
 		if String(c.get("label", "")) == "maintain_material:location:delegate":
 			build_c = c
-	_ok(not build_c.is_empty(), "缺料+無 forest outpost → founding candidate（★A1:派子隊建 forest outpost 閉環到採）")
-	if not build_c.is_empty():
-		_ok(String(build_c["to_task"].get("build_type", "")) == "civilian" and build_c["to_task"].get("delegate", false),
-			"to_task=founding delegate(build_type civilian，複用 _dispatch_builder 真建成)")
+	_ok(build_c.is_empty(), "★隊站 forest tile(same-tile founding pos==team.tile_pos) → 無 founding candidate（裁②靜默 followup）")
 	# ★閉環完成：隊 own outpost 在 forest → 採 satisfied（無 move/build candidate）
 	var w2: Array = _mk(); var s2: WorldState = w2[0]; var t2: TeamData = w2[1]
 	_set_forest(s2, Vector2i(6, 6))

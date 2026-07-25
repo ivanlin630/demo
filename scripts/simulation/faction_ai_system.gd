@@ -2808,9 +2808,11 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
 		return _dispatch_builder(state, team, target, String(td["build_type"]), 1)
-	# ★A1 facility 分支：自家 owned outpost 建設施 → 複用 _dispatch_facility_builder（TASK_EXPAND 子隊 consumer）。
+	# ★A1 裁①(二裁意圖「接 infra path 非另立子隊路」)：facility 分支只走 owner-不在場 remote 子隊。
+	# same-tile(owner 在場)facility 已在 _resolve_build_facility defer 給 infra path（infra desire-based
+	# _pick_facility 選最想建的+就地建=較 goal REGISTRY-order 聰明+單一 build slot 不撞），此處不再生同格 candidate。
 	if td.has("facility"):
-		return _dispatch_facility_builder(state, team, target, String(td["facility"]))
+		return _dispatch_facility_builder(state, team, target, String(td["facility"]))   # owner 遠離 own outpost → remote 子隊真移動→抵達→建
 	# 既有 build/settle 委派（S5）→ generic subteam dispatch。
 	var advisor_id: int = _pick_or_promote_advisor(state, team)
 	if advisor_id == -1:

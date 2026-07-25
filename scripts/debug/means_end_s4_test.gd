@@ -57,6 +57,7 @@ func _test_facility_action_candidate() -> void:
 	var w: Array = _mk("civilian", 10); var state: WorldState = w[0]; var team: TeamData = w[1]
 	var tile: HexTileData = state.world.tiles[5 * 1000 + 5]
 	tile.set("manufacturing_level", 0)   # workshop 未建
+	team.tile_pos = Vector2i(7, 7)   # ★A1 二裁:owner 遠離 own outpost(5,5)→remote facility candidate(派子隊);同格=defer infra
 	team.resources["material"] = 100000.0; team.resources["tools"] = 100000.0   # 資源遠夠
 	team.goal_state = [{"goal_type": "build_workshop", "target": null, "created_tick": 0, "status": "active"}]
 	var ctx: DecisionContext = DecisionContext.gather(state, team)
@@ -65,10 +66,11 @@ func _test_facility_action_candidate() -> void:
 	for c in cands:
 		if String(c.get("label", "")) == "build_workshop:facility:delegate" and c["to_task"].get("facility", "") == "workshop":
 			action = c
-	_ok(not action.is_empty(), "civ outpost+資源夠+pop 10+未建 → build_workshop facility candidate（前置全滿）")
+	_ok(not action.is_empty(), "civ outpost+資源夠+pop 10+未建+owner 遠離 → remote build_workshop facility candidate")
 	if not action.is_empty():
-		_ok(action["to_task"].get("delegate", false) == true and not action["to_task"].has("build_type"),
-			"to_task=facility delegate（★A1:複用 _dispatch_facility_builder 真建成,非發無 consumer TASK_BUILD）")
+		_ok(action["to_task"].get("delegate", false) == true and not action["to_task"].has("build_type") \
+				and action["to_task"].get("target") == Vector2i(5, 5),
+			"to_task=facility delegate remote(target=own outpost 5,5，派子隊 _dispatch_facility_builder 真建成)")
 
 # ③ 人力前置 pop<N → 靜默（無 build/假 candidate）
 func _test_manpower_silent() -> void:
