@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·construction pipeline 可觀測性補洞(A1 stall 一階定位)·純觀測非改行為·補全量暫態可觀測性不變量·spec=2026-07-25-construction-pipeline-observability-A1-stall-trace.md] A1 forest founding 仍 FAIL(outpost_built 兩 seed 0,dispatch 6080/1447 巨量但 completion 0)。systems code-trace 到極限反覆得『該 work』但 measure=0=construction pipeline 全無 Probe tap→違全量暫態可觀測性不變量→QA/systems 盲區猜一階。∴先補 pipeline permanent tap(不變量義務)→measurer 定位一階→一次修全部卡點(別 whack-a-mole)。★純觀測 slice:加 Probe.bump/tap 於 start_build/facility build 成功後(current_task_after 確認 transition 生效)+_tick_construction active_team==null stall(揭施工隊去向/task_reason=一階根)+_complete+timeout_cancel+_try_resume reject 原因分類。不修行為(latch/召回放寬待一階定後)。★reviewer focus(refute):(1)★觀測禁 RNG 全 tap 覆蓋否(第3次同族教訓 feedback_observer_no_global_rng,Probe 禁耗 randf/randi,三跑 byte-identical 硬驗)?(2)tap 純觀測不改行為否(無 side-effect 改 state/決策)?(3)tap 點夠定位一階否(start_build 後 current_task 實際值+stall 施工隊去向+召回 reject 分布)=能不能一輪坐實一階卡段?(4)因果鏈候選群(spec §已坐實:transition guard 攔#2/召回 remote is_owner 荒地=-1 失效#4)file:line 對否?CLEAN→dispatch implementer 加 tap→measurer 定位。有洞→回 to:systems。"
 ---
 
