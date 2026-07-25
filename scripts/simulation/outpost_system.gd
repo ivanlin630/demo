@@ -555,8 +555,6 @@ func check_construction_timeout(state: WorldState, tile: HexTileData) -> bool:
 		for k in cost:
 			if k == "ticks": continue
 			ResourceBank.add(ct, k, float(cost[k]) * 0.5, "construction_refund")
-		# ★修②:取消時 release 施工隊（對稱 _complete_construction:391，防 commitment latch 下施工隊永卡 TASK_BUILD）。
-		TaskArbiter.release(ct)
 	tile.construction_team_id = -1
 	tile.construction_ticks_left = 0
 	tile.construction_target = {}

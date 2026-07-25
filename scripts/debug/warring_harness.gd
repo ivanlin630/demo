@@ -95,11 +95,8 @@ const PROBE_KEYS: Array = [
 	# ★construction pipeline 可觀測性（A1 forest founding stall 一階 trace，2026-07-25）
 	"construct.start", "construct.start_task_not_build", "construct.progress", "construct.stall",
 	"construct.complete", "construct.timeout_cancel",
-	"resume.attempt", "resume.success", "resume.orig_recall",
+	"resume.attempt", "resume.success",
 	"resume.reject_combat", "resume.reject_starving", "resume.reject_owner", "resume.reject_resident", "resume.reject_busy",
-	# ★construction commitment latch（A1 根修）+ DIAG building 隊漏過 latch 路徑
-	"reeval.build_latch", "reeval.build_leak_force", "reeval.build_leak_stuck",
-	"reeval.build_leak_crisis", "reeval.build_leak_directive",
 ]
 
 # ★construction tap samples（一階根 payload：task_after / ct_task / ct_reason / candidates 等，counts 只給階段、samples 給 why）
