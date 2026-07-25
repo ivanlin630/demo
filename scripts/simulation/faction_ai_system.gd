@@ -420,7 +420,7 @@ func _evaluate_threat(state: WorldState, team: TeamData) -> void:
 	# force reeval：threat 觸發即反應（繞 _decide_unified cadence 節流——threat 非 _should_reeval 內建 trigger）。
 	# side-effect（_wire_threat_task/flee_from_pos/threat.dispatch tap/specimen）由 _decide_unified commit loop 承（DRY）。
 	team.decision_eval_next_tick = state.world.current_tick
-	_decide_unified(state, team)
+	_decide_unified(state, team, true)   # ★威脅 force=true 繞 construction latch（施工隊壓境能逃，不悶死）
 
 # 融合 threat：threat option 的 aux target 接線（DEFEND=prosperity_target / 求和=order_target+order_task）。
 # _evaluate_threat（non-unified）與 _decide_unified（unified）共用 → 兩路 threat 反應接線一致（DRY）。
@@ -1518,9 +1518,10 @@ func uses_unified(team: TeamData) -> bool:
 	return team.tags.has(TeamData.TAG_MERCHANT) or team.tags.has(TeamData.TAG_PRODUCE)
 
 # 切片隊走引擎決策 → 設 task（取代舊 member/solo 派工）。
-func _decide_unified(state: WorldState, team: TeamData) -> void:
+func _decide_unified(state: WorldState, team: TeamData, force_reeval: bool = false) -> void:
 	# ⑦ 統一重評 gate（修每小時過頻）：IDLE/stuck/crisis/命令新仍即時，否則 cadence 節流。
-	if not _should_reeval(state, team):
+	# ★force_reeval：威脅段(:401-423)傳 true 繞 construction latch（施工隊被壓境能逃，不悶死）。
+	if not _should_reeval(state, team, force_reeval):
 		return
 	team.decision_eval_next_tick = state.world.current_tick \
 		+ (DECISION_CADENCE / 4 if _decision_crisis(state, team) else DECISION_CADENCE)
@@ -1884,11 +1885,16 @@ func _directive_fresh(state: WorldState, team: TeamData) -> bool:
 	return state.factions[team.faction_id].directive_change_tick > team.last_decision_tick
 
 # ⑦ 統一「何時重評」predicate（唯一判斷點，架構紀律）：IDLE/stuck/crisis/命令新→即時；否則 cadence 節流。
-func _should_reeval(state: WorldState, team: TeamData) -> bool:
+func _should_reeval(state: WorldState, team: TeamData, force_reeval: bool = false) -> bool:
+	var _bld: bool = team.current_task == TeamData.TASK_BUILD   # ★DIAG:building 隊漏過 latch 的路徑
+	if force_reeval:
+		if _bld and Probe.enabled: Probe.bump("reeval.build_leak_force")
+		return true      # ★威脅 force(:401-423)/明確 force → 繞 construction latch + cadence（不悶逃命）
 	if team.current_task == TeamData.TASK_IDLE:
 		if Probe.enabled: Probe.bump("reeval.idle")
 		return true      # 空閒/剛釋放→即重評
 	if _is_stuck(team):
+		if _bld and Probe.enabled: Probe.bump("reeval.build_leak_stuck")
 		if Probe.enabled: Probe.bump("reeval.stuck")
 		return true                              # 卡住→重評
 	# Fix2 crisis edge-trigger：level-trigger(每 tick trip crisis 繞過 cadence, reeval.crisis=13087=93%)→ 邊緣化。
@@ -1897,14 +1903,22 @@ func _should_reeval(state: WorldState, team: TeamData) -> bool:
 	if in_crisis:
 		if not team.crisis_latched:
 			team.crisis_latched = true
+			if _bld and Probe.enabled: Probe.bump("reeval.build_leak_crisis")
 			if Probe.enabled: Probe.bump("reeval.crisis")
 			return true           # edge：進入 crisis 當下反射提前一次
 		# 持續 crisis → 不每 tick，落下方 cadence 閘
 	else:
 		team.crisis_latched = false   # 離開 crisis → 解 latch
 	if _directive_fresh(state, team):
+		if _bld and Probe.enabled: Probe.bump("reeval.build_leak_directive")
 		if Probe.enabled: Probe.bump("reeval.directive")
 		return true               # faction 新命令→即時響應
+	# ★construction commitment latch（A1 stall 根修）：施工中（已投料開工）不被【例行 cadence】argmax 搶去外交/貿易。
+	# 該打斷施工四路皆在上方保留：威脅→force_reeval(:401-423)；深餓→crisis edge；命令→directive；卡住→stuck。
+	# 此 latch 只擋純例行 cadence 經濟 argmax（非人格 gate 決策，是已 committed construction task 執行 latch）。
+	if team.current_task == TeamData.TASK_BUILD:
+		if Probe.enabled: Probe.bump("reeval.build_latch")
+		return false
 	if state.world.current_tick >= team.decision_eval_next_tick:
 		if Probe.enabled: Probe.bump("reeval.cadence")
 		return true
@@ -2744,6 +2758,21 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 		var t: TeamData = state.teams[tid]
 		if t.tile_pos == tile.tile_pos and t.current_task == TeamData.TASK_BUILD:
 			return   # 已有人施工
+	# ★2nd-layer load-bearing（A）：優先召回原施工隊（construction_team_id）。它專程來建、常還在工地格
+	# 只是被 directive/crisis/force leak 拉去外交（stall samples ct_pos==tile）→ 一次 leak 即永久棄 unless 救回。
+	# 繞 owner/resident gate（orig 是原施工隊本人非找別隊接手）;糧 gate 保留（餓不搬磚）。
+	var orig: TeamData = state.teams.get(tile.construction_team_id)
+	if orig != null and orig.combat_target == -1 \
+			and orig.tile_pos == tile.tile_pos \
+			and orig.current_task != TeamData.TASK_BUILD:
+		var od: float = ResourceSystem.effective_food(state, orig) \
+			/ maxf(float(orig.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		if od >= 3.0:
+			TaskArbiter.release(orig)   # release-first 過 transition guard
+			TaskArbiter.transition(state, orig, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+			if Probe.enabled: Probe.bump("resume.orig_recall")
+			return
+	# orig 死/晉升/detach(null)/離格/戰鬥/餓 → 落回現有 candidates（別隊接手，不退化）
 	var interruptible: Array = [TeamData.TASK_IDLE, TeamData.TASK_PRODUCE,
 		TeamData.TASK_MANUFACTURE, TeamData.TASK_TRADE]
 	var candidates: Array = []
