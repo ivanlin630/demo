@@ -71,10 +71,43 @@ latch skip reeval **不違憲**：這是**已 committed 執行的 construction t
 - **完工釋放驗**：完工後施工隊 current_task 釋放（非卡 TASK_BUILD）→ 可正常接新 task。
 - **★★威脅繞 latch 驗（R² 必補）**：施工中隊 + `threat_react ≥ threat_threshold + PREEMPT_MARGIN(2.0)`（真敵人壓境）→ `:401-423` 觸發 force reeval → **繞 latch、施工隊能逃/反應（非被 latch 悶住）**。★這與深餓測是**兩回事**（深餓走 `_decision_crisis`、威脅走 `:401-423`）——**兩者分開測，測深餓不能替代測威脅**。
 - **深餓例外驗**：施工中深餓 → crisis edge 仍能打斷 latch（不餓死工地）。
+- **★★directive-leak resume 救回驗（2nd-layer 必補）**：施工中隊被 faction directive leak 拉去外交（仍在工地格）→ `_try_resume_construction` 優先召回原隊 → 續建 → **驅真 tick 迴圈跑到 outpost_level>0 真完工**（execution-end，非 teleport）。對照無 resume（單 latch）baseline：leak 後永久棄、不完工。
 - 閘：headless 0-new + gate 74 removed=0 + determinism 3跑 byte-identical。
 
 ## 交付 → measurer execution-verified（★這輪硬標準）
 重跑 A1 focused（seed1337/42，6mo）：**outpost_built > 0**（forest founding + facility 真完工，對照 stall baseline 95.6%）+ stall 佔比消退 + construct.complete 上升 + reeval.build_latch fire。★fix 驗收 = execution-verified（跑起來 outpost_built>0），非只 R² CLEAN（上輪教訓）。→ 數字 to:blueprint（release-pass）+ specimen to:QA（A1 鏈真走完）。
 
-## ③resume 候選池空 followup（治本後 watch）
-latch 修好後施工隊不離格 → resume 需求淡化。measure 若 resume.attempt/stall 消退 → ③自然解，純紀錄；若殘留（施工隊仍偶離格）→ 補 resume 候選資格（優先召原 construction_team_id 隊）。**不本刀修**（whole：先治本 latch，measure 定 ③殘否）。material 續 PARK。
+## 修③ resume 治本（★2nd-layer，load-bearing——execution-verified 坐實非 followup）
+
+**★訂正（我原判斷錯）**：spec 原把 resume 延 followup。implementer execution-verified（1mo tap）坐實 **resume 實為完工 load-bearing，非 optional**：
+- latch fires 8332（擋 cadence steal 有效，94.6% held）但 **complete=1 未改善**（stall 3555 未消退）。
+- 根：latch 減 leak 但**無法 0 leak**——`_decide_unified` latch 早退（:1523）→ `last_decision_tick`(:1528) 不更新 → faction 發 directive（`directive_change_tick > 舊 last_decision_tick`）→ `_directive_fresh` true（latch 上方）→ building member reeval → argmax 選外交 → **棄工地**（leak_directive=439 主 / crisis 19 / force 12）。
+- **任一 leak = 永久棄**：builder→外交後**仍在工地格**（stall samples `ct_pos==tile`、`current_task=外交`），但 `_try_resume_construction` owner/resident gate **排除 builder 自己**（它非 outpost_owner、非 TAG_PRODUCE resident）→ 召不回 → 工地永久 stall → complete≈0。
+
+∴ latch（減 leak）+ resume（救 residual leak）= **閉環，缺一不可**。resume 升 load-bearing、本刀同修（whole-system-first：一次修全部卡點）。
+
+### 修：`_try_resume_construction` 優先召回原施工隊
+`_try_resume_construction`（faction_ai:2742）「已有人施工 return」（:2746）後、現有 candidates 掃描前，插入：
+```gdscript
+# ★2nd-layer load-bearing：優先召回原施工隊(construction_team_id)。它專程來建、
+# 常還在工地格只是被 directive/crisis/force leak 拉去外交(stall samples ct_pos==tile)→
+# release 舊 task 續建。繞 owner/resident gate(它是原施工隊本人,非「找別隊接手」)。
+var orig: TeamData = state.teams.get(tile.construction_team_id)
+if orig != null and orig.combat_target == -1 \
+        and orig.tile_pos == tile.tile_pos \
+        and orig.current_task != TeamData.TASK_BUILD:
+    # 糧 gate 仍守(餓不搬磚,避與 survival ping-pong,同現有 :2760)
+    var od: float = ResourceSystem.effective_food(state, orig) \
+        / maxf(float(orig.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+    if od >= 3.0:
+        TaskArbiter.release(orig)                                       # release-first 過 transition guard
+        TaskArbiter.transition(state, orig, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+        if Probe.enabled: Probe.bump("resume.orig_recall")
+        return
+# orig 死/離格/戰鬥/餓 → 落回現有 candidates(別隊接手)
+```
+- **繞 owner/resident gate 的理由**：orig 就是這 tile `construction_team_id` 記錄的原施工隊（它開的工），召它續建 ≠「找別隊接手」→ owner/resident 資格對它不適用。糧 gate 保留（餓不搬磚，survival 打斷正當）。
+- orig 死/晉升/detach（`state.teams.get` null）/離格/戰鬥/餓 → 落回現有 candidates 邏輯（別隊接手，不退化）。
+
+### （B）directive 對 building 例外 — followup watch（非本刀）
+(A) resume 救回後，directive→外交→resume→build **ping-pong thrash** 可能是 decision 噪音（build progress 不因 task 變重置 → 仍完工，但決策噪音干擾 QA 故事）。若 execution-verified 後 measure 顯 thrash 兇（resume.orig_recall 巨量/complete 仍被拖）→ 補 (B)：`_directive_fresh` 對 building member（current_task==TASK_BUILD）免疫（faction 經濟 directive 不拆自家工地；survival/threat directive 走別 gate 仍打斷）。**先 (A) 治本，measure 定 (B) 需否**。material 續 PARK。
