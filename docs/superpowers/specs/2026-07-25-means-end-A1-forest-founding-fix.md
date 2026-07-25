@@ -20,11 +20,13 @@ means-end S3 build-closure（`goal_resolver._resolve_resource_prereq` 採@地形
   - **(iii) 既有 build/settle delegate** → 沿用 SubteamSystem.dispatch。
 - ★**forest tile 選**：`find_nearest_terrain_tile("forest")`（S3 既有 must-fix②(i) 純地理 gate-ok）；unowned 靠 `_dispatch_builder` `target_tile.construction_team_id!=-1` 自然擋（★**有代價非零代價**：目的地在子隊在途中被搶建→子隊撲空等 ~10天殭屍逾時釋放，faction_ai:1721 既有機制；非本刀新增，mining bootstrap 共用；S3 unowned track 不變）。
 
-## 2b. ★must-fix①（reviewer R②）：S4 build_F 同款 TASK_BUILD 死路一併修
-reviewer 親驗 `goal_resolver.gd` **兩處 build_F 也發 `{task:TASK_BUILD}`＝同款死路**（`TASK_BUILD` 不在 `_on_arrival`/`begin_subteam_construction` match）：
-- **`:171`（`_resolve_build_facility` 前置2，隊在自己 tile 未建 → 建 new outpost）**：`{TASK_BUILD, team.tile_pos}` → **同 A1 founding**：改 founding candidate（delegate + build_type）→ `_dispatch_builder`。
-- **`:178`（build_F action，全滿 → 在自家 owned outpost 建 facility）**：`{TASK_BUILD, own_tile.tile_pos, facility}` → **語意 = 既有 outpost 建設施非新建 outpost** → facility candidate（delegate + facility key）→ `_dispatch_facility_builder`（既有 TASK_EXPAND 路）。
-- ∴ **一次修全三處 TASK_BUILD 死路**（S3 build-closure + S4 :171 + S4 :178），whole-system-first 免下輪重演「候選贏 argmax 但蓋不出」。
+## 2b. ★must-fix①（reviewer R②）+ ★★systems 裁訂正（implementer BLOCKED 揭 same-tile-no-arrival）
+reviewer 親驗 `goal_resolver.gd` 兩處 build_F 也發 `{task:TASK_BUILD}`＝同款死路。**但我原 spec 令兩處都「派子隊」＝錯**（implementer whole-headless 抓 mint_lv=0 regression）：**same-tile 建（own outpost/隊站的 tile）派同格子隊 → 子隊零距離無 movement → `begin_subteam_construction` 只在 arrival 觸發 → 永不 start → 建不成 + 卡 baseline 就地建**。★正解 = **same-tile 用就地 builder（母隊自己），remote 才派子隊**（複用既有 infra 分流 `_evaluate_infrastructure`/`_dispatch_facility_builder`：`team.tile_pos==tile → _subteam_upgrade_facility(就地) else _dispatch_facility_builder(派子隊)`）。
+
+- **`:178`（build_F action，自家 owned outpost 建 facility＝same-tile）**：facility candidate → **就地/派子隊分流**：owner 在場（`team.tile_pos == own_outpost tile`）→ `OutpostSystem._subteam_upgrade_facility(state, team, tile, facility)`（就地開工）；不在場 → `_dispatch_facility_builder`（派子隊）。**非一律派子隊**。
+- **`:171`（前置2，隊站空 tile 建 new outpost＝same-tile founding）**：★**移除該 candidate**（回 S4 facility-type-mismatch known_issues followup，non-A1-core）——same-tile outpost founding 無母隊就地 outpost-build 路，且它是「隊有 civilian 想建 mil-facility → 需 mil outpost」的 facility-type-mismatch 補（S4 followup 範疇非 A1 core）。build_F 的 facility-outpost-type 前置未滿 → 靜默（followup 不變）。
+- **S3 forest remote founding（異格）**：delegate `_dispatch_builder` **不變**（remote 子隊移動→抵達→begin_subteam_construction→建，該路正常，implementer s3 綠）。
+- ∴ **A1 修 scope**：S3 remote forest founding（delegate）+ S4:178 facility（就地/派子隊分流）。:171 移除（followup）。goal-chain 建 facility 複用既有 infra owner-在場分流＝所有權縫收斂（means-end 想建 → 接 infra path builder，非另立子隊路）。
 
 ## 3. 執行閉環（湧現）
 缺料 → founding candidate（派子隊 TASK_CONSTRUCT 到 forest）→ `_dispatch_builder` → 子隊 TASK_CONSTRUCT → `movement:291` 抵達 → `begin_subteam_construction:538` → `start_build`（civilian lv1 on forest tile）→ **forest outpost 真建成**（outpost_level>0）→ 該隊/faction 得 forest outpost → material harvest（positional）→ 缺料緩解 → build_F 設施。
@@ -37,7 +39,7 @@ reviewer 親驗 `goal_resolver.gd` **兩處 build_F 也發 `{task:TASK_BUILD}`�
 
 ## 5. TDD（★含執行端 + ★must-fix② 打真管線）
 1. build-closure 生 founding candidate（缺料 + 無 forest outpost + forest tile 可達 → founding delegate candidate）。
-2. ★★**執行端硬驗（must-fix② 真管線，非抄近似）**：**從隊真 material 缺口 `goal_state` 出發 → 呼 `GoalResolver.frontier_candidates` 拿真 candidate → 餵真 `_dispatch_goal_delegate`（測 founding/facility 型別判斷分支本身，非繞過直呼 `_dispatch_builder`）→ 子隊 TASK_CONSTRUCT → 抵達 → begin_subteam_construction → start_build → forest outpost 真建成（outpost_level>0）**。這打中 A1 原始壞掉的整段管線（candidate 生成 + argmax 選中 + delegate 型別判斷走對路 + 執行）。
+2. ★★**執行端硬驗（must-fix② 真管線，非抄近似）**：**從隊真 material 缺口 `goal_state` 出發 → 呼 `GoalResolver.frontier_candidates` 拿真 candidate → 餵真 `_dispatch_goal_delegate`（測 founding/facility 型別判斷分支本身，非繞過直呼 `_dispatch_builder`）→ 子隊 TASK_CONSTRUCT → ★★驅真 movement/arrival（**非 teleport 子隊到 target**）→ begin_subteam_construction → start_build → forest outpost 真建成（outpost_level>0）**。這打中 A1 原始壞掉的整段管線。★**驅真 movement 是硬條件**：implementer 首版用 teleport 繞過真 movement→遮住 same-tile-no-arrival bug（[[feedback_verify_execution_end]] 精化：execution-end 測須驅真 movement/arrival 觸發 begin_subteam_construction，teleport 假通過）。remote founding 走真移動抵達；same-tile facility 就地 builder（無 movement）也驗真建成。
 3. ★**S4 build_F 執行端硬驗**（must-fix①）：(a) `:171` 自建 outpost → founding → `_dispatch_builder` → outpost 真建成；(b) `:178` build_F action → facility → `_dispatch_facility_builder` → **facility 真建成**（own outpost 該 facility level>0）。
 4. TASK_BUILD 三處全移除（frontier_candidates 不再生任何 `{task:TASK_BUILD}` candidate）。
 5. ★次要：`_delegate_variant`（`goal_resolver:121`）加 `if self_cand.get("delegate", false): return {}` 早退（founding/facility candidate 已 delegate，別再包一層委派的委派）。
