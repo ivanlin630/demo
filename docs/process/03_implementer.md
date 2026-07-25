@@ -103,7 +103,7 @@ implementer 是**主目錄 standby session**，per-task 進 worktree 做、做�
 
 1. **待命**：session 在主目錄 `A:\GDS\demo`（main branch）、arm `Monitor(bash .claude/hooks/inbox-watch.sh, persistent)`，等 `to:implementer` 信。
 2. **接 task**：收信 → `git worktree add .worktrees/<feature> -b feat/<feature>`（已存在則 `cd` 進）→ `cd .worktrees/<feature>`。所有實作/commit/push 在此。
-3. **做**：照 plan TDD、逐 task commit、跑 godot 驗。
+3. **做**：照 plan TDD、逐 task commit、跑 godot 驗。**★報 TDD PASS/FAIL 數字前必實際跑一次、讀印出的 `=== DONE ===` 行真實計數**（別憑印象/半途 grep 湊；連續 S6/S7/A1 三輪自報數≠實際=reviewer grep 抓，2026-07-25 流程項）。**★execution-end TDD 禁 teleport 繞真觸發**（movement/arrival/cadence）——teleport 到 target 會遮 same-tile-no-arrival 型 bug（A1 血證）；須驅真 `MovementSystem.process()` tick 迴圈+`arrived_tick>=0` 斷言，抵達後才驗效果（連 memory `feedback_verify_execution_end`）。
 4. **交付（task 完成）**：寫 handback（X-to-Y frontmatter）到**唯一 main mailbox 絕對路徑**（見上 §2）→ **`cd` 回主目錄 `A:\GDS\demo`**（確認 `git branch --show-current`=**main**；worktree 的 feat 分支不動、只 shell 回家；★絕不在主目錄 checkout feat）。
 5. **★hold warm 等裁決（完成判定歸 01，非自判）**：**先別清 ctx**。task 是否真完成由**下游裁決**（measure→QA→01/②判），因為 QA 可能 redo。context held warm、待命等 `to:implementer` 的裁決信：
    - **`[REDO]` 信**（要改）→ 你 context 還在，直接改 → 新 handback（回步 4）。**不冷啟**。
