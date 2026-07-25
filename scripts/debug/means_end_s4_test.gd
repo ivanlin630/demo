@@ -63,11 +63,12 @@ func _test_facility_action_candidate() -> void:
 	var cands: Array = GoalResolver.frontier_candidates(state, team, ctx)
 	var action: Dictionary = {}
 	for c in cands:
-		if String(c.get("label", "")) == "build_workshop:facility" and c["to_task"].get("facility", "") == "workshop":
+		if String(c.get("label", "")) == "build_workshop:facility:delegate" and c["to_task"].get("facility", "") == "workshop":
 			action = c
-	_ok(not action.is_empty(), "civ outpost+資源夠+pop 10+未建 → build_workshop action candidate（前置全滿）")
+	_ok(not action.is_empty(), "civ outpost+資源夠+pop 10+未建 → build_workshop facility candidate（前置全滿）")
 	if not action.is_empty():
-		_ok(action["to_task"]["task"] == TeamData.TASK_BUILD, "to_task=TASK_BUILD（接既有 build 機械挑 wanted facility）")
+		_ok(action["to_task"].get("delegate", false) == true and not action["to_task"].has("build_type"),
+			"to_task=facility delegate（★A1:複用 _dispatch_facility_builder 真建成,非發無 consumer TASK_BUILD）")
 
 # ③ 人力前置 pop<N → 靜默（無 build/假 candidate）
 func _test_manpower_silent() -> void:

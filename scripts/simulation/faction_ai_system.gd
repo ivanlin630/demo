@@ -2804,12 +2804,19 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 # ★means-end S5 委派：goal delegate candidate 贏 → 派子隊執行其 action（build/settle），母隊留守本業。
 # 接既有 SubteamSystem.dispatch（advisor+settler pop+action task/target）。回 true=派出成功。
 func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) -> bool:
+	var target: Vector2i = td.get("target", Vector2i(-1, -1))
+	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
+	if td.has("build_type"):
+		return _dispatch_builder(state, team, target, String(td["build_type"]), 1)
+	# ★A1 facility 分支：自家 owned outpost 建設施 → 複用 _dispatch_facility_builder（TASK_EXPAND 子隊 consumer）。
+	if td.has("facility"):
+		return _dispatch_facility_builder(state, team, target, String(td["facility"]))
+	# 既有 build/settle 委派（S5）→ generic subteam dispatch。
 	var advisor_id: int = _pick_or_promote_advisor(state, team)
 	if advisor_id == -1:
 		return false
 	var settler: int = int(td.get("settler", clampi(team.population / 4, 2, 5)))
 	var action_task: String = String(td.get("task", TeamData.TASK_BUILD))
-	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	var sub_id: int = SubteamSystem.new().dispatch(state, team.team_id, advisor_id, settler, action_task, target)
 	return sub_id != -1
 
