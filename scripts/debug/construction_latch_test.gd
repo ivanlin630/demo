@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_test_completion_release()     # ③完工後 current_task 釋放(非卡 TASK_BUILD)
 	_test_threat_bypass_latch()    # ★★④威脅 force 繞 latch(施工中壓境→能逃,非悶住)
 	_test_deep_starve_bypass()     # ⑤深餓 crisis edge 繞 latch(不餓死工地;與威脅分開)
+	_test_directive_leak_resume()  # ★★⑥2nd-layer:施工隊被 leak 拉走→resume 召回原隊→驅真 tick 完工(load-bearing)
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -141,3 +142,28 @@ func _test_deep_starve_bypass() -> void:
 	# crisis edge 在 latch 上方 → 深餓施工隊仍能重評（不餓死工地）;與威脅(:401-423)分開路
 	_ok(fai._should_reeval(state, team) == true,
 		"深餓施工中 → crisis edge 繞 latch(true，不餓死工地；≠威脅路)")
+
+# ★★⑥2nd-layer resume 治本：施工隊被 leak 拉去別 task(仍在工地格)→ _try_resume_construction 召回原隊 → 驅真 tick 完工
+func _test_directive_leak_resume() -> void:
+	print("--- ★★⑥resume 召回原施工隊(load-bearing) ---")
+	var state := _mk_world()
+	var pos := Vector2i(2, 2)
+	var team := _mk_team(state, 1, pos, 10, {"慎重": 0.5, "好戰": 0.3, "貪婪": 0.6, "野心": 0.5, "求生欲": 0.3})
+	team.resources["material"] = 200.0
+	var os := OutpostSystem.new()
+	os.start_build(state, team, "civilian", 1)   # → TASK_BUILD, construction active, construction_team_id=1
+	var tile: HexTileData = state.world.tiles[pos.x * 1000 + pos.y]
+	# 模擬 leak：原施工隊被 directive/argmax 拉去別 task（仍在工地格 pos，未離場=stall samples ct_pos==tile）
+	team.current_task = TeamData.TASK_TRADE
+	_ok(tile.construction_team_id == 1 and tile.construction_ticks_left > 0, "工地 active(construction_team_id=1) 但施工隊 leak 去 %s" % team.current_task)
+	# _try_resume_construction → 優先召回原隊（繞 owner/resident gate；orig 在格+糧足）
+	var fai := FactionAISystem.new()
+	fai._try_resume_construction(state, tile, team)
+	_ok(team.current_task == TeamData.TASK_BUILD, "★resume 召回原施工隊(orig_recall) → TASK_BUILD 續建（非永久棄）")
+	# 驅真 tick 迴圈（advance_tick）→ 續建到 outpost_level>0 真完工
+	var runner := SimRunner.new()
+	for _i in range(4000):
+		runner.advance_tick(state, pos)
+		if tile.outpost_level > 0:
+			break
+	_ok(tile.outpost_level > 0, "★★resume 救回後驅真 tick → outpost 真完工(level=%d>0)＝閉環(latch 減 leak+resume 救殘 leak)" % tile.outpost_level)

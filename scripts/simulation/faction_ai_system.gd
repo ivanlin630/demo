@@ -2758,6 +2758,21 @@ func _try_resume_construction(state: WorldState, tile: HexTileData, leader_team:
 		var t: TeamData = state.teams[tid]
 		if t.tile_pos == tile.tile_pos and t.current_task == TeamData.TASK_BUILD:
 			return   # 已有人施工
+	# ★2nd-layer load-bearing（A）：優先召回原施工隊（construction_team_id）。它專程來建、常還在工地格
+	# 只是被 directive/crisis/force leak 拉去外交（stall samples ct_pos==tile）→ 一次 leak 即永久棄 unless 救回。
+	# 繞 owner/resident gate（orig 是原施工隊本人非找別隊接手）;糧 gate 保留（餓不搬磚）。
+	var orig: TeamData = state.teams.get(tile.construction_team_id)
+	if orig != null and orig.combat_target == -1 \
+			and orig.tile_pos == tile.tile_pos \
+			and orig.current_task != TeamData.TASK_BUILD:
+		var od: float = ResourceSystem.effective_food(state, orig) \
+			/ maxf(float(orig.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		if od >= 3.0:
+			TaskArbiter.release(orig)   # release-first 過 transition guard
+			TaskArbiter.transition(state, orig, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
+			if Probe.enabled: Probe.bump("resume.orig_recall")
+			return
+	# orig 死/晉升/detach(null)/離格/戰鬥/餓 → 落回現有 candidates（別隊接手，不退化）
 	var interruptible: Array = [TeamData.TASK_IDLE, TeamData.TASK_PRODUCE,
 		TeamData.TASK_MANUFACTURE, TeamData.TASK_TRADE]
 	var candidates: Array = []
