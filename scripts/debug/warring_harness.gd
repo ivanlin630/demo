@@ -92,7 +92,16 @@ const PROBE_KEYS: Array = [
 	"trade.deal", "trade.deal_market", "trade.deal_merchant", "trade.deal_resident", "trade.barter_deal",
 	"trade.market_bail.sell_no_surplus", "trade.market_bail.buy_no_stock", "trade.market_bail.buy_no_coin",
 	"trade.arrive", "trade.meet", "trade.timeout",
+	# ★construction pipeline 可觀測性（A1 forest founding stall 一階 trace，2026-07-25）
+	"construct.start", "construct.start_task_not_build", "construct.progress", "construct.stall",
+	"construct.complete", "construct.timeout_cancel",
+	"resume.attempt", "resume.success",
+	"resume.reject_combat", "resume.reject_starving", "resume.reject_owner", "resume.reject_resident", "resume.reject_busy",
 ]
+
+# ★construction tap samples（一階根 payload：task_after / ct_task / ct_reason / candidates 等，counts 只給階段、samples 給 why）
+const CONSTRUCT_SAMPLE_KEYS: Array = ["construct.start", "construct.stall", "construct.progress",
+	"construct.complete", "construct.timeout_cancel", "resume.attempt", "resume.success"]
 
 # 跑固定 seed warring 世界 total_ticks tick → 回結構化 metric（逐點可對照）。
 # 回傳 dict：seed / start_pop / curve[月快照] / intent[final histogram] / final / probe[counts 子集]。
@@ -144,6 +153,7 @@ static func run(world_seed: int, total_ticks: int,
 		},
 		"probe": _probe_subset(),
 		"probe_amounts": _probe_amounts_subset(),
+		"probe_samples": _probe_samples_subset(),   # ★construction tap payload（一階 trace）
 	}
 	Probe.enabled = false
 	return result
@@ -298,4 +308,11 @@ static func _probe_amounts_subset() -> Dictionary:
 	var d: Dictionary = {}
 	for k in AMOUNT_KEYS:
 		d[k] = Probe.amount(k)
+	return d
+
+static func _probe_samples_subset() -> Dictionary:
+	var d: Dictionary = {}
+	for k in CONSTRUCT_SAMPLE_KEYS:
+		if Probe.samples.has(k):
+			d[k] = Probe.samples[k]
 	return d
