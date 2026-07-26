@@ -13,7 +13,14 @@ material 供給查出決策模型 **means-end 缺口完整三段**（①動機�
 ### order-noise（arb_kill_nostock 42k-84k）= hollow-economy 症狀（measurer 確診 2026-07-24，同根不獨立修）
 kill_nostock 99.96-99.97% 集中在 tools/weapon_melee_low/weapon_ranged_low，這 3 種 **production=0**（cross-ref harvest_carry+manufacture_output 雙源）——沒隊在產（沒 weaponsmith/manufacturing 設施＝EXPAND 100% 失敗互證）→ 掛單找不到貨 → kill_nostock。material 本身有 production（362-556）且**零 kill＝非噪音源**。∴order-noise = **means-end/facility-scarcity 同一根的下游症狀**，非獨立 order-layer bug；root（means-end 全系統）修好自然消退，**不需另開 ungrounded-order-layer 修復工**。（(b) ungrounded 掛單分支 measure 排除。）
 
-### ⏸A1 stall latch+resume = 部分改善 HOLD（**A1 核心新 outpost founding 未坐實**，revert merge 待 per-action-count，blueprint 判 2026-07-26）
+### ⛔A1 stall latch+resume = **凍化 seed1337 世界 REGRESSION**（乾淨 fresh 重現坐實 2026-07-26，別 merge/folds until 根治）
+construction commitment latch+resume（branch 5b166eb1，已 revert 出 main 5292faec）**凍化 seed1337 世界**：乾淨 fresh 重現（worktree=純 5b166eb1 確認+cache 清+full re-import）seed1337 monthly `_snapshot`（真 `state.teams.size()`+pop）**71/438 逐月不變 attrition 1.4 = 凍**，vs fresh 現 main（means-end 無 latch）**71→63 churn 動**。∴ **凍源=latch+resume 本身**（非 per-action tap 37f2ce31、非 pre-existing means-end、非 curve artifact）。seed42 動（seed-specific）。**★翻用戶「latch valid 健康」前提——latch 不該 merge/folds 進手統一 until 凍化根治。**
+- **未解矛盾**：`latch-resume-a1-6mo.json`（measurer 跑 5b166eb1）seed1337 attrition 12.39% **動** vs 我乾淨 5b166eb1 **凍**——需 measurer 澄清那次 config（我乾淨測 worktree+cache 確認高信心）。
+- **機制詭異待深查**：latch 只 `_should_reeval TASK_BUILD→false`（施工隊）+ resume orig_recall（少，5）**卻凍全世界 teams/pop**（births/deaths/foundings 全停 day30後）= 機制不通，需逐 tick trace latch 下 seed1337 day25-35 怎麼卡。
+- **★systems 診斷教訓（memory `feedback_avoid_rabbithole` 已記）**：凍源我 3 次翻轉（non-tap→tap→latch），前兩次 code 論證/舊 json 對照猜錯，第 3 次 worktree cache-stale bug，**乾淨 fresh 重現（full re-import 排 cache）才坐實**。
+- A1 核心（新 outpost founding `construct.complete_build`）兩 seed 皆 0（但在凍化 run 上=suspect，clean 重量待 latch 修）。
+
+### ⏸(舊)A1 stall latch+resume = 部分改善 HOLD（↑已升級為凍化 regression）（**A1 核心新 outpost founding 未坐實**，revert merge 待 per-action-count，blueprint 判 2026-07-26）
 construction commitment latch + resume 治本（branch `feat/construction-commitment-latch` 5b166eb1，**已 revert 出 main** 5292faec，hold 不 merge）。**latch**（`_should_reeval` 施工中 skip 例行 cadence argmax，`force_reeval` 繞威脅 :401-423）+ **resume**（優先召回 `construction_team_id` 原隊繞 gate）。
 - **★blueprint 6mo 雙 seed 判 = 部分改善非閉 A1**：①latch modest+seed 不一（stall seed1337 95.6→87.3、seed42 96→89.7 = 降 6-8pt 仍~90% 離格；complete seed1337 33→56 但 **seed42 12→10 反向**）②**★16/16 抽樣 completion 全 `action='upgrade_facility'`（既有 outpost 升設施），零筆 `'build'`（新 outpost founding）= A1 核心硬標準未坐實**（可能真 0、可能 8-cap 抽樣 missed）。
 - **★我 merge 太快教訓**：我 1mo seed1337「完工率 86%」的 complete 上升**可能全是 upgrade_facility**（非 A1 要的 forest founding `action='build'`）。execution-verified 我驗 complete>0 但**沒分 completion action type**——A1 核心 = `'build'` completion 非任意 completion。連 [[feedback_verify_execution_end]]（驗對的效果非任意效果）。
