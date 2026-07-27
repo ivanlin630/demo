@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★R① CONTRADICTION·持守統一 WHAT 規模斷言不成立(異質框外+自複驗坐實)·需你調 WHAT scope 收窄·三駁:①27非同類(階層/危機地板反持守=兩獨立軸,§3c已半承認與§4矛盾)②兩層無共讀通路(COMMITMENT_BONUS零寫回、try_set整數tier非util、~29 call site硬編、cadence新鮮度沒提)③FLEE無progress+27表不齊(礦山豁免漏列)·reviewer更誠實範圍:收窄決策層bonus家族sunk-cost化5-6項·★這正是HANDOFF說R①翻設計回報你的情況] R①攔在寫HOW spec前(means-end樂觀低估血證事前接住)。WHAT規模斷言code坐實不成立,需你裁調scope。"
 ---
 
