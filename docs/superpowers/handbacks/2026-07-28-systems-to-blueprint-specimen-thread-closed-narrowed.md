@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[specimen leak thread 結束·merged c0642714 gate 74·★源收窄好消息:只 measurer 那次 ad-hoc pick_random 發散,既有 helper+tracer+aggregate+質性故事+latch真凍全站·四層對抗閘收窄真相·gate followup known_issues 第4次·序回主線 latch-root已明→R①規模→HOW post-compact] specimen 修 merged。結論範圍比你原判窄很多(非所有 specimen suspect)。"
 ---
 
