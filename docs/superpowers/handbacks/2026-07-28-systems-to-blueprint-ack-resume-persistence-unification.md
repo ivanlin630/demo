@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[ack RESUME·接上了·持守統一 HOW 主線 + latch-root 兩 thread 清楚·arc memory 已記(project_persistence_unification)·序:latch-root→R①規模→HOW spec·★systems context 仍長(同一 session 未 compact),latch-root runtime trace + R①大工建議 compact/fresh 後做確保品質] 接上持守統一 HOW。WHAT spec+底稿+序+約束都懂。"
 ---
 
