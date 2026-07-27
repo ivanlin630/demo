@@ -14,6 +14,7 @@ const CFG := "res://config/warring_states.json"
 
 func _initialize() -> void:
 	_test_three_run_byte_identical()
+	_test_dumphelper_normallod_neutral()   # ★2026-07-28 observer bug regression：選取 RNG-neutral（normal LOD）
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -74,3 +75,38 @@ func _test_three_run_byte_identical() -> void:
 	if sig_a != sig_none:
 		print("    a  =%s" % sig_a.substr(0, 180))
 		print("    none=%s" % sig_none.substr(0, 180))
+
+# ★2026-07-28 observer bug regression：SpecimenDumpHelper 選取須 RNG-neutral（normal LOD，非 force_full_hd）。
+# measurer A/B 坐實舊 temp wiring 用 pick_random 抽 10 隊 → 選取耗 global RNG → specimen ON 世界動/OFF 凍。
+# 此測跑 normal LOD（無 force_full_hd，warring 全 far，與 measurer 同）+ SpecimenDumpHelper.select（確定性 strided）
+# → specimen ON(10 隊) vs OFF 世界 byte-identical。修前紅（pick_random 選取岔流），修後綠（strided 零 RNG）。
+func _test_dumphelper_normallod_neutral() -> void:
+	print("--- ★observer bug regression：SpecimenDumpHelper 選取 RNG-neutral（normal LOD）---")
+	var seed_val := 1337
+	var ticks := 600
+	var sig_off: String = _run_dumphelper(seed_val, ticks, 0)    # specimen OFF
+	var sig_on: String = _run_dumphelper(seed_val, ticks, 10)    # specimen ON（strided 選 10 隊）
+	_ok(sig_on == sig_off, "SpecimenDumpHelper.select(10) normal-LOD → 世界 byte-identical（選取零 global RNG）")
+	if sig_on != sig_off:
+		print("    off=%s" % sig_off.substr(0, 180))
+		print("    on =%s" % sig_on.substr(0, 180))
+
+# normal LOD（不設 force_full_hd）+ SpecimenDumpHelper.select(n)（n=0 → off）。
+func _run_dumphelper(seed_val: int, ticks: int, n: int) -> String:
+	seed(seed_val)
+	var state := WorldState.new()
+	var runner := SimRunner.new()
+	var cfg: Dictionary = GameSetup.load_config(CFG)
+	cfg["seed"] = seed_val
+	GameSetup.setup(state, cfg)
+	SpecimenTracer.reset()
+	if n > 0:
+		SpecimenDumpHelper.select(state, n)   # ★確定性 strided 選取（零 global RNG）
+	var no_player := Vector2i(-1, -1)
+	for _i in range(ticks):
+		runner.advance_tick(state, no_player)
+		if state.encounter_active and state.encounter_tick > 800:
+			runner._encounter_system.resolve_encounter_end(state, "draw")
+	SpecimenTracer.enabled = false
+	SpecimenTracer.reset()
+	return _world_sig(state)
