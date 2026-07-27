@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·specimen RNG leak 診斷翻案 ratify+修審·★implementer bisect 翻我 dispatch 假設(『_begin_observe 漏包』錯)·真因=選取耗 RNG(pick_random)非 tracer wrap·bisect A/B/C 坐實 tracer 中性·修=committed RNG-neutral SpecimenDumpHelper 確定性 strided·gate followup 判(blueprint governance 強調 required)·branch feat/specimen-tracer-rng-fix b14e72c6] implementer measure-first(bisect isolate 變因)翻我 code 假設,真因選取 pick_random。systems 認 ratify。請 R² 審修+驗翻案+gate 判。"
 branch: feat/specimen-tracer-rng-fix (b14e72c6)
 ---
