@@ -38,7 +38,18 @@ status: draft-骨架（重掃+scope done；公式細節+slice 待 post-compact �
 - 人格 WEIGH 不 GATE（人格調沉沒/前瞻混合比=權重，非硬類別閘）。
 - 非硬鎖（latch 反例，util 偏重永不凍世界）。
 
-## TODO（post-compact 完整化 → R² → plan/slice）
+## ★執行層持守（用戶裁乙定案，真架構 build——重掃坐實規模）
+investigator 重掃補齊（2026-07-28）坐實規模「真 build 如 means-end 新子系統」，**非收既有**：
+- **A) TaskArbiter 83 call site**（try_set/transition/release，faction_ai 39 + interaction 15 + outpost 8 + player_cmd 6 + sim_runner 3 + subteam 1 + movement 2；★blueprint 估 ~29 **遠低估**）——重寫「整數 tier → 持守-aware」影響面。★核心比較點 `task_arbiter.gd:38 try_set`（整數 tier 嚴格大於）+ `:65-78 engine self-replace` = 真改點；83 中多是 release（清 task，未必改）——**slice 要先分「哪些 call site 真需傳持守值/改比較」vs「純 release 不動」**。
+- **B) 34 持守機制**（27 已知 + 7 表外：decision cadence 新鮮度/consistency coeff/survival boost/threat boost/same-need fallthrough/idle-filler/beggar restore）——subsume 範圍比 27 大。
+- **C) COMMITMENT_BONUS 零欄位寫回坐實**（decision_engine:88/173 只 rank 迴圈浮點加成，team.current_option 寫但非 u 值，task_arbiter 零引用）= R① 兩層無共讀通路確認 → **執行層要建寫回通路（真 build）**。cadence 新鮮度落差 3 點（COMMITMENT 讀 cadence 1日 vs current_option 可能舊 / timeout 每 tick vs goal cadence / crisis_immunity 2日 vs cadence 1日 double-immunity）。
+- **危機 axis 排除確認**（B 表中 combat_lock:1/crisis_immunity:2/famine_grace:3/PLAYER 豁免:5/… 屬急迫非持守，留原樣）。
+
+## TODO（★執行層真 build 大 arc，post-compact fresh context 完整化 → R² → plan/slice）
+- [ ] **執行層持守-aware 仲裁設計**：try_set 比較從「整數 tier 嚴格大於」→「tier + 持守強度」怎麼合成（危機 tier 仍守命=硬階層、非危機用持守 util 比）。83 call site 分類（真改點 vs release 不動）。
+- [ ] **COMMITMENT_BONUS 寫回通路**（建跨層讀取：決策層算的持守強度寫 team 欄位、執行層 try_set 讀）。
+- [ ] cadence 新鮮度解（3 落差點）。
+- [ ] A1 手不聽腦執行層 slice 收（committed builder 被搶/落跑，本 arc 執行層修）。
 - [ ] 沉沒成本量化（各動作「已投入/進度」怎麼取：construction_ticks 已耗/戰略意圖達成度/…）。
 - [ ] 前瞻價值量化（離完成距離）。
 - [ ] 人格→混合比 mapping（哪些 value 權重）。
