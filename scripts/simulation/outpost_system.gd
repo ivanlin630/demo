@@ -317,6 +317,8 @@ func _complete_construction(state: WorldState, tile: HexTileData, team: TeamData
 	# ★complete tap（純觀測）：completion 事件（A1 measure=0 的正向對照）。
 	if Probe.enabled:
 		Probe.bump("construct.complete")
+		# ★持守統一 Slice 4：per-action-type completion 計數（A1 閉環硬確認：'build'=新 outpost founding vs upgrade_*）。
+		Probe.bump("construct.complete_" + str(action))
 		Probe.bump_sample("construct.complete", {
 			"tick": state.world.current_tick, "tile": [tile.tile_pos.x, tile.tile_pos.y],
 			"action": action, "team": team.team_id,
