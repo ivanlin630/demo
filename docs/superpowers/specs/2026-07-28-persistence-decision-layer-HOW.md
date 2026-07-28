@@ -65,17 +65,25 @@ persist_strength(team, action) =
 - **執行層讀**：`TaskArbiter.try_set`（:38）讀 `team.persist_strength`。
 - **★新鮮度解**：`persist_strength` **隨進度事件更新**（construction tick 倒數時、抵達時），非只 cadence——sunk/prospect 是進度函數，進度變就重算（cheap，純算術）。避免 cadence(1日) vs 執行層(每tick) 落差。
 
-## 6. try_set 持守-aware 仲裁（★別破現有 PRIO、加維度）
+## 6. try_set 持守-aware 仲裁（★門檻式，R² 訂正 new_util 來源）
+★**R² 抓到**：`try_set` 簽名只有 `priority:int`、**無 util 浮點值管道**，原 pseudocode 的 `new_util` 沒來源。**選門檻式**（不比兩 util、不新增參數、自洽 §7「call site 不改」）：
 ```
 try_set(new_task, new_prio):
-    if 危機 axis（new_prio 或 current ≥ PRIO_THREAT）:
-        用現有整數 tier 嚴格大於（守命，persist 不介入）  # 背水一戰=危機 axis+人格，不受影響
-    else（非危機軟選擇）:
-        切換條件 = new_util > (current_util + team.persist_strength)
-        # 持守強度當「別亂換」偏置：新目標要贏過當前+持守才切
+    if 危機 axis（new_prio 或 current.task_priority ≥ PRIO_THREAT）:
+        用現有整數 tier 嚴格大於（守命，persist 不介入）  # 背水一戰=危機 axis+人格
+    elif 非危機 且 current task 是 committed progressive 動作（persist 適用）:
+        # ★門檻式：committed 動作 persist 高 → 擋非危機搶班（不需 new_util，只讀 team.persist_strength）
+        if team.persist_strength > PERSIST_HOLD_THRESHOLD:
+            return false   # 別被搶，完成 committed 優先
+        # persist 不足 → 落回現有整數 tier（可被搶）
+        用現有整數 tier 嚴格大於
+    else:
+        用現有整數 tier 嚴格大於（原行為，非 committed progressive 不受影響）
 ```
-- 危機 tier **原封不動**（combat_lock/survival/threat guard 全留）。持守只在**非危機同/低 tier 軟選擇**當黏著。
-- **latch 反例避開**：persist 是 rank **偏置**（util 比較），**非 skip reeval 硬鎖**——世界照演化、危機照打斷、util 照秤（不凍世界）。
+- **為何門檻式 > new_util 比較**：try_set 的搶班者 util 已在決策層 argmax 算過（贏家才來搶）；try_set 只需判「當前 committed 動作黏不黏得住」——`persist_strength`（人格加權）**單邊門檻**就夠，且**人格自然分化**：務實人格 persist 低 → 門檻低 → 易被搶（靈活轉換）；固執 persist 高 → 難搶（死硬完成）。**不需 new_util、call site 不改**（§7 自洽）。
+- **`PERSIST_HOLD_THRESHOLD`** = 常數（TEST VALUE，slice 調）；`persist_strength ≤ PERSIST_CAP < 危機量級`（危機永遠過 tier）。
+- 危機 tier **原封不動**（combat_lock/crisis-immunity guard 全留、在 persist 判斷之前）。
+- **latch 反例避開**：persist 是**單點門檻擋一次搶班**（return false），**非 skip reeval 硬鎖全世界**——被擋的搶班者下 tick 照常再評、危機照打斷、世界照演化（不凍世界）。★關鍵差異：latch 是「施工隊自己 skip 決策」凍死；此門檻是「別的隊搶不走 committed 隊」但 committed 隊自己照跑決策、完成/危機就釋放。
 
 ## 7. 83 call site 分類（whole-system-first，別破仲裁）
 - **真改點（少）**：`task_arbiter.gd:38 try_set`（加非危機持守比較）+ `:65 self-replace`（同層加持守）+ 決策層 5-6 處寫 `team.persist_strength`（bonus-collapse）+ 進度事件更新點（construction/movement）。
