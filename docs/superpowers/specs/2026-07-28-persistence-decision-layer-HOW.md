@@ -45,6 +45,11 @@ investigator 重掃補齊（2026-07-28）坐實規模「真 build 如 means-end 
 - **C) COMMITMENT_BONUS 零欄位寫回坐實**（decision_engine:88/173 只 rank 迴圈浮點加成，team.current_option 寫但非 u 值，task_arbiter 零引用）= R① 兩層無共讀通路確認 → **執行層要建寫回通路（真 build）**。cadence 新鮮度落差 3 點（COMMITMENT 讀 cadence 1日 vs current_option 可能舊 / timeout 每 tick vs goal cadence / crisis_immunity 2日 vs cadence 1日 double-immunity）。
 - **危機 axis 排除確認**（B 表中 combat_lock:1/crisis_immunity:2/famine_grace:3/PLAYER 豁免:5/… 屬急迫非持守，留原樣）。
 
+## ★設計原則（blueprint 提醒 2026-07-28，HOW 自主但守）
+- **持守-aware = 加維度非砍 PRIO**：try_set 比較加「持守強度」維度，**不砍現有 PRIO 整數 tier 階層**——危機 axis（COMBAT/SURVIVAL/THREAT）仍硬階層守命、留原樣。持守只在**同 tier 內/非危機軟選擇**當 tiebreak 偏置，危機一律 tier 勝（背水一戰=危機 axis+人格，不受持守影響）。
+- **別破現有仲裁**：83 call site whole-system-first（整個建完當 whole 才 measure，別邊改邊 patch）。slice **切細**（83 大面 → 先分「真需傳持守值/改比較」vs「純 release 不動」，逐 slice 當真 build）。
+- **latch 反例守約束**：util 偏重永不硬鎖凍世界（本場 latch 血證）。
+
 ## TODO（★執行層真 build 大 arc，post-compact fresh context 完整化 → R² → plan/slice）
 - [ ] **執行層持守-aware 仲裁設計**：try_set 比較從「整數 tier 嚴格大於」→「tier + 持守強度」怎麼合成（危機 tier 仍守命=硬階層、非危機用持守 util 比）。83 call site 分類（真改點 vs release 不動）。
 - [ ] **COMMITMENT_BONUS 寫回通路**（建跨層讀取：決策層算的持守強度寫 team 欄位、執行層 try_set 讀）。
