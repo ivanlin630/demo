@@ -289,6 +289,9 @@ func _on_arrival(state: WorldState, team: TeamData) -> void:
 	# C: 基建子隊抵達 → 依 task 啟動施工
 	if team.current_task in [TeamData.TASK_CONSTRUCT, TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND]:
 		OutpostSystem.new().begin_subteam_construction(state, team)
+	# ★持守統一 Slice 2 新鮮度：抵達=進度事件 → 重算 persist_strength（campaign/施工抵達後進度反映即時），
+	# 執行層(Slice 3)讀當下值非決策 cadence 舊值。progressive-only gate 在 helper 內（FLEE/IDLE→0）。純算術零 RNG。
+	PersistStrength.compute(state, team)
 
 func _get_neighbors(pos: Vector2i) -> Array:
 	return [

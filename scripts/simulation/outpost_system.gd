@@ -305,6 +305,10 @@ func _tick_construction(state: WorldState, tile: HexTileData) -> void:
 		tile.construction_started_tick = state.world.current_tick
 	tile.construction_last_progress_tick = state.world.current_tick
 	tile.construction_ticks_left -= maxi(active_team.population, 1)
+	# ★持守統一 Slice 2 新鮮度：construction 進度變 → 即重算施工隊 persist_strength（sunk 升），
+	# 執行層(Slice 3)讀時是當下進度值（非決策 cadence 舊值）。純算術零 RNG。
+	if tile.construction_ticks_left > 0:
+		PersistStrength.compute(state, active_team)
 	if tile.construction_ticks_left <= 0:
 		_complete_construction(state, tile, active_team)
 
@@ -528,6 +532,25 @@ static func construction_cost_of(tile: HexTileData) -> Dictionary:
 				var cur: int = int(tile.get(FACILITY_DEF[fac]["current_level_key"]))
 				return upgrade_cost(fac, cur + 1)
 	return {}   # demolish 無付款
+
+# ★持守統一 Slice 2：工地總 person-ticks（重建自 construction_target，鏡射 construction_cost_of）。
+# persist_strength 真 construction-tick progress 用（sunk = (total-left)/total）。純讀零 mutation。
+static func construction_ticks_total(tile: HexTileData) -> int:
+	var action: String = str(tile.construction_target.get("action", ""))
+	match action:
+		"build":
+			return BUILD_TICKS[str(tile.construction_target["type"])][int(tile.construction_target["level"]) - 1]
+		"upgrade_level":
+			return BUILD_TICKS[tile.outpost_type][int(tile.construction_target["level"]) - 1]
+		"upgrade_facility":
+			var fac: String = str(tile.construction_target.get("facility", ""))
+			if FACILITY_DEF.has(fac):
+				var c: Dictionary = upgrade_cost(fac, int(tile.get(FACILITY_DEF[fac]["current_level_key"])) + 1)
+				return int(c.get("ticks", 0))
+		"demolish":
+			if tile.outpost_level > 0:
+				return BUILD_TICKS[tile.outpost_type][tile.outpost_level - 1] / 2
+	return 0
 
 # 工地 30 天無實際進度 → 取消、退 50% 料給施工團、tile 釋放。回傳 true = 已取消。
 func check_construction_timeout(state: WorldState, tile: HexTileData) -> bool:
