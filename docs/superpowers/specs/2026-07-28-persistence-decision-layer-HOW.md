@@ -50,11 +50,55 @@ investigator 重掃補齊（2026-07-28）坐實規模「真 build 如 means-end 
 - **別破現有仲裁**：83 call site whole-system-first（整個建完當 whole 才 measure，別邊改邊 patch）。slice **切細**（83 大面 → 先分「真需傳持守值/改比較」vs「純 release 不動」，逐 slice 當真 build）。
 - **latch 反例守約束**：util 偏重永不硬鎖凍世界（本場 latch 血證）。
 
-## TODO（★執行層真 build 大 arc，post-compact fresh context 完整化 → R² → plan/slice）
-- [ ] **執行層持守-aware 仲裁設計**：try_set 比較從「整數 tier 嚴格大於」→「tier + 持守強度」怎麼合成（危機 tier 仍守命=硬階層、非危機用持守 util 比）。83 call site 分類（真改點 vs release 不動）。
-- [ ] **COMMITMENT_BONUS 寫回通路**（建跨層讀取：決策層算的持守強度寫 team 欄位、執行層 try_set 讀）。
-- [ ] cadence 新鮮度解（3 落差點）。
-- [ ] A1 手不聽腦執行層 slice 收（committed builder 被搶/落跑，本 arc 執行層修）。
+## 4. 持守強度公式（核心）
+```
+persist_strength(team, action) =
+    personality_mix(team) 加權於 [ sunk_cost_term(action) , prospect_term(action) ]
+```
+- **sunk_cost_term ∈ [0,1]**：已投入/進度佔比。construction=`(BUILD_TICKS - construction_ticks_left)/BUILD_TICKS`；戰略意圖=達成度；campaign=已行進/總距。★**progressive-only**：只有進度/終點的動作有此項；開放式（FLEE）= 無此概念 → persist_strength=0（走既有 timeout）。
+- **prospect_term ∈ [0,1]**：離完成/回報距離的反比（越近越高）。construction=同 sunk 的鏡像（剩越少越高）；trade run=離目標市場距離。
+- **personality_mix**：人格決定兩項權重比（**weigh 非 gate**）。固執/恆心/慎重 → sunk 權重高（死硬完成者）；務實/機會/貪婪 → prospect 權重高（靈活轉換者）。mapping 用既有 `team.leader.values`（如 `固執`/`慎重`→sunk、`貪婪`/`機會`→prospect），線性混合、非硬類別。
+- **clamp**：`persist_strength ≤ PERSIST_CAP`，且 `PERSIST_CAP < 危機 axis 量級`（危機永遠可打斷，非硬鎖——latch 反例避開）。
+
+## 5. 兩層讀取 + 寫回通路
+- **決策層寫**：rank cadence 時算 `persist_strength(team, team.current_task/option)` → **寫 `team.persist_strength` 欄位**（新欄，TeamData）。取代 5 個 flat COMMITMENT bonus 的來源（bonus-collapse）。
+- **執行層讀**：`TaskArbiter.try_set`（:38）讀 `team.persist_strength`。
+- **★新鮮度解**：`persist_strength` **隨進度事件更新**（construction tick 倒數時、抵達時），非只 cadence——sunk/prospect 是進度函數，進度變就重算（cheap，純算術）。避免 cadence(1日) vs 執行層(每tick) 落差。
+
+## 6. try_set 持守-aware 仲裁（★別破現有 PRIO、加維度）
+```
+try_set(new_task, new_prio):
+    if 危機 axis（new_prio 或 current ≥ PRIO_THREAT）:
+        用現有整數 tier 嚴格大於（守命，persist 不介入）  # 背水一戰=危機 axis+人格，不受影響
+    else（非危機軟選擇）:
+        切換條件 = new_util > (current_util + team.persist_strength)
+        # 持守強度當「別亂換」偏置：新目標要贏過當前+持守才切
+```
+- 危機 tier **原封不動**（combat_lock/survival/threat guard 全留）。持守只在**非危機同/低 tier 軟選擇**當黏著。
+- **latch 反例避開**：persist 是 rank **偏置**（util 比較），**非 skip reeval 硬鎖**——世界照演化、危機照打斷、util 照秤（不凍世界）。
+
+## 7. 83 call site 分類（whole-system-first，別破仲裁）
+- **真改點（少）**：`task_arbiter.gd:38 try_set`（加非危機持守比較）+ `:65 self-replace`（同層加持守）+ 決策層 5-6 處寫 `team.persist_strength`（bonus-collapse）+ 進度事件更新點（construction/movement）。
+- **不動（多數）**：83 中大量 release（清 task，持守不介入）+ try_set/transition call site 本身（它們呼 try_set，改在 try_set **內部**讀 persist_strength，call site 不必逐個改）。
+- ∴ 真改面 << 83（核心 = try_set 內部 + 決策層寫回 + 進度更新），但**行為影響面 = 全部**（whole-system-first：整個建完當 whole measure）。
+
+## 8. slice（切細、當真 build、每 slice R²）
+- **Slice 1（決策層 bonus-collapse，增量、可獨立驗）**：新 `team.persist_strength` 欄 + 公式 helper（sunk+prospect+人格）+ 5 commitment bonus 改讀它（決策層 rank 偏置）。progressive-only gate。驗：隊照人格黏著（死硬完成率高/務實轉換），無 thrash，**世界不凍**（latch 反例回歸）。
+- **Slice 2（執行層寫回 + 新鮮度）**：決策層寫 persist_strength + 進度事件更新（construction/movement）。驗：persist_strength 隨進度真更新、新鮮度落差消。
+- **Slice 3（執行層 try_set 持守-aware）**：try_set 非危機加持守比較（危機 tier 不變）。驗：committed 非危機動作不被輕易搶、危機仍即時打斷、背水一戰保住、世界不凍。
+- **Slice 4（A1 手不聽腦收）**：committed builder（TASK_BUILD 施工中）persist_strength 高 → 執行層不被非危機 util（外交/貿易）搶（A1 stall 根修，但**用 persist 偏置非 latch 硬鎖**）。驗：**A1 forest founding `construct.complete_build > 0` 真完工**（execution-verified，specimen-off/aggregate）+ 世界不凍。
+- 每 slice R² + whole-system-first（整個建完當 whole 才 measure，別邊建邊 patch）。
+
+## 9. 憲法對齊（複核）
+- **utility weigh 非 scripted**：persist_strength 是 rank 偏置權重，非寫死決策 edge。✓
+- **人格 WEIGH 不 GATE**：人格調 sunk/prospect 混合比 = 連續權重，非硬類別閘。✓
+- **非硬鎖（latch 反例）**：persist 是 util 偏置、危機永遠可打斷、世界照演化——永不凍世界。✓
+- **危機 axis 排除**：PRIO 階層/combat_lock/crisis 全留原樣，持守只在非危機軟選擇。✓
+
+## TODO（R² → plan → implementer）
+- [ ] R②（異質框外，尤其驗：persist 公式對否、try_set 加維度不破現有仲裁、latch 反例真避開世界不凍、83 分類真改點少）。
+- [ ] personality→sunk/prospect mapping 細節（哪些 values、線性係數）。
+- [ ] plan（executing-plans）→ implementer（Slice 1 起，逐 slice R²）。
 - [ ] 沉沒成本量化（各動作「已投入/進度」怎麼取：construction_ticks 已耗/戰略意圖達成度/…）。
 - [ ] 前瞻價值量化（離完成距離）。
 - [ ] 人格→混合比 mapping（哪些 value 權重）。
