@@ -84,6 +84,9 @@ var need_urgency: PackedFloat32Array = PackedFloat32Array()
 var solo_intent: Dictionary = {}
 var solo_task_last: String = ""   # SoloAI 上次選的 task（承諾慣性；與戰略 intent 分離，F-D4）
 var current_option: String = ""   # 統一決策引擎承諾用（現行 option 名）
+# ★持守統一 Slice 1（HOW spec 2026-07-28 §5）：決策層算的持守強度（人格加權沉沒成本+前瞻，progressive-only，
+# clamp≤PERSIST_CAP<危機量級）。取代 5 flat commitment bonus。決策層 rank cadence 算+寫；Slice 2 補進度事件新鮮度。
+var persist_strength: float = 0.0
 # ★means-end 長程規劃（組件 A，HOW spec 2026-07-24 §2）：team-level 遠慾望列表，跨 tick 持久（非 string tag）。
 # 每元素 GoalInstance = {goal_type:String, target=null, created_tick:int, status:String[active/satisfied/abandoned]}。
 # 只存慾望本身(要什麼)非 plan-state(怎麼走)；中繼 frontier 由 GoalResolver 每 tick 重算不鎖此。S1 空初始。

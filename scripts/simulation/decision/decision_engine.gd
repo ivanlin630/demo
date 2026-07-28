@@ -58,6 +58,9 @@ static func rank_scored(state: WorldState, team: TeamData) -> Array:
 static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", state: WorldState = null, team: TeamData = null) -> Array:
 	var scored: Array = []
 	var idx: int = 0
+	# ★持守統一 Slice 1：current_option 承諾慣性讀 persist_strength（人格加權沉沒成本，取代 flat COMMITMENT_BONUS）。
+	# 迴圈前算一次（cadence 級，per-team 定值）；harness 無 team → 退回 flat（測不破）。
+	var _persist: float = PersistStrength.compute(state, team) if team != null else COMMITMENT_BONUS
 	for opt in DecisionOptions.applicable(ctx):
 		var u: float = 0.0
 		for tw in DecisionOptions.terms_of(opt):
@@ -85,7 +88,7 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			Probe.bump("decision.opt_applicable." + opt)          # 候選分母
 			if _coeff < 1.0: Probe.bump("decision.opt_coeff_pressed." + opt)   # coeff 確隨急迫度變(非恆1)
 		if opt == current_option:
-			u += COMMITMENT_BONUS
+			u += _persist   # ★持守統一：flat COMMITMENT_BONUS → persist_strength（bonus-collapse）
 		scored.append({"u": u, "i": idx, "opt": opt})
 		idx += 1
 	# ★means-end 長程規劃（組件 G，HOW §8）：goal frontier candidates 追加進同一 rank 池（sort 前→與 static option 同 argmax 競爭）。
@@ -162,6 +165,8 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 		if opt in DecisionOptions.SURVIVAL_OPTION_SET: candidates.append(opt)
 	var scored: Array = []
 	var idx: int = 0
+	# ★持守統一 Slice 1：survival churn 防抖承諾慣性讀 persist_strength（取代 flat COMMITMENT_BONUS）。迴圈前算一次。
+	var _persist: float = PersistStrength.compute(state, team) if team != null else COMMITMENT_BONUS
 	for opt in candidates:
 		var u: float = 0.0
 		for tw in DecisionOptions.terms_of(opt):
@@ -170,7 +175,7 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 		# previous_task 保留 release 前 survival task，防餓隊每 cadence 亂跳（覓食/買糧/掠奪/併入）。
 		# 常態路 previous_task==current_task（_trigger_survival 設）→等價。
 		if DecisionOptions.to_task(state, team, opt).get("task") == team.previous_task:
-			u += COMMITMENT_BONUS
+			u += _persist   # ★持守統一：flat COMMITMENT_BONUS → persist_strength（bonus-collapse）
 		scored.append({"u": u, "i": idx, "opt": opt})
 		idx += 1
 	scored.sort_custom(func(a, b):

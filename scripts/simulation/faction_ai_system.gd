@@ -905,9 +905,10 @@ func _intent_scores(values: Dictionary, established: bool, weak_enemy: bool,
 	return scores
 
 # argmax + hysteresis：committed 情勢未變時黏住。共用於 _score_intents / select_strategic_intent。
-func _argmax_intent(scores: Dictionary, committed: String) -> Dictionary:
+func _argmax_intent(scores: Dictionary, committed: String, persist_bonus: float = COMMANDER_COMMITMENT_BONUS) -> Dictionary:
 	if committed != "" and scores.has(committed) and scores[committed] > -0.5:
-		scores[committed] += COMMANDER_COMMITMENT_BONUS
+		# ★持守統一 Slice 1：live 路傳 persist_strength（人格加權沉沒成本，取代 flat 0.15）；純函式/測用 flat default。
+		scores[committed] += persist_bonus
 	var best_type: String = "守成"
 	var best_score: float = -INF
 	for t in scores:
@@ -926,7 +927,7 @@ func _score_intents(values: Dictionary, established: bool, weak_enemy: bool,
 # ctx 欄位：leader_values, established, weak_enemy, can_levy, committed,
 #   can_found(bool, 僅 fid==-1), found_score(float), target_id(int)。
 # 輸出 {type, target_id, why}（type = 選中意圖；target_id 僅征服帶）。
-func select_strategic_intent(state: WorldState, _team: TeamData, ctx: Dictionary) -> Dictionary:
+func select_strategic_intent(state: WorldState, team: TeamData, ctx: Dictionary) -> Dictionary:
 	var values: Dictionary = ctx.get("leader_values", {})
 	var scores: Dictionary = _intent_scores(values,
 		bool(ctx.get("established", false)), bool(ctx.get("weak_enemy", false)),
@@ -938,7 +939,9 @@ func select_strategic_intent(state: WorldState, _team: TeamData, ctx: Dictionary
 	# 征服(可打贏弱敵)通常勝擴張；無 viable 弱敵時擴張補位(領土 pressure)→ strategic_ai 包圍。
 	if bool(ctx.get("can_expand", false)):
 		scores["擴張"] = 0.3 + float(values.get("野心", 0.5)) * 0.3
-	var picked: Dictionary = _argmax_intent(scores, String(ctx.get("committed", "")))
+	# ★持守統一 Slice 1：committed 戰略意圖 hysteresis 讀 persist_strength（人格加權沉沒成本，取代 flat COMMANDER bonus）。
+	var picked: Dictionary = _argmax_intent(scores, String(ctx.get("committed", "")),
+		PersistStrength.compute(state, team) if team != null else COMMANDER_COMMITMENT_BONUS)
 	var target_id: int = int(ctx.get("target_id", -1))
 	var needs_target: bool = picked["type"] == "征服" or picked["type"] == "擴張"
 	return {
@@ -1241,7 +1244,8 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	var best_sub_util: float = maxf(ally_util, subj_util)
 	var found_score: float = best_sub_util * (0.6 + ambition * 0.6)
 	if _solo_type(team) == "建國":
-		found_score += FOUND_COMMITMENT_BONUS   # hysteresis（戰略別每 cadence 翻）
+		# ★持守統一 Slice 1：建國意圖 hysteresis 讀 persist_strength（取代 flat FOUND bonus）。
+		found_score += PersistStrength.compute(state, team)
 	# 建國 gate（fid==-1 + 野心 + 累積[pop+7日食盈餘] + 路徑[ally] + 非危時）→ can_found
 	var accum_ok: bool = team.population >= AmbitionLadder.EXPAND_MIN_POP \
 		and ResourceSystem.effective_food(state, team) >= float(team.population) \
