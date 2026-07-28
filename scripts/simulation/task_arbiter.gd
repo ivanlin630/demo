@@ -12,6 +12,17 @@ const PRIO_VENDETTA: int = 55   # 私人脫軌（強仇+衝動）：生存(80)/�
 const PRIO_DISPATCH: int = 50
 const PRIO_FACTION:  int = 30
 const PRIO_AMBIENT:  int = 10
+# ★持守統一 Slice 3（HOW spec 2026-07-28 §6）：committed progressive 動作 persist_strength > 此 → 擋非危機搶班。
+# persist_strength ∈[0,PERSIST_CAP 0.3]（progressive-only,人格加權沉沒成本）。THRESHOLD 定在分固執/務實位置：
+# 固執(lean 1.0)過 ~1/3 progress 黏、中性(0.5)過 ~2/3、務實(0.2)幾乎不黏。危機/玩家/同 task 不受此擋。
+const PERSIST_HOLD_THRESHOLD: float = 0.1   # TEST VALUE — slice 調
+# ★硬擋只作用【真有終點/完成的 progressive task】(BUILD 族)——非 ongoing 開放式(PRODUCE/TRADE/GOVERN/FORAGE 等)。
+# 否則長 PRODUCE 隊 persist 高被硬鎖→不轉攻擊/防衛→戰鬥趨零=向凍(execution-verified 抓:attrition 0)。
+# 決策層 bonus(Slice1)仍對全 committed 溫和偏置(max 0.3 不鎖);此硬 return-false 門檻只保 completable committed。
+const PROGRESSIVE_HOLD_TASKS: Array = [
+	TeamData.TASK_BUILD, TeamData.TASK_CONSTRUCT, TeamData.TASK_UPGRADE,
+	TeamData.TASK_EXPAND, TeamData.TASK_SETTLE, TeamData.TASK_MIGRATE,
+]
 
 # A1a 拆閥（spec 2026-07-07-A1a-arbiter-valve）：引擎主 rank 的 dispatch source 白名單。
 # 這兩面（_decide_unified / _evaluate_solo）的 rank[0] 允許同層換掉引擎自己派的 task
@@ -44,6 +55,18 @@ static func try_set(state: WorldState, team: TeamData, new_task: String,
 	# 選別的 task（覓食/買糧…）不受阻，順利接住餓死隊。到期自動解。
 	if new_task == team.crisis_released_task and team.crisis_released_task != "" \
 			and state.world.current_tick < team.crisis_released_until:
+		return false
+	# ★持守統一 Slice 3 門檻式（§6）：committed progressive 動作（persist_strength 高）擋【非危機】搶班，完成優先。
+	# 危機 axis（任一側 ≥PRIO_THREAT：combat/survival/threat）不介入=守命/背水一戰；玩家命令（PRIO_PLAYER）authority 不擋；
+	# 同 task（target 更新非搶班）不擋。persist_strength progressive-only 已保證只 progressive committed 動作有值（FLEE/IDLE=0）。
+	# ★latch 反例：單點門檻 return false（非 skip reeval 硬鎖）——被擋者下 tick 照評、危機/玩家照打斷、committed 隊自跑決策、
+	#   完成/timeout 就釋放 persist 歸 0 → 世界照演化不凍。
+	if new_task != team.current_task \
+			and team.current_task in PROGRESSIVE_HOLD_TASKS \
+			and priority < PRIO_THREAT and team.task_priority < PRIO_THREAT \
+			and priority != PRIO_PLAYER \
+			and team.persist_strength > PERSIST_HOLD_THRESHOLD:
+		if Probe.enabled: Probe.bump("persist.hold")
 		return false
 	if team.current_task == TeamData.TASK_IDLE or priority > team.task_priority:
 		# 漏斗站4探針（純觀測）：TRADE 在途被搶 → 記誰搶走（new_task|source）
