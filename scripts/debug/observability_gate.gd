@@ -17,6 +17,9 @@ const RNG_FUNC_RE := "(?<![\\w.])(randf_range|randi_range|randfn|randf|randi|ran
 const RNG_METHOD_RE := "\\.(pick_random|shuffle)\\s*\\("
 # marker-missing WARN：檔名含觀測慣用詞但無 marker → 非阻斷提醒。
 const OBSERVE_NAME_HINTS := ["tracer", "probe", "dump", "specimen", "observ"]
+# ★WARN 收窄（2026-07-29）：test/bed/demo/measure/harness 後綴＝seeded 場景測試/一次性探針，
+#   本質非 reusable pure-observe helper（合法碰 state/RNG 建測試世界）→ 排除避噪音疲勞（16→3 actionable）。
+const WARN_SKIP_SUFFIX := ["_test", "_bed", "_demo", "_measure", "_harness"]
 
 func _initialize() -> void:
 	var cur: Dictionary = _counts()
@@ -58,10 +61,15 @@ func _rng_scan() -> Dictionary:
 		if not has_marker:
 			# marker-missing WARN（非阻斷）：檔名含觀測慣用詞但無 marker → 提醒複查。
 			var lower: String = fname.to_lower()
-			for hint in OBSERVE_NAME_HINTS:
-				if hint in lower:
-					print("[OBSERVABILITY-GATE] WARN: %s 疑觀測 helper 未加 @observe-pure marker，複查" % fname)
-					break
+			var stem: String = fname.get_basename().to_lower()
+			var is_scenario: bool = false   # test/bed/demo/measure/harness＝非 reusable observe helper，排除避噪音
+			for suf in WARN_SKIP_SUFFIX:
+				if stem.ends_with(suf): is_scenario = true; break
+			if not is_scenario:
+				for hint in OBSERVE_NAME_HINTS:
+					if hint in lower:
+						print("[OBSERVABILITY-GATE] WARN: %s 疑觀測 helper 未加 @observe-pure marker，複查" % fname)
+						break
 			continue
 		scanned += 1
 		var lines: PackedStringArray = txt.split("\n")
