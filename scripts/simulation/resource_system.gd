@@ -191,6 +191,8 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 
 		# R2：本 cadence 末更新食物流訊號（income − consumption 的日均 EMA）。
 		_update_food_flow(state, team, day_fraction)
+		# ★糧流感知 Slice A：每日 cadence 末算 runway 快取（harvest-only 內生 inflow−burn）→ persist safe_ratio 讀。
+		FoodFlow.update(state, team)
 
 # R2 flow-not-stock：日均淨食物流 EMA。net = effective_food(末) − 上次取樣；除 day_fraction → 日率；
 # α=day_fraction/FLOW_WINDOW_DAYS → 時間常數平滑（near/far cadence 無關）。首取樣只 seed 不計流。
