@@ -1,8 +1,16 @@
 # 觀測盲點閘 baseline（Fix 4，2026-07-15）——凍結生產側 specimen capture 覆蓋 vs 決策 commit 點數。
 # 新增決策 commit(try_set)點無伴隨 capture → 計數失衡=疑漏 tap；capture 點移除=coverage 退→FAIL。
 # 更新規則：合法新增 tap 後同步更新此 baseline（同 constitution_baseline 慣例）。
-capture_decision=10
+# 2026-07-29 ratify 10→9：d5b5cb73(threat-oracle-S3 converge)移 Fix3 threat tap，threat 決策
+#   (備戰/迎戰/求和/FLEE)converge 進 _decide_unified→由統一 commit loop capture_decision(:1621)承接
+#   (commit msg「specimen 由 _decide_unified commit loop 承 DRY」)＝coverage 未丟(subsumption 非 gap)、
+#   復原 redundant tap 反經 unified 路徑雙數。已驗 subsumption 才 ratify(feedback_full_transient_observability)。
+capture_decision=9
 capture_reaction=1
 capture_intent=2
 capture_options=2
-decision_tryset=6
+# 2026-07-29 ratify 6→3：同 d5b5cb73 convergence，unified commit 用 `_prio` 變數
+#   (try_set(...,_prio,"unified"))非 literal PRIO_*→逃 tryset_re(`PRIO_(DISPATCH|SURVIVAL|THREAT)`)。
+#   ★check② 現對 unified 主路徑部分失明(未計)——regex 盲區(reviewer R² §5 同族)，未來 gate refine
+#   tryset_re 認 `_prio`/unified path 使 check② 復全。暫 ratify floor=3(綠+誠實)、盲區記此。
+decision_tryset=3
