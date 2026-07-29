@@ -1,3 +1,4 @@
+# @observe-pure  ★observer-no-global-RNG 靜態閘納管(純觀測零 RNG;違=FAIL)
 class_name Probe
 
 # 量測累計器（純觀測）。enabled 預設 false → 一般跑 no-op；只 game_sim_test 開。

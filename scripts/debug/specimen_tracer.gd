@@ -1,3 +1,4 @@
+# @observe-pure  ★observer-no-global-RNG 靜態閘納管(純觀測零 RNG;違=FAIL)
 class_name SpecimenTracer
 
 # 指標 specimen 決策 tracer（純觀測，mirror Probe 全域 static）。
