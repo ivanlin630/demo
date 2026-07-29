@@ -100,6 +100,7 @@ const PROBE_KEYS: Array = [
 	"construct.complete_upgrade_level", "construct.complete_demolish", "construct.complete_crude_camp",
 	"persist.hold",
 	"foodflow.update",   # ★糧流感知 Slice A：runway 感官每日算次數（tap 禁 RNG）
+	"bridge.no_go_food", "bridge.topup",   # ★糧流 Slice B1：糧橋 no-go/top-up（A1 子隊配糧）
 	"resume.attempt", "resume.success",
 	"resume.reject_combat", "resume.reject_starving", "resume.reject_owner", "resume.reject_resident", "resume.reject_busy",
 ]

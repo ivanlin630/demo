@@ -4,6 +4,9 @@ const COLLECT_INTERVAL:        int = 30 * WorldState.TICKS_PER_HOUR  # 每 30 �
 const FACTION_UPDATE_INTERVAL: int = 20 * WorldState.TICKS_PER_HOUR  # 每 20 小時
 const DECISION_CADENCE: int = TimeScale.TICK_PER_DAY * 1   # TEST VALUE — 非-unified 週期重評（解 IDLE-lock）
 const DISPATCH_DIST_THRESHOLD: int   = 2
+# ★糧流 Slice B1 糧橋（解 A1 子隊餓死）：出發配糧 need=burn×ETA_total×safe_margin；母隊 food 撥得起才派。
+const FOOD_BRIDGE_SAFE_MARGIN: float = 1.5   # TEST VALUE — 需糧餘裕（緩衝途中 harvest 不足/繞路）
+const FOOD_BRIDGE_MOVE_PER_DAY: float = 2.0  # TEST VALUE — 移速估（ETA_travel=dist/此，鏡射 goal_resolver）
 
 static var _a2b_remote_tribute_payers: Dictionary = {}   # A2b 守衛 B：遠距徵收 dispatch 的 payer id（settle 對帳）
 const FOOD_EMERGENCY: float          = 3.0
@@ -2637,6 +2640,19 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 		_log_dispatch_fail(leader_team.faction_id,
 			"pop 不足: %d < %d" % [leader_team.population, pop * 2], cost)
 		return false
+	# ★糧流 Slice B1 糧橋 go/no-go（解 A1 子隊餓死真 victim）：子隊遠地跋涉+建程需糧 burn×ETA_total。
+	# 母隊(公庫+私產)food 撥得起才派→出發配糧到夠（下方 top-up）；不豐→no-go（別派餓死途中 dissolve）。
+	# ★ETA_total=去程(dist/移速)+建程(BUILD_TICKS/pop)（§5）；純算術零 RNG。收編取代礦山 ad-hoc food bootstrap。
+	var _eta_travel: float = float(_hex_dist(leader_team.tile_pos, target_pos)) / FOOD_BRIDGE_MOVE_PER_DAY
+	var _eta_build: float = float(OutpostSystem.BUILD_TICKS[outpost_type][level - 1]) / maxf(float(pop), 1.0)
+	var _need_food: float = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
+		* (_eta_travel + _eta_build) * FOOD_BRIDGE_SAFE_MARGIN
+	var _avail_food: float = float(vault.get("food", 0)) + float(leader_team.resources.get("food", 0))
+	if _avail_food < _need_food:
+		_log_dispatch_fail(leader_team.faction_id,
+			"糧橋不足: food %.0f < 需 %.0f(burn×ETA %.1f 天)" % [_avail_food, _need_food, _eta_travel + _eta_build], cost)
+		if Probe.enabled: Probe.bump("bridge.no_go_food")
+		return false
 	var sub_id: int = SubteamSystem.new().dispatch(
 		state, leader_team.team_id, advisor_id, pop, TeamData.TASK_CONSTRUCT, target_pos)
 	if sub_id == -1:
@@ -2648,30 +2664,30 @@ func _dispatch_builder(state: WorldState, leader_team: TeamData, target_pos: Vec
 	state.teams[sub_id].task_extra_data = {
 		"build_type": outpost_type, "level": level
 	}
-	# S3 礦村 bootstrap food：礦山格自給食物極低，需額外補糧撐到 market buy 閉環
-	# 補至 SURVIVAL_RECOVER_DAYS+14 天份（TEST VALUE），從 home vault 優先，不足補私產。
+	# ★糧流 Slice B1 通用 food top-up（第5真新建，收編取代礦山 ad-hoc food bootstrap）：撥母隊 food 給子隊
+	# 到夠 burn×ETA（去程+建程 dissolve 不了）→ 解 A1 forest founding 子隊遠地跋涉餓死真 victim（非只礦山）。
+	# go/no-go 已確保 avail≥need→此 top-up 撥得足；公庫優先差額補私產（守恆：純轉移）。
+	var _sub: TeamData = state.teams[sub_id]
+	var _gap: float = _need_food - float(_sub.resources.get("food", 0))
+	if _gap > 0.0:
+		if home_tile != null and home_tile.outpost_owner == leader_team.team_id:
+			var _fv: float = minf(_gap, float(home_tile.public_storage.get("food", 0)))
+			if _fv > 0.0:
+				TileBank.set_amt(home_tile, "food", float(home_tile.public_storage.get("food", 0)) - _fv, "bridge_topup_vault_out")
+				ResourceBank.add(_sub, "food", _fv, "bridge_topup_vault_in")
+				_gap -= _fv
+		if _gap > 0.0:
+			var _fo: float = minf(_gap, float(leader_team.resources.get("food", 0)))
+			if _fo > 0.0:
+				ResourceBank.add(leader_team, "food", -_fo, "bridge_topup_owner_out")
+				ResourceBank.add(_sub, "food", _fo, "bridge_topup_owner_in")
+		if Probe.enabled: Probe.bump("bridge.topup")
+	# 礦村 material+tools bootstrap（定居後立起鑄幣廠 mint cost×1.5；food 已由上方通用糧橋涵蓋）：
 	var tgt_tile: HexTileData = state.world.tiles.get(target_pos.x * 1000 + target_pos.y)
 	if tgt_tile != null and tgt_tile.terrain == "mountain" \
 			and (float(tgt_tile.resource_cap.get("ore_gold", 0)) > 0.0 \
 				or float(tgt_tile.resource_cap.get("ore_silver", 0)) > 0.0):
 		var sub: TeamData = state.teams[sub_id]
-		const BOOTSTRAP_DAYS: float = 50.0   # TEST VALUE — 礦村補糧天數（含施工+設施全周期）
-		var need: float = float(sub.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY \
-			* BOOTSTRAP_DAYS - float(sub.resources.get("food", 0))
-		if need > 0.0:
-			var from_vault: float = 0.0
-			if home_tile != null and home_tile.outpost_owner == leader_team.team_id:
-				from_vault = minf(need, float(home_tile.public_storage.get("food", 0)))
-				if from_vault > 0.0:
-					TileBank.set_amt(home_tile, "food", float(home_tile.public_storage.get("food", 0)) - from_vault, "mine_bootstrap_vault_out")
-					ResourceBank.add(sub, "food", from_vault, "mine_bootstrap_vault")
-					need -= from_vault
-			if need > 0.0:
-				var from_owner: float = minf(need, float(leader_team.resources.get("food", 0)))
-				if from_owner > 0.0:
-					ResourceBank.add(leader_team, "food", -from_owner, "mine_bootstrap_owner_out")
-					ResourceBank.add(sub, "food", from_owner, "mine_bootstrap_owner_in")
-		print("[Infra] 礦村 bootstrap 補糧 Team%d food=%.0f" % [sub_id, float(sub.resources.get("food", 0))])
 		# S3b 礦村 bootstrap material+tools：定居後能立即起建鑄幣廠（mint cost×1.5倍）
 		# material 需 150（mint cost 100 × 1.5）；tools 需 8（mint cost 5 × 1.5 四捨上整）
 		const MINT_MAT_BOOTSTRAP: float = 150.0    # TEST VALUE
