@@ -17,9 +17,10 @@ status: ready-for-R2
 
 ## 2. 機制
 
-### 2a. global-RNG 向量集（擴 constitution 的 3 個 → 5 類）
+### 2a. global-RNG 向量集（擴 constitution 的 3 個 → 7 類）
 偵測**耗 global RNG** 的呼叫（determinism 殺手）：
-- `\brandf\s*\(` / `\brandi\s*\(` / `\brandf_range\s*\(` / `\brandi_range\s*\(` / `\brandomize\s*\(`（bare global）
+- `\brandf\s*\(` / `\brandi\s*\(` / `\brandf_range\s*\(` / `\brandi_range\s*\(` / `\brandfn\s*\(` / `\brandomize\s*\(`（bare global；`randfn`＝GlobalScope 高斯分布，同等耗全域流，R² 補）
+- **`\bseed\s*\(`**（★R² 補，全域重播種——**比單次 randf 更危險**：呼一次 `seed(x)` 後**所有**後續 randf/randi 全被打亂＝靜默改寫整條後續隨機流、不用自己再呼隨機函式就污染，最貼「觀測改被觀測物」鐵律要害）。注：本地 RNG 用 property 賦值 `rng.seed = x`（無括號）＝**不**命中此 call regex，不誤殺。
 - **`\.pick_random\s*\(`**（Array/Dictionary 方法，用 global RNG）★新
 - **`\.shuffle\s*\(`**（同上）★新
 
@@ -32,7 +33,10 @@ status: ready-for-R2
 observe-pure 檔在**檔頭加 marker 註**：`# @observe-pure`（自我文件化、新觀測 helper 加 marker 即自動納管、無中央清單維護）。
 - 閘掃 `res://scripts/debug/` 全 `.gd`，**只對含 `# @observe-pure` 的檔**跑 2a/2b 向量檢查。
 - **核心 3 檔 seed marker**（本 slice 加）：`specimen_dump_helper.gd`、`specimen_tracer.gd`、`probe_stats.gd`（純觀測、零 RNG 正當理由）。★`*_bed`/`*_harness`（seeded 世界建構）**不加 marker**＝不納管（它們合法 seeded RNG）。
-- ★**同時**：`constitution_gate.gd` 的 `RNG_RE` 補 `pick_random`/`shuffle`（決策檔本就禁任何 RNG，純增益零風險，順手補 vector 集一致）。
+- ★**同時**：`constitution_gate.gd` 的 `RNG_RE` **同步補全 4 個新向量**（`pick_random`/`shuffle`/`randfn`/`seed`，非只 pick_random/shuffle——R² 要求兩閘 vector 集一致；決策檔本就禁任何 RNG，純增益零風險）。
+
+### 2d. marker-missing 非阻斷 warning（R² 殘留風險，systems 納）
+掃 `scripts/debug/` 時，檔名含觀測慣用詞（`tracer`/`probe`/`dump`/`specimen`/`observ`）但**無 `# @observe-pure` marker** → 印**非阻斷 `[OBSERVABILITY-GATE] WARN: <file> 疑觀測 helper 未加 @observe-pure marker，複查`**（不 FAIL、不擋 merge）。緩解「忘加 marker＝暫時不受保護」的記性依賴（R² 標的殘留風險，嚴重度低故 warn 非 fail）。
 
 ## 3. 契約 + 輸出
 - observe-pure 檔含任一 global-RNG 向量（過 2b 逃生口判別）→ **FAIL**，印 `[OBSERVABILITY-GATE] FAIL: <file>:<line> observe-pure 檔耗 global RNG: <matched>`。
@@ -41,7 +45,8 @@ observe-pure 檔在**檔頭加 marker 註**：`# @observe-pure`（自我文件�
 
 ## 4. TDD + 驗
 - **正例**：核心 3 檔現況（strided/零 RNG）→ PASS。
-- **反例（紅→綠）**：測 fixture 在 observe-pure 檔塞 `arr.pick_random()` → FAIL 命中該行；塞 bare `randf()` → FAIL；塞 `rng.randf()`（本地 seeded）→ **不** FAIL（逃生口）。
+- **反例（紅→綠）**：測 fixture 在 observe-pure 檔塞 `arr.pick_random()` → FAIL 命中該行；塞 bare `randf()` → FAIL；塞 `randfn(0,1)` → FAIL；塞 bare `seed(123)` → FAIL；塞 `rng.randf()`（本地 seeded）→ **不** FAIL（逃生口）；塞 `rng.seed = 123`（property 賦值無括號）→ **不** FAIL。
+- **warning 測**：`scripts/debug/` 檔名含 tracer/probe/dump/specimen/observ 但無 marker → 印 WARN 不 FAIL。
 - **marker 隔離**：`scaling_bed.gd`（`rng.randi()` seeded、無 marker）→ 不掃、不誤報。
 - 閘自身零 RNG、determinism 無關（純靜態掃）。headless 0-new + constitution_gate 74 不變。
 
