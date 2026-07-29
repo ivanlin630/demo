@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·糧流B1糧橋+top-up·91fe5741·機制正確(go/no-go測sub.resources.food+通用food top-up收編礦山bootstrap接_dispatch_builder)+unit 4/4+gate74+determinism+世界不凍·★但bridge從不fire(bridge_nogo=0/topup=0)=A1 founding warring中從不dispatch(上游無動機)非B1缺陷·B1 execution-verified驗不了target(A1 build)因founding從不發起=A1上游economy問題非糧橋·判B1機制merge否] B1機制對但糧橋從不fire=A1上游(founding從不dispatch)。判機制merge vs hold。"
 ---
 

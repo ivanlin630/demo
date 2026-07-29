@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★A1 build=0根再翻定案:非子隊餓死(糧橋範圍)是founding從不dispatch(上游warring無動機)·B1 execution-verified坐實:bridge_nogo=0/topup=0糧橋從不fire+_dispatch_builder warring中從不呼founding+complete_build=0未變·B1機制正確(R²中)但target A1沒fire因上游·坐實Slice4(b)A1 build需和平economy measure·judge measure-scope:A1 folds material/經濟arc(founding動機在economy非runway糧食軸),runway B1糧橋是dispatch時正確gate只是warring沒dispatch] A1根再翻:founding從不發起(上游economy)非餓死。B1機制備好。judge:A1需和平economy measure,material arc連動。"
 ---
 
