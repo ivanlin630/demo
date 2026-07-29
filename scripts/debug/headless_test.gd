@@ -7713,7 +7713,7 @@ func _test_dispatch_builder() -> void:
 	var owner := TeamData.new()
 	owner.team_id = 0; _seed_pop(owner, 30); owner.faction_id = 10
 	owner.tile_pos = Vector2i(0, 0)
-	owner.resources["material"] = 200.0; owner.resources["coin"] = 50.0
+	owner.resources["material"] = 200.0; owner.resources["coin"] = 50.0; owner.resources["food"] = 500.0   # ★B1 糧橋:builder 需 food(burn×ETA)
 	var leader := PersonData.new(); leader.id = 100; leader.team_id = 0
 	state.persons[100] = leader; owner.leader_id = 100
 	var adv := PersonData.new(); adv.id = 101; adv.team_id = 0
@@ -7757,7 +7757,7 @@ func _test_evaluate_infrastructure() -> void:
 	state.world = WorldData.new()
 	var leader_team := TeamData.new()
 	leader_team.team_id = 0; _seed_pop(leader_team, 30); leader_team.tile_pos = Vector2i(0, 0)
-	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0
+	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0; leader_team.resources["food"] = 500.0   # ★B1 糧橋:builder 需 food
 	var leader := PersonData.new(); leader.id = 100
 	leader.values = { "野心": 0.3, "慎重": 0.7, "好戰": 0.2, "貪婪": 0.4 }
 	state.persons[100] = leader; leader_team.leader_id = 100
@@ -7787,7 +7787,7 @@ func _test_subteam_arrival_triggers_build() -> void:
 	state.world = WorldData.new()
 	var owner := TeamData.new()
 	owner.team_id = 0; _seed_pop(owner, 30); owner.tile_pos = Vector2i(0, 0)
-	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0
+	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0; owner.resources["food"] = 500.0   # ★B1 糧橋:builder 需 food(burn×ETA)
 	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
 	owner.leader_id = 100
 	var adv := PersonData.new(); adv.id = 101; state.persons[101] = adv
@@ -7819,7 +7819,7 @@ func _test_dispatch_upgrader_and_facility() -> void:
 	state.world = WorldData.new()
 	var leader_team := TeamData.new()
 	leader_team.team_id = 0; _seed_pop(leader_team, 30)
-	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0
+	leader_team.resources["material"] = 500.0; leader_team.resources["coin"] = 100.0; leader_team.resources["food"] = 500.0   # ★B1 糧橋:builder 需 food
 	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
 	leader_team.leader_id = 100
 	var adv := PersonData.new(); adv.id = 101; adv.skills["統領"] = 0.5
@@ -7854,7 +7854,7 @@ func _test_auto_settle_after_build() -> void:
 	state.world = WorldData.new()
 	var owner := TeamData.new()
 	owner.team_id = 0; _seed_pop(owner, 30); owner.tile_pos = Vector2i(0, 0)
-	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0
+	owner.resources["material"] = 300.0; owner.resources["coin"] = 80.0; owner.resources["food"] = 500.0   # ★B1 糧橋:builder 需 food(burn×ETA)
 	var leader := PersonData.new(); leader.id = 100; state.persons[100] = leader
 	owner.leader_id = 100
 	var adv := PersonData.new(); adv.id = 101; adv.skills["統領"] = 0.5
@@ -12569,7 +12569,7 @@ func _w4_make_dispatch_state(pub_mat: float, priv_mat: float, on_home: bool) -> 
 	var tile := HexTileData.new()
 	tile.tile_pos = Vector2i(0, 0); tile.terrain = "plains"
 	tile.outpost_level = 1; tile.outpost_type = "civilian"; tile.outpost_owner = 0
-	tile.public_storage = { "material": pub_mat }
+	tile.public_storage = { "material": pub_mat, "food": 500.0 }   # ★B1 糧橋:builder 需 food(burn×ETA);公庫供糧
 	state.world.tiles[0] = tile
 	var team := TeamData.new(); team.team_id = 0; team.faction_id = 10
 	_seed_pop(team, 30)
