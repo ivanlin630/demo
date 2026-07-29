@@ -1,3 +1,4 @@
+# @observe-pure  ★observer-no-global-RNG 靜態閘納管(純觀測零 RNG;違=FAIL)
 class_name SpecimenDumpHelper
 
 # ★generalize §⑤ specimen dump（systems 2026-07-19 tooling ask）：

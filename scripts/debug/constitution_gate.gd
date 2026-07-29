@@ -26,7 +26,7 @@ const DECISION_FUNC_RE := "(^_pick_|^_decide_|^_evaluate_|^_facility_|^rank_|^to
 const DISPATCH_FUNC_RE := "^(rank_survival|rank_threat|rank_scored|rank_scored_ctx|rank_ambient|_evaluate_survival|_evaluate_threat|_evaluate_unified|_evaluate_infrastructure)$"
 
 # 值閘偵測器
-const RNG_RE := "\\b(randf|randi|randomize)\\s*\\("
+const RNG_RE := "\\b(randf_range|randi_range|randfn|randf|randi|randomize|seed|pick_random|shuffle)\\s*\\("
 const TASKARBITER_RE := "TaskArbiter\\.(transition|try_set)\\("
 # 硬門檻：if/elif/while 條件內比較具名常數(3+ 大寫)或數字字面
 const THRESHOLD_RE := "\\b(if|elif|while|and|or)\\b.*[<>]=?\\s*([A-Z][A-Z0-9_]{2,}[A-Za-z0-9_.]*|[0-9]+\\.?[0-9]*)"
