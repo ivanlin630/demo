@@ -122,11 +122,29 @@ means-end 已有 `maintain_food` goal（`goal_registry.gd:16-40`，`holding < ne
 
 ---
 
-## 5. 範圍（本 spec）與非範圍
+## 5. 範圍：3 slice（誠實規模——真有新建元件，非「純接線」）
 
-**本 spec 做**：糧流感官（通用、每日算、快取）+ 內生-only + 三消費者全接——①存活/持守（safe_ratio×人格餘裕）②派遣/配糧（糧橋+載重，接現成模型）③在家前瞻（餵既有 maintain_food 加前瞻觸發）。**多為現有零件重新接線**（burn、載重、地形回補、打獵、crisis-免疫、persist_strength/lean、maintain_food goal 皆現成）。
+**★規模修正（R① CONTRADICTION 2026-07-29 systems 攔）**：初稿說「多為現成接線」= 樂觀低估。架構骨架（一個感官三消費者）合理，但坐實有真新建元件。誠實切 3 slice、A→B→C：
 
-**非範圍（後續後勤 arc）**：母隊持續補給車隊（現在沒做，只有出發一次性分家 `subteam_system.gd:36-42`）。**本設計自動接得住**——以後真做了補給，車到＝存糧漲＝runway 自然變長，不用改。後勤專門延長糧橋範圍（超出載重的遠地派遣）。
+### SLICE A — 消費者① 存活/持守（最小、release 相關、根治 team14）
+- 感官每日算、**當前 tile**、`inflow = 可持續 harvest-only`（**延後打獵 EV**；harvest-only 偏保守=略謹慎但安全）。
+- `safe_ratio` **只對 progressive-hold tasks**（`task_arbiter.gd:22-25`：BUILD/CONSTRUCT/UPGRADE/EXPAND/SETTLE/MIGRATE，它們有 ticks/距離 ETA）；開放式 task 不用 safe_ratio。
+- **`persist_strength × safe_ratio` 交互 HOW 講死 + R② 硬檢**（曾出 world regression，不能糊）。
+- **接線為主**（burn/persist_strength/lean/crisis-免疫 現成）。
+
+### SLICE B — 消費者② 派遣/立國（真新建三件）
+- **路線打獵期望值估算器**：★**純數學 EV、禁 randf**（守 observer 鐵律，hunt 呼 randf → 估算不能真呼，做 pure-EV 鏡像）。
+- **任意 tile 假設 inflow 投影器**：現成只認 home outpost 布林；立國候選 =「若此蓋據點未來 inflow」的新 what-if。
+- **遠征 ETA**（travel+build 兩段）+ **派遣閘 4-5 call site 全接**（配糧+go/no-go；接現成 `movement_system` 載重）。
+
+### SLICE C — 消費者③ 在家前瞻
+- runway 下坡 → 觸發**既有** `maintain_food` goal（`goal_registry.gd:16-40`）+ **複用 B 的投影器**評估「別處立國」候選。
+
+### 排除/延後
+- **人口變動 hook 排除**（每日 cadence 已夠，staleness ≤1日、糧流慢量可接受）。
+- 打獵 EV 只從 Slice B 起（A 用 harvest-only 保守）。
+
+**非範圍（後續後勤 arc）**：母隊持續補給車隊（現只出發一次性分家 `subteam_system.gd:36-42`）。**本設計自動接得住**——車到＝存糧漲＝runway 自然變長。後勤專門延長糧橋範圍（超出載重的遠地派遣）。
 
 ---
 
