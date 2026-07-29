@@ -14,6 +14,13 @@ class_name PersistStrength
 
 const PERSIST_CAP: float = 0.3   # TEST VALUE — 持守偏置上限（≈舊 COMMITMENT_BONUS max，< 危機量級 survival boost ~2.0=永可打斷）
 const COMMIT_HORIZON_DAYS: float = 5.0   # TEST VALUE — sunk-cost 時間視野（committed 越久越黏，飽和於此天數）
+# ★糧流感知 Slice A（§4）：safe_ratio=runway/ETA 調制 persist（存活持守）。只 TASK_BUILD（有真 ETA）；
+# 5 種無 ETA（CONSTRUCT/UPGRADE/EXPAND/SETTLE/MIGRATE）走原 persist（safe_ratio 不介入）。
+const RATIO_SAFE: float = 2.0            # TEST VALUE — runway≥此×ETA→safe_factor=1（糧充裕 persist 全維持）
+const RATIO_FLOOR_BASE: float = 0.5      # TEST VALUE — ratio_floor 人格基準
+const RATIO_FLOOR_SPAN: float = 0.4      # TEST VALUE — 人格對 floor 的餘裕幅度（務實高 floor 早放/固執低 floor 撐久=team14 根治）
+const RATIO_FLOOR_MIN: float = 0.1
+const RATIO_FLOOR_MAX: float = 1.0
 
 # 開放式/無承諾動作（progressive-only gate 排除 → persist=0，走既有 timeout）。
 const NON_PROGRESSIVE: Array = [TeamData.TASK_IDLE, TeamData.TASK_FLEE]
@@ -44,7 +51,29 @@ static func _value(state: WorldState, team: TeamData) -> float:
 	var stick: float = clampf((float(vals.get("慎重", 0.5)) + float(vals.get("義氣", 0.5))) * 0.5, 0.0, 1.0)
 	var flex: float = clampf((float(vals.get("貪婪", 0.5)) + float(vals.get("野心", 0.5))) * 0.5, 0.0, 1.0)
 	var lean: float = clampf(0.5 + (stick - flex), 0.2, 1.0)   # 固執→1.0(死硬)/務實→0.2(靈活)/中性→0.5
-	return clampf(PERSIST_CAP * progress * lean, 0.0, PERSIST_CAP)
+	var base_persist: float = clampf(PERSIST_CAP * progress * lean, 0.0, PERSIST_CAP)
+	# ★糧流感知 Slice A（§4）：TASK_BUILD 有真 ETA → safe_ratio 調制（乘法縮放非硬塌，避 regression 向凍）。
+	#   5 種無 ETA task 走原 persist（safe_ratio 不介入，維持 Slice 1-4 行為）。
+	if team.current_task == TeamData.TASK_BUILD:
+		var sf: float = _safe_factor(state, team, stick, flex)
+		return base_persist * sf   # persist_effective = persist × safe_factor（糧見底→sf→0→放手求生）
+	return base_persist
+
+# ★safe_factor（§4b）：safe_ratio=runway/ETA → [0,1]，人格 ratio_floor 餘裕。糧充裕→1(黏)；見底→0(放手)。
+# 乘法縮放連續（非硬門檻塌=避 PROGRESSIVE_HOLD attrition→0 向凍 regression）。純算術零 RNG。
+static func _safe_factor(state: WorldState, team: TeamData, stick: float, flex: float) -> float:
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or tile.construction_ticks_left <= 0:
+		return 1.0   # 無真施工中 → 不調制（safe）
+	var eta_days: float = float(tile.construction_ticks_left) / maxf(float(team.population), 1.0)   # 粗估:剩 person-ticks/pop
+	if eta_days <= 0.0:
+		return 1.0
+	var safe_ratio: float = team.food_runway / eta_days   # runway 撐得到完成否
+	# ★人格 ratio_floor（team14 根治）：務實/機會(flex 高)→floor 高(早放留餘裕);固執/恆心(stick 高)→floor 低(撐久 edge-riding)。
+	var ratio_floor: float = clampf(RATIO_FLOOR_BASE + (flex - stick) * RATIO_FLOOR_SPAN, RATIO_FLOOR_MIN, RATIO_FLOOR_MAX)
+	if RATIO_SAFE <= ratio_floor:
+		return 1.0 if safe_ratio >= RATIO_SAFE else 0.0   # 退化防除零
+	return clampf((safe_ratio - ratio_floor) / (RATIO_SAFE - ratio_floor), 0.0, 1.0)
 
 # ★Slice 2 進度信號：施工中隊用真 construction-tick 進度（sunk=(total−left)/total，隨 tick 倒數更新=新鮮，
 #   解決決策層 cadence(1日) vs 執行層(每tick) 落差）；非施工 committed 動作退回 committed 時間佔比 proxy。
