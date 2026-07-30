@@ -13,11 +13,12 @@ status: ready-for-R2
 ## 1. scope（兩塊：新 deliver option + convoy 生命週期）
 - **(A) 新 deliver 決策 option**（菜單缺這個＝根）：surplus holder 有 res X surplus + 知有市場 demand → 生「deliver X 到市場」candidate，**走 util 秤入既有 argmax**（非 scripted；economy 決策本 fire 正常、只缺這 option）。
 - **(B) convoy 生命週期物理送貨**（②③④ plumbing）：porter 把 X 物理搬到市場 granary。
-- 兩塊一體＝「賣方送貨到市場」。接既有 `_market_visitor_buy` → 買方 fulfill。
+- 兩塊一體＝「賣方送貨去買方 demand 市場」。DELIVER 呼 `_market_visitor_sell` 直接 settle 買方 buy 單 → fulfill。
 
 ## 2. (A) deliver 決策 option（新）
-- **觸發**：隊有 res X surplus（`effective_holding(X) > TradeValuation.reserve(X) + margin`）**AND 知有市場 outpost 掛 buy X order**（belief-gated，複用 `_nearest_market_outpost_with` 找 known 市場有 X demand；★感知鐵律：讀 belief/known 非 god-view）。
-- **生 candidate**：`{task: TASK_CONVOY, target: 市場 pos, cargo: {X: deliver_qty}, kind: "deliver"}` 入 rank 池（frontier_candidates 或新 supply-side option）。deliver_qty = min(surplus−reserve, 市場 demand, 載重上限)。
+> **★R² 後訂正（implementer 建前抓、systems 親驗坐實 2026-07-31）**：原 spec 名 `_nearest_market_outpost_with`（=找有 STOCK 的市場、for 買方）+ `_market_visitor_buy`（買方拿貨）＝**對「賣方送貨去 demand 市場」語意反向**。正確積木：**demand finder=`OrderSystem.best_arbitrage_order`（order_system:233，掃 `received_buy_orders`→回下 buy 單隊市集 pos+res+order_id，belief-gated）**；**fulfill hook=`_market_visitor_sell`（interaction:805，賣方 deposit X 入 buyer tile granary+`_settle_owner_order` settle buy 單→`order_fulfilled++`+得 coin）**。且 measure 證買方 seek_market=5 幾乎不 visit → 「賣方 deposit 自家 granary 等買方 visitor_buy」雙跳**不會 fulfill**；**只有賣方直達 buyer 市場 visitor_sell 這條路能達驗收線②**。
+- **觸發**：隊有 res X surplus（`effective_holding(X) > TradeValuation.reserve(X) + margin`）**AND `best_arbitrage_order` 找到 known 買方市場掛 buy X order**（belief-gated via `received_buy_orders`；★感知鐵律讀 belief 非 god-view）。★**不 gate ARCHETYPE_TRADE**（任何 surplus holder 皆可 deliver，非只商隊——Team3 生產隊菜單缺這個=根）。
+- **生 candidate**：`{task: TASK_CONVOY, target: 買方市場 pos, cargo: {X: deliver_qty}, kind: "deliver", order_id}` 入 rank 池。deliver_qty = min(surplus−reserve, 買方 order qty, 載重上限)。
 - **util（util 秤非 scripted）**：`payoff = 賣 X coin gain（deliver_qty × 市場 bid 價）`正規化 → 走既有 `_candidate_util`（payoff×dev_coeff×discount）。economy 決策 fire 正常 → 這 option 加了 when surplus+demand 會 fire。
 - **★measured 驗（本 session 鐵律：決策問題先 dump per-option util）**：加 option 後 **dump 賣方（Team3）per-option util 驗此 candidate 真 fire**（贏 argmax when surplus+demand），**非假設**。
 
@@ -27,12 +28,12 @@ status: ready-for-R2
 - **③ convoy 各階段專屬 `_evaluate_subteam` early-return 分支**（比照 TASK_BUILD/SETTLE `faction_ai:1719-1760`，防 generic fallback `:1753-1755` 攔截半路棄貨）：
   - `FETCH`：取貨（源=母隊 tile vault/私產）→ 掛 OUTBOUND。
   - `OUTBOUND`：travel 到市場（move_target=市場 pos）。
-  - `DELIVER`：到市場 → `TileBank.deposit(市場 tile, X, cargo)` → cargo 物理入市場 granary。
+  - `DELIVER`：到**買方市場** → 呼 **`_market_visitor_sell`**（賣方=visitor、buyer=owner）→ deposit X 入 buyer tile granary + `_settle_owner_order`（settle buy 單→`order_fulfilled++`）+ coin 換手。★**這步就是 fulfill**（非「deposit 自家 granary 等買方 visitor_buy」雙跳，measure 證雙跳不 fulfill）。
   - `RETURN`：travel 回母隊 → 到家**釋放抽出 pop**（★非 `_convert_to_resident` settle、非 `try_merge_back` 整隊併入消失——完整返航釋放 pop）。
 - **④ 撤 persist-hold**（子隊非 IDLE 本 sticky `faction_ai:1758-1760`「duty 壓制投機」）→ 防護靠③專屬分支、非 persist。
 
 ## 4. 接既有撮合（GATE-B 活）
-DELIVER 後 X 在市場 granary → 買方 `_market_visitor_buy`（interaction:781）拿得到 → **`order_fulfilled>0`**（材料第一次真換手）。
+DELIVER 步的 `_market_visitor_sell` **直接 settle 買方 buy 單** → **`order_fulfilled>0`**（材料第一次真換手，賣方直達買方市場成交、非等買方來）。
 
 ## 5. 憲法對齊
 - deliver option **util 秤入既有 argmax**（非 scripted）；**感知鐵律**（demand 讀 belief/known 市場非 god-view）。
