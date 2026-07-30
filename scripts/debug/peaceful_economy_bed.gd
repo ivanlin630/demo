@@ -57,24 +57,52 @@ func _dump_peroption_util() -> void:
 	var no_player := Vector2i(-1, -1)
 	var sample_ticks: Array = [500, 3600, 7200]   # 早/半月/月1（fed 隊穩態、material need 仍>0）
 	var si: int = 0
+	# ★賣方 delivery 追蹤（Team3 material=400 surplus 掛 sell material×335）：
+	#   跨全 run 追 task=TASK_TRADE 是否 fire、tile_pos 是否離家去市場、material 是否離 inventory（賣掉/deposit）。
+	var t3_start: TeamData = state.teams.get(3)
+	var t3_start_pos: Vector2i = t3_start.tile_pos if t3_start != null else Vector2i(-999, -999)
+	var t3_start_mat: float = float(t3_start.resources.get("material", 0)) if t3_start != null else 0.0
+	var t3_ever_trade: bool = false
+	var t3_ever_moved: bool = false
+	var t3_min_mat: float = t3_start_mat
 	for tick in range(7201):
 		runner.advance_tick(state, no_player)
 		if state.encounter_active and state.encounter_tick > 800:
 			runner._encounter_system.resolve_encounter_end(state, "draw")
+		var t3: TeamData = state.teams.get(3)
+		if t3 != null:
+			if t3.current_task == TeamData.TASK_TRADE: t3_ever_trade = true
+			if t3.tile_pos != t3_start_pos: t3_ever_moved = true
+			t3_min_mat = minf(t3_min_mat, float(t3.resources.get("material", 0)))
 		if si < sample_ticks.size() and (tick + 1) == int(sample_ticks[si]):
-			_dump_t0_at(state, tick + 1)
+			_dump_team_at(state, 0, tick + 1)   # 買方
+			_dump_team_at(state, 3, tick + 1)   # 賣方
 			si += 1
+	# ★賣方 delivery 行為總結（定 GATE-B gap:(a)不 decide 去賣 vs (b)decide 了空間到不了）
+	var t3e: TeamData = state.teams.get(3)
+	print("\n  ── ★Team3 賣方 delivery 行為（全 run 追蹤）──")
+	if t3e != null:
+		print("    起 pos=%s 終 pos=%s ever_moved=%s | ever_TASK_TRADE=%s | material 起=%.0f 終=%.0f 最低=%.0f(離 inventory?%s)" % [
+			str(t3_start_pos), str(t3e.tile_pos), str(t3_ever_moved), str(t3_ever_trade),
+			t3_start_mat, float(t3e.resources.get("material", 0)), t3_min_mat,
+			"是" if t3_min_mat < t3_start_mat - 1.0 else "否(留家)"])
+		var otile: HexTileData = state.world.tiles.get(t3e.tile_pos.x * 1000 + t3e.tile_pos.y)
+		if otile != null:
+			print("    Team3 tile public_storage material=%.0f（賣單 material 有無 deposit 到市場 granary）" % float(otile.public_storage.get("material", 0)))
+	else:
+		print("    Team3 死/併")
 
-func _dump_t0_at(state: WorldState, tick: int) -> void:
-	var t0: TeamData = state.teams.get(0)
+func _dump_team_at(state: WorldState, tid: int, tick: int) -> void:
+	var t0: TeamData = state.teams.get(tid)
 	if t0 == null:
-		print("  tick %d: T0 死/併" % tick); return
+		print("  tick %d: T%d 死/併" % [tick, tid]); return
 	var ctx: DecisionContext = DecisionContext.gather(state, t0)
 	var scored: Array = DecisionEngine.rank_scored(state, t0)
 	var lv: Dictionary = TradeValuation.leader_vals(state, t0)
 	var need_mat: float = NeedOracle.need_keep(state, t0, "material", lv)
-	print("  === tick %d T0[%s] task=%s food=%.0f mat=%.0f coin=%.0f runway=%.1f food_days=%.2f need_mat=%.0f ===" % [
-		tick, _terr(state, t0), t0.current_task, float(t0.resources.get("food", 0)),
+	print("  === tick %d T%d[%s] task=%s pos=%s move_tgt=%s food=%.0f mat=%.0f coin=%.0f runway=%.1f food_days=%.2f need_mat=%.0f ===" % [
+		tick, tid, _terr(state, t0), t0.current_task, str(t0.tile_pos), str(t0.move_target),
+		float(t0.resources.get("food", 0)),
 		float(t0.resources.get("material", 0)), float(t0.resources.get("coin", 0)),
 		t0.food_runway, ctx.food_days, need_mat])
 	# 全 option util 排序（標 winner + static/goal）
