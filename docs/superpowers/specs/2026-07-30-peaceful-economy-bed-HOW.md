@@ -12,7 +12,7 @@ status: ready-for-R2
 ## 1. scope（零 sim-code 改，只加 config + 薄 bed）
 - **新 `config/peaceful_economy.json`**（主交付）：hand-author explicit、seeded、`好戰=0` 全隊、設計 sharp 經濟缺口。
 - **reuse `WarringHarness.run(seed, ticks, config_path)`**（通用 runner，4 問 tap 全已在 `PROBE_KEYS`）跑它。
-- **新薄 `peaceful_economy_bed.gd`**：呼 WarringHarness.run + 印 4 問格式報告 + 逐隊月故事（QA 稽核）。★零 sim 邏輯、零 RNG（守 [[feedback_observer_no_global_rng]]，bed 純讀+print）。
+- **新薄 `peaceful_economy_bed.gd`**：呼 WarringHarness.run + 印 4 問格式報告 + 逐隊月故事（QA 稽核）。★零 sim **邏輯**改。**★★訂正（2026-07-30 gate 抓）：bed 是 runner/harness（seed+跑自己世界，同 WarringHarness.run:52-55 seed），`seed()` 是合法世界設置非觀測擾動 → bed **不是** `@observe-pure`**（pure-observe marker 只給「觀測既有 sim 的嵌入式 helper」如 specimen_dump_helper/tracer/probe_stats；runner bed 貼 marker 會被 observability_gate ③ 正確 FAIL on `seed(`）。bed 的 determinism 由 seed() 保證（reproducible），非由「零 RNG」。**category 教訓：measurement BED（driver）≠ observe-HELPER（嵌入式 tap）；只後者 @observe-pure。**
 - **★設計選擇（HOW，我定，透明報 blueprint 可否決）**：**sharp hand-authored fixture**（每隊一個「明顯該做 X」的設定）而非 random-mode 全規模「和平旗世界」。理由：(a)零 sim-code 改（random 需改 person_generator archetype 生成=touch determinism）(b)**最決斷**——隊明顯該 found（material=0+料源在旁+有 means）卻不 found＝動機機器壞、難以「碰巧沒隊想 found」搪塞。organic 全規模留 follow-up（若 blueprint 要「warring 世界減戰爭」的 confound-clean 版）。
 
 ## 2. peaceful_economy.json 設計（sharp 診斷案，~12 隊）
@@ -41,13 +41,13 @@ explicit mode、固定 seed、radius ~8、resource_richness 5（確保有 unowne
 WarringHarness all-far（anchor -1,-1）跑：**team-strategic 決策（found/build/trade/runway）all-far 照跑**（warring 床 all-far 仍產 indep.found_*/construct.* 佐證）。person-level breeding（econ_bed_diagnose 用 anchor 帶近區）**非本 4 問範圍**（near-LOD follow-up 若要 person 經濟）。
 
 ## 6. 憲法對齊
-- 零 sim 邏輯改（純 config + 讀-print bed）＝零行為變、determinism 不受影響。bed 零 RNG（[[feedback_observer_no_global_rng]]，可加 `# @observe-pure` marker 納新閘）。seeded 可重現（explicit+固定 seed）。
+- 零 sim 邏輯改（純 config + 讀-print bed）＝零行為變、determinism 不受影響。bed 是 runner（seed 跑自己世界）＝**不 @observe-pure**（seed() 合法、marker 會被 gate 正確 FAIL）；determinism 由 seeded 保證（explicit+固定 seed 可重現）。pure-observe helper（specimen_dump_helper/tracer/probe_stats）才 @observe-pure。
 
 ## 7. TDD + 驗
 - config 載入 sanity（GameSetup.setup 無錯、~12 隊起、有 unowned forest tile）。
 - **★★fixture-liveness 斷言（機械防死 fixture，R² 教訓）**：bed/test 在 t0 斷言**每個 ①隊 `NeedOracle.need_keep(material)>0`**（+ ③料窮側同）——否則 fixture 因果死路（自變量無因果連結、不 fire 是必然非經驗）→ **FAIL 拒開工**。這條把「fixture 是否 live」變成機器可驗，防再出「material≈0 但 need_keep≡0」的預判死局。同理斷言 ①隊有 unowned forest tile 在 SEEK_TILE_RANGE 內（founding 靶存在）。
 - bed 跑 headless 0-new、~6mo 無崩、4 問 probe 子集印出、逐隊月故事印出。
-- ★bed 零 RNG（specimen/determinism 無關，純讀）。
+- ★bed 是 runner（seed 跑世界）＝**不 @observe-pure**；determinism 由 seeded 保證（observability_gate ③ 對 bed 不該 FAIL＝bed 無 marker 不被掃）。
 
 ## 8. 交付
 → R²（★異質：sharp-fixture vs organic 選擇合理否/缺口設計真驅動 4 行為否/tap 覆蓋 4 問齊否/bed 零 RNG/LOD all-far 對 team 決策足否）→ implementer（config + 薄 bed）→ **measurer 跑 → 產 4 問數（落地 docs/measurements 標 path）→ 回 blueprint 裁分支**。★execution-verified：4 問看 target 真 fire（gate funnel 分動機無 vs 卡 gate）。
