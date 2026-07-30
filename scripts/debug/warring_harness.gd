@@ -103,6 +103,8 @@ const PROBE_KEYS: Array = [
 	"bridge.no_go_food", "bridge.topup",   # ★糧流 Slice B1：糧橋 no-go/top-up（A1 子隊配糧）
 	"resume.attempt", "resume.success",
 	"resume.reject_combat", "resume.reject_starving", "resume.reject_owner", "resume.reject_resident", "resume.reject_busy",
+	# ★後勤 SLICE A：供給-delivery convoy（GATE-B 撮合物理送貨）——dispatch/fetch/deliver/return funnel
+	"convoy.dispatch", "convoy.fetch", "convoy.deliver", "convoy.return",
 ]
 
 # ★construction tap samples（一階根 payload：task_after / ct_task / ct_reason / candidates 等，counts 只給階段、samples 給 why）
@@ -309,7 +311,8 @@ const AMOUNT_KEYS: Array = ["rout.ready_sum_high", "rout.ready_sum_mid", "rout.r
 	"pursuit.loss_sum", "pursuit.cruelty_sum", "pursuit.greed_sum",
 	# S-A gate#1（餵養真解非搬餓）：併前 absorber/joiner 餘命 + 併後合隊餘命 + 隊規模分布
 	"consol.combined_days_sum", "consol.absorber_days_sum", "consol.joiner_days_sum", "consol.absorber_pop_sum",
-	"absorb.slack_sum", "absorb.yield_sum"]
+	"absorb.slack_sum", "absorb.yield_sum",
+	"convoy.cargo_out", "convoy.cargo_delivered"]   # ★後勤 SLICE A：cargo 守恆量測（載出 vs 真交付）
 static func _probe_amounts_subset() -> Dictionary:
 	var d: Dictionary = {}
 	for k in AMOUNT_KEYS:

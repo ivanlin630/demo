@@ -111,6 +111,63 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 		if not dv.is_empty():
 			delegated.append(dv)
 	out.append_array(delegated)
+	# ★後勤 SLICE A：供給-delivery candidate（surplus holder 知有 demand 市場 → 送貨結買單，GATE-B 撮合物理送貨）。
+	out.append_array(_deliver_candidates(state, team, ctx, lv))
+	return out
+
+# ★後勤 SLICE A（spec 2026-07-31 訂正版 §2）：surplus holder + 知 demand 市場（belief:親聞 buy 單）→ deliver convoy candidate。
+# 走 util 秤入 argmax（非 scripted；不 gate ARCHETYPE_TRADE——任何 surplus holder，生產隊菜單缺這個=GATE-B 根）。
+# 感知鐵律：demand 讀 received_buy_orders（belief，非 god-view）。純算術零 RNG。
+const DELIVER_MARGIN: float = 5.0            # TEST VALUE — surplus 需 > reserve + 此才算真餘量（噪音濾）
+const DELIVER_PAYOFF_NORM: float = 100.0     # TEST VALUE — coin gain 正規化（util 秤：coin_gain/此=payoff，clamp<GOAL_UTIL_CAP）
+# ★convoy 白名單 res（bound 貴的 reserve/need_keep 呼叫數；只這些值得 convoy 送）。
+const CONVOY_RES: Array = ["material", "food", "tools", "goods", "medicine", "arrows"]
+static func _deliver_candidates(state: WorldState, team: TeamData, ctx: DecisionContext, lv: Dictionary) -> Array:
+	var out: Array = []
+	# ★perf 廉價前閘（warring 49+ 隊每 cadence 呼；貴的 received_buy_orders(O(team_known))/reserve 前先廉價濾）：
+	if team.parent_team_id != -1 or team.population < FactionAISystem.CONVOY_MIN_PARENT_POP:
+		return out   # 子隊/太小隊不派 convoy
+	var has_tradeable: bool = false   # 無任何白名單 res 原始餘量 → 免掃 buy orders（廉價 raw holding 檢查）
+	for r in CONVOY_RES:
+		if float(team.resources.get(r, 0)) > DELIVER_MARGIN:
+			has_tradeable = true
+			break
+	if not has_tradeable:
+		return out
+	var buy_orders: Array = OrderSystem.new().received_buy_orders(state, team)
+	if buy_orders.is_empty():
+		return out
+	var seen_res: Dictionary = {}   # 每 res 一 candidate（取先到=近市場，determinism 靠 order 順序）
+	for o in buy_orders:
+		var res: String = String(o.get("res", ""))
+		if res == "" or seen_res.has(res) or not (res in CONVOY_RES):
+			continue
+		if int(o.get("origin_team", -1)) == team.team_id:
+			continue   # 自己的買單不送給自己
+		if float(team.resources.get(res, 0)) <= DELIVER_MARGIN:
+			continue   # ★廉價 raw-holding 前濾（免對持有極少的 res 呼貴的 reserve/need_keep）
+		var mpos = o.get("pos", Vector2i.ZERO)
+		if not (mpos is Vector2i) or mpos == Vector2i(-999, -999) or mpos == team.tile_pos:
+			continue
+		seen_res[res] = true   # 貴檢查每 unique res 只一次
+		var surplus: float = ResourceSystem.effective_holding(state, team, res) \
+			- TradeValuation.reserve(team, res, lv, state)
+		if surplus <= DELIVER_MARGIN:
+			continue   # 無真餘量（守活命/建設料 reserve）
+		var qty: float = minf(surplus, float(o.get("qty", 0)))
+		if qty < 1.0:
+			continue
+		var bid: float = TradeValuation.local_value(team, res, state)   # 市場估值 proxy（coin gain 秤）
+		var payoff: float = clampf(qty * bid / DELIVER_PAYOFF_NORM, 0.0, GOAL_UTIL_CAP)
+		var to_task: Dictionary = {
+			"task": TeamData.TASK_CONVOY, "target": mpos, "cargo": {res: qty},
+			"kind": "deliver", "order_id": int(o.get("order_id", -1)), "delegate": true,
+		}
+		var delay: float = _estimate_delay_days(team, to_task)
+		out.append({
+			"util": _candidate_util(payoff, ctx, delay),
+			"to_task": to_task, "label": "deliver_" + res, "delegate": true,
+		})
 	return out
 
 # ★S5 委派變體（組件 D）：build/settle 型 action 產「派子隊做」變體。★gate② 正解:applicable=真 viability

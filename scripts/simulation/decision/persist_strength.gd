@@ -22,6 +22,17 @@ const RATIO_FLOOR_SPAN: float = 0.4      # TEST VALUE — 人格對 floor 的餘
 const RATIO_FLOOR_MIN: float = 0.1
 const RATIO_FLOOR_MAX: float = 1.0
 
+# ★active-construction persist floor（founding-completion fix，spec 2026-07-30，坐實根=bed dump 0b6523db
+#   construct.stall=29101/complete_build=0：remote founding 子隊 cold-start(progress≈0)→base_persist<
+#   PERSIST_HOLD_THRESHOLD(0.1)→persist.hold gate 不 fire→routine argmax(覓食/外交@PRIO_DISPATCH,ct_reason=unified)
+#   搶班→progress 永不累積=惡性循環）。施工中隊(TASK_BUILD AND construction_ticks_left>0)hard-floor persist_eff≥此。
+# ★>PERSIST_HOLD_THRESHOLD(task_arbiter 0.1)+margin → persist.hold 擋 routine 搶班 → 留 TASK_BUILD → 完工。
+# ★均一 floor 非 floor×lean（R² 判合理例外，§4）：floor×lean 令務實隊 0.15×0.2=0.03<原 threshold 0.1=該人格永 0%
+#   完工=引擎結構死角剛好綁 personality 非合理人格分化；pipeline 完整性 > 人格分化（同 crisis handling 不分人格精神）。
+# ★hard floor 蓋過 safe_factor（§3）：crisis/survival/threat 自有 task_arbiter ≥PRIO_THREAT bypass 打斷施工
+#   （team14 餓死照放手=crisis 路徑非靠 persist 降 floor 下）→ floor 只擋 routine 覓食/外交、不擋 crisis=不破 team14。
+const CONSTRUCTION_ACTIVE_FLOOR: float = 0.15   # TEST VALUE — >PERSIST_HOLD_THRESHOLD(0.1)+margin
+
 # 開放式/無承諾動作（progressive-only gate 排除 → persist=0，走既有 timeout）。
 const NON_PROGRESSIVE: Array = [TeamData.TASK_IDLE, TeamData.TASK_FLEE]
 
@@ -56,7 +67,13 @@ static func _value(state: WorldState, team: TeamData) -> float:
 	#   5 種無 ETA task 走原 persist（safe_ratio 不介入，維持 Slice 1-4 行為）。
 	if team.current_task == TeamData.TASK_BUILD:
 		var sf: float = _safe_factor(state, team, stick, flex)
-		return base_persist * sf   # persist_effective = persist × safe_factor（糧見底→sf→0→放手求生）
+		var computed: float = base_persist * sf   # persist_effective = persist × safe_factor（糧見底→sf→0→放手求生）
+		# ★active-construction hard floor：施工真進行中(construction_ticks_left>0)→persist≥CONSTRUCTION_ACTIVE_FLOOR
+		#   （蓋過 safe_factor；cold-start/低 lean 也擋 routine argmax 搶班；crisis 自有 ≥THREAT bypass，不靠此）。
+		var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+		if tile != null and tile.construction_ticks_left > 0:
+			return maxf(computed, CONSTRUCTION_ACTIVE_FLOOR)
+		return computed
 	return base_persist
 
 # ★safe_factor（§4b）：safe_ratio=runway/ETA → [0,1]，人格 ratio_floor 餘裕。糧充裕→1(黏)；見底→0(放手)。
