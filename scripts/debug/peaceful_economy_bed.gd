@@ -1,11 +1,12 @@
 extends SceneTree
 
-# @observe-pure  ★observer-no-global-RNG 靜態閘納管（純觀測零 RNG；違=FAIL）
 # ──────────────────────────────────────────────────────────────────────────
 # 和平經濟觀測床（measure-first Step0，HOW spec 2026-07-30）。
 # 目的：seeded/和平/有缺口驅動的床，看得見經濟行為（warring 床被戰爭吃掉立國/發展時間）。
 # 量 4 問（founding / develop / trade / runway 是否 fire）→ 資料回 blueprint 裁分支。
-# ★零 sim-code 改（純讀+print）、零 RNG（守 [[feedback_observer_no_global_rng]]）。
+# ★零 sim-code 改（純讀+print）。★非 @observe-pure：bed 是 runner，呼 seed() 跑自己的世界（合法世界設置，
+#   非觀測擾動）→ determinism 由 seeded 保證（非零 RNG）。observability_gate ③ 只納嵌入式觀測 helper
+#   （specimen_dump_helper/tracer），bed 不加 marker（seed() 會被 ③ 正確 FAIL；[[feedback_observer_no_global_rng]]）。
 #
 # 流程：
 #   1. t0 fixture-liveness 斷言（每 ①/③料窮側 need_keep(material)>0 + ①有 forest 靶）→ 死路則拒開工。
