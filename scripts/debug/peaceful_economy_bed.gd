@@ -85,7 +85,10 @@ func _print_four_questions(result: Dictionary) -> void:
 	_pl(p, ["indep.found_ally", "indep.found_subjugate", "indep.found_timeout"])
 	_pl(p, ["indep.gate_ambitious", "indep.gate_path_ok"])
 	_pl(p, ["indep.gate_fail_pop", "indep.gate_fail_food", "indep.gate_fail_busy", "indep.gate_fail_nopath"])
-	_pl(p, ["construct.start", "construct.complete_build", "worldgen.build_outpost"])
+	_pl(p, ["construct.start", "construct.start_task_not_build", "construct.complete_build", "worldgen.build_outpost"])
+	# ★construction pipeline 拉走機制（complete_build=0 vs upgrade_facility>0：remote founding 子隊完工前被拉走）
+	_pl(p, ["construct.progress", "construct.stall", "construct.timeout_cancel", "construct.complete"])
+	_pl(p, ["resume.attempt", "resume.success", "resume.reject_combat", "resume.reject_starving", "resume.reject_busy"])
 
 	print("【Q2 develop（升級）嗎】")
 	_pl(p, ["construct.complete_upgrade_facility", "construct.complete_upgrade_level"])
@@ -97,6 +100,34 @@ func _print_four_questions(result: Dictionary) -> void:
 
 	print("【Q4 runway 機制 fire 嗎】")
 	_pl(p, ["foodflow.update", "bridge.no_go_food", "bridge.topup", "persist.hold"])
+
+	# ★construct pipeline sample payload（why 欄：施工隊被搶時 current_task 變啥 ct_task + 誰搶 ct_reason）
+	_print_construct_samples(result)
+
+# construct.* sample payload dump（result["probe_samples"] 已含 CONSTRUCT_SAMPLE_KEYS；純多印既有 data）
+func _print_construct_samples(result: Dictionary) -> void:
+	var samples: Dictionary = result.get("probe_samples", {})
+	print("\n───────── construct sample payload（pin 拉走機制：ct_task/ct_reason）─────────")
+	if samples.is_empty():
+		print("  （無 sample；construct pipeline 未觸發）"); return
+	for key in ["construct.start", "construct.stall", "construct.progress",
+			"construct.complete", "construct.timeout_cancel", "resume.attempt", "resume.success"]:
+		var arr: Array = samples.get(key, [])
+		if arr.is_empty():
+			continue
+		print("  [%s] n=%d（前 12 筆）:" % [key, arr.size()])
+		var lim: int = mini(arr.size(), 12)
+		for i in range(lim):
+			print("    " + _fmt_sample(arr[i]))
+
+func _fmt_sample(s: Dictionary) -> String:
+	var parts: Array = []
+	# 依序印關鍵 why 欄（存在才印）
+	for k in ["tick", "tile", "team", "ct_id", "action", "task_after", "prio_after",
+			"ct_task", "ct_reason", "ct_pos", "ticks_left", "active", "pop"]:
+		if s.has(k):
+			parts.append("%s=%s" % [k, str(s[k])])
+	return " ".join(parts)
 
 # print 一行 probe key 值
 func _pl(p: Dictionary, keys: Array) -> void:
