@@ -208,6 +208,13 @@ func _print_four_questions(result: Dictionary) -> void:
 	print("【Q4 runway 機制 fire 嗎】")
 	_pl(p, ["foodflow.update", "bridge.no_go_food", "bridge.topup", "persist.hold"])
 
+	print("【★後勤 SLICE A：convoy delivery（GATE-B 撮合物理送貨）】")
+	_pl(p, ["convoy.dispatch", "convoy.fetch", "convoy.deliver", "convoy.return"])
+	print("  cargo_out=%.0f cargo_delivered=%.0f | ★order_fulfilled=%d(驗收②) trade.deal=%d" % [
+		result.get("probe_amounts", {}).get("convoy.cargo_out", 0.0),
+		result.get("probe_amounts", {}).get("convoy.cargo_delivered", 0.0),
+		int(p.get("g1.order_fulfilled", 0)), int(p.get("trade.deal", 0))])
+
 	# ★construct pipeline sample payload（why 欄：施工隊被搶時 current_task 變啥 ct_task + 誰搶 ct_reason）
 	_print_construct_samples(result)
 

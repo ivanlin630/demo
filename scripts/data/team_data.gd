@@ -33,6 +33,7 @@ const TASK_MIGRATE     := "遷徙"
 const TASK_CONSTRUCT   := "建造"
 const TASK_UPGRADE     := "升級"
 const TASK_EXPAND      := "擴建"
+const TASK_CONVOY      := "運輸"   # ★後勤 SLICE A：供給-delivery convoy（porter 把 surplus 物理送到 demand 市場結買單）
 const TASK_TRIBUTE_OFFER := "tribute_offer"   # order_task（提供納貢），非 current_task
 
 const TAG_COMMAND  := "統領"

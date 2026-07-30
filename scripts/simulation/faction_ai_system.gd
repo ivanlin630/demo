@@ -763,6 +763,10 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			continue
 		var parent: TeamData = state.teams.get(sub.parent_team_id)
 		if parent != null and parent.tile_pos == sub.tile_pos:
+			# ★後勤 SLICE A：convoy porter 真歸建（釋放抽出 pop）= RETURN 完成 telemetry（porter 可能已被下方 release→IDLE，
+			#   故在真 merge 點認 convoy_phase 標記，避 convoy.return 漏記）。
+			if Probe.enabled and sub.task_extra_data.has("convoy_phase"):
+				Probe.bump("convoy.return")
 			sub_sys.try_merge_back(state, sub_id)
 		else:
 			TaskArbiter.release(sub)
@@ -1734,6 +1738,10 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 				TaskArbiter.release(sub)
 				merge_queue.append(sub.team_id)
 		return
+	# ★後勤 SLICE A：convoy 各階段專屬分支（防 generic fallback :1753 攔截半路棄貨；子隊 sticky 免 persist-hold）。
+	if sub.current_task == TeamData.TASK_CONVOY:
+		_tick_convoy(state, sub, merge_queue)
+		return
 	if sub.current_task == TeamData.TASK_SETTLE:
 		# 抵達自家 faction outpost → 就地安頓（無需 co-located team；獨自抵達即轉居民）
 		# 未到則保持 移動/安頓 task，不進 merge_queue（避免被召回母團）
@@ -1758,6 +1766,40 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	if sub.current_task == TeamData.TASK_IDLE:
 		_decide_subteam(state, sub, merge_queue)
 	# active-transit 已派 task → sticky（執行命令中 duty 壓制投機＝任務優先；到達自歸建 / discipline 自 detach）
+
+# ★後勤 SLICE A（spec §3）：convoy 生命週期 OUTBOUND→DELIVER→RETURN（porter 物理送貨結買單）。純算術零 RNG。
+# FETCH 在 dispatch 已撥載；此處 OUTBOUND(travel)→抵市場 DELIVER(_resolve_market_at_outpost=visitor_sell deposit+
+# settle buy 單→order_fulfilled++)→掉頭 RETURN→到家歸建釋放 pop（merge_back，非 settle/整隊消失）。
+func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
+	var xd: Dictionary = sub.task_extra_data
+	var phase: String = String(xd.get("convoy_phase", "OUTBOUND"))
+	var market_pos: Vector2i = xd.get("market_pos", Vector2i(-1, -1))
+	var home_pos: Vector2i = xd.get("home_pos", Vector2i(-1, -1))
+	if phase == "OUTBOUND":
+		if sub.move_target != Vector2i(-1, -1):
+			return   # 還在前往 demand 市場（sticky，不打斷不召回）
+		# 抵達 demand 市場 → DELIVER：visitor_sell deposit cargo 入 buyer tile + settle buy 單 → fulfilled++
+		var tile: HexTileData = state.world.tiles.get(market_pos.x * 1000 + market_pos.y)
+		if tile != null:
+			var res: String = String(xd.get("cargo_res", ""))
+			var before: float = float(sub.resources.get(res, 0))
+			InteractionSystem.new()._resolve_market_at_outpost(state, sub, tile)
+			Probe.bump("convoy.deliver")
+			if Probe.enabled:
+				Probe.add_amount("convoy.cargo_delivered", maxf(before - float(sub.resources.get(res, 0)), 0.0))
+		xd["convoy_phase"] = "RETURN"
+		sub.move_target = home_pos   # 掉頭回家
+		sub.task_start_tick = state.world.current_tick
+		return
+	if phase == "RETURN":
+		if sub.move_target != Vector2i(-1, -1):
+			return   # 還在回程
+		# 到家歸建 → 釋放抽出 pop（merge_back，非 settle）。convoy.return telemetry 在真 merge 點(loop2b:766)認
+		# convoy_phase 標記統一計（porter 可能中途被 loop2b release→IDLE 走 IDLE 併回路，故不在此 bump 避漏/重複）。
+		merge_queue.append(sub.team_id)
+		return
+	# 未知 phase 保險：歸建
+	merge_queue.append(sub.team_id)
 
 func _update_escort(state: WorldState, team: TeamData) -> void:
 	if team.order_target_id == -1:
@@ -2849,6 +2891,9 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 # 接既有 SubteamSystem.dispatch（advisor+settler pop+action task/target）。回 true=派出成功。
 func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) -> bool:
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
+	# ★後勤 SLICE A：deliver convoy 分支（送 surplus 到 demand 市場結買單）→ 派 porter 子隊。
+	if String(td.get("kind", "")) == "deliver":
+		return _dispatch_convoy(state, team, td)
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
 		return _dispatch_builder(state, team, target, String(td["build_type"]), 1)
@@ -2865,6 +2910,72 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	var action_task: String = String(td.get("task", TeamData.TASK_BUILD))
 	var sub_id: int = SubteamSystem.new().dispatch(state, team.team_id, advisor_id, settler, action_task, target)
 	return sub_id != -1
+
+# ★後勤 SLICE A（spec 2026-07-31 訂正版 §3）：派 porter 子隊送 surplus 到 demand 市場（FETCH cargo=exact load，conserving）。
+const CONVOY_PORTER_POP: int = 2          # TEST VALUE — porter 子隊 pop（小，只搬貨）
+const CONVOY_MIN_PARENT_POP: int = 4      # TEST VALUE — 母隊抽 porter 後留守下限（比 build gate 10 輕，porter 小）
+const CONVOY_CARGO_CAP: float = 200.0     # TEST VALUE — 單趟載重上限
+func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool:
+	var target: Vector2i = td.get("target", Vector2i(-1, -1))
+	if target == Vector2i(-1, -1) or target == team.tile_pos:
+		return false
+	if team.population < CONVOY_MIN_PARENT_POP:
+		return false
+	var cargo: Dictionary = td.get("cargo", {})
+	if cargo.is_empty():
+		return false
+	# ★throttle：一隊同時只一 convoy 在飛（防 surplus 每 cadence 重派 porter storm→warring 49 隊 porter 爆炸 perf 死）。
+	for tid in state.teams:
+		var pt: TeamData = state.teams[tid]
+		if pt.parent_team_id == team.team_id and pt.current_task == TeamData.TASK_CONVOY:
+			return false
+	var res: String = String(cargo.keys()[0])
+	var want_qty: float = minf(float(cargo[res]), CONVOY_CARGO_CAP)
+	var home_tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	var vault: float = float(home_tile.public_storage.get(res, 0)) if (home_tile != null \
+		and home_tile.outpost_owner == team.team_id) else 0.0
+	var load: float = minf(want_qty, float(team.resources.get(res, 0)) + vault)
+	if load < 1.0:
+		return false   # 母隊實無貨可載
+	var advisor_id: int = _pick_or_promote_advisor(state, team)
+	if advisor_id == -1:
+		return false
+	var sub_id: int = SubteamSystem.new().dispatch(
+		state, team.team_id, advisor_id, CONVOY_PORTER_POP, TeamData.TASK_CONVOY, target)
+	if sub_id == -1:
+		return false
+	var sub: TeamData = state.teams[sub_id]
+	_load_convoy_cargo(team, sub, home_tile, res, load)   # ★FETCH：cargo 設 exact load（conserving）
+	sub.task_extra_data = {
+		"convoy_phase": "OUTBOUND", "cargo_res": res, "cargo_qty": load,
+		"market_pos": target, "home_pos": team.tile_pos, "order_id": int(td.get("order_id", -1)),
+	}
+	Probe.bump("convoy.dispatch")
+	Probe.bump("convoy.fetch")
+	if Probe.enabled: Probe.add_amount("convoy.cargo_out", load)
+	print("[Convoy] Team%d 派運輸子隊 Team%d 送 %s×%.0f → demand 市場(%d,%d)" % [
+		team.team_id, sub_id, res, load, target.x, target.y])
+	return true
+
+# FETCH cargo 撥載：porter 設 exact load（dispatch 已帶 frac×res；調整 delta 從母隊 inventory→vault 補、或退多餘）。守恆。
+func _load_convoy_cargo(owner: TeamData, sub: TeamData, home_tile: HexTileData, res: String, load: float) -> void:
+	var cur: float = float(sub.resources.get(res, 0))
+	var delta: float = load - cur
+	if delta > 0.0:
+		var from_inv: float = minf(delta, float(owner.resources.get(res, 0)))
+		if from_inv > 0.0:
+			ResourceBank.add(owner, res, -from_inv, "convoy_load_inv_out")
+			ResourceBank.add(sub, res, from_inv, "convoy_load_in")
+			delta -= from_inv
+		if delta > 0.0 and home_tile != null and home_tile.outpost_owner == owner.team_id:
+			var v: float = float(home_tile.public_storage.get(res, 0))
+			var from_vault: float = minf(delta, v)
+			if from_vault > 0.0:
+				home_tile.public_storage[res] = v - from_vault
+				ResourceBank.add(sub, res, from_vault, "convoy_load_vault_in")
+	elif delta < 0.0:
+		ResourceBank.add(sub, res, delta, "convoy_unload_excess_out")       # delta<0 → 減 porter
+		ResourceBank.add(owner, res, -delta, "convoy_unload_excess_in")     # 退母隊
 
 # 撥付建造款：公庫優先。目標 tile 公庫足 → 子隊不需補（抵達後 _deduct_cost 自扣公庫）；
 # 僅當「公庫 + 子隊私產」不足時，owner 私產補差額（守恆：純轉移）。
