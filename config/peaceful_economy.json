@@ -1,0 +1,165 @@
+{
+  "_doc": "和平經濟觀測床 (measure-first Step0, spec 2026-07-30-peaceful-economy-bed-HOW). explicit/seeded/好戰=0 全獨立. 4 類 sharp 缺口各對一問. ★零 sim-code 改, config-only. ①/③established+缺料設施 need_keep(material)>0=LIVE (apothecary medicine=0→deficit 0.5≥DESIRE_MIN, food-decoupled). radius 8/richness 5 → 有 unowned forest tile (founding 靶). 位置皆 hex_dist≤8 of center(8,8).",
+  "seed": 70730,
+  "mode": "explicit",
+  "max_ticks": 50000,
+  "map": { "radius": 8, "resource_richness": 5 },
+  "teams": [
+    {
+      "id": 0, "name": "①立國A_平原缺料", "tile_pos": [6, 8], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 120.0, "material": 0.0, "coin": 800.0, "tools": 5.0 },
+      "leader": {
+        "name": "FoundA_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "FA_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 150 }
+    },
+    {
+      "id": 1, "name": "①立國B_平原缺料", "tile_pos": [10, 8], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 120.0, "material": 0.0, "coin": 800.0, "tools": 5.0 },
+      "leader": {
+        "name": "FoundB_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "FB_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 150 }
+    },
+    {
+      "id": 2, "name": "①立國C_平原缺料", "tile_pos": [8, 6], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 120.0, "material": 0.0, "coin": 800.0, "tools": 5.0 },
+      "leader": {
+        "name": "FoundC_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "FC_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 150 }
+    },
+    {
+      "id": 3, "name": "②發展A_料足", "tile_pos": [8, 10], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 150.0, "material": 400.0, "coin": 800.0, "tools": 30.0 },
+      "leader": {
+        "name": "DevA_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "DA_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 200 }
+    },
+    {
+      "id": 4, "name": "②發展B_料足", "tile_pos": [6, 10], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 150.0, "material": 400.0, "coin": 800.0, "tools": 30.0 },
+      "leader": {
+        "name": "DevB_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "DB_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 200 }
+    },
+    {
+      "id": 5, "name": "②發展C_料足", "tile_pos": [10, 6], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 150.0, "material": 400.0, "coin": 800.0, "tools": 30.0 },
+      "leader": {
+        "name": "DevC_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "DC_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 200 }
+    },
+    {
+      "id": 6, "name": "③貿易_糧富料窮", "tile_pos": [5, 9], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 350.0, "material": 0.0, "coin": 300.0, "tools": 3.0 },
+      "leader": {
+        "name": "TradeFood_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.5 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "TF_M1", "loyalty": 0.8, "skills": { "商業": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 400 }
+    },
+    {
+      "id": 7, "name": "③貿易_料富糧窮", "tile_pos": [11, 9], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 40.0, "material": 400.0, "coin": 300.0, "goods": 20.0, "tools": 5.0 },
+      "leader": {
+        "name": "TradeMat_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.5 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "TM_M1", "loyalty": 0.8, "skills": { "商業": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 30 }
+    },
+    {
+      "id": 8, "name": "③商隊_中介", "tile_pos": [8, 8], "population": 5,
+      "tags": ["商隊"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 60.0, "material": 0.0, "coin": 1000.0, "goods": 80.0 },
+      "leader": {
+        "name": "Caravan_Leader", "age": 40, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.5, "商業": 0.8 },
+        "values": { "貪婪": 0.8, "慎重": 0.6, "信義": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "CV_M1", "loyalty": 0.8, "skills": { "商業": 0.5 } } ]
+    },
+    {
+      "id": 9, "name": "④糧坡A_山地", "tile_pos": [6, 6], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 100.0, "material": 20.0, "coin": 200.0, "tools": 3.0 },
+      "leader": {
+        "name": "RunwayA_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "RA_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "mountain", "tile_food_init": 60 }
+    },
+    {
+      "id": 10, "name": "④糧坡B_山地", "tile_pos": [10, 10], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 100.0, "material": 20.0, "coin": 200.0, "tools": 3.0 },
+      "leader": {
+        "name": "RunwayB_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "RB_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "mountain", "tile_food_init": 60 }
+    },
+    {
+      "id": 11, "name": "④糧坡C_山地", "tile_pos": [7, 11], "population": 6,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 100.0, "material": 20.0, "coin": 200.0, "tools": 3.0 },
+      "leader": {
+        "name": "RunwayC_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0 }
+      },
+      "named_members": [ { "name": "RC_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "mountain", "tile_food_init": 60 }
+    }
+  ],
+  "player": { "team_id": -1, "is_leader": false }
+}
