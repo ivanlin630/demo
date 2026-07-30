@@ -96,7 +96,20 @@ func _print_four_questions(result: Dictionary) -> void:
 	print("【Q3 貿易/對缺口反應嗎】")
 	_pl(p, ["trade.deal", "trade.deal_market", "trade.deal_merchant", "trade.barter_deal"])
 	_pl(p, ["g1.order_placed", "g1.order_fulfilled", "g1.shortage_buy", "g1.food_buy"])
-	_pl(p, ["g1.seek_market", "g1.market_arrive"])
+	# seek→arrive→fill funnel（三段落差看卡哪層）
+	_pl(p, ["g1.seek_market", "g1.market_arrive", "trade.arrive", "trade.meet", "trade.timeout"])
+	# ★market_bail 分因（pin GATE-B co-location 失敗 sub-gap：賣方不去賣 vs 買方抵達空 granary）——讀 Probe.counts
+	#   （多數 bail key 不在 PROBE_KEYS subset；run() 後 Probe.counts 未 reset=本 run 數完整）。
+	print("  --market_bail 賣方端--")
+	_plc(["trade.market_bail.sell_no_surplus", "trade.market_bail.sell_ownerless",
+		"trade.market_bail.sell_no_price", "trade.market_bail.sell_zero_qty",
+		"trade.market_bail.sell_storage_full", "trade.market_bail.sell_owner_no_coin",
+		"trade.market_bail.sell_owner_cant_afford", "trade.market_bail.no_board_order"])
+	print("  --market_bail 買方端--")
+	_plc(["trade.market_bail.buy_no_stock", "trade.market_bail.buy_no_want",
+		"trade.market_bail.buy_cant_afford", "trade.market_bail.buy_carry_full",
+		"trade.market_bail.buy_no_coin", "trade.market_bail.buy_no_price",
+		"trade.market_bail.buy_withdraw_empty"])
 
 	print("【Q4 runway 機制 fire 嗎】")
 	_pl(p, ["foodflow.update", "bridge.no_go_food", "bridge.topup", "persist.hold"])
@@ -134,6 +147,13 @@ func _pl(p: Dictionary, keys: Array) -> void:
 	var parts: Array = []
 	for k in keys:
 		parts.append("%s=%d" % [k, int(p.get(k, 0))])
+	print("  " + " | ".join(parts))
+
+# print 一行 Probe.counts key 值（PROBE_KEYS subset 外的 key；run() 後 counts 未 reset=本 run 完整）
+func _plc(keys: Array) -> void:
+	var parts: Array = []
+	for k in keys:
+		parts.append("%s=%d" % [k, int(Probe.counts.get(k, 0))])
 	print("  " + " | ".join(parts))
 
 # ── 逐隊月故事（同 seed inline run）──
