@@ -108,6 +108,7 @@ func _pl(p: Dictionary, keys: Array) -> void:
 func _print_team_stories(ticks: int) -> void:
 	print("\n───────── 逐隊月故事（同 seed inline run）─────────")
 	seed(SEED)
+	FactionAISystem._a2b_remote_tribute_payers.clear()   # ★R²:對齊 WarringHarness.run:119(A2b 貢賦 ledger 每 run 重置)——雙 run 防跨 run 殘留污染
 	var state := WorldState.new()
 	var runner := SimRunner.new()
 	var config: Dictionary = GameSetup.load_config(CONFIG_PATH)
