@@ -35,8 +35,74 @@ func _initialize() -> void:
 	# ── 逐隊月故事（同 seed inline run，QA 稽核用）──
 	_print_team_stories(ticks)
 
+	# ── ★T0 fed 隊 per-option util 明細（instrumented dump，定 economy 決策真 binding）──
+	_dump_peroption_util()
+
 	print("=== 和平經濟觀測床 DONE ===")
 	quit()
+
+# ★一次性 per-option util dump（純觀測零行為變零 RNG）：選 fed 隊 T0(runway=9999,material 缺)在幾個 decide tick，
+# 印 DecisionEngine.rank_scored 全 option util 排序（靜態 23 + goal frontier candidates）+ 標 winner
+# + goal candidate 分項(payoff/dev_coeff/discount，goal_resolver:354-360)——看哪項壓下 economy goal util。
+# 分項用 bed-side 重建（呼可 call 的 static GoalResolver._discount_rate/_estimate_delay_days + ctx），零 sim 改。
+func _dump_peroption_util() -> void:
+	print("\n───────── ★T0 fed 隊 per-option util 明細（economy 決策真 binding）─────────")
+	seed(SEED)
+	FactionAISystem._a2b_remote_tribute_payers.clear()
+	var state := WorldState.new()
+	var runner := SimRunner.new()
+	var config: Dictionary = GameSetup.load_config(CONFIG_PATH)
+	config["seed"] = SEED
+	GameSetup.setup(state, config)
+	var no_player := Vector2i(-1, -1)
+	var sample_ticks: Array = [500, 3600, 7200]   # 早/半月/月1（fed 隊穩態、material need 仍>0）
+	var si: int = 0
+	for tick in range(7201):
+		runner.advance_tick(state, no_player)
+		if state.encounter_active and state.encounter_tick > 800:
+			runner._encounter_system.resolve_encounter_end(state, "draw")
+		if si < sample_ticks.size() and (tick + 1) == int(sample_ticks[si]):
+			_dump_t0_at(state, tick + 1)
+			si += 1
+
+func _dump_t0_at(state: WorldState, tick: int) -> void:
+	var t0: TeamData = state.teams.get(0)
+	if t0 == null:
+		print("  tick %d: T0 死/併" % tick); return
+	var ctx: DecisionContext = DecisionContext.gather(state, t0)
+	var scored: Array = DecisionEngine.rank_scored(state, t0)
+	var lv: Dictionary = TradeValuation.leader_vals(state, t0)
+	var need_mat: float = NeedOracle.need_keep(state, t0, "material", lv)
+	print("  === tick %d T0[%s] task=%s food=%.0f mat=%.0f coin=%.0f runway=%.1f food_days=%.2f need_mat=%.0f ===" % [
+		tick, _terr(state, t0), t0.current_task, float(t0.resources.get("food", 0)),
+		float(t0.resources.get("material", 0)), float(t0.resources.get("coin", 0)),
+		t0.food_runway, ctx.food_days, need_mat])
+	# 全 option util 排序（標 winner + static/goal）
+	for i in range(scored.size()):
+		var e: Dictionary = scored[i]
+		var tag: String = "[goal]  " if e.has("cand") else "[static]"
+		var mark: String = "  <=WIN" if i == 0 else ""
+		print("    %s u=%+.4f  %s%s" % [tag, float(e["u"]), String(e["opt"]), mark])
+	# goal candidate 分項（哪項壓 economy util）
+	var dev_coeff: float = clampf(ctx.food_days / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
+	var rate: float = GoalResolver._discount_rate(ctx)
+	for e in scored:
+		if not e.has("cand"):
+			continue
+		var cand: Dictionary = e["cand"]
+		var delay: float = GoalResolver._estimate_delay_days(t0, cand.get("to_task", {}))
+		var discount: float = 1.0 / (1.0 + rate * maxf(delay, 0.0))
+		var denom: float = dev_coeff * discount
+		var u: float = float(e["u"])
+		var clamped: bool = u >= GoalResolver.GOAL_UTIL_CAP - 0.0001
+		var implied_payoff: float = (u / denom) if denom > 0.0 else -1.0
+		print("      分項 [%s]: util=%.4f = payoff≈%.3f × dev_coeff=%.3f × discount=%.3f (rate=%.3f delay=%.1fd) cap=%.2f%s" % [
+			String(e["opt"]), u, implied_payoff, dev_coeff, discount, rate, delay,
+			GoalResolver.GOAL_UTIL_CAP, "  ★CLAMPED(payoff≥推算)" if clamped else ""])
+
+func _terr(state: WorldState, t: TeamData) -> String:
+	var tile: HexTileData = state.world.tiles.get(t.tile_pos.x * 1000 + t.tile_pos.y)
+	return tile.terrain if tile != null else "?"
 
 # ── t0 fixture-liveness（機械防死 fixture）──
 func _liveness_ok() -> bool:
