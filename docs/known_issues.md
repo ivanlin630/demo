@@ -998,3 +998,11 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
 
 ### ⏳convoy 協調 live-scan perf（2026-07-31，flow-fix follow-up，非 blocker）
 SLICE A flow-fix（convoy 協調散未填單）用 **live-scan in-flight guard**（`_deliver_candidates` 每次現掃 `state.teams` active convoy porters 聚合 per-order 在途認領）——correctness 對（結構免疫 registry 漏清幽靈認領，reviewer 鎖）+ flow measured 45→153=80%，**但 perf 成本真**：warring 49+ 隊每 cadence 呼 → O(teams×convoys)/call → single-seed 6mo warring >133min（首輪 GODOT_TIMEOUT=8000s 被殺、加大 28000s）。**follow-up 優化**：cache in-flight 認領 **per-cadence 算一次**（非 per-candidate per-team 重掃）→ 攤平 O(teams²×convoys)。非本輪 blocker（correctness/非凍優先驗）。連 [[reference_hob_perf_protocol]]。
+
+### ⏳warring O(N²) per-tick + 世界膨脹 130+ 超目標 50（2026-08-01 measurer 附帶發現，後-logistics backlog，設計 gated）
+measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms → day90 137隊 516ms（隊 2 倍、成本 11 倍）。★**非 convoy code**（convoy 是本輪 flow-fix、live-scan 另記上方 perf follow-up）——是**既有 decision/diplomacy/market 每 tick 掃全隊名冊**。世界**自然膨脹 130+ 隊、遠超 [[project_world_simulator]] memory 目標 ~50**。
+- **★不擋 flow-fix merge**（既有架構特性、非本輪 code）。**非緊急、非 fork 現在。**
+- **★reframe（blueprint=game-design owner 定）**：perf urgency **gated on 設計問題**——世界該 **~50 legible factions** 還是 **130+**？
+  - 若 **~50 才對** → 膨脹 130+ 本身是**設計 issue**（缺 consolidation 壓力）→ 修那個**順帶解 perf**（隊少）+ legibility 升。blueprint 傾向此（避碎片化）但待 game-design 評估。
+  - 若 **130+ 是 target** → O(N²) 是真 gameplay perf 問題、要**優化 architecture**（每 tick 全隊掃 → 空間 index/增量/cadence 攤平）。
+- **分流序**：①logistics arc（flow-fix merge → SLICE B/C）優先不動 ②perf/team-count = 後-logistics backlog（blueprint 先定 50 vs 130+ 設計、systems 再評 O(N²) architecture 可修否/成本）。連 [[reference_hob_perf_protocol]]。
