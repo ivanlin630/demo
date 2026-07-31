@@ -755,7 +755,11 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 			if _market_visitor_buy(state, visitor, owner, tile, oid, res, rem, commerce, owner_lv):
 				dealt = true
 		elif kind == "buy":
-			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv):
+			# ★後勤 SLICE A refine：convoy porter DELIVER → 傳 cargo[res] 當 deliver_cargo（賣 full cargo 繞 reserve）；normal 傳 -1。
+			var dc: float = -1.0
+			if visitor.task_extra_data.has("convoy_phase"):
+				dc = float(visitor.task_extra_data.get("cargo", {}).get(res, -1.0))
+			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv, dc):
 				dealt = true
 	if not saw_live_order:
 		Probe.bump("trade.market_bail.no_board_order")   # 板上無活單（29 bail 因可觀測）
@@ -804,17 +808,23 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 
 # 訪客賣：向 owner buy 單賣 → 貨入 public_storage、owner.coin → visitor.coin（套利閉合,coin 雙向）。
 # owner 無 coin → 買不成（連 coin 循環風險）。SURVIVAL 訪客不甩活命糧（surplus 已扣 reserve floor）。
+# ★deliver_cargo: >=0 = convoy DELIVER（sellable=cargo 待交付、繞 porter reserve；cargo 語意非 holding，非 scripted）；
+#   <0 = normal team sell（sellable=holding−reserve 既有不變，sim_runner:380 caller 回歸）。
 func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
-		oid: int, res: String, order_rem: int, owner_lv: Dictionary) -> bool:
+		oid: int, res: String, order_rem: int, owner_lv: Dictionary, deliver_cargo: float = -1.0) -> bool:
 	if owner == null: Probe.bump("trade.market_bail.sell_ownerless"); return false   # 無主 outpost 無 coin 收購
 	var ocoin: float = float(owner.resources.get("coin", 0))
 	if ocoin <= 0.0: Probe.bump("trade.market_bail.sell_owner_no_coin"); return false
-	var surplus: float = maxf(ResourceSystem.effective_holding(state, visitor, res)
-		- TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state), 0.0)
-	if surplus <= 0.0: Probe.bump("trade.market_bail.sell_no_surplus"); return false
+	var sellable: float
+	if deliver_cargo >= 0.0:
+		sellable = maxf(minf(deliver_cargo, float(visitor.resources.get(res, 0))), 0.0)   # convoy:賣 cargo 待交付（繞 reserve；cap 實有防超賣）
+	else:
+		sellable = maxf(ResourceSystem.effective_holding(state, visitor, res)
+			- TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state), 0.0)
+	if sellable <= 0.0: Probe.bump("trade.market_bail.sell_no_surplus"); return false
 	var bid: float = TradeValuation.local_value(owner, res, state)
 	if bid <= 0.0: Probe.bump("trade.market_bail.sell_no_price"); return false
-	var qty: int = int(minf(minf(float(order_rem), surplus), ocoin / bid))
+	var qty: int = int(minf(minf(float(order_rem), sellable), ocoin / bid))
 	if qty <= 0:
 		if ocoin / bid < 1.0: Probe.bump("trade.market_bail.sell_owner_cant_afford")
 		else: Probe.bump("trade.market_bail.sell_zero_qty")

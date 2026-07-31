@@ -12,6 +12,7 @@ func _initialize() -> void:
 	_test_cargo_conservation_excess_return()
 	_test_deliver_candidate_generated()
 	_test_no_deliver_when_no_surplus()
+	_test_deliver_cargo_sells_capped_conserving()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -82,6 +83,32 @@ func _test_no_deliver_when_no_surplus() -> void:
 		_ok("無 surplus(material=2)→無 deliver_material candidate(不噪音派空車)")
 	else:
 		_bad("無 surplus 卻生 deliver candidate(空車)")
+
+# ── refine：deliver_cargo 路賣 full cargo（繞 reserve）+ cap 到實有(守恆,不超賣)──
+func _test_deliver_cargo_sells_capped_conserving() -> void:
+	# porter material=50；owner buy material×100 + coin 充；deliver_cargo=200(>holding)→cap 到 50、守恆。
+	var state := WorldState.new()
+	var porter := TeamData.new(); porter.team_id = 5
+	ResourceBank.set_amt(porter, "material", 50.0, "t")
+	state.teams[5] = porter
+	var owner := TeamData.new(); owner.team_id = 1; owner.tile_pos = Vector2i(5, 5)
+	ResourceBank.set_amt(owner, "coin", 100000.0, "t")
+	owner.active_orders = [{"order_id": 42, "res": "material", "kind": "buy", "qty_remaining": 100}]
+	state.teams[1] = owner
+	var tile := HexTileData.new(); tile.tile_pos = Vector2i(5, 5); tile.outpost_owner = 1; tile.outpost_level = 1
+	tile.resource_cap["material"] = 100000.0
+	tile.market_orders = [{"order_id": 42, "res": "material", "kind": "buy", "qty_remaining": 100}]
+	state.world.tiles[5005] = tile
+	var pmat0: float = float(porter.resources.get("material", 0))
+	var gmat0: float = float(tile.public_storage.get("material", 0))
+	var ok: bool = InteractionSystem.new()._market_visitor_sell(state, porter, owner, tile, 42, "material", 100, {}, 200.0)
+	var sold: float = pmat0 - float(porter.resources.get("material", 0))
+	var deposited: float = float(tile.public_storage.get("material", 0)) - gmat0
+	# deliver_cargo=200>holding 50 → 賣≤50(cap 實有,不超賣);守恆:porter 減 == tile granary 增
+	if ok and sold > 0.0 and sold <= 50.0 + 0.001 and abs(sold - deposited) < 0.001:
+		_ok("deliver_cargo 賣 full cargo cap 實有:sold=%.0f(≤50)、porter−==granary+ 守恆" % sold)
+	else:
+		_bad("deliver_cargo 賣/守恆破:ok=%s sold=%.1f deposited=%.1f" % [str(ok), sold, deposited])
 
 # 建賣方 state：team0 material=X + team_known 有 buy material 單@(5,5) origin_team=1。
 func _mk_seller_state(mat: float) -> Array:
