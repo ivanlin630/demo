@@ -13,6 +13,7 @@ func _initialize() -> void:
 	_test_deliver_candidate_generated()
 	_test_no_deliver_when_no_surplus()
 	_test_deliver_cargo_sells_capped_conserving()
+	_test_inflight_claim_spreads_to_unfilled_order()
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -109,6 +110,38 @@ func _test_deliver_cargo_sells_capped_conserving() -> void:
 		_ok("deliver_cargo 賣 full cargo cap 實有:sold=%.0f(≤50)、porter−==granary+ 守恆" % sold)
 	else:
 		_bad("deliver_cargo 賣/守恆破:ok=%s sold=%.1f deposited=%.1f" % [str(ok), sold, deposited])
+
+# ── flow-fix：in-flight LIVE-SCAN 認領滿的單被跳過，deliver candidate 散到未填單 ──
+func _test_inflight_claim_spreads_to_unfilled_order() -> void:
+	# seller material=400；兩 buy material 單:X@(5,5) qty=64、Y@(7,7) qty=64。
+	# 一在途 convoy porter 認領 X（order_id=X, cargo_qty=64=填滿）→ candidate 應散到 Y（非再堆 X）。
+	var setup: Array = _mk_seller_state(400.0)   # team_known 已含 X@(5,5) order_id=42
+	var state: WorldState = setup[0]; var team: TeamData = setup[1]
+	# 加第二買單 Y@(7,7) order_id=43
+	var msgY := MessageData.new()
+	msgY.type = "order_buy"
+	msgY.params = {"res": "material", "qty": 64, "origin_team": 2,
+		"origin_pos": Vector2i(7, 7), "order_id": 43}
+	state.team_known[0].append(msgY)
+	# 在途 convoy porter 認領 X（order_id=42, cargo_qty=64 填滿 X）
+	var porter := TeamData.new(); porter.team_id = 99; porter.parent_team_id = 0
+	porter.current_task = TeamData.TASK_CONVOY
+	porter.task_extra_data = {"convoy_phase": "OUTBOUND", "cargo_res": "material",
+		"cargo_qty": 64.0, "order_id": 42}
+	state.teams[99] = porter
+	var ctx: DecisionContext = DecisionContext.gather(state, team)
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var cands: Array = GoalResolver._deliver_candidates(state, team, ctx, lv)
+	# X(42) 被在途認領滿(eff_rem=64−64=0)→跳;candidate 應 target Y@(7,7)
+	var tgt := Vector2i(-999, -999); var toid := -1
+	for c in cands:
+		if String(c.get("label", "")).begins_with("deliver_material"):
+			tgt = c.get("to_task", {}).get("target", Vector2i(-999, -999))
+			toid = int(c.get("to_task", {}).get("order_id", -1))
+	if tgt == Vector2i(7, 7) and toid == 43:
+		_ok("in-flight 認領滿的 X(42) 跳過 → candidate 散到未填 Y@(7,7) order 43（LIVE-SCAN 散單）")
+	else:
+		_bad("未散到未填單:target=%s oid=%d（應 (7,7)/43）" % [str(tgt), toid])
 
 # 建賣方 state：team0 material=X + team_known 有 buy material 單@(5,5) origin_team=1。
 func _mk_seller_state(mat: float) -> Array:
