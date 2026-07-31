@@ -105,6 +105,7 @@
 推論：
 - 龜縮世界（全員防衛、無野心征服者、野心階梯頂端從不上演）= **fail this bar**（不可信 + 無聊），即使技術無 bug。
 - **反面校正（2026-07-05）**：**雪球／一統 ≠ fail**。單一勢力吞全圖是「容易的一章」非結局，合「軍事易得，正統難守，傳承更難」——後續動盪由**正統／繼承爭位／叛亂／過度擴張崩解／天命失**製造（4/5/6/7 維度），**不靠壓征服率防壟斷**。**唯一真 fail 是「凍死」（啥都不發生、無起落）**，非「某方贏太多」。健康 bar = **有動有起落**，不論收斂到幾個勢力。
+- **★規模分布校正（2026-08-01，用戶定）：活的世界要「有大有小」——健康的權力規模分布（少數大勢力＋一些中的＋很多小的）且會流動（小長成大、大衰落分裂、弱被強吞）。** 這是「有動有起落」的規模維度。**反面 fail-mode（實測 2026-08-01 發現）：世界退化成「全塌均一小團」**（6mo warring 實測 avg 4.88→2.9 人/隊、133 隊全 ~3 人、無大團浮現）＝**碎片化 fail**——只出不進（子隊派遣/紮營高頻生小團）、只碎不併（整併機制在但湧現無效、長不出大的）。**「有大有小的活分布」是 bar，「全均一小」跟「凍死」一樣是 fail。**（勢力規模動態/兼併有效性 = backlog arc；先量真因再開藥，見 handback 2026-08-01。）
 - 玩家錨 C（資訊不對稱崛起）= 進入「本就活著的世界」的**鏡頭/參與者**，**非世界存在的理由**。先有好沙盒，玩家才是好鏡頭。
 - 量測導向：believability 不靠單元測達標，靠「活世界自己跑出該有的戲」（戰國 seed 類驗證床）。
 
@@ -157,6 +158,13 @@
 > v1（上）定「感知→腦→行為、引擎=唯一的秤」的**骨架**，但把「慾望」當人格驅動的既有物。v2 **深化「慾望」與「現實」到底是什麼**，並補上**承諾（長期）**與**內部政治（③）**。同 altitude：**模型／方向，非機制 spec**；各項怎麼算＝系統＋實測。血證見本次 session（Team14 thrash 餓死）。**驗收尺＝故事性判官**（QA 第五職，`04_qa.md`；motive→action→outcome 鏈完整）。
 
 **一句話**：懂價值 = **動態看清現實、守得住慾望、跨線才重估、等現實開窗才動**。Team14 缺整條 → 抖死。
+
+#### ★ RNG 判準 3 案 + 有機世界性格（與用戶成形 2026-07-17）
+決策路徑上的 RNG 分三案（constitution_gate triage 用）：
+1. **純骰替決策（無人格）** → **de-patch**（骰替思考＝壞;交人格/情境 util）。
+2. **世界不確定 outcome RNG** → **legit**（訊息到不到、隨機事件、event-ID、遭遇誰＝非決策,世界的隨機）。
+3. **人格加權機率決策** → **legit-IF-陡 + framework-routed + seeded**：性格/情境主宰**清楚案例**（推兩端，真忠 2% 背叛/真奸 95%），**骰只斷真難分的中間**。平骰（性格不影響機率）＝太運氣 → **陡化（tuning）非 de-patch**。
+- **★世界性格定調（用戶定 2026-07-17）：有機非鐘錶。** 性格是**傾向（機率）**、擲骰實現,但**曲線陡**→清楚案例註定（結果掙來的,不太運氣）、天人交戰的才不可測（有機戲）。同性格隊多數一致、只有卡界線的才分歧＝變化不靠銅板靠性格+處境+真兩難。roguelike 本色（DF/Kenshi/M&B）。seeded → determinism/byte-identical 測試不破。
 
 **1. 慾望不是人格，是「感知 × 比較」比出來的落差**
 - 人格**不是**慾望本身，是**比較用的尺**（我在意哪種落差）。慾望是關係性的：**看見+比較才生慾望**。看不到富鄰居（感知，走 belief）→ 再貪也不生「要那筆財」的慾望。
@@ -217,6 +225,7 @@
 - **★★用統一框架式做（用戶定 2026-07-15，接同一 arc 哲學）**：發展維度該像**決策一樣統一**——**一個統一「維度 registry」，每維由人格秤**（野心/貪婪→經濟、好戰→軍事、慎重→建設），隊追人格加權最高維。**加新維度＝registry 加 entry + 人格映射，不是各寫死一個系統。** 同 DecisionEngine option 一套、同 [[域專判斷器邊界原則]] 精神（穿人格秤非硬寫）。
 - **量測欄位（怎麼合成）**：**資源 / 錢 / 據點 / 人力**（4 個 measurables）——糧食＝門檻（沒糧免談），之上這 4 維體現發展度。
 - **★人格化多路（核心）**：**隊按人格走不同發展路**——**商隊追財（經濟：資源/錢）、軍閥追武（軍事：人力/戰力）、工匠追建設（據點/基建）**。同樣「食安之後」，不同人格追不同維度＝**多元文明類型的戲**（非單一「爬同一階梯」）。
+- **★★archetype = 湧現描述非硬類別（用戶重申 2026-07-23，憲法執行）**：商隊/軍閥/工匠**不是硬需求、不是被分到的盒子**——核心是**依人格自由發展、不設限**。archetype 是「一個人格驅動的隊最後長成什麼樣」的**事後描述**，非「你屬這類只能做這類」的規定。**∴ 人格 WEIGH 行為傾向、不 GATE 可用選項**——和平領袖掠奪 utility 趨近 0（幾乎不做，但情境夠 compelling 仍可、可被 utility 翻盤），非一道硬牆。差異化強度隨你調權重，但**不准變硬類別**。**★決策上任何硬 persona-gate（如 `AmbitionLadder` 擴張限 FORCE archetype、militancy 硬門檻、`persona>常數` OR-閘）= 補丁 = 違憲**（沙盒憲法「utility 餵 utility 非 scripted」的反面），一律 de-patch 成 soft 權重，**無 coherence 例外**（「這閘 personality-appropriate」是 rationalization，硬閘就是硬閘）。**邊界**：結構約束（outpost-type/terrain 限制）≠ 人格閘——那是**世界物理**（決策上物理能不能），留；憲法管的是**決策邏輯**（隊怎麼選），那裡不准 scripted 硬閘。結構稽核 = 憲法合規掃描（抓 scripted 決策閘，`constitution_gate.gd` 抓 scripted task 指派的姊妹）。
 - **發展度驅動**：rung 爬升 / prosperity-prey 判（誰值得征服＝誰發展高）/ AI 食安後追什麼（人格定）。
 - **★連經濟通縮**：財富（錢）是發展一維，但發現 **coin 通縮排乾**（薪水 sink>賣貨 source，交易池乾涸）→ 經濟這維目前是**壞的**。∴ **經濟通縮修 + 發展模型多維化＝同一「經濟/發展 arc」**（coin census 找錢在哪＝第一塊實據）。世界現況＝「吃得飽的求生部落爬薄階梯」，目標＝「人格化發展的多元文明」。
 
@@ -280,6 +289,8 @@
     - **merge 裁（2026-07-16）**：觀測閘綠即 merge（框架 correct+safe+主目標達成＝強證,不卡 emergence）,誠實標「供給破+surplus,人格分化 mechanism-present 待 multi-seed」。
     - **emergence 定案（multi-seed 2026-07-16）**：**好戰→軍事真 emergence 強坐實（Δ+0.36）**;貪婪→工坊/慎重→農**不顯＝need-first 設計的正確後果非 bug**（farming/workshop 由求生+deficit 主導,人格是 texture;食安不因人格打折）。**接受 by-design,不 tune 人格權重**（盲 tune 打架 need-correctness 傷供給側成功）。**願景訂正:人格化多路＝人格→archetype→目標→discretionary,非平坦 trait→設施映射;「工坊=貪婪」是錯映射該除。** 商業/定居的濃差異＝deal 側 arc 長出（為賣而產）。
   - **★deal 側牆＝死法②（下個 arc）**：供給「量」有了（18x goods）但**流通到 visitor 隨身可交易貨未打通**（sell_no_surplus 仍最大 bail）＝成交牆同款。經濟全景:**水管通（商業）+ 水有了（供給）→ 但水流到買家（deal-flow）仍塞**。下個 arc。
+  - **★★貧困陷阱＝兩把鎖（food + coin urgency）鎖住建設層（measurer §④b 3 隊坐實 2026-07-23）**：追武器坊建造不成，一路挖到 afford 根＝**常駐求生高壓的隊會賣光非求生資產換食/coin，structurally 湊不到投資本**。機制:`reserve_factor=0.6+(hoard-0.5)×0.5-urgency×0.4`，`urgency=max(food_urg, coin_urg)` 常駐 0.72-0.98 → factor 壓到 0.25-0.29 → material 賣到 reserve 25-29 → 永遠囤不到建造門檻（105）→ 蓋不出**原本能解它壓的設施** → 永困。**設計自洽的『貧困陷阱』非 bug**。**★關鍵訂正（data 坐實，非單一逃生閥）：這是兩把鎖**——`urgency=max(food_urg, coin_urg)`，食安修只解 food 那把；**coin_urg 常駐 0.8-0.97（3 隊 coin 全極低）＝很可能是 binding 那把**，光 coin_urg≈0.8 就把 factor 壓到 0.28（正中觀測）→ **食安修單獨後 urgency 仍=coin_urg 0.8 → afford 仍鎖**。∴**軍設施 afford 要 food AND coin 兩鎖都解**；coin 鎖＝既有 coin poverty（掠奪 coin→anon_treasury 不流 team.coin，v2b defer）從「buy 錢包」升格成「貧困陷阱第 2 鎖」。∴**食安是建設層前置閥之一非唯一**；afford/cost/cap 都是下游症狀，不獨立修（cost70 balance 值 keep=銀行，兩鎖解後才生效）。連結 [[means-end]]:前瞻買料 target 是拍死常數（cap 100）非由建造實際需求推導＝決策模型缺「為目標湊足所需」的缺口，facility-build keystone 頭號 exhibit。**★診斷史血證**:此線靜態推理三次全錯（117 框架→persona 1.13→實測 0.25），唯 measure 結案＝涉「隊會不會累積到某量」的判斷靜態不可信（動態 sell/urgency 沖銷），必實測。
+  - **★★material = 開採/地理資源非耕作資源（用戶定 2026-07-24，脫貧真脊椎的 world-model 裁決）**：三腿（reserve/coin/hold）修完 afford 仍 0%——patch-gate-first 證 inflow 無非法閘，真 binding = **aggregate material SUPPLY + 地理 food-terrain≠material-terrain 錯位**（隊為食定居 plains[食8/材0.5]被斷離 forest[材12]；material 只能採不能造[無 recipe out:material]、被所有 recipe 吃）。**★裁決 = 地理張力是 intended feature（非 bug、不 flatten）**：food vs material 走**兩種不同經濟邏輯**——**food=耕作**（原地改良、farming 設施 `×(1+farming_level×0.5)`、作物**季節級快再生** → 改良**永續**產量 coherent）；**material=開採**（樹**年代級慢生** → **不能像耕作那樣永續增產**）。**★關鍵區別（用戶 2026-07-24）：育林/種樹增產不 coherent（樹慢長不出來），但『伐木場=加快開採』coherent——它不種樹，把現有的樹砍更快。** ∴ farming＝永續耕作放大器 vs 伐木場＝**開採加速器**。**★核心框架 = 賽跑（用戶定 2026-07-24，非個人 boom-bust 取捨）：forest 材料是有限存量，『誰先砍完誰優勢大』**——誰先搶到 forest、砍得快、清完，誰把那筆材料收進口袋 → 發展優勢滾雪球；永續採贏不了清伐者（別人直接清光）→ 誘因永遠是衝/搶/快砍。**★機制＝現行的就夠（用戶 2026-07-24 核對坐實，非新機制）**：`regenerate_tiles:93-97` material regen＝**additive +12/天往 `resource_cap` 補（慢慢長、非瞬補、cap-bound）**、harvest 扣池（`_collect_from_tile` current−gain）→ **可耗竭池 + 慢回 + cap 全已在**。∴只需加兩樣：①**森林初始材料庫存高一點點**（forest tile 開局材料近一個高 `resource_cap`＝老熟林大獎，world-gen 初始值非改 regen 機制）②**伐木場設施＝加快 material 開採速率**（forest-only，讓「砍得快」變能贏的選項）。**regen 機制不動（已是慢慢長）。** **★唯一 measure＝tune 數字非改機制**：現行 +12/天夠不夠慢讓清伐後先手優勢維持夠久（賽跑尖銳）、還是太快幾天長回（先手不夠）→ measure 後微調 regen 數字/初始庫存/伐木場 boost（**別預調，先量**）。**不加育林（不 coherent）。** ∴ forest 隊＝材料生產者（搶砍+出口），plains 隊取得 material 靠**控產地（擴張搶 forest tile）+ 貿易 + 遷徙**＝取得閥。**★選擇的後果（用戶明選）：材料稀缺真實、發展是『競爭性』非『普世』**——能控/搶砍 forest/買得到的隊才發展，控不到=發展不起，**地理遊戲核心張力非 bug**（搶 forest tile 衝突 + 材料貿易 + forest 材料國↔plains 農業國互賴 + 先手滾雪球）。**★snowball 平衡待盯**：先手優勢別變死局（「先手必勝、遊戲結束」），靠既有 prosperity-prey 自我修正（滾大的富隊→眾矢之的→崛起與傾覆戲）+ measure 盯，過火再 tune。ore→material 製造（選項 c）用戶未選=暫緩（未來 mountain-archetype 深度可回訪，別繞地理張力）。
 
 ### ★★ 統一路線圖：收散亂 oracle（結構稽核 2026-07-16，用戶定「照路線架」）
 **核心判讀：DecisionEngine 統一是「半成品」**——引擎存在（23 option,已吸收 threat/survival/ambition）,但引擎外並存多條 dispatch 路 + 多份各算各的 need/threat/估值。`faction_ai_system.gd`（3781 行）是大雜燴載體。**不是從零建,是把散在裡面的東西抽出來收成統一思考驅動 oracle。**
@@ -294,14 +305,80 @@
 
 **優先序（用戶定「照路線架」）：**
 1. **統一 need oracle（B1/B4）＝第一塊**：`NeedHierarchy` 升成全域 need 源。need＝自用（消耗品,消耗率×人格buffer 推導）+ 供應鏈（下游生產傳導）+ 貿易（全資源餘量,市場需求+致富+商隊可載,綁 deal 側）。**一石三鳥：解經濟（生產/商業共讀一個 need,不打架）+ 拆最大打架種子（7 套餓）+ 示範散亂→單一 oracle 模式。** 含：停產接需求（個別設施）、溢出落地守恆（不蒸發）、消耗品也可貿易（非互斥桶,貿易對全資源）。
-2. **收斂三重 dispatch**：所有 team type 威脅/求生走引擎 rank,手派路退成 release-scaffolding。
-3. **統一威脅 oracle**：ThreatAssessment 單一源,消滅 `_threat_recent`/`_max_threat`/raw 掃描重複。
+   - **★兩軸 sharpen（2026-07-16）**：「7 套餓」兩軸混——**quantity 軸**（該留/產/賣多少）＝生產/商業打架根,**Arc 1 收斂**;**urgency 軸**（離餓幾天→survival 排序,DESPERATION/WARNING 天閾）＝NeedHierarchy L_SURVIVAL 已做,**順延 Arc 5 死常數人格化**。
+   - **★★Arc 1 APPROVED + merged（藍圖批 2026-07-16）**：4 項乾淨證據全綠——①need 單一源（S6 遷 facility_deficit,**byte-identical 純 refactor**＝本該單一源現真讀）②goods 死鎖解（有貨+活 sell 單/公庫 demand 滿凍結非堆）③停產 52.78+溢出守恆④crossover 100%/守恆 PASS/starve 持平。**兩坑批前修**（mis-cite 矛盾率誤指標 / facility_deficit 殘各算,嚴查兩度擋假 clean）。**終端消耗 self-use 推導＝known-deferred（戰耗機制建了補）;矛盾率＝死法② 指標非 Arc 1。**
+   - **★Arc 1 立的模式（Arc 2-3 照做）**：散亂→單一 oracle;**byte-identical refactor 驗**（遷了不變＝無回歸最強證據）;乾淨全量對指標+可溯源;嚴查（靜態查殘+measurer 對指標）擋假 clean。
+2. ~~**收斂三重 dispatch**~~ **降級低優先（R① reframe 2026-07-16）**：4 個 `rank_*` 經 R① 查證是**同 applicable() 池 + 同 terms 的 filtered subset,非繞過引擎**——稽核「三重 dispatch = 繞過引擎結構病」是**過度宣稱,無 bypass 可拆**。∴ 收斂只是 cosmetic cleanup（非 de-patch 打架種子）→ 降級低優先（survival/threat 語意可併的開放 Q 併此）。**★threat oracle 上移為 Arc 2。**
+3. **統一威脅 oracle（★上移為 Arc 2，2026-07-16）**：ThreatAssessment 單一源,消滅 `_threat_recent`/`_max_threat`/raw 掃描重複。**但前提（8 處各算/3 門檻 0.3-0.7 不一致）來自剛被 R① 打臉的稽核 → spec 前先 R① factcheck（8 處真各算還是同源 filtered?3 門檻真不一致?）驗實才做 oracle。稽核前提本 arc 一直被修正,不再假設。**
 4. **拆 `_threat_recent` 軍備閘**：征服者主動備戰（intent/人格驅動 deficit,非反應式）。
 5. **決策門檻死常數人格化**。
 6. **情緒系統**（emotion 收成與 need 平行的 term 供給層,非只 panic）。
 7. **內部政治 / 設施決策 / 俘虜**（中長期收成統一系統）。
 
 **HOW（架構怎麼實作、怎麼 migrate、切幾 arc）＝系統；藍圖鎖「單一 oracle、思考驅動、框架只留規則、可擴充」的 WHAT + 優先序。每大框過 R①（前提 factcheck,本 arc 已 7 次被獨立查證推翻）+ R②。**
+
+#### ★★大戰略校準：統一大半已完成 + 零殘留閘 = 框架硬驗收（2026-07-16）
+- **稽核「各算」系統性 over-count（R① 三次打臉）**：need→2 軸+僅 1 真 de-patch(facility_deficit,Arc 1 已修)、dispatch→已統一(cosmetic)、threat→已統一(ThreatAssessment 單源)。**「憲法溶解」統一工作早統一大半 → 散亂 oracle 統一不用 grind Arc 2-7,那些不是漏的閘。** ∴ **剩項(valuation/emotion/prisoner/死常數/內政)先 R①-verify 真缺否才做,別假設稽核。**
+- **★★用戶原則（2026-07-16）：只要剩一個非框架閘,模擬結果就變垃圾。** 整 arc 的垃圾結果正是隱藏閘（恆-hungry/執行鎖/`_threat_recent`）靜默汙染。∴ **框架驗收標準＝零殘留非框架閘,無「小可略過」取捨。**
+- **∴ 真工作重新校準**：不是統一散亂 oracle（大半已完成），是**殲滅每一個殘留非框架閘**（稽核 section A：`_threat_recent`/`_evaluate_threat` 門檻/tribute override/紮營獵食硬門檻/applicable DESPERATION 天閾/diplomatic RNG 閘… + exhaustive 補漏）。每個都是汙染源,全殲。
+- **★零殘留要機器證得出**：`constitution_gate.gd` 現只抓一閘型（禁引擎外 task 指派）→ 強化抓全閘型（硬門檻/override/continue/絕對閾/RNG 決策閘）→ **跑綠＝證零殘留 + 擋新閘。** 非人肉拍胸脯。
+- **框架「做好」＝兩硬條件綠**：①零殘留非框架閘（殲滅+constitution_gate 抓全閘型跑綠）②可擴充（加新系統乾淨,擴充性稽核證）。**兩條硬綠才談 behavior/經濟（用戶定序：框架先，行為後）。**
+- **★★god-view 後門＝殘留非框架閘的一種，屬「框架先」殲滅範圍（用戶戳「框架沒統一就看合理性」，藍圖認漂移 2026-07-18）**：god-view（讀真值繞過 belief）違感知鐵律＝汙染源，同 hidden-gate 家族。清單：`has_food_market` 掃全圖（`known_issues:35`）、**創世全知 `game_setup:569-578`**、near/far LOD 非中性。＝awareness/掃近隊 arc 的 belief-gate 部分（`line 577-585`）**是框架工作、非行為**。
+  - **∴ 改序（認錯先前 economy-first 漂移）**：**框架 god-view 殲滅（slice2 感知 + awareness belief-gate）先 → 零殘留閘綠 → 才 economy balance。** 先前把 economy 排 awareness 前＝把行為排框架前＝違「框架先」。
+  - **★硬理由（非只原則）**：`has_food_market` god-view **直接汙染 economy 決策**（隊全知所有市場位置）→ **28% doom / 貿易為何不流 在 god-view 髒基底上診斷不可信** → god-view 殲滅必須先於 economy 診斷。
+  - **economy arc 第一動作＝補丁閘優先查**（28% doom ＝殘留閘造的 or 真稀缺？）→ 不假設 balance 問題就 tune。屬「先量測+先查閘」非「先調參」。
+
+#### ★ threat-severity 行為意圖裁定（藍圖定 2026-07-17，threat-oracle 序3 收斂前置）
+**問題**：threat 收斂進統一 rank 需 severity-scaling（否則強威脅被貿易 1.3/野心 1.5 量級結構性壓過，現靠 filtered-hard 子集 gate 硬保 threat 奪 argmax＝非 util 量級＝seam#1 血證）。但「威脅越大→越戰 or 越逃」＝行為 WHAT，系統呈裁。
+
+**裁定：#3 人格分流 amplifier，且細化分兩支（超出系統框的加值）：**
+- **威脅嚴重度＝amplifier（把 threat 拉進全 pool 有真量級競秤），非固定方向**。方向由**人格 × 可勝性**決定，不寫死。合憲法（引擎秤人格，不替 NPC 定行為）＋孿生條（不在引擎壓某率）。
+- **備戰（defensive prep/arm）＝隨威脅普遍上升**——連謹慎/怯懦領袖被威脅也備戰（防禦＝低後悔對沖）。∴ **慎重在威脅下應「拉高備戰」非拉低**（現況 `terms.gd:176` 備戰不隨威脅變＝缺口）。人格調「幅度」非「方向」。
+- **迎戰（offensive confront）＝committal 支，人格 × 可勝性 gated**——`好戰高 AND 可勝（相對戰力）` 才隨威脅上升；否則 severity 導流到 **逃/求和**（敗北出路，膽量秤，連 [[絕境經濟]]）。現況 `:180` 迎戰隨威脅「下降」＝把「怯者/不可勝者不敢正面」錯編進**通用**公式（那是分支，非全體）。
+- **約束：severity＝感知威脅（belief，感知鐵律），非 god-view 真戰力**——虛張/偽裝必須有效（弱敵虛張嚇阻、強敵示弱誘攻）。threat-oracle 讀 `BeliefSystem.best_estimate` 不讀 `state.teams` 真值（連決策模型接線 §感知腳）。
+- **emergent cost 不設閘**：severity 驅動的過度軍事化→餓民→饑民流串＝合意湧現（自帶資源代價，承 line 361），不加上限補丁。
+
+**∴ threat util ＝ f(perceived_severity 拉量級) × 人格秤(好戰/膽量/求生) × 可勝性 → 分流備戰/迎戰/逃/求和。** 三支不同方向（備戰普遍升、迎戰 gated、逃/求和 outlet），非單一 monotone。
+
+**補裁（異質 R² HALT 揭 2 缺口，藍圖定 2026-07-17）：**
+- **① 可勝性＝慎重-加權 term，非硬 AND-gate（修上「好戰 AND 可勝」的洞）。** 異質審抓 `proud-doomed`（好戰高+慎重低+不可勝）落穿所有 outlet（迎戰 winnable-gate off / 求和被好戰抑 / FLEE 被高膽抑 / 備戰慎重-主導低）。修正：**謹慎的鷹（好戰高+慎重高）→不打不可勝之戰，導流備戰/求和；魯莽驕傲的鷹（好戰高+慎重低）→照打＝死戰 last-stand**（合意好戲：defiant 玉碎）。**設計不變量：severity 永遠找到 outlet，人格決定哪個——零 leader fall-through。** 可勝性 modulate 迎戰（給務實者），驕/魯莽 override 它（給死戰者）。
+- **② cap severity amplifier（util 量級），不 cap 下游後果。** 關鍵 WHY（非平衡取捨＝框架硬要求）：**uncapped amplifier ＝ 偽裝的硬閘**（threat 永遠碾 argmax、永不 trade）＝正是在 de-patch 的 `_threat_recent`/filtered-hard-gate。∴ **cap severity 是「零殘留閘」目標的必須**（bounded、saturating：強威脅可奪 argmax 但不無限碾平 trade/野心到零）。後果（militarize→餓民→饑民流串）不 cap＝真代價，資源系統扛（承上 emergent cost 不設閘）。cap 曲線的 saturation 速率可人格化（神經質者高估威脅）＝HOW-tuning。
+
+系統出 spec→R²（建議異質，核心 redirect）→impl。
+
+**★ 再補（S2 measure 揭 last-stand 沒落地，藍圖定 2026-07-17）：last-stand 走「窄人格閘」，非「全域高-severity boost 常數」。**
+- **證據**：狂徒（好戰0.95/慎重0.36/winnable0.03/severity1.06）選建設(1.33)非迎戰(0.465,第4),連 4 tick=我補裁① proud→死戰**沒實現**。
+- **假張力拆解**：系統憂「boost 迎戰贏建設 ↔ 不碾平 develop」互斥。**但 last-stand 只該在極窄角落 fire**（好戰高 × 慎重低 × 真不可勝 × 高 severity）→ defiance term 對絕大多數 leader（非狂徒）≈0 → **不可能碾平全體 trade**。系統把它想成全域 boost 才有張力；**gate 到 archetype，張力消失**。
+- **∴ 迎戰 util 對狂徒要「反轉可勝性依賴」**：常人 winnable 低→迎戰低（避戰）；狂徒 winnable 低→迎戰**高**（玉碎 defiance = 好戰×(1−慎重)×(1−winnable)×severity）。
+- **★框架約束（硬）**：此 defiance 係數綁**人格值**（第一家 NPC 判斷輸入），**不得引入全域 severity-boost 死常數**（框架清潔 arc 中加死常數=自我違憲）。若只能靠 tuned 全域常數做→flag,defer 到 behavior 期,別髒框架。
+- **驗收**：re-measure 證 狂徒→迎戰(last-stand fire) **且** trade 仍升(+165~266% 不回落) **且** cautious 仍避戰。三者齊才 merge S2。
+
+**★★ 收束（measure 打臉 → 藍圖吃下修正，2026-07-17）：last-stand DEFER，S2 取 b2 working 平衡版。**
+- **量測事實**：①照 narrow-gate 廢全域 boost → 傷 備戰/求和/FLEE（它們靠 boost 撐量級），repertoire 塌成迎戰獨大 + economy 惡化。②狂徒→迎戰 organic **UNCONFIRMED**（狂徒罕 + 出現多撞飢荒/低 severity，乾淨角落幾乎不發生）。
+- **藍圖認錯**：我把「severity amplifier（②要保的 capped 放大器）」誤當「全域 boost 死常數」→ 害系統廢掉它 → 破了②本身要的 threat 競秤。**全域 boost = ②的 capped 放大器，該保。**
+- **玉碎罕見 = 正確非 bug**：last stand 本質就是罕見 corner。為 organic 觀測不到的行為 degrade working 平衡 = 鑽牛角尖（違 measure-first）。
+- **∴ last-stand 原則保留（補裁①不撤），但 DEFER 到 behavior 期**——等狂徒-vs-真不可勝-高severity 真的發生夠多、觀測得到，再 tune。現在**不強塞不可觀測的角落**。
+- **全域 boost 框架判**：它是 legit capped 放大器（②，category 競秤 magnitude，非 pre-empt 人格）還是待人格化的殘留 flat 常數（b1 全 4 option 人格化 lift）？= 框架清潔期系統判，**不阻塞 S2**。若證它 pre-empt 人格 → 未來 de-patch slice（b1）；若只是 category magnitude → legit 留。
+- **S2 merge**：取 calibrate working 版（threat 有意義 0.5%→1.9-5.1% + cautious 分流對 + trade +165~266% + 世界健康），減 last-stand。
+
+**★★★ attrition accept 收回（premise 更正，藍圖 2026-07-18）：我 accept 的 +3x attrition 不是戰鬥、是餓死。**
+- **真相（長窗 watch）**：annihilation=0 兩 seed → attrition 根因 = **STARVATION 非 combat**。且非乾淨穩態：seed42 拉長 5 個月 pop 掉 34%、**15 隊餓死**（bleed）；只 seed1337 乾淨 9.2%。系統早先「attrition=真 engage 好戲」framing 未驗就斷 combat = 錯。
+- **我的判斷收回**：餓死 attrition ≠ 戰鬥好戲。那是**經濟餵不飽、世界萎縮**的失敗模式（正是那個 watch 要抓的 bleed）。我熱情「歡迎」建在錯前提上，撤。
+- **★重判準（餓死 attrition 該用這尺，非「戰鬥就歡迎」）**：分**自限代價** vs **失控死螺旋**。
+  - 可接受：過度軍事化 → 部分人餓 → **他們逃/搶/乞/投靠（絕境階梯 fire）** → 隊縮回、倖存者 OK ＝ 自限的侵略代價（合我 emergent cost 意圖）。
+  - **不可接受**：隊**被動餓死到滅**（15 隊死）＝ 絕境出路**沒 fire**（bug）或 economy 根本餵不飽（更大問題）。**「不設閘」是指代價機制不硬 cap，前提是代價自限；不是指「隨世界餓死到滅」。**
+  - ∴ 診斷關鍵問：**這些隊餓時有沒有先採絕境行動（逃/搶/乞/投靠），還是傻站著餓死？** 傻站著死 = 絕境經濟沒接好 = 真根，比 threat-oracle 大。
+- **★連 B（更大世界）：這是 B 的前置 blocker。** 50-100 隊世界**不能架在會把隊餓死的 economy 上**——放大規模＝放大餓死。B 第一關不只 profile O(N²)，是**世界能否 sustain N 隊不餓崩**。先清這個。
+- 系統正查 threat-oracle 是否推高飢荒（militarize 排擠覓食→餓死＝regression）。是→修 regression；世界固有→economy sustainability arc（B 前置）。
+- **★解決（藍圖判準命中，systems fix merged `31f9833c`，2026-07-18）**：根 = threat-oracle S3 把 threat @70 但 survival 落 @50 → survival 無法 preempt → 又餓又被威脅的隊做威脅反應非覓食 → **傻站餓死**（正是我判準的 bug：絕境出路沒 fire）。非「militarize 排擠」是**優先序倒置** regression。**fix：survival 復位 @PRIO_SURVIVAL 80**（階梯正典）。結果：seed42 餓死滅團 15→0、attrition 自限 2.78%（低於 pre-threat-oracle ~9%=survival 保序在統一路更 robust）、threat 黏性未損。**attrition 現=自限型（餓→逃/覓食 fire→隊縮回）= 我 acceptable 判準。**
+- **★B 第一關狀態**：**sampled 現規模（~25-50 隊）過**，非目標規模。**B 真第一關 = sustain 50-100 隊**（perf_scale world radius24/~100 隊）→ 下一步驗 scale sustain + O(N² profile 同一趟 + 多 seed + 確認世界仍 dynamic 非太靜。
+- **★★未真過（multi-seed 更正，2026-07-18）：survival @80 fix 非普適，B 第一關 residual root。** measurer multi-seed：seed4201 乾淨，但 **seed1337 仍（去灌水後）真 3 隊 no_forage 傻站死**（原報 7 隊含 4 隊 famine_days=0 誤計，QA 判準對）。
+  - **cause2（PRIO_COMBAT 鎖）被 QA 故事稽核推翻**：無一隊死於 literal 戰鬥（team19 combat_target=-1）。系統與我都猜錯、我還 elaborate 補丁閘框架＝白的（第 N 次症狀當機制）。
+  - **★真根 ①（measurer 精確 locate，非猜）：survival 保序優先序「散在多條 dispatch 路」不一致。** cause1 的 survival @80 只做 `_decide_unified:1553`，漏 `_evaluate_solo:1902`（solo 隊一律 @50）→ team19（非 unified/非 subteam）survival @50 壓不過 安頓@50 → 凍餓死。系統上輪「code 坐實 camp 豁免」也錯（team19 撞 `:3225 return` 根本不到 camp code）。
+  - **★WHAT：別 whack-a-mole 逐路補 @80。** 已 2 路（@80/@50），第 3 路可能再冒。**survival 優先序＝散落常數（正是統一 arc 的目標）→ 收成單一源**（survival-class 一律 PRIO_SURVIVAL，讀一處），才不會跨路分歧。**不變量：命運不看「走哪條 dispatch 路」**——solo/unified/subteam 的 survival 保序必須一致。統一後 detector 亦 trivial（一處可查 vs 掃跨路一致性）。
+  - **★cause2＝補丁閘（藍圖判）**：絕對 PRIO_COMBAT=100 鎖 → 餓死隊不能選逃/覓食 = 絕對門檻 pre-empt 膽量秤逃決策（[[feedback_patch_gate_first]]）。fix ≠ 換優先序數字（survival 101>combat 100 = whack-a-mole，且破「戰鬥中不能覓食」正解）。
+  - **★WHAT 意圖**：戰鬥 break-off/潰逃觸發**太窄**——`_mortal_flee_check` 只在 eff≤3（戰損近殲滅）fire，**只認戰損不認飢餓**。**該擴：餓到絕境的隊在戰鬥中也能潰逃求生（膽量秤，[[project_desperation_economy]] 絕境階梯延進戰鬥）。** 戰鬥仍高優先（鎖 legit），但餓死隊得有 desperation break-off option。HOW＝系統 trace exact 鎖點設計。
+- **★process 教訓（3 度過早宣勝）**：attrition=combat / fix=decisive / fix=universal 皆 measurer multi-seed 抓翻。**claim「X 修好」前先 multi-seed（含已知硬 seed 如 1337），非事後**。measurer multi-seed backstop 有效，但該前移。
 
 ### ★ full-HD 正典原則：命運不看玩家臉色（與用戶成形 2026-07-14；perf-caveated）
 
@@ -319,6 +396,13 @@
 - **★可玩天花板（1×=240tps，`89b22ad3` lod_perf_bed 坐實）**：**full-HD ≈ ~25 隊 / LOD ≈ ~40-45 隊**（15隊 full-HD=474tps、LOD=781；116隊 full-HD=18tps、LOD=25tps）。acceptance 可跑更大（慢可接受）。
 - **★O(N²) 是「50+ 硬前提，不分 regime」（LOD 救不了）**：LOD@116=25tps 也崩，far-cadence 攤銷只買 **1.42×**——**LOD 當不了 50+ stopgap**。∴ O(N²) faction_ai arc 的優先序**與 full-HD 決定解耦**（想要大世界不管哪個 regime 都得修它）。**反過來加固 full-HD 轉正典**：既然 scale 卡的是 O(N²) 非 regime，選 full-HD 只多付 1.42×（小），換 correctness（命運不看玩家臉色）值得。
 - **落地順序**：full-HD 現行規模先落（thrash-fix 在 full-HD judge）→ **gen 重校 slice**（含 breed/reactions 開機後的人口/凝聚動態，非只節奏；full-HD tick-time 已含 reaction/breed 成本）→ O(N²) arc 解鎖 50+ → LOD-as-fidelity-preserving-opt（真根修完、若還要更大規模才碰）。
+
+#### ★ O(N²) 掃描瘦身的 vision 約束（藍圖鎖 WHAT，2026-07-18；機制=系統 measure-first）
+真根：prey/threat 掃描迭代 **`team_discovered` 累積名單**（一旦發現永留）+ reachable 濾在迴圈**內** → 小圖每隊 discovered≈全隊 → O(N²)。修法方向＝**換迭代源**（掃「附近 + 顯著」有界集，非全累積名單）+ 地圖放大散開（密度不變）。**兩者並行才吃得到紅利**（大圖給「附近隊少」，換源才用得上）。
+- **★約束①：掃描用信念位置，不用真實位置。** 「誰在附近」由觀察者**自己的 belief store（belief_pos + staleness）+ 當下 vision** 定，非世界真座標。用真距離挑近隊＝god-view leak（違感知鐵律）。
+- **★約束②：不准砍掉記憶中的顯著威脅。** 掃描瘦身**只准砍「無關的陌生遠隊」，不准砍「記憶中重要的遠隊」**（世仇/大威脅/盟友遠也留，低頻評沒關係，但不能消失）。否則隊會忘了逼近的大敵＝壞 believability。
+- **★洞見：感知鐵律 ＝ O(N²) 修法同一約束。** 全知掃真座標既是 believability 罪也是 perf 罪；**感知-local 掃描同時治兩者**（只處理「我感知得到的」，而感知天生局部）。霧戰 = perf 局部性。
+- **機制不鎖（系統 measure-first）**：空間索引/salient 上限/cadence 待 profile O(N²) 熱點；**且先 audit `estimate_catch_up` 讀真值或信念（疑藏 god-view leak）**。現在硬鎖機制＝重犯「沒量就定案」。此節僅鎖 WHAT 約束，機制隨 O(N²) arc（B 前置 sustain 過後）設計。
 
 ### 決策模型接線現況（方向鎖了、線沒接完，2026-07-06 盤點）
 
@@ -348,7 +432,7 @@
 reverse-engineering arc 第二脊椎（faction「leader 零引擎＋5 平行權威」）逐條折入統一秤：
 - **A2b**（leader 隊戰術意圖）merged。
 - **A2c-1**（整併/consolidate）merged 2026-07-09（`c047241`）：舊 pre-gate `continue` bypass（可併隊直接跳過引擎、不被重評）→ 折成 rank_scored option「整併」競秤。整併現與攻擊/生產/貿易一起被秤，非繞過腦。
-- **教訓（記，免重犯）**：A2c-1 曾疑「fold＝世界變靜 regression」。經 **upgrade 實驗**（逼併回 320 vs 154→生存零改善，證 merge 對生存**無因果**）＋ **多 seed**（extinct.starve 方向不一致 1337:+3/42:−24/7:0＝seed-1337 幽靈）雙破 → 純 fold ship，survival-value 整案撤。**相關≠因果、單 seed≠真、先量再斷。**
+- **教訓**：A2c-1 fold 曾疑「變靜 regression」→ upgrade 實驗（生存零改善）+ 多 seed（方向不一致=seed-1337 幽靈）雙破 → 純 fold ship、survival-value 撤。**相關≠因果、單 seed≠真、先量再斷。**
 
 ### ★ 絕境經濟（設計方向，未鎖 spec，2026-07-09 與用戶成形）
 
@@ -359,6 +443,13 @@ A2c-1 揭 **merge/join food-blind**：整併/投靠選 absorber 只看 capacity/
   - **獨撐**：覓食硬撐（survival forage）
   - **變匪**：掠奪（絕境搶現有；職業搶需 loot util 人格化，見下）
   - → **絕境經濟 ≈ 把四條現有機制正確走引擎秤（非 bypass）＋ loot util 人格化**。人格塑選擇（驕者少乞多搶、義者施捨、貪者變匪）。乞討被拒/不足 → 升級投靠/變匪＝**絕望階梯**。
+- **★★絕望階梯「怎麼爬」intent 裁定（藍圖定 2026-07-18，code 揭階梯不會爬）**：measurer 坐實 `terms.gd` 絕境 option util **全與 famine_days 無關**（紮營=常數/乞食=常數/掠奪=看武裝/併入=看名聲），買糧觸底飽和 → **argmax 進危機就永久凍、失敗不升級**＝階梯有 rung 但不爬。裁定＝**與 threat-severity 同一結構（情境嚴重度放大、人格定方向）**：
+  - **① famine 深度＝amplifier（缺的那塊）**：food_days→0 時，整個絕境 category 的 urgency **隨飢餓深化上升**。這是讓階梯「爬」的引擎——util 隨絕境重排，非 static。
+  - **② 方向＝人格閘**（膽量/貪婪/榮譽/義氣/野心）：勇/貪/殘→**掠奪**、慎/榮→**乞討**、低野心/高求生→**投靠**、baseline→**覓食獨撐**。同 threat 的「severity 放大、人格定戰/逃」。
+  - **③ 失敗升級＝需失敗回饋（★原「不需計數器」被 QA raw trace 推翻，藍圖認錯 2026-07-18）**：坐实=**famine-amp 只等比 scale 不換序**（camp/beg/join 各 static 人格 × 同 `famine_severity` → 深餓三格同比升 → 相對序不變 → 鎖人格偏好格更死、永不換）。∴「更絕境 option 自動蓋過」**假**——amplifier 是「人格選格器」非「階梯攀爬器」。**修=通用 action-stall 失敗回饋**：committed 到某 survival option 達 N 天仍無 food relief → 降該格權 → 次人格偏好格贏。= 推廣既有 `task_start_tick` timeout idiom（SCOUT/FLEE/STATION）到 survival，非新機制。**守框架**：N 天門檻由人格（耐性）+ relief-state 驅動、非全域死常數；降權後由人格選次格（軍閥卡紮營→改掠奪；農夫卡乞→改投靠）。[[feedback_symptom_vs_root_retry]] 此處**支持**回饋（X 卡著沒 relief=「X 現在做不成」→換格，非盲重試）。
+  - **④ 無固定普適序**（駁系統選項 c 的固定 buy→loot→beg→join）：序本身**人格排**——驕傲軍閥「搶」在「乞」之前（寧搶不跪），怯懦農夫「乞/投靠」在「搶」之前。只有 baseline 物理序（覓食-自立恆在 < 買糧-需市場 < 社會/暴力-隨飢餓升）。
+  - **★框架約束**：amplifier 讀 `famine_days`（第三家情境）× 人格（第一家），**禁全域 ramp 死常數**（框架清潔 arc，塞死常數=自我違憲）。
+  - **★產出自限 attrition（我 acceptable 判準）**：每個 rung 都是**行動**（搶/乞/投靠/覓食）→ 解除或轉化飢餓（搶=得糧或戰死非餓死、投靠=被吸收、覓食=硬撐），**非被動站著餓死**。這正是餓死 attrition 從「傻站死」變「自限」的機制。
 - **投靠＝雙向引擎決定，非強制併（憲法一致，2026-07-09 與用戶成形）**：合不合併是**兩邊各自的思考結果**，非機制硬塞。現行 `_find_absorber` 挑 capacity/proximity＝食物盲、且單向硬併＝破憲法。
   - **弱隊 3 選 1**（引擎秤）：投靠**能養的**強者（有餘糧＋夠強，真求生）／獨撐覓食／變匪（絕境分岔）。無「該併就併」硬 gate。「一群饑民一起還是饑民」。
   - **強隊秤收不收**（多動機）：**擴軍收**（得人力/戰力＝現況腳）／**友好收**（同勢力/恩情＝記憶腳）／**拒收**。強者非垃圾桶。
@@ -492,6 +583,22 @@ A2c-1 揭 **merge/join food-blind**：整併/投靠選 absorber 只看 capacity/
 - **AI 深度**：逐步逼近完整（規劃/欺敵/記憶），節流閥四關。〔🟨 第一深化過〕
 - **統一架構**：矩陣逐格燒 + 強制閘守退化。〔🟨 旗艦格燒完、剩約 6 成〕
 - **per-tick 有界**：早晚期無延遲差＝硬不變量（世界大小全程有界；die-off spike 必收）。〔🟨 P0 加固、die-off 未收〕
+  - **★世界統一 fidelity=不容相機選贏家（用戶定 2026-07-18，「命運不看玩家臉色」信念層）**：規模 perf **不得**靠 near/far LOD 雙-fidelity（便宜遠/貴近）——雙 fidelity 必然非中性（近 player 隊多拿 regen/outpost/reactions→系統性變強＝相機選贏家，破沙盒 bar「觀測改被觀測物」）。**廢 LOD 雙-fidelity**；正典=全隊等值模擬。規模靠**空間有界互動（掃近隊：只 scan/評估感知鄰近隊，＝感知鐵律正解）+ belief/message 傳遠方資訊**，非降級遠隊。
+  - **★兩 channel（用戶戳出漏洞後補，2026-07-18）—— 遠方高危險不得隱形**：naive「只看半徑內」會讓遠方強敵進半徑前隱形＝盲區。修＝分兩路：**①掃近隊＝直接感知（空間、即時、精確）**＝O(N²) 成本所在，bound 這個省 perf；**②belief/情報網＝你知道的（近+遠、延遲、不確定、decay）**＝遠方危險經斥候/逃難者/商旅傳「大軍壓境」落進 belief，你對 belief 反應（備戰/結盟/逃）。非 god-view，是有霧降級情報，比現行瞬間精確 god-view 更真實。「近vs遠」非懸崖＝belief `uncertainty` 隨距離/時效 decay 的 confidence 梯度（模糊遠聞→派斥候；確認近敵→全動員）。
+  - **★硬約束（成敗前提）**：掃近隊**絕不能讓遠方高危險隊消失**→ 設計硬要求「危險必須經情報網傳到你，獨立於直接掃」。若 belief 只從直接掃填→bound 掃＝盲區＝方法破，得先建「危險會傳播」。**情報網夠不夠帶『遠方威脅擴張』awareness＝systems R① make-or-break 必驗前提**（belief/message/inquiry 骨架在，充分性未證）。
+  - **★決策考慮集 ≠ 當下視野（用戶再戳 2 案，2026-07-18）**：掃近隊只 bound「直接感知的**更新成本**」；**決策讀的是持久+顯著的 belief，非 raw 視野**。二精確化：
+    - **①持久（抗 flicker/隱蔽）**：看過一次→進 belief（last-seen + confidence 逐漸 decay）；隱蔽/閃現（這 tick 看到下 tick 沒）**不瞬間忘**，belief 撐著→續對「剛那有敵」反應。殺 flicker-thrash（看到→反應→沒看到→忘→再看→再反應 抖動）；決策由持久 belief 驅動非瞬時可見性（連跨線才換道反 thrash 原則）。position-landmine 的極端版（belief 不 per-tick reset）。
+    - **②恩仇永久記憶層（用戶定 2026-07-18，升級「不能忘」）**：決策考慮集＝**掃近隊（當下感知鄰隊）∪ 顯著記憶（世仇/恩人/已知大勢力/重要關係）**，後者**無視空間距離**——宿敵走出視線不從盤算刪。**兩層記憶**：短暫感知（路上隨瞥某隊）＝會 decay、有 cap；**重要記憶（恩仇/世仇/恩人/重要關係）＝永久，免疫 decay 與 cap 淘汰**（一輩子記得）。非「salience decay 慢」是「根本不淘汰」。
+    - **perf 仍安全**：短暫感知 belief 有 cap（`MAX_CLAIMS_PER_OBSERVER=200`/`MEMORY_MAX`）+ decay；恩仇永久層 bounded（1-2 代世界、隊數有界→一個人結的「有意義恩仇」天生就少）→ 決策 iterate＝nearby(k)+永久恩仇(m) 皆 bounded，不退 O(N²)。**R① 加驗**：既有 belief 真有 persist+decay？恩仇永久層存在還是均勻 decay（會忘宿敵）？別假設。
+  - **★★冷啟動悖論 + 創世 god-view 違憲（用戶戳出，2026-07-18，此 arc 頭號主樑）**：嚴格憲法（無全知、訊息靠實體傳播）下創世人人全盲→「怎貿易/外交/探索」？grep 坐實**現行作弊**：`game_setup.gd:569-578` 創世把**每隊塞進每隊 `team_discovered`＝人人開局全知＝違憲**，短路掉「資訊碎裂（`line 63` 遊戲前提）→發現弧」全部核心戲。**正確機器已存在**（`vision_system.tick_discovery`：本地視野半徑3+偵查技能+地形+隱蔽 gated 發現鄰隊＝憲法正確 discovery），只被創世作弊蓋掉。
+    - **修＝拔創世 god-view seeding，改創世知識＝②+③ 混（用戶定 2026-07-18）**：創世知道＝**自己派系 + 本地地理鄰居 + 有淵源對象（傳統盟友/世仇）**；陌生遠方一律未知，玩中發現。justify：派系＝你的人且互相 relay（channel ②）；本地＝你知道你山谷有誰；淵源＝接恩仇永久記憶。**保留碎裂（遠方未知→探索/傳播/資訊戰有得玩）+ 不凍死（政治+地理保底 bootstrap，避開沙盒最大 fail「凍死」）。** 選型棄①純湧現（孤立隊凍死盲風險）、棄現行全知作弊。
+    - **bootstrap = 本地先行→擴張**：第一筆貿易/外交/戰在視野+創世知識內（`diplomatic_ai:132`、`_find_trade_target` 已讀 `team_discovered`）；探索（need-驅動移動→vision 揭鄰）+ 傳播延伸觸角。**make-or-break（systems R①）**：拔全知後 need-驅動移動夠不夠 bootstrap 不凍？不夠→補輕量探索/好奇驅動 or 收窄創世 seed 半徑。同「危險會傳播」make-or-break 家族（belief populate 必須冷啟動就 work）。
+    - **★★make-or-break 驗出反面：「派系互相 relay」的 discovery 假設不成立（2026-07-20，Slice B reviewer 異質載重坐實）**：`team_discovered` 寫入只經創世 + 直接視野（`vision_system`），**relay/message 從不寫 discovery，只傳已識隊的 belief 更新**——上面「派系＝你的人且互相 relay」「傳播延伸觸角」的 justify **機制不成立**，後-B discovery 曾是純 proximity-driven（永不經「聽說遠方有隊」而 discover）。**裁：(b) relay-discovery 需建**（非新願望，是兌現本段原有 justify + make-or-break 前置承諾）——relay/message 傳到且提及未識隊時，連帶觸發最小 discovery（`team_discovered=true`+初始粗糙 belief entry）。**範圍收窄**：只求這個最小閉環，不建含率/延遲/失真的完整情報網模型（那是「資訊操控維度」的活，見 `docs/notes/2026-07-19-info-warfare-verbs-brainstorm.md`，observe-gated 排後面）。併入 B 擴，非另開 arc。
+  - **★世界特徵也 belief-gate（非只隊）+ 永遠要傳播、零豁免（用戶定 2026-07-19）**：「無全知」套所有東西——市場/糧點/資源/地形亦然。**一切知識只經傳播/發現進 belief，無「公開地標豁免」例外**（否決 invariants:186 舊裁）。
+    - **市場（C 裁）**：現行 `has_food_market`/`_nearest_market_outpost` 掃全圖（`known_issues:35`/`invariants:186` 衝突）＝god-view 後門，堵。**市場存在/位置永遠經傳播習得**（去過 or 聽過），無豁免。**名市場≠豁免，是名聲高傳播率→自然廣傳進多數隊 belief**（與世隔絕沒聽到的隊就是不知道）。**「地標」只剩物理事實**：市場固定不會動→位置 belief 一旦習得就可靠（不像移動軍隊要重估）；但**取得永遠靠傳播**，且 STATE（還在營運?被毀?）可過期、待新傳播更新。
+    - **∴ 系統改 `invariants:186`**：market 從「公開地標豁免 belief」→「belief-gate 如萬物，名聲高傳播率自然廣傳，位置固定故習得後穩定」。生存/經濟決策讀 belief 的已知市場，非全圖掃。
+  - **★資訊地基早設計好（`game-design:765-964`）—— 此 arc＝落地+強制，非新設計**：`line 396`「感知鐵律＝O(N²)修法同一約束…感知-local 掃描同治 believability+perf」正是掃近隊洞見；765-964 已細設 無全知/傳播/來源可信/失真/技能=理解。**此 arc 工作＝堵所有 god-view 後門（belief-gate 隊+世界特徵+拔創世 seeding）+ 掃近隊 bound perf + 加恩仇永久層 + 創世②+③**。**主動情報操作（捏造/放謠言）＝情報操控維度 defer（`line 909` 明訂非急），非此 arc**（＝用戶定「地基非操控」scope 線）。
+  - HOW（掃近隊怎麼 bound O(N²)、radius 定義、創世 seed 實作、feasibility）＝系統（handback `2026-07-18-blueprint-to-systems-drop-lod-scan-nearby` + refinement + awareness-arc-scope，R① 前提待驗）；排 B enabler（經濟 sustainability 之後）。
 - **敘事可見**：史書/編年，讓自生的戲看得到（沙盒 bar「好看」的眼睛）。**史書本身是 belief 產物——勝者寫史、可偏可篡=敘事本身就是正統/情報戰**。〔🟥〕
 - **玩家面**：玩家=最後薄鏡頭（player=agent 對稱，統一架構讓它便宜）；**自訂沙盒 + 起始劇本**兩模式。〔🟥〕
 
@@ -816,6 +923,35 @@ NPC 傳播資訊時可能：
 - 缺的僅：捏造 option ＋「訊息可不綁真事件」的口。
 
 → **路線圖項，非急**；等情報操控維度開建時做，現框架承接。
+
+## ★★ belief/知識 store 模型（brainstorm 定案 2026-07-19，awareness arc 地基）
+> 承「永遠要傳播、零豁免」+ 感知鐵律。決策讀 belief（會錯/舊/被騙的知識），非真值。此節定 belief store 怎麼組織。HOW（schema/migrate，**byte-identical refactor 驗**）＝系統。
+
+**1. 現況兩 store（泛化目標＝統一）**：訊息（`team_known`＝事件流，TTL 過期，carrier 相遇傳）+ 信念（`team_intel[obs][tgt]`＝對某隊 multi-claim 估計，可信度/失真/口碑成熟）。→ 泛化成**一個統一知識 store**，鍵 entity（隊/世界特徵/…），方便擴充（用戶定 #1：擴充性優先）。
+
+**2. 三級 volatility（decay 配「被記物變多快」）**：
+- **永久**（存在/身份/恩仇/市場位置）：免時效衰減，只被**矛盾事件**翻（razing/背叛/死亡）。
+- **低頻**（leader/派系/佔哪據點）：繼承/政變/征服**事件**更新，不時效衰減。
+- **高頻**（位置/戰力/情緒）：時效衰減 + 過期→未知（現 `belief_pos` 3 天已是此級，推廣至全高頻層）。
+- **★「淘汰整隊」＝bug 病根**：分層後，過期只讓**高頻→未知**，entity + 永久層**永不消失**（你記得誰是頭、是你世仇，只是不知它現在在哪多強）。
+
+**3. 不做硬 eviction，留全部 + 決策時 filter（用戶定 2026-07-19）**：
+- 拆開「記憶體 bound」vs「決策相關性」（原 eviction 混這兩者→生出「刪整隊」bug）。相關性＝**決策時 filter**（fresh OR 重要才納入考慮集；過期+不重要＝記得但不判別），**不刪資料**。
+- 永久層留一輩子（cheap，有界世界 met-entities 有界）；高頻層**古老無用可丟**（省記憶、不損決策、不忘身份）。
+
+**4. monotonic id（單一源，硬前置 + 修確認 bug）**：現 `_next_team_id`＝`max(live)+1` → **回收死 id → belief 冒名頂替 bug**（team100 死→重用→新舊 entity 混）。修＝持久遞增 counter，死 id 永久退休，收 **7 份 team-id 重複**（game_setup/subteam/manpower/population/reaction/recruit_tutorial/**event_unrest_split**，systems exhaustive 坐實）+ **2 份 person-id**（game_setup/recruit_tutorial）成單一源。`_next_beast_id` 用負區段遞減＝已 monotonic 正範式（fix 參考）。**belief key 必須是永久穩定身份。**
+
+**5. 恩仇掛人 vs 掛團（雙 key）**：跟人的仇隨人走（政變下台則跟下台者，`RelationGraph` 現孤兒/未接）、跟團的仇留給團。belief key 支援兩種；真接 RelationGraph＝關係維度（維度5）後續。
+
+**6. 世界特徵 belief（gap A）**：市場/據點/資源＝知識 store 的 entity，存在永久、當前存貨高頻，**發現(vision)/聽說(message) 才進**，非全圖掃 god-view（修 `has_food_market`）。
+
+**7. message→belief 橋（gap B）**：事件訊息到達 → 更新對應 entity 的 belief（**成長事件→實力估計↑→威脅判斷看得到成長**；威脅＝判斷非廣播，接 Slice D 讀 belief）。現兩 channel 部分脫節，要接。
+
+**8. 隊數有界 + belief 安全閥（robustness，極端 case）**：
+- **隊數 bound ＝ belief 與 perf 共用前提**（一人隊非 viable + anon-cohort 守 mass + named 升階有率；掃近隊本假設有界）。「全升 named + 各自成隊」＝打爆 anon-cohort 模型，源頭該擋。
+- **belief 安全閥（縱深）**：正常留全部；**高水位只砍垃圾**（無關係 + 早死 + 只瞥一次的一人隊），**永不砍恩仇/大勢力** → 極端下優雅降級非爆。
+
+**序**：**monotonic id ＝硬前置**（belief key 前提，也是乾淨 unification 6→1）；其餘接 awareness/god-view 殲滅 arc。HOW＝系統。
 
 ---
 
