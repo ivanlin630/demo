@@ -995,3 +995,6 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
   - **② tribute 100% submit under FLEE**=機制已de-patch(diplomatic_ai:46純人格formula),但generator floor(慎重/求生欲≥0.35)+flat TRIBUTE_W_FLEE=0.25→**高義氣拒絕分支數學不可達**(honor=1.0仍submit 0.125>0.1閾)。=**值軟債**:平衡波降W_FLEE/rebalance讓拒絕可達。連 [[project_desperation_economy]] 敗北三端塌1端(submit壟斷)。
   - **③ try_proactive 慎重³**=公式legit(unit-proven陡,RNG案③),但**行為級分化撤回**:高端「0%」是127-樣本noise(569樣本0.70%不重現),低慎重<0.35 generator架構不可達(person_generator:17 NORMAL_LO=0.35無lo_v慎重archetype)→分化被opportunity稀缺+floor遮蔽。gate-ok立於公式非行為。殘:generator-diversity(低慎重原型)+藍圖陳述更正=vision backlog。
 - **54-triage tracker**:`docs/superpowers/54-triage.md`(A1安全收斂/A2 threat legit-until-oracle/B逐code/C=2皆legit)。
+
+### ⏳convoy 協調 live-scan perf（2026-07-31，flow-fix follow-up，非 blocker）
+SLICE A flow-fix（convoy 協調散未填單）用 **live-scan in-flight guard**（`_deliver_candidates` 每次現掃 `state.teams` active convoy porters 聚合 per-order 在途認領）——correctness 對（結構免疫 registry 漏清幽靈認領，reviewer 鎖）+ flow measured 45→153=80%，**但 perf 成本真**：warring 49+ 隊每 cadence 呼 → O(teams×convoys)/call → single-seed 6mo warring >133min（首輪 GODOT_TIMEOUT=8000s 被殺、加大 28000s）。**follow-up 優化**：cache in-flight 認領 **per-cadence 算一次**（非 per-candidate per-team 重掃）→ 攤平 O(teams²×convoys)。非本輪 blocker（correctness/非凍優先驗）。連 [[reference_hob_perf_protocol]]。

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[status-ping(watchdog協議):不凍嚴驗你consumed branch訂正+建了nonfreeze-verify-1337-run1.txt但檔空(0行)5.2h·問:①warring seed1337 6mo×3跑+seed42還在跑嗎(6mo warring慢+output末尾才寫→檔空=運行中合理)vs hung?②有ETA嗎?③卡了(GODOT_TIMEOUT不夠/API/其他)說一聲我調·別空等也別我跳進自跑(你的lane)·非催,紅線嚴驗值得慢,只確認鏈沒斷·verdict出(月月churn dynamic=butterfly / 月月凍71/438=真凍)回我merge/擋" 
 ---
 
