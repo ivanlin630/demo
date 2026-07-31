@@ -755,10 +755,12 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 			if _market_visitor_buy(state, visitor, owner, tile, oid, res, rem, commerce, owner_lv):
 				dealt = true
 		elif kind == "buy":
-			# ★後勤 SLICE A refine：convoy porter DELIVER → 傳 cargo[res] 當 deliver_cargo（賣 full cargo 繞 reserve）；normal 傳 -1。
+			# ★後勤 SLICE A refine：convoy porter DELIVER → 傳 cargo_qty 當 deliver_cargo（賣 full cargo 繞 reserve）；normal 傳 -1。
+			# ★key：task_extra_data 存 cargo_res/cargo_qty（非 "cargo" dict）——只對 porter 的 cargo_res 傳。
 			var dc: float = -1.0
-			if visitor.task_extra_data.has("convoy_phase"):
-				dc = float(visitor.task_extra_data.get("cargo", {}).get(res, -1.0))
+			if visitor.task_extra_data.has("convoy_phase") \
+					and res == String(visitor.task_extra_data.get("cargo_res", "")):
+				dc = float(visitor.task_extra_data.get("cargo_qty", -1.0))
 			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv, dc):
 				dealt = true
 	if not saw_live_order:

@@ -1785,10 +1785,17 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 			Probe.bump("convoy.deliver")   # 抵達市場（DELIVER 嘗試）
 			if Probe.enabled:
 				Probe.add_amount("convoy.cargo_delivered", maxf(before - float(sub.resources.get(res, 0)), 0.0))
+				var reason: String = "settled" if dealt else _convoy_bail_reason(bail_before)
 				if dealt:
 					Probe.bump("convoy.deliver_settled")   # ★真成交 fulfilled++（make-or-break 真值）
 				else:
-					Probe.bump("convoy.deliver_bail_" + _convoy_bail_reason(bail_before))
+					Probe.bump("convoy.deliver_bail_" + reason)
+				# ★per-convoy DELIVER trajectory（定 bail 根:載 0 vs 載了丟 vs 買方飽和；+全 sell bail delta 真因，不只 first-in-list）
+				Probe.bump_sample("convoy.deliver_traj", {
+					"porter": sub.team_id, "res": res, "loaded": float(xd.get("cargo_qty", 0)),
+					"material_at_deliver": before, "sold": maxf(before - float(sub.resources.get(res, 0)), 0.0),
+					"result": reason, "bail_delta": _convoy_bail_delta(bail_before),
+				}, 16)
 		xd["convoy_phase"] = "RETURN"
 		sub.move_target = home_pos   # 掉頭回家
 		sub.task_start_tick = state.world.current_tick
@@ -1816,6 +1823,14 @@ func _convoy_bail_reason(before: Dictionary) -> String:
 		if int(Probe.counts.get("trade.market_bail." + b, 0)) > int(before.get(b, 0)):
 			return b   # DELIVER 期間升的 sell bail = 本 convoy 失敗因
 	return "other"   # 無 sell bail 升（板上無此 res buy 單/其他）
+# ★全 sell bail delta（DELIVER 期間所有升的 sell bail，非只 first-in-list——真因 disambiguate:買方飽和 vs porter surplus）
+func _convoy_bail_delta(before: Dictionary) -> Dictionary:
+	var d: Dictionary = {}
+	for b in _CONVOY_SELL_BAILS:
+		var rise: int = int(Probe.counts.get("trade.market_bail." + b, 0)) - int(before.get(b, 0))
+		if rise > 0:
+			d[b] = rise
+	return d
 
 func _update_escort(state: WorldState, team: TeamData) -> void:
 	if team.order_target_id == -1:
@@ -2961,6 +2976,9 @@ func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool
 	if sub_id == -1:
 		return false
 	var sub: TeamData = state.teams[sub_id]
+	# ★重診 instrument：FETCH 前源分佈（母隊私產 vs vault）——split 後 porter 已帶 frac×res。
+	var parent_priv_after_split: float = float(team.resources.get(res, 0))
+	var porter_after_split: float = float(sub.resources.get(res, 0))
 	_load_convoy_cargo(team, sub, home_tile, res, load)   # ★FETCH：cargo 設 exact load（conserving）
 	sub.task_extra_data = {
 		"convoy_phase": "OUTBOUND", "cargo_res": res, "cargo_qty": load,
@@ -2968,7 +2986,14 @@ func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool
 	}
 	Probe.bump("convoy.dispatch")
 	Probe.bump("convoy.fetch")
-	if Probe.enabled: Probe.add_amount("convoy.cargo_out", load)
+	if Probe.enabled:
+		Probe.add_amount("convoy.cargo_out", load)
+		# ★per-convoy FETCH trajectory（純觀測，定 26% 根:載 0 vs 載了丟）
+		Probe.bump_sample("convoy.fetch_traj", {
+			"porter": sub_id, "res": res, "load_target": load,
+			"parent_vault_pre": vault, "parent_priv_post_split": parent_priv_after_split,
+			"porter_post_split": porter_after_split, "porter_loaded": float(sub.resources.get(res, 0)),
+		}, 16)
 	print("[Convoy] Team%d 派運輸子隊 Team%d 送 %s×%.0f → demand 市場(%d,%d)" % [
 		team.team_id, sub_id, res, load, target.x, target.y])
 	return true

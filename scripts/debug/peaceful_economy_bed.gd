@@ -218,8 +218,29 @@ func _print_four_questions(result: Dictionary) -> void:
 		result.get("probe_amounts", {}).get("convoy.cargo_delivered", 0.0),
 		int(p.get("g1.order_fulfilled", 0)), int(p.get("trade.deal", 0))])
 
+	# ★per-convoy cargo trajectory（重診 26% 根:FETCH 載量+源 / DELIVER material=載 0 vs 載了丟）
+	_print_convoy_trajectory()
+
 	# ★construct pipeline sample payload（why 欄：施工隊被搶時 current_task 變啥 ct_task + 誰搶 ct_reason）
 	_print_construct_samples(result)
+
+# convoy per-convoy cargo trajectory（讀 Probe.samples；run() 後未 reset=本 run 完整）。定 26% 根:載 0 vs 載了 en-route 丟。
+func _print_convoy_trajectory() -> void:
+	print("\n───────── ★per-convoy cargo trajectory（26% ceiling 重診）─────────")
+	var fetch: Array = Probe.samples.get("convoy.fetch_traj", [])
+	print("  [FETCH 載量+源] n=%d:" % fetch.size())
+	for s in fetch:
+		print("    porter=%s res=%s load_target=%.0f | 源:parent_priv(split後)=%.0f vault_pre=%.0f porter_split=%.0f → porter_loaded=%.0f" % [
+			str(s.get("porter", -1)), str(s.get("res", "")), float(s.get("load_target", 0)),
+			float(s.get("parent_priv_post_split", 0)), float(s.get("parent_vault_pre", 0)),
+			float(s.get("porter_post_split", 0)), float(s.get("porter_loaded", 0))])
+	var deliv: Array = Probe.samples.get("convoy.deliver_traj", [])
+	print("  [DELIVER material] n=%d（載 0 vs 載了丟）:" % deliv.size())
+	for s in deliv:
+		print("    porter=%s loaded=%.0f → material_at_deliver=%.0f sold=%.0f result=%s bail_delta=%s %s" % [
+			str(s.get("porter", -1)), float(s.get("loaded", 0)), float(s.get("material_at_deliver", 0)),
+			float(s.get("sold", 0)), str(s.get("result", "")), str(s.get("bail_delta", {})),
+			"←FETCH載0" if float(s.get("loaded", 0)) < 1.0 else ("←載了en-route丟" if float(s.get("material_at_deliver", 0)) < float(s.get("loaded", 0)) - 0.5 else "←滿載到市場(bail 非 porter 側)")])
 
 # convoy.deliver_bail_* 分佈（掃 Probe.counts 前綴；run() 後未 reset=本 run 完整）
 func _convoy_bail_dist() -> String:
