@@ -728,12 +728,13 @@ func _resolve_market(state: WorldState, a: TeamData, b: TeamData) -> void:
 # 訪客到市集 outpost tile 觸發（sim_runner step3c）。outpost owner team = 做市商，
 # 訪客對 owner 的 board 兩側交易：買 owner sell 單(coin→owner)、賣入 owner buy 單(owner.coin→visitor)。
 # 履約按 order_id 直沖 owner.active_orders + board（權威，非 delta）。守恆走 ResourceBank/TileBank chokepoint。
-func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexTileData) -> void:
+func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexTileData) -> bool:
+	# 回 dealt（true=有成交/settle；後勤 SLICE A convoy DELIVER 讀此分流 settled vs bail）。既有 caller(sim_runner:380)忽略回值=安全。
 	if tile == null or tile.outpost_level <= 0:
-		return
+		return false
 	var owner_id: int = tile.outpost_owner
 	if owner_id == visitor.team_id:
-		return   # 自家市集不自交易
+		return false   # 自家市集不自交易
 	var owner: TeamData = state.teams.get(owner_id)   # 可能 null（無主 outpost）
 	var s_leader = state.persons.get(owner.leader_id) if owner != null else null
 	var commerce: float = float(s_leader.skills.get("商業", 0.0)) if s_leader else 0.0
@@ -768,6 +769,7 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 			Probe.bump("trade.deal_resident")
 	elif Probe.enabled and visitor.current_task == TeamData.TASK_TRADE:
 		Probe.bump("trade.meet_nodeal")
+	return dealt
 
 # 訪客買：向 owner sell 單 + public_storage stock 買 → 扣 storage、visitor.coin → owner.coin。
 # 可購量 = min(單餘量, 現貨, 買得起, 缺口, carry)；withdraw 實量計價（禁信 board 鏡像）。

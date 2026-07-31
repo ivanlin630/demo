@@ -79,6 +79,10 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	var parent: TeamData = state.teams.get(sub.parent_team_id)
 	if parent == null or parent.tile_pos != sub.tile_pos:
 		return false
+	# ★後勤 SLICE A convoy.return telemetry：在真 merge 點認 convoy porter（對齊 [Merge] 事件，無論它經 CONVOY 或
+	#   被 loop2b release→IDLE 併回路——task_extra_data.convoy_phase 標記 release 不清，故此處統一準確計）。
+	if Probe.enabled and sub.task_extra_data.has("convoy_phase"):
+		Probe.bump("convoy.return")
 	_merge_into(state, sub.parent_team_id, sub_id)
 	return true
 
