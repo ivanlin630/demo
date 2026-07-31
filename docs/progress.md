@@ -21,6 +21,29 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
+## 📍 當前狀態（2026-08-01）——經濟第一次真流動（flow-fix at merge gate）+ 規模動態診斷
+
+### 現況
+- **決策模型統一（腦 means-end + 手 持守）DONE**。持守 arc RELEASED；team14 nuance 量測後溶解（非真卡死）。
+- **經濟調查挖到真根（繞 7 次假根、全被量測打臉）**：不是缺動機、不是食物軸——是**供給產得出來卻不會跨距離移動**（採集自動上繳但公庫 tile-local、賣方菜單根本缺「送貨到市場」動作 → 貨物理從不離家 → 買方永不成交）。7 次假根：persist-block／cap-binding／cap-no-op／blueprint 放大鑽石／trade-trip-underfire／reserve-diagnosis／cargo-loss——**每個靜態斷言都被第一手 dump 駁**。
+- **後勤/logistics arc（供給移動）WHAT 定案**（spec 2026-07-31）：三層各有用不互吃——後勤運補（運自己的）/領主分配政策（人格施捨↔剝削+餵 unrest）/貿易（換外面的+逃剝削）；徵收(coin)另議、公庫/生產不動。
+- **★SLICE A 供給-delivery convoy：flow-fix measured 成功**——材料送達 **26%→80%**、成交 **0→4→6**、經濟第一次真流動（腳夫子隊複用子隊+載重、供需雙方派、散單協調修）。**非凍紅線 GREEN**（6mo warring 12.84% attrition + 月月 churn = 活世界；attrition=0 是 1mo 短窗 artifact）。**determinism 驗跑中**（run1/2 done、run3+seed42）→ **merge 待 determinism 確認**。
+- **meta-fix（survival 天平條件化）DROPPED**：第一手 per-option util dump 證經濟決策 fire 正常（build 1.40>survival 1.04），根本非天平問題。
+
+### 路線圖
+- 腦+手決策維度收官 → 經濟根=供給移動 → 後勤 arc（SLICE A flow-fix 收尾中）。
+- **序**：flow determinism→merge（經濟正式流動）→ SLICE B 領主分配政策 / C 貿易 → 勢力規模動態（join 瓶頸）+ perf（O(N²)）。
+- runway/糧流 arc：A/B1 banked（正確 infra）、B2/B3/C paused（食物軸證非塞點）；糧橋成後勤現成零件。
+
+### 偏離
+- runway 食物軸追了 2 個溶解 victim（team14/A1），部分 over-build（B1 banked、B2/B3/C paused）。
+- **7 次靜態斷言被量測駁 → 鐵律固化**：決策/貨流根**必 dump 真值（per-option util／per-convoy trajectory／現成資料）、禁靜態斷言**（讀 code 知「能」≠ runtime「真的」）。
+- 淨判：路徑蜿蜒但沒空轉——落地真 win（經濟首流動 verified 非放大）+ 精確診斷剩餘 arc。measure-disciplined 收斂、非偏航。
+
+### backlog（診斷完、排隊、logistics 後）
+- **勢力規模動態**（用戶願景「活世界有大有小」，game-design 已記）：世界塌全小（6mo 實測 133 隊全 ~2.9 人、無大團、rung≥2 僅 6 隊）；真根=跨隊 join（投靠/併入）卡在 dispatch→resolve（155→24、85% 蒸發），現跑的 merge(322)是母隊自我回收臨時工=錯的整併。方向=de-patch join resolve 瓶頸（同執行完成家族）非新建整併。
+- **perf**：warring O(N²) per-tick（每 tick 掃全隊名冊）、世界膨脹 130+ 超 50 目標；與規模動態同解（隊變少）。
+
 ## 📍 當前狀態（2026-07-15）——full-HD 觀察開跑 + flee 真修 + tracer 完整性 + god-view merged
 
 ### observability-path-completion（tap-gap 家族系統性收 + 盲點閘）→ main（merge `7a9640bf`，2026-07-15）
