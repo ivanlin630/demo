@@ -12,15 +12,15 @@ status: ready-for-R2
 
 ## 1. Fix：deliver candidate 目標排除 in-flight-claimed 買單
 現 `goal_resolver._deliver_candidates`：iterate `received_buy_orders` 取 per-res 首單 → 多賣方全指同 best 單 → 堆。
-- **in-flight guard**：加**convoy in-flight 認領登錄**——已有 in-flight convoy 目標的 buy order_id（+其 in-flight cargo 已認領量）→ 該單 deliver candidate **排除/扣減 remaining**。
-  - 登錄源：掃 active convoy 子隊 `task_extra_data.order_id`（in-flight 認領）；或 `state` 級 registry（dispatch 時 +order_id、DELIVER/RETURN/dissolve 時 −）。★純狀態、無 RNG。
+- **in-flight guard**：加**convoy in-flight 認領**——已有 in-flight convoy 目標的 buy order_id（+其 in-flight cargo 已認領量）→ 該單 deliver candidate **排除/扣減 remaining**。
+  - **★★認領源＝LIVE-SCAN（鎖定，R² 必補、非留 implementer 自選）**：**掃 active convoy 子隊的 `task_extra_data.order_id`**（每次 _deliver_candidates 現掃 `state.teams` 中 convoy porters）。★**禁 state-registry**：`_on_team_extinct`（faction_ai:2524-2547）porter 死於戰鬥/餓死走**泛用死亡路徑、零 convoy 特判** → state-registry **漏清變幽靈認領永久佔單**（該單永不再有 convoy=反更堵）。**live-scan 結構性免疫**（死 porter 自動從 state.teams 消失=認領自動失效、不需額外清 lifecycle）。純狀態、無 RNG。
   - `effective_rem = order.qty_remaining − Σ(in-flight convoy 認領 to 此 order 的 cargo)`；`effective_rem <= 0` → 跳此單（已被在途 convoy 認領滿）。
 - **散選**：deliver candidate 選 **effective_rem > 0 的 buy 單**（util/gain 秤 best，但排除已認領滿）→ 不同賣方散到不同未填單。
 - ★**憲法**：util/需求秤選單（gain × reachable × effective_rem>0）**非 scripted round-robin**；realistic（每缺料買家有車去）。
 
 ## 2. 接點
 - `_deliver_candidates`（goal_resolver:125）：`received_buy_orders` 迴圈加 `effective_rem` 計算（扣 in-flight 認領）→ 排除 effective_rem<=0。
-- in-flight registry：`state` 級 dict（order_id → 在途 cargo）或掃 active convoy porters。dispatch convoy 時登錄、DELIVER 成交/RETURN/dissolve 時清（守 lifecycle 對齊，別漏清=幽靈認領永久佔單）。
+- in-flight 認領＝**live-scan（鎖定）**：每次 `_deliver_candidates` 現掃 `state.teams` 中 active convoy porters（current_task==TASK_CONVOY 或 task_extra_data 有 convoy_phase）的 `task_extra_data.order_id` + cargo → 聚合 per-order 在途認領量。★**無 registry lifecycle 清理**（死 porter 自動消失=認領自動失效、結構性免疫漏清幽靈認領）。
 - 感知鐵律：買單讀 belief（received_buy_orders 既有 belief-gate）不變。
 
 ## 3. ★★TDD + 驗（★★MEASURE-VERIFY 硬性，別假設散了就升）
