@@ -93,6 +93,7 @@ func _mk_seller_state(mat: float) -> Array:
 	leader.values = {"慎重": 0.5, "野心": 0.5, "貪婪": 0.5}
 	team.leader_id = leader.id
 	state.persons[leader.id] = leader
+	AnonCohort.add(team.anon_cohorts, "平民", "healthy", 5)   # pop=leader1+anon5=6 ≥ CONVOY_MIN_PARENT_POP(4) 過 perf 前閘
 	state.teams[0] = team
 	# demand 市場 belief：team_known 注 buy material 單@(5,5)
 	var msg := MessageData.new()
