@@ -1006,3 +1006,12 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
   - 若 **~50 才對** → 膨脹 130+ 本身是**設計 issue**（缺 consolidation 壓力）→ 修那個**順帶解 perf**（隊少）+ legibility 升。blueprint 傾向此（避碎片化）但待 game-design 評估。
   - 若 **130+ 是 target** → O(N²) 是真 gameplay perf 問題、要**優化 architecture**（每 tick 全隊掃 → 空間 index/增量/cadence 攤平）。
 - **分流序**：①logistics arc（flow-fix merge → SLICE B/C）優先不動 ②perf/team-count = 後-logistics backlog（blueprint 先定 50 vs 130+ 設計、systems 再評 O(N²) architecture 可修否/成本）。連 [[reference_hob_perf_protocol]]。
+
+### ⏳勢力規模動態 arc — join resolve 瓶頸（2026-08-01 blueprint 診斷 done，後-logistics backlog，串 perf 同根）
+**世界塌全小**（133隊全~2.9人、無大團、rung≥2 僅 6隊）＝**「併小成大」沒運作**（blueprint QA 現成資料坐實）：
+- **現跑的 merge（322）= 母隊自我回收臨時工子隊**（Team40 派 Team61→完工併回、pop 恢復原狀非變大）＝**錯的整併、對 cross-lineage power consolidation 零效**。
+- **真正能併獨立小團進大隊 = join（投靠/併入）**，但 **dispatch 155→resolve 僅 24（85% 半路蒸發）+ accept 僅 46%**＝量小又卡在 resolve。
+- **∴根 = join dispatch→resolve 瓶頸（85% 蒸發）= 同 session「dispatch 多 completion 少 / 決策 fire 卻不執行」家族**（means-end/trade/founding/convoy 同型，連 [[feedback_verify_execution_end]] + [[project_economy_decision_underfire_metaroot]]）。
+- **★串 perf 同根**（上方 O(N²)/世界膨脹 130+）：世界膨脹 130+ 全小 **←** join consolidation 不運作。**修 join resolve → 隊少（解 perf）+ 隊大（legibility + rung 長得起來）＝一根解 perf+規模+legibility**。∴ blueprint「~50 legible vs 130+」設計問題的**機制答案**＝修 join（非硬 cap 隊數）。
+- **arc 方向**（backlog）：**非 build 新整併機制、是 de-patch join resolve 瓶頸**（measure-first 查 85% 蒸發為何：gated? argmax 輾? ——★禁靜態斷言、必 dump 真值，[[feedback_measure_peroption_util_before_decision_claim]] 本 session 6-7 駁）+ 可能讓大團 rung 長得起來。
+- **序**：非緊急、**flow-fix 優先**、logistics arc（SLICE B/C）後才撿。記此串起 perf+規模+legibility 三合一根。
