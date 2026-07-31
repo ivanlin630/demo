@@ -763,11 +763,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 			continue
 		var parent: TeamData = state.teams.get(sub.parent_team_id)
 		if parent != null and parent.tile_pos == sub.tile_pos:
-			# ★後勤 SLICE A：convoy porter 真歸建（釋放抽出 pop）= RETURN 完成 telemetry（porter 可能已被下方 release→IDLE，
-			#   故在真 merge 點認 convoy_phase 標記，避 convoy.return 漏記）。
-			if Probe.enabled and sub.task_extra_data.has("convoy_phase"):
-				Probe.bump("convoy.return")
-			sub_sys.try_merge_back(state, sub_id)
+			sub_sys.try_merge_back(state, sub_id)   # convoy.return telemetry 移入 try_merge_back（真 merge 點對齊 [Merge]）
 		else:
 			TaskArbiter.release(sub)
 			if parent != null:
@@ -1783,10 +1779,16 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 		if tile != null:
 			var res: String = String(xd.get("cargo_res", ""))
 			var before: float = float(sub.resources.get(res, 0))
-			InteractionSystem.new()._resolve_market_at_outpost(state, sub, tile)
-			Probe.bump("convoy.deliver")
+			# ★DELIVER 成交結果 instrument（分清真 settle vs bail 分因；deliver_bail_* 讀 visitor_sell 的 sell_* bail 差量）。
+			var bail_before: Dictionary = _convoy_sell_bail_snapshot()
+			var dealt: bool = InteractionSystem.new()._resolve_market_at_outpost(state, sub, tile)
+			Probe.bump("convoy.deliver")   # 抵達市場（DELIVER 嘗試）
 			if Probe.enabled:
 				Probe.add_amount("convoy.cargo_delivered", maxf(before - float(sub.resources.get(res, 0)), 0.0))
+				if dealt:
+					Probe.bump("convoy.deliver_settled")   # ★真成交 fulfilled++（make-or-break 真值）
+				else:
+					Probe.bump("convoy.deliver_bail_" + _convoy_bail_reason(bail_before))
 		xd["convoy_phase"] = "RETURN"
 		sub.move_target = home_pos   # 掉頭回家
 		sub.task_start_tick = state.world.current_tick
@@ -1794,12 +1796,26 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 	if phase == "RETURN":
 		if sub.move_target != Vector2i(-1, -1):
 			return   # 還在回程
-		# 到家歸建 → 釋放抽出 pop（merge_back，非 settle）。convoy.return telemetry 在真 merge 點(loop2b:766)認
-		# convoy_phase 標記統一計（porter 可能中途被 loop2b release→IDLE 走 IDLE 併回路，故不在此 bump 避漏/重複）。
+		# 到家歸建 → 釋放抽出 pop（merge_back，非 settle）。convoy.return telemetry 在真 merge 點(try_merge_back)認
+		# convoy_phase 統一計（對齊 [Merge]；porter 可能經 CONVOY 或被 release→IDLE 併回路，皆準確）。
 		merge_queue.append(sub.team_id)
 		return
 	# 未知 phase 保險：歸建
 	merge_queue.append(sub.team_id)
+
+# ★convoy DELIVER bail 分因（讀 _market_visitor_sell 的 sell_* bail 差量歸因 convoy，不改 interaction）。
+const _CONVOY_SELL_BAILS: Array = ["sell_no_surplus", "sell_owner_no_coin", "sell_no_price",
+	"sell_zero_qty", "sell_storage_full", "sell_ownerless", "sell_owner_cant_afford", "no_board_order"]
+func _convoy_sell_bail_snapshot() -> Dictionary:
+	var s: Dictionary = {}
+	for b in _CONVOY_SELL_BAILS:
+		s[b] = int(Probe.counts.get("trade.market_bail." + b, 0))
+	return s
+func _convoy_bail_reason(before: Dictionary) -> String:
+	for b in _CONVOY_SELL_BAILS:
+		if int(Probe.counts.get("trade.market_bail." + b, 0)) > int(before.get(b, 0)):
+			return b   # DELIVER 期間升的 sell bail = 本 convoy 失敗因
+	return "other"   # 無 sell bail 升（板上無此 res buy 單/其他）
 
 func _update_escort(state: WorldState, team: TeamData) -> void:
 	if team.order_target_id == -1:

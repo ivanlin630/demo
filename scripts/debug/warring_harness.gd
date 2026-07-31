@@ -103,8 +103,8 @@ const PROBE_KEYS: Array = [
 	"bridge.no_go_food", "bridge.topup",   # ★糧流 Slice B1：糧橋 no-go/top-up（A1 子隊配糧）
 	"resume.attempt", "resume.success",
 	"resume.reject_combat", "resume.reject_starving", "resume.reject_owner", "resume.reject_resident", "resume.reject_busy",
-	# ★後勤 SLICE A：供給-delivery convoy（GATE-B 撮合物理送貨）——dispatch/fetch/deliver/return funnel
-	"convoy.dispatch", "convoy.fetch", "convoy.deliver", "convoy.return",
+	# ★後勤 SLICE A：供給-delivery convoy（GATE-B 撮合物理送貨）——dispatch/fetch/deliver/return funnel + DELIVER 成交結果
+	"convoy.dispatch", "convoy.fetch", "convoy.deliver", "convoy.return", "convoy.deliver_settled",
 ]
 
 # ★construction tap samples（一階根 payload：task_after / ct_task / ct_reason / candidates 等，counts 只給階段、samples 給 why）

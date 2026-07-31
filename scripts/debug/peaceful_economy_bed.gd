@@ -210,13 +210,24 @@ func _print_four_questions(result: Dictionary) -> void:
 
 	print("【★後勤 SLICE A：convoy delivery（GATE-B 撮合物理送貨）】")
 	_pl(p, ["convoy.dispatch", "convoy.fetch", "convoy.deliver", "convoy.return"])
-	print("  cargo_out=%.0f cargo_delivered=%.0f | ★order_fulfilled=%d(驗收②) trade.deal=%d" % [
+	# ★DELIVER 成交真值：settled(真 fulfill) vs bail 分因（分清真失敗 vs log-gap）
+	print("  DELIVER 結果:deliver_settled=%d | bail 分因:%s" % [
+		int(Probe.counts.get("convoy.deliver_settled", 0)), _convoy_bail_dist()])
+	print("  cargo_out=%.0f cargo_delivered=%.0f | ★order_fulfilled=%d(驗收②真值) trade.deal=%d" % [
 		result.get("probe_amounts", {}).get("convoy.cargo_out", 0.0),
 		result.get("probe_amounts", {}).get("convoy.cargo_delivered", 0.0),
 		int(p.get("g1.order_fulfilled", 0)), int(p.get("trade.deal", 0))])
 
 	# ★construct pipeline sample payload（why 欄：施工隊被搶時 current_task 變啥 ct_task + 誰搶 ct_reason）
 	_print_construct_samples(result)
+
+# convoy.deliver_bail_* 分佈（掃 Probe.counts 前綴；run() 後未 reset=本 run 完整）
+func _convoy_bail_dist() -> String:
+	var parts: Array = []
+	for k in Probe.counts.keys():
+		if String(k).begins_with("convoy.deliver_bail_"):
+			parts.append("%s=%d" % [String(k).replace("convoy.deliver_bail_", ""), int(Probe.counts[k])])
+	return " ".join(parts) if not parts.is_empty() else "(無 bail)"
 
 # construct.* sample payload dump（result["probe_samples"] 已含 CONSTRUCT_SAMPLE_KEYS；純多印既有 data）
 func _print_construct_samples(result: Dictionary) -> void:
@@ -285,6 +296,16 @@ func _print_team_stories(ticks: int) -> void:
 			print("--- 月%d ---" % month)
 			for tid in tracked:
 				if state.teams.has(tid): print("  " + _line(state, tid))
+	# ★買方市場 granary material 真值（convoy DELIVER 有無真 deposit 入 buyer tile；別靠 visible-log）
+	print("--- 買方市場 granary material 真值（deposit 真發生?）---")
+	for tid in [0, 1, 2, 6, 9, 10, 11]:   # 掛 buy material 單的隊（其自家 outpost tile=demand 市場）
+		var bt: TeamData = state.teams.get(tid)
+		if bt == null: continue
+		var tile: HexTileData = state.world.tiles.get(bt.tile_pos.x * 1000 + bt.tile_pos.y)
+		if tile != null:
+			print("  T%d tile%s granary material=%.0f inv material=%.0f" % [
+				tid, str(bt.tile_pos), float(tile.public_storage.get("material", 0)),
+				float(bt.resources.get("material", 0))])
 
 func _line(state: WorldState, tid: int) -> String:
 	var t: TeamData = state.teams.get(tid)
