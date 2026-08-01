@@ -19,20 +19,35 @@
 
 ---
 
-## §1 核心 seam（機會成本模型、零新市場）
+## §1 核心 seam（統一光譜：給/賣內人格定價/賣外，零新市場）
 
-**剝削≠新內部 coin 市場**。領主 surplus 有兩條既有出路競爭同一 argmax：
-- **賣外面賺**（現成 trade/deliver convoy util，goal_resolver `_deliver_candidates`）。
-- **餵缺料居民**（★新 `_distribute_candidates`）。
+**★blueprint 裁定（2026-08-01、用戶定）：非 A-xor-B、做統一光譜**。剝削≠新市場——**復用現成貿易市場**（`TradeValuation` 定價 + coin 結算，premise 全 PROVEN 見 §0b）。領主 surplus 一條連續光譜、同一 argmax、一條 convoy+貿易脊椎、**人格 weigh 出光譜位置**：
 
-**persona WEIGH（憲法非 GATE）**：
-- **義氣高**→ distribute util 放大 → 餵居民贏 argmax → 居民 fed → `UnrestBank.reduce`。
-- **貪婪高**→ distribute util 壓低（surplus 寧賣外賺）→ 居民持續 deficit → `UnrestBank.add` → unrest↑ → defection。
-- 非硬鎖：貪婪領主 loyalty 崩在即（unrest 逼 defection）仍**可**發（util 動態、survival-like 反制），義氣領主自己斷糧時也讓位求生。
+```
+給免費(義氣max) ← 賣居民公道(neutral) → 賣居民高價(貪,剝一筆) → 賣外拋棄子民(貪max,餓死)
+        price=0            price=local_value        price=local_value×markup      不發、賣外部
+```
 
-∴ 剝削＝**withhold 的機會成本**（賣外賺而不發），非居民付錢。零新定價/支付機制。
+**兩個人格導出連續旋鈕（皆非硬 gate）**：
+1. **價格 factor**（約束③）：領主賣居民的 ask ＝ `local_value × price_factor(honor,greed)`，連續：honor max→`price_factor→0`（免費）、neutral→1（公道）、greed→`markup>1`（高價）。**modulation 現成 `local_value` settle（interaction:827/838），非新定價機制**。
+2. **util weigh**（約束②）：feed-residents candidate util ＝ `relief_term(honor 放大) + coin_term(price×可負擔量)`，競 argmax 對 sell-external（`_deliver_candidates`）。honor 放大 relief（救子民）、greed 壓 relief 但價高抽 coin。
+
+**三種湧現（同一機制 seed 出，非三 branch）**：
+- **仁君**：honor 高→relief util 大 + price→0→居民免費 fed→`UnrestBank.reduce`。
+- **苛捐雜稅**：greed 中→feed util 仍贏但 price 高→居民買不夠→部分 deficit→unrest↑、領主抽 coin（富而不仁）。
+- **拋棄子民**：greed max→feed util < sell-external util→surplus 全賣外→居民餓→unrest↑↑→defection。
+
+∴ **A（賣居民高價）與 B（機會成本扣留賣外）是同一光譜兩端**，價格旋鈕 + util weigh 皆連續人格導出。零新市場、零硬 gate。
 
 **感知鐵律 note**：分配決策讀**本勢力自己**居民 deficit（intra-faction 自有後勤狀態＝合法知情、非 god-view 讀敵隱藏態）。不涉隔空/敵情 belief。✅
+
+## §0b premise 驗（統一光譜三 premise 全 PROVEN，2026-08-01 grep 坐實、非信 blueprint 斷言）
+
+| premise | 結論 | file:line |
+|---|---|---|
+| 貿易市場有價格+coin 結算、price 於 settle 算 | ✅ `TradeValuation.ask_price/local_value`=BASE_PRICE+shortage mult；coin 轉 interaction:806-807(buy)/838-839(sell) | trade_valuation:127-148 |
+| 居民持 coin（購買力） | ✅ team.resources["coin"](TeamData:101)←member_tax(faction_ai:2521)←salary(salary_system:65)；居民付貢含 coin(interaction:527) | — |
+| intra-faction 貿易允許（無 faction gate） | ✅ 只擋 self-trade `owner==visitor`(interaction:731-736)、貿易跨/同勢力皆可(interaction:238)；領主掛賣、同勢力居民可買 | — |
 
 ---
 
@@ -43,15 +58,18 @@
 - runway < `DISTRIB_DEFICIT_DAYS`（新常數、初值 e.g. 4 天）＝deficit 候選。
 
 ### B. `_distribute_candidates`（新，goal_resolver.gd，仿 `_deliver_candidates`:125）
-- 對每個 deficit resident-team，生成 candidate：
-  `{task:TASK_CONVOY, target:resident_team_tile, cargo:"food", qty:補到 runway 目標的量, kind:"distribute", terminus_team_id:resident.id}`。
-- **util**（`_candidate_util` 家族）：`deficit_severity × HONOR_WEIGHT(honor)`，其中 `HONOR_WEIGHT = f(honor,greed)`（義氣放大、貪婪衰減，e.g. `base × (0.3 + honor) / (0.3 + greed)`）。競 argmax 對 trade-util（`_deliver_candidates`）。**GOAL_UTIL_CAP=1.5 沿用**。
-- source vault＝領主 capital granary surplus（FETCH 階段既有 `_load_convoy_cargo` faction_ai:2964 取源）。
+- 對每個 deficit resident-team，生成 **feed-residents candidate**（既有 argmax 候選、非特判 branch＝約束①）：
+  `{task:TASK_CONVOY, target:resident_team_tile, cargo:"food", qty:補到 runway 目標量, kind:"distribute", terminus_team_id:resident.id, price_factor:_price_factor(honor,greed)}`。
+- **price_factor（連續人格導出＝約束③）**：`_price_factor(honor,greed)` 連續映射——honor max→→0（免費）、neutral→1、greed→markup>1。e.g. `clamp( (0.5+greed) / (0.5+honor), 0, PRICE_MARKUP_CAP )`（honor 拉低、greed 拉高、無 if-gate）。
+- **util（連續 weigh＝約束②）**：`relief_term + coin_term`——`relief_term = deficit_severity × (0.3+honor)`（義氣放大救子民）、`coin_term = price_factor × local_value × affordable_qty × (0.3+greed)`（貪婪放大抽 coin）。競 argmax 對 sell-external（`_deliver_candidates`）+ 其他。**GOAL_UTIL_CAP=1.5 沿用**（reviewer 核乘數真推過 cap、非 economy-headroom 死 lever）。**無 `if greed>X` 硬 gate**。
+- source vault＝領主 capital granary surplus（FETCH 既有 `_load_convoy_cargo` faction_ai:2964）。
 
-### C. DELIVER 終點擴充（interaction_system.gd）
-- `_resolve_market_at_outpost`(731)：加 **resident-DELIVER 分支**——若 `task_extra_data.kind=="distribute"` 且抵達 tile 有 `terminus_team_id` 對應 resident-team → **直注 food 入 resident team pool**（`resident.resources["food"] += deliver_cargo` 或注 local granary），**無 market_order、無支付、無 reserve**（純施捨轉移）。
-- 沿用 `deliver_cargo>=0` bypass-reserve 路（interaction:815），但終點是 team pool 非 sell-settle。
-- convoy RETURN 照舊（faction_ai:1774 尾）歸建釋 pop。
+### C. DELIVER 終點擴充（interaction_system.gd，復用貿易市場＝約束④）
+- `_resolve_market_at_outpost`(731)：加 **resident-DELIVER 分支**——`task_extra_data.kind=="distribute"` 且抵達 tile 有 `terminus_team_id` 對應 resident-team → **賣入居民**（復用現成 sell-settle + coin 轉 interaction:838-839），**但 ask 用 `local_value × price_factor`**（modulation 現成定價、非新機制）：
+  - `price_factor==0`（仁君免費）→ ask=0 → 居民 0 coin 取食（現成路、qty 由 deliver_cargo）。
+  - `price_factor>0` → 居民按 ask 買可負擔量（`min(需求, resident.coin / ask)`）→ 買不夠則 deficit 殘留。**coin：resident.coin -= q×ask、領主(owner) coin += q×ask**（現成 806-807/838-839 路）。
+- 沿用 `deliver_cargo>=0` bypass-reserve（interaction:815）。**無新 market/order class**（grep 驗）。
+- convoy RETURN 照舊（faction_ai:1774 尾）歸建釋 pop；未售 cargo 隨 RETURN 歸領主 vault（守恆、非憑空銷毀）。
 
 ### D. unrest 耦合（新回饋，resource_system 或 faction_ai per-tick）
 - resident-team per-tick（或 per-cadence）：
@@ -66,12 +84,13 @@
 ## §3 dev-time 便宜驗（★約束3，非跳過）
 
 `scripts/debug/` 新 bed（仿 `peaceful_economy_bed`）：
-- fixture：1 領主（capital vault food surplus）+ N resident-teams（deficit：pop×burn > local food），兩型領主（義氣高 / 貪婪高）各一 run。
-- **硬斷**：
-  1. **distribute 真 fire**：義氣領主 → distribute convoy dispatch>0、DELIVER 真注 food 入 resident pool、resident runway 回升。
-  2. **剝削真餵 unrest**：貪婪領主 → distribute 讓位 trade（util 輸）→ resident 持續 deficit → `unrest_turns` 逐 cadence ↑ → 逼近/觸 defection≥20。
-  3. **persona 分岔**：同 fixture 只換 leader.values 貪婪/義氣 → distribute 決策翻轉（WEIGH 非 GATE 證據）。
-  4. determinism（seeded、3 跑 byte-identical）、observe 路徑零 RNG（[[feedback_observer_no_global_rng]]）、gates 綠。
+- fixture：1 領主（capital vault food surplus）+ N resident-teams（deficit：pop×burn > local food、居民持 coin），**三型領主 persona**（仁君 honor max / 苛捐 greed 中 / 拋棄 greed max）各一 run。
+- **硬斷（三種湧現同一機制 seed 出）**：
+  1. **仁君 fire**：honor max → distribute convoy dispatch>0、price_factor→0、居民免費 fed、runway 回升、`unrest_turns` reduce。
+  2. **苛捐雜稅**：greed 中 → distribute 仍 fire 但 price 高 → 居民買不夠（coin 見底）→ 部分 deficit 殘留、`unrest_turns`↑、**領主 coin 增**（抽 coin 證據）。
+  3. **拋棄子民**：greed max → feed util < sell-external util → surplus 全賣外、distribute dispatch≈0 → 居民餓 → `unrest_turns`↑↑ → 逼近/觸 defection≥20。
+  4. **連續非 gate**：同 fixture 掃 greed 0→1（honor 反向）→ price_factor + distribute-share **連續變**（無階梯跳）＝WEIGH 非 GATE 證據。
+  5. determinism（seeded、3 跑 byte-identical）、observe 路徑零 RNG（[[feedback_observer_no_global_rng]]）、coin 守恆（居民付=領主收）、gates 綠。
 
 ## §4 隔離（★約束2）
 - branch `feat/logistics-sliceB-distribution`（獨立、防 floor 式誤 merge、[[feedback_held_work_isolate_worktree]]）。
@@ -81,13 +100,16 @@
 
 ---
 
-## §6 ★WHAT-fork 呈 blueprint（剝削模型，你裁）
+## §6 ★統一光譜約束（blueprint 裁定 2026-08-01、用戶定、鎖統一非補丁、R² grep 硬檢）
 
-「貪婪囤+**高價賣居民**」HOW 有二解：
-- **(A) 內部定價/居民付 coin**：居民有購買力、內部 coin 市場、領主定價剝削 → 大（需居民 coin 經濟 + 定價層 + 支付結算）。
-- **(B) 機會成本扣留（本 spec 採）**：領主 surplus 賣外賺 vs 發居民＝同 argmax persona weigh；貪婪扣留→居民餓→unrest；無內部支付/定價。小且戲足（貪婪領主餓死子民→謀反）。
+甲禁自造新補丁（本 session 一路 de-patch）。四約束＝驗收 grep 硬檢：
 
-**我推 B**（最小、複用脊椎、零新市場、戲一樣）。若你 WHAT 要 A（居民真付錢的剝削經濟）則 SLICE B 擴（+內部 coin 層）。**你裁 A/B** → 我定稿 spec → R² → dispatch。
+| # | 約束 | grep 硬檢（R² + dev-verify） |
+|---|---|---|
+| ① | 選項＝**既有 argmax 候選**非特判 branch | `_distribute_candidates` 產候選入同一 `_candidate_util`/argmax；grep 無 `if kind=="distribute"` 在 dispatch/決策層特判繞過 argmax |
+| ② | 人格＝**連續 weigh** 出光譜非 `if greed>X` 硬 gate | grep util/price 路無 `if greed >`/`if honor >` 階梯 gate；只連續乘除 |
+| ③ | 價格＝**人格導出連續值**（貪→高）非新剝削定價機制 | `_price_factor` 連續映射、乘現成 `local_value`；grep 無新 price 常數表/定價 class |
+| ④ | **復用現成 convoy+貿易市場**非另建內部市場 | DELIVER 走現成 `_market_visitor_sell`+`TradeValuation`+coin 轉(806-807/838-839)；grep 無新 market/order class |
 
-## §7 工序
-甲 HOW spec（此檔，B 模型）→ **blueprint WHAT-confirm 剝削模型** ‖ **R² 設計審** → CLEAN+confirm → dispatch implementer（隔離 branch）→ dev-verify → 乙合量。
+## §7 工序（更新）
+甲 HOW spec 定稿（此檔、統一光譜、premise §0b 全 PROVEN）→ **R²**（★硬檢：無 persona-hard-gate②、無新市場④、無特判①、價格 modulation③）→ CLEAN → dispatch implementer（隔離 branch `feat/logistics-sliceB-distribution`）→ dev-verify（三人格湧現+連續非 gate）→ 乙合量。blueprint WHAT 已裁（統一光譜）。
