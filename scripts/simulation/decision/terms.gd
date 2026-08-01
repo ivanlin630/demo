@@ -58,10 +58,8 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
 const ABSORB_DRIVE_BASE: float = 1.0         # TEST VALUE — T3 正規化：吸納量級→[0,1]（1.2→1.0）
 const REP_MAGNET_W: float = 1.0              # TEST VALUE — 名聲磁鐵 §3 投靠加成權重（高名聲 host 翻贏逃）
-# ★乙 整併 util boost（de-patch util-starvation，spec 2026-08-01）：死常數過度正規化餓死整併選項→人格真放大競 argmax。
-# ★保守起步（§5 合量 tune，別定死）：起低寧欠整併也別塌 1 blob。
-const ABSORB_DRIVE_BASE_V2: float = 1.5      # TEST VALUE — base 保守抬(1.0→1.5,治①[0,1]cap;別狂拉)
-const AMB_GAIN: float = 1.5                  # TEST VALUE — 野心真放大增益(治②被閹;ambition_amp=0.5+此×gap→max~2.0/content 0.5)
+# ★REVERT crank(2026-08-02)：absorb boost 常數(ABSORB_DRIVE_BASE_V2/AMB_GAIN)已刪——arbitrary crank,引擎 0.104 算對。
+# join protection urgency 常數保留(B 條:弱靠強 survival 可能 genuine,magnitude 待 systems+reviewer 判,先不 revert)。
 const JOIN_PROTECT_GAIN: float = 1.0         # TEST VALUE — 理性 protection urgency 增益(弱 near 強 protector 非絕境也理性投靠)
 const JOIN_DRIVE_CAP: float = 2.0            # TEST VALUE — join_drive 上界(容 protection 抬過 [0,1],競 argmax)
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
@@ -237,12 +235,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# §HOW-8 完整 utility：資源可負擔(resource_slack) × 期待收益(absorb_yield) × 擴展需求(ambition_gap)。
 			# 個性(野心+仁慈)在 weight。擴張-class 公平競秤（禁硬優勢；征服真划算而贏=保留不動）。
 			if opt != "吸納" or ctx.absorb_target_id == -1: return 0.0
-			# ★乙 boost：野心當強乘數(治②被閹×0.3 band)+base 保守抬(治①[0,1]cap)。yield/slack gate 保留(防亂吸)。
-			# ambition_amp=0.5+AMB_GAIN×gap_norm(gap 滿→amp~2.0/content→0.5)=高野心強隊 util 競 argmax、低野心 stay(有大有小)。
-			var amb_norm: float = clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
-			var ambition_amp: float = 0.5 + AMB_GAIN * amb_norm
+			# ★REVERT crank(2026-08-02 用戶戳破+blueprint 令)：乙 boost 是 arbitrary crank(低 util 誤判 starvation)。
+			# 引擎 0.104 算對(小團 yield 真值低=隊不吸=理性);真 root=規模經濟未模型化(genuine finding)非 tuning。回原公式。
+			var amb_gap: float = clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
 			var yield_pos: float = clampf(ctx.absorb_yield, 0.0, 1.0)   # 負 yield=純負擔→0=不吸(gate#1)
-			return ABSORB_DRIVE_BASE_V2 * ctx.resource_slack * (0.5 + 0.5 * yield_pos) * ambition_amp
+			return ABSORB_DRIVE_BASE * ctx.resource_slack * (0.5 + 0.5 * yield_pos) * (0.5 + 0.5 * amb_gap)
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0

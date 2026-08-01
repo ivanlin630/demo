@@ -1976,8 +1976,8 @@ func _test_term_normalize_t3() -> void:
 	assert(absf(eo - 1.0) < 1e-5, "商隊+貨+arb→economic_opp=1.0")
 	ctx.absorb_target_id = 1; ctx.resource_slack = 1.0; ctx.absorb_yield = 1.0; ctx.ambition_gap = 10
 	var ab := DecisionTerms.eval("absorb_drive", ctx, "吸納")
-	# ★乙 boost：absorb_drive 野心真放大過 [0,1] 競 argmax（de-patch util-starvation，spec 2026-08-01）；上界=BASE_V2×(0.5+AMB_GAIN)。
-	assert(ab >= 0.0 and ab <= DecisionTerms.ABSORB_DRIVE_BASE_V2 * (0.5 + DecisionTerms.AMB_GAIN) + 0.01, "absorb_drive ≥0 且 ≤上界，got %f" % ab)
+	# ★REVERT crank(2026-08-02)：absorb_drive 回原 genuine 公式 [0,1]（boost 已 revert）。
+	assert(ab >= 0.0 and ab <= 1.0, "absorb_drive ∈[0,1]，got %f" % ab)
 	print("[TEST] term_normalize_t3 PASS")
 
 # term-scale normalize T1：survival-class 8 term eval 正規化 [0,1]（剝 urgency 移 coeff）。
