@@ -296,6 +296,16 @@
 - **有限資源守恆**：建造永不消耗有限資源；任何死亡 / 滅團，資產走守恆路由，永不憑空銷毀
 - coin 只能由鑄幣產生，無其他來源
 
+## ★ 統一搬運脊椎（後勤，用戶定 2026-08-01，enforce 起步）
+
+**所有供給的空間移動走同一 convoy 原件**（`_tick_convoy` FETCH→OUTBOUND→DELIVER→RETURN）。後勤運自己的 / 貿易換外面 / 進貢 / 領主分配 = **不同 dispatch 動機 + 不同 DELIVER 終點**，但**共用同一搬運機制**。禁各建平行搬運路。
+
+- **一個機制、多種動機/終點**：DELIVER 終點分支（賣 market_order / 領主→居民直注 / 進貢入上級 vault…）擴 `_resolve_market_at_outpost`，非另刻搬運迴圈。
+- **新供給移動需求 = 加 candidate 動機（`_*_candidates`）+ 加 DELIVER 終點分支**，不是新搬運系統。
+- **不含空間移動者 N/A**（如 consolidation/併隊不搬供給、tile-local 消耗）。
+- **為何**（血證）：散件（auto-withdraw/provision-carry/harvest-carry/remote-tribute/糧橋）各做各的 = 後勤統一 arc 要收斂的病根；平行搬運路 = drift + 觀測盲點 + 難維護。
+- WHAT owner=game-design.md 後勤節；HOW/enforce=本檔 + [[project_logistics_unification]]。
+
 ## 飢餓 / 人口
 
 - 飢餓判定唯一來源 = 團糧（個人不另算飢餓）
