@@ -113,7 +113,102 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 	out.append_array(delegated)
 	# ★後勤 SLICE A：供給-delivery candidate（surplus holder 知有 demand 市場 → 送貨結買單，GATE-B 撮合物理送貨）。
 	out.append_array(_deliver_candidates(state, team, ctx, lv))
+	# ★後勤 SLICE B：領主分配政策（統一光譜:給/賣公道/賣高價/拋棄；人格 weigh 出光譜位置，同 convoy 脊椎+貿易市場）。
+	out.append_array(_distribute_candidates(state, team, ctx, lv))
 	return out
+
+# ★後勤 SLICE B（spec 2026-08-01 §2B）：領主掃自有 deficit 居民 food buy-order → 生 feed-residents candidate。
+# 統一光譜:price_factor(honor→0 免費/neutral 公道/greed→markup 高價) + util(relief[honor 放大]+coin[greed 放大])競 argmax
+# 對 sell-external(_deliver_candidates)。★連續 weigh 非硬 gate、復用市場非新 class（約束②③④）。★感知鐵律:讀本勢力自有居民
+# deficit=合法(intra-faction 自有後勤態非 god-view)。純算術零 RNG。
+const DISTRIB_DEFICIT_DAYS: float = 4.0       # TEST VALUE — 居民 food runway < 此=deficit 候選
+const PRICE_MARKUP_CAP: float = 3.0           # TEST VALUE — price_factor 上界（貪婪剝一筆天花板）
+static func _distribute_candidates(state: WorldState, team: TeamData, ctx: DecisionContext, lv: Dictionary) -> Array:
+	var out: Array = []
+	# 廉價前閘:僅領主(faction leader)+有餘糧。子隊/無 faction/非領主/太小隊不分配。
+	if team.parent_team_id != -1 or team.faction_id == -1 \
+			or team.population < FactionAISystem.CONVOY_MIN_PARENT_POP:
+		return out
+	var f = state.factions.get(team.faction_id)
+	if f == null or f.leader_team_id != team.team_id:
+		return out   # 只領主分配自有子民
+	if float(team.resources.get("food", 0)) <= DELIVER_MARGIN:
+		return out   # 廉價 raw-holding 前濾
+	var food_surplus: float = ResourceSystem.effective_holding(state, team, "food") \
+		- TradeValuation.reserve(team, "food", lv, state)
+	if food_surplus <= DELIVER_MARGIN:
+		return out   # 無真餘糧可分（守自用 reserve）
+	# 人格連續旋鈕（約束②③：weigh 非 gate、price 人格導出連續）
+	var greed: float = float(lv.get("貪婪", 0.5))
+	var honor: float = float(lv.get("義氣", 0.5))
+	var price_factor: float = clampf((0.5 + greed) / (0.5 + honor), 0.0, PRICE_MARKUP_CAP)
+	# LIVE-SCAN 在途 convoy 認領（同 _deliver_candidates；散未填單、免堆同居民）。
+	var claimed: Dictionary = {}
+	for tid in state.teams:
+		var pt: TeamData = state.teams[tid]
+		if pt.task_extra_data.has("convoy_phase"):
+			var coid: int = int(pt.task_extra_data.get("order_id", -1))
+			if coid != -1:
+				claimed[coid] = float(claimed.get(coid, 0.0)) + float(pt.task_extra_data.get("cargo_qty", 0.0))
+	# 掃自有 deficit 居民 food buy-order（received_buy_orders 限本勢力 resident；騎現成 need→buy-order pipeline）。
+	var buy_orders: Array = OrderSystem.new().received_buy_orders(state, team)
+	var food_val: float = TradeValuation.local_value(team, "food", state)
+	var best_util: float = 0.0
+	var best: Dictionary = {}
+	for o in buy_orders:
+		if String(o.get("res", "")) != "food":
+			continue
+		var rid: int = int(o.get("origin_team", -1))
+		if rid == team.team_id or not state.teams.has(rid):
+			continue
+		var resident: TeamData = state.teams[rid]
+		if resident.faction_id != team.faction_id \
+				or not FactionAISystem.is_resident_static(state, resident):
+			continue   # 只本勢力自有居民（intra-faction，感知鐵律合法）
+		var runway: float = _resident_food_runway(state, resident)
+		if runway >= DISTRIB_DEFICIT_DAYS:
+			continue   # 非 deficit
+		var mpos = o.get("pos", Vector2i.ZERO)
+		if not (mpos is Vector2i) or mpos == team.tile_pos:
+			continue
+		var oid: int = int(o.get("order_id", -1))
+		var eff_rem: float = float(o.get("qty", 0)) - float(claimed.get(oid, 0.0))
+		if eff_rem <= 0.0:
+			continue   # 已被在途 convoy 認領滿
+		var qty: float = minf(food_surplus, eff_rem)
+		if qty < 1.0:
+			continue
+		# util 連續 weigh（約束②）：relief（義氣放大救子民）+ coin（貪婪放大抽 coin）。
+		var deficit_severity: float = clampf((DISTRIB_DEFICIT_DAYS - runway) / DISTRIB_DEFICIT_DAYS, 0.0, 1.0)
+		var relief_term: float = deficit_severity * (0.3 + honor)
+		var coin_term: float = price_factor * food_val * qty * (0.3 + greed) / DELIVER_PAYOFF_NORM
+		var u: float = relief_term + coin_term
+		if u > best_util:
+			best_util = u
+			best = {"qty": qty, "mpos": mpos, "oid": oid, "rid": rid}
+	if best.is_empty():
+		return out
+	var to_task: Dictionary = {
+		"task": TeamData.TASK_CONVOY, "target": best["mpos"], "cargo": {"food": best["qty"]},
+		"kind": "distribute", "order_id": int(best["oid"]), "terminus_team_id": int(best["rid"]),
+		"price_factor": price_factor, "delegate": true,
+	}
+	var delay: float = _estimate_delay_days(team, to_task)
+	out.append({
+		"util": _candidate_util(clampf(best_util, 0.0, GOAL_UTIL_CAP), ctx, delay),
+		"to_task": to_task, "label": "distribute_food", "delegate": true,
+	})
+	return out
+
+# 居民 food runway（複用 resource_system:126 算式：effective_food / burn）。純讀零 RNG。
+static func _resident_food_runway(state: WorldState, resident: TeamData) -> float:
+	var pop: int = resident.population + resident.minor_population
+	if pop <= 0:
+		return 9999.0
+	var burn: float = float(pop) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+	if burn <= 0.0:
+		return 9999.0
+	return ResourceSystem.effective_food(state, resident) / burn
 
 # ★後勤 SLICE A（spec 2026-07-31 訂正版 §2）：surplus holder + 知 demand 市場（belief:親聞 buy 單）→ deliver convoy candidate。
 # 走 util 秤入 argmax（非 scripted；不 gate ARCHETYPE_TRADE——任何 surplus holder，生產隊菜單缺這個=GATE-B 根）。

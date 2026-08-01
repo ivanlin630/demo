@@ -841,6 +841,7 @@ func _evaluate_all_body(state: WorldState, _team_ids: Array) -> void:
 		if _is_resident_team(state, team):
 			_evaluate_uprising(state, team)
 			_evaluate_owner_contact(state, team)
+			_tick_resident_unrest(state, team)   # ★SLICE B D:deficit→unrest / fed→relief（餵現成 defection≥20）
 		if SimRunner.phase_timing: _t3 = _fai_pht("loop3.outpost", _t3)
 		_update_equip_order(state, team)
 		# anon_combat_skill / anon_wage 改 computed（AnonTierSystem），不再主動更新
@@ -2922,8 +2923,8 @@ func _pick_or_promote_advisor(state: WorldState, team: TeamData) -> int:
 # 接既有 SubteamSystem.dispatch（advisor+settler pop+action task/target）。回 true=派出成功。
 func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) -> bool:
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
-	# ★後勤 SLICE A：deliver convoy 分支（送 surplus 到 demand 市場結買單）→ 派 porter 子隊。
-	if String(td.get("kind", "")) == "deliver":
+	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
+	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
 		return _dispatch_convoy(state, team, td)
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
@@ -2943,6 +2944,17 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	return sub_id != -1
 
 # ★後勤 SLICE A（spec 2026-07-31 訂正版 §3）：派 porter 子隊送 surplus 到 demand 市場（FETCH cargo=exact load，conserving）。
+const UNREST_STARVE_DAYS: float = 2.0     # ★SLICE B D — 居民 runway < 此=持續 deficit→unrest+（餵 defection≥20）
+# ★SLICE B D：居民 deficit→unrest / 受補回升→relief（per-cadence，餵現成 unrest_turns≥20 defection）。純算術零 RNG。
+func _tick_resident_unrest(state: WorldState, team: TeamData) -> void:
+	var runway: float = GoalResolver._resident_food_runway(state, team)
+	if runway < UNREST_STARVE_DAYS:
+		UnrestBank.add(team, 1, "領主斷糧/剝削")   # 持續斷糧/剝削買不夠 → 民怨↑
+		if Probe.enabled: Probe.bump("distribute.unrest_add")
+	elif runway > GoalResolver.DISTRIB_DEFICIT_DAYS and team.unrest_turns > 0:
+		UnrestBank.reduce(team, 1, "領主施捨")   # 受補回升安全線 → 民怨↓
+		if Probe.enabled: Probe.bump("distribute.unrest_reduce")
+
 const CONVOY_PORTER_POP: int = 2          # TEST VALUE — porter 子隊 pop（小，只搬貨）
 const CONVOY_MIN_PARENT_POP: int = 4      # TEST VALUE — 母隊抽 porter 後留守下限（比 build gate 10 輕，porter 小）
 const CONVOY_CARGO_CAP: float = 200.0     # TEST VALUE — 單趟載重上限
@@ -2983,8 +2995,12 @@ func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool
 	sub.task_extra_data = {
 		"convoy_phase": "OUTBOUND", "cargo_res": res, "cargo_qty": load,
 		"market_pos": target, "home_pos": team.tile_pos, "order_id": int(td.get("order_id", -1)),
+		# ★SLICE B：distribute convoy 帶 kind + price_factor（DELIVER 注入 override_ask=local_value×price_factor）。deliver 走 -1 現行。
+		"convoy_kind": String(td.get("kind", "deliver")),
+		"price_factor": float(td.get("price_factor", -1.0)),
 	}
 	Probe.bump("convoy.dispatch")
+	if String(td.get("kind", "")) == "distribute": Probe.bump("distribute.dispatch")   # SLICE B tap
 	Probe.bump("convoy.fetch")
 	if Probe.enabled:
 		Probe.add_amount("convoy.cargo_out", load)
