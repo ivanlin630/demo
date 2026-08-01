@@ -758,10 +758,14 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 			# ★後勤 SLICE A refine：convoy porter DELIVER → 傳 cargo_qty 當 deliver_cargo（賣 full cargo 繞 reserve）；normal 傳 -1。
 			# ★key：task_extra_data 存 cargo_res/cargo_qty（非 "cargo" dict）——只對 porter 的 cargo_res 傳。
 			var dc: float = -1.0
+			var oask: float = -1.0   # ★SLICE B：distribute 注入 override_ask=local_value×price_factor（給/公道/高價光譜）
 			if visitor.task_extra_data.has("convoy_phase") \
 					and res == String(visitor.task_extra_data.get("cargo_res", "")):
 				dc = float(visitor.task_extra_data.get("cargo_qty", -1.0))
-			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv, dc):
+				if String(visitor.task_extra_data.get("convoy_kind", "")) == "distribute":
+					var pf: float = float(visitor.task_extra_data.get("price_factor", 1.0))
+					oask = maxf(TradeValuation.local_value(owner, res, state) * pf, 0.0)   # honor→0 免費/greed→markup 高價
+			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv, dc, oask):
 				dealt = true
 	if not saw_live_order:
 		Probe.bump("trade.market_bail.no_board_order")   # 板上無活單（29 bail 因可觀測）
@@ -813,10 +817,14 @@ func _market_visitor_buy(state: WorldState, visitor: TeamData, owner: TeamData, 
 # ★deliver_cargo: >=0 = convoy DELIVER（sellable=cargo 待交付、繞 porter reserve；cargo 語意非 holding，非 scripted）；
 #   <0 = normal team sell（sellable=holding−reserve 既有不變，sim_runner:380 caller 回歸）。
 func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData, tile: HexTileData,
-		oid: int, res: String, order_rem: int, owner_lv: Dictionary, deliver_cargo: float = -1.0) -> bool:
+		oid: int, res: String, order_rem: int, owner_lv: Dictionary, deliver_cargo: float = -1.0,
+		override_ask: float = -1.0) -> bool:
+	# ★SLICE B override_ask: >=0=distribute 領主注入 ask（=local_value×price_factor）；==0=免費(仁君)跳 owner-coin/bid bail;
+	#   <0=現行 local_value 內算（normal trade + deliver 零變、guard 全不動）。付費端(>0)保留 affordability cap。
 	if owner == null: Probe.bump("trade.market_bail.sell_ownerless"); return false   # 無主 outpost 無 coin 收購
+	var free_dist: bool = override_ask == 0.0   # 仁君免費分配
 	var ocoin: float = float(owner.resources.get("coin", 0))
-	if ocoin <= 0.0: Probe.bump("trade.market_bail.sell_owner_no_coin"); return false
+	if not free_dist and ocoin <= 0.0: Probe.bump("trade.market_bail.sell_owner_no_coin"); return false
 	var sellable: float
 	if deliver_cargo >= 0.0:
 		sellable = maxf(minf(deliver_cargo, float(visitor.resources.get(res, 0))), 0.0)   # convoy:賣 cargo 待交付（繞 reserve；cap 實有防超賣）
@@ -824,20 +832,28 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 		sellable = maxf(ResourceSystem.effective_holding(state, visitor, res)
 			- TradeValuation.reserve(visitor, res, TradeValuation.leader_vals(state, visitor), state), 0.0)
 	if sellable <= 0.0: Probe.bump("trade.market_bail.sell_no_surplus"); return false
-	var bid: float = TradeValuation.local_value(owner, res, state)
-	if bid <= 0.0: Probe.bump("trade.market_bail.sell_no_price"); return false
-	var qty: int = int(minf(minf(float(order_rem), sellable), ocoin / bid))
+	var bid: float = override_ask if override_ask >= 0.0 else TradeValuation.local_value(owner, res, state)
+	if not free_dist and bid <= 0.0: Probe.bump("trade.market_bail.sell_no_price"); return false
+	# 免費分配跳 affordability(ocoin/bid div-by-0)；付費端保留 affordability cap（居民買可負擔量,買不夠→deficit 殘留=苛捐雜稅）。
+	var qty: int
+	if free_dist:
+		qty = int(minf(float(order_rem), sellable))
+	else:
+		qty = int(minf(minf(float(order_rem), sellable), ocoin / bid))
 	if qty <= 0:
-		if ocoin / bid < 1.0: Probe.bump("trade.market_bail.sell_owner_cant_afford")
+		if not free_dist and ocoin / bid < 1.0: Probe.bump("trade.market_bail.sell_owner_cant_afford")
 		else: Probe.bump("trade.market_bail.sell_zero_qty")
 		return false
 	var deposited: float = TileBank.deposit(tile, res, float(qty), "market_buy_in")   # cap 限
 	var q: int = int(deposited)
 	if q <= 0: Probe.bump("trade.market_bail.sell_storage_full"); return false
 	ResourceSystem.spend_holding(state, visitor, res, float(q))
-	ResourceBank.add(visitor, "coin", q * bid, "market_sell_coin_in")
-	ResourceBank.add(owner, "coin", -(q * bid), "market_sell_coin_out")
+	ResourceBank.add(visitor, "coin", q * bid, "market_sell_coin_in")     # bid=0 → coin no-op（免費）
+	ResourceBank.add(owner, "coin", -(q * bid), "market_sell_coin_out")   # 付費端居民付 coin→領主收（coin 守恆）
 	_settle_owner_order(owner, tile, oid, q)
+	if override_ask >= 0.0 and Probe.enabled:
+		Probe.bump("distribute.deliver")   # SLICE B tap:分配真交付
+		Probe.add_amount("distribute.food_delivered", float(q))
 	return true
 
 # 成交 coin 入 owner team；owner 已滅 → 入 tile.public_storage.coin（CoinAudit 池內不蒸發）。

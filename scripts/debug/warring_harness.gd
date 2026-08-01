@@ -105,6 +105,8 @@ const PROBE_KEYS: Array = [
 	"resume.reject_combat", "resume.reject_starving", "resume.reject_owner", "resume.reject_resident", "resume.reject_busy",
 	# ★後勤 SLICE A：供給-delivery convoy（GATE-B 撮合物理送貨）——dispatch/fetch/deliver/return funnel + DELIVER 成交結果
 	"convoy.dispatch", "convoy.fetch", "convoy.deliver", "convoy.return", "convoy.deliver_settled",
+	# ★後勤 SLICE B：領主分配政策（distribute dispatch/deliver + unrest 耦合）
+	"distribute.dispatch", "distribute.deliver", "distribute.unrest_add", "distribute.unrest_reduce",
 ]
 
 # ★construction tap samples（一階根 payload：task_after / ct_task / ct_reason / candidates 等，counts 只給階段、samples 給 why）
