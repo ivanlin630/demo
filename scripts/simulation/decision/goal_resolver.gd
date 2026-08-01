@@ -137,37 +137,62 @@ static func _deliver_candidates(state: WorldState, team: TeamData, ctx: Decision
 	var buy_orders: Array = OrderSystem.new().received_buy_orders(state, team)
 	if buy_orders.is_empty():
 		return out
-	var seen_res: Dictionary = {}   # 每 res 一 candidate（取先到=近市場，determinism 靠 order 順序）
+	# ★★flow-fix：LIVE-SCAN 在途 convoy 認領（每 order_id 已被 active convoy 認領的 cargo 量）——散未填單、不全堆同單。
+	# 鎖 live-scan（禁 state-registry）：死 porter 自動離 state.teams=認領自動失效、結構免疫漏清幽靈認領。純狀態零 RNG。
+	var claimed: Dictionary = {}
+	for tid in state.teams:
+		var pt: TeamData = state.teams[tid]
+		if pt.task_extra_data.has("convoy_phase"):
+			var coid: int = int(pt.task_extra_data.get("order_id", -1))
+			if coid != -1:
+				claimed[coid] = float(claimed.get(coid, 0.0)) + float(pt.task_extra_data.get("cargo_qty", 0.0))
+	# 散選：掃未填(effective_rem>0)買單，util/gain 秤選 best（非 scripted round-robin；每缺料買家有車去）。
+	var best_gain: float = 0.0
+	var best: Dictionary = {}
+	var reserve_cache: Dictionary = {}   # 每 res 貴的 reserve/effective_holding 只算一次
 	for o in buy_orders:
 		var res: String = String(o.get("res", ""))
-		if res == "" or seen_res.has(res) or not (res in CONVOY_RES):
+		if res == "" or not (res in CONVOY_RES):
 			continue
 		if int(o.get("origin_team", -1)) == team.team_id:
 			continue   # 自己的買單不送給自己
 		if float(team.resources.get(res, 0)) <= DELIVER_MARGIN:
-			continue   # ★廉價 raw-holding 前濾（免對持有極少的 res 呼貴的 reserve/need_keep）
+			continue   # ★廉價 raw-holding 前濾（免貴 reserve）
 		var mpos = o.get("pos", Vector2i.ZERO)
 		if not (mpos is Vector2i) or mpos == Vector2i(-999, -999) or mpos == team.tile_pos:
 			continue
-		seen_res[res] = true   # 貴檢查每 unique res 只一次
-		var surplus: float = ResourceSystem.effective_holding(state, team, res) \
-			- TradeValuation.reserve(team, res, lv, state)
+		var oid: int = int(o.get("order_id", -1))
+		var eff_rem: float = float(o.get("qty", 0)) - float(claimed.get(oid, 0.0))   # 扣在途認領
+		if eff_rem <= 0.0:
+			continue   # ★該單已被在途 convoy 認領滿 → 跳（散到別單）
+		var surplus: float = reserve_cache.get(res, -1.0)
+		if surplus < 0.0:
+			surplus = ResourceSystem.effective_holding(state, team, res) \
+				- TradeValuation.reserve(team, res, lv, state)
+			reserve_cache[res] = surplus
 		if surplus <= DELIVER_MARGIN:
-			continue   # 無真餘量（守活命/建設料 reserve）
-		var qty: float = minf(surplus, float(o.get("qty", 0)))
+			continue   # 無真餘量
+		var qty: float = minf(surplus, eff_rem)   # ★cap 到 effective_rem（不過載、不搶已認領量）
 		if qty < 1.0:
 			continue
-		var bid: float = TradeValuation.local_value(team, res, state)   # 市場估值 proxy（coin gain 秤）
-		var payoff: float = clampf(qty * bid / DELIVER_PAYOFF_NORM, 0.0, GOAL_UTIL_CAP)
-		var to_task: Dictionary = {
-			"task": TeamData.TASK_CONVOY, "target": mpos, "cargo": {res: qty},
-			"kind": "deliver", "order_id": int(o.get("order_id", -1)), "delegate": true,
-		}
-		var delay: float = _estimate_delay_days(team, to_task)
-		out.append({
-			"util": _candidate_util(payoff, ctx, delay),
-			"to_task": to_task, "label": "deliver_" + res, "delegate": true,
-		})
+		var bid: float = TradeValuation.local_value(team, res, state)
+		var gain: float = qty * bid
+		if gain > best_gain:
+			best_gain = gain
+			best = {"res": res, "qty": qty, "mpos": mpos, "oid": oid}
+	if best.is_empty():
+		return out
+	# 生 best 未填單的 deliver candidate（散:不同賣方/cadence 各挑未認領 best 單）。
+	var to_task: Dictionary = {
+		"task": TeamData.TASK_CONVOY, "target": best["mpos"], "cargo": {best["res"]: best["qty"]},
+		"kind": "deliver", "order_id": int(best["oid"]), "delegate": true,
+	}
+	var payoff: float = clampf(best_gain / DELIVER_PAYOFF_NORM, 0.0, GOAL_UTIL_CAP)
+	var delay: float = _estimate_delay_days(team, to_task)
+	out.append({
+		"util": _candidate_util(payoff, ctx, delay),
+		"to_task": to_task, "label": "deliver_" + String(best["res"]), "delegate": true,
+	})
 	return out
 
 # ★S5 委派變體（組件 D）：build/settle 型 action 產「派子隊做」變體。★gate② 正解:applicable=真 viability
