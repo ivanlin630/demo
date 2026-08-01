@@ -58,12 +58,8 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
 const ABSORB_DRIVE_BASE: float = 1.0         # TEST VALUE — T3 正規化：吸納量級→[0,1]（1.2→1.0）
 const REP_MAGNET_W: float = 1.0              # TEST VALUE — 名聲磁鐵 §3 投靠加成權重（高名聲 host 翻贏逃）
-# ★乙 整併 util boost（de-patch util-starvation，spec 2026-08-01）：死常數過度正規化餓死整併選項→人格真放大競 argmax。
-# ★保守起步（§5 合量 tune，別定死）：起低寧欠整併也別塌 1 blob。
-const ABSORB_DRIVE_BASE_V2: float = 1.5      # TEST VALUE — base 保守抬(1.0→1.5,治①[0,1]cap;別狂拉)
-const AMB_GAIN: float = 1.5                  # TEST VALUE — 野心真放大增益(治②被閹;ambition_amp=0.5+此×gap→max~2.0/content 0.5)
-const JOIN_PROTECT_GAIN: float = 1.0         # TEST VALUE — 理性 protection urgency 增益(弱 near 強 protector 非絕境也理性投靠)
-const JOIN_DRIVE_CAP: float = 2.0            # TEST VALUE — join_drive 上界(容 protection 抬過 [0,1],競 argmax)
+# ★REVERT crank(2026-08-02)：乙 boost 常數(ABSORB_DRIVE_BASE_V2/AMB_GAIN + JOIN_PROTECT_GAIN/JOIN_DRIVE_CAP)全刪——
+# absorb+join 皆 arbitrary crank(引擎算對:小團 yield 低不吸=理性;原 join 已 fire 於 hunger/threat)。完整回 pre-ce369dca genuine。
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
@@ -136,14 +132,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。
 			# 名聲磁鐵 §3：× (1 + host protector_rep × REP_MAGNET_W)——高名聲 host 投靠翻贏逃，中性(0.5)加成小。
 			if opt != "併入": return 0.0
+			# ★REVERT crank(2026-08-02)：protection urgency 已 revert(同 absorb crank 家族)——原 join 已 fire 於 hunger/threat
+			# (genuine survival 覆蓋受威脅弱隊靠強);加的 preemptive protection=crank-leaning(case B size 不 matter)。回原 quality band。
 			# T1：剝 hunger/threat urgency(移 coeff)，保名聲磁鐵品質(高名聲 host 投靠更值)。
-			var quality: float = 0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5
-			# ★乙 boost：理性 protection urgency(治 fed 隊 join util 太弱、只絕境 spike)——near 好 protector × 求生欲 × 低野心
-			# → 健康也理性投靠(趁撐得完旅程,順治 97% mid-travel 死)。★連續 weigh(reviewer ② 複驗:禁 if ambition>X,全連續乘)。
-			var survival: float = float(ctx.leader_values.get("求生欲", 0.5))
-			var low_amb: float = 1.0 - clampf(float(ctx.leader_values.get("野心", 0.5)), 0.0, 1.0)
-			var protection: float = JOIN_PROTECT_GAIN * ctx.best_protector_rep * survival * low_amb
-			return clampf(quality + protection, 0.0, JOIN_DRIVE_CAP)
+			return clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
 			# T1：剝 hunger urgency(移 coeff)。可耕地已 gate→品質 1.0。
@@ -237,12 +229,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# §HOW-8 完整 utility：資源可負擔(resource_slack) × 期待收益(absorb_yield) × 擴展需求(ambition_gap)。
 			# 個性(野心+仁慈)在 weight。擴張-class 公平競秤（禁硬優勢；征服真划算而贏=保留不動）。
 			if opt != "吸納" or ctx.absorb_target_id == -1: return 0.0
-			# ★乙 boost：野心當強乘數(治②被閹×0.3 band)+base 保守抬(治①[0,1]cap)。yield/slack gate 保留(防亂吸)。
-			# ambition_amp=0.5+AMB_GAIN×gap_norm(gap 滿→amp~2.0/content→0.5)=高野心強隊 util 競 argmax、低野心 stay(有大有小)。
-			var amb_norm: float = clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
-			var ambition_amp: float = 0.5 + AMB_GAIN * amb_norm
+			# ★REVERT crank(2026-08-02 用戶戳破+blueprint 令)：乙 boost 是 arbitrary crank(低 util 誤判 starvation)。
+			# 引擎 0.104 算對(小團 yield 真值低=隊不吸=理性);真 root=規模經濟未模型化(genuine finding)非 tuning。回原公式。
+			var amb_gap: float = clampf(float(ctx.ambition_gap) * 0.3, 0.0, 1.0)
 			var yield_pos: float = clampf(ctx.absorb_yield, 0.0, 1.0)   # 負 yield=純負擔→0=不吸(gate#1)
-			return ABSORB_DRIVE_BASE_V2 * ctx.resource_slack * (0.5 + 0.5 * yield_pos) * ambition_amp
+			return ABSORB_DRIVE_BASE * ctx.resource_slack * (0.5 + 0.5 * yield_pos) * (0.5 + 0.5 * amb_gap)
 		"train_drive":
 			# 野心階梯溶入（序3）：FORCE 累積/擴張階練兵 ambient drive（archetype/rung 導出於 ctx）。
 			if opt != "訓練": return 0.0

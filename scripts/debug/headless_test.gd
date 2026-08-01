@@ -1976,8 +1976,8 @@ func _test_term_normalize_t3() -> void:
 	assert(absf(eo - 1.0) < 1e-5, "商隊+貨+arb→economic_opp=1.0")
 	ctx.absorb_target_id = 1; ctx.resource_slack = 1.0; ctx.absorb_yield = 1.0; ctx.ambition_gap = 10
 	var ab := DecisionTerms.eval("absorb_drive", ctx, "吸納")
-	# ★乙 boost：absorb_drive 野心真放大過 [0,1] 競 argmax（de-patch util-starvation，spec 2026-08-01）；上界=BASE_V2×(0.5+AMB_GAIN)。
-	assert(ab >= 0.0 and ab <= DecisionTerms.ABSORB_DRIVE_BASE_V2 * (0.5 + DecisionTerms.AMB_GAIN) + 0.01, "absorb_drive ≥0 且 ≤上界，got %f" % ab)
+	# ★REVERT crank(2026-08-02)：absorb_drive 回原 genuine 公式 [0,1]（boost 已 revert）。
+	assert(ab >= 0.0 and ab <= 1.0, "absorb_drive ∈[0,1]，got %f" % ab)
 	print("[TEST] term_normalize_t3 PASS")
 
 # term-scale normalize T1：survival-class 8 term eval 正規化 [0,1]（剝 urgency 移 coeff）。
@@ -2011,8 +2011,8 @@ func _test_term_normalize_t1() -> void:
 	# join_drive(併入) ∈[0,1]
 	ctx.best_protector_rep = 0.5
 	var jd := DecisionTerms.eval("join_drive", ctx, "併入")
-	# ★乙 boost：join_drive 理性 protection urgency 可過 [0,1]（上界 JOIN_DRIVE_CAP），競 argmax。
-	assert(jd >= 0.0 and jd <= DecisionTerms.JOIN_DRIVE_CAP + 0.01, "併入 ≥0 且 ≤JOIN_DRIVE_CAP，got %f" % jd)
+	# ★REVERT crank(2026-08-02)：join_drive 回原 quality band [0,1]（protection urgency 已 revert）。
+	assert(jd >= 0.0 and jd <= 1.0, "併入 ∈[0,1]，got %f" % jd)
 	# occupy_drive(佔村) = 1.0(無 outpost)/0.3(有)
 	ctx.has_occupy_target = true; ctx.has_own_outpost = false
 	assert(DecisionTerms.eval("occupy_drive", ctx, "佔村") == 1.0, "佔村無outpost=1.0")
