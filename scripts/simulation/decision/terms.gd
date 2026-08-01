@@ -58,10 +58,8 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
 const ABSORB_DRIVE_BASE: float = 1.0         # TEST VALUE — T3 正規化：吸納量級→[0,1]（1.2→1.0）
 const REP_MAGNET_W: float = 1.0              # TEST VALUE — 名聲磁鐵 §3 投靠加成權重（高名聲 host 翻贏逃）
-# ★REVERT crank(2026-08-02)：absorb boost 常數(ABSORB_DRIVE_BASE_V2/AMB_GAIN)已刪——arbitrary crank,引擎 0.104 算對。
-# join protection urgency 常數保留(B 條:弱靠強 survival 可能 genuine,magnitude 待 systems+reviewer 判,先不 revert)。
-const JOIN_PROTECT_GAIN: float = 1.0         # TEST VALUE — 理性 protection urgency 增益(弱 near 強 protector 非絕境也理性投靠)
-const JOIN_DRIVE_CAP: float = 2.0            # TEST VALUE — join_drive 上界(容 protection 抬過 [0,1],競 argmax)
+# ★REVERT crank(2026-08-02)：乙 boost 常數(ABSORB_DRIVE_BASE_V2/AMB_GAIN + JOIN_PROTECT_GAIN/JOIN_DRIVE_CAP)全刪——
+# absorb+join 皆 arbitrary crank(引擎算對:小團 yield 低不吸=理性;原 join 已 fire 於 hunger/threat)。完整回 pre-ce369dca genuine。
 # capability grounding（裁2）：attack/loot eval 疊 self 戰力閘。有效武裝比達此→capability 足(=1)，
 # 無牙→0（送死沒人幹，世界事實非 tag-label）。待平衡校。
 const VIABLE_ARMED_RATIO: float = 0.3   # TEST VALUE
@@ -134,14 +132,10 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# §HOW-8 併入 drive = 生存壓（食壓 OR 威脅認慫求保護）；個性(求生欲)在 weight。
 			# 名聲磁鐵 §3：× (1 + host protector_rep × REP_MAGNET_W)——高名聲 host 投靠翻贏逃，中性(0.5)加成小。
 			if opt != "併入": return 0.0
+			# ★REVERT crank(2026-08-02)：protection urgency 已 revert(同 absorb crank 家族)——原 join 已 fire 於 hunger/threat
+			# (genuine survival 覆蓋受威脅弱隊靠強);加的 preemptive protection=crank-leaning(case B size 不 matter)。回原 quality band。
 			# T1：剝 hunger/threat urgency(移 coeff)，保名聲磁鐵品質(高名聲 host 投靠更值)。
-			var quality: float = 0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5
-			# ★乙 boost：理性 protection urgency(治 fed 隊 join util 太弱、只絕境 spike)——near 好 protector × 求生欲 × 低野心
-			# → 健康也理性投靠(趁撐得完旅程,順治 97% mid-travel 死)。★連續 weigh(reviewer ② 複驗:禁 if ambition>X,全連續乘)。
-			var survival: float = float(ctx.leader_values.get("求生欲", 0.5))
-			var low_amb: float = 1.0 - clampf(float(ctx.leader_values.get("野心", 0.5)), 0.0, 1.0)
-			var protection: float = JOIN_PROTECT_GAIN * ctx.best_protector_rep * survival * low_amb
-			return clampf(quality + protection, 0.0, JOIN_DRIVE_CAP)
+			return clampf(0.5 + ctx.best_protector_rep * REP_MAGNET_W * 0.5, 0.0, 1.0)
 		"camp_drive":
 			if opt != "紮營" or not ctx.has_farmable_tile: return 0.0
 			# T1：剝 hunger urgency(移 coeff)。可耕地已 gate→品質 1.0。

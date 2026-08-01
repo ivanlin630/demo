@@ -2011,8 +2011,8 @@ func _test_term_normalize_t1() -> void:
 	# join_drive(併入) ∈[0,1]
 	ctx.best_protector_rep = 0.5
 	var jd := DecisionTerms.eval("join_drive", ctx, "併入")
-	# ★乙 boost：join_drive 理性 protection urgency 可過 [0,1]（上界 JOIN_DRIVE_CAP），競 argmax。
-	assert(jd >= 0.0 and jd <= DecisionTerms.JOIN_DRIVE_CAP + 0.01, "併入 ≥0 且 ≤JOIN_DRIVE_CAP，got %f" % jd)
+	# ★REVERT crank(2026-08-02)：join_drive 回原 quality band [0,1]（protection urgency 已 revert）。
+	assert(jd >= 0.0 and jd <= 1.0, "併入 ∈[0,1]，got %f" % jd)
 	# occupy_drive(佔村) = 1.0(無 outpost)/0.3(有)
 	ctx.has_occupy_target = true; ctx.has_own_outpost = false
 	assert(DecisionTerms.eval("occupy_drive", ctx, "佔村") == 1.0, "佔村無outpost=1.0")
