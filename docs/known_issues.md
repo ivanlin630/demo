@@ -1017,4 +1017,6 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
 
 ### ✅甲 SLICE B 領主分配政策（統一光譜）merged（2026-08-01，4cc5da15）
 **給免費(義氣0.33)/賣公道(1.0)/賣高價(貪3.0)/賣外拋棄子民**＝一 argmax 一 convoy+貿易脊椎、人格 weigh 位置、**零新市場**（`_distribute_candidates` + `override_ask` 注入現成 `_market_visitor_sell`）。dev-verify lord_distribution_bed 6/6（光譜連續非 gate + 免費/付費 coin 守恆）+ merged main 驗（constitution 74 + bed ALL PASS + headless=baseline 5-FAIL 0-new + determinism byte-identical）。R² 兩輪 CLEAN（seam + 訂正 bid<=0 override_ask + 融合驗真 code 四約束 grep）。
-- **★§5 一次合量 must-check（execution-end、非假 done）**：warring `distribute.dispatch=0`（此窗 scarce 領主無餘糧）＝**organic firing 未證**（unrest 耦合活 add137/reduce5）。**§5 整世界合量必查「分配真 fire?（organic surplus→distribute）」**，若仍 0→finding（threshold 調 / 經濟 lord-surplus 生成 / distribution 條件）。[[feedback_verify_execution_end]]。
+- **★§5 一次合量 must-check（execution-end、非假 done）**：warring `distribute.dispatch=0`（此窗 scarce 領主無餘糧）＝**organic firing 未證**（unrest 耦合活 add137/reduce5＝接口通）。**§5 整世界合量必查「分配真 fire?」**。
+  - **★§5 量測條件（blueprint 定 2026-08-01）**：**必在「領主有餘糧」條件跑**（和平 economy/surplus 累積窗）才測得到分配 fire + 光譜三端分化，否則 warring 稀缺又測 0＝誤判「分配壞」（其實「沒糧可分」）。**tension**：warring 多隊利乙 join/吸納 vs surplus 利甲 distribute——§5 設計需兼顧（長窗經濟流動累 surplus / 混合場景 / 或分條件），設計時（乙 ready 後）解。
+  - **tap 分帳**：分配 fire 率 + 光譜分化(義氣給/貪高價/棄外) + unrest 餵 + 乙小併大 + 經濟流動＝沙盤活了嗎。若仍 0→finding（threshold 調 / 經濟 lord-surplus 生成）。[[feedback_verify_execution_end]]。
