@@ -1007,11 +1007,14 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
   - 若 **130+ 是 target** → O(N²) 是真 gameplay perf 問題、要**優化 architecture**（每 tick 全隊掃 → 空間 index/增量/cadence 攤平）。
 - **分流序**：①logistics arc（flow-fix merge → SLICE B/C）優先不動 ②perf/team-count = 後-logistics backlog（blueprint 先定 50 vs 130+ 設計、systems 再評 O(N²) architecture 可修否/成本）。連 [[reference_hob_perf_protocol]]。
 
-### ⏳勢力規模動態 arc — join resolve 瓶頸（2026-08-01 blueprint 診斷 done，後-logistics backlog，串 perf 同根）
+### ⏳勢力規模動態 arc — 整併觸發太晚（2026-08-01 measure REFRAME，乙 in-flight，串 perf 同根）
 **世界塌全小**（133隊全~2.9人、無大團、rung≥2 僅 6隊）＝**「併小成大」沒運作**（blueprint QA 現成資料坐實）：
 - **現跑的 merge（322）= 母隊自我回收臨時工子隊**（Team40 派 Team61→完工併回、pop 恢復原狀非變大）＝**錯的整併、對 cross-lineage power consolidation 零效**。
-- **真正能併獨立小團進大隊 = join（投靠/併入）**，但 **dispatch 155→resolve 僅 24（85% 半路蒸發）+ accept 僅 46%**＝量小又卡在 resolve。
-- **∴根 = join dispatch→resolve 瓶頸（85% 蒸發）= 同 session「dispatch 多 completion 少 / 決策 fire 卻不執行」家族**（means-end/trade/founding/convoy 同型，連 [[feedback_verify_execution_end]] + [[project_economy_decision_underfire_metaroot]]）。
-- **★串 perf 同根**（上方 O(N²)/世界膨脹 130+）：世界膨脹 130+ 全小 **←** join consolidation 不運作。**修 join resolve → 隊少（解 perf）+ 隊大（legibility + rung 長得起來）＝一根解 perf+規模+legibility**。∴ blueprint「~50 legible vs 130+」設計問題的**機制答案**＝修 join（非硬 cap 隊數）。
-- **arc 方向**（backlog）：**非 build 新整併機制、是 de-patch join resolve 瓶頸**（measure-first 查 85% 蒸發為何：gated? argmax 輾? ——★禁靜態斷言、必 dump 真值，[[feedback_measure_peroption_util_before_decision_claim]] 本 session 6-7 駁）+ 可能讓大團 rung 長得起來。
-- **序**：非緊急、**flow-fix 優先**、logistics arc（SLICE B/C）後才撿。記此串起 perf+規模+legibility 三合一根。
+- **★2026-08-01 measure+結構讀 REFRAME（非 resolve 瓶頸、blueprint 自認「85% 蒸發」猜錯）**：JOIN「併入」trajectory 量（3seed×1mo）＝dispatch 33→arrive 1→resolve 1，**97% 蒸發在 dispatch→arrival（mid-travel）**、非 gate(0)/非 resolver reject(0)。**resolver 本身好（1/1）**。
+  - **真根＝觸發太晚**：JOIN「併入」只在 distress 才可選（options.gd:137-141 `food_days<DESPERATION_DAYS OR 認慫strong+threat`）、**無理性整併觸發** → 絕境隊已 <3 天糧派 JOIN → **物理到不了多天外 host** → 半路死：belief-stale FREEZE（target >3天沒見→`move_target=(-1,-1)`→凍住 movement:93）/ 非 sticky churn（每天重評 faction_ai:1536 註稱 sticky 但只 `pass`）/ famine 死（grace 7d resource:26）。共同根＝**觸發太晚沒糧撐完旅程**。健康小隊永不理性併大。
+  - **★另有 pull-side「吸納」**（options.gd:154-166、強隊主動吸弱鄰、TASK_MERGE、**無 food gate**→強隊有糧撐旅程）＝更健康整併槓桿。**blueprint lean 吸納-主 + 併入-補**（等吸納 trajectory measure 回來才 commit final 方向、不半套硬拍）。
+  - **arc 方向**：de-patch＝**加理性整併觸發**（弱隊趁健康早併/強隊吸弱、util weigh 野心stay/求生join → 有大有小 ~50、非塌1）走既有 argmax+人格 weigh（統一非特判）。**串 perf 同根**（O(N²)/膨脹 130+）＝一根解 perf+規模+legibility。in-flight（乙、logistics arc）。連 [[feedback_verify_execution_end]] + [[project_economy_decision_underfire_metaroot]]。
+
+### ✅甲 SLICE B 領主分配政策（統一光譜）merged（2026-08-01，4cc5da15）
+**給免費(義氣0.33)/賣公道(1.0)/賣高價(貪3.0)/賣外拋棄子民**＝一 argmax 一 convoy+貿易脊椎、人格 weigh 位置、**零新市場**（`_distribute_candidates` + `override_ask` 注入現成 `_market_visitor_sell`）。dev-verify lord_distribution_bed 6/6（光譜連續非 gate + 免費/付費 coin 守恆）+ merged main 驗（constitution 74 + bed ALL PASS + headless=baseline 5-FAIL 0-new + determinism byte-identical）。R² 兩輪 CLEAN（seam + 訂正 bid<=0 override_ask + 融合驗真 code 四約束 grep）。
+- **★§5 一次合量 must-check（execution-end、非假 done）**：warring `distribute.dispatch=0`（此窗 scarce 領主無餘糧）＝**organic firing 未證**（unrest 耦合活 add137/reduce5）。**§5 整世界合量必查「分配真 fire?（organic surplus→distribute）」**，若仍 0→finding（threshold 調 / 經濟 lord-surplus 生成 / distribution 條件）。[[feedback_verify_execution_end]]。
