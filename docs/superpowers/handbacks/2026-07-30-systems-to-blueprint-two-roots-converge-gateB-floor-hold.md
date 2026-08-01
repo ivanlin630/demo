@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★重診收斂:兩根收斂GATE-B買撮合+floor診斷部分錯建議hold·①construct.start=14是升級非founding(floor護住升級6→7),founding-build從不dispatch(action=build=0/indep.found_*=0)·★buy-preempts-founding坐實(goal_resolver:200-203買候選在:206 founding之前,has_specie+市場可達→回買候選永不到founding):①隊coin+order_placed=1833市場可達→買候選永遠先返回founding從不生成·但買從不成交(GATE-B order_fulfilled=0)→material永不滿足→一直買從不found=雙重束縛·∴complete_build=0非bug(founding=正確fallback買=primary),binding根=GATE-B買撮合(已診斷known_issues:85-87=②trade根)·兩根收斂:①founding被②trade preempt+失敗擋·floor=正確construction-commitment修(非凍驗證+升級6→7)但target未達(founding從不dispatch)+觸RELEASED persist+gain邊際→建議HOLD不bank·攻GATE-B(收斂binding根,已知不pivot)] 兩根收斂GATE-B買撮合(founding被買preempt+買失敗雙束縛,complete_build=0非bug)。floor診斷部分錯(14=升級)建議hold。攻GATE-B。"
 ---
 

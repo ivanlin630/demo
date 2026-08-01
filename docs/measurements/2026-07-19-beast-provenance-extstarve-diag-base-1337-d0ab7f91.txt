@@ -1,0 +1,6 @@
+[EXT-STARVE-DIAG] tid=48 beast_kind= pop=0 famine=33.8
+[EXT-STARVE-DIAG] tid=58 beast_kind= pop=0 famine=33.3
+[EXT-STARVE-DIAG] tid=52 beast_kind= pop=0 famine=33.3
+[EXT-STARVE-DIAG] tid=19 beast_kind= pop=0 famine=33.3
+[EXT-STARVE-DIAG] tid=96 beast_kind= pop=0 famine=33.3
+[EXT-STARVE-DIAG] tid=35 beast_kind= pop=0 famine=33.3

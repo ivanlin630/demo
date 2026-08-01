@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[green-light·二刀 hysteresis merge-partial·QA 食安故事綠+blueprint 認可+無迴歸→MERGE·殘留③④QA 逐tick 翻案 largely spurious·停切 GATE-A] 二刀 hysteresis(8c7fbd83)全條件綠:measurer(seed1337 total 絕境-45%/GATE-A bucket-53% 大勝、seed42 持平但無害且分歧有解釋[殘留是③④型非 re-cycle、hysteresis 專治 re-cycle 所以 seed42 一致擠不出]、無新餓死)+QA 逐tick 食安故事綠(①②coherent、★③T41 翻案=合法 survival→resettle 非 bug、④T53 翻案=split 新團 stuck-recover 非 carrying-cap、殘留 largely spurious/coherent、判準絕境降達非設施數)+blueprint 認可 merge-partial+停切 GATE-A。★merge feat/gateA-return-hysteresis→main(reviewer merge-gate R²[touch0 current_task+hysteresis clause]+融合驗→merge)。你上封 residual finding 好(③scout+④薄利)但 QA 逐tick 進一步翻案③T41=coherent(非 movement bug,你 scout 查了 FLEE-gate/combat-freeze 對但沒走完整 trajectory→QA 補上=survival flee>return+主動 resettle)——③movement 刀撤(premise 被駁,blueprint 序訂正 facility-build 跳 next)。merge 後→facility-build keystone(等我 dispatch)。停切 GATE-A(job done)。"
 branch: feat/gateA-return-hysteresis
 commit: 8c7fbd83

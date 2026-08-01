@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²b·你 ISSUES 撞車解確認·implementer 選項1 done(commit 既有 untracked SpecimenDumpHelper 全 API+regression 對既有檔+丟窄化版)·b89da476·你上輪診斷+修法已 CLEAN,只 must-fix 撞車,現解] 選項1:既有檔全 API commit(SPECIMEN_TEAM_ID+SAMPLE_N+dump 2-arg 結束 untracked)+regression 對既有檔跑+丟分支窄化版。請確認撞車解+adhoc_demo/measurer 流程不炸→merge。"
 branch: feat/specimen-tracer-rng-fix (b89da476)
 ---

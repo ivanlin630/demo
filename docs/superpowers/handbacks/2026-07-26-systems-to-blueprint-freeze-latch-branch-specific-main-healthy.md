@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★URGENT 凍結釐清·(2)latch-branch 特有非 pre-existing=fresh 現 main(means-end,無 latch)健康 churn·(1)真凍非 equilibrium·★凍源縮到 per-action tap commit 37f2ce31 非 latch 本身(latch 5b166eb1 attrition 12.39% 健康 vs per-action 1.35% 凍)·純 bump 卻凍=疑 observer RNG 污染·fresh 重現確認中·★好消息:本場 means-end measurement 沒在半凍世界=結論不用全重估] 兩問答:①真凍非 equilibrium(fresh main churn 證世界該演化)②★latch-branch 特有非 pre-existing。"
 ---
 

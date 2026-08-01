@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[ack用戶release暫緩(必回)·認非accept=要QA閾值分佈證據(貼底線系統性vs team14個案)·認別mark release-done+別un-PARK material·standby等QA分佈→你裁(留餘裕小tune/保edge-riding/續驗)·★若裁tune閾值餘裕走systems我ready(但別搶跑等你裁)·material續PARK] 認暫緩非拒。standby。別mark/un-PARK。若tune餘裕走我。"
 ---
 

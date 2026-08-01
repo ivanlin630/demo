@@ -1,0 +1,76 @@
+{
+  "purpose": "blueprint HOLD要求的3項macro證據——不改tune,純產證據供blueprint判斷macro feel",
+  "compared_heads": {"main_no_S2": "3a429632", "S2_calibrated": "e3d34ffc"},
+  "raw_logs": [
+    "docs/measurements/2026-07-17-threatoracle-s2-baseline-3a429632.json",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-1337-e3d34ffc.json",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-42-e3d34ffc.json",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-4201-e3d34ffc.json",
+    "docs/measurements/2026-07-17-threatoracle-s2-specimen-v2-seed1337-e3d34ffc.log"
+  ],
+  "evidence_1_absolute_engage_rate_pct": {
+    "denominator": "decision.opt_chosen 全體總和(所有option被選中次數加總,非只threat option)",
+    "method": "post-process既有JSON dump(baseline 3a429632 vs calibrated e3d34ffc),同3 seed(1337/42/4201)×2mo,無需重跑",
+    "per_seed": {
+      "seed_1337": {"main_total_chosen": 20503, "cal_total_chosen": 18911,
+        "迎戰": {"main_pct": 0.21, "cal_pct": 3.01, "delta_pp": 2.80},
+        "備戰": {"main_pct": 1.73, "cal_pct": 4.45, "delta_pp": 2.72},
+        "求和": {"main_pct": 0.20, "cal_pct": 3.19, "delta_pp": 3.00},
+        "survival": {"main_pct": 15.39, "cal_pct": 14.44, "delta_pp": -0.95}},
+      "seed_42": {"main_total_chosen": 25977, "cal_total_chosen": 26841,
+        "迎戰": {"main_pct": 0.17, "cal_pct": 5.05, "delta_pp": 4.88},
+        "備戰": {"main_pct": 0.42, "cal_pct": 3.30, "delta_pp": 2.88},
+        "求和": {"main_pct": 0.98, "cal_pct": 4.80, "delta_pp": 3.82},
+        "survival": {"main_pct": 6.09, "cal_pct": 20.78, "delta_pp": 14.69}},
+      "seed_4201": {"main_total_chosen": 25648, "cal_total_chosen": 23965,
+        "迎戰": {"main_pct": 0.49, "cal_pct": 1.94, "delta_pp": 1.45},
+        "備戰": {"main_pct": 0.16, "cal_pct": 6.92, "delta_pp": 6.76},
+        "求和": {"main_pct": 2.01, "cal_pct": 3.43, "delta_pp": 1.42},
+        "survival": {"main_pct": 11.47, "cal_pct": 19.43, "delta_pp": 7.96}}
+    },
+    "summary": "迎戰絕對佔比：主線main<0.5%→calibrate後1.9-5.1%（+1.5~+4.9個百分點）。備戰：主線<1.8%→calibrate後3.3-6.9%。求和：主線<2.1%→calibrate後3.2-4.8%。survival：波動較大(main 6-15%→cal 14-21%,seed42尤其+14.69pp)。★絕對數字看起來遠比31x倍數溫和——engage仍是所有決策中的小眾選項(<6%)非碾平多數。"
+  },
+  "evidence_2_specimen_trace": {
+    "method": "新建bed(scripts/debug/threat_s2_macro_evidence_bed.gd,worktree未commit,不改任何既有production/tool檔)：GameSetup(seed)後掃真實leader分類4象限,sim跑進期間對匹配specimen re-query DecisionContext.gather()+DecisionEngine.rank_scored_ctx()(唯讀,suppress RNG/Probe同observer模式)在真threat_id!=-1時捕捉。★非char bed手構——真organic leader+真belief-based winnable+真need_urgency情境。",
+    "seed_1337_4mo_results": {
+      "cautious-hawk_team1": {
+        "leader": {"好戰": 0.64, "慎重": 0.88, "求生欲": 0.53},
+        "winnable": 0.111, "severity": 0.900,
+        "options": {"覓食": 0.581, "備戰": 0.298, "建設": 0.163, "求和": 0.058, "迎戰": 0.028, "survival": 0.0},
+        "final": "覓食(forage,非threat option勝出)",
+        "note": "★threat repertoire內部序符合respect-winnable故事：備戰(0.298)遠高於迎戰(0.028)——cautious-hawk確實avoid迎戰。但整體最終選中是覓食(經濟壓力當下更急),非備戰。"
+      },
+      "cautious-hawk_team10": {
+        "leader": {"好戰": 0.87, "慎重": 0.63}, "winnable": 0.083, "severity": 0.360,
+        "options": {"覓食": 0.859, "建設": 0.761, "訓練": 0.286, "攻擊": 0.163, "掠奪": 0.121, "survival": 0.0},
+        "final": "覓食",
+        "note": "severity較低(0.36)未達threat_threshold,故備戰/迎戰/求和未進applicable list——低severity下threat repertoire整組不開，非分流問題"
+      },
+      "coward_team3": {
+        "leader": {"好戰": 0.36, "求生欲": 0.64}, "winnable": 0.333, "severity": 0.133,
+        "options": {"覓食": 0.713, "建設": 0.202, "survival": 0.0},
+        "final": "覓食",
+        "note": "severity低(0.133 < threat_threshold 0.3附近)→備戰/迎戰/求和未applicable，只survival進列但util=0（威脅太輕微，求生欲高但不需真的逃）"
+      },
+      "proud-doomed_team12": {
+        "leader": {"好戰": 0.95, "慎重": 0.36}, "winnable": 0.030, "severity": 1.060,
+        "options": {"建設": 1.330, "遷移找糧": 0.850, "備戰": 0.610, "迎戰": 0.465, "紮營": 0.444, "訓練": 0.396, "求和": 0.200, "survival": 0.150},
+        "final": "建設(build，非迎戰)",
+        "note": "★★誠實揭露：這是極端案例(好戰0.95/慎重0.36/winnable僅0.03/severity達1.06接近上限)——理論上最該死戰的proud-doomed範本，但迎戰(0.465)僅排第4，輸給建設(1.330)/遷移找糧(0.850)/備戰(0.610)。連續4 tick同結果(非單點噪音)。★threat repertoire內部相對序仍合理(迎戰>紮營>求和>survival，且遠高於cautious情境下的迎戰值)，但『proud-doomed該死戰迎戰』的絕對winner故事在此specimen未organic兌現——被更急的經濟/生存options(建設/遷移找糧)蓋過。可能是calibrate dampen(CONFRONT_K=0.6+FLOOR 1.0+MAX 0.5)後迎戰整體強度被壓到連極端案例都贏不了經濟壓力，也可能是這個特定情境本身建設/遷移找糧真的更急迫(非threat機制問題)。"
+      }
+    },
+    "weak_pragmatic": "本輪(1seed×4mo)archetype pool為空(該世界沒生成好戰低+求生欲低+貪婪/信義高的leader)——非機制否證,是這個seed沒抽到這種人格組合",
+    "cross_seed_attempt": "嘗試seed42補驗但該次跑撞系統contention(wrapper tmp檔鎖,同session其他跑同時佔用)被GODOT_TIMEOUT殺,無output——非發現異常,是環境資源競爭,若systems/blueprint需要可再補跑",
+    "verdict": "★誠實判定：char bed(窄構造)的『四象限各自主導』故事在organic layer部分成立——相對排序方向對(cautious respect winnable使備戰>迎戰、proud-doomed severity高使迎戰值遠高於一般情境)。但『proud-doomed最終選中迎戰』這個具體最終贏家故事，本次抓到的唯一真實specimen反而選了建設非迎戰——calibrate後的迎戰強度可能對極端好戰案例仍不足以贏過強力經濟/生存拉力。這是calibrate的可能副作用（矯枉過正方向），非我能判斷是否可接受，如實報給blueprint/systems。"
+  },
+  "evidence_3_economy_delta_vs_main": {
+    "method": "post-process既有JSON,同3 seed×2mo,無需重跑",
+    "per_seed": {
+      "seed_1337": {"trade_chosen": "148→541(+265.5%)", "build_outpost": "35→39(+11.4%)", "farm_pos_teams": "8→10(+25.0%)", "merge_set_ok": "3→30(+900%)", "rung_ge_r1": "23→19(-17.4%)", "teams": "66→73(+10.6%)", "pop": "426→415(-2.6%)"},
+      "seed_42": {"trade_chosen": "180→481(+167.2%)", "build_outpost": "22→18(-18.2%)", "farm_pos_teams": "10→6(-40.0%)", "merge_set_ok": "21→0(-100%)", "rung_ge_r1": "18→17(-5.6%)", "teams": "61→59(-3.3%)", "pop": "421→418(-0.7%)"},
+      "seed_4201": {"trade_chosen": "130→128(-1.5%)", "build_outpost": "19→12(-36.8%)", "farm_pos_teams": "6→2(-66.7%)", "merge_set_ok": "0→0(n/a)", "rung_ge_r1": "15→21(+40.0%)", "teams": "49→51(+4.1%)", "pop": "310→321(+3.5%)"}
+    },
+    "summary": "三seed混合:trade多數上升(1337/42顯著+165~266%,4201持平)；build_outpost/farm_pos_teams三seed中2/3下降(18-67%不等,1337反升);merge/rung升降不一;世界健康(teams/pop皆個位數%變動,無崩潰)。整體不是『經濟被threat碾平』的樣貌(evidence①②已顯示threat仍是少數決策)，是economy內部分配洗牌(trade↑但settlement/build type activity在部分seed↓)。"
+  },
+  "overall_note": "3證據皆為no-code-change的純觀測產物(post-process既有數字+新增獨立debug bed,未碰任何production/既有tool檔)。evidence②誠實揭露一個具體反例(proud-doomed specimen未選迎戰)，交由blueprint/systems判斷這是calibrate過猶不及還是情境合理(economic urgency真的該贏)。"
+}

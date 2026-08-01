@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[bed dump 補·pin GATE-B co-location失敗sub-gap·peaceful_economy_bed.gd 4Q dump補印trade.market_bail.*(sell_no_surplus/buy_no_stock/buy_no_want/buy_cant_afford/buy_carry_full/buy_no_coin/buy_no_price/buy_withdraw_empty)+trade.arrive/meet/timeout+seek→arrive→fill funnel·目的:order_placed=1833但seek_market=5/arrive=40=市場互動極低撮合0,看bail breakdown定失敗在賣方(sell_no_surplus賣方不去賣surplus)vs買方(buy_no_stock granary空)vs config·純多print既有Probe.counts data零sim改·re-run落地docs/measurements標path] bed補print trade.market_bail breakdown+seek/arrive/fill funnel。純多print既有data。re-run落地→pin GATE-B co-location失敗sub-gap。"
 branch: feat/peaceful-economy-bed
 ---

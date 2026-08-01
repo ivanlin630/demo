@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²v2·糧流SLICE B訂正你3項(必回)·①硬性:配糧改sub.resources.food(frac-split實際持有非carry_capacity重量上限空放行)+B1建通用食物撥付top-up=第5真新建(food從不因cost補OUTPOST_COST無food key)+礦山bootstrap 2651-2674收編取代非疊加②引用改_dispatch_builder:2603-2698(非1250-1252母隊獨立隊路無子隊)③hunt_ev隊技能非tile+既有hunt_preview:40-46非新建+折扣公式候選(clampf(wild_game/expected_take)或e^遞減)B2 R²具體·spec同檔更新] 3項全訂正。①硬性已改sub.resources.food+top-up第5真新建。請複審→CLEAN→implementer B1。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★GATE-B真gap定案(賣方dump第一手親驗)+SLICE A scope=供給-delivery convoy·Team3(material=400 surplus)applicable只6-8 static/goal(build/maintain/求和/備戰/覓食/駐守/建設/survival)——★無『賣/去市場/deliver surplus』option·全run ever_moved=false/ever_TASK_TRADE=false/material 400→350(自耗非賣)/tile granary material=0(sell單從不deposit)·∴GATE-B真gap=(a)缺供給-delivery action:surplus holder菜單根本沒『把貨搬到交易點』option→被動sell order留家→material物理從不離賣方→買方order永不fulfilled=confirms你reframe(delivery/execution層非decision-fire)·★SLICE A scope=供給-delivery convoy:新deliver決策option(surplus+demand→派)+convoy生命週期物理送貨(FETCH surplus→OUTBOUND市場→DELIVER deposit granary→RETURN)·第一驗收=deliver convoy真派真到deposit(economy決策fire正常但這option根本不存在=非argmax輸是菜單缺)·我scope SLICE A HOW→R²" 
 ---
 

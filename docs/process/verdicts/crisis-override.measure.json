@@ -1,0 +1,45 @@
+{
+  "slice": "crisis-override",
+  "is_sim": true,
+  "measured_at_head": "e77aa99b (branch feat/crisis-override) — 泛化②絕境階梯stall-detection到OUTCOME-based跨線危機安全網(committed任何task深餓未緩→release→survival@80 preempt)，涵蓋5種stuck-task(FLEE/等待新領主/建設/外交/併入-pending)。off main d0ab7f91(godview-slice-F)。★HIGH:先於god-view D-後doom-delta讀(污染避免)。",
+  "raw_logs": [
+    "docs/measurements/2026-07-19-crisisoverride-charbed-e77aa99b.log",
+    "docs/measurements/2026-07-19-crisisoverride-constitution-e77aa99b.log",
+    "docs/measurements/2026-07-19-crisisoverride-headless-e77aa99b.log",
+    "docs/measurements/2026-07-19-crisisoverride-multiseed-e77aa99b.json",
+    "docs/measurements/2026-07-19-crisisoverride-seed1337-lockpoint-e77aa99b-decoded.log"
+  ],
+  "unit_level_gates": {
+    "char_bed_crisis_override_test": {"result": "7/7 ALL PASS(fire/recovered不fire/淺餓不fire/未到N天不fire/IDLE不fire/lazy baseline蓋+重置/5種stuck-task皆OUTCOME fire)", "verdict": "CONFIRMED"},
+    "constitution_gate": {"result": "PASS sites=64 removed=0", "verdict": "CONFIRMED"},
+    "headless_test": {"result": "comprehensive雙格式獨立重驗6/6=baseline(0 new)", "verdict": "CONFIRMED"}
+  },
+  "★tap_gap修正": "warring_harness.gd PROBE_KEYS main線缺survival.stall_exclude/boost_fire(先前desperation-ladder的fix只活在已棄置的calibration-sweep分支17fd4fc4,從沒進main線)+crisis.override_release全新tap-gap，此worktree一併補齊(純量測擴充非production邏輯)。",
+  "organic_3seed_8mo_vs_d0ab7f91_prefix_baseline": {
+    "seed_1337": {"extinct_starve": 8, "attrition_pct": 20.045045045045, "crisis_override_release": 133, "stall_exclude": 319,
+      "vs_prefix(6,19.14%)": "★extinct.starve不降反升(6→8)，attrition小幅升(19.14%→20.05%)——泛化fix沒讓這seed變好，見下specimen層原因"},
+    "seed_42": {"extinct_starve": 0, "attrition_pct": 5.09259259259259, "crisis_override_release": 64, "stall_exclude": 170,
+      "vs_prefix(0,2.08%)": "extinct.starve維持0，但attrition升(2.08%→5.09%)——population流失增加但未達整隊團滅"},
+    "seed_4201": {"extinct_starve": 0, "attrition_pct": 2.90697674418605, "crisis_override_release": 3, "stall_exclude": 50,
+      "vs_prefix(0,2.62%)": "維持健康,幾乎無變化(crisis罕fire=世界本就少危機情境,符合預期)"}
+  },
+  "★★specimen層關鍵發現(seed1337_8mo_lockpoint)": {
+    "crisis機制確認非死碼": "aggregate crisis.override_release=133次(seed1337)——機制真的在fire,非零觸發。",
+    "正面_flee故事大幅改善": "6隊flee候選中5隊(team61/64/65/82/99)呈coherent活動：持續移動+food正常波動(非凍結)+flee_from持續刷新——跟修前(main-dir a5495461)team75『29天完全凍結不動,flee_from全程空,food安然成長』的broken模式對比鮮明，這5隊像正常的『真威脅→逃跑→脫離或轉態』故事。",
+    "疑慮_2種殘留卡死模式": "team1/19(『等待新領主』defection狀態,famine爬到33+才死)全程觀察窗零task transition，懷疑release-then-instant-recommit——crisis於_evaluate_threat release後,同cadence稍後defection評估若條件仍成立會立即重派回同task,bed(逐tick取樣)可能看不到中間瞬態IDLE。team13(task=逃跑,reason=solo)同樣全程tile不動/flee_from空/food=0仍卡死。",
+    "★對extinct.starve不降反升的可能解讀": "假設屬實(release-then-recommit逃過crisis)，可解釋為何seed1337整隊死亡數沒降——crisis確實救了一部分隊(從別的角度看，先前d0ab7f91時5/6候選都是傷停狀態，現在只剩2-3個)，但同時可能有『被crisis釋放後短暫進入offer新option→仍不成功→重新卡住新task→這次是另一個死亡』的洗牌效應，總死亡數字面上沒降甚至微升。此為measurer觀察non-binding，需implementer code層驗證release-recommit假說是否成立。"
+  },
+  "★量化54%逃跑真vs_broken(implementer要)": {
+    "sample": "seed1337 specimen trace,6隊task=逃跑候選(13/61/64/65/82/99)",
+    "coherent_valid": "5/6(83%)——team61/64/65/82/99：持續移動+food波動+flee_from刷新",
+    "broken_stuck": "1/6(17%)——team13：tile凍結+flee_from空+food=0持續，famine爬33.3死",
+    "caveat": "樣本小(n=6,單seed)，非population級精確統計,僅供方向參考。跟修前(main-dir pre-crisis-override)相比，broken比例明顯下降(修前至少1/5清楚broken即team75,佔約20%同量級，但那批樣本沒有famine死亡伴隨；這批crisis-override後的broken案例team13反而是famine死亡case，暗示broken flee更集中在『同時深餓』的殘留案例，跟等待新領主/建設那批屬同家族)。"
+  },
+  "驗點回報(implementer要求)": {
+    "5種stuck_task不再卡餓死": "★部分達成非全達成——flee(5/6)/併入-committed(未見殘留)改善明顯；但等待新領主(team1/19)+個別flee(team13)仍卡死。非結構性保證，見上specimen發現。",
+    "crisis_override_release觸發頻率": "133(seed1337)/64(seed42)/3(seed4201)——健康,非過高(未見過度打斷正當task的跡象，char bed『淺餓不fire/未到N天不fire』已守)",
+    "doom剝掉stall_gap後更接近真economy_doom": "extinct.starve未降反升(seed1337)，無法確認doom已剝乾淨——若release-then-recommit假說成立，殘留doom裡仍混著『安全網沒接住』的機制性death，非純economy內在。",
+    "真逃威脅續逃_engine秤深餓survival贏": "5/6樣本符合(食物危急時最終轉survival贏,無不當中斷正在逃命的隊之跡象)"
+  },
+  "summary": "★★HIGH優先(先於god-view D-doom-delta讀)。快閘全過(char bed 7/7+gate 64+headless獨立重驗6/6=baseline)。organic：crisis.override_release確認真fire(133/64/3跨3seed,非死碼)，seed42/4201維持健康(0隊starve)，但seed1337 extinct.starve不降反升(6→8)。★specimen層(seed1337)給出關鍵解釋：flee故事質量大幅改善(5/6候選呈coherent行為,對比修前team75『29天完全凍結』的broken模式)，但殘留2-3個特定案例(defection『等待新領主』狀態的team1/19+task=逃跑的team13)全程零task transition仍餓死——懷疑release-then-instant-recommit(crisis release後同cadence立刻被其他子系統重派回同task,bed取樣看不到中間瞬態)，可能是extinct.starve沒降的部分原因。54%逃跑真vs broken量化(小樣本n=6,僅供方向)：83%coherent/17%broken。建議implementer code層驗證release-recommit假說，可能需要在release後加一個『本cadence內不可立刻重新委派回同task』的短暫免疫窗。"
+}

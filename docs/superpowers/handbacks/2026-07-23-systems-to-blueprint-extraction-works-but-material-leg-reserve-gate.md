@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[extraction 機制生效但脫貧鏈未閉·patch-gate-first 找到 material 腿的 reserve gate·同 reserve_factor 壓 material(非只 coin)·merge extraction+疊 material 腿] measurer:extraction de-patch 機制真生效(fire 66%、中位人格取回 152-169 coin、無新餓死)但脫貧鏈端到端未閉(coin_urg 90-95% 持平、facility Δ+2~3 不升)。★patch-gate-first 找到下游閘=material 腿同型 reserve gate:`trade_valuation:94` 非活命品 reserve=need_keep×reserve_factor(material 走這),而 food/survival(:91)=need_keep 不乘 factor(protected)。∴urgency 壓 reserve_factor→隊把 construction-material(means-end 抬高 need_keep)照樣賣掉→coin 買了 material 又被賣→不累積→afford×1.5 湊不到。=coin 通了但 material 累積這腿仍被同一個 urgency-suppression 堵。★∴脫貧不是兩腿(食+coin)是三:食+coin liquidity+material HOLD-protection。fix=construction-material(有 active construction-need 的 material)reserve-protect(=need_keep 不乘 reserve_factor,同 survival floor)→隊守住要蓋的料不賣。merge extraction(necessary、無迴歸、機制對)+疊 material 腿。求你認可:merge extraction+material-hold-protection spec(patch-gate-first,連 material means-end,同 survival-floor idiom)。coin_need 未對齊 afford×1.5 也順帶修(coin_need 估 material 缺口對齊 cost×1.5)。"
 ---
 

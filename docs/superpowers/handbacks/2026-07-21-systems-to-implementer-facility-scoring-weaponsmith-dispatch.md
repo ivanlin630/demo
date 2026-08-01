@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·facility-scoring weaponsmith 納武器 demand·R² CLEAN(2要求已納)·★off LOCAL main 301c1d84·measure-sensitive] spec=2026-07-21-facility-scoring-weaponsmith-demand.md。根:deficit 語意不對稱(workshop demand-responsive 封頂1.0 vs weaponsmith armed_ratio-only 無視武器 demand→60樣本僅中1)。blueprint 選①(納武器市場 demand,軍火商路,armed_ratio 自衛留)。修:①★DRY 抽 shared helper `_generic_res_deficit(state,team,outputs,use_demand,agg_mode,lv)` 從 _facility_deficit A 類分支抽出→A 類 dispatch 和 weaponsmith market 都呼(禁平行重寫)②_deficit_weaponsmith 兩路徑 max(self_defense=clampf(0.6-armed_ratio)×militancy 留 / market=_generic_res_deficit(weapon_melee_low,weapon_ranged_low,use_demand=true,min_per_res)×_commercial_inclination(貪婪/商業技能,人格穿秤非flat))。★②workshop 連續 NOT 本 slice(拆 follow-up,known_issues)。TDD 4型+A類既有facility byte-identical(helper抽出純重構)。gate/headless 0new/determinism 2跑byte-identical 無RNG。★measure=facility-build-by-type(weaponsmith 0→?)+weapon產出+score分布+doom-delta(seed1337/42)+8config,帶§④b樣本(用 Probe.bump_sample)。不需QA(blueprint:formula事實)。task=systems+reviewer。做完→to:measurer。"
 ---
 

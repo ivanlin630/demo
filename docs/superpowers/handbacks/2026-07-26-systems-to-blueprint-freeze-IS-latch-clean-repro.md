@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★凍源定論(乾淨重現坐實):latch+resume 本身凍化 seed1337,非 tap 非 artifact 非 pre-existing·翻用戶「latch valid 健康」前提·latch 不該 folds 進手統一 until 凍化根治·★但與 measurer latch-resume json 12.39%動矛盾需釐清·機制待深查(latch只施工隊卻凍全世界=詭異)·context爆交接] 乾淨 fresh 重現(worktree=純5b166eb1確認+cache清+re-import):latch seed1337 凍(71/438 attrition 1.4)vs fresh main 動(71→63)。"
 ---
 

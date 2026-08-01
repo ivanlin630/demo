@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R①覆核+升異質框外·糧流感知WHAT·premises §8全file:line驗過(blueprint)故覆核非重factcheck·★但大框(一個感官+三消費者)升異質驗規模『多為現有零件接線vs新子系統』(★means-end我orientation非新引擎樂觀低估被異質駁血證,同款驗)·spec=2026-07-29-runway-aware-persistence-survival-design.md] 糧流感知WHAT定案+用戶核可。premises §8驗過覆核。大框規模斷言升異質框外驗別重蹈means-end樂觀。"
 ---
 

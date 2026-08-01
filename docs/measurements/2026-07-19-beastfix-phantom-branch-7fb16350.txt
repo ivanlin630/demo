@@ -1,0 +1,1 @@
+[PHANTOM] {"beast_key_dangling":0,"beast_key_live":0,"dangling_any":0,"key_neg1000000":0,"live_beasts_now":0,"real_obs":65,"seed":1337,"teams_end":65,"ticks":21600}

@@ -1,0 +1,322 @@
+﻿ 
+=== 和平經濟觀測床（measure-first Step0）seed=70730 6月 ===
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[liveness] PASS：/料窮側 need_keep(material)>0 + 有 forest 靶（fixture LIVE）
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[Harvest] Tick60 季節=春 base=1.1
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 warning days_left=1.3 運輸→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 urgent days_left=0.4 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(14,8)
+[Survival] Team12 warning days_left=2.9 貿易→覓食
+[Barter] Team7 133xmaterial <-> Team8 80xgoods
+[Salary] Team8 薪水結算 coin=998.8
+[Salary] Team8 薪水結算 coin=997.6
+[Harvest] Tick21600 季節=夏 base=1.5
+[Harvest] Tick43200 季節=秋 base=1.2
+
+───────── 4 問報告（43200 tick, end_pop=56, attrition=22.2%, teams=10）─────────
+【Q1 founding dispatch 嗎】（gate funnel 分：動機無 vs 卡 gate）
+  indep.found_ally=0 | indep.found_subjugate=0 | indep.found_timeout=0
+  indep.gate_ambitious=0 | indep.gate_path_ok=0
+  indep.gate_fail_pop=0 | indep.gate_fail_food=0 | indep.gate_fail_busy=0 | indep.gate_fail_nopath=0
+  construct.start=15 | construct.start_task_not_build=8 | construct.complete_build=0 | worldgen.build_outpost=1
+  construct.progress=140 | construct.stall=31676 | construct.timeout_cancel=0 | construct.complete=6
+  resume.attempt=0 | resume.success=0 | resume.reject_combat=0 | resume.reject_starving=0 | resume.reject_busy=0
+【Q2 develop（升級）嗎】
+  construct.complete_upgrade_facility=6 | construct.complete_upgrade_level=0
+【Q3 貿易/對缺口反應嗎】
+  trade.deal=2 | trade.deal_market=2 | trade.deal_merchant=2 | trade.barter_deal=1
+  g1.order_placed=1811 | g1.order_fulfilled=4 | g1.shortage_buy=879 | g1.food_buy=55
+  g1.seek_market=2 | g1.market_arrive=13 | trade.arrive=2 | trade.meet=5 | trade.timeout=34
+  --market_bail 賣方端--
+  trade.market_bail.sell_no_surplus=13 | trade.market_bail.sell_ownerless=0 | trade.market_bail.sell_no_price=0 | trade.market_bail.sell_zero_qty=0 | trade.market_bail.sell_storage_full=0 | trade.market_bail.sell_owner_no_coin=0 | trade.market_bail.sell_owner_cant_afford=0 | trade.market_bail.no_board_order=0
+  --market_bail 買方端--
+  trade.market_bail.buy_no_stock=5 | trade.market_bail.buy_no_want=7 | trade.market_bail.buy_cant_afford=0 | trade.market_bail.buy_carry_full=0 | trade.market_bail.buy_no_coin=0 | trade.market_bail.buy_no_price=0 | trade.market_bail.buy_withdraw_empty=0
+【Q4 runway 機制 fire 嗎】
+  foodflow.update=4589 | bridge.no_go_food=0 | bridge.topup=0 | persist.hold=14
+【★後勤 SLICE A：convoy delivery（GATE-B 撮合物理送貨）】
+  convoy.dispatch=5 | convoy.fetch=5 | convoy.deliver=4 | convoy.return=5
+  DELIVER 結果:deliver_settled=2 | bail 分因:sell_no_surplus=2
+  cargo_out=172 cargo_delivered=45 | ★order_fulfilled=4(驗收真值) trade.deal=2
+
+───────── construct sample payload（pin 拉走機制：ct_task/ct_reason）─────────
+  [construct.start] n=8（前 12 筆）:
+    tick=500 tile=[8, 10] team=3 ct_id=3 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=500 tile=[6, 10] team=4 ct_id=4 action=upgrade_facility task_after=外交 prio_after=70
+    tick=500 tile=[10, 6] team=5 ct_id=5 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=500 tile=[11, 9] team=7 ct_id=7 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=1500 tile=[6, 8] team=0 ct_id=0 action=upgrade_facility task_after=建設 prio_after=50
+    tick=1500 tile=[10, 10] team=10 ct_id=10 action=upgrade_facility task_after=建設 prio_after=50
+    tick=2500 tile=[8, 6] team=2 ct_id=2 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=3000 tile=[6, 8] team=0 ct_id=0 action=upgrade_facility task_after=建設 prio_after=50
+  [construct.stall] n=8（前 12 筆）:
+    tick=510 tile=[6, 10] ct_id=4 ct_task=外交 ct_reason=unified ct_pos=[6, 10] ticks_left=168
+    tick=510 tile=[8, 10] ct_id=3 ct_task=覓食 ct_reason=unified ct_pos=[8, 10] ticks_left=168
+    tick=510 tile=[10, 6] ct_id=5 ct_task=覓食 ct_reason=unified ct_pos=[10, 6] ticks_left=168
+    tick=510 tile=[11, 9] ct_id=7 ct_task=覓食 ct_reason=unified ct_pos=[11, 9] ticks_left=336
+    tick=520 tile=[6, 10] ct_id=4 ct_task=外交 ct_reason=unified ct_pos=[6, 10] ticks_left=168
+    tick=520 tile=[8, 10] ct_id=3 ct_task=覓食 ct_reason=unified ct_pos=[8, 10] ticks_left=168
+    tick=520 tile=[10, 6] ct_id=5 ct_task=覓食 ct_reason=unified ct_pos=[10, 6] ticks_left=168
+    tick=520 tile=[11, 9] ct_id=7 ct_task=覓食 ct_reason=unified ct_pos=[11, 9] ticks_left=336
+  [construct.progress] n=8（前 12 筆）:
+    tick=1510 tile=[6, 8] ticks_left=168 active=0 pop=6
+    tick=1510 tile=[10, 10] ticks_left=168 active=10 pop=6
+    tick=1520 tile=[6, 8] ticks_left=162 active=0 pop=6
+    tick=1520 tile=[10, 10] ticks_left=162 active=10 pop=6
+    tick=1530 tile=[6, 8] ticks_left=156 active=0 pop=6
+    tick=1530 tile=[10, 10] ticks_left=156 active=10 pop=6
+    tick=1540 tile=[6, 8] ticks_left=150 active=0 pop=6
+    tick=1540 tile=[10, 10] ticks_left=150 active=10 pop=6
+  [construct.complete] n=6（前 12 筆）:
+    tick=1780 tile=[6, 8] team=0 action=upgrade_facility
+    tick=1780 tile=[10, 10] team=10 action=upgrade_facility
+    tick=3280 tile=[6, 8] team=0 action=upgrade_facility
+    tick=3780 tile=[10, 10] team=10 action=upgrade_facility
+    tick=7620 tile=[6, 6] team=9 action=upgrade_facility
+    tick=7620 tile=[7, 11] team=11 action=upgrade_facility
+
+───────── 逐隊月故事（同 seed inline run）─────────
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+--- t0 ---
+  T0[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T1[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=idle food=350 mat=0 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=idle food=40 mat=400 coin=300 need_mat=100 runway=9999.0
+  T8[plains] pop=6 task=idle food=60 mat=0 coin=1000 need_mat=0 runway=9999.0
+  T9[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+  T10[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+  T11[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+[Harvest] Tick60 季節=春 base=1.1
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 warning days_left=1.3 運輸→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 urgent days_left=0.4 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(14,8)
+[Survival] Team12 warning days_left=2.9 貿易→覓食
+[Barter] Team7 133xmaterial <-> Team8 80xgoods
+--- 月1 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=49 coin=726 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=734 need_mat=100 runway=9999.0
+  T3[plains] pop=6 task=覓食 food=48 mat=350 coin=800 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=305 coin=940 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=206 mat=7 coin=300 need_mat=100 runway=9999.0
+  T7[forest] pop=6 task=return_home food=12 mat=227 coin=300 need_mat=100 runway=2.6
+  T8[plains] pop=2 task=逃跑 food=2 mat=133 coin=1000 need_mat=0 runway=1.2
+  T9[mountain] pop=6 task=治理 food=18 mat=38 coin=200 need_mat=100 runway=4.4
+  T10[mountain] pop=6 task=貿易 food=20 mat=57 coin=200 need_mat=146 runway=4.9
+  T11[mountain] pop=6 task=貿易 food=24 mat=44 coin=200 need_mat=100 runway=5.8
+[Salary] Team8 薪水結算 coin=998.8
+--- 月2 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=50 coin=726 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=734 need_mat=100 runway=9999.0
+  T3[plains] pop=8 task=覓食 food=64 mat=386 coin=1000 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=305 coin=940 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=62 mat=13 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=8 task=覓食 food=64 mat=120 coin=500 need_mat=100 runway=9999.0
+  T8[plains] pop=2 task=覓食 food=7 mat=133 coin=999 need_mat=0 runway=4.2
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[Salary] Team8 薪水結算 coin=997.6
+[Harvest] Tick21600 季節=夏 base=1.5
+--- 月3 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=50 coin=726 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=734 need_mat=100 runway=9999.0
+  T3[plains] pop=8 task=覓食 food=64 mat=386 coin=1000 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=305 coin=940 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=20 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=8 task=覓食 food=64 mat=120 coin=500 need_mat=100 runway=9999.0
+  T8[plains] pop=2 task=覓食 food=16 mat=93 coin=998 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+--- 月4 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=51 coin=726 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=734 need_mat=100 runway=9999.0
+  T3[plains] pop=8 task=覓食 food=64 mat=386 coin=1000 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=305 coin=940 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=26 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=8 task=覓食 food=64 mat=120 coin=500 need_mat=100 runway=9999.0
+  T8[plains] pop=2 task=覓食 food=16 mat=93 coin=998 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=治理 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+--- 月5 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=51 coin=726 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=734 need_mat=100 runway=9999.0
+  T3[plains] pop=8 task=覓食 food=64 mat=386 coin=1000 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=305 coin=940 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=33 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=8 task=覓食 food=64 mat=120 coin=500 need_mat=100 runway=9999.0
+  T8[plains] pop=2 task=覓食 food=16 mat=93 coin=998 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[Harvest] Tick43200 季節=秋 base=1.2
+--- 月6 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=52 coin=726 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=734 need_mat=100 runway=9999.0
+  T3[plains] pop=8 task=覓食 food=64 mat=386 coin=1000 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=305 coin=940 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=4 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=8 task=覓食 food=64 mat=120 coin=500 need_mat=100 runway=9999.0
+  T8[plains] pop=2 task=覓食 food=16 mat=93 coin=998 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+--- 買方市場 granary material 真值（deposit 真發生?）---
+  T0 tile(6, 8) granary material=33 inv material=52
+  T1 tile(10, 8) granary material=22 inv material=51
+  T2 tile(8, 6) granary material=53 inv material=50
+  T6 tile(5, 9) granary material=2 inv material=4
+  T9 tile(6, 6) granary material=3 inv material=24
+
+───────── ★T0 fed 隊 per-option util 明細（economy 決策真 binding）─────────
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[Harvest] Tick60 季節=春 base=1.1
+  === tick 500 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=110 mat=15 coin=800 runway=9999.0 food_days=28.75 need_mat=100 ===
+    [goal]   u=+1.3953  build_workshop:resource  <=WIN
+    [goal]   u=+1.3953  build_apothecary:resource
+    [goal]   u=+1.3953  build_stable:resource
+    [static] u=+1.0414  survival
+    [static] u=+0.9748  備戰
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.8694  求和
+    [static] u=+0.3200  併入
+    [static] u=+0.2766  買料
+    [static] u=+0.2599  駐守
+    [static] u=+0.1104  建設
+    [static] u=+0.0927  吸納
+    [static] u=+0.0276  貿易
+    [static] u=+0.0000  掠奪
+      分項 [build_workshop:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [build_apothecary:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+  === tick 500 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=140 mat=350 coin=800 runway=9999.0 food_days=34.38 need_mat=100 ===
+    [static] u=+0.4069  求和  <=WIN
+    [static] u=+0.3537  備戰
+    [static] u=+0.3250  覓食
+    [static] u=+0.2461  駐守
+    [static] u=+0.1285  建設
+    [static] u=+0.1250  survival
+  === tick 3600 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=48 mat=26 coin=800 runway=9999.0 food_days=41.67 need_mat=138 ===
+    [goal]   u=+1.3953  build_stable:resource  <=WIN
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.3423  生產
+    [static] u=+0.2640  買料
+    [static] u=+0.2495  駐守
+    [static] u=+0.2093  備戰
+    [static] u=+0.1391  求和
+    [static] u=+0.1298  建設
+    [static] u=+0.0000  survival
+    [static] u=+0.0000  掠奪
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+  === tick 3600 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=78 mat=350 coin=800 runway=9999.0 food_days=50.94 need_mat=100 ===
+    [static] u=+0.3906  求和  <=WIN
+    [static] u=+0.3250  覓食
+    [static] u=+0.2494  駐守
+    [static] u=+0.2185  備戰
+    [static] u=+0.1300  建設
+    [static] u=+0.0000  survival
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[Survival] Team12 warning days_left=2.6 貿易→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[Survival] Team12 warning days_left=2.2 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[Survival] Team12 warning days_left=1.8 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[Survival] Team12 warning days_left=1.4 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(9,6)
+  === tick 7200 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=48 mat=49 coin=800 runway=9999.0 food_days=54.16 need_mat=138 ===
+    [goal]   u=+1.3953  build_stable:resource  <=WIN
+    [static] u=+1.0153  survival
+    [static] u=+0.9525  備戰
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.8618  求和
+    [static] u=+0.2703  生產
+    [static] u=+0.2616  駐守
+    [static] u=+0.2438  買料
+    [static] u=+0.1108  建設
+    [static] u=+0.0763  吸納
+    [static] u=+0.0281  貿易
+    [static] u=+0.0000  掠奪
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+  === tick 7200 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=48 mat=350 coin=800 runway=9999.0 food_days=65.86 need_mat=100 ===
+    [static] u=+0.5500  覓食  <=WIN
+    [static] u=+0.2494  駐守
+    [static] u=+0.2072  備戰
+    [static] u=+0.1380  求和
+    [static] u=+0.1300  建設
+    [static] u=+0.0000  survival
+
+  ── ★Team3 賣方 delivery 行為（全 run 追蹤）──
+    起 pos=(8, 10) 終 pos=(8, 10) ever_moved=false | ever_TASK_TRADE=false | material 起=400 終=350 最低=350(離 inventory?是)
+    Team3 tile public_storage material=0（賣單 material 有無 deposit 到市場 granary）
+=== 和平經濟觀測床 DONE ===
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+

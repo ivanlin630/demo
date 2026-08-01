@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·後勤SLICE A供給-delivery convoy(GATE-B撮合物理送貨,measure定案grounded)·spec=2026-07-31-logistics-slice-A-supply-delivery-convoy-HOW.md·measure第一手釘死GATE-B真gap=賣方菜單缺deliver option(Team3 surplus400但無deliver option/ever_moved=false/granary=0)非argmax輸非spatial·SLICE A=(A)新deliver決策option(surplus+知市場demand→生deliver candidate入argmax util秤非scripted,★measured驗真fire別假設)+(B)convoy生命週期(②新TASK_CONVOY+FETCH撥款樣式+③各階段專屬_evaluate_subteam分支防generic fallback:1753攔截+④撤persist-hold子隊本sticky+DELIVER TileBank.deposit市場granary+RETURN釋放pop非settle/merge)·接既有_market_visitor_buy→fulfilled>0·★★三驗收線(blueprint鎖):①真派真deposit granary②fulfilled>0材料第一次真換手③貨物理真離賣方·審deliver option真fire(measured非假設)+convoy生命週期不被settle/merge攔+cargo守恆+感知鐵律demand讀belief+不凍] 後勤SLICE A物理送貨第一刀。GATE-B真fix。審deliver option真fire+lifecycle不被攔+守恆+不凍。"
 ---
 

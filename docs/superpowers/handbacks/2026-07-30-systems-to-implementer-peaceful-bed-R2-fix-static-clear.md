@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[R²必補①·1行·雙run static清空對齊·peaceful_economy_bed.gd:_print_team_stories開頭補 FactionAISystem._a2b_remote_tribute_payers.clear()(對齊WarringHarness.run:119防跨run殘留污染,interaction_system:607-609真讀此static當貢賦閘)·reviewer CLEAN但此項必measurer落地前完成(別讓巧合沒fire頂替機制保證乾淨=Step0僥倖心態)·跑bed+liveness確認仍PASS+commit+handback] 補1行static clear(雙run對齊)。跑bed確認+commit+handback。"
 branch: feat/peaceful-economy-bed
 ---

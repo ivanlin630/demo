@@ -1,0 +1,28 @@
+{
+  "measured_at_head": "31f9833c (main, survival-prio-fix merged)",
+  "method": "default config(非perf_scale,~50-65隊規模),seed1337+4201×8mo,detach長跑",
+  "raw_logs": ["docs/measurements/2026-07-18-survivalprio-multiseed-31f9833c.json"],
+  "★correction_to_prior_決定性成功framing": {
+    "seed_42_original_result": "extinct.starve=0(乾淨)——這是我上輪報的'決定性成功'依據",
+    "seed_1337_this_round": {
+      "extinct_starve": 9,
+      "breakdown": {"no_forage_nonowner": 7, "while_fleeing_nonowner": 1, "while_foraging_nonowner": 1},
+      "attrition_pct": 32.21,
+      "pop_trajectory": [437,426,395,358,337,327,314,301],
+      "verdict": "★★7/9(78%)仍是no_forage死——survival PRIO fix並未在此seed消除傻站死問題！與seed42的乾淨結果矛盾"
+    },
+    "seed_4201_this_round": {
+      "extinct_starve": 0,
+      "attrition_pct": 4.65,
+      "pop_trajectory": [328,328,328,328,328,328,328,328],
+      "verdict": "乾淨(同seed42模式)——pop完全持平,零餓死"
+    }
+  },
+  "revised_verdict": "★survival PRIO fix非普適解——3 seed中2乾淨(42,4201)/1仍有多數no_forage死(1337,7/9=78%)。修法方向對(有效於某些世界狀態)但未完全堵住所有no_forage死亡路徑。",
+  "plausible_additional_mechanism": {
+    "code_finding": "task_arbiter.gd PRIO層級完整表:PRIO_COMBAT=100 > PRIO_SURVIVAL=80 > PRIO_THREAT=70 > PRIO_PLAYER=60 > PRIO_VENDETTA=55 > PRIO_DISPATCH=50 > PRIO_FACTION=30 > PRIO_AMBIENT=10",
+    "hypothesis": "PRIO_COMBAT(100)高於PRIO_SURVIVAL(80)——若隊被鎖在真實combat_target≠-1的交戰狀態(非只是threat-response task選擇,是literal正在打),survival@80無法preempt combat@100。若某些隊反覆被拖入combat(如持續被獵殺/追擊)而無法脫身覓食,即便S1.5/S2/S3的threat repertoire已修正,combat lock本身仍可能是另一條餓死路徑。★注意:seed1337的死因分類extinct.combat=0(死亡當下非literal combat中),但這不排除『死前長期被combat鎖住無法覓食,combat結束時已來不及』的時序——需specimen trace才能坐實。",
+    "caveat": "純code-based假說,非逐隊trace驗證。之前已建好scripts/debug/starvation_desperation_trace_bed.gd可用於seed1337坐實這15/9隊死前的task序列(是否卡在combat/其他非-survival task)。"
+  },
+  "summary": "★重要更正：survival PRIO fix(80>70>50)在seed42/4201完全解決no_forage死亡,但seed1337仍有78%餓死隊死於no_forage——非普適解。可能還有PRIO_COMBAT(100)>PRIO_SURVIVAL(80)這條路徑未堵。建議systems/implementer看是否要用specimen trace坐實seed1337死因,或這已經是可接受的殘留risk(3 seed中1個較差,非全滅級,但78%no_forage仍是原始bug訊號)。"
+}

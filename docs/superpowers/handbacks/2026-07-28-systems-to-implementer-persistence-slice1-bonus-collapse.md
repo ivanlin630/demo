@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·持守統一 Slice 1·決策層 bonus-collapse·R²CLEAN(補§6門檻式後)·spec=2026-07-28-persistence-decision-layer-HOW.md §4/§5/§8-Slice1·增量可獨立驗不動執行層·新team.persist_strength欄+公式helper+5 commitment bonus改讀+★世界不凍latch反例回歸驗] 持守統一 R①收窄+R²CLEAN(門檻式)。Slice 1=決策層,不碰執行層try_set(那是Slice3)。TDD+逐slice R²。"
 branch: feat/persistence-slice1-bonus-collapse
 ---

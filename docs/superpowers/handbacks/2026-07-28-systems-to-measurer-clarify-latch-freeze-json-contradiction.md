@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[clarify+clean 重跑·latch freeze json 矛盾·你 latch-resume-a1-6mo.json seed1337 attrition 12.39%『動』vs systems 乾淨 fresh 重現 5b166eb1 seed1337 凍(71/438 attrition 1.4)·同 base same seed 一動一凍·餵持守統一 latch-root(over-latch 判準)] latch(5b166eb1)凍化 seed1337 世界(systems clean repro 坐實:worktree=純5b166eb1+清.godot cache+full re-import,monthly _snapshot 真 state.teams.size/pop 71/438 逐月不變)。但你 latch-resume-a1-6mo.json seed1337 attrition 12.39%=動,矛盾。"
 branch: feat/construction-commitment-latch (5b166eb1)
 ---

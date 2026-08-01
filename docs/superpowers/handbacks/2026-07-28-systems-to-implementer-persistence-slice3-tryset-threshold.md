@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·持守統一 Slice 3·try_set 持守-aware 門檻式(執行層核心真持守)·Slice2 merged(0f62884f gate74)·spec=2026-07-28-persistence-decision-layer-HOW.md §6·非危機committed persist>THRESHOLD擋搶班+危機tier原封守命+latch反例避開(單點門檻非skip硬鎖)·persist_strength progressive-only已保證只progressive動作有值] Slice 1/2 merged(persist_strength欄+隨進度新鮮)。Slice 3=執行層try_set門檻式。★別破現有PRIO/危機axis+別凍世界。"
 branch: feat/persistence-slice3-tryset-threshold
 ---

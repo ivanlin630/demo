@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·後勤SLICE A convoy獨立驗三驗收線+return telemetry追蹤(R²要求非rubber-stamp)·convoy已merge main(f84fdd22 convoy+8721cc71 doc+fixture修4/4綠)·跑peaceful_economy_bed.gd產權威三驗收線:①convoy dispatch/fetch/deliver真+deposit granary②★order_fulfilled>0(整session為0的GATE-B撮合第一次活,材料真換手)③cargo真離賣方(ever_moved/material離inventory到granary)·★★return telemetry追蹤(R²未定論):convoy.return和平床=0——拉dispatch-tick時間戳或延長run天數確認是視窗太短(convoy還在途沒return完)非功能gap(warring convoy=59功能證);★落地docs/measurements標path驗存在+三跑determinism+不凍attrition非→0" 
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·SLICE A flow-fix convoy協調散未填單(trickle→flow)·spec=2026-07-31-logistics-sliceA-coordinate-convoy-spread-HOW.md(R²CLEAN+必補鎖live-scan)·26%真根measure定案:多convoy全堆同best buy單→前填滿rem=0後bail別買家沒車(192需>>45)·fix _deliver_candidates加in-flight guard:★★LIVE-SCAN鎖定(每次現掃state.teams中active convoy porters的task_extra_data.order_id+cargo聚合per-order在途認領→effective_rem=order.qty_remaining−在途認領,<=0跳單),禁state-registry(_on_team_extinct faction_ai:2524-2547 porter死走泛用死亡路零convoy特判→registry漏清幽靈認領永久佔單;live-scan結構免疫死porter自動消失)+散選util/gain秤未填單非scripted round-robin·★★MEASURE-VERIFY硬性(禁假設散了就升本session駁6-7次):交付附fulfilled 45→顯著升toward192+散多買家+sell_no_surplus降真值dump·不凍守恆determinism] SLICE A協調散單。★LIVE-SCAN鎖定(禁registry漏清)。★交付附fulfilled真升dump別假設。"
 branch: feat/logistics-sliceA-coordinate
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R①異質框外審·後勤統一大arc·WHAT spec=2026-07-31-logistics-supply-movement-design.md·blueprint授權大框升異質R①·factcheck §8 premises file:line(我驗P1採集上繳公庫resource_system:20-22,78 CLEAN/P2建設先扣公庫outpost_system:773-783 CLEAN/P5子隊detach outpost_system:347-349 CLEAN,P3 P4 P6請補驗)·★★核心R①=means-end樂觀低估血證重演風險:『現成零件』複用claim真假(§3.1腳夫子隊複用子隊dispatch+載重/§4 runway糧橋現成零件/§7 unrest管線現成SLICE B接口/§7公庫vault源目的現成——但§1明說公庫無跨距離路=移動100%新建,§6自標真新元件非接線)·驗:哪些真複用哈些其實真新建(別重蹈means-end當現成其實新建2次血證),§6規模誠實否" 
 ---
 

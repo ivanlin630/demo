@@ -1,0 +1,49 @@
+{
+  "slice": "slice2-perception",
+  "is_sim": true,
+  "measured_at_head": "a5495461 (branch feat/slice2-perception) — A1 threat_pos→belief / A2 absorb yield→belief-gate(pop_est proxy) / A3 invite距離gate用belief_pos(INVITE_RANGE 5→8) / Part C path_system landmine註解。off local main bb1e75ff(含②desperation-ladder-feedback)。修headless test-fixture缺belief後。",
+  "raw_logs": [
+    "docs/measurements/2026-07-19-slice2-charbed-a5495461.log",
+    "docs/measurements/2026-07-19-slice2-constitution-a5495461.log",
+    "docs/measurements/2026-07-19-slice2-headless-a5495461.log",
+    "docs/measurements/2026-07-19-slice2-multiseed-a5495461.json"
+  ],
+  "unit_level_gates": {
+    "char_bed_slice2_perception_test": {"result": "ALL PASS(A1 belief_pos非live/A2 belief-gate無→0有→proxy fire/A3 遠belief擋近belief過)", "verdict": "CONFIRMED"},
+    "constitution_gate": {"result": "PASS sites=64 removed=0", "verdict": "CONFIRMED"},
+    "headless_test": {
+      "method": "★comprehensive比對(`[FAIL]`+`Assertion failed`雙格式,非只grep單一pattern——本輪雙方(measurer+implementer)都先犯漏[FAIL]格式的錯,已互相糾正並用python解UTF-16逐行比對重驗)",
+      "result": "6/6與TRUE bb1e75ff baseline逐條相同(0 new)：[FAIL]×3(Team23建設×2/弱目標goal)+assert×3(join0.41/combat197/rung擴張)",
+      "verdict": "CONFIRMED（獨立重驗,非只信implementer自報）"
+    }
+  },
+  "★量測方法論修正(本輪雙方共同教訓)": {
+    "finding": "godot headless_test.gd 有兩種失敗輸出格式：`[FAIL] ...`（測試框架自印）與 `SCRIPT ERROR: Assertion failed: ...`（GDScript assert()崩潰輸出）。只grep/搜尋其中一種會漏另一種，導致base-vs-mine比對『兩邊都漏同樣的』而誤判IDENTICAL/0-new。",
+    "impact": "本輪先發生：implementer原自報『0 new』實際漏算3個invite測試失敗(因只grep [FAIL])；measurer我自己也一度只用『SCRIPT ERROR/Assertion failed』兩個關鍵字搜尋,同樣漏了[FAIL]格式,導致我口頭引用的『3個pre-existing』其實是真實6個的次集合(delta仍正確,但絕對數字錯)。雙方交叉重驗後才抓出。",
+    "fix_going_forward": "往後headless失敗計數一律用『[FAIL]』+『Assertion failed』雙關鍵字（或直接python解UTF-16全文比對），不可只用單一pattern。"
+  },
+  "organic_3seed_8mo_vs_bb1e75ff_baseline(pre-slice2)": {
+    "seed_1337": {"extinct_starve": 2, "attrition_pct": 14.8648648648649, "vs_baseline(5,18.47%)": "改善"},
+    "seed_42": {
+      "extinct_starve": 8, "attrition_pct": 21.5277777777778,
+      "breakdown": {"no_forage_nonowner": 5, "while_fleeing_nonowner": 2, "while_foraging_nonowner": 1},
+      "vs_baseline(0,2.08%)": "★★惡化——seed42此前在整條desperation-ladder-feedback鏈路皆是健康control(0隊starve),這輪(slice2-perception疊加A1/A2/A3感知修正後)變8隊starve死+attrition暴增至21.53%"
+    },
+    "seed_4201": {
+      "extinct_starve": 0, "attrition_pct": 2.61627906976744,
+      "vs_baseline(3,28.19%)": "★★大幅改善——回到接近S1+S2原始基線(2.91%)的健康水準,遠優於bb1e75ff(desperation-ladder-feedback)的28.19%/3隊starve"
+    }
+  },
+  "★★重大交叉發現_seed互換模式": {
+    "pattern": "與desperation-ladder-feedback calibration sweep階段觀察到的『seed互換』現象同型：bb1e75ff時seed4201是唯一惡化seed(健康control變問題seed)，這輪slice2-perception疊加A1/A2/A3後，seed4201回健康、但seed42反而變成新的問題seed(0→8隊starve)。三個seed沒有一個在兩輪都保持健康+改善——顯示這不是簡單的『修好了』，而是RNG-cascade世界分岔讓『哪個seed是問題seed』隨每次code變動而搬家，同本session多次出現的whack-a-mole模式。",
+    "對desperation-ladder-feedback的seed4201 regression討論的意義": "seed4201在ladder-feedback branch的惡化(0→3隊starve,2.9%→28.19%)，在疊加slice2-perception的A1/A2/A3感知修正後消失(回到2.62%/0隊)——這暗示ladder-feedback的seed4201惡化可能跟god-view感知問題(A2的god-view absorb直讀/A3的無距離限制invite)有交互作用，而非純粹ladder-feedback機制本身內在的問題。但seed42反過來惡化，讓因果關係更複雜，不宜簡單歸因『slice2-perception修好了ladder-feedback的regression』——比較準確的說法是『這是另一次世界分岔，這次seed42運氣差、seed4201運氣好』。",
+    "建議": "blueprint/systems若要重新評估先前對desperation-ladder-feedback的『attrition內在→(A)accept』判定，這個新資訊(seed互換)值得納入考量——但不建議單純因seed4201變好就撤銷該判定,因為seed42同時變壞,淨效果仍是『某個seed會不健康』，符合先前『attrition內在』的整體結論(只是問題seed換了)。"
+  },
+  "驗點回報(implementer要求)": {
+    "team19不再跨圖settle": "結構性保證：INVITE_RANGE=8已是code level硬gate(char bed A3測項『遠belief(25,0)>INVITE_RANGE→擋』直接證實)，任何跨圖(距離>8)的invite在此branch下無法通過gate，非機率性,是必然。未逐team_id肉眼核對(新世界team19未必是同一概念隊伍,ID可能對應不同隊)——若需要逐隊實例驗證可另跑lockpoint bed。",
+    "absorb收斂(A2降級仍fire)": "char bed A2測項確認『有belief→absorb_yield>0(pop_est proxy,併入仍fire)』；organic層面merge.set_ok/consol.accept_n持續有非零值(seed1337:60/5,seed42:100/4,seed4201:0/0)，機制仍在運作,未完全停擺。",
+    "threat不瞬追live位": "char bed A1測項直接確認(threat_pos=belief(1,1)非live(3,0))，code-level保證,非機率性。"
+  },
+  "determinism": "未逐seed雙跑覆核(單跑，省窗；env/RNG路徑與desperation-ladder-feedback系列一致，無新增不確定性來源)。",
+  "summary": "★快閘全過，headless已comprehensive雙格式獨立重驗(6/6與baseline逐條同,0 new，非只信implementer自報)。organic 3seed結果好壞參半且方向出乎意料：seed1337改善(5→2隊starve)+seed4201大幅改善(3→0隊starve,回近原始基線)，但★★seed42從健康control惡化為問題seed(0→8隊starve,2.08%→21.53%attrition)。此為與desperation-ladder-feedback calibration sweep同型的『seed互換/RNG-cascade世界分岔』模式——不是單純的『修好了』，是問題seed搬家。team19跨圖/absorb收斂/threat瞬追三個驗點皆有code-level結構性保證(char bed證實非機率性)。"
+}

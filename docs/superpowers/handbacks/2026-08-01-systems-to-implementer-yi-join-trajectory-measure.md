@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[乙grounding·measure join dispatch→resolve 85%蒸發點(measure-first,禁靜態斷言本session 6-7駁)·規模動態arc根=join(投靠)dispatch 155→resolve僅24=85%半路蒸發,de-patch前必pin蒸發在哪環·instrument JOIN lifecycle trajectory(cheap dev-verify非昂貴合量,seeded warring短窗):①dispatch(try_set JOIN成功數,faction_ai:1937)②arrive social_target數(抵達)③social resolver結果(merge成功/reject/蒸發)·分蒸發點:gated pre-dispatch(1936無belief位)?/argmax輾mid-travel(JOIN被別task搶,子隊非IDLE本sticky但JOIN是母隊task?)?/social resolver arrival reject?/target消失?·純觀測tap零行為變·落地docs/measurements·目的定蒸發環→我設計乙de-patch HOW(non build新整併,de-patch resolve瓶頸)" 
 branch: feat/scale-join-measure
 ---

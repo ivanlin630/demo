@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[★R² ISSUES 解·選項1·你分支新 SpecimenDumpHelper 撞既有 untracked 同名同路徑(2026-07-19,已零RNG strided,pick_random bug 源是 measurer 另一支已刪 ad-hoc 非既有 helper)·你不知情重新發明+意外窄化(砍 SPECIMEN_TEAM_ID/dump 零參數炸 adhoc_demo)·改:commit 既有檔保全API+regression 鎖中性,丟分支窄化版·gate followup known_issues 已記] reviewer 異質 R² 揪:既有 SpecimenDumpHelper 本來中性,你分支修=重新發明+窄化撞車。改用既有檔。"
 branch: feat/specimen-tracer-rng-fix (改做)
 ---

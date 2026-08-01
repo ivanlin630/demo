@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[補丁閘查·武器製造被選中=無硬override-gate,是連續crush+地質天然抑制·但farming-crush可能OVER-fire=需data關鍵子問] 你問武器holding~0是不是又一個補丁閘(擋製造被選中)。結構trace:①無硬override-gate——facility選擇=_facility_score argmax(de-patched連續制,非「恆-X→永建Y」硬override)。②weaponsmith兩結構抑制:terrain_fit 3.0 near ore_iron/0.5 else(3163地質world-rule,gate-ok)+farming survival-crush ×(1+SURVIVAL_CRUSH×urgency²)(3119,urgency讀局部糧granary+私產)。③keystone=ore_iron供給:weaponsmith terrain_fit和recipe input都要ore_iron→ore_iron稀缺=雙重卡(設施不建+建了無料)。★答『gate vs天然』:非違法override,是設計內連續crush+地質天然抑制。但關鍵子問(需data):farming-crush是否OVER-fire——全域糧76k豐但局部餓(urgency高)→farming永碾weaponsmith=分配artifact假抑制。需measure:facility-build-by-type/weaponsmith score分布/facility-eval時局部food-urgency/ore_iron已開採tile數。不over-claim(今日2誤讀),data定是天然限制vs過度抑制。"
 ---
 

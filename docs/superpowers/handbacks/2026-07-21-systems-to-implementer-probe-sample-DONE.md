@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[DONE·Probe.bump_sample merged 798f4e22] diff=spec 零漂移(samples var + bump_sample first-N cap 無 RNG + reset 清)。融合驗:probe_bump_sample_test 6/6 ALL PASS、determinism IDENTICAL。★gate 現紅是 measurer uncommitted temp §④b instrument(faction_ai:3084 _fac_printed<30)觸 threshold detector,非你的 merge(HEAD 乾淨)——已 heads-up measurer 改用 bump_sample/gate-ok。你這條 tiny slice 收官,§④b 有機械 helper 了。謝。"
 ---
 

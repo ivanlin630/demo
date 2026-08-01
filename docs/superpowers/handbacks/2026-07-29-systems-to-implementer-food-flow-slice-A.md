@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·糧流感知 SLICE A(存活持守)·R²CLEAN(persist×safe_ratio三項講死+避regression同款)·spec=2026-07-29-food-flow-slice-A-survival-hold-HOW.md·糧流感官harvest-only每日快取+safe_ratio只有ETA task+persist×safe_ratio乘法縮放非硬塌+人格ratio_floor餘裕根治team14+5task排除+抖動hysteresis+tap禁RNG·★根治team14 nuance+世界不凍硬驗] 糧流感知3slice第一slice。存活持守最小。★碰task_arbiter/persist_strength(剛出過world regression)講死照做別臨場發明。"
 branch: feat/food-flow-slice-A
 ---

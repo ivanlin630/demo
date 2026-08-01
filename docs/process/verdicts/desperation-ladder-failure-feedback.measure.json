@@ -1,0 +1,61 @@
+{
+  "slice": "desperation-ladder-feedback",
+  "is_sim": true,
+  "measured_at_head": "bb1e75ff (branch feat/desperation-ladder-feedback) — 第三輪：② 豁免補完，單一 option 豁免收單一源進 DecisionOptions.applicable()（全 rank_scored/rank_survival 路共用），退役 apply_stall_exclusion。承 REDO bf8452b7（5 路 STAMP+DETECT wiring 完整+去額外 gather RNG regression 根）。full re-measure（非 carry，因 determinism 對比 bf8452b7 DIFFERS=豁免 edge 真觸發）。",
+  "raw_logs": [
+    "docs/measurements/2026-07-18-despladder-charbed-bb1e75ff.log",
+    "docs/measurements/2026-07-18-despladder-constitution-bb1e75ff.log",
+    "docs/measurements/2026-07-18-despladder-headless-bb1e75ff.log",
+    "docs/measurements/2026-07-18-despladder-final-multiseed-bb1e75ff.json (v1，無 stall_exclude/boost_fire 欄，tap-gap 修前)",
+    "docs/measurements/2026-07-18-despladder-final-multiseed-bb1e75ff-v2.json (v2，tap-gap 修後，含 stall_exclude/boost_fire；世界與 v1 逐位元同——純輸出擴充非行為變更)",
+    "docs/measurements/2026-07-18-despladder-gamesim-run1-bb1e75ff.log"
+  ],
+  "unit_level_gates": {
+    "char_bed_survival_stall_ladder_test": {
+      "result": "11/11 ALL PASS（stall_verdict 三態 + patience 人格雙向 + applicable()排除+單一option豁免——含本輪新增『唯一survival(覓食)stalled→豁免ride(solo/unified不idle-starve)』測項）",
+      "verdict": "CONFIRMED"
+    },
+    "constitution_gate": {"result": "PASS sites=64 removed=0", "verdict": "CONFIRMED（同前幾輪無變化）"},
+    "headless_test": {"result": "殘3 assertion同名同行號(_test_p2a_survival_terms:15540/_test_beg_join_social_resolve:7078/_test_strategic_reads_ladder:13990)，無新增", "verdict": "CONFIRMED pre-existing"}
+  },
+  "★量測工具tap-gap_發現並修正": {
+    "finding": "warring_harness.gd 的 PROBE_KEYS 固定 allowlist（seeded_warring_bed.gd 用的聚合輸出）從未收 survival.stall_exclude / survival.boost_fire——首次跑(v1)aggregate JSON 完全沒有這兩個 key，看起來像『沒 fire』，但實際是 code 端 Probe.bump() 呼叫點正常在(faction_ai_system.gd:3459 / decision_engine.gd:71)，只是量測 bed 沒收這兩個 key 進輸出。",
+    "fix": "加兩行進 PROBE_KEYS（warring_harness.gd），純輸出擴充不動 Probe.bump 呼叫點/RNG路徑。rerun(v2)驗證：v1/v2 兩次獨立8月跑,attrition_pct/extinct.*全部逐位元相同(見下determinism段)=證實此修法零行為影響,只補齊觀測缺口。",
+    "note": "同本session反覆出現的『新counter/state必接tap』教訓(全量暫態可觀測性不變量)——此次缺口在量測bed非production code，已直接修正非只回報。"
+  },
+  "organic_3seed_8mo_vs_S1plusS2_baseline(ebf4489b)": {
+    "seed_1337": {
+      "extinct_starve": 5, "no_forage": 4, "while_fleeing": 1, "while_foraging": 0,
+      "attrition_pct": 18.4684684684685,
+      "stall_exclude": 299, "boost_fire": 46488,
+      "vs_baseline(extinct_starve=8,attrition=21.62%)": "改善(8→5, 21.62%→18.47%)"
+    },
+    "seed_42": {
+      "extinct_starve": 0, "attrition_pct": 2.08333333333333,
+      "stall_exclude": 99, "boost_fire": 1424,
+      "vs_baseline(extinct_starve=0,attrition=10.65%)": "改善(維持0隊starve死+attrition大幅降10.65%→2.08%)——確認REDO的額外gather RNG regression修法穩(未再0→8)"
+    },
+    "seed_4201": {
+      "extinct_starve": 3, "no_forage": 1, "while_fleeing": 1, "while_foraging": 1, "extinct_other": 2,
+      "attrition_pct": 28.1976744186047,
+      "stall_exclude": 335, "boost_fire": 44022,
+      "vs_baseline(extinct_starve=0,attrition=2.91%)": "★★惡化——S1+S2基線(ebf4489b)+ed2fdff6死碼輪皆為0隊starve死/2.91%attrition(此seed全鏈路唯一乾淨control),本輪(stall-detection真正wiring生效後)變3隊starve死+attrition暴增至28.19%(~10倍)"
+    }
+  },
+  "★★發現_seed4201_regression": {
+    "pattern": "seed4201此前全鏈路(post_S3/survival-prio-fix/S1+S2/ed2fdff6死碼輪)皆為健康control(0隊starve,attrition低個位數%)，唯一在stall-detection機制『真正開始fire』的這輪(REDO bf8452b7起)出現惡化，本輪(bb1e75ff)惡化持續且加劇。",
+    "stall_exclude對照": "seed4201 stall_exclude=335(三seed最高)，但seed1337 stall_exclude=299(次高,幾乎同量級)卻是改善方向——所以不是單純『exclude越多越差』的線性關係,不能只憑此數字下因果判定。",
+    "population結構差異(未深查,留給systems/implementer)": "seed4201 final teams=55(三seed最少)/rung_dist高度集中r0=28+r1=17(低rung佔多數)——是否與此seed的隊伍規模/rung結構使exclusion後『次格』選項本身就更差(換格換到死路)有關,未經code-level驗證,僅為觀測到的伴隨現象。",
+    "判定": "此為regression訊號,非measurer職權判定是否為此branch真根因或純RNG-cascade世界分岔——依議定書如實回報,建議systems/implementer code-level查因果鏈(可能起點：seed4201對應世界的exclusion-triggered換格序列，追蹤是否換到更差選項或觸發連鎖)。"
+  },
+  "determinism": {
+    "method": "v1(修tap-gap前)vs v2(修tap-gap後)——兩次獨立8月×3seed完整跑,程式碼世界生成/決策路徑完全相同(PROBE_KEYS只影響輸出dump非行為)",
+    "result": "★byte-identical at outcome level：三seed的attrition_pct(至完整浮點精度)+extinct.*/probe全數逐位元相同",
+    "note": "未跑正式state-hash工具（本repo無此類工具；game_sim_multi依既有memory記錄為unseeded,非適用於此determinism驗證，見[[reference_multi_sanity_unseeded]]）。v1/v2兩獨立跑聚合輸出完全吻合視為determinism證據已足——同implementer自報之16a7f17e/game_sim_multi兩跑byte-identical(a644e8de)互為佐證。"
+  },
+  "健康指標": {
+    "stall_exclude真正fire": "★確認——三seed分別299/99/335次,較REDO的seed1337單獨2月量測(69次)量級一致(本輪8月×3seed故總量更大),機制確實在unified/solo/subteam全路徑生效,非死碼(ed2fdff6的0→本輪三位數量級)。",
+    "idle_churn_thrash": "headless無新增assertion失敗=無偵測到新thrash;但idle-churn非headless覆蓋範圍,主要靠seed4201異常訊號間接提示,建議systems若deep-dive可用starvation_lockpoint_trace_bed.gd對seed4201抓幾個exclusion-triggered換格序列直接看。"
+  },
+  "summary": "★快閘全過(char bed 11/11+gate+headless)。★量測bed本身tap-gap(PROBE_KEYS漏收stall_exclude/boost_fire)已發現並修正,修正後(v2)驗證世界逐位元不變。★organic結果：3seed中2seed(1337/42)較S1+S2基線改善(extinct_starve降/attrition降),確認REDO額外gather regression修法穩定holding。★★但唯一control seed(4201)——此前全鏈路皆健康(0 starve)——在stall-detection真正生效這輪出現明顯惡化(0→3 starve,2.91%→28.19% attrition,~10倍)。stall_exclude次數雖為三seed最高但與seed1337(次高且改善)量級相近,非簡單線性因果,measurer不下因果判定,如實回報請systems/implementer code-level查(建議角度：seed4201的exclusion換格序列是否換到更差選項)。determinism確認(v1/v2兩獨立8月跑逐位元outcome相同)。"
+}

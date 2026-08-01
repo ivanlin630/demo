@@ -1,0 +1,1230 @@
+{
+  "1337": {
+    "attrition_pct": 9.00900900900901,
+    "curve": [
+      {
+        "established": 0,
+        "factions": 8,
+        "food_econ": {
+          "avg_food_flow": -3.88955306970839,
+          "min_food_flow": -26.7986726151501,
+          "n_teams_flow_sampled": 71,
+          "n_teams_negative_flow": 62,
+          "total_food_stock": 3817.99696067768
+        },
+        "intent": {
+          "CONQUER": 1,
+          "DEFEND": 14,
+          "EXPAND": 0,
+          "FOUND": 1,
+          "HOLD": 2,
+          "NONE": 2,
+          "RICH": 18
+        },
+        "month": 1,
+        "pop": 440,
+        "teams": 72
+      },
+      {
+        "established": 0,
+        "factions": 8,
+        "food_econ": {
+          "avg_food_flow": 1.42631064054843,
+          "min_food_flow": -48.5388842558042,
+          "n_teams_flow_sampled": 73,
+          "n_teams_negative_flow": 47,
+          "total_food_stock": 2126.42497382208
+        },
+        "intent": {
+          "CONQUER": 0,
+          "DEFEND": 14,
+          "EXPAND": 0,
+          "FOUND": 0,
+          "HOLD": 2,
+          "NONE": 1,
+          "RICH": 26
+        },
+        "month": 2,
+        "pop": 419,
+        "teams": 73
+      },
+      {
+        "established": 1,
+        "factions": 9,
+        "food_econ": {
+          "avg_food_flow": 0.998795358420536,
+          "min_food_flow": -61.5511798303062,
+          "n_teams_flow_sampled": 77,
+          "n_teams_negative_flow": 37,
+          "total_food_stock": 2089.98729045489
+        },
+        "intent": {
+          "CONQUER": 0,
+          "DEFEND": 15,
+          "EXPAND": 2,
+          "FOUND": 1,
+          "HOLD": 1,
+          "NONE": 0,
+          "RICH": 27
+        },
+        "month": 3,
+        "pop": 404,
+        "teams": 77
+      }
+    ],
+    "decision_diag": {
+      "diag.build_apothecary:facility:delegate.appl_n": 295,
+      "diag.build_apothecary:facility:delegate.coeff_pressed": 6,
+      "diag.build_apothecary:facility:delegate.coeff_sum": 207.449662748561,
+      "diag.build_apothecary:facility:delegate.mainurg_sum": 93.1601815638925,
+      "diag.build_apothecary:facility:delegate.ownutil_sum": 154.687097491551,
+      "diag.build_apothecary:facility:delegate.winutil_sum": 399.840399634816,
+      "diag.build_apothecary:location:delegate.appl_n": 93,
+      "diag.build_apothecary:location:delegate.coeff_pressed": 2,
+      "diag.build_apothecary:location:delegate.coeff_sum": 56.1754806650698,
+      "diag.build_apothecary:location:delegate.mainurg_sum": 51.84087276645,
+      "diag.build_apothecary:location:delegate.ownutil_sum": 65.8774021419505,
+      "diag.build_apothecary:location:delegate.winutil_sum": 173.580903306644,
+      "diag.build_apothecary:resource.appl_n": 7813,
+      "diag.build_apothecary:resource.coeff_pressed": 1294,
+      "diag.build_apothecary:resource.coeff_sum": 4507.73720377147,
+      "diag.build_apothecary:resource.mainurg_sum": 1790.37323860406,
+      "diag.build_apothecary:resource.ownutil_sum": 7933.24093112595,
+      "diag.build_apothecary:resource.winutil_sum": 12591.4057356628,
+      "diag.build_armorsmith:facility:delegate.appl_n": 3,
+      "diag.build_armorsmith:facility:delegate.coeff_sum": 2.14645220761886,
+      "diag.build_armorsmith:facility:delegate.mainurg_sum": 0,
+      "diag.build_armorsmith:facility:delegate.ownutil_sum": 2.1573078091557,
+      "diag.build_armorsmith:facility:delegate.winutil_sum": 2.81013334671411,
+      "diag.build_armorsmith:location:delegate.appl_n": 5,
+      "diag.build_armorsmith:location:delegate.coeff_sum": 3.69564152408634,
+      "diag.build_armorsmith:location:delegate.mainurg_sum": 1.39008097350597,
+      "diag.build_armorsmith:location:delegate.ownutil_sum": 3.52799538449853,
+      "diag.build_armorsmith:location:delegate.winutil_sum": 6.02833367394689,
+      "diag.build_armorsmith:resource.appl_n": 1590,
+      "diag.build_armorsmith:resource.coeff_pressed": 5,
+      "diag.build_armorsmith:resource.coeff_sum": 1133.03273707375,
+      "diag.build_armorsmith:resource.mainurg_sum": 444.215418256584,
+      "diag.build_armorsmith:resource.ownutil_sum": 1647.06976654196,
+      "diag.build_armorsmith:resource.winutil_sum": 2430.56801704847,
+      "diag.build_farming:location:delegate.appl_n": 3,
+      "diag.build_farming:location:delegate.coeff_sum": 1.94616095332141,
+      "diag.build_farming:location:delegate.mainurg_sum": 1.92386001348495,
+      "diag.build_farming:location:delegate.ownutil_sum": 2.55425145254555,
+      "diag.build_farming:location:delegate.winutil_sum": 3.40599745804026,
+      "diag.build_farming:resource.appl_n": 910,
+      "diag.build_farming:resource.coeff_pressed": 73,
+      "diag.build_farming:resource.coeff_sum": 530.321087844275,
+      "diag.build_farming:resource.mainurg_sum": 799.579265607281,
+      "diag.build_farming:resource.ownutil_sum": 184.919275536592,
+      "diag.build_farming:resource.winutil_sum": 2609.49503737943,
+      "diag.build_stable:facility:delegate.appl_n": 1403,
+      "diag.build_stable:facility:delegate.coeff_pressed": 7,
+      "diag.build_stable:facility:delegate.coeff_sum": 891.292388672979,
+      "diag.build_stable:facility:delegate.mainurg_sum": 391.087854539999,
+      "diag.build_stable:facility:delegate.ownutil_sum": 494.580341166678,
+      "diag.build_stable:facility:delegate.winutil_sum": 2465.67853597529,
+      "diag.build_stable:location:delegate.appl_n": 110,
+      "diag.build_stable:location:delegate.coeff_pressed": 10,
+      "diag.build_stable:location:delegate.coeff_sum": 66.4415601303722,
+      "diag.build_stable:location:delegate.mainurg_sum": 52.0436900642235,
+      "diag.build_stable:location:delegate.ownutil_sum": 81.7037977357219,
+      "diag.build_stable:location:delegate.winutil_sum": 192.573323255227,
+      "diag.build_stable:resource.appl_n": 6351,
+      "diag.build_stable:resource.coeff_pressed": 849,
+      "diag.build_stable:resource.coeff_sum": 3810.23742313982,
+      "diag.build_stable:resource.mainurg_sum": 1907.92412608418,
+      "diag.build_stable:resource.ownutil_sum": 5900.47636532719,
+      "diag.build_stable:resource.winutil_sum": 10671.5658990634,
+      "diag.build_weaponsmith:facility:delegate.appl_n": 3,
+      "diag.build_weaponsmith:facility:delegate.coeff_sum": 2.14645220761886,
+      "diag.build_weaponsmith:facility:delegate.mainurg_sum": 0,
+      "diag.build_weaponsmith:facility:delegate.ownutil_sum": 2.1573078091557,
+      "diag.build_weaponsmith:facility:delegate.winutil_sum": 2.81013334671411,
+      "diag.build_weaponsmith:location:delegate.appl_n": 5,
+      "diag.build_weaponsmith:location:delegate.coeff_sum": 3.69564152408634,
+      "diag.build_weaponsmith:location:delegate.mainurg_sum": 1.39008097350597,
+      "diag.build_weaponsmith:location:delegate.ownutil_sum": 3.52799538449853,
+      "diag.build_weaponsmith:location:delegate.winutil_sum": 6.02833367394689,
+      "diag.build_weaponsmith:resource.appl_n": 980,
+      "diag.build_weaponsmith:resource.coeff_sum": 735.170299588118,
+      "diag.build_weaponsmith:resource.mainurg_sum": 359.841691950575,
+      "diag.build_weaponsmith:resource.ownutil_sum": 924.348659470368,
+      "diag.build_weaponsmith:resource.winutil_sum": 1623.2125021522,
+      "diag.build_workshop:facility:delegate.appl_n": 271,
+      "diag.build_workshop:facility:delegate.coeff_sum": 194.550119309929,
+      "diag.build_workshop:facility:delegate.mainurg_sum": 89.6603437960148,
+      "diag.build_workshop:facility:delegate.ownutil_sum": 134.847429605767,
+      "diag.build_workshop:facility:delegate.winutil_sum": 380.000731749032,
+      "diag.build_workshop:location:delegate.appl_n": 62,
+      "diag.build_workshop:location:delegate.coeff_sum": 39.0340322458232,
+      "diag.build_workshop:location:delegate.mainurg_sum": 45.0738533735275,
+      "diag.build_workshop:location:delegate.ownutil_sum": 25.8626607012865,
+      "diag.build_workshop:location:delegate.winutil_sum": 133.56616186598,
+      "diag.build_workshop:resource.appl_n": 2035,
+      "diag.build_workshop:resource.coeff_pressed": 42,
+      "diag.build_workshop:resource.coeff_sum": 1257.5396586539,
+      "diag.build_workshop:resource.mainurg_sum": 1475.26698568244,
+      "diag.build_workshop:resource.ownutil_sum": 854.525713395918,
+      "diag.build_workshop:resource.winutil_sum": 4740.1044039476,
+      "diag.maintain_food:resource.appl_n": 6847,
+      "diag.maintain_food:resource.coeff_pressed": 374,
+      "diag.maintain_food:resource.coeff_sum": 4198.84546043824,
+      "diag.maintain_food:resource.mainurg_sum": 5386.35590366478,
+      "diag.maintain_food:resource.ownutil_sum": 1707.33797314348,
+      "diag.maintain_food:resource.winutil_sum": 15567.305874819,
+      "diag.maintain_material:location:delegate.appl_n": 112,
+      "diag.maintain_material:location:delegate.coeff_pressed": 13,
+      "diag.maintain_material:location:delegate.coeff_sum": 66.8099038465991,
+      "diag.maintain_material:location:delegate.mainurg_sum": 53.9381505635101,
+      "diag.maintain_material:location:delegate.ownutil_sum": 57.2378312699596,
+      "diag.maintain_material:location:delegate.winutil_sum": 196.576455946881,
+      "diag.maintain_material:resource.appl_n": 10084,
+      "diag.maintain_material:resource.coeff_pressed": 1403,
+      "diag.maintain_material:resource.coeff_sum": 6060.75523155215,
+      "diag.maintain_material:resource.mainurg_sum": 2312.69031789141,
+      "diag.maintain_material:resource.ownutil_sum": 6909.64602626262,
+      "diag.maintain_material:resource.winutil_sum": 15968.9392186661,
+      "diag.survival.appl_n": 14684,
+      "diag.survival.coeff_pressed": 6695,
+      "diag.survival.coeff_sum": 8280.11343864397,
+      "diag.survival.mainurg_sum": 2213.00893747214,
+      "diag.survival.ownutil_sum": 6121.90226384482,
+      "diag.survival.winutil_sum": 21933.1733397523,
+      "diag.乞食.appl_n": 759,
+      "diag.乞食.coeff_sum": 604.120350697011,
+      "diag.乞食.mainurg_sum": 521.90741622448,
+      "diag.乞食.ownutil_sum": 942.401286145211,
+      "diag.乞食.winutil_sum": 1613.62129153111,
+      "diag.佔村.appl_n": 124,
+      "diag.佔村.coeff_pressed": 5,
+      "diag.佔村.coeff_sum": 71.6049622168635,
+      "diag.佔村.mainurg_sum": 44.9984575399805,
+      "diag.佔村.ownutil_sum": 86.7153902004434,
+      "diag.佔村.winutil_sum": 162.466801424251,
+      "diag.併入.appl_n": 1955,
+      "diag.併入.coeff_pressed": 91,
+      "diag.併入.coeff_sum": 1377.54946316237,
+      "diag.併入.mainurg_sum": 869.484729398042,
+      "diag.併入.ownutil_sum": 1547.87870619604,
+      "diag.併入.winutil_sum": 3365.37694269033,
+      "diag.備戰.appl_n": 13831,
+      "diag.備戰.coeff_pressed": 4494,
+      "diag.備戰.coeff_sum": 8334.13858300782,
+      "diag.備戰.mainurg_sum": 2865.22200373096,
+      "diag.備戰.ownutil_sum": 9898.7549190497,
+      "diag.備戰.winutil_sum": 21008.3290646209,
+      "diag.吸納.appl_n": 4257,
+      "diag.吸納.coeff_pressed": 659,
+      "diag.吸納.coeff_sum": 2741.59523461945,
+      "diag.吸納.mainurg_sum": 1475.85436402391,
+      "diag.吸納.ownutil_sum": 385.57956348828,
+      "diag.吸納.winutil_sum": 6289.93940468887,
+      "diag.囤貨.appl_n": 2267,
+      "diag.囤貨.coeff_pressed": 299,
+      "diag.囤貨.coeff_sum": 1671.37903820744,
+      "diag.囤貨.mainurg_sum": 1510.05876934806,
+      "diag.囤貨.ownutil_sum": 1289.50738153554,
+      "diag.囤貨.winutil_sum": 2600.74260226356,
+      "diag.外交.appl_n": 75,
+      "diag.外交.coeff_sum": 52.4088140634201,
+      "diag.外交.mainurg_sum": 4.21626831598649,
+      "diag.外交.ownutil_sum": 41.0398447287058,
+      "diag.外交.winutil_sum": 104.263750575938,
+      "diag.建設.appl_n": 21509,
+      "diag.建設.coeff_pressed": 5144,
+      "diag.建設.coeff_sum": 12685.4830665433,
+      "diag.建設.mainurg_sum": 2037.6041339465,
+      "diag.建設.ownutil_sum": 7136.7188338629,
+      "diag.建設.winutil_sum": 32779.9085479275,
+      "diag.徵收.appl_n": 7170,
+      "diag.徵收.coeff_pressed": 1909,
+      "diag.徵收.coeff_sum": 4172.65872440174,
+      "diag.徵收.mainurg_sum": 2219.47425101368,
+      "diag.徵收.ownutil_sum": 3903.98114665624,
+      "diag.徵收.winutil_sum": 12494.6407530855,
+      "diag.掠奪.appl_n": 4785,
+      "diag.掠奪.coeff_pressed": 678,
+      "diag.掠奪.coeff_sum": 3120.93387774673,
+      "diag.掠奪.mainurg_sum": 2533.97844473499,
+      "diag.掠奪.ownutil_sum": 2002.67335516514,
+      "diag.掠奪.winutil_sum": 6443.15023496481,
+      "diag.攻擊.appl_n": 166,
+      "diag.攻擊.coeff_sum": 130.109544446609,
+      "diag.攻擊.mainurg_sum": 110.227213174105,
+      "diag.攻擊.ownutil_sum": 14.0954767546178,
+      "diag.攻擊.winutil_sum": 228.130781576588,
+      "diag.歸建.appl_n": 778,
+      "diag.歸建.coeff_pressed": 91,
+      "diag.歸建.coeff_sum": 633.43999627221,
+      "diag.歸建.mainurg_sum": 532.156769817695,
+      "diag.歸建.ownutil_sum": 529.590394737574,
+      "diag.歸建.winutil_sum": 1022.42010750833,
+      "diag.求和.appl_n": 13569,
+      "diag.求和.coeff_pressed": 5406,
+      "diag.求和.coeff_sum": 8280.34468090146,
+      "diag.求和.mainurg_sum": 3129.59788239912,
+      "diag.求和.ownutil_sum": 6690.08538260102,
+      "diag.求和.winutil_sum": 20334.9992673469,
+      "diag.生產.appl_n": 534,
+      "diag.生產.coeff_pressed": 13,
+      "diag.生產.coeff_sum": 388.73011292272,
+      "diag.生產.mainurg_sum": 226.468615253377,
+      "diag.生產.ownutil_sum": 347.580084988833,
+      "diag.生產.winutil_sum": 1064.74023392287,
+      "diag.紮營.appl_n": 3853,
+      "diag.紮營.coeff_pressed": 15,
+      "diag.紮營.coeff_sum": 2778.96812103361,
+      "diag.紮營.mainurg_sum": 2728.70623266697,
+      "diag.紮營.ownutil_sum": 5366.08923762124,
+      "diag.紮營.winutil_sum": 8350.17113735825,
+      "diag.覓食.appl_n": 8739,
+      "diag.覓食.coeff_pressed": 4871,
+      "diag.覓食.coeff_sum": 4376.38914126162,
+      "diag.覓食.mainurg_sum": 600.327602930503,
+      "diag.覓食.ownutil_sum": 5026.28051940467,
+      "diag.覓食.winutil_sum": 10455.1130307561,
+      "diag.訓練.appl_n": 2648,
+      "diag.訓練.coeff_pressed": 9,
+      "diag.訓練.coeff_sum": 2139.18610817666,
+      "diag.訓練.mainurg_sum": 1743.57149777854,
+      "diag.訓練.ownutil_sum": 902.010391884583,
+      "diag.訓練.winutil_sum": 3668.46313632514,
+      "diag.買料.appl_n": 7781,
+      "diag.買料.coeff_pressed": 1333,
+      "diag.買料.coeff_sum": 4586.0556316188,
+      "diag.買料.mainurg_sum": 229.482657136104,
+      "diag.買料.ownutil_sum": 1644.01741623932,
+      "diag.買料.winutil_sum": 9937.98678124988,
+      "diag.買糧.appl_n": 664,
+      "diag.買糧.coeff_sum": 549.594990654595,
+      "diag.買糧.mainurg_sum": 481.78457377851,
+      "diag.買糧.ownutil_sum": 1001.88520086268,
+      "diag.買糧.winutil_sum": 1614.02613955948,
+      "diag.貿易.appl_n": 14340,
+      "diag.貿易.coeff_pressed": 1456,
+      "diag.貿易.coeff_sum": 9753.28894208441,
+      "diag.貿易.mainurg_sum": 7156.36991565136,
+      "diag.貿易.ownutil_sum": 2105.83156324078,
+      "diag.貿易.winutil_sum": 21723.6020447169,
+      "diag.迎戰.appl_n": 10526,
+      "diag.迎戰.coeff_pressed": 570,
+      "diag.迎戰.coeff_sum": 7000.36407650689,
+      "diag.迎戰.mainurg_sum": 2844.50492154477,
+      "diag.迎戰.ownutil_sum": 4844.39165539998,
+      "diag.迎戰.winutil_sum": 15230.5404600692,
+      "diag.返家補給.appl_n": 595,
+      "diag.返家補給.coeff_pressed": 22,
+      "diag.返家補給.coeff_sum": 435.778580208119,
+      "diag.返家補給.mainurg_sum": 327.688168235123,
+      "diag.返家補給.ownutil_sum": 810.380452756829,
+      "diag.返家補給.winutil_sum": 1076.28830492472,
+      "diag.遷移找糧.appl_n": 527,
+      "diag.遷移找糧.coeff_pressed": 33,
+      "diag.遷移找糧.coeff_sum": 336.521545421468,
+      "diag.遷移找糧.mainurg_sum": 323.736388683319,
+      "diag.遷移找糧.ownutil_sum": 699.333624379693,
+      "diag.遷移找糧.winutil_sum": 932.221284604458,
+      "diag.駐守.appl_n": 8372,
+      "diag.駐守.coeff_pressed": 1769,
+      "diag.駐守.coeff_sum": 4859.05528023674,
+      "diag.駐守.mainurg_sum": 1812.27249379813,
+      "diag.駐守.ownutil_sum": 2277.95735130698,
+      "diag.駐守.winutil_sum": 13984.5310789725
+    },
+    "decision_opt_dist": {
+      "decision.opt_applicable.survival": 15948,
+      "decision.opt_applicable.乞食": 923,
+      "decision.opt_applicable.佔村": 135,
+      "decision.opt_applicable.併入": 1997,
+      "decision.opt_applicable.備戰": 14866,
+      "decision.opt_applicable.吸納": 4257,
+      "decision.opt_applicable.囤貨": 2511,
+      "decision.opt_applicable.外交": 75,
+      "decision.opt_applicable.建設": 22900,
+      "decision.opt_applicable.徵收": 10466,
+      "decision.opt_applicable.掠奪": 5123,
+      "decision.opt_applicable.攻擊": 166,
+      "decision.opt_applicable.歸建": 911,
+      "decision.opt_applicable.求和": 14462,
+      "decision.opt_applicable.生產": 534,
+      "decision.opt_applicable.紮營": 3949,
+      "decision.opt_applicable.覓食": 12118,
+      "decision.opt_applicable.訓練": 2648,
+      "decision.opt_applicable.買料": 7781,
+      "decision.opt_applicable.買糧": 1675,
+      "decision.opt_applicable.貿易": 14377,
+      "decision.opt_applicable.迎戰": 10801,
+      "decision.opt_applicable.返家補給": 1354,
+      "decision.opt_applicable.遷移找糧": 1518,
+      "decision.opt_applicable.駐守": 8457,
+      "decision.opt_chosen.build_apothecary:location:delegate": 11,
+      "decision.opt_chosen.build_apothecary:resource": 125,
+      "decision.opt_chosen.build_armorsmith:resource": 52,
+      "decision.opt_chosen.build_farming:location:delegate": 2,
+      "decision.opt_chosen.build_farming:resource": 391,
+      "decision.opt_chosen.build_stable:facility:delegate": 44,
+      "decision.opt_chosen.build_stable:resource": 1213,
+      "decision.opt_chosen.build_weaponsmith:resource": 322,
+      "decision.opt_chosen.build_workshop:facility:delegate": 24,
+      "decision.opt_chosen.build_workshop:location:delegate": 31,
+      "decision.opt_chosen.build_workshop:resource": 5525,
+      "decision.opt_chosen.maintain_food:resource": 546,
+      "decision.opt_chosen.maintain_material:resource": 81,
+      "decision.opt_chosen.survival": 1264,
+      "decision.opt_chosen.乞食": 164,
+      "decision.opt_chosen.佔村": 11,
+      "decision.opt_chosen.併入": 42,
+      "decision.opt_chosen.備戰": 1035,
+      "decision.opt_chosen.囤貨": 244,
+      "decision.opt_chosen.建設": 1391,
+      "decision.opt_chosen.徵收": 3296,
+      "decision.opt_chosen.掠奪": 338,
+      "decision.opt_chosen.歸建": 133,
+      "decision.opt_chosen.求和": 893,
+      "decision.opt_chosen.紮營": 96,
+      "decision.opt_chosen.覓食": 3379,
+      "decision.opt_chosen.買糧": 1011,
+      "decision.opt_chosen.貿易": 37,
+      "decision.opt_chosen.迎戰": 275,
+      "decision.opt_chosen.返家補給": 759,
+      "decision.opt_chosen.遷移找糧": 991,
+      "decision.opt_chosen.駐守": 85,
+      "decision.opt_coeff_pressed.survival": 15948,
+      "decision.opt_coeff_pressed.乞食": 923,
+      "decision.opt_coeff_pressed.佔村": 135,
+      "decision.opt_coeff_pressed.併入": 1997,
+      "decision.opt_coeff_pressed.備戰": 14866,
+      "decision.opt_coeff_pressed.吸納": 4257,
+      "decision.opt_coeff_pressed.囤貨": 2511,
+      "decision.opt_coeff_pressed.外交": 75,
+      "decision.opt_coeff_pressed.建設": 22900,
+      "decision.opt_coeff_pressed.徵收": 10466,
+      "decision.opt_coeff_pressed.掠奪": 5123,
+      "decision.opt_coeff_pressed.攻擊": 166,
+      "decision.opt_coeff_pressed.歸建": 911,
+      "decision.opt_coeff_pressed.求和": 14462,
+      "decision.opt_coeff_pressed.生產": 534,
+      "decision.opt_coeff_pressed.紮營": 3949,
+      "decision.opt_coeff_pressed.覓食": 12118,
+      "decision.opt_coeff_pressed.訓練": 2648,
+      "decision.opt_coeff_pressed.買料": 7781,
+      "decision.opt_coeff_pressed.買糧": 1675,
+      "decision.opt_coeff_pressed.貿易": 14377,
+      "decision.opt_coeff_pressed.迎戰": 10801,
+      "decision.opt_coeff_pressed.返家補給": 1354,
+      "decision.opt_coeff_pressed.遷移找糧": 1518,
+      "decision.opt_coeff_pressed.駐守": 8457
+    },
+    "end_pop": 404,
+    "farming_final": {
+      "faction_farm_pos": 8,
+      "faction_farm_zero": 41,
+      "farm_pos_avg_pop": 7.25,
+      "farm_pos_teams": 16,
+      "farm_zero_avg_pop": 5.62790697674419,
+      "farm_zero_teams": 86,
+      "indep_civ": 27,
+      "indep_farm_pos": 8,
+      "indep_farm_zero": 45,
+      "indep_mil": 26
+    },
+    "final": {
+      "established": 1,
+      "factions": 9,
+      "pop": 404,
+      "teams": 77
+    },
+    "intent": {
+      "CONQUER": 0,
+      "DEFEND": 15,
+      "EXPAND": 2,
+      "FOUND": 1,
+      "HOLD": 1,
+      "NONE": 0,
+      "RICH": 27
+    },
+    "probe": {
+      "absorb.dispatch": 0,
+      "absorb.slack_pos": 4763,
+      "absorb.target_found": 5350,
+      "absorb.util_n": 5350,
+      "absorb.yield_pos": 5297,
+      "accept.join_accept": 3,
+      "accept.join_reject": 5,
+      "accept.merge_accept": 0,
+      "accept.merge_reject": 0,
+      "annih.n_high": 0,
+      "annih.n_low": 0,
+      "annih.n_mid": 0,
+      "beg.dispatch": 1,
+      "beg.resolve": 1,
+      "capture.by_attack": 0,
+      "capture.total": 1,
+      "combat.end_annihilation": 0,
+      "combat.end_mortal_flee": 17,
+      "combat.end_readiness_above_thr": 17,
+      "combat.end_retreat": 0,
+      "combat.end_rout": 1,
+      "combat.ended_n": 18,
+      "combat.pop_start_le3": 17,
+      "combat.str_ratio_annih_n": 0,
+      "conq.combat_decisive": 0,
+      "conq.combat_entered": 18,
+      "conq.combat_retreat": 1,
+      "conq.declared": 2293,
+      "conq.indep_atk_believed_owned": 0,
+      "conq.intent": 382,
+      "conq.member_atk_dispatch": 0,
+      "conq.member_atk_eligible": 0,
+      "conq.prosperity_reached": 0,
+      "conq.retreat_captured": 1,
+      "conq.retreat_no_capture": 0,
+      "conq.win_absorbed": 0,
+      "conq.win_no_absorb": 0,
+      "conq.winner_loot": 0,
+      "conq.winner_none": 0,
+      "conq.winner_other": 365,
+      "conq.winner_prosperity": 0,
+      "consol.accept_n": 3,
+      "construct.complete": 37,
+      "construct.progress": 1285,
+      "construct.stall": 7871,
+      "construct.start": 45,
+      "construct.start_task_not_build": 27,
+      "construct.timeout_cancel": 4,
+      "crisis.override_release": 88,
+      "death.combat_named": 0,
+      "death.combat_pop": 0,
+      "death.defect_leave": 0,
+      "death.starve_anon": 31,
+      "death.starve_minor": 0,
+      "envoy.accept": 1,
+      "envoy.delivered": 4,
+      "envoy.dispatched": 16,
+      "envoy.gift_delivered": 3,
+      "envoy.gift_sent": 9,
+      "envoy.reject": 3,
+      "envoy.target_dead": 2,
+      "envoy.timeout": 11,
+      "establish.gate_all_pass": 0,
+      "establish.gate_b1_ok": 0,
+      "establish.gate_fail_b1_members": 0,
+      "establish.gate_fail_b2_command": 0,
+      "establish.gate_fail_b3_ambition": 0,
+      "establish.gate_fail_b4_readiness": 0,
+      "extinct.combat": 0,
+      "extinct.other": 1,
+      "extinct.starve": 1,
+      "extinct.starve_no_forage_nonowner": 0,
+      "extinct.starve_no_forage_owner": 0,
+      "extinct.starve_while_fleeing_nonowner": 0,
+      "extinct.starve_while_fleeing_owner": 0,
+      "extinct.starve_while_foraging_nonowner": 1,
+      "extinct.starve_while_foraging_owner": 0,
+      "g1.arb_hit": 18,
+      "g1.engine_survival": 3602,
+      "g1.food_buy": 465,
+      "g1.market_arrive": 414,
+      "g1.mint": 0,
+      "g1.order_fulfilled": 22,
+      "g1.order_placed": 4626,
+      "g1.order_settled_direct": 44,
+      "g1.restock_chosen": 438,
+      "g1.seek_market": 1884,
+      "g1.shortage_buy": 2886,
+      "g2.ambition_demote": 155,
+      "g2.ambition_promote": 330,
+      "g2.faction_found": 1,
+      "g2.feud_formed": 0,
+      "g2.vendetta_trigger": 0,
+      "g3.betrayal": 13,
+      "g3.scout_dispatch": 0,
+      "g3.trust_down": 16597,
+      "g3.trust_up": 11372,
+      "indep.found_ally": 10,
+      "indep.found_subjugate": 0,
+      "indep.found_timeout": 5,
+      "indep.gate_ambitious": 37431,
+      "indep.gate_fail_busy": 7042,
+      "indep.gate_fail_food": 9509,
+      "indep.gate_fail_nopath": 1557,
+      "indep.gate_fail_pop": 18125,
+      "indep.gate_path_ok": 1198,
+      "join.dispatch": 19,
+      "join.resolve": 3,
+      "merge.branch_reached": 0,
+      "merge.consolidate_dispatch": 13,
+      "merge.guard_fail_ordertgt": 0,
+      "merge.mv_block_combat": 0,
+      "merge.mv_moving": 0,
+      "merge.mv_no_target": 0,
+      "merge.mv_reached": 0,
+      "merge.pair_seen": 0,
+      "merge.set_fail": 2,
+      "merge.set_ok": 11,
+      "merge.surv_fail": 228,
+      "merge.surv_ok": 257,
+      "merge.try_entered": 0,
+      "merge_appl.chose_other": 23,
+      "merge_appl.chose_整併": 0,
+      "merge_appl.food_3to6": 3,
+      "merge_appl.food_ge6": 9,
+      "merge_appl.food_lt3": 11,
+      "merge_appl.total": 23,
+      "mergein.dissolve": 1,
+      "mergein.subteam": 2,
+      "mortal_flee.n": 17,
+      "mortal_flee.n_high": 0,
+      "mortal_flee.n_low": 0,
+      "mortal_flee.n_mid": 17,
+      "p1.assimilate": 0,
+      "p1.flee": 1,
+      "p1.revolt": 0,
+      "pursuit.n": 0,
+      "reaction.N1_flee": 0,
+      "reaction.N2_riot": 0,
+      "reaction.N3_defect": 0,
+      "reaction.N4_shirk": 0,
+      "reaction.N5_extort": 0,
+      "reaction.P1_comply": 0,
+      "reaction.P2_produce": 0,
+      "reaction.P4_expand": 0,
+      "reaction.breed": 0,
+      "reeval.build_latch": 21454,
+      "reeval.build_leak_crisis": 39,
+      "reeval.build_leak_directive": 1418,
+      "reeval.build_leak_force": 45,
+      "reeval.build_leak_stuck": 0,
+      "rep.host_nonneutral": 0,
+      "resume.attempt": 2442,
+      "resume.orig_recall": 20,
+      "resume.reject_busy": 849,
+      "resume.reject_combat": 4171,
+      "resume.reject_owner": 122592,
+      "resume.reject_resident": 0,
+      "resume.reject_starving": 45049,
+      "resume.success": 17,
+      "rout.n_high": 1,
+      "rout.n_low": 0,
+      "rout.n_mid": 0,
+      "rout.total": 1,
+      "strat.breakout_assigned": 358,
+      "strat.encircle_assigned": 6,
+      "strat.expand_reached": 11,
+      "strat.sa_move_dispatch": 40,
+      "surv.loot_dispatch": 14,
+      "survival.boost_fire": 9800,
+      "survival.stall_exclude": 171,
+      "trade.arrive": 229,
+      "trade.barter_deal": 19,
+      "trade.deal": 69,
+      "trade.deal_market": 40,
+      "trade.deal_merchant": 57,
+      "trade.deal_resident": 12,
+      "trade.market_bail.buy_no_coin": 2,
+      "trade.market_bail.buy_no_stock": 31,
+      "trade.market_bail.sell_no_surplus": 408,
+      "trade.meet": 260,
+      "trade.timeout": 72,
+      "worldgen.build_outpost": 67,
+      "worldgen.floor_fail": 0,
+      "worldgen.floor_pass": 1
+    },
+    "probe_amounts": {
+      "absorb.slack_sum": 2480.03522634983,
+      "absorb.yield_sum": 1102.09999999998,
+      "combat.loser_readiness_end_sum": 17.12,
+      "combat.loser_wnd_end_sum": 0.4,
+      "combat.pop_ratio_annih_sum": 0,
+      "combat.pop_start_sum": 27,
+      "combat.rounds_sum": 27,
+      "combat.str_ratio_annih_sum": 0,
+      "consol.absorber_days_sum": 68.3267396145345,
+      "consol.absorber_pop_sum": 24,
+      "consol.combined_days_sum": 53.391803823807,
+      "consol.joiner_days_sum": 1.4938801633536,
+      "mortal_flee.readiness_sum": 17,
+      "pursuit.cruelty_sum": 0,
+      "pursuit.greed_sum": 0,
+      "pursuit.loss_sum": 0,
+      "rout.ready_sum_high": 0.12,
+      "rout.ready_sum_low": 0,
+      "rout.ready_sum_mid": 0
+    },
+    "probe_samples": {
+      "construct.complete": [
+        {
+          "action": "upgrade_facility",
+          "team": 10,
+          "tick": 1180,
+          "tile": [
+            23,
+            17
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 48,
+          "tick": 3350,
+          "tile": [
+            19,
+            7
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 49,
+          "tick": 4520,
+          "tile": [
+            9,
+            14
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 34,
+          "tick": 5070,
+          "tile": [
+            14,
+            22
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 35,
+          "tick": 5870,
+          "tile": [
+            11,
+            18
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 37,
+          "tick": 6290,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 47,
+          "tick": 8350,
+          "tile": [
+            16,
+            15
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 0,
+          "tick": 8620,
+          "tile": [
+            11,
+            16
+          ]
+        }
+      ],
+      "construct.progress": [
+        {
+          "active": 57,
+          "pop": 3,
+          "tick": 410,
+          "ticks_left": 336,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "active": 57,
+          "pop": 3,
+          "tick": 420,
+          "ticks_left": 333,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "active": 57,
+          "pop": 3,
+          "tick": 430,
+          "ticks_left": 330,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "active": 57,
+          "pop": 3,
+          "tick": 440,
+          "ticks_left": 327,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "active": 57,
+          "pop": 3,
+          "tick": 510,
+          "ticks_left": 324,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "active": 10,
+          "pop": 5,
+          "tick": 510,
+          "ticks_left": 336,
+          "tile": [
+            23,
+            17
+          ]
+        },
+        {
+          "active": 57,
+          "pop": 3,
+          "tick": 520,
+          "ticks_left": 321,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "active": 10,
+          "pop": 5,
+          "tick": 520,
+          "ticks_left": 331,
+          "tile": [
+            23,
+            17
+          ]
+        }
+      ],
+      "construct.stall": [
+        {
+          "ct_id": 57,
+          "ct_pos": [
+            9,
+            11
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 450,
+          "ticks_left": 324,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "ct_id": 57,
+          "ct_pos": [
+            9,
+            11
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 460,
+          "ticks_left": 324,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "ct_id": 57,
+          "ct_pos": [
+            9,
+            11
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 470,
+          "ticks_left": 324,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "ct_id": 57,
+          "ct_pos": [
+            9,
+            11
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 480,
+          "ticks_left": 324,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "ct_id": 57,
+          "ct_pos": [
+            9,
+            11
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 490,
+          "ticks_left": 324,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "ct_id": 57,
+          "ct_pos": [
+            9,
+            11
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 500,
+          "ticks_left": 324,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "ct_id": 57,
+          "ct_pos": [
+            9,
+            11
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 690,
+          "ticks_left": 270,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "ct_id": 57,
+          "ct_pos": [
+            9,
+            11
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 700,
+          "ticks_left": 270,
+          "tile": [
+            9,
+            11
+          ]
+        }
+      ],
+      "construct.start": [
+        {
+          "action": "upgrade_facility",
+          "ct_id": 57,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 57,
+          "tick": 400,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 10,
+          "prio_after": 70,
+          "task_after": "外交",
+          "team": 10,
+          "tick": 500,
+          "tile": [
+            23,
+            17
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 62,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 62,
+          "tick": 600,
+          "tile": [
+            14,
+            22
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 63,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 63,
+          "tick": 600,
+          "tile": [
+            11,
+            18
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 64,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 64,
+          "tick": 600,
+          "tile": [
+            19,
+            7
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 49,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 49,
+          "tick": 2400,
+          "tile": [
+            9,
+            14
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 47,
+          "prio_after": 80,
+          "task_after": "return_home",
+          "team": 47,
+          "tick": 6500,
+          "tile": [
+            16,
+            15
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 0,
+          "prio_after": 80,
+          "task_after": "覓食",
+          "team": 0,
+          "tick": 8000,
+          "tile": [
+            11,
+            16
+          ]
+        }
+      ],
+      "construct.timeout_cancel": [
+        {
+          "ct_id": 45,
+          "stall_ticks": 7500,
+          "tick": 17500,
+          "tile": [
+            6,
+            26
+          ]
+        },
+        {
+          "ct_id": 8,
+          "stall_ticks": 7500,
+          "tick": 17500,
+          "tile": [
+            11,
+            28
+          ]
+        },
+        {
+          "ct_id": 7,
+          "stall_ticks": 7500,
+          "tick": 21500,
+          "tile": [
+            10,
+            28
+          ]
+        },
+        {
+          "ct_id": 86,
+          "stall_ticks": 7600,
+          "tick": 21500,
+          "tile": [
+            17,
+            17
+          ]
+        }
+      ],
+      "resume.attempt": [
+        {
+          "candidates": 0,
+          "ct_id": 57,
+          "outpost_owner": 37,
+          "tick": 1000,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 62,
+          "outpost_owner": 22,
+          "tick": 1000,
+          "tile": [
+            14,
+            22
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 64,
+          "outpost_owner": 40,
+          "tick": 1000,
+          "tile": [
+            19,
+            7
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 57,
+          "outpost_owner": 37,
+          "tick": 1000,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 62,
+          "outpost_owner": 22,
+          "tick": 1000,
+          "tile": [
+            14,
+            22
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 64,
+          "outpost_owner": 40,
+          "tick": 1000,
+          "tile": [
+            19,
+            7
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 57,
+          "outpost_owner": 37,
+          "tick": 1000,
+          "tile": [
+            9,
+            11
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 62,
+          "outpost_owner": 22,
+          "tick": 1000,
+          "tile": [
+            14,
+            22
+          ]
+        }
+      ],
+      "resume.success": [
+        {
+          "tick": 5000,
+          "tile": [
+            9,
+            11
+          ],
+          "worker": 37
+        },
+        {
+          "tick": 5000,
+          "tile": [
+            9,
+            11
+          ],
+          "worker": 37
+        },
+        {
+          "tick": 5000,
+          "tile": [
+            9,
+            11
+          ],
+          "worker": 37
+        },
+        {
+          "tick": 5000,
+          "tile": [
+            9,
+            11
+          ],
+          "worker": 37
+        },
+        {
+          "tick": 5000,
+          "tile": [
+            9,
+            11
+          ],
+          "worker": 37
+        },
+        {
+          "tick": 5000,
+          "tile": [
+            9,
+            11
+          ],
+          "worker": 37
+        },
+        {
+          "tick": 5000,
+          "tile": [
+            9,
+            11
+          ],
+          "worker": 37
+        },
+        {
+          "tick": 5000,
+          "tile": [
+            9,
+            11
+          ],
+          "worker": 37
+        }
+      ]
+    },
+    "rung_dist": {
+      "r0": 27,
+      "r1": 24,
+      "r2": 7,
+      "r3": 1,
+      "r4": 1
+    },
+    "seed": 1337,
+    "start_pop": 444,
+    "total_ticks": 21600
+  }
+}

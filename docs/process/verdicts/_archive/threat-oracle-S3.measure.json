@@ -1,0 +1,37 @@
+{
+  "measured_at_head": "7e8f61b0 (branch feat/threat-oracle-s3, off main d5bbbece = S2-calibrate merged, verified byte-equal to my e3d34ffc scripts/ via empty git diff)",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-threatoracle-s3-threatdissolution-7e8f61b0.log",
+    "docs/measurements/2026-07-17-threatoracle-s3-constitution-7e8f61b0.log",
+    "docs/measurements/2026-07-17-threatoracle-s3-headless-7e8f61b0.log",
+    "docs/measurements/2026-07-17-threatoracle-s3-1337-7e8f61b0.json",
+    "docs/measurements/2026-07-17-threatoracle-s3-42-7e8f61b0.json"
+  ],
+  "note_on_reuse": "d5bbbece(S3 base)與e3d34ffc(我先前跑過的S2-calibrate)在scripts/ 逐字相同(git diff空)——故S2-calibrate參照數字直接沿用既有JSON,無需重跑baseline",
+  "gates": {
+    "threat_dissolution_check": {"result": "ALL PASS,含live-seam收斂驗(非unified idle狂徒→_evaluate_threat route _decide_unified→迎戰實派+probe bump 124→125)", "verdict": "CONFIRMED"},
+    "constitution_gate": {"result": "PASS sites=64 removed=1(_evaluate_threat::taskarbiter fingerprint移除,精確吻合implementer claim)", "verdict": "CONFIRMED"},
+    "headless_test": {"result": "殘3 assertion同名同行號(15540/7078/13990,與calibrate版一致)", "verdict": "CONFIRMED pre-existing"}
+  },
+  "organic_threat率保_vs_S2_calibrate": {
+    "seed_1337": {
+      "迎戰": "3.01%->3.09%(+0.07pp,穩)", "備戰": "4.45%->5.47%(+1.01pp)", "求和": "3.19%->2.14%(-1.05pp)",
+      "survival": "14.44%->18.84%(+4.40pp)", "貿易": "2.86%->1.20%(-1.66pp)",
+      "build_outpost": "39->42(升)", "farm_pos_teams": "10->12(升)", "teams": "73->70", "pop": "415->403(-2.9%)",
+      "attrition_pct": "6.53%->9.23%(升)"
+    },
+    "seed_42": {
+      "迎戰": "5.05%->2.08%(-2.97pp)", "備戰": "3.30%->3.67%(+0.38pp)", "求和": "4.80%->4.01%(-0.79pp)",
+      "survival": "20.78%->14.32%(-6.46pp)", "貿易": "1.79%->1.09%(-0.70pp)",
+      "build_outpost": "18->16", "farm_pos_teams": "6->7(升)", "teams": "59->59(持平)", "pop": "418->392(-6.2%)",
+      "attrition_pct": "3.24%->9.26%(近3倍升)"
+    },
+    "verdict": "★threat率整體保住(無order-of-magnitude explosion/collapse——迎戰/備戰/求和/survival皆在個位數~20%量級內波動,方向seed間有差異但無失控)。economy(build_outpost/farm_pos)兩seed皆非退化(多數升)。★但attrition_pct兩seed皆顯著上升(6.53%→9.23%/3.24%→9.26%)——收斂後戰鬥/死亡率提高,可能是route全走_decide_unified後更多隊真正engage/preempt生效的自然結果(更多真交戰=更高attrition非bug)，但幅度(seed42近3倍)值得systems留意是否符合預期。"
+  },
+  "not_independently_deep_tested": [
+    "release不卡死(threat task威脅消失後release)——未建專門長跑追蹤specimen task釋放時序,僅由headless/threat_dissolution的整體PASS間接佐證無明顯卡死(否則會有大量idle-thrash訊號)",
+    "PRIO 70黏性(threat反應不被經濟@50 stomp)——未直接量測commit後PRIO衝突解決細節,threat_dissolution的live-seam測試證實迎戰能實派,間接佐證黏性生效但非窮盡驗證",
+    "preempt後選中分佈(R²建議項)——未建preempt專屬追蹤,時間預算取捨"
+  ],
+  "summary": "★單元層(threat_dissolution_check/constitution_gate/headless_test)全部CONFIRMED符合宣稱。organic threat率保: 兩seed皆在合理量級內波動(無爆量/歸零),economy多數改善。★attrition_pct兩seed皆顯著上升(尤其seed42近3倍)——值得systems留意但非崩潰訊號(teams/pop仍健康)。release/PRIO黏性/preempt分佈三項因時間預算未做專門深測，僅有間接佐證(整體綠燈無異常訊號)，非窮盡驗證，如實揭露。"
+}

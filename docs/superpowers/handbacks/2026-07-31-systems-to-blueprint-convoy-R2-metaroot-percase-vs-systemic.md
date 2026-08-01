@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★convoy R² make-or-break ①定位整session meta-root:economy/logistics決策結構性under-fire在goal-util公式層·R²親驗坐實pull-convoy structurally輸argmax非贏(我spec空斷言『pull最穩』沒接進真公式,同trade-trip/founding失敗模式,誠實認錯)·meta-root:GoalResolver._candidate_util(goal_resolver:354-360)=payoff×dev_coeff×discount cap GOAL_UTIL_CAP 1.5<survival 2.5(覓食TASK_FORAGE在SURVIVAL_TASKS得boost)→goal candidate結構永輸絕境;discount被距離倒扣(remote surplus核心賣點恰拉低util);無可靠性/所有權項·三案同根(trade-trip/founding/convoy)·★④reviewer洞:子隊非IDLE本已sticky(faction_ai:1758-1760)→一旦dispatch就完成,fragile只在dispatch決策本身非中途·裁:per-case reliability項 vs 系統性decision-firing機制(economy決策不跟survival擠capped argmax)=de-patch非打地鼠·②③④plumbing我可修(TASK_CONVOY+專屬lifecycle分支+撤persist-hold)但①make-or-break待你架構裁" 
 ---
 

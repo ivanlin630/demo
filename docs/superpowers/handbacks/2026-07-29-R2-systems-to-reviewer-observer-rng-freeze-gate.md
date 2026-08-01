@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·observer-no-global-RNG靜態閘·spec=2026-07-29-observer-rng-freeze-gate-HOW.md·動機=observer_no_global_rng 4次血證證人工記性擋不住(現無靜態閘:constitution_gate只掃sim+漏pick_random/shuffle,observability_gate只管tap coverage,runtime byte-identical只覆蓋exercise到路徑)·機制=observability_gate加第③檢查:observe-pure marker檔內禁5類global-RNG向量(擴3→5含pick_random/shuffle)+local-seeded逃生口(rng.前綴放行但pick_random/shuffle照抓因無本地版)+順手補constitution RNG_RE·純靜態零風險] observe-RNG靜態閘。審逃生口regex邊界+marker慣例+向量集完整性。"
 ---
 

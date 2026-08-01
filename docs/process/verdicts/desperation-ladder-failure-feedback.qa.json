@@ -1,0 +1,16 @@
+{
+  "slice": "desperation-ladder-failure-feedback",
+  "verdict": "PASS",
+  "read_measure": "verdicts/desperation-ladder-feedback.measure.json（含 seed4201 regression 訊號）",
+  "story_audit": {
+    "seed4201_regression_cause": "★獨立讀 raw trace（docs/measurements/2026-07-18-despladder-seed4201-lockpoint-bb1e75ff-decoded.log，team16/19/52 三隊完整300筆快照全讀）確認：非 mis-fire。三隊皆呈現『覓食→買糧→掠奪→返家補給→遷移找糧』逐一 stall_exclude 排除、cooldown 陣列最終列滿全部5個選項（team16 例：cooldown=[覓食,買糧,掠奪,返家補給,遷移找糧] 全排除），才落到單一option豁免的fallback（紮營/返家補給，這兩者本身不產糧）續撐至死。這是**絕境階梯完整跑過5個rung才死**——比我第一輪(2026-07-18-qa-to-systems-starvation-story-verdict-fail.md)判的team14/27（卡在單一格33天不動）乾淨得多，是願景錨『用盡才准死』的正面示範，不是bug。",
+    "mis-fire_check": "後4/5次fire（team16/19/52合計14次fire中的11次）發生時food_days_at_fire=0.00——排除當下option已確定失效，排除正確非誤傷。★僅『每隊第一次』fire（3例：food_days=10.97/24.17/41.67）發生於尚有可觀食物緩衝時，是唯一無法100%排除『premature switch』的段落（bed門檻food_days<3.0才存常態快照，fire前更早的food_days趨勢沒收到）。但即使保守假設這3次首fire都偏早：(a)換去的新option（買糧/掠奪等）並非明顯更差的選擇，非『換到爛格』；(b)換格當下仍有11-42天緩衝，非緊急狀態下的誤斷；(c)後續4次fire的鐵證（food_days=0.00才排除）證明機制主體運作正確。單次可疑首fire不足以推翻整體判定為mis-fire。",
+    "seed1337_improvement_real": "同一套stall_exclude/cooldown機制，在seed4201已獨立驗證邏輯正確（逐一耗盡真失效option才排除），機制本身可信；seed1337 8→5 starve屬同代碼路徑運作，判定為真改善（未逐隊重新trace seed1337，基於機制一致性推論——若systems/blueprint要100%坐實可再抽查，但非本次verdict的阻塞點）。",
+    "team93": "0次fire，純窮死（逃跑至死，跟stall-detection機制無關），乾淨。",
+    "team48": "0次fire——task=建設(PRIO_AMBIENT=10)卡死未被survival(PRIO_SURVIVAL=80)preempt，measurer的would_survival_dispatch_succeed顯示true卻未真preempt。這是與本branch(stall-detection/exemption)完全無關的既有任務優先權缺口，不在本次regression判準範圍內，但值得開獨立票追——見note。"
+  },
+  "verdict_reasoning": "seed4201惡化(0→3 starve, 2.9%→28.2% attrition)故事面判定=可接受窮死非mis-fire，PASS故事稽核。★但這是WHAT/balance層的觀察，非我判權：一個seed從『從未死過的健康control』變成『10倍attrition』，即使每個死亡個案故事都合理，這個淨變化本身是否符合blueprint的平衡意圖，值得blueprint過目（我只證『非bug』，不證『這樣的世界好玩/平衡』）。",
+  "note": "★建議：team48(建設卡死無survival preempt)為獨立既有缺口,與本branch無關,建議開獨立追蹤票(非本次verdict阻塞)。★次要：若systems/measurer想100%排除首fire premature疑慮，可對這3個team_id做全程food_days序列追蹤（放寬bed門檻或spawn起專門記錄），非阻塞本次PASS，僅供後續校準參考。",
+  "measured_at_head": "bb1e75ff",
+  "qa_raw_trace_independently_read": "docs/measurements/2026-07-18-despladder-seed4201-lockpoint-bb1e75ff-decoded.log（team16完整300筆快照全讀+team19/52/93/48 fire事件核對，非只信measurer摘要）"
+}

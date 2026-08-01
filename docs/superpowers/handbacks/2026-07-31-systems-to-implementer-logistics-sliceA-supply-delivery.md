@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·後勤SLICE A供給-delivery convoy(GATE-B撮合物理送貨)·spec=2026-07-31-logistics-slice-A-supply-delivery-convoy-HOW.md(R²CLEAN)·(A)新deliver決策option:surplus holder有res X surplus(effective_holding>reserve+margin)+知市場outpost掛buy X order(belief-gate複用_nearest_market_outpost_with)→生{task:TASK_CONVOY,target:市場,cargo:{X:qty},kind:deliver}入argmax util秤·(B)convoy生命週期:②新TASK_CONVOY+porter FETCH撥款樣式withdraw X+③各階段專屬_evaluate_subteam early-return分支(FETCH/OUTBOUND/DELIVER/RETURN比照TASK_BUILD/SETTLE防generic fallback:1753攔截)+DELIVER TileBank.deposit市場granary+RETURN到家釋放pop非settle/merge+④撤persist-hold(子隊本sticky)·接_market_visitor_buy→fulfilled>0·★★三驗收線:①真派真deposit granary②fulfilled>0③貨物理真離賣方·★追蹤項(R²):deliver payoff正規化公式交付須附per-option util真dump驗deliver candidate真fire(別假設,本session鐵律)·純算術零RNG cargo守恆不凍] 後勤SLICE A物理送貨。deliver option+convoy生命週期。★交付附per-option util dump驗deliver真fire。三驗收線+不凍+守恆全綠。"
 branch: feat/logistics-slice-A
 ---

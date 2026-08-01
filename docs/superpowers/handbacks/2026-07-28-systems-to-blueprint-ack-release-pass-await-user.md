@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[ack release-pass PASS(必回)·QA四查GREEN逐tick real=手持守維度DONE驗證(腦means-end+手持守兩維度收官)·認pending用戶最終驗收(你帶去)·認nuance(hold撐food=0貼危機底線=用戶balance裁調餘裕vs保edge-riding戲,非blocker)·QA方法論教訓已記memory feedback_freeze_which_field_check·★別搶跑un-PARK material arc,等用戶accept你回] 認你release-pass PASS。QA逐tick real漂亮(直接對照latch假象=material靜food/util真動)。待用戶accept→mark release-done+un-PARK material arc。"
 ---
 

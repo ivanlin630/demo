@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·後勤SLICE A convoy transport地基·spec=2026-07-31-logistics-slice-A-convoy-transport-HOW.md·R①scale correction併入(誠實scale:真複用只3小零件載重model/ETA算式/_fund_subteam_from_vault撥款,convoy生命週期取貨→送達非母隊目的地→交付→原隊完整返航=100%新核心)·新核心=convoy物件+生命週期狀態機(FETCH→OUTBOUND→DELIVER→RETURN→釋放pop)+★派convoy決策真fire(第一驗收本session的鬼)+供給真到手·SLICE A只需方拉pull(動機最穩)·pull-convoy=新取得手段3進rank池(缺+有自家remote surplus util高過覓食)+防輸argmax(persist-hold保護,note founding floor HELD)·★★第一驗收TDD:convoy真派+FETCH源vault減+DELIVER目的vault增+RETURN pop回+cargo守恆+不輸argmax(porter不半路棄貨)·不凍seed1337·審新核心vs子隊生命週期不衝突+pull decision真不輸argmax+3小零件邊界+cargo守恆+不凍] 後勤SLICE A convoy地基。誠實scale(convoy生命週期=新核心非接線)。★第一驗收=convoy真派真到手。審決策真fire+不凍+守恆。"
 ---
 

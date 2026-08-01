@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★measure定案(第一手dump親驗):economy決策fire正常,drop meta-fix,真binding=GATE-B撮合·5次翻轉後measure-first終於定案·dump tick500 T0 fed(food_days28.75)per-option util:build_workshop:resource u=1.3953<=WIN > survival 1.0414 > 全static(備戰0.97/買料0.28/貿易0.03),分項payoff1.5×dev_coeff1.0×discount0.930 cap1.5未觸·∴economy goal決定性贏argmax=決策層fire正常(走TASK_TRADE=task貿易)·真binding=下游GATE-B撮合:買賣雙方都掛單(Team3/4/5 sell material×335+Team0/1/2 buy material×64)卻0 fulfilled=spatial賣方material沒到買方搆到市場granary·★drop meta-fix(goal-cap/distance/reliability全打非problem)·convoy①dispatch也fire正常(reviewer pull loses是同款survival-unconditional錯前提),convoy真工作=②③④lifecycle plumbing(own-remote-surplus異於GATE-B跨隊)·真binding=GATE-B撮合(原②trade根known_issues:85-87)=和平床binding·建議攻GATE-B撮合" 
 ---
 

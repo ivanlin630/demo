@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·facility dispatch afford buffer 降·Gate B cheap·R² 2修正已納·★off LOCAL main 0f0a5eca·★連姊妹站2637+2780] spec=2026-07-22-facility-dispatch-afford-buffer.md。reviewer R² 訂正2點已納:①×1.5非anomaly是3站dispatch convention(資助移動subteam),但是choke(作者98a0a8f7認),降解mil weaponsmith卡建②須連姊妹站2637+2780同const(只改2780自拆一致)。修:新const FACILITY_DISPATCH_AFFORD_MULT=1.1(TEST VALUE),兩站同用:①_dispatch_facility_builder:2780 `cost[k]*1.5`→`*FACILITY_DISPATCH_AFFORD_MULT`②★_dispatch_upgrader:2637 同(vault+private ×1.5→同const)。★2551(新據點strict-private)別碰(另案)。TDD 4型(avail 90/80/88邊界+姊妹站同行為)。gate/headless 0new/determinism 2跑byte-identical 無RNG。★measure=facility-build-by-type(weaponsmith/upgrade dispatch成功率)+★owner-depletion稽核(降buffer後owner撥料是否depletion→thrash,reviewer要驗)+doom-delta,帶§④b樣本(長跑→QA新規則)。★仍trade-primary次要(mil仍需有material靠買=material貿易流measure主線,別誤當主fix)。task=systems+reviewer。做完→to:measurer。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[coin-cause 坐實=salary 主因(50-67% 兩族群通吃)·你兩假說皆 refuted/次要(mil-loot 零事件·civ-dealflow 小一個數量級)·根偏 illiquidity 非 shortage(salary→anon_treasury+extract gate greed-prud×.5>.4 中庸領袖永不 extract)·R① 又擋一次·salary WHAT 你裁] measurer coin-split 坐實:net coin flow 兩族群結構性負、★salary=兩族群共同最大 drain(mil 50-67%/civ 51-55% 跨 seed)=判準③通吃。你兩假說 measure 皆非主因:①mil-loot→anon_treasury=★假說原型不成立(conquest-loot 零事件,機制沒 fire;mil trade net 反而正=不因低賣虧)②civ-dealflow/GATE-B=真但次要(civ trade net -4~-31/3mo 比 salary 小一個數量級)→∴GATE-B 非 coin 引擎,維持排後獨立。★root code 坐實=illiquidity 非 shortage(守恆):salary→AnonTreasuryBank.deposit(隊自己 anon_treasury,illiquid)+_consider_extraction gate `greed-prudence×0.5>0.4`(faction_ai:2365)→中庸領袖(greed.5/prud.5=0.25<0.4)永不 extract→coin 鎖 anon_treasury 取不回 spendable。∴coin 不是沒有是拿不到。fix 偏 salary 機制(drain 太兇 or extract/recovery gate 太嚴讓 coin 永鎖)非『加 coin』。★R① 第4擋(你兩 coin-cause 假說 measure 前別 spec=對,兩個都次要,salary 才是)。salary balance/liquidity 的 WHAT(薪太高?extract gate 放寬?recovery 補?)你裁,我 scope HOW+可能再 measure salary drain vs income 精算。"
 ---
 

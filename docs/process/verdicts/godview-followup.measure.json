@@ -1,0 +1,23 @@
+{
+  "slice": "god-view follow-up (jhost + enemy_outpost belief-gate) — arc真收官 2 residual",
+  "measured_at_head": "9e965631",
+  "baseline_head": "0f92cf21",
+  "verdict": "PASS-leaning. enemy_outpost belief-gate behavior-sensitive (md5 changed, expected). doom-delta: seed1337 3->7, seed42 3->6, seed4201 0->0 identical. NOT freeze-bug (手不聽腦 2), no belief-proxy pathology. conq.declared DOWN (not up as implementer guessed). gates green. god-view arc TRUE close.",
+  "raw_logs": ["docs/measurements/2026-07-21-godviewFU-baseline-0f92cf21.json", "docs/measurements/2026-07-21-godviewFU-branch-9e965631.json", "docs/measurements/2026-07-21-godviewFU-lockpoint-1337.txt"],
+  "gates": {"constitution": "PASS sites=75 removed=1 (gv_teamstate de-patch via jhost; baseline.txt untouched, systems merge relabels)", "headless": "branch=known 5-fail 0-new", "determinism": "implementer 4aa393b6 no-new-RNG (md5 changed vs prior slice = enemy_outpost 選址 behavior-sensitive)"},
+  "doom_delta": {
+    "seed1337": {"base": 3, "branch": 7, "attr": "15.1->21.2", "pop": "377->350"},
+    "seed42": {"base": 3, "branch": 6, "attr": "18.1->22.5"},
+    "seed4201": {"base": 0, "branch": 0, "attr": "0.6->0.6", "note": "IDENTICAL (leak path not exercised)"}
+  },
+  "conflict_rate": {
+    "seed1337_conq_declared": "4010 -> 3113 (DOWN ~22%)",
+    "combat_ended": "seed1337 43->42, seed42 46->36 (~flat/down)",
+    "note": "implementer guessed conflict UP (只避已知敵->更多衝突); ACTUAL conq.declared DOWN — less god-view targeting -> fewer conquest declarations, not more. behavior-sensitive but net-quieter conflict not more."
+  },
+  "death_cause_branch_1337": {"手不聽腦": 2, "stuck-task": 26, "food-ok-vanish": 32, "broken-flee-sig": 20, "interpretation": "手不聽腦 only 2 = NOT freeze-bug; broken-flee 20 low = nullbelief-flee holds; no belief-proxy pathology spike (misdirected 選址 would show as stuck/手不聽腦 surge, not seen). starve↑ = doom-delta from behavior-sensitive enemy_outpost world-shift."},
+  "belief_proxy_no_distortion": "enemy_outpost uses belief-about-owner imperfect proxy (R² accepted). measured: no 選址 distortion signature (no 手不聽腦/stuck spike from avoiding-wrong/over-avoiding). proxy behaves OK, no need for heavy team_outpost_known store.",
+  "godview_arc_close": "A/F/E/D/B/C + null-belief-flee + 1119 + followup(jhost+enemy_outpost) = ALL god-view leaks treated. 敵情/威脅/追擊/創世/市場/可達性/join/選址 all belief-gated. systems constitution_gate detector -> zero-untracked-residual. Next: economy arc (re-baseline).",
+  "caveat": "seed4201 identical (leak path not hit there); seed1337/42 starve↑ is real behavior change (enemy_outpost 選址 shift) not bug; conq DOWN interesting (quieter not louder) — blueprint judges if less-conquest is desired doom-delta direction",
+  "summary": "follow-up 2-residual belief-gate PASS-leaning: enemy_outpost behavior-sensitive (starve↑ seed1337/42, seed4201 identical), NOT freeze-bug (手不聽腦 2), no belief-proxy distortion, conq.declared DOWN (quieter conflict not louder — opposite implementer guess). gates green. god-view arc TRUE close. blueprint judges doom-delta + quieter-conflict direction."
+}

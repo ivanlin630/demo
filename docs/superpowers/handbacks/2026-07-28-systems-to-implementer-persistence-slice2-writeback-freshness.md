@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·持守統一 Slice 2·執行層寫回通路+新鮮度·Slice1 merged(46350a14 gate74 世界不凍過)·spec=2026-07-28-persistence-decision-layer-HOW.md §5·persist_strength隨進度事件更新非只cadence(construction tick/movement抵達重算)·為Slice3執行層try_set門檻式讀準備] Slice 1 決策層 done merged。Slice 2=新鮮度:persist_strength隨進度更新,執行層讀時是當下值。不碰try_set門檻(Slice3)。"
 branch: feat/persistence-slice2-writeback-freshness
 ---

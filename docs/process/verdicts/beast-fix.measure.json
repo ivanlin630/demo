@@ -1,0 +1,47 @@
+{
+  "slice": "beast-fix (id 碰撞 + 決策洩漏 + extinct 守衛 addendum)",
+  "measured_at_head": "7fb16350",
+  "baseline_head": "f469127f",
+  "window": "8mo / 57600 ticks (organic); 3mo determinism",
+  "seeds": [1337, 42, 4201],
+  "raw_logs": [
+    "docs/measurements/2026-07-19-beastfix-baseline-f469127f.json",
+    "docs/measurements/2026-07-19-beastfix-branch-1524d5ed.json",
+    "docs/measurements/2026-07-19-beastfix-branch-confirm-7fb16350-1337.json",
+    "docs/measurements/2026-07-19-beastfix-det1-7fb16350-1337-3mo.json",
+    "docs/measurements/2026-07-19-beastfix-det2-7fb16350-1337-3mo.json",
+    "docs/measurements/2026-07-19-beastfix-phantom-branch-7fb16350.txt",
+    "docs/measurements/2026-07-19-beastfix-phantom-baseline-f469127f.txt"
+  ],
+  "regression_real_team": {
+    "seed1337": {"baseline": {"starve": 0, "attr": 3.15, "pop": 430, "teams": 69}, "branch": {"starve": 5, "attr": 20.27, "pop": 354, "teams": 71}, "verdict": "REGRESSION (late cascade, 8mo)"},
+    "seed42":   {"baseline": {"starve": 0, "attr": 3.94, "pop": 415, "teams": 66}, "branch": {"starve": 0, "attr": 4.63, "pop": 412, "teams": 64}, "verdict": "flat/healthy"},
+    "seed4201": {"baseline": {"starve": 0, "attr": 0.58, "pop": 342, "teams": 45}, "branch": {"starve": 0, "attr": 0.29, "pop": 343, "teams": 46}, "verdict": "improved/healthy"}
+  },
+  "seed1337_confirm_on_target_head": {"7fb16350_8mo": {"starve": 5, "attr": 20.27}, "note": "reproduces 1524d5ed value exactly → addendum zero-numeric-change; regression real not stale-code artifact"},
+  "seed1337_3mo_healthy": {"starve": 0, "attr": 4.73, "note": "regression emerges month 3→8 = late cascade divergence, not immediate mechanism break"},
+  "quick_gates": {
+    "constitution_gate": "PASS sites=64 removed=0 (0 new)",
+    "headless_comprehensive": "branch 7fb16350 5-fail set ≡ baseline f469127f 5-fail set (Team23 order=-1 / 弱目標 / p2a join 0.41 / rung 擴張 / 戰鬥197) → 0 new",
+    "determinism": "seed1337 3mo 2 runs full-dict byte-identical (starve=0/attr=4.7297)"
+  },
+  "belief_phantom_check": {
+    "method": "temp bed scan real-team state.team_intel keys for beast-region/dangling ids, seed1337 3mo",
+    "baseline_f469127f": {"real_obs": 69, "beast_key_live": 0, "beast_key_dangling": 0, "dangling_any": 0, "key_neg1000000": 0},
+    "branch_7fb16350":   {"real_obs": 65, "beast_key_live": 0, "beast_key_dangling": 0, "dangling_any": 0, "key_neg1000000": 0},
+    "verdict": "NULL RESULT — team_intel clean on BOTH heads (0 beast entries either side). Does NOT confirm implementer's belief-clean claim: real teams do not put beasts in team_intel at all; the id-collision phantom (if it manifests) is in combat_target, which this check did not cover. Belief-clean claim UNVERIFIED by measurer."
+  },
+  "fork_B_investigation": {
+    "verdict": "CASCADE (seed1337 fragility), NOT beast-fix mechanism defect",
+    "signal1_beast_accumulation": "REFUTED — branch concurrent beasts_now max 2, =0 during decline months; '31 vs 1 distinct' is collision counting artifact (baseline overwrites to single id), concurrent ~equal both heads",
+    "signal2_hunt_reward": "intact — 31 beasts spawn+die on branch, hunt path works",
+    "signal3_death_cause": "standard survival-ladder starvation, ZERO beast involvement; dying teams combat_target = human teams only",
+    "signal3_recalibrated_CRISIS_FLOOR_1.5": "14 vanished real teams reclassified by food_days (systems flagged bed '純窮死' label = merely 'no stall_exclude fire', NOT confirmed food-shortage): TRUE-FAMINE=9 (team12/14/15/16/43/48 food0 famine15-33d, 71/77/78 food<1.5 = coherent starvation), 手不聽腦-STUCK=2 (team64 food4.17 + team68 food4.58, famine=0, dispatch_would_succeed=true yet task=idle -> control-layer latch, NOT famine, NOT in starve metric, PRE-EXISTING not beast-fix), food-ok-vanish=3 (team49/65/83 merge/combat). Cascade verdict holds (9 genuine famine coherent); +flagged 2 pre-existing 手不聽腦 as separate known-issue candidate.",
+    "signal4_divergence": "tick-0 structural perturbation (beast unique ids) forks seed1337 into harsher famine/war basin; steady monotonic pop decline 446->354 but beasts_now=0 during decline => not beast-driven; basin is a losing trajectory",
+    "belief_clean_combat_target": "baseline ct_neg1000000=6 (all to collision-shared ambiguous beast); branch ct_neg1000000=1 + beast_ref=14 across unique ids; ct_dangling=0 both. Ambiguity removed — claim substantiated in spirit (was misdirection not dangling). Release note wording: 'beast combat_target collision-ambiguous -> unique' NOT 'phantom entries gone'",
+    "recommendation": "lean (A) accept + flag seed1337 fragile; correctness-important fix, regression limited to 1 cascade-fragile seed with coherent deaths; QA story-coherence judgment routed to:qa in parallel",
+    "raw_logs_added": ["docs/measurements/2026-07-19-beastfix-btrace-branch-7fb16350.txt", "docs/measurements/2026-07-19-beastfix-btrace-baseline-f469127f.txt", "docs/measurements/2026-07-19-beastfix-lockpoint-deaths-7fb16350-1337.txt"]
+  },
+  "incomplete": ["QA story-coherence judgment pending (routed to:qa)"],
+  "summary": "gates/determinism green, decision-leak fix TDD-sound. BUT seed1337 real-team REGRESSION at 8mo (starve 0→5, attr 3.15→20.27, reproducible+deterministic on 7fb16350) = beast-id-value change diverges cascade-fragile seed1337 into bad basin (≈pre-crisis 19% behavior). seed42/4201 healthy → not mechanism break. Belief-clean claim unverified (phantom null in team_intel). FORK for blueprint: accept (1 fragile seed, correctness-important fix) vs investigate/reject."
+}

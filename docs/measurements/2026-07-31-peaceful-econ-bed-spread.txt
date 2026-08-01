@@ -1,0 +1,32 @@
+﻿Exception calling "ReadAllBytes" with "1" argument(s): "The process 
+cannot access the file 'C:\Users\I12\AppData\Local\Temp\tmpD889.tmp'
+ because it is being used by another process."
+At A:\GDS\demo\.worktrees\peaceful-econ\tools\godot.ps1:27 char:1
++ $bytesOut = [System.IO.File]::ReadAllBytes($tempOut)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocatio 
+   nException
+    + FullyQualifiedErrorId : IOException
+ 
+Exception calling "ReadAllBytes" with "1" argument(s): "The process 
+cannot access the file 'C:\Users\I12\AppData\Local\Temp\tmpD88A.tmp'
+ because it is being used by another process."
+At A:\GDS\demo\.worktrees\peaceful-econ\tools\godot.ps1:28 char:1
++ $bytesErr = [System.IO.File]::ReadAllBytes($tempErr)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocatio 
+   nException
+    + FullyQualifiedErrorId : IOException
+ 
+Exception calling "GetString" with "1" argument(s): "Array cannot be
+ null.
+Parameter name: bytes"
+At A:\GDS\demo\.worktrees\peaceful-econ\tools\godot.ps1:30 char:1
++ $text = $cp950.GetString($bytesOut) + $cp950.GetString($bytesErr)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocatio 
+   nException
+    + FullyQualifiedErrorId : ArgumentNullException
+ 
+
+[GODOT TIMEOUT 600s - process killed]

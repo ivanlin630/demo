@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★26% ceiling真根measure定案(第一手親驗):買方order-fill+convoy未協調堆同單,非賣方reserve/cargo(我reserve+cargo-loss診斷全被measure駁=本session第6-7次靜態斷言refute)·trajectory:全porter滿載到市場(loaded==material_at_deliver 64/37/37/33源100%私產)→無載0無en-route丟·porter loaded=64→sold=12(買方只吸12)/loaded=37→sold=33/另2個sold=0 sell_no_surplus=買方buy單被前convoy填滿rem=0→後者bail·∴多convoy堆同一buy單(前填滿後bail)+買方order qty~64+coin cap限吸收·但買方T0/1/2各want material×64~192總需>45 fulfilled=有未滿足需求在別單·∴fix=協調convoy targeting散到未填buy單(非全堆best/最近單)→fulfilled 45→toward需求·key-bug修:_resolve讀錯key(cargo vs cargo_res)→deliver_cargo一直bypass(解釋前no-op),但reserve非binding key-fix不改26%(correctness merge)·★你判:26%=demand-limited正常經濟接受vs協調convoy散單=near-term flow fix(measured驗別假設)" 
 ---
 

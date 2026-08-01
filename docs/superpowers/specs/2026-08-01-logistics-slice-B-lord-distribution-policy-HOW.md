@@ -48,6 +48,7 @@
 | 貿易市場有價格+coin 結算、price 於 settle 算 | ✅ `TradeValuation.ask_price/local_value`=BASE_PRICE+shortage mult；coin 轉 interaction:806-807(buy)/838-839(sell) | trade_valuation:127-148 |
 | 居民持 coin（購買力） | ✅ team.resources["coin"](TeamData:101)←member_tax(faction_ai:2521)←salary(salary_system:65)；居民付貢含 coin(interaction:527) | — |
 | intra-faction 貿易允許（無 faction gate） | ✅ 只擋 self-trade `owner==visitor`(interaction:731-736)、貿易跨/同勢力皆可(interaction:238)；領主掛賣、同勢力居民可買 | — |
+| deficit 居民自動掛 food buy-order（load-bearing：distribute 賣入居民 buy-order） | ✅ effective_food < 人格安全目標 → `post_order(buy,food,need)`；前提居民村在自家市集 outpost 掛(order_system:49) | order_system:128-136 |
 
 ---
 
@@ -58,17 +59,19 @@
 - runway < `DISTRIB_DEFICIT_DAYS`（新常數、初值 e.g. 4 天）＝deficit 候選。
 
 ### B. `_distribute_candidates`（新，goal_resolver.gd，仿 `_deliver_candidates`:125）
-- 對每個 deficit resident-team，生成 **feed-residents candidate**（既有 argmax 候選、非特判 branch＝約束①）：
-  `{task:TASK_CONVOY, target:resident_team_tile, cargo:"food", qty:補到 runway 目標量, kind:"distribute", terminus_team_id:resident.id, price_factor:_price_factor(honor,greed)}`。
+- **騎現成 need→buy-order pipeline**：deficit 居民 effective_food < 人格安全目標 → **自動掛 food buy-order**（order_system:128-136、premise §0b PROVEN；居民村在自家市集 outpost 掛，order_system:49）。distribute 候選＝**target 鎖本勢力 deficit 居民 buy-order**（掃 `received_buy_orders` 限自有 resident-team），本質＝`_deliver_candidates` 的人格變體（target-preference＋price 注入）。
+- 對每個 deficit resident buy-order，生成 **feed-residents candidate**（既有 argmax 候選、非特判 branch＝約束①）：
+  `{task:TASK_CONVOY, target:resident_buyorder_tile, cargo:"food", qty:補到 runway 目標量, kind:"distribute", terminus_team_id:resident.id, order_id, price_factor:_price_factor(honor,greed)}`。
 - **price_factor（連續人格導出＝約束③）**：`_price_factor(honor,greed)` 連續映射——honor max→→0（免費）、neutral→1、greed→markup>1。e.g. `clamp( (0.5+greed) / (0.5+honor), 0, PRICE_MARKUP_CAP )`（honor 拉低、greed 拉高、無 if-gate）。
 - **util（連續 weigh＝約束②）**：`relief_term + coin_term`——`relief_term = deficit_severity × (0.3+honor)`（義氣放大救子民）、`coin_term = price_factor × local_value × affordable_qty × (0.3+greed)`（貪婪放大抽 coin）。競 argmax 對 sell-external（`_deliver_candidates`）+ 其他。**GOAL_UTIL_CAP=1.5 沿用**（reviewer 核乘數真推過 cap、非 economy-headroom 死 lever）。**無 `if greed>X` 硬 gate**。
 - source vault＝領主 capital granary surplus（FETCH 既有 `_load_convoy_cargo` faction_ai:2964）。
 
-### C. DELIVER 終點擴充（interaction_system.gd，復用貿易市場＝約束④）
-- `_resolve_market_at_outpost`(731)：加 **resident-DELIVER 分支**——`task_extra_data.kind=="distribute"` 且抵達 tile 有 `terminus_team_id` 對應 resident-team → **賣入居民**（復用現成 sell-settle + coin 轉 interaction:838-839），**但 ask 用 `local_value × price_factor`**（modulation 現成定價、非新機制）：
-  - `price_factor==0`（仁君免費）→ ask=0 → 居民 0 coin 取食（現成路、qty 由 deliver_cargo）。
-  - `price_factor>0` → 居民按 ask 買可負擔量（`min(需求, resident.coin / ask)`）→ 買不夠則 deficit 殘留。**coin：resident.coin -= q×ask、領主(owner) coin += q×ask**（現成 806-807/838-839 路）。
-- 沿用 `deliver_cargo>=0` bypass-reserve（interaction:815）。**無新 market/order class**（grep 驗）。
+### C. DELIVER＝復用 SLICE A sell path + ask 注入口 + free-end guard 放寬（interaction_system.gd）★訂正（答 R² bid<=0 洞）
+distribute convoy（visitor＝賣方）賣入**居民 buy-order**（owner＝居民＝買方付 coin），DELIVER 走現成 `_market_visitor_sell`。現況 bid=`local_value(owner)` 內算、無外部注入、且 `bid<=0`/`owner coin<=0` bail（interaction:819/828）→ 仁君免費(ask=0) 撞牆。**三點訂正**：
+1. **ask 注入口（約束③）**：`_market_visitor_sell` 加 `override_ask: float = -1`（−1＝現行 local_value 內算、**normal trade 零變、guard 全不動**）。distribute 傳 `override_ask = TradeValuation.local_value(...) × price_factor`。`override_ask>=0` 時 bid 用 override_ask 取代內算 local_value（828）。
+2. **free-end guard 放寬（僅 `override_ask==0` 情境）**：仁君免費 → **跳** `owner coin<=0 bail`(819) + `bid<=0 bail`(828)、qty=`min(order_rem, sellable)`（免 affordability cap 829 的 `ocoin/bid` div-by-0）、coin 轉＝q×0＝0（838-839 no-op）。食物仍轉入居民＝免費 fed。
+3. **付費端（`override_ask>0`、賣居民）**：bid=override_ask、**保留 affordability cap**（829 `ocoin/bid` 居民買可負擔量、買不夠→deficit 殘留＝苛捐雜稅、既有機制免改）、guard 照舊。
+- 連續：override_ask `0→high`，食物恆轉（免費全給／付費按負擔），coin=q×override_ask。**復用整條 sell path（約束④）、零新 market/order class（grep 驗）**。
 - convoy RETURN 照舊（faction_ai:1774 尾）歸建釋 pop；未售 cargo 隨 RETURN 歸領主 vault（守恆、非憑空銷毀）。
 
 ### D. unrest 耦合（新回饋，resource_system 或 faction_ai per-tick）

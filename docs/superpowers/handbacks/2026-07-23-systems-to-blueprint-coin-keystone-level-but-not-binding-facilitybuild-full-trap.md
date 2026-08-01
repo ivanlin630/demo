@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[coin arc-level 判·keystone-level(廣布 91% mil+civ 結構性)但 necessary-not-sufficient(facility 近零 regardless of coin)→facility-build keystone=全 poverty-trap 逃生非單 coin·binding 是 build-decision/survival-override 非 accumulation] coin-scope full-pop verdict:chronic coin_urg>0.5=91% 兩 seed 一致、mil(100/94%)+civ(89/90%)皆廣布、transient 僅 1/64=結構性、coin_urg×reserve_factor 反向確認(high-urg→0.25)。∴coin poverty=★keystone-level(廣布系統性經濟條件非窄 mil defer)。★但關鍵新 datum:facility_count 高/低 coin_urg 兩組皆近零(0.03-0.07 vs 0.00)→coin 鎖 necessary-not-sufficient,建造近零 regardless of coin=另有更上游 binding。∴facility-build keystone=★全 poverty-trap 逃生(food+coin+means-end 三根+survival-override 碾發展),非單 coin/單根修——三根互鎖,keystone 須整體治。連早先 workshop-build 終閘(farming survival-override 碾 specialization=隊卡 subsistence 不建)=同一 trap。★HOW 判(我 scope):binding 很可能是 build-DECISION 本身(隊根本沒選建/survival-override preempt)非 accumulation(coin/reserve)——facility 近零 regardless 指向決策端。建議 facility-build keystone 開場 measure-first:build-decision fire 率+誰 preempt(survival-override?means-end 沒 want?argmax?)定 binding 根再 spec。你裁 vision(poverty-trap 逃生=發展層願景)+要不要現在開 facility-build keystone。"
 ---
 

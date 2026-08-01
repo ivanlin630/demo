@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·founding-completion fix active-construction persist floor·spec=2026-07-30-founding-completion-construction-persist-floor-HOW.md·坐實根(bed dump 0b6523db):remote founding子隊construct.stall=29101/complete_build=0,stall samples ct_task=覓食/外交 ct_reason=unified ticks_left>0=argmax搶班非timeout·cold-start機制:_progress TASK_BUILD=(total-left)/total→起點progress≈0→base_persist≈0<PERSIST_HOLD_THRESHOLD(0.1)→persist.hold不fire→routine搶班不擋→progress永不累積惡性循環·fix=施工中隊persist_eff floor到≥threshold+margin(CONSTRUCTION_ACTIVE_FLOOR 0.15)→persist.hold擋routine argmax搶班→留TASK_BUILD完工·non-freeze(只floor active-construction+≥THREAT crisis照bypass打斷+完成釋放+re-eval照跑≠skip-reeval)·★不凍紅線TDD(seed1337 attrition非→0)·★人格WEIGH不GATE疑點+floor vs safe_factor scaling R² judge] founding persist floor修cold-start。審不凍紅線+人格gate疑點+crisis bypass保留+floor值。"
 ---
 

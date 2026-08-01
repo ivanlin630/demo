@@ -1,0 +1,18 @@
+{
+  "slice": "god-view Slice B (創世②③知識 + relay-discovery)",
+  "measured_at_head": "23989506",
+  "baseline_head": "703fa6e8",
+  "verdict": "PASS (clean improvement). Cold-start less-omniscient = HEALTHIER not disaster: total starve 22->5 all seeds improved, factions 8->10 = discovery-network works via vision+relay. config sanity 0-crash. Gates green.",
+  "raw_logs": ["docs/measurements/2026-07-20-godviewB-baseline-703fa6e8.json", "docs/measurements/2026-07-20-godviewB-branch-23989506.json"],
+  "gates": {"constitution": "PASS 64/0-new", "headless": "branch=known 5-fail 0-new", "determinism": "implementer 1693db37, not independently reproduced", "game_sim_multi": "0 SCRIPT ERROR (game_sim_test/tyrant/merchant/warzone)"},
+  "doom_delta": {
+    "seed1337": {"base": 13, "branch": 3, "attr": "25.5->20.0", "pop": "331->355", "factions": "8->10"},
+    "seed42": {"base": 5, "branch": 2, "attr": "17.1->22.9"},
+    "seed4201": {"base": 4, "branch": 0, "attr": "18.6->2.3", "pop": "280->336"},
+    "total_starve": "base 22 (13+5+4) -> branch 5 (3+2+0) = BIG IMPROVEMENT (not regression)"
+  },
+  "emergence": "WORKS — no cold-start collapse (opposite: healthier). factions still form (8->10 seed1337) = discovery-network functions via vision+relay despite lost omniscience. less-omniscient start = less aggressive early conquest -> more survivors.",
+  "relay_discovery": "not directly instrumented (no discovery probe key); emergence-health (factions form, no collapse, diplomacy implied by faction growth) = strong indirect evidence relay+vision compensate for lost all-pairs omniscience",
+  "config_8_逐判": "game_sim_multi 4 configs (game_sim_test/tyrant/merchant/warzone) 0-crash + headless clean -> NO config needs blind-omniscient (default belief/relay works). 4/8 directly sanity-tested; mechanism config-agnostic (creation-knowledge shrink uniform). untested 4 (demo/econ_bed/survival_start/world_sim) = belt-suspenders if blueprint wants",
+  "summary": "Slice B clean PASS: creation-knowledge shrink (all-pairs->②③local) + relay-discovery IMPROVES survival (total starve 22->5), emergence healthy (factions form via vision+relay, no cold-start collapse), config sanity 0-crash, gates green. Recommend accept."
+}

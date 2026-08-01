@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·和平經濟觀測床(measure-first Step0)·spec=2026-07-30-peaceful-economy-bed-HOW.md(R²v2 CLEAN)·零sim-code改:①新config/peaceful_economy.json(explicit seeded 好戰=0全隊 faction_id=-1 radius~8 有unowned forest tile)+②薄peaceful_economy_bed.gd(呼WarringHarness.run+印4問報告+逐隊月故事,零RNG可加@observe-pure)·★①/③established隊(非森林outpost level≥1+缺料設施需求_facility_deficit≥CONSTRUCTION_DESIRE_MIN+build-cost含material→need_keep(material)>0)material≈0真缺 forest tile在SEEK_TILE_RANGE=LIVE·★★fixture-liveness斷言t0每①隊need_keep(material)>0+有forest tile否則FAIL拒開工·②料足低設施upgrade·④food下坡runway] 和平經濟床。①/③established+缺料設施need_keep>0=LIVE。liveness斷言機械防死fixture。零sim改。"
 branch: feat/peaceful-economy-bed
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·material-hold-protection·脫貧第三腿·decouple 兩 urgency·premise measure-坐實故 R②] spec=2026-07-23-material-hold-protection.md。根:trade_valuation:94 material reserve=need_keep×_reserve_factor,_urgency=max(food,coin)(:97/108)→coin_urg 壓→construction-material 賣掉→不累積→afford 不過(measure 坐實脫貧鏈未閉)。blueprint WHAT 精修=decouple:construction-material 對 coin-urg 免疫、acute food 釋放(別 survival-floor 全保護=餓隊抱料餓死)。修:①_reserve_factor_food_only(只用 food_urg 非 max)②reserve(material) 若 _construction_facility_need>0→用 food-only factor 否則照舊③acute food(food_days<DESPERATION)→food_urg 高→factor 降→料可賣(守護)④coin_need material 分量對齊 afford cost×1.5−holding(extraction 拉夠)。★核審:①food-only decouple 語意(coin 焦慮不賣 build-料、food 危機仍賣)②construction-need 判定 reuse _construction_facility_need(遞迴?reserve 讀 need_keep 讀 construction,同既有 re-entrancy guard 無環)③★acute-food 釋放真防抱料餓死(food_days<DESPERATION→reserve 降→可賣,驗守護硬迴歸)④coin_need afford×1.5 對齊合理⑤無 RNG⑥非-construction material 照舊不誤傷。CLEAN→dispatch(feat/material-hold-protection,off extraction merge 後 main)。measure 三腿齊 facility 端到端升+★無抱料餓死。generalize 標記(means-end committed 資源)先 scoped material。"
 ---
 

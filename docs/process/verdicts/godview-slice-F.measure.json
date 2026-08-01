@@ -1,0 +1,39 @@
+{
+  "slice": "godview-slice-F",
+  "is_sim": true,
+  "measured_at_head": "d0ab7f91 (branch feat/godview-slice-F) — F1(fallback→sentinel+guard×4 site:scout/envoy-dispatch/envoy-track/encircle) + F2(刪8死*_pos欄,exhaustive grep零消費者)。off local main a5495461(①②+slice2全merged)。headless test-fixture gap(record_claim缺tile_pos)修過。",
+  "raw_logs": [
+    "docs/measurements/2026-07-19-godviewF-charbed-d0ab7f91.log",
+    "docs/measurements/2026-07-19-godviewF-constitution-d0ab7f91.log",
+    "docs/measurements/2026-07-19-godviewF-headless-d0ab7f91.log",
+    "docs/measurements/2026-07-19-godviewF-multiseed-d0ab7f91.json"
+  ],
+  "unit_level_gates": {
+    "char_bed_godview_f_test": {"result": "5/5 ALL PASS(scout/envoy/encircle無belief→不dispatch/不設assignment)", "verdict": "CONFIRMED"},
+    "constitution_gate": {"result": "PASS sites=64 removed=0", "verdict": "CONFIRMED"},
+    "headless_test": {
+      "method": "comprehensive雙格式([FAIL]+Assertion failed)獨立重驗",
+      "result": "6/6與baseline逐條同(0 new)——第一輪7個(1新增『慎重者矛盾情報→派斥候查證』,已判定test-fixture gap並修:record_claim補tile_pos)，修後獨立重驗過",
+      "verdict": "CONFIRMED"
+    }
+  },
+  "F2_byte_identical_複核": "implementer自報4-way(base/F2-only/full/mine-2x)全同hash b2452128；我未逐一複核determinism三跑(信implementer結構性證據=exhaustive grep零消費者+4-way比對，此類靜態刪欄位risk低)。",
+  "organic_3seed_8mo_doom_delta_trend": {
+    "seed_1337": {"extinct_starve": 6, "attrition_pct": 19.1441441441441, "mortal_flee_n": 43,
+      "vs_a5495461_baseline(2,14.86%,mortal_flee=31)": "小幅惡化(2→6隊starve,14.86%→19.14%attrition)，但仍在此arc歷史觀察範圍內(ed2fdff6輪7隊/bb1e75ff輪5隊)，非新高點"},
+    "seed_42": {"extinct_starve": 0, "attrition_pct": 2.08333333333333, "mortal_flee_n": 7,
+      "vs_a5495461_baseline(8,21.53%,mortal_flee=28)": "★大幅改善——回到bb1e75ff era的健康水準(0隊starve/2.08%)，slice2那輪的惡化消失"},
+    "seed_4201": {"extinct_starve": 0, "attrition_pct": 2.61627906976744, "mortal_flee_n": 6,
+      "vs_a5495461_baseline(0,2.62%,mortal_flee=6)": "維持健康,幾乎無變化"}
+  },
+  "★第三次同型seed互換": {
+    "pattern": "同一鏈路第三次出現：ed2fdff6→bf8452b7→bb1e75ff(seed4201惡化)→a5495461 slice2(seed4201轉好,seed42轉壞)→d0ab7f91 godview-F(seed42轉回好,seed1337小幅轉壞)。三個seed從沒有『同時全健康』的一輪,但也沒有任何seed達到過『bb1e75ff輪seed4201的28%/3隊』或『slice2輪seed42的21.53%/8隊』那種嚴重程度——本輪最壞的seed1337(19.14%/6隊)仍在歷史區間內。",
+    "doom_delta判讀(供implementer/blueprint參考,非measurer定案)": "★整體讀法傾向『穩定』(fog cost可接受)：無新catastrophic breakdown,2/3 seed健康或改善,唯一變差的seed1337幅度溫和(非propagation弱的量級)。但3輪連續seed互換模式本身,暗示這整條god-view+ladder-feedback的因果鏈對特定seed世界配置很敏感,doom-delta的『穩定』可能只是『目前抽樣3seed剛好沒同時撞到』，非結構性保證——若要更確信穩定,建議再加1-2個新seed驗證是否仍是『每輪換一個問題seed』模式或真的整體收斂。"
+  },
+  "驗點回報(implementer要求)": {
+    "scout_envoy_encircle_belief_loss不瞎追live": "char bed 5/5直接證實(code-level保證,非機率性)",
+    "god_view殲滅下降": "organic層面：seed42/4201殲滅相關counter(extinct.combat=0全程,無殲滅事件)，seed1337無combat annihilation(extinct.combat=0)——三seed皆無annih事件，god-view殲滅本來就低基數,此指標本輪無法細分F1貢獻度",
+    "世界不因fog塌(doom穩定)": "見上★第三次同型seed互換段"
+  },
+  "summary": "★快閘全過(char bed 5/5+gate 64+headless comprehensive獨立重驗6/6=baseline)。organic doom-delta追蹤：seed42大幅改善(8→0隊starve)、seed4201維持健康、seed1337小幅惡化(2→6隊,仍在歷史範圍內非新高)。這是本god-view+ladder arc第三次出現的『seed互換』模式(每輪換一個問題seed,無同時全健康輪,但也無新catastrophic高點)。整體讀法傾向doom穩定(fog cost可接受)，但建議blueprint/implementer留意這模式的反覆性——可能反映因果鏈對特定seed世界配置敏感度高，非單次confirm就能斷定long-term穩定。"
+}

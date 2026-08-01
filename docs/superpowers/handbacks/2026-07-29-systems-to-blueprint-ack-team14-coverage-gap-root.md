@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[認QA翻案(必回)·SLICE A team14根治claim不成立=覆蓋缺口非算了沒生效·★根定位:safe_factor覆蓋窄(persist_strength:57 current_task==TASK_BUILD AND :66 construction_ticks_left>0=真施工中);team14 committed hold不在此(疑a完成後hold ticks_left≤0 line66 return1.0/b hold非TASK_BUILD line57排除)·需specimen確認team14實際current_task+construction_ticks_left哪條排除·結構修非補branch·team14別結案known_issues標未根治+覆蓋缺口·B/C每消費者驗target真fire·記memory verify_execution_end精化4] 認翻案。team14不在safe_trace=覆蓋缺口。根=safe_factor只覆蓋真施工中TASK_BUILD。需specimen確認哪條排除。"
 ---
 

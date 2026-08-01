@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·★★make-or-break·economy-decision headroom meta-fix(一根解全家trade/founding/convoy/construction)·spec=2026-07-31-economy-decision-headroom-metafix-HOW.md·blueprint裁(b)系統性de-patch·★親驗refined機制(別在錯前提設計):survival boost已food-scaled(decision_engine:75-76 fed無boost絕境才2.5)=survival-conditional大體已做,真binding=GOAL_UTIL_CAP=1.5(goal_resolver:16)無條件封頂economy goals(static option不受1.5cap可>1.5即使fed也贏不過)+distance倒扣+無可靠性·meta-fix真lever=①食物scaled goal-cap headroom(runway modulator:fed→cap升能競爭/starving→cap≤survival保must-fix①,survival boost也scaled雙保絕境)②distance discount不對own-supply倒扣③guaranteed-own-supply可靠性通用維度·heavy驗:隊仍survive不因economy餓死+不凍+全家fed真fire·make-or-break從嚴複驗①food-scaled cap真讓fed贏且絕境survival仍贏(must-fix①不破)] economy headroom meta-fix。親驗survival已food-scaled,真lever=food-scaled goal cap非再scale survival。從嚴審must-fix①不破+全家真fire+不凍。"
 ---
 

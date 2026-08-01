@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·和平經濟觀測床(measure-first Step0)·spec=2026-07-30-peaceful-economy-bed-HOW.md·用戶核可measure-first(別憑2victim溶解訊號理論pivot,先量confound:runway建錯軸vs測錯條件warring壓經濟)·零sim-code改:新config/peaceful_economy.json(explicit seeded 好戰=0全隊 sharp缺口~12隊)+reuse WarringHarness.run(4問tap全在PROBE_KEYS)+薄peaceful_economy_bed.gd(讀-print 4問報告+逐隊月故事,零RNG)·量4問(founding dispatch?發展?貿易?runway機制fire?)gate funnel分動機無vs卡gate·★HOW選擇:sharp hand-fixture非random全規模和平旗(零code改+最決斷,透明報blueprint可否決)] 和平經濟床。審sharp-fixture選擇+缺口設計真驅動4行為+tap覆蓋齊+零RNG。"
 ---
 

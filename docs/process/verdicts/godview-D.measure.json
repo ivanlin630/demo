@@ -1,0 +1,19 @@
+{
+  "slice": "god-view Slice D (path_system velocity/intercept/catch + threat_assessment dist_factor belief-gate + 裁A firsthand last_tick)",
+  "measured_at_head": "99afe147",
+  "baseline_head": "b557bf85",
+  "verdict": "PASS-leaning. belief-化 correct (god-view arc A/F/E/D complete), combat_target凍結 gap NOT exposed (0->0), NOT freeze-bug (手不聽腦 1-2, broken-flee 0). doom-delta net-neutral total starve (22->22, seed-redistribution).",
+  "raw_logs": ["docs/measurements/2026-07-20-godviewD-baseline-b557bf85.json", "docs/measurements/2026-07-20-godviewD-branch-99afe147.json", "docs/measurements/2026-07-20-godviewD-lockpoint-base-1337.txt", "docs/measurements/2026-07-20-godviewD-lockpoint-branch-1337.txt", "docs/measurements/2026-07-20-godviewD-lockpoint-branch-4201.txt"],
+  "gates": {"constitution": "PASS 64/0-new", "headless": "branch=known 5-fail 0-new (22 fixture 面: 裁A auto-fix 12 + 2 direct + 8 unit, transparent)", "determinism": "implementer 55bbea49, not independently reproduced"},
+  "doom_delta": {
+    "seed1337": {"base": 11, "branch": 13, "attr": "29.5->25.5", "pop": "313->331", "note": "starve +2 but attr DOWN + pop UP = mixed/net-more-survivors"},
+    "seed42": {"base": 11, "branch": 5, "attr": "21.8->17.1", "note": "IMPROVED"},
+    "seed4201": {"base": 0, "branch": 4, "attr": "0.3->18.6", "pop": "343->280", "note": "REGRESSED (seed-cascade flips to 4201 this time); death=doom-delta famine (broken-flee sig 0, 手不聽腦 1) NOT broken pattern"},
+    "total_starve": "base 22 (11+11+0) -> branch 22 (13+5+4) = NET-NEUTRAL, seed-redistribution"
+  },
+  "combat_target_freeze_before_after": {"base": 0, "branch": 0, "verdict": "flagged stale-target pursuit-freeze gap NOT exposed by D (implementer's feared 撲空放棄網缺口 did not grow)"},
+  "coherent_broken_split": {"seed1337_branch": "手不聽腦 2, no broken-flee", "seed4201_branch": "手不聽腦 1, broken-flee 0 -> doom-delta famine not broken pattern; nullbelief-flee fix holds in D"},
+  "belief_化_arc": "god-view A/F/E/D complete; path_system 4 func + threat_assessment:20 dist_factor all belief-gate; 威脅評估 belief 化 honest claim. Remaining: B/C (worldgen knowledge/market) + 1119 can_reach next batch",
+  "caveat": "branch death-cause food-ok-vanish includes food=0 famine (finder-check classifier gap); 手不聽腦 count + broken-flee=0 + combat_target凍結=0 are the reliable NOT-a-bug signals",
+  "summary": "Slice D (largest god-view block) belief-化 correct, gates green, combat_target凍結 gap NOT exposed (0->0), NOT freeze-bug. doom-delta net-neutral total starve (22->22, seed-redistribution: 42 improved, 4201 regressed doom-delta-famine). blueprint judges doom-delta release acceptability."
+}

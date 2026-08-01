@@ -1,0 +1,23 @@
+{
+  "slice": "null-belief-flee 凍結根治 (applicability-gate + movement backstop)",
+  "measured_at_head": "28470932",
+  "baseline_head": "95c0cfe7",
+  "verdict": "PASS-leaning. seed1337 freeze fixed (starve 7->2, broken-flee signature 570->20 ~97%). coherent flee preserved. seed42 minor +1. Slice D pre-req met.",
+  "raw_logs": ["docs/measurements/2026-07-20-nullbelief-baseline-95c0cfe7.json", "docs/measurements/2026-07-20-nullbelief-branch-28470932.json", "docs/measurements/2026-07-20-nullbelief-branch-lockpoint-1337.txt", "docs/measurements/2026-07-20-nullbelief-flee-preE-baseline-8146c4a2-1337.txt"],
+  "gates": {"constitution": "PASS 64/0-new", "headless": "branch=known 5-fail 0-new (1 stale 'survival 恆候選' assertion 補 threat_pos, transparent)", "determinism": "implementer 364e8d29, not independently reproduced"},
+  "freeze_fixed": {
+    "seed1337_starve": "7 -> 2",
+    "broken_flee_signature (task=逃跑 + flee_from=(-1,-1))": "570 (pre-E 8146c4a2) -> 20 (branch) = ~97% eliminated",
+    "residual_20": "movement backstop edge (belief expired mid-flee -> released not frozen)"
+  },
+  "coherent_flee_preserved": "real-coord flee_from (14,20)/(17,9)/(19,4)/(22,3)/(23,8)/(26,9) still fire; gate only blocks (-1,-1) positionless",
+  "regression": {
+    "seed1337": {"base": 7, "branch": 2, "attr": "19.8->19.1"},
+    "seed42": {"base": 0, "branch": 1, "attr": "4.9->13.4", "note": "minor +1, attr jump noted (FLEE->forage shifts seed42 world)"},
+    "seed4201": {"base": 0, "branch": 0, "attr": "0.3->2.6"}
+  },
+  "pre_existing_confirmed": "baseline-diff (pre-E 8146c4a2): broken-flee signature 570 snaps / 11 teams -> freeze PRE-EXISTING (systems code-read confirmed), not E-introduced. Slice E cleared.",
+  "slice_D_prereq": "MET — pre-existing null-belief-flee freeze fixed; Slice D path_system belief-化 no longer polluted by this bug",
+  "caveat": "branch death-cause finder-check bed food-ok-vanish 41 includes food=0 true-starve (classifier gap); broken-flee signature 570->20 is the reliable direct freeze-fixed proof",
+  "summary": "applicability-gate fix works: seed1337 freeze deaths 7->2, positionless-FLEE signature 570->20, coherent flee intact, gates green. seed42 minor +1/attr-up. Slice D unblocked. Recommend accept."
+}

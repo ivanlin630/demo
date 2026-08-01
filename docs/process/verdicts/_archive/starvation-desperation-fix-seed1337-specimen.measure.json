@@ -1,0 +1,32 @@
+{
+  "slice": "starvation-desperation-fix-seed1337-specimen",
+  "is_sim": true,
+  "measured_at_head": "ebf4489b (.worktrees/starvation-desperation-fix)",
+  "method": "starvation_lockpoint_trace_bed.gd（修正版,已對齊WarringHarness.run()精確初始化:warring_states.json config+Probe.reset+ledger clear+移除誤用的force_full_hd）——第一版因config路徑錯誤(default.json非warring_states.json)產生錯誤世界(只3隊消失非真seed1337 aggregate世界)已作廢重跑。",
+  "raw_logs": ["docs/measurements/2026-07-18-starvation-lockpoint-seed1337-ebf4489b-fixed-raw.log", "docs/measurements/2026-07-18-starvation-lockpoint-seed1337-ebf4489b-fixed-decoded.log"],
+  "vanished_teams_total": 21,
+  "famine_days_gt_0_true_starve_candidates": 10,
+  "★逐隊死前鎖點": {
+    "team18": {"task":"return_home","reason":"unified","option":"返家補給","famine":33.8,"pattern":"task/option match,連續20 tick不變,famine持續累積"},
+    "team21": {"task":"逃跑(FLEE)","reason":"unified","option":"survival","famine":32.5,"pattern":"同上"},
+    "team48": {"task":"紮營","reason":"unified","option":"紮營","famine":32.9,"pattern":"同上"},
+    "team49": {"task":"紮營","reason":"unified","option":"紮營","famine":34.2,"pattern":"同上"},
+    "team52": {"task":"return_home","reason":"unified","option":"返家補給","famine":33.3,"pattern":"同上"},
+    "team53": {"task":"外交(diplomacy)","reason":"unified","option":"求和","famine":33.3,"note":"★特殊:task_priority=70(threat非survival),survival_dispatch_would_succeed=true(若想切到survival,策略上贏得了)——但引擎argmax本身沒選survival,可能該隊真的沒有可行survival選項(無aid target/無farmable tile/無市場/無prey/無接納者)"},
+    "team75": {"task":"覓食","reason":"solo","option":"遷移找糧","famine":6.3,"note":"非unified路徑(_evaluate_solo),famine較淺(才6.3天,較晚進入危機)"},
+    "team79": {"task":"覓食","reason":"subteam","option":"覓食","famine":3.3,"note":"子隊路徑(_decide_subteam)，famine最淺(3.3天,剛開始)"},
+    "team80": {"task":"乞食","reason":"survival","option":"買糧","famine":0.8,"note":"legacy rank_survival獨立迴圈路徑(reason=survival字面值),famine極淺(0.8天,剛觸發)"},
+    "team82": {"task":"貿易","reason":"unified","option":"買糧","famine":33.3,"pattern":"task=貿易(買糧的to_task映射)/option=買糧一致,連續不變famine深"}
+  },
+  "★★核心診斷（回答QA三選項)": {
+    "invite_settle比對": "★★0/10——沒有任何一隊task_reason='invite_settle'或呈現『邀請→跨圖walk』特徵。QA原本要驗的known-residual(invite-teleport)假說在seed1337這個世界的10個真飢荒案例裡完全沒出現。",
+    "thrash比對": "★★0/10——所有task/option組合連續20 tick(取樣窗內)完全不變,沒有『反覆重選不同失敗option』的震盪特徵。",
+    "idle比對": "★★0/10——沒有一隊task=idle,全部都在SURVIVAL_OPTION_SET或threat-class的某個具體task上。",
+    "真相(第四型态,QA原三選項外)": "★7/10(18,21,48,49,52,53,82)顯示reason=unified且task/option自洽一致,連續20 tick(取樣窗內每次重評都選同一個)不變,famine深(32-34天)——這是『引擎每cadence都正確重選同一個survival-class option,但這個option對應的ACTION本身從未resolve/完成,food_days卡在0』。非dispatch層問題(task_reason=unified,self-replace若要換也換得動),是EXECUTION層問題(選對了但做不成)。3/10(75,79,80)famine尚淺(0.8-6.3天),是剛進危機的正常過程中樣本,非同類終局案例。"
+  },
+  "★對應到systems已知殘留清單": {
+    "invite_teleport": "★不匹配——本次10隊真飢荒案例0隊呈現此特徵",
+    "buy_food_no_failure_feedback": "★部分匹配且更廣——systems原本點名『買糧撲空latch』，本次觀察到的模式不只買糧(team82=貿易/買糧)，紮營(team48/49)/返家補給(team18/52)/外交求和(team53)也呈現同款『選中同option但action不resolve,無失敗回饋觸發escalation』的latch特徵。★這可能是同一根因的更廣泛面(不限買糧,凡是SURVIVAL_OPTION_SET裡『需要外部條件配合才能成功』的option,一旦條件不滿足,都會卡在同一個latch而非failure→try-next)"
+  },
+  "summary": "★重要更正：seed1337殘留死亡並非systems/QA原本鎖定的invite-teleport known-residual，是另一種(但同樣屬於已知範疇的)『action執行不resolve+無失敗回饋escalation』latch模式，比原本點名的『買糧撲空』更廣(紮營/返家補給/求和皆同款)。非thrash(無option間震盪)非idle(task從未空轉)。這是S1(priority)+S2(escalation選項存在)已經做對的部分之外，第三層(action執行成功與否+失敗後重試)尚未覆蓋的缺口——與systems slice2規劃的『買糧無失敗回饋』屬同一類根因家族，範圍略廣於原本的估計。"
+}

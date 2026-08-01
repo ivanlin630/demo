@@ -1,0 +1,27 @@
+{
+  "method": "新建bed scripts/debug/starvation_lockpoint_trace_bed.gd(main dir,未commit)——直接讀team state(非經SpecimenTracer),對food_days<3.0的隊每tick記task/combat_target/current_option/food_days/famine_days,存最近20筆。跑完比對known_ids vs 現存state.teams找出消失(滅團)隊,印其死前瀕死軌跡。★raw log為CP950編碼(detach繞過wrapper),逐行解碼避免多位元組跨行錯位(整檔iconv -c會因單一壞byte導致後續全部錯位,已踩坑記錄)。",
+  "raw_logs": ["docs/measurements/2026-07-18-starvation-lockpoint-raw-seed1337.log", "docs/measurements/2026-07-18-starvation-lockpoint-decoded-seed1337.log"],
+  "vanished_teams_total": 10,
+  "vanished_team_ids": [-1000000, 14, 19, 20, 21, 22, 23, 27, 38, 40],
+  "note_on_-1000000": "非真實team(疑anon/sentinel佔位id,非15隊統計對象之一)，排除",
+  "note_on_38_40": "從未進入瀕死追蹤(food_days全程未見<3.0)——死因非starvation(疑combat或其他),非本次診斷對象",
+  "severe_famine_cases（famine_days>30,明確符合extinct.starve判準）": {
+    "team_14": {"task":"貿易(TRADE)", "option":"買糧(buy-food,★屬SURVIVAL_OPTION_SET)", "combat_target":-1, "food_days":0.00, "famine_days":33.7,
+      "pattern":"★★『有嘗試但沒成功』——task本身就是在做買糧(economic desperation action),非傻站著,但food_days卡0持續至少20tick(9579-9598)。★probe的_on_team_extinct分類只認TASK_FORAGE/TASK_FLEE兩種'有嘗試'→這隊會被歸類no_forage,但實際上他們在嘗試SURVIVAL_OPTION_SET裡的買糧,只是買不到/買不成"},
+    "team_19": {"task":"安頓(SETTLE)", "option":"survival(★決策引擎選中survival但task沒變!)", "combat_target":-1, "food_days":0.00, "famine_days":33.6,
+      "pattern":"★★『決策想切但切不掉』——option欄顯示決策引擎argmax選中了survival,但實際current_task仍停在安頓,20tick(51099-51118)沒能真正切換成逃跑/覓食類task。這是最接近你原假說(某高prio task卡住switch)的案例,但combat_target=-1(非literal戰鬥鎖)——鎖點是別的機制,非PRIO_COMBAT"},
+    "team_27": {"task":"投靠(SEEK-REFUGE/JOIN)", "option":"併入(merge,★屬SURVIVAL_OPTION_SET)", "combat_target":-1, "food_days":0.00, "famine_days":33.5,
+      "pattern":"同team14模式——task=投靠(尋求併入他隊求生)本身就是desperation行動,option=併入也在SURVIVAL_OPTION_SET內,但沒能成功併入,food卡0持續20tick(27099-27118)"}
+  },
+  "borderline_cases（famine_days=0,food_days臨界但未見持續累積飢餓,可能非starve死因）": {
+    "team_20": {"task":"覓食(FORAGE,probe認可的'有嘗試'task)","option":"買糧","food_days":"1.18-1.22","famine_days":0.0,"note":"已在覓食+嘗試買糧,非危急,推測非7隊no_forage之一(可能是while_foraging那1隊,或後續死於他因)"},
+    "team_21": {"task":"return_home","option":"返家補給(SURVIVAL_OPTION_SET)","food_days":"1.46-1.50","famine_days":0.0,"note":"同樣在做desperation行動,非危急,推測非no_forage死因"},
+    "team_22": {"task":"治理(GOVERN)","option":"(空)","food_days":"2.95-2.98","famine_days":0.0,"note":"剛跨閾值邊緣,樣本淺,不確定"},
+    "team_23": {"task":"投靠","option":"(空)","food_days":"1.59-1.66","famine_days":0.0,"note":"非危急"}
+  },
+  "★★核心結論": {
+    "combat_target": "★★三個嚴重飢荒案例(14/19/27) combat_target 全部=-1——PRIO_COMBAT=100鎖住的假說本次3個樣本中不支持！沒有一個是真的被literal戰鬥鎖住。",
+    "revised_picture": "『no_forage』底下藏兩種不同子型態，非單一bug：①『有嘗試但沒成功』(team14買糧/team27併入)——SURVIVAL_OPTION_SET的task正在跑,但execution/resolution本身卡住(可能無賣家/無coin/無人接納併入)。probe的分類邏輯只認TASK_FORAGE/TASK_FLEE兩種'有嘗試'→這類會被誤歸類no_forage,實際上他們有努力只是沒用。②『決策想切但切不掉』(team19,option=survival但task停在安頓)——這才是真正的dispatch卡住案例,但鎖點不是PRIO_COMBAT(combat_target=-1),機制待進一步查(可能是COMMITMENT_BONUS慣性/reeval cadence/task_arbiter別的擋路條件)。"
+  },
+  "caveat": "本次只樣本到seed1337裡famine_days>30的3隊(嚴重案例)+4隊臨界案例,非窮盡驗證全部7隊(bed設計為抓瀕死軌跡非精確對應probe的no_forage計數,兩者交集推論非100%確定對應)。若要100%坐實,需要在_on_team_extinct附近加tap直接標記death cause+對應team_id(production code改動,非measurer職權,需implementer配合)。"
+}

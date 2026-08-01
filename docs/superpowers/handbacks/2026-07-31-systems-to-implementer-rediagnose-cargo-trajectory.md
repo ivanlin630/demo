@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[重診26% ceiling真根·measure per-convoy cargo trajectory(別靜態斷言,reserve已被你measure駁)·和平床instrument每個deliver convoy:①FETCH載量(_load_convoy_cargo載幾+源=私產resources vs vault public_storage,母隊dispatch時material私產vs vault分佈)②OUTBOUND中porter material有無變化(en-route消耗?)③DELIVER時porter material(=0的那2 bail convoy確認FETCH載0 vs 載了到DELIVER丟)·目的:2 sell_no_surplus bail=porter DELIVER material≈0,定是FETCH載0(dispatch時surplus已committed/在vault私產少)vs 載了en-route丟·純觀測零行為變·落地docs/measurements·inert deliver_cargo保留branch別merge待真fix] 重診26%:per-convoy FETCH載量(源私產vs vault)→DELIVER material定bail根(載0 vs 載了丟)。純觀測。別斷言量真值。"
 branch: feat/logistics-sliceA-refine
 ---

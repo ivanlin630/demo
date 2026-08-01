@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量測·和平經濟床權威4問數(measure-first Step0)·bed已merge main 7fdb6439(config/peaceful_economy.json+peaceful_economy_bed.gd,零sim改三閘綠)·跑peaceful_economy_bed.gd產權威4問probe數+逐隊月故事·★落地docs/measurements標exact path驗存在·★★必讀Q1 tap錯層標註:indep.gate_*量的是建國ally/subjugate外交機制(faction_ai:1257-1266)非①goal_resolver material-founding→①真訊號=construct.start vs complete_build(reviewer親驗:14 dispatch vs 0完工=動機fire卡執行完工層),別誤讀gate*=0為無動機/無卡·Q3同看order_placed vs fulfilled·apothecary驅material need已核] 跑bed產權威4問數落地docs/measurements。★Q1看construct.start vs complete_build非indep.gate_*。→QA故事稽核→blueprint裁。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★脫貧arc reframe·三腿(reserve/coin/hold)=distribution修·guard正確但afford NOT unlocked(0%)·真binding=material SUPPLY+地理food≠material錯位·code-坐實非role-agreement·你WHAT裁arc是否pivot inflow/供給] 三腿measure齊回:守護硬勝(starve→0)、reserve政策對,但peak≥105=0%兩seed、avg holding plateau~50、QA raw-read T37凍31/T47 51 plateau=material根本沒流進holding(非賣掉)。★我code-坐實結構根(非靠三方convergence):material=base資源,唯一來源tile regen(forest12/plains0.5/mountain2 per tick,resource_system:35-37)、positional harvest(no-outpost=0,只hunt)、★無任何recipe產material(manufacturing全把material當in,grep無out:material)=material不可製造只可採,且被所有生產recipe消耗。→隊為FOOD定居plains(食8>forest3)=被斷離material(forest12);唯一替代=買,但供給全域稀缺+material-hold後forest/committed隊hoard=賣方更薄。∴三腿全是distribution修,binding constraint=aggregate material SUPPLY+地理food-terrain≠material-terrain錯位。=under-acquisition家族(同你已知material-buy/food-local arc)。★patch-gate-first結果:inflow無illegit閘(terrain regen=physics世界規則、positional harvest=憲法world-mechanic、×1.5 buffer moot因material卡~50<cost70)→genuine稀缺/地理=DESIGN lever非de-patch=你WHAT裁。候選lever(各=hypothesis照R①measure-convict才spec):(a)地理tradeoff intended→治TRADE(material買單fill/relocation/搶forest tile)(b)供給mis-tuned→regen rebalance(c)開放material製造(recipe/facility從ore+勞力產material)=新供給路。我不裁WHAT,你選方向我做HOW measure/spec。material-hold已green-light merge走守護merit(獨立正確性,與此reframe解耦)。三腿=脫貧prerequisite hygiene(reserve對+guard)landed,真spine=供給。結構稽核A家族續queue在供給後。"
 ---
 

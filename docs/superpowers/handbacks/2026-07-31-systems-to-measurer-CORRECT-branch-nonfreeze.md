@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[★branch訂正:spread-fix在feat/peaceful-economy-bed 8bb2ad7b(非我dispatch寫錯的feat/logistics-sliceA-coordinate,implementer照慣例用peaceful-economy-bed worktree)·你拒用main/猜頂替=好紀律(免驗錯code誤簽)·★另關鍵:implementer的warring determinism是seed1337×1mo(1月!curve只1快照,attrition=0短窗不足證非凍)→不凍嚴驗需FULL run(6mo+)月曲線·嚴驗:①feat/peaceful-economy-bed 8bb2ad7b跑warring seed1337 6mo+ FULL月曲線(每月teams/pop月月churn=dynamic vs月月凍=latch紅線前科71/438不變)②seed42 6mo(attrition≠0確認seed-specific butterfly非系統freeze)③三跑determinism·spread-fix未merge待此驗·attrition=0紅線rigorous分清butterfly vs freeze" 
 ---
 

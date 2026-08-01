@@ -1,0 +1,16 @@
+{
+  "★★code-verify(可靠,零RNG風險)——SURVIVAL_OPTION_SET term公式逐條讀": {
+    "location": "scripts/simulation/decision/terms.gd:105-146",
+    "camp_drive(紮營)": "return 1.0（固定常數！gate通過has_farmable_tile後品質恆1.0,不隨food_days/famine_days變）",
+    "beg_drive(乞食)": "return BEG_FLOOR_FACTOR（固定常數,注解明寫『低品質最後手段=低band定值』——設計上刻意壓低且不escalate）",
+    "loot_drive(掠奪)": "scale by self_armed_ratio（武裝能力）——與food_days/famine_days無關,只看打不打得動",
+    "join_drive(併入)": "scale by best_protector_rep（host名聲）——與food_days/famine_days無關,只看投靠對象好不好",
+    "buyfood_drive(買糧)": "★唯一讀ctx.food_days的：_gap=(food_security_target-food_days)/target。但food_days本身在遊戲狀態裡會bottom在0(不會更負)→food_days=0時_gap已達最大值(=1.0,飽和)。★意味買糧util在food_days觸底那一刻就已經封頂,famine_days拖多久都不會再讓它更高。",
+    "famine_days全文搜尋": "terms.gd裡完全沒有famine_days這個字——確認famine_days(持續絕望天數)不是任何SURVIVAL_OPTION_SET term的輸入"
+  },
+  "★★直接回答系統問題": "★不是COMMITMENT_BONUS黏、不是買糧base util恆高——是『掠奪/乞食util不隨famine升,絕境階梯本身沒escalation設計』這條命中！5個SURVIVAL_OPTION_SET term裡，2個是硬編常數(紮營=1.0/乞食=floor)、2個看靜態能力/名聲(掠奪/併入)、唯一看food_days的買糧一旦food觸底就飽和封頂。★沒有任何一條term會因為『卡在絕境裡越久』而分數上升——argmax從進入危機那刻起，只要情境(has_weak_prey/protector_rep/armed_ratio等靜態因子)不變，排序永遠凍結，不管famine_days是1天還是99天。",
+  "supporting_but_flawed_observation_run": {
+    "caveat": "另跑了一個seed1337 util-escalation trace bed(唯讀re-query DecisionContext.gather+rank_scored_ctx),★但gather()內部呼叫大量_find_*finder函式(RNG面未逐一排查),本輪world trajectory已確認與先前lockpoint-v2 divergent(team14/19在本輪是完全不同的故事)——不是RNG-neutral,不能拿來對應原本那3隊。僅供side-evidence:某team在food_days=0後util連續550 tick逐位元不變(遷移找糧=3.25849996745586不動)——與上面code-verify的『無escalation』結論方向一致，但這個run本身有方法論瑕疵,以上面code-verify為準,這個only做旁證。"
+  },
+  "recommendation": "code-verify已經給了確定答案,不需要再靠有RNG風險的observation run坐實。若systems要fix方向：買糧的_gap公式已對food_days封頂設計正確(這是它該做的,危急時最高優先級),真正缺的是其餘4個term(紮營/乞食/掠奪/併入)在crisis持續無解時應該有某種『越拖越死馬當活馬醫』的升壓機制(讀famine_days或team_panic)，目前完全沒有。"
+}

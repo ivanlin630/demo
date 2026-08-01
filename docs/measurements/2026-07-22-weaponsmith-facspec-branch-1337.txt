@@ -1,0 +1,50 @@
+[SoloAI] Team45 → 建設 (建設)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team45 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team45 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team45 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team45 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[SoloAI] Team32 → 建設 (建設)
+[SoloAI] Team45 → 建設 (建設)
+[SoloAI] Team35 → 建設 (建設)
+[FAC-SPEC] tick=500 team=0 tile=(9, 14) chose=workshop | farming=1.54 weaponsmith=0.84 smeltery=0.54 workshop=4.44 stable=2.39 apothecary=0.00 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=0 tile=(13, 3) chose=workshop | farming=1.13 weaponsmith=5.04 smeltery=3.22 workshop=4.44 stable=7.17 apothecary=0.00 | urgency=0.00 ore=60
+[FAC-SPEC] tick=500 team=0 tile=(15, 8) chose=apothecary | farming=1.34 weaponsmith=0.84 smeltery=0.54 workshop=4.44 stable=7.17 apothecary=5.06 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=0 tile=(23, 9) chose=apothecary | farming=1.26 weaponsmith=5.04 smeltery=3.22 workshop=4.44 stable=7.17 apothecary=5.06 | urgency=0.00 ore=54
+[FAC-SPEC] tick=500 team=0 tile=(24, 11) chose=apothecary | farming=1.54 weaponsmith=0.84 smeltery=0.54 workshop=4.44 stable=2.39 apothecary=5.06 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=0 tile=(24, 14) chose=workshop | farming=1.20 weaponsmith=0.84 smeltery=0.54 workshop=4.44 stable=2.39 apothecary=0.00 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=10 tile=(10, 27) chose=workshop | farming=1.22 weaponsmith=5.00 smeltery=3.07 workshop=4.48 stable=2.10 apothecary=0.00 | urgency=0.00 ore=162
+[FAC-SPEC] tick=500 team=10 tile=(18, 4) chose=apothecary | farming=1.09 weaponsmith=0.83 smeltery=0.51 workshop=4.48 stable=2.10 apothecary=5.02 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=10 tile=(23, 1) chose=apothecary | farming=1.11 weaponsmith=5.00 smeltery=3.07 workshop=4.48 stable=2.10 apothecary=5.02 | urgency=0.00 ore=244
+[FAC-SPEC] tick=500 team=10 tile=(23, 17) chose=stable | farming=1.39 weaponsmith=0.83 smeltery=0.51 workshop=4.48 stable=6.29 apothecary=0.00 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=12 tile=(1, 15) chose=weaponsmith | farming=1.34 weaponsmith=0.77 smeltery=0.50 workshop=4.40 stable=6.22 apothecary=4.86 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=12 tile=(25, 4) chose=apothecary | farming=1.22 weaponsmith=4.63 smeltery=3.03 workshop=2.20 stable=2.07 apothecary=4.86 | urgency=0.00 ore=36
+[FAC-SPEC] tick=500 team=12 tile=(27, 4) chose=apothecary | farming=1.07 weaponsmith=0.77 smeltery=0.50 workshop=4.40 stable=2.07 apothecary=4.86 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=17 tile=(8, 22) chose=apothecary | farming=1.02 weaponsmith=0.93 smeltery=0.56 workshop=4.32 stable=2.56 apothecary=4.90 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=17 tile=(10, 21) chose=apothecary | farming=1.06 weaponsmith=5.55 smeltery=3.33 workshop=2.16 stable=7.68 apothecary=4.90 | urgency=0.00 ore=146
+[FAC-SPEC] tick=500 team=17 tile=(15, 2) chose=weaponsmith | farming=1.04 weaponsmith=5.55 smeltery=3.33 workshop=4.32 stable=7.68 apothecary=4.90 | urgency=0.00 ore=60
+[FAC-SPEC] tick=500 team=22 tile=(14, 22) chose=stable | farming=1.28 weaponsmith=4.81 smeltery=3.08 workshop=4.39 stable=6.34 apothecary=4.91 | urgency=0.00 ore=71
+[FAC-SPEC] tick=500 team=26 tile=(22, 4) chose=apothecary | farming=1.38 weaponsmith=0.96 smeltery=0.59 workshop=4.35 stable=2.74 apothecary=4.82 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=29 tile=(11, 18) chose=stable | farming=1.19 weaponsmith=5.27 smeltery=3.30 workshop=4.46 stable=7.50 apothecary=4.84 | urgency=0.00 ore=159
+[SoloAI] Team32 → 建設 (建設)
+[FAC-SPEC] tick=500 team=32 tile=(8, 10) chose=apothecary | farming=1.06 weaponsmith=1.13 smeltery=0.59 workshop=4.50 stable=2.91 apothecary=4.93 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=33 tile=(8, 8) chose=apothecary | farming=1.06 weaponsmith=1.10 smeltery=0.59 workshop=4.44 stable=2.92 apothecary=4.82 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=34 tile=(12, 27) chose=weaponsmith | farming=1.17 weaponsmith=4.73 smeltery=3.04 workshop=4.48 stable=6.26 apothecary=0.00 | urgency=0.00 ore=136
+[FAC-SPEC] tick=500 team=35 tile=(10, 15) chose=armorsmith | farming=1.47 weaponsmith=1.07 smeltery=0.59 workshop=4.33 stable=2.86 apothecary=0.00 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=36 tile=(16, 5) chose=weaponsmith | farming=1.09 weaponsmith=0.73 smeltery=0.50 workshop=4.37 stable=2.07 apothecary=4.83 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=37 tile=(9, 11) chose=stable | farming=1.58 weaponsmith=0.90 smeltery=0.55 workshop=4.36 stable=7.41 apothecary=0.00 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=38 tile=(13, 12) chose=apothecary | farming=1.19 weaponsmith=5.56 smeltery=3.26 workshop=4.45 stable=2.41 apothecary=4.86 | urgency=0.00 ore=139
+[FAC-SPEC] tick=500 team=39 tile=(19, 2) chose=apothecary | farming=1.53 weaponsmith=5.54 smeltery=3.38 workshop=4.48 stable=2.60 apothecary=4.97 | urgency=0.00 ore=71
+[FAC-SPEC] tick=500 team=40 tile=(19, 7) chose=stable | farming=1.48 weaponsmith=0.91 smeltery=0.54 workshop=4.37 stable=2.46 apothecary=4.90 | urgency=0.00 ore=0
+[FAC-SPEC] tick=500 team=41 tile=(2, 16) chose=weaponsmith | farming=1.13 weaponsmith=0.76 smeltery=0.51 workshop=4.28 stable=2.11 apothecary=4.84 | urgency=0.00 ore=0
+[SoloAI] Team45 → 建設 (建設)

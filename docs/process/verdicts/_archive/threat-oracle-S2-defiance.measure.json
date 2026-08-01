@@ -1,0 +1,58 @@
+{
+  "measured_at_head": "eac603d2 (branch feat/threat-oracle-s2 defiance commit, off calibrate e3d34ffc)",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-threatoracle-s2defiance-charbed-eac603d2.log",
+    "docs/measurements/2026-07-17-threatoracle-s2defiance-threatdissolution-eac603d2.log",
+    "docs/measurements/2026-07-17-threatoracle-s2defiance-constitution-eac603d2.log",
+    "docs/measurements/2026-07-17-threatoracle-s2defiance-headless-eac603d2.log",
+    "docs/measurements/2026-07-17-threatoracle-s2defiance-specimen-seed1337-eac603d2.log",
+    "docs/measurements/2026-07-17-threatoracle-s2defiance-specimen-seed4201-eac603d2.log",
+    "docs/measurements/2026-07-17-threatoracle-s2defiance-1337-eac603d2.json",
+    "docs/measurements/2026-07-17-threatoracle-s2defiance-42-eac603d2.json"
+  ],
+  "unit_level_gates": {
+    "char_bed": {"result": "12/12 ALL PASS,defiance非對稱數字精確吻合implementer報告(狂徒不可勝迎戰=1.006 vs cautious不可勝迎戰=0.063)", "verdict": "CONFIRMED"},
+    "threat_dissolution_check": {"result": "ALL PASS", "verdict": "CONFIRMED"},
+    "constitution_gate": {"result": "PASS sites=65 removed=0", "verdict": "CONFIRMED"},
+    "headless_test": {"result": "殘3 assertion同名同行號(15540/7078/13990)", "verdict": "CONFIRMED pre-existing"}
+  },
+  "organic_三齊": {
+    "①狂徒→迎戰": {
+      "method": "specimen bed(重用threat_s2_macro_evidence_bed.gd)同2 seed(1337/4201)找proud-doomed唯一candidate",
+      "seed_1337_team12": "tick=8750,severity=0.9,winnable=0.000(全無勝算)——但覓食=3.469/紮營=2.970(急性飢荒級need_urgency)遠蓋過迎戰=0.829,最終選覓食",
+      "seed_4201_team10": "tick=720,severity=0.2(低於threat repertoire有意義門檻)——備戰/迎戰/求和根本不在applicable list,最終選囤貨",
+      "verdict": "UNCONFIRMED at specific-instance層級——2 seed僅各1個proud-doomed candidate,兩次都被其他極端壓力(飢荒/低severity)蓋過,非defiance機制錯(char bed已證公式方向對:1.006>>0.063)，是這2個seed的這1個具體specimen剛好都撞到confound情境。★若systems/blueprint要更確定性證據需要更多seed去撈到『高severity+非飢荒』的乾淨proud-doomed樣本(我未繼續撈,時間預算取捨)。"
+    },
+    "②trade仍升": {
+      "seed_1337": "main 0.72%→defiance 0.98%(+0.26pp)",
+      "seed_42": "main 0.69%→defiance 1.55%(+0.86pp)",
+      "verdict": "CONFIRMED——兩seed trade絕對佔比皆較main上升"
+    },
+    "③cautious仍避戰": {
+      "seed_1337_team1_cautious_hawk": "迎戰=0.062-0.067(4個連續tick)——仍遠低於備戰0.298-0.307,respect-winnable故事持續成立",
+      "verdict": "CONFIRMED"
+    }
+  },
+  "★NEW_concerns_not_explicitly_asked_but_material": {
+    "備戰求和survival大幅萎縮": {
+      "seed_1337": "備戰1.73%→0.25%(main vs defiance,-1.48pp)/求和0.20%→0.02%/survival15.39%→3.48%(-11.91pp)",
+      "seed_42": "備戰0.42%→0.22%/求和0.98%→0.28%/survival6.09%→2.29%",
+      "note": "廢全域boost後,備戰/求和/survival失去先前(calibrate版)靠全域boost撐的量——defiance只加在迎戰term,未鏡射到其他3個threat option → threat repertoire內部多樣性萎縮成近乎只剩迎戰,非四象限均衡分流"
+    },
+    "economy較calibrate步驟惡化": {
+      "seed_1337": "build_outpost 35(main)→39(calibrate)→25(defiance,較calibrate降36%)/farm_pos_teams 8→10→5(較calibrate降50%)",
+      "seed_42": "build_outpost 22→18→15(續降)/farm_pos_teams 10→6→8(較calibrate回升但仍低於main)",
+      "note": "★defiance版economy指標比上一輪『已收斂』的calibrate版更差——不是碾平級崩潰,但收斂方向似乎逆轉了一部分"
+    },
+    "迎戰率seed間方向不一致": {
+      "seed_1337": "main 0.21%→calibrate 3.01%→defiance 9.78%(較calibrate再升3倍)",
+      "seed_42": "main 0.17%→calibrate 5.05%→defiance 2.98%(較calibrate反降)",
+      "note": "同為defiance版,兩seed相對calibrate的方向不同(1337升/42降)——變異大,非單一方向收斂"
+    },
+    "population_decline": {
+      "seed_42": "pop 421(main)→418(calibrate)→399(defiance,-5.2%,較calibrate多降近5%)",
+      "note": "本輪目前所見最大單步pop降幅,供systems注意(非崩潰級但值得看)"
+    }
+  },
+  "summary": "★單元層(char bed defiance公式正確且非對稱)CONFIRMED。organic三齊:②trade仍升CONFIRMED③cautious仍避戰CONFIRMED①狂徒→迎戰UNCONFIRMED(樣本被confound,非機制否證)。★但發現3個未被明確要求但材料性的新現象：備戰/求和/survival大幅萎縮(threat repertoire多樣性塌縮)、economy指標較上一輪calibrate版惡化、迎戰率seed間方向不一致(1337升/42降)。判定：非乾淨『三齊綠』，是混合結果+3個新疑點，建議systems review非直接merge。"
+}

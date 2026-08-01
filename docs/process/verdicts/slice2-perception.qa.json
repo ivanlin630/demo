@@ -1,0 +1,14 @@
+{
+  "slice": "slice2-perception",
+  "verdict": "PASS",
+  "read_measure": "verdicts/slice2-perception.measure.json + verdicts/desperation-ladder-feedback.measure.json（前次 seed-swap 先例對照）",
+  "story_audit": {
+    "team19_cross_map_settle_gone": "★不靠特定 team_id trace，直接 git show a5495461 讀 code 獨立坐實：`_try_invite_nearby_exile`(faction_ai_system.gd:581-584) `var _bp=BeliefSystem.belief_pos(...); if _bp==(-1,-1) or _hex_dist(team.tile_pos,_bp)>INVITE_RANGE: continue`——用belief距離、無belief或超距硬擋，unconditional非機率性。`_flee_threat_pos`(:425) 同樣讀 belief_pos 非 live。這是比單一team trace更強的證據（結構保證 vs 樣本觀察）：任何隊、不論ID，belief距離超過8都邀不了、逃跑目標讀belief非live。A3/A1的god-view移除目的達成，PASS。",
+    "seed42_death_cause": "★獨立讀raw trace（docs/measurements/2026-07-19-slice2-seed42-lockpoint-a5495461-decoded.log，team10完整快照+team13/48/58/79 fire事件核對）：5個候選死隊裡4隊呈現與desperation-ladder-feedback seed4201同型的『逐一stall_exclude排除→耗盡部分SURVIVAL_OPTION_SET→落不產糧fallback仍死』模式（team13例：覓食27.64d→掠奪13.89d→紮營2.54d→買糧0.00d，food_days遞減、最後才真正0.00排除，比ladder那輪的首次fire更乾淨、緩衝更小，mis-fire疑慮比上次更低），1隊(team10)0-fire乾淨窮死（覓食單一格鎖死到famine=32.5，cooldown=[]全程未觸發排除）。確認為proper窮死，同ladder-feedback機制家族，非god-view fix(belief-vs-live錯位)引入的新失敗模式——measurer的belief_vs_live_gap欄位全程16隊0命中，獨立支持這個結論。",
+    "doom_redistribution_vs_new": "★數字面：bb1e75ff(ladder基線) 3seed total starve = 5+0+3=8；slice2(a5495461) = 2+0+8=10——doom搬家（問題seed從4201→42）+總量略升（8→10，非戲劇性暴增）。這與blueprint已裁定的ladder-feedback seed-swap先例（'intrinsic economy doom，接受'）同型——同一套機制在不同belief/gate調整後，哪個seed抽到不利隊伍配置會變、但故事性質不變（都是exhaust-the-ladder式窮死，非bug）。輕微總量上升值得記錄但不構成FAIL理由（story層面沒有新的bug模式，只是同一種『世界有時候會死人』的intrinsic doom換了張臉）。"
+  },
+  "verdict_reasoning": "①god-view移除達到目的（code-level unconditional gate，比trace更強證據）；②seed42故事=proper窮死非fix broke（獨立trace驗證，比上次ladder驗證更乾淨的證據——首次fire食物緩衝更小、belief_vs_live_gap零命中）；③doom搬家型態同ladder先例，blueprint已對此型態裁過。三項皆過systems判準表的PASS門檻。",
+  "note": "★同ladder那輪一樣，這是WHAT/balance層觀察非我判權：3seed total starve 8→10（略升）+ 問題seed從4201換到42——建議systems merge時一併讓blueprint知悉這是第二次seed-swap（同型態疊加），若未來還有第三次調整導致又一個seed暴增，累積起來的『總doom緩慢爬升』趨勢值得盤點，而非每次都當獨立事件孤立判。單次而言，本次PASS。",
+  "measured_at_head": "a5495461",
+  "qa_raw_trace_independently_read": "git show a5495461（①的code-level驗證）+ docs/measurements/2026-07-19-slice2-seed42-lockpoint-a5495461-decoded.log（②的trace獨立核對，team10完整讀+team13/48/58/79 fire事件比對）"
+}

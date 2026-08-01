@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·持守統一執行層 HOW 完整設計審·異質框外(規模當真build如means-end別樂觀,R①已駁過度宣稱)·核心:persist_strength=人格加權(sunk+prospect)兩層寫回+try_set非危機加持守維度(危機tier不變)+latch反例避開(util偏置非硬鎖世界不凍)+83分類真改點少+4slice·spec=2026-07-28-persistence-decision-layer-HOW.md] HOW完整設計done。R①收窄後執行層真build設計。異質框外審設計對否(dispatch implementer前)。"
 branch: main (spec only, 未實作)
 ---

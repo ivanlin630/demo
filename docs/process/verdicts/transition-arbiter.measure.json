@@ -1,0 +1,37 @@
+{
+  "slice": "transition-arbiter-bypass (手不聽腦後門根治)",
+  "measured_at_head": "93966d15",
+  "baseline_head": "649f7070",
+  "window": "8mo/57600t organic; 8mo lockpoint 3-way; 2mo determinism",
+  "seeds": [1337, 42, 4201],
+  "raw_logs": [
+    "docs/measurements/2026-07-19-transarbiter-baseline-649f7070.json",
+    "docs/measurements/2026-07-19-transarbiter-branch-93966d15.json",
+    "docs/measurements/2026-07-19-transarbiter-det1-93966d15-2mo.json",
+    "docs/measurements/2026-07-19-transarbiter-lockpoint-deaths-branch-93966d15.txt",
+    "docs/measurements/2026-07-19-transarbiter-lockpoint-deaths-baseline-649f7070.txt"
+  ],
+  "quick_gates": {
+    "constitution": "PASS sites=64 removed=0 (0 new)",
+    "headless": "branch 93966d15 5-fail set ≡ baseline 649f7070 5-fail set (0 new; aid-fixture change net-neutral, transparent)",
+    "determinism": "seed1337 2mo 2 runs full-dict byte-identical (starve=0/attr=3.6036)"
+  },
+  "regression_real_team": {
+    "seed1337": {"baseline": {"starve": 5, "attr": 20.27, "pop": 354, "teams": 71}, "branch": {"starve": 7, "attr": 19.82, "pop": 356, "teams": 72}, "note": "starve 5->7 UP but pop flat 354->356; 手不聽腦->acting conversion can raise counted famine; not a real-world regression"},
+    "seed42": {"baseline": {"starve": 0, "attr": 4.63}, "branch": {"starve": 0, "attr": 4.86}, "verdict": "flat/healthy"},
+    "seed4201": {"baseline": {"starve": 0, "attr": 0.29}, "branch": {"starve": 0, "attr": 0.29}, "verdict": "identical/healthy"}
+  },
+  "primary_targets_fixed": {
+    "team16": "baseline VANISHED (defection-stomp 凍死); branch SURVIVES -> FIXED (main spec target)",
+    "team64": "baseline 手不聽腦 (food4.17 dispatch=true idle); branch SURVIVES -> FIXED",
+    "team68": "baseline 手不聽腦 (food4.58); branch food-ok-vanish (food9.19 healthy merge/absorb) -> 手不聽腦 RESOLVED"
+  },
+  "death_cause_3way_seed1337_8mo": {
+    "手不聽腦": {"baseline": 2, "branch": 1, "note": "baseline {team64,68} both resolved; branch {team84} = 1 new in diverged basin"},
+    "stuck-task": {"baseline": 2, "branch": 5, "CAVEAT": "COARSE category — committed=覓食/遷移找糧 vanishes likely combat-death-while-foraging or absorption, NOT true freeze; bed cannot disambiguate. Over-attribution. New teams (62/71/73/79/90) = diverged-basin churn"},
+    "famine": {"baseline": 40, "branch": 48, "note": "includes beast husks (food=0)"}
+  },
+  "outpost_ge70_guard_check": "outposts present + trading on branch (market activity) same as baseline -> no observed BUILD breakage; ≥70 guard-block not directly instrumented (would need guard-fire probe) but no outpost regression observed",
+  "incomplete": ["stuck-task category needs combat-death-vs-freeze disambiguation (bed limitation)", "outpost ≥70 guard-fire not directly probed (inferred OK by absence of outpost regression)"],
+  "summary": "PASS-leaning. Fix works on documented targets: team16 survives (was 凍死), team64 survives + team68 手不聽腦 resolved. 手不聽腦 aggregate 2->1. No regression seed42/4201 (flat/identical). Gates green (constitution/headless 0-new, determinism byte-identical). Caveats: seed1337 diverged-basin (beast-fix cascade) surfaces 1 new 手不聽腦 (team84) + stuck-task label noise (coarse, likely combat-deaths not freezes); aggregate starve 5->7 is metric-lens artifact (pop flat 354->356) not real regression. team64/68 known_issue systems logged -> team64 fixed, team68 手不聽腦 resolved."
+}

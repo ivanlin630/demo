@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·SLICE A refine DELIVER賣full cargo繞porter reserve(trickle→flow)·spec=2026-07-31-logistics-sliceA-refine-deliver-full-cargo-HOW.md·make-or-break PASS但26%送達=trickle,blueprint裁refine near-term·根:_market_visitor_sell(interaction:810)surplus=holding-reserve對porter把delivery cargo當need reserve吃掉→sell_no_surplus bail·fix:_market_visitor_sell加optional deliver_cargo param(>=0=delivery convoy sellable=cargo繞reserve/-1=normal holding-reserve既有不變)+_resolve_market_at_outpost對convoy porter(task_extra_data convoy_phase)傳cargo qty·憲法cargo語意=待交付非holding非scripted·★TDD measure送達率真升(sell_no_surplus降+deliver_settled升+cargo_delivered/out 26%→顯著升+fulfilled>4,別假設)+cargo守恆(賣+殘RETURN)+normal sell不變+不凍·審deliver_cargo對normal sell零影響+守恆+送達率measured真升+cargo語意非scripted" 
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·material means-end need + 買料 action·Gate B trade核心·R² CLEAN(2要求已納)·★off LOCAL main 5cc2aec0·決策模型改measure-sensitive] spec=2026-07-22-material-means-end-buy.md。root chicken-egg(material need gated on已有facility→builder不帶need→want<0→買不到→建不了)。blueprint點頭means-end(憲法=utility耦合合憲)+QA補買料action。reviewer R² 2要求已納:①循環守衛結構化(cost-guard在deficit-call前=只讀cost該res的facility;build-cost res[material/tools]∩facility-output res=∅→結構無遞迴;禁擴到既是build-cost又是output的res,標assert)②cap(CONSTRUCTION_MATERIAL_NEED_CAP防多facility疊爆)。修3部閉環:①need_oracle _construction_facility_need(讀FactionAISystem._facility_deficit×upgrade_cost material,cost-guard前置,cap clamp)②DecisionContext gather加has_material_market(team_market_known有material stock,belief-gate仿has_food_market)+material_shortfall③options.gd新「買料」option(仿買糧:material_shortfall>0+has_material_market+has_specie→TASK_TRADE到有material的最近已知市集)+DecisionTerms buymaterial_drive(讀shortfall標度×商業/貪婪穿秤)。★需_nearest_market_outpost_with(res)找有該res stock的市集(或既有_nearest_market_outpost加res濾)。TDD 5型(spec §驗收)。gate PASS(新option/term過constitution_gate,_facility_deficit非新閘)/headless 0new/determinism 2跑byte-identical無RNG。★★measure帶§④b樣本+specimen→QA(長跑新規則):material buy DEAL(0→?)/post_buy.material/no_want率/weaponsmith START建成/weapon產出/doom-delta/owner-depletion/回歸。tools/coin分開非本刀。task=systems+reviewer。做完→to:measurer(→QA)。"
 ---
 

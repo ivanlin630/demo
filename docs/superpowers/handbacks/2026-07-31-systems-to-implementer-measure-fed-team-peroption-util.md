@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[measure-first grounding·dump fed隊真實per-option util定economy決策真binding·別第4次斷言·和平床(peaceful_economy_bed.gd main已merge)加一次性instrumented dump:選一個fed隊(T0 runway=9999 material=0缺料)在某decide tick,印decision_engine scored陣列全部option的util(靜態23 option + goal frontier candidates)排序·尤其economy goal candidate(買material/founding delegate)util vs當前贏的static option(覓食/govern/外交)util各自分數+差距·goal candidate加印payoff/dev_coeff/discount/reliability分項(goal_resolver:354-360)看哪項卡·純觀測instrumentation零行為變零RNG·落地docs/measurements標path] dump T0 fed隊per-option util明細(economy goal vs贏的static+分項)定真binding(payoff天花板?distance?)。純觀測。落地。"
 branch: feat/peaceful-economy-bed
 ---

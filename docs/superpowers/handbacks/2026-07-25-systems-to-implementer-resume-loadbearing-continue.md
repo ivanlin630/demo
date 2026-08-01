@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·2nd-layer resume 治本·R²v3 CLEAN·續 feat/construction-commitment-latch(8ffb8ab8)·你傾向(A)我認可·spec=2026-07-25-construction-commitment-latch-A1-fix.md §修③] latch WIP 保留,加 resume 治本閉環。你 execution-verified 坐實 resume load-bearing=好流程,認可(A)。修:_try_resume_construction 2746 後優先召回 construction_team_id 原隊(orig!=null+非戰鬥+在格+非已 TASK_BUILD+糧≥3天)→release-first+transition TASK_BUILD 續建,繞 owner/resident gate;orig 死/離格/餓→落回現有 candidates。★execution-verified(outpost_built>0)才收。TDD 補 directive-leak resume 救回測(驅真 tick 完工)。(B)directive 例外先不做=measure 定 thrash 需否。閘:headless 0-new+gate 74 removed=0+determinism 3跑 byte-identical。→measurer execution-verified 重量。"
 branch: feat/construction-commitment-latch (續 8ffb8ab8)
 ---

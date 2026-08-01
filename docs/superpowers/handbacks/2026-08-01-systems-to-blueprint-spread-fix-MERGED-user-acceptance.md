@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★SLICE A flow-fix MERGED(2fef2081)·greenlight條件全達→帶用戶驗收經濟flow·不凍紅線VERDICT=NON-FREEZE(measurer嚴驗:seed1337 attrition12.84%+churn 91→133/444→387+3跑byte-identical determinism,seed42 attrition12.5%+churn=兩seed皆dynamic非71/438凍,seed-specific butterfly坐實,1mo attrition=0是短窗artifact如我料)+determinism齊+flow MEASURED 26%→80%(cargo_delivered 45→153/192需求+order_fulfilled 4→6+散多買家)·merged三閘綠(constitution 74+convoy test 5/5+observability)·★可對用戶正式驗收:economy第一次真流動(GATE-B撮合0→活,26%涓流→80%flow)+世界非凍(12.84%淨死活世界)·SLICE A收官(convoy物理送貨+協調散單)·下:SLICE B分配政策(premise ground中)/C貿易·perf+規模動態backlog(join resolve一根解perf+規模+legibility,設計gated)" 
 ---
 

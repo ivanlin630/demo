@@ -1,0 +1,2176 @@
+{
+  "42": {
+    "attrition_pct": 8.33333333333333,
+    "curve": [
+      {
+        "established": 0,
+        "factions": 8,
+        "food_econ": {
+          "avg_food_flow": -0.61147590762178,
+          "min_food_flow": -10.4685816812355,
+          "n_teams_flow_sampled": 71,
+          "n_teams_negative_flow": 63,
+          "total_food_stock": 4118.998812264
+        },
+        "intent": {
+          "CONQUER": 2,
+          "DEFEND": 11,
+          "EXPAND": 0,
+          "FOUND": 1,
+          "HOLD": 0,
+          "NONE": 1,
+          "RICH": 23
+        },
+        "month": 1,
+        "pop": 429,
+        "teams": 71
+      },
+      {
+        "established": 0,
+        "factions": 8,
+        "food_econ": {
+          "avg_food_flow": -1.04645430032321,
+          "min_food_flow": -39.116705372912,
+          "n_teams_flow_sampled": 70,
+          "n_teams_negative_flow": 45,
+          "total_food_stock": 1976.83121714066
+        },
+        "intent": {
+          "CONQUER": 4,
+          "DEFEND": 9,
+          "EXPAND": 0,
+          "FOUND": 2,
+          "HOLD": 0,
+          "NONE": 1,
+          "RICH": 26
+        },
+        "month": 2,
+        "pop": 422,
+        "teams": 70
+      },
+      {
+        "established": 0,
+        "factions": 8,
+        "food_econ": {
+          "avg_food_flow": 5.29763648237072,
+          "min_food_flow": -39.2786439513892,
+          "n_teams_flow_sampled": 73,
+          "n_teams_negative_flow": 37,
+          "total_food_stock": 1981.40059478089
+        },
+        "intent": {
+          "CONQUER": 1,
+          "DEFEND": 10,
+          "EXPAND": 0,
+          "FOUND": 1,
+          "HOLD": 0,
+          "NONE": 1,
+          "RICH": 31
+        },
+        "month": 3,
+        "pop": 396,
+        "teams": 73
+      }
+    ],
+    "decision_diag": {
+      "diag.build_apothecary:facility:delegate.appl_n": 85,
+      "diag.build_apothecary:facility:delegate.coeff_pressed": 2,
+      "diag.build_apothecary:facility:delegate.coeff_sum": 55.7722072283684,
+      "diag.build_apothecary:facility:delegate.mainurg_sum": 0.297264112625271,
+      "diag.build_apothecary:facility:delegate.ownutil_sum": 68.2334611548169,
+      "diag.build_apothecary:facility:delegate.winutil_sum": 68.848025112874,
+      "diag.build_apothecary:location:delegate.appl_n": 75,
+      "diag.build_apothecary:location:delegate.coeff_pressed": 14,
+      "diag.build_apothecary:location:delegate.coeff_sum": 41.042724621459,
+      "diag.build_apothecary:location:delegate.mainurg_sum": 0.484305594712004,
+      "diag.build_apothecary:location:delegate.ownutil_sum": 96.3880437742708,
+      "diag.build_apothecary:location:delegate.winutil_sum": 99.0747167190057,
+      "diag.build_apothecary:resource.appl_n": 17240,
+      "diag.build_apothecary:resource.coeff_pressed": 3559,
+      "diag.build_apothecary:resource.coeff_sum": 10006.0138516866,
+      "diag.build_apothecary:resource.mainurg_sum": 5510.0879792656,
+      "diag.build_apothecary:resource.ownutil_sum": 16571.4726483363,
+      "diag.build_apothecary:resource.winutil_sum": 30416.7913707571,
+      "diag.build_armorsmith:facility:delegate.appl_n": 35,
+      "diag.build_armorsmith:facility:delegate.coeff_sum": 22.1609068668033,
+      "diag.build_armorsmith:facility:delegate.mainurg_sum": 19.2475718855858,
+      "diag.build_armorsmith:facility:delegate.ownutil_sum": 10.5088355729199,
+      "diag.build_armorsmith:facility:delegate.winutil_sum": 67.7119463302425,
+      "diag.build_armorsmith:location:delegate.appl_n": 29,
+      "diag.build_armorsmith:location:delegate.coeff_sum": 16.9203715563355,
+      "diag.build_armorsmith:location:delegate.mainurg_sum": 25.5346763134003,
+      "diag.build_armorsmith:location:delegate.ownutil_sum": 3.73098598324631,
+      "diag.build_armorsmith:location:delegate.winutil_sum": 69.5728732882355,
+      "diag.build_armorsmith:resource.appl_n": 1894,
+      "diag.build_armorsmith:resource.coeff_pressed": 13,
+      "diag.build_armorsmith:resource.coeff_sum": 1328.51471734295,
+      "diag.build_armorsmith:resource.mainurg_sum": 596.605484740946,
+      "diag.build_armorsmith:resource.ownutil_sum": 1940.37209956004,
+      "diag.build_armorsmith:resource.winutil_sum": 3055.81560763949,
+      "diag.build_farming:resource.appl_n": 2523,
+      "diag.build_farming:resource.coeff_pressed": 388,
+      "diag.build_farming:resource.coeff_sum": 1530.59560752161,
+      "diag.build_farming:resource.mainurg_sum": 2191.10758268833,
+      "diag.build_farming:resource.ownutil_sum": 596.817564712563,
+      "diag.build_farming:resource.winutil_sum": 6200.32059996904,
+      "diag.build_stable:facility:delegate.appl_n": 858,
+      "diag.build_stable:facility:delegate.coeff_pressed": 2,
+      "diag.build_stable:facility:delegate.coeff_sum": 555.505890647822,
+      "diag.build_stable:facility:delegate.mainurg_sum": 79.3075409285983,
+      "diag.build_stable:facility:delegate.ownutil_sum": 385.093646132181,
+      "diag.build_stable:facility:delegate.winutil_sum": 902.010230285573,
+      "diag.build_stable:location:delegate.appl_n": 104,
+      "diag.build_stable:location:delegate.coeff_pressed": 14,
+      "diag.build_stable:location:delegate.coeff_sum": 57.9630961777945,
+      "diag.build_stable:location:delegate.mainurg_sum": 26.0189819081123,
+      "diag.build_stable:location:delegate.ownutil_sum": 100.119029757517,
+      "diag.build_stable:location:delegate.winutil_sum": 168.647590007241,
+      "diag.build_stable:resource.appl_n": 17677,
+      "diag.build_stable:resource.coeff_pressed": 3559,
+      "diag.build_stable:resource.coeff_sum": 10338.3672051811,
+      "diag.build_stable:resource.mainurg_sum": 5957.90256204092,
+      "diag.build_stable:resource.ownutil_sum": 16612.3140583442,
+      "diag.build_stable:resource.winutil_sum": 31576.4763385313,
+      "diag.build_weaponsmith:facility:delegate.appl_n": 21,
+      "diag.build_weaponsmith:facility:delegate.coeff_sum": 12.2319987246756,
+      "diag.build_weaponsmith:facility:delegate.mainurg_sum": 19.2475718855858,
+      "diag.build_weaponsmith:facility:delegate.ownutil_sum": 1.02472190026534,
+      "diag.build_weaponsmith:facility:delegate.winutil_sum": 55.9553818703771,
+      "diag.build_weaponsmith:location:delegate.appl_n": 29,
+      "diag.build_weaponsmith:location:delegate.coeff_sum": 16.9203715563355,
+      "diag.build_weaponsmith:location:delegate.mainurg_sum": 25.5346763134003,
+      "diag.build_weaponsmith:location:delegate.ownutil_sum": 3.73098598324631,
+      "diag.build_weaponsmith:location:delegate.winutil_sum": 69.5728732882355,
+      "diag.build_weaponsmith:resource.appl_n": 798,
+      "diag.build_weaponsmith:resource.coeff_sum": 569.786480524994,
+      "diag.build_weaponsmith:resource.mainurg_sum": 309.328707448829,
+      "diag.build_weaponsmith:resource.ownutil_sum": 747.41118221975,
+      "diag.build_weaponsmith:resource.winutil_sum": 1288.66665206359,
+      "diag.build_workshop:facility:delegate.appl_n": 10,
+      "diag.build_workshop:facility:delegate.coeff_pressed": 1,
+      "diag.build_workshop:facility:delegate.coeff_sum": 6.34829694062209,
+      "diag.build_workshop:facility:delegate.mainurg_sum": 0,
+      "diag.build_workshop:facility:delegate.ownutil_sum": 7.05792681547366,
+      "diag.build_workshop:facility:delegate.winutil_sum": 7.67249077353081,
+      "diag.build_workshop:location:delegate.appl_n": 32,
+      "diag.build_workshop:location:delegate.coeff_sum": 18.1321302162335,
+      "diag.build_workshop:location:delegate.mainurg_sum": 0.000119949193243596,
+      "diag.build_workshop:location:delegate.ownutil_sum": 41.2795516345139,
+      "diag.build_workshop:location:delegate.winutil_sum": 43.9662245792488,
+      "diag.build_workshop:resource.appl_n": 5806,
+      "diag.build_workshop:resource.coeff_pressed": 653,
+      "diag.build_workshop:resource.coeff_sum": 3467.52986934846,
+      "diag.build_workshop:resource.mainurg_sum": 3780.97394266199,
+      "diag.build_workshop:resource.ownutil_sum": 3231.97895832953,
+      "diag.build_workshop:resource.winutil_sum": 12359.8109867599,
+      "diag.maintain_food:resource.appl_n": 12196,
+      "diag.maintain_food:resource.coeff_pressed": 1513,
+      "diag.maintain_food:resource.coeff_sum": 7295.67183995502,
+      "diag.maintain_food:resource.mainurg_sum": 9495.32471634168,
+      "diag.maintain_food:resource.ownutil_sum": 3306.88462257851,
+      "diag.maintain_food:resource.winutil_sum": 27971.7297233419,
+      "diag.maintain_material:location:delegate.appl_n": 104,
+      "diag.maintain_material:location:delegate.coeff_pressed": 14,
+      "diag.maintain_material:location:delegate.coeff_sum": 57.9630961777945,
+      "diag.maintain_material:location:delegate.mainurg_sum": 26.0189819081123,
+      "diag.maintain_material:location:delegate.ownutil_sum": 66.7460198383446,
+      "diag.maintain_material:location:delegate.winutil_sum": 168.647590007241,
+      "diag.maintain_material:resource.appl_n": 19632,
+      "diag.maintain_material:resource.coeff_pressed": 3572,
+      "diag.maintain_material:resource.coeff_sum": 11674.6051636663,
+      "diag.maintain_material:resource.mainurg_sum": 6108.93471260469,
+      "diag.maintain_material:resource.ownutil_sum": 12802.1825042134,
+      "diag.maintain_material:resource.winutil_sum": 33985.2877202341,
+      "diag.survival.appl_n": 30154,
+      "diag.survival.coeff_pressed": 13397,
+      "diag.survival.coeff_sum": 18009.3689737764,
+      "diag.survival.mainurg_sum": 8105.91997103818,
+      "diag.survival.ownutil_sum": 13245.1849791602,
+      "diag.survival.winutil_sum": 40499.0745555699,
+      "diag.乞食.appl_n": 1264,
+      "diag.乞食.coeff_sum": 1015.31177396181,
+      "diag.乞食.mainurg_sum": 931.60768160224,
+      "diag.乞食.ownutil_sum": 1763.06885350318,
+      "diag.乞食.winutil_sum": 2633.43069198734,
+      "diag.佔村.appl_n": 200,
+      "diag.佔村.coeff_pressed": 19,
+      "diag.佔村.coeff_sum": 109.66902698409,
+      "diag.佔村.mainurg_sum": 81.2436853602975,
+      "diag.佔村.ownutil_sum": 78.7765724529229,
+      "diag.佔村.winutil_sum": 258.327378261935,
+      "diag.併入.appl_n": 3489,
+      "diag.併入.coeff_pressed": 149,
+      "diag.併入.coeff_sum": 2167.42768604109,
+      "diag.併入.mainurg_sum": 717.789232373238,
+      "diag.併入.ownutil_sum": 2122.02502318338,
+      "diag.併入.winutil_sum": 5138.86908387808,
+      "diag.備戰.appl_n": 23577,
+      "diag.備戰.coeff_pressed": 6674,
+      "diag.備戰.coeff_sum": 14561.4039896601,
+      "diag.備戰.mainurg_sum": 6799.32890849951,
+      "diag.備戰.ownutil_sum": 16491.5400024169,
+      "diag.備戰.winutil_sum": 33601.7614312166,
+      "diag.吸納.appl_n": 7722,
+      "diag.吸納.coeff_pressed": 1365,
+      "diag.吸納.coeff_sum": 4703.60564524178,
+      "diag.吸納.mainurg_sum": 2049.96639543772,
+      "diag.吸納.ownutil_sum": 548.066413031242,
+      "diag.吸納.winutil_sum": 9713.58859522028,
+      "diag.囤貨.appl_n": 3288,
+      "diag.囤貨.coeff_pressed": 128,
+      "diag.囤貨.coeff_sum": 2482.56072881036,
+      "diag.囤貨.mainurg_sum": 2371.54514219723,
+      "diag.囤貨.ownutil_sum": 1898.22740274597,
+      "diag.囤貨.winutil_sum": 3659.91349198977,
+      "diag.外交.appl_n": 4565,
+      "diag.外交.coeff_pressed": 2603,
+      "diag.外交.coeff_sum": 2237.14050307485,
+      "diag.外交.mainurg_sum": 0,
+      "diag.外交.ownutil_sum": 3003.76700037276,
+      "diag.外交.winutil_sum": 6761.51331911377,
+      "diag.建設.appl_n": 40465,
+      "diag.建設.coeff_pressed": 7301,
+      "diag.建設.coeff_sum": 23246.3250457045,
+      "diag.建設.mainurg_sum": 3285.30267862643,
+      "diag.建設.ownutil_sum": 11384.3274662604,
+      "diag.建設.winutil_sum": 59073.6032435466,
+      "diag.徵收.appl_n": 9783,
+      "diag.徵收.coeff_pressed": 5446,
+      "diag.徵收.coeff_sum": 5203.01319415988,
+      "diag.徵收.mainurg_sum": 1698.62862222267,
+      "diag.徵收.ownutil_sum": 6646.18909939278,
+      "diag.徵收.winutil_sum": 17430.0784350733,
+      "diag.掠奪.appl_n": 8208,
+      "diag.掠奪.coeff_pressed": 1061,
+      "diag.掠奪.coeff_sum": 5176.98747828973,
+      "diag.掠奪.mainurg_sum": 4182.68514393959,
+      "diag.掠奪.ownutil_sum": 2971.5899040216,
+      "diag.掠奪.winutil_sum": 9573.8278959719,
+      "diag.攻擊.appl_n": 492,
+      "diag.攻擊.coeff_sum": 355.09659412585,
+      "diag.攻擊.mainurg_sum": 204.988219020507,
+      "diag.攻擊.ownutil_sum": 130.496222917356,
+      "diag.攻擊.winutil_sum": 798.022794142353,
+      "diag.歸建.appl_n": 731,
+      "diag.歸建.coeff_pressed": 88,
+      "diag.歸建.coeff_sum": 615.126015531377,
+      "diag.歸建.mainurg_sum": 574.863492369652,
+      "diag.歸建.ownutil_sum": 564.414328643389,
+      "diag.歸建.winutil_sum": 915.221775788172,
+      "diag.求和.appl_n": 27070,
+      "diag.求和.coeff_pressed": 10978,
+      "diag.求和.coeff_sum": 16508.9313958071,
+      "diag.求和.mainurg_sum": 8299.95545909005,
+      "diag.求和.ownutil_sum": 13466.3863087262,
+      "diag.求和.winutil_sum": 36683.2624076592,
+      "diag.生產.appl_n": 1425,
+      "diag.生產.coeff_sum": 910.955140312086,
+      "diag.生產.mainurg_sum": 0.888909097760916,
+      "diag.生產.ownutil_sum": 827.671703990001,
+      "diag.生產.winutil_sum": 4676.83773465827,
+      "diag.紮營.appl_n": 6490,
+      "diag.紮營.coeff_pressed": 16,
+      "diag.紮營.coeff_sum": 4678.76759297188,
+      "diag.紮營.mainurg_sum": 4594.39581310749,
+      "diag.紮營.ownutil_sum": 8344.68665434644,
+      "diag.紮營.winutil_sum": 12318.0460155181,
+      "diag.覓食.appl_n": 14435,
+      "diag.覓食.coeff_pressed": 8194,
+      "diag.覓食.coeff_sum": 7330.19563631023,
+      "diag.覓食.mainurg_sum": 1129.70470249749,
+      "diag.覓食.ownutil_sum": 7789.90103481595,
+      "diag.覓食.winutil_sum": 16300.6068339916,
+      "diag.訓練.appl_n": 3456,
+      "diag.訓練.coeff_pressed": 28,
+      "diag.訓練.coeff_sum": 2675.53651009067,
+      "diag.訓練.mainurg_sum": 2353.65176207921,
+      "diag.訓練.ownutil_sum": 1084.00005228372,
+      "diag.訓練.winutil_sum": 4453.54127964591,
+      "diag.買料.appl_n": 13068,
+      "diag.買料.coeff_pressed": 3077,
+      "diag.買料.coeff_sum": 7624.03211504219,
+      "diag.買料.mainurg_sum": 500.972561282467,
+      "diag.買料.ownutil_sum": 2978.96064933524,
+      "diag.買料.winutil_sum": 17345.8381304194,
+      "diag.買糧.appl_n": 1165,
+      "diag.買糧.coeff_sum": 950.109545690916,
+      "diag.買糧.mainurg_sum": 786.375581860542,
+      "diag.買糧.ownutil_sum": 1389.8061700592,
+      "diag.買糧.winutil_sum": 2191.77850746303,
+      "diag.貿易.appl_n": 25098,
+      "diag.貿易.coeff_pressed": 4763,
+      "diag.貿易.coeff_sum": 16198.7081316823,
+      "diag.貿易.mainurg_sum": 11122.3498909316,
+      "diag.貿易.ownutil_sum": 2253.15606811484,
+      "diag.貿易.winutil_sum": 36098.2591981887,
+      "diag.迎戰.appl_n": 21460,
+      "diag.迎戰.coeff_pressed": 978,
+      "diag.迎戰.coeff_sum": 14134.7853836802,
+      "diag.迎戰.mainurg_sum": 6077.18334514201,
+      "diag.迎戰.ownutil_sum": 9675.82570982792,
+      "diag.迎戰.winutil_sum": 27732.2260993497,
+      "diag.返家補給.appl_n": 1782,
+      "diag.返家補給.coeff_pressed": 58,
+      "diag.返家補給.coeff_sum": 1243.62795255072,
+      "diag.返家補給.mainurg_sum": 927.409491630271,
+      "diag.返家補給.ownutil_sum": 1976.36161598228,
+      "diag.返家補給.winutil_sum": 2734.34126865286,
+      "diag.遷移找糧.appl_n": 684,
+      "diag.遷移找糧.coeff_pressed": 22,
+      "diag.遷移找糧.coeff_sum": 418.619182999334,
+      "diag.遷移找糧.mainurg_sum": 432.815511256456,
+      "diag.遷移找糧.ownutil_sum": 842.656445505535,
+      "diag.遷移找糧.winutil_sum": 1059.1034540974,
+      "diag.駐守.appl_n": 13104,
+      "diag.駐守.coeff_pressed": 2675,
+      "diag.駐守.coeff_sum": 7500.5845459301,
+      "diag.駐守.mainurg_sum": 2838.87547017254,
+      "diag.駐守.ownutil_sum": 3433.86315470812,
+      "diag.駐守.winutil_sum": 23543.4145944937
+    },
+    "decision_opt_dist": {
+      "decision.opt_applicable.survival": 30759,
+      "decision.opt_applicable.乞食": 1467,
+      "decision.opt_applicable.佔村": 231,
+      "decision.opt_applicable.併入": 3783,
+      "decision.opt_applicable.備戰": 28318,
+      "decision.opt_applicable.吸納": 7722,
+      "decision.opt_applicable.囤貨": 3419,
+      "decision.opt_applicable.外交": 4982,
+      "decision.opt_applicable.建設": 42200,
+      "decision.opt_applicable.徵收": 16137,
+      "decision.opt_applicable.掠奪": 8556,
+      "decision.opt_applicable.攻擊": 504,
+      "decision.opt_applicable.歸建": 865,
+      "decision.opt_applicable.求和": 28033,
+      "decision.opt_applicable.生產": 1425,
+      "decision.opt_applicable.紮營": 6597,
+      "decision.opt_applicable.覓食": 21979,
+      "decision.opt_applicable.訓練": 3456,
+      "decision.opt_applicable.買料": 13069,
+      "decision.opt_applicable.買糧": 2242,
+      "decision.opt_applicable.貿易": 25450,
+      "decision.opt_applicable.迎戰": 21468,
+      "decision.opt_applicable.返家補給": 3201,
+      "decision.opt_applicable.遷移找糧": 2608,
+      "decision.opt_applicable.駐守": 13237,
+      "decision.opt_chosen.build_apothecary:resource": 154,
+      "decision.opt_chosen.build_farming:resource": 1815,
+      "decision.opt_chosen.build_stable:facility:delegate": 52,
+      "decision.opt_chosen.build_stable:resource": 1302,
+      "decision.opt_chosen.build_weaponsmith:resource": 331,
+      "decision.opt_chosen.build_workshop:facility:delegate": 75,
+      "decision.opt_chosen.build_workshop:location:delegate": 43,
+      "decision.opt_chosen.build_workshop:resource": 9984,
+      "decision.opt_chosen.maintain_food:resource": 776,
+      "decision.opt_chosen.survival": 605,
+      "decision.opt_chosen.乞食": 203,
+      "decision.opt_chosen.佔村": 31,
+      "decision.opt_chosen.併入": 294,
+      "decision.opt_chosen.備戰": 4741,
+      "decision.opt_chosen.囤貨": 131,
+      "decision.opt_chosen.外交": 417,
+      "decision.opt_chosen.建設": 1735,
+      "decision.opt_chosen.徵收": 6354,
+      "decision.opt_chosen.掠奪": 348,
+      "decision.opt_chosen.攻擊": 12,
+      "decision.opt_chosen.歸建": 134,
+      "decision.opt_chosen.求和": 963,
+      "decision.opt_chosen.紮營": 107,
+      "decision.opt_chosen.覓食": 7544,
+      "decision.opt_chosen.買料": 1,
+      "decision.opt_chosen.買糧": 1077,
+      "decision.opt_chosen.貿易": 352,
+      "decision.opt_chosen.迎戰": 8,
+      "decision.opt_chosen.返家補給": 1419,
+      "decision.opt_chosen.遷移找糧": 1924,
+      "decision.opt_chosen.駐守": 133,
+      "decision.opt_coeff_pressed.survival": 30759,
+      "decision.opt_coeff_pressed.乞食": 1467,
+      "decision.opt_coeff_pressed.佔村": 231,
+      "decision.opt_coeff_pressed.併入": 3783,
+      "decision.opt_coeff_pressed.備戰": 28318,
+      "decision.opt_coeff_pressed.吸納": 7722,
+      "decision.opt_coeff_pressed.囤貨": 3419,
+      "decision.opt_coeff_pressed.外交": 4982,
+      "decision.opt_coeff_pressed.建設": 42200,
+      "decision.opt_coeff_pressed.徵收": 16137,
+      "decision.opt_coeff_pressed.掠奪": 8556,
+      "decision.opt_coeff_pressed.攻擊": 504,
+      "decision.opt_coeff_pressed.歸建": 865,
+      "decision.opt_coeff_pressed.求和": 28033,
+      "decision.opt_coeff_pressed.生產": 1425,
+      "decision.opt_coeff_pressed.紮營": 6597,
+      "decision.opt_coeff_pressed.覓食": 21979,
+      "decision.opt_coeff_pressed.訓練": 3456,
+      "decision.opt_coeff_pressed.買料": 13069,
+      "decision.opt_coeff_pressed.買糧": 2242,
+      "decision.opt_coeff_pressed.貿易": 25450,
+      "decision.opt_coeff_pressed.迎戰": 21468,
+      "decision.opt_coeff_pressed.返家補給": 3201,
+      "decision.opt_coeff_pressed.遷移找糧": 2608,
+      "decision.opt_coeff_pressed.駐守": 13237
+    },
+    "end_pop": 396,
+    "farming_final": {
+      "faction_farm_pos": 6,
+      "faction_farm_zero": 44,
+      "farm_pos_avg_pop": 7.72727272727273,
+      "farm_pos_teams": 11,
+      "farm_zero_avg_pop": 5.72727272727273,
+      "farm_zero_teams": 110,
+      "indep_civ": 31,
+      "indep_farm_pos": 5,
+      "indep_farm_zero": 66,
+      "indep_mil": 40
+    },
+    "final": {
+      "established": 0,
+      "factions": 8,
+      "pop": 396,
+      "teams": 73
+    },
+    "intent": {
+      "CONQUER": 1,
+      "DEFEND": 10,
+      "EXPAND": 0,
+      "FOUND": 1,
+      "HOLD": 0,
+      "NONE": 1,
+      "RICH": 31
+    },
+    "probe": {
+      "absorb.dispatch": 0,
+      "absorb.slack_pos": 8942,
+      "absorb.target_found": 9685,
+      "absorb.util_n": 9685,
+      "absorb.yield_pos": 9629,
+      "accept.join_accept": 7,
+      "accept.join_reject": 11,
+      "accept.merge_accept": 0,
+      "accept.merge_reject": 0,
+      "annih.n_high": 0,
+      "annih.n_low": 0,
+      "annih.n_mid": 0,
+      "beg.dispatch": 5,
+      "beg.resolve": 1,
+      "capture.by_attack": 0,
+      "capture.total": 2,
+      "combat.end_annihilation": 0,
+      "combat.end_mortal_flee": 23,
+      "combat.end_readiness_above_thr": 25,
+      "combat.end_retreat": 0,
+      "combat.end_rout": 2,
+      "combat.ended_n": 25,
+      "combat.pop_start_le3": 23,
+      "combat.str_ratio_annih_n": 0,
+      "conq.combat_decisive": 0,
+      "conq.combat_entered": 23,
+      "conq.combat_retreat": 3,
+      "conq.declared": 4688,
+      "conq.indep_atk_believed_owned": 0,
+      "conq.intent": 973,
+      "conq.member_atk_dispatch": 0,
+      "conq.member_atk_eligible": 0,
+      "conq.prosperity_reached": 0,
+      "conq.retreat_captured": 2,
+      "conq.retreat_no_capture": 1,
+      "conq.win_absorbed": 0,
+      "conq.win_no_absorb": 0,
+      "conq.winner_loot": 96,
+      "conq.winner_none": 0,
+      "conq.winner_other": 836,
+      "conq.winner_prosperity": 0,
+      "consol.accept_n": 7,
+      "construct.complete": 18,
+      "construct.complete_build": 0,
+      "construct.complete_crude_camp": 0,
+      "construct.complete_demolish": 0,
+      "construct.complete_upgrade_facility": 18,
+      "construct.complete_upgrade_level": 0,
+      "construct.progress": 528,
+      "construct.stall": 5713,
+      "construct.start": 23,
+      "construct.start_task_not_build": 17,
+      "construct.timeout_cancel": 3,
+      "crisis.override_release": 70,
+      "death.combat_named": 0,
+      "death.combat_pop": 0,
+      "death.defect_leave": 0,
+      "death.starve_anon": 33,
+      "death.starve_minor": 0,
+      "envoy.accept": 0,
+      "envoy.delivered": 4,
+      "envoy.dispatched": 22,
+      "envoy.gift_delivered": 4,
+      "envoy.gift_sent": 14,
+      "envoy.reject": 4,
+      "envoy.target_dead": 0,
+      "envoy.timeout": 22,
+      "establish.gate_all_pass": 0,
+      "establish.gate_b1_ok": 0,
+      "establish.gate_fail_b1_members": 0,
+      "establish.gate_fail_b2_command": 0,
+      "establish.gate_fail_b3_ambition": 0,
+      "establish.gate_fail_b4_readiness": 0,
+      "extinct.combat": 0,
+      "extinct.other": 0,
+      "extinct.starve": 0,
+      "extinct.starve_no_forage_nonowner": 0,
+      "extinct.starve_no_forage_owner": 0,
+      "extinct.starve_while_fleeing_nonowner": 0,
+      "extinct.starve_while_fleeing_owner": 0,
+      "extinct.starve_while_foraging_nonowner": 0,
+      "extinct.starve_while_foraging_owner": 0,
+      "foodflow.update": 15361,
+      "g1.arb_hit": 21,
+      "g1.engine_survival": 9222,
+      "g1.food_buy": 467,
+      "g1.market_arrive": 402,
+      "g1.mint": 0,
+      "g1.order_fulfilled": 21,
+      "g1.order_placed": 4659,
+      "g1.order_settled_direct": 29,
+      "g1.restock_chosen": 1184,
+      "g1.seek_market": 1407,
+      "g1.shortage_buy": 2885,
+      "g2.ambition_demote": 172,
+      "g2.ambition_promote": 332,
+      "g2.faction_found": 0,
+      "g2.feud_formed": 0,
+      "g2.vendetta_trigger": 0,
+      "g3.betrayal": 12,
+      "g3.scout_dispatch": 0,
+      "g3.trust_down": 14644,
+      "g3.trust_up": 10620,
+      "indep.found_ally": 15,
+      "indep.found_subjugate": 0,
+      "indep.found_timeout": 11,
+      "indep.gate_ambitious": 34387,
+      "indep.gate_fail_busy": 6912,
+      "indep.gate_fail_food": 8801,
+      "indep.gate_fail_nopath": 1220,
+      "indep.gate_fail_pop": 17247,
+      "indep.gate_path_ok": 207,
+      "join.dispatch": 48,
+      "join.resolve": 7,
+      "merge.branch_reached": 0,
+      "merge.consolidate_dispatch": 234,
+      "merge.guard_fail_ordertgt": 0,
+      "merge.mv_block_combat": 0,
+      "merge.mv_moving": 0,
+      "merge.mv_no_target": 0,
+      "merge.mv_reached": 0,
+      "merge.pair_seen": 0,
+      "merge.set_fail": 48,
+      "merge.set_ok": 186,
+      "merge.surv_fail": 39,
+      "merge.surv_ok": 548,
+      "merge.try_entered": 0,
+      "merge_appl.chose_other": 0,
+      "merge_appl.chose_整併": 0,
+      "merge_appl.food_3to6": 0,
+      "merge_appl.food_ge6": 0,
+      "merge_appl.food_lt3": 0,
+      "merge_appl.total": 0,
+      "mergein.dissolve": 2,
+      "mergein.subteam": 5,
+      "mortal_flee.n": 23,
+      "mortal_flee.n_high": 0,
+      "mortal_flee.n_low": 0,
+      "mortal_flee.n_mid": 23,
+      "p1.assimilate": 1,
+      "p1.flee": 1,
+      "p1.revolt": 0,
+      "persist.hold": 28,
+      "pursuit.n": 1,
+      "reaction.N1_flee": 0,
+      "reaction.N2_riot": 0,
+      "reaction.N3_defect": 0,
+      "reaction.N4_shirk": 0,
+      "reaction.N5_extort": 0,
+      "reaction.P1_comply": 0,
+      "reaction.P2_produce": 0,
+      "reaction.P4_expand": 0,
+      "reaction.breed": 0,
+      "rep.host_nonneutral": 0,
+      "resume.attempt": 1708,
+      "resume.reject_busy": 542,
+      "resume.reject_combat": 3159,
+      "resume.reject_owner": 79017,
+      "resume.reject_resident": 0,
+      "resume.reject_starving": 37278,
+      "resume.success": 11,
+      "rout.n_high": 0,
+      "rout.n_low": 1,
+      "rout.n_mid": 1,
+      "rout.total": 2,
+      "strat.breakout_assigned": 237,
+      "strat.encircle_assigned": 0,
+      "strat.expand_reached": 3,
+      "strat.sa_move_dispatch": 26,
+      "surv.loot_dispatch": 5,
+      "survival.boost_fire": 17601,
+      "survival.stall_exclude": 186,
+      "trade.arrive": 234,
+      "trade.barter_deal": 33,
+      "trade.deal": 61,
+      "trade.deal_market": 26,
+      "trade.deal_merchant": 54,
+      "trade.deal_resident": 7,
+      "trade.market_bail.buy_no_coin": 7,
+      "trade.market_bail.buy_no_stock": 11,
+      "trade.market_bail.sell_no_surplus": 248,
+      "trade.meet": 310,
+      "trade.timeout": 99,
+      "worldgen.build_outpost": 84,
+      "worldgen.floor_fail": 0,
+      "worldgen.floor_pass": 1
+    },
+    "probe_amounts": {
+      "absorb.slack_sum": 4150.25049218472,
+      "absorb.yield_sum": 2131.39999999991,
+      "combat.loser_readiness_end_sum": 23.4,
+      "combat.loser_wnd_end_sum": 0.236111111111111,
+      "combat.pop_ratio_annih_sum": 0,
+      "combat.pop_start_sum": 23,
+      "combat.rounds_sum": 23,
+      "combat.str_ratio_annih_sum": 0,
+      "consol.absorber_days_sum": 114.243329568428,
+      "consol.absorber_pop_sum": 58,
+      "consol.combined_days_sum": 99.463387871969,
+      "consol.joiner_days_sum": 12.5,
+      "mortal_flee.readiness_sum": 23,
+      "pursuit.cruelty_sum": 0.454958200454712,
+      "pursuit.greed_sum": 0.418960332870483,
+      "pursuit.loss_sum": 1,
+      "rout.ready_sum_high": 0,
+      "rout.ready_sum_low": 0.2,
+      "rout.ready_sum_mid": 0.2
+    },
+    "probe_samples": {
+      "construct.complete": [
+        {
+          "action": "upgrade_facility",
+          "team": 50,
+          "tick": 1620,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 21,
+          "tick": 8740,
+          "tile": [
+            22,
+            17
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 11,
+          "tick": 9000,
+          "tile": [
+            8,
+            17
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 85,
+          "tick": 9960,
+          "tile": [
+            21,
+            2
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 27,
+          "tick": 10090,
+          "tile": [
+            8,
+            27
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 1,
+          "tick": 11100,
+          "tile": [
+            0,
+            20
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 16,
+          "tick": 11110,
+          "tile": [
+            15,
+            20
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "team": 22,
+          "tick": 11580,
+          "tile": [
+            22,
+            5
+          ]
+        }
+      ],
+      "construct.progress": [
+        {
+          "active": 50,
+          "pop": 3,
+          "tick": 510,
+          "ticks_left": 336,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "active": 50,
+          "pop": 3,
+          "tick": 520,
+          "ticks_left": 333,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "active": 50,
+          "pop": 3,
+          "tick": 530,
+          "ticks_left": 330,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "active": 50,
+          "pop": 3,
+          "tick": 540,
+          "ticks_left": 327,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "active": 50,
+          "pop": 3,
+          "tick": 550,
+          "ticks_left": 324,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "active": 50,
+          "pop": 3,
+          "tick": 560,
+          "ticks_left": 321,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "active": 50,
+          "pop": 3,
+          "tick": 570,
+          "ticks_left": 318,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "active": 50,
+          "pop": 3,
+          "tick": 580,
+          "ticks_left": 315,
+          "tile": [
+            15,
+            5
+          ]
+        }
+      ],
+      "construct.stall": [
+        {
+          "ct_id": 65,
+          "ct_pos": [
+            3,
+            23
+          ],
+          "ct_reason": "transition",
+          "ct_task": "建設",
+          "tick": 2410,
+          "ticks_left": 306,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "ct_id": 65,
+          "ct_pos": [
+            3,
+            23
+          ],
+          "ct_reason": "transition",
+          "ct_task": "建設",
+          "tick": 2420,
+          "ticks_left": 306,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "ct_id": 65,
+          "ct_pos": [
+            3,
+            23
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 2430,
+          "ticks_left": 306,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "ct_id": 65,
+          "ct_pos": [
+            3,
+            23
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 2440,
+          "ticks_left": 306,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "ct_id": 65,
+          "ct_pos": [
+            3,
+            23
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 2450,
+          "ticks_left": 306,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "ct_id": 65,
+          "ct_pos": [
+            3,
+            23
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 2460,
+          "ticks_left": 306,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "ct_id": 65,
+          "ct_pos": [
+            3,
+            23
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 2470,
+          "ticks_left": 306,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "ct_id": 65,
+          "ct_pos": [
+            3,
+            23
+          ],
+          "ct_reason": "unified",
+          "ct_task": "外交",
+          "tick": 2480,
+          "ticks_left": 306,
+          "tile": [
+            4,
+            23
+          ]
+        }
+      ],
+      "construct.start": [
+        {
+          "action": "upgrade_facility",
+          "ct_id": 50,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 50,
+          "tick": 500,
+          "tile": [
+            15,
+            5
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 65,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 65,
+          "tick": 2300,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 21,
+          "prio_after": 80,
+          "task_after": "覓食",
+          "team": 21,
+          "tick": 7500,
+          "tile": [
+            22,
+            17
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 11,
+          "prio_after": 80,
+          "task_after": "覓食",
+          "team": 11,
+          "tick": 8500,
+          "tile": [
+            8,
+            17
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 27,
+          "prio_after": 80,
+          "task_after": "return_home",
+          "team": 27,
+          "tick": 9000,
+          "tile": [
+            8,
+            27
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 84,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 84,
+          "tick": 9100,
+          "tile": [
+            13,
+            8
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 85,
+          "prio_after": 50,
+          "task_after": "建設",
+          "team": 85,
+          "tick": 9400,
+          "tile": [
+            21,
+            2
+          ]
+        },
+        {
+          "action": "upgrade_facility",
+          "ct_id": 21,
+          "prio_after": 80,
+          "task_after": "覓食",
+          "team": 21,
+          "tick": 9500,
+          "tile": [
+            22,
+            17
+          ]
+        }
+      ],
+      "construct.timeout_cancel": [
+        {
+          "ct_id": 65,
+          "stall_ticks": 7600,
+          "tick": 10000,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "ct_id": 6,
+          "stall_ticks": 7500,
+          "tick": 17500,
+          "tile": [
+            27,
+            2
+          ]
+        },
+        {
+          "ct_id": 26,
+          "stall_ticks": 7500,
+          "tick": 20500,
+          "tile": [
+            3,
+            20
+          ]
+        }
+      ],
+      "persist.safe_trace": [
+        {
+          "eta_days": 8,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14180
+        },
+        {
+          "eta_days": 8,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14180
+        },
+        {
+          "eta_days": 8,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14180
+        },
+        {
+          "eta_days": 7,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14190
+        },
+        {
+          "eta_days": 7,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14190
+        },
+        {
+          "eta_days": 7,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14190
+        },
+        {
+          "eta_days": 6,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14200
+        },
+        {
+          "eta_days": 6,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14200
+        },
+        {
+          "eta_days": 6,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14200
+        },
+        {
+          "eta_days": 6,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14200
+        },
+        {
+          "eta_days": 5,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14210
+        },
+        {
+          "eta_days": 5,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14210
+        },
+        {
+          "eta_days": 5,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14210
+        },
+        {
+          "eta_days": 4,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14220
+        },
+        {
+          "eta_days": 4,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14220
+        },
+        {
+          "eta_days": 4,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14220
+        },
+        {
+          "eta_days": 3,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14230
+        },
+        {
+          "eta_days": 3,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14230
+        },
+        {
+          "eta_days": 3,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14230
+        },
+        {
+          "eta_days": 2,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14240
+        },
+        {
+          "eta_days": 2,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14240
+        },
+        {
+          "eta_days": 2,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14240
+        },
+        {
+          "eta_days": 1,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14250
+        },
+        {
+          "eta_days": 1,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14250
+        },
+        {
+          "eta_days": 1,
+          "flex": 0.579,
+          "food_runway": 0,
+          "ratio_floor": 0.509,
+          "safe_factor": 0,
+          "safe_ratio": 0,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 14250
+        },
+        {
+          "eta_days": 20,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 499.95,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16100
+        },
+        {
+          "eta_days": 20,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 499.95,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16100
+        },
+        {
+          "eta_days": 20,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 499.95,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16100
+        },
+        {
+          "eta_days": 20,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 499.95,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16100
+        },
+        {
+          "eta_days": 19,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 526.263,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16110
+        },
+        {
+          "eta_days": 19,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 526.263,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16110
+        },
+        {
+          "eta_days": 19,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 526.263,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16110
+        },
+        {
+          "eta_days": 18,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 555.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16120
+        },
+        {
+          "eta_days": 18,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 555.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16120
+        },
+        {
+          "eta_days": 18,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 555.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16120
+        },
+        {
+          "eta_days": 17,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 588.176,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16130
+        },
+        {
+          "eta_days": 17,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 588.176,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16130
+        },
+        {
+          "eta_days": 17,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 588.176,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16130
+        },
+        {
+          "eta_days": 16,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 624.938,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16140
+        },
+        {
+          "eta_days": 16,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 624.938,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16140
+        },
+        {
+          "eta_days": 16,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 624.938,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16140
+        },
+        {
+          "eta_days": 15,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 666.6,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16150
+        },
+        {
+          "eta_days": 15,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 666.6,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16150
+        },
+        {
+          "eta_days": 15,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 666.6,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16150
+        },
+        {
+          "eta_days": 14,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 714.214,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16160
+        },
+        {
+          "eta_days": 14,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 714.214,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16160
+        },
+        {
+          "eta_days": 14,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 714.214,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16160
+        },
+        {
+          "eta_days": 13,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 769.154,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16170
+        },
+        {
+          "eta_days": 13,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 769.154,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16170
+        },
+        {
+          "eta_days": 13,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 769.154,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16170
+        },
+        {
+          "eta_days": 12,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 833.25,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16180
+        },
+        {
+          "eta_days": 12,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 833.25,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16180
+        },
+        {
+          "eta_days": 12,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 833.25,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16180
+        },
+        {
+          "eta_days": 11,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 909,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16190
+        },
+        {
+          "eta_days": 11,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 909,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16190
+        },
+        {
+          "eta_days": 11,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 909,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16190
+        },
+        {
+          "eta_days": 10,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 999.9,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16200
+        },
+        {
+          "eta_days": 10,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 999.9,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16200
+        },
+        {
+          "eta_days": 10,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 999.9,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16200
+        },
+        {
+          "eta_days": 10,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 999.9,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16200
+        },
+        {
+          "eta_days": 9,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1111,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16210
+        },
+        {
+          "eta_days": 9,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1111,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16210
+        },
+        {
+          "eta_days": 9,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1111,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16210
+        },
+        {
+          "eta_days": 8,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1249.875,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16220
+        },
+        {
+          "eta_days": 8,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1249.875,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16220
+        },
+        {
+          "eta_days": 8,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1249.875,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16220
+        },
+        {
+          "eta_days": 7,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1428.429,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16230
+        },
+        {
+          "eta_days": 7,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1428.429,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16230
+        },
+        {
+          "eta_days": 7,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1428.429,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16230
+        },
+        {
+          "eta_days": 6,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1666.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16240
+        },
+        {
+          "eta_days": 6,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1666.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16240
+        },
+        {
+          "eta_days": 6,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1666.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16240
+        },
+        {
+          "eta_days": 5,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1999.8,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16250
+        },
+        {
+          "eta_days": 5,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1999.8,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16250
+        },
+        {
+          "eta_days": 5,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 1999.8,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16250
+        },
+        {
+          "eta_days": 4,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 2499.75,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16260
+        },
+        {
+          "eta_days": 4,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 2499.75,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16260
+        },
+        {
+          "eta_days": 4,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 2499.75,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16260
+        },
+        {
+          "eta_days": 3,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 3333,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16270
+        },
+        {
+          "eta_days": 3,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 3333,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16270
+        },
+        {
+          "eta_days": 3,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 3333,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16270
+        },
+        {
+          "eta_days": 2,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 4999.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16280
+        },
+        {
+          "eta_days": 2,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 4999.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16280
+        },
+        {
+          "eta_days": 2,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 4999.5,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16280
+        },
+        {
+          "eta_days": 1,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 9999,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16290
+        },
+        {
+          "eta_days": 1,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 9999,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16290
+        },
+        {
+          "eta_days": 1,
+          "flex": 0.579,
+          "food_runway": 9999,
+          "ratio_floor": 0.509,
+          "safe_factor": 1,
+          "safe_ratio": 9999,
+          "stick": 0.556,
+          "team_id": 14,
+          "tick": 16290
+        }
+      ],
+      "resume.attempt": [
+        {
+          "candidates": 0,
+          "ct_id": 65,
+          "outpost_owner": 17,
+          "tick": 2500,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 65,
+          "outpost_owner": 17,
+          "tick": 2500,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 65,
+          "outpost_owner": 17,
+          "tick": 2500,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 65,
+          "outpost_owner": 17,
+          "tick": 2500,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 65,
+          "outpost_owner": 17,
+          "tick": 2500,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 65,
+          "outpost_owner": 17,
+          "tick": 2500,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 65,
+          "outpost_owner": 17,
+          "tick": 2500,
+          "tile": [
+            4,
+            23
+          ]
+        },
+        {
+          "candidates": 0,
+          "ct_id": 65,
+          "outpost_owner": 17,
+          "tick": 2500,
+          "tile": [
+            4,
+            23
+          ]
+        }
+      ],
+      "resume.success": [
+        {
+          "tick": 9500,
+          "tile": [
+            13,
+            8
+          ],
+          "worker": 30
+        },
+        {
+          "tick": 10000,
+          "tile": [
+            8,
+            27
+          ],
+          "worker": 27
+        },
+        {
+          "tick": 10000,
+          "tile": [
+            0,
+            20
+          ],
+          "worker": 65
+        },
+        {
+          "tick": 11000,
+          "tile": [
+            0,
+            20
+          ],
+          "worker": 1
+        },
+        {
+          "tick": 11500,
+          "tile": [
+            13,
+            8
+          ],
+          "worker": 30
+        },
+        {
+          "tick": 14000,
+          "tile": [
+            13,
+            22
+          ],
+          "worker": 15
+        },
+        {
+          "tick": 14500,
+          "tile": [
+            13,
+            8
+          ],
+          "worker": 30
+        },
+        {
+          "tick": 15000,
+          "tile": [
+            2,
+            21
+          ],
+          "worker": 87
+        }
+      ]
+    },
+    "rung_dist": {
+      "r0": 32,
+      "r1": 19,
+      "r2": 7,
+      "r3": 1,
+      "r4": 0
+    },
+    "seed": 42,
+    "start_pop": 432,
+    "total_ticks": 21600
+  }
+}

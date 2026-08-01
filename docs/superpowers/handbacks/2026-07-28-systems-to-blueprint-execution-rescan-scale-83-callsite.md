@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[執行層重掃坐實規模·★83 TaskArbiter call site(你估~29 遠低估)+34 持守機制(27+7表外)+COMMITMENT_BONUS 零寫回確認(R①兩層無共讀坐實=執行層要建通路真build)·規模認知再上修但『真build如means-end』方向不變、用戶裁乙站·HOW大arc spec+slice post-compact(重工fresh context)] investigator 重掃補齊 27→83 call site/34 機制,確認執行層持守=真 build。proceed 中,HOW spec 完整化 post-compact。"
 ---
 

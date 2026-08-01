@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·糧流 SLICE B1(糧橋+食物top-up+派遣閘)·R²v2CLEAN·spec=2026-07-29-food-flow-slice-B-dispatch-founding-HOW.md §1-B1/§2·★解A1子隊餓死真victim·配糧測sub.resources.food(非carry_capacity重量上限空放行)+通用food top-up第5真新建(母隊撥food夠burn×ETA)+礦山bootstrap 2651-2674收編取代·接_dispatch_builder:2603-2698·harvest-only inflow暫不含打獵EV(B2)/立國投影(B3)·★cross-slice A1子隊真被gate execution-verified非aggregate] SLICE B第一sub-slice。解A1子隊餓死。★驗A1子隊真不餓死(target真fire非aggregate派遣數)。"
 branch: feat/food-flow-slice-B1
 ---

@@ -1,0 +1,2418 @@
+﻿ 
+=== 和平經濟觀測床（measure-first Step0）seed=70730 6月 ===
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[liveness] PASS：/料窮側 need_keep(material)>0 + 有 forest 靶（fixture LIVE）
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[Harvest] Tick60 季節=春 base=1.1
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Ambition] Team6 rung 0→1 (定居 cap=2)
+[DayNight] Day 1 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=1 avg=6547 us max=1121845 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[Ambition] Team0 rung 0→1 (定居 cap=2)
+[Ambition] Team1 rung 0→1 (定居 cap=2)
+[Ambition] Team2 rung 0→1 (定居 cap=2)
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 2 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=2 avg=5742 us max=860854 us ticks=240 teams=12 factions=0
+[Outpost] Team3 設施施工 apothecary → Lv1 at (8,10)
+[Outpost] Team4 設施施工 workshop → Lv1 at (6,10)
+[Outpost] Team5 設施施工 apothecary → Lv1 at (10,6)
+[Outpost] Team7 設施施工 stable → Lv1 at (11,9)
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 3 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=3 avg=6849 us max=1021881 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 4 開始
+[TickPerf] day=4 avg=7569 us max=1021873 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 5 開始
+[Move] Team 8 抵達 (6,8)
+[TickPerf] day=5 avg=7420 us max=708338 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 6 開始
+[TickPerf] day=6 avg=6722 us max=826279 us ticks=240 teams=12 factions=0
+[Outpost] Team0 設施施工 apothecary → Lv1 at (6,8)
+[Outpost] Team10 設施施工 apothecary → Lv1 at (10,10)
+[DayNight] Day 7 開始
+[TickPerf] day=7 avg=7668 us max=828577 us ticks=240 teams=12 factions=0
+[Outpost] 設施完工 apothecary Lv1 at (6,8)
+[Outpost] 設施完工 apothecary Lv1 at (10,10)
+[DayNight] Day 8 開始
+[TickPerf] day=8 avg=6862 us max=658621 us ticks=240 teams=12 factions=0
+[DayNight] Day 9 開始
+[TickPerf] day=9 avg=7791 us max=639213 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (13,6)
+[DayNight] Day 10 開始
+[TickPerf] day=10 avg=8486 us max=839602 us ticks=240 teams=12 factions=0
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Outpost] Team2 設施施工 apothecary → Lv1 at (8,6)
+[Move] Team 8 抵達 (16,6)
+[DayNight] Day 11 開始
+[TickPerf] day=11 avg=7476 us max=755060 us ticks=240 teams=12 factions=0
+[DayNight] Day 12 開始
+[TickPerf] day=12 avg=6664 us max=684741 us ticks=240 teams=12 factions=0
+[Outpost] Team0 設施施工 workshop → Lv1 at (6,8)
+[Outpost] Team1 設施施工 apothecary → Lv1 at (10,8)
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=7705 us max=741048 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Outpost] 設施完工 workshop Lv1 at (6,8)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 14 開始
+[TickPerf] day=14 avg=7492 us max=643997 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Outpost] Team10 設施施工 workshop → Lv1 at (10,10)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=57 known=126
+[Move] Team 8 抵達 (11,9)
+[TickPerf] day=15 avg=7198 us max=667812 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Outpost] 設施完工 workshop Lv1 at (10,10)
+[DayNight] Day 16 開始
+[TickPerf] day=16 avg=8463 us max=877657 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 17 開始
+[TickPerf] day=17 avg=7359 us max=646118 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 18 開始
+[TickPerf] day=18 avg=6861 us max=674249 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 19 開始
+[TickPerf] day=19 avg=7753 us max=751763 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=57 known=102
+[Move] Team 8 抵達 (11,9)
+[TickPerf] day=20 avg=7316 us max=671687 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (12,9)
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=21 avg=9074 us max=980063 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (12,9)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 22 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=22 avg=8459 us max=777989 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (12,9)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 8 抵達 (12,9)
+[Manufacture] Team10 arrows worker_rate=0.55
+[DayNight] Day 23 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=23 avg=7764 us max=650794 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (15,9)
+[Move] Team 7 抵達 (15,9)
+[DayNight] Day 24 開始
+[TickPerf] day=24 avg=7673 us max=610776 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (15,9)
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=56 known=66
+[Move] Team 7 抵達 (15,9)
+[TickPerf] day=25 avg=9201 us max=816432 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (15,9)
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=26 avg=8782 us max=818466 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[Move] Team 7 抵達 (14,8)
+[DayNight] Day 27 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=27 avg=8294 us max=654276 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (15,7)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (14,8)
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=28 avg=9473 us max=783525 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (16,6)
+[Move] Team 8 抵達 (14,8)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=29 avg=7370 us max=614605 us ticks=240 teams=12 factions=0
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=53 known=53
+[Horse] Outpost (8, 6) 捕野馬 +1
+[Horse] Outpost (10, 6) 捕野馬 +1
+[Horse] Outpost (10, 10) 捕野馬 +1
+[TickPerf] day=30 avg=7941 us max=653312 us ticks=240 teams=12 factions=0
+[DayNight] Day 31 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=31 avg=10003 us max=1039841 us ticks=240 teams=12 factions=0
+[Outpost] Team9 設施施工 farming → Lv1 at (6,6)
+[Outpost] Team11 設施施工 farming → Lv1 at (7,11)
+[Outpost] 設施完工 farming Lv1 at (6,6)
+[Outpost] 設施完工 farming Lv1 at (7,11)
+[DayNight] Day 32 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=32 avg=8046 us max=657064 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 33 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=33 avg=8008 us max=726671 us ticks=240 teams=12 factions=0
+[Outpost] 拆除設施 workshop at (10,10)
+[Outpost] Team10 設施施工 farming → Lv1 at (10,10)
+[Move] Team 7 抵達 (14,4)
+[Move] Team 8 抵達 (15,7)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 34 開始
+[TickPerf] day=34 avg=8651 us max=741791 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (15,7)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[DayNight] Day 35 開始
+[MsgPrune] 刪除過期訊息 global=53 known=53
+[Salary] Team8 薪水結算 coin=996.9
+[TickPerf] day=35 avg=7768 us max=643999 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (15,7)
+[DayNight] Day 36 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=36 avg=7730 us max=793716 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (15,7)
+[DayNight] Day 37 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=37 avg=8095 us max=686707 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 38 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=38 avg=7966 us max=622858 us ticks=240 teams=12 factions=0
+[DayNight] Day 39 開始
+[TickPerf] day=39 avg=6218 us max=576432 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (14,8)
+[DayNight] Day 40 開始
+[MsgPrune] 刪除過期訊息 global=52 known=52
+[Move] Team 8 抵達 (14,8)
+[TickPerf] day=40 avg=7359 us max=667343 us ticks=240 teams=12 factions=0
+[DayNight] Day 41 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=41 avg=8058 us max=699405 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[DayNight] Day 42 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=42 avg=7755 us max=732595 us ticks=240 teams=12 factions=0
+[Famine] Team9 餓死 anon 1 (famine=7天)
+[Famine] Team10 餓死 anon 1 (famine=7天)
+[Move] Team 8 抵達 (12,9)
+[DayNight] Day 43 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=43 avg=7852 us max=799139 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (12,9)
+[Famine] Team9 餓死 anon 1 (famine=8天)
+[Famine] Team10 餓死 anon 1 (famine=8天)
+[Famine] Team11 餓死 anon 1 (famine=7天)
+[DayNight] Day 44 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=44 avg=7539 us max=666807 us ticks=240 teams=12 factions=0
+[Famine] Team9 餓死 anon 1 (famine=9天)
+[Famine] Team10 餓死 anon 1 (famine=9天)
+[Famine] Team11 餓死 anon 1 (famine=8天)
+[DayNight] Day 45 開始
+[MsgPrune] 刪除過期訊息 global=49 known=49
+[Move] Team 7 抵達 (8,9)
+[Famine] Team9 餓死 anon 1 (famine=10天)
+[Famine] Team10 餓死 anon 1 (famine=10天)
+[TickPerf] day=45 avg=7641 us max=581711 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 8 抵達 (11,9)
+[Famine] Team11 餓死 anon 1 (famine=9天)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 46 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=46 avg=8321 us max=1022286 us ticks=240 teams=12 factions=0
+[Famine] Team11 餓死 anon 1 (famine=10天)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 47 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=47 avg=6807 us max=814569 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,9)
+[Move] Team 8 抵達 (10,8)
+[Move] Team 4 抵達 (8,9)
+[DayNight] Day 48 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=48 avg=6346 us max=660056 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,8)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 49 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=49 avg=7454 us max=876584 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (0,13)
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 50 開始
+[MsgPrune] 刪除過期訊息 global=49 known=66
+[Move] Team 8 抵達 (10,8)
+[TickPerf] day=50 avg=7130 us max=784218 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,8)
+[Move] Team 10 抵達 (10,9)
+[Move] Team 11 抵達 (7,10)
+[DayNight] Day 51 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=51 avg=6623 us max=740844 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,8)
+[Move] Team 10 抵達 (10,9)
+[Move] Team 11 抵達 (8,9)
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 52 開始
+[MsgPrune] 刪除過期訊息 global=4 known=6
+[TickPerf] day=52 avg=7463 us max=812570 us ticks=240 teams=12 factions=0
+[Ambition] Team11 rung 0→1 (定居 cap=2)
+[Move] Team 8 抵達 (10,8)
+[Move] Team 10 抵達 (8,10)
+[Move] Team 11 抵達 (8,9)
+[Merge] Team3 ← Team10 完全合併 (absorber_pop=8)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 53 開始
+[MsgPrune] 刪除過期訊息 global=4 known=9
+[TickPerf] day=53 avg=7922 us max=721886 us ticks=240 teams=11 factions=0
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 54 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[TickPerf] day=54 avg=6381 us max=677880 us ticks=240 teams=11 factions=0
+[Move] Team 4 抵達 (14,8)
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 55 開始
+[MsgPrune] 刪除過期訊息 global=47 known=102
+[Move] Team 8 抵達 (10,8)
+[TickPerf] day=55 avg=7051 us max=734358 us ticks=240 teams=11 factions=0
+[Move] Team 8 抵達 (10,8)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (10,8)
+[Famine] Team8 餓死 anon 1 (famine=7天)
+[DayNight] Day 56 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=56 avg=7043 us max=811400 us ticks=240 teams=11 factions=0
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Ambition] Team11 rung 1→0 (定居 cap=2)
+[Move] Team 8 抵達 (11,7)
+[DayNight] Day 57 開始
+[MsgPrune] 刪除過期訊息 global=4 known=5
+[TickPerf] day=57 avg=5718 us max=626279 us ticks=240 teams=11 factions=0
+[Move] Team 8 抵達 (11,7)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 7 抵達 (12,9)
+[Move] Team 5 抵達 (10,6)
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[DayNight] Day 58 開始
+[MsgPrune] 刪除過期訊息 global=5 known=14
+[TickPerf] day=58 avg=7505 us max=909838 us ticks=240 teams=11 factions=0
+[Move] Team 11 抵達 (8,9)
+[Move] Team 7 抵達 (11,9)
+[DayNight] Day 59 開始
+[MsgPrune] 刪除過期訊息 global=2 known=4
+[TickPerf] day=59 avg=6614 us max=514198 us ticks=240 teams=11 factions=0
+[DayNight] Day 60 開始
+[MsgPrune] 刪除過期訊息 global=41 known=86
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Move] Team 5 抵達 (9,6)
+[TickPerf] day=60 avg=6102 us max=508398 us ticks=240 teams=11 factions=0
+[Move] Team 11 抵達 (8,8)
+[DayNight] Day 61 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=61 avg=7477 us max=783294 us ticks=240 teams=11 factions=0
+[Move] Team 5 抵達 (9,6)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 4 抵達 (6,10)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 8 抵達 (16,4)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 62 開始
+[MsgPrune] 刪除過期訊息 global=4 known=6
+[TickPerf] day=62 avg=5892 us max=526117 us ticks=240 teams=11 factions=0
+[Move] Team 5 抵達 (9,6)
+[Move] Team 8 抵達 (15,5)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 11 抵達 (8,10)
+[Merge] Team3 ← Team11 完全合併 (absorber_pop=10)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 7 抵達 (15,9)
+[DayNight] Day 63 開始
+[MsgPrune] 刪除過期訊息 global=5 known=8
+[TickPerf] day=63 avg=6744 us max=574377 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 64 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[TickPerf] day=64 avg=7075 us max=638455 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (14,8)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 5 抵達 (9,6)
+[Move] Team 8 抵達 (15,5)
+[DayNight] Day 65 開始
+[MsgPrune] 刪除過期訊息 global=39 known=59
+[Move] Team 3 抵達 (8,10)
+[Move] Team 7 抵達 (15,7)
+[TickPerf] day=65 avg=7709 us max=503272 us ticks=240 teams=10 factions=0
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 8 抵達 (14,6)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 66 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=66 avg=7066 us max=618371 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[DayNight] Day 67 開始
+[MsgPrune] 刪除過期訊息 global=6 known=6
+[TickPerf] day=67 avg=7424 us max=469619 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 68 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=68 avg=7627 us max=441806 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 69 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=69 avg=6717 us max=557880 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 8 抵達 (15,7)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 70 開始
+[MsgPrune] 刪除過期訊息 global=39 known=46
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Salary] Team8 薪水結算 coin=994.1
+[TickPerf] day=70 avg=7575 us max=514761 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 7 抵達 (16,7)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[DayNight] Day 71 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=71 avg=7111 us max=448907 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 72 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=72 avg=6068 us max=425705 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 73 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=73 avg=6034 us max=384907 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[DayNight] Day 74 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=74 avg=6044 us max=425439 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 75 開始
+[MsgPrune] 刪除過期訊息 global=37 known=45
+[Move] Team 4 抵達 (3,13)
+[TickPerf] day=75 avg=5463 us max=342375 us ticks=240 teams=10 factions=0
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 76 開始
+[TickPerf] day=76 avg=7107 us max=507901 us ticks=240 teams=10 factions=0
+[Move] Team 5 抵達 (10,6)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 77 開始
+[MsgPrune] 刪除過期訊息 global=4 known=5
+[TickPerf] day=77 avg=5660 us max=420088 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 78 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=78 avg=5710 us max=345250 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[Move] Team 8 抵達 (14,8)
+[DayNight] Day 79 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=79 avg=6644 us max=584728 us ticks=240 teams=10 factions=0
+[CrudeCamp] Team8 紮營 @(14,8) → civilian
+[DayNight] Day 80 開始
+[MsgPrune] 刪除過期訊息 global=34 known=37
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Move] Team 7 抵達 (14,6)
+[TickPerf] day=80 avg=6226 us max=407944 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (8,10)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[DayNight] Day 81 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Horse] Outpost (14, 8) 捕野馬 +1
+[TickPerf] day=81 avg=5383 us max=440031 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[Move] Team 7 抵達 (15,5)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 82 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=82 avg=6228 us max=473969 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (15,5)
+[Combat Start] Team-1000000 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[Move] Team 7 抵達 (15,5)
+[Combat Start] Team-1000001 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[DayNight] Day 83 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=83 avg=5199 us max=427902 us ticks=240 teams=11 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 84 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=84 avg=6027 us max=441120 us ticks=240 teams=10 factions=0
+[DayNight] Day 85 開始
+[MsgPrune] 刪除過期訊息 global=33 known=41
+[TickPerf] day=85 avg=6338 us max=489614 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (8,10)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[DayNight] Day 86 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=86 avg=5597 us max=467241 us ticks=240 teams=10 factions=0
+[DayNight] Day 87 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=87 avg=4869 us max=350627 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 88 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=88 avg=6402 us max=496476 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (11,9)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 89 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=89 avg=5517 us max=424177 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 90 開始
+[MsgPrune] 刪除過期訊息 global=35 known=33
+[Harvest] Tick21600 季節=夏 base=1.5
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Move] Team 4 抵達 (2,13)
+[TickPerf] day=90 avg=5594 us max=428638 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 91 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=91 avg=6832 us max=550064 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 92 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=92 avg=5164 us max=422096 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 93 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=93 avg=5966 us max=520182 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 94 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=94 avg=5518 us max=517151 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (14,6)
+[Move] Team 7 抵達 (14,6)
+[DayNight] Day 95 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 4 抵達 (2,13)
+[TickPerf] day=95 avg=4986 us max=404229 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 96 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=96 avg=5278 us max=468731 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 97 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=97 avg=5671 us max=422543 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[DayNight] Day 98 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=98 avg=5703 us max=428671 us ticks=240 teams=10 factions=0
+[DayNight] Day 99 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=99 avg=5924 us max=525706 us ticks=240 teams=10 factions=0
+[DayNight] Day 100 開始
+[MsgPrune] 刪除過期訊息 global=36 known=36
+[TickPerf] day=100 avg=6841 us max=505519 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 101 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=101 avg=5886 us max=563271 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 102 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=102 avg=4934 us max=397689 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 103 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=103 avg=5716 us max=471096 us ticks=240 teams=10 factions=0
+[DayNight] Day 104 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=104 avg=5267 us max=433062 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[DayNight] Day 105 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 7 抵達 (11,9)
+[TickPerf] day=105 avg=5636 us max=406678 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 106 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=106 avg=5857 us max=505977 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 107 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=107 avg=5389 us max=444538 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 108 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=108 avg=6845 us max=546842 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 109 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=109 avg=5783 us max=508123 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (13,7)
+[DayNight] Day 110 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[TickPerf] day=110 avg=5412 us max=458767 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 111 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=111 avg=6004 us max=466884 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 112 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=112 avg=5588 us max=478449 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 113 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=113 avg=4618 us max=396110 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 114 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=114 avg=5542 us max=455232 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (11,7)
+[DayNight] Day 115 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 4 抵達 (3,13)
+[TickPerf] day=115 avg=5981 us max=522782 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 116 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=116 avg=6026 us max=582827 us ticks=240 teams=10 factions=0
+[DayNight] Day 117 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=117 avg=5823 us max=426443 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 118 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=118 avg=5811 us max=421143 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[DayNight] Day 119 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=119 avg=4950 us max=427494 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (13,7)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 120 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Horse] Outpost (10, 10) 捕野馬 +1
+[TickPerf] day=120 avg=5157 us max=452763 us ticks=240 teams=10 factions=0
+[DayNight] Day 121 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=121 avg=6466 us max=513264 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 122 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=122 avg=4730 us max=386500 us ticks=240 teams=10 factions=0
+[DayNight] Day 123 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=123 avg=5590 us max=482547 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[Ambition] Team4 rung 1→0 (定居 cap=2)
+[DayNight] Day 124 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=124 avg=5289 us max=563427 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (4,10)
+[DayNight] Day 125 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 7 抵達 (15,5)
+[TickPerf] day=125 avg=5160 us max=397602 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 126 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=126 avg=5405 us max=518925 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 127 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=127 avg=5988 us max=521454 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 128 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=128 avg=5808 us max=456327 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 129 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=129 avg=5595 us max=400687 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 130 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 4 抵達 (2,13)
+[TickPerf] day=130 avg=6253 us max=559542 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 131 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=131 avg=6201 us max=609730 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 132 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=132 avg=5124 us max=371358 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 133 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=133 avg=6461 us max=490127 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 134 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=134 avg=5310 us max=430668 us ticks=240 teams=10 factions=0
+[DayNight] Day 135 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[TickPerf] day=135 avg=5097 us max=387698 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 136 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=136 avg=5477 us max=461385 us ticks=240 teams=10 factions=0
+[DayNight] Day 137 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=137 avg=4693 us max=428220 us ticks=240 teams=10 factions=0
+[DayNight] Day 138 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=138 avg=6039 us max=378929 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[DayNight] Day 139 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=139 avg=5781 us max=563761 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[DayNight] Day 140 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[TickPerf] day=140 avg=5300 us max=414635 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 7 抵達 (14,6)
+[Move] Team 4 抵達 (6,10)
+[Move] Team 7 抵達 (14,6)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 141 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=141 avg=5764 us max=555722 us ticks=240 teams=10 factions=0
+[DayNight] Day 142 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=142 avg=5346 us max=447287 us ticks=240 teams=10 factions=0
+[DayNight] Day 143 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=143 avg=5565 us max=487154 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 144 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=144 avg=6107 us max=396401 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 145 開始
+[MsgPrune] 刪除過期訊息 global=35 known=38
+[Move] Team 7 抵達 (11,9)
+[TickPerf] day=145 avg=6557 us max=468115 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (8,9)
+[DayNight] Day 146 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=146 avg=6460 us max=483795 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 147 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=147 avg=5351 us max=475328 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 4 抵達 (6,10)
+[Move] Team 7 抵達 (14,9)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Move] Team 7 抵達 (15,9)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 148 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=148 avg=5772 us max=502280 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 149 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=149 avg=5984 us max=508891 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 150 開始
+[MsgPrune] 刪除過期訊息 global=35 known=45
+[Horse] Outpost (6, 6) 捕野馬 +1
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Move] Team 4 抵達 (3,13)
+[TickPerf] day=150 avg=6363 us max=520914 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 7 抵達 (11,9)
+[Move] Team 3 抵達 (10,6)
+[Move] Team 4 抵達 (3,13)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 151 開始
+[MsgPrune] 刪除過期訊息 global=4 known=5
+[TickPerf] day=151 avg=6429 us max=575920 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 152 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=152 avg=5746 us max=514817 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 153 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=153 avg=6571 us max=601222 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (8,10)
+[Move] Team 4 抵達 (3,13)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 154 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=154 avg=5308 us max=519241 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (12,9)
+[Ambition] Team3 rung 1→0 (定居 cap=2)
+[DayNight] Day 155 開始
+[MsgPrune] 刪除過期訊息 global=35 known=45
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (12,9)
+[TickPerf] day=155 avg=5750 us max=480525 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 3 抵達 (5,13)
+[DayNight] Day 156 開始
+[MsgPrune] 刪除過期訊息 global=4 known=6
+[TickPerf] day=156 avg=6271 us max=520480 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 157 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=157 avg=6616 us max=607029 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (12,9)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 158 開始
+[MsgPrune] 刪除過期訊息 global=5 known=6
+[TickPerf] day=158 avg=5947 us max=424243 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (12,9)
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 159 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=159 avg=7386 us max=646198 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 160 開始
+[MsgPrune] 刪除過期訊息 global=33 known=38
+[Move] Team 3 抵達 (10,6)
+[Move] Team 7 抵達 (12,9)
+[TickPerf] day=160 avg=6965 us max=525662 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 4 抵達 (2,13)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 161 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=161 avg=6616 us max=540306 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 162 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=162 avg=6200 us max=515942 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Outpost] Team6 設施施工 apothecary → Lv1 at (5,9)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 163 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=163 avg=5901 us max=461131 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 164 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=164 avg=6191 us max=533875 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 165 開始
+[MsgPrune] 刪除過期訊息 global=33 known=37
+[TickPerf] day=165 avg=5652 us max=566247 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 166 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=166 avg=7039 us max=603378 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Outpost] 設施完工 apothecary Lv1 at (10,6)
+[DayNight] Day 167 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=167 avg=6409 us max=562304 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[Move] Team 7 抵達 (11,9)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 168 開始
+[MsgPrune] 刪除過期訊息 global=7 known=9
+[TickPerf] day=168 avg=5664 us max=507890 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Outpost] Team5 設施施工 workshop → Lv1 at (10,6)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 169 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=169 avg=5685 us max=497456 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 170 開始
+[MsgPrune] 刪除過期訊息 global=32 known=36
+[TickPerf] day=170 avg=5060 us max=423062 us ticks=240 teams=10 factions=0
+[DayNight] Day 171 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=171 avg=5359 us max=517070 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (8,10)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[DayNight] Day 172 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=172 avg=4492 us max=490684 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (4,12)
+[Move] Team 4 抵達 (3,13)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 173 開始
+[MsgPrune] 刪除過期訊息 global=6 known=7
+[TickPerf] day=173 avg=5710 us max=549240 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 174 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=174 avg=5056 us max=448728 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Ambition] Team4 rung 1→0 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[Manufacture] Team0 arrows worker_rate=0.56
+[DayNight] Day 175 開始
+[MsgPrune] 刪除過期訊息 global=32 known=32
+[TickPerf] day=175 avg=6046 us max=616796 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 176 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=176 avg=5502 us max=531094 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 177 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=177 avg=5838 us max=515982 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 178 開始
+[MsgPrune] 刪除過期訊息 global=6 known=6
+[TickPerf] day=178 avg=5501 us max=473836 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (12,9)
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 179 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=179 avg=5026 us max=467750 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 180 開始
+[MsgPrune] 刪除過期訊息 global=33 known=33
+[Harvest] Tick43200 季節=秋 base=1.2
+[Horse] Outpost (5, 9) 捕野馬 +1
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Move] Team 4 抵達 (2,13)
+[TickPerf] day=180 avg=5571 us max=500047 us ticks=240 teams=10 factions=0
+
+───────── 4 問報告（43200 tick, end_pop=59, attrition=18.1%, teams=10）─────────
+【Q1 founding dispatch 嗎】（gate funnel 分：動機無 vs 卡 gate）
+  indep.found_ally=0 | indep.found_subjugate=0 | indep.found_timeout=0
+  indep.gate_ambitious=0 | indep.gate_path_ok=0
+  indep.gate_fail_pop=0 | indep.gate_fail_food=0 | indep.gate_fail_busy=0 | indep.gate_fail_nopath=0
+  construct.start=15 | construct.start_task_not_build=8 | construct.complete_build=0 | worldgen.build_outpost=1
+  construct.progress=157 | construct.stall=29041 | construct.timeout_cancel=0 | construct.complete=7
+  resume.attempt=0 | resume.success=0 | resume.reject_combat=0 | resume.reject_starving=0 | resume.reject_busy=0
+【Q2 develop（升級）嗎】
+  construct.complete_upgrade_facility=7 | construct.complete_upgrade_level=0
+【Q3 貿易/對缺口反應嗎】
+  trade.deal=0 | trade.deal_market=0 | trade.deal_merchant=0 | trade.barter_deal=0
+  g1.order_placed=1833 | g1.order_fulfilled=0 | g1.shortage_buy=927 | g1.food_buy=103
+  g1.seek_market=5 | g1.market_arrive=40 | trade.arrive=6 | trade.meet=6 | trade.timeout=36
+  --market_bail 賣方端--
+  trade.market_bail.sell_no_surplus=13 | trade.market_bail.sell_ownerless=0 | trade.market_bail.sell_no_price=0 | trade.market_bail.sell_zero_qty=0 | trade.market_bail.sell_storage_full=0 | trade.market_bail.sell_owner_no_coin=0 | trade.market_bail.sell_owner_cant_afford=0 | trade.market_bail.no_board_order=0
+  --market_bail 買方端--
+  trade.market_bail.buy_no_stock=7 | trade.market_bail.buy_no_want=9 | trade.market_bail.buy_cant_afford=0 | trade.market_bail.buy_carry_full=4 | trade.market_bail.buy_no_coin=0 | trade.market_bail.buy_no_price=0 | trade.market_bail.buy_withdraw_empty=0
+【Q4 runway 機制 fire 嗎】
+  foodflow.update=4594 | bridge.no_go_food=0 | bridge.topup=0 | persist.hold=24
+
+───────── construct sample payload（pin 拉走機制：ct_task/ct_reason）─────────
+  [construct.start] n=8（前 12 筆）:
+    tick=500 tile=[8, 10] team=3 ct_id=3 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=500 tile=[6, 10] team=4 ct_id=4 action=upgrade_facility task_after=外交 prio_after=70
+    tick=500 tile=[10, 6] team=5 ct_id=5 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=500 tile=[11, 9] team=7 ct_id=7 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=1500 tile=[6, 8] team=0 ct_id=0 action=upgrade_facility task_after=建設 prio_after=50
+    tick=1500 tile=[10, 10] team=10 ct_id=10 action=upgrade_facility task_after=建設 prio_after=50
+    tick=2500 tile=[8, 6] team=2 ct_id=2 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=3000 tile=[6, 8] team=0 ct_id=0 action=upgrade_facility task_after=建設 prio_after=50
+  [construct.stall] n=8（前 12 筆）:
+    tick=510 tile=[6, 10] ct_id=4 ct_task=外交 ct_reason=unified ct_pos=[6, 10] ticks_left=168
+    tick=510 tile=[8, 10] ct_id=3 ct_task=覓食 ct_reason=unified ct_pos=[8, 10] ticks_left=168
+    tick=510 tile=[10, 6] ct_id=5 ct_task=覓食 ct_reason=unified ct_pos=[10, 6] ticks_left=168
+    tick=510 tile=[11, 9] ct_id=7 ct_task=覓食 ct_reason=unified ct_pos=[11, 9] ticks_left=336
+    tick=520 tile=[6, 10] ct_id=4 ct_task=外交 ct_reason=unified ct_pos=[6, 10] ticks_left=168
+    tick=520 tile=[8, 10] ct_id=3 ct_task=覓食 ct_reason=unified ct_pos=[8, 10] ticks_left=168
+    tick=520 tile=[10, 6] ct_id=5 ct_task=覓食 ct_reason=unified ct_pos=[10, 6] ticks_left=168
+    tick=520 tile=[11, 9] ct_id=7 ct_task=覓食 ct_reason=unified ct_pos=[11, 9] ticks_left=336
+  [construct.progress] n=8（前 12 筆）:
+    tick=1510 tile=[6, 8] ticks_left=168 active=0 pop=6
+    tick=1510 tile=[10, 10] ticks_left=168 active=10 pop=6
+    tick=1520 tile=[6, 8] ticks_left=162 active=0 pop=6
+    tick=1520 tile=[10, 10] ticks_left=162 active=10 pop=6
+    tick=1530 tile=[6, 8] ticks_left=156 active=0 pop=6
+    tick=1530 tile=[10, 10] ticks_left=156 active=10 pop=6
+    tick=1540 tile=[6, 8] ticks_left=150 active=0 pop=6
+    tick=1540 tile=[10, 10] ticks_left=150 active=10 pop=6
+  [construct.complete] n=7（前 12 筆）:
+    tick=1780 tile=[6, 8] team=0 action=upgrade_facility
+    tick=1780 tile=[10, 10] team=10 action=upgrade_facility
+    tick=3280 tile=[6, 8] team=0 action=upgrade_facility
+    tick=3780 tile=[10, 10] team=10 action=upgrade_facility
+    tick=7620 tile=[6, 6] team=9 action=upgrade_facility
+    tick=7620 tile=[7, 11] team=11 action=upgrade_facility
+    tick=40020 tile=[10, 6] team=3 action=upgrade_facility
+
+───────── 逐隊月故事（同 seed inline run）─────────
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+--- t0 ---
+  T0[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T1[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=idle food=350 mat=0 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=idle food=40 mat=400 coin=300 need_mat=100 runway=9999.0
+  T8[plains] pop=6 task=idle food=60 mat=0 coin=1000 need_mat=0 runway=9999.0
+  T9[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+  T10[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+  T11[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+[Harvest] Tick60 季節=春 base=1.1
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Ambition] Team6 rung 0→1 (定居 cap=2)
+[DayNight] Day 1 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=1 avg=6873 us max=1236027 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[Ambition] Team0 rung 0→1 (定居 cap=2)
+[Ambition] Team1 rung 0→1 (定居 cap=2)
+[Ambition] Team2 rung 0→1 (定居 cap=2)
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 2 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=2 avg=5365 us max=829841 us ticks=240 teams=12 factions=0
+[Outpost] Team3 設施施工 apothecary → Lv1 at (8,10)
+[Outpost] Team4 設施施工 workshop → Lv1 at (6,10)
+[Outpost] Team5 設施施工 apothecary → Lv1 at (10,6)
+[Outpost] Team7 設施施工 stable → Lv1 at (11,9)
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 3 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=3 avg=5622 us max=797118 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 4 開始
+[TickPerf] day=4 avg=6689 us max=903311 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 5 開始
+[Move] Team 8 抵達 (6,8)
+[TickPerf] day=5 avg=6347 us max=617040 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 6 開始
+[TickPerf] day=6 avg=6170 us max=784602 us ticks=240 teams=12 factions=0
+[Outpost] Team0 設施施工 apothecary → Lv1 at (6,8)
+[Outpost] Team10 設施施工 apothecary → Lv1 at (10,10)
+[DayNight] Day 7 開始
+[TickPerf] day=7 avg=8323 us max=787234 us ticks=240 teams=12 factions=0
+[Outpost] 設施完工 apothecary Lv1 at (6,8)
+[Outpost] 設施完工 apothecary Lv1 at (10,10)
+[DayNight] Day 8 開始
+[TickPerf] day=8 avg=6654 us max=668083 us ticks=240 teams=12 factions=0
+[DayNight] Day 9 開始
+[TickPerf] day=9 avg=6914 us max=671305 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (13,6)
+[DayNight] Day 10 開始
+[TickPerf] day=10 avg=6753 us max=619632 us ticks=240 teams=12 factions=0
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Outpost] Team2 設施施工 apothecary → Lv1 at (8,6)
+[Move] Team 8 抵達 (16,6)
+[DayNight] Day 11 開始
+[TickPerf] day=11 avg=6605 us max=715814 us ticks=240 teams=12 factions=0
+[DayNight] Day 12 開始
+[TickPerf] day=12 avg=6051 us max=570134 us ticks=240 teams=12 factions=0
+[Outpost] Team0 設施施工 workshop → Lv1 at (6,8)
+[Outpost] Team1 設施施工 apothecary → Lv1 at (10,8)
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=7162 us max=719283 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Outpost] 設施完工 workshop Lv1 at (6,8)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 14 開始
+[TickPerf] day=14 avg=6669 us max=515312 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Outpost] Team10 設施施工 workshop → Lv1 at (10,10)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=57 known=126
+[Move] Team 8 抵達 (11,9)
+[TickPerf] day=15 avg=7006 us max=650690 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Outpost] 設施完工 workshop Lv1 at (10,10)
+[DayNight] Day 16 開始
+[TickPerf] day=16 avg=7258 us max=773425 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 17 開始
+[TickPerf] day=17 avg=6586 us max=601323 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 18 開始
+[TickPerf] day=18 avg=6706 us max=633402 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 19 開始
+[TickPerf] day=19 avg=7193 us max=668405 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,9)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=57 known=102
+[Move] Team 8 抵達 (11,9)
+[TickPerf] day=20 avg=8057 us max=772698 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (12,9)
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=21 avg=8500 us max=907230 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (12,9)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 22 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=22 avg=8188 us max=762052 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (12,9)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 8 抵達 (12,9)
+[Manufacture] Team10 arrows worker_rate=0.55
+[DayNight] Day 23 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=23 avg=7153 us max=654538 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (15,9)
+[Move] Team 7 抵達 (15,9)
+[DayNight] Day 24 開始
+[TickPerf] day=24 avg=6779 us max=573785 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (15,9)
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=56 known=66
+[Move] Team 7 抵達 (15,9)
+[TickPerf] day=25 avg=7963 us max=707800 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (15,9)
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=26 avg=8892 us max=927884 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[Move] Team 7 抵達 (14,8)
+[DayNight] Day 27 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=27 avg=7072 us max=617901 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (15,7)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (14,8)
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=28 avg=8526 us max=736572 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (16,6)
+[Move] Team 8 抵達 (14,8)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=29 avg=7259 us max=634836 us ticks=240 teams=12 factions=0
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=53 known=53
+[Horse] Outpost (8, 6) 捕野馬 +1
+[Horse] Outpost (10, 6) 捕野馬 +1
+[Horse] Outpost (10, 10) 捕野馬 +1
+[TickPerf] day=30 avg=6814 us max=485881 us ticks=240 teams=12 factions=0
+--- 月1 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=49 coin=800 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=6 task=覓食 food=48 mat=350 coin=800 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=350 coin=800 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=206 mat=7 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=return_home food=22 mat=360 coin=300 need_mat=100 runway=4.6
+  T8[plains] pop=6 task=外交 food=16 mat=0 coin=1000 need_mat=0 runway=3.3
+  T9[mountain] pop=6 task=治理 food=18 mat=38 coin=200 need_mat=100 runway=4.4
+  T10[mountain] pop=6 task=貿易 food=20 mat=57 coin=200 need_mat=146 runway=4.9
+  T11[mountain] pop=6 task=貿易 food=23 mat=44 coin=200 need_mat=100 runway=5.9
+[DayNight] Day 31 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=31 avg=9259 us max=992175 us ticks=240 teams=12 factions=0
+[Outpost] Team9 設施施工 farming → Lv1 at (6,6)
+[Outpost] Team11 設施施工 farming → Lv1 at (7,11)
+[Outpost] 設施完工 farming Lv1 at (6,6)
+[Outpost] 設施完工 farming Lv1 at (7,11)
+[DayNight] Day 32 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=32 avg=7555 us max=657894 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 33 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=33 avg=6978 us max=617714 us ticks=240 teams=12 factions=0
+[Outpost] 拆除設施 workshop at (10,10)
+[Outpost] Team10 設施施工 farming → Lv1 at (10,10)
+[Move] Team 7 抵達 (14,4)
+[Move] Team 8 抵達 (15,7)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 34 開始
+[TickPerf] day=34 avg=8466 us max=732703 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (15,7)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[DayNight] Day 35 開始
+[MsgPrune] 刪除過期訊息 global=53 known=53
+[Salary] Team8 薪水結算 coin=996.9
+[TickPerf] day=35 avg=7154 us max=607834 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (15,7)
+[DayNight] Day 36 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=36 avg=7303 us max=660756 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (15,7)
+[DayNight] Day 37 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=37 avg=7805 us max=822743 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 38 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=38 avg=7409 us max=661318 us ticks=240 teams=12 factions=0
+[DayNight] Day 39 開始
+[TickPerf] day=39 avg=6340 us max=624035 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (14,8)
+[DayNight] Day 40 開始
+[MsgPrune] 刪除過期訊息 global=52 known=52
+[Move] Team 8 抵達 (14,8)
+[TickPerf] day=40 avg=6790 us max=634646 us ticks=240 teams=12 factions=0
+[DayNight] Day 41 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=41 avg=7028 us max=766340 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[DayNight] Day 42 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=42 avg=6392 us max=538004 us ticks=240 teams=12 factions=0
+[Famine] Team9 餓死 anon 1 (famine=7天)
+[Famine] Team10 餓死 anon 1 (famine=7天)
+[Move] Team 8 抵達 (12,9)
+[DayNight] Day 43 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=43 avg=7313 us max=819670 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (12,9)
+[Famine] Team9 餓死 anon 1 (famine=8天)
+[Famine] Team10 餓死 anon 1 (famine=8天)
+[Famine] Team11 餓死 anon 1 (famine=7天)
+[DayNight] Day 44 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=44 avg=6852 us max=722187 us ticks=240 teams=12 factions=0
+[Famine] Team9 餓死 anon 1 (famine=9天)
+[Famine] Team10 餓死 anon 1 (famine=9天)
+[Famine] Team11 餓死 anon 1 (famine=8天)
+[DayNight] Day 45 開始
+[MsgPrune] 刪除過期訊息 global=49 known=49
+[Move] Team 7 抵達 (8,9)
+[Famine] Team9 餓死 anon 1 (famine=10天)
+[Famine] Team10 餓死 anon 1 (famine=10天)
+[TickPerf] day=45 avg=6525 us max=585799 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 8 抵達 (11,9)
+[Famine] Team11 餓死 anon 1 (famine=9天)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 46 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=46 avg=7144 us max=911890 us ticks=240 teams=12 factions=0
+[Famine] Team11 餓死 anon 1 (famine=10天)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 47 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=47 avg=5757 us max=578721 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,9)
+[Move] Team 8 抵達 (10,8)
+[Move] Team 4 抵達 (8,9)
+[DayNight] Day 48 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=48 avg=5866 us max=617283 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,8)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 49 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=49 avg=7532 us max=754966 us ticks=240 teams=12 factions=0
+[Move] Team 7 抵達 (0,13)
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 50 開始
+[MsgPrune] 刪除過期訊息 global=49 known=66
+[Move] Team 8 抵達 (10,8)
+[TickPerf] day=50 avg=7203 us max=770277 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,8)
+[Move] Team 10 抵達 (10,9)
+[Move] Team 11 抵達 (7,10)
+[DayNight] Day 51 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=51 avg=6339 us max=735909 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,8)
+[Move] Team 10 抵達 (10,9)
+[Move] Team 11 抵達 (8,9)
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 52 開始
+[MsgPrune] 刪除過期訊息 global=4 known=6
+[TickPerf] day=52 avg=6438 us max=729387 us ticks=240 teams=12 factions=0
+[Ambition] Team11 rung 0→1 (定居 cap=2)
+[Move] Team 8 抵達 (10,8)
+[Move] Team 10 抵達 (8,10)
+[Move] Team 11 抵達 (8,9)
+[Merge] Team3 ← Team10 完全合併 (absorber_pop=8)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 53 開始
+[MsgPrune] 刪除過期訊息 global=4 known=9
+[TickPerf] day=53 avg=6197 us max=680708 us ticks=240 teams=11 factions=0
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 54 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[TickPerf] day=54 avg=5696 us max=673524 us ticks=240 teams=11 factions=0
+[Move] Team 4 抵達 (14,8)
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 55 開始
+[MsgPrune] 刪除過期訊息 global=47 known=102
+[Move] Team 8 抵達 (10,8)
+[TickPerf] day=55 avg=6218 us max=619347 us ticks=240 teams=11 factions=0
+[Move] Team 8 抵達 (10,8)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (10,8)
+[Famine] Team8 餓死 anon 1 (famine=7天)
+[DayNight] Day 56 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=56 avg=6492 us max=825603 us ticks=240 teams=11 factions=0
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Ambition] Team11 rung 1→0 (定居 cap=2)
+[Move] Team 8 抵達 (11,7)
+[DayNight] Day 57 開始
+[MsgPrune] 刪除過期訊息 global=4 known=5
+[TickPerf] day=57 avg=6146 us max=711653 us ticks=240 teams=11 factions=0
+[Move] Team 8 抵達 (11,7)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 7 抵達 (12,9)
+[Move] Team 5 抵達 (10,6)
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[DayNight] Day 58 開始
+[MsgPrune] 刪除過期訊息 global=5 known=14
+[TickPerf] day=58 avg=6543 us max=685112 us ticks=240 teams=11 factions=0
+[Move] Team 11 抵達 (8,9)
+[Move] Team 7 抵達 (11,9)
+[DayNight] Day 59 開始
+[MsgPrune] 刪除過期訊息 global=2 known=4
+[TickPerf] day=59 avg=5978 us max=541887 us ticks=240 teams=11 factions=0
+[DayNight] Day 60 開始
+[MsgPrune] 刪除過期訊息 global=41 known=86
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Move] Team 5 抵達 (9,6)
+[TickPerf] day=60 avg=5848 us max=499862 us ticks=240 teams=11 factions=0
+--- 月2 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=50 coin=800 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=8 task=覓食 food=64 mat=408 coin=1000 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=return_home food=0 mat=340 coin=800 need_mat=100 runway=0.0
+  T5[plains] pop=6 task=覓食 food=72 mat=150 coin=800 need_mat=100 runway=15.0
+  T6[plains] pop=6 task=覓食 food=62 mat=13 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=逃跑 food=74 mat=160 coin=300 need_mat=100 runway=15.3
+  T8[plains] pop=5 task=逃跑 food=11 mat=0 coin=997 need_mat=0 runway=2.7
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+  T11[plains] pop=2 task=建設 food=0 mat=36 coin=200 need_mat=100 runway=0.0
+[Move] Team 11 抵達 (8,8)
+[DayNight] Day 61 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=61 avg=6895 us max=762050 us ticks=240 teams=11 factions=0
+[Move] Team 5 抵達 (9,6)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 4 抵達 (6,10)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 8 抵達 (16,4)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 62 開始
+[MsgPrune] 刪除過期訊息 global=4 known=6
+[TickPerf] day=62 avg=5915 us max=541052 us ticks=240 teams=11 factions=0
+[Move] Team 5 抵達 (9,6)
+[Move] Team 8 抵達 (15,5)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 11 抵達 (8,10)
+[Merge] Team3 ← Team11 完全合併 (absorber_pop=10)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 7 抵達 (15,9)
+[DayNight] Day 63 開始
+[MsgPrune] 刪除過期訊息 global=5 known=8
+[TickPerf] day=63 avg=5657 us max=553799 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 64 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[TickPerf] day=64 avg=6068 us max=536534 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (14,8)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 5 抵達 (9,6)
+[Move] Team 8 抵達 (15,5)
+[DayNight] Day 65 開始
+[MsgPrune] 刪除過期訊息 global=39 known=59
+[Move] Team 3 抵達 (8,10)
+[Move] Team 7 抵達 (15,7)
+[TickPerf] day=65 avg=5854 us max=440412 us ticks=240 teams=10 factions=0
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 8 抵達 (14,6)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 66 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=66 avg=5896 us max=529165 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[DayNight] Day 67 開始
+[MsgPrune] 刪除過期訊息 global=6 known=6
+[TickPerf] day=67 avg=6475 us max=474400 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 68 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=68 avg=5829 us max=481284 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 69 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=69 avg=6330 us max=405344 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (15,7)
+[Move] Team 8 抵達 (15,7)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 70 開始
+[MsgPrune] 刪除過期訊息 global=39 known=46
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Salary] Team8 薪水結算 coin=994.1
+[TickPerf] day=70 avg=7110 us max=571852 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 7 抵達 (16,7)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[DayNight] Day 71 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=71 avg=6789 us max=568261 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 72 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=72 avg=6122 us max=431420 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 73 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=73 avg=6269 us max=448061 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (16,7)
+[DayNight] Day 74 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=74 avg=5586 us max=344801 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 75 開始
+[MsgPrune] 刪除過期訊息 global=37 known=45
+[Move] Team 4 抵達 (3,13)
+[TickPerf] day=75 avg=5879 us max=372017 us ticks=240 teams=10 factions=0
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 76 開始
+[TickPerf] day=76 avg=7608 us max=467323 us ticks=240 teams=10 factions=0
+[Move] Team 5 抵達 (10,6)
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[Move] Team 3 抵達 (9,10)
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Ambition] Team8 rung 1→0 (商業 cap=2)
+[DayNight] Day 77 開始
+[MsgPrune] 刪除過期訊息 global=4 known=5
+[TickPerf] day=77 avg=5653 us max=397581 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (9,10)
+[Move] Team 3 抵達 (9,10)
+[DayNight] Day 78 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=78 avg=5048 us max=410328 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[Move] Team 8 抵達 (14,8)
+[DayNight] Day 79 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=79 avg=5405 us max=414432 us ticks=240 teams=10 factions=0
+[CrudeCamp] Team8 紮營 @(14,8) → civilian
+[DayNight] Day 80 開始
+[MsgPrune] 刪除過期訊息 global=34 known=37
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Move] Team 7 抵達 (14,6)
+[TickPerf] day=80 avg=6328 us max=459906 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (8,10)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[DayNight] Day 81 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Horse] Outpost (14, 8) 捕野馬 +1
+[TickPerf] day=81 avg=5864 us max=539899 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[Move] Team 7 抵達 (15,5)
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 82 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=82 avg=5839 us max=466493 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (15,5)
+[Combat Start] Team-1000000 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[Move] Team 7 抵達 (15,5)
+[Combat Start] Team-1000001 vs Team4
+[Ambush] NPC Team4 被 boar 伏擊
+[DayNight] Day 83 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=83 avg=5028 us max=399829 us ticks=240 teams=11 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 84 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=84 avg=5943 us max=500612 us ticks=240 teams=10 factions=0
+[DayNight] Day 85 開始
+[MsgPrune] 刪除過期訊息 global=33 known=41
+[TickPerf] day=85 avg=6060 us max=492440 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (8,10)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[DayNight] Day 86 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=86 avg=5906 us max=455538 us ticks=240 teams=10 factions=0
+[DayNight] Day 87 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=87 avg=5251 us max=391356 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 88 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=88 avg=5551 us max=461980 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (11,9)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 89 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=89 avg=5393 us max=411932 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 90 開始
+[MsgPrune] 刪除過期訊息 global=35 known=33
+[Harvest] Tick21600 季節=夏 base=1.5
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Move] Team 4 抵達 (2,13)
+[TickPerf] day=90 avg=4743 us max=397347 us ticks=240 teams=10 factions=0
+--- 月3 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=50 coin=800 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=覓食 food=100 mat=245 coin=1200 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=覓食 food=52 mat=140 coin=800 need_mat=100 runway=10.8
+  T5[plains] pop=6 task=覓食 food=48 mat=150 coin=800 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=20 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=逃跑 food=13 mat=160 coin=300 need_mat=100 runway=2.7
+  T8[plains] pop=5 task=return_home food=40 mat=0 coin=995 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 91 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=91 avg=7017 us max=490496 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 92 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=92 avg=5263 us max=421837 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 93 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=93 avg=4999 us max=411511 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 94 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=94 avg=5179 us max=467881 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (14,6)
+[Move] Team 7 抵達 (14,6)
+[DayNight] Day 95 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 4 抵達 (2,13)
+[TickPerf] day=95 avg=4758 us max=447417 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 96 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=96 avg=5239 us max=452298 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 97 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=97 avg=5914 us max=488311 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[DayNight] Day 98 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=98 avg=5565 us max=408586 us ticks=240 teams=10 factions=0
+[DayNight] Day 99 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=99 avg=5327 us max=409146 us ticks=240 teams=10 factions=0
+[DayNight] Day 100 開始
+[MsgPrune] 刪除過期訊息 global=36 known=36
+[TickPerf] day=100 avg=6221 us max=555318 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 101 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=101 avg=5617 us max=600125 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 102 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=102 avg=5028 us max=410394 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 103 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=103 avg=5473 us max=442338 us ticks=240 teams=10 factions=0
+[DayNight] Day 104 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=104 avg=5000 us max=405828 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[DayNight] Day 105 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 7 抵達 (11,9)
+[TickPerf] day=105 avg=5594 us max=380130 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 106 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=106 avg=6303 us max=540511 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 107 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=107 avg=6350 us max=632260 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 108 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=108 avg=5429 us max=453411 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 109 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=109 avg=5428 us max=480376 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (13,7)
+[DayNight] Day 110 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[TickPerf] day=110 avg=4801 us max=418788 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 111 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=111 avg=5098 us max=424383 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 112 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=112 avg=5360 us max=491216 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 113 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=113 avg=5123 us max=448793 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 114 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=114 avg=4646 us max=409720 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (11,7)
+[DayNight] Day 115 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 4 抵達 (3,13)
+[TickPerf] day=115 avg=6126 us max=446835 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 116 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=116 avg=6052 us max=490920 us ticks=240 teams=10 factions=0
+[DayNight] Day 117 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=117 avg=5883 us max=460809 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 118 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=118 avg=5283 us max=432131 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[DayNight] Day 119 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=119 avg=5358 us max=481704 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (13,7)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 120 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Horse] Outpost (10, 10) 捕野馬 +1
+[TickPerf] day=120 avg=5026 us max=427936 us ticks=240 teams=10 factions=0
+--- 月4 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=51 coin=800 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=覓食 food=80 mat=245 coin=1200 need_mat=100 runway=9999.0
+  T4[forest] pop=6 task=return_home food=8 mat=140 coin=800 need_mat=100 runway=1.7
+  T5[plains] pop=6 task=覓食 food=48 mat=150 coin=800 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=26 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=貿易 food=14 mat=160 coin=300 need_mat=100 runway=2.9
+  T8[plains] pop=5 task=return_home food=40 mat=0 coin=995 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=治理 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[DayNight] Day 121 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=121 avg=6042 us max=524780 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 122 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=122 avg=5776 us max=407854 us ticks=240 teams=10 factions=0
+[DayNight] Day 123 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=123 avg=4408 us max=366548 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[Ambition] Team4 rung 1→0 (定居 cap=2)
+[DayNight] Day 124 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=124 avg=4596 us max=438057 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (4,10)
+[DayNight] Day 125 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 7 抵達 (15,5)
+[TickPerf] day=125 avg=5319 us max=484113 us ticks=240 teams=10 factions=0
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 126 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=126 avg=5461 us max=457272 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 127 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=127 avg=5221 us max=490754 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 128 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=128 avg=5753 us max=484920 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 129 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=129 avg=5606 us max=445902 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 130 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[Move] Team 4 抵達 (2,13)
+[TickPerf] day=130 avg=5518 us max=475234 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 131 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=131 avg=6540 us max=660675 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 132 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=132 avg=5696 us max=392668 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 133 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=133 avg=5386 us max=485323 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 134 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=134 avg=5554 us max=463804 us ticks=240 teams=10 factions=0
+[DayNight] Day 135 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[TickPerf] day=135 avg=5255 us max=380369 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 136 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=136 avg=5669 us max=504680 us ticks=240 teams=10 factions=0
+[DayNight] Day 137 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=137 avg=4937 us max=416354 us ticks=240 teams=10 factions=0
+[DayNight] Day 138 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=138 avg=6341 us max=637019 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[DayNight] Day 139 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=139 avg=5256 us max=516401 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (14,6)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[DayNight] Day 140 開始
+[MsgPrune] 刪除過期訊息 global=35 known=35
+[TickPerf] day=140 avg=5617 us max=443328 us ticks=240 teams=10 factions=0
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 7 抵達 (14,6)
+[Move] Team 4 抵達 (6,10)
+[Move] Team 7 抵達 (14,6)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 141 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=141 avg=5064 us max=437192 us ticks=240 teams=10 factions=0
+[DayNight] Day 142 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=142 avg=5166 us max=485510 us ticks=240 teams=10 factions=0
+[DayNight] Day 143 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=143 avg=5266 us max=394639 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 144 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=144 avg=6006 us max=395245 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (11,9)
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 145 開始
+[MsgPrune] 刪除過期訊息 global=35 known=38
+[Move] Team 7 抵達 (11,9)
+[TickPerf] day=145 avg=6028 us max=500210 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (8,9)
+[DayNight] Day 146 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=146 avg=6312 us max=444370 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 147 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=147 avg=5457 us max=442215 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 4 抵達 (6,10)
+[Move] Team 7 抵達 (14,9)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Move] Team 7 抵達 (15,9)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 148 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=148 avg=6385 us max=669574 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 7 抵達 (15,9)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 149 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=149 avg=5710 us max=503319 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 150 開始
+[MsgPrune] 刪除過期訊息 global=35 known=45
+[Horse] Outpost (6, 6) 捕野馬 +1
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Move] Team 4 抵達 (3,13)
+[TickPerf] day=150 avg=6556 us max=583119 us ticks=240 teams=10 factions=0
+--- 月5 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=51 coin=800 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=貿易 food=20 mat=245 coin=1200 need_mat=100 runway=2.5
+  T4[forest] pop=6 task=覓食 food=68 mat=140 coin=800 need_mat=100 runway=14.2
+  T5[plains] pop=6 task=覓食 food=48 mat=150 coin=800 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=33 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=return_home food=3 mat=160 coin=300 need_mat=100 runway=0.5
+  T8[plains] pop=5 task=return_home food=40 mat=0 coin=995 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 7 抵達 (11,9)
+[Move] Team 3 抵達 (10,6)
+[Move] Team 4 抵達 (3,13)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 151 開始
+[MsgPrune] 刪除過期訊息 global=4 known=5
+[TickPerf] day=151 avg=6328 us max=581199 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 152 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=152 avg=6509 us max=527393 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 153 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=153 avg=5666 us max=527313 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (8,10)
+[Move] Team 4 抵達 (3,13)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 154 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=154 avg=5318 us max=490786 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (12,9)
+[Ambition] Team3 rung 1→0 (定居 cap=2)
+[DayNight] Day 155 開始
+[MsgPrune] 刪除過期訊息 global=35 known=45
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (12,9)
+[TickPerf] day=155 avg=6051 us max=572648 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 3 抵達 (5,13)
+[DayNight] Day 156 開始
+[MsgPrune] 刪除過期訊息 global=4 known=6
+[TickPerf] day=156 avg=5936 us max=510307 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (3,13)
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 157 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=157 avg=5650 us max=479533 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (12,9)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 158 開始
+[MsgPrune] 刪除過期訊息 global=5 known=6
+[TickPerf] day=158 avg=5806 us max=454053 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (12,9)
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 159 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=159 avg=5959 us max=482528 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 160 開始
+[MsgPrune] 刪除過期訊息 global=33 known=38
+[Move] Team 3 抵達 (10,6)
+[Move] Team 7 抵達 (12,9)
+[TickPerf] day=160 avg=6627 us max=508637 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 4 抵達 (2,13)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Move] Team 4 抵達 (3,13)
+[DayNight] Day 161 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=161 avg=7594 us max=636663 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 162 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=162 avg=6739 us max=619182 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Outpost] Team6 設施施工 apothecary → Lv1 at (5,9)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 163 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=163 avg=6562 us max=527250 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 164 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=164 avg=6325 us max=593710 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 165 開始
+[MsgPrune] 刪除過期訊息 global=33 known=37
+[TickPerf] day=165 avg=5551 us max=548061 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 166 開始
+[MsgPrune] 刪除過期訊息 global=3 known=4
+[TickPerf] day=166 avg=7049 us max=548185 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Outpost] 設施完工 apothecary Lv1 at (10,6)
+[DayNight] Day 167 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=167 avg=6317 us max=559845 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Move] Team 3 抵達 (10,6)
+[Move] Team 7 抵達 (11,9)
+[Manufacture] Team0 arrows worker_rate=0.56
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 168 開始
+[MsgPrune] 刪除過期訊息 global=7 known=9
+[TickPerf] day=168 avg=5743 us max=502953 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (10,6)
+[Outpost] Team5 設施施工 workshop → Lv1 at (10,6)
+[Move] Team 3 抵達 (10,6)
+[DayNight] Day 169 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=169 avg=5318 us max=464464 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (6,10)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[DayNight] Day 170 開始
+[MsgPrune] 刪除過期訊息 global=32 known=36
+[TickPerf] day=170 avg=4983 us max=447353 us ticks=240 teams=10 factions=0
+[DayNight] Day 171 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=171 avg=5004 us max=435189 us ticks=240 teams=10 factions=0
+[Move] Team 3 抵達 (8,10)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team3 rung 1→2 (定居 cap=2)
+[DayNight] Day 172 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=172 avg=4988 us max=472947 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (4,12)
+[Move] Team 4 抵達 (3,13)
+[Ambition] Team7 rung 1→0 (定居 cap=2)
+[DayNight] Day 173 開始
+[MsgPrune] 刪除過期訊息 global=6 known=7
+[TickPerf] day=173 avg=4875 us max=530022 us ticks=240 teams=10 factions=0
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 174 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=174 avg=4989 us max=480092 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Ambition] Team4 rung 1→0 (定居 cap=2)
+[Move] Team 4 抵達 (2,13)
+[Manufacture] Team0 arrows worker_rate=0.56
+[DayNight] Day 175 開始
+[MsgPrune] 刪除過期訊息 global=32 known=32
+[TickPerf] day=175 avg=6131 us max=491502 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 176 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=176 avg=5700 us max=501362 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 177 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=177 avg=5234 us max=484065 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 178 開始
+[MsgPrune] 刪除過期訊息 global=6 known=6
+[TickPerf] day=178 avg=5329 us max=432667 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (12,9)
+[Move] Team 4 抵達 (2,13)
+[Move] Team 7 抵達 (12,9)
+[DayNight] Day 179 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=179 avg=5740 us max=534771 us ticks=240 teams=10 factions=0
+[Move] Team 4 抵達 (2,13)
+[DayNight] Day 180 開始
+[MsgPrune] 刪除過期訊息 global=33 known=33
+[Harvest] Tick43200 季節=秋 base=1.2
+[Horse] Outpost (5, 9) 捕野馬 +1
+[Horse] Outpost (8, 10) 捕野馬 +1
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Move] Team 4 抵達 (2,13)
+[TickPerf] day=180 avg=5374 us max=458509 us ticks=240 teams=10 factions=0
+--- 月6 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=52 coin=800 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=覓食 food=80 mat=245 coin=1200 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=覓食 food=32 mat=140 coin=800 need_mat=100 runway=6.7
+  T5[plains] pop=6 task=覓食 food=48 mat=150 coin=800 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=4 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=覓食 food=14 mat=160 coin=300 need_mat=100 runway=2.9
+  T8[plains] pop=5 task=return_home food=40 mat=0 coin=995 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+
+───────── ★T0 fed 隊 per-option util 明細（economy 決策真 binding）─────────
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[Harvest] Tick60 季節=春 base=1.1
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Ambition] Team6 rung 0→1 (定居 cap=2)
+[DayNight] Day 1 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=1 avg=6226 us max=985455 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[Ambition] Team0 rung 0→1 (定居 cap=2)
+[Ambition] Team1 rung 0→1 (定居 cap=2)
+[Ambition] Team2 rung 0→1 (定居 cap=2)
+[Ambition] Team5 rung 0→1 (定居 cap=2)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 2 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=2 avg=5199 us max=860078 us ticks=240 teams=12 factions=0
+[Outpost] Team3 設施施工 apothecary → Lv1 at (8,10)
+[Outpost] Team4 設施施工 workshop → Lv1 at (6,10)
+[Outpost] Team5 設施施工 apothecary → Lv1 at (10,6)
+[Outpost] Team7 設施施工 stable → Lv1 at (11,9)
+[Move] Team 8 抵達 (6,8)
+  === tick 500 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=110 mat=15 coin=800 runway=9999.0 food_days=28.75 need_mat=100 ===
+    [goal]   u=+1.3953  build_workshop:resource  <=WIN
+    [goal]   u=+1.3953  build_apothecary:resource
+    [goal]   u=+1.3953  build_stable:resource
+    [static] u=+1.0414  survival
+    [static] u=+0.9748  備戰
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.8694  求和
+    [static] u=+0.3200  併入
+    [static] u=+0.2766  買料
+    [static] u=+0.2599  駐守
+    [static] u=+0.1104  建設
+    [static] u=+0.0927  吸納
+    [static] u=+0.0276  貿易
+    [static] u=+0.0000  掠奪
+      分項 [build_workshop:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [build_apothecary:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+  === tick 500 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=140 mat=350 coin=800 runway=9999.0 food_days=34.38 need_mat=100 ===
+    [static] u=+0.4069  求和  <=WIN
+    [static] u=+0.3537  備戰
+    [static] u=+0.3250  覓食
+    [static] u=+0.2461  駐守
+    [static] u=+0.1285  建設
+    [static] u=+0.1250  survival
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 3 開始
+[Horse] Outpost (11, 9) 捕野馬 +1
+[TickPerf] day=3 avg=5274 us max=810138 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (6,8)
+[Move] Team 8 抵達 (6,8)
+[DayNight] Day 4 開始
+[TickPerf] day=4 avg=6027 us max=959845 us ticks=240 teams=12 factions=0
+[DayNight] Day 5 開始
+[TickPerf] day=5 avg=6120 us max=686355 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,8)
+[DayNight] Day 6 開始
+[TickPerf] day=6 avg=6468 us max=811123 us ticks=240 teams=12 factions=0
+[Outpost] Team0 設施施工 apothecary → Lv1 at (6,8)
+[Outpost] Team10 設施施工 apothecary → Lv1 at (10,10)
+[DayNight] Day 7 開始
+[TickPerf] day=7 avg=7644 us max=793464 us ticks=240 teams=12 factions=0
+[Outpost] 設施完工 apothecary Lv1 at (6,8)
+[Outpost] 設施完工 apothecary Lv1 at (10,10)
+[Move] Team 8 抵達 (14,9)
+[Move] Team 8 抵達 (15,9)
+[DayNight] Day 8 開始
+[TickPerf] day=8 avg=6023 us max=594682 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (15,9)
+[Move] Team 8 抵達 (15,9)
+[DayNight] Day 9 開始
+[TickPerf] day=9 avg=7024 us max=570922 us ticks=240 teams=12 factions=0
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[DayNight] Day 10 開始
+[TickPerf] day=10 avg=7640 us max=709467 us ticks=240 teams=12 factions=0
+[Outpost] Team2 設施施工 apothecary → Lv1 at (8,6)
+[Move] Team 8 抵達 (11,9)
+[DayNight] Day 11 開始
+[TickPerf] day=11 avg=6627 us max=678390 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 12 開始
+[TickPerf] day=12 avg=6488 us max=560841 us ticks=240 teams=12 factions=0
+[Outpost] Team0 設施施工 workshop → Lv1 at (6,8)
+[Outpost] Team1 設施施工 apothecary → Lv1 at (10,8)
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=7090 us max=664675 us ticks=240 teams=12 factions=0
+[Outpost] 設施完工 workshop Lv1 at (6,8)
+[DayNight] Day 14 開始
+[TickPerf] day=14 avg=7162 us max=612911 us ticks=240 teams=12 factions=0
+[Outpost] Team10 設施施工 workshop → Lv1 at (10,10)
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=57 known=124
+[TickPerf] day=15 avg=7133 us max=698897 us ticks=240 teams=12 factions=0
+  === tick 3600 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=48 mat=26 coin=800 runway=9999.0 food_days=41.11 need_mat=138 ===
+    [goal]   u=+1.3953  build_stable:resource  <=WIN
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.7436  備戰
+    [static] u=+0.7225  求和
+    [static] u=+0.5000  survival
+    [static] u=+0.3423  生產
+    [static] u=+0.2640  買料
+    [static] u=+0.2495  駐守
+    [static] u=+0.1298  建設
+    [static] u=+0.0000  掠奪
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+  === tick 3600 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=78 mat=350 coin=800 runway=9999.0 food_days=50.34 need_mat=100 ===
+    [static] u=+0.3630  求和  <=WIN
+    [static] u=+0.3250  覓食
+    [static] u=+0.2494  駐守
+    [static] u=+0.2072  備戰
+    [static] u=+0.1300  建設
+    [static] u=+0.1181  吸納
+    [static] u=+0.0000  survival
+    [static] u=+0.0000  掠奪
+[Move] Team 8 抵達 (10,10)
+[Outpost] 設施完工 workshop Lv1 at (10,10)
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 16 開始
+[TickPerf] day=16 avg=7583 us max=787326 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 17 開始
+[TickPerf] day=17 avg=6737 us max=604736 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,10)
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 18 開始
+[TickPerf] day=18 avg=6513 us max=659544 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,10)
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 19 開始
+[TickPerf] day=19 avg=8835 us max=885430 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=57 known=100
+[Move] Team 8 抵達 (10,10)
+[TickPerf] day=20 avg=7090 us max=660810 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=21 avg=8556 us max=760259 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (10,10)
+[DayNight] Day 22 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=22 avg=7748 us max=753033 us ticks=240 teams=12 factions=0
+[Move] Team 8 抵達 (11,10)
+[Famine] Team8 餓死 anon 1 (famine=7天)
+[CrudeCamp] Team8 紮營 @(11,10) → civilian
+[Manufacture] Team10 arrows worker_rate=0.55
+[DayNight] Day 23 開始
+[MsgPrune] 刪除過期訊息 global=1 known=3
+[TickPerf] day=23 avg=6831 us max=548441 us ticks=240 teams=12 factions=0
+[Ambition] Team8 rung 0→1 (商業 cap=2)
+[DayNight] Day 24 開始
+[TickPerf] day=24 avg=6866 us max=709143 us ticks=240 teams=12 factions=0
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=56 known=80
+[Outpost] Team11 設施施工 farming → Lv1 at (7,11)
+[TickPerf] day=25 avg=7719 us max=638295 us ticks=240 teams=12 factions=0
+[Outpost] 設施完工 farming Lv1 at (7,11)
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=26 avg=8536 us max=1014255 us ticks=240 teams=12 factions=0
+[DayNight] Day 27 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=27 avg=7052 us max=647935 us ticks=240 teams=12 factions=0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=28 avg=8289 us max=733560 us ticks=240 teams=12 factions=0
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=29 avg=7169 us max=692449 us ticks=240 teams=12 factions=0
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=53 known=53
+[Horse] Outpost (8, 6) 捕野馬 +1
+[Horse] Outpost (10, 6) 捕野馬 +1
+[Horse] Outpost (10, 10) 捕野馬 +1
+[TickPerf] day=30 avg=8174 us max=670611 us ticks=240 teams=12 factions=0
+  === tick 7200 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=48 mat=49 coin=800 runway=9999.0 food_days=53.12 need_mat=138 ===
+    [goal]   u=+1.3953  build_stable:resource  <=WIN
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.7411  備戰
+    [static] u=+0.7208  求和
+    [static] u=+0.5000  survival
+    [static] u=+0.3432  生產
+    [static] u=+0.2494  駐守
+    [static] u=+0.2279  買料
+    [static] u=+0.1300  建設
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+  === tick 7200 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=48 mat=350 coin=800 runway=9999.0 food_days=64.98 need_mat=100 ===
+    [static] u=+0.3354  求和  <=WIN
+    [static] u=+0.3250  覓食
+    [static] u=+0.2494  駐守
+    [static] u=+0.1959  備戰
+    [static] u=+0.1300  建設
+    [static] u=+0.0000  survival
+    [static] u=+0.0000  掠奪
+
+  ── ★Team3 賣方 delivery 行為（全 run 追蹤）──
+    起 pos=(8, 10) 終 pos=(8, 10) ever_moved=false | ever_TASK_TRADE=false | material 起=400 終=350 最低=350(離 inventory?是)
+    Team3 tile public_storage material=0（賣單 material 有無 deposit 到市場 granary）
+=== 和平經濟觀測床 DONE ===
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+

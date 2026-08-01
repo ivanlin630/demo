@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·糧流感知 SLICE A 實作·f945dd18·food_runway感官harvest-only+safe_ratio×persist乘法縮放(§4講死非硬塌)+人格ratio_floor(team14根治固執0.05/務實0.002分化)+5 task排除·驗food_flow_test 9/9+gate74+determinism+★世界不凍(attrition2.03%乘法沒向凍)+危機仍打斷+tap禁RNG·ETA粗估+ratio常數TEST VALUE measure-tuned] SLICE A實作done。審code落地講死否+world不凍+team14根治+ETA粗估可接受否。"
 branch: feat/food-flow-slice-A (f945dd18)
 ---

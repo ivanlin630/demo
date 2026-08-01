@@ -1,0 +1,18 @@
+{
+  "slice": "godview-F-5seed-baseline",
+  "is_sim": true,
+  "measured_at_head": "d0ab7f91 (branch feat/godview-slice-F, F-state) — ★FLEE-bug污染(pre-fix)：QA在godview-F故事稽核抓到TASK_FLEE缺stall-detection的獨立bug(team58型卡逃跑活活餓死)，此baseline跑於該bug已知但尚未修復前，非乾淨economy doom起點。blueprint裁：留著當『FLEE fix前後對照』，doom-delta趨勢起點應待FLEE-fixed state重新建。",
+  "raw_logs": ["docs/measurements/2026-07-19-godviewF-5seed-baseline-d0ab7f91.json"],
+  "purpose": "blueprint doom-delta趨勢精修：F→D total-delta(兩點趨勢非單點)。此為F-state（godview-slice-F merge前）5-seed baseline，D merge後同5seed re-measure算total-delta。",
+  "seeds": {
+    "1337": {"extinct_starve": 6, "attrition_pct": 19.1441441441441, "start_pop": 444, "end_pop": 359},
+    "42": {"extinct_starve": 0, "attrition_pct": 2.08333333333333, "start_pop": 432, "end_pop": 423},
+    "4201": {"extinct_starve": 0, "attrition_pct": 2.61627906976744, "start_pop": 344, "end_pop": 335},
+    "7": {"extinct_starve": 6, "attrition_pct": 26.6846361185984, "start_pop": 371, "end_pop": 272},
+    "100": {"extinct_starve": 0, "attrition_pct": 2.14285714285714, "start_pop": 420, "end_pop": 411}
+  },
+  "total_starve_across_5_seeds": 12,
+  "total_attrition_pct(pooled)": 10.492292391844853,
+  "note": "seed7(新加,補spread)呈現同seed1337一樣的『部分seed高starve』模式(6隊,26.68%attrition)——本輪seed42/4201/100三個皆健康(0隊starve,~2%attrition)，seed1337/7兩個明顯偏高(各6隊,19-27%attrition)。與godview-F.measure.json記錄的『第三次seed互換』脈絡一致：每輪有1-2個seed明顯偏高，其餘健康。",
+  "summary": "★此baseline標記FLEE-bug污染(pre-fix)，非blueprint要的乾淨economy doom趨勢起點。留存供：①FLEE fix前後對照(量化FLEE bug貢獻多少doom)；②FLEE fix落地+re-measure同5seed後，乾淨F→D(或FLEE-fixed→D) total-delta才是真正判準。此輪不觸發任何gate判定，純資料存檔。"
+}

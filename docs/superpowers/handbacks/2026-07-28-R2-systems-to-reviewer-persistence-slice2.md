@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·持守統一 Slice 2 執行層寫回新鮮度·cd22a91e·persist_strength隨真construction-tick progress更新(非時間proxy):sunk=(total−ticks_left)/total(★construction_ticks_total重建)+_tick_construction每tick+movement _on_arrival重算→執行層Slice3讀當下值·驗persist test 7組+gate74+determinism byte-identical+★世界不凍(attrition1.13%/teams49→64活)] Slice 2 新鮮度 done。審真進度sunk+total重建+每tick重算perf+世界不凍。"
 branch: feat/persistence-slice2-writeback-freshness (cd22a91e)
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[measure-first·ground GATE-B撮合賣方delivery gap(別靜態斷言,同買方dump款)·和平床加一次性dump:選一個賣方隊(Team3 material=400 surplus)在某decide tick,印per-option util全排序+winner·尤其『賣material/去市場賣』相關option util vs它贏的·+印Team3實際行為(有無TASK_TRADE去市場deliver? tile_pos移動? 掛sell order後material有無離開inventory到市場granary?)·目的:定GATE-B撮合真gap=賣方不decide sell-trip(decision)vs decide了但空間到不了買方市場(spatial/delivery)·純觀測零sim改·落地docs/measurements標path] dump Team3賣方per-option util+實際delivery行為,定GATE-B撮合真gap(賣方不decide去賣vs decide了空間到不了)。純觀測。落地。"
 branch: feat/peaceful-economy-bed
 ---

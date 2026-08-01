@@ -1,0 +1,17 @@
+{
+  "slice": "god-view 1119 can_reach belief-gate — arc FINAL leak",
+  "measured_at_head": "ab0c6e9d",
+  "baseline_head": "b5f9efa0",
+  "verdict": "PASS (clean, near-vacuous confirmed). can_reach belief-gated (0 residual live-read), doom-delta ALL 3 seeds byte-identical baseline vs branch = zero behavioral impact. gates green. god-view arc FULLY COMPLETE.",
+  "raw_logs": ["docs/measurements/2026-07-21-godview1119-baseline-b5f9efa0.json", "docs/measurements/2026-07-21-godview1119-branch-ab0c6e9d.json"],
+  "gates": {"constitution": "PASS 64/0-new", "headless": "branch=known 5-fail 0-new", "determinism": "implementer 6b10deeb (== Slice C md5, warring unchanged)"},
+  "doom_delta_identical": {
+    "seed1337": {"base": "3 / 15.09", "branch": "3 / 15.09", "match": "SAME"},
+    "seed42": {"base": "3 / 18.06", "branch": "3 / 18.06", "match": "SAME"},
+    "seed4201": {"base": "0 / 0.58", "branch": "0 / 0.58", "match": "SAME"},
+    "verdict": "ALL 3 seeds byte-identical -> near-vacuous (<999 恆真) confirmed: can_reach belief-gate is correctness-clean cosmetic, zero behavioral change"
+  },
+  "can_reach_belief_gate": "faction_ai:1123 belief_pos(f.leader_team_id, target) replaces live state.teams[target].tile_pos; 0 residual live-read on can_reach path",
+  "godview_arc_complete": "A/F/E/D/B/C + null-belief-flee + 1119 ALL landed & measured. god-view belief-化 arc FULLY COMPLETE (敵情/威脅/追擊/創世/市場/可達性 all belief-gated). systems can extend constitution_gate god-view detector for zero-residual proof. Next: economy arc. Deferred: GOODS/PRICES belief (info-manipulation dimension).",
+  "summary": "1119 can_reach belief-gate: near-vacuous confirmed (doom-delta ALL seeds byte-identical, correctness-clean cosmetic), belief-gate 0 residual live-read, gates green. god-view arc收官全落. Recommend accept."
+}

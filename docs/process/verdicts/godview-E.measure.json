@@ -1,0 +1,18 @@
+{
+  "slice": "god-view Slice E (4 dispatch leak E1/E2/E3/E5 live->belief_pos)",
+  "measured_at_head": "62697e6c",
+  "baseline_head": "8146c4a2",
+  "verdict": "belief-化 correct + gates green; real-team starve UP both seeds (doom-delta, NOT belief-navigation freeze-bug). Magnitude notable (>Slice F). doom-delta acceptability = blueprint release call.",
+  "raw_logs": ["docs/measurements/2026-07-20-godviewE-baseline-8146c4a2.json", "docs/measurements/2026-07-20-godviewE-branch-62697e6c.json", "docs/measurements/2026-07-20-godviewE-lockpoint-1337.txt"],
+  "gates": {"constitution": "PASS 64/0-new", "headless": "branch==baseline 5-fail 0-new", "determinism": "implementer c6259497, not independently reproduced (low-risk belief read)"},
+  "belief_化_confirmed": "4 E-paths use BeliefSystem.belief_pos (E1:336/E5:446/E2 join:1837); no live state.teams[X].tile_pos as move_target",
+  "regression": {
+    "seed1337": {"base": 7, "branch": 13, "attr": "19.8->27.0", "pop": "356->324"},
+    "seed42": {"base": 0, "branch": 6, "attr": "4.9->11.1"},
+    "seed4201": {"base": 0, "branch": 0, "attr": "0.3->2.9"}
+  },
+  "death_cause_branch_1337": {"手不聽腦": 2, "stuck-task": 7, "food-ok-vanish": 24, "near_death_tasks": "逃跑 1210 (high) / 覓食 720 / 建設 560 / 投靠 330 / 貿易 320", "interpretation": "手不聽腦 only 2 = NOT belief-navigation freeze-bug (would spike if belief-nav broke); deaths spread across flee(high)/forage/build = intended doom-delta (belief-化 -> more evasion/flee churn -> harder world)"},
+  "flag_out_of_scope": "faction_ai:1119 _hex_dist(leader_team.tile_pos, state.teams[target_id].tile_pos) < 999 = live-pos dist gate (loose); flagged to systems (next god-view audit); 1625 marked gate-ok bookkeeping",
+  "caveat": "classifier famine-count unreliable (food=0 finder-hit -> food-ok-vanish); 手不聽腦=2 is the reliable NOT-freeze-bug signal",
+  "summary": "belief-化 mechanically correct, gates green, NOT a freeze-bug (手不聽腦=2). But real-team starve up both seeds (1337 7->13, 42 0->6) = intended doom-delta, notably deeper than Slice F. blueprint judges doom-delta release acceptability."
+}

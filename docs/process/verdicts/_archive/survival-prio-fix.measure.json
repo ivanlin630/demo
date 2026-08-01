@@ -1,0 +1,32 @@
+{
+  "measured_at_head": "d286e21a (branch feat/survival-prio-fix, off main 623d3e77)",
+  "raw_logs": [
+    "docs/measurements/2026-07-18-survivalprio-charbed-d286e21a.log",
+    "docs/measurements/2026-07-18-survivalprio-constitution-d286e21a.log",
+    "docs/measurements/2026-07-18-survivalprio-threatdissolution-d286e21a.log",
+    "docs/measurements/2026-07-18-survivalprio-headless-d286e21a.log",
+    "docs/measurements/2026-07-18-survivalprio-42-d286e21a.json"
+  ],
+  "unit_level_gates": {
+    "char_bed_survival_prio_fix_test": {"result": "4/4 ALL PASS: survival派@80/threat@70不能stomp survival@80/survival→survival@80 self-replace/瀕死覓食commit@80", "verdict": "CONFIRMED"},
+    "constitution_gate": {"result": "PASS sites=64 removed=0", "verdict": "CONFIRMED"},
+    "threat_dissolution_check": {"result": "ALL PASS(repertoire+live-seam收斂驗)", "verdict": "CONFIRMED"},
+    "headless_test": {"result": "殘3 assertion同名同行號(15540/7078/13990)", "verdict": "CONFIRMED pre-existing"}
+  },
+  "organic_三驗_seed42_8mo": {
+    "①no_forage死→FLEE死恢復": {
+      "result": "★★extinct.starve=0（完全零餓死滅團!非只是分類恢復,是問題根本消失）",
+      "compare": {"pre_threat_oracle_3a429632": "extinct.starve=4(100% while_fleeing)", "broken_S3_623d3e77": "extinct.starve=15(100% no_forage)", "fixed_d286e21a": "extinct.starve=0"},
+      "verdict": "CONFIRMED且超預期——不只恢復成while_fleeing分類,是連『有逃但沒逃成』的死法都沒發生,同seed同窗0隊餓死。pop軌跡423,420,420,420,420,420,420,420(月1後完全持平)attrition_pct=2.78%(遠低於pre的原生水位)"
+    },
+    "②survival_preempt_threat": {
+      "result": "char bed直接驗證:threat@70不能stomp survival@80",
+      "verdict": "CONFIRMED"
+    },
+    "③threat黏性仍OK": {
+      "result": "迎戰4.61%/備戰4.63%/求和13.74%——threat repertoire仍顯著活躍(非被壓到0),對比broken-S3同seed(迎戰2.08%/備戰3.67%/求和4.01%)甚至更活躍(尤其求和13.74%>4.01%)",
+      "verdict": "CONFIRMED——threat機制未被閹割,絕境時才讓位"
+    }
+  },
+  "summary": "★fix效果決定性且超出預期——survival PRIO 80>70>50階層修正後,seed42 8mo窗內extinct.starve從15(全no_forage傻站死)直接歸零(非僅恢復成while_fleeing,是問題根本解除)。單元層4/4 char bed+gate+threat_dissolution+headless全CONFIRMED。threat黏性未受損(迎戰/備戰/求和仍顯著活躍甚至更高)。這是B(絕境經濟)前置blocker的乾淨解方,可判merge。"
+}

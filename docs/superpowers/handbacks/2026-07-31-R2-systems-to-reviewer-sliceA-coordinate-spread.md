@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·SLICE A flow-fix convoy協調散未填單(trickle→flow)·spec=2026-07-31-logistics-sliceA-coordinate-convoy-spread-HOW.md·26%真根measure定案(第一手trajectory):多convoy naive全targeting同best/近buy單→前填滿rem=0後bail,別想要材料買家沒車去(192需>>45)=convoy未協調非demand-limited·fix:_deliver_candidates加in-flight guard(掃active convoy子隊task_extra_data.order_id或state registry認領登錄→effective_rem=order.qty_remaining−Σ在途認領,effective_rem<=0跳單)+散選util/gain秤未填單非scripted round-robin·憲法realistic每缺料買家有車·★★MEASURE-VERIFY硬性(禁假設散了就升,本session靜態斷言駁6-7次):spread做完必量fulfilled 45→顯著升toward192+散到多買家(非堆T0/T1)+sell_no_surplus降·審in-flight registry lifecycle無漏清幽靈認領+effective_rem對+散選util非round-robin+fulfilled真升measured+不凍" 
 ---
 

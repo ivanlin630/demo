@@ -1,0 +1,14 @@
+{
+  "slice": "godview-slice-F",
+  "verdict": "PASS",
+  "read_measure": "verdicts/godview-slice-F.measure.json",
+  "story_audit": {
+    "f1_guard_achieves_goal": "★code-level獨立坐實（git show 20d4ce97，未等trace）：4個site（scout `_commit_conquest_attack`/envoy-dispatch `_dispatch_envoy`/envoy-track/encircle `_assign_encirclement`）皆從舊版『無belief時fallback用live tile_pos』改成sentinel(-1,-1)+guard（return false/skip/優雅降級保持現move_target），真的不瞎追live，非cosmetic。char bed（godview_f_test.gd 3個直測，讀了測試源碼）驗證方式合理，5/5 ALL PASS。F1達目的。F2刪8死*_pos欄=exhaustive grep零消費者，靜態刪欄位風險低，信implementer 4-way byte-identical複核。",
+    "seed1337_death_cause": "★獨立讀raw trace（docs/measurements/2026-07-19-godviewF-seed1337-lockpoint-d0ab7f91-decoded.log，team19/48完整區塊核對，非只信measurer摘要）：6隊死前軌跡全程combat_target=-1、無任何scout/envoy相關卡點——QA假說『F1 guard誤擋』不成立，獨立確認同意measurer判讀。真相：team19/52/58（3隊）耗盡ladder後卡進『等待新領主』(faction defection path A, prio=10 PRIO_AMBIENT, faction_ai_system.gd:3843)，即使`survival_dispatch_would_succeed=true`（理論上該preempt這個低優先權task）也沒被preempt，卡到famine=32-34死；team35(建設,prio=50)、team96(外交/求和,prio=70)同款低優先權卡死；team48(委靠/committed=併入,prio=80已在survival層但這個committed選項本身永不resolve)是另一子型態。全部與god-view F1/F2完全無關（無belief/scout/envoy signature）。",
+    "doom_redistribution_vs_new": "非F引入新死法——是既有的、比我上輪抓到的TASK_FLEE bug更廣的一個既有缺口：絕境階梯的stall-detection只監看`SURVIVAL_OPTION_SET`裡的committed選項，任何隊一旦被其他子系統（defection-transition/建設/diplomacy/join-commit）鎖進非survival task，即使優先權遠低於80、即使餓到famine=33+，也沒有安全網拉回真求生選項。這是RNG-cascade世界分岔讓不同seed剛好卡進哪種stuck-task的問題（同前3輪seed-swap模式），不是godview-F這輪的F1/F2造成——F1/F2乾淨，attrition歸因於pre-existing/更廣泛的既有缺口。"
+  },
+  "verdict_reasoning": "①F1 fallback guard code-level坐實達目的（比trace更強證據）；②seed1337 6死故事獨立驗證確認非F1誤擋，是既有『stall-detection覆蓋範圍不夠廣（只認SURVIVAL_OPTION_SET，不認defection/建設/diplomacy/join-commit等其他task）』缺口的又一批instance——這缺口不是godview-F這輪引入，是繼承自更早（同TASK_FLEE同宗）。過systems判準表『god-view移除成功+seed1337非F1 guard誤擋→PASS』門檻。",
+  "note": "★★重要：這批發現進一步坐實並擴大了我上輪（2026-07-19-qa-to-blueprint-current-world-story-verdict.md）抓到的TASK_FLEE bug——原判是TASK_FLEE專屬缺口，這輪measurer的5種不同stuck-task證據（逃跑/等待新領主/建設/外交/join-pending）顯示這是一個更泛化的家族bug：『絕境階梯stall-detection只認SURVIVAL_OPTION_SET committed選項，任何其他task卡住時完全沒有安全網』。強烈建議systems/blueprint把修復範圍從『TASK_FLEE專修』擴大成『famine_days超門檻+task非survival-class時的通用release機制』（measurer原話），一次涵蓋這整個家族而非逐一打地鼠。這是WHAT/HOW層的優先序建議，非我判權，但影響大（seed-swap模式意味著這缺口在『每次調整都換一個seed中獎』，長期看每個seed遲早都會撞到某種stuck-task），建議提高優先級。",
+  "measured_at_head": "d0ab7f91",
+  "qa_raw_trace_independently_read": "git show 20d4ce97（①的code-level驗證）+ docs/measurements/2026-07-19-godviewF-seed1337-lockpoint-d0ab7f91-decoded.log（②的trace獨立核對，team19/48區塊直讀）"
+}

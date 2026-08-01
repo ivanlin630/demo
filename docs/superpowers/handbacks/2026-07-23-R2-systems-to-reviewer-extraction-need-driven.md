@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·extraction de-patch need-driven·coin liquidity·死常數人格化·premise measure-坐實故 R②非R①] spec=2026-07-23-extraction-need-driven-depatch.md。根:_consider_extraction(faction_ai:2364)flat `greed-prud×0.5>0.4` 死常數門檻+不讀 need→中位領袖(0.25<0.4)永不 extract→salary 存入 anon_treasury coin 永鎖→has_specie false→買不了→湊不到 afford(coin-cause measure 坐實=salary illiquidity,premise 已驗故 R² 非 R①)。修 de-patch(blueprint 裁 need-driven 非 tune):①coin_need 信號(means-end 延伸:material-buy[_construction_facility_need]+food-buy[食壓]估 coin)②_consider_extraction 重寫:shortfall=coin_need-spendable>0 才 extract(need 驅),砍 flat gate③persona buffer texture(慎重留厚/貪婪留薄,extract=補 shortfall+margin 非清空)。審點:①coin_need 估算合理?(material_shortfall×ask+food)遞迴?(coin_need 讀 material/food need 非 facility-output→無環,同 material means-end guard)②persona buffer 不 swing always-extract-all(texture=margin 非 gate)③守恆(anon_treasury→team.coin 搬,CoinAudit=0)④砍 flat gate 不破 G1a coin 池(守恆無通膨;過抽 anon_treasury 空由 buffer 擋)⑤emergency 路徑保留⑥無 RNG。CLEAN→dispatch(feat/extraction-need-driven)。measure→QA(extraction fire 中位 0→?/coin_urg 降/脫貧鏈 has_specie→買→material→afford→build)。"
 ---
 

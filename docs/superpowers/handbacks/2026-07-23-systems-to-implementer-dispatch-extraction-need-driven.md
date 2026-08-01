@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·extraction de-patch need-driven·coin liquidity 死常數人格化·R² CLEAN(buffer floor 已補)·新 branch feat/extraction-need-driven] spec=2026-07-23-extraction-need-driven-depatch.md。R² CLEAN(5 點親驗+buffer floor 必補已納)。coin-cause 坐實=salary illiquidity(coin 鎖 anon_treasury 取不回)。根:_consider_extraction(faction_ai:2364)flat `greed-prud×0.5>0.4` 死常數+不讀 need→中位領袖永不 extract。修 de-patch:①coin_need 信號(means-end:material-buy[NeedOracle._construction_facility_need material>0→估 coin]+food-buy[food_days<DESPERATION→估 coin])②_consider_extraction 重寫:spendable=team.coin,shortfall=coin_need-spendable,>0 才 extract(need 驅,砍 flat gate),amt=min(shortfall+buffer, anon_treasury)③★_extract_buffer=lerp(BUFFER_MIN,BUFFER_MAX,prudence),BUFFER_MIN>0(TEST 5-10,貪婪只降正下限非 0=非清空)。TDD 6(★③慎重 buffer>貪婪+即使 greed=1.0 buffer>0[斷言絕對>0 測真清空反例];②無 need→不 extract;④shortfall≤0→不;⑤守恆 CoinAudit=0;⑥emergency 不變)。gate/headless 0new/determinism 2跑 byte-identical(純算術/人格,無 randf)。★★measure(→measurer §④b+specimen→QA):extraction fire 率(中位人格 0→?)/spendable coin 升/coin_urg 降(91%→?)/★脫貧鏈 has_specie→買糧買料→material 累積→afford→facility 建成(端到端)/★守恆 CoinAudit=0+texture(即使最貪婪 leader extract 後 anon_treasury>0,無 swing always-extract-all,coin 池不爆)/無新餓死。做完→to:measurer(→QA 判故事:中位隊有真需→取回自己 coin→買得起→脫貧;貪婪 vs 慎重 buffer 差異可見)。task=systems+reviewer(merge-gate)。"
 branch: feat/extraction-need-driven
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·market-seek stickiness Gate A·R² CLEAN·★off LOCAL main fa10121d·behavior-sensitive] spec=2026-07-22-market-seek-stickiness-gateA.md。deal-flow Gate A(手不聽腦家族,尋路 task)。根:measure seek 2207→arrive 798(64% divert)。修:faction_ai_system.gd _should_reeval(1877),在 _directive_fresh 之後、cadence(1898)之前加 `if team.current_task==TeamData.TASK_TRADE and team.move_target!=Vector2i(-1,-1) and not in_crisis: (Probe.bump reeval.marketseek_sticky) return false`。★in_crisis 是上方已算的 var(1886),直接用。crisis/stuck/directive/IDLE 上方已 return true=survival/威脅/命令 escape 全保(reviewer 確認威脅走 _evaluate_threat 獨立路不受阻);trade-timeout(817)兜 zombie;resident 擺攤 move_target=-1 不受影響。TDD 4型(在途非crisis→false/在途crisis→落cadence/已抵達move_target=-1→正常/非TASK_TRADE→不受影響)。gate/headless 0new/determinism 2跑byte-identical 無RNG。★measure=arrive%(36%→?)+deal數+無starve回歸(crisis escape驗)+doom-delta seed1337/42+8config,帶§④b樣本Probe.bump_sample。task=systems+reviewer。做完→to:measurer。"
 ---
 

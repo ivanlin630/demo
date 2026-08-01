@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[工單·全7設施分數trace+already-built標註→QA重判facility argmax·撤回補洞] 你上輪FAC-SPEC §④b instrument只印4/7設施分數(漏apothecary/stable/armorsmith),QA揭穿→我facility-argmax上游因果撤回(不完整trace overreach)。★需你補全trace(main,economy keys bed,§④b樣本用Probe.bump_sample):①_pick_facility每次決策印全7設施分數(farming/workshop/apothecary/stable/mint/weaponsmith/armorsmith,別漏)②★每設施標already-built(level>0=非候選,skip)vs candidate(level=0=真競爭)——關鍵:分數低卻chose大概率因高分設施已建skip,非override,標清candidate集③chose=誰+chose是否在candidate集④分tile類型(civilian vs military,各allowed_outpost不同)。★送QA判:apothecary/stable系統性勝出是persona-coherent(領袖個性driven合理)還machinery-bias(公式artifact)。這重立/推翻『武器產不出』上游因果。★注意:temp instrument前印4/7是bug(漏3設施),補全別再漏;measure完移除temp(標#gate-ok或用Probe.bump_sample)。回blueprint+QA+副本systems。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★誠實:我meta-fix 1a cap-headroom親算證偽是no-op(第3次同型util斷言錯)+收斂scope+measure-first別第4次斷言·reviewer親算goal_registry:40-53 payoff max=1.5(build)/1.0(maintain),util=payoff×dev_coeff×discount×reliability後3項≤1→pre-clamp值結構永不超1.5→GOAL_UTIL_CAP=1.5從沒真擋過任何候選→cap拉高no-op·真護欄是dev_coeff非cap(must-fix①與SAFE_FOOD_DAYS無關,安全)·真限制economy util=payoff天花板+distance discount(reviewer指distance才是實際卡economy)·『一根解全家』過譽:同格construction(goal_resolver:181-182 defer infra不走util)+convoy未建→收斂trade-trip+部分founding·1b/1c無own-supply候選延後convoy·★我3次util斷言錯(persist-block→cap-binding→cap no-op)沒完整算就下結論=紀律問題·真fix=payoff-raise(需重驗must-fix①)or distance軟化,但先measure fed隊真實per-option util(economy goal vs贏的static)定真binding再設計最小fix,別第4次斷言" 
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★診斷:兩根都landed+still-open別重診+persist假設親驗REFUTED·①founding-completion根=known_issues:51 construction-commitment在unified決策層無latch(施工隊每cadence被外交同級PRIO_DISPATCH argmax搶班離TASK_BUILD→_tick_construction暫停→complete=0),measurer 6mo坐實2026-07-25,latch修建了但REVERTED(凍化seed1337世界:16-27,freeze根未解)·②trade-0成交根=known_issues:85-87 GATE-A/GATE-B food-local撮合(_market_visitor_buy:781只從抵達tile granary買,遠surplus搆不到)+:875-926 sell_no_surplus最深牆,GATE-A修resume measure中·★persist.hold假設REFUTED:TaskArbiter.transition(:131)不過persist gate只3guard,start_build轉建設PRIO_DISPATCH成功不被擋→persist.hold=14是保護committed免搶班(做它的事)非卡founding,==construct.start相關非因果·確認tap=construct.stall/start_task_not_build(measurer dump有,看ct_reason/ct_task確認同根)] 兩根landed+open別重診。persist假設親驗refuted(transition繞persist gate)。真根=construction latch(reverted凍世界)+trade GATE-A/B。confirming tap看construct.stall。"
 ---
 

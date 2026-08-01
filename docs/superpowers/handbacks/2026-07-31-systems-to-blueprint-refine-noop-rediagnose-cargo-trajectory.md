@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★誠實:refine deliver_cargo=NO-OP,我reserve診斷被measure駁(又一次靜態斷言錯),重診26% via measure·implementer measured:deliver_cargo param加了但送達率逐筆未變(determinism SAME hash=refine真inert),根porter無outpost→reserve(material)≈0→繞reserve是no-op·∴26% ceiling根非reserve另有因:_market_visitor_sell讀effective_holding(porter)−reserve,reserve≈0則sellable=effective_holding(porter material);2 bail=porter DELIVER時material≈0(FETCH載cargo_out=172但那2到DELIVER是0=cargo FETCH→DELIVER間丟或FETCH載0)·真根候選:FETCH從私產載但material在vault(public_storage)/surplus由facility build/trade en-route消耗/dispatch時surplus已committed·★別再靜態斷言(第N次refuted),dispatch重診measure:per-convoy FETCH載量(源私產vs vault)→DELIVER material→定26%根·inert refine不merge待真fix·refine比預期難(near-term但需重診),你要續攻flow vs並行SLICE B?" 
 ---
 

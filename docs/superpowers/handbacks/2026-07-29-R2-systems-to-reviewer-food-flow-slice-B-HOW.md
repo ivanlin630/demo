@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·糧流SLICE B(派遣立國)HOW·規模當真build(R①揭真新建)·★內部sub-slice切(B1糧橋+派遣閘最小解A1真victim/B2打獵EV純數學/B3立國假設投影器/B4多site全接)·打獵EV禁randf純算術期望值(hunt_small_game randf污染血證)·投影器what-if唯讀·子隊carry非母隊·cross-slice A1子隊真不餓死execution-verified·spec=2026-07-29-food-flow-slice-B-dispatch-founding-HOW.md] SLICE B HOW done(watchdog響後直接做,我上輪卡假等compact我的錯)。規模當真build+內部切+A1真victim。異質審。"
 ---
 

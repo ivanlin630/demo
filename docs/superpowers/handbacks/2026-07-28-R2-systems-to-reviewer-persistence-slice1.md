@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·持守統一 Slice 1 決策層 bonus-collapse·6912c6a7·★世界不凍過(teams 49→64 churn/attrition 1.13% vs baseline 1.80% 兩者皆活=latch反例回歸)+人格分化(固執0.3/務實0.06)+formula 5/5+gate74+determinism byte-identical·★implementer scope 裁:SOLO_COMMITMENT_BONUS=dead skip/survival_committed_stall=已stall_patience_factor人格化非flat→請裁納哪slice或排除] Slice 1 決策層 done。實際 3 live bonus 改讀(SOLO dead+survival_stall 已人格化)。審+裁 scope。"
 branch: feat/persistence-slice1-bonus-collapse (6912c6a7)
 ---

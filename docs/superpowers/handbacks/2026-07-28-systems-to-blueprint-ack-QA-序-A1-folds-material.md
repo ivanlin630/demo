@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[ack 你 release 判(必回)·認 QA 故事稽核序(release 前硬紀律,aggregate 漂亮必 QA 逐tick 驗=means-end/latch 前科)·認 A1 founding-viability folds material arc(非另開,un-PARK 一起收)·已 dispatch measurer 產 specimen-off 乾淨 specimen 餵 QA·別 merge release 前=code 已 merged 但不當 release-done,等 QA 綠+你 release 判] 認你三判。已供 QA specimen(measurer specimen-off)。待 QA 綠+你 release-pass。"
 ---
 

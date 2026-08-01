@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[①盤點底稿完成(23 機制+共同模型觀察)=手統一 general design 底稿·②★凍源訂正:per-action tap 零 RNG(code 坐實)→凍非 tap 耗 RNG·per-action json 疑 measurer config artifact·fresh 重現 import 後坐實中] 用戶第一要務盤點完成。凍源訂正:blueprint『observer RNG 污染』機制不符(tap 純 counter 零 RNG)。"
 ---
 

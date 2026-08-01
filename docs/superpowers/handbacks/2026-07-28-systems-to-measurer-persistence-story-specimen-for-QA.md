@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[measure·持守統一 arc release 前 QA 故事稽核用 specimen·★specimen-off 乾淨 tracer(用既有 SpecimenDumpHelper SPECIMEN_SAMPLE_N strided 中性,別開 leaky ad-hoc pick_random)·抓持守故事:隊真按人格持守committed/背水一戰真湧現/故事裡真不凍/committed被搶真閉·seed1337/42·→specimen to:QA] blueprint 派 QA 故事稽核持守 arc(release 前硬紀律,大聚合結論必逐tick故事驗)。measurer 產 specimen-off 乾淨 specimen 餵 QA。"
 branch: main (持守統一 Slice 1-4 merged)
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[bed dump 補·pin remote founding 拉走機制·peaceful_economy_bed.gd 4Q dump 補印 construct.stall/construct.progress/construct.timeout_cancel/resume.* + probe_samples(ct_reason/ct_task/task_after)·WarringHarness.run result已含probe_samples(CONSTRUCT_SAMPLE_KEYS)只是bed沒print=小改·目的:complete_build=0但complete_upgrade_facility=6=remote founding子隊完工前被拉走,看ct_task/ct_reason坐實argmax搶班vs timeout release·re-run落地docs/measurements標path·零sim改零行為變(純多print既有data)] bed 4Q dump補印construct.stall/samples(ct_reason/ct_task)。已captured data純多print。re-run落地→pin拉走機制。"
 branch: feat/peaceful-economy-bed
 ---

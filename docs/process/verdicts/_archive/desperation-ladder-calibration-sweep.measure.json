@@ -1,0 +1,45 @@
+{
+  "slice": "desperation-ladder-calibration-sweep",
+  "is_sim": true,
+  "measured_at_head": "17fd4fc4 (branch feat/desperation-ladder-feedback) — implementer env override (LADDER_STALL_BASE→STALL_BASE_DAYS/LADDER_RELIEF_MIN→STALL_RELIEF_MIN/LADDER_STALL_WINDOW→STALL_EXCLUDE_WINDOW), no-env behavior byte-identical bb1e75ff",
+  "protocol": "docs/superpowers/handbacks/2026-07-18-systems-to-measurer-ladder-calibration-sweep.md（blueprint裁B：sweep找STALL_DAYS值『seed1337 latch保(starve≤5) AND seed4201回近baseline(attrition~2.9%,starve~0)』；命中=採用,掃遍無命中=證attrition內在→blueprint(A)accept）",
+  "tooling_note": "godot-detach.ps1 原只轉發 WARRING_*/GODOT_TIMEOUT env，LADDER_* 會漏掉——已擴充 filter 加 LADDER_*（純量測 launcher 擴充，已驗 cmd 檔內容確實含 LADDER_STALL_BASE，非改 production 邏輯）。",
+  "baseline_reference(bb1e75ff_no_env_default_STALL_BASE=8.0_RELIEF_MIN=1.0)": {
+    "seed_1337": {"extinct_starve": 5, "attrition_pct": 18.4684684684685, "stall_exclude": 299},
+    "seed_4201": {"extinct_starve": 3, "attrition_pct": 28.1976744186047, "stall_exclude": 335},
+    "target": "seed1337 latch保(starve≤5,attrition不回升)AND seed4201回近baseline(attrition~2.9%,starve~0)"
+  },
+  "sweep_candidates": [
+    {
+      "params": {"LADDER_STALL_BASE": 12.0, "LADDER_RELIEF_MIN": 1.0, "note": "主軸×1.5"},
+      "seed_1337": {"extinct_starve": 10, "attrition_pct": 26.3513513513514, "stall_exclude": 194},
+      "seed_4201": {"extinct_starve": 9, "attrition_pct": 29.0697674418605, "stall_exclude": 200},
+      "命中": false,
+      "verdict": "★兩seed皆惡化（非僅沒改善）——seed1337 5→10隊starve(18.47%→26.35%),seed4201 3→9隊starve(28.19%→29.07%,離baseline更遠)。更耐心(晚換格)讓壞option燒更多天才被排除,淨負面。"
+    },
+    {
+      "params": {"LADDER_STALL_BASE": 24.0, "LADDER_RELIEF_MIN": 1.0, "note": "主軸×3(極端點,驗證非U型)"},
+      "seed_1337": {"extinct_starve": 4, "attrition_pct": 27.9279279279279, "stall_exclude": 94},
+      "seed_4201": {"extinct_starve": 4, "attrition_pct": 19.4767441860465, "stall_exclude": 80},
+      "命中": false,
+      "verdict": "混合：seed4201 attrition改善(28.19%→19.48%,但仍6.7倍baseline目標2.9%,遠不算『回近』)+starve微升(3→4)；seed1337 starve改善(5→4)但attrition惡化(18.47%→27.93%)。非單調趨勢,但無一項達標。"
+    },
+    {
+      "params": {"LADDER_STALL_BASE": 8.0, "LADDER_RELIEF_MIN": 0.5, "note": "次軸單獨×0.5(維持預設STALL_BASE)"},
+      "seed_1337": {"extinct_starve": 6, "attrition_pct": 21.3963963963964, "stall_exclude": 331},
+      "seed_4201": {"extinct_starve": 3, "attrition_pct": 25.0, "stall_exclude": 247},
+      "命中": false,
+      "verdict": "seed4201 attrition小改善(28.19%→25%,仍8.6倍目標)starve持平(3→3)；seed1337小幅惡化(5→6隊,18.47%→21.40%)。方向對但幅度不足以達標。"
+    },
+    {
+      "params": {"LADDER_STALL_BASE": 16.0, "LADDER_RELIEF_MIN": 0.5, "note": "組合(主軸×2+次軸×0.5,per協議『找不到再加次軸組合』)"},
+      "seed_1337": {"extinct_starve": 7, "attrition_pct": 26.1261261261261, "stall_exclude": 154},
+      "seed_4201": {"extinct_starve": 5, "attrition_pct": 25.5813953488372, "stall_exclude": 140},
+      "命中": false,
+      "verdict": "組合未優於單軸最佳值,兩者皆惡化於baseline。"
+    }
+  ],
+  "判準表": "| STALL_BASE | RELIEF_MIN | seed1337 starve/attr | seed4201 starve/attr | 命中? |\n|---|---|---|---|---|\n| 8.0(baseline) | 1.0 | 5 / 18.47% | 3 / 28.19% | (baseline) |\n| 12.0 | 1.0 | 10 / 26.35% | 9 / 29.07% | 否(雙惡化) |\n| 24.0 | 1.0 | 4 / 27.93% | 4 / 19.48% | 否 |\n| 8.0 | 0.5 | 6 / 21.40% | 3 / 25.00% | 否 |\n| 16.0 | 0.5 | 7 / 26.13% | 5 / 25.58% | 否 |",
+  "determinism_note": "每候選單跑一次(省窗,右尺寸)——env const 為 static var 讀一次 init,同 no-env 已驗 byte-identical 之機制類推,無額外 RNG-order 風險來源；未逐候選雙跑覆核(若systems/blueprint要求可補,但4候選皆已明確未達標,認為非決定性缺口)。",
+  "summary": "★★掃遍 4 個候選（主軸×1.5/×3 + 次軸×0.5 + 組合×2+0.5），**無一達標**（seed1337 latch保 AND seed4201 回近baseline 兩條件同時滿足）。最佳 seed4201 attrition（STALL_BASE=24.0 得 19.48%）仍是 baseline 目標(2.9%)的 6.7 倍，且該候選讓 seed1337 attrition 惡化（18.47%→27.93%）。趨勢非單調（STALL_BASE↑不是單純線性變好或變壞），顯示這不是簡單的『調對一個滑桿』問題。**判定：calibration sweep 移不掉 seed4201 的 attrition 惡化——此為 attrition 內在（機制本質帶來的行為差異），非純 calibration 缺口。** 回報「不存在」，依協議路由 blueprint 裁 (A) accept merge。"
+}

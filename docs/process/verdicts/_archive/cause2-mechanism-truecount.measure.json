@@ -1,0 +1,28 @@
+{
+  "method": "starvation_lockpoint_trace_bed.gd v2(main dir,未commit)——加task_priority/task_reason/唯讀複製try_set布林邏輯算would_survival_dispatch_succeed。seed1337×8mo重跑(detach)。",
+  "raw_logs": ["docs/measurements/2026-07-18-starvation-lockpoint-v2-raw-seed1337.log", "docs/measurements/2026-07-18-starvation-lockpoint-v2-decoded-seed1337.log"],
+  "★true_count（③答案）": {
+    "famine_days_gt_0（真飢荒）": ["team14(famine=33.7)", "team19(famine=33.6)", "team27(famine=33.5)"],
+    "famine_days_eq_0（probe誤分類候選,food_days臨界但非持續飢荒）": ["team20(food_days~1.2)", "team21(food_days~1.5)", "team22(food_days~2.97)", "team23(food_days~1.6)"],
+    "verdict": "★確認QA『只3隊真飢荒』——famine_days>0篩選乾淨對應3隊,其餘4隊famine_days=0不該算真no_forage死。probe分類建議:①改認全SURVIVAL_OPTION_SET(非只FORAGE/FLEE)②只計famine_days>0案例才算『真飢荒死』,排除food_days臨界但famine_days=0的雜訊。"
+  },
+  "★3隊的task_priority/task_reason精確值（①②答案的關鍵）": {
+    "team14": {"task":"貿易","task_priority":80,"task_reason":"unified","option":"買糧","famine_days":33.7,
+      "would_succeed_if_survival_sourced_redispatch": false,
+      "would_succeed_if_unified_sourced_redispatch": true,
+      "diagnosis": "★不是self-replace block！reason=unified,若_decide_unified想再派一個unified來源的survival-class option,self-replace會過(unified==unified)。20 tick option都停在『買糧』——這是『決策層根本沒想換』(util一直選買糧argmax不變),非dispatch被擋。=②的『分開』理論(util沒escalation),非①的source-whitelist block。"},
+    "team19": {"task":"安頓","task_priority":50,"task_reason":"invite_settle","option":"survival","famine_days":33.6,
+      "would_succeed_if_survival_sourced_redispatch": true,
+      "would_succeed_if_unified_sourced_redispatch": true,
+      "diagnosis": "★★也不是self-replace block！task_priority=50(遠低於PRIO_SURVIVAL 80)——若survival dispatch真的被呼叫,strict-greater規則(80>50)會直接贏,不需經過self-replace檢查。20 tick仍卡在『安頓』代表survival dispatch迴圈根本沒被觸發／entry gate沒讓它進——這是第三種機制:entry gate(_evaluate_survival的WARNING/URGENCY判準)在famine_days=33.6/food_days=0的極端案例下仍沒讓這隊進survival-dispatch考慮範圍。★這才是真正的『手不聽腦』——不是手不聽腦,是腦根本沒被叫去想。"},
+    "team27": {"task":"投靠","task_priority":80,"task_reason":"unified","option":"併入","famine_days":33.5,
+      "would_succeed_if_survival_sourced_redispatch": false,
+      "would_succeed_if_unified_sourced_redispatch": true,
+      "diagnosis": "同team14——reason=unified,非self-replace block,是決策層util一直選併入不變(或併入本身在等對象接受,執行卡非決策卡)"}
+  },
+  "★對系統的直接回答": {
+    "①手不聽腦是source=survival的self-replace block嗎": "★★否定！3隊真飢荒案例中,team14/27=unified來源(self-replace不擋,是util/execution層問題)；team19=task_priority=50根本沒被survival dispatch碰過(entry gate問題,連try_set都沒機會擋)。我上輪坐實的『source=survival白名單』機制存在(team20/23確實是reason=survival被鎖)，但★不是這3隊真飢荒案例的成因！那是另一組(famine_days=0的邊界案例)的鎖點,非真正餓死的3隊。",
+    "②的不escalation是同一block還是分開": "★分開,且是2種不同的分開原因：team14/27=『util一直argmax選同option沒escalation』(決策層問題,dispatch層沒卡);team19=『entry gate沒讓survival-dispatch迴圈啟動』(比try_set更前面一關的問題)。"
+  },
+  "revised_root_cause_summary": "★三個真飢荒隊,三種不同鎖點,無一是我上輪假說的source='survival'白名單self-replace block(那個機制真實存在,但鎖住的是另外2隊food_days臨界但famine_days=0的邊緣案例,非這3隊真死因)。真正3隊的鎖點：①team14/27=決策util沒對惡化的food_days產生escalation壓力(可能買糧/併入本身在SURVIVAL_OPTION_SET內util公式沒讀food_days/famine_days惡化程度,或COMMITMENT_BONUS+reeval cadence讓它不太會換)②team19=survival-dispatch entry gate(_evaluate_survival的WARNING/URGENCY判準)在此案例沒開,函式根本沒被呼叫。"
+}

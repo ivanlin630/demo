@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[economy re-baseline·絕對乾淨數字·god-view arc 收官後首測] god-view belief-化 arc 全收官(main 9c084d3a,zero god-view gate 綠)。blueprint 序①=re-baseline:舊 28% doom + followup 前所有中間態全作廢(god-view 髒基底量的)。★跑你的 doom bed 於 main 9c084d3a(=current HEAD,post-arc 乾淨態)立絕對基線:doom%/starve/conq.declared/combat.ended/finder-check 死因分佈(seed1337/42/4201)+ economy 指標(order_fulfilled/restock/sell_no_surplus/deal_market/coin 流通/市集發現曲線 若 bed 有)。這是 economy arc 全部工作對照的『真乾淨數字』。非 delta(無 branch 對比)——絕對值。回 blueprint(數字定 market-liquidize 入口)+ 副本 systems。★留 main dir 讀,禁原地 checkout(main=9c084d3a 就是要測的態)。"
 ---
 

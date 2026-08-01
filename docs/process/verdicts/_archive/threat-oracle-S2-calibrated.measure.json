@@ -1,0 +1,46 @@
+{
+  "measured_at_head": "e3d34ffc (branch feat/threat-oracle-s2 calibrate commit, off S2 d5a83163, off baseline 3a429632)",
+  "baseline_head": "3a429632",
+  "pre_calibrate_head": "d5a83163",
+  "calibrated_head": "e3d34ffc",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-threatoracle-s2cal-charbed-e3d34ffc.log",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-threatdissolution-e3d34ffc.log",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-constitution-e3d34ffc.log",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-headless-e3d34ffc.log",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-seed1337-e3d34ffc.log",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-seed42-e3d34ffc.log",
+    "docs/measurements/2026-07-17-threatoracle-s2cal-seed4201-e3d34ffc.log"
+  ],
+  "method": "沿用既有.worktrees/threat-oracle-s2(同branch,HEAD推進至e3d34ffc)+既有baseline worktree/JSON(3a429632,無需重跑)。3 seed(1337/42/4201)×2mo對pre-S2 baseline做pointwise diff,重點抽迎戰chosen率+economy進程指標,與上一輪(d5a83163未校準)同metric比較看tune是否收斂。",
+  "gates": {
+    "char_bed": {"result": "12/12 ALL PASS,四象限方向不變(量級降,如預期)", "verdict": "CONFIRMED"},
+    "threat_dissolution_check": {"result": "ALL PASS(bed隨calibrate retune,語意對)", "verdict": "CONFIRMED"},
+    "constitution_gate": {"result": "PASS sites=65 removed=0(常數變非結構,不受影響)", "verdict": "CONFIRMED"},
+    "headless_test_full": {"result": "=== DONE ===,殘3 assertion同函式同行號(15540/7078/13990,與未校準S2一致)", "verdict": "CONFIRMED pre-existing"}
+  },
+  "organic_tune_convergence_check": {
+    "seeds_tested": [1337, 42, 4201],
+    "months": 2,
+    "迎戰_chosen_ratio_vs_pre_S2_baseline": {
+      "seed_1337": "44 → 570（≈13x，上輪未校準44x）",
+      "seed_42": "44 → 1355（≈31x，上輪未校準105x）",
+      "seed_4201": "126 → 465（≈3.7x，新增seed無上輪對照）",
+      "verdict": "★顯著收斂：13-31x（本輪）vs 44-105x（上輪未校準）——降幅明確,但3 seed間仍有變異(3.7x~31x),非緊收斂到單一數字,屬合理範圍非隱憂"
+    },
+    "economy_progression_non_zero_check": {
+      "seed_1337": "build_outpost 35→39(升)/farm_pos_teams 8→10(升)/merge.set_ok 3→30(升)/rung_dist r0-r2皆有值 — 完全非零,對比上輪同seed『全歸零』= 收斂",
+      "seed_42": "build_outpost 22→18(降但非零)/farm_pos_teams 10→6(降但非零)/merge.set_ok 21→0(歸零)但surv_ok 1→8(升)/rung r1-r2仍有值 — 混合(merge.set_ok歸零但其餘非零),較seed1337弱但非全滅",
+      "seed_4201": "build_outpost 19→12(降但非零)/farm_pos_teams 6→2(降但非零)/rung r0-r3皆有值 — 非零",
+      "verdict": "★三seed economy指標皆非全滅(對比上輪seed1337全歸零)——tune-loop『economy進程非零』收斂判準達成，但seed_42的merge.set_ok局部歸零值得留意(非致命,非全滅)"
+    },
+    "world_health_sanity": {
+      "seed_1337": "attrition 4.05%→6.53%, teams 66→73, pop 426→415",
+      "seed_42": "attrition 2.55%→3.24%, teams 61→59, pop 421→418",
+      "seed_4201": "attrition 9.88%→6.69%, teams 49→51, pop 310→321",
+      "verdict": "三seed皆健康量級(非崩潰),部分甚至attrition下降/teams成長"
+    }
+  },
+  "incomplete": [],
+  "summary": "★tune-loop收斂判定：迎戰選中率從上輪44-105x降至本輪3.7-31x(顯著收斂,仍略偏高但合理，符合『threat該更重要但不該碾平economy』設計意圖)+ economy進程指標三seed皆非全滅(對比上輪seed1337完全歸零)+四象限/dissolution/gate/headless單元層全綠。整體判定：收斂,可判merge。seed_42的merge.set_ok局部歸零/seed間迎戰比例變異(3.7x~31x)供systems參考,非blocking。"
+}

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[更正·d26ae644 別 discard→改 HOLD-for-QA·你 fix measured-helpful] 昨我發你 HALT 說 market-seek stickiness『別建/別 merge、丟棄』——★更正:d26ae644(你已建的 feat/market-sticky)measurer 量出 doom↓(starve7→0),機制止 re-eval churn 恰好對上 QA 真故事(re-seek 空市場 loop)。我 HALT 的『症狀/更糟』理由被量測翻轉=錯。∴ branch 別丟,HOLD 等 QA 故事驗證(premise 敘述錯但 fix 可能對機制)。你 hold warm 別動 code,等 QA 判 coherent→systems merge / 不 coherent→再議。抱歉 HALT→un-HALT 來回,跟著證據走(measure+QA)非鎖 premise。你的 fix 沒白做。"
 ---
 

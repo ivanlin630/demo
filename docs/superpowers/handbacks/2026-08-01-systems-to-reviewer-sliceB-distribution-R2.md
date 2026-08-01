@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² 甲=SLICE B分配政策HOW spec設計審(dispatch前必過)·spec:docs/superpowers/specs/2026-08-01-logistics-slice-B-lord-distribution-policy-HOW.md·審核心seam:①deficit偵測(領主掃自有resident-teams runway<閾)②_distribute_candidates(仿_deliver_candidates,util=deficit×persona義氣放大/貪婪衰減,競argmax對trade-util)③DELIVER終點擴充(interaction_system _resolve_market_at_outpost加resident-DELIVER分支,直注food入resident pool無market_order無支付)④unrest耦合(持續deficit→UnrestBank.add,fed→reduce,餵現成defection≥20)·審點:憲法WEIGH非GATE?感知鐵律(讀本勢力自有居民deficit=intra-faction合法非god-view敵情)?約束1走同一convoy原件非平行搬運?tap全接(distribute util per-option/DELIVER量/deficit runway/unrest源)?dev-verify硬斷夠?·剝削A/B fork並行呈blueprint裁,審seam本體不blocked"
 ---
 

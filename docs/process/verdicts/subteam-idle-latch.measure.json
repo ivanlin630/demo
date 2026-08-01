@@ -1,0 +1,34 @@
+{
+  "slice": "subteam-idle-latch (手不聽腦第3種, 1727 SURVIVAL_TASKS exclusion)",
+  "measured_at_head": "036fc42c",
+  "baseline_head": "c5ab36d9",
+  "window": "8mo/57600t organic + SITRACE seed1337/42",
+  "verdict": "NOT clean-pass — send-back-leaning. HOW-correct (stops thrash) but terminal-sticky side-effect breaks food-delivery loop, strongly implicated in seed42 0->10 regression.",
+  "raw_logs": [
+    "docs/measurements/2026-07-19-subteamidle-baseline-c5ab36d9.json",
+    "docs/measurements/2026-07-19-subteamidle-branch-036fc42c.json",
+    "docs/measurements/2026-07-19-subteamidle-sitrace-1337-036fc42c.txt",
+    "docs/measurements/2026-07-19-subteamidle-sitrace-42-036fc42c.txt"
+  ],
+  "quick_gates": {
+    "constitution": "PASS sites=64 removed=0 (0 new)",
+    "headless": "branch 5-fail set == baseline (0 new)",
+    "determinism": "implementer-reported ebf82786 (seed1337 2mo); not independently reproduced (no-RNG 1-line, low risk)"
+  },
+  "regression": {
+    "seed1337": {"baseline": {"starve": 7, "attr": 19.82, "pop": 356}, "branch": {"starve": 6, "attr": 19.14, "pop": 359}, "verdict": "marginal improve"},
+    "seed42": {"baseline": {"starve": 0, "attr": 4.86, "pop": 411}, "branch": {"starve": 10, "attr": 20.83, "pop": 342}, "verdict": "REGRESSION 0->10 famine"},
+    "seed4201": {"baseline": {"starve": 0, "attr": 0.29}, "branch": {"starve": 0, "attr": 0.29}, "verdict": "identical"}
+  },
+  "thrash_fixed": "YES — foragers no longer thrash-recalled; food flows (seed1337 team62 food 9-11 vs baseline thrash-stuck 2.5-4.58). ARRIVE<->RELEASE 1:1 oscillation gone.",
+  "terminal_sticky_CONFIRMED": {
+    "severity": "SIGNIFICANT (implementer/reviewer flagged non-blocker; measurer disagrees = blocker)",
+    "seed1337": "tid=49 stuck 48140 ticks hoarding 1970 food-days; tid=70/58/81/62 stuck 1000-1220t food 9-60",
+    "seed42": "tid=57 stuck 32480 ticks hoarding 209 food-days; tid=54/79 stuck 1000+t",
+    "mechanism": "foragers detach permanently at forage tile (FORAGE has no release path), forage+hoard food but NEVER 歸建/deliver to parent -> parent loses subteam food contribution -> parent famine",
+    "seed42_link": "seed42 branch deaths = 10 famine (0 stuck/手不聽腦); baseline seed42 = 0 starve. Fix's ONLY behavior change = foragers stay (don't merge-deliver). Strongly implicated: broken food-delivery loop -> parent starve. Not proven parent-by-parent (would need parent_team_id cross-ref) but mechanistically coherent + circumstantially strong."
+  },
+  "recommendation": "SEND-BACK to systems: 1727 fix needs companion — foragers (FORAGE/CAMP) need 'food-full -> deliver/歸建/re-rank' release path, else terminal-stick + hoard + starve parent. Without it, fix trades thrash-death for hoard-stick + seed42 parent-starve (net not clearly better). terminal-sticky is a BLOCKER not a benign WHAT-flag.",
+  "incomplete": ["seed42 famine-dead parent-of-stuck-forager cross-ref (parent_team_id not logged) — mechanism circumstantial not parent-by-parent proven"],
+  "summary": "Fix stops the thrash-starve (HOW-correct, food flows) but its terminal-sticky side-effect (foragers hoard 200-2000 food-days, never deliver to parent) breaks the food-supply loop and is strongly implicated in seed42 0->10 famine regression. Gates green. Recommend send-back for companion forager-release path; terminal-sticky = blocker."
+}

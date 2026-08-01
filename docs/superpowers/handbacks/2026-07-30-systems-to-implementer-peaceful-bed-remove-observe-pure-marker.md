@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[R²後修·1行·移 peaceful_economy_bed.gd 的 # @observe-pure marker(systems spec錯:bed是runner/harness seed跑自己世界=非pure-observe helper,seed()合法世界設置非觀測擾動→observability_gate ③正確FAIL on :110 seed()·bed determinism由seeded保證非零RNG·pure-observe marker只給嵌入式觀測helper如specimen_dump_helper/tracer)·移bed marker(保liveness_test marker=它t0純讀無seed)·跑observability_gate確認PASS+bed exit0+commit+handback] 移bed @observe-pure marker(我spec錯,bed是runner非observe-helper)。跑observability_gate確認PASS+commit+handback。"
 branch: feat/peaceful-economy-bed
 ---

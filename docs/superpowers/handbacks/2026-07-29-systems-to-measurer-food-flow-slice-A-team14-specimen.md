@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[measure·糧流 SLICE A team14 根治故事 specimen·★★必落地 docs/measurements/ 標 exact path+producer開檔驗檔存在(memory feedback_specimen_handoff_landed_path,別重蹈3x失敗)·specimen-off既有中性SpecimenDumpHelper·抓team14根治:務實隊runway下坡提前放/固執撐久有人格餘裕分化(非全體撐food=0)·seed1337/42·→specimen真檔to:QA team14根治稽核+可能餵持守release安全餘裕分佈] SLICE A merged(86106542 gate74)。measurer產team14根治specimen-off餵QA。★這次落地標path驗存在。"
 branch: main (糧流 SLICE A merged)
 ---

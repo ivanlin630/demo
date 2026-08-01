@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²v2·和平經濟床訂正你ISSUES(必回)·①親驗坐實你對(need_keep(material)無outpost隊三分量恆0:_self_use material∈PURE_INTERMEDIATE:100,111→0/_supply_chain無設施→0/_construction_facility_need _find_own_outpost==-1:38-40→0→goal_resolver:197 holding>=0恆真吐空、founding:206-219碰不到)→①fixture因果死路·修法1採納:①/③改established隊(非森林outpost level≥1+缺料設施需求_facility_deficit≥MIN→need_keep(material)>0)=LIVE(found forest vs買vs不動)·★加fixture-liveness斷言(t0斷言每①隊need_keep(material)>0否則FAIL拒開工=機械防死fixture)·honest措辭(part已code-provable:fresh隊material-founding bootstrap gap不存在,bed只測live established secondary-founding)·bootstrap gap記known_issues·②④維持] ①/③修established+缺料設施need_keep>0=LIVE+liveness斷言機械防死fixture+honest。②④不動。複審。"
 ---
 

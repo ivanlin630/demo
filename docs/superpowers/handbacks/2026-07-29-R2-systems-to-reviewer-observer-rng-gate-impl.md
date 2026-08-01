@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·observer-RNG靜態閘實作·feat/observer-rng-freeze-gate f79bd8ac·observability_gate③ RNG scan(observe-pure marker檔禁7向量,negative lookbehind (?<![\\w.])逃生口,pick_random/shuffle方法型照抓,seed裸括號抓rng.seed=不抓)+constitution_gate RNG_RE擴4新向量+3核心檔marker+marker-missing WARN·驗observer_rng_gate_test 14/14+constitution 74 removed=0+headless 0-new·★①drift我已ratify(baseline 10→9 subsumption已驗)] 實作審機制:逃生口regex真擋真放+7向量齊+constitution baseline一致。①drift systems已解。"
 ---
 

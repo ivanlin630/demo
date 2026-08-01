@@ -1,0 +1,28 @@
+{
+  "method": "既有production tap直讀(faction_ai_system.gd:2271-2286 `_on_team_extinct`死因分類,非我新建工具)——死亡當下team.current_task若=TASK_FORAGE→while_foraging;若=TASK_FLEE→while_fleeing;否則→no_forage(既有『blueprint 2026-07-12』診斷埋樁,本輪直接讀現成probe即得結論,免跑新specimen trace)。",
+  "compared_runs": {
+    "pre_threat_oracle": "3a429632(S1 probe+S1.5,無S2 util),seed42,8mo,既有worktree.worktrees/threat-oracle-s2-baseline",
+    "post_threat_oracle": "623d3e77(threat-oracle全merged),seed42,8mo,前輪長窗watch已產出"
+  },
+  "core_finding_絕境階梯fire否": {
+    "pre": {"extinct_starve_total": 4, "while_foraging": 0, "while_fleeing": 4, "no_forage": 0,
+      "verdict": "4/4(100%)死於TASK_FLEE——絕境階梯確實fire了(隊有嘗試逃),只是仍未逃脫餓死。★符合blueprint判準的『自限代價acceptable』案例"},
+    "post": {"extinct_starve_total": 15, "while_foraging": 0, "while_fleeing": 0, "no_forage": 15,
+      "verdict": "★★15/15(100%)死於no_forage(既非TASK_FORAGE也非TASK_FLEE)——絕境階梯完全沒fire,傻站著餓死。★符合blueprint判準的『bug不可接受』案例"}
+  },
+  "verdict": "★★清楚、code-verified、無模糊地帶：pre-threat-oracle 100%餓死隊死前在逃(絕境經濟接住,雖敗猶戰)；post-threat-oracle 100%餓死隊死前既非覓食也非逃跑(絕境經濟完全沒接住,傻站死)。這是質變非量變——不只餓死數增加(4→15),死亡『型態』從『有嘗試』變成『完全沒嘗試』。★依blueprint判準：這是bug,比threat-oracle造成餓死人數增加更嚴重的根因。",
+  "plausible_mechanism_待implementer/systems查證": {
+    "hypothesis": "task_arbiter PRIO 不對稱——S3收斂後(見implementer S3 handback自flag): 備戰/迎戰/求和 commit @PRIO_THREAT=70,而survival(FLEE)僅@PRIO_DISPATCH=50。優先序上threat options 高於 survival——一旦隊commit到備戰/迎戰/求和(70),即使food_days崩到SURVIVAL_BOOST_FLOOR以下,survival boost(decision_engine.gd:37-41)雖然把util推高,但★task_arbiter層級的PRIO 50<70可能擋掉了『用survival task直接置換掉threat task』的路徑——隊要等到threat task本身『release』(_evaluate_threat的release scaffolding)或下次完整reeval才可能真的切換,若commitment慣性(COMMITMENT_BONUS=0.3)+reeval cadence间隔夠長,可能來不及在餓死前完成切換。",
+    "caveat": "此為根據已讀code(faction_ai_system.gd/S3 handback自flag的PRIO不對稱風險)推導的假說,非本輪逐隊trace實證——我在S3複核時只驗了『FLEE絕對率保住』(聚合%數字),沒驗『FLEE能否真的preempt/置換掉已commit的threat task』這條——這正是implementer自己在S3 handback flag的風險項『measurer驗FLEE率保』我當時驗的是聚合率非preempt能力,這次的no_forage=15證實了這個risk真的兌現了。",
+    "follow_up_available": "已建新bed scripts/debug/starvation_desperation_trace_bed.gd(全隊specimen+SpecimenTracer完整決策timeline,含死隊最後決策)可挖出這15隊死前具體卡在哪個task(備戰/迎戰/求和/建設/貿易等)+PRIO衝突細節,尚未跑(本輪aggregate證據已夠回答『fire否』的核心問題,深挖『卡在哪』留給systems決定是否需要)"
+  },
+  "causation_對照_附帶結果": {
+    "extinct_starve": "pre=4 -> post=15(3.75x)",
+    "覓食chosen_pct": "pre=38.37% -> post=38.68%(幾乎不變,forage本身沒被排擠)",
+    "survival_chosen_pct": "pre=27.88% -> post=15.31%(顯著下降——但這是聚合『被選中』率,不代表『該逃時逃不掉』——見上方no_forage發現,問題不在survival被選少,是關鍵時刻沒被選到)",
+    "備戰chosen_pct": "pre=0.50% -> post=4.31%(8.6x)",
+    "迎戰chosen_pct": "pre=0.32% -> post=1.05%(3.3x)",
+    "求和chosen_pct": "pre=1.01% -> post=4.42%(4.4x)",
+    "note": "覓食聚合率沒降,故『排擠覓食』的原始假說不夠精確——真正的問題是『特定瀕死隊』在關鍵時刻被鎖在threat task出不來,非全體覓食時間被排擠。備戰/迎戰/求和聚合率皆顯著上升,與PRIO假說方向一致。"
+  }
+}

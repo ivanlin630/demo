@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·持守統一 Slice 3 try_set 門檻式(執行層核心)·15952748·★implementer execution-verified抓過度壓制(初版硬擋全非危機committed→PRODUCE隊鎖不轉→attrition 0向凍=latch重演)→修PROGRESSIVE_HOLD_TASKS白名單(只BUILD族completable硬保護,ongoing不擋)→attrition 2.03%恢復·危機axis原封+玩家authority+同task不擋+單點return false非skip·驗tryset 7/7+gate74+determinism+世界不凍·★spec §4/§6 refinement=progressive-only→completable-only白名單需ratify] Slice 3執行層真持守done。審門檻+白名單completable-only refinement+世界不凍。"
 branch: feat/persistence-slice3-tryset-threshold (15952748)
 ---

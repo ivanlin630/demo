@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·construction pipeline 可觀測性補洞·純觀測 slice·R²CLEAN·spec=2026-07-25-construction-pipeline-observability-A1-stall-trace.md] A1 forest founding 仍 FAIL(outpost_built 兩 seed 0,dispatch 6080/1447 巨量但 completion 0)。QA 定位卡『施工啟動後~完工前』。construction pipeline 全無 Probe tap→違全量暫態可觀測性不變量→盲區猜一階。加 permanent Probe tap 定位一階。★純觀測禁改行為。閘:headless 0-new+gate 74 removed=0+★三跑 byte-identical(觀測禁 RNG 硬驗)。→handback to:measurer 跑 A1 focused 定位一階。"
 branch: feat/construction-obs-tap
 ---

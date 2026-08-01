@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·cheap per-action-type completion 計數 tap·決定 A1 閉沒(新 outpost 'build' 真 0 還是抽樣 missed)·加到 branch feat/construction-commitment-latch(latch 在)·blueprint 序] blueprint 6mo 判 latch=部分改善非閉 A1:16/16 抽樣 completion 全 action='upgrade_facility' 零 'build'(新 outpost founding)=A1 核心未坐實(可能真 0/可能 8-cap 抽樣 missed)。加 cheap per-action-type outpost_built 計數 tap 100% 確認 build completion 真 0 否。★純觀測禁 RNG。閘:headless 0-new+gate 74+determinism 3跑 byte-identical。→measurer measure 分 action。"
 branch: feat/construction-commitment-latch (續 5b166eb1，latch+resume 在)
 ---

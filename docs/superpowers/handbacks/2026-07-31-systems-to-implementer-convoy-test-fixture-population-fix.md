@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[★convoy_delivery_test在merged main FAIL(1)·test fixture bug非函式bug·_mk_seller_state(convoy_delivery_test.gd:87)沒設team.population→default 0 < CONVOY_MIN_PARENT_POP(4,faction_ai:2916)→_deliver_candidates:129 perf前閘擋→cands=0→FAIL·函式對(和平床order_fulfilled 0→5證,那裡隊有pop)·修:_mk_seller_state加team.population=6(≥4過閘)·跑convoy_delivery_test確認4/4綠+headless 0-new+commit·★另:floor誤banked待blueprint裁別動persist_strength] convoy test fixture漏population→加team.population=6過CONVOY_MIN_PARENT_POP閘。跑test 4/4綠+commit。floor別動(待blueprint裁)。"
 branch: feat/peaceful-economy-bed
 ---

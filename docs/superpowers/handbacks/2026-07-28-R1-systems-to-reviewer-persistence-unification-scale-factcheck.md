@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R①·持守統一 factcheck·★異質框外驗規模斷言(寫 HOW spec 前)·三規模前提 code 坐實別假設:①23散機制真收成一套②兩層真共讀同一持守值③所有多tick動作真走同一套·★別重蹈 means-end R① 我 orientation『非新引擎』樂觀低估被異質駁血證·premise_contradiction→halt 回 blueprint 調 WHAT] 持守統一 WHAT 用戶核可,寫 HOW spec 前 R① 驗規模。WHAT spec+盤點底稿 23 機制在。統一模型觀察=待驗假設非斷言。"
 ---
 

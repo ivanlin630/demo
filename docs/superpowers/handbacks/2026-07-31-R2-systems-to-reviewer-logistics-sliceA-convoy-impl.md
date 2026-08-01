@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·後勤SLICE A convoy實作·feat/peaceful-economy-bed 4754214e·GATE-B撮合物理送貨第一刀·三驗收線measured全綠:①convoy dispatch/fetch/deliver=4+Market成交②★order_fulfilled 0→5(整session為0的GATE-B起來,材料第一次真換手)③cargo_delivered=69貨真離賣方·deliver candidate真fire(dump util=0.76贏argmax非假設,本session鐵律應用)·(A)goal_resolver._deliver_candidates(surplus+demand-finder received_buy_orders belief+不gate ARCHETYPE)+(B)convoy生命週期(TASK_CONVOY+FETCH exact-load conserving+_tick_convoy各階段專屬分支防generic:1753攔截+DELIVER _resolve_market_at_outpost=visitor_sell settle→fulfilled++ +RETURN merge釋pop無zombie)+throttle 1/隊·unit 4/4+determinism三跑byte-identical+不凍attrition1.80%teams90 convoy59 warring+gates全綠+cargo/pop守恆·★flag convoy.return和平床telemetry=0(功能已證merge/無zombie/pop守恆,warring convoy=59)·審deliver真fire measured+lifecycle不被攔+visitor_sell settle真fulfill+守恆+不凍+return telemetry" 
 ---
 

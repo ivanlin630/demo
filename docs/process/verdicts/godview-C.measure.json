@@ -1,0 +1,23 @@
+{
+  "slice": "god-view Slice C (市場 belief-gate + market-discovery store) — FINAL god-view block",
+  "measured_at_head": "a6cf4466",
+  "baseline_head": "9d427a39",
+  "verdict": "PASS. market belief-gate net-healthy (attr DOWN + pop UP all seeds, no economy collapse/cold-start deadlock). market-relay DIRECT-proven (107 events, beyond-vision). config 0-crash (merchant economy-config clean). gates green.",
+  "raw_logs": ["docs/measurements/2026-07-20-godviewC-baseline-9d427a39.json", "docs/measurements/2026-07-20-godviewC-branch-a6cf4466.json", "docs/measurements/2026-07-20-godviewC-market-relay-trace-1337.txt"],
+  "gates": {"constitution": "PASS 64/0-new", "headless": "branch=known 5-fail 0-new (2 stale WS-2b fixture 補 team_market_known)", "determinism": "implementer 6b10deeb no-new-RNG, not independently reproduced", "game_sim_multi": "0 SCRIPT ERROR (game_sim_test/tyrant/merchant/warzone; merchant=economy-heavy clean)"},
+  "doom_delta": {
+    "seed1337": {"base": 3, "branch": 3, "attr": "20.0->15.1", "pop": "355->377"},
+    "seed42": {"base": 2, "branch": 3, "attr": "22.9->18.1", "pop": "333->354"},
+    "seed4201": {"base": 0, "branch": 0, "attr": "2.3->0.6", "pop": "336->342"},
+    "note": "all attr DOWN + all pop UP = market belief-gate net-healthy, no economy collapse; starve near-flat (3/3/0 -> 3/3/0, seed42 +1 noise)"
+  },
+  "market_relay_direct_verified": {
+    "events": 107,
+    "example": "tick=1160 team=4 learned market@(9,11) via relay dist=7 > vision=3 (msg=order_sell) — NOT vision",
+    "verdict": "market-info relay DELIVERS beyond vision (承 Slice B R① 教訓 no-假設): order_buy/sell + outpost_built messages harvest market pos -> teams discover markets they never saw -> no cold-start economy deadlock. Directly substantiated, not inferred."
+  },
+  "cold_start_no_deadlock": "pop UP all seeds + market-relay working -> teams reach markets via 創世-nearby + vision + relay -> trade/buy-food not deadlocked by market belief-gate",
+  "economy_metric_caveat": "warring_harness has no dedicated trade/coin probe key; economy-health proxied by pop↑ + market-relay-delivers + merchant-config 0-crash. Direct trade-volume/coin-flow not instrumented (would need probe addition; proxies strong)",
+  "godview_arc_complete": "A/F/E/D/B/C all measured. Remaining: 1119 can_reach (next batch, near-vacuous low-priority) + GOODS/PRICES belief (deferred, info-manipulation dimension)",
+  "summary": "Slice C (final god-view block) market belief-gate PASS: net-healthy doom-delta (attr↓/pop↑ all seeds), market-relay direct-proven (107 beyond-vision events), no cold-start deadlock, merchant-config 0-crash, gates green. god-view belief-化 arc COMPLETE. Recommend accept."
+}

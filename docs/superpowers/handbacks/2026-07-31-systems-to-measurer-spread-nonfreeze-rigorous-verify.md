@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[★不凍紅線嚴驗(spread-fix merge前硬閘,別rubber-stamp)·SLICE A協調散單flow成功(cargo_delivered 45→153=80%measured)但★warring attrition 1.80%→0=latch-freeze紅線正字簽名·implementer論butterfly非凍(teams 63→91成長+conq3407+combat9+convoy活+byte-identical)·★★measurer嚴驗:①warring seed1337跑FULL月曲線(每月teams/pop——月月churn=dynamic vs月月凍住=latch紅線,latch前科71/438月月不變)②seed42(attrition≠0確認seed-specific butterfly非系統性freeze)·branch feat/logistics-sliceA-coordinate(spread-fix,未merge待此驗)·三跑determinism保·落地docs/measurements標path·此非rubber-stamp已證,attrition=0須rigorous分清butterfly vs freeze" 
 ---
 

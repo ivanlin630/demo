@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·founding-completion fix active-construction persist floor·spec=2026-07-30-founding-completion-construction-persist-floor-HOW.md(R²確認CLEAN)·persist_strength.gd加CONSTRUCTION_ACTIVE_FLOOR(0.15>PERSIST_HOLD_THRESHOLD 0.1)·_value施工中隊(current_task==TASK_BUILD AND tile construction_ticks_left>0)persist_eff=max(computed,FLOOR)·均一floor非floor×lean(R²判合理例外)·★★不凍紅線TDD(seed1337 6mo attrition非→0+世界churn+三跑determinism)+complete_build>0+★persist.hold真對founding子隊fire斷言(非只信complete_build)+own-outpost upgrade不退化(≥6)+crisis照打斷施工(food→0 survival@≥THREAT離TASK_BUILD)·純算術零RNG] founding persist floor。均一floor 0.15。★不凍紅線+persist.hold真fire+crisis打斷 TDD必全綠。"
 branch: feat/founding-persist-floor
 ---

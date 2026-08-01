@@ -1,0 +1,80 @@
+[Outpost] Team58 設施施工 stable → Lv1 at (23,17)
+[Outpost] Team59 設施施工 stable → Lv1 at (14,22)
+[Outpost] Team60 設施施工 stable → Lv1 at (11,18)
+[Outpost] Team61 設施施工 stable → Lv1 at (9,11)
+[Outpost] Team62 設施施工 stable → Lv1 at (19,7)
+[BC-SPEC] tick=750 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=750 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=760 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=760 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=770 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=770 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=780 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=780 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=790 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=790 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=800 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=800 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=810 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=810 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=820 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=820 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=830 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=830 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=840 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=840 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=850 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=850 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=860 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=860 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=870 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=870 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=880 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=880 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[BC-SPEC] tick=890 tile=(14,22) PAUSED_NO_BUILDER ticks_left=294 prev_builder=59 last_progress=740
+[BC-SPEC] tick=890 tile=(19,7) PAUSED_NO_BUILDER ticks_left=294 prev_builder=62 last_progress=740
+[Outpost] Team63 設施施工 stable → Lv1 at (17,17)
+[Outpost] 設施完工 stable Lv1 at (17,17)
+[Outpost] Team42 設施施工 farming → Lv1 at (11,19)
+[Outpost] Team24 設施施工 farming → Lv1 at (19,22)
+[Outpost] Team6 設施施工 farming → Lv1 at (10,28)
+[Outpost] Team47 設施施工 farming → Lv1 at (16,15)
+[Outpost] Team30 設施施工 farming → Lv1 at (14,0)
+[Outpost] 設施完工 farming Lv1 at (11,19)
+[Outpost] 設施完工 farming Lv1 at (14,0)
+[Infra] 工地逾時取消 at (19,7) 退料 50%
+[Outpost] 設施完工 farming Lv1 at (16,15)
+[Infra] 工地逾時取消 at (9,11) 退料 50%
+[Infra] 工地逾時取消 at (11,18) 退料 50%
+[Infra] 工地逾時取消 at (23,17) 退料 50%
+[Outpost] Team7 設施施工 farming → Lv1 at (14,28)
+[Outpost] Team42 設施施工 farming → Lv1 at (10,20)
+[Outpost] Team43 設施施工 stable → Lv1 at (20,0)
+[Outpost] Team13 設施施工 stable → Lv1 at (28,5)
+[Outpost] Team16 設施施工 farming → Lv1 at (28,4)
+[Outpost] Team18 設施施工 farming → Lv1 at (24,18)
+[Outpost] 設施完工 farming Lv1 at (14,28)
+[Infra] 工地逾時取消 at (14,22) 退料 50%
+[Outpost] Team14 設施施工 farming → Lv1 at (28,3)
+[Outpost] Team7 設施施工 workshop → Lv1 at (14,28)
+[Outpost] Team18 設施施工 farming → Lv1 at (23,19)
+[Outpost] Team3 設施施工 farming → Lv1 at (22,8)
+[Outpost] 設施完工 workshop Lv1 at (14,28)
+[Outpost] Team19 設施施工 stable → Lv1 at (12,6)
+[Outpost] Team25 設施施工 farming → Lv1 at (10,24)
+[Outpost] 設施完工 farming Lv1 at (10,24)
+[Outpost] 設施完工 farming Lv1 at (22,8)
+[Outpost] Team15 設施施工 stable → Lv1 at (3,13)
+[Outpost] Team13 設施施工 stable → Lv1 at (27,5)
+[Outpost] Team25 設施施工 workshop → Lv1 at (10,24)
+[Outpost] Team43 設施施工 stable → Lv1 at (19,0)
+[Infra] 工地逾時取消 at (19,22) 退料 50%
+[Infra] 工地逾時取消 at (10,28) 退料 50%
+[Outpost] Team6 設施施工 farming → Lv1 at (10,28)
+[Outpost] Team1 設施施工 workshop → Lv1 at (19,11)
+[Outpost] Team62 設施施工 stable → Lv1 at (18,8)
+[Outpost] 設施完工 workshop Lv1 at (10,24)
+[Outpost] Team20 設施施工 stable → Lv1 at (11,10)
+[Infra] 工地逾時取消 at (10,20) 退料 50%
+[Infra] 工地逾時取消 at (20,0) 退料 50%
+[Infra] 工地逾時取消 at (28,5) 退料 50%

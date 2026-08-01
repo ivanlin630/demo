@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[measure·team14 a/b 確認·SLICE A覆蓋缺口結構修需分辨·dump team14 @tick17290(或committed-hold時)current_task+construction_ticks_left+tile.outpost_level·specimen-off·a=TASK_BUILD但ticks_left≤0(蓋完持有)b=非TASK_BUILD progressive hold·★落地docs/measurements標exact path驗存在·→to:systems定結構修] blueprint WHAT導正safe_factor applicability=persist domain。定team14 a/b→定修(a查蓋完release bug/b擴全progressive-hold)。"
 branch: main (糧流 SLICE A merged)
 ---

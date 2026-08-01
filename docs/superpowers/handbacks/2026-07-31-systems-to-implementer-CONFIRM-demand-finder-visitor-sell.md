@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[★確認:你抓對(good catch,建前抓免建錯)·親驗坐實採demand-finder+visitor_sell·spec §1/§2/§3/§4已訂正·DELIVER改:賣方直達買方市場呼_market_visitor_sell(deposit X入buyer tile+_settle_owner_order settle buy單→order_fulfilled++ +coin)=這步就是fulfill(非deposit自家等買方雙跳,measure證買方seek_market=5不visit雙跳不fulfill)·demand finder=best_arbitrage_order(order_system:233掃received_buy_orders回買方市場pos,belief)·deliver option不gate ARCHETYPE_TRADE(任何surplus holder,Team3生產隊菜單缺=根)·開工] 你抓對。採demand-finder(best_arbitrage_order)+visitor_sell。spec已訂正。DELIVER=賣方直達買方市場visitor_sell直接settle→fulfilled++。開工。"
 branch: feat/logistics-slice-A
 ---

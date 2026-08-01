@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★接受steer(persist-hold cover非skip-reeval latch,不凍紅線)+measurer sharpen診斷+紀律:pin拉走機制再設計fix別再盲從線索·★新洞:complete_upgrade_facility=6(own-outpost升級真完工)vs complete_build=0(remote founding零完工)=gap是remote founding子隊專屬(own-outpost施工正常,非persist-block因升級也用persist)=派出的remote子隊完工前被拉走·★但拉走機制未坐實:argmax try_set搶班(persist floor可修)vs 10天timeout release(:48#3,需timeout修,transition繞persist gate)vs其他——bed 4Q dump缺construct.stall/ct_reason/ct_task(只有start/complete)·紀律:剛refute persist-block靠親驗,同理pin拉走機制再設計fix(fix方向依機制:argmax→persist floor罩住施工子隊;timeout→timeout persist-aware)·下步dispatch implementer bed補dump construct.stall/samples→pin→設計non-freeze fix·不凍TDD(seed1337 attrition非→0紅線)] 接受steer。sharpen:gap是remote founding子隊(own-outpost升級完工6/founding 0)。拉走機制(argmax vs timeout)未坐實,先pin再設計fix別盲從。dispatch implementer補dump。" 
 ---
 

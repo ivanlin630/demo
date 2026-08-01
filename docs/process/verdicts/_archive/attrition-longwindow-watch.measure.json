@@ -1,0 +1,27 @@
+{
+  "measured_at_head": "623d3e77 (main, threat-oracle 全merged)",
+  "method": "detach長跑(tools/godot-detach.ps1,WMI breakaway,survives bg-task reaping) 8mo×2seed(1337/42),main dir直跑(HEAD==623d3e77,無需worktree)。★首次launch漏帶--path導致godot找不到script立即死掉,背景wait空等被殺,已查明重跑修正。",
+  "raw_logs": ["docs/measurements/2026-07-18-attrition-longwindow-623d3e77.json"],
+  "pop_trajectory": {
+    "seed_1337": {
+      "monthly_pop": [438, 403, 403, 403, 403, 403, 403, 403],
+      "monthly_teams": [67, 70, 70, 70, 70, 70, 70, 70],
+      "monthly_factions": [9, 9, 9, 9, 9, 9, 9, 9],
+      "start_pop": 444, "end_pop": 403, "attrition_pct_8mo": 9.23,
+      "pattern": "月1快速降(438,一次性修正)→月2起完全持平(403持續6個月不變)——乾淨steady-state,非趨勢性下降"
+    },
+    "seed_42": {
+      "monthly_pop": [432, 392, 326, 310, 295, 292, 292, 285],
+      "monthly_teams": [57, 59, 52, 48, 47, 47, 50, 52],
+      "monthly_factions": [8, 8, 8, 6, 5, 5, 5, 5],
+      "start_pop": 432, "end_pop": 285, "attrition_pct_8mo": 34.03,
+      "pattern": "月1-5持續下降(432→292,-32%)→月6起趨平(292,292,285)——非單月修正,是拉長5個月的下降期後才穩定;factions同期8→5(失3個)"
+    }
+  },
+  "root_cause_analysis": {
+    "seed_1337_death_probes": {"death.starve_anon": 40, "extinct.starve": 0, "death.combat_pop": 0, "extinct.combat": 0, "combat.end_annihilation": 0},
+    "seed_42_death_probes": {"death.starve_anon": 108, "extinct.starve": 15, "extinct.starve_no_forage_nonowner": 15, "death.combat_pop": 0, "extinct.combat": 0, "combat.end_annihilation": 0},
+    "verdict": "★attrition根因=飢荒(starvation)非戰鬥(combat)——兩seed的extinct.combat/death.combat_pop皆=0(combat encounter有發生18-25次但無annihilation,多為rout/mortal_flee)。seed42有15整隊餓死滅團(extinct.starve_no_forage_nonowner=15)/seed1337是0隊。死因差距=食物經濟波動,非threat-oracle直接殺的。可能間接關聯(隊忙於迎戰/備戰擠壓覓食時間→食物安全惡化→餓死率升)但本次量測無法直接證實這條因果鏈,只能排除『threat戰鬥直接殺團』這個假設。"
+  },
+  "summary": "★blueprint問的『9.2%是steady-state還是慢性bleed→extinction』——答案是都不完全對：兩seed皆在數月內stabilize(非趨勢性降到滅團,世界末尾仍有50-70隊/5-9個faction,非extinction軌跡)，但『9.2%』這個數字只是2mo快照抓到的早期下降段，8mo長窗顯示真實eventual attrition高度seed-dependent(1337最終9.23%接近原數字/42最終34.03%遠超)。★根因非combat(annihilation=0兩seed)而是starvation(seed42有15隊餓死滅團/seed1337零隊)——若要更確定threat-oracle是否透過『擠壓覓食時間』間接推高飢荒率,需要對照無threat-oracle的世界跑同seed比較,本次未做(超出這次low-priority watch的時間預算)。"
+}

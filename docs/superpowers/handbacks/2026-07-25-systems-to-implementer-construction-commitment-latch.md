@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·A1 stall 根修·construction commitment latch·R²v2 CLEAN·spec=2026-07-25-construction-commitment-latch-A1-fix.md·★execution-verified(outpost_built>0)才算修好非只跑綠] A1 stall 根=construction commitment(TASK_BUILD)在 unified 決策層無 latch,施工隊每 cadence 被 _decide_unified argmax 搶去外交(measurer 6mo:stall 95.6-96%,ct_reason=unified/ct_task=外交)。修①_should_reeval 施工中 skip 例行 cadence reeval(★force_reeval 參數繞:威脅:401-423 傳 true 繞 latch 能逃,別悶死逃命)②check_construction_timeout release 對稱(防 latch 永卡)。★TDD execution-end 驅真 tick(FactionAI.process+Movement.process+construction tick)非 teleport,outpost_built>0 真完工才算。威脅繞 latch 測必補(與深餓分開,不同 gate)。閘:headless 0-new+gate 74 removed=0+determinism 3跑 byte-identical。→handback to:measurer execution-verified 重量(outpost_built>0)。"
 branch: feat/construction-commitment-latch
 ---

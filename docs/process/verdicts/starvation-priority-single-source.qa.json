@@ -1,0 +1,17 @@
+{
+  "slice": "starvation-priority-single-source",
+  "scope": "①-only: commit 1132bf0c (DecisionOptions.priority_for single-source, 5 dispatch paths). Excludes ②(famine-amplifier+failure-feedback, judged separately in verdicts/starvation-desperation-fix.qa.json = FAIL).",
+  "verdict": "PASS",
+  "read_measure": "verdicts/starvation-desperation-fix.measure.json + verdicts/starvation-desperation-fix-seed1337-specimen.measure.json (raw trace independently re-read for this ①-scoped question) + git show 1132bf0c + 2026-07-18-implementer-to-measurer-starvation-s1-single-source-done.md",
+  "story_audit": {
+    "central_question": "①-scope（priority preempt）獨立看，故事對嗎？latch 是否確屬②-domain非①失敗？",
+    "answer": "PASS，但用不同證據鏈支持（見下 correction）",
+    "team19_evidence": "★關鍵獨立佐證：我第一輪 seed1337 故事稽核（2026-07-18-qa-to-blueprint-seed1337-story-verdict.md，早於①/②拆分存在）獨立判 team19 為 ❌ ——『決策引擎選中 survival 但 task 20 tick 凍結不切』。這正是①commit message明講的目標bug（『True no_forage lock (team19): cause1 fix only did _decide_unified; other paths committed survival@50→couldn't preempt』）。implementer自己的S1完成信也明確界定scope=『task切不掉』型(dispatch路priority不一致)，非latch型。獨立驗證：combo分支(ebf4489b,含①+②)的seed1337消失隊清單裡team19已不存在（grep確認，只剩team18/21等不同ID）——與team19該型bug被①治好一致。",
+    "latch_is_②_domain_confirmed": "★獨立驗證確認：seed1337殘留7隊latch案例(18/21/48/49/52/53/82)全部reason=unified且prio=80——代表priority preempt機制對它們是成功的（它們搶到了survival-class task，不是①的preempt失敗），失敗發生在更下游的action-resolve層。①的scope（讓正確priority被選中）與②的scope（讓選中的action真的resolve或在失敗後escalate）乾淨不重疊，latch確屬②-domain非①的失敗。"
+  },
+  "correction_to_systems_framing": "★重要訂正：seed42 extinct.starve 15→0 這個數字**不是①的證據**——查git lineage確認main分支已含31f9833c（更早、已merge的priority修復，只涵蓋_decide_unified單一路徑），且『2026-07-18-systems-to-blueprint-starvation-fixed-b-prereq.md』早在①(1132bf0c)存在前就已用31f9833c單獨報告過seed42 15→0這個結果。①是在31f9833c之上，額外把同一priority邏輯擴到另外4條dispatch路（solo/subteam/join/+grep補的第5路）。seed42世界裡瀕死的隊顯然都走的是_decide_unified路（31f9833c已覆蓋），①對seed42這個具體數字沒有新增貢獻——引用它當①的證據是confound（張冠李戴）。★①真正的獨立證據是team19型（另外4條dispatch路的bug），我用team19的獨立trace判決+combo分支team19消失於死亡清單來支持，不是seed42。",
+  "verdict_reasoning": "PASS成立，但不是靠systems原本提議的seed42故事——是靠：(1)char bed unit test直接驗證priority_for三class映射+5路全讀（implementer報ALL PASS，機制層乾淨）；(2)我自己獨立找到的team19故事（決策/執行分裂bug）精確匹配①的目標scope，且combo分支上team19不再出現在死亡名單；(3)latch殘留7隊全數reason=unified/prio=80，證實與①乾淨切割，②的FAIL不牽連①。",
+  "note": "①=priority單一源架構修，讓survival-class能在全部5條dispatch路preempt同層task。preempt生效（有獨立trace佐證：team19型bug消失）。★①≠餓死整體修好（latch待②slice處理）★①≠sustain驗證（sustain屬世界層，非本次scope）。seed42/15→0數字請勿再引用為①的證據——那是31f9833c的功勞，systems下次撰寫commit message/handback時建議訂正歸因，避免誤導後續稽核。",
+  "measured_at_head": "1132bf0c",
+  "qa_raw_trace_independently_read": "docs/measurements/2026-07-18-starvation-lockpoint-seed1337-ebf4489b-fixed-decoded.log（grep確認team19不在消失隊清單）+ git show 1132bf0c + git lineage確認31f9833c已在main"
+}

@@ -1,0 +1,1150 @@
+[SubAI] Team53 引擎→徵收 (徵收)
+[SubAI] Team54 引擎→覓食 (覓食)
+[STDROP] tick=250 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=260 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=270 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=280 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=290 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=300 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=300 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=310 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=320 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=330 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=340 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=350 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=360 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=370 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=380 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=390 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=400 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=400 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=410 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=420 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=430 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=440 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=450 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=460 tid=54 CADENCE_GATE_IDLE next=480
+[STDROP] tick=470 tid=54 CADENCE_GATE_IDLE next=480
+[SubAI] Team54 引擎→覓食 (覓食)
+[STDROP] tick=600 tid=54 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=600 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 26) parent_tile=(11, 28)
+[STDROP] tick=800 tid=54 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=800 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 26) parent_tile=(11, 28)
+[SubAI] Team54 引擎→迎戰 (迎戰)
+[STDROP] tick=1000 tid=54 ARRIVE_MERGEQ task=迎戰 move=-1
+[SubAI] Team60 引擎→外交 (求和)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=1000 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 26) parent_tile=(11, 28)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=1100 tid=54 CADENCE_GATE_IDLE next=1140
+[STDROP] tick=1200 tid=54 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=1200 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 26) parent_tile=(11, 28)
+[SubAI] Team50 引擎→逃跑 (survival)
+[SubAI] Team54 引擎→迎戰 (迎戰)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=1400 tid=54 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=1400 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 26) parent_tile=(11, 28)
+[STDROP] tick=1500 tid=54 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=1500 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 26) parent_tile=(11, 28)
+[SubAI] Team54 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=1610 tid=54 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=1610 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 27) parent_tile=(11, 28)
+[STDROP] tick=1690 tid=54 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=1690 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 27) parent_tile=(11, 28)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=1700 tid=54 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=1700 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 27) parent_tile=(11, 28)
+[STDROP] tick=1800 tid=54 ARRIVE_MERGEQ task=貿易 move=-1
+[SubAI] Team66 引擎→迎戰 (迎戰)
+[SubAI] Team67 引擎→迎戰 (迎戰)
+[STDROP] tick=1800 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 27) parent_tile=(11, 28)
+[STDROP] tick=1900 tid=54 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=1900 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 27) parent_tile=(11, 28)
+[STDROP] tick=1930 tid=54 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=1930 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 27) parent_tile=(11, 28)
+[STDROP] tick=2000 tid=54 ARRIVE_MERGEQ task=貿易 move=-1
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=2000 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 27) parent_tile=(11, 28)
+[STDROP] tick=2100 tid=54 ARRIVE_MERGEQ task=貿易 move=-1
+[SubAI] Team68 引擎→迎戰 (迎戰)
+[STDROP] tick=2100 tid=54 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 27) parent_tile=(11, 28)
+[SubAI] Team62 引擎→逃跑 (survival)
+[SubAI] Team67 引擎→迎戰 (迎戰)
+[SubAI] Team54 引擎→逃跑 (survival)
+[SubAI] Team67 引擎→迎戰 (迎戰)
+[SubAI] Team68 引擎→迎戰 (迎戰)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team68 引擎→迎戰 (迎戰)
+[SubAI] Team56 引擎→逃跑 (survival)
+[SubAI] Team57 引擎→逃跑 (survival)
+[SubAI] Team62 引擎→逃跑 (survival)
+[SubAI] Team54 引擎→逃跑 (survival)
+[SubAI] Team49 引擎→逃跑 (survival)
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=4600 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=4600 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(18, 3)
+[STDROP] tick=4610 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(18, 3)
+[STDROP] tick=4620 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4630 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4640 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4650 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4660 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4670 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4680 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4690 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4700 tid=62 CADENCE_GATE_IDLE next=4850
+[STDROP] tick=4700 tid=62 CADENCE_GATE_IDLE next=4850
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=4830 tid=62 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=4830 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(18, 3)
+[SubAI] Team54 引擎→逃跑 (survival)
+[SubAI] Team62 引擎→逃跑 (survival)
+[STDROP] tick=4910 tid=62 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=4910 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(19, 3)
+[STDROP] tick=5000 tid=62 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=5000 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(20, 3)
+[STDROP] tick=5100 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5100 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 1) parent_tile=(8, 9)
+[STDROP] tick=5200 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5200 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(21, 3)
+[STDROP] tick=5300 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5300 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(18, 1) parent_tile=(8, 9)
+[STDROP] tick=5400 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5400 tid=69 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5400 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(18, 1) parent_tile=(8, 9)
+[STDROP] tick=5400 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(24, 7) parent_tile=(23, 5)
+[STDROP] tick=5500 tid=69 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5500 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(23, 7) parent_tile=(23, 4)
+[STDROP] tick=5510 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(23, 7) parent_tile=(23, 4)
+[STDROP] tick=5520 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5530 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5540 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5550 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5560 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5570 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5580 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5590 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5600 tid=69 CADENCE_GATE_IDLE next=5750
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=5600 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5600 tid=70 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5600 tid=70 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(6, 27)
+[STDROP] tick=5610 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5620 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5630 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=5630 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5630 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 1) parent_tile=(8, 9)
+[STDROP] tick=5640 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5650 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5660 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5670 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5680 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5690 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5700 tid=69 CADENCE_GATE_IDLE next=5750
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=5700 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5700 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5700 tid=70 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5700 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(19, 4)
+[STDROP] tick=5700 tid=70 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(6, 27)
+[STDROP] tick=5710 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=5710 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5710 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 9)
+[STDROP] tick=5720 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5730 tid=69 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=5730 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(23, 5) parent_tile=(22, 4)
+[STDROP] tick=5740 tid=69 CADENCE_GATE_IDLE next=5750
+[STDROP] tick=5750 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(23, 5) parent_tile=(22, 4)
+[STDROP] tick=5760 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5770 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5780 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5790 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5800 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5800 tid=49 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=5800 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5800 tid=70 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=5800 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 9)
+[STDROP] tick=5800 tid=70 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(6, 27)
+[STDROP] tick=5810 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5810 tid=70 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(6, 27)
+[STDROP] tick=5820 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5820 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5830 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5830 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5840 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5840 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5850 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5850 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5860 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5860 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5870 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=5870 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5870 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5870 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 9)
+[STDROP] tick=5880 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5880 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5890 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5890 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5900 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=5900 tid=70 CADENCE_GATE_IDLE next=6050
+[STDROP] tick=5900 tid=69 CADENCE_GATE_IDLE next=5990
+[STDROP] tick=6000 tid=49 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=6000 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 9)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=6100 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=6100 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 1) parent_tile=(8, 9)
+[SubAI] Team54 引擎→逃跑 (survival)
+[STDROP] tick=6200 tid=69 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=6200 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(25, 2) parent_tile=(24, 2)
+[STDROP] tick=6300 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=6300 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=6300 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(18, 1) parent_tile=(8, 9)
+[STDROP] tick=6300 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(20, 2)
+[STDROP] tick=6350 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=6350 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(18, 1) parent_tile=(8, 9)
+[STDROP] tick=6400 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(25, 4) parent_tile=(25, 2)
+[STDROP] tick=6450 tid=69 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=6450 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(25, 4) parent_tile=(25, 2)
+[STDROP] tick=6500 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=6500 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(21, 1)
+[SubAI] Team49 引擎→逃跑 (survival)
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=6600 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=6600 tid=69 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=6600 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(21, 0)
+[STDROP] tick=6600 tid=69 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(25, 4) parent_tile=(25, 3)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team55 引擎→覓食 (遷移找糧)
+[SubAI] Team62 引擎→逃跑 (survival)
+[STDROP] tick=7200 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7200 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(17, 4)
+[SubAI] Team55 紀律失效，脫離成獨立
+[STDROP] tick=7300 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7300 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7300 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 3) parent_tile=(8, 11)
+[STDROP] tick=7300 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(16, 5)
+[STDROP] tick=7400 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7400 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 3) parent_tile=(8, 11)
+[SubAI] Team54 引擎→逃跑 (survival)
+[STDROP] tick=7500 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7500 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(15, 6)
+[STDROP] tick=7550 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=7550 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 3) parent_tile=(8, 12)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=7600 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7600 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(14, 7)
+[STDROP] tick=7610 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=7610 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 11)
+[STDROP] tick=7700 tid=49 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=7700 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7700 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 10)
+[STDROP] tick=7700 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(9, 14)
+[STDROP] tick=7790 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=7790 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 10)
+[STDROP] tick=7800 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7800 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(9, 14)
+[STDROP] tick=7900 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=7900 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 1) parent_tile=(8, 9)
+[STDROP] tick=8000 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=8000 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=8000 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(18, 1) parent_tile=(8, 9)
+[STDROP] tick=8000 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(9, 14)
+[STDROP] tick=8100 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8100 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(9, 14)
+[STDROP] tick=8100 tid=49 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=8100 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(18, 1) parent_tile=(8, 8)
+[STDROP] tick=8200 tid=50 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=8200 tid=62 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8200 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 1) parent_tile=(8, 8)
+[STDROP] tick=8200 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(11, 11)
+[STDROP] tick=8270 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8270 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(18, 1) parent_tile=(8, 8)
+[STDROP] tick=8300 tid=50 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team56 引擎→逃跑 (survival)
+[STDROP] tick=8300 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=8300 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 0) parent_tile=(8, 7)
+[STDROP] tick=8300 tid=62 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(12, 11)
+[STDROP] tick=8310 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8310 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 13)
+[STDROP] tick=8340 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8340 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 13)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=8400 tid=56 ARRIVE_MERGEQ task=貿易 move=-1
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=8400 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 13)
+[STDROP] tick=8410 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8410 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 7)
+[STDROP] tick=8500 tid=49 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8500 tid=50 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=8500 tid=62 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=8500 tid=49 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 7)
+[STDROP] tick=8500 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 0) parent_tile=(8, 7)
+[STDROP] tick=8600 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=8600 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(8, 13)
+[SubAI] Team56 引擎→逃跑 (survival)
+[STDROP] tick=8710 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8710 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 13)
+[STDROP] tick=8750 tid=50 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8750 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 1) parent_tile=(8, 7)
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=8810 tid=50 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8810 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 7)
+[STDROP] tick=8820 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8820 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 14)
+[STDROP] tick=8900 tid=50 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=8900 tid=56 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=8900 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 7)
+[STDROP] tick=8900 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 14)
+[STDROP] tick=8990 tid=50 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=8990 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 7)
+[STDROP] tick=9000 tid=50 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=9000 tid=56 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=9000 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(8, 7)
+[STDROP] tick=9000 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 15)
+[STDROP] tick=9100 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=9100 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(8, 15)
+[STDROP] tick=9200 tid=50 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=9200 tid=50 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 3) parent_tile=(8, 7)
+[SubAI] Team56 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=9700 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=9700 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(8, 14)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=9900 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=9900 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(8, 14)
+[SubAI] Team56 引擎→逃跑 (survival)
+[STDROP] tick=10010 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=10010 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 15)
+[STDROP] tick=10020 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=10020 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 15)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=10100 tid=56 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=10100 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=10100 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 15)
+[STDROP] tick=10100 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(8, 15)
+[STDROP] tick=10260 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=10260 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(9, 15)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=10300 tid=56 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=10300 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=10300 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(9, 16)
+[STDROP] tick=10300 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(9, 16)
+[SubAI] Team8 引擎→貿易 (買糧)
+[STDROP] tick=10400 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=10400 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=10400 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(9, 16)
+[STDROP] tick=10400 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(9, 16)
+[STDROP] tick=10500 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=10500 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(9, 16)
+[SubAI] Team8 紀律失效，脫離成獨立
+[STDROP] tick=10600 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=10600 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(9, 16)
+[STDROP] tick=10610 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=10610 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(9, 16)
+[SubAI] Team56 引擎→逃跑 (survival)
+[STDROP] tick=10700 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=10700 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(9, 16)
+[STDROP] tick=10710 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=10710 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(9, 16)
+[STDROP] tick=10740 tid=56 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=10740 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=10740 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(9, 16)
+[STDROP] tick=10740 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(9, 16)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=10900 tid=56 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=10900 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(10, 15)
+[STDROP] tick=11000 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=11000 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=11000 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(10, 15)
+[STDROP] tick=11000 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(10, 15)
+[STDROP] tick=11200 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=11200 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=11200 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(10, 15)
+[STDROP] tick=11200 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(10, 15)
+[STDROP] tick=11220 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=11220 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(10, 15)
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=11300 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=11300 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(8, 13) parent_tile=(10, 15)
+[STDROP] tick=11460 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=11460 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=11600 tid=65 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=11600 tid=65 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(16, 6) parent_tile=(18, 5)
+[STDROP] tick=11700 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=11700 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 11) parent_tile=(10, 15)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=11700 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[SubAI] Team64 紀律失效，脫離成獨立
+[STDROP] tick=11800 tid=65 ARRIVE_MERGEQ task=外交 move=-1
+[STDROP] tick=11800 tid=65 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(16, 6) parent_tile=(17, 5)
+[STDROP] tick=11900 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team65 引擎→外交 (求和)
+[STDROP] tick=11900 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[STDROP] tick=12000 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=12000 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[STDROP] tick=12180 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=12180 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[STDROP] tick=12200 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=12300 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=12300 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[SubAI] Team14 引擎→貿易 (買糧)
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=12500 tid=57 ARRIVE_MERGEQ task=外交 move=-1
+[STDROP] tick=12500 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[SubAI] Team65 紀律失效，脫離成獨立
+[STDROP] tick=12600 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=12600 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=12700 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=12700 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[SubAI] Team14 紀律失效，脫離成獨立
+[STDROP] tick=13300 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=13300 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(11, 11) parent_tile=(10, 15)
+[STDROP] tick=13380 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=13380 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(11, 11) parent_tile=(10, 15)
+[STDROP] tick=13620 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=13620 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 11) parent_tile=(10, 15)
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=13900 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team66 引擎→逃跑 (survival)
+[SubAI] Team67 引擎→逃跑 (survival)
+[STDROP] tick=13900 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=14000 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=14000 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[STDROP] tick=14100 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=14100 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=14210 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=14210 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=14300 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=14300 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=14340 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=14340 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[SubAI] Team58 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=14500 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=14500 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[STDROP] tick=14580 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=14580 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=14610 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=14610 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=14800 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=14800 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=14820 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=14820 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=14900 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=14900 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[SubAI] Team14 引擎→紮營 (紮營)
+[SubAI] Team49 引擎→逃跑 (survival)
+[SubAI] Team57 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team67 引擎→外交 (求和)
+[SubAI] Team68 引擎→逃跑 (survival)
+[SubAI] Team14 紀律失效，脫離成獨立
+[STDROP] tick=15800 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=15800 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[SubAI] Team69 引擎→迎戰 (迎戰)
+[SubAI] Team70 引擎→迎戰 (迎戰)
+[STDROP] tick=16020 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=16020 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 11) parent_tile=(10, 15)
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=16110 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[SubAI] Team69 紀律失效，脫離成獨立
+[SubAI] Team70 紀律失效，脫離成獨立
+[STDROP] tick=16110 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=16200 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=16200 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=16260 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=16260 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=16300 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=16300 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=16500 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=16500 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=16500 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=16500 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=16600 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=16600 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=16800 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=16800 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 12) parent_tile=(10, 15)
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=16910 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=16910 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=16980 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=16980 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[SubAI] Team72 紀律失效，脫離成獨立
+[STDROP] tick=17100 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=17100 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[SubAI] Team16 引擎→紮營 (紮營)
+[SubAI] Team16 紀律失效，脫離成獨立
+[STDROP] tick=17500 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=17500 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[STDROP] tick=17600 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=17600 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[STDROP] tick=17800 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=17800 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[STDROP] tick=17900 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=17900 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[STDROP] tick=18000 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18000 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(25, 6)
+[SubAI] Team73 引擎→覓食 (覓食)
+[STDROP] tick=18100 tid=57 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18100 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18100 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[STDROP] tick=18100 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(25, 6)
+[STDROP] tick=18110 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18120 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18130 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18140 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18150 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18160 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18170 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18180 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=18180 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18180 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 11) parent_tile=(10, 15)
+[STDROP] tick=18190 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18200 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18200 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18210 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18220 tid=73 CADENCE_GATE_IDLE next=18250
+[STDROP] tick=18300 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18300 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(25, 6)
+[SubAI] Team73 引擎→覓食 (覓食)
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=18400 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18400 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(25, 6)
+[STDROP] tick=18410 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=18410 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=18420 tid=57 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=18420 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=18500 tid=57 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=18500 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18500 tid=57 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(13, 12) parent_tile=(10, 15)
+[STDROP] tick=18500 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(24, 7)
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=18600 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18600 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(24, 7)
+[STDROP] tick=18700 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18700 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(24, 7)
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=18800 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=18800 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(24, 8)
+[SubAI] Team73 引擎→覓食 (覓食)
+[STDROP] tick=18900 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team74 引擎→逃跑 (survival)
+[SubAI] Team75 引擎→逃跑 (survival)
+[STDROP] tick=18900 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 9) parent_tile=(24, 8)
+[STDROP] tick=18910 tid=73 CADENCE_GATE_IDLE next=19050
+[STDROP] tick=18920 tid=73 CADENCE_GATE_IDLE next=19050
+[STDROP] tick=18930 tid=73 CADENCE_GATE_IDLE next=19050
+[STDROP] tick=18940 tid=73 CADENCE_GATE_IDLE next=19050
+[STDROP] tick=19000 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19000 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 9) parent_tile=(24, 8)
+[STDROP] tick=19010 tid=73 CADENCE_GATE_IDLE next=19050
+[STDROP] tick=19020 tid=73 CADENCE_GATE_IDLE next=19050
+[STDROP] tick=19030 tid=73 CADENCE_GATE_IDLE next=19050
+[STDROP] tick=19040 tid=73 CADENCE_GATE_IDLE next=19050
+[SubAI] Team73 引擎→覓食 (覓食)
+[STDROP] tick=19100 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19100 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 9) parent_tile=(24, 8)
+[STDROP] tick=19110 tid=73 CADENCE_GATE_IDLE next=19290
+[STDROP] tick=19120 tid=73 CADENCE_GATE_IDLE next=19290
+[STDROP] tick=19130 tid=73 CADENCE_GATE_IDLE next=19290
+[STDROP] tick=19140 tid=73 CADENCE_GATE_IDLE next=19290
+[STDROP] tick=19150 tid=73 CADENCE_GATE_IDLE next=19290
+[STDROP] tick=19160 tid=73 CADENCE_GATE_IDLE next=19290
+[STDROP] tick=19170 tid=73 CADENCE_GATE_IDLE next=19290
+[STDROP] tick=19180 tid=73 CADENCE_GATE_IDLE next=19290
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=19200 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19200 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 9) parent_tile=(24, 8)
+[SubAI] Team70 引擎→紮營 (紮營)
+[STDROP] tick=19300 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19300 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 9) parent_tile=(24, 8)
+[SubAI] Team73 引擎→覓食 (覓食)
+[SubAI] Team70 紀律失效，脫離成獨立
+[STDROP] tick=19400 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team75 引擎→逃跑 (survival)
+[STDROP] tick=19400 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 9) parent_tile=(24, 8)
+[STDROP] tick=19410 tid=73 CADENCE_GATE_IDLE next=19550
+[STDROP] tick=19420 tid=73 CADENCE_GATE_IDLE next=19550
+[STDROP] tick=19500 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19500 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 9) parent_tile=(25, 7)
+[STDROP] tick=19510 tid=73 CADENCE_GATE_IDLE next=19550
+[STDROP] tick=19520 tid=73 CADENCE_GATE_IDLE next=19550
+[STDROP] tick=19530 tid=73 CADENCE_GATE_IDLE next=19550
+[STDROP] tick=19540 tid=73 CADENCE_GATE_IDLE next=19550
+[SubAI] Team73 引擎→覓食 (覓食)
+[SubAI] Team71 引擎→迎戰 (迎戰)
+[STDROP] tick=19600 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19600 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(25, 7)
+[STDROP] tick=19610 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19620 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19630 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19640 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19650 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19660 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19700 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19700 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(26, 6)
+[STDROP] tick=19710 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19720 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19730 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19740 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19750 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19760 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19770 tid=73 CADENCE_GATE_IDLE next=19790
+[STDROP] tick=19780 tid=73 CADENCE_GATE_IDLE next=19790
+[SubAI] Team73 引擎→覓食 (覓食)
+[SubAI] Team57 引擎→逃跑 (survival)
+[STDROP] tick=19800 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19800 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(27, 5)
+[STDROP] tick=19810 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19820 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19830 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19840 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19850 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19860 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19870 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19880 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19890 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19900 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=19900 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=19900 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(27, 5)
+[STDROP] tick=20000 tid=73 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team75 引擎→逃跑 (survival)
+[STDROP] tick=20000 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(27, 6)
+[STDROP] tick=20010 tid=73 CADENCE_GATE_IDLE next=20030
+[STDROP] tick=20020 tid=73 CADENCE_GATE_IDLE next=20030
+[SubAI] Team73 引擎→逃跑 (survival)
+[STDROP] tick=20040 tid=73 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=20040 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 9) parent_tile=(27, 6)
+[STDROP] tick=20050 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20060 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20070 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20080 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20090 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20100 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20100 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20110 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20120 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20130 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20140 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20150 tid=73 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=20150 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 8) parent_tile=(27, 6)
+[STDROP] tick=20160 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20170 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20180 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20190 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20200 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20200 tid=73 CADENCE_GATE_IDLE next=20270
+[SubAI] Team74 引擎→逃跑 (survival)
+[STDROP] tick=20210 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20220 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20230 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20240 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20250 tid=73 CADENCE_GATE_IDLE next=20270
+[STDROP] tick=20260 tid=73 CADENCE_GATE_IDLE next=20270
+[SubAI] Team73 引擎→逃跑 (survival)
+[STDROP] tick=20280 tid=73 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=20280 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(27, 7) parent_tile=(26, 6)
+[STDROP] tick=20290 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20300 tid=73 CADENCE_GATE_IDLE next=20510
+[SubAI] Team56 引擎→逃跑 (survival)
+[STDROP] tick=20300 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20310 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20320 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20330 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20340 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20350 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20360 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20370 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20380 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20390 tid=73 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=20390 tid=73 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(26, 7) parent_tile=(26, 6)
+[STDROP] tick=20400 tid=73 CADENCE_GATE_IDLE next=20510
+[STDROP] tick=20400 tid=73 CADENCE_GATE_IDLE next=20510
+[SubAI] Team76 引擎→逃跑 (survival)
+[STDROP] tick=21000 tid=77 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=21000 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 8) parent_tile=(23, 8)
+[SubAI] Team77 引擎→覓食 (覓食)
+[SubAI] Team58 引擎→逃跑 (survival)
+[STDROP] tick=21200 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=21200 tid=77 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=21200 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 11) parent_tile=(10, 15)
+[STDROP] tick=21200 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 8) parent_tile=(21, 9)
+[STDROP] tick=21210 tid=77 CADENCE_GATE_IDLE next=21250
+[STDROP] tick=21220 tid=77 CADENCE_GATE_IDLE next=21250
+[STDROP] tick=21230 tid=77 CADENCE_GATE_IDLE next=21250
+[STDROP] tick=21240 tid=77 CADENCE_GATE_IDLE next=21250
+[STDROP] tick=21300 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team77 引擎→迎戰 (迎戰)
+[STDROP] tick=21300 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 11) parent_tile=(10, 15)
+[SubAI] Team75 引擎→逃跑 (survival)
+[STDROP] tick=21400 tid=77 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=21400 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(20, 9)
+[STDROP] tick=21500 tid=76 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=21500 tid=77 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=21500 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(10, 15)
+[STDROP] tick=21500 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 3) parent_tile=(28, 6)
+[STDROP] tick=21500 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(19, 10)
+[STDROP] tick=21600 tid=56 ARRIVE_MERGEQ task=外交 move=-1
+[SubAI] Team74 引擎→覓食 (覓食)
+[STDROP] tick=21600 tid=77 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=21600 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(10, 15)
+[STDROP] tick=21600 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 4) parent_tile=(28, 6)
+[STDROP] tick=21600 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(19, 10)
+[STDROP] tick=21670 tid=76 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=21670 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 4) parent_tile=(28, 6)
+[STDROP] tick=21700 tid=76 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=21700 tid=77 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=21700 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 4) parent_tile=(28, 6)
+[STDROP] tick=21700 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 8) parent_tile=(18, 10)
+[SubAI] Team50 引擎→逃跑 (survival)
+[STDROP] tick=21800 tid=56 ARRIVE_MERGEQ task=外交 move=-1
+[STDROP] tick=21800 tid=74 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=21800 tid=76 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=21800 tid=77 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=21800 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(10, 15)
+[STDROP] tick=21800 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 8) parent_tile=(28, 0)
+[STDROP] tick=21800 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 4) parent_tile=(28, 6)
+[STDROP] tick=21800 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(17, 11)
+[STDROP] tick=21900 tid=56 ARRIVE_MERGEQ task=貿易 move=-1
+[SubAI] Team74 引擎→逃跑 (survival)
+[STDROP] tick=21900 tid=77 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=21900 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(10, 15)
+[STDROP] tick=21900 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(17, 11)
+[STDROP] tick=21910 tid=74 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=21910 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=22000 tid=56 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=22000 tid=74 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=22000 tid=77 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=22000 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(10, 15)
+[STDROP] tick=22000 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=22000 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(16, 12)
+[STDROP] tick=22100 tid=74 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=22100 tid=77 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=22100 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=22100 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(15, 13)
+[STDROP] tick=22200 tid=56 ARRIVE_MERGEQ task=外交 move=-1
+[SubAI] Team58 引擎→逃跑 (survival)
+[STDROP] tick=22200 tid=77 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=22200 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(10, 15)
+[STDROP] tick=22200 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 8) parent_tile=(14, 14)
+[STDROP] tick=22300 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=22300 tid=74 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team77 引擎→迎戰 (迎戰)
+[STDROP] tick=22300 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 12) parent_tile=(10, 15)
+[STDROP] tick=22300 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 8) parent_tile=(28, 0)
+[SubAI] Team74 引擎→逃跑 (survival)
+[STDROP] tick=22400 tid=77 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=22400 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(13, 15)
+[STDROP] tick=22410 tid=74 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=22410 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=22490 tid=74 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=22490 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=22500 tid=56 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team75 引擎→逃跑 (survival)
+[SubAI] Team76 引擎→貿易 (買糧)
+[STDROP] tick=22500 tid=77 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=22500 tid=56 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 11) parent_tile=(10, 15)
+[STDROP] tick=22500 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(14, 15)
+[STDROP] tick=22600 tid=74 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=22600 tid=77 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=22600 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=22600 tid=77 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 9) parent_tile=(14, 15)
+[SubAI] Team74 引擎→逃跑 (survival)
+[STDROP] tick=23000 tid=74 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=23000 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 8) parent_tile=(28, 0)
+[STDROP] tick=23100 tid=74 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=23100 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 8) parent_tile=(28, 0)
+[STDROP] tick=23200 tid=74 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=23200 tid=76 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=23200 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 8) parent_tile=(28, 0)
+[STDROP] tick=23200 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 3) parent_tile=(28, 6)
+[STDROP] tick=23300 tid=76 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=23300 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 3) parent_tile=(28, 6)
+[SubAI] Team74 引擎→逃跑 (survival)
+[STDROP] tick=23400 tid=76 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=23400 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 3) parent_tile=(28, 6)
+[STDROP] tick=23410 tid=74 ARRIVE_MERGEQ task=逃跑 move=-1
+[SubAI] Team78 引擎→逃跑 (survival)
+[STDROP] tick=23410 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=23450 tid=74 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=23450 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=23500 tid=74 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=23500 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 7) parent_tile=(28, 0)
+[STDROP] tick=23500 tid=76 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(22, 4) parent_tile=(28, 6)
+[SubAI] Team76 紀律失效，脫離成獨立
+[STDROP] tick=23520 tid=76 DISCIPLINE_DETACH
+[SubAI] Team78 引擎→覓食 (覓食)
+[STDROP] tick=23700 tid=78 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=23700 tid=78 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(0, 16)
+[STDROP] tick=23710 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23720 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23730 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23740 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23750 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23760 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23770 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23780 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23790 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23800 tid=78 CADENCE_GATE_IDLE next=23890
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=23800 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23810 tid=78 CADENCE_GATE_IDLE next=23890
+[SubAI] Team81 引擎→外交 (求和)
+[STDROP] tick=23820 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23830 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23840 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23850 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23860 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23870 tid=78 CADENCE_GATE_IDLE next=23890
+[STDROP] tick=23880 tid=78 CADENCE_GATE_IDLE next=23890
+[SubAI] Team78 引擎→覓食 (覓食)
+[STDROP] tick=23900 tid=78 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=23900 tid=78 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(0, 16)
+[STDROP] tick=23910 tid=78 CADENCE_GATE_IDLE next=24130
+[STDROP] tick=23920 tid=78 CADENCE_GATE_IDLE next=24130
+[STDROP] tick=23930 tid=78 CADENCE_GATE_IDLE next=24130
+[STDROP] tick=23940 tid=78 CADENCE_GATE_IDLE next=24130
+[STDROP] tick=23950 tid=78 CADENCE_GATE_IDLE next=24130
+[STDROP] tick=23960 tid=78 CADENCE_GATE_IDLE next=24130
+[STDROP] tick=24000 tid=74 ARRIVE_MERGEQ task=覓食 move=-1
+[SubAI] Team75 引擎→逃跑 (survival)
+[STDROP] tick=24000 tid=80 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=24000 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(26, 0)
+[STDROP] tick=24000 tid=80 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(16, 13) parent_tile=(13, 13)
+[STDROP] tick=24100 tid=74 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=24100 tid=80 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=24100 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(26, 0)
+[STDROP] tick=24100 tid=80 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(16, 13) parent_tile=(13, 13)
+[STDROP] tick=24200 tid=78 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=24200 tid=80 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=24200 tid=78 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 13) parent_tile=(0, 16)
+[STDROP] tick=24200 tid=80 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(16, 13) parent_tile=(14, 13)
+[SubAI] Team79 引擎→迎戰 (迎戰)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=24300 tid=74 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=24300 tid=80 ARRIVE_MERGEQ task=外交 move=-1
+[STDROP] tick=24300 tid=74 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(26, 0)
+[STDROP] tick=24300 tid=80 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(16, 13) parent_tile=(14, 14)
+[SubAI] Team74 紀律失效，脫離成獨立
+[STDROP] tick=24330 tid=74 DISCIPLINE_DETACH
+[SubAI] Team82 紀律失效，脫離成獨立
+[SubAI] Team78 引擎→迎戰 (迎戰)
+[SubAI] Team79 引擎→逃跑 (survival)
+[SubAI] Team50 紀律失效，脫離成獨立
+[SubAI] Team58 引擎→逃跑 (survival)
+[SubAI] Team80 引擎→逃跑 (survival)
+[STDROP] tick=24700 tid=78 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=24700 tid=78 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 11) parent_tile=(2, 14)
+[SubAI] Team78 引擎→貿易 (買糧)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team75 引擎→逃跑 (survival)
+[STDROP] tick=25200 tid=79 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=25200 tid=79 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(15, 22) parent_tile=(14, 22)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=25900 tid=83 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=25900 tid=83 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 12) parent_tile=(5, 11)
+[STDROP] tick=26000 tid=83 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=26000 tid=83 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 12) parent_tile=(5, 11)
+[STDROP] tick=26100 tid=83 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=26100 tid=83 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 12) parent_tile=(5, 11)
+[SubAI] Team83 紀律失效，脫離成獨立
+[STDROP] tick=26140 tid=83 DISCIPLINE_DETACH
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team75 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team61 引擎→逃跑 (survival)
+[SubAI] Team84 引擎→逃跑 (survival)
+[SubAI] Team75 引擎→逃跑 (survival)
+[STDROP] tick=27300 tid=84 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=27300 tid=84 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(17, 21) parent_tile=(14, 22)
+[SubAI] Team84 引擎→逃跑 (survival)
+[STDROP] tick=27320 tid=84 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=27320 tid=84 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(17, 21) parent_tile=(14, 22)
+[STDROP] tick=27330 tid=84 CADENCE_GATE_IDLE next=27550
+[STDROP] tick=27340 tid=84 CADENCE_GATE_IDLE next=27550
+[STDROP] tick=27350 tid=84 CADENCE_GATE_IDLE next=27550
+[STDROP] tick=27360 tid=84 CADENCE_GATE_IDLE next=27550
+[STDROP] tick=27370 tid=84 CADENCE_GATE_IDLE next=27550
+[STDROP] tick=27380 tid=84 CADENCE_GATE_IDLE next=27550
+[STDROP] tick=27390 tid=84 CADENCE_GATE_IDLE next=27550
+[STDROP] tick=27400 tid=84 CADENCE_GATE_IDLE next=27550
+[SubAI] Team49 引擎→逃跑 (survival)
+[SubAI] Team80 引擎→紮營 (紮營)
+[SubAI] Team80 紀律失效，脫離成獨立
+[STDROP] tick=27800 tid=85 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=27800 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(8, 10)
+[SubAI] Team85 引擎→迎戰 (迎戰)
+[SubAI] Team58 紀律失效，脫離成獨立
+[STDROP] tick=27900 tid=85 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=27900 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(8, 12) parent_tile=(8, 10)
+[STDROP] tick=28000 tid=85 CADENCE_GATE_IDLE next=28050
+[STDROP] tick=28100 tid=85 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=28100 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 9)
+[STDROP] tick=28200 tid=85 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=28200 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(8, 12) parent_tile=(8, 8)
+[STDROP] tick=28300 tid=85 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=28300 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(8, 8)
+[SubAI] Team61 引擎→逃跑 (survival)
+[STDROP] tick=28400 tid=85 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=28400 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(8, 7)
+[STDROP] tick=28600 tid=85 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=28600 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(8, 12) parent_tile=(8, 7)
+[SubAI] Team85 引擎→逃跑 (survival)
+[STDROP] tick=28800 tid=85 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=28800 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 12) parent_tile=(8, 7)
+[STDROP] tick=28900 tid=85 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=28900 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 12) parent_tile=(8, 7)
+[SubAI] Team85 引擎→逃跑 (survival)
+[STDROP] tick=29010 tid=85 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=29010 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 7)
+[STDROP] tick=29090 tid=85 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=29090 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 7)
+[STDROP] tick=29100 tid=85 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=29100 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 7)
+[STDROP] tick=29200 tid=85 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=29200 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 7)
+[STDROP] tick=29300 tid=75 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=29300 tid=85 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=29300 tid=75 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(20, 0) parent_tile=(26, 0)
+[STDROP] tick=29300 tid=85 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 11) parent_tile=(8, 7)
+[SubAI] Team86 引擎→迎戰 (迎戰)
+[STDROP] tick=29450 tid=75 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=29450 tid=75 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(20, 1) parent_tile=(26, 0)
+[SubAI] Team75 引擎→逃跑 (survival)
+[SubAI] Team78 引擎→逃跑 (survival)
+[STDROP] tick=29510 tid=75 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=29510 tid=75 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(26, 0)
+[STDROP] tick=29690 tid=75 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=29690 tid=75 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(26, 0)
+[STDROP] tick=29700 tid=75 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=29700 tid=75 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 2) parent_tile=(26, 0)
+[STDROP] tick=30000 tid=75 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=30000 tid=75 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(20, 0) parent_tile=(26, 0)
+[STDROP] tick=30100 tid=75 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=30100 tid=75 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(20, 0) parent_tile=(26, 0)
+[STDROP] tick=30300 tid=75 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=30300 tid=75 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(19, 0) parent_tile=(26, 0)
+[SubAI] Team49 引擎→逃跑 (survival)
+[SubAI] Team61 紀律失效，脫離成獨立
+[SubAI] Team85 引擎→逃跑 (survival)
+[SubAI] Team78 引擎→逃跑 (survival)
+[SubAI] Team85 紀律失效，脫離成獨立
+[SubAI] Team78 紀律失效，脫離成獨立
+[STDROP] tick=33600 tid=87 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=33600 tid=87 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(12, 6)
+[SubAI] Team87 引擎→逃跑 (survival)
+[STDROP] tick=33620 tid=87 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=33620 tid=87 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(12, 6)
+[STDROP] tick=33630 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33640 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33650 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33660 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33670 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33680 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33690 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33700 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33700 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33710 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33720 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33730 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33740 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33750 tid=87 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=33750 tid=87 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 7) parent_tile=(12, 6)
+[STDROP] tick=33760 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33770 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33780 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33790 tid=87 CADENCE_GATE_IDLE next=33850
+[STDROP] tick=33800 tid=87 CADENCE_GATE_IDLE next=33850
+[SubAI] Team86 引擎→覓食 (覓食)
+[STDROP] tick=33900 tid=86 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=33900 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 12) parent_tile=(7, 10)
+[STDROP] tick=34000 tid=86 CADENCE_GATE_IDLE next=34060
+[STDROP] tick=34100 tid=86 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=34100 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(8, 9)
+[STDROP] tick=34200 tid=86 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=34200 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(9, 8)
+[STDROP] tick=34300 tid=86 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=34300 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 12) parent_tile=(9, 8)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=34600 tid=86 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=34600 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(9, 8)
+[STDROP] tick=34700 tid=86 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=34700 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(9, 8)
+[SubAI] Team86 引擎→覓食 (覓食)
+[STDROP] tick=34900 tid=86 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=34900 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(8, 9)
+[SubAI] Team86 引擎→覓食 (覓食)
+[STDROP] tick=35200 tid=86 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=35200 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(6, 10)
+[STDROP] tick=35300 tid=86 CADENCE_GATE_IDLE next=35340
+[STDROP] tick=35500 tid=86 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=35500 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(4, 12)
+[SubAI] Team86 引擎→覓食 (覓食)
+[STDROP] tick=35700 tid=86 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=35700 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(4, 12)
+[STDROP] tick=35900 tid=86 ARRIVE_MERGEQ task=外交 move=-1
+[STDROP] tick=35900 tid=86 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 15) parent_tile=(4, 12)
+[SubAI] Team86 引擎→外交 (求和)
+[SubAI] Team49 引擎→逃跑 (survival)
+[SubAI] Team88 引擎→迎戰 (迎戰)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=39300 tid=89 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=39300 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(3, 26) parent_tile=(0, 26)
+[SubAI] Team89 引擎→迎戰 (迎戰)
+[SubAI] Team90 引擎→覓食 (覓食)
+[SubAI] Team91 紀律失效，脫離成獨立
+[STDROP] tick=39400 tid=90 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=39400 tid=90 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 8) parent_tile=(14, 11)
+[STDROP] tick=39410 tid=90 CADENCE_GATE_IDLE next=39550
+[STDROP] tick=39420 tid=90 CADENCE_GATE_IDLE next=39550
+[STDROP] tick=39430 tid=90 CADENCE_GATE_IDLE next=39550
+[STDROP] tick=39440 tid=90 CADENCE_GATE_IDLE next=39550
+[STDROP] tick=39450 tid=90 CADENCE_GATE_IDLE next=39550
+[STDROP] tick=39460 tid=90 CADENCE_GATE_IDLE next=39550
+[STDROP] tick=39470 tid=90 CADENCE_GATE_IDLE next=39550
+[STDROP] tick=39480 tid=90 CADENCE_GATE_IDLE next=39550
+[STDROP] tick=39500 tid=89 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=39500 tid=90 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=39500 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=39500 tid=90 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 8) parent_tile=(14, 11)
+[SubAI] Team49 引擎→逃跑 (survival)
+[STDROP] tick=39600 tid=89 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=39600 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=39700 tid=89 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=39700 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=39900 tid=89 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=39900 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(0, 26)
+[STDROP] tick=40000 tid=89 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40000 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(0, 26)
+[STDROP] tick=40100 tid=89 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40100 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(0, 26)
+[STDROP] tick=40200 tid=88 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40200 tid=89 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40200 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(15, 22) parent_tile=(15, 19)
+[STDROP] tick=40200 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(0, 26)
+[STDROP] tick=40300 tid=88 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40300 tid=89 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40300 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40300 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(15, 22) parent_tile=(15, 19)
+[STDROP] tick=40300 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(0, 26)
+[STDROP] tick=40300 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 8) parent_tile=(14, 11)
+[SubAI] Team88 引擎→迎戰 (迎戰)
+[STDROP] tick=40450 tid=89 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=40450 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 28) parent_tile=(0, 26)
+[SubAI] Team5 紀律失效，脫離成獨立
+[SubAI] Team49 紀律失效，脫離成獨立
+[STDROP] tick=40500 tid=88 ARRIVE_MERGEQ task=迎戰 move=-1
+[SubAI] Team89 引擎→逃跑 (survival)
+[STDROP] tick=40500 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(15, 19)
+[STDROP] tick=40510 tid=89 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=40510 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=40600 tid=88 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=40600 tid=89 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=40600 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(15, 19)
+[STDROP] tick=40600 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=40690 tid=89 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=40690 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=40700 tid=88 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=40700 tid=89 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=40700 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(15, 19)
+[STDROP] tick=40700 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=40800 tid=88 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=40800 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(15, 19)
+[STDROP] tick=40900 tid=88 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40900 tid=89 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=40900 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(15, 22) parent_tile=(15, 19)
+[STDROP] tick=40900 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(0, 26)
+[STDROP] tick=41000 tid=88 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=41000 tid=89 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=41000 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=41000 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(15, 22) parent_tile=(15, 19)
+[STDROP] tick=41000 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(5, 28) parent_tile=(0, 26)
+[STDROP] tick=41000 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(13, 11)
+[SubAI] Team88 引擎→迎戰 (迎戰)
+[SubAI] Team89 引擎→逃跑 (survival)
+[STDROP] tick=41100 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=41100 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(14, 10)
+[STDROP] tick=41110 tid=89 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=41110 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=41170 tid=89 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=41170 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=41200 tid=88 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=41200 tid=89 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=41200 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=41200 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(15, 19)
+[STDROP] tick=41200 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=41200 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(15, 10)
+[STDROP] tick=41300 tid=88 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=41300 tid=89 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=41300 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=41300 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(15, 19)
+[STDROP] tick=41300 tid=89 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(4, 27) parent_tile=(0, 26)
+[STDROP] tick=41300 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(15, 10)
+[STDROP] tick=41400 tid=88 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=41400 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(15, 19)
+[STDROP] tick=41500 tid=88 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=41500 tid=88 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(15, 19)
+[SubAI] Team89 引擎→逃跑 (survival)
+[STDROP] tick=41700 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=41700 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(14, 11)
+[SubAI] Team92 引擎→逃跑 (survival)
+[STDROP] tick=41910 tid=92 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=41910 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(8, 10) parent_tile=(16, 9)
+[STDROP] tick=42000 tid=92 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=42000 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(8, 10) parent_tile=(16, 9)
+[STDROP] tick=42400 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=42400 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(18, 9)
+[SubAI] Team88 紀律失效，脫離成獨立
+[STDROP] tick=42600 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=42600 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(18, 9)
+[STDROP] tick=42650 tid=92 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=42650 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(18, 9)
+[STDROP] tick=42890 tid=92 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=42890 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(9, 10) parent_tile=(17, 9)
+[SubAI] Team92 引擎→逃跑 (survival)
+[STDROP] tick=42910 tid=92 ARRIVE_MERGEQ task=逃跑 move=-1
+[STDROP] tick=42910 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(8, 10) parent_tile=(17, 9)
+[STDROP] tick=43000 tid=92 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=43000 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(8, 10) parent_tile=(17, 9)
+[STDROP] tick=43300 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=43300 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(17, 9)
+[STDROP] tick=43400 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=43400 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(10, 10) parent_tile=(16, 9)
+[STDROP] tick=44000 tid=92 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=44000 tid=92 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(12, 8) parent_tile=(14, 11)
+[SubAI] Team92 引擎→逃跑 (survival)
+[SubAI] Team92 紀律失效，脫離成獨立
+[SubAI] Team93 引擎→迎戰 (迎戰)
+[STDROP] tick=49700 tid=93 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=49700 tid=93 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(15, 22) parent_tile=(16, 26)
+[SubAI] Team93 引擎→迎戰 (迎戰)
+[STDROP] tick=49900 tid=93 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=49900 tid=93 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(16, 26)
+[STDROP] tick=50000 tid=93 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=50000 tid=93 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(16, 26)
+[STDROP] tick=50100 tid=93 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=50100 tid=93 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(16, 26)
+[STDROP] tick=50200 tid=93 ARRIVE_MERGEQ task=覓食 move=-1
+[STDROP] tick=50200 tid=93 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(15, 22) parent_tile=(16, 26)
+[SubAI] Team93 引擎→迎戰 (迎戰)
+[STDROP] tick=50400 tid=93 ARRIVE_MERGEQ task=迎戰 move=-1
+[STDROP] tick=50400 tid=93 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(16, 26)
+[STDROP] tick=50500 tid=93 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=50500 tid=93 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(16, 26)
+[STDROP] tick=50600 tid=93 ARRIVE_MERGEQ task=貿易 move=-1
+[STDROP] tick=50600 tid=93 LOOP2B_RELEASE_TO_IDLE parent_not_colocated sub_tile=(14, 22) parent_tile=(16, 26)

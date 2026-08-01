@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·SLICE A refine DELIVER賣full cargo繞porter reserve(trickle→flow)·spec=2026-07-31-logistics-sliceA-refine-deliver-full-cargo-HOW.md(R²CLEAN)·根:_market_visitor_sell(interaction:807-829)surplus=holding-reserve對porter把delivery cargo當need reserve吃掉→sell_no_surplus bail半數·fix:_market_visitor_sell加optional deliver_cargo:float=-1.0(>=0 delivery convoy→sellable=deliver_cargo繞reserve/<0 normal→holding-reserve既有不變)+qty capping(:817 min order_rem/sellable/owner_coin保conservation airtight)+_resolve_market_at_outpost唯一call site(758)對convoy porter(task_extra_data convoy_phase)傳task_extra_data.cargo[res]·憲法cargo語意=待交付非holding非scripted·★TDD measure送達率真升(sell_no_surplus降+deliver_settled升+cargo_delivered/out 26%→顯著升+order_fulfilled>4)別假設+cargo守恆(賣+殘RETURN merge)+normal sell byte-identical不變+不凍] SLICE A refine DELIVER賣full cargo繞reserve。deliver_cargo param。★交付附measure送達率真升(別假設refine有效)。normal sell不變+守恆+不凍。"
 branch: feat/logistics-sliceA-refine
 ---

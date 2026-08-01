@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·observer-no-global-RNG靜態閘·spec=2026-07-29-observer-rng-freeze-gate-HOW.md(R²CLEAN+必補已訂進§2a:7類向量含randfn/seed)·observability_gate.gd加第③檢查:observe-pure marker檔禁7類global-RNG向量(randf/randi/randf_range/randi_range/randfn/randomize/seed+pick_random/shuffle)+local-seeded逃生口(識別字.前綴放行,但pick_random/shuffle照抓+seed裸括號抓rng.seed=賦值不抓)+同步補constitution_gate RNG_RE全4新向量+marker-missing非阻斷WARN·核心3檔seed marker(specimen_dump_helper/specimen_tracer/probe_stats)·純靜態零RNG] observe-RNG靜態閘。7類向量。核心3檔加marker。反例測7向量+逃生口。"
 branch: feat/observer-rng-freeze-gate
 ---

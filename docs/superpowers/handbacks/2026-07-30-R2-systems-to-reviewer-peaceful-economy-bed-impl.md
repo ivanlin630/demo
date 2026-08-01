@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·和平經濟床實作·feat/peaceful-economy-bed 11db222b·零sim-code改(config+2讀-print debug檔)·liveness ALL PASS(need_keep material=100全①/③料窮側+62 unowned forest)+bed 6mo exit0+headless 0-new+constitution 74·★4問數(seed70730/6mo):Q1 complete_build=0/gate*=0/construct.start=14 Q2 upgrade_facility=6 fires Q3 trade.deal=0但order_placed=1833/fulfilled=0 Q4 foodflow=4594/persist=14/bridge=0·審:雙run determinism(月故事第二inline run:110 seed+:126 advance重現同世界?)+apothecary驅material need當①founding fixture對應A1否+4問tap齊+liveness真擋死fixture+零RNG] 和平經濟床impl。審雙run determinism+fixture對應+tap齊。4問數初看completion塌(founding/trade完成0)非純動機缺但measurer/QA/blueprint判。"
 ---
 

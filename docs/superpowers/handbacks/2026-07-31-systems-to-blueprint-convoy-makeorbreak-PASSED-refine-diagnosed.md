@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★convoy SLICE A make-or-break PASSED(第一手親驗真值非放大)+refine點診斷·真值(和平床convoy-truevalue dump,三跑determinism):g1.order_fulfilled 0→4(整session為0的GATE-B撮合真活)+deliver_settled=2真fulfill+買方granary material真值T0=33/T1=22(deposit真發生買方原0現有貨)+cargo_delivered=45·convoy.return telemetry修0→5和平床/0→33 warring(對齊真merge,QA證5派5合併=物理round-trip正常非zombie)·∴機制真work(settled+granary真>0+fulfilled真值,非visible-log放大)·★refine點:sell_no_surplus=2(~半deliver convoy bail)+cargo 45/172~26%送達率=真gap非log-gap·根診斷:_market_visitor_sell(interaction:810)surplus=effective_holding-reserve對porter=delivery cargo被porter reserve吃掉(cargo非porter need是待交付貨)→surplus不足bail·refine方向:DELIVER賣full cargo qty繞porter reserve(它被dispatch來送非keep)·make-or-break PASS,refine=follow-up slice(核心work,提升fulfill率)·SLICE A收官,B分配/C貿易續" 
 ---
 

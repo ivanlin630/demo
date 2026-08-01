@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[★釘死SLICE A make-or-break鐵指標(blueprint命,別放大2筆=成了,量真值非visible-log)·兩件·①修convoy.return計數器telemetry漏算(faction_ai:769觸發比真[Merge]窄→拉齊真merge點)·②★instrument DELIVER成交結果:現faction_ai:1786-1787呼_resolve_market_at_outpost後無條件bump convoy.deliver(計抵達非成交)→改記真成交vs bail分因(convoy.deliver_settled當_market_visitor_sell回true / convoy.deliver_bail_<reason>當false:sell_no_surplus/sell_owner_no_coin/sell_storage_full等)·+bed dump真值:每deliver convoy的market granary material deposit後真值(>0?)+g1.order_fulfilled真筆數(和平床0→?)·目的:3趟unclear分清真delivery失敗(visitor_sell bail=機制沒到位要修)vs log-gap(settled沒印log=只telemetry)·純觀測+telemetry修零行為變·落地docs/measurements] 釘convoy驗收線真值:①修return計數器②instrument DELIVER成交vs bail分因+dump granary material真值+fulfilled真筆數。3趟unclear分真失敗vs log-gap。量真值別靠visible-log。"
 branch: feat/logistics-slice-A-nail
 ---

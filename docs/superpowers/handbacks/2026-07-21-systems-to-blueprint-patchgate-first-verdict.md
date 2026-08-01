@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[補丁閘優先查 verdict·死法②非假稀缺goods-reserve-gate·信號指向FOOD結構非GOODS流動性] 序③補丁閘查完(code+re-baseline probe)。①team73「缺糧仍貿易」=NON task-priority patch-gate(覓食=PRIO_SURVIVAL會preempt貿易=PRIO_DISPATCH若ranked;真機制=applicability:survival opt gate在food_days<DESPERATION~3,team73 food=4.17>3→無survival opt applicable→default貿易。DESPERATION cliff非override)。②★死法②illiquidity≠假稀缺reserve-gate:goods reserve已=need_keep(0)×factor≈0(死鎖早解,可賣=holding)。sell_no_surplus=302=100%的meet+order_placed 9450/fulfilled 6+restock 2236=市場全買單無賣家=ONE-SIDED FOOD市場。food是survival-floored(reserve=need_keep「絕境不甩活命糧」永不液化)→糧短世界food市場結構上無法peer成交。③∴信號指向真FOOD結構(供給+food永不賣design)非goods流動性。market-liquidize branch(降goods reserve)修的是non-problem(goods reserve已~0)。★reframe:economy瓶頸可能是FOOD供給非GOODS成交。★信心:HIGH「非goods-reserve-gate」,MEDIUM「food-production根」(未驗:食物是否真被生產)。請measurer決定性measure firm up。"
 ---
 

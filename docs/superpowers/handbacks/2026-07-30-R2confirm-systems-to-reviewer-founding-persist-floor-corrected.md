@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²確認·founding persist floor 4項必補全訂正(過一輪確認再dispatch implementer)·①spec §1措辭改:floor對lean≤0.5全程load-bearing(親算固執lean1.0過floor@progress0.5只護前半/中性lean0.5 progress=1恰=floor全程/務實lean0.2 progress=1僅0.06永不到原threshold=全程唯一保護),刻意設計非cold-start暫時補丁勿砍·②§4 WEIGH-not-GATE收你判定:合理例外維持均一floor(floor×lean務實0.03<threshold=永遠0%完工=結構死角撞trait非人格分化,同crisis不分人格)·③§5 TDD補persist.hold真對founding子隊fire斷言(非只信complete_build,feedback_verify_execution_end)·④§5b measurer額外驗team14 timing(hard floor蓋safe_factor侵蝕晚放→對比fix前後多餓死否)·⑤§5c連結b5496643(此fix=同日persist-refuted footnote預言兌現,不同函式try_set vs transition非矛盾)] 4項全訂正spec §1/§4/§5/§5b/§5c。過確認再dispatch implementer。"
 ---
 

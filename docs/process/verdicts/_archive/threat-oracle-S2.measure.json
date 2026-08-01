@@ -1,0 +1,68 @@
+{
+  "measured_at_head": "d5a83163 (branch feat/threat-oracle-s2, off baseline 3a429632)",
+  "baseline_head": "3a429632",
+  "branch_head": "d5a83163",
+  "raw_logs": [
+    "docs/measurements/2026-07-17-threatoracle-s2-branch-charbed-d5a83163.log",
+    "docs/measurements/2026-07-17-threatoracle-s2-branch-constitution-d5a83163.log",
+    "docs/measurements/2026-07-17-threatoracle-s2-branch-headless-d5a83163.log",
+    "docs/measurements/2026-07-17-threatoracle-s2-branch-threatdissolution-d5a83163.log",
+    "docs/measurements/2026-07-17-threatoracle-s2-branch-reactiondissolution-d5a83163.log",
+    "docs/measurements/2026-07-17-threatoracle-s2-baseline-reactiondissolution-3a429632.log",
+    "docs/measurements/2026-07-17-threatoracle-s2-baseline-3a429632.json",
+    "docs/measurements/2026-07-17-threatoracle-s2-branch-seed1337-d5a83163.log",
+    "docs/measurements/2026-07-17-threatoracle-s2-branch-seed42-d5a83163.log"
+  ],
+  "method": "★行為變大案例,同seam系列自建獨立baseline worktree(.worktrees/threat-oracle-s2-baseline detached@3a429632)+branch worktree(@d5a83163)。判準=行為變合理性檢視(非diff=0)。char bed/gate/headless/dissolution beds獨立重跑；seeded_warring 2 seed(1337/42×2mo)做organic規模behavioral delta分析(非只confirm=0)。",
+  "gates": {
+    "char_bed_four_quadrant_and_R2": {
+      "result": "11 PASS/0 FAIL,ALL PASS（implementer報12/12,我count=11/0,差異疑統計口徑非缺陷——四象限proud-doomed→迎戰/cautious-hawk→備戰/coward→survival/weak-pragmatic→求和皆對;severity升備戰util;winnable respect(cautious)vs override(reckless);severity capped;2 R²場景[boost≠偽裝硬閘→中severity+貿易機會仍貿易勝][零fall-through→極端向量仍主導threat]皆PASS）",
+      "verdict": "CONFIRMED（獨立重跑,數字/行為皆符合宣稱）"
+    },
+    "constitution_gate": {
+      "result": "PASS sites=65 removed=0",
+      "matches_claim": true,
+      "verdict": "CONFIRMED"
+    },
+    "headless_test_full": {
+      "result": "=== DONE ===,殘3 assertion同函式名(_test_p2a_survival_terms/_test_beg_join_social_resolve/_test_strategic_reads_ladder)但行號位移(15529→15540/7075→7078/13979→13990,因測試檔本身新增行導致後續行號位移,非新增/減少failure)。2舊測遷移(_test_t5_intra_layer/_test_flee_threat_gate)未見failure=遷移後隨新行為PASS。",
+      "verdict": "CONFIRMED pre-existing(同函式仍3個),行號位移為預期(檔案本身變大非回歸)"
+    },
+    "threat_dissolution_check": {
+      "result": "ALL PASS(repertoire 4型+居民守衛+unified rank+live _evaluate_threat 實派probe bump)",
+      "verdict": "CONFIRMED"
+    },
+    "reaction_dissolution_check": {
+      "result": "1 FAIL(潰散隊未出FLEE,team_panic未接入決策)+survival ORDER gate PASS(真絕境壓過panic-only)+其餘6項cons全PASS",
+      "baseline_cross_check": "同一FAIL在baseline(3a429632)獨立重跑,訊息完全相同 → 確認pre-existing非S2引入",
+      "verdict": "CONFIRMED pre-existing FAIL(非回歸)+survival保序CONFIRMED"
+    }
+  },
+  "organic_behavioral_delta": {
+    "seeds_tested": [1337, 42],
+    "months": 2,
+    "total_diffs": {"seed_1337": 331, "seed_42": 305},
+    "population_health_sanity": {
+      "seed_1337": "attrition 4.05%→2.93%, pop 426→431, teams 66→69（正常量級,非世界崩潰）",
+      "seed_42": "attrition 2.55%→6.48%, pop 421→404, teams 61→57（正常量級,非世界崩潰）",
+      "verdict": "★兩seed皆非災難性崩潰（人口/隊數變動個位數百分比）——分歧發生在RNG-order cascade的預期範圍內結構"
+    },
+    "★迎戰_chosen_explosion_CROSS_SEED_CONFIRMED": {
+      "seed_1337": "opt_chosen.迎戰: 44 → 1947（約44倍）",
+      "seed_42": "opt_chosen.迎戰: 44 → 4602（約105倍）",
+      "verdict": "★★跨2 seed一致方向且量級巨大(44-105倍)——非單一seed噪音，是穩定重現的organic效果。需systems判斷此量級是否為設計意圖('threat現在該更重要')或severity/boost權重過強造成迎戰option在整體族群層級系統性碾壓其他選項(而非只在char bed的窄構造情境裡)"
+    },
+    "求和_chosen_also_up": {
+      "seed_1337": "40 → 885（約22倍）",
+      "seed_42": "254 → 1258（約5倍）",
+      "verdict": "同方向但幅度較迎戰小，符合spec設計('求和'亦severity-scaled)"
+    },
+    "★progression_metrics_seed_1337_TOTAL_COLLAPSE_seed_42_PARTIAL": {
+      "seed_1337": "probe.worldgen.build_outpost: 35→0 | farming_final.farm_pos_teams: 8→0 | probe.merge.set_ok/surv_ok/consolidate_dispatch: 全→0 | rung_dist.r1-r4: 全→0(只剩r0)",
+      "seed_42": "probe.worldgen.build_outpost: 22→12(未歸零) | farming_final.farm_pos_teams: 10→1(未歸零) | probe.merge.set_ok: 21→9/surv_ok: 1→44(未歸零,甚至升) | rung_dist.r1-r3仍有值(未全歸零)",
+      "verdict": "★seed_1337的『progression全面歸零』未在seed_42重現(部分抑制但非全滅)——不確定是seed_1337特定的war-spiral巧合還是severity/boost在某些世界狀態下觸發更極端的crowd-out。建議：若systems要merge前確認，建議至少再驗1-2 seed看『progression歸零』是否常態or seed_1337特例"
+    }
+  },
+  "incomplete": ["progression-collapse pattern只在2 seed驗,seed_1337全滅/seed_42部分—樣本不足以判斷是常態還是特例,若systems在意這條建議加碼seed"],
+  "summary": "★行為變合理性初判：char bed/gate/headless/dissolution beds全部CONFIRMED符合宣稱,四象限+2 R²場景在窄構造情境下正確。★但organic層級揭露一個unit test沒覆蓋到的規模效應——迎戰(engage)選中次數暴增44-105倍(跨2 seed一致方向,非噪音),且至少1/2 seed顯示經濟/聚落進程指標(outpost建造/merge/rung爬升)完全歸零。人口/隊數本身健康(非世界崩潰)，但『游牧-好戰』vs『聚落-經濟』的巨觀平衡看起來大幅倒向前者，幅度遠超四象限單元測試所能呈現。這是否為設計意圖(threat現在該重很多)或severity/boost常數需要收斂，是systems判斷，非measurer決定——已如實呈現數字+標記★不確定度。"
+}

@@ -1,0 +1,9 @@
+
+======== Running config: demo ========
+======== Running config: econ_bed ========
+======== Running config: survival_start ======
+==
+======== Running config: world_sim ========
+========== 多配置對比 ==========
+
+

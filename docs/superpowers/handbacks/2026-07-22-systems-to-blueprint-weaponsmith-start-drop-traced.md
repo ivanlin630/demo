@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[code-trace 完·weaponsmith START drop=_pick_facility 不查 afford→afford(強候選 tools)fail·跨供應鏈 civ→mil 斷] weapon SELECTION→START pipeline code-trace 完(measurer 精確 split 認)。★drop 定位:_pick_facility(3068)只查 score+slot、**不查 afford**→選中 weaponsmith(slot 有空,12-19×)→ 但 _begin_facility_construction(_can_afford)/_dispatch_facility_builder(avail<cost×1.5)**afford check fail→0 START**。★強候選=tools:weaponsmith cost lvl1=material 80+**tools 3**;tools 由 civ workshop(goods/tools/arrows)產;weaponsmith 只在 **military outpost**(allowed_outpost);**military 隊缺 tools**(跨供應鏈 civ-workshop→tools→mil-weaponsmith 斷,military 隊無 workshop 自產 tools 也未必買到)→ 永『選中-不-建』。slot 非因(_pick_facility slot-full→demolish-or-return-{},選中的 slot 都有空)。★fix 方向候選(需 measurer 定 afford res):(a)_pick_facility 加 afford 預檢(別選買不起的→選次佳可建)(b)★tools 跨供應鏈打通(military 隊經市場/faction 內部取 tools)——這才讓軍工真起。連綜合發展模型『軍閥追武』需 tools 產業鏈支撐。決定性 measure:weaponsmith START-fail afford res 分因(material vs tools)+military 隊 tools holding。定 res 才 spec。civ 棄工(②)另軌。"
 ---
 

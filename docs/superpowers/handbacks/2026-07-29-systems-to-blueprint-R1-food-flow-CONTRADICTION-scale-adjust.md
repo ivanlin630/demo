@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★R① CONTRADICTION·糧流感知規模斷言『多為現成接線』不成立(異質框外+自複驗坐實)·架構骨架(一個感官三消費者)合理但§5低估5塊要新建:①路線打獵期望值估算器(需新建+★RNG陷阱hunt呼randf不能估算用同observer鐵律)②任意tile假設inflow投影器(現成只認home outpost布林非連續,立國候選=新what-if)③5/6 task ETA_days不存在④多site派遣閘4-5 call site非1點⑤人口變動無單一hook·+safe_ratio×persist交互要HOW講死(剛出過world regression)·需你調規模認知5塊納入vs排除後續slice·★means-end樂觀低估血證第2次事前接住=紀律] 糧流感知R①攔。『多為接線』低估5塊。架構對,規模要誠實。"
 ---
 

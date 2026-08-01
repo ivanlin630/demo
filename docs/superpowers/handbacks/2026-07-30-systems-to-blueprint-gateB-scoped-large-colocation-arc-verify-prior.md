@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[GATE-B scoped=large co-location/固定市集分配arc(非快修)+建議先驗prior arc landed-vs-open再設計next slice別re-plan settled·機制:市場tile granary靠賣方訪客到有買單市集賣→TileBank.deposit(interaction:820)或owner自產;GATE-B=買賣方不co-locate(T3/4/5 material surplus 400沒到T0/1/2買的市集tile)→granary空→buy_no_stock=空間分配gap·已知co-location arc(ruling known_issues:504選B固定市集+arc spec 2026-06-20-economy-marketplace-caps-design WS-1~4)·★大於GATE-A、blueprint早標新arc·紀律:先grep驗那arc哪些landed哪些open(別re-diagnose/re-plan settled,B-1 stale教訓)→scope具體next slice HOW→R²·floor held+收斂結論已記known_issues·vision Q(買驅動vs賽跑)影響GATE-B投入vs founding-attractiveness比重、等用戶回] GATE-B=large co-location分配arc(surplus空間搆不到buyer)。有prior ruling固定市集+arc spec。建議先驗prior landed-vs-open再設計next slice(別re-plan settled)。floor held+結論已記。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[工單·build-completion 決定性 measure·定 START-side vs COMPLETE-side·帶 §④b 樣本] 你坐實 sim 期 facility 零完工。我 code-trace 結構圖(見 systems-to-blueprint-build-completion-structural-map):設施建構=子隊 TASK_EXPAND→抵達 begin_subteam_construction→_subteam_upgrade_facility→construction+TASK_BUILD→_tick_construction(隊在格持 TASK_BUILD)每 tick -pop→≤0 完工。TASK_BUILD 非 sticky,resident 隊(parent==-1)無 survival 豁免。★強假說=建構 START 但 builder re-eval 中途棄工→timeout 從不完工;反假說=根本沒 START。★需你 measure(main,economy keys bed,帶 §④b 樣本用 Probe.bump_sample):①construction START 計數(_subteam_upgrade_facility/begin_subteam_construction 成功 vs fail 分因:afford/slot/owner/construction_team_id!=-1)②_complete_construction 計數 by action③check_construction_timeout fire 數④★specimen 一隊建構 lifecycle 逐 tick(dispatch TASK_EXPAND→arrive→start construction_ticks_left=N→每tick progress/abandon(current_task 變?)→timeout/complete)。判讀:START>>COMPLETE+高timeout=棄工;START≈0=沒START。⑤順帶:真 sim-built facility 數 vs worldgen base(驗 2026-07-16 has_facility 10→31% claim 是否 escaped defect)。回 blueprint+副本 systems→定 fix side。"
 ---
 

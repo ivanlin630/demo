@@ -1,0 +1,21 @@
+{
+  "method": "code-verify(零RNG風險,追蹤control flow逐行確認,非pattern-match猜)——沿著uses_unified()/parent_team_id分支/_evaluate_solo/_evaluate_survival/Residency系統逐一讀完，用既有lockpoint-v2 trace的team19實測值(task_priority=50,task_reason=\"invite_settle\")跟code比對。",
+  "E驗證(讀數真不真)": {
+    "任務=安頓": "team.current_task==TASK_SETTLE(\"安頓\")——直接讀team state欄位,非probe抽象,確認為真。",
+    "task_priority=50/task_reason=invite_settle": "同樣直接讀team state,確認為真。",
+    "決策=survival(current_option欄)": "此欄可能是stale value(上次成功dispatch時留下,非即時反映『現在』rank_scored的argmax)——不影響下面B的定位,但提醒:current_option不該被當成『當下決策想要什麼』的即時信號,只反映『上次成功commit的是什麼』。",
+    "verdict": "E不是主因——task_priority/task_reason讀數為真,不是probe誤讀（那個E是famine_days=0的另外4隊,非team19這種）。"
+  },
+  "★★locate=B（優先序latch），精確code鏈": {
+    "step1_控制流分支": "faction_ai_system.gd:3225 `if uses_unified(team) or team.parent_team_id == -1: return`——team19若非merchant/produce tag(uses_unified=false)且非subteam(parent_team_id==-1,大機率成立,獨立流亡隊)→整個legacy _evaluate_survival函式(含proactive_camp那段)完全不執行，我上輪①的proactive_camp假說對team19這種隊根本不適用（blueprint打臉對）。",
+    "step2_真正驅動路徑": "team19這類非unified非subteam的隊，求生評估走`_evaluate_solo`(faction_ai_system.gd:1850)——1856行`if uses_unified(team): _decide_unified(...); return`不成立(非unified)→繼續往下1880行`rank_scored`+1902行`TaskArbiter.try_set(state,team,td[\"task\"],tgt,TaskArbiter.PRIO_DISPATCH,\"solo\")`。★關鍵：_evaluate_solo的try_set一律用PRIO_DISPATCH=50、source=\"solo\"，即使rank_scored選中的是survival-class選項也一樣走50不是80！",
+    "step3_task=安頓的來源": "faction_ai_system.gd:572-588『_try_invite_nearby_exile』(Residency邀請系統)——:583-584 `TaskArbiter.try_set(state,t,TeamData.TASK_SETTLE,tile.tile_pos,TaskArbiter.PRIO_DISPATCH,\"invite_settle\")`。★source字串='invite_settle'——這與team19實測task_reason完全吻合，證實team19的『安頓』task正是這個系統派的。",
+    "step4_鎖點": "team19現任task_priority=50(=PRIO_DISPATCH)+task_reason='invite_settle'。之後_evaluate_solo每cadence想用source='solo'@50重派(即使rank_scored選中survival)，try_set的同層self-replace規則要求`_source(新)∈ENGINE_SOURCES`(★'solo'有過)且`team.task_reason(現任)∈ENGINE_SOURCES`(★'invite_settle'不在[unified,solo]內,不過！)——★★這一關卡死。team19從接受安頓邀請那刻起，永遠無法被_evaluate_solo的任何後續dispatch(含survival)同層置換，除非TASK_SETTLE自然完成(真的安頓成功)或被外力release。"
+  },
+  "★對比我之前兩個錯假說": {
+    "假說1(source=survival白名單,前輪preliminary)": "適用對象=非子隊經rank_survival獨立迴圈(3364行)的隊，team19不符(那條路也在uses_unified/parent_team_id==-1時被3225跳過)",
+    "假說2(proactive_camp,更前一輪)": "適用對象=子隊(parent_team_id!=-1)+TASK_CAMP，team19是TASK_SETTLE非TASK_CAMP，且很可能非subteam，完全不適用（blueprint抓對，我over-concluded）",
+    "真正答案(本輪)": "team19是**locate B**——Residency邀請系統用非白名單source('invite_settle')派出的task，把_evaluate_solo自己的後續同層dispatch權柄鎖死。這是三個不同subsystem(Residency/rank_survival-loop/_decide_unified)各自用不同source字串卻共用同一個task_priority層級，只有unified/solo在白名單——任何第三方subsystem(如Residency)一旦搶到某層，就永久免疫於同層的所有其他subsystem置換。"
+  },
+  "fix方向(僅供參考非我裁)": "把'invite_settle'加入ENGINE_SOURCES風險大(等於讓任何@50來源都能被_evaluate_solo置換,可能破壞Residency流程本身的完整性——安頓邀請被中途打斷可能有其他副作用)；較保守方向：Residency系統自己在team進入危急狀態時主動release(比照proactive_camp到達結算的做法，在_try_invite_nearby_exile或team.current_task==TASK_SETTLE的某處也加一個『food critical→release』安全閥，類似:3210-3220那段但是給TASK_SETTLE用)。這是設計裁量。"
+}

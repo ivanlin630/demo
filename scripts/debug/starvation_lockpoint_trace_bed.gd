@@ -141,13 +141,13 @@ func _run() -> void:
 				extra = " absorb_target=%d belief_pos=%s live_pos=%s gap=%.1f" % [
 					snap["absorb_target_id"], str(snap["absorb_target_belief_pos"]),
 					str(snap["absorb_target_live_pos"]), snap["belief_vs_live_gap"]]
-			print("    tick=%d task=%s prio=%d reason=%s combat_target=%d option=%s food_days=%.2f pop=%d famine_days=%.1f tile=%s move_target=%s flee_from=%s committed=%s cooldown=%s survival_dispatch_would_succeed=%s%s" % [
+			print("    tick=%d task=%s prio=%d reason=%s combat_target=%d option=%s food_days=%.2f pop=%d famine_days=%.1f tile=%s move_target=%s flee_from=%s committed=%s cooldown=%s survival_dispatch_would_succeed=%s finder_hits=%s%s" % [
 				snap["tick"], String(snap["task"]), snap["task_priority"], String(snap["task_reason"]),
 				snap["combat_target"], String(snap["current_option"]),
 				snap["food_days"], snap["pop"], snap["famine_days"],
 				str(snap["tile_pos"]), str(snap["move_target"]), str(snap["flee_from_pos"]),
 				String(snap["survival_committed_option"]), String(snap["survival_stall_cooldown_keys"]),
-				str(snap["would_survival_dispatch_succeed"]), extra])
+				str(snap["would_survival_dispatch_succeed"]), str(snap.get("survival_finder_hits", false)), extra])
 		if fire_events.has(tid):
 			print("    ★★ stall_exclude FIRE 事件（%d 次）：" % fire_events[tid].size())
 			for ev in fire_events[tid]:

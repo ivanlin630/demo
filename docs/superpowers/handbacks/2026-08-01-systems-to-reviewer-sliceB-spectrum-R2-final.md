@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²(終稿)甲SLICE B統一光譜·blueprint裁擴B-only→統一光譜(給免費/賣居民人格定價/賣外),spec定稿·premise §0b三項全PROVEN(grep坐實:TradeValuation定價+coin結算interaction:806-807/838-839,居民持coin member_tax faction_ai:2521,intra-faction無gate只擋self-trade interaction:731)·★blueprint指定硬檢=grep四約束鎖統一非補丁:①候選非特判branch(grep無if kind==distribute繞argmax)②連續weigh非if greed>X硬gate(grep util/price無階梯gate)③價格人格導出連續值modulation現成local_value非新定價機制(grep無新price常數/class)④復用現成convoy+貿易市場非新market/order class·兩旋鈕:price_factor=clamp((0.5+greed)/(0.5+honor))×local_value/util=relief(honor放大)+coin(greed放大)·dev-verify三人格湧現(仁君/苛捐/拋棄)+連續掃greed非階梯+coin守恆·CLEAN→dispatch隔離branch;前輪R²已CLEAN B-only,此審光譜擴增部(價格factor+賣居民settle)"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²·糧流感知 SLICE A(存活持守)HOW·規模誠實後(harvest-only,延後打獵EV/投影器/派遣到B)·★persist×safe_ratio交互講死(乘法縮放非硬塌避PROGRESSIVE_HOLD attrition→0 regression血證/5種無ETA task排除/人格ratio_floor餘裕根治team14 nuance/抖動hysteresis)·spec=2026-07-29-food-flow-slice-A-survival-hold-HOW.md] SLICE A HOW done。★你上輪R①要求persist×safe_ratio講死已補。硬檢別重蹈world regression。"
 branch: main (spec only)
 ---

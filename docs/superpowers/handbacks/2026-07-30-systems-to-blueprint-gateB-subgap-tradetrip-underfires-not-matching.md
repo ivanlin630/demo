@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★GATE-B sub-gap pin翻轉框架:binding在撮合上游=物理貿易行幾乎不fire非空間撮合·funnel極小:order_placed=1833(掛單passive,order_system:40每需求cadence掛)但seek_market=5→arrive=40→meet=6→fulfilled=0·賣sell_no_surplus=13/買buy_no_stock=7/buy_no_want=9/carry_full=4皆小數=撮合層非主瓶頸,主瓶頸是幾乎沒隊真去市場·機制:_merchant_trade_target(faction_ai:2129 seek)只對ARCHETYPE_TRADE隊做arb+需team_market_known(belief-gate)有需求市場;非TRADE archetype隊只巡最近known市集(rare);買候選TASK_TRADE-to-mp另路(arrive 40主來源)但到了granary空/已滿足不成交·連known_issues:504『TRADE隊卡角色不呼_merchant_trade_target(faction leader跑勢力AI/獨立隊覓食分數蓋過)』=trade-trip決策loses argmax·∴GATE-B fix≠純撮合/co-location(prior framing),binding=trade-trip決策under-fires=decision-layer(economy決策不fire家族)·★vision更相關:trade幾乎不fire→3rd-path harvest-expedition(自主forest採料)可能比修trade robust·checkpoint:fix設計待vision+decision-layer確認,context深" 
 ---
 

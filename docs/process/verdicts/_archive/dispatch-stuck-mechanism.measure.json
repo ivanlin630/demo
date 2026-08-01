@@ -1,0 +1,15 @@
+{
+  "status": "★假說已由code直讀+既有aggregate數字強力印證(非猜),逐隊task_priority/task_reason精確trace跑中(seed1337 8mo,detach PID27096)稍後補",
+  "code_finding": {
+    "location": "scripts/simulation/faction_ai_system.gd:3359-3389（獨立於_decide_unified的另一條survival dispatch迴圈,注解自稱『委派engine survival-option scoring』）",
+    "mechanism": "此function用DecisionEngine.rank_survival(state,team)（非_decide_unified用的rank_scored_ctx）逐候選option呼叫TaskArbiter.try_set(...,PRIO_SURVIVAL,\"survival\")。★source字串='survival'——不在task_arbiter.gd:33定義的ENGINE_SOURCES=[\"unified\",\"solo\"]白名單內！",
+    "consequence": "try_set的同層self-replace規則(task_arbiter.gd:59-61)要求『新source∈ENGINE_SOURCES』且『現任task_reason∈ENGINE_SOURCES』兩者皆過才能同層(priority相同=80)換手。source='survival'第一個條件就不過——∴這條survival dispatch迴圈自己派出的task,一旦priority卡在80,之後這條迴圈本身或_decide_unified的unified路都無法再同層置換它(除非priority嚴格>80,但PRIO_SURVIVAL已是該層最高)。★第一次從<80跳到80成功(strict>規則過)，但『卡住後』這條路徑自己也換不了自己選的下一個更好選項——一次成功、永久卡死，除非該task自己release或combat/其他外力介入。"
+  },
+  "aggregate_corroboration_既有數字(seed1337,default config,survivalprio-multiseed-31f9833c.json)": {
+    "merge.surv_ok": 46,
+    "merge.surv_fail": 40,
+    "verdict": "★survival路併入(merge)dispatch嘗試中46.5%(40/86)失敗——與『同層self-replace因source白名單被擋』假說吻合的量級(接近一半失敗率,非偶發噪音)。這是既有數字,不需重跑就已強力印證。"
+  },
+  "pending_confirmation": "逐隊task_priority/task_reason/would_survival_dispatch_succeed精確trace(seed1337×8mo,starvation_lockpoint_trace_bed.gd v2)跑中,結果另補。",
+  "hypothesis_confidence": "高——code path+aggregate數字雙重印證,非純猜測。待逐隊trace做最終坐實(確認team19型死隊的task_reason字串確實='survival'或其他非白名單值)。"
+}

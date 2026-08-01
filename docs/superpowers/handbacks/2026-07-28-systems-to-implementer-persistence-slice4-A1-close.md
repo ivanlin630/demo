@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[實作·持守統一 Slice 4·A1 手不聽腦收(arc終點,用戶原concern)·Slice3 merged(69a71eb4 gate74 try_set門檻保護committed BUILD族)·spec §8-Slice4·execution-verified A1閉環(construct.complete_build>0真完工,對照A1-FAIL baseline build=0)·若剩餘gap(directive leak/resume)補·specimen-off/aggregate] Slice 1-3 merged(persist_strength+新鮮+try_set門檻)。Slice 4=驗A1真閉+補剩餘。★execution-verified才算收。"
 branch: feat/persistence-slice4-A1-close
 ---

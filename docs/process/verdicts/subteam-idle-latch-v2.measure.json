@@ -1,0 +1,24 @@
+{
+  "slice": "subteam-idle-latch v2 (供給環 conditional merge)",
+  "measured_at_head": "ab3044c3",
+  "baseline_head": "c5ab36d9",
+  "verdict": "NOT clean-pass. 供給環 mechanism largely works (hoarding capped ~10 for live-parent foragers) BUT must-pass seed42->0 FAILED (still 4), seed1337 WORSENED (6->10, worst version), + orphan-forager hoard edge.",
+  "raw_logs": [
+    "docs/measurements/2026-07-19-subteamidle-v2-branch-ab3044c3.json",
+    "docs/measurements/2026-07-19-subteamidle-v2-sitrace-42-ab3044c3.txt",
+    "docs/measurements/2026-07-19-subteamidle-baseline-c5ab36d9.json (reused v1 baseline)"
+  ],
+  "quick_gates": {"constitution": "PASS 64/0-new", "headless": "0-new", "determinism": "implementer bac0e781 (no-RNG, not independently reproduced)"},
+  "regression_vs_baseline": {
+    "seed1337": {"baseline": 7, "v1": 6, "v2": 10, "attr_v2": 28.38, "verdict": "v2 WORSENED (worst version)"},
+    "seed42": {"baseline": 0, "v1": 10, "v2": 4, "attr_v2": 12.04, "verdict": "v2 improved from v1 but MUST-PASS (->0) FAILED"},
+    "seed4201": {"baseline": 0, "v1": 0, "v2": 0, "verdict": "identical"}
+  },
+  "supply_loop_mechanism": {
+    "works": "YES for live-parent foragers — SITRACE seed42: most foragers (54/61/62/64/68/73/77/56) cap food_days ~10-11 (sated -> 歸建 deliver), vs v1 hoard 209. Hoarding 200-2000 largely gone.",
+    "orphan_edge": "tid=76 parent=0 stuck 16040t hoarding 483 food-days pop=6 — parent gone/unreachable -> can't 歸建 deliver -> hoards. Supply loop can't close when parent absent."
+  },
+  "gate_values_TEST": {"FORAGE_SATED_DAYS": 10, "PARENT_LOW_DAYS": 3, "note": "sated cap works (~10-11 observed). Tuning MIGHT help seed42 residual but seed1337 worsening + orphan edge suggest not purely gate-value."},
+  "incomplete": ["seed1337 v2 SITRACE not isolated (worsening cause: hoard vs cascade not fully split)", "gate-value sweep not run (recommend blueprint/systems decide tune vs rethink before sweeping)"],
+  "summary": "v2 供給環 mechanically largely correct (hoarding capped for live-parent foragers, food delivers). BUT fails must-pass (seed42 4 not 0), worsens seed1337 (10, worst), orphan-forager hoard edge remains. Recurring seed-cascade: each version flips different seeds. NOT clean-pass — blueprint/systems decide: gate-tune / orphan-handling / accept-cascade / rethink."
+}

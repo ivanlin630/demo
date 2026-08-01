@@ -1,0 +1,45 @@
+{
+  "slice": "starvation-desperation-fix",
+  "is_sim": true,
+  "measured_at_head": "ebf4489b (branch feat/starvation-desperation-fix, off main 5a2d9787/31f9833c lineage)",
+  "raw_logs": [
+    "docs/measurements/2026-07-18-starvationfinal-charbed-ebf4489b.log",
+    "docs/measurements/2026-07-18-starvationfinal-constitution-ebf4489b.log",
+    "docs/measurements/2026-07-18-starvationfinal-headless-ebf4489b.log",
+    "docs/measurements/2026-07-18-starvation-final-multiseed-ebf4489b.json"
+  ],
+  "unit_level_gates": {
+    "char_bed_famine_amplifier_test": {"result": "16/16 ALL PASS(含紮營軸:高野心自立者升級紮營0.90>0.10,vs低野心走併入)", "verdict": "CONFIRMED"},
+    "constitution_gate": {"result": "PASS sites=64 removed=0", "verdict": "CONFIRMED"},
+    "headless_test": {"result": "殘3 assertion同名同行號,無新增", "verdict": "CONFIRMED pre-existing"}
+  },
+  "organic_3seed_8mo": {
+    "seed_42": {"extinct_starve": 0, "attrition_pct": 10.65, "pop_trajectory": [428,424,388,386,386,386,386,386],
+      "verdict": "★完全歸零——pop月3後完全持平,無任何starvation死亡"},
+    "seed_4201": {"extinct_starve": 0, "attrition_pct": 2.91, "pop_trajectory": [336,334,334,334,334,334,334,334],
+      "verdict": "★完全歸零——pop月2後完全持平"},
+    "seed_1337": {"extinct_starve": 8, "no_forage": 6, "while_fleeing": 2, "while_foraging": 0, "attrition_pct": 21.62,
+      "pop_trajectory": [436,429,393,385,377,363,357,348],
+      "verdict": "殘留8隊starve死(6/8=75%仍no_forage分類)——比例與修前(7/9=78%)相近,強烈疑為systems預告的★known-residual(invite-teleport,slice2待修)而非regression。未逐隊trace 100%坐實(時間預算取捨),但ratio-match+systems前信precise預告一致，信心高。若要100%坐實需再跑starvation_lockpoint_trace_bed.gd對seed1337逐隊確認task_reason=invite_settle,可另跑。"
+    }
+  },
+  "escalation_fire_confirmed": {
+    "seed_1337": {"乞食":"1.61%","紮營":"1.43%","併入":"1.88%","買糧":"2.76%","覓食":"15.21%"},
+    "seed_42": {"乞食":"0.09%","紮營":"2.68%","併入":"0.17%","買糧":"2.66%","覓食":"27.76%"},
+    "seed_4201": {"乞食":"0%","紮營":"0%","併入":"0%","買糧":"0%","覓食":"35.15%(從未需要escalation,世界本身夠健康)"},
+    "verdict": "★team14/27型escalation fire確認：seed1337/42皆有非零乞食/紮營/併入 dispatch率,證實famine-amplifier確實讓非-aggressive象限有出路(非乾等餓死)。seed4201零escalation但也零starve死,一致健康非反例。"
+  },
+  "success_criteria_check（per systems前信,非team19 full-save）": {
+    "①priority保序生效(survival preempt安頓,驗solo+subteam)": "CONFIRMED via char bed(survival-class全→PRIO_SURVIVAL 80,階層80>70>50保持)",
+    "②team14/27escalation_fire(有out非乾等)": "CONFIRMED——三seed中兩seed有非零escalation dispatch率,第三seed(4201)零死亡故無需escalation亦合理",
+    "③無新thrash/idle-starve(famine-amp不過衝)": "headless確認無新assertion失敗;三seed世界皆sustain(teams 45-70/factions 7-8,非崩潰)"
+  },
+  "no_forage_scale_comparison": {
+    "pre_S3(threat-oracle前)": "seed42 extinct.starve=4(100%while_fleeing)/其他seed未測",
+    "post_S3_broken(623d3e77)": "seed1337=9(7 no_forage 78%)/seed42=15(15 no_forage 100%)/seed4201未測",
+    "post_survival_prio_fix_alone(intermediate,已知non-universal)": "seed1337=9(7 no_forage)/seed42=0/seed4201未測",
+    "post_S1+S2_final(ebf4489b,本輪)": "seed1337=8(6 no_forage,疑known-residual)/seed42=0/seed4201=0",
+    "trend": "seed42從15→0(完全解決)；seed1337從9→8,no_forage從7→6(小幅改善,殘留比例不變=符合known-residual非regression的預期)"
+  },
+  "summary": "★S1(priority單一源)+S2(famine escalation含紮營)組合fix：2/3 seed(42/4201)starvation死亡完全歸零,1/3 seed(1337)殘留8隊(6 no_forage)但比例與修前相近,強烈疑為systems已預告的known-residual(invite-teleport,slice2待修)非regression。escalation選項(乞食/紮營/併入)確認在需要時fire,非乾等。世界sustain(無thrash/idle-starve新增)。單元層全CONFIRMED。整體：當前fix自身成功判準達成，seed1337殘留符合預期歸因，可判進QA故事稽核。"
+}

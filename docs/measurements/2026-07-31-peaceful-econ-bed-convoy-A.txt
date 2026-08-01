@@ -1,0 +1,852 @@
+﻿ 
+=== 和平經濟觀測床（measure-first Step0）seed=70730 6月 ===
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[liveness] PASS：/料窮側 need_keep(material)>0 + 有 forest 靶（fixture LIVE）
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[Harvest] Tick60 季節=春 base=1.1
+[Sub] Team5 派出子隊 Team12 leader=P5002 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team5 派運輸子隊 Team12 送 material×64 → demand 市場(6,8)
+[Sub] Team5 派出子隊 Team13 leader=P11003 advisors=[] (pop=2 cap=7 task=運輸)
+[Convoy] Team5 派運輸子隊 Team13 送 material×64 → demand 市場(6,8)
+[Market@(6, 8)] Team12  outpost owner Team0 成交
+[MsgPrune] 刪除過期訊息 global=57 known=135
+[Market@(6, 8)] Team13  outpost owner Team0 成交
+[Merge] Team5 ← Team12 完全合併 (pop=4)
+[Merge] Team5 ← Team13 完全合併 (pop=6)
+[Sub] Team5 派出子隊 Team12 leader=P5002 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team5 派運輸子隊 Team12 送 material×37 → demand 市場(8,6)
+[MsgPrune] 刪除過期訊息 global=57 known=107
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Sub] Team5 派出子隊 Team13 leader=P11003 advisors=[] (pop=2 cap=7 task=運輸)
+[Convoy] Team5 派運輸子隊 Team13 送 material×51 → demand 市場(6,8)
+[Market@(8, 6)] Team12  outpost owner Team2 成交
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[Merge] Team5 ← Team12 完全合併 (pop=4)
+[Manufacture] Team10 arrows worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[MsgPrune] 刪除過期訊息 global=56 known=76
+[Merge] Team5 ← Team13 完全合併 (pop=6)
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=3 known=6
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=4 known=6
+[MsgPrune] 刪除過期訊息 global=3 known=5
+[CrudeCamp] Team8 紮營 @(14,9) → civilian
+[MsgPrune] 刪除過期訊息 global=53 known=59
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=56 known=56
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=52 known=52
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Famine] Team9 餓死 anon 1 (famine=7天)
+[Famine] Team10 餓死 anon 1 (famine=7天)
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[Famine] Team9 餓死 anon 1 (famine=8天)
+[Famine] Team11 餓死 anon 1 (famine=7天)
+[Famine] Team10 餓死 anon 1 (famine=8天)
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Famine] Team9 餓死 anon 1 (famine=9天)
+[Famine] Team10 餓死 anon 1 (famine=9天)
+[Famine] Team11 餓死 anon 1 (famine=8天)
+[MsgPrune] 刪除過期訊息 global=50 known=50
+[Famine] Team9 餓死 anon 1 (famine=10天)
+[Famine] Team10 餓死 anon 1 (famine=10天)
+[Famine] Team11 餓死 anon 1 (famine=9天)
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[Famine] Team11 餓死 anon 1 (famine=10天)
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=50 known=50
+[Merge] Team3 ← Team11 完全合併 (absorber_pop=8)
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[Merge] Team3 ← Team10 完全合併 (absorber_pop=10)
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=49 known=48
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=42 known=42
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[MsgPrune] 刪除過期訊息 global=42 known=42
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[Harvest] Tick21600 季節=夏 base=1.5
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[Manufacture] Team0 arrows worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[Harvest] Tick43200 季節=秋 base=1.2
+
+───────── 4 問報告（43200 tick, end_pop=60, attrition=16.7%, teams=10）─────────
+【Q1 founding dispatch 嗎】（gate funnel 分：動機無 vs 卡 gate）
+  indep.found_ally=0 | indep.found_subjugate=0 | indep.found_timeout=0
+  indep.gate_ambitious=0 | indep.gate_path_ok=0
+  indep.gate_fail_pop=0 | indep.gate_fail_food=0 | indep.gate_fail_busy=0 | indep.gate_fail_nopath=0
+  construct.start=14 | construct.start_task_not_build=7 | construct.complete_build=0 | worldgen.build_outpost=1
+  construct.progress=140 | construct.stall=29106 | construct.timeout_cancel=0 | construct.complete=6
+  resume.attempt=0 | resume.success=0 | resume.reject_combat=0 | resume.reject_starving=0 | resume.reject_busy=0
+【Q2 develop（升級）嗎】
+  construct.complete_upgrade_facility=6 | construct.complete_upgrade_level=0
+【Q3 貿易/對缺口反應嗎】
+  trade.deal=3 | trade.deal_market=3 | trade.deal_merchant=3 | trade.barter_deal=0
+  g1.order_placed=1817 | g1.order_fulfilled=5 | g1.shortage_buy=857 | g1.food_buy=76
+  g1.seek_market=2 | g1.market_arrive=12 | trade.arrive=2 | trade.meet=2 | trade.timeout=34
+  --market_bail 賣方端--
+  trade.market_bail.sell_no_surplus=13 | trade.market_bail.sell_ownerless=0 | trade.market_bail.sell_no_price=0 | trade.market_bail.sell_zero_qty=0 | trade.market_bail.sell_storage_full=0 | trade.market_bail.sell_owner_no_coin=0 | trade.market_bail.sell_owner_cant_afford=0 | trade.market_bail.no_board_order=0
+  --market_bail 買方端--
+  trade.market_bail.buy_no_stock=5 | trade.market_bail.buy_no_want=6 | trade.market_bail.buy_cant_afford=0 | trade.market_bail.buy_carry_full=0 | trade.market_bail.buy_no_coin=0 | trade.market_bail.buy_no_price=0 | trade.market_bail.buy_withdraw_empty=0
+【Q4 runway 機制 fire 嗎】
+  foodflow.update=4599 | bridge.no_go_food=0 | bridge.topup=0 | persist.hold=14
+【★後勤 SLICE A：convoy delivery（GATE-B 撮合物理送貨）】
+  convoy.dispatch=4 | convoy.fetch=4 | convoy.deliver=4 | convoy.return=0
+  cargo_out=216 cargo_delivered=69 | ★order_fulfilled=5(驗收) trade.deal=3
+
+───────── construct sample payload（pin 拉走機制：ct_task/ct_reason）─────────
+  [construct.start] n=8（前 12 筆）:
+    tick=500 tile=[8, 10] team=3 ct_id=3 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=500 tile=[6, 10] team=4 ct_id=4 action=upgrade_facility task_after=外交 prio_after=70
+    tick=500 tile=[10, 6] team=5 ct_id=5 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=500 tile=[11, 9] team=7 ct_id=7 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=1500 tile=[6, 8] team=0 ct_id=0 action=upgrade_facility task_after=建設 prio_after=50
+    tick=1500 tile=[10, 10] team=10 ct_id=10 action=upgrade_facility task_after=建設 prio_after=50
+    tick=2500 tile=[8, 6] team=2 ct_id=2 action=upgrade_facility task_after=覓食 prio_after=80
+    tick=3000 tile=[6, 8] team=0 ct_id=0 action=upgrade_facility task_after=建設 prio_after=50
+  [construct.stall] n=8（前 12 筆）:
+    tick=510 tile=[6, 10] ct_id=4 ct_task=外交 ct_reason=unified ct_pos=[6, 10] ticks_left=168
+    tick=510 tile=[8, 10] ct_id=3 ct_task=覓食 ct_reason=unified ct_pos=[8, 10] ticks_left=168
+    tick=510 tile=[10, 6] ct_id=5 ct_task=覓食 ct_reason=unified ct_pos=[10, 6] ticks_left=168
+    tick=510 tile=[11, 9] ct_id=7 ct_task=覓食 ct_reason=unified ct_pos=[11, 9] ticks_left=336
+    tick=520 tile=[6, 10] ct_id=4 ct_task=外交 ct_reason=unified ct_pos=[6, 10] ticks_left=168
+    tick=520 tile=[8, 10] ct_id=3 ct_task=覓食 ct_reason=unified ct_pos=[8, 10] ticks_left=168
+    tick=520 tile=[10, 6] ct_id=5 ct_task=覓食 ct_reason=unified ct_pos=[10, 6] ticks_left=168
+    tick=520 tile=[11, 9] ct_id=7 ct_task=覓食 ct_reason=unified ct_pos=[11, 9] ticks_left=336
+  [construct.progress] n=8（前 12 筆）:
+    tick=1510 tile=[6, 8] ticks_left=168 active=0 pop=6
+    tick=1510 tile=[10, 10] ticks_left=168 active=10 pop=6
+    tick=1520 tile=[6, 8] ticks_left=162 active=0 pop=6
+    tick=1520 tile=[10, 10] ticks_left=162 active=10 pop=6
+    tick=1530 tile=[6, 8] ticks_left=156 active=0 pop=6
+    tick=1530 tile=[10, 10] ticks_left=156 active=10 pop=6
+    tick=1540 tile=[6, 8] ticks_left=150 active=0 pop=6
+    tick=1540 tile=[10, 10] ticks_left=150 active=10 pop=6
+  [construct.complete] n=6（前 12 筆）:
+    tick=1780 tile=[6, 8] team=0 action=upgrade_facility
+    tick=1780 tile=[10, 10] team=10 action=upgrade_facility
+    tick=3280 tile=[6, 8] team=0 action=upgrade_facility
+    tick=3780 tile=[10, 10] team=10 action=upgrade_facility
+    tick=7620 tile=[6, 6] team=9 action=upgrade_facility
+    tick=7620 tile=[7, 11] team=11 action=upgrade_facility
+
+───────── 逐隊月故事（同 seed inline run）─────────
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+--- t0 ---
+  T0[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T1[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=idle food=120 mat=0 coin=800 need_mat=100 runway=9999.0
+  T3[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=idle food=150 mat=400 coin=800 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=idle food=350 mat=0 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=idle food=40 mat=400 coin=300 need_mat=100 runway=9999.0
+  T8[plains] pop=6 task=idle food=60 mat=0 coin=1000 need_mat=0 runway=9999.0
+  T9[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+  T10[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+  T11[mountain] pop=6 task=idle food=100 mat=20 coin=200 need_mat=100 runway=9999.0
+[Harvest] Tick60 季節=春 base=1.1
+[Sub] Team5 派出子隊 Team12 leader=P5003 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team5 派運輸子隊 Team12 送 material×64 → demand 市場(6,8)
+[Sub] Team5 派出子隊 Team13 leader=P11004 advisors=[] (pop=2 cap=7 task=運輸)
+[Convoy] Team5 派運輸子隊 Team13 送 material×64 → demand 市場(6,8)
+[Market@(6, 8)] Team12  outpost owner Team0 成交
+[MsgPrune] 刪除過期訊息 global=57 known=135
+[Market@(6, 8)] Team13  outpost owner Team0 成交
+[Merge] Team5 ← Team12 完全合併 (pop=4)
+[Merge] Team5 ← Team13 完全合併 (pop=6)
+[Sub] Team5 派出子隊 Team12 leader=P5003 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team5 派運輸子隊 Team12 送 material×37 → demand 市場(8,6)
+[MsgPrune] 刪除過期訊息 global=57 known=107
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[Sub] Team5 派出子隊 Team13 leader=P11004 advisors=[] (pop=2 cap=7 task=運輸)
+[Convoy] Team5 派運輸子隊 Team13 送 material×51 → demand 市場(6,8)
+[Market@(8, 6)] Team12  outpost owner Team2 成交
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[Merge] Team5 ← Team12 完全合併 (pop=4)
+[Manufacture] Team10 arrows worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[MsgPrune] 刪除過期訊息 global=56 known=76
+[Merge] Team5 ← Team13 完全合併 (pop=6)
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=3 known=6
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=4 known=6
+[MsgPrune] 刪除過期訊息 global=3 known=5
+[CrudeCamp] Team8 紮營 @(14,9) → civilian
+[MsgPrune] 刪除過期訊息 global=53 known=59
+--- 月1 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=49 coin=610 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=788 need_mat=100 runway=9999.0
+  T3[plains] pop=6 task=覓食 food=48 mat=350 coin=800 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=281 coin=1002 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=206 mat=7 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=覓食 food=48 mat=360 coin=300 need_mat=100 runway=9999.0
+  T8[forest] pop=6 task=覓食 food=0 mat=0 coin=1000 need_mat=100 runway=0.0
+  T9[mountain] pop=6 task=治理 food=18 mat=38 coin=200 need_mat=100 runway=4.5
+  T10[mountain] pop=6 task=貿易 food=20 mat=56 coin=200 need_mat=146 runway=5.0
+  T11[mountain] pop=6 task=貿易 food=24 mat=44 coin=200 need_mat=100 runway=5.8
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=56 known=56
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=52 known=52
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Famine] Team9 餓死 anon 1 (famine=7天)
+[Famine] Team10 餓死 anon 1 (famine=7天)
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[Famine] Team9 餓死 anon 1 (famine=8天)
+[Famine] Team11 餓死 anon 1 (famine=7天)
+[Famine] Team10 餓死 anon 1 (famine=8天)
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Famine] Team9 餓死 anon 1 (famine=9天)
+[Famine] Team10 餓死 anon 1 (famine=9天)
+[Famine] Team11 餓死 anon 1 (famine=8天)
+[MsgPrune] 刪除過期訊息 global=50 known=50
+[Famine] Team9 餓死 anon 1 (famine=10天)
+[Famine] Team10 餓死 anon 1 (famine=10天)
+[Famine] Team11 餓死 anon 1 (famine=9天)
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[Famine] Team11 餓死 anon 1 (famine=10天)
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=50 known=50
+[Merge] Team3 ← Team11 完全合併 (absorber_pop=8)
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[Merge] Team3 ← Team10 完全合併 (absorber_pop=10)
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=49 known=48
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=42 known=42
+--- 月2 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=50 coin=610 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=788 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=覓食 food=80 mat=445 coin=1200 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=281 coin=1002 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=62 mat=13 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=覓食 food=48 mat=360 coin=300 need_mat=100 runway=9999.0
+  T8[forest] pop=6 task=覓食 food=0 mat=0 coin=1000 need_mat=100 runway=0.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[MsgPrune] 刪除過期訊息 global=42 known=42
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[Harvest] Tick21600 季節=夏 base=1.5
+--- 月3 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=50 coin=610 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=788 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=覓食 food=80 mat=445 coin=1200 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=281 coin=1002 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=20 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=覓食 food=48 mat=360 coin=300 need_mat=100 runway=9999.0
+  T8[forest] pop=6 task=覓食 food=0 mat=0 coin=1000 need_mat=100 runway=0.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+--- 月4 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=51 coin=610 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=788 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=覓食 food=80 mat=445 coin=1200 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=281 coin=1002 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=26 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=覓食 food=48 mat=360 coin=300 need_mat=100 runway=9999.0
+  T8[forest] pop=6 task=治理 food=0 mat=0 coin=1000 need_mat=100 runway=9999.0
+  T9[mountain] pop=2 task=治理 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+--- 月5 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=51 coin=610 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=788 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=覓食 food=80 mat=445 coin=1200 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=281 coin=1002 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=33 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=覓食 food=48 mat=360 coin=300 need_mat=100 runway=9999.0
+  T8[forest] pop=6 task=return_home food=0 mat=0 coin=1000 need_mat=100 runway=0.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[Manufacture] Team0 arrows worker_rate=0.56
+[Manufacture] Team0 medicine worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[Manufacture] Team0 arrows worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Manufacture] Team0 arrows worker_rate=0.56
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[MsgPrune] 刪除過期訊息 global=40 known=40
+[Harvest] Tick43200 季節=秋 base=1.2
+--- 月6 ---
+  T0[plains] pop=6 task=貿易 food=48 mat=52 coin=610 need_mat=138 runway=9999.0
+  T1[plains] pop=6 task=覓食 food=48 mat=51 coin=800 need_mat=100 runway=9999.0
+  T2[plains] pop=6 task=覓食 food=48 mat=50 coin=788 need_mat=100 runway=9999.0
+  T3[plains] pop=10 task=覓食 food=80 mat=445 coin=1200 need_mat=100 runway=9999.0
+  T4[plains] pop=6 task=外交 food=48 mat=340 coin=800 need_mat=100 runway=9999.0
+  T5[plains] pop=6 task=覓食 food=48 mat=281 coin=1002 need_mat=100 runway=9999.0
+  T6[plains] pop=6 task=覓食 food=48 mat=4 coin=300 need_mat=100 runway=9999.0
+  T7[plains] pop=6 task=覓食 food=48 mat=360 coin=300 need_mat=100 runway=9999.0
+  T8[forest] pop=6 task=覓食 food=0 mat=0 coin=1000 need_mat=100 runway=0.0
+  T9[mountain] pop=2 task=覓食 food=0 mat=24 coin=200 need_mat=100 runway=0.0
+
+───────── ★T0 fed 隊 per-option util 明細（economy 決策真 binding）─────────
+[GameSetup] 完成：12 teams, 0 factions, 24 persons
+[Harvest] Tick60 季節=春 base=1.1
+  === tick 500 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=110 mat=15 coin=800 runway=9999.0 food_days=28.75 need_mat=100 ===
+    [goal]   u=+1.3953  build_workshop:resource  <=WIN
+    [goal]   u=+1.3953  build_apothecary:resource
+    [goal]   u=+1.3953  build_stable:resource
+    [static] u=+1.0414  survival
+    [static] u=+0.9748  備戰
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.8694  求和
+    [static] u=+0.3200  併入
+    [static] u=+0.2766  買料
+    [static] u=+0.2599  駐守
+    [static] u=+0.1104  建設
+    [static] u=+0.0927  吸納
+    [static] u=+0.0276  貿易
+    [static] u=+0.0000  掠奪
+      分項 [build_workshop:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [build_apothecary:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+  === tick 500 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=140 mat=350 coin=800 runway=9999.0 food_days=34.38 need_mat=100 ===
+    [static] u=+0.4069  求和  <=WIN
+    [static] u=+0.3537  備戰
+    [static] u=+0.3250  覓食
+    [static] u=+0.2461  駐守
+    [static] u=+0.1285  建設
+    [static] u=+0.1250  survival
+[Sub] Team7 派出子隊 Team12 leader=P7004 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team7 派運輸子隊 Team12 送 material×64 → demand 市場(10,8)
+[Sub] Team7 派出子隊 Team13 leader=P11005 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team7 派運輸子隊 Team13 送 material×64 → demand 市場(10,8)
+[Market@(10, 8)] Team12  outpost owner Team1 成交
+[Merge] Team7 ← Team12 完全合併 (pop=4)
+[Merge] Team7 ← Team13 完全合併 (pop=6)
+[Sub] Team7 派出子隊 Team12 leader=P7004 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team7 派運輸子隊 Team12 送 material×64 → demand 市場(10,8)
+[Market@(10, 8)] Team12  outpost owner Team1 成交
+[Sub] Team7 派出子隊 Team13 leader=P11005 advisors=[] (pop=2 cap=13 task=運輸)
+[Convoy] Team7 派運輸子隊 Team13 送 material×64 → demand 市場(10,8)
+[Barter] Team12 28xmaterial <-> Team8 17xgoods
+[Sub] Team3 派出子隊 Team14 leader=P3004 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team3 派運輸子隊 Team14 送 material×44 → demand 市場(10,8)
+[Sub] Team3 派出子隊 Team15 leader=P11006 advisors=[] (pop=2 cap=8 task=運輸)
+[Convoy] Team3 派運輸子隊 Team15 送 material×44 → demand 市場(10,8)
+[MsgPrune] 刪除過期訊息 global=57 known=173
+  === tick 3600 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=48 mat=26 coin=800 runway=9999.0 food_days=41.22 need_mat=138 ===
+    [goal]   u=+1.3953  build_stable:resource  <=WIN
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.7436  備戰
+    [static] u=+0.7225  求和
+    [static] u=+0.5000  survival
+    [static] u=+0.3423  生產
+    [static] u=+0.2640  買料
+    [static] u=+0.2495  駐守
+    [static] u=+0.1298  建設
+    [static] u=+0.1256  吸納
+    [static] u=+0.0000  掠奪
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+  === tick 3600 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=39 mat=262 coin=400 runway=9999.0 food_days=85.21 need_mat=100 ===
+    [static] u=+0.9458  求和  <=WIN
+    [goal]   u=+0.7652  deliver_material
+    [static] u=+0.7615  備戰
+    [static] u=+0.5000  survival
+    [static] u=+0.3250  覓食
+    [static] u=+0.2671  駐守
+    [static] u=+0.1811  建設
+    [goal]   u=+0.1739  deliver_tools
+    [static] u=+0.1276  吸納
+    [static] u=+0.0466  貿易
+    [static] u=+0.0000  掠奪
+      分項 [deliver_material]: util=0.7652 = payoff0.880 × dev_coeff=1.000 × discount=0.870 (rate=0.150 delay=1.0d) cap=1.50
+      分項 [deliver_tools]: util=0.1739 = payoff0.200 × dev_coeff=1.000 × discount=0.870 (rate=0.150 delay=1.0d) cap=1.50
+[Merge] Team3 ← Team14 完全合併 (pop=4)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 warning days_left=2.9 idle→覓食
+[Merge] Team3 ← Team15 完全合併 (pop=6)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 warning days_left=2.5 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[Survival] Team12 warning days_left=2.1 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(12,9)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[Survival] Team13 warning days_left=2.7 idle→覓食
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[Sub] Team3 派出子隊 Team14 leader=P3004 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team3 派運輸子隊 Team14 送 material×44 → demand 市場(10,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[SurvivalForage] team=Team13 pop=2 → 覓食 @(8,8)
+[Sub] Team3 派出子隊 Team15 leader=P11006 advisors=[] (pop=2 cap=8 task=運輸)
+[Convoy] Team3 派運輸子隊 Team15 送 material×44 → demand 市場(10,8)
+[Barter] Team1 21xfood <-> Team13 4xgoods
+[SurvivalMergeIn] team=Team12 → 併入 Team1
+[Survival] Team12 warning days_left=2.9 idle→投靠
+[Market@(10, 8)] Team15  outpost owner Team1 成交
+[SurvivalMergeIn] team=Team12 → 併入 Team8
+[MsgPrune] 刪除過期訊息 global=57 known=125
+[Merge] Team3 ← Team14 完全合併 (pop=4)
+[SurvivalMergeIn] team=Team12 → 併入 Team1
+[Survival] Team12 warning days_left=2.1 idle→投靠
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[SurvivalMergeIn] team=Team12 → 併入 Team1
+[Market@(10, 8)] Team13  outpost owner Team1 成交
+[Merge] Team3 ← Team15 完全合併 (pop=6)
+[Famine] Team8 餓死 anon 1 (famine=7天)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(11,7)
+[Survival] Team12 warning days_left=1.2 idle→覓食
+[MsgPrune] 刪除過期訊息 global=3 known=15
+[CrudeCamp] Team8 紮營 @(12,9) → civilian
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(11,7)
+[Survival] Team12 urgent days_left=0.4 idle→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(11,7)
+[MsgPrune] 刪除過期訊息 global=6 known=43
+[Sub] Team3 派出子隊 Team14 leader=P3004 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team3 派運輸子隊 Team14 送 material×36 → demand 市場(10,8)
+[Market@(10, 8)] Team14  outpost owner Team1 成交
+[MsgPrune] 刪除過期訊息 global=3 known=19
+[Combat Start] Team-1000000 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+[MsgPrune] 刪除過期訊息 global=2 known=16
+[Merge] Team3 ← Team14 完全合併 (pop=6)
+[SurvivalMergeIn] team=Team12 → 併入 Team3
+[Survival] Team12 warning days_left=2.9 idle→投靠
+[SurvivalMergeIn] team=Team12 → 併入 Team5
+[MsgPrune] 刪除過期訊息 global=54 known=119
+[Combat Start] Team-1000001 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(11,7)
+[MsgPrune] 刪除過期訊息 global=6 known=25
+[Market@(11, 9)] Team13  outpost owner Team7 成交
+[MsgPrune] 刪除過期訊息 global=7 known=27
+[Combat Start] Team-1000002 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+[Manufacture] Team0 arrows worker_rate=0.55
+[Manufacture] Team0 medicine worker_rate=0.55
+[SurvivalMergeIn] team=Team12 → 併入 Team8
+[Survival] Team12 warning days_left=2.9 idle→投靠
+[SurvivalMergeIn] team=Team12 → 併入 Team8
+[MsgPrune] 刪除過期訊息 global=5 known=29
+[SurvivalMergeIn] team=Team12 → 併入 Team13
+[Survival] Team12 warning days_left=2.1 idle→投靠
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[Survival] Team13 warning days_left=2.9 貿易→投靠
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[SurvivalMergeIn] team=Team13 → 併入 Team8
+[Merge] Team8 ← Team13 完全合併 (pop=7)
+[SurvivalMergeIn] team=Team12 → 併入 Team8
+[Survival] Team12 warning days_left=1.7 idle→投靠
+[SurvivalMergeIn] team=Team12 → 併入 Team8
+[MsgPrune] 刪除過期訊息 global=6 known=22
+[Manufacture] Team10 arrows worker_rate=0.55
+[Merge] Team8 ← Team12 完全合併 (pop=8)
+[MsgPrune] 刪除過期訊息 global=51 known=80
+  === tick 7200 T0[plains] task=貿易 pos=(6, 8) move_tgt=(5, 9) food=48 mat=49 coin=800 runway=9999.0 food_days=53.25 need_mat=138 ===
+    [goal]   u=+1.3953  build_stable:resource  <=WIN
+    [static] u=+1.0794  survival
+    [static] u=+1.0043  備戰
+    [goal]   u=+0.9302  maintain_material:resource
+    [static] u=+0.8963  求和
+    [static] u=+0.3403  併入
+    [static] u=+0.2646  駐守
+    [static] u=+0.2524  生產
+    [static] u=+0.2504  買料
+    [static] u=+0.1218  吸納
+    [static] u=+0.1061  建設
+    [static] u=+0.0263  貿易
+    [goal]   u=+0.0077  deliver_food
+      分項 [build_stable:resource]: util=1.3953 = payoff1.500 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [maintain_material:resource]: util=0.9302 = payoff1.000 × dev_coeff=1.000 × discount=0.930 (rate=0.150 delay=0.5d) cap=1.50
+      分項 [deliver_food]: util=0.0077 = payoff0.010 × dev_coeff=1.000 × discount=0.769 (rate=0.150 delay=2.0d) cap=1.50
+  === tick 7200 T3[plains] task=覓食 pos=(8, 10) move_tgt=(8, 9) food=48 mat=322 coin=882 runway=9999.0 food_days=64.02 need_mat=100 ===
+    [static] u=+0.3630  求和  <=WIN
+    [static] u=+0.3250  覓食
+    [static] u=+0.2494  駐守
+    [goal]   u=+0.2435  deliver_material
+    [static] u=+0.2072  備戰
+    [static] u=+0.1300  建設
+    [static] u=+0.0357  貿易
+    [goal]   u=+0.0087  deliver_food
+    [static] u=+0.0000  survival
+      分項 [deliver_material]: util=0.2435 = payoff0.280 × dev_coeff=1.000 × discount=0.870 (rate=0.150 delay=1.0d) cap=1.50
+      分項 [deliver_food]: util=0.0087 = payoff0.010 × dev_coeff=1.000 × discount=0.870 (rate=0.150 delay=1.0d) cap=1.50
+
+  ── ★Team3 賣方 delivery 行為（全 run 追蹤）──
+    起 pos=(8, 10) 終 pos=(8, 10) ever_moved=false | ever_TASK_TRADE=false | material 起=400 終=322 最低=262(離 inventory?是)
+    Team3 tile public_storage material=0（賣單 material 有無 deposit 到市場 granary）
+=== 和平經濟觀測床 DONE ===
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+

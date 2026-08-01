@@ -1,0 +1,45 @@
+{
+  "slice": "crisis-immunity (release 免疫窗，防 instant-recommit)",
+  "measured_at_head": "b71647ab",
+  "baseline_head": "d0ab7f91",
+  "intermediate_head": "e77aa99b (crisis-override 泛化②，無免疫窗)",
+  "window": "8mo / 57600 ticks",
+  "seeds": [1337, 42, 4201],
+  "raw_logs": [
+    "docs/measurements/2026-07-19-crisisimmunity-multiseed-b71647ab.json",
+    "docs/measurements/2026-07-19-crisisoverride-multiseed-e77aa99b.json",
+    "docs/measurements/2026-07-19-godviewF-5seed-baseline-d0ab7f91.json",
+    "docs/measurements/2026-07-19-crisisimmunity-det-run2-1337-b71647ab.json"
+  ],
+  "three_way": {
+    "seed1337": {
+      "main_base_d0ab7f91": {"starve": 6, "attrition_pct": 19.14, "release": null},
+      "crisis_noimmun_e77aa99b": {"starve": 8, "attrition_pct": 20.05, "release": 133},
+      "immunity_b71647ab": {"starve": 0, "attrition_pct": 3.15, "release": 27}
+    },
+    "seed42": {
+      "main_base_d0ab7f91": {"starve": 0, "attrition_pct": 2.08, "release": null},
+      "crisis_noimmun_e77aa99b": {"starve": 0, "attrition_pct": 5.09, "release": 64},
+      "immunity_b71647ab": {"starve": 0, "attrition_pct": 3.94, "release": 49}
+    },
+    "seed4201": {
+      "main_base_d0ab7f91": {"starve": 0, "attrition_pct": 2.62, "release": null},
+      "crisis_noimmun_e77aa99b": {"starve": 0, "attrition_pct": 2.91, "release": 3},
+      "immunity_b71647ab": {"starve": 0, "attrition_pct": 0.58, "release": 2}
+    }
+  },
+  "quick_gates": {
+    "char_bed_crisis_override_test": "ALL PASS (含免疫窗 3 測項：擋同 task 重委派/放別 survival task/過期可再委派)",
+    "constitution_gate": "PASS sites=64 removed=0 (0 new violation)",
+    "headless_comprehensive": "branch 6 fails ≡ baseline d0ab7f91 6 fails，byte-identical set (0 new)",
+    "determinism": "seed1337 兩獨立跑 full-dict byte-identical (starve=0/attr=3.1532/rel=27)"
+  },
+  "spec_guards": {
+    "seed1337_starve_reversal_fixed": "6→8(反升)→0 (免疫窗擋 release-then-instant-recommit)",
+    "seed1337_attrition_drop": "20.05%→3.15%",
+    "release_churn_drop": "133→27 (每次 release 真接住，不重複 release 同隊)",
+    "health_seeds_no_starve_regression": "seed42/4201 皆維持 0 starve (4201 attr 2.62→0.58 改善；42 attr 2.08→3.94 微升無滅團)"
+  },
+  "incomplete": [],
+  "summary": "crisis release 免疫窗生效。seed1337 免疫前 e77aa99b 的 6→8 反升(release-then-instant-recommit)被修回 0 starve、attrition 20.05%→3.15%、release churn 133→27(接住而非重派)。健康 seed 42/4201 無 starve 迴歸。快閘全綠 + determinism byte-identical。→ blueprint release-pass。"
+}

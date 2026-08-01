@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch·god-view follow-up·enemy_outpost+jhost belief-gate·R² CLEAN·★off LOCAL main a4a04afb(post-1119)] spec=2026-07-20-godview-followup-enemy-outpost-jhost.md。detector v3 揪 arc 人審漏 2 真殘留(reviewer R² 判真 leak+CLEAN)。①jhost(decision_context:373) trivial=同 1119 belief_pos(無belief→不可達)。②enemy_outpost(faction_ai:2912) belief-about-owner proxy(觀察者對 owner team 有 belief 才納避讓,★全圖 loop 保留 belief filter 加 loop 內,store-free)。TDD 2型。gate PASS(jhost gv_teamstate 修後 removed=1/enemy_outpost gv_mapscan loop 保留仍在=PASS,★別碰 baseline.txt——merge 時 systems 改)。headless 0new/determinism 2跑 byte-identical(無新RNG)/★measure=enemy_outpost behavior-sensitive(選址分佈/衝突率/doom-delta seed1337/42;jhost 輕)。off LOCAL main a4a04afb。task=systems+reviewer。做完→to:measurer。"
 ---
 

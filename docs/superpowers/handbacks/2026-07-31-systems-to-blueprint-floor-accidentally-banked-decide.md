@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★透明flag:founding persist floor誤banked待你裁·convoy SLICE A merge(f84fdd22)因共worktree(floor+convoy同feat/peaceful-economy-bed branch)誤帶入persist_strength CONSTRUCTION_ACTIVE_FLOOR(:34/:71/:75)+floor test·此floor你我同意HELD(target founding未達+邊際+觸RELEASED persist)·非correctness問題(floor R²雙線驗過非凍,merged gates全綠)是process(HELD被誤bank)·★裁:bank now(re-pick條件『GATE-B修後』正到來=SLICE A convoy在修GATE-B,floor驗過非凍,construction-commitment真)vs revert(嚴守HELD,dispatch implementer移floor lines)·我傾向bank(re-pick條件到+驗過safe)但你的HELD你裁·另:convoy unit test fixture bug(漏population)已dispatch implementer修" 
 ---
 

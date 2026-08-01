@@ -1,0 +1,29 @@
+{
+  "slice": "subteam-idle-latch v3 (連續母團監看 + orphan-forager)",
+  "measured_at_head": "c53c8cbb",
+  "baseline_head": "c5ab36d9",
+  "verdict": "Structural fixes DONE & correct (no oscillation/hoarding/手不聽腦, orphan handled). seed1337 best (4, below baseline). BUT seed42 regressed to 9 (clean famine) — seed-swap persists across v1/v2/v3. Residual now = GATE-VALUE sensitivity (structural clean), blueprint's '再談(A)' condition met.",
+  "raw_logs": [
+    "docs/measurements/2026-07-19-subteamidle-v3-branch-c53c8cbb.json",
+    "docs/measurements/2026-07-19-subteamidle-v3-sitrace-42.txt",
+    "docs/measurements/2026-07-19-subteamidle-baseline-c5ab36d9.json (reused)"
+  ],
+  "quick_gates": {"constitution": "PASS 64/0-new (implementer)", "headless": "0-new (implementer)", "determinism": "implementer 2ebb70aa; not independently reproduced"},
+  "seed_swap_across_versions": {
+    "seed1337": {"baseline": 7, "v1": 6, "v2": 10, "v3": 4, "note": "v3 best (below baseline)"},
+    "seed42": {"baseline": 0, "v1": 10, "v2": 4, "v3": 9, "note": "v3 worst since v1; must-pass ->0 FAILED"},
+    "seed4201": {"baseline": 0, "v1": 0, "v2": 0, "v3": 0, "note": "identical all versions"}
+  },
+  "six_hard_verify": {
+    "a_recall_convergence": "PASS — no slow oscillation (SITRACE resets <=4, most 0-1)",
+    "b_seed42_famine_to_0": "FAIL — 9 famine (worse than v2's 4). Clean famine death (no stuck/手不聽腦/hoard/oscillation) = supply insufficiency for seed42's tight-food world",
+    "c_seed1337_6to10_recover": "PASS — v3 seed1337 = 4 (below baseline 7, best version); v2's 6->10 worsening recovered",
+    "d_orphan_gone": "PASS — no 200-2000 hoarding (capped); orphan handler added; SITRACE no extreme hoarders either seed",
+    "e_hand_obeys_brain_0": "NEAR — seed42 0 手不聽腦; seed1337 1 手不聽腦 + 2 stuck-task residual (marginal, mostly held)",
+    "f_perf_no_spike": "OK by construction — continuous monitor = per-tick O(1) state.teams.get per survival subteam (bounded count); not micro-benchmarked but no algorithmic spike"
+  },
+  "root_of_seed42_residual": "Clean famine (parents starve), NO structural pathology (no oscillation/hoard/手不聽腦). Structural holes (in-transit recall, orphan) FIXED in v3. seed42 residual = gate-value sensitivity: PARENT_LOW=3 may over-recall foragers in tight-food seed42 (foragers low-food 3.7, recalled before accumulating -> low forage yield -> parents starve), and/or SATED=10 delivery cadence. This is the 'after structural, gate-tune' phase blueprint flagged.",
+  "recommendation": "Structural work DONE & correct (v3 is the right structural version). Seed-swap now = gate-value tradeoff. RECOMMEND blueprint authorize bounded gate-sweep (few (SATED, PARENT_LOW) combos x seed 1337/42/4201) to find a config balancing both seeds. If no config balances (whack-a-mole persists across gate values) -> inherent seed-cascade -> blueprint picks best-aggregate version/tradeoff. NOT premature (structural direction now settled).",
+  "incomplete": ["gate-value sweep not run (awaiting blueprint authorization per '再談(A)')", "perf not micro-benchmarked (O(1) by construction)"],
+  "summary": "v3 structural fixes correct & clean; seed1337 best (4); but seed42->9 (must-pass failed), seed-swap persists 3 versions. Residual = gate-value sensitivity (clean famine, no structural pathology). Recommend authorized gate-sweep to balance seeds, or accept inherent cascade + pick best version."
+}
