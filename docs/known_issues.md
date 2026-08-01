@@ -1015,7 +1015,15 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
   - **★另有 pull-side「吸納」**（options.gd:154-166、強隊主動吸弱鄰、TASK_MERGE、**無 food gate**→強隊有糧撐旅程）＝更健康整併槓桿。**blueprint lean 吸納-主 + 併入-補**（等吸納 trajectory measure 回來才 commit final 方向、不半套硬拍）。
   - **arc 方向**：de-patch＝**加理性整併觸發**（弱隊趁健康早併/強隊吸弱、util weigh 野心stay/求生join → 有大有小 ~50、非塌1）走既有 argmax+人格 weigh（統一非特判）。**串 perf 同根**（O(N²)/膨脹 130+）＝一根解 perf+規模+legibility。連 [[feedback_verify_execution_end]] + [[project_economy_decision_underfire_metaroot]]。
 
-### ✅乙 整併 util boost merged（2026-08-01，ce369dca）
+### ⚠️乙 整併 util boost ＝ REVERTED crank（2026-08-02、真根 case B）
+**乙 boost（ce369dca）＝arbitrary crank、已完整 REVERT（08d10281 merge、main 回 pre-ce369dca genuine baseline）**。用戶戳破決策引擎命門（[[../../../memory 見 feedback_genuine_value_not_crank]]）：util 必＝真實價值、禁「因不 fire 就 crank 分數讓贏」。
+- **我的錯**：per-option dump 見吸納 ownutil 0.104 從不贏 → 誤判「util-starvation 要修」→ 加 `ABSORB_DRIVE_BASE_V2=1.5`(flat crank) + `ambition_amp[0.5,2.0]`(tuned) + join `protection urgency`+cap 2.0 讓 absorb/join 贏。**crank、paper over 真 finding**。
+- **★真根＝CASE B：規模經濟 absent（4 維坐實）**——軍力 linear(npc_combat:654)/生產 **SUBLINEAR** sqrt cap2.0(resource:63、大團 per-capita 更少)/抗風險 proportional attrition/領土 pop cap **50/團** overflow split。**model 不獎勵 size 甚至反獎勵 → 世界碎小團＝正確湧現、absorb 0.104 是引擎正確估算、integration 真值低是對的**。
+- **∴「有大有小」無 genuine-value 基礎**：consolidation 真沒好處（甚至負）→ **需先讓 size MATTER（加真規模好處：軍力 concentration/生產效率/抗風險）＝WHAT/vision（blueprint 帶用戶拍板中）**。要→加進 combat/production/stability+absorb_yield 自然算進（util 自然升湧現非 crank）→自然 consolidation→有大有小+perf 一根解；不要→碎片化接受、arc drop、perf 另循 O(N²) 優化。
+- **reframe：130+ 團非 consolidation bug、是「size 不 matter」正確結果**。修 join/absorb util＝治標甚至 crank。
+- **survival-boost（絕境併入）＝genuine**（food-scaled 真 survival spike、原有非 crank、留）。
+
+### ✅（已 REVERT，存查）乙 整併 util boost 曾 merged（2026-08-01，ce369dca→已 revert 08d10281）
 **根定案（per-option util DUMP）＝整併 util 結構餓死**（吸納 ownutil 0.104 vs 贏 1.09~10× 弱、finder 找 4794 但 dispatch 0；併入 0.332 只絕境 spike）＝**死常數過度正規化**（terms.gd:224-230 base 1.0 [0,1]cap + 野心×0.3 被閹 + 三 factor 連乘）。de-patch＝`absorb_drive` 野心真放大（ambition_amp=0.5+1.5·gap）+ base 1.0→1.5 / `join_drive` 理性 protection urgency（near×求生欲×低野心 cap2.0）、拆死常數、走既有 argmax term pipeline 統一非特判。dev-verify 4/4 + merged main 驗（constitution 74 + consol_boost_test ALL PASS + headless baseline 0-new + determinism byte-identical）。**warring absorb.dispatch 0→10（starvation 治好）+ teams 84（保守未塌非 blob）**。R² 兩輪 CLEAN。
 - **★§5 一次合量 must-check（乙）**：①**absorb 完成率**（dev-verify `dispatch 10→merge 1`＝pull-side 也 mid-travel 蒸發、同 JOIN 33→1 belief-stale freeze movement:93）——**§5 對比 absorb vs JOIN 蒸發比例、排除新 ambition-driven targeting 瞄更遠 prey 加重蒸發**（reviewer 要求）。②**規模分布 tune**（隊數/規模朝 ~50 有大有小、非塌1；不夠→調高 AMB_GAIN/base、過衝→調低、保守起步值 §5 定）。③mid-travel completion 是下層（util-starvation primary 根已治）＝follow-up（可能修 belief-stale freeze movement:93）。
 
