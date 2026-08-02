@@ -46,6 +46,17 @@ Monitor(command="bash .claude/hooks/inbox-watch.sh", persistent=true, descriptio
 - emit-once（key=path+mtime）：同信不重觸；revise 重開（mtime 變）→ 重新吐。
 - 開場既有 open 信標 `[開場既存]` 吐一次（讓剛開的 session 知道待辦）。
 
+#### ★blueprint 專屬：Telegram 進站 Monitor（開場**額外** arm 一條、與信箱並列，存活 restart/compact）
+用戶要遠端用 Telegram 驅動 blueprint（免盯 CLI）。**只 blueprint 一個 session** 開場多 arm 這條（其他角色不 arm、走 git 信箱）：
+```
+Monitor(command="source tools/telegram/config.local.sh && python tools/telegram/tg_poll.py",
+        persistent=true, description="Telegram 進站(用戶訊息喚醒 blueprint)")
+```
+- **只 blueprint 一 poller**（`getUpdates` offset 消費、多 poller 互搶同一 update）；其他角色走 git 信箱不變。
+- 進站事件 `📱 [Telegram] 用戶: <text>` → **當用戶輸入處理**（≠背景事件）→ `bash tools/telegram/send.sh --file <utf8檔>` 回（UTF-8 via 檔避 CP950）。
+- **出站只在真需用戶裁**推（WHAT fork／授權／QA 綠／喬不攏）；role-to-role 不推（免手機噪音）。
+- bridge 本地 `tools/telegram/`（機密 `config.local.sh` gitignored 不進 git）；細節+安全見 `tools/telegram/README.md`（本地）。
+
 ### 寄件端（任意角色）
 1. Write 一封信到 `docs/superpowers/handbacks/YYYY-MM-DD-<from>-to-<to>-<topic>.md`。
 2. frontmatter：`from: <me>` / `to: <role>` / `status: open` / `topic: <一句>`。
