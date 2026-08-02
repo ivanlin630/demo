@@ -111,6 +111,18 @@
   - **維度二·軍力（backlog，排生產落地量完後）**：真根＝**combat 是唯一漏掉 time-scale wave 的系統**（戰鬥 5–10 tick vs 行軍 48 tick/格 → 反應式增援必遲到）。arc＝①combat 上 wave（round cadence 吃 elapsed、**NPC 結算戰與玩家遭遇戰 world-tick 一致**、拉長 → 反應式互援復活；本身亦獨立 coherence 修）②**互援**（共址/相鄰同 faction 隊開戰即併戰 → defeat-in-detail 湧現、集中＝bloc、分散被各個擊破）。`leadership_mult`/`tactics_mult` 已在（大隊領導 edge 部分已實現）。**守**：集中不得壓垮既有絕境逃膽量秤（否則集中＝團滅加速、反彈殲滅-heavy 老病）。序在生產後（避免兩大 arc 同撞 systems、且經濟錨先立）。
   - **候選 arc·軍民混编 / 民兵動員（2026-08-03 用戶定，待 B MVP 後、待 audit-first）**：軍民比**由團型分級**（非齊一混、非二元）——**專業軍團**（騎士團/貴族兵）=純軍拒屯兵、不算勞力；**後備/開墾團**=屯兵·半兵半農=部分勞力；**居民團**=**民兵制**（主力勞力 + 小武裝比，防禦才召）。機制=**團型設 `armed` 能力**（取代 faction_ai 自由設 `armed_anon_ratio`）；**平時民兵算勞力（農夫種田）**；**威脅→民兵動員抽離勞力池去打仗→產出掉（guns-vs-butter 真戰爭成本）**；和平解甲回田。涵蓋 systems 查出的三缺口（militarize/pop→軍 ABSENT、established 團 spread gated、recruit 非決策）。**★統一非補丁鐵律**：動手前**先 audit 現有散落機制**（`armed_anon_ratio`/`TAG_MILITARY`/`TAG_PRODUCE`/`TASK_TRAIN`/`equip_order`/belief→「全動員」/紮營 gate）→ **統一它們進一個模型**，禁再加平行補丁（同 [[統一矩陣]] / 整系統優先）。
     - **★audit 結論（2026-08-03，用戶怕點坐實）**：現況**三個各自為政的 pop-fraction 旋鈕**——`armed_anon_ratio`（武裝比，**由武器庫存**推 `equipment_system:62-73`）、`guard_ratio`（守衛比，威脅+tag 設 `faction_ai:2168-2180`，只影響夜哨/休息）、`captive_guard_ratio`（俘虜守衛比，自有決策 fn）——**三個不同 owner、不同規則、互不通**；加上**勞力池 `pool_of` 是二元 by-tag**（PRODUCE 全算/軍隊全不算，**無法表達民兵分數抽離**）。**arc 的真面目 = 把這些收斂成「一個團型驅動的 mobilizable 分數,威脅時把人力在勞力池↔戰力間搬」。** 約 **30% 統一現有 + 70% 新做**。建於 primitives（`armed_anon_ratio` 數值+戰鬥消費端 / `pool_of` / `AnonCohort` 守恆容器 / `TAG_*` 但需二元→光譜）；**折入** scattered（`equipment_system` 庫存推比、`equip_order`、`guard_ratio`、`captive_guard_ratio`、4 處分歧 tag-assign）；**新做**（mobilization 決策 pop→軍、team_type→ratio 表、belief→全動員、勞力池分數化 membership）。
+
+## 📍 當前路線圖總覽（2026-08-03，blueprint owner）
+> `docs/roadmap.md` 已 stale（2026-06-15 UI 時代、未回填整個 economy/統一/size-matter 程序）→ 本節為 live 前瞻視圖；細節 arc 記憶見 memory `project_*`。
+- **傘：統一決策框架 / 統一矩陣**——NPC 行為全走 genuine utility DecisionEngine（憲法溶解 done）。禁 scripted gate / crank。
+- **★活躍前線：有大有小 / size-matter arc**（真根 CASE B：model 不獎勵 size → 加真規模好處、兩軸 大隊=領導 / 大勢力=集團）：
+  - **維度① 生產（統一勞力池）**：mechanism MERGED `506aaa64` ✓、組織軸 works（ratio~1）✓；**領導軸 → B MVP（idle-labor→建設 genuine）在飛 systems** → §8 重量領導軸 ratio 追平（誠實 measured 才宣稱）。
+  - **維度② 軍力**：backlog——combat 上 time-scale wave（NPC 結算戰 / 玩家遭遇戰 tick 一致）+ 反應式互援；排生產驗收後。
+  - **军民混编 / 民兵動員**：candidate——統一 3 個散落 pop-fraction 旋鈕 + 團型軍民比 + 威脅動員（guns-vs-butter）；audit done；排 B MVP 後。
+- **支援 / 已完**：後勤 SLICE A（供給移動 flow）merged+用戶 accepted；持守統一 released；時間統一 wave slice A merged。
+- **遞延 backlog**：material/伐木供給側、established chain、遭遇戰收斂（舊 P6）、perf O(N²) scaling。
+- **infra**：Telegram 雙向 bridge（遠端驅動 blueprint）done（`reference_telegram_bridge`）。
+- **★doc 待辦**：`roadmap.md`（死化石）待 systems reconcile/archive（指向本節 + memory `project_*` 為 living 來源）。
 - 玩家錨 C（資訊不對稱崛起）= 進入「本就活著的世界」的**鏡頭/參與者**，**非世界存在的理由**。先有好沙盒，玩家才是好鏡頭。
 - 量測導向：believability 不靠單元測達標，靠「活世界自己跑出該有的戲」（戰國 seed 類驗證床）。
 
