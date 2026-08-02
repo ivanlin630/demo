@@ -5586,7 +5586,7 @@ func _test_food_granary_cap() -> void:
 	var rs := ResourceSystem.new()
 	# 大量採集多次
 	for i in 50:
-		rs._collect_from_tile(state, t, tile, 1.0, 1.0, 0.0, 0.0)
+		rs._collect_from_tile(state, t, tile, 1.0, tile, 1.0, 0.0, 0.0)
 	var cap: float = OutpostSystem.new()._get_storage_cap(tile, "food")
 	# 食物進糧倉 capped，team.resources food 不該爆量囤積
 	assert(float(tile.public_storage.get("food", 0)) <= cap + 0.01, "糧倉 food 應 ≤ cap(%.0f)，實際=%.0f" % [cap, tile.public_storage.get("food",0)])
@@ -8381,6 +8381,7 @@ func _test_collect_ore_to_storage() -> void:
 	state.world.tiles[0] = src_tile
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
+	team.tags.append(TeamData.TAG_PRODUCE)   # ★勞力池:採集隊須 PRODUCE-tagged（居民,入勞力池+need 算）
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
@@ -9462,7 +9463,7 @@ func _test_conquest_collection_loop() -> void:
 	# (a) owner 站村上：村產出入 tile 公庫 → effective_food 讀得到
 	var ef_before: float = ResourceSystem.effective_food(state, owner)
 	var rs := ResourceSystem.new()
-	rs._collect_from_tile(state, village, tile, 1.0, 1.0, 0.5, 0.5, {}, 1.0)
+	rs._collect_from_tile(state, village, tile, 1.0, tile, 1.0, 0.5, 0.5, {}, 1.0)
 	var granary: float = float(tile.public_storage.get("food", 0))
 	assert(granary > 0.0, "村產出應入 tile 公庫（owner 糧倉）")
 	var ef_after: float = ResourceSystem.effective_food(state, owner)
@@ -10888,7 +10889,7 @@ func _test_collect_uses_morale() -> void:
 		state.teams[0] = team
 		var tile := HexTileData.new()
 		tile.resources = { "food": 1000.0 }
-		rs._collect_from_tile(state, team, tile, 1.0, 1.0, 0.0, 0.0)
+		rs._collect_from_tile(state, team, tile, 1.0, tile, 1.0, 0.0, 0.0)
 		gains.append(float(team.resources["food"]))
 	assert(gains[0] > 0.0, "morale 0.5 仍應有產出")
 	var ratio: float = gains[1] / gains[0]
@@ -11444,9 +11445,10 @@ func _make_mfg_state(facility_levels: Dictionary) -> Array:
 	state.teams[0] = team
 	return [state, team, tile]
 
-# _make_mfg_state 預設參數下的本 tick 產量 q（pop=10、avg_skill=0）
+# _make_mfg_state 預設本 tick 產量 q（pop=10、avg_skill=0）。★勞力池:單一 mfg 工位 pool10≥demand(level×K_MFG)
+# →fill=1→labor_mult=LABOR_SCALE(1.0)、labor_share=1.0(單隊)→worker_rate=level×1.0×1.0×0.5（取代舊 pop_mult sqrt=size 靠 breadth 非單工位爆量）。
 func _mfg_q(level: int, rate: float) -> float:
-	var worker_rate: float = float(level) * clampf(sqrt(10.0 / 5.0), 0.5, 2.0) * 0.5
+	var worker_rate: float = float(level) * LaborSystem.LABOR_SCALE * 0.5
 	return worker_rate * rate
 
 func _test_workshop_recipes() -> void:
@@ -11499,8 +11501,9 @@ func _test_recipe_input_scaling() -> void:
 	var r := _make_mfg_state({ "manufacturing_level": 1 })
 	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
 	team.resources = { "material": 100.0, "goods": 99.0, "arrows": 99.0 }
-	# worker_rate = level × pop_mult × (0.5 + avg_skill × 0.5)；無 named member → avg_skill 0
-	var worker_rate: float = 1.0 * clampf(sqrt(10.0 / 5.0), 0.5, 2.0) * 0.5
+	# worker_rate = level × labor_mult × labor_share × (0.5 + avg_skill × 0.5)；無 named member → avg_skill 0
+	# 統一勞力池：單 mfg 工位 demand=level×K_MFG 遠 < pool → fill=1.0 → labor_mult=LABOR_SCALE（非舊 sqrt depth）
+	var worker_rate: float = 1.0 * LaborSystem.LABOR_SCALE * 0.5
 	var q: float = worker_rate * ManufacturingSystem.TOOLS_RATE
 	var ms := ManufacturingSystem.new()
 	ms.tick_all(state, [0])
@@ -11953,7 +11956,7 @@ func _test_collect_excludes_wild_horses() -> void:
 	team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
-	rs._collect_from_tile(state, team, tile, 1.0, 1.0, 0.0, 0.0)
+	rs._collect_from_tile(state, team, tile, 1.0, tile, 1.0, 0.0, 0.0)
 	assert(int(tile.resources["wild_horses"]) == 2, "wild_horses 不被 generic 採，實際=%d" % int(tile.resources["wild_horses"]))
 	assert(float(team.resources.get("herb", 0)) > 0.0, "herb 正常採")
 	assert(not team.resources.has("wild_horses"), "team 不應有 wild_horses")
@@ -12268,6 +12271,13 @@ func _fief_make_tax_state(owner_id: int, collector_id: int, rate: float,
 	_seed_pop(ct, 5); ct.work_morale = 1.0; ct.tax_rate = rate
 	ct.tile_pos = Vector2i(0, 0)
 	ct.resources = { "material": 0.0 }
+	# 統一勞力池：gather:material 工位需 material need>0 才配勞力。給採集者真 need context——
+	# 親聞 material 買單（trade demand，感知鐵律 team_known 內、非過期、origin≠己）→ demand(material)>0
+	# → 單工位 fill=1.0、labor_share=1.0 → gain=5.0（=舊 pop5 pop_mult），稅拆分機制不變。
+	ct.tags.append(TeamData.TAG_PRODUCE)
+	var _dm := MessageData.new(); _dm.type = "order_buy"
+	_dm.params = { "res": "material", "qty": 50, "origin_team": 9, "expire_tick": 99999 }
+	state.team_known[collector_id] = [_dm]
 	state.teams[collector_id] = ct
 	return state
 
@@ -14393,7 +14403,7 @@ func _test_carry_cap_forage() -> void:
 	state.teams[0] = t
 	var rs := ResourceSystem.new()
 	for i in 50:
-		rs._collect_from_tile(state, t, tile, 1.0, 1.0, 0.0, 0.0)
+		rs._collect_from_tile(state, t, tile, 1.0, tile, 1.0, 0.0, 0.0)
 	var ms := MovementSystem.new()
 	# material(weight 1.0) 不該超 carry cap 太多（硬上限，非無限囤）
 	assert(ms.calc_total_weight(t) <= ms.get_carry_capacity(t) + 1.0, "移動隊總重應≤carry cap，實際 weight=%.1f cap=%.1f" % [ms.calc_total_weight(t), ms.get_carry_capacity(t)])
