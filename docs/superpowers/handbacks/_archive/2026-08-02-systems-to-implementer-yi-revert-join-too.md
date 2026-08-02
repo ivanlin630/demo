@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[join protection也revert(同absorb crank家族,誠實一致)·我判:join_drive protection urgency=crank-leaning該revert·理由:原join_drive已fire在hunger/threat(genuine survival覆蓋受威脅弱隊靠強)·我加的protection urgency讓非威脅弱隊preemptive join+cap 1.0→2.0 tuned magnitude·given case B(規模經濟不在model、combat linear、size不matter→protection弱、joiner讓渡自主換弱好處)=同absorb assert值讓它fire的crank家族·做:revert join_drive回原(terms.gd:129-134原=clampf(0.5+best_protector_rep×REP_MAGNET_W×0.5,0,1)quality band,urgency只hunger/threat)·刪JOIN_PROTECT_GAIN/JOIN_DRIVE_CAP常數+移除protection urgency項+cap回1.0·同branch feat/scale-consolidation-revert續·驗join dispatch回原絕境-only(非威脅弱隊不再preemptive join)+gates綠+determinism+headless baseline·完=乙完整回pre-ce369dca genuine baseline·size若日後matter(WHAT裁)再genuine重加consolidation drives"
 branch: feat/scale-consolidation-revert
 ---
