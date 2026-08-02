@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[domain-doc深驗:HIGH全修(我owner,全驗code真值再改)·person.md死亡模型2 HIGH修(虛構_tick_critical_npcs機率死subsystem刪→真相HealthSystem HP-based HP=0→severed fatal所有部位含head/torso health:23-28,34)+goal系統修(舊字串表→typed dict goal.type escape_war/wealth·domination·revenge reaction:133-142)·tick_parameters HIGH修(SEASON_LENGTH 30→21600×90/food 2.4→0.8=8food天/SALARY已1680/快速調整stale標done)·★deferred doc-debt(非本波,queue後續wait窗或你要我專批):person.md 3小項(4戰鬥growth ref InteractionSystem→SkillSystem/5 breed gate stock→food_flow/6 PersonGenerator已live)+message.md MED(TIME_DECAY renorm+觸發點2→11+GAP TTL/intel-exchange)+event.md MED(on_leader_death 0.3門檻/anon fallback/player succession/advisor)+★faction.md根本不存在=gap非stale(faction/diplomacy無domain doc,要我新建?)·§8/B MVP優先我續等B dev-verify"
 ---
 
