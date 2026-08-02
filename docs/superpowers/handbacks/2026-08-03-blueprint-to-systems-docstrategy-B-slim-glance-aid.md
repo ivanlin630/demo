@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶doc-strategy裁定=B瘦身(真用途揭示:用戶不讀這些、只偶爾整理思路瞄機制→glance-aid正中,A過度維持會rot/C封存丟glance價值)·統一指令:domain docs(person/message/event/tick_parameters等)瘦成glance-aid shape=①用途1-2句②機制高層模型(不寫死常數/精確公式)③關鍵設計why(用戶整理思路要的)④指標(常數精確邏輯→code/跨系統→invariants)⑤標code為準非窮舉·丟drift-prone細節(常數/公式/函式名)留高層模型+意圖(近零rot)·faction.md補一份『瘦的』(現無faction/外交glance-doc)·執行=低優先on-touch(下次動到該子系統順手瘦,不特批),止血HIGH已做不誤導,§8/B MVP優先·MED deferred項→瘦身時一併(非逐條fix)·你確認shape回我"
 ---
 
