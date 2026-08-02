@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[B HOW gap flag(你令查):三路張力現況缺·grounding確認:建設EXISTS labor-blind(加idle-labor主路)/紮營EXISTS但gated NOT has_own_outpost+絕境=大隊有outpost無法found第2據點(spread不存在)/militarize ABSENT(無pop→軍決策,TASK_TRAIN是野心階梯)/recruit ABSENT(pop是survival後果非決策→壓招募無對象)·∴develop/spread/defend三路張力現況只develop(建設)可加idle-labor,spread需un-gate紮營+idle觸發(中scope),militarize需新決策(大scope),recruit無·★我建議MVP=建設-only先修(直修§8根:大隊idle勞力→建manufacturing新線用掉=正是§8 day50證的行為只是更早,genuine),驗§8領導軸ratio追平;spread(紮營第2據點)/militarize三路完整張力=另slice(避免一次過大+先驗MVP真追平再擴)·你裁MVP-only還是本arc含spread/militarize·HOW spec已R②(建設idle-labor genuine非crank)·labor pool 506aaa64別revert"
 ---
 
