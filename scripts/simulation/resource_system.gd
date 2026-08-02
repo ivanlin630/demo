@@ -60,20 +60,22 @@ func collect_resources(state: WorldState, team_ids: Array, cadence_ticks: int = 
 				HuntSystem.new().hunt_small_game(state, team, tile, false)   # 被動小獵
 			continue
 
-		var pop_mult: float  = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
+		# ★統一勞力池：pop_mult→labor_mult(共址勞力稀缺分配,per gather:res 讀 home tile alloc);labor_share=本隊佔池比例。
+		LaborSystem.ensure_fresh(state, tile)
+		var labor_share: float = float(team.population) / LaborSystem.pool_of(state, tile)
 		var leader           = state.persons.get(team.leader_id)
 		var prod_skill: float = float(leader.skills.get("生產", 0.0)) if leader else 0.0
 		var eng_skill: float  = float(leader.skills.get("工程", 0.0)) if leader else 0.0
 
-		# 本格+鄰格採集所得聚合（私產部分），用於課一般稅（稅進站立 tile 公庫）
+		# 本格+鄰格採集所得聚合（私產部分），用於課一般稅（稅進站立 tile 公庫）。labor 池以 home tile(站立)為準。
 		var gained: Dictionary = {}
 		if tile.outpost_level == 3:
-			_collect_from_tile(state, team, tile, 2.0, pop_mult, prod_skill, eng_skill, gained, day_fraction)
+			_collect_from_tile(state, team, tile, 2.0, tile, labor_share, prod_skill, eng_skill, gained, day_fraction)
 			for neighbor in _get_adjacent_tiles(state, team.tile_pos):
-				_collect_from_tile(state, team, neighbor, 0.5, pop_mult, prod_skill, eng_skill, gained, day_fraction)
+				_collect_from_tile(state, team, neighbor, 0.5, tile, labor_share, prod_skill, eng_skill, gained, day_fraction)
 		else:
 			var outpost_mult: float = [1.0, 1.4][tile.outpost_level - 1]
-			_collect_from_tile(state, team, tile, outpost_mult, pop_mult, prod_skill, eng_skill, gained, day_fraction)
+			_collect_from_tile(state, team, tile, outpost_mult, tile, labor_share, prod_skill, eng_skill, gained, day_fraction)
 
 		_apply_normal_tax(state, team, tile, gained)
 
@@ -252,8 +254,8 @@ func flush_forage_episodes(state: WorldState, team_ids: Array) -> Array:
 	return out
 
 func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData,
-		outpost_mult: float, pop_mult: float,
-		prod_skill: float, eng_skill: float, gained: Dictionary = {},
+		outpost_mult: float, home_tile: HexTileData,
+		labor_share: float, prod_skill: float, eng_skill: float, gained: Dictionary = {},
 		day_fraction: float = 1.0) -> void:
 	for res in src_tile.resources.keys():
 		if res == "wild_horses" or res == "wild_game":
@@ -263,7 +265,11 @@ func _collect_from_tile(state: WorldState, team: TeamData, src_tile: HexTileData
 			continue
 		# R1：harvest 乘 day_fraction（與 consumption 同 cadence 基準，修 24× 供給不對稱）
 		var gain: float = src_tile.productivity * current * COLLECT_RATE * day_fraction
-		gain *= outpost_mult * pop_mult
+		# ★統一勞力池：pop_mult→labor_mult(home tile alloc,per gather:res × 本隊池比例)。
+		# 鄰格 reach-out(lvl3)res 非 home workstation→中性 LABOR_SCALE(不受本格池約束)。承載(current)數學不動。
+		var lkey: String = "gather:" + String(res)
+		var lm: float = LaborSystem.labor_mult(home_tile, lkey) if home_tile.labor_alloc.has(lkey) else LaborSystem.LABOR_SCALE
+		gain *= outpost_mult * lm * labor_share
 		gain *= team.work_morale
 		match res:
 			"food":

@@ -17,6 +17,9 @@ var farming_level: int = 0          # 0–3，civilian only
 var manufacturing_level: int = 0    # 0–3，civilian only
 var stable_level: int = 0           # 0–3 馬廄（眷養 mounts，限平原）
 var stable_progress: float = 0.0    # mount 產出小數累積（≥1 轉整數入 owner team）
+# ★統一勞力池（labor pool，2026-08-03）：共址 PRODUCE pop 稀缺分配給採集/製造工位（size 在生產 matter）。
+var labor_alloc: Dictionary = {}    # workstation_key(gather:<res>/mfg:<level_key>) → {demand,share,fill}；LaborSystem 每 cadence 重算
+var labor_eval_next_tick: int = 0   # per-tile cadence gate（lazy-on-cadence rebalance）
 var apothecary_level: int = 0       # 0–3 藥坊（civilian；herb→medicine，B 期啟用）
 var smelter_level: int = 0          # 0–3 冶煉廠（military；ore_iron→ore_steel）
 var weaponsmith_level: int = 0      # 0–3 武器坊（military）

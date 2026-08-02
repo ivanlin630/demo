@@ -79,7 +79,9 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 			Probe.bump("manufacture.noop_no_worker")   # S1 tap：無居民人力
 			continue
 
-		var pop_mult: float   = clampf(sqrt(float(team.population) / 5.0), 0.5, 2.0)
+		# ★統一勞力池：pop_mult→labor_mult(共址勞力稀缺分配);labor_share=本隊佔池比例(多隊防雙算,單隊=1)。
+		LaborSystem.ensure_fresh(state, tile)
+		var labor_share: float = float(team.population) / LaborSystem.pool_of(state, tile)
 		var avg_skill: float  = _avg_skill(state, team, "製造")
 
 		var ran_any: bool = false
@@ -89,7 +91,7 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 			if level <= 0:
 				continue   # 無此設施（下方統一 no_facility tap，避免每 group bump 灌數）
 			any_facility = true
-			var worker_rate: float = float(level) * pop_mult * (0.5 + avg_skill * 0.5)
+			var worker_rate: float = float(level) * LaborSystem.labor_mult(tile, "mfg:" + level_key) * labor_share * (0.5 + avg_skill * 0.5)
 			var ran_recipe: String = _run_recipe_group(state, team, tile, level_key, worker_rate)
 			if ran_recipe != "":
 				ran_any = true

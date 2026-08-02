@@ -5586,7 +5586,7 @@ func _test_food_granary_cap() -> void:
 	var rs := ResourceSystem.new()
 	# 大量採集多次
 	for i in 50:
-		rs._collect_from_tile(state, t, tile, 1.0, 1.0, 0.0, 0.0)
+		rs._collect_from_tile(state, t, tile, 1.0, tile, 1.0, 0.0, 0.0)
 	var cap: float = OutpostSystem.new()._get_storage_cap(tile, "food")
 	# 食物進糧倉 capped，team.resources food 不該爆量囤積
 	assert(float(tile.public_storage.get("food", 0)) <= cap + 0.01, "糧倉 food 應 ≤ cap(%.0f)，實際=%.0f" % [cap, tile.public_storage.get("food",0)])
@@ -9462,7 +9462,7 @@ func _test_conquest_collection_loop() -> void:
 	# (a) owner 站村上：村產出入 tile 公庫 → effective_food 讀得到
 	var ef_before: float = ResourceSystem.effective_food(state, owner)
 	var rs := ResourceSystem.new()
-	rs._collect_from_tile(state, village, tile, 1.0, 1.0, 0.5, 0.5, {}, 1.0)
+	rs._collect_from_tile(state, village, tile, 1.0, tile, 1.0, 0.5, 0.5, {}, 1.0)
 	var granary: float = float(tile.public_storage.get("food", 0))
 	assert(granary > 0.0, "村產出應入 tile 公庫（owner 糧倉）")
 	var ef_after: float = ResourceSystem.effective_food(state, owner)
@@ -10888,7 +10888,7 @@ func _test_collect_uses_morale() -> void:
 		state.teams[0] = team
 		var tile := HexTileData.new()
 		tile.resources = { "food": 1000.0 }
-		rs._collect_from_tile(state, team, tile, 1.0, 1.0, 0.0, 0.0)
+		rs._collect_from_tile(state, team, tile, 1.0, tile, 1.0, 0.0, 0.0)
 		gains.append(float(team.resources["food"]))
 	assert(gains[0] > 0.0, "morale 0.5 仍應有產出")
 	var ratio: float = gains[1] / gains[0]
@@ -11953,7 +11953,7 @@ func _test_collect_excludes_wild_horses() -> void:
 	team.tile_pos = Vector2i(0, 0)
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
-	rs._collect_from_tile(state, team, tile, 1.0, 1.0, 0.0, 0.0)
+	rs._collect_from_tile(state, team, tile, 1.0, tile, 1.0, 0.0, 0.0)
 	assert(int(tile.resources["wild_horses"]) == 2, "wild_horses 不被 generic 採，實際=%d" % int(tile.resources["wild_horses"]))
 	assert(float(team.resources.get("herb", 0)) > 0.0, "herb 正常採")
 	assert(not team.resources.has("wild_horses"), "team 不應有 wild_horses")
@@ -14393,7 +14393,7 @@ func _test_carry_cap_forage() -> void:
 	state.teams[0] = t
 	var rs := ResourceSystem.new()
 	for i in 50:
-		rs._collect_from_tile(state, t, tile, 1.0, 1.0, 0.0, 0.0)
+		rs._collect_from_tile(state, t, tile, 1.0, tile, 1.0, 0.0, 0.0)
 	var ms := MovementSystem.new()
 	# material(weight 1.0) 不該超 carry cap 太多（硬上限，非無限囤）
 	assert(ms.calc_total_weight(t) <= ms.get_carry_capacity(t) + 1.0, "移動隊總重應≤carry cap，實際 weight=%.1f cap=%.1f" % [ms.calc_total_weight(t), ms.get_carry_capacity(t)])
