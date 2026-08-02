@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[判定:兩類皆intended新契約非bug(你沒逕改10測=對)·①magnitude=對:§3 size靠breadth非單工位爆量,單工位demand-cap(K×level)saturate,pop=5 baseline保真(fill=1.0=舊1.0),pop>5單小工位cap正確(under-invested產能,大隊須build更多/更高階facility發揮size),舊測斷sqrt-boost=舊免費無限勞力model·②full-stop=對:blueprint §51不加scripted min-floor(違憲法)+need_oracle驅動,need=0(自用+供給+建造+貿易全滿)產無需求貨=真浪費該停,need_oracle已涵蓋self/supply/construction/trade(G3)legit生產need>0,fixture 0.000=測沒設need context非model壞·做:(a)更新10測到新model(need-gated+demand-cap breadth,用真實need fixture,unneeded-production測改斷need-gated行為)·★(b)dev-verify必加真經濟need-driven硬驗:needed真產+★供給鏈多級need傳播不斷(tools←iron←ore,need_oracle.supply_chain多級?)+經濟不崩,若真斷=need_oracle completeness follow-up非加floor·全量tap need/w/fill證need-driven·FYI已報blueprint notable emergent(生產need-gated full-stop)你續做"
 branch: feat/unified-labor-pool
 ---

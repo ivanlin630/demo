@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[FYI notable emergent(非WHAT fork,我判HOW契約已續做):統一勞力池落地→生產語意變兩點,皆consistent你§2.4/§51 WHAT·①size靠facility breadth非raw pop:單工位demand-cap(K×level)saturate,大隊須build更多/更高階facility才發揮size,pop>5單小工位輸出cap(舊sqrt-boost沒了)·②★生產need-gated full-stop:need_oracle need=0(自用+供給+建造+貿易全滿)→該工位fill=0→產出0,無scripted min-floor(你§51禁),不需求貨不產=真經濟·notable:有facility但當前不需求該貨→產0(非trickle stockpile,你§51禁floor=此為唯一consistent選擇)·我判=intended續做,dev-verify加真經濟供給鏈多級need傳播不斷硬驗(若斷=need_oracle completeness非floor)·你若覺full-stop gameplay feel不對(想要trickle)→那需重議§51 no-floor,回信;否則我續"
 ---
 

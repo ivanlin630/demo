@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[統一勞力池開工(讓size在生產matter,治CASE B genuine-value非crank用戶裁定)·spec docs/superpowers/specs/2026-08-03-unified-labor-pool-HOW.md(R²CLEAN+1追蹤項)·做:新LaborSystem(scripts/simulation/labor_system.gd class_name LaborSystem)單一共享allocator採集+製造共讀·per-tile勞力池=共址PRODUCE pop總和(HexTileData加labor_alloc:Dictionary workstation→{demand,share,fill}+labor_eval_next_tick)·workstation_key=gather:<res>+mfg:<level_key> sorted·rebalance演算法:pool=Σ共址PRODUCE pop→demand(mfg:level×K_MFG 3.0/gather:K_GATHER 5.0)→need權重(need_oracle need_keep+demand per output res Σ共址隊,w=0不參與)→需求加權比例share=pool×w/Σw→clamp≤demand+削下按剩w再分未封頂iterate到穩(固定8迭代上限)→fill=share/demand·頻率解耦lazy-on-cadence:生產sweep處理tile開頭呼LaborSystem.ensure_fresh僅current_tick>=labor_eval_next_tick才真重算(LABOR_CADENCE=TICK_PER_DAY×3)+危機共址food_days<2即時重算·labor_mult取代pop_mult:manufacturing:92 worker_rate=level×labor_mult(tile,mfg:Lk)×(0.5+skill)/resource:265-266 gain=...×labor_mult(tile,gather:res)(labor_mult=fill×LABOR_SCALE校準pop5單工位≈1.0)·多隊防雙算:gather每隊×team_pop/pool·output ownership不變·perf tile→teams index一次·★守憲硬約束(違=reject):deterministic sorted+算術+零RNG三跑byte-identical/current承載COLLECT_RATE/regen零改只換pop_mult支/憲法決策util不碰·★baseline保真±5%單工位(LABOR_SCALE校準防偷改量級)·★R²追蹤:小隊多活動下滑survivable硬驗(pool分裂每fill<1 intended但非崩早期經濟,need_oracle糧優先)·隔離branch feat/unified-labor-pool"
 branch: feat/unified-labor-pool
 ---

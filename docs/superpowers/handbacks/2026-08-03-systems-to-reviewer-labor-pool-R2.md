@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²(可升R①)統一勞力池HOW·讓size在生產matter治CASE B(genuine-value非crank,用戶size-matter裁定)·spec docs/superpowers/specs/2026-08-03-unified-labor-pool-HOW.md·premise §0全G0 grounded(manufacturing:82/resource:63,265-266/need_oracle:13-15/outpost:166/faction_ai:106)·設計:新LaborSystem單一共享allocator採集+製造共讀,per-tile勞力池=共址PRODUCE pop總和,workstation demand=規模×K,need_oracle加權比例+demand-cap+溢出串聯deterministic,頻率解耦lazy-on-cadence(LABOR_CADENCE 3天+危機food<2觸發),labor_mult取代兩套pop_mult(baseline-preserving校準±5%+linear到demand-cap=size matter)·★審點:①統一非平行patch(單allocator採集製造共讀非各搞)②deterministic(sorted+算術+cascade固定迭代+零RNG三跑byte-identical)③承載獨立(只改pop_mult→labor_mult,current/COLLECT_RATE/regen零改)④baseline保真(LABOR_SCALE校準±5%現況防偷改量級)⑤憲法決策不碰(執行層rate非util/argmax)⑥size matter genuine非crank(產出∝真手數到demand-cap,大隊餵多工位,勞力真經濟投入)⑦大隊一格遞減靠demand-cap+current非sqrt⑧R②自審補§2b多隊防雙算/perf·可升R①若你認新seam大框需premise深驗·CLEAN→dispatch隔離branch"
 ---
 

@@ -85,3 +85,8 @@ absorb 低 util 是引擎**正確**估算。「有大有小」**無 genuine-valu
 - **unified 非平行 patch**：接既有 team/tag/need_oracle/物流，無新 resident subsystem。
 - **R① 教訓（P5）**：別把「還沒設計的效果」用「既有機制不准動」包裝。宣稱某公式是某設計意圖的載體前，先驗**哪個機制**真的承載它——`sqrt(pop/5)` 被誤認成覓食承載，真承載其實是 `current/COLLECT_RATE/regen`。意圖(大隊一格遞減)是真的、機制認定錯了。
 - 溯源：`2026-08-02 CASE-B economies-of-scale-absent`（真根定案）；`2026-08-03 reviewer R① verdict`（P5 訂正）。
+
+## 落地 emergent（2026-08-03，blueprint 確認 intended）
+- **①size = facility breadth 非 raw pop**：單工位 demand-cap 飽和 → 大隊須 build 更多/更高階 facility 才發揮 size（raw pop 灌單小工位＝浪費）。size = 資本投產能，正是 WHAT。
+- **②生產 need-gated full-stop**：need=0（自用+供給+建造+貿易全滿）→ 產 0，**無 trickle**（trickle=floor=禁）。**確認正確**：不需求不產＝真經濟。
+- **★buffer/戰略儲備走 genuine need**：戰前囤武器/荒前囤糧＝真需求 → need_oracle 模 **reserve target**（未達→need>0→自然 fire），**非** trickle floor。「該囤沒囤」= need_oracle completeness follow-up。
