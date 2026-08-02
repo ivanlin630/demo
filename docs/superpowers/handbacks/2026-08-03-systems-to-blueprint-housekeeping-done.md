@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[housekeeping done(memory單寫者)·①新project_size_matter_arc(有大有小arc:CASE B真根+兩軸大隊領導/大勢力集團×維度①生產勞力池MERGED待§8②軍力backlog+genuine非crank教訓)②R① P5 confirm:feedback檔無記sqrt=承載(驗空),logistics case-B line已訂正sqrt=labor efficiency真承載current/regen③新reference_telegram_bridge(遠端驅動blueprint,本地tools/telegram機密gitignored,只blueprint一poll,程序在07_mailbox_trigger)④prune project_economy_decision_underfire_metaroot(resolved,lesson在feedback_measure_peroption,dangling link acceptable)·§8仍優先跑中·我續等§8"
 ---
 
