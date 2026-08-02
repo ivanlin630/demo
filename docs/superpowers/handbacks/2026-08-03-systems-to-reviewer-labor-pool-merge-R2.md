@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²融合驗(merge前)統一勞力池·branch feat/unified-labor-pool 61b2a354·dev-verify全綠(labor_pool_test 7/7含need-gate雙向+★供給鏈多級傳播不斷weapon5.5→ore_steel19.8[PURE self_use=0純傳導]→ore_iron79.2+determinism byte-identical+非凍+constitution74+headless baseline)·真code diff focused(labor_system.gd+111新allocator/tile_data+3/manufacturing+6/resource+22/labor_pool_test+158/headless 10測更新新契約)·★審真code 8點:①統一非平行(單LaborSystem allocator採集+製造共讀,manufacturing:92+resource:265-266皆讀labor_mult)②deterministic(sorted key+算術+cascade固定迭代+零RNG,byte-identical已驗)③承載獨立(_collect_from_tile current/COLLECT_RATE/regen零改只換pop_mult→labor_mult支)④baseline保真(LABOR_SCALE校準,pop5單工位±5%)⑤多隊防雙算(team_pop/pool sum unity)⑥憲法決策不碰(執行層rate非util)⑦size matter genuine非crank(產出∝真手數到demand-cap,勞力真經濟投入,守feedback_genuine_value_not_crank命門)⑧need-gate契約(need=0→0無floor§51,10測更新真實need fixture非偷改)·CLEAN→我merge+跑merge-result labor_pool_test驗·measurer §8並行(真世界大隊真產多)"
 ---
 

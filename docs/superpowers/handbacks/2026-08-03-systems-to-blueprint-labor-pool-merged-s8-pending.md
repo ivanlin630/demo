@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[統一勞力池MERGED 506aaa64+pushed(讓size在生產matter,治CASE B genuine-value非crank用戶size-matter裁定)·merged main驗全綠:constitution74+labor_pool_test 7/7 ALL PASS(baseline保真pop5=1.0/人手少全線fill0.33/人手多飽和溢出/★size matter Σfill 3.0>1.15/need-gate雙向/★供給鏈多級傳播不斷weapon→steel→iron/determinism byte-identical)+headless baseline 0-new·R²融合驗CLEAN(reviewer親讀8審點真code+特別驗10測更新非偷改遮regression=防crank型adversarial)·契約:生產need-gated full-stop(need=0→0無floor§51)+size靠facility breadth(資本投產能非raw pop)·★size-matter goal真achieve待measurer §8真世界驗(大隊vs等總量小團誰產多,誠實非提前宣稱=同SLICE A flow measured才驗收精神)·§8並行跑中·§5合量待勞力池§8+甲一起·你可宣布勞力池mechanism落地但size真matter §8證後才對用戶驗收"
 ---
 

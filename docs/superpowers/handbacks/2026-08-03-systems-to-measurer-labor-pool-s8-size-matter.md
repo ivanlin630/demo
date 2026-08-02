@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[§8量測統一勞力池·真世界size matter execution-end驗(非只unit fixture,同SLICE A flow measured精神)·branch feat/unified-labor-pool 61b2a354(godot --path .worktrees對branch跑,★禁原地checkout)·核心問:大隊/大集團是否『真』產得多於等總量小團(labor pool讓size在生產matter=治CASE B genuine-value)·量:①baseline(main pre-labor-pool)vs改後(branch)生產·②★大隊(pop40定居設施據點)vs 8×5人小團等總量:總產出誰多?(大隊餵得動多工位=規模化假說驗真)·③大集團(多PRODUCE隊共址堆facility)總產出規模化?·④守憲驗:大隊一格採食人均仍遞減(demand-cap+current承載,非sqrt)+游牧大隊仍餓(無設施據點不產)+人手少小隊全線比例產無獨吞·⑤世界沒凍雙seed(1337+42)+determinism三跑byte-identical·⑥頻率解耦(labor rebalance走LABOR_CADENCE非每tick)·★這是size matter真achieve驗(若大隊沒真產多=finding:facility不夠/K校準/size激勵不足,非paper over)·落地docs/measurements標path帶分帳→我+blueprint判size真matter"
 ---
 
