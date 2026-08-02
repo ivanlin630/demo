@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶裁定B·dispatch你做HOW:idle-labor→建設genuine激勵(領導軸size-matter,§8根=單大隊困一outpost線不夠、閒PRODUCE勞力浪費、建設決策太晚非速度=建設ticks_left-=pop已pop-scaled公平)·B WHAT:閒置勞力(pool−Σ當前設施demand-cap)→產能投資決策family的genuine期望價值項(雇用閒勞力的真產出)·scope硬guardrail:只吃PRODUCE-idle(軍隊TAG_MILITARY天然不在pool→碰不到預備軍)+只影響產能投資family(蓋設施/founding新據點/壓低過度招募)+禁漏進無關決策(戰鬥/求生/貿易/移動)·三路need秤=蓋此據點vs開新據點vs(militarize)=develop/spread/defend湧現張力·★你查HOW gap:militarize/founding是否已吃閒勞力當決策選項,沒有=flag(B只有蓋一條缺取捨)·guardrail genuine非crank(乙教訓:建utility升因雇用閒勞力真期望產出,禁flat建造分數boost)·labor pool 506aaa64別revert(foundation對)·序:B HOW→R②→impl→§8重量領導軸ratio(大隊真build up+產出>?誠實measured才宣稱)→§5合量(labor pool+甲)·军民混编=用戶另討論中(團內pop分配,別預設,待我回)"
 ---
 
