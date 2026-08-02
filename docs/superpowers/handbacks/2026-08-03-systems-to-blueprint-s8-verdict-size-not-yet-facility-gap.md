@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★§8 verdict誠實回報(measurer直讀tile.labor_alloc逐日非猜):labor-pool機制CORRECT但領導軸size-matter『尚未』achieve·組織軸(集團多outpost共址pool)WORKS ratio~1+守憲nomad恰0+determinism byte-identical+機制day50給工位就用=證機制對·但領導軸(單大隊pop40 vs 8×pop5分散)ratio 0.38-0.45<1=大隊產出僅小隊38-45%跨3seed非雜訊·★根因(非labor-pool bug):每outpost civ lvl1只2天然採集線(demand-cap=10),大隊pool15-40超10的勞力無處去浪費,8分散小隊反擁16線贏線數;day50大隊自蓋manufacturing新增第3線立刻fill=1.0但facility-building太慢60天追不平=downstream facility覆蓋率不足·∴size-matter尚未achieve非機制錯(誠實非paper over,守genuine_value_not_crank)·labor pool merged(506aaa64)是正確foundation別revert(組織軸works)·★你裁領導軸方向(WHAT):A接受partial(size靠facility breadth=集團/建設投資達成,領導軸需longer horizon/大隊spread建設)/B加genuine idle-labor→build激勵(大隊idle勞力=真浪費→建facility genuine用它→size matter快,★必genuine非crank同乙教訓)/C longer window驗·我推B(labor稀缺後idle勞力真waste,建設用它=genuine閉環)但你WHAT定"
 ---
 
