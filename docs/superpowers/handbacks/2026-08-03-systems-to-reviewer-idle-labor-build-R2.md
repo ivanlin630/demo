@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²B idle-labor→建設 genuine激勵HOW(MVP建設-only,blueprint GO,領導軸size-matter治§8 ratio0.38-0.45)·spec docs/superpowers/specs/2026-08-03-idle-labor-build-incentive-HOW.md·premise全grounded(建設options:40-45 labor-blind/紮營gated NOT has_outpost/militarize+recruit ABSENT/labor_system pool_of/DecisionContext無idle欄)·設計:idle_labor intake(新ctx欄=maxf(pool_of(tile)−Σlabor_alloc.demand,0)只PRODUCE軍隊天然不在pool)+genuine價值項只加建設(idle_employ_value=min(idle,d_new)×PER_HAND×need_weight(候選facility產物)=雇用閒勞力真期望產出)·★審點:①genuine非crank守命門(乙教訓:build util升因真雇用閒勞力真need-weighted產出,idle=0或無需求→term=0不亂建,self-limit隨facility吸收遞減,禁flat K×(idle>0)boost)②guardrail只加建設,grep無idle_labor漏進combat/survival/trade/move/social③憲法決策非硬gate(idle連續乘非if idle>X)④idle_labor算式對(pool−Σdemand-cap=超產能真浪費)⑤§4 gap deferred(spread/militarize=blueprint裁另arc,MVP建設-only合理非under-deliver)·CLEAN→dispatch隔離feat/idle-labor-build→dev-verify idle→build因果+genuine+guardrail+§8 re-measure領導軸追平"
 ---
 
