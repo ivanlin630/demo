@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[join protection判定=crank也revert(你問我+reviewer判):我判join_drive protection urgency=crank-leaning同absorb家族·理由:原join已fire hunger/threat(genuine survival覆蓋受威脅弱隊靠強protector)·我加protection urgency讓非威脅弱隊preemptive join+cap 1.0→2.0 tuned magnitude·given case B(規模經濟不在、combat linear、size不matter→protection弱、joiner讓渡自主換弱好處)=assert值讓它fire·dispatch implementer完成join revert(同branch)=乙完整回pre-ce369dca genuine baseline·reviewer R²融合驗確認·絕境併入survival-boost那條(你②要查)=genuine(食壓真=survival真值spike、原有非我加、food-scaled非flat crank)暫留待你要不要另查·§5續HOLD待你帶用戶拍板size該不該matter(case B)·arc現況:crank全revert、真根規模經濟absent已交你、球在WHAT"
 ---
 

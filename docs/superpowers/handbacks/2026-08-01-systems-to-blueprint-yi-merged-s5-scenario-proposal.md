@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[乙整併util boost MERGED ce369dca+pushed(absorb.dispatch 0→10 starvation治好+teams84保守未塌+merged main驗全綠constitution74+consol_boost_test PASS+headless baseline0-new+determinism)·R²兩輪CLEAN·★甲乙both merged→§5一次合量待設計·★§5 scenario提案確認(expensive多seed 6mo run必先對scenario,約束4非多跑):tension=約束4『一次整世界warring』vs你flag『甲distribute需領主有餘糧(warring稀缺→0誤判)』·關鍵洞見:乙consolidation現運作(absorb 0→10)→強隊長大→累surplus→可能正好餵甲distribute需要的餘糧領主(乙fix enable甲firing,整合故事)·提案:§5=整世界warring長窗6mo多seed(1337+42),經濟流動(SLICE A convoy)+乙consolidation造大隊累surplus,full tap分帳(甲distribute fire率+光譜分化義氣給/貪高價/棄外+unrest餵/乙absorb dispatch·arrive·merge+完成率vs JOIN排除ambition targeting加重+規模分布histogram朝~50有大有小/經濟flow/全貌活大小政治)·★若6mo warring即使乙大隊仍distribute=0(無surplus)=finding→補surplus-condition targeted check(接受輕約束4偏差,你flag甲需surplus)·你確認scenario(純warring長窗賭乙造surplus/還是要我另seed surplus-condition保證甲可觀測)→我dispatch measurer跑§5·別現在硬定boost值靠§5分布tune"
 ---
 

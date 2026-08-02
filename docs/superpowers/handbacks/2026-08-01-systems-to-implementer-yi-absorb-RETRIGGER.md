@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[re-trigger·吸納量測沒撿到·甲SLICE B已merged收尾、你idle後沒loop回撿吸納measure(那張handback 2026-08-01-systems-to-implementer-yi-absorb-trajectory-measure.md還open、branch feat/scale-absorb-measure還沒建)·現撿它跑:instrument吸納(pull-side整併)lifecycle trajectory=強隊主動吸弱鄰TASK_MERGE(options.gd:154-166無food gate)·量①吸納候選fire數(absorb_target_id!=-1)②dispatch TASK_MERGE數③arrive prey數④merge成功數·分蒸發點(finder無target/belief-stale凍/prey移動/churn)·對比JOIN 33→1驗『強隊有糧撐旅程』假說·cheap dev-verify同3seed×1mo·純觀測tap零行為變零RNG·落地docs/measurements·隔離branch feat/scale-absorb-measure·別下de-patch結論只交真值→我+blueprint方向定乙HOW·blueprint watchdog在等這環,卡/不清楚回to:systems別空等"
 branch: feat/scale-absorb-measure
 ---

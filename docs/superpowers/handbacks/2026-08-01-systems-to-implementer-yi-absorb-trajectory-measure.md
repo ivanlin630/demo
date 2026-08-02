@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[乙補全貌·量吸納(pull-side整併)trajectory補完整併全貌·JOIN(併入push)已量97%半路死,但另條路吸納(options.gd:154-166強隊主動吸弱鄰TASK_MERGE無food gate)未量·measure-first定de-patch落點需知pull-side是否已work·instrument吸納lifecycle(cheap dev-verify,seeded warring短窗同前3seed×1mo):①absorb候選fire數(absorb_target_id!=-1可選次)②dispatch TASK_MERGE數③arrive prey數(強隊行軍到弱鄰)④merge成功數(_try_merge分流真併)·分蒸發點同JOIN框架(finder無target?/belief-stale凍?/prey移動/re-eval churn)·純觀測tap零行為變零RNG·落地docs/measurements·對比JOIN 33→1看pull-side是否更高成功率(強隊有糧撐旅程假說驗真)·非de-patch只交真值→我+blueprint方向定HOW·延用feat/scale-join-measure branch或新isolated"
 branch: feat/scale-absorb-measure
 ---

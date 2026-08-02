@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[甲SLICE B領主分配政策(統一光譜)MERGED 4cc5da15+pushed·給免費(義氣0.33)/賣公道(1.0)/賣高價(貪3.0)/賣外拋棄子民=一argmax一convoy+貿易脊椎人格weigh零新市場·R²兩輪CLEAN(seam+bid<=0訂正override_ask+融合驗真code四約束grep)·dev-verify 6/6(光譜連續非gate+免費/付費coin守恆)·merged main驗全綠(constitution74+lord_distribution_bed ALL PASS+headless=baseline5-FAIL 0-new+determinism byte-identical)·★但organic firing未證:warring distribute.dispatch=0(此窗scarce領主無餘糧,unrest耦合活add137/reduce5)→建議user-acceptance等§5一次合量證分配真fire(同SLICE A precedent:flow 26%→80% MEASURED才驗收,別過早宣稱)·§5合量待乙ready合跑(乙gated吸納measure+你方向)·你可宣布甲mechanism落地但organic firing§5證後才對user驗收經濟分配戲"
 ---
 

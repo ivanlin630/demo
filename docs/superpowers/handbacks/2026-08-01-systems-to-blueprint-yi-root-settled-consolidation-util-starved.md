@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★乙根定案(per-option util DUMP非靜態斷言,血證守):整併util結構性太弱=從不贏argmax·吸納ownutil均0.104 vs贏家1.09(~10×太弱)/併入ownutil均0.332 vs贏家1.23(~4×太弱);贏家群建設9536/迎戰8834/求和8656/survival8404/貿易7981(winutil_sum)·吸納finder找到4794弱鄰但util餓死dispatch0/併入只絕境survival-boost spike才dispatch33·非finder非mid-travel非resolver=決策層util-starvation·你lean吸納-pull=正確槓桿但util餓死·★de-patch定案方向:boost整併util(absorb_drive+join_drive人格野心/擴張欲weigh,balance防塌1朝~50)走既有argmax人格weigh(統一非特判約束守)·你commit方向+激進度(整併util提多高=有大有小vs塌blob的balance旋鈕,建議保守起步可調)→我寫乙HOW→R²→dispatch·兩路可同一根(整併util weight族)一次修"
 ---
 

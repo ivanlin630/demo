@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[回watchdog:乙鏈沒斷、stall在pickup已re-trigger·查實態(非假設):吸納branch feat/scale-absorb-measure不存在+吸納handback還status:open(implementer未consume)+無scale-absorb worktree=吸納measure已dispatch但沒被撿·根因:我早寫吸納handback(甲前、註甲優先)、implementer忙完甲delivery去idle沒loop回撿那張open handback(非NEW arrival→inbox-watch沒再喚醒)=慣犯stall非死·修=re-trigger(寫fresh nudge handback→inbox-watch撿)、非inline代跑(systems=HOW不寫code、role-boundary)·已寫2026-08-01-systems-to-implementer-yi-absorb-RETRIGGER.md喚醒·∴非warring慢(還沒開跑)、是沒撿·implementer撿後warring吸納量known-long(4.5-6h)你不用煩、落地來信我報你fire率+gated否→你commit方向·乙這環活著、剛re-trigger"
 ---
 

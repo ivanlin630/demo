@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★誠實自查verdict:用戶對·乙boost=largely(b)arbitrary crank該revert·我讀自己code(ce369dca terms.gd:63-64,236-245+decision_context:389-404):genuine-value核心存在(resource_slack=pop_cap空額×糧舒適=真容量/absorb_yield=pop_est/20+land=真得到啥,belief-gated非god-view)但我加的兩boost槓桿是crank:①ABSORB_DRIVE_BASE_V2=1.5 flat乘數零真值依據純crank②ambition_amp[0.5,2.0]AMB_GAIN=1.5野心放大器塞drive tuned推過argmax線·★決定性:真值genuinely低=3人團yield≈3/20=0.15,absorb ownutil 0.104是引擎正確估tiny-team吸併邊際小非bug,我誤讀dump成starvation要修實則真值就低正確,crank乘數paper over真finding·★上游finding(用戶更深點對):absorb_yield只算pop+land不含規模經濟(變大有無更強更富更穩?),根=①size有無真好處沒模型化②世界為何碎3人團·★建議:revert boost(BASE_V2→1.0+ambition_amp→原band或入weight),§5續HOLD,measure-first查上游規模經濟(size真好處在不在model,在→加yield genuine-value,不在→有大有小需先讓size matter=WHAT)·我判斷錯:見never fire就crank非問低value是否正確,lesson擴measure-first(dump必要但要問低util是否genuine正確再crank)·用戶最終裁revert/keep"
 ---
 

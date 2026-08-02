@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★乙規模動態根 measure+結構讀 grounded=reframe你心智模型·非『resolve瓶頸85%蒸發』·真相:join『併入』(options.gd:137-141)只在distress才可選(food_days<DESPERATION_DAYS OR 認慫strong+threat),無理性整併觸發→絕境隊已<3天糧派JOIN物理到不了多天外host→97%半路死(belief-stale FREEZE凍住movement:93/非sticky churn faction_ai:1536/famine grace 7d)·共同根=觸發太晚沒糧撐旅程·健康小隊永不理性併大→你要的『小併大世界有大有小』根本沒發生·resolver本身好(1/1)·★另有『吸納』pull-side(options.gd:154強隊吸弱鄰無food gate→強隊有糧撐旅程)更健康整併槓桿但未量·de-patch落點取決:小併大走併入-push(讓弱隊理性早併,趁健康撐得完旅程,野心stay/求生join weigh出有大有小)還是吸納-pull(強隊主動吸,已無food gate)還是兩者?激進度balance(你495bfdee規模校正~50)?·我並行量吸納補全貌,你定方向我寫HOW→R²→dispatch"
 ---
 

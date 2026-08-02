@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[乙整併util boost開工·spec docs/superpowers/specs/2026-08-01-scale-dynamics-consolidation-util-boost-HOW.md(R²CLEAN+1追蹤項)·de-patch決策層util-starvation(per-option dump定案:吸納ownutil 0.104 vs贏1.09~10×弱finder找4794但dispatch0/併入0.332只絕境spike)·根=死常數過度正規化(terms.gd:224-230 absorb_drive base1.0[0,1]cap+野心×0.3被閹+三factor連乘)·做:A absorb_drive野心真放大(amb_gap→ambition_amp=0.5+AMB_GAIN·ambition_gap,AMB_GAIN保守起步~1.5)+base保守抬(ABSORB_DRIVE_BASE 1.0→~1.5,別狂拉)→高野心強隊absorb util競argmax低野心stay B join_drive加理性protection urgency(弱near強protector非只絕境,weigh求生欲/低野心,溫和)·★統一非補丁硬約束(違=reject):①走既有terms.gd drive+weight pipeline無特判branch繞argmax②連續weigh非if ambition>X硬gate只連續乘③term re-weight非新機制④感知鐵律prey_pos/host_pos走belief·★reviewer追蹤:B join protection urgency公式落地時reviewer專門複驗②禁硬gate,務必連續·保守起步值靠§5合量tune別自己定死·全量tap(absorb/join ownutil+dispatch+merge+隊數規模分布)·dev-verify:小併大真fire(dispatch>0+merge>0隊數降)+人格分化連續非階梯+保守未塌1blob+determinism·隔離branch feat/scale-consolidation-util-boost"
 branch: feat/scale-consolidation-util-boost
 ---

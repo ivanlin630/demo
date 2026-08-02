@@ -1,6 +1,6 @@
 # 統一勞力池 — 讓 size 在生產上 matter（WHAT / vision）
 
-status: DRAFT（pending R① factcheck 前提 → CLEAN 才鎖）
+status: R①-CORRECTED（P1–P4 CLEAN，P5 訂正見下 → reviewer 預核「訂正後 CLEAN」→ 可鎖+dispatch systems）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-03
 
@@ -20,9 +20,11 @@ absorb 低 util 是引擎**正確**估算。「有大有小」**無 genuine-valu
 - **P3** `outpost_system.gd:166 _has_resident_on_tile` — 布林閘（有無 PRODUCE-tag 隊在 tile），**非**勞力量級；
   勞力量級 = 動作隊 `team.population`（`manufacturing:82`）。據點**本身無獨立勞力 stat**。
 - **P4（詮釋）** 兩套 pop_mult **互不搶**：勞力現為「免費/無限」——每系統各取 team.population，無共享約束。
-- **P5** `resource_system.gd:63` 的 `sqrt` = **tile 覓食承載上限**（sublinear，蓄意設計，★不准動）。
+- **P5（R①訂正·原認定不成立）** `resource_system.gd:63` 的 `sqrt(pop/5)` **不是** tile 承載——它跟 `manufacturing:82` **逐字相同**，是「勞力規模效率遞減」曲線（labor residue），**該一起併入勞力池**。
+  tile 真正的生態承載 = `_collect_from_tile`（`resource_system:254-284`）：`gain = productivity × current × COLLECT_RATE(0.05) × day_fraction`，`current`（庫存隨採集遞減）+ regen——**獨立機制、勞力池不碰**。
+  → 原「神聖 sqrt 不准動」守憲條款作廢；改由 demand-cap + `current` 遞減承載「大隊一格採食人均遞減」意圖（見 §守憲訂正）。
 
-> R① 判準：P1–P5 file:line + 詮釋成立否？premise_contradiction → halt 修。
+> R① 判決（`2026-08-03 reviewer→blueprint verdict`）：**P1–P4 CLEAN、P5 不成立但非 halt**（dispatch 已預設「sqrt 非承載則守憲條款改」）→ 訂正後 reviewer 預核 CLEAN。
 
 ## 設計（統一勞力池）
 
@@ -54,9 +56,11 @@ absorb 低 util 是引擎**正確**估算。「有大有小」**無 genuine-valu
 - 各生產活動照**自己頻率**跑時，**乘當前 share**。→ 分配 cadence 與生產 cadence **解耦、零雙算衝突**。
 - 接用戶「隨時算太頻繁」：週期重算 + 危機觸發，非每 tick 抖。
 
-### 守憲
+### 守憲（P5 訂正版）
 - **deterministic**（sorted + 純算術、無 RNG）→ 三跑 byte-identical。
-- **守覓食承載 cap**（P5）：實際產 `= min(勞力率, tile 承載)`；大隊在一格採食仍人均遞減（神聖 sublinear 保住）。
+- **tile 生態承載獨立不碰**：`_collect_from_tile` 的 `current/COLLECT_RATE/regen`（`resource_system:254-284`）是承載真載體，勞力池**只改 pop_mult 那一支、不碰庫存數學**。
+- **「大隊一格採食人均遞減」= 真設計意圖（用戶），改由兩機制承載**（非舊 sqrt、非「不准動」假前提）：
+  ① **採食 demand-cap**——大隊無法對單格無限灌勞力（超 cap 溢走）；② **`current` 庫存遞減**——過採一格 → 庫存掉 → yield 降。systems 設 food demand-cap 保住此意圖，measurement 驗大隊一格仍餓、須鋪多格/供給。
 - **無 explicit toggle**；玩家隊 on/off 另循 `player_command_system`、非核心、本 arc 不做。
 
 ## 這服務的兩軸（size matter）
@@ -73,10 +77,11 @@ absorb 低 util 是引擎**正確**估算。「有大有小」**無 genuine-valu
 ## 量測（systems 交 measurer/QA）
 - **現況 baseline vs 改後**：大隊/大集團是否**真**產得多於小團（非只搬數字）。
 - 世界**沒凍**（雙 seed）、determinism 三跑 byte-identical。
-- 覓食承載 cap 未被破（大團一格採食人均仍遞減）。
+- 大隊一格採食**人均仍遞減**（由 demand-cap + `current` 庫存遞減承載，非 sqrt）；tile 生態承載機制（`_collect_from_tile`）未被勞力池破壞。
 - 「人手少但都要生產」情境：小隊多需求時全線比例產、無單工位獨吞。
 
 ## 血脈（別再犯）
 - **非 crank**：勞力是真經濟投入、閒置設施是真損失；util 因真 yield 升 = 湧現非腳本（守「無意義分數競爭」命門）。
 - **unified 非平行 patch**：接既有 team/tag/need_oracle/物流，無新 resident subsystem。
-- 溯源：`2026-08-02 CASE-B economies-of-scale-absent`（真根定案）。
+- **R① 教訓（P5）**：別把「還沒設計的效果」用「既有機制不准動」包裝。宣稱某公式是某設計意圖的載體前，先驗**哪個機制**真的承載它——`sqrt(pop/5)` 被誤認成覓食承載，真承載其實是 `current/COLLECT_RATE/regen`。意圖(大隊一格遞減)是真的、機制認定錯了。
+- 溯源：`2026-08-02 CASE-B economies-of-scale-absent`（真根定案）；`2026-08-03 reviewer R① verdict`（P5 訂正）。

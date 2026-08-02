@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²乙整併util boost HOW(dispatch前必過,blueprint COMMIT方向)·spec docs/superpowers/specs/2026-08-01-scale-dynamics-consolidation-util-boost-HOW.md·根定案per-option util DUMP(吸納ownutil均0.104 vs贏1.09~10×弱/併入0.332 vs 1.23,吸納finder找4794但util餓死dispatch0)=決策層util-starvation非finder/travel/resolver·餓死公式§0b坐實(terms.gd:224-230 absorb_drive=BASE1.0×slack×(0.5+0.5yield)×(0.5+0.5·amb_gap),amb_gap=ambition×0.3被閹+base[0,1]cap+三factor連乘)=死常數過度正規化·de-patch:A absorb野心真放大(amb_gap→ambition_amp=0.5+AMB_GAIN·ambition_gap)+base保守抬 B join加理性protection urgency(弱near強非只絕境)·★審統一非補丁grep硬檢:①走既有argmax term pipeline(terms.gd drive+weight)無特判branch繞argmax②連續weigh非if ambition>X硬gate只連續乘③野心真放大是term re-weight非新機制④感知鐵律prey_pos/host_pos走belief保持·保守起步值靠§5合量tune·dev-verify小併大真fire+人格分化連續+保守未塌"
 ---
 

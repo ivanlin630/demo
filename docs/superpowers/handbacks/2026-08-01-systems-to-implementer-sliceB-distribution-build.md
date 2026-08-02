@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[甲SLICE B領主分配政策=統一光譜·開工·spec終稿docs/superpowers/specs/2026-08-01-logistics-slice-B-lord-distribution-policy-HOW.md(R²CLEAN+bid<=0洞已訂正)·統一光譜:給免費(義氣)←賣公道→賣高價(貪剝一筆)→賣外拋棄子民,一argmax一convoy+貿易脊椎人格weigh位置零新市場·四元件:A deficit偵測(領主掃自有resident food runway<DISTRIB_DEFICIT_DAYS)B _distribute_candidates(goal_resolver仿_deliver_candidates,target鎖自有deficit居民buy-order,price_factor=clamp((0.5+greed)/(0.5+honor))連續,util=relief(honor放大)+coin(greed放大)競argmax)C DELIVER復用_market_visitor_sell+加override_ask:float=-1注入口(distribute傳local_value×price_factor,override_ask==0跳owner coin<=0/bid<=0 bail+qty=min(order_rem,sellable)免div,>0保留affordability cap)D unrest耦合(持續deficit→UnrestBank.add,fed→reduce,餵現成defection≥20)·★四約束鎖統一非補丁R²grep硬檢:候選非特判/連續weigh非硬gate/價格modulation非新機制/復用市場非新class·★感知鐵律:讀本勢力自有居民deficit=合法非god-view·★全量tap:distribute util per-option/DELIVER量/deficit runway/unrest源·dev-verify三人格湧現+連續掃greed非階梯+coin守恆·隔離branch feat/logistics-sliceB-distribution"
 branch: feat/logistics-sliceB-distribution
 ---

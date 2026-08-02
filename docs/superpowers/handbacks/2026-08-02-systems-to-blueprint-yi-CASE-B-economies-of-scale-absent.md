@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★規模經濟investigation DECISIVE=CASE B(size好處根本不在model、甚至反獎勵)·讀code 4維全LINEAR/ABSENT:①軍力npc_combat:654-656 linear in pop(2×pop=2×str flat無concentration/formation bonus)②生產resource_system:63 sqrt(pop/5)cap2.0=SUBLINEAR大團per-capita產更少③抗風險resource:26-28 proportional attrition(10%minor/5%anon同%大小同死率)④領土team_data:48-49 pop cap 50/團硬頂+overflow splits(size不解鎖領土)·★model不獎勵size甚至反獎勵(生產sublinear+50cap+overflow split)→世界碎小團=正確湧現、absorb低util對、用戶直覺全中·∴有大有小無genuine-value基礎:consolidation真的沒好處(甚至負),要有大有小需先讓size MATTER=加真規模好處(WHAT/vision你帶用戶拍板)·reframe整個規模動態/perf arc:130+團非consolidation bug是size不matter的正確結果·revert crank已dispatch implementer·序:你帶用戶拍板要不要讓size matter(加economies of scale:軍力concentration/生產規模效率/抗風險)→若要=WHAT定好處類型+量級,我做HOW genuine-yield;若不要=接受碎片化、規模動態arc drop·§5續HOLD"
 ---
 

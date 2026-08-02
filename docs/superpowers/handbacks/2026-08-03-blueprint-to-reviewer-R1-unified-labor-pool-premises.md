@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: "[R① factcheck 前提·新大框『統一勞力池讓size在生產matter』·spec=docs/superpowers/specs/2026-08-03-unified-labor-production-scale-design.md·逐條驗file:line+詮釋,premise_contradiction→halt:P1 manufacturing_system:82製造勞力=clampf(sqrt(pop/5),0.5,2.0)且RECIPE_GROUPS迴圈每設施免費並吃同pop_mult(設施間不競爭)·P2 resource_system:63採集用自己一份sqrt(pop/5)與製造獨立互不搶·P3 outpost_system:166 _has_resident_on_tile=布林閘非勞力量級,勞力量級=team.population,據點本身無獨立勞力stat·P4詮釋:兩套pop_mult互不搶(勞力現免費/無限,各取team.population無共享約束)·P5 resource_system:63的sqrt=tile覓食承載上限(sublinear蓄意不准動)·問:P1-P5成立否?尤其P4『互不搶』詮釋+P5承載cap認定·CLEAN才鎖spec才dispatch systems做HOW]"
 ---
 

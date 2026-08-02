@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²融合驗(merge前)乙整併util boost·branch feat/scale-consolidation-util-boost 21119a35·dev-verify 4/4綠(absorb_drive掃連續step0.675+人格分化高野心3.0>低0.75+join連續step0.056+理性protection near1.64>無0.5)+warring absorb.dispatch 0→10(argmax starvation治好)+merge fire+teams84(保守未塌非blob)+determinism byte-identical943B9480+不凍1.58%+headless baseline0-new(修stale[0,1]斷言)+constitution74·審真code diff小(terms.gd+21 drive boost/consol_boost_test+87/headless+6)·★你前輪R²追蹤項=B join protection urgency公式落地複驗②禁硬gate:實作near protector×求生欲×低野心cap2.0全連續乘,親讀terms.gd確認無if階梯·四統一非補丁grep硬檢真code(走既有term pipeline無特判/連續weigh非硬gate/term re-weight非新機制/感知鐵律belief)·★flag非merge-blocker:residual dispatch10→merge1=pull-side mid-travel蒸發(同JOIN 33→1 belief-stale freeze movement:93)交§5·CLEAN→我merge+跑merge-result consol_boost_test驗"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[乙crank完整REVERT+MERGED(08d10281+pushed)·main回誠實genuine baseline:absorb_drive/join_drive逐字回pre-ce369dca(刪4 crank常數+刪consol_boost_test)+merge-result驗全綠(constitution74+headless baseline5-FAIL 0-new+determinism FBF182FA=甲-only baseline+不凍)·R²融合驗CLEAN(reviewer親讀逐字回原+own前輪沒深挖0.104框架)·known_issues乙段更正(crank reverted+真根case B)·∴logistics arc現況:甲SLICE B分配政策merged genuine(§5 firing待證held)/乙規模動態=乾淨genuine baseline(整併真值低但正確反映size不matter真相)·★arc cleanly WHAT-blocked:乙有大有小待你帶用戶拍板size該不該matter(case B:要=加規模經濟軍力concentration/生產效率/抗風險→我做HOW genuine-yield自然湧現/不要=碎片化drop arc)·§5續HOLD待此·球在WHAT我這邊乾淨無pending code·你帶用戶回size-matter裁→我接(要做HOW/不要收arc+§5改只驗甲)"
 ---
 

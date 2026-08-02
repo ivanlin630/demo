@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²洞已訂正甲SLICE B·你抓仁君免費(price_factor=0)撞_market_visitor_sell的bid<=0 bail(interaction:828)+無外部price注入口=真洞·訂正§2C三點(答你精確):①ask注入口override_ask:float=-1(−1=現行內算local_value,normal trade零變guard全不動),distribute傳override_ask=local_value×price_factor②free-end guard放寬僅override_ask==0情境(跳owner coin<=0/bid<=0 bail,qty=min(order_rem,sellable)免829 ocoin/bid div-by-0,coin轉=0 no-op)③付費端override_ask>0保留affordability cap(既有829=苛捐雜稅免改)·連續:override_ask 0→high食物恆轉coin=q×override_ask復用整條sell path零新class·另補premise §0b第4項:deficit居民自動掛food buy-order PROVEN(order_system:128-136)=distribute全騎現成need→buy-order→deliver pipeline·fix是你指的標準解(外部注入),已dispatch implementer隔離branch並行,你若不同意fix回信flag(早修便宜)"
 ---
 
