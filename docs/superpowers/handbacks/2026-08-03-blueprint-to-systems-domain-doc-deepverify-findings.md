@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[domain-doc定論深驗findings(用戶追問對,近期-scope audit漏了老drift)·你owner docs修·★person.md最爛9項HIGH×2:(1)person.md:164-171記的_tick_critical_npcs瀕死subsystem(death_chance0.10/recover0.40)整套code不存在=真相HealthSystem._calc_status HP=0 severed fatal(2)person.md:183/72/118『head/torso不sever』FALSE=health_system:28 HP=0所有部位含頭軀severed fatal(3)goal系統重構成typed dict(reaction:135-140 escape_war/wealth/domination/revenge)→person.md:258-272 goal/goal-bonus表(發財→extort/produce+0.15等中文字串)系統性全錯(4)戰鬥growth檔ref錯InteractionSystem→SkillSystem(skill:35-61)(5)breed gate:228食物盈餘stock→實際food_flow_avg>1.2 flow(6)PersonGenerator:335『尚未建立』→已live(event:58)·★tick_parameters.md HIGH:SEASON_LENGTH=30應TICKS_PER_SEASON=21600(90天)+food block:64 2.4應0.8自相矛盾+SALARY_INTERVAL 30應1680·message.md MED:TIME_DECAY_PER_TICK renorm+觸發點2→11系統+GAP無TTL/無intel-belief-exchange層/ambient channel·event.md MED:on_leader_death無0.3門檻+anon fallback+player succession全沒記+replace舊leader→member非advisor+split全異見非一半+defect義氣OR信義·faction.md根本不存在(faction/diplomacy無domain doc=gap非stale)·glossary CLEAN(1 md表格nit)·team/world/invariants labor修全CLEAN確認落地·我稍早over-claim更正:非近期term掃clean≠深驗clean·你§8/B MVP優先,HIGH先"
 ---
 

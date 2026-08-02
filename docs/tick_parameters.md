@@ -14,7 +14,7 @@
 | `TICKS_PER_TURN` | `ui/sim_bridge.gd:4` | 24 | 按一次推進1天 | — | 不動 |
 | `TICKS_PER_SECOND` | `ui/turn_controls.gd:4` | 4 | 自動跑速：4tick/秒=6小時/秒 | 視需求 | |
 | world_turn 間隔 | `sim_runner.gd:127` | 每 6 tick | 1 world_turn = 6小時 | — | 不動（顯示用） |
-| `SEASON_LENGTH` | `simulation/harvest_system.gd:3` | **30** | **1季=1.25天，1年=5天** ← 太短 | **720** | 1季=30天，1年=120天 |
+| `SEASON_LENGTH` | `simulation/harvest_system.gd:3`（=`WorldState.TICKS_PER_SEASON`） | **21600**（=TICKS_PER_DAY×90） | 1季=90天、1年=360天 | — | — |
 | Harvest 更新頻率 | `sim_runner.gd:146` | 每 6 tick | 每6小時更新農業乘數 | — | 不動（技術性） |
 | `FAR_ZONE_INTERVAL` | `sim_runner.gd:6` | 10 | 遠區每10tick更新 | — | 不動（技術性） |
 | `OVERFLOW_CHECK_INTERVAL` | `simulation/population_system.gd:3` | 10 | 人口溢出每10tick檢查 | — | 不動 |
@@ -61,10 +61,10 @@
 
 ### 食物存量參考（主場景 test setup，cadence-aware 修正後）
 - 初始 food = 300，人口 = 10
-- 每天消耗 = 10 × `FOOD_PER_PERSON_PER_DAY (2.4)` = **24 food/天**
-- 無 outpost → 300 food ÷ 24 = **約 12.5 天後斷糧**
+- 每天消耗 = 10 × `FOOD_PER_PERSON_PER_DAY (0.8)` = **8 food/天**（× day_fraction）
+- 無 outpost → 300 food ÷ 8 = **約 37.5 天後斷糧**
 
-> 註：2026-06-07 之前公式 bug 導致實際消耗為設計值 1/10（每天 2.4 食物 → 125 天），cadence-aware 修正後對齊設計值。
+> 註：`FOOD_PER_PERSON_PER_DAY=0.8`（resource_system:3、R1 供給÷24 後校準）；satisfaction=food/(pop×0.8×day_fraction)。
 
 ---
 
@@ -139,8 +139,8 @@
 
 | 問題 | 根因 | 修改參數 |
 |---|---|---|
-| 季節/年份太短 | `SEASON_LENGTH = 30` | 改 720（30天/季） |
-| 薪水太頻繁 | `SALARY_INTERVAL = 30` | 改 720（30天/次） |
+| ~~季節/年份太短~~ | ✅ 已修 `SEASON_LENGTH=21600`（90天/季） | — |
+| ~~薪水太頻繁~~ | ✅ 已修 `SALARY_INTERVAL=1680`（7天/次） | — |
 | 同盟檢查太頻繁 | `ALLIANCE_CHECK_INTERVAL = 30` | 改 240（10天/次） |
 | NPC 消失（人口掉） | 暴露公式 + test setup 食物不足 | main.gd 加食物 or 降門檻 |
 | 食物/疲勞 1/10 速率 bug | 公式 /TICKS_PER_DAY 假設每 tick 跑，實際每 hour | ✅ 已修（2026-06-07，cadence-aware）|

@@ -161,14 +161,12 @@ var equipment: Dictionary = {}
 | `right_arm` / `left_arm` | 戰鬥/弓箭/製造/工程/醫療 技能 × 雙臂均值（`get_skill_mult`） |
 | `right_leg` / `left_leg` | 個人移動速度 × 雙腿均值（`get_effective_speed`） |
 
-### Critical 瀕死機制（head/torso）
+### 傷勢機制（HP-based，`HealthSystem`）
 
-每 Tick 雙重判定（`_tick_critical_npcs`）：
-
-1. **死亡機率**：`death_chance = 0.10 × (1 - medicine × 0.5)`
-2. **治療恢復**：若未死亡，`recover_chance = 0.40 × medicine`（critical → wounded）
-
-無醫療：~10%/Tick 死亡；醫療=1.0：5%/Tick 死亡 + 40% 恢復機會。
+**部位 HP 制**（`health_system.gd`、2026 重構、取代舊 `_tick_critical_npcs` 機率死亡——**該 subsystem 已不存在**）：
+- 每部位有 `hp/max_hp`，命中扣 HP（`bp[part].hp = maxf(hp − dmg, 0)`，:34）。
+- `_calc_status(hp,max_hp)`(:23-28) 映射 HP→status；**`HP=0 → "severed" = fatal wound（所有部位、含 head/torso）**（:28）。
+- **HP 再生**：`HP_REGEN_PER_TICK=0.5`（骨折 `HP_REGEN_FRACTURE=0.05`）；毒 `POISON_HP_DRAIN=5.0`。
 
 ### 戰鬥命中分配
 
@@ -179,8 +177,7 @@ var equipment: Dictionary = {}
 | right_arm / left_arm | 各 10% |
 | right_leg / left_leg | 各 15% |
 
-每次命中：status 降一級（healthy → wounded → critical → severed）。
-四肢 severed 時：NPC 死亡。head/torso severed 不發生（critical = 瀕死上限）。
+每次命中扣該部位 HP。**任何部位 HP=0→severed=致命**（含 head/torso、非「四肢才致命」）。
 
 ### 大地圖 vs 遭遇戰分層
 
@@ -253,14 +250,15 @@ score > 門檻的真威脅，才設 `team.current_task = "逃跑"`，move_target
 
 已知問題：bridge 與 survival 鏈（乞食/return_home）互搶 task（仲裁未定，見 known_issues task仲裁）。
 
-### Goals 加分（_goal_bonus）
+### Goals 加分（`_goal_bonus`，goal 是 **typed dict**、讀 `goal.type`，reaction_system:133-142）
 
-| 目標字串 | 加分的反應 | 加分量 |
+| goal.type | 加分的反應 | 加分量 |
 |---|---|---|
-| "求生" / "逃離" | N1_flee | +0.2 |
-| "發財" | N5_extort, P2_produce | +0.15 |
-| "復仇" | N2_riot, N3_defect | +0.2 |
-| "建立勢力" | P4_expand | +0.35 |
+| `escape_war` / `wealth` | N1_flee | +0.2 |
+| `domination` | P4_expand | +0.35 |
+| `revenge` | N2_riot, N3_defect | +0.2 |
+
+（★2026 重構：goal 從舊字串（"求生"/"發財"…）改 typed dict `{type, ...}`；舊字串表已作廢。）
 
 ### 目標自動生成（每 10 Tick）
 
