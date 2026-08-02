@@ -123,6 +123,18 @@
 - **遞延 backlog**：material/伐木供給側、established chain、遭遇戰收斂（舊 P6）、perf O(N²) scaling。
 - **infra**：Telegram 雙向 bridge（遠端驅動 blueprint）done（`reference_telegram_bridge`）。
 - **★doc 待辦**：`roadmap.md`（死化石）待 systems reconcile/archive（指向本節 + memory `project_*` 為 living 來源）。
+
+## 🗂️ 未來願景 brainstorm 索引（parked，findability 用，2026-08-03 補）
+> `docs/notes/2026-07-19-*` = 10 篇**刻意 parked 的未來 arc 停車筆記**（「不碰 canonical」的有意設計：腦力激盪→停車→成熟才升 canonical）。本索引**只解 findability**（原本只 1 篇被 link、其餘孤兒=同 roadmap 失聯病），**非**強行 canonize。七維度/五底線的 placeholder 詳設計在對應 note：
+- **身份/王朝/正統/聯姻/繼承/性別**（七維度 #4/#5/#6）→ `notes/2026-07-19-identity-dynasty-legitimacy-brainstorm.md`（血脈→聯姻→繼承→正統→宗教 同一串 + 天命 belief 侵蝕 + 單一繼位爭）。
+- **天災（物質×信念雙打）**（七維度 #7）→ `notes/2026-07-19-natural-disaster-brainstorm.md`（毀糧 + 蝕天命雙效）。
+- **敘事可見/史書**（五底線 敘事可見）→ `notes/2026-07-19-narrative-legibility-chronicle-brainstorm.md`（A 觀者真史 essential-first / B 世界內偏史）。
+- **情報操控·造謠 + 資訊戰四動詞**（情報系統）→ `notes/2026-07-19-active-rumor-fabrication-brainstorm.md` + `notes/2026-07-19-info-warfare-verbs-brainstorm.md`（憑空捏造 + NPC 主動 偵察/反情報/販賣情報，資訊=可爭奪資源非只被動傳播/扭曲）。
+- **決策模型 v2 深化 + 長程計畫**（§決策模型 v2）→ `notes/2026-07-19-decision-model-v2-deepening-brainstorm.md`（③內政/慾望泛化/④情緒）+ `notes/2026-07-19-long-range-planning-brainstorm.md`（means-end 承諾深化）。
+- **正面羈絆 + 人物成長弧**（★新維度、七維度未含）→ `notes/2026-07-19-bonds-and-character-arcs-brainstorm.md`（正面羈絆=背叛的賭注重量 / 人會變成長弧 / 個人效忠 vs 忠於位·派系——**與現「人格固定 by design」有張力，升 canonical 前須調和**）。
+- **經濟階級**（★新視角、game-design 未名）→ `notes/2026-07-19-economic-class-brainstorm.md`（相對剝奪於財富兩鉤，窮 member 怨囤財頭人→叛，大半湧現）。
+- **技術/知識（技術≠技能 + 知識即資訊）**（§未來加技術 placeholder l.241 深化）→ `notes/2026-07-19-technology-knowledge-brainstorm.md`（技術=能做啥·配方上限·可傳可失 / 技能=做多好 / 知識=不均分佈的資訊，接核心「資訊不透明」命題）。
+- **memory-only vision 項**（非 note、但屬願景）：NPC 個別傷亡追蹤（[[project_future_improvements]]，team-pop 粒度→記名個體）；未成年長大/coming-of-age（[[project_population_fixes]]，生命週期 #6 機制）；PersonGenerator（匿名升格記名/天賦人物）。
 - 玩家錨 C（資訊不對稱崛起）= 進入「本就活著的世界」的**鏡頭/參與者**，**非世界存在的理由**。先有好沙盒，玩家才是好鏡頭。
 - 量測導向：believability 不靠單元測達標，靠「活世界自己跑出該有的戲」（戰國 seed 類驗證床）。
 
