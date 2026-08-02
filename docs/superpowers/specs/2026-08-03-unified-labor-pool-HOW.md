@@ -67,7 +67,8 @@
 
 ## §7 dev-verify（交付前自跑）+ §8 量測（交 measurer）
 **dev-verify bed**（`scripts/debug/`）硬斷：
-1. **baseline 保真**：pop=5 單隊單工位產出 ±5% 現況（LABOR_SCALE 校準證、非偷改量級）。
+1. **baseline 保真（單工位）**：pop=5 單隊單工位產出 ±5% 現況（LABOR_SCALE 校準證、非偷改量級）。
+1b. **★小隊多活動下滑 survivable（R² 追蹤項、reviewer 2026-08-03）**：小隊（pop 5–10）**同時做多活動**（採食+採材+製造）＝**常見情況非 edge**。labor 稀缺 → pool 分裂 → 每工位 fill<1 → 每活動比現況慢（**intended：稀缺逼排序**）。**硬驗此下滑 bounded + survivable**：need_oracle survival 權重把糧優先拉滿（不餓死）、總產仍撐得住早期經濟、**非全面崩**（世界不因小隊產崩而塌）。measure 下滑幅度；若崩→tune（LABOR_SCALE↑ per-hand 產高 / K↓ demand 小=少分裂），**非加 scripted floor**（憲法）。
 2. **size matter**：大隊（pop 40）/大集團（多隊共址）**真產得多於等總量小團**（餵得動多工位）——非只搬數字、比總產出。
 3. **人手少全線比例**：小池多需求 → 每需要工位都 fill>0 分一份（無單工位獨吞、無 winner-take-all）。
 4. **人手多飽和外溢**：大池 → 全工位 fill=1 + 餘力（surplus）。
