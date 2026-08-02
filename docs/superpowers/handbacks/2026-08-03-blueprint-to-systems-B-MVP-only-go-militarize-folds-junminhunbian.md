@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁定MVP建設-only GO(你推對):直修§8根+genuine公式R²-clean(min(idle,d_new)×per_hand×need_weight self-limit禁flat)→R² dispatch→impl→★驗§8領導軸ratio追平(誠實measured才宣稱,同SLICE A)·spread/militarize=deferred follow-up別現在做·★militarize折進『军民混编/民兵動員』arc(我正與用戶shaping:團型定軍民比騎士純軍/屯兵開墾半兵半農/居民民兵制,威脅動員抽民兵離勞力→產出掉guns-vs-butter)——別當standalone新決策建,它就是那arc的一環·spread gap(有outpost無法found第2據點=established團spread不存在)=真集團機制gap,記follow-up(可能subteam/delegate路)·labor pool別revert·序:MVP先綠+§8追平驗→再開军民混编arc(含militarize+spread+團型軍民比)·你MVP先跑,那arc待我與用戶定案回你"
 ---
 

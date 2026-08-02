@@ -996,6 +996,12 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
   - **③ try_proactive 慎重³**=公式legit(unit-proven陡,RNG案③),但**行為級分化撤回**:高端「0%」是127-樣本noise(569樣本0.70%不重現),低慎重<0.35 generator架構不可達(person_generator:17 NORMAL_LO=0.35無lo_v慎重archetype)→分化被opportunity稀缺+floor遮蔽。gate-ok立於公式非行為。殘:generator-diversity(低慎重原型)+藍圖陳述更正=vision backlog。
 - **54-triage tracker**:`docs/superpowers/54-triage.md`(A1安全收斂/A2 threat legit-until-oracle/B逐code/C=2皆legit)。
 
+### ⏳有大有小 領導軸 follow-up：spread gap + militarize（2026-08-03，B MVP 後）
+B idle-labor→建設 MVP（建設-only、develop 路）修 §8 領導軸。**三路張力（develop/spread/defend）剩兩路 deferred**：
+- **spread gap**：`紮營` gated `NOT has_own_outpost`＝**established 團（有 outpost）無法 found 第2據點**＝真集團機制 gap（大隊困單 outpost、產能上限=該 outpost 滿設施）。follow-up（可能 subteam/delegate 路 found 新據點）。
+- **militarize（defend）**：ABSENT（無 pop→軍決策）→ **折進未來「军民混编/民兵動員」arc**（blueprint 與用戶 shaping：團型定軍民比[騎士純軍/屯兵半兵半農/居民民兵]、威脅動員抽民兵離勞力→產出掉＝guns-vs-butter）。非 standalone、待該 arc 定案。
+- 序：MVP 先綠 + §8 領導軸 ratio 追平驗 → 再開军民混编 arc。
+
 ### ⏳need_oracle 前瞻/reserve need — buffer 儲備 completeness（2026-08-03，統一勞力池 follow-up，非本 slice blocker）
 統一勞力池 → 生產 **need-gated full-stop**（need=0→產出 0、無 min-floor，blueprint §51 憲法確認）。∴ **buffer/戰略儲備（戰前囤武器、荒前囤糧）＝真 gameplay 需求，須走 genuine anticipatory need**（need_oracle 模 reserve target → need>0 → production 自然 fire），**非 trickle floor**（trickle=floor=§51 禁）。
 - **∴ 任何「該囤沒囤」＝need_oracle completeness item**（新增 reserve/前瞻 need：戰前威脅→武器 reserve、季節/荒前→糧 reserve），非加 floor 遮。
