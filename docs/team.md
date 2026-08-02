@@ -156,7 +156,8 @@ var strategic_assignments: Dictionary  # StrategicAI 派的座標目標（key: t
 
 ### 採集（resource_system）
 - 條件：所在格 `outpost_level > 0`
-- 每次收取：`productivity × tile.resources[res] × COLLECT_RATE(0.05) × outpost_mult × pop_mult × work_morale`（food 另乘 farming_level/季節）
+- 每次收取：`productivity × tile.resources[res] × COLLECT_RATE(0.05) × outpost_mult × labor_mult × work_morale`（food 另乘 farming_level/季節）
+  - ★`labor_mult` = `LaborSystem` 統一勞力池分配（2026-08-03、取代舊 `pop_mult=sqrt(pop/5)`）：per-tile 勞力池（共址 PRODUCE pop 總和）按 need_oracle 加權比例分各工位、`labor_mult = fill × LABOR_SCALE`。**need-gated full-stop**（該資源 need=0→fill=0→不採）；size 靠餵多/大 facility（breadth）。詳 [[docs/superpowers/specs/2026-08-03-unified-labor-pool-HOW.md]]。**tile 承載（`current`/COLLECT_RATE/regen）獨立不碰**。
 - food/material → 採集團 `team.resources`（私產）；ore/mounts/製造成品 → tile `public_storage`（公庫）
 
 ### 財產兩層（永不混淆）
@@ -177,7 +178,7 @@ var strategic_assignments: Dictionary  # StrategicAI 派的座標目標（key: t
 
 ## 飢餓致死 + 滅團（2026-06-13 famine-death）
 
-- `satisfaction = food / (pop × 2.4 × day)`；< 0.3 → `famine_days` 累積，>7 天 grace 後：minor 先死（10%/日）→ anon（5%/日，kill_random）
+- `satisfaction = food / (pop × FOOD_PER_PERSON_PER_DAY(0.8) × day_fraction)`；< 0.3（FAMINE_SATISFACTION_THRESHOLD）→ `famine_days` 累積，>7 天 grace 後：minor 先死（10%/日）→ anon（5%/日，kill_random）
 - named/leader：個人 `person.hunger` 累積 → ≥0.7 → blood 流失 → blood<30 戰場昏迷失能（可俘）→ blood=0 死亡
 - 滅團（pop≤0）：`_on_team_extinct` 標記 → tick 末 `cleanup_extinct_teams` 路由遺財（公庫/abandoned/地面，守恆）+ erase
 

@@ -49,11 +49,15 @@
 
 | 參數 | 檔案 | 當前值 | 現在意義 | 建議值 |
 |---|---|---|---|---|
-| `FOOD_PER_PERSON_PER_TICK` | `simulation/resource_system.gd:3` | **0.1** | 10人 = 1food/tick = 24food/天 | — |
-| `COLLECT_RATE` | `simulation/resource_system.gd:9` | **0.05** | 每次 collect 取 tile 池比例（馬爾薩斯 tune 0.01→0.05；池常駐 cap，遠區村收入 ≈ cap×rate×mults×2.4 次/日） | — |
+| `FOOD_PER_PERSON_PER_DAY` | `simulation/resource_system.gd:3` | **0.8** | food_needed = total_pop × 0.8 × day_fraction（R1 供給÷24 後校準） | — |
+| `COLLECT_RATE` | `simulation/resource_system.gd:16` | **0.05** | 每次 collect 取 tile 池比例（馬爾薩斯 tune 0.01→0.05；`current` 庫存遞減=生態承載） | — |
 | REGEN plains food | `simulation/resource_system.gd:7` | 8.0/tick | 平原農業再生（需 outpost） | — |
 | REGEN forest material | `simulation/resource_system.gd:9` | 12.0/tick | 林地木材再生 | — |
 | `FOOD_RESERVE_TICKS` | `simulation/interaction_system.gd:32` | 20.0 | 交易自留底線=20tick食物 | — |
+| `K_MFG` | `simulation/labor_system.gd:8` | 3.0 | 每製造設施 level 要幾手（demand=level×K_MFG） | — |
+| `K_GATHER` | `simulation/labor_system.gd:9` | 5.0 | 每採集線飽和手數 | — |
+| `LABOR_SCALE` | `simulation/labor_system.gd:10` | 1.0 | labor_mult=fill×此；校準 pop5 單工位=現 pop_mult@5 | — |
+| `LABOR_CADENCE` | `simulation/labor_system.gd:11` | `TICK_PER_DAY×3` | 勞力池重算 cadence（常駐慢+危機觸發） | — |
 
 ### 食物存量參考（主場景 test setup，cadence-aware 修正後）
 - 初始 food = 300，人口 = 10

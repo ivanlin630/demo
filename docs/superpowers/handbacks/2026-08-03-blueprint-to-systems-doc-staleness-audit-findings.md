@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[doc staleness audit findings(read-only子代理跨docs vs code)·你owner的docs修·好消息:sqrt=承載誤解全docs都沒有(只code註解已刪)+game-design(我owner)驗current零stale+combat/乙revert/status docs都current·★HIGH 2:team.md:159 harvest公式名已刪pop_mult應=勞力池(labor_mult×labor_share,need-gated full-stop)/world.md:132-138 harvest pseudocode COLLECT_RATE 0.01應0.05+漏labor鏈+gate has_outpost已改outpost_level>0·MED 3:world.md:143 FOOD_PER_PERSON_PER_TICK 0.1應FOOD_PER_PERSON_PER_DAY=0.8×day_fraction/team.md:180 satisfaction pop×2.4應0.8(原2.4配24×bug)/progress.md:24-45 lagging沒提勞力池merge+乙revert+CASE-B根·LOW:tick_parameters.md:53 COLLECT_RATE line-ref錯(:9應:16)+無LaborSystem常數(K_MFG/K_GATHER/LABOR_SCALE/LABOR_CADENCE/OVERFLOW_ITERS)·GAP:invariants.md無勞力池invariant(deterministic zero-RNG allocator+need-gated no-floor+carrying current/COLLECT_RATE/regen不碰=labor_system守憲級,建議加)·你§8優先,HIGH是misleading-false有空先修"
 ---
 

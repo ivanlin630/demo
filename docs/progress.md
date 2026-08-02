@@ -21,7 +21,15 @@
 【NOW】GUI 用戶親驗 ‖ 強制閘全立 ‖ 矩陣剩餘(人力/belief)  【queued】envoy 弧殘/cadence 殘餘/G3-D/玩家面
 ```
 
-## 📍 當前狀態（2026-08-01）——經濟第一次真流動（flow-fix at merge gate）+ 規模動態診斷
+## 📍 當前狀態（2026-08-03）——logistics 甲 merged + 有大有小 arc（CASE B → 統一勞力池 merged 待 §8）
+
+### 近期里程碑（2026-08-02~03）
+- **甲 SLICE B 領主分配政策 MERGED（4cc5da15）**：統一光譜（給免費/賣公道/賣高價/賣外拋棄）、一 argmax 一 convoy+貿易脊椎、人格 weigh、**零新市場**（genuine-value）。organic firing 待 §5（領主有餘糧條件）。
+- **★乙規模動態 = 誠實 pivot**：乙整併 util boost（ce369dca）**被用戶戳破＝arbitrary crank**（因不 fire 就 crank 分數讓贏＝腳本化）→ **完整 REVERT（08d10281）回 genuine baseline**。真根 measure 定案＝**CASE B：規模經濟 absent**（model 不獎勵 size 甚至反獎勵、4 維坐實 → 世界碎小團是正確湧現、整併低 util 是引擎正確）。→ 用戶裁 **size 該 matter**。
+- **★統一勞力池 MERGED（506aaa64）**：讓 size 在生產 genuinely matter（治 CASE B、genuine-value 非 crank）。勞力=稀缺資源、`LaborSystem` 共享 allocator、labor_mult 取代 sqrt residue、need-gated full-stop（無 floor）、size 靠 facility breadth。unit 7/7 綠 + R² anti-crank CLEAN。**★size 真 matter 待 measurer §8 真世界驗才宣稱**（同 SLICE A measured 精神）。詳 `project_size_matter_arc`。
+- **教訓**：util 必＝真實價值、禁 crank 遮 finding（`feedback_genuine_value_not_crank`）。
+
+## 📍 當前狀態（2026-08-01）——經濟第一次真流動（flow-fix merged）+ 規模動態診斷
 
 ### 現況
 - **決策模型統一（腦 means-end + 手 持守）DONE**。持守 arc RELEASED；team14 nuance 量測後溶解（非真卡死）。

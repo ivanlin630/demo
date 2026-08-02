@@ -306,6 +306,17 @@
 - **為何**（血證）：散件（auto-withdraw/provision-carry/harvest-carry/remote-tribute/糧橋）各做各的 = 後勤統一 arc 要收斂的病根；平行搬運路 = drift + 觀測盲點 + 難維護。
 - WHAT owner=game-design.md 後勤節；HOW/enforce=本檔 + [[project_logistics_unification]]。
 
+## ★ 統一勞力池（生產規模、用戶定 size-matter 2026-08-03，enforce 起步）
+
+**勞力＝有限稀缺資源**：所有生產（採集+每製造設施）吃**同一 per-tile 勞力池**（共址 `TAG_PRODUCE` 隊 pop 總和）。`LaborSystem` 單一共享 allocator、採集端+製造端共讀（統一非平行）。取代舊兩套免費 `sqrt(pop/5)` pop_mult residue。
+
+- **deterministic**：allocator sorted key + 純算術 + cascade 固定迭代上限 + **零 RNG** → 三跑 byte-identical。
+- **need-gated、無 scripted min-floor**：工位 need 權重走 `need_oracle`（self+supply+construction+trade、多級供給鏈傳播）；`need=0 → fill=0 → 產出 0`（不需求貨不產＝真經濟）。**禁加 min-floor 保底**（違憲法硬 gate）；buffer/戰略儲備走 genuine anticipatory need（need_oracle reserve target）非 floor。
+- **tile 生態承載獨立不碰**：`_collect_from_tile` 的 `current`(庫存遞減)/`COLLECT_RATE`/`regen`（resource:254-284）是承載真載體；勞力池**只改 `pop_mult→labor_mult` 那一支、庫存數學零改**。大隊採快→current 掉快→yield 降（人均遞減意圖）。
+- **size 靠 facility breadth**：單工位 `demand-cap(K×level)` saturate；size 優勢來自餵多/大 facility（資本投產能）非 raw pop 灌單工位。
+- **執行層非決策**：勞力池＝生產 rate、util/argmax 不碰。**非 crank**（產出 ∝ 真手數到 demand-cap、勞力真經濟投入、[[genuine-value 非 arbitrary boost]]）。
+- WHAT owner=game-design.md；HOW=`docs/superpowers/specs/2026-08-03-unified-labor-pool-HOW.md` + `project_size_matter_arc`。
+
 ## 飢餓 / 人口
 
 - 飢餓判定唯一來源 = 團糧（個人不另算飢餓）

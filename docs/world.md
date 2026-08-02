@@ -127,20 +127,25 @@ var last_encounter_result: Dictionary = {}
 
 ### 資源收集
 
-條件：`team.has_outpost == true`（透過 tile_id = pos.x × 1000 + pos.y 查詢）
+條件：所在格 `tile.outpost_level > 0`
 
 ```
+# _collect_from_tile（resource_system:254-284）
+labor_mult = LaborSystem.fill(tile, "gather:"+res) × LABOR_SCALE   # ★統一勞力池 need-gated；need=0→0 不採
 for res in tile.resources:
-    gain = tile.productivity × tile.resources[res] × 0.01
-    team.resources[res] += gain
+    gain = tile.productivity × tile.resources[res] × COLLECT_RATE(0.05) × day_fraction
+    gain × = outpost_mult × labor_mult × work_morale
+    team.resources[res] += gain           # (ore/成品 → tile public_storage 公庫)
 ```
 
-收集泛用化——tile 有哪些 key，team 就累積哪些 key（包含 ore_gold 等稀有資源）。
+- **★勞力鏈（2026-08-03）**：`labor_mult` = 統一勞力池分配（共址 PRODUCE pop 按 need 加權比例，取代舊 `sqrt(pop/5)`）；**need-gated full-stop**。詳 [[team.md]] 採集 + 勞力池 HOW spec。
+- **承載**：`current`(tile.resources[res] 隨採集遞減) × COLLECT_RATE + regen ＝生態承載真載體、勞力池不碰。
+- 收集泛用化——tile 有哪些 key，team 就累積哪些（含稀有資源）。
 
 ### 資源消耗
 
 ```
-food_needed = (population + minor_population) × 0.1  # FOOD_PER_PERSON_PER_TICK
+food_needed = total_pop × FOOD_PER_PERSON_PER_DAY(0.8) × day_fraction   # resource_system:3,126
 ```
 
 - 食物充足：扣除消耗，`needs["food"] = 1.0`
