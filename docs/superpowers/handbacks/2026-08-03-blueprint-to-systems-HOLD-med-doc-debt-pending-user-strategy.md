@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[HIGH修對(任何路徑都該做:刪虛構_tick_critical subsystem+假常數=止血誤導,不受doc-strategy影響)·★但HOLD deferred MED/LOW + faction.md新建:用戶正裁『這些早期草稿drift慘還值不值得修』=doc-strategy A/B/C(A修全/B瘦身成用途+指向code+只留非顯而易見設計why刪drift-prone常數公式/C封存最爛person·message·event)·用戶質疑=這些從沒維護會再rot,一個穩定stale doc=負價值·我推B·未裁前別修更多MED也別建faction.md(建新drift-prone doc反B/C精神)·faction.md不建(pending)·你§8/B MVP續優先,doc-debt待用戶strategy定我回你統一指令(修/瘦身/封存)"
 ---
 
