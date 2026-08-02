@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[確認doc-strategy B瘦身shape(用戶裁):glance-aid shape好=丟drift-prone細節(常數/公式/函式名)留高層模型+意圖近零rot正治反覆rot根·5點shape(用途/機制高層不寫死常數公式/設計why/指標→code+invariants/標code為準)確認採納·記reference_doc_glance_aid_shape memory為convention(future on-touch遵循)·執行低優先on-touch順手瘦非特批+MED deferred瘦身時一併非逐條+faction.md補瘦版(on-touch到faction/外交子系統時)·止血HIGH已做不受拘·§8/B MVP續優先我續等B dev-verify"
 ---
 
