@@ -8381,6 +8381,7 @@ func _test_collect_ore_to_storage() -> void:
 	state.world.tiles[0] = src_tile
 	var team := TeamData.new()
 	team.team_id = 0; team.tile_pos = Vector2i(0, 0); _seed_pop(team, 10)
+	team.tags.append(TeamData.TAG_PRODUCE)   # ★勞力池:採集隊須 PRODUCE-tagged（居民,入勞力池+need 算）
 	state.teams[0] = team
 	var rs := ResourceSystem.new()
 	rs.collect_resources(state, [0])
@@ -11444,9 +11445,10 @@ func _make_mfg_state(facility_levels: Dictionary) -> Array:
 	state.teams[0] = team
 	return [state, team, tile]
 
-# _make_mfg_state 預設參數下的本 tick 產量 q（pop=10、avg_skill=0）
+# _make_mfg_state 預設本 tick 產量 q（pop=10、avg_skill=0）。★勞力池:單一 mfg 工位 pool10≥demand(level×K_MFG)
+# →fill=1→labor_mult=LABOR_SCALE(1.0)、labor_share=1.0(單隊)→worker_rate=level×1.0×1.0×0.5（取代舊 pop_mult sqrt=size 靠 breadth 非單工位爆量）。
 func _mfg_q(level: int, rate: float) -> float:
-	var worker_rate: float = float(level) * clampf(sqrt(10.0 / 5.0), 0.5, 2.0) * 0.5
+	var worker_rate: float = float(level) * LaborSystem.LABOR_SCALE * 0.5
 	return worker_rate * rate
 
 func _test_workshop_recipes() -> void:
@@ -11499,8 +11501,9 @@ func _test_recipe_input_scaling() -> void:
 	var r := _make_mfg_state({ "manufacturing_level": 1 })
 	var state: WorldState = r[0]; var team: TeamData = r[1]; var tile: HexTileData = r[2]
 	team.resources = { "material": 100.0, "goods": 99.0, "arrows": 99.0 }
-	# worker_rate = level × pop_mult × (0.5 + avg_skill × 0.5)；無 named member → avg_skill 0
-	var worker_rate: float = 1.0 * clampf(sqrt(10.0 / 5.0), 0.5, 2.0) * 0.5
+	# worker_rate = level × labor_mult × labor_share × (0.5 + avg_skill × 0.5)；無 named member → avg_skill 0
+	# 統一勞力池：單 mfg 工位 demand=level×K_MFG 遠 < pool → fill=1.0 → labor_mult=LABOR_SCALE（非舊 sqrt depth）
+	var worker_rate: float = 1.0 * LaborSystem.LABOR_SCALE * 0.5
 	var q: float = worker_rate * ManufacturingSystem.TOOLS_RATE
 	var ms := ManufacturingSystem.new()
 	ms.tick_all(state, [0])
@@ -12268,6 +12271,13 @@ func _fief_make_tax_state(owner_id: int, collector_id: int, rate: float,
 	_seed_pop(ct, 5); ct.work_morale = 1.0; ct.tax_rate = rate
 	ct.tile_pos = Vector2i(0, 0)
 	ct.resources = { "material": 0.0 }
+	# 統一勞力池：gather:material 工位需 material need>0 才配勞力。給採集者真 need context——
+	# 親聞 material 買單（trade demand，感知鐵律 team_known 內、非過期、origin≠己）→ demand(material)>0
+	# → 單工位 fill=1.0、labor_share=1.0 → gain=5.0（=舊 pop5 pop_mult），稅拆分機制不變。
+	ct.tags.append(TeamData.TAG_PRODUCE)
+	var _dm := MessageData.new(); _dm.type = "order_buy"
+	_dm.params = { "res": "material", "qty": 50, "origin_team": 9, "expire_tick": 99999 }
+	state.team_known[collector_id] = [_dm]
 	state.teams[collector_id] = ct
 	return state
 
