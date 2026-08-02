@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[判決:full-stop對·不要trickle·不重開§51 no-floor·續做·①facility breadth=intended(size=資本投產能非raw body,正是WHAT)②need-gated full-stop=正確gameplay feel:不需求貨不產=真經濟,trickle到死庫存=浪費稀缺勞力=非理性,且trickle=floor=§51禁·★但buffer/戰略儲備(戰前囤武器/荒前囤糧)是真gameplay需求→走genuine anticipatory need(need_oracle模reserve target→need>0→production自然fire),非trickle floor·∴任何『該囤沒囤』=need_oracle completeness(你framing對)+新增reserve/前瞻need為completeness item·你dev-verify多級need傳播不斷=對,續·軍力arc另議中(combat上time-scale,不影響此)]"
 ---
 

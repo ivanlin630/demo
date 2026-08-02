@@ -996,6 +996,11 @@ consolidation 磁鐵 ship 後現況：`protector_rep` 只從**直接事件**長�
   - **③ try_proactive 慎重³**=公式legit(unit-proven陡,RNG案③),但**行為級分化撤回**:高端「0%」是127-樣本noise(569樣本0.70%不重現),低慎重<0.35 generator架構不可達(person_generator:17 NORMAL_LO=0.35無lo_v慎重archetype)→分化被opportunity稀缺+floor遮蔽。gate-ok立於公式非行為。殘:generator-diversity(低慎重原型)+藍圖陳述更正=vision backlog。
 - **54-triage tracker**:`docs/superpowers/54-triage.md`(A1安全收斂/A2 threat legit-until-oracle/B逐code/C=2皆legit)。
 
+### ⏳need_oracle 前瞻/reserve need — buffer 儲備 completeness（2026-08-03，統一勞力池 follow-up，非本 slice blocker）
+統一勞力池 → 生產 **need-gated full-stop**（need=0→產出 0、無 min-floor，blueprint §51 憲法確認）。∴ **buffer/戰略儲備（戰前囤武器、荒前囤糧）＝真 gameplay 需求，須走 genuine anticipatory need**（need_oracle 模 reserve target → need>0 → production 自然 fire），**非 trickle floor**（trickle=floor=§51 禁）。
+- **∴ 任何「該囤沒囤」＝need_oracle completeness item**（新增 reserve/前瞻 need：戰前威脅→武器 reserve、季節/荒前→糧 reserve），非加 floor 遮。
+- 本 slice dev-verify 先驗**多級 need 傳播不斷**（tools←iron←ore、供給鏈即時 need）；reserve/前瞻 need ＝**分開的 need_oracle 增強 follow-up**（若勞力池量測顯「該囤沒囤」缺口才觸發）。[[feedback_genuine_value_not_crank]]（reserve 走真 need 非 scripted floor）。
+
 ### ⏳convoy 協調 live-scan perf（2026-07-31，flow-fix follow-up，非 blocker）
 SLICE A flow-fix（convoy 協調散未填單）用 **live-scan in-flight guard**（`_deliver_candidates` 每次現掃 `state.teams` active convoy porters 聚合 per-order 在途認領）——correctness 對（結構免疫 registry 漏清幽靈認領，reviewer 鎖）+ flow measured 45→153=80%，**但 perf 成本真**：warring 49+ 隊每 cadence 呼 → O(teams×convoys)/call → single-seed 6mo warring >133min（首輪 GODOT_TIMEOUT=8000s 被殺、加大 28000s）。**follow-up 優化**：cache in-flight 認領 **per-cadence 算一次**（非 per-candidate per-team 重掃）→ 攤平 O(teams²×convoys)。非本輪 blocker（correctness/非凍優先驗）。連 [[reference_hob_perf_protocol]]。
 
