@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[R①-CORRECTED CLEAN→dispatch你做HOW·統一勞力池讓size在生產matter(真根CASE B規模經濟absent)·spec=docs/superpowers/specs/2026-08-03-unified-labor-production-scale-design.md·WHAT定案:①勞力池=共址PRODUCE隊人口總和(多隊相加),採集+所有製造設施共吃一池,取代兩套免費pop_mult(P1 manufacturing:82/P2 resource_system:63逐字相同labor residue)②各工位demand=規模×K,demand-cap=飽和上限③分配=need_oracle需求加權比例+demand-cap封頂+溢出按權重串聯(非greedy winner-take-all,人手少全線比例產)④頻率解耦:常駐labor-share較慢cadence重算+危機觸發,各活動照自己頻率乘當前share⑤守憲:deterministic三跑byte-identical/tile生態承載current/COLLECT_RATE/regen(_collect_from_tile:254-284)獨立不碰/大隊一格採食人均遞減改由food demand-cap+current遞減承載非sqrt/無toggle·★R①訂正:P5『sqrt=覓食承載』不成立,sqrt是labor residue該併池,真承載是current庫存機制·你做HOW:K值+demand曲線/重算cadence+危機觸發條件/labor-share存哪(team或tile state)/共享allocator seam位置/採集端manufacturing端如何共讀·你R②自審→實作→量測(大隊集團真產得多+不凍+determinism+守承載+人手少全線比例)·★memory訂正委託:feedback或project檔若記『sqrt(pop/5)=覓食承載不准動』需更正=labor efficiency非承載,真承載current/COLLECT_RATE/regen,意圖(大隊一格遞減)真但機制認定錯"
 ---
 
