@@ -344,8 +344,11 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if team.faction_id != -1 and c.help_need_severity > 0.0:
 		var _hf = state.factions.get(team.faction_id)
 		if _hf != null and _hf.leader_team_id != -1 and _hf.leader_team_id != team.team_id:
-			# 施助者=自家領主；位走 belief best_estimate（感知鐵律，無 belief→不知去哪求→不 applicable）。
+			# 施助者=自家領主；位 fresh belief 優先→無→★名冊 fallback（組織常識:知自家領主固定據點位，破 bootstrap 死結）。
 			var _hpos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, _hf.leader_team_id).get("tile_pos", Vector2i(-1, -1))
+			if _hpos == Vector2i(-1, -1):
+				_hpos = FactionAISystem._faction_roster_pos(state, team, _hf.leader_team_id)   # ★名冊 fallback（只位置零 live-state）
+				if _hpos != Vector2i(-1, -1) and Probe.enabled: Probe.bump("help.roster_fallback")
 			if _hpos != Vector2i(-1, -1):
 				c.help_target_id = _hf.leader_team_id
 				c.help_target_pos = _hpos
@@ -362,9 +365,16 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 				if _mt.faction_id != team.faction_id: continue
 				var _be: Dictionary = BeliefSystem.best_estimate(state, team.team_id, _mid)
 				var _mpos = _be.get("tile_pos", Vector2i(-1, -1))
-				if _mpos == Vector2i(-1, -1): continue   # 無 belief 位→不知去哪查（不瞎掃）
-				var _age: int = state.world.current_tick - int(_be.get("last_tick", 0))
-				var _st: float = clampf(float(_age) / maxf(_norm, 1.0), 0.0, 1.0)
+				var _st: float
+				if _mpos == Vector2i(-1, -1):
+					# ★名冊 fallback（破 bootstrap:從沒親聞子民→查其固定據點位）；無固定據點(移動子民)→跳。
+					_mpos = FactionAISystem._faction_roster_pos(state, team, _mid)
+					if _mpos == Vector2i(-1, -1): continue
+					_st = 1.0   # 從沒親聞=最陳舊=最該查（genuine：無資訊=max staleness）
+					if Probe.enabled: Probe.bump("scout.roster_fallback")
+				else:
+					var _age: int = state.world.current_tick - int(_be.get("last_tick", 0))
+					_st = clampf(float(_age) / maxf(_norm, 1.0), 0.0, 1.0)
 				if _st > c.scout_staleness:
 					c.scout_staleness = _st; c.scout_target_id = _mid; c.scout_target_pos = _mpos
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)

@@ -13,6 +13,9 @@ var occupied_by: int = -1
 var outpost_type: String = ""       # "" | "civilian" | "military"
 var outpost_level: int = 0          # 0=無, 1/2/3
 var outpost_owner: int = -1         # team_id
+# ★資訊網 bootstrap-fix 界⑤：隱匿據點旗（一行前瞻 stub、現恆 false=公告名冊；名冊 fallback filter not outpost_hidden）。
+# 對抗資訊戰層（parked）將來令首領設 true=秘密據點不上組織名冊。現不加功能。
+var outpost_hidden: bool = false
 var farming_level: int = 0          # 0–3，civilian only
 var manufacturing_level: int = 0    # 0–3，civilian only
 var stable_level: int = 0           # 0–3 馬廄（眷養 mounts，限平原）

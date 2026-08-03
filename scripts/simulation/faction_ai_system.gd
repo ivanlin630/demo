@@ -4086,6 +4086,25 @@ func _find_own_outpost(state: WorldState, team: TeamData) -> Vector2i:
 			return tile.tile_pos
 	return Vector2i(-1, -1)
 
+# ★資訊網 bootstrap-fix 名冊 fallback（組織常識：faction 成員天生知自家勢力固定據點位）。守 5 硬界：
+# ①只回 tile_pos 零 live-state（runway/resources/pop 不讀，content 仍靠信使物理送）②只固定 outpost（移動隊無→-1 落 belief）
+# ③同勢力 gate（他勢力/無 faction→-1）④MVP=當下 faction_id（分裂後 ex-faction→-1 零資訊；★非用戶 frozen-snapshot ④、known gap 未實作、non-blocking 現無 ex-faction 消費者）⑤隱匿據點旗（not outpost_hidden）。
+# 感知鐵律：自家 faction 結構 outpost 位=靜態組織常識，非 indexed 他隊 live 態；constitution_gate legit intra-faction 結構。
+static func _faction_roster_pos(state: WorldState, member: TeamData, target_id: int) -> Vector2i:
+	if member.faction_id == -1:
+		return Vector2i(-1, -1)   # ③無 faction 無名冊
+	var target: TeamData = state.teams.get(target_id)
+	if target == null or target.faction_id != member.faction_id:
+		return Vector2i(-1, -1)   # ③他勢力/④分裂後 ex-faction（當下 faction_id gate；known gap:非 frozen snapshot）
+	# ②只固定 outpost（inline _find_own_outpost 邏輯，static 免 new instance；移動 target 無 outpost→-1）
+	for tile_id in state.world.tiles:   # gate-ok: own-faction infra 位掃（同 _find_own_outpost 地理型；讀 static outpost_owner 結構非 indexed 他隊 live 態，③faction gate 已限同勢力，感知鐵律 legit）
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level > 0 and tile.outpost_owner == target_id:
+			if tile.outpost_hidden:
+				return Vector2i(-1, -1)   # ⑤隱匿據點不上名冊
+			return tile.tile_pos          # ①只位置零 live-state
+	return Vector2i(-1, -1)
+
 func _estimate_eta_to(state: WorldState, team: TeamData, target: Vector2i) -> int:
 	var path: Dictionary = PathSystem.find_path(state, team.tile_pos, target)
 	if path.path.is_empty(): return 9999999
