@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[★用戶點破結構假說命門:『大隊據點蓋滿沒』=structural-vs-pace真discriminator,measure-first必查·§8數據暗示大隊沒蓋滿(2/3seed facility 60天沒完工+早建seed只多第3線≠蓋滿全設施類型到頂)→『單outpost材料天花板』結構假說PREMATURE,大隊恐根本沒撞到那天花板,現限制可能=建設pace/窗口/決策非spread·★加進你measure-first investigation:量facility飽和度——大隊60天末蓋了幾座/幾級 vs 該outpost可容上限?撞材料天花板沒(建manufacturing但採集料供不上=真ceiling證據)?·分兩case回我:(a)沒蓋滿=限制pace/窗口→結構假說不成立,可能longer window或genuine建設pace(非crank)/(b)蓋滿+材料capped=結構確認→才輪spread·★HOLD accept-partial+『full parity歸spread』收法(我剛太快lean結構未驗、用戶拉回measure-first)·仍C硬否·anomaly照查·§5待此"
 ---
 
