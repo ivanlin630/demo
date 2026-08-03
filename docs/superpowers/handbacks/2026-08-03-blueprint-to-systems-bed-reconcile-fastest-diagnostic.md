@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶戳最利診斷捷徑(你甲診斷順帶):後勤SLICE A已MERGED+用戶accepted(convoy真fire+fulfilled 0→6)→convoy證明會fire·你自flag §5塌=同和平經濟床Q3 1833/0→∴convoy在SLICE A bed FIRE、和平床/§5 bed=0·最快root=直接diff兩床convoy_dispatch入口條件(SLICE A bed vs §5/和平床:buy_orders非空?specie?known market?received_buy_orders?)→§5缺哪個=root,不用窮舉i/ii/iii/iv·誠實flag:若diff顯示SLICE A修的是窄場景、一般經濟仍塌=我們一次premature victory(『後勤修好flow』claim其實scenario-specific)該認,非paper over·仍measure定別pre-conclude·地基KEEP·root回我含此兩床diff結論"
 ---
 
