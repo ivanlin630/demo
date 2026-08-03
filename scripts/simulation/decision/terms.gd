@@ -109,6 +109,12 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# （自家可造 outputs 的 worst-shortfall；聽到好賣 tools/goods 買單→pull 升→選生產產貨→進市場）。
 			if opt != "生產": return 0.0
 			return ctx.produce_pull
+		"idle_employ_value":
+			# ★B idle-labor→建設 genuine 激勵：雇用閒 PRODUCE 勞力於待建產能的真 need-weighted 期望產出。
+			# ★anti-crank：非 flat 建造 boost；ctx.idle_employ_value 全因子從 manufacturing 真公式反推（乙教訓）。
+			# ★guardrail：只加「建設」（MVP develop 路，禁漏 combat/survival/trade/move/social）。
+			if opt != "建設": return 0.0
+			return ctx.idle_employ_value
 		"ambition_drive":
 			# 階梯缺口 → 爬階靠「做東西」(生產/建設)，非貿易（貿易是賺錢非爬階）。
 			# 貿易移出 → 野心 magnitude 不再同步抬貿易，霸主(野心高)與商人(貪婪高)才分得開。
@@ -304,6 +310,7 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"buyfood":           return 1.0 if bool(v.get("_is_merchant", false)) else NON_MERCHANT_TRADE_FACTOR
 		"buymaterial":       return clampf(float(v.get("貪婪", 0.5)), 0.3, 1.0)   # 貪婪→建設/軍火投資傾向（穿人格秤，非 flat）
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
+		"idle_employ":       return 1.0   # ★B idle-labor：genuine 期望產出全在 eval/ctx（無人格 crank，中性 weight，乙教訓）
 		# §HOW-6 併入 weight：求生欲主 + 低野心（餓+不稱霸傾向抱團；好感在 resolver 分流秤，非此）。
 		"mergein":           return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4
 		# §HOW-8 吸納 weight：野心 + 仁慈(1-殘忍)/信義（殘忍者寧屠不吸；仁慈者傾納弱）。
