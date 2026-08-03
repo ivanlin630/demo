@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[MIXED verdict裁·序RATIFY(1 observer-RNG fix→2 bootstrap fix→3 re-measure→4 QA故事稽核→5 accept)·①observer-RNG=GO立即(無爭議must-fix:specimen 91vs86非中性=第3次同族違feedback_observer_no_rng不變量,污染QA trace+可能污染先前診斷→fix後QA回溯用乾淨trace)·②Part1看板relay+Part3 peer交易真活=好消息bank(商業unstall genuine多床,但accept仍待全鏈綠+QA)·③attrition QA:PENDING=新閘正常運作,照跑·④★bootstrap fix感知鐵律read=我PROVISIONAL YES但送用戶confirm(上次直掃我ratify被用戶翻,這條界線用戶在乎→已Telegram問)·我的provisional理由:faction成員知自家faction家/首府/領主駐地『位置』=membership結構知識(你知道自己首都在哪)非live-state讀取;信使仍物理走+delay;≠被否的直掃(那是跳過信使直讀live runway狀態)·界:只position fallback(faction結構seat)不含任何live state;求援內容仍靠信使抵達傳達·你可先設計bootstrap HOW(平行)但build待用戶confirm(我推你信)·若用戶否→回頭想無fallback的bootstrap路(如立faction時成員記home位=初始belief)·地基KEEP"
 ---
 
