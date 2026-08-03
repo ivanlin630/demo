@@ -108,6 +108,12 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# （供 QA 判②demand-responsive 後是否仍卡於 rank；純觀測零行為變、Probe-gated 無 RNG）。
 		if ctx.produce_pull > PRODUCE_WANT_THRESH and String(scored[0]["opt"]) != "生產":
 			Probe.bump("produce.wanted_not_chosen")
+		# ★B idle-labor→建設 觀測（全量 tap、§5#4）：閒 PRODUCE 勞力有 genuine 建產能價值→是否選建
+		# （QA/§8 判 idle→build 因果 + genuine 邊界）。純觀測、Probe-gated、零 RNG、零行為變。
+		if ctx.idle_employ_value > 0.0:
+			Probe.bump("idle_employ.value_positive")
+			if String(scored[0]["opt"]) == "建設":
+				Probe.bump("idle_employ.build_chosen_with_idle")
 		# 診斷(裁A)：zero-option 三類分流（coeff-lockout / base-util 競爭 / applicable 稀有）。純觀測。
 		var winner: Dictionary = scored[0]
 		for e in scored:

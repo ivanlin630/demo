@@ -38,7 +38,8 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_MANUFACTURE, "target": team.tile_pos},
 	},
 	"建設": {
-		"terms": [["settle_fit", "settle"], ["ambition_drive", "ambition"]],
+		# ★B idle-labor→建設：idle_employ_value=雇用閒 PRODUCE 勞力於待建產能真期望產出（只此 option、guardrail）。
+		"terms": [["settle_fit", "settle"], ["ambition_drive", "ambition"], ["idle_employ_value", "idle_employ"]],
 		"applicable": func(_ctx: DecisionContext) -> bool:
 			return true,   # bootstrap(無據點建新) + 升級(有據點) 皆候選 → 無據點生產隊不被困
 		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:

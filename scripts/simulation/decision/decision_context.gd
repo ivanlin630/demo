@@ -30,6 +30,9 @@ var feud_target_id: int = -1
 var has_own_outpost: bool = false
 var has_manufacturing_facility: bool = false   # S1：本格有製造設施+生產權（「生產」applicable precondition，A2 補缺）
 var produce_pull: float = 0.0   # ★製造 bootstrap 子根②：自家可造 outputs 的 belief demand-responsive worst-shortfall（0-1；替死常數 produce_need）
+# ★B idle-labor→建設 genuine 激勵（治 §8 領導軸 size-matter）：閒 PRODUCE 勞力（pool−Σ設施 demand-cap）=真浪費。
+var idle_labor: float = 0.0          # 超現產能吸納的閒 PRODUCE 勞力（手數；team 所在 tile；只 PRODUCE=軍隊天然不算）
+var idle_employ_value: float = 0.0   # 雇用閒勞力於待建 mfg 設施的真 need-weighted 期望產出（anti-crank：全因子從 manufacturing 真公式反推；只加建設 util）
 var is_merchant: bool = false
 var has_home_outpost: bool = false
 var current_task: String = ""   # ★GATE-A 二刀 touch0：team 自身 current_task（返家 hysteresis 用；自身欄非 god-view）
@@ -180,6 +183,27 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 					var hold: float = float(team.resources.get(out, 0)) + float(_ptile.public_storage.get(out, 0))   # 對齊 manufacturing:139 target
 					_best = maxf(_best, clampf((target - hold) / target, 0.0, 1.0))
 			c.produce_pull = _best
+	# ★B idle-labor→建設：閒 PRODUCE 勞力（pool−Σ workstation demand-cap）→ 雇用於待建產能=genuine 期望產出。
+	# 只在 team 站自家 outpost 才算（建設落自家據點）。idle=0 或無需求 → idle_employ_value=0（不亂建）。
+	c.idle_labor = 0.0
+	c.idle_employ_value = 0.0
+	var _btile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if _btile != null and _btile.outpost_owner == team.team_id and _btile.outpost_level > 0:
+		LaborSystem.ensure_fresh(state, _btile)   # lazy：直讀 labor_alloc（勞力池 cadence 已存、頻率解耦）
+		var _pool: float = LaborSystem.pool_of(state, _btile)
+		var _dcap: float = 0.0
+		for _lk in _btile.labor_alloc:
+			_dcap += float(_btile.labor_alloc[_lk].get("demand", 0.0))   # 現 active workstation 吸得掉的手數
+		c.idle_labor = maxf(_pool - _dcap, 0.0)
+		if c.idle_labor > 0.0:
+			# ★perf：_idle_employ_value 遞迴呼 NeedOracle（supply_chain/construction tile-scan）昂貴 → cadence-gate 快取
+			# （單寫者=本 owner 隊；LABOR_CADENCE 同勞力池，staleness 有界；決策每 tick 只 O(1) 讀）。
+			if state.world.current_tick < _btile.idle_employ_next_tick:
+				c.idle_employ_value = _btile.idle_employ_cached
+			else:
+				c.idle_employ_value = DecisionContext._idle_employ_value(state, team, _btile, c.idle_labor, c.leader_values)
+				_btile.idle_employ_cached = c.idle_employ_value
+				_btile.idle_employ_next_tick = state.world.current_tick + LaborSystem.LABOR_CADENCE
 	c.is_merchant = team.tags.has(TeamData.TAG_MERCHANT)
 	c.has_home_outpost = FactionAISystem.new()._find_own_outpost(state, team) != Vector2i(-1, -1)
 	c.current_task = team.current_task   # ★GATE-A 二刀 touch0：自身 current_task（返家 hysteresis；自身欄非 god-view）
@@ -459,6 +483,41 @@ static func _max_threat(state: WorldState, team: TeamData) -> float:
 		var t: float = ThreatAssessment.score(state, team, other)
 		if t > best: best = t
 	return clampf(best, 0.0, 1.0)
+
+# ★B idle-labor→建設 genuine 激勵值：雇用閒 PRODUCE 勞力於「待建 mfg 設施」的真 need-weighted 期望產出。
+# ★★anti-crank（reviewer 追蹤項、乙教訓）：禁發明 PER_HAND 常數——全因子從 manufacturing 真 worker_rate 反推：
+#   d_new              = 候選 facility 新增 demand = level × K_MFG（level=cur+1）
+#   facility_full_output = level × LABOR_SCALE × (0.5+avg_skill×0.5) × RATES[recipe]  # manufacturing:94,150 代 fill=1
+#   employ_value       = min(idle_labor/d_new, 1.0) × facility_full_output × need_weight(產物)
+# = 雇用閒勞力的真 need-weighted 期望產出。取所有可建 mfg 設施×配方 max（最值得雇用機會）。
+# idle=0 或無需求（need_weight=0）→ 0（不亂建）；self-limit（idle 隨 facility 吸收遞減）。
+static func _idle_employ_value(state: WorldState, team: TeamData, tile: HexTileData, idle_labor: float, lv: Dictionary) -> float:
+	var avg_skill: float = ManufacturingSystem.new()._avg_skill(state, team, "製造")
+	var best: float = 0.0
+	for facility in OutpostSystem.FACILITY_DEF:
+		var def: Dictionary = OutpostSystem.FACILITY_DEF[facility]
+		var lkey: String = String(def["current_level_key"])
+		if not ManufacturingSystem.RECIPE_GROUPS.has(lkey):
+			continue   # 只 mfg 設施（有配方）；gather/mint 非本 MVP
+		if not (tile.outpost_type in def.get("allowed_outpost", [])):
+			continue   # 該格能建型（civilian/military gate）
+		var cur: int = int(tile.get(lkey))
+		if cur >= 3:
+			continue   # 已滿級無新產能可建
+		var level: int = cur + 1
+		var d_new: float = float(level) * LaborSystem.K_MFG
+		if d_new <= 0.0:
+			continue
+		var fill_frac: float = minf(idle_labor / d_new, 1.0)   # 閒勞力能填新工位的比例（self-limit）
+		for recipe in ManufacturingSystem.RECIPE_GROUPS[lkey]:
+			var out: String = String(recipe["out"])
+			var need_weight: float = NeedOracle.need_keep(state, team, out, lv) + NeedOracle.demand(state, team, out, lv)
+			if need_weight <= 0.0:
+				continue   # 無需求產物 → 不建（genuine 非亂建）
+			var rate: float = float(ManufacturingSystem.RATES[recipe["rate_const"]])
+			var full_output: float = float(level) * LaborSystem.LABOR_SCALE * (0.5 + avg_skill * 0.5) * rate
+			best = maxf(best, fill_frac * full_output * need_weight)
+	return best
 
 # 自家糧倉 food：掃自有 outpost tile（owner==team_id）取 public_storage food。
 # own_granary_tile 只在 team 站在自家據點時回傳；返家補給 gate 須在「離家」時也讀得到家糧 →
