@@ -64,8 +64,10 @@ func tick_all(state: WorldState, team_ids: Array) -> void:
 		if not state.teams.has(tid):
 			continue
 		var team: TeamData = state.teams[tid]
-		if team.current_task != TeamData.TASK_MANUFACTURE:
-			continue
+		# ★de-patch(2026-08-03、[[feedback-patch-gate-first]])：移除 `current_task != TASK_MANUFACTURE → skip` 補丁閘
+		# ——它 pre-empt 已整合的勞力池（facility 從不 RUN、飽和 6.7%+材料消耗 0.000）。production 解耦成「共址 PRODUCE
+		# pop 自動工作 facility per 勞力配置」（執行層、如 gather 對稱），非 leader current_task 決策。保留 gate 自動：
+		# outpost(:下)/works_tile/PRODUCE resident(position+type) + need-gated(labor_mult fill=0→worker_rate=0) + materials。
 		var tile_id: int      = team.tile_pos.x * 1000 + team.tile_pos.y
 		var tile: HexTileData = state.world.tiles.get(tile_id)
 		if tile == null or tile.outpost_level == 0:
@@ -157,7 +159,10 @@ func _run_recipe_group(state: WorldState, team: TeamData, tile: HexTileData, lev
 			continue
 		for res in recipe["in"]:
 			ResourceBank.add(team, res, -(float(recipe["in"][res]) * q), "manufacture_input")     # 投入隨產量縮放（in = 每單位成品原料）；原無 clamp 保可負
+			Probe.add_amount("manufacture.input_consumed", float(recipe["in"][res]) * q)   # ★de-patch 驗:材料消耗總量（was 0.000=facility 從不 RUN）
 		_add_output(team, tile, recipe["out"], q)
+		Probe.bump("manufacture.fired")                                    # ★de-patch 驗:facility 真 RUN 次數（per-labor-allocation）
+		Probe.add_amount("manufacture.output." + String(recipe["out"]), q)  # ★de-patch 驗:各產物產出量
 		return recipe["out"]
 	return ""
 
