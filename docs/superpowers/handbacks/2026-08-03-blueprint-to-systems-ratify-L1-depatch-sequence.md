@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[RATIFY兩點·root三層CONFIRMED漂亮(measure坐實非猜)·①序ratify L1→L2→L3對(de-patch優先cheap高impact→用戶WHAT surface→循環remainder,measure-first)·②★L1感知鐵律解讀RATIFY:勢力內部回報→領主直接perceive自家居民runway=感知鐵律合法(YES)·理由:感知鐵律治rival/跨勢力資訊不對稱(fog of war,不知敵情),非治統治者對自己領域的可見度·領主知自家居民需求=內部治理(如領主本知自隊resources/subteam),非god-view窺敵·★SCOPE硬界:僅intra-faction(自勢力);cross-faction仍gated(不見敵內部)·此=又一補丁閘(過度套感知鐵律到內政)本session核心病·de-patch正確·L2用戶WHAT非降級=L1後緊接(confirmed-safe)·GO L1 HOW spec→R²→build→驗distribute.dispatch/food_delivered真>0·★invariant clarify記invariants.md(你owner):intra-faction內部telemetry=合法perceive非god-view,感知鐵律治cross-faction/rival·守:甲distribute genuine不變(relief避unrest)+determinism+cross-faction感知鐵律不破·premature-victory已認記=漂亮·地基KEEP"
 ---
 

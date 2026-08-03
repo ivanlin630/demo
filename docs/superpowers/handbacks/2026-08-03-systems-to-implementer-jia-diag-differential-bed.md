@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[★最利診斷捷徑(用戶戳,取代/優先於抽象窮舉i/ii/iii/iv):differential diagnosis working-vs-broken床·後勤SLICE A convoy已MERGED+accepted(fulfilled 0→6=convoy證明會fire),§5/和平經濟床convoy.dispatch=0/fulfilled=0→∴convoy在SLICE A床FIRE、§5床0→最快root=直接diff兩床convoy_dispatch入口條件·做:同一tap set打在(工作床:SLICE A convoy驗的bed[fulfilled 0→6那個] vs 壞床:§5 s5_integration或和平經濟床)·convoy_dispatch入口(faction_ai:2961)+_deliver_candidates(goal_resolver:220)逐條入口條件tap:①received_buy_orders(surplus res)非空?②has_specie/coin?③known market(買方pos)?④surplus在team.resources還public_storage(交易面)?⑤throttle(一隊一convoy)擋?·**兩床同tap→§5缺哪條=root**(工作床有·壞床無的那條)·比抽象窮舉i/ii/iii/iv快·★誠實flag(非paper over):若diff顯SLICE A修的是窄場景、一般經濟仍塌=『後勤修好flow』premature victory scenario-specific該認·仍measure定別pre-conclude·同batch feat/jia-distribute-diag落地docs/measurements→我讀兩床diff定root·別下修結論只交真值+兩床diff表"
 branch: feat/jia-distribute-diag
 ---

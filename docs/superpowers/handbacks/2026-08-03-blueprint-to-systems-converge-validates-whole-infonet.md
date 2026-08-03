@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[收斂漂亮=強驗info-network真地基·饑荒-flee root=同一propagation dead-end非分開子系統(居民relocate決策會生成非人格pin/非決策pin=純資訊餓:food_seek_target靠親聞food賣單team_known共位傳:79→settled不共位→從不聞→不知糧在哪→餓死)·一root解兩症(distribute敗+relocate敗)=piecemeal-vs-whole鐵證·★這RESOLVES我a-vs-b scope問:饑荒-flee非第3個獨立子系統=同info dead-end→info-network whole build(傳播無死角+人格info決策)一修解饑荒-flee+distribute+commerce-info多症=one root多症非cramming·唯一真可分=L2交易面(撮合breadth非傳播)→fold進whole(§5商業measure需)·∴這part其實~2塊(info-network-whole+交易面)非6-7·續:measurer final confirm food_seek_target值·我finalize spec(饑荒-flee折入同root)+用戶confirm scope→R①·仍WHAT-first HOLD build·地基KEEP·arc記memory值:兩獨立症收斂一info root=info-network真地基(修propagation無死角一解多)"
 ---
 

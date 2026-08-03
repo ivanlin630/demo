@@ -1,6 +1,6 @@
 # 資訊網（核心）— 資訊當通例的全面網、有意收集/傳播進思考層（WHAT / vision）
 
-status: DRAFT（用戶 shaping 定調 → 待用戶過目 + R① factcheck 前提 → 才鎖）
+status: USER-CONFIRMED scope（2026-08-04 用戶裁 (a) whole 一次量）→ pending R① factcheck 前提 → CLEAN 才鎖
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-03
 scope: **核心**（可靠傳播 + 有意收集/求援決策）；**不含對抗式資訊戰**（造謠/反情報/販賣情報 = parked `2026-07-19-*` notes、下一層）。
@@ -22,7 +22,7 @@ scope: **核心**（可靠傳播 + 有意收集/求援決策）；**不含對抗
 
 ## 併入 whole build（§5 commerce 需、用戶已定）
 - **交易面 broaden（L2）**：**任兩同格、雙方願意 → 成交**（貨源任一方任何持有 公/私/團庫、非只屋主公庫；willingness gate、非 store-type）。**★只賣真剩餘**：持有 − keep-line，**keep-line 含戰略儲備**（求生 + 前瞻:戰前武器/荒前糧/計畫料）。tile→teams bounded 非 O(N²)。
-- **饑荒-flee sanity（診斷併入）**：居民餓死前**該人格化求生逃**（照妖鏡#1 已人格化絕境逃）；診斷分「人格真選擇撐(罕見合理)vs 沒 flee 決策(bug)」→ 若 bug 一併修。
+- **饑荒-flee（診斷完、2026-08-03 收斂）**：★**非獨立子系統、同一 propagation dead-end root**——居民 relocate 找糧決策**會生成**（非人格 pin、非決策 pin）、但 `food_seek_target` 靠親聞 food 賣單（team_known 共位傳:79）→ settled 不共位 → **不知糧在哪 → not-applicable → 餓死**。**修傳播無死角即同修此症**（一 root 三症：distribute 敗 + relocate 敗 + commerce-info 敗）。piecemeal-vs-whole 鐵證。
 
 ## ★整系統優先（用戶定）
 **整張核心資訊網 + 交易面 做完當一個 whole、一次量**——**不切片**（feedback_whole_system_first：健全系統才有價值模擬結果、別 piecemeal 打地鼠）。§5 饑荒/商業 unstall = whole 建好後量出的 outcome。

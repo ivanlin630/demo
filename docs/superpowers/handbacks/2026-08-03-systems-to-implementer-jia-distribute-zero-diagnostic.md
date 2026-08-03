@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[measure-first診斷·甲distribute=0教科書條件真根(§5揭:領主food 3280餘糧+同faction resident瀕死unrest623+resident掛food買單14-18次卻distribute整輪0 fire)·measurer線索(不代因果):_distribute_candidates(goal_resolver:126-201)掃received_buy_orders(order_system:164-174讀team_known order_buy訊息非同faction全知),post_order emit_message傳播(order_system:30-34)但是否達領主team_known未tap·★分兩因(禁靜態斷言禁猜):(a)candidate從未生成(訊息未達領主team_known→buy_orders空→_distribute_candidates早退)vs(b)candidate生成但輸argmax(領主全程task=覓食從未distribute convoy)·做:一次性診斷tap(cheap dev-verify複用§5條件或小fixture領主surplus+同faction resident deficit掛food買單):①_distribute_candidates入口tap:領主received_buy_orders(food)非空?(訊息真達?)②若非空:distribute candidate真生成?util值vs argmax贏家(per-option util dump,分candidate-lost)③若空:訊息傳播鏈斷點(post_order emit→message propagate→領主team_known,哪環沒到)·純觀測tap零行為變零RNG·落地docs/measurements→我讀定(a)/(b)真根·★別下修結論只交真值(a訊息傳播修/b argmax util,天差)·隔離branch feat/jia-distribute-diag"
 branch: feat/jia-distribute-diag
 ---
