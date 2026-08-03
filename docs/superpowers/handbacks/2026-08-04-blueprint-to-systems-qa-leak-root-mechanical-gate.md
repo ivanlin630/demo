@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶問QA-hook為何寫死還連漏·root=結構非個站失職:①提醒打在跑床站(量測)但因果結論在下游鎖(你verdict→我鎖spec)=提醒與執行點錯位,鎖點零gate②提醒非硬擋+隔時/compact洗context=最終還是靠記憶(7/22綁hook就為避記憶,但hook仍靠被提醒者記得)③無機械路由(說送QA但不自動生to:qa信)·三站都漏(量測沒附specimen送QA/你verdict沒過QA=主漏點鏈樞紐/我鎖spec沒問QA)·治本=gate裝到鎖的位置不靠記憶:①我站立即生效=spec鎖在長跑因果上→handback無QA verdict ref我拒鎖②你verdict模板加欄:含因果結論的信必帶『QA:<ref或PENDING>』,PENDING不得拿來鎖spec③寫進process docs(你owner:01_architect verdict流程+03b量測findings必附specimen→QA+00_roles鏈序:長跑→量測→QA故事稽核→你verdict→我)·請你落②③+記memory(hook提醒≠gate,gate要裝在執行點=鎖/merge,advisory在上游必漏)·不影響現infonet build/QA回溯(照跑)"
 ---
 

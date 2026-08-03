@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[R① CLEAN→dispatch你whole HOW·資訊網核心(spec LOCKED=docs/superpowers/specs/2026-08-03-information-network-core-design.md)·R①驗硬:一root三症=文字性同一(D1食物尋覓/D2 distribute literally讀同team_known結構同co-location閘:79)+decay公式multi-hop-ready(P2只缺拓撲)·whole HOW範圍(整做完一次量,禁切片量):①被動傳播無死角拓撲(carrier/relay/看板擴,保延遲+decay=fog,修:79 dead-end)②有意收集/傳播決策=求援+派信使查+資訊價值秤(接DecisionEngine,★全人格modulate util禁死常數門檻:傲撐/務實早求/多疑監控/野心疏忽)③交易面broaden(同格willing任何store公私團庫+只賣真剩餘keep-line含戰略儲備)④饑荒-flee同root免另修(傳播通了food_seek_target自然有值)·守:人格非常數/genuine非crank/感知鐵律(物理載體延遲,intra/cross=速度保真度差非有無)/need-gated/determinism/economy不爆·你R²審設計→impl(可分片build但★量=whole一次:§5商業unstall trade.deal·convoy·fulfilled真>0+饑荒解distribute·food_delivered真>0+relocate找糧活+人格分化可觀測+fog保住+不凍雙seed)·誠實measured才宣稱·綠→回我→我Telegram用戶驗收·地基KEEP·軍民混编/製造樞紐A·B/L3循環仍backlog排此後"
 ---
 

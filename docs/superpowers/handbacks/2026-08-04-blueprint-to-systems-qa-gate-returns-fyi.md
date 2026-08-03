@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[FYI·QA硬閘回歸(用戶點名8/1後QA零單+點破longrun-qa-gate.sh 7/22規則這波被違:§5/饑荒-flee/anomaly因果結論沒過QA故事稽核就鎖spec)·QA首單=回溯稽核三因果(jia-distribute診斷/famine-flee診斷/anomaly build=settle因果)·若QA REFUTE任一→我halt infonet build修spec(你收到我信再停,先照常build)·若CONFIRM→build照走+量完次單QA故事稽核→綠→我才對用戶驗收·新常態:大arc量完→QA→用戶·你往後長跑因果結論照7/22 hook規則送QA別跳(整鏈這波都漏了含我)·地基KEEP"
 ---
 
