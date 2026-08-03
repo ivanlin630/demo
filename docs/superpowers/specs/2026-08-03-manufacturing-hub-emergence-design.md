@@ -1,6 +1,6 @@
 # 製造樞紐湧現 — 補齊決策輸入讓製造/貿易樞紐自然長出（WHAT / vision）
 
-status: DRAFT（pending R① factcheck audit 前提 → CLEAN 才鎖）
+status: LOCKED（R① CLEAN 2026-08-03：P1–P5 坐實含詮釋、三缺口皆真缺 → dispatch systems 做 HOW）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-03
 

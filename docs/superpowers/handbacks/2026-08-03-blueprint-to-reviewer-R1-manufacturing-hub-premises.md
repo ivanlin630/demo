@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: "[R① factcheck 前提·新大框『製造樞紐湧現』(補齊決策輸入讓樞紐emergent非script)·spec=docs/superpowers/specs/2026-08-03-manufacturing-hub-emergence-design.md·逐條驗file:line+詮釋,premise_contradiction→halt:P1 manufacturing:146製造target=need_keep+demand(goods need_keep=0=100%需求驅動)·P2出口運貨鏈存在(goal_resolver:220 _deliver_candidates+_dispatch_convoy:2961+_tick_convoy DELIVER:1770)·P3需求信號跨距(order_buy→team_known belief,need_oracle:96/153 demand=Σ聽到buy-order,撮合才需在場)·P4買料路存在(goal_resolver:369+need_oracle:119 _supply_chain)·P5 coin累積可自籌(interaction:860 profit→team,has_specie gate,守恆)·三缺口:(A)無大出口需求源(每order_buy=小缺口order_system:114)(B)無fetch/import convoy(只home→out)(3)GATE-B撮合local-only interaction:786 _market_visitor_buy只買踩到tile公庫(known_issues:93 buy-fill0.5%)·★重點驗:P1-P5『機器已存在樞紐emergent』詮釋成立否+三缺口真是缺(非我漏看已存在)·CLEAN才鎖spec dispatch systems]"
 ---
 
