@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[R① CLEAN→dispatch你做HOW·製造樞紐湧現(補齊genuine決策輸入讓樞紐emergent非script,治§8單大隊採掘非強權=加值型第二種大)·spec LOCKED=docs/superpowers/specs/2026-08-03-manufacturing-hub-emergence-design.md·核心原則:湧現非script(不建樞紐系統/不script某隊變工廠,補輸入讓引擎自秤import→manufacture→export)·audit定機器大半已在(mfg:146讀demand/goods 100%需求驅動/goal_resolver:220出口運貨鏈/goal_resolver:369+need_oracle:119買料路+供應鏈/coin自籌)→接既有seam非建新·三缺口你做HOW:(A)大出口需求源=genuine真需求實體往order_buy/team_known掛sizeable standing買單(mfg端不動需求自流,★genuine非憑空灌demand=crank)(B)取料/import convoy變體(鏡射_dispatch_convoy:foreign源載home卸,供應鏈material缺觸發,複用porter spine)(3)GATE-B去local化(interaction:786 _market_visitor_buy只買踩到tile→讓raw-in+goods-out跨距成交,一道seam同解,★守感知鐵律非god-view靠convoy物理橋接,known_issues:93全經濟瓶頸)·守:genuine非crank/unify非patch(接demand()/convoy/GATE-B seam禁平行)/need-gated full-stop/感知鐵律/determinism/economy不爆·你R②審設計→slice→build→★量湧現(樞紐該長處長不該長處不長+economy不爆+determinism)·誠實measured才宣稱·地基KEEP·§5合量仍可並行·軍民混编backlog排後"
 ---
 
