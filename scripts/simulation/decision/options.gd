@@ -353,6 +353,19 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_HERALD, "target": _hc.help_target_pos,
 				"order_target": _hc.help_target_id, "kind": "help", "delegate": true},
 	},
+	# ★資訊網 S-scout：偵察（dispatch scout）→ 派斥候子隊查自家子民 stale belief、帶 fresh need 訊回領主 team_known。
+	# applicable=有 info-gap（子民 belief 陳舊）+ 在乎（統領人格 util）、非「沉默>N」死常數。
+	"偵察": {
+		"terms": [["scout_drive", "scout"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return not ctx.is_subteam and ctx.scout_target_id != -1 and ctx.scout_staleness > 0.0,
+		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:
+			var _sc: DecisionContext = DecisionContext.gather(_state, team)
+			if _sc.scout_target_id == -1:
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			return {"task": TeamData.TASK_SCOUT, "target": _sc.scout_target_pos,
+				"order_target": _sc.scout_target_id, "kind": "scout", "delegate": true},
+	},
 	# 野心階梯溶入（序3）：FORCE-archetype 累積階練兵（原 rung_task ACCUMULATE×FORCE→TASK_TRAIN）。
 	# archetype/rung 當 weight（ambient_train_drive）驅動，非查表塞 task。
 	"訓練": {

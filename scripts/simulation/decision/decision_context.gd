@@ -72,6 +72,11 @@ var food_seek_target: Vector2i = Vector2i(-1, -1)
 var help_need_severity: float = 0.0   # 未滿足 need 嚴重度 0-1（食糧缺口為主；genuine base 給 help util）
 var help_target_id: int = -1          # 潛在施助者 team（自家 faction 領主，belief-pos 已知可達）；-1=無對象
 var help_target_pos: Vector2i = Vector2i(-1, -1)   # 施助者 belief last-seen 位（herald travel 目標；感知鐵律）
+# ★資訊網 S-scout（偵察→TASK_SCOUT）：對在乎的事有 stale/absent belief（自家子民久沒訊息）+ 可負擔斥候。
+# applicable=有 info-gap+在乎（非「沉默>N」死常數）；util base=info_staleness×info_value 人格 modulate。
+var scout_staleness: float = 0.0        # 最在乎實體的 belief 陳舊度 0-1（age/norm；genuine info_value base）
+var scout_target_id: int = -1           # 待查實體（自家 faction 子民 belief 最陳舊者）；-1=無 info-gap
+var scout_target_pos: Vector2i = Vector2i(-1, -1)   # 待查實體 belief last-seen 位（scout travel 目標）
 # Fix A-2 v2（rejection-learning）：有可達且未近期被拒的 host 才把併入當出路——破「餓世界恆拒→重選併入→又拒」loop。
 # host 鏡射 to_task:200 優先序（strong_neighbor else consolidate，非 OR）；cooldown 過期可再試（非永久黑名單）。
 var has_acceptable_join_host: bool = false
@@ -344,6 +349,24 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			if _hpos != Vector2i(-1, -1):
 				c.help_target_id = _hf.leader_team_id
 				c.help_target_pos = _hpos
+	# ★資訊網 S-scout：領主對自家子民 belief 陳舊 → 派斥候查（active 版求援；症1/famine 領主主動探子民 need）。
+	# staleness = belief age / norm（錨 BeliefSystem.SCOUT_TIMEOUT，非死常數）；target=最陳舊且知位的子民。
+	c.scout_staleness = 0.0; c.scout_target_id = -1; c.scout_target_pos = Vector2i(-1, -1)
+	if team.faction_id != -1:
+		var _sf = state.factions.get(team.faction_id)
+		if _sf != null and _sf.leader_team_id == team.team_id:   # 只領主探子民（在乎自家人）
+			var _norm: float = float(BeliefSystem.SCOUT_TIMEOUT)
+			for _mid in state.teams:
+				if _mid == team.team_id: continue
+				var _mt: TeamData = state.teams[_mid]
+				if _mt.faction_id != team.faction_id: continue
+				var _be: Dictionary = BeliefSystem.best_estimate(state, team.team_id, _mid)
+				var _mpos = _be.get("tile_pos", Vector2i(-1, -1))
+				if _mpos == Vector2i(-1, -1): continue   # 無 belief 位→不知去哪查（不瞎掃）
+				var _age: int = state.world.current_tick - int(_be.get("last_tick", 0))
+				var _st: float = clampf(float(_age) / maxf(_norm, 1.0), 0.0, 1.0)
+				if _st > c.scout_staleness:
+					c.scout_staleness = _st; c.scout_target_id = _mid; c.scout_target_pos = _mpos
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)
 	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:

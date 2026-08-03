@@ -1481,6 +1481,56 @@ func _tick_help_herald(state: WorldState, herald: TeamData, merge_queue: Array) 
 	if predicted != Vector2i(-1, -1):
 		herald.move_target = predicted
 
+# ★資訊網 S-scout：派斥候子隊查子民 stale belief（reuse envoy 範式；task_reason=info_scout 專屬 tick）。
+func _dispatch_info_scout(state: WorldState, mother: TeamData, td: Dictionary) -> bool:
+	var target_pos: Vector2i = td.get("target", Vector2i(-1, -1))
+	var target_id: int = int(td.get("order_target", -1))
+	if target_pos == Vector2i(-1, -1) or not state.teams.has(target_id):
+		return false
+	if mother.population <= 1:
+		return false
+	var sub_sys := SubteamSystem.new()
+	var sub_leader: int = sub_sys._pick_subteam_leader(state, mother, TeamData.TASK_SCOUT)
+	if sub_leader == -1 or sub_leader == mother.leader_id:
+		return false
+	var dist: int = _hex_dist(mother.tile_pos, target_pos)
+	var scout_id: int = sub_sys.dispatch(state, mother.team_id, sub_leader, ENVOY_POP,
+		TeamData.TASK_SCOUT, target_pos, target_id, "")
+	if scout_id == -1:
+		return false
+	var scout: TeamData = state.teams[scout_id]
+	scout.task_reason = "info_scout"   # ★區別 conquest "scout"；_evaluate_subteam 專屬 tick
+	scout.task_start_tick = state.world.current_tick
+	scout.task_extra_data = {"scout_mother": mother.team_id, "timeout": _founding_timeout(dist)}
+	_equip_envoy_mounts(state, mother, scout)
+	Probe.bump("scout.dispatched")
+	return true
+
+# ★資訊網 S-scout：斥候 tick——朝子民 belief-pos 走；co-located→查得子民 need（食糧買單）帶回領主 team_known
+# + 刷新領主對子民 belief（firsthand fresh）→ 領主 received_buy_orders 得子民 need（active 版症1 解）。timeout→recall。
+func _tick_info_scout(state: WorldState, scout: TeamData, merge_queue: Array) -> void:
+	var mother: TeamData = state.teams.get(scout.parent_team_id)
+	if mother == null:
+		_recall_envoy(state, scout); return
+	var target_id: int = scout.order_target_id
+	var target: TeamData = state.teams.get(target_id)
+	if target == null:
+		Probe.bump("scout.target_dead"); _recall_envoy(state, scout); return
+	var budget: int = int(scout.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+	if state.world.current_tick - scout.task_start_tick > budget:
+		Probe.bump("scout.timeout"); _recall_envoy(state, scout); return
+	# 抵達子民（co-located）→ 查得 need + 刷新領主 belief → recall。
+	if scout.tile_pos == target.tile_pos:
+		# 刷新領主對子民 belief（firsthand fresh：scout 是領主 agent 親見）
+		BeliefSystem.record_claim(state, mother.team_id, target_id, mother.team_id, "親見",
+			{"tile_pos": target.tile_pos}, 1.0, false)
+		_deposit_help_need(state, target_id, mother)   # 帶子民 food 買單回領主 team_known（同 herald deposit 機制）
+		Probe.bump("scout.info_returned")
+		_recall_envoy(state, scout); return
+	var predicted: Vector2i = PathSystem.predict_intercept(state, scout, target)
+	if predicted != Vector2i(-1, -1):
+		scout.move_target = predicted
+
 # ★資訊網 S-herald：把 need-origin 隊的食糧買單 deposit 進施助者 team_known（honest firsthand intra-faction，
 # 感知鐵律：信使物理送達才傳；無買單→送最近 runway 缺口 proxy 訊）。→ 領主 received_buy_orders 得知子民 need。
 func _deposit_help_need(state: WorldState, origin_id: int, helper: TeamData) -> void:
@@ -1801,6 +1851,10 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	# ★資訊網 S-herald：求援信使子隊（belief-pos travel→抵達 deposit need 訊→recall）。
 	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "help_call":
 		_tick_help_herald(state, sub, merge_queue)
+		return
+	# ★資訊網 S-scout：偵察斥候子隊（belief-pos travel→抵達查子民 need 帶回領主→recall）。
+	if sub.current_task == TeamData.TASK_SCOUT and sub.task_reason == "info_scout":
+		_tick_info_scout(state, sub, merge_queue)
 		return
 	if sub.current_task == TeamData.TASK_BUILD:
 		return  # C: 施工中（建設），不打斷、不召回
@@ -3009,6 +3063,9 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	# ★資訊網 S-herald：求援 → 派 HERALD 子隊帶 need 訊到施助者（belief-pos travel、抵達 deposit 進目標 team_known）。
 	if String(td.get("kind", "")) == "help":
 		return _dispatch_help_herald(state, team, td)
+	# ★資訊網 S-scout：偵察 → 派 SCOUT 子隊查子民、帶 fresh need 訊回領主 team_known（active 版；領主主動探）。
+	if String(td.get("kind", "")) == "scout":
+		return _dispatch_info_scout(state, team, td)
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
 		return _dispatch_builder(state, team, target, String(td["build_type"]), 1)

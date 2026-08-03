@@ -58,6 +58,7 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
 # ★資訊網 S-herald：野心(傲氣 proxy)抑制求援傾向的係數（modulation coeff、非 fire-crank；高野心=獨立少開口）。
 const HELP_PRIDE_SUPPRESS: float = 0.6   # TEST VALUE — 野心 1.0→求援傾向 ×0.4（傲慢撐；野心 0→不抑制）。rationale:傲vs務實分化強度
+const SCOUT_AMBITION_NEGLECT: float = 0.5   # TEST VALUE — 野心 1.0→偵察傾向 ×0.5（擴張疏忽內政）。modulation coeff 非 fire-crank
 const ABSORB_DRIVE_BASE: float = 1.0         # TEST VALUE — T3 正規化：吸納量級→[0,1]（1.2→1.0）
 const REP_MAGNET_W: float = 1.0              # TEST VALUE — 名聲磁鐵 §3 投靠加成權重（高名聲 host 翻贏逃）
 # ★REVERT crank(2026-08-02)：乙 boost 常數(ABSORB_DRIVE_BASE_V2/AMB_GAIN + JOIN_PROTECT_GAIN/JOIN_DRIVE_CAP)全刪——
@@ -128,6 +129,14 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			var _hon: float = float(ctx.leader_values.get("義氣", 0.5))       # proxy 依附/信任本勢力
 			var _pmult: float = (0.4 + _srv * 0.6) * (1.0 - _amb * HELP_PRIDE_SUPPRESS) * (0.5 + _hon * 0.5)
 			return ctx.help_need_severity * clampf(_pmult, 0.0, 1.5)
+		"scout_drive":
+			# ★資訊網 S-scout 偵察 util（genuine + 人格）：base=真 info_staleness（belief age/norm、DERIVED 非死常數）
+			# ×人格 MODULATE：統領/責任↑盯子民 / 野心↑擴張疏忽內政↓。→ per-option dump 顯 關切型多查 vs 野心型少查。
+			if opt != "偵察": return 0.0
+			var _cmd: float = float(ctx.leader_values.get("統領", 0.5))    # 責任/關切 proxy
+			var _amb2: float = float(ctx.leader_values.get("野心", 0.5))    # 擴張疏忽內政
+			var _smult: float = (0.4 + _cmd * 0.6) * (1.0 - _amb2 * SCOUT_AMBITION_NEGLECT)
+			return ctx.scout_staleness * clampf(_smult, 0.0, 1.5)
 		"ambition_drive":
 			# 階梯缺口 → 爬階靠「做東西」(生產/建設)，非貿易（貿易是賺錢非爬階）。
 			# 貿易移出 → 野心 magnitude 不再同步抬貿易，霸主(野心高)與商人(貪婪高)才分得開。
