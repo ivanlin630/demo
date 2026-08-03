@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²製造樞紐HOW(blueprint WHAT LOCKED R①CLEAN)·spec docs/superpowers/specs/2026-08-03-manufacturing-hub-HOW.md·湧現非script補genuine輸入讓引擎自秤import→manufacture→export=加值型第二種大·三缺口接既有seam非建新·SEAM0=need_oracle:96 demand()折order_buy→mfg:146·(A)genuine出口需求源=populations消耗goods upkeep(goods need_keep=0現無consumer→加消耗∝size→shortfall走order_system:114 post_order買單→demand()大→樞紐)(B)import convoy變體鏡射_dispatch_convoy(material供應鏈缺+聽foreign order_sell→OUTBOUND→BUY→RETURN→deposit home複用porter spine)(C)買方de-local=import convoy BUY物理travel到foreign seller tile _market_visitor_buy=convoy物理橋接對稱賣方DELIVER,B+C一道seam·★審點:①(A)genuine非循環crank?(goods真消耗populations真用tools/weapon upkeep,量級真消耗率×真pop非憑空灌,還是invent consumer餵hub=circular?——最需你戳)②湧現非script(補輸入非建樞紐系統/非script某隊變工廠)③unify非patch(接demand()/convoy/GATE-B禁平行,valuation統一別重引TARGET_PER_POP)④感知鐵律(撮合position-gated+需求belief+跨距convoy物理非god-view range-match)⑤need-gated full-stop守§51⑥B import phase鏡射_dispatch_convoy乾淨?·CLEAN→dispatch隔離(可分slice A→B→C)→dev-verify→emergence量測樞紐該長長"
 ---
 

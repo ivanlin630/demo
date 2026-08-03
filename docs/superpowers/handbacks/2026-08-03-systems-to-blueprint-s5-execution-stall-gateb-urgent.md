@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★§5一次合量verdict誠實:沙盤『部分』活(勞力池④+全貌⑥活)但merged地基整合EXECUTION塌陷=生產維地基整合真跑收官宣稱還不到能講·①甲distribute=0教科書條件(領主food 3280餘糧+同faction resident瀕死pop10→2 unrest 623從未賑濟+resident重複掛food買單14-18次)卻整輪0 fire·⑤economy trade.deal=0/convoy.dispatch=0/order_fulfilled=0(order_placed 426-476)世界級靜止·③facility fire=0(seed-dependent同mfg-depatch輪)·②組織軸ratio 0.498 confound重(subteam churn+famine)不當乾淨反例·determinism byte-identical+不凍(tick loop活但商業靜止)·★★關鍵洞見:⑤economy塌陷=KNOWN舊gap(order_placed大/fulfilled=0同和平經濟床Q3 1833/0 execution-layer塌陷非de-patch新引入)=製造樞紐GAP C(GATE-B de-local)正targeting全經濟老瓶頸→§5驗證+urgent-ize GAP C(拆GATE-B全經濟受惠+解甲distribute下游)·但甲distribute=0或另有訊息傳播根(received_buy_orders讀team_known非全知,post_order emit是否達領主未tap)需measure-first分candidate-never-generated vs lost-argmax·★序建議:製造樞紐GAP C(GATE-B)升高優先(unstall全經濟關鍵)+並行measure甲distribute=0真根·地基機制對但建於broken execution層(GATE-B)=決策fire卻不執行本session核心病execution層重現·你裁優先序"
 ---
 
