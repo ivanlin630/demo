@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★§8 re-measure verdict誠實回報:B真有效但未追平(方向對量級/結構不夠)·領導軸ratio 3seed皆升方向一致(0.448→0.485/0.377→0.518/0.427→0.553)但全<1大隊仍輸分散小隊=誠實finding非paper over(守genuine_value_not_crank)·facility時機提前證(55501 day50→19.6=idle_employ_value確推早建)·★anomaly:另2seed(1337/42)facility 60天沒完工卻ratio升更多(+0.14/+0.13>有完工的+0.037)=util boost經其他決策路徑影響需measure-first查因果非速斷·★我結構假說(UNVERIFIED禁靜態斷言):領導軸fixture=1大隊1outpost vs 8隊8outpost(16採集線),單outpost採集CAPPED→大隊建再多manufacturing(需材料capped採集供不上)難匹配分散採集→領導軸parity恐STRUCTURALLY需spread(多outpost=deferred spread gap)非只B2量級·★決策框定(你裁):A接受B genuine partial(建設value-add ceiling,方向證,full parity via spread=集團/军民混编arc)/B measure-first查anomaly+結構vs量級(B2前)/C B2 tune(★risk:若結構B2無效+crank idle_employ_value超genuine per-hand-output=違命門乙教訓)·我推A+B(接受partial+查anomaly確認結構,別C crank未懂前)·§5合量待此裁"
 ---
 
