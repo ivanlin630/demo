@@ -769,6 +769,11 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 				dealt = true
 	if not saw_live_order:
 		Probe.bump("trade.market_bail.no_board_order")   # 板上無活單（29 bail 因可觀測）
+	# ★資訊網 S-trade broaden（Part 3）：訪客也與同格「非 owner」隊 peer 交易——任何 store（公/私/團庫）、
+	# willingness 由 trade primitives 自 gate（無互利不成）、keep-line=TradeValuation.reserve 既有（不空掏戰略/活命）。
+	# owner 走 board（上方）不在此 peer pass=不雙 fire。tile→teams bounded（單格掃、非 O(N²)）。
+	if _market_peer_trade(state, visitor, tile, owner_id):
+		dealt = true
 	if dealt:
 		print("[Market@%s] Team%d ↔ outpost owner Team%d 成交" % [str(tile.tile_pos), visitor.team_id, owner_id])
 		Probe.bump("trade.deal")
@@ -779,6 +784,31 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 			Probe.bump("trade.deal_resident")
 	elif Probe.enabled and visitor.current_task == TeamData.TASK_TRADE:
 		Probe.bump("trade.meet_nodeal")
+	return dealt
+
+# ★資訊網 S-trade broaden：訪客與同格「非 owner」隊 peer 交易（reuse 既有 guarded primitives
+# _attempt_trade_direction+_attempt_barter：任何 store 私產/公庫、keep-line=reserve 不空掏、willingness 自 gate 無互利不成）。
+# owner 走 board 不在此=不雙 fire。同格才在場（感知鐵律）。回 dealt（coin-delta proxy、鏡射 _resolve_market）。
+func _market_peer_trade(state: WorldState, visitor: TeamData, tile: HexTileData, owner_id: int) -> bool:
+	var dealt: bool = false
+	for pid in state.teams:
+		if pid == visitor.team_id or pid == owner_id:
+			continue   # 自己/owner（board 已處理）跳
+		var peer: TeamData = state.teams[pid]
+		if peer.tile_pos != tile.tile_pos:
+			continue   # 非同格=不在場（感知鐵律；tile→teams 過濾，非 O(N²) 每 tick 只 arrived 訪客呼）
+		var v_coin_before: float = float(visitor.resources.get("coin", 0))
+		var v_before: Dictionary = _snapshot_order_res(visitor)
+		var p_before: Dictionary = _snapshot_order_res(peer)
+		_attempt_trade_direction(state, visitor, peer)   # keep-line=reserve 內守（不空掏戰略/活命）
+		_attempt_trade_direction(state, peer, visitor)
+		_attempt_barter(state, visitor, peer)
+		var _os := OrderSystem.new()
+		_os.settle_orders(visitor, v_before, state.world.current_tick)
+		_os.settle_orders(peer, p_before, state.world.current_tick)
+		if absf(float(visitor.resources.get("coin", 0)) - v_coin_before) > 0.001:
+			dealt = true
+			Probe.bump("trade.peer_deal")   # ★S-trade 觀測：同格 peer 交易成交（交易面 broaden 真 fire）
 	return dealt
 
 # 訪客買：向 owner sell 單 + public_storage stock 買 → 扣 storage、visitor.coin → owner.coin。
