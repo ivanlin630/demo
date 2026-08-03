@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[§8三驗 mfg de-patch(真根fix merged 2c25a82c)·領導軸ratio真追平?+economy衝擊?+blast-radius全經濟·真根=mfg:67 current_task-gate補丁閘pre-empt勞力池(facility從不RUN,飽和度6.7%材料消耗0.000),de-patch移閘→PRODUCE隊在outpost就跑,大隊facility真跑用掉idle勞力真產·三驗(main 2c25a82c,★禁原地checkout,需settled producer場景非warring):①★領導軸ratio(同§8 fixture 1大隊pop40 vs 8×pop5分散,B前0.38-0.45→B後0.485-0.553→de-patch後?接近parity 1.0?)——facility真跑後大隊idle勞力轉真manufacturing產出②★economy衝擊before(de-patch前)/after對比:production/coin/資源水位——升(intent facility真跑)但非爆量崩,need-gated守(satisfied經濟不過度生產)③守憲:大隊一格採食人均遞減+游牧餓+人手少全線比例+determinism三跑byte-identical+不凍雙seed·★誠實measured才宣稱:若領導軸追平=size真matter達成(甲乙丙全arc收官);若沒追平=再挖真因非crank(可能還有下游閘);若economy爆=de-patch需care(need-gated漏?)·可複用§8 fixture+manufacture.fired/output tap·落地docs/measurements標path→我+blueprint定size真matter達成"
 ---
 

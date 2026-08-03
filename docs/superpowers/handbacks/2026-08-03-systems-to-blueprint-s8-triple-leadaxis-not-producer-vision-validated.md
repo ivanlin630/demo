@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★§8三驗verdict誠實:領導軸ratio沒追平(0.485→0.486幾乎沒動3seed),size真matter未達成非crank·de-patch機制確實work(facility真RUN 94次材料0→非0)但經濟量級微小1.7%——真根更深:manufacturing產量need-gated(need_keep+demand=自用+貿易缺口天生小)永遠追不上bulk gather總量2192.9,大隊extra勞力單outpost無productive outlet(gather2線capped+manufacture need-capped)·economy非爆(need-gated守1.7%溫和)+determinism byte-identical·★關鍵洞見正中你vision:單大隊生產parity靠manufacturing追不上=驗證大隊=軍事/集團=生產,單大隊本非生產強權(正確湧現非fail),生產規模靠集團(組織軸ratio~1 works),單大隊size-advantage=軍事(军民混编arc)·de-patch=genuine general fix(facility真跑=好KEEP不論領導軸,補丁閘該移)·★決策(WHAT你+用戶):A接受領導軸生產gap=正確湧現(生產維arc收官:集團生產works+de-patch+甲分配+勞力池,領導軸=軍事歸军民混编)/B推領導軸生產(trade-driven mfg demand拉/spread=deferred)·我lean A(vision驗證+誠實避免over-engineer+C crank硬否)·measurer方法論誠實揭露(nomad推論/food度量/人均confound)不改headline·§5合量待此裁"
 ---
 
