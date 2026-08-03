@@ -1433,6 +1433,82 @@ func _recall_envoy(state: WorldState, envoy: TeamData) -> void:
 		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（正常 AI 接手，非 zombie）
 		state.remove_tag(envoy, TeamData.TAG_SUBTEAM, "envoy_orphan")
 
+# ★資訊網 S-herald：派求援信使子隊（reuse envoy 範式：spare named 當信使、belief-pos travel、母隊留守）。
+# 帶母隊 need（食糧買單）ref；抵施助者→deposit need 訊進其 team_known（症1 領主學不到子民餓的通例解）。
+func _dispatch_help_herald(state: WorldState, mother: TeamData, td: Dictionary) -> bool:
+	var target_pos: Vector2i = td.get("target", Vector2i(-1, -1))
+	var target_id: int = int(td.get("order_target", -1))
+	if target_pos == Vector2i(-1, -1) or not state.teams.has(target_id):
+		return false
+	if mother.population <= 1:
+		return false   # 不掏空母隊
+	var sub_sys := SubteamSystem.new()
+	var sub_leader: int = sub_sys._pick_subteam_leader(state, mother, TeamData.TASK_HERALD)
+	if sub_leader == -1 or sub_leader == mother.leader_id:
+		return false   # 無 spare named → 無法派信使（稀有 by construction）
+	var dist: int = _hex_dist(mother.tile_pos, target_pos)
+	var envoy_id: int = sub_sys.dispatch(state, mother.team_id, sub_leader, ENVOY_POP,
+		TeamData.TASK_HERALD, target_pos, target_id, "")
+	if envoy_id == -1:
+		return false
+	var herald: TeamData = state.teams[envoy_id]
+	herald.task_reason = "help_call"   # ★區別 envoy_proposal；_evaluate_subteam 專屬 tick
+	herald.task_start_tick = state.world.current_tick
+	herald.task_extra_data = {"help_origin": mother.team_id, "timeout": _founding_timeout(dist)}
+	_equip_envoy_mounts(state, mother, herald)
+	Probe.bump("help.herald_dispatched")
+	return true
+
+# ★資訊網 S-herald：求援信使 tick——朝施助者 belief-pos 走；co-located→deposit 母隊 need（食糧買單）訊進
+# 施助者 team_known（honest intra-faction）→ 領主經傳到的 belief 得知子民餓 → distribute 匹配。timeout/target 亡→recall。
+func _tick_help_herald(state: WorldState, herald: TeamData, merge_queue: Array) -> void:
+	if state.teams.get(herald.parent_team_id) == null:
+		_recall_envoy(state, herald); return
+	var target_id: int = herald.order_target_id
+	var target: TeamData = state.teams.get(target_id)
+	if target == null:
+		Probe.bump("help.target_dead"); _recall_envoy(state, herald); return
+	var budget: int = int(herald.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+	if state.world.current_tick - herald.task_start_tick > budget:
+		Probe.bump("help.timeout"); _recall_envoy(state, herald); return
+	# 抵達施助者（co-located）→ deposit need 訊 → 完成 recall。
+	if herald.tile_pos == target.tile_pos:
+		_deposit_help_need(state, int(herald.task_extra_data.get("help_origin", -1)), target)
+		Probe.bump("help.delivered")
+		_recall_envoy(state, herald); return
+	# 追蹤刷新（同 _tick_envoy：belief-gate predict_intercept、無 belief→保持現 move_target）。
+	var predicted: Vector2i = PathSystem.predict_intercept(state, herald, target)
+	if predicted != Vector2i(-1, -1):
+		herald.move_target = predicted
+
+# ★資訊網 S-herald：把 need-origin 隊的食糧買單 deposit 進施助者 team_known（honest firsthand intra-faction，
+# 感知鐵律：信使物理送達才傳；無買單→送最近 runway 缺口 proxy 訊）。→ 領主 received_buy_orders 得知子民 need。
+func _deposit_help_need(state: WorldState, origin_id: int, helper: TeamData) -> void:
+	var origin: TeamData = state.teams.get(origin_id)
+	if origin == null: return
+	if not state.team_known.has(helper.team_id):
+		state.team_known[helper.team_id] = []
+	# 已知 order_id（去重）
+	var known: Dictionary = {}
+	for m in state.team_known[helper.team_id]:
+		if m.type == "order_buy": known[int(m.params.get("order_id", -1))] = true
+	# deposit origin 的 food 買單（active_orders 權威）；無則不 deposit（無正式 need 訊）。
+	for o in origin.active_orders:
+		if String(o.get("kind", "")) != "buy" or String(o.get("res", "")) != "food":
+			continue
+		var oid: int = int(o.get("order_id", -1))
+		if known.has(oid): continue
+		var msg := MessageData.new()
+		msg.id = state.global_messages.size(); msg.type = "order_buy"
+		msg.origin_team_id = origin_id; msg.origin_tick = state.world.current_tick; msg.strength = 1.0
+		msg.is_distorted = false   # 信使親送 intra-faction = honest
+		msg.params = {"order_id": oid, "res": "food", "qty": int(o.get("qty_remaining", 0)),
+			"origin_team": origin_id, "origin_pos": origin.tile_pos, "expire_tick": int(o.get("expire_tick", 0))}
+		state.global_messages.append(msg)
+		state.team_known[helper.team_id].append(msg)
+		known[oid] = true
+		Probe.bump("help.need_deposited")
+
 # ──────── 任務指派 ────────
 
 func _assign_tasks(state: WorldState, f) -> void:
@@ -1721,6 +1797,10 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	# ②a 信使外交：envoy_proposal 子隊追蹤刷新 target best_estimate + 自配 timeout（新 invariant 自守）
 	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "envoy_proposal":
 		_tick_envoy(state, sub, merge_queue)
+		return
+	# ★資訊網 S-herald：求援信使子隊（belief-pos travel→抵達 deposit need 訊→recall）。
+	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "help_call":
+		_tick_help_herald(state, sub, merge_queue)
 		return
 	if sub.current_task == TeamData.TASK_BUILD:
 		return  # C: 施工中（建設），不打斷、不召回
@@ -2926,6 +3006,9 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
 	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
 		return _dispatch_convoy(state, team, td)
+	# ★資訊網 S-herald：求援 → 派 HERALD 子隊帶 need 訊到施助者（belief-pos travel、抵達 deposit 進目標 team_known）。
+	if String(td.get("kind", "")) == "help":
+		return _dispatch_help_herald(state, team, td)
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
 		return _dispatch_builder(state, team, target, String(td["build_type"]), 1)

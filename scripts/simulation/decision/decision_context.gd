@@ -67,6 +67,11 @@ var has_specie: bool = false
 var has_buyable_food: bool = false
 # Fix B 遷移找糧 target（視野內可達 wild_game[繼承 pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）；(-1,-1)=真無可達已知糧源。
 var food_seek_target: Vector2i = Vector2i(-1, -1)
+# ★資訊網 S-herald（求援→TASK_HERALD）：有未滿足 need（食糧 runway 低/缺料/受威脅）+ 知潛在施助者（belief）。
+# applicable=need+knowledge-based（非死常數門檻）；要不要真派信使=util 秤（人格 modulate）。
+var help_need_severity: float = 0.0   # 未滿足 need 嚴重度 0-1（食糧缺口為主；genuine base 給 help util）
+var help_target_id: int = -1          # 潛在施助者 team（自家 faction 領主，belief-pos 已知可達）；-1=無對象
+var help_target_pos: Vector2i = Vector2i(-1, -1)   # 施助者 belief last-seen 位（herald travel 目標；感知鐵律）
 # Fix A-2 v2（rejection-learning）：有可達且未近期被拒的 host 才把併入當出路——破「餓世界恆拒→重選併入→又拒」loop。
 # host 鏡射 to_task:200 優先序（strong_neighbor else consolidate，非 OR）；cooldown 過期可再試（非永久黑名單）。
 var has_acceptable_join_host: bool = false
@@ -326,6 +331,19 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			break
 	# Fix B 遷移找糧 target（視野內可達 wild_game[pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）。
 	c.food_seek_target = _fa._find_food_seek_target(state, team)
+	# ★資訊網 S-herald：未滿足 need severity（食糧 runway 缺口為主 genuine base）+ 知潛在施助者（自家 faction 領主 belief-pos）。
+	# severity=真 runway 缺口（deficit_severity），非死常數；help_target=領主（belief 已知位、非自己、非子隊已 pin）。
+	c.help_need_severity = clampf((DecisionTerms.DESPERATION_DAYS - c.food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
+	c.help_target_id = -1
+	c.help_target_pos = Vector2i(-1, -1)
+	if team.faction_id != -1 and c.help_need_severity > 0.0:
+		var _hf = state.factions.get(team.faction_id)
+		if _hf != null and _hf.leader_team_id != -1 and _hf.leader_team_id != team.team_id:
+			# 施助者=自家領主；位走 belief best_estimate（感知鐵律，無 belief→不知去哪求→不 applicable）。
+			var _hpos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, _hf.leader_team_id).get("tile_pos", Vector2i(-1, -1))
+			if _hpos != Vector2i(-1, -1):
+				c.help_target_id = _hf.leader_team_id
+				c.help_target_pos = _hpos
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)
 	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:

@@ -339,6 +339,20 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_DIPLOMACY, "target": _pc.threat_pos,
 				"order_target": _pc.threat_id, "order_task": TeamData.TASK_TRIBUTE_OFFER},
 	},
+	# ★資訊網 S-herald：求援（call for help）→ 派信使子隊帶 need 訊到施助者 team_known（修症1 領主學不到子民餓）。
+	# applicable=有未滿足 need + 知施助者（belief）、非死常數門檻；要不要真派=help_drive util 秤（人格 modulate）。
+	"求援": {
+		"terms": [["help_drive", "help"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return not ctx.is_subteam and ctx.help_target_id != -1 and ctx.help_need_severity > 0.0,
+		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:
+			var _hc: DecisionContext = DecisionContext.gather(_state, team)
+			if _hc.help_target_id == -1:
+				return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
+			# delegate=true → _dispatch_goal_delegate kind:"help" → 派 HERALD 子隊 belief-pos travel→抵達 deposit need 訊。
+			return {"task": TeamData.TASK_HERALD, "target": _hc.help_target_pos,
+				"order_target": _hc.help_target_id, "kind": "help", "delegate": true},
+	},
 	# 野心階梯溶入（序3）：FORCE-archetype 累積階練兵（原 rung_task ACCUMULATE×FORCE→TASK_TRAIN）。
 	# archetype/rung 當 weight（ambient_train_drive）驅動，非查表塞 task。
 	"訓練": {

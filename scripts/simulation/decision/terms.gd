@@ -56,6 +56,8 @@ const OCCUPY_MIN_POP: int = 6           # TEST VALUE — 佔村最低 pop（守�
 # 競秤）：獨立 _trigger_survival 設 PRIO_SURVIVAL(80) task → 整併走 _decide_unified PRIO_DISPATCH(50)
 # 寫不進 = 同現行。稀有性/威脅競秤=A2d 深化,A2c-1 不碰(保恆 fire)。
 const JOIN_LOW_AMBITION_FLOOR: float = 0.2   # TEST VALUE — 投靠 low-ambition factor 下限（野心滿也留殘值，餓極仍可投靠）
+# ★資訊網 S-herald：野心(傲氣 proxy)抑制求援傾向的係數（modulation coeff、非 fire-crank；高野心=獨立少開口）。
+const HELP_PRIDE_SUPPRESS: float = 0.6   # TEST VALUE — 野心 1.0→求援傾向 ×0.4（傲慢撐；野心 0→不抑制）。rationale:傲vs務實分化強度
 const ABSORB_DRIVE_BASE: float = 1.0         # TEST VALUE — T3 正規化：吸納量級→[0,1]（1.2→1.0）
 const REP_MAGNET_W: float = 1.0              # TEST VALUE — 名聲磁鐵 §3 投靠加成權重（高名聲 host 翻贏逃）
 # ★REVERT crank(2026-08-02)：乙 boost 常數(ABSORB_DRIVE_BASE_V2/AMB_GAIN + JOIN_PROTECT_GAIN/JOIN_DRIVE_CAP)全刪——
@@ -115,6 +117,17 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# ★guardrail：只加「建設」（MVP develop 路，禁漏 combat/survival/trade/move/social）。
 			if opt != "建設": return 0.0
 			return ctx.idle_employ_value
+		"help_drive":
+			# ★資訊網 S-herald 求援 util（genuine + 人格 MODULATE、非 crank）：
+			# base = 真未滿足 need 缺口 severity（DERIVED from food_days runway 缺口，非 invent）×期望紓困先驗。
+			# 人格 MODULATE 傾向（非 boost）：求生欲↑早求 / 野心↑傲氣獨立少開口(傲慢↓) / 義氣↑信任勢力求援(依附↑)。
+			# → per-option util dump 顯 傲(高野心)少求 vs 務實(高求生欲)早求 = 真分化（驗收項）。
+			if opt != "求援": return 0.0
+			var _srv: float = float(ctx.leader_values.get("求生欲", 0.5))
+			var _amb: float = float(ctx.leader_values.get("野心", 0.5))       # proxy 傲氣/孤高（獨立不求人）
+			var _hon: float = float(ctx.leader_values.get("義氣", 0.5))       # proxy 依附/信任本勢力
+			var _pmult: float = (0.4 + _srv * 0.6) * (1.0 - _amb * HELP_PRIDE_SUPPRESS) * (0.5 + _hon * 0.5)
+			return ctx.help_need_severity * clampf(_pmult, 0.0, 1.5)
 		"ambition_drive":
 			# 階梯缺口 → 爬階靠「做東西」(生產/建設)，非貿易（貿易是賺錢非爬階）。
 			# 貿易移出 → 野心 magnitude 不再同步抬貿易，霸主(野心高)與商人(貪婪高)才分得開。
@@ -311,6 +324,8 @@ static func weight(term: String, leader_values: Dictionary) -> float:
 		"buymaterial":       return clampf(float(v.get("貪婪", 0.5)), 0.3, 1.0)   # 貪婪→建設/軍火投資傾向（穿人格秤，非 flat）
 		"intent_fit":        return 1.0   # 人格染色已在 eval baked（意圖不同→不同人格,故不走 weight 分歧）
 		"idle_employ":       return 1.0   # ★B idle-labor：genuine 期望產出全在 eval/ctx（無人格 crank，中性 weight，乙教訓）
+		"help":              return 1.0   # ★資訊網 S-herald：人格 MODULATE 已在 help_drive eval（求生欲/野心/義氣）、weight 中性
+		"scout":             return 1.0   # ★資訊網 S-scout：人格 MODULATE 已在 scout_drive eval、weight 中性
 		# §HOW-6 併入 weight：求生欲主 + 低野心（餓+不稱霸傾向抱團；好感在 resolver 分流秤，非此）。
 		"mergein":           return float(v.get("求生欲", 0.5)) * 0.6 + (1.0 - float(v.get("野心", 0.5))) * 0.4
 		# §HOW-8 吸納 weight：野心 + 仁慈(1-殘忍)/信義（殘忍者寧屠不吸；仁慈者傾納弱）。
