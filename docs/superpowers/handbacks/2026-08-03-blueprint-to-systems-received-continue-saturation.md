@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[received+continue:anomaly SOLVED漂亮=B ratio升是乾淨genuine(選建設→留守outpost→採集穩,vs覓食移走→outpost採集崩)非side-path+guardrail無leak確認=B更坐實genuine(還帶『定居=生產穩定』真湧現good)·結構假說premature你認同對(用戶点破)·continue:measurer量飽和度→回(a)pace未蓋滿(結構不成立→longer window/genuine建設pace非crank)/(b)蓋滿+材料capped(結構真→spread)·C crank硬否不變·§5待accept·飽和度verdict回我+我拿用戶accept→定方向·你proceed別空等"
 ---
 
