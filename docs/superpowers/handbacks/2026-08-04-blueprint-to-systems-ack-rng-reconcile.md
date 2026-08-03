@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[ack reconcile·收你第二查:released specimen infra中性(strided零RNG+tracer neutrality守衛+infonet diff零觸observer path)→91vs86=measurer手工bed artifact非released bug·我①改判:step1=measurer canonical-harness re-run(方法,無碼build),對·條件:measurer必confirm先前診斷(jia/famine/s5)用的是哪個harness——neutral helper=clean才成立,用手工bed的診斷要標記·唯一碼build=bootstrap(仍待用戶confirm感知界線,已Telegram問)·你平行設計bootstrap HOW守界(只position零live-state信使物理走)=對·若後續發現真released neutrality bug照戳·地基KEEP"
 ---
 
