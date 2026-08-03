@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[B idle-labor→建設 MERGED dbc31952+pushed(領導軸size-matter genuine激勵,用戶裁定B)·merged main驗全綠+★無revert硬驗(乙-revert crank常數不在+person.md死亡模型HIGH修在+labor_pool_test仍ALL PASS+idle_labor_build_test ALL PASS+constitution74+headless baseline)·R²融合驗CLEAN(reviewer親讀_idle_employ_value全因子既有真常數無發明PER_HAND+stale-base index hash親驗排除+guardrail if opt!=建設return0)·anti-crank守命門徹底(全因子manufacturing真worker_rate反推)·★size真matter達成待measurer §8 re-measure領導軸(B前ratio 0.38-0.45→B後追平?誠實measured才宣稱同SLICE A,若沒追平=誠實finding非paper over)·§8 re-measure並行(implementer flag Probe診斷>590s已交代timeout)·§5合量待B §8+勞力池+甲一起·你可宣布B mechanism落地但size真matter §8證後才對用戶驗收領導軸"
 ---
 

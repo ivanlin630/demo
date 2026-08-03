@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[B idle-labor→建設 genuine激勵開工(MVP建設-only,blueprint GO,領導軸size-matter治§8 ratio0.38-0.45)·spec docs/superpowers/specs/2026-08-03-idle-labor-build-incentive-HOW.md(R²CLEAN+1追蹤項)·做:①DecisionContext加idle_labor欄=maxf(pool_of(state,tile)−Σtile.labor_alloc[k].demand,0)(gather時算,只PRODUCE軍隊天然不在pool_of)②建設option util加idle_employ_value(terms.gd 建設drive或settle_fit擴)·★★追蹤項(reviewer anti-crank,乙教訓):idle_employ_value禁發明PER_HAND常數→從manufacturing真worker_rate反推:idle_employ_value=min(idle_labor/d_new,1.0)×facility_full_output×need_weight,其中d_new=候選facility新增demand(level×K_MFG),facility_full_output=該facility fill=1滿載真輸出=level×1.0×LABOR_SCALE×(0.5+avg_skill)×RATES[recipe](即manufacturing:92,150-159真公式代fill=1),need_weight=need_oracle(候選產物)·=雇用閒勞力真need-weighted期望產出,idle=0或無需求→0,self-limit·★guardrail硬約束:只加建設,禁漏combat/survival/trade/move/social(grep),憲法非硬gate(連續乘非if idle>X)·dev-verify:idle→build因果(idle>0+真需求可建→建設util升選建/idle=0不升)+genuine非crank(idle=0或無需求→term=0不亂建)+guardrail grep+determinism+headless baseline·隔離branch feat/idle-labor-build·交付後我R²融合驗→§8 re-measure領導軸ratio追平(誠實measured才宣稱)"
 branch: feat/idle-labor-build
 ---

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²融合驗(merge前)B idle-labor→建設·branch feat/idle-labor-build eb263529(stacked labor-pool,labor-pool已merge main 506aaa64)·dev-verify全綠(idle_labor_build_test 11/11+headless baseline+determinism byte-identical+constitution74+★anti-crank反推公式)·真code delta focused(decision_context+59 idle_labor欄/options+3/terms+7 idle_employ_value/tile_data+3/decision_engine+6/tests)·★審真code 5點:①anti-crank(idle_employ_value全因子從manufacturing真worker_rate反推min(idle/d_new,1)×facility_full_output×need_weight,禁發明PER_HAND常數,idle=0或無需求→0 self-limit,守feedback_genuine_value_not_crank命門=這次別又縮小版乙)②guardrail只加建設(grep idle_labor無漏combat/survival/trade/move/social)③憲法非硬gate(連續乘非if idle>X)④idle_labor算式=maxf(pool_of−Σlabor_alloc.demand,0)只PRODUCE⑤§4 spread/militarize deferred(blueprint裁MVP建設-only)·★stale-base note:branch merge-base=61b2a354落後main(缺handbacks/doc修),但branch terms.gd含乙-revert(no crank)=3-way merge應乾淨,我merge後硬驗無revert(乙-revert在/doc HIGH修在/labor_pool_test仍綠)·CLEAN→我merge+merge-result驗(idle_labor_build_test+labor_pool_test+constitution+headless+terms.gd乙-revert確認)→measurer §8 re-measure領導軸"
 ---
 
