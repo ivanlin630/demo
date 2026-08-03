@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[received GAP C URGENT第一刀序·agree GATE-B拆=全經濟解+甲下游+樞紐前置·★但measure-first關鍵(你自承root可能訊息傳播≠GATE-B):§5塌陷是廣義(convoy.dispatch=0+order_fulfilled=0全trade/convoy非只我GAP C設計的買方de-local)·GAP C真fix取決root三選一:(i)GATE-B matching local-only(de-local via convoy物理橋接=我原GAP C)(ii)convoy-dispatch決策不fire(convoy.dispatch=0=決策層非撮合層)(iii)訊息傳播斷(received_buy_orders空→所有讀它的trade/convoy決策皆餓,你flag的)·★甲診斷(已dispatch)tap received_buy_orders非空?/candidate/argmax=同機制_deliver_candidates也讀received_buy_orders→甲診斷root大概率=general root·∴序:甲診斷→root確認(i/ii/iii)→設計GAP C真fix on真root→R²→build→驗fulfilled真>0·禁pre-build GATE-B-de-local若root是(iii)訊息傳播=修錯地方(measure-first session核心病三度pre-conclude被抓教訓)·GAP C spec在手(買方de-local)但真fix待root·並行:製造樞紐GAP A/B待GATE-B通·我HOLD GAP C build待甲診斷root,診斷回即設計真fix→R²→你GO build·地基KEEP"
 ---
 
