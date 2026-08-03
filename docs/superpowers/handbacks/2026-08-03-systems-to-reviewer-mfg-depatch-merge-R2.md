@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R²融合驗(merge前)mfg de-patch·branch feat/mfg-labor-depatch 0c9a5c6a(labor-pool sibling,merge-base 61b2a354已含乙-revert)·dev-verify全綠(mfg_labor_depatch_test 5/5 de-patch生效+4保留gate+headless baseline+determinism byte-identical=labor-pool baseline+constitution74)·真code delta focused(manufacturing_system.gd:67移補丁閘一行+comment+tap/mfg_labor_depatch_test+101)·★審真code:①補丁閘真移除(current_task!=TASK_MANUFACTURE gate沒了,PRODUCE隊在outpost就跑)②保留gate全在(need-gated worker_rate仍含labor_mult fill/materials _can_consume/dedup labor_share/position outpost/PRODUCE resident)③無新gate/無新RNG·★stale-base note:branch=labor-pool sibling缺main的B+doc(raw diff B檔顯刪=artifact),但branch terms.gd:61含乙-revert(無crank const)+mfg-depatch只碰manufacturing_system.gd(main自ancestor未碰)=3-way merge保main的B+套de-patch,我merge後硬驗(B idle_employ_value在/乙-revert crank不在/labor_pool_test+idle_labor_build_test仍綠/mfg de-patch生效)·economy before/after+§8領導軸=交measurer(warring無settled producer)·CLEAN→我merge+merge-result驗→measurer §8三驗"
 ---
 

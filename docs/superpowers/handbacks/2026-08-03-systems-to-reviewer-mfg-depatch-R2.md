@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² manufacturing per-labor-allocation de-patch HOW(blueprint裁i,領導軸真根=facility從不RUN)·spec docs/superpowers/specs/2026-08-03-mfg-labor-integration-depatch-HOW.md·真根file:line坐實:mfg:67 current_task!=TASK_MANUFACTURE gate補丁閘pre-empt勞力池(飽和度6.7%+材料消耗0.000全程=facility蓋出從不RUN,measurer實測)·de-patch=移除mfg:67一行(tick_all其餘62-96已整合勞力池:ensure_fresh+labor_share=team_pop/pool防雙算+worker_rate=level×labor_mult(mfg:Lk)×labor_share×skill)→manufacturing為PRODUCE隊在outpost就跑如gather對稱·★審點:①de-patch非疊補丁(移補丁閘completing統一,非新機制,延伸settled勞力池架構)②need-gated §51保留(labor_mult=fill×LABOR_SCALE,need=0→fill=0→worker_rate=0不產,自動不over-produce)③憲法production解耦一致(執行層per-allocation非決策,同gather已如此,pop自動工作facility非leader task choice)④保留gate全對(materials _can_consume/dedup labor_share/position outpost/軍隊不在pool)⑤blast-radius驗夠(不過度生產/不economy衝擊/determinism/constitution site應減/領導軸ratio真追平§8)·follow-up:TASK_MANUFACTURE decision option可能vestigial(production不再需它)=另清非本de-patch·CLEAN→dispatch隔離feat/mfg-labor-depatch→dev-verify 5驗→§8三驗領導軸+全經濟"
 ---
 

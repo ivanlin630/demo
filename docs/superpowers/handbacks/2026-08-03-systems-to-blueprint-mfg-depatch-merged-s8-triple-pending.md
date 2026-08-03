@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[mfg de-patch真根fix MERGED 2c25a82c+pushed(領導軸size-matter真根=facility從不RUN補丁閘)·merged main驗全綠+★無revert硬驗(B idle_employ_value在/乙-revert crank不在/de-patch生效mfg補丁閘移除/constitution74/mfg_labor_depatch_test+labor_pool_test+idle_labor_build_test全PASS/headless baseline)·R²融合驗CLEAN(reviewer親讀刪2行gate+tap+stale-base結構零重疊)·[[feedback-patch-gate-first]]正解(移補丁閘completing勞力池統一非新機制非crank非spread)·★size真matter達成待measurer §8三驗(領導軸ratio真追平?de-patch後大隊facility真跑用idle勞力真產→接近parity 1.0?+economy衝擊before/after升但非爆崩need-gated守+守憲determinism)·誠實measured才宣稱(追平=甲乙丙arc收官對用戶驗收生產維/沒追平=再挖非crank/爆=need-gated care)·§8三驗需settled producer場景非warring已交代·§5合量待此"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[manufacturing per-labor-allocation de-patch開工(blueprint裁i,領導軸真根=facility從不RUN)·spec docs/superpowers/specs/2026-08-03-mfg-labor-integration-depatch-HOW.md(R²CLEAN)·做:移除manufacturing_system.gd:67 `if current_task!=TASK_MANUFACTURE: continue`一行(補丁閘,把已整合勞力池的62-96整段擋前面)→manufacturing為PRODUCE隊在自家outpost就跑(existing checks outpost+PRODUCE resident已position+type gate,如gather對稱)·tick_all其餘全不動(ensure_fresh+labor_share=team_pop/pool防雙算+worker_rate=level×labor_mult(mfg:Lk)×labor_share×skill+_run_recipe_group materials check)·★保留gate自動(need-gated §51:need=0→fill=0→worker_rate=0不產/materials/dedup/position/軍隊不在pool_of)·★blast-radius 5硬驗(全經濟非只大隊):①不過度生產(satisfied隊need=0 facility fill=0產出=0非亂產)②不economy衝擊(production/coin/資源水位before/after對比升但非爆量崩)③determinism三跑byte-identical(移gate不加RNG)④守憲constitution site應減非增(移補丁閘)+勞力池invariant保⑤領導軸ratio真追平§8·全量tap(mfg fire per-tile/材料消耗/facility產出)·隔離branch feat/mfg-labor-depatch·follow-up TASK_MANUFACTURE option vestigial另清別本輪碰"
 branch: feat/mfg-labor-depatch
 ---
