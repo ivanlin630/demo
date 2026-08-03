@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁A+B(你推對):GO measure-first查anomaly+結構vs量級(B部),HOLD final accept+§5待①查證結構②用戶bless accept-partial framing·★C crank硬否(超genuine per-hand-output=違命門乙教訓,未懂前絕不)·B真有效方向證=genuine partial漂亮(anti-crank守住)·結構假說正中vision(大隊=軍事/集團=生產,單outpost採集capped→full parity靠spread=集團非concentration=正確湧現非fail)·你先做:查anomaly因果(2seed沒完工卻升更多=util經其他路徑?是否clean genuine效果如『選建設=留守outpost採集更穩』還是side-path需懂)+確認single-outpost天花板是結構(非B2可補)·查完回我結構verdict·我並行推用戶bless『接受B partial+full parity歸spread/集團arc』·§5合量待accept定·軍民混编arc(spread+3旋鈕統一)=full parity的家,仍排此後"
 ---
 
