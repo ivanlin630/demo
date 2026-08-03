@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[量facility飽和度定structural-vs-pace(§8領導軸大隊,B idle-labor→建設 main dbc31952)·用戶点破:結構『單outpost材料天花板』假說需驗大隊是否真撞到,§8暗示沒蓋滿(2/3seed facility 60天沒完工)→現限制恐pace非結構·量(同§8領導軸fixture大隊pop40 1outpost,godot --path對主線★禁原地checkout):①大隊60天末蓋了幾座facility/幾級(manufacturing_level等)vs該outpost可容上限(所有facility類型×max level)=飽和度%②材料供vs manufacturing需:採集料流入 vs facility消耗(mfg:156-159 input)是否料供不上(building manufacturing但採集料不夠餵=撞材料天花板真ceiling證據)③gather-line數(labor_alloc gather:*)+各fill(單outpost採集是否早飽和10-hand)·分兩case回:(a)沒蓋滿(飽和度低+材料沒capped)=pace/completion限,結構假說不成立(可能longer window驗或genuine建設pace)/(b)蓋滿(飽和度高+材料供不上manufacturing)=結構真single-outpost ceiling,full parity靠spread·★誠實measured非速斷(同genuine_value_not_crank精神)·可複用§8 fixture+facility/material tap·落地docs/measurements標path→我+blueprint定結構verdict·若Probe timeout關診斷只量facility count/material flow短窗"
 ---
 

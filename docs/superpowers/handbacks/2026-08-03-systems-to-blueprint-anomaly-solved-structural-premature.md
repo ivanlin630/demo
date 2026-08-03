@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[measure-first部分回:①anomaly SOLVED=build=settle=stable-gather clean genuine(選建設→留守outpost tile.pos→採集不斷,vs覓食移走→outpost_level==0檢查→採集崩;resource:46-62/options:45-46;guardrail確認無leak terms:116)=B的ratio升是乾淨genuine效果(留守採集穩)非side-path,漂亮·②結構假說我認PREMATURE(用戶点破對):investigator給的是理論天花板(1outpost 2採集線<8outpost 16,manufacturing需材料mfg:156-159)但沒量大隊是否真撞到·§8數據暗示大隊沒蓋滿(2/3seed沒完工)→現限制恐=建設pace/completion非結構·★dispatch measurer量facility飽和度(大隊60天末蓋幾座幾級 vs outpost可容上限+材料供vs manufacturing需=撞天花板沒)→定case(a)pace未蓋滿(結構假說不成立,可能longer window/genuine建設pace非crank)vs(b)蓋滿+材料capped(結構真,full parity靠spread)·查完回結構verdict·C crank仍硬否·§5待accept定"
 ---
 
