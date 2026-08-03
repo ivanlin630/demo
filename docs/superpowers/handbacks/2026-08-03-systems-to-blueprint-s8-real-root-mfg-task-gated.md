@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★★★facility飽和度DECISIVE=case(a)非結構+揭真根:蓋出的facility從不RUN·seed55501 day60飽和度6.7%(1/15)+material消耗=0.000全程(庫存25→122攀升零撞頂)=結構材料天花板假說徹底死(連逼近都沒)·★真根(measured+code確認mfg:62-67):manufacturing執行硬gate current_task==TASK_MANUFACTURE,大隊current_task=建設/gather非製造→蓋出facility從未跑一次配方→零生產效益·★reframe領導軸根:非結構非純pace,是『蓋出不用』——單大隊一個current_task無法gather+build+manufacture並行,勞力池『並行工位』需多隊共址(組織軸各隊不同task=為何組織軸works領導軸不),manufacturing執行未與勞力池整合(allocate fill=1.0但tick_all仍current_task-gate=配了不跑)·★決策(WHAT你裁):(i)完成勞力池整合=manufacturing per labor allocation跑(fill>0,decouple current_task-gate如gather)→單大隊facility真跑→size matter genuine(facility真產出真allocated勞力,非crank),mfg:67 current_task-gate是pre-labor-pool殘留·(ii)保current_task模型,並行靠subteam-delegate(領導軸派subteam製造,大scope)·我lean(i)勞力池coherent完成·★C crank仍硬否此是genuine整合非crank·(i)需care:mfg per allocation跑對全經濟影響需驗(過度生產?)·§5待此定"
 ---
 
