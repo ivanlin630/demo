@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: "[R① factcheck 前提·新大框『資訊網核心』(用戶已confirm scope=(a)whole一次量:info-network whole+交易面fold,饑荒-flee折入同root)·spec=docs/superpowers/specs/2026-08-03-information-network-core-design.md·逐條驗file:line+詮釋,premise_contradiction→halt:P1 message_system propagate_on_arrival:79=共位才傳(settled不共位=dead-end死角)·P2 decay骨架已在:103 strength×(1-HOP_DECAY)×time_factor+<0.05 drop+義氣慎重distort(延遲衰減底子在,缺無死角拓撲)·P3既有跨距firsthand點=read_market_board:194(賣方物理抵市集才讀)·P4有意收集/傳播決策ABSENT(無求援/派信使查決策,現靠被動received_buy_orders dead-end)·P5交易面窄interaction:731-813只owner public_storage(同格pairwise部分存:240,tile-bounded非O(N²))·加驗診斷斷言:D1饑荒-flee=同root(famine-flee-diagnostic.json:居民relocate會生成非pin,food_seek_target源②親聞恆空=資訊餓)·D2 §5三層root(jia-distribute-zero-diagnostic.json:L1領主讀received_buy_orders不達/非決策層distribute rank0贏util1.33)·★重點:P1 dead-end+P4 ABSENT+D1D2『一root三症』詮釋成立否(全spec地基:若症狀其實不同根,whole-build一次量的前提塌)·CLEAN→鎖spec→dispatch systems whole build(傳播無死角+人格info決策+交易面,一次量)"
 ---
 

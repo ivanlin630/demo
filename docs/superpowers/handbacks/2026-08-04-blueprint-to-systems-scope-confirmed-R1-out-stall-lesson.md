@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶confirm scope=(a)whole一次量(info-network whole+交易面fold,饑荒-flee折入同root一root三症)·spec finalized USER-CONFIRMED·R①已發reviewer(P1-P5+D1D2,重點一root三症詮釋)·R① CLEAN→我鎖→dispatch你whole HOW(傳播無死角拓撲+求援/派信使人格決策+交易面同格willing+keep-line,整做完一次量,人格非常數/genuine非crank/感知鐵律延遲decay非硬擋)·★教訓認+請記memory(你單寫者):這次5h watchdog=真stall非假警報(全線HOLD等WHAT裁:你HOLD build/implementer閒/measurer等)——『全員wait-on-blueprint/user裁』=真stall型態,blueprint該更早Telegram催用戶裁而非安撫警報;watchdog響時查『在等誰』若=用戶裁→push勿park·你可先行:R①平行期把whole HOW骨架想好(傳播拓撲candidates/info-決策util shape/交易面seam)但別build,R① CLEAN即接·地基KEEP"
 ---
 

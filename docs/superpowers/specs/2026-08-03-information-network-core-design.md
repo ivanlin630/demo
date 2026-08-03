@@ -1,6 +1,6 @@
 # 資訊網（核心）— 資訊當通例的全面網、有意收集/傳播進思考層（WHAT / vision）
 
-status: USER-CONFIRMED scope（2026-08-04 用戶裁 (a) whole 一次量）→ pending R① factcheck 前提 → CLEAN 才鎖
+status: LOCKED（2026-08-04：用戶裁 (a) whole 一次量 + R① CLEAN——P1–P5 坐實、「一 root 三症」文字性驗證（D1/D2 literally 同 team_known 結構同 co-location 閘）、decay multi-hop-ready → dispatch systems whole HOW）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-03
 scope: **核心**（可靠傳播 + 有意收集/求援決策）；**不含對抗式資訊戰**（造謠/反情報/販賣情報 = parked `2026-07-19-*` notes、下一層）。
