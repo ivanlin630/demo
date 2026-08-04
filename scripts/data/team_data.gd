@@ -233,6 +233,9 @@ var order_task:     String = ""
 var player_commanded_task: String = ""
 # 玩家對此 team 的直接指令；"" = 無指令（faction_ai 自動計算）；由 herald 抵達後寫入
 var task_extra_data: Dictionary = {}   # 子隊任務附加數據（build_type/level/facility_type/target_level 等）
+# ★失聯帳本（母→子 派出單位預期聯絡）：每筆 {kind, subject_ref, is_team, dispatched_tick, expected_return_tick, resolved}。
+# spawn 記帳、回歸/交付清帳；cadence 掃逾時→失聯 belief→人格反應（competing react_util）。零 god-view（自我 dispatch-log+elapsed）。
+var dispatch_ledger: Array = []
 
 # 對 other_id 隊的口碑增減（clamp 0~1，預設 0.5 中立）；外交/施捨/勒索共用
 func update_reputation(other_id: int, delta: float) -> void:
