@@ -10,6 +10,15 @@ updated: 2026-07-22
 
 # 03 implementer 現況
 
+**★資訊網 distribute 免費直注 relief（機制最後一 bug）（branch `feat/info-network-whole`，續，HEAD 待 commit）**：
+- **root（diagnostic#6 重現 persist bed 0b599dc8）**：distribute 賑濟 convoy 6/6 arrive（travel 正常**非黑洞**、confirm 我前診斷 convoy 機制無黑洞）、卡 **settle 站** 5/6 bail（`sell_owner_no_coin×4`/`sell_ownerless×1`）。`interaction:767` distribute 注 `override_ask=local_value×price_factor`，`price_factor=(0.5+greed)/(0.5+honor)` 分子最小 0.5 **永不 0**→oask 永不 0→「免費仁君路」`free_dist=(override_ask==0)` **UNREACHABLE=dead code 實作 bug**（非設計錯）→ 恆對餓 resident 定價→無 coin bail。
+- **修（de-patch、啟用既有 dead 路）**：①`interaction:767` distribute 的 `oask=0.0`（免費直注 gift；啟用既有 free_dist 路：跳 owner-coin/affordability/no_price bail→`TileBank.deposit` 免費存 resident 據點→bid=0 coin no-op 守恆→`distribute.deliver` bump）②ownerless edge：free_dist 若 `owner==null` 但 tile 是據點→允許 deposit（不 bail sell_ownerless；ocoin/owner coin add owner-guard）。
+- **人格語意保留（非 crank）**：發不發賑濟=`_try_distribute_side` mini-util 仁慈/責任秤（一字不改）；送了=免費（本病=決策 fire 但 settle 定價卡餓子民、非 util 低）。
+- **驗全綠**：`lord_distribution_bed` 9/9（+ownerless free_dist RED）；infonet 全 bed 綠；headless **0-new**；gate PASS sites=74 removed=0；determinism 3-run（GODOT_TIMEOUT=1200、seed1337 1mo）MD5 `9290F462BD4A01B542A4519A091FCA79` byte-identical（＝side-dispatch 同 MD5：free-relief 在 warring seed1337 1mo **inert**＝該窗 distribute-settle 未被 exercise，真效果在 persist bed；determinism 屬性成立、零新 randf）。
+- **下一站**：handback to:systems R²→我路 measurer re-measure **症1 端到端 on persist bed（config/infonet_whole.json）**（`distribute.deliver 5/6→6/6` + `food_delivered` 顯著>1 + 糧真到 resident 據點 runway 回升＝**症1 首次真閉環**）→QA。★機制最後一 bug、arc 機制 complete 在望。
+
+---
+
 **★資訊網 distribute side-dispatch（症1 雙端對稱最後一步）（branch `feat/info-network-whole`，續，HEAD 待 commit）**：
 - **root（RE-measure#5→systems 定案）**：de-scan 解候選生成（`distribute.candidate_eval 0→680`）但 `distribute.dispatch` 仍 0、T0 領主恆覓食＝**distribute 留主 argmax 跟覓食競爭輸**（同 herald/scout 移出前的「applicable 但輸主 argmax」病）。
 - **修（de-patch 同 herald 家族）**：①移 `goal_resolver frontier_candidates:117` `_distribute_candidates` append（distribute 脫主 rank 池＝determinism-neutral 移 loser、主 winner 不變）②新 `faction_ai._try_distribute_side`（side-dispatch pass、`_try_herald_side/_try_scout_side` 旁）：reuse `_distribute_candidates`（已 de-scan belief+人格零 god-view）算最佳賑濟候選→`_dispatch_convoy`（自 throttle 一 convoy/lord + 內建 `distribute.dispatch` tap :3353）③revert de-scan 誤加的 `_dispatch_goal_delegate` 冗餘 tap（與 :3353 雙計）。mini_util tap 補。

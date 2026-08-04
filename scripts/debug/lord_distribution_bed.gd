@@ -14,6 +14,7 @@ func _initialize() -> void:
 	_test_side_dispatch_fires_when_busy()  # ★資訊網 side-dispatch：領主本業覓食(非 distribute)仍平行派賑濟 convoy
 	_test_free_distribute_coin_conserving()
 	_test_paid_distribute_coin_conserving()
+	_test_ownerless_free_dist()            # ★資訊網:免費 gift 到無主 resident 據點(owner==null)不 bail、食物入 tile
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -138,6 +139,19 @@ func _test_paid_distribute_coin_conserving() -> void:
 		_ok("付費分配:居民付 %.0f coin==porter 收 %.0f(coin 守恆,領主抽 coin)" % [rcoin_paid, pcoin_got])
 	else:
 		_bad("付費分配 coin 破:ok=%s 付=%.1f 收=%.1f" % [str(ok), rcoin_paid, pcoin_got])
+
+# ★資訊網 ownerless free_dist edge：免費 gift 到無主(owner==null)resident 據點 → 不 bail sell_ownerless、食物入 tile storage。
+func _test_ownerless_free_dist() -> void:
+	var st: Array = _mk_sell_fixture()
+	var state: WorldState = st[0]; var porter: TeamData = st[1]; var tile: HexTileData = st[3]
+	var food0: float = float(tile.public_storage.get("food", 0))
+	# owner=null（無主據點）+ override_ask=0（免費 gift）
+	var ok: bool = InteractionSystem.new()._market_visitor_sell(state, porter, null, tile, 77, "food", 100, {}, 40.0, 0.0)
+	var deposited: float = float(tile.public_storage.get("food", 0)) - food0
+	if ok and deposited > 0.0:
+		_ok("ownerless free_dist:無主據點免費直注 %.0f food 入 tile(不 bail sell_ownerless、coin no-op)" % deposited)
+	else:
+		_bad("ownerless free_dist 破:ok=%s deposited=%.1f(仍 bail sell_ownerless?)" % [str(ok), deposited])
 
 # ── fixtures ──
 # lord(faction leader,food surplus)+resident(同 faction,deficit,持 coin,掛 food buy-order @自有 outpost)。
