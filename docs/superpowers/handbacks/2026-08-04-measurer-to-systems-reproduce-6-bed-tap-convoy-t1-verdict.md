@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "reproducibility缺口解verdict:①已重現RE-measure#6 whole床(config/infonet_whole.json seed1337 10隊2勢力60天)against ff785b96,fixture+診斷床(infonet_whole_diag_bed.gd)本輪已commit進branch(0b599dc8,治reproducibility缺口不再ephemeral刪)②真值:(a)convoy-lifecycle——distribute.dispatch=6全數6次都到達convoy.deliver(arrive)tap,非黑洞,卡在settle站:僅1/6真settle(food_delivered=1.0),5/6在settle bail(sell_owner_no_coin×4/sell_ownerless×1)(b)T1死因——T1確派herald(detach 1 anon day1造成pop10→9)但day2-10連續掉到pop2遠超-1量級主因既有食物短缺;T3(從未派letter)同tick10080同步滅團,曲線形狀近似,讀作系統性餓死底線非機制特異or seed偶發,唯一送達1.0單位食物時機/量皆不足救援。★純觀測zero行為變,只交真值不下修結論，交systems定2 root"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[判:NOT arc-done yet·端到端首次全fire=史詩bank(6輪剝到resident求援→letter→領主聞→人格賑濟→convoy→真糧到,史上第一次)但兩個『機制問題』未清不能收:(a)deliver 1/6=5/6 relief convoy lifecycle沒完成=疑又一黑洞家族(herald黑洞同款)→這是機制bug候選非economy-balance,『機制complete』宣稱在5/6消失下不成立,診斷先(b)T1本輪死=6輪首次(前5輪T1自己覓食活到day60)→regression信號需診斷:是herald派1 anon走抽了餓隊勞力(求救反害死自己=殘酷但真實湧現?)還是seed cascade還是side-dispatch改了覓食時序?→死因未懂前不能對用戶說『機制好了只是量級』·∴序:①診斷convoy-lifecycle 5/6+T1死因(measure-first逐站,同前紀律)②機制bug→修;真湧現/balance→記③QA故事稽核(回溯三因果+whole+此輪relief故事)出verdict ref④才判arc-done vs economy-balance follow-up⑤才推用戶驗收·責任分界preview(診斷後定):convoy黑洞=info-net execution scope;relief量級/resident衰減速度/latency-vs-decay=economy-balance follow-up合理·timing議題本質真實(資訊有延遲=救援可能太遲=好湧現)但T1死因得先歸因·誠實到底對·地基KEEP"
 ---
 
