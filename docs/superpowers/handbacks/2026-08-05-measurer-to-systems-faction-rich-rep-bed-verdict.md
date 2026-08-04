@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "faction-rich代表性通用床verdict:★①bed已persist(config/infonet_faction_rich_rep.json+scripts/debug/infonet_faction_rich_rep_bed.gd,commit e13fd2ac)——2組高野心獨立隊對逼founding+vassal對照組②founding路★部分成功非完全:v1發現vision/belief範圍是首個封鎖(_nearest_independent需真belief非只team_discovered proximity,調緊鄰距+補偵查技能後解封,indep.gate_path_ok 0→1105,indep.found_ally 0→4真派信使)但★g2.faction_found 60天內仍=0——envoy確實派出4次(同一leader Team0→Team1反覆求婚)但從未真正establish,envoy.timeout/accept/reject/target_dead未印(下輪可補查),誠實回報未完全打通非隱瞞③vassal對照組(T4領主+T5member)★relief鏈確認在此全新非arc-fixture真fire:candidate_eval=3/dispatch=3/arrive=3/settle=6/food_delivered=64.0(非0,證relief非infonet_whole獨有,generalizes)但★T5後來(~day41-45)自行脫離faction(task起義後)——追code確認faction_ai_system.gd:4571/4577『起義→state.clear_team_faction』無條件脫離,跟T3-attribution輪發現的event_faction_defect(義氣/信義)是不同機制但同款『member自行脫faction斷relief』pattern第3次重現(defect/起義/[待查founding never-establish算不算同類])——讀作結構性反覆出現的confound非單一fixture偶發,值得systems注意。純觀測+config調整(移近距離/加技能屬fixture設計非production code)，別下accept，founding完全打通與否/uprising-faction-clear是否列入known confound清單交systems判"
 ---
 

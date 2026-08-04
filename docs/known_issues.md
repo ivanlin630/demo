@@ -1072,3 +1072,11 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
 - **★§5 一次合量 must-check（execution-end、非假 done）**：warring `distribute.dispatch=0`（此窗 scarce 領主無餘糧）＝**organic firing 未證**（unrest 耦合活 add137/reduce5＝接口通）。**§5 整世界合量必查「分配真 fire?」**。
   - **★§5 量測條件（blueprint 定 2026-08-01）**：**必在「領主有餘糧」條件跑**（和平 economy/surplus 累積窗）才測得到分配 fire + 光譜三端分化，否則 warring 稀缺又測 0＝誤判「分配壞」（其實「沒糧可分」）。**tension**：warring 多隊利乙 join/吸納 vs surplus 利甲 distribute——§5 設計需兼顧（長窗經濟流動累 surplus / 混合場景 / 或分條件），設計時（乙 ready 後）解。
   - **tap 分帳**：分配 fire 率 + 光譜分化(義氣給/貪高價/棄外) + unrest 餵 + 乙小併大 + 經濟流動＝沙盤活了嗎。若仍 0→finding（threshold 調 / 經濟 lord-surplus 生成）。[[feedback_verify_execution_end]]。
+
+### ★faction 成員資格 fragility＝結構 confound（2026-08-05，measurer 3 次重現、systems 親驗坐實）
+資訊網補完批 (A) 代表性床揭：**member 自行脫 faction → 斷 relief（及所有 lord-member 經濟關係）＝結構性反覆 pattern、非單一 fixture 偶發**。多退出機制皆 `state.clear_team_faction`：
+- **defect**：`event_faction_defect.gd:16` `honor < DEFECT_HONOR_THRESHOLD(0.35) or trust < 0.35` → `:24 clear`（T3-attribution 輪、義氣門檻）。
+- **起義 uprising**：`faction_ai:4571`(守城)/`4577`(流亡) `clear_team_faction`＝**無條件**（(A) 床 T5 ~day41 起義→脫、斷 relief）。
+- **defection_evaluation**：`faction_ai:4640/4643`（owner-contact-loss/leader-change，`_evaluate_owner_contact` 路）。
+- **founding never-establish**：`g2.faction_found=0`（(A) 床 envoy 派 4× 求婚但 never establish、faction 關係**建不起來**）＝同族「faction 關係不穩」另一端。
+- **★意涵（systems 注意、連 arc）**：faction 成員資格**易碎**（多機制退出/建不起）→ lord-member 關係鮮少持久 → relief/規模經濟/生產池 等 lord-member 機制反覆被斷。**連 [[project_size_matter_arc]]（規模經濟 absent＝faction 不 cohere）+ 照妖鏡死常數（DEFECT_HONOR_THRESHOLD 硬門檻 + uprising 無條件 clear = faction-balance 批人格化候選）**。measurement confound：relief 難觀測（member 常在 relief 前/中離開）；但 sim 語意上 member 叛離/起義離 faction **可能是 genuine 湧現**（不忠者該走）——**是否「太易碎」= 未來 faction-cohesion/立國arc 判**（非本批修）。
