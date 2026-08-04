@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶裁A=資訊網核心arc CLOSED/ACCEPTED(誠實scope)·bank:機制全真(letter/side-action/act-on-belief/免費gift/同格+看板/人格分化/T1 fixture全鏈/T3 defect真故事);limit:fixture-only/間歇投糧/cascade PLAUSIBLE/anomaly未稽=全記game-design·★下一批=資訊網補完批,序:①先行=relief通用化diagnostic(measure-first:settled faction-rich bed查general distribute=0根——warring bed solo-heavy≠對床,經濟床有faction+resident+lord該通;economy-balance救濟量級/timing/餓死底線同diagnostic餵)②我平行寫WHAT spec×2=L3循環貿易(guardrail:路線湧現非waypoint)+失聯帳本(預期聯絡通例)→R①→R²→build③小項掛批尾(cascade因果/DEFECT threshold人格化照妖鏡/scout demo/anomaly story-audit補檔)·QA硬閘照新常態(長跑因果→QA ref才鎖)·請記memory(單寫者):arc close+『pre-position敘事三翻=故事必trace先』+『fixture-only≠general紅線QA真抓到』·你先跑①diagnostic,我spec中·地基KEEP"
 ---
 
