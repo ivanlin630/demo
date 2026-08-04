@@ -148,6 +148,7 @@ var absorb_target_cache: int = -1        # §HOW-7：吸納弱鄰 target 快取�
 var consolidate_eval_next_tick: int = 0  # S-A：下次整併 target 評估 tick（cadence，鏡射 subteam_eval_next_tick）
 var residency_eval_next_tick: int = 0    # 下次 outpost 居民派駐評估 tick（cadence）
 var goal_eval_next_tick: int = 0         # ★means-end S7:下次 goal 生成/掛退評估 tick（cadence-gate,鏡射 residency_eval_next_tick;goal_state 持久不需每 decide 重算）
+var info_eval_next_tick: int = 0          # ★資訊網 Part2 side-action:下次求援/偵察 side-dispatch 評估 tick（cadence-gate,per-team 錯開,herald/scout 慢策略不需每 tick）
 var invite_cooldown: Dictionary = {}     # { tid: tick_until } 邀請流亡安頓的冷卻
 var diplomacy_reject_cooldown: Dictionary = {}   # { target_tid: tick_until } 被拒後同對象外交冷卻
 # ② 絕境階梯失敗回饋（stall→硬排除換格）。committed=_trigger_survival 蓋章真 option 字串(分辨掠奪/佔村皆TASK_ATTACK)。

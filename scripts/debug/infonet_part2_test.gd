@@ -55,17 +55,24 @@ func _test_anon_messenger_emptyhanded() -> void:
 	_ok(h_food == 0.0 and h_coin == 0.0 and h_mat == 0.0, "★herald 零 res carry（food=%.1f coin=%.1f mat=%.1f=empty-handed）" % [h_food, h_coin, h_mat])
 	_ok(absf(float(m.resources.get("food",0)) - mfood0) < 0.01, "母隊 food 不流失（%.1f→%.1f=餓 resident 任何流失都在乎、信使空手）" % [mfood0, float(m.resources.get("food",0))])
 
-# ③ _dispatch_help_herald 端到端：小餓 resident（pop>=2、全 anon 無 spare named）→ anon herald 送出。
+# ③ side-dispatch 端到端：深餓 resident（pop>=2、全 anon、名冊可達領主）→ _try_herald_side 派 anon herald。
 func _test_dispatch_help_end_to_end() -> void:
-	print("--- ③_dispatch_help_herald 端到端 ---")
-	var a := _mk_mother(5, false); var state: WorldState = a[0]; var m: TeamData = a[1]
-	m.tags = [TeamData.TAG_PRODUCE]
-	var target := TeamData.new(); target.team_id = 2; target.faction_id = 0; target.tile_pos = Vector2i(9,9); state.teams[2] = target
+	print("--- ③side-dispatch 端到端（深餓 resident）---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 1000
+	var fac := FactionData.new(); fac.faction_id = 0; fac.leader_team_id = 1; state.factions[0] = fac
+	var lt := HexTileData.new(); lt.tile_pos = Vector2i(9,9); lt.outpost_level = 1; lt.outpost_owner = 1
+	state.world.tiles[9*1000+9] = lt
+	var lord := TeamData.new(); lord.team_id = 1; lord.faction_id = 0; lord.tile_pos = Vector2i(9,9)
+	AnonCohort.add(lord.anon_cohorts, "平民", "healthy", 20); state.teams[1] = lord
+	var m := TeamData.new(); m.team_id = 2; m.faction_id = 0; m.tile_pos = Vector2i(5,5); m.tags = [TeamData.TAG_PRODUCE]
+	AnonCohort.add(m.anon_cohorts, "平民", "healthy", 5); m.resources = {"food": 0.2}   # 深餓 severity 高
+	var lm := PersonData.new(); lm.id = 12; lm.values = {"求生欲": 1.0, "野心": 0.0, "義氣": 0.6}; state.persons[12] = lm; m.leader_id = 12
+	state.teams[2] = m
 	Probe.reset(); Probe.enabled = true
-	var ok: bool = FactionAISystem.new()._dispatch_help_herald(state, m, {"target": Vector2i(9,9), "order_target": 2, "kind": "help", "delegate": true})
+	FactionAISystem.new()._try_herald_side(state, m)
 	Probe.enabled = false
-	_ok(ok and int(Probe.counts.get("help.herald_dispatched", 0)) == 1,
-		"小餓 resident(全 anon 無 named)→ anon herald 送出（ok=%s dispatched=%d）=修 dispatch=0 根" % [str(ok), int(Probe.counts.get("help.herald_dispatched",0))])
+	_ok(int(Probe.counts.get("help.herald_dispatched", 0)) == 1,
+		"深餓 resident(全 anon 無 named、名冊可達領主)→ side-dispatch anon herald（dispatched=%d）=修 dispatch=0+argmax-loss 根" % int(Probe.counts.get("help.herald_dispatched",0)))
 
 # ④ pop<2 → 不送（不掏空）。
 func _test_pop_gate() -> void:

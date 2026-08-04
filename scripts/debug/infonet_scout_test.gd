@@ -7,8 +7,8 @@ extends SceneTree
 var _fail: int = 0
 
 func _initialize() -> void:
-	_test_util_command_vs_ambition()   # ①genuine+人格:統領(關切)>野心(疏忽) 偵察傾向
-	_test_applicable_infogap()         # ②applicable=info-gap+在乎、非死常數
+	_test_util_command_vs_ambition()   # ①genuine+人格:統領(關切)>野心(疏忽) 偵察傾向（scout_drive 術式，side-dispatch _scout_pmult 沿用）
+	# ②applicable REGISTRY 測移除：Part2 (a) 偵察脫主 argmax→side-dispatch（見 infonet_sideaction_test）。
 	_test_ctx_scout_fields()           # ③領主 gather:子民 belief 陳舊→scout_target/staleness
 	_test_scout_returns_need()         # ④斥候 co-loc 子民→帶 need 回領主 team_known+刷新 belief
 	if _fail == 0: print("=== DONE === ALL PASS")

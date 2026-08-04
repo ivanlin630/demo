@@ -1433,27 +1433,6 @@ func _recall_envoy(state: WorldState, envoy: TeamData) -> void:
 		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（正常 AI 接手，非 zombie）
 		state.remove_tag(envoy, TeamData.TAG_SUBTEAM, "envoy_orphan")
 
-# ★資訊網 S-herald：派求援信使子隊（reuse envoy 範式：spare named 當信使、belief-pos travel、母隊留守）。
-# 帶母隊 need（食糧買單）ref；抵施助者→deposit need 訊進其 team_known（症1 領主學不到子民餓的通例解）。
-func _dispatch_help_herald(state: WorldState, mother: TeamData, td: Dictionary) -> bool:
-	var target_pos: Vector2i = td.get("target", Vector2i(-1, -1))
-	var target_id: int = int(td.get("order_target", -1))
-	if target_pos == Vector2i(-1, -1) or not state.teams.has(target_id):
-		return false
-	if mother.population < 2:
-		return false   # 不掏空母隊（同 can_send_herald gate）
-	# ★資訊網 Part2 reframe：求援信使=anon 1 人跑腿（村莊派個人求救），非 spare named subteam
-	# （requiring named=subteam 機具 artifact；小餓 resident 無 spare named→送不出=dispatch=0 根）。
-	var dist: int = _hex_dist(mother.tile_pos, target_pos)
-	var herald_id: int = SubteamSystem.new().dispatch_anon_messenger(state, mother.team_id,
-		TeamData.TASK_HERALD, "help_call", target_pos, target_id,
-		{"help_origin": mother.team_id, "timeout": _founding_timeout(dist)})   # empty-handed（零 res carry）
-	if herald_id == -1:
-		return false
-	_equip_envoy_mounts(state, mother, state.teams[herald_id])   # 有馬配馬（無馬照走）；不轉 resource
-	Probe.bump("help.herald_dispatched")
-	return true
-
 # ★資訊網 S-herald：求援信使 tick——朝施助者 belief-pos 走；co-located→deposit 母隊 need（食糧買單）訊進
 # 施助者 team_known（honest intra-faction）→ 領主經傳到的 belief 得知子民餓 → distribute 匹配。timeout/target 亡→recall。
 func _tick_help_herald(state: WorldState, herald: TeamData, merge_queue: Array) -> void:
@@ -1476,30 +1455,6 @@ func _tick_help_herald(state: WorldState, herald: TeamData, merge_queue: Array) 
 	if predicted != Vector2i(-1, -1):
 		herald.move_target = predicted
 
-# ★資訊網 S-scout：派斥候子隊查子民 stale belief（reuse envoy 範式；task_reason=info_scout 專屬 tick）。
-func _dispatch_info_scout(state: WorldState, mother: TeamData, td: Dictionary) -> bool:
-	var target_pos: Vector2i = td.get("target", Vector2i(-1, -1))
-	var target_id: int = int(td.get("order_target", -1))
-	if target_pos == Vector2i(-1, -1) or not state.teams.has(target_id):
-		return false
-	if mother.population <= 1:
-		return false
-	var sub_sys := SubteamSystem.new()
-	var sub_leader: int = sub_sys._pick_subteam_leader(state, mother, TeamData.TASK_SCOUT)
-	if sub_leader == -1 or sub_leader == mother.leader_id:
-		return false
-	var dist: int = _hex_dist(mother.tile_pos, target_pos)
-	var scout_id: int = sub_sys.dispatch(state, mother.team_id, sub_leader, ENVOY_POP,
-		TeamData.TASK_SCOUT, target_pos, target_id, "")
-	if scout_id == -1:
-		return false
-	var scout: TeamData = state.teams[scout_id]
-	scout.task_reason = "info_scout"   # ★區別 conquest "scout"；_evaluate_subteam 專屬 tick
-	scout.task_start_tick = state.world.current_tick
-	scout.task_extra_data = {"scout_mother": mother.team_id, "timeout": _founding_timeout(dist)}
-	_equip_envoy_mounts(state, mother, scout)
-	Probe.bump("scout.dispatched")
-	return true
 
 # ★資訊網 S-scout：斥候 tick——朝子民 belief-pos 走；co-located→查得子民 need（食糧買單）帶回領主 team_known
 # + 刷新領主對子民 belief（firsthand fresh）→ 領主 received_buy_orders 得子民 need（active 版症1 解）。timeout→recall。
@@ -1553,6 +1508,131 @@ func _deposit_help_need(state: WorldState, origin_id: int, helper: TeamData) -> 
 		state.team_known[helper.team_id].append(msg)
 		known[oid] = true
 		Probe.bump("help.need_deposited")
+
+# ──────── ★資訊網 Part2 (a) side-action：求援/偵察 平行 side-dispatch（脫主 argmax、mini-util cost-benefit）────────
+# de-patch 精神（同勞力池 facility 脫 current_task）：派 1 anon 跑腿=平行 side-action（派信使≠放棄自救）。
+# ★calibration-anchor（R² ①、同 idle-labor PER_HAND 紀律）：RELIEF_EXPECT/ANON_COST 皆 DERIVED 自食物常數、非 invent fire-crank。
+const INFO_RELIEF_EXPECT: float = DecisionTerms.DESPERATION_DAYS * ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 求助期望紓困≈買回到絕境門檻的食物價值（3×0.8=2.4）
+const INFO_ANON_COST: float = ResourceSystem.FOOD_PER_PERSON_PER_DAY   # 1 anon 邊際成本≈其每日食耗/產出 proxy（0.8）
+# ★scope 硬限：只 herald/scout 兩條 1-anon 資訊跑腿（非泛化 side-task 框架繞 argmax）。
+
+const INFO_DISPATCH_CADENCE: int = WorldState.TICKS_PER_DAY   # 求援/偵察=慢策略,每日評一次即可(per-team 錯開防每 tick O(teams²) 掃)
+
+func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
+	for tid in team_ids:
+		var team: TeamData = state.teams.get(tid)
+		if team == null or team.parent_team_id != -1 or team.combat_target != -1:
+			continue   # 子隊/戰鬥中不 side-dispatch
+		# ★perf：cadence-gate（per-team 錯開）——side-dispatch 每日評一次非每 tick（scout O(teams) 掃 per leader 昂貴）。
+		if state.world.current_tick < team.info_eval_next_tick:
+			continue
+		team.info_eval_next_tick = state.world.current_tick + INFO_DISPATCH_CADENCE
+		_try_herald_side(state, team)
+		_try_scout_side(state, team)
+
+# 求援 side：餓 + 知施助者 + mini-util>0（cost-benefit）→ 派 anon 信使（不佔主任務、平行）。
+func _try_herald_side(state: WorldState, team: TeamData) -> void:
+	if team.population < 2:
+		return   # can_send_herald（pop 1 自己走）
+	if _has_inflight_info(state, team, "help_call"):
+		return   # throttle 一隊一 in-flight herald
+	var food_days: float = ResourceSystem.effective_food(state, team) \
+		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var severity: float = clampf((DecisionTerms.DESPERATION_DAYS - food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
+	if severity <= 0.0:
+		return   # 不絕境不求援（need-gated）
+	var tgt: Dictionary = _resolve_help_target(state, team)
+	if int(tgt["id"]) == -1:
+		return   # 無施助者（belief/名冊皆無）
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var mini: float = severity * _help_pmult(lv) * INFO_RELIEF_EXPECT - INFO_ANON_COST
+	if Probe.enabled: Probe.note("help.mini_util", mini)
+	if mini <= 0.0:
+		return   # cost-benefit 不划算（傲慢撐/輕度餓不值 1 anon）
+	var dist: int = _hex_dist(team.tile_pos, tgt["pos"])
+	var hid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
+		TeamData.TASK_HERALD, "help_call", tgt["pos"], int(tgt["id"]),
+		{"help_origin": team.team_id, "timeout": _founding_timeout(dist)})
+	if hid != -1:
+		_equip_envoy_mounts(state, team, state.teams[hid])
+		Probe.bump("help.herald_dispatched")
+
+# 偵察 side：領主 + 子民 belief 陳舊 + mini-util>0 → 派 anon 斥候（亦 anon 化、不再 named subteam）。
+func _try_scout_side(state: WorldState, team: TeamData) -> void:
+	if team.population < 2:
+		return
+	var f = state.factions.get(team.faction_id)
+	if f == null or f.leader_team_id != team.team_id:
+		return   # 只領主探子民
+	if _has_inflight_info(state, team, "info_scout"):
+		return   # throttle 一隊一 in-flight scout
+	var tgt: Dictionary = _resolve_scout_target(state, team)
+	if int(tgt["id"]) == -1 or float(tgt["staleness"]) <= 0.0:
+		return
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var mini: float = float(tgt["staleness"]) * _scout_pmult(lv) * INFO_RELIEF_EXPECT - INFO_ANON_COST
+	if Probe.enabled: Probe.note("scout.mini_util", mini)
+	if mini <= 0.0:
+		return
+	var dist: int = _hex_dist(team.tile_pos, tgt["pos"])
+	var sid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
+		TeamData.TASK_SCOUT, "info_scout", tgt["pos"], int(tgt["id"]),
+		{"scout_mother": team.team_id, "timeout": _founding_timeout(dist)})
+	if sid != -1:
+		_equip_envoy_mounts(state, team, state.teams[sid])
+		Probe.bump("scout.dispatched")
+
+# in-flight throttle：已有 task_reason 的 side-messenger 子隊 → 不重派（鏡射 convoy 一隊一）。
+func _has_inflight_info(state: WorldState, team: TeamData, reason: String) -> bool:
+	for tid in team.subteam_ids:
+		var s: TeamData = state.teams.get(tid)
+		if s != null and s.task_reason == reason:
+			return true
+	return false
+
+# 求助對象解析（fresh belief 優先→名冊 fallback，同 ctx 舊邏輯；side-dispatch 自足）。
+func _resolve_help_target(state: WorldState, team: TeamData) -> Dictionary:
+	if team.faction_id == -1:
+		return {"id": -1, "pos": Vector2i(-1, -1)}
+	var f = state.factions.get(team.faction_id)
+	if f == null or f.leader_team_id == -1 or f.leader_team_id == team.team_id:
+		return {"id": -1, "pos": Vector2i(-1, -1)}
+	var lid: int = f.leader_team_id
+	var pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, lid).get("tile_pos", Vector2i(-1, -1))
+	if pos == Vector2i(-1, -1):
+		pos = _faction_roster_pos(state, team, lid)
+	return {"id": (lid if pos != Vector2i(-1, -1) else -1), "pos": pos}
+
+# 待查子民解析（領主對自家最陳舊 belief 子民；fresh belief age→norm、無 belief→名冊 staleness=1）。
+func _resolve_scout_target(state: WorldState, team: TeamData) -> Dictionary:
+	var best_id: int = -1; var best_pos: Vector2i = Vector2i(-1, -1); var best_st: float = 0.0
+	var norm: float = float(BeliefSystem.SCOUT_TIMEOUT)
+	for mid in state.teams:
+		if mid == team.team_id: continue
+		var mt: TeamData = state.teams[mid]
+		if mt.faction_id != team.faction_id: continue
+		var be: Dictionary = BeliefSystem.best_estimate(state, team.team_id, mid)
+		var mpos = be.get("tile_pos", Vector2i(-1, -1))
+		var st: float
+		if mpos == Vector2i(-1, -1):
+			mpos = _faction_roster_pos(state, team, mid)
+			if mpos == Vector2i(-1, -1): continue
+			st = 1.0
+		else:
+			st = clampf(float(state.world.current_tick - int(be.get("last_tick", 0))) / maxf(norm, 1.0), 0.0, 1.0)
+		if st > best_st:
+			best_st = st; best_id = mid; best_pos = mpos
+	return {"id": best_id, "pos": best_pos, "staleness": best_st}
+
+# 人格 mult（鏡射 terms help_drive/scout_drive；求援/偵察脫 argmax 後 side-dispatch 用）。
+func _help_pmult(lv: Dictionary) -> float:
+	return clampf((0.4 + float(lv.get("求生欲", 0.5)) * 0.6) \
+		* (1.0 - float(lv.get("野心", 0.5)) * DecisionTerms.HELP_PRIDE_SUPPRESS) \
+		* (0.5 + float(lv.get("義氣", 0.5)) * 0.5), 0.0, 1.5)
+
+func _scout_pmult(lv: Dictionary) -> float:
+	return clampf((0.4 + float(lv.get("統領", 0.5)) * 0.6) \
+		* (1.0 - float(lv.get("野心", 0.5)) * DecisionTerms.SCOUT_AMBITION_NEGLECT), 0.0, 1.5)
 
 # ──────── 任務指派 ────────
 
@@ -3055,12 +3135,7 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
 	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
 		return _dispatch_convoy(state, team, td)
-	# ★資訊網 S-herald：求援 → 派 HERALD 子隊帶 need 訊到施助者（belief-pos travel、抵達 deposit 進目標 team_known）。
-	if String(td.get("kind", "")) == "help":
-		return _dispatch_help_herald(state, team, td)
-	# ★資訊網 S-scout：偵察 → 派 SCOUT 子隊查子民、帶 fresh need 訊回領主 team_known（active 版；領主主動探）。
-	if String(td.get("kind", "")) == "scout":
-		return _dispatch_info_scout(state, team, td)
+	# ★資訊網 Part2 (a)：求援/偵察 已脫離主 argmax/delegate → 移到 _info_side_dispatch 平行步（此處無 help/scout 分支）。
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
 		return _dispatch_builder(state, team, target, String(td["build_type"]), 1)

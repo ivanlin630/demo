@@ -8,8 +8,8 @@ var _fail: int = 0
 
 func _initialize() -> void:
 	_test_ctx_help_fields()          # ①needy+知領主 belief→help_target/severity 設
-	_test_util_pride_vs_pragmatic()  # ②genuine+人格:務實(求生欲)>傲(野心) 求援傾向分化
-	_test_applicable_need_knowledge() # ③applicable=need+knowledge、非死常數;無對象/不需/子隊→false
+	_test_util_pride_vs_pragmatic()  # ②genuine+人格:務實(求生欲)>傲(野心) 求援傾向分化（help_drive 術式，side-dispatch _help_pmult 沿用）
+	# ③applicable REGISTRY 測移除：Part2 (a) 求援脫主 argmax→side-dispatch（見 infonet_sideaction_test）。
 	_test_deposit_need_to_helper()   # ④信使抵達 deposit 母隊食糧買單→施助者 team_known(症1 通例解)
 	if _fail == 0: print("=== DONE === ALL PASS")
 	else: print("=== DONE === %d FAIL" % _fail)

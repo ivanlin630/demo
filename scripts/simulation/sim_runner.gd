@@ -149,6 +149,7 @@ static var SYSTEMS: Array = [
 	{"name": "salary",           "fn": "_step6c_salary",            "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
 	{"name": "fatigue",          "fn": "_step6d_fatigue",           "lod": LOD_BOTH, "shape": "teams_cadence", "tl": "near.consume"},
 	{"name": "faction_ai",       "fn": "_step6b_faction_ai",        "lod": LOD_BOTH, "shape": "teams",         "tl": "near.faction_ai"},
+	{"name": "info_dispatch",    "fn": "_step6b2_info_dispatch",    "lod": LOD_BOTH, "shape": "teams",         "tl": "near.faction_ai"},
 	{"name": "training",         "fn": "_step6f_training",          "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
 	{"name": "strategic_ai",     "fn": "_step6e_strategic_ai",      "lod": LOD_BOTH, "shape": "state",         "tl": "near.strategic_ai"},
 	{"name": "reactions",        "fn": "_step7_person_reactions",   "lod": LOD_NEAR, "shape": "teams",         "tl": ""},
@@ -455,6 +456,10 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 
 func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
 	_faction_ai_system.evaluate_all(state, team_ids)
+
+func _step6b2_info_dispatch(state: WorldState, team_ids: Array) -> void:
+	# ★資訊網 Part2 (a) side-action：求援/偵察 平行 side-dispatch（脫主 argmax、每 team 評 mini-util cost-benefit）。
+	_faction_ai_system.info_side_dispatch_all(state, team_ids)
 
 func _step6f_training(state: WorldState, team_ids: Array) -> void:
 	_training_system.process(state, team_ids)
