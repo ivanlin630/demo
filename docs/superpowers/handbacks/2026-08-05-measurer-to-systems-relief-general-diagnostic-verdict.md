@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "relief通用化diagnostic verdict:★①settled econ床(peaceful_economy seed70730 6mo)全程幾乎0 faction——12隊0 faction開局,g2.faction_found=0/indep.found_ally=0全程未曾走『正規founding』路,唯一一次faction形成是day5左右『Team5主服Team2→勢力0』(submit/vassal路,非g2.faction_found那條)真形成1個lord+member pair,但該member(Team5)全程無食物危機(無famine/death log)→distribute=0在此案例是『真無需求』非『機制不apply』;證實systems假說=settled床structural absence(0或1個且剛好不餓)為主因,非機制一般失敗②③直接reuse本session已landed的infonet_whole.json fixture數據(唯一faction-rich+resident真餓settled床)逐站斷點:RE6(pre-fix)dispatch=6→arrive=6→settled=1(5 bail:sell_owner_no_coin×4+sell_ownerless×1)food=1.0;RE7(free-direct-inject fix9b502d52)dispatch=5→arrive=2→settled=2(bail=0)food=58.0;T1confirm(game_setup fix20a7d8ef)dispatch=14→arrive=6→settled=6→food=72.0——鏈條在settle站(非candidate_eval非dispatch非travel)曾是唯一斷點,現已被兩輪fix修好;economy-balance誠實揭露:T1食物曲線間歇(day28-43連續16天food=0而後day44起才回升,同ticket自己預期的『太小太晚』pattern吻合)——relief救得活(不致死)但非穩定復甦,是波動撐命。純觀測,別下accept，結構缺失vs機制缺陷判準交systems"
 ---
 

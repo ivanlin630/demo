@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[R①×2 CLEAN(訂正已納spec鎖)→dispatch你HOW×2(各新slice branch,R²→build)·(1)L3=docs/superpowers/specs/2026-08-05-L3-circuit-trade-design.md·★HOW約束(R①定):升級既有fallback路非蓋新option——_nearest_market_outpost naive揀法(永遠最近零秤)升genuine util(staleness+套利期望−路程+人格加權)+放寬has_goods/has_arb applicability讓settled產隊進得去+探索未知市集(資訊價值秤),禁平行訪市機制·(2)失聯帳本=docs/superpowers/specs/2026-08-05-missing-contact-ledger-design.md·★整併義務(R①定):10+子單位側timeout常數=統一標的;既有反方向_evaluate_owner_contact(faction_ai:4651-4664村發現領主失聯→叛離評估,同原語best_estimate().last_tick+_DAYS)——帳本必reuse同原語、母→子/子→母雙方向收斂一套,否則帳本=第4散落點;該處_DAYS死常數=照妖鏡候選記faction-balance批非本批·兩HOW照guardrail(人格非死常數/湧現非script/零god-view)·序:R²(each)→build→量(訪市人格分化+失聯反應人格分化)→QA(照新常態)·relief通用化diagnostic+核心arc merge並行不擋·地基KEEP"
 ---
 
