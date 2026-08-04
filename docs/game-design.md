@@ -123,6 +123,7 @@
 - **支援 / 已完**：後勤 SLICE A（供給移動 flow）merged+用戶 accepted；持守統一 released；時間統一 wave slice A merged。
 - **遞延 backlog**：material/伐木供給側、established chain、遭遇戰收斂（舊 P6）、perf O(N²) scaling、**L3 隔格循環貿易**（商人巡市集讀外板+跑商路；**★guardrail 用戶定 2026-08-05：禁寫死巡邏路線——「去某市集看看」=資訊價值(板子多舊+套利期望) vs 路程成本的引擎決策，人格加權（重商勤跑/膽小近跑），巡迴=湧現 pattern 非 waypoint 清單**；同 scout「資訊值不值得收集」家族）、economy-balance（救濟量級/timing、系統性餓死底線）。
   - **信使損耗模型（已定，資訊網 arc）**：信使死**不通知**寄件方（死訊瞬回=god-view）——寄件方只知「派了、沒回音」，**沉默本身是資訊**；再派=湧現（需求仍在→mini-util 續 fire→人格秤再派，實測 T1 連派 8 信使）；每信使=真抽 1 人力（信使一直死=村失血=真悲劇螺旋）；進階候選：預期回程逾時→belief 推斷凶多吉少（非 god-view）。
+  - **★失聯感知＝通例（用戶定 2026-08-05，資訊網 follow-up、排現 arc 收完後）**：**所有派出單位共用一個系統**（信使/斥候/商隊/賑濟隊/子隊/開墾隊…）——母隊記**預期回報時間**（依距離/任務估）；逾時→belief 標「失聯」→**進思考層人格反應**（務實再派·派查/多疑防備/重情派救/冷酷註銷；領主對遠方村莊久無音訊=同系統）。零 god-view（全建於「自己派過誰+過了多久」的自我記憶推理）。「派信使查」決策=此系統反應端、信使逾時推斷=其一 case——統一成**一張預期聯絡帳本**、非各處特例。
 - **infra**：Telegram 雙向 bridge（遠端驅動 blueprint）done（`reference_telegram_bridge`）。
 - **★doc 待辦**：`roadmap.md`（死化石）待 systems reconcile/archive（指向本節 + memory `project_*` 為 living 來源）。
 

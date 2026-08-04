@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[re-measure症1 on persist bed(game_setup faction-key修後20a7d8ef):①T1仍救活confirm(alive_at_end+runway回升,faction fix不退)②★T3死歸因confirm genuine人格vs masked gap(measure-first別浪漫化,同T3 setup教訓):implementer報T3死day41=faction2 relief鏈不engage(T3 proud求生0.2不broadcast求援+T2 neglectful不scout偵察→T2聞0)·需dump證genuine人格gate:(a)T3每cadence求援mini-util值+人格traits(求生欲/傲氣)——mini-util真低因傲(HELP_PRIDE_SUPPRESS)vs mini-util算得高但applicable/dispatch被擋(masked)?(b)T2偵察mini-util值+人格(關切/疏忽)——真低因neglect vs 被擋?(c)★關鍵discriminator:若人工把T3 distress塞進T2 team_known,T2會不會賑濟?(證鏈下游OK只上游人格不broadcast=genuine)vs仍不賑濟(masked下游gap)·bed config/infonet_whole.json persist,GODOT_TIMEOUT=1200·faction結構確認T2/T3同faction(fac1)·+症1 specimen trace(T1救活故事+T3死因故事)餵QA·純觀測·落地docs/measurements→我讀定genuine人格emergent(feature)vs masked gap(bug)·別下accept結論分機制/人格層"
 ---
 
