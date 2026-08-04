@@ -2566,11 +2566,11 @@ func _merchant_trade_target(state: WorldState, team: TeamData) -> Vector2i:
 		if not ord.is_empty():
 			Probe.bump("g1.arb_attempt")
 			return ord["pos"]   # 單原點=下單隊自家市集 outpost（固定市場地方）
-	# 無 arb（沒讀過任何別隊單）→ 巡最近市集 outpost（公開地標）→ 抵達親讀看板取得 arb。
-	var mkt: Vector2i = _nearest_market_outpost(state, team)
+	# ★L3 循環貿易：無 arb → genuine visit-util 選市集（staleness+arb 期望−路程×人格）取代 naive 最近。
+	var mkt: Vector2i = _best_market_target(state, team)
 	if mkt != Vector2i(-1, -1):
 		Probe.bump("g1.seek_market")
-	return mkt   # (-1,-1) = 無市場可去
+	return mkt   # (-1,-1) = 無值得跑的市集
 
 # ★god-view Slice C：找最近「已知市集 outpost」（belief-gate，非全圖 god-view）。
 # 只掃 team_market_known（三源習得：創世/親見/relay），非全 state.world.tiles。無已知市集→(-1,-1)。
@@ -2612,6 +2612,87 @@ func _nearest_market_outpost_with(state: WorldState, team: TeamData, res: String
 			best_d = d
 			best_pos = tile.tile_pos
 	return best_pos
+
+# ★L3 循環貿易：market visit-util（升 naive nearest→genuine util）。argmax over belief-known 市集。
+# visit_util = W_ARB×arb_norm + W_STALE×stale_norm − W_TRIP×trip_norm×(0.5+慎重)，× archetype mult。
+# ★calibration 錨真值（DERIVED、非 fire-crank）：trip_norm=dist/MERCHANT_MAX_RANGE（最大有意義商路）、
+#   stale_norm=elapsed/SCOUT_TIMEOUT（既有 belief-staleness 時標 reuse）、arb_norm=arb 期望/MARKET_ARB_NORM（coin payoff 正規化、同 DELIVER_PAYOFF_NORM 尺）。
+# W_*=相對優先權重（arb 收益/trip 成本 primary、staleness 資訊價值 secondary）、非 fire 門檻（near-stale 自然 fire、非反推調參）。
+const MARKET_W_ARB: float = 1.0
+const MARKET_W_STALE: float = 0.5
+const MARKET_W_TRIP: float = 1.0
+const MARKET_ARB_NORM: float = 100.0                        # coin payoff 正規化（同 goal_resolver DELIVER_PAYOFF_NORM 尺）
+const MARKET_STALE_NORM: int = BeliefSystem.SCOUT_TIMEOUT   # 典型 belief-staleness 時標（reuse、DERIVED）
+
+func _best_market_target(state: WorldState, team: TeamData) -> Vector2i:
+	return _scan_best_market(state, team).get("pos", Vector2i(-1, -1))
+
+# ctx.has_market_visit_value 用：best visit_util > 0（有值得跑的市集）。
+func _market_best_visit_util(state: WorldState, team: TeamData) -> float:
+	return float(_scan_best_market(state, team).get("util", 0.0))
+
+const MARKET_VISIT_CADENCE: int = WorldState.TICKS_PER_DAY   # ★perf：visit-util 掃含 vision-harvest 昂貴→每日評一次非每 gather
+# ctx.has_market_visit_value（cadence 快取、perf；_scan_best_market 含 _harvest_market_known vision 掃、禁每 decision 算）。
+func has_market_visit_value(state: WorldState, team: TeamData) -> bool:
+	if state.world.current_tick < team.market_visit_next_tick:
+		return team.market_visit_cached
+	team.market_visit_next_tick = state.world.current_tick + MARKET_VISIT_CADENCE
+	team.market_visit_cached = _market_best_visit_util(state, team) > 0.0
+	return team.market_visit_cached
+
+# 掃 belief-known 市集算 visit-util、回 {pos, util}（argmax）。★零 god-view：pos=belief（三源）、
+# staleness=自我 last_read 記憶、arb=heard orders；禁讀市集 live public_storage 秤 util。
+func _scan_best_market(state: WorldState, team: TeamData) -> Dictionary:
+	_harvest_market_known(state, team)
+	var known: Dictionary = state.team_market_known.get(team.team_id, {})
+	if known.is_empty():
+		return {"pos": Vector2i(-1, -1), "util": 0.0}
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var caution: float = float(lv.get("慎重", 0.5))
+	var arch_mult: float = 1.5 if team.ambition_archetype == AmbitionLadder.ARCHETYPE_TRADE else 1.0
+	var last_read: Dictionary = state.team_market_last_read.get(team.team_id, {})
+	var best_pos: Vector2i = Vector2i(-1, -1); var best_u: float = 0.0
+	for tile_id in known:
+		var tile: HexTileData = state.world.tiles.get(tile_id)
+		if tile == null or tile.outpost_level <= 0:
+			continue   # demolish/失效市集
+		if tile.outpost_owner == team.team_id:
+			continue   # 自家看板無跨隊 arb
+		var dist: int = _hex_dist(team.tile_pos, tile.tile_pos)
+		var trip_norm: float = clampf(float(dist) / float(OrderSystem.MERCHANT_MAX_RANGE), 0.0, 1.0)
+		var stale_norm: float   # last_read 缺=從沒 firsthand 讀過→MAX(探索未知)；有=elapsed/norm
+		if last_read.has(tile_id):
+			stale_norm = clampf(float(state.world.current_tick - int(last_read[tile_id])) / float(MARKET_STALE_NORM), 0.0, 1.0)
+		else:
+			stale_norm = 1.0
+		var arb_norm: float = clampf(_market_arb_expectation(state, team, tile.tile_pos) / MARKET_ARB_NORM, 0.0, 1.0)
+		# ★archetype 只放大正向 appetite（arb 收益+探索），非乘整體（乘整體會讓 TRADE 在負 util 時探索更少=反了）；
+		#   trip 成本由慎重 modulate（膽小遠程成本感高→只跑近）。gain−cost 分離。
+		var gain: float = (MARKET_W_ARB * arb_norm + MARKET_W_STALE * stale_norm) * arch_mult
+		var cost: float = MARKET_W_TRIP * trip_norm * (0.5 + caution)
+		var u: float = gain - cost
+		if u > best_u:
+			best_u = u; best_pos = tile.tile_pos
+	if Probe.enabled:
+		if best_pos != Vector2i(-1, -1): Probe.bump("market.visit_util")
+	return {"pos": best_pos, "util": best_u}
+
+# 該市集 pos 的 arb 兌現期望（belief heard orders @該市集、非 god-view live stock）。
+func _market_arb_expectation(state: WorldState, team: TeamData, mkt_pos: Vector2i) -> float:
+	var os := OrderSystem.new()
+	var best: float = 0.0
+	for o in os.received_sell_orders(state, team):
+		if int(o["origin_team"]) == team.team_id or o["pos"] != mkt_pos:
+			continue
+		best = maxf(best, TradeValuation.local_value(team, o["res"], state) * float(o["qty"]))
+	for o in os.received_buy_orders(state, team):
+		if int(o["origin_team"]) == team.team_id or o["pos"] != mkt_pos:
+			continue
+		var stock: float = ResourceSystem.effective_holding(state, team, o["res"])
+		if stock <= 0.0:
+			continue
+		best = maxf(best, TradeValuation.local_value(team, o["res"], state) * minf(stock, float(o["qty"])))
+	return best
 
 # market-discovery 兩源 harvest（★無新 RNG）：①直接親見（vision 半徑內 outpost，bounded local scan 非全圖）
 # ②relay harvest（team_known 的 order/outpost_built 訊息 market pos，★濾 outpost_level>0 避無 outpost 隊 live pos noise）。

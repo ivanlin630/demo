@@ -211,6 +211,10 @@ func read_market_board(state: WorldState, team: TeamData) -> void:
 	if tile == null or tile.outpost_level <= 0:
 		return   # 不在市集 outpost → 無在場可見
 	Probe.bump("g1.market_arrive")   # WS-2b 觀測：隊抵達市集 outpost（讀看板的前提）
+	# ★L3 循環貿易：firsthand 讀板 → stamp last_read（staleness 歸零；未讀過的市集無條目=staleness MAX 探索未知）。
+	if not state.team_market_last_read.has(team.team_id):
+		state.team_market_last_read[team.team_id] = {}
+	state.team_market_last_read[team.team_id][tid] = state.world.current_tick
 	if not state.team_known.has(team.team_id):
 		state.team_known[team.team_id] = []
 	# ★S-prop step0：prune 過期/decay 殆盡的 relayed entry（本隊原生 entry 由 _sync_board 權威維護、此不碰）。

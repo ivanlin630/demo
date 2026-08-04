@@ -10,6 +10,7 @@ var food_days: float = 0.0
 var population: int = 0
 var has_goods: bool = false
 var has_arb: bool = false
+var has_market_visit_value: bool = false   # ★L3 循環貿易：有值得跑的 belief-known 市集（best visit_util>0；settled 產隊進得去）
 var team_strength: float = 0.0
 var threat: float = 0.0
 # 序7 reaction 溶入：團潰散信號（兵卒集體恐慌）。= 高 stress 低 loyalty named 成員比例聚合。
@@ -164,6 +165,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.is_subteam = team.parent_team_id != -1   # A2a：子隊旗（歸建 directive + 戰略-gate）
 	c.has_goods = float(team.resources.get("goods", 0)) >= 10.0
 	c.has_arb = not OrderSystem.new().best_arbitrage_order(state, team).is_empty()
+	c.has_market_visit_value = FactionAISystem.new().has_market_visit_value(state, team)   # ★L3：有值得跑的市集（cadence 快取、perf：harvest 昂貴禁每 gather）
 	c.team_strength = NpcCombatSystem.new().team_strength(state, team.team_id)
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.head", _tg)
 	c.ambition_gap = maxi(team.ambition_cap - team.ambition_rung, 0)

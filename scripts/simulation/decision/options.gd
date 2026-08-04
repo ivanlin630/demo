@@ -16,7 +16,7 @@ static var REGISTRY: Dictionary = {
 		# 駐村隊（movement 居民鎖）不濾：掛 TRADE 站自家村=擺攤營業（來客觸發 _resolve_market
 		# + absorb 糧倉賣餘糧=需求側環實體）。漏斗 r3 實證：濾掉→村攤關門→成交崩，勿再加鎖。
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.has_goods or ctx.has_arb,
+			return ctx.has_goods or ctx.has_arb or ctx.has_market_visit_value,   # ★L3：settled 產隊(無貨無 arb 但有值得跑市集)進得去
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var tgt: Vector2i = FactionAISystem.new()._merchant_trade_target(state, team)
 			# ★god-view Slice C：belief-gate 後無已知市集→(-1,-1)。只 roaming merchant→IDLE（無市集去=無事可做）；

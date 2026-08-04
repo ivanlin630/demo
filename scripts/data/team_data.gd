@@ -233,6 +233,9 @@ var order_task:     String = ""
 var player_commanded_task: String = ""
 # 玩家對此 team 的直接指令；"" = 無指令（faction_ai 自動計算）；由 herald 抵達後寫入
 var task_extra_data: Dictionary = {}   # 子隊任務附加數據（build_type/level/facility_type/target_level 等）
+# ★L3 循環貿易 perf：has_market_visit_value cadence 快取（visit-util 掃含 vision-harvest 昂貴、禁每 gather 算）。
+var market_visit_cached: bool = false
+var market_visit_next_tick: int = 0
 
 # 對 other_id 隊的口碑增減（clamp 0~1，預設 0.5 中立）；外交/施捨/勒索共用
 func update_reputation(other_id: int, delta: float) -> void:
