@@ -59,14 +59,16 @@ func _test_util_pride_vs_pragmatic() -> void:
 func _test_applicable_need_knowledge() -> void:
 	print("--- ③applicable need+knowledge ---")
 	var appl: Callable = DecisionOptions.REGISTRY["求援"]["applicable"]
-	var c1 := DecisionContext.new(); c1.is_subteam = false; c1.help_target_id = 1; c1.help_need_severity = 0.5
-	_ok(appl.call(c1), "needy+知施助者 → applicable")
-	var c2 := DecisionContext.new(); c2.is_subteam = false; c2.help_target_id = -1; c2.help_need_severity = 0.5
+	var c1 := DecisionContext.new(); c1.is_subteam = false; c1.help_target_id = 1; c1.help_need_severity = 0.5; c1.can_send_herald = true
+	_ok(appl.call(c1), "needy+知施助者+可送 → applicable")
+	var c2 := DecisionContext.new(); c2.is_subteam = false; c2.help_target_id = -1; c2.help_need_severity = 0.5; c2.can_send_herald = true
 	_ok(not appl.call(c2), "不知施助者 → not applicable（無對象）")
-	var c3 := DecisionContext.new(); c3.is_subteam = false; c3.help_target_id = 1; c3.help_need_severity = 0.0
+	var c3 := DecisionContext.new(); c3.is_subteam = false; c3.help_target_id = 1; c3.help_need_severity = 0.0; c3.can_send_herald = true
 	_ok(not appl.call(c3), "不缺（severity 0）→ not applicable（need-gated）")
-	var c4 := DecisionContext.new(); c4.is_subteam = true; c4.help_target_id = 1; c4.help_need_severity = 0.5
+	var c4 := DecisionContext.new(); c4.is_subteam = true; c4.help_target_id = 1; c4.help_need_severity = 0.5; c4.can_send_herald = true
 	_ok(not appl.call(c4), "子隊 → not applicable（母團處理）")
+	var c5 := DecisionContext.new(); c5.is_subteam = false; c5.help_target_id = 1; c5.help_need_severity = 0.5; c5.can_send_herald = false
+	_ok(not appl.call(c5), "★不可送(pop<2 can_send_herald=false)→ not applicable（look-before-leap 治 regression）")
 
 # ④ _deposit_help_need：origin 有食糧買單 → 信使 deposit 進施助者 team_known（received_buy_orders 得見）。
 func _test_deposit_need_to_helper() -> void:

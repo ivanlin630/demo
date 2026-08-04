@@ -35,14 +35,16 @@ func _test_util_command_vs_ambition() -> void:
 func _test_applicable_infogap() -> void:
 	print("--- ②applicable info-gap ---")
 	var appl: Callable = DecisionOptions.REGISTRY["偵察"]["applicable"]
-	var c1 := DecisionContext.new(); c1.is_subteam = false; c1.scout_target_id = 5; c1.scout_staleness = 0.5
-	_ok(appl.call(c1), "有 info-gap+知位 → applicable")
-	var c2 := DecisionContext.new(); c2.is_subteam = false; c2.scout_target_id = -1; c2.scout_staleness = 0.5
+	var c1 := DecisionContext.new(); c1.is_subteam = false; c1.scout_target_id = 5; c1.scout_staleness = 0.5; c1.can_send_scout = true
+	_ok(appl.call(c1), "有 info-gap+知位+可派 → applicable")
+	var c2 := DecisionContext.new(); c2.is_subteam = false; c2.scout_target_id = -1; c2.scout_staleness = 0.5; c2.can_send_scout = true
 	_ok(not appl.call(c2), "無待查對象 → not applicable")
-	var c3 := DecisionContext.new(); c3.is_subteam = false; c3.scout_target_id = 5; c3.scout_staleness = 0.0
+	var c3 := DecisionContext.new(); c3.is_subteam = false; c3.scout_target_id = 5; c3.scout_staleness = 0.0; c3.can_send_scout = true
 	_ok(not appl.call(c3), "belief 不陳舊(staleness 0)→ not applicable")
-	var c4 := DecisionContext.new(); c4.is_subteam = true; c4.scout_target_id = 5; c4.scout_staleness = 0.5
+	var c4 := DecisionContext.new(); c4.is_subteam = true; c4.scout_target_id = 5; c4.scout_staleness = 0.5; c4.can_send_scout = true
 	_ok(not appl.call(c4), "子隊 → not applicable")
+	var c5 := DecisionContext.new(); c5.is_subteam = false; c5.scout_target_id = 5; c5.scout_staleness = 0.5; c5.can_send_scout = false
+	_ok(not appl.call(c5), "★無 spare named(can_send_scout=false)→ not applicable（look-before-leap）")
 
 # ③ ctx gather：領主對子民 belief 陳舊 → scout_target 設、staleness>0。
 func _test_ctx_scout_fields() -> void:

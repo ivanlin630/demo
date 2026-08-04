@@ -344,7 +344,7 @@ static var REGISTRY: Dictionary = {
 	"求援": {
 		"terms": [["help_drive", "help"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return not ctx.is_subteam and ctx.help_target_id != -1 and ctx.help_need_severity > 0.0,
+			return not ctx.is_subteam and ctx.help_target_id != -1 and ctx.help_need_severity > 0.0 and ctx.can_send_herald,
 		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:
 			var _hc: DecisionContext = DecisionContext.gather(_state, team)
 			if _hc.help_target_id == -1:
@@ -358,7 +358,7 @@ static var REGISTRY: Dictionary = {
 	"偵察": {
 		"terms": [["scout_drive", "scout"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return not ctx.is_subteam and ctx.scout_target_id != -1 and ctx.scout_staleness > 0.0,
+			return not ctx.is_subteam and ctx.scout_target_id != -1 and ctx.scout_staleness > 0.0 and ctx.can_send_scout,
 		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:
 			var _sc: DecisionContext = DecisionContext.gather(_state, team)
 			if _sc.scout_target_id == -1:

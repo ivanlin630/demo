@@ -1440,22 +1440,17 @@ func _dispatch_help_herald(state: WorldState, mother: TeamData, td: Dictionary) 
 	var target_id: int = int(td.get("order_target", -1))
 	if target_pos == Vector2i(-1, -1) or not state.teams.has(target_id):
 		return false
-	if mother.population <= 1:
-		return false   # 不掏空母隊
-	var sub_sys := SubteamSystem.new()
-	var sub_leader: int = sub_sys._pick_subteam_leader(state, mother, TeamData.TASK_HERALD)
-	if sub_leader == -1 or sub_leader == mother.leader_id:
-		return false   # 無 spare named → 無法派信使（稀有 by construction）
+	if mother.population < 2:
+		return false   # 不掏空母隊（同 can_send_herald gate）
+	# ★資訊網 Part2 reframe：求援信使=anon 1 人跑腿（村莊派個人求救），非 spare named subteam
+	# （requiring named=subteam 機具 artifact；小餓 resident 無 spare named→送不出=dispatch=0 根）。
 	var dist: int = _hex_dist(mother.tile_pos, target_pos)
-	var envoy_id: int = sub_sys.dispatch(state, mother.team_id, sub_leader, ENVOY_POP,
-		TeamData.TASK_HERALD, target_pos, target_id, "")
-	if envoy_id == -1:
+	var herald_id: int = SubteamSystem.new().dispatch_anon_messenger(state, mother.team_id,
+		TeamData.TASK_HERALD, "help_call", target_pos, target_id,
+		{"help_origin": mother.team_id, "timeout": _founding_timeout(dist)})   # empty-handed（零 res carry）
+	if herald_id == -1:
 		return false
-	var herald: TeamData = state.teams[envoy_id]
-	herald.task_reason = "help_call"   # ★區別 envoy_proposal；_evaluate_subteam 專屬 tick
-	herald.task_start_tick = state.world.current_tick
-	herald.task_extra_data = {"help_origin": mother.team_id, "timeout": _founding_timeout(dist)}
-	_equip_envoy_mounts(state, mother, herald)
+	_equip_envoy_mounts(state, mother, state.teams[herald_id])   # 有馬配馬（無馬照走）；不轉 resource
 	Probe.bump("help.herald_dispatched")
 	return true
 

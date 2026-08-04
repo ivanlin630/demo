@@ -77,6 +77,9 @@ var help_target_pos: Vector2i = Vector2i(-1, -1)   # 施助者 belief last-seen 
 var scout_staleness: float = 0.0        # 最在乎實體的 belief 陳舊度 0-1（age/norm；genuine info_value base）
 var scout_target_id: int = -1           # 待查實體（自家 faction 子民 belief 最陳舊者）；-1=無 info-gap
 var scout_target_pos: Vector2i = Vector2i(-1, -1)   # 待查實體 belief last-seen 位（scout travel 目標）
+# ★資訊網 Part2 dispatch gate（look-before-leap、治 seed regression + option 誠實）：能否真派信使/斥候。
+var can_send_herald: bool = false   # pop>=2 可分 1 anon 當信使（1 人隊自己走=relocate 路）
+var can_send_scout: bool = false    # named_members>=2 有 spare named（leader 外）派斥候 subteam
 # Fix A-2 v2（rejection-learning）：有可達且未近期被拒的 host 才把併入當出路——破「餓世界恆拒→重選併入→又拒」loop。
 # host 鏡射 to_task:200 優先序（strong_neighbor else consolidate，非 OR）；cooldown 過期可再試（非永久黑名單）。
 var has_acceptable_join_host: bool = false
@@ -377,6 +380,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 					_st = clampf(float(_age) / maxf(_norm, 1.0), 0.0, 1.0)
 				if _st > c.scout_staleness:
 					c.scout_staleness = _st; c.scout_target_id = _mid; c.scout_target_pos = _mpos
+	# ★資訊網 Part2 dispatch gate：能否真派（look-before-leap，unexecutable option 不進 rank=治 regression+誠實）。
+	c.can_send_herald = team.population >= 2   # 可分 1 anon 信使（pop 1 自己走 relocate）
+	c.can_send_scout = team.named_members.size() >= 2   # spare named（leader 外）派斥候 subteam
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)
 	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:
