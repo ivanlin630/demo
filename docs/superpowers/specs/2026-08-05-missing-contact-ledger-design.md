@@ -1,6 +1,6 @@
 # 失聯帳本 — 預期聯絡＝通例（所有派出單位一個系統）（WHAT / vision）
 
-status: DRAFT（pending R① factcheck 前提 → CLEAN 才鎖）
+status: LOCKED（R① CLEAN 2026-08-05 + 1 整併義務已納：與既有 _evaluate_owner_contact 同原語處理）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-05
 溯源：用戶定 2026-08-05「不只求援——所有信使與子隊都應有同個系統,感知人怎麼太久沒消息」；資訊網補完批。
@@ -30,7 +30,9 @@ date: 2026-08-05
 - **P2** 「派信使查」（scout side-dispatch）已 merged 活（35/40 fire）= 反應端既有。
 - **P3** belief 系統可承載「失聯」標記（team_known/belief store 既有,加 flag 類型即可、非新 store）。
 
-> R① 判準：P1–P3 成立否？尤其 P1「無統一 tracking」（若已有散落 tracking = audit 找出來統一、非新建）。
+> R① verdict：CLEAN。P1 比 claim 更嚴重——**10+ 個獨立 timeout 常數散落**（FOUNDING/TRADE/STATION/SCOUT/FLEE/CONTACT/CONSTRUCT_TRANSIT/letter/envoy…全是**子單位側自我到期**、非母隊側帳本）＝統一標的清單。
+## ★整併義務（R① 定、防第 4 散落點）
+既有 **反方向失聯偵測**：`_evaluate_owner_contact` + `_trigger_defection_evaluation`（faction_ai:4651-4664）＝「**村發現領主久無音訊** → 叛離評估」，用同款原語（`BeliefSystem.best_estimate().last_tick` + `_DAYS` 門檻）。**R²/HOW 必須明確處理關係**：帳本應 **reuse 同款原語**（last_tick 推理）、雙方向（母→子、子→母）收斂同一套失聯感知——**否則新帳本自己就是第 4 個散落知識點**（正撞本 spec 要解的病）。note：該處 `_DAYS` 門檻＝死常數照妖鏡候選（同 DEFECT threshold、記 faction-balance 批、非本批）。
 
 ## 守
 通例統一非特例／人格非死常數／零 god-view（自我記憶推理）／反應走既有 side-action／determinism。

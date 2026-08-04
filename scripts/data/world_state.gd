@@ -12,6 +12,10 @@ var world: WorldData = WorldData.new()
 var teams: Dictionary = {}
 var persons: Dictionary = {}
 var global_messages: Array = []
+# ★資訊網 B carrier：飛行中的信件（求援 distress）——net-new、非 state.teams 成員
+# → 免撞 succession/cull/subteam-routing/on_leader_death/combat 全 team 機具（B root 根治）。
+# 每封 Dictionary：{origin_team_id, faction_id, target_lord_id, target_pos, kind, payload, current_pos, spawn_tick, timeout, speed}
+var in_transit_letters: Array = []
 # 觀測事件 channel（observer slice）：emit_ambient 專用 append-only。
 # 獨立於 global_messages —— 後者 size() 被 order_system 借作 order_id 空間，
 # 任何 append 會位移 oid 流 = 擾動訂單行為；此 channel sim 零讀（僅 observer UI 消費）。

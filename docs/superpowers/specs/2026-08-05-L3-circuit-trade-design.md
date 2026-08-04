@@ -1,6 +1,6 @@
 # L3 循環貿易 — 商人巡市集讓遠距跨勢力貿易湧現（WHAT / vision）
 
-status: DRAFT（pending R① factcheck 前提 → CLEAN 才鎖）
+status: LOCKED（R① CLEAN 2026-08-05 + P2/P3 訂正已納：真缺口=既有 fallback 路太 naive 非「無此路」）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-05
 溯源：§5 三層 root 之 L3（隔格跨勢力貿易死:賣方從不讀外市集板）；資訊網補完批。
@@ -29,11 +29,13 @@ L1（勢力內賑濟）/L2（同格交易）已修活；**L3 = 隔格 + 跨勢�
 
 ## 現況前提（★pending R①）
 - **P1** `read_market_board`（order_system:194）= 到場 firsthand 讀板（既有、對）。
-- **P2** `best_arbitrage_order` + `MERCHANT_MAX_RANGE=20`（order_system:233/240）= 商人**只對「已聽聞」的單反應**——**無「主動去讀板」決策**（= L3 缺口本體）。
-- **P3** settled 隊無任何「訪外市集」候選生成路（§5 measured：board_read 沒 fire）。
+- **P2（R① 訂正）** 既有一條「無 arb 時巡最近 known 市集」fallback 路（`_merchant_trade_target` faction_ai:2563-2573 + `_nearest_market_outpost`:2578-2593；「貿易」option applicable = `has_goods or has_arb`，options.gd:18）——**「無主動讀板決策」字面不成立**。**真缺口（更窄、精確）**：①該路 **naive**（永遠揀最近、零 staleness/util 秤、零人格分化）②applicability 被 `has_goods/has_arb` 擋 → **settled 產隊進不去**③只能去 `team_market_known`（聽過/看過）內的市集 → **永遠發現不了未知遠方市集**。
+- **P3（R① 訂正）** settled 隊 board_read 沒 fire（§5 measured）＝上述 ②③ 的後果（applicability 擋 + known 範圍窄），非「零路存在」。
 - **P4** L2 同格撮合 + keep-line 已 merged 活（成交 +72% 多床）。
 
-> R① 判準：P1–P4 成立否？尤其 P2「無主動訪市決策」= 缺口本體。
+> R① verdict：CLEAN（P2/P3 依親讀訂正如上）。
+## ★HOW 方向約束（R① 定、防平行機制）
+**升級既有路、非從零蓋新 option**：把 `_nearest_market_outpost` 的 naive 揀法升成 **genuine util 秤**（staleness+套利期望−路程、人格加權）+ 放寬 applicability 讓 settled 產隊進得去 + 探索未知市集路（資訊價值秤）。**禁**另建平行「訪市」機制。
 
 ## 守
 湧現非 script／人格非死常數／感知鐵律（資訊與貨全物理走）／need-gated + keep-line／determinism。

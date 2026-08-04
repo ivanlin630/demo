@@ -12,6 +12,18 @@ const MERCHANT_MAX_RANGE: int = 20
 # 賣＝effective_holding−reserve>0 的餘量；買＝reserve−effective_holding>0 的缺口；food 走 food_security_target 統一。
 const ORDER_POST_MIN: float = 1.0   # 掛單最小量（<此不值得掛）
 
+# ★資訊網 S-prop（看板 relay hub、修 :79 dead-end）：訪客抵市集除讀外，也 deposit 自己 team_known 的 order
+# copy 到看板→看板累積異地消息再輻射給後續訪客（載體=人流、延遲=訪問間隔、decay=board age）。守感知鐵律
+# （物理抵 outpost_level>0 才 deposit/read）。★decay 錨既有公式（SimMessageSystem.TIME_DECAY_PER_TICK，非 invent）。
+const BOARD_RELAY_CAP: int = 32          # per-board relayed entry 上限（perf/memory bound、非 fire-crank；FIFO 淘汰最舊）
+const BOARD_RELAY_MIN_STRENGTH: float = 0.05   # relayed entry decay strength <此 → 清（鏡射 SimMessageSystem copy.strength<=0.05 skip）
+
+# relayed board entry 的 age-decayed strength（錨 SimMessageSystem time_factor 公式：max(1−age×TIME_DECAY_PER_TICK,0.1)×deposit_strength）。
+static func _board_entry_strength(state: WorldState, e: Dictionary) -> float:
+	var age: int = state.world.current_tick - int(e.get("origin_tick", state.world.current_tick))
+	var time_factor: float = maxf(1.0 - float(age) * SimMessageSystem.TIME_DECAY_PER_TICK, 0.1)
+	return float(e.get("strength", 1.0)) * time_factor
+
 var _msg := SimMessageSystem.new()
 
 # 發訂單：權威存發起隊 active_orders + emit message 傳播副本。回 order_id。
@@ -52,6 +64,8 @@ func _register_on_board(state: WorldState, team: TeamData, oid: int, kind: Strin
 	tile.market_orders.append({
 		"order_id": oid, "kind": kind, "res": res,
 		"qty_remaining": qty, "origin_team": team.team_id, "expire_tick": expire,
+		# ★資訊網 S-prop：origin_tick(age→decay) + strength + relayed 旗（本隊原生單 relayed=false、由 _sync_board 權威維護）。
+		"origin_tick": state.world.current_tick, "strength": 1.0, "relayed": false,
 	})
 	Probe.bump("g1.board_register")
 
@@ -199,35 +213,90 @@ func read_market_board(state: WorldState, team: TeamData) -> void:
 	Probe.bump("g1.market_arrive")   # WS-2b 觀測：隊抵達市集 outpost（讀看板的前提）
 	if not state.team_known.has(team.team_id):
 		state.team_known[team.team_id] = []
+	# ★S-prop step0：prune 過期/decay 殆盡的 relayed entry（本隊原生 entry 由 _sync_board 權威維護、此不碰）。
+	var alive: Array = []
+	for e in tile.market_orders:
+		if bool(e.get("relayed", false)):
+			if int(e.get("expire_tick", 0)) <= state.world.current_tick:
+				Probe.bump("board.relay_prune"); continue
+			if _board_entry_strength(state, e) < BOARD_RELAY_MIN_STRENGTH:
+				Probe.bump("board.relay_prune"); continue
+		alive.append(e)
+	tile.market_orders = alive
 	# 已知 order_id（去重）
 	var known_ids: Dictionary = {}
 	for m in state.team_known[team.team_id]:
 		if m.type == "order_buy" or m.type == "order_sell":
 			known_ids[int(m.params.get("order_id", -1))] = true
+	# ★S-prop step1：讀看板（含他隊原生單 + 異地 relayed 消息）→ 進 team_known。relayed 帶 decayed strength（staleness）。
 	for e in tile.market_orders:
 		if int(e["origin_team"]) == team.team_id:
 			continue   # 自己的單不讀
 		var oid: int = int(e["order_id"])
 		if known_ids.has(oid):
 			continue   # 去重
+		var is_relay: bool = bool(e.get("relayed", false))
 		var msg := MessageData.new()
 		msg.id = state.global_messages.size()
 		msg.type = "order_" + String(e["kind"])
-		msg.description = "[Board] Team%d %s %s ×%d" % [int(e["origin_team"]), String(e["kind"]), String(e["res"]), int(e["qty_remaining"])]
+		msg.description = "[Board%s] Team%d %s %s ×%d" % ["-relay" if is_relay else "", int(e["origin_team"]), String(e["kind"]), String(e["res"]), int(e["qty_remaining"])]
 		msg.source_pos = tile.tile_pos
 		msg.origin_team_id = int(e["origin_team"])
-		msg.origin_tick = state.world.current_tick
-		msg.strength = 1.0
-		msg.is_distorted = false   # firsthand 親讀 = honest 不失真
+		# relayed：保原 origin_tick（age 累積跨 relay hop→decay 真起作用）；原生單=firsthand now。
+		msg.origin_tick = int(e.get("origin_tick", state.world.current_tick)) if is_relay else state.world.current_tick
+		msg.strength = _board_entry_strength(state, e) if is_relay else 1.0
+		msg.is_distorted = false   # 親讀公開看板 = honest（relay staleness 走 strength/age 非 distort）
 		msg.params = {
 			"order_id": oid, "res": e["res"], "qty": int(e["qty_remaining"]),
-			"origin_team": int(e["origin_team"]), "origin_pos": tile.tile_pos,
+			"origin_team": int(e["origin_team"]), "origin_pos": e.get("origin_pos", tile.tile_pos),
 			"expire_tick": int(e["expire_tick"]),
 		}
 		state.global_messages.append(msg)
 		state.team_known[team.team_id].append(msg)
 		known_ids[oid] = true
-		Probe.bump("g1.board_read")
+		Probe.bump("board.relay_read" if is_relay else "g1.board_read")
+	# ★S-prop step2：deposit 訪客 team_known 的 order 消息 copy 到看板 → 累積異地消息再輻射（載體=人流）。
+	_deposit_known_orders_to_board(state, team, tile)
+
+# ★S-prop：訪客把自己 team_known 的 order_buy/order_sell 消息 deposit 為看板 relayed entry（異地消息中繼）。
+# dedup by order_id（看板已有不重複）；cap BOARD_RELAY_CAP（FIFO 淘汰最舊 relayed）；帶 origin_tick(age)+strength(decay)。
+# 守感知鐵律：只 deposit team 親知的單（team_known）、只在物理所在市集看板、relayed 帶 decay 會 stale。
+func _deposit_known_orders_to_board(state: WorldState, team: TeamData, tile: HexTileData) -> void:
+	var board_oids: Dictionary = {}
+	for e in tile.market_orders:
+		board_oids[int(e["order_id"])] = true
+	for m in state.team_known.get(team.team_id, []):
+		if m.type != "order_buy" and m.type != "order_sell":
+			continue
+		var oid: int = int(m.params.get("order_id", -1))
+		if oid < 0 or board_oids.has(oid):
+			continue   # 看板已有（他隊原生 or 已 relayed）→ 不重複
+		if int(m.params.get("expire_tick", 0)) <= state.world.current_tick:
+			continue   # 過期消息不中繼
+		var cur_strength: float = float(m.strength)
+		if cur_strength < BOARD_RELAY_MIN_STRENGTH:
+			continue   # 訪客手上已 decay 殆盡的消息不值中繼
+		tile.market_orders.append({
+			"order_id": oid, "kind": String(m.type).trim_prefix("order_"),
+			"res": String(m.params.get("res", "")), "qty_remaining": int(m.params.get("qty", 0)),
+			"origin_team": int(m.params.get("origin_team", -1)), "expire_tick": int(m.params.get("expire_tick", 0)),
+			"origin_tick": int(m.origin_tick), "strength": cur_strength, "relayed": true,
+			"origin_pos": m.params.get("origin_pos", tile.tile_pos),
+		})
+		board_oids[oid] = true
+		Probe.bump("board.relay_deposit")
+	# cap：relayed entry 過多 → FIFO 淘汰最舊（原生單不淘）。
+	var relayed_count: int = 0
+	for e in tile.market_orders:
+		if bool(e.get("relayed", false)): relayed_count += 1
+	if relayed_count > BOARD_RELAY_CAP:
+		var drop: int = relayed_count - BOARD_RELAY_CAP
+		var kept: Array = []
+		for e in tile.market_orders:
+			if drop > 0 and bool(e.get("relayed", false)):
+				drop -= 1; Probe.bump("board.relay_evict"); continue
+			kept.append(e)
+		tile.market_orders = kept
 
 # 套利挑單：sell盤(便宜買)/buy單(高價賣) 取 local_value 差最大者（殘缺情報，讀 received）。
 func best_arbitrage_order(state: WorldState, merchant: TeamData) -> Dictionary:

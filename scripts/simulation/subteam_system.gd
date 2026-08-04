@@ -64,6 +64,36 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		parent_id, sub.team_id, sub_leader_id, str(sub.named_members), pop_count, sub_cap, task])
 	return sub.team_id
 
+# ★資訊網 Part2：派 anon 1 人信使（≠subteam，無 named leader）——村莊派個人求救。
+# leader_id=-1（無 named；population getter 不計 phantom→pop=anon 1）；只搬 1 anon pop、★零 resource carry
+# （R² tracking：餓 resident 任何 res 流失都在乎，信使空手；不沿 dispatch() proportional-split）。gate 母隊 pop>=2。
+func dispatch_anon_messenger(state: WorldState, parent_id: int, task: String, reason: String,
+		move_target: Vector2i, order_target_id: int, extra_data: Dictionary) -> int:
+	var parent: TeamData = state.teams.get(parent_id)
+	if parent == null or parent.population < 2:
+		return -1   # 不掏空（同 can_send_herald gate、冗餘守）
+	if AnonTierSystem.total_pop(parent) < 1:
+		return -1   # 無 anon 可分當信使
+	var sub := TeamData.new()
+	sub.team_id          = _next_team_id(state)
+	sub.tile_pos         = parent.tile_pos
+	sub.current_task     = task
+	sub.task_priority    = TaskArbiter.PRIO_DISPATCH if task != TeamData.TASK_IDLE else 0
+	sub.task_reason      = reason
+	sub.move_target      = move_target
+	sub.order_target_id  = order_target_id
+	sub.leader_id        = -1   # ★anon 信使無 named leader（team infra 容 -1；population 不計 phantom）
+	sub.task_start_tick  = state.world.current_tick
+	sub.task_extra_data  = extra_data
+	state.set_readiness(sub, parent.readiness, "anon_msg_init")
+	state.set_team_tags(sub, [TeamData.TAG_SUBTEAM], "anon_msg_init")
+	# ★empty-handed：只搬 1 anon pop、零 resource transfer（不沿 dispatch() 的 proportional resource split）。
+	AnonTierSystem.transfer_proportional(parent, sub, 1)
+	state.create_team(sub)
+	state.set_subteam_parent(sub, parent_id)
+	state.set_team_faction(sub, parent.faction_id)
+	return sub.team_id
+
 func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	var sub: TeamData = state.teams.get(sub_id)
 	if sub == null or sub.parent_team_id == -1:

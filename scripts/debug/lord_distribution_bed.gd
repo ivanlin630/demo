@@ -10,8 +10,11 @@ func _initialize() -> void:
 	_test_price_factor_spectrum()
 	_test_price_factor_continuous_not_gate()
 	_test_distribute_candidate_fires_persona()
+	_test_descan_no_runway_gate()          # ★資訊網 de-scan：憑送達 belief(buy-order)fire、不讀 resident live runway/死常數門檻
+	_test_side_dispatch_fires_when_busy()  # ★資訊網 side-dispatch：領主本業覓食(非 distribute)仍平行派賑濟 convoy
 	_test_free_distribute_coin_conserving()
 	_test_paid_distribute_coin_conserving()
+	_test_ownerless_free_dist()            # ★資訊網:免費 gift 到無主 resident 據點(owner==null)不 bail、食物入 tile
 	if _fail == 0:
 		print("=== DONE === ALL PASS")
 	else:
@@ -66,6 +69,47 @@ func _test_distribute_candidate_fires_persona() -> void:
 		else:
 			_bad("%s distribute candidate 未 fire(cands=%d)" % [persona["n"], cands.size()])
 
+# ★資訊網 de-scan（arc 最後一哩）：領主憑「聽到的」buy-order(belief) fire distribute，
+# 不再直讀 resident live runway/死常數門檻。RED=舊碼 resident food 高(runway>DISTRIB_DEFICIT_DAYS)→continue skip。
+func _test_descan_no_runway_gate() -> void:
+	var setup: Array = _mk_lord_state(0.5, 0.5)   # neutral persona
+	var state: WorldState = setup[0]; var lord: TeamData = setup[1]
+	# resident food 拉高（runway 遠超舊 DISTRIB_DEFICIT_DAYS=4.0）——舊碼會 skip；de-scan 憑 buy-order belief 仍 fire。
+	var resident: TeamData = state.teams[2]
+	ResourceBank.set_amt(resident, "food", 999.0, "descan")   # runway 999/(5×0.8)≈250 >> 4.0
+	var ctx: DecisionContext = DecisionContext.gather(state, lord)
+	var lv: Dictionary = TradeValuation.leader_vals(state, lord)
+	var cands: Array = GoalResolver._distribute_candidates(state, lord, ctx, lv)
+	var fired: bool = false
+	for c in cands:
+		if String(c.get("label", "")) == "distribute_food": fired = true; break
+	if fired:
+		_ok("de-scan:resident runway≈250(遠>舊門檻4.0)仍 fire distribute=憑送達 belief(buy-order)非讀 live runway/死常數")
+	else:
+		_bad("de-scan 破:resident food 高→未 fire=仍讀 live runway god-view 或死常數門檻殘留")
+
+# ★資訊網 distribute side-dispatch：領主 body 忙本業（覓食、非 distribute）仍平行派賑濟 convoy＝脫主 argmax。
+# RED=distribute 若留主 argmax、lord 覓食 latch→distribute 永輸→不派（RE-measure#5 症）。
+func _test_side_dispatch_fires_when_busy() -> void:
+	var setup: Array = _mk_lord_state(0.5, 1.0)   # 高義氣領主（relief 強）
+	var state: WorldState = setup[0]; var lord: TeamData = setup[1]
+	lord.current_task = TeamData.TASK_FORAGE   # ★body 忙覓食（非 distribute）
+	var teams_before: int = state.teams.size()
+	Probe.reset(); Probe.enabled = true
+	FactionAISystem.new()._try_distribute_side(state, lord)
+	Probe.enabled = false
+	var dispatched: int = int(Probe.counts.get("distribute.dispatch", 0))
+	var convoy_spawned: bool = false
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id == lord.team_id and t.current_task == TeamData.TASK_CONVOY:
+			convoy_spawned = true; break
+	if dispatched == 1 and convoy_spawned and lord.current_task == TeamData.TASK_FORAGE:
+		_ok("side-dispatch:領主覓食中仍平行派賑濟 convoy(distribute.dispatch=1、body task=覓食不變=脫主 argmax directive)")
+	else:
+		_bad("side-dispatch 破:dispatch=%d convoy=%s lord_task=%s teams %d→%d" % [
+			dispatched, str(convoy_spawned), lord.current_task, teams_before, state.teams.size()])
+
 # 免費分配(override_ask=0):食物轉入居民、居民 coin 不變、coin 守恆(lord+resident 總 coin 不變)。
 func _test_free_distribute_coin_conserving() -> void:
 	var st: Array = _mk_sell_fixture()
@@ -95,6 +139,19 @@ func _test_paid_distribute_coin_conserving() -> void:
 		_ok("付費分配:居民付 %.0f coin==porter 收 %.0f(coin 守恆,領主抽 coin)" % [rcoin_paid, pcoin_got])
 	else:
 		_bad("付費分配 coin 破:ok=%s 付=%.1f 收=%.1f" % [str(ok), rcoin_paid, pcoin_got])
+
+# ★資訊網 ownerless free_dist edge：免費 gift 到無主(owner==null)resident 據點 → 不 bail sell_ownerless、食物入 tile storage。
+func _test_ownerless_free_dist() -> void:
+	var st: Array = _mk_sell_fixture()
+	var state: WorldState = st[0]; var porter: TeamData = st[1]; var tile: HexTileData = st[3]
+	var food0: float = float(tile.public_storage.get("food", 0))
+	# owner=null（無主據點）+ override_ask=0（免費 gift）
+	var ok: bool = InteractionSystem.new()._market_visitor_sell(state, porter, null, tile, 77, "food", 100, {}, 40.0, 0.0)
+	var deposited: float = float(tile.public_storage.get("food", 0)) - food0
+	if ok and deposited > 0.0:
+		_ok("ownerless free_dist:無主據點免費直注 %.0f food 入 tile(不 bail sell_ownerless、coin no-op)" % deposited)
+	else:
+		_bad("ownerless free_dist 破:ok=%s deposited=%.1f(仍 bail sell_ownerless?)" % [str(ok), deposited])
 
 # ── fixtures ──
 # lord(faction leader,food surplus)+resident(同 faction,deficit,持 coin,掛 food buy-order @自有 outpost)。

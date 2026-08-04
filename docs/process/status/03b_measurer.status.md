@@ -12,7 +12,9 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——T3死歸因verdict已完成寄出
+**狀態**：工作中（等下一票）——relief通用化diagnostic verdict已完成寄出
+
+**工單**：無（relief通用化diagnostic verdict已完成寄systems：★①settled econ床(peaceful_economy seed70730 6mo)全程幾乎0 faction,g2.faction_found=0/indep.found_*=0全未觸發正規建國路,唯一一次faction形成(day5 Team5主服Team2→勢力0,vassal路非g2.faction_found)該member全程無famine——distribute=0在此案例=真無需求非機制不apply,證實systems假說=結構缺失為主因。②③直接reuse本session已landed的infonet_whole.json逐輪數據(唯一faction-rich+resident真餓settled床):RE6(pre-fix)6→6→settled1(5bail)food1.0;RE7(9b502d52免費直注)5→2→settled2(bail=0)food58.0;T1confirm(20a7d8ef)14→6→settled6食72.0——唯一斷點(settle站bail)已被兩輪fix修好,鏈條現通;economy-balance誠實揭露T1連續16天food=0(day28-43)才等到relief,救得活不致死但非穩定復甦,波動撐命。落地1新檔+3引用既有檔。已回systems handback:2026-08-05-measurer-to-systems-relief-general-diagnostic-verdict.md，別下accept，結構缺失vs機制缺陷判準交systems/blueprint。
 
 **工單**：無（T3死歸因verdict已完成寄systems：★★不是masked gap,是第三機制——event_faction_defect(T3義氣0.3<DEFECT_HONOR_THRESHOLD 0.35,unrest_turns≥20)day0(tick~60)T3自行脫離faction1,member剩1(僅T2)→連鎖disband_faction→T2/T3 faction_id雙雙變-1全程60天。①T1仍救活confirm(food_delivered58→72,dispatch14,faction fix不退)。②(a)T3 herald mini-util數學閉式證明恆負(-0.427封頂severity=1仍負)但這是formula事實非實際路徑(實際_resolve_help_target在faction_id==-1就先擋,mini-util從未真被算)(b)T2 scout同理恆負且faction null-check直接擋(c)discriminator決定性:手動注入T3distress進T2.team_known仍0dispatch,繞過cadence直呼也0,直接call _distribute_candidates回傳[],追根=t2.faction_id當下=-1——非util失敗是faction根本不存在。★誠實結論:genuine-vs-masked判準本身不完全適用,是第三上游機制(faction defect,同樣T3自己低義氣觸發)把整條relief鏈structural prerequisite自己拆了連T2都被拖累。落地5檔已ls/wc驗證。清理:temp 2 beds已刪,(c)非純觀測(手動寫team_known)已聲明,期間發現另一session動別的檔案未觸碰。已回systems handback:2026-08-05-measurer-to-systems-t3-death-attribution-verdict.md，別下accept，是否動defect門檻交systems/blueprint判。
 

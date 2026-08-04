@@ -1,0 +1,1196 @@
+{
+  "bed": "t3_targeting_diag_bed (infonet_whole seed 1337 6mo inline、純觀測 3-station tap)",
+  "convoys": {
+    "10": {
+      "gone_tick": 1300,
+      "last_phase": "OUTBOUND",
+      "last_tile": "(18, 13)",
+      "market_pos": "(18, 14)",
+      "phases": {
+        "OUTBOUND": 900
+      },
+      "porter": 10,
+      "spawn_tick": 400,
+      "terminus": 1
+    },
+    "11": {
+      "gone_tick": 2810,
+      "last_phase": "OUTBOUND",
+      "last_tile": "(14, 8)",
+      "market_pos": "(18, 14)",
+      "phases": {
+        "OUTBOUND": 10
+      },
+      "porter": 11,
+      "spawn_tick": 2800,
+      "terminus": 1
+    },
+    "12": {
+      "gone_tick": 4100,
+      "last_phase": "RETURN",
+      "last_tile": "(18, 14)",
+      "market_pos": "(18, 14)",
+      "phases": {
+        "OUTBOUND": 900,
+        "RETURN": 100
+      },
+      "porter": 12,
+      "spawn_tick": 3100,
+      "terminus": 1
+    },
+    "13": {
+      "gone_tick": 4310,
+      "last_phase": "OUTBOUND",
+      "last_tile": "(14, 8)",
+      "market_pos": "(18, 14)",
+      "phases": {
+        "OUTBOUND": 20
+      },
+      "porter": 13,
+      "spawn_tick": 4300,
+      "terminus": 1
+    }
+  },
+  "diagnostic": "T3 cross-faction relief 目標錯位（measure-first、只交真值）",
+  "dist_heard": [
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "gate_same_fac": true,
+      "lord": 2,
+      "lord_fac": 1,
+      "opos": "(18, 14)",
+      "rid": 1,
+      "rid_fac": 1
+    }
+  ],
+  "dist_pick": [
+    {
+      "lord": 2,
+      "lord_fac": 1,
+      "mpos": "(18, 14)",
+      "oid": 10,
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "lord": 2,
+      "lord_fac": 1,
+      "mpos": "(18, 14)",
+      "oid": 100,
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "lord": 2,
+      "lord_fac": 1,
+      "mpos": "(18, 14)",
+      "oid": 151,
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "lord": 2,
+      "lord_fac": 1,
+      "mpos": "(18, 14)",
+      "oid": 100,
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "lord": 2,
+      "lord_fac": 1,
+      "mpos": "(18, 14)",
+      "oid": 100,
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "lord": 2,
+      "lord_fac": 1,
+      "mpos": "(18, 14)",
+      "oid": 100,
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "lord": 2,
+      "lord_fac": 1,
+      "mpos": "(18, 14)",
+      "oid": 100,
+      "rid": 1,
+      "rid_fac": 1
+    },
+    {
+      "lord": 2,
+      "lord_fac": 1,
+      "mpos": "(18, 14)",
+      "oid": 100,
+      "rid": 1,
+      "rid_fac": 1
+    }
+  ],
+  "dist_settle": [
+    {
+      "deposited": 26,
+      "oid": 58,
+      "owner_fac": 1,
+      "porter": 10,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    },
+    {
+      "deposited": 8,
+      "oid": 145,
+      "owner_fac": 1,
+      "porter": 12,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    },
+    {
+      "deposited": 2,
+      "oid": 149,
+      "owner_fac": 1,
+      "porter": 12,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    },
+    {
+      "deposited": 5,
+      "oid": 145,
+      "owner_fac": 1,
+      "porter": 12,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    },
+    {
+      "deposited": 1,
+      "oid": 147,
+      "owner_fac": 1,
+      "porter": 12,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    },
+    {
+      "deposited": 6,
+      "oid": 145,
+      "owner_fac": 1,
+      "porter": 12,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    },
+    {
+      "deposited": 2,
+      "oid": 149,
+      "owner_fac": 1,
+      "porter": 12,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    },
+    {
+      "deposited": 3,
+      "oid": 144,
+      "owner_fac": 1,
+      "porter": 12,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    },
+    {
+      "deposited": 5,
+      "oid": 147,
+      "owner_fac": 1,
+      "porter": 12,
+      "terminus": 1,
+      "tile_owner": 1,
+      "tile_pos": "(18, 14)"
+    }
+  ],
+  "probe": {
+    "distribute.deliver": 9,
+    "distribute.dispatch": 5,
+    "distribute.food_delivered": 58
+  },
+  "t1_t3": {
+    "1": {
+      "daily": [
+        {
+          "day": 1,
+          "food": 10,
+          "pop": 9,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 2,
+          "food": 5.2,
+          "pop": 8,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 3,
+          "food": 0,
+          "pop": 7,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 4,
+          "food": 0,
+          "pop": 7,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 5,
+          "food": 0,
+          "pop": 6,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 6,
+          "food": 24.3,
+          "pop": 6,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 7,
+          "food": 20.6,
+          "pop": 6,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 8,
+          "food": 15.1,
+          "pop": 6,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 9,
+          "food": 11.5,
+          "pop": 6,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 10,
+          "food": 5.9,
+          "pop": 6,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 11,
+          "food": 2.5,
+          "pop": 5,
+          "pos": "(18, 14)",
+          "task": "治理"
+        },
+        {
+          "day": 12,
+          "food": 0,
+          "pop": 4,
+          "pos": "(18, 14)",
+          "task": "治理"
+        },
+        {
+          "day": 13,
+          "food": 0,
+          "pop": 3,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 14,
+          "food": 0,
+          "pop": 3,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 15,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 16,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 17,
+          "food": 8,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 18,
+          "food": 6.1,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 19,
+          "food": 4.8,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 20,
+          "food": 9.9,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 21,
+          "food": 15.6,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 22,
+          "food": 14.3,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 23,
+          "food": 17.4,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 24,
+          "food": 16.1,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 25,
+          "food": 19.3,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 26,
+          "food": 18.1,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 27,
+          "food": 16.8,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 28,
+          "food": 14.9,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 29,
+          "food": 13.7,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 30,
+          "food": 11.8,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 31,
+          "food": 10.5,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 32,
+          "food": 9.3,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 33,
+          "food": 7.4,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 34,
+          "food": 6.1,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 35,
+          "food": 4.2,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 36,
+          "food": 2.9,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 37,
+          "food": 1.7,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 38,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 39,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "治理"
+        },
+        {
+          "day": 40,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "治理"
+        },
+        {
+          "day": 41,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "貿易"
+        },
+        {
+          "day": 42,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "貿易"
+        },
+        {
+          "day": 43,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "貿易"
+        },
+        {
+          "day": 44,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "貿易"
+        },
+        {
+          "day": 45,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "貿易"
+        },
+        {
+          "day": 46,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 47,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 48,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 49,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 50,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 51,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 52,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "覓食"
+        },
+        {
+          "day": 53,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "起義"
+        },
+        {
+          "day": 54,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 14)",
+          "task": "治理"
+        },
+        {
+          "day": 55,
+          "food": 7.3,
+          "pop": 2,
+          "pos": "(18, 15)",
+          "task": "覓食"
+        },
+        {
+          "day": 56,
+          "food": 7.3,
+          "pop": 2,
+          "pos": "(19, 15)",
+          "task": "覓食"
+        },
+        {
+          "day": 57,
+          "food": 7.3,
+          "pop": 2,
+          "pos": "(19, 16)",
+          "task": "覓食"
+        },
+        {
+          "day": 58,
+          "food": 6,
+          "pop": 2,
+          "pos": "(19, 16)",
+          "task": "覓食"
+        },
+        {
+          "day": 59,
+          "food": 7.3,
+          "pop": 2,
+          "pos": "(19, 15)",
+          "task": "覓食"
+        },
+        {
+          "day": 60,
+          "food": 6.7,
+          "pop": 2,
+          "pos": "(19, 15)",
+          "task": "覓食"
+        }
+      ],
+      "death_tick": -1,
+      "last_pop": 2
+    },
+    "3": {
+      "daily": [
+        {
+          "day": 1,
+          "food": 9.5,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 2,
+          "food": 3.9,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 3,
+          "food": 0,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 4,
+          "food": 0,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 5,
+          "food": 0,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 6,
+          "food": 0,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 7,
+          "food": 0,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "建設"
+        },
+        {
+          "day": 8,
+          "food": 0,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "建設"
+        },
+        {
+          "day": 9,
+          "food": 0,
+          "pop": 10,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 10,
+          "food": 0,
+          "pop": 9,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 11,
+          "food": 0,
+          "pop": 8,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 12,
+          "food": 0,
+          "pop": 7,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 13,
+          "food": 0,
+          "pop": 6,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 14,
+          "food": 0,
+          "pop": 5,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 15,
+          "food": 0,
+          "pop": 4,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 16,
+          "food": 0,
+          "pop": 3,
+          "pos": "(18, 8)",
+          "task": "守城"
+        },
+        {
+          "day": 17,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "守城"
+        },
+        {
+          "day": 18,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 19,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 20,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 21,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 22,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 23,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 24,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 25,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "守城"
+        },
+        {
+          "day": 26,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "守城"
+        },
+        {
+          "day": 27,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 28,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 29,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 30,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 31,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 32,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 33,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 34,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "守城"
+        },
+        {
+          "day": 35,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "守城"
+        },
+        {
+          "day": 36,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 37,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 38,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 39,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 40,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        },
+        {
+          "day": 41,
+          "food": 0,
+          "pop": 2,
+          "pos": "(18, 8)",
+          "task": "覓食"
+        }
+      ],
+      "death_tick": 10080,
+      "last_pop": 2
+    }
+  }
+}

@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: "[R① factcheck×2·補完批兩spec前提·(1)L3循環貿易=docs/superpowers/specs/2026-08-05-L3-circuit-trade-design.md:P1 read_market_board(order_system:194)=到場firsthand讀板·P2 best_arbitrage_order+MERCHANT_MAX_RANGE=20(order_system:233/240)=商人只對已聽聞單反應、無『主動去讀板』決策(=缺口本體,重點驗)·P3 settled隊無訪外市集候選生成路(§5 measured board_read沒fire)·P4 L2同格撮合+keep-line已merged活·(2)失聯帳本=docs/superpowers/specs/2026-08-05-missing-contact-ledger-design.md:P1派出單位無統一tracking(herald/scout有lifecycle taps但母隊側無預期回報帳;subteam/convoy各自無失聯感知——★重點驗:若已有散落tracking要找出來統一非新建,同3旋鈕教訓)·P2 scout side-dispatch已merged活(反應端既有)·P3 belief store可承載失聯flag(加類型非新store)·兩spec核心guardrail已用戶ratified(L3路線湧現非waypoint/帳本人格反應非死常數),R①只驗code前提·CLEAN→鎖→systems R²→build(各自新slice branch)"
 ---
 

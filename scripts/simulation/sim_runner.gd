@@ -135,6 +135,7 @@ static var SYSTEMS: Array = [
 	{"name": "equip",            "fn": "_step1c_update_equipment",  "lod": LOD_BOTH, "shape": "teams",         "tl": "near.equip"},
 	{"name": "strategic_move",   "fn": "_step2a_strategic_move",    "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
 	{"name": "move",             "fn": "_step2_move_teams",         "lod": LOD_BOTH, "shape": "move",          "tl": "near.move"},
+	{"name": "letters",          "fn": "_step_tick_letters",        "lod": LOD_BOTH, "shape": "state",         "tl": ""},
 	{"name": "propagate",        "fn": "_step3_propagate_messages", "lod": LOD_BOTH, "shape": "moved",         "tl": ""},
 	{"name": "intel",            "fn": "_step3b_exchange_intel",    "lod": LOD_BOTH, "shape": "moved",         "tl": ""},
 	{"name": "market",           "fn": "_step3c_read_market_board", "lod": LOD_BOTH, "shape": "arrived",       "tl": "near.messages"},
@@ -149,6 +150,7 @@ static var SYSTEMS: Array = [
 	{"name": "salary",           "fn": "_step6c_salary",            "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
 	{"name": "fatigue",          "fn": "_step6d_fatigue",           "lod": LOD_BOTH, "shape": "teams_cadence", "tl": "near.consume"},
 	{"name": "faction_ai",       "fn": "_step6b_faction_ai",        "lod": LOD_BOTH, "shape": "teams",         "tl": "near.faction_ai"},
+	{"name": "info_dispatch",    "fn": "_step6b2_info_dispatch",    "lod": LOD_BOTH, "shape": "teams",         "tl": "near.faction_ai"},
 	{"name": "training",         "fn": "_step6f_training",          "lod": LOD_BOTH, "shape": "teams",         "tl": ""},
 	{"name": "strategic_ai",     "fn": "_step6e_strategic_ai",      "lod": LOD_BOTH, "shape": "state",         "tl": "near.strategic_ai"},
 	{"name": "reactions",        "fn": "_step7_person_reactions",   "lod": LOD_NEAR, "shape": "teams",         "tl": ""},
@@ -455,6 +457,14 @@ func _step6d_fatigue(state: WorldState, team_ids: Array, cadence_ticks: int) -> 
 
 func _step6b_faction_ai(state: WorldState, team_ids: Array) -> void:
 	_faction_ai_system.evaluate_all(state, team_ids)
+
+func _step6b2_info_dispatch(state: WorldState, team_ids: Array) -> void:
+	# ★資訊網 Part2 (a) side-action：求援/偵察 平行 side-dispatch（脫主 argmax、每 team 評 mini-util cost-benefit）。
+	_faction_ai_system.info_side_dispatch_all(state, team_ids)
+
+# ★資訊網 B carrier：飛行中信件逐 tick 移動/交付/timeout/攔截（置 move 後、非 team=免撞全 team 機具）。
+func _step_tick_letters(state: WorldState) -> void:
+	_faction_ai_system.tick_letters_all(state)
 
 func _step6f_training(state: WorldState, team_ids: Array) -> void:
 	_training_system.process(state, team_ids)

@@ -339,6 +339,10 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_DIPLOMACY, "target": _pc.threat_pos,
 				"order_target": _pc.threat_id, "order_task": TeamData.TASK_TRIBUTE_OFFER},
 	},
+	# ★資訊網 Part2 (a) side-action（de-patch）：求援/偵察 **脫離主 argmax**（原 REGISTRY entry 移除）——
+	# 派 1 anon 跑腿=平行 side-action（派信使≠放棄自救、村莊邊覓食邊派人求救；逼進單 task argmax=category error）。
+	# → 移到 faction_ai `_info_side_dispatch`（sim_runner _step6b2、平行 tick step、mini-util cost-benefit）。
+	# 主決策 winner 不變（移除本就 rank 3/4 的 loser 對 argmax 中性、determinism-neutral）。
 	# 野心階梯溶入（序3）：FORCE-archetype 累積階練兵（原 rung_task ACCUMULATE×FORCE→TASK_TRAIN）。
 	# archetype/rung 當 weight（ambient_train_drive）驅動，非查表塞 task。
 	"訓練": {

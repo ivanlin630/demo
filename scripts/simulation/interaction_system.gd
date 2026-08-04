@@ -763,12 +763,16 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 					and res == String(visitor.task_extra_data.get("cargo_res", "")):
 				dc = float(visitor.task_extra_data.get("cargo_qty", -1.0))
 				if String(visitor.task_extra_data.get("convoy_kind", "")) == "distribute":
-					var pf: float = float(visitor.task_extra_data.get("price_factor", 1.0))
-					oask = maxf(TradeValuation.local_value(owner, res, state) * pf, 0.0)   # honor→0 免費/greed→markup 高價
+					oask = 0.0   # ★免費直注 gift：賑濟=施捨、mini-util(仁慈/責任)已 gate 該不該送、送了就免費給（不對餓子民定價）；啟用既有 free_dist 路（舊 local_value×price_factor 分子最小 0.5 永不 0=免費路 dead code bug）
 			if _market_visitor_sell(state, visitor, owner, tile, oid, res, rem, owner_lv, dc, oask):
 				dealt = true
 	if not saw_live_order:
 		Probe.bump("trade.market_bail.no_board_order")   # 板上無活單（29 bail 因可觀測）
+	# ★資訊網 S-trade broaden（Part 3）：訪客也與同格「非 owner」隊 peer 交易——任何 store（公/私/團庫）、
+	# willingness 由 trade primitives 自 gate（無互利不成）、keep-line=TradeValuation.reserve 既有（不空掏戰略/活命）。
+	# owner 走 board（上方）不在此 peer pass=不雙 fire。tile→teams bounded（單格掃、非 O(N²)）。
+	if _market_peer_trade(state, visitor, tile, owner_id):
+		dealt = true
 	if dealt:
 		print("[Market@%s] Team%d ↔ outpost owner Team%d 成交" % [str(tile.tile_pos), visitor.team_id, owner_id])
 		Probe.bump("trade.deal")
@@ -779,6 +783,31 @@ func _resolve_market_at_outpost(state: WorldState, visitor: TeamData, tile: HexT
 			Probe.bump("trade.deal_resident")
 	elif Probe.enabled and visitor.current_task == TeamData.TASK_TRADE:
 		Probe.bump("trade.meet_nodeal")
+	return dealt
+
+# ★資訊網 S-trade broaden：訪客與同格「非 owner」隊 peer 交易（reuse 既有 guarded primitives
+# _attempt_trade_direction+_attempt_barter：任何 store 私產/公庫、keep-line=reserve 不空掏、willingness 自 gate 無互利不成）。
+# owner 走 board 不在此=不雙 fire。同格才在場（感知鐵律）。回 dealt（coin-delta proxy、鏡射 _resolve_market）。
+func _market_peer_trade(state: WorldState, visitor: TeamData, tile: HexTileData, owner_id: int) -> bool:
+	var dealt: bool = false
+	for pid in state.teams:
+		if pid == visitor.team_id or pid == owner_id:
+			continue   # 自己/owner（board 已處理）跳
+		var peer: TeamData = state.teams[pid]
+		if peer.tile_pos != tile.tile_pos:
+			continue   # 非同格=不在場（感知鐵律；tile→teams 過濾，非 O(N²) 每 tick 只 arrived 訪客呼）
+		var v_coin_before: float = float(visitor.resources.get("coin", 0))
+		var v_before: Dictionary = _snapshot_order_res(visitor)
+		var p_before: Dictionary = _snapshot_order_res(peer)
+		_attempt_trade_direction(state, visitor, peer)   # keep-line=reserve 內守（不空掏戰略/活命）
+		_attempt_trade_direction(state, peer, visitor)
+		_attempt_barter(state, visitor, peer)
+		var _os := OrderSystem.new()
+		_os.settle_orders(visitor, v_before, state.world.current_tick)
+		_os.settle_orders(peer, p_before, state.world.current_tick)
+		if absf(float(visitor.resources.get("coin", 0)) - v_coin_before) > 0.001:
+			dealt = true
+			Probe.bump("trade.peer_deal")   # ★S-trade 觀測：同格 peer 交易成交（交易面 broaden 真 fire）
 	return dealt
 
 # 訪客買：向 owner sell 單 + public_storage stock 買 → 扣 storage、visitor.coin → owner.coin。
@@ -821,9 +850,11 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 		override_ask: float = -1.0) -> bool:
 	# ★SLICE B override_ask: >=0=distribute 領主注入 ask（=local_value×price_factor）；==0=免費(仁君)跳 owner-coin/bid bail;
 	#   <0=現行 local_value 內算（normal trade + deliver 零變、guard 全不動）。付費端(>0)保留 affordability cap。
-	if owner == null: Probe.bump("trade.market_bail.sell_ownerless"); return false   # 無主 outpost 無 coin 收購
-	var free_dist: bool = override_ask == 0.0   # 仁君免費分配
-	var ocoin: float = float(owner.resources.get("coin", 0))
+	var free_dist: bool = override_ask == 0.0   # 仁君免費分配（gift、無 owner-coin 交易）
+	# 付費端無主 outpost 無 coin 收購 → bail；★免費 gift 允許無主 resident 據點直注（食物入 tile storage、resident 讀，coin no-op 無需 owner）。
+	if owner == null and not free_dist:
+		Probe.bump("trade.market_bail.sell_ownerless"); return false
+	var ocoin: float = float(owner.resources.get("coin", 0)) if owner != null else 0.0
 	if not free_dist and ocoin <= 0.0: Probe.bump("trade.market_bail.sell_owner_no_coin"); return false
 	var sellable: float
 	if deliver_cargo >= 0.0:
@@ -849,11 +880,17 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 	if q <= 0: Probe.bump("trade.market_bail.sell_storage_full"); return false
 	ResourceSystem.spend_holding(state, visitor, res, float(q))
 	ResourceBank.add(visitor, "coin", q * bid, "market_sell_coin_in")     # bid=0 → coin no-op（免費）
-	ResourceBank.add(owner, "coin", -(q * bid), "market_sell_coin_out")   # 付費端居民付 coin→領主收（coin 守恆）
+	if owner != null:
+		ResourceBank.add(owner, "coin", -(q * bid), "market_sell_coin_out")   # 付費端居民付 coin→領主收（coin 守恆）；免費 gift bid=0 no-op；無主據點 owner=null 略過
 	_settle_owner_order(owner, tile, oid, q)
 	if override_ask >= 0.0 and Probe.enabled:
 		Probe.bump("distribute.deliver")   # SLICE B tap:分配真交付
 		Probe.add_amount("distribute.food_delivered", float(q))
+		# ★T3 錯位診斷 tap（純觀測）：distribute settle 真收貨方——porter+終點 terminus+實際 tile owner+tile_pos+oid（定 settle 撿 co-located 錯人否）。
+		Probe.bump_sample("diag.dist_settle", {
+			"porter": visitor.team_id, "terminus": int(visitor.task_extra_data.get("terminus_team_id", -1)),
+			"tile_owner": (owner.team_id if owner != null else -1), "owner_fac": (owner.faction_id if owner != null else -99),
+			"tile_pos": str(tile.tile_pos), "oid": oid, "deposited": q}, 32)
 	return true
 
 # 成交 coin 入 owner team；owner 已滅 → 入 tile.public_storage.coin（CoinAudit 池內不蒸發）。

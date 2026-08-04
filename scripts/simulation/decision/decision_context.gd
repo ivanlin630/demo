@@ -67,6 +67,19 @@ var has_specie: bool = false
 var has_buyable_food: bool = false
 # Fix B 遷移找糧 target（視野內可達 wild_game[繼承 pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）；(-1,-1)=真無可達已知糧源。
 var food_seek_target: Vector2i = Vector2i(-1, -1)
+# ★資訊網 S-herald（求援→TASK_HERALD）：有未滿足 need（食糧 runway 低/缺料/受威脅）+ 知潛在施助者（belief）。
+# applicable=need+knowledge-based（非死常數門檻）；要不要真派信使=util 秤（人格 modulate）。
+var help_need_severity: float = 0.0   # 未滿足 need 嚴重度 0-1（食糧缺口為主；genuine base 給 help util）
+var help_target_id: int = -1          # 潛在施助者 team（自家 faction 領主，belief-pos 已知可達）；-1=無對象
+var help_target_pos: Vector2i = Vector2i(-1, -1)   # 施助者 belief last-seen 位（herald travel 目標；感知鐵律）
+# ★資訊網 S-scout（偵察→TASK_SCOUT）：對在乎的事有 stale/absent belief（自家子民久沒訊息）+ 可負擔斥候。
+# applicable=有 info-gap+在乎（非「沉默>N」死常數）；util base=info_staleness×info_value 人格 modulate。
+var scout_staleness: float = 0.0        # 最在乎實體的 belief 陳舊度 0-1（age/norm；genuine info_value base）
+var scout_target_id: int = -1           # 待查實體（自家 faction 子民 belief 最陳舊者）；-1=無 info-gap
+var scout_target_pos: Vector2i = Vector2i(-1, -1)   # 待查實體 belief last-seen 位（scout travel 目標）
+# ★資訊網 Part2 dispatch gate（look-before-leap、治 seed regression + option 誠實）：能否真派信使/斥候。
+var can_send_herald: bool = false   # pop>=2 可分 1 anon 當信使（1 人隊自己走=relocate 路）
+var can_send_scout: bool = false    # named_members>=2 有 spare named（leader 外）派斥候 subteam
 # Fix A-2 v2（rejection-learning）：有可達且未近期被拒的 host 才把併入當出路——破「餓世界恆拒→重選併入→又拒」loop。
 # host 鏡射 to_task:200 優先序（strong_neighbor else consolidate，非 OR）；cooldown 過期可再試（非永久黑名單）。
 var has_acceptable_join_host: bool = false
@@ -326,6 +339,50 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 			break
 	# Fix B 遷移找糧 target（視野內可達 wild_game[pop 守衛] / 已知食物賣單 pos，皆過 PathSystem 可達）。
 	c.food_seek_target = _fa._find_food_seek_target(state, team)
+	# ★資訊網 S-herald：未滿足 need severity（食糧 runway 缺口為主 genuine base）+ 知潛在施助者（自家 faction 領主 belief-pos）。
+	# severity=真 runway 缺口（deficit_severity），非死常數；help_target=領主（belief 已知位、非自己、非子隊已 pin）。
+	c.help_need_severity = clampf((DecisionTerms.DESPERATION_DAYS - c.food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
+	c.help_target_id = -1
+	c.help_target_pos = Vector2i(-1, -1)
+	if team.faction_id != -1 and c.help_need_severity > 0.0:
+		var _hf = state.factions.get(team.faction_id)
+		if _hf != null and _hf.leader_team_id != -1 and _hf.leader_team_id != team.team_id:
+			# 施助者=自家領主；位 fresh belief 優先→無→★名冊 fallback（組織常識:知自家領主固定據點位，破 bootstrap 死結）。
+			var _hpos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, _hf.leader_team_id).get("tile_pos", Vector2i(-1, -1))
+			if _hpos == Vector2i(-1, -1):
+				_hpos = FactionAISystem._faction_roster_pos(state, team, _hf.leader_team_id)   # ★名冊 fallback（只位置零 live-state）
+				if _hpos != Vector2i(-1, -1) and Probe.enabled: Probe.bump("help.roster_fallback")
+			if _hpos != Vector2i(-1, -1):
+				c.help_target_id = _hf.leader_team_id
+				c.help_target_pos = _hpos
+	# ★資訊網 S-scout：領主對自家子民 belief 陳舊 → 派斥候查（active 版求援；症1/famine 領主主動探子民 need）。
+	# staleness = belief age / norm（錨 BeliefSystem.SCOUT_TIMEOUT，非死常數）；target=最陳舊且知位的子民。
+	c.scout_staleness = 0.0; c.scout_target_id = -1; c.scout_target_pos = Vector2i(-1, -1)
+	if team.faction_id != -1:
+		var _sf = state.factions.get(team.faction_id)
+		if _sf != null and _sf.leader_team_id == team.team_id:   # 只領主探子民（在乎自家人）
+			var _norm: float = float(BeliefSystem.SCOUT_TIMEOUT)
+			for _mid in state.teams:
+				if _mid == team.team_id: continue
+				var _mt: TeamData = state.teams[_mid]
+				if _mt.faction_id != team.faction_id: continue
+				var _be: Dictionary = BeliefSystem.best_estimate(state, team.team_id, _mid)
+				var _mpos = _be.get("tile_pos", Vector2i(-1, -1))
+				var _st: float
+				if _mpos == Vector2i(-1, -1):
+					# ★名冊 fallback（破 bootstrap:從沒親聞子民→查其固定據點位）；無固定據點(移動子民)→跳。
+					_mpos = FactionAISystem._faction_roster_pos(state, team, _mid)
+					if _mpos == Vector2i(-1, -1): continue
+					_st = 1.0   # 從沒親聞=最陳舊=最該查（genuine：無資訊=max staleness）
+					if Probe.enabled: Probe.bump("scout.roster_fallback")
+				else:
+					var _age: int = state.world.current_tick - int(_be.get("last_tick", 0))
+					_st = clampf(float(_age) / maxf(_norm, 1.0), 0.0, 1.0)
+				if _st > c.scout_staleness:
+					c.scout_staleness = _st; c.scout_target_id = _mid; c.scout_target_pos = _mpos
+	# ★資訊網 Part2 dispatch gate：能否真派（look-before-leap，unexecutable option 不進 rank=治 regression+誠實）。
+	c.can_send_herald = team.population >= 2   # 可分 1 anon 信使（pop 1 自己走 relocate）
+	c.can_send_scout = team.named_members.size() >= 2   # spare named（leader 外）派斥候 subteam
 	if SimRunner.phase_timing: _tg = FactionAISystem._fai_pht_s("gather.home_food", _tg)
 	# 派系 stakes directive 集合（攻擊/徵收/外交；mirror P3 攻擊）。
 	if team.faction_id != -1:
