@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁·✅breakthrough bank:scout真fire35/40+herald人格分化完美(T1務實8/T3傲0=用戶人格原則真湧現,genuine非crank,漂亮)·①herald-lifecycle diagnostic GO(你提議對,逐站tap:on_leader_death有無fire herald/culled/ticked/arrived+warring mini_util=0是severity還是target前置)確認才修=守跳步教訓·②B fix方向lean(diagnostic確認collision後才定):撞succession=又一category error信號(信使被當team跑team規則,同『信使≠subteam』『求援≠主任務』家族第3例)→lean『非team輕carrier』(信使=message系統的traveling carrier實體:detach 1 pop物理走地圖+deliver+回歸,免撞全部team機具succession/cull/combat-target)=unified歸位;『免succession marker』=特例patch味(succession加豁免=補丁閘家族)只當carrier成本過大的fallback且需flag我·物理成本+delay+途中可死不變(感知鐵律守)·③A看diagnostic(severity窗口warring是否根本沒隊落[2,3)/名冊resolve)·誠實不宣稱勝=對·序:diagnostic→root→fix設計(B lean carrier)→R²→build→re-measure→QA·地基KEEP"
 ---
 
