@@ -121,7 +121,8 @@
   - **維度② 軍力**：backlog——combat 上 time-scale wave（NPC 結算戰 / 玩家遭遇戰 tick 一致）+ 反應式互援；排生產驗收後。
   - **军民混编 / 民兵動員**：candidate——統一 3 個散落 pop-fraction 旋鈕 + 團型軍民比 + 威脅動員（guns-vs-butter）；audit done；排 B MVP 後。
 - **支援 / 已完**：後勤 SLICE A（供給移動 flow）merged+用戶 accepted；持守統一 released；時間統一 wave slice A merged。
-- **遞延 backlog**：material/伐木供給側、established chain、遭遇戰收斂（舊 P6）、perf O(N²) scaling。
+- **遞延 backlog**：material/伐木供給側、established chain、遭遇戰收斂（舊 P6）、perf O(N²) scaling、**L3 隔格循環貿易**（商人巡市集讀外板+跑商路；**★guardrail 用戶定 2026-08-05：禁寫死巡邏路線——「去某市集看看」=資訊價值(板子多舊+套利期望) vs 路程成本的引擎決策，人格加權（重商勤跑/膽小近跑），巡迴=湧現 pattern 非 waypoint 清單**；同 scout「資訊值不值得收集」家族）、economy-balance（救濟量級/timing、系統性餓死底線）。
+  - **信使損耗模型（已定，資訊網 arc）**：信使死**不通知**寄件方（死訊瞬回=god-view）——寄件方只知「派了、沒回音」，**沉默本身是資訊**；再派=湧現（需求仍在→mini-util 續 fire→人格秤再派，實測 T1 連派 8 信使）；每信使=真抽 1 人力（信使一直死=村失血=真悲劇螺旋）；進階候選：預期回程逾時→belief 推斷凶多吉少（非 god-view）。
 - **infra**：Telegram 雙向 bridge（遠端驅動 blueprint）done（`reference_telegram_bridge`）。
 - **★doc 待辦**：`roadmap.md`（死化石）待 systems reconcile/archive（指向本節 + memory `project_*` 為 living 來源）。
 
