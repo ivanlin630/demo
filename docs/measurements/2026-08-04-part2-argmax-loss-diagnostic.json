@@ -1,0 +1,29 @@
+{
+  "diagnostic": "Part2 求援 argmax-loss 確認 — 求援 applicable 但輸 argmax、從沒 reach dispatch",
+  "spec": "2026-08-04-systems-to-implementer-part2-argmax-diagnostic.md",
+  "branch": "feat/info-network-whole（bed 在此、需 求援 machinery；spec 命名 feat/part2-argmax-diag）",
+  "bed": "scripts/debug/infonet_argmax_diag_bed.gd (seed 1337, honest-carrier, 純觀測零行為變)",
+  "constants": {"DESPERATION_DAYS": 3.0, "SURVIVAL_BOOST_FLOOR": 2.0, "SURVIVAL_BOOST_MAX": 2.5, "FOOD_PER_PERSON_PER_DAY": 0.8},
+  "fixture": "小餓 resident pop3(leader+2 anon) 站自家 outpost@(5,5)、名冊可達領主@(9,9)（help_target 解析得到）、food 掃 food_days 窗口。",
+  "note_no_fix": "★別下修結論——只交真值 + argmax 輸給誰表 + distribute 依賴驗。root 確認 + (a) 設計交 systems。",
+
+  "argmax_loss_table": [
+    {"food_days": 3.50, "求援_applicable": false, "reason": "food_days≥DESPERATION_DAYS=3 → help_need_severity=0 → not applicable（正確、不絕境不求援）"},
+    {"food_days": 2.50, "求援_applicable": true, "求援_util": 0.040, "求援_rank": "3/4", "winner": "返家補給", "winner_util": 0.472, "top": {"返家補給": 0.47, "駐守": 0.22, "建設": 0.21, "求援": 0.04}},
+    {"food_days": 1.50, "求援_applicable": true, "求援_util": 0.123, "求援_rank": "3/4", "winner": "返家補給", "winner_util": 1.118, "top": {"返家補給": 1.12, "駐守": 0.22, "建設": 0.22, "求援": 0.12}, "note": "food<2 survival-boost 起、返家補給 boosted"},
+    {"food_days": 0.50, "求援_applicable": true, "求援_util": 0.207, "求援_rank": "3/4", "winner": "返家補給", "winner_util": 2.389, "top": {"返家補給": 2.39, "駐守": 0.22, "建設": 0.22, "求援": 0.21}, "note": "boost 破頂 2.5"}
+  ],
+
+  "root_confirmed": {
+    "argmax_loss": "★求援 applicable（food<3）但**每 food 級皆輸 argmax rank 3/4**、從沒 reach dispatch → herald_dispatched=0 的真 root（dispatch-gate 修 necessary 但 insufficient）。",
+    "loses_to_who": "★winner = **返家補給**（此 resident 站自家 outpost=home，返家補給 是它的求生 option）——★**非 systems 假設的 覓食/relocate/買糧**（那些是無 home 隊的求生；home-based resident 走返家補給）。",
+    "util_correction": "★求援 util **0.04–0.21**（≠ systems 假設 ~0.35）——窗口 [2,3) severity 低（(3−food_days)/3 小）× 人格 mult → util 很低；food→0 severity↑但返家補給 survival-boost 同步破頂（2.39）、求援 追不上。",
+    "genuine_note": "求援輸給求生=引擎正確（餓隊該先自救）。但『派信使』≠『放棄自救』：送個跑腿人同時仍可返家/覓食 → 求援與求生非互斥 → argmax 二選一是機制錯配（支持 systems (a) side-action 設計：求援脫離 argmax 競爭、當 side-action 併發）。★僅陳述、修法交 systems。"
+  },
+
+  "distribute_dependency_verified": {
+    "test": "⑥人工塞 distress(resident food 買單)進領主 team_known → distribute fire?",
+    "result": "★distribute candidate **生成** util=0.659 rank=1/5（winner=建設）→ **證 distribute=0 是下游於 herald 送達**（領主沒聽到 need→distribute 根本不生成；一旦聽到就生成）=非獨立第二關、herald 通則解。",
+    "secondary_obs": "此 fixture distribute rank=1 輸給 建設（util 0.659 vs 建設 rank0）——領主有 idle-labor→建設(idle_employ_value)競爭。=distribute 生成後另有 argmax 競爭（次要觀察、非本診斷主軸；領主非餓、建設贏是引擎行為）。"
+  }
+}

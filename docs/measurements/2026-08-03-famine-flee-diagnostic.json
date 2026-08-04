@@ -1,0 +1,35 @@
+{
+  "diagnostic": "饑荒-flee sanity — 居民餓死是 (a) resident 結構 pin 還是 (b) 全域糧缺/visibility",
+  "spec": "2026-08-03-systems-to-implementer-famine-flee-diagnostic.md",
+  "branch": "feat/famine-flee-diag",
+  "base": "main d9e8304f",
+  "bed": "scripts/debug/famine_flee_diag_bed.gd (seed 1337, 純觀測零行為變零 production 改)",
+  "note_no_fix": "★別下修結論——只交真值 + (a)/(b) 判別。root 判定交 systems。",
+
+  "scenario": "同一饑荒世界:主格(5,5)貧瘠(food=0/wild_game=0)+鄰格皆貧瘠+遠格(7,5)food-rich(wild_game 500,dist 2 在視野可達)。food=0/coin=0 瀕死 pop11(≤FORAGE_VIABLE_POP=15)。全格 discovered。resident(擁 outpost)vs mobile(無 outpost)對照。",
+
+  "resident_PRODUCE_owns_outpost": {
+    "food_days": 0.0, "pop": 11,
+    "has_forage_tile": false, "_find_forage_tile": "(-1,-1) [鄰格無 wild_game;(7,5)dist2 非鄰格]",
+    "has_food_market": false, "has_buyable_food": false,
+    "food_seek_target": "(7,5)", "_find_food_seek_target": "(7,5) [視野內 wild_game 可達]",
+    "rank_survival": ["遷移找糧"],
+    "winner": "遷移找糧", "winner_task": "覓食(FORAGE)", "winner_target": "(7,5)",
+    "moves_away_from_barren": true
+  },
+  "mobile_no_outpost": {
+    "food_days": 0.0, "pop": 11,
+    "has_forage_tile": false, "food_seek_target": "(7,5)",
+    "rank_survival": ["遷移找糧", "紮營"],
+    "winner": "遷移找糧", "winner_task": "覓食(FORAGE)", "winner_target": "(7,5)",
+    "moves_away_from_barren": true
+  },
+
+  "discriminator_result": {
+    "NOT_a_decision_pin": "★blueprint (a)『resident 結構 pin:覓食只 local barren、從不 relocate、mobile 會逃它不會』= 決策層 REFUTED。resident 與 mobile 皆選 遷移找糧、皆 move target=(7,5) 離開貧瘠格。resident 決策層無 pin、給可達已知糧源就 relocate（與 mobile 同）。差異僅 mobile 多一 紮營 option（無 outpost 才能 found），兩者 winner 皆 遷移找糧。",
+    "narrows_to": "root ≠ (a)-決策 pin。→ (b) 或 visibility:真 §5 餓死居民大概率 food_seek_target=-1（視野內無 wild_game 可達 + 無親聞 food 賣單）→ 遷移找糧 not-applicable → 無 food-yielding survival option → 餓死。",
+    "convergence_with_jia_root": "★food_seek_target 兩源(_find_food_seek_target):①視野 wild_game ②親聞 food 賣單(received_sell_orders=team_known)。②與 jia distribute/deliver root 同機制:訊息傳播 co-location-only(propagate_on_arrival:79)→ settled 居民不共位 → 從不親聞 food 賣單 → ② 恆空。若 ① 也空(local 無 wild_game)→ food_seek_target=-1 → 困死。=居民『學不到哪有糧』(visibility)、非決策不逃。"
+  },
+
+  "to_measurer_confirm": "真 §5 餓死居民 runway→0 全程 tap:food_seek_target 值(=-1?)+ has_forage_tile + received food sell orders 數。若 food_seek_target 恆 -1 → (b)/visibility 坐實(非決策 pin);若曾 !=-1 卻沒移動 → 執行層 pin(手不聽腦、另查)。本 bed 已證:給可達已知糧源、居民決策層會 relocate。"
+}

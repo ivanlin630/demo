@@ -1,0 +1,36 @@
+{
+  "diagnostic": "herald-lifecycle (缺口B) + warring-prerequisite (缺口A) — measure-first、別下結論、只交真值",
+  "spec": "2026-08-04-systems-to-implementer-herald-lifecycle-diagnostic.md",
+  "branch": "feat/info-network-whole（beds 在此；spec 命名 feat/herald-lifecycle-diag）",
+  "beds": ["scripts/debug/infonet_herald_lifecycle_bed.gd (B、手動逐站 lifecycle)", "scripts/debug/infonet_warring_prereq_bed.gd (A、seed1337 warring 2wk)"],
+  "note_no_fix": "★別下修結論——只交真值 + herald 卡哪站表 + A severity/target 判別。2 root 判定+fix 交 systems。",
+
+  "缺口B_herald_lifecycle": {
+    "method": "深餓 resident pop3(全 anon)→_try_herald_side spawn anon herald→手動逐 tick(loop3 on_leader_death→_tick_help_herald→movement)trace 到 deposit。全 tile 格網(有 path)。",
+    "站①_spawn": "OK：hid、leader_id=-1、pop=1、task=HERALD、reason=help_call、parent=2、move_target=(8,5)",
+    "站②_on_leader_death": "★FIRE @tick0：anon 晉升 named leader P13(統領0.19)、leader_id -1→13；但 reason='help_call' 與 parent=2 **不變**（不改結構）",
+    "站④_ticked": "true（help_call 分支 _evaluate_subteam:1930 早位、promotion 後仍 route 到 _tick_help_herald）",
+    "站⑤_move": "真移動：(5,5)→(6,5)→…→(8,5) arrived tick19",
+    "站⑥_deposit": "★DEPOSIT 成功 tick20（領主 team_known food_buy 0→1）=交付鏈通",
+    "result": "★isolated lifecycle 全通（spawn→promote→travel→arrive→deposit）——promotion 不 black-hole 交付。",
+    "discrepancy": "★但 RE-measure#3(canonical harness)報 8 heralds 無 arrival/timeout/death 任一 tap=full-sim 沒 tick 它們——isolated 重現不出（isolated 有 tick+deposit）→ black hole 是 full-sim-only 互動（loop2/loop3 ordering / 或 heralds spawn 在 target 移動·不可達·被 cull 場景），非 isolated 的 promotion-lifecycle-break。",
+    "supports_fix": "★on_leader_death 對 1-pop anon 信使 promote 出 throwaway named P13=team-ness 副作用(浪費+full-sim 風險面)→支持 systems (a→B) 『lean 非 team carrier』(信使做成 in-transit 訊息物件、非 team、免 succession/cull/subteam 路由)。isolated 證 team-carrier 勉強能通但脆(full-sim 黑洞)。"
+  },
+
+  "缺口A_warring_prerequisite": {
+    "method": "seed1337 default(warring) config、force_full_hd、2wk、Probe on、讀 _try_herald_side probes。",
+    "help_severity_positive": 5,
+    "help_target_resolved": 0,
+    "help_target_unresolved": 5,
+    "help_herald_dispatched": 0,
+    "distrib_entry_lord": 0,
+    "result": "★缺口A root = **target 前置**（非 severity）：有隊夠餓（severity>0 共 5 評次）但**名冊/belief 全解不出施助者**（target_resolved=0、target_unresolved=5）。",
+    "why": "warring 餓隊多為 solo/獨立（faction_id=-1）或其 faction 領主無固定 outpost（mobile）→ _resolve_help_target（需 faction_id!=-1 + 領主 belief-pos 或 _faction_roster_pos 固定據點）解不出 → herald 恆 0。+ distrib.entry_lord=0（2wk 無餘糧領主評 distribute）。",
+    "severity_vs_target": "★target 前置確認（severity 前置排除：teams 確實夠餓）。"
+  },
+
+  "two_roots_summary": {
+    "B": "herald 交付鏈 isolated 通、full-sim 黑洞(8 heralds 沒 tick)=team-carrier 脆+succession 副作用→fix 方向 lean 非 team carrier（systems 已預判）。",
+    "A": "warring herald 0=target 前置（餓隊無 faction/無領主固定據點→名冊解不出施助者），非 severity。→fix 需 warring 餓隊有可解 help target（solo 隊納入? 或 faction 結構前置）。"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "diagnostic": "甲 distribute/deliver = 0 root cause — measure-first, working-vs-broken differential + 4 angles (i撮合local / ii convoy-decision-no-fire / iii訊息斷 / iv交易面窄)",
+  "specs": [
+    "2026-08-03-systems-to-implementer-jia-distribute-zero-diagnostic.md",
+    "2026-08-03-systems-to-implementer-jia-diag-add-surface-angle.md (iv)",
+    "2026-08-03-systems-to-implementer-jia-diag-differential-bed.md (working-vs-broken)"
+  ],
+  "branch": "feat/jia-distribute-diag",
+  "base": "main 3e0512f9",
+  "bed": "scripts/debug/jia_distribute_diag_bed.gd (deterministic seed 1337, honest-carrier-locked to isolate stochastic-propagation confound)",
+  "note_no_fix": "★別下修結論——只交真值 + 差分。root 判定與修法交 systems。",
+
+  "test_A_propagation_on_contact": {
+    "R_team_known_food_buy_after_post": 1,
+    "L_team_known_food_buy_before_exchange": 0,
+    "L_team_known_food_buy_after_coloc_exchange": 1,
+    "result": "propagation-on-contact 真達（同 faction、同 tile 共位、honest carrier）。",
+    "stochastic_caveat": "★_decide_propagation_mode 用 randf（message_system:137）→ mode∈{honest,unintentional,malicious,silent}。silent→不傳。未鎖 carrier 值時 run-to-run 傳/不傳跳動（實測 seed 前一 run 傳、後一 run silent）。本 bed 鎖 carrier 義氣1/慎重0→w_silent=0 保穩測機制。=(a) 傳播即使接觸也非必達（silent 機率）。",
+    "mechanism_fileline": "message_system.gd propagate_on_arrival:79 `if other_team.tile_pos != arrived_team.tile_pos: continue` — 傳播僅在兩隊同 tile 共位（非 faction-wide broadcast）。received_buy_orders(order_system:164) 只讀 team_known。"
+  },
+
+  "test_B_distribute_mechanism_argmax": {
+    "distrib_entry_lord": 1,
+    "food_orders_reached_lord": 1,
+    "intra_resident_pass": 1, "deficit_resident_pass": 1, "candidate_eligible": 1,
+    "candidate_generated": 1,
+    "distribute_util": 1.3333, "distribute_rank": 0, "total_options": 5,
+    "argmax_winner": "distribute_food", "winner_util": 1.3333,
+    "result": "買單一旦達領主 team_known → 全 gate 通過 → candidate 生成 util 1.3333 → 贏 argmax(rank 0/5)。機制+util+argmax 全通、非 (b/ii)。"
+  },
+
+  "test_C_trade_surface_iv": {
+    "sell_surplus_private_team_resources": 1000,
+    "sell_surplus_public_storage": 0,
+    "visitor_buy_when_surplus_private": "false (trade.market_bail.buy_no_stock=1)",
+    "visitor_buy_after_moved_to_public": "true (trade.deal=1)",
+    "result": "交易面 = owner public_storage（_market_visitor_buy 讀 TileBank 現貨；interaction:731-813 owner-mediated）。私產 team.resources surplus 賣不掉、流到公庫才成交。",
+    "iv_candidate": "root(iv)=surplus 卡私產、沒流到可撮合面 public_storage。採集所得主要落私產（只 tax-fraction→公庫）。"
+  },
+
+  "test_D_deliver_differential_working_vs_broken": {
+    "method": "同一 surplus 賣方，唯一差異=買單有無在賣方 team_known（模擬 propagation 達/未達）。",
+    "working_order_in_team_known": {"buyorders_total": 1, "res_convoy": 1, "raw_holding_ok": 1, "mpos_ok": 1, "surplus_ok": 1, "candidate_generated": 1},
+    "broken_order_absent": {"buyorders_total": 0, "candidate_generated": 0, "exit_no_buyorders": 1},
+    "differentiating_condition": "received_buy_orders（訊息達賣方 team_known 與否）——working 每環全過生成 candidate；broken 首環(buyorders 空)即早退。非 argmax/surplus/coin/throttle。"
+  },
+
+  "convergence_raw_finding": {
+    "root_a_iii_iv_convergent": "distribute(_distribute_candidates) 與 deliver(_deliver_candidates) 兩機制皆:買單達 team_known → candidate 生成 + 贏 argmax(B) / 生成(D-working)；買單不達 → 早退 0(D-broken)。唯一 binding = 買單傳達可撮合方 team_known。",
+    "why_zero_in_real_sim": "settled 領主/賣方 + resident/買方 各在自家 outpost(不同 tile)→ propagate_on_arrival 要求同 tile 共位→從不共位→買單從不進對方 team_known→received_buy_orders 空→distribute/deliver 整輪 0。+ propagation 即使共位也可能 silent(randf)。",
+    "NOT_ii_argmax": "distribute 生成即 rank 0 贏 util 1.3333；deliver 生成即 candidate。非決策不 fire、非 util 低、非 throttle。",
+    "iv_second_gap": "即使有 surplus，採集所得落私產 team.resources(非交易面 public_storage)→ sell order 賣不掉(buy_no_stock)。與傳播 gap 疊加。",
+    "shared_mechanism_note": "distribute + deliver 同讀 received_buy_orders(team_known-propagation)→root general(systems 已預判)、非單 distribute。"
+  },
+
+  "honest_premature_victory_flag": {
+    "note": "★誠實 flag（systems 要）：後勤 SLICE A convoy fulfilled 0→6 是在 buy-order 已在賣方 team_known 的 fixture/近距場景 fire；一般經濟 settled 各據點不共位→買單不傳達→convoy dispatch=0。SLICE A 修的是『candidate 生成+convoy 執行』層，未修『買單傳達賣方』層 → 一般經濟仍塌 = scenario-specific victory、真 binding 在上游訊息傳達/交易面。非 paper over、measure 定。"
+  }
+}

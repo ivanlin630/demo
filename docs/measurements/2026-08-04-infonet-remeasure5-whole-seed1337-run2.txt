@@ -1,0 +1,1085 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 資訊網whole獨立驗收床(RE-measure#5 distribute de-scan) seed=1337 60天 ===
+★主argmax零改確認：REGISTRY.has(求援)=false  REGISTRY.has(偵察)=false（該皆 false）
+[GameSetup] 完成：10 teams, 2 factions, 20 persons
+[Faction] 立國：勢力1（leader=Team2，2 teams）
+[Order] Team0 sell food ×3932 (oid=1)
+[Order] Team0 buy weapon_melee_low ×9 (oid=2)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=3)
+[Order] Team0 buy material ×60 (oid=4)
+[Order] Team0 buy tools ×8 (oid=5)
+[Order] Team1 buy weapon_melee_low ×2 (oid=6)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=7)
+[Order] Team1 buy material ×44 (oid=8)
+[Order] Team1 buy tools ×1 (oid=9)
+[Order] Team1 buy food ×29 (oid=10)
+[Order] Team2 sell food ×3961 (oid=11)
+[Order] Team2 buy weapon_melee_low ×9 (oid=12)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=13)
+[Order] Team2 buy material ×60 (oid=14)
+[Order] Team2 buy tools ×5 (oid=15)
+[Order] Team3 buy weapon_melee_low ×2 (oid=16)
+[Order] Team3 buy weapon_ranged_low ×1 (oid=17)
+[Order] Team3 buy material ×44 (oid=18)
+[Order] Team3 buy tools ×1 (oid=19)
+[Order] Team3 buy food ×4 (oid=20)
+[Order] Team4 sell food ×532 (oid=21)
+[Order] Team4 buy weapon_melee_low ×7 (oid=22)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=23)
+[Order] Team4 buy material ×64 (oid=24)
+[Order] Team4 buy tools ×4 (oid=25)
+[Order] Team5 buy weapon_melee_low ×7 (oid=26)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=27)
+[Order] Team5 buy tools ×3 (oid=28)
+[Order] Team6 sell food ×1065 (oid=29)
+[Order] Team6 buy weapon_melee_low ×13 (oid=30)
+[Order] Team6 buy weapon_ranged_low ×10 (oid=31)
+[Order] Team6 buy material ×64 (oid=32)
+[Order] Team6 buy tools ×7 (oid=33)
+[Order] Team7 sell food ×277 (oid=34)
+[Order] Team7 buy weapon_melee_low ×2 (oid=35)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=36)
+[Order] Team7 buy material ×64 (oid=37)
+[Order] Team7 buy tools ×2 (oid=38)
+[Order] Team8 sell food ×277 (oid=39)
+[Order] Team8 buy weapon_melee_low ×2 (oid=40)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=41)
+[Order] Team8 buy material ×64 (oid=42)
+[Order] Team8 buy tools ×2 (oid=43)
+[Order] Team9 sell food ×277 (oid=44)
+[Order] Team9 buy weapon_melee_low ×2 (oid=45)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=46)
+[Order] Team9 buy material ×64 (oid=47)
+[Order] Team9 buy tools ×2 (oid=48)
+[Harvest] Tick60 季節=春 base=1.1
+[Move] Team 5 抵達 (13,20)
+[Ambition] Team0 rung 0→1 (定居 cap=1)
+[Ambition] Team2 rung 0→1 (商業 cap=4)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Ambition] Team6 rung 0→1 (定居 cap=2)
+[Ambition] Team8 rung 0→1 (定居 cap=2)
+[Ambition] Team9 rung 0→1 (定居 cap=2)
+[DayNight] Day 1 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 10 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=30)
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=1 avg=39349 us max=2798725 us ticks=240 teams=10 factions=2
+[Ambition] Team2 rung 1→2 (商業 cap=4)
+[Ambition] Team4 rung 1→2 (定居 cap=2)
+[Ambition] Team6 rung 1→2 (定居 cap=2)
+[Ambition] Team7 rung 0→1 (定居 cap=2)
+[Ambition] Team2 rung 2→3 (商業 cap=4)
+[DayNight] Day 2 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 10 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=30)
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=2 avg=33370 us max=1414193 us ticks=240 teams=10 factions=2
+[Site] 選址 (13, 12) score=343 周邊資源={ "herb": 21, "ore_gold": 12, "wild_horses": 1, "ore_iron": 139 } terrain=forest
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (21, 8) score=515 周邊資源={ "ore_silver": 124, "ore_iron": 234 } terrain=mountain
+[Site] Faction1 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 3 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 10 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=30)
+[Horse] Outpost (14, 8) 捕野馬 +1
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=3 avg=34494 us max=1523495 us ticks=240 teams=10 factions=2
+[Move] Team 5 抵達 (13,20)
+[Move] Team 5 抵達 (13,20)
+[DayNight] Day 4 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 10 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=30)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=4 avg=35891 us max=1954909 us ticks=240 teams=10 factions=2
+[Move] Team 5 抵達 (13,20)
+[DayNight] Day 5 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 10 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=30)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Move] Team 5 抵達 (13,20)
+[TickPerf] day=5 avg=35946 us max=1493866 us ticks=240 teams=10 factions=2
+[day 5] T0 pop=15 food=3940.0 runway=421.65d task=覓食 | T1 pop=6 food=0.0 runway=0.00d task=覓食 | T2 pop=15 food=3940.0 runway=478.09d task=建設 | T3 pop=10 food=0.0 runway=0.00d task=覓食 | letter_dispatched=4 delivered=4 need_deposited=1 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+[Order] Team0 sell food ×4992 (oid=50)
+[Order] Team0 buy weapon_melee_low ×9 (oid=51)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=52)
+[Order] Team0 buy material ×60 (oid=53)
+[Order] Team0 buy tools ×8 (oid=54)
+[Order] Team1 buy weapon_melee_low ×1 (oid=55)
+[Order] Team1 buy material ×16 (oid=56)
+[Order] Team1 buy food ×26 (oid=57)
+[Order] Team2 sell food ×5698 (oid=58)
+[Order] Team2 buy weapon_melee_low ×9 (oid=59)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=60)
+[Order] Team2 buy material ×60 (oid=61)
+[Order] Team2 buy tools ×5 (oid=62)
+[Order] Team3 buy weapon_melee_low ×1 (oid=63)
+[Order] Team3 buy weapon_ranged_low ×1 (oid=64)
+[Order] Team3 buy material ×15 (oid=65)
+[Order] Team3 buy tools ×1 (oid=66)
+[Order] Team3 buy food ×19 (oid=67)
+[Order] Team4 sell food ×865 (oid=68)
+[Order] Team4 buy weapon_melee_low ×7 (oid=69)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=70)
+[Order] Team4 buy material ×62 (oid=71)
+[Order] Team4 buy tools ×4 (oid=72)
+[Order] Team5 buy weapon_melee_low ×7 (oid=73)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=74)
+[Order] Team5 buy tools ×3 (oid=75)
+[Order] Team6 sell food ×1564 (oid=76)
+[Order] Team6 buy weapon_melee_low ×13 (oid=77)
+[Order] Team6 buy weapon_ranged_low ×10 (oid=78)
+[Order] Team6 buy material ×40 (oid=79)
+[Order] Team6 buy tools ×7 (oid=80)
+[Order] Team7 sell food ×304 (oid=81)
+[Order] Team7 buy weapon_melee_low ×2 (oid=82)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=83)
+[Order] Team7 buy material ×34 (oid=84)
+[Order] Team7 buy tools ×2 (oid=85)
+[Order] Team8 sell food ×316 (oid=86)
+[Order] Team8 buy weapon_melee_low ×2 (oid=87)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=88)
+[Order] Team8 buy material ×61 (oid=89)
+[Order] Team8 buy tools ×2 (oid=90)
+[Order] Team9 sell food ×318 (oid=91)
+[Order] Team9 buy weapon_melee_low ×2 (oid=92)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=93)
+[Order] Team9 buy material ×61 (oid=94)
+[Order] Team9 buy tools ×2 (oid=95)
+[DayNight] Day 6 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 10 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=30)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=6 avg=34047 us max=1594785 us ticks=240 teams=10 factions=2
+[Move] Team 5 抵達 (13,20)
+[Combat Start] Team-1000000 vs Team6
+[Ambush] NPC Team6 被 boar 伏擊
+[DayNight] Day 7 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 10 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=30)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=7 avg=37345 us max=2210677 us ticks=240 teams=11 factions=2
+[Treat] Team6 治療 1 傷兵：救 0 死 1 (medicine=0.00)
+[Treat] Team6 治療 1 傷兵：救 0 死 1 (medicine=0.00)
+[DayNight] Day 8 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 8 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=28)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=8 avg=33134 us max=1283268 us ticks=240 teams=10 factions=2
+[DayNight] Day 9 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 8 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=28)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=9 avg=33945 us max=1411674 us ticks=240 teams=10 factions=2
+[Famine] Team3 餓死 anon 1 (famine=7天)
+[DayNight] Day 10 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 8 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=28)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[TickPerf] day=10 avg=34489 us max=1733101 us ticks=240 teams=10 factions=2
+[day 10] T0 pop=15 food=3880.0 runway=490.00d task=覓食 | T1 pop=2 food=0.0 runway=0.00d task=覓食 | T2 pop=15 food=3880.0 runway=490.00d task=建設 | T3 pop=9 food=0.0 runway=0.00d task=覓食 | letter_dispatched=8 delivered=8 need_deposited=2 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+[Order] Team0 sell food ×5812 (oid=98)
+[Order] Team0 buy weapon_melee_low ×9 (oid=99)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=100)
+[Order] Team0 buy material ×60 (oid=101)
+[Order] Team0 buy tools ×8 (oid=102)
+[Order] Team1 buy material ×13 (oid=103)
+[Order] Team1 buy food ×8 (oid=104)
+[Order] Team2 sell food ×5841 (oid=105)
+[Order] Team2 buy weapon_melee_low ×9 (oid=106)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=107)
+[Order] Team2 buy material ×60 (oid=108)
+[Order] Team2 buy tools ×5 (oid=109)
+[Order] Team3 buy weapon_melee_low ×1 (oid=110)
+[Order] Team3 buy weapon_ranged_low ×1 (oid=111)
+[Order] Team3 buy material ×11 (oid=112)
+[Order] Team3 buy tools ×1 (oid=113)
+[Order] Team3 buy food ×17 (oid=114)
+[Order] Team4 sell food ×1072 (oid=115)
+[Order] Team4 buy weapon_melee_low ×7 (oid=116)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=117)
+[Order] Team4 buy material ×60 (oid=118)
+[Order] Team4 buy tools ×4 (oid=119)
+[Order] Team5 buy weapon_melee_low ×7 (oid=120)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=121)
+[Order] Team5 buy tools ×3 (oid=122)
+[Order] Team6 sell food ×1886 (oid=123)
+[Order] Team6 buy weapon_melee_low ×12 (oid=124)
+[Order] Team6 buy weapon_ranged_low ×10 (oid=125)
+[Order] Team6 buy material ×15 (oid=126)
+[Order] Team6 buy tools ×7 (oid=127)
+[Order] Team7 sell food ×326 (oid=128)
+[Order] Team7 buy weapon_melee_low ×2 (oid=129)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=130)
+[Order] Team7 buy material ×31 (oid=131)
+[Order] Team7 buy tools ×2 (oid=132)
+[Order] Team8 sell food ×349 (oid=133)
+[Order] Team8 buy weapon_melee_low ×2 (oid=134)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=135)
+[Order] Team8 buy material ×58 (oid=136)
+[Order] Team8 buy tools ×2 (oid=137)
+[Order] Team9 sell food ×351 (oid=138)
+[Order] Team9 buy weapon_melee_low ×2 (oid=139)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=140)
+[Order] Team9 buy material ×58 (oid=141)
+[Order] Team9 buy tools ×2 (oid=142)
+[Famine] Team3 餓死 anon 1 (famine=8天)
+[DayNight] Day 11 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 8 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=28)
+[TickPerf] day=11 avg=33705 us max=1591457 us ticks=240 teams=10 factions=2
+[Combat Start] Team-1000001 vs Team6
+[Ambush] NPC Team6 被 boar 伏擊
+[Famine] Team3 餓死 anon 1 (famine=9天)
+[DayNight] Day 12 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 8 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=28)
+[TickPerf] day=12 avg=31379 us max=1321807 us ticks=240 teams=11 factions=2
+[Treat] Team6 治療 1 傷兵：救 0 死 1 (medicine=0.00)
+[Famine] Team3 餓死 anon 1 (famine=10天)
+[Treat] Team6 治療 1 傷兵：救 0 死 1 (medicine=0.00)
+[DayNight] Day 13 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=13 avg=35763 us max=1807264 us ticks=240 teams=10 factions=2
+[Famine] Team3 餓死 anon 1 (famine=11天)
+[DayNight] Day 14 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=14 avg=31899 us max=1497690 us ticks=240 teams=10 factions=2
+[Famine] Team3 餓死 anon 1 (famine=12天)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=49 known=49
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=15 avg=32191 us max=1285879 us ticks=240 teams=10 factions=2
+[day 15] T0 pop=15 food=3820.0 runway=485.00d task=覓食 | T1 pop=2 food=0.0 runway=0.00d task=治理 | T2 pop=15 food=3820.0 runway=485.00d task=建設 | T3 pop=4 food=0.0 runway=0.00d task=覓食 | letter_dispatched=8 delivered=8 need_deposited=2 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+[Order] Team0 sell food ×5752 (oid=94)
+[Order] Team0 buy weapon_melee_low ×9 (oid=95)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=96)
+[Order] Team0 buy material ×60 (oid=97)
+[Order] Team0 buy tools ×8 (oid=98)
+[Order] Team1 buy material ×11 (oid=99)
+[Order] Team1 buy food ×8 (oid=100)
+[Order] Team2 sell food ×5781 (oid=101)
+[Order] Team2 buy weapon_melee_low ×9 (oid=102)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=103)
+[Order] Team2 buy material ×60 (oid=104)
+[Order] Team2 buy tools ×5 (oid=105)
+[Order] Team3 buy material ×7 (oid=106)
+[Order] Team3 buy food ×7 (oid=107)
+[Order] Team4 sell food ×1202 (oid=108)
+[Order] Team4 buy weapon_melee_low ×7 (oid=109)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=110)
+[Order] Team4 buy material ×58 (oid=111)
+[Order] Team4 buy tools ×4 (oid=112)
+[Order] Team5 buy weapon_melee_low ×7 (oid=113)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=114)
+[Order] Team5 buy tools ×3 (oid=115)
+[Order] Team6 sell food ×2145 (oid=116)
+[Order] Team6 buy weapon_melee_low ×12 (oid=117)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=118)
+[Order] Team6 buy tools ×7 (oid=119)
+[Order] Team7 sell food ×347 (oid=120)
+[Order] Team7 buy weapon_melee_low ×2 (oid=121)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=122)
+[Order] Team7 buy material ×28 (oid=123)
+[Order] Team7 buy tools ×2 (oid=124)
+[Order] Team8 sell food ×383 (oid=125)
+[Order] Team8 buy weapon_melee_low ×2 (oid=126)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=127)
+[Order] Team8 buy material ×55 (oid=128)
+[Order] Team8 buy tools ×2 (oid=129)
+[Order] Team9 sell food ×382 (oid=130)
+[Order] Team9 buy weapon_melee_low ×2 (oid=131)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=132)
+[Order] Team9 buy material ×55 (oid=133)
+[Order] Team9 buy tools ×2 (oid=134)
+[Famine] Team3 餓死 anon 1 (famine=13天)
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[DayNight] Day 16 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=16 avg=35694 us max=2048420 us ticks=240 teams=10 factions=2
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[Famine] Team3 餓死 anon 1 (famine=14天)
+[DayNight] Day 17 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=17 avg=32898 us max=1280491 us ticks=240 teams=10 factions=2
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[DayNight] Day 18 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=18 avg=31242 us max=1331269 us ticks=240 teams=10 factions=2
+[DayNight] Day 19 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=19 avg=35300 us max=1756344 us ticks=240 teams=10 factions=2
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=47 known=47
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=20 avg=32743 us max=1385685 us ticks=240 teams=10 factions=2
+[day 20] T0 pop=15 food=3760.0 runway=480.00d task=覓食 | T1 pop=2 food=0.0 runway=0.00d task=覓食 | T2 pop=15 food=3760.0 runway=480.00d task=建設 | T3 pop=2 food=0.0 runway=0.00d task=覓食 | letter_dispatched=8 delivered=8 need_deposited=2 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+[Order] Team0 sell food ×5692 (oid=87)
+[Order] Team0 buy weapon_melee_low ×9 (oid=88)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=89)
+[Order] Team0 buy material ×60 (oid=90)
+[Order] Team0 buy tools ×8 (oid=91)
+[Order] Team1 buy material ×10 (oid=92)
+[Order] Team1 buy food ×8 (oid=93)
+[Order] Team2 sell food ×5721 (oid=94)
+[Order] Team2 buy weapon_melee_low ×9 (oid=95)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=96)
+[Order] Team2 buy material ×60 (oid=97)
+[Order] Team2 buy tools ×5 (oid=98)
+[Order] Team3 buy material ×5 (oid=99)
+[Order] Team3 buy food ×3 (oid=100)
+[Order] Team4 sell food ×1273 (oid=101)
+[Order] Team4 buy weapon_melee_low ×7 (oid=102)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=103)
+[Order] Team4 buy material ×55 (oid=104)
+[Order] Team4 buy tools ×4 (oid=105)
+[Order] Team5 buy weapon_melee_low ×7 (oid=106)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=107)
+[Order] Team5 buy tools ×3 (oid=108)
+[Order] Team6 sell food ×2331 (oid=109)
+[Order] Team6 buy weapon_melee_low ×12 (oid=110)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=111)
+[Order] Team6 buy tools ×7 (oid=112)
+[Order] Team7 sell food ×365 (oid=113)
+[Order] Team7 buy weapon_melee_low ×2 (oid=114)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=115)
+[Order] Team7 buy material ×25 (oid=116)
+[Order] Team7 buy tools ×2 (oid=117)
+[Order] Team8 sell food ×411 (oid=118)
+[Order] Team8 buy weapon_melee_low ×2 (oid=119)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=120)
+[Order] Team8 buy material ×51 (oid=121)
+[Order] Team8 buy tools ×2 (oid=122)
+[Order] Team9 sell food ×409 (oid=123)
+[Order] Team9 buy weapon_melee_low ×2 (oid=124)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=125)
+[Order] Team9 buy material ×52 (oid=126)
+[Order] Team9 buy tools ×2 (oid=127)
+[Ambition] Team2 rung 3→2 (商業 cap=4)
+[DayNight] Day 21 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=21 avg=35360 us max=1653126 us ticks=240 teams=10 factions=2
+[DayNight] Day 22 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=22 avg=34552 us max=1745959 us ticks=240 teams=10 factions=2
+[Uprising B] Team1 流亡（求生=0.90，old owner=Team1）
+[DayNight] Day 23 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=23 avg=20351 us max=1313249 us ticks=240 teams=10 factions=2
+[Site] Faction-1 派工失敗: 資源不足 1.5x: material 有 11(公庫3+私8) (需 { "material": 50, "tools": 0 })
+[Move] Team 1 抵達 (18,14)
+[DayNight] Day 24 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=24 avg=19175 us max=1335247 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[Move] Team 1 抵達 (18,15)
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=45 known=45
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=25 avg=22546 us max=1761100 us ticks=240 teams=10 factions=2
+[day 25] T0 pop=15 food=3700.0 runway=475.00d task=覓食 | T1 pop=2 food=0.0 runway=0.00d task=覓食 | T2 pop=15 food=3700.0 runway=475.00d task=建設 | T3 pop=2 food=0.0 runway=0.00d task=守城 | letter_dispatched=8 delivered=8 need_deposited=2 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+[SoloAI] Team1 → 紮營 (紮營)
+[Order] Team0 sell food ×5632 (oid=83)
+[Order] Team0 buy weapon_melee_low ×9 (oid=84)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=85)
+[Order] Team0 buy material ×60 (oid=86)
+[Order] Team0 buy tools ×8 (oid=87)
+[Order] Team1 buy material ×8 (oid=88)
+[Order] Team1 buy food ×8 (oid=89)
+[CrudeCamp] Team1 紮營 @(18,15) → civilian
+[Uprising B] Team1 流亡（求生=0.90，old owner=Team1）
+[Order] Team2 sell food ×5661 (oid=90)
+[Order] Team2 buy weapon_melee_low ×9 (oid=91)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=92)
+[Order] Team2 buy material ×60 (oid=93)
+[Order] Team2 buy tools ×5 (oid=94)
+[Order] Team3 buy material ×3 (oid=95)
+[Order] Team3 buy food ×3 (oid=96)
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[Order] Team4 sell food ×1306 (oid=97)
+[Order] Team4 buy weapon_melee_low ×7 (oid=98)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=99)
+[Order] Team4 buy material ×53 (oid=100)
+[Order] Team4 buy tools ×4 (oid=101)
+[Order] Team5 buy weapon_melee_low ×7 (oid=102)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=103)
+[Order] Team5 buy tools ×3 (oid=104)
+[Order] Team6 sell food ×2425 (oid=105)
+[Order] Team6 buy weapon_melee_low ×12 (oid=106)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=107)
+[Order] Team6 buy tools ×7 (oid=108)
+[Order] Team7 sell food ×385 (oid=109)
+[Order] Team7 buy weapon_melee_low ×2 (oid=110)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=111)
+[Order] Team7 buy material ×23 (oid=112)
+[Order] Team7 buy tools ×2 (oid=113)
+[Order] Team8 sell food ×440 (oid=114)
+[Order] Team8 buy weapon_melee_low ×2 (oid=115)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=116)
+[Order] Team8 buy material ×48 (oid=117)
+[Order] Team8 buy tools ×2 (oid=118)
+[Order] Team9 sell food ×438 (oid=119)
+[Order] Team9 buy weapon_melee_low ×2 (oid=120)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=121)
+[Order] Team9 buy material ×49 (oid=122)
+[Order] Team9 buy tools ×2 (oid=123)
+[DayNight] Day 26 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=26 avg=21015 us max=1594272 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[Move] Team 1 抵達 (19,15)
+[DayNight] Day 27 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=27 avg=19559 us max=1458992 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 紮營 (紮營)
+[CrudeCamp] Team1 紮營 @(19,15) → civilian
+[Uprising B] Team1 流亡（求生=0.90，old owner=Team1）
+[DayNight] Day 28 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=28 avg=22385 us max=1787815 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (19,16)
+[DayNight] Day 29 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=29 avg=19692 us max=1451689 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 紮營 (紮營)
+[CrudeCamp] Team1 紮營 @(19,16) → civilian
+[Uprising B] Team1 流亡（求生=0.90，old owner=Team1）
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=41 known=41
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[Horse] Outpost (14, 14) 捕野馬 +1
+[Horse] Outpost (19, 16) 捕野馬 +1
+[TickPerf] day=30 avg=20554 us max=1298821 us ticks=240 teams=10 factions=2
+[day 30] T0 pop=15 food=3640.0 runway=470.00d task=覓食 | T1 pop=2 food=0.0 runway=0.00d task=起義 | T2 pop=15 food=3640.0 runway=470.00d task=建設 | T3 pop=2 food=0.0 runway=0.00d task=覓食 | letter_dispatched=8 delivered=8 need_deposited=2 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+[SoloAI] Team1 → 覓食 (遷移找糧)
+[Order] Team0 sell food ×5572 (oid=83)
+[Order] Team0 buy weapon_melee_low ×9 (oid=84)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=85)
+[Order] Team0 buy material ×60 (oid=86)
+[Order] Team0 buy tools ×8 (oid=87)
+[Order] Team1 buy food ×8 (oid=88)
+[Order] Team2 sell food ×5601 (oid=89)
+[Order] Team2 buy weapon_melee_low ×9 (oid=90)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=91)
+[Order] Team2 buy material ×60 (oid=92)
+[Order] Team2 buy tools ×5 (oid=93)
+[Order] Team3 buy material ×2 (oid=94)
+[Order] Team3 buy food ×3 (oid=95)
+[Order] Team4 sell food ×1318 (oid=96)
+[Order] Team4 buy weapon_melee_low ×7 (oid=97)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=98)
+[Order] Team4 buy material ×51 (oid=99)
+[Order] Team4 buy tools ×4 (oid=100)
+[Order] Team5 buy weapon_melee_low ×7 (oid=101)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=102)
+[Order] Team5 buy tools ×3 (oid=103)
+[Order] Team6 sell food ×2428 (oid=104)
+[Order] Team6 buy weapon_melee_low ×12 (oid=105)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=106)
+[Order] Team6 buy tools ×7 (oid=107)
+[Order] Team7 sell food ×403 (oid=108)
+[Order] Team7 buy weapon_melee_low ×2 (oid=109)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=110)
+[Order] Team7 buy material ×20 (oid=111)
+[Order] Team7 buy tools ×2 (oid=112)
+[Order] Team8 sell food ×464 (oid=113)
+[Order] Team8 buy weapon_melee_low ×2 (oid=114)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=115)
+[Order] Team8 buy material ×45 (oid=116)
+[Order] Team8 buy tools ×2 (oid=117)
+[Order] Team9 sell food ×463 (oid=118)
+[Order] Team9 buy weapon_melee_low ×2 (oid=119)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=120)
+[Order] Team9 buy material ×46 (oid=121)
+[Order] Team9 buy tools ×2 (oid=122)
+[Order] Team1 sell material ×1 (oid=123)
+[DayNight] Day 31 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=31 avg=23124 us max=2011739 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 紮營 (紮營)
+[Order] Team1 buy material ×1 (oid=123)
+[CrudeCamp] Team1 紮營 @(18,16) → civilian
+[Uprising B] Team1 流亡（求生=0.90，old owner=Team1）
+[Site] 選址 (21, 7) score=525 周邊資源={ "ore_silver": 124, "ore_iron": 107, "herb": 3, "wild_horses": 1 } terrain=mountain
+[DayNight] Day 32 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[Horse] Outpost (18, 16) 捕野馬 +1
+[TickPerf] day=32 avg=21494 us max=1423989 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (17,16)
+[Ambition] Team1 rung 0→1 (定居 cap=1)
+[Order] Team1 buy tools ×1 (oid=124)
+[DayNight] Day 33 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[Horse] Outpost (18, 16) 捕野馬 +1
+[TickPerf] day=33 avg=23852 us max=1587923 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[Move] Team 1 抵達 (17,16)
+[DayNight] Day 34 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[Horse] Outpost (18, 16) 捕野馬 +1
+[TickPerf] day=34 avg=22974 us max=1669913 us ticks=240 teams=10 factions=2
+[Site] Faction-1 派工失敗: 資源不足 1.5x: material 有 19(公庫0+私19) (需 { "material": 50, "tools": 0 })
+[SoloAI] Team1 → 覓食 (覓食)
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[Move] Team 1 抵達 (17,16)
+[DayNight] Day 35 開始
+[MsgPrune] 刪除過期訊息 global=41 known=41
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[Horse] Outpost (18, 16) 捕野馬 +1
+[Salary] Team1 薪水結算 coin=9.3
+[TickPerf] day=35 avg=20437 us max=1283524 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 紮營 (紮營)
+[Order] Team0 sell food ×5512 (oid=84)
+[Order] Team0 buy weapon_melee_low ×9 (oid=85)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=86)
+[Order] Team0 buy material ×60 (oid=87)
+[Order] Team0 buy tools ×8 (oid=88)
+[Order] Team1 buy food ×5 (oid=89)
+[CrudeCamp] Team1 紮營 @(17,16) → civilian
+[Uprising B] Team1 流亡（求生=0.90，old owner=Team1）
+[Order] Team2 sell food ×5541 (oid=90)
+[Order] Team2 buy weapon_melee_low ×9 (oid=91)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=92)
+[Order] Team2 buy material ×60 (oid=93)
+[Order] Team2 buy tools ×5 (oid=94)
+[Order] Team3 buy food ×3 (oid=95)
+[Uprising A] Team3 守城（野心=0.90，old owner=Team3）
+[Order] Team4 sell food ×1312 (oid=96)
+[Order] Team4 buy weapon_melee_low ×7 (oid=97)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=98)
+[Order] Team4 buy material ×48 (oid=99)
+[Order] Team4 buy tools ×4 (oid=100)
+[Order] Team5 buy weapon_melee_low ×7 (oid=101)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=102)
+[Order] Team5 buy tools ×3 (oid=103)
+[Order] Team6 sell food ×2324 (oid=104)
+[Order] Team6 buy weapon_melee_low ×12 (oid=105)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=106)
+[Order] Team6 buy tools ×7 (oid=107)
+[Order] Team7 sell food ×418 (oid=108)
+[Order] Team7 buy weapon_melee_low ×2 (oid=109)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=110)
+[Order] Team7 buy material ×17 (oid=111)
+[Order] Team7 buy tools ×2 (oid=112)
+[Order] Team8 sell food ×490 (oid=113)
+[Order] Team8 buy weapon_melee_low ×2 (oid=114)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=115)
+[Order] Team8 buy material ×41 (oid=116)
+[Order] Team8 buy tools ×2 (oid=117)
+[Order] Team9 sell food ×487 (oid=118)
+[Order] Team9 buy weapon_melee_low ×2 (oid=119)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=120)
+[Order] Team9 buy material ×43 (oid=121)
+[Order] Team9 buy tools ×2 (oid=122)
+[Ambition] Team1 rung 1→0 (定居 cap=1)
+[DayNight] Day 36 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=36 avg=23182 us max=1639794 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → return_home (返家補給)
+[Order] Team1 buy material ×20 (oid=123)
+[Move] Team 1 抵達 (17,16)
+[Ambition] Team4 rung 2→1 (定居 cap=2)
+[DayNight] Day 37 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=37 avg=22451 us max=1769861 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → return_home (返家補給)
+[Move] Team 5 抵達 (13,20)
+[Move] Team 1 抵達 (17,16)
+[Move] Team 5 抵達 (13,20)
+[Ambition] Team4 rung 1→0 (定居 cap=2)
+[DayNight] Day 38 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=38 avg=23722 us max=1379167 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → return_home (返家補給)
+[Move] Team 1 抵達 (17,16)
+[Move] Team 5 抵達 (13,20)
+[Move] Team 5 抵達 (13,20)
+[DayNight] Day 39 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=39 avg=22138 us max=1235627 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → return_home (返家補給)
+[Move] Team 1 抵達 (17,16)
+[DayNight] Day 40 開始
+[MsgPrune] 刪除過期訊息 global=41 known=41
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=40 avg=26148 us max=1661525 us ticks=240 teams=10 factions=2
+[day 40] T0 pop=15 food=3520.0 runway=460.00d task=覓食 | T1 pop=2 food=0.0 runway=0.00d task=return_home | T2 pop=15 food=3520.0 runway=460.00d task=建設 | T3 pop=2 food=0.0 runway=0.00d task=覓食 | letter_dispatched=8 delivered=8 need_deposited=2 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+[SoloAI] Team1 → return_home (返家補給)
+[Order] Team0 sell food ×5452 (oid=83)
+[Order] Team0 buy weapon_melee_low ×9 (oid=84)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=85)
+[Order] Team0 buy material ×60 (oid=86)
+[Order] Team0 buy tools ×8 (oid=87)
+[Order] Team1 buy food ×8 (oid=88)
+[Order] Team2 sell food ×5481 (oid=89)
+[Order] Team2 buy weapon_melee_low ×9 (oid=90)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=91)
+[Order] Team2 buy material ×60 (oid=92)
+[Order] Team2 buy tools ×5 (oid=93)
+[Order] Team3 sell material ×1 (oid=94)
+[Order] Team3 buy food ×3 (oid=95)
+[Order] Team4 sell food ×1293 (oid=96)
+[Order] Team4 buy weapon_melee_low ×7 (oid=97)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=98)
+[Order] Team4 buy material ×46 (oid=99)
+[Order] Team4 buy tools ×4 (oid=100)
+[Order] Team5 buy weapon_melee_low ×7 (oid=101)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=102)
+[Order] Team5 buy tools ×3 (oid=103)
+[Order] Team6 sell food ×2220 (oid=104)
+[Order] Team6 buy weapon_melee_low ×12 (oid=105)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=106)
+[Order] Team6 buy tools ×7 (oid=107)
+[Order] Team7 sell food ×435 (oid=108)
+[Order] Team7 buy weapon_melee_low ×2 (oid=109)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=110)
+[Order] Team7 buy material ×14 (oid=111)
+[Order] Team7 buy tools ×2 (oid=112)
+[Order] Team8 sell food ×510 (oid=113)
+[Order] Team8 buy weapon_melee_low ×2 (oid=114)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=115)
+[Order] Team8 buy material ×38 (oid=116)
+[Order] Team8 buy tools ×2 (oid=117)
+[Order] Team9 sell food ×511 (oid=118)
+[Order] Team9 buy weapon_melee_low ×2 (oid=119)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=120)
+[Order] Team9 buy material ×40 (oid=121)
+[Order] Team9 buy tools ×2 (oid=122)
+[Move] Team 1 抵達 (17,16)
+[DayNight] Day 41 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=41 avg=22484 us max=1386919 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 覓食 (遷移找糧)
+[DayNight] Day 42 開始
+[Death] Person3000 (team3) 餓死
+[Death] Person3001 (team3) 餓死
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[Extinct] Team3 滅團清除（遺財已路由）
+[TickPerf] day=42 avg=23830 us max=1303059 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (16,15)
+[Ambition] Team1 rung 0→1 (定居 cap=1)
+[Order] Team1 buy material ×40 (oid=123)
+[Order] Team1 buy tools ×1 (oid=124)
+[DayNight] Day 43 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=43 avg=22680 us max=1524538 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (16,15)
+[DayNight] Day 44 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=44 avg=21230 us max=1307240 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (16,15)
+[DayNight] Day 45 開始
+[MsgPrune] 刪除過期訊息 global=41 known=39
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=45 avg=22188 us max=1100762 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Order] Team0 sell food ×5392 (oid=84)
+[Order] Team0 buy weapon_melee_low ×9 (oid=85)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=86)
+[Order] Team0 buy material ×60 (oid=87)
+[Order] Team0 buy tools ×8 (oid=88)
+[Order] Team1 buy food ×2 (oid=89)
+[Order] Team2 sell food ×5421 (oid=90)
+[Order] Team2 buy weapon_melee_low ×9 (oid=91)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=92)
+[Order] Team2 buy material ×60 (oid=93)
+[Order] Team2 buy tools ×5 (oid=94)
+[Order] Team4 sell food ×1266 (oid=95)
+[Order] Team4 buy weapon_melee_low ×7 (oid=96)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=97)
+[Order] Team4 buy material ×44 (oid=98)
+[Order] Team4 buy tools ×4 (oid=99)
+[Order] Team5 buy weapon_melee_low ×7 (oid=100)
+[Order] Team5 buy weapon_ranged_low ×6 (oid=101)
+[Order] Team5 buy tools ×3 (oid=102)
+[Order] Team5 buy food ×7 (oid=103)
+[Order] Team6 sell food ×2116 (oid=104)
+[Order] Team6 buy weapon_melee_low ×12 (oid=105)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=106)
+[Order] Team6 buy tools ×7 (oid=107)
+[Order] Team7 sell food ×450 (oid=108)
+[Order] Team7 buy weapon_melee_low ×2 (oid=109)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=110)
+[Order] Team7 buy material ×11 (oid=111)
+[Order] Team7 buy tools ×2 (oid=112)
+[Order] Team8 sell food ×528 (oid=113)
+[Order] Team8 buy weapon_melee_low ×2 (oid=114)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=115)
+[Order] Team8 buy material ×35 (oid=116)
+[Order] Team8 buy tools ×2 (oid=117)
+[Order] Team9 sell food ×530 (oid=118)
+[Order] Team9 buy weapon_melee_low ×2 (oid=119)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=120)
+[Order] Team9 buy material ×37 (oid=121)
+[Order] Team9 buy tools ×2 (oid=122)
+[Move] Team 1 抵達 (16,15)
+[DayNight] Day 46 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=46 avg=23964 us max=1742652 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Ambition] Team1 rung 1→0 (定居 cap=1)
+[Move] Team 1 抵達 (16,15)
+[DayNight] Day 47 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=47 avg=20914 us max=1248526 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (16,15)
+[Ambition] Team1 rung 0→1 (定居 cap=1)
+[Order] Team1 buy material ×40 (oid=121)
+[Order] Team1 buy tools ×1 (oid=122)
+[DayNight] Day 48 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=48 avg=21418 us max=1250821 us ticks=240 teams=9 factions=2
+[DayNight] Day 49 開始
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=49 avg=23518 us max=1623810 us ticks=240 teams=9 factions=2
+[Ambition] Team1 rung 1→0 (定居 cap=1)
+[DayNight] Day 50 開始
+[MsgPrune] 刪除過期訊息 global=39 known=38
+[Sub] Team6 派出子隊 Team10 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team6 ← Team10 完全合併 (pop=26)
+[TickPerf] day=50 avg=22410 us max=1225551 us ticks=240 teams=9 factions=2
+[day 50] T0 pop=15 food=3400.0 runway=450.00d task=覓食 | T1 pop=2 food=3.3 runway=2.08d task=覓食 | T2 pop=15 food=3400.0 runway=450.00d task=建設 | T3死/併 | letter_dispatched=8 delivered=8 need_deposited=2 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+[SoloAI] Team1 → 覓食 (遷移找糧)
+[Order] Team0 sell food ×5332 (oid=84)
+[Order] Team0 buy weapon_melee_low ×9 (oid=85)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=86)
+[Order] Team0 buy material ×60 (oid=87)
+[Order] Team0 buy tools ×8 (oid=88)
+[Order] Team1 buy food ×5 (oid=89)
+[Order] Team2 sell food ×5361 (oid=90)
+[Order] Team2 buy weapon_melee_low ×9 (oid=91)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=92)
+[Order] Team2 buy material ×60 (oid=93)
+[Order] Team2 buy tools ×5 (oid=94)
+[Order] Team4 sell food ×1232 (oid=95)
+[Order] Team4 buy weapon_melee_low ×7 (oid=96)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=97)
+[Order] Team4 buy material ×42 (oid=98)
+[Order] Team4 buy tools ×4 (oid=99)
+[Order] Team5 buy weapon_melee_low ×5 (oid=100)
+[Order] Team5 buy weapon_ranged_low ×4 (oid=101)
+[Order] Team5 buy tools ×2 (oid=102)
+[Order] Team5 buy food ×55 (oid=103)
+[Order] Team6 sell food ×2052 (oid=104)
+[Order] Team6 buy weapon_melee_low ×12 (oid=105)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=106)
+[Order] Team6 buy tools ×7 (oid=107)
+[Order] Team7 sell food ×461 (oid=108)
+[Order] Team7 buy weapon_melee_low ×2 (oid=109)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=110)
+[Order] Team7 buy material ×8 (oid=111)
+[Order] Team7 buy tools ×2 (oid=112)
+[Order] Team8 sell food ×546 (oid=113)
+[Order] Team8 buy weapon_melee_low ×2 (oid=114)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=115)
+[Order] Team8 buy material ×31 (oid=116)
+[Order] Team8 buy tools ×2 (oid=117)
+[Order] Team9 sell food ×547 (oid=118)
+[Order] Team9 buy weapon_melee_low ×2 (oid=119)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=120)
+[Order] Team9 buy material ×34 (oid=121)
+[Order] Team9 buy tools ×2 (oid=122)
+[Move] Team 5 抵達 (14,20)
+[SubAI] Team5 引擎→貿易 (買糧)
+[Move] Team 5 抵達 (14,20)
+[Merge] Team4 ← Team5 完全合併 (pop=30)
+[DayNight] Day 51 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Sub] Team4 派出子隊 Team10 leader=P4001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team4 超額 10 人，advisor Team4001 帶走
+[Sub] Team6 派出子隊 Team11 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team10 引擎→覓食 (覓食)
+[Merge] Team6 ← Team11 完全合併 (pop=26)
+[TickPerf] day=51 avg=21885 us max=1351737 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (14,16)
+[Move] Team 10 抵達 (13,20)
+[Ambition] Team1 rung 0→1 (定居 cap=1)
+[Move] Team 10 抵達 (14,20)
+[Merge] Team4 ← Team10 完全合併 (pop=30)
+[DayNight] Day 52 開始
+[Sub] Team4 派出子隊 Team10 leader=P5000 advisors=[] (pop=10 cap=38 task=idle)
+[PopMgmt] Team4 超額 10 人，advisor Team5000 帶走
+[Sub] Team6 派出子隊 Team11 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[Merge] Team4 ← Team10 完全合併 (pop=30)
+[Merge] Team6 ← Team11 完全合併 (pop=26)
+[TickPerf] day=52 avg=22421 us max=1453914 us ticks=240 teams=8 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (13,16)
+[Order] Team1 buy material ×40 (oid=122)
+[Order] Team1 buy tools ×1 (oid=123)
+[DayNight] Day 53 開始
+[Sub] Team4 派出子隊 Team10 leader=P5001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team4 超額 10 人，advisor Team5001 帶走
+[Sub] Team6 派出子隊 Team11 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team10 引擎→覓食 (覓食)
+[Merge] Team6 ← Team11 完全合併 (pop=26)
+[TickPerf] day=53 avg=22557 us max=1324979 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 逃跑 (survival)
+[DayNight] Day 54 開始
+[Sub] Team4 派出子隊 Team11 leader=P4001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team4 超額 9 人，advisor Team4001 帶走
+[Sub] Team6 派出子隊 Team12 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team10 引擎→外交 (求和)
+[SubAI] Team11 引擎→覓食 (覓食)
+[Merge] Team6 ← Team12 完全合併 (pop=26)
+[TickPerf] day=54 avg=21546 us max=1117946 us ticks=240 teams=10 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 10 抵達 (14,20)
+[Merge] Team4 ← Team10 完全合併 (pop=29)
+[Ambition] Team1 rung 1→0 (定居 cap=1)
+[Move] Team 1 抵達 (11,17)
+[DayNight] Day 55 開始
+[MsgPrune] 刪除過期訊息 global=40 known=38
+[Sub] Team4 派出子隊 Team12 leader=P5000 advisors=[] (pop=9 cap=38 task=idle)
+[PopMgmt] Team4 超額 9 人，advisor Team5000 帶走
+[Sub] Team6 派出子隊 Team13 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team11 引擎→外交 (求和)
+[Merge] Team4 ← Team12 完全合併 (pop=29)
+[Merge] Team6 ← Team13 完全合併 (pop=26)
+[TickPerf] day=55 avg=24627 us max=1472338 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Order] Team0 sell food ×5272 (oid=84)
+[Order] Team0 buy weapon_melee_low ×9 (oid=85)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=86)
+[Order] Team0 buy material ×60 (oid=87)
+[Order] Team0 buy tools ×8 (oid=88)
+[Order] Team1 buy food ×2 (oid=89)
+[Order] Team2 sell food ×5301 (oid=90)
+[Order] Team2 buy weapon_melee_low ×9 (oid=91)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=92)
+[Order] Team2 buy material ×60 (oid=93)
+[Order] Team2 buy tools ×5 (oid=94)
+[Order] Team4 sell food ×1078 (oid=95)
+[Order] Team4 buy weapon_melee_low ×14 (oid=96)
+[Order] Team4 buy weapon_ranged_low ×11 (oid=97)
+[Order] Team4 buy material ×40 (oid=98)
+[Order] Team4 buy tools ×8 (oid=99)
+[Order] Team6 sell food ×1993 (oid=100)
+[Order] Team6 buy weapon_melee_low ×12 (oid=101)
+[Order] Team6 buy weapon_ranged_low ×9 (oid=102)
+[Order] Team6 buy tools ×7 (oid=103)
+[Order] Team7 sell food ×472 (oid=104)
+[Order] Team7 buy weapon_melee_low ×2 (oid=105)
+[Order] Team7 buy weapon_ranged_low ×1 (oid=106)
+[Order] Team7 buy material ×5 (oid=107)
+[Order] Team7 buy tools ×2 (oid=108)
+[Order] Team8 sell food ×563 (oid=109)
+[Order] Team8 buy weapon_melee_low ×2 (oid=110)
+[Order] Team8 buy weapon_ranged_low ×1 (oid=111)
+[Order] Team8 buy material ×28 (oid=112)
+[Order] Team8 buy tools ×2 (oid=113)
+[Order] Team9 sell food ×565 (oid=114)
+[Order] Team9 buy weapon_melee_low ×2 (oid=115)
+[Order] Team9 buy weapon_ranged_low ×1 (oid=116)
+[Order] Team9 buy material ×31 (oid=117)
+[Order] Team9 buy tools ×2 (oid=118)
+[Move] Team 1 抵達 (11,17)
+[Move] Team 11 抵達 (14,20)
+[Merge] Team4 ← Team11 完全合併 (pop=30)
+[DayNight] Day 56 開始
+[Sub] Team4 派出子隊 Team10 leader=P5001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team4 超額 10 人，advisor Team5001 帶走
+[Sub] Team6 派出子隊 Team11 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team10 引擎→覓食 (覓食)
+[Merge] Team6 ← Team11 完全合併 (pop=26)
+[TickPerf] day=56 avg=20451 us max=1232893 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (12,17)
+[DayNight] Day 57 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[Sub] Team4 派出子隊 Team11 leader=P5000 advisors=[] (pop=9 cap=38 task=idle)
+[PopMgmt] Team4 超額 9 人，advisor Team5000 帶走
+[Sub] Team6 派出子隊 Team12 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team10 引擎→外交 (求和)
+[Merge] Team4 ← Team11 完全合併 (pop=29)
+[Merge] Team6 ← Team12 完全合併 (pop=26)
+[TickPerf] day=57 avg=22617 us max=1026366 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (12,17)
+[Move] Team 10 抵達 (14,20)
+[Merge] Team4 ← Team10 完全合併 (pop=30)
+[Order] Team1 buy material ×40 (oid=117)
+[Order] Team1 buy tools ×1 (oid=118)
+[DayNight] Day 58 開始
+[Sub] Team4 派出子隊 Team10 leader=P4001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team4 超額 10 人，advisor Team4001 帶走
+[Sub] Team6 派出子隊 Team11 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team10 引擎→覓食 (覓食)
+[Merge] Team6 ← Team11 完全合併 (pop=26)
+[TickPerf] day=58 avg=23772 us max=1528179 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (12,17)
+[DayNight] Day 59 開始
+[Sub] Team4 派出子隊 Team11 leader=P5000 advisors=[] (pop=9 cap=38 task=idle)
+[PopMgmt] Team4 超額 9 人，advisor Team5000 帶走
+[Sub] Team6 派出子隊 Team12 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team10 引擎→外交 (求和)
+[Merge] Team4 ← Team11 完全合併 (pop=29)
+[Merge] Team6 ← Team12 完全合併 (pop=26)
+[TickPerf] day=59 avg=22092 us max=1168994 us ticks=240 teams=9 factions=2
+[SoloAI] Team1 → 覓食 (覓食)
+[Move] Team 1 抵達 (13,16)
+[Move] Team 10 抵達 (14,20)
+[Merge] Team4 ← Team10 完全合併 (pop=30)
+[Combat Start] Team-1000002 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+[DayNight] Day 60 開始
+[MsgPrune] 刪除過期訊息 global=39 known=37
+[Sub] Team4 派出子隊 Team10 leader=P5001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team4 超額 10 人，advisor Team5001 帶走
+[Sub] Team6 派出子隊 Team11 leader=P6001 advisors=[] (pop=1 cap=1 task=idle)
+[PopMgmt] Team6 超額 6 人，advisor Team6001 帶走
+[SubAI] Team10 引擎→覓食 (覓食)
+[Merge] Team6 ← Team11 完全合併 (pop=26)
+[Combat Start] Team-1000003 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+[TickPerf] day=60 avg=20675 us max=1192421 us ticks=240 teams=10 factions=2
+[day 60] T0 pop=15 food=3280.0 runway=440.00d task=覓食 | T1 pop=2 food=7.3 runway=4.58d task=覓食 | T2 pop=15 food=3280.0 runway=440.00d task=建設 | T3死/併 | letter_dispatched=8 delivered=8 need_deposited=2 | ★distribute.dispatch=0 deliver=0 food_delivered=0.0 | convoy.dispatch=0 deliver=0
+
+───────── 最終報告(day60) ─────────
+
+§5 商業 unstall：
+  trade.deal=0  convoy.dispatch=0 convoy.fetch=0 convoy.deliver=0  g1.order_placed=506 g1.order_fulfilled=0
+  trade.peer_deal=0
+
+★★症1 全鏈：letter→lord聞→distribute→送糧：
+  help.letter_dispatched=8  help.delivered=8  help.need_deposited=2（letter 鏈，前輪已通）
+  ★★distribute.dispatch=0  distribute.deliver=0  distribute.candidate_eval=680  ★food_delivered=0.0
+  distribute.unrest_add=1692 unrest_reduce=0（居民自讀 runway 回升線，非 god-view）
+  scout.dispatched=0 info_returned=0
+  board.relay_deposit=4 read=0
+
+★★resident runway 真回升（端到端真效果，非只candidate，feedback_verify_execution_end）：
+  T1 起 pop=10 food=15.0 → 終 pop=2 food=7.3 runway=4.58d unrest_turns=585
+  T3(起 food=15.0 pop=10) → 終態：死/併（餓死=runway未回升的最壞結果）
+
+ 組織軸集團生產：
+  T_COOP(4+5)_total=1372.0  T_SOLO_BIG(6)_total=2767.8  ratio=0.496
+
+ fog/hub 效應：
+  T7(遠隊) team_discovered.size=0 team_known(訊息量)=10  discovered T2/T3(faction2)=false/false
+  T8(遠隊) team_discovered.size=0 team_known(訊息量)=10  discovered T2/T3(faction2)=false/false
+
+ economy 不爆（keep-line，領主端）：
+  T0(領主) 終態：food=3280.0 material=0.0 coin=500.0
+  T2(領主) 終態：food=3280.0 material=0.0 coin=500.0
+
+ 全貌：
+  存活隊數=10  總人口(含minor)=104  faction數=2
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
