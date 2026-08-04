@@ -1541,9 +1541,12 @@ func _try_herald_side(state: WorldState, team: TeamData) -> void:
 	var severity: float = clampf((DecisionTerms.DESPERATION_DAYS - food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
 	if severity <= 0.0:
 		return   # 不絕境不求援（need-gated）
+	if Probe.enabled: Probe.bump("help.severity_positive")   # ★缺口A 診斷:落 food 窗口(severity>0)隊數
 	var tgt: Dictionary = _resolve_help_target(state, team)
 	if int(tgt["id"]) == -1:
+		if Probe.enabled: Probe.bump("help.target_unresolved")   # ★缺口A:severity>0 但名冊/belief 解不出施助者
 		return   # 無施助者（belief/名冊皆無）
+	if Probe.enabled: Probe.bump("help.target_resolved")   # ★缺口A:severity>0 且解出施助者
 	var lv: Dictionary = TradeValuation.leader_vals(state, team)
 	var mini: float = severity * _help_pmult(lv) * INFO_RELIEF_EXPECT - INFO_ANON_COST
 	if Probe.enabled: Probe.note("help.mini_util", mini)
