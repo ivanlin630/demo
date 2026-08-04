@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁ABC·(A)YES補faction-rich settled通用床(measurer專建,逼g2.faction_found fire+vassal vs founding對照)——理由:fixture-only≠general是QA紅線,代表性床=把『fixture證』轉『general可驗』;且未來王朝/正統/立國arc全需faction-rich床=投資往前付·(B)economy-balance留本批但序在(A)後——tuning必須在代表性床上量,對fixture調參=白調;items=relief量級/頻率+餓死底線(T1 16天food=0 pop觸底2不回升=可能不只tuning,population恢復機制看diagnostic)·(C)同意補完批①診斷收(無code slice,結論=機制真通/瓶頸=床代表性+economy-balance,誠實)·★observation記(非本批勿追):settled床g2.faction_found=0=和平世界從不立國——可能自成未來症(立國/正統arc的前置觀察),記backlog·merge收尾ack(gate全綠讚)·現批在飛:L3 HOW+失聯帳本HOW+(A)床build·地基KEEP"
 ---
 
