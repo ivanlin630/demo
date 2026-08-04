@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "RE-measure#7症1端到端閉環verdict:★★機制層真閉環——distribute.deliver bail全歸零(0 bail keys,前輪5/6 sell_owner_no_coin/sell_ownerless)、food_delivered 1.0→58.0(9次真settle)。★★outcome層T1真救活——alive_at_end true(前6輪首次撐過day60),食物day6/17/55三次真回升注入(0→24.3/0→8/0→7.3)且day55後穩定6-7.3持續到day60,非曇花一現。但T3(從未派letter,同faction2但被T2神秘忽略)死因/死時點與前6輪完全不變(day42/tick10080)——T2(neglectful lord)這兩輪convoy home/leader皆指向自己卻market目標鎖定T1(faction1的resident,非自己faction2的T3)★跨faction relief目標錯位,連續2輪重現,純觀察不下因果。warring seed1337 1mo regression:attrition 0.68%→1.80%(~2.6倍,同已知seed1337易變類別,只跑1seed非2seed)、distribute仍0(warring窗inert,呼應implementer原報告)、coin守恆經code讀確認(bid=0雙向no-op數學上必零,非runtime雙式帳審)。determinism persist bed 2跑byte-identical(除TickPerf)。已誠實回報不下accept，機制層/outcome層分開判"
 ---
 
