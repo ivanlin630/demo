@@ -10,6 +10,7 @@ func _initialize() -> void:
 	_test_price_factor_spectrum()
 	_test_price_factor_continuous_not_gate()
 	_test_distribute_candidate_fires_persona()
+	_test_descan_no_runway_gate()          # ★資訊網 de-scan：憑送達 belief(buy-order)fire、不讀 resident live runway/死常數門檻
 	_test_free_distribute_coin_conserving()
 	_test_paid_distribute_coin_conserving()
 	if _fail == 0:
@@ -65,6 +66,25 @@ func _test_distribute_candidate_fires_persona() -> void:
 				persona["n"], float(fired.get("util", 0)), float(fired["to_task"].get("price_factor", -1))])
 		else:
 			_bad("%s distribute candidate 未 fire(cands=%d)" % [persona["n"], cands.size()])
+
+# ★資訊網 de-scan（arc 最後一哩）：領主憑「聽到的」buy-order(belief) fire distribute，
+# 不再直讀 resident live runway/死常數門檻。RED=舊碼 resident food 高(runway>DISTRIB_DEFICIT_DAYS)→continue skip。
+func _test_descan_no_runway_gate() -> void:
+	var setup: Array = _mk_lord_state(0.5, 0.5)   # neutral persona
+	var state: WorldState = setup[0]; var lord: TeamData = setup[1]
+	# resident food 拉高（runway 遠超舊 DISTRIB_DEFICIT_DAYS=4.0）——舊碼會 skip；de-scan 憑 buy-order belief 仍 fire。
+	var resident: TeamData = state.teams[2]
+	ResourceBank.set_amt(resident, "food", 999.0, "descan")   # runway 999/(5×0.8)≈250 >> 4.0
+	var ctx: DecisionContext = DecisionContext.gather(state, lord)
+	var lv: Dictionary = TradeValuation.leader_vals(state, lord)
+	var cands: Array = GoalResolver._distribute_candidates(state, lord, ctx, lv)
+	var fired: bool = false
+	for c in cands:
+		if String(c.get("label", "")) == "distribute_food": fired = true; break
+	if fired:
+		_ok("de-scan:resident runway≈250(遠>舊門檻4.0)仍 fire distribute=憑送達 belief(buy-order)非讀 live runway/死常數")
+	else:
+		_bad("de-scan 破:resident food 高→未 fire=仍讀 live runway god-view 或死常數門檻殘留")
 
 # 免費分配(override_ask=0):食物轉入居民、居民 coin 不變、coin 守恆(lord+resident 總 coin 不變)。
 func _test_free_distribute_coin_conserving() -> void:

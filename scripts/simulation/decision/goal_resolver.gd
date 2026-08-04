@@ -117,12 +117,20 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 	out.append_array(_distribute_candidates(state, team, ctx, lv))
 	return out
 
-# ★後勤 SLICE B（spec 2026-08-01 §2B）：領主掃自有 deficit 居民 food buy-order → 生 feed-residents candidate。
+# ★後勤 SLICE B（spec 2026-08-01 §2B、資訊網 de-scan 2026-08-04）：領主憑「聽到的」子民 food buy-order（belief）→ 生 feed-residents candidate。
 # 統一光譜:price_factor(honor→0 免費/neutral 公道/greed→markup 高價) + util(relief[honor 放大]+coin[greed 放大])競 argmax
-# 對 sell-external(_deliver_candidates)。★連續 weigh 非硬 gate、復用市場非新 class（約束②③④）。★感知鐵律:讀本勢力自有居民
-# deficit=合法(intra-faction 自有後勤態非 god-view)。純算術零 RNG。
-const DISTRIB_DEFICIT_DAYS: float = 4.0       # TEST VALUE — 居民 food runway < 此=deficit 候選
+# 對 sell-external(_deliver_candidates)。★連續 weigh 非硬 gate、復用市場非新 class（約束②③④）。
+# ★感知鐵律（資訊網 arc de-scan）：**只讀送達 belief（received_buy_orders）+ faction 結構（is_resident_static=組織常識、非 live 態）**——
+#   舊「讀本勢力自有居民 deficit=合法 god-view」自辯已被用戶資訊網 arc 否定（領主直掃自家居民 live runway/pop/food=god-view 殘留）。
+#   relief 源自 buy-order qty（子民表達了 need），belief stale→可能多送=fog 成本可接受（非偷讀 live 補正）。純算術零 RNG。
 const PRICE_MARKUP_CAP: float = 3.0           # TEST VALUE — price_factor 上界（貪婪剝一筆天花板）
+# relief need_signal 正規化 scale（★非門檻 gate：任何 qty>=1 仍 fire、NORM 只影響 relief 強度梯度）。
+# ★calibration-anchor（DERIVED、PER_HAND 紀律，非 invent 能 fire 常數）：典型小型居民絕境窗全額 food 買單量
+#   = 絕境天(DESPERATION_DAYS) × 每人日耗(FOOD_PER_PERSON_PER_DAY) × 典型居民規模(DISTRIB_RELIEF_REF_POP)。
+const DISTRIB_RELIEF_REF_POP: float = 5.0     # TEST VALUE — 典型小型定居居民規模（relief scale 參考、非 gate）
+const DISTRIB_RELIEF_NORM: float = DecisionTerms.DESPERATION_DAYS * ResourceSystem.FOOD_PER_PERSON_PER_DAY * DISTRIB_RELIEF_REF_POP
+# ★de-scan 後 _distribute_candidates 不再用此（deficit 判定改 belief）；仍供 _tick_resident_unrest 居民自讀 runway 回升安全線（自讀非 god-view lord-scan）。
+const DISTRIB_DEFICIT_DAYS: float = 4.0       # TEST VALUE — 居民 food runway > 此=脫離 deficit（unrest 回升線）
 static func _distribute_candidates(state: WorldState, team: TeamData, ctx: DecisionContext, lv: Dictionary) -> Array:
 	var out: Array = []
 	# 廉價前閘:僅領主(faction leader)+有餘糧。子隊/無 faction/非領主/太小隊不分配。
@@ -164,10 +172,9 @@ static func _distribute_candidates(state: WorldState, team: TeamData, ctx: Decis
 		var resident: TeamData = state.teams[rid]
 		if resident.faction_id != team.faction_id \
 				or not FactionAISystem.is_resident_static(state, resident):
-			continue   # 只本勢力自有居民（intra-faction，感知鐵律合法）
-		var runway: float = _resident_food_runway(state, resident)
-		if runway >= DISTRIB_DEFICIT_DAYS:
-			continue   # 非 deficit
+			continue   # 只本勢力自有居民（intra-faction faction 結構=組織常識，非 live 態）
+		# ★de-scan（資訊網 arc）：移除 god-view live-read（_resident_food_runway 直讀 resident live pop/food）
+		#   + 死常數門檻閘（runway >= DISTRIB_DEFICIT_DAYS continue）。deficit 判定改憑送達 belief（buy-order 存在=子民表達了 need）。
 		var mpos = o.get("pos", Vector2i.ZERO)
 		if not (mpos is Vector2i) or mpos == team.tile_pos:
 			continue
@@ -178,11 +185,14 @@ static func _distribute_candidates(state: WorldState, team: TeamData, ctx: Decis
 		var qty: float = minf(food_surplus, eff_rem)
 		if qty < 1.0:
 			continue
-		# util 連續 weigh（約束②）：relief（義氣放大救子民）+ coin（貪婪放大抽 coin）。
-		var deficit_severity: float = clampf((DISTRIB_DEFICIT_DAYS - runway) / DISTRIB_DEFICIT_DAYS, 0.0, 1.0)
-		var relief_term: float = deficit_severity * (0.3 + honor)
+		# util 連續 weigh（約束②、de-scan）：relief（義氣放大救子民）+ coin（貪婪放大抽 coin）。無死常數門檻。
+		# ★need_signal 源自送達 belief（buy-order 剩餘 qty=領主聽到的 need 訊）非 live runway；NORM=scale 非 gate。
+		var need_signal: float = clampf(eff_rem / DISTRIB_RELIEF_NORM, 0.0, 1.0)
+		var relief_term: float = need_signal * (0.3 + honor)
 		var coin_term: float = price_factor * food_val * qty * (0.3 + greed) / DELIVER_PAYOFF_NORM
 		var u: float = relief_term + coin_term
+		if Probe.enabled:
+			Probe.bump("distribute.candidate_eval"); Probe.note("distribute.relief_term", relief_term)
 		if u > best_util:
 			best_util = u
 			best = {"qty": qty, "mpos": mpos, "oid": oid, "rid": rid}

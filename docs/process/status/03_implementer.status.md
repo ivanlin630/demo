@@ -10,6 +10,14 @@ updated: 2026-07-22
 
 # 03 implementer 現況
 
+**★資訊網 distribute de-scan（arc 最後一哩）（branch `feat/info-network-whole`，續，HEAD 待 commit）**：
+- **root（RE-measure#4→systems 定案）**：letter-carrier 根治交付（delivered 8/8 領主真聞）但 `distribute.dispatch` 仍 0＝`goal_resolver:168-169` `_resident_food_runway(resident)` 直讀 resident live pop/food＝**god-view 殘留（用戶否定的領主直掃自家居民）** + `DISTRIB_DEFICIT_DAYS=4.0` 死常數門檻（letter 蓋門口卻開後窗）。
+- **修（de-scan）**：①移 `:168` god-view live-read ②移 `:169` 死常數硬 continue 閘 ③relief 改源自送達 belief：`need_signal = clampf(eff_rem/DISTRIB_RELIEF_NORM,0,1)`（buy-order 剩餘 qty=領主聽到的 need 訊），`relief_term = need_signal×(0.3+honor)` 人格 weigh，coin_term 不變、無死常數門檻 ④`DISTRIB_RELIEF_NORM`=DERIVED calibration scale（DESPERATION_DAYS×FOOD_PER_PERSON_PER_DAY×典型居民pop 5＝12.0、PER_HAND 紀律、**非 fire gate**）⑤訂正 :122 舊 comment（intra-faction deficit god-view 自辯已否定→belief-only）。`DISTRIB_DEFICIT_DAYS` 保留（`_tick_resident_unrest` 居民自讀 runway 回升線=自讀非 lord god-view）。+補 `distribute.dispatch` tap（全觀測缺口：warring_harness 列 key 但從未 bump）。
+- **驗全綠**：`lord_distribution_bed` +de-scan RED（resident food 999 runway≈250>>4.0 仍 fire=證 god-view runway gate 真移）全綠；infonet 全 bed 綠；headless **0-new**；gate PASS sites=74 removed=0（`_resident_food_runway` helper 留給自讀 caller、distribute call 移=belief-only）；determinism 3-run（GODOT_TIMEOUT=1200、seed1337 1mo）MD5 `9ACAC8D7092EB9A77E5807E636A2C324` byte-identical（carrier+de-scan 合併 stack）。**★訂正**：前 carrier 報的 `06D9B76D` 是 stale-file（godot.ps1 default 360s 超時 kill→未 dump→hash 到舊 means-end 檔）；warring 1mo 實需 ~900s，本次 GODOT_TIMEOUT=1200 fresh 驗證檔真新（size 32967）＝determinism 屬性真成立、carrier code 零 randf 本就確定性。
+- **下一站**：handback to:systems R²→我路 measurer re-measure **症1 端到端 on FACTION bed**（`distribute.dispatch>0` + 糧真到 resident runway 回升）→QA。**★資訊網 arc 收官在望**（1a 板+2a herald 側動+2b scout+3 trade+carrier+A③+de-scan=一 root 三症全鏈通）。
+
+---
+
 **★資訊網 B herald 非team carrier + A③名冊full（branch `feat/info-network-whole`，續，HEAD 待 commit）**：
 - **root（diagnostic 確認→systems 定案）**：B=herald team-carrier full-sim 黑洞（on_leader_death 對 1-pop anon 信使 promote 出 throwaway named=team-ness 副作用、full-sim team 互動吃掉 herald tick）。fix=herald 從「假裝 team」還原成 **in-transit 訊息物件**（category error 家族正解、非 beast 式散 exemption 補丁）。
 - **修**：①`state.in_transit_letters`（net-new、非 state.teams→免撞 succession/cull/subteam/on_leader_death/combat 全 team 機具）②`_try_herald_side` reframe=建 letter+detach 1 anon（sunk cost 真成本）+payload=origin 自己 food need snapshot（有真買單帶走、無則 runway-deficit synth=genuine 非 crank）③新 tick step `_step_tick_letters`（sim_runner 置 move 後）：letter 1hex/tick 物理走→抵 seat（lord co-located→deposit team_known / 不在→register seat board Part1 接力）/timeout remove/敵 faction 隊在場攔截 remove（物理零 RNG）④A③ `_resolve_help_target`=最近自家 faction 固定 outpost（full 名冊、治 mobile-lord；solo 仍不解=正確）⑤刪死 `_tick_help_herald`+help_call 分支（de-team）；scout 保留不動。

@@ -3270,7 +3270,11 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
 	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
-		return _dispatch_convoy(state, team, td)
+		var conv_ok: bool = _dispatch_convoy(state, team, td)
+		# ★全量 tap（資訊網 de-scan 驗收 症1 端到端）：distribute convoy 真派出 → distribute.dispatch。
+		if conv_ok and Probe.enabled and String(td.get("kind", "")) == "distribute":
+			Probe.bump("distribute.dispatch")
+		return conv_ok
 	# ★資訊網 Part2 (a)：求援/偵察 已脫離主 argmax/delegate → 移到 _info_side_dispatch 平行步（此處無 help/scout 分支）。
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):
