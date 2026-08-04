@@ -1,7 +1,7 @@
 ---
 from: systems
 to: measurer
-status: open
+status: consumed
 topic: "[補完批(A)build faction-rich settled 代表性通用床(blueprint 裁,把 relief 機制 fixture-證轉 general-可驗;fixture-only≠general QA 紅線)·你專建·目標:①逼 g2.faction_found 真 fire(正規建國路,非只 infonet_whole 的手擺 faction+peaceful 的 vassal 主服路)②多 faction 各 lord+member-resident 同 faction、至少一 resident 真餓(近餓死起點)③settled 非 warring·對照組義務:vassal(主服)形成 vs founding(g2.faction_found)形成兩路徑——驗 distribute relief 行為是否路徑相關(measurer diagnostic 提的:萬一 founding fire 行為是否不同 vassal)·bed 落地 config/ + harness 落地 scripts/debug/(比照 infonet_whole_diag_bed persist 治 reproducibility)·量:relief 鏈四站(candidate_eval→dispatch→travel→settle)在 general founding-faction 床是否全通如 fixture、food_delivered、resident alive/runway·★這是 general 驗證床(非 fixture)=補完批 relief 通用化的『修』(blueprint:非改機制,補代表性床)·序:(A)床 build+量 → 回 systems/blueprint 判 general 是否真通 → (B)economy-balance 在此床上量(relief 量級/頻率+餓死底線,序在 A 後,對 fixture 調參=白調)·guardrail:床是 fixture 但機制零特例,零 god-view;measure-first dump 真值·地基 KEEP"
 ---
 

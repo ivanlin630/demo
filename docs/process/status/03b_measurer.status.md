@@ -12,7 +12,9 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——relief通用化diagnostic verdict已完成寄出
+**狀態**：工作中（等下一票）——faction-rich代表性通用床build+verdict已完成寄出
+
+**工單**：無（faction-rich代表性通用床verdict已完成寄systems：★bed已persist(config/infonet_faction_rich_rep.json+scripts/debug/infonet_faction_rich_rep_bed.gd,commit e13fd2ac worktree)。founding路部分成功:v1發現vision/belief範圍是首個封鎖(_nearest_independent需真claims非只team_discovered proximity),調緊鄰距+補偵查技能解封後indep.gate_path_ok 0→1105/indep.found_ally 0→4真派信使,但g2.faction_found 60天內仍=0(未完全establish,未深挖envoy accept/reject卡點,如實回報未完全打通)。vassal對照組(T4領主+T5member,全新非arc config)★relief鏈確認真fire:candidate_eval=3/dispatch=3/arrive=3/settle=6/food_delivered=64.0,證relief非infonet_whole獨有真generalize。★意外重複模式:T5後來(day41起義)自行脫離faction(faction_ai_system.gd:4571/4577無條件clear_team_faction)——跟T3-attribution輪的event_faction_defect不同機制但同款『member自行脫faction斷relief』pattern第3次重現,讀作結構性confound非偶發,已回報供留意。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-faction-rich-rep-bed-verdict.md，別下accept，founding是否需再開票深追/uprising-defect confound是否正式列冊交systems/blueprint。
 
 **工單**：無（relief通用化diagnostic verdict已完成寄systems：★①settled econ床(peaceful_economy seed70730 6mo)全程幾乎0 faction,g2.faction_found=0/indep.found_*=0全未觸發正規建國路,唯一一次faction形成(day5 Team5主服Team2→勢力0,vassal路非g2.faction_found)該member全程無famine——distribute=0在此案例=真無需求非機制不apply,證實systems假說=結構缺失為主因。②③直接reuse本session已landed的infonet_whole.json逐輪數據(唯一faction-rich+resident真餓settled床):RE6(pre-fix)6→6→settled1(5bail)food1.0;RE7(9b502d52免費直注)5→2→settled2(bail=0)food58.0;T1confirm(20a7d8ef)14→6→settled6食72.0——唯一斷點(settle站bail)已被兩輪fix修好,鏈條現通;economy-balance誠實揭露T1連續16天food=0(day28-43)才等到relief,救得活不致死但非穩定復甦,波動撐命。落地1新檔+3引用既有檔。已回systems handback:2026-08-05-measurer-to-systems-relief-general-diagnostic-verdict.md，別下accept，結構缺失vs機制缺陷判準交systems/blueprint。
 
