@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "補完批(B)economy-balance verdict:★★population觸底不回升=mechanism gap非tuning(blueprint疑對)——2個獨立fixture交叉驗證:rep床T5食物day14-33連續20天穩定正值(12-25區間)pop仍鎖死=2從未回升;T1-confirm(20a7d8ef)床T1食物day44-49連續6天穩定6-7.3 pop同樣鎖死=2從未回升——兩個不同config/不同resident/不同時間窗,同款『食物穩定充足≥6-20天,population仍0恢復』,讀作真無population-recovery通路非relief量級/timing問題(若只是tuning,充足期夠長該有訊號,兩案例都沒有)。①relief量級/頻率(rep床45天窗):distribute.dispatch=3次(~每15天1次)/food_delivered=64.0(45天均攤約1.4/天,對pop2resident剛好在1.6/天基本消耗線附近,量級屬邊緣夠用非寬裕)②timing:首2次注入約day5+day14落地,day12 pop已先觸底(注入來得及穩住食物但來不及在觸底前介入,relief在population已跌到底之後才追上food)③餓死底線confirm:pop2是這整條arc(含T1/T3/T5三隻獨立resident,三個不同config)全數收斂的統一下限,無例外。★method聲明:本輪嘗試逐tick cargo-delta抓取『真deposit時刻』方法不準(混進porter在途小額cargo耗損雜訊,13筆多為OUTBOUND階段0.3-0.7小額非真settle),已誠實標註取而代之改用日food曲線大跳點+aggregate Probe數對照,不精確到秒但方向可信。純觀測未新建bed-tuning-for-narrative(用既有rep床原生45天窗,未壓起義取更長)。別下accept，population-recovery mechanism gap是否列入known issue/是否需要新機制(如breed/immigrate)交systems/blueprint判"
 ---
 
