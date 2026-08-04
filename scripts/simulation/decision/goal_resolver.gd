@@ -113,8 +113,8 @@ static func frontier_candidates(state: WorldState, team: TeamData, ctx: Decision
 	out.append_array(delegated)
 	# ★後勤 SLICE A：供給-delivery candidate（surplus holder 知有 demand 市場 → 送貨結買單，GATE-B 撮合物理送貨）。
 	out.append_array(_deliver_candidates(state, team, ctx, lv))
-	# ★後勤 SLICE B：領主分配政策（統一光譜:給/賣公道/賣高價/拋棄；人格 weigh 出光譜位置，同 convoy 脊椎+貿易市場）。
-	out.append_array(_distribute_candidates(state, team, ctx, lv))
+	# ★資訊網 distribute side-dispatch：領主賑濟 distribute 已脫主 argmax（跟覓食競爭輸=同 herald/scout 舊病）→
+	#   移到 faction_ai._try_distribute_side 平行 side-action（領主下令派賑濟 convoy=directive、body 照覓食）。此處不再進主 rank 池。
 	return out
 
 # ★後勤 SLICE B（spec 2026-08-01 §2B、資訊網 de-scan 2026-08-04）：領主憑「聽到的」子民 food buy-order（belief）→ 生 feed-residents candidate。

@@ -11,6 +11,7 @@ func _initialize() -> void:
 	_test_price_factor_continuous_not_gate()
 	_test_distribute_candidate_fires_persona()
 	_test_descan_no_runway_gate()          # ★資訊網 de-scan：憑送達 belief(buy-order)fire、不讀 resident live runway/死常數門檻
+	_test_side_dispatch_fires_when_busy()  # ★資訊網 side-dispatch：領主本業覓食(非 distribute)仍平行派賑濟 convoy
 	_test_free_distribute_coin_conserving()
 	_test_paid_distribute_coin_conserving()
 	if _fail == 0:
@@ -85,6 +86,28 @@ func _test_descan_no_runway_gate() -> void:
 		_ok("de-scan:resident runway≈250(遠>舊門檻4.0)仍 fire distribute=憑送達 belief(buy-order)非讀 live runway/死常數")
 	else:
 		_bad("de-scan 破:resident food 高→未 fire=仍讀 live runway god-view 或死常數門檻殘留")
+
+# ★資訊網 distribute side-dispatch：領主 body 忙本業（覓食、非 distribute）仍平行派賑濟 convoy＝脫主 argmax。
+# RED=distribute 若留主 argmax、lord 覓食 latch→distribute 永輸→不派（RE-measure#5 症）。
+func _test_side_dispatch_fires_when_busy() -> void:
+	var setup: Array = _mk_lord_state(0.5, 1.0)   # 高義氣領主（relief 強）
+	var state: WorldState = setup[0]; var lord: TeamData = setup[1]
+	lord.current_task = TeamData.TASK_FORAGE   # ★body 忙覓食（非 distribute）
+	var teams_before: int = state.teams.size()
+	Probe.reset(); Probe.enabled = true
+	FactionAISystem.new()._try_distribute_side(state, lord)
+	Probe.enabled = false
+	var dispatched: int = int(Probe.counts.get("distribute.dispatch", 0))
+	var convoy_spawned: bool = false
+	for tid in state.teams:
+		var t: TeamData = state.teams[tid]
+		if t.parent_team_id == lord.team_id and t.current_task == TeamData.TASK_CONVOY:
+			convoy_spawned = true; break
+	if dispatched == 1 and convoy_spawned and lord.current_task == TeamData.TASK_FORAGE:
+		_ok("side-dispatch:領主覓食中仍平行派賑濟 convoy(distribute.dispatch=1、body task=覓食不變=脫主 argmax directive)")
+	else:
+		_bad("side-dispatch 破:dispatch=%d convoy=%s lord_task=%s teams %d→%d" % [
+			dispatched, str(convoy_spawned), lord.current_task, teams_before, state.teams.size()])
 
 # 免費分配(override_ask=0):食物轉入居民、居民 coin 不變、coin 守恆(lord+resident 總 coin 不變)。
 func _test_free_distribute_coin_conserving() -> void:

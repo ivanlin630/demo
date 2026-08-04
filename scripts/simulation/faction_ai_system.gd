@@ -1647,6 +1647,21 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		team.info_eval_next_tick = state.world.current_tick + INFO_DISPATCH_CADENCE
 		_try_herald_side(state, team)
 		_try_scout_side(state, team)
+		_try_distribute_side(state, team)
+
+# ★資訊網 distribute side-dispatch（第三 side-action 型、blueprint sign-off）：領主憑聽到的子民 need（belief）+ 人格
+# 賑濟 → 派 distribute convoy（directive、母隊 body 照覓食、脫主 argmax 免跟覓食競爭輸=同 herald/scout 家族）。
+# reuse _distribute_candidates（已 de-scan：belief received_buy_orders + 人格 relief、零 god-view 零死常數）算最佳候選；
+# mini-util=該候選 util（>0 才返候選）；_dispatch_convoy 自 throttle 一 convoy/lord + 內建 distribute.dispatch tap。純算術零 RNG。
+func _try_distribute_side(state: WorldState, team: TeamData) -> void:
+	var ctx: DecisionContext = DecisionContext.gather(state, team)
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var cands: Array = GoalResolver._distribute_candidates(state, team, ctx, lv)
+	if cands.is_empty():
+		return   # 非領主/無餘糧/無聽到 belief need/mini-util<=0（_distribute_candidates 內建 gate）
+	var best: Dictionary = cands[0]
+	if Probe.enabled: Probe.note("distribute.mini_util", float(best.get("util", 0.0)))
+	_dispatch_convoy(state, team, best["to_task"])   # 自 throttle（一 convoy/lord）+ 成功時 distribute.dispatch tap（:3353）
 
 # 求援 side：餓 + 知施助者 + mini-util>0（cost-benefit）→ 派 anon 信使（不佔主任務、平行）。
 func _try_herald_side(state: WorldState, team: TeamData) -> void:
@@ -3270,11 +3285,7 @@ func _dispatch_goal_delegate(state: WorldState, team: TeamData, td: Dictionary) 
 	var target: Vector2i = td.get("target", Vector2i(-1, -1))
 	# ★後勤 SLICE A/B：deliver（賣外）/distribute（領主分配子民）convoy 分支 → 派 porter 子隊（同脊椎）。
 	if String(td.get("kind", "")) == "deliver" or String(td.get("kind", "")) == "distribute":
-		var conv_ok: bool = _dispatch_convoy(state, team, td)
-		# ★全量 tap（資訊網 de-scan 驗收 症1 端到端）：distribute convoy 真派出 → distribute.dispatch。
-		if conv_ok and Probe.enabled and String(td.get("kind", "")) == "distribute":
-			Probe.bump("distribute.dispatch")
-		return conv_ok
+		return _dispatch_convoy(state, team, td)   # distribute.dispatch tap 已在 _dispatch_convoy:3353（免雙計）
 	# ★資訊網 Part2 (a)：求援/偵察 已脫離主 argmax/delegate → 移到 _info_side_dispatch 平行步（此處無 help/scout 分支）。
 	# ★A1 founding 分支：新建 outpost → 複用 _dispatch_builder（含 afford/pop/advisor gate + TASK_CONSTRUCT 子隊 consumer）。
 	if td.has("build_type"):

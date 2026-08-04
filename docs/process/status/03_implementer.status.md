@@ -10,6 +10,15 @@ updated: 2026-07-22
 
 # 03 implementer 現況
 
+**★資訊網 distribute side-dispatch（症1 雙端對稱最後一步）（branch `feat/info-network-whole`，續，HEAD 待 commit）**：
+- **root（RE-measure#5→systems 定案）**：de-scan 解候選生成（`distribute.candidate_eval 0→680`）但 `distribute.dispatch` 仍 0、T0 領主恆覓食＝**distribute 留主 argmax 跟覓食競爭輸**（同 herald/scout 移出前的「applicable 但輸主 argmax」病）。
+- **修（de-patch 同 herald 家族）**：①移 `goal_resolver frontier_candidates:117` `_distribute_candidates` append（distribute 脫主 rank 池＝determinism-neutral 移 loser、主 winner 不變）②新 `faction_ai._try_distribute_side`（side-dispatch pass、`_try_herald_side/_try_scout_side` 旁）：reuse `_distribute_candidates`（已 de-scan belief+人格零 god-view）算最佳賑濟候選→`_dispatch_convoy`（自 throttle 一 convoy/lord + 內建 `distribute.dispatch` tap :3353）③revert de-scan 誤加的 `_dispatch_goal_delegate` 冗餘 tap（與 :3353 雙計）。mini_util tap 補。
+- **side-action 邊界正式化**（blueprint 定、寫進 spec）：side-dispatch=herald/scout/distribute **三型明列**、非泛化框架；每新增型需 blueprint sign-off。
+- **驗全綠**：`lord_distribution_bed` +side-dispatch RED（領主 body 覓食中仍平行派賑濟 convoy=脫主 argmax）全 8 綠；infonet 全 bed 綠；headless **0-new**；gate PASS sites=74 removed=0；determinism 3-run（GODOT_TIMEOUT=1200、seed1337 1mo）MD5 `9290F462BD4A01B542A4519A091FCA79` byte-identical（metric size 32967→34049＝distribute convoy 真 fire＝症1 世界效果現形）。
+- **下一站**：handback to:systems R²→我路 measurer re-measure **症1 端到端 on FACTION bed**（`distribute.dispatch>0` + 糧真到 resident runway 回升＝**症1 首次閉環**）→QA。**★資訊網 arc 收官**：resident 求援(side)→letter→領主聞→領主賑濟(side)→convoy→糧真到 resident=雙端對稱全鏈通。
+
+---
+
 **★資訊網 distribute de-scan（arc 最後一哩）（branch `feat/info-network-whole`，續，HEAD 待 commit）**：
 - **root（RE-measure#4→systems 定案）**：letter-carrier 根治交付（delivered 8/8 領主真聞）但 `distribute.dispatch` 仍 0＝`goal_resolver:168-169` `_resident_food_runway(resident)` 直讀 resident live pop/food＝**god-view 殘留（用戶否定的領主直掃自家居民）** + `DISTRIB_DEFICIT_DAYS=4.0` 死常數門檻（letter 蓋門口卻開後窗）。
 - **修（de-scan）**：①移 `:168` god-view live-read ②移 `:169` 死常數硬 continue 閘 ③relief 改源自送達 belief：`need_signal = clampf(eff_rem/DISTRIB_RELIEF_NORM,0,1)`（buy-order 剩餘 qty=領主聽到的 need 訊），`relief_term = need_signal×(0.3+honor)` 人格 weigh，coin_term 不變、無死常數門檻 ④`DISTRIB_RELIEF_NORM`=DERIVED calibration scale（DESPERATION_DAYS×FOOD_PER_PERSON_PER_DAY×典型居民pop 5＝12.0、PER_HAND 紀律、**非 fire gate**）⑤訂正 :122 舊 comment（intra-faction deficit god-view 自辯已否定→belief-only）。`DISTRIB_DEFICIT_DAYS` 保留（`_tick_resident_unrest` 居民自讀 runway 回升線=自讀非 lord god-view）。+補 `distribute.dispatch` tap（全觀測缺口：warring_harness 列 key 但從未 bump）。
