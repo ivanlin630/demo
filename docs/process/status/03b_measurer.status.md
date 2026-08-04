@@ -12,7 +12,9 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——faction-rich代表性通用床build+verdict已完成寄出
+**狀態**：工作中（等下一票）——補完批(B)economy-balance verdict已完成寄出
+
+**工單**：無（補完批(B)economy-balance verdict已完成寄systems：★★population觸底不回升=mechanism gap非tuning——2個獨立fixture交叉驗證:rep床T5食物day14-33連續20天穩定正值(12-25)pop仍鎖死2從未回升;T1-confirm床T1食物day44-49連續6天穩定6-7.3 pop同樣鎖死2從未回升,兩個不同config/不同resident同款pattern,讀作真無population-recovery通路。①relief量級(rep床45天窗):dispatch=3/food_delivered=64.0均攤約1.4/天,對pop2消耗線1.6/天邊緣夠用非寬裕②timing:day12 pop先觸底,day14才有第2波relief落地(趕得及穩食物趕不及觸底前介入)③pop=2是全arc三隻獨立resident(3個不同config)統一收斂下限無例外。★method誠實聲明:逐tick cargo-delta抓真deposit時刻方法不準(混進porter在途小額耗損雜訊),已誠實標註改用日曲線大跳點+aggregate Probe對照。純觀測未bed-tuning-for-narrative(用既有原生45天窗)。落地2新檔+1交叉引用已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-economy-balance-B-verdict.md，別下accept，population-recovery gap是否列known issue交systems/blueprint。
 
 **工單**：無（faction-rich代表性通用床verdict已完成寄systems：★bed已persist(config/infonet_faction_rich_rep.json+scripts/debug/infonet_faction_rich_rep_bed.gd,commit e13fd2ac worktree)。founding路部分成功:v1發現vision/belief範圍是首個封鎖(_nearest_independent需真claims非只team_discovered proximity),調緊鄰距+補偵查技能解封後indep.gate_path_ok 0→1105/indep.found_ally 0→4真派信使,但g2.faction_found 60天內仍=0(未完全establish,未深挖envoy accept/reject卡點,如實回報未完全打通)。vassal對照組(T4領主+T5member,全新非arc config)★relief鏈確認真fire:candidate_eval=3/dispatch=3/arrive=3/settle=6/food_delivered=64.0,證relief非infonet_whole獨有真generalize。★意外重複模式:T5後來(day41起義)自行脫離faction(faction_ai_system.gd:4571/4577無條件clear_team_faction)——跟T3-attribution輪的event_faction_defect不同機制但同款『member自行脫faction斷relief』pattern第3次重現,讀作結構性confound非偶發,已回報供留意。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-faction-rich-rep-bed-verdict.md，別下accept，founding是否需再開票深追/uprising-defect confound是否正式列冊交systems/blueprint。
 

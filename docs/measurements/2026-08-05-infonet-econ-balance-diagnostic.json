@@ -1,0 +1,421 @@
+{
+  "diagnostic": "補完批(B) economy-balance：relief 量級/頻率+population恢復（measure-first，只交真值）",
+  "min_pop": 2,
+  "min_pop_first_tick": 3100,
+  "pop_ever_recovered_after_min": false,
+  "pop_food_daily": [
+    {
+      "day": 1,
+      "faction": 0,
+      "food": 9.9,
+      "pop": 9,
+      "task": "覓食"
+    },
+    {
+      "day": 2,
+      "faction": 0,
+      "food": 5.1,
+      "pop": 8,
+      "task": "覓食"
+    },
+    {
+      "day": 3,
+      "faction": 0,
+      "food": 0,
+      "pop": 7,
+      "task": "覓食"
+    },
+    {
+      "day": 4,
+      "faction": 0,
+      "food": 0,
+      "pop": 7,
+      "task": "覓食"
+    },
+    {
+      "day": 5,
+      "faction": 0,
+      "food": 22.7,
+      "pop": 7,
+      "task": "覓食"
+    },
+    {
+      "day": 6,
+      "faction": 0,
+      "food": 18.5,
+      "pop": 7,
+      "task": "覓食"
+    },
+    {
+      "day": 7,
+      "faction": 0,
+      "food": 14.2,
+      "pop": 7,
+      "task": "覓食"
+    },
+    {
+      "day": 8,
+      "faction": 0,
+      "food": 7.9,
+      "pop": 6,
+      "task": "覓食"
+    },
+    {
+      "day": 9,
+      "faction": 0,
+      "food": 4.3,
+      "pop": 6,
+      "task": "覓食"
+    },
+    {
+      "day": 10,
+      "faction": 0,
+      "food": 0,
+      "pop": 5,
+      "task": "覓食"
+    },
+    {
+      "day": 11,
+      "faction": 0,
+      "food": 0,
+      "pop": 4,
+      "task": "覓食"
+    },
+    {
+      "day": 12,
+      "faction": 0,
+      "food": 2.8,
+      "pop": 3,
+      "task": "覓食"
+    },
+    {
+      "day": 13,
+      "faction": 0,
+      "food": 0,
+      "pop": 2,
+      "task": "治理"
+    },
+    {
+      "day": 14,
+      "faction": 0,
+      "food": 18,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 15,
+      "faction": 0,
+      "food": 22.2,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 16,
+      "faction": 0,
+      "food": 21,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 17,
+      "faction": 0,
+      "food": 19.7,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 18,
+      "faction": 0,
+      "food": 24.8,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 19,
+      "faction": 0,
+      "food": 23.5,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 20,
+      "faction": 0,
+      "food": 21.6,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 21,
+      "faction": 0,
+      "food": 20.3,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 22,
+      "faction": 0,
+      "food": 19.1,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 23,
+      "faction": 0,
+      "food": 17.1,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 24,
+      "faction": 0,
+      "food": 15.8,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 25,
+      "faction": 0,
+      "food": 13.9,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 26,
+      "faction": 0,
+      "food": 12.6,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 27,
+      "faction": 0,
+      "food": 11.3,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 28,
+      "faction": 0,
+      "food": 9.4,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 29,
+      "faction": 0,
+      "food": 8.1,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 30,
+      "faction": 0,
+      "food": 6.2,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 31,
+      "faction": 0,
+      "food": 4.9,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 32,
+      "faction": 0,
+      "food": 3.7,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 33,
+      "faction": 0,
+      "food": 1.7,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 34,
+      "faction": 0,
+      "food": 0.5,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 35,
+      "faction": 0,
+      "food": 0,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 36,
+      "faction": 0,
+      "food": 0,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 37,
+      "faction": 0,
+      "food": 0,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 38,
+      "faction": 0,
+      "food": 0,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 39,
+      "faction": 0,
+      "food": 0,
+      "pop": 2,
+      "task": "貿易"
+    },
+    {
+      "day": 40,
+      "faction": 0,
+      "food": 0,
+      "pop": 2,
+      "task": "治理"
+    },
+    {
+      "day": 41,
+      "faction": 0,
+      "food": 0,
+      "pop": 2,
+      "task": "治理"
+    },
+    {
+      "day": 42,
+      "faction": -1,
+      "food": 0,
+      "pop": 2,
+      "task": "起義"
+    },
+    {
+      "day": 43,
+      "faction": -1,
+      "food": 0,
+      "pop": 2,
+      "task": "治理"
+    },
+    {
+      "day": 44,
+      "faction": -1,
+      "food": 0,
+      "pop": 2,
+      "task": "治理"
+    },
+    {
+      "day": 45,
+      "faction": -1,
+      "food": 0,
+      "pop": 2,
+      "task": "掠奪"
+    }
+  ],
+  "probe": {
+    "distribute.deliver": 6,
+    "distribute.dispatch": 3,
+    "distribute.food_delivered": 64
+  },
+  "relief_events": [
+    {
+      "day": 2,
+      "delivered_qty": 0.3,
+      "phase": "OUTBOUND",
+      "porter": 9,
+      "tick": 500
+    },
+    {
+      "day": 2,
+      "delivered_qty": 0.3,
+      "phase": "OUTBOUND",
+      "porter": 9,
+      "tick": 600
+    },
+    {
+      "day": 2,
+      "delivered_qty": 0.3,
+      "phase": "OUTBOUND",
+      "porter": 9,
+      "tick": 700
+    },
+    {
+      "day": 3,
+      "delivered_qty": 0.3,
+      "phase": "OUTBOUND",
+      "porter": 9,
+      "tick": 800
+    },
+    {
+      "day": 3,
+      "delivered_qty": 0.3,
+      "phase": "OUTBOUND",
+      "porter": 9,
+      "tick": 900
+    },
+    {
+      "day": 9,
+      "delivered_qty": 0.7,
+      "phase": "OUTBOUND",
+      "porter": 15,
+      "tick": 2300
+    },
+    {
+      "day": 10,
+      "delivered_qty": 0.7,
+      "phase": "OUTBOUND",
+      "porter": 15,
+      "tick": 2400
+    },
+    {
+      "day": 10,
+      "delivered_qty": 0.7,
+      "phase": "OUTBOUND",
+      "porter": 15,
+      "tick": 2500
+    },
+    {
+      "day": 10,
+      "delivered_qty": 0.7,
+      "phase": "OUTBOUND",
+      "porter": 15,
+      "tick": 2600
+    },
+    {
+      "day": 12,
+      "delivered_qty": 0.7,
+      "phase": "OUTBOUND",
+      "porter": 18,
+      "tick": 2900
+    },
+    {
+      "day": 12,
+      "delivered_qty": 0.7,
+      "phase": "OUTBOUND",
+      "porter": 18,
+      "tick": 3000
+    },
+    {
+      "day": 12,
+      "delivered_qty": 0.7,
+      "phase": "OUTBOUND",
+      "porter": 18,
+      "tick": 3100
+    },
+    {
+      "day": 13,
+      "delivered_qty": 0.7,
+      "phase": "OUTBOUND",
+      "porter": 18,
+      "tick": 3200
+    }
+  ]
+}
