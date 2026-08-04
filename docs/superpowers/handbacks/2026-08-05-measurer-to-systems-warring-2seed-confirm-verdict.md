@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "warring 2seed確認verdict:★★seed1337易變單seed假象確認,非真regression——4跑矩陣:main/1337=0.68%(舊值同)main/42=0.69%(舊值同)branch/1337=1.80%(重跑重現,同RE7)branch/42=0.23%(★較main改善,非惡化)。seed1337惡化+seed42改善=方向不一致=典型seed-cascade類別(RE#3-#6反覆出現同型),非branch造成的系統性regression。determinism:branch/1337單獨重跑二次(4跑batch超時後隔離重試)兩次數字一致(1.80%)。★附帶發現:重跑期間worktree game_setup.gd出現另一session(疑implementer)未commit WIP改動——create_faction actual sequential id vs config faction_id map修正,ˋ直接命中我RE6/RE7回報的『T2疑跨faction送relief給T1』觀察,已避開不動不commit,如實回報供留意"
 ---
 
