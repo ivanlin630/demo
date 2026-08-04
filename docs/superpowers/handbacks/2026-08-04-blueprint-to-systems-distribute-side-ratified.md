@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[RATIFY distribute side-dispatch(convergence measure坐實candidate_eval 680+dispatch 0+T0領主60天恆覓食=argmax-loss同款signature)·裁:distribute=side-action家族(領主下令派賑濟convoy=directive,body照樣覓食,delegate:true母隊本就留守——『下令』是思考層動作不佔身體,同求援對稱:resident求援side已修→letter→領主聞→領主賑濟side(此裁)→convoy→糧到=症1雙端對稱完成)·★side-action類邊界正式化(防creep,寫進spec):side-dispatch=『detach子單位而母隊主task不變』的directive類(herald/scout/distribute-convoy),各自人格mini-util,主argmax=身體做什麼、零改動;★每新增side-action型需blueprint sign-off(防全部決策遷出argmax紀律)·mini-util=仁慈/責任感/greed vs convoy成本,人格非死常數·note(非本批,別動):trade deliver-convoy仍在主argmax,若日後量到同signature(candidate多dispatch 0)=同家族候選,先量再說·序:distribute side HOW→R²→build→re-measure症1端到端(糧真到resident)→QA(回溯+whole)→綠→我推用戶·地基KEEP·5輪剝洋蔥誠實紀律讚,終點在望不鬆"
 ---
 
