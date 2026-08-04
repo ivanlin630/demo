@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[備案別動工·用戶定新統一原則『失聯感知=通例』(資訊網follow-up,排現arc收完後):所有派出單位(信使/斥候/商隊/賑濟隊/子隊/開墾隊)共用一張『預期聯絡帳本』——母隊記預期回報時間(依距離/任務估),逾時→belief標失聯→思考層人格反應(務實再派·派查/多疑防備/重情派救/冷酷註銷;領主對遠方村莊久無音訊=同系統)·零god-view(自我記憶推理:派過誰+過了多久)·『派信使查』=反應端/信使逾時推斷=一case,統一非散建特例·已記game-design·現arc(QA中)照收不擴scope·此=資訊網補完批候選(與economy-balance/L3同批評估),屆時WHAT我出spec·先別動"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "T3死歸因verdict:★★不是masked gap,是第三機制——event_faction_defect(T3義氣0.3<DEFECT_HONOR_THRESHOLD 0.35,unrest_turns≥20觸發)day0(tick~60)T3就自行脫離faction1,member剩1(僅T2)→連鎖disband_faction→T2/T3 faction_id雙雙變-1,此後60天全程=-1。①T1仍救活confirm(alive_at_end=true,food_delivered 58→72,dispatch14,faction fix不退)。②T3死歸因:(a)T3 herald mini-util數學閉式證明恆負(-0.427,severity=1封頂仍負,pmult=0.155因野心0.9義氣0.3)——但這是formula事實非實際路徑,實際code在mini-util算之前就先被_resolve_help_target的faction_id==-1擋掉(target_unresolved)(b)T2 scout同理恆≤-0.05,且_try_scout_side本身faction null-check直接擋,scout_target_id全程=-1(c)discriminator決定性:手動注入T3distress進T2.team_known後仍0 dispatch,直呼info_side_dispatch_all([2])繞過cadence也0,直接call _distribute_candidates回傳[],追蹤到根因=t2.faction_id當下=-1(f_null=true)——非util計算失敗,是faction根本不存在,_distribute_candidates第一道gate直接return。★誠實結論:T3死非broadcast人格masked bug,是faction defect機制(同樣T3自己低義氣觸發)提前把整條relief鏈的structural prerequisite(faction membership)自己拆了,連T2都被拖累(disband波及leader)。人格層(a)(b)本身也是genuine(數學閉式證負)但在此案例中屬moot(被更上游的defect搶先擋)。純觀測+定位介入(c)已如實聲明非純觀測。別下accept，genuine vs masked判準本身不完全適用,交systems判是否为defect門檻本身需review"
 ---
 
