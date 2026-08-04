@@ -1,0 +1,1287 @@
+{
+  "bed": "convoy_t1_diag_bed (peaceful_economy config seed 70730 6mo inline、純觀測)",
+  "convoy_life": {
+
+  },
+  "diagnostic": "convoy-lifecycle 5/6 + T1 死因（measure-first、只交真值）",
+  "probe": {
+    "convoy.deliver_arrive": 8,
+    "convoy.deliver_settled": 5,
+    "distribute.deliver_settle": 0,
+    "distribute.dispatch": 0,
+    "distribute.food_delivered": 0
+  },
+  "t1": {
+    "alive_at_end": true,
+    "death_tick": -1,
+    "last_pop": 6,
+    "last_task": "治理",
+    "letter_dispatched": false,
+    "letter_tick": -1,
+    "min_pop": 6,
+    "pop_daily": [
+      {
+        "day": 1,
+        "food": 118,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 2,
+        "food": 115.7,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 3,
+        "food": 112.3,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 4,
+        "food": 110,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 5,
+        "food": 106.7,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 6,
+        "food": 104.2,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 7,
+        "food": 102,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 8,
+        "food": 99.7,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 9,
+        "food": 97.3,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 10,
+        "food": 93.7,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 11,
+        "food": 91.7,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 12,
+        "food": 89.4,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 13,
+        "food": 86,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 14,
+        "food": 83.9,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 15,
+        "food": 80.5,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 16,
+        "food": 78,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 17,
+        "food": 76,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 18,
+        "food": 72.9,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 19,
+        "food": 70.8,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 20,
+        "food": 67.5,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 21,
+        "food": 65.3,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 22,
+        "food": 62.8,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 23,
+        "food": 59.5,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 24,
+        "food": 57.1,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 25,
+        "food": 53.6,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 26,
+        "food": 51.5,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 27,
+        "food": 49.4,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 28,
+        "food": 46.4,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 29,
+        "food": 44.1,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 30,
+        "food": 40.8,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 31,
+        "food": 38.5,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 32,
+        "food": 36.2,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 33,
+        "food": 32.9,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 34,
+        "food": 30.6,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 35,
+        "food": 27.1,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 36,
+        "food": 24.8,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 37,
+        "food": 22.6,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 38,
+        "food": 19.2,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 39,
+        "food": 16.7,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 40,
+        "food": 13.5,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 41,
+        "food": 11.5,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 42,
+        "food": 9.4,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 43,
+        "food": 6.2,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 44,
+        "food": 3.8,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 45,
+        "food": 0.5,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 46,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 47,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 48,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 49,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 50,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 51,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 52,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 53,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 54,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 55,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 56,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 57,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 58,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 59,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 60,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 61,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 62,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 63,
+        "food": 0,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 64,
+        "food": 0,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 65,
+        "food": 0,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 66,
+        "food": 0,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 67,
+        "food": 1.6,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 68,
+        "food": 5.1,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 69,
+        "food": 8.4,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 70,
+        "food": 8.2,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 71,
+        "food": 6.3,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 72,
+        "food": 4.2,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 73,
+        "food": 0.7,
+        "pop": 6,
+        "task": "投靠"
+      },
+      {
+        "day": 74,
+        "food": 0,
+        "pop": 6,
+        "task": "乞食"
+      },
+      {
+        "day": 75,
+        "food": 0,
+        "pop": 6,
+        "task": "乞食"
+      },
+      {
+        "day": 76,
+        "food": 0,
+        "pop": 6,
+        "task": "乞食"
+      },
+      {
+        "day": 77,
+        "food": 0,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 78,
+        "food": 0.3,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 79,
+        "food": 0.1,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 80,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 81,
+        "food": 0.4,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 82,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 83,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 84,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 85,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 86,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 87,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 88,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 89,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 90,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 91,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 92,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 93,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 94,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 95,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 96,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 97,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 98,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 99,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 100,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 101,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 102,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 103,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 104,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 105,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 106,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 107,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 108,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 109,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 110,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 111,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 112,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 113,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 114,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 115,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 116,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 117,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 118,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 119,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 120,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 121,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 122,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 123,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 124,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 125,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 126,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 127,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 128,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 129,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 130,
+        "food": 0.1,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 131,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 132,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 133,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 134,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 135,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 136,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 137,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 138,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 139,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 140,
+        "food": 0,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 141,
+        "food": 0,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 142,
+        "food": 0,
+        "pop": 6,
+        "task": "掠奪"
+      },
+      {
+        "day": 143,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 144,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 145,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 146,
+        "food": 0.1,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 147,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 148,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 149,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 150,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 151,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 152,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 153,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 154,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 155,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 156,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 157,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 158,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 159,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 160,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 161,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 162,
+        "food": 0,
+        "pop": 6,
+        "task": "覓食"
+      },
+      {
+        "day": 163,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 164,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 165,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 166,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 167,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 168,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 169,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 170,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 171,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 172,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 173,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 174,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 175,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 176,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 177,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 178,
+        "food": 0,
+        "pop": 6,
+        "task": "return_home"
+      },
+      {
+        "day": 179,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      },
+      {
+        "day": 180,
+        "food": 0,
+        "pop": 6,
+        "task": "治理"
+      }
+    ],
+    "tasks": [
+      {
+        "task": "idle",
+        "tick": 1
+      },
+      {
+        "task": "覓食",
+        "tick": 10
+      },
+      {
+        "task": "治理",
+        "tick": 10330
+      },
+      {
+        "task": "覓食",
+        "tick": 10820
+      },
+      {
+        "task": "治理",
+        "tick": 12490
+      },
+      {
+        "task": "return_home",
+        "tick": 12500
+      },
+      {
+        "task": "治理",
+        "tick": 14170
+      },
+      {
+        "task": "return_home",
+        "tick": 14780
+      },
+      {
+        "task": "掠奪",
+        "tick": 15020
+      },
+      {
+        "task": "覓食",
+        "tick": 16460
+      },
+      {
+        "task": "投靠",
+        "tick": 17500
+      },
+      {
+        "task": "乞食",
+        "tick": 17620
+      },
+      {
+        "task": "掠奪",
+        "tick": 18400
+      },
+      {
+        "task": "return_home",
+        "tick": 18880
+      },
+      {
+        "task": "覓食",
+        "tick": 19600
+      },
+      {
+        "task": "return_home",
+        "tick": 19840
+      },
+      {
+        "task": "治理",
+        "tick": 21370
+      },
+      {
+        "task": "return_home",
+        "tick": 22000
+      },
+      {
+        "task": "覓食",
+        "tick": 22240
+      },
+      {
+        "task": "治理",
+        "tick": 23770
+      },
+      {
+        "task": "覓食",
+        "tick": 24400
+      },
+      {
+        "task": "return_home",
+        "tick": 24640
+      },
+      {
+        "task": "治理",
+        "tick": 26170
+      },
+      {
+        "task": "return_home",
+        "tick": 26800
+      },
+      {
+        "task": "治理",
+        "tick": 28330
+      },
+      {
+        "task": "return_home",
+        "tick": 28960
+      },
+      {
+        "task": "覓食",
+        "tick": 29440
+      },
+      {
+        "task": "治理",
+        "tick": 30970
+      },
+      {
+        "task": "建設",
+        "tick": 31000
+      },
+      {
+        "task": "治理",
+        "tick": 31120
+      },
+      {
+        "task": "建設",
+        "tick": 31500
+      },
+      {
+        "task": "覓食",
+        "tick": 31600
+      },
+      {
+        "task": "return_home",
+        "tick": 31840
+      },
+      {
+        "task": "治理",
+        "tick": 33370
+      },
+      {
+        "task": "掠奪",
+        "tick": 33520
+      },
+      {
+        "task": "return_home",
+        "tick": 34240
+      },
+      {
+        "task": "治理",
+        "tick": 35770
+      },
+      {
+        "task": "return_home",
+        "tick": 36400
+      },
+      {
+        "task": "覓食",
+        "tick": 36640
+      },
+      {
+        "task": "治理",
+        "tick": 38170
+      },
+      {
+        "task": "覓食",
+        "tick": 38800
+      },
+      {
+        "task": "return_home",
+        "tick": 39040
+      },
+      {
+        "task": "治理",
+        "tick": 40570
+      },
+      {
+        "task": "return_home",
+        "tick": 41200
+      },
+      {
+        "task": "治理",
+        "tick": 42730
+      }
+    ]
+  }
+}
