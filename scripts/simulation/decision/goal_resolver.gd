@@ -170,6 +170,11 @@ static func _distribute_candidates(state: WorldState, team: TeamData, ctx: Decis
 		if rid == team.team_id or not state.teams.has(rid):
 			continue
 		var resident: TeamData = state.teams[rid]
+		# ★T3 錯位診斷 tap（純觀測、零行為）：領主聽到的每筆 food 買單 origin + faction + pos（定 T2 是否聽到 T1 跨勢力單/gate 擋否）。
+		if Probe.enabled:
+			Probe.bump_sample("diag.dist_heard", {"lord": team.team_id, "lord_fac": team.faction_id,
+				"rid": rid, "rid_fac": resident.faction_id, "opos": str(o.get("pos", Vector2i.ZERO)),
+				"gate_same_fac": resident.faction_id == team.faction_id}, 64)
 		if resident.faction_id != team.faction_id \
 				or not FactionAISystem.is_resident_static(state, resident):
 			continue   # 只本勢力自有居民（intra-faction faction 結構=組織常識，非 live 態）
@@ -198,6 +203,11 @@ static func _distribute_candidates(state: WorldState, team: TeamData, ctx: Decis
 			best = {"qty": qty, "mpos": mpos, "oid": oid, "rid": rid}
 	if best.is_empty():
 		return out
+	# ★T3 錯位診斷 tap（純觀測）：最終選中的賑濟對象 rid + 其 faction + convoy target mpos（定 candidate 選對否/target 解對否）。
+	if Probe.enabled:
+		Probe.bump_sample("diag.dist_pick", {"lord": team.team_id, "lord_fac": team.faction_id,
+			"rid": int(best["rid"]), "rid_fac": (state.teams[int(best["rid"])].faction_id if state.teams.has(int(best["rid"])) else -99),
+			"mpos": str(best["mpos"]), "oid": int(best["oid"])}, 32)
 	var to_task: Dictionary = {
 		"task": TeamData.TASK_CONVOY, "target": best["mpos"], "cargo": {"food": best["qty"]},
 		"kind": "distribute", "order_id": int(best["oid"]), "terminus_team_id": int(best["rid"]),

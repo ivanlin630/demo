@@ -886,6 +886,11 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 	if override_ask >= 0.0 and Probe.enabled:
 		Probe.bump("distribute.deliver")   # SLICE B tap:分配真交付
 		Probe.add_amount("distribute.food_delivered", float(q))
+		# ★T3 錯位診斷 tap（純觀測）：distribute settle 真收貨方——porter+終點 terminus+實際 tile owner+tile_pos+oid（定 settle 撿 co-located 錯人否）。
+		Probe.bump_sample("diag.dist_settle", {
+			"porter": visitor.team_id, "terminus": int(visitor.task_extra_data.get("terminus_team_id", -1)),
+			"tile_owner": (owner.team_id if owner != null else -1), "owner_fac": (owner.faction_id if owner != null else -99),
+			"tile_pos": str(tile.tile_pos), "oid": oid, "deposited": q}, 32)
 	return true
 
 # 成交 coin 入 owner team；owner 已滅 → 入 tile.public_storage.coin（CoinAudit 池內不蒸發）。

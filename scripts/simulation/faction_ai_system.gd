@@ -3359,6 +3359,7 @@ func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool
 		# ★SLICE B：distribute convoy 帶 kind + price_factor（DELIVER 注入 override_ask=local_value×price_factor）。deliver 走 -1 現行。
 		"convoy_kind": String(td.get("kind", "deliver")),
 		"price_factor": float(td.get("price_factor", -1.0)),
+		"terminus_team_id": int(td.get("terminus_team_id", -1)),   # ★診斷用（candidate 意圖收貨方，對照 settle 實際 tile owner 定錯位）
 	}
 	Probe.bump("convoy.dispatch")
 	if String(td.get("kind", "")) == "distribute": Probe.bump("distribute.dispatch")   # SLICE B tap
