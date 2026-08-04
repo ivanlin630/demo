@@ -27,6 +27,7 @@
 
 - **★量測→QA 故事稽核→藍圖（2026-07-14 加）**：量測員產全量 specimen trace → **QA 讀 trace 判故事性**（motive→action→outcome，`04_qa §第五職`）→ 餵藍圖。聚合 metric 過≠好戲過，需人讀全量 trace。QA 故事性判官≠release-gate（藍圖仍持 release-pass）。互鎖前提=全量暫態可觀測性不變量（`invariants.md`）。
 - **★★QA 故事稽核不可跳（2026-07-18 用戶戳·systems 違反血證）**：release-gate 砍（2026-07-09）**≠故事稽核砍**——別 conflate 把整 QA 站丟。**canonical 鏈量測→QA 故事稽核→藍圖不可跳；QA session 沒開=flow owner flag blocker（arm QA / 呈報），非 silent skip 藉口**。**QA 故事稽核 ≠ multi-seed（兩軸）**：multi-seed 驗「普不普適(跨世界)」、QA 驗「故事對不對(隊在演啥)」；**單 seed trace 就足以故事稽核（餓死vs戰死），不必等 multi-seed**。血證：threat-oracle/starvation 全走量測員數字→藍圖跳 QA→systems 把「attrition 升」誤讀成 combat 好戲餵藍圖（實=starvation，沒人讀單 seed 死因故事）。連 memory [[feedback_qa_inversion]]。
+- **★★QA-verdict 機械閘（2026-08-04 用戶定，治 hook 連漏）**：QA 故事稽核在鏈序裡但**鎖點零 gate**＝advisory 靠記憶必漏（§5/饑荒-flee/anomaly 三因果沒過 QA 就鎖 spec）。**治本＝gate 裝執行點**：**含因果結論的 handback 必帶 `QA:<ref 或 PENDING>` 欄；spec 鎖在長跑因果上、來源無 `QA:<ref>`（或 PENDING）→ systems 拒鎖**（詳 `01_architect §spec 鎖在長跑因果`）。量測員 findings 必附 specimen→QA（`03b_measurer §⑤`）。**通則：hook 提醒 ≠ gate，gate 裝執行點（鎖/merge）非 advisory 上游**（memory [[feedback_self_approve_gate]]）。**鏈序含 QA-ref**：長跑→量測(附 specimen)→**QA 故事稽核(出 verdict ref)**→verdict(帶 QA:ref)→systems 鎖/merge。
 
 - **★reviewer 是鏈上的站**（`02_reviewer.md` reviewer 讀；系統側閘序見 `01 §兩道對抗閘`）：**R②（審 spec）每 slice 必過，CLEAN 才 dispatch/merge**；**R①（factcheck 前提）只新概念大框且前提含未驗 code 斷言才啟用**（小 slice/已 file:line 坐實則免）。**無斷點自動鏈 ≠ 跳站**——推下一站含推 reviewer②。
 - 同一 feature 不會同時找兩個談：先藍圖定要什麼，再系統定怎麼架。

@@ -4,10 +4,73 @@ code: "03"
 status: idle
 current_ticket: "-（★二刀 hysteresis 8c7fbd83 systems green-light merge-partial(seed1337 -45%/-53% 大勝+QA 逐tick 食安綠+停切 GATE-A)→handback to:reviewer 請 merge-gate R²→融合驗→merge。③movement 刀撤(QA 翻案=合法 survival flee+resettle 非 bug)。★停切 GATE-A(一刀+二刀=settled-left-home job done)。下一 keystone=facility-build(coin-scope+means-end+carrying-cap valves,等 dispatch)。前:GATE-A MERGED 2d7134e7+mil-facility MERGED 37988f71+武器 arc 收官 produce_need 0bf67e29(reviewer R² CLEAN+systems ratify+green-light,我 --no-ff merge)。全鏈 merged:material-buy v1/v2a(e6519f9f)/tools-demand+cost70(9c551c06)/produce_need(0bf67e29),每層真 bug 已修。workshop-BUILD 剩閘=farming 求生 override=食物經濟下游症狀(blueprint 新 arc,★禁 force-workshop 違憲)。下步待食物地方安全新 arc(measure-first,等 measurer 數字才 spec,別預先動工)。v2b DEFER 收攤。idle-wait。製造 bootstrap 子根②:produce_need 死常數 0.3/0.6→ctx.produce_pull(自家可造 outputs belief demand-responsive worst-shortfall)+tap wanted_not_chosen。TDD 6/6(RED ①neuter 0.90→0/④term const;★⑤god-view 感知鐵律硬驗);headless 0-new;gate PASS 75;determinism MD5 a2835d99(2mo 無行為變=workshop 幾乎沒建 bootstrap ① 仍閘,正是 measure 要坐實)。measure:manufacture.* probe 0→?/TASK_MANUFACTURE 隊數/tools+goods 產量/weaponsmith 建成/感知鐵律 civ 沒聽到=揭子根①→QA。完成=systems+reviewer merge-gate R²。前 tools-demand MERGED 9c551c06。v2b DEFER。:兩修有效(cost70 afford 可達+tools demand 接上)可增量 merge,但 weaponsmith 仍 0=單一剩閘 tools SUPPLY=0(workshop 建少+產 0)。我 scout 坐實終閘深一層(manufacturing:67 TASK_MANUFACTURE gate+生產 option:32 需 has_manufacturing_facility)=製造產能 bootstrap 根(非單 slice)。systems RATIFY 授權 merge(正確 plumbing 銀行)→handback to:reviewer 請 merge-gate R²(複 confirm re-entrancy guard)→融合驗→merge。製造 bootstrap=established-chain arc 範圍等 blueprint。await reviewer merge-gate。v2b DEFER。前工單詳:兩 build 閘一起解:①need_oracle material→{material,tools}+雙遞迴守衛(output-guard+re-entrancy,graph-independent)②order_system tools eligible/proxy③weaponsmith material 80→70。TDD 11/11(RED ①tools 3→0/③b re-entrancy 0→100/⑤proxy 無單/⑥70→80);headless 0-new;gate PASS 75;determinism MD5 a2835d99。measure 終驗=weaponsmith 建成數>0+感知鐵律 tools 未繞道→QA。完成判定=systems+reviewer(merge-gate 複 confirm 守衛 impl)。前 material-buy v2a MERGED e6519f9f;v2b(coin)DEFER。接 v1 branch 疊①③修半破:①full build-need(desire=gate 非 multiplier,全 cost 80 非稀釋 24)②buymaterial_drive 繫建設迫切(shortfall/CAP×max _facility_deficit)③food-ok gate(food>=DESPERATION 鏡射買糧互斥=防餓死)。TDD 8/8(RED ①80→30.2/③1.0 flat/④餓隊 applicable);headless 0-new;gate PASS 75;determinism MD5 99b47415。measurer 量完:三修有效(material peak 117/買料 chosen/food-safe 無迴歸)=真進度可增量 merge,但 weaponsmith 仍 0 建。★真根更深(patch-gate-first):卡兩硬閘非 trade/coin=①facility afford×1.5(faction_ai:2801 非 verdict 引 2572)material 120 vs 封頂 117 ②tools=0 全域(workshop civilian-only cross-type 缺口)。v2b(coin)也建不了→flag systems 裁 build 閘先於 v2b。待 systems/blueprint 裁。Gate B chicken-egg 真根修:material need 只在已有 facility 時 fire→builder 不帶 need→買不到→建不了=weaponsmith-HELD/market-seek-WITHDRAW/facility-buffer-ABANDON 收斂之真根。3-part 閉環:need_oracle _construction_facility_need(means-end,cost-guard 前置+CAP100 防疊爆,build-cost∩output=∅ 無遞迴)/decision_context has_material_market+material_shortfall/options 買料+terms buymaterial(貪婪 scale)。TDD 5/5(RED ①100→0);headless 0-new;gate PASS sites=75(_facility_deficit 呼叫非新閘);determinism byte-identical MD5 57f44e2a 純 utility 無 RNG。handback to:measurer(→QA):買料 DEAL 0→?/post_buy.material/no_want 率/weaponsmith 建成/owner-depletion/§④b sample。前 facility-buffer ABANDON:const 1.5→1.1 觸 owner-depletion(G1a 斷)=reviewer『查 ×1.5 承重』具現。systems 分析=空解窗[weaponsmith material80/mil hold54-80 需 buffer≤1.0 才幫到,但 1.1 已破 G1a→無 buffer 值能幫 weaponsmith 又不破 G1a]→buffer 部分承重+對 weaponsmith 空解=非對的 lever。branch feat/facility-buffer 別 merge/可棄,main 從沒拿改=已 1.5。TDD 沒白做=有價值負結果(RED 驗+具現 depletion 邊界=證 lever 死),已記 known_issue。weaponsmith 真解=material 貿易(Gate B 主線 measure 在飛)。並行 HELD:weaponsmith(0aa7d3ae 同 Gate B)。等 Gate B material 貿易主線 dispatch。）"
 updated: 2026-07-22[dispatch→HALT→HOLD-for-QA→WITHDRAW 來回收尾]:QA 最終判治標非治本(doom↓=止 re-seek churn 副效果,真根 Gate B production under-supply)。feat/market-sticky@d26ae644 不 merge、branch 可棄(fix 驗證 stickiness 機制對 re-seek churn 有效=留檔 known,但非該修層)。並行 HELD:weaponsmith(0aa7d3ae 同 Gate B under-production 家族)。主線回 Gate B production(weaponsmith afford/material 分配/build-completion),systems 定案再派。QA 撿獨立 crisis-threshold bug(food=0×500tick 不 fire)已記低優先 known-issue,非我這條。）"
-updated: 2026-07-22
+updated: 2026-08-03[統一勞力池全綠交付+乙 revert 完成，皆 await R²]
 ---
 
 # 03 implementer 現況
+
+**★herald-lifecycle(缺口B)+warring-prereq(缺口A)診斷交付（measure-first、`feat/info-network-whole` 3fcb3194）·await systems 定 2 root→設計 fix**：
+- RE-measure#3:herald dispatch 但 distribute=0（缺口B 交付黑洞）+ herald warring 恆 0（缺口A）。
+- ★缺口B:isolated 交付鏈全通（spawn→on_leader_death promote P13→travel→DEPOSIT tick20）；full-sim 8-heralds-never-tick 重現不出=full-sim-only 黑洞、非 promotion-break（已排除）；team-carrier 副作用（succession 出 throwaway P13）支持 (a→B) lean 非 team carrier。
+- ★缺口A:target 前置（severity_positive=5 夠餓 但 target_resolved=0/unresolved=5=餓隊 solo/faction_id=-1/領主無固定 outpost→_resolve_help_target 解不出），非 severity。
+- bed-only+transient probe（Probe-gated 零行為變）。measurement docs/measurements/2026-08-04-herald-lifecycle-warring-prereq-diagnostic.json。handback herald-lifecycle-diag-findings（open）。source consumed。★HOLD 待 systems 定 2 root+設計 fix。
+
+**★資訊網 Part2 (a) side-action 交付（`feat/info-network-whole` ea8d4dbd）·await systems R²→measurer re-measure whole**：
+- root（diagnostic 確認）=求援輸主 argmax rank 3/4（category error：派信使≠放棄自救）。fix=求援/偵察脫主 argmax→平行 side-dispatch（de-patch 同勞力池精神）。
+- 主 argmax 零改（REGISTRY 移 loser）；新 _step6b2_info_dispatch（cadence-gate 每日/team）評 herald/scout mini-util+throttle；mini-util 錨真值（RELIEF_EXPECT=DESPERATION×FOOD_PPD 2.4/ANON_COST=FOOD_PPD 0.8 DERIVED）；herald+scout 皆 anon empty-handed。
+- 全綠：TDD sideaction 6/6（深餓務實派/傲慢撐死 emergent/throttle）+part2 7/7+herald 4/4+scout 4/4、headless 3=baseline、constitution 74、determinism 3 跑 byte-identical 9ACAC8D7。
+- ★emergent teams 84→120 attrition 0→1.35（info-net→存活互動）。⚠★perf-watch:warring 1mo ~900s（累積+teams 成長 compounding）→measurer 長 timeout/resume+恐 perf follow-up。vestigial:ctx help/scout/can_send+terms help/scout_drive REGISTRY 已不讀→cleanup follow-up。handback part2-side-action-delivery（open）。source consumed。await R²→measurer。
+
+**★Part2 求援 argmax-loss 診斷交付（measure-first、`feat/info-network-whole` 436f85c2）·await systems 確認 root→設計 (a) side-action**：
+- RE-measure#2 揭 help/scout/distribute 仍 0→真 root=argmax-loss（dispatch-gate 修 necessary 但 insufficient）。
+- ★求援每 food 級輸 argmax rank 3/4：winner=返家補給（非假設覓食/relocate/買糧、home-based resident）；求援 util 0.04-0.21（非假設 0.35；window[2,3)severity 低、food→0 返家補給 boost 破頂追不上）。求援輸求生=引擎正確但派信使≠放棄自救=argmax 二選一機制錯配→支持 (a) side-action。
+- ⑥distribute 依賴驗：distress 塞領主 team_known→distribute candidate 生成 util 0.659=證 distribute=0 下游於 herald 送達（非獨立第二關）。
+- bed-only 零 production 改。measurement docs/measurements/2026-08-04-part2-argmax-loss-diagnostic.json。handback part2-argmax-diag-findings（open）。source consumed。★HOLD 修待 systems 設計 (a)。
+
+**★資訊網 Part2 dispatch-fix 交付（`feat/info-network-whole` 85edc4f6）·await systems R²→measurer re-measure whole**：
+- root=bootstrap 修好 applicable 但 dispatch=0（herald 需 spare named、小餓 resident 無→送不出）+ seed1337 regression。
+- ①spawn-ability applicable gate（can_send_herald=pop>=2/can_send_scout=named>=2、look-before-leap 治 regression+誠實）②求援 herald→anon 1 人 empty-handed 信使（dispatch_anon_messenger:leader_id=-1、1 anon pop、★零 res carry 不 proportional-split；_dispatch_help_herald reframe）。偵察保留 named subteam。util 一字不改 genuine。
+- 全綠：TDD part2 7/7+herald 9/9+scout 9/9、headless 3=baseline、constitution 74、determinism 3 跑 byte-identical 2B7A0A5。handback part2-dispatch-delivery（open）。source consumed。★re-measure（herald_dispatched>0+distribute>0+regression 消+scout spare-named）交 measurer。await R²。
+
+**★資訊網 bootstrap-fix 交付（`feat/info-network-whole` d9550ad8）·await systems R²→measurer re-measure whole**：
+- root=herald/scout 0-fire bootstrap 死結（target_pos 卡 live-belief、成員從不 meet→無位→永不 applicable；真病 target_pos 無值非 util 低）。
+- 修=名冊 fallback：help/scout_target_pos fresh belief→無→_faction_roster_pos（自家勢力固定據點位、組織常識、5 硬界 encode，④誠實標 known gap 非 frozen-snapshot）。util 一字不改（genuine 非 crank）。outpost_hidden stub（界⑤）。gv_mapscan gate-ok（感知鐵律 own-infra legit）。tap help/scout.roster_fallback。
+- 全綠：TDD 6/6、headless 3=baseline、constitution 74（god-view detector 綠）、determinism 3 跑 byte-identical E87F455。handback bootstrap-fix-delivery（open）。source consumed。★whole re-measure（症1 distribute/food_delivered、famine、人格分化、fog、hub、economy）交 measurer。await R²。
+
+**★資訊網 whole 全 4 slice build 完+整合 gate 綠（`feat/info-network-whole`）·await systems R²→measurer whole 量**：
+- 一 root 三症（propagation dead-end :79）通例修、接既有 seam。S-prop 99deaa80（看板 relay hub、修共位 dead-end）/S-herald d17cd050（求援→TASK_HERALD 送 need 到領主 team_known 修症1）/S-scout d4766834（偵察→TASK_SCOUT 領主查子民帶 need 回 active 症1）/S-trade ac7d3975（交易面 broaden 同格 peer 私產 keep-line 守 修症iv）。各 TDD 綠（5/8/8/3）。
+- 整合 gate：headless 3=baseline、constitution 74（★god-view detector 綠=感知鐵律守）、determinism 3 跑 byte-identical MD5 34C8B74（零新 randf）。
+- genuine 非 crank：per-option util dump 證分化（help 務實0.640>傲0.102、scout 統領0.800>野心0.160）；calibration 常數皆錨真值（decay=TIME_DECAY_PER_TICK/util base=真severity·staleness/modulation coeff 非 fire-crank）。全量 tap 就位。
+- ⚠flag:1mo warring attrition 0.68%→0 teams 84→86（可能 emergent 合作 vs 戰鬥抑制，measurer 跨 seed/月斷）。perf-watch:_market_peer_trade O(teams)/市集到訪。
+- handback infonet-whole-delivery（open）。source dispatch consumed。★whole emergent 量（§5 商業/famine/人格/fog/hub/economy）交 systems 路 measurer。await R²。
+
+**★甲 distribute/deliver=0 + 饑荒-flee 診斷（measure-first、別下結論）交付·await systems 讀定 root**：
+- 甲（`feat/jia-distribute-diag` b2d67e7d）：三 ask 合批（a/b + iv 交易面 + differential）。root=**買單傳達可撮合方 team_known**（received_buy_orders）、非 argmax(ii)。B:買單達→distribute util 1.3333 rank 0/5 贏。D 差分:唯一差異 received_buy_orders。C(iv):交易面=owner public_storage、私產 surplus buy_no_stock 賣不掉。真世界 0=settled 各據點不共位（propagate_on_arrival:79 要同 tile）→買單從不達。measurement docs/measurements/2026-08-03-jia-distribute-zero-diagnostic.json。handback consumed by systems。
+- 饑荒-flee（`feat/famine-flee-diag` 32827479）：root≠(a)決策 pin——resident 給可達已知糧源即 遷移找糧 relocate（與 mobile 同、無結構 pin，blueprint(a) REFUTED）→narrows (b)/visibility（真 §5 大概率 food_seek_target=-1）。★converge jia root:food_seek_target 源②親聞 food 賣單=team_known propagation co-location-only→settled 不共位→從不親聞→學不到哪有糧。measurement docs/measurements/2026-08-03-famine-flee-diagnostic.json。handback open。
+- 兩診斷純觀測（jia Probe taps 零行為/零 RNG determinism 4D6FCB46；famine bed-only 零 production 改）。★HOLD 任何 fix build 待 systems 讀定 root。measurer confirm 真經濟床（Probe-on>wrapper timeout、taps 就位）。
+
+**★manufacturing per-labor-allocation de-patch（`feat/mfg-labor-depatch` 0c9a5c6a，stacked on labor-pool 61b2a354）全綠交付·await systems R²**：
+- 領導軸真根=facility 從不 RUN（mfg:67 current_task 補丁閘 pre-empt 勞力池，飽和 6.7%/材料 0.000）。移除一行補丁閘 → PRODUCE 隊在自家 outpost 就跑（如 gather）。保留 gate 全自動（need-gated/materials/position/PRODUCE/dedup）。tap manufacture.fired/input_consumed/output。
+- TDD 5/5（①de-patch 生效 IDLE 隊產 tools 0.050 移閘前=0 + ②satisfied ③materials ④position ⑤PRODUCE 4 保留 gate 皆 0）。headless 3=baseline、constitution 74、determinism 3 跑 byte-identical MD5 06D9B76D（=labor-pool baseline：warring 無 settled producer→de-patch 行為中性/零 RNG）、非凍。
+- ★economy volume before/after + §8 領導軸 ratio 追平 = 交 measurer（warring combat 場景 manufacture.fired=0；機制 unit-proven）。依賴 labor-pool 先 merge。follow-up TASK_MANUFACTURE vestigial 別本輪。handback mfg-depatch-delivery（open）。source consumed。await R²。
+
+**★B idle-labor→建設 genuine 激勵 MVP（`feat/idle-labor-build` eb263529，stacked on labor-pool 61b2a354）全綠交付·await systems R²**：
+- ①ctx.idle_labor=maxf(pool_of−Σ demand,0) ②建設 util+idle_employ_value（★anti-crank：全因子 manufacturing 真公式反推、禁 PER_HAND 發明；min(idle/d_new,1)×facility_full_output×need_weight）。guardrail grep clean（只建設、只 PRODUCE、連續乘非 gate）。tap idle_employ.value_positive/build_chosen_with_idle。
+- ★自查自修 perf regression：_idle_employ_value 每決策 NeedOracle tile-scan 爆 → tile 快取（LABOR_CADENCE gate 單寫者=owner）。A/B 坐實修後 28s=baseline 零 regression。
+- 全 gate 綠：TDD 11/11、headless 3=baseline、constitution 74、determinism 3 跑 byte-identical MD5 4D6FCB46、非凍。
+- ★real-sim §8 領導軸 fire-count 交 measurer（Probe-on 全經濟 decision_engine 診斷 loop>590s 超 wrapper；機制 unit-proven+perf-clean）。依賴 labor-pool 先 merge。handback idle-labor-build-delivery（open）。source dispatch consumed。await R²。
+
+**★統一勞力池（`feat/unified-labor-pool` 61b2a354）全綠交付·await systems R²**：
+- systems 判「headless +10 皆 intended 新契約非 bug」→ 照 (a)(b) 做完。(a) 10 產線測更新新 model（`_mfg_q` sqrt→LABOR_SCALE、tax fixture 補 TAG_PRODUCE+親聞 material 買單 gain=5.0 不變、collect 補 PRODUCE）。(b) dev-verify：need-gate 雙向（food need>0 fill>0 / gem need=0 fill=0）+ ★供給鏈多級傳播 weapon(5.5)→ore_steel(19.8 PURE self_use=0 純傳導)→ore_iron(79.2 level-2) 不斷。
+- 全 gate 綠：headless 3=baseline、labor_pool_test 7/7、determinism 3 跑 byte-identical MD5 06D9B76D、非凍(attrition 0.68%+84 隊活躍)、constitution 74。
+- handback `labor-pool-green-delivery`（已 consumed by systems）。await R² 融合驗 + measurer §8。
+
+**★乙 consolidation revert（`feat/scale-consolidation-revert` b65a9692）完成確認·await systems R²**：
+- absorb + join_drive 皆回 pre-ce369dca genuine baseline（join=`clampf(0.5+best_protector_rep×REP_MAGNET_W×0.5,0,1)` quality band；absorb=`ABSORB_DRIVE_BASE×resource_slack×(0.5+0.5·yield_pos)×(0.5+0.5·amb_gap)`）。JOIN_PROTECT_GAIN/JOIN_DRIVE_CAP/ABSORB_DRIVE_BASE_V2/AMB_GAIN 全刪。
+- 全 gate 綠：headless 3=baseline、constitution 74、determinism 3 跑 byte-identical MD5 FBF182FA。
+- handback `yi-revert-complete`（open）。source dispatch `yi-revert-join-too` 已 consumed。await R² 融合驗→merge。
+
+---
 
 **means-end S7 收尾（HEAD 待 commit,branch feat/means-end-s7-cadence off local main 0d10df05[含 S6],在飛）★最後 slice·S7 merge=whole-done**：
 - **修（收尾不新增機制）**：①★perf cadence-gate（`ensure_maintain_goals` 加 `team.goal_eval_next_tick` 每 `GOAL_EVAL_CADENCE`=3天 呼一次非每 decide，鏡射 residency_eval；解 known_issues A goal gen facility_deficit 慢）②★goal 掛退 lifecycle（build_F 建成/desire 掉→退移除，免 goal_state 無限累積；maintain 冪等持久留）③must-fix① 護欄不動。

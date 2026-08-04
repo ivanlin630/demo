@@ -24,6 +24,35 @@ kill_nostock 99.96-99.97% 集中在 tools/weapon_melee_low/weapon_ranged_low，�
 - **★vision Q 升用戶（blueprint 帶，不擋 GATE-B）**：買驅動經濟 vs 用戶伐木/賽跑願景（誰先砍 forest 優勢=founding 當 primary）可能 mismatch；**founding-attractiveness（讓立國獨立於買可達也值得選）等用戶回**，別為賽跑願景在 GATE-B 前塞 founding 補丁。
 - **★active-construction persist floor＝現 BANKED（2026-07-31 blueprint 裁 bank+文件化，f84fdd22 merged）**：`persist_strength.gd CONSTRUCTION_ACTIVE_FLOOR=0.15`（施工中隊 TASK_BUILD+ticks_left>0→persist_eff=max(computed,FLOOR)保護免 routine argmax 搶班）。**曾 HOLD**（target founding complete_build>0 未達）——**現 bank 的 rationale（HELD 主因 moot）**：①verified-safe（R² 雙線非凍紅線清白 + merged gates 全綠、含觸 RELEASED persist 交互驗過）②**HELD 主因『founding 未達』moot**——measure 定案 founding 決策 fire 正常（買 preempt=正確 fallback、非決策壞）、且 **floor 本就保全 active-construction（含 upgrades 真完工 6→7）非只 founding**③re-pick 條件『economy work active』到（SLICE A convoy 在修 GATE-B delivery）④誠實測：條件變我會主動 re-pick（founding-target moot+驗 safe+construction-commitment measured-real 07-25）＝非 accident-convenience、是條件真變。★**共 worktree 誤帶入是 process slip（見 memory HELD 隔離），但 bank 本身經 blueprint 裁定+此 rationale=clean provenance 非默默 accident**。連 [[project_persistence_unification]]（RELEASED + construction floor 延伸）。
 
+### ★資訊網 arc：核心機制 VALIDATED（fixture）但 whole-world distribute 未通（2026-08-05 QA CONFIRM-WITH-REVISIONS 誠實 flag）
+資訊網 arc（求援 letter→領主聞→賑濟 side-dispatch→免費直注 convoy）**核心機制逐站 VALIDATED**（T1 fixture 全鏈真、糧真到、7+ 輪剝殼）。**★但 QA 對抗審揭誠實 scope 限制（鎖字前必標、非機制假）**：
+- **whole-world distribute 未通**：全 49 隊 warring 床 `distribute.deliver=0`（main/branch 皆然）——relief 鏈只在專屬 T1/T3 fixture 走通、**一般 settled 經濟 distribute 仍 0**（warring solo-heavy 少 faction-resident relief 案例）＝踩自家 `jia honest_premature_victory_flag`（窄床 accepted≠general）。**禁 resolved/fixed 描述一般經濟紓困。**
+- fixture 內 T1 day38-54 17 天 food=0、pop 9→2＝「間歇投糧撐命」非「穩定復甦」。
+- seed-cascade（warring 1337 惡化/42 改善）=**plausible 非 confirmed**（量級 4.5x unrest 無逐 tick 因果鏈）。
+- T2 scout util fixture 恆 -0.8=genuine no-target cost（T2 factionless）非 stub、但此 fixture 未 demo scout 人格（人格分化只 help-seeking 側證）。
+- **→ whole-world distribute 通用 = economy-balance/L3 補完批**（[[project_information_network]] backlog）。連 [[feedback_verify_execution_end]]（premature victory 精化6：窄場景 accepted 當 general）。
+
+### ★★§5 執行塌陷 root REFINE = 三層（2026-08-03，jia-distribute-zero-diagnostic.json 完整診斷）+ 後勤/商業 premature-victory
+§5 整合揭執行全塌（`distribute.dispatch=0`+`order_placed=426/fulfilled=0`+`trade.deal=0`+`convoy.dispatch=0`，領主 food=3940 rich 卻居民 pop2 runway0 餓死不救）。完整診斷（4 角度+差分+surface）定 root **三層、非單一 GATE-B**：
+- **L1＝propagation dead-end（★兩症收斂同一 root、非「直掃」修）**：`propagate_on_arrival:79` 傳播只在共位發生（`if other.tile_pos != arrived.tile_pos: continue`）→ settled 隊不共位 → 消息 **dead-end 永不傳**。**兩獨立症狀收斂此同一 root**（診斷坐實 `jia-distribute-zero-diagnostic.json` + `famine-flee-diagnostic.json`）：
+  - **甲 distribute 敗**：居民買單沒傳達領主 team_known（`goal_resolver:154` received_buy_orders 恆空）→ 領主坐擁餘糧不救自家餓死居民。
+  - **居民餓死**：food 賣單沒傳達居民 team_known → `food_seek_target` 源②親聞 food 賣單恆空 → 居民**學不到哪有糧** → 遷移找糧 not-applicable → 餓死。**注**：非結構 pin bug（resident 給可達已知糧源即 relocate、與 mobile 同、(a) REFUTED）、非人格撐死（relocate 決策會生成、只是沒 target）＝**純資訊餓**。
+  - **★＝架構信號**（同型缺口重複、[[feedback_structural_audit_complement]]）：修 propagation 無死角**一解多症**、非逐症 patch。
+  - **★修法（用戶定 2026-08-03，否定原「直掃」；資訊網 arc）＝修 propagation 讓消息無死角傳達（延遲/decay 保 fog、非硬擋、非開領主直讀特例）**＋**「有意收集/傳播」=思考層決策**（餓村莊決定求援派信使 / 領主決定派信使查、**人格秤 util 非死常數門檻**）。見 invariants.md「資訊永遠傳播」段。原直掃 spec 已 SUPERSEDED。HOW spec 待 blueprint user-confirmed WHAT 框定。
+- **L2 同格跨勢力貿易交易面窄**：`interaction:731-813` 只 owner public_storage、非 team.resources（用戶 WHAT=broaden 同格 willing→team.resources、bounded 非 O(N²)）。
+- **L3 隔格跨勢力貿易**：`read_market_board`（order_system:194）須賣方物理抵買方市集、settled 不巡→從不讀外單。深、最大 remainder、需循環/carrier flow。
+- **非 (ii) 決策層**：distribute 生成即 rank0 贏 util1.33、deliver 生成 candidate、convoy/argmax/throttle 全 fine（診斷 test_B/D）。binding=**上游買單物理傳達**（感知鐵律兩路徑 co-location carrier `message_system:79` + 市集看板 `read_market_board:194` 皆須物理在場，settled 隊不共位/不巡市集）。
+- **★premature-victory CONFIRMED（不 paper over）**：「後勤 SLICE A convoy fulfilled 0→6 修好」= scenario-specific——0→6 在「買單已在賣方 team_known」近距 fixture fire；一般 settled 各據點不共位→買單不傳達→convoy.dispatch=0。SLICE A 修 candidate生成+convoy執行層、**未修買單傳達層**。「商業 market-as-place 修好」同款（deal~1-2、market 未大 revive、`sell_no_surplus 51.7%` known wall）。窄場景 accepted ≠ general working（[[feedback_verify_execution_end]] 精化6）。
+- **序建議**：L1（de-patch、§5 impact 最高、cheap）→L2（用戶 WHAT surface）→L3（循環 remainder）。待 blueprint WHAT 裁序+L1 感知鐵律解讀。**上方「GATE-B 買撮合 binding 根」段＝此 refine 的粗粒版**（GATE-B 是 L2/L3 的一部分；L1 intra-faction 是新拆出的更根本層）。
+
+### ★★constitution_gate god-view detector 盲點：間接 local-var 存取漏抓（2026-08-04 R² 揭、系統性追蹤）
+`constitution_gate.gd:40 GV_TEAMSTATE_RE` 只認**字面 `state.teams[id].<動態欄>` 鏈式** pattern——**漏「先 `var X: TeamData = state.teams[...]` 存 local var、再隔行讀 `X.population`/`X.food` 等動態欄」的間接寫法**（比鏈式更常見自然）。血證：`goal_resolver:_distribute_candidates` `_resident_food_runway(resident)` 直讀 resident live pop/food=god-view，**活過本 session 多輪 review（SLICE B/L1/資訊網 R①R²）+ 人審多次直讀該區、皆沒抓到**（不在 baseline_v2 白名單=從沒被 gate 碰過），直到 measurer 實測+diagnostic 才浮出（distribute de-scan 已移除此違規）。
+- **★意味 codebase 可能還有同款盲點殘留**（其他間接 god-view live-read 逃過 gate）。
+- **追蹤（systems）**：①**兩階段 grep 掃 `scripts/simulation/decision/` + `faction_ai_system.gd`**（先找 `= state.teams[` 賦值、再對目標變數名找後續 `.population`/`.food`/`.coin` 等動態欄讀）看殘留同款；②**強化 detector**（GV_TEAMSTATE_RE 認間接 local-var 存取、或加 data-flow 粒度）。連 [[reference_constitution_gate_marking]]（機器證>人審 completeness、但機器本身有 pattern 盲點=需補）。
+
+### ⏳資訊網名冊 ④分裂 frozen-snapshot 未實作（known gap、2026-08-04 R² 訂正）
+bootstrap fix 名冊（faction 成員知自家固定據點位、`_faction_roster_pos`）**MVP 用 faction-gate 讀當下 `faction_id`**——分裂後對 ex-faction 回 -1（零資訊）。**★這 ≠ 用戶 ④ 硬界**（原文「分裂=名冊凍成 belief 快照帶走、對方後續新建/棄置不知會過時」＝帶走一份**會變舊的快照**）。MVP 是分裂瞬間零資訊、**連快照都沒**＝機制不同（R² 抓我原「達 ④ outcome」自我認證過頭）。**non-blocking**：現 Part2 消費者（help=自家領主/scout=自家子民）只鎖同勢力當下、**無人讀 ex-faction 位** → 現無害。**未來若有消費者需「分裂後仍知對方舊據點 stale」→ 另 slice 建 stored 名冊 snapshot + copy-on-split**。連 [[project_information_network]]。
+
 ### ⏳糧流 Slice4(b) 和平 economy measure — 首批驗收 tripwire（B1 merged c82a685e，2026-07-29）
 糧流 runway arc：**Slice A（糧感官）+ B1（糧橋 go/no-go + 通用 food top-up）已 merged**（reviewer R² CLEAN + blueprint JUDGE merge=YES），機制正確、bank 起 infra。**但 A1 build=0 execution-verified 坐實=founding 從不 dispatch（warring 無動機、糧橋 bridge_nogo=0/topup=0 從不 fire）＝A1 folds material/經濟 arc（founding 動機=料驅 economy 非 runway 糧食軸）**。B2/B3/C **PAUSE**（blueprint 帶 roadmap fork 問用戶：pivot economy/motivation vs 續 runway 糧食軸）。
 - **★首批必驗（reviewer R² 追蹤項，別靠 aggregate 矇混）**：economy 起、founding 真開始 fire 時，**礦山站子隊完工後撐不撐得到自足**必第一批驗（非只驗一般 plains 站）。疑慮：B1 通用 top-up `_need_food = pop×FOOD_PER_PERSON×(eta_travel+eta_build)×1.5` **只算建 outpost 本身 ETA、沒算「蓋完後還要蓋第一座設施才自足」那段**——舊礦山 bootstrap（`BOOTSTRAP_DAYS=50`，已被收編刪除）comment 自承涵蓋施工+設施全周期（礦山格種不了田、自給食物極低）。親算 civilian lv1 `eta_build≈16.7 天`×1.5 顯著短於原 50 天＝**公式概念性縮水**，非數字差一點。`food_bridge_test.gd` fixture 全 `terrain="plains"` 無 mountain/ore 案例＝這風險**完全沒被測到**，2mo warring aggregate 也因 founding 從不 fire 沒 exercise 到。潛伏非發作中 regression（對非礦山站是純改善），不擋 B1 merge，但 Slice4(b) 首批 spec 開頭必列驗。連 [[feedback_verify_execution_end]]（機制對 target 不 fire＝該驗場景從沒真跑過，team14/A1 同款）。

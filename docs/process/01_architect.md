@@ -64,3 +64,14 @@ spec 鎖定（reviewer CLEAN）後，**dispatch = 直接寫 `to:implementer stat
 - 系統**不** inline 改 code（L1/L2 禁；僅 L3 surgical 1-3 行例外）。
 
 handback 內含觸及檔/驗收法摘要（指向 spec，注意事項寫 spec/plan 內）。task 完成判定 = systems + reviewer/QA，非 implementer 自判。
+
+## ★★spec 鎖在長跑因果 = QA-verdict 機械閘（2026-08-04 用戶定，治 QA-hook 連漏）
+
+**病 root（結構、非個站失職）**：`.claude/hooks/longrun-qa-gate.sh`（7/22）提醒**打在跑床站（量測）**，但因果結論在**下游鎖**（systems verdict→spec-lock / blueprint 鎖 WHAT），**鎖點零 gate**＝提醒與執行點錯位；advisory 靠記憶+compact 洗 context 必漏（血證 §5/饑荒-flee/anomaly 三因果沒過 QA 就鎖 spec）。**通則：hook 提醒 ≠ gate；gate 要裝在執行點（鎖/merge），advisory 在上游必漏**（memory `feedback_self_approve_gate` 2026-08-04）。
+
+**機械閘（裝在「鎖」的位置、不靠記憶）**：
+1. **含因果結論的 handback 必帶 `QA: <ref 或 PENDING>` 欄**（因果結論＝「X 造成/卡住 Y」「Z 是根因」「這門檻擋那行為」等——同 R① §判準的 gating/因果宣稱）。
+2. **systems 拒鎖**：任何 spec 要**鎖在長跑因果結論**上，**引用來源 handback 無 `QA:<ref>`（或為 `PENDING`）→ systems 拒絕 lock/dispatch**、回退送 QA 故事稽核先。純機械改/純事實前提（file:line 原始事實）免（同 R① 豁免邊界）。
+3. **鏈序**：長跑 → 量測員（附 specimen）→ **QA 故事稽核（出 verdict ref）** → verdict → systems 鎖 spec / blueprint 鎖 WHAT。QA session 沒開＝flow owner flag blocker（`00_roles`）、非 silent skip。
+
+∴ **不帶 QA verdict ref 就無法過 spec-lock**＝結構硬擋，取代「記得送 QA」的 advisory。連 `03b_measurer §⑤`（findings 必附 specimen→QA）、`00_roles` 接力流向、memory [[feedback_qa_inversion]]。
