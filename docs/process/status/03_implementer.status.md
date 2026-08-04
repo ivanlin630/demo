@@ -10,6 +10,15 @@ updated: 2026-07-22
 
 # 03 implementer 現況
 
+**★GameSetup faction-key robust（T3 診斷根治·branch `feat/info-network-whole`，續，HEAD 待 commit）**：
+- **root（我 T3 診斷確認→systems 裁 (a)）**：`world_state.create_faction` 給 SEQUENTIAL in-sim id（0,1）非 config faction_id（1,2）；`game_setup:578` 沒接回傳值、`:585-586` 直接拿 config faction_id 當 in-sim id → 亂配（T1 誤入 T2 faction、T3 factionless）。
+- **修（test-infra 只 game_setup.gd）**：建 `cfg_to_actual`（config faction_id→actual sequential id）map；leader `create_faction` 接回傳存 map；非 leader 用 `cfg_to_actual.has(fid2)`+`set_team_faction(..., cfg_to_actual[fid2])`（查不到=沿舊靜默不指派 factionless、非新失敗模式）。掃全檔 confirm :603/612 god-view seed=config-only 自比較（不碰 state.factions/team.faction_id、安全不動、澄清①）。不碰 `create_faction` engine / decision / faction_ai（scope=test-infra）。
+- **驗**：★faction map 修正確認（tap：T0/T1=fac0、T2/T3=fac1＝config 意圖，前 T1→T2 亂配/T3 orphan 已治）；lord_distribution 9/9 + infonet 全綠 + headless **0-new** + gate PASS 74；**驗不破他 bed**：warring/default（無 explicit faction_id、procedural）+ peaceful（全 -1）＝change inert byte-neutral（只 infonet_whole 非 conforming config 受影響）；determinism 3-run MD5 `9290F462BD4A01B542A4519A091FCA79` byte-identical（＝前批同值＝warring inert 實證 byte-neutral、驗不破他 bed）。
+- **★★誠實 flag（別 overclaim）**：faction-key **結構修好**，但 **T3 仍死 day41**——非 faction（已修），而是 **faction2 relief 鏈不 engage**：dist_heard 只 T0 聞（84×）、**T2 聞 0、T3 distress 無人聞**。T3（proud、求生欲0.2）疑不 broadcast distress + T2（neglectful 義氣0.4）收不到→不賑濟。＝**可能 intended 人格 emergent 對比**（責任型救 T1 vs 疏忽+傲氣→悲劇死）**或另一 gap**——需 blueprint/systems 判（arc-done with 悲劇 T3 vs 進一步機制）。**未達 spec 驗收「T3 也救活」。**
+- **下一站**：handback to:systems（R² + ★T3-仍死歸因待判）→measurer re-measure 症1 端到端（T1 救活 confirm + T3 死歸因）+ warring 2seed→QA/blueprint 判。
+
+---
+
 **★資訊網 distribute 免費直注 relief（機制最後一 bug）（branch `feat/info-network-whole`，續，HEAD 待 commit）**：
 - **root（diagnostic#6 重現 persist bed 0b599dc8）**：distribute 賑濟 convoy 6/6 arrive（travel 正常**非黑洞**、confirm 我前診斷 convoy 機制無黑洞）、卡 **settle 站** 5/6 bail（`sell_owner_no_coin×4`/`sell_ownerless×1`）。`interaction:767` distribute 注 `override_ask=local_value×price_factor`，`price_factor=(0.5+greed)/(0.5+honor)` 分子最小 0.5 **永不 0**→oask 永不 0→「免費仁君路」`free_dist=(override_ask==0)` **UNREACHABLE=dead code 實作 bug**（非設計錯）→ 恆對餓 resident 定價→無 coin bail。
 - **修（de-patch、啟用既有 dead 路）**：①`interaction:767` distribute 的 `oask=0.0`（免費直注 gift；啟用既有 free_dist 路：跳 owner-coin/affordability/no_price bail→`TileBank.deposit` 免費存 resident 據點→bid=0 coin no-op 守恆→`distribute.deliver` bump）②ownerless edge：free_dist 若 `owner==null` 但 tile 是據點→允許 deposit（不 bail sell_ownerless；ocoin/owner coin add owner-guard）。

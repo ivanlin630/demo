@@ -568,22 +568,27 @@ static func _setup_explicit_teams(state: WorldState, config: Dictionary) -> void
 	for t_cfg in teams_cfg:
 		_build_explicit_team(state, t_cfg)
 	# 再 create factions（leader 自動加入 member_team_ids）
+	# ★T3 根治：create_faction 內 f.faction_id=_next_faction_id(SEQUENTIAL 0,1,2…)、非 config faction_id
+	#   → 建 config faction_id → 實際 in-sim faction id map，非 leader 用 map 查 actual（原直接拿 config fid 當 in-sim id=亂配）。
 	var seen_factions: Dictionary = {}
+	var cfg_to_actual: Dictionary = {}   # config faction_id → 實際 in-sim(sequential) faction id
 	for t_cfg in teams_cfg:
 		var fid: int = int(t_cfg.get("faction_id", -1))
 		if fid == -1: continue
 		if seen_factions.has(fid): continue
 		seen_factions[fid] = true
 		if t_cfg.get("is_faction_leader", false):
-			state.create_faction(int(t_cfg["id"]))
-	# 第三段：非 leader 的 faction member 加入 faction list（leader 在 create_faction 已加）
+			var actual_fid: int = state.create_faction(int(t_cfg["id"]))   # 回實際 sequential id
+			if actual_fid != -1:
+				cfg_to_actual[fid] = actual_fid                            # ★map config→actual
+	# 第三段：非 leader 的 faction member 加入 faction list（用 map 查 actual id、非直接 config faction_id）
 	for t_cfg in teams_cfg:
 		var fid2: int = int(t_cfg.get("faction_id", -1))
 		if fid2 == -1: continue
 		if t_cfg.get("is_faction_leader", false): continue
 		var tid: int = int(t_cfg["id"])
-		if state.factions.has(fid2) and state.teams.has(tid):
-			state.set_team_faction(state.teams[tid], fid2)   # 入 faction（雙向同步）
+		if cfg_to_actual.has(fid2) and state.teams.has(tid):
+			state.set_team_faction(state.teams[tid], cfg_to_actual[fid2])   # ★用 actual id 入正確 faction（查不到=沿舊靜默不指派 factionless、非新失敗模式）
 	# ★god-view Slice B：創世知識 seed（②+③，非全知）取代舊 all-pairs 全知（開局全知污染 emergence
 	# 冷啟動：初識/外交/威脅該靠 belief 傳播長出）。② 同 faction 互 discovered / ③ 本地鄰居(proximity≤
 	# CREATION_KNOW_RADIUS) / ③ 淵源(parent 若 config 有)。窄例外：omniscient_discovery=true(default false)
