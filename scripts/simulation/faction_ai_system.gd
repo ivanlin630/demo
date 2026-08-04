@@ -1435,25 +1435,143 @@ func _recall_envoy(state: WorldState, envoy: TeamData) -> void:
 
 # ★資訊網 S-herald：求援信使 tick——朝施助者 belief-pos 走；co-located→deposit 母隊 need（食糧買單）訊進
 # 施助者 team_known（honest intra-faction）→ 領主經傳到的 belief 得知子民餓 → distribute 匹配。timeout/target 亡→recall。
-func _tick_help_herald(state: WorldState, herald: TeamData, merge_queue: Array) -> void:
-	if state.teams.get(herald.parent_team_id) == null:
-		_recall_envoy(state, herald); return
-	var target_id: int = herald.order_target_id
-	var target: TeamData = state.teams.get(target_id)
-	if target == null:
-		Probe.bump("help.target_dead"); _recall_envoy(state, herald); return
-	var budget: int = int(herald.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
-	if state.world.current_tick - herald.task_start_tick > budget:
-		Probe.bump("help.timeout"); _recall_envoy(state, herald); return
-	# 抵達施助者（co-located）→ deposit need 訊 → 完成 recall。
-	if herald.tile_pos == target.tile_pos:
-		_deposit_help_need(state, int(herald.task_extra_data.get("help_origin", -1)), target)
-		Probe.bump("help.delivered")
-		_recall_envoy(state, herald); return
-	# 追蹤刷新（同 _tick_envoy：belief-gate predict_intercept、無 belief→保持現 move_target）。
-	var predicted: Vector2i = PathSystem.predict_intercept(state, herald, target)
-	if predicted != Vector2i(-1, -1):
-		herald.move_target = predicted
+# ★資訊網 B carrier tick step（sim_runner 置 move 後、每 tick）：飛行中信件逐封
+# move→抵 seat 交付（lord co-located→deposit 進 team_known、否則 register 進 seat board 等取）/timeout/敵攔截。
+# ★感知鐵律：letter payload=spawn 時 origin 自己 need snapshot（零 live god-view）；物理走+delay；攔截/timeout=物理零 RNG。
+# ★determinism：遍歷 in_transit_letters insertion order；move/攔截/timeout 全確定性、零新 randf。
+func tick_letters_all(state: WorldState) -> void:
+	if state.in_transit_letters.is_empty():
+		return
+	var kept: Array = []
+	for letter in state.in_transit_letters:
+		var outcome: int = _tick_one_letter(state, letter)
+		if outcome == 0:   # 0=在途保留、1=已消（交付/timeout/攔截）
+			kept.append(letter)
+	state.in_transit_letters = kept
+
+# 回 0=在途（保留）、1=已消（交付/timeout/攔截、caller 丟棄）。
+func _tick_one_letter(state: WorldState, letter: Dictionary) -> int:
+	# timeout（pop 已耗=真成本）
+	var budget: int = int(letter.get("timeout", 2 * WorldState.TICKS_PER_DAY))
+	if state.world.current_tick - int(letter.get("spawn_tick", 0)) > budget:
+		Probe.bump("help.letter_timeout"); return 1
+	var target_pos: Vector2i = letter.get("target_pos", Vector2i(-1, -1))
+	if target_pos == Vector2i(-1, -1):
+		Probe.bump("help.letter_timeout"); return 1   # 目標消失（防呆）
+	# move toward target_pos（1 hex/tick、PathSystem 真地形路由=物理 delay）
+	var cur: Vector2i = letter.get("current_pos", Vector2i(-1, -1))
+	if cur != target_pos:
+		var path: Dictionary = PathSystem.find_path(state, cur, target_pos)
+		var steps: Array = path.get("path", [])
+		if steps.size() >= 2:
+			cur = steps[1]
+			letter["current_pos"] = cur
+	# ★敵 faction 隊在場攔截（物理零 RNG）：current_pos tile 有異 faction 隊 → 信使死。
+	if _letter_intercepted(state, letter, cur):
+		Probe.bump("help.letter_intercepted"); return 1
+	# 抵達 seat → 交付
+	if cur == target_pos:
+		var lord: TeamData = state.teams.get(int(letter.get("target_lord_id", -1)))
+		if lord != null and lord.tile_pos == target_pos:
+			_deliver_letter_to_lord(state, letter, lord)   # lord 在 seat → deposit 進 team_known
+		else:
+			_deliver_letter_to_board(state, letter, target_pos)   # lord 不在 → 掛 seat board（Part1 接力等取）
+		Probe.bump("help.delivered"); return 1
+	return 0
+
+# 敵攔截判定：letter current_pos tile 有異 faction 隊在場（faction_id != letter.faction_id）→ 攔截。
+# 物理零 RNG、零 god-view（讀 tile 佔位=公開物理事實，非 indexed 他隊 live 內態）。
+func _letter_intercepted(state: WorldState, letter: Dictionary, pos: Vector2i) -> bool:
+	var lfid: int = int(letter.get("faction_id", -1))
+	var tid_key: int = pos.x * 1000 + pos.y
+	for other_id in state.teams_by_tile.get(tid_key, []):
+		var other: TeamData = state.teams.get(other_id)
+		if other == null: continue
+		if other.faction_id != lfid:
+			return true   # 異 faction（含 solo 匪 faction_id=-1）在場 → 攔截
+	return false
+
+# 交付①：lord 在 seat → 把 payload（origin food 買單 snapshot）deposit 進 lord.team_known（honest firsthand）。
+func _deliver_letter_to_lord(state: WorldState, letter: Dictionary, lord: TeamData) -> void:
+	if not state.team_known.has(lord.team_id):
+		state.team_known[lord.team_id] = []
+	var known: Dictionary = {}
+	for m in state.team_known[lord.team_id]:
+		if m.type == "order_buy": known[int(m.params.get("order_id", -1))] = true
+	var origin_id: int = int(letter.get("origin_team_id", -1))
+	for o in letter.get("payload", []):
+		var oid: int = int(o.get("order_id", -1))
+		if known.has(oid): continue
+		var msg := MessageData.new()
+		msg.id = state.global_messages.size(); msg.type = "order_buy"
+		msg.origin_team_id = origin_id; msg.origin_tick = int(o.get("origin_tick", state.world.current_tick)); msg.strength = 1.0
+		msg.is_distorted = false   # 信使親送 intra-faction = honest
+		msg.params = {"order_id": oid, "res": "food", "qty": int(o.get("qty", 0)),
+			"origin_team": origin_id, "origin_pos": o.get("origin_pos", Vector2i(-1, -1)), "expire_tick": int(o.get("expire_tick", 0))}
+		state.global_messages.append(msg)
+		state.team_known[lord.team_id].append(msg)
+		known[oid] = true
+		Probe.bump("help.need_deposited")
+
+# 交付②：lord 不在 seat → 把 payload 掛 seat outpost market_orders board（領主不在也留著等取、Part1 read_market_board 接力）。
+func _deliver_letter_to_board(state: WorldState, letter: Dictionary, seat_pos: Vector2i) -> void:
+	var tile: HexTileData = state.world.tiles.get(seat_pos.x * 1000 + seat_pos.y)
+	if tile == null or tile.outpost_level <= 0:
+		return   # seat 消失/降級 → 無處掛（信息損失，pop 已耗）
+	var origin_id: int = int(letter.get("origin_team_id", -1))
+	var have: Dictionary = {}
+	for e in tile.market_orders:
+		have[int(e.get("order_id", -1))] = true
+	for o in letter.get("payload", []):
+		var oid: int = int(o.get("order_id", -1))
+		if have.has(oid): continue
+		tile.market_orders.append({
+			"order_id": oid, "kind": "buy", "res": "food",
+			"qty_remaining": int(o.get("qty", 0)), "origin_team": origin_id, "expire_tick": int(o.get("expire_tick", 0)),
+			# relayed=true（信使代掛他隊單、非 seat owner 原生）；origin_tick 保 spawn（age→decay 真起作用）。
+			"origin_tick": int(o.get("origin_tick", state.world.current_tick)), "strength": 1.0, "relayed": true,
+		})
+		have[oid] = true
+		Probe.bump("help.need_deposited")
+
+# 求援信使 detach：從 mother 移 1 anon（deterministic：lowest tier 先、平民信使）——sunk cost、不 recall。
+func _detach_one_anon(team: TeamData) -> bool:
+	for tier in AnonTierSystem.TIER_ORDER:
+		if AnonTierSystem.tier_count(team, tier) > 0:
+			AnonTierSystem.remove_anon(team, tier, 1)
+			return true
+	return false
+
+# 求援 in-flight throttle（letter 版；一隊一 in-flight，鏡射舊 subteam throttle）。
+func _has_inflight_letter(state: WorldState, origin_id: int) -> bool:
+	for letter in state.in_transit_letters:
+		if int(letter.get("origin_team_id", -1)) == origin_id:
+			return true
+	return false
+
+# 合成 distress order id base（避與真 order_id[=global_messages 空間] 撞；per-origin 確定性、去重穩定）。
+const LETTER_SYNTH_ORDER_BASE: int = 1_000_000_000
+
+# origin 自己 food 買單 snapshot（spawn 凍結、payload 帶走；讀自己 need 非 target live）——
+# 有真 food 買單→帶走；無→合成 runway-deficit distress（genuine 缺口非 crank，同舊 _deposit 註「無買單→proxy」）。
+func _snapshot_food_buy(state: WorldState, team: TeamData, spawn_tick: int) -> Array:
+	var out: Array = []
+	for o in team.active_orders:
+		if String(o.get("kind", "")) != "buy" or String(o.get("res", "")) != "food":
+			continue
+		if int(o.get("qty_remaining", 0)) <= 0:
+			continue
+		out.append({"order_id": int(o.get("order_id", -1)), "qty": int(o.get("qty_remaining", 0)),
+			"origin_pos": team.tile_pos, "expire_tick": int(o.get("expire_tick", 0)),
+			"origin_tick": spawn_tick})
+	if out.is_empty():
+		# runway 缺口 = 絕境門檻食量 − 現有 effective_food（genuine 真缺口、非 fire-crank）。
+		var need: float = DecisionTerms.DESPERATION_DAYS * float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY
+		var deficit: int = maxi(int(ceil(need - ResourceSystem.effective_food(state, team))), 1)
+		out.append({"order_id": LETTER_SYNTH_ORDER_BASE + team.team_id, "qty": deficit,
+			"origin_pos": team.tile_pos, "expire_tick": spawn_tick + 2 * WorldState.TICKS_PER_DAY,
+			"origin_tick": spawn_tick})
+	return out
 
 
 # ★資訊網 S-scout：斥候 tick——朝子民 belief-pos 走；co-located→查得子民 need（食糧買單）帶回領主 team_known
@@ -1534,8 +1652,8 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 func _try_herald_side(state: WorldState, team: TeamData) -> void:
 	if team.population < 2:
 		return   # can_send_herald（pop 1 自己走）
-	if _has_inflight_info(state, team, "help_call"):
-		return   # throttle 一隊一 in-flight herald
+	if _has_inflight_letter(state, team.team_id):
+		return   # throttle 一隊一 in-flight letter（B carrier 版）
 	var food_days: float = ResourceSystem.effective_food(state, team) \
 		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 	var severity: float = clampf((DecisionTerms.DESPERATION_DAYS - food_days) / DecisionTerms.DESPERATION_DAYS, 0.0, 1.0)
@@ -1552,13 +1670,19 @@ func _try_herald_side(state: WorldState, team: TeamData) -> void:
 	if Probe.enabled: Probe.note("help.mini_util", mini)
 	if mini <= 0.0:
 		return   # cost-benefit 不划算（傲慢撐/輕度餓不值 1 anon）
+	# ★B carrier：payload=origin 自己 food 買單 snapshot（讀自己 need、非 target live state；感知鐵律 honest）。
+	var payload: Array = _snapshot_food_buy(state, team, state.world.current_tick)
+	if AnonTierSystem.total_pop(team) < 1:
+		return   # 無 anon 可當信使（冗餘守，population<2 已擋大多）
+	_detach_one_anon(team)   # ★真成本、自限：1 pop 隨信離隊（sunk，不 recall；mini-util 已計 ANON_COST）
 	var dist: int = _hex_dist(team.tile_pos, tgt["pos"])
-	var hid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
-		TeamData.TASK_HERALD, "help_call", tgt["pos"], int(tgt["id"]),
-		{"help_origin": team.team_id, "timeout": _founding_timeout(dist)})
-	if hid != -1:
-		_equip_envoy_mounts(state, team, state.teams[hid])
-		Probe.bump("help.herald_dispatched")
+	state.in_transit_letters.append({
+		"origin_team_id": team.team_id, "faction_id": team.faction_id,
+		"target_lord_id": int(tgt["id"]), "target_pos": tgt["pos"], "kind": "help",
+		"payload": payload, "current_pos": team.tile_pos,
+		"spawn_tick": state.world.current_tick, "timeout": _founding_timeout(dist), "speed": 1,
+	})
+	Probe.bump("help.letter_dispatched")
 
 # 偵察 side：領主 + 子民 belief 陳舊 + mini-util>0 → 派 anon 斥候（亦 anon 化、不再 named subteam）。
 func _try_scout_side(state: WorldState, team: TeamData) -> void:
@@ -1593,18 +1717,30 @@ func _has_inflight_info(state: WorldState, team: TeamData, reason: String) -> bo
 			return true
 	return false
 
-# 求助對象解析（fresh belief 優先→名冊 fallback，同 ctx 舊邏輯；side-dispatch 自足）。
+# ★A③ 求助對象解析：target_pos=最近自家 faction 固定 outpost（full 名冊、非只 lord 自家）——
+# 治 mobile-lord（lord 無 outpost 也可解，faction 有任一 seat 即可收信）；warring solo(faction_id=-1) 仍不解=正確。
+# target_lord_id=faction leader（co-located 則 deposit 進其 team_known，否則 register 進 seat board 等取）。
 func _resolve_help_target(state: WorldState, team: TeamData) -> Dictionary:
 	if team.faction_id == -1:
 		return {"id": -1, "pos": Vector2i(-1, -1)}
 	var f = state.factions.get(team.faction_id)
 	if f == null or f.leader_team_id == -1 or f.leader_team_id == team.team_id:
 		return {"id": -1, "pos": Vector2i(-1, -1)}
-	var lid: int = f.leader_team_id
-	var pos: Vector2i = BeliefSystem.best_estimate(state, team.team_id, lid).get("tile_pos", Vector2i(-1, -1))
-	if pos == Vector2i(-1, -1):
-		pos = _faction_roster_pos(state, team, lid)
-	return {"id": (lid if pos != Vector2i(-1, -1) else -1), "pos": pos}
+	# 掃自家 faction 全員固定 outpost（用戶定「成員知自家所有固定據點」=組織常識、position-only），挑離 origin 最近。
+	var best_pos: Vector2i = Vector2i(-1, -1); var best_d: int = 1 << 30
+	for tile_id in state.world.tiles:   # gate-ok: own-faction infra 位掃（讀 static outpost_owner/level 結構非 indexed 他隊 live 態；faction gate 已限同勢力,感知鐵律 legit,同 _faction_roster_pos）
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level <= 0 or tile.outpost_hidden:
+			continue
+		if tile.outpost_owner == team.team_id:
+			continue   # 自家 outpost 不寄己
+		var owner: TeamData = state.teams.get(tile.outpost_owner)
+		if owner == null or owner.faction_id != team.faction_id:
+			continue
+		var d: int = _hex_dist(team.tile_pos, tile.tile_pos)
+		if d < best_d:
+			best_d = d; best_pos = tile.tile_pos
+	return {"id": (f.leader_team_id if best_pos != Vector2i(-1, -1) else -1), "pos": best_pos}
 
 # 待查子民解析（領主對自家最陳舊 belief 子民；fresh belief age→norm、無 belief→名冊 staleness=1）。
 func _resolve_scout_target(state: WorldState, team: TeamData) -> Dictionary:
@@ -1926,10 +2062,7 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "envoy_proposal":
 		_tick_envoy(state, sub, merge_queue)
 		return
-	# ★資訊網 S-herald：求援信使子隊（belief-pos travel→抵達 deposit need 訊→recall）。
-	if sub.current_task == TeamData.TASK_HERALD and sub.task_reason == "help_call":
-		_tick_help_herald(state, sub, merge_queue)
-		return
+	# ★資訊網 B carrier：求援信使已 de-team（state.in_transit_letters 物件、_step_tick_letters 處理）——此處無 help_call 子隊。
 	# ★資訊網 S-scout：偵察斥候子隊（belief-pos travel→抵達查子民 need 帶回領主→recall）。
 	if sub.current_task == TeamData.TASK_SCOUT and sub.task_reason == "info_scout":
 		_tick_info_scout(state, sub, merge_queue)

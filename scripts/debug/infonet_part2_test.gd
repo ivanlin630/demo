@@ -71,8 +71,8 @@ func _test_dispatch_help_end_to_end() -> void:
 	Probe.reset(); Probe.enabled = true
 	FactionAISystem.new()._try_herald_side(state, m)
 	Probe.enabled = false
-	_ok(int(Probe.counts.get("help.herald_dispatched", 0)) == 1,
-		"深餓 resident(全 anon 無 named、名冊可達領主)→ side-dispatch anon herald（dispatched=%d）=修 dispatch=0+argmax-loss 根" % int(Probe.counts.get("help.herald_dispatched",0)))
+	_ok(int(Probe.counts.get("help.letter_dispatched", 0)) == 1,
+		"深餓 resident(全 anon、A③名冊解出領主 seat)→ side-dispatch B carrier letter（dispatched=%d）=修 dispatch=0+argmax-loss 根" % int(Probe.counts.get("help.letter_dispatched",0)))
 
 # ④ pop<2 → 不送（不掏空）。
 func _test_pop_gate() -> void:

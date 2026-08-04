@@ -41,7 +41,7 @@ func _herald_fired(state: WorldState, r: TeamData) -> int:
 	Probe.reset(); Probe.enabled = true
 	FactionAISystem.new()._try_herald_side(state, r)
 	Probe.enabled = false
-	return int(Probe.counts.get("help.herald_dispatched", 0))
+	return int(Probe.counts.get("help.letter_dispatched", 0))   # B carrier：herald→letter
 
 # ① 主 argmax 零改：求援/偵察 不再在 REGISTRY 主池（determinism-neutral 移除 loser）。
 func _test_argmax_neutral() -> void:
@@ -67,13 +67,14 @@ func _test_miniutil_mild_hunger_no() -> void:
 	var a := _mk(2.5 * 5.0 * ResourceSystem.FOOD_PER_PERSON_PER_DAY, {"求生欲": 1.0, "野心": 0.0, "義氣": 0.6})  # food_days≈2.5
 	_ok(_herald_fired(a[0], a[1]) == 0, "輕度餓(severity 低) → mini-util<0 不派（cost-benefit、不絕境不值送 anon）")
 
-# ⑤ throttle：已有 in-flight help_call 子隊 → 不重派。
+# ⑤ throttle：已有 in-flight letter → 不重派（B carrier 版）。
 func _test_throttle_one_inflight() -> void:
-	print("--- ⑤throttle 一隊一 in-flight ---")
+	print("--- ⑤throttle 一隊一 in-flight letter ---")
 	var a := _mk(0.2, {"求生欲": 1.0, "野心": 0.0, "義氣": 0.6}); var state: WorldState = a[0]; var r: TeamData = a[1]
-	FactionAISystem.new()._try_herald_side(state, r)   # 第一次派出
-	var fired2: int = _herald_fired(state, r)   # 第二次（已 in-flight）
-	_ok(fired2 == 0, "已 in-flight herald → 不重派（throttle 一隊一、鏡射 convoy；second dispatched=%d）" % fired2)
+	FactionAISystem.new()._try_herald_side(state, r)   # 第一次派出（append 進 in_transit_letters）
+	var fired2: int = _herald_fired(state, r)   # 第二次（已 in-flight letter）
+	_ok(fired2 == 0 and state.in_transit_letters.size() == 1,
+		"已 in-flight letter → 不重派（throttle 一隊一；second dispatched=%d letters=%d）" % [fired2, state.in_transit_letters.size()])
 
 # ⑥ scout side-dispatch：領主對子民 belief 陳舊 → anon scout 派出。
 func _test_scout_side_anon() -> void:
