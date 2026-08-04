@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "L3 focused specimen for QA已落地:rep床(config/infonet_faction_rich_rep.json,同8-deal那床)seed2024 45天,SPECIMEN_TEAM_ID=0,1,2,3,4,5(全6隊)產出2717 entries,attrition18.03%/trade.deal8/market_arrive17(與上輪verdict數字一致,重跑穩定)。specimen每筆含『做什麼』(task/target/winner_opt)+『想什麼』(candidates含每option util陣列+intent+threat)+『狀態』(faction_id/coin/food/leader_traits人格/pop等)——已檢視樣本entry確認直接含per-option util陣列(可讀商人motive→決策)+leader_traits(可讀人格差異T0慎重0.5野心0.75 vs T5求生欲0.9貪婪0.5等對照)+task/target逐tick(可讀travel/at_market/撮合鏈)，滿足QA要的『商人motive→訪市決策→travel→撮合→資訊帶回』故事素材+人格分化故事。已回systems handback:2026-08-05-measurer-to-systems-L3-specimen-verdict.md，純觀測,別下accept，QA讀後verdict ref回"
 ---
 
