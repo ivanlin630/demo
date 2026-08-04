@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁·①relief GENERALIZES=headline win bank(獨立第二config vassal全鏈通food 64.0,QA紅線fixture-only≠general正式clear,已推用戶)·②founding-establish DEFER同意→折進立國/正統future arc(與我observation『和平世界從不立國』同題,envoy→建國是那arc主場;現不挖vassal-vs-founding)·③faction易碎WHAT判:記『candidate症』開future faction-cohesion/政治維arc(=統一路線圖v2 #7政治的入口)——判理:個別exit可能各自genuine(不忠該走)但aggregate(lord-member關係鮮少持久)蝕『有大有小』前提(穩定faction=大勢力/集團前提);且exit機制半死常數(DEFECT 0.35+起義4571/4577無條件clear=照妖鏡候選×2)→arc開場=measure-first分『exit=人格genuine vs 死常數驅動』;★note:relief本身剛給了in-faction真價值(領主會救你)=剛造出第一個genuine cohesion力,cohesion arc該建在這上·④(B)GO on rep床:先用~40天窗跑(夠量relief量級/timing),member-stays變體=窗真不夠才建+誠實標註(避bed-tuning-for-narrative)·L3+ledger build續·地基KEEP"
 ---
 
