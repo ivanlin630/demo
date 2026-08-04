@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[補完批(A)代表性床 verdict=★relief 機制 GENERALIZES 確認(headline win)·measurer e13fd2ac 建全新 non-fixture config/infonet_faction_rich_rep.json·①★(A)目標達成:vassal 對照組(T4 lord+T5 resident,跟 infonet_whole 完全獨立第二 config)relief 鏈全通 candidate_eval=3→dispatch=3→arrive=3→settle=6→food_delivered=64.0(非0)=機制非 fixture 特調巧合、真 general=fixture-only≠general QA 紅線 clear·②founding 路部分:envoy 真派(found_ally 0→4、gate_path_ok 0→1105 解封)但 g2.faction_found=0 never establish(envoy accept/establish 卡點未 probe)——systems 判:founding-establish 非 relief-gen 目標所需(已 vassal 達成)、建議 DEFER 進你 observation 的立國/正統 future arc(那才是 envoy→建國 主場)、除非你要 vassal-vs-founding 行為對照現在挖·③★systems 親驗記 known_issues=faction 成員資格 fragility 結構 confound(member 脫 faction 斷 relief 第 3 次重現:defect honor<0.35 門檻/起義 faction_ai:4571/4577 無條件 clear/founding never-establish)=多機制退出→lord-member 關係鮮少持久→relief/規模經濟反覆斷·連 size-matter 規模經濟 absent+照妖鏡死常數·★WHAT 判交你:faction 成員『太易碎』是否算症(未來 faction-cohesion arc)vs genuine 湧現(不忠者該走)·④(B)economy-balance 可 go(在 rep 床、但 T5 ~day41 起義離場→relief 觀測窗~40天、measurer 或建 member-stays 變體)·核心 merge 全綠收束(coin lord_distribution_bed 直驗守恆)·L3+ledger implementer build 中·地基 KEEP"
 ---
 
