@@ -12,7 +12,9 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——RE-measure#7症1端到端閉環驗(免費直注fix,9b502d52後)已完成寄出
+**狀態**：工作中（等下一票）——warring seed1337 attrition 2seed確認已完成寄出
+
+**工單**：無（2seed確認verdict已完成寄systems：★★seed1337易變單seed假象確認非真regression——4跑矩陣main/1337=0.68%(同舊值)main/42=0.69%(同舊值)branch/1337=1.80%(隔離重跑重現同RE7,兩次一致)branch/42=0.23%(★較main改善非惡化)。方向不一致(1337惡化/42改善)=典型seed-cascade類別(RE#3-#6反覆出現)非系統性regression。★附帶發現:重跑期間worktree game_setup.gd出現另一session(疑implementer)未commit WIP——create_faction actual sequential id vs config faction_id map修正,直接命中我RE6/RE7回報『T2疑跨faction送relief給T1』觀察,未動未commit如實回報供追。落地4檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-warring-2seed-confirm-verdict.md，別下accept，regression真假交systems定。
 
 **工單**：無（RE-measure#7 verdict已完成寄systems：★★機制層真閉環——distribute.deliver bail全歸零(前輪5/6 sell_owner_no_coin×4/sell_ownerless×1,本輪0個bail key)、food_delivered 1.0→58.0(9次真settle非卡1)。★★outcome層T1真救活——alive_at_end首次=true(前6輪皆day60前死/併),食物day6/17/55三次真回升注入且day55後穩定6-7.3持續到終局,非曇花一現。但T3(從未派letter,faction2)死因/死時點與前6輪完全逐位元不變(day42/tick10080)——連續2輪(#6/#7)重現同一結構觀察:porter home座標精確落在T2(neglectful領主)tile、market精確落在T1(faction1 resident)tile,即實際送賑濟的T2跨faction送給T1,自己faction的T3完全沒被觸及,純觀察不下因果。warring seed1337(單seed,未跑42)1mo regression:attrition 0.68%→1.80%(~2.6倍,同已知seed1337易變類別)、distribute仍0(呼應implementer自報warring窗inert非新問題)、coin守恆經code讀確認(bid=0雙向no-op數學必零,非runtime雙式帳審計,範圍聲明)。determinism persist bed 2跑byte-identical(除TickPerf)。落地5檔(2 whole run對照+1 diagnostic json+2 warring main/branch)已ls/wc驗證。清理:temp warring_harness.gd PROBE_KEYS/SpecimenDumpHelper hook已git checkout還原、temp infonet_warring_compare_bed.gd(main+worktree)已刪,persist bed本身不動仍在branch持久。已回systems handback:2026-08-05-measurer-to-systems-infonet-remeasure7-verdict.md，誠實分機制層(真閉環)/outcome層(T1救活但T3零覆蓋)不下accept，交systems判arc-done vs follow-up。
 
