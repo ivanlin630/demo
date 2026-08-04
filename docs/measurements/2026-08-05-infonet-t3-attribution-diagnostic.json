@@ -1,0 +1,960 @@
+{
+  "diagnostic": "T3 死歸因 genuine 人格 vs masked gap（measure-first、只交真值）",
+  "faction_structure": {
+    "T0": 0,
+    "T1": -1,
+    "T2": -1,
+    "T3": -1
+  },
+  "inject_day": 20,
+  "injected": true,
+  "post_inject_convoy_to_t3": [],
+  "probe": {
+    "distribute.deliver": 12,
+    "distribute.dispatch": 9
+  },
+  "t2_scout_util_trace": [
+    {
+      "day": 1,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 2,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 3,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 4,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 5,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 6,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 7,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 8,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 9,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 10,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 11,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 12,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 13,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 14,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 15,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 16,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 17,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 18,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 19,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 20,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 21,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 22,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 23,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 24,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 25,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 26,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 27,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 28,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 29,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 30,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 31,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 32,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 33,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 34,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 35,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 36,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 37,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 38,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 39,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 40,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 41,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 42,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 43,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 44,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 45,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 46,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 47,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 48,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 49,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 50,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 51,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 52,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 53,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 54,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 55,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 56,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 57,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 58,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 59,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    },
+    {
+      "day": 60,
+      "mini_util": -0.8,
+      "scout_pmult": 0.312,
+      "scout_target_id": -1,
+      "staleness": 0,
+      "統領": 0.2,
+      "野心": 0.8
+    }
+  ],
+  "t3_help_util_trace": [
+    {
+      "day": 1,
+      "food_days": 1.18,
+      "help_pmult": 0.155,
+      "mini_util": -0.574,
+      "severity": 0.61,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 2,
+      "food_days": 0.48,
+      "help_pmult": 0.155,
+      "mini_util": -0.486,
+      "severity": 0.84,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 3,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 4,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 5,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 6,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 7,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 8,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 9,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 10,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 11,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 12,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 13,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 14,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 15,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 16,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 17,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 18,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 19,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 20,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 21,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 22,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 23,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 24,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 25,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 26,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 27,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 28,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 29,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 30,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 31,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 32,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 33,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 34,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 35,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 36,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 37,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 38,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 39,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    },
+    {
+      "day": 40,
+      "food_days": 0,
+      "help_pmult": 0.155,
+      "mini_util": -0.427,
+      "severity": 1,
+      "求生欲": 0.2,
+      "義氣": 0.3,
+      "野心": 0.9
+    }
+  ]
+}

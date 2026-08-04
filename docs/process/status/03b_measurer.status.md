@@ -12,7 +12,9 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——warring seed1337 attrition 2seed確認已完成寄出
+**狀態**：工作中（等下一票）——T3死歸因verdict已完成寄出
+
+**工單**：無（T3死歸因verdict已完成寄systems：★★不是masked gap,是第三機制——event_faction_defect(T3義氣0.3<DEFECT_HONOR_THRESHOLD 0.35,unrest_turns≥20)day0(tick~60)T3自行脫離faction1,member剩1(僅T2)→連鎖disband_faction→T2/T3 faction_id雙雙變-1全程60天。①T1仍救活confirm(food_delivered58→72,dispatch14,faction fix不退)。②(a)T3 herald mini-util數學閉式證明恆負(-0.427封頂severity=1仍負)但這是formula事實非實際路徑(實際_resolve_help_target在faction_id==-1就先擋,mini-util從未真被算)(b)T2 scout同理恆負且faction null-check直接擋(c)discriminator決定性:手動注入T3distress進T2.team_known仍0dispatch,繞過cadence直呼也0,直接call _distribute_candidates回傳[],追根=t2.faction_id當下=-1——非util失敗是faction根本不存在。★誠實結論:genuine-vs-masked判準本身不完全適用,是第三上游機制(faction defect,同樣T3自己低義氣觸發)把整條relief鏈structural prerequisite自己拆了連T2都被拖累。落地5檔已ls/wc驗證。清理:temp 2 beds已刪,(c)非純觀測(手動寫team_known)已聲明,期間發現另一session動別的檔案未觸碰。已回systems handback:2026-08-05-measurer-to-systems-t3-death-attribution-verdict.md，別下accept，是否動defect門檻交systems/blueprint判。
 
 **工單**：無（2seed確認verdict已完成寄systems：★★seed1337易變單seed假象確認非真regression——4跑矩陣main/1337=0.68%(同舊值)main/42=0.69%(同舊值)branch/1337=1.80%(隔離重跑重現同RE7,兩次一致)branch/42=0.23%(★較main改善非惡化)。方向不一致(1337惡化/42改善)=典型seed-cascade類別(RE#3-#6反覆出現)非系統性regression。★附帶發現:重跑期間worktree game_setup.gd出現另一session(疑implementer)未commit WIP——create_faction actual sequential id vs config faction_id map修正,直接命中我RE6/RE7回報『T2疑跨faction送relief給T1』觀察,未動未commit如實回報供追。落地4檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-warring-2seed-confirm-verdict.md，別下accept，regression真假交systems定。
 
