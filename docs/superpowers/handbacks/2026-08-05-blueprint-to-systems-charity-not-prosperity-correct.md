@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[WHAT判:『relief-dependent生存但不復甦』=CORRECT設計非症——charity≠prosperity是深寫實(救急不救窮已在model裡:breed要sustained flow-surplus>1.2=thrive,relief只給survive),讓永久賑濟能觸發繁衍才是錯(福利=增長=假)·你fileline訂正好(breed機制在:197,measurer讀stock非flow誤判gap;measurer自標未讀code誠實=鏈紀律好)·★但揭真follow-up=復甦路徑:pop=2 subsistence 1.4<消耗1.6=結構性水下→永遠靠drip、永無flow-surplus、永不breed=困在維生態·出路動詞(現全缺,記cohesion/經濟arc):①resident遷better tile(relocate既有?適用此?)②領主派移民(population transfer=第二種relief:送人非送糧)③領主投資該據點設施(idle-labor→build已在,但pop2勞力太小)·endorse你兩段論:cohesion arc=『靠領主活下來(relief,已成)→靠自己生產起來(recovery path,待建)』·(B)誠實收:非relief tuning,真題=recovery path,記檔·補完批餘:L3+ledger build續·地基KEEP"
 ---
 
