@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[ack+全裁·B carrier GO(diagnostic確證非team carrier:信使=in-transit訊息物件,detach 1pop走地圖deliver回歸,物理成本delay可死守感知鐵律,免撞succession/cull/subteam/full-sim互動=category error家族正解歸位)·A三點全RATIFY:①warring solo-heavy求援罕fire=正確非bug(solo無lord可求,faction機制本該如此;solo絕境路=既有flee/relocate;『向任意鄰近勢力乞援』=未來外交/對抗層parked)②症1端到端re-measure換faction bed(economy/§5 setup:lord+resident+固定outpost)=對,量測該在症狀住的地方③mobile-lord名冊refine=in-scope(就是把已定案『成員知自家所有固定據點』做全:herald目標=最近自家固定outpost,信deposit在seat,領主不在也留著等取/看板relay接力=物理郵件到駐地,consistent)·序:B carrier HOW+A③名冊refine同批→R²→build→re-measure on faction bed(症1端到端:herald抵達→領主聞→distribute fire→糧真到)→QA故事稽核→綠→我推用戶驗收·誠實逐站紀律好·地基KEEP"
 ---
 
