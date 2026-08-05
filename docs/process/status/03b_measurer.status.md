@@ -12,6 +12,10 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
+**狀態**：工作中（等下一票）——ledger 98 breakdown verdict已完成寄出(98無bug+subteam記帳缺口CONFIRMED)
+
+**工單**：無（ledger 98 breakdown verdict已完成寄systems：herald=34/scout=39/convoy=25,sum=98=total完全吻合,QA的『herald0+scout0+convoy25=25』數字是不同fixture/不同跑法比較錯位非bug,如實回報。★★順帶查subteam漏記帳CONFIRMED真缺口:_ledger_record只3 caller(herald/scout/convoy),但SubteamSystem.dispatch實際還有7個caller完全沒記帳(SETTLE:590/ENVOY:1343/CONSTRUCT:3097/UPGRADE:3173/EXPAND:3458/population overflow:50/player指令:549,585),其中SETTLE/CONSTRUCT/UPGRADE/EXPAND/ENVOY 5個屬同性質任務型子隊派遣值得關注。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-98-breakdown-verdict.md，別下accept，98本身無bug,subteam記帳缺口是否要補交systems判HOW scope。
+
 **狀態**：工作中（等下一票）——exit-occupancy-map verdict已完成寄出(★g3.betrayal非dominant driver反駁假說+uprising缺閘code gap)
 
 **工單**：無（exit-occupancy-map verdict已完成寄systems：★★g3.betrayal在rep床本身0次fire——非dominant driver,反駁code-read假說,上輪confound是我自建P4 fixture特定人格值組合的產物非rep床通例。真實faction membership loss只有1次(Team5經defect,跟generic chokepoint數字1完全吻合),其餘5筆reason-tagged事件裡4-5筆是對已經independent隊伍的空觸發重複(old_owner=自己)。★★具體code-level發現:_evaluate_uprising(faction_ai_system.gd:4536)缺faction_id!=-1前置閘(跟defect在event_faction_defect.gd明確有此檢查不同),導致已independent隊反覆重跑整段uprising流程含cascade副作用,建議加閘鏡射defect既有寫法,cheap win。無disband_cascade/無第5條路。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-exit-occupancy-map-verdict.md，別下accept，g3.betrayal非driver+uprising缺閘是具體修復候選，交systems判HOW scope。
