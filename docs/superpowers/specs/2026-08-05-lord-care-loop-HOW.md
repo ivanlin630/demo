@@ -19,8 +19,9 @@ proactive-care loop 讓好領主自然建恩義史→cohesion ①natural 分化�
 
 ### ①ledger 加 holding 條目類（第 4 kind）
 - 領主對**自家 faction 固定據點/村（holding）**記 `dispatch_ledger` 條目 kind="holding"（subject_ref=村 team_id、is_team=true）。與 herald/scout/convoy 別：**holding 非一次性派出、是持久監看**——`expected_return_tick` = 上次接觸 + **預期音訊週期**（機械估：依距離、零人格）；每次接觸（scout-check 帶回 / 村自身訊息達）**刷新** dispatched_tick（非 resolved-and-drop）。
-- 記帳點：領主 established 據點/收村時 append holding 條目（or lazy：`_step_contact_ledger` 對自家 faction holding 補建）。
+- 記帳點：領主 established 據點/收村時 append holding 條目。
 - 逾時偵測：`_step_contact_ledger` 對 holding 用共享 `_contact_elapsed_days`（belief last_tick / 自我 last-contact）> 預期→失聯 belief（村久無音訊）。**零 god-view**（只知逾時、不知村真況）。
+- **★必查項①決斷（reviewer R²）＝改 `_step_contact_ledger` 讓 holding kind 特殊處理（refresh-and-keep、非 lazy 補建）**：現有迴圈（`:4697-4719`）逾時→fire reaction + `resolved=true` + **不進 kept**（永久丟棄）＝對 herald/scout/convoy 一次性派出**正確**。**holding kind 例外**：逾時 fire care 反應（派 scout-check）後 **不 set resolved、不丟棄**——**refresh** `dispatched_tick=current_tick`（重置監看窗）+ **放回 kept**（持久監看續留）。即 `_step_contact_ledger` 迴圈內 `if kind=="holding": refresh+kept.append(entry)` 分支、非走 resolved-drop。（不選 lazy 補建：每 tick 重造 entry 雜訊+難追。）
 
 ### ②理不理＝領主人格秤（零死常數）
 - holding 逾時→**領主決定理不理**＝`_pick_contact_reaction` 家族的 care 變體（連續 util）：`care_util = overdue_ratio × 人格加權（責任/仁慈）`，vs `ignore_util = overdue_ratio × 人格加權（野心/疏忽）`——argmax（competing、同 react 家族結構、**禁 if/elif 死一條**）。
@@ -30,6 +31,7 @@ proactive-care loop 讓好領主自然建恩義史→cohesion ①natural 分化�
 - check→reuse scout side-dispatch（`_try_scout_side` / `dispatch_anon_messenger TASK_SCOUT` target=村 pos）。**真成本**（斥候佔人力、與軍偵搶）。
 - **★(a) firsthand 觀察 write（P4 缺口補）**：scout 抵村 co-located（既有感知 carve-out 合法）→ **讀現場可見**（村 food 存量 / population / 困頓跡象、**非私念非全知**）→ 合成 distress 觀察值（**不依賴村 post 買單**——傲村不開口也看得見；類 herald `runway-deficit synth`）→ 寫 belief（`received_buy_orders` proxy 訊 or distress belief、**帶時戳**）。
 - ＝現行 S-scout tick 的 firsthand read **擴**：原只讀「村 post 的買單」→ 加「村可見 food/pop 缺口」（posted-order-independent）。
+- **★★必查項②決斷（reviewer R²、最高風險=god-view 覆轍防線）**：firsthand 觀察 write **必須 inline 在 `_tick_info_scout` 既有 `if scout.tile_pos == target.tile_pos`（co-location）分支『裡面』**、**禁抽成外部/獨立可呼叫函式**（若抽 helper、該 helper 只能從此 co-location 分支內呼、絕不從別處呼）。理由：讀的資料（村 food/pop）與 distribute-descan 修掉的 `_resident_food_runway` god-view **幾乎一樣、差別只在物理 co-location gate**——co-location 分支內＝物理在場 firsthand（合法）、分支外＝god-view 直讀（違憲、換包裝復刻剛修好的違規）。**merge-gate 逐行核對呼叫點鎖在 co-location 分支內**（constitution gate + reviewer 逐行）。
 
 ### ④觀察 belief → distribute mini-util（餵已 merge 賑濟秤）
 - firsthand distress 觀察值入 belief → `_try_distribute_side`/`_distribute_candidates` 讀（received_buy_orders / distress belief）→ 領主 preemptive 賑濟（既有免費 gift convoy）→ relief settle → benefactor memory 累積（cohesion ①natural 地基）。
