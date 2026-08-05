@@ -1,6 +1,6 @@
 # 復甦路徑/村經濟可持續 — 給被救的村一條靠自己站起來的路（WHAT / vision）
 
-status: DRAFT（開場經濟底查 + R① → 才鎖）
+status: DRAFT（R① CLEAN 2026-08-05 + P3 訂正[領主投資=新 lord-side 機制非小改] → 等經濟底查一起鎖）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-05
 溯源：cohesion ①natural 四執行 blocker 同族收斂（race/target/need-gate/anon-exhaustion）→ 深根 = 村經濟不可持續；charity≠prosperity 判（relief=survive、thrive 要 flow-surplus）；用戶拍 A + 遷村令設計 2026-08-05。
@@ -23,7 +23,7 @@ date: 2026-08-05
 ## §4 前提（pending R①）
 - P1 沉沒成本秤既有（persist 統一 merged）可 reuse 於遷村決策。
 - P2 勞力池共址即產能（merged）→ 移民到村即效。
-- P3 idle-labor→build（merged）可延伸「領主出料指定村蓋」。
+- **P3（R① 訂正=真缺口）**：`idle_employ_value` **util 公式可 reuse 當計算基礎**，但「建設」option 的 target **寫死自隊自 tile**（options.gd:40-46）——「領主出料指定**別的村**蓋」**結構上不支援** → 需**新建 lord-side 機制**（類 distribute/herald 的 lord-side dispatch：材料指定+convoy 交付 → **目標村自己的建設決策**收到料才真蓋）、**非簡單延伸既有 option**。HOW 範圍照此評估。
 - P4 信使指令（資訊網 merged）可載「遷村令」類 directive。
 - P5 unrest/起義/叛離出口（cohesion merged）可承接「被迫遷怨」。
 
