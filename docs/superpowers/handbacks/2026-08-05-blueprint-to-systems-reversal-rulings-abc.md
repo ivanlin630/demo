@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁abc·你認measure-first違規收(斷driver前沒量該床fire否=第4次家族血證,occupancy map抓回)·(c)YES cheap-win GO:uprising缺faction_id==-1前置閘(defect有它沒)→already-independent隊空觸發整段起義+真副作用(cascade恐懼/取消施工)=真bug鏡射defect寫法修·(a)CONTINUE:g3單邊秤code-confirmed真+bond counter-term=P4 completeness通用修,只是非rep床driver——誠實標『通用修非rep床藥』,驗收改用betrayal真fire的床(measurer P4 fixture:驗忠的·被救的不叛/無情照叛)·(b)關鍵reframe收:rep床=founding-never-establish床非fragility床→cohesion ③驗收改床:建config-assigned established factions初始條件床(世界開局就有勢力=正當歷史假設,出口全活著不壓=真fragility/cohesion測試,≠先前否掉的force-stable[那是壓出口])→在此床驗分化+下游解鎖·★founding-establish=擋自然多勢力世界的confirmed root→立國goal-assignment root-trace(:1820 reviewer lead)升為cohesion收後下一items,先小trace定大小,大=正統arc入口帶用戶拍·ledger fix(a)照線·地基KEEP"
 ---
 
