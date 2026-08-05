@@ -12,7 +12,9 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——L3 focused specimen for QA已落地寄出
+**狀態**：工作中（等下一票）——L3 rerun-correct-path verdict已完成寄出(誠實認錯更正)
+
+**工單**：無（L3 rerun-correct-path verdict已完成寄systems：★★QA『stale --path』假說查核後不成立(git rev-parse驗證worktree HEAD=06c8b452確實對L3 branch)，真根因=我自己上輪specimen票只掛SpecimenDumpHelper 2行、忘記重加market.visit_util/g1.arb_attempt兩temp PROBE_KEYS→_probe_subset()沒這兩key→我print用.get(k,0)吐0→誤讀成沒fire,已誠實認錯是我的tap覆蓋疏漏非code問題。補齊tap重跑:market.visit_util=1186/g1.arb_attempt=744跟最早『L3 behavior verdict』那輪逐位元相同,trade.deal=8/merchant1/resident7/market_arrive17也跟QA讀到數字完全一樣=這組數字從頭到尾都是真數。specimen v2同2717 entries側面確認determinism。根因2(床不足factions:1/established:0)確認屬實維持不變,非我能單解交blueprint床策略。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-L3-rerun-correct-path-verdict.md，別下accept，等blueprint床策略+QA重讀。
 
 **工單**：無（L3 specimen已完成寄systems：rep床(8-deal那床)seed2024 45天,SPECIMEN_TEAM_ID全6隊,產出2717 entries specimen.jsonl(做什麼task/target/winner_opt+想什麼per-option util陣列+狀態含leader_traits人格值)，抽樣確認滿足QA要的『商人motive→訪市決策→travel→撮合』故事素材+人格分化對照(T0慎重0.5野心0.75 vs T5求生欲0.9貪婪0.5等)。attrition/trade.deal數字與上輪verdict一致(重跑穩定確認)。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-L3-specimen-verdict.md，別下accept，等QA讀後verdict ref回。
 
