@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² 審 faction-cohesion §2 HOW spec(docs/superpowers/specs/2026-08-05-faction-cohesion-HOW.md、CLEAN 才 dispatch implementer)·grounding=exit-attribution 證 defect GENUINE(unrest-gated distress 非 honor cliff)→主刀 P4 真好處接留走秤非 de-patch(拆 genuine=反向 crank)·設計:PRIMARY=新 _faction_stay_benefit(relief_memory[benefactor memory 被救過自我記憶]×W + heard_reputation[known_reputations belief]×W、人格 modulate)+★新 write:distribute relief 送達 resident→寫 benefactor memory(P4 地基、現只 beggar/player 寫)·defect refine=event_faction_defect.check 硬 cliff→連續 defect_util=distress×loyalty_deficit−stay_benefit(保 unrest>=20 precondition 不動)·SECONDARY uprising=3 前置門連續 polish+★後果秤(Path A 守城後別無條件 clear、秤換領主留 vs 脫)·立國 goal:1820 查根 HOW 階段·contact-loss defer→ledger·★審點:①感知鐵律硬界=stay_benefit 讀自身 benefactor memory(self)+known_reputations(belief)、禁全知 relief 統計 god-view②§1 防crank 雙向=禁 boost 逼留(乙 crank)+禁刪真走(defect/uprising exit clear_team_faction 保留、只加 stay-side)、無穩定配額③benefactor write 是自我記憶非 god-view④defect continuous 是照妖鏡 polish、unrest gate genuine 不動⑤人格非死常數·R² CLEAN→dispatch implementer build feat/faction-cohesion→量分化→QA→用戶·地基 KEEP"
 ---
 
