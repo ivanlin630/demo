@@ -80,14 +80,37 @@ func _initialize() -> void:
 		int(Probe.counts.get("cohesion.defect_fire", 0)), int(Probe.counts.get("cohesion.uprising_stay_faction", 0)),
 		int(Probe.counts.get("g3.betrayal", 0))])
 
+	# ★QA要求補tap(2026-08-05-qa-to-measurer-moderate-distress-verdict.md)：help.*/distribute.*鏈中間環節，
+	#   判「求援求助全程沒fire」vs「fire了但lord沒回應」vs「回應了但太慢」三種故事。
+	print("★help鏈(resident自身求援側)：help.severity_positive=%d help.target_unresolved=%d help.target_resolved=%d help.letter_dispatched=%d help.delivered=%d help.letter_timeout=%d help.letter_intercepted=%d help.need_deposited=%d" % [
+		int(Probe.counts.get("help.severity_positive", 0)), int(Probe.counts.get("help.target_unresolved", 0)),
+		int(Probe.counts.get("help.target_resolved", 0)), int(Probe.counts.get("help.letter_dispatched", 0)),
+		int(Probe.counts.get("help.delivered", 0)), int(Probe.counts.get("help.letter_timeout", 0)),
+		int(Probe.counts.get("help.letter_intercepted", 0)), int(Probe.counts.get("help.need_deposited", 0))])
+	print("★distribute鏈(lord回應側)：distribute.dispatch=%d distribute.unrest_add=%d distribute.unrest_reduce=%d distribute.mini_util(peak)=%.4f help.mini_util(peak)=%.4f" % [
+		int(Probe.counts.get("distribute.dispatch", 0)), int(Probe.counts.get("distribute.unrest_add", 0)),
+		int(Probe.counts.get("distribute.unrest_reduce", 0)), float(Probe.peaks.get("distribute.mini_util", 0.0)),
+		float(Probe.peaks.get("help.mini_util", 0.0))])
+
 	var dump: Dictionary = {
-		"diagnostic": "faction-cohesion moderate-distress分化床(ex-ante判準見config._doc)",
+		"diagnostic": "faction-cohesion moderate-distress分化床(ex-ante判準見config._doc)+QA要求help/distribute鏈補tap",
 		"marked_established": marked, "members": members,
 		"probe": {"distribute.deliver": Probe.counts.get("distribute.deliver", 0),
 			"cohesion.benefactor_write": Probe.counts.get("cohesion.benefactor_write", 0),
 			"cohesion.defect_fire": Probe.counts.get("cohesion.defect_fire", 0),
 			"cohesion.uprising_stay_faction": Probe.counts.get("cohesion.uprising_stay_faction", 0),
-			"g3.betrayal": Probe.counts.get("g3.betrayal", 0)},
+			"g3.betrayal": Probe.counts.get("g3.betrayal", 0),
+			"help.severity_positive": Probe.counts.get("help.severity_positive", 0),
+			"help.target_unresolved": Probe.counts.get("help.target_unresolved", 0),
+			"help.target_resolved": Probe.counts.get("help.target_resolved", 0),
+			"help.letter_dispatched": Probe.counts.get("help.letter_dispatched", 0),
+			"help.delivered": Probe.counts.get("help.delivered", 0),
+			"help.letter_timeout": Probe.counts.get("help.letter_timeout", 0),
+			"help.letter_intercepted": Probe.counts.get("help.letter_intercepted", 0),
+			"help.need_deposited": Probe.counts.get("help.need_deposited", 0),
+			"distribute.dispatch": Probe.counts.get("distribute.dispatch", 0),
+			"distribute.unrest_add": Probe.counts.get("distribute.unrest_add", 0),
+			"distribute.unrest_reduce": Probe.counts.get("distribute.unrest_reduce", 0)},
 	}
 	var f := FileAccess.open(OUT_PATH, FileAccess.WRITE)
 	if f != null:
