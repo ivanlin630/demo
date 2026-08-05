@@ -12,6 +12,10 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
+**狀態**：工作中（等下一票）——失聯帳本diversity re-measure verdict已完成寄出(★★★diversity CONFIRMED)
+
+**工單**：無（diversity re-measure verdict已完成寄systems：★★★diversity merge-blocker解除——purpose-built小床(4組dominant-trait領主,避開warring全床perf blocker,30天窗)28次逾時橫跨4隊,聚合分佈{redispatch:8,writeoff:3,defensive:10,rescue:7}全4類真fire,每隊選擇100%乾淨對應零交叉:team0(統領0.9)只選redispatch/team2(野心0.9)只選writeoff/team4(慎重0.9)只選defensive/team6(義氣0.9)只選rescue,完全命中預期映射,直接反駁reviewer疑慮(overdue_ratio共用乘數→argmax齊一)。★infra footnote:同fixture 60天版本(含/不含specimen)仍逾GODOT_TIMEOUT=1200,累計本arc第6次逾時,30天才過關,加重已知infra壓力證據供known_issues。specimen本輪仍未產(優先權重放拿到真diversity數字)。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-diversity-verdict.md，別下accept，diversity已解決交systems判是否足以解merge-blocker,infra/specimen是否需跟進。
+
 **狀態**：工作中（等下一票）——失聯帳本behavior量verdict已完成寄出(infra blocker+diversity未解)
 
 **工單**：無（失聯帳本behavior量verdict已完成寄systems：★infra blocker——warring_states.json全尺寸床連4次跑逾GODOT_TIMEOUT=1200(3mo/2mo/45天+specimen/45天無specimen皆逾時,非單次失誤),改用小床infonet_whole.json(10隊)60天才順利跑完,懷疑環境併發或branch perf,如實回報不下因果判斷。★小床結果:contact.ledger_add=35/overdue=7/全選redispatch,但關鍵限制=7次全來自同一team(team0,統領0.8最高)不同team_id數=1,樣本太窄無法回答reviewer真正關切的『不同人格隊是否選不同react類』(argmax對這一組人格值算對但diversity問題未解)。help.letter_dispatched=0/scout.dispatched=0(此seed下只convoy驅動)。specimen因infra blocker本輪未產出。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-behavior-verdict.md，別下accept，diversity問題需另建多dominant-trait對照fixture,infra blocker交systems評估。
