@@ -12,6 +12,10 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
+**狀態**：工作中（等下一票）——faction-cohesion behavior量verdict已完成寄出(★③下游解鎖未達成+①②被confound污染)
+
+**工單**：無（faction-cohesion behavior量verdict已完成寄systems：★★③下游解鎖(arc最重要目標)未達成——rep床(seed2024 45天)cohesion後仍collapse成factions:1/established:0,跟cohesion前數字幾乎一樣,relief長窗/L3 cross-faction domain沒解鎖,核心壞消息優先呈報。①②分化+该散照散本輪被confound污染未答:自建GoodLord(honor0.8)vs BadLord(honor0.15)matched-honor(0.34)member對照床,兩邊member都在day3/5經由完全無關的既有[Diplomacy]背叛(g3.betrayal)機制脫離faction,早於cohesion defect/uprising有機會操作(離隊時unrest恆0),之後兩邊走幾乎一模一樣獨立生存曲線(day45同步unrest=67/defect_util=0.53完全重合)——沒能測到P4 stay_benefit差異化,誠實回報非隱瞞,建議redesign fixture(避開G3 betrayal觸發)才能真正測①②。specimen本輪未產。落地3檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-cohesion-behavior-verdict.md，別下accept，③是核心壞消息優先看，①②需redesign補測，交systems判下一步。
+
 **狀態**：工作中（等下一票）——失聯帳本diversity re-measure verdict已完成寄出(★★★diversity CONFIRMED)
 
 **工單**：無（diversity re-measure verdict已完成寄systems：★★★diversity merge-blocker解除——purpose-built小床(4組dominant-trait領主,避開warring全床perf blocker,30天窗)28次逾時橫跨4隊,聚合分佈{redispatch:8,writeoff:3,defensive:10,rescue:7}全4類真fire,每隊選擇100%乾淨對應零交叉:team0(統領0.9)只選redispatch/team2(野心0.9)只選writeoff/team4(慎重0.9)只選defensive/team6(義氣0.9)只選rescue,完全命中預期映射,直接反駁reviewer疑慮(overdue_ratio共用乘數→argmax齊一)。★infra footnote:同fixture 60天版本(含/不含specimen)仍逾GODOT_TIMEOUT=1200,累計本arc第6次逾時,30天才過關,加重已知infra壓力證據供known_issues。specimen本輪仍未產(優先權重放拿到真diversity數字)。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-diversity-verdict.md，別下accept，diversity已解決交systems判是否足以解merge-blocker,infra/specimen是否需跟進。

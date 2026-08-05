@@ -1,0 +1,693 @@
+{
+  "defect_util_samples": [
+    {
+      "defect_util": 0.53,
+      "distress_pressure": 1,
+      "loyalty_deficit": 0.66,
+      "stay_benefit": 0.13,
+      "team": 1,
+      "unrest": 67
+    },
+    {
+      "defect_util": 0.53,
+      "distress_pressure": 1,
+      "loyalty_deficit": 0.66,
+      "stay_benefit": 0.13,
+      "team": 3,
+      "unrest": 67
+    }
+  ],
+  "diagnostic": "faction-cohesion P4分化量測（measure-first，只交真值）",
+  "members": {
+    "1": {
+      "alive_at_end": false,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 0,
+          "food": 149.7,
+          "pop": 10,
+          "task": "治理",
+          "unrest_turns": 0
+        },
+        {
+          "day": 2,
+          "faction": 0,
+          "food": 148.5,
+          "pop": 10,
+          "task": "治理",
+          "unrest_turns": 0
+        },
+        {
+          "day": 3,
+          "faction": -1,
+          "food": 148,
+          "pop": 10,
+          "task": "治理",
+          "unrest_turns": 0
+        },
+        {
+          "day": 4,
+          "faction": -1,
+          "food": 146.2,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 5,
+          "faction": -1,
+          "food": 143.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 6,
+          "faction": -1,
+          "food": 143.1,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 7,
+          "faction": -1,
+          "food": 141.9,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 8,
+          "faction": -1,
+          "food": 138.8,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 9,
+          "faction": -1,
+          "food": 136.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 10,
+          "faction": -1,
+          "food": 132.3,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 11,
+          "faction": -1,
+          "food": 129.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 12,
+          "faction": -1,
+          "food": 126.9,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 13,
+          "faction": -1,
+          "food": 122.5,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 14,
+          "faction": -1,
+          "food": 119.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 15,
+          "faction": -1,
+          "food": 114.5,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 16,
+          "faction": -1,
+          "food": 111.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 17,
+          "faction": -1,
+          "food": 108,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 18,
+          "faction": -1,
+          "food": 102.5,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 19,
+          "faction": -1,
+          "food": 98.3,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 20,
+          "faction": -1,
+          "food": 92.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 21,
+          "faction": -1,
+          "food": 88.3,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 22,
+          "faction": -1,
+          "food": 84.1,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 23,
+          "faction": -1,
+          "food": 77.8,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 24,
+          "faction": -1,
+          "food": 73.5,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 25,
+          "faction": -1,
+          "food": 66.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 26,
+          "faction": -1,
+          "food": 62,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 27,
+          "faction": -1,
+          "food": 57.2,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 28,
+          "faction": -1,
+          "food": 50,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 29,
+          "faction": -1,
+          "food": 45.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 30,
+          "faction": -1,
+          "food": 37.9,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 31,
+          "faction": -1,
+          "food": 33,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 32,
+          "faction": -1,
+          "food": 28,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 33,
+          "faction": -1,
+          "food": 20.1,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 34,
+          "faction": -1,
+          "food": 15,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 7
+        },
+        {
+          "day": 35,
+          "faction": -1,
+          "food": 7.1,
+          "pop": 10,
+          "task": "貿易",
+          "unrest_turns": 34
+        },
+        {
+          "day": 36,
+          "faction": -1,
+          "food": 1.7,
+          "pop": 10,
+          "task": "投靠",
+          "unrest_turns": 60
+        },
+        {
+          "day": 37,
+          "faction": -1,
+          "food": 8.7,
+          "pop": 10,
+          "task": "貿易",
+          "unrest_turns": 67
+        }
+      ],
+      "exit_day": 2,
+      "exit_tick": 500
+    },
+    "3": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 1,
+          "food": 151.6,
+          "pop": 10,
+          "task": "治理",
+          "unrest_turns": 0
+        },
+        {
+          "day": 2,
+          "faction": 1,
+          "food": 152.5,
+          "pop": 10,
+          "task": "治理",
+          "unrest_turns": 0
+        },
+        {
+          "day": 3,
+          "faction": 1,
+          "food": 151.7,
+          "pop": 10,
+          "task": "治理",
+          "unrest_turns": 0
+        },
+        {
+          "day": 4,
+          "faction": 1,
+          "food": 152.6,
+          "pop": 10,
+          "task": "治理",
+          "unrest_turns": 0
+        },
+        {
+          "day": 5,
+          "faction": -1,
+          "food": 151.7,
+          "pop": 10,
+          "task": "治理",
+          "unrest_turns": 0
+        },
+        {
+          "day": 6,
+          "faction": -1,
+          "food": 150.2,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 7,
+          "faction": -1,
+          "food": 148.5,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 8,
+          "faction": -1,
+          "food": 145.6,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 9,
+          "faction": -1,
+          "food": 143.5,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 10,
+          "faction": -1,
+          "food": 140.2,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 11,
+          "faction": -1,
+          "food": 138.2,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 12,
+          "faction": -1,
+          "food": 135.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 13,
+          "faction": -1,
+          "food": 131.1,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 14,
+          "faction": -1,
+          "food": 128.7,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 15,
+          "faction": -1,
+          "food": 123.8,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 16,
+          "faction": -1,
+          "food": 120,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 17,
+          "faction": -1,
+          "food": 116.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 18,
+          "faction": -1,
+          "food": 110.8,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 19,
+          "faction": -1,
+          "food": 106.9,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 20,
+          "faction": -1,
+          "food": 100.8,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 21,
+          "faction": -1,
+          "food": 97,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 22,
+          "faction": -1,
+          "food": 92.7,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 23,
+          "faction": -1,
+          "food": 86.3,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 24,
+          "faction": -1,
+          "food": 81.9,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 25,
+          "faction": -1,
+          "food": 75.2,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 26,
+          "faction": -1,
+          "food": 70.6,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 27,
+          "faction": -1,
+          "food": 65.9,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 28,
+          "faction": -1,
+          "food": 58.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 29,
+          "faction": -1,
+          "food": 53.2,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 30,
+          "faction": -1,
+          "food": 45.6,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 31,
+          "faction": -1,
+          "food": 40.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 32,
+          "faction": -1,
+          "food": 35.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 33,
+          "faction": -1,
+          "food": 27.6,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 34,
+          "faction": -1,
+          "food": 22.3,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 0
+        },
+        {
+          "day": 35,
+          "faction": -1,
+          "food": 14.4,
+          "pop": 10,
+          "task": "外交",
+          "unrest_turns": 1
+        },
+        {
+          "day": 36,
+          "faction": -1,
+          "food": 8.8,
+          "pop": 10,
+          "task": "投靠",
+          "unrest_turns": 27
+        },
+        {
+          "day": 37,
+          "faction": -1,
+          "food": 3.5,
+          "pop": 10,
+          "task": "貿易",
+          "unrest_turns": 53
+        },
+        {
+          "day": 38,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "貿易",
+          "unrest_turns": 67
+        },
+        {
+          "day": 39,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "投靠",
+          "unrest_turns": 67
+        },
+        {
+          "day": 40,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "投靠",
+          "unrest_turns": 67
+        },
+        {
+          "day": 41,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "投靠",
+          "unrest_turns": 67
+        },
+        {
+          "day": 42,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "貿易",
+          "unrest_turns": 67
+        },
+        {
+          "day": 43,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "投靠",
+          "unrest_turns": 67
+        },
+        {
+          "day": 44,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "貿易",
+          "unrest_turns": 67
+        },
+        {
+          "day": 45,
+          "faction": -1,
+          "food": 0,
+          "pop": 9,
+          "task": "投靠",
+          "unrest_turns": 67
+        }
+      ],
+      "exit_day": 4,
+      "exit_tick": 1000
+    }
+  }
+}
