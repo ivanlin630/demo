@@ -12,6 +12,10 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
+**狀態**：工作中（等下一票）——失聯帳本specimen for QA已落地寄出
+
+**工單**：無（specimen for QA已完成寄systems：同diversity床(seed4044 30天)+SpecimenDumpHelper掛全8隊,產出3961 entries,聚合數字與上輪diversity verdict逐位元相同確認determinism。specimen含每隊逐tick做什麼/想什麼(util陣列)/狀態(leader_traits人格值),可讓QA讀出team0(統領0.9)→redispatch/team2(野心0.9)→writeoff/team4(慎重0.9)→defensive/team6(義氣0.9)→rescue完整因果鏈。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-specimen-verdict.md，別下accept，等QA讀後verdict ref回。
+
 **狀態**：工作中（等下一票）——faction-cohesion behavior量verdict已完成寄出(★③下游解鎖未達成+①②被confound污染)
 
 **工單**：無（faction-cohesion behavior量verdict已完成寄systems：★★③下游解鎖(arc最重要目標)未達成——rep床(seed2024 45天)cohesion後仍collapse成factions:1/established:0,跟cohesion前數字幾乎一樣,relief長窗/L3 cross-faction domain沒解鎖,核心壞消息優先呈報。①②分化+该散照散本輪被confound污染未答:自建GoodLord(honor0.8)vs BadLord(honor0.15)matched-honor(0.34)member對照床,兩邊member都在day3/5經由完全無關的既有[Diplomacy]背叛(g3.betrayal)機制脫離faction,早於cohesion defect/uprising有機會操作(離隊時unrest恆0),之後兩邊走幾乎一模一樣獨立生存曲線(day45同步unrest=67/defect_util=0.53完全重合)——沒能測到P4 stay_benefit差異化,誠實回報非隱瞞,建議redesign fixture(避開G3 betrayal觸發)才能真正測①②。specimen本輪未產。落地3檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-cohesion-behavior-verdict.md，別下accept，③是核心壞消息優先看，①②需redesign補測，交systems判下一步。
