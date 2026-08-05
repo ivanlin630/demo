@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "established-bed-cohesion-reverify verdict:床已建+persist(commit f0a78d51,.worktrees/faction-cohesion)。g3 extension(03f03ce4)+uprising faction_id gate(00a40775)已於worktree HEAD landed(ledger subteam記帳缺口另案known_issues追蹤非此床blocker)→已跑正式30天re-measure(非只sanity)。②genuine-exit-preserved確認/③下游不秒崩確認/①分化INCONCLUSIVE(兩側distress member同day0退出,defect_fire對稱6:5,可能是distress fixture太極端讓餓死螺旋比社交機制快,也可能真model behavior非bug)。g3.betrayal本輪0未fire,(a)bond-counter驗測不到。★①因果結論待QA讀specimen(已送to:qa,2964 entries)verdict ref後才可鎖spec,別先鎖。地基KEEP"
 ---
 
