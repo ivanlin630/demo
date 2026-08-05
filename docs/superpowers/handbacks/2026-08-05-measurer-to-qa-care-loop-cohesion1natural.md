@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "cohesion①natural最終考(care-loop,feat/lord-care-loop a24d4c71)結果→QA故事稽核(specimen 2285 entries):用既有moderate-distress ex-ante判準床(D=5hex,44天calm buffer)測。★決策層乾淨分化(care/ignore argmax真依人格分化,lord0好領主全選care/lord2壞領主全選ignore,零交叉)——但★執行層斷:care.scout_dispatched=0(47次care決定,0次真派scout)。temp-print定位到_dispatch_care_scout的SubteamSystem.dispatch_anon_messenger回傳sid=-1(population始終12-15正常≥2,vpos/dist皆正確解析(21,16)/dist=5,唯一剩候選=AnonTierSystem.total_pop(parent)<1即anon池耗盡)。結果T1/T3仍同day44/45退出,跟care-loop前完全相同exit_day——這輪cohesion①natural的分化仍未展現,但這次卡點已精確定位到執行層(非決策層/非target-resolution/非race-timing),請讀specimen判斷是否為anon池耗盡+建議systems查AnonTierSystem.total_pop在此fixture下為何耗盡。"
 ---
 
