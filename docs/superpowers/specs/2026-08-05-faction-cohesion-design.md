@@ -1,6 +1,6 @@
 # 勢力凝聚力 — 拆死常數出口、真好處接進留走秤（WHAT / vision）
 
-status: DRAFT（§3 前提 pending R① + 開場 exit-attribution 量測 → 才鎖）
+status: DRAFT（R① CLEAN 2026-08-05：P1–P4 全坐實、P4 非誇大[留走決策零 benefit 讀取]、+3 道隱藏死常數門入刀口 → 等 exit-attribution 量測一起鎖）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-05
 溯源：faction-fragility 三擋驗收（relief 窗被起義斷 / rep 床崩單勢力 / L3 無 cross-faction domain）→ 用戶拍 A 提前；統一路線圖 #7 政治入口。
@@ -16,6 +16,7 @@ date: 2026-08-05
 - **拆死常數出口（de-patch，主刀）**：
   - 叛離：`義氣<0.35 → 自動走` 死門檻 → **「留 vs 走」人格加權 utility**（義氣/忠誠/野心/恐懼 modulate 真值）。
   - 起義：起義後**無條件清空**勢力關係 → 起義**後果也秤**（推翻領主 ≠ 必然脫離勢力；可能換領主留勢力——按人格與情勢）。
+  - **★R① 加碼（刀口擴）**：`_evaluate_uprising`（:4535-4553）自藏**三道額外死常數前置門**（`avg_loy>=0.2`／`unrest_turns<60`／`stress_sources<2`）——de-patch 刀口**必含這三道**（非只義氣/信義那組）；後段 stand/flee 只讀 4 項人格、零 benefit 信號（P4 同源）。
 - **真好處接進留走秤**：留下的期望價值讀**真機制**（relief 救援史/保護紀錄/經濟共享流量/秩序），不造新常數。
 - **立國卡點**（envoy accept/establish 從不成功）：**查根**；修否視根而定（若小=順修、若大=歸立國/正統 arc）。
 - **不在本 arc**：正統/名分/繼承（王朝 arc）、復甦路徑動詞（記檔的 cohesion 兩段論第二段、視量測需要拉入）。
@@ -23,7 +24,7 @@ date: 2026-08-05
 ## §3 現況前提（pending R① + 開場量測）
 - **P1** 叛離死門檻：`event_faction_defect`（義氣<0.35 OR 信義<0.35、`DEFECT_HONOR_THRESHOLD=0.35`）。
 - **P2** 起義無條件清：`faction_ai:4571/4577` faction 關係 clear（無秤）。
-- **P3** 立國 never-establish：envoy 真派（found_ally 0→4）但 `g2.faction_found=0`（accept/establish 卡點未 probe）。
+- **P3（R① 驗實+追深一層）** 立國 never-establish：`_declare_established`（:4498-4510）只在 `:1820「立國」in f.goals` 才被呼——**真卡點 = 「立國」goal 何時被賦予**（比 establish 更早一步）；HOW 階段查根。
 - **P4** 留下的真好處已存在但未接進留走決策：relief（generalizes 已證）/labor pool 共址/distribute——「留 vs 走」現況**不讀**這些。
 - **★開場量測（spec 鎖前）**：exit-attribution——床裡逐件叛離/起義 trace，分「人格 genuine（該走）vs 死常數驅動（假走）」＋各出口佔比 → grounding §2 的刀口。
 
