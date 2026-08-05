@@ -1476,6 +1476,10 @@ func _tick_one_letter(state: WorldState, letter: Dictionary) -> int:
 			_deliver_letter_to_lord(state, letter, lord)   # lord 在 seat → deposit 進 team_known
 		else:
 			_deliver_letter_to_board(state, letter, target_pos)   # lord 不在 → 掛 seat board（Part1 接力等取）
+		# ★失聯帳本清帳：letter 送達=成功→標母 ledger herald 筆 resolved（timeout/intercept 不清=沉默即資訊→母逾時反應）。
+		var origin_t: TeamData = state.teams.get(int(letter.get("origin_team_id", -1)))
+		if origin_t != null:
+			_ledger_resolve(origin_t, false, int(letter.get("spawn_tick", -1)))
 		Probe.bump("help.delivered"); return 1
 	return 0
 
@@ -1648,6 +1652,7 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		_try_herald_side(state, team)
 		_try_scout_side(state, team)
 		_try_distribute_side(state, team)
+		_step_contact_ledger(state, team)   # ★失聯帳本：掃逾時派出單位→失聯 belief→競爭 react_util 人格反應
 
 # ★資訊網 distribute side-dispatch（第三 side-action 型、blueprint sign-off）：領主憑聽到的子民 need（belief）+ 人格
 # 賑濟 → 派 distribute convoy（directive、母隊 body 照覓食、脫主 argmax 免跟覓食競爭輸=同 herald/scout 家族）。
@@ -1698,6 +1703,7 @@ func _try_herald_side(state: WorldState, team: TeamData) -> void:
 		"spawn_tick": state.world.current_tick, "timeout": _founding_timeout(dist), "speed": 1,
 	})
 	Probe.bump("help.letter_dispatched")
+	_ledger_record(team, "herald", state.world.current_tick, false, state.world.current_tick, dist, tgt["pos"])   # ★失聯帳本記帳(herald=非team letter、subject_ref=spawn_tick、last_pos=target)
 
 # 偵察 side：領主 + 子民 belief 陳舊 + mini-util>0 → 派 anon 斥候（亦 anon 化、不再 named subteam）。
 func _try_scout_side(state: WorldState, team: TeamData) -> void:
@@ -1723,6 +1729,7 @@ func _try_scout_side(state: WorldState, team: TeamData) -> void:
 	if sid != -1:
 		_equip_envoy_mounts(state, team, state.teams[sid])
 		Probe.bump("scout.dispatched")
+		_ledger_record(team, "scout", sid, true, state.world.current_tick, dist, tgt["pos"])   # ★失聯帳本記帳(scout=team subject、last_pos=target)
 
 # in-flight throttle：已有 task_reason 的 side-messenger 子隊 → 不重派（鏡射 convoy 一隊一）。
 func _has_inflight_info(state: WorldState, team: TeamData, reason: String) -> bool:
@@ -3362,6 +3369,7 @@ func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool
 		"terminus_team_id": int(td.get("terminus_team_id", -1)),   # ★診斷用（candidate 意圖收貨方，對照 settle 實際 tile owner 定錯位）
 	}
 	Probe.bump("convoy.dispatch")
+	_ledger_record(team, "convoy", sub_id, true, state.world.current_tick, _hex_dist(team.tile_pos, target), target)   # ★失聯帳本記帳(convoy=team subject、last_pos=target)
 	if String(td.get("kind", "")) == "distribute": Probe.bump("distribute.dispatch")   # SLICE B tap
 	Probe.bump("convoy.fetch")
 	if Probe.enabled:
@@ -4648,6 +4656,120 @@ func _has_memory_type(person: PersonData, type: String) -> bool:
 			return true
 	return false
 
+# ★失聯帳本 共享原語（母↔子一套、整併義務核心、防第 4 散落點）：觀察者對 subject 多久沒消息（days）。
+# team subject → best_estimate.last_tick（既有 belief provenance；last_tick=-1→未接觸回 -1）；
+# 非-team dispatch(letter) → dispatched_tick（自我 dispatch-log）。★零 god-view：只知「我多久沒消息」、非對方真死活/位置。
+func _contact_elapsed_days(state: WorldState, observer_id: int, is_team: bool, subject_ref: int, dispatched_tick: int) -> int:
+	if is_team:
+		var snap: Dictionary = BeliefSystem.best_estimate(state, observer_id, subject_ref)
+		var lt: int = int(snap.get("last_tick", -1))
+		if lt == -1:
+			return -1   # 從未接觸
+		return (state.world.current_tick - lt) / WorldState.TICKS_PER_DAY
+	return (state.world.current_tick - dispatched_tick) / WorldState.TICKS_PER_DAY
+
+# ★失聯帳本：往返機械估（真移速 DERIVED、非 fire-crank）——往返路程 + 1 日 service。
+func _round_trip_ticks(dist: int) -> int:
+	return dist * MovementSystem.BASE_MOVE_TICKS * 2 + WorldState.TICKS_PER_DAY
+
+# 記帳（各 dispatch spawn 後呼；既有 dispatch 路加一行、非新機制）。
+func _ledger_record(team: TeamData, kind: String, subject_ref: int, is_team: bool, dispatched_tick: int, dist: int, last_known_pos: Vector2i = Vector2i(-1, -1)) -> void:
+	team.dispatch_ledger.append({
+		"kind": kind, "subject_ref": subject_ref, "is_team": is_team,
+		"dispatched_tick": dispatched_tick,
+		"expected_return_tick": dispatched_tick + _round_trip_ticks(dist),
+		"last_known_pos": last_known_pos,   # ★rescue 用：失聯單位 last-known pos(dispatch target、team 可再走 belief 刷新)
+		"resolved": false,
+	})
+	if Probe.enabled: Probe.bump("contact.ledger_add")
+
+# 清帳（單位回歸/交付確認 hook 呼）：標對應筆 resolved（team subject by subject_ref、letter by dispatched_tick）。
+func _ledger_resolve(team: TeamData, is_team: bool, ref_or_tick: int) -> void:
+	for entry in team.dispatch_ledger:
+		if bool(entry.get("resolved", false)): continue
+		if bool(entry.get("is_team", false)) != is_team: continue
+		var match_key: int = int(entry.get("subject_ref", -1)) if is_team else int(entry.get("dispatched_tick", -1))
+		if match_key == ref_or_tick:
+			entry["resolved"] = true
+			return
+
+# ★失聯偵測 + 競爭 react_util 人格反應（母→子、cadence per-team）。
+func _step_contact_ledger(state: WorldState, team: TeamData) -> void:
+	if team.dispatch_ledger.is_empty():
+		return
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	var kept: Array = []
+	for entry in team.dispatch_ledger:
+		if bool(entry.get("resolved", false)):
+			continue   # 已清帳 → 丟棄
+		var disp: int = int(entry.get("dispatched_tick", 0))
+		var expected: int = int(entry.get("expected_return_tick", disp))
+		var expected_days: int = maxi((expected - disp) / WorldState.TICKS_PER_DAY, 1)
+		var elapsed_days: int = _contact_elapsed_days(state, team.team_id, bool(entry.get("is_team", false)), int(entry.get("subject_ref", -1)), disp)
+		if elapsed_days < 0:   # team subject belief 未建（剛派）→ 用自我 dispatch elapsed 兜底
+			elapsed_days = (state.world.current_tick - disp) / WorldState.TICKS_PER_DAY
+		var overdue_ratio: float = float(elapsed_days) / float(expected_days)
+		if overdue_ratio <= 1.0:
+			kept.append(entry)   # 未逾時 → 續等
+			continue
+		# ★逾時 → 失聯 belief（零 god-view：只標「我逾時未收消息」、不知對方真死活）
+		entry["lost"] = true
+		if Probe.enabled: Probe.bump("contact.overdue")
+		# ★競爭 react_util 候選集（4 類各算 util、argmax；★禁 if/elif 人格特質分支揀死一條=偽 util 死門檻）
+		var react: String = _pick_contact_reaction(overdue_ratio, lv)
+		_apply_contact_reaction(state, team, entry, react)
+		entry["resolved"] = true   # 反應後結案（一次反應、不重複觸）
+	team.dispatch_ledger = kept
+
+# 競爭 react_util：4 反應各 = overdue_ratio × 人格加權（連續、非門檻），argmax 選最高。
+# ★genuine 結構命門：各自 util 進同一候選集 argmax，非人格特質 if/elif 揀死一條（同求援/偵察 mini-util 候選集模式）。
+func _pick_contact_reaction(overdue_ratio: float, lv: Dictionary) -> String:
+	var util: Dictionary = {
+		"redispatch": overdue_ratio * (0.3 + float(lv.get("統領", 0.5)) * 0.7),   # 統領重資產→再派查明
+		"defensive":  overdue_ratio * (0.3 + float(lv.get("慎重", 0.5)) * 0.7),   # 多疑→防禦準備
+		"rescue":     overdue_ratio * (0.3 + float(lv.get("義氣", 0.5)) * 0.7),   # 重情→救援意圖 flag
+		"writeoff":   overdue_ratio * (0.3 + float(lv.get("野心", 0.5)) * 0.7),   # 冷酷/野心→註銷當沒了
+	}
+	var best_k: String = "writeoff"; var best_u: float = -1.0
+	for k in util:
+		if float(util[k]) > best_u:
+			best_u = float(util[k]); best_k = k
+	return best_k
+
+const CONTACT_VIGILANCE_DURATION: int = WorldState.TICKS_PER_DAY * 3   # 失聯警覺期（defensive 反應→暫時警覺）
+
+# 失聯單位 last-known pos（★零 god-view）：team-subject→belief best_estimate pos(fresher)、缺則 last_known_pos；letter→last_known_pos(dispatch target)。
+func _lost_unit_pos(state: WorldState, team: TeamData, entry: Dictionary) -> Vector2i:
+	if bool(entry.get("is_team", false)):
+		var be: Dictionary = BeliefSystem.best_estimate(state, team.team_id, int(entry.get("subject_ref", -1)))
+		var p = be.get("tile_pos", Vector2i(-1, -1))
+		if p != Vector2i(-1, -1):
+			return p
+	return entry.get("last_known_pos", Vector2i(-1, -1))
+
+func _apply_contact_reaction(state: WorldState, team: TeamData, entry: Dictionary, react: String) -> void:
+	match react:
+		"redispatch":   # 再派查明（接既有 side-action 動詞、不新建）——lost scout→再探、lost herald→再求援
+			if String(entry.get("kind", "")) == "scout":
+				_try_scout_side(state, team)
+			else:
+				_try_herald_side(state, team)
+			if Probe.enabled: Probe.bump("contact.react_redispatch")
+		"defensive":    # ★真 consumer：失聯→謹慎，餵既有 threat perception（暫時 caution 提升→既有 threat_threshold 降→備戰/防衛更易 fire）。
+			team.contact_vigilant_until = state.world.current_tick + CONTACT_VIGILANCE_DURATION   # 非新旋鈕:入既有 caution→threat_threshold 路
+			if Probe.enabled: Probe.bump("contact.react_defensive")
+		"rescue":       # ★真 consumer：reuse scout side-dispatch 派去查失聯單位 last-known pos（資訊收集 fit、救援隊 verb 照 defer）。
+			var lost_pos: Vector2i = _lost_unit_pos(state, team, entry)
+			if lost_pos != Vector2i(-1, -1) and team.population >= 2:
+				var rid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
+					TeamData.TASK_SCOUT, "contact_rescue", lost_pos, int(entry.get("subject_ref", -1)),
+					{"scout_mother": team.team_id, "timeout": _founding_timeout(_hex_dist(team.tile_pos, lost_pos))})
+				if rid != -1:
+					_equip_envoy_mounts(state, team, state.teams[rid])
+					if Probe.enabled: Probe.bump("contact.react_rescue")
+		"writeoff":     # 註銷當沒了（resolved=true 已在 caller）
+			if Probe.enabled: Probe.bump("contact.react_writeoff")
+
 func _evaluate_owner_contact(state: WorldState, team: TeamData) -> void:
 	if not _is_resident_team(state, team): return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
@@ -4655,12 +4777,12 @@ func _evaluate_owner_contact(state: WorldState, team: TeamData) -> void:
 	if owner_id == -1 or not state.teams.has(owner_id):
 		_trigger_defection_evaluation(state, team, "owner_gone")
 		return
-	var snap: Dictionary = BeliefSystem.best_estimate(state, team.team_id, owner_id)
-	var last_tick: int = int(snap.get("last_tick", -1))
-	if last_tick == -1:
+	var snap: Dictionary = BeliefSystem.best_estimate(state, team.team_id, owner_id)   # owner leader 異動邏輯仍需 snap
+	# ★失聯帳本：子→母 失聯感知走共享原語 _contact_elapsed_days（與母→子 ledger 同一套，防第 4 散落點）。
+	var days_since: int = _contact_elapsed_days(state, team.team_id, true, owner_id, -1)
+	if days_since == -1:
 		return   # 從未接觸（剛建立可能）
-	var days_since: int = (state.world.current_tick - last_tick) / WorldState.TICKS_PER_DAY
-	if days_since > CONTACT_TIMEOUT_DAYS:   # gate-ok: world-mechanic: CONTACT_TIMEOUT_DAYS cadence
+	if days_since > CONTACT_TIMEOUT_DAYS:   # gate-ok: world-mechanic: CONTACT_TIMEOUT_DAYS cadence（本批不動門檻、留照妖鏡批）
 		_trigger_defection_evaluation(state, team, "no_contact")
 		return
 	# owner leader 異動 → 7 天緩衝

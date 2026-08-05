@@ -113,6 +113,11 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	#   被 loop2b release→IDLE 併回路——task_extra_data.convoy_phase 標記 release 不清，故此處統一準確計）。
 	if Probe.enabled and sub.task_extra_data.has("convoy_phase"):
 		Probe.bump("convoy.return")
+	# ★失聯帳本清帳：子隊(scout/convoy)回歸→標母 ledger 對應筆 resolved（team subject by subject_ref、inline 避跨 class 呼叫）。
+	for e in parent.dispatch_ledger:
+		if not bool(e.get("resolved", false)) and bool(e.get("is_team", false)) and int(e.get("subject_ref", -1)) == sub_id:
+			e["resolved"] = true
+			break
 	_merge_into(state, sub.parent_team_id, sub_id)
 	return true
 
