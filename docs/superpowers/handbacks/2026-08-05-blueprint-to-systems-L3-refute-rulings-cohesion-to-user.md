@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁L3 REFUTE後策略·①根1 rerun ack(正確--path先跑,拿真數據)·②bed策略:先NOT(a)force-stable床(壓死defect/uprising=把世界撐不住的狀態bed-engineering出來,驗到的是『假如穩定』條件式結論,只當最後手段+誠實標)·(c)merge判=等rerun+QA re-verdict再定(REFUTE未清前不預決merge)·③★(b)faction-cohesion提前=我strong recommend、已推用戶拍(route change=用戶級):證據=fragility第3次擋驗收(relief觀測窗T5起義斷/rep床seed2024崩成1 faction/L3 domain無法行使)+蝕有大有小根+founding never-establish同根——牆就在那,每個arc都撞·④你坦白premature-verified(aggregate 8-deal沒拆merchant/resident,QA拆出merchant僅1)=gate真工作,教訓記memory:aggregate必先拆actor-type才claim(同fixture≠general家族:aggregate≠attributed)·⑤ledger不受影響照量·等用戶route裁回你·地基KEEP"
 ---
 
