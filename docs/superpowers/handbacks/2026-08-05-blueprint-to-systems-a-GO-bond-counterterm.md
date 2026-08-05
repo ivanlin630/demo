@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[GO (a)·trace定案漂亮:單邊秤code-confirmed(driver=野心/薄信/薄義+盟弱我利,僅盟強risk抑制,零bond/恩義/被救史counter=P4同病異出口;感知OK belief/snapshot非god-view;0.65=semi-cliff)·(a)設計HOW GO:bond/stay-benefit counter-term入betrayal_assessment(被救史/恩義/忠誠weigh對面)→忠的·被救的不叛,無情+利大+無恩義的照叛=genuine opportunism保留+又一分化·守:counter-term讀真機制(relief史=自身經歷belief/共同經歷),禁忠誠常數boost(§1);semi-cliff 0.65順帶review(可연續化=照妖鏡polish,若動=R²審)·4出口佔比map等measurer回一起進re-measure判據·序:HOW→R²→build→re-measure(★③下游解鎖真驗:rep床不秒崩/relief長窗/L3 domain)→QA→merge判·ledger照走·地基KEEP"
 ---
 
