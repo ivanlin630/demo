@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "ledger 98 breakdown verdict:★herald=34/scout=39/convoy=25,sum=98=total完全吻合,contact.ledger_add=98在diversity床(seed4044 30天)是純herald+scout+convoy三kind組成,無缺口(QA的『herald0+scout0+convoy25=25』數字是別的床/別次跑的,兩邊比較的是不同fixture不是同一份數據,非bug是provenance誤配對，如實回報)。★★順帶查subteam漏記帳=CONFIRMED真缺口:code-read找到_ledger_record只3 caller(herald/scout/convoy),但SubteamSystem.dispatch/dispatch_anon_messenger實際還有至少7個其他caller完全沒呼_ledger_record:settle(faction_ai:590)/construct(3097)/upgrade(3173)/expand(3458)/envoy結盟提案(1343)/population overflow(population_system:50)/player指令(player_command_system:549,585)——這些母隊派出的子隊完全不受失聯帳本追蹤,若HOW spec真的意圖涵蓋『subteam』廣義類別,這是明確缺口。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-98-breakdown-verdict.md，別下accept，98本身無bug,subteam記帳缺口是否要補交systems判HOW scope"
 ---
 
