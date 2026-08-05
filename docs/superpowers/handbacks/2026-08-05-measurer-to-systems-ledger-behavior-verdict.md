@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "失聯帳本behavior量verdict:★infra blocker先報——warring_states.json全尺寸床連4次跑逾GODOT_TIMEOUT=1200(3mo/2mo/45天+specimen/45天無specimen皆逾時,非我單次失誤是系統性),改用小床infonet_whole.json(10隊)才在60天內順利跑完,強烈懷疑是warring全床本身在此branch/環境perf重(不只我這輪的問題)或機器同時多session競爭資源,非機制本身問題,如實回報供你們評估是否要查perf或改用小床當標準驗收床。★小床結果(60天,infonet_whole.json,convoy.dispatch=14驅動):contact.ledger_add=35/contact.overdue=7/全部7次選redispatch,但★關鍵限制=全部7次逾時事件來自同一team(team0,統領0.8最高特質),不同team_id數=1——樣本太窄,無法回答reviewer真正關切的『不同人格的隊是否選不同react類』(需要多個不同dominant-trait的隊各自逾時才能測),本輪只證實:單一隊(統領最高)argmax正確選中redispatch(跟手算一致,非bug),但diversity問題本輪未能回答。help.letter_dispatched=0/scout.dispatched=0(此branch/seed下未fire,只convoy驅動了7次逾時)。specimen因infra blocker本輪未產出(擱置)。純觀測,自建溫度探針已revert。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-behavior-verdict.md，別下accept，diversity問題+infra perf問題皆需後續補測，交systems判"
 ---
 
