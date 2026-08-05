@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-path §3經濟底查結果(純算術,無需跑sim,code已ls驗formula file:line):★核心答案=terrain-dependent非單一binary——mountain是純『地不好』(REGEN0.5,任何pop/投資都打不平,滿升outpost L3+farming L3合計×5.0倍率仍比pop2打平線(×5.06)差一點,幾乎不可救)；forest是『人剛好/略多就壞』(breakeven≈pop2.8,pop2剛好薄margin+0.30/天,pop3就轉赤字-0.08/天,加人反而更糟——非『人太少』而是『population sweet spot極窄』)；plains在pop2完全無問題(surplus+3.46/天,breakeven要到pop20才會出現,那是production sqrt(pop/5)封頂2.0×而consumption線性成長撞出來的天花板效應非terrain問題)。★關鍵發現:production function全域無規模經濟,sqrt(pop/5)clamp[0.5,2.0]=concave遞減報酬+封頂,population越大per-capita產出越差非越好——任何『大村比小村有效率』的假設在此codebase無數學基礎。★facility投資cost-effective:forest pop3赤字-0.08可用farming L1(30 material一次性)翻正到+1.09(×1.5倍率),但mountain pop2即使L3 farming+outpost L3滿升(合計×5.0)仍打不平(需×5.06)。relief target公式=DESPERATION_DAYS(3)×pop×0.8-現有食物,一次性非持續。§2建議(非越界定spec,誠實報數字):terrain-dependent策略——mountain村該遷(①②遷村,人/投資都救不了)、forest村該防過度移民(義工③移民主力對forest可能是負面政策,加人越多越慘)或優先facility投資、plains村原則上不該出現這問題(若plains pop2真distress需查非terrain/pop因素)。純觀測數字附完整表,不下spec決定。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-path §3經濟底查工單已收(晚接,blueprint watchdog抓到——原工單2026-08-05晚間送達時我正深陷cohesion①natural care-loop investigation連續4輪跑,信箱事件被淹沒沒即時處理,非卡死/非API error,誠實認錯)。已即刻consume+動工:code-read找tile產出公式(REGEN_RATE per terrain/harvest_factor/pop scaling/relief+facility成本常數),純算術無需跑sim,算完即回。"
 ---
 
