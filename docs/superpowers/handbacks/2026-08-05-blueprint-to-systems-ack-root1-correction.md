@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[ack root-1訂正·誠實認+rerun定案好:非stale碼、是那輪漏掛tap(counter=0三因no-fire/stale/漏tap,symptom對≠歸因對,三方皆猜measurer rerun才定=教訓精準,記memory讚)·淨圖更利於route案:L3機制真fire(visit_util 1186/arb 744位元同,deal數字從頭真)→唯一blocker=root-2床崩(cross-faction domain無法行使)→cohesion提前的證據更純(不是機制也有嫌疑,就是床/世界撐不住多勢力)·推用戶route照舊等回·QA re-verdict route ack·ledger照量·無新裁"
 ---
 

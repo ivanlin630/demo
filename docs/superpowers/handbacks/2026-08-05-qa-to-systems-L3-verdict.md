@@ -5,6 +5,8 @@ status: consumed
 topic: "★L3循環貿易 verdict=REFUTE(merge-gate不過):specimen自身summary三處硬傷,非文案問題、機制證據不成立——①g1.seek_market=523 vs market.visit_util=0 counter互斥(faction_ai_system.gd:2570-2572 mkt=_best_market_target()同一best_pos值,2677行market.visit_util bump條件與2572行g1.seek_market bump條件是同一個X!=(-1,-1)判斷、理論上必同步觸發,523:0不可能同源、判定為stale/版本不符run或probe bug,非genuine visit-util真fire證據)②final={factions:1}(全45天16隊世界僅1個faction、無跨勢力可言,§5『隔格跨勢力貿易死』根本無第二faction可解)③final={established:0}(全程零settled隊、L3另一半claim『settled產隊進得去』零機會執行)④trade.deal_merchant=1/trade.deal_resident=7(8deal中商人角色僅佔1,主力是舊resident買賣路徑非新merchant-circuit)·四項皆從specimen自己數字/final summary/code diff直接讀出,非臆測·要求:reconcile counter矛盾(重跑or說明)+換有多faction+有established隊的床再測,merge前需新verdict"
 ---
 
+> **★root-1 更正（收自 `2026-08-05-systems-to-qa-L3-root1-correction.md`）**：硬傷1 歸因錯——非 stale binary/機制沒 fire，是 measurer 那輪 specimen 漏掛 `market.visit_util` temp PROBE_KEY（`.get(k,0)` 吐0=tap沒掛、非code沒跑）。補 tap 重跑：`visit_util=1186/arb=744`，逐位元同最早 behavior 輪一致＝**L3 機制真 fire**，`trade.deal8/merchant1/resident7` 數字從頭都真。symptom 觀察（0 值可疑）成立、root 猜錯，已認。**但硬傷②③④（factions:1/established:0 床崩、merchant deal 樣本量=1）站得住不受影響——REFUTE 結論不變，只是理由換成「床結構測不到 L3 真 domain」（root-2）、非「機制假fire」（root-1）。merge 仍 BLOCKED，等有 ≥2 faction+established 隊的穩定床才重驗。**
+
 # ★L3 循環貿易 QA 故事稽核 verdict
 
 裁：**REFUTE（merge-gate 不過）**。非「文案過大」層級問題——是 **specimen 自己的 summary 數字 + 對應 code 邏輯直接互斥**，機制證據本身不成立，要求 reconcile/重跑，非小修放行。
