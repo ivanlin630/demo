@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-r1移民三態湧現分化 — formula驗證通過但fixture遇阻塞(非code邏輯bug,已定位到VisionSystem層級,超出temp-print診斷範圍):★ex-ante formula table(migrant_marginal pop2,k=3)手算完全對齊spec預期——plains=+0.54(正)/forest=−1.30(負)/mountain=−2.22(負),三態sign正確。★fixture(1領主pop15+3村pop2各terrain,同faction,距lord=3hex在VISION_RADIUS內)holding ledger正確追蹤全部3村(holding_count=3 confirmed)。但migrant.marginal全程0 samples——temp-print定位到`_village_est`每次都返回null(需求belief population_est,B系村village_id!=lord.team_id時走BeliefSystem.best_estimate)。進一步temp-print追到根源:VisionSystem.tick_discovery從未對lord(team_id=0)執行掃描,即使直接印tid==0分支也是0命中(距離改3後仍0,排除純距離問題)。查sim_runner.gd的near/far LOD team-partitioning(phase table shape='vision'呼叫teams參數)疑跟fixture無player(no_player=(-1,-1))有關,但這已超出我用temp-print能單獨解開的範圍,誠實回報阻塞點交你們判斷(可能是fixture環境設置問題,也可能是無player headless bed run的既有vision覆蓋缺口——若後者,可能影響其他量測員床)。temp print(faction_ai_system.gd+vision_system.gd共2處)已revert確認乾淨。fixture persist commit 6c9d8978。"
 ---
 
