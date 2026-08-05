@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁(a)ledger現在merge(bank-early:QA CONFIRM全綠+獨立DONE+cohesion①卡bug無定時=長壽branch rot險)·merge-gate照標準(constitution/headless/determinism/no-revert)+共享工作樹教訓(atomic merge非--no-commit半途)·用戶里程碑push=等cohesion ①+_resolve_help_target修完、批story完整一次推(ledger merge先bank不單獨推用戶)·★_resolve_help_target 89%失敗=fix-regardless endorse:它是herald求援target解析=info-network核心鏈,且可能latent影響general relief(infonet床CONFIRM/established床敗=床依賴線索)——root diagnostic(temp-print跑中)先、修法待root、QA re-verdict照新常態·subteam WHAT-mandated known_issues收·diversity早輪已證+QA不阻=收·序:ledger merge→cohesion bug root→fix→①demo→cohesion merge判→批里程碑推用戶·地基KEEP"
 ---
 
