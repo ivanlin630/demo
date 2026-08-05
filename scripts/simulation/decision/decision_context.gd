@@ -109,6 +109,8 @@ var intent_target: int = -1
 # 融合 threat（序1 溶入）：鏡射舊 _evaluate_threat 掃描（raw score over ALL discovered，
 # 含 approach/power 非純 hostility；≠ ctx.threat 的 reputation-filtered _max_threat）。
 # threat option（備戰/迎戰/求和）的 applicable gate + eval 讀此。
+# ★失聯帳本 defensive：警覺期威脅門檻降幅（≈半個 caution×0.3 範圍、meaningful vigilance、非 fire-crank）。
+const CONTACT_VIGILANCE_THREAT_DROP: float = 0.15
 var threat_react: float = 0.0
 var threat_id: int = -1
 var threat_pos: Vector2i = Vector2i(-1, -1)
@@ -235,6 +237,9 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	# 融合 threat：鏡射舊 _evaluate_threat 掃描（raw score over ALL discovered，含 approach/power 非純 hostility）。
 	var _caution: float = float(c.leader_values.get("慎重", 0.5))
 	c.threat_threshold = ThreatAssessment.THREAT_BASE_THRESHOLD + _caution * 0.3
+	# ★失聯帳本 defensive 真 consumer：警覺期內→威脅門檻降（餵既有 threat gate、備戰/防衛更易 fire；非新平行旋鈕）。
+	if team.contact_vigilant_until > state.world.current_tick:
+		c.threat_threshold = maxf(c.threat_threshold - CONTACT_VIGILANCE_THREAT_DROP, 0.0)
 	var _best_t: float = 0.0
 	var _best_id: int = -1
 	for tid in state.team_discovered.get(team.team_id, []):

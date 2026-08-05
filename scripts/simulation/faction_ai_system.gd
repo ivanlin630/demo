@@ -1703,7 +1703,7 @@ func _try_herald_side(state: WorldState, team: TeamData) -> void:
 		"spawn_tick": state.world.current_tick, "timeout": _founding_timeout(dist), "speed": 1,
 	})
 	Probe.bump("help.letter_dispatched")
-	_ledger_record(team, "herald", state.world.current_tick, false, state.world.current_tick, dist)   # ★失聯帳本記帳(herald=非team letter、subject_ref=spawn_tick)
+	_ledger_record(team, "herald", state.world.current_tick, false, state.world.current_tick, dist, tgt["pos"])   # ★失聯帳本記帳(herald=非team letter、subject_ref=spawn_tick、last_pos=target)
 
 # 偵察 side：領主 + 子民 belief 陳舊 + mini-util>0 → 派 anon 斥候（亦 anon 化、不再 named subteam）。
 func _try_scout_side(state: WorldState, team: TeamData) -> void:
@@ -1729,7 +1729,7 @@ func _try_scout_side(state: WorldState, team: TeamData) -> void:
 	if sid != -1:
 		_equip_envoy_mounts(state, team, state.teams[sid])
 		Probe.bump("scout.dispatched")
-		_ledger_record(team, "scout", sid, true, state.world.current_tick, dist)   # ★失聯帳本記帳(scout=team subject)
+		_ledger_record(team, "scout", sid, true, state.world.current_tick, dist, tgt["pos"])   # ★失聯帳本記帳(scout=team subject、last_pos=target)
 
 # in-flight throttle：已有 task_reason 的 side-messenger 子隊 → 不重派（鏡射 convoy 一隊一）。
 func _has_inflight_info(state: WorldState, team: TeamData, reason: String) -> bool:
@@ -3369,7 +3369,7 @@ func _dispatch_convoy(state: WorldState, team: TeamData, td: Dictionary) -> bool
 		"terminus_team_id": int(td.get("terminus_team_id", -1)),   # ★診斷用（candidate 意圖收貨方，對照 settle 實際 tile owner 定錯位）
 	}
 	Probe.bump("convoy.dispatch")
-	_ledger_record(team, "convoy", sub_id, true, state.world.current_tick, _hex_dist(team.tile_pos, target))   # ★失聯帳本記帳(convoy=team subject)
+	_ledger_record(team, "convoy", sub_id, true, state.world.current_tick, _hex_dist(team.tile_pos, target), target)   # ★失聯帳本記帳(convoy=team subject、last_pos=target)
 	if String(td.get("kind", "")) == "distribute": Probe.bump("distribute.dispatch")   # SLICE B tap
 	Probe.bump("convoy.fetch")
 	if Probe.enabled:
@@ -4673,11 +4673,12 @@ func _round_trip_ticks(dist: int) -> int:
 	return dist * MovementSystem.BASE_MOVE_TICKS * 2 + WorldState.TICKS_PER_DAY
 
 # 記帳（各 dispatch spawn 後呼；既有 dispatch 路加一行、非新機制）。
-func _ledger_record(team: TeamData, kind: String, subject_ref: int, is_team: bool, dispatched_tick: int, dist: int) -> void:
+func _ledger_record(team: TeamData, kind: String, subject_ref: int, is_team: bool, dispatched_tick: int, dist: int, last_known_pos: Vector2i = Vector2i(-1, -1)) -> void:
 	team.dispatch_ledger.append({
 		"kind": kind, "subject_ref": subject_ref, "is_team": is_team,
 		"dispatched_tick": dispatched_tick,
 		"expected_return_tick": dispatched_tick + _round_trip_ticks(dist),
+		"last_known_pos": last_known_pos,   # ★rescue 用：失聯單位 last-known pos(dispatch target、team 可再走 belief 刷新)
 		"resolved": false,
 	})
 	if Probe.enabled: Probe.bump("contact.ledger_add")
@@ -4735,6 +4736,17 @@ func _pick_contact_reaction(overdue_ratio: float, lv: Dictionary) -> String:
 			best_u = float(util[k]); best_k = k
 	return best_k
 
+const CONTACT_VIGILANCE_DURATION: int = WorldState.TICKS_PER_DAY * 3   # 失聯警覺期（defensive 反應→暫時警覺）
+
+# 失聯單位 last-known pos（★零 god-view）：team-subject→belief best_estimate pos(fresher)、缺則 last_known_pos；letter→last_known_pos(dispatch target)。
+func _lost_unit_pos(state: WorldState, team: TeamData, entry: Dictionary) -> Vector2i:
+	if bool(entry.get("is_team", false)):
+		var be: Dictionary = BeliefSystem.best_estimate(state, team.team_id, int(entry.get("subject_ref", -1)))
+		var p = be.get("tile_pos", Vector2i(-1, -1))
+		if p != Vector2i(-1, -1):
+			return p
+	return entry.get("last_known_pos", Vector2i(-1, -1))
+
 func _apply_contact_reaction(state: WorldState, team: TeamData, entry: Dictionary, react: String) -> void:
 	match react:
 		"redispatch":   # 再派查明（接既有 side-action 動詞、不新建）——lost scout→再探、lost herald→再求援
@@ -4743,12 +4755,18 @@ func _apply_contact_reaction(state: WorldState, team: TeamData, entry: Dictionar
 			else:
 				_try_herald_side(state, team)
 			if Probe.enabled: Probe.bump("contact.react_redispatch")
-		"defensive":    # 防禦準備 belief flag（零 god-view、本批不建防禦動詞）
-			team.task_extra_data["contact_defensive"] = true
+		"defensive":    # ★真 consumer：失聯→謹慎，餵既有 threat perception（暫時 caution 提升→既有 threat_threshold 降→備戰/防衛更易 fire）。
+			team.contact_vigilant_until = state.world.current_tick + CONTACT_VIGILANCE_DURATION   # 非新旋鈕:入既有 caution→threat_threshold 路
 			if Probe.enabled: Probe.bump("contact.react_defensive")
-		"rescue":       # 救援意圖 flag（本批不建救援隊動詞、待 blueprint sign-off side-action 新型）
-			entry["rescue_flag"] = true
-			if Probe.enabled: Probe.bump("contact.react_rescue")
+		"rescue":       # ★真 consumer：reuse scout side-dispatch 派去查失聯單位 last-known pos（資訊收集 fit、救援隊 verb 照 defer）。
+			var lost_pos: Vector2i = _lost_unit_pos(state, team, entry)
+			if lost_pos != Vector2i(-1, -1) and team.population >= 2:
+				var rid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
+					TeamData.TASK_SCOUT, "contact_rescue", lost_pos, int(entry.get("subject_ref", -1)),
+					{"scout_mother": team.team_id, "timeout": _founding_timeout(_hex_dist(team.tile_pos, lost_pos))})
+				if rid != -1:
+					_equip_envoy_mounts(state, team, state.teams[rid])
+					if Probe.enabled: Probe.bump("contact.react_rescue")
 		"writeoff":     # 註銷當沒了（resolved=true 已在 caller）
 			if Probe.enabled: Probe.bump("contact.react_writeoff")
 
