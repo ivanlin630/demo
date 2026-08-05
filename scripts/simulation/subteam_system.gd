@@ -67,6 +67,34 @@ func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 # ★資訊網 Part2：派 anon 1 人信使（≠subteam，無 named leader）——村莊派個人求救。
 # leader_id=-1（無 named；population getter 不計 phantom→pop=anon 1）；只搬 1 anon pop、★零 resource carry
 # （R² tracking：餓 resident 任何 res 流失都在乎，信使空手；不沿 dispatch() proportional-split）。gate 母隊 pop>=2。
+# ★復甦 R1 移民：從 parent 抽 k anon → 遷徙 subteam 朝 target 村（抵達 _tick_migrant 併入 target=P2 共址即產能）。
+# 鏡射 dispatch_anon_messenger（leader_id=-1、空手），差別=k pop、TASK_MIGRATE、reason="migrate"。真成本（人離源村）。
+func dispatch_anon_migrants(state: WorldState, parent_id: int, k: int,
+		move_target: Vector2i, order_target_id: int) -> int:
+	var parent: TeamData = state.teams.get(parent_id)
+	if parent == null or k <= 0 or parent.population < 2:
+		return -1
+	if AnonTierSystem.total_pop(parent) < k:
+		return -1   # anon 不夠 k（不掏空）
+	var sub := TeamData.new()
+	sub.team_id          = _next_team_id(state)
+	sub.tile_pos         = parent.tile_pos
+	sub.current_task     = TeamData.TASK_MIGRATE
+	sub.task_priority    = TaskArbiter.PRIO_DISPATCH
+	sub.task_reason      = "migrate"
+	sub.move_target      = move_target
+	sub.order_target_id  = order_target_id
+	sub.leader_id        = -1
+	sub.task_start_tick  = state.world.current_tick
+	sub.task_extra_data  = {"migrant_target": order_target_id}
+	state.set_readiness(sub, parent.readiness, "migrant_init")
+	state.set_team_tags(sub, [TeamData.TAG_SUBTEAM], "migrant_init")
+	AnonTierSystem.transfer_proportional(parent, sub, k)   # 抽 k anon（空手、零 resource）
+	state.create_team(sub)
+	state.set_subteam_parent(sub, parent_id)
+	state.set_team_faction(sub, parent.faction_id)
+	return sub.team_id
+
 func dispatch_anon_messenger(state: WorldState, parent_id: int, task: String, reason: String,
 		move_target: Vector2i, order_target_id: int, extra_data: Dictionary) -> int:
 	var parent: TeamData = state.teams.get(parent_id)
