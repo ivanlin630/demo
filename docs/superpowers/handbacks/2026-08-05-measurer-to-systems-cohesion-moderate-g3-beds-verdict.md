@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "cohesion驗收包補2床verdict:★床2(g3 betrayal-fires)乾淨PASS+QA CONFIRM(T1 saved stay_benefit0.47未叛/T3 neglected stay_benefit0.0225真叛,in-situ live cadence獨立驗證,已persist commit c1542a26)。★床1(moderate-distress①分化)仍INCONCLUSIVE但證據更強化:ex-ante物理判準(D=5hex,物理最短relief延遲≈2.02天)+44天calm buffer,結果distribute.deliver全程0次relief嘗試(兩lord皆然)T1/T3同day44/45退出——這輪排除了『distance太遠/food太極端』的簡單解釋,浮現更根本假說:relief dispatch可能純reactive非proactive,一旦觸發defect已經贏,不論之前多少calm buffer(已送to:qa specimen判故事)。已persist commit 46803ca8。②③早前established床已bank。cohesion驗收包目前狀態:③②✓ g3✓ ①仍未證(兩輪獨立fixture同一結論,可能是機制特性非fixture問題,建議systems判斷是否需要看relief觸發邏輯本身,而非再調fixture參數)。地基KEEP"
 ---
 
