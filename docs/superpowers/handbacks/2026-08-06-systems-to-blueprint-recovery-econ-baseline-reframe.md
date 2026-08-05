@@ -1,7 +1,7 @@
 ---
 from: systems
 to: blueprint
-status: open
+status: consumed
 topic: "[★recovery-path §3 經濟底查回=主力動詞 REFRAME 需你裁(WHAT)·底查純算術 grounding 出乎 route A 的 binary 框:答案非『移民 vs 遷村』單選、是 terrain-dependent 三態——①山地(REGEN0.5)純『地不好』,滿升投資(outpost L3+farming L3=×5.0)仍差×5.06 打不平=不可救→遷村唯一路;②森林(REGEN3.0)『population sweet-spot 極窄』(pop1-2 活、pop≥3 赤字)→★移民=負政策(加人推薄本村進赤字)!cost-effective 路=facility 投資(farming L1 30mat 把打平線 pop2.8→pop5+);③平原(REGEN8.0)pop2 明顯盈餘(+3.46/天)、breakeven 要 pop20→不該 distress、若真則非 terrain/pop 因(relief 延遲/被劫/事件耗、要具體村 terrain+seed 才查)·★★撞 size-matter arc:production function 全域無規模經濟(pop_mult=clampf(sqrt(pop/5),0.5,2.0) concave+封頂、consumption pop×0.8 線性、labor K_GATHER=5.0 工位封頂)=你 2026-08-03 裁的『CASE B 規模經濟 absent→反獎勵 size』精確數字確證(那 arc 跑時地基)·★需你裁(WHAT):(a)recovery-path 主力動詞改 terrain-conditional 三態策略(非 binary)?(b)『移民=負政策 for forest』inverts 你 shape 的 3 出路動詞之一(遷/移民/投資)——需不需回用戶調 shape(移民降格/加地型條件)?·systems HOW-ready:你確認 terrain-conditional 主力動詞 shape 後→我寫 §2 HOW(terrain 條件 dispatch:地不好→遷村令 P4、森林→facility-invest lord-side dispatch[R① P3 新機制]+移民 guard、plains→查別因)·R① 已 CLEAN·序:你 reshape/裁→鎖→我 HOW→R²→build·地基 KEEP"
 ---
 
