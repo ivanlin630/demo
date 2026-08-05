@@ -1596,7 +1596,31 @@ func _tick_info_scout(state: WorldState, scout: TeamData, merge_queue: Array) ->
 		# 刷新領主對子民 belief（firsthand fresh：scout 是領主 agent 親見）
 		BeliefSystem.record_claim(state, mother.team_id, target_id, mother.team_id, "親見",
 			{"tile_pos": target.tile_pos}, 1.0, false)
-		_deposit_help_need(state, target_id, mother)   # 帶子民 food 買單回領主 team_known（同 herald deposit 機制）
+		_deposit_help_need(state, target_id, mother)   # 帶子民 post 的 food 買單回領主 team_known（同 herald deposit 機制）
+		# ★★care-loop (a) firsthand 觀察 write（P4 核心）——★必查項②：此段**必須 inline 在 co-location 分支內**，
+		#   禁抽外部/獨立可呼叫函式。讀村 live food/pop 缺口與 distribute-descan 修掉的 _resident_food_runway god-view
+		#   幾乎一樣、差別只在此 co-location gate（物理在場 firsthand=合法；分支外讀=違憲換皮復刻）。
+		#   傲村不 post 買單也看得見缺口（posted-order-independent）→ synth distress 入領主 team_known（帶時戳、去重）。
+		var _vburn: float = maxf(float(target.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+		var _vfdays: float = ResourceSystem.effective_food(state, target) / _vburn
+		if _vfdays < DecisionTerms.DESPERATION_DAYS:
+			var _deficit: int = maxi(int(ceil((DecisionTerms.DESPERATION_DAYS - _vfdays) * _vburn)), 1)
+			var _oid: int = CARE_FIRSTHAND_ORDER_BASE + target_id   # 合成 distress order_id（per-村去重穩定）
+			if not state.team_known.has(mother.team_id):
+				state.team_known[mother.team_id] = []
+			var _dup: bool = false
+			for _m in state.team_known[mother.team_id]:
+				if _m.type == "order_buy" and int(_m.params.get("order_id", -1)) == _oid: _dup = true; break
+			if not _dup:
+				var _msg := MessageData.new()
+				_msg.id = state.global_messages.size(); _msg.type = "order_buy"
+				_msg.origin_team_id = target_id; _msg.origin_tick = state.world.current_tick; _msg.strength = 1.0
+				_msg.is_distorted = false   # firsthand co-location 親見=honest
+				_msg.params = {"order_id": _oid, "res": "food", "qty": _deficit,
+					"origin_team": target_id, "origin_pos": target.tile_pos, "expire_tick": state.world.current_tick + 2 * WorldState.TICKS_PER_DAY}
+				state.global_messages.append(_msg)
+				state.team_known[mother.team_id].append(_msg)
+				if Probe.enabled: Probe.bump("care.firsthand_distress")
 		Probe.bump("scout.info_returned")
 		_recall_envoy(state, scout); return
 	var predicted: Vector2i = PathSystem.predict_intercept(state, scout, target)
@@ -1652,7 +1676,8 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		_try_herald_side(state, team)
 		_try_scout_side(state, team)
 		_try_distribute_side(state, team)
-		_step_contact_ledger(state, team)   # ★失聯帳本：掃逾時派出單位→失聯 belief→競爭 react_util 人格反應
+		_ensure_holding_ledger(state, team)   # ★care-loop：領主 ensure 自家村 holding 監看條目（once-guard）
+		_step_contact_ledger(state, team)   # ★失聯帳本+care：掃逾時→失聯 belief→競爭 react_util / holding care/ignore
 
 # ★資訊網 distribute side-dispatch（第三 side-action 型、blueprint sign-off）：領主憑聽到的子民 need（belief）+ 人格
 # 賑濟 → 派 distribute convoy（directive、母隊 body 照覓食、脫主 argmax 免跟覓食競爭輸=同 herald/scout 家族）。
@@ -4740,6 +4765,53 @@ func _ledger_resolve(team: TeamData, is_team: bool, ref_or_tick: int) -> void:
 			entry["resolved"] = true
 			return
 
+const CARE_FIRSTHAND_ORDER_BASE: int = 2_000_000_000   # firsthand 觀察 synth distress order_id base（避撞真 order_id + letter synth 1e9；per-村去重）
+
+# ★care-loop ①：領主對自家 faction resident 村 ensure holding ledger 條目（once-guard、非每 tick 噪音 lazy-rebuild）。
+# 記帳點：faction 領主 cadence（info_side_dispatch）ensure-once——每村僅 append 一次（guard by 現有 holding subject）。
+# 零 god-view：dist 讀 belief best_estimate pos（無 belief→dist0 base 週期）、team.tile_pos=自身。
+func _ensure_holding_ledger(state: WorldState, team: TeamData) -> void:
+	if team.faction_id == -1:
+		return
+	var f = state.factions.get(team.faction_id)
+	if f == null or f.leader_team_id != team.team_id:
+		return   # 只領主監看自家村
+	var tracked: Dictionary = {}
+	for e in team.dispatch_ledger:
+		if String(e.get("kind", "")) == "holding":
+			tracked[int(e.get("subject_ref", -1))] = true
+	for mid in f.member_team_ids:
+		if mid == team.team_id or tracked.has(mid):
+			continue
+		var m: TeamData = state.teams.get(mid)
+		if m == null or not FactionAISystem.is_resident_static(state, m):
+			continue
+		var bpos = BeliefSystem.best_estimate(state, team.team_id, mid).get("tile_pos", Vector2i(-1, -1))
+		var dist: int = _hex_dist(team.tile_pos, bpos) if bpos != Vector2i(-1, -1) else 0
+		_ledger_record(team, "holding", mid, true, state.world.current_tick, dist, bpos)   # holding=持久監看(subject=村)
+
+# ★care-loop ②反應：care 決定→派 scout 查村（reuse scout 機具、reason=info_scout→_tick_info_scout 走 firsthand）。
+func _dispatch_care_scout(state: WorldState, team: TeamData, entry: Dictionary) -> void:
+	if team.population < 2 or _has_inflight_info(state, team, "info_scout"):
+		return   # throttle 一隊一 scout（真成本、佔人力）
+	var vid: int = int(entry.get("subject_ref", -1))
+	var vpos = BeliefSystem.best_estimate(state, team.team_id, vid).get("tile_pos", entry.get("last_known_pos", Vector2i(-1, -1)))
+	if vpos == Vector2i(-1, -1):
+		return   # 無 belief/last-known pos → 查不了
+	var dist: int = _hex_dist(team.tile_pos, vpos)
+	var sid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
+		TeamData.TASK_SCOUT, "info_scout", vpos, vid,
+		{"scout_mother": team.team_id, "timeout": _founding_timeout(dist)})
+	if sid != -1:
+		_equip_envoy_mounts(state, team, state.teams[sid])
+		if Probe.enabled: Probe.bump("care.scout_dispatched")
+
+# ★care-loop ②秤：care(責任/仁慈) vs ignore(野心/疏忽) competing util（禁 if/elif 死一條、零死常數）。
+func _pick_care_reaction(overdue_ratio: float, lv: Dictionary) -> String:
+	var care_u: float = overdue_ratio * (0.3 + float(lv.get("義氣", 0.5)) * 0.5 + float(lv.get("統領", 0.5)) * 0.2)
+	var ignore_u: float = overdue_ratio * (0.3 + float(lv.get("野心", 0.5)) * 0.7)
+	return "care" if care_u >= ignore_u else "ignore"
+
 # ★失聯偵測 + 競爭 react_util 人格反應（母→子、cadence per-team）。
 func _step_contact_ledger(state: WorldState, team: TeamData) -> void:
 	if team.dispatch_ledger.is_empty():
@@ -4760,9 +4832,22 @@ func _step_contact_ledger(state: WorldState, team: TeamData) -> void:
 			kept.append(entry)   # 未逾時 → 續等
 			continue
 		# ★逾時 → 失聯 belief（零 god-view：只標「我逾時未收消息」、不知對方真死活）
-		entry["lost"] = true
 		if Probe.enabled: Probe.bump("contact.overdue")
-		# ★競爭 react_util 候選集（4 類各算 util、argmax；★禁 if/elif 人格特質分支揀死一條=偽 util 死門檻）
+		# ★holding kind（領主對自家村持久監看）＝例外：care/ignore 人格秤 → refresh-and-keep（非 resolved-drop）。
+		if String(entry.get("kind", "")) == "holding":
+			var care: String = _pick_care_reaction(overdue_ratio, lv)   # competing care/ignore（禁 if/elif 死一條）
+			if care == "care":
+				_dispatch_care_scout(state, team, entry)   # 派 scout 查村（reuse scout 機具、真成本）
+				if Probe.enabled: Probe.bump("contact.care_check")
+			else:
+				if Probe.enabled: Probe.bump("contact.care_ignore")   # 疏忽→村照樣餓死叛離=正確分化
+			# ★refresh-and-keep：重置監看窗（dispatched+expected）、放回 kept（持久監看續留、非一次性丟）。
+			entry["dispatched_tick"] = state.world.current_tick
+			entry["expected_return_tick"] = state.world.current_tick + (int(entry["expected_return_tick"]) - disp)
+			kept.append(entry)
+			continue
+		# 一次性 unit（herald/scout/convoy）：4 類競爭 react_util argmax + resolved-drop。
+		entry["lost"] = true
 		var react: String = _pick_contact_reaction(overdue_ratio, lv)
 		_apply_contact_reaction(state, team, entry, react)
 		entry["resolved"] = true   # 反應後結案（一次反應、不重複觸）

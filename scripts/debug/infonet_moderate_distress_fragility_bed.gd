@@ -92,6 +92,13 @@ func _initialize() -> void:
 		int(Probe.counts.get("distribute.unrest_reduce", 0)), float(Probe.peaks.get("distribute.mini_util", 0.0)),
 		float(Probe.peaks.get("help.mini_util", 0.0))])
 
+	# ★care-loop鏈(工單2026-08-05-systems-to-measurer-care-loop-cohesion-1natural.md)：
+	#   holding overdue→care/ignore秤→scout dispatch→co-location firsthand→synth distress order→distribute pickup。
+	print("★care-loop鏈(領主主動照護)：contact.overdue=%d contact.care_check=%d contact.care_ignore=%d care.scout_dispatched=%d care.firsthand_distress=%d" % [
+		int(Probe.counts.get("contact.overdue", 0)), int(Probe.counts.get("contact.care_check", 0)),
+		int(Probe.counts.get("contact.care_ignore", 0)), int(Probe.counts.get("care.scout_dispatched", 0)),
+		int(Probe.counts.get("care.firsthand_distress", 0))])
+
 	var dump: Dictionary = {
 		"diagnostic": "faction-cohesion moderate-distress分化床(ex-ante判準見config._doc)+QA要求help/distribute鏈補tap",
 		"marked_established": marked, "members": members,
@@ -110,7 +117,13 @@ func _initialize() -> void:
 			"help.need_deposited": Probe.counts.get("help.need_deposited", 0),
 			"distribute.dispatch": Probe.counts.get("distribute.dispatch", 0),
 			"distribute.unrest_add": Probe.counts.get("distribute.unrest_add", 0),
-			"distribute.unrest_reduce": Probe.counts.get("distribute.unrest_reduce", 0)},
+			"distribute.unrest_reduce": Probe.counts.get("distribute.unrest_reduce", 0),
+			"contact.overdue": Probe.counts.get("contact.overdue", 0),
+			"contact.care_check": Probe.counts.get("contact.care_check", 0),
+			"contact.care_ignore": Probe.counts.get("contact.care_ignore", 0),
+			"care.scout_dispatched": Probe.counts.get("care.scout_dispatched", 0),
+			"care.firsthand_distress": Probe.counts.get("care.firsthand_distress", 0)},
+		"care_sample": Probe.samples.get("care.reaction_sample", []),
 	}
 	var f := FileAccess.open(OUT_PATH, FileAccess.WRITE)
 	if f != null:
