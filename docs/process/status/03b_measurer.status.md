@@ -12,6 +12,10 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
+**狀態**：工作中（等下一票）——失聯帳本behavior量verdict已完成寄出(infra blocker+diversity未解)
+
+**工單**：無（失聯帳本behavior量verdict已完成寄systems：★infra blocker——warring_states.json全尺寸床連4次跑逾GODOT_TIMEOUT=1200(3mo/2mo/45天+specimen/45天無specimen皆逾時,非單次失誤),改用小床infonet_whole.json(10隊)60天才順利跑完,懷疑環境併發或branch perf,如實回報不下因果判斷。★小床結果:contact.ledger_add=35/overdue=7/全選redispatch,但關鍵限制=7次全來自同一team(team0,統領0.8最高)不同team_id數=1,樣本太窄無法回答reviewer真正關切的『不同人格隊是否選不同react類』(argmax對這一組人格值算對但diversity問題未解)。help.letter_dispatched=0/scout.dispatched=0(此seed下只convoy驅動)。specimen因infra blocker本輪未產出。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-behavior-verdict.md，別下accept，diversity問題需另建多dominant-trait對照fixture,infra blocker交systems評估。
+
 **狀態**：工作中（等下一票）——faction-cohesion開場exit-attribution verdict已完成寄出
 
 **工單**：無（exit-attribution verdict已完成寄systems：★★defect出口genuine確認——自建4組lord+member對照fixture,matched honor(T1餵飽0.34 vs T3餓0.34同值):T1 unrest恆0 60天never exit,T3 unrest飆升(26/52/79/105/132)exit_day=0即刻defect。同honor值結果南轅北轍,證unrest_turns>=20(真resource distress)是真正gatekeeper,reviewer疑慮(honor門檻flip=arbitrary)不成立於實際運行(不餓member永遠不會被評到defect check)。uprising(T5,同starve曲線但honor0.6 defect-safe)day14才觸發(unrest>=60+loyalty<0.2+stress≥2三重門檻)=同樣genuine但『無條件脫離vs可換領主留任』設計問題未解維持open。contact-loss(T7遠距24格)60天內從未觸發=inconclusive,懷疑測法缺陷(_evaluate_owner_contact從未接觸過直接early-return,需重新設計先建belief再隔離)。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-exit-attribution-verdict.md，別下accept，defect刀口有堅實grounding,uprising/contact-loss仍需補測交systems判§2 spec方向。
