@@ -1,0 +1,26 @@
+{
+  "diagnostic": "失聯帳本diversity re-measure(defensive/rescue fix驗證,baf2a670)",
+  "final": {
+    "factions": 4,
+    "teams": 13
+  },
+  "per_lord_react": {
+    "0": {
+      "redispatch": 7
+    },
+    "3": {
+      "defensive": 2
+    },
+    "5": {
+      "defensive": 2
+    }
+  },
+  "probe": {
+    "contact.ledger_add": 29,
+    "contact.overdue": 11,
+    "contact.react_defensive": 4,
+    "contact.react_redispatch": 7,
+    "contact.react_rescue": 0,
+    "contact.react_writeoff": 0
+  }
+}
