@@ -1,0 +1,1621 @@
+{
+  "diagnostic": "faction-cohesion③正式re-measure(30天,g3+uprising fix已landed)",
+  "faction_track": {
+    "1": [
+      {
+        "day": 1,
+        "established": true,
+        "member_count": 3
+      },
+      {
+        "day": 2,
+        "established": true,
+        "member_count": 4
+      },
+      {
+        "day": 3,
+        "established": true,
+        "member_count": 5
+      },
+      {
+        "day": 4,
+        "established": true,
+        "member_count": 3
+      },
+      {
+        "day": 5,
+        "established": true,
+        "member_count": 3
+      },
+      {
+        "day": 6,
+        "established": true,
+        "member_count": 4
+      },
+      {
+        "day": 7,
+        "established": true,
+        "member_count": 5
+      },
+      {
+        "day": 8,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 9,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 10,
+        "established": true,
+        "member_count": 5
+      },
+      {
+        "day": 11,
+        "established": true,
+        "member_count": 5
+      },
+      {
+        "day": 12,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 13,
+        "established": true,
+        "member_count": 7
+      },
+      {
+        "day": 14,
+        "established": true,
+        "member_count": 7
+      },
+      {
+        "day": 15,
+        "established": true,
+        "member_count": 7
+      },
+      {
+        "day": 16,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 17,
+        "established": true,
+        "member_count": 7
+      },
+      {
+        "day": 18,
+        "established": true,
+        "member_count": 8
+      },
+      {
+        "day": 19,
+        "established": true,
+        "member_count": 8
+      },
+      {
+        "day": 20,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 21,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 22,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 23,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 24,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 25,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 26,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 27,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 28,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 29,
+        "established": true,
+        "member_count": 6
+      },
+      {
+        "day": 30,
+        "established": true,
+        "member_count": 6
+      }
+    ],
+    "2": [
+      {
+        "day": 1,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 2,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 3,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 4,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 5,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 6,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 7,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 8,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 9,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 10,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 11,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 12,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 13,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 14,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 15,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 16,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 17,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 18,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 19,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 20,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 21,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 22,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 23,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 24,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 25,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 26,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 27,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 28,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 29,
+        "established": false,
+        "member_count": 0
+      },
+      {
+        "day": 30,
+        "established": false,
+        "member_count": 0
+      }
+    ]
+  },
+  "final": {
+    "established": 2,
+    "factions": 2,
+    "teams": 21
+  },
+  "marked_established": [
+    0,
+    1
+  ],
+  "members": {
+    "0": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 0,
+          "food": 5165.8,
+          "pop": 14,
+          "unrest_turns": 0
+        },
+        {
+          "day": 2,
+          "faction": 0,
+          "food": 5323.4,
+          "pop": 13,
+          "unrest_turns": 0
+        },
+        {
+          "day": 3,
+          "faction": 0,
+          "food": 5552.5,
+          "pop": 12,
+          "unrest_turns": 0
+        },
+        {
+          "day": 4,
+          "faction": 0,
+          "food": 5733.3,
+          "pop": 13,
+          "unrest_turns": 0
+        },
+        {
+          "day": 5,
+          "faction": 0,
+          "food": 5999.5,
+          "pop": 12,
+          "unrest_turns": 0
+        },
+        {
+          "day": 6,
+          "faction": 0,
+          "food": 6178.7,
+          "pop": 11,
+          "unrest_turns": 0
+        },
+        {
+          "day": 7,
+          "faction": 0,
+          "food": 6347.6,
+          "pop": 11,
+          "unrest_turns": 0
+        },
+        {
+          "day": 8,
+          "faction": 0,
+          "food": 6582.9,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 9,
+          "faction": 0,
+          "food": 6751.5,
+          "pop": 11,
+          "unrest_turns": 0
+        },
+        {
+          "day": 10,
+          "faction": 0,
+          "food": 6913.7,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 11,
+          "faction": 0,
+          "food": 6907.3,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 12,
+          "faction": 0,
+          "food": 6901.3,
+          "pop": 8,
+          "unrest_turns": 0
+        },
+        {
+          "day": 13,
+          "faction": 0,
+          "food": 6893.3,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 14,
+          "faction": 0,
+          "food": 6888.7,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 15,
+          "faction": 0,
+          "food": 6882,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 16,
+          "faction": 0,
+          "food": 6877.7,
+          "pop": 6,
+          "unrest_turns": 0
+        },
+        {
+          "day": 17,
+          "faction": 0,
+          "food": 6873.7,
+          "pop": 6,
+          "unrest_turns": 0
+        },
+        {
+          "day": 18,
+          "faction": 0,
+          "food": 6870.3,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 19,
+          "faction": 0,
+          "food": 6865.7,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 20,
+          "faction": 0,
+          "food": 6858.7,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 21,
+          "faction": 0,
+          "food": 6854,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 22,
+          "faction": 0,
+          "food": 6849.3,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 23,
+          "faction": 0,
+          "food": 6842.3,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 24,
+          "faction": 0,
+          "food": 6837.7,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 25,
+          "faction": 0,
+          "food": 6830.7,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 26,
+          "faction": 0,
+          "food": 6826,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 27,
+          "faction": 0,
+          "food": 6821.3,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 28,
+          "faction": 0,
+          "food": 6812.3,
+          "pop": 6,
+          "unrest_turns": 0
+        },
+        {
+          "day": 29,
+          "faction": 0,
+          "food": 6808.3,
+          "pop": 6,
+          "unrest_turns": 0
+        },
+        {
+          "day": 30,
+          "faction": 0,
+          "food": 6805.3,
+          "pop": 7,
+          "unrest_turns": 0
+        }
+      ],
+      "exit_day": -1
+    },
+    "1": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 0,
+          "food": 2062.7,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 2,
+          "faction": 0,
+          "food": 2138.6,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 3,
+          "faction": 0,
+          "food": 2231.1,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 4,
+          "faction": 0,
+          "food": 2289.1,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 5,
+          "faction": 0,
+          "food": 2372.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 6,
+          "faction": 0,
+          "food": 2429,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 7,
+          "faction": 0,
+          "food": 2490.2,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 8,
+          "faction": 0,
+          "food": 2573.9,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 9,
+          "faction": 0,
+          "food": 2621.9,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 10,
+          "faction": 0,
+          "food": 2700.9,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 11,
+          "faction": 0,
+          "food": 2749.6,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 12,
+          "faction": 0,
+          "food": 2790.8,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 13,
+          "faction": 0,
+          "food": 2851.5,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 14,
+          "faction": 0,
+          "food": 2895.1,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 15,
+          "faction": 0,
+          "food": 2941.2,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 16,
+          "faction": 0,
+          "food": 2972.4,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 17,
+          "faction": 0,
+          "food": 3006,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 18,
+          "faction": 0,
+          "food": 3057.1,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 19,
+          "faction": 0,
+          "food": 3086.5,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 20,
+          "faction": 0,
+          "food": 3133.2,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 21,
+          "faction": 0,
+          "food": 3160.6,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 22,
+          "faction": 0,
+          "food": 3190.5,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 23,
+          "faction": 0,
+          "food": 3224.8,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 24,
+          "faction": 0,
+          "food": 3245.2,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 25,
+          "faction": 0,
+          "food": 3272.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 26,
+          "faction": 0,
+          "food": 3286.2,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 27,
+          "faction": 0,
+          "food": 3303.7,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 28,
+          "faction": 0,
+          "food": 3326.9,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 29,
+          "faction": 0,
+          "food": 3343.4,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 30,
+          "faction": 0,
+          "food": 3360.9,
+          "pop": 10,
+          "unrest_turns": 0
+        }
+      ],
+      "exit_day": -1
+    },
+    "2": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": -1,
+          "food": 9.3,
+          "pop": 10,
+          "unrest_turns": 26
+        },
+        {
+          "day": 2,
+          "faction": -1,
+          "food": 3.8,
+          "pop": 10,
+          "unrest_turns": 52
+        },
+        {
+          "day": 3,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 79
+        },
+        {
+          "day": 4,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 105
+        },
+        {
+          "day": 5,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 132
+        },
+        {
+          "day": 6,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 158
+        },
+        {
+          "day": 7,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 184
+        },
+        {
+          "day": 8,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 211
+        },
+        {
+          "day": 9,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 237
+        },
+        {
+          "day": 10,
+          "faction": -1,
+          "food": 0,
+          "pop": 9,
+          "unrest_turns": 264
+        },
+        {
+          "day": 11,
+          "faction": -1,
+          "food": 0,
+          "pop": 8,
+          "unrest_turns": 290
+        },
+        {
+          "day": 12,
+          "faction": -1,
+          "food": 0,
+          "pop": 7,
+          "unrest_turns": 316
+        },
+        {
+          "day": 13,
+          "faction": -1,
+          "food": 0,
+          "pop": 6,
+          "unrest_turns": 343
+        },
+        {
+          "day": 14,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 369
+        },
+        {
+          "day": 15,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 396
+        },
+        {
+          "day": 16,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 422
+        },
+        {
+          "day": 17,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 448
+        },
+        {
+          "day": 18,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 475
+        },
+        {
+          "day": 19,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 501
+        },
+        {
+          "day": 20,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 528
+        },
+        {
+          "day": 21,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 554
+        },
+        {
+          "day": 22,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 580
+        },
+        {
+          "day": 23,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 607
+        },
+        {
+          "day": 24,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 633
+        },
+        {
+          "day": 25,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 660
+        },
+        {
+          "day": 26,
+          "faction": -1,
+          "food": 0,
+          "pop": 4,
+          "unrest_turns": 686
+        },
+        {
+          "day": 27,
+          "faction": -1,
+          "food": 0,
+          "pop": 4,
+          "unrest_turns": 712
+        },
+        {
+          "day": 28,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 739
+        },
+        {
+          "day": 29,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 765
+        },
+        {
+          "day": 30,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 792
+        }
+      ],
+      "exit_day": 0
+    },
+    "3": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 1,
+          "food": 5250.6,
+          "pop": 14,
+          "unrest_turns": 0
+        },
+        {
+          "day": 2,
+          "faction": 1,
+          "food": 5462.9,
+          "pop": 13,
+          "unrest_turns": 0
+        },
+        {
+          "day": 3,
+          "faction": 1,
+          "food": 5774.2,
+          "pop": 12,
+          "unrest_turns": 0
+        },
+        {
+          "day": 4,
+          "faction": 1,
+          "food": 5992.5,
+          "pop": 14,
+          "unrest_turns": 0
+        },
+        {
+          "day": 5,
+          "faction": 1,
+          "food": 6277,
+          "pop": 14,
+          "unrest_turns": 0
+        },
+        {
+          "day": 6,
+          "faction": 1,
+          "food": 6475.5,
+          "pop": 13,
+          "unrest_turns": 0
+        },
+        {
+          "day": 7,
+          "faction": 1,
+          "food": 6647.4,
+          "pop": 12,
+          "unrest_turns": 0
+        },
+        {
+          "day": 8,
+          "faction": 1,
+          "food": 6922.7,
+          "pop": 11,
+          "unrest_turns": 0
+        },
+        {
+          "day": 9,
+          "faction": 1,
+          "food": 6915.3,
+          "pop": 11,
+          "unrest_turns": 0
+        },
+        {
+          "day": 10,
+          "faction": 1,
+          "food": 6911.3,
+          "pop": 12,
+          "unrest_turns": 0
+        },
+        {
+          "day": 11,
+          "faction": 1,
+          "food": 6903.3,
+          "pop": 12,
+          "unrest_turns": 0
+        },
+        {
+          "day": 12,
+          "faction": 1,
+          "food": 6895.3,
+          "pop": 11,
+          "unrest_turns": 0
+        },
+        {
+          "day": 13,
+          "faction": 1,
+          "food": 6884.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 14,
+          "faction": 1,
+          "food": 6877.7,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 15,
+          "faction": 1,
+          "food": 6871,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 16,
+          "faction": 1,
+          "food": 6864.7,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 17,
+          "faction": 1,
+          "food": 6858.7,
+          "pop": 8,
+          "unrest_turns": 0
+        },
+        {
+          "day": 18,
+          "faction": 1,
+          "food": 6850.7,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 19,
+          "faction": 1,
+          "food": 6846,
+          "pop": 7,
+          "unrest_turns": 0
+        },
+        {
+          "day": 20,
+          "faction": 1,
+          "food": 6844.3,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 21,
+          "faction": 1,
+          "food": 6838.3,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 22,
+          "faction": 1,
+          "food": 6832.3,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 23,
+          "faction": 1,
+          "food": 6823.3,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 24,
+          "faction": 1,
+          "food": 6817.3,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 25,
+          "faction": 1,
+          "food": 6808.3,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 26,
+          "faction": 1,
+          "food": 6802.3,
+          "pop": 9,
+          "unrest_turns": 0
+        },
+        {
+          "day": 27,
+          "faction": 1,
+          "food": 6793.3,
+          "pop": 8,
+          "unrest_turns": 0
+        },
+        {
+          "day": 28,
+          "faction": 1,
+          "food": 6785.3,
+          "pop": 8,
+          "unrest_turns": 0
+        },
+        {
+          "day": 29,
+          "faction": 1,
+          "food": 6780,
+          "pop": 8,
+          "unrest_turns": 0
+        },
+        {
+          "day": 30,
+          "faction": 1,
+          "food": 6772,
+          "pop": 8,
+          "unrest_turns": 0
+        }
+      ],
+      "exit_day": -1
+    },
+    "4": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 1,
+          "food": 2118.5,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 2,
+          "faction": 1,
+          "food": 2245,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 3,
+          "faction": 1,
+          "food": 2377.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 4,
+          "faction": 1,
+          "food": 2485.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 5,
+          "faction": 1,
+          "food": 2617.7,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 6,
+          "faction": 1,
+          "food": 2687.2,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 7,
+          "faction": 1,
+          "food": 2754.8,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 8,
+          "faction": 1,
+          "food": 2854.8,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 9,
+          "faction": 1,
+          "food": 2921.9,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 10,
+          "faction": 1,
+          "food": 3000.5,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 11,
+          "faction": 1,
+          "food": 3058.8,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 12,
+          "faction": 1,
+          "food": 3108.8,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 13,
+          "faction": 1,
+          "food": 3172.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 14,
+          "faction": 1,
+          "food": 3207.6,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 15,
+          "faction": 1,
+          "food": 3260.4,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 16,
+          "faction": 1,
+          "food": 3298,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 17,
+          "faction": 1,
+          "food": 3325.9,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 18,
+          "faction": 1,
+          "food": 3375,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 19,
+          "faction": 1,
+          "food": 3401.4,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 20,
+          "faction": 1,
+          "food": 3438.4,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 21,
+          "faction": 1,
+          "food": 3455.4,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 22,
+          "faction": 1,
+          "food": 3477.9,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 23,
+          "faction": 1,
+          "food": 3505,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 24,
+          "faction": 1,
+          "food": 3523.8,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 25,
+          "faction": 1,
+          "food": 3546,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 26,
+          "faction": 1,
+          "food": 3558.4,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 27,
+          "faction": 1,
+          "food": 3569.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 28,
+          "faction": 1,
+          "food": 3586.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 29,
+          "faction": 1,
+          "food": 3593.3,
+          "pop": 10,
+          "unrest_turns": 0
+        },
+        {
+          "day": 30,
+          "faction": 1,
+          "food": 3606.7,
+          "pop": 10,
+          "unrest_turns": 0
+        }
+      ],
+      "exit_day": -1
+    },
+    "5": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": -1,
+          "food": 8.7,
+          "pop": 10,
+          "unrest_turns": 26
+        },
+        {
+          "day": 2,
+          "faction": -1,
+          "food": 2.5,
+          "pop": 10,
+          "unrest_turns": 52
+        },
+        {
+          "day": 3,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 79
+        },
+        {
+          "day": 4,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 105
+        },
+        {
+          "day": 5,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 132
+        },
+        {
+          "day": 6,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 158
+        },
+        {
+          "day": 7,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 184
+        },
+        {
+          "day": 8,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 211
+        },
+        {
+          "day": 9,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "unrest_turns": 237
+        },
+        {
+          "day": 10,
+          "faction": -1,
+          "food": 0,
+          "pop": 9,
+          "unrest_turns": 264
+        },
+        {
+          "day": 11,
+          "faction": -1,
+          "food": 0,
+          "pop": 8,
+          "unrest_turns": 290
+        },
+        {
+          "day": 12,
+          "faction": -1,
+          "food": 0,
+          "pop": 7,
+          "unrest_turns": 316
+        },
+        {
+          "day": 13,
+          "faction": -1,
+          "food": 0,
+          "pop": 6,
+          "unrest_turns": 343
+        },
+        {
+          "day": 14,
+          "faction": -1,
+          "food": 0,
+          "pop": 5,
+          "unrest_turns": 369
+        },
+        {
+          "day": 15,
+          "faction": -1,
+          "food": 0,
+          "pop": 4,
+          "unrest_turns": 396
+        },
+        {
+          "day": 16,
+          "faction": -1,
+          "food": 0,
+          "pop": 3,
+          "unrest_turns": 422
+        },
+        {
+          "day": 17,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 448
+        },
+        {
+          "day": 18,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 475
+        },
+        {
+          "day": 19,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 501
+        },
+        {
+          "day": 20,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 528
+        },
+        {
+          "day": 21,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 554
+        },
+        {
+          "day": 22,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 580
+        },
+        {
+          "day": 23,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 607
+        },
+        {
+          "day": 24,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 633
+        },
+        {
+          "day": 25,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 660
+        },
+        {
+          "day": 26,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 686
+        },
+        {
+          "day": 27,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 712
+        },
+        {
+          "day": 28,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 739
+        },
+        {
+          "day": 29,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 765
+        },
+        {
+          "day": 30,
+          "faction": -1,
+          "food": 0,
+          "pop": 2,
+          "unrest_turns": 792
+        }
+      ],
+      "exit_day": 0
+    }
+  },
+  "probe": {
+    "cohesion.defect_fire": 11,
+    "cohesion.uprising_stay_faction": 0,
+    "g3.betrayal": 0
+  }
+}
