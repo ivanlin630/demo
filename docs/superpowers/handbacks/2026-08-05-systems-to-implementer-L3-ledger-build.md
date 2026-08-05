@@ -1,7 +1,7 @@
 ---
 from: systems
 to: implementer
-status: open
+status: consumed
 topic: "[dispatch build 2 補完批 slice(R②×2 CLEAN、各新 slice branch off 更新後 main 含核心 arc merge 4f09671e)·(1)L3 循環貿易 feat/L3-circuit-trade,spec docs/superpowers/specs/2026-08-05-L3-circuit-trade-HOW.md:升級 _nearest_market_outpost naive→genuine _best_market_target visit-util(staleness+arb 期望−路程×人格 modulate)+放寬 options.gd:19 貿易 applicability(+has_market_visit_value,settled 產隊進得去)+探索未知市集(staleness MAX)+新 team_market_last_read store(read_market_board 到場 stamp);arb_expectation reuse best_arbitrage_order(order_system:302-331,belief-only 天然守感知鐵律);走主 argmax 非 side-action;禁平行機制·★reviewer 輕追蹤:trip_cost 權重/staleness_norm calibration 錨真值(真移速/典型 relay 週期 DERIVED,禁反推調到剛好 fire)·(2)失聯帳本 feat/missing-contact-ledger,spec docs/superpowers/specs/2026-08-05-missing-contact-ledger-HOW.md:共享原語 _contact_elapsed_days(抽 faction_ai:4658-4663 的 best_estimate.last_tick+/TICKS_PER_DAY,重構 _evaluate_owner_contact 走它=母↔子一套,單一呼叫點:843 低風險,CONTACT_TIMEOUT_DAYS 門檻本批不動留原地,:4666-4674 owner-leader-changed 不在重構範圍)+TeamData.dispatch_ledger:Array[Dictionary](各 dispatch 點 append,letter 用既有 spawn_tick 當 dispatched_tick)+逾時 overdue_ratio 連續值→失聯 belief(零 god-view)→人格反應·★★reviewer 硬追蹤(genuine 結構命門):react_util 四類(再派/防禦/救援flag/註銷)必須是 competing util 候選集,各自算 util 用 argmax/mini-util>0 選最高,禁 if/elif 人格特質分支揀死一條(=偽裝 util 的死常數門檻、退化);同求援/偵察 mini-util 候選集模式·守 TDD/gate(constitution 74)/determinism byte-identical/感知鐵律/人格非死常數;完成 handback to:systems R²+量測員(人格分化)·地基 KEEP"
 ---
 
