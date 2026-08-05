@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "失聯帳本specimen for QA已落地:同diversity床(seed4044,30天)+SpecimenDumpHelper掛全8隊,產出3961 entries,聚合數字(contact.ledger_add=98/overdue=28/redispatch=8/writeoff=3/defensive=10/rescue=7)與上輪diversity verdict逐位元相同,重跑穩定確認determinism。specimen含每隊逐tick『做什麼』(task/target/winner_opt)+『想什麼』(candidates含util陣列)+『狀態』(faction_id/coin/food/leader_traits人格值),可讓QA讀出team0(統領0.9)→redispatch/team2(野心0.9)→writeoff/team4(慎重0.9)→defensive/team6(義氣0.9)→rescue的完整因果鏈(母隊派出→單位逾時→ledger偵測→人格反應)。已回systems handback:2026-08-05-measurer-to-systems-ledger-specimen-verdict.md，純觀測temp taps已revert，別下accept，等QA讀後verdict ref回"
 ---
 
