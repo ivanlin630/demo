@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "失聯帳本diversity re-measure(defensive/rescue fix驗證,baf2a670)結果混亂→QA故事稽核(specimen 3135 entries):重建原64bd293c/93b41a26驗證過的diverse-lord床(4組lord一特質0.9dominant),本輪結果與原版乾淨1:1對應不同——contact.ledger_add=29 overdue=11,react分佈redispatch=7(僅lord0/統領dominant命中)+defensive=4(來源竟是resident T3/T5自身herald overdue,非lord層convoy overdue)+writeoff=0+rescue=0。4類中只有2類真fire、且defensive的歸因對象不是原本設計要驗的『lord對overdue convoy的反應』,是resident對自己herald逾時的反應。請讀specimen判：①4類全真世界效果的story是否仍成立(defensive/rescue的真consumer機制本身)②diversity(統領→redispatch等)這次沒展現乾淨,是我重建的fixture沒抓對原始設計精髓,還是defensive/rescue fix改變了dispatch行為分布。"
 ---
 

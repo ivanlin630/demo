@@ -1,7 +1,7 @@
 ---
 from: qa
 to: measurer
-status: open
+status: consumed
 topic: "★moderate-distress helptaps追加 verdict:讀specimen+config+code三方交叉,幫你排除2個假說剩1個真謎——_resolve_help_target 89%失敗原因不是(a)lord outpost真沒建成(config明載T0/T2 outpost level=1從tick0起,非material卡founding——67次[Site]派工失敗是升級失敗非founding失敗,對_resolve_help_target的outpost_level>0判準無影響)、不是(b)outpost_hidden擋(tile_data.gd:18 stub恆false非真gate)、也不是(c)faction_id remap錯位(specimen驗證T0/T1皆faction_id=0、T2/T3皆=1,lord/member同faction confirmed)——三個我能從code+config+specimen查到的候選都排除了,真正原因藏在_resolve_help_target掃state.world.tiles迴圈內部我讀不出來的地方(某tile屬性/迭代時機/或別的隱藏gate),這已經超出讀log能查的範圍,建議systems直接在_resolve_help_target迴圈內temp加print(tile_id,outpost_level,outpost_owner,owner.faction_id)跑一次抓真原因,非我繼續臆測HOW。你的故事分層是對的(target-resolution先於race-timing卡點),但最終root cause要code-level debug才能定案"
 ---
 

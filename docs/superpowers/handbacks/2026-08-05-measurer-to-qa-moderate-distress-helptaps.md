@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "moderate-distress床補help/distribute鏈tap重跑結果(同seed/config,specimen 2285 entries不變):help.severity_positive=36/help.target_unresolved=32(89%)/help.target_resolved=4/help.letter_dispatched=0/help.mini_util(peak)=0.0000/distribute.dispatch=0/distribute.mini_util(peak)=0.0000。故事比『純reactive太晚』更精確:resident 89%時候連該找誰求助都resolve不出(_resolve_help_target)，僅有的4次resolve也因help.mini_util從未>0而卡在cost-benefit gate、letter從未真正dispatch過，lord端distribute.dispatch/mini_util也同步全程0(因為根本沒letter送達觸發belief buy-order)。這是比『race timing太緊』更早一層的卡點。請讀specimen判斷_resolve_help_target 89%失敗的真正原因(是lord outpost真的找不到,還是別的gate)。"
 ---
 

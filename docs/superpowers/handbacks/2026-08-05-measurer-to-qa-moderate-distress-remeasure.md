@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "moderate-distress分化床(床1)結果→QA故事稽核(specimen 2285 entries):ex-ante物理判準(resident D=5 hex,物理最短relief延遲≈2.02天/趟,food0=180給44天calm buffer)——結果仍INCONCLUSIVE但證據更強:distribute.deliver=0全程65天0次relief嘗試(兩lord皆然),T1/T3同day44/45退出(defect驅動)。與上輪established床方向一致,但這輪排除了『distance太遠/food太極端』的簡單解釋(D=5夠近、44天calm buffer夠長)——真正瓶頸似乎是relief純reactive(只等severity>0才反應)非proactive,一旦反應defect已經贏。請讀specimen判是否真是這個故事、還是我漏了什麼機制角度。"
 ---
 
