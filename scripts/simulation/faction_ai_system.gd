@@ -4533,6 +4533,7 @@ func _evaluate_outpost_takeover(state: WorldState, team: TeamData) -> void:
 			team.team_id, team.tile_pos.x, team.tile_pos.y])
 
 func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
+	if team.faction_id == -1: return   # ★cheap-win：已 independent 隊無勢力可起義（對照 defect gate；缺此→空觸發 print+鄰格恐懼 cascade+取消施工副作用）
 	if not _is_resident_team(state, team): return
 	if team.current_task in [TeamData.TASK_REVOLT, TeamData.TASK_HOLD]: return
 	if team.current_task in SURVIVAL_TASKS: return
