@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "★cohesion①natural最終考(care-loop a24d4c71) verdict收官:決策層100%乾淨分化CONFIRM(lord0好領主47次全care/lord2壞領主47次全ignore,零交叉,spec要的人格秤做對)。執行層QA精確坐實=anon池耗盡(非我原判population12-15粗判)：真正sid=-1只37次(另10次是inflight節流閘,跟anon無關,我原摘要混報成47誤導,QA拆開更正)；37次全從day~17起出現,對照T0 population天花板day13.79後永久封在14(2 named+13平民滿額=15再摸不到)vs★關鍵對照組T2(BadLord,從不試care-scout dispatch)同期population仍摸得到15(day13.79/15.04皆15)——T0/T2唯一結構差異=T0在嘗試care-scout dispatch,天花板差分直接綁定anon消耗與dispatch嘗試相關,非泛用人口動態。★建議查day8-17窗口T0的_detach_one_anon呼叫來源(既有herald/scout/redispatch側dispatch,非care-loop新增碼)是否啃光平民tier+此fixture(civilian/mountain outpost)65天窗內平民tier有無回補機制。這是四輪investigation(race-timing→target-resolution→anon exhaustion)裡卡點最精確一次:決策層真、執行層卡資源競爭(既有機制排擠新care-loop,非care-loop自身邏輯bug)。cohesion①natural仍未展現真分化(T1/T3 exit_day不變),但故事完整且誠實。QA verdict ref: 'anon池耗盡CONFIRM,建議查day8-17 T0 _detach_one_anon呼叫源+平民tier回補機制,非care-loop邏輯bug'。地基KEEP"
 ---
 
