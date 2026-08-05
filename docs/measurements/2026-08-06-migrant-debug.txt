@@ -1,0 +1,1212 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== recovery-path R1 移民三態湧現分化床（seed=9090 40天）===
+[GameSetup] 完成：4 teams, 1 factions, 4 persons
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×4941 (oid=0)
+[Order] Team0 buy weapon_melee_low ×8 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×6 (oid=2)
+[Order] Team0 buy material ×60 (oid=3)
+[Order] Team0 buy tools ×5 (oid=4)
+[Order] Team1 sell food ×91 (oid=5)
+[Order] Team1 buy material ×60 (oid=6)
+[Order] Team1 buy tools ×1 (oid=7)
+[Order] Team2 sell food ×91 (oid=8)
+[Order] Team2 buy material ×60 (oid=9)
+[Order] Team2 buy tools ×1 (oid=10)
+[Order] Team3 sell food ×91 (oid=11)
+[Order] Team3 buy material ×60 (oid=12)
+[Order] Team3 buy tools ×1 (oid=13)
+[Harvest] Tick60 季節=春 base=1.1
+[MGDBG] lord=0 dispatch_ledger.size=4 holding_count=3
+[MGDBG] lord=0 vid=1 est=null
+[MGDBG] lord=0 vid=2 est=null
+[MGDBG] lord=0 vid=3 est=null
+[Succession] Team 4 從匿名晉升新領袖 P3001（統領=0.16）
+[Order] Team4 buy food ×3 (oid=14)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(19,20)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(19,20)
+[Move] Team 4 抵達 (19,20)
+[Combat Start] Team-1000000 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(19,20)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Ambition] Team0 rung 0→1 (商業 cap=1)
+[DayNight] Day 1 開始
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=1 avg=14762 us max=2525481 us ticks=240 teams=6 factions=1
+[Move] Team 4 抵達 (19,20)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[SubAI] Team4 引擎→覓食 (覓食)
+[Ambition] Team4 rung 0→1 (商業 cap=2)
+[Move] Team 4 抵達 (19,20)
+[MGDBG] lord=0 dispatch_ledger.size=5 holding_count=3
+[MGDBG] lord=0 vid=1 est=null
+[MGDBG] lord=0 vid=2 est=null
+[MGDBG] lord=0 vid=3 est=null
+[Succession] Team 5 從匿名晉升新領袖 P3002（統領=0.14）
+[Order] Team5 buy food ×3 (oid=16)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(19,20)
+[Survival] Team5 urgent days_left=0.0 偵查→覓食
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(19,20)
+[DayNight] Day 2 開始
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=2 avg=13526 us max=1608571 us ticks=240 teams=6 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (28, 18) score=300 周邊資源={ "ore_iron": 189, "ore_silver": 109, "herb": 3 } terrain=plains
+[Move] Team 4 抵達 (20,20)
+[Move] Team 5 抵達 (19,20)
+[Merge] Team0 ← Team4 完全合併 (pop=13)
+[SubAI] Team5 引擎→覓食 (覓食)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私1) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (19,20)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (20,20)
+[Merge] Team0 ← Team5 完全合併 (pop=14)
+[MGDBG] lord=0 dispatch_ledger.size=6 holding_count=3
+[MGDBG] lord=0 vid=1 est=null
+[MGDBG] lord=0 vid=2 est=null
+[MGDBG] lord=0 vid=3 est=null
+[Succession] Team 4 從匿名晉升新領袖 P3003（統領=0.17）
+[Order] Team4 buy food ×3 (oid=17)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(19,20)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[DayNight] Day 3 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(19,20)
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=3 avg=19309 us max=1312018 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (19,20)
+[SubAI] Team4 引擎→覓食 (覓食)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (19,20)
+[DayNight] Day 4 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=4 avg=20131 us max=1083032 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (20,20)
+[Merge] Team0 ← Team4 完全合併 (pop=14)
+[MGDBG] lord=0 dispatch_ledger.size=5 holding_count=3
+[MGDBG] lord=0 vid=1 est=null
+[MGDBG] lord=0 vid=2 est=null
+[MGDBG] lord=0 vid=3 est=null
+[Succession] Team 4 從匿名晉升新領袖 P3004（統領=0.05）
+[Order] Team4 buy food ×2 (oid=18)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(20,21)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(20,21)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (20,21)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(20,21)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 5 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[Move] Team 4 抵達 (20,21)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(20,21)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[TickPerf] day=5 avg=20414 us max=874241 us ticks=240 teams=5 factions=1
+[Order] Team0 sell food ×6625 (oid=19)
+[Order] Team0 buy weapon_melee_low ×7 (oid=20)
+[Order] Team0 buy weapon_ranged_low ×6 (oid=21)
+[Order] Team0 buy material ×60 (oid=22)
+[Order] Team0 buy tools ×5 (oid=23)
+[Order] Team1 sell food ×84 (oid=24)
+[Order] Team1 buy material ×55 (oid=25)
+[Order] Team1 buy tools ×1 (oid=26)
+[Order] Team2 sell food ×85 (oid=27)
+[Order] Team2 buy material ×57 (oid=28)
+[Order] Team2 buy tools ×1 (oid=29)
+[Order] Team3 sell food ×84 (oid=30)
+[Order] Team3 buy material ×58 (oid=31)
+[Order] Team3 buy tools ×1 (oid=32)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(20,21)
+[Move] Team 4 抵達 (20,21)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(20,21)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[MGDBG] lord=0 dispatch_ledger.size=5 holding_count=3
+[MGDBG] lord=0 vid=1 est=null
+[MGDBG] lord=0 vid=2 est=null
+[MGDBG] lord=0 vid=3 est=null
+[SubAI] Team4 紀律失效，脫離成獨立
+[Succession] Team 5 從匿名晉升新領袖 P3005（統領=0.09）
+[Order] Team5 buy food ×2 (oid=33)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(20,21)
+[Survival] Team5 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(20,21)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (20,21)
+[Move] Team 5 抵達 (20,21)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(20,21)
+[Survival] Team5 urgent days_left=0.0 idle→覓食
+[StrategicAI] Faction0 首要目標: defend target=4
+[Ambition] Team4 rung 0→1 (商業 cap=3)
+[DayNight] Day 6 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Horse] Outpost (14, 20) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=6 avg=22089 us max=1206974 us ticks=240 teams=6 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (20,21)
+[Move] Team 5 抵達 (20,21)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(20,21)
+[Survival] Team5 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私1) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(20,21)
+[Move] Team 5 抵達 (20,21)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(20,21)
+[Survival] Team5 urgent days_left=0.0 idle→覓食
+[MGDBG] lord=0 dispatch_ledger.size=6 holding_count=3
+[MGDBG] lord=0 vid=1 est=null
+[MGDBG] lord=0 vid=2 est=null
+[MGDBG] lord=0 vid=3 est=null
+[Succession] Team 6 從匿名晉升新領袖 P3006（統領=0.28）
+[Order] Team6 buy food ×3 (oid=34)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(20,21)
+[Survival] Team6 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私1) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(20,21)
+[DayNight] Day 7 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私1) (需 { "material": 50, "tools": 0 })
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=7 avg=25591 us max=1310277 us ticks=240 teams=7 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (20,21)
+[Move] Team 6 抵達 (20,21)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(20,21)
+[Survival] Team5 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(20,21)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 7(公庫2+私5) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私1) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 7(公庫2+私5) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私1) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(20,21)
+[Move] Team 4 抵達 (20,21)
+[Move] Team 5 抵達 (20,21)
+[Move] Team 6 抵達 (20,21)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Ambition] Team5 rung 0→1 (商業 cap=3)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 7(公庫2+私5) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私1) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (20,20)
+[Merge] Team0 ← Team5 完全合併 (pop=12)
+[MGDBG] lord=0 dispatch_ledger.size=7 holding_count=3
+[MGDBG] lord=0 vid=1 est=null
+[MGDBG] lord=0 vid=2 est=null
+[MGDBG] lord=0 vid=3 est=null
+[Succession] Team 7 從匿名晉升新領袖 P3007（統領=0.00）
+[Order] Team7 buy food ×3 (oid=35)
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[Survival] Team7 urgent days_left=0.0 偵查→覓食
+[DayNight] Day 8 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 8(公庫2+私5) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=8 avg=21626 us max=853948 us ticks=240 teams=7 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 8(公庫2+私5) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (20,21)
+[Move] Team 6 抵達 (18,22)
+[Move] Team 7 抵達 (19,20)
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[Survival] Team7 urgent days_left=0.0 idle→覓食
+[Ambition] Team4 rung 1→0 (商業 cap=3)
+[Ambition] Team6 rung 0→1 (商業 cap=2)
+[SubAI] Team6 紀律失效，脫離成獨立
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 8(公庫2+私6) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 8(公庫2+私6) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,22)
+[Move] Team 7 抵達 (19,20)
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[Survival] Team7 urgent days_left=0.0 idle→覓食
+[DayNight] Day 9 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 8(公庫3+私6) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[TickPerf] day=9 avg=20343 us max=870705 us ticks=240 teams=7 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 7 抵達 (19,20)
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[Survival] Team7 urgent days_left=0.0 idle→覓食
+[MGDBG] lord=0 dispatch_ledger.size=7 holding_count=3
+[MGDBG] lord=0 vid=1 est=null
+[MGDBG] lord=0 vid=2 est=null
+[MGDBG] lord=0 vid=3 est=null
+[Succession] Team 8 從匿名晉升新領袖 P3008（統領=0.21）
+[Order] Team8 buy food ×3 (oid=35)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,20)
+[Survival] Team8 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 9(公庫3+私6) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,20)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 9(公庫3+私6) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (20,21)
+[Move] Team 7 抵達 (19,20)
+[Move] Team 8 抵達 (19,20)
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[Survival] Team7 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,20)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[StrategicAI] Faction0 首要目標: defend target=7
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 9(公庫3+私6) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 10 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 9(公庫3+私6) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[Move] Team 7 抵達 (19,20)
+[Move] Team 8 抵達 (19,20)
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(19,20)
+[Survival] Team7 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,20)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[TickPerf] day=10 avg=25184 us max=1104838 us ticks=240 teams=8 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×6874 (oid=36)
+[Order] Team0 buy weapon_melee_low ×6 (oid=37)
+[Order] Team0 buy weapon_ranged_low ×4 (oid=38)
+[Order] Team0 buy material ×60 (oid=39)
+[Order] Team0 buy tools ×4 (oid=40)
+[Order] Team1 sell food ×76 (oid=41)
+[Order] Team1 buy material ×50 (oid=42)
+[Order] Team1 buy tools ×1 (oid=43)
+[Order] Team2 sell food ×78 (oid=44)
+[Order] Team2 buy material ×55 (oid=45)
+[Order] Team2 buy tools ×1 (oid=46)
+[Order] Team3 sell food ×77 (oid=47)
+[Order] Team3 buy material ×57 (oid=48)
+[Order] Team3 buy tools ×1 (oid=49)
+[Order] Team4 buy food ×1 (oid=50)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫3+私7) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,20)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (19,20)
+[Move] Team 7 抵達 (19,20)
+[Move] Team 8 抵達 (19,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,20)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[MGDBG] lord=0 bail pop=9 anon=4
+[Ambition] Team6 rung 1→0 (商業 cap=2)
+[Ambition] Team7 rung 0→1 (商業 cap=2)
+[Succession] Team 9 從匿名晉升新領袖 P3009（統領=0.11）
+[Order] Team9 buy food ×2 (oid=51)
+[SurvivalForage] team=Team9 pop=1 → 覓食 @(19,20)
+[Survival] Team9 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫3+私7) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team9 pop=1 → 覓食 @(19,20)
+[SubAI] Team7 紀律失效，脫離成獨立
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫3+私7) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (19,20)
+[Move] Team 7 抵達 (19,20)
+[Move] Team 8 抵達 (19,20)
+[Move] Team 9 抵達 (19,20)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[Survival] Team9 urgent days_left=0.0 idle→覓食
+[DayNight] Day 11 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫3+私7) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=11 avg=25484 us max=1383439 us ticks=240 teams=9 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫3+私7) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,20)
+[Move] Team 7 抵達 (19,20)
+[Move] Team 8 抵達 (17,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(17,20)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫3+私8) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team9 pop=1 → 覓食 @(17,20)
+[Move] Team 8 抵達 (17,20)
+[Move] Team 9 抵達 (17,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(17,20)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[MGDBG] lord=0 bail pop=8 anon=3
+[Order] Team6 buy food ×2 (oid=52)
+[Ambition] Team9 rung 0→1 (商業 cap=2)
+[Succession] Team 10 從匿名晉升新領袖 P3010（統領=0.09）
+[Order] Team10 buy food ×3 (oid=53)
+[Survival] Team10 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫3+私8) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[SubAI] Team8 紀律失效，脫離成獨立
+[DayNight] Day 12 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫3+私8) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=12 avg=22281 us max=703809 us ticks=240 teams=10 factions=1
+[Move] Team 7 抵達 (17,20)
+[Move] Team 8 抵達 (17,20)
+[Ambition] Team8 rung 0→1 (定居 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫3+私8) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫3+私8) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (17,20)
+[Move] Team 8 抵達 (17,20)
+[Move] Team 9 抵達 (20,20)
+[Merge] Team0 ← Team9 完全合併 (pop=9)
+[Move] Team 7 抵達 (17,20)
+[Move] Team 8 抵達 (17,20)
+[MGDBG] lord=0 bail pop=8 anon=2
+[Succession] Team 11 從匿名晉升新領袖 P3011（統領=0.00）
+[Order] Team11 buy food ×3 (oid=54)
+[Survival] Team11 urgent days_left=0.0 偵查→覓食
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=64251 us max=1553251 us ticks=240 teams=10 factions=1
+[Move] Team 7 抵達 (17,20)
+[Move] Team 8 抵達 (17,20)
+[Move] Team 10 抵達 (19,18)
+[SurvivalForage] team=Team10 pop=1 → 覓食 @(19,18)
+[Survival] Team10 urgent days_left=0.0 idle→覓食
+[Ambition] Team7 rung 1→0 (商業 cap=2)
+[SubAI] Team10 紀律失效，脫離成獨立
+[Move] Team 7 抵達 (17,20)
+[Move] Team 8 抵達 (17,20)
+[Move] Team 10 抵達 (19,18)
+[Order] Team7 buy food ×1 (oid=55)
+[DayNight] Day 14 開始
+[SurvivalForage] team=Team11 pop=1 → 覓食 @(19,18)
+[TickPerf] day=14 avg=94564 us max=1495782 us ticks=240 teams=10 factions=1
+[Move] Team 7 抵達 (17,20)
+[Move] Team 8 抵達 (17,20)
+[Move] Team 10 抵達 (19,18)
+[Move] Team 11 抵達 (19,18)
+[Combat Start] Team-1000001 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+[SurvivalForage] team=Team11 pop=1 → 覓食 @(19,18)
+[Survival] Team11 urgent days_left=0.0 idle→覓食
+[MGDBG] lord=0 bail pop=7 anon=1
+[StrategicAI] Faction0 首要目標: defend target=10
+[Ambition] Team8 rung 1→0 (定居 cap=2)
+[Order] Team8 buy food ×1 (oid=57)
+[Ambition] Team10 rung 0→1 (商業 cap=2)
+[Succession] Team 12 從匿名晉升新領袖 P3012（統領=0.30）
+[Order] Team12 buy food ×2 (oid=58)
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(20,21)
+[Survival] Team12 urgent days_left=0.0 偵查→覓食
+[SurvivalForage] team=Team12 pop=1 → 覓食 @(20,21)
+[Move] Team 4 抵達 (15,21)
+[Move] Team 7 抵達 (17,20)
+[Move] Team 8 抵達 (17,20)
+[Move] Team 10 抵達 (19,18)
+[Move] Team 11 抵達 (19,18)
+[Move] Team 12 抵達 (20,21)
+[SurvivalForage] team=Team11 pop=1 → 覓食 @(19,18)
+[Survival] Team11 urgent days_left=0.0 idle→覓食
+[SubAI] Team12 引擎→徵收 (徵收)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=15 known=15
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team11 pop=1 → 覓食 @(19,18)
+[Move] Team 7 抵達 (15,21)
+[Move] Team 11 抵達 (19,18)
+[Merge] Team0 ← Team12 完全合併 (pop=8)
+[SurvivalForage] team=Team11 pop=1 → 覓食 @(19,18)
+[Survival] Team11 urgent days_left=0.0 idle→覓食
+[TickPerf] day=15 avg=87071 us max=1573977 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×6855 (oid=44)
+[Order] Team0 buy weapon_melee_low ×4 (oid=45)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=46)
+[Order] Team0 buy material ×60 (oid=47)
+[Order] Team0 buy tools ×3 (oid=48)
+[Order] Team1 sell food ×69 (oid=49)
+[Order] Team1 buy material ×45 (oid=50)
+[Order] Team1 buy tools ×1 (oid=51)
+[Order] Team2 sell food ×72 (oid=52)
+[Order] Team2 buy material ×53 (oid=53)
+[Order] Team2 buy tools ×1 (oid=54)
+[Order] Team3 sell food ×70 (oid=55)
+[Order] Team3 buy material ×55 (oid=56)
+[Order] Team3 buy tools ×1 (oid=57)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,22)
+[Move] Team 7 抵達 (15,22)
+[Move] Team 8 抵達 (15,22)
+[Move] Team 11 抵達 (19,18)
+[SurvivalForage] team=Team11 pop=1 → 覓食 @(19,18)
+[Survival] Team11 urgent days_left=0.0 idle→覓食
+[MGDBG] lord=0 bail pop=7 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Succession] Team 12 從匿名晉升新領袖 P3013（統領=0.30）
+[Order] Team12 buy food ×3 (oid=58)
+[Survival] Team12 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[SubAI] Team11 紀律失效，脫離成獨立
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫4+私10) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,22)
+[Move] Team 8 抵達 (15,22)
+[Move] Team 11 抵達 (19,18)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 16 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=16 avg=94541 us max=1868775 us ticks=240 teams=11 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,23)
+[Move] Team 6 抵達 (15,22)
+[Move] Team 8 抵達 (15,23)
+[Move] Team 11 抵達 (19,18)
+[Move] Team 12 抵達 (18,22)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Ambition] Team12 rung 0→1 (定居 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,23)
+[Move] Team 6 抵達 (15,23)
+[Move] Team 11 抵達 (19,18)
+[MGDBG] lord=0 bail pop=7 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Order] Team6 buy food ×3 (oid=58)
+[Ambition] Team10 rung 1→0 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 17 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=17 avg=92703 us max=1453344 us ticks=240 teams=11 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (15,23)
+[Move] Team 11 抵達 (19,18)
+[Move] Team 12 抵達 (20,20)
+[Merge] Team0 ← Team12 完全合併 (pop=8)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫5+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,23)
+[Move] Team 11 抵達 (19,18)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,23)
+[Move] Team 11 抵達 (19,18)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Ambition] Team11 rung 0→1 (商業 cap=2)
+[DayNight] Day 18 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=18 avg=93357 us max=1631933 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Order] Team4 buy food ×1 (oid=58)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,22)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,22)
+[Move] Team 6 抵達 (15,22)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Ambition] Team6 rung 0→1 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 19 開始
+[MsgPrune] 刪除過期訊息 global=1 known=5
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=19 avg=93128 us max=1605434 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,22)
+[Move] Team 6 抵達 (15,22)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Ambition] Team11 rung 1→0 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=15 known=19
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (14,24)
+[TickPerf] day=20 avg=93657 us max=1571285 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×6828 (oid=43)
+[Order] Team0 buy weapon_melee_low ×4 (oid=44)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=45)
+[Order] Team0 buy material ×60 (oid=46)
+[Order] Team0 buy tools ×3 (oid=47)
+[Order] Team1 sell food ×61 (oid=48)
+[Order] Team1 buy material ×42 (oid=49)
+[Order] Team1 buy tools ×1 (oid=50)
+[Order] Team2 sell food ×66 (oid=51)
+[Order] Team2 buy material ×51 (oid=52)
+[Order] Team2 buy tools ×1 (oid=53)
+[Order] Team3 sell food ×63 (oid=54)
+[Order] Team3 buy material ×54 (oid=55)
+[Order] Team3 buy tools ×1 (oid=56)
+[Ambition] Team6 rung 1→0 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Order] Team10 buy food ×1 (oid=57)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Order] Team11 buy food ×1 (oid=58)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (13,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 21 開始
+[MsgPrune] 刪除過期訊息 global=1 known=5
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=21 avg=94831 us max=1989069 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (13,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Order] Team7 buy food ×1 (oid=58)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (13,24)
+[Move] Team 10 抵達 (18,17)
+[Move] Team 11 抵達 (17,20)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Order] Team6 buy food ×2 (oid=59)
+[Ambition] Team11 rung 0→1 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 22 開始
+[MsgPrune] 刪除過期訊息 global=2 known=4
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=22 avg=96453 us max=1629121 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (13,21)
+[Move] Team 10 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (13,21)
+[Move] Team 6 抵達 (13,21)
+[Move] Team 7 抵達 (15,21)
+[Move] Team 8 抵達 (13,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Ambition] Team4 rung 0→1 (商業 cap=3)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[CrudeCamp] Team7 紮營 @(15,21) → civilian
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫5+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (13,21)
+[Move] Team 6 抵達 (13,21)
+[Move] Team 8 抵達 (13,24)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫6+私13) (需 { "material": 50, "tools": 0 })
+[Order] Team7 buy material ×32 (oid=58)
+[Ambition] Team11 rung 1→0 (商業 cap=2)
+[DayNight] Day 23 開始
+[Horse] Outpost (15, 21) 捕野馬 +1
+[TickPerf] day=23 avg=97705 us max=1814760 us ticks=240 teams=10 factions=1
+[Move] Team 8 抵達 (13,24)
+[Move] Team 4 抵達 (13,21)
+[Move] Team 6 抵達 (13,21)
+[Move] Team 10 抵達 (19,18)
+[Faction] Team7 脫離勢力0
+[Ambition] Team0 rung 1→0 (商業 cap=1)
+[Ambition] Team4 rung 1→0 (商業 cap=3)
+[DayNight] Day 24 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Horse] Outpost (15, 21) 捕野馬 +1
+[TickPerf] day=24 avg=114159 us max=1961480 us ticks=240 teams=10 factions=1
+[Move] Team 4 抵達 (13,21)
+[Move] Team 8 抵達 (13,24)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Order] Team8 buy food ×1 (oid=59)
+[Move] Team 8 抵達 (13,24)
+[Move] Team 10 抵達 (19,18)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫6+私13) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=16 known=24
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=25 avg=95384 us max=1657652 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫6+私13) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×6796 (oid=44)
+[Order] Team0 buy weapon_melee_low ×4 (oid=45)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=46)
+[Order] Team0 buy material ×60 (oid=47)
+[Order] Team0 buy tools ×3 (oid=48)
+[Order] Team1 sell food ×54 (oid=49)
+[Order] Team1 buy material ×41 (oid=50)
+[Order] Team1 buy tools ×1 (oid=51)
+[Order] Team2 sell food ×60 (oid=52)
+[Order] Team2 buy material ×49 (oid=53)
+[Order] Team2 buy tools ×1 (oid=54)
+[Order] Team3 sell food ×56 (oid=55)
+[Order] Team3 buy material ×52 (oid=56)
+[Order] Team3 buy tools ×1 (oid=57)
+[Order] Team10 buy food ×1 (oid=58)
+[Move] Team 8 抵達 (14,24)
+[Move] Team 10 抵達 (19,18)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Order] Team11 buy food ×2 (oid=59)
+[Move] Team 8 抵達 (14,24)
+[Move] Team 10 抵達 (19,18)
+[Move] Team 11 抵達 (18,17)
+[DayNight] Day 26 開始
+[MsgPrune] 刪除過期訊息 global=2 known=7
+[TickPerf] day=26 avg=95074 us max=1953168 us ticks=240 teams=10 factions=1
+[Move] Team 8 抵達 (14,24)
+[Move] Team 11 抵達 (18,17)
+[Order] Team7 buy food ×3 (oid=58)
+[Move] Team 10 抵達 (19,18)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Order] Team4 buy food ×1 (oid=59)
+[Order] Team6 buy food ×1 (oid=60)
+[DayNight] Day 27 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=27 avg=90893 us max=1440738 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,18)
+[Move] Team 8 抵達 (14,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫6+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,18)
+[Move] Team 8 抵達 (14,24)
+[Move] Team 6 抵達 (15,18)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫6+私14) (需 { "material": 50, "tools": 0 })
+[Order] Team7 buy material ×10 (oid=60)
+[DayNight] Day 28 開始
+[MsgPrune] 刪除過期訊息 global=1 known=4
+[TickPerf] day=28 avg=94675 us max=1650441 us ticks=240 teams=10 factions=1
+[Move] Team 8 抵達 (14,24)
+[Move] Team 11 抵達 (18,17)
+[Move] Team 6 抵達 (15,18)
+[Move] Team 8 抵達 (14,24)
+[Move] Team 11 抵達 (18,17)
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=2 known=5
+[TickPerf] day=29 avg=91225 us max=1522175 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 10 抵達 (18,17)
+[Move] Team 11 抵達 (18,17)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫6+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (15,18)
+[Move] Team 8 抵達 (15,23)
+[Move] Team 10 抵達 (18,17)
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=15 known=14
+[Horse] Outpost (20, 20) 捕野馬 +1
+[Move] Team 8 抵達 (15,22)
+[Move] Team 10 抵達 (17,17)
+[Combat Start] Team-1000002 vs Team10
+[Ambush] NPC Team10 被 boar 伏擊
+[TickPerf] day=30 avg=96499 us max=1811999 us ticks=240 teams=11 factions=1
+[Order] Team0 sell food ×6764 (oid=44)
+[Order] Team0 buy weapon_melee_low ×4 (oid=45)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=46)
+[Order] Team0 buy material ×60 (oid=47)
+[Order] Team0 buy tools ×3 (oid=48)
+[Order] Team1 sell food ×46 (oid=49)
+[Order] Team1 buy material ×40 (oid=50)
+[Order] Team1 buy tools ×1 (oid=51)
+[Order] Team2 sell food ×54 (oid=52)
+[Order] Team2 buy material ×47 (oid=53)
+[Order] Team2 buy tools ×1 (oid=54)
+[Order] Team3 sell food ×49 (oid=55)
+[Order] Team3 buy material ×51 (oid=56)
+[Order] Team3 buy tools ×1 (oid=57)
+[MGDBG] lord=0 bail pop=8 anon=0
+[DayNight] Day 31 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=31 avg=94989 us max=1964161 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (17,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫6+私14) (需 { "material": 50, "tools": 0 })
+[Order] Team7 buy food ×3 (oid=57)
+[Order] Team11 buy food ×1 (oid=58)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Order] Team6 buy food ×3 (oid=59)
+[Order] Team8 buy food ×1 (oid=60)
+[DayNight] Day 32 開始
+[TickPerf] day=32 avg=94742 us max=1501035 us ticks=240 teams=10 factions=1
+[Move] Team 6 抵達 (17,17)
+[Move] Team 4 抵達 (17,17)
+[Move] Team 6 抵達 (17,17)
+[CrudeCamp] Team6 紮營 @(17,17) → civilian
+[Order] Team6 buy material ×22 (oid=61)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Order] Team7 buy material ×4 (oid=62)
+[DayNight] Day 33 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[TickPerf] day=33 avg=102385 us max=1501331 us ticks=240 teams=10 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (13,21)
+[Faction] Team6 脫離勢力0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫6+私15) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 34 開始
+[TickPerf] day=34 avg=103493 us max=1872078 us ticks=240 teams=10 factions=1
+[MGDBG] lord=0 bail pop=8 anon=0
+[Order] Team10 buy food ×1 (oid=63)
+[Order] Team4 sell material ×1 (oid=64)
+[Order] Team10 sell material ×1 (oid=65)
+[DayNight] Day 35 開始
+[MsgPrune] 刪除過期訊息 global=16 known=19
+[Salary] Team4 薪水結算 coin=0.0
+[Salary] Team8 薪水結算 coin=0.0
+[Salary] Team10 薪水結算 coin=0.0
+[Salary] Team11 薪水結算 coin=0.0
+[TickPerf] day=35 avg=94374 us max=1655256 us ticks=240 teams=10 factions=1
+[Order] Team0 sell food ×6732 (oid=50)
+[Order] Team0 buy weapon_melee_low ×4 (oid=51)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=52)
+[Order] Team0 buy material ×60 (oid=53)
+[Order] Team0 buy tools ×3 (oid=54)
+[Order] Team1 sell food ×39 (oid=55)
+[Order] Team1 buy material ×38 (oid=56)
+[Order] Team1 buy tools ×1 (oid=57)
+[Order] Team2 sell food ×48 (oid=58)
+[Order] Team2 buy material ×45 (oid=59)
+[Order] Team2 buy tools ×1 (oid=60)
+[Order] Team3 sell food ×42 (oid=61)
+[Order] Team3 buy material ×50 (oid=62)
+[Order] Team3 buy tools ×1 (oid=63)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 10 抵達 (18,17)
+[CrudeCamp] Team10 紮營 @(18,17) → civilian
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫6+私15) (需 { "material": 50, "tools": 0 })
+[Order] Team4 buy food ×1 (oid=64)
+[Order] Team10 buy material ×27 (oid=65)
+[DayNight] Day 36 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[Horse] Outpost (18, 17) 捕野馬 +1
+[TickPerf] day=36 avg=103960 us max=1946012 us ticks=240 teams=10 factions=1
+[Move] Team 11 抵達 (19,17)
+[Faction] Team10 脫離勢力0
+[Order] Team7 buy food ×3 (oid=65)
+[Order] Team11 buy food ×2 (oid=66)
+[StrategicAI] Faction0 首要目標: defend target=11
+[MGDBG] lord=0 bail pop=8 anon=0
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫6+私15) (需 { "material": 50, "tools": 0 })
+[Order] Team6 buy food ×3 (oid=67)
+[Order] Team8 buy food ×2 (oid=68)
+[DayNight] Day 37 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=37 avg=100543 us max=2298827 us ticks=240 teams=10 factions=1
+[Move] Team 4 抵達 (15,18)
+[Move] Team 8 抵達 (13,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (13,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫6+私15) (需 { "material": 50, "tools": 0 })
+[Order] Team6 buy material ×16 (oid=68)
+[Move] Team 4 抵達 (15,18)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Order] Team7 buy material ×3 (oid=69)
+[DayNight] Day 38 開始
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[TickPerf] day=38 avg=96489 us max=1535630 us ticks=240 teams=10 factions=1
+[Move] Team 11 抵達 (19,18)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫7+私15) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 39 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=39 avg=94440 us max=1620855 us ticks=240 teams=10 factions=1
+[Move] Team 11 抵達 (19,18)
+[MGDBG] lord=0 bail pop=8 anon=0
+[Order] Team10 buy food ×3 (oid=67)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫7+私15) (需 { "material": 50, "tools": 0 })
+[Order] Team4 sell material ×2 (oid=68)
+[DayNight] Day 40 開始
+[MsgPrune] 刪除過期訊息 global=16 known=18
+[Move] Team 8 抵達 (14,24)
+[Move] Team 11 抵達 (19,18)
+[TickPerf] day=40 avg=99978 us max=1743680 us ticks=240 teams=10 factions=1
+
+───── recovery-r1 摘要(40天) ─────
+final teams=10 factions=1
+  plains(T1): alive=true pop=2 faction=0
+  forest(T2): alive=true pop=2 faction=0
+  mountain(T3): alive=true pop=2 faction=0
+
+★migrant鏈計數：migrant.dispatched=0 migrant.arrived=0
+migrant.marginal(peak)=0.0000 migrant.mini_util(peak)=0.0000
+
+★per-target migrant.marginal真值(判三態sign):
+  plains(T1): n=0 first={  }
+  forest(T2): n=0 first={  }
+  mountain(T3): n=0 first={  }
+
+[dump] → res://docs/measurements/2026-08-06-infonet-recovery-r1-migrant.json
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+

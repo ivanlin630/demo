@@ -1,0 +1,30 @@
+{
+  "diagnostic": "recovery-path R1 移民三態湧現分化床(ex-ante formula見config._doc)",
+  "final": {
+    "factions": 1,
+    "teams": 8
+  },
+  "per_village_marginal_sample": {
+
+  },
+  "probe": {
+    "migrant.arrived": 0,
+    "migrant.dispatched": 0,
+    "migrant.marginal_peak": 0,
+    "migrant.mini_util_peak": 0
+  },
+  "villages": {
+    "1_plains": {
+      "alive": true,
+      "pop": 2
+    },
+    "2_forest": {
+      "alive": true,
+      "pop": 2
+    },
+    "3_mountain": {
+      "alive": true,
+      "pop": 2
+    }
+  }
+}

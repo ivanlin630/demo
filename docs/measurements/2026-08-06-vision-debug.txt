@@ -1,0 +1,24 @@
+﻿Exception calling "ReadAllBytes" with "1" argument(s): "The proce
+ss cannot access the file 'C:\Users\I12\AppData\Local\Temp\tmp896
+7.tmp' because it is being used by another process."
+At A:\GDS\demo\tools\godot.ps1:27 char:1
++ $bytesOut = [System.IO.File]::ReadAllBytes($tempOut)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvoca 
+   tionException
+    + FullyQualifiedErrorId : IOException
+ 
+Exception calling "GetString" with "1" argument(s): "Array cannot
+ be null.
+Parameter name: bytes"
+At A:\GDS\demo\tools\godot.ps1:30 char:1
++ $text = $cp950.GetString($bytesOut) + $cp950.GetString($bytesEr
+r)
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvoca 
+   tionException
+    + FullyQualifiedErrorId : ArgumentNullException
+ 
+
+[GODOT TIMEOUT 600s - process killed]
