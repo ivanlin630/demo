@@ -8,7 +8,7 @@ extends SceneTree
 
 const CONFIG_PATH := "res://config/infonet_recovery_r1_migrant.json"
 const SEED: int = 9090
-const DAYS: int = 40
+const DAYS: int = 22
 const OUT_PATH := "res://docs/measurements/2026-08-06-infonet-recovery-r1-migrant.json"
 
 func _initialize() -> void:
@@ -23,13 +23,16 @@ func _initialize() -> void:
 	GameSetup.setup(state, config)
 	SpecimenDumpHelper.setup_from_env(state)
 
-	var no_player := Vector2i(-1, -1)
+	# ★systems fix(2026-08-06-systems-to-measurer-recovery-r1-fixture-fix.md)：no_player=(-1,-1)→
+	#   全隊落far LOD bucket→vision只每FAR_ZONE_INTERVAL=100tick跑一次→belief population_est沒機會populate。
+	#   量測harness修正(非code改)：傳lord位置當player_pos anchor→lord+3村(距≤3)全落near bucket→快cadence vision。
+	var cluster_pos: Vector2i = state.teams[0].tile_pos
 	var ticks: int = WorldState.TICKS_PER_DAY * DAYS
 	var marginal_samples: Dictionary = {1: [], 2: [], 3: []}   # village_id → [marginal values seen]
 	var labels: Dictionary = {1: "plains", 2: "forest", 3: "mountain"}
 
 	for tick in range(ticks):
-		runner.advance_tick(state, no_player)
+		runner.advance_tick(state, cluster_pos)
 
 	print("\n───── recovery-r1 摘要(%d天) ─────" % DAYS)
 	print("final teams=%d factions=%d" % [state.teams.size(), state.factions.size()])
@@ -53,6 +56,9 @@ func _initialize() -> void:
 	for vid in [1, 2, 3]:
 		var arr: Array = per_village.get(vid, [])
 		print("  %s(T%d): n=%d first=%s" % [String(labels[vid]), vid, arr.size(), str(arr[0] if not arr.is_empty() else {})])
+	print("\n★migrant.dispatched_sample(哪村真收到派遣):")
+	for s in Probe.samples.get("migrant.dispatched_sample", []):
+		print("  target_village=%s marginal=%s" % [str(s.get("target_village", -1)), str(s.get("marginal", 0.0))])
 
 	var dump: Dictionary = {
 		"diagnostic": "recovery-path R1 移民三態湧現分化床(ex-ante formula見config._doc)",
