@@ -883,6 +883,13 @@ func _market_visitor_sell(state: WorldState, visitor: TeamData, owner: TeamData,
 	if owner != null:
 		ResourceBank.add(owner, "coin", -(q * bid), "market_sell_coin_out")   # 付費端居民付 coin→領主收（coin 守恆）；免費 gift bid=0 no-op；無主據點 owner=null 略過
 	_settle_owner_order(owner, tile, oid, q)
+	# ★cohesion P4 地基：distribute relief 真送達 resident（settle 成功）→ resident leader 寫 benefactor memory
+	#   （benefactor=領主=convoy 母隊 visitor.parent_team_id）＝「領主救了我」自我記憶、stay_benefit 的地基。零 RNG。
+	if override_ask >= 0.0 and owner != null and state.persons.has(owner.leader_id):
+		var lord_bid: int = visitor.parent_team_id
+		if lord_bid != -1 and lord_bid != owner.team_id:
+			_npc_ai.write_memory(state.persons[owner.leader_id], "benefactor", lord_bid, state.world.current_tick, 1.0)
+			if Probe.enabled: Probe.bump("cohesion.benefactor_write")
 	if override_ask >= 0.0 and Probe.enabled:
 		Probe.bump("distribute.deliver")   # SLICE B tap:分配真交付
 		Probe.add_amount("distribute.food_delivered", float(q))

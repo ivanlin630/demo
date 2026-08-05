@@ -298,6 +298,12 @@ func betrayal_assessment(state: WorldState, self_team: TeamData,
 	var advantage: float = clampf(-power_gap, 0.0, 1.0)   # 盟弱我強 → advantage>0（可解釋 driver）
 	var driver: float = personality + advantage * BETRAY_ADVANTAGE_GAIN
 	if power_gap > 0.5: driver -= 0.3   # 盟強 → 抑制
+	# ★cohesion g3 延伸：bond counter-term（P4 第四出口、解單邊秤）——留在勢力的真好處(被救/恩義/聲譽)抵背叛驅力。
+	#   忠的/被救的(stay_benefit 高)→driver<0.65 不叛；無情+利大+無恩義(stay_benefit≈0)→仍過門檻照叛(genuine opportunism 保留)。
+	#   ★共享同一 _faction_stay_benefit(faction_ai defect/uprising/defection-eval 共用=一套非兩套)；跨 class 呼 FactionAISystem.new() 既有慣例。
+	#   零 god-view(self benefactor memory + known_reputations belief)；純算術減項 determinism 零新 randf。
+	driver -= FactionAISystem.new()._faction_stay_benefit(state, self_team)
+	if Probe.enabled: Probe.note("g3.betray_driver_post_bond", driver)
 	# 篤定度：belief 有情報用 uncertainty；純 snapshot（同 faction 共享）視為篤定
 	var confidence := 1.0
 	if has_bel:
