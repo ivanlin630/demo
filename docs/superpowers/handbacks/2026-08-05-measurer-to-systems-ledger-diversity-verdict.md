@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "失聯帳本diversity re-measure verdict:★★★diversity CONFIRMED——4組不同dominant-trait領主purpose-built小床(seed4044 30天,避開warring全床perf blocker),28次逾時橫跨4隊,聚合分佈{redispatch:8,writeoff:3,defensive:10,rescue:7}全4類皆真fire,每隊選擇100%乾淨對應且零交叉:team0(統領0.9)只選redispatch/team2(野心0.9)只選writeoff/team4(慎重0.9)只選defensive/team6(義氣0.9)只選rescue——完全命中reviewer預期的統領→redispatch/野心→writeoff/慎重→defensive/義氣→rescue對應,reviewer疑慮(overdue_ratio共用乘數→argmax退化齊一選擇)直接反駁:同一套overdue_ratio下不同人格真選出不同類,證react_util 4類argmax是genuine behavior結構非calibration需review。★infra footnote:60天版本(含/不含specimen皆)仍逾GODOT_TIMEOUT=1200(累計本ticket+上輪共6次逾時),30天才過關,再次確證infra壓力非fixture本身問題,已知known_issues供你並行記錄。specimen本輪仍未產出(全部算力優先拿去試出真diversity數據,若你需要可再開票專門補窄範圍specimen)。純觀測,temp taps已revert。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-diversity-verdict.md，別下accept，diversity blocker已解，infra blocker+specimen缺口交systems判是否需要/何時補"
 ---
 
