@@ -1,6 +1,6 @@
 # 復甦路徑 HOW（systems / 邊際經濟計算層 + 三動詞 dispatch）
 
-status: DRAFT（待 R² per slice）
+status: DRAFT-v2（R² round1=ISSUES 三 finding 全訂正 2026-08-06：①VillageEstimate god-view 防線 §1.0/②facility_roi survival-bounded 治 HORIZON 自打臉 §1.1.2/③material_cost→upgrade_cost；待 R² round2）
 owner: systems（HOW）← WHAT LOCKED `2026-08-05-recovery-path-design.md`（§2.5 動詞通用、邊際經濟湧現、禁地型查表）
 date: 2026-08-06
 grounding: §3 經濟底查（`2026-08-06-...econ-baseline-verdict`）+ R① CLEAN（P1-P5 reuse、P3=新 lord-side 機制訂正）+ blueprint marginal-ruling（2026-08-06）。
@@ -9,24 +9,39 @@ grounding: §3 經濟底查（`2026-08-06-...econ-baseline-verdict`）+ R① CLE
 **禁地型查表**（「山→遷/森→投」= 腳本違憲）。三動詞（移民/投資/遷村）**共讀同一邊際經濟計算層**、各自 util = 真邊際數字 → **terrain 三態行為湧現、零 lookup**。terrain 三態 = **驗證床設計參考**（量測分化），非 code 分支。同「補丁閘優先查／決策交引擎人格秤」精神。
 
 ## §1 邊際經濟計算層 `MarginalEconomy`（三動詞共讀 substrate）
-新 static helper（純算術、零 RNG、類 `FoodFlow`），計算三個邊際量、**全部 off `FoodFlow._sustainable_inflow`**（food_flow.gd:35-47，遊戲自身 survival 判讀的可持續產出公式，含 terrain REGEN × outpost_mult × `pop_mult=clampf(sqrt(pop/5),0.5,2.0)` × farming × prod_skill）：
+新 static helper（純算術、零 RNG、類 `FoodFlow`）。
 
-1. **移民邊際** `migrant_marginal(village_est, +k)`
-   = `inflow(pop_est+k) − inflow(pop_est)` **−** `k × FOOD_PER_PERSON_PER_DAY(0.8)`。
-   → 森林 pop2→3：Δinflow≈+0.42 − 0.8 = **−0.38（負）** → 引擎自己算出「不移」；平原 pop2→3：Δinflow 大 − 0.8 = 正 → 移。**三態從此式湧現**。
-   ★語意修正（底查）：「人到=產能到」**僅邊際為正的地成立**——`pop_mult` concave+封頂 = 加人邊際遞減，deficit 村加人=加速惡化。
+### §1.0 ★輸入 = VillageEstimate（非 live target team）——god-view 防線核心（R² finding① 訂正）
+★★**`MarginalEconomy` 禁呼 `FoodFlow._sustainable_inflow(state, live_target_team)`**（那讀 target live tile/leader = god-view，同 `_resident_food_runway` 違規同款）。改吃**純 struct `VillageEstimate`**、經內部 pure `_inflow_est(est)` 重算產出公式（鏡射 food_flow.gd:39-47 的 REGEN × outpost_mult × `pop_mult=clampf(sqrt(pop/5),0.5,2.0)` × farming × `(1+prod_skill×0.3)`）。
 
-2. **投資 ROI** `facility_roi(village_est, facility, next_lvl)`
-   = `[inflow(farming_lvl+1) − inflow(current)] × HORIZON` **−** `material_cost`。
-   reuse `idle_employ_value` 計算基礎（terms.gd:115-120、真 need-weighted 期望產出、anti-crank 全因子從真公式反推）。`material_cost`=`NeedOracle._construction_facility_need`（faction_ai_system:2858 既有）。
-   → 森林 pop3 farming L1（30mat×1.5）：inflow 1.90→2.85、翻正 → ROI 正 → 投資划算；山地 pop2 滿升仍 inflow<consumption → ROI 永負 → 引擎不投（emerges）。
-   `HORIZON`=DERIVED（≈回本評估窗、非 invent-crank；建議 = DESPERATION_DAYS 級或 outpost 壽命 proxy，R² 校）。
+`VillageEstimate` 欄位來源（R② finding① 明確化——`_sustainable_inflow` 的**每一個乘數項**逐一交代，尤其 reviewer 抓的 `harvest_factor`+`prod_skill` 兩 live 欄）：
+| 欄 | 來源 | 理由（感知鐵律） |
+|---|---|---|
+| terrain（REGEN） | 自家村行政/holding 記錄（領主治理即知；relocate 目標=explored/scouted、未知→skip） | 靜態地理、非 live-tile god-view 讀值 |
+| outpost_level / farming_level | 同上（結構欄、緩變、建置時記錄） | 領主治自家村的行政知識、非 live 讀 |
+| pop | **belief `pop_est`**（holding 報 / care-scout firsthand） | 動態、感知鐵律走 belief |
+| **harvest_factor** | **NEUTRAL = 1.0（季節平均）** | ★belief store 無此 tile 季節欄、領主無法知遠村當下季節噪 → 誠實無知中性值；**正是 §3 底查 Model B 用的 baseline** |
+| **prod_skill（生產）** | **NEUTRAL = 0.0** | ★belief 不 carry 特定技能值、遠村領主技能未知 → 保守中性；同底查 baseline |
 
-3. **遷村價值** `relocate_value(team, target_tile_est)`
-   = `inflow(target_terrain, pop)` （他地前景）**−** `inflow(current)` **−** `sunk_penalty`（既有據點沉沒；reuse persist 統一既有秤 P1）。
-   → 山地村：current inflow 永<consumption、target 平原/森林前景高 → relocate_value 大正 → 遷；平原村：current 已盈餘 → 遷無益 → 不遷（emerges）。
+★**三態 discrimination robust to neutral defaults**：migrant_marginal 的 sign 由 `C = REGEN×harvest×outpost×farming×(1+skill×0.3)` 對比 0.8 決定，**terrain REGEN 主導**——即使 neutral(harvest=1/skill=0/outpost=1/farming=0)：plains `C=8×Δpop_mult(0.143)=1.14>0.8→正`、forest `C=3→0.43<0.8→負`、mountain `C=0.5→0.07→負`。neutral 只改 magnitude 不改 sign 三態 → **設計成立**（neutral 是誠實近似非偷減乘數項）。
 
-**★§1 感知鐵律硬約束（god-view 防線、命門）**：三邊際量的**目標村狀態輸入（pop / 現有 facility level / food-deficit）一律 belief-estimated、禁讀 god-view target team live**。terrain 視為 belief-known（村已在 holding ledger／已 scout 過才知其地；未知地不能算前景）。來源 = `BeliefSystem.best_estimate` / holding ledger / **care-scout firsthand co-location**（已 merged、傲村不 post 也看得見）。**無 belief → 保守不行動**（不 fabricate 邊際 off god-view，invariants:186）。自身真值（`team.population` 領主自己）照讀。**新增決策讀他村 stat → 走 belief + 補「真值≠belief」回歸測**（invariants:197 契約）。
+### §1.1 三邊際量（全 off `_inflow_est(VillageEstimate)`）
+1. **移民邊際** `migrant_marginal(est, +k)` = `_inflow_est(pop+k) − _inflow_est(pop) − k×0.8`。
+   → 森林 pop2→3 負 → 引擎不移；平原正 → 移。★「人到=產能到」**僅邊際正的地成立**（pop_mult concave+封頂、deficit 村加人加速惡化）。
+2. **投資 ROI** `facility_roi(est, facility, next_lvl)`（R² finding②③ 訂正）：
+   ```
+   Δinflow      = _inflow_est(farming_lvl+1) − _inflow_est(current)          # 恆正小量
+   net_after    = _inflow_est(farming_lvl+1) − est.pop×0.8                    # 投資後淨
+   effective_days = PLANNING_HORIZON            if net_after >= 0            # 可持續→惠及全視野
+                  = min(PLANNING_HORIZON, food_est / −net_after)  otherwise  # 仍赤字→只惠及殘存活窗
+   roi = Δinflow × effective_days − upgrade_cost_value
+   ```
+   ★**HORIZON 自打臉根治（finding②）**：discrimination **非靠調 HORIZON**、靠 **survival-boundedness**——山地投資後仍赤字（net_after<0）→ effective_days 綁殘存活窗（短）→ Δinflow×短窗 < cost → ROI 負 → 引擎不投（即使 HORIZON 大）；森林投資後轉正（net_after≥0）→ full horizon → ROI 正 → 投。`PLANNING_HORIZON` = genuine 基建規劃視野（季量級、DERIVED 自 `WorldState.TICKS_PER_DAY`，**非 fire-crank**）；★measurer 驗 discrimination **robust across HORIZON 區間 [40,120] 天**（若三態不隨 horizon 知邊翻轉=證非 knife-edge tuned=anti-fire-crank proof）。
+   `upgrade_cost_value` = **`OutpostSystem.upgrade_cost(facility, target_level)`**（outpost_system.gd:112-118、純 facility×level→cost 表、terrain-agnostic、零 state 依賴、零 god-view）× `TradeValuation.local_value`（共單位）。**非** `_construction_facility_need`（那 = 呼叫者自 outpost under-desire 加總 + 會讀 target live facility=god-view、finding③）。
+3. **遷村價值** `relocate_value(team, target_est)` = `_inflow_est(target)` 前景 **−** `_inflow_est(current)` **−** `sunk_penalty`（reuse persist 統一 `persist_strength` 沉沒項、persist_strength.gd）。
+   → 山地村 current 永赤字 + target 前景高 → 大正 → 遷；平原村 current 盈餘 → 不遷（emerges）。target_est 限 explored/scouted（未知地不能算前景）。
+
+**★§1 感知鐵律硬約束（god-view 防線、命門）**：三邊際量**全經 VillageEstimate（§1.0）、禁讀 live target team/tile/leader**。無 est（未 scout/未在 holding）→ 保守不行動（invariants:186）。自身真值（領主自己 `team.population`）照讀。跨距 = convoy/letter 真送達非瞬間。**新測**：`_test_leak_*` 補「MarginalEconomy 給 stale/錯 VillageEstimate → 決策跟 estimate 非 live 真值」兩向斷言（invariants:197 契約、R² 必查）。
 
 ## §2 三動詞 dispatch（lord-side side-action 家族）
 全部掛既有 `info_side_dispatch_all`（faction_ai_system:1667）迴圈：脫主 argmax（母隊 body 照自救=同 herald/scout/distribute）、per-team cadence-gate（:1673）、mini-util cost-benefit、真成本、throttle。mini-util anchor 紀律照 :1660（DERIVED 自食物常數、非 fire-crank）。
@@ -54,9 +69,9 @@ grounding: §3 經濟底查（`2026-08-06-...econ-baseline-verdict`）+ R① CLE
 - 抗命後果 = 領主人格：算了 / 斷賑濟（既有 distribute 停）/ **武力押遷 = 軍事 arc、本 arc 只留鉤子**（不實作強遷、只留 unrest→起義/叛離既有出口 P5 承接暴君逼反 → 湧現劇情）。
 
 ## §4 感知鐵律 enforce（god-view 防線彙總）
-- §1 三邊際輸入 = belief only（目標村 pop/facility/deficit）；terrain=belief-known；relocate 目標 = explored/known tiles（禁 god-view 全地掃最佳）。
-- 無 belief→保守不行動（invariants:186）。跨距 = convoy/letter 真送達（非瞬間、reuse in_transit_letters/_dispatch_convoy）。
-- **新測**：`_test_leak_*` 家族補「領主邊際決策讀 belief 非真值」兩向斷言（真值≠belief 時決策跟 belief）——invariants:197 契約，R² 必查。
+- §1.0 VillageEstimate = 唯一輸入面：**禁呼 `_inflow` on live target team**；結構欄（terrain/outpost/farming）=自家村行政記錄、pop=belief `pop_est`、harvest/prod_skill=NEUTRAL（見 §1.0 表逐欄理由）；relocate 目標 = explored/known tiles（禁 god-view 全地掃最佳）。
+- 無 est→保守不行動（invariants:186）。跨距 = convoy/letter 真送達（非瞬間、reuse in_transit_letters/_dispatch_convoy）。
+- **新測**：`_test_leak_*` 家族補「MarginalEconomy 給 stale/錯 VillageEstimate → 決策跟 estimate 非 live 真值」兩向斷言——invariants:197 契約，R² 必查。
 
 ## §5 §1 防 crank enforce（WHAT §1 + memory §1 雙向）
 - **無復甦配額**；三動詞 util 全真值（migrant_marginal=真邊際、facility_roi=真回收、relocate_value=真前景−沉沒；**禁 boost 逼 fire**）。
@@ -71,12 +86,14 @@ grounding: §3 經濟底查（`2026-08-06-...econ-baseline-verdict`）+ R① CLE
 |---|---|---|
 | P1 沉沒成本秤 | persist 統一（merged） | relocate_value 的 sunk_penalty |
 | P2 勞力池共址即產能 | merged | 移民抵村即產（僅邊際正） |
-| P3 idle_employ_value | terms.gd:115-120 / decision_context.gd:201 | facility_roi 計算基礎 |
+| P3 idle_employ_value | terms.gd:115-120 / decision_context.gd:201 | facility_roi 期望產出計算精神（anti-crank 全因子從真公式反推） |
+| ★facility 升級料成本 | `OutpostSystem.upgrade_cost` outpost_system.gd:112-118 | facility_roi 的 `upgrade_cost_value`（純表、零 god-view；**取代** finding③ 誤引的 `_construction_facility_need`） |
 | P3 建設 option（自 tile） | options.gd:40-47 | 村端收料在地蓋（material-delivery 解 target 寫死） |
 | P3 distribute convoy | faction_ai:1686-1694 | material-delivery dispatch 母體（換 payload） |
 | P4 in_transit_letters | faction_ai:1724 | 遷村令 directive（kind="relocate"） |
 | P5 unrest/起義/叛離 | cohesion（merged） | 承接遷怨/抗命/暴君逼反 |
-| 產出公式 | food_flow.gd:35-47 | 三邊際量 off `_sustainable_inflow` |
+| ★產出公式（**鏡射非直呼**） | food_flow.gd:39-47 | `_inflow_est(VillageEstimate)` 鏡射公式、**禁呼 `_sustainable_inflow(live_team)`**（§1.0 god-view 防線） |
+| persist_strength 沉沒 | persist_strength.gd | relocate_value 的 sunk_penalty（人格加權沉沒） |
 | relief target | faction_ai:2868-2869 | relief 一次性補血（結構修在三動詞） |
 
 ## §8 build 序（3 slice、各 R²→build→量→QA）
