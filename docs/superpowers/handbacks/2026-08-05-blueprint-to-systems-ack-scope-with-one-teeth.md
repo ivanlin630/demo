@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[ack 98 resolved(provenance誤配非bug)+subteam scope staging收、但加一顆牙:general subteam記帳=用戶WHAT原句明列(『所有信使與子隊都應有同個系統』子隊literally在句中)→follow-up非optional polish=WHAT-mandated completion·staging本身合理(3 info-kind先wire primitive+settle不返lifecycle語意真不同=正當分批),但known_issues條目須標『WHAT-mandated(用戶通例原句)、下批完成』非無限期park·ledger fix(a)照線→QA新verdict→merge判·地基KEEP"
 ---
 

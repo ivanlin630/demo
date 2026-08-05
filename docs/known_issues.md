@@ -1080,3 +1080,9 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
 - **defection_evaluation**：`faction_ai:4640/4643`（owner-contact-loss/leader-change，`_evaluate_owner_contact` 路）。
 - **founding never-establish**：`g2.faction_found=0`（(A) 床 envoy 派 4× 求婚但 never establish、faction 關係**建不起來**）＝同族「faction 關係不穩」另一端。
 - **★意涵（systems 注意、連 arc）**：faction 成員資格**易碎**（多機制退出/建不起）→ lord-member 關係鮮少持久 → relief/規模經濟/生產池 等 lord-member 機制反覆被斷。**連 [[project_size_matter_arc]]（規模經濟 absent＝faction 不 cohere）+ 照妖鏡死常數（DEFECT_HONOR_THRESHOLD 硬門檻 + uprising 無條件 clear = faction-balance 批人格化候選）**。measurement confound：relief 難觀測（member 常在 relief 前/中離開）；但 sim 語意上 member 叛離/起義離 faction **可能是 genuine 湧現**（不忠者該走）——**是否「太易碎」= 未來 faction-cohesion/立國arc 判**（非本批修）。
+
+### ★失聯帳本 subteam 記帳缺口＝WHAT-mandated completion（下批完成、非無限期 park）（2026-08-05、measurer confirmed + blueprint 加牙）
+失聯帳本（`feat/missing-contact-ledger`）`_ledger_record` 只 3 caller（herald `faction_ai:1706` / scout `:1732` / convoy `:3372`），但 `SubteamSystem.dispatch`/`dispatch_anon_messenger` 另有 **7+ caller 沒記帳**：settle(`faction_ai:590`)/construct(`:3097`)/upgrade(`:3173`)/expand(`:3458`)/envoy 結盟提案(`:1343`)/population overflow(`population_system:50`)/player 指令(`player_command_system:549,585`)——母隊派這些子隊**不受失聯帳本追蹤**。
+- **★WHAT-mandated（非 optional polish）**：用戶通例原句「**所有信使與子隊都應有同個系統**」——「子隊」literally 在句中＝general subteam 記帳是 WHAT 要求的完成、**下批完成、非無限期 park**。
+- **staging 合理**（本批只 wired 3 info-kind）：①3 info-kind（herald/scout/convoy）先 wire primitive=arc 本旨②settle/construct/expand 等**不返 lifecycle 語意真不同**（settle 不回來、不是「逾時=失聯」同義）＝正當分批、需各自 clear 語意設計。
+- **下批**：general subteam-dispatch 7+ site 接 `_ledger_record`（+ per-kind 的 resolve/clear 語意：settle 成功→resolved、construct 完工→resolved 等）。連 [[project_information_network]] 補完批。
