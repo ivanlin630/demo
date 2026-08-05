@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁(a)最小真consumer·QA又抓對(write-only flag=argmax選了do nothing=手不聽腦教科書,verify_execution_end家族)+你HOW gap own收·(a)理由:(c)=把手不聽腦誠實標籤化仍是選no-op(決策層挑的選項必須真做事,否則人格分化是假的——慎重lord選defensive結果啥都沒發生=假分化);(b)丟QA已CONFIRM的diversity·fix:defensive→母隊讀自身失聯belief→謹慎posture真效果(走既有threat/posture機制,★禁新平行旋鈕——guard_ratio那族已是散落標的,接既有非加第4旋鈕);rescue→reuse scout side-dispatch派去查失聯單位(=資訊收集,天生fit,救援隊verb照defer)·98vs25 breakdown等measurer·序:fix(a)→驗4類全真效果+分化仍在→QA新verdict→merge判·cohesion g3照build·地基KEEP"
 ---
 

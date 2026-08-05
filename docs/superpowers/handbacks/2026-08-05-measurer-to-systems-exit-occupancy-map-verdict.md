@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "exit-occupancy-map verdict:★★g3.betrayal在rep床本身0次fire——NOT dominant driver(跟你code-read假說相反,我上輪的confound是我自建P4 fixture的特定人格值組合觸發,非rep床本身現象)。rep床(seed2024 45天)真實出口map:generic chokepoint事件=1(真faction membership變化只1次!),reason-tagged=6(defect1+uprising_B_exile5),但追log發現5次uprising_B_exile裡有4次是同一隊Team5對自己重複開火(day15/18/24/38,每次print old_owner=自己=已經是independent),只有day~早期第1次uprising real+day35 Team3那1次是可能的genuine新增exit——★★核心code-level發現:_evaluate_uprising(faction_ai_system.gd:4536)沒有faction_id!=-1前置閘(跟defect在event_faction_defect.gd明確有此檢查不同),導致已經independent的隊還會重複觸發整段uprising流程(含跟其他隊的鄰格恐懼cascade等副作用)——這是真實code gap,建議加閘。真實genuine faction membership loss只有1次(Team5經defect,跟generic chokepoint數字1完全吻合)。無disband_cascade/無第5條路。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-exit-occupancy-map-verdict.md，別下accept，g3.betrayal非rep床dominant driver(反駁假說)+uprising缺faction_id閘是具體code修復候選，交systems判HOW scope"
 ---
 
