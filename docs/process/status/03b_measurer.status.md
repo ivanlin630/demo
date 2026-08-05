@@ -12,6 +12,10 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
+**狀態**：工作中（等下一票）——faction-cohesion開場exit-attribution verdict已完成寄出
+
+**工單**：無（exit-attribution verdict已完成寄systems：★★defect出口genuine確認——自建4組lord+member對照fixture,matched honor(T1餵飽0.34 vs T3餓0.34同值):T1 unrest恆0 60天never exit,T3 unrest飆升(26/52/79/105/132)exit_day=0即刻defect。同honor值結果南轅北轍,證unrest_turns>=20(真resource distress)是真正gatekeeper,reviewer疑慮(honor門檻flip=arbitrary)不成立於實際運行(不餓member永遠不會被評到defect check)。uprising(T5,同starve曲線但honor0.6 defect-safe)day14才觸發(unrest>=60+loyalty<0.2+stress≥2三重門檻)=同樣genuine但『無條件脫離vs可換領主留任』設計問題未解維持open。contact-loss(T7遠距24格)60天內從未觸發=inconclusive,懷疑測法缺陷(_evaluate_owner_contact從未接觸過直接early-return,需重新設計先建belief再隔離)。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-exit-attribution-verdict.md，別下accept，defect刀口有堅實grounding,uprising/contact-loss仍需補測交systems判§2 spec方向。
+
 **狀態**：工作中（等下一票）——L3 rerun-correct-path verdict已完成寄出(誠實認錯更正)
 
 **工單**：無（L3 rerun-correct-path verdict已完成寄systems：★★QA『stale --path』假說查核後不成立(git rev-parse驗證worktree HEAD=06c8b452確實對L3 branch)，真根因=我自己上輪specimen票只掛SpecimenDumpHelper 2行、忘記重加market.visit_util/g1.arb_attempt兩temp PROBE_KEYS→_probe_subset()沒這兩key→我print用.get(k,0)吐0→誤讀成沒fire,已誠實認錯是我的tap覆蓋疏漏非code問題。補齊tap重跑:market.visit_util=1186/g1.arb_attempt=744跟最早『L3 behavior verdict』那輪逐位元相同,trade.deal=8/merchant1/resident7/market_arrive17也跟QA讀到數字完全一樣=這組數字從頭到尾都是真數。specimen v2同2717 entries側面確認determinism。根因2(床不足factions:1/established:0)確認屬實維持不變,非我能單解交blueprint床策略。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-L3-rerun-correct-path-verdict.md，別下accept，等blueprint床策略+QA重讀。

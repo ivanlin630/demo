@@ -1,0 +1,1161 @@
+{
+  "diagnostic": "faction-cohesion exit-attribution 開場量測（measure-first、只交真值）",
+  "members": {
+    "1": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 0,
+          "food": 3140.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 2,
+          "faction": 0,
+          "food": 3270,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 3,
+          "faction": 0,
+          "food": 3446,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 4,
+          "faction": 0,
+          "food": 3564.1,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 5,
+          "faction": 0,
+          "food": 3739.3,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 6,
+          "faction": 0,
+          "food": 3847.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 7,
+          "faction": 0,
+          "food": 3951.1,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 8,
+          "faction": 0,
+          "food": 4084.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 9,
+          "faction": 0,
+          "food": 4178.1,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 10,
+          "faction": 0,
+          "food": 4290.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 11,
+          "faction": 0,
+          "food": 4368,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 12,
+          "faction": 0,
+          "food": 4443.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 13,
+          "faction": 0,
+          "food": 3291.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 14,
+          "faction": 0,
+          "food": 3347.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 15,
+          "faction": 0,
+          "food": 3432.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 16,
+          "faction": 0,
+          "food": 3484.3,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 17,
+          "faction": 0,
+          "food": 3527.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 18,
+          "faction": 0,
+          "food": 3598.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 19,
+          "faction": 0,
+          "food": 3606.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 20,
+          "faction": 0,
+          "food": 3596.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 21,
+          "faction": 0,
+          "food": 3589.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 22,
+          "faction": 0,
+          "food": 3583.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 23,
+          "faction": 0,
+          "food": 3573.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 24,
+          "faction": 0,
+          "food": 3566.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 25,
+          "faction": 0,
+          "food": 3556.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 26,
+          "faction": 0,
+          "food": 3549.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 27,
+          "faction": 0,
+          "food": 3543.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 28,
+          "faction": 0,
+          "food": 3533.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 29,
+          "faction": 0,
+          "food": 3526.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 30,
+          "faction": 0,
+          "food": 3516.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 31,
+          "faction": 0,
+          "food": 3509.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 32,
+          "faction": 0,
+          "food": 3503.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 33,
+          "faction": 0,
+          "food": 3493.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 34,
+          "faction": 0,
+          "food": 3486.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 35,
+          "faction": 0,
+          "food": 3476.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 36,
+          "faction": 0,
+          "food": 3469.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 37,
+          "faction": 0,
+          "food": 3463.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 38,
+          "faction": 0,
+          "food": 3453.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 39,
+          "faction": 0,
+          "food": 3446.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 40,
+          "faction": 0,
+          "food": 3436.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 41,
+          "faction": 0,
+          "food": 3429.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 42,
+          "faction": 0,
+          "food": 3423.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 43,
+          "faction": 0,
+          "food": 3413.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 44,
+          "faction": 0,
+          "food": 3406.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 45,
+          "faction": 0,
+          "food": 3396.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 46,
+          "faction": 0,
+          "food": 3389.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 47,
+          "faction": 0,
+          "food": 3383.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 48,
+          "faction": 0,
+          "food": 3373.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 49,
+          "faction": 0,
+          "food": 3366.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 50,
+          "faction": 0,
+          "food": 3356.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 51,
+          "faction": 0,
+          "food": 3349.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 52,
+          "faction": 0,
+          "food": 3343.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 53,
+          "faction": 0,
+          "food": 3333.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 54,
+          "faction": 0,
+          "food": 3326.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 55,
+          "faction": 0,
+          "food": 3316.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 56,
+          "faction": 0,
+          "food": 3309.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 57,
+          "faction": 0,
+          "food": 3303.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 58,
+          "faction": 0,
+          "food": 3293.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 59,
+          "faction": 0,
+          "food": 3286.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 60,
+          "faction": 0,
+          "food": 3276.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        }
+      ],
+      "exit_day": -1,
+      "exit_tick": -1
+    },
+    "3": {
+      "alive_at_end": false,
+      "daily": [
+        {
+          "day": 1,
+          "faction": -1,
+          "food": 9.3,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 26
+        },
+        {
+          "day": 2,
+          "faction": -1,
+          "food": 3.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 52
+        },
+        {
+          "day": 3,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 79
+        },
+        {
+          "day": 4,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 105
+        },
+        {
+          "day": 5,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 132
+        },
+        {
+          "day": 6,
+          "faction": -1,
+          "food": 0,
+          "pop": 10,
+          "task": "投靠",
+          "unrest_turns": 158
+        }
+      ],
+      "exit_day": 0,
+      "exit_tick": 200
+    },
+    "5": {
+      "alive_at_end": false,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 2,
+          "food": 9.1,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 26
+        },
+        {
+          "day": 2,
+          "faction": 2,
+          "food": 3.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 52
+        },
+        {
+          "day": 3,
+          "faction": 2,
+          "food": 0,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 79
+        },
+        {
+          "day": 4,
+          "faction": 2,
+          "food": 0,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 105
+        },
+        {
+          "day": 5,
+          "faction": 2,
+          "food": 0,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 132
+        },
+        {
+          "day": 6,
+          "faction": 2,
+          "food": 0,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 158
+        },
+        {
+          "day": 7,
+          "faction": 2,
+          "food": 0,
+          "pop": 10,
+          "task": "建設",
+          "unrest_turns": 184
+        },
+        {
+          "day": 8,
+          "faction": 2,
+          "food": 0,
+          "pop": 10,
+          "task": "建設",
+          "unrest_turns": 211
+        },
+        {
+          "day": 9,
+          "faction": 2,
+          "food": 0,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 237
+        },
+        {
+          "day": 10,
+          "faction": 2,
+          "food": 0,
+          "pop": 9,
+          "task": "覓食",
+          "unrest_turns": 264
+        },
+        {
+          "day": 11,
+          "faction": 2,
+          "food": 0,
+          "pop": 8,
+          "task": "覓食",
+          "unrest_turns": 290
+        },
+        {
+          "day": 12,
+          "faction": 2,
+          "food": 0,
+          "pop": 7,
+          "task": "覓食",
+          "unrest_turns": 316
+        },
+        {
+          "day": 13,
+          "faction": 2,
+          "food": 0,
+          "pop": 6,
+          "task": "覓食",
+          "unrest_turns": 343
+        },
+        {
+          "day": 14,
+          "faction": 2,
+          "food": 0,
+          "pop": 5,
+          "task": "覓食",
+          "unrest_turns": 369
+        },
+        {
+          "day": 15,
+          "faction": -1,
+          "food": 0,
+          "pop": 4,
+          "task": "守城",
+          "unrest_turns": 396
+        }
+      ],
+      "exit_day": 14,
+      "exit_tick": 3370
+    },
+    "7": {
+      "alive_at_end": true,
+      "daily": [
+        {
+          "day": 1,
+          "faction": 3,
+          "food": 859.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 2,
+          "faction": 3,
+          "food": 925.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 3,
+          "faction": 3,
+          "food": 1008,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 4,
+          "faction": 3,
+          "food": 1074.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 5,
+          "faction": 3,
+          "food": 1150.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 6,
+          "faction": 3,
+          "food": 1197.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 7,
+          "faction": 3,
+          "food": 1238.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 8,
+          "faction": 3,
+          "food": 1309.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 9,
+          "faction": 3,
+          "food": 1356.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 10,
+          "faction": 3,
+          "food": 1415.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 11,
+          "faction": 3,
+          "food": 1456.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 12,
+          "faction": 3,
+          "food": 1488.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 13,
+          "faction": 3,
+          "food": 1544.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 14,
+          "faction": 3,
+          "food": 1575,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 15,
+          "faction": 3,
+          "food": 1613.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 16,
+          "faction": 3,
+          "food": 1636.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 17,
+          "faction": 3,
+          "food": 1659.3,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 18,
+          "faction": 3,
+          "food": 1696.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 19,
+          "faction": 3,
+          "food": 1715.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 20,
+          "faction": 3,
+          "food": 1747.3,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 21,
+          "faction": 3,
+          "food": 1765.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 22,
+          "faction": 3,
+          "food": 1785.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 23,
+          "faction": 3,
+          "food": 1812.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 24,
+          "faction": 3,
+          "food": 1827.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 25,
+          "faction": 3,
+          "food": 1848.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 26,
+          "faction": 3,
+          "food": 1861.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 27,
+          "faction": 3,
+          "food": 1872,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 28,
+          "faction": 3,
+          "food": 1888,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 29,
+          "faction": 3,
+          "food": 1896.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 30,
+          "faction": 3,
+          "food": 1910.1,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 31,
+          "faction": 3,
+          "food": 1916.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 32,
+          "faction": 3,
+          "food": 1924.7,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 33,
+          "faction": 3,
+          "food": 1936.1,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 34,
+          "faction": 3,
+          "food": 1943,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 35,
+          "faction": 3,
+          "food": 1952.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 36,
+          "faction": 3,
+          "food": 1959.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 37,
+          "faction": 3,
+          "food": 1965.9,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 38,
+          "faction": 3,
+          "food": 1972.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 39,
+          "faction": 3,
+          "food": 1977.7,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 40,
+          "faction": 3,
+          "food": 1983.7,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 41,
+          "faction": 3,
+          "food": 1987.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 42,
+          "faction": 3,
+          "food": 1990.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 43,
+          "faction": 3,
+          "food": 1994.7,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 44,
+          "faction": 3,
+          "food": 1997.1,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 45,
+          "faction": 3,
+          "food": 1998.8,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 46,
+          "faction": 3,
+          "food": 1999.7,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 47,
+          "faction": 3,
+          "food": 2000.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 48,
+          "faction": 3,
+          "food": 2002,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 49,
+          "faction": 3,
+          "food": 2003,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 50,
+          "faction": 3,
+          "food": 2005.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 51,
+          "faction": 3,
+          "food": 2006.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 52,
+          "faction": 3,
+          "food": 2006.4,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 53,
+          "faction": 3,
+          "food": 2008.1,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 54,
+          "faction": 3,
+          "food": 2008.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 55,
+          "faction": 3,
+          "food": 2006.7,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 56,
+          "faction": 3,
+          "food": 2006.5,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 57,
+          "faction": 3,
+          "food": 2005.2,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 58,
+          "faction": 3,
+          "food": 2004.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 59,
+          "faction": 3,
+          "food": 2003.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        },
+        {
+          "day": 60,
+          "faction": 3,
+          "food": 2000.6,
+          "pop": 10,
+          "task": "覓食",
+          "unrest_turns": 0
+        }
+      ],
+      "exit_day": -1,
+      "exit_tick": -1
+    }
+  }
+}
