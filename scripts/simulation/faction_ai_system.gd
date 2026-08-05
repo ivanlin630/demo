@@ -4567,11 +4567,19 @@ func _evaluate_uprising(state: WorldState, team: TeamData) -> void:
 		tile.construction_target     = {}
 		print("[Uprising] cancel construction at (%d,%d)" % [team.tile_pos.x, team.tile_pos.y])
 	if stand:
-		# Path A 守城：奪取 outpost、自立（保留 PRODUCE 身分）
-		state.clear_team_faction(team)   # 起義脫離 faction（雙向同步）
+		# Path A 守城：奪取 outpost。★後果秤（cohesion）：換領主留勢力 vs 自立脫離——
+		#   義氣高/被救過(stay_benefit 高)→推翻本地暴領主但留勢力換新安排；野心高/stay_benefit 低→自立脫離。
+		var secede_u: float = ambition * 0.6 + (1.0 - honor) * 0.4
+		var stay_u: float = honor * 0.5 + _faction_stay_benefit(state, team)
+		if stay_u > secede_u:
+			if Probe.enabled: Probe.bump("cohesion.uprising_stay_faction")   # 推翻本地暴領主、留勢力（不脫 faction）
+			print("[Uprising A] Team%d 守城留勢力（義氣=%.2f stay=%.2f>secede=%.2f，old owner=Team%d）" % [
+				team.team_id, honor, stay_u, secede_u, old_owner_id])
+		else:
+			state.clear_team_faction(team)   # 自立脫離 faction（雙向同步）
+			print("[Uprising A] Team%d 守城自立（野心=%.2f secede=%.2f>=stay=%.2f，old owner=Team%d）" % [
+				team.team_id, ambition, secede_u, stay_u, old_owner_id])
 		if tile: OutpostOwnerBank.set_owner(tile, team.team_id, "takeover")
-		print("[Uprising A] Team%d 守城（野心=%.2f，old owner=Team%d）" % [
-			team.team_id, ambition, old_owner_id])
 	else:
 		# Path B 流亡（原 spec E 邏輯）
 		state.clear_team_faction(team)   # 起義流亡脫離 faction（雙向同步）
@@ -4617,14 +4625,52 @@ func _count_stress_sources(state: WorldState, team: TeamData) -> int:
 	if team.unrest_turns > 40: sources += 1
 	return sources
 
+# ★勢力凝聚力 P4：member 對「留在此勢力」的真期望價值（★零 god-view：讀自身 benefactor memory + known_reputations belief）。
+# stay_benefit = W_RELIEF×relief_memory(被救過自我記憶) + W_REP×heard_reputation(聽聞領主聲望 belief)，人格 modulate(義氣/信義高→更重恩義)。
+# ★calibration 錨真值（非 fire-crank）：relief_mem/heard_rep 皆 [0,1] 正規化；W_RELIEF>W_REP(親身被救>聽聞)、和≈1；與 defect_util([0,1]量級)可比。
+const COHESION_W_RELIEF: float = 0.7   # 親身被救(benefactor memory)權重
+const COHESION_W_REP: float = 0.3      # 聽聞領主道德聲望(belief)權重
+const COHESION_RELIEF_SAT: float = 3.0 # relief 記憶飽和數(被救 3 次→relief_mem 滿、重複被救忠誠飽和)
+func _faction_stay_benefit(state: WorldState, team: TeamData) -> float:
+	if team.faction_id == -1:
+		return 0.0
+	var leader: PersonData = state.persons.get(team.leader_id)
+	if leader == null:
+		return 0.0
+	var f = state.factions.get(team.faction_id)
+	var lord_id: int = f.leader_team_id if f != null else -1
+	if lord_id == -1 or lord_id == team.team_id:
+		return 0.0   # 無領主/自己是領主→無「留在別人麾下」的 stay-benefit
+	# relief_memory：自身 benefactor memory 指向該領主（被救次數飽和到 [0,1]）
+	var relief_mem: float = clampf(_benefactor_strength(leader, lord_id) / COHESION_RELIEF_SAT, 0.0, 1.0)
+	# heard_reputation：known_reputations[領主]（belief 道德聲望、預設 0.5 中立）
+	var heard_rep: float = float(team.known_reputations.get(lord_id, 0.5))
+	# 人格 modulate：義氣/信義高→更重視領主恩義（[0.5,1.5]）
+	var honor: float = float(leader.values.get("義氣", 0.5))
+	var trust: float = float(leader.values.get("信義", 0.5))
+	var pmod: float = 0.5 + (honor + trust) * 0.5
+	var sb: float = (COHESION_W_RELIEF * relief_mem + COHESION_W_REP * heard_rep) * pmod
+	if Probe.enabled: Probe.note("cohesion.stay_benefit", sb)
+	return sb
+
+# 自身 benefactor memory 指向 lord_id 的強度（被救次數、★讀 self memory 非全知統計）。
+func _benefactor_strength(person: PersonData, lord_id: int) -> float:
+	if lord_id == -1:
+		return 0.0
+	var s: float = 0.0
+	for m in person.memory:
+		if m is Dictionary and m.get("type") == "benefactor" and int(m.get("subject_id", -1)) == lord_id:
+			s += float(m.get("intensity", 1.0))
+	return s
+
 func _trigger_defection_evaluation(state: WorldState, team: TeamData, reason: String) -> void:
 	var leader = state.persons.get(team.leader_id)
 	if leader == null: return   # gate-ok: guard early-return (null/player/combat/cadence/pos/empty，非決策閘)
 	var honor: float = float(leader.values.get("義氣", 0.5))
 	var prudence: float = float(leader.values.get("慎重", 0.5))
 	var ambition: float = float(leader.values.get("野心", 0.5))
-	var has_benefactor_memory: float = 0.3 if _has_memory_type(leader, "benefactor") else 0.0
-	var a_score: float = honor + has_benefactor_memory
+	# ★cohesion 整併：三決策點統一 stay-benefit（原 has_benefactor_memory flat+0.3 粗糙常數 → rich relief-memory+reputation 人格 weigh）。
+	var a_score: float = honor + _faction_stay_benefit(state, team)
 	var b_score: float = prudence
 	var c_score: float = ambition - honor * 0.3
 	if a_score >= b_score and a_score >= c_score:
