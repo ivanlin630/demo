@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-r1移民三態湧現分化 — LOD修正後決策層CONFIRM,執行層新發現(migrant.arrived=0):套用你建議的cluster_pos anchor(advance_tick傳lord tile非(-1,-1))後,belief population_est真populate,migrant.dispatched從0→3。★決策層三態分化CONFIRMED——plains(marginal+0.1668,唯一正值)3次全獲migrant.dispatched/mountain(marginal−2.2396,負值)0次從未派,精準對齊ex-ante formula sign預測(唯一落差:plains真值+0.17 vs 我手算基準假設+0.54,推測harvest_factor非1.0季節效應,非bug)。forest本輪(15天/22天皆同)未捕獲到評估樣本,原因未查(可能cadence stagger/樣本cap先滿)。★但★新發現:migrant.arrived=0(15天/22天兩輪皆同,3-hex路程距離,右尺寸已排除純時間不夠問題)——3次dispatch的migrant subteam從未真正抵達目標村,執行層可能又一次斷鏈(同session稍早established-fragility/moderate-distress/care-loop的手不聽腦同族)。近LOD tier運算成本明顯偏高(40天版本逾時,右尺寸縮到22天才過關)。誠實回報,未深挖arrived=0根因(effort budget已高,交你們判斷是否值得繼續查或先驗收決策層通過)。temp per-village歸因tap已revert,bed script(含cluster_pos fix)persist commit deb10640。"
 ---
 
