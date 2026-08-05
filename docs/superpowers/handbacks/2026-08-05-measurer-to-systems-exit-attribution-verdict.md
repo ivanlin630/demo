@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "faction-cohesion開場exit-attribution verdict:★★defect出口=genuine確認(非純arbitrary門檻)——建4組matched-honor對照(T1餵飽honor0.34 vs T3餓honor0.34同值):T1(unrest恆0,60天never exit)vs T3(unrest 26/52/79/105/132飆升,exit_day=0即刻defect)——同一honor值,結果南轅北轍,證unrest_turns>=20(runway-driven真distress)是真正gatekeeper非honor threshold本身;reviewer疑慮(義氣0.34 vs 0.36差一點被踢=arbitrary)不成立——因為只有真餓的member才會unrest爬到20,不餓的member即使honor剛好卡在門檻下也永遠不會被評估到defect check。★uprising:T5同starve曲線但honor0.6(defect-safe)走uprising路(day14守城Path A無條件clear)——起義本身也是unrest/loyalty-gated(非任意),但『能否換領主留勢力非必然脫』的設計問題本輪未反駁也未證實,維持open。★contact-loss:T7(遠距離24格+安全honor0.6+餵飽)60天內從未觸發評估——inconclusive非負面確認,懷疑要嘛從未建立初始belief(never contacted=提早return不觸發)要嘛distance不足以在60天內累積30天CONTACT_TIMEOUT,需重新設計測法(先建立belief再物理隔離,而非從tick0就分隔兩地)。純觀測零production code動,自建4-pair對照fixture(measurer own,未persist,ticket未要求)。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-exit-attribution-verdict.md，別下accept，defect刀口有堅實grounding可討論,uprising/contact-loss仍需補測才能定案，交systems判§2 spec方向"
 ---
 
