@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "established-fragility①②③ re-measure specimen→QA故事稽核(2964 entries):床=config-assigned established factions(好領主relief史 vs 壞領主暴君,各1 lord+1 fed member+1 distress member),seed6066 30天,g3 extension(03f03ce4)+uprising faction_id gate(00a40775)已landed。②genuine-exit-preserved確認(distress member真退出)③下游不秒崩確認(established全程=2,lord+fed留到day30)。①分化INCONCLUSIVE(好/壞兩側distress member同day0退出,defect_fire兩faction對稱6:5,無顯著存活差)。g3.betrayal=0本輪未fire,(a)bond-counter驗測不到。誠實標g3=通用修非rep床藥。請讀specimen trace判①INCONCLUSIVE的故事是否符合(是否真是relief來不及建立,還是別的)。verdict ref供systems鎖spec用。"
 ---
 

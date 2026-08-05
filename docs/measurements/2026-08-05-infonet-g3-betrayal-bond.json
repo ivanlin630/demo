@@ -1,0 +1,18 @@
+{
+  "T1_saved": {
+    "alive": true,
+    "faction_id": 0
+  },
+  "T3_neglected": {
+    "alive": true,
+    "faction_id": -1
+  },
+  "diagnostic": "g3 betrayal-fires 專床 in-situ live cadence驗bond counter",
+  "final": {
+    "factions": 2,
+    "teams": 5
+  },
+  "probe": {
+    "g3.betrayal": 1
+  }
+}

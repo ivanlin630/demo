@@ -1,0 +1,430 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== g3 betrayal-fires 專床（seed=8080 1100 ticks，in-situ live cadence驗bond counter）===
+[GameSetup] 完成：4 teams, 2 factions, 4 persons
+[SpecimenDumpHelper] specimen_team_ids=[0, 1, 2, 3]（enabled=true，dump 前記呼 SpecimenDumpHelper.dump）
+[setup] T1(saved) benefactor=3 rep=0.8 | T3(neglected) benefactor=0 rep=0.15
+[setup] T1 stay_benefit(pre-run)=0.4700  T3 stay_benefit(pre-run)=0.0225
+[Order] Team0 sell food ×2980 (oid=0)
+[Order] Team0 buy weapon_melee_low ×3 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=2)
+[Order] Team0 buy material ×60 (oid=3)
+[Order] Team0 buy tools ×2 (oid=4)
+[Order] Team1 sell food ×2968 (oid=5)
+[Order] Team1 buy weapon_melee_low ×4 (oid=6)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=7)
+[Order] Team1 buy material ×60 (oid=8)
+[Order] Team1 buy tools ×4 (oid=9)
+[Order] Team2 sell food ×2980 (oid=10)
+[Order] Team2 buy weapon_melee_low ×3 (oid=11)
+[Order] Team2 buy weapon_ranged_low ×2 (oid=12)
+[Order] Team2 buy material ×60 (oid=13)
+[Order] Team2 buy tools ×2 (oid=14)
+[Order] Team3 sell food ×2968 (oid=15)
+[Order] Team3 buy weapon_melee_low ×4 (oid=16)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=17)
+[Order] Team3 buy material ×60 (oid=18)
+[Order] Team3 buy tools ×2 (oid=19)
+[Harvest] Tick60 季節=春 base=1.1
+[Move] Team 0 抵達 (9,10)
+[Move] Team 2 抵達 (10,14)
+[Ambition] Team1 rung 0→1 (武力 cap=4)
+[Ambition] Team3 rung 0→1 (武力 cap=4)
+[DayNight] Day 1 開始
+
+========== [SpecimenTracer] flush 16 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=10 intent=日常 | winner=覓食 task=覓食 tgt=(9, 10)
+    candidates: 覓食=0.41 駐守=0.20 建設=0.09
+    狀態: pop=5 food(priv=3000.0/gran=0.0/eff=3000.0) consume/d=4.0 rung=0 fid=0 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T1] tick=10 intent=日常 | winner=駐守 task=治理 tgt=(11, 10)
+    candidates: 駐守=0.15 建設=0.07
+    狀態: pop=20 food(priv=3000.0/gran=0.0/eff=3000.0) consume/d=16.0 rung=0 fid=0 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=10 intent=日常 | winner=駐守 task=治理 tgt=(10, 14)
+    candidates: 駐守=0.20 建設=0.09
+    狀態: pop=5 food(priv=3000.0/gran=0.0/eff=3000.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=10 intent=日常 | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=1.37 駐守=0.15
+    狀態: pop=20 food(priv=3000.0/gran=0.0/eff=3000.0) consume/d=16.0 rung=0 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=70 heartbeat（no-decision）pop=5 food(eff=3000.0)
+[Specimen T1] tick=70 heartbeat（no-decision）pop=20 food(eff=3000.0)
+[Specimen T2] tick=70 heartbeat（no-decision）pop=5 food(eff=3000.0)
+[Specimen T3] tick=70 heartbeat（no-decision）pop=20 food(eff=3000.0)
+[Specimen T0] tick=130 heartbeat（no-decision）pop=5 food(eff=2998.3)
+[Specimen T1] tick=130 heartbeat（no-decision）pop=20 food(eff=3043.4)
+[Specimen T2] tick=130 heartbeat（no-decision）pop=5 food(eff=2998.3)
+[Specimen T3] tick=130 heartbeat（no-decision）pop=20 food(eff=3046.6)
+[Specimen T0] tick=190 heartbeat（no-decision）pop=5 food(eff=2998.3)
+[Specimen T1] tick=190 heartbeat（no-decision）pop=20 food(eff=3043.4)
+[Specimen T2] tick=190 heartbeat（no-decision）pop=5 food(eff=2998.3)
+[Specimen T3] tick=190 heartbeat（no-decision）pop=20 food(eff=3046.6)
+=======================================================
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Horse] Outpost (10, 14) 捕野馬 +1
+[Horse] Outpost (11, 10) 捕野馬 +1
+[Horse] Outpost (11, 14) 捕野馬 +1
+[TickPerf] day=1 avg=3811 us max=625786 us ticks=240 teams=4 factions=2
+[Move] Team 2 抵達 (11,14)
+[Ambition] Team1 rung 1→2 (武力 cap=4)
+[Ambition] Team3 rung 1→2 (武力 cap=4)
+[Ambition] Team1 rung 2→3 (武力 cap=4)
+[Ambition] Team3 rung 2→3 (武力 cap=4)
+[DayNight] Day 2 開始
+
+========== [SpecimenTracer] flush 46 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(11, 10)
+    candidates: 建設=0.89 訓練=0.28 駐守=0.17
+    狀態: pop=20 food(priv=2986.7/gran=94.9/eff=3081.6) consume/d=16.0 rung=3 fid=0 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=求和 task=外交 tgt=(11, 14)
+    candidates: 備戰=0.78 求和=0.64 迎戰=0.59 survival=0.50 駐守=0.26 建設=0.16
+    beliefs: [{ "tgt": 3, "est": { "population_est": 10, "tile_pos": (11, 14), "last_tick": 400, "tier": 2, "resource_scale": 3, "faction_id": 1, "tags": ["生產"], "current_task": "建設", "food_est": 2986.66666666667, "material_est": 0, "coin_est": 20, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=5 food(priv=996.7/gran=2000.0/eff=2996.7) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.42 訓練=0.28 駐守=0.16
+    狀態: pop=20 food(priv=2986.7/gran=105.7/eff=3092.4) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=求和 task=外交 tgt=(11, 10)
+    candidates: 備戰=0.79 求和=0.64 迎戰=0.59 survival=0.50 覓食=0.44 建設=0.16
+    beliefs: [{ "tgt": 1, "est": { "population_est": 18, "tile_pos": (11, 10), "last_tick": 400, "tier": 1, "resource_scale": 3 } }]
+    狀態: pop=5 food(priv=2996.7/gran=0.0/eff=2996.7) consume/d=4.0 rung=0 fid=0 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T2] tick=300 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.08 備戰=0.79 求和=0.64 迎戰=0.60 survival=0.50 建設=0.17 貿易=0.04
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=300 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.67 訓練=0.29 駐守=0.17 貿易=0.05
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=310 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.13 備戰=0.80 求和=0.64 迎戰=0.60 survival=0.50 建設=0.18 貿易=0.04
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=310 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.76 備戰=0.37 訓練=0.30 駐守=0.18 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=310 heartbeat（no-decision）pop=5 food(eff=2995.0)
+[Specimen T1] tick=310 heartbeat（no-decision）pop=20 food(eff=3131.5)
+[Specimen T2] tick=320 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.15 備戰=0.80 求和=0.64 迎戰=0.60 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=320 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.52 備戰=0.37 訓練=0.30 駐守=0.18 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=330 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.16 備戰=0.80 求和=0.64 迎戰=0.60 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=330 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.55 備戰=0.37 訓練=0.30 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=340 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.16 備戰=0.80 求和=0.64 迎戰=0.60 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=340 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.57 備戰=0.36 訓練=0.30 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=350 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.17 備戰=0.80 求和=0.64 迎戰=0.60 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=350 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.58 備戰=0.36 訓練=0.30 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=360 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.17 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=360 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.58 備戰=0.36 訓練=0.30 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=370 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.17 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=370 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.59 備戰=0.36 訓練=0.30 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=370 heartbeat（no-decision）pop=5 food(eff=2995.0)
+[Specimen T1] tick=370 heartbeat（no-decision）pop=20 food(eff=3131.5)
+[Specimen T2] tick=380 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.17 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=380 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.59 備戰=0.36 訓練=0.30 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=390 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.17 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=390 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.59 備戰=0.36 訓練=0.29 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=400 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.18 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=995.0/gran=0.0/eff=995.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=400 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.59 備戰=0.36 訓練=0.29 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2980.0/gran=164.7/eff=3144.7) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=410 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.18 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=410 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.59 備戰=0.36 訓練=0.29 駐守=0.19 貿易=0.05 求和=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=420 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.18 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=420 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.25 備戰=0.36 訓練=0.29 駐守=0.19 求和=0.05 貿易=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=430 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.18 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=430 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.23 備戰=0.36 訓練=0.28 駐守=0.19 求和=0.05 貿易=0.05 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=430 heartbeat（no-decision）pop=5 food(eff=2993.3)
+[Specimen T1] tick=430 heartbeat（no-decision）pop=20 food(eff=3173.5)
+[Specimen T2] tick=440 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.18 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=440 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.22 備戰=0.36 訓練=0.28 駐守=0.19 求和=0.05 貿易=0.04 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=450 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.18 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=450 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.21 備戰=0.36 訓練=0.28 駐守=0.19 求和=0.05 貿易=0.04 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=460 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.19 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=460 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.21 備戰=0.36 訓練=0.28 駐守=0.19 求和=0.05 貿易=0.04 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=470 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.19 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=470 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.21 備戰=0.36 訓練=0.27 駐守=0.19 求和=0.05 貿易=0.04 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+=======================================================
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Horse] Outpost (11, 10) 捕野馬 +1
+[Horse] Outpost (11, 14) 捕野馬 +1
+[TickPerf] day=2 avg=21931 us max=487326 us ticks=240 teams=4 factions=2
+[Site] 選址 (8, 12) score=332 周邊資源={ "wild_horses": 4, "ore_iron": 330, "ore_silver": 98 } terrain=plains
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Site] 選址 (8, 16) score=322 周邊資源={ "wild_horses": 4, "herb": 7, "ore_silver": 12, "ore_gold": 25 } terrain=plains
+[Site] Faction1 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Diplomacy] Team3 背叛 Team2
+[Site] 選址 (8, 12) score=318 周邊資源={ "wild_horses": 4, "ore_iron": 330, "ore_silver": 98 } terrain=plains
+[Ambition] Team3 rung 3→2 (武力 cap=4)
+[DayNight] Day 3 開始
+
+========== [SpecimenTracer] flush 20 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T2] tick=480 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.19 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=480 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.21 備戰=0.36 訓練=0.27 駐守=0.19 求和=0.05 貿易=0.04 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T1] tick=490 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(11, 10)
+    candidates: 建設=0.40 訓練=0.29 駐守=0.18
+    狀態: pop=20 food(priv=2973.3/gran=200.2/eff=3173.5) consume/d=16.0 rung=3 fid=0 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T2] tick=490 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.19 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=490 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.21 備戰=0.36 訓練=0.27 駐守=0.19 求和=0.05 貿易=0.04 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=490 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=求和 task=外交 tgt=(11, 10)
+    candidates: 備戰=0.80 求和=0.71 迎戰=0.60 survival=0.50 覓食=0.41 建設=0.18
+    beliefs: [{ "tgt": 1, "est": { "population_est": 6, "tile_pos": (11, 10), "last_tick": 600, "tier": 1, "resource_scale": 3 } }]
+    狀態: pop=5 food(priv=2993.3/gran=0.0/eff=2993.3) consume/d=4.0 rung=0 fid=0 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T2] tick=500 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(11, 14)
+    candidates: 徵收=1.19 備戰=0.80 求和=0.64 迎戰=0.61 survival=0.50 建設=0.18 貿易=0.05
+    狀態: pop=5 food(priv=993.3/gran=0.0/eff=993.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=500 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.21 備戰=0.36 訓練=0.27 駐守=0.19 求和=0.05 貿易=0.04 survival=0.00 掠奪=0.00
+    beliefs: [{ "tgt": 2, "est": { "tier": 2, "tile_pos": (11, 14), "last_tick": 300, "population_est": 5, "faction_id": 1, "tags": ["統領"], "current_task": "外交", "food_est": 996.666666666667, "material_est": 0, "coin_est": 300, "goods_est": 0, "armed_est": 0 } }]
+    狀態: pop=20 food(priv=2973.3/gran=230.4/eff=3203.8) consume/d=16.0 rung=3 fid=1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=550 heartbeat（no-decision）pop=5 food(eff=2991.7)
+[Specimen T1] tick=550 heartbeat（no-decision）pop=20 food(eff=3206.9)
+[Specimen T2] tick=560 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=0.86 survival=0.81 求和=0.68 迎戰=0.61 建設=0.17 貿易=0.04
+    狀態: pop=5 food(priv=991.7/gran=0.0/eff=991.7) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=560 heartbeat（no-decision）pop=20 food(eff=3242.6)
+[Specimen T0] tick=610 heartbeat（no-decision）pop=5 food(eff=2990.0)
+[Specimen T1] tick=610 heartbeat（no-decision）pop=20 food(eff=3250.4)
+[Specimen T2] tick=620 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=0.98 survival=0.94 求和=0.75 迎戰=0.63 建設=0.14 貿易=0.03
+    狀態: pop=5 food(priv=990.0/gran=0.0/eff=990.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=620 heartbeat（no-decision）pop=20 food(eff=3299.5)
+[Specimen T0] tick=670 heartbeat（no-decision）pop=5 food(eff=2990.0)
+[Specimen T1] tick=670 heartbeat（no-decision）pop=20 food(eff=3250.4)
+[Specimen T2] tick=680 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=1.03 survival=0.99 求和=0.77 迎戰=0.63 建設=0.13 貿易=0.03
+    狀態: pop=5 food(priv=990.0/gran=0.0/eff=990.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=680 heartbeat（no-decision）pop=20 food(eff=3299.5)
+=======================================================
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Horse] Outpost (11, 10) 捕野馬 +1
+[Horse] Outpost (11, 14) 捕野馬 +1
+[TickPerf] day=3 avg=5280 us max=463031 us ticks=240 teams=4 factions=2
+[DayNight] Day 4 開始
+
+========== [SpecimenTracer] flush 16 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=730 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(11, 10)
+    candidates: 建設=0.42 訓練=0.28 駐守=0.18
+    狀態: pop=20 food(priv=2953.3/gran=344.8/eff=3298.1) consume/d=16.0 rung=3 fid=0 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=730 heartbeat（no-decision）pop=5 food(eff=2988.3)
+[Specimen T2] tick=740 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=1.05 survival=1.02 求和=0.79 迎戰=0.64 建設=0.13 貿易=0.03
+    狀態: pop=5 food(priv=988.3/gran=0.0/eff=988.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=740 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.17 備戰=0.42 survival=0.28 訓練=0.26 駐守=0.17 求和=0.06 貿易=0.04 掠奪=0.00 攻擊=0.00
+    狀態: pop=20 food(priv=2953.3/gran=387.2/eff=3340.5) consume/d=16.0 rung=2 fid=-1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=790 heartbeat（no-decision）pop=5 food(eff=2988.3)
+[Specimen T1] tick=790 heartbeat（no-decision）pop=20 food(eff=3298.1)
+[Specimen T2] tick=800 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=1.06 survival=1.02 求和=0.79 迎戰=0.64 建設=0.13 貿易=0.03
+    狀態: pop=5 food(priv=988.3/gran=0.0/eff=988.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=800 heartbeat（no-decision）pop=20 food(eff=3340.5)
+[Specimen T0] tick=850 heartbeat（no-decision）pop=5 food(eff=2986.7)
+[Specimen T1] tick=850 heartbeat（no-decision）pop=20 food(eff=3341.8)
+[Specimen T2] tick=860 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=1.06 survival=1.03 求和=0.79 迎戰=0.64 建設=0.13 貿易=0.03
+    狀態: pop=5 food(priv=986.7/gran=0.0/eff=986.7) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=860 heartbeat（no-decision）pop=20 food(eff=3370.9)
+[Specimen T0] tick=910 heartbeat（no-decision）pop=5 food(eff=2985.0)
+[Specimen T1] tick=910 heartbeat（no-decision）pop=20 food(eff=3392.0)
+[Specimen T2] tick=920 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=1.06 survival=1.03 求和=0.80 迎戰=0.64 建設=0.13 貿易=0.03
+    狀態: pop=5 food(priv=985.0/gran=0.0/eff=985.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=920 heartbeat（no-decision）pop=20 food(eff=3413.5)
+=======================================================
+[Horse] Outpost (10, 10) 捕野馬 +1
+[Horse] Outpost (11, 10) 捕野馬 +1
+[Horse] Outpost (11, 14) 捕野馬 +1
+[TickPerf] day=4 avg=4429 us max=242815 us ticks=240 teams=4 factions=2
+[Combat Start] Team-1000000 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+
+───── g3 betrayal-fires 摘要 ─────
+final teams=5 factions=2
+T1(saved)存活=true faction=0 | T3(neglected)存活=true faction=-1
+★g3.betrayal總次數=1
+
+[dump] → res://docs/measurements/2026-08-05-infonet-g3-betrayal-bond.json
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=970 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=建設 task=建設 tgt=(11, 10)
+    candidates: 建設=0.44 訓練=0.28 駐守=0.19
+    狀態: pop=20 food(priv=2940.0/gran=452.0/eff=3392.0) consume/d=16.0 rung=3 fid=0 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=970 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=求和 task=外交 tgt=(11, 10)
+    candidates: 備戰=0.80 求和=0.79 迎戰=0.60 survival=0.50 覓食=0.41 建設=0.18
+    beliefs: [{ "tgt": 1, "est": { "population_est": 6, "tile_pos": (11, 10), "last_tick": 1100, "tier": 1, "resource_scale": 3 } }]
+    狀態: pop=5 food(priv=2985.0/gran=0.0/eff=2985.0) consume/d=4.0 rung=0 fid=0 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T2] tick=980 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=1.06 survival=1.03 求和=0.80 迎戰=0.64 建設=0.13 貿易=0.03
+    狀態: pop=5 food(priv=985.0/gran=0.0/eff=985.0) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=980 intent={ "intent": "征服", "why": "野心/好戰驅動，belief 評 target2 可打贏", "mode": "prosperity" } | winner=建設 task=建設 tgt=(11, 14)
+    candidates: 建設=2.01 備戰=0.45 survival=0.29 訓練=0.25 駐守=0.16 求和=0.06 貿易=0.04 掠奪=0.00 攻擊=0.00
+    狀態: pop=20 food(priv=2940.0/gran=473.5/eff=3413.5) consume/d=16.0 rung=2 fid=-1 coin=20 mat=0
+    leader: 野心=1.00 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=2.0天
+[Specimen T0] tick=1030 heartbeat（no-decision）pop=5 food(eff=2983.3)
+[Specimen T1] tick=1030 heartbeat（no-decision）pop=20 food(eff=3427.6)
+[Specimen T2] tick=1040 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=0.64 survival=0.56 覓食=0.46 求和=0.36 迎戰=0.22 建設=0.13 貿易=0.03
+    狀態: pop=5 food(priv=983.3/gran=0.0/eff=983.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=1040 heartbeat（no-decision）pop=20 food(eff=3454.7)
+[Specimen T0] tick=1090 heartbeat（no-decision）pop=5 food(eff=2983.3)
+[Specimen T1] tick=1090 heartbeat（no-decision）pop=20 food(eff=3427.6)
+[Specimen T2] tick=1100 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=survival task=逃跑 tgt=(-1, -1)
+    candidates: 備戰=0.64 survival=0.56 覓食=0.46 求和=0.36 迎戰=0.22 建設=0.13 貿易=0.03
+    狀態: pop=5 food(priv=983.3/gran=0.0/eff=983.3) consume/d=4.0 rung=0 fid=1 coin=300 mat=0
+    leader: 野心=0.30 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.8天
+[Specimen T3] tick=1100 heartbeat（no-decision）pop=20 food(eff=3454.7)
+=======================================================
+[SpecimenTracer] write_jsonl → res://docs/measurements/2026-08-05-infonet-g3-betrayal-bond.specimen.jsonl (110 entries)
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
