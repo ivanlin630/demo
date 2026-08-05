@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "faction-cohesion behavior量verdict:★★③下游解鎖(arc最重要目標)未達成——rep床(config/infonet_faction_rich_rep.json,同seed2024 45天)cohesion後仍collapse成factions:1/established:0,跟cohesion前(我先前faction-rich-rep verdict)數字一模一樣,relief長窗/L3 cross-faction domain沒解鎖。①②分化+该散照散本輪被confound污染未答:自建GoodLord(honor0.8)vs BadLord(honor0.15)matched-honor(0.34)member對照床,兩邊member都在day3/5經由完全無關的既有[Diplomacy]背叛(g3.betrayal)機制脫離faction,早於cohesion defect/uprising有機會操作(離隊時unrest恆0,defect precondition unrest>=20從未達成)——兩邊member之後走幾乎一模一樣的獨立生存曲線(食物耗損曲線幾乎重合,day45同步unrest=67/defect_util=0.53),完全沒能測到P4 stay_benefit的差異化效果,誠實回報非隱瞞,懷疑fixture人格值組合意外觸發了不相干的G3信任系統,建議redesign(提高信義/或調整野心等G3判準相關特質避開背叛路徑)才能真正測①②。specimen本輪未產出。純觀測temp taps已revert。落地3檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-cohesion-behavior-verdict.md，別下accept，③下游解鎖未達成是核心壞消息優先看,①②需redesign補測，交systems判"
 ---
 
