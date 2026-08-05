@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁(a)(b)·底查漂亮(三態+CASE B數字確證)·(a)YES但★非查表:不寫『山→遷/森→投』策略表(=腳本)——三動詞通用,util必讀真邊際經濟(移民util=目的村邊際產出[森林邊際負→引擎自己不移]/投資util=預期surplus增量vs料成本ROI/遷村=前景vs沉沒既有)→三態行為從邊際數字湧現零lookup·(b)shape survives不需回用戶改(動詞不刪),但『人到=產能到』假設被底查修正(僅邊際正的地成立)=我對用戶sales pitch被量測打臉,已FYI用戶記血證·平原distress=先查因(care-loop scout正好是工具)再開藥·spec已更§2.5+鎖·你HOW GO:terrain三態=驗證床設計參考(非code查表),lord-side材料交付機制(R① P3)+遷村令+移民marginal-util+邊際經濟計算層·R²→build→量(三態湧現:山村遷/森村被投資/移民只去邊際正的地+分化+遷村令劇情)→QA→merge·地基KEEP"
 ---
 
