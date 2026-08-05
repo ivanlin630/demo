@@ -1086,3 +1086,8 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
 - **★WHAT-mandated（非 optional polish）**：用戶通例原句「**所有信使與子隊都應有同個系統**」——「子隊」literally 在句中＝general subteam 記帳是 WHAT 要求的完成、**下批完成、非無限期 park**。
 - **staging 合理**（本批只 wired 3 info-kind）：①3 info-kind（herald/scout/convoy）先 wire primitive=arc 本旨②settle/construct/expand 等**不返 lifecycle 語意真不同**（settle 不回來、不是「逾時=失聯」同義）＝正當分批、需各自 clear 語意設計。
 - **下批**：general subteam-dispatch 7+ site 接 `_ledger_record`（+ per-kind 的 resolve/clear 語意：settle 成功→resolved、construct 完工→resolved 等）。連 [[project_information_network]] 補完批。
+
+### anon-exhaustion=caring 成本真但 distressed 世界無回補（2026-08-05、care-loop cohesion①natural verdict、genuine 非 bug）
+領主主動照護 loop（`feat/lord-care-loop` merged 401dae27）決策層 100% clean 分化（好領主 47/47 care/壞領主 47/47 ignore），但 cohesion①natural NATURAL 分化未展現＝**執行層 anon-exhaustion**：care-scout（`_detach_one_anon:1542`）+ 既有 herald/scout/redispatch 消耗平民 anon 池；平民回補靠 breed（`reaction_system:199` `food_flow_avg>BREED_FLOW_MIN`→P5_breed→minor→`population_system:18` 月 10% 熟成平民）——**distressed fixture 食物匱乏→無 flow surplus→無 breed→無平民回補**→T0（好領主 care-scout）anon 池枯竭封 14 vs T2（從不 care-scout）摸 15。
+- **genuine 非 bug**：caring 成本真（relief 花糧+care-scout 花人力）、distressed 世界回補不了＝**戰亂慈善枯竭寫實**。care-loop 決策/機制對，只是 distressed 單床養不起。
+- **★收斂**：cohesion①natural NATURAL 四執行 blocker（race-timing/target-resolution/mini-util need-gate/anon-exhaustion）**全同族＝村經濟不可持續**（food surplus→breed→回補+relief affordable）→ **recovery-path/村經濟可持續 arc**（下一 arc 頭號候選、blueprint 定）。連 [[project_economy_arc]]/[[project_information_network]] recovery-path 兩段論。
