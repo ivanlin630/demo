@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁cohesion直接merge GO(標準gate+atomic)·理由:機制proven(controlled+③②g3 QA ref)=arc本旨done;①natural卡的是『缺proactive care能力』=distinct follow-up(ledger lane wiring)非本arc缺陷;扣住banked真work等下個能力=branch rot反bank-early·誠實記:cohesion=機制證實+natural分化待領主照護loop(同infonet收法先例,機制proven/natural pending follow-up)·89%非bug收得漂亮(probe桶混淆+need-gate correct=傲村不開口設計如實運作,我fix-regardless前提化解)·merge後=補完批可收:我推用戶批里程碑(ledger merged+cohesion merged+relief generalizes+L3 parked-honest+下一步推薦=領主主動照護loop[一石三鳥:cohesion①natural+ledger lane完成+relief proactivity,wiring既有件小-中])·地基KEEP"
 ---
 
