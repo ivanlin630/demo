@@ -42,6 +42,11 @@ stay_benefit =
   - honor 0.35 cliff → distressed 中 honor 連續 weigh（照妖鏡 polish、非救命）。
 - `execute` `clear_team_faction` **不動**（走的一側保留、genuine exit）。
 
+### ★整併：第三個「留vs走」決策點（reviewer R² 必查項、systems 判整併）
+`_trigger_defection_evaluation`（`faction_ai:4620-4643`、contact-loss/owner-change 觸發的 a/b/c 人格 split：留faction/投降/獨立）**已用 `has_benefactor_memory` flat+0.3**（`:4626-4627` `a_score = honor + 0.3`）＝第三個讀「被救過」訊號的入口。
+- **判＝整併**（一個 stay-benefit 概念、一致精度、防同底層事實兩套讀法）：`:4626-4627` 的 `has_benefactor_memory` flat+0.3 → 改 `a_score = honor + _faction_stay_benefit(state, team)`（rich：relief-memory+reputation 人格 weigh 取代粗糙常數）。
+- **界**：此處**觸發**（`_evaluate_owner_contact` contact-loss）仍 ledger arc domain（defer 不碰）；只**升級 stay-benefit 讀法**（a_score 的留-side）＝cohesion arc 的 stay-benefit 統一（三決策點 defect/uprising/defection-eval 共用 `_faction_stay_benefit`）。
+
 ### SECONDARY：uprising（`_evaluate_uprising`）
 - **3 前置門→連續 polish**：`avg_loy>=0.2`/`unrest_turns<60`/`stress_sources<2` 硬 return → 折進連續 uprising-utility（trigger genuine 故 polish；unrest/loyalty 連續 weigh 非硬 cliff）。
 - **★後果秤（uprising 主刀）**：Path A 守城後**別無條件 `clear_team_faction`**——秤「換領主留勢力 vs 脫離」（reuse `_faction_stay_benefit` + 人格：義氣高/stay_benefit 高→推翻本地暴領主但**留勢力**換新安排；野心高/stay_benefit 低→自立脫離）。Path B 流亡保留脫離（流亡語意=離開）。
