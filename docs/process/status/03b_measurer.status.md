@@ -12,6 +12,10 @@ current_ticket: 無（§8 re-measure領導軸完成:★★B真有效但『未追
 
 # 03b measurer 現況
 
+**狀態**：工作中（等下一票）——exit-occupancy-map verdict已完成寄出(★g3.betrayal非dominant driver反駁假說+uprising缺閘code gap)
+
+**工單**：無（exit-occupancy-map verdict已完成寄systems：★★g3.betrayal在rep床本身0次fire——非dominant driver,反駁code-read假說,上輪confound是我自建P4 fixture特定人格值組合的產物非rep床通例。真實faction membership loss只有1次(Team5經defect,跟generic chokepoint數字1完全吻合),其餘5筆reason-tagged事件裡4-5筆是對已經independent隊伍的空觸發重複(old_owner=自己)。★★具體code-level發現:_evaluate_uprising(faction_ai_system.gd:4536)缺faction_id!=-1前置閘(跟defect在event_faction_defect.gd明確有此檢查不同),導致已independent隊反覆重跑整段uprising流程含cascade副作用,建議加閘鏡射defect既有寫法,cheap win。無disband_cascade/無第5條路。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-exit-occupancy-map-verdict.md，別下accept，g3.betrayal非driver+uprising缺閘是具體修復候選，交systems判HOW scope。
+
 **狀態**：工作中（等下一票）——失聯帳本specimen for QA已落地寄出
 
 **工單**：無（specimen for QA已完成寄systems：同diversity床(seed4044 30天)+SpecimenDumpHelper掛全8隊,產出3961 entries,聚合數字與上輪diversity verdict逐位元相同確認determinism。specimen含每隊逐tick做什麼/想什麼(util陣列)/狀態(leader_traits人格值),可讓QA讀出team0(統領0.9)→redispatch/team2(野心0.9)→writeoff/team4(慎重0.9)→defensive/team6(義氣0.9)→rescue完整因果鏈。落地2檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-specimen-verdict.md，別下accept，等QA讀後verdict ref回。
