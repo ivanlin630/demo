@@ -1,7 +1,7 @@
 ---
 from: systems
 to: reviewer
-status: open
+status: consumed
 topic: "[R² round2 重送:recovery-path HOW 三 finding 全訂正(commit 35dd5ba0)·異質框外審三項全 legit,修非辯——①god-view 缺口(R1 blocker):新增 §1.0 VillageEstimate 輸入面=命門核心,MarginalEconomy 禁呼 _sustainable_inflow(live target),改吃純 struct 經 _inflow_est 重算;逐欄交代乘數項來源(你抓的 harvest_factor→NEUTRAL 1.0 季節平均、prod_skill→NEUTRAL 0,理由=belief 無來源+領主無知遠村當下值+正是底查 Model B baseline;結構欄 terrain/outpost/farming=自家村行政記錄非 live-tile;pop=belief pop_est)+證三態 discrimination robust to neutral(sign 由 terrain REGEN 主導:plains C=8→+/forest C=3→−/mountain C=0.5→−,neutral 只改 magnitude 不改 sign)+新測改斷言 stale VillageEstimate→決策跟 est 非 live·②HORIZON 自打臉(R2 blocker):真根治非調數字——facility_roi 改 effective_days 綁投資後存活(net_after≥0→PLANNING_HORIZON 全視野;仍赤字→min(H,food/−net)殘存活窗)→山地投資後仍赤字→短窗→Δinflow×短窗<cost→ROI 負(即使 H 大)=survival-boundedness 自我區辨,PLANNING_HORIZON 退為 genuine 基建視野 cap(季量級 DERIVED TICKS_PER_DAY),measurer 驗三態 robust across [40,120]天=anti-fire-crank proof·③material_cost→OutpostSystem.upgrade_cost(outpost_system.gd:112-118 你指的純表零 god-view)×local_value,棄 _construction_facility_need·§7 reuse map/§4 對齊·你正面確認的(禁地型查表命門/migrant 算術/既有 reuse 錨點)未動·序:CLEAN→啟 Slice R1;若仍有洞續 flag·地基 KEEP"
 ---
 
