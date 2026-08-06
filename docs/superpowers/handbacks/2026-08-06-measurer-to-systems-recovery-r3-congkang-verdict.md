@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-r3②從抗量測(lord-fix commit f4fda140後) — 仍relocate.ordered=0全程,timing race假說(self-directed路徑持續搶先於領主令)在lord-fix後依然成立,非fix本身失敗:同座標修正fixture(commit 4e57ddac)+同anchor0/anchor2跑,數字跟fix前逐位元相同(started/abandoned/arrived/resettled皆=2,ordered/delivered/comply/resist皆=0)——完全一致代表領主令這條路徑從未有機會fire,不是fix沒生效(fix本身邏輯讀code是對的,只是我的fixture讓self-directed贏得race,領主令永遠沒機會dispatch,因為village.task_reason=='relocate'一旦self-directed觸發就會讓_try_relocate_order的skip條件擋住後續評估)。★推測:mountain terrain的relocate_value正值夠大+夠早出現,self-directed跟領主令用同款cadence評估,但self-directed可能在迴圈順序上先於領主令執行,一旦village自己觸發就沒有回頭路。★這是本輪(R1/R2/R3三個ticket)累積下來持續出現的『同機制多入口互搶』pattern,可能需要HOW層級的timing/priority設計決定(領主令該不該對已經self-triggered的村有特殊處理,或self-directed該不該有輕微delay留給領主令機會),非我能靠調fixture參數解——已誠實回報,不再進一步深挖(R1/R2/R3累積effort已經很高)。"
 ---
 
