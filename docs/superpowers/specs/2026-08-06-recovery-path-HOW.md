@@ -68,9 +68,13 @@ grounding: §3 經濟底查（`2026-08-06-...econ-baseline-verdict`）+ R① CLE
 - **★湧現紅利**：領主投資 **TIMING matter 自然湧現**（早投村還撐得住→蓋→復甦；晚投絕境投→料浪費村死）= 同 care-loop「主動勝被動」、**強化 arc 非 bug**。
 
 ### (C) 遷村令 dispatch `_try_relocate_order`（Slice R3、P4）
-- `relocate_value`（MarginalEconomy 第 3 marginal §1.1.3）= `_inflow_est(target_est)` 前景 − `_inflow_est(current_est)` − `sunk_penalty`（persist_strength 沉沒）。領主秤自家村 relocate_value + 領主人格（規劃型整併/仁君勸+送搬遷糧/放任）→ 下遷村令。
+- ★★**領主令用領主自己視角（blueprint 裁 fix-first 2026-08-06、兩層對抗命門 + god-view 清）**：
+  - **舊 bug（第一版）**：領主令 gate 用 `relocate_value(subj_est, target_est, sunk=PersistStrength.compute(村))` = **村的戀土-weighted** → (1)領主令 gate 吃村戀土 → 領主永不令會抗命的村 → **兩層對抗結構性 dead**（自願遷先走/戀土村不下令）(2)★**領主讀村內在戀土=god-view 後門**（領主哪知村民多戀土=村的內心）。
+  - **★fix**：領主令決策改用**領主自己視角 genuine util**——`_inflow_est(target)` 前景 − `_inflow_est(current)`（村壞地經濟損失、領主 belief 可見 terrain）+ 整併領地戰略 benefit − order-cost；**★不減村戀土 sunk**（可含領主 belief 可見的**棄置 outpost 基建損失**=領主自家領土基建、非村內心）。乘領主人格（規劃型整併/仁君勸→高、放任→低）。
+  - **★anti-crank 牙**：領主**非被迫下令**（被動/不重整併領主不下=分化）；壞地村領主也**可能不下令**（genuine 差異非全序）；村 obey/resist genuine（有從有抗非全抗）。
 - 機制 = **信使 directive 走資訊網**（reuse `in_transit_letters` kind=`"relocate"`、payload=target_tile；令**真送達**才生效、非瞬間 = 感知鐵律跨距）。throttle 一令/村。
 - ★**目標選擇 god-view gate（B、無 explored-tiles terrain belief store）**：**領主令 target = 領主已知領土**（own-faction 行政知、同 VillageEstimate 結構欄來源）；**禁 god-view 全地掃最佳 tile**。target_est 結構欄走 §1.0 VillageEstimate 同款來源。
+- ★**self-relocate 保留村戀土**（村自己秤走不走、§3、村讀自己 sunk 合法非 god-view）；領主令與 self-relocate 分視角（領主經濟/村戀土）= 兩層對抗湧現源。
 
 ## §3 村端收令 + 自願遷（village-side、Slice R3）
 - **村自願遷**：村秤 `relocate_value`（**目標地限 vision-explored/reachable tiles、非 god-view best-tile scan**、無 explored belief store→限視野可達，鏡射 `遷移找糧` target 法 options.gd:288 視野可達）> 閾 → 自發遷。
