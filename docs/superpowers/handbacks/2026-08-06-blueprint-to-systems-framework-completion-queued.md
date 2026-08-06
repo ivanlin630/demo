@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶裁『兩個都完成』(2026-08-06)+排序A(復甦先收再整段轉框架收尾)·記路線圖done(game-design 📍總覽頭號大工程)·請你memory bank(單寫者):project_unification_matrix加『框架收尾兩硬綠大工程queued、用戶2026-08-06定』·完成標準=用戶早定兩硬綠(§358):①零殘留非框架閘(殲滅god-view後門/死常數/隱藏閘§殲滅清單A+強化constitution_gate抓全閘型跑綠=機器證)②可擴充(擴充性稽核證)·兩線撞同象faction_ai(實測5018行/引用35系統/62系統共讀WorldState)·序=先行為(抽邏輯進引擎自然瘦)再結構(切有邊界模組+定對接介面),反序兩次白工·結構線同時服務對接(player_*_api/observer_query_api已鋪Dictionary DTO半橋、缺序列化+進程邊界)·★NOT NOW:排復甦arc(R2投資build中+R3遷村令)收後於arc邊界啟spec/brainstorm·現無action只bank+備·復甦鏈照跑不擋·地基KEEP"
 ---
 
