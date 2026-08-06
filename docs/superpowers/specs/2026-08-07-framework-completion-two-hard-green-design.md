@@ -1,6 +1,6 @@
 # 框架收尾「兩硬綠」program — 零殘留閘 + 可擴充（WHAT / vision）
 
-status: DRAFT-v2（R² ISSUES 6 findings 訂正、pending reviewer re-verify CLEAN → 鎖 → slice 切）
+status: LOCKED（2026-08-07：R² re-verify CLEAN、6 findings 全訂正 → systems F0 起）
 owner: blueprint（WHAT）→ systems 做 HOW
 date: 2026-08-07
 溯源：用戶定 2026-08-06「兩個都完成」+ 排序 A；grounding `2026-08-06-framework-grounding-audit.md`（file:line re-verified）；R² 異質框外審 `2026-08-07-reviewer-...-ISSUES`（Opus agent 深讀 + reviewer 親複驗、6 findings）。連 [[project_unification_matrix]] + [[project_framework_seams]]。
@@ -40,7 +40,7 @@ date: 2026-08-07
 - **平行（clean-extractable）**：marginal/message/labor（2-3 ref）seam 文檔化。
 
 ## §4 slice 序（高層、systems HOW 定確切切法）
-1. **★F0（prerequisite）**：建真 state-fingerprint + 多 seed regression 安全網（§2.2）。**無此不動結構 slice。**
+1. **★F0（prerequisite）**：建真 state-fingerprint + 多 seed regression 安全網（§2.2）。**無此不動結構 slice。**（★R² 輕量觀察：F0 自身 effort/scope 邊界——幾 seed/幾床才算夠——由 systems F0 HOW 界定，判準＝覆蓋度足以攔住結構 slice 可能引入的行為漂移類型，非任意數字。）
 2. **F1**：Track ① threshold 子集死常數審 + 人格化 + diplomatic:325 標（bounded、推硬綠①）。
 3. **F2**：純程序模組先切（envoy/公庫/residency、§2.3、byte-fingerprint 驗）+ clean-extractable seam 文檔。
 4. **F3**：Track ②(A) decision-dense 抽引擎（behavior-first）。
