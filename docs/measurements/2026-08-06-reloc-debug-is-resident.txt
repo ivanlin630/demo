@@ -1,0 +1,236 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== recovery-path R3 遷村令測床（seed=6262 10天, ANCHOR_LORD=0）===
+[GameSetup] 完成：6 teams, 3 factions, 6 persons
+[Order] Team0 buy weapon_melee_low ×9 (oid=0)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=1)
+[Order] Team0 buy tools ×4 (oid=2)
+[Order] Team2 buy weapon_melee_low ×9 (oid=3)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=4)
+[Order] Team2 buy tools ×4 (oid=5)
+[Order] Team3 buy weapon_melee_low ×1 (oid=6)
+[Order] Team3 buy weapon_ranged_low ×1 (oid=7)
+[Order] Team4 buy weapon_melee_low ×9 (oid=8)
+[Order] Team4 buy weapon_ranged_low ×7 (oid=9)
+[Order] Team4 buy tools ×4 (oid=10)
+[Order] Team5 buy weapon_melee_low ×1 (oid=11)
+[Order] Team5 buy weapon_ranged_low ×1 (oid=12)
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Tick 10] Person 0 (leader/team0) → P4_expand | stress=0.00 loyalty=0.90
+[Tick 10] Person 1000 (leader/team1) → P1_comply | stress=0.00 loyalty=0.91
+[Harvest] Tick60 季節=春 base=1.1
+[Move] Team 1 抵達 (16,14)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 4 抵達 (14,214)
+[DayNight] Day 1 開始
+[TickPerf] day=1 avg=21736 us max=2714864 us ticks=240 teams=6 factions=3
+[Move] Team 1 抵達 (16,14)
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 5 抵達 (16,214)
+[DayNight] Day 2 開始
+[TickPerf] day=2 avg=20098 us max=1129850 us ticks=240 teams=6 factions=3
+[Move] Team 1 抵達 (16,14)
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 5 抵達 (16,214)
+[Succession] Team 6 從匿名晉升新領袖 P5001（統領=0.26）
+[Order] Team6 buy food ×2 (oid=13)
+[Survival] Team6 urgent days_left=0.0 偵查→idle
+[Succession] Team 7 從匿名晉升新領袖 P5002（統領=0.20）
+[Order] Team7 buy food ×2 (oid=14)
+[Survival] Team7 urgent days_left=0.0 偵查→idle
+[DayNight] Day 3 開始
+[Merge] Team2 ← Team6 完全合併 (pop=15)
+[Merge] Team4 ← Team7 完全合併 (pop=15)
+[TickPerf] day=3 avg=27977 us max=1195347 us ticks=240 teams=6 factions=3
+[Move] Team 1 抵達 (16,14)
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 1 抵達 (16,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[DayNight] Day 4 開始
+[TickPerf] day=4 avg=22705 us max=1384184 us ticks=240 teams=6 factions=3
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 3 抵達 (16,114)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[DayNight] Day 5 開始
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[TickPerf] day=5 avg=20786 us max=1109707 us ticks=240 teams=6 factions=3
+[Order] Team0 buy weapon_melee_low ×9 (oid=15)
+[Order] Team0 buy weapon_ranged_low ×7 (oid=16)
+[Order] Team0 buy tools ×4 (oid=17)
+[Order] Team2 buy weapon_melee_low ×9 (oid=18)
+[Order] Team2 buy weapon_ranged_low ×7 (oid=19)
+[Order] Team2 buy tools ×4 (oid=20)
+[Order] Team3 buy weapon_melee_low ×1 (oid=21)
+[Order] Team3 buy weapon_ranged_low ×1 (oid=22)
+[Order] Team4 buy weapon_melee_low ×9 (oid=23)
+[Order] Team4 buy weapon_ranged_low ×7 (oid=24)
+[Order] Team4 buy tools ×4 (oid=25)
+[Order] Team5 buy weapon_melee_low ×1 (oid=26)
+[Order] Team5 buy weapon_ranged_low ×1 (oid=27)
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 0 抵達 (14,14)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 0 抵達 (14,14)
+[DayNight] Day 6 開始
+[TickPerf] day=6 avg=21705 us max=1598290 us ticks=240 teams=6 factions=3
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[DayNight] Day 7 開始
+[TickPerf] day=7 avg=22582 us max=1288726 us ticks=240 teams=6 factions=3
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 3 抵達 (16,114)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[DayNight] Day 8 開始
+[TickPerf] day=8 avg=20404 us max=1085205 us ticks=240 teams=6 factions=3
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 0 抵達 (14,14)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 0 抵達 (14,14)
+[Move] Team 1 抵達 (16,14)
+[DayNight] Day 9 開始
+[TickPerf] day=9 avg=21299 us max=1366252 us ticks=240 teams=6 factions=3
+[HLDBG] lord=0 f.member_team_ids=[0, 1]
+[HLDBG] lord=0 mid=0 skip(self or already tracked)
+[HLDBG] lord=0 mid=1 m_null=false is_resident=false
+[RELDBG] lord=0 dispatch_ledger.size=0
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 1 抵達 (16,14)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 5 抵達 (16,214)
+[Move] Team 0 抵達 (14,14)
+[DayNight] Day 10 開始
+[Move] Team 1 抵達 (16,14)
+[Move] Team 2 抵達 (14,114)
+[Move] Team 3 抵達 (16,114)
+[Move] Team 4 抵達 (14,214)
+[Move] Team 5 抵達 (16,214)
+[TickPerf] day=10 avg=22122 us max=1240341 us ticks=240 teams=6 factions=3
+
+───── recovery-r3 摘要(10天, anchor=LordA) ─────
+final teams=6 factions=3
+  LordA(T0): alive=true pop=15 faction=0 tile_pos=(14, 14) terrain=N/A unrest=0
+  VillageA_Mtn_Compliant(T1): alive=true pop=5 faction=0 tile_pos=(16, 14) terrain=N/A unrest=0
+  LordB(T2): alive=true pop=15 faction=1 tile_pos=(14, 114) terrain=N/A unrest=0
+  VillageB_Mtn_Resistant(T3): alive=true pop=5 faction=1 tile_pos=(16, 114) terrain=N/A unrest=0
+  LordC(T4): alive=true pop=15 faction=2 tile_pos=(14, 214) terrain=N/A unrest=0
+  VillageC_Plains_Surplus(T5): alive=true pop=5 faction=2 tile_pos=(16, 214) terrain=N/A unrest=0
+
+★relocate鏈計數：relocate.ordered=0 relocate.delivered=0 relocate.comply=0 relocate.resist=0 relocate.unrest_added=0
+relocate.started=0 relocate.abandoned=0 relocate.arrived=0 relocate.resettled=0
+relocate.value(peak)=0.0000
+
+★per-target relocate.value真值:
+  VillageA_Mtn_Compliant(T1): n=0 first={  }
+  VillageB_Mtn_Resistant(T3): n=0 first={  }
+  VillageC_Plains_Surplus(T5): n=0 first={  }
+
+[dump] → res://docs/measurements/2026-08-06-infonet-recovery-r3-relocate-anchor0.json
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
