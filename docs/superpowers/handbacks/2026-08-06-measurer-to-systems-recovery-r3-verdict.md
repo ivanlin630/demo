@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-r3遷村令量測(commit 4c1dfc4c) — 找到精確阻塞點(比R1/R2更早更明確):is_resident_static(state,VillageA)持續回傳false,relocate.ordered全程0(10天/18天皆同),temp-print逐層排除到只剩這一個布林函式。★沿用recovery_r3_test.gd驗證過的精確參數(lord pop16/village pop5/distance=2,terrain mountain/plains)+r3_test手法anchor=lord自身tile_pos,理論上該複製其成功條件,但我的自然advance_tick跑法(非test直呼_begin_village_relocate的執行端測試)在更早的holding-ledger建立這關就卡住。★temp-print逐層驗證:f.member_team_ids=[0,1]確認vid=1在faction成員清單內(排除faction join問題)/game_setup.gd:647-661確認VillageA的outpost config有走獨立處理路徑(非只lord自動建,level=1+OutpostOwnerBank.set_owner(tile,1,'init')都在)/TAG_PRODUCE確認字串='生產'跟我config的tags值相符——三個前提個別檢查都對,但is_resident_static(state,VillageA)還是回false,不確定卡在哪個內部子條件(tile查找key/OutpostOwnerBank實際寫入欄位/其他)。★這是比R1(belief est null)/R2(同款+near-LOD cadence)更早、更根本的阻塞層——甚至還沒到belief這關,是最基礎的『這隊算不算resident』判斷就卡死,值得優先查因為若這是共通bug,可能同時影響R1/R2的部分fixture design。誠實聲明:我已經對這個布林函式做了三層diagnostic(member_team_ids/config路徑讀code/is_resident_static回傳值本身),但沒有再往function內部逐行加print去找究竟是哪個if卡住(effort budget已經很高,這輪工單量測已耗時數小時),建議systems若要繼續查,下一步是在is_resident_static本體(faction_ai_system.gd:503-517左右)逐行加print、或直接跑我persist的fixture(commit 876b11c4)重現。"
 ---
 
