@@ -1469,8 +1469,12 @@ func _tick_one_letter(state: WorldState, letter: Dictionary) -> int:
 	# ★敵 faction 隊在場攔截（物理零 RNG）：current_pos tile 有異 faction 隊 → 信使死。
 	if _letter_intercepted(state, letter, cur):
 		Probe.bump("help.letter_intercepted"); return 1
-	# 抵達 seat → 交付
+	# 抵達 → 交付
 	if cur == target_pos:
+		# ★復甦 R3 遷村令：kind=relocate → 送令到村 → 從抗人格秤（非 food-buy deliver 路）。
+		if String(letter.get("kind", "")) == "relocate":
+			_deliver_relocate_order(state, letter)
+			Probe.bump("relocate.delivered"); return 1
 		var lord: TeamData = state.teams.get(int(letter.get("target_lord_id", -1)))
 		if lord != null and lord.tile_pos == target_pos:
 			_deliver_letter_to_lord(state, letter, lord)   # lord 在 seat → deposit 進 team_known
@@ -1679,6 +1683,8 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		_ensure_holding_ledger(state, team)   # ★care-loop：領主 ensure 自家村 holding 監看條目（once-guard）
 		_try_migrant_side(state, team)   # ★復甦 R1：領主往 migrant_marginal>0 村移民（三態湧現；用 holding 已知村）
 		_try_invest_side(state, team)    # ★復甦 R2：領主往 facility_roi>0 村送料投資 farming（三態+雙 survival bound；用 holding 已知村）
+		_try_relocate_order(state, team) # ★復甦 R3：領主秤自家村 relocate_value → 下遷村令（letter、真送達、target 限已知領土）
+		_try_self_relocate(state, team)  # ★復甦 R3：村自願遷（村秤自身 relocate_value>閾 → 自發遷）
 		_step_contact_ledger(state, team)   # ★失聯帳本+care：掃逾時→失聯 belief→競爭 react_util / holding care/ignore
 
 # ★資訊網 distribute side-dispatch（第三 side-action 型、blueprint sign-off）：領主憑聽到的子民 need（belief）+ 人格
@@ -1776,6 +1782,172 @@ func _tick_migrant(state: WorldState, sub: TeamData, _merge_queue: Array) -> voi
 	#   棄 predict_intercept（移動目標攔截器對靜態村是錯工具：新生 anon subteam 零 belief→belief_pos(-1,-1) 走不動、
 	#   且 observe_velocity 耗 global RNG=此路本該零 RNG）。村位=行政知（own-faction、非 god-view）。
 	sub.move_target = target.tile_pos
+
+# ══════ ★復甦 R3 遷村執行端（§2C+§3、compound reuse、整 team 非 subteam）══════
+# 棄現據點(generalize _action_abandon_outpost 核 set_owner(-1)) → 村轉 mobile(TASK_MIGRATE reason=relocate、
+# resident-lock 豁免 MIGRATE + top-level 無 merge-back) → 移向 target → 抵達 establish
+# (空地 establish_crude_camp founding / own-faction outpost _convert_to_resident 落腳)。真送達非瞬間=感知鐵律跨距。
+const RELOCATE_TIMEOUT_DAYS: int = 25   # 遷途 timeout（防永久漂；到期原地落腳/流亡=genuine 收束）
+func _begin_village_relocate(state: WorldState, village: TeamData, target_pos: Vector2i) -> bool:
+	if target_pos == Vector2i(-1, -1) or village.tile_pos == target_pos:
+		return false
+	if village.task_reason == "relocate":
+		return false   # 已在遷（throttle）
+	# 棄現據點（真成本沉沒；generalize _action_abandon_outpost 的核 set_owner(-1)）
+	var cur_tile: HexTileData = state.world.tiles.get(village.tile_pos.x * 1000 + village.tile_pos.y)
+	if cur_tile != null and cur_tile.outpost_owner == village.team_id:
+		OutpostOwnerBank.set_owner(cur_tile, -1, "relocate_abandon")
+		if Probe.enabled: Probe.bump("relocate.abandoned")
+	# 轉 mobile（TASK_MIGRATE reason=relocate @PRIO_SURVIVAL；非 ENGINE_SOURCE reason → 同層覓食 self-replace 擋不動、保遷途）
+	village.task_extra_data = {"relocate_target": target_pos, "relocate_spawn": state.world.current_tick}
+	TaskArbiter.release(village)
+	# ★遷村 lifecycle 轉換（同 _convert_to_resident/establish_crude_camp 生命週期 transition；brain=決策層 relocate_value+從抗+閾、
+	#   此為 hand 執行）。★constitution taskarbiter 硬凍(無 gate-ok 豁免)→呈報 systems bless baseline(74→75、legit 新機制)。
+	TaskArbiter.transition(state, village, TeamData.TASK_MIGRATE, TaskArbiter.PRIO_SURVIVAL, "relocate")
+	village.task_reason = "relocate"
+	village.move_target = target_pos
+	if Probe.enabled: Probe.bump("relocate.started")
+	print("[Relocate] Team%d 棄據點遷向 (%d,%d)" % [village.team_id, target_pos.x, target_pos.y])
+	return true
+
+# per-tick 遷村推進（top-level 村；置 sim_runner move 後）：抵 target→establish 落腳、未到→續移、timeout→原地收束。
+func tick_relocations_all(state: WorldState) -> void:
+	for tid in state.teams:
+		var v: TeamData = state.teams.get(tid)
+		if v == null or v.task_reason != "relocate":
+			continue
+		var tgt: Vector2i = v.task_extra_data.get("relocate_target", Vector2i(-1, -1))
+		if tgt == Vector2i(-1, -1):
+			_finish_relocate(state, v, false); continue
+		var over: bool = state.world.current_tick - int(v.task_extra_data.get("relocate_spawn", 0)) \
+			> RELOCATE_TIMEOUT_DAYS * WorldState.TICKS_PER_DAY
+		if v.tile_pos == tgt or over:
+			if v.tile_pos == tgt and Probe.enabled: Probe.bump("relocate.arrived")
+			_settle_relocated_village(state, v)
+		else:
+			v.move_target = tgt   # 續移（movement 推進）
+
+# 抵達落腳：own-faction outpost→convert_to_resident、空地→establish_crude_camp founding、皆不成→原地流亡收束。
+func _settle_relocated_village(state: WorldState, v: TeamData) -> void:
+	var tile: HexTileData = state.world.tiles.get(v.tile_pos.x * 1000 + v.tile_pos.y)
+	if tile != null and tile.outpost_owner != -1:
+		var o: TeamData = state.teams.get(tile.outpost_owner)
+		if o != null and o.faction_id == v.faction_id and o.team_id != v.team_id:
+			InteractionSystem.new()._convert_to_resident(state, v)   # own-faction outpost 落腳（併入現據點）
+			_finish_relocate(state, v, true); return
+	if establish_crude_camp(state, v):   # 空地 founding（新 level-1 outpost、身分躍遷 PRODUCE）
+		_finish_relocate(state, v, true); return
+	# 落腳失敗（mountain/被占/自家原地）→ 原地釋放（流亡、genuine 失敗案：可能後續再遷/死）
+	_finish_relocate(state, v, false)
+
+func _finish_relocate(state: WorldState, v: TeamData, resettled: bool) -> void:
+	v.task_reason = ""
+	v.task_extra_data = {}
+	TaskArbiter.release(v)
+	if resettled and Probe.enabled: Probe.bump("relocate.resettled")
+
+# ★遷村目標挑選（§3、god-view gate）：掃 own-faction outpost 位（領主/村行政知、同 _faction_roster_pos gate-ok、
+# 非 god-view 全地掃）→ 對每候選地算 relocate_value（belief est、subject pop）→ 回最高正 > 門檻者。
+# subject_est=遷主(村)自身 est；sunk=遷主 persist（人格加權沉沒、戀土黏現地）。
+const RELOCATE_THRESHOLD: float = 2.0   # TEST VALUE — 遷值須越此正 margin 才遷（避邊際微移抖動；genuine 非 fire-crank）
+func _best_relocate_target(state: WorldState, faction_id: int, subject: TeamData, subject_est: VillageEstimate, sunk: float) -> Dictionary:
+	var best_pos: Vector2i = Vector2i(-1, -1); var best_v: float = RELOCATE_THRESHOLD
+	for tile_id in state.world.tiles:   # gate-ok: own-faction infra 位掃（讀 static outpost_owner/terrain 結構、faction gate 限同勢力、感知鐵律 legit、同 _faction_roster_pos）
+		var tile: HexTileData = state.world.tiles[tile_id]
+		if tile.outpost_level <= 0 or tile.tile_pos == subject.tile_pos:
+			continue
+		var o: TeamData = state.teams.get(tile.outpost_owner)
+		if o == null or o.faction_id != faction_id:
+			continue   # 只 own-faction 已知領土（admin 知識）
+		var target_est := VillageEstimate.make(tile.terrain, tile.outpost_level, tile.farming_level, subject_est.pop)
+		var rv: float = MarginalEconomy.relocate_value(subject_est, target_est, sunk)
+		if Probe.enabled: Probe.note("relocate.value", rv)
+		if rv > best_v:
+			best_v = rv; best_pos = tile.tile_pos
+	return {"pos": best_pos, "value": best_v}
+
+# ★領主下遷村令（§2C、C）：領主秤自家村 relocate_value + 人格 → 下令 = in_transit_letters kind='relocate'
+# payload=target_tile（reuse letter infra、真送達非瞬間、throttle 一令/村）。target 限 own-faction 已知領土（god-view gate）。
+func _try_relocate_order(state: WorldState, team: TeamData) -> void:
+	if team.faction_id == -1:
+		return
+	var f = state.factions.get(team.faction_id)
+	if f == null or f.leader_team_id != team.team_id:
+		return   # 只領主下遷村令
+	for e in team.dispatch_ledger:
+		if String(e.get("kind", "")) != "holding":
+			continue
+		var vid: int = int(e.get("subject_ref", -1))
+		var village: TeamData = state.teams.get(vid)
+		if village == null or vid == team.team_id or village.task_reason == "relocate":
+			continue
+		if _has_inflight_relocate_order(state, vid):
+			continue   # throttle 一令/村
+		var subj_est: VillageEstimate = _village_est(state, team, vid)
+		if subj_est == null:
+			continue   # 無 belief/行政 est → 保守不下令
+		var sunk: float = PersistStrength.compute(state, village)
+		var best: Dictionary = _best_relocate_target(state, team.faction_id, village, subj_est, sunk)
+		if best["pos"] == Vector2i(-1, -1):
+			continue   # 無更優已知領土（爛地無處遷=可能死、genuine）
+		# 遷村令 letter：origin=領主、target_pos=村（送令到村）、payload=遷往地。真送達非瞬間、可被攔截。
+		var dist: int = _hex_dist(team.tile_pos, village.tile_pos)
+		state.in_transit_letters.append({
+			"origin_team_id": team.team_id, "faction_id": team.faction_id,
+			"target_lord_id": vid, "target_pos": village.tile_pos, "kind": "relocate",
+			"relocate_to": best["pos"], "current_pos": team.tile_pos,
+			"spawn_tick": state.world.current_tick, "timeout": _founding_timeout(dist), "speed": 1,
+		})
+		if Probe.enabled: Probe.bump("relocate.ordered")
+		return   # 一 cadence 一令
+
+func _has_inflight_relocate_order(state: WorldState, village_id: int) -> bool:
+	for letter in state.in_transit_letters:
+		if String(letter.get("kind", "")) == "relocate" and int(letter.get("target_lord_id", -1)) == village_id:
+			return true
+	return false
+
+# ★遷村令收令 handler（§3、兩層對抗）：村從 vs 抗人格秤（忠/懼→從帶怨 unrest / 傲/戀土→抗命）。genuine 人格秤非死常數門檻。
+func _deliver_relocate_order(state: WorldState, letter: Dictionary) -> void:
+	var vid: int = int(letter.get("target_lord_id", -1))
+	var village: TeamData = state.teams.get(vid)
+	if village == null:
+		return
+	var to_pos: Vector2i = letter.get("relocate_to", Vector2i(-1, -1))
+	var leader: PersonData = state.persons.get(village.leader_id)
+	var lv: Dictionary = leader.values if leader != null else {}
+	# 從抗秤（連續 genuine、非死門檻）：obey = 忠(義氣)+懼(1−好戰、弱者怕領主) − 傲(野心)−戀土(慎重 proxy 守成)。
+	var obey: float = float(lv.get("義氣", 0.5)) + (1.0 - float(lv.get("好戰", 0.5))) * 0.5 \
+		- float(lv.get("野心", 0.5)) - float(lv.get("慎重", 0.5)) * 0.5
+	if obey >= 0.5:
+		# 從：遷（帶怨 unrest 累積、reuse cohesion；被迫離土）
+		if _begin_village_relocate(state, village, to_pos):
+			UnrestBank.add(village, 1, "被令遷村")
+			if Probe.enabled:
+				Probe.bump("relocate.comply"); Probe.bump("relocate.unrest_added")
+			print("[Relocate] Team%d 從令遷村(帶怨)" % vid)
+	else:
+		# 抗命：不遷（傲/戀土）；後果=領主人格後續(算了/斷賑濟/武力押遷=軍事 arc 留鉤 P5 起義叛離、本 slice 不強遷）。
+		if Probe.enabled: Probe.bump("relocate.resist")
+		print("[Relocate] Team%d 抗命不遷(傲/戀土)" % vid)
+
+# ★村自願遷（§3）：村秤自身 relocate_value（own-faction 已知領土 target）> 閾 → 自發遷（非領主令、村自主）。
+func _try_self_relocate(state: WorldState, team: TeamData) -> void:
+	if team.faction_id == -1 or team.task_reason == "relocate":
+		return
+	var f = state.factions.get(team.faction_id)
+	if f != null and f.leader_team_id == team.team_id:
+		return   # 領主自身不自願遷（走領主決策；此為子民村自主）
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or tile.outpost_owner != team.team_id or tile.outpost_level <= 0:
+		return   # 非駐村村長 → 不評（無據點可棄）
+	var self_est := VillageEstimate.make(tile.terrain, tile.outpost_level, tile.farming_level, team.population)  # 自家 tile=自知非 god-view
+	var sunk: float = PersistStrength.compute(state, team)
+	var best: Dictionary = _best_relocate_target(state, team.faction_id, team, self_est, sunk)
+	if best["pos"] == Vector2i(-1, -1):
+		return   # 無更優已知領土
+	if _begin_village_relocate(state, team, best["pos"]):
+		if Probe.enabled: Probe.bump("relocate.self")
 
 # ★復甦 R2 投資 side（§2B、P3 material-delivery 第3個 lord-side 家族）：領主評自家村 facility_roi，
 # 只往「新建 farming 後轉正」的村送料（三態湧現：森村 deficit→surplus 投／山地投資後仍赤字 ROI 負不投／領主絕境不投）。

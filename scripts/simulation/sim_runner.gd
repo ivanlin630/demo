@@ -465,6 +465,7 @@ func _step6b2_info_dispatch(state: WorldState, team_ids: Array) -> void:
 # ★資訊網 B carrier：飛行中信件逐 tick 移動/交付/timeout/攔截（置 move 後、非 team=免撞全 team 機具）。
 func _step_tick_letters(state: WorldState) -> void:
 	_faction_ai_system.tick_letters_all(state)
+	_faction_ai_system.tick_relocations_all(state)   # ★復甦 R3：遷村中的村逐 tick 推進(抵達 establish 落腳)、置 move/letter 後
 
 func _step6f_training(state: WorldState, team_ids: Array) -> void:
 	_training_system.process(state, team_ids)

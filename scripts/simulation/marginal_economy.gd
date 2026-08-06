@@ -57,3 +57,10 @@ static func facility_roi(est: VillageEstimate, facility: String, next_lvl: int, 
 		# 仍赤字 → 只惠及殘存活窗（現存糧撐幾天）；food_est NEUTRAL 0 → 窗 0 → ROI=−cost（山地自我區辨）。
 		effective_days = minf(PLANNING_HORIZON_DAYS, est.food_est / maxf(-net_after, 0.001))
 	return d_inflow * effective_days - upgrade_cost_value
+
+# ★遷村價值（§1.1.3、Slice R3）：遷到 target 地的淨前景 − current 地前景 − 沉沒成本（persist_strength 沉沒、呼叫者算傳入）。
+# = _inflow_est(target) − _inflow_est(current) − sunk_penalty。全 belief VillageEstimate（結構防線、_inflow_est 拿不到 live target）。
+# 山地村 current 永赤字 + target 前景高 → 大正 → 遷；平原盈餘村 target 差/沉沒重 → ≤0 → 不遷（三態湧現、零 if-terrain）。
+# ★sunk_penalty 由呼叫者算（PersistStrength.compute(state, team) 人格加權沉沒）傳 float → MarginalEconomy 純算術零 state。
+static func relocate_value(current_est: VillageEstimate, target_est: VillageEstimate, sunk_penalty: float) -> float:
+	return _inflow_est(target_est) - _inflow_est(current_est) - sunk_penalty
