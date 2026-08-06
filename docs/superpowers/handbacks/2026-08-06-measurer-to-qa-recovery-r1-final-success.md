@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "recovery-r1移民三態湧現分化最終驗收(3根修commit 5810f95c) — 完整端到端CONFIRM(specimen 4540 entries):同床同seed(deb10640+cluster_pos anchor)重跑,決策+執行雙層皆通過。plains(marginal+0.1668,唯一正值)村pop真從2升到6(migrant.dispatched=2/migrant.arrived=2,100%到達率)/forest(marginal應−1.30,本輪未捕獲評估樣本)+mountain(marginal−2.2396)pop皆維持2不變、從未獲派——同一領主同一機制、命運分岔由地不由腳本,湧現分化端到端真實。請讀specimen判motive→scout/lord決策→migrant dispatch→抵村併入→村pop升的完整因果鏈是否連貫。"
 ---
 
