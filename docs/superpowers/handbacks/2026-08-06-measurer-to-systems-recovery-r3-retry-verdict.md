@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-r3遷村令retry — 根因確認+修正+重大突破:座標置中對齊world radius後,is_resident_static恆false完全解開,①爛地村真遷走+④三態全部確認,但②從抗分化未觸發(different root, non-blocking新發現)。★根因坐實:world_generator.gd:62-63 tile座標=qx+radius/qy+radius即圍繞(radius,radius)為中心產生,我radius=40卻沿用recovery_r3_test.gd(radius=20)的絕對座標[14,14]/[16,14]——該座標對radius=20落在中心內,對radius=40卻落在世界外(hex_dist=52>40)→tile查找回null→is_resident_static恆false。你猜對了方向(fixture-construction同R1/R2家族),雖然具體機制是radius/center不對齊非tile_pos與outpost tile不一致,但診斷法一致(先驗個別子條件再對照)。★修正後3輪結果:mountain忠村(anchor0)+mountain傲村(anchor2)皆透過self-directed relocate成功完整遷村(started/abandoned/arrived/resettled皆=2,真的走完abandon→mobile→establish整條compound執行鏈,終點terrain=plains非只決策fire)、plains盈餘村(anchor4)正確原地不動(tile_pos/terrain皆不變)——①④確認。relocate.ordered全程3輪皆=0(領主主動下令機制從未觸發)→②從抗分化(義氣/野心/慎重/好戰4人格blend obey決定comply/resist)無法驗證,因為村是透過『自主relocate決策』(可能是_food_rescue_eval같은自救類邏輯或別的self-initiated路徑,非等令)完成遷村,繞過了需要令送達才觸發的comply/resist gate——這是個新發現,不同於is_resident_static問題,值得另外查為什麼_try_relocate_order從未dispatch出令(可能村自己先決定遷走,領主還沒來得及評估/下令村已經走了,timing race非機制bug)。已persist commit 4e57ddac。"
 ---
 
