@@ -1,0 +1,22 @@
+{
+  "diagnostic": "recovery-path R3 遷村令測床(ex-ante formula見config._doc), anchor=2",
+  "final": {
+    "factions": 3,
+    "teams": 14
+  },
+  "per_village_value_sample": {
+
+  },
+  "probe": {
+    "relocate.abandoned": 2,
+    "relocate.arrived": 2,
+    "relocate.comply": 0,
+    "relocate.delivered": 0,
+    "relocate.ordered": 0,
+    "relocate.resettled": 2,
+    "relocate.resist": 0,
+    "relocate.started": 2,
+    "relocate.unrest_added": 0,
+    "relocate.value_peak": 7.5
+  }
+}
