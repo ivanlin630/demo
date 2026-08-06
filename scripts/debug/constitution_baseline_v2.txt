@@ -10,6 +10,7 @@ scripts/simulation/decision/options.gd::applicable::route
 scripts/simulation/diplomatic_ai_system.gd::_calc_diplomacy_score::threshold  # gate-ok: if gift_food>0.0 禮物存在 guard(非決策硬閾)
 scripts/simulation/diplomatic_ai_system.gd::consider_betrayal::rng  # gate-ok: 案③已陡(driver≥HARD→100%,中間 margin 才骰)
 scripts/simulation/faction_ai_system.gd::_assign_tasks::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
+scripts/simulation/faction_ai_system.gd::_begin_village_relocate::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)——★復甦 R3 遷村 lifecycle transition(同 _convert_to_resident/establish_crude_camp、brain=決策層 relocate_value+從抗+閾)、呈 systems R² ratify baseline 74→75
 scripts/simulation/faction_ai_system.gd::_check_discipline::rng  # gate-ok: 案②outcome(壓力下紀律失效=世界回應,非決策)
 scripts/simulation/faction_ai_system.gd::_commit_conquest_attack::taskarbiter  # gate-ok: task lifecycle scaffolding(引擎 dispatch/release,非決策閘)
 scripts/simulation/faction_ai_system.gd::_decide_subteam::route
