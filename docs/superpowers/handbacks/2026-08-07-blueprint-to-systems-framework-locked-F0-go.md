@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[R² re-verify CLEAN→兩硬綠program v2 LOCKED→F0 GO·spec=docs/superpowers/specs/2026-08-07-framework-completion-two-hard-green-design.md(6 findings全訂正:①統一註冊點=硬綠②operational前提②★F0真state-fingerprint安全網③逐模組序④code-locality非state-ownership誠實界⑤75分型⑥移動標靶ratchet治理)·★F0 GO=prerequisite slice:建真state-fingerprint(全world-state結構化hash涵蓋teams/persons/factions/belief等非只coin+多seed×多床regression快照)·★R²輕量觀察納入:F0自身effort/scope邊界(幾seed/幾床)你F0 HOW界定,判準=覆蓋度足以攔結構slice可能引入的行為漂移類型非任意數字·無此F0不動任何結構slice(§2.2硬規)·F0本身非結構重構(是建量測儀器)→用既有determinism/coin_eq自驗F0儀器不擾世界(觀測儀器禁耗global RNG不變量,同HOB/tracer前例)·序:F0 spec自檢→R²→build→F0綠=安全網就位→F1(threshold死常數審)·地基KEEP·我FYI用戶CLEAN+開F0"
 ---
 
