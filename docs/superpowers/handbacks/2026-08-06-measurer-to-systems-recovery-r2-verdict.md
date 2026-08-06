@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-r2投資機制量測(commit 6db4d90c) — formula驗證通過+機制真work(獨立佐證)+我fixture部分未完全復現(誠實回報):★ex-ante facility_roi formula(讀code手算,見config._doc)forest正/mountain遠負,符合三態預期。★機制本身真的work:雖然我設計的3組faction pair中,intended target Village1(vid=1)全程belief est=null(同R1初版遇過的belief-formation問題,這次即使套cluster_pos anchor仍未解),但同一世界裡另一個系統自然生成的resident村(vid=7,forest,pop=1)成功獲facility_roi=7.5(正)並觸發invest.dispatched=1——這獨立證明_try_invest_side機制本身(閘門+facility_roi calc+dispatch)在near-LOD條件下確實能真fire,不是code層級的bug。★mountain案(anchor4跑22天)confirm invest.dispatched=0全程,村最終faction=-1(因赤字自然脫離)——負ROI從未被投資,符合預期。★anti-crank forest晚投案(anchor2)因belief問題同樣未完整驗證village-side viable gate,但lord2的invest.dispatched也是0全程(無法判斷是anti-crank gate生效還是同款belief問題)。★perf新發現:R2的near-LOD運算成本明顯比R1重,22天/15天窗口皆逾時,右尺寸縮到8天才過關——供你們known_issues參考。★lord-desperate雙bound案未建組織fixture,已用code-read確認DESPERATION_DAYS=3.0門檻邏輯正確(faction_ai_system.gd:1795-1798),非組織量測缺口。誠實淨判:機制存在且會fire(vid=7案佐證)，但我的3-pair fixture沒能乾淨复现①③④全部維度，需要更多時間/更精準的fixture設計(可能複用vid=7那種自然生成路徑的洞察)才能補齊，交你們判斷是否需要我再迭代或這樣的部分驗證+code層確認已足夠。"
 ---
 

@@ -1096,3 +1096,7 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
 復甦路徑 R1（`MarginalEconomy` 邊際經濟計算層 + 移民 marginal-util dispatch）merged。決策層三態 CONFIRMED、執行層 arrived 三根修。兩個非阻塞 follow-up：
 - **migrant 無專屬 specimen tap**：migrant 走 anon 側派（`dispatch_anon_migrants`、leader_id=-1）無專屬 print、不進標準 specimen tap → 決策細節（marginal 算式）無法逐 tick 獨立追、只驗 outcome+code（同 side-action 家族限制）。有 Probe tap（`migrant.marginal`/`mini_util`/`dispatched`/`arrived`）。全量暫態可觀測性理想=補標準 specimen path。
 - **`MIGRANT_RATION_DAYS=15` 遠村校準**：口糧供給窗 15 天（`subteam_system.gd`）；近村 OK，**遠村（journey>15 天）可能途中耗盡口糧→survival preempt 再現**。R1 近村驗證；遠村距離需 measurer 校準 RATION_DAYS vs journey ETA。
+
+### recovery-r2 量測 perf + fixture-construction 教訓（2026-08-06、非 code bug）
+- **R2 near-LOD 運算成本比 R1 重**：measurer 22天/15天窗口皆逾時、右尺寸縮到 8 天才過關。R2 加 facility_roi/material convoy/village build-as-survival 多 per-team 算 → near-LOD（cluster_pos anchor 全隊 near）成本疊。連 O(N²) faction AI perf 牆（project_time_scale_wave）。量 R2/R3 用小窗+cluster anchor。
+- **fixture 置村 belief-formation**：manual 手置 target 村（vid=1）全程 `_village_est` belief est=null（cluster_pos anchor 仍未解），但**自然生成 resident 村（vid=7 forest）work**。根=`_village_est` 讀 lord `dispatch_ledger` holding 條目（own-faction 村）+belief best_estimate；manual 置村不在 lord holding ledger / 未被世界結構納入 → never 評估。**★量 invest/recovery 類需 target 村 = own-faction holding-ledger resident（自然生成路徑、如 vid=7），非 manual 孤立置**。連 reference_measurement_protocol no-player far-cadence vision。
