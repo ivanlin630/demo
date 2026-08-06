@@ -1677,6 +1677,7 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		_try_scout_side(state, team)
 		_try_distribute_side(state, team)
 		_ensure_holding_ledger(state, team)   # ★care-loop：領主 ensure 自家村 holding 監看條目（once-guard）
+		_try_migrant_side(state, team)   # ★復甦 R1：領主往 migrant_marginal>0 村移民（三態湧現；用 holding 已知村）
 		_step_contact_ledger(state, team)   # ★失聯帳本+care：掃逾時→失聯 belief→競爭 react_util / holding care/ignore
 
 # ★資訊網 distribute side-dispatch（第三 side-action 型、blueprint sign-off）：領主憑聽到的子民 need（belief）+ 人格
@@ -1692,6 +1693,88 @@ func _try_distribute_side(state: WorldState, team: TeamData) -> void:
 	var best: Dictionary = cands[0]
 	if Probe.enabled: Probe.note("distribute.mini_util", float(best.get("util", 0.0)))
 	_dispatch_convoy(state, team, best["to_task"])   # 自 throttle（一 convoy/lord）+ 成功時 distribute.dispatch tap（:3353）
+
+# ★復甦 R1 移民 side（§2 A）：領主評自家村，只往 migrant_marginal>0 的村移民（森林/山地村自動不收=三態湧現）。
+const MIGRANT_BATCH: int = 3   # TEST VALUE — 一批移民 anon 數
+# ★util 校準（DERIVED、非 fire-crank）：benefit=marginal(淨食/日) × payback 視野 × 人格；cost=送 k 人一次性移動成本。
+#   marginal≤0 → util<0（三態 gate 保）；marginal>0 → 淨益×視野 可越過一次性移動成本 → fire。
+const MIGRANT_EXPECT_DAYS: float = 30.0   # TEST VALUE — 移民淨益回收視野（月量級規劃、genuine 非門檻）
+const MIGRANT_MOVE_COST: float = MarginalEconomy.MIGRANT_UPKEEP * float(MIGRANT_BATCH)   # 送 k 人一次性移動成本 proxy（途中食耗、DERIVED 食物常數）
+func _try_migrant_side(state: WorldState, team: TeamData) -> void:
+	if team.faction_id == -1:
+		return
+	var f = state.factions.get(team.faction_id)
+	if f == null or f.leader_team_id != team.team_id:
+		return   # 只領主安排自家村移民
+	if team.population < CONVOY_MIN_PARENT_POP or AnonTierSystem.total_pop(team) < MIGRANT_BATCH + 2:
+		return   # ★來源不抽穿：領主(源)留守下限（不拆東牆補西牆）
+	if _has_inflight_migrant(state, team):
+		return   # throttle 一隊一 in-flight migrant
+	var lv: Dictionary = TradeValuation.leader_vals(state, team)
+	# 掃 holding 村找 migrant_marginal 最高正的 target（belief pop_est、零 god-view）。
+	var best_v: int = -1; var best_marg: float = 0.0; var best_pos: Vector2i = Vector2i(-1, -1)
+	for e in team.dispatch_ledger:
+		if String(e.get("kind", "")) != "holding":
+			continue
+		var vid: int = int(e.get("subject_ref", -1))
+		var est: VillageEstimate = _village_est(state, team, vid)
+		if est == null:
+			continue   # 無 belief/行政 est → 保守不行動
+		var marg: float = MarginalEconomy.migrant_marginal(est, MIGRANT_BATCH)
+		if Probe.enabled: Probe.note("migrant.marginal", marg)
+		if marg > best_marg:
+			best_marg = marg; best_v = vid; best_pos = state.teams[vid].tile_pos   # gate-ok: own-faction 村位=行政知識（同 _faction_roster_pos）
+	if best_v == -1:
+		return   # 無邊際正村（森林/山地全負→不移=三態湧現、零 if-terrain）
+	var util: float = best_marg * MIGRANT_EXPECT_DAYS * _help_pmult(lv) - MIGRANT_MOVE_COST
+	if Probe.enabled: Probe.note("migrant.mini_util", util)
+	if util <= 0.0:
+		return   # cost-benefit 不划算
+	var mid: int = SubteamSystem.new().dispatch_anon_migrants(state, team.team_id, MIGRANT_BATCH, best_pos, best_v)
+	if mid != -1 and Probe.enabled:
+		Probe.bump("migrant.dispatched")
+
+# ★VillageEstimate 組裝（§1.0）：結構欄=自家村行政記錄(gate-ok own-faction infra、靜態地理+建置)、pop=belief pop_est。
+# ★禁把 live target team 傳給 MarginalEconomy（結構防線在 _inflow_est 簽名只吃 est）。無 belief pop→null（保守不行動）。
+func _village_est(state: WorldState, lord: TeamData, village_id: int) -> VillageEstimate:
+	var v: TeamData = state.teams.get(village_id)
+	if v == null:
+		return null
+	var tile: HexTileData = state.world.tiles.get(v.tile_pos.x * 1000 + v.tile_pos.y)   # gate-ok: own-faction 村 outpost 行政記錄（terrain/level/farming 結構欄、非 live public_storage）
+	if tile == null or tile.outpost_owner != village_id or tile.outpost_level <= 0:
+		return null
+	var pop_est: int = -1
+	if village_id == lord.team_id:
+		pop_est = lord.population   # 自身真值（感知鐵律容自讀）
+	else:
+		pop_est = int(BeliefSystem.best_estimate(state, lord.team_id, village_id).get("population_est", -1))
+	if pop_est < 0:
+		return null   # 無 belief pop→保守不行動（invariants:186）
+	return VillageEstimate.make(tile.terrain, tile.outpost_level, tile.farming_level, pop_est)
+
+func _has_inflight_migrant(state: WorldState, team: TeamData) -> bool:
+	for tid in team.subteam_ids:
+		var s: TeamData = state.teams.get(tid)
+		if s != null and s.task_reason == "migrate":
+			return true
+	return false
+
+# ★移民 subteam tick（抵 target 村→併入 anon=P2 共址即產能、非併回母隊；未到→朝 target 走）。
+func _tick_migrant(state: WorldState, sub: TeamData, _merge_queue: Array) -> void:
+	var tid: int = int(sub.task_extra_data.get("migrant_target", -1))
+	var target: TeamData = state.teams.get(tid)
+	if target == null:
+		if not state.teams_pending_erase.has(sub.team_id): state.teams_pending_erase.append(sub.team_id)
+		return   # 目標村消失→解散（人隨之散、真成本已付）
+	if sub.tile_pos == target.tile_pos:
+		AnonTierSystem.transfer_proportional(sub, target, AnonTierSystem.total_pop(sub))   # 併入 target 村（P2 共址即產能）
+		if Probe.enabled: Probe.bump("migrant.arrived")
+		if not state.teams_pending_erase.has(sub.team_id): state.teams_pending_erase.append(sub.team_id)
+		return
+	# ★執行層修：村靜態 own-faction、直接 move_target=村 pos（同 convoy home_pos/settle outpost）——
+	#   棄 predict_intercept（移動目標攔截器對靜態村是錯工具：新生 anon subteam 零 belief→belief_pos(-1,-1) 走不動、
+	#   且 observe_velocity 耗 global RNG=此路本該零 RNG）。村位=行政知（own-faction、非 god-view）。
+	sub.move_target = target.tile_pos
 
 # 求援 side：餓 + 知施助者 + mini-util>0（cost-benefit）→ 派 anon 信使（不佔主任務、平行）。
 func _try_herald_side(state: WorldState, team: TeamData) -> void:
@@ -2113,6 +2196,9 @@ func _evaluate_subteam(state: WorldState, sub: TeamData, merge_queue: Array) -> 
 	# ★資訊網 S-scout：偵察斥候子隊（belief-pos travel→抵達查子民 need 帶回領主→recall）。
 	if sub.current_task == TeamData.TASK_SCOUT and sub.task_reason == "info_scout":
 		_tick_info_scout(state, sub, merge_queue)
+		return
+	if sub.current_task == TeamData.TASK_MIGRATE and sub.task_reason == "migrate":
+		_tick_migrant(state, sub, merge_queue)   # ★復甦 R1：移民 subteam 朝 target 村→抵達併入
 		return
 	if sub.current_task == TeamData.TASK_BUILD:
 		return  # C: 施工中（建設），不打斷、不召回
