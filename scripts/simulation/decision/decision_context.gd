@@ -6,6 +6,7 @@ class_name DecisionContext
 # best_arbitrage_order/team_strength（instance）、RelationGraph.strongest（讀 leader.relation_edges）。
 
 var leader_values: Dictionary = {}
+var desperation_entry_threshold: float = DecisionTerms.DESPERATION_DAYS   # ★F1 靶A：人格化 survival-entry 門檻（單一計算點、5+ applicable 共讀）
 var food_days: float = 0.0
 var can_rescue_build: bool = false      # ★復甦 R2 §2B.1：料備妥產糧設施自救建設 viable（build-as-survival）
 var rescue_build_util: float = 0.0      # ★同上 genuine util（食安價值 frac × P(survive_to_harvest)）
@@ -162,6 +163,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	var _tg: int = Time.get_ticks_usec() if SimRunner.phase_timing else 0
 	var ldr: PersonData = state.persons.get(team.leader_id)
 	c.leader_values = ldr.values.duplicate() if ldr != null else {}
+	c.desperation_entry_threshold = DecisionTerms.desperation_entry_threshold(c.leader_values)   # ★F1 靶A 單一計算點（5+ survival-entry applicable 共讀；HOW §2.5.1）
 	var ef: float = ResourceSystem.effective_food(state, team)
 	c.food_days = ef / maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
 	c.population = team.population

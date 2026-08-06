@@ -3871,7 +3871,10 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 	var ldr: PersonData = state.persons.get(leader_team.leader_id)
 	var ldr_greed: float = float(ldr.values.get("貪婪", 0.5)) if ldr != null else 0.5
 	var ldr_ambition: float = float(ldr.values.get("野心", 0.5)) if ldr != null else 0.5
-	var is_greedy_leader: bool = (ldr_greed + ldr_ambition) >= MINING_GREED_THRESHOLD
+	# ★F1 靶B：硬 persona-gate(貪婪+野心>=1.1)→ soft weight（連續、無 1.1 懸崖）。
+	# 差異化改由「ore bonus ∝ (貪婪+野心) × 山地地形懲罰」湧現：普通 leader 小 bonus 壓不過山懲→不建礦(稀有擬真保留)、
+	# 貪婪 leader 大 bonus 壓過→建礦。零差異化損失（貪婪隊 bonus ≥ 舊 gate 值）、無 1.09→1.1 懸崖。
+	var greed_ambition: float = ldr_greed + ldr_ambition
 	# 敵 outpost 位置一次收集（hoist：原每 candidate 全圖掃 = O(tiles²) → 500-tick infra spike 根）
 	var enemy_outposts: Array = _enemy_outpost_positions(state, leader_team)
 	for tile_id in state.world.tiles:
@@ -3887,20 +3890,22 @@ func _evaluate_new_outpost_location(state: WorldState, leader_team: TeamData) ->
 			and (float(tile.resource_cap.get("ore_gold", 0)) > 0.0 \
 				or float(tile.resource_cap.get("ore_silver", 0)) > 0.0)
 		var min_dist: int = 1 if is_ore_mountain else 2
-		# S2 礦村搜索擴距：貪婪 leader 對礦山搜索 dist 擴至 ORE_MOUNTAIN_MAX_DIST（r=8 礦山常在邊陲）
-		var max_dist: int = ORE_MOUNTAIN_MAX_DIST if (is_ore_mountain and is_greedy_leader) else 5
+		# S2 礦村搜索擴距：ore 山搜索 dist 擴至 ORE_MOUNTAIN_MAX_DIST（r=8 礦山常在邊陲）。
+		# ★F1 靶B：去 is_greedy_leader 硬 gate——ore 山恆擴搜、差異化由下方連續 score bonus 定（普通 leader 搜到但 bonus 小不選、fp 不變）。
+		var max_dist: int = ORE_MOUNTAIN_MAX_DIST if is_ore_mountain else 5
 		if dist > max_dist or dist < min_dist: continue
 		var score: float = float(tile.productivity) * 100.0
 		score += float(TERRAIN_BUILD_BONUS.get(tile.terrain, 0))
 		score -= float(dist) * 5.0
 		score += clampf(10.0 - float(dist), 0.0, 10.0) * 2.0
 		score += _site_resource_bonus(state, tile.tile_pos)
-		# S2 礦村：含礦山地對貪婪/野心 leader 加權 ore bonus（壓過山地懲罰=蓄意富裕擴張；普通 leader 不選=稀有擬真）
-		# 門檻 MINING_GREED_THRESHOLD：greed+ambition 須達此值才觸發（避免凡人 leader 也選礦山）
-		if tile.terrain == "mountain" and is_greedy_leader:
+		# ★F1 靶B：ore bonus 連續 ∝ (貪婪+野心)（去 is_greedy_leader 硬 gate、無 1.1 懸崖）。
+		# 山地地形懲罰(TERRAIN_BUILD_BONUS/低 productivity)自然差異化：普通 leader 小 bonus 壓不過→不建礦(稀有擬真)、
+		# 貪婪 leader 大 bonus 壓過→蓄意富裕擴張。貪婪隊(>=1.1) bonus = (greed+ambition)×WEIGHT ≥ 舊 gate 值=零損失。
+		if tile.terrain == "mountain":
 			var ore_here: float = _site_resource_bonus_ore_only(state, tile.tile_pos)
 			if ore_here > 0.0:
-				score += ore_here * (ldr_greed + ldr_ambition) * MINING_GREED_WEIGHT   # TEST VALUE
+				score += ore_here * greed_ambition * MINING_GREED_WEIGHT   # 連續 weight（無 1.1 gate）
 		var min_enemy_dist: int = 9999
 		for ep in enemy_outposts:
 			var ed: int = _hex_dist(tile.tile_pos, ep)
