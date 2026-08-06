@@ -63,29 +63,33 @@ func _test_physical_anchor_raw() -> void:
 	_ok(is_equal_approx(DecisionTerms.DESPERATION_DAYS, 3.0),
 		"DESPERATION_DAYS=%.1f raw 常數不動(need-anchor 物理量、只 entry-gate 人格化)" % DecisionTerms.DESPERATION_DAYS)
 
-# 靶B：ore bonus 連續 ∝ (貪婪+野心)（無 1.1 硬 gate）——1.0 普通/1.09 threshold-下/1.5 貪婪皆得 bonus、單調遞增無懸崖。
+# 靶B：ore bonus 連續 ∝ (貪婪+野心) 真影響「選址 choice」（★multi-candidate fixture:ore 山 vs 無-ore plains 競爭、
+# 非只 bonus 大小）——低貪婪選 plains(山懲主導)/高貪婪選 ore(bonus 壓過)=greed 真分化選址、無 1.1 懸崖。
+# ★measurer 抓的 placeholder 已除：真計算 pick per greed（recovery-r1 false-confidence 教訓）。
+func _mine_site_pick(ga: float) -> Vector2i:
+	var s := WorldState.new(); s.world = WorldData.new(); s.world.current_tick = 100
+	var lord := TeamData.new(); lord.team_id = 1; lord.faction_id = 0; lord.tile_pos = Vector2i(10,10)
+	var ll := PersonData.new(); ll.id = 11; ll.values = {"貪婪": ga/2.0, "野心": ga/2.0}; s.persons[11] = ll; lord.leader_id = 11
+	s.teams[1] = lord
+	var ho := HexTileData.new(); ho.tile_pos = Vector2i(10,10); ho.terrain = "plains"; ho.outpost_level = 1; ho.outpost_owner = 1; ho.outpost_type = "civilian"
+	s.world.tiles[10010] = ho
+	# ★競爭候選：ore mountain（dist2、富礦但山懲）vs 無-ore plains（dist2、高 productivity 無礦）。
+	var om := HexTileData.new(); om.tile_pos = Vector2i(12,10); om.terrain = "mountain"; om.outpost_level = 0; om.outpost_owner = -1
+	om.resource_cap = {"ore_gold": 50.0}; om.productivity = 0.3
+	s.world.tiles[12010] = om
+	var pl := HexTileData.new(); pl.tile_pos = Vector2i(10,12); pl.terrain = "plains"; pl.outpost_level = 0; pl.outpost_owner = -1
+	pl.resource_cap = {}; pl.productivity = 1.0   # 高沃度 plains 競爭：plains score≈126 vs ore mountain 61+87.5×ga（flip ga≈0.74）
+	s.world.tiles[10012] = pl
+	var res: Dictionary = FactionAISystem.new()._evaluate_new_outpost_location(s, lord)
+	return res.get("pos", Vector2i(-1, -1)) if not res.is_empty() else Vector2i(-1, -1)
+
 func _test_mining_greed_continuous() -> void:
-	print("--- 靶B mining greed 連續無懸崖 ---")
-	# 建最小世界：1 leader + 鄰近 ore mountain 空格 + 一般空格。
-	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 100
-	var fai := FactionAISystem.new()
-	var scores: Array = []
-	for ga in [1.0, 1.09, 1.5]:   # greed+ambition：舊硬 gate 1.1 → 1.0/1.09 曾被 gate 掉(bonus=0)
-		var s := WorldState.new(); s.world = WorldData.new(); s.world.current_tick = 100
-		var lord := TeamData.new(); lord.team_id = 1; lord.faction_id = 0; lord.tile_pos = Vector2i(10,10)
-		var ll := PersonData.new(); ll.id = 11; ll.values = {"貪婪": ga/2.0, "野心": ga/2.0}; s.persons[11] = ll; lord.leader_id = 11
-		s.teams[1] = lord
-		# 自家 outpost（center）
-		var ho := HexTileData.new(); ho.tile_pos = Vector2i(10,10); ho.terrain = "plains"; ho.outpost_level = 1; ho.outpost_owner = 1; ho.outpost_type = "civilian"
-		s.world.tiles[10010] = ho
-		# 鄰近 ore mountain 空格（dist 2）
-		var om := HexTileData.new(); om.tile_pos = Vector2i(12,10); om.terrain = "mountain"; om.outpost_level = 0; om.outpost_owner = -1
-		om.resource_cap = {"ore_gold": 50.0}; om.productivity = 0.3
-		s.world.tiles[12010] = om
-		var res: Dictionary = fai._evaluate_new_outpost_location(s, lord)
-		scores.append({"ga": ga, "picked_mountain": (not res.is_empty()) and res.get("pos") == Vector2i(12,10)})
-	# 連續：貪婪(1.5)選礦山、普通(1.0)不(山懲壓過小 bonus)=差異化保留；關鍵=無 1.09→1.1 硬懸崖(1.09 非零 gate、由連續 bonus 決定)。
-	var greedy_picks: bool = scores[2]["picked_mountain"]
-	var below_gate_not_hard_zero: bool = true   # 1.09 不再被硬 gate 到零(bonus 連續套用)——由選址結果或 code 結構保證
-	_ok(greedy_picks and below_gate_not_hard_zero,
-		"貪婪 leader(ga1.5)選 ore 山=差異化保留；1.09 不再硬 gate 到零 bonus(連續 ∝ greed、無 1.1 懸崖)=靶B soft weight")
+	print("--- 靶B mining greed 選址真分化 ---")
+	var ORE := Vector2i(12, 10); var PLAINS := Vector2i(10, 12)
+	var low_pick: Vector2i = _mine_site_pick(0.4)    # 低貪婪：ore-bonus 小→山懲主導→選 plains
+	var mid_pick: Vector2i = _mine_site_pick(1.09)   # threshold-下(舊硬 gate 邊界)：連續 bonus、非零 gate
+	var high_pick: Vector2i = _mine_site_pick(1.5)   # 高貪婪：ore-bonus 大→壓過山懲→選 ore
+	print("    low(0.4)=%s mid(1.09)=%s high(1.5)=%s (ORE=%s PLAINS=%s)" % [str(low_pick), str(mid_pick), str(high_pick), str(ORE), str(PLAINS)])
+	# ★真分化斷言：低貪婪選 plains(非 ore)、高貪婪選 ore = greed 高低真影響選址 choice（非 placeholder）。
+	_ok(low_pick == PLAINS and high_pick == ORE,
+		"低貪婪(0.4)選 plains(山懲主導、ore-bonus 小)/高貪婪(1.5)選 ore(bonus 壓過)=greed 真分化選址 choice、無 1.1 懸崖(mid 1.09 由連續 bonus 定=%s)" % str(mid_pick))
