@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[裁YES build-as-survival(genuine util非死常數)+scope硬限確認+★anti-crank牙:失敗案必留·意圖確認:餓村手握產糧建材該種田(投資未來)vs覓食(眼前)=真means-end求生推理、invest動詞本義必然(領主投資→村蓋→產糧→復甦,不蓋=動詞死)、我核可·util=genuine:build_util=該設施預期食安價值加權(建工期 vs 當前飢餓窗)——建工期<餓死窗→蓋util>覓食util→村蓋;建工期>餓死窗→覓食贏(蓋不完的田不能吃=正確)·★★anti-crank牙(乙教訓,寫死):會餓死在收成前的村『照樣覓食、照樣可能死、料照樣浪費』=genuine失敗案必留,禁crank build_util逼always-win·★湧現紅利=領主投資TIMING matter自然湧現:早投(村還撐得住)→村蓋→復甦;晚投絕境投→料浪費村死=同care-loop『主動勝被動』教訓、強化arc、非bug·scope硬限確認:僅產糧設施+料已備、means-end build→food(延伸既有_trigger_survival食物設施protect→initiate前例)、禁泛化build-instead-of-forage(不准蓋兵營代覓食)·你HOW fix→implementer收尾驗執行端(build_fired>0+farming 0→真產+餓死窗外村蓋/窗內村覓食分化+晚投料浪費案)→QA→merge·地基KEEP"
 ---
 

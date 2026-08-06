@@ -58,6 +58,15 @@ grounding: §3 經濟底查（`2026-08-06-...econ-baseline-verdict`）+ R① CLE
 - ★**第2重 survival bound（領主端 source-constraint、blueprint 2026-08-06 定）**：`facility_roi` 綁**村端** post-investment survival（§1.1.2）；此外**領主自己求生線內才投、別掏空自己**——投資出料前 gate：領主出 `upgrade_cost` material（+convoy 口糧）後**自身仍在求生線上**（鏡射 R1 migrant source-floor `CONVOY_MIN_PARENT_POP`/口糧 afford）。領主自身絕境（food_days<DESPERATION 或 material 不足留存）→ 不投（先自救）。= 雙 survival bound（村端 ROI 值不值 + 領主端 afford 不掏空）。
 - ★**驗執行端**（memory feedback_verify_execution_end）：送料後**目標村建設須真 fire**——verify 村建設 precondition 讀 holding material（`has_manufacturing_facility`/build start 讀料）。candidate 生成≠真蓋；build-time 必驗料到→建設 argmax 勝→TASK_BUILD 真轉→facility level 真升。若料到但建設不 fire = 手不聽腦執行層 blocker，須查（options.gd 建設 applicable/util 是否反映到手 material）。
 
+### (B.1) 村端 build-as-survival self-rescue（Slice R2、blueprint 裁 YES 2026-08-06、驗執行端命門）
+**問題**：invest-target 村（ROI+ 必小 pop food-insecure）→ 覓食 `PRIO_SURVIVAL(80)` 壓過 build 令 `PRIO_DISPATCH(50)` → delivered 料永不蓋（Catch-22、§2B 預警手不聽腦執行層）。
+**裁定**：飢餓村手握**產糧設施建材**該把「蓋它」當**求生自救**（means-end build→food、invest 動詞本義必然）。
+- **機制**：survival 選項集（`rank_survival`/`_trigger_survival`）加「**建材備妥產糧設施 self-rescue build**」——延伸既有 `_trigger_survival` 食物設施 **protect→initiate** 前例（現只護「已在蓋」→ 擴到「料備妥可發起」）。
+- **★util = GENUINE（禁死常數）**：`build_util = 該設施預期食安價值 × P(survive_to_harvest)`；`P(survive)` 由 **建工期(build ETA→產糧) vs 當前飢餓窗(food_days)** 決定——建工期 < 餓死窗 → 蓋 util > 覓食 util → **村蓋**；建工期 ≥ 餓死窗 → **覓食贏**（蓋不完的田不能吃=正確）。
+- **★★anti-crank 牙（乙教訓、寫死）**：**會餓死在收成前的村照樣覓食、照樣可能死、料照樣浪費 = genuine 失敗案必留**；**禁 crank `build_util` 逼 always-win**。低 util 是正確不是 starvation-bug。
+- **scope 硬限**：僅**產糧設施 + 料已備**；**禁泛化 build-instead-of-forage**（不准蓋兵營代覓食）。means-end build→food 專屬。
+- **★湧現紅利**：領主投資 **TIMING matter 自然湧現**（早投村還撐得住→蓋→復甦；晚投絕境投→料浪費村死）= 同 care-loop「主動勝被動」、**強化 arc 非 bug**。
+
 ### (C) 遷村令 dispatch `_try_relocate_order`（Slice R3、P4）
 - 領主秤自家村 `relocate_value`（belief）+ 領主人格（規劃型整併/仁君勸+送搬遷糧/放任）→ 下遷村令。
 - 機制 = **信使 directive 走資訊網**（reuse `in_transit_letters` kind=`"relocate"`、payload=target_tile；令**真送達**才生效、非瞬間 = 感知鐵律跨距）。throttle 一令/村。
