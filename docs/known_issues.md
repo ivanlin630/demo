@@ -1091,3 +1091,8 @@ measurer 6mo warring 量到 **per-tick 成本 O(N²) 量級**：day1 65隊 46ms 
 領主主動照護 loop（`feat/lord-care-loop` merged 401dae27）決策層 100% clean 分化（好領主 47/47 care/壞領主 47/47 ignore），但 cohesion①natural NATURAL 分化未展現＝**執行層 anon-exhaustion**：care-scout（`_detach_one_anon:1542`）+ 既有 herald/scout/redispatch 消耗平民 anon 池；平民回補靠 breed（`reaction_system:199` `food_flow_avg>BREED_FLOW_MIN`→P5_breed→minor→`population_system:18` 月 10% 熟成平民）——**distressed fixture 食物匱乏→無 flow surplus→無 breed→無平民回補**→T0（好領主 care-scout）anon 池枯竭封 14 vs T2（從不 care-scout）摸 15。
 - **genuine 非 bug**：caring 成本真（relief 花糧+care-scout 花人力）、distressed 世界回補不了＝**戰亂慈善枯竭寫實**。care-loop 決策/機制對，只是 distressed 單床養不起。
 - **★收斂**：cohesion①natural NATURAL 四執行 blocker（race-timing/target-resolution/mini-util need-gate/anon-exhaustion）**全同族＝村經濟不可持續**（food surplus→breed→回補+relief affordable）→ **recovery-path/村經濟可持續 arc**（下一 arc 頭號候選、blueprint 定）。連 [[project_economy_arc]]/[[project_information_network]] recovery-path 兩段論。
+
+### recovery-path Slice R1 移民 follow-up（2026-08-06、merged 53907687、非阻塞）
+復甦路徑 R1（`MarginalEconomy` 邊際經濟計算層 + 移民 marginal-util dispatch）merged。決策層三態 CONFIRMED、執行層 arrived 三根修。兩個非阻塞 follow-up：
+- **migrant 無專屬 specimen tap**：migrant 走 anon 側派（`dispatch_anon_migrants`、leader_id=-1）無專屬 print、不進標準 specimen tap → 決策細節（marginal 算式）無法逐 tick 獨立追、只驗 outcome+code（同 side-action 家族限制）。有 Probe tap（`migrant.marginal`/`mini_util`/`dispatched`/`arrived`）。全量暫態可觀測性理想=補標準 specimen path。
+- **`MIGRANT_RATION_DAYS=15` 遠村校準**：口糧供給窗 15 天（`subteam_system.gd`）；近村 OK，**遠村（journey>15 天）可能途中耗盡口糧→survival preempt 再現**。R1 近村驗證；遠村距離需 measurer 校準 RATION_DAYS vs journey ETA。
