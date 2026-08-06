@@ -15,6 +15,7 @@ func _initialize() -> void:
 	_test_source_not_drained()     # ④來源不抽穿:領主 anon 不足→不派
 	_test_migrant_arrival()        # ★★驗執行端:migrant 抵村→併入 target pop 真升(修 arrived=0 predict_intercept bug)
 	_test_migrant_travel_target()  # 移動 move_target=村靜態 pos(非 predict_intercept→(-1,-1) 卡死)
+	_test_migrant_full_pipeline()  # ★★★全 advance_tick pipeline arrived 驗(真路徑、非 hand-step)
 	if _fail == 0: print("=== DONE === ALL PASS")
 	else: print("=== DONE === %d FAIL" % _fail)
 	quit()
@@ -130,3 +131,43 @@ func _test_migrant_travel_target() -> void:
 	AnonCohort.add(sub.anon_cohorts, "平民", "healthy", 3); state.teams[30] = sub
 	FactionAISystem.new()._tick_migrant(state, sub, [])
 	_ok(sub.move_target == Vector2i(8,8), "未到村→move_target=村靜態 pos(8,8)(直接設非 predict_intercept→(-1,-1) 卡死)")
+
+# ★★★全 advance_tick pipeline 驗（systems must-change：hand-stepped unit 繞過 merge-back vanish 階段=false-confidence）。
+# 真跑 pipeline：lord(fac leader)+plains 欠人村 holding → migrant dispatch → subteam 過 merge-back(不被吸回)→travel→arrive 併入。
+func _test_migrant_full_pipeline() -> void:
+	print("--- ★★★全 pipeline arrived 驗 ---")
+	seed(4242)
+	var config: Dictionary = {
+		"seed": 4242, "mode": "explicit", "max_ticks": 50000,
+		"map": {"radius": 20, "resource_richness": 5},
+		"teams": [
+			{"id": 0, "name": "Lord", "tile_pos": [14,14], "population": 16, "tags": ["統領","生產"],
+				"faction_id": 1, "is_faction_leader": true, "anon_tiers": {"平民": 14},
+				"resources": {"food": 3000.0, "coin": 200.0},
+				"leader": {"name": "L", "skills": {"統領": 0.7}, "values": {"統領": 0.7, "義氣": 0.7, "求生欲": 0.6, "野心": 0.2}},
+				"outpost": {"type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 4000}},
+			{"id": 1, "name": "Village", "tile_pos": [17,14], "population": 2, "tags": ["生產"],
+				"faction_id": 1, "is_faction_leader": false, "anon_tiers": {"平民": 1},
+				"resources": {"food": 100.0},
+				"leader": {"name": "V", "skills": {"生產": 0.4}, "values": {"求生欲": 0.7}},
+				"outpost": {"type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 2000}},
+		],
+	}
+	var state := WorldState.new()
+	var runner := SimRunner.new()
+	GameSetup.setup(state, config)
+	# 確保 lord 對村有 belief pop_est（同 faction 創世 discovery；補記保 migrant 早 fire）
+	if state.teams.has(0) and state.teams.has(1):
+		BeliefSystem.record_claim(state, 0, 1, 0, "親見", {"tile_pos": state.teams[1].tile_pos, "population_est": 2}, 1.0, false)
+	Probe.reset(); Probe.enabled = true
+	var anchor: Vector2i = (state.teams[0] as TeamData).tile_pos   # ★player_pos anchor=lord tile（teams near→info_dispatch 收到、同 measurer 精確 fixture；no_player 全 far→near-list 空 migrant 不評）
+	var village_pop0: int = (state.teams[1] as TeamData).population
+	for _t in range(300):
+		runner.advance_tick(state, anchor)
+	Probe.enabled = false
+	var disp: int = int(Probe.counts.get("migrant.dispatched", 0))
+	var arr: int = int(Probe.counts.get("migrant.arrived", 0))
+	var village_pop1: int = (state.teams[1] as TeamData).population if state.teams.has(1) else -1
+	# ★真路徑驗（非 hand-step）：dispatched>0(決策) + arrived>0(過 merge-back exclusion+口糧免 survival-preempt+travel+併入)。
+	_ok(disp > 0 and arr > 0 and village_pop1 > village_pop0,
+		"★全 pipeline：dispatched=%d + arrived=%d>0 + 村 pop %d→%d 真升(過 merge-back+口糧+travel+併入、非 hand-step false-confidence)" % [disp, arr, village_pop0, village_pop1])

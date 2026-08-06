@@ -1,5 +1,7 @@
 class_name SubteamSystem
 
+const MIGRANT_RATION_DAYS: float = 15.0   # ★移民旅途口糧天數（TEST VALUE、DERIVED 供給窗；領主供給、空手 anon 免途中 famine 打斷）
+
 func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		pop_count: int, task: String, move_target: Vector2i,
 		order_target_id: int = -1, order_task: String = "",
@@ -89,7 +91,12 @@ func dispatch_anon_migrants(state: WorldState, parent_id: int, k: int,
 	sub.task_extra_data  = {"migrant_target": order_target_id}
 	state.set_readiness(sub, parent.readiness, "migrant_init")
 	state.set_team_tags(sub, [TeamData.TAG_SUBTEAM], "migrant_init")
-	AnonTierSystem.transfer_proportional(parent, sub, k)   # 抽 k anon（空手、零 resource）
+	AnonTierSystem.transfer_proportional(parent, sub, k)   # 抽 k anon
+	# ★旅途口糧（領主供給移民、真成本）：空手 anon 移民必即刻 famine→survival 打斷 MIGRATE/抑制移動→永不抵達。
+	#   給足 k 人跨途食糧（RATION_DAYS×每人日耗）→ 途中不餓→不被 survival preempt。領主真扣（來源約束已守留守）。
+	var rations: float = float(k) * ResourceSystem.FOOD_PER_PERSON_PER_DAY * MIGRANT_RATION_DAYS
+	var paid: float = ResourceBank.remove(parent, "food", rations, "migrant_rations")
+	ResourceBank.add(sub, "food", paid, "migrant_rations_in")
 	state.create_team(sub)
 	state.set_subteam_parent(sub, parent_id)
 	state.set_team_faction(sub, parent.faction_id)
@@ -130,7 +137,8 @@ func try_merge_back(state: WorldState, sub_id: int) -> bool:
 	# TASK_BUILD/TASK_SETTLE 已到目標格，讓正常邏輯（到 parent 格才 merge）處理即可
 	var _TRANSIT_TASKS: Array = [
 		TeamData.TASK_SETTLE, TeamData.TASK_CONSTRUCT,
-		TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND
+		TeamData.TASK_UPGRADE, TeamData.TASK_EXPAND,
+		TeamData.TASK_MIGRATE,   # ★復甦 R1 bed-root：移民子隊生於 parent(領主)格、未出發即被 merge_back 吸回=vanish→arrived=0；同 SETTLE 在途不吸回（到 target 由 _tick_migrant 併入）
 	]
 	if sub.current_task in _TRANSIT_TASKS:
 		return false
