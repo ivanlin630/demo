@@ -1847,11 +1847,12 @@ func _finish_relocate(state: WorldState, v: TeamData, resettled: bool) -> void:
 	if resettled and Probe.enabled: Probe.bump("relocate.resettled")
 
 # ★遷村目標挑選（§3、god-view gate）：掃 own-faction outpost 位（領主/村行政知、同 _faction_roster_pos gate-ok、
-# 非 god-view 全地掃）→ 對每候選地算 relocate_value（belief est、subject pop）→ 回最高正 > 門檻者。
-# subject_est=遷主(村)自身 est；sunk=遷主 persist（人格加權沉沒、戀土黏現地）。
+# 非 god-view 全地掃）→ 對每候選地算 relocate_value（belief est、subject pop）→ 回 argmax（raw、呼叫者秤人格+門檻）。
+# subject_est=遷主(村)自身 est；sunk=遷主視角沉沒（self=own persist 戀土 / lord=belief 可見 outpost 基建、★領主不讀村戀土）。
 const RELOCATE_THRESHOLD: float = 2.0   # TEST VALUE — 遷值須越此正 margin 才遷（避邊際微移抖動；genuine 非 fire-crank）
+const RELOCATE_ORDER_INFRA_SUNK: float = 0.4   # TEST VALUE — 領主 belief 可見棄置 outpost 基建損失/level（自家領土 admin 知、非村內心）
 func _best_relocate_target(state: WorldState, faction_id: int, subject: TeamData, subject_est: VillageEstimate, sunk: float) -> Dictionary:
-	var best_pos: Vector2i = Vector2i(-1, -1); var best_v: float = RELOCATE_THRESHOLD
+	var best_pos: Vector2i = Vector2i(-1, -1); var best_v: float = -1.0e18   # raw argmax（呼叫者 gate）
 	for tile_id in state.world.tiles:   # gate-ok: own-faction infra 位掃（讀 static outpost_owner/terrain 結構、faction gate 限同勢力、感知鐵律 legit、同 _faction_roster_pos）
 		var tile: HexTileData = state.world.tiles[tile_id]
 		if tile.outpost_level <= 0 or tile.tile_pos == subject.tile_pos:
@@ -1886,10 +1887,19 @@ func _try_relocate_order(state: WorldState, team: TeamData) -> void:
 		var subj_est: VillageEstimate = _village_est(state, team, vid)
 		if subj_est == null:
 			continue   # 無 belief/行政 est → 保守不下令
-		var sunk: float = PersistStrength.compute(state, village)
-		var best: Dictionary = _best_relocate_target(state, team.faction_id, village, subj_est, sunk)
+		# ★領主自己視角 genuine util（fix：★不讀村 PersistStrength/戀土=god-view 後門、否則永不令會抗命的村=兩層對抗 dead）。
+		# sunk=領主 belief 可見棄置 outpost 基建損失（∝ subj outpost_level=自家領土 admin 知、非村內心）；秤 _inflow 前景差（belief terrain）。
+		var lord_sunk: float = float(subj_est.outpost_level) * RELOCATE_ORDER_INFRA_SUNK
+		var best: Dictionary = _best_relocate_target(state, team.faction_id, village, subj_est, lord_sunk)
 		if best["pos"] == Vector2i(-1, -1):
 			continue   # 無更優已知領土（爛地無處遷=可能死、genuine）
+		# 乘領主人格（規劃整併 慎重/野心 + 仁君 義氣 → 高下令傾向；放任型低 → 不下令＝anti-crank 分化、非被迫）。
+		var llv: Dictionary = TradeValuation.leader_vals(state, team)
+		var lord_pmult: float = clampf(float(llv.get("慎重", 0.5)) + float(llv.get("義氣", 0.5)) + float(llv.get("野心", 0.5)) - 0.75, 0.1, 2.0)
+		var order_util: float = float(best["value"]) * lord_pmult
+		if Probe.enabled: Probe.note("relocate.order_util", order_util)
+		if order_util <= RELOCATE_THRESHOLD:
+			continue   # 領主視角不划算（壞地損失不夠大 / 放任領主）→ 不下令（genuine 差異、非全序）
 		# 遷村令 letter：origin=領主、target_pos=村（送令到村）、payload=遷往地。真送達非瞬間、可被攔截。
 		var dist: int = _hex_dist(team.tile_pos, village.tile_pos)
 		state.in_transit_letters.append({
@@ -1942,10 +1952,10 @@ func _try_self_relocate(state: WorldState, team: TeamData) -> void:
 	if tile == null or tile.outpost_owner != team.team_id or tile.outpost_level <= 0:
 		return   # 非駐村村長 → 不評（無據點可棄）
 	var self_est := VillageEstimate.make(tile.terrain, tile.outpost_level, tile.farming_level, team.population)  # 自家 tile=自知非 god-view
-	var sunk: float = PersistStrength.compute(state, team)
+	var sunk: float = PersistStrength.compute(state, team)   # ★self 讀自己 sunk/戀土=合法（自知非 god-view）
 	var best: Dictionary = _best_relocate_target(state, team.faction_id, team, self_est, sunk)
-	if best["pos"] == Vector2i(-1, -1):
-		return   # 無更優已知領土
+	if best["pos"] == Vector2i(-1, -1) or float(best["value"]) <= RELOCATE_THRESHOLD:
+		return   # 無更優已知領土 / 遷值不越門檻（含自身戀土沉沒）→ 不遷
 	if _begin_village_relocate(state, team, best["pos"]):
 		if Probe.enabled: Probe.bump("relocate.self")
 
