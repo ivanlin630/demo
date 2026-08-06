@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "F1死常數人格化量測完成(commit b0e5a41f) — ★靶A完整CONFIRM乾淨分化,★靶B意外發現test斷言弱點(密集sweep揭露差異化未驗證):靶A(desperation_entry_threshold)用3隊獨立無faction(neutral/cautious/bold,同起始food30/pop5/mountain純消耗)組織自然床,ex-ante formula預算完整命中——neutral threshold=3.00→cross_day=5/cautious threshold=5.10(封頂)→cross_day=3(最早跌破,謹慎早進絕境)/bold threshold=1.50(封底)→cross_day=7(最晚,膽大撐更久)——同機制人格不同命乾淨CONFIRM。物理錨(DESPERATION_DAYS×pop×0.8)三隊皆=12.00不受人格污染,need-anchor分離確認。靶B(MINING_GREED連續性)獨立於implementer的framework_f1_test.gd自建Tier1控制場景,密集sweep ga=[0.2...2.0]16點(非只test原本3點)直呼_evaluate_new_outpost_location——★意外發現:全部16個ga值(含最低0.2)皆picked_mountain=true,無任何差異化,跟test comment宣稱的『普通(1.0)不選,山懲壓過小bonus』不符。重讀framework_f1_test.gd:87-91確認該test的_ok斷言只檢查scores[2](ga=1.5單一案例),`below_gate_not_hard_zero`是硬編true的placeholder非真實計算——test PASS不代表『普通不選/貪婪才選』的差異化真的被驗證過,是我密集sweep(而非只3點稀疏取樣)才揭露這個落差。誠實回報:不確定是2-tile世界(僅home+ore無其他候選地競爭)的fixture artifact讓argmax在沒有替代方案時必選ore、還是真實code層級差異化缺失,建議systems判斷是否要補一個有多個候選地(含無ore的plains選項)的fixture才能真的驗到greed高低差異,或這就是預期內行為(只要有ore就選,純粹貪婪程度只影響bonus大小非二元選/不選)。"
 ---
 
