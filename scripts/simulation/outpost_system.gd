@@ -501,6 +501,7 @@ func _begin_facility_construction(state: WorldState, team: TeamData, tile: HexTi
 	tile.construction_target    = { "action": "upgrade_facility", "facility": facility }
 	TaskArbiter.transition(state, team, TeamData.TASK_BUILD, TaskArbiter.PRIO_DISPATCH)
 	_tap_build_start(state, team, tile, "upgrade_facility")
+	if Probe.enabled: Probe.bump("village.build_fired")   # ★復甦 R2 §6 tap（驗執行端：村端建設真 fire、料到→蓋）
 	print("[Outpost] Team%d 設施施工 %s → Lv%d at (%d,%d)" % [
 		team.team_id, facility, cur + 1, tile.tile_pos.x, tile.tile_pos.y])
 	return true

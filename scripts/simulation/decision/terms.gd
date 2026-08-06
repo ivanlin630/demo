@@ -118,6 +118,11 @@ static func eval(term: String, ctx: DecisionContext, opt: String) -> float:
 			# ★guardrail：只加「建設」（MVP develop 路，禁漏 combat/survival/trade/move/social）。
 			if opt != "建設": return 0.0
 			return ctx.idle_employ_value
+		"food_rescue_build":
+			# ★復甦 R2 §2B.1（build-as-survival self-rescue）：飢餓村料備妥產糧設施蓋田自救 util（genuine 非死常數）。
+			# = 1.0(求生行動基線、同覓食) + 食安價值 frac × P(survive_to_harvest)（ctx.rescue_build_util 已含、_food_rescue_eval 算）。
+			if opt != "自救建田": return 0.0
+			return ctx.rescue_build_util
 		"help_drive":
 			# ★資訊網 S-herald 求援 util（genuine + 人格 MODULATE、非 crank）：
 			# base = 真未滿足 need 缺口 severity（DERIVED from food_days runway 缺口，非 invent）×期望紓困先驗。

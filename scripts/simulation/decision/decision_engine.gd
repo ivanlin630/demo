@@ -131,7 +131,7 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 
 # 被動求生 repertoire（定案）：覓食/買糧/乞食/返家補給/紮營/併入=被動求生(食物+投靠認慫)→"survival" 一組
 # 保 fallthrough；★排攻擊型 掠奪/佔村（主動侵略，靠人格 weight 主導非 fallthrough 保底，否則溫和 fed 隊誤 loot）。
-const PASSIVE_SURVIVAL_SET: Array = ["覓食", "買糧", "乞食", "返家補給", "紮營", "併入"]
+const PASSIVE_SURVIVAL_SET: Array = ["覓食", "買糧", "乞食", "返家補給", "紮營", "併入", "自救建田"]   # ★復甦 R2 §2B.1：自救建田=被動求生(蓋田自食)→同 survival 需求組 fallthrough
 
 # 需求分組：PASSIVE_SURVIVAL_SET 成員→"survival"（不看 affinity）；非→按 affinity 主層。
 static func _need_category(opt: String) -> String:
