@@ -1,6 +1,6 @@
 # F1 人格化 — 3 threshold 靶（WHAT / vision）
 
-status: DRAFT（pending R①[① physical-anchor 分離確認] + R² → build）
+status: HALT（2026-08-07 R①=premise_contradiction：靶①②citation錯指[靶①改死fallback code/靶②機制不存在]、只靶③坐實 → systems 重audit真live位置後 spec v2）
 owner: blueprint（WHAT）→ systems 做 HOW
 parent: `2026-08-07-framework-completion-two-hard-green-design.md`（硬綠① Track、slice F1）
 date: 2026-08-07

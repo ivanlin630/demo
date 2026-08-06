@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: "[F1人格化spec=docs/superpowers/specs/2026-08-07-framework-F1-personification-design.md·R①窄(前提多已audit file:line坐實、只1項需confirm)+R²設計審·★R①唯一confirm靶=靶①物理錨分離:DESPERATION_DAYS(3.0)audit標『兩用途=survival decision-ENTRY門檻(人格化靶)+物理need-anchor買糧/relief量(留死常數)』——親驗這兩用途code真可分離否(entry門檻人格化不會污染買糧目標量計算)?若不可分=HOW要先拆用途·靶②③=憲法A家族硬persona-gate→soft weight(judgment已定line39、R①免、R²審de-patch對否)·R²審點:①三靶人格化genuine非crank否(讀真人格值modulate、非調逼fire率、乙教訓)②靶①entry人格化會不會與survival優先序PRIO_SURVIVAL統一(散落常數收單一源、time-scale wave教訓)衝突或需一致③soft weight去cliff真零差異化損失否(高martial仍最易反、只是低martial不再硬排除)④fp預期分化=行為變slice與②結構slice分不混確認·CLEAN→鎖→systems build(fp intended分化驗)·地基KEEP"
 ---
 
