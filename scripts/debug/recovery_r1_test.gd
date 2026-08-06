@@ -13,6 +13,8 @@ func _initialize() -> void:
 	_test_migrant_forest_no_dispatch() # ②森林村→marginal<0→不派
 	_test_migrant_plains_dispatch()    # 平原欠人村→marginal>0→派
 	_test_source_not_drained()     # ④來源不抽穿:領主 anon 不足→不派
+	_test_migrant_arrival()        # ★★驗執行端:migrant 抵村→併入 target pop 真升(修 arrived=0 predict_intercept bug)
+	_test_migrant_travel_target()  # 移動 move_target=村靜態 pos(非 predict_intercept→(-1,-1) 卡死)
 	if _fail == 0: print("=== DONE === ALL PASS")
 	else: print("=== DONE === %d FAIL" % _fail)
 	quit()
@@ -98,3 +100,33 @@ func _test_source_not_drained() -> void:
 	print("--- ④來源不抽穿 ---")
 	var a := _mk_lord_with_village("plains", 3)   # 領主 anon 僅 3(<BATCH3+2)→不掏穿
 	_ok(_migrant_fired(a[0], a[1]) == 0, "領主 anon 不足留守下限→不派(不拆東牆補西牆、即使平原 target 邊際正)")
+
+# ★★驗執行端：migrant subteam 抵村（co-located）→_tick_migrant 併入 target pop 真升 + arrived bump（修 predict_intercept arrived=0 bug）。
+func _test_migrant_arrival() -> void:
+	print("--- ★★驗執行端:migrant 抵村併入 ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 100000
+	var village := TeamData.new(); village.team_id = 9; village.faction_id = 0; village.tile_pos = Vector2i(5,5)
+	AnonCohort.add(village.anon_cohorts, "平民", "healthy", 2); state.teams[9] = village
+	var sub := TeamData.new(); sub.team_id = 30; sub.faction_id = 0; sub.parent_team_id = 1
+	sub.tile_pos = Vector2i(5,5)   # ★co-located 於村
+	sub.current_task = TeamData.TASK_MIGRATE; sub.task_reason = "migrate"; sub.task_extra_data = {"migrant_target": 9}
+	AnonCohort.add(sub.anon_cohorts, "平民", "healthy", 3); state.teams[30] = sub
+	var pop_before: int = village.population
+	Probe.reset(); Probe.enabled = true
+	FactionAISystem.new()._tick_migrant(state, sub, [])
+	Probe.enabled = false
+	_ok(village.population == pop_before + 3 and int(Probe.counts.get("migrant.arrived",0)) == 1 and state.teams_pending_erase.has(30),
+		"migrant 抵村→target pop %d→%d(+3 併入 P2 共址即產能)+arrived=1+subteam 解散(驗執行端真效果)" % [pop_before, village.population])
+
+# 移動：未到村→move_target=村靜態 pos（非 predict_intercept 對零-belief anon 回 (-1,-1) 卡死）。
+func _test_migrant_travel_target() -> void:
+	print("--- migrant 移動 move_target=村 pos ---")
+	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 100000
+	var village := TeamData.new(); village.team_id = 9; village.faction_id = 0; village.tile_pos = Vector2i(8,8)
+	AnonCohort.add(village.anon_cohorts, "平民", "healthy", 2); state.teams[9] = village
+	var sub := TeamData.new(); sub.team_id = 30; sub.faction_id = 0; sub.parent_team_id = 1
+	sub.tile_pos = Vector2i(0,0); sub.move_target = Vector2i(-9,-9)   # 未到村
+	sub.current_task = TeamData.TASK_MIGRATE; sub.task_reason = "migrate"; sub.task_extra_data = {"migrant_target": 9}
+	AnonCohort.add(sub.anon_cohorts, "平民", "healthy", 3); state.teams[30] = sub
+	FactionAISystem.new()._tick_migrant(state, sub, [])
+	_ok(sub.move_target == Vector2i(8,8), "未到村→move_target=村靜態 pos(8,8)(直接設非 predict_intercept→(-1,-1) 卡死)")

@@ -1771,9 +1771,10 @@ func _tick_migrant(state: WorldState, sub: TeamData, _merge_queue: Array) -> voi
 		if Probe.enabled: Probe.bump("migrant.arrived")
 		if not state.teams_pending_erase.has(sub.team_id): state.teams_pending_erase.append(sub.team_id)
 		return
-	var predicted: Vector2i = PathSystem.predict_intercept(state, sub, target)
-	if predicted != Vector2i(-1, -1):
-		sub.move_target = predicted
+	# ★執行層修：村靜態 own-faction、直接 move_target=村 pos（同 convoy home_pos/settle outpost）——
+	#   棄 predict_intercept（移動目標攔截器對靜態村是錯工具：新生 anon subteam 零 belief→belief_pos(-1,-1) 走不動、
+	#   且 observe_velocity 耗 global RNG=此路本該零 RNG）。村位=行政知（own-faction、非 god-view）。
+	sub.move_target = target.tile_pos
 
 # 求援 side：餓 + 知施助者 + mini-util>0（cost-benefit）→ 派 anon 信使（不佔主任務、平行）。
 func _try_herald_side(state: WorldState, team: TeamData) -> void:
