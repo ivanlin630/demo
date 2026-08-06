@@ -2099,6 +2099,16 @@ func _decide_unified(state: WorldState, team: TeamData) -> void:
 		# ★means-end S2：goal frontier candidate 用其 cand.to_task（label 非 static REGISTRY key）；static option 走既有。
 		var td: Dictionary = (e["cand"]["to_task"] as Dictionary) if e.has("cand") else DecisionOptions.to_task(state, team, opt)
 		if SimRunner.phase_timing: _fai_pht("unified.to_task", _t2)
+		# ★復甦 R2 §2B.1（build-as-survival self-rescue）：自救建田 → 發起/續產糧設施 construction
+		# （_ensure 內 _subteam_upgrade_facility 起建+transition BUILD；起建後升 PRIO_SURVIVAL survival-tier 保 sustain）。
+		if opt == "自救建田":
+			if _ensure_rescue_build_started(state, team):
+				# ★source="unified"（ENGINE_SOURCES）→ 同層(PRIO_SURVIVAL) self-replace 換掉 覓食@80（否則 rescue_build 非
+				#   engine-source 被同層 覓食 擋 → construction 起了但 task 卡覓食=zombie 無工人）。BUILD 真接手 → _tick_construction 進。
+				TaskArbiter.try_set(state, team, TeamData.TASK_BUILD, team.tile_pos, TaskArbiter.PRIO_SURVIVAL, "unified")
+				team.current_option = opt   # 承諾追蹤（下 cadence commitment 保 sticky sustain）
+				return
+			continue   # 起建失敗（料被消耗/slot 滿）→ 試次佳（覓食…、失敗案留）
 		# ★means-end S5 委派：delegate candidate 贏 → 派子隊執行 action，母隊留守（本 cadence 畢）；派失敗→試次佳。
 		if td.get("delegate", false):
 			if _dispatch_goal_delegate(state, team, td):
@@ -3961,6 +3971,77 @@ func _is_food_facility_short(facility: String) -> bool:
 		return false
 	var cost: Dictionary = OutpostSystem.FACILITY_DEF.get(facility, {}).get("cost", {})
 	return int(cost.get("ticks", 9999)) <= SURVIVAL_BUILD_MAX_TICKS
+
+# ★復甦 R2 §2B.1（build-as-survival self-rescue、blueprint 裁 YES genuine util、非死常數）：飢餓村在自家 outpost、
+# 料備妥產糧設施 → 自救建設 option（解 delivered 料被覓食壓過永不蓋的 Catch-22）。純函式評估（無副作用、供 ctx）。
+# 回 {viable:bool, facility:String, util:float}：
+#   util = 食安價值(farming 增產覆蓋每日食耗 frac) × P(survive_to_harvest)（建工期 vs 餓死窗；蓋得完的田才吃得到）。
+#   viable = (料備妥 + 產糧設施可建 + build_eta<food_days) 或 (自己正在蓋產糧設施=in-progress 續蓋)。
+#   蓋不完(build_eta≥食窗)→viable=false→落覓食（可能餓死+料浪費＝genuine 失敗案必留、禁 crank always-win）。
+# scope 硬限：僅 FOOD_FACILITIES（產糧）+料已備 means-end build→food；禁泛化 build-instead-of-forage。純算術零 RNG。
+func _food_rescue_eval(state: WorldState, team: TeamData) -> Dictionary:
+	var none: Dictionary = {"viable": false, "facility": "", "util": 0.0}
+	if team.tile_pos == Vector2i(-1, -1):
+		return none
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile == null or tile.outpost_level <= 0:
+		return none
+	var os := OutpostSystem.new()
+	if not os._faction_owns(state, team, tile):
+		return none
+	var food_days: float = ResourceSystem.effective_food(state, team) \
+		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	var burn: float = maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	# in-progress 續蓋：自己正在蓋短工期產糧設施 → viable（sustain；util=1+食安 frac、+commitment 慣性保不被覓食換走）。
+	if tile.construction_team_id == team.team_id \
+			and _is_food_facility_short(str(tile.construction_target.get("facility", ""))):
+		var ipf: String = str(tile.construction_target.get("facility", ""))
+		var ipcur: int = int(tile.get(OutpostSystem.FACILITY_DEF.get(ipf, {}).get("current_level_key", "farming_level")))
+		var ipfrac: float = clampf(_food_facility_gain(tile, team, ipf, ipcur) / burn, 0.0, 1.0)
+		return {"viable": true, "facility": ipf, "util": 1.0 + ipfrac}
+	if tile.construction_team_id != -1:
+		return none   # 別人在蓋 / 非產糧短工期 → 不介入
+	for f in FOOD_FACILITIES:
+		var def: Dictionary = OutpostSystem.FACILITY_DEF.get(f, {})
+		if def.is_empty(): continue
+		if not (tile.outpost_type in def.get("allowed_outpost", [])): continue
+		if def.has("required_terrain") and tile.terrain != def["required_terrain"]: continue
+		var cur: int = int(tile.get(def["current_level_key"]))
+		if cur >= 3: continue
+		if cur == 0 and OutpostSystem.slots_used(tile) >= OutpostSystem.slot_cap(tile): continue
+		var cost: Dictionary = OutpostSystem.upgrade_cost(f, cur + 1)
+		if not os._can_afford(team, tile, cost):
+			continue   # 料未備（公庫+私產不足）→ 非 self-rescue 候選（禁掏空、genuine）
+		# ★genuine P(survive_to_harvest)：建工期(person-ticks / pop / 日tick) < 餓死窗(food_days) 才蓋得完。
+		var build_eta_days: float = float(cost.get("ticks", 72)) \
+			/ maxf(float(team.population), 1.0) / float(WorldState.TICKS_PER_DAY)
+		if build_eta_days >= food_days:
+			continue   # 蓋不完的田不能吃 → 覓食贏（失敗案留、禁 crank always-win）
+		# util = 1.0（求生行動基線、同覓食）+ 食安價值 frac（永久增產覆蓋每日食耗率、[0,1]）→ 蓋得完時穩越覓食。
+		var food_value_frac: float = clampf(_food_facility_gain(tile, team, f, cur) / burn, 0.0, 1.0)
+		return {"viable": true, "facility": f, "util": 1.0 + food_value_frac}
+	return none
+
+# 產糧設施升一級的每日增產（自家 tile 自知、非 god-view；鏡射 MarginalEconomy._inflow_est 公式、純算術）。
+func _food_facility_gain(tile: HexTileData, team: TeamData, facility: String, cur: int) -> float:
+	if facility != "farming":
+		return 0.0   # 目前唯一影響 _inflow_est 的產糧設施
+	var a := VillageEstimate.make(tile.terrain, tile.outpost_level, cur, team.population)
+	var b := VillageEstimate.make(tile.terrain, tile.outpost_level, cur + 1, team.population)
+	return MarginalEconomy._inflow_est(b) - MarginalEconomy._inflow_est(a)
+
+# ★發起自救建設（_decide_unified 選中「自救建田」→ 初始化 construction；已在蓋回 true 續）。有副作用。
+func _ensure_rescue_build_started(state: WorldState, team: TeamData) -> bool:
+	var ev: Dictionary = _food_rescue_eval(state, team)
+	if not ev["viable"]:
+		return false
+	var tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	if tile != null and tile.construction_team_id == team.team_id:
+		return true   # 已在蓋（sustain）
+	if OutpostSystem.new()._subteam_upgrade_facility(state, team, tile, String(ev["facility"])):
+		if Probe.enabled: Probe.bump("survival.rescue_build")
+		return true
+	return false
 
 func _facility_score(state: WorldState, team: TeamData, tile: HexTileData,
 		leader: PersonData, facility: String) -> float:

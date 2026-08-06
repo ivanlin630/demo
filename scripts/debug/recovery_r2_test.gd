@@ -15,6 +15,8 @@ func _initialize() -> void:
 	_test_invest_mountain_no_dispatch()   # ②山地村→roi<0→不投(三態湧現)
 	_test_invest_lord_desperate_no()      # ★bound#2 領主端 source-floor:領主絕境→先自救不投(即使村 roi>0)
 	_test_invest_deliver_deposits()       # ★material-delivery:invest convoy 抵村→料 deposit 入村 public_storage(非賣)
+	_test_rescue_build_viable()           # ★build-as-survival:料備妥+建工期<餓死窗→自救建田 viable+util>覓食基線
+	_test_rescue_build_starve_no()        # ★★anti-crank:建工期≥餓死窗(快餓死)→viable=false→不蓋→落覓食(失敗案留、禁 always-win)
 	_test_invest_full_pipeline()          # ★★★全 advance_tick pipeline:料到村→村建設真 fire→farming 0→1(驗執行端真路徑、非 hand-step)
 	if _fail == 0: print("=== DONE === ALL PASS")
 	else: print("=== DONE === %d FAIL" % _fail)
@@ -125,6 +127,35 @@ func _test_invest_deliver_deposits() -> void:
 	_ok(mat_after >= mat_before + 44.0 and float(sub.resources.get("material",0)) < 1.0 \
 			and String(sub.task_extra_data.get("convoy_phase")) == "RETURN",
 		"invest convoy 抵村→料入村 public_storage %.0f→%.0f(deposit 非賣)+porter 卸空+轉 RETURN(reuse convoy 生命週期)" % [mat_before, mat_after])
+
+# 建村(自家 civilian outpost、farming_level 0)+料備妥、food/pop 依參控 food_days。
+func _mk_village_at_outpost(terrain: String, pop: int, food: float, material: float) -> Array:
+	var state := WorldState.new(); state.world = WorldData.new(); state.world.current_tick = 100000
+	var v := TeamData.new(); v.team_id = 5; v.faction_id = 0; v.tile_pos = Vector2i(5,5)
+	AnonCohort.add(v.anon_cohorts, "平民", "healthy", pop)
+	v.resources = {"food": food}
+	state.teams[5] = v
+	var t := HexTileData.new(); t.tile_pos = Vector2i(5,5); t.terrain = terrain
+	t.outpost_level = 1; t.outpost_owner = 5; t.outpost_type = "civilian"; t.farming_level = 0
+	t.public_storage = {"material": material}
+	state.world.tiles[5005] = t
+	return [state, v]
+
+# ★build-as-survival viable：料備妥 + 建工期 < 餓死窗 → 自救建田 viable + util>1.0(勝覓食基線、permanent 產能)。
+func _test_rescue_build_viable() -> void:
+	print("--- ★build-as-survival viable ---")
+	var a := _mk_village_at_outpost("forest", 3, 20.0, 45.0)   # food_days 8.3 >> build_eta 0.1、料 45≥cost30
+	var ev: Dictionary = FactionAISystem.new()._food_rescue_eval(a[0], a[1])
+	_ok(bool(ev["viable"]) and float(ev["util"]) > 1.0,
+		"料備妥+建工期<餓死窗→自救建田 viable、util=%.2f>1.0(勝覓食基線、蓋田=permanent 產能)" % float(ev["util"]))
+
+# ★★anti-crank：快餓死(建工期≥餓死窗、蓋不完)→viable=false→不蓋→落覓食(可能死+料浪費=genuine 失敗案必留、禁 always-win crank)。
+func _test_rescue_build_starve_no() -> void:
+	print("--- ★★anti-crank 快餓死不蓋 ---")
+	var a := _mk_village_at_outpost("forest", 3, 0.1, 45.0)   # food_days 0.04 < build_eta 0.1(蓋不完)、料備妥
+	var ev: Dictionary = FactionAISystem.new()._food_rescue_eval(a[0], a[1])
+	_ok(not bool(ev["viable"]),
+		"快餓死(建工期≥餓死窗)→viable=false→不蓋→落覓食(蓋不完的田不能吃=genuine 失敗案留、禁 crank always-win)")
 
 # ★★★全 advance_tick pipeline（驗執行端、非 hand-step）：lord(有料)+森村欠糧無 farming holding
 #   → 領主 facility_roi>0 送料 convoy → 料 deposit 入村公庫 → 村端 _pick_facility(飢餓 urgency)選 farming

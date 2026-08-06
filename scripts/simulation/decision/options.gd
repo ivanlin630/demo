@@ -54,6 +54,17 @@ static var REGISTRY: Dictionary = {
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			return {"task": TeamData.TASK_FORAGE, "target": FactionAISystem.new()._find_forage_tile(state, team)},
 	},
+	"自救建田": {
+		# ★復甦 R2 §2B.1（build-as-survival self-rescue、blueprint 裁 YES genuine）：飢餓村料備妥產糧設施 →
+		# 蓋田自救（永久產能）勝覓食（臨時填）。util=1+食安價值 frac × P(survive_to_harvest)（ctx.rescue_build_util、
+		# genuine 非死常數）；蓋不完(build_eta≥食窗)/料未備 → viable=false → 落覓食（可能餓死+料浪費=失敗案留、禁 crank）。
+		# scope 硬限：僅產糧設施+料已備 means-end build→food（_food_rescue_eval 內 gate），禁泛化 build-instead-of-forage。
+		"terms": [["food_rescue_build", "survival_pressure"]],
+		"applicable": func(ctx: DecisionContext) -> bool:
+			return ctx.can_rescue_build,
+		"to_task": func(_state: WorldState, team: TeamData) -> Dictionary:
+			return {"task": TeamData.TASK_BUILD, "target": team.tile_pos},
+	},
 	"survival": {
 		"terms": [["threat_pressure", "survival_pressure"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -371,7 +382,7 @@ static var REGISTRY: Dictionary = {
 const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練", "吸納"]   # §HOW-7 吸納=擴張戰略,子隊不自主發起
 
 # survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
-const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "併入", "紮營", "乞食", "買糧", "遷移找糧"]   # S-A §HOW-6：統一「併入」(join+整併合一)絕境求生；Fix B 遷移找糧
+const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "併入", "紮營", "乞食", "買糧", "遷移找糧", "自救建田"]   # S-A §HOW-6：統一「併入」(join+整併合一)絕境求生；Fix B 遷移找糧；★復甦 R2 §2B.1 自救建田(build-as-survival)
 
 # 序4 vendetta 溶入：血仇開打門檻（防輕微不快即戰）。TEST VALUE。
 const FEUD_ATTACK_MIN := 0.5

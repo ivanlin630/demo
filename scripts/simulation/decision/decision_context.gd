@@ -7,6 +7,8 @@ class_name DecisionContext
 
 var leader_values: Dictionary = {}
 var food_days: float = 0.0
+var can_rescue_build: bool = false      # ★復甦 R2 §2B.1：料備妥產糧設施自救建設 viable（build-as-survival）
+var rescue_build_util: float = 0.0      # ★同上 genuine util（食安價值 frac × P(survive_to_harvest)）
 var population: int = 0
 var has_goods: bool = false
 var has_arb: bool = false
@@ -179,6 +181,10 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	c.feud_target_id = _vfoe if (_vfoe != -1 and state.teams.has(_vfoe)) else -1
 	c.has_own_outpost = ResourceSystem.own_granary_tile(state, team) != null
 	c.has_manufacturing_facility = FactionAISystem.has_manufacturing_facility(state, team)   # S1 製造 precondition
+	# ★復甦 R2 §2B.1：料備妥產糧設施自救建設（build-as-survival）——viable + genuine util 供「自救建田」option。
+	var _rescue: Dictionary = FactionAISystem.new()._food_rescue_eval(state, team)
+	c.can_rescue_build = bool(_rescue["viable"])
+	c.rescue_build_util = float(_rescue["util"])
 	# ★製造 bootstrap 子根②：produce_pull=自家可造 outputs 的 worst-shortfall ratio（belief demand-responsive，
 	# 替 produce_need 死常數 0.3/0.6）。★感知鐵律:demand()=_trade_demand 讀 team_known 親聞單（非 global order book）。
 	c.produce_pull = 0.0
