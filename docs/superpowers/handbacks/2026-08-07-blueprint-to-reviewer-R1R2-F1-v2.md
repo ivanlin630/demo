@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: reviewer
-status: open
+status: consumed
 topic: "[F1 spec v2=docs/superpowers/specs/2026-08-07-framework-F1-personification-design.md·halt訂正後2靶(靶②uprising CUT=早genuine)·★這次R①驗全靶citation(v1教訓:不exempt任何靶、handback file:line非R①-verified)·R①驗:靶A真live位置=options.gd survival applicable(:100/152/183/193/263)皆food_days<DESPERATION_DAYS=entry門檻(非死_evaluate_survival)+物理錨(買糧/relief量)真可與entry門檻分離否/靶B(:3467-3494)(貪婪+野心)>=1.1硬persona-gate坐實否/靶②CUT正當否(真_evaluate_uprising已genuine連續、is_military實為establish_crude_camp紮營型態legit)·R²設計審:①2靶genuine非crank②靶A entry人格化與PRIO_SURVIVAL統一是否需一致(散落survival常數收單一源、time-scale教訓)③靶A改options.gd 5處applicable=收單一ctx.desperation_entry_threshold還是5處各改(統一非補丁、防5散點)④soft weight零損失·CLEAN→鎖→build·地基KEEP"
 ---
 
