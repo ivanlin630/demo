@@ -1,0 +1,1859 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== recovery-path R2 投資測床（seed=5252 8天, ANCHOR_LORD=0）===
+[GameSetup] 完成：6 teams, 3 factions, 6 persons
+[SpecimenDumpHelper] specimen_team_ids=[0, 1]（enabled=true，dump 前記呼 SpecimenDumpHelper.dump）
+[Outpost] Team0 設施施工 farming → Lv1 at (20,20)
+[Order] Team0 sell food ×4950 (oid=0)
+[Order] Team0 buy weapon_melee_low ×8 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×6 (oid=2)
+[Order] Team0 buy tools ×8 (oid=3)
+[Order] Team1 sell food ×33 (oid=4)
+[Order] Team1 buy weapon_melee_low ×1 (oid=5)
+[Order] Team1 buy material ×59 (oid=6)
+[Order] Team1 buy tools ×1 (oid=7)
+[Order] Team2 buy weapon_melee_low ×8 (oid=8)
+[Order] Team2 buy weapon_ranged_low ×6 (oid=9)
+[Order] Team2 buy tools ×4 (oid=10)
+[Order] Team3 buy food ×5 (oid=11)
+[Order] Team4 buy weapon_melee_low ×8 (oid=12)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=13)
+[Order] Team4 buy tools ×4 (oid=14)
+[Order] Team5 buy weapon_melee_low ×1 (oid=15)
+[INVDBG] _try_invest_side ENTRY lord=0 faction_id=0
+[INVDBG] lord=0 passed all gates, scanning holding entries: dispatch_ledger.size=2
+[INVDBG] lord=0 vid=1 est=null
+[Tick 10] Person 0 (leader/team0) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 10] Person 1000 (leader/team1) → P2_produce | stress=0.00 loyalty=0.90
+[Succession] Team 6 從匿名晉升新領袖 P5001（統領=0.11）
+[Order] Team6 buy food ×2 (oid=16)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(21,20)
+[Survival] Team6 urgent days_left=0.0 偵查→覓食
+[Tick 20] Person 5001 (leader/team6) → P1_comply | stress=0.00 loyalty=0.61
+[Harvest] Tick60 季節=春 base=1.1
+[Move] Team 6 抵達 (21,20)
+[Outpost] 設施完工 farming Lv1 at (20,20)
+[Outpost] Team0 設施施工 farming → Lv2 at (20,20)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(22,20)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[StrategicAI] Faction0 首要目標: defend target=6
+[Move] Team 3 抵達 (23,120)
+[Move] Team 5 抵達 (23,220)
+[Ambition] Team0 rung 0→1 (商業 cap=1)
+[Combat Start] Team-1000000 vs Team6
+[Ambush] NPC Team6 被 boar 伏擊
+[Move] Team 6 抵達 (22,20)
+[SubAI] Team6 引擎→覓食 (覓食)
+[Outpost] 設施完工 farming Lv2 at (20,20)
+[Outpost] Team0 設施施工 farming → Lv3 at (20,20)
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Ambition] Team6 rung 0→1 (商業 cap=3)
+[DayNight] Day 1 開始
+
+========== [SpecimenTracer] flush 48 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=10 intent=日常 | winner=覓食 task=覓食 tgt=(22, 20)
+    candidates: 覓食=0.37 駐守=0.17 建設=0.07
+    狀態: pop=4 food(priv=49.9/gran=0.0/eff=49.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=0
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=10 heartbeat（no-decision）pop=14 food(eff=5008.5)
+[Specimen T0] tick=10 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=10 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=20 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=20 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=30 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=30 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=40 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=40 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=50 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=50 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=60 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=60 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=70 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=70 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=80 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=80 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=90 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=90 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=100 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=100 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=110 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=110 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=120 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=120 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=130 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=130 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=140 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=140 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=150 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=150 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=160 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=160 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=170 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=170 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=180 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=180 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=190 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=190 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=200 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=200 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=210 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=210 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=220 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=220 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=230 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=230 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[Move] Team 6 抵達 (22,20)
+[Horse] Outpost (23, 20) 捕野馬 +1
+[TickPerf] day=1 avg=56542 us max=7476353 us ticks=240 teams=7 factions=3
+[INVDBG] _try_invest_side ENTRY lord=0 faction_id=0
+[INVDBG] lord=0 passed all gates, scanning holding entries: dispatch_ledger.size=3
+[INVDBG] lord=0 vid=1 est=null
+[Succession] Team 7 從匿名晉升新領袖 P5002（統領=0.00）
+[Order] Team7 buy food ×3 (oid=18)
+[SurvivalForage] team=Team7 pop=1 → 覓食 @(21,20)
+[Survival] Team7 urgent days_left=0.0 偵查→覓食
+[Tick 260] Person 5002 (leader/team7) → P1_comply | stress=0.00 loyalty=0.67
+[Move] Team 2 抵達 (20,120)
+[Move] Team 3 抵達 (23,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 7 抵達 (21,20)
+[Survival] Team7 urgent days_left=0.0 idle→覓食
+[SubAI] Team7 紀律失效，脫離成獨立
+[Outpost] 設施完工 farming Lv3 at (20,20)
+[Order] Team0 sell material ×260 (oid=19)
+[Move] Team 6 抵達 (20,20)
+[Merge] Team0 ← Team6 完全合併 (pop=13)
+[Tick 380] Person 5001 (leader/team0) → P4_expand | stress=0.00 loyalty=0.47
+[Move] Team 5 抵達 (23,220)
+[Move] Team 7 抵達 (21,20)
+[Tick 440] Person 5002 (leader/team7) → N2_riot | stress=1.00 loyalty=0.35
+[DayNight] Day 2 開始
+
+========== [SpecimenTracer] flush 63 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=240 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=240 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=覓食 task=覓食 tgt=(22, 20)
+    candidates: 覓食=0.41 備戰=0.21 駐守=0.18 建設=0.10 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=46.7/gran=0.4/eff=47.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=250 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=250 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=260 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=260 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=270 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=270 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=280 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=280 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=290 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=290 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=300 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=300 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=310 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=45.9/gran=0.5/eff=46.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=310 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=310 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=320 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=320 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=330 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=330 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=340 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=340 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=350 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=350 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=360 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=360 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=370 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=駐守 task=治理 tgt=(20, 20)
+    candidates: 駐守=0.24 建設=0.12
+    狀態: pop=12 food(priv=4981.3/gran=825.7/eff=5807.0) consume/d=9.6 rung=1 fid=0 coin=600 mat=320
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=370 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=45.1/gran=0.6/eff=45.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=370 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=370 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=380 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=380 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=380 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=390 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=390 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=390 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=400 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=400 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=400 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=410 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=410 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=410 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=420 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=420 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=420 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=430 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=44.3/gran=0.7/eff=45.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=5
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=430 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=430 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=430 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=440 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=440 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=440 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=450 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=450 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=450 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=460 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=460 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=460 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=470 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=470 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=470 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[Horse] Outpost (23, 20) 捕野馬 +1
+[TickPerf] day=2 avg=60802 us max=4430384 us ticks=240 teams=7 factions=3
+[INVDBG] _try_invest_side ENTRY lord=0 faction_id=0
+[INVDBG] lord=0 passed all gates, scanning holding entries: dispatch_ledger.size=4
+[INVDBG] lord=0 vid=1 est=null
+[Sub] Team0 派出子隊 Team9 leader=P5001 advisors=[] (pop=5 cap=10 task=升級)
+[Infra] Team0 派升級子隊 Team9 → (20,20) Lv2
+[Succession] Team 8 從匿名晉升新領袖 P5003（統領=0.29）
+[Order] Team8 buy food ×3 (oid=20)
+[Survival] Team8 urgent days_left=0.0 偵查→覓食
+[Order] Team9 buy weapon_melee_low ×2 (oid=21)
+[Order] Team9 buy weapon_ranged_low ×2 (oid=22)
+[Order] Team9 buy tools ×1 (oid=23)
+[StrategicAI] Faction0 首要目標: defend target=8
+[Tick 500] Person 5003 (leader/team8) → P1_comply | stress=0.00 loyalty=0.55
+[Move] Team 2 抵達 (20,120)
+[Move] Team 3 抵達 (23,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Site] 選址 (20, 23) score=271 周邊資源={ "herb": 10, "ore_silver": 104, "ore_iron": 150 } terrain=forest
+[Site] Faction0 派工失敗: pop 不足: 7 < 12 (需 { "material": 50, "tools": 0 })
+[Tick 510] Person 5004 (member/team0) → P4_expand | stress=0.00 loyalty=0.99
+[Tick 510] Person 5001 (leader/team9) → P1_comply | stress=0.00 loyalty=0.48
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 8 抵達 (22,18)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(22,18)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[SubAI] Team8 紀律失效，脫離成獨立
+[Move] Team 9 抵達 (20,20)
+[Outpost] 子隊 Team9 開始升級 → Lv2 at (20,20)
+[Move] Team 8 抵達 (22,18)
+[Ambition] Team8 rung 0→1 (定居 cap=2)
+[Move] Team 5 抵達 (23,220)
+[DayNight] Day 3 開始
+
+========== [SpecimenTracer] flush 79 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=480 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=480 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=480 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=490 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=43.5/gran=0.8/eff=44.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=6
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=490 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=490 reaction person=5001 P4_expand why={ "loyalty": 0.47, "stress": 0 }
+[Specimen T1] tick=490 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=500 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=500 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=500 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=駐守 task=治理 tgt=(20, 20)
+    candidates: 駐守=0.29 建設=0.13 吸納=0.04 貿易=0.03 survival=0.00 掠奪=0.00
+    狀態: pop=7 food(priv=2903.9/gran=1238.7/eff=4142.7) consume/d=5.6 rung=1 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=510 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=510 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=510 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=520 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=520 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=520 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=530 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=530 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=530 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=540 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=540 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=540 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=550 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=42.7/gran=0.9/eff=43.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=6
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=550 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=550 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=550 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=560 intent=致富 | winner=駐守 task=治理 tgt=(20, 20)
+    candidates: 駐守=0.29 備戰=0.22 建設=0.13 求和=0.09 吸納=0.05 貿易=0.03 survival=0.00 掠奪=0.00
+    狀態: pop=7 food(priv=2901.9/gran=1498.4/eff=4400.3) consume/d=5.6 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=560 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=560 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=560 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=570 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=570 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=570 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=580 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=580 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=580 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=590 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=590 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=590 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=600 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=600 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=600 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=610 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=41.9/gran=1.0/eff=42.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=7
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=610 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=610 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=610 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=620 intent=致富 | winner=求和 task=外交 tgt=(20, 20)
+    candidates: 備戰=0.43 求和=0.29 駐守=0.28 survival=0.18 建設=0.13 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=7 food(priv=2899.9/gran=1704.2/eff=4604.1) consume/d=5.6 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=620 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=620 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=620 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=630 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=630 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=630 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=640 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=640 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=640 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=650 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=650 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=650 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=660 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=660 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=660 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=670 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=求和 task=外交 tgt=(20, 20)
+    candidates: 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=41.1/gran=1.1/eff=42.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=8
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=670 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=670 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=670 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=680 intent=致富 | winner=求和 task=外交 tgt=(20, 20)
+    candidates: 備戰=0.24 駐守=0.22 建設=0.12 求和=0.10 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=7 food(priv=2897.9/gran=1918.3/eff=4816.2) consume/d=5.6 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=680 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=680 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=680 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=690 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=690 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=690 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=700 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=700 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=700 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=710 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=710 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=710 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[Horse] Outpost (23, 20) 捕野馬 +1
+[TickPerf] day=3 avg=92487 us max=4070306 us ticks=240 teams=9 factions=3
+[INVDBG] _try_invest_side ENTRY lord=0 faction_id=0
+[INVDBG] lord=0 passed all gates, scanning holding entries: dispatch_ledger.size=4
+[INVDBG] lord=0 vid=1 est=null
+[Succession] Team 10 從匿名晉升新領袖 P5005（統領=0.19）
+[Order] Team10 buy food ×3 (oid=24)
+[Survival] Team10 urgent days_left=0.0 偵查→覓食
+[Tick 740] Person 5005 (leader/team10) → P1_comply | stress=0.00 loyalty=0.72
+[Move] Team 7 抵達 (21,22)
+[Ambition] Team7 rung 0→1 (商業 cap=2)
+[SubAI] Team10 紀律失效，脫離成獨立
+[Tick 770] Person 5003 (leader/team8) → P4_expand | stress=0.20 loyalty=0.36
+[Tick 780] Person 5003 (leader/team8) → P1_comply | stress=0.15 loyalty=0.37
+[Move] Team 10 抵達 (20,20)
+[Move] Team 2 抵達 (20,120)
+[Move] Team 3 抵達 (23,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 8 抵達 (20,20)
+[StrategicAI] Faction0 首要目標: defend target=10
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 10 抵達 (20,20)
+[Tick 930] Person 5005 (leader/team10) → N2_riot | stress=1.00 loyalty=0.39
+[Tick 950] Person 5002 (leader/team7) → P2_produce | stress=0.00 loyalty=0.00
+[DayNight] Day 4 開始
+
+========== [SpecimenTracer] flush 97 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=720 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=720 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=720 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=730 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=求和 task=外交 tgt=(20, 20)
+    candidates: 備戰=0.23 駐守=0.19 求和=0.17 建設=0.11 survival=0.00
+    狀態: pop=4 food(priv=40.3/gran=1.2/eff=41.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=8
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=730 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=730 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=730 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=740 intent=致富 | winner=求和 task=外交 tgt=(20, 20)
+    candidates: 備戰=0.78 求和=0.65 survival=0.50 駐守=0.22 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2896.0/gran=2000.0/eff=4896.0) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=740 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=740 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=740 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=750 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=750 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=750 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=760 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=760 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=760 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=770 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=770 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=770 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=780 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=780 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=780 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=790 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 求和=0.18 建設=0.11 survival=0.00
+    狀態: pop=4 food(priv=39.5/gran=1.3/eff=40.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=9
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=790 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=790 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=790 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=800 intent=致富 | winner=求和 task=外交 tgt=(20, 20)
+    candidates: 備戰=0.78 求和=0.66 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2894.2/gran=2000.0/eff=4894.2) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=800 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=800 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=800 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=810 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=810 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=810 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=820 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=820 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=820 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=830 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=830 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=830 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=840 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=840 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=840 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T1] tick=850 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=38.7/gran=1.4/eff=40.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=10
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=850 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=850 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=850 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=860 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.13 備戰=0.26 駐守=0.21 求和=0.15 建設=0.12 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=6 food(priv=2892.4/gran=2000.0/eff=4892.4) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=860 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.13 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=38.5/gran=1.5/eff=40.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=10
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=860 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=860 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=860 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=870 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.17 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2892.1/gran=2000.0/eff=4892.1) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=870 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.27 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=38.4/gran=1.5/eff=39.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=10
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=870 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=870 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=870 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=880 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.18 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2891.8/gran=2000.0/eff=4891.8) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=880 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.27 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=38.3/gran=1.5/eff=39.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=10
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=880 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=880 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=880 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=890 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.18 備戰=0.24 駐守=0.21 建設=0.12 求和=0.08 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=6 food(priv=2891.5/gran=2000.0/eff=4891.5) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=890 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.27 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=38.1/gran=1.5/eff=39.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=10
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=890 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=890 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=890 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=900 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.18 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2891.2/gran=2000.0/eff=4891.2) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=900 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.28 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=38.0/gran=1.5/eff=39.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=900 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=900 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=900 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=910 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.18 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2890.9/gran=2000.0/eff=4890.9) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=910 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.28 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=37.9/gran=1.5/eff=39.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=910 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=910 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=910 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=920 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.18 備戰=0.26 駐守=0.21 建設=0.12 求和=0.10 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=6 food(priv=2890.6/gran=2000.0/eff=4890.6) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=920 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.28 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=37.7/gran=1.6/eff=39.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=920 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=920 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=920 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=930 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.19 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2890.3/gran=2000.0/eff=4890.3) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=930 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.28 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=37.6/gran=1.6/eff=39.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=930 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=930 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=930 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=940 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.19 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2890.0/gran=2000.0/eff=4890.0) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=940 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.28 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=37.5/gran=1.6/eff=39.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=940 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=940 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=940 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=950 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.19 備戰=0.26 駐守=0.21 建設=0.12 求和=0.10 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=6 food(priv=2889.7/gran=2000.0/eff=4889.7) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=950 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.28 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=37.3/gran=1.6/eff=39.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=950 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=950 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=950 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[Horse] Outpost (23, 20) 捕野馬 +1
+[TickPerf] day=4 avg=243125 us max=5307483 us ticks=240 teams=10 factions=3
+[INVDBG] _try_invest_side ENTRY lord=0 faction_id=0
+[INVDBG] lord=0 passed all gates, scanning holding entries: dispatch_ledger.size=5
+[INVDBG] lord=0 vid=1 est=null
+[Succession] Team 11 從匿名晉升新領袖 P5006（統領=0.17）
+[Order] Team11 buy food ×3 (oid=25)
+[Survival] Team11 urgent days_left=0.0 偵查→覓食
+[Tick 980] Person 5006 (leader/team11) → P1_comply | stress=0.00 loyalty=0.92
+[Move] Team 8 抵達 (20,20)
+[Move] Team 10 抵達 (20,20)
+[Move] Team 3 抵達 (23,120)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 10 抵達 (20,20)
+[Tick 1050] Person 5006 (leader/team11) → P2_produce | stress=0.70 loyalty=0.84
+[Tick 1060] Person 5006 (leader/team11) → N2_riot | stress=0.80 loyalty=0.82
+[Move] Team 10 抵達 (20,20)
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 8 抵達 (20,20)
+[SubAI] Team11 紀律失效，脫離成獨立
+[Move] Team 11 抵達 (23,17)
+[Combat Start] Team-1000001 vs Team11
+[Ambush] NPC Team11 被 boar 伏擊
+[Move] Team 10 抵達 (20,20)
+[Ambition] Team11 rung 0→1 (商業 cap=2)
+[DayNight] Day 5 開始
+
+========== [SpecimenTracer] flush 120 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=960 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.19 備戰=0.26 駐守=0.21 建設=0.12 求和=0.10 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=6 food(priv=2889.4/gran=2000.0/eff=4889.4) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=960 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.29 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=37.2/gran=1.6/eff=38.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=960 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=960 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=960 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=970 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.19 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=6 food(priv=2889.1/gran=2000.0/eff=4889.1) consume/d=4.8 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=970 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.29 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=37.1/gran=1.7/eff=38.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=970 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=970 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=970 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=980 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.19 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2888.8/gran=2000.0/eff=4888.8) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=980 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.29 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=36.9/gran=1.7/eff=38.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=11
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=980 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=980 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=980 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=990 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.20 備戰=0.25 駐守=0.21 建設=0.12 求和=0.09 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=5 food(priv=2888.5/gran=2000.0/eff=4888.5) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=990 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.29 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=36.8/gran=1.7/eff=38.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=12
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=990 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=990 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=990 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1000 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.20 備戰=0.25 駐守=0.21 建設=0.12 求和=0.09 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=5 food(priv=2888.3/gran=2000.0/eff=4888.3) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1000 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.29 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=36.7/gran=1.7/eff=38.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=12
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1000 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1000 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1000 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1010 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.20 備戰=0.25 駐守=0.21 建設=0.12 求和=0.09 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=5 food(priv=2888.0/gran=2000.0/eff=4888.0) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1010 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.29 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=36.5/gran=1.7/eff=38.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=12
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1010 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1010 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1010 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1020 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.20 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2887.7/gran=2000.0/eff=4887.7) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1020 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.30 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=36.4/gran=1.7/eff=38.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=12
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1020 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1020 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1020 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1030 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.20 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2887.5/gran=2000.0/eff=4887.5) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1030 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.30 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=36.3/gran=1.8/eff=38.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=12
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1030 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1030 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1030 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1040 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.20 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2887.2/gran=2000.0/eff=4887.2) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1040 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.30 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=36.1/gran=1.8/eff=37.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=12
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1040 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1040 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1040 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1050 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.21 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2886.9/gran=2000.0/eff=4886.9) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1050 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.30 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=36.0/gran=1.8/eff=37.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=12
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1050 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1050 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1050 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1060 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.21 備戰=0.25 駐守=0.21 建設=0.12 求和=0.09 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=5 food(priv=2886.7/gran=2000.0/eff=4886.7) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1060 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.30 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=35.9/gran=1.8/eff=37.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=12
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1060 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1060 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1060 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1070 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.21 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2886.4/gran=2000.0/eff=4886.4) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1070 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.30 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=35.7/gran=1.8/eff=37.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=13
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1070 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1070 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1070 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1080 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.21 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2886.1/gran=2000.0/eff=4886.1) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1080 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.30 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=35.6/gran=1.8/eff=37.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=13
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1080 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1080 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1080 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1090 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.21 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2885.9/gran=2000.0/eff=4885.9) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1090 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.31 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=35.5/gran=1.9/eff=37.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=13
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1090 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1090 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1090 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1100 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.21 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2885.6/gran=2000.0/eff=4885.6) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1100 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.31 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=35.3/gran=1.9/eff=37.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=13
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1100 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1100 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1100 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1110 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.22 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2885.3/gran=2000.0/eff=4885.3) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1110 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.31 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=35.2/gran=1.9/eff=37.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=13
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1110 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1110 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1110 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1120 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.22 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2885.1/gran=2000.0/eff=4885.1) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1120 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.31 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=35.1/gran=1.9/eff=37.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=13
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1120 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1120 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1120 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1130 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.22 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2884.8/gran=2000.0/eff=4884.8) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1130 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.31 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=34.9/gran=1.9/eff=36.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=13
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1130 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1130 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1130 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1140 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.22 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2884.5/gran=2000.0/eff=4884.5) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1140 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.31 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=34.8/gran=1.9/eff=36.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=13
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1140 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1140 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1140 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1150 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.22 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2884.3/gran=2000.0/eff=4884.3) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1150 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.32 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=34.7/gran=2.0/eff=36.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=14
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1150 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1150 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1150 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1160 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.23 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2884.0/gran=2000.0/eff=4884.0) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1160 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.32 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=34.5/gran=2.0/eff=36.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=14
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1160 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1160 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1160 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1170 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.23 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2883.7/gran=2000.0/eff=4883.7) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1170 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.32 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=34.4/gran=2.0/eff=36.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=14
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1170 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1170 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1170 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1180 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.23 備戰=0.25 駐守=0.21 建設=0.12 求和=0.09 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=5 food(priv=2883.5/gran=2000.0/eff=4883.5) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1180 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.32 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=34.3/gran=2.0/eff=36.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=14
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1180 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1180 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1180 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1190 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.23 備戰=0.25 駐守=0.21 建設=0.12 求和=0.09 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=5 food(priv=2883.2/gran=2000.0/eff=4883.2) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1190 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.32 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=34.1/gran=2.0/eff=36.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=14
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1190 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1190 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1190 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[Move] Team 8 抵達 (20,20)
+[Ambition] Team8 rung 1→0 (定居 cap=2)
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[TickPerf] day=5 avg=382950 us max=5954857 us ticks=240 teams=11 factions=3
+[Order] Team0 sell food ×4861 (oid=27)
+[Order] Team0 buy weapon_melee_low ×3 (oid=28)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=29)
+[Order] Team0 buy tools ×5 (oid=30)
+[Order] Team1 sell food ×19 (oid=31)
+[Order] Team1 buy weapon_melee_low ×1 (oid=32)
+[Order] Team1 buy material ×39 (oid=33)
+[Order] Team1 buy tools ×1 (oid=34)
+[Order] Team2 buy weapon_melee_low ×8 (oid=35)
+[Order] Team2 buy weapon_ranged_low ×6 (oid=36)
+[Order] Team2 buy tools ×4 (oid=37)
+[Order] Team3 buy food ×8 (oid=38)
+[Order] Team4 buy weapon_melee_low ×8 (oid=39)
+[Order] Team4 buy weapon_ranged_low ×6 (oid=40)
+[Order] Team4 buy tools ×4 (oid=41)
+[Order] Team5 buy weapon_melee_low ×1 (oid=42)
+[INVDBG] _try_invest_side ENTRY lord=0 faction_id=0
+[INVDBG] lord=0 passed all gates, scanning holding entries: dispatch_ledger.size=6
+[INVDBG] lord=0 vid=1 est=null
+[Succession] Team 12 從匿名晉升新領袖 P5007（統領=0.00）
+[Order] Team12 buy food ×3 (oid=43)
+[Survival] Team12 urgent days_left=0.0 偵查→覓食
+[Tick 1220] Person 5007 (leader/team12) → P1_comply | stress=0.00 loyalty=0.53
+[Move] Team 10 抵達 (20,20)
+[Outpost] Team9 升級 → civilian Lv2
+[SubAI] Team9 引擎→徵收 (徵收)
+[Move] Team 8 抵達 (20,20)
+[Faction] Team11 脫離勢力0
+[Ambition] Team7 rung 1→0 (商業 cap=2)
+[Tick 1270] Person 5006 (leader/team11) → P1_comply | stress=0.45 loyalty=0.63
+[Move] Team 10 抵達 (20,20)
+[Move] Team 2 抵達 (20,120)
+[Move] Team 3 抵達 (23,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 10 抵達 (20,20)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 9 抵達 (20,20)
+[Merge] Team0 ← Team9 完全合併 (pop=9)
+[Move] Team 5 抵達 (23,220)
+[Ambition] Team0 rung 0→1 (商業 cap=1)
+[SubAI] Team12 紀律失效，脫離成獨立
+[DayNight] Day 6 開始
+
+========== [SpecimenTracer] flush 126 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=1200 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.23 備戰=0.25 駐守=0.21 建設=0.12 求和=0.09 吸納=0.06 貿易=0.04 survival=0.00 掠奪=0.00
+    狀態: pop=5 food(priv=2882.9/gran=2000.0/eff=4882.9) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1200 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.32 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=34.0/gran=2.1/eff=36.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=14
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1200 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1200 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1200 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1210 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.23 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=5 food(priv=2882.7/gran=2000.0/eff=4882.7) consume/d=4.0 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1210 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=33.9/gran=2.1/eff=36.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=14
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1210 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1210 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1210 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1220 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.24 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2882.4/gran=2000.0/eff=4882.4) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1220 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=33.7/gran=2.1/eff=35.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=14
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1220 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1220 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1220 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1230 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.24 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2882.2/gran=2000.0/eff=4882.2) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1230 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=33.6/gran=2.1/eff=35.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1230 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1230 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1230 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1240 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.24 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2882.0/gran=2018.3/eff=4900.3) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1240 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.25 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=33.5/gran=2.1/eff=35.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1240 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1240 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1240 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1250 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.24 備戰=0.58 求和=0.43 survival=0.31 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2881.7/gran=2036.6/eff=4918.3) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=33.3/gran=2.1/eff=35.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1250 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1250 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1250 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1260 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.24 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2881.5/gran=2054.8/eff=4936.3) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1260 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=33.2/gran=2.2/eff=35.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1260 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1260 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1260 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1270 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.24 備戰=0.58 求和=0.43 survival=0.31 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2881.3/gran=2073.6/eff=4954.9) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1270 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=33.1/gran=2.2/eff=35.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1270 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1270 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1270 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1280 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.25 備戰=0.58 求和=0.43 survival=0.31 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2881.0/gran=2091.0/eff=4972.0) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1280 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.9/gran=2.2/eff=35.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1280 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1280 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1280 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1290 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.25 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2880.8/gran=2108.3/eff=4989.1) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1290 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.8/gran=2.2/eff=35.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1290 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1290 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1290 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1300 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.25 備戰=0.58 求和=0.43 survival=0.31 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2880.6/gran=2125.5/eff=5006.1) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1300 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.7/gran=2.2/eff=34.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1300 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1300 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1300 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1310 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.25 備戰=0.78 求和=0.62 survival=0.50 駐守=0.21 建設=0.12 吸納=0.06 貿易=0.04 掠奪=0.00
+    狀態: pop=4 food(priv=2880.3/gran=2142.6/eff=5023.0) consume/d=3.2 rung=0 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1310 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.5/gran=2.3/eff=34.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=15
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1310 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1310 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1310 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1320 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.28 備戰=0.78 求和=0.62 survival=0.50 駐守=0.23 建設=0.13 吸納=0.07 貿易=0.05 掠奪=0.00
+    狀態: pop=4 food(priv=2880.1/gran=2159.7/eff=5039.8) consume/d=3.2 rung=1 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1320 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.4/gran=2.3/eff=34.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=16
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1320 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1320 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1320 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1330 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.32 備戰=0.78 求和=0.62 survival=0.50 駐守=0.27 建設=0.15 吸納=0.07 貿易=0.05 掠奪=0.00
+    狀態: pop=4 food(priv=2879.9/gran=2179.4/eff=5059.3) consume/d=3.2 rung=1 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1330 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.3/gran=2.3/eff=34.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=16
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1330 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1330 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1330 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1340 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.34 備戰=0.78 求和=0.62 survival=0.50 駐守=0.28 建設=0.16 吸納=0.07 貿易=0.05 掠奪=0.00
+    狀態: pop=4 food(priv=2879.6/gran=2199.1/eff=5078.7) consume/d=3.2 rung=1 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1340 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.1/gran=2.3/eff=34.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=16
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1340 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1340 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1340 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1350 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.35 備戰=0.78 求和=0.62 survival=0.50 駐守=0.29 建設=0.16 吸納=0.07 貿易=0.05 掠奪=0.00
+    狀態: pop=4 food(priv=2879.4/gran=2218.6/eff=5098.1) consume/d=3.2 rung=1 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1350 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=2.3/eff=34.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=16
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1350 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1350 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1350 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1360 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.35 備戰=0.58 求和=0.43 survival=0.31 駐守=0.29 建設=0.16 吸納=0.07 貿易=0.05 掠奪=0.00
+    狀態: pop=4 food(priv=2879.2/gran=2238.1/eff=5117.3) consume/d=3.2 rung=1 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1360 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=2.2/eff=34.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=16
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1360 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1360 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1360 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1370 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.36 備戰=0.78 求和=0.62 survival=0.50 駐守=0.29 建設=0.16 吸納=0.07 貿易=0.05 掠奪=0.00
+    狀態: pop=4 food(priv=2878.9/gran=2257.4/eff=5136.3) consume/d=3.2 rung=1 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1370 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=2.1/eff=34.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=16
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1370 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1370 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1370 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1380 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.36 備戰=0.78 求和=0.62 survival=0.50 駐守=0.29 建設=0.16 吸納=0.07 貿易=0.05 掠奪=0.00
+    狀態: pop=4 food(priv=2878.7/gran=2276.6/eff=5155.3) consume/d=3.2 rung=1 fid=0 coin=350 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1380 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=2.0/eff=34.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=16
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1380 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1380 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1380 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1380 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1390 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.34 駐守=0.27 建設=0.15 吸納=0.06 貿易=0.05 掠奪=0.00
+    狀態: pop=9 food(priv=4937.9/gran=2286.4/eff=7224.3) consume/d=7.2 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1390 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.9/eff=33.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=16
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1390 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1390 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1390 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1390 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1400 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.31 駐守=0.25 建設=0.14 吸納=0.06 貿易=0.05 掠奪=0.00
+    狀態: pop=9 food(priv=4937.5/gran=2296.0/eff=7233.5) consume/d=7.2 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1400 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.8/eff=33.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=17
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1400 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1400 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1400 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1400 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1410 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.29 駐守=0.23 建設=0.13 吸納=0.06 貿易=0.05 掠奪=0.00
+    狀態: pop=9 food(priv=4937.1/gran=2305.6/eff=7242.7) consume/d=7.2 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1410 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.7/eff=33.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=17
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1410 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1410 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1410 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1410 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1420 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.14 駐守=0.22 建設=0.12 吸納=0.04 貿易=0.04 掠奪=0.00
+    狀態: pop=9 food(priv=4936.7/gran=2315.1/eff=7251.8) consume/d=7.2 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1420 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.5/eff=33.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=17
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1420 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1420 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1420 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1420 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1430 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.95 駐守=0.20 建設=0.10 吸納=0.04 貿易=0.03 掠奪=0.00
+    狀態: pop=9 food(priv=4936.3/gran=2324.6/eff=7260.9) consume/d=7.2 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1430 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.24 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.4/eff=33.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=17
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1430 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1430 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1430 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1430 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[Move] Team 8 抵達 (20,20)
+[Move] Team 10 抵達 (20,20)
+[Move] Team 12 抵達 (23,18)
+[TickPerf] day=6 avg=380706 us max=6939054 us ticks=240 teams=11 factions=3
+[INVDBG] _try_invest_side ENTRY lord=0 faction_id=0
+[INVDBG] lord=0 passed all gates, scanning holding entries: dispatch_ledger.size=6
+[INVDBG] lord=0 vid=1 est=null
+[Order] Team7 buy food ×1 (oid=45)
+[Succession] Team 13 從匿名晉升新領袖 P5008（統領=0.19）
+[Order] Team13 buy food ×2 (oid=46)
+[Survival] Team13 urgent days_left=0.0 偵查→覓食
+[Tick 1460] Person 5008 (leader/team13) → P1_comply | stress=0.00 loyalty=0.88
+[Move] Team 10 抵達 (20,20)
+[Move] Team 8 抵達 (20,20)
+[Site] Faction0 派工失敗: pop 不足: 8 < 12 (需 { "material": 50, "tools": 0 })
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Ambition] Team12 rung 0→1 (定居 cap=2)
+[Move] Team 10 抵達 (20,20)
+[Tick 1540] Person 5008 (leader/team13) → N2_riot | stress=0.80 loyalty=0.79
+[Move] Team 8 抵達 (20,20)
+[Order] Team0 sell material ×110 (oid=47)
+[Move] Team 10 抵達 (20,20)
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[CrudeCamp] Team7 紮營 @(21,22) → civilian
+[Tick 1620] Person 5007 (leader/team12) → P4_expand | stress=0.05 loyalty=0.14
+[SubAI] Team13 紀律失效，脫離成獨立
+[Move] Team 8 抵達 (20,20)
+[DayNight] Day 7 開始
+
+========== [SpecimenTracer] flush 144 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=1440 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.84 駐守=0.19 建設=0.09 吸納=0.03 貿易=0.03 掠奪=0.00
+    狀態: pop=9 food(priv=4935.9/gran=2334.0/eff=7269.9) consume/d=7.2 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1440 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.3/eff=33.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=17
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1440 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1440 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1440 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1440 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1450 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.78 駐守=0.19 建設=0.09 吸納=0.03 貿易=0.03 掠奪=0.00
+    狀態: pop=9 food(priv=4935.5/gran=2349.7/eff=7285.2) consume/d=7.2 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1450 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.2/eff=33.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=17
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1450 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1450 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1450 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1450 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1460 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.74 駐守=0.19 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4935.1/gran=2366.7/eff=7301.8) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1460 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.1/eff=33.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=17
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1460 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1460 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1460 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1460 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1470 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.73 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4934.8/gran=2383.5/eff=7318.3) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1470 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=1.0/eff=33.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=17
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1470 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1470 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1470 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1470 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1480 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4934.4/gran=2400.3/eff=7334.7) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1480 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.9/eff=32.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=18
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1480 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1480 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1480 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1480 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1490 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4934.0/gran=2416.9/eff=7350.9) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1490 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.7/eff=32.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=18
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1490 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1490 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1490 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1490 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1500 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4933.7/gran=2433.4/eff=7367.1) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1500 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.6/eff=32.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=18
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1500 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1500 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1500 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1500 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1510 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4933.3/gran=2447.6/eff=7380.9) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1510 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.5/eff=32.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=18
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1510 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1510 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1510 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1510 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1520 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4932.9/gran=2460.7/eff=7393.6) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1520 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.4/eff=32.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=18
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1520 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1520 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1520 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1520 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1530 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4932.6/gran=2473.7/eff=7406.3) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1530 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.3/eff=32.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=18
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1530 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1530 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1530 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1530 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1540 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4932.2/gran=2486.7/eff=7418.9) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1540 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.2/eff=32.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=18
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1540 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1540 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1540 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1540 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1550 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4931.8/gran=2499.6/eff=7431.4) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1550 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.1/eff=32.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=18
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1550 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1550 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1550 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1550 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1560 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.72 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4931.5/gran=2512.4/eff=7443.9) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1560 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=32.0/gran=0.0/eff=32.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1560 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1560 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1560 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1560 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1570 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.73 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4931.1/gran=2523.2/eff=7454.3) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1570 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=31.8/gran=0.0/eff=31.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1570 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1570 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1570 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1570 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1580 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=0.73 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02 掠奪=0.00
+    狀態: pop=8 food(priv=4930.7/gran=2534.0/eff=7464.8) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1580 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=徵收 task=徵收 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=31.7/gran=0.0/eff=31.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1580 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1580 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1580 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1580 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1590 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.73 駐守=0.18 建設=0.08 吸納=0.03 貿易=0.02
+    狀態: pop=8 food(priv=4930.4/gran=2544.8/eff=7475.1) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1590 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: 徵收=1.33 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=31.6/gran=0.0/eff=31.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1590 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1590 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1590 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1590 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1600 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.19 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4930.0/gran=2555.5/eff=7485.5) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1600 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: 徵收=1.13 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=31.5/gran=0.0/eff=31.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1600 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1600 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1600 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1600 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1610 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.20 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4929.6/gran=2566.2/eff=7495.8) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1610 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(20, 20)
+    candidates: 徵收=1.13 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.23 備戰=0.23 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=31.4/gran=0.0/eff=31.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1610 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1610 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1610 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1610 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1620 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.20 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4929.3/gran=2576.8/eff=7506.1) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1620 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=31.3/gran=0.0/eff=31.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1620 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1620 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1620 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1620 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1630 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.20 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4928.9/gran=2591.5/eff=7520.4) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1630 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=31.2/gran=0.0/eff=31.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1630 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1630 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1630 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1630 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1640 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.20 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4928.5/gran=2606.2/eff=7534.7) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1640 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=31.0/gran=0.0/eff=31.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=19
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1640 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1640 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1640 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1640 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1650 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.20 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4928.2/gran=2620.8/eff=7549.0) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1650 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.9/gran=0.0/eff=30.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=20
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1650 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1650 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1650 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1650 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1660 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.20 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4927.8/gran=2635.3/eff=7563.1) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1660 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.8/gran=0.0/eff=30.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=20
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1660 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1660 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1660 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1660 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1670 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.21 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4927.4/gran=2649.8/eff=7577.2) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1670 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.7/gran=0.0/eff=30.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=20
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1670 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1670 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1670 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1670 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[Move] Team 10 抵達 (20,20)
+[Salary] Team8 薪水結算 coin=0.0
+[Salary] Team10 薪水結算 coin=0.0
+[Salary] Team11 薪水結算 coin=0.0
+[Salary] Team12 薪水結算 coin=0.0
+[Salary] Team13 薪水結算 coin=0.0
+[Ambition] Team11 rung 1→0 (商業 cap=2)
+[TickPerf] day=7 avg=401557 us max=7311408 us ticks=240 teams=12 factions=3
+[INVDBG] _try_invest_side ENTRY lord=0 faction_id=0
+[INVDBG] lord=0 passed all gates, scanning holding entries: dispatch_ledger.size=7
+[INVDBG] lord=0 vid=1 est=null
+[INVDBG] lord=0 vid=7 terrain=forest pop=1 roi=7.5000
+[Sub] Team0 派出子隊 Team15 leader=P5004 advisors=[] (pop=2 cap=36 task=運輸)
+[Convoy] Team0 派運輸子隊 Team15 送 material×45 → demand 市場(21,22)
+[SoloAI] Team11 → 逃跑 (survival)
+[Order] Team7 buy material ×29 (oid=48)
+[Order] Team8 buy food ×3 (oid=49)
+[Succession] Team 14 從匿名晉升新領袖 P5009（統領=0.05）
+[Order] Team14 buy food ×3 (oid=50)
+[Survival] Team14 urgent days_left=0.0 偵查→覓食
+[Order] Team15 sell material ×45 (oid=51)
+[Order] Team15 buy weapon_melee_low ×1 (oid=52)
+[Tick 1700] Person 5009 (leader/team14) → P1_comply | stress=0.00 loyalty=1.00
+[Tick 1700] Person 5004 (member/team15) → P1_comply | stress=0.00 loyalty=1.00
+[Move] Team 5 抵達 (23,220)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 10 抵達 (20,20)
+[Move] Team 13 抵達 (24,18)
+[Faction] Team7 脫離勢力0
+[Faction] Team13 脫離勢力0
+[Move] Team 8 抵達 (20,20)
+[Move] Team 10 抵達 (20,20)
+[Tick 1780] Person 5009 (leader/team14) → N2_riot | stress=0.80 loyalty=0.90
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 13 抵達 (24,18)
+[Move] Team 8 抵達 (20,20)
+[Order] Team8 sell material ×1 (oid=55)
+[Order] Team10 sell material ×1 (oid=56)
+[Move] Team 10 抵達 (20,20)
+[Ambition] Team13 rung 0→1 (商業 cap=2)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 2 抵達 (20,120)
+[Move] Team 4 抵達 (20,220)
+[Move] Team 5 抵達 (23,220)
+[Move] Team 11 抵達 (26,14)
+[DayNight] Day 8 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+
+========== [SpecimenTracer] flush 121 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=1680 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.21 駐守=0.18 建設=0.08 吸納=0.03
+    狀態: pop=8 food(priv=4927.1/gran=2664.2/eff=7591.2) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1680 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.6/gran=0.0/eff=30.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=20
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1680 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1680 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T0] tick=1680 reaction person=5004 P4_expand why={ "loyalty": 0.99, "stress": 0 }
+[Specimen T1] tick=1680 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1690 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.56 貿易=0.21 駐守=0.18 建設=0.08
+    狀態: pop=8 food(priv=4926.7/gran=2676.1/eff=7602.8) consume/d=6.4 rung=1 fid=0 coin=600 mat=170
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1690 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.5/gran=0.0/eff=30.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=20
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1690 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1690 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1690 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1700 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.62 駐守=0.23 貿易=0.21 建設=0.11
+    狀態: pop=5 food(priv=3518.8/gran=2693.3/eff=6212.1) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1700 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.3/gran=0.0/eff=30.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=20
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1700 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1700 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1700 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1710 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.63 駐守=0.24 貿易=0.21 建設=0.11
+    狀態: pop=5 food(priv=3518.5/gran=2710.4/eff=6228.9) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1710 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.2/gran=0.0/eff=30.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=20
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1710 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1710 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1710 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1720 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.65 駐守=0.25 貿易=0.22 建設=0.12
+    狀態: pop=5 food(priv=3518.3/gran=2727.5/eff=6245.8) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1720 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.1/gran=0.0/eff=30.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=20
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1720 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1720 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1720 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1730 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.65 駐守=0.26 貿易=0.22 建設=0.12
+    狀態: pop=5 food(priv=3518.0/gran=2744.5/eff=6262.5) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1730 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=30.0/gran=0.0/eff=30.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=21
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1730 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1730 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1730 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1740 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.66 駐守=0.27 貿易=0.22 建設=0.13
+    狀態: pop=5 food(priv=3517.7/gran=2761.5/eff=6279.2) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1740 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.9/gran=0.0/eff=29.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=21
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1740 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1740 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1740 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1750 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.66 駐守=0.27 貿易=0.22 建設=0.13
+    狀態: pop=5 food(priv=3517.5/gran=2778.7/eff=6296.1) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1750 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.8/gran=0.0/eff=29.8) consume/d=3.2 rung=0 fid=0 coin=10 mat=21
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1750 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1750 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1750 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1760 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.67 駐守=0.27 貿易=0.22 建設=0.13
+    狀態: pop=5 food(priv=3517.2/gran=2795.8/eff=6313.0) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1760 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.6/gran=0.0/eff=29.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=21
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1760 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1760 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1760 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1770 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.67 駐守=0.27 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3516.9/gran=2812.8/eff=6329.7) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1770 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.5/gran=0.0/eff=29.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=21
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1770 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1770 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1770 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1780 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.67 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3516.7/gran=2829.8/eff=6346.4) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1780 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.4/gran=0.0/eff=29.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=21
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1780 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1780 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1780 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1790 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.67 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3516.4/gran=2846.7/eff=6363.1) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1790 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.3/gran=0.0/eff=29.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=21
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1790 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1790 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1790 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1800 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3516.1/gran=2863.5/eff=6379.6) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1800 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.22 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.2/gran=0.0/eff=29.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=21
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1800 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1800 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1800 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1810 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3515.9/gran=2881.2/eff=6397.0) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1810 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.1/gran=0.0/eff=29.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=22
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1810 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1810 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1810 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1820 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3515.6/gran=2898.8/eff=6414.4) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1820 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=29.0/gran=0.0/eff=29.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=22
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1820 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1820 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1820 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1830 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3515.3/gran=2916.3/eff=6431.6) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1830 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.9/gran=0.0/eff=28.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=22
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1830 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1830 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1830 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1840 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3515.1/gran=2930.7/eff=6445.8) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1840 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.7/gran=0.0/eff=28.7) consume/d=3.2 rung=0 fid=0 coin=10 mat=22
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1840 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1840 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1840 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1850 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3514.8/gran=2945.1/eff=6459.9) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1850 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.6/gran=0.0/eff=28.6) consume/d=3.2 rung=0 fid=0 coin=10 mat=22
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1850 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1850 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1850 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1860 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3514.5/gran=2959.4/eff=6474.0) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1860 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.5/gran=0.0/eff=28.5) consume/d=3.2 rung=0 fid=0 coin=10 mat=22
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1860 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1860 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1860 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1870 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3514.3/gran=2971.9/eff=6486.2) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1870 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.4/gran=0.0/eff=28.4) consume/d=3.2 rung=0 fid=0 coin=10 mat=22
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1870 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1870 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1870 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1880 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3514.0/gran=2984.3/eff=6498.3) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1880 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.3/gran=0.0/eff=28.3) consume/d=3.2 rung=0 fid=0 coin=10 mat=22
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1880 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1880 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1880 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1890 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3513.7/gran=2996.7/eff=6510.5) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1890 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 覓食=0.37 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.2/gran=0.0/eff=28.2) consume/d=3.2 rung=0 fid=0 coin=10 mat=23
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1890 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1890 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1890 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1900 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3513.5/gran=3009.0/eff=6522.5) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1900 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 覓食=0.37 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.1/gran=0.0/eff=28.1) consume/d=3.2 rung=0 fid=0 coin=10 mat=23
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1900 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1900 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1900 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1910 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3513.2/gran=3021.3/eff=6534.5) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1910 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 覓食=0.37 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=28.0/gran=0.0/eff=28.0) consume/d=3.2 rung=0 fid=0 coin=10 mat=23
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1910 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1910 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1910 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[Move] Team 10 抵達 (20,20)
+[TickPerf] day=8 avg=383030 us max=9515044 us ticks=240 teams=14 factions=3
+
+───── recovery-r2 摘要(8天, anchor=Lord1) ─────
+final teams=14 factions=3
+  Lord1(T0): alive=true pop=5 faction=0 farming_level=3 food=6546.5
+  Village1_ForestEarly(T1): alive=true pop=4 faction=0 farming_level=0 food=27.9
+  Lord2(T2): alive=true pop=14 faction=1 farming_level=N/A food=4911.3
+  Village2_ForestLate(anti-crank)(T3): alive=true pop=2 faction=1 farming_level=N/A food=0.0
+  Lord3(T4): alive=true pop=14 faction=2 farming_level=N/A food=4911.3
+  Village3_Mountain(T5): alive=true pop=4 faction=2 farming_level=N/A food=24.7
+
+★invest鏈計數：invest.dispatched=1 invest.material_delivered=0.0 village.build_fired=3 survival.rescue_build=3
+invest.roi(peak)=7.5000
+
+★per-target invest.roi真值:
+  Village1_ForestEarly(T1): n=0 first={  }
+  Village2_ForestLate(anti-crank)(T3): n=0 first={  }
+  Village3_Mountain(T5): n=0 first={  }
+
+[dump] → res://docs/measurements/2026-08-06-infonet-recovery-r2-invest-anchor0.json
+
+========== [SpecimenTracer] flush 5 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=1920 intent={ "intent": "防衛", "why": "備戰籌餉", "mode": "fund_war" } | winner=貿易 task=貿易 tgt=(20, 20)
+    candidates: 徵收=0.68 覓食=0.37 駐守=0.28 貿易=0.23 建設=0.13
+    狀態: pop=5 food(priv=3512.9/gran=3033.6/eff=6546.5) consume/d=4.0 rung=1 fid=0 coin=429 mat=125
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T1] tick=1920 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_workshop:resource task=貿易 tgt=(21, 22)
+    candidates: build_workshop:resource=1.20 build_apothecary:resource=1.20 build_stable:resource=1.20 徵收=1.13 maintain_material:resource=0.80 自救建田=0.53 覓食=0.37 備戰=0.23 買料=0.21 駐守=0.19 建設=0.11 求和=0.06 survival=0.00
+    狀態: pop=4 food(priv=27.9/gran=0.0/eff=27.9) consume/d=3.2 rung=0 fid=0 coin=10 mat=23
+    leader: 野心=0.20 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=5.2天
+[Specimen T0] tick=1920 reaction person=0 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+[Specimen T0] tick=1920 reaction person=5001 P1_comply why={ "loyalty": 1, "stress": 0 }
+[Specimen T1] tick=1920 reaction person=1000 P2_produce why={ "loyalty": 0.9, "stress": 0 }
+=======================================================
+[SpecimenTracer] write_jsonl → res://docs/measurements/2026-08-06-infonet-recovery-r2-invest-anchor0.specimen.jsonl (803 entries)
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+

@@ -1,0 +1,17 @@
+{
+  "diagnostic": "recovery-path R2 投資測床(ex-ante formula見config._doc), anchor=2",
+  "final": {
+    "factions": 3,
+    "teams": 12
+  },
+  "per_village_roi_sample": {
+
+  },
+  "probe": {
+    "invest.dispatched": 0,
+    "invest.material_delivered": 0,
+    "invest.roi_peak": 0,
+    "survival.rescue_build": 4,
+    "village.build_fired": 4
+  }
+}
