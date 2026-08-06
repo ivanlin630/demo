@@ -116,6 +116,7 @@
 ## 📍 當前路線圖總覽（2026-08-03，blueprint owner）
 > `docs/roadmap.md` 已 stale（2026-06-15 UI 時代、未回填整個 economy/統一/size-matter 程序）→ 本節為 live 前瞻視圖；細節 arc 記憶見 memory `project_*`。
 - **傘：統一決策框架 / 統一矩陣**——NPC 行為全走 genuine utility DecisionEngine（憲法溶解 done）。禁 scripted gate / crank。
+- **★★排程頭號大工程：框架收尾「兩硬綠」（用戶定 2026-08-06「兩個都完成」、排復甦 arc 收後、整段做）**——用戶問架構耦合（faction_ai 5018 行/引用 35 系統/62 系統共讀 WorldState）引出，裁「行為統一 + 結構模組化 兩個都要完成」。★完成標準=用戶早定的**兩硬綠**（本 doc §大戰略校準 l.358）：**①零殘留非框架閘**（殲滅 god-view 後門/死常數/隱藏硬閘 §殲滅清單 A + **強化 `constitution_gate.gd` 抓全閘型跑綠＝機器證非人肉**）**②可擴充**（加新系統乾淨、擴充性稽核證）。★兩線撞同一象＝`faction_ai_system`（5018 行）：**序＝先行為（抽該進引擎的邏輯出來→自然瘦一大圈）再結構（剩下切有邊界模組＋定乾淨對接介面）**，反序＝兩次白工。誠實：大工程/動核心有風險/過程零新玩法→**故必在 arc 邊界整段做、不與半成品 arc 對撞**（用戶拍 A＝復甦先收）。結構模組化同時服務「對接別人程式」（API 層 `player_*_api`/`observer_query_api` 已鋪 Dictionary DTO 半座橋，缺序列化+進程邊界）。連 [[project_unification_matrix]]（行為線）+ [[project_framework_seams]]（結構線/所有權圖）。spec/brainstorm 待復甦收後於 arc 邊界啟。
 - **★活躍前線：有大有小 / size-matter arc**（真根 CASE B：model 不獎勵 size → 加真規模好處、兩軸 大隊=領導 / 大勢力=集團）：
   - **維度① 生產（統一勞力池）**：mechanism MERGED `506aaa64` ✓、組織軸 works（ratio~1）✓；**領導軸 → B MVP（idle-labor→建設 genuine）在飛 systems** → §8 重量領導軸 ratio 追平（誠實 measured 才宣稱）。
   - **維度② 軍力**：backlog——combat 上 time-scale wave（NPC 結算戰 / 玩家遭遇戰 tick 一致）+ 反應式互援；排生產驗收後。
