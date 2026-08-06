@@ -1,0 +1,28 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== F1靶B mining_greed連續性測床(Tier1控制場景直呼) ===
+[Site] 選址 (12, 10) score=79 周邊資源={  } terrain=mountain
+  ga=0.20 picked_mountain=true
+  ga=0.40 picked_mountain=true
+  ga=0.60 picked_mountain=true
+  ga=0.80 picked_mountain=true
+  ga=0.90 picked_mountain=true
+  ga=1.00 picked_mountain=true
+  ga=1.05 picked_mountain=true
+  ga=1.08 picked_mountain=true
+  ga=1.09 picked_mountain=true
+  ga=1.10 picked_mountain=true
+  ga=1.11 picked_mountain=true
+  ga=1.15 picked_mountain=true
+  ga=1.20 picked_mountain=true
+  ga=1.50 picked_mountain=true
+  ga=1.80 picked_mountain=true
+  ga=2.00 picked_mountain=true
+
+───── F1靶B 摘要 ─────
+crossover_ga=0.20 (若非精準等於1.10=非硬gate行為佐證;若>1.10附近平滑過渡亦可)
+完整sweep結果: [{ "ga": 0.2, "picked_mountain": true }, { "ga": 0.4, "picked_mountain": true }, { "ga": 0.6, "picked_mountain": true }, { "ga": 0.8, "picked_mountain": true }, { "ga": 0.9, "picked_mountain": true }, { "ga": 1, "picked_mountain": true }, { "ga": 1.05, "picked_mountain": true }, { "ga": 1.08, "picked_mountain": true }, { "ga": 1.09, "picked_mountain": true }, { "ga": 1.1, "picked_mountain": true }, { "ga": 1.11, "picked_mountain": true }, { "ga": 1.15, "picked_mountain": true }, { "ga": 1.2, "picked_mountain": true }, { "ga": 1.5, "picked_mountain": true }, { "ga": 1.8, "picked_mountain": true }, { "ga": 2, "picked_mountain": true }]
+
+[dump] → res://docs/measurements/2026-08-07-infonet-f1-mining-greed.json
+=== DONE ===
+

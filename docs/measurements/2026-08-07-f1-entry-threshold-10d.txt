@@ -1,0 +1,564 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== F1靶A desperation_entry_threshold測床（seed=7171 10天）===
+[GameSetup] 完成：3 teams, 0 factions, 3 persons
+[SpecimenDumpHelper] specimen_team_ids=[0, 1, 2]（enabled=true，dump 前記呼 SpecimenDumpHelper.dump）
+[setup] ex-ante預算threshold: neutral=3.00 cautious=5.10 bold=1.50
+[Site] Faction-1 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×14 (oid=0)
+[Order] Team0 buy weapon_melee_low ×1 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=2)
+[Order] Team0 buy material ×60 (oid=3)
+[Order] Team0 buy tools ×1 (oid=4)
+[Order] Team1 sell food ×2 (oid=5)
+[Order] Team1 buy weapon_melee_low ×1 (oid=6)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=7)
+[Order] Team1 buy material ×62 (oid=8)
+[Order] Team1 buy tools ×1 (oid=9)
+[Order] Team2 sell food ×20 (oid=10)
+[Order] Team2 buy material ×50 (oid=11)
+[Harvest] Tick60 季節=春 base=1.1
+[DayNight] Day 1 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=10 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=囤貨 task=貿易 tgt=(20, 20)
+    candidates: build_farming:location:delegate=0.80 build_workshop:location:delegate=0.80 build_apothecary:location:delegate=0.80 build_stable:location:delegate=0.80 maintain_material:location:delegate=0.53 囤貨=0.36 駐守=0.22 建設=0.10
+    狀態: pop=5 food(priv=30.0/gran=0.0/eff=30.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=0
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=10 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(19, 21)
+    candidates: build_farming:location:delegate=1.28 build_workshop:location:delegate=1.28 build_apothecary:location:delegate=1.28 build_stable:location:delegate=1.28 maintain_material:location:delegate=0.85 覓食=0.21 駐守=0.14 建設=0.06
+    狀態: pop=5 food(priv=30.0/gran=0.0/eff=30.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=0
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=10 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=囤貨 task=貿易 tgt=(20, 20)
+    candidates: build_farming:location:delegate=0.58 build_workshop:location:delegate=0.58 build_apothecary:location:delegate=0.58 build_stable:location:delegate=0.58 囤貨=0.48 maintain_material:location:delegate=0.39 駐守=0.17 建設=0.08
+    狀態: pop=5 food(priv=30.0/gran=0.0/eff=30.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=0
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=70 heartbeat（no-decision）pop=5 food(eff=30.0)
+[Specimen T1] tick=70 heartbeat（no-decision）pop=5 food(eff=30.0)
+[Specimen T2] tick=70 heartbeat（no-decision）pop=5 food(eff=30.0)
+[Specimen T0] tick=130 heartbeat（no-decision）pop=5 food(eff=28.4)
+[Specimen T1] tick=130 heartbeat（no-decision）pop=5 food(eff=28.5)
+[Specimen T2] tick=130 heartbeat（no-decision）pop=5 food(eff=28.4)
+[Specimen T0] tick=190 heartbeat（no-decision）pop=5 food(eff=28.4)
+[Specimen T1] tick=190 heartbeat（no-decision）pop=5 food(eff=28.5)
+[Specimen T2] tick=190 heartbeat（no-decision）pop=5 food(eff=28.4)
+=======================================================
+[TickPerf] day=1 avg=12193 us max=1786138 us ticks=240 teams=3 factions=0
+[Order] Team1 buy food ×1 (oid=12)
+[DayNight] Day 2 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.30 建設=0.27 駐守=0.24
+    狀態: pop=5 food(priv=26.9/gran=0.0/eff=26.9) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=250 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.27 駐守=0.20 買料=0.12 建設=0.10
+    狀態: pop=5 food(priv=27.0/gran=0.0/eff=27.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=0
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.36 訓練=0.30 建設=0.27 駐守=0.18
+    狀態: pop=5 food(priv=26.8/gran=0.0/eff=26.8) consume/d=4.0 rung=0 fid=-1 coin=10 mat=0
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=300 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.32 建設=0.28 駐守=0.25
+    狀態: pop=5 food(priv=25.3/gran=0.0/eff=25.3) consume/d=4.0 rung=0 fid=-1 coin=10 mat=6
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=300 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 駐守=0.21 覓食=0.21 買料=0.14 建設=0.11
+    狀態: pop=5 food(priv=25.5/gran=0.0/eff=25.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=300 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.38 訓練=0.32 建設=0.28 駐守=0.19
+    狀態: pop=5 food(priv=25.2/gran=0.0/eff=25.2) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=360 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.33 建設=0.28 駐守=0.25
+    狀態: pop=5 food(priv=25.3/gran=0.0/eff=25.3) consume/d=4.0 rung=0 fid=-1 coin=10 mat=6
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=360 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 駐守=0.21 覓食=0.21 買料=0.14 建設=0.11
+    狀態: pop=5 food(priv=25.5/gran=0.0/eff=25.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=360 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.38 訓練=0.32 建設=0.28 駐守=0.19
+    狀態: pop=5 food(priv=25.2/gran=0.0/eff=25.2) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=420 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.33 建設=0.29 駐守=0.26
+    狀態: pop=5 food(priv=23.7/gran=0.0/eff=23.7) consume/d=4.0 rung=0 fid=-1 coin=10 mat=8
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=420 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 駐守=0.22 覓食=0.21 買料=0.15 建設=0.11
+    狀態: pop=5 food(priv=24.0/gran=0.0/eff=24.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=420 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.38 訓練=0.33 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=23.6/gran=0.0/eff=23.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+=======================================================
+[TickPerf] day=2 avg=23050 us max=1741927 us ticks=240 teams=3 factions=0
+[DayNight] Day 3 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=480 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.34 建設=0.29 駐守=0.26
+    狀態: pop=5 food(priv=23.7/gran=0.0/eff=23.7) consume/d=4.0 rung=0 fid=-1 coin=10 mat=8
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=480 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 駐守=0.22 覓食=0.21 買料=0.15 建設=0.11
+    狀態: pop=5 food(priv=24.0/gran=0.0/eff=24.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=480 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.33 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=23.6/gran=0.0/eff=23.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=540 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.34 建設=0.29 駐守=0.26
+    狀態: pop=5 food(priv=22.1/gran=0.0/eff=22.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=10
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=540 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 駐守=0.22 覓食=0.21 買料=0.15 建設=0.12
+    狀態: pop=5 food(priv=22.5/gran=0.0/eff=22.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=540 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.33 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=22.1/gran=0.0/eff=22.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=600 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.34 建設=0.29 駐守=0.26
+    狀態: pop=5 food(priv=22.1/gran=0.0/eff=22.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=10
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=600 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 駐守=0.22 覓食=0.21 買料=0.15 建設=0.11
+    狀態: pop=5 food(priv=22.5/gran=0.0/eff=22.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=600 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.34 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=22.1/gran=0.0/eff=22.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=660 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.34 建設=0.30 駐守=0.26
+    狀態: pop=5 food(priv=20.5/gran=0.0/eff=20.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=12
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=660 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 駐守=0.22 覓食=0.21 買料=0.15 建設=0.11
+    狀態: pop=5 food(priv=21.0/gran=0.0/eff=21.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=660 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.34 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=20.5/gran=0.0/eff=20.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+=======================================================
+[TickPerf] day=3 avg=20232 us max=895186 us ticks=240 teams=3 factions=0
+[DayNight] Day 4 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=720 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.34 建設=0.30 駐守=0.26
+    狀態: pop=5 food(priv=19.0/gran=0.0/eff=19.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=15
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=720 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 駐守=0.22 覓食=0.22 建設=0.11 買糧=0.09
+    狀態: pop=5 food(priv=19.5/gran=0.0/eff=19.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=720 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.34 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=18.9/gran=0.0/eff=18.9) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=780 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.34 建設=0.30 駐守=0.26
+    狀態: pop=5 food(priv=19.0/gran=0.0/eff=19.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=15
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=780 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.22 駐守=0.22 建設=0.11 買糧=0.09
+    狀態: pop=5 food(priv=19.5/gran=0.0/eff=19.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=1
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=780 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.34 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=18.9/gran=0.0/eff=18.9) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=840 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.33 建設=0.30 駐守=0.26
+    狀態: pop=5 food(priv=17.4/gran=0.0/eff=17.4) consume/d=4.0 rung=0 fid=-1 coin=10 mat=17
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=840 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.24 駐守=0.22 建設=0.11 買糧=0.09
+    狀態: pop=5 food(priv=18.0/gran=0.0/eff=18.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=840 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.34 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=17.3/gran=0.0/eff=17.3) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=900 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.33 建設=0.30 駐守=0.26
+    狀態: pop=5 food(priv=17.4/gran=0.0/eff=17.4) consume/d=4.0 rung=0 fid=-1 coin=10 mat=17
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=900 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.25 駐守=0.22 建設=0.11 買糧=0.10
+    狀態: pop=5 food(priv=18.0/gran=0.0/eff=18.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=900 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.34 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=17.3/gran=0.0/eff=17.3) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+=======================================================
+[TickPerf] day=4 avg=19534 us max=1036216 us ticks=240 teams=3 factions=0
+[Order] Team0 buy food ×1 (oid=13)
+[DayNight] Day 5 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=960 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.32 建設=0.30 駐守=0.27
+    狀態: pop=5 food(priv=15.8/gran=0.0/eff=15.8) consume/d=4.0 rung=0 fid=-1 coin=10 mat=19
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=960 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.27 駐守=0.22 建設=0.11 買糧=0.10
+    狀態: pop=5 food(priv=16.5/gran=0.0/eff=16.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=960 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.39 訓練=0.34 建設=0.29 駐守=0.19
+    狀態: pop=5 food(priv=15.7/gran=0.0/eff=15.7) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1020 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.31 建設=0.30 駐守=0.27
+    狀態: pop=5 food(priv=14.2/gran=0.0/eff=14.2) consume/d=4.0 rung=0 fid=-1 coin=10 mat=21
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1020 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.33 駐守=0.23 買糧=0.12 建設=0.10
+    狀態: pop=5 food(priv=15.0/gran=0.0/eff=15.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1020 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.40 訓練=0.34 建設=0.29 駐守=0.20
+    狀態: pop=5 food(priv=14.1/gran=0.0/eff=14.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1080 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 買料=0.31 建設=0.30 駐守=0.27
+    狀態: pop=5 food(priv=14.2/gran=0.0/eff=14.2) consume/d=4.0 rung=0 fid=-1 coin=10 mat=21
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1080 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.35 駐守=0.23 買糧=0.13 建設=0.10
+    狀態: pop=5 food(priv=15.0/gran=0.0/eff=15.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1080 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.40 訓練=0.34 建設=0.29 駐守=0.20
+    狀態: pop=5 food(priv=14.1/gran=0.0/eff=14.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1140 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 自救建田=0.62 建設=0.30 買料=0.30 駐守=0.27
+    狀態: pop=5 food(priv=12.7/gran=0.0/eff=12.7) consume/d=4.0 rung=0 fid=-1 coin=10 mat=23
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1140 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.37 駐守=0.23 買糧=0.13 建設=0.10
+    狀態: pop=5 food(priv=13.5/gran=0.0/eff=13.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1140 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.40 訓練=0.34 建設=0.29 駐守=0.20
+    狀態: pop=5 food(priv=12.5/gran=0.0/eff=12.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+=======================================================
+[TickPerf] day=5 avg=18461 us max=771557 us ticks=240 teams=3 factions=0
+[Order] Team0 buy weapon_melee_low ×1 (oid=14)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=15)
+[Order] Team0 buy material ×21 (oid=16)
+[Order] Team0 buy tools ×1 (oid=17)
+[Order] Team1 buy weapon_melee_low ×1 (oid=18)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=19)
+[Order] Team1 buy material ×59 (oid=20)
+[Order] Team1 buy tools ×1 (oid=21)
+[Order] Team2 sell food ×1 (oid=22)
+[Order] Team2 buy material ×42 (oid=23)
+[DayNight] Day 6 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T0] tick=1200 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=1.09 build_workshop:resource=1.09 build_apothecary:resource=1.09 build_stable:resource=1.09 maintain_material:resource=0.73 自救建田=0.63 買料=0.30 建設=0.29 駐守=0.27
+    狀態: pop=5 food(priv=12.7/gran=0.0/eff=12.7) consume/d=4.0 rung=0 fid=-1 coin=10 mat=23
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1200 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.39 駐守=0.23 買糧=0.14 建設=0.10
+    狀態: pop=5 food(priv=13.5/gran=0.0/eff=13.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1200 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.90 build_workshop:resource=0.90 build_apothecary:resource=0.90 build_stable:resource=0.90 maintain_material:resource=0.60 買料=0.40 訓練=0.34 建設=0.29 駐守=0.20
+    狀態: pop=5 food(priv=12.5/gran=0.0/eff=12.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1260 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.97 build_workshop:resource=0.97 build_apothecary:resource=0.97 build_stable:resource=0.97 自救建田=0.66 maintain_material:resource=0.65 建設=0.29 駐守=0.27 買糧=0.21
+    狀態: pop=5 food(priv=11.1/gran=0.0/eff=11.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=25
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1260 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.40 build_workshop:resource=1.40 build_apothecary:resource=1.40 build_stable:resource=1.40 maintain_material:resource=0.93 覓食=0.43 駐守=0.24 買糧=0.15 建設=0.10
+    狀態: pop=5 food(priv=12.0/gran=0.0/eff=12.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=2
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1260 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.78 build_workshop:resource=0.78 build_apothecary:resource=0.78 build_stable:resource=0.78 maintain_material:resource=0.52 買料=0.40 訓練=0.34 建設=0.30 駐守=0.20
+    狀態: pop=5 food(priv=10.9/gran=0.0/eff=10.9) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1320 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.78 build_workshop:resource=0.78 build_apothecary:resource=0.78 build_stable:resource=0.78 自救建田=0.70 maintain_material:resource=0.52 建設=0.29 駐守=0.27 買糧=0.22
+    狀態: pop=5 food(priv=9.6/gran=0.0/eff=9.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=27
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1320 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.13 build_workshop:resource=1.13 build_apothecary:resource=1.13 build_stable:resource=1.13 maintain_material:resource=0.75 覓食=0.48 駐守=0.24 買糧=0.17 建設=0.10
+    狀態: pop=5 food(priv=10.5/gran=0.0/eff=10.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1320 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.63 build_workshop:resource=0.63 build_apothecary:resource=0.63 build_stable:resource=0.63 maintain_material:resource=0.42 買料=0.41 訓練=0.34 建設=0.30 駐守=0.20
+    狀態: pop=5 food(priv=9.3/gran=0.0/eff=9.3) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1380 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.78 build_workshop:resource=0.78 build_apothecary:resource=0.78 build_stable:resource=0.78 自救建田=0.71 maintain_material:resource=0.52 建設=0.28 駐守=0.27 買糧=0.22
+    狀態: pop=5 food(priv=9.6/gran=0.0/eff=9.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=27
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1380 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(17, 20)
+    candidates: build_farming:resource=1.13 build_workshop:resource=1.13 build_apothecary:resource=1.13 build_stable:resource=1.13 maintain_material:resource=0.75 覓食=0.50 駐守=0.24 買糧=0.17 建設=0.10
+    狀態: pop=5 food(priv=10.5/gran=0.0/eff=10.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1380 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.63 build_workshop:resource=0.63 build_apothecary:resource=0.63 build_stable:resource=0.63 maintain_material:resource=0.42 買料=0.41 訓練=0.34 建設=0.30 駐守=0.20
+    狀態: pop=5 food(priv=9.3/gran=0.0/eff=9.3) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+=======================================================
+[Outpost] Team0 設施施工 farming → Lv1 at (17,20)
+[TickPerf] day=6 avg=19688 us max=1041727 us ticks=240 teams=3 factions=0
+[Order] Team2 buy food ×1 (oid=24)
+[Order] Team1 buy food ×19 (oid=25)
+[Outpost] 設施完工 farming Lv1 at (17,20)
+[DayNight] Day 7 開始
+
+========== [SpecimenTracer] flush 13 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=1440 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(23, 20)
+    candidates: build_farming:resource=0.89 build_workshop:resource=0.89 build_apothecary:resource=0.89 build_stable:resource=0.89 maintain_material:resource=0.60 覓食=0.52 駐守=0.25 買糧=0.18 建設=0.10
+    狀態: pop=5 food(priv=9.0/gran=0.0/eff=9.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1440 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.50 build_workshop:resource=0.50 build_apothecary:resource=0.50 build_stable:resource=0.50 買料=0.41 訓練=0.33 maintain_material:resource=0.33 建設=0.29 駐守=0.20
+    狀態: pop=5 food(priv=7.7/gran=0.0/eff=7.7) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1440 heartbeat（no-decision）pop=5 food(eff=8.0)
+[Specimen T1] tick=1500 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=build_farming:resource task=貿易 tgt=(23, 20)
+    candidates: build_farming:resource=0.89 build_workshop:resource=0.89 build_apothecary:resource=0.89 build_stable:resource=0.89 maintain_material:resource=0.60 覓食=0.56 駐守=0.25 買糧=0.19 建設=0.09
+    狀態: pop=5 food(priv=9.0/gran=0.0/eff=9.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1500 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=build_farming:resource task=貿易 tgt=(20, 20)
+    candidates: build_farming:resource=0.50 build_workshop:resource=0.50 build_apothecary:resource=0.50 build_stable:resource=0.50 買料=0.41 maintain_material:resource=0.33 訓練=0.33 建設=0.29 駐守=0.20
+    狀態: pop=5 food(priv=7.7/gran=0.0/eff=7.7) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1500 heartbeat（no-decision）pop=5 food(eff=8.0)
+[Specimen T1] tick=1560 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(19, 21)
+    candidates: 覓食=0.72 build_farming:resource=0.70 build_workshop:resource=0.70 build_apothecary:resource=0.70 build_stable:resource=0.70 maintain_material:resource=0.47 買糧=0.34 駐守=0.25 建設=0.09
+    狀態: pop=5 food(priv=7.6/gran=0.0/eff=7.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1560 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買料 task=貿易 tgt=(20, 20)
+    candidates: 買料=0.41 build_farming:resource=0.38 build_workshop:resource=0.38 build_apothecary:resource=0.38 build_stable:resource=0.38 訓練=0.32 建設=0.29 maintain_material:resource=0.25 駐守=0.20
+    狀態: pop=5 food(priv=6.2/gran=0.0/eff=6.2) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1560 heartbeat（no-decision）pop=5 food(eff=6.4)
+[Specimen T0] tick=1590 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=0.74 build_workshop:resource=0.46 build_apothecary:resource=0.46 build_stable:resource=0.46 maintain_material:resource=0.31 駐守=0.28 建設=0.27
+    狀態: pop=5 food(priv=6.4/gran=0.0/eff=6.4) consume/d=4.0 rung=0 fid=-1 coin=10 mat=14
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1620 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(19, 21)
+    candidates: 覓食=1.55 買糧=0.82 build_farming:resource=0.52 build_workshop:resource=0.52 build_apothecary:resource=0.52 build_stable:resource=0.52 maintain_material:resource=0.35 駐守=0.26 建設=0.09
+    狀態: pop=5 food(priv=6.0/gran=0.0/eff=6.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1620 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=1.34 訓練=0.31 建設=0.29 build_farming:resource=0.27 build_workshop:resource=0.27 build_apothecary:resource=0.27 build_stable:resource=0.27 駐守=0.20 maintain_material:resource=0.18
+    狀態: pop=5 food(priv=4.6/gran=0.0/eff=4.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1650 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=1.23 build_workshop:resource=0.34 build_apothecary:resource=0.34 build_stable:resource=0.34 駐守=0.28 建設=0.27 maintain_material:resource=0.22
+    狀態: pop=5 food(priv=4.9/gran=0.0/eff=4.9) consume/d=4.0 rung=0 fid=-1 coin=10 mat=16
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+=======================================================
+[TickPerf] day=7 avg=19826 us max=1224635 us ticks=240 teams=3 factions=0
+[DayNight] Day 8 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=1680 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(19, 21)
+    candidates: 覓食=1.56 買糧=0.83 build_farming:resource=0.52 build_workshop:resource=0.52 build_apothecary:resource=0.52 build_stable:resource=0.52 maintain_material:resource=0.35 駐守=0.26 建設=0.09
+    狀態: pop=5 food(priv=6.0/gran=0.0/eff=6.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1680 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=1.35 訓練=0.30 建設=0.28 build_farming:resource=0.27 build_workshop:resource=0.27 build_apothecary:resource=0.27 build_stable:resource=0.27 駐守=0.20 maintain_material:resource=0.18
+    狀態: pop=5 food(priv=4.6/gran=0.0/eff=4.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1710 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=1.71 駐守=0.28 建設=0.27 build_workshop:resource=0.22 build_apothecary:resource=0.22 build_stable:resource=0.22 maintain_material:resource=0.15
+    狀態: pop=5 food(priv=3.4/gran=0.0/eff=3.4) consume/d=4.0 rung=0 fid=-1 coin=10 mat=18
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1740 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(19, 21)
+    candidates: 覓食=2.07 買糧=1.31 build_farming:resource=0.37 build_workshop:resource=0.37 build_apothecary:resource=0.37 build_stable:resource=0.37 駐守=0.26 maintain_material:resource=0.25 建設=0.09
+    狀態: pop=5 food(priv=4.5/gran=0.0/eff=4.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1740 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=1.85 訓練=0.29 建設=0.28 駐守=0.20 build_farming:resource=0.17 build_workshop:resource=0.17 build_apothecary:resource=0.17 build_stable:resource=0.17 maintain_material:resource=0.11
+    狀態: pop=5 food(priv=3.0/gran=0.0/eff=3.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1770 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=1.72 駐守=0.28 建設=0.26 build_workshop:resource=0.22 build_apothecary:resource=0.22 build_stable:resource=0.22 maintain_material:resource=0.15
+    狀態: pop=5 food(priv=3.4/gran=0.0/eff=3.4) consume/d=4.0 rung=0 fid=-1 coin=10 mat=18
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1800 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(19, 21)
+    candidates: 覓食=2.09 買糧=1.32 build_farming:resource=0.37 build_workshop:resource=0.37 build_apothecary:resource=0.37 build_stable:resource=0.37 駐守=0.26 maintain_material:resource=0.25 建設=0.09
+    狀態: pop=5 food(priv=4.5/gran=0.0/eff=4.5) consume/d=4.0 rung=0 fid=-1 coin=10 mat=3
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1800 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=1.86 訓練=0.29 建設=0.28 駐守=0.20 build_farming:resource=0.17 build_workshop:resource=0.17 build_apothecary:resource=0.17 build_stable:resource=0.17 maintain_material:resource=0.11
+    狀態: pop=5 food(priv=3.0/gran=0.0/eff=3.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1830 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.22 駐守=0.28 建設=0.26 build_workshop:resource=0.12 build_apothecary:resource=0.12 build_stable:resource=0.12 maintain_material:resource=0.08
+    狀態: pop=5 food(priv=1.9/gran=0.0/eff=1.9) consume/d=4.0 rung=0 fid=-1 coin=10 mat=20
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1860 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(19, 21)
+    candidates: 覓食=2.59 買糧=1.80 駐守=0.27 build_farming:resource=0.23 build_workshop:resource=0.23 build_apothecary:resource=0.23 build_stable:resource=0.23 maintain_material:resource=0.15 建設=0.09
+    狀態: pop=5 food(priv=3.0/gran=0.0/eff=3.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1860 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.37 訓練=0.28 建設=0.28 駐守=0.20 build_farming:resource=0.07 build_workshop:resource=0.07 build_apothecary:resource=0.07 build_stable:resource=0.07 maintain_material:resource=0.05
+    狀態: pop=5 food(priv=1.4/gran=0.0/eff=1.4) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1890 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.23 駐守=0.28 建設=0.26 build_workshop:resource=0.12 build_apothecary:resource=0.12 build_stable:resource=0.12 maintain_material:resource=0.08
+    狀態: pop=5 food(priv=1.9/gran=0.0/eff=1.9) consume/d=4.0 rung=0 fid=-1 coin=10 mat=20
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+=======================================================
+[TickPerf] day=8 avg=18138 us max=638414 us ticks=240 teams=3 factions=0
+[Order] Team0 sell material ×5 (oid=26)
+[DayNight] Day 9 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=1920 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=覓食 task=覓食 tgt=(19, 21)
+    candidates: 覓食=3.10 買糧=2.27 駐守=0.27 build_farming:resource=0.11 build_workshop:resource=0.11 build_apothecary:resource=0.11 build_stable:resource=0.11 建設=0.09 maintain_material:resource=0.08
+    狀態: pop=5 food(priv=1.6/gran=0.0/eff=1.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1920 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.81 建設=0.27 訓練=0.26 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=1950 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.72 駐守=0.28 建設=0.25 build_workshop:resource=0.02 build_apothecary:resource=0.02 build_stable:resource=0.02 maintain_material:resource=0.01
+    狀態: pop=5 food(priv=0.4/gran=0.0/eff=0.4) consume/d=4.0 rung=0 fid=-1 coin=10 mat=22
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=1980 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=買糧 task=貿易 tgt=(17, 20)
+    candidates: 買糧=2.28 駐守=0.27 build_farming:resource=0.11 build_workshop:resource=0.11 build_apothecary:resource=0.11 build_stable:resource=0.11 建設=0.08 maintain_material:resource=0.08
+    狀態: pop=5 food(priv=1.6/gran=0.0/eff=1.6) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=1980 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.82 建設=0.27 訓練=0.25 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=2010 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.84 駐守=0.28 建設=0.25 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=24
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=2040 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=買糧 task=貿易 tgt=(17, 20)
+    candidates: 買糧=2.77 駐守=0.28 建設=0.08 build_farming:resource=0.01 build_workshop:resource=0.01 build_apothecary:resource=0.01 build_stable:resource=0.01 maintain_material:resource=0.00
+    狀態: pop=5 food(priv=0.1/gran=0.0/eff=0.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=2040 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.83 建設=0.27 訓練=0.25 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=2070 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.85 駐守=0.28 建設=0.25 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=24
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=2100 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=買糧 task=貿易 tgt=(17, 20)
+    candidates: 買糧=2.79 駐守=0.28 建設=0.08 build_farming:resource=0.01 build_workshop:resource=0.01 build_apothecary:resource=0.01 build_stable:resource=0.01 maintain_material:resource=0.00
+    狀態: pop=5 food(priv=0.1/gran=0.0/eff=0.1) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=2100 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.83 建設=0.26 訓練=0.25 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=2130 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.86 駐守=0.28 建設=0.25 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=26
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+=======================================================
+[TickPerf] day=9 avg=18443 us max=667018 us ticks=240 teams=3 factions=0
+[Order] Team0 buy food ×16 (oid=27)
+[DayNight] Day 10 開始
+
+========== [SpecimenTracer] flush 12 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=2160 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=買糧 task=貿易 tgt=(17, 20)
+    candidates: 買糧=2.83 駐守=0.28 建設=0.08 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=2160 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.84 建設=0.26 訓練=0.25 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=2190 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.87 駐守=0.28 建設=0.25 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=26
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=2220 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=買糧 task=貿易 tgt=(17, 20)
+    candidates: 買糧=2.85 駐守=0.28 建設=0.08 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=2220 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.84 建設=0.26 訓練=0.24 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=2250 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.88 駐守=0.28 建設=0.25 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=28
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=2280 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=買糧 task=貿易 tgt=(17, 20)
+    candidates: 買糧=2.87 駐守=0.28 建設=0.08 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=4
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=2280 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.85 建設=0.26 訓練=0.24 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=2310 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.89 駐守=0.28 建設=0.25 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=30
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+[Specimen T1] tick=2340 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=買糧 task=貿易 tgt=(17, 20)
+    candidates: 買糧=2.89 駐守=0.28 建設=0.08 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=2340 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.85 建設=0.26 訓練=0.24 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=6
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+[Specimen T0] tick=2370 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.90 駐守=0.28 建設=0.25 maintain_material:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=30
+    leader: 野心=0.50 慎重=0.50 求生欲=0.50 好戰=0.50 貪婪=0.50 → food_sec_target=4.0天
+=======================================================
+[TickPerf] day=10 avg=20475 us max=862048 us ticks=240 teams=3 factions=0
+
+───── F1靶A 摘要(10天) ─────
+  neutral(T0): pred_threshold=3.00 cross_day=5 final_daily={ "day": 10, "pop": 5, "food_days": 0 }
+  cautious(T1): pred_threshold=5.10 cross_day=3 final_daily={ "day": 10, "pop": 5, "food_days": 0 }
+  bold(T2): pred_threshold=1.50 cross_day=7 final_daily={ "day": 10, "pop": 5, "food_days": 0 }
+
+★物理錨驗證(買糧量/relief target應=DESPERATION_DAYS(3.0)×pop×0.8,不隨人格變):
+  neutral(T0): pop=5 raw_anchor(DESPERATION_DAYS×pop×0.8)=12.00
+  cautious(T1): pop=5 raw_anchor(DESPERATION_DAYS×pop×0.8)=12.00
+  bold(T2): pop=5 raw_anchor(DESPERATION_DAYS×pop×0.8)=12.00
+
+[dump] → res://docs/measurements/2026-08-07-infonet-f1-entry-threshold.json
+
+========== [SpecimenTracer] flush 2 entries（候選 =當下不可派/無target，util雖高仍fallthrough）==========
+[Specimen T1] tick=2400 intent={ "intent": "防衛", "why": "慎重/威脅驅動，備戰守土", "mode": "hold" } | winner=買糧 task=貿易 tgt=(17, 20)
+    candidates: 買糧=2.90 駐守=0.28 建設=0.08 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=5
+    leader: 野心=0.20 慎重=0.90 求生欲=0.90 好戰=0.10 貪婪=0.20 → food_sec_target=6.8天
+[Specimen T2] tick=2400 intent={ "intent": "致富", "why": "貪婪驅動，treasury 增", "mode": "trade" } | winner=買糧 task=貿易 tgt=(20, 20)
+    candidates: 買糧=2.86 建設=0.26 訓練=0.24 駐守=0.20 maintain_material:resource=0.00 build_farming:resource=0.00 build_workshop:resource=0.00 build_apothecary:resource=0.00 build_stable:resource=0.00
+    狀態: pop=5 food(priv=0.0/gran=0.0/eff=0.0) consume/d=4.0 rung=0 fid=-1 coin=10 mat=6
+    leader: 野心=0.50 慎重=0.10 求生欲=0.10 好戰=0.90 貪婪=0.50 → food_sec_target=2.4天
+=======================================================
+[SpecimenTracer] write_jsonl → res://docs/measurements/2026-08-07-infonet-f1-entry-threshold.specimen.jsonl (123 entries)
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
