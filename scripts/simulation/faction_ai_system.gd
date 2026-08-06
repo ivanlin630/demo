@@ -1678,6 +1678,7 @@ func info_side_dispatch_all(state: WorldState, team_ids: Array) -> void:
 		_try_distribute_side(state, team)
 		_ensure_holding_ledger(state, team)   # ★care-loop：領主 ensure 自家村 holding 監看條目（once-guard）
 		_try_migrant_side(state, team)   # ★復甦 R1：領主往 migrant_marginal>0 村移民（三態湧現；用 holding 已知村）
+		_try_invest_side(state, team)    # ★復甦 R2：領主往 facility_roi>0 村送料投資 farming（三態+雙 survival bound；用 holding 已知村）
 		_step_contact_ledger(state, team)   # ★失聯帳本+care：掃逾時→失聯 belief→競爭 react_util / holding care/ignore
 
 # ★資訊網 distribute side-dispatch（第三 side-action 型、blueprint sign-off）：領主憑聽到的子民 need（belief）+ 人格
@@ -1775,6 +1776,60 @@ func _tick_migrant(state: WorldState, sub: TeamData, _merge_queue: Array) -> voi
 	#   棄 predict_intercept（移動目標攔截器對靜態村是錯工具：新生 anon subteam 零 belief→belief_pos(-1,-1) 走不動、
 	#   且 observe_velocity 耗 global RNG=此路本該零 RNG）。村位=行政知（own-faction、非 god-view）。
 	sub.move_target = target.tile_pos
+
+# ★復甦 R2 投資 side（§2B、P3 material-delivery 第3個 lord-side 家族）：領主評自家村 facility_roi，
+# 只往「新建 farming 後轉正」的村送料（三態湧現：森村 deficit→surplus 投／山地投資後仍赤字 ROI 負不投／領主絕境不投）。
+# ★雙 survival bound：①村端 ROI（facility_roi 值不值、survival-bounded 治 HORIZON 自打臉）②領主端 source-constraint
+#   （領主出料+porter 後自身仍在求生線、絕境先自救不投＝鏡射 R1 _try_migrant_side floor pattern）。
+# 送料 = reuse _dispatch_convoy 母體 + convoy_kind="invest" DELIVER deposit 入村公庫（非賣）→ 村端既有建設消耗真蓋。
+const INVEST_SAFETY: float = 1.5   # 送料安全餘量（鏡射 _dispatch_builder cost×1.5，確保村端 _can_afford 過）
+func _try_invest_side(state: WorldState, team: TeamData) -> void:
+	if team.faction_id == -1:
+		return
+	var f = state.factions.get(team.faction_id)
+	if f == null or f.leader_team_id != team.team_id:
+		return   # 只領主投資自家村
+	# ★bound#2 領主端 source-constraint（鏡射 R1 :1709-1710 floor）：留守 pop 下限（convoy 抽 porter）+ 領主絕境先自救不投。
+	if team.population < CONVOY_MIN_PARENT_POP:
+		return
+	var lord_food_days: float = ResourceSystem.effective_food(state, team) \
+		/ maxf(float(team.population) * ResourceSystem.FOOD_PER_PERSON_PER_DAY, 0.001)
+	if lord_food_days < DecisionTerms.DESPERATION_DAYS:
+		return   # 領主絕境→先自救不投（雙 bound 之領主端）
+	# 升級料需求（OutpostSystem.upgrade_cost 純表；R2 farming L1）+ 領主端 afford（不掏空自己）。
+	var cost: Dictionary = OutpostSystem.upgrade_cost("farming", 1)
+	var material_need: float = float(cost.get("material", 0)) * INVEST_SAFETY
+	var home_tile: HexTileData = state.world.tiles.get(team.tile_pos.x * 1000 + team.tile_pos.y)
+	var vault_mat: float = float(home_tile.public_storage.get("material", 0)) \
+		if (home_tile != null and home_tile.outpost_owner == team.team_id) else 0.0
+	if float(team.resources.get("material", 0)) + vault_mat < material_need:
+		return   # 領主無料可投（不掏空）
+	# upgrade_cost_value = Σ cost[res] × 領主 local_value（純表×領主估值、共單位；MarginalEconomy 收 float 保純算術零 god-view）。
+	var cost_value: float = 0.0
+	for k in cost:
+		if k == "ticks": continue
+		cost_value += float(cost[k]) * TradeValuation.local_value(team, k, state)
+	# 掃 holding 村找 facility_roi 最高正（belief est 結構防線、只評無 farming 村＝R2 新建 scope）。
+	var best_v: int = -1; var best_roi: float = 0.0; var best_pos: Vector2i = Vector2i(-1, -1)
+	for e in team.dispatch_ledger:
+		if String(e.get("kind", "")) != "holding":
+			continue
+		var vid: int = int(e.get("subject_ref", -1))
+		var est: VillageEstimate = _village_est(state, team, vid)
+		if est == null:
+			continue   # 無 belief/行政 est → 保守不行動
+		if est.farming_level > 0:
+			continue   # 已有 farming → 升級走 infra 既有路（R2 scope=新建 farming）
+		var roi: float = MarginalEconomy.facility_roi(est, "farming", est.farming_level + 1, cost_value)
+		if Probe.enabled: Probe.note("invest.roi", roi)
+		if roi > best_roi:
+			best_roi = roi; best_v = vid; best_pos = state.teams[vid].tile_pos   # gate-ok: own-faction 村位=行政知
+	if best_v == -1:
+		return   # 無 ROI 正村（山地投資後仍赤字→ROI 負→不投=三態湧現、零 if-terrain）
+	# 送 material convoy（reuse _dispatch_convoy 自 throttle 一 convoy/lord + FETCH 載料；convoy_kind=invest DELIVER deposit）。
+	var td: Dictionary = {"kind": "invest", "target": best_pos, "cargo": {"material": material_need}}
+	if _dispatch_convoy(state, team, td):
+		if Probe.enabled: Probe.bump("invest.dispatched")
 
 # 求援 side：餓 + 知施助者 + mini-util>0（cost-benefit）→ 派 anon 信使（不佔主任務、平行）。
 func _try_herald_side(state: WorldState, team: TeamData) -> void:
@@ -2253,6 +2308,20 @@ func _tick_convoy(state: WorldState, sub: TeamData, merge_queue: Array) -> void:
 	if phase == "OUTBOUND":
 		if sub.move_target != Vector2i(-1, -1):
 			return   # 還在前往 demand 市場（sticky，不打斷不召回）
+		# ★復甦 R2 material-delivery：invest convoy 抵村 → 料 deposit 入村 public_storage（非賣）→ 村端建設 _can_afford 讀公庫消耗真蓋。
+		if String(xd.get("convoy_kind", "deliver")) == "invest":
+			var vtile: HexTileData = state.world.tiles.get(market_pos.x * 1000 + market_pos.y)
+			if vtile != null:
+				var ires: String = String(xd.get("cargo_res", "material"))
+				var iqty: float = float(sub.resources.get(ires, 0))
+				var dep: float = TileBank.deposit(vtile, ires, iqty, "invest_material_in")
+				ResourceBank.add(sub, ires, -dep, "invest_deliver_out")   # 守恆：porter 卸下已 deposit 量
+				Probe.bump("convoy.deliver")
+				if Probe.enabled: Probe.add_amount("invest.material_delivered", dep)
+			xd["convoy_phase"] = "RETURN"
+			sub.move_target = home_pos   # 掉頭回家（reuse RETURN→merge_back 生命週期、避 R1 subteam-lifecycle 坑）
+			sub.task_start_tick = state.world.current_tick
+			return
 		# 抵達 demand 市場 → DELIVER：visitor_sell deposit cargo 入 buyer tile + settle buy 單 → fulfilled++
 		var tile: HexTileData = state.world.tiles.get(market_pos.x * 1000 + market_pos.y)
 		if tile != null:

@@ -33,3 +33,27 @@ static func migrant_marginal(est: VillageEstimate, k: int) -> float:
 	est_after.prod_skill = est.prod_skill
 	var after: float = _inflow_est(est_after)
 	return after - before - float(k) * MIGRANT_UPKEEP
+
+# ★投資 ROI（§1.1.2、Slice R2）：升 farming 一級的淨回收（食產增益 × 有效視野 − 升級料價值）。
+# ★★命門（survival-bounded、治 HORIZON 自打臉）：discrimination 非靠調 HORIZON、靠有效視野綁「殘存活窗」——
+#   投資後仍赤字（net_after<0）→ effective_days 綁 food_est/−net_after（短）→ Δinflow×短窗 < cost → ROI 負 → 不投
+#     （即使 HORIZON 大：山地投資後 REGEN 0.5×1.5 遠不夠 pop×0.8 → 永赤字 → 短窗 → ROI 負自我區辨、非 knife-edge tuned）。
+#   投資後轉正（net_after>=0）→ full horizon → Δinflow×H 大幅越過 cost → ROI 正 → 投（森村 deficit→surplus）。
+# upgrade_cost_value 由呼叫者算（OutpostSystem.upgrade_cost 純表 × TradeValuation.local_value(領主,res)），
+#   傳入 float 保 MarginalEconomy 純算術零 state（god-view 結構防線一致）。
+const PLANNING_HORIZON_DAYS: float = 90.0   # 季量級規劃視野（一季≈90 天、genuine 基建視野、非 fire-crank；measurer 驗 discrimination robust across [40,120]）
+static func facility_roi(est: VillageEstimate, facility: String, next_lvl: int, upgrade_cost_value: float) -> float:
+	# 目前唯一影響 _inflow_est 的 facility = farming（farming_bonus 1+lvl×0.5）；非 farming → Δinflow=0（只食產 ROI，R2 scope）。
+	var before: float = _inflow_est(est)
+	var est_after := VillageEstimate.make(est.terrain, est.outpost_level, next_lvl if facility == "farming" else est.farming_level, est.pop)
+	est_after.harvest_factor = est.harvest_factor
+	est_after.prod_skill = est.prod_skill
+	var after: float = _inflow_est(est_after)
+	var d_inflow: float = after - before                      # 恆正小量（farming 增食產）
+	var need: float = float(est.pop) * MIGRANT_UPKEEP          # pop×0.8 每日食耗
+	var net_after: float = after - need                        # 投資後淨（正=可持續、負=仍赤字）
+	var effective_days: float = PLANNING_HORIZON_DAYS
+	if net_after < 0.0:
+		# 仍赤字 → 只惠及殘存活窗（現存糧撐幾天）；food_est NEUTRAL 0 → 窗 0 → ROI=−cost（山地自我區辨）。
+		effective_days = minf(PLANNING_HORIZON_DAYS, est.food_est / maxf(-net_after, 0.001))
+	return d_inflow * effective_days - upgrade_cost_value
