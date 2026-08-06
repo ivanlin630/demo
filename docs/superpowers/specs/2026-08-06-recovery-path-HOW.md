@@ -55,6 +55,7 @@ grounding: §3 經濟底查（`2026-08-06-...econ-baseline-verdict`）+ R① CLE
 ### (B) 投資 dispatch `_try_invest_side`（Slice R2、R① P3 新機制）
 - **P3 gap**：`options.gd:40-47` 建設 option target **寫死 `team.tile_pos`**（不能指定別村蓋）。**解法非跨 tile build**——領主**送料**（material convoy）到目標村、**目標村自己既有的建設 option（本 tile）收到料→ idle labor 在地蓋**。
 - 機制 = **material-delivery convoy**（reuse `_try_distribute_side`/`_dispatch_convoy`:1694，payload 從 food 換 **material**、指定 facility 類型）。lord-side mini-util = 目標村 `facility_roi`（belief）；`facility_roi≤0 → 不送`（山地村自動不獲投資）。
+- ★**第2重 survival bound（領主端 source-constraint、blueprint 2026-08-06 定）**：`facility_roi` 綁**村端** post-investment survival（§1.1.2）；此外**領主自己求生線內才投、別掏空自己**——投資出料前 gate：領主出 `upgrade_cost` material（+convoy 口糧）後**自身仍在求生線上**（鏡射 R1 migrant source-floor `CONVOY_MIN_PARENT_POP`/口糧 afford）。領主自身絕境（food_days<DESPERATION 或 material 不足留存）→ 不投（先自救）。= 雙 survival bound（村端 ROI 值不值 + 領主端 afford 不掏空）。
 - ★**驗執行端**（memory feedback_verify_execution_end）：送料後**目標村建設須真 fire**——verify 村建設 precondition 讀 holding material（`has_manufacturing_facility`/build start 讀料）。candidate 生成≠真蓋；build-time 必驗料到→建設 argmax 勝→TASK_BUILD 真轉→facility level 真升。若料到但建設不 fire = 手不聽腦執行層 blocker，須查（options.gd 建設 applicable/util 是否反映到手 material）。
 
 ### (C) 遷村令 dispatch `_try_relocate_order`（Slice R3、P4）
