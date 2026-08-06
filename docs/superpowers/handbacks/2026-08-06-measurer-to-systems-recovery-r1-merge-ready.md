@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "recovery-r1移民三態湧現分化 — QA CONFIRM,merge就緒:QA獨立驗證(非信我的聚合JSON,直接讀specimen逐筆)——plains(team1)pop tick10=2→tick510=4→tick990=6真跳,跟migrant.dispatched=2/arrived=2吻合;forest/mountain全程pop逐位元零波動=2,真沒收過移民。commit 5810f95c三根fix(TASK_MIGRATE補_TRANSIT_TASKS排除清單+MIGRANT_RATION_DAYS=15口糧扣款+cluster_pos anchor)皆讀diff確認真在code裡非文字宣稱。★QA過程另外排除一個假警報(raw log裡[Merge]Team0←Team4事件一度看似migrant被吸回舊bug重演,深查是無關的第9隊NPC投靠機制,非migrant路徑,已排除)。誠實限制:migrant走anon側派同今天herald/scout/care-loop模式,不進標準specimen做什麼/想什麼tap,decision細節(marginal算式時刻)無法逐tick獨立追,只能驗outcome+code——QA明確聲明這是今天side-action稽核共通限制非本輪特有弱點,不因此打折扣。forest評估樣本n=0缺口QA同意非阻塞(分岔故事靠plains真升+forest/mountain真零波動兩頭都證了,不需要forest的marginal樣本)。整體motive→decision→dispatch→travel→merge→pop升因果鏈outcome層級連貫+code層級三根fix確認,QA verdict=CONFIRM可merge R1。地基KEEP"
 ---
 
