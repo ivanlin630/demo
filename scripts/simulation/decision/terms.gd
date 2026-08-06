@@ -46,6 +46,24 @@ static func food_security_target(leader_values: Dictionary) -> float:
 	var ambition: float = float(leader_values.get("野心", 0.5))
 	return clampf(FOOD_SEC_BASE + (caution - 0.5) * FOOD_SEC_CAUTION - (ambition - 0.5) * FOOD_SEC_AMBITION,
 		FOOD_SEC_MIN, FOOD_SEC_MAX)
+
+# ★F1 靶A：DESPERATION entry-gate 人格化（真風險容忍 modulate；genuine 非 crank 逼 fire 率）。
+# 慎重↑/求生欲↑ → threshold↑（謹慎/懼死領袖早進絕境 option）；好戰↑(膽/冒險 proxy)→ threshold↓（膽大隊撐更低糧才進）。
+# ★中性領袖(全 0.5)→ ×1.0 = raw DESPERATION_DAYS（fp 只對人格分歧隊分化、中性零漂）。
+# ★單一計算點（HOW §2.5.1）：DecisionContext.gather 一處呼、5+ survival-entry applicable 共讀 ctx.desperation_entry_threshold。
+# ★物理錨分離（§2.5.3）：此僅 entry-gate；need-anchor（買糧量/relief=DESPERATION×pop×0.8）留 raw DESPERATION_DAYS。
+const DESP_ENTRY_CAUTION: float = 0.6    # TEST VALUE — 慎重對 entry 斜率
+const DESP_ENTRY_SURVIVAL: float = 0.6   # TEST VALUE — 求生欲(懼死)對 entry 斜率
+const DESP_ENTRY_BOLD: float = 0.6       # TEST VALUE — 好戰(膽/冒險)反向斜率
+const DESP_ENTRY_LO: float = 0.5         # TEST VALUE — 膽大下限乘子(撐到 1.5 天才進)
+const DESP_ENTRY_HI: float = 1.7         # TEST VALUE — 謹慎/懼上限乘子(5.1 天早進)
+static func desperation_entry_threshold(leader_values: Dictionary) -> float:
+	var caution: float = float(leader_values.get("慎重", 0.5))
+	var survival: float = float(leader_values.get("求生欲", 0.5))
+	var bold: float = float(leader_values.get("好戰", 0.5))
+	var mult: float = clampf(1.0 + (caution - 0.5) * DESP_ENTRY_CAUTION \
+		+ (survival - 0.5) * DESP_ENTRY_SURVIVAL - (bold - 0.5) * DESP_ENTRY_BOLD, DESP_ENTRY_LO, DESP_ENTRY_HI)
+	return DESPERATION_DAYS * mult
 const SCARCITY_RAID_MIN: float = 0.55   # TEST VALUE — 匱乏→搶的野心/好戰門檻（防 over-war：溫和窮隊不搶）
 # ── 佔村（雙引擎咬合：奪據點→據點產糧養兵，複用 capture+residency）──
 const OCCUPY_DRIVE_BASE: float = 1.2    # TEST VALUE — 佔村驅力基值（× occupy weight ≈ 0.4-0.7 → util 略勝 loot，要根據地的狼優先打村）

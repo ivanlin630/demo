@@ -1,0 +1,31 @@
+{
+  "_doc": "F1死常數人格化靶A測床(measurer持久fixture,2026-08-07,工單2026-08-07-systems-to-measurer-F1-measure.md)：3隊獨立無faction(neutral/cautious/bold人格),同起始food=30/pop=5/mountain terrain(近零產出,純消耗觀察),追蹤逐日food_days跌破各自desperation_entry_threshold的時間點。ex-ante formula預算(desperation_entry_threshold=DESPERATION_DAYS(3.0)×mult,mult=clamp(1+(慎重-0.5)*0.6+(求生欲-0.5)*0.6-(好戰-0.5)*0.6,0.5,1.7)):neutral(全0.5)→mult=1.0→threshold=3.0/cautious(慎重0.9,求生欲0.9,好戰0.1)→mult=1.7(封頂)→threshold=5.1/bold(慎重0.1,求生欲0.1,好戰0.9)→mult=0.5(封底)→threshold=1.5。預期cautious最早跌破自己門檻(5.1天最高)、bold最晚(1.5天最低)——同機制人格不同命。",
+  "seed": 7171,
+  "mode": "explicit",
+  "max_ticks": 50000,
+  "map": { "radius": 20, "resource_richness": 5 },
+  "teams": [
+    { "id": 0, "name": "T_NEUTRAL", "tile_pos": [17, 20], "population": 5,
+      "tags": ["生產"], "faction_id": -1, "is_faction_leader": false,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 30.0, "material": 0.0, "coin": 10.0 },
+      "leader": { "name": "Neutral_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.3, "生產": 0.5 }, "values": { "統領": 0.3, "野心": 0.5, "慎重": 0.5, "義氣": 0.5, "信義": 0.5, "求生欲": 0.5, "好戰": 0.5, "貪婪": 0.5 } },
+      "outpost": { "type": "civilian", "level": 1, "terrain": "mountain", "tile_food_init": 30 } },
+    { "id": 1, "name": "T_CAUTIOUS", "tile_pos": [20, 20], "population": 5,
+      "tags": ["生產"], "faction_id": -1, "is_faction_leader": false,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 30.0, "material": 0.0, "coin": 10.0 },
+      "leader": { "name": "Cautious_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.3, "生產": 0.5 }, "values": { "統領": 0.3, "野心": 0.2, "慎重": 0.9, "義氣": 0.5, "信義": 0.5, "求生欲": 0.9, "好戰": 0.1, "貪婪": 0.2 } },
+      "outpost": { "type": "civilian", "level": 1, "terrain": "mountain", "tile_food_init": 30 } },
+    { "id": 2, "name": "T_BOLD", "tile_pos": [23, 20], "population": 5,
+      "tags": ["生產"], "faction_id": -1, "is_faction_leader": false,
+      "anon_tiers": { "平民": 4 },
+      "resources": { "food": 30.0, "material": 0.0, "coin": 10.0 },
+      "leader": { "name": "Bold_Leader", "age": 30, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.3, "生產": 0.5 }, "values": { "統領": 0.3, "野心": 0.5, "慎重": 0.1, "義氣": 0.5, "信義": 0.5, "求生欲": 0.1, "好戰": 0.9, "貪婪": 0.5 } },
+      "outpost": { "type": "civilian", "level": 1, "terrain": "mountain", "tile_food_init": 30 } }
+  ],
+  "player": { "team_id": -1, "is_leader": false }
+}

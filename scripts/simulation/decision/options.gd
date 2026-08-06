@@ -97,7 +97,7 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.has_home_outpost and (ctx.home_food >= DecisionTerms.RESTOCK_MIN or ctx.home_food_productive) and ( \
 					(ctx.is_merchant and ctx.food_days < DecisionTerms.RESTOCK_DAYS) \
-					or ctx.food_days < DecisionTerms.DESPERATION_DAYS \
+					or ctx.food_days < ctx.desperation_entry_threshold \
 					or (ctx.current_task == TeamData.TASK_RETURN_HOME and ctx.food_days < DecisionTerms.RETURN_HYSTERESIS_DAYS)),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.new()._find_own_outpost(state, team)},
@@ -149,7 +149,7 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return (ctx.has_strong_neighbor or ctx.consolidate_target_id != -1) \
 					and ctx.has_acceptable_join_host \
-					and (ctx.food_days < DecisionTerms.DESPERATION_DAYS \
+					and (ctx.food_days < ctx.desperation_entry_threshold \
 						or (ctx.has_strong_neighbor and ctx.threat > ctx.threat_threshold)),
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# §3b：host = rep 保護傘(strong_neighbor,跨faction,喂-讀對齊磁鐵) 優先；無則 consolidate_target(同faction)。
@@ -180,7 +180,7 @@ static var REGISTRY: Dictionary = {
 	"紮營": {
 		"terms": [["camp_drive", "camp"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_farmable_tile \
+			return ctx.food_days < ctx.desperation_entry_threshold and ctx.has_farmable_tile \
 					and not ctx.has_own_outpost,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var ft: Vector2i = FactionAISystem.new()._find_unowned_farmable_tile(state, team)
@@ -190,7 +190,7 @@ static var REGISTRY: Dictionary = {
 	"乞食": {
 		"terms": [["beg_drive", "beg"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_aid_target,
+			return ctx.food_days < ctx.desperation_entry_threshold and ctx.has_aid_target,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var aid: int = FactionAISystem.new()._find_aid_target(state, team)
 			if aid == -1: return {"task": TeamData.TASK_IDLE, "target": Vector2i(-1, -1)}
@@ -260,7 +260,7 @@ static var REGISTRY: Dictionary = {
 		# 海市蜃樓餓死）。閉商隊 toss-up trap（返家 1.0≈買糧 merchant 1.0，靠 drive 競不贏→結構 gate）。
 		# 鏡射 material-buy food-ok gate 互斥。targeted:forest(home_food_productive=false)→買糧不變(仍離家買=多樣性)。
 		"applicable": func(ctx: DecisionContext) -> bool:
-			return ctx.food_days < DecisionTerms.DESPERATION_DAYS and ctx.has_food_market \
+			return ctx.food_days < ctx.desperation_entry_threshold and ctx.has_food_market \
 					and ctx.has_specie and ctx.has_buyable_food and not ctx.home_food_productive,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			# 到最近市集 outpost 走既有 TASK_TRADE；到場 _resolve_market 餓隊 food local_value 高→買 food。
@@ -275,8 +275,9 @@ static var REGISTRY: Dictionary = {
 		"terms": [["buymaterial_drive", "buymaterial"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			# ★v2a food-ok gate（reviewer R²）：買料非 survival-class→util 高搶 survival rank；餓隊買料→餓死。
-			# food_days>=DESPERATION（鏡射買糧 food<DESPERATION=互斥）→餓時只買糧、食足才投資建設料=結構防餓死。
-			return ctx.food_days >= DecisionTerms.DESPERATION_DAYS \
+			# food_days>=entry_threshold（鏡射買糧 food<threshold=互斥）→餓時只買糧、食足才投資建設料=結構防餓死。
+			# ★F1 靶A：讀同一 ctx.desperation_entry_threshold（買糧<threshold 的 mutex 補集、保互斥不破 gap/overlap）。
+			return ctx.food_days >= ctx.desperation_entry_threshold \
 					and ctx.material_shortfall > 0.0 and ctx.has_material_market and ctx.has_specie,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
 			var mp: Vector2i = FactionAISystem.new()._nearest_market_outpost_with(state, team, "material")
@@ -292,7 +293,7 @@ static var REGISTRY: Dictionary = {
 		"applicable": func(ctx: DecisionContext) -> bool:
 			var _forage_ok: bool = ctx.population <= FactionAISystem.FORAGE_VIABLE_POP and ctx.has_forage_tile
 			var _buyfood_ok: bool = ctx.has_food_market and ctx.has_specie and ctx.has_buyable_food
-			return ctx.food_days < DecisionTerms.DESPERATION_DAYS \
+			return ctx.food_days < ctx.desperation_entry_threshold \
 					and ctx.food_seek_target != Vector2i(-1, -1) \
 					and not _forage_ok and not _buyfood_ok,
 		"to_task": func(state: WorldState, team: TeamData) -> Dictionary:
