@@ -1,0 +1,317 @@
+{
+  "peaceful:1337": {
+    "1000": {
+      "domains": {
+        "belief": "7f9b3904d8b4831162e60370492c2469",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "8738d3398a5abd8e7e65c0ef85ef5a7b",
+        "teams": "415886b2b1308aa02de7fa97c17da930",
+        "tiles": "ad4fa79c52f889e4672c4ced8c955c5b",
+        "world": "966e603779b935d97b4cfaee607dfccd"
+      },
+      "full": "6e16bac1e943aaeeaa1e4a29974f4b79"
+    },
+    "240": {
+      "domains": {
+        "belief": "5a3a7207e4e2b238522845c95a8fe6fa",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "6c570fec598721e89ca53c94456f1ff5",
+        "teams": "3d93f6d9993bff45c29b54d22dc51781",
+        "tiles": "82659be69ded7856a4158d925733b1d9",
+        "world": "fe04e768f49f8caad8e32211b64af27f"
+      },
+      "full": "1a332370bad09acce973fb509d7d4aae"
+    },
+    "2400": {
+      "domains": {
+        "belief": "522ffb4acc718214b541cb6b5b89bd51",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "8b7d820da87535b538cd2045b726569d",
+        "teams": "e8aaa53733f683be2eeefd3c5939d32b",
+        "tiles": "93e6524f38934ce740516ff8fe3d9d6a",
+        "world": "d659fc34055e60d4e02ec197ac92728b"
+      },
+      "full": "b27f6d6512eb19e3afc90c5a974169af"
+    }
+  },
+  "peaceful:42": {
+    "1000": {
+      "domains": {
+        "belief": "9e796fbbf93779e190925153de5388e6",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "2cbb65e4f6fd805e262f9da08776f136",
+        "teams": "4af4b9a17c1867da4b77d908f1af4565",
+        "tiles": "b86ee59426dc3ae9ab61364db27e8e44",
+        "world": "966e603779b935d97b4cfaee607dfccd"
+      },
+      "full": "8bb6cd2c7dc1e9b7846fd7502398b350"
+    },
+    "240": {
+      "domains": {
+        "belief": "084cc2e261d1c297e436242e769a01b2",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "9e9fd92cc0e197a9b72d817269255788",
+        "teams": "94cca619c1ee6834b786d1b362819d23",
+        "tiles": "fcd9561fb0a15ed5af23ecc8f9ad9f2d",
+        "world": "fe04e768f49f8caad8e32211b64af27f"
+      },
+      "full": "cc7ad6f1c2f20d68bca5b4322fe12b34"
+    },
+    "2400": {
+      "domains": {
+        "belief": "36cbdf7ad1c57cdeec2858efee056d9d",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "08428175122c3ac18c8fa5e672f9d3c1",
+        "teams": "82f6d80c211c8f6ab358c77d2ae3734d",
+        "tiles": "5ca06e746d12090ca2be492731b41da2",
+        "world": "d659fc34055e60d4e02ec197ac92728b"
+      },
+      "full": "98bca124fa3feca231efadab3a9a2dfd"
+    }
+  },
+  "peaceful:7": {
+    "1000": {
+      "domains": {
+        "belief": "ea8cd7bb3a8f320de88fbe989b9f79ba",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "8e1aaae2168a9d90756cc272596de2ef",
+        "teams": "e0ee7a66c91b9b06d6809569de3c7ace",
+        "tiles": "8b0f584ccc722003b265affe1a8987e2",
+        "world": "966e603779b935d97b4cfaee607dfccd"
+      },
+      "full": "4fa28b1dbb693e242b34246af80c4715"
+    },
+    "240": {
+      "domains": {
+        "belief": "79e4548d299b75a80f1cebfdd336b8ca",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "fe110bc25a9858c8e72ad0cd419acba4",
+        "teams": "fc9adb0aa68bd22866fae17b995f6028",
+        "tiles": "abe9b7c7d9bd1749fba8f58363d63ecb",
+        "world": "fe04e768f49f8caad8e32211b64af27f"
+      },
+      "full": "5261756ff1b1363c61f2319b253608aa"
+    },
+    "2400": {
+      "domains": {
+        "belief": "0a5954550ade6ef0bea562da20cf17dd",
+        "factions": "d41d8cd98f00b204e9800998ecf8427e",
+        "persons": "d4a3c42d374d35edabc0807505f0fae9",
+        "teams": "933b9a2a76f02640140bb401517c7449",
+        "tiles": "02d1e0fbf1f8fbe8d29d20145e37d9da",
+        "world": "7cd758b49edc21855e60551423783652"
+      },
+      "full": "6f16f52df7d689c99e3563942d4243ba"
+    }
+  },
+  "recovery:1337": {
+    "1000": {
+      "domains": {
+        "belief": "e76166106b9f1629e8014aaadda55e44",
+        "factions": "177d8858a4380ad2776f58a3e5dc4807",
+        "persons": "9f9060cfd3574aded61fdbc72407d25e",
+        "teams": "89ed32f2b53e05359effee4d2786925f",
+        "tiles": "fd00aacaf9cda32f044202dd94301f18",
+        "world": "040a5a9b39d506cd711738508a6712c9"
+      },
+      "full": "b24dd283ac30a534655715a2d6331562"
+    },
+    "240": {
+      "domains": {
+        "belief": "1aa13103517bb08e056f111fb38b39da",
+        "factions": "c36dedae4c294b61f061ca0422c847b3",
+        "persons": "c46c8d4fd24a9dfdcb03c456905a1c47",
+        "teams": "d239f631eb704b7e969bb0248f6faf1a",
+        "tiles": "a4e1e083cb1fbf049991be4c6bf281ba",
+        "world": "70b49da0ef57fef185b32ae07493b84f"
+      },
+      "full": "a9584f0da03b185e6618465e9fa7a8a2"
+    },
+    "2400": {
+      "domains": {
+        "belief": "5cb5f32cb7aa453a85eeb064475bef50",
+        "factions": "177d8858a4380ad2776f58a3e5dc4807",
+        "persons": "0d9441ee218bd8fc8074d2eec90b1fa4",
+        "teams": "9948a2c0b3fc164d2a44fcb302ec57f9",
+        "tiles": "b7e1198f903cd72cbf0ab57bba8a41ca",
+        "world": "945f461f4a5c0c00b8ecc8932248574f"
+      },
+      "full": "670940923049624c1de3c8d82c76783e"
+    }
+  },
+  "recovery:42": {
+    "1000": {
+      "domains": {
+        "belief": "55051a356574893ec1ea3a7ed7e1877b",
+        "factions": "c710b968aa3a089c2b8ea48ad1bfcdc1",
+        "persons": "d427d6e451e96feb24e81804db6a6124",
+        "teams": "5cdbd506b9c95b2fd725585b3abb4140",
+        "tiles": "7b1e7bb2c1fca3506602c16a7c637a3e",
+        "world": "8df1e01c97cb5cfd267768d806d931cd"
+      },
+      "full": "2344c719119c4aa8270363312a25bf58"
+    },
+    "240": {
+      "domains": {
+        "belief": "cbad7c6bd2fe5c912c50f570e7bec98d",
+        "factions": "aadfe7815703f358d127183623583457",
+        "persons": "bf9dce8313823a1dcc322ad66ffb2008",
+        "teams": "6329e4502f164dfc0d4449d42a0dc80e",
+        "tiles": "e7cfa01208156b7a8a9bbc5263b3bea9",
+        "world": "f1ac2345e59d28f7dc18b69f78ccbb29"
+      },
+      "full": "70155799559ffc08f9ca46fbe6f121fc"
+    },
+    "2400": {
+      "domains": {
+        "belief": "0c3e192402038d917cbe9d8fa2b33bcc",
+        "factions": "c710b968aa3a089c2b8ea48ad1bfcdc1",
+        "persons": "683d8d2741c5387c0f4d4aad90c000a9",
+        "teams": "003326b1a2bca93ac0933348c81d5256",
+        "tiles": "ac98ed0accab7bcac3bff2dfa08b781c",
+        "world": "808f76ead67004a31bd74d352607434d"
+      },
+      "full": "8bbff88f98b671146ecc4f7e607c98aa"
+    }
+  },
+  "recovery:7": {
+    "1000": {
+      "domains": {
+        "belief": "b522934dca2228965e6fb56480022b73",
+        "factions": "e511b0d8250ee89b24140662f672318f",
+        "persons": "694ec9d0050a64b090577cf1952c11d5",
+        "teams": "8485a10d3e1e28a39bf8c82ca4db1684",
+        "tiles": "956ddd99492d24c4a0a4347fdb5e6b12",
+        "world": "ae8f5b1e8a0c5de97080302a8b918b72"
+      },
+      "full": "2a6c83792f5bc0903cb98915e08cad1a"
+    },
+    "240": {
+      "domains": {
+        "belief": "a72871909ed7d0de2fa309191268edb2",
+        "factions": "cda90b8ec54d727c7321e3a6357822c6",
+        "persons": "dd2dcc5f0fcec88f0631c32cd51bcfa2",
+        "teams": "a31a7e4e158919d445d7a947f22058e7",
+        "tiles": "4d84801961b6105aa6dbc5938a199a39",
+        "world": "1f8f1aff8568dcd30344043072229e55"
+      },
+      "full": "9ac93049ee2875278104756e1609aec1"
+    },
+    "2400": {
+      "domains": {
+        "belief": "84115297f34df4e28f849da105031a95",
+        "factions": "e511b0d8250ee89b24140662f672318f",
+        "persons": "694ec9d0050a64b090577cf1952c11d5",
+        "teams": "4939a0b9a8be238985625008841f71ad",
+        "tiles": "99847d4b0cfb0006133563048d026858",
+        "world": "bd22dbc069446b28984da9443393da50"
+      },
+      "full": "7a21f1a4eaf159c21fdd7eb0e93163f8"
+    }
+  },
+  "warring:1337": {
+    "1000": {
+      "domains": {
+        "belief": "b02340244e6e35950d0c14938c16d57b",
+        "factions": "c24e7fa378c1960aaaa328d9639190c7",
+        "persons": "c6f5a013d64b982cf42afe41c31893a1",
+        "teams": "68c8ddd787e9a73a2a7728731d2581da",
+        "tiles": "88c809fa829853e0a0a9760c77b3c1c1",
+        "world": "6705ee4f34e4941e07713d0589d1f849"
+      },
+      "full": "8b1d28554d6a3ff0c276ff2fdceb9e0e"
+    },
+    "240": {
+      "domains": {
+        "belief": "d4174bad4d79e34737f22a57f6f2872a",
+        "factions": "59ff3a82cd5b60be8cbdbabce777be39",
+        "persons": "3a19c1f33b0115b39c525a333856b262",
+        "teams": "bcefabec1d2112a082df1e29412107af",
+        "tiles": "c92d637f2e4abc47e3cdbd216f026c83",
+        "world": "efe0680d0db276b230b4a7a9cab031f9"
+      },
+      "full": "84f1a212aa4cfc1a1441de091820eddc"
+    },
+    "2400": {
+      "domains": {
+        "belief": "0776d908dd76713d154301a7fbd512ae",
+        "factions": "28a98db1d634185494e59a76427901cb",
+        "persons": "b26cdeeebedcda667f56eebec248cf1c",
+        "teams": "fca404e5cd0ff1f8c7d2b8a081eb4d9b",
+        "tiles": "bebbee47e31a7335f9709c967bb60011",
+        "world": "00d4b820ce515d3de2495c225879c4a2"
+      },
+      "full": "633fe5ac1621c25481c3d49e9e3e5c5c"
+    }
+  },
+  "warring:42": {
+    "1000": {
+      "domains": {
+        "belief": "8e254ba68eac2db5b0877e4b1345628a",
+        "factions": "90ab30d1380e51c2a86f07dba90eee32",
+        "persons": "332b3977b4d0584515dc38935040c9ba",
+        "teams": "067ce6187ea2c81401dce1aa1ce0f451",
+        "tiles": "ecc279ea712aec91f38a6e7a893b3c83",
+        "world": "856e86cc29c2da1b05ec5c8bf5a8c936"
+      },
+      "full": "b10cca55c115b7176db26181d71fa9fb"
+    },
+    "240": {
+      "domains": {
+        "belief": "82935c5f6696186312177f5df73c4ba8",
+        "factions": "59ff3a82cd5b60be8cbdbabce777be39",
+        "persons": "3a19c1f33b0115b39c525a333856b262",
+        "teams": "c3c31ea4916d6efa7c8860aec941e118",
+        "tiles": "c92d637f2e4abc47e3cdbd216f026c83",
+        "world": "efe0680d0db276b230b4a7a9cab031f9"
+      },
+      "full": "79b63f9d60aaf84b7e3eec6d5d9d93f3"
+    },
+    "2400": {
+      "domains": {
+        "belief": "3c695b3483ef99a332a75c40d6aed365",
+        "factions": "01c504c822e2c8b1235fd47e2d2aa3ef",
+        "persons": "c4ad56e39a0ac427be3feb8a4b1cc938",
+        "teams": "2b02ef87502f5f455c56efb5f23594dc",
+        "tiles": "6623b3040b2b67566e14b231ac0d8043",
+        "world": "9aac8a00d28a527381cb946529a58356"
+      },
+      "full": "6675159218f01fa842b72caa02e232e5"
+    }
+  },
+  "warring:7": {
+    "1000": {
+      "domains": {
+        "belief": "0e220617bb4afeba10b19f5c86af1e4f",
+        "factions": "c26357a9a09374ee6c2c82d22c7ffa30",
+        "persons": "558c2f33c6eaff171b131a300e82298f",
+        "teams": "f24968fa03cdba8e53034c6258dc7321",
+        "tiles": "4156f4a41edc4dae87dce9050947677a",
+        "world": "6705ee4f34e4941e07713d0589d1f849"
+      },
+      "full": "0aa654af44331c90ea892036c3a234cd"
+    },
+    "240": {
+      "domains": {
+        "belief": "7a2f5ac9ee598d47b02c17268884fbbd",
+        "factions": "693d25271b7ccbab749e161f7c6e9660",
+        "persons": "dbb99c3a52d69c2b4d223c33e31fd854",
+        "teams": "21f530c52c75c4c46eff7516bf675150",
+        "tiles": "c92d637f2e4abc47e3cdbd216f026c83",
+        "world": "93a16d52bf906e9d1412a98f25e33f83"
+      },
+      "full": "ec50f25556c1805b63d55d0952908a05"
+    },
+    "2400": {
+      "domains": {
+        "belief": "c733a4f07ba8a0c95da945b24fbac465",
+        "factions": "7c6213d65dd5c38503b70be4f0fb6278",
+        "persons": "240a780496868c194cdf9738db7d3dcc",
+        "teams": "95ef3c49c56fcdd64718f63d7215ff6d",
+        "tiles": "c2f2dceb6553b68b1d3b520ca1c3db9e",
+        "world": "da204569694b7e7a28b5d012a9098255"
+      },
+      "full": "212e96d530a9cb96cf74ad7d3a9bfc3b"
+    }
+  }
+}
