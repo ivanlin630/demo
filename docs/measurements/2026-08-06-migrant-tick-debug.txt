@@ -1,0 +1,409 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== recovery-path R1 移民三態湧現分化床（seed=9090 15天）===
+[GameSetup] 完成：4 teams, 1 factions, 4 persons
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 0(公庫0+私0) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×4956 (oid=0)
+[Order] Team0 buy weapon_melee_low ×8 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×6 (oid=2)
+[Order] Team0 buy material ×60 (oid=3)
+[Order] Team0 buy tools ×5 (oid=4)
+[Order] Team1 sell food ×91 (oid=5)
+[Order] Team1 buy material ×59 (oid=6)
+[Order] Team1 buy tools ×1 (oid=7)
+[Order] Team2 sell food ×91 (oid=8)
+[Order] Team2 buy material ×59 (oid=9)
+[Order] Team2 buy tools ×1 (oid=10)
+[Order] Team3 sell food ×91 (oid=11)
+[Order] Team3 buy material ×59 (oid=12)
+[Order] Team3 buy tools ×1 (oid=13)
+[Tick 10] Person 0 (leader/team0) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 10] Person 1000 (leader/team1) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 10] Person 2000 (leader/team2) → P2_produce | stress=0.00 loyalty=0.90
+[Tick 10] Person 3000 (leader/team3) → P2_produce | stress=0.00 loyalty=0.90
+[Succession] Team 4 從匿名晉升新領袖 P3001（統領=0.29）
+[Order] Team4 buy food ×4 (oid=14)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(19,20)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[Tick 20] Person 3001 (leader/team4) → P1_comply | stress=0.00 loyalty=0.91
+[Harvest] Tick60 季節=春 base=1.1
+[Combat Start] Team-1000000 vs Team1
+[Ambush] NPC Team1 被 boar 伏擊
+[Move] Team 4 抵達 (19,20)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(19,20)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Tick 80] Person 3001 (leader/team4) → P4_expand | stress=0.60 loyalty=0.84
+[Tick 90] Person 3001 (leader/team4) → P1_comply | stress=0.55 loyalty=0.85
+[StrategicAI] Faction0 首要目標: defend target=4
+[Ambition] Team0 rung 0→1 (商業 cap=1)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Move] Team 4 抵達 (19,20)
+[SubAI] Team4 引擎→外交 (求和)
+[DayNight] Day 1 開始
+[Move] Team 4 抵達 (20,20)
+[Merge] Team0 ← Team4 完全合併 (pop=14)
+[Tick 240] Person 3001 (leader/team0) → P4_expand | stress=0.00 loyalty=0.99
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=1 avg=16467 us max=2949453 us ticks=240 teams=4 factions=1
+[MTDBG] sub=5 pos=(20, 20) move_target=(23, 20) tick=260
+[Succession] Team 4 從匿名晉升新領袖 P3002（統領=0.07）
+[Order] Team4 buy food ×3 (oid=16)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(20,21)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[Succession] Team 5 從匿名晉升新領袖 P3003（統領=0.28）
+[Order] Team5 buy food ×12 (oid=17)
+[SurvivalForage] team=Team5 pop=3 → 覓食 @(20,21)
+[Survival] Team5 urgent days_left=0.0 遷徙→覓食
+[Tick 260] Person 3002 (leader/team4) → P1_comply | stress=0.00 loyalty=0.98
+[Tick 260] Person 3003 (leader/team5) → P1_comply | stress=0.00 loyalty=0.96
+[Move] Team 4 抵達 (20,21)
+[Move] Team 5 抵達 (20,21)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(20,21)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Tick 340] Person 3002 (leader/team4) → N2_riot | stress=0.80 loyalty=0.89
+[Ambition] Team5 rung 0→1 (商業 cap=2)
+[Move] Team 4 抵達 (20,21)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Move] Team 5 抵達 (20,20)
+[Merge] Team0 ← Team5 完全合併 (pop=13)
+[Tick 390] Person 3003 (leader/team0) → P4_expand | stress=0.10 loyalty=0.98
+[Tick 400] Person 3003 (leader/team0) → P1_comply | stress=0.05 loyalty=0.99
+[DayNight] Day 2 開始
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=2 avg=12892 us max=1933933 us ticks=240 teams=5 factions=1
+[Site] 選址 (14, 18) score=300 周邊資源={ "wild_horses": 4, "ore_iron": 58, "ore_silver": 76 } terrain=plains
+[MTDBG] sub=6 pos=(20, 20) move_target=(23, 20) tick=500
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,22)
+[Succession] Team 5 從匿名晉升新領袖 P3004（統領=0.17）
+[Order] Team5 buy food ×3 (oid=18)
+[Survival] Team5 urgent days_left=0.0 偵查→覓食
+[Succession] Team 6 從匿名晉升新領袖 P3005（統領=0.22）
+[Order] Team6 buy food ×10 (oid=19)
+[Survival] Team6 urgent days_left=0.0 遷徙→覓食
+[Tick 500] Person 3004 (leader/team5) → P1_comply | stress=0.00 loyalty=0.69
+[Tick 500] Person 3005 (leader/team6) → P1_comply | stress=0.00 loyalty=0.77
+[Faction] Team4 脫離勢力0
+[Move] Team 4 抵達 (18,22)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,22)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Tick 560] Person 3005 (leader/team6) → P4_expand | stress=0.60 loyalty=0.70
+[Tick 570] Person 3005 (leader/team6) → N1_flee | stress=0.40 loyalty=0.68
+[SurvivalCamp] team=Team6 → 紮營 @(19,21)
+[Tick 580] Person 3005 (leader/team6) → P1_comply | stress=0.50 loyalty=0.67
+[CrudeCamp] Team6 紮營 @(19,21) → military
+[Tick 590] Person 3005 (leader/team6) → N1_flee | stress=0.30 loyalty=0.65
+[Survival] Team6 urgent days_left=0.0 治理→return_home
+[Tick 600] Person 3005 (leader/team6) → P1_comply | stress=0.40 loyalty=0.64
+[Tick 610] Person 3005 (leader/team6) → P4_expand | stress=0.50 loyalty=0.62
+[SubAI] Team4 紀律失效，脫離成獨立
+[Order] Team6 buy material ×23 (oid=21)
+[Tick 620] Person 3005 (leader/team6) → N2_riot | stress=0.60 loyalty=0.60
+[Move] Team 5 抵達 (18,22)
+[SurvivalCamp] team=Team5 → 紮營 @(18,22)
+[Survival] Team5 urgent days_left=0.0 idle→紮營
+[Move] Team 4 抵達 (18,22)
+[Move] Team 6 抵達 (19,21)
+[CrudeCamp] Team5 紮營 @(18,22) → civilian
+[Survival] Team6 urgent days_left=0.0 idle→return_home
+[Tick 670] Person 3004 (leader/team5) → N2_riot | stress=1.00 loyalty=0.39
+[Tick 680] Person 3002 (leader/team4) → P1_comply | stress=0.35 loyalty=0.48
+[SubAI] Team6 紀律失效，脫離成獨立
+[DayNight] Day 3 開始
+[Horse] Outpost (19, 21) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=3 avg=28324 us max=1902354 us ticks=240 teams=7 factions=1
+[SoloAI] Team4 → 外交 (求和)
+[MTDBG] sub=8 pos=(20, 20) move_target=(23, 20) tick=740
+[Order] Team5 buy material ×22 (oid=22)
+[Succession] Team 7 從匿名晉升新領袖 P3006（統領=0.13）
+[Order] Team7 buy food ×3 (oid=23)
+[Survival] Team7 urgent days_left=0.0 偵查→覓食
+[Succession] Team 8 從匿名晉升新領袖 P3007（統領=0.24）
+[Order] Team8 buy food ×13 (oid=24)
+[Survival] Team8 urgent days_left=0.0 遷徙→覓食
+[Tick 740] Person 3006 (leader/team7) → P1_comply | stress=0.00 loyalty=0.57
+[Tick 740] Person 3007 (leader/team8) → P1_comply | stress=0.00 loyalty=0.83
+[Move] Team 6 抵達 (19,21)
+[Faction] Team5 脫離勢力0
+[Tick 800] Person 3007 (leader/team8) → P4_expand | stress=0.60 loyalty=0.76
+[Faction] Team6 脫離勢力0
+[SoloAI] Team4 → 外交 (求和)
+[Tick 830] Person 3007 (leader/team8) → N1_flee | stress=0.60 loyalty=0.70
+[Tick 840] Person 3007 (leader/team8) → P4_expand | stress=0.70 loyalty=0.68
+[SubAI] Team5 紀律失效，脫離成獨立
+[Tick 850] Person 3007 (leader/team8) → N1_flee | stress=0.50 loyalty=0.66
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[Tick 860] Person 3007 (leader/team8) → P4_expand | stress=0.60 loyalty=0.64
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[Tick 900] Person 3007 (leader/team8) → N2_riot | stress=1.00 loyalty=0.56
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[Move] Team 7 抵達 (19,18)
+[SubAI] Team7 紀律失效，脫離成獨立
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[Move] Team 8 抵達 (19,18)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(19,18)
+[Ambition] Team7 rung 0→1 (商業 cap=3)
+[DayNight] Day 4 開始
+[Move] Team 4 抵達 (20,20)
+[Horse] Outpost (19, 21) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=4 avg=33241 us max=1520946 us ticks=240 teams=9 factions=1
+[SoloAI] Team6 → return_home (返家補給)
+[Succession] Team 9 從匿名晉升新領袖 P3008（統領=0.14）
+[Order] Team9 buy food ×3 (oid=27)
+[Survival] Team9 urgent days_left=0.0 偵查→覓食
+[Tick 980] Person 3008 (leader/team9) → P1_comply | stress=0.00 loyalty=0.80
+[Move] Team 8 抵達 (19,18)
+[SubAI] Team8 紀律失效，脫離成獨立
+[Ambition] Team8 rung 0→1 (定居 cap=2)
+[Move] Team 6 抵達 (19,21)
+[Ambition] Team4 rung 1→0 (定居 cap=2)
+[SoloAI] Team4 → 逃跑 (survival)
+[Tick 1070] Person 3007 (leader/team8) → P4_expand | stress=0.40 loyalty=0.46
+[Tick 1080] Person 3006 (leader/team7) → P4_expand | stress=0.20 loyalty=0.25
+[Tick 1090] Person 3008 (leader/team9) → N2_riot | stress=1.00 loyalty=0.64
+[Move] Team 7 抵達 (20,20)
+[Tick 1110] Person 3007 (leader/team8) → P1_comply | stress=0.20 loyalty=0.47
+[Move] Team 7 抵達 (20,20)
+[SubAI] Team9 紀律失效，脫離成獨立
+[DayNight] Day 5 開始
+[Move] Team 8 抵達 (20,20)
+[Horse] Outpost (19, 21) 捕野馬 +1
+[Horse] Outpost (20, 20) 捕野馬 +1
+[TickPerf] day=5 avg=67413 us max=1527848 us ticks=240 teams=10 factions=1
+[Order] Team0 sell food ×6955 (oid=28)
+[Order] Team0 buy weapon_melee_low ×2 (oid=29)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=30)
+[Order] Team0 buy material ×59 (oid=31)
+[Order] Team0 buy tools ×2 (oid=32)
+[Order] Team1 sell food ×85 (oid=33)
+[Order] Team1 buy material ×45 (oid=34)
+[Order] Team1 buy tools ×1 (oid=35)
+[Order] Team2 sell food ×84 (oid=36)
+[Order] Team2 buy material ×54 (oid=37)
+[Order] Team2 buy tools ×1 (oid=38)
+[Order] Team3 sell food ×84 (oid=39)
+[Order] Team3 buy material ×47 (oid=40)
+[Order] Team3 buy tools ×1 (oid=41)
+[SoloAI] Team6 → return_home (返家補給)
+[Succession] Team 10 從匿名晉升新領袖 P3009（統領=0.07）
+[Order] Team10 buy food ×3 (oid=42)
+[Survival] Team10 urgent days_left=0.0 偵查→覓食
+[Tick 1220] Person 3009 (leader/team10) → P1_comply | stress=0.00 loyalty=0.63
+[Move] Team 7 抵達 (20,20)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 4 抵達 (23,20)
+[Move] Team 7 抵達 (20,20)
+[Faction] Team9 脫離勢力0
+[Move] Team 8 抵達 (20,20)
+[Move] Team 9 抵達 (18,17)
+[Move] Team 6 抵達 (19,21)
+[SoloAI] Team4 → 逃跑 (survival)
+[Move] Team 7 抵達 (20,20)
+[Move] Team 8 抵達 (20,20)
+[Ambition] Team9 rung 0→1 (定居 cap=3)
+[Move] Team 7 抵達 (20,20)
+[SubAI] Team10 紀律失效，脫離成獨立
+[Tick 1410] Person 3009 (leader/team10) → N2_riot | stress=1.00 loyalty=0.29
+[DayNight] Day 6 開始
+[Move] Team 8 抵達 (20,20)
+[Ambition] Team7 rung 1→0 (商業 cap=3)
+[Ambition] Team8 rung 1→0 (定居 cap=2)
+[TickPerf] day=6 avg=117795 us max=2296931 us ticks=240 teams=11 factions=1
+[SoloAI] Team6 → return_home (返家補給)
+[Order] Team4 buy food ×2 (oid=44)
+[Move] Team 7 抵達 (20,20)
+[Move] Team 10 抵達 (22,21)
+[Combat Start] Team-1000001 vs Team10
+[Ambush] NPC Team10 被 boar 伏擊
+[Move] Team 8 抵達 (20,20)
+[Move] Team 4 抵達 (26,20)
+[Combat Start] Team-1000002 vs Team10
+[Ambush] NPC Team10 被 boar 伏擊
+[SoloAI] Team9 → 逃跑 (survival)
+[Ambition] Team10 rung 0→1 (商業 cap=2)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 6 抵達 (19,21)
+[SoloAI] Team4 → 覓食 (遷移找糧)
+[Move] Team 10 抵達 (22,22)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 10 抵達 (22,22)
+[Move] Team 8 抵達 (20,20)
+[DayNight] Day 7 開始
+[Salary] Team6 薪水結算 coin=0.0
+[Salary] Team7 薪水結算 coin=0.0
+[Salary] Team8 薪水結算 coin=0.0
+[TickPerf] day=7 avg=117226 us max=2058277 us ticks=240 teams=11 factions=1
+[SoloAI] Team6 → return_home (返家補給)
+[Order] Team5 buy food ×3 (oid=47)
+[Order] Team6 buy food ×3 (oid=48)
+[Move] Team 4 抵達 (27,21)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 7 抵達 (22,21)
+[Ambition] Team7 rung 0→1 (商業 cap=3)
+[Move] Team 8 抵達 (20,20)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 6 抵達 (19,21)
+[Move] Team 4 抵達 (27,21)
+[Move] Team 9 抵達 (21,15)
+[Move] Team 10 抵達 (22,22)
+[Move] Team 8 抵達 (20,20)
+[Order] Team6 buy material ×23 (oid=49)
+[Ambition] Team4 rung 0→1 (定居 cap=2)
+[Move] Team 8 抵達 (19,20)
+[Ambition] Team9 rung 1→0 (定居 cap=3)
+[Move] Team 10 抵達 (22,22)
+[DayNight] Day 8 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[TickPerf] day=8 avg=117608 us max=2315704 us ticks=240 teams=11 factions=1
+[SoloAI] Team6 → return_home (返家補給)
+[Order] Team5 buy material ×17 (oid=49)
+[Move] Team 8 抵達 (19,20)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 9 抵達 (21,15)
+[Move] Team 10 抵達 (22,22)
+[Ambition] Team10 rung 1→0 (商業 cap=2)
+[Move] Team 6 抵達 (19,21)
+[Ambition] Team7 rung 1→0 (商業 cap=3)
+[Order] Team8 buy food ×1 (oid=50)
+[Move] Team 10 抵達 (22,22)
+[DayNight] Day 9 開始
+[Ambition] Team4 rung 1→0 (定居 cap=2)
+[TickPerf] day=9 avg=116770 us max=2303988 us ticks=240 teams=11 factions=1
+[SoloAI] Team6 → return_home (返家補給)
+[Order] Team9 buy food ×1 (oid=51)
+[Move] Team 10 抵達 (22,22)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 6 抵達 (19,21)
+[Order] Team7 buy food ×1 (oid=52)
+[Move] Team 9 抵達 (21,15)
+[Move] Team 10 抵達 (22,22)
+[DayNight] Day 10 開始
+[Move] Team 10 抵達 (22,22)
+[TickPerf] day=10 avg=118395 us max=2276721 us ticks=240 teams=11 factions=1
+[Order] Team0 sell food ×6935 (oid=53)
+[Order] Team0 buy weapon_melee_low ×1 (oid=54)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=55)
+[Order] Team0 buy material ×59 (oid=56)
+[Order] Team0 buy tools ×2 (oid=57)
+[Order] Team1 sell food ×81 (oid=58)
+[Order] Team1 buy material ×44 (oid=59)
+[Order] Team1 buy tools ×1 (oid=60)
+[Order] Team2 sell food ×77 (oid=61)
+[Order] Team2 buy material ×47 (oid=62)
+[Order] Team2 buy tools ×1 (oid=63)
+[Order] Team3 sell food ×77 (oid=64)
+[Order] Team3 buy material ×44 (oid=65)
+[Order] Team3 buy tools ×1 (oid=66)
+[SoloAI] Team6 → 覓食 (覓食)
+[SoloAI] Team9 → 覓食 (覓食)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 9 抵達 (21,15)
+[Move] Team 10 抵達 (22,22)
+[SoloAI] Team4 → 覓食 (遷移找糧)
+[Move] Team 6 抵達 (20,21)
+[Move] Team 7 抵達 (22,22)
+[Ambition] Team6 rung 0→1 (商業 cap=2)
+[Move] Team 7 抵達 (22,22)
+[Move] Team 10 抵達 (22,22)
+[DayNight] Day 11 開始
+[TickPerf] day=11 avg=121286 us max=2430261 us ticks=240 teams=11 factions=1
+[Order] Team4 buy food ×2 (oid=67)
+[Order] Team10 buy food ×1 (oid=68)
+[Move] Team 4 抵達 (26,23)
+[Move] Team 7 抵達 (22,22)
+[Move] Team 10 抵達 (22,22)
+[Tick 2710] Person 3005 (leader/team6) → P4_expand | stress=0.10 loyalty=0.00
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 4 抵達 (26,23)
+[Move] Team 7 抵達 (22,22)
+[Move] Team 9 抵達 (21,15)
+[Move] Team 10 抵達 (22,22)
+[Move] Team 8 抵達 (20,20)
+[DayNight] Day 12 開始
+[Move] Team 8 抵達 (20,20)
+[TickPerf] day=12 avg=113434 us max=2386612 us ticks=240 teams=11 factions=1
+[Order] Team5 buy food ×3 (oid=69)
+[Move] Team 7 抵達 (22,22)
+[Move] Team 10 抵達 (22,22)
+[Move] Team 8 抵達 (20,20)
+[SoloAI] Team9 → 覓食 (覓食)
+[SoloAI] Team4 → 覓食 (覓食)
+[Move] Team 8 抵達 (20,20)
+[Ambition] Team6 rung 1→0 (商業 cap=2)
+[Move] Team 4 抵達 (26,23)
+[Move] Team 7 抵達 (22,22)
+[Move] Team 9 抵達 (21,15)
+[Move] Team 10 抵達 (22,22)
+[Order] Team6 buy material ×62 (oid=70)
+[Order] Team6 buy food ×1 (oid=71)
+[Move] Team 8 抵達 (20,20)
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=118134 us max=2463720 us ticks=240 teams=11 factions=1
+[SoloAI] Team6 → return_home (返家補給)
+[Order] Team5 buy material ×12 (oid=72)
+[Move] Team 8 抵達 (20,20)
+[Tick 3150] Person 3007 (leader/team8) → P4_expand | stress=0.70 loyalty=0.92
+[Tick 3190] Person 3007 (leader/team8) → N2_riot | stress=1.00 loyalty=0.84
+[Move] Team 7 抵達 (22,22)
+[Move] Team 10 抵達 (22,22)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 6 抵達 (19,21)
+[SoloAI] Team4 → 覓食 (覓食)
+[Order] Team8 buy food ×4 (oid=73)
+[Move] Team 8 抵達 (20,20)
+[Move] Team 4 抵達 (26,23)
+[Move] Team 10 抵達 (22,22)
+[DayNight] Day 14 開始
+[MsgPrune] 刪除過期訊息 global=2 known=0
+[Salary] Team6 薪水結算 coin=0.0
+[Salary] Team8 薪水結算 coin=0.0
+[TickPerf] day=14 avg=112437 us max=2185123 us ticks=240 teams=11 factions=1
+[Faction] Team8 脫離勢力0
+[Move] Team 8 抵達 (20,20)
+[SoloAI] Team6 → return_home (返家補給)
+[Move] Team 10 抵達 (22,22)
+[Ambition] Team7 rung 0→1 (商業 cap=3)
+[Move] Team 8 抵達 (20,20)
+[SoloAI] Team4 → 覓食 (覓食)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫1+私0) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (26,23)
+[Move] Team 10 抵達 (22,22)
+[Move] Team 6 抵達 (19,21)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=15 known=45
+[TickPerf] day=15 avg=113509 us max=2209566 us ticks=240 teams=11 factions=1
+
+───── recovery-r1 摘要(15天) ─────
+final teams=11 factions=1
+  plains(T1): alive=true pop=2 faction=0
+  forest(T2): alive=true pop=2 faction=0
+  mountain(T3): alive=true pop=2 faction=0
+
+★migrant鏈計數：migrant.dispatched=3 migrant.arrived=0
+migrant.marginal(peak)=0.1668 migrant.mini_util(peak)=0.0658
+
+★per-target migrant.marginal真值(判三態sign):
+  plains(T1): n=3 first={ "terrain": "plains", "marginal": 0.16678756615079 }
+  forest(T2): n=0 first={  }
+  mountain(T3): n=3 first={ "terrain": "mountain", "marginal": -2.23957577711558 }
+
+★migrant.dispatched_sample(哪村真收到派遣):
+  target_village=1 marginal=0.16678756615079
+  target_village=1 marginal=0.16678756615079
+  target_village=1 marginal=0.16678756615079
+
+[dump] → res://docs/measurements/2026-08-06-infonet-recovery-r1-migrant.json
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
