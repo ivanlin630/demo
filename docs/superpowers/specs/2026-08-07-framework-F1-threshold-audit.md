@@ -30,3 +30,17 @@ date: 2026-08-07
 
 ## output → blueprint
 3-靶 classification（survival DESPERATION-entry / is_military / MINING_GREED persona-gates → soft weight）→ blueprint spec 人格化 slices（★genuine 真值 modulate 非 crank 逼 outcome、乙教訓；憲法 A 家族判準已定=硬 persona-gate→soft weight 零差異化損失）→ R①→R²→build（fp 預期分化驗 intended、與②結構 slice 分不混）。
+
+---
+## ★★v2 訂正（R① premise_contradiction halt、reviewer 親驗 v1 citation 2/3 錯、2026-08-07）——上方 v1「3 靶」SUPERSEDED
+★v1 犯 **live-vs-dead code path 未驗 + citation 未獨立 R①-verify**（[[feedback_fileline_vs_interpretation]] 第9血證）：
+- **靶① RE-POINT**：`_evaluate_survival`(:3974-4535) **不含 DESPERATION_DAYS**、:3995 uses_unified early-return=**legacy 近死 fallback**（統一引擎不走、改=零效果=recovery-r1 false-confidence 同款）。真 live DESPERATION entry-gate = **`options.gd` survival-option applicable**（:100 返家/:152 投靠/:183 覓食/:193 乞食/:263 買糧 皆 `food_days<DESPERATION_DAYS`）= survival-ENTRY 門檻（WHEN 考慮求生）→ **人格化靶**（膽/懼/慎重、建議 `ctx.desperation_entry_threshold` 加權替 raw、applicable 讀之）。★DESPERATION 作 **need-anchor**（買糧/relief 量=DESPERATION×pop×0.8）=物理**留**、只 entry-gate 化。`_evaluate_survival` 死 fallback → ②結構 dead-code 清除（非本 slice）。
+- **靶② CUT**：`_evaluate_uprising`(4535 起) **無 is_military**（v1 誤引=establish_crude_camp 紮營軍/民型態、legit branch）；真 uprising **已 genuine 連續秤**（前置 avg_loy<0.2/unrest_turns>=60/stress>=2 precondition；`stand_score=野心×0.5+慎重×0.3+義氣×0.2`/flee/secede/`stay_u=義氣×0.5+faction_stay_benefit` 人格加權、cohesion arc 審過）→**已對、CUT**。
+- **靶③ PROCEED**：`_evaluate_new_outpost_location` `(貪婪+野心)>=MINING_GREED_THRESHOLD(1.1)` 硬 persona-gate=reviewer 坐實 → soft weight（憲法 A 家族）。
+
+### ★F1 genuine scope v2（2 靶）
+1. **DESPERATION entry-gate 人格化**（options.gd survival-option applicable :100/152/183/193/263、膽/懼/慎重、entry-gate 化非 need-anchor）。
+2. **MINING_GREED persona-gate → soft weight**（:3467-3494、憲法 A 家族、貪婪/野心 WEIGH）。
+
+### ★教訓
+audit 查了「已人格化 vs 否」但**沒查「live vs dead code path」**（uses_unified early-return legacy fallback→改死 code 零效果）+ exempt citation R①「judgment 已定」是洞（判準對≠citation 對）。R① 閘正確攔（premise_contradiction halt）。
