@@ -68,12 +68,14 @@ grounding: §3 經濟底查（`2026-08-06-...econ-baseline-verdict`）+ R① CLE
 - **★湧現紅利**：領主投資 **TIMING matter 自然湧現**（早投村還撐得住→蓋→復甦；晚投絕境投→料浪費村死）= 同 care-loop「主動勝被動」、**強化 arc 非 bug**。
 
 ### (C) 遷村令 dispatch `_try_relocate_order`（Slice R3、P4）
-- 領主秤自家村 `relocate_value`（belief）+ 領主人格（規劃型整併/仁君勸+送搬遷糧/放任）→ 下遷村令。
+- `relocate_value`（MarginalEconomy 第 3 marginal §1.1.3）= `_inflow_est(target_est)` 前景 − `_inflow_est(current_est)` − `sunk_penalty`（persist_strength 沉沒）。領主秤自家村 relocate_value + 領主人格（規劃型整併/仁君勸+送搬遷糧/放任）→ 下遷村令。
 - 機制 = **信使 directive 走資訊網**（reuse `in_transit_letters` kind=`"relocate"`、payload=target_tile；令**真送達**才生效、非瞬間 = 感知鐵律跨距）。throttle 一令/村。
+- ★**目標選擇 god-view gate（B、無 explored-tiles terrain belief store）**：**領主令 target = 領主已知領土**（own-faction 行政知、同 VillageEstimate 結構欄來源）；**禁 god-view 全地掃最佳 tile**。target_est 結構欄走 §1.0 VillageEstimate 同款來源。
 
 ## §3 村端收令 + 自願遷（village-side、Slice R3）
-- **村自願遷**：村秤 `relocate_value`（belief-known 目標地、非 god-view best-tile scan）> 閾 → 自發遷。
-- **遷村令收令 handler**（用戶定兩層對抗）：令送達 → 村**從 vs 抗人格秤**：
+- **村自願遷**：村秤 `relocate_value`（**目標地限 vision-explored/reachable tiles、非 god-view best-tile scan**、無 explored belief store→限視野可達，鏡射 `遷移找糧` target 法 options.gd:288 視野可達）> 閾 → 自發遷。
+- ★**遷村執行端（A、驗執行端命門、無既有整村 relocate 機制）**：整村 relocate = **接既有件 compound**——棄現據點（generalize `_action_abandon_outpost` player_command:525 → AI 側）→ 村轉 mobile（population 隨隊）→ `TASK_SETTLE` target → `_convert_to_resident`（faction_ai:2142 既有）於 target tile 落腳。**★驗執行端**（R1 arrived/R2 build 血證）：測試跑真全 advance_tick pipeline 驗村**真完成遷**（棄據點→移動抵 target→settle→resident 於新 tile），非只決策 fire。tap：`relocate.ordered`/`relocate.abandoned`/`relocate.arrived`/`relocate.resettled`。
+- **遷村令收令 handler**（用戶定兩層對抗、genuine 人格秤非死常數門檻）：令送達 → 村**從 vs 抗人格秤**：
   - 忠/懼 高 → **從**、但 `unrest` 累積（帶怨；reuse cohesion unrest）。
   - 傲/戀土 高 → **抗命**（不遷）。
 - 抗命後果 = 領主人格：算了 / 斷賑濟（既有 distribute 停）/ **武力押遷 = 軍事 arc、本 arc 只留鉤子**（不實作強遷、只留 unrest→起義/叛離既有出口 P5 承接暴君逼反 → 湧現劇情）。
