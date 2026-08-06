@@ -1,6 +1,6 @@
 # F1 人格化 — threshold 靶（WHAT / vision）v2
 
-status: DRAFT-v2（R① halt 訂正後、據 F1 audit v2 真 live citation、pending R①[全靶 citation 驗] + R² → build）
+status: LOCKED（2026-08-07：R①全靶citation+R² CLEAN、2必查項折入§2.5 → systems build）
 owner: blueprint（WHAT）→ systems 做 HOW
 parent: `2026-08-07-framework-completion-two-hard-green-design.md`（硬綠① Track、slice F1）
 date: 2026-08-07
@@ -26,6 +26,10 @@ date: 2026-08-07
 
 ### 靶② uprising = ★CUT（documented、非漏）
 `_evaluate_uprising` 早已 genuine 連續秤（avg_loy/unrest/stress precondition + stand/flee/secede/stay_u 人格加權 + cohesion `faction_stay_benefit`、cohesion arc 審過）。v1 誤引 `is_military` 實為 `establish_crude_camp` 紮營軍/民型態分類（legit branch、不同性質）。**無真硬 gate 可 de-patch → 移出 F1 scope。**
+
+## §2.5 ★HOW-binding 條件（R² CLEAN 必查、寫死非留 implementer 選）
+1. **★靶A 走單一統一計算點**：5 處 applicable(:100/152/183/193/263) **必共讀單一 `ctx.desperation_entry_threshold`**（一處算、五處讀）、**禁 5 處各改**。= 本 arc 反覆驗證的統一紀律（`_contact_elapsed_days` 跨 3 決策點 / `_faction_stay_benefit` 跨 defect+uprising+g3 三系統）;5 各改 = 5 旋鈕散落 precision 病重演。
+2. **★entry 門檻 vs PRIO_SURVIVAL 獨立**：entry 門檻 = **candidate 生成層**（WHEN 考慮求生）、PRIO_SURVIVAL = **task 仲裁優先權層**——**兩不同層、HOW 須明講獨立處理、非隱含假設同一值**。
 
 ## §3 量測（湧現分化、fp intended）
 - **靶A**：survival-entry 分化——膽大隊撐更久才進絕境、謹慎隊早進（同世界不同隊不同進入點）;物理錨（買糧量）不變（分離證）。
