@@ -28,9 +28,36 @@ date: 2026-08-06
 - 逐一過 75 baselined `threshold`-type sites → 分 physical-viability(留)/death-constant(§5 人格化靶)。此=零殘留硬綠的 genuine 剩工（非盲改清單）。
 - diplomatic:325 補 gate-ok 標（小）。
 
-## ②結構線 grounding（TBD、序=先行為後結構）
-- 所有權/耦合 map：clean-extractable(marginal/message/labor 2-3 ref) vs 纏。
-- ★faction_ai 5018 行內部拆解：行為 chunk 可抽進引擎自然瘦 / 剩切哪幾個有邊界模組 / 對接介面。
+## ②結構線 grounding（faction_ai 5018 行 = 209 func / ~25 section 拆解）
+section map（grep `^func`/`# ──` 實掃）→ ~8 行為域：
+
+### (A) 先行為抽引擎（decision chunks → DecisionEngine 自然瘦、序優先）
+| chunk | 行區 | 現況 | 抽法 |
+|---|---|---|---|
+| 統一戰略 scorer + 意圖選擇 + 目標評估 | 895-1311 | 部分已走 rank_scored/_decide_unified | 收剩餘散 scorer 進引擎（decision→util term） |
+| D 被動威脅反應 | 374-518 | 部分已 rank_scored threat（threat-oracle arc） | 剩 scaffolding 保、decision 已抽 |
+| 獨立/子團/獨立 Team 自主 AI | 1169-1311/2435-2920 | 走 _decide_unified/rank_scored | 驗 filtered-subset 真統一（seam#1 結論：各編碼語意需逐驗） |
+
+### (B) 後結構切邊界模組（lifecycle/dispatch chunks、序後）
+| 候選模組 | 行區(~) | 內聚性 | 對接介面 |
+|---|---|---|---|
+| **基建/設施 lifecycle** | 3126-4352(~1200) | 高（設施需求/選址/建設 dispatch/公庫料） | tile/outpost state + build task |
+| **side-dispatch 家族**（求援/偵察/移民/投資/遷村令+遷村執行端） | 1662-2142(~480) | 高（info_side_dispatch + lord-side 家族 + R3 compound） | belief/letter/convoy/subteam |
+| **公庫徵用/領存** | 3173-3396(~220) | 高（extraction lifecycle） | resource/TileBank |
+| **outpost 居民派駐** | 142-305/519-642(~280) | 中（派駐 AI） | outpost/resident |
+| **envoy 外交** | 1312-1661(~350) | 高（信使外交 helpers） | diplomatic/letter |
+
+### (C) orchestration/scaffolding（留 faction_ai 核）
+- `evaluate_all` 主循環（643-869）= tick 編排（+phase timing）。Tag 權限（870）。輔助函數（2921-3125）。
+
+### 所有權/耦合 map
+- **clean-extractable**（少 ref、可先）：`MarginalEconomy`（剛建、純算術、~R1-R3 caller）/message/labor（2-3 ref）。
+- **entangled 核**：`faction_ai_system.gd`（實測引用 35 系統/62 系統共讀 WorldState）= 大雜燴、須先(A)抽 decision 瘦身再(B)切模組。
+
+## ★★grounding 總結論（→ blueprint spec 兩硬綠 program）
+1. **①零殘留硬綠 largely machine-proven**（constitution_gate v2 @75 過閘、god-view 多已修）→ genuine 剩工=**審 75 baselined threshold sites 死常數（§5 照妖鏡人格化）** 非盲 de-patch stale 清單。
+2. **②可擴充硬綠 = 結構線主戰場**：faction_ai 5018 行拆解 = (A)先抽 decision chunks 進引擎瘦身 → (B)切 5 邊界模組（基建/side-dispatch/公庫/outpost-residency/envoy）。clean-extractable(marginal/message/labor)可平行先動。
+3. 序=先行為(A)後結構(B)（反序白工）。R3 lord-fix 已預演 god-view 殲滅精神。
 
 ## output → blueprint
 兩份 grounding 清單（行為線閘表 + 結構線 map）→ blueprint 據真數字 spec 兩硬綠 program（非憑印象）→ R①→R²→slice 切。
