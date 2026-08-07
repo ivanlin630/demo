@@ -51,6 +51,23 @@
 - 各 membership query 改 `is_in_set(opt, X)` = `REGISTRY.has(opt) and entry.sets.X`。**guard `REGISTRY.has` 保「非-REGISTRY opt 查 set → false」**（現 `opt in SET` 對非成員=false、對非-REGISTRY-opt 亦 false，guard 等價）。
 - 不在任何 set 的 option（買料/歸建）→ 6 flags 全 false（= 現行 membership）。
 
+### ★★INV-2b（design fork 釘死 = R² 必查項 resolved）——刪 const array、單源、full caller enum
+**fork = (b) 刪除 6 個舊 const array**（非 (a) 保留=兩本帳假統一、違「加 option 動一處」目的）。單一真源 = `REGISTRY[opt].sets`。加 2 accessor（DecisionOptions）：
+- `is_in_set(opt: String, name: String) -> bool` = `REGISTRY.has(opt) and bool(REGISTRY[opt].sets.get(name, false))` — 取代全 `opt in SET` membership。
+- `options_in_set(name: String) -> Array` = REGISTRY **插入序**迭代、filter flag — 取代 `for g in SET` 迭代。
+- ★**byte-identical 迭代序證**：唯一 production 迭代 = `decision_context:404 for g in STAKES_SET: if g in f.goals: append`（append 按 SET 序）。REGISTRY 插入序 **攻擊(:203)<徵收(:225)<外交(:241) = STAKES_SET 手序 ["攻擊","徵收","外交"] 完全吻合** → `options_in_set("stakes")` byte-identical。5 個 membership set order-irrelevant。
+
+**★★full caller enum（刪 array→全 site 須改、否則 Invalid-call/Identifier-not-found 炸；F2 debug/test 教訓）**：
+- **production 11**（membership→`is_in_set`；STAKES 迭代→`options_in_set`）：
+  - `decision_engine.gd:75`（SURVIVAL）/`:138`（PASSIVE_SURVIVAL）/`:171`（SURVIVAL）/`:203`（THREAT）/`:228`（AMBIENT）
+  - `options.gd:396`（SURVIVAL、含 `or opt=="survival"` 保留）/`:412`（SURVIVAL）/`:410`（STRATEGIC_SELFINIT）
+  - `faction_ai_system.gd:4562`（SURVIVAL、★R² 抓、不在原 3-home 名單）
+  - `decision_context.gd:404`（STAKES 迭代→`for g in DecisionOptions.options_in_set("stakes")`）
+  - `decision_engine.gd:81`（THREAT、`opt in THREAT_OPTION_SET` boost gate）
+- **debug/test 11 真 code**：`buyfood_measure.gd:88`（print `str(options_in_set("survival"))`）/`headless_test.gd:4833,5783,6512,6709,9984,11146,13069`（7 membership assert）/`starvation_lockpoint_trace_bed.gd:23`（`for opt in options_in_set("survival")`）/`survival_layer_unify_test.gd:137`/`survival_prio_fix_test.gd:67`（membership）
+- **comment-only 7 處**（無 code 改、可留舊名於註解或順手更新文字）：`starvation_desperation_trace_bed:4`/`starvation_lockpoint_trace_bed:20`/`starvation_util_escalation_trace_bed:5`/`survival_single_source_test:26`/`headless_test:13037`/`rung_dissolution_check:52`/`seam1_registry_test:9`。
+- ★依賴：SURVIVAL/STRATEGIC_SELFINIT 現於 options.gd、THREAT/AMBIENT/PASSIVE 現於 decision_engine.gd、STAKES 現於 decision_context.gd → accessor 統一置 DecisionOptions、跨檔 caller 改 `DecisionOptions.is_in_set(...)`。decision_engine/decision_context → DecisionOptions 單向（已驗零環）。
+
 ### INV-3（terms 軸不動）
 - `terms.gd` 常數 + term eval 零改。REGISTRY 的 `terms` 欄（`[[term_id, weight_key]]`）零改。terms 是 shared 軸、不折入 option 點。
 
