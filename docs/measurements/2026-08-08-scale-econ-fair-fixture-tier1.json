@@ -1,0 +1,56 @@
+{
+  "concentrated": {
+    "attrition_pct": 4.16666666666667,
+    "bail_reasons": {
+
+    },
+    "construct.complete_upgrade_facility": 1,
+    "convoy.deliver": 0,
+    "convoy.deliver_bail_sell_ownerless": 0,
+    "convoy.deliver_settled": 0,
+    "convoy.dispatch": 0,
+    "end_pop": 23,
+    "faction_dissolved_day": 1,
+    "faction_trace": {
+      "0@day1": "1→0",
+      "0@day25": "0→-1",
+      "1@day1": "1→0",
+      "1@day25": "0→-1",
+      "2@day1": "1→0",
+      "2@day25": "0→-1",
+      "3@day1": "1→0",
+      "3@day25": "0→-1"
+    },
+    "manufacture.fired": 0,
+    "secession_count": 8,
+    "start_pop": 24
+  },
+  "diagnostic": "fair-fixture Tier1(concentrated vs dispersed, cohesion輸入對齊)",
+  "dispersed": {
+    "attrition_pct": 33.3333333333333,
+    "bail_reasons": {
+      "convoy.deliver_bail_other": 1,
+      "convoy.deliver_bail_sell_ownerless": 1
+    },
+    "construct.complete_upgrade_facility": 3,
+    "convoy.deliver": 2,
+    "convoy.deliver_bail_sell_ownerless": 1,
+    "convoy.deliver_settled": 0,
+    "convoy.dispatch": 5,
+    "end_pop": 16,
+    "faction_dissolved_day": 1,
+    "faction_trace": {
+      "0@day1": "1→0",
+      "0@day42": "0→-1",
+      "1@day1": "1→0",
+      "1@day42": "0→-1",
+      "2@day1": "1→0",
+      "2@day25": "0→-1",
+      "3@day1": "1→0",
+      "3@day25": "0→-1"
+    },
+    "manufacture.fired": 0,
+    "secession_count": 8,
+    "start_pop": 24
+  }
+}
