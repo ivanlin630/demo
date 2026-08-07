@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——規模經濟力底查 fair-fixture Tier1 verdict已完成寄出(★★genuine分散代價訊號乾淨浮現)
+**狀態**：工作中（等下一票）——規模經濟力底查 Tier2 verdict已完成寄出(★★重大更正:前輪genuine分散代價結論premature,跨seed方向不一致)+specimen已送QA故事稽核
+
+**工單**：無（Tier2(3seed+specimen+determinism)已完成寄systems+specimen已送QA：determinism確認過關(byte-identical)。★★同窗長(2mo)3seed交叉比較方向不一致——seed8181 dispersed較慘(20.8% vs 4.2%,符合前輪方向)/seed1337反過來concentrated較慘(16.7% vs 0.0%)/seed42零訊號(0% vs 0%)——主動撤回上輪「genuine分散代價乾淨浮現」的過早樂觀結論,誠實更正非等別人發現。relief_dispatched_to_T2=false在所有測試seed中一致,排除convoy-bug-as-death-driver假說,死因(genuine labor-survival vs決策層從未評估救濟)未進一步區分,已送specimen(4份)給QA逐tick讀故事才可鎖因果。落地16檔已git commit(dfc12105)。已回systems handback:2026-08-08-measurer-to-systems-tier2-verdict.md+to:qa handback:2026-08-08-measurer-to-qa-scale-econ-specimen-audit.md，別下accept，等QA故事稽核verdict。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——規模經濟力底查 fair-fixture Tier1 verdict已完成寄出(★★genuine分散代價訊號乾淨浮現)
 
 **工單**：無（fair-fixture Tier1 verdict已完成寄systems：systems fork決=redesign fixture(非修bug)——CONCENTRATED_fair(1 lord+3 member全co-located同tile,人格/資源逐項對齊)vs既有DISPERSED,cohesion輸入完全相同。★check(1)過關:兩側faction瓦解時序幾乎相同(concentrated day24單波解散甚至更早,dispersed day25+42分兩批)——證實cohesion確為distance-blind,瓦解非空間驅動。★★但despite同時瓦解,attrition天差地遠(concentrated4.2%famine=0 vs dispersed33.3%famine連4次)——population loss主因不是faction membership流失,是genuine空間/經濟效應,這是整個arc第一次乾淨拿到『分散真代價』訊號非結構artifact。check(2)sell_ownerless本輪fixture結構性測不到(concentrated零convoy活動無對照組)。已誠實揭露自己量測腳本day1 false-positive bug(config faction_id vs runtime重編號不一致,非真game事件)。落地3檔已git commit(81633d16)。已回systems handback:2026-08-08-measurer-to-systems-fair-fixture-verdict.md，別下accept，交系統判斷是否進Tier2鎖因果鏈或另建fixture測check(2)。
 
