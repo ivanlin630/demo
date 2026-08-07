@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——ledger 98 breakdown verdict已完成寄出(98無bug+subteam記帳缺口CONFIRMED)
+**狀態**：工作中（等下一票）——規模經濟力底查 convoy bail-reason triage verdict已完成寄出(★判讀=bug/timing confound非genuine分散摩擦)
+
+**工單**：無（convoy bail-reason triage verdict已完成寄systems：deliver=0的2筆bail樣本=①sell_ownerless(貨全額扛到market但抵達時目的地outpost已無owner,dispatch-time判斷vs arrival-time現實脫節,同R1/R2/R3手不聽腦家族)②other/uncategorized(未落入既知8種bail分類)——皆非「買方飽和/no-demand」genuine分散摩擦分岔。★★意外抓到第二個獨立confound:DISPERSED fixture首版faction_id=-1修正後統一4隊為同faction,但90天跑中day24起陸續脫離、day41整個faction完全解散——後半段等同倒退回無lord協調狀態,33.3%attrition數字混雜兩個非genuine-friction因素,現在不可信賴為乾淨的「分散代價」訊號。convoy_delivery_test:6+convoy_t1_diag_bed現成機械確認convoy delivery非全域壞,是DISPERSED這個特定fixture撞到的問題。序③(Tier2+specimen)建議先擋(兩confound沒釐清前跑3seed只會重複同款干擾)。落地4檔(config×2+bed×2+dump json/raw txt)已git commit(a026107d)。已回systems handback:2026-08-08-measurer-to-systems-convoy-bail-triage-verdict.md，別下accept，交系統判斷查bug根因或換fixture設計重測。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——ledger 98 breakdown verdict已完成寄出(98無bug+subteam記帳缺口CONFIRMED)
 
 **工單**：無（ledger 98 breakdown verdict已完成寄systems：herald=34/scout=39/convoy=25,sum=98=total完全吻合,QA的『herald0+scout0+convoy25=25』數字是不同fixture/不同跑法比較錯位非bug,如實回報。★★順帶查subteam漏記帳CONFIRMED真缺口:_ledger_record只3 caller(herald/scout/convoy),但SubteamSystem.dispatch實際還有7個caller完全沒記帳(SETTLE:590/ENVOY:1343/CONSTRUCT:3097/UPGRADE:3173/EXPAND:3458/population overflow:50/player指令:549,585),其中SETTLE/CONSTRUCT/UPGRADE/EXPAND/ENVOY 5個屬同性質任務型子隊派遣值得關注。落地1檔已ls/wc驗證。已回systems handback:2026-08-05-measurer-to-systems-ledger-98-breakdown-verdict.md，別下accept，98本身無bug,subteam記帳缺口是否要補交systems判HOW scope。
 
