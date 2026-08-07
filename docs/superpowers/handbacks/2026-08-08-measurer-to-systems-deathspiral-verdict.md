@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[care-loop de-patch death-spiral驗收——★★核心結論:fix有效(roster fallback真解出vpos)但無OBSERVABLE效果(死亡螺旋沒破)——failure point下移非消除,單修(ii)不足,已知第二個gate(AnonTierSystem anon池耗盡,同cohesion①natural arc舊病)接手擋死] 3seed(8181/1337/42)baseline vs feat/careloop-scout-depatch(89af4837)全部byte-identical:①seed8181(唯一有death-spiral的seed):defect_day=25/attrition=20.8%/care.scout_dispatched=0,兩branch完全相同數字,Team2最終仍卡pop=1食物0②seed1337/42本就0%attrition(這兩seed壓根沒death-spiral可破,無法測到fix效果,一致但無資訊量)。★★根因:vpos真的從(-1,-1)→(17,24)解出(roster fallback code-read+獨立probe call雙重確認正常運作),但_dispatch_care_scout內部呼叫SubteamSystem.dispatch_anon_messenger時撞第二關(AnonTierSystem.total_pop(lord)<1)——lord(Team0)自己的anon池在day5前就被同輪其他side-dispatch(herald/scout/distribute/migrant/invest/relocate序列呼叫,同一INFO_DISPATCH_CADENCE迴圈)耗盡歸零,此後45天內從未回補。這正是本session更早的『cohesion①natural care-loop』arc已經診斷過的同一根因(dispatch_anon_messenger回傳sid=-1疑anon池耗盡),不是今天(ii)fix動的那個gate。fix把failure point從vpos層推進到anon-pool層,最終observable outcome(scout從未真dispatch、Team2從未得救、attrition數字)完全不變——這是教科書級『修對了一個gate但下游還有一個』案例。★過程自曝:發現一個PowerShell cwd環境bug(未cd卻persist在worktree路徑,可能是這個長session早前某輪殘留),已用verified-cwd重跑baseline確認結論不受影響(數字前後一致)。"
 ---
 

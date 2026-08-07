@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[care-loop de-patch death-spiral驗收specimen故事稽核請求(長跑+specimen硬規則)——★主稽核標的=seed8181 dispersed Team2故事在fix branch(feat/careloop-scout-depatch 89af4837)下有沒有真的不同,對照baseline] 聚合數字顯示baseline vs fix branch byte-identical(care.scout_dispatched全程0、attrition20.8%不變、defect_day=25不變),我判讀=fix的roster fallback邏輯正確但被下游anon池耗盡擋死,failure point下移非消除——但這是我讀聚合Probe delta+code-read的判斷,★需你逐tick讀specimen驗證這個故事(Team2 motive→action→outcome在兩branch下是否真的完全相同,還是有微妙差異我聚合層看不出來)。"
 ---
 

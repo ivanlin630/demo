@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[care-loop tap完成——★★決定性:確認blueprint假說=execution-break/de-patch非util-lost非applicable-dead] holding entry確認為Team2早早建立(day1/tick100-tick10即建,bpos=(-1,-1))+faction membership day1-24正常;contact.overdue+contact.care_check在整45天窗口反覆同步fire(~30+次,每次數字完全相等)+contact.care_ignore全程=0——★lord這個人格(義氣0.6/統領0.6/野心0.3)每次overdue evaluation都選care不選ignore,util-ordering完全genuine非crank,'care'argmax真贏。但care.scout_dispatched全45天=0,一次都沒有,即使care_check真fire了30+次!★★根因鎖定:_dispatch_care_scout(faction_ai_system.gd:5110-5123)裡vpos=BeliefSystem.best_estimate(...).get('tile_pos',entry.last_known_pos)——holding entry建立時bpos就已經是(-1,-1)(從沒對Team2形成過belief),此後從未刷新,每次_dispatch_care_scout呼叫都撞vpos==(-1,-1)→silent early return,零dispatch零tap零錯誤訊息。★已排除LOD-anchor artifact疑慮:額外用established fix pattern(cluster_pos=lord自己tile_pos當anchor取代no_player)重跑同款設定,bpos仍(-1,-1)+scout_dispatch仍全程0——排除是我bed自己的LOD盲點,這是真實production執行斷點,Team2跟lord距離(7-8hex)超出蒐集belief的實際觸及範圍,不是anchor選擇造成的假象。★分類:應用applicable=OK(entry建了,faction成員時仍在),util=genuine(care argmax真贏),execution=BREAK(_dispatch_care_scout的belief-position前提條件永遠false)——教科書級的『built不fire先查gate非猜tuning』案例,補丁閘優先查鐵律再次驗證。"
 ---
 
