@@ -245,7 +245,7 @@ func _action_extract_treasury(state: WorldState, _target: int, pt: TeamData, _pt
 	var ratio: float = float(state.player_state.get("extract_ratio", 0.0))
 	if ratio <= 0.0 or ratio > 1.0:
 		return { "ok": false, "msg": "extract_ratio 必須 (0, 1]" }
-	FactionAISystem.new()._extract_treasury(state, pt, ratio, "玩家主動")
+	CoinTreasury.extract_treasury(state, pt, ratio, "玩家主動")
 	return { "ok": true, "msg": "徵用 %.0f%%" % (ratio * 100) }
 
 func _action_withdraw_from_storage(state: WorldState, _target: int, pt: TeamData, pt_id: int) -> Dictionary:

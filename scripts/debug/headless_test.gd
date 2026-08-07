@@ -8518,7 +8518,7 @@ func _test_extraction() -> void:
 	state.persons[100] = leader; team.leader_id = 100
 	state.teams[0] = team
 	var fai := FactionAISystem.new()
-	fai._extract_treasury(state, team, 0.3, "貪婪驅動")
+	CoinTreasury.extract_treasury(state, team, 0.3, "貪婪驅動")
 	assert(float(team.anon_treasury) == 70.0, "treasury 應 70")
 	assert(float(team.resources["coin"]) == 30.0, "coin 應 30")
 	assert(team.unrest_turns == 1, "unrest_turns 應 +1")

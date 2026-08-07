@@ -51,8 +51,8 @@ func _test_mid_leader_extracts() -> void:
 	print("--- ①中位領袖 need-driven extract ---")
 	var w: Array = _mk(0.5, 0.5, 100.0, 0.0, 0.0)   # 中位人格 + 食壓(food 0) + coin 0
 	var fai := FactionAISystem.new()
-	var need: float = fai.coin_need(w[0], w[1])
-	fai._consider_extraction(w[0], w[1])
+	var need: float = CoinTreasury.coin_need(w[0], w[1])
+	CoinTreasury.consider_extraction(w[0], w[1])
 	var coin_after: float = float(w[1].resources.get("coin", 0))
 	_ok(need > 0.0, "食壓 → coin_need>0（means-end food-buy，got %.0f）" % need)
 	_ok(coin_after > 0.0 and w[1].anon_treasury < 100.0, "中位領袖(greed.5/prud.5)有真需 → extract 取回 coin（原 flat 0.4 永不，coin %.0f treasury %.0f）" % [coin_after, w[1].anon_treasury])
@@ -62,8 +62,8 @@ func _test_no_need_no_extract() -> void:
 	print("--- ②無 need→不 extract ---")
 	var w: Array = _mk(0.5, 0.5, 100.0, 0.0, 1000.0)   # food 充足(food_days 遠>DESPERATION)、無 outpost
 	var fai := FactionAISystem.new()
-	_ok(is_equal_approx(fai.coin_need(w[0], w[1]), 0.0), "食足無建設 → coin_need=0")
-	fai._consider_extraction(w[0], w[1])
+	_ok(is_equal_approx(CoinTreasury.coin_need(w[0], w[1]), 0.0), "食足無建設 → coin_need=0")
+	CoinTreasury.consider_extraction(w[0], w[1])
 	_ok(float(w[1].resources.get("coin", 0)) == 0.0 and is_equal_approx(w[1].anon_treasury, 100.0), "無 need → 不 extract（treasury 100 不動，不亂徵）")
 
 # ★③ persona buffer：慎重 buffer > 貪婪 + 即使 greed=1.0(慎重 0) buffer > 0（測真清空反例）
@@ -72,8 +72,8 @@ func _test_persona_buffer() -> void:
 	var fai := FactionAISystem.new()
 	var prudent := PersonData.new(); prudent.values = {"貪婪": 0.0, "慎重": 1.0}
 	var greedy := PersonData.new(); greedy.values = {"貪婪": 1.0, "慎重": 0.0}
-	var bp: float = fai._extract_buffer(prudent)
-	var bg: float = fai._extract_buffer(greedy)
+	var bp: float = CoinTreasury.extract_buffer(prudent)
+	var bg: float = CoinTreasury.extract_buffer(greedy)
 	_ok(bp > bg, "慎重 leader buffer(%.0f) > 貪婪 leader buffer(%.0f)（texture）" % [bp, bg])
 	_ok(bg > 0.0, "★即使最貪婪 leader(greed 1.0/慎重 0) buffer=%.0f > 0（下限守護=非清空 treasury，真清空反例）" % bg)
 
@@ -82,8 +82,8 @@ func _test_shortfall_nonpos() -> void:
 	print("--- ④shortfall≤0→不 extract ---")
 	var w: Array = _mk(0.5, 0.5, 100.0, 1000.0, 0.0)   # 食壓有 need 但 coin 1000 已夠
 	var fai := FactionAISystem.new()
-	var need: float = fai.coin_need(w[0], w[1])
-	fai._consider_extraction(w[0], w[1])
+	var need: float = CoinTreasury.coin_need(w[0], w[1])
+	CoinTreasury.consider_extraction(w[0], w[1])
 	_ok(need < 1000.0 and is_equal_approx(w[1].anon_treasury, 100.0), "spendable 1000≥coin_need %.0f → shortfall≤0 → 不 extract（treasury 不動）" % need)
 
 # ⑤ 守恆：extract 前後 (team.coin + anon_treasury) 總和不變
@@ -91,7 +91,7 @@ func _test_conservation() -> void:
 	print("--- ⑤守恆 ---")
 	var w: Array = _mk(0.5, 0.5, 100.0, 0.0, 0.0)   # 食壓 → 會 extract
 	var before: float = float(w[1].resources.get("coin", 0)) + w[1].anon_treasury
-	FactionAISystem.new()._consider_extraction(w[0], w[1])
+	CoinTreasury.consider_extraction(w[0], w[1])
 	var after: float = float(w[1].resources.get("coin", 0)) + w[1].anon_treasury
 	_ok(is_equal_approx(before, after), "coin+treasury 前 %.1f == 後 %.1f（anon_treasury→team.coin 池間搬，守恆）" % [before, after])
 
@@ -102,8 +102,8 @@ func _test_emergency_intact() -> void:
 	var we: Array = _mk(0.5, 0.5, 100.0, 0.0, 0.0)
 	var wn: Array = _mk(0.5, 0.5, 100.0, 0.0, 0.0)
 	var fai := FactionAISystem.new()
-	fai._extract_treasury(we[0], we[1], 0.5, "飢餓緊急")
-	fai._extract_treasury(wn[0], wn[1], 0.5, "need_driven")
+	CoinTreasury.extract_treasury(we[0], we[1], 0.5, "飢餓緊急")
+	CoinTreasury.extract_treasury(wn[0], wn[1], 0.5, "need_driven")
 	var stress_e: float = we[0].persons[10].stress
 	var stress_n: float = wn[0].persons[10].stress
 	_ok(stress_e < stress_n, "emergency stress penalty(%.3f) < 非 emergency(%.3f)（is_emergency 分支完好，de-patch 未動）" % [stress_e, stress_n])
