@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——規模經濟力底查arc收官報告已完成寄出(★QA CONFIRM propagation死角框架,整條arc完整鏈路收斂)
+**狀態**：工作中（等下一票）——relief/info鏈斷點pinpoint verdict已完成寄出(★2a求援=timing race非單站斷;2b care-loop=乾淨never-attempt)
+
+**工單**：無（relief-chain pinpoint已完成寄systems：已見blueprint裁A(propagation-first,scale re-measure後置),數字直接餵spec design target。★2a求援(herald):非單純applicable-dead也非util-lost,是timing race——day23-24severity轉正(0.31→0.58)仍在faction內target_resolved成功但letter_dispatched=0(util未過);day25 severity衝頂1.00同一天faction_id→-1永久關applicable閘(_resolve_help_target:2068硬gate)——util即將過關那刻applicable閘剛好關,同session反覆撞到的多入口互搶timing race家族。全45天全域help.letter_dispatched只fire1次(day41,Team2早已faction=-1不可能是它)。★2b care-loop(scout):care.scout_dispatched全45天=0,lord一次都沒派過scout查任何子民——乾淨never-attempt,但誠實自曝我猜的scout.mini_util_positive key不存在(production無此tap),無法細分applicable-dead vs util-lost非坐實。distribute.dispatch全45天=0呼應QA已confirm死角。g1.market_arrive全域9次零散無法team-tag坐實。落地3檔已git commit。已回systems handback:2026-08-08-measurer-to-systems-relief-chain-pinpoint-verdict.md，別下accept，供spec design target細節非越界定HOW。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——規模經濟力底查arc收官報告已完成寄出(★QA CONFIRM propagation死角框架,整條arc完整鏈路收斂)
 
 **工單**：無（arc收官報告已完成寄systems：QA最終verdict=CONFIRM(不需再跑tap)——seed8181 dispersed Team2死亡=project_information_network propagation死角(co-location-gated propagate_on_arrival)在規模經濟fixture復發,非genuine labor-survival;decision層(求和/買糧/乞食/紮營/併入)全真嘗試過,util genuine,卡在跨隊訊息傳播(received_buy_orders讀team_known非god-view,read_market_board明講無在場讀不到)。★QA reframe:degree-of-dispersion可能是這個已知死角的新觸發維度(隊越分散co-location機率越低死角觸發率越高)——直接解釋我Tier2跨seed不一致(死角觸發時機不穩定,同session反覆撞到的多入口互搶timing race家族同款故事形狀)。整條arc完整鏈路(util transport-blind code-read→cohesion distance-blind code-read→fair-fixture Tier1誤判→Tier2撤回→QA坐實propagation死角)收斂寄systems，建議跟project_information_network arc owner對齊優先序(該arc HOLD修復推進則此線直接受益)。已回systems handback:2026-08-08-measurer-to-systems-scale-econ-arc-close.md，別下accept，HOW決策交systems。
 
