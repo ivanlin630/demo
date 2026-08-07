@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——規模經濟力底查 convoy bail-reason triage verdict已完成寄出(★判讀=bug/timing confound非genuine分散摩擦)
+**狀態**：工作中（等下一票）——規模經濟力底查 fair-fixture Tier1 verdict已完成寄出(★★genuine分散代價訊號乾淨浮現)
+
+**工單**：無（fair-fixture Tier1 verdict已完成寄systems：systems fork決=redesign fixture(非修bug)——CONCENTRATED_fair(1 lord+3 member全co-located同tile,人格/資源逐項對齊)vs既有DISPERSED,cohesion輸入完全相同。★check(1)過關:兩側faction瓦解時序幾乎相同(concentrated day24單波解散甚至更早,dispersed day25+42分兩批)——證實cohesion確為distance-blind,瓦解非空間驅動。★★但despite同時瓦解,attrition天差地遠(concentrated4.2%famine=0 vs dispersed33.3%famine連4次)——population loss主因不是faction membership流失,是genuine空間/經濟效應,這是整個arc第一次乾淨拿到『分散真代價』訊號非結構artifact。check(2)sell_ownerless本輪fixture結構性測不到(concentrated零convoy活動無對照組)。已誠實揭露自己量測腳本day1 false-positive bug(config faction_id vs runtime重編號不一致,非真game事件)。落地3檔已git commit(81633d16)。已回systems handback:2026-08-08-measurer-to-systems-fair-fixture-verdict.md，別下accept，交系統判斷是否進Tier2鎖因果鏈或另建fixture測check(2)。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——規模經濟力底查 convoy bail-reason triage verdict已完成寄出(★判讀=bug/timing confound非genuine分散摩擦)
 
 **工單**：無（convoy bail-reason triage verdict已完成寄systems：deliver=0的2筆bail樣本=①sell_ownerless(貨全額扛到market但抵達時目的地outpost已無owner,dispatch-time判斷vs arrival-time現實脫節,同R1/R2/R3手不聽腦家族)②other/uncategorized(未落入既知8種bail分類)——皆非「買方飽和/no-demand」genuine分散摩擦分岔。★★意外抓到第二個獨立confound:DISPERSED fixture首版faction_id=-1修正後統一4隊為同faction,但90天跑中day24起陸續脫離、day41整個faction完全解散——後半段等同倒退回無lord協調狀態,33.3%attrition數字混雜兩個非genuine-friction因素,現在不可信賴為乾淨的「分散代價」訊號。convoy_delivery_test:6+convoy_t1_diag_bed現成機械確認convoy delivery非全域壞,是DISPERSED這個特定fixture撞到的問題。序③(Tier2+specimen)建議先擋(兩confound沒釐清前跑3seed只會重複同款干擾)。落地4檔(config×2+bed×2+dump json/raw txt)已git commit(a026107d)。已回systems handback:2026-08-08-measurer-to-systems-convoy-bail-triage-verdict.md，別下accept，交系統判斷查bug根因或換fixture設計重測。
 
