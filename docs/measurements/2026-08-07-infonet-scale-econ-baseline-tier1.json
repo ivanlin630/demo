@@ -1,0 +1,29 @@
+{
+  "concentrated": {
+    "attrition_pct": 0,
+    "construct.complete_upgrade_facility": 2,
+    "convoy.cargo_delivered": 0,
+    "convoy.cargo_out": 0,
+    "convoy.deliver_settled": 0,
+    "convoy.dispatch": 0,
+    "end_pop": 24,
+    "g1.order_fulfilled": 0,
+    "manufacture.fired": 0,
+    "manufacture.noop_no_worker": 0,
+    "trade.deal": 0
+  },
+  "diagnostic": "規模經濟力底查(concentrated vs dispersed, ex-ante見spec)",
+  "dispersed": {
+    "attrition_pct": 33.3333333333333,
+    "construct.complete_upgrade_facility": 3,
+    "convoy.cargo_delivered": 0,
+    "convoy.cargo_out": 88.3507994389481,
+    "convoy.deliver_settled": 0,
+    "convoy.dispatch": 5,
+    "end_pop": 16,
+    "g1.order_fulfilled": 0,
+    "manufacture.fired": 0,
+    "manufacture.noop_no_worker": 0,
+    "trade.deal": 2
+  }
+}

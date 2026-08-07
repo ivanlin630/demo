@@ -1,0 +1,398 @@
+{
+  "bail_reasons": {
+    "convoy.deliver_bail_other": 1,
+    "convoy.deliver_bail_sell_ownerless": 1
+  },
+  "convoy_deliver_arrive": 2,
+  "convoy_deliver_settled": 0,
+  "convoy_dispatch": 5,
+  "deliver_traj": [
+    {
+      "bail_delta": {
+        "sell_ownerless": 4
+      },
+      "loaded": 21.5450282692454,
+      "material_at_deliver": 21.5450282692454,
+      "porter": 7,
+      "res": "material",
+      "result": "sell_ownerless",
+      "sold": 0
+    },
+    {
+      "bail_delta": {
+
+      },
+      "loaded": 8.47692267100016,
+      "material_at_deliver": 6.14358933766683,
+      "porter": 9,
+      "res": "food",
+      "result": "other",
+      "sold": 0
+    }
+  ],
+  "diagnostic": "DISPERSED convoy deliver=0 bail-reason triage",
+  "end_pop": 16,
+  "pop_daily": [
+    {
+      "day": 1,
+      "pop": 24
+    },
+    {
+      "day": 2,
+      "pop": 24
+    },
+    {
+      "day": 3,
+      "pop": 24
+    },
+    {
+      "day": 4,
+      "pop": 24
+    },
+    {
+      "day": 5,
+      "pop": 24
+    },
+    {
+      "day": 6,
+      "pop": 24
+    },
+    {
+      "day": 7,
+      "pop": 24
+    },
+    {
+      "day": 8,
+      "pop": 24
+    },
+    {
+      "day": 9,
+      "pop": 24
+    },
+    {
+      "day": 10,
+      "pop": 24
+    },
+    {
+      "day": 11,
+      "pop": 24
+    },
+    {
+      "day": 12,
+      "pop": 24
+    },
+    {
+      "day": 13,
+      "pop": 24
+    },
+    {
+      "day": 14,
+      "pop": 24
+    },
+    {
+      "day": 15,
+      "pop": 24
+    },
+    {
+      "day": 16,
+      "pop": 24
+    },
+    {
+      "day": 17,
+      "pop": 24
+    },
+    {
+      "day": 18,
+      "pop": 24
+    },
+    {
+      "day": 19,
+      "pop": 24
+    },
+    {
+      "day": 20,
+      "pop": 24
+    },
+    {
+      "day": 21,
+      "pop": 24
+    },
+    {
+      "day": 22,
+      "pop": 24
+    },
+    {
+      "day": 23,
+      "pop": 24
+    },
+    {
+      "day": 24,
+      "pop": 24
+    },
+    {
+      "day": 25,
+      "pop": 24
+    },
+    {
+      "day": 26,
+      "pop": 24
+    },
+    {
+      "day": 27,
+      "pop": 24
+    },
+    {
+      "day": 28,
+      "pop": 24
+    },
+    {
+      "day": 29,
+      "pop": 24
+    },
+    {
+      "day": 30,
+      "pop": 24
+    },
+    {
+      "day": 31,
+      "pop": 24
+    },
+    {
+      "day": 32,
+      "pop": 24
+    },
+    {
+      "day": 33,
+      "pop": 23
+    },
+    {
+      "day": 34,
+      "pop": 22
+    },
+    {
+      "day": 35,
+      "pop": 20
+    },
+    {
+      "day": 36,
+      "pop": 20
+    },
+    {
+      "day": 37,
+      "pop": 20
+    },
+    {
+      "day": 38,
+      "pop": 20
+    },
+    {
+      "day": 39,
+      "pop": 20
+    },
+    {
+      "day": 40,
+      "pop": 20
+    },
+    {
+      "day": 41,
+      "pop": 19
+    },
+    {
+      "day": 42,
+      "pop": 19
+    },
+    {
+      "day": 43,
+      "pop": 19
+    },
+    {
+      "day": 44,
+      "pop": 19
+    },
+    {
+      "day": 45,
+      "pop": 19
+    },
+    {
+      "day": 46,
+      "pop": 19
+    },
+    {
+      "day": 47,
+      "pop": 19
+    },
+    {
+      "day": 48,
+      "pop": 19
+    },
+    {
+      "day": 49,
+      "pop": 19
+    },
+    {
+      "day": 50,
+      "pop": 19
+    },
+    {
+      "day": 51,
+      "pop": 19
+    },
+    {
+      "day": 52,
+      "pop": 19
+    },
+    {
+      "day": 53,
+      "pop": 19
+    },
+    {
+      "day": 54,
+      "pop": 19
+    },
+    {
+      "day": 55,
+      "pop": 19
+    },
+    {
+      "day": 56,
+      "pop": 19
+    },
+    {
+      "day": 57,
+      "pop": 19
+    },
+    {
+      "day": 58,
+      "pop": 19
+    },
+    {
+      "day": 59,
+      "pop": 19
+    },
+    {
+      "day": 60,
+      "pop": 19
+    },
+    {
+      "day": 61,
+      "pop": 19
+    },
+    {
+      "day": 62,
+      "pop": 19
+    },
+    {
+      "day": 63,
+      "pop": 19
+    },
+    {
+      "day": 64,
+      "pop": 18
+    },
+    {
+      "day": 65,
+      "pop": 18
+    },
+    {
+      "day": 66,
+      "pop": 18
+    },
+    {
+      "day": 67,
+      "pop": 18
+    },
+    {
+      "day": 68,
+      "pop": 18
+    },
+    {
+      "day": 69,
+      "pop": 18
+    },
+    {
+      "day": 70,
+      "pop": 18
+    },
+    {
+      "day": 71,
+      "pop": 17
+    },
+    {
+      "day": 72,
+      "pop": 17
+    },
+    {
+      "day": 73,
+      "pop": 17
+    },
+    {
+      "day": 74,
+      "pop": 17
+    },
+    {
+      "day": 75,
+      "pop": 17
+    },
+    {
+      "day": 76,
+      "pop": 17
+    },
+    {
+      "day": 77,
+      "pop": 16
+    },
+    {
+      "day": 78,
+      "pop": 16
+    },
+    {
+      "day": 79,
+      "pop": 16
+    },
+    {
+      "day": 80,
+      "pop": 16
+    },
+    {
+      "day": 81,
+      "pop": 16
+    },
+    {
+      "day": 82,
+      "pop": 16
+    },
+    {
+      "day": 83,
+      "pop": 16
+    },
+    {
+      "day": 84,
+      "pop": 16
+    },
+    {
+      "day": 85,
+      "pop": 16
+    },
+    {
+      "day": 86,
+      "pop": 16
+    },
+    {
+      "day": 87,
+      "pop": 16
+    },
+    {
+      "day": 88,
+      "pop": 16
+    },
+    {
+      "day": 89,
+      "pop": 16
+    },
+    {
+      "day": 90,
+      "pop": 16
+    }
+  ],
+  "start_pop": 24
+}

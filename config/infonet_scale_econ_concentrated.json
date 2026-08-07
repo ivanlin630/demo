@@ -1,0 +1,19 @@
+{
+  "_doc": "規模經濟力底查(measurer持久fixture,2026-08-07,spec docs/superpowers/specs/2026-08-07-scale-economy-baseline-measure-HOW.md)：CONCENTRATED場景——1大據點全pop=24,同DISPERSED(4×pop6)總量對照,唯一變因=集中度。plains terrain(同DISPERSED對齊,避地型混淆)。",
+  "seed": 8181,
+  "mode": "explicit",
+  "max_ticks": 50000,
+  "map": { "radius": 20, "resource_richness": 5 },
+  "teams": [
+    { "id": 0, "name": "T_CONCENTRATED", "tile_pos": [20, 20], "population": 24,
+      "tags": ["統領", "生產"], "faction_id": -1,
+      "anon_tiers": { "平民": 22 },
+      "resources": { "food": 480.0, "material": 40.0, "coin": 800.0, "tools": 5.0 },
+      "leader": { "name": "Concentrated_Leader", "age": 35, "loyalty": 0.9, "stress": 0.0,
+        "skills": { "統領": 0.6, "生產": 0.6, "商業": 0.4 },
+        "values": { "野心": 0.3, "慎重": 0.7, "義氣": 0.6, "好戰": 0.0, "求生欲": 0.5 } },
+      "named_members": [ { "name": "C_M1", "loyalty": 0.8, "skills": { "生產": 0.4 } } ],
+      "outpost": { "type": "civilian", "level": 1, "terrain": "plains", "tile_food_init": 480 } }
+  ],
+  "player": { "team_id": -1, "is_leader": false }
+}
