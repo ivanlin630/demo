@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——care-loop tap verdict已完成寄出(★★決定性:execution-break非util-lost非applicable-dead,確認blueprint假說)
+**狀態**：工作中（等QA+下一票）——care-loop de-patch death-spiral驗收已完成寄出(★★fix有效但無效果,failure point下移非消除,單修不足)+specimen已送QA稽核
+
+**工單**：無（death-spiral驗收已完成寄systems+specimen已送QA：3seed(8181/1337/42) baseline vs feat/careloop-scout-depatch(89af4837)全部byte-identical——roster fallback邏輯真的修好(vpos真解出)但care.scout_dispatched全程仍0,死亡螺旋沒破(seed8181 attrition20.8%/defect_day25兩branch完全相同)。根因:lord自己anon池day5前被同輪其他side-dispatch耗盡歸零,dispatch_anon_messenger內建gate擋死——同本session更早cohesion①natural care-loop arc已知病灶,非今天fix動的gate,failure point下移非消除。單修(ii)不足,需接續處理anon池競爭。過程自曝抓到一個PowerShell cwd環境飄移bug,已verified-cwd重跑確認結論不受影響。落地20檔已git commit(8458e144)。已回systems handback:2026-08-08-measurer-to-systems-deathspiral-verdict.md+to:qa specimen稽核請求:2026-08-08-measurer-to-qa-deathspiral-specimen-audit.md，別下accept，等QA故事稽核verdict。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——care-loop tap verdict已完成寄出(★★決定性:execution-break非util-lost非applicable-dead,確認blueprint假說)
 
 **工單**：無（care-loop tap已完成寄systems：holding entry day1即建(applicable OK)+contact.overdue/care_check整45天反覆同步fire30+次+care_ignore全程0(util genuine,義氣0.6統領0.6野心0.3人格算出care每次真贏非crank)+★但care.scout_dispatched全45天=0——根因鎖定_dispatch_care_scout(faction_ai_system.gd:5110-5123)的vpos=BeliefSystem.best_estimate(...)永遠(-1,-1)(從沒對Team2形成belief且從未刷新),silent early return零dispatch零tap零錯誤訊息。已用established fix pattern(cluster_pos=lord自己tile_pos anchor)排除LOD-anchor artifact疑慮,結果不變,確認是真實production執行斷點(Team2距lord7-8hex超出belief觸及範圍)。教科書級『built不fire先查gate非猜tuning』案例,補丁閘優先查鐵律驗證。修法方向:_dispatch_care_scout需要無belief時的fallback(同_resolve_help_target已有的名冊fallback精神)。temp production tap已git checkout --復原確認乾淨。落地5檔已git commit。已回systems handback:2026-08-08-measurer-to-systems-careloop-tap-verdict.md，別下accept，供定ii care-loop修法(gate/execution補非util調)。
 
