@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等QA查完point(a)）——QA seed8181 verdict=REFRAME(非genuine labor-survival,decision層有真嘗試求助),回code-read支持QA propagation死角假說,等QA續查後對齊才報systems
+**狀態**：工作中（等下一票）——規模經濟力底查arc收官報告已完成寄出(★QA CONFIRM propagation死角框架,整條arc完整鏈路收斂)
+
+**工單**：無（arc收官報告已完成寄systems：QA最終verdict=CONFIRM(不需再跑tap)——seed8181 dispersed Team2死亡=project_information_network propagation死角(co-location-gated propagate_on_arrival)在規模經濟fixture復發,非genuine labor-survival;decision層(求和/買糧/乞食/紮營/併入)全真嘗試過,util genuine,卡在跨隊訊息傳播(received_buy_orders讀team_known非god-view,read_market_board明講無在場讀不到)。★QA reframe:degree-of-dispersion可能是這個已知死角的新觸發維度(隊越分散co-location機率越低死角觸發率越高)——直接解釋我Tier2跨seed不一致(死角觸發時機不穩定,同session反覆撞到的多入口互搶timing race家族同款故事形狀)。整條arc完整鏈路(util transport-blind code-read→cohesion distance-blind code-read→fair-fixture Tier1誤判→Tier2撤回→QA坐實propagation死角)收斂寄systems，建議跟project_information_network arc owner對齊優先序(該arc HOLD修復推進則此線直接受益)。已回systems handback:2026-08-08-measurer-to-systems-scale-econ-arc-close.md，別下accept，HOW決策交systems。
+
+---
+
+**狀態(舊)**：工作中（等QA查完point(a)）——QA seed8181 verdict=REFRAME(非genuine labor-survival,decision層有真嘗試求助),回code-read支持QA propagation死角假說,等QA續查後對齊才報systems
 
 **工單**：無（QA回seed8181 verdict:REFRAME——Team2決策層有真嘗試對外求助(求和/買糧/乞食/紮營/併入argmax真中選,非死常數),排除『decision層從沒想過求助』;真根疑雙重卡點(a)day24脫離勢力後faction-scoped救濟結構性失資格(b)Team2買糧單疑似co-location-gated propagation死角從未真撮合。QA point(a)『Team0 day13-24有沒有評估過對Team2的distribute』還沒查完,標記待辦,要我對齊再報systems。我回code-read:①specimen全檔案零distribute候選是side-action可見度限制(同session已知限制)非證據②★code-read直接支持QA②(b)假說:_distribute_candidates(goal_resolver.gd:134-169)第一道真篩子=OrderSystem.received_buy_orders讀team_known(propagation機制非god-view),read_market_board註解明講co-location-gated——跟已知project_information_network arc診斷過的propagation死角極可能同根復發(該arc當時WHAT-only HOLD待build)③offer加distribute.mini_util Probe tap重跑做更精確驗證,待QA判斷要不要。已回to:qa handback:2026-08-08-measurer-to-qa-distribute-gate-code-read.md，別報systems，等QA續查/回覆再對齊。
 
