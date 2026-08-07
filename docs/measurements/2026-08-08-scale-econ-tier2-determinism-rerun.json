@@ -1,0 +1,14 @@
+{
+  "attrition_pct": 33.3333333333333,
+  "bail_reasons": {
+    "convoy.deliver_bail_other": 1,
+    "convoy.deliver_bail_sell_ownerless": 1
+  },
+  "convoy.deliver": 2,
+  "convoy.deliver_settled": 0,
+  "convoy.dispatch": 5,
+  "end_pop": 16,
+  "manufacture.fired": 0,
+  "seed": 8181,
+  "start_pop": 24
+}

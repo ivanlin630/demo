@@ -1,0 +1,1209 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== 規模經濟力底查 Tier2 determinism 二跑(seed8181 dispersed) ===
+
+########## DISPERSED_determinism_check seed=8181 ##########
+[GameSetup] 完成：4 teams, 1 factions, 8 persons
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×93 (oid=0)
+[Order] Team0 buy weapon_melee_low ×3 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=2)
+[Order] Team0 buy material ×54 (oid=3)
+[Order] Team0 buy tools ×5 (oid=4)
+[Order] Team1 sell food ×93 (oid=5)
+[Order] Team1 buy weapon_melee_low ×3 (oid=6)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=7)
+[Order] Team1 buy material ×54 (oid=8)
+[Order] Team1 buy tools ×1 (oid=9)
+[Order] Team2 sell food ×93 (oid=10)
+[Order] Team2 buy weapon_melee_low ×3 (oid=11)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=12)
+[Order] Team2 buy material ×54 (oid=13)
+[Order] Team2 buy tools ×1 (oid=14)
+[Order] Team3 sell food ×93 (oid=15)
+[Order] Team3 buy weapon_melee_low ×3 (oid=16)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=17)
+[Order] Team3 buy material ×54 (oid=18)
+[Order] Team3 buy tools ×1 (oid=19)
+[Harvest] Tick60 季節=春 base=1.1
+[Succession] Team 4 從匿名晉升新領袖 P3002（統領=0.07）
+[Order] Team4 buy food ×2 (oid=20)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Move] Team 4 抵達 (18,17)
+[SubAI] Team4 引擎→覓食 (覓食)
+[DayNight] Day 1 開始
+[TickPerf] day=1 avg=16822 us max=2931369 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,17)
+[Merge] Team0 ← Team4 完全合併 (pop=6)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Succession] Team 4 從匿名晉升新領袖 P3003（統領=0.24）
+[Order] Team4 buy food ×2 (oid=21)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 2 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=2 avg=21991 us max=1356566 us ticks=240 teams=5 factions=1
+[Site] 選址 (26, 13) score=366 周邊資源={ "ore_iron": 183, "ore_silver": 77, "wild_horses": 6, "herb": 2 } terrain=mountain
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[SubAI] Team4 引擎→覓食 (覓食)
+[Ambition] Team4 rung 0→1 (商業 cap=3)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[Succession] Team 5 從匿名晉升新領袖 P3004（統領=0.78）
+[Order] Team5 buy food ×1 (oid=22)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[Survival] Team5 urgent days_left=0.0 偵查→覓食
+[DayNight] Day 3 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[TickPerf] day=3 avg=20157 us max=779130 us ticks=240 teams=6 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,17)
+[Move] Team 5 抵達 (18,17)
+[Merge] Team0 ← Team4 完全合併 (pop=5)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[Survival] Team5 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (18,17)
+[SubAI] Team5 引擎→覓食 (覓食)
+[Ambition] Team5 rung 0→1 (武力 cap=4)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 4 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=4 avg=20257 us max=855330 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (18,17)
+[Succession] Team 6 從匿名晉升新領袖 P3005（統領=0.10）
+[Order] Team6 buy food ×2 (oid=23)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (17,17)
+[Move] Team 6 抵達 (18,17)
+[Merge] Team0 ← Team5 完全合併 (pop=5)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 5 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[TickPerf] day=5 avg=21294 us max=786289 us ticks=240 teams=5 factions=1
+[Order] Team0 sell food ×92 (oid=24)
+[Order] Team0 buy weapon_melee_low ×3 (oid=25)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=26)
+[Order] Team0 buy material ×47 (oid=27)
+[Order] Team0 buy tools ×4 (oid=28)
+[Order] Team1 sell food ×74 (oid=29)
+[Order] Team1 buy weapon_melee_low ×3 (oid=30)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=31)
+[Order] Team1 buy material ×42 (oid=32)
+[Order] Team1 buy tools ×1 (oid=33)
+[Order] Team2 sell food ×74 (oid=34)
+[Order] Team2 buy weapon_melee_low ×3 (oid=35)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=36)
+[Order] Team2 buy material ×48 (oid=37)
+[Order] Team2 buy tools ×1 (oid=38)
+[Order] Team3 sell food ×78 (oid=39)
+[Order] Team3 buy weapon_melee_low ×3 (oid=40)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=41)
+[Order] Team3 buy material ×52 (oid=42)
+[Order] Team3 buy tools ×1 (oid=43)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫4+私19) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 24(公庫4+私19) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 24(公庫4+私19) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 6 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 25(公庫4+私20) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=6 avg=19864 us max=929238 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 25(公庫4+私20) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私16) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 26(公庫5+私21) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SubAI] Team6 引擎→覓食 (覓食)
+[Ambition] Team6 rung 0→1 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 27(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 7 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 27(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=7 avg=21330 us max=798911 us ticks=240 teams=5 factions=1
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 28(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 28(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[SubAI] Team6 紀律失效，脫離成獨立
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 29(公庫6+私23) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[DayNight] Day 8 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=8 avg=20132 us max=746135 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Ambition] Team6 rung 1→0 (商業 cap=2)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 31(公庫6+私25) (需 { "material": 50, "tools": 0 })
+[Outpost] Team1 設施施工 farming → Lv1 at (24,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 1(公庫0+私1) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 9 開始
+[Outpost] 設施完工 farming Lv1 at (24,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 2(公庫0+私2) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 22(公庫4+私19) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=9 avg=19144 us max=636056 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Relocate] Team2 棄據點遷向 (24,17)
+[Relocate] Team3 棄據點遷向 (24,17)
+[Order] Team6 buy food ×1 (oid=44)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 3(公庫1+私2) (需 { "material": 50, "tools": 0 })
+[Order] Team2 sell material ×18 (oid=45)
+[Order] Team3 sell material ×13 (oid=46)
+[Move] Team 6 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 4(公庫1+私3) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 10 開始
+[TickPerf] day=10 avg=12693 us max=790908 us ticks=240 teams=5 factions=1
+[Order] Team0 sell food ×77 (oid=47)
+[Order] Team0 buy weapon_melee_low ×3 (oid=48)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=49)
+[Order] Team0 buy material ×41 (oid=50)
+[Order] Team0 buy tools ×4 (oid=51)
+[Order] Team1 sell food ×57 (oid=52)
+[Order] Team1 buy weapon_melee_low ×3 (oid=53)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=54)
+[Order] Team1 buy material ×60 (oid=55)
+[Order] Team1 buy tools ×1 (oid=56)
+[Order] Team2 buy weapon_melee_low ×3 (oid=57)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=58)
+[Order] Team3 buy weapon_melee_low ×3 (oid=59)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=60)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 5(公庫1+私4) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 24(公庫4+私20) (需 { "material": 50, "tools": 0 })
+[Combat Start] Team-1000000 vs Team3
+[Ambush] NPC Team3 被 boar 伏擊
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 6(公庫2+私4) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (19,16)
+[DayNight] Day 11 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 7(公庫2+私5) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=11 avg=12234 us max=749070 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 8(公庫2+私6) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (19,16)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 9(公庫2+私7) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 12 開始
+[TickPerf] day=12 avg=10627 us max=455027 us ticks=240 teams=5 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫3+私7) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 27(公庫5+私22) (需 { "material": 50, "tools": 0 })
+[Move] Team 2 抵達 (24,17)
+[Move] Team 6 抵達 (19,16)
+[Settle] Team2 安頓於 (24,17) 變居民
+[StrategicAI] Faction0 首要目標: defend target=1
+[Move] Team 3 抵達 (24,17)
+[Settle] Team3 安頓於 (24,17) 變居民
+[DayNight] Day 13 開始
+[TickPerf] day=13 avg=14360 us max=546512 us ticks=240 teams=5 factions=1
+[Move] Team 6 抵達 (19,16)
+[DayNight] Day 14 開始
+[TickPerf] day=14 avg=14953 us max=642517 us ticks=240 teams=5 factions=1
+[Order] Team2 sell material ×20 (oid=62)
+[Order] Team3 sell material ×14 (oid=63)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 30(公庫6+私24) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[DayNight] Day 15 開始
+[MsgPrune] 刪除過期訊息 global=21 known=51
+[TickPerf] day=15 avg=15187 us max=659210 us ticks=240 teams=5 factions=1
+[Order] Team0 sell food ×62 (oid=43)
+[Order] Team0 buy weapon_melee_low ×3 (oid=44)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=45)
+[Order] Team0 buy material ×34 (oid=46)
+[Order] Team0 buy tools ×4 (oid=47)
+[Order] Team1 sell food ×42 (oid=48)
+[Order] Team1 buy weapon_melee_low ×3 (oid=49)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=50)
+[Order] Team1 buy material ×50 (oid=51)
+[Order] Team1 buy tools ×1 (oid=52)
+[Order] Team2 buy weapon_melee_low ×3 (oid=53)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=54)
+[Order] Team3 buy weapon_melee_low ×3 (oid=55)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=56)
+[DayNight] Day 16 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=16 avg=14013 us max=834305 us ticks=240 teams=5 factions=1
+[Sub] Team2 派出子隊 Team7 leader=P2001 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team2 派運輸子隊 Team7 送 material×22 → demand 市場(24,24)
+[Order] Team7 sell material ×21 (oid=56)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 32(公庫7+私26) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 33(公庫7+私26) (需 { "material": 50, "tools": 0 })
+[StrategicAI] Faction0 首要目標: defend target=7
+[DayNight] Day 17 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=17 avg=14261 us max=774968 us ticks=240 teams=6 factions=1
+[Order] Team6 buy food ×1 (oid=56)
+[Move] Team 6 抵達 (16,19)
+[DayNight] Day 18 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[TickPerf] day=18 avg=13642 us max=781745 us ticks=240 teams=6 factions=1
+[Move] Team 6 抵達 (16,19)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 35(公庫8+私28) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 36(公庫8+私28) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 19 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=19 avg=15036 us max=1011233 us ticks=240 teams=6 factions=1
+[Sub] Team3 派出子隊 Team8 leader=P3001 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team3 派運輸子隊 Team8 送 material×17 → demand 市場(17,24)
+[Order] Team8 sell material ×17 (oid=55)
+[Order] Team2 sell material ×1 (oid=56)
+[DayNight] Day 20 開始
+[MsgPrune] 刪除過期訊息 global=20 known=50
+[TickPerf] day=20 avg=9812 us max=487586 us ticks=240 teams=7 factions=1
+[Order] Team0 sell food ×46 (oid=37)
+[Order] Team0 buy weapon_melee_low ×3 (oid=38)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=39)
+[Order] Team0 buy material ×27 (oid=40)
+[Order] Team0 buy tools ×4 (oid=41)
+[Order] Team1 sell food ×52 (oid=42)
+[Order] Team1 buy weapon_melee_low ×3 (oid=43)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=44)
+[Order] Team1 buy material ×43 (oid=45)
+[Order] Team1 buy tools ×1 (oid=46)
+[Order] Team2 buy weapon_melee_low ×3 (oid=47)
+[Order] Team2 buy weapon_ranged_low ×2 (oid=48)
+[Order] Team2 buy food ×2 (oid=49)
+[Order] Team3 buy weapon_melee_low ×3 (oid=50)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=51)
+[Order] Team3 buy food ×2 (oid=52)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 38(公庫8+私30) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (16,19)
+[Move] Team 7 抵達 (24,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 39(公庫9+私30) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 21 開始
+[TickPerf] day=21 avg=10602 us max=803192 us ticks=240 teams=7 factions=1
+[Ambition] Team1 rung 0→1 (定居 cap=2)
+[Order] Team7 sell material ×21 (oid=58)
+[Order] Team3 sell material ×1 (oid=59)
+[Move] Team 6 抵達 (16,19)
+[DayNight] Day 22 開始
+[TickPerf] day=22 avg=9178 us max=613555 us ticks=240 teams=7 factions=1
+[SurvivalCamp] team=Team7 → 紮營 @(24,22)
+[Survival] Team7 warning days_left=2.9 運輸→紮營
+[Survival] Team8 warning days_left=2.9 運輸→覓食
+[CrudeCamp] Team7 紮營 @(24,22) → civilian
+[Order] Team7 buy material ×37 (oid=60)
+[Order] Team7 buy tools ×1 (oid=61)
+[Move] Team 6 抵達 (16,19)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 41(公庫9+私32) (需 { "material": 50, "tools": 0 })
+[Order] Team8 buy food ×1 (oid=62)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 42(公庫10+私32) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 23 開始
+[Order] Team7 buy food ×1 (oid=63)
+[TickPerf] day=23 avg=10929 us max=477111 us ticks=240 teams=7 factions=1
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Move] Team 8 抵達 (18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Survival] Team8 warning days_left=1.2 idle→覓食
+[DayNight] Day 24 開始
+[MsgPrune] 刪除過期訊息 global=3 known=7
+[TickPerf] day=24 avg=8516 us max=437276 us ticks=240 teams=7 factions=1
+[Move] Team 8 抵達 (18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Survival] Team8 urgent days_left=0.8 idle→覓食
+[Faction] Team2 脫離勢力0
+[Faction] Team3 脫離勢力0
+[Faction] Team7 脫離勢力0
+[Order] Team8 sell material ×17 (oid=64)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Order] Team2 sell material ×4 (oid=65)
+[StrategicAI] Faction0 首要目標: defend target=8
+[Move] Team 8 抵達 (18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Survival] Team8 urgent days_left=0.4 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[DayNight] Day 25 開始
+[MsgPrune] 刪除過期訊息 global=14 known=32
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 44(公庫10+私34) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Move] Team 3 抵達 (24,17)
+[Move] Team 8 抵達 (18,20)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 45(公庫10+私34) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[TickPerf] day=25 avg=10526 us max=557167 us ticks=240 teams=7 factions=1
+[Order] Team0 sell food ×31 (oid=52)
+[Order] Team0 buy weapon_melee_low ×3 (oid=53)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=54)
+[Order] Team0 buy material ×20 (oid=55)
+[Order] Team0 buy tools ×4 (oid=56)
+[Order] Team1 sell food ×64 (oid=57)
+[Order] Team1 buy weapon_melee_low ×3 (oid=58)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=59)
+[Order] Team1 buy material ×36 (oid=60)
+[Order] Team1 buy tools ×1 (oid=61)
+[Order] Team2 buy weapon_melee_low ×1 (oid=62)
+[Order] Team2 buy food ×22 (oid=63)
+[Order] Team3 buy weapon_melee_low ×1 (oid=64)
+[Order] Team3 buy food ×22 (oid=65)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Move] Team 2 抵達 (24,17)
+[Move] Team 8 抵達 (18,20)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Survival] Team8 urgent days_left=0.0 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(18,20)
+[Order] Team6 buy food ×1 (oid=67)
+[Move] Team 3 抵達 (23,16)
+[DayNight] Day 26 開始
+[TickPerf] day=26 avg=10441 us max=713167 us ticks=240 teams=7 factions=1
+[Order] Team3 buy weapon_ranged_low ×2 (oid=68)
+[Move] Team 2 抵達 (24,17)
+[Move] Team 8 抵達 (18,20)
+[SubAI] Team8 引擎→覓食 (覓食)
+[CrudeCamp] Team6 紮營 @(15,19) → civilian
+[Order] Team7 sell material ×1 (oid=69)
+[Order] Team3 sell material ×3 (oid=70)
+[Move] Team 2 抵達 (24,17)
+[Move] Team 3 抵達 (23,16)
+[Move] Team 8 抵達 (18,20)
+[Order] Team6 buy material ×29 (oid=71)
+[DayNight] Day 27 開始
+[TickPerf] day=27 avg=13443 us max=731427 us ticks=240 teams=7 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 47(公庫11+私36) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 48(公庫11+私36) (需 { "material": 50, "tools": 0 })
+[Move] Team 2 抵達 (24,17)
+[Faction] Team6 脫離勢力0
+[DayNight] Day 28 開始
+[Order] Team7 buy food ×3 (oid=73)
+[TickPerf] day=28 avg=16089 us max=662318 us ticks=240 teams=7 factions=1
+[SubAI] Team7 紀律失效，脫離成獨立
+[Move] Team 2 抵達 (26,17)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(21,18)
+[Survival] Team8 warning days_left=2.9 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(21,18)
+[Move] Team 8 抵達 (21,18)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(21,18)
+[Survival] Team8 warning days_left=2.5 idle→覓食
+[Order] Team8 buy food ×1 (oid=74)
+[DayNight] Day 29 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[TickPerf] day=29 avg=15446 us max=697134 us ticks=240 teams=7 factions=1
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 50(公庫12+私38) (需 { "material": 50, "tools": 0 })
+[Move] Team 1 抵達 (29,16)
+[Move] Team 2 抵達 (26,17)
+[Move] Team 8 抵達 (21,18)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(21,18)
+[Survival] Team8 warning days_left=2.1 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(21,18)
+[Order] Team8 sell material ×17 (oid=73)
+[Order] Team2 sell material ×7 (oid=74)
+[Move] Team 2 抵達 (26,17)
+[DayNight] Day 30 開始
+[MsgPrune] 刪除過期訊息 global=14 known=19
+[Horse] Outpost (24, 22) 捕野馬 +1
+[Move] Team 8 抵達 (21,18)
+[TickPerf] day=30 avg=16307 us max=635217 us ticks=240 teams=7 factions=1
+[SubAI] Team8 引擎→覓食 (覓食)
+[Order] Team0 sell food ×16 (oid=61)
+[Order] Team0 buy weapon_melee_low ×3 (oid=62)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=63)
+[Order] Team0 buy material ×13 (oid=64)
+[Order] Team0 buy tools ×4 (oid=65)
+[Order] Team1 buy weapon_melee_low ×3 (oid=66)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=67)
+[Order] Team1 buy material ×48 (oid=68)
+[Order] Team1 buy tools ×1 (oid=69)
+[Order] Team2 buy weapon_melee_low ×1 (oid=70)
+[Order] Team2 buy food ×22 (oid=71)
+[Order] Team3 buy weapon_melee_low ×3 (oid=72)
+[Order] Team3 buy food ×7 (oid=73)
+[Move] Team 2 抵達 (26,17)
+[Move] Team 8 抵達 (21,18)
+[Order] Team6 buy food ×2 (oid=74)
+[DayNight] Day 31 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=31 avg=16417 us max=776185 us ticks=240 teams=7 factions=1
+[SubAI] Team8 引擎→覓食 (覓食)
+[Order] Team1 buy food ×2 (oid=74)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=75)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 53(公庫13+私40) (需 { "material": 50, "tools": 0 })
+[Move] Team 8 抵達 (21,18)
+[Order] Team7 sell material ×1 (oid=76)
+[Order] Team3 sell material ×3 (oid=77)
+[Move] Team 2 抵達 (24,17)
+[Market@(24, 17)] Team2  outpost owner Team1 成交
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(21,18)
+[Survival] Team8 warning days_left=2.9 idle→覓食
+[Order] Team6 buy material ×17 (oid=82)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(21,18)
+[DayNight] Day 32 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=32 avg=17581 us max=742664 us ticks=240 teams=7 factions=1
+[Move] Team 2 抵達 (24,17)
+[Move] Team 8 抵達 (21,18)
+[Famine] Team2 餓死 anon 1 (famine=7天)
+[SubAI] Team8 引擎→覓食 (覓食)
+[Move] Team 2 抵達 (24,17)
+[Move] Team 8 抵達 (21,18)
+[DayNight] Day 33 開始
+[Order] Team7 buy food ×3 (oid=82)
+[TickPerf] day=33 avg=15692 us max=693344 us ticks=240 teams=7 factions=1
+[SubAI] Team8 引擎→覓食 (覓食)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 56(公庫14+私42) (需 { "material": 50, "tools": 0 })
+[Move] Team 2 抵達 (24,17)
+[Move] Team 3 抵達 (21,17)
+[Move] Team 8 抵達 (21,18)
+[Famine] Team2 餓死 anon 1 (famine=8天)
+[Move] Team 2 抵達 (24,17)
+[DayNight] Day 34 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[TickPerf] day=34 avg=16950 us max=765899 us ticks=240 teams=7 factions=1
+[Move] Team 1 抵達 (24,24)
+[Move] Team 8 抵達 (21,17)
+[Market@(24, 24)] Team1  outpost owner Team-1 成交
+[Merge] Team3 ← Team8 完全合併 (pop=6)
+[Famine] Team2 餓死 anon 1 (famine=9天)
+[StrategicAI] Faction0 首要目標: defend target=1
+[Order] Team2 sell material ×4 (oid=84)
+[Move] Team 1 抵達 (24,24)
+[Move] Team 2 抵達 (24,17)
+[DayNight] Day 35 開始
+[MsgPrune] 刪除過期訊息 global=21 known=27
+[Move] Team 2 抵達 (24,17)
+[Famine] Team2 餓死 anon 1 (famine=10天)
+[TickPerf] day=35 avg=14850 us max=638384 us ticks=240 teams=6 factions=1
+[Order] Team0 sell food ×1 (oid=64)
+[Order] Team0 buy weapon_melee_low ×3 (oid=65)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=66)
+[Order] Team0 buy material ×6 (oid=67)
+[Order] Team0 buy tools ×4 (oid=68)
+[Order] Team1 buy weapon_melee_low ×3 (oid=69)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=70)
+[Order] Team1 buy material ×47 (oid=71)
+[Order] Team1 buy tools ×1 (oid=72)
+[Order] Team2 buy food ×4 (oid=73)
+[Order] Team3 buy weapon_melee_low ×1 (oid=74)
+[Order] Team3 buy food ×26 (oid=75)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 59(公庫15+私44) (需 { "material": 50, "tools": 0 })
+[Move] Team 1 抵達 (24,24)
+[Order] Team6 buy food ×2 (oid=76)
+[Move] Team 1 抵達 (24,24)
+[Move] Team 2 抵達 (24,17)
+[Move] Team 3 抵達 (21,18)
+[DayNight] Day 36 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=36 avg=17268 us max=705890 us ticks=240 teams=6 factions=1
+[Order] Team0 buy food ×1 (oid=75)
+[Order] Team1 buy food ×10 (oid=76)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=77)
+[Move] Team 1 抵達 (24,24)
+[Move] Team 3 抵達 (21,18)
+[Order] Team7 sell material ×1 (oid=78)
+[Order] Team3 sell material ×20 (oid=79)
+[Move] Team 2 抵達 (24,17)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[Order] Team6 buy material ×16 (oid=80)
+[DayNight] Day 37 開始
+[MsgPrune] 刪除過期訊息 global=3 known=2
+[TickPerf] day=37 avg=17192 us max=1057284 us ticks=240 teams=6 factions=1
+[Move] Team 1 抵達 (24,24)
+[Takeover] Team1 接管無人 outpost (24,24)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 62(公庫15+私46) (需 { "material": 50, "tools": 0 })
+[Relocate] Team1 棄據點遷向 (24,17)
+[DayNight] Day 38 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Order] Team7 buy food ×3 (oid=77)
+[TickPerf] day=38 avg=20515 us max=2029800 us ticks=240 teams=6 factions=1
+[Move] Team 2 抵達 (24,17)
+[Move] Team 2 抵達 (24,17)
+[Ambition] Team3 rung 1→0 (定居 cap=2)
+[DayNight] Day 39 開始
+[MsgPrune] 刪除過期訊息 global=5 known=5
+[TickPerf] day=39 avg=14990 us max=1115312 us ticks=240 teams=6 factions=1
+[Order] Team2 sell material ×6 (oid=73)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 63(公庫16+私47) (需 { "material": 50, "tools": 0 })
+[Move] Team 7 抵達 (24,22)
+[DayNight] Day 40 開始
+[MsgPrune] 刪除過期訊息 global=16 known=29
+[Move] Team 2 抵達 (24,17)
+[Move] Team 7 抵達 (24,22)
+[TickPerf] day=40 avg=30635 us max=853226 us ticks=240 teams=6 factions=1
+[Order] Team0 sell material ×9 (oid=58)
+[Order] Team0 buy weapon_melee_low ×2 (oid=59)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=60)
+[Order] Team0 buy tools ×3 (oid=61)
+[Order] Team1 buy weapon_melee_low ×2 (oid=62)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=63)
+[Order] Team1 buy material ×19 (oid=64)
+[Order] Team2 buy food ×4 (oid=65)
+[Order] Team3 buy weapon_melee_low ×1 (oid=66)
+[Order] Team3 buy food ×24 (oid=67)
+[Move] Team 3 抵達 (23,16)
+[Order] Team6 buy food ×2 (oid=68)
+[Move] Team 7 抵達 (24,22)
+[DayNight] Day 41 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=41 avg=34922 us max=1074598 us ticks=240 teams=6 factions=1
+[Order] Team0 buy food ×16 (oid=66)
+[Order] Team1 buy food ×21 (oid=67)
+[Order] Team3 buy weapon_ranged_low ×1 (oid=68)
+[Move] Team 3 抵達 (23,16)
+[Move] Team 7 抵達 (24,22)
+[Faction] 勢力0 解散
+[Faction] Team0 脫離勢力0
+[Outpost] Team0 設施施工 farming → Lv1 at (17,17)
+[Order] Team7 sell material ×1 (oid=70)
+[Order] Team0 buy material ×7 (oid=71)
+[Order] Team3 sell material ×20 (oid=72)
+[Move] Team 2 抵達 (23,16)
+[Move] Team 3 抵達 (23,16)
+[Order] Team6 buy material ×15 (oid=73)
+[Outpost] 設施完工 farming Lv1 at (17,17)
+[DayNight] Day 42 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=42 avg=24663 us max=1083237 us ticks=240 teams=6 factions=0
+[Move] Team 1 抵達 (24,17)
+[Move] Team 7 抵達 (24,22)
+[Ambition] Team1 rung 0→1 (定居 cap=2)
+[Move] Team 2 抵達 (23,16)
+[Move] Team 3 抵達 (23,16)
+[Move] Team 7 抵達 (24,22)
+[Order] Team1 sell food ×43 (oid=73)
+[Order] Team1 buy tools ×1 (oid=74)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[DayNight] Day 43 開始
+[MsgPrune] 刪除過期訊息 global=2 known=3
+[Order] Team7 buy food ×3 (oid=73)
+[TickPerf] day=43 avg=14590 us max=731348 us ticks=240 teams=6 factions=0
+[Move] Team 2 抵達 (23,16)
+[DayNight] Day 44 開始
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[TickPerf] day=44 avg=15121 us max=650583 us ticks=240 teams=6 factions=0
+[Sub] Team3 派出子隊 Team8 leader=P3001 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team3 派運輸子隊 Team8 送 material×21 → demand 市場(24,17)
+[Order] Team8 sell material ×20 (oid=72)
+[Order] Team2 sell material ×6 (oid=73)
+[Survival] Team8 warning days_left=2.9 運輸→覓食
+[DayNight] Day 45 開始
+[MsgPrune] 刪除過期訊息 global=14 known=20
+[Merge] Team3 ← Team8 完全合併 (pop=6)
+[TickPerf] day=45 avg=16583 us max=703101 us ticks=240 teams=6 factions=0
+[Order] Team0 sell material ×13 (oid=60)
+[Order] Team0 buy weapon_melee_low ×1 (oid=61)
+[Order] Team0 buy tools ×1 (oid=62)
+[Order] Team1 buy weapon_melee_low ×3 (oid=63)
+[Order] Team1 buy weapon_ranged_low ×2 (oid=64)
+[Order] Team1 buy material ×22 (oid=65)
+[Order] Team2 buy food ×4 (oid=66)
+[Order] Team3 buy weapon_melee_low ×3 (oid=67)
+[Order] Team3 buy food ×14 (oid=68)
+[Sub] Team3 派出子隊 Team8 leader=P3001 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team3 派運輸子隊 Team8 送 material×21 → demand 市場(24,17)
+[Order] Team8 sell material ×20 (oid=69)
+[Order] Team8 buy food ×1 (oid=70)
+[Survival] Team8 warning days_left=2.5 運輸→覓食
+[Order] Team6 buy food ×2 (oid=71)
+[Move] Team 2 抵達 (21,18)
+[Event] Team 0 領袖替換：Person 0 → Person 3004（統領=0.78）
+[Tag] Team0 +軍隊 -生產
+[Ambition] Team2 rung 0→1 (定居 cap=2)
+[SoloAI] Team0 → 覓食 (覓食)
+[DayNight] Day 46 開始
+[MsgPrune] 刪除過期訊息 global=9 known=14
+[TickPerf] day=46 avg=17778 us max=957682 us ticks=240 teams=7 factions=0
+[Order] Team0 buy food ×8 (oid=64)
+[Order] Team3 buy weapon_ranged_low ×1 (oid=65)
+[SoloAI] Team0 → 覓食 (覓食)
+[Ambition] Team3 rung 1→0 (定居 cap=2)
+[SoloAI] Team0 → 覓食 (覓食)
+[Order] Team7 sell material ×1 (oid=66)
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (18,17)
+[Order] Team6 buy material ×14 (oid=67)
+[SoloAI] Team0 → 覓食 (覓食)
+[DayNight] Day 47 開始
+[TickPerf] day=47 avg=17812 us max=924832 us ticks=240 teams=7 factions=0
+[Move] Team 0 抵達 (18,17)
+[Move] Team 3 抵達 (23,14)
+[Move] Team 8 抵達 (22,14)
+[SubAI] Team8 引擎→外交 (求和)
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[SoloAI] Team0 → 覓食 (覓食)
+[SoloAI] Team0 → 覓食 (覓食)
+[Order] Team1 sell food ×30 (oid=68)
+[Order] Team1 buy tools ×1 (oid=69)
+[Ambition] Team2 rung 1→0 (定居 cap=2)
+[SoloAI] Team0 → 覓食 (覓食)
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (18,17)
+[Ambition] Team0 rung 0→1 (武力 cap=4)
+[DayNight] Day 48 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Order] Team7 buy food ×3 (oid=69)
+[TickPerf] day=48 avg=17428 us max=745250 us ticks=240 teams=7 factions=0
+[Order] Team0 buy weapon_ranged_low ×2 (oid=70)
+[Order] Team0 buy material ×15 (oid=71)
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (18,17)
+[Move] Team 3 抵達 (23,13)
+[Move] Team 8 抵達 (23,15)
+[SubAI] Team8 引擎→外交 (求和)
+[Move] Team 8 抵達 (23,15)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(23,14)
+[Survival] Team8 warning days_left=2.9 idle→覓食
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(23,14)
+[DayNight] Day 49 開始
+[MsgPrune] 刪除過期訊息 global=4 known=7
+[TickPerf] day=49 avg=12660 us max=764841 us ticks=240 teams=7 factions=0
+[CrudeCamp] Team2 紮營 @(21,18) → civilian
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 8 抵達 (23,14)
+[SurvivalForage] team=Team8 pop=1 → 覓食 @(22,14)
+[Survival] Team8 warning days_left=2.5 idle→覓食
+[Order] Team2 buy material ×34 (oid=68)
+[Move] Team 0 抵達 (18,17)
+[DayNight] Day 50 開始
+[MsgPrune] 刪除過期訊息 global=13 known=17
+[Move] Team 8 抵達 (22,14)
+[TickPerf] day=50 avg=16122 us max=939235 us ticks=240 teams=7 factions=0
+[Order] Team0 buy weapon_melee_low ×3 (oid=56)
+[Order] Team0 buy tools ×4 (oid=57)
+[Ambition] Team1 rung 1→0 (定居 cap=2)
+[Order] Team1 buy weapon_melee_low ×3 (oid=58)
+[Order] Team1 buy weapon_ranged_low ×2 (oid=59)
+[Order] Team1 buy material ×19 (oid=60)
+[Order] Team2 buy food ×4 (oid=61)
+[Order] Team3 buy weapon_melee_low ×3 (oid=62)
+[Order] Team3 buy food ×10 (oid=63)
+[Sub] Team0 派出子隊 Team9 leader=P1 advisors=[] (pop=1 cap=1 task=運輸)
+[Convoy] Team0 派運輸子隊 Team9 送 food×8 → demand 市場(24,20)
+[Order] Team8 sell material ×20 (oid=64)
+[Order] Team9 sell material ×7 (oid=65)
+[Move] Team 8 抵達 (23,13)
+[Merge] Team3 ← Team8 完全合併 (pop=6)
+[Order] Team3 sell material ×20 (oid=66)
+[Order] Team6 buy food ×2 (oid=67)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 51 開始
+[MsgPrune] 刪除過期訊息 global=6 known=7
+[TickPerf] day=51 avg=17535 us max=791765 us ticks=240 teams=7 factions=0
+[Order] Team0 buy food ×1 (oid=62)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=63)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[Ambition] Team0 rung 1→0 (武力 cap=4)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team7 sell material ×1 (oid=64)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team6 buy material ×13 (oid=65)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 52 開始
+[TickPerf] day=52 avg=20770 us max=1082255 us ticks=240 teams=7 factions=0
+[Order] Team0 sell material ×2 (oid=66)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[Order] Team1 sell food ×17 (oid=67)
+[Order] Team1 buy tools ×1 (oid=68)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[Move] Team 9 抵達 (24,20)
+[DayNight] Day 53 開始
+[MsgPrune] 刪除過期訊息 global=1 known=2
+[Order] Team7 buy food ×3 (oid=68)
+[TickPerf] day=53 avg=22544 us max=1129307 us ticks=240 teams=7 factions=0
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 54 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=54 avg=19407 us max=971912 us ticks=240 teams=7 factions=0
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team2 buy material ×16 (oid=68)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 55 開始
+[MsgPrune] 刪除過期訊息 global=12 known=15
+[Move] Team 0 抵達 (17,17)
+[TickPerf] day=55 avg=23360 us max=951080 us ticks=240 teams=7 factions=0
+[Order] Team1 buy weapon_melee_low ×3 (oid=57)
+[Order] Team1 buy weapon_ranged_low ×2 (oid=58)
+[Order] Team1 buy material ×18 (oid=59)
+[Order] Team2 buy food ×4 (oid=60)
+[Ambition] Team3 rung 1→0 (定居 cap=2)
+[Order] Team3 buy weapon_melee_low ×3 (oid=61)
+[Order] Team3 buy food ×14 (oid=62)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team9 sell material ×7 (oid=63)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[Move] Team 3 抵達 (23,12)
+[Move] Team 9 抵達 (18,17)
+[SubAI] Team9 引擎→覓食 (覓食)
+[Order] Team3 sell material ×20 (oid=64)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team6 buy food ×2 (oid=65)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 9 抵達 (19,16)
+[DayNight] Day 56 開始
+[MsgPrune] 刪除過期訊息 global=8 known=9
+[CrudeCamp] Team3 紮營 @(23,12) → civilian
+[TickPerf] day=56 avg=22652 us max=1119964 us ticks=240 teams=7 factions=0
+[Order] Team0 buy food ×6 (oid=58)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=59)
+[Order] Team3 buy material ×26 (oid=60)
+[Order] Team3 buy tools ×1 (oid=61)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[Move] Team 9 抵達 (17,17)
+[Merge] Team0 ← Team9 完全合併 (pop=5)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team7 sell material ×1 (oid=62)
+[Order] Team0 buy weapon_melee_low ×1 (oid=63)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=64)
+[Order] Team0 buy tools ×1 (oid=65)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team6 buy material ×12 (oid=66)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 57 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=57 avg=24268 us max=1038964 us ticks=240 teams=6 factions=0
+[Order] Team0 sell material ×20 (oid=65)
+[SoloAI] Team0 → 覓食 (覓食)
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (18,17)
+[Order] Team1 sell food ×3 (oid=66)
+[Order] Team1 buy tools ×1 (oid=67)
+[SoloAI] Team0 → 覓食 (覓食)
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (18,17)
+[DayNight] Day 58 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Order] Team7 buy food ×3 (oid=67)
+[TickPerf] day=58 avg=21299 us max=948849 us ticks=240 teams=6 factions=0
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (18,17)
+[Ambition] Team0 rung 0→1 (武力 cap=4)
+[Order] Team0 buy material ×12 (oid=68)
+[DayNight] Day 59 開始
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[TickPerf] day=59 avg=23909 us max=1315518 us ticks=240 teams=6 factions=0
+[SoloAI] Team0 → 覓食 (覓食)
+[Order] Team1 buy food ×1 (oid=67)
+[Order] Team2 buy material ×16 (oid=68)
+[Move] Team 0 抵達 (19,16)
+[DayNight] Day 60 開始
+[MsgPrune] 刪除過期訊息 global=13 known=13
+[Horse] Outpost (23, 12) 捕野馬 +1
+[TickPerf] day=60 avg=18209 us max=919515 us ticks=240 teams=6 factions=0
+[Order] Team1 buy weapon_melee_low ×3 (oid=56)
+[Order] Team1 buy weapon_ranged_low ×2 (oid=57)
+[Order] Team1 buy material ×17 (oid=58)
+[Order] Team2 buy food ×4 (oid=59)
+[Order] Team3 buy weapon_melee_low ×3 (oid=60)
+[Order] Team3 buy food ×16 (oid=61)
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (19,16)
+[Order] Team6 buy food ×2 (oid=62)
+[DayNight] Day 61 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[TickPerf] day=61 avg=18519 us max=827626 us ticks=240 teams=6 factions=0
+[Order] Team3 buy weapon_ranged_low ×2 (oid=59)
+[Order] Team3 buy material ×27 (oid=60)
+[Order] Team3 buy tools ×1 (oid=61)
+[SoloAI] Team0 → 覓食 (覓食)
+[Order] Team7 sell material ×1 (oid=62)
+[Order] Team0 buy weapon_melee_low ×3 (oid=63)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=64)
+[Order] Team0 buy tools ×4 (oid=65)
+[Move] Team 0 抵達 (18,17)
+[Order] Team6 buy material ×11 (oid=66)
+[DayNight] Day 62 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[TickPerf] day=62 avg=20155 us max=1217312 us ticks=240 teams=6 factions=0
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (18,17)
+[Order] Team1 buy tools ×1 (oid=65)
+[DayNight] Day 63 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[Order] Team7 buy food ×3 (oid=63)
+[TickPerf] day=63 avg=21947 us max=1411530 us ticks=240 teams=6 factions=0
+[Order] Team0 buy material ×17 (oid=64)
+[DayNight] Day 64 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Death] Person3005 (team6) 餓死
+[Extinct] Team6 滅團清除（遺財已路由）
+[TickPerf] day=64 avg=19374 us max=1224674 us ticks=240 teams=5 factions=0
+[Order] Team1 buy food ×14 (oid=64)
+[Order] Team2 buy material ×16 (oid=65)
+[DayNight] Day 65 開始
+[MsgPrune] 刪除過期訊息 global=12 known=11
+[TickPerf] day=65 avg=19334 us max=1052081 us ticks=240 teams=5 factions=0
+[Order] Team1 sell material ×5 (oid=54)
+[Order] Team1 buy weapon_melee_low ×2 (oid=55)
+[Order] Team1 buy weapon_ranged_low ×1 (oid=56)
+[Order] Team2 buy food ×4 (oid=57)
+[Order] Team3 buy weapon_melee_low ×3 (oid=58)
+[Order] Team3 buy food ×14 (oid=59)
+[Ambition] Team0 rung 1→0 (武力 cap=4)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 66 開始
+[MsgPrune] 刪除過期訊息 global=4 known=3
+[TickPerf] day=66 avg=21339 us max=983080 us ticks=240 teams=5 factions=0
+[Order] Team0 buy food ×1 (oid=56)
+[Order] Team3 buy weapon_ranged_low ×2 (oid=57)
+[Order] Team3 buy material ×30 (oid=58)
+[Order] Team3 buy tools ×1 (oid=59)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team7 sell material ×1 (oid=60)
+[Order] Team0 sell material ×5 (oid=61)
+[Order] Team0 buy weapon_melee_low ×1 (oid=62)
+[Order] Team0 buy weapon_ranged_low ×1 (oid=63)
+[Order] Team0 buy tools ×2 (oid=64)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 67 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=67 avg=19406 us max=701242 us ticks=240 teams=5 factions=0
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 68 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Order] Team7 buy food ×3 (oid=61)
+[TickPerf] day=68 avg=20775 us max=837441 us ticks=240 teams=5 factions=0
+[SoloAI] Team0 → return_home (返家補給)
+[Outpost] Team3 設施施工 farming → Lv1 at (23,12)
+[Move] Team 0 抵達 (17,17)
+[Event] Team 0 領袖替換：Person 3004 → Person 0（統領=0.60）
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Outpost] 設施完工 farming Lv1 at (23,12)
+[Move] Team 0 抵達 (17,17)
+[Event] Team 0 領袖替換：Person 0 → Person 3004（統領=0.78）
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 69 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=69 avg=19989 us max=850352 us ticks=240 teams=5 factions=0
+[SoloAI] Team0 → return_home (返家補給)
+[Event] Team 0 領袖替換：Person 3004 → Person 0（統領=0.60）
+[Ambition] Team3 rung 0→1 (定居 cap=2)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team1 buy food ×22 (oid=64)
+[Order] Team2 buy material ×16 (oid=65)
+[Move] Team 0 抵達 (17,17)
+[Event] Team 0 領袖替換：Person 0 → Person 3004（統領=0.78）
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 70 開始
+[MsgPrune] 刪除過期訊息 global=9 known=8
+[Move] Team 0 抵達 (17,17)
+[Salary] Team0 薪水結算 coin=185.1
+[Event] Team 0 領袖替換：Person 3004 → Person 0（統領=0.60）
+[TickPerf] day=70 avg=19597 us max=819271 us ticks=240 teams=5 factions=0
+[Order] Team1 sell material ×25 (oid=59)
+[Order] Team1 buy weapon_melee_low ×1 (oid=60)
+[Order] Team2 buy food ×4 (oid=61)
+[Order] Team3 buy weapon_melee_low ×3 (oid=62)
+[Order] Team3 buy food ×10 (oid=63)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Event] Team 0 領袖替換：Person 0 → Person 3004（統領=0.78）
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 71 開始
+[MsgPrune] 刪除過期訊息 global=9 known=8
+[Death] Person2000 (team2) 餓死
+[Extinct] Team2 滅團清除（遺財已路由）
+[TickPerf] day=71 avg=20299 us max=828554 us ticks=240 teams=4 factions=0
+[Order] Team0 buy food ×8 (oid=56)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=57)
+[Order] Team3 buy material ×62 (oid=58)
+[Order] Team3 buy tools ×1 (oid=59)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team0 sell material ×22 (oid=60)
+[Order] Team0 buy weapon_melee_low ×1 (oid=61)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 72 開始
+[MsgPrune] 刪除過期訊息 global=3 known=3
+[TickPerf] day=72 avg=18328 us max=665282 us ticks=240 teams=4 factions=0
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → 覓食 (覓食)
+[SoloAI] Team0 → 覓食 (覓食)
+[Order] Team7 sell material ×1 (oid=59)
+[Move] Team 0 抵達 (18,17)
+[Ambition] Team0 rung 0→1 (武力 cap=4)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=60)
+[Order] Team0 buy material ×12 (oid=61)
+[Order] Team0 buy tools ×4 (oid=62)
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (19,16)
+[DayNight] Day 73 開始
+[MsgPrune] 刪除過期訊息 global=2 known=2
+[Order] Team7 buy food ×3 (oid=61)
+[TickPerf] day=73 avg=16460 us max=624067 us ticks=240 teams=4 factions=0
+[DayNight] Day 74 開始
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[TickPerf] day=74 avg=12875 us max=700666 us ticks=240 teams=4 factions=0
+[Order] Team1 buy food ×22 (oid=60)
+[DayNight] Day 75 開始
+[MsgPrune] 刪除過期訊息 global=7 known=5
+[TickPerf] day=75 avg=14350 us max=656893 us ticks=240 teams=4 factions=0
+[Order] Team1 sell material ×25 (oid=54)
+[Order] Team1 buy weapon_melee_low ×1 (oid=55)
+[Order] Team3 sell food ×1 (oid=56)
+[Order] Team3 buy weapon_melee_low ×3 (oid=57)
+[Ambition] Team0 rung 1→0 (武力 cap=4)
+[DayNight] Day 76 開始
+[MsgPrune] 刪除過期訊息 global=8 known=7
+[TickPerf] day=76 avg=13177 us max=810884 us ticks=240 teams=4 factions=0
+[Order] Team0 buy food ×1 (oid=50)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=51)
+[Order] Team3 buy material ×57 (oid=52)
+[Order] Team3 buy tools ×1 (oid=53)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team0 sell material ×5 (oid=54)
+[Order] Team0 buy weapon_melee_low ×1 (oid=55)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 77 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[Death] Person2001 (team7) 餓死
+[SoloAI] Team0 → return_home (返家補給)
+[Extinct] Team7 滅團清除（遺財已路由）
+[TickPerf] day=77 avg=14135 us max=907060 us ticks=240 teams=3 factions=0
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 78 開始
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[SoloAI] Team0 → return_home (返家補給)
+[TickPerf] day=78 avg=13242 us max=584840 us ticks=240 teams=3 factions=0
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[DayNight] Day 79 開始
+[MsgPrune] 刪除過期訊息 global=2 known=1
+[SoloAI] Team0 → return_home (返家補給)
+[TickPerf] day=79 avg=10999 us max=505640 us ticks=240 teams=3 factions=0
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team1 buy food ×22 (oid=51)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 80 開始
+[MsgPrune] 刪除過期訊息 global=6 known=5
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[TickPerf] day=80 avg=11906 us max=538936 us ticks=240 teams=3 factions=0
+[Order] Team1 sell material ×25 (oid=46)
+[Order] Team1 buy weapon_melee_low ×1 (oid=47)
+[Order] Team3 sell food ×19 (oid=48)
+[Order] Team3 buy weapon_melee_low ×3 (oid=49)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[DayNight] Day 81 開始
+[MsgPrune] 刪除過期訊息 global=9 known=8
+[SoloAI] Team0 → return_home (返家補給)
+[TickPerf] day=81 avg=12181 us max=626127 us ticks=240 teams=3 factions=0
+[Order] Team0 buy food ×8 (oid=41)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=42)
+[Order] Team3 buy material ×53 (oid=43)
+[Order] Team3 buy tools ×1 (oid=44)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[Order] Team0 sell material ×22 (oid=45)
+[Order] Team0 buy weapon_melee_low ×1 (oid=46)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 82 開始
+[SoloAI] Team0 → return_home (返家補給)
+[TickPerf] day=82 avg=13570 us max=625103 us ticks=240 teams=3 factions=0
+[SoloAI] Team0 → return_home (返家補給)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[Move] Team 0 抵達 (17,17)
+[DayNight] Day 83 開始
+[MsgPrune] 刪除過期訊息 global=3 known=2
+[TickPerf] day=83 avg=10916 us max=594928 us ticks=240 teams=3 factions=0
+[Event] Team 0 領袖替換：Person 3004 → Person 0（統領=0.60）
+[Order] Team0 buy tools ×1 (oid=45)
+[SoloAI] Team0 → 覓食 (覓食)
+[Move] Team 0 抵達 (18,17)
+[DayNight] Day 84 開始
+[MsgPrune] 刪除過期訊息 global=4 known=3
+[TickPerf] day=84 avg=8478 us max=549697 us ticks=240 teams=3 factions=0
+[Ambition] Team0 rung 0→1 (定居 cap=2)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=42)
+[Order] Team0 buy material ×17 (oid=43)
+[Order] Team1 buy food ×22 (oid=44)
+[SoloAI] Team0 → 覓食 (覓食)
+[DayNight] Day 85 開始
+[MsgPrune] 刪除過期訊息 global=7 known=6
+[Move] Team 0 抵達 (19,16)
+[TickPerf] day=85 avg=9577 us max=600560 us ticks=240 teams=3 factions=0
+[Order] Team1 sell material ×25 (oid=38)
+[Order] Team1 buy weapon_melee_low ×1 (oid=39)
+[Order] Team3 sell food ×33 (oid=40)
+[Order] Team3 buy weapon_melee_low ×3 (oid=41)
+[SoloAI] Team0 → 覓食 (覓食)
+[DayNight] Day 86 開始
+[MsgPrune] 刪除過期訊息 global=6 known=6
+[TickPerf] day=86 avg=10060 us max=685844 us ticks=240 teams=3 factions=0
+[Order] Team0 buy food ×18 (oid=36)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=37)
+[Order] Team3 buy material ×49 (oid=38)
+[Order] Team3 buy tools ×1 (oid=39)
+[Move] Team 0 抵達 (19,16)
+[Order] Team0 buy weapon_melee_low ×3 (oid=40)
+[DayNight] Day 87 開始
+[MsgPrune] 刪除過期訊息 global=4 known=3
+[TickPerf] day=87 avg=8462 us max=604732 us ticks=240 teams=3 factions=0
+[SoloAI] Team0 → 覓食 (遷移找糧)
+[DayNight] Day 88 開始
+[MsgPrune] 刪除過期訊息 global=1 known=0
+[TickPerf] day=88 avg=9008 us max=515423 us ticks=240 teams=3 factions=0
+[Order] Team0 buy tools ×4 (oid=36)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 89 開始
+[MsgPrune] 刪除過期訊息 global=1 known=1
+[TickPerf] day=89 avg=7538 us max=537223 us ticks=240 teams=3 factions=0
+[Move] Team 0 抵達 (17,17)
+[Order] Team0 buy weapon_ranged_low ×2 (oid=36)
+[Order] Team0 buy material ×10 (oid=37)
+[Order] Team1 buy food ×22 (oid=38)
+[Ambition] Team0 rung 1→0 (定居 cap=2)
+[SoloAI] Team0 → return_home (返家補給)
+[DayNight] Day 90 開始
+[MsgPrune] 刪除過期訊息 global=4 known=4
+[Harvest] Tick21600 季節=夏 base=1.5
+[Horse] Outpost (15, 19) 捕野馬 +1
+[Move] Team 0 抵達 (17,17)
+[SoloAI] Team0 → return_home (返家補給)
+[TickPerf] day=90 avg=10971 us max=525268 us ticks=240 teams=3 factions=0
+final: pop=16 attrition=33.3% convoy.dispatch=5 deliver_settled=0 bail={ "convoy.deliver_bail_sell_ownerless": 1, "convoy.deliver_bail_other": 1 }
+
+[dump] → res://docs/measurements/2026-08-08-scale-econ-tier2-determinism-rerun.json
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
