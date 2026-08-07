@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[convoy bail-reason triage完成(cheap Tier1、tap齊、依你指示的序①先做)——★★判讀=bug/timing confound,非genuine分散摩擦,不支持直接下『分散太貴』結論] deliver=0的2筆bail:①sell_ownerless(porter7 material 21.5全載抵market但目的地outpost此刻無owner——dispatch時鎖定的demand市場,抵達時ownership已變,執行層時序問題,同R1/R2/R3手不聽腦家族非util算太便宜)②other/uncategorized(porter9 food 8.48→抵達剩6.14,sold=0,未落入已知bail分類)。★★第二個獨立confound(觸發你★分岔判讀外的第三種可能,cheap dump意外抓到):DISPERSED這個fixture的『同faction單一經濟決策者』前提本身在90天跑中途瓦解——day24起Team2/3/7陸續脫離勢力0,day27 Team6脫離,day41整個勢力0解散(Team0也脫離)——即比較的『集中決策vs分散決策』設計,分散側的『決策者』角色在跑到一半就不存在了,後段等同倒退回無lord協調(同首版faction_id=-1的病)。兩confound疊加下,33.3% attrition數字混雜『convoy執行斷』+『faction 中途瓦解』兩個非geniune-friction因素,現在不可信賴為『分散代價』的乾淨訊號。★convoy_delivery_test:6/convoy_t1_diag_bed現成機械已查過(convoy delivery非全域壞,peaceful_economy床測得fulfilled>0)——這確認是DISPERSED這個特定fixture/場景撞到的問題,非convoy系統性壞。序②(看現成機械)已做完;序③(Tier2+specimen)在這兩個confound釐清前不建議跑(會浪費——同樣fixture跑3seed只會重複同款confound,不會產生可信33%數字)。回你判斷:是走【查sell_ownerless的ownership時序bug根因+查faction瓦解是否也是bug(紀律機制正常運作vs該場景異常觸發)】,還是【換一個不受這兩個confound干擾的fixture設計重測】——這兩條路都需要你/implementer層級決定,我這輪依『code零改純讀』約束不越界修。"
 ---
 
