@@ -1,0 +1,744 @@
+{
+  "anonflow_return_totals": {
+    "anonflow.return_subteam": 3,
+    "anonflow.return_survival": 1,
+    "anonflow.return_unified": 1
+  },
+  "convoy_return_total": 2,
+  "daily_log": [
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 1,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 3,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+        "anonflow.return_subteam": 1
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 2,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 2,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 3,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 1,
+      "lord_pop": 4,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+        "anonflow.return_subteam": 1
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 4,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 1,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+        "anonflow.return_subteam": 1
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 5,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 6,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 7,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 8,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 9,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 10,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 2
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 11,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 12,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 13,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 14,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 15,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 16,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 17,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 18,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 19,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 20,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 21,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 22,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 23,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 24,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 25,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 26,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 27,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 28,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 29,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 30,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 31,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 32,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 33,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 34,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+        "anonflow.return_unified": 1
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 1,
+      "day": 35,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 36,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 37,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 38,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 1
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 39,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 40,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 41,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 1,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 42,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 43,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 0,
+      "day": 44,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    },
+    {
+      "anonflow_returns": {
+        "anonflow.return_survival": 1
+      },
+      "care.scout_dispatched": 0,
+      "convoy.return": 1,
+      "day": 45,
+      "distribute.dispatch": 0,
+      "help.letter_dispatched": 0,
+      "invest.dispatched": 0,
+      "lord_anon": 0,
+      "lord_pop": 5,
+      "migrant.dispatched": 0,
+      "relocate.ordered": 0,
+      "relocate.self": 0
+    }
+  ],
+  "days": 45,
+  "lord_anon_max": 3,
+  "lord_anon_min": 0,
+  "lord_anon_zero_since_day": 5,
+  "out_totals": {
+    "care.scout_dispatched": 0,
+    "distribute.dispatch": 0,
+    "help.letter_dispatched": 1,
+    "invest.dispatched": 0,
+    "migrant.dispatched": 0,
+    "relocate.ordered": 0,
+    "relocate.self": 3
+  },
+  "seed": 8181
+}
