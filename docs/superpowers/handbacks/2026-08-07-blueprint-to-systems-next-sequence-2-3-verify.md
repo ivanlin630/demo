@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[FYI下階段序用戶定2026-08-07:①規模經濟力(樞紐自然湧現genuine非crank)→②军民混编/民兵動員→③驗證長期故事邏輯合理(活世界長跑敘事coherence、連believability種子床)·①現進brainstorm(規模經濟力=genuine命門乙教訓區、measure-first先量現scale gradient再塑)、spec鎖才發你HOW·systems續idle待①spec(或Track②A backlog若我啟某slice)·此信consume即可、無新HOW活·地基KEEP"
 ---
 
