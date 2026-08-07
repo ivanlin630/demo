@@ -51,10 +51,8 @@ const FOUND_FOOD_SURPLUS_DAYS: float = 7.0      # TEST VALUE — 累積夠 = 有
 # ── ②a 信使外交（envoy）+ founding timeout（保險網）──
 # timeout=保險網非死常數：按距離/移速估往返時間（新 invariant「凡 in-flight latch 必有 timeout」）。
 # 往返裕度係數：單程 ETA × 此。信使追「移動」target（非靜止）→ 步行信使僅 named>anon 微速差，
-# 收斂需遠多於直線 ETA（量測：3.0/2天 floor → delivery=0；6.0/12天 floor → accept>0）。
-# 有馬則 3× 速→秒到，此裕度變寬鬆 slack。TEST VALUE（平衡 pass 調；mount 經濟成熟後可縮）。
-const FOUNDING_TIMEOUT_MULT: float = 6.0
-const FOUNDING_TIMEOUT_FLOOR_DAYS: int = 12       # TEST VALUE — 步行信使追移動 target 的收斂下限
+# ★F3 ②結構搬移：FOUNDING_TIMEOUT_MULT/FLOOR_DAYS + founding_timeout/equip_envoy_mounts/recall_envoy
+# 已逐字移入 SubteamSystem（static、零 logic 改）。caller 改 SubteamSystem.。
 const ENVOY_POP: int = 1                          # TEST VALUE — 信使子隊人數（最小分隊）
 const ENVOY_REDUNDANCY_FOUNDING: int = 2          # TEST VALUE — 建國提案冗餘騎數（亂世信使會死，多騎首達生效）
 const GIFT_FRACTION_MIN: float = 0.10             # TEST VALUE — 掏禮佔糧盈餘下限（低野心=保守掏）
@@ -1207,7 +1205,7 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 	# B. 吞併 task 在途（TASK_ATTACK 建國）→ 逾時 release（此分支 prey 已 defer 至 prosperity，殘留 symmetry）。
 	if team.current_task != TeamData.TASK_IDLE and team.task_reason == "found_subjugate":
 		if state.world.current_tick - team.task_start_tick \
-				> _founding_timeout(_hex_dist(team.tile_pos, team.move_target)):
+				> SubteamSystem.founding_timeout(_hex_dist(team.tile_pos, team.move_target)):
 			TaskArbiter.release(team)
 			Probe.bump("indep.found_timeout")
 		return
@@ -1313,9 +1311,7 @@ func _evaluate_independent_strategy(state: WorldState, team: TeamData) -> void:
 
 # timeout=保險網（非死常數）：單程 hex 距離 × 每格 tick 成本估（BASE_MOVE_TICKS，speed=1 基準）
 # × 往返裕度係數；下限 2 天（防近距離秒 release）。信使 task 與母隊 pending 共用此估算。
-func _founding_timeout(dist: int) -> int:
-	return maxi(int(float(dist) * float(MovementSystem.BASE_MOVE_TICKS) * FOUNDING_TIMEOUT_MULT),
-		FOUNDING_TIMEOUT_FLOOR_DAYS * WorldState.TICKS_PER_DAY)
+# ★F3：_founding_timeout → SubteamSystem.founding_timeout（結構搬移）。
 
 # 派信使子隊送提案（復用 SubteamSystem/herald/mounts/movement/belief 既有信號，零新系統）。
 # 提案權威存母隊 pending_proposal；信使帶 proposal_id ref（task_extra_data）。冗餘多騎首達生效。
@@ -1330,7 +1326,7 @@ func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype:
 	if target_pos == Vector2i(-1, -1):
 		return false   # 無 belief 位 → 不派 envoy（不瞎追 live）
 	var dist: int = _hex_dist(mother.tile_pos, target_pos)
-	var budget: int = _founding_timeout(dist)
+	var budget: int = SubteamSystem.founding_timeout(dist)
 	var proposal_id: String = "%d_%d_%d" % [mother.team_id, target_id, state.world.current_tick]
 	var sub_sys := SubteamSystem.new()
 	var sent: int = 0
@@ -1348,7 +1344,7 @@ func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype:
 		envoy.task_reason = "envoy_proposal"
 		envoy.task_start_tick = state.world.current_tick   # dispatch 直賦 task 未設 → timeout 基準
 		envoy.task_extra_data = {"proposal_id": proposal_id, "timeout": budget}
-		_equip_envoy_mounts(state, mother, envoy)   # 馬：撥至 pop×1（有幾配幾，無馬照走）
+		SubteamSystem.equip_envoy_mounts(state, mother, envoy)   # 馬：撥至 pop×1（有幾配幾，無馬照走）
 		sent += 1
 		Probe.bump("envoy.dispatched")
 	if sent == 0:
@@ -1382,33 +1378,23 @@ func _dispatch_envoy(state: WorldState, mother: TeamData, target_id: int, ptype:
 	return true
 
 # 馬：從母隊 resources 撥 mounts 至信使 pop×1（有幾配幾，無馬走路=慢但能送）。守恆（母隊扣、信使加）。
-func _equip_envoy_mounts(state: WorldState, mother: TeamData, envoy: TeamData) -> void:
-	var want: int = envoy.population
-	var have_envoy: int = int(envoy.resources.get("mounts", 0))
-	var need: int = maxi(want - have_envoy, 0)
-	if need <= 0:
-		return
-	var from_mother: int = mini(need, int(mother.resources.get("mounts", 0)))
-	if from_mother <= 0:
-		return
-	ResourceBank.add(mother, "mounts", -from_mother, "envoy_mount_out")
-	ResourceBank.add(envoy, "mounts", from_mother, "envoy_mount_in")
+# ★F3：_equip_envoy_mounts → SubteamSystem.equip_envoy_mounts（結構搬移）。
 
 # 信使每 tick：追蹤刷新 target best_estimate（對齊 scout pursuit）+ 自配 timeout + target 死偵測。
 func _tick_envoy(state: WorldState, envoy: TeamData, merge_queue: Array) -> void:
 	if state.teams.get(envoy.parent_team_id) == null:   # 母隊已亡 → 脫離成獨立（非 zombie）
-		_recall_envoy(state, envoy)
+		SubteamSystem.recall_envoy(state, envoy)
 		return
 	var target_id: int = envoy.order_target_id
 	var target: TeamData = state.teams.get(target_id)
 	if target == null:   # 目標已滅 → 提案落空，信使歸隊
 		Probe.bump("envoy.target_dead")
-		_recall_envoy(state, envoy)
+		SubteamSystem.recall_envoy(state, envoy)
 		return
 	var budget: int = int(envoy.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
 	if state.world.current_tick - envoy.task_start_tick > budget:
 		Probe.bump("envoy.timeout")
-		_recall_envoy(state, envoy)
+		SubteamSystem.recall_envoy(state, envoy)
 		return
 	# 追蹤刷新：攔截預測（朝 target 移動方向提前，破 pursuit-lag 永 1 格差）+ best_estimate fallback。
 	# 對齊 _refresh_attack_pursuit（攻擊追擊 land combat 同機制）：可見且動→lead，靜/不可見→最後已知位。
@@ -1422,16 +1408,7 @@ func _tick_envoy(state: WorldState, envoy: TeamData, merge_queue: Array) -> void
 		envoy.move_target = predicted   # 攔截預測 or belief last-seen 位（predict_intercept 已 belief-gate）
 	# else: 無 belief 位 → 保持現 move_target（不設 (-1,-1)/live），下 tick timeout/recall 承接
 
-# 信使歸隊：釋放 task + 朝母隊移動 → 到母格 try_merge_back（復用 merge）。母隊 pending 靠自身 timeout 清。
-func _recall_envoy(state: WorldState, envoy: TeamData) -> void:
-	TaskArbiter.release(envoy)   # → IDLE, move_target=-1
-	envoy.task_reason = "envoy_recall"
-	var parent: TeamData = state.teams.get(envoy.parent_team_id)
-	if parent != null:
-		envoy.move_target = parent.tile_pos   # 下 tick _decide_subteam 路由回家/併回
-	else:
-		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（正常 AI 接手，非 zombie）
-		state.remove_tag(envoy, TeamData.TAG_SUBTEAM, "envoy_orphan")
+# ★F3：_recall_envoy → SubteamSystem.recall_envoy（結構搬移）。
 
 # ★資訊網 S-herald：求援信使 tick——朝施助者 belief-pos 走；co-located→deposit 母隊 need（食糧買單）訊進
 # 施助者 team_known（honest intra-faction）→ 領主經傳到的 belief 得知子民餓 → distribute 匹配。timeout/target 亡→recall。
@@ -1587,14 +1564,14 @@ func _snapshot_food_buy(state: WorldState, team: TeamData, spawn_tick: int) -> A
 func _tick_info_scout(state: WorldState, scout: TeamData, merge_queue: Array) -> void:
 	var mother: TeamData = state.teams.get(scout.parent_team_id)
 	if mother == null:
-		_recall_envoy(state, scout); return
+		SubteamSystem.recall_envoy(state, scout); return
 	var target_id: int = scout.order_target_id
 	var target: TeamData = state.teams.get(target_id)
 	if target == null:
-		Probe.bump("scout.target_dead"); _recall_envoy(state, scout); return
+		Probe.bump("scout.target_dead"); SubteamSystem.recall_envoy(state, scout); return
 	var budget: int = int(scout.task_extra_data.get("timeout", 2 * WorldState.TICKS_PER_DAY))
 	if state.world.current_tick - scout.task_start_tick > budget:
-		Probe.bump("scout.timeout"); _recall_envoy(state, scout); return
+		Probe.bump("scout.timeout"); SubteamSystem.recall_envoy(state, scout); return
 	# 抵達子民（co-located）→ 查得 need + 刷新領主 belief → recall。
 	if scout.tile_pos == target.tile_pos:
 		# 刷新領主對子民 belief（firsthand fresh：scout 是領主 agent 親見）
@@ -1626,7 +1603,7 @@ func _tick_info_scout(state: WorldState, scout: TeamData, merge_queue: Array) ->
 				state.team_known[mother.team_id].append(_msg)
 				if Probe.enabled: Probe.bump("care.firsthand_distress")
 		Probe.bump("scout.info_returned")
-		_recall_envoy(state, scout); return
+		SubteamSystem.recall_envoy(state, scout); return
 	var predicted: Vector2i = PathSystem.predict_intercept(state, scout, target)
 	if predicted != Vector2i(-1, -1):
 		scout.move_target = predicted
@@ -1906,7 +1883,7 @@ func _try_relocate_order(state: WorldState, team: TeamData) -> void:
 			"origin_team_id": team.team_id, "faction_id": team.faction_id,
 			"target_lord_id": vid, "target_pos": village.tile_pos, "kind": "relocate",
 			"relocate_to": best["pos"], "current_pos": team.tile_pos,
-			"spawn_tick": state.world.current_tick, "timeout": _founding_timeout(dist), "speed": 1,
+			"spawn_tick": state.world.current_tick, "timeout": SubteamSystem.founding_timeout(dist), "speed": 1,
 		})
 		if Probe.enabled: Probe.bump("relocate.ordered")
 		return   # 一 cadence 一令
@@ -2045,7 +2022,7 @@ func _try_herald_side(state: WorldState, team: TeamData) -> void:
 		"origin_team_id": team.team_id, "faction_id": team.faction_id,
 		"target_lord_id": int(tgt["id"]), "target_pos": tgt["pos"], "kind": "help",
 		"payload": payload, "current_pos": team.tile_pos,
-		"spawn_tick": state.world.current_tick, "timeout": _founding_timeout(dist), "speed": 1,
+		"spawn_tick": state.world.current_tick, "timeout": SubteamSystem.founding_timeout(dist), "speed": 1,
 	})
 	Probe.bump("help.letter_dispatched")
 	_ledger_record(team, "herald", state.world.current_tick, false, state.world.current_tick, dist, tgt["pos"])   # ★失聯帳本記帳(herald=非team letter、subject_ref=spawn_tick、last_pos=target)
@@ -2070,9 +2047,9 @@ func _try_scout_side(state: WorldState, team: TeamData) -> void:
 	var dist: int = _hex_dist(team.tile_pos, tgt["pos"])
 	var sid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
 		TeamData.TASK_SCOUT, "info_scout", tgt["pos"], int(tgt["id"]),
-		{"scout_mother": team.team_id, "timeout": _founding_timeout(dist)})
+		{"scout_mother": team.team_id, "timeout": SubteamSystem.founding_timeout(dist)})
 	if sid != -1:
-		_equip_envoy_mounts(state, team, state.teams[sid])
+		SubteamSystem.equip_envoy_mounts(state, team, state.teams[sid])
 		Probe.bump("scout.dispatched")
 		_ledger_record(team, "scout", sid, true, state.world.current_tick, dist, tgt["pos"])   # ★失聯帳本記帳(scout=team subject、last_pos=target)
 
@@ -5140,9 +5117,9 @@ func _dispatch_care_scout(state: WorldState, team: TeamData, entry: Dictionary) 
 	var dist: int = _hex_dist(team.tile_pos, vpos)
 	var sid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
 		TeamData.TASK_SCOUT, "info_scout", vpos, vid,
-		{"scout_mother": team.team_id, "timeout": _founding_timeout(dist)})
+		{"scout_mother": team.team_id, "timeout": SubteamSystem.founding_timeout(dist)})
 	if sid != -1:
-		_equip_envoy_mounts(state, team, state.teams[sid])
+		SubteamSystem.equip_envoy_mounts(state, team, state.teams[sid])
 		if Probe.enabled: Probe.bump("care.scout_dispatched")
 
 # ★care-loop ②秤：care(責任/仁慈) vs ignore(野心/疏忽) competing util（禁 if/elif 死一條、零死常數）。
@@ -5234,9 +5211,9 @@ func _apply_contact_reaction(state: WorldState, team: TeamData, entry: Dictionar
 			if lost_pos != Vector2i(-1, -1) and team.population >= 2:
 				var rid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
 					TeamData.TASK_SCOUT, "contact_rescue", lost_pos, int(entry.get("subject_ref", -1)),
-					{"scout_mother": team.team_id, "timeout": _founding_timeout(_hex_dist(team.tile_pos, lost_pos))})
+					{"scout_mother": team.team_id, "timeout": SubteamSystem.founding_timeout(_hex_dist(team.tile_pos, lost_pos))})
 				if rid != -1:
-					_equip_envoy_mounts(state, team, state.teams[rid])
+					SubteamSystem.equip_envoy_mounts(state, team, state.teams[rid])
 					if Probe.enabled: Probe.bump("contact.react_rescue")
 		"writeoff":     # 註銷當沒了（resolved=true 已在 caller）
 			if Probe.enabled: Probe.bump("contact.react_writeoff")
