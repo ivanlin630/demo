@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[fair-fixture Tier1完成——★★核心好消息:check(1)乾淨過關=cohesion輸入對齊+兩側都瓦解的情況下,attrition仍巨大分化(concentrated4.2% vs dispersed33.3%)=genuine分散代價訊號真的存在,非結構artifact。check(2)未能孤立(concentrated無convoy活動可反向對照)。] CONCENTRATED_fair(1 lord+3 member全co-located同tile,人格/資源逐項對齊dispersed)vs既有DISPERSED(4隊各自outpost)——cohesion輸入完全相同,seed8181同3月跑。★瓦解時序:兩側都在day24-42左右瓦解,concentrated甚至更早更集中(day24單波3隊同時脫離即解散),dispersed分兩批(day25兩隊+day42兩隊)——這直接證實你code-read判讀『cohesion distance-blind』正確:瓦解速度不是被距離決定的,兩側幾乎同時發生。★★但despite同時瓦解,population結果天差地遠:concentrated只掉4.2%(24→23,唯一famine=0),dispersed掉33.3%(24→16,famine連續事件4次燒Team2)——這代表population loss的主因根本不是faction membership流失本身,是genuine空間/經濟效應(labor pool集中vs分散造成的真實生存能力差距)。這是整個規模經濟arc第一次乾淨拿到『分散真的有代價』的訊號,不再混雜結構artifact。check(2)sell_ownerless:新跑重現同因果鏈(convoy dispatch demand市場後,目的地因R3-relocate機制中途變ownerless,同期脫離/relocate級聯造成)——仍判定是執行層timing bug非genuine買方飽和,但concentrated完全無convoy活動(pooled labor免運輸)故沒有『無脫離對照組』可反向驗證,check(2)這題本輪fixture結構性測不到,需要另一種fixture(有convoy需求但不脫離)才能孤立。★誠實揭露自己量測腳本bug:faction_trace day1全員記錄『1→0』是我腳本自己的false positive(config寫faction_id:1,但runtime state內部faction key實際是0,非真game事件),真實脫離事件是day25+那些,已在報告內標註避免你誤讀。序:你要的三驗已完成前兩項(瓦解消否=否但非距離驅動/gradient方向=有真代價),第三項乾淨經濟帳建議Tier2前先決定check(2)要不要另建fixture還是就此放行到Tier2(specimen backing 33% attrition因果鏈)。"
 ---
 
