@@ -1,6 +1,6 @@
 # care-loop scout de-patch HOW（ii relief-cluster 第一刀、補丁閘 execution-break）
 
-**status**: DRAFT（待 R² CLEAN → LOCK）
+**status**: LOCKED（R² CLEAN 2026-08-08、reviewer 親驗 premise+感知鐵律 5 邊界+保序+零 crank；1 輕量必查項=§修/§1 措辭訂正「roster 純加第三層 final fallback、非取代 last_known_pos」已訂正）
 **scope**: ii relief-decision cluster 第一刀 = care-loop scout 執行斷點 de-patch（blueprint 裁 ii、care-loop 先、補丁閘優先查）。
 **premise**: measured + file:line 坐實（R① 免、非未驗斷言）——measurer care-loop tap：care argmax 真贏 30+ 次（義氣0.6 lord genuine）、`care.scout_dispatched=0` 全 45 天；根因 `_dispatch_care_scout:5114` `vpos==(-1,-1)` silent-return（Team2 從沒形成 belief）= circular（要 scout 學狀態需位置、位置只 belief 有、無 belief→不能 scout→死鎖）。
 **連**：[[feedback_patch_gate_first]]（built 不 fire 先查 gate）、[[feedback_verify_execution_end]]、[[project_information_network]] 結構常識補則、[[project_size_matter_arc]] scale 底查 relief-death cluster。
