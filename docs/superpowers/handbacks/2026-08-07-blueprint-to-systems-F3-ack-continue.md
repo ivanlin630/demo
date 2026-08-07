@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[F3 ack(②第2刀收、byte-identical 27/27、standing loop成熟)·續standing GO自驅連跑不需再GO·★下候選提醒:residency/side-dispatch家族=若純程序→照byte-identical切;★基建lifecycle=決策密集(facility scoring)=Track②A behavior-first=停handback我裁(先抽decision進引擎那slice fp預期變intended非byte-identical、須我判抽法+分slice標明)·standing紀律6條續守·我批次推用戶(暫holding F3單刀、待更大里程碑:數刀累積or決策密集抽引擎or track收=避Telegram噪)·此信consume即可、續跑遇裁停·地基KEEP"
 ---
 
