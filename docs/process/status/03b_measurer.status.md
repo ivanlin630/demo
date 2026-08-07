@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等QA+下一票）——care-loop de-patch death-spiral驗收已完成寄出(★★fix有效但無效果,failure point下移非消除,單修不足)+specimen已送QA稽核
+**狀態**：工作中（等下一票）——care-loop de-patch death-spiral QA CONFIRM已轉發systems,量測+故事稽核雙軌收尾
+
+**工單**：無（QA CONFIRM verdict已轉發systems：①baseline/fixbranch specimen md5逐位元100%相同(比逐tick比對更強證據)②CONFIRM我的因果框架(fix邏輯真fire,下游anon池才是真正卡點,failure point下移非消除)③額外跨fixture結構性佐證(Team0 population ceiling signature跟QA另一輪不同fixture撞到同款anon耗盡型態,非孤例)。單修(ii care-loop roster fallback)確認邏輯正確但不足破death-spiral,下一步交systems/blueprint判斷。已回systems handback:2026-08-08-measurer-to-systems-deathspiral-qa-confirmed.md，量測+故事稽核雙軌收尾，這條ticket到此完整結案。
+
+---
+
+**狀態(舊)**：工作中（等QA+下一票）——care-loop de-patch death-spiral驗收已完成寄出(★★fix有效但無效果,failure point下移非消除,單修不足)+specimen已送QA稽核
 
 **工單**：無（death-spiral驗收已完成寄systems+specimen已送QA：3seed(8181/1337/42) baseline vs feat/careloop-scout-depatch(89af4837)全部byte-identical——roster fallback邏輯真的修好(vpos真解出)但care.scout_dispatched全程仍0,死亡螺旋沒破(seed8181 attrition20.8%/defect_day25兩branch完全相同)。根因:lord自己anon池day5前被同輪其他side-dispatch耗盡歸零,dispatch_anon_messenger內建gate擋死——同本session更早cohesion①natural care-loop arc已知病灶,非今天fix動的gate,failure point下移非消除。單修(ii)不足,需接續處理anon池競爭。過程自曝抓到一個PowerShell cwd環境飄移bug,已verified-cwd重跑確認結論不受影響。落地20檔已git commit(8458e144)。已回systems handback:2026-08-08-measurer-to-systems-deathspiral-verdict.md+to:qa specimen稽核請求:2026-08-08-measurer-to-qa-deathspiral-specimen-audit.md，別下accept，等QA故事稽核verdict。
 
