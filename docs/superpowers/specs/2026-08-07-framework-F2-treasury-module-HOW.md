@@ -30,3 +30,14 @@ faction_ai 大雜燴無完美乾淨 chunk。treasury/coin 域=cohesive resource-
 
 ## §4 序
 spec 自檢（本檔）→ R²（結構審：邊界乾淨否/介面/反向耦合/無行為變）→ build（fp byte-identical 驗）→ QA → merge = F2 收（結構 track 第一刀示範）→ F3+ 剩模組逐切。地基 KEEP。
+
+---
+## ★§2.3 訂正（R² CLEAN+必查項:caller 清單補 debug/test、2026-08-07）
+R² 親讀確認**零反向耦合**（5 域函式全呼已模組化外部 AnonTreasuryBank/ResourceBank/LoyaltyBank/UnrestBank/TradeValuation/NeedOracle/ResourceSystem/DecisionTerms、比 spec 保留疑慮還乾淨）+ 純 code-move 零邏輯改。但★我 caller 清單**漏 debug/test**（GDScript `_prefix` 非強制 private、test 直呼、函式移走全 Invalid-call）：
+
+**完整 caller 清單（exhaustive grep、全改呼 `CoinTreasury.xxx`）**：
+- **production 外部**：`player_command_system.gd:248`（extract）/`resource_system.gd:177`（extract）/`faction_ai_system.gd:835`（consider loop）/`:836`（tax loop）。
+- **faction_ai internal**（3233/3236/3237）：隨函式移入 CoinTreasury=模組內、不算外部 caller。
+- **★debug/test（漏補、必改）**：`extraction_need_driven_test.gd`（:54/55/65/66/75/76/85/86/94/98/105/106 全篇 extract/buffer/consider/coin_need）/`material_hold_test.gd:97`（coin_need）`:107`（consider）/`unified_commerce_test.gd:224,260`（tax）/**★`headless_test.gd:8521`（extract=CLAUDE.md 交付標準 headless entrypoint 本體、非 player_command 那條已涵蓋路徑、不補會當場炸 deliverable 測試）**。
+
+★**通則（全結構 slice 適用）**：模組切 caller-enumeration 必 **exhaustive grep 含 debug/test**（`_prefix` 非 private、test 直呼移走即炸）——同 F1 incomplete-enumeration 家族、R² 接住。
