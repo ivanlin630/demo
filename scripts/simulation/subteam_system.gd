@@ -2,6 +2,39 @@ class_name SubteamSystem
 
 const MIGRANT_RATION_DAYS: float = 15.0   # ★移民旅途口糧天數（TEST VALUE、DERIVED 供給窗；領主供給、空手 anon 免途中 famine 打斷）
 
+# ★F3 ②結構搬移（純程序、零 logic 改）：subteam-messenger utils 自 faction_ai_system 逐字搬入（instance→static）。
+# 介面 static：SubteamSystem.founding_timeout / equip_envoy_mounts / recall_envoy。零反向耦合（全呼外部
+# MovementSystem/WorldState/ResourceBank/TaskArbiter/state；不回呼 faction_ai）。
+const FOUNDING_TIMEOUT_MULT: float = 6.0
+const FOUNDING_TIMEOUT_FLOOR_DAYS: int = 12       # TEST VALUE — 步行信使追移動 target 的收斂下限
+
+static func founding_timeout(dist: int) -> int:
+	return maxi(int(float(dist) * float(MovementSystem.BASE_MOVE_TICKS) * FOUNDING_TIMEOUT_MULT),
+		FOUNDING_TIMEOUT_FLOOR_DAYS * WorldState.TICKS_PER_DAY)
+
+static func equip_envoy_mounts(state: WorldState, mother: TeamData, envoy: TeamData) -> void:
+	var want: int = envoy.population
+	var have_envoy: int = int(envoy.resources.get("mounts", 0))
+	var need: int = maxi(want - have_envoy, 0)
+	if need <= 0:
+		return
+	var from_mother: int = mini(need, int(mother.resources.get("mounts", 0)))
+	if from_mother <= 0:
+		return
+	ResourceBank.add(mother, "mounts", -from_mother, "envoy_mount_out")
+	ResourceBank.add(envoy, "mounts", from_mother, "envoy_mount_in")
+
+# 信使歸隊：釋放 task + 朝母隊移動 → 到母格 try_merge_back（復用 merge）。母隊 pending 靠自身 timeout 清。
+static func recall_envoy(state: WorldState, envoy: TeamData) -> void:
+	TaskArbiter.release(envoy)   # → IDLE, move_target=-1
+	envoy.task_reason = "envoy_recall"
+	var parent: TeamData = state.teams.get(envoy.parent_team_id)
+	if parent != null:
+		envoy.move_target = parent.tile_pos   # 下 tick _decide_subteam 路由回家/併回
+	else:
+		state.detach_subteam(envoy)            # 母隊已亡 → 脫離成獨立（正常 AI 接手，非 zombie）
+		state.remove_tag(envoy, TeamData.TAG_SUBTEAM, "envoy_orphan")
+
 func dispatch(state: WorldState, parent_id: int, sub_leader_id: int,
 		pop_count: int, task: String, move_target: Vector2i,
 		order_target_id: int = -1, order_task: String = "",
