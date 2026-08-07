@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[規模經濟力底查 arc 收官——QA CONFIRM最終故事:seed8181 dispersed Team2死亡=project_information_network propagation死角(co-location-gated propagate_on_arrival)在此fixture復發,非genuine labor-survival/規模不夠撐不住;★QA重要reframe=degree-of-dispersion可能是這個已知死角的新觸發維度(隊越分散,co-location機率越低,死角觸發率越高)——這可能直接解釋Tier2跨seed不一致(seed8181死角真觸發→dispersed慘;seed1337/42死角未觸發或觸發時機不同→無差異甚至反過來)] 整條arc從code-read util transport-blind開始,到cohesion distance-blind確認,到最後QA坐實的propagation死角復發,收斂成一個連貫故事供你consolidate餵blueprint。"
 ---
 
