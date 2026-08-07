@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——規模經濟力底查 Tier2 verdict已完成寄出(★★重大更正:前輪genuine分散代價結論premature,跨seed方向不一致)+specimen已送QA故事稽核
+**狀態**：工作中（等QA查完point(a)）——QA seed8181 verdict=REFRAME(非genuine labor-survival,decision層有真嘗試求助),回code-read支持QA propagation死角假說,等QA續查後對齊才報systems
+
+**工單**：無（QA回seed8181 verdict:REFRAME——Team2決策層有真嘗試對外求助(求和/買糧/乞食/紮營/併入argmax真中選,非死常數),排除『decision層從沒想過求助』;真根疑雙重卡點(a)day24脫離勢力後faction-scoped救濟結構性失資格(b)Team2買糧單疑似co-location-gated propagation死角從未真撮合。QA point(a)『Team0 day13-24有沒有評估過對Team2的distribute』還沒查完,標記待辦,要我對齊再報systems。我回code-read:①specimen全檔案零distribute候選是side-action可見度限制(同session已知限制)非證據②★code-read直接支持QA②(b)假說:_distribute_candidates(goal_resolver.gd:134-169)第一道真篩子=OrderSystem.received_buy_orders讀team_known(propagation機制非god-view),read_market_board註解明講co-location-gated——跟已知project_information_network arc診斷過的propagation死角極可能同根復發(該arc當時WHAT-only HOLD待build)③offer加distribute.mini_util Probe tap重跑做更精確驗證,待QA判斷要不要。已回to:qa handback:2026-08-08-measurer-to-qa-distribute-gate-code-read.md，別報systems，等QA續查/回覆再對齊。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——規模經濟力底查 Tier2 verdict已完成寄出(★★重大更正:前輪genuine分散代價結論premature,跨seed方向不一致)+specimen已送QA故事稽核
 
 **工單**：無（Tier2(3seed+specimen+determinism)已完成寄systems+specimen已送QA：determinism確認過關(byte-identical)。★★同窗長(2mo)3seed交叉比較方向不一致——seed8181 dispersed較慘(20.8% vs 4.2%,符合前輪方向)/seed1337反過來concentrated較慘(16.7% vs 0.0%)/seed42零訊號(0% vs 0%)——主動撤回上輪「genuine分散代價乾淨浮現」的過早樂觀結論,誠實更正非等別人發現。relief_dispatched_to_T2=false在所有測試seed中一致,排除convoy-bug-as-death-driver假說,死因(genuine labor-survival vs決策層從未評估救濟)未進一步區分,已送specimen(4份)給QA逐tick讀故事才可鎖因果。落地16檔已git commit(dfc12105)。已回systems handback:2026-08-08-measurer-to-systems-tier2-verdict.md+to:qa handback:2026-08-08-measurer-to-qa-scale-econ-specimen-audit.md，別下accept，等QA故事稽核verdict。
 
