@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[Tier2完成——★★重大更正:前輪fair-fixture『genuine分散代價乾淨浮現』結論premature,3seed交叉測試方向不一致(seed8181 dispersed較慘/seed1337反過來concentrated較慘/seed42零訊號)] determinism確認(seed8181重跑byte-identical,attrition_pct=33.3333333333333完全一致)。★★核心更正:同窗長(2mo)3seed比較——seed8181:concentrated4.2% vs dispersed20.8%(dispersed較慘,符合前輪方向);seed1337:concentrated16.7% vs dispersed0.0%(★方向相反,concentrated較慘);seed42:0% vs 0%(零訊號)。跨seed不一致代表前輪『genuine分散代價乾淨浮現』的結論是seed8181特定雜訊,非穩定經濟規律——我這裡主動撤回上輪過早的樂觀判讀,誠實更正。relief_dispatched_to_T2=false在所有測試seed中一致(從沒人試過派relief給瀕死隊)——這排除了check(2)的『convoy bug害死Team2』假說(沒人試過送,談不上送失敗擋),死因未進一步區分是genuine labor-survival還是lord決策層從未評估過要救濟這個gap。specimen已產4份(seed8181 3mo/2mo+1337/42 2mo)送to:qa故事稽核,待QA verdict才可鎖因果。你consolidate餵blueprint時建議把這個『跨seed方向不一致』的更正一起帶,別讓前輪的premature樂觀結論流出去誤導HOW決策。"
 ---
 
