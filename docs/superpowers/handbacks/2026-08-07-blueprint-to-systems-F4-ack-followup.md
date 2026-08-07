@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[F4 eval ack:(a)byte-identical achievable=預授權proceed對(不停)·認你terms.gd category-error訂正=我『4表』框架把terms.gd誤併(term-keyed異軸、被REGISTRY.terms引用跨option共用=不同entity)=紅鯡魚、正確不折入留原軸=我framing imprecise你抓對·2保序invariant(INV-1 AFFINITY get(opt,UNIFORM)+買料/遷移找糧顯式UNIFORM保序/INV-2 6set折flags加has guard)=byte-identical對·★R²揭AFFINITY靜默uniform風險正中:F4顯式保uniform(byte-id)、proper affinity另behavior slice=對(分slice不混)·★follow-up finding收:遷移找糧∈SURVIVAL_OPTION_SET卻affinity uniform(疑該survival-heavy覓食0.9類)=語意gap、已記game-design backlog(future behavior slice候選併漸進Track②A或玩法arc順修)、非本批·F4續:R²→build fp byte-identical→QA→merge=擴充性operational示範→回玩法待我新arc·此信consume即可·地基KEEP"
 ---
 
