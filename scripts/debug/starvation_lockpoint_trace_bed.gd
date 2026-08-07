@@ -20,7 +20,7 @@ func _initialize() -> void:
 # 補真 finder：跑 SURVIVAL_OPTION_SET 每 opt 的 to_task，任一有可達 target(≠(-1,-1))=dispatchable。
 # ★determinism-safe：DecisionOptions.to_task + 全 survival finder(_find_forage_tile 等)已驗零 randf（觀測不擾動）。
 func _survival_finder_hits(state: WorldState, team: TeamData) -> bool:
-	for opt in DecisionOptions.SURVIVAL_OPTION_SET:
+	for opt in DecisionOptions.options_in_set("survival"):
 		var td: Dictionary = DecisionOptions.to_task(state, team, opt)
 		var tsk = td.get("task", TeamData.TASK_IDLE)
 		var tgt: Vector2i = td.get("target", Vector2i(-1, -1))

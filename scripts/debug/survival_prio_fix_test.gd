@@ -64,7 +64,7 @@ func _test_decide_unified_survival_prio() -> void:
 	fai._decide_unified(s, t)
 	print("  [info] task=%s prio=%d" % [t.current_task, t.task_priority])
 	# 瀕死隊選 survival-class → task_priority @PRIO_SURVIVAL 80（非 @50）
-	var is_surv: bool = t.current_option in DecisionOptions.SURVIVAL_OPTION_SET or t.current_option == "survival"
+	var is_surv: bool = DecisionOptions.is_in_set(t.current_option, "survival") or t.current_option == "survival"
 	if is_surv:
 		_ok(t.task_priority == TaskArbiter.PRIO_SURVIVAL, "瀕死 survival 選項 commit @80(option=%s prio=%d)" % [t.current_option, t.task_priority])
 	else:

@@ -92,9 +92,8 @@ var home_food: float = 0.0
 # ★GATE-A 食糧 keystone：家 outpost tile 食物再生≥燃燒率 = 產糧家（返家可採飽脫餓，非空 granary trap）。
 # harvest positional→離 food-rich home 買糧=home regen 沒人採→餓死 surplus 平原。此信號讓返家補給認「產糧潛力」非只 granary stock。
 var home_food_productive: bool = false
-# P3/P4 混合協調：派系 stakes directive 集合（攻擊/徵收/外交）。
-# 立國=leader-level（_declare_established，非 member option）；掠奪=日常個體（非 stakes）。
-const STAKES_SET: Array = ["攻擊", "徵收", "外交"]
+# ★F4：STAKES_SET const 已刪、單源 REGISTRY[opt].sets.stakes（options_in_set("stakes") 讀、插入序=攻擊/徵收/外交）。
+# P3/P4 混合協調：派系 stakes directive 集合（攻擊/徵收/外交）。立國=leader-level（非 member option）；掠奪=非 stakes。
 var faction_stakes: Array = []
 var faction_attack_target: int = -1
 var faction_tribute_target: int = -1
@@ -401,7 +400,7 @@ static func gather(state: WorldState, team: TeamData) -> DecisionContext:
 	if team.faction_id != -1:
 		var f = state.factions.get(team.faction_id)
 		if f != null:
-			for g in STAKES_SET:
+			for g in DecisionOptions.options_in_set("stakes"):
 				if g in f.goals: c.faction_stakes.append(g)
 			if "攻擊" in c.faction_stakes:
 				var _at: int = _fa._nearest_independent(state, team)

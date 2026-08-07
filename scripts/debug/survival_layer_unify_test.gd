@@ -134,7 +134,7 @@ func _test_layer0_survival_boost() -> void:
 	print("--- 層0 survival util 量級 boost ---")
 	# food_days=1 (<FLOOR 2) → survival-class 加法超量級奪 argmax
 	var scored1: Array = DecisionEngine.rank_scored_ctx(_mk_ctx(1.0))
-	_ok(scored1[0]["opt"] in DecisionOptions.SURVIVAL_OPTION_SET,
+	_ok(DecisionOptions.is_in_set(String(scored1[0]["opt"]), "survival"),
 		"food_days=1 → rank[0] 為 survival-class(boost 破頂)，實際=%s" % scored1[0]["opt"])
 	# food_days=5 (>FLOOR) → boost 不觸發：覓食 util 低於 food_days=1 態
 	var scored5: Array = DecisionEngine.rank_scored_ctx(_mk_ctx(5.0))
