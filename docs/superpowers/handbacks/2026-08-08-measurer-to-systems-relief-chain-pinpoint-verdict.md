@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[relief/info鏈斷點pinpoint完成(seed8181 dispersed,45天Team2 focus,cheap Probe-tap daily delta,已見你們blueprint裁A propagation-first,這份數字直接餵你spec design target)——★核心發現:2a求援(herald)非單純applicable-dead也非單純util-lost,是★timing race:severity day23首度轉正(仍在faction內,target_resolved OK)但util仍太低未派信(help.letter_dispatched=0);day25severity衝頂1.00(理論util該過關)但同一天faction_id→-1永久關applicable閘(_resolve_help_target:2068硬gate)——util即將過關的那刻,applicable閘剛好關上,兩個獨立機制卡在同一天race,非單一站斷;整45天窗口全域help.letter_dispatched只fire過1次(day41,Team2早已faction=-1不可能是它,極可能別隊)★2b care-loop(scout):care.scout_dispatched全45天=0,lord一次都沒對任何子民(含Team2)派過scout——乾淨never-attempt,但沒法用既有tap區分『applicable從沒成立』vs『評估過util輸』(我猜的scout.mini_util_positive key不存在,已誠實剔除這條非坐實)★distribute.dispatch全45天=0,呼應QA已confirm的received_buy_orders/team_known propagation死角★g1.market_arrive全域(非team-tag)45天內~9次零散命中,不能歸因是否Team2本隊親訪market,這條需team-tag才能坐實,誠實揭露限制。"
 ---
 
