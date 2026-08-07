@@ -5112,8 +5112,13 @@ func _dispatch_care_scout(state: WorldState, team: TeamData, entry: Dictionary) 
 		return   # throttle 一隊一 scout（真成本、佔人力）
 	var vid: int = int(entry.get("subject_ref", -1))
 	var vpos = BeliefSystem.best_estimate(state, team.team_id, vid).get("tile_pos", entry.get("last_known_pos", Vector2i(-1, -1)))
+	# ★care-loop de-patch：既有兩層(belief.tile_pos→last_known_pos 快照)零覆蓋、其後補第三層 roster final fallback——
+	# 領主憑組織常識(own-faction 村在哪=靜態 outpost 位、position-only 非 god-view)派 scout；scout 仍物理走+founding_timeout
+	# 延遲+抵達親見 state(領主不因 roster 知村餓=感知鐵律)。破 silent-return execution-break(belief/快照皆空→領主查不了子民=死角)。
 	if vpos == Vector2i(-1, -1):
-		return   # 無 belief/last-known pos → 查不了
+		vpos = _faction_roster_pos(state, team, vid)   # own-faction only（factionless→-1 仍 silent-return 保）
+	if vpos == Vector2i(-1, -1):
+		return   # 三層皆無 pos → 查不了
 	var dist: int = _hex_dist(team.tile_pos, vpos)
 	var sid: int = SubteamSystem.new().dispatch_anon_messenger(state, team.team_id,
 		TeamData.TASK_SCOUT, "info_scout", vpos, vid,
