@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——care-loop de-patch death-spiral QA CONFIRM已轉發systems,量測+故事稽核雙軌收尾
+**狀態**：工作中（等下一票）——anon-pool收支診斷已完成寄出(★誠實結論:數據不乾淨支持LEAK也不支持GENUINE-競爭,可能是框架外第三種可能)
+
+**工單**：無（anon-pool flow診斷已完成寄systems：決定性測量lord Team0 anon池min=0max=3,day5前耗盡此後40天(89%窗口)永久卡0從未回補。但named crisis-relief機制(herald/scout/distribute/migrant/invest)全數0或近0——demand不足以構成blueprint框架的『genuine競爭』;唯一lord-attributable活動=3個task=idle子隊(parent=0,tick400-1100)淨效果趨近零不解釋depletion。★誠實回報不強行分類:既非教科書LEAK(named dispatched幾乎0,無『卡住不回』可觀察)也非教科書GENUINE-競爭(demand不足構成競爭),可能是pool本身結構性偏小+某個tap集合外的routine機制在早期消耗掉。建議下一步(若仍需精確定案):在AnonTierSystem.transfer_proportional加caller-context tap抓tick0-500窗口真正consumer,這輪依cheap優先原則未再深挖。落地3檔已git commit(54aa5b5b)。已回systems handback:2026-08-08-measurer-to-systems-anonpool-flow-verdict.md，別下accept，交systems/blueprint判斷a/b/iii或要不要再深挖。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——care-loop de-patch death-spiral QA CONFIRM已轉發systems,量測+故事稽核雙軌收尾
 
 **工單**：無（QA CONFIRM verdict已轉發systems：①baseline/fixbranch specimen md5逐位元100%相同(比逐tick比對更強證據)②CONFIRM我的因果框架(fix邏輯真fire,下游anon池才是真正卡點,failure point下移非消除)③額外跨fixture結構性佐證(Team0 population ceiling signature跟QA另一輪不同fixture撞到同款anon耗盡型態,非孤例)。單修(ii care-loop roster fallback)確認邏輯正確但不足破death-spiral,下一步交systems/blueprint判斷。已回systems handback:2026-08-08-measurer-to-systems-deathspiral-qa-confirmed.md，量測+故事稽核雙軌收尾，這條ticket到此完整結案。
 
