@@ -1,6 +1,6 @@
 # F4 統一註冊表 HOW（②結構 operational 示範、byte-identical）
 
-**status**: DRAFT（待 R² CLEAN → LOCK）
+**status**: LOCKED（R² CLEAN 終判 2026-08-07、reviewer 親讀+獨立重跑 grep 零增零漏+STAKES 序 byte-id 親驗）
 **track**: framework 兩硬綠 ②「可擴充」operational（加東西=動一處『註冊』部分解）
 **用戶**: 拍 C（2026-08-07）=先做統一註冊表（便宜高值直解「加東西大改」痛）+ 收結構進度 → 回玩法 → 26 決策 func 走 B 漸進 Track②A backlog。
 **驗收模式**: byte-identical 純結構（F0 fp 對 ce201650 baseline 27/27 = 零行為變）。**非** F1-式 fp-分化。
