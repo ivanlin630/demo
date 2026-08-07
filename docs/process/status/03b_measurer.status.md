@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——relief/info鏈斷點pinpoint verdict已完成寄出(★2a求援=timing race非單站斷;2b care-loop=乾淨never-attempt)
+**狀態**：工作中（等下一票）——care-loop tap verdict已完成寄出(★★決定性:execution-break非util-lost非applicable-dead,確認blueprint假說)
+
+**工單**：無（care-loop tap已完成寄systems：holding entry day1即建(applicable OK)+contact.overdue/care_check整45天反覆同步fire30+次+care_ignore全程0(util genuine,義氣0.6統領0.6野心0.3人格算出care每次真贏非crank)+★但care.scout_dispatched全45天=0——根因鎖定_dispatch_care_scout(faction_ai_system.gd:5110-5123)的vpos=BeliefSystem.best_estimate(...)永遠(-1,-1)(從沒對Team2形成belief且從未刷新),silent early return零dispatch零tap零錯誤訊息。已用established fix pattern(cluster_pos=lord自己tile_pos anchor)排除LOD-anchor artifact疑慮,結果不變,確認是真實production執行斷點(Team2距lord7-8hex超出belief觸及範圍)。教科書級『built不fire先查gate非猜tuning』案例,補丁閘優先查鐵律驗證。修法方向:_dispatch_care_scout需要無belief時的fallback(同_resolve_help_target已有的名冊fallback精神)。temp production tap已git checkout --復原確認乾淨。落地5檔已git commit。已回systems handback:2026-08-08-measurer-to-systems-careloop-tap-verdict.md，別下accept，供定ii care-loop修法(gate/execution補非util調)。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——relief/info鏈斷點pinpoint verdict已完成寄出(★2a求援=timing race非單站斷;2b care-loop=乾淨never-attempt)
 
 **工單**：無（relief-chain pinpoint已完成寄systems：已見blueprint裁A(propagation-first,scale re-measure後置),數字直接餵spec design target。★2a求援(herald):非單純applicable-dead也非util-lost,是timing race——day23-24severity轉正(0.31→0.58)仍在faction內target_resolved成功但letter_dispatched=0(util未過);day25 severity衝頂1.00同一天faction_id→-1永久關applicable閘(_resolve_help_target:2068硬gate)——util即將過關那刻applicable閘剛好關,同session反覆撞到的多入口互搶timing race家族。全45天全域help.letter_dispatched只fire1次(day41,Team2早已faction=-1不可能是它)。★2b care-loop(scout):care.scout_dispatched全45天=0,lord一次都沒派過scout查任何子民——乾淨never-attempt,但誠實自曝我猜的scout.mini_util_positive key不存在(production無此tap),無法細分applicable-dead vs util-lost非坐實。distribute.dispatch全45天=0呼應QA已confirm死角。g1.market_arrive全域9次零散無法team-tag坐實。落地3檔已git commit。已回systems handback:2026-08-08-measurer-to-systems-relief-chain-pinpoint-verdict.md，別下accept，供spec design target細節非越界定HOW。
 

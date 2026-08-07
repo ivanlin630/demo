@@ -24,12 +24,15 @@ func _initialize() -> void:
 	config["seed"] = SEED
 	GameSetup.setup(state, config)
 	var no_player := Vector2i(-1, -1)
+	if OS.get_environment("CARE_TAP") == "1" and OS.get_environment("ANCHOR_LORD") == "1":
+		no_player = state.teams[0].tile_pos   # ★established fix pattern:lord自己tile_pos當anchor→強制near-tier cadence,測belief blocker是否LOD-anchor artifact
 	var ticks: int = WorldState.TICKS_PER_DAY * DAYS
 
 	var prev_counts: Dictionary = {}
 	var watch_keys: Array = ["help.severity_positive", "help.target_unresolved", "help.target_resolved",
 		"help.letter_dispatched", "scout.mini_util_positive", "care.scout_dispatched",
-		"g1.market_arrive", "distribute.dispatch"]
+		"g1.market_arrive", "distribute.dispatch",
+		"contact.overdue", "contact.care_check", "contact.care_ignore", "contact.ledger_add"]
 	for k in watch_keys: prev_counts[k] = 0
 
 	var daily_log: Array = []
@@ -59,12 +62,14 @@ func _initialize() -> void:
 				entry["t2_faction_id"] = null
 			daily_log.append(entry)
 			if day <= 30 or entry.get("help.letter_dispatched", 0) > 0 or entry.get("help.severity_positive", 0) > 0:
-				print("  day%d: t2_faction=%s food_days=%.2f severity=%.2f pop=%s task=%s | help_sev+=%d target_ok+=%d target_dead+=%d letter+=%d scout_dispatch+=%d" % [
+				print("  day%d: t2_faction=%s food_days=%.2f severity=%.2f pop=%s task=%s | help_sev+=%d target_ok+=%d target_dead+=%d letter+=%d scout_dispatch+=%d | ledger_add+=%d overdue+=%d care_check+=%d care_ignore+=%d" % [
 					day, str(entry.get("t2_faction_id")), float(entry.get("t2_food_days", -1)), float(entry.get("t2_severity", -1)),
 					str(entry.get("t2_pop")), str(entry.get("t2_task")),
 					int(entry.get("help.severity_positive", 0)), int(entry.get("help.target_resolved", 0)),
 					int(entry.get("help.target_unresolved", 0)), int(entry.get("help.letter_dispatched", 0)),
-					int(entry.get("care.scout_dispatched", 0))])
+					int(entry.get("care.scout_dispatched", 0)),
+					int(entry.get("contact.ledger_add", 0)), int(entry.get("contact.overdue", 0)),
+					int(entry.get("contact.care_check", 0)), int(entry.get("contact.care_ignore", 0))])
 
 	var dump: Dictionary = {"diagnostic": "relief/info鏈斷點pinpoint(Team2 focus)", "daily_log": daily_log}
 	var f := FileAccess.open(OUT_PATH, FileAccess.WRITE)
