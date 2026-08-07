@@ -174,7 +174,7 @@ func resolve_consumption(state: WorldState, team_ids: Array, cadence_ticks: int)
 			var food_after: float = float(team.resources.get("food", 0))
 			if food_after < float(team.population) * FOOD_PER_PERSON_PER_DAY \
 					and team.anon_treasury > 0.0:
-				FactionAISystem.new()._extract_treasury(state, team, 0.3, "飢餓緊急")
+				CoinTreasury.extract_treasury(state, team, 0.3, "飢餓緊急")
 
 		# WS-2d 旅途乾糧：隊在自家 outpost → 從糧倉補 carried food 到 buffer（出門帶著走，
 		# 不被糧倉拴住）。糧倉→team 同隊轉移(守恆)。buffer 小(N天份)不破囤糧 cap。

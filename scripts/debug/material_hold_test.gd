@@ -94,9 +94,9 @@ func _test_coin_need_afford() -> void:
 	var price: float = TradeValuation.local_value(w[1], "material", w[0])
 	var expect_afford: float = maxf(mat_cost * 1.5 - 90.0, 0.0) * price   # afford×1.5 缺口
 	var old_shortfall: float = maxf(NeedOracle.need_keep(w[0], w[1], "material", lv) - 90.0, 0.0) * price   # 舊 need_keep 缺口
-	var cn: float = minf(fai.coin_need(w[0], w[1]), FactionAISystem.COIN_NEED_CAP)
+	var cn: float = minf(CoinTreasury.coin_need(w[0], w[1]), CoinTreasury.COIN_NEED_CAP)
 	_ok(mat_cost > 0.0, "有 construction material cost（想蓋 weaponsmith，got %.0f）" % mat_cost)
-	_ok(is_equal_approx(cn, minf(expect_afford, FactionAISystem.COIN_NEED_CAP)), "coin_need=%.0f=afford×1.5 缺口(cost×1.5-90=%.0f 對齊 afford，非舊 shortfall %.0f)" % [cn, expect_afford, old_shortfall])
+	_ok(is_equal_approx(cn, minf(expect_afford, CoinTreasury.COIN_NEED_CAP)), "coin_need=%.0f=afford×1.5 缺口(cost×1.5-90=%.0f 對齊 afford，非舊 shortfall %.0f)" % [cn, expect_afford, old_shortfall])
 
 # ⑤ 守恆：construction team extraction，coin+treasury 前後不變
 func _test_conservation() -> void:
@@ -104,7 +104,7 @@ func _test_conservation() -> void:
 	var w: Array = _mk(true, 0.0, 0.0, 0.0)   # 食壓+想蓋→coin_need 大→extract
 	w[1].anon_treasury = 200.0
 	var before: float = float(w[1].resources.get("coin", 0)) + w[1].anon_treasury
-	FactionAISystem.new()._consider_extraction(w[0], w[1])
+	CoinTreasury.consider_extraction(w[0], w[1])
 	var after: float = float(w[1].resources.get("coin", 0)) + w[1].anon_treasury
 	_ok(is_equal_approx(before, after), "coin+treasury 前 %.1f == 後 %.1f（守恆）" % [before, after])
 

@@ -221,7 +221,7 @@ func _test_member_tax_conservation() -> void:
 	s.teams[1] = team
 	var mc0: float = 0.0
 	for pid in team.named_members: mc0 += s.persons[pid].coin
-	FactionAISystem.new()._collect_member_tax(s, team)
+	CoinTreasury.collect_member_tax(s, team)
 	var mc1: float = 0.0
 	for pid in team.named_members: mc1 += s.persons[pid].coin
 	var tc1: float = float(team.resources.get("coin", 0))
@@ -229,7 +229,7 @@ func _test_member_tax_conservation() -> void:
 	_ok(absf((mc0 - mc1) - tc1) < 0.001, "★守恆 Δperson(%.1f)=Δteam(%.1f)" % [mc0 - mc1, tc1])
 	var min_p: float = 1e9
 	for pid in team.named_members: min_p = minf(min_p, s.persons[pid].coin)
-	_ok(min_p >= FactionAISystem.PERSONAL_COIN_FLOOR, "留 floor：最低 person.coin(%.1f) >= FLOOR(%.1f)" % [min_p, FactionAISystem.PERSONAL_COIN_FLOOR])
+	_ok(min_p >= CoinTreasury.PERSONAL_COIN_FLOOR, "留 floor：最低 person.coin(%.1f) >= FLOOR(%.1f)" % [min_p, CoinTreasury.PERSONAL_COIN_FLOOR])
 
 # ── ★combo：市場有 sell stock + 買方經稅有 coin → deal fire（no_coin binding 破）──
 func _test_combo_taxed_buyer_deals() -> void:
@@ -257,7 +257,7 @@ func _test_combo_taxed_buyer_deals() -> void:
 	var food_pretax: float = float(visitor.resources.get("food", 0))
 	_ok(food_pretax == 0.0, "稅前 team.coin=0 → 買不成（food=%.0f）" % food_pretax)
 	# 收稅 → team.coin 回補
-	FactionAISystem.new()._collect_member_tax(s, visitor)
+	CoinTreasury.collect_member_tax(s, visitor)
 	_ok(float(visitor.resources.get("coin", 0)) > 3.4, "★稅後 team.coin(%.1f) > market ask ~3.4（買方有錢）" % float(visitor.resources.get("coin", 0)))
 	# 稅後：到市場買成
 	iact._resolve_market_at_outpost(s, visitor, tile)
