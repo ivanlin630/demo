@@ -4559,7 +4559,7 @@ func _famine_crisis(state: WorldState, team: TeamData) -> bool:
 # ② 絕境階梯 STAMP（單一源全 5 路 try_set 成功站呼）：蓋章真 option 字串 + tick + food baseline。
 #   換到新 survival option 才重蓋（同 option 續承諾則 baseline 保留累積時間=stall 計時不 reset）。非 survival option 不蓋。
 func _stamp_survival_commit(state: WorldState, team: TeamData, opt: String) -> void:
-	if opt not in DecisionOptions.SURVIVAL_OPTION_SET: return
+	if not DecisionOptions.is_in_set(opt, "survival"): return
 	if team.survival_committed_option == opt: return   # 同 option 續承諾：保留 baseline 累積 stall 時間
 	team.survival_committed_option = opt
 	team.survival_committed_tick = state.world.current_tick

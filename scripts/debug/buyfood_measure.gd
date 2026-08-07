@@ -85,6 +85,6 @@ func _run() -> void:
 	fai._decide_unified(s, m)
 	print("\n--- 實際決策 ---")
 	print("  task = %s（看是否取食@市集 vs 搶/覓/返家/idle）" % m.current_task)
-	print("\n結論：survival options 清單 = %s" % str(DecisionOptions.SURVIVAL_OPTION_SET))
+	print("\n結論：survival options 清單 = %s" % str(DecisionOptions.options_in_set("survival")))
 	print("  → 「買糧@市集」是否在內 / 是否勝出？")
 	print("=== buyfood measure DONE ===")

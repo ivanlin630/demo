@@ -72,13 +72,13 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 		# 層0 安全氣囊（★插在 coeff 乘法之後——寫死此序：coeff 前會被 0.15 floor 打折失效）：
 		# 極低糧時 survival-class 加法超量級破頂，隨 food→0 線性放大，奪回 argmax。全 SURVIVAL_OPTION_SET 等量加
 		# (不改 survival-class 內部相對序，只集體破頂)。food_days=FLOOR 時加成=0 平滑銜接無 flip-flop。
-		if ctx.food_days < SURVIVAL_BOOST_FLOOR and opt in DecisionOptions.SURVIVAL_OPTION_SET:
+		if ctx.food_days < SURVIVAL_BOOST_FLOOR and DecisionOptions.is_in_set(opt, "survival"):
 			u += SURVIVAL_BOOST_MAX * (SURVIVAL_BOOST_FLOOR - ctx.food_days) / SURVIVAL_BOOST_FLOOR
 			if Probe.enabled: Probe.bump("survival.boost_fire")   # 觸發頻率=健康指標(measurer 要)
 		# ★threat-oracle S2 break-top boost（解 skeptic finding3 單 term-多 term 不匹配）：severity≥FLOOR 時
 		# threat option 加法破頂 ∝ severity（鏡射 survival，全 THREAT_OPTION_SET 等量加，保內部序）
 		# ★capped 且 < survival boost(2.5)：threat=belief→survival(存亡)保序不破；blueprint② 非偽裝硬閘。
-		if ctx.threat_react >= THREAT_BOOST_FLOOR and opt in THREAT_OPTION_SET:
+		if ctx.threat_react >= THREAT_BOOST_FLOOR and DecisionOptions.is_in_set(opt, "threat"):
 			u += THREAT_BOOST_MAX * clampf((ctx.threat_react - THREAT_BOOST_FLOOR) / (DecisionTerms.SEVERITY_MAX - THREAT_BOOST_FLOOR), 0.0, 1.0)
 			if Probe.enabled: Probe.bump("threat.boost_fire")
 		if Probe.enabled and ctx.need_urgency.size() == NeedHierarchy.N_LAYERS:
@@ -129,13 +129,11 @@ static func rank_scored_ctx(ctx: DecisionContext, current_option: String = "", s
 			Probe.add_amount("diag.%s.winutil_sum" % opt, float(winner["u"]))  # winner util
 	return scored
 
-# 被動求生 repertoire（定案）：覓食/買糧/乞食/返家補給/紮營/併入=被動求生(食物+投靠認慫)→"survival" 一組
-# 保 fallthrough；★排攻擊型 掠奪/佔村（主動侵略，靠人格 weight 主導非 fallthrough 保底，否則溫和 fed 隊誤 loot）。
-const PASSIVE_SURVIVAL_SET: Array = ["覓食", "買糧", "乞食", "返家補給", "紮營", "併入", "自救建田"]   # ★復甦 R2 §2B.1：自救建田=被動求生(蓋田自食)→同 survival 需求組 fallthrough
-
-# 需求分組：PASSIVE_SURVIVAL_SET 成員→"survival"（不看 affinity）；非→按 affinity 主層。
+# ★F4：PASSIVE_SURVIVAL_SET const 已刪、單源 REGISTRY[opt].sets.passive_survival（is_in_set 讀）。
+# 被動求生 repertoire：覓食/買糧/乞食/返家補給/紮營/併入/自救建田=被動求生→"survival" 一組保 fallthrough。
+# 需求分組：passive_survival 成員→"survival"（不看 affinity）；非→按 affinity 主層。
 static func _need_category(opt: String) -> String:
-	if opt in PASSIVE_SURVIVAL_SET:
+	if DecisionOptions.is_in_set(opt, "passive_survival"):
 		return "survival"
 	return "L%d" % NeedHierarchy.main_layer_of(opt)
 
@@ -168,7 +166,7 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 	# ② 絕境階梯：applicable() 已收單一源 stall 排除 + 單一 option 豁免（全 rank 路共用）→ 此處直取 survival 子集。
 	var candidates: Array = []
 	for opt in DecisionOptions.applicable(ctx):
-		if opt in DecisionOptions.SURVIVAL_OPTION_SET: candidates.append(opt)
+		if DecisionOptions.is_in_set(opt, "survival"): candidates.append(opt)
 	var scored: Array = []
 	var idx: int = 0
 	# ★持守統一 Slice 1：survival churn 防抖承諾慣性讀 persist_strength（取代 flat COMMITMENT_BONUS）。迴圈前算一次。
@@ -195,12 +193,12 @@ static func rank_survival(state: WorldState, team: TeamData) -> Array:
 # 融合 threat 子集排序（序1 溶入：non-unified _evaluate_threat 委派用，鏡射 rank_survival）。
 # 取 ctx（呼叫端已 gather，避重算）→ applicable ∩ THREAT_OPTION_SET → util 秤 → 降序。
 # 無 commitment bonus（鏡射舊 _dispatch_threat_response 純 argmax；threat 每 cadence idle 才重觸發）。
-const THREAT_OPTION_SET: Array = ["survival", "備戰", "迎戰", "求和"]   # survival=FLEE(逃跑)
+# ★F4：THREAT_OPTION_SET const 已刪、單源 REGISTRY[opt].sets.threat（is_in_set 讀）。survival=FLEE(逃跑)。
 
 static func rank_threat(ctx: DecisionContext) -> Array:
 	var scored: Array = []
 	for opt in DecisionOptions.applicable(ctx):
-		if opt not in THREAT_OPTION_SET: continue
+		if not DecisionOptions.is_in_set(opt, "threat"): continue
 		var u: float = 0.0
 		if opt == "survival":
 			# threat repertoire FLEE：鏡射舊 _dispatch survival*0.8 + (threat_react−0.5)*0.3。
@@ -220,12 +218,12 @@ static func rank_threat(ctx: DecisionContext) -> Array:
 # 取 ctx（呼叫端已 gather，避重算）→ applicable ∩ AMBIENT_OPTION_SET → util 秤 → 降序 → opt 字串陣列。
 # 無 survival 特例、無 commitment：ambient 只填 idle；team 到此已過 loop3 survival/threat/prosperity 評估，
 # ambient 不該二次猜生存/威脅 → 排除 survival/FLEE/threat option（收窄 idle 隊次門檻 FLEE churn）。
-const AMBIENT_OPTION_SET: Array = ["訓練", "貿易", "生產", "建設", "囤貨", "駐守"]
+# ★F4：AMBIENT_OPTION_SET const 已刪、單源 REGISTRY[opt].sets.ambient（is_in_set 讀）。
 
 static func rank_ambient(ctx: DecisionContext) -> Array:
 	var scored: Array = []
 	for opt in DecisionOptions.applicable(ctx):
-		if opt not in AMBIENT_OPTION_SET: continue
+		if not DecisionOptions.is_in_set(opt, "ambient"): continue
 		var u: float = 0.0
 		for tw in DecisionOptions.terms_of(opt):
 			u += DecisionTerms.weight(tw[1], ctx.leader_values) * DecisionTerms.eval(tw[0], ctx, opt)

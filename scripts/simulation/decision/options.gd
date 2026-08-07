@@ -11,6 +11,7 @@ class_name DecisionOptions
 #   統一套一次（每 entry predicate 之前），非塞進各 entry pred → 未來加 option 不會漏套。
 static var REGISTRY: Dictionary = {
 	"貿易": {
+		"affinity": [0.2, 0.0, 0.1, 0.6, 0.1], "sets": {"ambient": true},
 		"terms": [["economic_opp", "economic"], ["intent_fit", "intent_fit"]],
 		# roam-trade：商隊主力；生產隊也可(軟壓低 via economic_opp 角色因子,非禁)。
 		# 駐村隊（movement 居民鎖）不濾：掛 TRADE 站自家村=擺攤營業（來客觸發 _resolve_market
@@ -26,6 +27,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_TRADE, "target": tgt},
 	},
 	"生產": {
+		"affinity": [0.3, 0.0, 0.0, 0.5, 0.2], "sets": {"ambient": true},
 		"terms": [["produce_need", "settle"], ["ambition_drive", "ambition"]],
 		# S1：製造需設施 precondition（A2 補缺）——無製造設施→濾掉（否則無設施選製造=no-op 空轉）。
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -38,6 +40,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_MANUFACTURE, "target": team.tile_pos},
 	},
 	"建設": {
+		"affinity": [0.1, 0.0, 0.0, 0.3, 0.6], "sets": {"ambient": true, "strategic_selfinit": true},
 		# ★B idle-labor→建設：idle_employ_value=雇用閒 PRODUCE 勞力於待建產能真期望產出（只此 option、guardrail）。
 		"terms": [["settle_fit", "settle"], ["ambition_drive", "ambition"], ["idle_employ_value", "idle_employ"]],
 		"applicable": func(_ctx: DecisionContext) -> bool:
@@ -46,6 +49,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_BUILD, "target": team.tile_pos},
 	},
 	"覓食": {
+		"affinity": [0.9, 0.1, 0.0, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["survival_pressure", "survival_pressure"]],
 		# P2b-1：viable-pop 守衛移入 applicable（舊 _trigger_survival forage 限 pop≤此值）。
 		# Fix4：+ 覓食可達性預檢——本格/鄰格無 wild_game tile 則不 applicable（防 forage-to-nowhere churn）。
@@ -55,6 +59,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_FORAGE, "target": FactionAISystem.new()._find_forage_tile(state, team)},
 	},
 	"自救建田": {
+		"affinity": [0.8, 0.0, 0.0, 0.0, 0.2], "sets": {"survival": true, "passive_survival": true},
 		# ★復甦 R2 §2B.1（build-as-survival self-rescue、blueprint 裁 YES genuine）：飢餓村料備妥產糧設施 →
 		# 蓋田自救（永久產能）勝覓食（臨時填）。util=1+食安價值 frac × P(survive_to_harvest)（ctx.rescue_build_util、
 		# genuine 非死常數）；蓋不完(build_eta≥食窗)/料未備 → viable=false → 落覓食（可能餓死+料浪費=失敗案留、禁 crank）。
@@ -66,6 +71,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_BUILD, "target": team.tile_pos},
 	},
 	"survival": {
+		"affinity": [0.2, 0.8, 0.0, 0.0, 0.0], "sets": {"threat": true},
 		"terms": [["threat_pressure", "survival_pressure"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			# null-belief-flee 根治（applicability-gate）：FLEE 僅當威脅有 belief 座標(threat_pos!=-1)才 applicable。
@@ -77,6 +83,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_FLEE, "target": Vector2i(-1, -1)},
 	},
 	"駐守": {
+		"affinity": [0.2, 0.1, 0.1, 0.1, 0.5], "sets": {"ambient": true},
 		"terms": [["settle_fit", "settle"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.has_own_outpost,
@@ -84,6 +91,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_GOVERN, "target": team.tile_pos},
 	},
 	"返家補給": {
+		"affinity": [0.7, 0.2, 0.1, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["restock_need", "survival_pressure"]],
 		# 商隊 proactive 補給：糧低於 RESTOCK 且有家可回 → 回家補 carried(避 survival latch)。
 		# P2b-1 generalize：任何有家隊絕境(food<DESPERATION)→回家(保 non-unified 1037 熱路徑)。
@@ -103,6 +111,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_RETURN_HOME, "target": FactionAISystem.new()._find_own_outpost(state, team)},
 	},
 	"掠奪": {
+		"affinity": [0.4, 0.0, 0.0, 0.5, 0.1], "sets": {"survival": true},
 		"terms": [["loot_drive", "loot"], ["intent_fit", "intent_fit"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.has_weak_prey,
@@ -117,6 +126,7 @@ static var REGISTRY: Dictionary = {
 	# 佔村：奪據點+搬進去（雙引擎咬合）。與掠奪同 menu 秤 util argmax（零新判斷器）。
 	# intent_fit=匱乏→奪產村 boost（與掠奪 parallel）；occupy_drive=野心 base_need edge（決定佔 vs 搶）。
 	"佔村": {
+		"affinity": [0.3, 0.0, 0.0, 0.4, 0.3], "sets": {"survival": true, "strategic_selfinit": true},
 		"terms": [["occupy_drive", "occupy"], ["intent_fit", "intent_fit"]],
 		# means-end：要根據地的狼（無自家 outpost 最需要 / 或征服 intent）+ 有可據弱村 + pop 夠守+分駐。
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -143,6 +153,7 @@ static var REGISTRY: Dictionary = {
 	# S-A §HOW-6：統一「併入」（join+整併合一，取代兩 row）。絕境求生 food-scaled；weight=求生欲/(1-野心)
 	# （§HOW-6 定，非 join weight——join weight×low_ambition 使 併入 rank 過低不勝 survival first=0 regression）。
 	"併入": {
+		"affinity": [0.3, 0.1, 0.6, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["join_drive", "mergein"]],
 		# §HOW-8 ungate + §3b：絕境 OR 威脅認慫。host = rep 保護傘(strong_neighbor,跨faction) 或 consolidate_target(同faction)。
 		# Fix A-2 v2：+ has_acceptable_join_host（可達且未近期被拒的 host）→ 不追必被拒的併入幻覺 loop。
@@ -164,6 +175,7 @@ static var REGISTRY: Dictionary = {
 	},
 	# S-A §HOW-7：強方擴張 pull「吸納」（強隊主動吸弱鄰，擴張-class @PRIO_DISPATCH，非 survival）。
 	"吸納": {
+		"affinity": [0.0, 0.0, 0.4, 0.3, 0.3], "sets": {"strategic_selfinit": true},
 		"terms": [["absorb_drive", "absorb"]],
 		# §HOW-7：有 capacity-bound 可吸弱鄰（finder 已保統領餘裕裝得下）→ 擴張候選（無 food gate）。
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -178,6 +190,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_MERGE, "target": prey_pos, "order_target": prey},
 	},
 	"紮營": {
+		"affinity": [0.6, 0.1, 0.0, 0.1, 0.2], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["camp_drive", "camp"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.food_days < ctx.desperation_entry_threshold and ctx.has_farmable_tile \
@@ -188,6 +201,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_CAMP, "target": ft},
 	},
 	"乞食": {
+		"affinity": [0.8, 0.0, 0.2, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["beg_drive", "beg"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.food_days < ctx.desperation_entry_threshold and ctx.has_aid_target,
@@ -201,6 +215,7 @@ static var REGISTRY: Dictionary = {
 	},
 	# 序4 vendetta 溶入：feud_pull term 掛入 → 血仇成攻擊的一個 weight 驅力（衝動 leader 血仇高→攻擊贏 rank）。
 	"攻擊": {
+		"affinity": [0.1, 0.1, 0.0, 0.6, 0.2], "sets": {"stakes": true},
 		"terms": [["faction_duty", "faction_duty"], ["attack_drive", "attack"], ["intent_fit", "intent_fit"], ["feud_pull", "feud"]],
 		# 混合協調：派系 directive=攻擊 且有獨立 target → 候選（無 directive 時零影響）。
 		# means-end：征服 intent 隊亦開攻擊（非只 faction_stakes），target=intent_target/weak_prey。
@@ -223,6 +238,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_ATTACK, "target": atid_pos, "combat_target": atid},
 	},
 	"徵收": {
+		"affinity": [0.0, 0.0, 0.2, 0.6, 0.2], "sets": {"stakes": true},
 		"terms": [["faction_duty", "faction_duty"], ["levy_drive", "levy"]],
 		# 派系 directive=徵收 且有更富 member target → 候選。
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -239,6 +255,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_TRIBUTE, "target": rt_pos},
 	},
 	"外交": {
+		"affinity": [0.0, 0.1, 0.6, 0.1, 0.2], "sets": {"stakes": true},
 		"terms": [["faction_duty", "faction_duty"], ["diplo_drive", "diplo"]],
 		# 派系 directive=外交 且有獨立鄰 target + ★target 未在 reject_cooldown 內（被拒不再纏）→ 候選。
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -253,6 +270,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_DIPLOMACY, "target": dt_pos},
 	},
 	"買糧": {
+		"affinity": [0.9, 0.0, 0.1, 0.0, 0.0], "sets": {"survival": true, "passive_survival": true},
 		"terms": [["buyfood_drive", "buyfood"]],
 		# 餓 + 有市集 + 有錢 + ★聽過食物賣單(has_buyable_food) → 買糧候選（Fix A look-before-leap：
 		# 從沒聽過任何食物賣單=不追純幻覺；無錢=乞食真語意，不入）。駐村隊不濾。
@@ -272,6 +290,8 @@ static var REGISTRY: Dictionary = {
 	# → 缺料 + 有 material 市場 + 有籌碼 → 到有 material 的最近已知市集買（閉環:reserve>0→_market_visitor_buy want-driven 買 material→建得起）。
 	# 仿買糧結構;非 survival（economic），PRIO_DISPATCH。
 	"買料": {
+		"affinity": [0.2, 0.2, 0.2, 0.2, 0.2], "sets": {},   # ★F4 INV-1：買料非表2→顯式 UNIFORM(保序、非訂正)
+
 		"terms": [["buymaterial_drive", "buymaterial"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			# ★v2a food-ok gate（reviewer R²）：買料非 survival-class→util 高搶 survival rank；餓隊買料→餓死。
@@ -287,6 +307,8 @@ static var REGISTRY: Dictionary = {
 	# Fix B 遷移找糧：絕境階梯新階（當地求生全不可 fulfill → 移向視野內可達糧源）。獨立 option 保承諾慣性/trace
 	# 可讀；weight 複用 survival_pressure（食物越低越想動，同覓食驅力）。排序 emergent（weight×人格 argmax）非硬階梯。
 	"遷移找糧": {
+		"affinity": [0.2, 0.2, 0.2, 0.2, 0.2], "sets": {"survival": true},   # ★F4 INV-1：遷移找糧非表2→顯式 UNIFORM(保序;∈SURVIVAL_SET 但 uniform affinity=follow-up behavior slice)
+
 		"terms": [["survival_pressure", "survival_pressure"]],
 		# Fix B 絕境階梯新階：餓 + 有可達已知糧源(food_seek_target) + 當地覓食·買糧皆不 applicable
 		# → 移向糧源（有 local 出路優先 local，不遷移）。撲空/target 消失由 cadence 重秤 + C 連貫死收。
@@ -305,6 +327,7 @@ static var REGISTRY: Dictionary = {
 	},
 	# means-end：致富+餘糧 → 蓋倉囤貨低買高賣（複用 TASK_TRADE 到市集 hub，非新機制）。
 	"囤貨": {
+		"affinity": [0.1, 0.0, 0.0, 0.7, 0.2], "sets": {"ambient": true},
 		"terms": [["intent_fit", "intent_fit"]],
 		# means-end：致富 intent + 有餘糧 + 有貿易機會(arb/市集) → 蓋倉囤貨候選。
 		# 駐村隊不濾（同「貿易」註：TRADE 姿態=村攤營業，非 zombie）。
@@ -322,6 +345,7 @@ static var REGISTRY: Dictionary = {
 	# ── 融合 threat（序1 溶入）：4 反應 repertoire 中的 3（FLEE=既有 survival option）。
 	# threat-gated（applicable 讀 threat_react≥threshold），人格秤 argmax（撕除舊手算）。
 	"備戰": {
+		"affinity": [0.1, 0.8, 0.0, 0.1, 0.0], "sets": {"threat": true},
 		"terms": [["prepare_drive", "prepare"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.threat_react >= ctx.threat_threshold,
@@ -330,6 +354,7 @@ static var REGISTRY: Dictionary = {
 			return {"task": TeamData.TASK_PREPARE, "target": Vector2i(-1, -1)},
 	},
 	"迎戰": {
+		"affinity": [0.1, 0.6, 0.0, 0.3, 0.0], "sets": {"threat": true},
 		"terms": [["defend_drive", "defend"]],
 		# 居民團不可迎戰（鏡射舊 _dispatch_threat_response is_resident 排除）。
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -341,6 +366,7 @@ static var REGISTRY: Dictionary = {
 				"prosperity_target": _dc.threat_id},
 	},
 	"求和": {
+		"affinity": [0.1, 0.7, 0.2, 0.0, 0.0], "sets": {"threat": true},
 		"terms": [["pacify_drive", "pacify"]],
 		# ★求和 target(threat_id) 未在 reject_cooldown 內才候選（被拒不再纏 loop，diplomacy grounded）。
 		"applicable": func(ctx: DecisionContext) -> bool:
@@ -358,6 +384,7 @@ static var REGISTRY: Dictionary = {
 	# 野心階梯溶入（序3）：FORCE-archetype 累積階練兵（原 rung_task ACCUMULATE×FORCE→TASK_TRAIN）。
 	# archetype/rung 當 weight（ambient_train_drive）驅動，非查表塞 task。
 	"訓練": {
+		"affinity": [0.0, 0.1, 0.0, 0.7, 0.2], "sets": {"ambient": true, "strategic_selfinit": true},
 		"terms": [["train_drive", "train"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.archetype == AmbitionLadder.ARCHETYPE_FORCE and ctx.has_trainable,
@@ -368,6 +395,7 @@ static var REGISTRY: Dictionary = {
 	# A2a 子隊溶入：歸建＝服從母團權威/回母團集結（duty 驅，通用 row，非子隊專屬 term）。
 	# faction_duty weight 已 _duty_factor(loyalty,野心)→忠誠子隊聽令回母團；不忠→掠奪(greed)贏 rank。
 	"歸建": {
+		"affinity": [0.1, 0.1, 0.8, 0.0, 0.0], "sets": {},
 		"terms": [["faction_duty", "faction_duty"]],
 		"applicable": func(ctx: DecisionContext) -> bool:
 			return ctx.is_subteam,
@@ -378,12 +406,19 @@ static var REGISTRY: Dictionary = {
 	},
 }
 
-# A2a 通用戰略-gate：子隊不自主發起「擴張自身戰略足跡」的 option（立據/奪據/練兵＝leader/faction 決定；
-# 母團命令走 pre-set lifecycle task，引擎點結構上無 strategic directive）。新增戰略 option 入 SET 自動涵蓋。
-const STRATEGIC_SELFINIT_SET: Array = ["建設", "佔村", "訓練", "吸納"]   # §HOW-7 吸納=擴張戰略,子隊不自主發起
+# ★F4 統一註冊表（INV-2b fork=b）：6 個舊 OPTION_SET const array 已刪、單源 REGISTRY[opt].sets。
+# set name: survival / passive_survival / threat / ambient / strategic_selfinit / stakes。
+# is_in_set：REGISTRY.has guard（非-REGISTRY opt→false，等價舊 `opt in SET`）+ sets.get(name,false)。
+static func is_in_set(opt: String, name: String) -> bool:
+	return REGISTRY.has(opt) and bool((REGISTRY[opt].get("sets", {}) as Dictionary).get(name, false))
 
-# survival-class option 子集（P2b-1：non-unified _trigger_survival 委派 rank_survival 用）。
-const SURVIVAL_OPTION_SET: Array = ["返家補給", "覓食", "掠奪", "佔村", "併入", "紮營", "乞食", "買糧", "遷移找糧", "自救建田"]   # S-A §HOW-6：統一「併入」(join+整併合一)絕境求生；Fix B 遷移找糧；★復甦 R2 §2B.1 自救建田(build-as-survival)
+# options_in_set：REGISTRY 插入序迭代 filter（byte-identical 迭代序：STAKES 手序 ["攻擊","徵收","外交"] = REGISTRY 序）。
+static func options_in_set(name: String) -> Array:
+	var out: Array = []
+	for opt in REGISTRY:
+		if bool((REGISTRY[opt].get("sets", {}) as Dictionary).get(name, false)):
+			out.append(opt)
+	return out
 
 # 序4 vendetta 溶入：血仇開打門檻（防輕微不快即戰）。TEST VALUE。
 const FEUD_ATTACK_MIN := 0.5
@@ -393,7 +428,7 @@ const FEUD_ATTACK_MIN := 0.5
 # _decide_subteam/_try_join_target）→ 不變量:survival 保序=命運不看走哪 dispatch 路，solo/unified/subteam
 # commit priority 一致（survival-class 皆 PRIO_SURVIVAL）。加 survival-class option 自動涵蓋（SURVIVAL_OPTION_SET）。
 static func priority_for(opt: String) -> int:
-	if opt in SURVIVAL_OPTION_SET or opt == "survival":
+	if is_in_set(opt, "survival") or opt == "survival":
 		return TaskArbiter.PRIO_SURVIVAL   # 求生 preempt 同層(絕境隊命運不看 dispatch 路)
 	if opt in ["備戰", "迎戰", "求和"]:
 		return TaskArbiter.PRIO_THREAT      # threat 反應 @70(finding3 黏性)
@@ -407,9 +442,9 @@ static func applicable(ctx: DecisionContext) -> Array:
 		# ★caveat②：A2a 通用戰略-gate（每 entry predicate 之前統一套一次，非塞進各 entry pred）：
 		# 子隊不自主發起戰略級 option（立據/奪據/練兵＝leader/faction 決定；母團戰略令走 pre-set lifecycle task）。
 		# 非子隊 is_subteam=false → 不觸 → 行為零變。新增戰略 option 入 STRATEGIC_SELFINIT_SET 自動涵蓋。
-		if ctx.is_subteam and opt in STRATEGIC_SELFINIT_SET:
+		if ctx.is_subteam and is_in_set(opt, "strategic_selfinit"):
 			continue
-		var _is_surv: bool = opt in SURVIVAL_OPTION_SET
+		var _is_surv: bool = is_in_set(opt, "survival")
 		# ② 絕境階梯失敗回饋單一源：stall cooldown 內的 survival option 暫退候選（全 rank 路共用=unified/solo/subteam/survival）。
 		# argmax 自然選次高 base-weight applicable survival 格 → 產階梯 progression。被排除者記入 stalled_excluded 供豁免。
 		if _is_surv and opt in ctx.survival_stall_active:

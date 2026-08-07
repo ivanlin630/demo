@@ -4830,7 +4830,7 @@ func _test_buyfood_term_and_option() -> void:
 	assert(DecisionTerms.weight("buyfood", {"_is_merchant": true}) > DecisionTerms.weight("buyfood", {"_is_merchant": false}), \
 		"[buyfood] 商隊買糧 weight 未高於非商隊")
 	# (c) 買糧 in SURVIVAL_OPTION_SET（全隊化）
-	assert("買糧" in DecisionOptions.SURVIVAL_OPTION_SET, "[buyfood] 買糧未入 survival 子集")
+	assert(DecisionOptions.is_in_set("買糧", "survival"), "[buyfood] 買糧未入 survival 子集")
 	print("[buyfood] term/option OK")
 
 func _buyfood_tile(s: WorldState, pos: Vector2i) -> HexTileData:
@@ -5780,7 +5780,7 @@ func _test_true_desperation_still_survival() -> void:
 	# Fix1 遷移：非子隊非-unified 隊求生走引擎(_evaluate_solo→rank_scored)，非 legacy _evaluate_survival。
 	# 真絕境(team+糧倉皆空)+鄰格可覓食 → 引擎須產 survival-class option(不掩飢荒仍有出路)。
 	var opt: String = DecisionEngine.decide(state, t)
-	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET, \
+	assert(DecisionOptions.is_in_set(opt, "survival"), \
 		"真絕境引擎應產 survival-class(覓食可達)，實際=%s" % opt)
 	print("true desperation engine-survival OK (%s)" % opt)
 
@@ -6509,7 +6509,7 @@ func _test_survival_trigger_urgent() -> void:
 	_mk_game_tile(state, Vector2i(0, 0))   # 狩獵唯一：survival forage 需 wild_game
 	# Fix1 遷移：非子隊求生走引擎。food=0 + 本格可覓食 → 引擎產 survival-class option。
 	var opt: String = DecisionEngine.decide(state, team)
-	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET,
+	assert(DecisionOptions.is_in_set(opt, "survival"),
 		"緊急(food<1)引擎應產 survival-class，實際=%s" % opt)
 	print("Survival Task2 OK (engine opt=%s)" % opt)
 
@@ -6706,7 +6706,7 @@ func _test_p2b1_rank_survival() -> void:
 	assert("返家補給" in ranked, "[p2b1] 非商隊絕境無返家補給 option")
 	# rank_survival 只回 survival 子集（無 貿易/生產/建設/駐守/survival(FLEE)）
 	for o in ranked:
-		assert(o in DecisionOptions.SURVIVAL_OPTION_SET, "[p2b1] rank_survival 含非 survival option %s" % o)
+		assert(DecisionOptions.is_in_set(o, "survival"), "[p2b1] rank_survival 含非 survival option %s" % o)
 	# (b) 有家絕境隊：返家補給 量級支配（restock_need 碾壓）
 	assert(ranked[0] == "返家補給", "[p2b1] 有家絕境隊首選非返家補給 = %s" % ranked[0])
 	print("[p2b1] rank_survival OK top=%s n=%d" % [ranked[0], ranked.size()])
@@ -9981,7 +9981,7 @@ func _test_survival_reeval_in_loot() -> void:
 	# Fix1 遷移：非子隊求生走引擎。餓隊(food=0)在掠奪中 → 引擎重評仍產 survival-class
 	# (掠奪本身∈survival-class，或換覓食等)——證引擎不把餓隊鎖死在非求生。
 	var opt: String = DecisionEngine.decide(state, team)
-	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET,
+	assert(DecisionOptions.is_in_set(opt, "survival"),
 		"餓隊引擎重評應產 survival-class，實際=%s" % opt)
 	print("Wakeup Task4 OK (engine opt=%s)" % opt)
 
@@ -11143,7 +11143,7 @@ func _test_arbiter_survival_beats_dispatch() -> void:
 	assert(TaskArbiter.try_set(state, team, TeamData.TASK_TRADE, Vector2i(2, 2), TaskArbiter.PRIO_DISPATCH))
 	# Fix1 遷移：斷糧 → 引擎 survival-class util 應壓過貿易(survival 輸入贏，非硬閘 priority)。
 	var opt: String = DecisionEngine.decide(state, team)
-	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET,
+	assert(DecisionOptions.is_in_set(opt, "survival"),
 		"斷糧引擎 survival-class 應壓過貿易，實際=%s" % opt)
 	print("Arbiter Task2a OK (engine opt=%s)" % opt)
 
@@ -13066,7 +13066,7 @@ func _test_survival_relatch_repick() -> void:
 	# Fix1 遷移：relatch/repick 語意移到引擎——仍餓(food_days<WARNING)+覓食可達 → 引擎重評仍產 survival-class
 	# (非把餓隊鎖死在死鎖 FORAGE)。
 	var opt: String = DecisionEngine.decide(state, t)
-	assert(opt in DecisionOptions.SURVIVAL_OPTION_SET, "餓隊引擎重評應產 survival-class，實際=%s" % opt)
+	assert(DecisionOptions.is_in_set(opt, "survival"), "餓隊引擎重評應產 survival-class，實際=%s" % opt)
 	print("[TEST] survival_relatch_repick PASS (engine opt=%s)" % opt)
 
 func _test_flee_threat_gate() -> void:

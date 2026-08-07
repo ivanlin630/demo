@@ -79,44 +79,15 @@ static func compute_raw(state: WorldState, team: TeamData, food_days: float, thr
 # §3 一致性係數 affinity 表：option → 服務哪些需求層(權重，行和≈1)。純靜態 lookup，零動態分支。
 # [生存, 安全, 歸屬, 尊重, 自我實現]。全 23 REGISTRY option 覆蓋（spec §3「全 23 統一套用」）。
 # TEST VALUE：語意分配（organic measure 校）。
-const AFFINITY: Dictionary = {
-	# 生存-class（求糧/苟活）
-	"覓食":     [0.9, 0.1, 0.0, 0.0, 0.0],
-	"買糧":     [0.9, 0.0, 0.1, 0.0, 0.0],
-	"返家補給": [0.7, 0.2, 0.1, 0.0, 0.0],
-	"紮營":     [0.6, 0.1, 0.0, 0.1, 0.2],   # 紮營=建基→間接自我實現
-	"乞食":     [0.8, 0.0, 0.2, 0.0, 0.0],
-	"自救建田": [0.8, 0.0, 0.0, 0.0, 0.2],   # ★復甦 R2 §2B.1：蓋產糧設施自救=生存主導(layer0)+基業(自我實現)→coeff 隨食急迫追蹤(同覓食生存層)
-	# 安全-class（威脅反應）
-	"survival": [0.2, 0.8, 0.0, 0.0, 0.0],   # FLEE
-	"備戰":     [0.1, 0.8, 0.0, 0.1, 0.0],
-	"迎戰":     [0.1, 0.6, 0.0, 0.3, 0.0],
-	"求和":     [0.1, 0.7, 0.2, 0.0, 0.0],
-	# 歸屬-class（社交/結盟）
-	"併入":     [0.3, 0.1, 0.6, 0.0, 0.0],
-	"外交":     [0.0, 0.1, 0.6, 0.1, 0.2],
-	"歸建":     [0.1, 0.1, 0.8, 0.0, 0.0],
-	"吸納":     [0.0, 0.0, 0.4, 0.3, 0.3],   # 吸弱鄰=擴張(尊重)+建國基(自我實現)
-	# 尊重-class（地位/征服/積累）
-	"訓練":     [0.0, 0.1, 0.0, 0.7, 0.2],
-	"攻擊":     [0.1, 0.1, 0.0, 0.6, 0.2],
-	"掠奪":     [0.4, 0.0, 0.0, 0.5, 0.1],   # 掠奪=絕境糧(生存)+武力地位(尊重)
-	"佔村":     [0.3, 0.0, 0.0, 0.4, 0.3],   # 佔村=糧基+擴張+建國
-	"徵收":     [0.0, 0.0, 0.2, 0.6, 0.2],
-	"生產":     [0.3, 0.0, 0.0, 0.5, 0.2],   # 積累
-	"貿易":     [0.2, 0.0, 0.1, 0.6, 0.1],   # 致富=尊重(地位)
-	"囤貨":     [0.1, 0.0, 0.0, 0.7, 0.2],
-	# 自我實現-class（建國/稱霸/定居長治）
-	"建設":     [0.1, 0.0, 0.0, 0.3, 0.6],   # 建設=據點基業→自我實現
-	"駐守":     [0.2, 0.1, 0.1, 0.1, 0.5],   # 定居長治
-}
-
+# ★F4 統一註冊表：表2 AFFINITY（24 option 需求層）已折入 DecisionOptions.REGISTRY[opt].affinity（單源、affinity_of 讀）。
+# 買料/遷移找糧 顯式 UNIFORM（保序、非訂正、follow-up behavior slice）。_AFFINITY_UNIFORM 留（非-REGISTRY fallback）。
 const _AFFINITY_UNIFORM: Array = [0.2, 0.2, 0.2, 0.2, 0.2]
 
-# affinity 查表（未列 option→均勻，coeff 對其近中性）。純 lookup。回 Array（const Dict value 型別）。
+# ★F4：affinity 查表改讀單源 REGISTRY[opt].affinity（表2 AFFINITY 已折入、刪）。非-REGISTRY opt(如 "")→UNIFORM（保序）。
+# 純 lookup。回 Array。依賴 need_hierarchy→DecisionOptions.REGISTRY（單向零環、R² 驗）。
 static func affinity_of(opt: String) -> Array:
-	if AFFINITY.has(opt):
-		return AFFINITY[opt]
+	if DecisionOptions.REGISTRY.has(opt):
+		return DecisionOptions.REGISTRY[opt]["affinity"]
 	return _AFFINITY_UNIFORM
 
 # option 主 affinity 層(argmax)。空/未知→-1。純 lookup（診斷 probe/S3 用）。
