@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[規模經濟力底查 Tier2 specimen 故事稽核請求(長跑+specimen硬規則)——★主稽核標的=seed8181 dispersed Team2餓死故事,附3seed聚合數字供背景(seed1337/42無famine事件可稽,只seed8181有真死亡故事)] specimen已產4份:seed8181(3mo版,famine真發生day61-70前T2掉到pop1/food0卡覓食迴圈)+seed8181(2mo版,同故事截斷版)+seed1337(2mo,concentrated反而較慘但我這輪只tap了dispersed側Team2,concentrated死因未追)+seed42(2mo,雙側零attrition無故事可稽)。★★核心待QA裁決問題:seed8181 dispersed的Team2死亡故事讀起來是否支持『genuine labor-survival collapse』(小隊自產不足,無關convoy/relief)——聚合數字顯示relief_dispatched_to_t2=false(從沒人試過派救濟給它)+famine_days=4+最終卡在pop=1/food=0永久覓食迴圈,但我這輪只從聚合層面讀,沒有逐tick讀specimen entries驗證『Team2自己有沒有嘗試過買糧/生產/求助,還是純粹decision層從沒想過要issue求助』——這需要你讀specimen的motive→action→outcome才能坐實,非我聚合數字能回答。"
 ---
 
