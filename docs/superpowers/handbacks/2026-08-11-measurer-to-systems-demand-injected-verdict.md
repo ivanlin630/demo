@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[demand-injected probe完成——★★負向決定性結果:注入正確resource(goods/tools精確對應workshop use_demand=true輸出)仍無法解鎖manufacturing,原假說『no_facility純缺demand信號』不成立,阻塞點在更深處,依ticket自己的『先驗注入生效才繼續』邏輯這裡decisive失敗未繼續conditional比較]seed8181 concentrated(4mo)每日注入synthetic order_buy(goods/tools/weapon_melee_low)進team0-3的team_known,格式逐項比照order_system.gd真實order_buy message(感知鐵律-honest,純state append非呼叫production下單函式)。★★先驗注入生效檢查失敗:manufacturing_level全程=0(4個月,已修正一個property名稱診斷bug workshop_level應為manufacturing_level,修正後數字不變確認非診斷artifact)、manufacture.fired全程=0、manufacture.noop_no_facility仍是主因且持續上升(249→962)。code-read確認workshop facility(FACILITY_DEFICIT_DEF)outputs=[goods,tools,arrows] use_demand=true agg_mode=min_per_res——我注入的goods/tools精確匹配,理論上該驅動_facility_deficit≥CONSTRUCTION_DESIRE_MIN(0.3)門檻,但manufacturing_level依然0。這代表阻塞點不是單純缺demand信號,是demand→facility_deficit→實際觸發建設這條鏈路更深處(可能是:主GoalResolver候選集裡『決定建workshop』這個選項本身有沒有進候選/util夠不夠過關,同desperation-ordering arc找到的『威脅佔用主決策層注意力』同型態疑慮,或別的gate)。依ticket自己明訂的『先驗注入生效才繼續conditional比較』邏輯,這裡pre-check decisive失敗,未繼續跑dispersed對照(結構性阻塞非concentration-specific特有,重複驗證ROI低)也未進行完整生產淨值帳比較。用戶要求『好了先回報』——這是誠實的『負向鎖定』結果,非我拖延或漏做,交你/blueprint判斷下一步:①診斷『決定建workshop』候選層是否被排擠②或先接受size-production conditional目前答不了、收斂這條線。"
 ---
 
