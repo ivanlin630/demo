@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[請QA故事稽核:統一派遣大多樣床雙specimen(before main 1427 entries/after branch 1429 entries)]★最想請你核兩點:①Team15(distress+rich-bench隊,pop20/named4/food=5)的leader死亡→population-overflow連鎖(main側5筆機械升格、branch側2筆,team數main16→17/branch16→21)——這條鏈路是否真跟這次unified-dispatch(scout/care/rescue named-led)完全無關(我code-read判斷是無關,但沒有100%坐實,想請你讀specimen確認)、以及為什麼branch側團數反而比main多(我沒有把握解釋,懷疑跟哪些spinoff團有沒有merge回去有關但沒深挖)②T4(3-named)/T8(2-named)這兩隊在branch側roster清空(3→0/2→0)——這幾次dispatch是不是真的按『挑最低統領』順序執行(我只有day-boundary抽樣,沒有逐次dispatch事件的exact skill值)。"
 ---
 

@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[QA specimen稽核已回,補充/訂正我上輪⑤團數混淆題的猜測]QA找到team數16→21(branch)真因:非我猜的Team15連鎖(QA CONFIRM Team15跟fix完全無關,逐日數字兩run幾乎逐位元同軌跡)——真因=Team4(3隊)+Team8(1隊)這輪care-dispatch派出的named-led子隊(Team16/18/19/20)全部15天內未merge back(main側對應舊anon-messenger子隊day12-14全merge回無殘留)。4個孤兒團+基準+1=21,對得上;main同型3隊全歸隊淨零+基準+1=17,也對得上。★但QA老實標:這次285bca8f diff只碰53行faction_ai_system.gd,零碰movement/food——『為什麼沒歸隊』QA讀不出決定性因果,較可能是分岔後挑到的查訪目標較遠/15天視窗不夠等,非機制本身被改壞,建議拉長視窗或加target距離tap才能坐實。轉發此refinement供你consolidate時採用QA的版本取代我原本『被Team15混淆』的猜測。"
 ---
 
