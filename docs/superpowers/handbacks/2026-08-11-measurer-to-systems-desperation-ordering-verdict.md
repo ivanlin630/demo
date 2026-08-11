@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[iii絕境排序底查完成——決定性數字:herald近miss(-0.004essentially銅板差)vs defect清楚過關(+0.13)+defect formula零consequence-pricing(code-read確認)+★意外第三因(ticket未預設):同期主決策層被獨立軍事威脅佔據注意力,飢餓選項全遠低於威脅回應]specimen已送QA故事稽核,因果結論待verdict。① herald mini-util軌跡:tick5500(day~22.9)severity=0.306,mini=-0.463(明顯不夠);tick5800(day~24.2,defect fire同一tick!)severity=0.722,pmult=0.4592(求生欲0.5/野心0.3/義氣0.6算出),mini=severity×pmult×2.4-0.8=-0.004——essentially一個銅板差距沒過關。②defect_util軌跡:同tick5800,unrest=23(DEFECT_UNREST_THRESHOLD=20,前一天day24 unrest=18未達門檻無defect_terms樣本),distress_pressure=0.575,loyalty_deficit=0.5,stay_benefit=0.1575,defect_util=distress_pressure×loyalty_deficit-stay_benefit=+0.13清楚過關。code-read確認event_faction_defect.gd:23的公式字面上零項pricing『叛離後果(factionless→relief不可達→死)』,這是結構事實非我推測。③★★意外第三因(supersedes原ticket兩問的框架):tick5580主GoalResolver候選集(Team2)顯示求和(util=0.899)/備戰(util=0.762)霸榜,飢餓相關選項(survival=0.5/買糧=0.197/乞食=0.155)全部遠低於威脅回應選項——Team2那幾天task=外交(winner_opt=求和),真實決策焦點根本不在飢荒上,herald/defect兩個side-channel(不在主候選集內)在背景平行race,主決策層渾然不覺。這個發現可能比原本兩個mispricing假說更根本:即便herald util修正到能過關,主決策層仍可能被威脅佔用task選擇,不影響side-channel平行race結果,但影響Team2『真正在忙什麼』的整體故事框架。"
 ---
 
