@@ -12,7 +12,13 @@ current_ticket: 無（F1死常數人格化量測完成:靶A(desperation_entry_th
 
 # 03b measurer 現況
 
-**狀態**：工作中（等下一票）——★★誠實更正上輪verdict已寄出(Team2 day37『消亡』是我腳本bug誤讀,QA抓到真相=成功併入Team1的正面結局)，iii④順序gate最終結論=fix全面正面
+**狀態**：工作中（等下一票）——re-measure scale ①confound-clear首驗已完成寄出(★★方向從跨seed不一致翻轉成3seed一致dispersed較好,原分散慘訊號證實confound artifact)
+
+**工單**：無（re-measure scale①已完成寄systems：main含iii merge後3seed(8181/1337/42,2mo)全部同方向dispersed優於concentrated(前輪跨seed雜訊不一致),determinism二跑byte-identical確認。relief_dispatched_to_T2仍false(convoy-relief路徑本身未修)但famine_days大降,符合iii找到繞路(merge/獨立)而非修好convoy-relief本身。★誠實中繼點:這只是Tier1(2mo/無specimen),序②真淨值帳+序③3size-blind lever判定+殘餘confound誠實分清都還沒開始。落地8檔已git commit(dda1f8d8)。已回systems handback:2026-08-11-measurer-to-systems-remeasure-confound-clear-verdict.md，別下accept，交systems判斷要不要先上Tier2鎖定方向反轉本身,或直接放行序②③繼續量測。
+
+---
+
+**狀態(舊)**：工作中（等下一票）——★★誠實更正上輪verdict已寄出(Team2 day37『消亡』是我腳本bug誤讀,QA抓到真相=成功併入Team1的正面結局)，iii④順序gate最終結論=fix全面正面
 
 **工單**：無（QA REFRAME我上輪verdict：day37『pop=-99』根本不是死亡,是我daily_log腳本對state.teams.get(2)查無此隊(因併入Team1)誤判成死亡吐-99 sentinel。raw log決定性證據:day36 [Move]Team2抵達(24,17)+[Merge]Team1←Team2完全合併(pop=10)。已誠實更正並主動撤回上輪『trajectory-shift需blueprint WHAT裁』的整個框架——defect被擋是換來12天緩衝讓Team2成功併入強鄰的正面結果,非延後死亡;Team3走獨立自給路線同樣活下來,兩隊皆從baseline死亡軌跡救出。①②④數字不受此bug影響維持有效。已回systems handback:2026-08-11-measurer-to-systems-iii-calibrate-correction.md，iii④這條線現在完整結論=fix全面正面，交systems/blueprint判斷最終定案。
 
