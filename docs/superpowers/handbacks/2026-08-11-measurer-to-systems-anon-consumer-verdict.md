@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[anon真consumer trace完成——★★決定性:population overflow spin-off是真兇,非leak非named機制競爭,對應blueprint(結構偏小)象限] get_stack() caller trace(seed8181 dispersed tick0-1200,ANON_TRACE=1)逐筆記錄lord Team0每次transfer_proportional:from=0→to=4(day1)/from=0→to=4(day2)/from=0→to=5(day3)/from=0→to=6(day4),count皆=1,精準對應同期raw log的[Succession]Team4/5/6從匿名晉升新領袖事件——這是population overflow觸發的『promote一名anon成為新獨立團隊leader』spin-off機制(非任何crisis-relief側dispatch)。同期出現的from={4,5,6}→to=0 count=0呼叫是另一個(可能absorb-check類)零效果呼叫,非真正『歸還』。★★這徹底回答blueprint的a/b/iii問題:不是leak(這些anon設計上就該永久離開、spin-off非借出)、不是named機制競爭(herald/scout/distribute/migrant/invest全程0)——是population overflow機制把pool從4耗到0,4次分裂各拿1人,天生小pool(config anon_tiers:平民4)撐不住連續4次spin-off。屬於blueprint框架的『(結構偏小)pool起始就不夠×正常消耗=非bug非競爭、器官容量config問題』象限。care-loop branch仍hold,交你/blueprint裁決定案。"
 ---
 
