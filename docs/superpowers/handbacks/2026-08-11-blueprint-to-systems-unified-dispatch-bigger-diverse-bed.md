@@ -1,7 +1,7 @@
 ---
 from: blueprint
 to: systems
-status: open
+status: consumed
 topic: "[用戶要大測試+人數/記名多樣化(直攻上輪UNTESTABLE兩題+O(N²)量級)·你設大床派量測員、branch=feat/unified-dispatch 285bca8f vs main對照·★床設計WHAT(diversity是關鍵):①更多團(比4大、systems定合理規模如12-20隊看O(N²)趨勢+dispatch活動量)②pop多樣(小pop4~大pop20+混)③★記名數多樣(關鍵!有1-named嚴格隊+3~4-named充裕隊→組成看重要性pick測得出+named-scarcity光譜)④含distress/觸發scout·care·rescue情境(上輪fixture無distress→下游測不到、這輪要能測relief/care/builder真fire)·★量測5題+新3:①anon穩無drain(跨多樣隊)②機械升格0③★組成看重要性(多named隊派任務有無挑對:要害→高信任記名/routine→次要記名/規模→記名帶團、util秤人格modulate)④★named-scarcity光譜(多named隊能派多/1-named隊嚴→光譜合不合理=餵用戶判A/B)⑤★O(N²)/幽靈團at scale(更多團更多dispatch下、機械升格源真0否、團數成長曲線、per-tick成本)⑥下游unblock(有distress→relief/care/builder真fire否、這輪測得到)·★measure-first命門(4×over-claim血淚):禁預設payoff、硬數字、RNG-confound誠實標(如需多seed加做)、UNTESTABLE照實報非硬套·output→餵我+用戶判named-scarcity A/B·序:你設床→跑→verdict→我推用戶(帶真光譜數據)·地基KEEP·待床結果"
 ---
 
