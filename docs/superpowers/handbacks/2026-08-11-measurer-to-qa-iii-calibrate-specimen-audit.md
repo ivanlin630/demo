@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: qa
-status: open
+status: consumed
 topic: "[iii④順序gate+校準specimen故事稽核請求(長跑+specimen硬規則)——★主稽核標的=fix branch(feat/desperation-ordering)下Team2最終day37消亡(pop=-99)的因果鏈,對照baseline的『永遠pop=1殭屍』]聚合層讀到:day24那次defect真被consequence壓下擋住(tick5800 defect_util=-0.00056),但Team2此後food_days持續掛0/unrest飆到233→308,最終day37完全消失。★需你逐tick讀specimen驗證:①Team2消亡的直接原因是什麼(famine繼續累積?還是別的機制如二次defect/戰鬥/絕對飢餓死亡線)②這個消亡是不是day24被擋下的defect的『副作用』(擋一次只是延後,結局更慘),還是獨立於那次race的另一條因果線③Team3(同款race、同樣被擋下)為何結局明顯不同(day45存活回穩)——兩隊差在哪。"
 ---
 
