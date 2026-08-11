@@ -1,0 +1,843 @@
+{
+  "care_total": 0,
+  "daily_log": [
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 8,
+        "scout.dispatched": 1
+      },
+      "day": 1,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [
+        4
+      ],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 16,
+        "scout.dispatched": 1
+      },
+      "day": 2,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 28,
+        "scout.dispatched": 1
+      },
+      "day": 3,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 38,
+        "scout.dispatched": 1
+      },
+      "day": 4,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 53,
+        "scout.dispatched": 1
+      },
+      "day": 5,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 63,
+        "scout.dispatched": 1
+      },
+      "day": 6,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 73,
+        "scout.dispatched": 1
+      },
+      "day": 7,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 88,
+        "scout.dispatched": 1
+      },
+      "day": 8,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 98,
+        "scout.dispatched": 1
+      },
+      "day": 9,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 113,
+        "scout.dispatched": 1
+      },
+      "day": 10,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 123,
+        "scout.dispatched": 1
+      },
+      "day": 11,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 133,
+        "scout.dispatched": 1
+      },
+      "day": 12,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 148,
+        "scout.dispatched": 1
+      },
+      "day": 13,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 158,
+        "scout.dispatched": 1
+      },
+      "day": 14,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 0,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 173,
+        "scout.dispatched": 1
+      },
+      "day": 15,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 179,
+        "scout.dispatched": 1
+      },
+      "day": 16,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 183,
+        "scout.dispatched": 1
+      },
+      "day": 17,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 189,
+        "scout.dispatched": 1
+      },
+      "day": 18,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 193,
+        "scout.dispatched": 1
+      },
+      "day": 19,
+      "named_cmd_skills": [
+        0
+      ],
+      "named_t0": 1,
+      "new_teams": [],
+      "pop_t0": 6,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 202,
+        "scout.dispatched": 2
+      },
+      "day": 20,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [
+        5
+      ],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 208,
+        "scout.dispatched": 2
+      },
+      "day": 21,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 214,
+        "scout.dispatched": 2
+      },
+      "day": 22,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 223,
+        "scout.dispatched": 2
+      },
+      "day": 23,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 229,
+        "scout.dispatched": 2
+      },
+      "day": 24,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 238,
+        "scout.dispatched": 2
+      },
+      "day": 25,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 242,
+        "scout.dispatched": 2
+      },
+      "day": 26,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 246,
+        "scout.dispatched": 2
+      },
+      "day": 27,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 252,
+        "scout.dispatched": 2
+      },
+      "day": 28,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 5
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 256,
+        "scout.dispatched": 2
+      },
+      "day": 29,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 1,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 263,
+        "scout.dispatched": 2
+      },
+      "day": 30,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 2,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 269,
+        "scout.dispatched": 2
+      },
+      "day": 31,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 3,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 275,
+        "scout.dispatched": 2
+      },
+      "day": 32,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 3,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 284,
+        "scout.dispatched": 2
+      },
+      "day": 33,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 3,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 290,
+        "scout.dispatched": 2
+      },
+      "day": 34,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 3,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 299,
+        "scout.dispatched": 2
+      },
+      "day": 35,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 3,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 305,
+        "scout.dispatched": 2
+      },
+      "day": 36,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 3,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 311,
+        "scout.dispatched": 2
+      },
+      "day": 37,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 3,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 320,
+        "scout.dispatched": 2
+      },
+      "day": 38,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 4,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 0,
+        "manufacture.noop_no_facility": 324,
+        "scout.dispatched": 2
+      },
+      "day": 39,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 4,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 3,
+        "manufacture.noop_no_facility": 330,
+        "scout.dispatched": 2
+      },
+      "day": 40,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 4,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 5,
+        "manufacture.noop_no_facility": 334,
+        "scout.dispatched": 2
+      },
+      "day": 41,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 4,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 7,
+        "manufacture.noop_no_facility": 338,
+        "scout.dispatched": 2
+      },
+      "day": 42,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 4,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 10,
+        "manufacture.noop_no_facility": 344,
+        "scout.dispatched": 2
+      },
+      "day": 43,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 4,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 12,
+        "manufacture.noop_no_facility": 348,
+        "scout.dispatched": 2
+      },
+      "day": 44,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    },
+    {
+      "anon_t0": 4,
+      "counts": {
+        "care.scout_dispatched": 0,
+        "construct.complete_upgrade_facility": 4,
+        "contact.react_rescue": 0,
+        "help.letter_dispatched": 0,
+        "manufacture.fired": 15,
+        "manufacture.noop_no_facility": 354,
+        "scout.dispatched": 2
+      },
+      "day": 45,
+      "named_cmd_skills": [],
+      "named_t0": 0,
+      "new_teams": [],
+      "pop_t0": 5,
+      "team_count": 4
+    }
+  ],
+  "days": 45,
+  "facility_log": {
+    "team0": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team1": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    },
+    "team2": {
+      "manufacturing_level": 0,
+      "outpost_level": 1
+    }
+  },
+  "final_team_count": 4,
+  "manufacture_fired_total": 15,
+  "mechanical_promo_hits": [],
+  "noop_no_facility_total": 354,
+  "rescue_total": 0,
+  "scout_total": 2,
+  "seed": 8181
+}
