@@ -1,0 +1,154 @@
+﻿Godot Engine v4.2.2.stable.official.15073afe3 - https://godotengine.org
+ 
+=== anon真consumer trace(seed=8181 tick0-1200,Team0聚焦) ===
+[GameSetup] 完成：4 teams, 1 factions, 8 persons
+day0 起始 lord_anon=4
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
+[Order] Team0 sell food ×93 (oid=0)
+[Order] Team0 buy weapon_melee_low ×3 (oid=1)
+[Order] Team0 buy weapon_ranged_low ×3 (oid=2)
+[Order] Team0 buy material ×54 (oid=3)
+[Order] Team0 buy tools ×5 (oid=4)
+[Order] Team1 sell food ×93 (oid=5)
+[Order] Team1 buy weapon_melee_low ×3 (oid=6)
+[Order] Team1 buy weapon_ranged_low ×3 (oid=7)
+[Order] Team1 buy material ×54 (oid=8)
+[Order] Team1 buy tools ×1 (oid=9)
+[Order] Team2 sell food ×93 (oid=10)
+[Order] Team2 buy weapon_melee_low ×3 (oid=11)
+[Order] Team2 buy weapon_ranged_low ×3 (oid=12)
+[Order] Team2 buy material ×54 (oid=13)
+[Order] Team2 buy tools ×1 (oid=14)
+[Order] Team3 sell food ×93 (oid=15)
+[Order] Team3 buy weapon_melee_low ×3 (oid=16)
+[Order] Team3 buy weapon_ranged_low ×3 (oid=17)
+[Order] Team3 buy material ×54 (oid=18)
+[Order] Team3 buy tools ×1 (oid=19)
+[Harvest] Tick60 季節=春 base=1.1
+[anon-trace] transfer_proportional from=0 to=4 count=1 caller=?:-1
+[Succession] Team 4 從匿名晉升新領袖 P3002（統領=0.07）
+[Order] Team4 buy food ×2 (oid=20)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Move] Team 4 抵達 (18,17)
+[SubAI] Team4 引擎→覓食 (覓食)
+[DayNight] Day 1 開始
+[TickPerf] day=1 avg=24066 us max=4167334 us ticks=240 teams=5 factions=1
+  day1 end: lord_anon=3 lord_pop=5
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 10(公庫0+私10) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,17)
+[anon-trace] transfer_proportional from=4 to=0 count=0 caller=?:-1
+[Merge] Team0 ← Team4 完全合併 (pop=6)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[anon-trace] transfer_proportional from=0 to=4 count=1 caller=?:-1
+[Succession] Team 4 從匿名晉升新領袖 P3003（統領=0.24）
+[Order] Team4 buy food ×2 (oid=21)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 2 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=2 avg=35816 us max=3153364 us ticks=240 teams=5 factions=1
+  day2 end: lord_anon=2 lord_pop=5
+[Site] 選址 (26, 13) score=366 周邊資源={ "ore_iron": 183, "ore_silver": 77, "wild_horses": 6, "herb": 2 } terrain=mountain
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[SurvivalForage] team=Team4 pop=1 → 覓食 @(18,17)
+[Survival] Team4 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[SubAI] Team4 引擎→覓食 (覓食)
+[Ambition] Team4 rung 0→1 (商業 cap=3)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 13(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (18,17)
+[anon-trace] transfer_proportional from=0 to=5 count=1 caller=?:-1
+[Succession] Team 5 從匿名晉升新領袖 P3004（統領=0.78）
+[Order] Team5 buy food ×1 (oid=22)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[Survival] Team5 urgent days_left=0.0 偵查→覓食
+[DayNight] Day 3 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[TickPerf] day=3 avg=25601 us max=1033941 us ticks=240 teams=6 factions=1
+  day3 end: lord_anon=1 lord_pop=4
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 11(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 17(公庫2+私15) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 14(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 4 抵達 (17,17)
+[Move] Team 5 抵達 (18,17)
+[anon-trace] transfer_proportional from=4 to=0 count=0 caller=?:-1
+[Merge] Team0 ← Team4 完全合併 (pop=5)
+[SurvivalForage] team=Team5 pop=1 → 覓食 @(18,17)
+[Survival] Team5 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫0+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 18(公庫2+私16) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫1+私13) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (18,17)
+[SubAI] Team5 引擎→覓食 (覓食)
+[Ambition] Team5 rung 0→1 (武力 cap=4)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 4 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 19(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 15(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[TickPerf] day=4 avg=28191 us max=1321883 us ticks=240 teams=5 factions=1
+  day4 end: lord_anon=1 lord_pop=5
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (18,17)
+[anon-trace] transfer_proportional from=0 to=6 count=1 caller=?:-1
+[Succession] Team 6 從匿名晉升新領袖 P3005（統領=0.10）
+[Order] Team6 buy food ×2 (oid=23)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 偵查→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私11) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 20(公庫3+私17) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 5 抵達 (17,17)
+[Move] Team 6 抵達 (18,17)
+[anon-trace] transfer_proportional from=5 to=0 count=0 caller=?:-1
+[Merge] Team0 ← Team5 完全合併 (pop=5)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 12(公庫1+私12) (需 { "material": 50, "tools": 0 })
+[DayNight] Day 5 開始
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 21(公庫3+私18) (需 { "material": 50, "tools": 0 })
+[Site] Faction0 派工失敗: 資源不足 1.5x: material 有 16(公庫2+私14) (需 { "material": 50, "tools": 0 })
+[Move] Team 6 抵達 (18,17)
+[SurvivalForage] team=Team6 pop=1 → 覓食 @(18,17)
+[Survival] Team6 urgent days_left=0.0 idle→覓食
+[TickPerf] day=5 avg=26480 us max=941003 us ticks=240 teams=5 factions=1
+  day5 end: lord_anon=0 lord_pop=5
+=== DONE ===
+WARNING: player.team_id=-1 不存在
+     at: push_warning (core/variant/variant_utility.cpp:1111)
+
