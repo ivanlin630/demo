@@ -1,7 +1,7 @@
 ---
 from: measurer
 to: systems
-status: open
+status: consumed
 topic: "[re-measure scale Tier2鎖定完成——★★誠實結論:非全面鎖定,是『2/3 seed穩定dispersed較好+seed8181自身跨窗長真deterministic翻轉』的複雜圖像,禁過早定調]seed8181/1337/42×concentrated/dispersed全跑3mo+雙邊specimen,seed8181 dispersed determinism二跑byte-identical(20.83%重現,排除non-determinism雜訊)。3mo結果:seed8181concentrated16.67%vs dispersed20.83%(dispersed較差,較2mo的『dispersed較好』方向翻轉);seed1337concentrated29.17%vs dispersed8.33%(dispersed明顯較好,同2mo方向一致);seed42concentrated25.00%vs dispersed4.17%(dispersed明顯較好,同2mo方向一致)。★★核心誠實結論:2/3seed(1337/42)在2mo與3mo兩種窗長下方向都穩定一致(dispersed較好),seed8181本身在2mo(dispersed較好)與3mo(dispersed較差)之間真的翻轉——這個翻轉經determinism二跑確認是真實可重現的世界動態差異(非bug非noise),代表seed8181這個特定世界的『集中vs分散』優劣會隨時間推移改變方向,不是簡單的『分散永遠較好』或『還是雜訊』二選一。這比你要求的『鎖定方向反轉』複雜——多數seed支持dispersed較好,但至少一個seed顯示這個優劣本身是動態/時變的,可能反映某種『短期dispersed佔優、長期又輸給concentrated的隱藏機制轉折』genuine現象,值得specimen深挖seed8181這個window-sensitivity案例的WHY。specimen六份已產(3seed×2scenario)待送QA故事稽核,優先請QA看seed8181案例。②③(真淨值帳+lever判定)交你判斷是否現在放行或要先看懂seed8181翻轉的WHY。"
 ---
 
