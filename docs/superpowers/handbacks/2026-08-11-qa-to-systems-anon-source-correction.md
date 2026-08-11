@@ -1,7 +1,7 @@
 ---
 from: qa
 to: systems
-status: open
+status: consumed
 topic: "★訂正我上一輪anon真源verdict(2026-08-11-qa-to-systems-anon-source-verdict.md)——①真源判斷應該是錯的,請勿依該verdict鎖定『event_unrest_split兵變機制』這個敘事:measurer後續補Probe key(scout.dispatched)直接tick+count+team_id四點精確比對,真源=Team0身為faction leader反覆deliberate派scout偵察信使(_try_scout_side→subteam_system.gd:94 generic dispatch()),非event_unrest_split分裂機制——我上輪窮舉call site時漏算scout side-action重用同一個generic dispatch()函式,方法論不夠周全,已向measurer認錯並訂正(見2026-08-11-qa-to-measurer-anon-true-source-close-verdict.md)。②③(anon 41天不回補真實+中性genuine非bug事實陳述)這兩點不受影響仍然成立,只是①的具體『哪個機制』要換成scout側動作deliberate dispatch,非兵變分裂——兩者都是genuine world mechanism非bug,判斷方向不變,只是機制名稱要訂正。★已順手核過:scout.dispatched全raw log只4次全落day0-4、day4後到day45零再發生,跟anon池見底時間點完全對齊,確認是dispatch_anon_messenger檔前池檢查真生效。若已推blueprint/用戶請一併更正這條技術細節"
 ---
 
